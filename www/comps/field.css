@@ -1,0 +1,229 @@
+.field{
+	flex:1 1 auto;
+	display:flex;
+	flex-direction:column;
+}
+.field.container{
+	display:flex;
+	flex-flow:column wrap;
+	margin:0px !important;
+}
+.field.container.row{
+	flex-direction:row;
+}
+.field.hidden{
+	display:none;
+}
+
+.field .input-box{
+	flex:1 1 auto;
+	min-height:64px;
+	padding:0px 0px 0px 8px;
+	border:none;
+	border-color:var(--color-border);
+	border-radius:3px 3px 0px 0px;
+	box-sizing:border-box;
+	display:flex;
+	flex-flow:column nowrap;
+	justify-content:center;
+	position:relative;
+	box-shadow:inset 0 -1px 0 0 var(--color-border);
+	background-color:var(--color-bg);
+	box-shadow:inset 0 0 0 0 transparent,1px 1px 3px var(--color-shade);
+}
+.field .input-box:focus-within:not(.disabled){
+	box-shadow:inset 0 -2px 0 0 var(--color-accent1),1px 1px 5px var(--color-shade);
+	transition:box-shadow 0.3s, background-color 0.3s;
+}
+.field .input-box .input-line{
+	display:flex;
+	flex-flow:row nowrap;
+	flex:1 1 auto;
+	align-items:center;
+	overflow:auto;
+}
+.field .field-icon{
+	height:22px;
+	margin:4px 9px 4px 0px;
+	display:flex;
+	filter:var(--image-filter);
+}
+.field.top-aligned .input-line{
+	align-items:stretch;
+	padding:5px 0px 3px;
+}
+.field .caption{
+	margin:6px 0px 0px 0px;
+	font-size:80%;
+	color:var(--color-accent1);
+	flex:0 0 auto;
+	cursor:default;
+}
+.field .disabled .caption{
+	color:var(--color-font);
+}
+.field .captionSub{
+	margin:3px 0px 0px 6px;
+	font-size:80%;
+	cursor:default;
+}
+
+/* header field */
+.field .heading{
+	display:flex;
+	flex-flow:row nowrap;
+	margin:6px 0px 0px 0px;
+	align-items:center;
+}
+.field .heading.size1{
+	font-size:160%;
+}
+.field .heading.size2{
+	font-size:140%;
+}
+.field .heading.size3{
+	font-size:120%;
+}
+.field .heading img{
+	height:30px;
+	margin-right:9px;
+	filter:var(--image-filter);
+}
+
+
+.field .invalid,
+.field .invalid::placeholder{
+	/* necessary for chrome */
+	color:var(--color-error) !important;
+}
+
+/* input field */
+.field .input{
+	width:0px; /* base width, required for inputs < 100px */
+	max-width:100%;
+	min-height:28px;
+	line-height:28px;
+	margin-right:6px;
+	padding:0px;
+	font-size:inherit;
+	font-family:inherit;
+	background-color:transparent;
+	border:none;
+	box-sizing:border-box;
+	flex:1 0 auto;
+	display:flex;
+	flex-direction:column;
+	justify-content:center;
+	outline:none;
+	color:var(--color-font);
+}
+.field .input::placeholder{
+	color:var(--color-font-alt);
+	opacity:1; /* standardize across browsers */
+}
+.field .input:disabled{
+	color:inherit; /* readonly state is represented by field background */
+}
+.field .input .list{
+	margin:0px;
+	border:none;
+	overflow:visible;
+}
+.field .input.textarea{
+	font-size:inherit;
+	font-family:inherit;
+}
+.field .color-input{
+	display:flex;
+	flex-flow:row nowrap;
+	padding:0px 8px 0px 0px;
+	align-items:stretch;
+	flex:1 1 auto;
+}
+.field .color-input input{
+	flex:1 1 auto;
+}
+.field .color-input .preview{
+	flex:0 1 50px;
+	height:20px;
+	border:1px solid var(--color-border);
+	border-radius:9px;
+	align-self:center;
+}
+
+/* slider input */
+.field .slider-input{
+	display:flex;
+	flex-direction:row;
+	align-items:center;
+	flex:1 1 auto;
+	overflow:hidden;
+}
+.field .slider-input input.range{
+	width:100%; /* otherwise does not shrink properly */
+	flex:1 2 auto;
+	margin:12px 12px 12px 0px;
+	
+	-webkit-appearance:none;
+	appearance:none;
+	height:8px;
+	outline:none;
+	background:#a9a5a5;
+	cursor:pointer;
+	border-radius:5px;
+}
+.field .slider-input .range::-moz-range-thumb,
+.field .slider-input .range::-webkit-slider-thumb{
+	-webkit-appearance:none;
+	appearance:none;
+	width:11px;
+	height:20px;
+	background:var(--color-accent1);
+	cursor:pointer;
+	border:none;
+	border-radius:5px;
+	margin:0px;
+}
+.field .slider-input .value{
+	flex:0 1 auto;
+	max-width:60px;
+	padding:2px 6px;
+	margin:0px 8px 0px 0px;
+	border-radius:5px;
+	text-align:center;
+	color:var(--color-font);
+	background-color:var(--color-bg);
+}
+
+/* richtext field */
+.field.richtext{
+	min-height:200px;
+}
+
+/* chart field */
+.field .chart{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:column nowrap;
+	background-color:var(--color-bg);
+	border-radius:3px;
+}
+.field .chart .actions{
+	flex:0 0 auto;
+}
+
+/* user overwrites */
+.user-bordersAll .field .input-box{
+	border-width:1px;
+	border-style:solid;
+}
+.user-bordersSquared .field .color-input .preview,
+.user-bordersSquared .field .chart,
+.user-bordersSquared .field .input-box,
+.user-bordersSquared .field .slider input,
+.user-bordersSquared .field .slider .slider-value{
+	border-radius:0px;
+}
+.user-bordersRounded .field .input-box{
+	border-radius:3px;
+}

@@ -1,0 +1,299 @@
+.list{
+	flex:1 1 auto;
+	border-radius:3px;
+	display:flex;
+	flex-direction:column;
+	overflow:auto;
+}
+.list .lookup{
+	width:110px !important;
+	min-width:unset;
+	max-width:unset;
+	margin:0px 3px;
+	padding:6px 8px;
+}
+.list .lookup.small{
+	width:30px !important;
+}
+
+/* list as lookup or dropdown */
+/* HTML table view */
+.list .layoutTable{
+	flex:1 1 auto;
+	overflow:auto;
+}
+.list .layoutTable table{
+	width:100%;
+}
+.list .layoutTable tbody tr{
+	color:var(--color-font);
+	background-color:var(--color-bg);
+}
+.list .layoutTable tbody tr.rowSelect:hover,
+.list .layoutTable tbody tr.rowSelect:focus{
+	cursor:pointer;
+	background-color:var(--color-accent3);
+	outline:none;
+	transition:background-color 0.2s;
+}
+.list .layoutTable tbody tr.rowSelect:hover td,
+.list .layoutTable tbody tr.rowSelect:focus td{
+	box-shadow:inset 0 -2px 0 0 var(--color-accent3-alt);
+	transition:box-shadow 0.5s;
+}
+.list .layoutTable th{
+	padding:6px;
+	margin-bottom:-1px;
+	position:sticky;
+	top:0px;
+	border-bottom:1px solid var(--color-border);
+	background-color:var(--color-bg);
+	border-collapse:separate;
+	z-index:var(--z-index-list-header);
+}
+.list .layoutTable th,
+.list .layoutTable td{
+	height:38px;
+	box-sizing:border-box;
+}
+.list .layoutTable th.checkbox,
+.list .layoutTable td.checkbox{
+	padding:3px 4px 0px 4px;
+}
+.list .layoutTable th.checkbox img,
+.list .layoutTable td.checkbox img{
+	height:26px;
+	margin:3px;
+	outline:none;
+	filter:var(--image-filter);
+}
+.list .layoutTable td{
+	padding:4px 8px;
+	border-bottom:1px solid var(--color-border);
+	border-right:1px solid var(--color-border);
+}
+.list .layoutTable td:last-child{
+	border-right:none;
+}
+.list .layoutTable th.checkbox img:focus,
+.list .layoutTable th.checkbox img:hover,
+.list .layoutTable td.checkbox img:focus,
+.list .layoutTable td.checkbox img:hover{
+	height:32px;
+	margin:0px;
+}
+.list .layoutTable td .batch{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	
+	/* auto cutting text */
+	width:inherit; /* inherit from table cell */
+	overflow:hidden;
+}
+.list .layoutTable .sub-actions{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	justify-content:space-between;
+}
+
+
+/* box layout view */
+.list .layoutCards{
+	display:flex;
+	flex-flow:row wrap;
+	padding:16px 0px 0px 16px;
+	overflow:auto;
+}
+.list .layoutCards .top-actions{
+	width:100%;
+	margin:0px 0px 16px 0px;
+	display:flex;
+	flex-flow:row wrap;
+	justify-content:center;
+	align-items:center;
+}
+.list .layoutCards .top-actions span.select{
+	margin:0px 9px 0px 18px;
+}
+.list .layoutCards .top-actions select{
+	width:auto;
+	min-width:unset;
+	flex:0 1 auto;
+	margin:0px 9px 0px 0px;
+	padding:3px;
+}
+.list .layoutCards .top-actions .no-results{
+	font-style:italic;
+	font-size:120%;
+}
+.list .layoutCards .card{
+	flex:1 1 400px;
+	max-width:500px;
+	min-height:90px;
+	margin:0px 16px 16px 0px;
+	position:relative;
+	border:2px solid var(--color-border);
+	border-radius:5px;
+	overflow:hidden;
+	box-shadow:1px 1px 4px var(--color-shade);
+	background-image:var(--image-list-cards);
+	background-size:cover;
+}
+.list .layoutCards .card .header{
+	height:8px;
+	margin:0px 0px 12px 0px;
+	background-color:var(--color-bg);
+	border-bottom:2px solid var(--color-border);
+}
+.list .layoutCards .card .actions{
+	position:absolute;
+	left:0px;
+	top:0px;
+	padding:2px 3px;
+	display:flex;
+	flex-flow:column nowrap;
+	border-right:2px solid var(--color-border);
+	border-bottom:2px solid var(--color-border);
+	border-radius:3px 0px 3px 0px;
+	background-color:var(--color-bg);
+}
+.list .layoutCards .card.rowSelect:hover{
+	margin:-2px 16px 18px 0px;
+	cursor:pointer;
+	outline:none;
+	transition:background-color 0.2s, box-shadow 0.2s, margin 0.2s, padding 0.2s, border 0.5s;
+	box-shadow:1px 1px 5px var(--color-shade);
+}
+.list .layoutCards .card img.checkbox{
+	height:26px;
+	margin:3px;
+	outline:none;
+}
+.list .layoutCards .card img.checkbox:focus,
+.list .layoutCards .card img.checkbox:hover{
+	height:32px;
+	margin:0px;
+}
+.list .layoutCards .card table{
+	max-width:100%;
+	margin:0px 20px 8px 50px;
+}
+.list .layoutCards .card td{
+	padding:0px 24px 5px 0px;
+	vertical-align:bottom;
+}
+.list .layoutCards .card td:first-child{
+	color:var(--color-font-alt);
+}
+.list .layoutCards .card .batch{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:flex-end;
+	
+	/* auto cutting text */
+	max-width:250px;
+	overflow:hidden;
+}
+
+
+/* list as input field */
+.list-input-rows{
+	width:100%;
+	overflow:hidden;
+}
+.list-input-rows tr{
+	height:38px;
+}
+.list-input-rows td{
+	padding:0px;
+}
+.list-input-rows.multi-line td{
+	border-bottom:1px dotted var(--color-border);
+}
+.list-input-row-items{
+	display:flex;
+	flex-flow:row wrap;
+	align-items:center;
+}
+.list-input-row-items.nowrap{
+	flex-wrap:nowrap;
+}
+
+
+/* list header functions (CSV, filters) */
+.list-header{
+	display:flex;
+	flex-flow:column nowrap;
+	align-items:flex-start;
+	padding:12px 16px 20px 16px;
+	border-bottom:1px solid #d2d2d2;
+}
+.list-header span.message{
+	margin:0px 0px 12px 0px;
+}
+.list-header span.message.error{
+	color:red;
+}
+.list-header-title{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+}
+.list-header-title span{
+	font-size:120%;
+	line-height:22px;
+}
+.list-header-title img{
+	height:22px;
+	margin-right:9px;
+	filter:var(--image-filter);
+}
+.list-auto-renew-line{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	margin:6px 0px;
+}
+.list-auto-renew-line>*{
+	margin:0px 9px 0px 0px;
+}
+.list-csv-line{
+	min-width:400px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	margin:0px 0px 6px 0px;
+}
+.list-csv-line span{
+	flex:0 0 200px;
+	margin:0px 12px 0px 0px;
+}
+.list-csv-line input,
+.list-csv-line select{
+	min-width:250px !important;
+}
+
+
+/* user overwrites */
+.user-bordersAll .list:not(.isFullPage):not(.asInput){
+	border:1px solid var(--color-border);
+}
+.user-bordersSquared .list,
+.user-bordersSquared .list .layoutCards .card,
+.user-bordersSquared .list .layoutCards .card .header,
+.user-bordersSquared .list .layoutCards .card .actions{
+	border-radius:0px;
+}
+
+/* mobile overwrites */
+.is-mobile .list .layoutTable th.title{
+	padding:8px 6px;
+}
+.is-mobile .list .layoutTable td{
+	padding:8px 6px;
+}
+.is-mobile .list .lookup{
+	width:120px;
+}

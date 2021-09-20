@@ -1,0 +1,175 @@
+.app-header{
+	flex:0 0 auto;
+	display:flex;
+	flex-direction:row;
+	justify-content:center;
+	background-size:16px 16px;
+	z-index:var(--z-index-header);
+	position:relative;
+	box-shadow:1px 1px 4px var(--color-shade);
+}
+.app-header-bg{
+	position:absolute;
+	top:0px;
+	right:0px;
+	bottom:0px;
+	left:0px;
+	background-color:var(--color-navigation-default);
+}
+.app-header-content{
+	padding:20px 10px 0px;
+	flex:1 1 auto;
+	display:flex;
+	flex-direction:row;
+	justify-content:space-between;
+	box-sizing:border-box;
+}
+.app-header .entries{
+	display:flex;
+	flex-direction:row;
+}
+
+.app-header .entry-wrap{
+	margin:0px 3px 0px 0px;
+	position:relative;
+	display:flex;
+	flex-flow:column nowrap;
+	align-items:flex-start;
+	position:relative;
+}
+.app-header .entry-bg{
+	position:absolute;
+	top:0px;
+	right:0px;
+	bottom:0px;
+	left:0px;
+	border-radius:5px 5px 0px 0px;
+}
+.app-header .entry{
+	height:40px;
+	display:flex;
+	flex-direction:row;
+	align-items:center;
+	padding:10px 10px 8px 10px;
+	border-radius:5px 5px 0px 0px;
+	font-size:110%;
+	color:var(--color-bg-font);
+	box-sizing:border-box;
+	text-decoration:none;
+	outline:none;
+	z-index:var(--z-index-header-entry);
+}
+.app-header .entry.no-wrap{
+	margin:0px 3px 0px 0px;
+}
+.app-header .entry img{
+	height:22px;
+	filter:var(--image-filter-bg);
+}
+.app-header .entry span{
+	margin:0px 0px 0px 10px;
+	white-space:nowrap;
+}
+.app-header .entry span:first-child{
+	margin:0px;
+}
+.app-header .entry:focus,
+.app-header .entry:hover,
+.app-header .entry-wrap:focus .entry,
+.app-header .entry-wrap:hover .entry{
+	border:2px solid var(--color-header-border);
+	border-bottom:none;
+	padding:6px 8px 8px 8px;
+	transition:padding-top 0.2s;
+}
+.app-header .entry-wrap:focus .entry-bg,
+.app-header .entry-wrap:hover .entry-bg{
+	filter:brightness(1.1) grayscale(20%);
+}
+.app-header .entry.router-link-active{
+	height:44px;
+	border:2px solid var(--color-header-border);
+	border-bottom:none;
+	padding:4px 8px 8px 8px;
+	margin-top:-4px;
+	transition:padding-top 0.4s, height 0.4, margin-top 0.4;
+}
+.app-header .entry-bg.router-link-active{
+	top:-4px;
+	filter:brightness(1.2) grayscale(40%);
+}
+
+.app-header .entry-wrap .children{
+	min-width:100%;
+	position:absolute;
+	padding:0px 0px 3px 0px;
+	margin:-6px 0px 0px 0px;
+	top:40px;
+	visibility:hidden;
+	opacity:0;
+	overflow:visible;
+	background-color:var(--color-navigation-default);
+	filter:brightness(1.2) grayscale(40%);
+	border:2px solid #bbb;
+	border-top:1px solid #bbb;
+	border-radius:0px 0px 3px 3px;
+	transition:opacity 0.3s, margin-top 0.4s;
+	box-sizing:border-box;
+}
+.app-header .entry-wrap:focus .children,
+.app-header .entry-wrap:hover .children,
+.app-header .entry-wrap .children:focus,
+.app-header .entry-wrap .children:hover{
+	visibility:visible;
+	opacity:0.95;
+	margin-top:0px;
+}
+.app-header .children .entry.child{
+	font-size:95%;
+	height:34px;
+	padding:6px 4px;
+	margin:2px 5px;
+	border:none;
+}
+.app-header .entry.child:focus,
+.app-header .entry.child:hover{
+	box-shadow:inset 0 -2px 0 0 #aaa;
+}
+.app-header .entry.child.active,
+.app-header .entry.child.router-link-active{
+	box-shadow:inset 0 -2px 0 0 #fff;
+}
+
+
+/* user overwrites */
+.user-bordersSquared .app-header .entry-bg,
+.user-bordersSquared .app-header .entry{
+	border-radius:0px !important;
+}
+.user-bordersSquared .app-header .entry-wrap .children{
+	border-radius:0px;
+}
+.user-compact .app-header{
+	box-shadow:none;
+	border-bottom:1px solid var(--color-header-border);
+}
+.user-dark .app-header-bg,
+.user-dark .app-header .entry-bg{
+	filter:brightness(70%) saturate(70%);
+}
+.user-dark .app-header .entry-wrap:focus .entry-bg,
+.user-dark .app-header .entry-wrap:hover .entry-bg{
+	filter:brightness(80%) grayscale(10%);
+}
+.user-dark .app-header .entry-bg.router-link-active{
+	filter:brightness(90%) grayscale(20%);
+}
+.user-dark .app-header .entry-wrap .children{
+	filter:brightness(90%) grayscale(20%);
+}
+
+
+/* mobile overwrites */
+.is-mobile .app-header-content{
+	padding:10px 2px 0px;
+}

@@ -1,0 +1,26 @@
+.settings{}
+.settings .contentBox .content{
+	display:flex;
+	flex-flow:row wrap;
+	justify-content:center;
+}
+.settings table{
+	width:100%;
+	margin-top:10px;
+}
+.settings td{
+	padding:2px 8px 2px 0px;
+}
+.settings .message{
+	padding-top:10px;
+	color:var(--color-error);
+}
+.settings .settings-page-limit{
+	display:flex;
+	flex-direction:row;
+	justify-content:center;
+	align-items:center;
+}
+.settings .settings-page-limit div{
+	margin-right:16px;
+}

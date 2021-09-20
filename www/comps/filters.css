@@ -1,0 +1,76 @@
+.filters{
+	width:100%;
+	max-width:700px;
+	display:flex;
+	flex-flow:column nowrap;
+}
+.filter-actions{
+	display:flex;
+	flex-flow:row wrap;
+	justify-content:space-between;
+}
+.filter-actions.end{
+	justify-content:flex-end;
+	margin-top:9px;
+}
+
+.filter{
+	display:flex;
+	flex-flow:column nowrap;
+}
+.filter .subQuery{
+	padding:6px;
+	margin:6px 0px;
+	border:1px solid #ccc;
+}
+.filter-sides{
+	display:flex;
+	flex-flow:column nowrap;
+	margin:0px 0px 6px 0px;
+}
+.filter-sides.inRow{
+	flex-flow:row nowrap;
+	margin:0px;
+}
+.filter-sides .date-wrap{
+	position:relative;
+}
+.filter-side-line-top{
+	margin:0px 0px 3px 0px;
+	display:flex;
+	flex-flow:row nowrap;
+}
+.filter-side-line{
+	flex:1 1 auto;
+	min-width:500px;
+	margin:0px 0px 3px 9px;
+	display:flex;
+	flex-flow:row nowrap;
+}
+.filter-side-line.inRow{
+	margin:0px;
+	min-width:unset;
+}
+.filter-side{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:column nowrap;
+}
+.filter-sides select.connector,
+.filter-sides select.operator{
+	flex:0 1 auto;
+	width:100px !important;
+	min-width:unset;
+	margin-right:6px;
+}
+.filter-side-inputs{
+	display:flex;
+	flex-flow:row nowrap;
+}
+.filter-side-inputs>input,
+.filter-side-inputs>select{
+	flex:0 1 auto;
+	min-width:unset !important;
+	max-width:unset !important;
+	margin-right:5px !important;
+}

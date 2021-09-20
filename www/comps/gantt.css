@@ -1,0 +1,162 @@
+.gantt{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:column nowrap;
+    border-radius:3px;
+    overflow:auto;
+}
+.gantt input.zoom-factor{
+	width:80px;
+}
+.gantt .date-range-label{
+	font-size:110%;
+}
+.gantt .nothing-there{
+	padding:12px;
+	text-align:center;
+	font-size:110%;
+	font-style:italic;
+}
+
+/* left side bar, showing all labels for each line */
+.gantt-labels{
+	flex:0 0 auto;
+	display:flex;
+	flex-flow:column nowrap;
+	border-right:1px solid var(--color-border);
+}
+.gantt-label-entry{
+	height:30px;
+	padding:0px 0px 0px 9px;
+	line-height:30px;
+	display:flex;
+	flex-flow:row nowrap;
+	box-sizing:border-box;
+	border-bottom:1px solid var(--color-border);
+}
+.gantt-label-entry:first-child{
+	border:none;
+}
+.gantt-group{
+	background-color:var(--color-bg);
+}
+
+
+/* main content, showing header + all lines */
+.gantt-content{
+	flex: 1 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
+}
+.gantt-lines{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:column wrap;
+	overflow-x:auto;
+}
+
+.gantt-header{
+	height:30px;
+	display:flex;
+	flex-flow:row nowrap;
+	box-sizing:border-box;
+	border-bottom:1px solid var(--color-border);
+}
+.gantt-header.lower{
+	border-bottom:1px solid var(--color-border);
+}
+.gantt-header-item{
+	height:30px;
+	line-height:30px;
+	padding:0px 6px;
+	flex:0 0 auto;
+	overflow:hidden;
+	box-sizing:border-box;
+	border-right:1px solid var(--color-border);
+}
+.gantt-header-item.clickable:hover{
+	background-color:var(--color-accent3);
+}
+.gantt-header-item.lower{
+	border-bottom:1px solid var(--color-border);
+}
+.gantt-header-item.today{
+	font-weight:bold;
+}
+.gantt-header-item.weekend{
+	background-color:var(--color-accent2);
+}
+.gantt-header-item:last-child{
+	border-right:none;
+}
+
+.gantt-line{
+	height:30px;
+	line-height:30px;
+	position:relative;
+	box-sizing:border-box;
+	background-position:-1px 0px;
+	background-image:linear-gradient(to right,var(--color-border) 1px, transparent 0px);
+}
+.gantt-line.show-line{
+	border-bottom:1px solid var(--color-border);
+}
+.gantt-line-record{
+	top:0px;
+	height:30px;
+	white-space:nowrap;
+	position:absolute;
+	box-sizing:border-box;
+	border-radius:5px;
+}
+.gantt-line-record .record-values{
+	height:24px;
+	line-height:24px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	overflow:hidden;
+	position:relative;
+	padding:0px 6px;
+	z-index:var(--z-index-calendar-caption);
+}
+.gantt-line-record .record-values:hover{
+	overflow:visible;
+}
+.gantt-line-record .record-line{
+	position:absolute;
+	border-radius:5px;
+	background-color:var(--color-accent3-alt);
+	z-index:var(--z-index-calendar-line);
+}
+.gantt-line-record .record-line.start{
+	width:3px;
+	left:1px;
+	top:9px;
+	bottom:4px;
+}
+.gantt-line-record .record-line.middle{
+	height:3px;
+	left:1px;
+	right:1px;
+	top:20px;
+}
+.gantt-line-record .record-line.end{
+	width:3px;
+	right:1px;
+	top:9px;
+	bottom:4px;
+}
+.gantt-line-record:hover .record-line.end{
+	opacity:0.3;
+}
+
+
+/* user overwrites */
+.user-bordersAll .form:not(.singleField) .gantt{
+	border:1px solid var(--color-border);
+}
+.user-bordersSquared .gantt,
+.user-bordersSquared .gantt-line-record .record-line{
+	border-radius:0px;
+}

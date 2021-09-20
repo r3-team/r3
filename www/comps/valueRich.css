@@ -1,0 +1,87 @@
+.value-rich{
+	margin-right:6px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	
+	/* auto cutting text */
+	overflow:hidden;
+}
+.value-rich.color{
+	width:40px;
+	height:16px;
+	border:1px solid #333;
+	border-radius:8px;
+}
+.value-rich.files{
+	max-width:700px;
+	margin-right:0px;
+	display:flex;
+	flex-flow:row wrap;
+}
+.value-rich .gallery-item{
+	object-fit:cover;
+	box-sizing:border-box;
+	border:1px solid var(--color-border);
+	border-radius:5px;
+	margin:0px 4px 2px 0px;
+}
+.value-rich .gallery-item.placeholder{
+	opacity:0.6;
+	background-color:var(--color-bg);
+}
+.value-rich span{
+	/* auto cutting text */
+	min-width:0px;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	overflow:hidden;
+}
+.value-rich.wrap span{
+	white-space:normal;
+}
+
+/* list table context */
+.value-rich.context-list-table .gallery-item{
+	width:40px;
+	height:30px;
+}
+
+/* list cards context */
+.value-rich.context-list-cards .gallery-item{
+	width:150px;
+	height:150px;
+}
+
+/* list input context */
+.value-rich.context-list-input .gallery-item{
+	max-height:32px; /* input row can never show more */
+	margin:1px 5px 1px 0px;
+}
+
+/* calendar context */
+.value-rich.context-calendar .gallery-item{
+	height:22px;
+	margin:2px 5px 2px 0px;
+}
+
+/* calendar gantt context */
+.value-rich.context-calendar-gantt:hover{
+	overflow:visible;
+	font-weight:bold;
+}
+.value-rich.color.context-calendar-gantt,
+.value-rich.files.context-calendar-gantt{
+	flex-shrink:0;
+}
+.value-rich.context-calendar-gantt .gallery-item{
+	height:24px;
+	margin:0px 5px 0px 0px;
+}
+
+
+/* user overwrites */
+.user-bordersSquared .value-rich.color,
+.user-bordersSquared .value-rich.files .gallery-item{
+	border-radius:0px;
+}

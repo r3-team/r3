@@ -1,0 +1,79 @@
+/* button */
+.button{
+	height:30px;
+	margin:0px 8px 0px 0px;
+	padding:4px 0px 4px 0px;
+	font-size:inherit;
+	color:inherit;
+	box-sizing:border-box;
+	display:flex;
+	flex-direction:row;
+	align-items:center;
+	float:left;
+	outline:none;
+}
+.button.large{
+	height:40px;
+	font-size:120%;
+}
+.button.inactive{
+	/*filter:brightness(70%)*/;
+}
+.button.background{
+	margin:0px 4px 0px 0px;
+	padding:4px 0px 4px 10px;
+	border-radius:4px;
+	background-color:var(--color-action);
+	box-shadow:0px 1px 2px var(--color-shade);
+	color:var(--color-bg-font);
+	transition:color 0.1s, box-shadow 0.1s, background-color 0.1s;
+}
+.button.background.inactive{
+	filter:grayscale(100%);
+}
+.button.background.cancel{
+	background-color:var(--color-cancel);
+}
+.button.background.darkBg{
+	border:2px solid var(--color-action-border);
+	box-shadow:none;
+}
+.button.background.darkBg.cancel{
+	border:2px solid var(--color-cancel-border);
+}
+.button.right{
+	float:right;
+}
+.button.spaced{
+	margin:10px 18px 10px 10px;
+}
+.button.not-spaced{
+	margin:0px;
+}
+.button img{
+	height:22px;
+	margin:3px;
+	filter:var(--image-filter);
+	transition:height 0.2s, margin 0.2s;
+}
+.button.inactive img{
+	filter:var(--image-filter-alt);
+}
+.button.background img,
+.button.background span{
+	margin:0px 10px 0px 0px;
+}
+.button.background img,
+.button.darkBg img{
+	height:100%;
+	filter:var(--image-filter-bg);
+}
+.button:focus:not(.background):not(.inactive) img,
+.button:hover:not(.background):not(.inactive) img{
+	height:28px;
+	margin:0px;
+	transition:height 0.2s, margin 0.2s;
+}
+.button span{
+	white-space:nowrap;
+}

@@ -1,0 +1,182 @@
+<p><em>Aktualisiert 2021-09-14</em></p>
+<h1 id="inhaltsverzeichnis">Inhaltsverzeichnis</h1>
+<ol type="1">
+<li><a href="#einführung">Einführung</a></li>
+<li><a href="#bereitstellungsmodelle">Bereitstellungsmodelle</a>
+<ol type="1">
+<li><a href="#eigenständig">Eigenständig</a></li>
+<li><a href="#dediziert">Dediziert</a></li>
+<li><a href="#portabel">Portabel</a></li>
+</ol></li>
+<li><a href="#technische-anforderungen">Technische Anforderungen</a>
+<ol type="1">
+<li><a href="#server">Server</a></li>
+<li><a href="#endgeräte">Endgeräte</a></li>
+</ol></li>
+<li><a href="#installation">Installation</a>
+<ol type="1">
+<li><a href="#unter-windows-server">Unter Windows Server</a></li>
+<li><a href="#auf-einem-linux-server">Auf einem Linux-Server</a></li>
+</ol></li>
+<li><a href="#erster-zugriff-auf-rei3">Erster Zugriff auf REI3</a></li>
+<li><a href="#konfiguration">Konfiguration</a>
+<ol type="1">
+<li><a href="#builder-option">Builder-Option</a></li>
+<li><a href="#ssl-zertifikate">SSL-Zertifikate</a></li>
+</ol></li>
+<li><a href="#allgemeine-administration">Allgemeine Administration</a>
+<ol type="1">
+<li><a href="#wartungsmodus">Wartungsmodus</a></li>
+<li><a href="#authentifizierung-und-autorisierung">Authentifizierung und Autorisierung</a></li>
+<li><a href="#anmeldungen-mit-datensätzen-verbinden">Anmeldungen mit Datensätzen verbinden</a></li>
+<li><a href="#authentifizierung-und-autorisierung-über-ldap">Authentifizierung und Autorisierung über LDAP</a></li>
+</ol></li>
+<li><a href="#anwendungen-verwalten">Anwendungen verwalten</a></li>
+<li><a href="#sicherung-und-wiederherstellung">Sicherung und Wiederherstellung</a>
+<ol type="1">
+<li><a href="#dateien">Dateien</a></li>
+<li><a href="#datenbank">Datenbank</a></li>
+</ol></li>
+<li><a href="#aktualisierungen">Aktualisierungen</a>
+<ol type="1">
+<li><a href="#plattformaktualisierung">Plattformaktualisierung</a></li>
+</ol></li>
+<li><a href="#betreiben-einer-eigenen-rei3-instanz-in-der-cloud">Betreiben einer eigenen REI3-Instanz in der Cloud</a></li>
+</ol>
+<h1 id="einführung">Einführung</h1>
+<p>Dies ist die Dokumentation zum Bereitstellen, Konfigurieren und Betreiben der REI3-Anwendungsplattform. Administrationskenntnisse für die Zielinfrastruktur (Windows Server oder Linux) werden vorausgesetzt. Nach der Installation können Administratoren REI3-Anwendungen aus Online- oder lokalen Repositorys in Infrastrukturen mit oder ohne Internetzugang bereitstellen.</p>
+<p>REI3 selbst ist ein Serverdienst mit dem vorgefertigte Webanwendungen bereitgestellt werden. REI3-Anwendungen bauen aufeinander auf, um Daten wiederzuverwenden und Funktionalität zu erweitern.</p>
+<h1 id="bereitstellungsmodelle">Bereitstellungsmodelle</h1>
+<p>Für den Einsatz in verschiedenen Kundenumgebungen stehen mehrere Bereitstellungsmodelle für die REI3-Plattform zur Verfügung; diese sind unten im Detail aufgeführt. Installations- und Konfigurationsanweisungen folgen anschließend.</p>
+<h2 id="eigenständig">Eigenständig</h2>
+<p>Dieses Modell wurde für kleine und mittlere Installationen (~250 Benutzer) erstellt und ist auf Windows Server beschränkt. Die eigenständige Bereitstellung weist fast keine externen Abhängigkeiten auf. Es ist das empfohlene Modell für Unternehmen mit kleineren IT-Teams, da es nur wenig Aufwand erfordert.</p>
+<p>Wenn REI3 eigenständig ausgeführt wird, enthält und verwaltet REI3 eine eigene interne Datenbank, wobei vollständige Sicherungen über die REI3-Adminoberfläche konfiguriert werden können. Dieses Bereitstellungsmodell unterstützt derzeit keine inkrementellen Sicherungen; eine Einschränkung für große Instanzen, da vollständige Sicherungen länger dauern.</p>
+<p>Es ist immer möglich, von einem eigenständigen zu einem dedizierten Bereitstellungsmodell zu migrieren, wenn die Situation dies erfordert.</p>
+<h2 id="dediziert">Dediziert</h2>
+<p>In diesem Modell wird REI3 getrennt von einem Datenbanksystem ausgeführt. Dies wird für große Instanzen empfohlen oder wenn eine Organisation ein Datenbankteam zur Verfügung hat. Diese Version kann auf Linux- und Windows-Servern bereitgestellt werden.</p>
+<p>Bei Nutzung dieses Modells erfordert REI3 ein separates PostgreSQL-Datenbank-System und verwaltet selbst keine Datenbanksicherungen.</p>
+<h2 id="portabel">Portabel</h2>
+<p>Eine Option für Entwicklungs-, Demo- und Testinstanzen. Mit der portablen Version kann REI3 direkt ohne Setup auf Windows-Servern oder -Endgeräten gestartet werden. Wie das eigenständige Modell enthält auch die portable Version eine eigene Datenbank. Es wird nicht empfohlen, produktive Anwendungen von einer portablen Instanz aus auszuführen.</p>
+<h1 id="technische-anforderungen">Technische Anforderungen</h1>
+<h2 id="server">Server</h2>
+<p>Um REI3 ausführen zu können, müssen folgende Anforderungen erfüllt sein:</p>
+<ul>
+<li>Betriebssystem
+<ul>
+<li>Linux Server (REI3 wird unter Debian, CentOS und Ubuntu Server getestet)</li>
+<li>Windows Server 2016 oder höher</li>
+</ul></li>
+<li>Arbeitsspeicher
+<ul>
+<li>Für mittelgroße Installationen (~250 Benutzer) sollten 4+ GB für die Anwendung verfügbar sein.</li>
+</ul></li>
+<li>Festplattenplatz
+<ul>
+<li>REI3 selbst benötigt weniger als 500 MB Speicherplatz.</li>
+<li>Neben der Anwendung wird Speicherplatz für die Datenbank (falls eigenständig) und das Hochladen von Dateien benötigt. Ein konservativer Plan würde mit 50 GB beginnen.</li>
+</ul></li>
+<li>Software
+<ul>
+<li>Unter Windows Server: Microsoft Visual C ++ 2015</li>
+</ul></li>
+<li>Datenbank (nur dedizierte Bereitstellung)
+<ul>
+<li>Eine PostgresSQL 12.2 oder neuer Datenbank mit vollen Berechtigungen</li>
+</ul></li>
+</ul>
+<h2 id="endgeräte">Endgeräte</h2>
+<p>Für den Zugriff auf eine laufende REI3-Instanz kann jeder moderne Browser verwendet werden. Dies schließt mobile Browser ein. REI3 verwendet moderne Webstandards; "Internet Explorer" wird nicht unterstützt.</p>
+<h1 id="installation">Installation</h1>
+<h2 id="unter-windows-server">Unter Windows Server</h2>
+<p>REI3 wird mit einem grafischen Installationsprogramm für Windows Server mit installierter Desktop-Erfahrung geliefert. Das Installationsprogramm unterstützt sowohl eigenständige als auch dedizierte Bereitstellungsmodelle.</p>
+<p>Bei der Auswahl des eigenständigen Bereitstellungsmodells reicht es aus, dem Installationsprogramm für die Basisinstallation zu folgen, und REI3 kann sofort gestartet werden.</p>
+<p>Bei der Auswahl des dedizierten Modells müssen die Datenbankverbindungsdetails für eine leere, laufende PostgreSQL-Datenbank in die Konfigurationsdatei <code>config.json</code> im ausgewählten Anwendungsverzeichnis eingegeben werden. Mit gültigen Verbindungsdetails zu seiner Datenbank wird REI3 beim ersten Start das Setup automatisch abschließen.</p>
+<p>Unabhängig vom Bereitstellungsmodell wird REI3 unter Windows Server als Windows-Dienst behandelt und kann als solcher gestartet werden. Falls der Dienst nicht starten sollte, schreibt REI3 in das Windows-Applikationslog.</p>
+<h2 id="auf-einem-linux-server">Auf einem Linux-Server</h2>
+<p>Für Linux-Server bietet REI3 derzeit ein komprimiertes Archiv mit vorkompilierten Binärdateien. Nach dem Extrahieren an einem Ort Ihrer Wahl muss die Datei <code>r3</code> ausführbar gemacht und die Konfigurationsdatei <code>config.json</code> von der Vorlagendatei <code>config_template.json</code> kopiert werden.</p>
+<p>Bevor Sie REI3 ausführen, müssen Sie gültige Verbindungsdetails zu einer leeren, laufenden PostgreSQL-Datenbank in <code>config.json</code> eingeben. Mit gültigen Verbindungsdetails zu seiner Datenbank wird REI3 beim ersten Start das Setup automatisch abschließen.</p>
+<p>Um REI3 als Dienst bei Ihrem Betriebssystem zu registrieren, führen Sie <code>r3 -install</code> mit erhöhten Berechtigungen aus. REI3 schreibt ins <code>syslog</code>, welches referenziert werden kann, falls der Dienst nicht startet.</p>
+<h1 id="erster-zugriff-auf-rei3">Erster Zugriff auf REI3</h1>
+<p>Während der Ausführung ist REI3 standardmäßig über Port 443 erreichbar. Sie können jeden modernen Browser verwenden, um lokal auf REI3 unter <code>https://localhost/</code> oder über das Netzwerk mit einer entsprechend konfigurierten Firewall zuzugreifen. Während der Installation wird ein einzelner Administratorbenutzer erstellt. Benutzername und Passwort sind jeweils auf "admin" gesetzt.</p>
+<p>Nach der Anmeldung kann auf die Adminoberfläche zugegriffen werden, um Benutzer zu verwalten, Anwendungen zu installieren, auf Systemprotokolle zuzugreifen usw. Das Standardkennwort sollte direkt nach der ersten Anmeldung geändert werden.</p>
+<h1 id="konfiguration">Konfiguration</h1>
+<p>Die Kernkonfiguration von REI3 kann in der Konfigurationsdatei (<code>config.json</code>) geändert werden, die sich im ausgewählten REI3-Installationsverzeichnis befindet. Das Festlegen von Dateipfaden, Webserver-Port und Datenbankverbindungsdetails ist unkompliziert. Änderungen werden beim Neustart des Anwendungsdienstes angewendet. Spezielle Konfigurationsoptionen und Zertifizierungsmanagement werden separat erläutert.</p>
+<h2 id="builder-option">Builder-Option</h2>
+<p>Die REI3-Plattform hostet in erster Linie vorgefertigte Anwendungen, auf die Benutzer zugreifen können. Es enthält zudem ein grafisches Werkzeug zur Anwendungserstellung, den "Builder". Diese Komponente kann aktiviert werden, indem die Builder-Option in der Konfigurationsdatei auf <code>true</code> gesetzt wird. Nach dem Neustart von REI3 können Administratorbenutzer auf den Builder zugreifen, indem sie in der Adminoberfläche in den Wartungsmodus wechseln.</p>
+<p>Der Builder ist ein umfangreiches Werkzeug. Alle REI3-Anwendungen werden ausschließlich über den Builder erstellt und geändert. Bitte beachten Sie, dass das Ändern von Anwendungen dauerhafte Konsequenzen bis hin zum Datenverlust hat. Versuchen Sie nicht, den Builder in einer produktiven Instanz zu verwenden. Zum Testen oder Entwickeln von Anwendungen sollte in jedem Fall eine separate Instanz verwendet werden. Die portable Version macht dies für Windows-Endgeräte einfach. Unter Linux dient ein separater Anwendungsdienst, der auf eine separate Datenbank zugreift, demselben Zweck.</p>
+<h2 id="ssl-zertifikate">SSL-Zertifikate</h2>
+<p>Während der Installation erstellt REI3 ein selbstsigniertes Zertifikat, um den verschlüsselten Zugriff auf die Anwendung zu ermöglichen. Es wird nicht empfohlen, dieses Zertifikat dauerhaft zu nutzen. Wenn möglich, sollte für REI3 ein ordnungsgemäß signiertes Zertifikat bereitgestellt werden, um eine sichere Kommunikation mit Vertrauen zwischen Endgeräten und Server zu gewährleisten.</p>
+<p>Wir können Unterstützung beim Aufbau der erforderlichen Infrastruktur anbieten. Die Verwaltung von Zertifikaten hängt jedoch von Ihrer Organisation ab. Cloud-basierte Angebote für REI3 umfassen Zertifizierungsdienste.</p>
+<h1 id="allgemeine-administration">Allgemeine Administration</h1>
+<p>Nach der Konfiguration werden grundsätzlich alle administrativen Aufgaben über die Adminoberfläche in der REI3-Hauptwebanwendung ausgeführt. Jeder Benutzer, der als "Administrator" definiert ist, hat vollen Zugriff auf diese Funktionen.</p>
+<h2 id="wartungsmodus">Wartungsmodus</h2>
+<p>Um tiefgreifende Systemänderungen sicher auszuführen, steht ein separater Betriebsmodus zur Verfügung, der als "Wartungsmodus" bezeichnet wird. Wenn diese Option aktiviert ist, werden alle Benutzer, die keine Administratoren sind, automatisch vom System abgemeldet. Neue Anmeldungen von Nicht-Administratoren werden ebenfalls abgelehnt.</p>
+<p>Im Wartungsmodus können Anwendungen installiert, konfiguriert und gelöscht werden. Bitte beachten Sie, dass durch das Löschen von Anwendungen alle entsprechenden Daten dauerhaft aus dem System gelöscht werden. Dies ist ohne aktuelle, funktionale Backups nicht rückgängig zu machen.</p>
+<h2 id="authentifizierung-und-autorisierung">Authentifizierung und Autorisierung</h2>
+<p>Über definierte Anmeldenamen und Passwörter werden Benutzer in REI3 authentifiziert. Neue Anmeldungen können nach Belieben erstellt werden. Es gibt keine Einschränkungen, außer dass Anmeldenamen eindeutig sein müssen. Um Zugriff zu gewähren, müssen Anwendungsrollen Anmeldungen zugewiesen werden. Rollen arbeiten kumulativ; Je mehr Rollen einer Anmeldung zugewiesen sind, desto mehr Berechtigungen werden erteilt. Kennwortkomplexitäts-Optionen stehen in der Admistratoroberfläche bereit.</p>
+<h2 id="anmeldungen-mit-datensätzen-verbinden">Anmeldungen mit Datensätzen verbinden</h2>
+<p>Einige Anwendungen ordnen Datensätze Anmeldungen zu, um Workflows zu ermöglichen. Ein Beispiel hierfür ist die offizielle Kernanwendung "Organisationen", welche Anmeldungen zu Mitarbeitern zuordnet. Diese Verbindung kann dann von allen auf "Organisationen" aufbauenden Anwendungen genutzt werden. Andere Entitäten können ebenfalls zu Anmeldungen zugeordnet werden, wie bspw. Anmeldungen zu Kunden-Accounts. Bitte referenzieren Sie hierzu die entsprechenden Anwendungs-Hilfeseiten.</p>
+<h2 id="authentifizierung-und-autorisierung-über-ldap">Authentifizierung und Autorisierung über LDAP</h2>
+<p>REI3 hostet ein internes Authentifizierungs-Backend. Zur Integration in vorhandene Infrastrukturen kann REI3 LDAP-Dienste nutzen, um folgendes anzubieten:</p>
+<ul>
+<li>LDAP-Authentifizierung: Benutzerkonten werden regelmäßig von LDAP importiert, um lokale Anmeldungen zu erstellen. Anmeldedaten werden dann live gegen das LDAP geprüft.
+<ul>
+<li>Bei der Verwendung mehrfacher LDAP-Verbindungen (oder beim Mischen lokaler mit Anmeldungen von LDAP) können duplikate Anmeldenamen existieren. LDAP-Verbindungen können konfiguriert werden, um E-Mail-Adressen oder andere Attribute für Anmeldenamen zu nutzen.</li>
+<li>Nur Microsoft-AD: Wenn ein Benutzerkonto deaktiviert wird, werden Sitzungen dieser Anmeldung während des nächsten LDAP-Imports automatisch geschlossen.</li>
+</ul></li>
+<li>LDAP-Autorisierung: Durch das Auslesen von Gruppenmitgliedschaften können Anwendungsrollen automatisch Anmeldungen zugewiesen werden.
+<ul>
+<li>Nur Microsoft-AD: Verschachtelte Gruppenmitgliedschaften werden automatisch aufgelöst.</li>
+</ul></li>
+</ul>
+<h1 id="anwendungen-verwalten">Anwendungen verwalten</h1>
+<p>Um REI3 nutzen zu können, müssen Anwendungen installiert werden. Um Anwendungen zu verwalten, muss zuerst der Wartungsmodus aktiviert werden.</p>
+<p>Anwendungen werden über die Adminoberfläche installiert. Sie können aus mehreren Quellen abgerufen werden:</p>
+<ul>
+<li>Offizielles Repository: Vorinstalliertes Repository für offizielle REI3-Anwendungen. Für den Zugriff auf diesen Onlinedienst ist ein Internetzugang erforderlich.</li>
+<li>Lokales Repository: Für Organisationen, die mehrere REI3-Instanzen ausführen und/oder die vollständige Kontrolle über alle Veröffentlichungen benötigen. Ein Repository kann auf jeder REI3-Instanz installiert werden, da es sich auch um eine REI3-Anwendung handelt.</li>
+<li>Manueller Import von Anwendungen: Alle Anwendungen können manuell importiert werden. Dies ist nützlich für Entwicklungsversionen, Tests und für Anwendungen, die in keinem Repository veröffentlicht wurden.</li>
+</ul>
+<p>Unternehmen, die mit REI3 beginnen, sollten mit dem offiziellen Repository starten und zu lokalen Repositorys wechseln, wenn sie skalieren oder selbst entwickelte Anwendungen im Fokus stehen.</p>
+<h1 id="sicherung-und-wiederherstellung">Sicherung und Wiederherstellung</h1>
+<p>Um eine REI3-Instanz vollständig wiederherzustellen, müssen diese Komponenten gesichert werden:</p>
+<ul>
+<li>Die REI3-Datenbank</li>
+<li>Die REI3-Konfigurationsdatei <code>config.json</code></li>
+<li>Das "hochgeladene Dateien"-Verzeichnis</li>
+<li>Die verwendeten SSL-Zertifikate</li>
+</ul>
+<p>Bei der eigenständigen Ausführung deckt die integrierte Sicherung alle oben genannten Punkte ab und ermöglicht eine vollständige Wiederherstellung, solange das Zielsicherungsverzeichnis vom Anwendungsserver getrennt ist. In anderen Betriebsmodellen oder wenn Sie mehr Kontrolle benötigen, finden Sie unten weitere Details.</p>
+<p>Bei Bedarf bieten wir auch Unterstützungsleistungen für Organisationen zum Einrichten sinnvoller Sicherungslösungen als auch in Wiederherstellungsszenarien an.</p>
+<h2 id="dateien">Dateien</h2>
+<p>Die Konfigurationsdatei <code>config.json</code> befindet sich im ausgewählten Anwendungsverzeichnis für REI3. Zertifikate und Dateipfade werden in der Konfigurationsdatei selbst referenziert. Für eine vollständige Wiederherstellung sind Kopien davon erforderlich.</p>
+<p>Andere Verzeichnisse als die angegebenen müssen nicht gesichert werden, sind jedoch nicht sehr groß und können eingeschlossen werden, um Sicherungsjobs einfach zu halten.</p>
+<p>Die Konfigurationsdatei kann bei Verlust rekonstruiert und Zertifikate neu erstellt werden. Dies würde etwas Aufwand erfordern und eine schnelle Wiederherstellung behindern.</p>
+<h2 id="datenbank">Datenbank</h2>
+<p>In jedem Bereitstellungsmodell wird eine PostgreSQL-Datenbank für REI3 verwendet. Um auf die eigenständige, integrierte Datenbank zuzugreifen, verwenden Sie die Verbindungsdetails aus der REI3-Konfigurationsdatei (<code>config.json</code>), während der REI3-Dienst ausgeführt wird. Die Datenbank heißt standardmäßig "app".</p>
+<p>Für vollständige Sicherungen empfehlen wir die Verwendung interner PostgreSQL-Tools wie <code>pg_dump</code> zum Sichern und<code> pg_restore</code> zum Wiederherstellen der Datenbank. Beispiele:</p>
+<ul>
+<li>Um in ein Zielverzeichnis zu sichern: pg_dump -h HOSTNAME -p 5432 -U USERNAME -Fd -f TARGETDIR</li>
+<li>Um aus einem Verzeichnis wiederherzustellen: pg_restore -h HOSTNAME -p 5432 -U USERNAME -d TARGETDBNAME SOURCEDIR</li>
+</ul>
+<p>Empfehlungen:</p>
+<ul>
+<li>Sichern Sie immer an einem separaten Netzwerkspeicherort, zur Absicherung gegen einen totalen Systemausfall.</li>
+<li>Wiederherstellungen vollständiger Sicherungen sollten immer in eine leere / neue Datenbank ausgeführt werden, um sicherzustellen, dass alle Daten in den gesicherten Zustand zurückversetzt werden können. Die wiederhergestellte Datenbank kann dann umbenannt oder die REI3-Konfigurationsdatei aktualisiert werden, um auf die wiederhergestellte Datenbank zuzugreifen.</li>
+</ul>
+<p>Inkrementelle Sicherungen sind für größere Instanzen nützlich, werden jedoch in dieser Dokumentation nicht behandelt. Unternehmen, die groß genug sind, um diese Anforderung zu haben, sollten entweder ihre vorhandenen Sicherungslösungen verwenden oder dokumentierte PostgreSQL-Praktiken zur Ausführung inkrementeller Sicherungen befolgen.</p>
+<h1 id="aktualisierungen">Aktualisierungen</h1>
+<p>Es gibt zwei Arten von Aktualisierungen: Anwendung- und Plattformaktualisierung. Anwendungsaktualisierungen sind häufiger und dienen dazu, die Funktionalität für REI3-Anwendungen zu erweitern. Diese können direkt von der Adminoberfläche installiert werden, wenn der Wartungsmodus aktiv ist. Wenn die Aktualisierungen über das Repository empfangen werden, handelt es sich um einen Ein-Klick-Vorgang. Manuelle Aktualisierungen müssen über gepackte Anwendungsdateien bereitgestellt werden. Es wird empfohlen, Aktualisierungen zuerst in Testumgebungen zu installieren, da sich Aussehen und Verhalten zwischen Anwendungsversionen ändern können.</p>
+<p>Plattformaktualisierungen richten sich an die zugrunde liegende Plattform-Software und sind möglicherweise auch für Anwendungsaktualisierungen erforderlich, wenn für diese neuere Plattformfunktionen erforderlich sind. Da Sicherheits- und Stabilitätsprobleme mit Plattformaktualisierungen behoben werden, ist es immer gut, die Plattform selbst zu aktualisieren.</p>
+<h2 id="plattformaktualisierung">Plattformaktualisierung</h2>
+<p>Wenn das grafische Installationsprogramm für Windows verwendet wird, kann durch Ausführen einer neueren Version die Aktualisierung gestartet werden. Der Plattformdienst wird automatisch neu gestartet.</p>
+<p>Bei Linux-Servern ist es erforderlich, den Dienst zu stoppen und Dateien im ausgewählten Anwendungsverzeichnis mit dem neuesten extrahierbaren Paket zu überschreiben. Danach kann der Dienst neu gestartet werden.</p>
+<p>Um die portable Version zu aktualisieren, stoppen Sie alle laufenden REI3-Instanzen und extrahieren Sie den Inhalt einer neueren, portablen Version in das Anwendungsverzeichnis.</p>
+<h1 id="betreiben-einer-eigenen-rei3-instanz-in-der-cloud">Betreiben einer eigenen REI3-Instanz in der Cloud</h1>
+<p>REI3 kann im Internet zugänglich gemacht werden, indem entsprechende Firewall-Ports geöffnet werden. Wir, die REI3-Hersteller, sind bestrebt, die Plattform so sicher wie möglich zu gestalten. Wie bei jeder anderen Anwendung ist es immer möglich, dass unentdeckte Sicherheitslücken ausgenutzt und unbefugter Zugriff erreicht wird. Neben der regelmäßigen Aktualisierung von REI3 selbst sind wir der Ansicht, dass zusätzliche Sicherheitsmaßnahmen erforderlich sind, um Webanwendungen in der Cloud sicher auszuführen. Diese sind u. A.:</p>
+<ul>
+<li>Ausführen von Intrusion-Detection-Software auf dem Anwendungsserver oder Firewalls</li>
+<li>Anwenden von Härtungsprinzipien auf dem Anwendungsserver</li>
+<li>Verwenden einer DMZ zum Trennen von Cloud-Diensten von lokalen, geschützten Netzwerken</li>
+</ul>
+<p>Die REI3-Plattform enthält einen Bruteforce-Schutz. Dies reicht bei Weitem nicht alleine für einen sicheren Betrieb mit Cloud-Verbindung. In jedem Fall sollten zusätzliche Maßnahmen (wie oben beschrieben) angewendet werden.</p>

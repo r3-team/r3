@@ -1,0 +1,407 @@
+.admin{
+	display:flex;
+	flex-direction:row;
+	flex-wrap:nowrap;
+}
+.admin .license-required{
+	margin:0px 0px 16px;
+	font-style:italic;
+	text-align:center;
+}
+
+.admin .table-default-wrap{
+	flex:1 1 auto;
+	overflow-y:auto;
+}
+.admin .table-default{
+	width:100%;
+}
+.admin .table-default>thead>tr>th{
+	height:36px;
+	border-bottom:1px solid var(--color-border);
+	background-color:var(--color-bg);
+}
+.admin .table-default>thead>tr>th.gab{
+	width:200px;
+}
+.admin .table-default>thead>tr>th.left-border{
+	border-left:3px double var(--color-border);
+}
+.admin .table-default>thead>tr>th .mixed-header{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+}
+.admin .table-default>thead>tr>th .mixed-header>img{
+	width:16px;
+	height:16px;
+	margin-right:6px;
+	filter:var(--image-filter);
+}
+.admin .table-default>tbody>tr>td{
+	padding:3px 8px;
+	border-top:1px solid var(--color-border);
+}
+.admin .table-default>tbody>tr>td.left-border{
+	border-left:3px double var(--color-border);
+}
+.admin .table-default>tbody>tr.grouping>td{
+	background-color:var(--color-bg);
+}
+.admin .table-default.no-padding>tbody>tr>td{
+	padding:3px 2px 3px 4px;
+}
+
+/* system logs */
+.admin .logs{
+	display:flex;
+	flex-direction:column;
+	flex:1 1 auto;
+}
+.admin .logs .actions{
+	flex:0 0 auto;
+	padding:12px;
+	display:flex;
+	flex-direction:row;
+	justify-content:space-between;
+	background-color:var(--color-bg);
+}
+.admin .logs .actions .right-bar{
+	display:flex;
+	flex-direction:row;
+	align-items:center;
+}
+.admin .logs .actions .entry{
+	margin:0px 6px;
+	flex:0 1 200px;
+}
+.admin .logs .actions .entry input{
+	border:none;
+}
+.admin .logs .actions .input-date{
+	flex:0 1 300px;
+	position:relative;
+}
+
+
+/* logins */
+.admin-logins .login-record{
+	max-width:400px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+}
+.admin-logins .login-record-input{
+	flex:1 1 auto;
+	position:relative;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+}
+.admin-logins .login-record-input input{
+	margin-right:5px;
+}
+.admin-logins .role-select{
+	max-width:1200px;
+	min-width:300px;
+	margin:0px 5px 10px;
+	border:1px solid var(--color-border);
+	border-top:none;
+	border-radius:0px 0px 5px 5px;
+}
+.admin-logins .module-icon{
+	width:24px;
+	margin-right:9px;
+	filter:var(--image-filter);
+}
+
+
+/* system configuration */
+.admin-config{
+	flex:1 1 auto;
+	display:flex;
+	flex-direction:column;
+}
+.admin-config.contentBox .content{
+	display:flex;
+	flex-flow:row wrap;
+}
+.admin-config table{
+	width:100%;
+}
+.admin-config .companyWelcome{
+	height:70px;
+}
+.admin-config .logo{
+	object-fit:contain;
+	height:60px;
+	margin:10px 0px 0px;
+	padding:3px;
+	border:1px solid var(--color-border);
+	border-radius:3px;
+}
+.admin-config .colorInputWrap{
+	display:flex;
+	max-width:300px;
+}
+.admin-config .colorInputWrap .preview{
+	width:30px;
+	height:30px;
+	flex:0 0 auto;
+	margin-left:4px;
+	border-radius:4px;
+	background-color:none;
+	box-sizing:border-box;
+	border:1px solid var(--color-border);
+}
+.admin-config .note{
+	font-size:90%;
+	line-height:20px;
+	margin:20px 6px 10px;
+}
+.admin-config .backup-dir td{
+	padding-bottom:20px;
+}
+.admin-config .backup-dir input{
+	max-width:unset;
+}
+.admin-config .backup-note{
+	margin:40px 30px;
+	text-align:center;
+}
+.admin-config .versions{
+	padding-left:30px;
+}
+.admin-config .repo-key{
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:space-between;
+	margin:0px 0px 5px 0px;
+}
+.admin-config .repo-key-input{
+	display:flex;
+	flex-flow:column nowrap;
+	align-items:flex-start;
+}
+.admin-config .repo-key-input input,
+.admin-config .repo-key-input textarea{
+	min-width:350px;
+}
+.admin-config .mail-test-input{
+	display:flex;
+	flex-flow:row nowrap;
+}
+
+
+/* license */
+.admin-license .file{
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:space-between;
+	align-items:center;
+	max-width:520px;
+	padding:0px 16px;
+	margin:0px 0px 12px 0px;
+	color:var(--color-font);
+	border:2px solid var(--color-border);
+	border-radius:5px;
+	background-color:var(--color-bg);
+}
+.admin-license .file img{
+	width:auto;
+	height:120px;
+	margin-left:12px;
+}
+.admin-license table{
+	margin:6px 0px;
+}
+.admin-license table td{
+	padding:5px 32px 5px 0px;
+}
+.admin-license .invalid{
+	font-size:130%;
+	color:var(--color-error);
+}
+.admin-license .valid{
+	font-size:130%;
+	color:var(--color-success);
+}
+
+
+/* modules */
+.admin-modules{
+	flex:1 1 auto;
+	display:flex;
+	flex-direction:column;
+}
+.admin-modules .module-icon{
+	width:24px;
+	margin-right:8px;
+	filter:var(--image-filter);
+}
+.admin-modules .message{
+	margin:0px;
+	padding:15px 20px;
+	background-color:var(--color-bg);
+}
+.admin-modules .message.error{
+	color:var(--color-error);
+}
+.admin-modules-file img,
+.admin-modules-file h1{
+	margin:0px 9px 0px 0px !important;
+}
+
+
+/* LDAP */
+.admin-ldaps input{
+	width:500px !important;
+	max-width:unset !important;
+}
+.admin-ldaps table td{
+	padding:3px 9px 3px 0px !important;
+}
+.admin-ldaps .roles-title{
+	margin-top:30px;
+}
+.admin-ldaps .entry-actions{
+	display:flex;
+	flex-flow:row nowrap;
+	margin:5px 0px 12px;
+}
+
+
+/* repo */
+.admin-repo .repo-empty{
+	width:100%;
+	margin:30px 0px;
+	text-align:center;
+}
+.admin-repo .repo-module{
+	display:flex;
+	flex-flow:row nowrap;
+	max-width:1200px;
+	margin:0px 12px 12px 0px;
+	border:2px solid var(--color-border);
+	border-radius:4px;
+}
+.admin-repo .repo-module .part{
+	display:flex;
+	flex-flow:column nowrap;
+}
+.admin-repo .repo-module .bad-state{
+	color:var(--color-error);
+}
+.admin-repo .repo-module .part .title{
+	display:flex;
+	flex-flow:row wrap;
+	justify-content:space-between;
+	margin-bottom:6px;
+	border-bottom:1px solid var(--color-border);
+}
+.admin-repo .repo-module .part .description{
+	max-width:800px;
+	max-height:200px;
+	overflow-y:auto;
+}
+.admin-repo .repo-module .part .author{
+	text-indent:3px;
+}
+.admin-repo .repo-module .part .actions-box{
+	margin-top:8px;
+	display:flex;
+	flex-flow:column nowrap;
+	align-items:flex-start;
+}
+.admin-repo .repo-module .part.left{
+	flex:3 1 900px;
+	min-width:500px;
+	padding:12px;
+	padding-right:18px;
+	line-height:150%;
+	background-color:var(--color-bg);
+}
+.admin-repo .repo-module .part.right{
+	padding:12px 16px;
+	line-height:150%;
+	font-size:110%;
+	display:flex;
+	flex-flow:column;
+	align-items:flex-start;
+	color:var(--color-bg-font);
+	border-left:2px solid var(--color-border);
+	background-color:var(--color-container-title-lower);
+	flex:0 1 300px;
+}
+
+
+/* roles */
+.admin-roles .content{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
+}
+.admin-roles .admin-role{
+	max-width:450px;
+	flex:1 1 100%;
+	display:flex;
+	flex-flow:column nowrap;
+	border-right:1px solid var(--color-border);
+}
+.admin-roles .admin-role-title{
+	height:40px;
+	padding:5px;
+	box-sizing:border-box;
+	display:flex;
+	flex-flow:column nowrap;
+	align-items:center;
+	border-bottom:1px solid var(--color-border);
+}
+.admin-roles .admin-role-desc{
+	padding:10px 5px;
+	font-size:90%;
+	text-align:center;
+	border-bottom:1px solid var(--color-border);
+}
+.admin-roles .admin-role-members{
+	flex:1 1 auto;
+	overflow-y:auto;
+	overflow-x:hidden;
+	color:var(--color-font);
+	border-bottom:1px solid var(--color-border);
+	background-color:var(--color-bg);
+}
+.admin-roles .admin-role-members .entry{
+	display:flex;
+	flex-flow:row nowrap;
+	border-bottom:1px dotted var(--color-border);
+	align-items:center;
+	padding:2px 5px;
+	position:relative;
+}
+.admin-roles .admin-role-members .entry:focus,
+.admin-roles .admin-role-members .entry:hover{
+	background-color:var(--color-accent3);
+}
+.admin-roles .admin-role input{
+	flex:1 1 auto;
+	border:none;
+	outline:none;
+	color:var(--color-font);
+	background-color:var(--color-bg);
+}
+
+
+/* mails */
+.admin-mails{}
+.admin-mails .row-actions{
+	display:flex;
+	flex-flow:row nowrap;
+}
+.admin-mails .mail-testing{
+	display:flex;
+	flex-flow:row nowrap;
+}
+.admin-mails .mail-testing h1{
+	margin-right:9px;
+}

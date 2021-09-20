@@ -1,0 +1,95 @@
+.form-wrap{
+	flex:4 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
+	overflow:visible;
+	z-index:var(--z-index-form);
+	
+	/* box-shadow fix */
+	/* setting overflow:auto kills box shadow */
+	padding-left:2px;
+}
+
+/* fields */
+.form .fields{
+	overflow:auto;
+	display:flex;
+	flex-direction:column;
+	padding:var(--spacing-parent);
+}
+.form .field{
+	margin:var(--spacing-child);
+}
+.form.singleField .fields{
+	padding:0px;
+}
+.form.singleField .field{
+	margin:0px;
+	overflow:auto;
+}
+.form.singleField .calendar .month,
+.form.singleField .chart,
+.form.singleField .list,
+.form.singleField .gantt{
+	border-radius:0px;
+}
+
+/* data change log */
+.form-wrap div.log{
+	flex:1 1 auto;
+	max-width:500px;
+	display:flex;
+	flex-direction:column;
+}
+.form-wrap div.log div.log-entries{
+	flex:1 1 auto;
+	display:flex;
+	flex-direction:column;
+	padding:var(--spacing-parent);
+	overflow-y:auto;
+}
+.form-wrap div.log div.entry{
+	display:flex;
+	flex-direction:column;
+}
+.form-wrap div.log div.log-entries div.log-fields{
+	display:flex;
+	flex-flow:column nowrap;
+	margin:10px 0px 0px 0px;
+}
+.form-wrap div.log div.log-entries .field{
+	min-width:150px;
+	max-width:500px;
+	margin:var(--spacing-child);
+}
+
+/* context help */
+.form-wrap .help{
+	flex:1 0 auto;
+	max-width:500px;
+	min-width:400px;
+	display:flex;
+	flex-direction:column;
+}
+.form-wrap .help .help-content{
+	flex:1 1 auto;
+	display:flex;
+}
+
+/* user overwrites */
+.user-bordersSquared div.form div.top div.state{
+	border-radius:0px;
+}
+.user-compact .form-wrap{
+	padding:0px !important;
+}
+
+
+/* mobile overwrites */
+.is-mobile .form-wrap{
+	flex-direction:column;
+	padding-left:0px;
+}
+.is-mobile .form .fields{
+	overflow:unset;
+}
