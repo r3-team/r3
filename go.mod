@@ -2,7 +2,7 @@ module r3
 
 go 1.17
 
-replace tools v0.0.0 => ../tools
+replace tools v0.0.0 => ../r3_tools
 
 require (
 	github.com/arran4/golang-ical v0.0.0-20210825232153-efac1f4cb8ac

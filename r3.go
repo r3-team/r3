@@ -191,6 +191,7 @@ func main() {
 			config.File.Paths.EmbeddedDbData = filepath.Join(cli.setData, "database")
 			config.File.Paths.Files = filepath.Join(cli.setData, "files")
 			config.File.Paths.Temp = filepath.Join(cli.setData, "temp")
+			config.File.Paths.Transfer = filepath.Join(cli.setData, "transfer")
 		}
 		if cli.setPort != 0 {
 			config.File.Web.Port = cli.setPort
