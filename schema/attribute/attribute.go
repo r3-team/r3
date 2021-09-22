@@ -9,8 +9,8 @@ import (
 	"r3/schema/lookups"
 	"r3/schema/pgFunction"
 	"r3/schema/pgIndex"
+	"r3/tools"
 	"r3/types"
-	"tools"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"

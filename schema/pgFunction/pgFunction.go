@@ -7,10 +7,10 @@ import (
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/lookups"
+	"r3/tools"
 	"r3/types"
 	"regexp"
 	"strings"
-	"tools"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v4"

@@ -12,7 +12,7 @@ import (
 	"r3/config"
 	"r3/handler"
 	"r3/schema/lookups"
-	"tools"
+	"r3/tools"
 
 	"github.com/gofrs/uuid"
 )

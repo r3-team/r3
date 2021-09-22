@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"r3/bruteforce"
 	"r3/config"
+	"r3/tools"
 	"strconv"
-	"tools"
 
 	"github.com/jackc/pgx/v4"
 )

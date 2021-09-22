@@ -6,7 +6,7 @@ import (
 	"r3/db"
 	"r3/db/upgrade"
 	"r3/login"
-	"tools"
+	"r3/tools"
 
 	"github.com/jackc/pgx/v4"
 )

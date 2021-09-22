@@ -9,9 +9,9 @@ import (
 	"r3/schema/caption"
 	"r3/schema/lookups"
 	"r3/schema/pgFunction"
+	"r3/tools"
 	"r3/types"
 	"strings"
-	"tools"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"

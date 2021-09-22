@@ -11,10 +11,10 @@ import (
 	"r3/config"
 	"r3/handler"
 	"r3/schema/lookups"
+	"r3/tools"
 	"r3/types"
 	"sort"
 	"strings"
-	"tools"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"

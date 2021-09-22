@@ -6,8 +6,8 @@ import (
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
+	"r3/tools"
 	"r3/types"
-	"tools"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"

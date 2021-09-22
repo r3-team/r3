@@ -7,8 +7,8 @@ import (
 	"r3/cache"
 	"r3/db"
 	"r3/handler"
+	"r3/tools"
 	"r3/types"
-	"tools"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"

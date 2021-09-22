@@ -3,9 +3,9 @@ package log
 import (
 	"fmt"
 	"r3/db"
+	"r3/tools"
 	"r3/types"
 	"sync"
-	"tools"
 
 	"github.com/jackc/pgtype"
 )

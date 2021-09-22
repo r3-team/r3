@@ -2,8 +2,6 @@ module r3
 
 go 1.17
 
-replace tools v0.0.0 => ../r3_tools
-
 require (
 	github.com/arran4/golang-ical v0.0.0-20210825232153-efac1f4cb8ac
 	github.com/emersion/go-imap v1.1.0
@@ -13,6 +11,7 @@ require (
 	github.com/go-ldap/ldap/v3 v3.4.1
 	github.com/gofrs/uuid v4.0.0+incompatible
 	github.com/gorilla/websocket v1.4.2
+	github.com/h2non/filetype v1.1.1
 	github.com/jackc/pgtype v1.8.1
 	github.com/jackc/pgx/v4 v4.13.0
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
@@ -21,7 +20,6 @@ require (
 	golang.org/x/crypto v0.0.0-20210817164053-32db794688a5 // indirect
 	golang.org/x/sys v0.0.0-20210909193231-528a39cd75f3 // indirect
 	golang.org/x/text v0.3.7 // indirect
-	tools v0.0.0
 )
 
 require (
@@ -29,7 +27,6 @@ require (
 	github.com/emersion/go-sasl v0.0.0-20200509203442-7bfe0ed36a21 // indirect
 	github.com/emersion/go-textwrapper v0.0.0-20200911093747-65d896831594 // indirect
 	github.com/google/go-cmp v0.5.4 // indirect
-	github.com/h2non/filetype v1.1.1 // indirect
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
 	github.com/jackc/pgconn v1.10.0 // indirect
 	github.com/jackc/pgio v1.0.0 // indirect

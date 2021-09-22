@@ -10,9 +10,9 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/schema/lookups"
+	"r3/tools"
 	"r3/types"
 	"strings"
-	"tools"
 
 	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"

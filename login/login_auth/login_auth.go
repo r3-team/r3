@@ -7,9 +7,9 @@ import (
 	"r3/db"
 	"r3/handler"
 	"r3/ldap/ldap_auth"
+	"r3/tools"
 	"strings"
 	"time"
-	"tools"
 
 	"github.com/gbrlsnchs/jwt/v3"
 	"github.com/jackc/pgtype"

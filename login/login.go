@@ -9,10 +9,10 @@ import (
 	"r3/db"
 	"r3/schema/lookups"
 	"r3/setting"
+	"r3/tools"
 	"r3/types"
 	"strconv"
 	"strings"
-	"tools"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"

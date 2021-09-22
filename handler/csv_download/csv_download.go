@@ -16,10 +16,10 @@ import (
 	"r3/handler"
 	"r3/log"
 	"r3/login/login_auth"
+	"r3/tools"
 	"r3/types"
 	"strconv"
 	"time"
-	"tools"
 	"unicode/utf8"
 
 	"github.com/gofrs/uuid"

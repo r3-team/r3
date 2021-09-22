@@ -12,11 +12,11 @@ import (
 	"r3/db"
 	"r3/handler"
 	"r3/login/login_auth"
+	"r3/tools"
 	"r3/types"
 	"reflect"
 	"strings"
 	"time"
-	"tools"
 
 	ics "github.com/arran4/golang-ical"
 	"github.com/jackc/pgtype"

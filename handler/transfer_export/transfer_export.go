@@ -8,8 +8,8 @@ import (
 	"r3/handler"
 	"r3/log"
 	"r3/login/login_auth"
+	"r3/tools"
 	"r3/transfer"
-	"tools"
 )
 
 var genErr = "could not finish module export"

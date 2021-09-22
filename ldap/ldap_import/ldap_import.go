@@ -10,8 +10,8 @@ import (
 	"r3/ldap/ldap_conn"
 	"r3/log"
 	"r3/login"
+	"r3/tools"
 	"r3/types"
-	"tools"
 	"unicode/utf8"
 
 	goldap "github.com/go-ldap/ldap/v3"

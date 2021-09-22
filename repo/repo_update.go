@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"r3/config"
 	"r3/db"
+	"r3/tools"
 	"r3/types"
-	"tools"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v4"

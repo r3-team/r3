@@ -10,9 +10,9 @@ import (
 	"r3/schema/column"
 	"r3/schema/lookups"
 	"r3/schema/query"
+	"r3/tools"
 	"r3/types"
 	"sort"
-	"tools"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"

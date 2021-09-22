@@ -2,7 +2,7 @@ package cert
 
 import (
 	"os"
-	"tools"
+	"r3/tools"
 )
 
 func CreateIfNotExist(certPath string, keyPath string) error {

@@ -13,9 +13,9 @@ import (
 	"r3/mail"
 	"r3/repo"
 	"r3/schema/lookups"
+	"r3/tools"
 	"sync"
 	"time"
-	"tools"
 
 	"github.com/gofrs/uuid"
 )
