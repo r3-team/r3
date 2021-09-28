@@ -310,6 +310,15 @@ func importDeleteNotExisting_tx(tx pgx.Tx, module types.Module) error {
 					idsKeep = append(idsKeep, column.Id)
 				}
 
+			case "chart":
+				var fieldChart types.FieldChart
+				if err := json.Unmarshal(fieldJson, &fieldChart); err != nil {
+					return err
+				}
+				for _, column := range fieldChart.Columns {
+					idsKeep = append(idsKeep, column.Id)
+				}
+
 			case "data":
 				var fieldDataRel types.FieldDataRelationship
 				if err := json.Unmarshal(fieldJson, &fieldDataRel); err != nil {
