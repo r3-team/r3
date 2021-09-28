@@ -136,10 +136,15 @@ let MyChart = {
 			if(typeof this.option.backgroundColor === 'undefined')
 				this.option.backgroundColor = 'transparent';
 			
-			// overwrite dataset (currently only 1 dataset is available)
-			if(typeof this.option.dataset === 'undefined')
-				this.option.dataset = {};
+			// set dataset defaults if empty
+			// source header is false, otherwise first column will be used as dimension name
+			if(typeof this.option.dataset === 'undefined') 
+				this.option.dataset = {
+					source:[],
+					sourceHeader:false
+				};
 			
+			// overwrite dataset source with query data (currently only 1 dataset is usable)
 			this.option.dataset.source = [];
 			for(let i = 0, j = res.payload.rows.length; i < j; i++) {
 				

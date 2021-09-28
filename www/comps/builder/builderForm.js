@@ -519,7 +519,8 @@ let MyBuilderForm = {
 				onMobile:true,
 				chartOption:JSON.stringify({
 					dataset:{
-						source:['filled by app']
+						source:['filled by app'],
+						sourceHeader:false
 					},
 					legend: {
 						orient:'vertical',
