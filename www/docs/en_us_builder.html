@@ -1,4 +1,4 @@
-<p><em>Updated 2021-09-13</em></p>
+<p><em>Updated 2021-09-28</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -28,6 +28,7 @@
 <li><a href="#field-options">Field options</a></li>
 <li><a href="#list-fields">List fields</a></li>
 <li><a href="#calendar-fields">Calendar fields</a></li>
+<li><a href="#chart-fields">Chart fields</a></li>
 <li><a href="#form-states">Form states</a></li>
 </ol></li>
 <li><a href="#queries">Queries</a>
@@ -100,7 +101,7 @@
 <li>Color (optional): Freely selectable color. Is shown on the start page and on the header when the application is active. Can be overwritten in instances with customizing. Should be a color with low-brightness to contrast bright header fonts.</li>
 <li>Default position: Order in which application should appear in menus (smaller first). Can be overwritten in instances by admins. When 'assigned to' a parent application, positions affect the order underneath the parent application.</li>
 <li>Start form (optional but required for menu): Form that opens when clicking on the application from the start or header menu. A form must be created first to be selectable here - a menu entry for the application will only appear once a start form is set.</li>
-<li>Translations (1 is required): Languages, the application is available in. A language is defined by its 5-letter language code (en_us, de_de, ch_cn, and so on). Be aware: You must provide translations for all languages that you define here - not doing this results in error strings being shown to the end user. Besides the application title, other entities (menus, forms, help pages, ...) require translations when creating them. You can also define a fallback language, which is used if an user selects a language that your application does not offer. To start, you should keep to a single translation and expand when needed.</li>
+<li>Translations (1 is required): Languages, the application is available in. A language is defined by its 5-letter language code (en_us, de_de, ch_cn, and so on). Be aware: You must provide translations for all languages that you define here - not doing this results in error strings being shown to the end user. Besides the application title, other entities (menus, forms, help pages, ...) require translations when creating them. You can also define a fallback language, which is used if a user selects a language that your application does not offer. To start, you should keep to a single translation and expand when needed.</li>
 </ul>
 <p>Some options depend on other entities being created first (other applications to build on, forms to select as start form, icons to show). When creating an application these can be skipped and added/changed later.</p>
 <p>In addition, a couple of non-editable meta data fields are shown. These are set when an updated application is exported. Please refer to <a href="#application-transfers">Application transfers</a> for more details.</p>
@@ -168,7 +169,7 @@
 <li>Unprotected record, protected values. Useful for cases in which a record is optional, but its values need to stay a certain way to be sensible.</li>
 <li>Unprotected record, unprotected values. Useful for sample data - can be overwritten, changed or deleted at will.</li>
 </ul>
-<p>Important! When a record or its values are unprotected, they can be deleted/changed in the target instance. When updating your application in the instance, already deleted/changed preset records are not recreated or updated. REI3 follows this definition: An unprotected preset/value is optional and if an user in the target instance decides to delete/change it, it will stay that way.</p>
+<p>Important! When a record or its values are unprotected, they can be deleted/changed in the target instance. When updating your application in the instance, already deleted/changed preset records are not recreated or updated. REI3 follows this definition: An unprotected preset/value is optional and if a user in the target instance decides to delete/change it, it will stay that way.</p>
 <p>Protected presets/preset values on the other hand are always updated. Since deletion/change is blocked, updates only occur if presets have changed themselves. When switching an unprotected preset/preset value to 'protected', deleted/changed presets/preset values are recreated/updated.</p>
 <p>Preset values must be defined as their original value state. To see this state, you can open the data view on any relation; this will show the original attribute values. Some examples:</p>
 <ul>
@@ -212,7 +213,7 @@
 <li>Keep changes for a number of days. Change log keeps all changes for the specified amount of days.</li>
 </ol>
 <p>A system task regularly deletes older changes, when the retention settings are satisfied. If both settings are used (number and days of changes), the more conservative setting wins. Example: 30 changes should be kept for 90 days. If there are more than 30 changes, they are all still being kept if they occurred within the last 90 days. If there are changes after 90 days, but still less than 30, they are also being kept.</p>
-<p>Changes are visible to users in forms that access corresponding relations via the change log window. This will show all changes corresponding to joined relations (see <a href="#queries">Queries</a>), but only for attributes that are accessible to the user via data input fields. If an user has access to a data field, and changes are available, they will be visible without further permissions being required.</p>
+<p>Changes are visible to users in forms that access corresponding relations via the change log window. This will show all changes corresponding to joined relations (see <a href="#queries">Queries</a>), but only for attributes that are accessible to the user via data input fields. If a user has access to a data field, and changes are available, they will be visible without further permissions being required.</p>
 <p>The change retention cleanup job can be configured to run more or less often in the admin UI.</p>
 <h1 id="roles-and-access-management">Roles and access management</h1>
 <p>Roles serve to grant access within REI3. There are currently two distinct areas of access:</p>
@@ -224,7 +225,7 @@
 <p>When creating a role, you need to choose an unique role name within your application. Titles and descriptions serve to explain the role to administrators of other REI3 instances as they will be shown in the admin UI. They are not visible to non-admin users.</p>
 <p>Roles can be members of other roles. This enables access inheritance with no fixed limit on how many levels of inheritance are allowed. A user logging in, receives access following assigned roles and the memberships of these roles (and the memberships of those roles, and so on).</p>
 <p>When applications build on other applications (see <a href="#building-on-applications">Building on applications</a>) usually some access to the other application´s data is necessary. This is solved by making your roles members of roles from the other application. In many cases data access is desired but users from one application should not see user interfaces from the other; this is solved by creating data only roles (no menu access specified) with which users only get access to data.</p>
-<p>Lastly, the option 'assignable' controls whether a role is directly assignable to an user. If set to 'false' the specific role is hidden in the admin UI and can only be used via membership of other roles. This can be useful for data only roles or for complex role hierarchies.</p>
+<p>Lastly, the option 'assignable' controls whether a role is directly assignable to a user. If set to 'false' the specific role is hidden in the admin UI and can only be used via membership of other roles. This can be useful for data only roles or for complex role hierarchies.</p>
 <h1 id="presentation-and-user-interfaces">Presentation and user interfaces</h1>
 <p>Besides managing data, most systems require some kind of frontend. For this purpose, REI3 includes <a href="#forms">forms</a> to display and manipulate data and <a href="#menus">menus</a> to navigate your application.</p>
 <h2 id="forms">Forms</h2>
@@ -255,7 +256,7 @@
 <li>Contextual: As part of a data form, showing contextually connected records to the record currently being handled by the data form.</li>
 </ul></li>
 <li>Header: Simply text with an optional preceding icon. Used for titles or small explanations.</li>
-<li>Button: Actions that an user can execute (see <a href="#field-options">Button fields</a>).</li>
+<li>Button: Actions that a user can execute (see <a href="#field-options">Button fields</a>).</li>
 <li>Data: Data forms only. Dependent on the defined <a href="#queries">query</a>, attribute input fields are available for record view and manipulation. They are labeled by a relation index number, the relation and the attribute name, as in '0) employee.forename'.
 <ul>
 <li>Depending on the attribute type, fields will behave differently and offer different <a href="#field-options">options</a>. For example: Text attributes can be presented as a line input, a URL or with a richtext editor, while integer attributes can be presented as number or date inputs.</li>
@@ -357,7 +358,7 @@
 <li>Display: Table or card layout. A table list is presented with one line per record and all shown values scroll horizontally. The card layout places record values vertically into a card, resembling a business card. More display options may come in the future.</li>
 <li>Result limit: The default page result limit. If more results are available, the user needs to navigate between pages. Can be overwritten by the user.</li>
 <li><a href="#csv-import-and-export">CSV import/export</a></li>
-<li>Quick filter: A simple text box with which an user can filter the entire list. Very inefficient, as all visible attribute values are being looked through. Advisable only for lists handling limited data or when all shown attributes are well indexed. Often used for smaller sub lists that are already being filtered by a currently open form record.</li>
+<li>Quick filter: A simple text box with which a user can filter the entire list. Very inefficient, as all visible attribute values are being looked through. Advisable only for lists handling limited data or when all shown attributes are well indexed. Often used for smaller sub lists that are already being filtered by a currently open form record.</li>
 <li>Open record (relation 0): Allows the user to select records from the list to open on a data form. Depending on the <a href="#queries">query</a> configuration, existing records can be opened or new ones created. The target form must use the same base relation (index: 0) to properly handle the chosen record.</li>
 <li>Apply form record to: Only available when 'Open record (relation 0)' is used and useful only for list fields placed on data forms. Takes the ID of the currently handled form record and assigns it to a field on the target form as relationship target. Useful when the list field is a sub list as part of a data form; by applying the record to the target form, connected sub entities can be conveniently created without having to manually input the relationship target.</li>
 </ul>
@@ -387,7 +388,7 @@
 </ul>
 <p>When designing complex lists with many joins, sub queries, groupings, filters and so on, logic errors or badly chosen configuration options can result in non-desirable data sets. To troubleshoot this, a SQL-preview function is available on the list field when inside the builder UI. This function returns the raw SQL that is being used to retrieve the current list data. With this preview, you can directly see how the chosen options affect the final SQL query. Regardless of the chosen configuration, each list retrieval only ever executes a single SQL, including all joins, sub queries and so on.</p>
 <h3 id="calendar-fields">Calendar fields</h3>
-<p>Calendar fields work very similar to list fields. They have their own <a href="#queries">query</a> like list fields and can use the same columns and configuration options. Please refer to <a href="#list-fields">list fields</a> for detailed explanations.</p>
+<p>Calendar fields work very similar to <a href="#list-fields">list fields</a>. They have their own <a href="#queries">query</a> like list fields and can use the same columns and configuration options. Please refer to <a href="#list-fields">list fields</a> for detailed explanations.</p>
 <p>Besides the same options that are available for list fields, calendar fields have a few specific ones; these are used to generate and style the calendar entries:</p>
 <ul>
 <li>Date from/to: Attributes that define the 'location' of shown records on the calendar. Given attribute values must be <a href="#date-and-time-management">date or datetime</a> and must not be mixed. If date values are used, only full day entries are shown on the calendar; if datetime values are used, either full day or time based entries (example: from 12:00 to 14:30) are shown.</li>
@@ -399,6 +400,14 @@
 <li>Availability time date records for departments, with their department names used for grouping.</li>
 <li>Combined availability time records for all members of a team, with the team name used for grouping.</li>
 </ul></li>
+</ul>
+<h3 id="chart-fields">Chart fields</h3>
+<p>Similar to <a href="#list-fields">list fields</a>, chart fields access a defined <a href="#queries">query</a> to receive and then present data. This is achieved by inclusion of the powerful open source visualization library <a href="https://echarts.apache.org/en/index.html">echarts</a>. REI3 ships with the full version of echarts, in theory supporting all available charts (see <a href="https://echarts.apache.org/examples/en/index.html">examples</a>). There are however some implementation details to be aware of:</p>
+<ul>
+<li>The Builder does not offer visual configuration of all echart options - there is a huge number of them and they are expanded with new releases. Instead application authors can edit the echarts 'options' object, which gives access to basically all configuration options (see <a href="https://echarts.apache.org/en/option.html#title">echarts documentation</a>).</li>
+<li>For some simple chart types (bar, line, pie, scatter), the Builder offers some UI inputs. For more complicated types (like boxplots, funnel, etc.), the 'options' object can freely be used (see <a href="https://echarts.apache.org/en/option.html#series">series</a>). Legends, styles and many other elements can be configured this way. If the 'options' object is used, the Builder inputs can safely be ignored - they only help to fill the object initially or when using simple charts.</li>
+<li>REI3 fills in the <a href="https://echarts.apache.org/en/option.html#dataset.source">dataset source</a> of the 'option' object with an array of results from the chart field query. Every array element is itself an array of values, representing all chart columns in the selected order. When defining a chart, the dataset source is accessed by choosing the value index (0=first column, 1=second, and so on) in the <a href="https://echarts.apache.org/en/option.html#series">series</a> configuration.</li>
+<li>When using the 'time' axis type, the column display should be set to a time type (either 'date time', 'date' or 'time'); this will cause REI3 to automatically convert time values for echarts to properly display. If the display type is set to 'standard', the unix timestamps are used by echarts (unix timestamps are the native format of time &amp; date storage in REI3, see <a href="#date-and-time-management">date and time management</a>).</li>
 </ul>
 <h3 id="form-states">Form states</h3>
 <p>Form states serve to change the behavior of fields; this is done by applying specified effects on fields based on form state conditions. Multiple form states can be used and will work in parallel.</p>
@@ -449,7 +458,7 @@
 <li>(Regular) filters: Automatically applied on any data access. Depending on filter conditions, different data can be shown in different contexts (logged in user, role membership, active interface <a href="#translations">language code</a>, and so on). Caution: If login or role conditions are used in relationship inputs, already selected values can be filtered out depending on the active user, changing the current value of a field without any user action. Usually in these cases, input filtering is desired - this can be achieved by using filter sets instead (see below).</li>
 <li>Filter sets: A filter set is a named collection of filter conditions. Multiple filter sets can be defined for a query. Filter sets can serve different purposes:
 <ul>
-<li>Sub selections: Wherever filter sets can be used (lists, calendars, Gantt, ...), if at least 2 sets are defined, users can choose between them. This enables result subsets in lists (like only 'active' or 'closed' records) and in input dropdowns ('show only colleagues in my department' or 'in entire company'). The first filter set is activated immediately until its changed by an user. If multiple sets are desired but everything should be shown by default, create the first filter set without any filter lines.</li>
+<li>Sub selections: Wherever filter sets can be used (lists, calendars, Gantt, ...), if at least 2 sets are defined, users can choose between them. This enables result subsets in lists (like only 'active' or 'closed' records) and in input dropdowns ('show only colleagues in my department' or 'in entire company'). The first filter set is activated immediately until its changed by a user. If multiple sets are desired but everything should be shown by default, create the first filter set without any filter lines.</li>
 <li>Input only filters: Relationship inputs can be filtered with user context dependent conditions (login/roles). Using regular filters will affect the current field value without user action (if login condition results in different/less data). Using a filter set, enables filtering to be limited to the value input (dropdowns usually) and will not affect existing field values. If a single filter set is defined, the user will not be presented with a choice between filter sets.</li>
 </ul></li>
 </ul>
@@ -505,7 +514,7 @@
 <h2 id="menus">Menus</h2>
 <p>Menus serve to navigate between and inside applications in REI3. Two types of menus exist:</p>
 <ul>
-<li>Main menu: Shown at the top of the page and on the start page for each user. Automatically created by resolving accessible applications for the current login. The header menu shows the top level of applications as well as a second level of <a href="#creating-your-own-applications">assigned to</a> applications (child applications). Currently only 2 levels of hierarchy are supported. The display order can be defined in the application overview (Builder start page) with the <a href="#creating-your-own-applications">default position</a>; this option can be overwritten in a target instance inside the admin panel. An application is only shown in the main menu, when a start form has been defined and an user has access to it; this includes admin users.</li>
+<li>Main menu: Shown at the top of the page and on the start page for each user. Automatically created by resolving accessible applications for the current login. The header menu shows the top level of applications as well as a second level of <a href="#creating-your-own-applications">assigned to</a> applications (child applications). Currently only 2 levels of hierarchy are supported. The display order can be defined in the application overview (Builder start page) with the <a href="#creating-your-own-applications">default position</a>; this option can be overwritten in a target instance inside the admin panel. An application is only shown in the main menu, when a start form has been defined and a user has access to it; this includes admin users.</li>
 <li>Application menu: This can directly be defined in the Builder with unlimited levels of hierarchy; we recommend to keep the menu hierarchy to at most 3 levels for usability reasons. Each menu entry can optionally open a form and/or contain sub menu entries. When sub entries are defined, you can choose whether these entries are shown by default or must be toggled first by opening the parent menu entry. The translatable menu title as well as menu icon are applied to an opened form if the form does not define its own title/icon.</li>
 </ul>
 <p>When <a href="#building-on-applications">Building on applications</a>, you can choose to copy the entire menu structure from another application. This is can be useful when you intent to extend another application; you copy the original menu structure, change target forms and add your own, custom menu entries.</p>
@@ -602,7 +611,7 @@
 <ul>
 <li>Dates: When displaying integer values as 'date' they represent a 'fixed day in a year' and are formatted as such. When entering a date, it is stored as midnight at UTC of the corresponding day. So choosing the 2nd August 2017 will be stored as unix timestamp '1501632000' or '2017-08-02 00:00:00 UTC'. Because all date values are stored as midnight, they can directly be compared. Timezone information is not stored or used at all in this context.</li>
 <li>Time: When displaying an integer as 'time' they represent a 'fixed point of time on a clock' and are formatted as such. When entering a time, it is stored as the offset to unix zero ('1970-01-01 00:00:00'). Because there is no date component, the highest possible value is the count of seconds until '23:59:59' (or 86399 as unix timestamp). This implementation allows comparison between time values. Similar to dates, timezones are not used in this context.</li>
-<li>Datetime: When displaying integer values as 'datetime' they represent a 'timezone adjusted date &amp; time'. When entering a date &amp; time, the local timezone is subtracted from the value and it is stored as the corresponding unix timestamp. When the same value is shown back to an user, its timezone will be added, showing the correct relative date &amp; time. The relative date &amp; time might be different, depending on timezone and daylight savings time - the point in time will be the same however. The timezone information that was used to enter the original value is not stored.</li>
+<li>Datetime: When displaying integer values as 'datetime' they represent a 'timezone adjusted date &amp; time'. When entering a date &amp; time, the local timezone is subtracted from the value and it is stored as the corresponding unix timestamp. When the same value is shown back to a user, its timezone will be added, showing the correct relative date &amp; time. The relative date &amp; time might be different, depending on timezone and daylight savings time - the point in time will be the same however. The timezone information that was used to enter the original value is not stored.</li>
 </ul></li>
 </ul>
 <p>With this implementation, attributes storing dates must be handled separately to attributes storing datetimes or just times. As date/time values are not bound to timezones but datetimes are, displaying a date value as datetime will be wrong. Date, time &amp; datetime values can directly be compared with values of the same type but not between each other. The only exception is the option of mixing dates &amp; datetimes in date range inputs (combined from/to input) and calendars. This is useful when dealing with events and appointments in a mixed context. Without a date range, the right context (whether we have a date or datetime) cannot be safely assumed.</p>
