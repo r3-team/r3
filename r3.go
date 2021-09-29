@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"net"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -51,6 +52,7 @@ var (
 type cliInput struct {
 	adminCreate      string
 	configFile       string
+	dynamicPort      bool
 	http             bool
 	openStart        bool
 	run              bool
@@ -77,18 +79,19 @@ func main() {
 
 	// process configuration overwrites from command line
 	var cli cliInput
-	flag.StringVar(&cli.serviceName, "servicename", appName, "Specify which service to manage")
-	flag.BoolVar(&cli.serviceInstall, "install", false, "Install platform service")
-	flag.BoolVar(&cli.serviceUninstall, "uninstall", false, "Uninstall platform service")
-	flag.BoolVar(&cli.serviceStart, "start", false, "Start platform service")
-	flag.BoolVar(&cli.serviceStop, "stop", false, "Stop platform service")
-	flag.BoolVar(&cli.openStart, "open", false, "Open URL of running platform (can be combined with -run)")
-	flag.BoolVar(&cli.http, "http", false, "Run in HTTP mode (for testing purposes only!)")
-	flag.BoolVar(&cli.run, "run", false, "Run platform service in this shell")
-	flag.StringVar(&cli.adminCreate, "newadmin", "", "Create new admin user (username:password)")
-	flag.StringVar(&cli.setData, "setdata", "", "Config file: Set data directory (platform files and database if stand-alone)")
-	flag.IntVar(&cli.setPort, "setport", 0, "Config file: Set webserver port (default: 443)")
-	flag.StringVar(&cli.configFile, "config", "", "Specify alternative configuration file location")
+	flag.StringVar(&cli.serviceName, "servicename", appName, "Specify name of service to manage (to (un)install, start or stop service)")
+	flag.BoolVar(&cli.serviceInstall, "install", false, fmt.Sprintf("Install %s service", appName))
+	flag.BoolVar(&cli.serviceUninstall, "uninstall", false, fmt.Sprintf("Uninstall %s service", appName))
+	flag.BoolVar(&cli.serviceStart, "start", false, fmt.Sprintf("Start %s service", appName))
+	flag.BoolVar(&cli.serviceStop, "stop", false, fmt.Sprintf("Stop %s service", appName))
+	flag.BoolVar(&cli.openStart, "open", false, fmt.Sprintf("Open URL of %s in default browser (combined with -run)", appName))
+	flag.BoolVar(&cli.dynamicPort, "dynamicport", false, "Start with a port provided by the operating system (combined with -run)")
+	flag.BoolVar(&cli.http, "http", false, "Start with unencrypted HTTP (for testing/development only, combined with -run)")
+	flag.BoolVar(&cli.run, "run", false, fmt.Sprintf("Run %s from this shell", appName))
+	flag.StringVar(&cli.adminCreate, "newadmin", "", "Create new admin user (username:password), password must not contain spaces or colons")
+	flag.StringVar(&cli.setData, "setdata", "", "Write to config file: Data directory (platform files and database if stand-alone)")
+	flag.IntVar(&cli.setPort, "setport", 0, "Write to config file: Webserver port (default: 443)")
+	flag.StringVar(&cli.configFile, "config", "", "Start with alternative config file location (combined with -run)")
 	flag.Parse()
 
 	// define service and service logger
@@ -147,6 +150,20 @@ func main() {
 
 	// print usage info if interactive and no arguments were added
 	if service.Interactive() && len(os.Args) == 1 {
+		fmt.Println("\n################################################################################")
+		fmt.Printf("This is the executable of %s, the open application platform, v%s\n", appName, appVersion)
+		fmt.Println("Copyright (c) 2019-2021 Gabriel Victor Herbert\n")
+		fmt.Printf("%s can be installed as service (-install), run from a shell (-run) or started\n", appName)
+		fmt.Println("in portable mode (-run -open -http -dynamicport) for testing or development.\n")
+		fmt.Println("If installed via wizard as stand-alone (Windows only), no additional")
+		fmt.Println("configuration is necessary.\n")
+		fmt.Println("If installed on Linux or via wizard as dedicated, an empty PostgreSQL DB must be")
+		fmt.Printf("accessible with full permissions for this DB for %s to finish its setup.\n\n", appName)
+		fmt.Println("The system start configuration is found inside the file 'config.json'.")
+		fmt.Println("Please visit https://rei3.de/admindocu-en_us/ for more details.")
+		fmt.Println("################################################################################\n")
+		fmt.Println("Available command line flags:")
+
 		flag.PrintDefaults()
 		return
 	}
@@ -184,6 +201,9 @@ func main() {
 		prg.logger.Info("service was successfully stopped")
 		return
 	}
+	if cli.dynamicPort {
+		config.File.Web.Port = 0
+	}
 	if cli.setData != "" || cli.setPort != 0 {
 
 		if cli.setData != "" {
@@ -202,8 +222,8 @@ func main() {
 		return
 	}
 
-	// exit if app is not run in this context
-	if service.Interactive() && !cli.run {
+	// interactive, app only starts if to be run from shell or when creating an admin user
+	if service.Interactive() && !cli.run && cli.adminCreate == "" {
 		return
 	}
 
@@ -367,6 +387,13 @@ func (prg *program) execute(svc service.Service) {
 	mux.HandleFunc("/import", transfer_import.Handler)
 
 	webServerString := fmt.Sprintf("%s:%d", config.File.Web.Listen, config.File.Web.Port)
+	webListener, err := net.Listen("tcp", webServerString)
+	if err != nil {
+		prg.logger.Errorf("failed to register listener for HTTP server, %v", err)
+		return
+	}
+	config.File.Web.Port = webListener.Addr().(*net.TCPAddr).Port
+
 	prg.webServer = &http.Server{
 		Addr:              webServerString,
 		Handler:           mux,
@@ -379,7 +406,7 @@ func (prg *program) execute(svc service.Service) {
 		if prg.cli.openStart {
 			tools.OpenRessource(fmt.Sprintf("http://localhost:%d", config.File.Web.Port), false)
 		}
-		if err := prg.webServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		if err := prg.webServer.Serve(webListener); err != nil && err != http.ErrServerClosed {
 			prg.logger.Error(err)
 		}
 	} else {
@@ -394,7 +421,7 @@ func (prg *program) execute(svc service.Service) {
 		if prg.cli.openStart {
 			tools.OpenRessource(fmt.Sprintf("https://localhost:%d", config.File.Web.Port), false)
 		}
-		if err := prg.webServer.ListenAndServeTLS(certPath, keyPath); err != nil && err != http.ErrServerClosed {
+		if err := prg.webServer.ServeTLS(webListener, certPath, keyPath); err != nil && err != http.ErrServerClosed {
 			prg.logger.Error(err)
 		}
 	}
