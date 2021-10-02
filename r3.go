@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bufio"
 	"context"
 	"flag"
 	"fmt"
@@ -62,7 +63,6 @@ type cliInput struct {
 	serviceInstall   bool
 	serviceUninstall bool
 	setData          string
-	setPort          int
 }
 type program struct {
 	cli       cliInput
@@ -87,10 +87,9 @@ func main() {
 	flag.BoolVar(&cli.openStart, "open", false, fmt.Sprintf("Open URL of %s in default browser (combined with -run)", appName))
 	flag.BoolVar(&cli.dynamicPort, "dynamicport", false, "Start with a port provided by the operating system (combined with -run)")
 	flag.BoolVar(&cli.http, "http", false, "Start with unencrypted HTTP (for testing/development only, combined with -run)")
-	flag.BoolVar(&cli.run, "run", false, fmt.Sprintf("Run %s from this shell", appName))
+	flag.BoolVar(&cli.run, "run", false, fmt.Sprintf("Run %s from within this console", appName))
 	flag.StringVar(&cli.adminCreate, "newadmin", "", "Create new admin user (username:password), password must not contain spaces or colons")
 	flag.StringVar(&cli.setData, "setdata", "", "Write to config file: Data directory (platform files and database if stand-alone)")
-	flag.IntVar(&cli.setPort, "setport", 0, "Write to config file: Webserver port (default: 443)")
 	flag.StringVar(&cli.configFile, "config", "", "Start with alternative config file location (combined with -run)")
 	flag.Parse()
 
@@ -137,6 +136,31 @@ func main() {
 		return
 	}
 
+	// print usage info if interactive and no arguments were added
+	if service.Interactive() && len(os.Args) == 1 {
+		fmt.Printf("\n################################################################################\n")
+		fmt.Printf("This is the executable of %s, the open application platform, v%s\n", appName, appVersion)
+		fmt.Printf("Copyright (c) 2019-2021 Gabriel Victor Herbert\n\n")
+		fmt.Printf("%s can be installed as service (-install) or run from the console (-run).\n", appName)
+		fmt.Printf("For the first start, %s needs to have access to an empty PostgreSQL database\n", appName)
+		fmt.Printf("with full permissions; database connection details need to be stored in %s´s\n", appName)
+		fmt.Printf("configuration file, by default: 'config.json'.\n\n")
+		fmt.Printf("Windows only: If the stand-alone version was installed or the portable version\n")
+		fmt.Printf("is used, the system is already pre-configured.\n\n")
+		fmt.Printf("Please visit https://rei3.de/admindocu-en_us/ for more details.\n")
+		fmt.Printf("################################################################################\n\n")
+		fmt.Printf("Available command line flags:\n")
+
+		flag.PrintDefaults()
+
+		// wait for user input to keep console open
+		fmt.Printf("\nPlease read above how to install or start %s. Press enter to return.\n", appName)
+
+		reader := bufio.NewReader(os.Stdin)
+		reader.ReadString('\n')
+		return
+	}
+
 	// change configuration file location
 	if cli.configFile != "" {
 		config.SetConfigFilePath(cli.configFile)
@@ -145,26 +169,6 @@ func main() {
 	// load configuration from file
 	if err := config.LoadFile(); err != nil {
 		prg.logger.Errorf("failed to read configuration file, %v", err)
-		return
-	}
-
-	// print usage info if interactive and no arguments were added
-	if service.Interactive() && len(os.Args) == 1 {
-		fmt.Println("\n################################################################################")
-		fmt.Printf("This is the executable of %s, the open application platform, v%s\n", appName, appVersion)
-		fmt.Println("Copyright (c) 2019-2021 Gabriel Victor Herbert\n")
-		fmt.Printf("%s can be installed as service (-install), run from a shell (-run) or started\n", appName)
-		fmt.Println("in portable mode (-run -open -http -dynamicport) for testing or development.\n")
-		fmt.Println("If installed via wizard as stand-alone (Windows only), no additional")
-		fmt.Println("configuration is necessary.\n")
-		fmt.Println("If installed on Linux or via wizard as dedicated, an empty PostgreSQL DB must be")
-		fmt.Printf("accessible with full permissions for this DB for %s to finish its setup.\n\n", appName)
-		fmt.Println("The system start configuration is found inside the file 'config.json'.")
-		fmt.Println("Please visit https://rei3.de/admindocu-en_us/ for more details.")
-		fmt.Println("################################################################################\n")
-		fmt.Println("Available command line flags:")
-
-		flag.PrintDefaults()
 		return
 	}
 
@@ -204,25 +208,21 @@ func main() {
 	if cli.dynamicPort {
 		config.File.Web.Port = 0
 	}
-	if cli.setData != "" || cli.setPort != 0 {
+	if cli.setData != "" {
 
-		if cli.setData != "" {
-			config.File.Paths.Certificates = filepath.Join(cli.setData, "certificates")
-			config.File.Paths.EmbeddedDbData = filepath.Join(cli.setData, "database")
-			config.File.Paths.Files = filepath.Join(cli.setData, "files")
-			config.File.Paths.Temp = filepath.Join(cli.setData, "temp")
-			config.File.Paths.Transfer = filepath.Join(cli.setData, "transfer")
-		}
-		if cli.setPort != 0 {
-			config.File.Web.Port = cli.setPort
-		}
+		config.File.Paths.Certificates = filepath.Join(cli.setData, "certificates")
+		config.File.Paths.EmbeddedDbData = filepath.Join(cli.setData, "database")
+		config.File.Paths.Files = filepath.Join(cli.setData, "files")
+		config.File.Paths.Temp = filepath.Join(cli.setData, "temp")
+		config.File.Paths.Transfer = filepath.Join(cli.setData, "transfer")
+
 		if err := config.WriteFile(); err != nil {
 			prg.logger.Errorf("failed to write configuration file, %v", err)
 		}
 		return
 	}
 
-	// interactive, app only starts if to be run from shell or when creating an admin user
+	// interactive, app only starts if to be run from console or when creating an admin user
 	if service.Interactive() && !cli.run && cli.adminCreate == "" {
 		return
 	}
