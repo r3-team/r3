@@ -55,7 +55,7 @@ type cliInput struct {
 	configFile       string
 	dynamicPort      bool
 	http             bool
-	openStart        bool
+	open             bool
 	run              bool
 	serviceName      string
 	serviceStart     bool
@@ -65,10 +65,11 @@ type cliInput struct {
 	setData          string
 }
 type program struct {
-	cli       cliInput
-	logger    service.Logger // logs to the operating system if called as service, otherwise to stdOut
-	stopping  bool
-	webServer *http.Server
+	cli             cliInput
+	embeddedDbOwned bool           // this instance has started the embedded database
+	logger          service.Logger // logs to the operating system if called as service, otherwise to stdOut
+	stopping        bool
+	webServer       *http.Server
 }
 
 func main() {
@@ -84,10 +85,10 @@ func main() {
 	flag.BoolVar(&cli.serviceUninstall, "uninstall", false, fmt.Sprintf("Uninstall %s service", appName))
 	flag.BoolVar(&cli.serviceStart, "start", false, fmt.Sprintf("Start %s service", appName))
 	flag.BoolVar(&cli.serviceStop, "stop", false, fmt.Sprintf("Stop %s service", appName))
-	flag.BoolVar(&cli.openStart, "open", false, fmt.Sprintf("Open URL of %s in default browser (combined with -run)", appName))
+	flag.BoolVar(&cli.open, "open", false, fmt.Sprintf("Open URL of %s in default browser (combined with -run)", appName))
 	flag.BoolVar(&cli.dynamicPort, "dynamicport", false, "Start with a port provided by the operating system (combined with -run)")
-	flag.BoolVar(&cli.http, "http", false, "Start with unencrypted HTTP (for testing/development only, combined with -run)")
-	flag.BoolVar(&cli.run, "run", false, fmt.Sprintf("Run %s from within this console", appName))
+	flag.BoolVar(&cli.http, "http", false, "Start with HTTP (not encrypted, for testing/development only, combined with -run)")
+	flag.BoolVar(&cli.run, "run", false, fmt.Sprintf("Run %s from within this console (see 'config.json' for configuration)", appName))
 	flag.StringVar(&cli.adminCreate, "newadmin", "", "Create new admin user (username:password), password must not contain spaces or colons")
 	flag.StringVar(&cli.setData, "setdata", "", "Write to config file: Data directory (platform files and database if stand-alone)")
 	flag.StringVar(&cli.configFile, "config", "", "Start with alternative config file location (combined with -run)")
@@ -138,23 +139,20 @@ func main() {
 
 	// print usage info if interactive and no arguments were added
 	if service.Interactive() && len(os.Args) == 1 {
+		fmt.Printf("Available parameters:\n")
+		flag.PrintDefaults()
+
 		fmt.Printf("\n################################################################################\n")
 		fmt.Printf("This is the executable of %s, the open application platform, v%s\n", appName, appVersion)
 		fmt.Printf("Copyright (c) 2019-2021 Gabriel Victor Herbert\n\n")
-		fmt.Printf("%s can be installed as service (-install) or run from the console (-run).\n", appName)
-		fmt.Printf("For the first start, %s needs to have access to an empty PostgreSQL database\n", appName)
-		fmt.Printf("with full permissions; database connection details need to be stored in %s´s\n", appName)
-		fmt.Printf("configuration file, by default: 'config.json'.\n\n")
-		fmt.Printf("Windows only: If the stand-alone version was installed or the portable version\n")
-		fmt.Printf("is used, the system is already pre-configured.\n\n")
-		fmt.Printf("Please visit https://rei3.de/admindocu-en_us/ for more details.\n")
+		fmt.Printf("%s can be installed as service (-install) or run from the console (-run).\n\n", appName)
+		fmt.Printf("When %s is running, use any modern browser to access it (port 443 by default).\n\n", appName)
+		fmt.Printf("For installation instructions, please refer to the included README file or visit\n")
+		fmt.Printf("https://rei3.de/admindocu-en_us/ for the full admin documentation.\n")
 		fmt.Printf("################################################################################\n\n")
-		fmt.Printf("Available command line flags:\n")
-
-		flag.PrintDefaults()
 
 		// wait for user input to keep console open
-		fmt.Printf("\nPlease read above how to install or start %s. Press enter to return.\n", appName)
+		fmt.Printf("See above for available parameters. Press enter to return.\n")
 
 		reader := bufio.NewReader(os.Stdin)
 		reader.ReadString('\n')
@@ -222,6 +220,17 @@ func main() {
 		return
 	}
 
+	// main executable can be used to open the app in default browser even if its not started (-open without -run)
+	// used for shortcuts in start menu when installed on Windows systems with desktop experience
+	// if dynamic port is used, we cannot open app without starting it (port is not known)
+	if cli.open && !cli.dynamicPort {
+		protocol := "https"
+		if cli.http {
+			protocol = "http"
+		}
+		tools.OpenRessource(fmt.Sprintf("%s://localhost:%d", protocol, config.File.Web.Port), false)
+	}
+
 	// interactive, app only starts if to be run from console or when creating an admin user
 	if service.Interactive() && !cli.run && cli.adminCreate == "" {
 		return
@@ -273,6 +282,10 @@ func (prg *program) execute(svc service.Service) {
 			prg.logger.Errorf("failed to start embedded database, %v", err)
 			return
 		}
+
+		// we own the embedded DB if we can successfully start it
+		// otherwise another instance might be running it
+		prg.embeddedDbOwned = true
 	}
 
 	// connect to database
@@ -367,7 +380,7 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
-	// start main web server
+	// prepare web server
 	go websocket.StartBackgroundTasks()
 
 	mux := http.NewServeMux()
@@ -402,10 +415,17 @@ func (prg *program) execute(svc service.Service) {
 	}
 	log.Info("server", fmt.Sprintf("starting web handlers for '%s'", webServerString))
 
-	if prg.cli.http {
-		if prg.cli.openStart {
-			tools.OpenRessource(fmt.Sprintf("http://localhost:%d", config.File.Web.Port), false)
+	// if dynamic port is used we can only now open the app in default browser (port is now known)
+	if prg.cli.open && prg.cli.dynamicPort {
+		protocol := "https"
+		if prg.cli.http {
+			protocol = "http"
 		}
+		tools.OpenRessource(fmt.Sprintf("%s://localhost:%d", protocol, config.File.Web.Port), false)
+	}
+
+	// start web server and block routine
+	if prg.cli.http {
 		if err := prg.webServer.Serve(webListener); err != nil && err != http.ErrServerClosed {
 			prg.logger.Error(err)
 		}
@@ -416,10 +436,6 @@ func (prg *program) execute(svc service.Service) {
 		if err := cert.CreateIfNotExist(certPath, keyPath); err != nil {
 			prg.logger.Error(err)
 			return
-		}
-
-		if prg.cli.openStart {
-			tools.OpenRessource(fmt.Sprintf("https://localhost:%d", config.File.Web.Port), false)
 		}
 		if err := prg.webServer.ServeTLS(webListener, certPath, keyPath); err != nil && err != http.ErrServerClosed {
 			prg.logger.Error(err)
@@ -456,8 +472,8 @@ func (prg *program) Stop(svc service.Service) error {
 		log.Info("server", "stopped database handler")
 	}
 
-	// stop embedded database if used
-	if config.File.Db.Embedded {
+	// stop embedded database if owned
+	if prg.embeddedDbOwned {
 		if err := embedded.Stop(); err != nil {
 			prg.logger.Error(err)
 		}

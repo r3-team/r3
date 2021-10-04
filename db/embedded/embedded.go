@@ -62,8 +62,7 @@ func Start() error {
 	}
 
 	if state {
-		log.Info("server", "embedded database already running")
-		return nil
+		return fmt.Errorf("database already running, another instance is likely active")
 	}
 	_, err = execWaitFor(dbBinCtl, []string{"start", "-D", dbData,
 		fmt.Sprintf(`-o "-p %d"`, config.File.Db.Port)}, []string{msgStarted}, 10)
