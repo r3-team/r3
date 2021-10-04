@@ -38,6 +38,18 @@ let MyAdminLogs = {
 						:offset="offset"
 						:total="total"
 					/>
+					<select class="entry" v-model="context" @change="offset = 0;get()">
+						<option value="">[{{ capApp.context }}]</option>
+						<option value="application">Applications</option>
+						<option value="backup">Backup</option>
+						<option value="cache">Cache</option>
+						<option value="csv">CSV</option>
+						<option value="ldap">LDAP</option>
+						<option value="mail">Mail</option>
+						<option value="scheduler">Scheduler</option>
+						<option value="server">Server</option>
+						<option value="transfer">Transfer</option>
+					</select>
 					<input class="entry"
 						v-model="byString"
 						@keyup.enter="offset = 0;get()"
@@ -101,11 +113,12 @@ let MyAdminLogs = {
 			
 			// inputs
 			byString:'',
-			unixFrom:null,
-			unixTo:null,
+			context:'',
 			limit:100,
 			offset:0,
 			total:0,
+			unixFrom:null,
+			unixTo:null,
 			
 			// data
 			logs:[]
@@ -182,6 +195,7 @@ let MyAdminLogs = {
 			let trans = new wsHub.transactionBlocking();
 			trans.add('log','get',{
 				byString:this.byString,
+				context:this.context,
 				dateFrom:this.unixFrom,
 				dateTo:this.unixTo,
 				limit:this.limit,

@@ -14,6 +14,7 @@ func LogGet(reqJson json.RawMessage) (interface{}, error) {
 		err error
 		req struct {
 			ByString string      `json:"byString"`
+			Context  string      `json:"context"`
 			DateFrom pgtype.Int8 `json:"dateFrom"`
 			DateTo   pgtype.Int8 `json:"dateTo"`
 			Limit    int         `json:"limit"`
@@ -28,8 +29,8 @@ func LogGet(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	res.Logs, res.Total, err = log.Get(req.DateFrom,
-		req.DateTo, req.Limit, req.Offset, req.ByString)
+	res.Logs, res.Total, err = log.Get(req.DateFrom, req.DateTo,
+		req.Limit, req.Offset, req.Context, req.ByString)
 
 	if err != nil {
 		return nil, err

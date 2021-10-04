@@ -18,18 +18,20 @@ var (
 
 	// log levels
 	contextLevel = map[string]int{
-		"backup":    1,
-		"cache":     1,
-		"csv":       1,
-		"mail":      1,
-		"ldap":      1,
-		"scheduler": 1,
-		"server":    1,
-		"transfer":  1,
+		"application": 1,
+		"backup":      1,
+		"cache":       1,
+		"csv":         1,
+		"mail":        1,
+		"ldap":        1,
+		"scheduler":   1,
+		"server":      1,
+		"transfer":    1,
 	}
 )
 
-func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int, byString string) ([]types.Log, int, error) {
+func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
+	context string, byString string) ([]types.Log, int, error) {
 
 	logs := make([]types.Log, 0)
 	total := 0
@@ -40,11 +42,15 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int, byStri
 	qb.Set("FROM", "instance.log AS l")
 	qb.Add("JOIN", "LEFT JOIN app.module AS m ON m.id = l.module_id")
 
+	if context != "" {
+		qb.Add("WHERE", `l.context::TEXT = {CONTEXT}`)
+		qb.AddPara("{CONTEXT}", context)
+	}
+
 	if byString != "" {
 		qb.Add("WHERE", `(
-			l.context::TEXT ILIKE {NAME} OR
-			l.message       ILIKE {NAME} OR
-			m.name          ILIKE {NAME}
+			l.message ILIKE {NAME} OR
+			m.name    ILIKE {NAME}
 		)`)
 		qb.AddPara("{NAME}", fmt.Sprintf("%%%s%%", byString))
 	}
