@@ -55,3 +55,6 @@
 .login .badAuth input:focus{
 	background-color:#ffc1c1;
 }
+.login .warning{
+	background-color:#bd2828 !important;
+}

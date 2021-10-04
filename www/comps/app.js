@@ -21,6 +21,7 @@ let MyApp = {
 		<my-login v-if="!appReady"
 			@authenticated="initApp"
 			:backendReady="wsConnected"
+			:httpMode="httpMode"
 			:loginReady="loginReady"
 		/>
 		
@@ -189,6 +190,9 @@ let MyApp = {
 			return entries;
 		},
 		
+		// simple
+		httpMode:function() { return location.protocol === 'http:'; },
+		
 		// stores
 		activated:    function() { return this.$store.getters['local/activated']; },
 		appVersion:   function() { return this.$store.getters['local/appVersion']; },
@@ -242,7 +246,7 @@ let MyApp = {
 		
 		// web socket control
 		wsConnect:function() {
-			let protocol = location.protocol === 'http:' ? 'ws:' : 'wss:';
+			let protocol = this.httpMode ? 'ws:' : 'wss:';
 			wsHub.open(
 				`${protocol}//${window.location.host}/websocket`,
 				this.wsConnectOk,

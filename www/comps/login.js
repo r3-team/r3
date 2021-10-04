@@ -52,9 +52,19 @@ let MyLogin = {
 		
 		<template v-if="backendReady && loginReady">
 			
+			<!-- HTTP message -->
+			<div class="contentBox" v-if="httpMode">
+				<div class="top warning">
+					<div class="area">
+						<img class="icon" src="images/warning.png" />
+						<h1>{{ message.httpMode[language] }}</h1>
+					</div>
+				</div>
+			</div>
+			
 			<!-- maintenance mode message -->
 			<div class="contentBox" v-if="productionMode === 0">
-				<div class="top" :style="customBgLogin">
+				<div class="top warning" :style="customBgLogin">
 					<div class="area">
 						<img class="icon" src="images/warning.png" />
 						<h1>{{ message.maintenanceMode[language] }}</h1>
@@ -125,6 +135,7 @@ let MyLogin = {
 	</div>`,
 	props:{
 		backendReady:{ type:Boolean, required:true }, // can talk to backend
+		httpMode:    { type:Boolean, required:true }, // unencrypted connection
 		loginReady:  { type:Boolean, required:true }  // can login
 	},
 	emits:['authenticated'],
@@ -139,6 +150,10 @@ let MyLogin = {
 			language:'en_US',
 			languages:['de','en_US'],
 			message:{
+				httpMode:{
+					de:'Verbindung ist nicht verschlüsselt',
+					en_US:'Connection is not encrypted'
+				},
 				loading:{
 					de:'Am Laden...',
 					en_US:'Loading...'
@@ -148,8 +163,8 @@ let MyLogin = {
 					en_US:'Login'
 				},
 				maintenanceMode:{
-					de:'Wartungsmodus aktiv',
-					en_US:'Maintenance mode active'
+					de:'Wartungsmodus ist aktiv',
+					en_US:'Maintenance mode is active'
 				},
 				reload:{
 					de:'Neu laden',
