@@ -165,6 +165,22 @@ let MyBuilderFormStateCondition = {
 		isFirst:      { type:Boolean, required:true },
 		modelValue:   { type:Object,  required:true }
 	},
+	watch:{
+		condition:{
+			handler:function(c) {
+				// set main mode
+				if     (c.newRecord !== null) this.mode = 'record';
+				else if(c.roleId    !== null) this.mode = 'role';
+				else if(c.fieldId0  !== null) this.mode = 'field';
+				
+				// set field comparisson mode
+				if     (c.presetId1 !== null) this.mode2Field = 'preset';
+				else if(c.value1    !== null) this.mode2Field = 'fixed';
+				else                          this.mode2Field = 'field';
+			},
+			immediate:true
+		}
+	},
 	emits:['remove','update:modelValue'],
 	data:function() {
 		return {
@@ -204,19 +220,6 @@ let MyBuilderFormStateCondition = {
 		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
 		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
 		capApp:        function() { return this.$store.getters.captions.builder.form.states; }
-	},
-	mounted:function() {
-		let c = this.condition;
-		
-		// set main mode
-		if     (c.newRecord !== null) this.mode = 'record';
-		else if(c.roleId    !== null) this.mode = 'role';
-		else if(c.fieldId0  !== null) this.mode = 'field';
-		
-		// set field comparisson mode
-		if     (c.presetId1 !== null) this.mode2Field = 'preset';
-		else if(c.value1    !== null) this.mode2Field = 'fixed';
-		else                          this.mode2Field = 'field';
 	},
 	methods:{
 		changeMode:function(value) {
