@@ -93,8 +93,9 @@ func Start() error {
 		// system tasks currently have a single schedule, every x seconds
 		s.intervalType = "seconds"
 
-		if s.runLastUnix == 0 {
-			// system task schedule never ran, use now as starting point
+		// system task schedule never ran, use now as starting point
+		// update check should however run immediately (in case of important security update)
+		if s.runLastUnix == 0 && t.name != "updateCheck" {
 			s.runLastUnix = tools.GetTimeUnix()
 		}
 
