@@ -20,9 +20,6 @@ let MyAdminModulesItem = {
 			</div>
 		</td>
 		<td class="noWrap">
-			'{{ module.name }}' v{{ module.releaseBuild }}
-		</td>
-		<td class="noWrap">
 			{{ module.releaseDate === 0 ? '-' : getUnixFormat(module.releaseDate,'Y-m-d') }}
 		</td>
 		<td class="noWrap">
@@ -44,6 +41,14 @@ let MyAdminModulesItem = {
 				:active="!installStarted && productionMode === 0"
 				:caption="capApp.button.update.replace('{VERSION}',repoModule.releaseBuild)"
 				:image="!installStarted ? 'download.png' : 'load.gif'"
+			/>
+		</td>
+		<td class="noWrap">
+			<my-button image="question.png"
+				@trigger="changeLogShow"
+				:active="changeLog !== '' && changeLog !== null"
+				:caption="module.name+' v'+module.releaseBuild"
+				:naked="true"
 			/>
 		</td>
 		<td class="noWrap" v-if="builderEnabled">
@@ -149,6 +154,13 @@ let MyAdminModulesItem = {
 			return false;
 		},
 		
+		// simple
+		changeLog:function() {
+			if(this.repoModule === false) return '';
+			
+			return this.repoModule.changeLog;
+		},
+		
 		// stores
 		modules:       function() { return this.$store.getters['schema/modules']; },
 		builderEnabled:function() { return this.$store.getters.builderEnabled; },
@@ -164,6 +176,19 @@ let MyAdminModulesItem = {
 		getUnixFormat,
 		srcBase64Icon,
 		
+		changeLogShow:function() {
+			this.$store.commit('dialog',{
+				captionTop:this.capApp.changeLog,
+				captionBody:this.changeLog,
+				image:'time.png',
+				width:1000,
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.close,
+					image:'cancel.png'
+				}]
+			});
+		},
 		ownerEnable:function() {
 			this.owner = true;
 		},
@@ -299,12 +324,6 @@ let MyAdminModules = {
 						</th>
 						<th class="noWrap">
 							<div class="mixed-header">
-								<img src="images/form.png" />
-								<span>{{ capGen.version }}</span>
-							</div>
-						</th>
-						<th class="noWrap">
-							<div class="mixed-header">
 								<img src="images/calendar.png" />
 								<span>{{ capApp.releaseDate }}</span>
 							</div>
@@ -313,6 +332,12 @@ let MyAdminModules = {
 							<div class="mixed-header">
 								<img src="images/ok.png" />
 								<span>{{ capApp.update }}</span>
+							</div>
+						</th>
+						<th class="noWrap">
+							<div class="mixed-header">
+								<img src="images/time.png" />
+								<span>{{ capApp.changeLog }}</span>
 							</div>
 						</th>
 						<th class="noWrap" v-if="builderEnabled">

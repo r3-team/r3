@@ -94,6 +94,12 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 // mapped by current database version string, returns new database version string
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
+	"2.4": func(tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(db.Ctx, `
+			ALTER TABLE instance.repo_module ADD COLUMN change_log TEXT;
+		`)
+		return "2.5", err
+	},
 	"2.3": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
 			CREATE TABLE IF NOT EXISTS app.field_chart (

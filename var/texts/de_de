@@ -315,6 +315,7 @@
 				"installFailed":"Aktualisierung der Anwendung ist fehlgeschlagen. Bei Aktualisierung einer einzelnen Anwendung können fehlende Abhängigkeiten zu Problemen führen - bitte versuchen, alle Anwendungen gemeinsam zu aktualisieren, um diese zu lösen.<br /><br />Fehlermeldung: {ERROR}",
 				"uploadFailed":"Anwendung konnte nicht von der hochgeladenen Datei installiert werden. Bitte das Loglevel für Transfere auf \"Alles\" erhöhen und erneut versuchen - Details werden dann im Systemlog aufgeführt."
 			},
+			"changeLog":"Änderungshistorie",
 			"dependOnUs":"Folgende Anwendungen sind hiervon abhängig: {NAMES}",
 			"hidden":"Versteckt",
 			"import":"Von Datei hinzufügen",

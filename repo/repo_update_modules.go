@@ -41,6 +41,12 @@ func getModules(token string, url string, skipVerify bool,
 				Aggregator:    pgtype.Varchar{Status: pgtype.Null},
 				Index:         0,
 			},
+			types.DataGetExpression{ // module change log
+				AttributeId:   tools.UuidStringToNullUuid("f36130a9-bfed-42dc-920f-036ffd0d35b0"),
+				AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+				Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+				Index:         0,
+			},
 			types.DataGetExpression{ // author name
 				AttributeId:   tools.UuidStringToNullUuid("295f5bd9-772a-41f0-aa81-530a0678e441"),
 				AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
@@ -68,7 +74,7 @@ func getModules(token string, url string, skipVerify bool,
 	}
 
 	for _, row := range res.Rows {
-		if len(row.Values) != 4 {
+		if len(row.Values) != 5 {
 			return errors.New("invalid value count for store module")
 		}
 
@@ -83,6 +89,16 @@ func getModules(token string, url string, skipVerify bool,
 			case 2:
 				repo.InStore = value.(bool)
 			case 3:
+				repo.ChangeLog = pgtype.Varchar{
+					Status: pgtype.Null,
+				}
+				if value != nil {
+					repo.ChangeLog = pgtype.Varchar{
+						Status: pgtype.Present,
+						String: value.(string),
+					}
+				}
+			case 4:
 				repo.Author = value.(string)
 			}
 		}

@@ -315,6 +315,7 @@
 				"installFailed":"Update of application has failed. When updating a single application, missing dependencies can causes issues - please try updating all applications together to resolve these.<br /><br />Error message: {ERROR}",
 				"uploadFailed":"Failed to add application from the uploaded file. Please increase the log level for transfers to 'Everything' and try again - details will then be visible in the system logs."
 			},
+			"changeLog":"Change log",
 			"dependOnUs":"Following Applications depend on this: {NAMES}",
 			"hidden":"Hidden",
 			"import":"Add from file",
