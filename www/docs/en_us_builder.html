@@ -1,4 +1,4 @@
-<p><em>Updated 2021-09-28</em></p>
+<p><em>Updated 2021-10-18</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -389,12 +389,12 @@
 <p>When designing complex lists with many joins, sub queries, groupings, filters and so on, logic errors or badly chosen configuration options can result in non-desirable data sets. To troubleshoot this, a SQL-preview function is available on the list field when inside the builder UI. This function returns the raw SQL that is being used to retrieve the current list data. With this preview, you can directly see how the chosen options affect the final SQL query. Regardless of the chosen configuration, each list retrieval only ever executes a single SQL, including all joins, sub queries and so on.</p>
 <h3 id="calendar-fields">Calendar fields</h3>
 <p>Calendar fields work very similar to <a href="#list-fields">list fields</a>. They have their own <a href="#queries">query</a> like list fields and can use the same columns and configuration options. Please refer to <a href="#list-fields">list fields</a> for detailed explanations.</p>
-<p>Besides the same options that are available for list fields, calendar fields have a few specific ones; these are used to generate and style the calendar entries:</p>
+<p>Besides options that are also available to list fields, calendar fields have additional options for generating and styling the calendar entries:</p>
 <ul>
-<li>Date from/to: Attributes that define the 'location' of shown records on the calendar. Given attribute values must be <a href="#date-and-time-management">date or datetime</a> and must not be mixed. If date values are used, only full day entries are shown on the calendar; if datetime values are used, either full day or time based entries (example: from 12:00 to 14:30) are shown.</li>
+<li>Date from/to: <a href="#attributes">Attributes</a> that define the date/time of shown records on the calendar. Given attribute values must be <a href="#date-and-time-management">date or datetime</a> and must not be mixed. If date values are used, only full day entries are shown on the calendar; if datetime values are used, both full day as well as non-full day entries are displayed.</li>
 <li>Color: (Optional) attribute value that is used to color in the date entries on the calendar. Should be combined with the 'Color' display option for text attributes to make inputting valid color values easy on data forms.</li>
 <li>Open record (relation 0): Open calendar entry (or create new one) in target form. Records must be compatible with chosen form (relation 0 of form must be the displayed record relation, see <a href="#queries">Queries</a>).</li>
-<li>Gantt: A different presentation option for the calendar. All date entries are shown on a horizontal time axis instead of a calendar grid. Once active, the date range must be selected; this is defined by how many days/before after today are on the time axis before needing to go to a new page. This option only becomes useful, when grouping results so that multiple lines can be shown on the time axis; this is done by assigning one or many columns to column batch 1 (see <a href="#list-fields">Column batches</a>). The combined value of column batch 1 will group records together. Some use cases:
+<li>Gantt: A different presentation option for the calendar. All date entries are shown on a horizontal time axis instead of a calendar grid. This option becomes useful, when date records can be grouped by a common criteria. A group is defined by the value of one or more columns assigned to column batch 1 (see <a href="#list-fields">Column batches</a>). Some use cases:
 <ul>
 <li>Date records belonging to specific individuals, with their full names used for grouping.</li>
 <li>Availability time date records for departments, with their department names used for grouping.</li>

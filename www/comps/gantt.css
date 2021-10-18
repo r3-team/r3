@@ -6,7 +6,7 @@
     overflow:auto;
 }
 .gantt input.zoom-factor{
-	width:80px;
+	width:80px !important;
 }
 .gantt .date-range-label{
 	font-size:110%;
@@ -20,7 +20,7 @@
 
 /* left side bar, showing all labels for each line */
 .gantt-labels{
-	flex:0 0 auto;
+	flex:0 0 180px; /* base size is important to calculate Gantt content width */
 	display:flex;
 	flex-flow:column nowrap;
 	border-right:1px solid var(--color-border);
@@ -55,14 +55,21 @@
 	overflow-x:auto;
 }
 
+.gantt-headers{
+	height:60px;
+	position:relative;
+}
 .gantt-header{
 	height:30px;
+	position:absolute;
+	top:0px;
 	display:flex;
 	flex-flow:row nowrap;
 	box-sizing:border-box;
 	border-bottom:1px solid var(--color-border);
 }
 .gantt-header.lower{
+	top:30px;
 	border-bottom:1px solid var(--color-border);
 }
 .gantt-header-item{
@@ -78,6 +85,8 @@
 	background-color:var(--color-accent3);
 }
 .gantt-header-item.lower{
+	text-align:center;
+	padding:0px;
 	border-bottom:1px solid var(--color-border);
 }
 .gantt-header-item.today{
@@ -85,9 +94,6 @@
 }
 .gantt-header-item.weekend{
 	background-color:var(--color-accent2);
-}
-.gantt-header-item:last-child{
-	border-right:none;
 }
 
 .gantt-line{

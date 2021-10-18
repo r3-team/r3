@@ -817,6 +817,8 @@
 			"icsHint":"Access calendar from external application",
 			"icsPublish":"Publish for personal use",
 			"ganttToggleHint":"Toggle between day & hour mode",
+			"ganttShowLabels":"Groups",
+			"ganttShowLabelsHint":"Show/hide groups",
 			"zoomResetHint":"Reset zoom level"
 		},
 		"icsDesc":"Use this URL to subscribe to this calendar (iCalendar, ICS).",

@@ -817,6 +817,8 @@
 			"icsHint":"Auf Kalender von Extern zugreifen",
 			"icsPublish":"Für persönliche Nutzung veröffentlichen",
 			"ganttToggleHint":"Zwischen Stunden- & Tagmodus wechseln",
+			"ganttShowLabels":"Gruppen",
+			"ganttShowLabelsHint":"Gruppen anzeigen/verstecken",
 			"zoomResetHint":"Zoom-Level zurücksetzen"
 		},
 		"icsDesc":"Diese URL verwenden, um Kalender zu abonnieren (iCalendar, ICS).",

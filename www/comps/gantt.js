@@ -192,6 +192,13 @@ let MyGantt = {
 					:captionTitle="capGen.button.newHint"
 					:darkBg="true"
 				/>
+				<my-button
+					@trigger="showGroupLabels = !showGroupLabels"
+					:caption="!isMobile ? capApp.button.ganttShowLabels : ''"
+					:captionTitle="capApp.button.ganttShowLabelsHint"
+					:darkBg="true"
+					:image="showGroupLabels ? 'visible1.png' : 'visible0.png'"
+				/>
 			</div>
 			
 			<div class="area nowrap navigation default-inputs">
@@ -259,7 +266,7 @@ let MyGantt = {
 		
 		<!-- gantt content -->
 		<div class="gantt-content">
-			<div class="gantt-labels" v-if="!isEmpty">
+			<div class="gantt-labels" v-if="showGroupLabels">
 				<div class="gantt-label-entry"></div>
 				<div class="gantt-label-entry"></div>
 				<div class="gantt-label-entry gantt-group"
@@ -279,27 +286,29 @@ let MyGantt = {
 			</div>
 			
 			<div class="gantt-lines" ref="content">
-			
-				<!-- header meta line: shows groupings of step entities (hours->days, days->months) -->
-				<div class="gantt-header">
-					<div class="gantt-header-item"
-						v-for="i in headerItemsMeta"
-						:style="'width:'+stepPixels*i.steps+'px'"
-					>
-						{{ displayHeaderMetaItem(i.value) }}
+				<div class="gantt-headers">
+					
+					<!-- header meta line: shows groupings of step entities (hours->days, days->months) -->
+					<div class="gantt-header">
+						<div class="gantt-header-item"
+							v-for="i in headerItemsMeta"
+							:style="'width:'+stepPixels*i.steps+'px'"
+						>
+							{{ displayHeaderMetaItem(i.value) }}
+						</div>
 					</div>
-				</div>
-				
-				<!-- header line: shows step entities (hours, days, ...) -->
-				<div class="gantt-header lower">
-					<div class="gantt-header-item lower"
-						v-for="i in headerItems"
-						@click="clickHeaderItem(i.unixTime,false)"
-						@click.middle="clickHeaderItem(i.unixTime,true)"
-						:class="{ clickable:rowSelect, today:getUnixFromDate(dateStart) === i.unixTime, weekend:i.isWeekend }"
-						:style="'width:'+stepPixels+'px'"
-					>
-						{{ i.caption }}
+					
+					<!-- header line: shows step entities (hours, days, ...) -->
+					<div class="gantt-header lower">
+						<div class="gantt-header-item lower"
+							v-for="i in headerItems"
+							@click="clickHeaderItem(i.unixTime,false)"
+							@click.middle="clickHeaderItem(i.unixTime,true)"
+							:class="{ clickable:rowSelect, today:getUnixFromDate(dateStart) === i.unixTime, weekend:i.isWeekend }"
+							:style="'width:'+stepPixels+'px'"
+						>
+							{{ i.caption }}
+						</div>
 					</div>
 				</div>
 				
@@ -332,8 +341,6 @@ let MyGantt = {
 		attributeIdDate1:{ type:String, required:true },
 		choices:    { type:Array,   required:false, default:() => [] },
 		columns:    { type:Array,   required:true }, // processed list columns
-		days0:      { type:Number,  required:true },
-		days1:      { type:Number,  required:true },
 		filters:    { type:Array,   required:true }, // processed query filters
 		formLoading:{ type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
 		handleError:{ type:Function,required:true },
@@ -359,23 +366,47 @@ let MyGantt = {
 			linePixels:30,   // line height in pixels
 			page:0,          // which page we are on (0: default, 1: next, -1: prev)
 			ready:false,     // component ready to be used
+			resizeTimer:null,
+			showGroupLabels:true,
 			startDate:0,     // start date (TZ), base for date ranges, set once to keep navigation clear
 			stepBase:8,      // base size of step width in pixels, used to multiply with zoom factor
 			stepType:'days', // gantt step type (hours, days)
 			stepZoom:7,      // zoom factor for step, 7 is default (7*8=56)
-			stepZoomDefault:7
+			stepZoomDefault:7,
+			steps:0
 		};
 	},
 	computed:{
 		// unix date range points, 0=gantt start, 1=gantt end
 		date0:function() {
 			let d = new Date(this.dateStart.getTime());
-			d.setDate(d.getDate() - this.days0 + (this.page*(this.days0+this.days1)));
+			
+			switch(this.stepType) {
+				case 'days': // start 3 days before current day
+					d.setDate(d.getDate() - 3 + (this.page*this.steps));
+				break;
+				case 'hours':
+					d.setDate(d.getDate() + this.page);
+				break;
+			}
 			return d;
 		},
 		date1:function() {
 			let d = new Date(this.dateStart.getTime());
-			d.setDate(d.getDate() + this.days1 + (this.page*(this.days0+this.days1)));
+			
+			switch(this.stepType) {
+				case 'days':
+					d.setDate(d.getDate() + this.steps - 3 + (this.page*(this.steps)));
+				break;
+				case 'hours':
+					let days = Math.floor(this.steps / 24);
+					
+					if(days === 0 || this.steps % 24 !== 0)
+						days += 1;
+					
+					d.setDate(d.getDate() + days + this.page);
+				break;
+			}
 			return d;
 		},
 		
@@ -418,7 +449,10 @@ let MyGantt = {
 			return `width:${this.stepPixels}px;`;
 		},
 		styleLine:function() {
-			return `background-size:${this.stepPixels}px ${this.linePixels}px;`;
+			return [
+				`max-width:${this.stepPixels * this.steps}px`,
+				`background-size:${this.stepPixels}px ${this.linePixels}px`
+			].join(';');
 		},
 		
 		// simple
@@ -439,6 +473,9 @@ let MyGantt = {
 		capApp:        function() { return this.$store.getters.captions.calendar; },
 		capGen:        function() { return this.$store.getters.captions.generic; },
 		settings:      function() { return this.$store.getters.settings; }
+	},
+	created:function() {
+		window.addEventListener('resize',this.resize);
 	},
 	mounted:function() {
 		this.dateStart = this.getDateNowRounded();
@@ -462,6 +499,10 @@ let MyGantt = {
 			});
 		}
 		
+		// setup watchers for presentation changes
+		this.$watch(() => [this.stepZoom,this.showGroupLabels],() =>
+			this.$nextTick(this.setSteps));
+		
 		// if fullpage: set initial states via route parameters
 		if(this.isFullPage) {
 			this.paramsUpdated();     // load existing parameters from route query
@@ -471,6 +512,12 @@ let MyGantt = {
 		}
 		
 		this.ready = true;
+		this.$nextTick(function() {
+			this.setSteps();
+		});
+	},
+	unmounted:function() {
+		window.removeEventListener('resize',this.resize);
 	},
 	methods:{
 		// external
@@ -577,6 +624,10 @@ let MyGantt = {
 			this.page += factor;
 			this.reloadInside();
 		},
+		resize:function() {
+			clearTimeout(this.resizeTimer);
+			this.resizeTimer = setTimeout(() => this.setSteps(),150);
+		},
 		scrollToNow:function() {
 			if(this.page !== 0)
 				return this.pageChange(this.page-(this.page*2));
@@ -647,6 +698,22 @@ let MyGantt = {
 			
 			if(this.isDays) // add month as: January, ...
 				return this.capApp['month'+value];
+		},
+		setSteps:function() {
+			// get count of steps that fit within Gantt content
+			let stepsNew = Math.floor(
+				this.$refs.content.offsetWidth /
+				(this.stepBase * this.stepZoom)
+			);
+			
+			if(stepsNew === this.steps)
+				return;
+			
+			this.steps = Math.floor(
+				this.$refs.content.offsetWidth /
+				(this.stepBase * this.stepZoom)
+			);
+			this.reloadOutside();
 		},
 		styleLabel:function(group) {
 			return `height:${group.lines.length*this.linePixels}px;`;
