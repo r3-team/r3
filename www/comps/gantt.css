@@ -35,7 +35,7 @@
 	border-bottom:1px solid var(--color-border);
 }
 .gantt-label-entry:first-child{
-	border:none;
+	height:60px; /* double line height */
 }
 .gantt-group{
 	background-color:var(--color-bg);
@@ -132,7 +132,7 @@
 .gantt-line-record .record-line{
 	position:absolute;
 	border-radius:5px;
-	background-color:var(--color-accent3-alt);
+	background-color:var(--color-accent4);
 	z-index:var(--z-index-calendar-line);
 }
 .gantt-line-record .record-line.start{

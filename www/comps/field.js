@@ -332,6 +332,7 @@ let MyField = {
 			:attributeIdDate1="field.attributeIdDate1"
 			:choices="choicesProcessed"
 			:columns="columnsProcessed"
+			:fieldId="field.id"
 			:days0="field.dateRange0 / 86400"
 			:days1="field.dateRange1 / 86400"
 			:filters="filtersProcessed"

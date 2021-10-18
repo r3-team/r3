@@ -10,6 +10,10 @@ import {
 	isAttributeFiles
 } from './shared/attribute.js';
 import {
+	fieldOptionGet,
+	fieldOptionSet
+} from './shared/field.js';
+import {
 	fillRelationRecordIds,
 	getFiltersEncapsulated,
 	getQueryAttributesPkFilter,
@@ -665,6 +669,13 @@ let MyList = {
 			}
 			return out;
 		},
+		choiceIdDefault:function() {
+			// default is user field option, fallback is first choice in list
+			return this.fieldOptionGet(
+				this.fieldId,'choiceId',
+				this.choices.length === 0 ? null : this.choices[0].id
+			);
+		},
 		hasBulkActions:function() {
 			if(this.isInput || this.rows.length === 0)
 				return false;
@@ -767,16 +778,15 @@ let MyList = {
 		},
 		
 		// simple
-		autoSelect:   function() { return this.inputIsNew && this.inputAutoSelect !== 0 && !this.inputAutoSelectDone; },
-		choiceFilters:function() { return this.getChoiceFilters(this.choices,this.choiceId); },
-		expressions:  function() { return this.getQueryExpressions(this.columns); },
-		joins:        function() { return this.fillRelationRecordIds(this.query.joins); },
+		autoSelect:     function() { return this.inputIsNew && this.inputAutoSelect !== 0 && !this.inputAutoSelectDone; },
+		choiceFilters:  function() { return this.getChoiceFilters(this.choices,this.choiceId); },
+		expressions:    function() { return this.getQueryExpressions(this.columns); },
+		joins:          function() { return this.fillRelationRecordIds(this.query.joins); },
 		
 		// stores
 		relationIdMap:   function() { return this.$store.getters['schema/relationIdMap']; },
 		attributeIdMap:  function() { return this.$store.getters['schema/attributeIdMap']; },
 		iconIdMap:       function() { return this.$store.getters['schema/iconIdMap']; },
-		fieldIdMapOption:function() { return this.$store.getters['local/fieldIdMapOption']; },
 		capApp:          function() { return this.$store.getters.captions.list; },
 		capGen:          function() { return this.$store.getters.captions.generic; },
 		isMobile:        function() { return this.$store.getters.isMobile; },
@@ -826,20 +836,14 @@ let MyList = {
 			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
 		} else {
 			// sub lists are initiated once
-			this.choiceId  = this.choices.length > 0 ? this.choices[0].id : null;
+			this.choiceId  = this.choiceIdDefault;
 			this.limit     = this.resultLimit; 
 			this.orders    = JSON.parse(JSON.stringify(this.query.orders));
 		}
 		
 		// set initial auto renew timer
 		if(this.autoRenew !== null) {
-			this.autoRenewInput = this.autoRenew;
-			
-			if(typeof this.fieldIdMapOption[this.fieldId] !== 'undefined'
-				&& typeof this.fieldIdMapOption[this.fieldId]['autoRenew'] !== 'undefined') {
-				
-				this.autoRenewInput = this.fieldIdMapOption[this.fieldId]['autoRenew'];
-			}
+			this.autoRenewInput = this.fieldOptionGet(this.fieldId,'autoRenew',this.autoRenew);
 			this.setAutoRenewTimer(false);
 		}
 	},
@@ -848,6 +852,8 @@ let MyList = {
 	},
 	methods:{
 		// externals
+		fieldOptionGet,
+		fieldOptionSet,
 		fillRelationRecordIds,
 		getCaption,
 		getChoiceFilters,
@@ -902,10 +908,13 @@ let MyList = {
 		reloadInside:function(entity) {
 			// inside state has changed, reload list (not relevant for list input)
 			switch(entity) {
-				case 'choice':      // fallthrough
 				case 'dropdown':    // fallthrough
 				case 'filterQuick': // fallthrough
-				case 'filtersUser': this.offset = 0; break; 
+				case 'filtersUser': this.offset = 0; break;
+				case 'choice':
+					this.offset = 0;
+					this.fieldOptionSet(this.fieldId,'choiceId',this.choiceId);
+				break;
 				case 'order':
 					this.offset = 0;
 					this.orderOverwritten = true;
@@ -953,7 +962,7 @@ let MyList = {
 			// initial order by parameter follows query order
 			//  if user overwrites order, initial order is empty
 			let params = {
-				choice:     { parse:'string',   value:this.choices.length > 0 ? this.choices[0].id : null },
+				choice:     { parse:'string',   value:this.choiceIdDefault },
 				limit:      { parse:'int',      value:this.resultLimit },
 				offset:     { parse:'int',      value:0 },
 				orderby:    { parse:'listOrder',value:!this.orderOverwritten ? JSON.stringify(this.query.orders) : '[]' },
@@ -1212,11 +1221,7 @@ let MyList = {
 			this.autoRenewTimer = setInterval(this.get,this.autoRenewInput * 1000);
 			
 			// store timer option for field
-			this.$store.commit('local/fieldOptionSet',{
-				fieldId:this.fieldId,
-				name:'autoRenew',
-				value:this.autoRenewInput
-			});
+			this.fieldOptionSet(this.fieldId,'autoRenew',this.autoRenewInput);
 		},
 		toggleOrderBy:function() {
 			this.orders[0].ascending = !this.orders[0].ascending;

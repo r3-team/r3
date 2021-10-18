@@ -2,6 +2,10 @@ import srcBase64Icon            from './shared/image.js';
 import {getCaption}             from './shared/language.js';
 import MyValueRich              from './valueRich.js';
 import {
+	fieldOptionGet,
+	fieldOptionSet
+} from './shared/field.js';
+import {
 	getChoiceFilters,
 	getColumnIndexesHidden
 } from './shared/form.js';
@@ -268,7 +272,6 @@ let MyGantt = {
 		<div class="gantt-content">
 			<div class="gantt-labels" v-if="showGroupLabels">
 				<div class="gantt-label-entry"></div>
-				<div class="gantt-label-entry"></div>
 				<div class="gantt-label-entry gantt-group"
 					v-for="(g,k) in groups"
 					:key="k"
@@ -341,6 +344,7 @@ let MyGantt = {
 		attributeIdDate1:{ type:String, required:true },
 		choices:    { type:Array,   required:false, default:() => [] },
 		columns:    { type:Array,   required:true }, // processed list columns
+		fieldId:    { type:String,  required:true },
 		filters:    { type:Array,   required:true }, // processed query filters
 		formLoading:{ type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
 		handleError:{ type:Function,required:true },
@@ -377,6 +381,14 @@ let MyGantt = {
 		};
 	},
 	computed:{
+		choiceIdDefault:function() {
+			// default is user field option, fallback is first choice in list
+			return this.fieldOptionGet(
+				this.fieldId,'choiceId',
+				this.choices.length === 0 ? null : this.choices[0].id
+			);
+		},
+		
 		// unix date range points, 0=gantt start, 1=gantt end
 		date0:function() {
 			let d = new Date(this.dateStart.getTime());
@@ -500,16 +512,23 @@ let MyGantt = {
 		}
 		
 		// setup watchers for presentation changes
-		this.$watch(() => [this.stepZoom,this.showGroupLabels],() =>
-			this.$nextTick(this.setSteps));
+		this.$watch(() => [this.showGroupLabels,this.stepZoom],() => {
+			this.fieldOptionSet(this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
+			this.fieldOptionSet(this.fieldId,'ganttStepZoom',this.stepZoom);
+			this.$nextTick(this.setSteps);
+		});
 		
 		// if fullpage: set initial states via route parameters
 		if(this.isFullPage) {
 			this.paramsUpdated();     // load existing parameters from route query
 			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
 		} else {
-			this.choiceId = this.choices.length > 0 ? this.choices[0].id : null;
+			this.choiceId = this.choiceIdDefault;
 		}
+		
+		// initial field options
+		this.showGroupLabels = this.fieldOptionGet(this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
+		this.stepZoom        = this.fieldOptionGet(this.fieldId,'ganttStepZoom',this.stepZoom);
 		
 		this.ready = true;
 		this.$nextTick(function() {
@@ -521,6 +540,8 @@ let MyGantt = {
 	},
 	methods:{
 		// external
+		fieldOptionGet,
+		fieldOptionSet,
 		fillRelationRecordIds,
 		getCaption,
 		getChoiceFilters,
@@ -605,6 +626,7 @@ let MyGantt = {
 		
 		// actions
 		choiceIdSet:function(choiceId) {
+			this.fieldOptionSet(this.fieldId,'choiceId',choiceId);
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},
@@ -678,7 +700,7 @@ let MyGantt = {
 		},
 		paramsUpdated:function() {
 			let params = {
-				choice:{ parse:'string', value:this.choices.length !== 0 ? this.choices[0].id : null },
+				choice:{ parse:'string', value:this.choiceIdDefault },
 				page:  { parse:'int',    value:0 },
 				type:  { parse:'string', value:this.stepTypeDefault }
 			};

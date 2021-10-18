@@ -7,6 +7,10 @@ import {
 	getCalendarCutOff1
 } from './shared/calendar.js';
 import {
+	fieldOptionGet,
+	fieldOptionSet
+} from './shared/field.js';
+import {
 	getChoiceFilters,
 	getColumnIndexesHidden
 } from './shared/form.js';
@@ -601,6 +605,13 @@ let MyCalendar = {
 		};
 	},
 	computed:{
+		choiceIdDefault:function() {
+			// default is user field option, fallback is first choice in list
+			return this.fieldOptionGet(
+				this.fieldId,'choiceId',
+				this.choices.length === 0 ? null : this.choices[0].id
+			);
+		},
 		expressions:function() {
 			// special date range expressions + regular column expressions
 			return this.getQueryExpressionsDateRange(
@@ -655,13 +666,15 @@ let MyCalendar = {
 			this.paramsUpdated();     // load existing parameters from route query
 			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
 		} else {
-			this.choiceId = this.choices.length > 0 ? this.choices[0].id : null;
+			this.choiceId = this.choiceIdDefault;
 		}
 		
 		this.ready = true;
 	},
 	methods:{
 		// externals
+		fieldOptionGet,
+		fieldOptionSet,
 		getCalendarCutOff0,
 		getCalendarCutOff1,
 		getChoiceFilters,
@@ -678,6 +691,7 @@ let MyCalendar = {
 		choiceIdSet:function(choiceId) {
 			if(choiceId === this.choiceId) return;
 			
+			this.fieldOptionSet(this.fieldId,'choiceId',choiceId);
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},
@@ -734,7 +748,7 @@ let MyCalendar = {
 		},
 		paramsUpdated:function() {
 			let params = {
-				choice:{ parse:'string', value:this.choices.length > 0 ? this.choices[0].id : null },
+				choice:{ parse:'string', value:this.choiceIdDefault },
 				month: { parse:'int',    value:this.date.getMonth() },
 				year:  { parse:'int',    value:this.date.getFullYear() }
 			};
