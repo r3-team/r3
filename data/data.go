@@ -53,7 +53,8 @@ func authorizedRelation(loginId int64, relationId uuid.UUID, requestedAccess int
 }
 
 // get applicable policy filter (e. g. WHERE clause) for data call
-func getPolicyFilter(loginId int64, action string, policies []types.RelationPolicy) (string, error) {
+func getPolicyFilter(loginId int64, action string, tableAlias string,
+	policies []types.RelationPolicy) (string, error) {
 
 	if len(policies) == 0 {
 		return "", nil
@@ -99,8 +100,8 @@ func getPolicyFilter(loginId int64, action string, policies []types.RelationPoli
 				return "", err
 			}
 
-			clauses = append(clauses, fmt.Sprintf("%s <> ALL(%s())",
-				lookups.PkName, fncName))
+			clauses = append(clauses, fmt.Sprintf(`"%s"."%s" <> ALL(%s())`,
+				tableAlias, lookups.PkName, fncName))
 		}
 
 		if p.PgFunctionIdIncl.Valid {
@@ -110,8 +111,8 @@ func getPolicyFilter(loginId int64, action string, policies []types.RelationPoli
 				return "", err
 			}
 
-			clauses = append(clauses, fmt.Sprintf("%s = ANY(%s())",
-				lookups.PkName, fncName))
+			clauses = append(clauses, fmt.Sprintf(`"%s"."%s" = ANY(%s())`,
+				tableAlias, lookups.PkName, fncName))
 		}
 
 		// first matching policy is applied
@@ -123,7 +124,7 @@ func getPolicyFilter(loginId int64, action string, policies []types.RelationPoli
 		return "", nil
 	}
 
-	return fmt.Sprintf("AND %s", strings.Join(clauses, " AND ")), nil
+	return fmt.Sprintf("\nAND %s", strings.Join(clauses, "\nAND ")), nil
 }
 
 func getFunctionName(pgFunctionId uuid.UUID) (string, error) {
@@ -135,5 +136,5 @@ func getFunctionName(pgFunctionId uuid.UUID) (string, error) {
 	if !exists {
 		return "", fmt.Errorf("unknown module '%s'", fnc.ModuleId)
 	}
-	return fmt.Sprintf("%s.%s", mod.Name, fnc.Name), nil
+	return fmt.Sprintf(`"%s"."%s"`, mod.Name, fnc.Name), nil
 }

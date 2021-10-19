@@ -36,18 +36,21 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	if !exists {
 		return fmt.Errorf("unknown module '%s'", rel.ModuleId)
 	}
+	tableAlias := "t"
 
 	// get policy filter if applicable
-	policyFilter, err := getPolicyFilter(loginId, "delete", rel.Policies)
+	policyFilter, err := getPolicyFilter(loginId, "delete", tableAlias, rel.Policies)
 	if err != nil {
 		return err
 	}
 
 	if _, err := tx.Exec(ctx, fmt.Sprintf(`
-		DELETE FROM "%s"."%s"
-		WHERE "%s" = $1
+		DELETE FROM "%s"."%s" AS "%s"
+		WHERE "%s"."%s" = $1
 		%s
-	`, mod.Name, rel.Name, lookups.PkName, policyFilter), recordId); err != nil {
+	`, mod.Name, rel.Name, tableAlias, tableAlias,
+		lookups.PkName, policyFilter), recordId); err != nil {
+
 		return err
 	}
 	return nil
