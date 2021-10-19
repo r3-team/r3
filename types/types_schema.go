@@ -29,16 +29,26 @@ type Module struct {
 	Captions        CaptionMap   `json:"captions"`
 }
 type Relation struct {
-	Id             uuid.UUID   `json:"id"`
-	ModuleId       uuid.UUID   `json:"moduleId"`
-	AttributeIdPk  uuid.UUID   `json:"attributeIdPk"` // read only, ID of PK attribute
-	Name           string      `json:"name"`
-	RetentionCount pgtype.Int4 `json:"retentionCount"`
-	RetentionDays  pgtype.Int4 `json:"retentionDays"`
-	Attributes     []Attribute `json:"attributes"` // read only, all relation attributes
-	Indexes        []PgIndex   `json:"indexes"`    // read only, all relation indexes
-	Presets        []Preset    `json:"presets"`    // read only, all relation presets
-	Triggers       []PgTrigger `json:"triggers"`   // read only, all relation triggers
+	Id             uuid.UUID        `json:"id"`
+	ModuleId       uuid.UUID        `json:"moduleId"`
+	AttributeIdPk  uuid.UUID        `json:"attributeIdPk"` // read only, ID of PK attribute
+	Name           string           `json:"name"`
+	RetentionCount pgtype.Int4      `json:"retentionCount"`
+	RetentionDays  pgtype.Int4      `json:"retentionDays"`
+	Attributes     []Attribute      `json:"attributes"` // read only, all relation attributes
+	Indexes        []PgIndex        `json:"indexes"`    // read only, all relation indexes
+	Policies       []RelationPolicy `json:"policies"`   // read only, all relation policies
+	Presets        []Preset         `json:"presets"`    // read only, all relation presets
+	Triggers       []PgTrigger      `json:"triggers"`   // read only, all relation triggers
+}
+type RelationPolicy struct {
+	Position         int           `json:"position"`
+	RoleId           uuid.UUID     `json:"roleId"`
+	PgFunctionIdExcl uuid.NullUUID `json:"pgFunctionIdExcl"`
+	PgFunctionIdIncl uuid.NullUUID `json:"pgFunctionIdIncl"`
+	ActionDelete     bool          `json:"actionDelete"`
+	ActionSelect     bool          `json:"actionSelect"`
+	ActionUpdate     bool          `json:"actionUpdate"`
 }
 type Preset struct {
 	Id         uuid.UUID     `json:"id"`

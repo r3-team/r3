@@ -296,6 +296,22 @@
 }
 
 /* relation */
+.builder-relations .sub-component{
+	display:flex;
+	flex-flow:column nowrap;
+	align-items:flex-start;
+	padding:6px 12px 12px 12px;
+	margin:0px 15px 10px;
+	border:1px solid var(--color-border);
+	border-top:none;
+	border-radius:0px 0px 5px 5px;
+}
+.builder-relations .sub-component table{
+	margin:10px 0px 20px;
+}
+.builder-relations .sub-component table td{
+	padding:3px 5px;
+}
 .builder-relation{
 	flex:1 1 auto;
 	flex-direction:column;

@@ -97,6 +97,42 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 	"2.4": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
 			ALTER TABLE instance.repo_module ADD COLUMN change_log TEXT;
+			
+			CREATE TABLE app.relation_policy (
+			    relation_id uuid NOT NULL,
+				"position" smallint NOT NULL,
+			    role_id uuid NOT NULL,
+			    pg_function_id_excl uuid,
+			    pg_function_id_incl uuid,
+			    action_delete boolean NOT NULL,
+			    action_select boolean NOT NULL,
+			    action_update boolean NOT NULL,
+			    CONSTRAINT policy_pkey PRIMARY KEY (relation_id,"position"),
+			    CONSTRAINT policy_pg_function_id_excl_fkey FOREIGN KEY (pg_function_id_excl)
+			        REFERENCES app.pg_function (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID,
+			    CONSTRAINT policy_pg_function_id_incl_fkey FOREIGN KEY (pg_function_id_incl)
+			        REFERENCES app.pg_function (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID,
+			    CONSTRAINT policy_relation_id_fkey FOREIGN KEY (relation_id)
+			        REFERENCES app.relation (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID,
+			    CONSTRAINT policy_role_id_fkey FOREIGN KEY (role_id)
+			        REFERENCES app.role (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID
+			);
 		`)
 		return "2.5", err
 	},
