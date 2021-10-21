@@ -17,7 +17,7 @@ let MyBuilderRelationsItemPolicy = {
 		<td>
 			<select v-model="pgFunctionIdExcl">
 				<option :value="null">-</option>
-				<option v-for="f in module.pgFunctions" :value="f.id">
+				<option v-for="f in filterFunctions" :value="f.id">
 					{{ f.name }}
 				</option>
 			</select>
@@ -25,7 +25,7 @@ let MyBuilderRelationsItemPolicy = {
 		<td>
 			<select v-model="pgFunctionIdIncl">
 				<option :value="null">-</option>
-				<option v-for="f in module.pgFunctions" :value="f.id">
+				<option v-for="f in filterFunctions" :value="f.id">
 					{{ f.name }}
 				</option>
 			</select>
@@ -59,6 +59,19 @@ let MyBuilderRelationsItemPolicy = {
 	},
 	emits:['moveDown','moveUp','remove','update:modelValue'],
 	computed:{
+		filterFunctions:function() {
+			// limit to integer array returns, as in: INTEGER[], bigint[] or  INT []
+			let pat = /^(integer|bigint|int)\s?\[\]$/i;
+			let out = [];
+			for(let i = 0, j = this.module.pgFunctions.length; i < j; i++) {
+				let f = this.module.pgFunctions[i];
+				
+				if(pat.test(f.codeReturns))
+					out.push(f);
+			}
+			return out;
+		},
+		
 		// inputs
 		actionDelete:{
 			get:function()  { return this.modelValue.actionDelete; },
@@ -186,6 +199,10 @@ let MyBuilderRelationsItem = {
 							/>
 						</tbody>
 					</table>
+					<p v-if="policies.length !== 0">
+						{{ capApp.policyExplanation }}
+					</p>
+					
 					<my-button image="add.png"
 						@trigger="addPolicy"
 						:caption="capGen.button.add"
@@ -247,9 +264,10 @@ let MyBuilderRelationsItem = {
 				actionDelete:false,
 				actionSelect:false,
 				actionUpdate:false,
-				roleId:null,
 				pgFunctionIdExcl:null,
-				pgFunctionIdIncl:null
+				pgFunctionIdIncl:null,
+				position:this.policies.length,
+				roleId:null
 			});
 		},
 		open:function() {
