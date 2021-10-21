@@ -36,9 +36,9 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	if !exists {
 		return fmt.Errorf("unknown module '%s'", rel.ModuleId)
 	}
-	tableAlias := "t"
 
 	// get policy filter if applicable
+	tableAlias := "t"
 	policyFilter, err := getPolicyFilter(loginId, "delete", tableAlias, rel.Policies)
 	if err != nil {
 		return err

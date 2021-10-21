@@ -103,7 +103,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 
 		// set data for index
 		if err := setForIndex_tx(ctx, tx, index, dataSetsByIndex,
-			indexRecordIds, indexRecordsCreated); err != nil {
+			indexRecordIds, indexRecordsCreated, loginId); err != nil {
 
 			return indexRecordIds, err
 		}
@@ -124,7 +124,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 // recursive call, if relationship tupel must be created first
 func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 	dataSetsByIndex map[int]types.DataSet, indexRecordIds map[int]int64,
-	indexRecordsCreated map[int]bool) error {
+	indexRecordsCreated map[int]bool, loginId int64) error {
 
 	if _, exists := indexRecordsCreated[index]; exists {
 		return nil
@@ -249,13 +249,24 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 	}
 
 	if !isNewRecord && len(values) != 0 {
+
 		// update existing record
+
+		// get policy filter if applicable
+		tableAlias := "t"
+		policyFilter, err := getPolicyFilter(loginId, "update", tableAlias, rel.Policies)
+		if err != nil {
+			return err
+		}
+
 		values = append(values, dataSet.RecordId)
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`
-			UPDATE "%s"."%s" SET %s
-			WHERE id = %s
-		`, mod.Name, rel.Name, strings.Join(params, `, `),
-			fmt.Sprintf("$%d", len(values))), values...); err != nil {
+			UPDATE "%s"."%s" AS "%s" SET %s
+			WHERE "%s"."%s" = %s
+			%s
+		`, mod.Name, rel.Name, tableAlias, strings.Join(params, `, `), tableAlias,
+			lookups.PkName, fmt.Sprintf("$%d", len(values)), policyFilter),
+			values...); err != nil {
 
 			return err
 		}
@@ -283,7 +294,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 					// we must create other relation first, as we need to refer to it
 
 					if err := setForIndex_tx(ctx, tx, shipIndex, dataSetsByIndex,
-						indexRecordIds, indexRecordsCreated); err != nil {
+						indexRecordIds, indexRecordsCreated, loginId); err != nil {
 
 						return err
 					}
@@ -323,14 +334,15 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 		if len(values) == 0 {
 			insertQuery = fmt.Sprintf(`
 				INSERT INTO "%s"."%s" DEFAULT VALUES
-				RETURNING id
-			`, mod.Name, rel.Name)
+				RETURNING "%s"
+			`, mod.Name, rel.Name, lookups.PkName)
 		} else {
 			insertQuery = fmt.Sprintf(`
 				INSERT INTO "%s"."%s" (%s)
 				VALUES (%s)
-				RETURNING id
-			`, mod.Name, rel.Name, strings.Join(names, `, `), strings.Join(params, `, `))
+				RETURNING "%s"
+			`, mod.Name, rel.Name, strings.Join(names, `, `),
+				strings.Join(params, `, `), lookups.PkName)
 		}
 
 		if err := tx.QueryRow(ctx, insertQuery, values...).Scan(&newRecordId); err != nil {
@@ -387,9 +399,10 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				UPDATE "%s"."%s" SET "%s" = NULL
 				WHERE "%s" = $1
-				AND id <> ALL($2)
+				AND "%s" <> ALL($2)
 			`, shipMod.Name, shipRel.Name, shipAtr.Name,
-				shipAtr.Name), indexRecordIds[index], shipValues.values); err != nil {
+				shipAtr.Name, lookups.PkName), indexRecordIds[index],
+				shipValues.values); err != nil {
 
 				return err
 			}
@@ -397,9 +410,9 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 			// add new references to this tupel
 			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				UPDATE "%s"."%s" SET "%s" = $1
-				WHERE id = ANY($2)
-			`, shipMod.Name, shipRel.Name, shipAtr.Name), indexRecordIds[index],
-				shipValues.values); err != nil {
+				WHERE "%s" = ANY($2)
+			`, shipMod.Name, shipRel.Name, shipAtr.Name, lookups.PkName),
+				indexRecordIds[index], shipValues.values); err != nil {
 
 				return err
 			}
