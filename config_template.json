@@ -1,5 +1,5 @@
 {
-	"builder":false,
+	"builder": false,
 	"db": {
 		"embedded": true,
 		"host": "localhost",
@@ -14,7 +14,7 @@
 		"embeddedDbData": "data/database/",
 		"files": "data/files/",
 		"temp": "data/temp/",
-		"transfer":"data/transfer"
+		"transfer": "data/transfer"
 	},
 	"web": {
 		"cert": "cert.crt",

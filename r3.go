@@ -69,6 +69,7 @@ type cliInput struct {
 	serviceInstall   bool
 	serviceUninstall bool
 	setData          string
+	wwwPath          string
 }
 type program struct {
 	cli             cliInput
@@ -86,18 +87,19 @@ func main() {
 
 	// process configuration overwrites from command line
 	var cli cliInput
-	flag.StringVar(&cli.serviceName, "servicename", appName, "Specify name of service to manage (to (un)install, start or stop service)")
-	flag.BoolVar(&cli.serviceInstall, "install", false, fmt.Sprintf("Install %s service", appName))
-	flag.BoolVar(&cli.serviceUninstall, "uninstall", false, fmt.Sprintf("Uninstall %s service", appName))
-	flag.BoolVar(&cli.serviceStart, "start", false, fmt.Sprintf("Start %s service", appName))
-	flag.BoolVar(&cli.serviceStop, "stop", false, fmt.Sprintf("Stop %s service", appName))
-	flag.BoolVar(&cli.open, "open", false, fmt.Sprintf("Open URL of %s in default browser (combined with -run)", appName))
+	flag.StringVar(&cli.adminCreate, "newadmin", "", "Create new admin user (username:password), password must not contain spaces or colons")
+	flag.StringVar(&cli.configFile, "config", "config.json", "Location of configuration file (combined with -run)")
 	flag.BoolVar(&cli.dynamicPort, "dynamicport", false, "Start with a port provided by the operating system (combined with -run)")
 	flag.BoolVar(&cli.http, "http", false, "Start with HTTP (not encrypted, for testing/development only, combined with -run)")
+	flag.BoolVar(&cli.open, "open", false, fmt.Sprintf("Open URL of %s in default browser (combined with -run)", appName))
 	flag.BoolVar(&cli.run, "run", false, fmt.Sprintf("Run %s from within this console (see 'config.json' for configuration)", appName))
-	flag.StringVar(&cli.adminCreate, "newadmin", "", "Create new admin user (username:password), password must not contain spaces or colons")
+	flag.BoolVar(&cli.serviceInstall, "install", false, fmt.Sprintf("Install %s service", appName))
+	flag.StringVar(&cli.serviceName, "servicename", appName, "Specify name of service to manage (to (un)install, start or stop service)")
+	flag.BoolVar(&cli.serviceStart, "start", false, fmt.Sprintf("Start %s service", appName))
+	flag.BoolVar(&cli.serviceStop, "stop", false, fmt.Sprintf("Stop %s service", appName))
+	flag.BoolVar(&cli.serviceUninstall, "uninstall", false, fmt.Sprintf("Uninstall %s service", appName))
 	flag.StringVar(&cli.setData, "setdata", "", "Write to config file: Data directory (platform files and database if stand-alone)")
-	flag.StringVar(&cli.configFile, "config", "", "Start with alternative config file location (combined with -run)")
+	flag.StringVar(&cli.wwwPath, "wwwpath", "", "(Development) Use web files from given path instead of embedded ones")
 	flag.Parse()
 
 	// define service and service logger
@@ -165,12 +167,9 @@ func main() {
 		return
 	}
 
-	// change configuration file location
-	if cli.configFile != "" {
-		config.SetConfigFilePath(cli.configFile)
-	}
-
 	// load configuration from file
+	config.SetConfigFilePath(cli.configFile)
+
 	if err := config.LoadFile(); err != nil {
 		prg.logger.Errorf("failed to read configuration file, %v", err)
 		return
@@ -383,14 +382,19 @@ func (prg *program) execute(svc service.Service) {
 	// prepare web server
 	go websocket.StartBackgroundTasks()
 
-	fsStaticWww, err := fs.Sub(fs.FS(fsStatic), "www")
-	if err != nil {
-		prg.logger.Errorf("failed to access embedded web file directory, %v", err)
-		return
+	mux := http.NewServeMux()
+
+	if prg.cli.wwwPath == "" {
+		fsStaticWww, err := fs.Sub(fs.FS(fsStatic), "www")
+		if err != nil {
+			prg.logger.Errorf("failed to access embedded web file directory, %v", err)
+			return
+		}
+		mux.Handle("/", http.FileServer(http.FS(fsStaticWww)))
+	} else {
+		mux.Handle("/", http.FileServer(http.Dir(prg.cli.wwwPath)))
 	}
 
-	mux := http.NewServeMux()
-	mux.Handle("/", http.FileServer(http.FS(fsStaticWww)))
 	mux.HandleFunc("/cache/download/", cache_download.Handler)
 	mux.HandleFunc("/csv/download/", csv_download.Handler)
 	mux.HandleFunc("/csv/upload", csv_upload.Handler)

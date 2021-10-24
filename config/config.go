@@ -29,7 +29,7 @@ var (
 	appVersionBuild string // build counter of this application (1023)
 
 	// configuration file location
-	filePath      string = "config.json"
+	filePath      string // location of configuration file in JSON format
 	filePathTempl string = "config_template.json"
 
 	// configuration values from file, must not be changed during runtime
