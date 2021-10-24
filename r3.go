@@ -3,8 +3,10 @@ package main
 import (
 	"bufio"
 	"context"
+	"embed"
 	"flag"
 	"fmt"
+	"io/fs"
 	"net"
 	"net/http"
 	"os"
@@ -48,6 +50,10 @@ var (
 	appName      string = "REI3"
 	appNameShort string = "R3"
 	appVersion   string = "0.1.2.3"
+
+	// embed static web files
+	//go:embed www/*
+	fsStatic embed.FS
 )
 
 type cliInput struct {
@@ -362,12 +368,6 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
-	// load captions into memory for regular delivery
-	if err := config.InitAppCaptions(); err != nil {
-		prg.logger.Errorf("failed to read captions into memory, %v", err)
-		return
-	}
-
 	log.Info("server", fmt.Sprintf("is ready to start application (%s)", appVersion))
 
 	// apply configuration parameters
@@ -383,8 +383,14 @@ func (prg *program) execute(svc service.Service) {
 	// prepare web server
 	go websocket.StartBackgroundTasks()
 
+	fsStaticWww, err := fs.Sub(fs.FS(fsStatic), "www")
+	if err != nil {
+		prg.logger.Errorf("failed to access embedded web file directory, %v", err)
+		return
+	}
+
 	mux := http.NewServeMux()
-	mux.Handle("/", http.FileServer(http.Dir(config.File.Paths.Web)))
+	mux.Handle("/", http.FileServer(http.FS(fsStaticWww)))
 	mux.HandleFunc("/cache/download/", cache_download.Handler)
 	mux.HandleFunc("/csv/download/", csv_download.Handler)
 	mux.HandleFunc("/csv/upload", csv_upload.Handler)

@@ -320,14 +320,6 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 	},
 	"2.1": func(tx pgx.Tx) (string, error) {
 
-		// update configuration file
-		config.File.Paths.Captions = "var/texts/"
-		config.File.Paths.Packages = "var/packages/"
-
-		if err := config.WriteFile(); err != nil {
-			return "", err
-		}
-
 		// replace PG function schedule positions with new IDs
 		type schedule struct {
 			pgFunctionId uuid.UUID

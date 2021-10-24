@@ -1,0 +1,27 @@
+package cache
+
+import (
+	"encoding/json"
+
+	_ "embed"
+)
+
+var (
+	//go:embed captions/de_de
+	caption_de_de json.RawMessage
+
+	//go:embed captions/en_us
+	caption_en_us json.RawMessage
+)
+
+func GetCaptions(code string) json.RawMessage {
+	switch code {
+	case "de_de":
+		return caption_de_de
+	case "en_us":
+		return caption_en_us
+	}
+
+	// default to english, if language code was not valid
+	return caption_en_us
+}

@@ -38,10 +38,6 @@ var (
 	// operation data
 	TokenSecret *jwt.HMACSHA
 	License     types.License = types.License{}
-
-	// system language codes
-	languageCodeDefault = "en_us"
-	languageCodes       = []string{"de_de", "en_us"}
 )
 
 // returns
@@ -64,12 +60,6 @@ func GetConfigFilepath() string {
 }
 func GetLicenseActive() bool {
 	return License.ValidUntil > tools.GetTimeUnix()
-}
-func GetLanguageCodeValid(requestedCode string) string {
-	if tools.StringInSlice(requestedCode, languageCodes) {
-		return requestedCode
-	}
-	return languageCodeDefault
 }
 
 // setters
