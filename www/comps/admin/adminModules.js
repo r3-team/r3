@@ -76,9 +76,8 @@ let MyAdminModulesItem = {
 				/>
 				<my-button image="delete.png"
 					@trigger="delAsk"
-					:active="productionMode === 0 && dependOnUsNames.length === 0"
+					:active="productionMode === 0"
 					:cancel="true"
-					:captionTitle="dependOnUsDisplay"
 				/>
 			</div>
 		</td>
@@ -100,34 +99,53 @@ let MyAdminModulesItem = {
 		};
 	},
 	computed:{
-		dependOnUsDisplay:function() {
-			if(this.dependOnUsNames.length === 0)
-				return '';
-			
-			return this.capApp.dependOnUs.replace('{NAMES}',this.dependOnUsNames.join(', '));
-		},
-		dependOnUsNames:function() {
-			let out = [];
-			
-			for(let i = 0, j = this.modules.length; i < j; i++) {
-				let m = this.modules[i];
-				
-				if(m.id === this.id)
-					continue;
-				
-				for(let x = 0, y = m.dependsOn.length; x < y; x++) {
-					if(m.dependsOn[x] === this.id) {
-						out.push(m.name);
-						break;
-					}
-				}
-			}
-			return out;
-		},
 		hasChanges:function() {
 			return this.position !== this.options.position
 				|| this.hidden   !== this.options.hidden
 				|| this.owner    !== this.options.owner;
+		},
+		moduleNamesDependendOnUs:function() {
+			let out = [];
+			
+			for(let i = 0, j = this.moduleIdsDependendOnUs.length; i < j; i++) {
+				let m = this.moduleIdMap[this.moduleIdsDependendOnUs[i]];
+				out.push(m.name);
+			}
+			return out;
+		},
+		moduleIdsDependendOnUs:function() {
+			let out  = [];
+			let that = this;
+			
+			let addDependendIds = function(m) {
+				
+				// check all other modules for dependency to parent module
+				for(let i = 0, j = that.modules.length; i < j; i++) {
+					
+					let childId = that.modules[i].id;
+					
+					// root, parent module or was already added
+					if(childId === that.module.id || childId === m.id || out.includes(childId))
+						continue;
+					
+					for(let x = 0, y = that.modules[i].dependsOn.length; x < y; x++) {
+						
+						if(that.modules[i].dependsOn[x] !== m.id)
+							continue;
+						
+						out.push(childId);
+						
+						// add dependencies from child as well
+						addDependendIds(that.modules[i]);
+						break;
+					}
+				}
+			};
+			
+			// get dependencies if this module (root)
+			addDependendIds(this.module);
+			
+			return out;
 		},
 		
 		// repository
@@ -163,6 +181,7 @@ let MyAdminModulesItem = {
 		
 		// stores
 		modules:       function() { return this.$store.getters['schema/modules']; },
+		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
 		builderEnabled:function() { return this.$store.getters.builderEnabled; },
 		capApp:        function() { return this.$store.getters.captions.admin.modules; },
 		capGen:        function() { return this.$store.getters.captions.generic; },
@@ -199,8 +218,8 @@ let MyAdminModulesItem = {
 			}
 			
 			this.$store.commit('dialog',{
-				captionTop:this.capApp.dialog.ownerTitle,
 				captionBody:this.capApp.dialog.owner,
+				captionTop:this.capApp.dialog.ownerTitle,
 				image:'warning.png',
 				buttons:[{
 					cancel:true,
@@ -216,12 +235,21 @@ let MyAdminModulesItem = {
 		
 		// backend calls
 		delAsk:function() {
+			let appNames = '';
+			
+			if(this.moduleNamesDependendOnUs.length !== 0)
+				appNames = this.capApp.dialog.deleteApps.replace('{LIST}',
+					`<li>${this.moduleNamesDependendOnUs.join('</li><li>')}</li>`
+				);
+			
 			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
+				captionBody:this.capApp.dialog.delete.replace('{APPS}',appNames),
+				captionTop:this.capApp.dialog.deleteTitle.replace('{APP}',this.module.name),
+				image:'warning.png',
 				buttons:[{
 					cancel:true,
 					caption:this.capGen.button.delete,
-					exec:this.del,
+					exec:this.delAsk2,
 					image:'delete.png'
 				},{
 					caption:this.capGen.button.cancel,
@@ -229,12 +257,34 @@ let MyAdminModulesItem = {
 				}]
 			});
 		},
+		delAsk2:function() {
+			this.$nextTick(function() {
+				this.$store.commit('dialog',{
+					captionBody:this.capApp.dialog.deleteMulti.replace('{COUNT}',this.moduleNamesDependendOnUs.length + 1),
+					captionTop:this.capApp.dialog.deleteTitle.replace('{APP}',this.module.name),
+					image:'warning.png',
+					buttons:[{
+						cancel:true,
+						caption:this.capGen.button.delete,
+						exec:this.del,
+						image:'delete.png'
+					},{
+						caption:this.capGen.button.cancel,
+						image:'cancel.png'
+					}]
+				});
+			});
+		},
 		del:function() {
 			let trans = new wsHub.transactionBlocking();
-			trans.add('module','del',{
-				id:this.id
-			},this.delOk);
-			trans.send(this.$root.genericError);
+			trans.add('module','del',{id:this.id});
+			
+			// add dependencies to delete
+			for(let i = 0, j = this.moduleIdsDependendOnUs.length; i < j; i++) {
+				trans.add('module','del',{id:this.moduleIdsDependendOnUs[i]});
+			}
+			
+			trans.send(this.$root.genericError,this.delOk);
 		},
 		delOk:function(res) {
 			this.$root.schemaReload();

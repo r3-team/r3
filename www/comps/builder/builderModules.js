@@ -65,7 +65,7 @@ let MyBuilderModulesItem = {
 			<td>
 				<my-button
 					@trigger="toggleSubComponent('dependsOn')"
-					:active="modulesDependsOnAllowed.length > 0"
+					:active="modules.filter(m => m.id !== module.id).length > 0"
 					:caption="String(dependsOn.length)"
 					:image="showDependencies ? 'triangleDown.png' : 'triangleRight.png'"
 				/>
@@ -121,7 +121,7 @@ let MyBuilderModulesItem = {
 				<div class="sub-component">
 					<div class="item-list">
 						<div class="item" 
-							v-for="m in modulesDependsOnAllowed"
+							v-for="m in modules.filter(m => m.id !== module.id)"
 							:key="m.id"
 						>
 							<my-bool
@@ -268,46 +268,6 @@ let MyBuilderModulesItem = {
 		},
 		styleColorPreview:function() {
 			return `background-color:#${this.color1};`;
-		},
-		
-		// list of module IDs that can be depencies, no circular references
-		modulesDependsOnAllowed:function() {
-			
-			let out  = [];
-			let that = this;
-			
-			let refersToModule = function(moduleCheck,moduleIdTarget) {
-				
-				// check if module is target
-				if(moduleCheck.id === moduleIdTarget)
-					return true;
-				
-				// if not, check if any module dependency is target module
-				for(let i = 0, j = moduleCheck.dependsOn.length; i < j; i++) {
-					
-					let moduleDependsCheck = that.moduleIdMap[moduleCheck.dependsOn[i]];
-					
-					if(moduleDependsCheck.id === moduleIdTarget)
-						return true;
-					
-					// if dependency is not module target,
-					//  check if its dependencies refer to target module
-					if(refersToModule(moduleDependsCheck,moduleIdTarget))
-						return true;
-					
-				}
-				return false;
-			};
-			
-			for(let i = 0, j = this.modules.length; i < j; i++) {
-				
-				if(this.modules[i].id === this.id)
-					continue;
-				
-				if(!refersToModule(this.modules[i],this.id))
-					out.push(this.modules[i]);
-			}
-			return out;
 		},
 		
 		// simple states

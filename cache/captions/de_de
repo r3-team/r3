@@ -308,7 +308,10 @@
 				"updateAll":"Alle aktualisieren ({COUNT})"
 			},
 			"dialog":{
-				"delete":"Bist du sicher, dass du diese Anwendung löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelles Backup nicht rückgängig zu machen.</b>",
+				"delete":"Bist du sicher, dass du diese Anwendung löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelles Backup nicht rückgängig zu machen.</b>{APPS}",
+				"deleteApps":"<br /><br />Folgende Anwendungen sind von dieser abhängig und werden ebenfalls gelöscht:<ul>{LIST}</ul>",
+				"deleteMulti":"Diese Aktion wird <b>{COUNT} Anwendung(en)</b> mit dazugehörigen Daten <b>permanent</b> löschen.<br /><br />Möchtest du wirklich fortfahren?",
+				"deleteTitle":"Permanente Löschung der Anwendung \"{APP}\"",
 				"owner":"Wenn diese Option aktiviert ist, können Änderungen an dieser Anwendung als neue Version exportiert werden. Falls du nicht der originale Autor bist, werden alle Änderungen VERLOREN GEHEN, wenn eine neue Version vom Autoren installiert wird. Dies kann auch zu DATENVERLUST führen.<br /><br />Falls du vorhast, Anwendungen anderer Autoren zu verändern/erweitern, kannst du gefahrlos auf \"diesen aufbauen\" - bitte referenziere die Builder-Dokumentation für mehr Details.",
 				"ownerTitle":"Warnung - bitte vorsichtig lesen!"
 			},
@@ -317,7 +320,6 @@
 				"uploadFailed":"Anwendung konnte nicht von der hochgeladenen Datei installiert werden. Bitte das Loglevel für Transfere auf \"Alles\" erhöhen und erneut versuchen - Details werden dann im Systemlog aufgeführt."
 			},
 			"changeLog":"Änderungshistorie",
-			"dependOnUs":"Folgende Anwendungen sind hiervon abhängig: {NAMES}",
 			"hidden":"Versteckt",
 			"import":"Von Datei hinzufügen",
 			"nothingInstalled":"Es sind keine Anwendungen installiert.",

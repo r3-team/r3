@@ -232,14 +232,6 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 			return errors.New("module dependency to itself is not allowed")
 		}
 
-		isCircular, err := hasCircularDependency_tx(tx, id, moduleIdOn)
-		if err != nil {
-			return err
-		}
-		if isCircular {
-			return errors.New("circular module dependency is not allowed")
-		}
-
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.module_depends (module_id, module_id_on)
 			VALUES ($1,$2)
@@ -274,46 +266,6 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 		return err
 	}
 	return nil
-}
-
-func hasCircularDependency_tx(tx pgx.Tx, moduleIdSource uuid.UUID,
-	moduleIdCandidate uuid.UUID) (bool, error) {
-
-	moduleIdsCheckNext := make([]uuid.UUID, 0)
-
-	rows, err := tx.Query(db.Ctx, `
-		SELECT module_id_on
-		FROM app.module_depends
-		WHERE module_id = $1
-	`, moduleIdCandidate)
-	if err != nil {
-		return false, err
-	}
-
-	for rows.Next() {
-		var id uuid.UUID
-		if err := rows.Scan(&id); err != nil {
-			rows.Close()
-			return false, err
-		}
-
-		// any dependency from any module to source module is circular dependency
-		if moduleIdSource == id {
-			rows.Close()
-			return true, nil
-		}
-		moduleIdsCheckNext = append(moduleIdsCheckNext, id)
-	}
-	rows.Close()
-
-	// check modules that candidate is dependent on for dependency to source module
-	for _, id := range moduleIdsCheckNext {
-		isCircular, err := hasCircularDependency_tx(tx, moduleIdSource, id)
-		if isCircular || err != nil {
-			return isCircular, err
-		}
-	}
-	return false, nil
 }
 
 func getDependsOn_tx(tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {

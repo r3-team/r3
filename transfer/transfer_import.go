@@ -558,7 +558,11 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]imp
 			return
 		}
 
-		// add dependencies first
+		// add itself before dependencies (avoids infinite loops from circular dependencies)
+		modules = append(modules, m)
+		moduleIdsAdded = append(moduleIdsAdded, m.Id)
+
+		// add dependencies
 		for _, dependId := range m.DependsOn {
 
 			if _, exists := moduleIdMapMeta[dependId]; !exists {
@@ -567,22 +571,18 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]imp
 			}
 			addModule(moduleIdMapMeta[dependId].module)
 		}
-
-		// add itself
-		modules = append(modules, m)
-		moduleIdsAdded = append(moduleIdsAdded, m.Id)
 	}
 
 	for _, meta := range moduleIdMapMeta {
 		addModule(meta.module)
 	}
 
-	// log optimized import order
+	// log chosen installation order
 	logNames := make([]string, len(modules))
 	for i, m := range modules {
 		logNames[i] = m.Name
 	}
-	log.Info("transfer", fmt.Sprintf("import has decided on optimized order: %s",
+	log.Info("transfer", fmt.Sprintf("import has decided on installation order: %s",
 		strings.Join(logNames, ", ")))
 
 	return modules, nil
