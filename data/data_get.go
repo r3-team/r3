@@ -91,6 +91,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 			Values:         values,
 		})
 	}
+	if err := rows.Err(); err != nil {
+		return results, 0, err
+	}
 	rows.Close()
 
 	// work out result count
