@@ -107,6 +107,11 @@
 				"apply":"Änderungen übernehmen",
 				"removeLogo":"Logo entfernen"
 			},
+			"dialog":{
+				"builderMode":"Der Builder dient zum Erstellen oder Verändern von Anwendungen.<br /><br />Das Ändern von Anwendungen kann zum Datenverlust führen und sollte <b>NIEMALS</b> in produktiven Umgebungen getan werden.<br /><br />Um den Builder sicher zu nutzen, bitte eine dedizierte Instanz von REI3 verwenden; fertige und getestete Anwendungen können dann in ein Produktivsystem transferiert werden.<br /><br />Um mehr zu lernen, steht die <a href=\"https://rei3.de/builderdocu-en_us/\" target=\"_blank\">Builder-Dokumentation</a> zur Verfügung.",
+				"productionMode":"Der Wartungsmodus wird genutzt, um Anwendungen zu aktualisieren, installieren oder zu entfernen.<br /><br />Beim Aktivieren des Wartungsmodus werden <b>alle Benutzer ohne Adminrechte abgemeldet</b>.",
+				"pleaseRead":"Bitte vor dem Speichern lesen"
+			},
 			"appName":"Instanzname",
 			"appNameShort":"Seitentitel",
 			"appVersion":"Plattform-Version",
@@ -122,6 +127,7 @@
 			"bruteforceCountTracked":"Verfolgte Hosts",
 			"bruteforceProtection":"Bruteforce-Schutz aktivieren",
 			"bruteforceTitle":"Bruteforce-Schutz",
+			"builderMode":"Builder-Modus",
 			"colorHint":"Leer lassen für Standardwerte",
 			"companyColorHeader":"Titelfarbe (Hauptmenü)",
 			"companyColorLogin":"Titelfarbe (Anmeldung)",
@@ -157,7 +163,7 @@
 			"logLevelTransfer":"Transfer",
 			"logsKeepDays":"Logs aufheben (in Tagen)",
 			"productionMode":"Wartungsmodus",
-			"publicHostName":"Public hostname",
+			"publicHostName":"Öffentlicher Hostname",
 			"pwForceDigit":"Erzwinge Zahl",
 			"pwForceLower":"Erzwinge Kleinbuchstaben",
 			"pwForceSpecial":"Erzwinge Sonderzeichen",

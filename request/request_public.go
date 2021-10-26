@@ -25,7 +25,7 @@ func PublicGet() (interface{}, error) {
 	res.AppName = config.GetString("appName")
 	res.AppNameShort = config.GetString("appNameShort")
 	res.AppVersion, _, _, _ = config.GetAppVersions()
-	res.Builder = config.File.Builder
+	res.Builder = config.GetUint64("builderMode") == 1
 	res.CompanyColorHeader = config.GetString("companyColorHeader")
 	res.CompanyColorLogin = config.GetString("companyColorLogin")
 	res.CompanyLogo = config.GetString("companyLogo")

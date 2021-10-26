@@ -261,8 +261,6 @@ let MyApp = {
 			this.stateChange();
 		},
 		wsBackendRequest:function(res) {
-			
-			let trans;
 			switch(res.ressource) {
 				// affects admins only (reloads happen in maintenance mode only)
 				// add busy counters to also block admins that did not request the schema reload
@@ -279,12 +277,17 @@ let MyApp = {
 					this.initSchema();
 				break;
 				
+				// affects admins only (builder can be actived only in maintenance mode)
+				case 'builder_mode_changed':
+					this.$store.commit('builder',res.payload);
+				break;
+				
 				// affects everyone logged in
 				case 'reauthorized':
 					if(!this.appReady)
 						return;
 					
-					trans = new wsHub.transaction();
+					let trans = new wsHub.transaction();
 					trans.add('lookup','get',{name:'access'},this.retrievedAccess);
 					trans.send(this.genericError);
 				break;

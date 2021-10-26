@@ -107,6 +107,11 @@
 				"apply":"Apply changes",
 				"removeLogo":"Remove logo"
 			},
+			"dialog":{
+				"builderMode":"The Builder is used to create or change applications.<br /><br />Changing applications can result in data loss and should <b>NEVER</b> be done in production environments.<br /><br />To safely use the Builder, please use a dedicated instance of REI3; ready and tested applications can then be transferred to a production system.<br /><br />Please refer to the <a href=\"https://rei3.de/builderdocu-en_us/\" target=\"_blank\">Builder documentation</a> to learn more.",
+				"productionMode":"The maintenance mode is used to update, install or remove applications from the system.<br /><br />Switching to maintenance mode will <b>logout all users without admin permissions</b>.",
+				"pleaseRead":"Please read before saving"
+			},
 			"appName":"Instance name",
 			"appNameShort":"Page title",
 			"appVersion":"Platform version",
@@ -122,6 +127,7 @@
 			"bruteforceCountTracked":"Tracked hosts",
 			"bruteforceProtection":"Enable bruteforce protection",
 			"bruteforceTitle":"Bruteforce protection",
+			"builderMode":"Builder mode",
 			"colorHint":"Keep empty for default",
 			"companyColorHeader":"Title color (header)",
 			"companyColorLogin":"Title color (login)",

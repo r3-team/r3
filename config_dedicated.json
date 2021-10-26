@@ -1,5 +1,4 @@
 {
-	"builder": false,
 	"db": {
 		"embedded": false,
 		"host": "localhost",

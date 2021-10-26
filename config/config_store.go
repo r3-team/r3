@@ -23,14 +23,14 @@ var (
 
 	NamesUint64 = []string{"backupDaily", "backupMonthly", "backupWeekly",
 		"backupCountDaily", "backupCountMonthly", "backupCountWeekly",
-		"bruteforceAttempts", "bruteforceProtection", "dbTimeoutCsv",
-		"dbTimeoutDataRest", "dbTimeoutDataWs", "dbTimeoutIcs", "icsDaysPost",
-		"icsDaysPre", "icsDownload", "logApplication", "logBackup", "logCache",
-		"logCsv", "logLdap", "logMail", "logServer", "logScheduler",
-		"logTransfer", "logsKeepDays", "productionMode", "pwForceDigit",
-		"pwForceLower", "pwForceSpecial", "pwForceUpper", "pwLengthMin",
-		"schemaTimestamp", "repoChecked", "repoFeedback", "repoSkipVerify",
-		"tokenExpiryHours"}
+		"bruteforceAttempts", "bruteforceProtection", "builderMode",
+		"dbTimeoutCsv", "dbTimeoutDataRest", "dbTimeoutDataWs", "dbTimeoutIcs",
+		"icsDaysPost", "icsDaysPre", "icsDownload", "logApplication",
+		"logBackup", "logCache", "logCsv", "logLdap", "logMail", "logServer",
+		"logScheduler", "logTransfer", "logsKeepDays", "productionMode",
+		"pwForceDigit", "pwForceLower", "pwForceSpecial", "pwForceUpper",
+		"pwLengthMin", "schemaTimestamp", "repoChecked", "repoFeedback",
+		"repoSkipVerify", "tokenExpiryHours"}
 )
 
 // store setters

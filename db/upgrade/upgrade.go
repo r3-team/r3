@@ -133,6 +133,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			        DEFERRABLE INITIALLY DEFERRED
 			        NOT VALID
 			);
+			
+			INSERT INTO instance.config (name,value)
+			VALUES ('builderMode','0');
 		`)
 		return "2.5", err
 	},

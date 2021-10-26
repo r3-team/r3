@@ -1,8 +1,6 @@
 package types
 
 type FileType struct {
-	Builder bool `json:"builder"`
-
 	Db FileTypeDb `json:"db"`
 
 	Paths struct {

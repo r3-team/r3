@@ -130,6 +130,9 @@ func (hub *hubType) start() {
 				// if clients are not kicked, prepare response
 				var err error
 
+				if event.BuilderOff || event.BuilderOn {
+					jsonMsg, err = prepareUnrequested("builder_mode_changed", event.BuilderOn)
+				}
 				if event.Renew {
 					jsonMsg, err = prepareUnrequested("reauthorized", nil)
 				}
