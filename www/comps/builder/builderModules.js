@@ -9,12 +9,85 @@ let displayArrow = function(state) {
 	return state ? 'images/triangleDown.png' : 'images/triangleRight.png';
 };
 
+let MyBuilderModulesItemStartForm = {
+	name:'my-builder-modules-item-start-form',
+	template:`<tr>
+		<td>#{{ position+1 }}</td>
+		<td>
+			<select v-model="roleId">
+				<option v-for="r in module.roles" :value="r.id">
+					{{ r.name }}
+				</option>
+			</select>
+		</td>
+		<td>
+			<select v-model="formId">
+				<option :value="null">-</option>
+				<option v-for="f in module.forms" :value="f.id">
+					{{ f.name }}
+				</option>
+			</select>
+		</td>
+		<td>
+			<div class="row centered">
+				<my-button image="arrowDown.png"
+					v-if="!isLast"
+					@trigger="$emit('moveDown')"
+					:naked="true"
+				/>
+				<my-button image="arrowUp.png"
+					v-if="position !== 0"
+					@trigger="$emit('moveUp')"
+					:naked="true"
+				/>
+			</div>
+		</td>
+		<td>
+			<my-button image="cancel.png"
+				@trigger="$emit('remove')"
+				:naked="true"
+			/>
+		</td>
+	</tr>`,
+	props:{
+		isLast:    { type:Boolean, required:true },
+		modelValue:{ type:Object,  required:true },
+		module:    { type:Object,  required:true },
+		position:  { type:Number,  required:true }
+	},
+	emits:['moveDown','moveUp','remove','update:modelValue'],
+	computed:{
+		// inputs
+		formId:{
+			get:function()  { return this.modelValue.formId; },
+			set:function(v) { this.update('formId',v); }
+		},
+		roleId:{
+			get:function()  { return this.modelValue.roleId; },
+			set:function(v) { this.update('roleId',v); }
+		},
+		
+		// stores
+		capApp:function() { return this.$store.getters.captions.builder.relation; },
+		capGen:function() { return this.$store.getters.captions.generic; }
+	},
+	methods:{
+		update:function(name,value) {
+			let v = JSON.parse(JSON.stringify(this.modelValue));
+			v[name] = value;
+			
+			this.$emit('update:modelValue',v);
+		}
+	}
+};
+
 let MyBuilderModulesItem = {
 	name:'my-builder-modules-item',
 	components:{
 		'chrome-picker':VueColor.Chrome,
 		MyBuilderCaption,
-		MyBuilderIconInput
+		MyBuilderIconInput,
+		MyBuilderModulesItemStartForm
 	},
 	template:`<tbody>
 		<tr>
@@ -82,15 +155,15 @@ let MyBuilderModulesItem = {
 				</select>
 			</td>
 			<td>
-				<input v-model.number="position" />
+				<input class="short" v-model.number="position" />
 			</td>
 			<td>
-				<select v-model="formId" :disabled="module.forms.length === 0">
-					<option :value="null">-</option>
-					<option v-for="f in module.forms" :value="f.id">
-						{{ f.name }}
-					</option>
-				</select>
+				<my-button
+					@trigger="toggleSubComponent('startForms')"
+					:active="module.forms.length !== 0"
+					:caption="String(startForms.length)"
+					:image="showStartForms ? 'triangleDown.png' : 'triangleRight.png'"
+				/>
 			</td>
 			<td>
 				<my-button
@@ -100,7 +173,7 @@ let MyBuilderModulesItem = {
 				/>
 			</td>
 			<td>
-				<input class="short" :value="displayReleaseDate" disabled="disabled" />
+				<input :value="displayReleaseDate" disabled="disabled" />
 			</td>
 			<td>
 				<input class="short" v-model="releaseBuild" disabled="disabled" />
@@ -113,6 +186,62 @@ let MyBuilderModulesItem = {
 					@trigger="set"
 					:active="hasChanges"
 				/>
+			</td>
+		</tr>
+		
+		<tr v-if="showStartForms">
+			<td colspan="999">
+				<div class="sub-component">
+					
+					<!-- default start form -->
+					<div class="item-list">
+						<span>{{ capApp.startFormDefault }}</span>
+						<select v-model="formId">
+							<option :value="null">-</option>
+							<option v-for="f in module.forms" :value="f.id">
+								{{ f.name }}
+							</option>
+						</select>
+					</div>
+					<div class="item-list">
+						<span>{{ capApp.startFormDefaultHint }}</span>
+					</div>
+					<br />
+					
+					<div class="item-list">
+						<table v-if="startForms.length !== 0">
+							<thead>
+								<tr>
+									<td>{{ capGen.order }}</td>
+									<td>{{ capGen.role }}</td>
+									<td>{{ capApp.startForm }}</td>
+									<td colspan="2"></td>
+								</tr>
+							</thead>
+							<tbody>
+								<my-builder-modules-item-start-form
+									v-for="(sf,i) in startForms"
+									@moveDown="startForms.splice(i+1,0,startForms.splice(i,1)[0])"
+									@moveUp="startForms.splice(i-1,0,startForms.splice(i,1)[0])"
+									@remove="startForms.splice(i,1)"
+									@update:modelValue="startForms[i] = $event"
+									:isLast="i === startForms.length-1"
+									:modelValue="sf"
+									:module="module"
+									:position="i"
+								/>
+							</tbody>
+						</table>
+						<p v-if="startForms.length !== 0">
+							{{ capApp.startFormsExplanation }}
+						</p>
+					</div>
+						
+					<my-button image="add.png"
+						@trigger="addStartForm"
+						:caption="capGen.button.add"
+					/>
+				</div>
 			</td>
 		</tr>
 		
@@ -149,10 +278,10 @@ let MyBuilderModulesItem = {
 							>{{ l }}</option>
 						</select>
 					</div>
-					
 					<div class="item-list">
 						<span>{{ capApp.languageMainHint }}</span>
 					</div>
+					<br />
 					
 					<!-- language entry and header title -->
 					<div class="item-list">
@@ -216,6 +345,7 @@ let MyBuilderModulesItem = {
 					releaseBuildApp:0,
 					releaseDate:0,
 					dependsOn:[],
+					startForms:[],
 					languages:['en_us'],
 					forms:[],
 					relations:[],
@@ -240,11 +370,13 @@ let MyBuilderModulesItem = {
 			releaseBuildApp:this.module.releaseBuildApp,
 			releaseDate:this.module.releaseDate,
 			dependsOn:JSON.parse(JSON.stringify(this.module.dependsOn)),
+			startForms:JSON.parse(JSON.stringify(this.module.startForms)),
 			languages:JSON.parse(JSON.stringify(this.module.languages)),
 			captions:JSON.parse(JSON.stringify(this.module.captions)),
 			showColorPicker:false,
 			showDependencies:false,
-			showLanguages:false
+			showLanguages:false,
+			showStartForms:false
 		};
 	},
 	computed:{
@@ -256,9 +388,10 @@ let MyBuilderModulesItem = {
 				|| this.color1       !== this.module.color1
 				|| this.position     !== this.module.position
 				|| this.languageMain !== this.module.languageMain
-				|| JSON.stringify(this.dependsOn) !== JSON.stringify(this.module.dependsOn)
-				|| JSON.stringify(this.languages) !== JSON.stringify(this.module.languages)
-				|| JSON.stringify(this.captions)  !== JSON.stringify(this.module.captions)
+				|| JSON.stringify(this.dependsOn)  !== JSON.stringify(this.module.dependsOn)
+				|| JSON.stringify(this.startForms) !== JSON.stringify(this.module.startForms)
+				|| JSON.stringify(this.languages)  !== JSON.stringify(this.module.languages)
+				|| JSON.stringify(this.captions)   !== JSON.stringify(this.module.captions)
 			;
 		},
 		displayReleaseDate:function() {
@@ -287,11 +420,18 @@ let MyBuilderModulesItem = {
 		getUnixFormat,
 		
 		// actions
-		open:function() {
-			this.$router.push('/builder/relations/'+this.module.id);
+		addStartForm:function() {
+			this.startForms.push({
+				position:this.startForms.length,
+				formId:null,
+				roleId:null
+			});
 		},
 		hideColorPicker:function() {
 			this.showColorPicker = false;
+		},
+		open:function() {
+			this.$router.push('/builder/relations/'+this.module.id);
 		},
 		setColor:function(newVal) {
 			this.color1 = newVal.hex.substr(1);
@@ -316,12 +456,19 @@ let MyBuilderModulesItem = {
 		},
 		toggleSubComponent:function(name) {
 			if(name === 'dependsOn') {
-				this.showLanguages = false;
+				this.showLanguages  = false;
+				this.showStartForms = false;
 				this.showDependencies = !this.showDependencies;
 			}
 			if(name === 'languages') {
 				this.showDependencies = false;
+				this.showStartForms   = false;
 				this.showLanguages = !this.showLanguages;
+			}
+			if(name === 'startForms') {
+				this.showDependencies = false;
+				this.showLanguages    = false;
+				this.showStartForms = !this.showStartForms;
 			}
 		},
 		
@@ -342,6 +489,7 @@ let MyBuilderModulesItem = {
 				releaseBuildApp:this.releaseBuildApp,
 				releaseDate:this.releaseDate,
 				dependsOn:this.dependsOn,
+				startForms:this.startForms,
 				languages:this.languages,
 				captions:this.captions
 			},this.setOk);

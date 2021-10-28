@@ -95,8 +95,14 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 	}
 	rows.Close()
 
-	// get captions
+	// get start forms & captions
 	for i, mod := range modules {
+
+		mod.StartForms, err = getStartForms(mod.Id)
+		if err != nil {
+			return modules, err
+		}
+
 		mod.Captions, err = caption.Get("module", mod.Id, []string{"moduleTitle", "moduleHelp"})
 		if err != nil {
 			return modules, err
@@ -109,8 +115,8 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 	formId pgtype.UUID, iconId pgtype.UUID, name string, color1 string,
 	position int, languageMain string, releaseBuild int, releaseBuildApp int,
-	releaseDate int64, dependsOn []uuid.UUID, languages []string,
-	captions types.CaptionMap) error {
+	releaseDate int64, dependsOn []uuid.UUID, startForms []types.ModuleStartForm,
+	languages []string, captions types.CaptionMap) error {
 
 	if err := db.CheckIdentifier(name); err != nil {
 		return err
@@ -240,6 +246,23 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 		}
 	}
 
+	// set start forms
+	if _, err := tx.Exec(db.Ctx, `
+		DELETE FROM app.module_start_form
+		WHERE module_id = $1
+	`, id); err != nil {
+		return err
+	}
+
+	for i, sf := range startForms {
+		if _, err := tx.Exec(db.Ctx, `
+			INSERT INTO app.module_start_form (module_id, position, role_id, form_id)
+			VALUES ($1,$2,$3,$4)
+		`, id, i, sf.RoleId, sf.FormId); err != nil {
+			return err
+		}
+	}
+
 	// set languages
 	if _, err := tx.Exec(db.Ctx, `
 		DELETE FROM app.module_language
@@ -266,6 +289,31 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 		return err
 	}
 	return nil
+}
+
+func getStartForms(id uuid.UUID) ([]types.ModuleStartForm, error) {
+
+	startForms := make([]types.ModuleStartForm, 0)
+	rows, err := db.Pool.Query(db.Ctx, `
+		SELECT role_id, form_id
+		FROM app.module_start_form
+		WHERE module_id = $1
+		ORDER BY position ASC
+	`, id)
+	if err != nil {
+		return startForms, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var sf types.ModuleStartForm
+		if err := rows.Scan(&sf.RoleId, &sf.FormId); err != nil {
+			return startForms, err
+		}
+		startForms = append(startForms, sf)
+
+	}
+	return startForms, nil
 }
 
 func getDependsOn_tx(tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {

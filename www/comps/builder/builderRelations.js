@@ -175,7 +175,7 @@ let MyBuilderRelationsItem = {
 								<td colspan="2"></td>
 							</tr>
 							<tr>
-								<td>{{ capApp.policyPosition }}</td>
+								<td>{{ capGen.order }}</td>
 								<td>{{ capGen.role }}</td>
 								<td>{{ capApp.policyActionSelect }}</td>
 								<td>{{ capApp.policyActionUpdate }}</td>

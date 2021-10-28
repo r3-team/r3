@@ -133,7 +133,45 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			        DEFERRABLE INITIALLY DEFERRED
 			        NOT VALID
 			);
+			CREATE INDEX fki_relation_policy_pg_function_id_excl_fkey
+				ON app.relation_policy USING btree (pg_function_id_excl ASC NULLS LAST);
+			CREATE INDEX fki_relation_policy_pg_function_id_incl_fkey
+				ON app.relation_policy USING btree (pg_function_id_incl ASC NULLS LAST);
+			CREATE INDEX fki_relation_policy_relation_id_fkey
+				ON app.relation_policy USING btree (relation_id ASC NULLS LAST);
+			CREATE INDEX fki_relation_policy_role_id_fkey
+				ON app.relation_policy USING btree (role_id ASC NULLS LAST);
 			
+			CREATE TABLE IF NOT EXISTS app.module_start_form(
+			    module_id uuid NOT NULL,
+			    "position" integer NOT NULL,
+			    role_id uuid NOT NULL,
+			    form_id uuid NOT NULL,
+			    CONSTRAINT module_start_form_pkey PRIMARY KEY (module_id, "position"),
+			    CONSTRAINT module_start_form_form_id_fkey FOREIGN KEY (form_id)
+			        REFERENCES app.form (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT module_start_form_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT module_start_form_role_id_fkey FOREIGN KEY (role_id)
+			        REFERENCES app.role (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX fki_module_start_form_module_id_fkey
+			    ON app.module_start_form USING btree (module_id ASC NULLS LAST);
+			CREATE INDEX fki_module_start_form_role_id_fkey
+			    ON app.module_start_form USING btree (role_id ASC NULLS LAST);
+			CREATE INDEX fki_module_start_form_form_id_fkey
+			    ON app.module_start_form USING btree (form_id ASC NULLS LAST);
+			
+			-- new config
 			INSERT INTO instance.config (name,value)
 			VALUES ('builderMode','0');
 		`)

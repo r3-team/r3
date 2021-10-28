@@ -6,27 +6,33 @@ import (
 )
 
 type Module struct {
-	Id              uuid.UUID    `json:"id"`
-	ParentId        pgtype.UUID  `json:"parentId"`        // module parent ID
-	FormId          pgtype.UUID  `json:"formId"`          // start form
-	IconId          pgtype.UUID  `json:"iconId"`          // module icon in header/menu
-	Name            string       `json:"name"`            // name of module, is used for DB schema
-	Color1          string       `json:"color1"`          // primary module color (used for header)
-	Position        int          `json:"position"`        // position of module in nav. contexts (home, header)
-	LanguageMain    string       `json:"languageMain"`    // language code of main language (for fallback)
-	ReleaseBuild    int          `json:"releaseBuild"`    // build of this module, incremented with each release
-	ReleaseBuildApp int          `json:"releaseBuildApp"` // build of app at last release
-	ReleaseDate     int64        `json:"releaseDate"`     // date of last release
-	DependsOn       []uuid.UUID  `json:"dependsOn"`       // modules that this module is dependent on
-	Languages       []string     `json:"languages"`       // language codes that this module supports
-	Relations       []Relation   `json:"relations"`
-	Forms           []Form       `json:"forms"`
-	Menus           []Menu       `json:"menus"`
-	Icons           []Icon       `json:"icons"`
-	Roles           []Role       `json:"roles"`
-	LoginForms      []LoginForm  `json:"loginForms"`
-	PgFunctions     []PgFunction `json:"pgFunctions"`
-	Captions        CaptionMap   `json:"captions"`
+	Id              uuid.UUID         `json:"id"`
+	ParentId        pgtype.UUID       `json:"parentId"`        // module parent ID
+	FormId          pgtype.UUID       `json:"formId"`          // default start form
+	IconId          pgtype.UUID       `json:"iconId"`          // module icon in header/menu
+	Name            string            `json:"name"`            // name of module, is used for DB schema
+	Color1          string            `json:"color1"`          // primary module color (used for header)
+	Position        int               `json:"position"`        // position of module in nav. contexts (home, header)
+	LanguageMain    string            `json:"languageMain"`    // language code of main language (for fallback)
+	ReleaseBuild    int               `json:"releaseBuild"`    // build of this module, incremented with each release
+	ReleaseBuildApp int               `json:"releaseBuildApp"` // build of app at last release
+	ReleaseDate     int64             `json:"releaseDate"`     // date of last release
+	DependsOn       []uuid.UUID       `json:"dependsOn"`       // modules that this module is dependent on
+	StartForms      []ModuleStartForm `json:"startForms"`      // start forms, assigned via role membership
+	Languages       []string          `json:"languages"`       // language codes that this module supports
+	Relations       []Relation        `json:"relations"`
+	Forms           []Form            `json:"forms"`
+	Menus           []Menu            `json:"menus"`
+	Icons           []Icon            `json:"icons"`
+	Roles           []Role            `json:"roles"`
+	LoginForms      []LoginForm       `json:"loginForms"`
+	PgFunctions     []PgFunction      `json:"pgFunctions"`
+	Captions        CaptionMap        `json:"captions"`
+}
+type ModuleStartForm struct {
+	Position int       `json:"position"`
+	RoleId   uuid.UUID `json:"roleId"`
+	FormId   uuid.UUID `json:"formId"`
 }
 type Relation struct {
 	Id             uuid.UUID        `json:"id"`
