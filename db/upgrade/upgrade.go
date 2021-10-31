@@ -96,8 +96,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	"2.4": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
+			-- repo change logs
 			ALTER TABLE instance.repo_module ADD COLUMN change_log TEXT;
 			
+			-- relation policies
 			CREATE TABLE app.relation_policy (
 			    relation_id uuid NOT NULL,
 				"position" smallint NOT NULL,
@@ -142,6 +144,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX fki_relation_policy_role_id_fkey
 				ON app.relation_policy USING btree (role_id ASC NULLS LAST);
 			
+			-- start forms
 			CREATE TABLE IF NOT EXISTS app.module_start_form(
 			    module_id uuid NOT NULL,
 			    "position" integer NOT NULL,
@@ -174,6 +177,42 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- new config
 			INSERT INTO instance.config (name,value)
 			VALUES ('builderMode','0');
+			
+			-- update log function
+			CREATE OR REPLACE FUNCTION instance.log(
+				level integer,
+				message text,
+				app_name text DEFAULT NULL::text)
+			    RETURNS void
+			    LANGUAGE 'plpgsql'
+			    COST 100
+			    VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+				module_id UUID;
+				level_show INT;
+			BEGIN
+				-- check log level
+				SELECT value::INT INTO level_show
+				FROM instance.config
+				WHERE name = 'logApplication';
+				
+				IF level_show < level THEN
+					RETURN;
+				END IF;
+			
+				-- resolve module ID if possible
+				-- if not possible: log with module_id = NULL (better than not to log)
+				IF app_name IS NOT NULL THEN
+					SELECT id INTO module_id
+					FROM app.module
+					WHERE name = app_name;
+				END IF;
+			
+				INSERT INTO instance.log (level,context,module_id,message,date_milli)
+				VALUES (level,'module',module_id,message,(EXTRACT(EPOCH FROM CLOCK_TIMESTAMP()) * 1000)::BIGINT);
+			END;
+			$BODY$;
 		`)
 		return "2.5", err
 	},
