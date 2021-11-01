@@ -135,7 +135,7 @@ let MyGanttLineRecord = {
 		// actions
 		clickRecord:function(middleClick) {
 			if(this.rowSelect)
-				this.$emit('record-selected',this.recordId,null,middleClick);
+				this.$emit('record-selected',this.recordId,[],middleClick);
 		}
 	}
 };
@@ -190,8 +190,8 @@ let MyGantt = {
 			<div class="area nowrap">
 				<my-button image="new.png"
 					v-if="rowSelect"
-					@trigger="$emit('record-selected',0,null,false)"
-					@trigger-middle="$emit('record-selected',0,null,true)"
+					@trigger="$emit('form-open-new',[],false)"
+					@trigger-middle="$emit('form-open-new',[],true)"
 					:caption="!isMobile ? capGen.button.new : ''"
 					:captionTitle="capGen.button.newHint"
 					:darkBg="true"
@@ -358,7 +358,7 @@ let MyGantt = {
 		stepTypeDefault:{ type:String,  required:true },
 		stepTypeToggle: { type:Boolean, required:true }
 	},
-	emits:['record-selected','set-args'],
+	emits:['form-open-new','record-selected','set-args'],
 	data:function() {
 		return {
 			choiceId:null,
@@ -640,7 +640,7 @@ let MyGantt = {
 				`${this.attributeIdDate0}_${unixTime}`,
 				`${this.attributeIdDate1}_${unixTime}`
 			];
-			this.$emit('record-selected',0,[`attributes=${attributes.join(',')}`],middleClick);
+			this.$emit('form-open-new',[`attributes=${attributes.join(',')}`],middleClick);
 		},
 		pageChange:function(factor) {
 			this.page += factor;

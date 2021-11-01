@@ -13,7 +13,8 @@ import {srcBase64}                from './shared/image.js';
 
 import {
 	getFlexStyle,
-	getInputFieldName
+	getInputFieldName,
+	setGetterArgs
 } from './shared/form.js';
 
 import {
@@ -213,7 +214,7 @@ let MyField = {
 						@blurred="blur"
 						@focused="focus"
 						@form-open="$emit('set-form-record',$event,field.formIdOpen)"
-						@form-open-new="$emit('set-form-record',0,field.formIdOpen,getArgsToApplyRecordAsAttribute())"
+						@form-open-new="$emit('set-form-record',0,field.formIdOpen,addRecordAttributeArgs([]))"
 						@record-selected="relationshipRecordSelected"
 						@record-removed="relationshipRecordRemoved"
 						:choices="choicesProcessed"
@@ -261,7 +262,8 @@ let MyField = {
 		<!-- button -->
 		<my-button
 			v-if="isButton"
-			@trigger="triggerButton"
+			@trigger="triggerButton(false)"
+			@trigger-middle="triggerButton(true)"
 			:caption="caption"
 			:imageBase64="iconId ? srcBase64(iconIdMap[iconId].file) : ''"
 		/>
@@ -278,7 +280,7 @@ let MyField = {
 		<!-- list -->
 		<my-list
 			v-if="isList"
-			@record-selected="(...args) => $emit('set-form-record',args[0],field.formIdOpen,getArgsToApplyRecordAsAttribute(),args[1])"
+			@record-selected="(...args) => $emit('set-form-record',args[0],field.formIdOpen,addRecordAttributeArgs([]),args[1])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			:autoRenew="field.autoRenew"
 			:choices="choicesProcessed"
@@ -301,6 +303,7 @@ let MyField = {
 		<!-- calendar -->
 		<my-calendar
 			v-if="isCalendar && !field.gantt"
+			@form-open-new="(...args) => $emit('set-form-record',0,field.formIdOpen,addRecordAttributeArgs(args[0]),args[1])"
 			@record-selected="(...args) => $emit('set-form-record',args[0],field.formIdOpen,args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			:attributeIdColor="field.attributeIdColor"
@@ -325,6 +328,7 @@ let MyField = {
 		<!-- gantt -->
 		<my-gantt
 			v-if="isCalendar && field.gantt"
+			@form-open-new="(...args) => $emit('set-form-record',0,field.formIdOpen,addRecordAttributeArgs(args[0]),args[1])"
 			@record-selected="(...args) => $emit('set-form-record',args[0],field.formIdOpen,args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			:attributeIdColor="field.attributeIdColor"
@@ -892,6 +896,7 @@ let MyField = {
 		isAttributeRelationship,
 		isAttributeString,
 		openLink,
+		setGetterArgs,
 		srcBase64,
 		
 		// actions
@@ -909,10 +914,10 @@ let MyField = {
 			if(this.showColorPickerInput)
 				this.showColorPickerInput = false;
 		},
-		triggerButton:function() {
+		triggerButton:function(middleClick) {
 			if(this.field.formIdOpen !== null)
 				this.$emit('set-form-record',0,this.field.formIdOpen,
-					this.getArgsToApplyRecordAsAttribute());
+					this.addRecordAttributeArgs([]),middleClick);
 		},
 		relationshipRecordSelected:function(recordId,middleClick) {
 			if(recordId === null)
@@ -939,16 +944,17 @@ let MyField = {
 		},
 		
 		// helpers
-		getArgsToApplyRecordAsAttribute:function() {
-			if(this.field.attributeIdRecord === null)
-				return [];
-			
-			if(typeof this.joinsIndexMap['0'] === 'undefined' || this.joinsIndexMap['0'].recordId === 0)
-				return [];
+		addRecordAttributeArgs:function(args) {
+			if(this.field.attributeIdRecord === null
+				|| typeof this.joinsIndexMap['0'] === 'undefined'
+				|| this.joinsIndexMap['0'].recordId === 0
+			) {
+				return args;
+			}
 			
 			// add record ID from primary relation join as default value for defined attribute
-			let atr = this.attributeIdMap[this.field.attributeIdRecord];
-			return [`attributes=${atr.id}_${this.joinsIndexMap['0'].recordId}`];
+			let atr = this.attributeIdMap[this.field.attributeIdRecord].id;
+			return this.setGetterArgs(args,'attributes',`${atr}_${this.joinsIndexMap['0'].recordId}`);
 		},
 		setValue:function(val,valOld,indexAttributeId) {
 			if(val === '')

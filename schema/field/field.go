@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"r3/compatible"
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
@@ -37,9 +38,9 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		
 		-- calendar field
 		fn.form_id_open, fn.attribute_id_date0, fn.attribute_id_date1,
-		fn.attribute_id_color, fn.index_date0, fn.index_date1, fn.index_color,
-		fn.ics, fn.gantt, fn.gantt_steps, fn.gantt_steps_toggle, fn.date_range0,
-		fn.date_range1,
+		fn.attribute_id_color, fn.attribute_id_record, fn.index_date0,
+		fn.index_date1, fn.index_color, fn.ics, fn.gantt, fn.gantt_steps,
+		fn.gantt_steps_toggle, fn.date_range0, fn.date_range1,
 		
 		-- chart field
 		fa.chart_option,
@@ -111,9 +112,9 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		var autoRenew, dateRange0, dateRange1, indexColor, min, max pgtype.Int4
 		var attributeId, attributeIdAlt, attributeIdNm, attributeIdDate0,
 			attributeIdDate1, attributeIdColor, attributeIdRecordBtn,
-			attributeIdRecordData, attributeIdRecordList, fieldParentId,
-			formIdOpenBtn, formIdOpenCal, formIdOpenData, formIdOpenList,
-			iconId pgtype.UUID
+			attributeIdRecordCalendar, attributeIdRecordData,
+			attributeIdRecordList, fieldParentId, formIdOpenBtn, formIdOpenCal,
+			formIdOpenData, formIdOpenList, iconId pgtype.UUID
 		var category, csvExport, csvImport, filterQuick, filterQuickList,
 			gantt, ganttStepsToggle, ics, outsideIn, wrap pgtype.Bool
 		var defPresetIds []uuid.UUID
@@ -121,15 +122,16 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		if err := rows.Scan(&fieldId, &fieldParentId, &iconId, &content, &state,
 			&onMobile, &atrContent, &attributeIdRecordBtn, &formIdOpenBtn,
 			&formIdOpenCal, &attributeIdDate0, &attributeIdDate1,
-			&attributeIdColor, &indexDate0, &indexDate1, &indexColor,
-			&ics, &gantt, &ganttSteps, &ganttStepsToggle, &dateRange0,
-			&dateRange1, &chartOption, &direction, &justifyContent, &alignItems,
-			&alignContent, &wrap, &grow, &shrink, &basis, &perMin, &perMax,
-			&size, &attributeId, &attributeIdAlt, &index, &display, &min, &max,
-			&def, &regexCheck, &formIdOpenData, &attributeIdRecordData,
-			&attributeIdNm, &category, &filterQuick, &outsideIn, &autoSelect,
-			&defPresetIds, &attributeIdRecordList, &formIdOpenList, &autoRenew,
-			&csvExport, &csvImport, &layout, &filterQuickList, &resultLimit); err != nil {
+			&attributeIdColor, &attributeIdRecordCalendar, &indexDate0,
+			&indexDate1, &indexColor, &ics, &gantt, &ganttSteps,
+			&ganttStepsToggle, &dateRange0, &dateRange1, &chartOption,
+			&direction, &justifyContent, &alignItems, &alignContent, &wrap,
+			&grow, &shrink, &basis, &perMin, &perMax, &size, &attributeId,
+			&attributeIdAlt, &index, &display, &min, &max, &def, &regexCheck,
+			&formIdOpenData, &attributeIdRecordData, &attributeIdNm, &category,
+			&filterQuick, &outsideIn, &autoSelect, &defPresetIds,
+			&attributeIdRecordList, &formIdOpenList, &autoRenew, &csvExport,
+			&csvImport, &layout, &filterQuickList, &resultLimit); err != nil {
 
 			rows.Close()
 			return fields, err
@@ -154,26 +156,27 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			posButtonLookup = append(posButtonLookup, pos)
 		case "calendar":
 			fields = append(fields, types.FieldCalendar{
-				Id:               fieldId,
-				IconId:           iconId,
-				Content:          content,
-				State:            state,
-				OnMobile:         onMobile,
-				FormIdOpen:       formIdOpenCal,
-				AttributeIdDate0: attributeIdDate0.Bytes,
-				AttributeIdDate1: attributeIdDate1.Bytes,
-				AttributeIdColor: attributeIdColor,
-				IndexDate0:       int(indexDate0.Int),
-				IndexDate1:       int(indexDate1.Int),
-				IndexColor:       indexColor,
-				Ics:              ics.Bool,
-				Gantt:            gantt.Bool,
-				GanttSteps:       ganttSteps,
-				GanttStepsToggle: ganttStepsToggle.Bool,
-				DateRange0:       int64(dateRange0.Int),
-				DateRange1:       int64(dateRange1.Int),
-				Columns:          []types.Column{},
-				Query:            types.Query{},
+				Id:                fieldId,
+				IconId:            iconId,
+				Content:           content,
+				State:             state,
+				OnMobile:          onMobile,
+				FormIdOpen:        formIdOpenCal,
+				AttributeIdDate0:  attributeIdDate0.Bytes,
+				AttributeIdDate1:  attributeIdDate1.Bytes,
+				AttributeIdColor:  attributeIdColor,
+				AttributeIdRecord: attributeIdRecordCalendar,
+				IndexDate0:        int(indexDate0.Int),
+				IndexDate1:        int(indexDate1.Int),
+				IndexColor:        indexColor,
+				Ics:               ics.Bool,
+				Gantt:             gantt.Bool,
+				GanttSteps:        ganttSteps,
+				GanttStepsToggle:  ganttStepsToggle.Bool,
+				DateRange0:        int64(dateRange0.Int),
+				DateRange1:        int64(dateRange1.Int),
+				Columns:           []types.Column{},
+				Query:             types.Query{},
 			})
 			posCalendarLookup = append(posCalendarLookup, pos)
 		case "chart":
@@ -218,10 +221,10 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 					State:             state,
 					OnMobile:          onMobile,
 					FormIdOpen:        formIdOpenData,
-					AttributeIdRecord: attributeIdRecordData,
 					AttributeId:       attributeId.Bytes,
 					AttributeIdAlt:    attributeIdAlt,
 					AttributeIdNm:     attributeIdNm,
+					AttributeIdRecord: attributeIdRecordData,
 					Index:             int(index.Int),
 					Display:           display.String,
 					AutoSelect:        int(autoSelect.Int),
@@ -522,9 +525,9 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 			}
 			if err := setCalendar_tx(tx, fieldId, f.FormIdOpen,
 				f.AttributeIdDate0, f.AttributeIdDate1, f.AttributeIdColor,
-				f.IndexDate0, f.IndexDate1, f.IndexColor, f.Gantt, f.GanttSteps,
-				f.GanttStepsToggle, f.Ics, f.DateRange0, f.DateRange1,
-				f.Columns); err != nil {
+				f.AttributeIdRecord, f.IndexDate0, f.IndexDate1, f.IndexColor,
+				f.Gantt, f.GanttSteps, f.GanttStepsToggle, f.Ics, f.DateRange0,
+				f.DateRange1, f.Columns); err != nil {
 
 				return err
 			}
@@ -682,8 +685,8 @@ func setButton_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 }
 func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	attributeIdDate0 uuid.UUID, attributeIdDate1 uuid.UUID,
-	attributeIdColor pgtype.UUID, indexDate0 int, indexDate1 int,
-	indexColor pgtype.Int4, gantt bool, ganttSteps pgtype.Varchar,
+	attributeIdColor pgtype.UUID, attributeIdRecord pgtype.UUID, indexDate0 int,
+	indexDate1 int, indexColor pgtype.Int4, gantt bool, ganttSteps pgtype.Varchar,
 	ganttStepsToggle bool, ics bool, dateRange0 int64, dateRange1 int64,
 	columns []types.Column) error {
 
@@ -692,18 +695,23 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 		return err
 	}
 
+	// fix imports < 2.5: New optional record attribute
+	attributeIdRecord = compatible.FixPgxNull(attributeIdRecord).(pgtype.UUID)
+
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.field_calendar
 			SET form_id_open = $1, attribute_id_date0 = $2, 
-				attribute_id_date1 = $3, attribute_id_color = $4, 
-				index_date0 = $5, index_date1 = $6, index_color = $7, 
-				gantt = $8, gantt_steps = $9, gantt_steps_toggle = $10,
-				ics = $11, date_range0 = $12, date_range1 = $13
-			WHERE field_id = $14
+				attribute_id_date1 = $3, attribute_id_color = $4,
+				attribute_id_record = $5, index_date0 = $6, index_date1 = $7,
+				index_color = $8, gantt = $9, gantt_steps = $10,
+				gantt_steps_toggle = $11, ics = $12, date_range0 = $13,
+				date_range1 = $14
+			WHERE field_id = $15
 		`, formIdOpen, attributeIdDate0, attributeIdDate1, attributeIdColor,
-			indexDate0, indexDate1, indexColor, gantt, ganttSteps,
-			ganttStepsToggle, ics, dateRange0, dateRange1, fieldId); err != nil {
+			attributeIdRecord, indexDate0, indexDate1, indexColor, gantt,
+			ganttSteps, ganttStepsToggle, ics, dateRange0, dateRange1,
+			fieldId); err != nil {
 
 			return err
 		}
@@ -711,13 +719,14 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.field_calendar (
 				field_id, form_id_open, attribute_id_date0, attribute_id_date1,
-				attribute_id_color, index_date0, index_date1, index_color,
-				gantt, gantt_steps, gantt_steps_toggle, ics, date_range0,
-				date_range1
-			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+				attribute_id_color, attribute_id_record, index_date0, 
+				index_date1, index_color, gantt, gantt_steps, 
+				gantt_steps_toggle, ics, date_range0, date_range1
+			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
 		`, fieldId, formIdOpen, attributeIdDate0, attributeIdDate1,
-			attributeIdColor, indexDate0, indexDate1, indexColor,
-			gantt, ganttSteps, ganttStepsToggle, ics, dateRange0, dateRange1); err != nil {
+			attributeIdColor, attributeIdRecord, indexDate0, indexDate1,
+			indexColor, gantt, ganttSteps, ganttStepsToggle, ics, dateRange0,
+			dateRange1); err != nil {
 
 			return err
 		}

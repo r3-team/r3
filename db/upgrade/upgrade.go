@@ -144,6 +144,16 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX fki_relation_policy_role_id_fkey
 				ON app.relation_policy USING btree (role_id ASC NULLS LAST);
 			
+			-- missing record attribute on calendar fields
+			ALTER TABLE app.field_calendar ADD COLUMN attribute_id_record UUID;
+			
+			ALTER TABLE app.field_calendar ADD CONSTRAINT field_calendar_attribute_id_record_fkey
+				FOREIGN KEY (attribute_id_record)
+				REFERENCES app.attribute (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
 			-- start forms
 			CREATE TABLE IF NOT EXISTS app.module_start_form(
 			    module_id uuid NOT NULL,
