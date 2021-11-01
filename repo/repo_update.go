@@ -62,13 +62,13 @@ func Update() error {
 
 	// get modules, their latest releases and translated module meta data
 	if err := getModules(token, dataAccessUrl, skipVerify, repoModuleMap); err != nil {
-		return err
+		return fmt.Errorf("failed to get modules, %w", err)
 	}
 	if err := getModuleReleases(token, dataAccessUrl, skipVerify, repoModuleMap, lastRun); err != nil {
-		return err
+		return fmt.Errorf("failed to get module releases, %w", err)
 	}
 	if err := getModuleMetas(token, dataAccessUrl, skipVerify, repoModuleMap); err != nil {
-		return err
+		return fmt.Errorf("failed to get meta info for modules, %w", err)
 	}
 
 	// apply changes to local module store
@@ -79,10 +79,10 @@ func Update() error {
 	defer tx.Rollback(db.Ctx)
 
 	if err := removeModules_tx(tx, repoModuleMap); err != nil {
-		return err
+		return fmt.Errorf("failed to remove modules, %w", err)
 	}
 	if err := addModules_tx(tx, repoModuleMap); err != nil {
-		return err
+		return fmt.Errorf("failed to add modules, %w", err)
 	}
 	if err := config.SetUint64_tx(tx, "repoChecked", thisRun); err != nil {
 		return err

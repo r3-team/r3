@@ -124,7 +124,7 @@ func getModuleReleases(token string, url string, skipVerify bool,
 
 				// add only first release per module (are sorted descending by build)
 				if tools.UuidInSlice(moduleId, moduleIdsAdded) {
-					continue
+					break
 				}
 
 				if _, exists := repoModuleMap[moduleId]; !exists {
@@ -167,7 +167,11 @@ func getModuleReleases(token string, url string, skipVerify bool,
 				moduleIdsAdded = append(moduleIdsAdded, repoModule.ModuleId)
 			}
 		}
-		repoModuleMap[repoModule.ModuleId] = repoModule
+
+		// only the latest release is used, module ID is not set for subsequent ones
+		if repoModule.ModuleId != uuid.Nil {
+			repoModuleMap[repoModule.ModuleId] = repoModule
+		}
 	}
 	return nil
 }
