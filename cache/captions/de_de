@@ -907,6 +907,7 @@
 				"javascript":"JavaScript-Ausdruck",
 				"languageCode":"Login-Sprach-Code (en_us, ...)",
 				"login":"Login-ID (Integer)",
+				"preset":"ID von vordefinierten Datensatz (Integer)",
 				"record":"Datensatz-ID (Integer, Formular Relation 0)",
 				"recordNew":"Datensatz ist neu (TRUE/FALSE, Formular)",
 				"role":"Login hat Rolle (TRUE/FALSE)",

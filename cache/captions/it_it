@@ -907,6 +907,7 @@
 				"javascript":"Espressione JavaScript",
 				"languageCode":"codice lingua login (en_us, ...)",
 				"login":"ID login (integer)",
+				"preset":"ID preimpostato (integer)",
 				"record":"ID record (integer, relazione modulo 0)",
 				"recordNew":"il record è nuovo (TRUE/FALSE, modulo)",
 				"role":"il login ha ruolo (TRUE/FALSE)",

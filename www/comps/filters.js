@@ -229,6 +229,7 @@ let MyFilterSide = {
 					<option value="record"      >{{ capApp.option.content.record }}</option>
 					<option value="recordNew"   >{{ capApp.option.content.recordNew }}</option>
 					<option value="login"       >{{ capApp.option.content.login }}</option>
+					<option value="preset"      >{{ capApp.option.content.preset }}</option>
 					<option value="role"        >{{ capApp.option.content.role }}</option>
 					<option value="languageCode">{{ capApp.option.content.languageCode }}</option>
 					<option value="javascript"  >{{ capApp.option.content.javascript }}</option>
@@ -276,6 +277,22 @@ let MyFilterSide = {
 					<option v-for="f in dataFields" :value="f.id">
 						{{ getFieldCaption(f) }}
 					</option>
+				</select>
+				
+				<!-- preset input -->
+				<select
+					v-if="!columnsMode && isPreset"
+					v-model="presetId"
+				>
+					<option :value="null"></option>
+					<optgroup
+						v-for="r in moduleIdMap[moduleId].relations.filter(v => v.presets.length !== 0)"
+						:label="r.name"
+					>
+						<option v-for="p in r.presets.filter(v => v.protected)" :value="p.id">
+							{{ p.name }}
+						</option>
+					</optgroup>
 				</select>
 				
 				<!-- role input -->
@@ -388,6 +405,10 @@ let MyFilterSide = {
 				this.joinsParents.length
 			);
 		},
+		presetId:{
+			get:function()  { return this.modelValue.presetId; },
+			set:function(v) { this.set('presetId',v); }
+		},
 		query:{
 			get:function()  { return this.modelValue.query; },
 			set:function(v) { this.set('query',v); }
@@ -418,6 +439,7 @@ let MyFilterSide = {
 		isAttribute:  function() { return this.content === 'attribute'; },
 		isField:      function() { return this.content === 'field'; },
 		isJavascript: function() { return this.content === 'javascript'; },
+		isPreset:     function() { return this.content === 'preset'; },
 		isRole:       function() { return this.content === 'role'; },
 		isSubQuery:   function() { return this.content === 'subQuery'; },
 		isValue:      function() { return this.content === 'value'; },
@@ -471,14 +493,12 @@ let MyFilterSide = {
 				v.attributeIndex  = 0;
 				v.attributeNested = 0;
 			}
-			if(v.content !== 'field')
-				v.fieldId = null;
 			
-			if(v.content !== 'role')
-				v.roleId = null;
-			
-			if(v.content !== 'value')
-				v.value = null;
+			// remove invalid references
+			if(v.content !== 'field')  v.fieldId  = null;
+			if(v.content !== 'preset') v.presetId = null;
+			if(v.content !== 'role')   v.roleId   = null; 
+			if(v.content !== 'value')  v.value    = null;
 			
 			if(v.content !== 'subQuery') {
 				v.query           = null;

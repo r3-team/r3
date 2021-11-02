@@ -146,7 +146,6 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			-- missing record attribute on calendar fields
 			ALTER TABLE app.field_calendar ADD COLUMN attribute_id_record UUID;
-			
 			ALTER TABLE app.field_calendar ADD CONSTRAINT field_calendar_attribute_id_record_fkey
 				FOREIGN KEY (attribute_id_record)
 				REFERENCES app.attribute (id) MATCH SIMPLE
@@ -187,6 +186,16 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- new config
 			INSERT INTO instance.config (name,value)
 			VALUES ('builderMode','0');
+			
+			-- new preset filter criteria
+			ALTER TYPE app.query_filter_side_content ADD VALUE 'preset';
+			ALTER TABLE app.query_filter_side ADD COLUMN preset_id UUID;
+			ALTER TABLE app.query_filter_side ADD CONSTRAINT query_filter_side_preset_id_fkey
+				FOREIGN KEY (preset_id)
+				REFERENCES app.preset (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
 			
 			-- update log function
 			CREATE OR REPLACE FUNCTION instance.log(

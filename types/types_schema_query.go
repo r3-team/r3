@@ -56,6 +56,7 @@ type QueryFilterSide struct {
 	AttributeNested int         `json:"attributeNested"` // nesting level of attribute  (0=main query, 1=1st sub query)
 	AttributeIndex  int         `json:"attributeIndex"`  // relation index of attribute
 	FieldId         pgtype.UUID `json:"fieldId"`         // frontend field value
+	PresetId        pgtype.UUID `json:"presetId"`        // preset ID of record to be compared
 	RoleId          pgtype.UUID `json:"roleId"`          // role ID assigned to user
 
 	Brackets        int            `json:"brackets"`        // opening/closing brackets (side 0/1)

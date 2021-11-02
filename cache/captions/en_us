@@ -907,6 +907,7 @@
 				"javascript":"JavaScript expression",
 				"languageCode":"login language code (en_us, ...)",
 				"login":"login ID (integer)",
+				"preset":"preset record ID (Integer)",
 				"record":"record ID (integer, form relation 0)",
 				"recordNew":"record is new (TRUE/FALSE, form)",
 				"role":"login has role (TRUE/FALSE)",

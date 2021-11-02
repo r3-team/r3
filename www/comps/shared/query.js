@@ -133,6 +133,15 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,jo
 			case 'login':
 				s.value = MyStore.getters.loginId;
 			break;
+			case 'preset':
+				// unprotected presets can be deleted, 0 as fallback
+				s.value = 0;
+				
+				let presetIdMap = MyStore.getters['schema/presetIdMapRecordId'];
+				
+				if(typeof presetIdMap[s.presetId] !== 'undefined')
+					s.value = presetIdMap[s.presetId];
+			break;
 			case 'record':
 				if(typeof joinsIndexMap['0'] !== 'undefined')
 					s.value = joinsIndexMap['0'].recordId;
