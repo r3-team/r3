@@ -40,7 +40,7 @@
 			"generalErrorTitle":"Errore",
 			"presetProtected":"Questo record è protetto e non può essere cancellato",
 			"unauthorized":"Accesso non autorizzato",
-			"uniqueConstraint":"Il valore oer '{NAMES}' "deve essere univoco"
+			"uniqueConstraint":"Il valore oer '{NAMES}' deve essere univoco"
 		},
 		"option":{
 			"aggArray":"vettore",
@@ -319,12 +319,12 @@
 				"deleteApps":"<br /><br />Le seguenti applicazioni dipendono da questa e verranno anch'esse eliminate:<ul>{LIST}</ul>",
 				"deleteMulti":"Questa azione eliminerà <b>in modo definitivo</b> <b>{COUNT} applicazione(i)</b> e i dati corrispondenti.<br /><br />Vuoi davvero continuare?",
 				"deleteTitle":"Cancellazione definitivo dell'applicazione '{APP}'",
-				"owner":"Con questa opzione abilitata, le modifiche a questa applicazione possono essere esportate come una nuova versione. Se non sei l'autore originale, tutte le modifiche andranno PERSE quando verrà installata una nuova versione dell'autore. Ciò può anche comportare la PERDITA DI DATI.<br /><br />Se intendi modificare/estendere le applicazioni di altri autori, puoi farlo in sicurezza "costruendo su di esse" - fai riferimento alla documentazione del Builder per maggiori dettagli.",
+				"owner":"Con questa opzione abilitata, le modifiche a questa applicazione possono essere esportate come una nuova versione. Se non sei l'autore originale, tutte le modifiche andranno PERSE quando verrà installata una nuova versione dell'autore. Ciò può anche comportare la PERDITA DI DATI.<br /><br />Se intendi modificare/estendere le applicazioni di altri autori, puoi farlo in sicurezza \"costruendo su di esse\" - fai riferimento alla documentazione del Builder per maggiori dettagli.",
 				"ownerTitle":"Avvertimento - leggi attentamente!"
 			},
 			"error":{
 				"installFailed":"L'aggiornamento dell'applicazione non è riuscito. Quando si aggiorna una singola applicazione, le dipendenze mancanti possono causare problemi: prova ad aggiornare tutte le applicazioni insieme per risolverli.<br /><br />Messaggio di errore: {ERROR}",
-				"uploadFailed":"Impossibile aggiungere l'applicazione dal file caricato. Aumenta il livello di registro per i trasferimenti a "Tutto" e riprova: i dettagli saranno visibili nei registri di sistema."
+				"uploadFailed":"Impossibile aggiungere l'applicazione dal file caricato. Aumenta il livello di registro per i trasferimenti a \"Tutto\" e riprova: i dettagli saranno visibili nei registri di sistema."
 			},
 			"changeLog":"Log modifiche",
 			"hidden":"Nascosto",
@@ -967,7 +967,7 @@
 		},
 		"wizard":{
 			"installBundle":"Core Company",
-			"installBundleDesc":"Installa un set preconfezionato di applicazioni principali, utile per qualsiasi organizzazione. L'insieme "Core Company" include:<ul><li>Gestione delle assenze</li><li>Monitoraggio del tempo</li><li>Gestione delle attività</li><li>Strumenti per modellare la tua organizzazione</li> </ul>Dopo l'installazione, dai un'occhiata alle pagine di aiuto delle singole applicazioni per saperne di più sulla configurazione iniziale di ciascuna.",
+			"installBundleDesc":"Installa un set preconfezionato di applicazioni principali, utile per qualsiasi organizzazione. L'insieme \"Core Company\" include:<ul><li>Gestione delle assenze</li><li>Monitoraggio del tempo</li><li>Gestione delle attività</li><li>Strumenti per modellare la tua organizzazione</li> </ul>Dopo l'installazione, dai un'occhiata alle pagine di aiuto delle singole applicazioni per saperne di più sulla configurazione iniziale di ciascuna.",
 			"installFile":"Da file",
 			"installFileDesc":"Installa applicazioni da file REI3 locali. Per sistemi offline o applicazioni fai da te.<br /><br />I file per le applicazioni REI3 offerte pubblicamente possono essere scaricati dal sito ufficiale <a href=\"https://rei3.de/download_en\" target=\" _blank\">repository</a>.",
 			"installRepo":"Da archivio",
