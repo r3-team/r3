@@ -95,7 +95,7 @@ let MyBuilderFields = {
 					
 					<!-- action: list data SQL preview -->
 					<img class="action edit clickable" src="images/code.png"
-						v-if="!isTemplate && element.content === 'list'"
+						v-if="!isTemplate && ['calendar','chart','list'].includes(element.content)"
 						@click="getSqlPreview(element)"
 						:title="capApp.sql"
 					/>
