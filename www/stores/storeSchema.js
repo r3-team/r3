@@ -37,7 +37,6 @@ const MyStoreSchema = {
 			
 			// reset state
 			state.modules         = payload.modules;
-			state.languageCodes   = ['en_us','de_de'];
 			state.attributeIdMap  = {};
 			state.moduleIdMap     = {};
 			state.moduleNameMap   = {};
@@ -105,7 +104,8 @@ const MyStoreSchema = {
 				}
 			}
 		},
-		timestamp(state,payload) { state.timestamp = payload; }
+		languageCodes(state,payload) { state.languageCodes = payload; },
+		timestamp    (state,payload) { state.timestamp     = payload; }
 	},
 	getters:{
 		attributeIdMap: (state) => state.attributeIdMap,

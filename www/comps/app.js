@@ -346,6 +346,7 @@ let MyApp = {
 			this.$store.commit('builder',r.payload.builder);
 			this.$store.commit('productionMode',r.payload.productionMode);
 			this.$store.commit('pageTitle',this.pageTitle); // apply new app short name to page
+			this.$store.commit('schema/languageCodes',r.payload.languageCodes);
 			this.$store.commit('schema/timestamp',r.payload.schemaTimestamp);
 			this.publicLoaded = true;
 			this.stateChange();
