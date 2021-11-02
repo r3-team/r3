@@ -260,13 +260,7 @@ let MyList = {
 						v-model.number="limit"
 						@change="reloadInside()"
 					>
-						<option value="10">10</option>
-						<option value="25">25</option>
-						<option value="50">50</option>
-						<option value="100">100</option>
-						<option value="250">250</option>
-						<option value="500">500</option>
-						<option value="1000">1000</option>
+						<option v-for="o in limitOptions" :value="o">{{ o }}</option>
 					</select>
 				</div>
 			</div>
@@ -712,6 +706,14 @@ let MyList = {
 				return this.focused ? '' : this.capApp.inputPlaceholderAdd;
 			
 			return this.focused ? '' : this.inputCaption;
+		},
+		limitOptions:function() {
+			let out = [10,25,50,100,250,500,1000];
+			
+			if(!out.includes(this.limitDefault))
+				out.unshift(this.limitDefault);
+			
+			return out.sort((a,b) => a-b);
 		},
 		pageCount:function() {
 			if(this.count === 0) return 0;
