@@ -197,6 +197,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
 			
+			-- new query fixed limit
+			ALTER TABLE app.query ADD COLUMN fixed_limit INTEGER NOT NULL DEFAULT 0;
+			ALTER TABLE app.query ALTER COLUMN fixed_limit DROP DEFAULT;
+			
 			-- update log function
 			CREATE OR REPLACE FUNCTION instance.log(
 				level integer,

@@ -43,6 +43,7 @@ let MyChart = {
 		filters:    { type:Array,  required:true },
 		formLoading:{ type:Boolean,required:true },
 		isFullPage: { type:Boolean,required:true },
+		limit:      { type:Number, required:true },
 		optionJson: { type:String, required:true },
 		query:      { type:Object, required:true }
 	},
@@ -117,7 +118,8 @@ let MyChart = {
 				joins:this.getRelationsJoined(this.query.joins),
 				expressions:this.getQueryExpressions(this.columns),
 				filters:this.filters.concat(this.choiceFilters),
-				orders:this.query.orders
+				orders:this.query.orders,
+				limit:this.limit
 			},this.getOk);
 			trans.send(this.handleError);
 		},

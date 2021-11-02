@@ -40,11 +40,11 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	}
 
 	if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
-		SELECT id, relation_id
+		SELECT id, relation_id, fixed_limit
 		FROM app.query
 		WHERE %s_id = $1
 		%s
-	`, entity, filterClause), id).Scan(&q.Id, &q.RelationId); err != nil {
+	`, entity, filterClause), id).Scan(&q.Id, &q.RelationId, &q.FixedLimit); err != nil {
 		return q, err
 	}
 
@@ -209,17 +209,19 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 
 		if subQuery {
 			if _, err := tx.Exec(db.Ctx, `
-				INSERT INTO app.query (id, query_filter_query_id,
+				INSERT INTO app.query (id, fixed_limit, query_filter_query_id,
 					query_filter_position, query_filter_side)
-				VALUES ($1,$2,$3,$4)
-			`, query.Id, entityId, filterPosition, filterSide); err != nil {
+				VALUES ($1,$2,$3,$4,$5)
+			`, query.Id, query.FixedLimit, entityId,
+				filterPosition, filterSide); err != nil {
+
 				return err
 			}
 		} else {
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-				INSERT INTO app.query (id, %s_id)
-				VALUES ($1,$2)
-			`, entity), query.Id, entityId); err != nil {
+				INSERT INTO app.query (id, fixed_limit, %s_id)
+				VALUES ($1,$2,$3)
+			`, entity), query.Id, query.FixedLimit, entityId); err != nil {
 				return err
 			}
 		}
@@ -227,9 +229,9 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 
 	if _, err := tx.Exec(db.Ctx, `
 		UPDATE app.query
-		SET relation_id = $1
-		WHERE id = $2
-	`, query.RelationId, query.Id); err != nil {
+		SET relation_id = $1, fixed_limit = $2
+		WHERE id = $3
+	`, query.RelationId, query.FixedLimit, query.Id); err != nil {
 		return err
 	}
 

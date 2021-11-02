@@ -20,11 +20,12 @@ var (
 type Query struct {
 	Id         uuid.UUID     `json:"id"`
 	RelationId pgtype.UUID   `json:"relationId"` // query source relation
+	FixedLimit int           `json:"fixedLimit"` // fixed limit, used for queries like 'top 5 of X'
 	Joins      []QueryJoin   `json:"joins"`      // query joins over multiple relations
 	Filters    []QueryFilter `json:"filters"`    // default query filter
 	Orders     []QueryOrder  `json:"orders"`     // default query sort
 	Lookups    []QueryLookup `json:"lookups"`    // import lookups via PG indexes
-	Choices    []QueryChoice `json:"choices"`    // optional filters, selectable by users
+	Choices    []QueryChoice `json:"choices"`    // named filter sets, selectable by users
 }
 
 type QueryJoin struct {

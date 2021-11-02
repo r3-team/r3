@@ -285,12 +285,22 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 		queryGroup = fmt.Sprintf("\nGROUP BY %s", strings.Join(groupByItems, ", "))
 	}
 
-	// build final data SQL query
-	queryOrder, queryLimit, queryOffset := "", "", ""
-	if err := addOrderLimitOffset(data, nestingLevel, &queryOrder, &queryLimit, &queryOffset); err != nil {
+	// build ORDER BY
+	queryOrder, err := addOrderBy(data, nestingLevel)
+	if err != nil {
 		return "", "", err
 	}
 
+	// build LIMIT/OFFSET
+	queryLimit, queryOffset := "", ""
+	if data.Limit != 0 {
+		queryLimit = fmt.Sprintf("\nLIMIT %d", data.Limit)
+	}
+	if data.Offset != 0 {
+		queryOffset = fmt.Sprintf("\nOFFSET %d", data.Offset)
+	}
+
+	// build final data retrieval SQL query
 	query := fmt.Sprintf(
 		`SELECT %s`+"\n"+
 			`FROM "%s"."%s" AS "%s" %s%s%s%s%s%s`,
@@ -303,7 +313,7 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 		queryLimit,               // LIMIT
 		queryOffset)              // OFFSET
 
-	// build final 'total count' SQL query (not relevant for sub queries)
+	// build final total count SQL query (not relevant for sub queries)
 	queryCount := ""
 	if nestingLevel == 0 {
 
@@ -604,10 +614,12 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 	return nil
 }
 
-func addOrderLimitOffset(data types.DataGet, nestingLevel int,
-	order *string, limit *string, offset *string) error {
+func addOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 
-	// build order by line
+	if len(data.Orders) == 0 {
+		return "", nil
+	}
+
 	orderItems := make([]string, len(data.Orders))
 	var codeSelect string
 	var err error
@@ -636,7 +648,7 @@ func addOrderLimitOffset(data types.DataGet, nestingLevel int,
 					getRelationCode(int(ord.Index.Int), nestingLevel))
 
 				if err != nil {
-					return err
+					return "", err
 				}
 			}
 
@@ -644,7 +656,7 @@ func addOrderLimitOffset(data types.DataGet, nestingLevel int,
 			// order by chosen expression (by position in array)
 			codeSelect = getExpressionCodeSelect(int(ord.ExpressionPos.Int))
 		} else {
-			return errors.New("unknown data GET order parameter")
+			return "", errors.New("unknown data GET order parameter")
 		}
 
 		if ord.Ascending == true {
@@ -653,17 +665,7 @@ func addOrderLimitOffset(data types.DataGet, nestingLevel int,
 			orderItems[i] = fmt.Sprintf("%s DESC NULLS LAST", codeSelect)
 		}
 	}
-
-	if len(orderItems) != 0 {
-		*order = fmt.Sprintf("\nORDER BY %s", strings.Join(orderItems, ", "))
-	}
-	if data.Limit != 0 {
-		*limit = fmt.Sprintf("\nLIMIT %d", data.Limit)
-	}
-	if data.Offset != 0 {
-		*offset = fmt.Sprintf("\nOFFSET %d", data.Offset)
-	}
-	return nil
+	return fmt.Sprintf("\nORDER BY %s", strings.Join(orderItems, ", ")), nil
 }
 
 // helpers

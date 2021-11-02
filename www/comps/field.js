@@ -282,6 +282,7 @@ let MyField = {
 			v-if="isList"
 			@record-selected="(...args) => $emit('set-form-record',args[0],field.formIdOpen,addRecordAttributeArgs([]),args[1])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
+			:allowPaging="field.query.fixedLimit === 0"
 			:autoRenew="field.autoRenew"
 			:choices="choicesProcessed"
 			:columns="columnsProcessed"
@@ -295,8 +296,8 @@ let MyField = {
 			:iconId="iconId ? iconId : null"
 			:isFullPage="isFullPage"
 			:layout="field.layout"
+			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 			:query="field.query"
-			:resultLimit="field.resultLimit"
 			:rowSelect="field.formIdOpen !== null"
 		/>
 		
@@ -362,6 +363,7 @@ let MyField = {
 			:formLoading="formLoading"
 			:handleError="handleError"
 			:isFullPage="isFullPage"
+			:limit="field.query.fixedLimit"
 			:optionJson="field.chartOption"
 			:query="field.query"
 		/>

@@ -208,6 +208,7 @@ let MyList = {
 					
 					<!-- offset -->
 					<my-input-offset class-input="selector"
+						v-if="allowPaging"
 						@input="offset = $event;reloadInside()"
 						:caption="!isMobile ? true : false"
 						:darkBg="true"
@@ -255,7 +256,7 @@ let MyList = {
 					</select>
 					
 					<select class="selector"
-						v-if="isFullPage && !isMobile"
+						v-if="isFullPage && allowPaging && !isMobile"
 						v-model.number="limit"
 						@change="reloadInside()"
 					>
@@ -539,18 +540,19 @@ let MyList = {
 		</template>
 	</div>`,
 	props:{
-		autoRenew:  { required:false,default:null },                    // refresh list data every x seconds
-		choices:    { type:Array,   required:false, default:() => [] }, // processed query choices
-		columns:    { type:Array,   required:true },                    // processed list columns
-		fieldId:    { type:String,  required:true },
-		filters:    { type:Array,   required:true },                    // processed query filters
-		handleError:{ type:Function,required:true },
-		iconId:     { required:false,default:null },
-		layout:     { type:String,  required:false, default:'table' },  // list layout: table, cards
-		query:      { type:Object,  required:true },                    // list query
-		resultLimit:{ type:Number,  required:false, default:10 },       // default result limit
+		autoRenew:   { required:false,default:null },                    // refresh list data every x seconds
+		choices:     { type:Array,   required:false, default:() => [] }, // processed query choices
+		columns:     { type:Array,   required:true },                    // processed list columns
+		fieldId:     { type:String,  required:true },
+		filters:     { type:Array,   required:true },                    // processed query filters
+		handleError: { type:Function,required:true },
+		iconId:      { required:false,default:null },
+		layout:      { type:String,  required:false, default:'table' },  // list layout: table, cards
+		limitDefault:{ type:Number,  required:false, default:10 },       // default list limit
+		query:       { type:Object,  required:true },                    // list query
 		
 		// toggles
+		allowPaging:{ type:Boolean, required:false, default:true },  // enable paging
 		csvExport:  { type:Boolean, required:false, default:false },
 		csvImport:  { type:Boolean, required:false, default:false },
 		filterQuick:{ type:Boolean, required:false, default:false }, // enable quick filter
@@ -836,9 +838,9 @@ let MyList = {
 			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
 		} else {
 			// sub lists are initiated once
-			this.choiceId  = this.choiceIdDefault;
-			this.limit     = this.resultLimit; 
-			this.orders    = JSON.parse(JSON.stringify(this.query.orders));
+			this.choiceId = this.choiceIdDefault;
+			this.limit    = this.limitDefault;
+			this.orders   = JSON.parse(JSON.stringify(this.query.orders));
 		}
 		
 		// set initial auto renew timer
@@ -963,7 +965,7 @@ let MyList = {
 			//  if user overwrites order, initial order is empty
 			let params = {
 				choice:     { parse:'string',   value:this.choiceIdDefault },
-				limit:      { parse:'int',      value:this.resultLimit },
+				limit:      { parse:'int',      value:this.limitDefault },
 				offset:     { parse:'int',      value:0 },
 				orderby:    { parse:'listOrder',value:!this.orderOverwritten ? JSON.stringify(this.query.orders) : '[]' },
 				quickfilter:{ parse:'string',   value:'' }

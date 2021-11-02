@@ -294,6 +294,12 @@
 	flex-flow:row nowrap;
 	margin:0px 0px 6px 0px;
 }
+.builder-query .fixed-limit{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	justify-content:space-between;
+}
 
 /* relation */
 .builder-relations .sub-component{
