@@ -728,7 +728,7 @@
 			"choices":"Filtri impostati ({COUNT})*",
 			"choicesHint":"*Il primo set è attivo per impostazione predefinita - scelta disponibile se ne esistono 2 o più.",
 			"filters":"Filtri ({COUNT})",
-			"fixedLimit":"Fixed result limit",
+			"fixedLimit":"Limite risultati impostato",
 			"fixedLimit0":"non attivo",
 			"joinAddHint":"Unisci un'altra relazione a questa",
 			"joinApplyCreateHint":"(C)rete: creaa un record su questa relazione",
