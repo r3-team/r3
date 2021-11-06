@@ -55,6 +55,7 @@ let MyFormLog = {
 							:dataFieldMap="dataFieldMap"
 							:field="f"
 							:fieldIdMapState="fieldIdMapState"
+							:formBadLoad="false"
 							:formBadSave="false"
 							:formLoading="loading"
 							:handleError="handleError"

@@ -379,6 +379,7 @@ let MyField = {
 			:dataFieldMap="dataFieldMap"
 			:field="f"
 			:fieldIdMapState="fieldIdMapState"
+			:formBadLoad="formBadLoad"
 			:formBadSave="formBadSave"
 			:formLoading="formLoading"
 			:flexDirParent="field.direction"
@@ -393,6 +394,7 @@ let MyField = {
 		dataFieldMap:   { type:Object,  required:true },
 		field:          { type:Object,  required:true },
 		fieldIdMapState:{ type:Object,  required:false, default:() => { return {}} }, // overwritten states
+		formBadLoad:    { type:Boolean, required:true }, // attempted record load with no return
 		formBadSave:    { type:Boolean, required:true }, // attempted save with invalid inputs
 		formLoading:    { type:Boolean, required:true },
 		flexDirParent:  { type:String,  required:true }, // flex direction (row/column) of parent
@@ -649,6 +651,10 @@ let MyField = {
 			
 			// overwrite in log viewer context, only hidden or readonly allowed
 			if(this.logViewer && state !== 'hidden')
+				state = 'readonly';
+			
+			// overwrite visible data field to readonly if form could not load record
+			if(this.isData && this.formBadLoad && state !== 'hidden')
 				state = 'readonly';
 			
 			return state;

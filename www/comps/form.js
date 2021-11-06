@@ -104,7 +104,7 @@ let MyForm = {
 						/>
 						<my-button image="save.png"
 							@trigger="set(false)"
-							:active="hasChanges"
+							:active="hasChanges && !badLoad"
 							:caption="capGen.button.save"
 							:captionTitle="capGen.button.saveHint"
 							:darkBg="true"
@@ -112,7 +112,7 @@ let MyForm = {
 						<my-button image="save_new.png"
 							v-if="!isMobile && allowNew"
 							@trigger="set(true)"
-							:active="hasChanges && canSetNew"
+							:active="hasChanges && !badLoad && canSetNew"
 							:caption="capGen.button.saveNew"
 							:captionTitle="capGen.button.saveNewHint"
 							:darkBg="true"
@@ -148,6 +148,7 @@ let MyForm = {
 					:dataFieldMap="fieldIdMapData"
 					:field="f"
 					:fieldIdMapState="fieldIdMapState"
+					:formBadLoad="badLoad"
 					:formBadSave="badSave"
 					:formLoading="loading"
 					:handleError="handleError"
@@ -205,6 +206,7 @@ let MyForm = {
 	data:function() {
 		return {
 			// states
+			badLoad:false,       // attempted record load with no return (can happen if access is lost during save)
 			badSave:false,       // attempted save (data SET) with invalid fields, also updates data fields
 			lastFormId:'',       // when routing occurs: if ID is the same, no need to rebuild form
 			loading:false,       // form is currently loading, informs sub components when form is ready
@@ -227,7 +229,7 @@ let MyForm = {
 	},
 	computed:{
 		canDelete:function() {
-			if(this.isNew || this.joins.length === 0 || !this.joins[0].applyDelete)
+			if(this.isNew || this.badLoad || this.joins.length === 0 || !this.joins[0].applyDelete)
 				return false;
 			
 			// check for protected preset record
@@ -696,6 +698,7 @@ let MyForm = {
 		},
 		resetRecord:function() {
 			this.badSave = false;
+			this.badLoad = false;
 			this.recordIdIndexMap = {};
 			this.valuesSetAllDefault();
 			this.get();
@@ -922,8 +925,17 @@ let MyForm = {
 			trans.send(this.handleError);
 		},
 		getOk:function(res,req) {
-			if(res.payload.rows.length !== 1)
-				return this.setFormEmpty(false); // invalid record lookup
+			// handle invalid record lookup
+			if(res.payload.rows.length !== 1) {
+				
+				// more than 1 record returned
+				if(res.payload.rows.length > 1)
+					return this.setFormEmpty(false); 
+				
+				// no record returned (might have lost access after save)
+				this.badLoad = true;
+				return;
+			}
 			
 			this.loading = true;
 			
@@ -941,6 +953,7 @@ let MyForm = {
 					a.outsideIn,a.attributeIdNm),res.payload.rows[0].values[i]);
 			}
 			this.badSave = false;
+			this.badLoad = false;
 			this.releaseLoadingOnNextTick();
 		},
 		getFromSubJoin:function(join,recordId) {
