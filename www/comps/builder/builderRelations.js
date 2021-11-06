@@ -16,7 +16,7 @@ let MyBuilderRelationsItemPolicy = {
 		<td><my-bool v-model="actionDelete" /></td>
 		<td>
 			<select v-model="pgFunctionIdExcl">
-				<option :value="null">-</option>
+				<option :value="null">[{{ capApp.policyNotSet }}]</option>
 				<option v-for="f in filterFunctions" :value="f.id">
 					{{ f.name }}
 				</option>
@@ -24,7 +24,7 @@ let MyBuilderRelationsItemPolicy = {
 		</td>
 		<td>
 			<select v-model="pgFunctionIdIncl">
-				<option :value="null">-</option>
+				<option :value="null">[{{ capApp.policyNotSet }}]</option>
 				<option v-for="f in filterFunctions" :value="f.id">
 					{{ f.name }}
 				</option>
@@ -60,8 +60,8 @@ let MyBuilderRelationsItemPolicy = {
 	emits:['moveDown','moveUp','remove','update:modelValue'],
 	computed:{
 		filterFunctions:function() {
-			// limit to integer array returns, as in: INTEGER[], bigint[] or  INT []
-			let pat = /^(integer|bigint|int)\s?\[\]$/i;
+			// limit to integer array returns, as in: INTEGER[], bigint[], INT [] or integer ARRAY
+			let pat = /^(integer|bigint|int)(\s?\[\]|\sarray)$/i;
 			let out = [];
 			for(let i = 0, j = this.module.pgFunctions.length; i < j; i++) {
 				let f = this.module.pgFunctions[i];
@@ -100,8 +100,7 @@ let MyBuilderRelationsItemPolicy = {
 		
 		// stores
 		module:function() { return this.$store.getters['schema/moduleIdMap'][this.moduleId]; },
-		capApp:function() { return this.$store.getters.captions.builder.relation; },
-		capGen:function() { return this.$store.getters.captions.generic; }
+		capApp:function() { return this.$store.getters.captions.builder.relation; }
 	},
 	methods:{
 		update:function(name,value) {
@@ -261,13 +260,12 @@ let MyBuilderRelationsItem = {
 	methods:{
 		addPolicy:function() {
 			this.policies.push({
-				actionDelete:false,
-				actionSelect:false,
-				actionUpdate:false,
+				roleId:null,
 				pgFunctionIdExcl:null,
 				pgFunctionIdIncl:null,
-				position:this.policies.length,
-				roleId:null
+				actionDelete:false,
+				actionSelect:false,
+				actionUpdate:false
 			});
 		},
 		open:function() {

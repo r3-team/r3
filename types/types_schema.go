@@ -48,7 +48,6 @@ type Relation struct {
 	Triggers       []PgTrigger      `json:"triggers"`   // read only, all relation triggers
 }
 type RelationPolicy struct {
-	Position         int           `json:"position"`
 	RoleId           uuid.UUID     `json:"roleId"`
 	PgFunctionIdExcl uuid.NullUUID `json:"pgFunctionIdExcl"`
 	PgFunctionIdIncl uuid.NullUUID `json:"pgFunctionIdIncl"`

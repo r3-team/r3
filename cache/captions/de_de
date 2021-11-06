@@ -778,6 +778,7 @@
 			"policyFunctions":"Filterfunktionen",
 			"policyFunctionExcl":"Datensatz-IDs blockieren",
 			"policyFunctionIncl":"Datensatz-IDs erlauben",
+			"policyNotSet":"ungefiltert",
 			"presets":"Vordefinierte Datensätze ({CNT})",
 			"presetProtected":"Geschützt",
 			"presetValues":"Werte",

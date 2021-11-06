@@ -778,6 +778,7 @@
 			"policyFunctions":"Filtro funzioni",
 			"policyFunctionExcl":"Blocca il record ID",
 			"policyFunctionIncl":"Abilita il record ID",
+			"policyNotSet":"non filtrato",
 			"presets":"Record preimpostati ({CNT})",
 			"presetProtected":"Protetto",
 			"presetValues":"Valori",

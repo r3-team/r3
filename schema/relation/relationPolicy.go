@@ -21,7 +21,7 @@ func getPolicies(relationId uuid.UUID) ([]types.RelationPolicy, error) {
 	policies := make([]types.RelationPolicy, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT position, role_id, pg_function_id_excl, pg_function_id_incl,
+		SELECT role_id, pg_function_id_excl, pg_function_id_incl,
 			action_delete, action_select, action_update
 		FROM app.relation_policy
 		WHERE relation_id = $1
@@ -35,7 +35,7 @@ func getPolicies(relationId uuid.UUID) ([]types.RelationPolicy, error) {
 	for rows.Next() {
 		var p types.RelationPolicy
 
-		if err := rows.Scan(&p.Position, &p.RoleId, &p.PgFunctionIdExcl,
+		if err := rows.Scan(&p.RoleId, &p.PgFunctionIdExcl,
 			&p.PgFunctionIdIncl, &p.ActionDelete, &p.ActionSelect,
 			&p.ActionUpdate); err != nil {
 
