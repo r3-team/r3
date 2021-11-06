@@ -897,6 +897,9 @@ let MyForm = {
 			if(this.recordId === 0)
 				return this.releaseLoadingOnNextTick();
 			
+			// set base record ID, necessary for form filter 'newRecord'
+			this.recordIdIndexMap[0] = this.recordId;
+			
 			// add index attributes to be retrieved
 			let expressions = [];
 			for(let ia in this.values) {
