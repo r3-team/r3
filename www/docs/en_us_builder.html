@@ -1,8 +1,8 @@
-<p><em>Updated 2021-10-18</em></p>
+<p><em>Updated 2021-11-07</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
-<li><a href="#basics-and-the-builder">Basics and the Builder</a></li>
+<li><a href="#the-builder">The Builder</a></li>
 <li><a href="#getting-started">Getting started</a>
 <ol type="1">
 <li><a href="#installing-applications-as-reference">Installing applications as reference</a></li>
@@ -17,6 +17,7 @@
 <li><a href="#indexing">Indexing</a></li>
 <li><a href="#functions">Functions</a></li>
 <li><a href="#triggers">Triggers</a></li>
+<li><a href="#policies">Policies</a></li>
 <li><a href="#change-logs">Change logs</a></li>
 </ol></li>
 <li><a href="#roles-and-access-management">Roles and access management</a></li>
@@ -67,43 +68,46 @@
 <li><a href="#troubleshooting">Troubleshooting</a></li>
 </ol>
 <h1 id="introduction">Introduction</h1>
-<p>This is the documentation for building applications with the REI3 application platform. REI3 is a server application that runs on-premise or in the cloud, on Windows and Linux. REI3 applications are served as a progressive web app that runs on any modern browser and can be installed on clients directly. To learn how to setup and administrate REI3, please refer to the admin documentation.</p>
-<p>With REI3, simple applications can be created very quickly, while complex and scalable applications are also facilitated. It can be compared to low-code products, but also offers access to low-level entities such as database triggers, indexes, sub queries, custom functions, complex relationships and so on. In this regard REI3 can be used to create powerful applications, while benefiting greatly from existing knowledge of relational database systems. It is not necessary to have deep knowledge of database systems to build applications in REI3; however by learning about them, more functionality is available to application authors.</p>
-<p>Building REI3 applications is done exclusively with the integrated, graphical interface, simply called 'the Builder'. The Builder is included in all REI3 releases but must be enabled before it can be accessed.</p>
-<h1 id="basics-and-the-builder">Basics and the Builder</h1>
-<p>Before accessing the Builder there are a few important concepts to understand:</p>
-<ul>
-<li>Instance: An installation of REI3. To differentiate from packaged applications, we use the word 'instance' to refer to running installations of REI3.</li>
-<li>Schema: A complete description of a REI3 application, containing its data, role, function, UI and other definitions. The Builder exclusively manipulates application schemas.</li>
-<li>Transfer: A shorthand for the process of exporting a compressed and signed schema file and importing it into other REI3 instances. Transfers can be completed manually (by uploading schema files) or automatically via repositories (the official REI3 repository or self-hosted ones). Executing a transfer means installing or updating an application schema inside another REI3 instance.</li>
-</ul>
-<p>Using the Builder enables full write access to application schemas inside a REI3 instance. Changing an application schema will directly manipulate underlying data structures, potentially destroying existing data in the instance but also in target instances when transferring an application.</p>
-<p>Important precautions</p>
+<p>This is the documentation for building REI3 applications. REI3 is a free, open-source business application platform, which can run on-premise or from the cloud, on Windows and Linux. To learn how to setup and administrate REI3, please refer to the <a href="https://rei3.de/admindocu-en_us/">admin documentation</a>.</p>
+<p>REI3´s primary purpose is to fulfill business software requirements. Simple applications, like a system that manages company event attendance, can be built within a single hour. More complex applications, like absence management or a system to execute mail campaigns, require more time but are also easily buildable with REI3. Organizations using REI3 can save time and money by reducing dependency on costly software solutions for simple requirements, while cheaply addressing complex, niche requirements that no fitting solution is available for.</p>
+<p>Most people with IT administration skills can utilize REI3 to address software requirements; it is however very useful to know and understand relational databases to make use of all features. REI3 provides access to low-level entities, such as database indexes, triggers, sub queries, functions and so on. With some background knowledge, complex relationships, business logic, access control as well as performance tuning can be implemented to build powerful, fast and scalable applications.</p>
+<h1 id="the-builder">The Builder</h1>
+<p>Building REI3 applications is done exclusively with an integrated, graphical utility, simply called 'the Builder'. The Builder is included in all REI3 releases.</p>
+<p>Using the Builder, individuals and organizations can create or change applications. Finished applications can then be exported as file and re-imported into other REI3 instances. This way applications can be built on one system and <a href="#application-transfers">transferred</a> to another. It is also possible to share applications with others by exchanging REI3 files or using online repositories.</p>
+<p>Changing an application with the Builder can result in changes to the underlying data structure, potentially deleting data in the instance but also in other instances when transferring an application. Precautions must be taken accordingly:</p>
 <ul>
 <li>NEVER use the Builder in productive instances. To build, use the portable version of REI3 or run a separate REI3 instance. For critical instances, it is smart to run a copy of a productive system to confirm application changes before deploying to the final, productive instance.</li>
-<li>DO NOT make changes to applications from other authors directly - these are deleted when the application is updated. You can expand existing applications safely by adding custom data &amp; UI on top of them inside your own applications. Please refer to <a href="#building-on-applications">Building on applications</a> to learn more.</li>
+<li>DO NOT make changes to applications from other authors - these are deleted when the application is updated. You can expand existing applications safely by adding custom data &amp; UI on top of them inside your own applications. Please refer to <a href="#building-on-applications">Building on applications</a> to learn more.</li>
 <li>ALWAYS consider carefully when deciding to <a href="#deletions">delete data structures</a> (relations/attributes). This will affect target instances and, if other applications build on yours, affect other applications as well. Renaming data structures is safe however.</li>
 </ul>
-<p>Once you understand these concepts, and have a non-productive instance ready, you can enable the Builder by changing the option 'builder' to 'true' within the file 'config.json' inside your REI3 application directory. After a restart of REI3, and enabling the maintenance mode in the admin UI, the Builder icon will appear on the top-left corner of the REI3 page header.</p>
+<p>To enable the Builder, you need to login into a running REI3 instance with an admin user. After enabling the maintenance mode, which will kick all non-admin users from the system, the Builder can be switched on. Once activated, the Builder can be accessed from its icon on the top-left corner of the main menu.</p>
+<p><img src="en_us_builder_pics/admin_config.png" alt="Activating the Builder" /></p>
 <h1 id="getting-started">Getting started</h1>
-<p>Going into the Builder UI you will be presented with a list of installed application schemas (empty if none are installed) as well as an application export dialog. To create a new application, you only need to decide on an unique name and click on the save icon. The name is important as it must stay unique even after transferring to another instance.</p>
-<p>For the official repository of REI3, we decided to use author prefixes to avoid naming conflicts (ours is 'r3_'). You are free to choose any name you wish; an unique prefix is required however if you want to publish applications in the official REI3 repository. You can request a prefix by contacting us.</p>
+<p>Going into the Builder UI you will be presented with a list of installed applications. To create a new application, you only need to decide on a name and click on the save icon. The name can become important later as application names need to stay unique within a given REI3 instance. It is however no problem the change the name later.</p>
+<p><img src="en_us_builder_pics/start.png" alt="Builder start page" /></p>
 <h2 id="installing-applications-as-reference">Installing applications as reference</h2>
 <p>To play around and see working examples, you can install applications from the REI3 repository from the admin UI. In a non-productive instance you can install, change, delete and re-install applications at any time. Installing finished applications can help with understanding how these are built and how specific options are used.</p>
+<p><img src="en_us_builder_pics/repo_install.png" alt="Install apps from repo" /></p>
 <h2 id="creating-your-own-applications">Creating your own applications</h2>
-<p>Creating a new application is straightforward. After opening the <a href="#basics-and-the-builder">Builder</a>, a list of installed applications is presented to you. The first line is reserved for creating new applications. By entering an unique name for the application and clicking the save icon, a new application is generated. You can then open the application to add things like <a href="#data-storage">data storage</a>, <a href="#menus">menus</a>, <a href="#forms">forms</a> and much more.</p>
+<p>Creating a new application is straightforward. After opening the <a href="#the-builder">Builder</a>, a list of installed applications is presented to you. The first line is reserved for creating new applications. By entering a unique name for the application and clicking the save icon, a new application is generated. You can then open the application to add things like <a href="#data-storage">data storage</a>, <a href="#menus">menus</a>, <a href="#forms">forms</a> and so on.</p>
 <p>There a few options when creating or updating the application itself:</p>
 <ul>
-<li>Name: An unique name, representing your application. Only important for transferring your application to other instances - users see a <a href="#translations">translated</a> application title instead (see below).</li>
+<li>Name: A unique name, representing your application. Only important for transferring your application to other instances - users see a <a href="#translations">translated</a> application title instead (see below).</li>
 <li>Depends on (optional): Dependencies to other applications. More details in <a href="#building-on-applications">Building on applications</a>.</li>
 <li>Assigned to (optional): Application which serves as a parent to the selected application. Must be activated in 'depends on' first. This option effectively creates a hierarchy in the start and header menus. Currently the hierarchy is limited to 2 levels (1 parent, multiple children) - these might be expanded in the future.</li>
 <li>Icon (optional): An <a href="#icons">icon</a> representing the application. Must be added to the application first.</li>
 <li>Color (optional): Freely selectable color. Is shown on the start page and on the header when the application is active. Can be overwritten in instances with customizing. Should be a color with low-brightness to contrast bright header fonts.</li>
 <li>Default position: Order in which application should appear in menus (smaller first). Can be overwritten in instances by admins. When 'assigned to' a parent application, positions affect the order underneath the parent application.</li>
-<li>Start form (optional but required for menu): Form that opens when clicking on the application from the start or header menu. A form must be created first to be selectable here - a menu entry for the application will only appear once a start form is set.</li>
-<li>Translations (1 is required): Languages, the application is available in. A language is defined by its 5-letter language code (en_us, de_de, ch_cn, and so on). Be aware: You must provide translations for all languages that you define here - not doing this results in error strings being shown to the end user. Besides the application title, other entities (menus, forms, help pages, ...) require translations when creating them. You can also define a fallback language, which is used if a user selects a language that your application does not offer. To start, you should keep to a single translation and expand when needed.</li>
+<li>Start form (optional): Depending on assigned <a href="#roles-and-access-management">roles</a>, a different <a href="#forms">form</a> can be shown when opening the application. Multiple rules for matching role membership with start form can be set; if no rule matches, the default start form is shown. A valid start form is required for the application to show up in the user´s menu.
+<ul>
+<li><img src="en_us_builder_pics/start_form.png" alt="Role dependent start form" /></li>
+</ul></li>
+<li>Languages (1 is required): Languages, the application is available in. A language is defined by its 5-letter language code (en_us, de_de, ch_cn, and so on). Be aware: You must provide translations for all languages that you define here - not doing this results in error strings being shown to users. Besides the application title, other entities (menus, forms, help pages, ...) require translations when creating them. You can also define a fallback language, which is used if a user selects a language that your application does not offer. To start, you should keep to a single translation and expand when needed.
+<ul>
+<li><img src="en_us_builder_pics/start_language.png" alt="Application languages" /></li>
+</ul></li>
 </ul>
-<p>Some options depend on other entities being created first (other applications to build on, forms to select as start form, icons to show). When creating an application these can be skipped and added/changed later.</p>
+<p>Some options depend on other entities being created first (other applications to build on, forms to select as start form, icons to show). When creating an application these can be skipped and updated later.</p>
 <p>In addition, a couple of non-editable meta data fields are shown. These are set when an updated application is exported. Please refer to <a href="#application-transfers">Application transfers</a> for more details.</p>
 <ul>
 <li>Release date: Current date when exported.</li>
@@ -116,13 +120,15 @@
 <p>Relations and attributes are referenced in <a href="#forms">forms</a> to display, create or update data in lists, fields, calendars and so on. They are also accessible in custom <a href="#functions">functions</a> for complex data manipulation, calculations or other data related actions.</p>
 <h2 id="relations">Relations</h2>
 <p>To store data for any entity, you create a relation - this will automatically create a corresponding database table with the same name. REI3 enforces valid names when things like relations are created. Optionally, you can also specify <a href="#change-logs">data retention settings</a> for the relation.</p>
-<p>Relations are central to managing data in REI3. They contain all records, their attributes (e. g. their data), <a href="#indexing">indexes</a> (mostly for performance tuning), <a href="#presets">presets</a> (predefined records) and <a href="#triggers">triggers</a> (automatically executed functions). To store anything, relations must be populated with attributes.</p>
+<p><img src="en_us_builder_pics/relations.png" alt="Relations" /></p>
+<p>Relations are central to managing data in REI3. They contain all records, their values (following their <a href="#attributes">attributes</a>), <a href="#indexing">indexes</a> (mostly for performance tuning), <a href="#presets">presets</a> (predefined records), <a href="#triggers">triggers</a> (automatically executed functions) and <a href="#policies">policies</a>.</p>
 <h2 id="attributes">Attributes</h2>
 <p>An attribute is a data field for each record in a relation. When creating an attribute, a database column is added to its relation table with the same name.</p>
+<p><img src="en_us_builder_pics/attributes.png" alt="Attributes" /></p>
 <p>Adding an attribute has many more options available compared to relations:</p>
 <ul>
-<li>Name: Attribute name, needs to be unique within the relation.</li>
 <li>Icon: Default <a href="#icons">icon</a> for this attribute. Used by attribute input fields on <a href="#forms">data forms</a> if no other icon is defined.</li>
+<li>Name: Attribute name, needs to be unique within the relation.</li>
 <li>Title: A <a href="#translations">translated</a> title - displayed in attribute input fields and <a href="#list-fields">list columns</a> if not overwritten.</li>
 <li>Content: The content of the attribute - multiple content types exist.
 <ul>
@@ -152,16 +158,18 @@
 <li>Relation 2: class (details of class records)</li>
 <li>Relation 3: student_class (N:1 attribute to 'student', N:1 attribute to 'class', integer attribute 'started in year' to describe first year of student attendance)</li>
 </ul>
+<p><img src="en_us_builder_pics/nm_relationship.png" alt="N:M Relationship" /></p>
 <p>Relationship attributes use foreign keys to enforce the existence of referenced records. When a record that serves as relationship target is deleted, the foreign key becomes invalid. This also occurs, although more rarely, when the referenced key of such a record is changed. To deal with these cases, you can specify a desired behavior for 'ON DELETE' (referenced record is deleted) and 'ON UPDATE' (key of referenced record is changed):</p>
 <ul>
 <li>NO ACTION: Block the deletion of the original record.</li>
 <li>RESTRICT: Similar to NO ACTION, but does not allow deferring in a running transaction. This option is not important in most cases but is available when needed.</li>
 <li>CASCADE: Delete the record which is referencing the invalid relationship target. Often used in parent-to-child relationships - when parent is deleted, delete all children automatically.</li>
-<li>SET NULL: Replace the invalid value with NULL. Only works if the <a href="#relationships">relationship attribute</a> is nullable.</li>
+<li>SET NULL: Replace the invalid value with NULL. Only works if the relationship <a href="#attributes">attribute</a> is nullable.</li>
 <li>SET DEFAULT: Replace the invalid value with defined default value. Only works if a <a href="#attributes">default value</a> is set.</li>
 </ul>
 <h2 id="presets">Presets</h2>
 <p>Presets are predefined records that are shipped with your application. A preset consists of a name as well as attribute values. The preset name only serves to reference to the preset inside the Builder - it is not visible to any end user. When your application is transferred to a target instance, one record for each preset is created in the corresponding relation. All defined attribute values are applied to this record.</p>
+<p><img src="en_us_builder_pics/presets.png" alt="Presets" /></p>
 <p>When you define your preset, you can choose to protect it and/or its attribute values. Protecting the preset itself, blocks deletion of its associated record, while protecting attribute values blocks updating these values. The protection settings can be mixed to serve different purposes:</p>
 <ul>
 <li>Protected record, protected values. For records that must stay a certain way for your application to work properly; this can be useful for workflow states.</li>
@@ -186,12 +194,13 @@
 <li>As indexes serve to find records by certain criteria, attributes that are used in <a href="#query-filters">filters</a> benefit from indexing a lot.</li>
 <li>Having indexes for specific attributes is important for good database performance; creating indexes for all attributes is a bad idea however. The more indexes exist, the slower changes to records become as indexes must be updated as well. In addition, each index has storage overhead, adding to the database size.</li>
 <li>Unique indexes can be used to enforce unique values in all kinds of attributes (unique names/numbers/dates/...). This is one use-case for indexing besides performance.</li>
-<li>Indexes can be used to enforce unique, composite keys by using multiple attributes to form an unique index.</li>
+<li>Indexes can be used to enforce unique, composite keys by using multiple attributes to form a unique index.</li>
 </ul>
 <h2 id="functions">Functions</h2>
 <p>Functions in REI3 are PL/pgSQL functions. PL/pgSQL or Procedural Language/PostgreSQL is a programming language of the underlying database system that REI3 is running on (PostgreSQL). To learn more about writing PL/pgSQL, please refer to the official documentation for this language.</p>
 <p>By writing functions, complex data manipulation tasks can be achieved. Functions can be executed with <a href="#triggers">relation triggers</a>, called from other functions or regularly by using function schedules.</p>
-<p>REI3 includes dynamic placeholders so that all references to an application schema (relations, attributes and other functions) are upgrade safe - this includes safe renaming and blocking of deletion in case entities are still referenced. As long as these placeholders are used, you cannot easily break your functions when making changes to your applications. Make sure to only ever use placeholders to read or write from/to the database, otherwise the stability of the system can be negatively affected.</p>
+<p><img src="en_us_builder_pics/function.png" alt="Function" /></p>
+<p>REI3 includes dynamic placeholders so that all references to application entities (relations, attributes and other functions) are upgrade safe - this includes safe renaming and blocking of deletion in case entities are still referenced. As long as these placeholders are used, you cannot easily break your functions when making changes to your applications. Make sure to only ever use placeholders to read or write from/to the database, otherwise the stability of the system can be negatively affected.</p>
 <p>In addition to functions from applications, instance functions are available to expose data or features from the REI3 instance. These can be used to read configuration settings (like the public hostname), get context information (like the login ID used to access the database) or execute tasks (like <a href="#sending-an-email">sending emails</a>). To learn more about instance functions, please refer to the integrated help texts in the Builder UI for functions.</p>
 <h2 id="triggers">Triggers</h2>
 <p>Triggers in REI3 are PostgreSQL database triggers. Database triggers react to events in a database and serve to apply logic, check inputs or block certain actions. When inserting, updating or deleting records in a relation, a trigger executes a defined <a href="#functions">function</a>. In REI3, triggers also serve to access internal functions, exposed by the current instance. These instance functions are used to get information from the instance (like the ID of the current login) or execute certain actions (like sending emails).</p>
@@ -201,11 +210,16 @@
 <li>EACH ROW: Trigger executes function for each affected row or once for the statement. If set per row, NEW/OLD can be used to reference the record state as it was (OLD) and what it would be changed to (NEW).</li>
 <li>BEFORE/AFTER: Trigger executes function before or after the specified event has occured. BEFORE can be used to overwrite missing NULL values, while AFTER can be useful to work with changes over multiple relations ('see DEFERRABLE').</li>
 <li>CONSTRAINT: Similar to a regular trigger, but its timing can be changed (see 'DEFERRABLE').</li>
-<li>DEFERRABLE: If set, trigger may be executed at the end of a database transaction instead of immediately. As REI3 offers updates of joined relations in forms, a deferred trigger waits until all affected relations are updated and then executes its function. Currently, 'INITIALLY DEFERRED' should always be enabled as well when creating deferred triggers - this might change when more features become available.</li>
+<li>DEFERRABLE: If set, trigger may be executed at the end of a database transaction instead of immediately. As REI3 offers updates of joined relations in forms, a deferred trigger waits until all affected relations are updated and then executes its function.</li>
 <li>INITIALLY DEFERRED: Trigger will be deferred by default.</li>
 <li>Condition: A SQL condition, must return true for the trigger to execute the function.</li>
 <li>Execute: The function to execute. Must be a function that returns 'trigger'.</li>
 </ul>
+<h2 id="policies">Policies</h2>
+<p>A relation policy can limit what specific records are accessible to a logged in user via their <a href="#roles-and-access-management">role memberships</a>. This is done by setting filter functions for specific actions. While forms, lists, input fields and other frontend elements can also <a href="#query-filters">filter records</a>, relation polices are applied globally and cannot be circumvented by changing the frontend. Relation policies are also 'quiet', meaning that users are not informed about missing access - they simply see different records.</p>
+<p><img src="en_us_builder_pics/policies.png" alt="Policies" /></p>
+<p>To create a policy, a role must be connected to at least one action (display, change, delete). If records should be filtered, an 'allow' (whitelist) or 'block' (blacklist) filter function is used. A filter function is just a regular <a href="#functions">function</a> that returns an array of record IDs (as in 'INTEGER[]' or 'bigint ARRAY'); the record IDs must match the relation for which the policy is defined. With the help of instance functions, such as 'has_role()' or 'get_login_id()', filter functions limit what records are accessible based on the currently logged in user.</p>
+<p>Polices have a defined order. The first policy matching the attempted action of the logged in user with the selected role, is applied. If the user has multiple roles, only the first matching policy is applied. If no filtering is desired, a role can be assigned all actions and both filter functions kept empty; this enables full access. If no policy is matched, full access is also granted.</p>
 <h2 id="change-logs">Change logs</h2>
 <p>When data is changed in REI3 you can choose to automatically keep copies of these changes. These change retention settings are defined for <a href="#relations">relations</a>. If nothing is set, no data changes are kept. Every relation has 2 settings for defining data change retention:</p>
 <ol type="1">
@@ -216,23 +230,27 @@
 <p>Changes are visible to users in forms that access corresponding relations via the change log window. This will show all changes corresponding to joined relations (see <a href="#queries">Queries</a>), but only for attributes that are accessible to the user via data input fields. If a user has access to a data field, and changes are available, they will be visible without further permissions being required.</p>
 <p>The change retention cleanup job can be configured to run more or less often in the admin UI.</p>
 <h1 id="roles-and-access-management">Roles and access management</h1>
-<p>Roles serve to grant access within REI3. There are currently two distinct areas of access:</p>
+<p>Roles are used to control what a user can see and do in an application. Roles control:</p>
 <ul>
-<li>Data: Low-level access to <a href="#relations">relations</a> and <a href="#attributes">attributes</a>. Regardless what is supposed to be shown in lists and input fields, without proper access, the user cannot get data or make changes. In most cases, defining access on a relation is sufficient; setting attribute access can however be useful for giving access to very specific data. Be aware that when building <a href="#forms">forms</a> adding lists/input fields that show inaccessible attributes for the logged in user, will result in an error.</li>
-<li>Menus: Simply what <a href="#menus">menus</a> are shown to the role member. If menus have a hierarchy, not giving access to the parent menu blocks access to any child menu.</li>
+<li>Data entity access: Access control for data structures, e. g. <a href="#relations">relations</a> and <a href="#attributes">attributes</a>.</li>
+<li>Applied policies: Access control for specific records, which is defined via <a href="#policies">relation policies</a>.</li>
+<li>Used start forms: Which form is shown when a user opens an application. Defined for the <a href="#creating-your-own-applications">application</a>.</li>
+<li>Visible menus: Which menus are shown for a role member.</li>
 </ul>
-<p>Roles in REI3 are always cumulative - the more roles a user has, the more access is available. Following that, there is no 'deny' option. When you need to deny a group of users access, you remove the corresponding access from the currently used role and create a second role granting this specific access. This second role is then only assigned to users that should still receive this access. In general, it serves to have a role concept that is as simple as possible. Complexity will inevitably come to any access definition with time and should therefore be reduced as much as possible early on.</p>
-<p>When creating a role, you need to choose an unique role name within your application. Titles and descriptions serve to explain the role to administrators of other REI3 instances as they will be shown in the admin UI. They are not visible to non-admin users.</p>
+<p>Roles in REI3 are cumulative - the more roles a user has, the more access is available. Following that, there is no 'deny' option. When you need to deny a group of users access, you remove the corresponding access from the role and create a second one, granting this specific access. This second role is then only assigned to users that should still receive this access. In general, it serves to have a role concept that is as simple as possible.</p>
+<p>When creating a role, you need to choose a unique role name within your application. Titles and descriptions serve to explain the role to administrators of other REI3 instances as they will be shown in the admin UI. They are not visible to non-admin users.</p>
 <p>Roles can be members of other roles. This enables access inheritance with no fixed limit on how many levels of inheritance are allowed. A user logging in, receives access following assigned roles and the memberships of these roles (and the memberships of those roles, and so on).</p>
-<p>When applications build on other applications (see <a href="#building-on-applications">Building on applications</a>) usually some access to the other application´s data is necessary. This is solved by making your roles members of roles from the other application. In many cases data access is desired but users from one application should not see user interfaces from the other; this is solved by creating data only roles (no menu access specified) with which users only get access to data.</p>
-<p>Lastly, the option 'assignable' controls whether a role is directly assignable to a user. If set to 'false' the specific role is hidden in the admin UI and can only be used via membership of other roles. This can be useful for data only roles or for complex role hierarchies.</p>
+<p>When applications build on other applications (see <a href="#building-on-applications">Building on applications</a>) usually some access to the other application´s data is necessary. This is solved by making your roles members of roles from other applications. In many cases data access is desired but users from one application should not see user interfaces from the other; this is solved by creating 'data only' roles (no menu access specified).</p>
+<p>Lastly, the option 'assignable' controls whether a role is directly assignable to a user. If set to 'false' the specific role is hidden in the admin UI and can only be assigned indirectly via membership of other roles. This can be useful for 'data only' roles or for complex role hierarchies.</p>
 <h1 id="presentation-and-user-interfaces">Presentation and user interfaces</h1>
 <p>Besides managing data, most systems require some kind of frontend. For this purpose, REI3 includes <a href="#forms">forms</a> to display and manipulate data and <a href="#menus">menus</a> to navigate your application.</p>
 <h2 id="forms">Forms</h2>
-<p>Forms serve to show and manipulate data. Besides menus and complimentary functions (<a href="#change-logs">change logs</a>, <a href="#help-pages">help pages</a>, etc.), everything you see inside a REI3 application is defined within a form. When creating a form, you can specify the following:</p>
+<p>Forms serve to show and manipulate data. Besides menus and complimentary functions (<a href="#change-logs">change logs</a>, <a href="#help-pages">help pages</a>, etc.), everything you see inside a REI3 application is defined within a form.</p>
+<p><img src="en_us_builder_pics/forms.png" alt="Forms" /></p>
+<p>When creating a form, you can specify the following:</p>
 <ul>
 <li>Icon: An <a href="#icons">icon</a> representing the form. Shown in the form header, if not overwritten by a menu entry.</li>
-<li>Name: An unique name in your application. Only for your own reference, not shown to users.</li>
+<li>Name: A unique name in your application. Only for your own reference, not shown to users.</li>
 <li>Title: The translated title of your form (see <a href="#translations">Translations</a>). Shown to users. Can be overwritten by a menu entry.</li>
 <li>Open preset: Option to open a specific <a href="#presets">preset record</a> when opening a form. Useful for central configuration records but otherwise not often used.</li>
 </ul>
@@ -246,6 +264,7 @@
 <li>Showing a dashboard of multiple lists and buttons to reach different parts of your application.</li>
 </ul></li>
 </ul>
+<p><img src="en_us_builder_pics/form.png" alt="Form" /></p>
 <p>Independently of what kind of form it is, forms are entirely comprised of fields. Fields serve to create layouts, manipulate data, execute actions and more. Available fields are shown in the sidebar of the form UI inside the Builder, depending on what the form has access to. These types of fields exist:</p>
 <ul>
 <li>Container: These construct the layout of your form. Containers 'contain' other fields, including other containers to create simple or complex <a href="#form-layouts">layouts</a>.</li>
@@ -451,7 +470,7 @@
 </ul>
 <p>Besides selecting relations, if more than one record is to be handled (lists/calendar fields), sorting can be applied to the results. Sorting is applied to the selected attribute (chosen via relation index + attribute name) in the defined order; when multiple sorting options are defined, results are sorted by the first, then the second and so on.</p>
 <h3 id="query-filters">Query filters</h3>
-<p>As the name implies, query filters filter query results. They are used in list/calendar fields and in relationship inputs (fields showing <a href="#relationships">relationship attributes</a>).</p>
+<p>As the name implies, query filters filter query results. They are used in forms, lists, calendars and in relationship inputs (fields showing <a href="#relationships">relationship attributes</a>).</p>
 <p>Filters are made up from filter lines. Each line contains an AND/OR connector (first line is always AND), two filter criteria (to compare them) and an operator (equals, greater than, etc.). Additionally filter lines can be grouped with left and right brackets to create more complex AND/OR conditions. Some operators do not require a second filter criteria - 'IS NULL' for example just checks the first criteria against NULL.</p>
 <p>Query filters can be defined in two ways:</p>
 <ul>
@@ -467,13 +486,14 @@
 <li>Attribute value: Current record value for the specified attribute. Not affected by changes on a form - updates after changes to a record were saved.</li>
 <li>Field value: Attribute input field value on the current data form. These can be accessed, for example, by list fields inside their own filters, allowing lists to be filtered by input fields on the same form. When the chosen input field value changes, the filter is updated and the connected query filter automatically reloads.</li>
 <li>Fixed value: A fixed text or number value to compare against.</li>
-<li>Login ID: Integer ID of the logged in user. Can be combined with the field display option <a href="#field-options">Login</a> to connect relation records to REI3 users and then filter relations based on the logged in user. Useful for employee, customer, agent or other person-based records.</li>
+<li>Login ID: Integer ID of the logged in user. Can be combined with the field display option <a href="#field-options">Login</a> or <a href="#login-forms">Login forms</a> to connect relation records to REI3 users and then filter relations based on the logged in user. Useful for employee, customer, agent or other person-based records.</li>
 <li>Login language code: The selected 5-letter language-code ('de_de', 'en_us', etc.) of the logged in user. Can be used to join relations for translating user definable records and then filter these according to the active user interface language.</li>
-<li>Login has role (TRUE/FALSE): TRUE if the currently logged in user has this role (direct assigment or inheritance are both valid).</li>
-<li>Record ID ([relation name]): The integer ID of the currently handled record from a data form. Only useful when query is being executed on a data form.</li>
-<li>Record is new (TRUE/FALSE): TRUE if record currently being handled by a data form is new. Only useful when query is being executed on a data form.</li>
-<li>True value (TRUE). Always TRUE - used to compare against other TRUE values.</li>
-<li>JavaScript expression: The return value of the given JavaScript expression. The expression is executed as a function when the filter criteria is being checked. Useful for simple date calculations (like getting the previous year) or similar tasks. Should not be used to access any objects outside of itself.</li>
+<li>Login has role: TRUE if the currently logged in user has the selected role (directly assigned or inherited).</li>
+<li>Preset record ID: Integer ID of the record that has been created from a <a href="#presets">preset</a>. Only protected presets can be selected, as unprotected presets can be deleted.</li>
+<li>Record ID: Integer ID of the currently handled record from a data form. Only useful when query is being executed on a data form.</li>
+<li>Record is new: TRUE if record being handled by the current form is new. Only useful when query is being executed on a data form.</li>
+<li>True value. Always TRUE - used to compare against other TRUE values.</li>
+<li>JavaScript expression: The return value of the given JavaScript expression. The expression is executed as a function when the filter criteria is being checked. Useful for simple date calculations (like getting the previous year) or similar tasks. Should not be used to access anything outside the function itself.</li>
 <li>Sub query: The value from a sub query. Value type depends on the selected attribute from the defined sub query.</li>
 </ul>
 <h2 id="help-pages">Help pages</h2>
@@ -517,9 +537,11 @@
 <li>Main menu: Shown at the top of the page and on the start page for each user. Automatically created by resolving accessible applications for the current login. The header menu shows the top level of applications as well as a second level of <a href="#creating-your-own-applications">assigned to</a> applications (child applications). Currently only 2 levels of hierarchy are supported. The display order can be defined in the application overview (Builder start page) with the <a href="#creating-your-own-applications">default position</a>; this option can be overwritten in a target instance inside the admin panel. An application is only shown in the main menu, when a start form has been defined and a user has access to it; this includes admin users.</li>
 <li>Application menu: This can directly be defined in the Builder with unlimited levels of hierarchy; we recommend to keep the menu hierarchy to at most 3 levels for usability reasons. Each menu entry can optionally open a form and/or contain sub menu entries. When sub entries are defined, you can choose whether these entries are shown by default or must be toggled first by opening the parent menu entry. The translatable menu title as well as menu icon are applied to an opened form if the form does not define its own title/icon.</li>
 </ul>
+<p><img src="en_us_builder_pics/menus.png" alt="Menus" /></p>
 <p>When <a href="#building-on-applications">Building on applications</a>, you can choose to copy the entire menu structure from another application. This is can be useful when you intent to extend another application; you copy the original menu structure, change target forms and add your own, custom menu entries.</p>
 <h2 id="login-forms">Login forms</h2>
 <p>Sometimes it is useful to connect the currently logged in user to a record from within your application. To assign a personal, employee or a customer contact record for example.</p>
+<p><img src="en_us_builder_pics/login_form.png" alt="Login form" /></p>
 <p>To enable this, an integer attribute can be placed on any of your relations. This attribute will then contain the login ID (which also is an integer). Once the login attribute exists, you have two options to update it:</p>
 <ol type="1">
 <li>Define a login form: By defining a login form, an instance administrator can create/select a record for each login within the admin interface. Available options:
@@ -540,7 +562,7 @@
 <li>Data (<a href="#relations">relations</a> &amp; <a href="#attributes">attributes</a>): Access to parent relations in relationships within the child application; effectively extending these directly (with 1:1 relationships) or creating new data structures attached to the parent relations. Parent relations &amp; attributes can also be accessed in <a href="#queries">queries</a>, enabling access to these as if they were part of the child application.</li>
 <li><a href="#forms">Forms</a>: Access to forms from the parent application as targets in <a href="#list-fields">lists</a>, <a href="#field-options">buttons</a> or within <a href="#menus">menus</a>. This allows for re-use of existing user interfaces.</li>
 <li><a href="#menus">Menus</a>: Access to menus from the parent application. It is also possible to copy an entire menu structure of an application to quickly recreate the parent, while making desired changes to specific menu entries.</li>
-<li><a href="#functions">Functions</a>: Parent functions can be accessed directly, while access to relations &amp; attributes from within functions in the child application is also enabled. To keep applications upgrade safe as much as possible, always use the provided placeholders when referencing entities in functions. This will not protect against deletions (see below) but will keep your application running when entities are renamed.</li>
+<li><a href="#functions">Functions</a>: Parent functions can be accessed directly, while access to relations &amp; attributes from within functions in the child application is also enabled. To keep applications upgrade safe, always use the provided placeholders when referencing entities in functions. This will not protect against deletions (see below) but will keep your application running when entities are renamed.</li>
 </ul>
 <h2 id="extension-scenarios">Extension scenarios</h2>
 <p>Depending on the specific case, different approaches to application extension are possible.</p>
@@ -566,14 +588,14 @@
 <h2 id="exporting-applications">Exporting applications</h2>
 <p>Applications are exported on the Builder start page. To start the export process you select the desired application and run an export check. This check will compare the current state of the application to the last known version. If any changes exist, a new version must be created before an export is possible. By creating a new version target instances understand that there are changes to apply. In order to export any changes, an application must be set to 'export changes' in the admin UI for applications. You should only do this for your own applications.</p>
 <p>Important notice: When you <a href="#building-on-applications">build on applications</a> from other authors, these are dependencies that are automatically exported together with your application. To protect against accidentally making changes to applications from others, all applications are in the state 'do not export changes' by default. While in this state, the last imported version of the application is exported and not the potentially changed version, accessible in the Builder. If you decide to export new versions for applications built by others, you potentially risk loss of your changes as well as data loss, when a new version from the original author is installed. You can <a href="#extension-scenarios">safely build</a> on other applications without making direct changes.</p>
-<p>Ultimately, the export will generate a compressed zip file, which includes your application and all its dependencies. Within the zip file, each application is represented as a *.json file, which contains the corresponding schema and a signature, created with your private key. Applications that were not changed are exported with their original schema and signature.</p>
+<p>Ultimately, the export will generate a compressed zip file, which includes your application and all its dependencies. Within the zip file, each application is represented as a *.json file, which contains the corresponding application structure and a signature, created with your private key. Applications that were not changed are exported as they were with their original signature.</p>
 <h2 id="importing-applications">Importing applications</h2>
 <p>Applications can be imported to REI3 instances in two ways:</p>
 <ul>
 <li>By importing an application package file.</li>
 <li>By importing an application from a repository.</li>
 </ul>
-<p>When you attempt to import your application into another REI3 instance, the signature of the application schema is checked against a list of trusted public keys. Only applications which signature can be successfully compared to these trusted public keys can be imported. You can add your public key to any REI3 instance within the admin UI.</p>
+<p>When you attempt to import your application into another REI3 instance, the signature of the application is checked against a list of trusted public keys. Only applications which signature can be successfully compared to these trusted public keys can be imported. You can add your public key to any REI3 instance within the admin UI.</p>
 <p>Applications are either installed or updated when they are imported. All changes made to the applications or their dependencies are automatically applied by REI3. Should there be a problem, the entire import process is reverted even if multiple applications were affected. Import issues can be checked inside the admin UI by increasing the log level for 'transfers' and repeating the import.</p>
 <h2 id="hosting-a-repository">Hosting a repository</h2>
 <p>When running many local or offline REI3 instances, it can be sensible to host your own REI3 application repository. It is also possible to host your own repository in the cloud, accessible to anyone. This is done by setting up a REI3 instance and installing the 'REI3 repository' application; this is the same application we use to host the central REI3 repository.</p>

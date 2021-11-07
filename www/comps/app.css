@@ -743,7 +743,8 @@ table td.maximum{
 /* HTML documentation */
 .html-docs{
 	text-align:justify;
-	line-height:140%;
+	font-size:110%;
+	line-height:150%;
 	padding:0px 16px !important;
 }
 .html-docs h1{
@@ -754,6 +755,22 @@ table td.maximum{
 }
 .html-docs h3{
 	margin:14px 0px 0px 0px;
+}
+.html-docs img{
+	width:100%;
+	margin:5px 0px;
+	box-shadow:1px 1px 3px var(--color-shade);
+}
+.html-docs li img{
+	margin:10px 0px;
+}
+.html-docs p,
+.html-docs img{
+	max-width:1000px;
+}
+.html-docs ol,
+.html-docs ul{
+	max-width:950px;
 }
 
 
