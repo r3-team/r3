@@ -959,7 +959,8 @@
 		"help":"Hilfeseiten",
 		"helpContextTitle":"Kontext",
 		"helpModuleTitle":"Anwendung",
-		"invalidInputs":"Eingaben prüfen!"
+		"invalidInputs":"Eingaben prüfen!",
+		"noAccess":"Kein Zugriff"
 	},
 	"home":{
 		"button":{

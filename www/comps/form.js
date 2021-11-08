@@ -127,8 +127,15 @@ let MyForm = {
 							:darkBg="true"
 						/>
 					</div>
-					<div class="area" v-if="badSave && fieldIdsInvalid.length !== 0">
+					<div class="area">
 						<my-button image="warning.png"
+							v-if="badLoad"
+							:caption="capApp.noAccess"
+							:cancel="true"
+							:darkBg="true"
+						/>
+						<my-button image="warning.png"
+							v-if="badSave && fieldIdsInvalid.length !== 0"
 							@trigger="scrollToInvalidField"
 							:caption="capApp.invalidInputs"
 							:cancel="true"

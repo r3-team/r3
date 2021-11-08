@@ -959,7 +959,8 @@
 		"help":"Help pages",
 		"helpContextTitle":"Context",
 		"helpModuleTitle":"Application",
-		"invalidInputs":"Check inputs!"
+		"invalidInputs":"Check inputs!",
+		"noAccess":"No access"
 	},
 	"home":{
 		"button":{

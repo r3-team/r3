@@ -959,7 +959,8 @@
 		"help":"Pagine aiuto",
 		"helpContextTitle":"Contesto",
 		"helpModuleTitle":"Applicazione",
-		"invalidInputs":"Controlla input!"
+		"invalidInputs":"Controlla input!",
+		"noAccess":"Nessun accesso"
 	},
 	"home":{
 		"button":{
