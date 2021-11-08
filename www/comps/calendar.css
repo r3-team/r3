@@ -98,7 +98,7 @@
 .calendar .month .day .event .background{
 	overflow:hidden;
 	margin:10px 0px 0px;
-	border-bottom:3px solid var(--color-accent3-alt);
+	border-bottom:3px solid var(--color-accent4);
 }
 .calendar .month .day .event.first .background{
 	margin-left:5px;
@@ -117,7 +117,7 @@
 	position:absolute;
 	bottom:4px;
 	right:3px;
-	background-color:var(--color-accent3-alt);
+	background-color:var(--color-accent4);
 	z-index:var(--z-index-calendar-day-event-ending-beam);
 }
 .calendar .month .day .event .values{

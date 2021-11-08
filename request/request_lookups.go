@@ -32,15 +32,7 @@ func LookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 		`, loginId).Scan(&languageCode); err != nil {
 			return nil, err
 		}
-
-		// overwrite non-valid system language code
-		languageCode = config.GetLanguageCodeValid(languageCode)
-
-		res, err := config.GetAppCaptions(languageCode)
-		if err != nil {
-			return nil, err
-		}
-		return res, nil
+		return cache.GetCaptions(languageCode), nil
 
 	case "customizing":
 		var res struct {

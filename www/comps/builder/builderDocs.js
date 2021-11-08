@@ -33,6 +33,7 @@ let MyBuilderDocs = {
 			return this.docs
 				.replace(/href="#(.*?)"/g,'href="'+window.location+'#'+this.idPlaceholder+`$1`+'"')
 				.replace(/id="(.*?)"/g,'id="'+this.idPlaceholder+`$1`+'"')
+				.replace(/src="(.*?)"/g,'src="docs/'+`$1`+'"')
 			;
 		},
 		

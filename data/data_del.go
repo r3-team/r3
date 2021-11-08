@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"r3/cache"
 	"r3/handler"
+	"r3/schema/lookups"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v4"
@@ -19,10 +20,9 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 		return errors.New(handler.ErrUnauthorized)
 	}
 
-	// check source relation and module
 	rel, exists := cache.RelationIdMap[relationId]
 	if !exists {
-		return errors.New("relation does not exist")
+		return fmt.Errorf("unknown relation '%s'", relationId)
 	}
 
 	// check for protected preset record
@@ -34,13 +34,23 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 
 	mod, exists := cache.ModuleIdMap[rel.ModuleId]
 	if !exists {
-		return errors.New("module does not exist")
+		return fmt.Errorf("unknown module '%s'", rel.ModuleId)
+	}
+
+	// get policy filter if applicable
+	tableAlias := "t"
+	policyFilter, err := getPolicyFilter(loginId, "delete", tableAlias, rel.Policies)
+	if err != nil {
+		return err
 	}
 
 	if _, err := tx.Exec(ctx, fmt.Sprintf(`
-		DELETE FROM "%s"."%s"
-		WHERE id = $1
-	`, mod.Name, rel.Name), recordId); err != nil {
+		DELETE FROM "%s"."%s" AS "%s"
+		WHERE "%s"."%s" = $1
+		%s
+	`, mod.Name, rel.Name, tableAlias, tableAlias,
+		lookups.PkName, policyFilter), recordId); err != nil {
+
 		return err
 	}
 	return nil

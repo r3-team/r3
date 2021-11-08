@@ -510,21 +510,13 @@ let MyBuilderFieldOptions = {
 						</select>
 					</td>
 				</tr>
-				<tr v-if="!field.ics">
+				<tr>
 					<td>{{ capApp.gantt }}</td>
 					<td>
 						<my-bool
 							@update:modelValue="set('gantt',$event)"
 							:modelValue="field.gantt"
-						/>
-					</td>
-				</tr>
-				<tr v-if="!field.gantt">
-					<td>{{ capApp.ics }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="set('ics',$event)"
-							:modelValue="field.ics"
+							:readonly="field.ics"
 						/>
 					</td>
 				</tr>
@@ -555,7 +547,17 @@ let MyBuilderFieldOptions = {
 						</td>
 					</tr>
 				</template>
-				<template v-if="field.gantt || field.ics">
+				<tr>
+					<td>{{ capApp.ics }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="set('ics',$event)"
+							:modelValue="field.ics"
+							:readonly="field.gantt"
+						/>
+					</td>
+				</tr>
+				<template v-if="field.ics">
 					<tr>
 						<td>{{ capApp.dateRange0 }}</td>
 						<td>

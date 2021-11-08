@@ -22,7 +22,7 @@ import (
 var regexRelId = regexp.MustCompile(`^\_r(\d+)id`) // finds: _r3id
 
 // get data
-// updates SQL query pointer value (for error logging), data rows and total count
+// updates SQL query pointer value (for error logging), returns data rows + total count
 func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 	query *string) ([]types.DataGetResult, int, error) {
 
@@ -91,6 +91,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 			Values:         values,
 		})
 	}
+	if err := rows.Err(); err != nil {
+		return results, 0, err
+	}
 	rows.Close()
 
 	// work out result count
@@ -105,10 +108,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 	return results, count, nil
 }
 
-// build SELECT calls from data GET request
-// queries can also be sub queries, a nesting level is included for separation (0 = main query)
-// can optionally add expressions to collect all tupel IDs
-// returns queries (data + count)
+// build SQL call from data GET request
+// also used for sub queries, a nesting level is included for separation (0 = main query)
+// returns data + count SQL query strings
 func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *[]interface{},
 	loginId int64, nestingLevel int) (string, string, error) {
 
@@ -120,50 +122,81 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 	}
 
 	var (
-		inSelect       []string                  // select expressions
 		inJoin         []string                  // relation joins
+		inSelect       []string                  // select expressions
+		inWhere        []string                  // filters
 		mapIndex_relId = make(map[int]uuid.UUID) // map of all relations by index
 	)
 
 	// check source relation and module
 	rel, exists := cache.RelationIdMap[data.RelationId]
 	if !exists {
-		return "", "", errors.New("relation does not exist")
+		return "", "", fmt.Errorf("unknown relation '%s'", data.RelationId)
 	}
 
 	mod, exists := cache.ModuleIdMap[rel.ModuleId]
 	if !exists {
-		return "", "", errors.New("module does not exist")
-	}
-
-	// JOIN relations connected via relationship attributes
-	mapIndex_relId[data.IndexSource] = data.RelationId
-	for _, join := range data.Joins {
-		if join.IndexFrom == -1 { // source relation need not be joined
-			continue
-		}
-
-		if err := joinRelation(mapIndex_relId, join, &inJoin, nestingLevel); err != nil {
-			return "", "", err
-		}
+		return "", "", fmt.Errorf("unknown module '%s'", rel.ModuleId)
 	}
 
 	// define relation code for source relation
 	// source relation might have index != 0 (for GET from joined relation)
 	relCode := getRelationCode(data.IndexSource, nestingLevel)
 
-	// build WHERE lines
-	// before SELECT expressions because these are excluded from count query
-	// SQL arguments are numbered ($1, $2, ...) with no way to skip any (? placeholder is not allowed);
-	//  excluded sub queries arguments from SELECT expressions causes missing argument numbers
-	queryWhere := ""
-	if err := buildWhere(data.Filters, queryArgs, queryCountArgs, loginId,
-		nestingLevel, &queryWhere); err != nil {
+	// add relations as joins via relationship attributes
+	mapIndex_relId[data.IndexSource] = data.RelationId
+	for _, join := range data.Joins {
+		if join.IndexFrom == -1 { // source relation need not be joined
+			continue
+		}
 
-		return "", "", err
+		if err := addJoin(mapIndex_relId, join, &inJoin, nestingLevel); err != nil {
+			return "", "", err
+		}
 	}
 
-	// process SELECT expressions
+	// add filters
+	// before expressions because these are excluded from 'total count' query
+	// SQL arguments are numbered ($1, $2, ...) with no way to skip any (? placeholder is not allowed);
+	//  excluded sub queries arguments from expressions causes missing argument numbers
+	for i, filter := range data.Filters {
+
+		// overwrite first filter connector and add brackets in first and last filter line
+		// done so that query filters do not interfere with other filters
+		if i == 0 {
+			filter.Connector = "AND"
+			filter.Side0.Brackets++
+		}
+		if i == len(data.Filters)-1 {
+			filter.Side1.Brackets++
+		}
+
+		if err := addWhere(filter, queryArgs, queryCountArgs,
+			loginId, &inWhere, nestingLevel); err != nil {
+
+			return "", "", err
+		}
+	}
+
+	for index, relationId := range mapIndex_relId {
+
+		// add policy filter if applicable
+		rel, exists := cache.RelationIdMap[relationId]
+		if !exists {
+			return "", "", fmt.Errorf("unknown relation '%s'", relationId)
+		}
+
+		policyFilter, err := getPolicyFilter(loginId, "select",
+			getRelationCode(index, nestingLevel), rel.Policies)
+
+		if err != nil {
+			return "", "", err
+		}
+		inWhere = append(inWhere, policyFilter)
+	}
+	queryWhere := strings.Replace(strings.Join(inWhere, ""), "AND", "\nWHERE", 1)
+
+	// add expressions
 	mapIndex_agg := make(map[int]bool)        // map of indexes with aggregation
 	mapIndex_aggRecords := make(map[int]bool) // map of indexes with record aggregation
 	for pos, expr := range data.Expressions {
@@ -191,7 +224,7 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 		}
 
 		// attribute expression
-		if err := selectAttribute(pos, expr, mapIndex_relId, &inSelect,
+		if err := addSelect(pos, expr, mapIndex_relId, &inSelect,
 			nestingLevel); err != nil {
 
 			return "", "", err
@@ -205,7 +238,7 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 		}
 	}
 
-	// SELECT relation tupel IDs after attributes on main query
+	// add expressions for relation tupel IDs after attributes (on main query)
 	if nestingLevel == 0 {
 		for index, relId := range mapIndex_relId {
 
@@ -252,13 +285,22 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 		queryGroup = fmt.Sprintf("\nGROUP BY %s", strings.Join(groupByItems, ", "))
 	}
 
-	// build ORDER BY, LIMIT, OFFSET lines
-	queryOrder, queryLimit, queryOffset := "", "", ""
-	if err := buildOrderLimitOffset(data, nestingLevel, &queryOrder, &queryLimit, &queryOffset); err != nil {
+	// build ORDER BY
+	queryOrder, err := addOrderBy(data, nestingLevel)
+	if err != nil {
 		return "", "", err
 	}
 
-	// build data query
+	// build LIMIT/OFFSET
+	queryLimit, queryOffset := "", ""
+	if data.Limit != 0 {
+		queryLimit = fmt.Sprintf("\nLIMIT %d", data.Limit)
+	}
+	if data.Offset != 0 {
+		queryOffset = fmt.Sprintf("\nOFFSET %d", data.Offset)
+	}
+
+	// build final data retrieval SQL query
 	query := fmt.Sprintf(
 		`SELECT %s`+"\n"+
 			`FROM "%s"."%s" AS "%s" %s%s%s%s%s%s`,
@@ -271,7 +313,7 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 		queryLimit,               // LIMIT
 		queryOffset)              // OFFSET
 
-	// build totals query (not relevant for sub queries)
+	// build final total count SQL query (not relevant for sub queries)
 	queryCount := ""
 	if nestingLevel == 0 {
 
@@ -298,7 +340,7 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 // if attribute is from another relation than the given index (relationship),
 //  attribute value = tupel IDs in relation with given index via given attribute
 // 'outside in' is important in cases of self reference, where direction cannot be ascertained by attribute
-func selectAttribute(exprPos int, expr types.DataGetExpression,
+func addSelect(exprPos int, expr types.DataGetExpression,
 	mapIndex_relId map[int]uuid.UUID, inSelect *[]string, nestingLevel int) error {
 
 	relCode := getRelationCode(expr.Index, nestingLevel)
@@ -393,7 +435,7 @@ func selectAttribute(exprPos int, expr types.DataGetExpression,
 	return nil
 }
 
-func joinRelation(mapIndex_relId map[int]uuid.UUID, rel types.DataGetJoin,
+func addJoin(mapIndex_relId map[int]uuid.UUID, rel types.DataGetJoin,
 	inJoin *[]string, nestingLevel int) error {
 
 	// check join attribute
@@ -456,149 +498,128 @@ func joinRelation(mapIndex_relId map[int]uuid.UUID, rel types.DataGetJoin,
 }
 
 // fills WHERE string from data GET request filters and returns count of arguments
-func buildWhere(filters []types.DataGetFilter, queryArgs *[]interface{},
-	queryCountArgs *[]interface{}, loginId int64, nestingLevel int, where *string) error {
+func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
+	queryCountArgs *[]interface{}, loginId int64, inWhere *[]string, nestingLevel int) error {
 
-	bracketBalance := 0
-	inWhere := make([]string, 0)
+	if !tools.StringInSlice(filter.Connector, types.QueryFilterConnectors) {
+		return errors.New("bad filter connector")
+	}
+	if !tools.StringInSlice(filter.Operator, types.QueryFilterOperators) {
+		return errors.New("bad filter operator")
+	}
 
-	for i, filter := range filters {
+	isNullOp := isNullOperator(filter.Operator)
 
-		// overwrite first filter connector and add brackets in first and last filter line
-		// done so that query filters do not interfere with other filters
-		if i == 0 {
-			filter.Connector = "AND"
-			filter.Side0.Brackets++
-		}
-		if i == len(filters)-1 {
-			filter.Side1.Brackets++
-		}
+	// define comparisons
+	var getComp = func(s types.DataGetFilterSide, comp *string) error {
+		var err error
+		var isQuery = s.Query.RelationId != uuid.Nil
 
-		if !tools.StringInSlice(filter.Connector, types.QueryFilterConnectors) {
-			return errors.New("bad filter connector")
-		}
-		if !tools.StringInSlice(filter.Operator, types.QueryFilterOperators) {
-			return errors.New("bad filter operator")
-		}
+		// sub query filter
+		if isQuery {
+			subQuery, _, err := prepareQuery(s.Query, queryArgs,
+				queryCountArgs, loginId, nestingLevel+1)
 
-		bracketBalance -= filter.Side0.Brackets
-		bracketBalance += filter.Side1.Brackets
-		isNullOp := isNullOperator(filter.Operator)
-
-		// define comparisons
-		var getComp = func(s types.DataGetFilterSide, comp *string) error {
-			var err error
-			var isQuery = s.Query.RelationId != uuid.Nil
-
-			// sub query filter
-			if isQuery {
-				subQuery, _, err := prepareQuery(s.Query, queryArgs,
-					queryCountArgs, loginId, nestingLevel+1)
-
-				if err != nil {
-					return err
-				}
-
-				*comp = fmt.Sprintf("(\n%s\n)", subQuery)
-				return nil
+			if err != nil {
+				return err
 			}
 
-			// attribute filter
-			if s.AttributeId.Status == pgtype.Present {
-				*comp, err = getAttributeCode(s.AttributeId.Bytes,
-					getRelationCode(s.AttributeIndex, s.AttributeNested))
+			*comp = fmt.Sprintf("(\n%s\n)", subQuery)
+			return nil
+		}
 
-				if err != nil {
-					return err
-				}
+		// attribute filter
+		if s.AttributeId.Status == pgtype.Present {
+			*comp, err = getAttributeCode(s.AttributeId.Bytes,
+				getRelationCode(s.AttributeIndex, s.AttributeNested))
 
-				// special case: (I)LIKE comparison needs attribute cast as TEXT
-				// this is relevant for integers/floats/etc.
-				if isLikeOperator(filter.Operator) {
-					*comp = fmt.Sprintf("%s::TEXT", *comp)
-				}
-				return nil
+			if err != nil {
+				return err
 			}
 
-			// user value filter
-			// can be anything, text, numbers, floats, boolean, NULL values
-			// create placeholders and add to query arguments
-
-			if isNullOp {
-				// do not add user value as argument if NULL operator is used
-				// to use NULL operator the data type must be known ahead of time (prepared statement)
-				//  "pg: could not determine data type"
-				// because user can add anything we would check the type ourselves
-				//  or just check for NIL because that´s all we care about in this case
-				if s.Value == nil {
-					*comp = "NULL"
-					return nil
-				} else {
-					*comp = "NOT NULL"
-					return nil
-				}
-			}
-
+			// special case: (I)LIKE comparison needs attribute cast as TEXT
+			// this is relevant for integers/floats/etc.
 			if isLikeOperator(filter.Operator) {
-				// special syntax for ILIKE comparison (add wildcard characters)
-				s.Value = fmt.Sprintf("%%%s%%", s.Value)
-			}
-
-			// PGX fix: cannot use proper true/false values in SQL parameters
-			// no good solution found so far, error: 'cannot convert (true|false) to Text'
-			if fmt.Sprintf("%T", s.Value) == "bool" {
-				if s.Value.(bool) == true {
-					s.Value = "true"
-				} else {
-					s.Value = "false"
-				}
-			}
-
-			*queryArgs = append(*queryArgs, s.Value)
-			if queryCountArgs != nil {
-				*queryCountArgs = append(*queryCountArgs, s.Value)
-			}
-
-			if isArrayOperator(filter.Operator) {
-				*comp = fmt.Sprintf("($%d)", len(*queryArgs))
-			} else {
-				*comp = fmt.Sprintf("$%d", len(*queryArgs))
+				*comp = fmt.Sprintf("%s::TEXT", *comp)
 			}
 			return nil
 		}
 
-		// build left/right comparison sides (ignore right side, if NULL operator)
-		comp0, comp1 := "", ""
-		if err := getComp(filter.Side0, &comp0); err != nil {
-			return err
-		}
-		if !isNullOp {
-			if err := getComp(filter.Side1, &comp1); err != nil {
-				return err
+		// user value filter
+		// can be anything, text, numbers, floats, boolean, NULL values
+		// create placeholders and add to query arguments
+
+		if isNullOp {
+			// do not add user value as argument if NULL operator is used
+			// to use NULL operator the data type must be known ahead of time (prepared statement)
+			//  "pg: could not determine data type"
+			// because user can add anything we would check the type ourselves
+			//  or just check for NIL because that´s all we care about in this case
+			if s.Value == nil {
+				*comp = "NULL"
+				return nil
+			} else {
+				*comp = "NOT NULL"
+				return nil
 			}
 		}
 
-		// generate WHERE line from parsed filter definition
-		line := fmt.Sprintf("\n%s %s%s %s %s%s", filter.Connector,
-			getBrackets(filter.Side0.Brackets, false),
-			comp0, filter.Operator, comp1,
-			getBrackets(filter.Side1.Brackets, true))
+		if isLikeOperator(filter.Operator) {
+			// special syntax for ILIKE comparison (add wildcard characters)
+			s.Value = fmt.Sprintf("%%%s%%", s.Value)
+		}
 
-		inWhere = append(inWhere, line)
-	}
-	if bracketBalance != 0 {
-		return errors.New("bracket count is unequal")
+		// PGX fix: cannot use proper true/false values in SQL parameters
+		// no good solution found so far, error: 'cannot convert (true|false) to Text'
+		if fmt.Sprintf("%T", s.Value) == "bool" {
+			if s.Value.(bool) == true {
+				s.Value = "true"
+			} else {
+				s.Value = "false"
+			}
+		}
+
+		*queryArgs = append(*queryArgs, s.Value)
+		if queryCountArgs != nil {
+			*queryCountArgs = append(*queryCountArgs, s.Value)
+		}
+
+		if isArrayOperator(filter.Operator) {
+			*comp = fmt.Sprintf("($%d)", len(*queryArgs))
+		} else {
+			*comp = fmt.Sprintf("$%d", len(*queryArgs))
+		}
+		return nil
 	}
 
-	// join lines and replace first AND with WHERE
-	*where = strings.Replace(strings.Join(inWhere, ""), "AND", "WHERE", 1)
+	// build left/right comparison sides (ignore right side, if NULL operator)
+	comp0, comp1 := "", ""
+	if err := getComp(filter.Side0, &comp0); err != nil {
+		return err
+	}
+	if !isNullOp {
+		if err := getComp(filter.Side1, &comp1); err != nil {
+			return err
+		}
+	}
+
+	// generate WHERE line from parsed filter definition
+	line := fmt.Sprintf("\n%s %s%s %s %s%s", filter.Connector,
+		getBrackets(filter.Side0.Brackets, false),
+		comp0, filter.Operator, comp1,
+		getBrackets(filter.Side1.Brackets, true))
+
+	*inWhere = append(*inWhere, line)
+
 	return nil
 }
 
-func buildOrderLimitOffset(data types.DataGet, nestingLevel int,
-	order *string, limit *string, offset *string) error {
+func addOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 
-	// build order by line
+	if len(data.Orders) == 0 {
+		return "", nil
+	}
+
 	orderItems := make([]string, len(data.Orders))
 	var codeSelect string
 	var err error
@@ -627,7 +648,7 @@ func buildOrderLimitOffset(data types.DataGet, nestingLevel int,
 					getRelationCode(int(ord.Index.Int), nestingLevel))
 
 				if err != nil {
-					return err
+					return "", err
 				}
 			}
 
@@ -635,7 +656,7 @@ func buildOrderLimitOffset(data types.DataGet, nestingLevel int,
 			// order by chosen expression (by position in array)
 			codeSelect = getExpressionCodeSelect(int(ord.ExpressionPos.Int))
 		} else {
-			return errors.New("unknown data GET order parameter")
+			return "", errors.New("unknown data GET order parameter")
 		}
 
 		if ord.Ascending == true {
@@ -644,17 +665,7 @@ func buildOrderLimitOffset(data types.DataGet, nestingLevel int,
 			orderItems[i] = fmt.Sprintf("%s DESC NULLS LAST", codeSelect)
 		}
 	}
-
-	if len(orderItems) != 0 {
-		*order = fmt.Sprintf("\nORDER BY %s", strings.Join(orderItems, ", "))
-	}
-	if data.Limit != 0 {
-		*limit = fmt.Sprintf("\nLIMIT %d", data.Limit)
-	}
-	if data.Offset != 0 {
-		*offset = fmt.Sprintf("\nOFFSET %d", data.Offset)
-	}
-	return nil
+	return fmt.Sprintf("\nORDER BY %s", strings.Join(orderItems, ", ")), nil
 }
 
 // helpers

@@ -6,39 +6,54 @@ import (
 )
 
 type Module struct {
-	Id              uuid.UUID    `json:"id"`
-	ParentId        pgtype.UUID  `json:"parentId"`        // module parent ID
-	FormId          pgtype.UUID  `json:"formId"`          // start form
-	IconId          pgtype.UUID  `json:"iconId"`          // module icon in header/menu
-	Name            string       `json:"name"`            // name of module, is used for DB schema
-	Color1          string       `json:"color1"`          // primary module color (used for header)
-	Position        int          `json:"position"`        // position of module in nav. contexts (home, header)
-	LanguageMain    string       `json:"languageMain"`    // language code of main language (for fallback)
-	ReleaseBuild    int          `json:"releaseBuild"`    // build of this module, incremented with each release
-	ReleaseBuildApp int          `json:"releaseBuildApp"` // build of app at last release
-	ReleaseDate     int64        `json:"releaseDate"`     // date of last release
-	DependsOn       []uuid.UUID  `json:"dependsOn"`       // modules that this module is dependent on
-	Languages       []string     `json:"languages"`       // language codes that this module supports
-	Relations       []Relation   `json:"relations"`
-	Forms           []Form       `json:"forms"`
-	Menus           []Menu       `json:"menus"`
-	Icons           []Icon       `json:"icons"`
-	Roles           []Role       `json:"roles"`
-	LoginForms      []LoginForm  `json:"loginForms"`
-	PgFunctions     []PgFunction `json:"pgFunctions"`
-	Captions        CaptionMap   `json:"captions"`
+	Id              uuid.UUID         `json:"id"`
+	ParentId        pgtype.UUID       `json:"parentId"`        // module parent ID
+	FormId          pgtype.UUID       `json:"formId"`          // default start form
+	IconId          pgtype.UUID       `json:"iconId"`          // module icon in header/menu
+	Name            string            `json:"name"`            // name of module, is used for DB schema
+	Color1          string            `json:"color1"`          // primary module color (used for header)
+	Position        int               `json:"position"`        // position of module in nav. contexts (home, header)
+	LanguageMain    string            `json:"languageMain"`    // language code of main language (for fallback)
+	ReleaseBuild    int               `json:"releaseBuild"`    // build of this module, incremented with each release
+	ReleaseBuildApp int               `json:"releaseBuildApp"` // build of app at last release
+	ReleaseDate     int64             `json:"releaseDate"`     // date of last release
+	DependsOn       []uuid.UUID       `json:"dependsOn"`       // modules that this module is dependent on
+	StartForms      []ModuleStartForm `json:"startForms"`      // start forms, assigned via role membership
+	Languages       []string          `json:"languages"`       // language codes that this module supports
+	Relations       []Relation        `json:"relations"`
+	Forms           []Form            `json:"forms"`
+	Menus           []Menu            `json:"menus"`
+	Icons           []Icon            `json:"icons"`
+	Roles           []Role            `json:"roles"`
+	LoginForms      []LoginForm       `json:"loginForms"`
+	PgFunctions     []PgFunction      `json:"pgFunctions"`
+	Captions        CaptionMap        `json:"captions"`
+}
+type ModuleStartForm struct {
+	Position int       `json:"position"`
+	RoleId   uuid.UUID `json:"roleId"`
+	FormId   uuid.UUID `json:"formId"`
 }
 type Relation struct {
-	Id             uuid.UUID   `json:"id"`
-	ModuleId       uuid.UUID   `json:"moduleId"`
-	AttributeIdPk  uuid.UUID   `json:"attributeIdPk"` // read only, ID of PK attribute
-	Name           string      `json:"name"`
-	RetentionCount pgtype.Int4 `json:"retentionCount"`
-	RetentionDays  pgtype.Int4 `json:"retentionDays"`
-	Attributes     []Attribute `json:"attributes"` // read only, all relation attributes
-	Indexes        []PgIndex   `json:"indexes"`    // read only, all relation indexes
-	Presets        []Preset    `json:"presets"`    // read only, all relation presets
-	Triggers       []PgTrigger `json:"triggers"`   // read only, all relation triggers
+	Id             uuid.UUID        `json:"id"`
+	ModuleId       uuid.UUID        `json:"moduleId"`
+	AttributeIdPk  uuid.UUID        `json:"attributeIdPk"` // read only, ID of PK attribute
+	Name           string           `json:"name"`
+	RetentionCount pgtype.Int4      `json:"retentionCount"`
+	RetentionDays  pgtype.Int4      `json:"retentionDays"`
+	Attributes     []Attribute      `json:"attributes"` // read only, all relation attributes
+	Indexes        []PgIndex        `json:"indexes"`    // read only, all relation indexes
+	Policies       []RelationPolicy `json:"policies"`   // read only, all relation policies
+	Presets        []Preset         `json:"presets"`    // read only, all relation presets
+	Triggers       []PgTrigger      `json:"triggers"`   // read only, all relation triggers
+}
+type RelationPolicy struct {
+	RoleId           uuid.UUID     `json:"roleId"`
+	PgFunctionIdExcl uuid.NullUUID `json:"pgFunctionIdExcl"`
+	PgFunctionIdIncl uuid.NullUUID `json:"pgFunctionIdIncl"`
+	ActionDelete     bool          `json:"actionDelete"`
+	ActionSelect     bool          `json:"actionSelect"`
+	ActionUpdate     bool          `json:"actionUpdate"`
 }
 type Preset struct {
 	Id         uuid.UUID     `json:"id"`
@@ -146,26 +161,27 @@ type FieldButton struct {
 	Captions          CaptionMap  `json:"captions"`
 }
 type FieldCalendar struct {
-	Id               uuid.UUID      `json:"id"`
-	IconId           pgtype.UUID    `json:"iconId"`
-	Content          string         `json:"content"`
-	State            string         `json:"state"`
-	OnMobile         bool           `json:"onMobile"`
-	FormIdOpen       pgtype.UUID    `json:"formIdOpen"`
-	AttributeIdDate0 uuid.UUID      `json:"attributeIdDate0"`
-	AttributeIdDate1 uuid.UUID      `json:"attributeIdDate1"`
-	AttributeIdColor pgtype.UUID    `json:"attributeIdColor"`
-	IndexDate0       int            `json:"indexDate0"`
-	IndexDate1       int            `json:"indexDate1"`
-	IndexColor       pgtype.Int4    `json:"indexColor"`
-	Gantt            bool           `json:"gantt"`            // gantt presentation
-	GanttSteps       pgtype.Varchar `json:"ganttSteps"`       // gantt step type (hours, days)
-	GanttStepsToggle bool           `json:"ganttStepsToggle"` // user can toggle between gantt step types
-	Ics              bool           `json:"ics"`              // calendar available as ICS download
-	DateRange0       int64          `json:"dateRange0"`       // ICS/gantt time range before NOW (seconds)
-	DateRange1       int64          `json:"dateRange1"`       // ICS/gantt time range after NOW (seconds)
-	Columns          []Column       `json:"columns"`
-	Query            Query          `json:"query"`
+	Id                uuid.UUID      `json:"id"`
+	IconId            pgtype.UUID    `json:"iconId"`
+	Content           string         `json:"content"`
+	State             string         `json:"state"`
+	OnMobile          bool           `json:"onMobile"`
+	FormIdOpen        pgtype.UUID    `json:"formIdOpen"`
+	AttributeIdDate0  uuid.UUID      `json:"attributeIdDate0"`
+	AttributeIdDate1  uuid.UUID      `json:"attributeIdDate1"`
+	AttributeIdColor  pgtype.UUID    `json:"attributeIdColor"`
+	AttributeIdRecord pgtype.UUID    `json:"attributeIdRecord"`
+	IndexDate0        int            `json:"indexDate0"`
+	IndexDate1        int            `json:"indexDate1"`
+	IndexColor        pgtype.Int4    `json:"indexColor"`
+	Gantt             bool           `json:"gantt"`            // gantt presentation
+	GanttSteps        pgtype.Varchar `json:"ganttSteps"`       // gantt step type (hours, days)
+	GanttStepsToggle  bool           `json:"ganttStepsToggle"` // user can toggle between gantt step types
+	Ics               bool           `json:"ics"`              // calendar available as ICS download
+	DateRange0        int64          `json:"dateRange0"`       // ICS/gantt time range before NOW (seconds)
+	DateRange1        int64          `json:"dateRange1"`       // ICS/gantt time range after NOW (seconds)
+	Columns           []Column       `json:"columns"`
+	Query             Query          `json:"query"`
 }
 type FieldChart struct {
 	Id          uuid.UUID   `json:"id"`

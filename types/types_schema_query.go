@@ -20,11 +20,12 @@ var (
 type Query struct {
 	Id         uuid.UUID     `json:"id"`
 	RelationId pgtype.UUID   `json:"relationId"` // query source relation
+	FixedLimit int           `json:"fixedLimit"` // fixed limit, used for queries like 'top 5 of X'
 	Joins      []QueryJoin   `json:"joins"`      // query joins over multiple relations
 	Filters    []QueryFilter `json:"filters"`    // default query filter
 	Orders     []QueryOrder  `json:"orders"`     // default query sort
 	Lookups    []QueryLookup `json:"lookups"`    // import lookups via PG indexes
-	Choices    []QueryChoice `json:"choices"`    // optional filters, selectable by users
+	Choices    []QueryChoice `json:"choices"`    // named filter sets, selectable by users
 }
 
 type QueryJoin struct {
@@ -56,6 +57,7 @@ type QueryFilterSide struct {
 	AttributeNested int         `json:"attributeNested"` // nesting level of attribute  (0=main query, 1=1st sub query)
 	AttributeIndex  int         `json:"attributeIndex"`  // relation index of attribute
 	FieldId         pgtype.UUID `json:"fieldId"`         // frontend field value
+	PresetId        pgtype.UUID `json:"presetId"`        // preset ID of record to be compared
 	RoleId          pgtype.UUID `json:"roleId"`          // role ID assigned to user
 
 	Brackets        int            `json:"brackets"`        // opening/closing brackets (side 0/1)

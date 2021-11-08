@@ -68,7 +68,19 @@ let MyAdminConfig = {
 						<td>
 							<my-bool-string-number
 								v-model="configInput.productionMode"
+								@update:modelValue="informProductionMode"
 								:reversed="true"
+								:readonly="configInput.builderMode === '1'"
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.builderMode }}</td>
+						<td>
+							<my-bool-string-number
+								v-model="configInput.builderMode"
+								@update:modelValue="informBuilderMode"
+								:readonly="configInput.productionMode === '1'"
 							/>
 						</td>
 					</tr>
@@ -698,6 +710,34 @@ let MyAdminConfig = {
 				that.$root.genericError(null,error);
 			};
 		},
+		informBuilderMode:function() {
+			if(this.configInput.builderMode === '0')
+				return;
+			
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.builderMode,
+				captionTop:this.capApp.dialog.pleaseRead,
+				buttons:[{
+					caption:this.capGen.button.close,
+					cancel:true,
+					image:'cancel.png'
+				}]
+			});
+		},
+		informProductionMode:function() {
+			if(this.configInput.productionMode !== '0')
+				return;
+			
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.productionMode,
+				captionTop:this.capApp.dialog.pleaseRead,
+				buttons:[{
+					caption:this.capGen.button.close,
+					cancel:true,
+					image:'cancel.png'
+				}]
+			});
+		},
 		publicKeyShow:function(name,key) {
 			this.$store.commit('dialog',{
 				captionBody:key,
@@ -743,6 +783,13 @@ let MyAdminConfig = {
 			if(req.payload.productionMode === '0' && this.config.productionMode === '1') {
 				let trans = new wsHub.transaction();
 				trans.add('login','kickNonAdmins',{});
+				trans.send(this.$root.genericError);
+			}
+			
+			// inform clients about changed builder mode
+			if(req.payload.builderMode !== this.config.builderMode) {
+				let trans = new wsHub.transaction();
+				trans.add('login','informBuilderState',{});
 				trans.send(this.$root.genericError);
 			}
 			

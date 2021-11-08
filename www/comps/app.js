@@ -2,7 +2,7 @@ import MyDialog              from './dialog.js';
 import MyFeedback            from './feedback.js';
 import MyHeader              from './header.js';
 import MyLogin               from './login.js';
-import {hasAccessToAnyMenu}  from './shared/access.js';
+import {getStartFormId}      from './shared/access.js';
 import {genericError}        from './shared/error.js';
 import {getCaptionForModule} from './shared/language.js';
 import {openLink}            from './shared/generic.js';
@@ -124,8 +124,8 @@ let MyApp = {
 					return false;
 				
 				// module is accessible if start form is set and user has access to any menu
-				let accessible = module.formId !== null
-					&& that.hasAccessToAnyMenu(module.menus,that.menuAccess);
+				let formIdStart = getStartFormId(module,that.access);
+				let accessible  = formIdStart !== null;
 				
 				// ignore hidden modules
 				if(that.moduleIdMapOptions[module.id].hidden)
@@ -160,7 +160,7 @@ let MyApp = {
 					accessible:accessible,
 					caption:caption,
 					children:children,
-					formId:module.formId,
+					formId:formIdStart,
 					iconId:module.iconId,
 					id:module.id,
 					name:module.name,
@@ -194,6 +194,7 @@ let MyApp = {
 		httpMode:function() { return location.protocol === 'http:'; },
 		
 		// stores
+		access:       function() { return this.$store.getters.access; },
 		activated:    function() { return this.$store.getters['local/activated']; },
 		appVersion:   function() { return this.$store.getters['local/appVersion']; },
 		customLogo:   function() { return this.$store.getters['local/customLogo']; },
@@ -209,7 +210,6 @@ let MyApp = {
 		isAtDialog:   function() { return this.$store.getters.isAtDialog; },
 		isAtFeedback: function() { return this.$store.getters.isAtFeedback; },
 		isMobile:     function() { return this.$store.getters.isMobile; },
-		menuAccess:   function() { return this.$store.getters.access.menu; },
 		pageTitle:    function() { return this.$store.getters.pageTitle; },
 		settings:     function() { return this.$store.getters.settings; }
 	},
@@ -228,7 +228,7 @@ let MyApp = {
 		// externals
 		genericError,
 		getCaptionForModule,
-		hasAccessToAnyMenu,
+		getStartFormId,
 		openLink,
 		
 		// general app states
@@ -261,8 +261,6 @@ let MyApp = {
 			this.stateChange();
 		},
 		wsBackendRequest:function(res) {
-			
-			let trans;
 			switch(res.ressource) {
 				// affects admins only (reloads happen in maintenance mode only)
 				// add busy counters to also block admins that did not request the schema reload
@@ -279,12 +277,17 @@ let MyApp = {
 					this.initSchema();
 				break;
 				
+				// affects admins only (builder can be actived only in maintenance mode)
+				case 'builder_mode_changed':
+					this.$store.commit('builder',res.payload);
+				break;
+				
 				// affects everyone logged in
 				case 'reauthorized':
 					if(!this.appReady)
 						return;
 					
-					trans = new wsHub.transaction();
+					let trans = new wsHub.transaction();
 					trans.add('lookup','get',{name:'access'},this.retrievedAccess);
 					trans.send(this.genericError);
 				break;
@@ -343,6 +346,7 @@ let MyApp = {
 			this.$store.commit('builder',r.payload.builder);
 			this.$store.commit('productionMode',r.payload.productionMode);
 			this.$store.commit('pageTitle',this.pageTitle); // apply new app short name to page
+			this.$store.commit('schema/languageCodes',r.payload.languageCodes);
 			this.$store.commit('schema/timestamp',r.payload.schemaTimestamp);
 			this.publicLoaded = true;
 			this.stateChange();

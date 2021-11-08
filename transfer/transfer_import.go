@@ -184,10 +184,11 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		log.Info("transfer", fmt.Sprintf("set module '%s' v%d, %s",
 			mod.Name, mod.ReleaseBuild, mod.Id))
 
-		if err := importCheckResultAndApply(tx, module.Set_tx(tx, mod.Id, mod.ParentId, mod.FormId, mod.IconId,
-			mod.Name, mod.Color1, mod.Position, mod.LanguageMain, mod.ReleaseBuild,
-			mod.ReleaseBuildApp, mod.ReleaseDate, mod.DependsOn, mod.Languages,
-			mod.Captions), mod.Id, idMapSkipped); err != nil {
+		if err := importCheckResultAndApply(tx, module.Set_tx(tx, mod.Id,
+			mod.ParentId, mod.FormId, mod.IconId, mod.Name, mod.Color1,
+			mod.Position, mod.LanguageMain, mod.ReleaseBuild,
+			mod.ReleaseBuildApp, mod.ReleaseDate, mod.DependsOn, mod.StartForms,
+			mod.Languages, mod.Captions), mod.Id, idMapSkipped); err != nil {
 
 			return err
 		}
@@ -223,8 +224,8 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		log.Info("transfer", fmt.Sprintf("set relation %s", e.Id))
 
 		if err := importCheckResultAndApply(tx, relation.Set_tx(tx,
-			e.ModuleId, e.Id, e.Name, e.RetentionCount, e.RetentionDays),
-			e.Id, idMapSkipped); err != nil {
+			e.ModuleId, e.Id, e.Name, e.RetentionCount, e.RetentionDays,
+			e.Policies), e.Id, idMapSkipped); err != nil {
 
 			return err
 		}
@@ -558,7 +559,11 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]imp
 			return
 		}
 
-		// add dependencies first
+		// add itself before dependencies (avoids infinite loops from circular dependencies)
+		modules = append(modules, m)
+		moduleIdsAdded = append(moduleIdsAdded, m.Id)
+
+		// add dependencies
 		for _, dependId := range m.DependsOn {
 
 			if _, exists := moduleIdMapMeta[dependId]; !exists {
@@ -567,22 +572,18 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]imp
 			}
 			addModule(moduleIdMapMeta[dependId].module)
 		}
-
-		// add itself
-		modules = append(modules, m)
-		moduleIdsAdded = append(moduleIdsAdded, m.Id)
 	}
 
 	for _, meta := range moduleIdMapMeta {
 		addModule(meta.module)
 	}
 
-	// log optimized import order
+	// log chosen installation order
 	logNames := make([]string, len(modules))
 	for i, m := range modules {
 		logNames[i] = m.Name
 	}
-	log.Info("transfer", fmt.Sprintf("import has decided on optimized order: %s",
+	log.Info("transfer", fmt.Sprintf("import has decided on installation order: %s",
 		strings.Join(logNames, ", ")))
 
 	return modules, nil

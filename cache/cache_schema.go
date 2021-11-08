@@ -41,10 +41,11 @@ var (
 	schema_mx sync.Mutex
 
 	// references to specific entities
-	ModuleIdMap    map[uuid.UUID]types.Module
-	RelationIdMap  map[uuid.UUID]types.Relation
-	AttributeIdMap map[uuid.UUID]types.Attribute
-	RoleIdMap      map[uuid.UUID]types.Role
+	ModuleIdMap     map[uuid.UUID]types.Module
+	RelationIdMap   map[uuid.UUID]types.Relation
+	AttributeIdMap  map[uuid.UUID]types.Attribute
+	RoleIdMap       map[uuid.UUID]types.Role
+	PgFunctionIdMap map[uuid.UUID]types.PgFunction
 
 	// schema cache
 	schemaCache     schemaCacheType // full cache
@@ -96,6 +97,7 @@ func UpdateSchema(moduleId pgtype.UUID, newVersion bool) error {
 		RelationIdMap = make(map[uuid.UUID]types.Relation)
 		AttributeIdMap = make(map[uuid.UUID]types.Attribute)
 		RoleIdMap = make(map[uuid.UUID]types.Role)
+		PgFunctionIdMap = make(map[uuid.UUID]types.PgFunction)
 	} else {
 		log.Info("cache", "starting schema processing for one module")
 		moduleIdsReload = append(moduleIdsReload, moduleId.Bytes)
@@ -267,12 +269,15 @@ func reloadModule(id uuid.UUID) error {
 		return err
 	}
 
-	// get pg functions
+	// store & backfill PG functions
 	log.Info("cache", "load functions")
 
 	mod.PgFunctions, err = pgFunction.Get(mod.Id)
 	if err != nil {
 		return err
+	}
+	for _, fnc := range mod.PgFunctions {
+		PgFunctionIdMap[fnc.Id] = fnc
 	}
 
 	// update cache map with parsed module

@@ -92,10 +92,12 @@
 		"nothingSelected":"Nothing selected",
 		"nothingThere":"No results available",
 		"notice":"Notice",
+		"order":"Order",
 		"password":"Password",
 		"results":"{CNT} results",
 		"resultsNone":"- no results -",
 		"resultsOf":"/ {CNT}",
+		"role":"Role",
 		"title":"Title",
 		"username":"Username",
 		"version":"Version"
@@ -105,6 +107,11 @@
 			"button":{
 				"apply":"Apply changes",
 				"removeLogo":"Remove logo"
+			},
+			"dialog":{
+				"builderMode":"The Builder is used to create or change applications.<br /><br />Changing applications can result in data loss and should <b>NEVER</b> be done in production environments.<br /><br />To safely use the Builder, please use a dedicated instance of REI3; ready and tested applications can then be transferred to a production system.<br /><br />Please refer to the <a href=\"https://rei3.de/builderdocu-en_us/\" target=\"_blank\">Builder documentation</a> to learn more.",
+				"productionMode":"The maintenance mode is used to update, install or remove applications from the system.<br /><br />Switching to maintenance mode will <b>logout all users without admin permissions</b>.",
+				"pleaseRead":"Please read before saving"
 			},
 			"appName":"Instance name",
 			"appNameShort":"Page title",
@@ -121,6 +128,7 @@
 			"bruteforceCountTracked":"Tracked hosts",
 			"bruteforceProtection":"Enable bruteforce protection",
 			"bruteforceTitle":"Bruteforce protection",
+			"builderMode":"Builder mode",
 			"colorHint":"Keep empty for default",
 			"companyColorHeader":"Title color (header)",
 			"companyColorLogin":"Title color (login)",
@@ -307,7 +315,10 @@
 				"updateAll":"Update all ({COUNT})"
 			},
 			"dialog":{
-				"delete":"Are you sure you want to delete this application? This will also delete all included data from your system.<br /><br /><b>This action is irreversible without current backups.</b>",
+				"delete":"Are you sure you want to delete this application? This will also delete all included data from your system.<br /><br /><b>This action is irreversible without current backups.</b>{APPS}",
+				"deleteApps":"<br /><br />The following applications are dependend on this one and will also be deleted:<ul>{LIST}</ul>",
+				"deleteMulti":"This action will <b>permanently</b> delete <b>{COUNT} application(s)</b> and corresponding data.<br /><br />Do you really want to continue?",
+				"deleteTitle":"Permanent deletion of application '{APP}'",
 				"owner":"With this option enabled, changes to this application can be exported as a new version. If you are not the original author, all changes will be LOST when a new version from the author is installed. This can also result in DATA LOSS.<br /><br />If you intend to change/extent applications from other authors, you can safely do so by 'building on them' - please refer to the Builder documentation for more details.",
 				"ownerTitle":"Warning - please read carefully!"
 			},
@@ -315,7 +326,7 @@
 				"installFailed":"Update of application has failed. When updating a single application, missing dependencies can causes issues - please try updating all applications together to resolve these.<br /><br />Error message: {ERROR}",
 				"uploadFailed":"Failed to add application from the uploaded file. Please increase the log level for transfers to 'Everything' and try again - details will then be visible in the system logs."
 			},
-			"dependOnUs":"Following Applications depend on this: {NAMES}",
+			"changeLog":"Change log",
 			"hidden":"Hidden",
 			"import":"Add from file",
 			"nothingInstalled":"No applications are installed.",
@@ -553,7 +564,7 @@
 			"icon":"Form icon",
 			"ics":"iCAL subscriptions",
 			"layout":"List layout",
-			"limit":"Result limit",
+			"limit":"Result count",
 			"new":"New form",
 			"onMobile":"In mobile view",
 			"presetOpen":"Open preset",
@@ -623,7 +634,7 @@
 			"languageCode":"Language code",
 			"languageCodeHint":"en_us, zh_cn, de_de, ...",
 			"languageMain":"Primary language*",
-			"languageMainHint":"*is used as fallback, if chosen user language is not available",
+			"languageMainHint":"*is used if chosen user language is not available.",
 			"languageTitle":"Application title",
 			"languages":"Languages",
 			"new":"New application",
@@ -633,6 +644,10 @@
 			"releaseBuildApp":"Platform version",
 			"releaseDate":"Release date",
 			"startForm":"Start form",
+			"startFormDefault":"Default start form*",
+			"startFormDefaultHint":"*is used if no other form can be assigned via role.",
+			"startForms":"Start forms",
+			"startFormsExplanation":"The first start form is used that matches a role of the current login.",
 			"title":"Applications"
 		},
 		"pgFunction":{
@@ -713,6 +728,8 @@
 			"choices":"Filter sets ({COUNT})*",
 			"choicesHint":"*First set is active by default - choice available if 2 or more exist.",
 			"filters":"Filters ({COUNT})",
+			"fixedLimit":"Fixed result limit",
+			"fixedLimit0":"not active",
 			"joinAddHint":"Join another relation to this one",
 			"joinApplyCreateHint":"(C)reate record on this relation",
 			"joinApplyDeleteHint":"(D)elete record on this relation",
@@ -752,6 +769,16 @@
 			"onInsert":"INSERT",
 			"onUpdate":"UPDATE",
 			"perRow":"EACH ROW",
+			"policies":"Policies",
+			"policyActions":"Action",
+			"policyActionDelete":"Delete",
+			"policyActionSelect":"Display",
+			"policyActionUpdate":"Change",
+			"policyExplanation":"The first policy that matches a role of the current login is applied, if the attempted action is enabled for this policy. To give full access to a role for example, a policy with all actions enabled and no filters can be placed at the top.",
+			"policyFunctions":"Filter functions",
+			"policyFunctionExcl":"Block record IDs",
+			"policyFunctionIncl":"Allow record IDs",
+			"policyNotSet":"unfiltered",
 			"presets":"Preset records ({CNT})",
 			"presetProtected":"Protected",
 			"presetValues":"Values",
@@ -816,6 +843,8 @@
 			"icsHint":"Access calendar from external application",
 			"icsPublish":"Publish for personal use",
 			"ganttToggleHint":"Toggle between day & hour mode",
+			"ganttShowLabels":"Groups",
+			"ganttShowLabelsHint":"Show/hide groups",
 			"zoomResetHint":"Reset zoom level"
 		},
 		"icsDesc":"Use this URL to subscribe to this calendar (iCalendar, ICS).",
@@ -881,6 +910,7 @@
 				"javascript":"JavaScript expression",
 				"languageCode":"login language code (en_us, ...)",
 				"login":"login ID (integer)",
+				"preset":"preset record ID (Integer)",
 				"record":"record ID (integer, form relation 0)",
 				"recordNew":"record is new (TRUE/FALSE, form)",
 				"role":"login has role (TRUE/FALSE)",
@@ -929,7 +959,8 @@
 		"help":"Help pages",
 		"helpContextTitle":"Context",
 		"helpModuleTitle":"Application",
-		"invalidInputs":"Check inputs!"
+		"invalidInputs":"Check inputs!",
+		"noAccess":"No access"
 	},
 	"home":{
 		"button":{

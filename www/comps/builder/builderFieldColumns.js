@@ -171,22 +171,24 @@ let MyBuilderFieldColumnOptions = {
 			v-if="isSubQuery"
 			@set-choices="setQuery('choices',$event)"
 			@set-filters="setQuery('filters',$event)"
+			@set-fixed-limit="setQuery('fixedLimit',$event)"
 			@set-joins="setQuery('joins',$event)"
 			@set-lookups="setQuery('lookups',$event)"
 			@set-orders="setQuery('orders',$event)"
 			@set-relation-id="setQuery('relationId',$event)"
-			:allow-choices="false"
-			:allow-orders="true"
-			:builder-language="builderLanguage"
+			:allowChoices="false"
+			:allowOrders="true"
+			:builderLanguage="builderLanguage"
 			:choices="column.query.choices"
-			:data-fields="dataFields"
+			:dataFields="dataFields"
 			:filters="column.query.filters"
+			:fixedLimit="column.query.fixedLimit"
 			:joins="column.query.joins"
-			:joins-parents="[joins]"
+			:joinsParents="[joins]"
 			:lookups="column.query.lookups"
-			:module-id="moduleId"
+			:moduleId="moduleId"
 			:orders="column.query.orders"
-			:relation-id="column.query.relationId"
+			:relationId="column.query.relationId"
 		/>
 	</div>`,
 	props:{
@@ -249,9 +251,9 @@ let MyBuilderFieldColumnOptions = {
 			else          return this.$emit('set',name,0);
 		},
 		setQuery:function(name,value) {
-			let query = JSON.parse(JSON.stringify(this.column.query));
-			query[name] = value;
-			this.set('query',query);
+			let v = JSON.parse(JSON.stringify(this.column.query));
+			v[name] = value;
+			this.set('query',v);
 		},
 		setIndexAttribute:function(indexAttributeId) {
 			let v = indexAttributeId.split('_');

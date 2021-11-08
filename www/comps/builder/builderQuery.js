@@ -705,16 +705,38 @@ let MyBuilderQuery = {
 				:lookups="lookups"
 			/>
 		</div>
+		
+		<!-- fixed limit -->
+		<div class="fixed-limit" v-if="allowFixedLimit && joins.length !== 0">
+			<my-button
+				:active="false"
+				:caption="capApp.fixedLimit"
+				:large="true"
+				:naked="true"
+			/>
+			<my-button
+				v-if="fixedLimitInput === 0"
+				@trigger="fixedLimitInput = 10"
+				:caption="capApp.fixedLimit0"
+				:naked="true"
+			/>
+			<input class="short"
+				v-if="fixedLimitInput !== 0"
+				v-model.number="fixedLimitInput"
+			/>
+		</div>
 	</div>`,
 	props:{
 		allowChoices:   { type:Boolean, required:false, default:true },
 		allowFilters:   { type:Boolean, required:false, default:true },
+		allowFixedLimit:{ type:Boolean, required:false, default:true },
 		allowLookups:   { type:Boolean, required:false, default:false },
 		allowOrders:    { type:Boolean, required:false, default:false },
 		builderLanguage:{ type:String,  required:false, default:'' },
 		choices:        { type:Array,   required:true },                    // choices for optional query filters (selectable by users)
 		dataFields:     { type:Array,   required:false, default:() => [] }, // form fields for filter candidates
 		filters:        { type:Array,   required:true },
+		fixedLimit:     { type:Number,  required:true },
 		lookups:        { type:Array,   required:true },
 		joins:          { type:Array,   required:true },                    // available relations, incl. source relation
 		joinsParents:   { type:Array,   required:false, default:() => [] }, // each item is an array of joins from a parent query
@@ -724,8 +746,8 @@ let MyBuilderQuery = {
 		relationIdStart:{ required:false, default:null }                    // when query starts with a defined relation
 	},
 	emits:[
-		'index-removed','set-choices','set-filters','set-joins',
-		'set-lookups','set-orders','set-relation-id'
+		'index-removed','set-choices','set-filters','set-fixed-limit',
+		'set-joins','set-lookups','set-orders','set-relation-id'
 	],
 	data:function() {
 		return {
@@ -772,6 +794,10 @@ let MyBuilderQuery = {
 			set:function(newVal) {
 				this.$emit('set-relation-id',newVal);
 			}
+		},
+		fixedLimitInput:{
+			get:function()  { return this.fixedLimit; },
+			set:function(v) { this.$emit('set-fixed-limit',v === '' ? 0 : v); }
 		},
 		joinsInput:{
 			get:function()  { return this.joins; },

@@ -92,10 +92,12 @@
 		"nothingSelected":"Keine Auswahl getroffen",
 		"nothingThere":"Keine Ergebnisse verfügbar",
 		"notice":"Hinweis",
+		"order":"Reihenf.",
 		"password":"Passwort",
 		"results":"{CNT} Ergebnisse",
 		"resultsNone":"- keine Ergebnisse -",
 		"resultsOf":"/ {CNT}",
+		"role":"Rolle",
 		"title":"Titel",
 		"username":"Benutzername",
 		"version":"Version"
@@ -105,6 +107,11 @@
 			"button":{
 				"apply":"Änderungen übernehmen",
 				"removeLogo":"Logo entfernen"
+			},
+			"dialog":{
+				"builderMode":"Der Builder dient zum Erstellen oder Verändern von Anwendungen.<br /><br />Das Ändern von Anwendungen kann zum Datenverlust führen und sollte <b>NIEMALS</b> in produktiven Umgebungen getan werden.<br /><br />Um den Builder sicher zu nutzen, bitte eine dedizierte Instanz von REI3 verwenden; fertige und getestete Anwendungen können dann in ein Produktivsystem transferiert werden.<br /><br />Um mehr zu lernen, steht die <a href=\"https://rei3.de/builderdocu-en_us/\" target=\"_blank\">Builder-Dokumentation</a> zur Verfügung.",
+				"productionMode":"Der Wartungsmodus wird genutzt, um Anwendungen zu aktualisieren, installieren oder zu entfernen.<br /><br />Beim Aktivieren des Wartungsmodus werden <b>alle Benutzer ohne Adminrechte abgemeldet</b>.",
+				"pleaseRead":"Bitte vor dem Speichern lesen"
 			},
 			"appName":"Instanzname",
 			"appNameShort":"Seitentitel",
@@ -121,6 +128,7 @@
 			"bruteforceCountTracked":"Verfolgte Hosts",
 			"bruteforceProtection":"Bruteforce-Schutz aktivieren",
 			"bruteforceTitle":"Bruteforce-Schutz",
+			"builderMode":"Builder-Modus",
 			"colorHint":"Leer lassen für Standardwerte",
 			"companyColorHeader":"Titelfarbe (Hauptmenü)",
 			"companyColorLogin":"Titelfarbe (Anmeldung)",
@@ -156,7 +164,7 @@
 			"logLevelTransfer":"Transfer",
 			"logsKeepDays":"Logs aufheben (in Tagen)",
 			"productionMode":"Wartungsmodus",
-			"publicHostName":"Public hostname",
+			"publicHostName":"Öffentlicher Hostname",
 			"pwForceDigit":"Erzwinge Zahl",
 			"pwForceLower":"Erzwinge Kleinbuchstaben",
 			"pwForceSpecial":"Erzwinge Sonderzeichen",
@@ -307,7 +315,10 @@
 				"updateAll":"Alle aktualisieren ({COUNT})"
 			},
 			"dialog":{
-				"delete":"Bist du sicher, dass du diese Anwendung löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelles Backup nicht rückgängig zu machen.</b>",
+				"delete":"Bist du sicher, dass du diese Anwendung löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelles Backup nicht rückgängig zu machen.</b>{APPS}",
+				"deleteApps":"<br /><br />Folgende Anwendungen sind von dieser abhängig und werden ebenfalls gelöscht:<ul>{LIST}</ul>",
+				"deleteMulti":"Diese Aktion wird <b>{COUNT} Anwendung(en)</b> mit dazugehörigen Daten <b>permanent</b> löschen.<br /><br />Möchtest du wirklich fortfahren?",
+				"deleteTitle":"Permanente Löschung der Anwendung \"{APP}\"",
 				"owner":"Wenn diese Option aktiviert ist, können Änderungen an dieser Anwendung als neue Version exportiert werden. Falls du nicht der originale Autor bist, werden alle Änderungen VERLOREN GEHEN, wenn eine neue Version vom Autoren installiert wird. Dies kann auch zu DATENVERLUST führen.<br /><br />Falls du vorhast, Anwendungen anderer Autoren zu verändern/erweitern, kannst du gefahrlos auf \"diesen aufbauen\" - bitte referenziere die Builder-Dokumentation für mehr Details.",
 				"ownerTitle":"Warnung - bitte vorsichtig lesen!"
 			},
@@ -315,7 +326,7 @@
 				"installFailed":"Aktualisierung der Anwendung ist fehlgeschlagen. Bei Aktualisierung einer einzelnen Anwendung können fehlende Abhängigkeiten zu Problemen führen - bitte versuchen, alle Anwendungen gemeinsam zu aktualisieren, um diese zu lösen.<br /><br />Fehlermeldung: {ERROR}",
 				"uploadFailed":"Anwendung konnte nicht von der hochgeladenen Datei installiert werden. Bitte das Loglevel für Transfere auf \"Alles\" erhöhen und erneut versuchen - Details werden dann im Systemlog aufgeführt."
 			},
-			"dependOnUs":"Folgende Anwendungen sind hiervon abhängig: {NAMES}",
+			"changeLog":"Änderungshistorie",
 			"hidden":"Versteckt",
 			"import":"Von Datei hinzufügen",
 			"nothingInstalled":"Es sind keine Anwendungen installiert.",
@@ -553,7 +564,7 @@
 			"icon":"Formular-Icon",
 			"ics":"iCAL-Abonnements",
 			"layout":"Listen-Layout",
-			"limit":"Ergebnislimit",
+			"limit":"Ergebnisanzahl",
 			"new":"Neues Formular",
 			"onMobile":"In mobiler Ansicht",
 			"presetOpen":"Vord. Datensatz öffnen",
@@ -623,7 +634,7 @@
 			"languageCode":"Sprach-Code",
 			"languageCodeHint":"en_us, zh_cn, de_de, ...",
 			"languageMain":"Primäre Sprache*",
-			"languageMainHint":"*dient als Ersatz, wenn die gewählte Benutzersprache nicht verfügbar ist",
+			"languageMainHint":"*wird verwendet wenn die gewählte Benutzersprache nicht verfügbar ist.",
 			"languageTitle":"Anwendungstitel",
 			"languages":"Sprachen",
 			"new":"Neue Anwendung",
@@ -633,6 +644,10 @@
 			"releaseBuildApp":"Plattform-Version",
 			"releaseDate":"Veröff.-Datum",
 			"startForm":"Startformular",
+			"startFormDefault":"Standard-Startformular*",
+			"startFormDefaultHint":"*wird verwendet wenn kein anderes Formular per Rolle zugewiesen werden kann.",
+			"startForms":"Startformulare",
+			"startFormsExplanation":"Das erste Startformular wird verwendet, das einer Rolle der aktuellen Anmeldung entspricht.",
 			"title":"Anwendungen"
 		},
 		"pgFunction":{
@@ -713,6 +728,8 @@
 			"choices":"Filtersätze ({COUNT})*",
 			"choicesHint":"*Erste Satz ist erstmal aktiv - Auswahl möglich, wenn 2 oder mehr existieren.",
 			"filters":"Filter ({COUNT})",
+			"fixedLimit":"Festes Ergebnislimit",
+			"fixedLimit0":"nicht aktiv",
 			"joinAddHint":"Eine Relation mit dieser verbinden (join)",
 			"joinApplyCreateHint":"(C) Datensatz erzeugen auf dieser Relation",
 			"joinApplyDeleteHint":"(D) Datensatz löschen auf dieser Relation",
@@ -752,6 +769,16 @@
 			"onInsert":"INSERT",
 			"onUpdate":"UPDATE",
 			"perRow":"EACH ROW",
+			"policies":"Richtlinien",
+			"policyActions":"Handlung",
+			"policyActionDelete":"Löschen",
+			"policyActionSelect":"Anzeigen",
+			"policyActionUpdate":"Verändern",
+			"policyExplanation":"Die erste Richtlinie, die einer Rolle der aktuellen Anmeldung entspricht, wird angewendet, solange die versuchte Handlung für diese Richtlinie aktiviert ist. Um bspw. einer Rolle vollen Zugriff zu erlauben, kann eine Richtlinie mit allen Handlungen aktiviert und keinen Filtern an oberster Stelle gesetzt werden.",
+			"policyFunctions":"Filterfunktionen",
+			"policyFunctionExcl":"Datensatz-IDs blockieren",
+			"policyFunctionIncl":"Datensatz-IDs erlauben",
+			"policyNotSet":"ungefiltert",
 			"presets":"Vordefinierte Datensätze ({CNT})",
 			"presetProtected":"Geschützt",
 			"presetValues":"Werte",
@@ -816,6 +843,8 @@
 			"icsHint":"Auf Kalender von Extern zugreifen",
 			"icsPublish":"Für persönliche Nutzung veröffentlichen",
 			"ganttToggleHint":"Zwischen Stunden- & Tagmodus wechseln",
+			"ganttShowLabels":"Gruppen",
+			"ganttShowLabelsHint":"Gruppen anzeigen/verstecken",
 			"zoomResetHint":"Zoom-Level zurücksetzen"
 		},
 		"icsDesc":"Diese URL verwenden, um Kalender zu abonnieren (iCalendar, ICS).",
@@ -881,6 +910,7 @@
 				"javascript":"JavaScript-Ausdruck",
 				"languageCode":"Login-Sprach-Code (en_us, ...)",
 				"login":"Login-ID (Integer)",
+				"preset":"ID von vordefinierten Datensatz (Integer)",
 				"record":"Datensatz-ID (Integer, Formular Relation 0)",
 				"recordNew":"Datensatz ist neu (TRUE/FALSE, Formular)",
 				"role":"Login hat Rolle (TRUE/FALSE)",
@@ -929,7 +959,8 @@
 		"help":"Hilfeseiten",
 		"helpContextTitle":"Kontext",
 		"helpModuleTitle":"Anwendung",
-		"invalidInputs":"Eingaben prüfen!"
+		"invalidInputs":"Eingaben prüfen!",
+		"noAccess":"Kein Zugriff"
 	},
 	"home":{
 		"button":{

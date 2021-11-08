@@ -7,6 +7,10 @@ import {
 	getCalendarCutOff1
 } from './shared/calendar.js';
 import {
+	fieldOptionGet,
+	fieldOptionSet
+} from './shared/field.js';
+import {
 	getChoiceFilters,
 	getColumnIndexesHidden
 } from './shared/form.js';
@@ -41,8 +45,8 @@ let MyCalendarMonth = {
 			<div class="area nowrap">
 				<my-button image="new.png"
 					v-if="hasCreate"
-					@trigger="clickRecord(0,false)"
-					@trigger-middle="clickRecord(0,true)"
+					@trigger="$emit('form-open-new',[],false)"
+					@trigger-middle="$emit('form-open-new',[],true)"
 					:caption="!isMobile ? capGen.button.new : ''"
 					:captionTitle="capGen.button.newHint"
 					:darkBg="true"
@@ -137,8 +141,10 @@ let MyCalendarMonth = {
 			<!-- days -->
 			<div class="day"
 				v-for="day in 7"
-				@click.exact="clickDay(((week-1)*7)+day-1,false)"
-				@click.shift="clickDay(((week-1)*7)+day-1,true)"
+				@click.exact="clickDay(((week-1)*7)+day-1,false,false)"
+				@click.shift="clickDay(((week-1)*7)+day-1,true,false)"
+				@click.middle.exact="clickDay(((week-1)*7)+day-1,false,true)"
+				@click.middle.shift="clickDay(((week-1)*7)+day-1,true,true)"
 				:class="getDayClasses(((week-1)*7)+day-1,day)"
 			>
 				<h1 class="noHighlight">{{ getDayNumber(((week-1)*7)+day-1) }}</h1>
@@ -227,7 +233,10 @@ let MyCalendarMonth = {
 		rows:       { type:Array,   required:false, default:() => [] },
 		rowSelect:  { type:Boolean, required:false, default:false }
 	},
-	emits:['day-selected','record-selected','set-choice-id','set-date'],
+	emits:[
+		'day-selected','form-open-new','record-selected',
+		'set-choice-id','set-date'
+	],
 	data:function() {
 		return {
 			icsToken:'',
@@ -408,14 +417,14 @@ let MyCalendarMonth = {
 		srcBase64,
 		
 		// actions
-		clickDay:function(dayOffset,shift) {
+		clickDay:function(dayOffset,shift,middleClick) {
 			if(!this.rowSelect) return;
 			
 			let d = new Date(this.date0.valueOf());
 			d.setDate(d.getDate() + dayOffset);
 			
 			// dates are stored as UTC zero
-			this.$emit('day-selected',this.getDateAtUtcZero(d),shift);
+			this.$emit('day-selected',this.getDateAtUtcZero(d),shift,middleClick);
 		},
 		clickRecord:function(recordId,middleClick) {
 			if(this.rowSelect)
@@ -431,7 +440,7 @@ let MyCalendarMonth = {
 			}
 			
 			// if already on current month, select 'today'
-			this.$emit('day-selected',this.getDateAtUtcZero(now),false);
+			this.$emit('day-selected',this.getDateAtUtcZero(now),false,false);
 		},
 		
 		// presentation
@@ -544,6 +553,7 @@ let MyCalendar = {
 		<my-calendar-month class="shade"
 			v-if="view === 'month'"
 			@day-selected="daySelected"
+			@form-open-new="(...args) => $emit('form-open-new',...args)"
 			@record-selected="(...args) => $emit('record-selected',...args)"
 			@set-choice-id="choiceIdSet"
 			@set-date="dateSet"
@@ -585,7 +595,7 @@ let MyCalendar = {
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:false, default:false }
 	},
-	emits:['record-selected','set-args'],
+	emits:['form-open-new','record-selected','set-args'],
 	data:function() {
 		return {
 			// calendar state
@@ -601,6 +611,13 @@ let MyCalendar = {
 		};
 	},
 	computed:{
+		choiceIdDefault:function() {
+			// default is user field option, fallback is first choice in list
+			return this.fieldOptionGet(
+				this.fieldId,'choiceId',
+				this.choices.length === 0 ? null : this.choices[0].id
+			);
+		},
 		expressions:function() {
 			// special date range expressions + regular column expressions
 			return this.getQueryExpressionsDateRange(
@@ -655,13 +672,15 @@ let MyCalendar = {
 			this.paramsUpdated();     // load existing parameters from route query
 			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
 		} else {
-			this.choiceId = this.choices.length > 0 ? this.choices[0].id : null;
+			this.choiceId = this.choiceIdDefault;
 		}
 		
 		this.ready = true;
 	},
 	methods:{
 		// externals
+		fieldOptionGet,
+		fieldOptionSet,
 		getCalendarCutOff0,
 		getCalendarCutOff1,
 		getChoiceFilters,
@@ -678,6 +697,7 @@ let MyCalendar = {
 		choiceIdSet:function(choiceId) {
 			if(choiceId === this.choiceId) return;
 			
+			this.fieldOptionSet(this.fieldId,'choiceId',choiceId);
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},
@@ -688,15 +708,16 @@ let MyCalendar = {
 				this.reloadInside();
 			}
 		},
-		daySelected:function(d,shift) {
+		daySelected:function(d,shift,middleClick) {
 			if(!shift) {
 				this.dateSelect0 = d;
 				this.dateSelect1 = d;
 			}
 			else {
-				if(this.dateSelect0 === null)
+				if(this.dateSelect0 === null) {
 					this.dateSelect0 = d;
-				
+					return;
+				}
 				this.dateSelect1 = d;
 			}
 			
@@ -704,7 +725,7 @@ let MyCalendar = {
 				`${this.attributeIdDate0}_${this.getUnixFromDate(this.dateSelect0)}`,
 				`${this.attributeIdDate1}_${this.getUnixFromDate(this.dateSelect1)}`
 			];
-			this.$emit('record-selected',0,[`attributes=${attributes.join(',')}`],false);
+			this.$emit('form-open-new',[`attributes=${attributes.join(',')}`],middleClick);
 		},
 		
 		// reloads
@@ -734,7 +755,7 @@ let MyCalendar = {
 		},
 		paramsUpdated:function() {
 			let params = {
-				choice:{ parse:'string', value:this.choices.length > 0 ? this.choices[0].id : null },
+				choice:{ parse:'string', value:this.choiceIdDefault },
 				month: { parse:'int',    value:this.date.getMonth() },
 				year:  { parse:'int',    value:this.date.getFullYear() }
 			};

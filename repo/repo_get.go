@@ -17,9 +17,9 @@ func GetModule(byString string, languageCode string, limit int,
 
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
-	qb.AddList("SELECT", []string{"rm.module_id_wofk", "rm.name", "rm.author",
-		"rm.in_store", "rm.release_build", "rm.release_build_app",
-		"rm.release_date", "rm.file"})
+	qb.AddList("SELECT", []string{"rm.module_id_wofk", "rm.name",
+		"rm.change_log", "rm.author", "rm.in_store", "rm.release_build",
+		"rm.release_build_app", "rm.release_date", "rm.file"})
 
 	qb.Set("FROM", "instance.repo_module AS rm")
 
@@ -95,8 +95,8 @@ func GetModule(byString string, languageCode string, limit int,
 	for rows.Next() {
 		var rm types.RepoModule
 
-		if err := rows.Scan(&rm.ModuleId, &rm.Name, &rm.Author, &rm.InStore,
-			&rm.ReleaseBuild, &rm.ReleaseBuildApp, &rm.ReleaseDate,
+		if err := rows.Scan(&rm.ModuleId, &rm.Name, &rm.ChangeLog, &rm.Author,
+			&rm.InStore, &rm.ReleaseBuild, &rm.ReleaseBuildApp, &rm.ReleaseDate,
 			&rm.FileId); err != nil {
 
 			return repoModules, 0, err

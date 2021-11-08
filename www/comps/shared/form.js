@@ -137,3 +137,20 @@ export function getResolvedPlaceholders(value) {
 	}
 	return value;
 };
+
+// set getter argument values in array of empty/pre-existing getters
+export function setGetterArgs(argsArray,name,value) {
+	
+	if(argsArray.length === 0)
+		return [`${name}=${value}`];
+	
+	for(let i = 0, j = argsArray.length; i < j; i++) {
+		
+		if(argsArray[i].indexOf(`${name}=`) === 0) {
+			// argument already exists, add new value to it
+			argsArray[i] = `${argsArray[i]},${value}`;
+			break;
+		}
+	}
+	return argsArray;
+};
