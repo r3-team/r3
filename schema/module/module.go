@@ -95,8 +95,14 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 	}
 	rows.Close()
 
-	// get captions
+	// get start forms & captions
 	for i, mod := range modules {
+
+		mod.StartForms, err = getStartForms(mod.Id)
+		if err != nil {
+			return modules, err
+		}
+
 		mod.Captions, err = caption.Get("module", mod.Id, []string{"moduleTitle", "moduleHelp"})
 		if err != nil {
 			return modules, err
@@ -109,8 +115,8 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 	formId pgtype.UUID, iconId pgtype.UUID, name string, color1 string,
 	position int, languageMain string, releaseBuild int, releaseBuildApp int,
-	releaseDate int64, dependsOn []uuid.UUID, languages []string,
-	captions types.CaptionMap) error {
+	releaseDate int64, dependsOn []uuid.UUID, startForms []types.ModuleStartForm,
+	languages []string, captions types.CaptionMap) error {
 
 	if err := db.CheckIdentifier(name); err != nil {
 		return err
@@ -232,18 +238,27 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 			return errors.New("module dependency to itself is not allowed")
 		}
 
-		isCircular, err := hasCircularDependency_tx(tx, id, moduleIdOn)
-		if err != nil {
-			return err
-		}
-		if isCircular {
-			return errors.New("circular module dependency is not allowed")
-		}
-
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.module_depends (module_id, module_id_on)
 			VALUES ($1,$2)
 		`, id, moduleIdOn); err != nil {
+			return err
+		}
+	}
+
+	// set start forms
+	if _, err := tx.Exec(db.Ctx, `
+		DELETE FROM app.module_start_form
+		WHERE module_id = $1
+	`, id); err != nil {
+		return err
+	}
+
+	for i, sf := range startForms {
+		if _, err := tx.Exec(db.Ctx, `
+			INSERT INTO app.module_start_form (module_id, position, role_id, form_id)
+			VALUES ($1,$2,$3,$4)
+		`, id, i, sf.RoleId, sf.FormId); err != nil {
 			return err
 		}
 	}
@@ -276,44 +291,29 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 	return nil
 }
 
-func hasCircularDependency_tx(tx pgx.Tx, moduleIdSource uuid.UUID,
-	moduleIdCandidate uuid.UUID) (bool, error) {
+func getStartForms(id uuid.UUID) ([]types.ModuleStartForm, error) {
 
-	moduleIdsCheckNext := make([]uuid.UUID, 0)
-
-	rows, err := tx.Query(db.Ctx, `
-		SELECT module_id_on
-		FROM app.module_depends
+	startForms := make([]types.ModuleStartForm, 0)
+	rows, err := db.Pool.Query(db.Ctx, `
+		SELECT role_id, form_id
+		FROM app.module_start_form
 		WHERE module_id = $1
-	`, moduleIdCandidate)
+		ORDER BY position ASC
+	`, id)
 	if err != nil {
-		return false, err
+		return startForms, err
 	}
+	defer rows.Close()
 
 	for rows.Next() {
-		var id uuid.UUID
-		if err := rows.Scan(&id); err != nil {
-			rows.Close()
-			return false, err
+		var sf types.ModuleStartForm
+		if err := rows.Scan(&sf.RoleId, &sf.FormId); err != nil {
+			return startForms, err
 		}
+		startForms = append(startForms, sf)
 
-		// any dependency from any module to source module is circular dependency
-		if moduleIdSource == id {
-			rows.Close()
-			return true, nil
-		}
-		moduleIdsCheckNext = append(moduleIdsCheckNext, id)
 	}
-	rows.Close()
-
-	// check modules that candidate is dependent on for dependency to source module
-	for _, id := range moduleIdsCheckNext {
-		isCircular, err := hasCircularDependency_tx(tx, moduleIdSource, id)
-		if isCircular || err != nil {
-			return isCircular, err
-		}
-	}
-	return false, nil
+	return startForms, nil
 }
 
 func getDependsOn_tx(tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {

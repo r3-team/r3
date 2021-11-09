@@ -1,20 +1,15 @@
 package types
 
 type FileType struct {
-	Builder bool `json:"builder"`
-
 	Db FileTypeDb `json:"db"`
 
 	Paths struct {
-		Captions       string `json:"captions"`
 		Certificates   string `json:"certificates"`
 		EmbeddedDbBin  string `json:"embeddedDbBin"`
 		EmbeddedDbData string `json:"embeddedDbData"`
 		Files          string `json:"files"`
-		Packages       string `json:"packages"`
 		Temp           string `json:"temp"`
 		Transfer       string `json:"transfer"`
-		Web            string `json:"web"`
 	} `json:"paths"`
 
 	Web struct {

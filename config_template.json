@@ -1,5 +1,4 @@
 {
-	"builder":false,
 	"db": {
 		"embedded": true,
 		"host": "localhost",
@@ -9,15 +8,12 @@
 		"pass": "app"
 	},
 	"paths": {
-		"captions": "var/texts/",
 		"certificates": "data/certificates/",
 		"embeddedDbBin": "pgsql/bin/",
 		"embeddedDbData": "data/database/",
 		"files": "data/files/",
-		"packages": "var/packages/",
 		"temp": "data/temp/",
-		"transfer":"data/transfer",
-		"web": "www/"
+		"transfer": "data/transfer"
 	},
 	"web": {
 		"cert": "cert.crt",

@@ -73,8 +73,8 @@ func ModuleSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	}
 	if err := module.Set_tx(tx, req.Id, req.ParentId, req.FormId, req.IconId,
 		req.Name, req.Color1, req.Position, req.LanguageMain, req.ReleaseBuild,
-		req.ReleaseBuildApp, req.ReleaseDate, req.DependsOn, req.Languages,
-		req.Captions); err != nil {
+		req.ReleaseBuildApp, req.ReleaseDate, req.DependsOn, req.StartForms,
+		req.Languages, req.Captions); err != nil {
 
 		return nil, err
 	}

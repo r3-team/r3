@@ -26,3 +26,20 @@ export function hasAnyAssignableRole(roles) {
 	}
 	return false;
 };
+
+export function getStartFormId(module,access) {
+	
+	// return NULL if no menu access is granted at all
+	if(!hasAccessToAnyMenu(module.menus,access.menu))
+		return null;
+	
+	// check role specific start form
+	for(let i = 0, j = module.startForms.length; i < j; i++) {
+		
+		if(access.roleIds.includes(module.startForms[i].roleId))
+			return module.startForms[i].formId;
+	}
+	
+	// return default start form (NULL is allowed)
+	return module.formId;
+};

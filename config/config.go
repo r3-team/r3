@@ -29,7 +29,7 @@ var (
 	appVersionBuild string // build counter of this application (1023)
 
 	// configuration file location
-	filePath      string = "config.json"
+	filePath      string // location of configuration file in JSON format
 	filePathTempl string = "config_template.json"
 
 	// configuration values from file, must not be changed during runtime
@@ -38,10 +38,6 @@ var (
 	// operation data
 	TokenSecret *jwt.HMACSHA
 	License     types.License = types.License{}
-
-	// system language codes
-	languageCodeDefault = "en_us"
-	languageCodes       = []string{"de_de", "en_us"}
 )
 
 // returns
@@ -64,12 +60,6 @@ func GetConfigFilepath() string {
 }
 func GetLicenseActive() bool {
 	return License.ValidUntil > tools.GetTimeUnix()
-}
-func GetLanguageCodeValid(requestedCode string) string {
-	if tools.StringInSlice(requestedCode, languageCodes) {
-		return requestedCode
-	}
-	return languageCodeDefault
 }
 
 // setters

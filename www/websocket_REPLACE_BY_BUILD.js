@@ -32,9 +32,11 @@ let wsHub = {
 			this.callbacks[name](argument);
 	},
 	close:function() {
-		if(this.ws !== null)
+		if(this.ws !== null) {
+			// https://developer.mozilla.org/en-US/docs/Web/API/CloseEvent/code
+			this.ws.close(1000); // code 1000: Normal Closure
 			this.ws = null;
-		
+		}
 		this.closeTransactions(); // kill active transactions
 		this.callback('close');   // execute last, close callback
 		this.callbacks = {};      // reset callbacks

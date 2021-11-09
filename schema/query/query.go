@@ -3,6 +3,7 @@ package query
 import (
 	"errors"
 	"fmt"
+	"r3/compatible"
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
@@ -39,11 +40,11 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	}
 
 	if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
-		SELECT id, relation_id
+		SELECT id, relation_id, fixed_limit
 		FROM app.query
 		WHERE %s_id = $1
 		%s
-	`, entity, filterClause), id).Scan(&q.Id, &q.RelationId); err != nil {
+	`, entity, filterClause), id).Scan(&q.Id, &q.RelationId, &q.FixedLimit); err != nil {
 		return q, err
 	}
 
@@ -208,17 +209,19 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 
 		if subQuery {
 			if _, err := tx.Exec(db.Ctx, `
-				INSERT INTO app.query (id, query_filter_query_id,
+				INSERT INTO app.query (id, fixed_limit, query_filter_query_id,
 					query_filter_position, query_filter_side)
-				VALUES ($1,$2,$3,$4)
-			`, query.Id, entityId, filterPosition, filterSide); err != nil {
+				VALUES ($1,$2,$3,$4,$5)
+			`, query.Id, query.FixedLimit, entityId,
+				filterPosition, filterSide); err != nil {
+
 				return err
 			}
 		} else {
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-				INSERT INTO app.query (id, %s_id)
-				VALUES ($1,$2)
-			`, entity), query.Id, entityId); err != nil {
+				INSERT INTO app.query (id, fixed_limit, %s_id)
+				VALUES ($1,$2,$3)
+			`, entity), query.Id, query.FixedLimit, entityId); err != nil {
 				return err
 			}
 		}
@@ -226,9 +229,9 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 
 	if _, err := tx.Exec(db.Ctx, `
 		UPDATE app.query
-		SET relation_id = $1
-		WHERE id = $2
-	`, query.RelationId, query.Id); err != nil {
+		SET relation_id = $1, fixed_limit = $2
+		WHERE id = $3
+	`, query.RelationId, query.FixedLimit, query.Id); err != nil {
 		return err
 	}
 
@@ -411,14 +414,14 @@ func getFilterSide(queryId uuid.UUID, filterPosition int, side int) (types.Query
 
 	if err := db.Pool.QueryRow(db.Ctx, `
 		SELECT attribute_id, attribute_index, attribute_nested, brackets,
-			content, field_id, role_id, query_aggregator, value
+			content, field_id, preset_id, role_id, query_aggregator, value
 		FROM app.query_filter_side
 		WHERE query_id = $1
 		AND query_filter_position = $2
 		AND side = $3
 	`, queryId, filterPosition, side).Scan(&s.AttributeId, &s.AttributeIndex,
-		&s.AttributeNested, &s.Brackets, &s.Content, &s.FieldId, &s.RoleId,
-		&s.QueryAggregator, &s.Value); err != nil {
+		&s.AttributeNested, &s.Brackets, &s.Content, &s.FieldId, &s.PresetId,
+		&s.RoleId, &s.QueryAggregator, &s.Value); err != nil {
 
 		return s, err
 	}
@@ -469,16 +472,19 @@ func setFilters_tx(tx pgx.Tx, queryId uuid.UUID, queryChoiceId pgtype.UUID,
 func SetFilterSide_tx(tx pgx.Tx, queryId uuid.UUID, filterPosition int,
 	side int, s types.QueryFilterSide) error {
 
+	// fix imports < 2.5: New filter side option: Preset
+	s.PresetId = compatible.FixPgxNull(s.PresetId).(pgtype.UUID)
+
 	if _, err := tx.Exec(db.Ctx, `
 		INSERT INTO app.query_filter_side (
 			query_id, query_filter_position, side, attribute_id,
 			attribute_index, attribute_nested, brackets, content, field_id,
-			role_id, query_aggregator, value
+			preset_id, role_id, query_aggregator, value
 		)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
 	`, queryId, filterPosition, side, s.AttributeId, s.AttributeIndex,
-		s.AttributeNested, s.Brackets, s.Content, s.FieldId, s.RoleId,
-		s.QueryAggregator, s.Value); err != nil {
+		s.AttributeNested, s.Brackets, s.Content, s.FieldId, s.PresetId,
+		s.RoleId, s.QueryAggregator, s.Value); err != nil {
 
 		return err
 	}

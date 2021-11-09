@@ -94,6 +94,151 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 // mapped by current database version string, returns new database version string
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
+	"2.4": func(tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(db.Ctx, `
+			-- repo change logs
+			ALTER TABLE instance.repo_module ADD COLUMN change_log TEXT;
+			
+			-- relation policies
+			CREATE TABLE app.relation_policy (
+			    relation_id uuid NOT NULL,
+				"position" smallint NOT NULL,
+			    role_id uuid NOT NULL,
+			    pg_function_id_excl uuid,
+			    pg_function_id_incl uuid,
+			    action_delete boolean NOT NULL,
+			    action_select boolean NOT NULL,
+			    action_update boolean NOT NULL,
+			    CONSTRAINT policy_pkey PRIMARY KEY (relation_id,"position"),
+			    CONSTRAINT policy_pg_function_id_excl_fkey FOREIGN KEY (pg_function_id_excl)
+			        REFERENCES app.pg_function (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID,
+			    CONSTRAINT policy_pg_function_id_incl_fkey FOREIGN KEY (pg_function_id_incl)
+			        REFERENCES app.pg_function (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID,
+			    CONSTRAINT policy_relation_id_fkey FOREIGN KEY (relation_id)
+			        REFERENCES app.relation (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID,
+			    CONSTRAINT policy_role_id_fkey FOREIGN KEY (role_id)
+			        REFERENCES app.role (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID
+			);
+			CREATE INDEX fki_relation_policy_pg_function_id_excl_fkey
+				ON app.relation_policy USING btree (pg_function_id_excl ASC NULLS LAST);
+			CREATE INDEX fki_relation_policy_pg_function_id_incl_fkey
+				ON app.relation_policy USING btree (pg_function_id_incl ASC NULLS LAST);
+			CREATE INDEX fki_relation_policy_relation_id_fkey
+				ON app.relation_policy USING btree (relation_id ASC NULLS LAST);
+			CREATE INDEX fki_relation_policy_role_id_fkey
+				ON app.relation_policy USING btree (role_id ASC NULLS LAST);
+			
+			-- missing record attribute on calendar fields
+			ALTER TABLE app.field_calendar ADD COLUMN attribute_id_record UUID;
+			ALTER TABLE app.field_calendar ADD CONSTRAINT field_calendar_attribute_id_record_fkey
+				FOREIGN KEY (attribute_id_record)
+				REFERENCES app.attribute (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			-- start forms
+			CREATE TABLE IF NOT EXISTS app.module_start_form(
+			    module_id uuid NOT NULL,
+			    "position" integer NOT NULL,
+			    role_id uuid NOT NULL,
+			    form_id uuid NOT NULL,
+			    CONSTRAINT module_start_form_pkey PRIMARY KEY (module_id, "position"),
+			    CONSTRAINT module_start_form_form_id_fkey FOREIGN KEY (form_id)
+			        REFERENCES app.form (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT module_start_form_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT module_start_form_role_id_fkey FOREIGN KEY (role_id)
+			        REFERENCES app.role (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX fki_module_start_form_module_id_fkey
+			    ON app.module_start_form USING btree (module_id ASC NULLS LAST);
+			CREATE INDEX fki_module_start_form_role_id_fkey
+			    ON app.module_start_form USING btree (role_id ASC NULLS LAST);
+			CREATE INDEX fki_module_start_form_form_id_fkey
+			    ON app.module_start_form USING btree (form_id ASC NULLS LAST);
+			
+			-- new config
+			INSERT INTO instance.config (name,value)
+			VALUES ('builderMode','0');
+			
+			-- new preset filter criteria
+			ALTER TYPE app.query_filter_side_content ADD VALUE 'preset';
+			ALTER TABLE app.query_filter_side ADD COLUMN preset_id UUID;
+			ALTER TABLE app.query_filter_side ADD CONSTRAINT query_filter_side_preset_id_fkey
+				FOREIGN KEY (preset_id)
+				REFERENCES app.preset (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			-- new query fixed limit
+			ALTER TABLE app.query ADD COLUMN fixed_limit INTEGER NOT NULL DEFAULT 0;
+			ALTER TABLE app.query ALTER COLUMN fixed_limit DROP DEFAULT;
+			
+			-- update log function
+			CREATE OR REPLACE FUNCTION instance.log(
+				level integer,
+				message text,
+				app_name text DEFAULT NULL::text)
+			    RETURNS void
+			    LANGUAGE 'plpgsql'
+			    COST 100
+			    VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+				module_id UUID;
+				level_show INT;
+			BEGIN
+				-- check log level
+				SELECT value::INT INTO level_show
+				FROM instance.config
+				WHERE name = 'logApplication';
+				
+				IF level_show < level THEN
+					RETURN;
+				END IF;
+			
+				-- resolve module ID if possible
+				-- if not possible: log with module_id = NULL (better than not to log)
+				IF app_name IS NOT NULL THEN
+					SELECT id INTO module_id
+					FROM app.module
+					WHERE name = app_name;
+				END IF;
+			
+				INSERT INTO instance.log (level,context,module_id,message,date_milli)
+				VALUES (level,'module',module_id,message,(EXTRACT(EPOCH FROM CLOCK_TIMESTAMP()) * 1000)::BIGINT);
+			END;
+			$BODY$;
+		`)
+		return "2.5", err
+	},
 	"2.3": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
 			CREATE TABLE IF NOT EXISTS app.field_chart (
@@ -277,14 +422,6 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		return "2.3", err
 	},
 	"2.1": func(tx pgx.Tx) (string, error) {
-
-		// update configuration file
-		config.File.Paths.Captions = "var/texts/"
-		config.File.Paths.Packages = "var/packages/"
-
-		if err := config.WriteFile(); err != nil {
-			return "", err
-		}
 
 		// replace PG function schedule positions with new IDs
 		type schedule struct {

@@ -164,22 +164,24 @@ let MyBuilderForm = {
 					@index-removed="fieldQueryRemoveIndex($event)"
 					@set-choices="fieldQuerySet('choices',$event)"
 					@set-filters="fieldQuerySet('filters',$event)"
+					@set-fixed-limit="fieldQuerySet('fixedLimit',$event)"
 					@set-joins="fieldQuerySet('joins',$event)"
 					@set-lookups="fieldQuerySet('lookups',$event)"
 					@set-orders="fieldQuerySet('orders',$event)"
 					@set-relation-id="fieldQuerySet('relationId',$event)"
-					:allow-lookups="fieldQueryEdit.content === 'list' && fieldQueryEdit.csvImport"
-					:allow-orders="true"
-					:builder-language="builderLanguage"
+					:allowLookups="fieldQueryEdit.content === 'list' && fieldQueryEdit.csvImport"
+					:allowOrders="true"
+					:builderLanguage="builderLanguage"
 					:choices="fieldQueryEdit.query.choices"
-					:data-fields="dataFields"
+					:dataFields="dataFields"
 					:filters="fieldQueryEdit.query.filters"
+					:fixedLimit="fieldQueryEdit.query.fixedLimit"
 					:joins="fieldQueryEdit.query.joins"
-					:module-id="module.id"
+					:moduleId="module.id"
 					:orders="fieldQueryEdit.query.orders"
 					:lookups="fieldQueryEdit.query.lookups"
-					:relation-id="fieldQueryEdit.query.relationId"
-					:relation-id-start="fieldQueryRelationIdStart"
+					:relationId="fieldQueryEdit.query.relationId"
+					:relationIdStart="fieldQueryRelationIdStart"
 				/>
 			</div>
 			
@@ -194,15 +196,17 @@ let MyBuilderForm = {
 					@set-lookups="lookups = $event"
 					@set-orders="orders = $event"
 					@set-relation-id="relationId = $event"
-					:allow-choices="false"
-					:builder-language="builderLanguage"
+					:allowChoices="false"
+					:allowFixedLimit="false"
+					:builderLanguage="builderLanguage"
 					:choices="choices"
 					:filters="filters"
+					:fixedLimit="0"
 					:joins="joins"
 					:lookups="lookups"
-					:module-id="form.moduleId"
+					:moduleId="form.moduleId"
 					:orders="orders"
-					:relation-id="relationId"
+					:relationId="relationId"
 				/>
 				
 				<!-- template fields -->
@@ -772,18 +776,10 @@ let MyBuilderForm = {
 			}
 			this.fieldQueryEdit.columns = colsCloned;
 		},
-		fieldQuerySet:function(content,value) {
-			let query = JSON.parse(JSON.stringify(this.fieldQueryEdit.query));
-			
-			switch(content) {
-				case 'relationId': query.relationId = value; break;
-				case 'joins':      query.joins      = value; break;
-				case 'filters':    query.filters    = value; break;
-				case 'orders':     query.orders     = value; break;
-				case 'lookups':    query.lookups    = value; break;
-				case 'choices':    query.choices    = value; break;
-			}
-			this.fieldQueryEdit.query = query;
+		fieldQuerySet:function(name,value) {
+			let v = JSON.parse(JSON.stringify(this.fieldQueryEdit.query));
+			v[name] = value;
+			this.fieldQueryEdit.query = v;
 		},
 		
 		// backend calls

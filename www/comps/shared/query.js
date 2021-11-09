@@ -52,6 +52,7 @@ export function getQueryExpressions(columns) {
 			query:{
 				queryId:c.query.id,
 				relationId:c.query.relationId,
+				limit:c.query.fixedLimit,
 				joins:c.query.joins,
 				expressions:[getQueryExpressionAttribute(c)],
 				filters:c.query.filters,
@@ -132,6 +133,15 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,jo
 			break;
 			case 'login':
 				s.value = MyStore.getters.loginId;
+			break;
+			case 'preset':
+				// unprotected presets can be deleted, 0 as fallback
+				s.value = 0;
+				
+				let presetIdMap = MyStore.getters['schema/presetIdMapRecordId'];
+				
+				if(typeof presetIdMap[s.presetId] !== 'undefined')
+					s.value = presetIdMap[s.presetId];
 			break;
 			case 'record':
 				if(typeof joinsIndexMap['0'] !== 'undefined')
@@ -216,7 +226,7 @@ export function getQueryAttributesPkFilter(relationId,recordIds,index,not) {
 export function getQueryTemplate() {
 	return {
 		id:'00000000-0000-0000-0000-000000000000',
-		relationId:null,joins:[],filters:[],orders:[],lookups:[],choices:[]
+		relationId:null,fixedLimit:0,joins:[],filters:[],orders:[],lookups:[],choices:[]
 	};
 };
 

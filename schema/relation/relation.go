@@ -77,13 +77,20 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 		}
 		r.ModuleId = moduleId
 		r.Attributes = make([]types.Attribute, 0)
+
+		r.Policies, err = getPolicies(r.Id)
+		if err != nil {
+			return relations, err
+		}
+
 		relations = append(relations, r)
 	}
 	return relations, nil
 }
 
 func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
-	retentionCount pgtype.Int4, retentionDays pgtype.Int4) error {
+	retentionCount pgtype.Int4, retentionDays pgtype.Int4,
+	policies []types.RelationPolicy) error {
 
 	if err := db.CheckIdentifier(name); err != nil {
 		return err
@@ -153,6 +160,11 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 				return err
 			}
 		}
+	}
+
+	// set policies
+	if err := setPolicies_tx(tx, id, policies); err != nil {
+		return err
 	}
 	return nil
 }

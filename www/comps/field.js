@@ -13,7 +13,8 @@ import {srcBase64}                from './shared/image.js';
 
 import {
 	getFlexStyle,
-	getInputFieldName
+	getInputFieldName,
+	setGetterArgs
 } from './shared/form.js';
 
 import {
@@ -213,7 +214,7 @@ let MyField = {
 						@blurred="blur"
 						@focused="focus"
 						@form-open="$emit('set-form-record',$event,field.formIdOpen)"
-						@form-open-new="$emit('set-form-record',0,field.formIdOpen,getArgsToApplyRecordAsAttribute())"
+						@form-open-new="$emit('set-form-record',0,field.formIdOpen,addRecordAttributeArgs([]))"
 						@record-selected="relationshipRecordSelected"
 						@record-removed="relationshipRecordRemoved"
 						:choices="choicesProcessed"
@@ -261,7 +262,8 @@ let MyField = {
 		<!-- button -->
 		<my-button
 			v-if="isButton"
-			@trigger="triggerButton"
+			@trigger="triggerButton(false)"
+			@trigger-middle="triggerButton(true)"
 			:caption="caption"
 			:imageBase64="iconId ? srcBase64(iconIdMap[iconId].file) : ''"
 		/>
@@ -278,8 +280,9 @@ let MyField = {
 		<!-- list -->
 		<my-list
 			v-if="isList"
-			@record-selected="(...args) => $emit('set-form-record',args[0],field.formIdOpen,getArgsToApplyRecordAsAttribute(),args[1])"
+			@record-selected="(...args) => $emit('set-form-record',args[0],field.formIdOpen,addRecordAttributeArgs([]),args[1])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
+			:allowPaging="field.query.fixedLimit === 0"
 			:autoRenew="field.autoRenew"
 			:choices="choicesProcessed"
 			:columns="columnsProcessed"
@@ -293,14 +296,15 @@ let MyField = {
 			:iconId="iconId ? iconId : null"
 			:isFullPage="isFullPage"
 			:layout="field.layout"
+			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 			:query="field.query"
-			:resultLimit="field.resultLimit"
 			:rowSelect="field.formIdOpen !== null"
 		/>
 		
 		<!-- calendar -->
 		<my-calendar
 			v-if="isCalendar && !field.gantt"
+			@form-open-new="(...args) => $emit('set-form-record',0,field.formIdOpen,addRecordAttributeArgs(args[0]),args[1])"
 			@record-selected="(...args) => $emit('set-form-record',args[0],field.formIdOpen,args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			:attributeIdColor="field.attributeIdColor"
@@ -325,6 +329,7 @@ let MyField = {
 		<!-- gantt -->
 		<my-gantt
 			v-if="isCalendar && field.gantt"
+			@form-open-new="(...args) => $emit('set-form-record',0,field.formIdOpen,addRecordAttributeArgs(args[0]),args[1])"
 			@record-selected="(...args) => $emit('set-form-record',args[0],field.formIdOpen,args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			:attributeIdColor="field.attributeIdColor"
@@ -332,6 +337,7 @@ let MyField = {
 			:attributeIdDate1="field.attributeIdDate1"
 			:choices="choicesProcessed"
 			:columns="columnsProcessed"
+			:fieldId="field.id"
 			:days0="field.dateRange0 / 86400"
 			:days1="field.dateRange1 / 86400"
 			:filters="filtersProcessed"
@@ -357,6 +363,7 @@ let MyField = {
 			:formLoading="formLoading"
 			:handleError="handleError"
 			:isFullPage="isFullPage"
+			:limit="field.query.fixedLimit"
 			:optionJson="field.chartOption"
 			:query="field.query"
 		/>
@@ -372,6 +379,7 @@ let MyField = {
 			:dataFieldMap="dataFieldMap"
 			:field="f"
 			:fieldIdMapState="fieldIdMapState"
+			:formBadLoad="formBadLoad"
 			:formBadSave="formBadSave"
 			:formLoading="formLoading"
 			:flexDirParent="field.direction"
@@ -386,6 +394,7 @@ let MyField = {
 		dataFieldMap:   { type:Object,  required:true },
 		field:          { type:Object,  required:true },
 		fieldIdMapState:{ type:Object,  required:false, default:() => { return {}} }, // overwritten states
+		formBadLoad:    { type:Boolean, required:true }, // attempted record load with no return
 		formBadSave:    { type:Boolean, required:true }, // attempted save with invalid inputs
 		formLoading:    { type:Boolean, required:true },
 		flexDirParent:  { type:String,  required:true }, // flex direction (row/column) of parent
@@ -644,6 +653,10 @@ let MyField = {
 			if(this.logViewer && state !== 'hidden')
 				state = 'readonly';
 			
+			// overwrite visible data field to readonly if form could not load record
+			if(this.isData && this.formBadLoad && state !== 'hidden')
+				state = 'readonly';
+			
 			return state;
 		},
 		
@@ -891,6 +904,7 @@ let MyField = {
 		isAttributeRelationship,
 		isAttributeString,
 		openLink,
+		setGetterArgs,
 		srcBase64,
 		
 		// actions
@@ -908,10 +922,10 @@ let MyField = {
 			if(this.showColorPickerInput)
 				this.showColorPickerInput = false;
 		},
-		triggerButton:function() {
+		triggerButton:function(middleClick) {
 			if(this.field.formIdOpen !== null)
 				this.$emit('set-form-record',0,this.field.formIdOpen,
-					this.getArgsToApplyRecordAsAttribute());
+					this.addRecordAttributeArgs([]),middleClick);
 		},
 		relationshipRecordSelected:function(recordId,middleClick) {
 			if(recordId === null)
@@ -938,16 +952,17 @@ let MyField = {
 		},
 		
 		// helpers
-		getArgsToApplyRecordAsAttribute:function() {
-			if(this.field.attributeIdRecord === null)
-				return [];
-			
-			if(typeof this.joinsIndexMap['0'] === 'undefined' || this.joinsIndexMap['0'].recordId === 0)
-				return [];
+		addRecordAttributeArgs:function(args) {
+			if(this.field.attributeIdRecord === null
+				|| typeof this.joinsIndexMap['0'] === 'undefined'
+				|| this.joinsIndexMap['0'].recordId === 0
+			) {
+				return args;
+			}
 			
 			// add record ID from primary relation join as default value for defined attribute
-			let atr = this.attributeIdMap[this.field.attributeIdRecord];
-			return [`attributes=${atr.id}_${this.joinsIndexMap['0'].recordId}`];
+			let atr = this.attributeIdMap[this.field.attributeIdRecord].id;
+			return this.setGetterArgs(args,'attributes',`${atr}_${this.joinsIndexMap['0'].recordId}`);
 		},
 		setValue:function(val,valOld,indexAttributeId) {
 			if(val === '')

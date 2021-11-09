@@ -52,14 +52,19 @@ func RenewAccessById(loginId int64) error {
 	return load(loginId, true)
 }
 
-// kick one login
-func KickLoginById(loginId int64) {
+// update clients
+func KickLoginById(loginId int64) { // kick single login
 	ClientEvent_handlerChan <- types.ClientEvent{LoginId: loginId, Kick: true}
 }
-
-// kick all non-admins
-func KickNonAdmins() {
+func KickNonAdmins() { // kick all non-admins
 	ClientEvent_handlerChan <- types.ClientEvent{LoginId: 0, KickNonAdmin: true}
+}
+func ChangedBuilderMode(modeActive bool) {
+	if modeActive {
+		ClientEvent_handlerChan <- types.ClientEvent{LoginId: 0, BuilderOn: true}
+	} else {
+		ClientEvent_handlerChan <- types.ClientEvent{LoginId: 0, BuilderOff: true}
+	}
 }
 
 // load access permissions for login ID into cache

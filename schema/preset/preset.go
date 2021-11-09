@@ -287,7 +287,8 @@ func setRecord_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, recordId 
 		// if refered record does not exist, do not set record
 		// otherwise potential NOT NULL constraint would be breached
 		if !exists {
-			return fmt.Errorf("referenced preset '%s' does not exist", value.PresetIdRefer.Bytes)
+			return fmt.Errorf("referenced preset '%s' does not exist",
+				uuid.FromBytesOrNil(value.PresetIdRefer.Bytes[:]))
 		}
 		sqlNames = append(sqlNames, fmt.Sprintf(`"%s"`, atrName))
 		sqlValues = append(sqlValues, recordId)

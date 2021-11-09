@@ -17,58 +17,55 @@ import (
 	"github.com/gorilla/websocket"
 )
 
-// a specific, active websocket client
+// a websocket client
 type clientType struct {
 	address   string             // IP address, no port
-	admin     bool               // is admin?
-	change_mx sync.Mutex         // mutex for safely changing client
+	admin     bool               // belongs to admin login?
 	ctx       context.Context    // global context for client requests
 	ctxCancel context.CancelFunc // to abort requests in case of disconnect
 	loginId   int64              // client login ID, 0 = not logged in yet
 	noAuth    bool               // logged in without authentication (username only)
-	send      chan []byte        // websocket send channel
-	sendOpen  bool               // websocket send channel open?
-	ws        *websocket.Conn    // websocket connection
+	write_mx  sync.Mutex
+	ws        *websocket.Conn // websocket connection
 }
 
 // a hub for all active websocket clients
-// clients can only be added/removed via the single, central hub
 type hubType struct {
-	broadcast chan []byte
-	clients   map[*clientType]bool
-	add       chan *clientType
-	remove    chan *clientType
+	clients map[*clientType]bool
+
+	// action channels
+	clientAdd chan *clientType // add client to hub
+	clientDel chan *clientType // delete client from hub
 }
 
 var (
-	clientUpgrader = websocket.Upgrader{}
+	clientUpgrader = websocket.Upgrader{
+		ReadBufferSize:  1024,
+		WriteBufferSize: 1024}
+
 	handlerContext = "websocket"
-	hub_mx         sync.Mutex // mutex for safely changing websocket hub
 
 	hub = hubType{
 		clients:   make(map[*clientType]bool),
-		add:       make(chan *clientType),
-		remove:    make(chan *clientType),
-		broadcast: make(chan []byte),
+		clientAdd: make(chan *clientType),
+		clientDel: make(chan *clientType),
 	}
 )
 
 func StartBackgroundTasks() {
 	go hub.start()
-	go handleClientEvents()
 }
 
-// handles websocket client
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// bruteforce check must occur before websocket connection is established
-	// otherwise the HTTP writer is hijacked
+	// otherwise the HTTP writer is not usable (hijacked for websocket)
 	if blocked := bruteforce.Check(r); blocked {
 		handler.AbortRequestNoLog(w, handler.ErrBruteforceBlock)
 		return
 	}
 
-	conn, err := clientUpgrader.Upgrade(w, r, nil)
+	ws, err := clientUpgrader.Upgrade(w, r, nil)
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 		return
@@ -78,6 +75,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	host, _, err := net.SplitHostPort(r.RemoteAddr)
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		ws.Close()
 		return
 	}
 
@@ -89,51 +87,85 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	client := &clientType{
 		address:   host,
 		admin:     false,
-		change_mx: sync.Mutex{},
 		ctx:       ctx,
 		ctxCancel: ctxCancel,
 		loginId:   0,
 		noAuth:    false,
-		send:      make(chan []byte),
-		sendOpen:  true,
-		ws:        conn,
+		write_mx:  sync.Mutex{},
+		ws:        ws,
 	}
 
-	hub.add <- client
+	hub.clientAdd <- client
 
-	go client.write()
 	go client.read()
 }
 
 func (hub *hubType) start() {
+
+	var removeClient = func(client *clientType) {
+		if _, exists := hub.clients[client]; exists {
+			log.Info("server", fmt.Sprintf("disconnecting client at %s", client.address))
+			client.ws.WriteMessage(websocket.CloseMessage, []byte{}) // optional
+			client.ws.Close()
+			client.ctxCancel()
+			delete(hub.clients, client)
+		}
+	}
+
 	for {
+		// hub is only handled here, no locking is required
 		select {
-		case client := <-hub.add:
-			hub_mx.Lock()
+		case client := <-hub.clientAdd:
 			hub.clients[client] = true
-			hub_mx.Unlock()
 
-		case client := <-hub.remove:
-			hub_mx.Lock()
-			if _, exists := hub.clients[client]; exists {
-				client.change_mx.Lock()
-				log.Info("server", fmt.Sprintf("disconnecting client at %s", client.address))
-				delete(hub.clients, client)
-				close(client.send)
-				client.ctxCancel()
-				client.sendOpen = false
-				client.ws.Close()
-				client.change_mx.Unlock()
+		case client := <-hub.clientDel:
+			removeClient(client)
+
+		case event := <-cache.ClientEvent_handlerChan:
+
+			jsonMsg := []byte{} // message back to client
+			kickEvent := event.Kick || event.KickNonAdmin
+
+			if !kickEvent {
+				// if clients are not kicked, prepare response
+				var err error
+
+				if event.BuilderOff || event.BuilderOn {
+					jsonMsg, err = prepareUnrequested("builder_mode_changed", event.BuilderOn)
+				}
+				if event.Renew {
+					jsonMsg, err = prepareUnrequested("reauthorized", nil)
+				}
+				if event.SchemaLoading {
+					jsonMsg, err = prepareUnrequested("schema_loading", nil)
+				}
+				if event.SchemaTimestamp != 0 {
+					jsonMsg, err = prepareUnrequested("schema_loaded", event.SchemaTimestamp)
+				}
+				if err != nil {
+					log.Error("server", "could not prepare unrequested transaction", err)
+					continue
+				}
 			}
-			hub_mx.Unlock()
 
-		case message := <-hub.broadcast:
-			for client := range hub.clients {
-				select {
-				case client.send <- message:
-				default: // client send channel is full
-					log.Warning("server", "websocket", fmt.Errorf("client channel is full"))
-					hub.remove <- client
+			for client, _ := range hub.clients {
+
+				// login ID 0 affects all
+				if event.LoginId != 0 && event.LoginId != client.loginId {
+					continue
+				}
+
+				// non-kick event, send message
+				if !kickEvent {
+					go client.write(jsonMsg)
+				}
+
+				// kick client, if requested
+				if event.Kick || (event.KickNonAdmin && !client.admin) {
+					log.Info("server", fmt.Sprintf("kicking client (login ID %d)",
+						client.loginId))
+
+					removeClient(client)
 				}
 			}
 		}
@@ -144,65 +176,24 @@ func (client *clientType) read() {
 	for {
 		_, message, err := client.ws.ReadMessage()
 		if err != nil {
-			hub.remove <- client
+			hub.clientDel <- client
 			return
 		}
 
-		// do not wait for result to allow parallel requests
-		// useful for new requests after aborting long running requests
+		// do not wait for response to allow for parallel requests
 		go func() {
-			result := client.handleTransaction(message)
-
-			client.change_mx.Lock()
-			if client.sendOpen {
-				client.send <- result
-			}
-			client.change_mx.Unlock()
+			client.write(client.handleTransaction(message))
 		}()
 	}
 }
 
-func (client *clientType) write() {
-	for {
-		select {
-		case message, open := <-client.send:
-			if !open {
-				client.ws.WriteMessage(websocket.CloseMessage, []byte{})
-				return
-			}
-			if err := client.ws.WriteMessage(websocket.TextMessage, message); err != nil {
-				hub.remove <- client
-				return
-			}
-		}
-	}
-}
+func (client *clientType) write(message []byte) {
+	client.write_mx.Lock()
+	defer client.write_mx.Unlock()
 
-func (client *clientType) sendUnrequested(ressource string, payload interface{}) {
-
-	var resTrans types.UnreqResponseTransaction
-	resTrans.TransactionNr = 0 // transaction was not requested
-
-	payloadJson, err := json.Marshal(payload)
-	if err != nil {
+	if err := client.ws.WriteMessage(websocket.TextMessage, message); err != nil {
+		hub.clientDel <- client
 		return
-	}
-
-	resTrans.Responses = make([]types.UnreqResponse, 1)
-	resTrans.Responses[0].Payload = payloadJson
-	resTrans.Responses[0].Ressource = ressource
-	resTrans.Responses[0].Result = "OK"
-
-	transJson, err := json.Marshal(resTrans)
-	if err != nil {
-		return
-	}
-
-	client.change_mx.Lock()
-	defer client.change_mx.Unlock()
-
-	if client.sendOpen {
-		client.send <- []byte(transJson)
 	}
 }
 
@@ -239,7 +230,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 		resTrans.Responses = make([]types.Response, 0)
 
 		if blocked := bruteforce.CheckByHost(client.address); blocked {
-			hub.remove <- client
+			hub.clientDel <- client
 			return []byte("{}")
 		}
 
@@ -287,46 +278,24 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 	return resTransJson
 }
 
-// client events from outside the websocket handler
-func handleClientEvents() {
-	for {
-		event := <-cache.ClientEvent_handlerChan
+func prepareUnrequested(ressource string, payload interface{}) ([]byte, error) {
 
-		for client, _ := range hub.clients {
+	var resTrans types.UnreqResponseTransaction
+	resTrans.TransactionNr = 0 // transaction was not requested
 
-			// login ID 0 affects all
-			if event.LoginId != 0 && event.LoginId != client.loginId {
-				continue
-			}
-
-			// ask client to renew authorization cache
-			if event.Renew {
-				client.sendUnrequested("reauthorized", nil)
-			}
-
-			// kick client
-			if event.Kick {
-				log.Info("server", fmt.Sprintf("kicking client (login ID %d)",
-					client.loginId))
-
-				hub.remove <- client
-			}
-
-			// kick non-admin
-			if event.KickNonAdmin && !client.admin {
-				log.Info("server", fmt.Sprintf("kicking non-admin client (login ID %d)",
-					client.loginId))
-
-				hub.remove <- client
-			}
-
-			// inform clients about schema events
-			if event.SchemaLoading {
-				client.sendUnrequested("schema_loading", nil)
-			}
-			if event.SchemaTimestamp != 0 {
-				client.sendUnrequested("schema_loaded", event.SchemaTimestamp)
-			}
-		}
+	payloadJson, err := json.Marshal(payload)
+	if err != nil {
+		return []byte{}, err
 	}
+
+	resTrans.Responses = make([]types.UnreqResponse, 1)
+	resTrans.Responses[0].Payload = payloadJson
+	resTrans.Responses[0].Ressource = ressource
+	resTrans.Responses[0].Result = "OK"
+
+	transJson, err := json.Marshal(resTrans)
+	if err != nil {
+		return []byte{}, err
+	}
+	return transJson, nil
 }

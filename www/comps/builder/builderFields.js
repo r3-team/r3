@@ -95,7 +95,7 @@ let MyBuilderFields = {
 					
 					<!-- action: list data SQL preview -->
 					<img class="action edit clickable" src="images/code.png"
-						v-if="!isTemplate && element.content === 'list'"
+						v-if="!isTemplate && ['calendar','chart','list'].includes(element.content)"
 						@click="getSqlPreview(element)"
 						:title="capApp.sql"
 					/>
@@ -545,7 +545,7 @@ let MyBuilderFields = {
 					JSON.parse(JSON.stringify(field.query.filters))
 				),
 				orders:field.query.orders,
-				limit:10
+				limit:field.query.fixedLimit !== 0 ? field.query.fixedLimit : 0
 			},this.getSqlPreviewOk);
 			trans.send(this.$root.genericError);
 		},
