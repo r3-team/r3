@@ -17,20 +17,17 @@ let MyDialog = {
 			
 			<div class="content no-padding">
 				<div class="dialog-text"
-					v-if="textDisplay === 'html'"
+					v-if="isHtml"
 					v-html="captionBody"
 				></div>
 				
-				<div class="dialog-text default-inputs"
-					v-if="textDisplay === 'textarea'"
-				>
+				<div class="dialog-text default-inputs" v-if="isTextarea">
 					<textarea class="dialog-text">{{ captionBody }}</textarea>
 				</div>
 				
-				<div class="dialog-text richtext"
-					v-if="textDisplay === 'richtext'"
-				>
+				<div class="dialog-text richtext" v-if="isRichtext">
 					<my-input-richtext
+						v-if="!richtextClosing"
 						:modelValue="captionBody"
 						:readonly="true"
 					/>
@@ -49,6 +46,11 @@ let MyDialog = {
 			</div>
 		</div>
 	</div>`,
+	data:function() {
+		return {
+			richtextClosing:false
+		};
+	},
 	computed:{
 		captionTop: function() {
 			if(this.$store.getters.dialogCaptionTop === '')
@@ -56,6 +58,11 @@ let MyDialog = {
 			
 			return this.$store.getters.dialogCaptionTop;
 		},
+		
+		// simple
+		isHtml:    function() { return this.textDisplay === 'html'; },
+		isRichtext:function() { return this.textDisplay === 'richtext'; },
+		isTextarea:function() { return this.textDisplay === 'textarea'; },
 		
 		// stores
 		buttons:    function() { return this.$store.getters.dialogButtons; },
@@ -67,14 +74,23 @@ let MyDialog = {
 	},
 	methods:{
 		trigger:function(i) {
-			if(typeof this.buttons[i].exec !== 'undefined') {
+			// richtext looses all styling during close
+			// remove before fade out occurs
+			this.richtextClosing = true;
+			
+			this.$nextTick(function() {
+				// execute button actions if set
+				if(typeof this.buttons[i].exec !== 'undefined') {
+					
+					if(Array.isArray(this.buttons[i].params))
+						this.buttons[i].exec(...this.buttons[i].params);
+					else
+						this.buttons[i].exec();
+				}
 				
-				if(Array.isArray(this.buttons[i].params))
-					this.buttons[i].exec(...this.buttons[i].params);
-				else
-					this.buttons[i].exec();
-			}
-			this.$store.commit('isAtDialog',false);
+				// close dialog window proper
+				this.$store.commit('isAtDialog',false)
+			});
 		}
 	}
 };
