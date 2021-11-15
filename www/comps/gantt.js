@@ -189,7 +189,7 @@ let MyGantt = {
 			<!-- keep div for flex layout -->
 			<div class="area nowrap">
 				<my-button image="new.png"
-					v-if="rowSelect"
+					v-if="hasCreate"
 					@trigger="$emit('form-open-new',[],false)"
 					@trigger-middle="$emit('form-open-new',[],true)"
 					:caption="!isMobile ? capGen.button.new : ''"
@@ -307,7 +307,7 @@ let MyGantt = {
 							v-for="i in headerItems"
 							@click="clickHeaderItem(i.unixTime,false)"
 							@click.middle="clickHeaderItem(i.unixTime,true)"
-							:class="{ clickable:rowSelect, today:getUnixFromDate(dateStart) === i.unixTime, weekend:i.isWeekend }"
+							:class="{ clickable:hasCreate, today:getUnixFromDate(dateStart) === i.unixTime, weekend:i.isWeekend }"
 							:style="'width:'+stepPixels+'px'"
 						>
 							{{ i.caption }}
@@ -387,6 +387,10 @@ let MyGantt = {
 				this.fieldId,'choiceId',
 				this.choices.length === 0 ? null : this.choices[0].id
 			);
+		},
+		hasCreate:function() {
+			if(this.query.joins.length === 0) return false;
+			return this.query.joins[0].applyCreate && this.rowSelect;
 		},
 		
 		// unix date range points, 0=gantt start, 1=gantt end
@@ -631,7 +635,7 @@ let MyGantt = {
 			this.reloadInside();
 		},
 		clickHeaderItem:function(unixTime,middleClick) {
-			if(!this.rowSelect) return;
+			if(!this.hasCreate) return;
 			
 			if(this.isDays)
 				unixTime = this.getUnixShifted(unixTime,false);
