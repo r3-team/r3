@@ -178,8 +178,9 @@ let MyBuilderFieldOptionsChart = {
 	emits:['update:modelValue'],
 	data:function() {
 		return {
-			jsonInput:'',
-			jsonBad:false
+			jsonBad:false,      // JSON validity check failed
+			jsonFirstLoad:true, // prettify JSON input on first load
+			jsonInput:''        // separated to execute JSON validity checking
 		};
 	},
 	computed:{
@@ -206,7 +207,14 @@ let MyBuilderFieldOptionsChart = {
 	},
 	watch:{
 		option:{
-			handler:function(v) { this.jsonInput = v; },
+			handler:function(v) {
+				if(this.jsonFirstLoad) {
+					this.jsonInput     = JSON.stringify(JSON.parse(v),null,2);
+					this.jsonFirstLoad = false;
+					return;
+				}
+				this.jsonInput = v;
+			},
 			immediate:true
 		}
 	},
