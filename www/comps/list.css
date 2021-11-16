@@ -2,8 +2,15 @@
 	flex:1 1 auto;
 	border-radius:3px;
 	display:flex;
-	flex-direction:column;
+	flex-flow:column nowrap;
 	overflow:auto;
+}
+.list.asInput{
+	align-self:stretch;
+	justify-content:space-between;
+}
+.list.asInput.inputAddShown{
+	margin-bottom:38px;
 }
 .list .lookup{
 	width:110px !important;
@@ -220,6 +227,15 @@
 .list-input-row-items.nowrap{
 	flex-wrap:nowrap;
 }
+.list-input-row-empty{
+	position:absolute;
+	padding-left:8px;
+	bottom:0px;
+	left:0px;
+	right:0px;
+	background-color:var(--color-bg);
+	border-top:1px solid var(--color-border);
+}
 
 
 /* list header functions (CSV, filters) */
@@ -279,6 +295,9 @@
 /* user overwrites */
 .user-bordersAll .list:not(.isFullPage):not(.asInput){
 	border:1px solid var(--color-border);
+}
+.user-bordersRounded .list-input-row-empty{
+	border-radius:0px 0px 3px 3px;
 }
 .user-bordersSquared .list,
 .user-bordersSquared .list .layoutCards .card,

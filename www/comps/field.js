@@ -55,7 +55,7 @@ let MyField = {
 				:id="getInputFieldName(field.id)"
 			>
 				<div class="caption"
-					v-if="focused || value !== null || isBoolean || isDateInput || isSlider || isRichtext || isCategory"
+					v-if="focused || value !== null || isBoolean || isDateInput || isSlider || isRichtext || isCategory || isRelationship"
 					:class="{ invalid:showInvalid }"
 				>{{ caption }}</div>
 				
@@ -227,7 +227,6 @@ let MyField = {
 						:header="false"
 						:inputAsCategory="field.category"
 						:inputAutoSelect="field.autoSelect"
-						:inputCaption="caption"
 						:inputIsNew="isNew"
 						:inputIsReadonly="isReadonly"
 						:inputMulti="isRelationship1N"

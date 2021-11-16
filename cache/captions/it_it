@@ -98,6 +98,7 @@
 		"resultsNone":"- nessun risultato -",
 		"resultsOf":"/ {CNT}",
 		"role":"Ruolo",
+		"threeDots":"...",
 		"title":"Titolo",
 		"username":"Username",
 		"version":"Versione"

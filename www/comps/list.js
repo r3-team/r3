@@ -37,7 +37,7 @@ let MyList = {
 	template:`<div class="list"
 		@keydown="keyDown"
 		v-click-outside="escape"
-		:class="{shade:!isInput, isFullPage:isFullPage, asInput:isInput, readonly:inputIsReadonly }"
+		:class="{shade:!isInput, isFullPage:isFullPage, asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly }"
 	>
 		<!-- list as input field (showing record(s) from active field value) -->
 		<template v-if="isInput">
@@ -126,54 +126,60 @@ let MyList = {
 				</tr>
 			</table>
 			
-			<!-- empty record input field -->
-			<table class="list-input-rows" v-if="showInputAddLine">
-				<tr>
-					<td class="minimum">
-						<slot name="input-icon" />
-					</td>
-					<td>
-						<div class="list-input-row-items">
-							<input class="input"
-								@click="focus"
-								@focus="focus"
-								@keyup="updatedTextInput"
-								v-model="quickFilter"
-								:class="{ invalid:!inputValid }"
-								:disabled="inputIsReadonly"
-								:placeholder="inputLinePlaceholder"
-								:tabindex="!inputIsReadonly ? 0 : -1"
-							/>
-						</div>
-					</td>
-					<td class="minimum">
-						<div class="list-input-row-items nowrap">
-							<my-button image="add.png"
-								v-if="inputOpenForm && hasCreate"
-								@trigger="$emit('form-open-new')"
-								:captionTitle="capApp.inputHintCreate"
-								:naked="true"
-							/>
-							<my-button image="arrowDown.png"
-								v-if="!inputIsReadonly"
-								@trigger="toggleDropdown"
-								:captionTitle="capApp.inputHintSelect"
-								:naked="true"
-							/>
-						</div>
-					</td>
-				</tr>
-			</table>
+			<template v-if="showInputAddLine">
+				<!-- empty record input field -->
+				
+				<div class="list-input-row-empty">
+					<table class="list-input-rows">
+						<tr>
+							<td class="minimum">
+								<slot name="input-icon" />
+							</td>
+							<td>
+								<div class="list-input-row-items">
+									<input class="input"
+										@click="focus"
+										@focus="focus"
+										@keyup="updatedTextInput"
+										v-model="quickFilter"
+										:class="{ invalid:!inputValid }"
+										:disabled="inputIsReadonly"
+										:placeholder="inputLinePlaceholder"
+										:tabindex="!inputIsReadonly ? 0 : -1"
+									/>
+								</div>
+							</td>
+							<td class="minimum">
+								<div class="list-input-row-items nowrap">
+									<my-button image="add.png"
+										v-if="inputOpenForm && hasCreate"
+										@trigger="$emit('form-open-new')"
+										:captionTitle="capApp.inputHintCreate"
+										:naked="true"
+									/>
+									<my-button image="arrowDown.png"
+										v-if="!inputIsReadonly"
+										@trigger="toggleDropdown"
+										:captionTitle="capApp.inputHintSelect"
+										:naked="true"
+									/>
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</template>
 		</template>
 		
-		<!-- regular list view (either view or input dropdown) -->
 		<template v-if="showTable && !inputAsCategory">
+			<!-- regular list view (either view or input dropdown) -->
 			
-			<!-- list header line -->
 			<div class="top lower" v-if="header">
+				<!-- list header line -->
 				
-				<!-- actions -->
 				<div class="area nowrap">
+					<!-- actions -->
+					
 					<my-button image="new.png"
 						v-if="hasCreate"
 						@trigger="$emit('record-selected',0,false)"
@@ -218,8 +224,8 @@ let MyList = {
 					/>
 				</div>
 				
-				<!-- auto renew / user filter / quick filter / query choices / page limits -->
 				<div class="area nowrap default-inputs">
+					<!-- auto renew / user filter / quick filter / query choices / page limits -->
 					
 					<my-button image="autoRenew.png"
 						v-if="!isMobile && autoRenew !== null"
@@ -265,8 +271,8 @@ let MyList = {
 				</div>
 			</div>
 			
-			<!-- list header functions -->
 			<div v-if="showCsv || showFilters || showAutoRenew">
+				<!-- list header functions -->
 				
 				<!-- auto renew -->
 				<div class="list-header default-inputs" v-if="showAutoRenew">
@@ -288,7 +294,6 @@ let MyList = {
 					</div>
 				</div>
 				
-				<!-- filters -->
 				<div class="list-header" v-if="showFilters">
 					<my-filters
 						v-model="filtersUser"
@@ -309,7 +314,6 @@ let MyList = {
 					</my-filters>
 				</div>
 				
-				<!-- CSV -->
 				<my-list-csv class="default-inputs"
 					v-if="showCsv"
 					@reload="get"
@@ -324,12 +328,13 @@ let MyList = {
 				/>
 			</div>
 			
-			<!-- list results as HTML table -->
 			<div class="layoutTable"
 				v-if="layout === 'table'"
 				:class="{ 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
 				:id="isFullPage ? scrollFormId : null"
 			>
+				<!-- list results as HTML table -->
+				
 				<table :class="{ 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
 					<thead v-if="header">
 						<!-- attribute headers -->
@@ -559,7 +564,6 @@ let MyList = {
 		// list as input field
 		inputAsCategory:{ type:Boolean, required:false, default:false },    // input is category selector (all records are shown, active ones are checked off)
 		inputAutoSelect:{ type:Number,  required:false, default:0 },        // # of records to auto select (2 = first two, -3 = last three, 0 = none)
-		inputCaption:   { type:String,  required:false, default:'' },       // input placeholder if empty
 		inputIsNew:     { type:Boolean, required:false, default:false },    // input field belongs to new record
 		inputIsReadonly:{ type:Boolean, required:false, default:false },    // input field is readonly
 		inputOpenForm:  { type:Boolean, required:false, default:false },    // input can open another form
@@ -702,10 +706,11 @@ let MyList = {
 			return this.joins[0].applyUpdate && this.rowSelect;
 		},
 		inputLinePlaceholder:function() {
-			if(this.inputRecordIds.length !== 0)
-				return this.focused ? '' : this.capApp.inputPlaceholderAdd;
+			if(this.focused) return '';
 			
-			return this.focused ? '' : this.inputCaption;
+			return this.anyInputRows
+				? this.capApp.inputPlaceholderAdd
+				: this.capGen.threeDots;
 		},
 		limitOptions:function() {
 			let out = [10,25,50,100,250,500,1000];
@@ -731,7 +736,7 @@ let MyList = {
 		},
 		showInputAddLine:function() {
 			return !this.inputAsCategory && (
-				this.inputRecordIds.length === 0 || (this.inputMulti && !this.inputIsReadonly)
+				!this.anyInputRows || (this.inputMulti && !this.inputIsReadonly)
 			);
 		},
 		showInputAddAll:function() {
@@ -782,6 +787,7 @@ let MyList = {
 		},
 		
 		// simple
+		anyInputRows:   function() { return this.inputRecordIds.length !== 0; },
 		autoSelect:     function() { return this.inputIsNew && this.inputAutoSelect !== 0 && !this.inputAutoSelectDone; },
 		choiceFilters:  function() { return this.getChoiceFilters(this.choices,this.choiceId); },
 		expressions:    function() { return this.getQueryExpressions(this.columns); },
@@ -1384,7 +1390,7 @@ let MyList = {
 				.concat(this.choiceFilters)
 			;
 			
-			if(this.inputRecordIds.length !== 0)
+			if(this.anyInputRows)
 				filters.push(this.getQueryAttributesPkFilter(
 					this.query.relationId,this.inputRecordIds,0,true
 				));
@@ -1424,12 +1430,12 @@ let MyList = {
 			// * field is category input (always shows everything)
 			// * auto select is active
 			// * input has records to get data for
-			if(!this.inputAsCategory && !this.autoSelect && this.inputRecordIds.length === 0)
+			if(!this.inputAsCategory && !this.autoSelect && !this.anyInputRows)
 				return;
 			
 			// apply existing filters, except user filters (not relevant here)
 			let filters = JSON.parse(JSON.stringify(this.filters));
-			if(!this.inputAsCategory && this.inputRecordIds.length !== 0)
+			if(!this.inputAsCategory && this.anyInputRows)
 				filters.push(this.getQueryAttributesPkFilter(
 					this.query.relationId,this.inputRecordIds,0,false
 				));
@@ -1446,7 +1452,7 @@ let MyList = {
 		},
 		getInputOk:function(res) {
 			// apply results to input rows if category or specific record IDs were retrieved
-			if(this.inputAsCategory || this.inputRecordIds.length !== 0)
+			if(this.inputAsCategory || this.anyInputRows)
 				this.rowsInput = res.payload.rows;
 			
 			// remove invalid records (due to field filters)

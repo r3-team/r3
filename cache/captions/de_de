@@ -99,6 +99,7 @@
 		"resultsOf":"/ {CNT}",
 		"role":"Rolle",
 		"title":"Titel",
+		"threeDots":"...",
 		"username":"Benutzername",
 		"version":"Version"
 	},
