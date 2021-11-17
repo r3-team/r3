@@ -150,13 +150,13 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 			continue
 		}
 
-		if err := addJoin(mapIndex_relId, join, &inJoin, nestingLevel); err != nil {
+		if err := addJoin(mapIndex_relId, join, &inJoin, loginId, nestingLevel); err != nil {
 			return "", "", err
 		}
 	}
 
-	// add filters
-	// before expressions because these are excluded from 'total count' query
+	// add filters from data GET query
+	// before expressions because these are excluded from 'total count' query and can contain sub query filters
 	// SQL arguments are numbered ($1, $2, ...) with no way to skip any (? placeholder is not allowed);
 	//  excluded sub queries arguments from expressions causes missing argument numbers
 	for i, filter := range data.Filters {
@@ -178,23 +178,19 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 		}
 	}
 
-	for index, relationId := range mapIndex_relId {
+	// add filter for base relation policy if applicable
+	policyFilter, err := getPolicyFilter(loginId, "select",
+		getRelationCode(data.IndexSource, nestingLevel), rel.Policies)
 
-		// add policy filter if applicable
-		rel, exists := cache.RelationIdMap[relationId]
-		if !exists {
-			return "", "", fmt.Errorf("unknown relation '%s'", relationId)
-		}
-
-		policyFilter, err := getPolicyFilter(loginId, "select",
-			getRelationCode(index, nestingLevel), rel.Policies)
-
-		if err != nil {
-			return "", "", err
-		}
+	if err != nil {
+		return "", "", err
+	}
+	if policyFilter != "" {
 		inWhere = append(inWhere, policyFilter)
 	}
-	queryWhere := strings.Replace(strings.Join(inWhere, ""), "AND", "\nWHERE", 1)
+
+	// add filters to query, replacing first AND with WHERE
+	queryWhere := strings.Replace(strings.Join(inWhere, ""), "AND", "WHERE", 1)
 
 	// add expressions
 	mapIndex_agg := make(map[int]bool)        // map of indexes with aggregation
@@ -435,11 +431,11 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 	return nil
 }
 
-func addJoin(mapIndex_relId map[int]uuid.UUID, rel types.DataGetJoin,
-	inJoin *[]string, nestingLevel int) error {
+func addJoin(mapIndex_relId map[int]uuid.UUID, join types.DataGetJoin,
+	inJoin *[]string, loginId int64, nestingLevel int) error {
 
 	// check join attribute
-	atr, exists := cache.AttributeIdMap[rel.AttributeId]
+	atr, exists := cache.AttributeIdMap[join.AttributeId]
 	if !exists {
 		return errors.New("join attribute does not exist")
 	}
@@ -450,11 +446,11 @@ func addJoin(mapIndex_relId map[int]uuid.UUID, rel types.DataGetJoin,
 
 	// is join attribute on source relation? (direction of relationship)
 	var relIdTarget uuid.UUID // relation ID that is to be joined
-	var relIdSource = mapIndex_relId[rel.IndexFrom]
-	var relCodeSource = getRelationCode(rel.IndexFrom, nestingLevel)
-	var relCodeTarget = getRelationCode(rel.Index, nestingLevel) // relation code that is to be joined
-	var relCodeFrom string                                       // relation code of where join attribute is from
-	var relCodeTo string                                         // relation code of where join attribute is pointing to
+	var relIdSource = mapIndex_relId[join.IndexFrom]
+	var relCodeSource = getRelationCode(join.IndexFrom, nestingLevel)
+	var relCodeTarget = getRelationCode(join.Index, nestingLevel) // relation code that is to be joined
+	var relCodeFrom string                                        // relation code of where join attribute is from
+	var relCodeTo string                                          // relation code of where join attribute is pointing to
 
 	if atr.RelationId == relIdSource {
 		// join attribute comes from source relation, other relation is defined in relationship
@@ -471,7 +467,7 @@ func addJoin(mapIndex_relId map[int]uuid.UUID, rel types.DataGetJoin,
 		relIdTarget = atr.RelationId
 	}
 
-	mapIndex_relId[rel.Index] = relIdTarget
+	mapIndex_relId[join.Index] = relIdTarget
 
 	// check other relation and corresponding module
 	relTarget, exists := cache.RelationIdMap[relIdTarget]
@@ -485,19 +481,28 @@ func addJoin(mapIndex_relId map[int]uuid.UUID, rel types.DataGetJoin,
 	}
 
 	// define JOIN type
-	if !tools.StringInSlice(rel.Connector, types.QueryJoinConnectors) {
+	if !tools.StringInSlice(join.Connector, types.QueryJoinConnectors) {
 		return errors.New("invalid join type")
 	}
 
-	*inJoin = append(*inJoin, fmt.Sprintf("\n"+`%s JOIN "%s"."%s" AS "%s" ON "%s"."%s" = "%s"."%s"`,
-		rel.Connector, modTarget.Name, relTarget.Name, relCodeTarget,
+	// apply filter policy to JOIN if applicable
+	policyFilter, err := getPolicyFilter(loginId, "select",
+		getRelationCode(join.Index, nestingLevel), relTarget.Policies)
+
+	if err != nil {
+		return err
+	}
+
+	*inJoin = append(*inJoin, fmt.Sprintf("\n"+`%s JOIN "%s"."%s" AS "%s" ON "%s"."%s" = "%s"."%s" %s`,
+		join.Connector, modTarget.Name, relTarget.Name, relCodeTarget,
 		relCodeFrom, atr.Name,
-		relCodeTo, lookups.PkName))
+		relCodeTo, lookups.PkName,
+		policyFilter))
 
 	return nil
 }
 
-// fills WHERE string from data GET request filters and returns count of arguments
+// parses filters to generate query lines and arguments
 func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 	queryCountArgs *[]interface{}, loginId int64, inWhere *[]string, nestingLevel int) error {
 
