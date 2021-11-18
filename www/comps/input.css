@@ -95,15 +95,14 @@
 .input-dropdown-wrap{
 	height:0px;
 	position:absolute;
-	bottom:0px;
+	bottom:-1px;
 	left:1%;
 	right:1%;
 	overflow:visible !important;
 	z-index:var(--z-index-dropdown);
 }
 .input-dropdown-wrap.upwards{
-	top:0px;
-	bottom:unset;
+	bottom:calc(var(--row-height) + 1px);
 }
 .input-dropdown{
 	width:100% !important;

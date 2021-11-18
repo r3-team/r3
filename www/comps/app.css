@@ -44,6 +44,10 @@
 	--spacing-parent:var(--spacing) 0px 0px var(--spacing);
 	
 	/**/
+	/* heights */
+	--row-height:38px;
+	
+	/**/
 	/* colors */
 	--color-container-title-upper:#606060;
 	--color-container-title-lower:#8c8c8c;

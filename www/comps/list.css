@@ -10,7 +10,7 @@
 	justify-content:space-between;
 }
 .list.asInput.inputAddShown{
-	margin-bottom:38px;
+	margin-bottom:var(--row-height);
 }
 .list .lookup{
 	width:110px !important;
@@ -60,7 +60,7 @@
 }
 .list .layoutTable th,
 .list .layoutTable td{
-	height:38px;
+	height:var(--row-height);
 	box-sizing:border-box;
 }
 .list .layoutTable th.checkbox,
@@ -211,7 +211,7 @@
 	overflow:hidden;
 }
 .list-input-rows tr{
-	height:38px;
+	height:var(--row-height);
 }
 .list-input-rows td{
 	padding:0px;
