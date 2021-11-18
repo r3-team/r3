@@ -501,7 +501,7 @@ let MyBuilderFields = {
 				
 				// workaround for missing filter values (collected from live form)
 				// NULL comparison is always valid
-				if(['field','languageCode','login','record','recordNew','role'].includes(s.content))
+				if(['field','javascript','languageCode','login','record','recordNew','role'].includes(s.content))
 					s.value = null;
 				
 				if(s.content === 'subQuery') {
