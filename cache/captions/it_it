@@ -505,6 +505,7 @@
 			"columnWrap":"A capo automatico",
 			"containerContentLayout":"Disposizione dei contenuti",
 			"content":"Query dati del modulo",
+			"contentColumn":"Query dati del colonna",
 			"contentField":"Query dati del campo",
 			"copy":"Duplica modulo",
 			"copyForm":"Seleziona modulo",

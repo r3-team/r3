@@ -165,31 +165,6 @@ let MyBuilderFieldColumnOptions = {
 				</td>
 			</tr>
 		</tbody></table>
-		
-		<!-- column sub query -->
-		<my-builder-query class="subQuery"
-			v-if="isSubQuery"
-			@set-choices="setQuery('choices',$event)"
-			@set-filters="setQuery('filters',$event)"
-			@set-fixed-limit="setQuery('fixedLimit',$event)"
-			@set-joins="setQuery('joins',$event)"
-			@set-lookups="setQuery('lookups',$event)"
-			@set-orders="setQuery('orders',$event)"
-			@set-relation-id="setQuery('relationId',$event)"
-			:allowChoices="false"
-			:allowOrders="true"
-			:builderLanguage="builderLanguage"
-			:choices="column.query.choices"
-			:dataFields="dataFields"
-			:filters="column.query.filters"
-			:fixedLimit="column.query.fixedLimit"
-			:joins="column.query.joins"
-			:joinsParents="[joins]"
-			:lookups="column.query.lookups"
-			:moduleId="moduleId"
-			:orders="column.query.orders"
-			:relationId="column.query.relationId"
-		/>
 	</div>`,
 	props:{
 		builderLanguage:{ type:String, required:true },
@@ -250,11 +225,6 @@ let MyBuilderFieldColumnOptions = {
 			if(allowNull) return this.$emit('set',name,null);
 			else          return this.$emit('set',name,0);
 		},
-		setQuery:function(name,value) {
-			let v = JSON.parse(JSON.stringify(this.column.query));
-			v[name] = value;
-			this.set('query',v);
-		},
 		setIndexAttribute:function(indexAttributeId) {
 			let v = indexAttributeId.split('_');
 			
@@ -299,6 +269,13 @@ let MyBuilderFieldColumns = {
 						:title="capApp.onMobile"
 					/>
 					
+					<!-- action: edit column query (if sub query) -->
+					<img class="action edit clickable" src="images/database.png"
+						v-if="!isTemplate && element.subQuery"
+						@click="columnIdQuerySet(element.id)"
+						:class="{ selected:columnIdQuery === element.id }"
+					/>
+					
 					<div class="title">{{ getTitle(element) }}</div>
 					
 					<div class="part clickable"
@@ -339,11 +316,11 @@ let MyBuilderFieldColumns = {
 				<my-builder-field-column-options
 					v-if="idEdit === element.id"
 					@set="(...args) => propertySet(index,args[0],args[1])"
-					:builder-language="builderLanguage"
+					:builderLanguage="builderLanguage"
 					:column="element"
-					:data-fields="dataFields"
+					:dataFields="dataFields"
 					:joins="joins"
-					:module-id="moduleId"
+					:moduleId="moduleId"
 				/>
 			</div>
 		</template>
@@ -351,6 +328,7 @@ let MyBuilderFieldColumns = {
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		columns:        { type:Array,   required:true },
+		columnIdQuery:  { required:false,default:null },
 		dataFields:     { type:Array,   required:true },
 		field:          { type:Object,  required:true },
 		isTemplate:     { type:Boolean, required:true },
@@ -358,7 +336,7 @@ let MyBuilderFieldColumns = {
 		moduleId:       { type:String,  required:true },
 		showCaptions:   { type:Boolean, required:false, default:false }
 	},
-	emits:['column-remove','columns-set'],
+	emits:['column-id-query-set','column-remove','columns-set'],
 	data:function() {
 		return {
 			idEdit:'' // column ID in edit mode
@@ -394,6 +372,12 @@ let MyBuilderFieldColumns = {
 		getItemTitle,
 		
 		// actions
+		columnIdQuerySet:function(columnId) {
+			if(this.columnIdQuery === columnId)
+				return this.$emit('column-id-query-set',null);
+			
+			this.$emit('column-id-query-set',columnId);
+		},
 		idEditSet:function(columnId) {
 			if(this.idEdit === columnId)
 				return this.idEdit = '';

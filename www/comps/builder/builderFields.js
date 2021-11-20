@@ -186,11 +186,11 @@ let MyBuilderFields = {
 				<my-builder-field-options
 					v-if="!isTemplate && fieldIdEdit === element.id"
 					@set="(...args) => fieldPropertySet(index,args[0],args[1])"
-					:builder-language="builderLanguage"
-					:data-fields="dataFields"
+					:builderLanguage="builderLanguage"
+					:dataFields="dataFields"
 					:field="element"
 					:joinsIndexMap="joinsIndexMap"
-					:module-id="moduleId"
+					:moduleId="moduleId"
 				/>
 				
 				<!-- columns for list fields -->
@@ -201,52 +201,56 @@ let MyBuilderFields = {
 					
 					<my-builder-field-columns class="inList"
 						@columns-set="fieldPropertySet(index,'columns',$event)"
+						@column-id-query-set="$emit('field-column-query-set',element.id,$event)"
 						@column-remove="$emit('column-remove',$event)"
-						:builder-language="builderLanguage"
+						:builderLanguage="builderLanguage"
+						:columnIdQuery="columnIdQuery"
 						:columns="element.columns"
-						:data-fields="dataFields"
+						:dataFields="dataFields"
 						:field="element"
 						:joins="element.query.joins"
-						:is-template="false"
-						:module-id="moduleId"
-						:show-captions="showCaptions"
+						:isTemplate="false"
+						:moduleId="moduleId"
+						:showCaptions="showCaptions"
 					/>
 				</div>
 				
 				<!-- column templates for list fields -->
 				<my-builder-field-column-templates
 					v-if="fieldIdQuery === element.id"
-					:builder-language="builderLanguage"
-					:data-fields="dataFields"
+					:builderLanguage="builderLanguage"
+					:dataFields="dataFields"
 					:field="element"
 					:joins="element.query.joins"
-					:module-id="moduleId"
+					:moduleId="moduleId"
 				/>
 				
 				<!-- nested fields in container -->
 				<my-builder-fields class="container-nested"
 					v-if="!isTemplate && element.content === 'container'"
+					@field-column-query-set="(...args) => $emit('field-column-query-set',...args)"
 					@field-counter-set="$emit('field-counter-set',$event)"
 					@field-id-query-set="$emit('field-id-query-set',$event)"
 					@field-remove="$emit('field-remove',$event)"
 					@field-move-store="$emit('field-move-store',$event)"
 					@column-remove="$emit('column-remove',$event)"
-					:builder-language="builderLanguage"
+					:builderLanguage="builderLanguage"
 					:class="element.direction"
-					:data-fields="dataFields"
-					:field-counter="fieldCounter"
-					:field-id-map-ref="fieldIdMapRef"
-					:field-id-query="fieldIdQuery"
-					:field-move-list="fieldMoveList"
-					:field-move-index="fieldMoveIndex"
+					:columnIdQuery="columnIdQuery"
+					:dataFields="dataFields"
+					:fieldCounter="fieldCounter"
+					:fieldIdMapRef="fieldIdMapRef"
+					:fieldIdQuery="fieldIdQuery"
+					:fieldMoveList="fieldMoveList"
+					:fieldMoveIndex="fieldMoveIndex"
 					:fields="element.fields"
 					:flexDirParent="element.direction"
-					:is-template="isTemplate"
+					:isTemplate="isTemplate"
 					:joinsIndexMap="joinsIndexMap"
-					:module-id="moduleId"
-					:show-captions="showCaptions"
-					:show-outside-in="showOutsideIn"
-					:show-states="showStates"
+					:moduleId="moduleId"
+					:showCaptions="showCaptions"
+					:showOutside-in="showOutsideIn"
+					:showStates="showStates"
 					:style="getStyleChildren(element)"
 				/>
 			</div>
@@ -254,6 +258,7 @@ let MyBuilderFields = {
 	</draggable>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },
+		columnIdQuery:  { required:false,default:null },
 		dataFields:     { type:Array,   required:false, default:() => [] },          // all data fields from form
 		fields:         { type:Array,   required:true },                             // fields to handle
 		flexDirParent:  { type:String,  required:true },                             // flex direction of parent (row|column)
@@ -270,8 +275,8 @@ let MyBuilderFields = {
 		showStates:     { type:Boolean, required:false, default:false }
 	},
 	emits:[
-		'column-remove','field-counter-set','field-id-query-set',
-		'field-remove','field-move-store'
+		'column-remove','field-column-query-set','field-counter-set',
+		'field-id-query-set','field-remove','field-move-store'
 	],
 	data:function() {
 		return {

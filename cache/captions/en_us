@@ -505,6 +505,7 @@
 			"columnWrap":"Text wrap",
 			"containerContentLayout":"Content layout",
 			"content":"Form data query",
+			"contentColumn":"Column data sub query",
 			"contentField":"Field data query",
 			"copy":"Duplicate form",
 			"copyForm":"Select form",

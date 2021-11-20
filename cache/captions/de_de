@@ -505,6 +505,7 @@
 			"columnWrap":"Textumbruch",
 			"containerContentLayout":"Inhalts-Layout",
 			"content":"Formular-Datenabfrage",
+			"contentColumn":"Spalten-Datenabfrage",
 			"contentField":"Feld-Datenabfrage",
 			"copy":"Formular duplizieren",
 			"copyForm":"Formular auswählen",

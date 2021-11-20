@@ -8,8 +8,6 @@
 .builder-form .sidebar{
 	min-width:400px;
 	flex:0 0 auto;
-	display:flex;
-	flex-flow:column nowrap;
 	overflow:auto;
 }
 .builder-form .sidebar .templates-wrap{
@@ -25,8 +23,6 @@
 /* form builder main area */
 .builder-form-main{
 	flex:2 1 auto;
-	display:flex;
-	flex-flow:column nowrap;
 	z-index:var(--z-index-form);
 	overflow:auto;
 }
@@ -34,6 +30,8 @@
 .builder-form-content{
 	flex:1 5 auto;
 	overflow:auto;
+	display:flex;
+	flex-flow:column nowrap;
 }
 .builder-form-fields{
 	/* all active fields in builder */
@@ -282,10 +280,4 @@
 .builder-form-state-condition>*,
 .builder-form-state-effect>*{
 	margin-right:8px !important;
-}
-
-
-/* user overwrites */
-.user-compact .builder-form-main{
-	box-shadow:1px 1px 8px var(--color-shade);
 }

@@ -4,6 +4,7 @@
 	max-height:100%;
 	display:flex;
 	flex-flow:column nowrap;
+	box-sizing:border-box;
 }
 .menu .contentBox{
 	z-index:var(--z-index-menu);
@@ -69,10 +70,10 @@
 }
 .user-compact .menu{
 	align-self:stretch;
+	border-right:1px solid var(--color-border);
 }
 .user-compact .menu .contentBox{
 	flex-grow:1;
-	border-right:1px solid var(--color-menu-border);
 }
 
 /* mobile overwrites */

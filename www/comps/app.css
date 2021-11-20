@@ -326,6 +326,7 @@ h3{
 	margin:var(--spacing-child);
 	display:flex;
 	flex-direction:column;
+	box-sizing:border-box;
 	box-shadow:1px 1px 8px var(--color-shade);
 	color:var(--color-font);
 	background-color:var(--color-bg);
@@ -591,6 +592,7 @@ table td.maximum{
 	flex:0 0 280px;
 	display:flex;
 	flex-flow:column nowrap;
+	box-sizing:border-box;
 }
 .navigation{
 	flex:0 1 auto;
@@ -864,16 +866,21 @@ table td.maximum{
 	margin:0px;
 	border:none;
 	border-bottom:1px solid var(--color-border);
+	border-right:1px solid var(--color-border);
 	border-radius:0px;
+	box-shadow:none;
 	--content-box-max-width:unset;
+}
+.user-compact .app-content .contentBox:last-child{
+	border-right:none;
 }
 .user-compact .app-content .contentBox .top{
 	border-radius:0px;
 }
-.user-compact .navigation.contentBox{
-	flex-grow:1;
-	border-right:1px solid var(--color-menu-border);
+.user-compact .navigationWrap{
+	border-right:1px solid var(--color-border);
 }
+.user-compact .navigation.contentBox,
 .user-compact .navigation.contentBox .content{
 	flex-grow:1;
 }

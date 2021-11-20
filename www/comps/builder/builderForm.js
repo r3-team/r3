@@ -27,10 +27,11 @@ let MyBuilderForm = {
 	},
 	template:`<div class="builder-form" v-if="form">
 	
-		<div class="builder-form-main">
+		<div class="contentBox builder-form-main">
 		
-			<!-- form builder main area -->
-			<div class="builder-form-content contentBox">
+			<div class="builder-form-content">
+			
+				<!-- form builder main area -->
 				<div class="top">
 					
 					<div class="area nowrap">
@@ -99,25 +100,27 @@ let MyBuilderForm = {
 				<my-builder-fields class="builder-form-fields default-inputs" flexDirParent="column"
 					v-if="!showHelp"
 					@fields-set="fields = $event"
+					@field-column-query-set="(...args) => setFieldColumnQuery(args[0],args[1])"
 					@field-counter-set="fieldCounter = $event"
-					@field-id-query-set="fieldIdQuery = $event"
+					@field-id-query-set="setFieldColumnQuery($event,null)"
 					@field-move-store="fieldMoveStore"
 					@field-remove="removeById($event,'field')"
 					@column-remove="removeById($event,'column')"
-					:builder-language="builderLanguage"
-					:data-fields="dataFields"
-					:field-counter="fieldCounter"
-					:field-id-map-ref="fieldIdMapRef"
-					:field-id-query="fieldIdQuery"
-					:field-move-list="fieldMoveList"
-					:field-move-index="fieldMoveIndex"
+					:builderLanguage="builderLanguage"
+					:columnIdQuery="columnIdQuery"
+					:dataFields="dataFields"
+					:fieldCounter="fieldCounter"
+					:fieldIdMapRef="fieldIdMapRef"
+					:fieldIdQuery="fieldIdQuery"
+					:fieldMoveList="fieldMoveList"
+					:fieldMoveIndex="fieldMoveIndex"
 					:fields="fields"
-					:is-template="false"
+					:isTemplate="false"
 					:joinsIndexMap="joinsIndexMap"
-					:module-id="form.moduleId"
-					:show-captions="showCaptions"
-					:show-outside-in="true"
-					:show-states="showStates"
+					:moduleId="form.moduleId"
+					:showCaptions="showCaptions"
+					:showOutside-in="true"
+					:showStates="showStates"
 				/>
 				
 				<!-- form context help -->
@@ -140,12 +143,14 @@ let MyBuilderForm = {
 			/>
 		</div>
 		
-		<!-- form builder sidebar -->
-		<div class="sidebar contentBox scroll" v-if="showSidebar">
+		<div class="contentBox sidebar scroll" v-if="showSidebar">
+		
+			<!-- form builder sidebar -->
 			<div class="top">
 				<div class="area">
 					<img class="icon" src="images/database.png" />
-					<h1>{{ !showFieldQuery ? capApp.content : capApp.contentField }}</h1>
+					<h1 v-if="showFieldQuery">{{ capApp.contentField }}</h1>
+					<h1 v-if="!showFieldQuery">{{ capApp.content }}</h1>
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
@@ -156,6 +161,8 @@ let MyBuilderForm = {
 					/>
 				</div>
 			</div>
+			
+			<div class="top lower" v-if="settings.compact" />
 			
 			<div class="content" v-if="showFieldQuery">
 				
@@ -183,6 +190,43 @@ let MyBuilderForm = {
 					:relationId="fieldQueryEdit.query.relationId"
 					:relationIdStart="fieldQueryRelationIdStart"
 				/>
+				
+				<template v-if="showColumnQuery">
+					<!-- field column sub query -->
+					<br /><br />
+					<div class="row">
+						<my-button image="database.png"
+							:active="false"
+							:caption="capApp.contentColumn"
+							:large="true"
+							:naked="true"
+						/>
+					</div>
+					
+					<my-builder-query
+						v-if="showColumnQuery"
+						@set-choices="fieldColumnQuerySet('choices',$event)"
+						@set-filters="fieldColumnQuerySet('filters',$event)"
+						@set-fixed-limit="fieldColumnQuerySet('fixedLimit',$event)"
+						@set-joins="fieldColumnQuerySet('joins',$event)"
+						@set-lookups="fieldColumnQuerySet('lookups',$event)"
+						@set-orders="fieldColumnQuerySet('orders',$event)"
+						@set-relation-id="fieldColumnQuerySet('relationId',$event)"
+						:allowChoices="false"
+						:allowOrders="true"
+						:builderLanguage="builderLanguage"
+						:choices="columnQueryEdit.query.choices"
+						:dataFields="dataFields"
+						:filters="columnQueryEdit.query.filters"
+						:fixedLimit="columnQueryEdit.query.fixedLimit"
+						:joins="columnQueryEdit.query.joins"
+						:joinsParents="[fieldQueryEdit.query.joins]"
+						:orders="columnQueryEdit.query.orders"
+						:lookups="columnQueryEdit.query.lookups"
+						:moduleId="module.id"
+						:relationId="columnQueryEdit.query.relationId"
+					/>
+				</template>
 			</div>
 			
 			<div class="content" v-if="!showFieldQuery">
@@ -260,6 +304,7 @@ let MyBuilderForm = {
 			choices:[],
 			
 			// state
+			columnIdQuery:null,
 			fieldCounter:0,     // counter to generate unique IDs for all fields
 			                    // used to populate new fields and for template fields
 			fieldIdQuery:null,  // field ID of which query is currently being edited
@@ -305,9 +350,35 @@ let MyBuilderForm = {
 		dataFields:function() {
 			return this.getDataFields(this.fields);
 		},
-		
-		// unique field reference counter for all fields (mapped by field ID)
+		columnIdMap:function() {
+			let map = {};
+			let collect = function(fields) {
+				for(let i = 0, j = fields.length; i < j; i++) {
+					
+					let f = fields[i];
+					
+					if(f.content === 'container') {
+						collect(f.fields);
+						continue;
+					}
+					
+					if(typeof f.columns !== 'undefined') {
+						for(let x = 0, y = f.columns.length; x < y; x++) {
+							map[f.columns[x].id] = f.columns[x];
+						}
+					}
+				}
+			};
+			collect(this.fields);
+			return map;
+		},
+		columnQueryEdit:function() {
+			if(this.columnIdQuery === null) return false;
+			
+			return this.columnIdMap[this.columnIdQuery];
+		},
 		fieldIdMapRef:function() {
+			// unique field reference counter for all fields (mapped by field ID)
 			let refs = {};
 			let refCounter = 0;
 			
@@ -418,6 +489,9 @@ let MyBuilderForm = {
 			
 			return atr.relationId;
 		},
+		showColumnQuery:function() {
+			return this.columnQueryEdit !== false;
+		},
 		showFieldQuery:function() {
 			return this.fieldQueryEdit !== false;
 		},
@@ -474,6 +548,7 @@ let MyBuilderForm = {
 			this.choices    = JSON.parse(JSON.stringify(this.form.query.choices));
 			this.fieldIdsRemove  = [];
 			this.columnIdsRemove = [];
+			this.columnIdQuery   = null;
 			this.fieldIdQuery    = null;
 		},
 		
@@ -780,6 +855,15 @@ let MyBuilderForm = {
 			let v = JSON.parse(JSON.stringify(this.fieldQueryEdit.query));
 			v[name] = value;
 			this.fieldQueryEdit.query = v;
+		},
+		fieldColumnQuerySet:function(name,value) {
+			let v = JSON.parse(JSON.stringify(this.columnQueryEdit.query));
+			v[name] = value;
+			this.columnQueryEdit.query = v;
+		},
+		setFieldColumnQuery:function(fieldId,columnId) {
+			this.fieldIdQuery  = fieldId;
+			this.columnIdQuery = columnId;
 		},
 		
 		// backend calls

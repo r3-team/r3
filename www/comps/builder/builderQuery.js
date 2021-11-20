@@ -302,7 +302,7 @@ let MyBuilderQueryOrders = {
 			@set-attribute-id="update(i,'attributeId',$event)"
 			@set-index="update(i,'index',$event)"
 			:ascending="o.ascending"
-			:attribute-id="o.attributeId"
+			:attributeId="o.attributeId"
 			:index="o.index"
 			:joins="joins"
 			:key="i"
@@ -393,15 +393,15 @@ let MyBuilderQueryNestedJoin = {
 				@relation-remove="(...args) => $emit('relation-remove',...args)"
 				@relation-apply-toggle="(...args) => $emit('relation-apply-toggle',...args)"
 				@relation-connector-set="(...args) => $emit('relation-connector-set',...args)"
-				:apply-create="j.applyCreate"
-				:apply-update="j.applyUpdate"
-				:apply-delete="j.applyDelete"
+				:applyCreate="j.applyCreate"
+				:applyUpdate="j.applyUpdate"
+				:applyDelete="j.applyDelete"
 				:connector="j.connector"
 				:key="j.index"
 				:index="j.index"
 				:joins="j.joins"
-				:join-attribute-id="j.joinAttributeId"
-				:join-relation-id="j.joinRelationId"
+				:joinAttributeId="j.joinAttributeId"
+				:joinRelationId="j.joinRelationId"
 				:module="module"
 				:name="j.name"
 			/>
@@ -573,14 +573,14 @@ let MyBuilderQuery = {
 				@relation-remove="relationRemove"
 				@relation-connector-set="relationConnectorSet"
 				@relation-apply-toggle="relationApplyToggle"
-				:apply-create="relationsNested.applyCreate"
-				:apply-update="relationsNested.applyUpdate"
-				:apply-delete="relationsNested.applyDelete"
+				:applyCreate="relationsNested.applyCreate"
+				:applyUpdate="relationsNested.applyUpdate"
+				:applyDelete="relationsNested.applyDelete"
 				:connector="relationsNested.connector"
 				:index="relationsNested.index"
 				:joins="relationsNested.joins"
-				:join-attribute-id="relationsNested.joinAttributeId"
-				:join-relation-id="relationsNested.joinRelationId"
+				:joinAttributeId="relationsNested.joinAttributeId"
+				:joinRelationId="relationsNested.joinRelationId"
 				:key="relationsNested.index"
 				:module="module"
 				:name="relationsNested.name"
@@ -674,15 +674,15 @@ let MyBuilderQuery = {
 				@move-up="choiceMove(i,false)"
 				@remove="choiceRemove(i)"
 				@update="choiceApply(i,$event)"
-				:builder-language="builderLanguage"
+				:builderLanguage="builderLanguage"
 				:choice="choicesInput[i]"
-				:data-fields="dataFields"
+				:dataFields="dataFields"
 				:joins="joins"
-				:joins-parents="joinsParents"
+				:joinsParents="joinsParents"
 				:key="i+'_'+c.id"
-				:module-id="moduleId"
-				:move-down="i < choicesInput.length - 1"
-				:move-up="i !== 0"
+				:moduleId="moduleId"
+				:moveDown="i < choicesInput.length - 1"
+				:moveUp="i !== 0"
 			/>
 		</div>
 		
@@ -923,10 +923,7 @@ let MyBuilderQuery = {
 			this.choicesInput = this.choicesInput;
 		},
 		displayArrow:function(state,count) {
-			if(count === 0)
-				return '';
-			
-			return state ? 'triangleDown.png' : 'triangleRight.png';
+			return state && count !== 0 ? 'triangleDown.png' : 'triangleRight.png';
 		},
 		filterAdd:function() {
 			this.filterAddCnt++;
