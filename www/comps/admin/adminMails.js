@@ -92,7 +92,7 @@ let MyAdminMails = {
 						<td class="minimum">
 							<my-button image="search.png" @trigger="showMail(m)" />
 						</td>
-						<td>{{ displayAttach(m) }}</td>
+						<td v-html="displayAttach(m)"></td>
 						<td>{{ getUnixFormat(m.date,settings.dateFormat+' H:i') }}</td>
 						<td>{{ displaySendAttempts(m) }}</td>
 						<td>{{ typeof accountIdMap[m.accountId] !== 'undefined' ? accountIdMap[m.accountId].name : '-' }}</td>
@@ -146,8 +146,8 @@ let MyAdminMails = {
 			return `${mail.attemptCount}/5 (${this.getUnixFormat(mail.attemptDate,this.settings.dateFormat+' H:i')})`;
 		},
 		displayAttach:function(mail) {
+			if(mail.outgoing)    return `<i>${this.capApp.attachmentsNoPreview}</i>`;
 			if(mail.files === 0) return '-';
-			
 			return `${mail.files} (${this.getSizeReadable(mail.filesSize)})`;
 		},
 		

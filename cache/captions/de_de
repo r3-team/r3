@@ -293,6 +293,7 @@
 			"accountStartTls":"STARTTLS",
 			"accountTest":"Test-E-Mail",
 			"accountUser":"Benutzername",
+			"attachmentsNoPreview":"nur für eingehende sichtbar",
 			"attempts":"Sendeversuche",
 			"bccList":"BCC",
 			"body":"Nachricht",
