@@ -151,7 +151,7 @@ let MyForm = {
 					@set-form-args="setFormArgs"
 					@set-form-record="setFormRecord"
 					@set-valid="validSet"
-					@set-value="valueSet"
+					@set-value="valueSetByField"
 					:dataFieldMap="fieldIdMapData"
 					:field="f"
 					:fieldIdMapState="fieldIdMapState"
@@ -718,30 +718,22 @@ let MyForm = {
 		},
 		
 		// field value control
-		valueSet:function(indexAttributeId,value) {
-			// set one value
-			this.values[indexAttributeId] = value;
+		valueSetByField:function(indexAttributeId,value) {
+			// set value from data field input, not during form load
+			if(this.loading)
+				return;
 			
-			// check if join attribute value has changed
-			let ia = this.getDetailsFromIndexAttributeId(indexAttributeId);
-			for(let k in this.joinsIndexMap) {
-				
-				if(ia.outsideIn)
-					continue;
-				
-				// GET data for affected join
-				if(this.joinsIndexMap[k].attributeId === ia.attributeId)
-					this.getFromSubJoin(this.joinsIndexMap[k],value);
-			}
+			this.values[indexAttributeId] = value;
+			this.valueUpdated(indexAttributeId);
 		},
 		valueSetInit:function(indexAttributeId,value) {
-			// initialize value, storing its value and a copy (original) for comparisson
+			// initialize value, storing its value and a copy for change comparisson
+			// do not check for join updates - initial values are complete
 			this.values[indexAttributeId]    = value;
 			this.valuesOrg[indexAttributeId] = JSON.parse(JSON.stringify(value));
 		},
 		valuesSetAllDefault:function() {
 			
-			// reset all values to defaults
 			// parse attribute values from form route getter
 			let attributeIdMapGetters = {};
 			if(typeof this.$route.query.attributes !== 'undefined') {
@@ -768,15 +760,26 @@ let MyForm = {
 			// apply default values
 			for(let k in this.values) {
 				
-				// default values from fields
-				this.values[k]    = this.valuesDef[k];
-				this.valuesOrg[k] = null;
-				
-				// default values from form getter
+				// overwrite default values from form getter
 				let ia = this.getDetailsFromIndexAttributeId(k);
 				
 				if(typeof attributeIdMapGetters[ia.attributeId] !== 'undefined')
-					this.valueSet(k,attributeIdMapGetters[ia.attributeId]);
+					this.valuesDef[k] = attributeIdMapGetters[ia.attributeId];
+				
+				this.values[k]    = this.valuesDef[k];
+				this.valuesOrg[k] = null;
+				this.valueUpdated(k);
+			}
+		},
+		valueUpdated:function(indexAttributeId,value) {
+			let ia = this.getDetailsFromIndexAttributeId(indexAttributeId);
+			if(ia.outsideIn)
+				return;
+			
+			// get data from sub joins if relationship attribute value has changed
+			for(let k in this.joinsIndexMap) {
+				if(this.joinsIndexMap[k].attributeId === ia.attributeId)
+					this.getFromSubJoin(this.joinsIndexMap[k],this.values[indexAttributeId]);
 			}
 		},
 		
