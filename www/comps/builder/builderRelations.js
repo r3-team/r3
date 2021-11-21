@@ -1,3 +1,4 @@
+import {getDependentModules} from '../shared/builder.js';
 export {MyBuilderRelations as default};
 
 let MyBuilderRelationsItemPolicy = {
@@ -6,9 +7,14 @@ let MyBuilderRelationsItemPolicy = {
 		<td>#{{ position+1 }}</td>
 		<td>
 			<select v-model="roleId">
-				<option v-for="r in module.roles" :value="r.id">
-					{{ r.name }}
-				</option>
+				<optgroup
+					v-for="mod in getDependentModules(module,modules)"
+					:label="mod.name"
+				>
+					<option v-for="r in mod.roles" :value="r.id">
+						{{ r.name }}
+					</option>
+				</optgroup>
 			</select>
 		</td>
 		<td><my-bool v-model="actionSelect" /></td>
@@ -99,10 +105,14 @@ let MyBuilderRelationsItemPolicy = {
 		},
 		
 		// stores
-		module:function() { return this.$store.getters['schema/moduleIdMap'][this.moduleId]; },
-		capApp:function() { return this.$store.getters.captions.builder.relation; }
+		module: function() { return this.$store.getters['schema/moduleIdMap'][this.moduleId]; },
+		modules:function() { return this.$store.getters['schema/modules']; },
+		capApp: function() { return this.$store.getters.captions.builder.relation; }
 	},
 	methods:{
+		// external
+		getDependentModules,
+		
 		update:function(name,value) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = value;

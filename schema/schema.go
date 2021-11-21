@@ -166,6 +166,35 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 			name1.String, name2.String)
 	}
 
+	// check relation policy access to external roles
+	if err := tx.QueryRow(db.Ctx, `
+		SELECT COUNT(*), STRING_AGG(r.name, ', ')
+		FROM app.relation_policy AS rp
+		INNER JOIN app.role     AS r ON r.id = rp.role_id
+		INNER JOIN app.relation AS t ON t.id = rp.relation_id
+		INNER JOIN app.module   AS m ON m.id = t.module_id
+			AND m.id = $1
+		
+		-- dependency
+		WHERE r.id NOT IN (
+			SELECT id
+			FROM app.role
+			WHERE module_id = m.id
+			OR module_id IN (
+				SELECT module_id_on
+				FROM app.module_depends
+				WHERE module_id = m.id
+			)
+		)
+	`, moduleId).Scan(&cnt, &name1); err != nil {
+		return err
+	}
+
+	if cnt != 0 {
+		return fmt.Errorf("dependency check failed, relation policies accessing role(s) '%s' from independent module(s)",
+			name1.String)
+	}
+
 	// check menu access to external forms
 	if err := tx.QueryRow(db.Ctx, `
 		SELECT COUNT(*), STRING_AGG(f.name, ', ')
