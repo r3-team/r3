@@ -20,9 +20,25 @@ Individuals and organizations can extend or create applications with the integra
   * Customization of application colors, names, welcome messages and so on.
 
 ## 📀 How to install
-REI3 runs on Windows or Linux systems. On Windows systems it can be installed in minutes with a graphical installation wizard, while Linux systems are easily deployed with a pre-packaged binary. A portable version is also available for Windows clients for testing and developing applications. [Downloads](https://rei3.de/download_en/) are available on the official [website](https://rei3.de/home_en/).
 
-For information about how to install and configure REI3, please visit the [admin documentation](https://rei3.de/admindocu-en_us/).
+### Windows
+1. [Download](https://rei3.de/download_en/) and execute the installer. If you choose the stand-alone mode, REI3 is automatically configured for you.
+1. That´s it.
+
+If you want to use your own database server, you can install REI3 in dedicated mode - visit the [admin documentation](https://rei3.de/admindocu-en_us/) to learn more.
+
+A portable version is also available for Windows clients for testing and developing applications. 
+
+### Linux
+1. Prepare a PostgreSQL server with a new, empty database.
+1. [Download](https://rei3.de/download_en/) and extract the precompiled Linux package.
+1. Make the file `r3` executable.
+1. Rename the file `config_template.json` to `config.json` and enter connection details to the chosen database.
+1. Install REI3 as a service with `r3 -install`.
+1. Start REI3 with your service manager, as in `systemctl start rei3`.
+1. That´s it.
+
+For the full [admin documentation](https://rei3.de/admindocu-en_us/), please visit the website.
 
 ## 💡 How to build applications
 All versions of REI3 include the graphical Builder utility, which can create new or change existing applications. After installing REI3, an administrator can enable the Builder inside the system configuration page. The maintenance mode must be enabled first, which will kick all non-admin users from the system while changes are being made.
