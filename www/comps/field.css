@@ -1,5 +1,4 @@
 .field{
-	max-height:100%; /* to allow overflow inside input-line */
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
