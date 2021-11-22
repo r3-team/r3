@@ -38,7 +38,7 @@ var expectedErrorRx = []*regexp.Regexp{
 	// do not limit regex to "ind_" prefixes for unique constraints, is used for app-schema indexes as well
 	regexp.MustCompile(`^ERROR\: duplicate key value violates unique constraint \".*\"`),
 
-	// custom error message from application
+	// custom error message from application, used in instance.abort_show_message()
 	regexp.MustCompile(`^ERROR\: R3_MSG\: `),
 }
 

@@ -8,7 +8,7 @@ let MyHeader = {
 		<div class="app-header-bg" :style="bgStyle" />
 		
 		<div class="app-header-content" :style="styles">
-			<div class="entries">
+			<div ref="content" class="entries">
 				
 				<template v-if="!isMobile && isAdmin" >
 					
@@ -55,7 +55,9 @@ let MyHeader = {
 						:to="'/app/'+me.name"
 					>
 						<img :src="srcBase64Icon(me.iconId,'images/module.png')" />
-						<span v-if="settings.headerCaptions">{{ me.caption }}</span>
+						<span v-if="settings.headerCaptions && !reducedHeader">
+							{{ me.caption }}
+						</span>
 					</router-link>
 					
 					<!-- sub header -->
@@ -88,7 +90,9 @@ let MyHeader = {
 				</div>
 			</div>
 			
-			<div class="entries">
+			<div ref="empty" class="entries" style="flex:1 1 auto;"></div>
+			
+			<div ref="system" class="entries">
 				
 				<!-- busy indicator -->
     				<transition name="fade_out">
@@ -148,6 +152,14 @@ let MyHeader = {
 		moduleEntries:{ type:Array, required:true }
 	},
 	emits:['logout'],
+	data:function() {
+		return {
+			contentSizePx:0,        // width in pixel required by all application entries
+			contentSizePxBuffer:50, // keep this space free (currently only for busy indicator)
+			reducedHeader:false,    // reduce sizes for application entries if space is limited
+			sizeCheckTimedOut:false // time-out for checking header size
+		};
+	},
 	computed:{
 		bgStyle:function() {
 			// custom color before specific module color
@@ -194,10 +206,43 @@ let MyHeader = {
 		productionMode:function() { return this.$store.getters.productionMode; },
 		settings:      function() { return this.$store.getters.settings; }
 	},
+	created:function() {
+		window.addEventListener('resize',this.windowResized);
+	},
+	mounted:function() {
+		this.windowResized();
+	},
+	unmounted:function() {
+		window.removeEventListener('resize',this.windowResized);
+	},
 	methods:{
 		// externals
 		srcBase64Icon,
 		
+		// display
+		windowResized:function() {
+			if(this.sizeCheckTimedOut)
+				return;
+			
+			if(!this.reducedHeader) {
+				if(this.$refs.empty.offsetWidth < this.contentSizePxBuffer) {
+					// empty space in header is too small, store currently required space for content, enable reduced header
+					this.contentSizePx = this.$refs.content.offsetWidth;
+					this.reducedHeader = true;
+				}
+			}
+			else {
+				// if empty space is large enough to show full content size, disable reduced header
+				if(this.$refs.empty.offsetWidth > this.contentSizePxBuffer + this.contentSizePx - this.$refs.content.offsetWidth)
+					this.reducedHeader = false;
+			}
+			
+			// limit header size checks
+			this.sizeCheckTimedOut = true;
+			setTimeout(() => this.sizeCheckTimedOut = false,100);
+		},
+		
+		// actions
 		cancelRequest:function() { this.$root.wsCancel(); },
 		openFeedback: function() { this.$store.commit('isAtFeedback',true); },
 		pagePrev:     function() { window.history.back(); },
