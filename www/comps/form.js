@@ -95,8 +95,8 @@ let MyForm = {
 					<div class="area">
 						<my-button image="new.png"
 							v-if="allowNew"
-							@trigger="setFormRecord(0)"
-							@trigger-middle="setFormRecord(0,null,null,true)"
+							@trigger="openNewAsk(false)"
+							@trigger-middle="openNewAsk(true)"
 							:active="(!isNew || hasChanges) && canSetNew"
 							:caption="capGen.button.new"
 							:captionTitle="capGen.button.newHint"
@@ -827,6 +827,42 @@ let MyForm = {
 		},
 		
 		// actions
+		openNewAsk:function(middleClick) {
+			// middle click does not kill form inputs, no confirmation required
+			if(middleClick)
+				return this.openNew(true);
+			
+			// existing record with no changes, no confirmation required
+			if(!this.isNew && !this.hasChanges)
+				return this.openNew(false);
+			
+			let caption = this.capGen.button.new;
+			let image   = 'new.png';
+			let msg     = this.capApp.dialog.new;
+			
+			if(this.isNew) {
+				caption = this.capGen.button.reset;
+				image   = 'refresh.png';
+				msg     = this.capApp.dialog.newReset;
+			}
+			
+			this.$store.commit('dialog',{
+				captionBody:msg,
+				buttons:[{
+					cancel:true,
+					caption:caption,
+					exec:this.openNew,
+					image:image
+				},{
+					caption:this.capGen.button.cancel,
+					image:'cancel.png'
+				}]
+			});
+		},
+		openNew:function(middleClick) {
+			if(middleClick) this.setFormRecord(0,null,null,true)
+			else            this.setFormRecord(0);
+		},
 		openBuilder:function() {
 			this.$router.push('/builder/form/'+this.form.id);
 		},
