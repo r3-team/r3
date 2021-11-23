@@ -275,39 +275,56 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 		// insert new record
 
 		// first check whether this relation is part of any joined relationship
-		for shipIndex, shipDataSet := range dataSetsByIndex {
+		for indexOther, dataSetOther := range dataSetsByIndex {
 
-			if shipIndex == index { // ignore itself
+			// join to its own index is invalid
+			if indexOther == index {
 				continue
 			}
 
-			if shipDataSet.IndexFrom == index {
+			// another relation is coming from us
+			if dataSetOther.IndexFrom == index {
 
 				// check on which side the relationship attribute resides
-				relAtr, exists := cache.AttributeIdMap[shipDataSet.AttributeId]
+				relAtrOther, exists := cache.AttributeIdMap[dataSetOther.AttributeId]
 				if !exists {
 					return errors.New("attribute does not exist")
 				}
 
-				if relAtr.RelationId == dataSet.RelationId {
-					// relationship attribute on this (to be created) tupel
-					// we must create other relation first, as we need to refer to it
+				// if attribute is on our side, we need to add its value to this tupel
+				// if its on the other side, its value will be added when the other tupel is being created
+				if relAtrOther.RelationId == dataSet.RelationId {
 
-					if err := setForIndex_tx(ctx, tx, shipIndex, dataSetsByIndex,
+					// the other relation has a higher index, so its tupel might not exist yet
+					if err := setForIndex_tx(ctx, tx, indexOther, dataSetsByIndex,
 						indexRecordIds, indexRecordsCreated, loginId); err != nil {
 
 						return err
 					}
-					indexRecordsCreated[shipIndex] = true
+					indexRecordsCreated[indexOther] = true
 
-					// add relationship attribute value for this tupel creation
-					values = append(values, indexRecordIds[shipIndex])
-					names = append(names, fmt.Sprintf(`"%s"`, relAtr.Name))
-					params = append(params, fmt.Sprintf(`$%d`, len(values)))
+					// if there is no relationship value available yet, we add it to the tupel
+					relValueNotSet := true
+					for _, atr := range dataSet.Attributes {
+						if atr.AttributeId == relAtrOther.Id {
+							if atr.Value != nil {
+								relValueNotSet = false
+							}
+							break
+						}
+					}
+
+					if relValueNotSet {
+						// add relationship attribute value for this tupel creation
+						values = append(values, indexRecordIds[indexOther])
+						names = append(names, fmt.Sprintf(`"%s"`, relAtrOther.Name))
+						params = append(params, fmt.Sprintf(`$%d`, len(values)))
+					}
 				}
 			}
 
-			if dataSet.IndexFrom == shipIndex {
+			// we are coming from another relation
+			if dataSet.IndexFrom == indexOther {
 
 				// check on which side the relationship attribute resides
 				relAtr, exists := cache.AttributeIdMap[dataSet.AttributeId]
@@ -315,13 +332,12 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 					return errors.New("attribute does not exist")
 				}
 
+				// if attribute is on this side, add to this record
+				// other relation tupel exists already as its index is lower
 				// exclude if both relations are the same, in this case the lower index always wins
-				if relAtr.RelationId == dataSet.RelationId && dataSet.RelationId != shipDataSet.RelationId {
-					// relationship attribute on this (to be created) tupel
-					// other relation tupel must exist already as its index is lower
+				if relAtr.RelationId == dataSet.RelationId && dataSet.RelationId != dataSetOther.RelationId {
 
-					// add relationship attribute value for this tupel creation
-					values = append(values, indexRecordIds[shipIndex])
+					values = append(values, indexRecordIds[indexOther])
 					names = append(names, fmt.Sprintf(`"%s"`, relAtr.Name))
 					params = append(params, fmt.Sprintf(`$%d`, len(values)))
 				}
