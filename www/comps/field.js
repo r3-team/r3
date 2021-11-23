@@ -217,6 +217,7 @@ let MyField = {
 						@form-open-new="$emit('set-form-record',0,field.formIdOpen,addRecordAttributeArgs([]))"
 						@record-selected="relationshipRecordSelected"
 						@record-removed="relationshipRecordRemoved"
+						@records-selected-init="$emit('set-value-init',fieldAttributeId,$event,true,true)"
 						:choices="choicesProcessed"
 						:columns="columnsProcessed"
 						:fieldId="field.id"
@@ -375,6 +376,7 @@ let MyField = {
 			@set-form-record="(...args) => $emit('set-form-record',...args)"
 			@set-valid="(...args) => $emit('set-valid',...args)"
 			@set-value="(...args) => $emit('set-value',...args)"
+			@set-value-init="(...args) => $emit('set-value-init',...args)"
 			:dataFieldMap="dataFieldMap"
 			:field="f"
 			:fieldIdMapState="fieldIdMapState"
@@ -403,7 +405,7 @@ let MyField = {
 		logViewer:      { type:Boolean, required:false, default:false }, // is part of log viewer
 		values:         { type:Object,  required:true }
 	},
-	emits:['set-form-args','set-form-record','set-valid','set-value'],
+	emits:['set-form-args','set-form-record','set-valid','set-value','set-value-init'],
 	data:function() {
 		return {
 			focused:false,

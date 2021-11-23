@@ -573,7 +573,7 @@ let MyList = {
 	},
 	emits:[
 		'blurred','focused','form-open','form-open-new',
-		'record-removed','record-selected','set-args'
+		'record-removed','record-selected','records-selected-init','set-args'
 	],
 	data:function() {
 		return {
@@ -1471,30 +1471,32 @@ let MyList = {
 			}
 			
 			// auto-selection of records
-			// apply only if nothing was selected or entire selection was invalid
+			// only if nothing was selected or entire selection was invalid
 			if(this.autoSelect && (this.inputRecordIds.length - recordsRemoved) === 0) {
 				
+				// select first/last X records
+				let ids = [];
 				if(this.inputAutoSelect > 0) {
-					
-					// select first X records
 					for(let i = 0; i < this.inputAutoSelect; i++) {
 						
 						if(res.payload.rows.length - 1 < i)
 							break;
 						
-						this.clickRow(res.payload.rows[i],false);
+						ids.push(res.payload.rows[i].indexRecordIds['0']);
 					}
 				}
 				else {
-					// select last X records
 					for(let i = 0; i > this.inputAutoSelect; i--) {
 						
 						if(res.payload.rows.length - 1 + i < 0)
 							break;
 						
-						this.clickRow(res.payload.rows[res.payload.rows.length - 1 + i],false);
+						ids.push(res.payload.rows[res.payload.rows.length - 1 + i].indexRecordIds['0']);
 					}
 				}
+				if(ids.length !== 0)
+					this.$emit('records-selected-init',this.inputMulti ? ids : ids[0]);
+				
 				this.inputAutoSelectDone = true;
 			}
 		}

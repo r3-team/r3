@@ -171,6 +171,7 @@ let MyForm = {
 					@set-form-record="setFormRecord"
 					@set-valid="validSet"
 					@set-value="valueSetByField"
+					@set-value-init="valueSet"
 					:dataFieldMap="fieldIdMapData"
 					:field="f"
 					:fieldIdMapState="fieldIdMapState"
@@ -711,7 +712,7 @@ let MyForm = {
 					}
 					
 					that.valuesDef[indexAttributeId] = def;
-					that.valueSetInit(indexAttributeId,def);
+					that.valueSet(indexAttributeId,def,true,false);
 					
 					// set value and default for altern. field attribute
 					if(f.attributeIdAlt !== null) {
@@ -720,7 +721,7 @@ let MyForm = {
 							f.index,f.attributeIdAlt,false,null);
 						
 						that.valuesDef[indexAttributeIdAlt] = null;
-						that.valueSetInit(indexAttributeIdAlt,null);
+						that.valueSet(indexAttributeIdAlt,null,true,false);
 					}
 				}
 				return fields;
@@ -762,19 +763,31 @@ let MyForm = {
 		},
 		
 		// field value control
-		valueSetByField:function(indexAttributeId,value) {
-			// set value from data field input, not during form load
-			if(this.loading)
-				return;
-			
+		valueSet:function(indexAttributeId,value,isOriginal,updateJoins) {
 			this.values[indexAttributeId] = value;
-			this.valueUpdated(indexAttributeId);
+			
+			// set original value for change comparisson against current value
+			if(isOriginal)
+				this.valuesOrg[indexAttributeId] = JSON.parse(JSON.stringify(value));
+			
+			// update sub joins if value has changed from input
+			if(updateJoins) {
+				let ia = this.getDetailsFromIndexAttributeId(indexAttributeId);
+				if(ia.outsideIn)
+					return;
+				
+				// get data from sub joins if relationship attribute value has changed
+				for(let k in this.joinsIndexMap) {
+					if(this.joinsIndexMap[k].attributeId === ia.attributeId)
+						this.getFromSubJoin(this.joinsIndexMap[k],value);
+				}
+			}
 		},
-		valueSetInit:function(indexAttributeId,value) {
-			// initialize value, storing its value and a copy for change comparisson
-			// do not check for join updates - initial values are complete
-			this.values[indexAttributeId]    = value;
-			this.valuesOrg[indexAttributeId] = JSON.parse(JSON.stringify(value));
+		valueSetByField:function(indexAttributeId,value) {
+			// block updates during form load
+			//  some fields (richtext) updated their values after form was already unloaded
+			if(!this.loading)
+				this.valueSet(indexAttributeId,value,false,true);
 		},
 		valuesSetAllDefault:function() {
 			
@@ -810,19 +823,7 @@ let MyForm = {
 				if(typeof attributeIdMapGetters[ia.attributeId] !== 'undefined')
 					this.valuesDef[k] = attributeIdMapGetters[ia.attributeId];
 				
-				this.valueSetInit(k,this.valuesDef[k]);
-				this.valueUpdated(k);
-			}
-		},
-		valueUpdated:function(indexAttributeId,value) {
-			let ia = this.getDetailsFromIndexAttributeId(indexAttributeId);
-			if(ia.outsideIn)
-				return;
-			
-			// get data from sub joins if relationship attribute value has changed
-			for(let k in this.joinsIndexMap) {
-				if(this.joinsIndexMap[k].attributeId === ia.attributeId)
-					this.getFromSubJoin(this.joinsIndexMap[k],this.values[indexAttributeId]);
+				this.valueSet(k,this.valuesDef[k],true,true);
 			}
 		},
 		
@@ -1070,8 +1071,10 @@ let MyForm = {
 			for(let i = 0, j = res.payload.rows[0].values.length; i < j; i++) {
 				let a = req.payload.expressions[i];
 				
-				this.valueSetInit(this.getIndexAttributeId(a.index,a.attributeId,
-					a.outsideIn,a.attributeIdNm),res.payload.rows[0].values[i]);
+				this.valueSet(
+					this.getIndexAttributeId(a.index,a.attributeId,a.outsideIn,a.attributeIdNm),
+					res.payload.rows[0].values[i],true,false
+				);
 			}
 			this.badSave = false;
 			this.badLoad = false;
@@ -1143,11 +1146,11 @@ let MyForm = {
 			else {
 				// reset index attribute values
 				for(let i = 0, j = expressions.length; i < j; i++) {
-					this.valueSetInit(this.getIndexAttributeId(
-						expressions[i].index,
-						expressions[i].attributeId,
-						expressions[i].outsideIn,
-						expressions[i].attributeIdNm),null
+					let e = expressions[i];
+					
+					this.valueSet(
+						this.getIndexAttributeId(e.index,e.attributeId,e.outsideIn,e.attributeIdNm),
+						null,true,false
 					);
 				}
 			}
@@ -1160,14 +1163,13 @@ let MyForm = {
 				this.recordIdIndexMap[index] = res.payload.rows[0].indexRecordIds[index];
 			}
 			
-			let ias = req.payload.expressions;
 			for(let i = 0, j = res.payload.rows[0].values.length; i < j; i++) {
-				this.valueSetInit(this.getIndexAttributeId(
-					ias[i].index,
-					ias[i].attributeId,
-					ias[i].outsideIn,
-					ias[i].attributeIdNm
-				),res.payload.rows[0].values[i]);
+				let e = req.payload.expressions[i];
+				
+				this.valueSet(
+					this.getIndexAttributeId(e.index,e.attributeId,e.outsideIn,e.attributeIdNm),
+					res.payload.rows[0].values[i],true,false
+				);
 			}
 		},
 		set:function(saveAndNew) {
