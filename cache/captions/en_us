@@ -957,6 +957,14 @@
 		"dialog":{
 			"delete":"Are you sure that you want to <b>permanently</b> delete this record?"
 		},
+		"message":{
+			"recordCreated":"Record has been created",
+			"recordCreatedMobile":"Created!",
+			"recordDeleted":"Record has been deleted",
+			"recordDeletedMobile":"Deleted!",
+			"recordUpdated":"Record has been updated",
+			"recordUpdatedMobile":"Updated!"
+		},
 		"dataLog":"Change logs",
 		"deletedUser":"deleted User",
 		"help":"Help pages",

@@ -785,24 +785,30 @@ table td.maximum{
 /* default fade (in+out) */
 .fade-enter-active,
 .fade-leave-active{
-	transition:opacity .2s;
+	transition:opacity 0.2s;
 }
-.fade-enter,
+.fade-enter-active.slow-in{
+	transition:opacity 3s;
+}
+.fade-leave-active.slow-out{
+	transition:opacity 3s;
+}
+.fade-enter-from,
 .fade-leave-to{
 	opacity:0;
 }
 
 /* only fade in */
 .fade_in-enter-active{
-	transition:opacity .2s;
+	transition:opacity 0.2s;
 }
-.fade_in-enter{
+.fade_in-enter-from{
 	opacity:0;
 }
 
 /* only fade out */
 .fade_out-leave-active{
-	transition:opacity .4s;
+	transition:opacity 0.4s;
 }
 .fade_out-leave-to{
 	opacity:0;

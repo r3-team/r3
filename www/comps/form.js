@@ -126,6 +126,18 @@ let MyForm = {
 							:captionTitle="capGen.button.deleteHint"
 							:darkBg="true"
 						/>
+						
+						<!-- record saved message -->
+						<transition name="fade" class="slow-out">
+							<div class="form-save-message" v-if="recordActionMessage !== null">
+								<my-button
+									:active="false"
+									:caption="recordActionMessage"
+									:darkBg="true"
+									:naked="true"
+								/>
+							</div>
+						</transition>
 					</div>
 					<div class="area">
 						<my-button image="warning.png"
@@ -217,6 +229,8 @@ let MyForm = {
 			badSave:false,       // attempted save (data SET) with invalid fields, also updates data fields
 			lastFormId:'',       // when routing occurs: if ID is the same, no need to rebuild form
 			loading:false,       // form is currently loading, informs sub components when form is ready
+			messageCode:null,    // form message
+			messageTimeout:null, // form message expiration timeout
 			showHelp:false,      // show form context help
 			showLog:false,       // show data change log
 			
@@ -309,6 +323,25 @@ let MyForm = {
 				map[join.index] = join;
 			}
 			return map;
+		},
+		
+		// presentation
+		recordActionMessage:function() {
+			switch(this.messageCode) {
+				case 'created': return this.isMobile
+					? this.capApp.message.recordCreatedMobile
+					: this.capApp.message.recordCreated;
+				break;
+				case 'deleted': return this.isMobile
+					? this.capApp.message.recordDeletedMobile
+					: this.capApp.message.recordDeleted;
+				break;
+				case 'updated': return this.isMobile
+					? this.capApp.message.recordUpdatedMobile
+					: this.capApp.message.recordUpdated;
+				break;
+			}
+			return null;
 		},
 		
 		// field state overwrite
@@ -614,11 +647,10 @@ let MyForm = {
 			if(this.lastFormId === this.form.id)
 				return this.resetRecord();
 			
-			// set page title
+			// reset form states
 			this.$store.commit('pageTitle',this.title);
-			
-			// close change log if form changed
-			this.showLog = false;
+			this.messageCode = null;
+			this.showLog     = false;
 			
 			// build form
 			this.lastFormId = this.form.id;
@@ -798,6 +830,11 @@ let MyForm = {
 		openBuilder:function() {
 			this.$router.push('/builder/form/'+this.form.id);
 		},
+		recordStateChanged:function(code) {
+			clearTimeout(this.messageTimeout);
+			this.messageTimeout = setTimeout(() => this.messageCode = null,3000);
+			this.messageCode    = code;
+		},
 		scrollToInvalidField:function() {
 			if(this.fieldIdsInvalid.length === 0)
 				return;
@@ -901,6 +938,7 @@ let MyForm = {
 		},
 		delOk:function(res) {
 			this.setFormEmpty(false);
+			this.recordStateChanged('deleted');
 		},
 		get:function() {
 			// no record defined, form is done loading
@@ -1123,6 +1161,10 @@ let MyForm = {
 			trans.send(this.handleError,this.setOk,{saveAndNew:saveAndNew});
 		},
 		setOk:function(res,req,store) {
+			// set record-saved timestamp
+			if(this.isNew) this.recordStateChanged('created');
+			else           this.recordStateChanged('updated');
+			
 			// reload form if inline
 			if(this.isInline) {
 				this.$emit('record-updated',res[0].payload.indexRecordIds[0]);

@@ -76,6 +76,11 @@
 	display:flex;
 }
 
+/* messages */
+.form-save-message{
+	margin:0px 0px 0px 12px;
+}
+
 /* user overwrites */
 .user-bordersSquared div.form div.top div.state{
 	border-radius:0px;

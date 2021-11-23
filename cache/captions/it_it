@@ -957,6 +957,14 @@
 		"dialog":{
 			"delete":"Sei sicuro di voler eliminare questo record <b>in modo permanente</b>?"
 		},
+		"message":{
+			"recordCreated":"Record has been created",
+			"recordCreatedMobile":"Created!",
+			"recordDeleted":"Record has been deleted",
+			"recordDeletedMobile":"Deleted!",
+			"recordUpdated":"Record has been updated",
+			"recordUpdatedMobile":"Updated!"
+		},
 		"dataLog":"Registri delle modifiche",
 		"deletedUser":"Utenti cancellati",
 		"help":"Pagine aiuto",

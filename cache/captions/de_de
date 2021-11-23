@@ -957,6 +957,14 @@
 		"dialog":{
 			"delete":"Bist du sicher, dass du diesen Datensatz <b>permanent</b> löschen möchtest?"
 		},
+		"message":{
+			"recordCreated":"Datensatz wurde erstellt",
+			"recordCreatedMobile":"Erstellt!",
+			"recordDeleted":"Datensatz wurde gelöscht",
+			"recordDeletedMobile":"Gelöscht!",
+			"recordUpdated":"Datensatz wurde aktualisiert",
+			"recordUpdatedMobile":"Aktualisiert!"
+		},
 		"dataLog":"Verändungen",
 		"deletedUser":"gelöschter Benutzer",
 		"help":"Hilfeseiten",
