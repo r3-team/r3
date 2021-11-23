@@ -14,6 +14,7 @@
 			"export":"Export",
 			"filter":"Filter",
 			"filterHint":"Filter results",
+			"goBack":"Go back",
 			"import":"Import",
 			"new":"New",
 			"newHint":"Create new record",
@@ -957,7 +958,8 @@
 		"dialog":{
 			"delete":"Are you sure that you want to <b>permanently</b> delete this record?",
 			"new":"There are unsaved changes.<br /><br />Do you still want to open a new record?",
-			"newReset":"This will reset all your inputs.<br /><br />Do you want to continue?"
+			"newReset":"This will reset all your inputs.<br /><br />Do you want to continue?",
+			"prev":"There are unsaved changes.<br /><br />Do you still want to go back?"
 		},
 		"message":{
 			"recordCreated":"Record has been created",

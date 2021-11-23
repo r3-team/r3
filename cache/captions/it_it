@@ -14,6 +14,7 @@
 			"export":"Esporta",
 			"filter":"Filtra",
 			"filterHint":"Filtra i risultati",
+			"goBack":"Go back",
 			"import":"Importa",
 			"new":"Nuovo",
 			"newHint":"Crea un nuovo record",
@@ -957,7 +958,8 @@
 		"dialog":{
 			"delete":"Sei sicuro di voler eliminare questo record <b>in modo permanente</b>?",
 			"new":"There are unsaved changes.<br /><br />Do you still want to open a new record?",
-			"newReset":"This action will reset all your inputs.<br /><br />Do you want to continue?"
+			"newReset":"This action will reset all your inputs.<br /><br />Do you want to continue?",
+			"prev":"There are unsaved changes.<br /><br />Do you still want to go back?"
 		},
 		"message":{
 			"recordCreated":"Record has been created",

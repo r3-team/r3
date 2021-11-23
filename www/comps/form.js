@@ -117,6 +117,13 @@ let MyForm = {
 							:captionTitle="capGen.button.saveNewHint"
 							:darkBg="true"
 						/>
+						<my-button image="upward.png"
+							v-if="!isMobile"
+							@trigger="openPrevAsk"
+							:cancel="true"
+							:caption="capGen.button.goBack"
+							:darkBg="true"
+						/>
 						<my-button image="shred.png"
 							v-if="allowDel"
 							@trigger="delAsk"
@@ -827,6 +834,9 @@ let MyForm = {
 		},
 		
 		// actions
+		openBuilder:function() {
+			this.$router.push('/builder/form/'+this.form.id);
+		},
 		openNewAsk:function(middleClick) {
 			// middle click does not kill form inputs, no confirmation required
 			if(middleClick)
@@ -863,8 +873,25 @@ let MyForm = {
 			if(middleClick) this.setFormRecord(0,null,null,true)
 			else            this.setFormRecord(0);
 		},
-		openBuilder:function() {
-			this.$router.push('/builder/form/'+this.form.id);
+		openPrevAsk:function() {
+			if(!this.hasChanges)
+				return this.openPrev();
+			
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.prev,
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.goBack,
+					exec:this.openPrev,
+					image:'upward.png'
+				},{
+					caption:this.capGen.button.cancel,
+					image:'cancel.png'
+				}]
+			});
+		},
+		openPrev:function() {
+			window.history.back();
 		},
 		recordStateChanged:function(code) {
 			clearTimeout(this.messageTimeout);

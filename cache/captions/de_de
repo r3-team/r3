@@ -14,6 +14,7 @@
 			"export":"Exportieren",
 			"filter":"Filtern",
 			"filterHint":"Ergebnisse filtern",
+			"goBack":"Zurück gehen",
 			"import":"Importieren",
 			"new":"Neu",
 			"newHint":"Neuen Datensatz erstellen",
@@ -957,7 +958,8 @@
 		"dialog":{
 			"delete":"Bist du sicher, dass du diesen Datensatz <b>permanent</b> löschen möchtest?",
 			"new":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem einen neuen Datensatz erstellen?",
-			"newReset":"Dies wird alle Eingaben zurücksetzen.<br /><br />Möchtest du fortfahren?"
+			"newReset":"Dies wird alle Eingaben zurücksetzen.<br /><br />Möchtest du fortfahren?",
+			"prev":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem zurückgehen?"
 		},
 		"message":{
 			"recordCreated":"Datensatz wurde erstellt",
