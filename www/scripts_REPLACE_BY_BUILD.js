@@ -174,14 +174,14 @@ const MyRouter = VueRouter.createRouter({
 		return { top:0 };
 	}
 });
-MyRouter.beforeEach((to,from,next) => {
+MyRouter.beforeEach((to,from) => {
 	
 	// store scroll position of form element if available
 	let e = document.getElementById(MyStore.getters.scrollFormId);
 	if(e !== null)
 		MyRouterPositions[from.path] = e.scrollTop;
 	
-	next();
+	return true;
 });
 
 // define main app

@@ -90,8 +90,18 @@ let MyGoForm = {
 		};
 	},
 	watch:{
-		moduleNameActive:function() {
-			this.loadModuleMeta();
+		moduleNameActive:{
+			handler:function() {
+				// if module cannot be resolved, go home
+				if(typeof this.moduleNameMap[this.moduleNameActive] === 'undefined')
+					return this.$router.replace('/');
+				
+				this.module = this.moduleNameMap[this.moduleNameActive];
+				
+				this.$store.commit('moduleColor1',this.module.color1);
+				this.$store.commit('moduleLanguage',this.getValidLanguageCode(this.module));
+			},
+			immediate:true
 		}
 	},
 	computed:{
@@ -116,22 +126,8 @@ let MyGoForm = {
 		isAtMenu:     function() { return this.$store.getters.isAtMenu; },
 		isMobile:     function() { return this.$store.getters.isMobile; }
 	},
-	mounted:function() {
-		this.loadModuleMeta();
-	},
 	methods:{
 		// externals
-		getValidLanguageCode,
-		
-		loadModuleMeta:function() {
-			// module cannot be resolved, go home
-			if(typeof this.moduleNameMap[this.moduleNameActive] === 'undefined')
-				return this.$router.push('/');
-			
-			this.module = this.moduleNameMap[this.moduleNameActive];
-			
-			this.$store.commit('moduleColor1',this.module.color1);
-			this.$store.commit('moduleLanguage',this.getValidLanguageCode(this.module));
-		}
+		getValidLanguageCode
 	}
 };
