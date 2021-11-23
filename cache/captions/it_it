@@ -959,7 +959,8 @@
 			"delete":"Sei sicuro di voler eliminare questo record <b>in modo permanente</b>?",
 			"new":"There are unsaved changes.<br /><br />Do you still want to open a new record?",
 			"newReset":"This action will reset all your inputs.<br /><br />Do you want to continue?",
-			"prev":"There are unsaved changes.<br /><br />Do you still want to go back?"
+			"prev":"There are unsaved changes.<br /><br />Do you still want to go back?",
+			"prevBrowser":"There are unsaved changes - if you continue these will be lost. Do you still want to continue?"
 		},
 		"message":{
 			"recordCreated":"Record has been created",

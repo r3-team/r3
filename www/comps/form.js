@@ -222,6 +222,11 @@ let MyForm = {
 			immediate:true
 		});
 		
+		// inform system that a data form has changes
+		this.$watch('hasChanges',(val) => {
+			this.$store.commit('formHasChanges',val);
+		});
+		
 		if(!this.isInline)
 			window.addEventListener('keydown',this.handleHotkeys);
 	},
@@ -706,7 +711,7 @@ let MyForm = {
 					}
 					
 					that.valuesDef[indexAttributeId] = def;
-					that.valueSetInit(indexAttributeId,null);
+					that.valueSetInit(indexAttributeId,def);
 					
 					// set value and default for altern. field attribute
 					if(f.attributeIdAlt !== null) {
@@ -805,8 +810,7 @@ let MyForm = {
 				if(typeof attributeIdMapGetters[ia.attributeId] !== 'undefined')
 					this.valuesDef[k] = attributeIdMapGetters[ia.attributeId];
 				
-				this.values[k]    = this.valuesDef[k];
-				this.valuesOrg[k] = null;
+				this.valueSetInit(k,this.valuesDef[k]);
 				this.valueUpdated(k);
 			}
 		},
@@ -870,6 +874,8 @@ let MyForm = {
 			});
 		},
 		openNew:function(middleClick) {
+			this.$store.commit('formHasChanges',false);
+			
 			if(middleClick) this.setFormRecord(0,null,null,true)
 			else            this.setFormRecord(0);
 		},
@@ -891,6 +897,7 @@ let MyForm = {
 			});
 		},
 		openPrev:function() {
+			this.$store.commit('formHasChanges',false);
 			window.history.back();
 		},
 		recordStateChanged:function(code) {
@@ -1183,7 +1190,7 @@ let MyForm = {
 				if(!j.applyCreate && j.recordId === 0)
 					return;
 				
-				// add from relation, if not source relation
+				// recursively add parent index, if one exists
 				if(j.indexFrom !== -1)
 					addRelationByIndex(j.indexFrom);
 				
@@ -1198,18 +1205,25 @@ let MyForm = {
 			
 			// add values by index attribute ID
 			for(let k in this.values) {
-				if(this.isAttributeValueEqual(this.values[k],this.valuesOrg[k]))
+				
+				let d     = this.getDetailsFromIndexAttributeId(k);
+				let j     = this.joinsIndexMap[d.index];
+				let isNew = j.recordId === 0;
+				
+				// ignore NULL values for new record
+				if(isNew && this.values[k] === null)
 					continue;
 				
-				let d = this.getDetailsFromIndexAttributeId(k);
-				let j = that.joinsIndexMap[d.index];
-				
-				// add join to request to supply attribute values
-				addRelationByIndex(d.index);
+				// ignore unchanged values for existing record
+				if(!isNew && this.isAttributeValueEqual(this.values[k],this.valuesOrg[k]))
+					continue;
 				
 				// ignore values if join settings disallow creation/update
 				if(!j.applyCreate && j.recordId === 0) continue;
 				if(!j.applyUpdate && j.recordId !== 0) continue;
+				
+				// add join to request to set attribute values
+				addRelationByIndex(d.index);
 				
 				req[d.index].attributes.push({
 					attributeId:d.attributeId,
@@ -1224,6 +1238,8 @@ let MyForm = {
 			trans.send(this.handleError,this.setOk,{saveAndNew:saveAndNew});
 		},
 		setOk:function(res,req,store) {
+			this.$store.commit('formHasChanges',false);
+			
 			// set record-saved timestamp
 			if(this.isNew) this.recordStateChanged('created');
 			else           this.recordStateChanged('updated');

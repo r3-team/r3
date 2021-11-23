@@ -27,6 +27,7 @@ const MyStore = Vuex.createStore({
 		dialogStyles:'',
 		dialogTextDisplay:'', // display option (html, textarea, richtext)
 		feedback:false,       // feedback function is enabled
+		formHasChanges:false, // a data form has unsaved changes
 		isAdmin:false,        // user is admin
 		isAtDialog:false,     // app shows generic dialog
 		isAtFeedback:false,   // app shows feedback dialog
@@ -98,6 +99,7 @@ const MyStore = Vuex.createStore({
 		captions           (state,payload) { state.captions            = payload; },
 		config             (state,payload) { state.config              = payload; },
 		feedback           (state,payload) { state.feedback            = payload; },
+		formHasChanges     (state,payload) { state.formHasChanges      = payload; },
 		isAdmin            (state,payload) { state.isAdmin             = payload; },
 		isAtDialog         (state,payload) { state.isAtDialog          = payload; },
 		isAtFeedback       (state,payload) { state.isAtFeedback        = payload; },
@@ -141,6 +143,7 @@ const MyStore = Vuex.createStore({
 		dialogStyles:       (state) => state.dialogStyles,
 		dialogTextDisplay:  (state) => state.dialogTextDisplay,
 		feedback:           (state) => state.feedback,
+		formHasChanges:     (state) => state.formHasChanges,
 		isAdmin:            (state) => state.isAdmin,
 		isAtDialog:         (state) => state.isAtDialog,
 		isAtFeedback:       (state) => state.isAtFeedback,
