@@ -867,9 +867,11 @@ let MyForm = {
 					cancel:true,
 					caption:caption,
 					exec:this.openNew,
+					keyEnter:true,
 					image:image
 				},{
 					caption:this.capGen.button.cancel,
+					keyEscape:true,
 					image:'cancel.png'
 				}]
 			});
@@ -890,9 +892,11 @@ let MyForm = {
 					cancel:true,
 					caption:this.capGen.button.goBack,
 					exec:this.openPrev,
+					keyEnter:true,
 					image:'upward.png'
 				},{
 					caption:this.capGen.button.cancel,
+					keyEscape:true,
 					image:'cancel.png'
 				}]
 			});
@@ -983,9 +987,11 @@ let MyForm = {
 					cancel:true,
 					caption:this.capGen.button.delete,
 					exec:this.del,
+					keyEnter:true,
 					image:'shred.png'
 				},{
 					caption:this.capGen.button.cancel,
+					keyEscape:true,
 					image:'cancel.png'
 				}]
 			});

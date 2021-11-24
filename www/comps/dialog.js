@@ -46,6 +46,12 @@ let MyDialog = {
 			</div>
 		</div>
 	</div>`,
+	mounted:function() {
+		window.addEventListener('keyup',this.handleHotkeys);
+	},
+	unmounted:function() {
+		window.removeEventListener('keyup',this.handleHotkeys);
+	},
 	data:function() {
 		return {
 			richtextClosing:false
@@ -73,23 +79,44 @@ let MyDialog = {
 		textDisplay:function() { return this.$store.getters.dialogTextDisplay; }
 	},
 	methods:{
+		handleHotkeys:function(e) {
+			let search = null;
+			switch(e.key) {
+				case 'Enter':  search = 'keyEnter';  break;
+				case 'Escape': search = 'keyEscape'; break;
+				default: return; break;
+			}
+			
+			// search for a button with this particular action key assigned
+			for(let i = 0, j = this.buttons.length; i < j; i++) {
+				let btn = this.buttons[i];
+				
+				if(typeof btn[search] !== 'undefined' && btn[search]) {
+					this.executeButton(btn);
+					e.preventDefault();
+					break;
+				}
+			}
+		},
+		
+		// actions
+		executeButton:function(btn) {
+			// execute action if set
+			if(typeof btn.exec !== 'undefined') {
+				if(Array.isArray(btn.params)) btn.exec(...btn.params);
+				else                          btn.exec();
+			}
+			
+			// close dialog window
+			this.$store.commit('isAtDialog',false)
+		},
 		trigger:function(i) {
 			// richtext looses all styling during close
 			// remove before fade out occurs
 			this.richtextClosing = true;
 			
 			this.$nextTick(function() {
-				// execute button actions if set
-				if(typeof this.buttons[i].exec !== 'undefined') {
-					
-					if(Array.isArray(this.buttons[i].params))
-						this.buttons[i].exec(...this.buttons[i].params);
-					else
-						this.buttons[i].exec();
-				}
-				
-				// close dialog window proper
-				this.$store.commit('isAtDialog',false)
+				this.executeButton(this.buttons[i]);
 			});
 		}
 	}

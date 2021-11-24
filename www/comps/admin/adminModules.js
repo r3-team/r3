@@ -225,9 +225,11 @@ let MyAdminModulesItem = {
 					cancel:true,
 					caption:this.capGen.button.apply,
 					exec:this.ownerEnable,
+					keyEnter:true,
 					image:'warning.png'
 				},{
 					caption:this.capGen.button.cancel,
+					keyEscape:true,
 					image:'cancel.png'
 				}]
 			});
@@ -250,9 +252,11 @@ let MyAdminModulesItem = {
 					cancel:true,
 					caption:this.capGen.button.delete,
 					exec:this.delAsk2,
+					keyEnter:true,
 					image:'delete.png'
 				},{
 					caption:this.capGen.button.cancel,
+					keyEscape:true,
 					image:'cancel.png'
 				}]
 			});
@@ -267,9 +271,11 @@ let MyAdminModulesItem = {
 						cancel:true,
 						caption:this.capGen.button.delete,
 						exec:this.del,
+						keyEnter:true,
 						image:'delete.png'
 					},{
 						caption:this.capGen.button.cancel,
+						keyEscape:true,
 						image:'cancel.png'
 					}]
 				});
