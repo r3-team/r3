@@ -202,7 +202,7 @@ let MyBuilderMenu = {
 		
 		// actions
 		add:function() {
-			this.menus.push({
+			this.menus.unshift({
 				id:this.newCnt++,
 				moduleId:this.id,
 				formId:null,

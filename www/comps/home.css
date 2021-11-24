@@ -14,6 +14,7 @@
 .home-standardBox{
 	width:550px;
 	margin:15px 0px !important;
+	box-shadow:1px 1px 8px var(--color-shade) !important;
 	align-self:center;
 }
 
