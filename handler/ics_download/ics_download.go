@@ -19,6 +19,7 @@ import (
 	"time"
 
 	ics "github.com/arran4/golang-ical"
+	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"
 )
 
@@ -296,6 +297,36 @@ func convertQueryToDataFilter(filters []types.QueryFilter, loginId int64, langua
 			sideOut.Value = loginId
 		}
 		if side.Content == "subQuery" {
+
+			joins := make([]types.DataGetJoin, 0)
+			for _, j := range side.Query.Joins {
+				joins = append(joins, types.DataGetJoin{
+					AttributeId: uuid.FromBytesOrNil(j.AttributeId.Bytes[:]),
+					Connector:   j.Connector,
+					Index:       j.Index,
+					IndexFrom:   j.IndexFrom,
+				})
+			}
+
+			orders := make([]types.DataGetOrder, 0)
+			for _, o := range side.Query.Orders {
+				orders = append(orders, types.DataGetOrder{
+					Ascending: o.Ascending,
+					AttributeId: pgtype.UUID{
+						Bytes:  o.AttributeId,
+						Status: pgtype.Present,
+					},
+					Index: pgtype.Int4{
+						Int:    int32(o.Index),
+						Status: pgtype.Present,
+					},
+				})
+			}
+
+			sideOut.Query.Joins = joins
+			sideOut.Query.Orders = orders
+			sideOut.Query.RelationId = uuid.FromBytesOrNil(side.Query.RelationId.Bytes[:])
+			sideOut.Query.Limit = side.Query.FixedLimit
 			sideOut.Query.Expressions = []types.DataGetExpression{
 				types.DataGetExpression{
 					Aggregator:    side.QueryAggregator,
@@ -306,17 +337,20 @@ func convertQueryToDataFilter(filters []types.QueryFilter, loginId int64, langua
 			}
 			sideOut.Query.Filters = convertQueryToDataFilter(side.Query.Filters, loginId, languageCode)
 		}
+		if side.Content == "true" {
+			sideOut.Value = true
+		}
 		return sideOut
 	}
 
 	for i, filter := range filters {
 
-		var filterOut types.DataGetFilter
-		filterOut.Connector = filter.Connector
-		filterOut.Operator = filter.Operator
-		filterOut.Side0 = processSide(filter.Side0)
-		filterOut.Side1 = processSide(filter.Side1)
-
+		filterOut := types.DataGetFilter{
+			Connector: filter.Connector,
+			Operator:  filter.Operator,
+			Side0:     processSide(filter.Side0),
+			Side1:     processSide(filter.Side1),
+		}
 		if i == 0 {
 			filterOut.Side0.Brackets++
 		}
