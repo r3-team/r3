@@ -19,7 +19,6 @@ import (
 	"time"
 
 	ics "github.com/arran4/golang-ical"
-	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"
 )
 
@@ -169,15 +168,23 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// add event summary expressions
 	for _, column := range f.Columns {
-		dataGet.Expressions = append(dataGet.Expressions, types.DataGetExpression{
-			AttributeId: pgtype.UUID{
-				Bytes:  column.AttributeId,
-				Status: pgtype.Present,
-			},
+
+		atrId := pgtype.UUID{
+			Bytes:  column.AttributeId,
+			Status: pgtype.Present,
+		}
+
+		expr := types.DataGetExpression{
+			AttributeId:   atrId,
 			AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
 			Aggregator:    pgtype.Varchar{Status: pgtype.Null},
 			Index:         column.Index,
-		})
+		}
+		if column.SubQuery {
+			expr.Query = convertSubQueryToDataGet(column.Query, column.Aggregator,
+				atrId, column.Index, loginId, languageCode)
+		}
+		dataGet.Expressions = append(dataGet.Expressions, expr)
 	}
 
 	// get data
@@ -276,6 +283,53 @@ func isUtcZero(unix int64) bool {
 	return unix%86400 == 0
 }
 
+func convertSubQueryToDataGet(query types.Query, queryAggregator pgtype.Varchar,
+	attributeId pgtype.UUID, attributeIndex int, loginId int64, languageCode string) types.DataGet {
+
+	var dataGet types.DataGet
+
+	joins := make([]types.DataGetJoin, 0)
+	for _, j := range query.Joins {
+		joins = append(joins, types.DataGetJoin{
+			AttributeId: j.AttributeId.Bytes,
+			Connector:   j.Connector,
+			Index:       j.Index,
+			IndexFrom:   j.IndexFrom,
+		})
+	}
+
+	orders := make([]types.DataGetOrder, 0)
+	for _, o := range query.Orders {
+		orders = append(orders, types.DataGetOrder{
+			Ascending: o.Ascending,
+			AttributeId: pgtype.UUID{
+				Bytes:  o.AttributeId,
+				Status: pgtype.Present,
+			},
+			Index: pgtype.Int4{
+				Int:    int32(o.Index),
+				Status: pgtype.Present,
+			},
+		})
+	}
+
+	dataGet.Joins = joins
+	dataGet.Orders = orders
+	dataGet.RelationId = query.RelationId.Bytes
+	dataGet.Limit = query.FixedLimit
+	dataGet.Expressions = []types.DataGetExpression{
+		types.DataGetExpression{
+			Aggregator:    queryAggregator,
+			AttributeId:   attributeId,
+			AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+			Index:         attributeIndex,
+		},
+	}
+	dataGet.Filters = convertQueryToDataFilter(query.Filters, loginId, languageCode)
+
+	return dataGet
+}
+
 func convertQueryToDataFilter(filters []types.QueryFilter, loginId int64, languageCode string) []types.DataGetFilter {
 	filtersOut := make([]types.DataGetFilter, len(filters))
 
@@ -297,45 +351,8 @@ func convertQueryToDataFilter(filters []types.QueryFilter, loginId int64, langua
 			sideOut.Value = loginId
 		}
 		if side.Content == "subQuery" {
-
-			joins := make([]types.DataGetJoin, 0)
-			for _, j := range side.Query.Joins {
-				joins = append(joins, types.DataGetJoin{
-					AttributeId: uuid.FromBytesOrNil(j.AttributeId.Bytes[:]),
-					Connector:   j.Connector,
-					Index:       j.Index,
-					IndexFrom:   j.IndexFrom,
-				})
-			}
-
-			orders := make([]types.DataGetOrder, 0)
-			for _, o := range side.Query.Orders {
-				orders = append(orders, types.DataGetOrder{
-					Ascending: o.Ascending,
-					AttributeId: pgtype.UUID{
-						Bytes:  o.AttributeId,
-						Status: pgtype.Present,
-					},
-					Index: pgtype.Int4{
-						Int:    int32(o.Index),
-						Status: pgtype.Present,
-					},
-				})
-			}
-
-			sideOut.Query.Joins = joins
-			sideOut.Query.Orders = orders
-			sideOut.Query.RelationId = uuid.FromBytesOrNil(side.Query.RelationId.Bytes[:])
-			sideOut.Query.Limit = side.Query.FixedLimit
-			sideOut.Query.Expressions = []types.DataGetExpression{
-				types.DataGetExpression{
-					Aggregator:    side.QueryAggregator,
-					AttributeId:   side.AttributeId,
-					AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-					Index:         side.AttributeIndex,
-				},
-			}
-			sideOut.Query.Filters = convertQueryToDataFilter(side.Query.Filters, loginId, languageCode)
+			sideOut.Query = convertSubQueryToDataGet(side.Query, side.QueryAggregator,
+				side.AttributeId, side.AttributeIndex, loginId, languageCode)
 		}
 		if side.Content == "true" {
 			sideOut.Value = true
