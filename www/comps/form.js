@@ -483,6 +483,7 @@ let MyForm = {
 		fieldIdMapData:function() { return this.getDataFieldMap(this.fields); },
 		isData:        function() { return this.relationId !== null; },
 		isNew:         function() { return this.recordId === 0; },
+		warnUnsaved:   function() { return this.hasChanges && this.settings.warnUnsaved; },
 		
 		// stores
 		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
@@ -844,12 +845,8 @@ let MyForm = {
 		},
 		openNewAsk:function(middleClick) {
 			// middle click does not kill form inputs, no confirmation required
-			if(middleClick)
-				return this.openNew(true);
-			
-			// existing record with no changes, no confirmation required
-			if(!this.isNew && !this.hasChanges)
-				return this.openNew(false);
+			if(middleClick || !this.warnUnsaved)
+				return this.openNew(middleClick);
 			
 			let caption = this.capGen.button.new;
 			let image   = 'new.png';
@@ -883,7 +880,7 @@ let MyForm = {
 			else            this.setFormRecord(0);
 		},
 		openPrevAsk:function() {
-			if(!this.hasChanges)
+			if(!this.warnUnsaved)
 				return this.openPrev();
 			
 			this.$store.commit('dialog',{

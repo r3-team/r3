@@ -1112,6 +1112,7 @@
 		"titleAdmin":"Admin",
 		"titleDisplay":"Anzeige",
 		"titleSecurity":"Sicherheit",
-		"titleTheme":"Darstellung"
+		"titleTheme":"Darstellung",
+		"warnUnsaved":"Warnung bei ungespeicherten Änderungen"
 	}
 }

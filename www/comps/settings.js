@@ -155,6 +155,10 @@ let MySettings = {
 								<td>{{ capApp.sundayFirstDow }}</td>
 								<td><my-bool v-model="settingsInput.sundayFirstDow" /></td>
 							</tr>
+							<tr>
+								<td>{{ capApp.warnUnsaved }}</td>
+								<td><my-bool v-model="settingsInput.warnUnsaved" /></td>
+							</tr>
 						</tbody>
 					</table>
 				</div>

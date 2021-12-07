@@ -21,8 +21,8 @@ func SettingsSet_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interfac
 
 	if err := setting.Set_tx(tx, loginId, req.LanguageCode, req.DateFormat,
 		req.SundayFirstDow, req.FontSize, req.BordersAll, req.BordersCorner,
-		req.PageLimit, req.HeaderCaptions, req.Spacing, req.Dark,
-		req.Compact, req.HintUpdateVersion, req.HintFirstSteps); err != nil {
+		req.PageLimit, req.HeaderCaptions, req.Spacing, req.Dark, req.Compact,
+		req.HintUpdateVersion, req.HintFirstSteps, req.WarnUnsaved); err != nil {
 
 		return nil, err
 	}

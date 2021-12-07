@@ -94,6 +94,13 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 // mapped by current database version string, returns new database version string
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
+	"2.5": func(tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(db.Ctx, `
+			ALTER TABLE instance.login_setting ADD COLUMN warn_unsaved BOOLEAN NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.login_setting ALTER COLUMN warn_unsaved DROP DEFAULT;
+		`)
+		return "2.6", err
+	},
 	"2.4": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
 			-- repo change logs
