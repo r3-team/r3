@@ -305,8 +305,10 @@ let MyGantt = {
 					<div class="gantt-header lower">
 						<div class="gantt-header-item lower"
 							v-for="i in headerItems"
-							@click="clickHeaderItem(i.unixTime,false)"
-							@click.middle="clickHeaderItem(i.unixTime,true)"
+							@click.exact="clickHeaderItem(i.unixTime,false,false)"
+							@click.shift="clickHeaderItem(i.unixTime,true,false)"
+							@click.middle.exact="clickHeaderItem(i.unixTime,false,true)"
+							@click.middle.shift="clickHeaderItem(i.unixTime,true,true)"
 							:class="{ clickable:hasCreate, today:getUnixFromDate(dateStart) === i.unixTime, weekend:i.isWeekend }"
 							:style="'width:'+stepPixels+'px'"
 						>
@@ -364,20 +366,21 @@ let MyGantt = {
 			choiceId:null,
 			dateStart:null,
 			notScrolled:true,
-			groups:[],       // gantt groups, by defined column, each with its lines of records
+			groups:[],        // gantt groups, by defined column, each with its lines of records
 			headerItems:[],
 			headerItemsMeta:[],
-			linePixels:30,   // line height in pixels
-			page:0,          // which page we are on (0: default, 1: next, -1: prev)
-			ready:false,     // component ready to be used
+			linePixels:30,    // line height in pixels
+			page:0,           // which page we are on (0: default, 1: next, -1: prev)
+			ready:false,      // component ready to be used
 			resizeTimer:null,
 			showGroupLabels:true,
-			startDate:0,     // start date (TZ), base for date ranges, set once to keep navigation clear
-			stepBase:8,      // base size of step width in pixels, used to multiply with zoom factor
-			stepType:'days', // gantt step type (hours, days)
-			stepZoom:7,      // zoom factor for step, 7 is default (7*8=56)
+			startDate:0,      // start date (TZ), base for date ranges, set once to keep navigation clear
+			stepBase:8,       // base size of step width in pixels, used to multiply with zoom factor
+			stepType:'days',  // gantt step type (hours, days)
+			stepZoom:7,       // zoom factor for step, 7 is default (7*8=56)
 			stepZoomDefault:7,
-			steps:0
+			steps:0,
+			unixTimeRangeStart:null // for time range input
 		};
 	},
 	computed:{
@@ -634,14 +637,20 @@ let MyGantt = {
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},
-		clickHeaderItem:function(unixTime,middleClick) {
+		clickHeaderItem:function(unixTime,shift,middleClick) {
 			if(!this.hasCreate) return;
+			
+			if(this.unixTimeRangeStart === null) {
+				this.unixTimeRangeStart = unixTime;
+				
+				if(shift) return;
+			}
 			
 			if(this.isDays)
 				unixTime = this.getUnixShifted(unixTime,false);
 			
 			let attributes = [
-				`${this.attributeIdDate0}_${unixTime}`,
+				`${this.attributeIdDate0}_${this.unixTimeRangeStart}`,
 				`${this.attributeIdDate1}_${unixTime}`
 			];
 			this.$emit('form-open-new',[`attributes=${attributes.join(',')}`],middleClick);
