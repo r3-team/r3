@@ -96,8 +96,12 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	"2.5": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
+			-- new login setting
 			ALTER TABLE instance.login_setting ADD COLUMN warn_unsaved BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN warn_unsaved DROP DEFAULT;
+			
+			-- new form state condition
+			ALTER TABLE app.form_state_condition ADD COLUMN login1 BOOLEAN;
 		`)
 		return "2.6", err
 	},

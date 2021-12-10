@@ -130,11 +130,12 @@ type FormStateCondition struct {
 	FieldId1     pgtype.UUID    `json:"fieldId1"`     // if set: field0 value must match field1 value
 	PresetId1    pgtype.UUID    `json:"presetId1"`    // if set: field0 value must match preset record value
 	RoleId       pgtype.UUID    `json:"roleId"`       // if set: with operator '=' login must have role ('<>' must not have role)
-	FieldChanged pgtype.Bool    `json:"fieldChanged"` // if set: true if field value was changed
+	FieldChanged pgtype.Bool    `json:"fieldChanged"` // if set: true matches field value changed, false matches unchanged
 	NewRecord    pgtype.Bool    `json:"newRecord"`    // if set: true matches new, false existing record
 	Brackets0    int            `json:"brackets0"`
 	Brackets1    int            `json:"brackets1"`
 	Connector    string         `json:"connector"` // AND, OR
+	Login1       pgtype.Bool    `json:"login1"`    // if set: true matches login ID of current user
 	Operator     string         `json:"operator"`  // comparisson operator (=, <>, etc.)
 	Value1       pgtype.Varchar `json:"value1"`    // fixed value for direct field0 match
 }

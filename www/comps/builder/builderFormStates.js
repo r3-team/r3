@@ -37,14 +37,16 @@ let MyBuilderFormStateCondition = {
 			<option value="field"
 				:disabled="!anyDataFields"
 			>{{ capApp.modeField }}</option>
+			<option value="fieldChanged"
+				:disabled="!anyDataFields"
+			>{{ capApp.modeFieldChanged }}</option>
 			<option value="role"
 				:disabled="module.roles.length === 0"
 			>{{ capApp.modeRole }}</option>
 		</select>
 		
-		<!-- field value condition -->
-		<template v-if="mode === 'field'">
-			
+		<!-- field selector -->
+		<template v-if="mode === 'field' || mode === 'fieldChanged'">
 			<select
 				@input="update('fieldId0',$event.target.value)"
 				:value="condition.fieldId0"
@@ -53,70 +55,70 @@ let MyBuilderFormStateCondition = {
 					F{{ fieldIdMapRef[f.id] }}
 				</option>
 			</select>
+		</template>
 		
-			<!-- field changed option -->
-			<span>{{ capApp.fieldChanged }}</span>
-			<my-bool
-				@update:modelValue="update('fieldChanged',$event)"
-				:modelValue="condition.fieldChanged"
-			/>
+		<!-- field value condition -->
+		<template v-if="mode === 'field'">
 			
 			<!-- field value option -->
-			<template v-if="condition.fieldChanged !== true">
-				<my-filter-operator class="operator"
-					@update:modelValue="update('operator',$event)"
-					:builderMode="false"
-					:modelValue="condition.operator"
-					:onlyEquals="mode2Field === 'preset'"
-				/>
+			<my-filter-operator class="operator"
+				@update:modelValue="update('operator',$event)"
+				:builderMode="false"
+				:modelValue="condition.operator"
+				:onlyEquals="mode2Field === 'preset' || mode2Field === 'login'"
+			/>
+			
+			<!-- field value comparissons -->
+			<template v-if="!hasNullOperator">
+				<select
+					@input="changeMode2Field($event.target.value)"
+					:value="mode2Field"
+				>
+					<option value="fixed">
+						{{ capApp.modeField2Fixed }}
+					</option>
+					<option value="field"
+						:disabled="!anyDataFields"
+					>{{ capApp.modeField2Field }}</option>
+					<option value="preset"
+						:disabled="field0Presets.length === 0"
+					>{{ capApp.modeField2Preset }}</option>
+					<option value="login">
+						{{ capApp.modeField2Login }}
+					</option>
+				</select>
 				
-				<!-- field value comparissons -->
-				<template v-if="!hasNullOperator">
-					<select
-						@input="changeMode2Field($event.target.value)"
-						:value="mode2Field"
-					>
-						<option value="fixed">{{ capApp.modeField2Fixed }}</option>
-						<option value="field"
-							:disabled="!anyDataFields"
-						>{{ capApp.modeField2Field }}</option>
-						<option value="preset"
-							:disabled="field0Presets.length === 0"
-						>{{ capApp.modeField2Preset }}</option>
-					</select>
-					
-					<select
-						v-if="mode2Field === 'field'"
-						@input="update('fieldId1',$event.target.value)"
-						:value="condition.fieldId1"
-					>
-						<option :value="null">-</option>
-						<template v-for="f in dataFieldMap">
-							<option
-								v-if="f.id !== condition.fieldId0"
-								:value="f.id"
-							>F{{ fieldIdMapRef[f.id] }}</option>
-						</template>
-					</select>
-					
-					<select
-						v-if="mode2Field === 'preset'"
-						@input="update('presetId1',$event.target.value)"
-						:value="condition.presetId1"
-					>
-						<option :value="null">-</option>
+				<select
+					v-if="mode2Field === 'field'"
+					@input="update('fieldId1',$event.target.value)"
+					:value="condition.fieldId1"
+				>
+					<option :value="null">-</option>
+					<template v-for="f in dataFieldMap">
 						<option
-							v-for="p in field0Presets"
-							:value="p.id"
-						>{{ p.name }}</option>
-					</select>
-					
-					<input class="short"
-						v-if="mode2Field === 'fixed'"
-						@input="update('value1',$event.target.value)"
-						:value="condition.value1"
-					>
-				</template>
+							v-if="f.id !== condition.fieldId0"
+							:value="f.id"
+						>F{{ fieldIdMapRef[f.id] }}</option>
+					</template>
+				</select>
+				
+				<select
+					v-if="mode2Field === 'preset'"
+					@input="update('presetId1',$event.target.value)"
+					:value="condition.presetId1"
+				>
+					<option :value="null">-</option>
+					<option
+						v-for="p in field0Presets"
+						:value="p.id"
+					>{{ p.name }}</option>
+				</select>
+				
+				<input class="short"
+					v-if="mode2Field === 'fixed'"
+					@input="update('value1',$event.target.value)"
+					:value="condition.value1"
+				>
 			</template>
 		</template>
 		
@@ -147,6 +149,15 @@ let MyBuilderFormStateCondition = {
 			/>
 		</template>
 		
+		<!-- field changed option -->
+		<template v-if="mode === 'fieldChanged'">
+			<span>{{ capApp.fieldChanged }}</span>
+			<my-bool
+				@update:modelValue="update('fieldChanged',$event)"
+				:modelValue="condition.fieldChanged"
+			/>
+		</template>
+		
 		<my-filter-brackets
 			@update:modelValue="update('brackets1',$event)"
 			:left="false"
@@ -169,12 +180,14 @@ let MyBuilderFormStateCondition = {
 		condition:{
 			handler:function(c) {
 				// set main mode
-				if     (c.newRecord !== null) this.mode = 'record';
-				else if(c.roleId    !== null) this.mode = 'role';
-				else if(c.fieldId0  !== null) this.mode = 'field';
+				if     (c.newRecord    !== null) this.mode = 'record';
+				else if(c.roleId       !== null) this.mode = 'role';
+				else if(c.fieldChanged !== null) this.mode = 'fieldChanged';
+				else if(c.fieldId0     !== null) this.mode = 'field';
 				
 				// set field comparisson mode
-				if     (c.presetId1 !== null) this.mode2Field = 'preset';
+				if     (c.login1    !== null) this.mode2Field = 'login';
+				else if(c.presetId1 !== null) this.mode2Field = 'preset';
 				else if(c.value1    !== null) this.mode2Field = 'fixed';
 				else                          this.mode2Field = 'field';
 			},
@@ -226,9 +239,10 @@ let MyBuilderFormStateCondition = {
 			this.mode = value;
 			
 			switch(value) {
-				case 'field':  this.update('fieldId0',this.dataFieldMap[Object.keys(this.dataFieldMap)[0]].id); break;
-				case 'record': this.update('newRecord',true); break;
-				case 'role':   this.update('roleId',this.module.roles[0].id); break;
+				case 'field':        this.update('fieldId0',this.dataFieldMap[Object.keys(this.dataFieldMap)[0]].id); break;
+				case 'fieldChanged': this.update('fieldChanged',true); break;
+				case 'record':       this.update('newRecord',true); break;
+				case 'role':         this.update('roleId',this.module.roles[0].id); break;
 			}
 		},
 		changeMode2Field:function(value) {
@@ -236,6 +250,7 @@ let MyBuilderFormStateCondition = {
 			
 			switch(value) {
 				case 'fixed':  this.update('value1',''); break;
+				case 'login':  this.update('login1',true); break;
 				case 'preset': this.update('presetId1',this.field0Presets[0].id); break;
 			}
 		},
@@ -244,24 +259,25 @@ let MyBuilderFormStateCondition = {
 			v[name] = value;
 			
 			// clean up invalid parameter values
-			if(this.mode !== 'field') {
-				v.fieldId0     = null;
-				v.fieldId1     = null;
-				v.fieldChanged = null;
-				v.presetId1    = null;
-			} else {
-				if(v.fieldChanged) {
-					v.fieldId1  = null;
-					v.presetId1 = null;
-					v.value1    = null;
-				} else {
-					if(this.mode2Field !== 'field')  v.fieldId1  = null;
-					if(this.mode2Field !== 'fixed')  v.value1    = null;
-					if(this.mode2Field !== 'preset') v.presetId1 = null;
-				}
+			if(this.mode !== 'field' && this.mode !== 'fieldChanged') {
+				v.fieldId0 = null;
 			}
-			if(this.mode !== 'record') v.newRecord = null;
-			if(this.mode !== 'role')   v.roleId    = null;
+			if(this.mode !== 'field') {
+				v.fieldId1  = null;
+				v.login1    = null;
+				v.presetId1 = null;
+				v.value1    = null;
+			}
+			if(this.mode !== 'fieldChanged') v.fieldChanged = null;
+			if(this.mode !== 'record')       v.newRecord    = null;
+			if(this.mode !== 'role')         v.roleId       = null;
+			
+			if(this.mode === 'field') {
+				if(this.mode2Field !== 'field')  v.fieldId1  = null;
+				if(this.mode2Field !== 'fixed')  v.value1    = null;
+				if(this.mode2Field !== 'login')  v.login1    = null;
+				if(this.mode2Field !== 'preset') v.presetId1 = null;
+			}
 			
 			this.$emit('update:modelValue',v);
 		}
@@ -416,6 +432,7 @@ let MyBuilderFormState = {
 				brackets0:0,
 				brackets1:0,
 				connector:'AND',
+				login1:null,
 				operator:'=',
 				value1:''
 			});

@@ -386,17 +386,20 @@ let MyForm = {
 						let f0value = this.values[this.getIndexAttributeIdByField(
 							this.fieldIdMapData[c.fieldId0],false)];
 						
-						if(c.fieldChanged) {
+						if(c.fieldChanged !== null) {
 							let f0valueOrg = this.valuesOrg[this.getIndexAttributeIdByField(
 								this.fieldIdMapData[c.fieldId0],false)];
 							
-							line += f0value !== f0valueOrg ? 'true' : 'false';
+							line += this.filterIsCorrect(c.fieldChanged ? '<>' : '=',f0value,f0valueOrg) ? 'true' : 'false';
 						}
 						else if(c.operator === 'IS NULL') {
 							line += f0value === null ? 'true' : 'false';
 						}
 						else if(c.operator === 'IS NOT NULL') {
 							line += f0value !== null ? 'true' : 'false';
+						}
+						else if(c.login1 !== null) {
+							line += this.filterIsCorrect(c.operator,f0value,this.loginId) ? 'true' : 'false';
 						}
 						else if(c.value1 !== null) {
 							
@@ -454,7 +457,7 @@ let MyForm = {
 						else
 							line += !this.access.roleIds.includes(c.roleId) ? 'true' : 'false';
 					}
-					if(c.newRecord !== null) {
+					else if(c.newRecord !== null) {
 						
 						// new record condition
 						line += this.isNew === c.newRecord ? 'true' : 'false';
@@ -500,6 +503,7 @@ let MyForm = {
 		capGen:        function() { return this.$store.getters.captions.generic; },
 		isAdmin:       function() { return this.$store.getters.isAdmin; },
 		isMobile:      function() { return this.$store.getters.isMobile; },
+		loginId:       function() { return this.$store.getters.loginId; },
 		moduleLanguage:function() { return this.$store.getters.moduleLanguage; },
 		productionMode:function() { return this.$store.getters.productionMode; },
 		settings:      function() { return this.$store.getters.settings; }
