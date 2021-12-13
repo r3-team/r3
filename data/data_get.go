@@ -401,12 +401,21 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 	// get tupel IDs from other relation
 	if expr.AttributeIdNm.Status != pgtype.Present {
 
+		var selectExpr string
+
+		if lookups.IsContentRelationship11(atr.Content) {
+			selectExpr = fmt.Sprintf(`"%s"`, lookups.PkName)
+		} else {
+			selectExpr = fmt.Sprintf(`JSON_AGG("%s")`, lookups.PkName)
+		}
+
 		// from other relation, collect tupel IDs in relationship with given index tupel
 		*inSelect = append(*inSelect, fmt.Sprintf(`(
-			SELECT JSON_AGG(id)
+			SELECT %s
 			FROM "%s"."%s"
 			WHERE "%s"."%s" = "%s"."%s"
 		) AS %s`,
+			selectExpr,
 			shipMod.Name, shipRel.Name,
 			shipRel.Name, atr.Name, relCode, lookups.PkName,
 			codeSelect))
@@ -419,7 +428,7 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 
 		// from other relation, collect tupel IDs from n:m relationship attribute
 		*inSelect = append(*inSelect, fmt.Sprintf(`(
-			SELECT JSON_AGG(%s)
+			SELECT JSON_AGG("%s")
 			FROM "%s"."%s"
 			WHERE "%s"."%s" = "%s"."%s"
 		) AS %s`,
