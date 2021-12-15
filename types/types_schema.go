@@ -1,6 +1,8 @@
 package types
 
 import (
+	"encoding/json"
+
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"
 )
@@ -102,6 +104,14 @@ type LoginForm struct {
 	Name              string     `json:"name"`
 	Captions          CaptionMap `json:"captions"`
 }
+type OpenForm struct {
+	FormIdOpen       uuid.UUID   `json:"formIdOpen"`       // form to open
+	AttributeIdApply pgtype.UUID `json:"attributeIdApply"` // apply record ID to attribute on opened form
+	RelationIndex    int         `json:"relationIndex"`    // relation index of record to apply to attribute
+	PopUp            bool        `json:"popUp"`            // opened form is pop-up-form
+	MaxHeight        int         `json:"maxHeight"`        // max. height in PX for opened form (pop-up only)
+	MaxWidth         int         `json:"maxWidth"`         // max. width  in PX for opened form (pop-up only)
+}
 type Icon struct {
 	Id       uuid.UUID `json:"id"`
 	ModuleId uuid.UUID `json:"moduleId"`
@@ -143,7 +153,6 @@ type FormStateEffect struct {
 	FieldId  uuid.UUID `json:"fieldId"`  // affected field
 	NewState string    `json:"newState"` // effect state (hidden, readonly, default, required)
 }
-
 type Field struct {
 	Id       uuid.UUID   `json:"id"`
 	IconId   pgtype.UUID `json:"iconId"`
@@ -152,37 +161,43 @@ type Field struct {
 	OnMobile bool        `json:"onMobile"` // display this field on mobile?
 }
 type FieldButton struct {
-	Id                uuid.UUID   `json:"id"`
-	IconId            pgtype.UUID `json:"iconId"`
-	Content           string      `json:"content"`
-	State             string      `json:"state"`
-	OnMobile          bool        `json:"onMobile"`
+	Id       uuid.UUID   `json:"id"`
+	IconId   pgtype.UUID `json:"iconId"`
+	Content  string      `json:"content"`
+	State    string      `json:"state"`
+	OnMobile bool        `json:"onMobile"`
+	OpenForm OpenForm    `json:"openForm"`
+	Captions CaptionMap  `json:"captions"`
+
+	// legacy
 	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
 	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
-	Captions          CaptionMap  `json:"captions"`
 }
 type FieldCalendar struct {
-	Id                uuid.UUID      `json:"id"`
-	IconId            pgtype.UUID    `json:"iconId"`
-	Content           string         `json:"content"`
-	State             string         `json:"state"`
-	OnMobile          bool           `json:"onMobile"`
-	FormIdOpen        pgtype.UUID    `json:"formIdOpen"`
-	AttributeIdDate0  uuid.UUID      `json:"attributeIdDate0"`
-	AttributeIdDate1  uuid.UUID      `json:"attributeIdDate1"`
-	AttributeIdColor  pgtype.UUID    `json:"attributeIdColor"`
-	AttributeIdRecord pgtype.UUID    `json:"attributeIdRecord"`
-	IndexDate0        int            `json:"indexDate0"`
-	IndexDate1        int            `json:"indexDate1"`
-	IndexColor        pgtype.Int4    `json:"indexColor"`
-	Gantt             bool           `json:"gantt"`            // gantt presentation
-	GanttSteps        pgtype.Varchar `json:"ganttSteps"`       // gantt step type (hours, days)
-	GanttStepsToggle  bool           `json:"ganttStepsToggle"` // user can toggle between gantt step types
-	Ics               bool           `json:"ics"`              // calendar available as ICS download
-	DateRange0        int64          `json:"dateRange0"`       // ICS/gantt time range before NOW (seconds)
-	DateRange1        int64          `json:"dateRange1"`       // ICS/gantt time range after NOW (seconds)
-	Columns           []Column       `json:"columns"`
-	Query             Query          `json:"query"`
+	Id               uuid.UUID      `json:"id"`
+	IconId           pgtype.UUID    `json:"iconId"`
+	Content          string         `json:"content"`
+	State            string         `json:"state"`
+	OnMobile         bool           `json:"onMobile"`
+	AttributeIdDate0 uuid.UUID      `json:"attributeIdDate0"`
+	AttributeIdDate1 uuid.UUID      `json:"attributeIdDate1"`
+	AttributeIdColor pgtype.UUID    `json:"attributeIdColor"`
+	IndexDate0       int            `json:"indexDate0"`
+	IndexDate1       int            `json:"indexDate1"`
+	IndexColor       pgtype.Int4    `json:"indexColor"`
+	Gantt            bool           `json:"gantt"`            // gantt presentation
+	GanttSteps       pgtype.Varchar `json:"ganttSteps"`       // gantt step type (hours, days)
+	GanttStepsToggle bool           `json:"ganttStepsToggle"` // user can toggle between gantt step types
+	Ics              bool           `json:"ics"`              // calendar available as ICS download
+	DateRange0       int64          `json:"dateRange0"`       // ICS/gantt time range before NOW (seconds)
+	DateRange1       int64          `json:"dateRange1"`       // ICS/gantt time range after NOW (seconds)
+	OpenForm         OpenForm       `json:"openForm"`
+	Columns          []Column       `json:"columns"`
+	Query            Query          `json:"query"`
+
+	// legacy
+	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
+	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
 }
 type FieldChart struct {
 	Id          uuid.UUID   `json:"id"`
@@ -229,19 +244,17 @@ type FieldData struct {
 	Captions       CaptionMap     `json:"captions"`
 }
 type FieldDataRelationship struct {
-	Id                uuid.UUID   `json:"id"`
-	IconId            pgtype.UUID `json:"iconId"`
-	Content           string      `json:"content"`
-	State             string      `json:"state"`
-	OnMobile          bool        `json:"onMobile"`
-	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
-	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
-	AttributeId       uuid.UUID   `json:"attributeId"`
-	AttributeIdAlt    pgtype.UUID `json:"attributeIdAlt"`
-	AttributeIdNm     pgtype.UUID `json:"attributeIdNm"`
-	Index             int         `json:"index"`
-	Display           string      `json:"display"`
-	AutoSelect        int         `json:"autoSelect"` // auto select record(s)
+	Id             uuid.UUID   `json:"id"`
+	IconId         pgtype.UUID `json:"iconId"`
+	Content        string      `json:"content"`
+	State          string      `json:"state"`
+	OnMobile       bool        `json:"onMobile"`
+	AttributeId    uuid.UUID   `json:"attributeId"`
+	AttributeIdAlt pgtype.UUID `json:"attributeIdAlt"`
+	AttributeIdNm  pgtype.UUID `json:"attributeIdNm"`
+	Index          int         `json:"index"`
+	Display        string      `json:"display"`
+	AutoSelect     int         `json:"autoSelect"` // auto select record(s)
 	// 1:1, n:1: 0 = none, 2 = second, -3 = third last
 	// n:m: 0 = none, 2 = first two, -3 = last three
 	Def          string         `json:"def"`
@@ -254,7 +267,12 @@ type FieldDataRelationship struct {
 	FilterQuick  bool           `json:"filterQuick"`
 	OutsideIn    bool           `json:"outsideIn"`
 	Query        Query          `json:"query"`
+	OpenForm     OpenForm       `json:"openForm"`
 	Captions     CaptionMap     `json:"captions"`
+
+	// legacy
+	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
+	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
 }
 type FieldHeader struct {
 	Id       uuid.UUID   `json:"id"`
@@ -266,21 +284,24 @@ type FieldHeader struct {
 	Captions CaptionMap  `json:"captions"`
 }
 type FieldList struct {
-	Id                uuid.UUID   `json:"id"`
-	IconId            pgtype.UUID `json:"iconId"`
-	Content           string      `json:"content"`
-	State             string      `json:"state"`
-	OnMobile          bool        `json:"onMobile"`
-	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
+	Id          uuid.UUID   `json:"id"`
+	IconId      pgtype.UUID `json:"iconId"`
+	Content     string      `json:"content"`
+	State       string      `json:"state"`
+	OnMobile    bool        `json:"onMobile"`
+	CsvExport   bool        `json:"csvExport"`
+	CsvImport   bool        `json:"csvImport"`
+	AutoRenew   pgtype.Int4 `json:"autoRenew"`   // automatic list refresh
+	Layout      string      `json:"layout"`      // list layout: table, cards
+	FilterQuick bool        `json:"filterQuick"` // enable quickfilter (uses all visible columns)
+	ResultLimit int         `json:"resultLimit"` // predefined limit, overwritable by user
+	Columns     []Column    `json:"columns"`
+	OpenForm    OpenForm    `json:"openForm"`
+	Query       Query       `json:"query"`
+
+	// legacy
 	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
-	CsvExport         bool        `json:"csvExport"`
-	CsvImport         bool        `json:"csvImport"`
-	AutoRenew         pgtype.Int4 `json:"autoRenew"`   // automatic list refresh
-	Layout            string      `json:"layout"`      // list layout: table, cards
-	FilterQuick       bool        `json:"filterQuick"` // enable quickfilter (uses all visible columns)
-	ResultLimit       int         `json:"resultLimit"` // predefined limit, overwritable by user
-	Columns           []Column    `json:"columns"`
-	Query             Query       `json:"query"`
+	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
 }
 type Column struct {
 	Id          uuid.UUID      `json:"id"`
@@ -361,3 +382,14 @@ type Deletion struct {
 	Entity string    `json:"entity"`
 }
 type CaptionMap map[string]map[string]string // content->language_code->value
+
+// custom marshallers
+// use local type to avoid marshal loop (has same fields but none of the original methods)
+func (src OpenForm) MarshalJSON() ([]byte, error) {
+
+	if src.FormIdOpen == uuid.Nil {
+		return []byte("null"), nil
+	}
+	type alias OpenForm
+	return json.Marshal(alias(src))
+}

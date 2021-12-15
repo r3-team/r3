@@ -8,6 +8,7 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/schema/pgIndex"
+	"r3/types"
 	"strconv"
 	"strings"
 
@@ -102,7 +103,110 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			-- new form state condition
 			ALTER TABLE app.form_state_condition ADD COLUMN login1 BOOLEAN;
+			
+			-- new open form entity
+			CREATE TABLE IF NOT EXISTS app.open_form (
+			    field_id uuid,
+			    column_id uuid,
+			    form_id_open uuid NOT NULL,
+				attribute_id_apply uuid,
+				relation_index integer NOT NULL,
+			    pop_up boolean NOT NULL,
+			    max_height integer NOT NULL,
+			    max_width integer NOT NULL,
+			    CONSTRAINT open_form_column_id_fkey FOREIGN KEY (column_id)
+			        REFERENCES app."column" (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT open_form_field_id_fkey FOREIGN KEY (field_id)
+			        REFERENCES app.field (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT open_form_form_id_open_fkey FOREIGN KEY (form_id_open)
+			        REFERENCES app.form (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT open_form_attribute_id_apply_fkey FOREIGN KEY (attribute_id_apply)
+			        REFERENCES app.attribute (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX fki_open_form_field_id_fkey
+				ON app.open_form USING btree (field_id ASC NULLS LAST);
+			CREATE INDEX fki_open_form_column_id_fkey
+				ON app.open_form USING btree (column_id ASC NULLS LAST);
 		`)
+
+		// migrate existing form open actions to new 'open form' entity
+		type result struct {
+			FieldId  uuid.UUID
+			OpenForm types.OpenForm
+		}
+		results := make([]result, 0)
+
+		rows, err := tx.Query(db.Ctx, `
+			SELECT field_id, form_id_open, attribute_id_record FROM app.field_button
+			WHERE form_id_open IS NOT NULL
+			UNION
+			SELECT field_id, form_id_open, attribute_id_record FROM app.field_calendar
+			WHERE form_id_open IS NOT NULL
+			UNION
+			SELECT field_id, form_id_open, attribute_id_record FROM app.field_data_relationship
+			WHERE form_id_open IS NOT NULL
+			UNION
+			SELECT field_id, form_id_open, attribute_id_record FROM app.field_list
+			WHERE form_id_open IS NOT NULL
+		`)
+		if err != nil {
+			return "", err
+		}
+
+		for rows.Next() {
+			var r result
+			var o types.OpenForm
+
+			if err := rows.Scan(&r.FieldId, &o.FormIdOpen, &o.AttributeIdApply); err != nil {
+				return "", err
+			}
+			r.OpenForm = o
+			results = append(results, r)
+		}
+		rows.Close()
+
+		for _, r := range results {
+
+			if _, err := tx.Exec(db.Ctx, `
+				INSERT INTO app.open_form (
+					field_id, form_id_open, attribute_id_apply,
+					relation_index, pop_up, max_height, max_width
+				)
+				VALUES ($1,$2,$3,0,false,0,0)
+			`, r.FieldId, r.OpenForm.FormIdOpen, r.OpenForm.AttributeIdApply); err != nil {
+				return "", err
+			}
+		}
+
+		if _, err := tx.Exec(db.Ctx, `
+			ALTER TABLE app.field_button
+				DROP COLUMN form_id_open,
+				DROP COLUMN attribute_id_record;
+			ALTER TABLE app.field_calendar
+				DROP COLUMN form_id_open,
+				DROP COLUMN attribute_id_record;
+			ALTER TABLE app.field_data_relationship
+				DROP COLUMN form_id_open,
+				DROP COLUMN attribute_id_record;
+			ALTER TABLE app.field_list
+				DROP COLUMN form_id_open,
+				DROP COLUMN attribute_id_record;
+		`); err != nil {
+			return "", err
+		}
+
 		return "2.6", err
 	},
 	"2.4": func(tx pgx.Tx) (string, error) {

@@ -1,3 +1,5 @@
+import MyStore from '../../stores/store.js';
+
 export function getDependentModules(moduleSource,modulesAll) {
 	let out = [];
 	for(let i = 0, j = modulesAll.length; i < j; i++) {
@@ -51,6 +53,10 @@ export function getItemTitle(relation,attribute,index,outsideIn,attributeNm) {
 		atrNmCap = `->${attributeNm.name}`;
 	
 	return `${index}) ${relCap}${relation.name}.${attribute.name}${atrNmCap}`;
+};
+
+export function getItemTitleRelation(relationId,index) {
+	return `${index}) ${MyStore.getters['schema/relationIdMap'][relationId].name}`;
 };
 
 export function getPgFunctionTemplate() {

@@ -10,6 +10,7 @@ import (
 	"r3/schema/caption"
 	"r3/schema/column"
 	"r3/schema/lookups"
+	"r3/schema/openForm"
 	"r3/schema/query"
 	"r3/tools"
 	"r3/types"
@@ -33,14 +34,10 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		SELECT f.id, f.parent_id, f.icon_id, f.content, f.state, f.on_mobile,
 		a.content,
 		
-		-- button field
-		fb.attribute_id_record, fb.form_id_open,
-		
 		-- calendar field
-		fn.form_id_open, fn.attribute_id_date0, fn.attribute_id_date1,
-		fn.attribute_id_color, fn.attribute_id_record, fn.index_date0,
-		fn.index_date1, fn.index_color, fn.ics, fn.gantt, fn.gantt_steps,
-		fn.gantt_steps_toggle, fn.date_range0, fn.date_range1,
+		fn.attribute_id_date0, fn.attribute_id_date1, fn.attribute_id_color,
+		fn.index_date0, fn.index_date1, fn.index_color, fn.ics, fn.gantt,
+		fn.gantt_steps, fn.gantt_steps_toggle, fn.date_range0, fn.date_range1,
 		
 		-- chart field
 		fa.chart_option,
@@ -57,27 +54,27 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		fd.max, fd.def, fd.regex_check,
 		
 		-- data relationship field
-		fr.form_id_open, fr.attribute_id_record, fr.attribute_id_nm,
-		fr.category, fr.filter_quick, fr.outside_in, fr.auto_select, (
+		fr.attribute_id_nm, fr.category, fr.filter_quick, fr.outside_in,
+		fr.auto_select, (
 			SELECT COALESCE(ARRAY_AGG(preset_id), '{}')
 			FROM app.field_data_relationship_preset
 			WHERE field_id = fr.field_id
 		) AS preset_ids,
 		
 		-- list field
-		fl.attribute_id_record, fl.form_id_open, fl.auto_renew, fl.csv_export,
-		fl.csv_import, fl.layout, fl.filter_quick, fl.result_limit
+		fl.auto_renew, fl.csv_export, fl.csv_import, fl.layout,
+		fl.filter_quick, fl.result_limit
 		
 		FROM app.field AS f
-		LEFT JOIN app.field_button    AS fb ON fb.field_id = f.id
-		LEFT JOIN app.field_calendar  AS fn ON fn.field_id = f.id
-		LEFT JOIN app.field_chart     AS fa ON fa.field_id = f.id
-		LEFT JOIN app.field_container AS fc ON fc.field_id = f.id
-		LEFT JOIN app.field_data      AS fd ON fd.field_id = f.id
+		LEFT JOIN app.field_button            AS fb ON fb.field_id = f.id
+		LEFT JOIN app.field_calendar          AS fn ON fn.field_id = f.id
+		LEFT JOIN app.field_chart             AS fa ON fa.field_id = f.id
+		LEFT JOIN app.field_container         AS fc ON fc.field_id = f.id
+		LEFT JOIN app.field_data              AS fd ON fd.field_id = f.id
 		LEFT JOIN app.field_data_relationship AS fr ON fr.field_id = f.id
-		LEFT JOIN app.field_header    AS fh ON fh.field_id = f.id
-		LEFT JOIN app.field_list      AS fl ON fl.field_id = f.id
-		LEFT JOIN app.attribute       AS a  ON a.id        = fd.attribute_id
+		LEFT JOIN app.field_header            AS fh ON fh.field_id = f.id
+		LEFT JOIN app.field_list              AS fl ON fl.field_id = f.id
+		LEFT JOIN app.attribute               AS a  ON a.id        = fd.attribute_id
 		WHERE f.form_id = $1
 		ORDER BY f.position ASC
 	`, formId)
@@ -111,26 +108,21 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			indexDate1, size, resultLimit pgtype.Int2
 		var autoRenew, dateRange0, dateRange1, indexColor, min, max pgtype.Int4
 		var attributeId, attributeIdAlt, attributeIdNm, attributeIdDate0,
-			attributeIdDate1, attributeIdColor, attributeIdRecordBtn,
-			attributeIdRecordCalendar, attributeIdRecordData,
-			attributeIdRecordList, fieldParentId, formIdOpenBtn, formIdOpenCal,
-			formIdOpenData, formIdOpenList, iconId pgtype.UUID
+			attributeIdDate1, attributeIdColor, fieldParentId,
+			iconId pgtype.UUID
 		var category, csvExport, csvImport, filterQuick, filterQuickList,
 			gantt, ganttStepsToggle, ics, outsideIn, wrap pgtype.Bool
 		var defPresetIds []uuid.UUID
 
 		if err := rows.Scan(&fieldId, &fieldParentId, &iconId, &content, &state,
-			&onMobile, &atrContent, &attributeIdRecordBtn, &formIdOpenBtn,
-			&formIdOpenCal, &attributeIdDate0, &attributeIdDate1,
-			&attributeIdColor, &attributeIdRecordCalendar, &indexDate0,
-			&indexDate1, &indexColor, &ics, &gantt, &ganttSteps,
-			&ganttStepsToggle, &dateRange0, &dateRange1, &chartOption,
-			&direction, &justifyContent, &alignItems, &alignContent, &wrap,
-			&grow, &shrink, &basis, &perMin, &perMax, &size, &attributeId,
-			&attributeIdAlt, &index, &display, &min, &max, &def, &regexCheck,
-			&formIdOpenData, &attributeIdRecordData, &attributeIdNm, &category,
-			&filterQuick, &outsideIn, &autoSelect, &defPresetIds,
-			&attributeIdRecordList, &formIdOpenList, &autoRenew, &csvExport,
+			&onMobile, &atrContent, &attributeIdDate0, &attributeIdDate1,
+			&attributeIdColor, &indexDate0, &indexDate1, &indexColor, &ics,
+			&gantt, &ganttSteps, &ganttStepsToggle, &dateRange0, &dateRange1,
+			&chartOption, &direction, &justifyContent, &alignItems,
+			&alignContent, &wrap, &grow, &shrink, &basis, &perMin, &perMax,
+			&size, &attributeId, &attributeIdAlt, &index, &display, &min, &max,
+			&def, &regexCheck, &attributeIdNm, &category, &filterQuick,
+			&outsideIn, &autoSelect, &defPresetIds, &autoRenew, &csvExport,
 			&csvImport, &layout, &filterQuickList, &resultLimit); err != nil {
 
 			rows.Close()
@@ -145,38 +137,44 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		switch content {
 		case "button":
 			fields = append(fields, types.FieldButton{
-				Id:                fieldId,
-				IconId:            iconId,
-				Content:           content,
-				State:             state,
-				OnMobile:          onMobile,
-				AttributeIdRecord: attributeIdRecordBtn,
-				FormIdOpen:        formIdOpenBtn,
+				Id:       fieldId,
+				IconId:   iconId,
+				Content:  content,
+				State:    state,
+				OnMobile: onMobile,
+				OpenForm: types.OpenForm{},
+
+				// legacy
+				FormIdOpen:        compatible.GetNullUuid(),
+				AttributeIdRecord: compatible.GetNullUuid(),
 			})
 			posButtonLookup = append(posButtonLookup, pos)
 		case "calendar":
 			fields = append(fields, types.FieldCalendar{
-				Id:                fieldId,
-				IconId:            iconId,
-				Content:           content,
-				State:             state,
-				OnMobile:          onMobile,
-				FormIdOpen:        formIdOpenCal,
-				AttributeIdDate0:  attributeIdDate0.Bytes,
-				AttributeIdDate1:  attributeIdDate1.Bytes,
-				AttributeIdColor:  attributeIdColor,
-				AttributeIdRecord: attributeIdRecordCalendar,
-				IndexDate0:        int(indexDate0.Int),
-				IndexDate1:        int(indexDate1.Int),
-				IndexColor:        indexColor,
-				Ics:               ics.Bool,
-				Gantt:             gantt.Bool,
-				GanttSteps:        ganttSteps,
-				GanttStepsToggle:  ganttStepsToggle.Bool,
-				DateRange0:        int64(dateRange0.Int),
-				DateRange1:        int64(dateRange1.Int),
-				Columns:           []types.Column{},
-				Query:             types.Query{},
+				Id:               fieldId,
+				IconId:           iconId,
+				Content:          content,
+				State:            state,
+				OnMobile:         onMobile,
+				AttributeIdDate0: attributeIdDate0.Bytes,
+				AttributeIdDate1: attributeIdDate1.Bytes,
+				AttributeIdColor: attributeIdColor,
+				IndexDate0:       int(indexDate0.Int),
+				IndexDate1:       int(indexDate1.Int),
+				IndexColor:       indexColor,
+				Ics:              ics.Bool,
+				Gantt:            gantt.Bool,
+				GanttSteps:       ganttSteps,
+				GanttStepsToggle: ganttStepsToggle.Bool,
+				DateRange0:       int64(dateRange0.Int),
+				DateRange1:       int64(dateRange1.Int),
+				Columns:          []types.Column{},
+				Query:            types.Query{},
+				OpenForm:         types.OpenForm{},
+
+				// legacy
+				FormIdOpen:        compatible.GetNullUuid(),
+				AttributeIdRecord: compatible.GetNullUuid(),
 			})
 			posCalendarLookup = append(posCalendarLookup, pos)
 		case "chart":
@@ -215,30 +213,33 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		case "data":
 			if lookups.IsContentRelationship(atrContent.String) {
 				fields = append(fields, types.FieldDataRelationship{
-					Id:                fieldId,
-					IconId:            iconId,
-					Content:           content,
-					State:             state,
-					OnMobile:          onMobile,
-					FormIdOpen:        formIdOpenData,
-					AttributeId:       attributeId.Bytes,
-					AttributeIdAlt:    attributeIdAlt,
-					AttributeIdNm:     attributeIdNm,
-					AttributeIdRecord: attributeIdRecordData,
-					Index:             int(index.Int),
-					Display:           display.String,
-					AutoSelect:        int(autoSelect.Int),
-					Min:               min,
-					Max:               max,
-					RegexCheck:        regexCheck,
-					Def:               def.String,
-					DefPresetIds:      defPresetIds,
-					Category:          category.Bool,
-					FilterQuick:       filterQuick.Bool,
-					OutsideIn:         outsideIn.Bool,
-					Columns:           []types.Column{},
-					Query:             types.Query{},
-					Captions:          types.CaptionMap{},
+					Id:             fieldId,
+					IconId:         iconId,
+					Content:        content,
+					State:          state,
+					OnMobile:       onMobile,
+					AttributeId:    attributeId.Bytes,
+					AttributeIdAlt: attributeIdAlt,
+					AttributeIdNm:  attributeIdNm,
+					Index:          int(index.Int),
+					Display:        display.String,
+					AutoSelect:     int(autoSelect.Int),
+					Min:            min,
+					Max:            max,
+					RegexCheck:     regexCheck,
+					Def:            def.String,
+					DefPresetIds:   defPresetIds,
+					Category:       category.Bool,
+					FilterQuick:    filterQuick.Bool,
+					OutsideIn:      outsideIn.Bool,
+					Columns:        []types.Column{},
+					Query:          types.Query{},
+					OpenForm:       types.OpenForm{},
+					Captions:       types.CaptionMap{},
+
+					// legacy
+					FormIdOpen:        compatible.GetNullUuid(),
+					AttributeIdRecord: compatible.GetNullUuid(),
 				})
 				posDataRelLookup = append(posDataRelLookup, pos)
 			} else {
@@ -275,21 +276,24 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 
 		case "list":
 			fields = append(fields, types.FieldList{
-				Id:                fieldId,
-				IconId:            iconId,
-				Content:           content,
-				State:             state,
-				OnMobile:          onMobile,
-				AttributeIdRecord: attributeIdRecordList,
-				FormIdOpen:        formIdOpenList,
-				Columns:           []types.Column{},
-				AutoRenew:         autoRenew,
-				CsvExport:         csvExport.Bool,
-				CsvImport:         csvImport.Bool,
-				Layout:            layout.String,
-				FilterQuick:       filterQuickList.Bool,
-				Query:             types.Query{},
-				ResultLimit:       int(resultLimit.Int),
+				Id:          fieldId,
+				IconId:      iconId,
+				Content:     content,
+				State:       state,
+				OnMobile:    onMobile,
+				Columns:     []types.Column{},
+				AutoRenew:   autoRenew,
+				CsvExport:   csvExport.Bool,
+				CsvImport:   csvImport.Bool,
+				Layout:      layout.String,
+				FilterQuick: filterQuickList.Bool,
+				Query:       types.Query{},
+				OpenForm:    types.OpenForm{},
+				ResultLimit: int(resultLimit.Int),
+
+				// legacy
+				FormIdOpen:        compatible.GetNullUuid(),
+				AttributeIdRecord: compatible.GetNullUuid(),
 			})
 			posListLookup = append(posListLookup, pos)
 		}
@@ -297,10 +301,14 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	}
 	rows.Close()
 
-	// lookup button fields: captions
+	// lookup button fields: open form, captions
 	for _, pos := range posButtonLookup {
 		var field = fields[pos].(types.FieldButton)
 
+		field.OpenForm, err = openForm.Get("field", field.Id)
+		if err != nil {
+			return fields, err
+		}
 		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle"})
 		if err != nil {
 			return fields, err
@@ -308,10 +316,14 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		fields[pos] = field
 	}
 
-	// lookup calendar fields: query, columns
+	// lookup calendar fields: open form, query, columns
 	for _, pos := range posCalendarLookup {
 		var field = fields[pos].(types.FieldCalendar)
 
+		field.OpenForm, err = openForm.Get("field", field.Id)
+		if err != nil {
+			return fields, err
+		}
 		field.Query, err = query.Get("field", field.Id, 0, 0)
 		if err != nil {
 			return fields, err
@@ -349,10 +361,14 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		fields[pos] = field
 	}
 
-	// lookup data relationship fields: query, columns, captions
+	// lookup data relationship fields: open form, query, columns, captions
 	for _, pos := range posDataRelLookup {
 		var field = fields[pos].(types.FieldDataRelationship)
 
+		field.OpenForm, err = openForm.Get("field", field.Id)
+		if err != nil {
+			return fields, err
+		}
 		field.Query, err = query.Get("field", field.Id, 0, 0)
 		if err != nil {
 			return fields, err
@@ -379,10 +395,14 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		fields[pos] = field
 	}
 
-	// lookup list fields: query, columns
+	// lookup list fields: open form, query, columns
 	for _, pos := range posListLookup {
 		var field = fields[pos].(types.FieldList)
 
+		field.OpenForm, err = openForm.Get("field", field.Id)
+		if err != nil {
+			return fields, err
+		}
 		field.Query, err = query.Get("field", field.Id, 0, 0)
 		if err != nil {
 			return fields, err
@@ -471,11 +491,14 @@ func GetCalendar(fieldId uuid.UUID) (types.FieldCalendar, error) {
 		return f, err
 	}
 
+	f.OpenForm, err = openForm.Get("field", f.Id)
+	if err != nil {
+		return f, err
+	}
 	f.Query, err = query.Get("field", f.Id, 0, 0)
 	if err != nil {
 		return f, err
 	}
-
 	f.Columns, err = column.Get(f.Id)
 	if err != nil {
 		return f, err
@@ -511,7 +534,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 				return err
 			}
 			if err := setButton_tx(tx, fieldId, f.AttributeIdRecord,
-				f.FormIdOpen); err != nil {
+				f.FormIdOpen, f.OpenForm); err != nil {
 
 				return err
 			}
@@ -527,7 +550,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 				f.AttributeIdDate0, f.AttributeIdDate1, f.AttributeIdColor,
 				f.AttributeIdRecord, f.IndexDate0, f.IndexDate1, f.IndexColor,
 				f.Gantt, f.GanttSteps, f.GanttStepsToggle, f.Ics, f.DateRange0,
-				f.DateRange1, f.Columns); err != nil {
+				f.DateRange1, f.Columns, f.OpenForm); err != nil {
 
 				return err
 			}
@@ -589,7 +612,8 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 				}
 				if err := setDataRelationship_tx(tx, fieldId, f.FormIdOpen,
 					f.AttributeIdRecord, f.AttributeIdNm, f.Columns, f.Category,
-					f.FilterQuick, f.OutsideIn, f.AutoSelect, f.DefPresetIds); err != nil {
+					f.FilterQuick, f.OutsideIn, f.AutoSelect, f.DefPresetIds,
+					f.OpenForm); err != nil {
 
 					return err
 				}
@@ -615,7 +639,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 			}
 			if err := setList_tx(tx, fieldId, f.AttributeIdRecord, f.FormIdOpen,
 				f.AutoRenew, f.CsvExport, f.CsvImport, f.Layout, f.FilterQuick,
-				f.ResultLimit, f.Columns); err != nil {
+				f.ResultLimit, f.Columns, f.OpenForm); err != nil {
 
 				return err
 			}
@@ -658,7 +682,7 @@ func setGeneric_tx(tx pgx.Tx, formId uuid.UUID, id uuid.UUID,
 	return id, nil
 }
 func setButton_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
-	formIdOpen pgtype.UUID) error {
+	formIdOpen pgtype.UUID, oForm types.OpenForm) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_button", "field_id")
 	if err != nil {
@@ -666,20 +690,22 @@ func setButton_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	}
 
 	if known {
-		if _, err := tx.Exec(db.Ctx, `
-			UPDATE app.field_button
-			SET attribute_id_record = $1, form_id_open = $2
-			WHERE field_id = $3
-		`, attributeIdRecord, formIdOpen, fieldId); err != nil {
-			return err
-		}
+		// nothing to update on the button entity itself currently
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.field_button (field_id, attribute_id_record, form_id_open)
-			VALUES ($1,$2,$3)
-		`, fieldId, attributeIdRecord, formIdOpen); err != nil {
+			INSERT INTO app.field_button (field_id)
+			VALUES ($1)
+		`, fieldId); err != nil {
 			return err
 		}
+	}
+
+	// fix imports < 2.6: New open form entity
+	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
+
+	// set open form
+	if err := openForm.Set_tx(tx, "field", fieldId, oForm); err != nil {
+		return err
 	}
 	return nil
 }
@@ -688,7 +714,7 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	attributeIdColor pgtype.UUID, attributeIdRecord pgtype.UUID, indexDate0 int,
 	indexDate1 int, indexColor pgtype.Int4, gantt bool, ganttSteps pgtype.Varchar,
 	ganttStepsToggle bool, ics bool, dateRange0 int64, dateRange1 int64,
-	columns []types.Column) error {
+	columns []types.Column, oForm types.OpenForm) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_calendar", "field_id")
 	if err != nil {
@@ -701,35 +727,40 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.field_calendar
-			SET form_id_open = $1, attribute_id_date0 = $2, 
-				attribute_id_date1 = $3, attribute_id_color = $4,
-				attribute_id_record = $5, index_date0 = $6, index_date1 = $7,
-				index_color = $8, gantt = $9, gantt_steps = $10,
-				gantt_steps_toggle = $11, ics = $12, date_range0 = $13,
-				date_range1 = $14
-			WHERE field_id = $15
-		`, formIdOpen, attributeIdDate0, attributeIdDate1, attributeIdColor,
-			attributeIdRecord, indexDate0, indexDate1, indexColor, gantt,
-			ganttSteps, ganttStepsToggle, ics, dateRange0, dateRange1,
-			fieldId); err != nil {
+			SET attribute_id_date0 = $1, attribute_id_date1 = $2,
+				attribute_id_color = $3, index_date0 = $4, index_date1 = $5,
+				index_color = $6, gantt = $7, gantt_steps = $8,
+				gantt_steps_toggle = $9, ics = $10, date_range0 = $11,
+				date_range1 = $12
+			WHERE field_id = $13
+		`, attributeIdDate0, attributeIdDate1, attributeIdColor, indexDate0,
+			indexDate1, indexColor, gantt, ganttSteps, ganttStepsToggle, ics,
+			dateRange0, dateRange1, fieldId); err != nil {
 
 			return err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.field_calendar (
-				field_id, form_id_open, attribute_id_date0, attribute_id_date1,
-				attribute_id_color, attribute_id_record, index_date0, 
-				index_date1, index_color, gantt, gantt_steps, 
-				gantt_steps_toggle, ics, date_range0, date_range1
-			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
-		`, fieldId, formIdOpen, attributeIdDate0, attributeIdDate1,
-			attributeIdColor, attributeIdRecord, indexDate0, indexDate1,
-			indexColor, gantt, ganttSteps, ganttStepsToggle, ics, dateRange0,
-			dateRange1); err != nil {
+				field_id, attribute_id_date0, attribute_id_date1,
+				attribute_id_color, index_date0, index_date1, index_color,
+				gantt, gantt_steps, 	gantt_steps_toggle, ics, date_range0,
+				date_range1
+			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+		`, fieldId, attributeIdDate0, attributeIdDate1, attributeIdColor,
+			indexDate0, indexDate1, indexColor, gantt, ganttSteps,
+			ganttStepsToggle, ics, dateRange0, dateRange1); err != nil {
 
 			return err
 		}
+	}
+
+	// fix imports < 2.6: New open form entity
+	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
+
+	// set open form
+	if err := openForm.Set_tx(tx, "field", fieldId, oForm); err != nil {
+		return err
 	}
 	return column.Set_tx(tx, fieldId, columns)
 }
@@ -832,7 +863,7 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 func setDataRelationship_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	attributeIdRecord pgtype.UUID, attributeIdNm pgtype.UUID,
 	columns []types.Column, category bool, filterQuick bool, outsideIn bool,
-	autoSelect int, defPresetIds []uuid.UUID) error {
+	autoSelect int, defPresetIds []uuid.UUID, oForm types.OpenForm) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_data_relationship", "field_id")
 	if err != nil {
@@ -842,11 +873,10 @@ func setDataRelationship_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.field_data_relationship
-			SET form_id_open = $1, attribute_id_record = $2, 
-				attribute_id_nm = $3, category = $4, filter_quick = $5,
-				outside_in = $6, auto_select = $7
-			WHERE field_id = $8
-		`, formIdOpen, attributeIdRecord, attributeIdNm, category, filterQuick,
+			SET 	attribute_id_nm = $1, category = $2, filter_quick = $3,
+				outside_in = $4, auto_select = $5
+			WHERE field_id = $6
+		`, attributeIdNm, category, filterQuick,
 			outsideIn, autoSelect, fieldId); err != nil {
 
 			return err
@@ -854,11 +884,11 @@ func setDataRelationship_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.field_data_relationship (
-				field_id, form_id_open, attribute_id_record, attribute_id_nm,
-				category, filter_quick, outside_in, auto_select
-			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-		`, fieldId, formIdOpen, attributeIdRecord, attributeIdNm, category,
-			filterQuick, outsideIn, autoSelect); err != nil {
+				field_id, attribute_id_nm, category,
+				filter_quick, outside_in, auto_select
+			) VALUES ($1,$2,$3,$4,$5,$6)
+		`, fieldId, attributeIdNm, category, filterQuick,
+			outsideIn, autoSelect); err != nil {
 
 			return err
 		}
@@ -879,6 +909,14 @@ func setDataRelationship_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID
 		`, fieldId, presetId); err != nil {
 			return err
 		}
+	}
+
+	// fix imports < 2.6: New open form entity
+	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
+
+	// set open form
+	if err := openForm.Set_tx(tx, "field", fieldId, oForm); err != nil {
+		return err
 	}
 	return column.Set_tx(tx, fieldId, columns)
 }
@@ -909,7 +947,8 @@ func setHeader_tx(tx pgx.Tx, fieldId uuid.UUID, size int) error {
 }
 func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	formIdOpen pgtype.UUID, autoRenew pgtype.Int4, csvExport bool, csvImport bool,
-	layout string, filterQuick bool, resultLimit int, columns []types.Column) error {
+	layout string, filterQuick bool, resultLimit int, columns []types.Column,
+	oForm types.OpenForm) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_list", "field_id")
 	if err != nil {
@@ -919,27 +958,33 @@ func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.field_list
-			SET attribute_id_record = $1, form_id_open = $2, auto_renew = $3,
-				csv_export = $4, csv_import = $5, layout = $6, filter_quick = $7,
-				result_limit = $8
-			WHERE field_id = $9
-		`, attributeIdRecord, formIdOpen, autoRenew, csvExport, csvImport,
-			layout, filterQuick, resultLimit, fieldId); err != nil {
+			SET auto_renew = $1, csv_export = $2, csv_import = $3, layout = $4,
+				filter_quick = $5, result_limit = $6
+			WHERE field_id = $7
+		`, autoRenew, csvExport, csvImport, layout,
+			filterQuick, resultLimit, fieldId); err != nil {
 
 			return err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.field_list (
-				field_id, attribute_id_record, form_id_open, auto_renew,
-				csv_export, csv_import, layout, filter_quick, result_limit
+				field_id, auto_renew, csv_export, csv_import,
+				layout, filter_quick, result_limit
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-		`, fieldId, attributeIdRecord, formIdOpen, autoRenew, csvExport,
-			csvImport, layout, filterQuick, resultLimit); err != nil {
+			VALUES ($1,$2,$3,$4,$5,$6,$7)
+		`, fieldId, autoRenew, csvExport, csvImport,
+			layout, filterQuick, resultLimit); err != nil {
 
 			return err
 		}
+	}
+	// fix imports < 2.6: New open form entity
+	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
+
+	// set open form
+	if err := openForm.Set_tx(tx, "field", fieldId, oForm); err != nil {
+		return err
 	}
 	return column.Set_tx(tx, fieldId, columns)
 }

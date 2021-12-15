@@ -558,9 +558,8 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'button',
 				state:'default',
+				openForm:null,
 				onMobile:true,
-				formIdOpen:null,
-				attributeIdRecord:null,
 				captions:{
 					fieldTitle:{}
 				}
@@ -579,12 +578,12 @@ let MyBuilderForm = {
 				indexDate0:null,
 				indexDate1:null,
 				indexColor:null,
-				formIdOpen:null,
 				gantt:false,
 				ganttSteps:null,
 				ics:false,
 				dateRange0:0,
 				dateRange1:0,
+				openForm:null,
 				query:this.getQueryTemplate(),
 				columns:[]
 			};
@@ -672,15 +671,14 @@ let MyBuilderForm = {
 				}
 			};
 			if(this.isAttributeRelationship(attribute.content)) {
-				field.formIdOpen    = null;
 				field.attributeIdNm = attributeIdNm;
-				field.attributeIdRecord = null;
 				field.columns       = [];
 				field.query         = this.getQueryTemplate();
 				field.category      = false;
 				field.filterQuick   = false;
 				field.outsideIn     = outsideIn;
 				field.defPresetIds  = [];
+				field.openForm      = null;
 			}
 			return field;
 		},
@@ -705,13 +703,12 @@ let MyBuilderForm = {
 				state:'default',
 				onMobile:true,
 				columns:[],
-				formIdOpen:null,
-				attributeIdRecord:null,
 				autoRenew:null,
 				csvExport:false,
 				csvImport:false,
 				filterQuick:false,
 				layout:'table',
+				openForm:null,
 				query:this.getQueryTemplate(),
 				recordSelector:false,
 				resultLimit:50

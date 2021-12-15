@@ -75,11 +75,11 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 		INNER JOIN app.relation AS r
 			ON r.id = a.relation_id
 		INNER JOIN app.module AS m
-			ON m.id = r.module_id
-		WHERE m.id = $1
+			ON  m.id = r.module_id
+			AND m.id = $1
 		
 		-- dependency
-		AND a.relationship_id NOT IN (
+		WHERE a.relationship_id NOT IN (
 			SELECT id
 			FROM app.relation
 			WHERE module_id = m.id
@@ -135,19 +135,19 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 			name1.String)
 	}
 
-	// check list access to external forms
+	// check field access to external forms
 	if err := tx.QueryRow(db.Ctx, `
-		SELECT COUNT(*), STRING_AGG(f.name, ', '), STRING_AGG(f_open.name, ', ')
-		FROM app.field_list AS l
-		INNER JOIN app.field AS lf ON lf.id = l.field_id  -- field of list field
-		INNER JOIN app.form  AS f  ON f.id  = lf.form_id  -- form of list field
-		INNER JOIN app.form  AS f_open ON f_open.id = l.form_id_open
+		SELECT COUNT(*), STRING_AGG(f3.name, ', '), STRING_AGG(f1.name, ', ')
+		FROM app.open_form AS of
+		INNER JOIN app.form  AS f1 ON f1.id = of.form_id_open -- opened form
+		INNER JOIN app.field AS f2 ON f2.id = of.field_id     -- field that opens
+		INNER JOIN app.form  AS f3 ON f3.id = f2.form_id      -- form of field that opens
 		INNER JOIN app.module AS m
-			ON m.id = f.module_id
+			ON m.id  = f3.module_id
 			AND m.id = $1
 		
 		-- dependency
-		WHERE f_open.id NOT IN (
+		WHERE f1.id NOT IN (
 			SELECT id
 			FROM app.form
 			WHERE module_id = m.id
@@ -162,7 +162,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	if cnt != 0 {
-		return fmt.Errorf("dependency check failed, list field(s) on form(s) '%s' accessing form(s) '%s' from independent module(s)",
+		return fmt.Errorf("dependency check failed, fields(s) on form(s) '%s' opening form(s) '%s' from independent module(s)",
 			name1.String, name2.String)
 	}
 

@@ -1,6 +1,7 @@
 import {
 	getDependentModules,
 	getItemTitle,
+	getItemTitleRelation,
 	getValueFromJson,
 	setValueInJson
 } from '../shared/builder.js';
@@ -791,14 +792,17 @@ let MyBuilderFieldOptions = {
 				:modelValue="field.chartOption"
 			/>
 			
-			<!-- open form with no record -->
-			<template v-if="isButton">
+			<!-- open form -->
+			<template v-if="(isButton || isList || isCalendar || isRelationship) && field.query.relationId !== null">
 				<tr>
-					<td>{{ capApp.formOpenEmpty }}</td>
+					<td colspan="2"><br /><b>{{ capApp.openForm }}</b></td>
+				</tr>
+				<tr>
+					<td>{{ capApp.openFormFormIdOpen }}</td>
 					<td>
 						<select
-							@input="setNull('formIdOpen',$event.target.value)"
-							:value="field.formIdOpen"
+							@input="setOpenForm('formIdOpen',$event.target.value)"
+							:value="isOpenForm ? field.openForm.formIdOpen : ''"
 						>
 							<option value="">-</option>
 							<optgroup
@@ -814,55 +818,69 @@ let MyBuilderFieldOptions = {
 				</tr>
 			</template>
 			
-			<!-- open form with record -->
-			<tr v-if="(isList || isCalendar || isRelationship) && field.query.relationId !== null">
-				<td>{{ capApp.formOpen }}</td>
-				<td>
-					<select
-						@input="setNull('formIdOpen',$event.target.value)"
-						:value="field.formIdOpen"
-					>
-						<option value="">-</option>
-						<optgroup
-							v-for="mod in getDependentModules(module,modules)"
-							:label="mod.name"
+			<template v-if="isOpenForm">
+				<tr>
+					<td>{{ capApp.openFormPopUp }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="setOpenForm('popUp',$event)"
+							:modelValue="field.openForm.popUp"
+						/>
+					</td>
+				</tr>
+				<tr v-if="field.openForm.popUp">
+					<td>{{ capApp.openFormMaxHeight }}</td>
+					<td>
+						<input
+							@input="setOpenForm('maxHeight',$event.target.value)"
+							:value="field.openForm.maxHeight"
+						/>
+					</td>
+				</tr>
+				<tr v-if="field.openForm.popUp">
+					<td>{{ capApp.openFormMaxWidth }}</td>
+					<td>
+						<input
+							@input="setOpenForm('maxWidth',$event.target.value)"
+							:value="field.openForm.maxWidth"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2"><b>{{ capApp.openFormNewRecord }}</b></td>
+				</tr>
+				<tr>
+					<td>{{ capApp.openFormRelationIndex }}</td>
+					<td>
+						<select
+							@input="setOpenForm('relationIndex',$event.target.value)"
+							:value="field.openForm.relationIndex"
 						>
 							<option
-								v-for="f in mod.forms.filter(v => v.query.relationId === field.query.relationId)"
-								:value="f.id"
-							>
-								{{ f.name }}
-							</option>
-						</optgroup>
-					</select>
-				</td>
-			</tr>
-			
-			<!-- apply record value as attribute value for opened form -->
-			<tr v-if="isFormOpenWithAttribute">
-				<td>{{ capApp.attributeRecord }}</td>
-				<td>
-					<select
-						@input="setNull('attributeIdRecord',$event.target.value)"
-						:value="field.attributeIdRecord"
-					>
-						<option value=""></option>
-						<optgroup
-							v-for="mod in getDependentModules(module,modules)"
-							:label="mod.name"
+								v-for="j in joinsIndexMap"
+								:value="j.index"
+							>{{ getItemTitleRelation(j.relationId,j.index) }}</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.openFormAttributeApply }}</td>
+					<td>
+						<select
+							@input="setOpenForm('attributeIdApply',$event.target.value)"
+							:value="field.openForm.attributeIdApply !== null ? field.openForm.attributeIdApply : ''"
 						>
-							<template v-for="r in mod.relations">
-								<option
-									v-for="a in r.attributes.filter(v => attributeIdsReferToFormRelation.includes(v.id))"
-									:value="a.id"
-								>
-									{{ r.name + '.' + a.name }}
-								</option>
-							</template>
-						</optgroup>
-					</select>
-				</td>
-			</tr>
+							<option value="">-</option>
+							<option
+								v-for="a in openFormTargetAttributes"
+								:value="a.id"
+							>
+								{{ relationIdMap[a.relationId].name + '.' + a.name }}
+							</option>
+						</select>
+					</td>
+				</tr>
+			</template>
 		</tbody></table>
 	</div>`,
 	props:{
@@ -880,22 +898,52 @@ let MyBuilderFieldOptions = {
 			
 			return this.attributeIdMap[this.field.attributeId];
 		},
-		attributeIdsReferToFormRelation:function() {
-			if(typeof this.joinsIndexMap['0'] === 'undefined') return [];
+		openFormTargetAttributes:function() {
+			if(!this.isOpenForm)
+				return [];
 			
-			let atrIds = [];
-			let relId  = this.joinsIndexMap['0'].relationId;
-			
-			for(let k in this.attributeIdMap) {
-				let a = this.attributeIdMap[k];
+			// parse from which relation the record is applied, based on the chosen relation index
+			let recordRelationId = null;
+			for(let k in this.joinsIndexMap) {
 				
-				if(!this.isAttributeRelationship(a.content))
-					continue;
-				
-				if(a.relationshipId === relId)
-					atrIds.push(a.id);
+				if(this.joinsIndexMap[k].index === this.field.openForm.relationIndex) {
+					recordRelationId = this.joinsIndexMap[k].relationId;
+					break;
+				}
 			}
-			return atrIds;
+			if(recordRelationId === null)
+				return [];
+			
+			let form = this.formIdMap[this.field.openForm.formIdOpen];
+			let out  = [];
+			
+			// collect fitting attributes
+			for(let i = 0, j = form.query.joins.length; i < j; i++) {
+				let r = this.relationIdMap[form.query.joins[i].relationId];
+				
+				// attributes on relation from target form, in relationship with record relation
+				for(let x = 0, y = r.attributes.length; x < y; x++) {
+					let a = r.attributes[x];
+				
+					if(!this.isAttributeRelationship(a.content))
+						continue;
+					
+					if(a.relationshipId === recordRelationId)
+						out.push(a);
+				}
+				
+				// attributes on record relation, in relationship with relation from target form
+				for(let x = 0, y = this.relationIdMap[recordRelationId].attributes.length; x < y; x++) {
+					let a = this.relationIdMap[recordRelationId].attributes[x];
+				
+					if(!this.isAttributeRelationship(a.content))
+						continue;
+					
+					if(a.relationshipId === r.id)
+						out.push(a);
+				}
+			}
+			return out;
 		},
 		presetIdMap:function() {
 			if(!this.isRelationship)
@@ -927,6 +975,7 @@ let MyBuilderFieldOptions = {
 		isDatetime:   function() { return this.isData && this.field.display === 'datetime'; },
 		isHeader:     function() { return this.field.content === 'header'; },
 		isList:       function() { return this.field.content === 'list'; },
+		isOpenForm:   function() { return typeof this.field.openForm !== 'undefined' && this.field.openForm !== null; },
 		isQuery:      function() { return this.isCalendar || this.isChart || this.isList || this.isRelationship },
 		isFiles:function() {
 			return this.isData && this.isAttributeFiles(this.attribute.content);
@@ -939,10 +988,6 @@ let MyBuilderFieldOptions = {
 		},
 		isString:function() {
 			return this.isData && this.isAttributeString(this.attribute.content);
-		},
-		isFormOpenWithAttribute:function() {
-			return typeof this.field.attributeIdRecord !== 'undefined' &&
-				typeof this.field.formIdOpen !== 'undefined' && this.field.formIdOpen !== null;
 		},
 		
 		// stores
@@ -959,6 +1004,7 @@ let MyBuilderFieldOptions = {
 		getDependentModules,
 		getDetailsFromIndexAttributeId,
 		getIndexAttributeId,
+		getItemTitleRelation,
 		isAttributeFiles,
 		isAttributeInteger,
 		isAttributeRelationship,
@@ -983,6 +1029,39 @@ let MyBuilderFieldOptions = {
 			
 			ids.splice(pos,1);
 			this.set('defPresetIds',ids);
+		},
+		setOpenForm:function(name,val) {
+			
+			// clear if no form is opened
+			if(name === 'formIdOpen' && val === '')
+				return this.set('openForm',null);
+			
+			let v = JSON.parse(JSON.stringify(this.field.openForm));
+			
+			// set initial value if empty
+			if(v === null) {
+				v = {
+					formIdOpen:null,
+					attributeIdApply:null,
+					relationIndex:0,
+					popUp:false,
+					maxHeight:0,
+					maxWidth:0
+				};
+			}
+			
+			// set changed value
+			if(['relationIndex','maxHeight','maxWidth'].includes(name))
+				val = parseInt(val);
+			
+			if(name === 'attributeIdApply' && val === '')
+				val = null;
+			
+			if(name === 'formIdOpen')
+				v.attributeIdApply = null;
+			
+			v[name] = val;
+			this.set('openForm',v);
 		},
 		setInt:function(name,val,allowNull) {
 			if(val !== '')

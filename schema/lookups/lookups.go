@@ -195,6 +195,9 @@ func IsContentNumeric(content string) bool {
 func IsContentRelationship(content string) bool {
 	return content == "1:1" || content == "n:1"
 }
+func IsContentRelationship11(content string) bool {
+	return content == "1:1"
+}
 func IsContentText(content string) bool {
 	return content == "varchar" || content == "text"
 }

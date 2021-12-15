@@ -825,9 +825,13 @@ let MyForm = {
 				// overwrite default values from form getter
 				let ia = this.getDetailsFromIndexAttributeId(k);
 				
-				if(typeof attributeIdMapGetters[ia.attributeId] !== 'undefined')
-					this.valuesDef[k] = attributeIdMapGetters[ia.attributeId];
-				
+				if(typeof attributeIdMapGetters[ia.attributeId] !== 'undefined') {
+					
+					if(ia.outsideIn && this.isAttributeRelationshipN1(this.attributeIdMap[ia.attributeId].content))
+						this.valuesDef[k] = [attributeIdMapGetters[ia.attributeId]];
+					else
+						this.valuesDef[k] = attributeIdMapGetters[ia.attributeId];
+				}
 				this.valueSet(k,this.valuesDef[k],true,true);
 			}
 		},

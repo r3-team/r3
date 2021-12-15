@@ -153,7 +153,8 @@ let MyList = {
 								<div class="list-input-row-items nowrap">
 									<my-button image="add.png"
 										v-if="inputOpenForm && hasCreate"
-										@trigger="$emit('form-open-new')"
+										@trigger="$emit('form-open-new',false)"
+										@trigger-middle="$emit('form-open-new',true)"
 										:captionTitle="capApp.inputHintCreate"
 										:naked="true"
 									/>
@@ -182,8 +183,8 @@ let MyList = {
 					
 					<my-button image="new.png"
 						v-if="hasCreate"
-						@trigger="$emit('record-selected',0,false)"
-						@trigger-middle="$emit('record-selected',0,true)"
+						@trigger="$emit('form-open-new',false)"
+						@trigger-middle="$emit('form-open-new',true)"
 						:caption="!isMobile ? capGen.button.new : ''"
 						:captionTitle="capGen.button.newHint"
 						:darkBg="true"
