@@ -125,10 +125,10 @@
 			"backupEmbeddedNote":"Backup-urile integrate și complete sunt disponibile numai dacă este utilizat modelul de implementare autonom.<br /><br />Documentația sistemului conține capitole referitoare la măsurile de backup recomandate pentru instanțe dedicate.",
 			"backupMonthly":"Lunar",
 			"backupWeekly":"Săptămânal",
-			"bruteforceAttempts":"Gazde blocate după încercări",
+			"bruteforceAttempts":"Nr. de încercări după care gazdele vor fi blocate",
 			"bruteforceCountBlocked":"Gazde blocate",
 			"bruteforceCountTracked":"Gazde urmărite",
-			"bruteforceProtection":"Activați protecția împotriva forței brute",
+			"bruteforceProtection":"Activați protecția împotriva forței brute (bruteforce)",
 			"bruteforceTitle":"Protecția forței brute (bruteforce)",
 			"builderMode":"Modul Builder",
 			"colorHint":"Păstrați gol pentru implicit",
@@ -329,7 +329,7 @@
 				"installFailed":"Actualizarea aplicației a eșuat. Când actualizați o singură aplicație, dependențele lipsă pot cauza probleme - vă rugăm să încercați să actualizați toate aplicațiile împreună pentru a le rezolva.<br /><br />Mesaj de eroare: {ERROR}",
 				"uploadFailed":"Nu s-a putut adăuga aplicația din fișierul încărcat. Vă rugăm să creșteți nivelul de jurnal (loguri) la „Toate” și să încercați din nou - detaliile vor fi apoi vizibile în jurnalele de sistem."
 			},
-			"changeLog":"Schimbă jurnalul",
+			"changeLog":"Jurnalul schimbărilor",
 			"hidden":"Ascuns",
 			"import":"Adăugați din fișier",
 			"nothingInstalled":"Nu sunt instalate aplicații.",
@@ -370,7 +370,7 @@
 				"runNow":"Rulează acum"
 			},
 			"names":{
-				"cleanupBruteforce":"Curățați memoria cache de forță brută",
+				"cleanupBruteforce":"Curățați memoria cache de brutforce",
 				"cleanupDataLogs":"Curățare jurnalele de modificări expirate",
 				"cleanupFiles":"Curățați fișierele încărcate expirate",
 				"cleanupLogs":"Curățați jurnalele de sistem expirate",
@@ -383,8 +383,8 @@
 				"repoCheck":"Executați actualizarea depozitului",
 				"updateCheck":"Verificați dacă există actualizări ale platformei"
 			},
-			"dateAttempt":"Ultimul start",
-			"dateSuccess":"Ultima, finalizare cu succes",
+			"dateAttempt":"Ultimul rulaj",
+			"dateSuccess":"Ultima finalizare cu succes",
 			"functions":"Sarcina aplicației",
 			"interval":"Interval de execuție",
 			"intervalSeconds":"Interval de executare (în secunde)",
@@ -1015,7 +1015,7 @@
 			"inputMinute":"--",
 			"inputMonth":"ll",
 			"inputSecond":"--",
-			"inputYear":"aaaaa"
+			"inputYear":"aaaa"
 		}
 	},
 	"list":{
@@ -1097,7 +1097,7 @@
 		"dateFormat":"Formatul datei",
 		"dateFormat0":"aaaa-ll-zz (2012-12-30)",
 		"dateFormat1":"aaaa/ll/zzz (2012/12/30)",
-		"dateFormat2":"zz.ll.aaaaa (30.12.2012)",
+		"dateFormat2":"zz.ll.aaaa (30.12.2012)",
 		"dateFormat3":"aaaa/ll/zz (30/12/2012)",
 		"dateFormat4":"ll/zz/aa (12/30/2012)",
 		"dark":"Mod întunecat",
