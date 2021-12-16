@@ -38,6 +38,33 @@ A portable version is also available for Windows clients for testing and develop
 1. Start REI3 with your service manager, as in `systemctl start rei3`.
 1. That´s it.
 
+#### Example for `config.json` used for connect to the remote database  
+```...json
+{
+        "db": {
+                "embedded": false,
+                "host": "192.168.0.20",
+                "port": 5432,
+                "name": "r3",
+                "user": "r3",
+                "pass": "r3"
+        },
+        "paths": {
+                "certificates": "data/certificates/",
+                "embeddedDbBin": "pgsql/bin/",
+                "embeddedDbData": "data/database/",
+                "files": "data/files/",
+                "temp": "data/temp/",
+                "transfer": "data/transfer"
+        },
+        "web": {
+                "cert": "cert.crt",
+                "key": "cert.key",
+                "listen": "0.0.0.0",
+                "port": 5443
+        }
+}
+```
 For the full [admin documentation](https://rei3.de/admindocu-en_us/), please visit the website.
 
 ## 💡 How to build applications
@@ -48,7 +75,7 @@ For information about how to use the Builder, please visit the [Builder document
 ## 📑 How to build your own version of REI3
 1. Install the latest version of [Golang](https://golang.org/dl/).
 1. Download & extract the source code of the version you want to build (as in `2.4.3.2799`).
-1. Go into the source code directory (where `r3.go` is located) and execute: `go build -ldflags "-X main.appVersion={YOUR_APP_VERSION}"`
+1. Go into the source code directory (where `r3.go` is located) and execute: `go build -ldflags "-X main.appVersion={YOUR_APP_VERSION}"` Example: `go build -ldflags "-X main.appVersion=2.5.1.2980"`
    * Make sure to replace `{YOUR_APP_VERSION}` with the version of the extracted source code. At least the major/minor version must match, otherwise you need to deal with upgrading the REI3 database as well (see `db/upgrade/upgrade.go`).
    * By setting the environment parameter `GOOS`, you can build for either Windows (`GOOS=windows`) or Linux (`GOOS=linux`).
 1. Use your new compiled version of REI3 to replace an installed version.
