@@ -1,21 +1,21 @@
 ## REI3
-REI3 is a business application platform that anyone can use. It provides access to a growing range of [business applications](https://rei3.de/applications_en/), which are offered for free.
+REI3 is a business application platform that anyone can use. It provides access to a growing range of free [business applications](https://rei3.de/applications_en/), which are built with the integrated, graphical application [Builder](https://rei3.de/docu_en/).
 
-Individuals and organizations can extend or create applications with the integrated, graphical application [Builder](https://rei3.de/docu_en/). Applications can also be exported and, if desired, imported into repositories to be shared with others.
+Individuals and organizations can freely build on or create completely new applications. Once created, applications can be exported and shared with others via files or public repositories.
 
 ### ⭐ Features
 * Easy to install on Windows and Linux systems with very few dependencies.
 * Self-hosted or deployable to cloud systems as web-based service.
-* Usable free of charge, with no fixed user limit.
+* Usable free of charge, with no user limit.
 * Growing feature set for powerful applications:
   * Complex relationships, joined relation input forms, sub queries and so on.
-  * Frontend components, such as calendars, Gantt plans, color inputs, sliders and many more.
-  * Support for complex functions and business rules with general or per-record access, database triggers and more.
+  * Various frontend components, such as calendars, Gantt plans, color inputs, sliders and many more.
+  * Support for complex functions and business rules with general or per-record access control, database triggers and more.
   * Mobile views, with options to optimize frontend components for easier use on small screens.
   * Sending and receiving mails with attachments.
   * Multi-language support.
   * API for read and write access.
-* For enterprise clients:
+* For enterprise environments:
   * LDAP import for user logins and access permissions.
   * Customization of application colors, names, welcome messages and so on.
 
@@ -53,7 +53,6 @@ For information about how to use the Builder, please visit the [Builder document
    * By setting the environment parameter `GOOS`, you can build for either Windows (`GOOS=windows`) or Linux (`GOOS=linux`).
 1. Use your new compiled version of REI3 to replace an installed version.
    * Starting with REI3 2.5, static resource files (HTML, JS, CSS, etc.) are embedded into the binary during compilation. Replacing the binary is enough to fully overwrite REI3.
-   * With versions before 2.5, you need to also overwrite the folders `var` and `www` if you made any changes to the frontend or language captions.
 1. You are now running your own version of REI3.
 
 ## 📇 Technologies
