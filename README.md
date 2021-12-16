@@ -38,21 +38,19 @@ A portable version is also available for Windows clients for testing and develop
 1. Start REI3 with your service manager, as in `systemctl start rei3`.
 1. That´s it.
 
-#### Example for `config.json` used for connect to the remote database  
+#### Example `config.json` file with connection details
 ```...json
 {
         "db": {
                 "embedded": false,
-                "host": "192.168.0.20",
+                "host": "10.0.150.1",
                 "port": 5432,
-                "name": "r3",
+                "name": "r3_database",
                 "user": "r3",
-                "pass": "r3"
+                "pass": "A_STRONG_PASSWORD_PLZ"
         },
         "paths": {
                 "certificates": "data/certificates/",
-                "embeddedDbBin": "pgsql/bin/",
-                "embeddedDbData": "data/database/",
                 "files": "data/files/",
                 "temp": "data/temp/",
                 "transfer": "data/transfer"
@@ -75,11 +73,12 @@ For information about how to use the Builder, please visit the [Builder document
 ## 📑 How to build your own version of REI3
 1. Install the latest version of [Golang](https://golang.org/dl/).
 1. Download & extract the source code of the version you want to build (as in `2.4.3.2799`).
-1. Go into the source code directory (where `r3.go` is located) and execute: `go build -ldflags "-X main.appVersion={YOUR_APP_VERSION}"` Example: `go build -ldflags "-X main.appVersion=2.5.1.2980"`
-   * Make sure to replace `{YOUR_APP_VERSION}` with the version of the extracted source code. At least the major/minor version must match, otherwise you need to deal with upgrading the REI3 database as well (see `db/upgrade/upgrade.go`).
-   * By setting the environment parameter `GOOS`, you can build for either Windows (`GOOS=windows`) or Linux (`GOOS=linux`).
-1. Use your new compiled version of REI3 to replace an installed version.
-   * Starting with REI3 2.5, static resource files (HTML, JS, CSS, etc.) are embedded into the binary during compilation. Replacing the binary is enough to fully overwrite REI3.
+1. Go into the source code directory (where `r3.go` is located) and execute: `go build -ldflags "-X main.appVersion={YOUR_APP_VERSION}"`.
+   * Replace `{YOUR_APP_VERSION}` with the version of the extracted source code. Example: `go build -ldflags "-X main.appVersion=2.5.1.2980"`
+   * You can change the build version anytime. If you want to upgrade the major/minor version numbers however, you need to deal with upgrading the REI3 database (see `db/upgrade/upgrade.go`).
+   * By setting the environment parameter `GOOS`, you can cross-compile for other systems (`GOOS=windows`, `GOOS=linux`, ...).
+   * Since REI3 2.5, static resource files (HTML, JS, CSS, etc.) are embedded into the binary during compilation.
+1. Use your new, compiled binary of REI3 to replace an already installed one.
 1. You are now running your own version of REI3.
 
 ## 📇 Technologies
