@@ -177,6 +177,8 @@ func OpenRessource(path string, openWith bool) error {
 	switch runtime.GOOS {
 	case "linux":
 		cmd = exec.Command("xdg-open", path)
+    case "freebsd":
+		cmd = exec.Command("xdg-open", path)
 	case "windows":
 		if openWith {
 			cmd = exec.Command("openWith", path)
