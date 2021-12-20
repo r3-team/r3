@@ -7,5 +7,5 @@ import (
 )
 
 func addSysProgAttrs(cmd *exec.Cmd) {
-	// linux users should not use embedded to begin with
+	// freebsd users should not use embedded to begin with
 }
