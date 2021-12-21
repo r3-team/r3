@@ -806,6 +806,7 @@ let MyForm = {
 			this.badLoad = false;
 			this.recordIdIndexMap = {};
 			this.valuesSetAllDefault();
+			this.popUpFormId = null;
 			this.get();
 		},
 		releaseLoadingOnNextTick:function() {
