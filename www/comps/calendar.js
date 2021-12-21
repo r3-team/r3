@@ -45,8 +45,8 @@ let MyCalendarMonth = {
 			<div class="area nowrap">
 				<my-button image="new.png"
 					v-if="hasCreate"
-					@trigger="$emit('form-open-new',[],false)"
-					@trigger-middle="$emit('form-open-new',[],true)"
+					@trigger="$emit('open-form',0,[],false)"
+					@trigger-middle="$emit('open-form',0,[],true)"
 					:caption="!isMobile ? capGen.button.new : ''"
 					:captionTitle="capGen.button.newHint"
 					:darkBg="true"
@@ -234,8 +234,7 @@ let MyCalendarMonth = {
 		rowSelect:  { type:Boolean, required:false, default:false }
 	},
 	emits:[
-		'day-selected','form-open-new','record-selected',
-		'set-choice-id','set-date'
+		'day-selected','open-form','record-selected','set-choice-id','set-date'
 	],
 	data:function() {
 		return {
@@ -553,7 +552,7 @@ let MyCalendar = {
 		<my-calendar-month class="shade"
 			v-if="view === 'month'"
 			@day-selected="daySelected"
-			@form-open-new="(...args) => $emit('form-open-new',...args)"
+			@open-form="(...args) => $emit('open-form',...args)"
 			@record-selected="(...args) => $emit('record-selected',...args)"
 			@set-choice-id="choiceIdSet"
 			@set-date="dateSet"
@@ -595,7 +594,7 @@ let MyCalendar = {
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:false, default:false }
 	},
-	emits:['form-open-new','record-selected','set-args'],
+	emits:['open-form','record-selected','set-args'],
 	data:function() {
 		return {
 			// calendar state
@@ -725,7 +724,7 @@ let MyCalendar = {
 				`${this.attributeIdDate0}_${this.getUnixFromDate(this.dateSelect0)}`,
 				`${this.attributeIdDate1}_${this.getUnixFromDate(this.dateSelect1)}`
 			];
-			this.$emit('form-open-new',[`attributes=${attributes.join(',')}`],middleClick);
+			this.$emit('open-form',0,[`attributes=${attributes.join(',')}`],middleClick);
 		},
 		
 		// reloads

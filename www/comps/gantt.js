@@ -190,8 +190,8 @@ let MyGantt = {
 			<div class="area nowrap">
 				<my-button image="new.png"
 					v-if="hasCreate"
-					@trigger="$emit('form-open-new',[],false)"
-					@trigger-middle="$emit('form-open-new',[],true)"
+					@trigger="$emit('open-form',0,[],false)"
+					@trigger-middle="$emit('open-form',0,[],true)"
 					:caption="!isMobile ? capGen.button.new : ''"
 					:captionTitle="capGen.button.newHint"
 					:darkBg="true"
@@ -360,7 +360,7 @@ let MyGantt = {
 		stepTypeDefault:{ type:String,  required:true },
 		stepTypeToggle: { type:Boolean, required:true }
 	},
-	emits:['form-open-new','record-selected','set-args'],
+	emits:['open-form','record-selected','set-args'],
 	data:function() {
 		return {
 			choiceId:null,
@@ -653,7 +653,7 @@ let MyGantt = {
 				`${this.attributeIdDate0}_${this.unixTimeRangeStart}`,
 				`${this.attributeIdDate1}_${unixTime}`
 			];
-			this.$emit('form-open-new',[`attributes=${attributes.join(',')}`],middleClick);
+			this.$emit('open-form',0,[`attributes=${attributes.join(',')}`],middleClick);
 		},
 		pageChange:function(factor) {
 			this.page += factor;

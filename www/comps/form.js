@@ -1,7 +1,7 @@
-import MyField           from './field.js';
-import MyFormHelp        from './formHelp.js';
-import MyFormLog         from './formLog.js';
-import {srcBase64}       from './shared/image.js';
+import MyField     from './field.js';
+import MyFormHelp  from './formHelp.js';
+import MyFormLog   from './formLog.js';
+import {srcBase64} from './shared/image.js';
 import {
 	filterIsCorrect,
 	openLink
@@ -9,6 +9,7 @@ import {
 import {
 	getDataFieldMap,
 	getFormRoute,
+	getGetterArg,
 	getInputFieldName,
 	getResolvedPlaceholders
 } from './shared/form.js';
@@ -17,10 +18,10 @@ import {
 	isAttributeRelationshipN1,
 	isAttributeValueEqual,
 	getAttributeValueFromString,
+	getAttributeValuesFromGetter,
 	getDetailsFromIndexAttributeId,
 	getIndexAttributeId,
-	getIndexAttributeIdByField,
-	getValueFromQuery
+	getIndexAttributeIdByField
 } from './shared/attribute.js';
 import {
 	fillRelationRecordIds,
@@ -42,8 +43,24 @@ let MyForm = {
 			v-if="!isMobile || (!showLog && !showHelp)"
 			:class="{ singleField:isSingleField }"
 		>
+			<!-- pop-up form -->
+			<div class="app-sub-window" v-if="popUpFormId !== null">
+				<my-form class="form-pop-up shade"
+					@close="popUpFormId = null"
+					@record-deleted="popUpRecordChanged($event,'deleted')"
+					@record-open="popUpRecordId = $event"
+					@record-updated="popUpRecordChanged($event,'updated')"
+					:attributeIdMapDef="popUpAttributeIdMapDef"
+					:formId="popUpFormId"
+					:isInline="true"
+					:module="module"
+					:recordId="popUpRecordId"
+					:style="popUpStyles"
+				/>
+			</div>
+			
 			<!-- title bar upper -->
-			<div class="top" v-if="!isInline">
+			<div class="top">
 				<div class="area">
 					<img class="icon"
 						v-if="iconId !== null"
@@ -62,12 +79,13 @@ let MyForm = {
 					<template v-if="isData && !isSingleField">
 						<my-button image="refresh.png"
 							@trigger="get"
-							@trigger-middle="setFormRecord(recordId,null,null,true)"
+							@trigger-middle="openForm(recordId,null,null,true)"
 							:active="!isNew"
 							:captionTitle="capGen.button.refreshHint"
 							:darkBg="true"
 						/>
 						<my-button image="time.png"
+							v-if="!isInline"
 							@trigger="showLog = !showLog"
 							:active="!isNew"
 							:captionTitle="capApp.button.logHint"
@@ -76,6 +94,7 @@ let MyForm = {
 					</template>
 					
 					<my-button image="question.png"
+						v-if="!isInline"
 						@trigger="showHelp = !showHelp"
 						:active="helpAvailable"
 						:captionTitle="capApp.button.helpHint"
@@ -84,6 +103,13 @@ let MyForm = {
 					<my-button image="builder.png"
 						v-if="isAdmin && builderEnabled && !isMobile && !productionMode"
 						@trigger="openBuilder"
+						:darkBg="true"
+					/>
+					<my-button image="cancel.png"
+						v-if="isInline"
+						@trigger="closeAsk"
+						:cancel="true"
+						:captionTitle="capGen.button.close"
 						:darkBg="true"
 					/>
 				</div>
@@ -110,7 +136,7 @@ let MyForm = {
 							:darkBg="true"
 						/>
 						<my-button image="save_new.png"
-							v-if="!isMobile && allowNew"
+							v-if="!isInline && !isMobile && allowNew"
 							@trigger="set(true)"
 							:active="hasChanges && !badLoad && canSetNew"
 							:caption="capGen.button.saveNew"
@@ -118,7 +144,7 @@ let MyForm = {
 							:darkBg="true"
 						/>
 						<my-button image="upward.png"
-							v-if="!isMobile"
+							v-if="!isMobile && !isInline"
 							@trigger="openPrevAsk"
 							:cancel="true"
 							:caption="capGen.button.goBack"
@@ -167,8 +193,8 @@ let MyForm = {
 			<div class="content grow fields">
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
+					@open-form="openForm"
 					@set-form-args="setFormArgs"
-					@set-form-record="setFormRecord"
 					@set-valid="validSet"
 					@set-value="valueSetByField"
 					@set-value-init="valueSet"
@@ -177,6 +203,7 @@ let MyForm = {
 					:fieldIdMapState="fieldIdMapState"
 					:formBadLoad="badLoad"
 					:formBadSave="badSave"
+					:formIsInline="isInline"
 					:formLoading="loading"
 					:handleError="handleError"
 					:isFullPage="isSingleField"
@@ -209,14 +236,15 @@ let MyForm = {
 		/>
 	</div>`,
 	props:{
-		allowDel:{ type:Boolean,required:false, default:true },
-		allowNew:{ type:Boolean,required:false, default:true },
-		formId:  { type:String, required:true },
-		isInline:{ type:Boolean,required:false, default:false }, // opened within another element
-		module:  { type:Object, required:true },
-		recordId:{ type:Number, required:true }
+		allowDel:         { type:Boolean,required:false, default:true },
+		allowNew:         { type:Boolean,required:false, default:true },
+		attributeIdMapDef:{ type:Object, required:false, default:() => {return {};} }, // map of attribute default values (new record)
+		formId:           { type:String, required:true },
+		isInline:         { type:Boolean,required:false, default:false },              // opened within another element
+		module:           { type:Object, required:true },
+		recordId:         { type:Number, required:true }
 	},
-	emits:['record-updated'],
+	emits:['close','record-deleted','record-open','record-updated'],
 	mounted:function() {
 		// reset form if either content or record changes
 		this.$watch(() => [this.formId,this.recordId],() => { this.reset() },{
@@ -228,12 +256,10 @@ let MyForm = {
 			this.$store.commit('formHasChanges',val);
 		});
 		
-		if(!this.isInline)
-			window.addEventListener('keydown',this.handleHotkeys);
+		window.addEventListener('keydown',this.handleHotkeys);
 	},
 	unmounted:function() {
-		if(!this.isInline)
-			window.removeEventListener('keydown',this.handleHotkeys);
+		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	data:function() {
 		return {
@@ -246,6 +272,14 @@ let MyForm = {
 			messageTimeout:null, // form message expiration timeout
 			showHelp:false,      // show form context help
 			showLog:false,       // show data change log
+			
+			// pop-up form
+			popUpAttributeIdMapDef:{}, // default attribute values for pop-up form
+			popUpFieldId:null,   // field ID that opened pop-up form
+			popUpFormId:null,    // form ID to open in pop-up form
+			popUpRecordId:0,     // record ID to open in pop-up form
+			popUpMaxHeight:0,
+			popUpMaxWidth:0,
 			
 			// form data
 			fields:[],           // all fields (nested within each other)
@@ -339,6 +373,15 @@ let MyForm = {
 		},
 		
 		// presentation
+		popUpStyles:function() {
+			if(this.popUpFormId === null)
+				return '';
+			
+			let styles = [];
+			if(this.popUpMaxWidth  !== 0) styles.push(`max-width:${this.popUpMaxWidth}px`);
+			if(this.popUpMaxHeight !== 0) styles.push(`max-height:${this.popUpMaxHeight}px`);
+			return styles.join(';');
+		},
 		recordActionMessage:function() {
 			switch(this.messageCode) {
 				case 'created': return this.isMobile
@@ -513,9 +556,11 @@ let MyForm = {
 		fillRelationRecordIds,
 		filterIsCorrect,
 		getAttributeValueFromString,
+		getAttributeValuesFromGetter,
 		getDataFieldMap,
 		getDetailsFromIndexAttributeId,
 		getFormRoute,
+		getGetterArg,
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
 		getInputFieldName,
@@ -523,7 +568,6 @@ let MyForm = {
 		getQueryFiltersProcessed,
 		getRelationsJoined,
 		getResolvedPlaceholders,
-		getValueFromQuery,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
 		isAttributeValueEqual,
@@ -639,7 +683,11 @@ let MyForm = {
 			this.$root.genericError(null,message);
 		},
 		handleHotkeys:function(e) {
-			if(!this.isData) return;
+			// not data or pop-up form open
+			if(!this.isData || this.popUpFormId !== null) return;
+			
+			if(this.isInline && e.key === 'Escape')
+				this.closeAsk();
 			
 			if(e.key === 's' && e.ctrlKey && this.hasChanges) {
 				this.set(false);
@@ -746,7 +794,7 @@ let MyForm = {
 				
 				for(let i = 0, j = presets.length; i < j; i++) {
 					if(presets[i].id === this.form.presetIdOpen) {
-						this.setFormRecord(this.presetIdMapRecordId[presets[i].id]);
+						this.openForm(this.presetIdMapRecordId[presets[i].id]);
 						return;
 					}
 				}
@@ -795,43 +843,20 @@ let MyForm = {
 				this.valueSet(indexAttributeId,value,false,true);
 		},
 		valuesSetAllDefault:function() {
-			
-			// parse attribute values from form route getter
-			let attributeIdMapGetters = {};
-			if(typeof this.$route.query.attributes !== 'undefined') {
-				
-				let attributes = this.$route.query.attributes.split(',');
-				
-				for(let i = 0, j = attributes.length; i < j; i++) {
-					
-					let parts = attributes[i].split('_');
-					if(parts.length !== 2)
-						continue;
-					
-					let atrId = parts[0];
-					let value = parts[1];
-					
-					if(typeof this.attributeIdMap[atrId] === 'undefined')
-						continue;
-					
-					attributeIdMapGetters[atrId] =
-						this.getValueFromQuery(this.attributeIdMap[atrId].content,value);
-				}
-			}
-			
-			// apply default values
 			for(let k in this.values) {
 				
-				// overwrite default values from form getter
+				// overwrite default attribute default values
 				let ia = this.getDetailsFromIndexAttributeId(k);
 				
-				if(typeof attributeIdMapGetters[ia.attributeId] !== 'undefined') {
+				if(typeof this.attributeIdMapDef[ia.attributeId] !== 'undefined') {
 					
 					if(ia.outsideIn && this.isAttributeRelationshipN1(this.attributeIdMap[ia.attributeId].content))
-						this.valuesDef[k] = [attributeIdMapGetters[ia.attributeId]];
+						this.valuesDef[k] = [this.attributeIdMapDef[ia.attributeId]];
 					else
-						this.valuesDef[k] = attributeIdMapGetters[ia.attributeId];
+						this.valuesDef[k] = this.attributeIdMapDef[ia.attributeId];
 				}
+				
+				// set default value
 				this.valueSet(k,this.valuesDef[k],true,true);
 			}
 		},
@@ -848,6 +873,28 @@ let MyForm = {
 		},
 		
 		// actions
+		closeAsk:function() {
+			if(!this.warnUnsaved)
+				return this.close();
+			
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.close,
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.close,
+					exec:this.close,
+					keyEnter:true,
+					image:'ok.png'
+				},{
+					caption:this.capGen.button.cancel,
+					keyEscape:true,
+					image:'cancel.png'
+				}]
+			});
+		},
+		close:function() {
+			this.$emit('close');
+		},
 		openBuilder:function() {
 			this.$router.push('/builder/form/'+this.form.id);
 		},
@@ -883,9 +930,7 @@ let MyForm = {
 		},
 		openNew:function(middleClick) {
 			this.$store.commit('formHasChanges',false);
-			
-			if(middleClick) this.setFormRecord(0,null,null,true)
-			else            this.setFormRecord(0);
+			this.openForm(0,null,null,middleClick);
 		},
 		openPrevAsk:function() {
 			if(!this.warnUnsaved)
@@ -910,6 +955,40 @@ let MyForm = {
 			this.$store.commit('formHasChanges',false);
 			window.history.back();
 		},
+		popUpRecordChanged:function(recordId,change) {
+			// update data field value to reflect change of pop-up form record
+			let field = this.fieldIdMapData[this.popUpFieldId];
+			let atr   = this.attributeIdMap[field.attributeId];
+			let iaId  = this.getIndexAttributeIdByField(field,false);
+			
+			if(!this.isAttributeRelationship(atr.content))
+				return;
+			
+			let isMulti = field.attributeIdNm !== null ||
+				(field.outsideIn && this.isAttributeRelationshipN1(atr.content));
+			
+			switch(change) {
+				case 'deleted':
+					if(!isMulti)
+						return this.values[iaId] = null;
+					
+					let pos = this.values[iaId].indexOf(this.popUpRecordId);
+					if(pos !== -1) this.values[iaId].splice(pos,1);
+				break;
+				case 'updated':
+					if(!isMulti)
+						return this.values[iaId] = recordId;
+					
+					if(this.values[iaId] === null)
+						return this.values[iaId] = [recordId];
+					
+					if(this.values[iaId].indexOf(recordId) === -1)
+						this.values[iaId].push(recordId);
+				break;
+			}
+			this.loading = true;
+			this.releaseLoadingOnNextTick();
+		},
 		recordStateChanged:function(code) {
 			clearTimeout(this.messageTimeout);
 			this.messageTimeout = setTimeout(() => this.messageCode = null,3000);
@@ -924,47 +1003,63 @@ let MyForm = {
 		},
 		
 		// navigation
-		setFormArgs:function(args,push) {
-			let path = this.getFormRoute(this.form.id,this.recordId,true,args);
+		openForm:function(recordId,options,getterArgs,newTab) {
 			
-			if(this.$route.fullPath === path)
-				return; // nothing changed, ignore
+			// stay on form if not otherwise specified
+			let formIdOpen = this.form.id;
 			
-			if(push) this.$router.push(path);
-			else     this.$router.replace(path);
-		},
-		setFormEmpty:function(push) {
-			if(push) this.$router.push(this.getFormRoute(this.form.id,0,true));
-			else     this.$router.replace(this.getFormRoute(this.form.id,0,true));
-		},
-		setFormRecord:function(recordId,formIdOpen,getArgs,newTab) {
-			
-			if(typeof formIdOpen === 'undefined' || formIdOpen === null)
-				formIdOpen = this.form.id; // no form specified, stay on current
-			
-			if(typeof getArgs === 'undefined' || getArgs === null)
-				getArgs = []; // no getters specified, add empty array
-			
+			// set defaults if not given
 			if(typeof recordId === 'undefined' || recordId === null)
-				recordId = 0; // no record specified, open empty record
+				recordId = 0; // open empty record if none is given
+			
+			if(typeof options === 'undefined' || options === null)
+				options = { formIdOpen:null, popUp:false };
+			else
+				formIdOpen = options.formIdOpen;
+			
+			if(typeof getterArgs === 'undefined' || getterArgs === null)
+				getterArgs = []; // no getters specified, add empty array
+			
+			// inline forms can only refresh themselves
+			if(this.isInline)
+				return this.$emit('record-open',recordId);
+			
+			// open pop-up form if desired
+			if(options.popUp) {
+				let getter = this.getGetterArg(getterArgs,'attributes');
+				
+				this.popUpAttributeIdMapDef = getter === '' ? {}
+					: this.getAttributeValuesFromGetter(getter);
+				
+				this.popUpFormId    = formIdOpen;
+				this.popUpRecordId  = recordId;
+				this.popUpFieldId   = null;
+				this.popUpMaxHeight = options.maxHeight;
+				this.popUpMaxWidth  = options.maxWidth;
+				
+				if(typeof this.fieldIdMapData[options.fieldId] !== 'undefined')
+					this.popUpFieldId = options.fieldId;
+				
+				return;
+			}
 			
 			// keep attribute default values from current getter if form does not change
 			if(formIdOpen === this.form.id && typeof this.$route.query.attributes !== 'undefined') {
 				
 				// ignore current getter, if new one is supplied with same name
 				let newAttributesGetter = false;
-				for(let i = 0, j = getArgs.length; i < j; i++) {
-					if(getArgs[i].indexOf('attributes=') === 0) {
+				for(let i = 0, j = getterArgs.length; i < j; i++) {
+					if(getterArgs[i].indexOf('attributes=') === 0) {
 						newAttributesGetter = true;
 						break;
 					}
 				}
 				
 				if(!newAttributesGetter)
-					getArgs.push(`attributes=${this.$route.query.attributes}`);
+					getterArgs.push(`attributes=${this.$route.query.attributes}`);
 			}
 			
-			let path = this.getFormRoute(formIdOpen,recordId,true,getArgs);
+			let path = this.getFormRoute(formIdOpen,recordId,true,getterArgs);
 			
 			if(newTab)
 				return this.openLink('#'+path,true);
@@ -982,6 +1077,15 @@ let MyForm = {
 				return this.$router.push(path);
 			
 			return this.$router.replace(path);
+		},
+		setFormArgs:function(args,push) {
+			let path = this.getFormRoute(this.form.id,this.recordId,true,args);
+			
+			if(this.$route.fullPath === path)
+				return; // nothing changed, ignore
+			
+			if(push) this.$router.push(path);
+			else     this.$router.replace(path);
 		},
 		
 		// backend calls
@@ -1014,12 +1118,15 @@ let MyForm = {
 				trans.add('data','del',{
 					relationId:j.relationId,
 					recordId:j.recordId
-				},this.delOk);
+				});
 			}
-			trans.send(this.handleError);
+			trans.send(this.handleError,this.delOk);
 		},
 		delOk:function(res) {
-			this.setFormEmpty(false);
+			if(this.isInline)
+				this.$emit('record-deleted',this.recordId);
+			
+			this.openForm();
 			this.recordStateChanged('deleted');
 		},
 		get:function() {
@@ -1063,7 +1170,7 @@ let MyForm = {
 				
 				// more than 1 record returned
 				if(res.payload.rows.length > 1)
-					return this.setFormEmpty(false); 
+					return this.openForm();
 				
 				// no record returned (might have lost access after save)
 				this.badLoad = true;
@@ -1257,21 +1364,16 @@ let MyForm = {
 			if(this.isNew) this.recordStateChanged('created');
 			else           this.recordStateChanged('updated');
 			
-			// reload form if inline
-			if(this.isInline) {
+			if(this.isInline)
 				this.$emit('record-updated',res[0].payload.indexRecordIds[0]);
-				
-				if(!this.isNew) return this.reset();
-				else            return;
-			}
 			
 			// load empty record if requested
 			if(store.saveAndNew)
-				return this.setFormRecord(0);
+				return this.openForm();
 			
 			// load newly created record
 			if(this.isNew)
-				return this.setFormRecord(res[0].payload.indexRecordIds[0]);
+				return this.openForm(res[0].payload.indexRecordIds[0]);
 			
 			// reload same record
 			// unfortunately necessary as update trigger in backend can change values

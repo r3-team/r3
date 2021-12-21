@@ -9,6 +9,12 @@
 	/* setting overflow:auto kills box shadow */
 	padding-left:2px;
 }
+.form .form-pop-up{
+	margin-top:80px;
+	margin-bottom:30px;
+	width:95%;
+	max-width:auto;
+}
 
 /* fields */
 .form .fields{

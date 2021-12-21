@@ -47,10 +47,10 @@ let MyDialog = {
 		</div>
 	</div>`,
 	mounted:function() {
-		window.addEventListener('keyup',this.handleHotkeys);
+		window.addEventListener('keydown',this.handleHotkeys);
 	},
 	unmounted:function() {
-		window.removeEventListener('keyup',this.handleHotkeys);
+		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	data:function() {
 		return {

@@ -571,13 +571,13 @@
 			"new":"New form",
 			"onMobile":"In mobile view",
 			"openForm":"Open form",
-			"openFormAttributeApply":"...as attribute value",
+			"openFormAttributeApply":"...to set value on form",
 			"openFormFormIdOpen":"Form",
 			"openFormMaxHeight":"Maximum height (px)",
 			"openFormMaxWidth":"Maximum width (px)",
 			"openFormNewRecord":"When creating new records",
 			"openFormPopUp":"Pop-up form",
-			"openFormRelationIndex":"Use form record ID...",
+			"openFormRelationIndex":"Use record from relation",
 			"presetOpen":"Open preset",
 			"readonly":"Read only",
 			"required":"Required",
@@ -963,6 +963,7 @@
 			"retractLogs":"Retract logs"
 		},
 		"dialog":{
+			"close":"There are unsaved changes.<br /><br />Do you still want to close this form?",
 			"delete":"Are you sure that you want to <b>permanently</b> delete this record?",
 			"new":"There are unsaved changes.<br /><br />Do you still want to open a new record?",
 			"newReset":"This will reset all your inputs.<br /><br />Do you want to continue?",

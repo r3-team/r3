@@ -110,7 +110,8 @@ let MyList = {
 							/>
 							<my-button image="open.png"
 								v-if="inputOpenForm && hasUpdate"
-								@trigger="$emit('form-open',r.indexRecordIds['0'])"
+								@trigger="$emit('open-form',r.indexRecordIds['0'],false)"
+								@trigger-middle="$emit('open-form',r.indexRecordIds['0'],true)"
 								:captionTitle="capApp.inputHintOpen"
 								:naked="true"
 							/>
@@ -153,8 +154,8 @@ let MyList = {
 								<div class="list-input-row-items nowrap">
 									<my-button image="add.png"
 										v-if="inputOpenForm && hasCreate"
-										@trigger="$emit('form-open-new',false)"
-										@trigger-middle="$emit('form-open-new',true)"
+										@trigger="$emit('open-form',0,false)"
+										@trigger-middle="$emit('open-form',0,true)"
 										:captionTitle="capApp.inputHintCreate"
 										:naked="true"
 									/>
@@ -183,8 +184,8 @@ let MyList = {
 					
 					<my-button image="new.png"
 						v-if="hasCreate"
-						@trigger="$emit('form-open-new',false)"
-						@trigger-middle="$emit('form-open-new',true)"
+						@trigger="$emit('open-form',0,false)"
+						@trigger-middle="$emit('open-form',0,true)"
 						:caption="!isMobile ? capGen.button.new : ''"
 						:captionTitle="capGen.button.newHint"
 						:darkBg="true"
@@ -570,11 +571,11 @@ let MyList = {
 		inputOpenForm:  { type:Boolean, required:false, default:false },    // input can open another form
 		inputMulti:     { type:Boolean, required:false, default:false },    // input has multiple records to represent (instead of just one)
 		inputRecordIds: { type:Array,   required:false, default:() => [] }, // input record IDs, representing active values to show
-		inputValid:     { type:Boolean, required:false, default:true  }
+		inputValid:     { type:Boolean, required:false, default:true }
 	},
 	emits:[
-		'blurred','focused','form-open','form-open-new',
-		'record-removed','record-selected','records-selected-init','set-args'
+		'blurred','focused','open-form','record-removed',
+		'record-selected','records-selected-init','set-args'
 	],
 	data:function() {
 		return {

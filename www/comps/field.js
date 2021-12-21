@@ -9,19 +9,16 @@ import MyList                     from './list.js';
 import {hasAccessToAttribute}     from './shared/access.js';
 import {getQueryFiltersProcessed} from './shared/query.js';
 import {srcBase64}                from './shared/image.js';
-
 import {
 	getLinkMeta,
 	getNilUuid,
 	openLink
 } from './shared/generic.js';
-
 import {
 	getFlexStyle,
 	getInputFieldName,
 	setGetterArgs
 } from './shared/form.js';
-
 import {
 	getIndexAttributeId,
 	isAttributeBoolean,
@@ -31,7 +28,6 @@ import {
 	isAttributeRelationship,
 	isAttributeString
 } from './shared/attribute.js';
-
 export {MyField as default};
 
 let MyField = {
@@ -218,8 +214,7 @@ let MyField = {
 						v-if="isRelationship"
 						@blurred="blur"
 						@focused="focus"
-						@form-open="$emit('set-form-record',$event,openForm.formIdOpen)"
-						@form-open-new="$emit('set-form-record',0,openForm.formIdOpen,addRecordAttributeArgs([]),$event)"
+						@open-form="(...args) => openForm(args[0],[],args[1])"
 						@record-selected="relationshipRecordSelected"
 						@record-removed="relationshipRecordRemoved"
 						@records-selected-init="$emit('set-value-init',fieldAttributeId,$event,true,true)"
@@ -236,7 +231,7 @@ let MyField = {
 						:inputIsNew="isNew"
 						:inputIsReadonly="isReadonly"
 						:inputMulti="isRelationship1N"
-						:inputOpenForm="openForm !== false"
+						:inputOpenForm="field.openForm !== null && !formIsInline"
 						:inputRecordIds="relationshipRecordIds"
 						:inputValid="!showInvalid"
 						:isInput="true"
@@ -285,8 +280,8 @@ let MyField = {
 		<!-- list -->
 		<my-list
 			v-if="isList"
-			@form-open-new="$emit('set-form-record',0,openForm.formIdOpen,addRecordAttributeArgs([]),$event)"
-			@record-selected="(...args) => $emit('set-form-record',args[0],openForm.formIdOpen,[],args[1])"
+			@open-form="(...args) => openForm(args[0],[],args[1])"
+			@record-selected="(...args) => openForm(args[0],[],args[1])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			:allowPaging="field.query.fixedLimit === 0"
 			:autoRenew="field.autoRenew"
@@ -304,14 +299,14 @@ let MyField = {
 			:layout="field.layout"
 			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 			:query="field.query"
-			:rowSelect="openForm !== false"
+			:rowSelect="field.openForm !== null && !formIsInline"
 		/>
 		
 		<!-- calendar -->
 		<my-calendar
 			v-if="isCalendar && !field.gantt"
-			@form-open-new="(...args) => $emit('set-form-record',0,openForm.formIdOpen,addRecordAttributeArgs(args[0]),args[1])"
-			@record-selected="(...args) => $emit('set-form-record',args[0],openForm.formIdOpen,args[1],args[2])"
+			@open-form="(...args) => openForm(args[0],args[1],args[2])"
+			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			:attributeIdColor="field.attributeIdColor"
 			:attributeIdDate0="field.attributeIdDate0"
@@ -329,14 +324,14 @@ let MyField = {
 			:indexDate1="field.indexDate1"
 			:isFullPage="isFullPage"
 			:query="field.query"
-			:rowSelect="openForm !== false"
+			:rowSelect="field.openForm !== null"
 		/>
 		
 		<!-- gantt -->
 		<my-gantt
 			v-if="isCalendar && field.gantt"
-			@form-open-new="(...args) => $emit('set-form-record',0,openForm.formIdOpen,addRecordAttributeArgs(args[0]),args[1])"
-			@record-selected="(...args) => $emit('set-form-record',args[0],openForm.formIdOpen,args[1],args[2])"
+			@open-form="(...args) => openForm(args[0],args[1],args[2])"
+			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			:attributeIdColor="field.attributeIdColor"
 			:attributeIdDate0="field.attributeIdDate0"
@@ -354,7 +349,7 @@ let MyField = {
 			:indexDate0="field.indexDate0"
 			:indexDate1="field.indexDate1"
 			:isFullPage="isFullPage"
-			:rowSelect="openForm !== false"
+			:rowSelect="field.openForm !== null"
 			:stepTypeDefault="field.ganttSteps"
 			:stepTypeToggle="field.ganttStepsToggle"
 			:query="field.query"
@@ -378,8 +373,8 @@ let MyField = {
 		<my-field
 			v-if="isContainer"
 			v-for="f in field.fields"
+			@open-form="(...args) => $emit('open-form',...args)"
 			@set-form-args="(...args) => $emit('set-form-args',...args)"
-			@set-form-record="(...args) => $emit('set-form-record',...args)"
 			@set-valid="(...args) => $emit('set-valid',...args)"
 			@set-value="(...args) => $emit('set-value',...args)"
 			@set-value-init="(...args) => $emit('set-value-init',...args)"
@@ -388,6 +383,7 @@ let MyField = {
 			:fieldIdMapState="fieldIdMapState"
 			:formBadLoad="formBadLoad"
 			:formBadSave="formBadSave"
+			:formIsInline="formIsInline"
 			:formLoading="formLoading"
 			:flexDirParent="field.direction"
 			:handleError="handleError"
@@ -400,9 +396,10 @@ let MyField = {
 	props:{
 		dataFieldMap:   { type:Object,  required:true },
 		field:          { type:Object,  required:true },
-		fieldIdMapState:{ type:Object,  required:false, default:() => { return {}} }, // overwritten states
+		fieldIdMapState:{ type:Object,  required:false, default:() => {return {};} }, // overwritten states
 		formBadLoad:    { type:Boolean, required:true }, // attempted record load with no return
 		formBadSave:    { type:Boolean, required:true }, // attempted save with invalid inputs
+		formIsInline:   { type:Boolean, required:true },
 		formLoading:    { type:Boolean, required:true },
 		flexDirParent:  { type:String,  required:true }, // flex direction (row/column) of parent
 		handleError:    { type:Function,required:true }, // function to handle errors
@@ -411,7 +408,7 @@ let MyField = {
 		logViewer:      { type:Boolean, required:false, default:false }, // is part of log viewer
 		values:         { type:Object,  required:true }
 	},
-	emits:['set-form-args','set-form-record','set-valid','set-value','set-value-init'],
+	emits:['open-form','set-form-args','set-valid','set-value','set-value-init'],
 	data:function() {
 		return {
 			focused:false,
@@ -846,7 +843,6 @@ let MyField = {
 		},
 		
 		// simple
-		openForm:   function() { return this.field.openForm === null ? false : this.field.openForm; },
 		showInvalid:function() { return !this.isValid && (this.formBadSave || !this.notTouched) },
 		
 		// content
@@ -933,10 +929,29 @@ let MyField = {
 			if(this.showColorPickerInput)
 				this.showColorPickerInput = false;
 		},
-		triggerButton:function(middleClick) {
-			if(this.openForm !== false)
-				this.$emit('set-form-record',0,this.openForm.formIdOpen,
-					this.addRecordAttributeArgs([]),middleClick);
+		openForm:function(recordId,getters,middleClick) {
+			
+			// set defaults
+			if(typeof recordId    === 'undefined') recordId    = 0;
+			if(typeof getters     === 'undefined') getters     = [];
+			if(typeof middleClick === 'undefined') middleClick = false;
+			
+			// apply record from defined relation index as attribute value via getter
+			if(this.field.openForm.attributeIdApply !== null
+				&& typeof this.joinsIndexMap[this.field.openForm.relationIndex] !== 'undefined'
+				&& this.joinsIndexMap[this.field.openForm.relationIndex].recordId !== 0) {
+				
+				let atrId    = this.field.openForm.attributeIdApply;
+				let recordId = this.joinsIndexMap[this.field.openForm.relationIndex].recordId;
+				
+				getters = this.setGetterArgs(getters,'attributes',`${atrId}_${recordId}`);
+			}
+			
+			// apply source field ID
+			let options = JSON.parse(JSON.stringify(this.field.openForm));
+			options.fieldId = this.field.id;
+			
+			this.$emit('open-form',recordId,options,getters,middleClick);
 		},
 		relationshipRecordSelected:function(recordId,middleClick) {
 			if(recordId === null)
@@ -961,23 +976,12 @@ let MyField = {
 			}
 			this.value = valueNew.length !== 0 ? valueNew : null;
 		},
+		triggerButton:function(middleClick) {
+			if(this.field.openForm !== null)
+				this.openForm(0,[],middleClick);
+		},
 		
 		// helpers
-		addRecordAttributeArgs:function(args) {
-			
-			// no attribute to fill or no record ID available, keep existing arguments
-			if(this.field.openForm.attributeIdApply === null
-				|| typeof this.joinsIndexMap[this.openForm.relationIndex] === 'undefined'
-				|| this.joinsIndexMap[this.openForm.relationIndex].recordId === 0) {
-				
-				return args;
-			}
-			
-			// add record ID from defined relation index as default attribute value on target form
-			let atrId    = this.field.openForm.attributeIdApply;
-			let recordId = this.joinsIndexMap[this.openForm.relationIndex].recordId;
-			return this.setGetterArgs(args,'attributes',`${atrId}_${recordId}`);
-		},
 		setValue:function(val,valOld,indexAttributeId) {
 			if(val === '')
 				val = null;

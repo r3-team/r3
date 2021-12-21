@@ -1,7 +1,8 @@
-import MyForm                 from './form.js';
-import MyMenu                 from './menu.js';
-import {getValidLanguageCode} from './shared/language.js';
-import {getStartFormId }      from './shared/access.js';
+import MyForm                         from './form.js';
+import MyMenu                         from './menu.js';
+import {getAttributeValuesFromGetter} from './shared/attribute.js';
+import {getValidLanguageCode}         from './shared/language.js';
+import {getStartFormId }              from './shared/access.js';
 export {MyGoForm, MyGoModule};
 
 let MyGoModule = {
@@ -73,6 +74,7 @@ let MyGoForm = {
 		/>
 		<my-form
 			v-show="!isMobile || !isAtMenu"
+			:attributeIdMapDef="getterAttributeIdMapDefaults"
 			:formId="formId"
 			:module="module"
 			:recordId="recordId"
@@ -105,6 +107,12 @@ let MyGoForm = {
 		}
 	},
 	computed:{
+		getterAttributeIdMapDefaults:function() {
+			if(typeof this.$route.query.attributes === 'undefined')
+				return {};
+			
+			return this.getAttributeValuesFromGetter(this.$route.query.attributes);
+		},
 		moduleNameActive:function() {
 			// child takes precedence if active
 			return this.moduleNameChild !== ''
@@ -128,6 +136,7 @@ let MyGoForm = {
 	},
 	methods:{
 		// externals
+		getAttributeValuesFromGetter,
 		getValidLanguageCode
 	}
 };

@@ -571,13 +571,13 @@
 			"new":"Neues Formular",
 			"onMobile":"In mobiler Ansicht",
 			"openForm":"Formular öffnen",
-			"openFormAttributeApply":"...als Attributwert",
+			"openFormAttributeApply":"...um Wert auf Formular zu setzen",
 			"openFormFormIdOpen":"Formular",
 			"openFormMaxHeight":"Maximale Höhe (px)",
 			"openFormMaxWidth":"Maximale Breite (px)",
 			"openFormNewRecord":"Beim Erstellen neuer Datensätze",
 			"openFormPopUp":"Pop-up-Formular",
-			"openFormRelationIndex":"Benutze Formulardatensatz-ID...",
+			"openFormRelationIndex":"Verwende Datensatz von Relation",
 			"presetOpen":"Vord. Datensatz öffnen",
 			"readonly":"Lesend",
 			"required":"Benötigt",
@@ -963,6 +963,7 @@
 			"retractLogs":"Logs einklappen"
 		},
 		"dialog":{
+			"close":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem das Formular schließen?",
 			"delete":"Bist du sicher, dass du diesen Datensatz <b>permanent</b> löschen möchtest?",
 			"new":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem einen neuen Datensatz erstellen?",
 			"newReset":"Dies wird alle Eingaben zurücksetzen.<br /><br />Möchtest du fortfahren?",

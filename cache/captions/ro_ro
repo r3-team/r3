@@ -571,13 +571,13 @@
 			"new":"Formular nou",
 			"onMobile":"Vizualizare dispozitiv mobil",
 			"openForm":"Open form",
-			"openFormAttributeApply":"...as attribute value",
+			"openFormAttributeApply":"...to set value on form",
 			"openFormFormIdOpen":"Form",
 			"openFormMaxHeight":"Maximum height (px)",
 			"openFormMaxWidth":"Maximum width (px)",
 			"openFormNewRecord":"When creating new records",
 			"openFormPopUp":"Pop-up form",
-			"openFormRelationIndex":"Use form record ID...",
+			"openFormRelationIndex":"Use record from relation",
 			"presetOpen":"Deschide presetarea",
 			"readonly":"Numai citire",
 			"required":"Necesar",
@@ -963,6 +963,7 @@
 			"retractLogs":"Retrageți jurnalele"
 		},
 		"dialog":{
+			"close":"There are unsaved changes.<br /><br />Do you still want to close this form?",
 			"delete":"Sunteți sigur că doriți să ștergeți <b>permanent</b> această înregistrare?",
 			"new":"Există modificări nesalvate.<br /><br />Doriți în continuare să deschideți o înregistrare nouă?",
 			"newReset":"Aceasta vă va reseta toate introducerile.<br /><br />Doriți să continuați?",
