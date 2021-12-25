@@ -182,6 +182,7 @@ func receiveStore_tx(tx pgx.Tx, mailAccountId int32, msg *imap.Message,
 	// parse body
 	var body string
 	var files []types.MailFile
+	var gotFinalInlineText bool = false
 
 	for {
 		p, err := mr.NextPart()
@@ -194,13 +195,27 @@ func receiveStore_tx(tx pgx.Tx, mailAccountId int32, msg *imap.Message,
 		switch h := p.Header.(type) {
 		case *mail.InlineHeader:
 
-			// regular body
+			if gotFinalInlineText {
+				continue
+			}
+
+			// text
 			b, err := io.ReadAll(p.Body)
 			if err != nil {
 				return err
 			}
 			body = string(b)
 
+			// some senders include both HTML and plain text
+			// in these cases, we overwrite our body until we get the HTML version
+			// we then ignore following inline texts
+			headerType, _, err := h.ContentType()
+			if err != nil {
+				return err
+			}
+			if headerType == "text/html" {
+				gotFinalInlineText = true
+			}
 		case *mail.AttachmentHeader:
 
 			// attachment
