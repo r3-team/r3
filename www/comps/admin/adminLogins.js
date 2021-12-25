@@ -540,8 +540,8 @@ let MyAdminLogins = {
 				</thead>
 				
 				<!-- login form -->
-				<div class="app-sub-window" v-if="loginFormIndexOpen !== null">
-					<my-form class="form-pop-up shade"
+				<div class="app-sub-window under-header" v-if="loginFormIndexOpen !== null">
+					<my-form class="form-pop-up"
 						@close="loginFormIndexOpen = null"
 						@record-updated="setRecord(loginFormIndexOpen,loginFormLogin,$event);loginFormIndexOpen = null"
 						:allowDel="false"

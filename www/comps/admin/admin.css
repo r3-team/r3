@@ -114,15 +114,6 @@
 	margin-right:9px;
 	filter:var(--image-filter);
 }
-.admin-logins .form-pop-up{
-	margin-top:80px;
-	margin-bottom:30px;
-	width:95%;
-	max-width:1200px;
-	height:80%;
-	max-height:1200px;
-	border:1px solid var(--color-border);
-}
 
 
 /* system configuration */

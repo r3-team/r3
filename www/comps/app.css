@@ -300,6 +300,9 @@ h3{
 	align-items:center;
 	z-index:var(--z-index-dialog-wrap);
 }
+.app-sub-window.under-header{
+	padding-top:60px;
+}
 
 /* input block overlay */
 .input-block-overlay{

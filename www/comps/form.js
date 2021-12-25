@@ -44,8 +44,8 @@ let MyForm = {
 			:class="{ singleField:isSingleField }"
 		>
 			<!-- pop-up form -->
-			<div class="app-sub-window" v-if="popUpFormId !== null">
-				<my-form class="form-pop-up shade"
+			<div class="app-sub-window under-header" v-if="popUpFormId !== null">
+				<my-form class="form-pop-up"
 					@close="popUpFormId = null"
 					@record-deleted="popUpRecordChanged($event,'deleted')"
 					@record-open="popUpRecordId = $event"
