@@ -20,7 +20,7 @@ import (
 )
 
 func SendAll() error {
-	if cache.GetMailAccountCount() == 0 {
+	if !cache.GetMailAccountsExist() {
 		log.Info("mail", "cannot start sending, no accounts defined")
 		return nil
 	}

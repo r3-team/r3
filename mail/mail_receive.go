@@ -15,10 +15,11 @@ import (
 	"github.com/emersion/go-imap/client"
 	_ "github.com/emersion/go-message/charset"
 	"github.com/emersion/go-message/mail"
+	"github.com/jackc/pgx/v4"
 )
 
 func ReceiveAll() error {
-	if cache.GetMailAccountCount() == 0 {
+	if !cache.GetMailAccountsExist() {
 		log.Info("mail", "cannot start retrieval, no accounts defined")
 		return nil
 	}
@@ -99,113 +100,10 @@ func receive(ma types.MailAccount) error {
 	}()
 
 	for msg := range messages {
-		if msg == nil {
-			return errors.New("server did not return message")
-		}
 
-		msgBody := msg.GetBody(&section)
-		if msgBody == nil {
-			return errors.New("message body was empty")
-		}
-
-		mr, err := mail.CreateReader(msgBody)
-		if err != nil {
+		if err := receiveStore_tx(tx, ma.Id, msg, &section); err != nil {
+			tx.Rollback(db.Ctx)
 			return err
-		}
-
-		// parse header
-		var date time.Time
-		var subject string
-		var cc, from, to []*mail.Address
-
-		header := mr.Header
-		date, err = header.Date()
-		if err != nil {
-			return err
-		}
-		from, err = header.AddressList("From")
-		if err != nil {
-			return err
-		}
-		to, err = header.AddressList("To")
-		if err != nil {
-			return err
-		}
-		cc, err = header.AddressList("Cc")
-		if err != nil {
-			return err
-		}
-		subject, err = header.Subject()
-		if err != nil {
-			return err
-		}
-
-		// parse body
-		var body string
-		var files []types.MailFile
-
-		for {
-			p, err := mr.NextPart()
-			if err == io.EOF {
-				break
-			} else if err != nil {
-				return err
-			}
-
-			switch h := p.Header.(type) {
-			case *mail.InlineHeader:
-
-				// regular body
-				b, err := io.ReadAll(p.Body)
-				if err != nil {
-					return err
-				}
-				body = string(b)
-
-			case *mail.AttachmentHeader:
-
-				// attachment
-				name, err := h.Filename()
-				if err != nil {
-					return err
-				}
-
-				b, err := io.ReadAll(p.Body)
-				if err != nil {
-					return err
-				}
-
-				files = append(files, types.MailFile{
-					File: b,
-					Name: name,
-					Size: int64(len(b) / 1024),
-				})
-			}
-		}
-
-		var mailId int64
-		if err := tx.QueryRow(db.Ctx, `
-			INSERT INTO instance.mail_spool (from_list, to_list, cc_list,
-				subject, body, date, mail_account_id, outgoing)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,FALSE)
-			RETURNING id
-		`, getStringListFromAddress(from),
-			getStringListFromAddress(to),
-			getStringListFromAddress(cc),
-			subject, body, date.Unix(), ma.Id).Scan(&mailId); err != nil {
-
-			return err
-		}
-
-		// add files to mail spool
-		for i, file := range files {
-			if _, err := tx.Exec(db.Ctx, `
-				INSERT INTO instance.mail_spool_file (
-					mail_id, position, file, file_name, file_size)
-				VALUES ($1,$2,$3,$4,$5)
-			`, mailId, i, file.File, file.Name, file.Size); err != nil {
-				return err
-			}
 		}
 
 		// add mail to deletion sequence
@@ -214,6 +112,7 @@ func receive(ma types.MailAccount) error {
 
 	// wait for fetch to complete
 	if err := <-doneErr; err != nil {
+		tx.Rollback(db.Ctx)
 		return err
 	}
 
@@ -232,6 +131,120 @@ func receive(ma types.MailAccount) error {
 	}
 	if err := c.Expunge(nil); err != nil {
 		return err
+	}
+	return nil
+}
+
+func receiveStore_tx(tx pgx.Tx, mailAccountId int32, msg *imap.Message,
+	section *imap.BodySectionName) error {
+
+	if msg == nil {
+		return errors.New("server did not return message")
+	}
+
+	msgBody := msg.GetBody(section)
+	if msgBody == nil {
+		return errors.New("message body was empty")
+	}
+
+	mr, err := mail.CreateReader(msgBody)
+	if err != nil {
+		return err
+	}
+
+	// parse header
+	var date time.Time
+	var subject string
+	var cc, from, to []*mail.Address
+
+	header := mr.Header
+	date, err = header.Date()
+	if err != nil {
+		return err
+	}
+	from, err = header.AddressList("From")
+	if err != nil {
+		return err
+	}
+	to, err = header.AddressList("To")
+	if err != nil {
+		return err
+	}
+	cc, err = header.AddressList("Cc")
+	if err != nil {
+		return err
+	}
+	subject, err = header.Subject()
+	if err != nil {
+		return err
+	}
+
+	// parse body
+	var body string
+	var files []types.MailFile
+
+	for {
+		p, err := mr.NextPart()
+		if err == io.EOF {
+			break
+		} else if err != nil {
+			return err
+		}
+
+		switch h := p.Header.(type) {
+		case *mail.InlineHeader:
+
+			// regular body
+			b, err := io.ReadAll(p.Body)
+			if err != nil {
+				return err
+			}
+			body = string(b)
+
+		case *mail.AttachmentHeader:
+
+			// attachment
+			name, err := h.Filename()
+			if err != nil {
+				return err
+			}
+
+			b, err := io.ReadAll(p.Body)
+			if err != nil {
+				return err
+			}
+
+			files = append(files, types.MailFile{
+				File: b,
+				Name: name,
+				Size: int64(len(b) / 1024),
+			})
+		}
+	}
+
+	var mailId int64
+	if err := tx.QueryRow(db.Ctx, `
+		INSERT INTO instance.mail_spool (from_list, to_list, cc_list,
+			subject, body, date, mail_account_id, outgoing)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,FALSE)
+		RETURNING id
+	`, getStringListFromAddress(from),
+		getStringListFromAddress(to),
+		getStringListFromAddress(cc),
+		subject, body, date.Unix(), mailAccountId).Scan(&mailId); err != nil {
+
+		return err
+	}
+
+	// add files to mail spool
+	for i, file := range files {
+		if _, err := tx.Exec(db.Ctx, `
+			INSERT INTO instance.mail_spool_file (
+				mail_id, position, file, file_name, file_size)
+			VALUES ($1,$2,$3,$4,$5)
+		`, mailId, i, file.File, file.Name, file.Size); err != nil {
+			return err
+		}
 	}
 	return nil
 }
