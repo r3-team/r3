@@ -1,4 +1,4 @@
-package mail
+package attach
 
 import (
 	"bytes"
@@ -18,7 +18,7 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
-func Attach_all() error {
+func DoAll() error {
 	mails := make([]types.Mail, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
@@ -43,14 +43,14 @@ func Attach_all() error {
 	rows.Close()
 
 	for _, m := range mails {
-		if err := attach(m); err != nil {
+		if err := do(m); err != nil {
 			return err
 		}
 	}
 	return nil
 }
 
-func attach(mail types.Mail) error {
+func do(mail types.Mail) error {
 
 	// check validity of record and attributes to attach files to
 	atr, exists := cache.AttributeIdMap[mail.AttributeId.Bytes]
@@ -122,7 +122,7 @@ func attach(mail types.Mail) error {
 	}
 
 	// prepare files attribute value
-	filesValue, err := getAttributeFilesFromInterface(filesValueIn)
+	filesValue, err := lookups.GetAttributeFilesFromInterface(filesValueIn)
 	if err != nil {
 		return err
 	}

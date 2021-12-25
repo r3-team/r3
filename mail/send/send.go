@@ -1,4 +1,4 @@
-package mail
+package send
 
 import (
 	"crypto/tls"
@@ -19,7 +19,13 @@ import (
 	"github.com/jordan-wright/email"
 )
 
-func SendAll() error {
+var (
+	accountMode          = "smtp"
+	sendAttempts     int = 5  // send attempts per mails
+	sendAttemptEvery int = 60 // repeat attempts every x seconds
+)
+
+func DoAll() error {
 	if !cache.GetMailAccountsExist() {
 		log.Info("mail", "cannot start sending, no accounts defined")
 		return nil
@@ -57,7 +63,7 @@ func SendAll() error {
 
 	for _, m := range mails {
 
-		if err := send(m); err != nil {
+		if err := do(m); err != nil {
 
 			// unable to send, update attempt counter and date for later attempt
 			log.Error("mail", fmt.Sprintf("is unable to send (attempt %d)",
@@ -86,16 +92,16 @@ func SendAll() error {
 	return nil
 }
 
-func send(m types.Mail) error {
+func do(m types.Mail) error {
 
 	// get mail account to send with
 	var err error
 	var ma types.MailAccount
 
 	if m.AccountId.Status == pgtype.Present {
-		ma, err = cache.GetMailAccount(m.AccountId.Int, modeSend)
+		ma, err = cache.GetMailAccount(m.AccountId.Int, accountMode)
 	} else {
-		ma, err = cache.GetMailAccountAny(modeSend)
+		ma, err = cache.GetMailAccountAny(accountMode)
 	}
 	if err != nil {
 		return err
@@ -159,7 +165,7 @@ func send(m types.Mail) error {
 		}
 
 		// attachments are set
-		files, err := getAttributeFilesFromInterface(value)
+		files, err := lookups.GetAttributeFilesFromInterface(value)
 		if err != nil {
 			return err
 		}

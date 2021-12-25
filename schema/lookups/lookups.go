@@ -1,8 +1,10 @@
 package lookups
 
 import (
+	"encoding/json"
 	"fmt"
 	"r3/db"
+	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v4"
@@ -172,6 +174,7 @@ func GetPgIndexNamesById_tx(tx pgx.Tx, id uuid.UUID) (string, string, error) {
 	return moduleName, relationName, nil
 }
 
+// database entity names
 func GetPKConstraintName(relationId uuid.UUID) string {
 	return fmt.Sprintf("pk_%s", relationId.String())
 }
@@ -200,4 +203,23 @@ func IsContentRelationship11(content string) bool {
 }
 func IsContentText(content string) bool {
 	return content == "varchar" || content == "text"
+}
+
+// attribute conversions
+func GetAttributeFilesFromInterface(in interface{}) (types.DataSetFiles, error) {
+	files := types.DataSetFiles{}
+
+	if in == nil {
+		return files, nil
+	}
+
+	inJson, err := json.Marshal(in)
+	if err != nil {
+		return files, err
+	}
+
+	if err := json.Unmarshal(inJson, &files); err != nil {
+		return files, err
+	}
+	return files, nil
 }

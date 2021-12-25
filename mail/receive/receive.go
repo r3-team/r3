@@ -1,4 +1,4 @@
-package mail
+package receive
 
 import (
 	"crypto/tls"
@@ -9,6 +9,7 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/types"
+	"strings"
 	"time"
 
 	"github.com/emersion/go-imap"
@@ -18,7 +19,12 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
-func ReceiveAll() error {
+var (
+	accountMode = "imap"
+	errDatabase = errors.New("message could not be stored in database")
+)
+
+func DoAll() error {
 	if !cache.GetMailAccountsExist() {
 		log.Info("mail", "cannot start retrieval, no accounts defined")
 		return nil
@@ -27,13 +33,13 @@ func ReceiveAll() error {
 	accountMap := cache.GetMailAccountMap()
 
 	for _, ma := range accountMap {
-		if ma.Mode != modeReceive {
+		if ma.Mode != accountMode {
 			continue
 		}
 
 		log.Info("mail", fmt.Sprintf("retrieving from '%s'", ma.Name))
 
-		if err := receive(ma); err != nil {
+		if err := do(ma); err != nil {
 			log.Error("mail", fmt.Sprintf("failed to retrieve from '%s'", ma.Name), err)
 			continue
 		}
@@ -41,7 +47,7 @@ func ReceiveAll() error {
 	return nil
 }
 
-func receive(ma types.MailAccount) error {
+func do(ma types.MailAccount) error {
 
 	var c *client.Client
 	var err error
@@ -82,11 +88,6 @@ func receive(ma types.MailAccount) error {
 	}
 
 	// fetch mails from mailbox
-	tx, err := db.Pool.Begin(db.Ctx)
-	if err != nil {
-		return err
-	}
-
 	seqDel := new(imap.SeqSet) // messages to delete
 	seqGet := new(imap.SeqSet) // messages to fetch
 	seqGet.AddRange(1, mbox.Messages)
@@ -99,15 +100,30 @@ func receive(ma types.MailAccount) error {
 		doneErr <- c.Fetch(seqGet, []imap.FetchItem{section.FetchItem()}, messages)
 	}()
 
+	// process and then store messages to mail spooler
+	tx, err := db.Pool.Begin(db.Ctx)
+	if err != nil {
+		return err
+	}
+
 	for msg := range messages {
 
-		if err := receiveStore_tx(tx, ma.Id, msg, &section); err != nil {
-			tx.Rollback(db.Ctx)
-			return err
-		}
+		if err := processMessage_tx(tx, ma.Id, msg, &section); err != nil {
 
-		// add mail to deletion sequence
-		seqDel.AddNum(msg.SeqNum)
+			if errors.Is(err, errDatabase) {
+
+				// database operation failed, this should not happen, we rollback and abort
+				tx.Rollback(db.Ctx)
+				return err
+			} else {
+				// mail processing can fail because of many reasons, warn and move on
+				log.Warning("mail", "message cannot be processed and is ignored", err)
+			}
+
+		} else {
+			// add mail to deletion sequence if processed successfully
+			seqDel.AddNum(msg.SeqNum)
+		}
 	}
 
 	// wait for fetch to complete
@@ -124,18 +140,20 @@ func receive(ma types.MailAccount) error {
 		mbox.Messages))
 
 	// if database update was successful, execute mail deletion
-	item := imap.FormatFlagsOp(imap.AddFlags, true)
-	flags := []interface{}{imap.DeletedFlag}
-	if err := c.Store(seqDel, item, flags, nil); err != nil {
-		return err
-	}
-	if err := c.Expunge(nil); err != nil {
-		return err
+	if len(seqDel.Set) != 0 {
+		item := imap.FormatFlagsOp(imap.AddFlags, true)
+		flags := []interface{}{imap.DeletedFlag}
+		if err := c.Store(seqDel, item, flags, nil); err != nil {
+			return err
+		}
+		if err := c.Expunge(nil); err != nil {
+			return err
+		}
 	}
 	return nil
 }
 
-func receiveStore_tx(tx pgx.Tx, mailAccountId int32, msg *imap.Message,
+func processMessage_tx(tx pgx.Tx, mailAccountId int32, msg *imap.Message,
 	section *imap.BodySectionName) error {
 
 	if msg == nil {
@@ -248,18 +266,30 @@ func receiveStore_tx(tx pgx.Tx, mailAccountId int32, msg *imap.Message,
 		getStringListFromAddress(cc),
 		subject, body, date.Unix(), mailAccountId).Scan(&mailId); err != nil {
 
-		return err
+		return fmt.Errorf("%w, %s", errDatabase, err)
 	}
 
-	// add files to mail spool
+	// add attachments to mail spooler
 	for i, file := range files {
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO instance.mail_spool_file (
 				mail_id, position, file, file_name, file_size)
 			VALUES ($1,$2,$3,$4,$5)
 		`, mailId, i, file.File, file.Name, file.Size); err != nil {
-			return err
+			return fmt.Errorf("%w, %s", errDatabase, err)
 		}
 	}
 	return nil
+}
+
+// helpers
+func getStringListFromAddress(list []*mail.Address) string {
+	out := make([]string, 0)
+	for _, a := range list {
+		if a.String() == "" {
+			continue
+		}
+		out = append(out, a.String())
+	}
+	return strings.Join(out, ", ")
 }

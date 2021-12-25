@@ -1,20 +1,10 @@
 package mail
 
 import (
-	"encoding/json"
-	"net/mail"
 	"r3/db"
 	"r3/types"
-	"strings"
 
 	"github.com/jackc/pgx/v4"
-)
-
-var (
-	sendAttempts     int = 5  // send attempts per mails
-	sendAttemptEvery int = 60 // repeat attempts every x seconds
-	modeReceive          = "imap"
-	modeSend             = "smtp"
 )
 
 // mail spooler
@@ -104,34 +94,4 @@ func SetAccount_tx(tx pgx.Tx, id int32, name string, mode string, sendAs string,
 		}
 	}
 	return nil
-}
-
-// helpers
-func getStringListFromAddress(list []*mail.Address) string {
-	out := make([]string, 0)
-	for _, a := range list {
-		if a.String() == "" {
-			continue
-		}
-		out = append(out, a.String())
-	}
-	return strings.Join(out, ", ")
-}
-
-func getAttributeFilesFromInterface(in interface{}) (types.DataSetFiles, error) {
-	files := types.DataSetFiles{}
-
-	if in == nil {
-		return files, nil
-	}
-
-	inJson, err := json.Marshal(in)
-	if err != nil {
-		return files, err
-	}
-
-	if err := json.Unmarshal(inJson, &files); err != nil {
-		return files, err
-	}
-	return files, nil
 }

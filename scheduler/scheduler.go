@@ -10,7 +10,9 @@ import (
 	"r3/db"
 	"r3/ldap/ldap_import"
 	"r3/log"
-	"r3/mail"
+	"r3/mail/attach"
+	"r3/mail/receive"
+	"r3/mail/send"
 	"r3/repo"
 	"r3/schema/lookups"
 	"r3/tools"
@@ -128,13 +130,13 @@ func Start() error {
 			t.fn = ldap_import.RunAll
 		case "mailAttach":
 			t.nameLog = "Email attachment transfer"
-			t.fn = mail.Attach_all
+			t.fn = attach.DoAll
 		case "mailRetrieve":
 			t.nameLog = "Email retrieval"
-			t.fn = mail.ReceiveAll
+			t.fn = receive.DoAll
 		case "mailSend":
 			t.nameLog = "Email dispatch"
-			t.fn = mail.SendAll
+			t.fn = send.DoAll
 		case "repoCheck":
 			t.nameLog = "Check for updates from repository"
 			t.fn = repo.Update
