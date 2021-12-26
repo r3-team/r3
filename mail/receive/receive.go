@@ -2,6 +2,7 @@ package receive
 
 import (
 	"crypto/tls"
+	"encoding/base64"
 	"errors"
 	"fmt"
 	"io"
@@ -9,6 +10,7 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/types"
+	"regexp"
 	"strings"
 	"time"
 
@@ -22,6 +24,7 @@ import (
 var (
 	accountMode = "imap"
 	errDatabase = errors.New("message could not be stored in database")
+	regexCid    = regexp.MustCompile(`<img[^>]*cid\:([^\"]*)`)
 )
 
 func DoAll() error {
@@ -198,9 +201,15 @@ func processMessage_tx(tx pgx.Tx, mailAccountId int32, msg *imap.Message,
 	}
 
 	// parse body
+	type cid struct {
+		contentId   string
+		contentType string
+		file        []byte
+	}
 	var body string
+	var cids []cid
 	var files []types.MailFile
-	var gotFinalInlineText bool = false
+	var gotHtmlText bool = false
 
 	for {
 		p, err := mr.NextPart()
@@ -213,27 +222,48 @@ func processMessage_tx(tx pgx.Tx, mailAccountId int32, msg *imap.Message,
 		switch h := p.Header.(type) {
 		case *mail.InlineHeader:
 
-			if gotFinalInlineText {
-				continue
-			}
-
-			// text
-			b, err := io.ReadAll(p.Body)
-			if err != nil {
-				return err
-			}
-			body = string(b)
-
-			// some senders include both HTML and plain text
-			// in these cases, we overwrite our body until we get the HTML version
-			// we then ignore following inline texts
 			headerType, _, err := h.ContentType()
 			if err != nil {
 				return err
 			}
-			if headerType == "text/html" {
-				gotFinalInlineText = true
+
+			if strings.Contains(headerType, "text") {
+
+				// some senders include both HTML and plain text
+				// in these cases, we only want the HTML version
+				if gotHtmlText {
+					continue
+				}
+
+				b, err := io.ReadAll(p.Body)
+				if err != nil {
+					return err
+				}
+				body = string(b)
+
+				if headerType == "text/html" {
+					gotHtmlText = true
+				}
+
+			} else if strings.Contains(headerType, "image") {
+				b, err := io.ReadAll(p.Body)
+				if err != nil {
+					return err
+				}
+
+				base64Text := make([]byte, base64.StdEncoding.EncodedLen(len(b)))
+				base64.StdEncoding.Encode(base64Text, b)
+
+				id := strings.TrimPrefix(p.Header.Get("Content-ID"), "<")
+				id = strings.TrimSuffix(id, ">")
+
+				cids = append(cids, cid{
+					contentId:   id,
+					contentType: headerType,
+					file:        base64Text,
+				})
 			}
+
 		case *mail.AttachmentHeader:
 
 			// attachment
@@ -254,7 +284,27 @@ func processMessage_tx(tx pgx.Tx, mailAccountId int32, msg *imap.Message,
 			})
 		}
 	}
+	// look for CID links in text body
+	// example: <img src="cid:part1.rDMcVMnB.49OoxErI@rei3.de" alt="">
+	for _, matches := range regexCid.FindAllStringSubmatch(body, -1) {
 
+		// match 0: img tag until CID end (<img src="cid:part1.rDMcVMnB.49OoxErI@rei3.de)
+		// match 1: CID                   (part1.rDMcVMnB.49OoxErI@rei3.de)
+		if len(matches) != 2 {
+			continue
+		}
+
+		for _, cid := range cids {
+			if cid.contentId == matches[1] {
+				body = strings.Replace(body, fmt.Sprintf("cid:%s", matches[1]),
+					fmt.Sprintf(`data:%s;base64,%s`, cid.contentType, cid.file), -1)
+
+				break
+			}
+		}
+	}
+
+	// store message in spooler
 	var mailId int64
 	if err := tx.QueryRow(db.Ctx, `
 		INSERT INTO instance.mail_spool (from_list, to_list, cc_list,
@@ -269,7 +319,7 @@ func processMessage_tx(tx pgx.Tx, mailAccountId int32, msg *imap.Message,
 		return fmt.Errorf("%w, %s", errDatabase, err)
 	}
 
-	// add attachments to mail spooler
+	// add attachments to spooler
 	for i, file := range files {
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO instance.mail_spool_file (
