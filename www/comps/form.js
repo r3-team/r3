@@ -44,9 +44,12 @@ let MyForm = {
 			:class="{ singleField:isSingleField }"
 		>
 			<!-- pop-up form -->
-			<div class="app-sub-window under-header" v-if="popUpFormId !== null">
-				<my-form class="form-pop-up"
-					@close="popUpFormId = null"
+			<div class="app-sub-window under-header"
+				v-if="popUpFormId !== null"
+				@click.self="$refs.popUpForm.closeAsk()"
+			>
+				<my-form class="form-pop-up" ref="popUpForm"
+					@close="closePopUp()"
 					@record-deleted="popUpRecordChanged($event,'deleted')"
 					@record-open="popUpRecordId = $event"
 					@record-updated="popUpRecordChanged($event,'updated')"
@@ -895,6 +898,12 @@ let MyForm = {
 		},
 		close:function() {
 			this.$emit('close');
+		},
+		closePopUp:function() {
+			this.popUpFormId = null;
+			
+			// reset form change state to main form
+			this.$store.commit('formHasChanges',this.hasChanges);
 		},
 		openBuilder:function() {
 			this.$router.push('/builder/form/'+this.form.id);
