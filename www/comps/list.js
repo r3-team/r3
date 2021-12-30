@@ -237,6 +237,13 @@ let MyList = {
 						:darkBg="true"
 					/>
 					
+					<my-button image="refresh.png"
+						v-if="isFullPage"
+						@trigger="reloadInside('manual')"
+						:captionTitle="capGen.button.refresh"
+						:darkBg="true"
+					/>
+					
 					<my-button image="filter.png"
 						v-if="isFullPage"
 						@trigger="toggleUserFilters"
@@ -931,13 +938,14 @@ let MyList = {
 					this.offset = 0;
 					this.orderOverwritten = true;
 				break;
+				case 'manuel': break; // manual reload
 				default: break; // no special treatment
 			}
 			
 			// reload full page list by updating route parameters
 			// enables browser history for fullpage list navigation
-			//  special case: user filters do not have route parameters (need direct reload)
-			if(this.isFullPage && entity !== 'filtersUser')
+			//  special cases: user filters & manuel reloads (no page param change)
+			if(this.isFullPage && entity !== 'filtersUser' && entity !== 'manual')
 				return this.paramsUpdate(true);
 			
 			this.get();
