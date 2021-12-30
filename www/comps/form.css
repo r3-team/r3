@@ -32,10 +32,10 @@
 .form .field{
 	margin:var(--spacing-child);
 }
-.form.singleField .fields{
+.form.singleField>.fields{
 	padding:0px;
 }
-.form.singleField .field{
+.form.singleField>.fields .field{
 	margin:0px;
 	overflow:auto;
 }

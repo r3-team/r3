@@ -281,8 +281,7 @@ let MyForm = {
 			popUpFieldId:null,   // field ID that opened pop-up form
 			popUpFormId:null,    // form ID to open in pop-up form
 			popUpRecordId:0,     // record ID to open in pop-up form
-			popUpMaxHeight:0,
-			popUpMaxWidth:0,
+			popUpStyles:'',      // CSS styles for pop-up form
 			
 			// form data
 			fields:[],           // all fields (nested within each other)
@@ -376,15 +375,6 @@ let MyForm = {
 		},
 		
 		// presentation
-		popUpStyles:function() {
-			if(this.popUpFormId === null)
-				return '';
-			
-			let styles = [];
-			if(this.popUpMaxWidth  !== 0) styles.push(`max-width:${this.popUpMaxWidth}px`);
-			if(this.popUpMaxHeight !== 0) styles.push(`max-height:${this.popUpMaxHeight}px`);
-			return styles.join(';');
-		},
 		recordActionMessage:function() {
 			switch(this.messageCode) {
 				case 'created': return this.isMobile
@@ -966,6 +956,9 @@ let MyForm = {
 			window.history.back();
 		},
 		popUpRecordChanged:function(recordId,change) {
+			if(!this.isData)
+				return;
+			
 			// update data field value to reflect change of pop-up form record
 			let field = this.fieldIdMapData[this.popUpFieldId];
 			let atr   = this.attributeIdMap[field.attributeId];
@@ -1044,8 +1037,11 @@ let MyForm = {
 				this.popUpFormId    = formIdOpen;
 				this.popUpRecordId  = recordId;
 				this.popUpFieldId   = null;
-				this.popUpMaxHeight = options.maxHeight;
-				this.popUpMaxWidth  = options.maxWidth;
+				
+				let styles = [];
+				if(options.maxWidth  !== 0) styles.push(`max-width:${options.maxWidth}px`);
+				if(options.maxHeight !== 0) styles.push(`max-height:${options.maxHeight}px`);
+				this.popUpStyles = styles.join(';');
 				
 				if(typeof this.fieldIdMapData[options.fieldId] !== 'undefined')
 					this.popUpFieldId = options.fieldId;
