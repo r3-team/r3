@@ -29,22 +29,22 @@
 	flex-direction:column;
 	padding:var(--spacing-parent);
 }
-.form .field{
+.form .fields .field{
 	margin:var(--spacing-child);
 }
-.form.singleField>.fields{
+.form .fields.singleField{
 	padding:0px;
 }
-.form.singleField>.fields .field{
+.form .fields.singleField .field{
 	margin:0px;
 	overflow:auto;
 }
-.form.singleField .calendar .month,
-.form.singleField .chart,
-.form.singleField .list,
-.form.singleField .gantt{
+.form .fields.singleField .calendar .month,
+.form .fields.singleField .chart,
+.form .fields.singleField .list,
+.form .fields.singleField .gantt{
 	border-radius:0px;
-}
+}	
 
 /* data change log */
 .form-wrap div.log{
@@ -94,14 +94,21 @@
 }
 
 /* user overwrites */
+.user-bordersAll .form .fields:not(.singleField) .calendar .month,
+.user-bordersAll .form .fields:not(.singleField) .gantt{
+	border:1px solid var(--color-border);
+}
 .user-bordersSquared .form .top .state,
-.user-bordersSquared .form-pop-up .form{
+.user-bordersSquared .form-pop-up .form,
+.user-bordersSquared .calendar .month,
+.user-bordersSquared .calendar .month .day .part>span,
+.user-bordersSquared .gantt,
+.user-bordersSquared .gantt-line-record .record-line{
 	border-radius:0px;
 }
 .user-compact .form-wrap{
 	padding:0px !important;
 }
-
 
 /* mobile overwrites */
 .is-mobile .form-wrap{

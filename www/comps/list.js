@@ -6,9 +6,7 @@ import MyValueRich        from './valueRich.js';
 import {getChoiceFilters} from './shared/form.js';
 import {srcBase64}        from './shared/image.js';
 import {getCaption}       from './shared/language.js';
-import {
-	isAttributeFiles
-} from './shared/attribute.js';
+import {isAttributeFiles} from './shared/attribute.js';
 import {
 	fieldOptionGet,
 	fieldOptionSet
@@ -238,7 +236,7 @@ let MyList = {
 					/>
 					
 					<my-button image="refresh.png"
-						v-if="isFullPage"
+						v-if="!isMobile"
 						@trigger="reloadInside('manual')"
 						:captionTitle="capGen.button.refresh"
 						:darkBg="true"

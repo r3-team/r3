@@ -41,7 +41,6 @@ let MyForm = {
 	template:`<div class="form-wrap" :key="form.id">
 		<div class="form contentBox grow scroll"
 			v-if="!isMobile || (!showLog && !showHelp)"
-			:class="{ singleField:isSingleField }"
 		>
 			<!-- pop-up form -->
 			<div class="app-sub-window under-header"
@@ -193,7 +192,7 @@ let MyForm = {
 				</template>
 			</div>
 			
-			<div class="content grow fields">
+			<div class="content grow fields" :class="{ singleField:isSingleField }">
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
 					@open-form="openForm"

@@ -55,6 +55,7 @@
 	overflow-x:auto;
 }
 
+/* headers */
 .gantt-headers{
 	height:60px;
 	position:relative;
@@ -96,6 +97,7 @@
 	background-color:var(--color-accent2);
 }
 
+/* lines */
 .gantt-line{
 	height:30px;
 	line-height:30px;
@@ -155,14 +157,4 @@
 }
 .gantt-line-record:hover .record-line.end{
 	opacity:0.3;
-}
-
-
-/* user overwrites */
-.user-bordersAll .form:not(.singleField) .gantt{
-	border:1px solid var(--color-border);
-}
-.user-bordersSquared .gantt,
-.user-bordersSquared .gantt-line-record .record-line{
-	border-radius:0px;
 }
