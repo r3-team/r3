@@ -373,6 +373,7 @@ let MyField = {
 		<my-field
 			v-if="isContainer"
 			v-for="f in field.fields"
+			@execute-function="$emit('execute-function',$event)"
 			@open-form="(...args) => $emit('open-form',...args)"
 			@set-form-args="(...args) => $emit('set-form-args',...args)"
 			@set-valid="(...args) => $emit('set-valid',...args)"
@@ -408,7 +409,7 @@ let MyField = {
 		logViewer:      { type:Boolean, required:false, default:false }, // is part of log viewer
 		values:         { type:Object,  required:true }
 	},
-	emits:['open-form','set-form-args','set-valid','set-value','set-value-init'],
+	emits:['execute-function','open-form','set-form-args','set-valid','set-value','set-value-init'],
 	data:function() {
 		return {
 			focused:false,
@@ -979,6 +980,9 @@ let MyField = {
 		triggerButton:function(middleClick) {
 			if(this.field.openForm !== null)
 				this.openForm(0,[],middleClick);
+			
+			if(this.field.jsFunctionId !== null)
+				this.$emit('execute-function',this.field.jsFunctionId);
 		},
 		
 		// helpers

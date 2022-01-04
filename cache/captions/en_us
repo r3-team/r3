@@ -615,9 +615,10 @@
 				"go_back":"app.go_back() => UNDEFINED<br /><br />Executes a browser-back navigation.",
 				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />Returns true if the current login has the assigned role (nested roles are included).",
 				"open_form":"app.open_form(form_id,record_id,new_tab,pop_up,max_height,max_width) => UNDEFINED<br /><br />Opens new form either in new browser tab or as pop-up window (with max-/minimum height).",
+				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Deletes the current form record.",
+				"record_new":"app.record_new() => UNDEFINED<br /><br />Opens new record.",
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Reloads the current form record.",
 				"record_save":"app.record_save() => UNDEFINED<br /><br />Saves the current form record.",
-				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Deletes the current form record."
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Aborts the operation and sends a message to the executing user, which is displayed in the user interface.",

@@ -195,6 +195,7 @@ let MyForm = {
 			<div class="content grow fields" :class="{ singleField:isSingleField }">
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
+					@execute-function="executeFunction"
 					@open-form="openForm"
 					@set-form-args="setFormArgs"
 					@set-valid="validSet"
@@ -312,6 +313,55 @@ let MyForm = {
 		},
 		canSetNew:function() {
 			return this.joins.length !== 0 && this.joins[0].applyCreate;
+		},
+		exposedFunctions:function() {
+			return {
+				// simple functions
+				get_language_code:()  => this.settings.languageCode,
+				get_login_id:     ()  => this.loginId,
+				get_record_id:    (i) =>
+					typeof this.recordIdIndexMap[i] !== 'undefined'
+						? this.recordIdIndexMap[i] : -1,
+				get_role_ids:     ()  => this.access.roleIds,
+				go_back:          ()  => window.history.back(),
+				has_role:         (v) => this.access.roleIds.includes(v),
+				open_form:        (formId,recordId,newTab,popUp,maxY,maxX) =>
+					this.openForm(recordId,{
+						formIdOpen:formId,
+						popUp:popUp,
+						maxHeight:maxY,
+						maxWidth:maxX
+					},[],newTab),
+				
+				// call other functions
+				call_frontend:(id,...args) => this.executeFunction(id,args),
+				
+				// direct translations
+				record_delete:this.delAsk,
+				record_new:   this.openNewAsk,
+				record_reload:this.get,
+				record_save:  this.set,
+				
+				// field manipulation
+				get_field_value:(fieldId) => {
+					if(typeof this.fieldIdMapData[fieldId] === 'undefined')
+						return;
+					
+					let ia = this.getIndexAttributeIdByField(
+						this.fieldIdMapData[fieldId],false)
+					
+					return this.values[ia];
+				},
+				set_field_value:(fieldId,value) => {
+					if(typeof this.fieldIdMapData[fieldId] === 'undefined')
+						return;
+					
+					let ia = this.getIndexAttributeIdByField(
+						this.fieldIdMapData[fieldId],false)
+					
+					this.valueSet(ia,value,false,true);
+				}
+			};
 		},
 		hasChanges:function() {
 			for(let k in this.values) {
@@ -524,24 +574,25 @@ let MyForm = {
 		warnUnsaved:   function() { return this.hasChanges && this.settings.warnUnsaved; },
 		
 		// stores
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		formIdMap:     function() { return this.$store.getters['schema/formIdMap']; },
-		formIdMapMenu: function() { return this.$store.getters['schema/formIdMapMenu']; },
-		iconIdMap:     function() { return this.$store.getters['schema/iconIdMap']; },
+		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
+		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
+		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
+		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
+		formIdMapMenu:  function() { return this.$store.getters['schema/formIdMapMenu']; },
+		iconIdMap:      function() { return this.$store.getters['schema/iconIdMap']; },
+		jsFunctionIdMap:function() { return this.$store.getters['schema/jsFunctionIdMap']; },
 		presetIdMapRecordId:function() { return this.$store.getters['schema/presetIdMapRecordId']; },
-		access:        function() { return this.$store.getters.access; },
-		backendCodes:  function() { return this.$store.getters.constants.backendCodes; },
-		builderEnabled:function() { return this.$store.getters.builderEnabled; },
-		capApp:        function() { return this.$store.getters.captions.form; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		isAdmin:       function() { return this.$store.getters.isAdmin; },
-		isMobile:      function() { return this.$store.getters.isMobile; },
-		loginId:       function() { return this.$store.getters.loginId; },
-		moduleLanguage:function() { return this.$store.getters.moduleLanguage; },
-		productionMode:function() { return this.$store.getters.productionMode; },
-		settings:      function() { return this.$store.getters.settings; }
+		access:         function() { return this.$store.getters.access; },
+		backendCodes:   function() { return this.$store.getters.constants.backendCodes; },
+		builderEnabled: function() { return this.$store.getters.builderEnabled; },
+		capApp:         function() { return this.$store.getters.captions.form; },
+		capGen:         function() { return this.$store.getters.captions.generic; },
+		isAdmin:        function() { return this.$store.getters.isAdmin; },
+		isMobile:       function() { return this.$store.getters.isMobile; },
+		loginId:        function() { return this.$store.getters.loginId; },
+		moduleLanguage: function() { return this.$store.getters.moduleLanguage; },
+		productionMode: function() { return this.$store.getters.productionMode; },
+		settings:       function() { return this.$store.getters.settings; }
 	},
 	methods:{
 		// externals
@@ -893,6 +944,30 @@ let MyForm = {
 			
 			// reset form change state to main form
 			this.$store.commit('formHasChanges',this.hasChanges);
+		},
+		executeFunction:function(jsFunctionId,args) {
+			if(typeof this.jsFunctionIdMap[jsFunctionId] === 'undefined')
+				return;
+			
+			if(typeof args === 'undefined')
+				args = [];
+			
+			let fnc  = this.jsFunctionIdMap[jsFunctionId];
+			let code = fnc.codeFunction;
+			
+			// first argument is exposed application functions object
+			// additional arguments are defined by function
+			let argNames = 'app';
+			
+			if(fnc.codeArgs !== '')
+				argNames += ','+fnc.codeArgs;
+			
+			// limit function code access
+			// strict mode does not allow overwriting already defined variables
+			// also blocked, restoration of access to window: let win = (function() {return this;}())
+			code = `"use strict";let window = 'Access to window object denied';${code}`;
+			
+			return Function(argNames,code)(this.exposedFunctions,...args);
 		},
 		openBuilder:function() {
 			this.$router.push('/builder/form/'+this.form.id);
