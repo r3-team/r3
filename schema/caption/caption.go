@@ -95,6 +95,11 @@ func getEntityName(content string) (string, error) {
 	case "formHelp":
 		return "form_id", nil
 
+	case "jsFunctionTitle":
+		fallthrough
+	case "jsFunctionDesc":
+		return "js_function_id", nil
+
 	case "loginFormTitle":
 		return "login_form_id", nil
 

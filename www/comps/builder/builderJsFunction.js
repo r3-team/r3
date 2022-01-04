@@ -1,24 +1,25 @@
 import MyBuilderCaption               from './builderCaption.js';
 import {MyBuilderFunctionPlaceholder} from './builderFunctions.js';
+import {getDataFieldMap}              from '../shared/form.js';
 import {
 	getDependentModules,
-	getPgFunctionTemplate
+	getItemTitle
 } from '../shared/builder.js';
-export {MyBuilderPgFunction as default};
+export {MyBuilderJsFunction as default};
 
-let MyBuilderPgFunction = {
-	name:'my-builder-pg-function',
+let MyBuilderJsFunction = {
+	name:'my-builder-js-function',
 	components:{
 		MyBuilderCaption,
 		MyBuilderFunctionPlaceholder
 	},
 	template:`<div class="builder-function">
 		
-		<div class="contentBox" v-if="pgFunction">
+		<div class="contentBox" v-if="jsFunction">
 			<div class="top">
 				<div class="area nowrap">
 					<my-builder-caption
-						v-model="captions.pgFunctionTitle"
+						v-model="captions.jsFunctionTitle"
 						:contentName="capApp.titleOne"
 						:language="builderLanguage"
 					/>
@@ -64,17 +65,17 @@ let MyBuilderPgFunction = {
 				<table v-if="showDetails">
 					<tr>
 						<td>{{ capApp.codeArgs }}</td>
-						<td><input disabled :value="pgFunction.codeArgs !== '' ? pgFunction.codeArgs : '-'" /></td>
+						<td><input v-model="codeArgs" /></td>
 					</tr>
 					<tr>
 						<td>{{ capApp.codeReturns }}</td>
-						<td><input disabled :value="pgFunction.codeReturns !== '' ? pgFunction.codeReturns : '-'" /></td>
+						<td><input v-model="codeReturns" /></td>
 					</tr>
 					<tr>
 						<td>{{ capGen.title }}</td>
 						<td>
 							<my-builder-caption
-								v-model="captions.pgFunctionTitle"
+								v-model="captions.jsFunctionTitle"
 								:language="builderLanguage"
 							/>
 						</td>
@@ -83,7 +84,7 @@ let MyBuilderPgFunction = {
 						<td>{{ capGen.description }}</td>
 						<td>
 							<my-builder-caption
-								v-model="captions.pgFunctionDesc"
+								v-model="captions.jsFunctionDesc"
 								:language="builderLanguage"
 								:multiLine="true"
 							/>
@@ -108,7 +109,7 @@ let MyBuilderPgFunction = {
 			</div>
 		</div>
 		
-		<div class="contentBox right" v-if="pgFunction && showSidebar">
+		<div class="contentBox right" v-if="jsFunction && showSidebar">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/database.png" />
@@ -117,34 +118,37 @@ let MyBuilderPgFunction = {
 			</div>
 			<div class="top lower">
 				<div class="area nowrap">
-					<my-button
-						v-if="isTrigger"
-						@trigger="addNew = !addNew"
-						:caption="capApp.button.addNew"
-						:darkBg="true"
-						:image="addNew ? 'checkbox1.png' : 'checkbox0.png'"
-					/>
-					<my-button
-						v-if="isTrigger"
-						@trigger="addOld = !addOld"
-						:caption="capApp.button.addOld"
-						:darkBg="true"
-						:image="addOld ? 'checkbox1.png' : 'checkbox0.png'"
-					/>
-					<my-button image="refresh.png"
-						@trigger="codeFunction = getPgFunctionTemplate()"
-						:caption="capApp.button.template"
-						:darkBg="true"
-					/>
 				</div>
 			</div>
 			<div class="content padding default-inputs">
 				
 				<div class="message" v-html="capApp.entityInput"></div>
 				
+				<template v-if="formId !== null">
+					<div class="placeholders fields-title">
+						<h2>{{ capApp.placeholdersForm }}</h2>
+						
+						<select v-model="fieldMode">
+							<option value="get">{{ capApp.option.fieldGet }}</option>
+							<option value="set">{{ capApp.option.fieldSet }}</option>
+						</select>
+					</div>
+					
+					<div class="placeholders fields">
+						<my-builder-function-placeholder
+							v-for="f in dataFieldMap"
+							@toggle="toggleEntity('field',f.id)"
+							:builderLanguage="builderLanguage"
+							:key="f.id"
+							:name="displayFieldName(f)"
+							:selected="entitySelected === 'field' && entitySelectedId === f.id"
+						/>
+					</div>
+				</template>
+				
 				<h2>{{ capApp.placeholdersModules }}</h2>
 				<div class="placeholders modules"
-					v-for="mod in getDependentModules(module,modules).filter(v => v.relations.length !== 0 || v.pgFunctions.length !== 0)"
+					v-for="mod in getDependentModules(module,modules).filter(v => v.pgFunctions.length !== 0 || v.jsFunctions.length !== 0)"
 					:key="mod.id"
 				>
 					<my-button
@@ -156,28 +160,28 @@ let MyBuilderPgFunction = {
 					
 					<template v-if="moduleIdsOpen.includes(mod.id)">
 						
-						<!-- relations & attributes -->
-						<div class="placeholders relations" v-for="rel in mod.relations" :key="rel.id">
-							
+						<!-- JS functions -->
+						<div class="functions-title" v-if="mod.jsFunctions.filter(v => v.formId === null || v.formId === formId).length !== 0">
+							{{ capApp.functionsFrontend }}
+						</div>
+						<div class="placeholders functions">
 							<my-builder-function-placeholder
-								@toggle="toggleEntity('relation',rel.id)"
+								v-for="f in mod.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
+								@show-help="showHelp(f.name+'()',$event)"
+								@toggle="toggleEntity('jsFunction',f.id)"
 								:builderLanguage="builderLanguage"
-								:name="rel.name"
-								:selected="entitySelected === 'relation' && entitySelectedId === rel.id"
-							/>
-							
-							<my-builder-function-placeholder
-								v-for="atr in rel.attributes"
-								@toggle="toggleEntity('attribute',atr.id)"
-								:builderLanguage="builderLanguage"
-								:key="atr.id"
-								:naked="true"
-								:name="atr.name"
-								:selected="entitySelected === 'attribute' && entitySelectedId === atr.id"
+								:functionObj="f"
+								:functionType="'js'"
+								:key="f.id"
+								:name="f.name"
+								:selected="entitySelected === 'jsFunction' && entitySelectedId === f.id"
 							/>
 						</div>
 						
 						<!-- PG functions -->
+						<div class="functions-title" v-if="mod.pgFunctions.filter(v => v.codeReturns !== 'trigger' && v.codeReturns !== 'TRIGGER').length !== 0">
+							{{ capApp.functionsBackend }}
+						</div>
 						<div class="placeholders functions">
 							<my-builder-function-placeholder
 								v-for="f in mod.pgFunctions.filter(v => v.codeReturns !== 'trigger' && v.codeReturns !== 'TRIGGER')"
@@ -194,19 +198,18 @@ let MyBuilderPgFunction = {
 					</template>
 				</div>
 				
-				<!-- instance functions -->
-				<h2>{{ capApp.placeholdersInstance }}</h2>
+				<h2>{{ capApp.placeholdersGlobal }}</h2>
 				
 				<div class="placeholders functions">
 					<my-builder-function-placeholder
-						v-for="f in instanceFunctionIds"
+						v-for="f in appFunctions"
 						@show-help="showHelp(f+'()',$event)"
-						@toggle="toggleEntity('instanceFunction',f)"
+						@toggle="toggleEntity('appFunction',f)"
 						:builderLanguage="builderLanguage"
-						:functionHelp="capApp.helpPg[f]"
+						:functionHelp="capApp.helpJs[f]"
 						:key="f"
 						:name="f"
-						:selected="entitySelected === 'instanceFunction' && entitySelectedId === f"
+						:selected="entitySelected === 'appFunction' && entitySelectedId === f"
 					/>
 				</div>
 			</div>
@@ -217,7 +220,7 @@ let MyBuilderPgFunction = {
 		id:             { type:String, required:true }
 	},
 	watch:{
-		pgFunction:{
+		jsFunction:{
 			handler:function() { this.reset(); },
 			immediate:true
 		}
@@ -225,20 +228,20 @@ let MyBuilderPgFunction = {
 	data:function() {
 		return {
 			name:'',
+			formId:null,
 			captions:{},
+			codeArgs:'',
 			codeFunction:'',
+			codeReturns:'',
 			
-			instanceFunctionIds:[
-				'abort_show_message','get_name','get_login_id',
-				'get_login_language_code','get_public_hostname','get_role_ids',
-				'has_role','has_role_any','log_error','log_info','log_warning',
-				'mail_delete','mail_delete_after_attach','mail_get_next',
-				'mail_send'
+			appFunctions:[
+				'get_language_code','get_login_id','get_record_id',
+				'get_role_ids','go_back','has_role','open_form',
+				'record_delete','record_reload','record_save'
 			],
 			
 			// states
-			addNew:false,
-			addOld:false,
+			fieldMode:'get',
 			entitySelected:'',
 			entitySelectedId:null,
 			moduleIdsOpen:[],
@@ -248,30 +251,35 @@ let MyBuilderPgFunction = {
 		};
 	},
 	computed:{
-		module:function() {
-			if(this.pgFunction === false)
-				return false;
+		dataFieldMap:function() {
+			if(this.formId === null)
+				return {};
 			
-			return this.moduleIdMap[this.pgFunction.moduleId];
+			return this.getDataFieldMap(this.formIdMap[this.formId].fields);
 		},
-		pgFunction:function() {
-			if(typeof this.pgFunctionIdMap[this.id] === 'undefined')
+		module:function() {
+			if(this.jsFunction === false)
 				return false;
 			
-			return this.pgFunctionIdMap[this.id];
+			return this.moduleIdMap[this.jsFunction.moduleId];
+		},
+		jsFunction:function() {
+			if(typeof this.jsFunctionIdMap[this.id] === 'undefined')
+				return false;
+			
+			return this.jsFunctionIdMap[this.id];
 		},
 		hasChanges:function() {
-			return this.codeFunction !== this.placeholdersSet(this.pgFunction.codeFunction)
-				|| JSON.stringify(this.captions) !== JSON.stringify(this.pgFunction.captions);
+			return this.codeArgs     !== this.jsFunction.codeArgs
+				|| this.codeFunction !== this.placeholdersSet(this.jsFunction.codeFunction)
+				|| this.codeReturns  !== this.jsFunction.codeReturns
+				|| JSON.stringify(this.captions) !== JSON.stringify(this.jsFunction.captions);
 		},
 		preview:function() {
 			if(!this.showPreview) return '';
 			
-			return this.placeholdersUnset(true);
+			return this.placeholdersUnset();
 		},
-		
-		// simple
-		isTrigger:function() { return this.pgFunction.codeReturns === 'trigger'; },
 		
 		// stores
 		modules:        function() { return this.$store.getters['schema/modules']; },
@@ -279,14 +287,24 @@ let MyBuilderPgFunction = {
 		moduleNameMap:  function() { return this.$store.getters['schema/moduleNameMap']; },
 		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
 		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
+		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
+		jsFunctionIdMap:function() { return this.$store.getters['schema/jsFunctionIdMap']; },
 		pgFunctionIdMap:function() { return this.$store.getters['schema/pgFunctionIdMap']; },
 		capApp:         function() { return this.$store.getters.captions.builder.function; },
 		capGen:         function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
 		// externals
+		getDataFieldMap,
 		getDependentModules,
-		getPgFunctionTemplate,
+		getItemTitle,
+		
+		// presentation
+		displayFieldName:function(f) {
+			let atr = this.attributeIdMap[f.attributeId];
+			let rel = this.relationIdMap[atr.relationId];
+			return this.getItemTitle(rel,atr,f.index,false,false);
+		},
 		
 		// actions
 		addTab:function(evt) {
@@ -301,44 +319,48 @@ let MyBuilderPgFunction = {
 			field.selectionEnd   = startPos + 1;
 		},
 		reset:function() {
-			this.name         = this.pgFunction.name;
-			this.captions     = JSON.parse(JSON.stringify(this.pgFunction.captions));
-			this.codeFunction = this.placeholdersSet(this.pgFunction.codeFunction);
+			this.name         = this.jsFunction.name;
+			this.formId       = this.jsFunction.formId;
+			this.codeArgs     = this.jsFunction.codeArgs;
+			this.codeFunction = this.placeholdersSet(this.jsFunction.codeFunction);
+			this.codeReturns  = this.jsFunction.codeReturns;
+			this.captions     = JSON.parse(JSON.stringify(this.jsFunction.captions));
 		},
 		insertEntitySelected:function(evt) {
 			if(this.entitySelectedId === null)
 				return;
 			
-			let field = evt.target;
-			let text  = '';
-			let mod, rel, atr, fnc;
+			let field  = evt.target;
+			let text   = '';
+			let prefix = 'app';
+			let mod, rel, atr, fnc, frm, fld;
 			
 			// build unique placeholder name
-			// relation:    {module_name}.[relation_name]
-			// pg function: {module_name}.[function_name]()
-			// attribute:   (module_name.relation_name.attribute_name)
 			switch(this.entitySelected) {
-				case 'relation':
-					rel  = this.relationIdMap[this.entitySelectedId];
-					mod  = this.moduleIdMap[rel.moduleId];
-					text = `{${mod.name}}.[${rel.name}]`;
+				case 'appFunction':
+					text = `${prefix}.${this.entitySelectedId}()`;
+				break;
+				case 'form':
+					frm  = this.formIdMap[this.entitySelectedId];
+					mod  = this.moduleIdMap[frm.moduleId];
+					text = `${prefix}.open_form({${mod.name}.${frm.name}},0,false)`;
+				break;
+				case 'field':
+					fld  = this.dataFieldMap[this.entitySelectedId];
+					atr  = this.attributeIdMap[fld.attributeId];
+					rel  = this.relationIdMap[atr.relationId];
+					let opt = this.fieldMode === 'get' ? '' : this.capApp.valueNewJsHint;
+					text = `${prefix}.${this.fieldMode}_field_value({${fld.index}:${rel.name}.${atr.name}}${opt})`;
+				break;
+				case 'jsFunction':
+					fnc  = this.jsFunctionIdMap[this.entitySelectedId];
+					mod  = this.moduleIdMap[fnc.moduleId];
+					text = `${prefix}.call_frontend({${mod.name}.${fnc.name}})`;
 				break;
 				case 'pgFunction':
 					fnc  = this.pgFunctionIdMap[this.entitySelectedId];
 					mod  = this.moduleIdMap[fnc.moduleId];
-					text = `{${mod.name}}.[${fnc.name}]()`;
-				break;
-				case 'attribute':
-					atr  = this.attributeIdMap[this.entitySelectedId];
-					rel  = this.relationIdMap[atr.relationId];
-					mod  = this.moduleIdMap[rel.moduleId];
-					text = `(${mod.name}.${rel.name}.${atr.name})`;
-					
-					if(this.addNew) text = 'NEW.'+text;
-					if(this.addOld) text = 'OLD.'+text;
-				break;
-				case 'instanceFunction':
-					text = `instance.${this.entitySelectedId}()`;
+					text = `${prefix}.call_backend({${mod.name}.${fnc.name}})`;
 				break;
 			}
 			
@@ -390,63 +412,73 @@ let MyBuilderPgFunction = {
 		},
 		
 		// placeholders are used for storing entities via ID instead of name (which can change)
-		// attribute reference: (module.relation.attribute) <-> (ATR_ID)
-		// relation  reference: {module}[relation]          <-> {MOD_ID}[REL_ID]
-		// function  reference: {module}[function](...      <-> {MOD_ID}[FNC_IC](...
 		placeholdersSet:function(body) {
-			let that = this;
+			let that   = this;
+			let fields = this.dataFieldMap;
+			let uuid   = '[a-z0-9\-]{36}';
+			let prefix = 'app';
+			let pat;
 			
-			// replace attributes with placeholders
-			// stored in function text as: (ATR_ID)
-			body = body.replace(/\(([a-z0-9\-]{36})\)/g,function(match,id) {
-				let atr = that.attributeIdMap[id];
-				let rel = that.relationIdMap[atr.relationId];
-				let mod = that.moduleIdMap[rel.moduleId];
-				return `(${mod.name}.${rel.name}.${atr.name})`;
-			});
-			
-			// replace functions with placeholders
-			// stored in function text as: [FNC_ID](...
-			body = body.replace(/\[([a-z0-9\-]{36})\]\(/g,function(match,id) {
-				return `[${that.pgFunctionIdMap[id].name}](`;
-			});
-			
-			// replace relations with placeholders
-			// stored in function text as: [REL_ID]
-			body = body.replace(/\[([a-z0-9\-]{36})\]/g,function(match,id) {
-				return `[${that.relationIdMap[id].name}]`;
-			});
-			
-			// replace modules with placeholders
-			// stored in function text as: {MOD_ID}
-			body = body.replace(/\{([a-z0-9\-]{36})\}/g,function(match,id) {
-				return `{${that.moduleIdMap[id].name}}`;
-			});
-			return body;
-		},
-		placeholdersUnset:function(previewMode) {
-			let that = this;
-			let body = this.codeFunction;
-			
-			// replace attribute placeholders
-			// stored as: (module.relation.attribute)
-			let pat = /\(([a-z][a-z0-9\_]+)\.([a-z][a-z0-9\_]+)\.([a-z][a-z0-9\_]+)\)/g;
-			body = body.replace(pat,function(match,modName,relName,atrName) {
+			// replace field IDs with placeholders
+			pat = new RegExp(`${prefix}\.(get|set)_field_value\\(\'(${uuid})'`,'g');
+			body = body.replace(pat,function(match,fldMode,id) {
+				let fld = false;
 				
-				// resolve module by name
-				if(typeof that.moduleNameMap[modName] === 'undefined')
+				for(let k in fields) {
+					if(fields[k].id === id) {
+						fld = fields[k];
+						break;
+					}
+				}
+				if(fld === false)
 					return match;
 				
-				let mod = that.moduleNameMap[modName];
+				let atr = that.attributeIdMap[fld.attributeId];
+				let rel = that.relationIdMap[atr.relationId];
+				return `${prefix}.${fldMode}_field_value({${fld.index}:${rel.name}.${atr.name}}`;
+			});
+			
+			// replace function IDs with placeholders
+			pat = new RegExp(`${prefix}\.call_(backend|frontend)\\(\'(${uuid})'`,'g');
+			body = body.replace(pat,function(match,fncMode,id) {
+				let fnc = false;
+				
+				if(fncMode === 'backend' && that.pgFunctionIdMap[id] !== 'undefined') {
+					fnc = that.pgFunctionIdMap[id];
+				}
+				else if(fncMode === 'frontend' && that.jsFunctionIdMap[id] !== 'undefined') {
+					fnc = that.jsFunctionIdMap[id];
+				}
+				if(fnc === false)
+					return match;
+				
+				let mod = that.moduleIdMap[fnc.moduleId];
+				return `${prefix}.call_${fncMode}({${mod.name}.${fnc.name}}`;
+			});
+			
+			return body;
+		},
+		placeholdersUnset:function() {
+			let that   = this;
+			let body   = this.codeFunction;
+			let fields = this.dataFieldMap;
+			let prefix = 'app';
+			let dbName = '[a-z0-9_]+';
+			let pat;
+			
+			// replace field get/set placeholders
+			// stored as: app.get_field_value({0:contact.is_active}...
+			pat = new RegExp(`${prefix}\.(get|set)_field_value\\(\{(\\d+)\:(${dbName})\.(${dbName})\}`,'g');
+			body = body.replace(pat,function(match,fldMode,index,relName,atrName) {
 				
 				// resolve relation by name
 				let rel = false;
 				
-				for(let i = 0, j = mod.relations.length; i < j; i++) {
-					if(mod.relations[i].name !== relName)
+				for(let i = 0, j = that.module.relations.length; i < j; i++) {
+					if(that.module.relations[i].name !== relName)
 						continue;
 					
-					rel = mod.relations[i];
+					rel = that.module.relations[i];
 					break;
 				}
 				if(rel === false)
@@ -465,17 +497,26 @@ let MyBuilderPgFunction = {
 				if(atr === false)
 					return match;
 				
-				// replace placeholder
-				if(previewMode)
-					return atr.name;
+				// data field
+				let fld = false;
 				
-				return `(${atr.id})`;
+				for(let k in fields) {
+					if(fields[k].index === parseInt(index) && fields[k].attributeId === atr.id) {
+						fld = fields[k];
+						break;
+					}
+				}
+				if(fld === false)
+					return match;
+				
+				// replace placeholder
+				return `${prefix}\.${fldMode}_field_value('${fld.id}'`;
 			});
 			
-			// replace function placeholders
-			// stored as: {module}[function](...
-			pat = /\{([a-z][a-z0-9\_]+)\}\.\[([a-z][a-z0-9\_]+)\]\(/g;
-			body = body.replace(pat,function(match,modName,fncName) {
+			// replace frontend/backend function placeholders
+			// stored as: app.call_backend({r3_organizations.get_name_by_id},12...
+			pat = new RegExp(`${prefix}\.call_(frontend|backend)\\(\{(${dbName})\.(${dbName})\}`,'g');
+			body = body.replace(pat,function(match,fncMode,modName,fncName) {
 				
 				// resolve module by name
 				if(typeof that.moduleNameMap[modName] === 'undefined')
@@ -486,53 +527,32 @@ let MyBuilderPgFunction = {
 				// resolve function by name
 				let fnc = false;
 				
-				for(let i = 0, j = mod.pgFunctions.length; i < j; i++) {
-					if(mod.pgFunctions[i].name !== fncName)
-						continue;
-					
-					fnc = mod.pgFunctions[i];
-					break;
+				if(fncMode === 'backend') {
+					for(let i = 0, j = mod.pgFunctions.length; i < j; i++) {
+						if(mod.pgFunctions[i].name !== fncName)
+							continue;
+						
+						fnc = mod.pgFunctions[i];
+						break;
+					}
 				}
+				else if(fncMode === 'frontend') {
+					for(let i = 0, j = mod.jsFunctions.length; i < j; i++) {
+						if(mod.jsFunctions[i].name !== fncName)
+							continue;
+						
+						fnc = mod.jsFunctions[i];
+						break;
+					}
+				}
+				
 				if(fnc === false)
 					return match;
 				
 				// replace placeholder
-				if(previewMode)
-					return `${mod.name}.${fnc.name}(`;
-				
-				return `{${mod.id}}.[${fnc.id}](`;
+				return `${prefix}\.call_${fncMode}('${fnc.id}'`;
 			});
 			
-			// replace relation placeholders
-			// stored as: {module}[relation]
-			pat = /\{([a-z][a-z0-9\_]+)\}\.\[([a-z][a-z0-9\_]+)\]/g;
-			body = body.replace(pat,function(match,modName,relName) {
-				
-				// resolve module by name
-				if(typeof that.moduleNameMap[modName] === 'undefined')
-					return match;
-				
-				let mod = that.moduleNameMap[modName];
-				
-				// resolve relation by name
-				let rel = false;
-				
-				for(let i = 0, j = mod.relations.length; i < j; i++) {
-					if(mod.relations[i].name !== relName)
-						continue;
-					
-					rel = mod.relations[i];
-					break;
-				}
-				if(rel === false)
-					return match;
-				
-				// replace placeholder
-				if(previewMode)
-					return `${mod.name}.${rel.name}`;
-				
-				return `{${mod.id}}.[${rel.id}]`;
-			});
 			return body;
 		},
 		
@@ -540,14 +560,14 @@ let MyBuilderPgFunction = {
 		set:function() {
 			let trans = new wsHub.transactionBlocking();
 			
-			trans.add('pgFunction','set',{
-				id:this.pgFunction.id,
-				moduleId:this.pgFunction.moduleId,
-				name:this.pgFunction.name,
-				codeArgs:this.pgFunction.codeArgs,
-				codeFunction:this.placeholdersUnset(false),
-				codeReturns:this.pgFunction.codeReturns,
-				schedules:this.pgFunction.schedules,
+			trans.add('jsFunction','set',{
+				id:this.jsFunction.id,
+				moduleId:this.jsFunction.moduleId,
+				formId:this.jsFunction.formId,
+				name:this.jsFunction.name,
+				codeArgs:this.codeArgs,
+				codeFunction:this.placeholdersUnset(),
+				codeReturns:this.codeReturns,
 				captions:this.captions
 			},this.setOk);
 			trans.add('schema','check',{moduleId:this.module.id});

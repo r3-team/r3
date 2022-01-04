@@ -115,6 +115,7 @@ let MyBuilderForm = {
 					:fieldMoveList="fieldMoveList"
 					:fieldMoveIndex="fieldMoveIndex"
 					:fields="fields"
+					:formId="id"
 					:isTemplate="false"
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="form.moduleId"
@@ -273,6 +274,7 @@ let MyBuilderForm = {
 							:field-move-list="fieldMoveList"
 							:field-move-index="fieldMoveIndex"
 							:field-counter="fieldCounter"
+							:formId="id"
 							:is-template="true"
 							:show-outside-in="showOutsideIn"
 						/>

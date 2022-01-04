@@ -34,6 +34,9 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		SELECT f.id, f.parent_id, f.icon_id, f.content, f.state, f.on_mobile,
 		a.content,
 		
+		-- button field
+		fb.js_function_id,
+		
 		-- calendar field
 		fn.attribute_id_date0, fn.attribute_id_date1, fn.attribute_id_color,
 		fn.index_date0, fn.index_date1, fn.index_color, fn.ics, fn.gantt,
@@ -108,14 +111,14 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			indexDate1, size, resultLimit pgtype.Int2
 		var autoRenew, dateRange0, dateRange1, indexColor, min, max pgtype.Int4
 		var attributeId, attributeIdAlt, attributeIdNm, attributeIdDate0,
-			attributeIdDate1, attributeIdColor, fieldParentId,
-			iconId pgtype.UUID
+			attributeIdDate1, attributeIdColor, fieldParentId, iconId,
+			jsFunctionIdButton pgtype.UUID
 		var category, csvExport, csvImport, filterQuick, filterQuickList,
 			gantt, ganttStepsToggle, ics, outsideIn, wrap pgtype.Bool
 		var defPresetIds []uuid.UUID
 
 		if err := rows.Scan(&fieldId, &fieldParentId, &iconId, &content, &state,
-			&onMobile, &atrContent, &attributeIdDate0, &attributeIdDate1,
+			&onMobile, &atrContent, &jsFunctionIdButton, &attributeIdDate0, &attributeIdDate1,
 			&attributeIdColor, &indexDate0, &indexDate1, &indexColor, &ics,
 			&gantt, &ganttSteps, &ganttStepsToggle, &dateRange0, &dateRange1,
 			&chartOption, &direction, &justifyContent, &alignItems,
@@ -137,12 +140,13 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		switch content {
 		case "button":
 			fields = append(fields, types.FieldButton{
-				Id:       fieldId,
-				IconId:   iconId,
-				Content:  content,
-				State:    state,
-				OnMobile: onMobile,
-				OpenForm: types.OpenForm{},
+				Id:           fieldId,
+				IconId:       iconId,
+				JsFunctionId: jsFunctionIdButton,
+				Content:      content,
+				State:        state,
+				OnMobile:     onMobile,
+				OpenForm:     types.OpenForm{},
 
 				// legacy
 				FormIdOpen:        compatible.GetNullUuid(),
@@ -534,7 +538,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 				return err
 			}
 			if err := setButton_tx(tx, fieldId, f.AttributeIdRecord,
-				f.FormIdOpen, f.OpenForm); err != nil {
+				f.FormIdOpen, f.OpenForm, f.JsFunctionId); err != nil {
 
 				return err
 			}
@@ -682,26 +686,33 @@ func setGeneric_tx(tx pgx.Tx, formId uuid.UUID, id uuid.UUID,
 	return id, nil
 }
 func setButton_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
-	formIdOpen pgtype.UUID, oForm types.OpenForm) error {
+	formIdOpen pgtype.UUID, oForm types.OpenForm, jsFunctionId pgtype.UUID) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_button", "field_id")
 	if err != nil {
 		return err
 	}
 
+	// fix imports < 2.6: New open form entity, new JS function reference
+	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
+	jsFunctionId = compatible.FixPgxNull(jsFunctionId).(pgtype.UUID)
+
 	if known {
-		// nothing to update on the button entity itself currently
+		if _, err := tx.Exec(db.Ctx, `
+			UPDATE app.field_button
+			SET js_function_id = $1
+			WHERE field_id = $2
+		`, jsFunctionId, fieldId); err != nil {
+			return err
+		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.field_button (field_id)
-			VALUES ($1)
-		`, fieldId); err != nil {
+			INSERT INTO app.field_button (field_id, js_function_id)
+			VALUES ($1,$2)
+		`, fieldId, jsFunctionId); err != nil {
 			return err
 		}
 	}
-
-	// fix imports < 2.6: New open form entity
-	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
 
 	// set open form
 	if err := openForm.Set_tx(tx, "field", fieldId, oForm); err != nil {

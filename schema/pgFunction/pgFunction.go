@@ -354,14 +354,13 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 	return nil
 }
 
-// IDs of modules/relations/attributes can be used in function body to refer to existing entities
+// IDs of modules/relations/attributes/PG functions can be used in function body to refer to existing entities
 // as entity names can change any time, keeping IDs is safer
 // to create a PG function, we need to replace these IDs with proper names
 // we also store IDs of all entities so that we can create foreign keys and ensure consistency
 func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error) {
 
-	// clear all dependency records for this function
-	// rebuilt when parsing IDs below
+	// rebuilt dependency records for this function
 	if _, err := tx.Exec(db.Ctx, `
 		DELETE FROM app.pg_function_depends
 		WHERE pg_function_id = $1

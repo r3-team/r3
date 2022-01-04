@@ -11,6 +11,7 @@ import (
 	"r3/schema/field"
 	"r3/schema/form"
 	"r3/schema/icon"
+	"r3/schema/jsFunction"
 	"r3/schema/loginForm"
 	"r3/schema/menu"
 	"r3/schema/pgFunction"
@@ -145,7 +146,7 @@ func importDeleteNotExisting_tx(tx pgx.Tx, module types.Module) error {
 	}
 
 	// PG functions
-	// must be deleted after PG triggers (referals to DB function object
+	// must be deleted after PG triggers (referals to DB function object)
 	idsKeep = make([]uuid.UUID, 0)
 	idsDelete = make([]uuid.UUID, 0)
 
@@ -388,6 +389,26 @@ func importDeleteNotExisting_tx(tx pgx.Tx, module types.Module) error {
 		}
 	}
 
+	// JS functions
+	idsKeep = make([]uuid.UUID, 0)
+	idsDelete = make([]uuid.UUID, 0)
+
+	for _, entity := range module.JsFunctions {
+		idsKeep = append(idsKeep, entity.Id)
+	}
+
+	idsDelete, err = importGetIdsToDeleteFromModule_tx(tx, "js_function", module.Id, idsKeep)
+	if err != nil {
+		return err
+	}
+
+	for _, id := range idsDelete {
+		log.Info("transfer", fmt.Sprintf("del JS function %s", id.String()))
+		if err := jsFunction.Del_tx(tx, id); err != nil {
+			return err
+		}
+	}
+
 	// presets
 	idsKeep = make([]uuid.UUID, 0)
 	idsDelete = make([]uuid.UUID, 0)
@@ -417,7 +438,7 @@ func importGetIdsToDeleteFromModule_tx(tx pgx.Tx, entity string,
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !tools.StringInSlice(entity, []string{"form", "icon",
+	if !tools.StringInSlice(entity, []string{"form", "icon", "js_function",
 		"login_form", "menu", "pg_function", "relation", "role"}) {
 
 		return idsDelete, errors.New("unsupport type for delete check")

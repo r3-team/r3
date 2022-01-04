@@ -189,6 +189,7 @@ let MyBuilderFields = {
 					:builderLanguage="builderLanguage"
 					:dataFields="dataFields"
 					:field="element"
+					:formId="formId"
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="moduleId"
 				/>
@@ -245,6 +246,7 @@ let MyBuilderFields = {
 					:fieldMoveIndex="fieldMoveIndex"
 					:fields="element.fields"
 					:flexDirParent="element.direction"
+					:formId="formId"
 					:isTemplate="isTemplate"
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="moduleId"
@@ -261,12 +263,13 @@ let MyBuilderFields = {
 		columnIdQuery:  { required:false,default:null },
 		dataFields:     { type:Array,   required:false, default:() => [] },          // all data fields from form
 		fields:         { type:Array,   required:true },                             // fields to handle
-		flexDirParent:  { type:String,  required:true },                             // flex direction of parent (row|column)
 		fieldIdMapRef:  { type:Object,  required:false, default:() => {return {}} }, // field reference map (unique field counter for each ID)
 		fieldIdQuery:   { required:false, default:null },
 		fieldMoveList:  { required:true },
 		fieldMoveIndex: { type:Number,  required:true },
 		fieldCounter:   { type:Number,  required:true },
+		flexDirParent:  { type:String,  required:true },                             // flex direction of parent (row|column)
+		formId:         { type:String,  required:true },
 		isTemplate:     { type:Boolean, required:true },                    // is template for fields
 		joinsIndexMap:  { type:Object,  required:false, default:() => {return {}} },
 		moduleId:       { type:String,  required:false, default:'' },

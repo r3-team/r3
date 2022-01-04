@@ -792,8 +792,34 @@ let MyBuilderFieldOptions = {
 				:modelValue="field.chartOption"
 			/>
 			
+			<!-- execute JS function -->
+			<template v-if="isButton">
+				<tr>
+					<td>{{ capApp.jsFunction }}</td>
+					<td>
+						<select
+							@input="setNull('jsFunctionId',$event.target.value)"
+							:value="field.jsFunctionId"
+						>
+							<option value="">-</option>
+							<optgroup
+								v-for="mod in getDependentModules(module,modules)"
+								:label="mod.name"
+							>
+								<option
+									v-for="fnc in mod.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
+									:value="fnc.id"
+								>
+									{{ fnc.name }}
+								</option>
+							</optgroup>
+						</select>
+					</td>
+				</tr>
+			</template>
+			
 			<!-- open form -->
-			<template v-if="(isButton || isList || isCalendar || isRelationship) && field.query.relationId !== null">
+			<template v-if="isButton || ((isList || isCalendar || isRelationship) && field.query.relationId !== null)">
 				<tr>
 					<td colspan="2"><br /><b>{{ capApp.openForm }}</b></td>
 				</tr>
@@ -887,6 +913,7 @@ let MyBuilderFieldOptions = {
 		builderLanguage:{ type:String,  required:true },
 		dataFields:     { type:Array,   required:true },
 		field:          { type:Object,  required:true },
+		formId:         { type:String,  required:true },
 		joinsIndexMap:  { type:Object,  required:true },
 		moduleId:       { type:String,  required:true }
 	},

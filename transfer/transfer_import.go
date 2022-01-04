@@ -17,6 +17,7 @@ import (
 	"r3/schema/attribute"
 	"r3/schema/form"
 	"r3/schema/icon"
+	"r3/schema/jsFunction"
 	"r3/schema/loginForm"
 	"r3/schema/menu"
 	"r3/schema/module"
@@ -254,7 +255,7 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		}
 	}
 
-	// pg functions, refer to relations/attributes/pg_functions (self reference)
+	// PG functions, refer to relations/attributes/pg_functions (self reference)
 	for _, e := range mod.PgFunctions {
 
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
@@ -264,7 +265,7 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		if !run {
 			continue
 		}
-		log.Info("transfer", fmt.Sprintf("set function %s", e.Id))
+		log.Info("transfer", fmt.Sprintf("set PG function %s", e.Id))
 
 		if err := importCheckResultAndApply(tx, pgFunction.Set_tx(tx,
 			e.ModuleId, e.Id, e.Name, e.CodeArgs, e.CodeFunction, e.CodeReturns,
@@ -274,7 +275,7 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		}
 	}
 
-	// pg triggers, refer to pg functions
+	// PG triggers, refer to PG functions
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Triggers {
 
@@ -297,7 +298,7 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		}
 	}
 
-	// pg indexes
+	// PG indexes
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Indexes {
 
@@ -380,6 +381,26 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 			e.ModuleId, e.Id, e.Name, e.Assignable, e.ChildrenIds,
 			e.AccessRelations, e.AccessAttributes, e.AccessMenus,
 			e.Captions), e.Id, idMapSkipped); err != nil {
+
+			return err
+		}
+	}
+
+	// JS functions, refer to forms/fields/roles/pg_functions/js_functions (self reference)
+	for _, e := range mod.JsFunctions {
+
+		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info("transfer", fmt.Sprintf("set JS function %s", e.Id))
+
+		if err := importCheckResultAndApply(tx, jsFunction.Set_tx(tx,
+			e.ModuleId, e.Id, e.FormId, e.Name, e.CodeArgs, e.CodeFunction,
+			e.CodeReturns, e.Captions), e.Id, idMapSkipped); err != nil {
 
 			return err
 		}

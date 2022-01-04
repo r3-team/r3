@@ -265,6 +265,15 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "del":
 			return IconDel_tx(tx, reqJson)
 		}
+	case "jsFunction":
+		switch action {
+		case "del":
+			return JsFunctionDel_tx(tx, reqJson)
+		case "get":
+			return JsFunctionGet(reqJson)
+		case "set":
+			return JsFunctionSet_tx(tx, reqJson)
+		}
 	case "key":
 		switch action {
 		case "create":

@@ -139,6 +139,120 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ON app.open_form USING btree (field_id ASC NULLS LAST);
 			CREATE INDEX fki_open_form_column_id_fkey
 				ON app.open_form USING btree (column_id ASC NULLS LAST);
+			
+			-- clean up PG functions
+			ALTER TABLE app.pg_function ALTER COLUMN code_args SET NOT NULL;
+			ALTER TABLE app.pg_function ALTER COLUMN code_returns SET NOT NULL;
+			
+			-- JS functions
+			CREATE TABLE IF NOT EXISTS app.js_function (
+			    id uuid NOT NULL,
+			    module_id uuid NOT NULL,
+			    form_id uuid,
+			    name character varying(64) COLLATE pg_catalog."default" NOT NULL,
+			    code_function text COLLATE pg_catalog."default" NOT NULL,
+			    code_args text COLLATE pg_catalog."default" NOT NULL,
+			    code_returns text COLLATE pg_catalog."default" NOT NULL,
+			    CONSTRAINT js_function_pkey PRIMARY KEY (id),
+			    CONSTRAINT js_function_module_id_name_key UNIQUE (module_id, name)
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT js_function_form_id_fkey FOREIGN KEY (form_id)
+			        REFERENCES app.form (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT js_function_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_js_function_form_id
+			    ON app.js_function USING btree (form_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_module_id
+			    ON app.js_function USING btree (module_id ASC NULLS LAST);
+				
+			CREATE TABLE IF NOT EXISTS app.js_function_depends (
+			    js_function_id uuid NOT NULL,
+			    js_function_id_on uuid,
+				pg_function_id_on uuid,
+			    field_id_on uuid,
+				form_id_on uuid,
+				role_id_on uuid,
+			    CONSTRAINT js_function_depends_field_id_on_fkey FOREIGN KEY (field_id_on)
+			        REFERENCES app.field (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT js_function_depends_form_id_on_fkey FOREIGN KEY (form_id_on)
+			        REFERENCES app.form (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT js_function_depends_role_id_on_fkey FOREIGN KEY (role_id_on)
+			        REFERENCES app.role (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT js_function_depends_js_function_id_fkey FOREIGN KEY (js_function_id)
+			        REFERENCES app.js_function (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT js_function_depends_js_function_id_on_fkey FOREIGN KEY (js_function_id_on)
+			        REFERENCES app.js_function (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT js_function_depends_pg_function_id_on_fkey FOREIGN KEY (pg_function_id_on)
+			        REFERENCES app.pg_function (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_field_id_on
+			    ON app.js_function_depends USING btree (field_id_on ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_form_id_on
+			    ON app.js_function_depends USING btree (form_id_on ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_role_id_on
+			    ON app.js_function_depends USING btree (role_id_on ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_js_function_id
+			    ON app.js_function_depends USING btree (js_function_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_js_function_id_on
+			    ON app.js_function_depends USING btree (js_function_id_on ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_pg_function_id_on
+			    ON app.js_function_depends USING btree (pg_function_id_on ASC NULLS LAST);
+			
+			-- caption updates for JS functions
+			ALTER TYPE app.caption_content ADD VALUE 'jsFunctionTitle';
+			ALTER TYPE app.caption_content ADD VALUE 'jsFunctionDesc';
+			
+			ALTER TABLE app.caption ADD COLUMN js_function_id uuid;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_js_function_id_fkey
+				FOREIGN KEY (js_function_id)
+				REFERENCES app.js_function (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			-- JS function triggers
+			ALTER TABLE app.field_button ADD COLUMN js_function_id UUID;
+			ALTER TABLE app.field_button ADD CONSTRAINT field_button_js_function_id_fkey
+				FOREIGN KEY (js_function_id)
+				REFERENCES app.js_function (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_field_button_js_function_id
+			    ON app.field_button USING btree (js_function_id ASC NULLS LAST);
 		`)
 
 		// migrate existing form open actions to new 'open form' entity

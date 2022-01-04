@@ -342,7 +342,85 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	if cnt != 0 {
-		return fmt.Errorf("dependency check failed, PG functions accessing entities from independent module(s)")
+		return fmt.Errorf("dependency check failed, backend functions accessing entities from independent module(s)")
+	}
+
+	// check JS function access to external pgFunctions/jsFunctions/forms/fields/roles
+	if err := tx.QueryRow(db.Ctx, `
+		SELECT COUNT(*)
+		FROM app.module
+		WHERE id IN (
+			-- dependent on PG functions
+			SELECT module_id
+			FROM app.pg_function
+			WHERE id IN (
+				SELECT d.pg_function_id_on
+				FROM app.js_function_depends AS d
+				INNER JOIN app.js_function AS f ON f.id = d.js_function_id
+				WHERE f.module_id = $1
+			)
+			
+			UNION
+			
+			-- dependent on JS functions
+			SELECT module_id
+			FROM app.js_function
+			WHERE id IN (
+				SELECT d.js_function_id_on
+				FROM app.js_function_depends AS d
+				INNER JOIN app.js_function AS f ON f.id = d.js_function_id
+				WHERE f.module_id = $2
+			)
+			
+			UNION
+			
+			-- dependent on forms
+			SELECT module_id
+			FROM app.form
+			WHERE id IN (
+				SELECT d.form_id_on
+				FROM app.js_function_depends AS d
+				INNER JOIN app.js_function AS f ON f.id = d.js_function_id
+				WHERE f.module_id = $3
+			)
+			OR id IN (
+				-- dependent on fields
+				SELECT form_id
+				FROM app.field
+				WHERE id IN (
+					SELECT d.field_id_on
+					FROM app.js_function_depends AS d
+					INNER JOIN app.js_function AS f ON f.id = d.js_function_id
+					WHERE f.module_id = $4
+				)
+			)
+			
+			UNION
+			
+			-- dependent on roles
+			SELECT module_id
+			FROM app.role
+			WHERE id IN (
+				SELECT d.role_id_on
+				FROM app.js_function_depends AS d
+				INNER JOIN app.js_function AS f ON f.id = d.js_function_id
+				WHERE f.module_id = $5
+			)
+		)
+	
+		-- dependency
+		AND id <> $6
+		AND id NOT IN (
+			SELECT module_id_on
+			FROM app.module_depends
+			WHERE module_id = $7
+		)
+	`, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId).Scan(&cnt); err != nil {
+		return err
+	}
+
+	if cnt != 0 {
+		return fmt.Errorf("dependency check failed, frontend functions accessing entities from independent module(s)")
 	}
 
 	// check role membership inside external parent roles

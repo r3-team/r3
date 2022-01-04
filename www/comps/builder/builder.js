@@ -68,8 +68,8 @@ let MyBuilder = {
 							>{{ capApp.navigationRelations }}</router-link>
 							
 							<router-link class="entry center clickable"
-								:to="'/builder/pg-functions/'+module.id" 
-							>{{ capApp.navigationPgFunctions }}</router-link>
+								:to="'/builder/functions/'+module.id" 
+							>{{ capApp.navigationFunctions }}</router-link>
 							
 							<router-link class="entry center clickable"
 								:to="'/builder/roles/'+module.id" 
@@ -103,7 +103,7 @@ let MyBuilder = {
 					
 					<div class="navigation-entities-header" v-if="subMenu">
 						<h1 v-if="navigation === 'forms'">{{ capApp.navigationFormsSub }}</h1>
-						<h1 v-if="navigation === 'pg-functions'">{{ capApp.navigationPgFunctionsSub }}</h1>
+						<h1 v-if="navigation === 'functions'">{{ capApp.navigationFunctionsSub }}</h1>
 						<h1 v-if="navigation === 'roles'">{{ capApp.navigationRolesSub }}</h1>
 						<h1 v-if="navigation === 'relations'">{{ capApp.navigationRelationsSub }}</h1>
 						<input class="lookup" placeholder="..."
@@ -142,12 +142,29 @@ let MyBuilder = {
 							>{{ rol.name }}</router-link>
 						</template>
 						
-						<!-- pg functions -->
-						<template v-if="navigation === 'pg-functions'">
+						<!-- functions -->
+						<template v-if="navigation === 'functions'">
+							
+							<!-- PG functions -->
+							<div class="navigation-entities-header-sub"
+								v-if="module.pgFunctions.filter(v => v.name.includes(filter)).length > 0"
+							>{{ capApp.navigationFunctionsSubBackend }}</div>
+							
 							<router-link class="entry clickable"
 								v-for="fnc in module.pgFunctions.filter(v => v.name.includes(filter))"
 								:key="fnc.id"
 								:to="'/builder/pg-function/'+fnc.id" 
+							>{{ fnc.name }}</router-link>
+							
+							<!-- JS functions -->
+							<div class="navigation-entities-header-sub"
+								v-if="module.jsFunctions.filter(v => v.name.includes(filter)).length > 0"
+							>{{ capApp.navigationFunctionsSubFrontend }}</div>
+							
+							<router-link class="entry clickable"
+								v-for="fnc in module.jsFunctions.filter(v => v.name.includes(filter))"
+								:key="fnc.id"
+								:to="'/builder/js-function/'+fnc.id" 
 							>{{ fnc.name }}</router-link>
 						</template>
 					</div>
@@ -213,6 +230,7 @@ let MyBuilder = {
 					case 'form':        id = this.formIdMap[val.params.id].moduleId;       break;
 					case 'role':        id = this.roleIdMap[val.params.id].moduleId;       break;
 					case 'pg-function': id = this.pgFunctionIdMap[val.params.id].moduleId; break;
+					case 'js-function': id = this.jsFunctionIdMap[val.params.id].moduleId; break;
 				}
 				this.moduleId = id;
 				
@@ -238,7 +256,7 @@ let MyBuilder = {
 			if(this.navigation === 'roles' && this.module.roles.length !== 0)
 				return true;
 			
-			if(this.navigation === 'pg-functions' && this.module.pgFunctions.length !== 0)
+			if(this.navigation === 'functions' && (this.module.pgFunctions.length !== 0 || this.module.jsFunctions.length !== 0))
 				return true;
 			
 			return false;
@@ -275,8 +293,9 @@ let MyBuilder = {
 		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
 		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
 		iconIdMap:      function() { return this.$store.getters['schema/iconIdMap']; },
-		roleIdMap:      function() { return this.$store.getters['schema/roleIdMap']; },
+		jsFunctionIdMap:function() { return this.$store.getters['schema/jsFunctionIdMap']; },
 		pgFunctionIdMap:function() { return this.$store.getters['schema/pgFunctionIdMap']; },
+		roleIdMap:      function() { return this.$store.getters['schema/roleIdMap']; },
 		builderEnabled: function() { return this.$store.getters.builderEnabled; },
 		capApp:         function() { return this.$store.getters.captions.builder; },
 		capGen:         function() { return this.$store.getters.captions.generic; },

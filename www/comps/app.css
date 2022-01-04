@@ -159,8 +159,6 @@ body                                         { --depth:9; }
 .admin-repo .repo-module .part.left          { --depth:0; }
 .admin-repo .repo-module .part.right         { --depth:3; }
 .builder .lookup                             { --depth:1; }
-.builder-pg-function .entity-title           { --depth:1; }
-.builder-pg-function .function-details table { --depth:3; }
 .builder-icon-input .iconLine                { --depth:2; }
 .builder-icon-input .iconLine:focus          { --depth:1; }
 .builder-icon-input .iconLine.disabled       { --depth:5; }

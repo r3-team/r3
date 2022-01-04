@@ -29,6 +29,7 @@ type Module struct {
 	Roles           []Role            `json:"roles"`
 	LoginForms      []LoginForm       `json:"loginForms"`
 	PgFunctions     []PgFunction      `json:"pgFunctions"`
+	JsFunctions     []JsFunction      `json:"jsFunctions"`
 	Captions        CaptionMap        `json:"captions"`
 }
 type ModuleStartForm struct {
@@ -161,13 +162,14 @@ type Field struct {
 	OnMobile bool        `json:"onMobile"` // display this field on mobile?
 }
 type FieldButton struct {
-	Id       uuid.UUID   `json:"id"`
-	IconId   pgtype.UUID `json:"iconId"`
-	Content  string      `json:"content"`
-	State    string      `json:"state"`
-	OnMobile bool        `json:"onMobile"`
-	OpenForm OpenForm    `json:"openForm"`
-	Captions CaptionMap  `json:"captions"`
+	Id           uuid.UUID   `json:"id"`
+	IconId       pgtype.UUID `json:"iconId"`
+	JsFunctionId pgtype.UUID `json:"jsFunctionId"`
+	Content      string      `json:"content"`
+	State        string      `json:"state"`
+	OnMobile     bool        `json:"onMobile"`
+	OpenForm     OpenForm    `json:"openForm"`
+	Captions     CaptionMap  `json:"captions"`
 
 	// legacy
 	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
@@ -376,6 +378,16 @@ type PgIndexAttribute struct {
 	AttributeId uuid.UUID `json:"attributeId"`
 	Position    int       `json:"position"`
 	OrderAsc    bool      `json:"orderAsc"`
+}
+type JsFunction struct {
+	Id           uuid.UUID   `json:"id"`
+	ModuleId     uuid.UUID   `json:"moduleId"`
+	FormId       pgtype.UUID `json:"formId"`
+	Name         string      `json:"name"`
+	CodeArgs     string      `json:"codeArgs"`
+	CodeFunction string      `json:"codeFunction"`
+	CodeReturns  string      `json:"codeReturns"`
+	Captions     CaptionMap  `json:"captions"`
 }
 type Deletion struct {
 	Id     uuid.UUID `json:"id"`

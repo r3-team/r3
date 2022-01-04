@@ -15,6 +15,7 @@ const MyStoreSchema = {
 		attributeIdMap:{},
 		formIdMap:{},
 		iconIdMap:{},
+		jsFunctionIdMap:{},
 		moduleIdMap:{},
 		moduleNameMap:{},
 		pgFunctionIdMap:{},
@@ -43,6 +44,7 @@ const MyStoreSchema = {
 			state.formIdMap       = {};
 			state.formIdMapMenu   = {};
 			state.iconIdMap       = {};
+			state.jsFunctionIdMap = {};
 			state.pgFunctionIdMap = {};
 			state.relationIdMap   = {};
 			state.roleIdMap       = {};
@@ -98,9 +100,14 @@ const MyStoreSchema = {
 					state.roleIdMap[mod.roles[x].id] = mod.roles[x];
 				}
 				
-				// process pg functions
+				// process PG functions
 				for(let x = 0, y = mod.pgFunctions.length; x < y; x++) {
 					state.pgFunctionIdMap[mod.pgFunctions[x].id] = mod.pgFunctions[x];
+				}
+				
+				// process JS functions
+				for(let x = 0, y = mod.jsFunctions.length; x < y; x++) {
+					state.jsFunctionIdMap[mod.jsFunctions[x].id] = mod.jsFunctions[x];
 				}
 			}
 		},
@@ -108,19 +115,20 @@ const MyStoreSchema = {
 		timestamp    (state,payload) { state.timestamp     = payload; }
 	},
 	getters:{
-		attributeIdMap: (state) => state.attributeIdMap,
-		formIdMap:      (state) => state.formIdMap,
-		formIdMapMenu:  (state) => state.formIdMapMenu,
-		iconIdMap:      (state) => state.iconIdMap,
-		languageCodes:  (state) => state.languageCodes,
-		modules:        (state) => state.modules,
-		moduleIdMap:    (state) => state.moduleIdMap,
+		attributeIdMap:     (state) => state.attributeIdMap,
+		formIdMap:          (state) => state.formIdMap,
+		formIdMapMenu:      (state) => state.formIdMapMenu,
+		iconIdMap:          (state) => state.iconIdMap,
+		jsFunctionIdMap:    (state) => state.jsFunctionIdMap,
+		languageCodes:      (state) => state.languageCodes,
+		modules:            (state) => state.modules,
+		moduleIdMap:        (state) => state.moduleIdMap,
 		moduleIdMapOptions: (state) => state.moduleIdMapOptions,
-		moduleNameMap:  (state) => state.moduleNameMap,
-		pgFunctionIdMap:(state) => state.pgFunctionIdMap,
+		moduleNameMap:      (state) => state.moduleNameMap,
+		pgFunctionIdMap:    (state) => state.pgFunctionIdMap,
 		presetIdMapRecordId:(state) => state.presetIdMapRecordId,
-		relationIdMap:  (state) => state.relationIdMap,
-		roleIdMap:      (state) => state.roleIdMap,
-		timestamp:      (state) => state.timestamp
+		relationIdMap:      (state) => state.relationIdMap,
+		roleIdMap:          (state) => state.roleIdMap,
+		timestamp:          (state) => state.timestamp
 	}
 };

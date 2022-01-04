@@ -18,10 +18,7 @@ func PgFunctionDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := pgFunction.Del_tx(tx, req.Id); err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return nil, pgFunction.Del_tx(tx, req.Id)
 }
 
 func PgFunctionGet(reqJson json.RawMessage) (interface{}, error) {
@@ -43,10 +40,6 @@ func PgFunctionSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := pgFunction.Set_tx(tx, req.ModuleId, req.Id, req.Name, req.CodeArgs,
-		req.CodeFunction, req.CodeReturns, req.Schedules, req.Captions); err != nil {
-
-		return nil, err
-	}
-	return nil, nil
+	return nil, pgFunction.Set_tx(tx, req.ModuleId, req.Id, req.Name, req.CodeArgs,
+		req.CodeFunction, req.CodeReturns, req.Schedules, req.Captions)
 }
