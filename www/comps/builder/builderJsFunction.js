@@ -1,4 +1,5 @@
 import MyBuilderCaption               from './builderCaption.js';
+import MyBuilderQuery                 from './builderQuery.js';
 import {MyBuilderFunctionPlaceholder} from './builderFunctions.js';
 import {getDataFieldMap}              from '../shared/form.js';
 import {
@@ -11,7 +12,8 @@ let MyBuilderJsFunction = {
 	name:'my-builder-js-function',
 	components:{
 		MyBuilderCaption,
-		MyBuilderFunctionPlaceholder
+		MyBuilderFunctionPlaceholder,
+		MyBuilderQuery
 	},
 	template:`<div class="builder-function">
 		
@@ -65,11 +67,21 @@ let MyBuilderJsFunction = {
 				<table v-if="showDetails">
 					<tr>
 						<td>{{ capApp.codeArgs }}</td>
-						<td><input v-model="codeArgs" /></td>
+						<td>
+							<input
+								v-model="codeArgs"
+								:placeholder="capApp.codeArgsHintJs"
+							/>
+						</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.codeReturns }}</td>
-						<td><input v-model="codeReturns" /></td>
+						<td>
+							<input
+								v-model="codeReturns"
+								:placeholder="capApp.codeReturnsHintJs"
+							/>
+						</td>
 					</tr>
 					<tr>
 						<td>{{ capGen.title }}</td>
@@ -124,9 +136,30 @@ let MyBuilderJsFunction = {
 				
 				<div class="message" v-html="capApp.entityInput"></div>
 				
-				<template v-if="formId !== null">
+				<template v-if="form !== false">
+				
+					<div class="placeholders form-query-title">
+						<h2>{{ capApp.placeholdersFormQuery }}</h2>
+						
+						<my-builder-query
+							:allowChoices="false"
+							:allowFixedLimit="false"
+							:allowFilters="false"
+							:allowJoinEdit="false"
+							:builderLanguage="builderLanguage"
+							:choices="form.query.choices"
+							:filters="form.query.filters"
+							:fixedLimit="0"
+							:joins="form.query.joins"
+							:lookups="form.query.lookups"
+							:moduleId="form.moduleId"
+							:orders="form.query.orders"
+							:relationId="form.query.relationId"
+						/>
+					</div>
+					
 					<div class="placeholders fields-title">
-						<h2>{{ capApp.placeholdersForm }}</h2>
+						<h2>{{ capApp.placeholdersFormFields }}</h2>
 						
 						<select v-model="fieldMode">
 							<option value="get">{{ capApp.option.fieldGet }}</option>
@@ -257,6 +290,9 @@ let MyBuilderJsFunction = {
 			
 			return this.getDataFieldMap(this.formIdMap[this.formId].fields);
 		},
+		form:function() {
+			return this.formId === null ? false : this.formIdMap[this.formId];
+		},
 		module:function() {
 			if(this.jsFunction === false)
 				return false;
@@ -276,9 +312,7 @@ let MyBuilderJsFunction = {
 				|| JSON.stringify(this.captions) !== JSON.stringify(this.jsFunction.captions);
 		},
 		preview:function() {
-			if(!this.showPreview) return '';
-			
-			return this.placeholdersUnset();
+			return !this.showPreview ? '' : this.placeholdersUnset();
 		},
 		
 		// stores

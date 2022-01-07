@@ -341,7 +341,7 @@ let MyBuilderQueryNestedJoin = {
 			<div v-html="displayName()" />
 		
 			<!-- relation options -->
-			<div class="options">
+			<div class="options" v-if="!readonly">
 				<div class="option clickable"
 					@click="relationAddShow = !relationAddShow"
 					:title="capApp.joinAddHint"
@@ -404,6 +404,7 @@ let MyBuilderQueryNestedJoin = {
 				:joinRelationId="j.joinRelationId"
 				:module="module"
 				:name="j.name"
+				:readonly="readonly"
 			/>
 		</div>
 	</div>`,
@@ -423,7 +424,8 @@ let MyBuilderQueryNestedJoin = {
 		joinAttributeId:{ type:String, required:true },
 		joinRelationId: { type:String, required:true },
 		module:         { type:Object, required:true },
-		name:           { type:String, required:true }
+		name:           { type:String, required:true },
+		readonly:       { type:Boolean,required:true }
 	},
 	emits:[
 		'relation-add','relation-apply-toggle',
@@ -584,6 +586,7 @@ let MyBuilderQuery = {
 				:key="relationsNested.index"
 				:module="module"
 				:name="relationsNested.name"
+				:readonly="!allowJoinEdit"
 			/>
 		</div>
 		
@@ -730,6 +733,7 @@ let MyBuilderQuery = {
 		allowChoices:   { type:Boolean, required:false, default:true },
 		allowFilters:   { type:Boolean, required:false, default:true },
 		allowFixedLimit:{ type:Boolean, required:false, default:true },
+		allowJoinEdit:  { type:Boolean, required:false, default:true },
 		allowLookups:   { type:Boolean, required:false, default:false },
 		allowOrders:    { type:Boolean, required:false, default:false },
 		builderLanguage:{ type:String,  required:false, default:'' },

@@ -2,7 +2,7 @@ let ws = {
 	blockingCount:0, // how many blocking transactions are active?
 	callbacks:{},    // outside callback functions, defined on open()
 	conn:null,       // websocket connection, null if not opened
-	debug:true,     // if true, prints transactions to console.log
+	debug:false,     // if true, prints transactions to console.log
 	transactions:{}, // active transactions: key = transaction number
 	
 	// open websocket connection to defined URL with optional event callbacks

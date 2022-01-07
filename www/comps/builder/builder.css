@@ -568,6 +568,9 @@
 .builder-function .placeholders.modules{
 	margin:0px 0px 12px 0px;
 }
+.builder-function .placeholders.form-query-title{
+	margin:0px 0px 12px 0px;
+}
 .builder-function .placeholders.fields-title{
 	display:flex;
 	flex-flow:row nowrap;
