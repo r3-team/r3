@@ -538,7 +538,7 @@ let MyBuilderPgFunction = {
 		
 		// backend calls
 		set:function() {
-			ws.send([
+			ws.sendMultiple([
 				ws.prepare('pgFunction','set',{
 					id:this.pgFunction.id,
 					moduleId:this.pgFunction.moduleId,

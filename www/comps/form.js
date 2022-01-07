@@ -339,6 +339,14 @@ let MyForm = {
 					},[],newTab),
 				
 				// call other functions
+				call_backend:(id,...args) => {
+					return new Promise((resolve,reject) => {
+						ws.send('pgFunction','exec',{id:id,args:args}).then(
+							(res) => resolve(res.payload),
+							(err) => reject(err)
+						);
+					});
+				},
 				call_frontend:(id,...args) => this.executeFunction(id,args),
 				
 				// direct translations

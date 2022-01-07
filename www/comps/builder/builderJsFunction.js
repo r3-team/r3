@@ -367,34 +367,51 @@ let MyBuilderJsFunction = {
 			let field  = evt.target;
 			let text   = '';
 			let prefix = 'app';
-			let mod, rel, atr, fnc, frm, fld;
+			let mod, rel, atr, fnc, frm, fld, args;
 			
 			// build unique placeholder name
 			switch(this.entitySelected) {
 				case 'appFunction':
-					text = `${prefix}.${this.entitySelectedId}()`;
-				break;
-				case 'form':
-					frm  = this.formIdMap[this.entitySelectedId];
-					mod  = this.moduleIdMap[frm.moduleId];
-					text = `${prefix}.open_form({${mod.name}.${frm.name}},0,false)`;
+					text = `${prefix}.${this.entitySelectedId}();`;
 				break;
 				case 'field':
 					fld  = this.dataFieldMap[this.entitySelectedId];
 					atr  = this.attributeIdMap[fld.attributeId];
 					rel  = this.relationIdMap[atr.relationId];
 					let opt = this.fieldMode === 'get' ? '' : this.capApp.valueNewJsHint;
-					text = `${prefix}.${this.fieldMode}_field_value({${fld.index}:${rel.name}.${atr.name}}${opt})`;
+					text = `${prefix}.${this.fieldMode}_field_value({${fld.index}:${rel.name}.${atr.name}}${opt});`;
+				break;
+				case 'form':
+					frm  = this.formIdMap[this.entitySelectedId];
+					mod  = this.moduleIdMap[frm.moduleId];
+					text = `${prefix}.open_form({${mod.name}.${frm.name}},0,false);`;
 				break;
 				case 'jsFunction':
 					fnc  = this.jsFunctionIdMap[this.entitySelectedId];
 					mod  = this.moduleIdMap[fnc.moduleId];
-					text = `${prefix}.call_frontend({${mod.name}.${fnc.name}})`;
+					
+					// add argument names to show function interface
+					args = fnc.codeArgs === '' ? '' : ', '+fnc.codeArgs.toUpperCase();
+					text = `${prefix}.call_frontend({${mod.name}.${fnc.name}}${args});`;
 				break;
 				case 'pgFunction':
 					fnc  = this.pgFunctionIdMap[this.entitySelectedId];
 					mod  = this.moduleIdMap[fnc.moduleId];
-					text = `${prefix}.call_backend({${mod.name}.${fnc.name}})`;
+					
+					// add argument names to show function interface
+					// remove argument type and default value to keep it easy to read
+					args = fnc.codeArgs.split(',');
+					for(let i = 0, j = args.length; i < j; i++) {
+						if(args[i] === '') continue;
+						
+						args[i] = args[i].split(' ')[0].toUpperCase();
+					}
+					let argsList = args.length === 0 ? '' : ', '+args.join(', ');
+					
+					text = `${prefix}.call_backend({${mod.name}.${fnc.name}}${argsList}).then(`
+						+ `\n\t(res) => { // if success: return value in 'res' },`
+						+ `\n\t(err) => { // if error: error message in 'err' }\n);`
+					;
 				break;
 			}
 			
@@ -592,7 +609,7 @@ let MyBuilderJsFunction = {
 		
 		// backend calls
 		set:function() {
-			ws.send([
+			ws.sendMultiple([
 				ws.prepare('jsFunction','set',{
 					id:this.jsFunction.id,
 					moduleId:this.jsFunction.moduleId,

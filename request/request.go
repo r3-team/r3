@@ -195,6 +195,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "set":
 			return PasswortSet_tx(tx, reqJson, loginId)
 		}
+	case "pgFunction":
+		switch action {
+		case "exec":
+			return PgFunctionExec_tx(tx, reqJson)
+		}
 	case "setting":
 		switch action {
 		case "get":
