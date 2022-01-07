@@ -112,7 +112,6 @@ let MyBuilderPgTrigger = {
 		open:function() {
 			this.$router.push('/builder/pg-function/'+this.pgFunctionId);
 		},
-		
 		delAsk:function() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.delete,
@@ -128,16 +127,11 @@ let MyBuilderPgTrigger = {
 			});
 		},
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('pgTrigger','del',{
-				id:this.pgTrigger.id
-			},this.delOk);
-			trans.send(this.$root.genericError);
+			ws.send('pgTrigger','del',{id:this.pgTrigger.id},true).then(
+				(res) => this.$root.schemaReload(this.module.id),
+				(err) => this.$root.genericError(err)
+			);
 		},
-		delOk:function(res) {
-			this.$root.schemaReload(this.module.id);
-		},
-		
 		set:function(atr) {
 			// fix invalid options
 			if(!this.perRow || this.fires !== 'AFTER') {
@@ -151,8 +145,7 @@ let MyBuilderPgTrigger = {
 				this.isDeferred   = false;
 			}
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('pgTrigger','set',{
+			ws.send('pgTrigger','set',{
 				id:this.pgTrigger.id,
 				relationId:this.relation.id,
 				pgFunctionId:this.pgFunctionId,
@@ -165,15 +158,16 @@ let MyBuilderPgTrigger = {
 				isDeferred:this.isDeferred,
 				perRow:this.perRow,
 				codeCondition:this.codeCondition
-			},this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			if(this.isNew) {
-				this.codeCondition = '';
-				this.pgFunctionId  = null;
-			}
-			this.$root.schemaReload(this.module.id);
+			},true).then(
+				(res) => {
+					if(this.isNew) {
+						this.codeCondition = '';
+						this.pgFunctionId  = null;
+					}
+					this.$root.schemaReload(this.module.id);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

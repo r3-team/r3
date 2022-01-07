@@ -558,23 +558,22 @@ let MyBuilderJsFunction = {
 		
 		// backend calls
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			
-			trans.add('jsFunction','set',{
-				id:this.jsFunction.id,
-				moduleId:this.jsFunction.moduleId,
-				formId:this.jsFunction.formId,
-				name:this.jsFunction.name,
-				codeArgs:this.codeArgs,
-				codeFunction:this.placeholdersUnset(),
-				codeReturns:this.codeReturns,
-				captions:this.captions
-			},this.setOk);
-			trans.add('schema','check',{moduleId:this.module.id});
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			this.$root.schemaReload(this.module.id);
+			ws.send([
+				ws.prepare('jsFunction','set',{
+					id:this.jsFunction.id,
+					moduleId:this.jsFunction.moduleId,
+					formId:this.jsFunction.formId,
+					name:this.jsFunction.name,
+					codeArgs:this.codeArgs,
+					codeFunction:this.placeholdersUnset(),
+					codeReturns:this.codeReturns,
+					captions:this.captions
+				}),
+				ws.prepare('schema','check',{moduleId:this.module.id})
+			],true).then(
+				(res) => this.$root.schemaReload(this.module.id),
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

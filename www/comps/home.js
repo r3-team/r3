@@ -275,9 +275,10 @@ let MyHome = {
 		
 		// actions
 		installPackage:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('package','install',{});
-			trans.send(this.$root.genericError);
+			ws.send('package','install',{},true).then(
+				(res) => {},
+				(err) => this.$root.genericError(err)
+			);
 			this.installStarted = true;
 		},
 		showHelp:function(top,body) {

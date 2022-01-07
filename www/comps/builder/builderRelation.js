@@ -438,16 +438,14 @@ let MyBuilderRelation = {
 		
 		// backend calls
 		getPreview:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('relation','preview',{
+			ws.send('relation','preview',{
 				id:this.id,
 				limit:this.previewLimit,
 				offset:this.previewOffset
-			},this.getPreviewOk);
-			trans.send(this.$root.genericError);
-		},
-		getPreviewOk:function(res) {
-			this.previewRows = res.payload;
+			},true).then(
+				(res) => this.previewRows = res.payload,
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

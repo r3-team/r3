@@ -250,47 +250,47 @@ let MyBuilderAttribute = {
 			});
 		},
 		del:function(rel) {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('attribute','del',{
-				id:this.attribute.id
-			},this.delOk);
-			trans.send(this.$root.genericError);
+			ws.send('attribute','del',{id:this.attribute.id},true).then(
+				(res) => this.$root.schemaReload(this.module.id),
+				(err) => this.$root.genericError(err)
+			);
 		},
-		delOk:function(res) {
-			this.$root.schemaReload(this.module.id);
-		},
-		set:function(atr) {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('attribute','set',{
-				id:this.attribute.id,
-				moduleId:this.relation.moduleId,
-				relationId:this.relation.id,
-				relationshipId:this.relationshipId,
-				iconId:this.iconId,
-				name:this.name,
-				content:this.content,
-				length:this.length,
-				nullable:this.nullable,
-				def:this.def,
-				onUpdate:this.onUpdate,
-				onDelete:this.onDelete,
-				captions:this.captions
-			},this.setOk);
-			trans.add('schema','check',{moduleId:this.relation.moduleId});
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			if(this.isNew) {
-				this.name   = '';
-				this.iconId = null;
-				this.def    = '';
-				this.length = 0;
-				this.relationshipId = null;
-				this.captions = {
-					attributeTitle:{}
-				};
-			}
-			this.$root.schemaReload(this.module.id);
+		set:function() {
+			ws.sendMultiple([
+				ws.prepare('attribute','set',{
+					id:this.attribute.id,
+					moduleId:this.relation.moduleId,
+					relationId:this.relation.id,
+					relationshipId:this.relationshipId,
+					iconId:this.iconId,
+					name:this.name,
+					content:this.content,
+					length:this.length,
+					nullable:this.nullable,
+					def:this.def,
+					onUpdate:this.onUpdate,
+					onDelete:this.onDelete,
+					captions:this.captions
+				}),
+				ws.prepare('schema','check',{
+					moduleId:this.relation.moduleId
+				})
+			],true).then(
+				(res) => {
+					if(this.isNew) {
+						this.name   = '';
+						this.iconId = null;
+						this.def    = '';
+						this.length = 0;
+						this.relationshipId = null;
+						this.captions = {
+							attributeTitle:{}
+						};
+					}
+					this.$root.schemaReload(this.module.id);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

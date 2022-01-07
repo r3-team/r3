@@ -618,7 +618,7 @@
 				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Deletes the current form record.",
 				"record_new":"app.record_new() => UNDEFINED<br /><br />Opens new record.",
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Reloads the current form record.",
-				"record_save":"app.record_save() => UNDEFINED<br /><br />Saves the current form record.",
+				"record_save":"app.record_save() => UNDEFINED<br /><br />Saves the current form record."
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Anulează operația și trimite un mesaj utilizatorului care rulează acum și care este afișat pe ecranul utilizatorului.",

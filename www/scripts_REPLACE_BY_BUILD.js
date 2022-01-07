@@ -4,8 +4,14 @@ import MyFilters  from './comps/filters.js';
 import MyHome     from './comps/home.js';
 import MySettings from './comps/settings.js';
 import MyStore    from './stores/store.js';
-import {MyGoForm,MyGoModule}       from './comps/go.js';
-import {MyBool,MyBoolStringNumber} from './comps/input.js';
+import {
+	MyGoForm,
+	MyGoModule
+} from './comps/go.js';
+import {
+	MyBool,
+	MyBoolStringNumber
+} from './comps/input.js';
 
 // admin
 import MyAdmin             from './comps/admin/admin.js';

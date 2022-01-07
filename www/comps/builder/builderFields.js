@@ -542,8 +542,7 @@ let MyBuilderFields = {
 		
 		// backend calls
 		getSqlPreview:function(field) {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('dataSql','get',{
+			ws.send('dataSql','get',{
 				relationId:field.query.relationId,
 				joins:this.getRelationsJoined(field.query.joins),
 				expressions:this.sqlPreviewResolveExpressions(
@@ -554,22 +553,23 @@ let MyBuilderFields = {
 				),
 				orders:field.query.orders,
 				limit:field.query.fixedLimit !== 0 ? field.query.fixedLimit : 0
-			},this.getSqlPreviewOk);
-			trans.send(this.$root.genericError);
-		},
-		getSqlPreviewOk:function(res) {
-			this.$store.commit('dialog',{
-				captionTop:this.capApp.sql,
-				captionBody:res.payload,
-				image:'database.png',
-				textDisplay:'textarea',
-				width:800,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
-			});
+			},true).then(
+				(res) => {
+					this.$store.commit('dialog',{
+						captionTop:this.capApp.sql,
+						captionBody:res.payload,
+						image:'database.png',
+						textDisplay:'textarea',
+						width:800,
+						buttons:[{
+							caption:this.capGen.button.close,
+							cancel:true,
+							image:'cancel.png'
+						}]
+					});
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

@@ -1,6 +1,6 @@
 import MyStore from '../../stores/store.js';
 
-export function genericError(requests,message) {
+export function genericError(message) {
 	if(typeof MyStore.getters.captions === 'undefined')
 		return;
 	

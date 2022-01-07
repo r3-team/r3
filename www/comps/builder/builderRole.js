@@ -336,8 +336,7 @@ let MyBuilderRole = {
 		},
 		
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('role','set',{
+			ws.send('role','set',{
 				id:this.role.id,
 				name:this.role.name,
 				assignable:this.role.assignable,
@@ -348,11 +347,10 @@ let MyBuilderRole = {
 				accessRelations:this.accessRelations,
 				accessAttributes:this.accessAttributes,
 				accessMenus:this.accessMenus
-			},this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function() {
-			this.$root.schemaReload(this.module.id);
+			},true).then(
+				(res) => this.$root.schemaReload(this.module.id),
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

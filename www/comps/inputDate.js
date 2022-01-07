@@ -83,7 +83,7 @@ let MyInputDateEntry = {
 						v-if="i % 2 !== 0"
 						@update:modelValue="parseInput(getInputType(i-1),$event)"
 						:caption="getInputCaption(i-1)"
-						:is-readonly="isReadonly"
+						:isReadonly="isReadonly"
 						:modelValue="getInputValue(i-1)"
 						:size="getInputSize(i-1)"
 					/>
@@ -101,7 +101,7 @@ let MyInputDateEntry = {
 				<my-input-date-entry-input
 					@update:modelValue="parseInput('H',$event)"
 					:caption="capApp.inputHour"
-					:is-readonly="isReadonly"
+					:isReadonly="isReadonly"
 					:modelValue="hour"
 					:size="2"
 				/>
@@ -109,7 +109,7 @@ let MyInputDateEntry = {
 				<my-input-date-entry-input
 					@update:modelValue="parseInput('M',$event)"
 					:caption="capApp.inputMinute"
-					:is-readonly="isReadonly"
+					:isReadonly="isReadonly"
 					:modelValue="minute"
 					:size="2"
 				/>
@@ -117,7 +117,7 @@ let MyInputDateEntry = {
 				<my-input-date-entry-input
 					@update:modelValue="parseInput('S',$event)"
 					:caption="capApp.inputSecond"
-					:is-readonly="isReadonly"
+					:isReadonly="isReadonly"
 					:modelValue="second"
 					:size="2"
 				/>
@@ -326,18 +326,18 @@ let MyInputDate = {
 				<my-input-date-entry
 					v-model="unixFromInput"
 					:caption-prefix="isRange ? capApp.dateFrom : ''"
-					:is-date="isDate"
-					:is-time="isTime && !fullDay"
-					:is-readonly="isReadonly"
+					:isDate="isDate"
+					:isTime="isTime && !fullDay"
+					:isReadonly="isReadonly"
 				/>
 				
 				<my-input-date-entry
 					v-if="isRange"
 					v-model="unixToInput"
 					:caption-prefix="capApp.dateTo"
-					:is-date="isDate"
-					:is-time="isTime && !fullDay"
-					:is-readonly="isReadonly"
+					:isDate="isDate"
+					:isTime="isTime && !fullDay"
+					:isReadonly="isReadonly"
 				/>
 			</div>
 			
@@ -378,11 +378,12 @@ let MyInputDate = {
 				:date="date"
 				:date0="date0"
 				:date1="date1"
-				:date-select0="dateSelect0"
-				:date-select1="dateSelect1"
-				:input-time="isTime"
-				:is-input="true"
-				:row-select="true"
+				:dateSelect0="dateSelect0"
+				:dateSelect1="dateSelect1"
+				:handleError="$root.genericError"
+				:inputTime="isTime"
+				:isInput="true"
+				:rowSelect="true"
 			/>
 		</div>
 	</div>`,

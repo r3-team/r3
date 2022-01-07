@@ -89,18 +89,18 @@ let MyBuilderIcons = {
 		
 		// backend calls
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			
+			let requests = [];
 			for(let i = 0, j = this.iconIdsSelected.length; i < j; i++) {
-				trans.add('icon','del',{
-					id:this.iconIdsSelected[i]
-				},this.delOk);
+				requests.push(ws.prepare('icon','del',{id:this.iconIdsSelected[i]}));
 			}
-			trans.send(this.$root.genericError);
-		},
-		delOk:function(res) {
-			this.$root.schemaReload(this.module.id);
-			this.iconIdsSelected = [];
+			
+			ws.send(requests,true).then(
+				(res) => {
+					this.$root.schemaReload(this.module.id);
+					this.iconIdsSelected = [];
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		add:function(evt) {
 			let that        = this;
@@ -116,18 +116,18 @@ let MyBuilderIcons = {
 				if(res.error === '')
 					that.$root.schemaReload(that.module.id);
 				else
-					that.$root.genericError(null,'icon upload failed');
+					that.$root.genericError('icon upload failed');
 			}
 			
 			let file = evt.target.files[0];
 			
 			if(file.type !== "image/png") {
-				this.$root.genericError(null,'only PNG files are supported');
+				this.$root.genericError('only PNG files are supported');
 				return;
 			}
 			
 			if(Math.round(file.size / 1024) > 64) {
-				this.$root.genericError(null,'max. icon size is 64kb');
+				this.$root.genericError('max. icon size is 64kb');
 				return;
 			}
 			

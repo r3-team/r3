@@ -169,7 +169,7 @@ let MyCalendarMonth = {
 						>
 							<my-value-rich class="context-calendar"
 								v-for="(v,vi) in e.values"
-								:attribute-id="columns[vi].attributeId"
+								:attributeId="columns[vi].attributeId"
 								:basis="columns[vi].basis"
 								:display="columns[vi].display"
 								:key="vi"
@@ -199,7 +199,7 @@ let MyCalendarMonth = {
 					
 					<my-value-rich class="context-calendar"
 						v-for="(v,vi) in e.values"
-						:attribute-id="columns[vi].attributeId"
+						:attributeId="columns[vi].attributeId"
 						:basis="columns[vi].basis"
 						:display="columns[vi].display"
 						:key="vi"
@@ -225,6 +225,7 @@ let MyCalendarMonth = {
 		fieldId:    { type:String,  required:false, default:'' },
 		filters:    { type:Array,   required:false, default:() => [] },
 		formLoading:{ type:Boolean, required:false, default:false },
+		handleError:{ type:Function,required:true },
 		ics:        { type:Boolean, required:false, default:false },
 		inputTime:  { type:Boolean, required:false, default:false },
 		isInput:    { type:Boolean, required:false, default:false },
@@ -533,14 +534,10 @@ let MyCalendarMonth = {
 		
 		// backend calls
 		setIcsTokenFixed:function() {
-			let trans = new wsHub.transaction();
-			trans.add('login','setTokenFixed',{
-				context:'ics'
-			},this.setIcsTokenFixedOk);
-			trans.send(this.handleError);
-		},
-		setIcsTokenFixedOk:function(res) {
-			this.icsToken = res.payload.tokenFixed;
+			ws.send('login','setTokenFixed',{context:'ics'},true).then(
+				(res) => this.icsToken = res.payload.tokenFixed,
+				(err) => this.handleError(err)
+			);
 		}
 	}
 };
@@ -556,23 +553,24 @@ let MyCalendar = {
 			@record-selected="(...args) => $emit('record-selected',...args)"
 			@set-choice-id="choiceIdSet"
 			@set-date="dateSet"
-			:choice-id="choiceId"
+			:choiceId="choiceId"
 			:choices="choices"
 			:columns="columns"
 			:date="date"
 			:date0="date0"
 			:date1="date1"
-			:date-select0="dateSelect0"
-			:date-select1="dateSelect1"
-			:field-id="fieldId"
+			:dateSelect0="dateSelect0"
+			:dateSelect1="dateSelect1"
+			:fieldId="fieldId"
 			:filters="filters"
 			:formLoading="formLoading"
-			:has-color="attributeIdColor !== null"
-			:has-create="hasCreate"
-			:icon-id="iconId"
+			:handleError="handleError"
+			:hasColor="attributeIdColor !== null"
+			:hasCreate="hasCreate"
+			:iconId="iconId"
 			:ics="ics"
 			:rows="rows"
-			:row-select="rowSelect"
+			:rowSelect="rowSelect"
 		/>
 	</div>`,
 	props:{
@@ -806,8 +804,7 @@ let MyCalendar = {
 				orders.push(this.query.orders[i]);
 			}
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('data','get',{
+			ws.send('data','get',{
 				relationId:this.query.relationId,
 				joins:this.getRelationsJoined(this.query.joins),
 				expressions:this.expressions,
@@ -816,11 +813,10 @@ let MyCalendar = {
 					this.attributeIdDate1,this.indexDate1,dateEnd
 				)).concat(this.choiceFilters),
 				orders:orders
-			},this.getOk);
-			trans.send(this.handleError);
-		},
-		getOk:function(res,req) {
-			this.rows = res.payload.rows;
+			},true).then(
+				(res) => this.rows = res.payload.rows,
+				(err) => this.handleError(err)
+			);
 		}
 	}
 };

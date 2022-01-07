@@ -538,23 +538,22 @@ let MyBuilderPgFunction = {
 		
 		// backend calls
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			
-			trans.add('pgFunction','set',{
-				id:this.pgFunction.id,
-				moduleId:this.pgFunction.moduleId,
-				name:this.pgFunction.name,
-				codeArgs:this.pgFunction.codeArgs,
-				codeFunction:this.placeholdersUnset(false),
-				codeReturns:this.pgFunction.codeReturns,
-				schedules:this.pgFunction.schedules,
-				captions:this.captions
-			},this.setOk);
-			trans.add('schema','check',{moduleId:this.module.id});
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			this.$root.schemaReload(this.module.id);
+			ws.send([
+				ws.prepare('pgFunction','set',{
+					id:this.pgFunction.id,
+					moduleId:this.pgFunction.moduleId,
+					name:this.pgFunction.name,
+					codeArgs:this.pgFunction.codeArgs,
+					codeFunction:this.placeholdersUnset(false),
+					codeReturns:this.pgFunction.codeReturns,
+					schedules:this.pgFunction.schedules,
+					captions:this.captions
+				}),
+				ws.prepare('schema','check',{moduleId:this.module.id})
+			],true).then(
+				(res) => this.$root.schemaReload(this.module.id),
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

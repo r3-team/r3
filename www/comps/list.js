@@ -1353,10 +1353,9 @@ let MyList = {
 			});
 		},
 		del:function(idsToDelete) {
-			let trans = new wsHub.transactionBlocking();
+			let requests = [];
 			
 			for(let i = 0, j = this.joins.length; i < j; i++) {
-				
 				let j = this.joins[i];
 				
 				if(!j.applyDelete)
@@ -1370,16 +1369,17 @@ let MyList = {
 					if(r.indexRecordIds[j.index] === 0)
 						continue;
 					
-					trans.add('data','del',{
+					requests.push(ws.prepare('data','del',{
 						relationId:j.relationId,
 						recordId:r.indexRecordIds[j.index]
-					});
+					}));
 				}
 			}
-			trans.send(this.handleError,this.delOk);
-		},
-		delOk:function(res) {
-			this.get();
+			
+			ws.sendMultiple(requests,true).then(
+				(res) => this.get(),
+				(err) => this.handleError(err)
+			);
 		},
 		
 		get:function() {
@@ -1403,8 +1403,7 @@ let MyList = {
 					this.query.relationId,this.inputRecordIds,0,true
 				));
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('data','get',{
+			ws.send('data','get',{
 				relationId:this.query.relationId,
 				joins:this.getRelationsJoined(this.joins),
 				expressions:this.expressions,
@@ -1412,16 +1411,17 @@ let MyList = {
 				orders:this.orders,
 				limit:this.limit,
 				offset:this.offset
-			},this.getOk);
-			trans.send(this.handleError);
-		},
-		getOk:function(res) {
-			this.count = res.payload.count;
-			this.rows  = res.payload.rows;
-			this.selectReset();
-			
-			if(this.isInput)
-				this.$nextTick(this.updateDropdownDirection);
+			},true).then(
+				(res) => {
+					this.count = res.payload.count;
+					this.rows  = res.payload.rows;
+					this.selectReset();
+					
+					if(this.isInput)
+						this.$nextTick(this.updateDropdownDirection);
+				},
+				(err) => this.handleError(err)
+			);
 		},
 		
 		getInput:function() {
@@ -1448,65 +1448,65 @@ let MyList = {
 					this.query.relationId,this.inputRecordIds,0,false
 				));
 			
-			let trans = new wsHub.transaction();
-			trans.add('data','get',{
+			ws.send('data','get',{
 				relationId:this.query.relationId,
 				joins:this.getRelationsJoined(this.joins),
 				expressions:this.expressions,
 				filters:filters,
 				orders:this.orders
-			},this.getInputOk);
-			trans.send(this.handleError);
-		},
-		getInputOk:function(res) {
-			// apply results to input rows if category or specific record IDs were retrieved
-			if(this.inputAsCategory || this.anyInputRows)
-				this.rowsInput = res.payload.rows;
-			
-			// remove invalid records (due to field filters)
-			let recordIdsValid = [];
-			let recordsRemoved = 0;
-			for(let i = 0, j = res.payload.rows.length; i < j; i++) {
-				recordIdsValid.push(res.payload.rows[i].indexRecordIds['0']);
-			}
-			
-			for(let i = 0, j = this.inputRecordIds.length; i < j; i++) {
-				
-				if(!recordIdsValid.includes(this.inputRecordIds[i])) {
-					this.$emit('record-removed',this.inputRecordIds[i]);
-					recordsRemoved++;
-				}
-			}
-			
-			// auto-selection of records
-			// only if nothing was selected or entire selection was invalid
-			if(this.autoSelect && (this.inputRecordIds.length - recordsRemoved) === 0) {
-				
-				// select first/last X records
-				let ids = [];
-				if(this.inputAutoSelect > 0) {
-					for(let i = 0; i < this.inputAutoSelect; i++) {
-						
-						if(res.payload.rows.length - 1 < i)
-							break;
-						
-						ids.push(res.payload.rows[i].indexRecordIds['0']);
+			},false).then(
+				(res) => {
+					// apply results to input rows if category or specific record IDs were retrieved
+					if(this.inputAsCategory || this.anyInputRows)
+						this.rowsInput = res.payload.rows;
+					
+					// remove invalid records (due to field filters)
+					let recordIdsValid = [];
+					let recordsRemoved = 0;
+					for(let i = 0, j = res.payload.rows.length; i < j; i++) {
+						recordIdsValid.push(res.payload.rows[i].indexRecordIds['0']);
 					}
-				}
-				else {
-					for(let i = 0; i > this.inputAutoSelect; i--) {
+					
+					for(let i = 0, j = this.inputRecordIds.length; i < j; i++) {
 						
-						if(res.payload.rows.length - 1 + i < 0)
-							break;
-						
-						ids.push(res.payload.rows[res.payload.rows.length - 1 + i].indexRecordIds['0']);
+						if(!recordIdsValid.includes(this.inputRecordIds[i])) {
+							this.$emit('record-removed',this.inputRecordIds[i]);
+							recordsRemoved++;
+						}
 					}
-				}
-				if(ids.length !== 0)
-					this.$emit('records-selected-init',this.inputMulti ? ids : ids[0]);
-				
-				this.inputAutoSelectDone = true;
-			}
+					
+					// auto-selection of records
+					// only if nothing was selected or entire selection was invalid
+					if(this.autoSelect && (this.inputRecordIds.length - recordsRemoved) === 0) {
+						
+						// select first/last X records
+						let ids = [];
+						if(this.inputAutoSelect > 0) {
+							for(let i = 0; i < this.inputAutoSelect; i++) {
+								
+								if(res.payload.rows.length - 1 < i)
+									break;
+								
+								ids.push(res.payload.rows[i].indexRecordIds['0']);
+							}
+						}
+						else {
+							for(let i = 0; i > this.inputAutoSelect; i--) {
+								
+								if(res.payload.rows.length - 1 + i < 0)
+									break;
+								
+								ids.push(res.payload.rows[res.payload.rows.length - 1 + i].indexRecordIds['0']);
+							}
+						}
+						if(ids.length !== 0)
+							this.$emit('records-selected-init',this.inputMulti ? ids : ids[0]);
+						
+						this.inputAutoSelectDone = true;
+					}
+				},
+				(err) => this.handleError(err)
+			);
 		}
 	}
 };

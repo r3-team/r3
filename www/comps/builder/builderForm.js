@@ -873,16 +873,15 @@ let MyBuilderForm = {
 			);
 			
 			// apply form
-			let trans = new wsHub.transactionBlocking();
-			
+			let requests = [];
 			for(let i = 0, j = this.columnIdsRemove.length; i < j; i++) {
-				trans.add('column','del',{ id:this.columnIdsRemove[i] });
+				requests.push(ws.prepare('column','del',{id:this.columnIdsRemove[i]}));
 			}
 			for(let i = 0, j = this.fieldIdsRemove.length; i < j; i++) {
-				trans.add('field','del',{ id:this.fieldIdsRemove[i] });
+				requests.push(ws.prepare('field','del',{id:this.fieldIdsRemove[i]}));
 			}
 			
-			trans.add('form','set',{
+			requests.push(ws.prepare('form','set',{
 				id:this.form.id,
 				moduleId:this.form.moduleId,
 				presetIdOpen:this.form.presetIdOpen,
@@ -898,12 +897,15 @@ let MyBuilderForm = {
 				fields:fieldsCleaned,
 				states:this.states,
 				captions:this.captions
-			},this.setOk);
-			trans.add('schema','check',{moduleId:this.form.moduleId});
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			this.$root.schemaReload(this.module.id);
+			}));
+			requests.push(ws.prepare('schema','check',{
+				moduleId:this.form.moduleId
+			}));
+			
+			ws.sendMultiple(requests,true).then(
+				(res) => this.$root.schemaReload(this.module.id),
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

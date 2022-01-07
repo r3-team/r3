@@ -209,22 +209,16 @@ let MyBuilderRolesItem = {
 			});
 		},
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('role','del',{
-				id:this.role.id
-			},this.delOk);
-			trans.send(this.$root.genericError);
-		},
-		delOk:function(res) {
-			this.$root.schemaReload(this.moduleId);
-			
-			let trans = new wsHub.transaction();
-			trans.add('login','reauthAll',{});
-			trans.send(this.$root.genericError);
+			ws.send('role','del',{id:this.role.id},true).then(
+				(res) => {
+					this.$root.schemaReload(this.moduleId);
+					this.$root.loginReauthAll(false);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('role','set',{
+			ws.send('role','set',{
 				id:this.role.id,
 				moduleId:this.moduleId,
 				childrenIds:this.childrenIds,
@@ -236,18 +230,16 @@ let MyBuilderRolesItem = {
 				accessRelations:this.role.accessRelations,
 				accessAttributes:this.role.accessAttributes,
 				accessMenus:this.role.accessMenus
-			},this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			if(this.isNew)
-				this.name = '';
-			
-			this.$root.schemaReload(this.moduleId);
-			
-			let trans = new wsHub.transaction();
-			trans.add('login','reauthAll',{});
-			trans.send(this.$root.genericError);
+			},true).then(
+				(res) => {
+					if(this.isNew)
+						this.name = '';
+					
+					this.$root.schemaReload(this.moduleId);
+					this.$root.loginReauthAll(false);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

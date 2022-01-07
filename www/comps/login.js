@@ -260,8 +260,8 @@ let MyLogin = {
 		openLink,
 		
 		// misc
-		handleError:function(req,message) {
-			if(req[0].action === 'user')
+		handleError:function(action) {
+			if(action === 'user')
 				this.badAuth = true;
 			
 			this.loading = false;
@@ -274,37 +274,38 @@ let MyLogin = {
 		authenticate:function() {
 			if(!this.isValid) return;
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('auth','user',{
+			ws.send('auth','user',{
 				username:this.username,
 				password:this.password
-			},this.authenticatedByUser);
-			trans.send(this.handleError);
+			},true).then(
+				(res) => this.authenticatedByUser(res.payload.token),
+				(err) => this.handleError('user')
+			);
 			this.loading = true;
 		},
 		authenticatePublic:function(username) {
 			// keep token as public user is not asked
 			this.$store.commit('local/tokenKeep',true);
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('auth','user',{
-				username:username
-			},this.authenticatedByUser);
-			trans.send(this.handleError);
+			ws.send('auth','user',{username:this.username},true).then(
+				(res) => this.authenticatedByUser(res.payload.token),
+				(err) => this.handleError('user')
+			);
 			this.loading = true;
 		},
 		authenticateByToken:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('auth','token',{token:this.token});
-			trans.send(this.handleError,this.appEnable);
+			ws.send('auth','token',{token:this.token},true).then(
+				(res) => this.appEnable(),
+				(err) => this.handleError('token')
+			);
 			this.loading = true;
 		},
-		authenticatedByUser:function(res,req) {
-			if(res.payload.token === '')
-				return this.handleError();
+		authenticatedByUser:function(token) {
+			if(token === '')
+				return this.handleError('user');
 			
 			// store token if valid
-			this.$store.commit('local/token',res.payload.token);
+			this.$store.commit('local/token',token);
 			this.appEnable();
 		},
 		

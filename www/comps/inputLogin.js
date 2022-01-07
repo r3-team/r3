@@ -57,30 +57,29 @@ let MyInputLogin = {
 	methods:{
 		get:function() {
 			// if login is set, exclude ID
-			let idsExclude = this.loginId !== null ? this.idsExclude.concat([this.loginId]) : this.idsExclude;
+			let idsExclude = this.loginId !== null
+				? this.idsExclude.concat([this.loginId]) : this.idsExclude;
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('login','getNames',{
+			ws.send('login','getNames',{
 				byString:this.inputText,
 				idsExclude:idsExclude,
 				noLdapAssign:this.noLdapAssign
-			},this.getOk);
-			trans.send(this.$root.genericError);
-		},
-		getOk:function(res,req) {
-			this.logins = res.payload;
+			},true).then(
+				(res) => this.logins = res.payload,
+				(err) => this.$root.genericError(err)
+			);
 		},
 		getName:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('login','getNames',{
+			ws.send('login','getNames',{
 				id:this.loginId,
 				noLdapAssign:this.noLdapAssign
-			},this.getNameOk);
-			trans.send(this.$root.genericError);
-		},
-		getNameOk:function(res) {
-			if(res.payload.length === 1)
-				this.inputTextSet = res.payload[0].name;
+			},true).then(
+				(res) => {
+					if(res.payload.length === 1)
+						this.inputTextSet = res.payload[0].name;
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

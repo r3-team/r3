@@ -250,32 +250,28 @@ let MyBuilderPreset = {
 			});
 		},
 		del:function(rel) {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('preset','del',{
-				id:this.preset.id
-			},this.delOk);
-			trans.send(this.$root.genericError);
-		},
-		delOk:function(res) {
-			this.$root.schemaReload(this.relation.moduleId);
+			ws.send('preset','del',{id:this.preset.id},true).then(
+				(res) => this.$root.schemaReload(this.relation.moduleId),
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('preset','set',{
+			ws.send('preset','set',{
 				id:this.preset.id,
 				relationId:this.relation.id,
 				name:this.name,
 				protected:this.protected,
 				values:this.values
-			},this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function() {
-			if(this.isNew) {
-				this.name   = '';
-				this.values = [];
-			}
-			this.$root.schemaReload(this.relation.moduleId);
+			},true).then(
+				(res) => {
+					if(this.isNew) {
+						this.name   = '';
+						this.values = [];
+					}
+					this.$root.schemaReload(this.relation.moduleId);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

@@ -74,26 +74,26 @@ let MySettingsSecurity = {
 		
 		// backend calls
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('password','set',{
+			ws.send('password','set',{
 				pwNew0:this.pwNew0,
 				pwNew1:this.pwNew1,
 				pwOld:this.pwOld
-			},this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			switch(res.payload.code){
-				case 'PW_CURRENT_WRONG':    this.message = this.capApp.messagePwCurrentWrong; break;
-				case 'PW_REQUIRES_DIGIT':   this.message = this.capApp.messagePwRequiresDigit; break;
-				case 'PW_REQUIRES_LOWER':   this.message = this.capApp.messagePwRequiresLower; break;
-				case 'PW_REQUIRES_SPECIAL': this.message = this.capApp.messagePwRequiresSpecial; break;
-				case 'PW_REQUIRES_UPPER':   this.message = this.capApp.messagePwRequiresUpper; break;
-				case 'PW_TOO_SHORT':        this.message = this.capApp.messagePwShort; break;
-			}
-			this.pwNew0 = '';
-			this.pwNew1 = '';
-			this.pwOld  = '';
+			},true).then(
+				(res) => {
+					switch(res.payload.code){
+						case 'PW_CURRENT_WRONG':    this.message = this.capApp.messagePwCurrentWrong; break;
+						case 'PW_REQUIRES_DIGIT':   this.message = this.capApp.messagePwRequiresDigit; break;
+						case 'PW_REQUIRES_LOWER':   this.message = this.capApp.messagePwRequiresLower; break;
+						case 'PW_REQUIRES_SPECIAL': this.message = this.capApp.messagePwRequiresSpecial; break;
+						case 'PW_REQUIRES_UPPER':   this.message = this.capApp.messagePwRequiresUpper; break;
+						case 'PW_TOO_SHORT':        this.message = this.capApp.messagePwShort; break;
+					}
+					this.pwNew0 = '';
+					this.pwNew1 = '';
+					this.pwOld  = '';
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

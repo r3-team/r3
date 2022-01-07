@@ -1,7 +1,8 @@
-import MyField     from './field.js';
-import MyFormHelp  from './formHelp.js';
-import MyFormLog   from './formLog.js';
-import {srcBase64} from './shared/image.js';
+import MyField               from './field.js';
+import MyFormHelp            from './formHelp.js';
+import MyFormLog             from './formLog.js';
+import {hasAccessToRelation} from './shared/access.js';
+import {srcBase64}           from './shared/image.js';
 import {
 	filterIsCorrect,
 	openLink
@@ -299,8 +300,12 @@ let MyForm = {
 	},
 	computed:{
 		canDelete:function() {
-			if(this.isNew || this.badLoad || this.joins.length === 0 || !this.joins[0].applyDelete)
+			if(this.isNew || this.badLoad || this.joins.length === 0
+				|| !this.joins[0].applyDelete
+				|| !this.hasAccessToRelation(this.access,this.joins[0].relationId,3)
+			) {
 				return false;
+			}
 			
 			// check for protected preset record
 			let rel = this.relationIdMap[this.joins[0].relationId];
@@ -611,6 +616,7 @@ let MyForm = {
 		getQueryFiltersProcessed,
 		getRelationsJoined,
 		getResolvedPlaceholders,
+		hasAccessToRelation,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
 		isAttributeValueEqual,
@@ -618,11 +624,11 @@ let MyForm = {
 		srcBase64,
 		
 		// form management
-		handleError:function(req,message) {
+		handleError:function(message) {
 			
 			// check for known error code from backend
 			if(message === this.backendCodes.errGeneric)
-				return this.$root.genericError(null,this.capGen.error.generalError);
+				return this.$root.genericError(this.capGen.error.generalError);
 			
 			if(message.startsWith(this.backendCodes.errKnown)) {
 				
@@ -723,7 +729,7 @@ let MyForm = {
 			}
 			
 			// display message with default error handler
-			this.$root.genericError(null,message);
+			this.$root.genericError(message);
 		},
 		handleHotkeys:function(e) {
 			// not data or pop-up form open
@@ -1186,28 +1192,29 @@ let MyForm = {
 			});
 		},
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			
+			let requests = [];
 			for(let i = 0, j = this.joins.length; i < j; i++) {
-				
 				let j = this.joins[i];
 				
 				if(!j.applyDelete || this.recordIdIndexMap[i] === 0)
 					continue;
 				
-				trans.add('data','del',{
+				requests.push(ws.prepare('data','del',{
 					relationId:j.relationId,
 					recordId:j.recordId
-				});
+				}));
 			}
-			trans.send(this.handleError,this.delOk);
-		},
-		delOk:function(res) {
-			if(this.isInline)
-				this.$emit('record-deleted',this.recordId);
 			
-			this.openForm();
-			this.recordStateChanged('deleted');
+			ws.sendMultiple(requests,true).then(
+				(res) => {
+					if(this.isInline)
+						this.$emit('record-deleted',this.recordId);
+					
+					this.openForm();
+					this.recordStateChanged('deleted');
+				},
+				(err) => this.handleError(err)
+			);
 		},
 		get:function() {
 			// no record defined, form is done loading
@@ -1230,8 +1237,7 @@ let MyForm = {
 				});
 			}
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('data','get',{
+			ws.send('data','get',{
 				relationId:this.relationId,
 				indexSource:0,
 				joins:this.relationsJoined,
@@ -1241,42 +1247,43 @@ let MyForm = {
 						this.relationId,this.recordId,0,false
 					)
 				])
-			},this.getOk);
-			trans.send(this.handleError);
-		},
-		getOk:function(res,req) {
-			// handle invalid record lookup
-			if(res.payload.rows.length !== 1) {
-				
-				// more than 1 record returned
-				if(res.payload.rows.length > 1)
-					return this.openForm();
-				
-				// no record returned (might have lost access after save)
-				this.badLoad = true;
-				return;
-			}
-			
-			this.loading = true;
-			
-			// update relation record IDs
-			this.recordIdIndexMap = {};
-			for(let index in res.payload.rows[0].indexRecordIds) {
-				this.recordIdIndexMap[index] = res.payload.rows[0].indexRecordIds[index];
-			}
-			
-			// update attribute values
-			for(let i = 0, j = res.payload.rows[0].values.length; i < j; i++) {
-				let a = req.payload.expressions[i];
-				
-				this.valueSet(
-					this.getIndexAttributeId(a.index,a.attributeId,a.outsideIn,a.attributeIdNm),
-					res.payload.rows[0].values[i],true,false
-				);
-			}
-			this.badSave = false;
-			this.badLoad = false;
-			this.releaseLoadingOnNextTick();
+			},true).then(
+				(res) => {
+					// handle invalid record lookup
+					if(res.payload.rows.length !== 1) {
+						
+						// more than 1 record returned
+						if(res.payload.rows.length > 1)
+							return this.openForm();
+						
+						// no record returned (might have lost access after save)
+						this.badLoad = true;
+						return;
+					}
+					
+					this.loading = true;
+					
+					// update relation record IDs
+					this.recordIdIndexMap = {};
+					for(let index in res.payload.rows[0].indexRecordIds) {
+						this.recordIdIndexMap[index] = res.payload.rows[0].indexRecordIds[index];
+					}
+					
+					// update attribute values
+					for(let i = 0, j = res.payload.rows[0].values.length; i < j; i++) {
+						let a = expressions[i];
+						
+						this.valueSet(
+							this.getIndexAttributeId(a.index,a.attributeId,a.outsideIn,a.attributeIdNm),
+							res.payload.rows[0].values[i],true,false
+						);
+					}
+					this.badSave = false;
+					this.badLoad = false;
+					this.releaseLoadingOnNextTick();
+				},
+				(err) => this.handleError(err)
+			);
 		},
 		getFromSubJoin:function(join,recordId) {
 			let joinIndexes = [join.index]; // all join indexes to collect (start with initial join)
@@ -1327,8 +1334,7 @@ let MyForm = {
 			}
 			
 			if(recordId !== null) {
-				let trans = new wsHub.transactionBlocking();
-				trans.add('data','get',{
+				ws.send('data','get',{
 					relationId:join.relationId,
 					indexSource:join.index,
 					joins:joins,
@@ -1338,8 +1344,26 @@ let MyForm = {
 							this.relationId,recordId,join.index,false
 						)
 					])
-				},this.getFromSubJoinOk);
-				trans.send(this.handleError);
+				},true).then(
+					(res) => {
+						if(res.payload.rows.length !== 1)
+							return;
+						
+						for(let index in res.payload.rows[0].indexRecordIds) {
+							this.recordIdIndexMap[index] = res.payload.rows[0].indexRecordIds[index];
+						}
+						
+						for(let i = 0, j = res.payload.rows[0].values.length; i < j; i++) {
+							let e = expressions[i];
+							
+							this.valueSet(
+								this.getIndexAttributeId(e.index,e.attributeId,e.outsideIn,e.attributeIdNm),
+								res.payload.rows[0].values[i],true,false
+							);
+						}
+					},
+					(err) => this.handleError(err)
+				);
 			}
 			else {
 				// reset index attribute values
@@ -1351,23 +1375,6 @@ let MyForm = {
 						null,true,false
 					);
 				}
-			}
-		},
-		getFromSubJoinOk:function(res,req) {
-			if(res.payload.rows.length !== 1)
-				return;
-			
-			for(let index in res.payload.rows[0].indexRecordIds) {
-				this.recordIdIndexMap[index] = res.payload.rows[0].indexRecordIds[index];
-			}
-			
-			for(let i = 0, j = res.payload.rows[0].values.length; i < j; i++) {
-				let e = req.payload.expressions[i];
-				
-				this.valueSet(
-					this.getIndexAttributeId(e.index,e.attributeId,e.outsideIn,e.attributeIdNm),
-					res.payload.rows[0].values[i],true,false
-				);
 			}
 		},
 		set:function(saveAndNew) {
@@ -1433,32 +1440,32 @@ let MyForm = {
 				});
 			}
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('data','set',req);
-			trans.send(this.handleError,this.setOk,{saveAndNew:saveAndNew});
-		},
-		setOk:function(res,req,store) {
-			this.$store.commit('formHasChanges',false);
-			
-			// set record-saved timestamp
-			if(this.isNew) this.recordStateChanged('created');
-			else           this.recordStateChanged('updated');
-			
-			if(this.isInline)
-				this.$emit('record-updated',res[0].payload.indexRecordIds[0]);
-			
-			// load empty record if requested
-			if(store.saveAndNew)
-				return this.openForm();
-			
-			// load newly created record
-			if(this.isNew)
-				return this.openForm(res[0].payload.indexRecordIds[0]);
-			
-			// reload same record
-			// unfortunately necessary as update trigger in backend can change values
-			// if we knew nothing triggered, we could update our values without reload
-			this.get();
+			ws.send('data','set',req,true).then(
+				(res) => {
+					this.$store.commit('formHasChanges',false);
+					
+					// set record-saved timestamp
+					if(this.isNew) this.recordStateChanged('created');
+					else           this.recordStateChanged('updated');
+					
+					if(this.isInline)
+						this.$emit('record-updated',res.payload.indexRecordIds[0]);
+					
+					// load empty record if requested
+					if(saveAndNew)
+						return this.openForm();
+					
+					// load newly created record
+					if(this.isNew)
+						return this.openForm(res.payload.indexRecordIds[0]);
+					
+					// reload same record
+					// unfortunately necessary as update trigger in backend can change values
+					// if we knew nothing triggered, we could update our values without reload
+					this.get();
+				},
+				(err) => this.handleError(err)
+			);
 		}
 	}
 };

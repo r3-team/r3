@@ -81,12 +81,10 @@ let MyBuilderHelp = {
 			let mod = JSON.parse(JSON.stringify(this.module));
 			mod.captions.moduleHelp = this.helpInput;
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('module','set',mod,this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function() {
-			this.$root.schemaReload(this.module.id);
+			ws.send('module','set',mod,true).then(
+				(res) => this.$root.schemaReload(this.module.id),
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

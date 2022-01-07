@@ -282,35 +282,31 @@ let MyAdminModulesItem = {
 			});
 		},
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('module','del',{id:this.id});
+			let requests = [ws.prepare('module','del',{id:this.id})];
 			
 			// add dependencies to delete
 			for(let i = 0, j = this.moduleIdsDependendOnUs.length; i < j; i++) {
-				trans.add('module','del',{id:this.moduleIdsDependendOnUs[i]});
+				requests.push(ws.prepare('module','del',{id:this.moduleIdsDependendOnUs[i]}));
 			}
 			
-			trans.send(this.$root.genericError,this.delOk);
-		},
-		delOk:function(res) {
-			this.$root.schemaReload();
-			
-			let trans = new wsHub.transaction();
-			trans.add('scheduler','reload',{});
-			trans.send(this.$root.genericError);
+			ws.sendMultiple(requests,true).then(
+				(res) => {
+					this.$root.schemaReload();
+					this.$root.schedulerReload(false);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('moduleOption','set',{
+			ws.send('moduleOption','set',{
 				id:this.id,
 				hidden:this.hidden,
 				owner:this.owner,
 				position:this.position
-			},this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function() {
-			this.$root.schemaReload();
+			},true).then(
+				(res) => this.$root.schemaReload(),
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };
@@ -484,10 +480,10 @@ let MyAdminModules = {
 	},
 	methods:{
 		// error handling
-		installError:function(req,message) {
+		installError:function(message) {
 			message = this.capApp.error.installFailed.replace('{ERROR}',message);
 			
-			this.$root.genericError(req,message);
+			this.$root.genericError(message);
 			this.installStarted = false;
 		},
 		
@@ -511,13 +507,10 @@ let MyAdminModules = {
 				that.fileUploading = false;
 				
 				if(!res.success) {
-					that.$root.genericError(null,that.capApp.error.uploadFailed);
+					that.$root.genericError(that.capApp.error.uploadFailed);
 					return;
 				}
-				
-				let trans = new wsHub.transaction();
-				trans.add('login','reauthAll',{});
-				trans.send(that.$root.genericError);
+				this.$root.loginReauthAll(false);
 			}
 			formData.append('token',this.token);
 			formData.append('file',this.fileToUpload);
@@ -527,28 +520,23 @@ let MyAdminModules = {
 		
 		// backend calls
 		getRepo:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('repoModule','get',{
-				getInstalled:true,
-				getNew:false
-			},this.getRepoOk);
-			trans.send(this.$root.genericError);
-		},
-		getRepoOk:function(res) {
-			this.repoModules = res.payload.repoModules;
+			ws.send('repoModule','get',{getInstalled:true,getNew:false},true).then(
+				(res) => this.repoModules = res.payload.repoModules,
+				(err) => this.$root.genericError(err)
+			);
 		},
 		install:function(fileId) {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('repoModule','install',{
-				fileId:fileId
-			},this.installOk);
-			trans.send(this.installError);
+			ws.send('repoModule','install',{fileId:fileId},true).then(
+				(res) => this.installOk(),
+				(err) => this.installError(err)
+			);
 			this.installStarted = true;
 		},
 		installAll:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('repoModule','installAll',{},this.installOk);
-			trans.send(this.installError);
+			ws.send('repoModule','installAll',{},true).then(
+				(res) => this.installOk(),
+				(err) => this.installError(err)
+			);
 			this.installStarted = true;
 		},
 		installOk:function() {

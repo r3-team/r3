@@ -190,63 +190,65 @@ let MyFormLog = {
 			if(relations.length === 0)
 				return this.reset();
 			
-			let trans = new wsHub.transactionBlocking();
+			let requests = [];
 			for(let i = 0, j = relations.length; i < j; i++) {
 				
 				let r = relations[i];
-				trans.add('data','getLog',{
+				requests.push(ws.prepare('data','getLog',{
 					recordId:r.recordId,
 					attributeIds:r.attributeIds,
 					index:r.index
-				});
+				}));
 			}
-			trans.send(this.handleError,this.getOk);
-		},
-		getOk:function(res,req) {
-			this.loading = true;
-			this.reset();
-			
-			// store logs grouped by composite key of date+login ID
-			// each log connects to a single relation - a change spanning multiple relations is therefore grouped
-			let that        = this;
-			let logsGrouped = {};
-			let parseLogsForRelation = function(logs,request) {
-				
-				for(let i = 0, j = logs.length; i < j; i++) {
-					let l = logs[i];
-					let g = `${l.dateChange}_${l.loginName}`;
+			ws.sendMultiple(requests,true).then(
+				(res) => {
+					this.loading = true;
+					this.reset();
 					
-					if(typeof logsGrouped[g] === 'undefined')
-						logsGrouped[g] = {
-							dateChange:l.dateChange,
-							loginName:l.loginName,
-							values:{}
-						};
-					
-					for(let x = 0, y = l.attributes.length; x < y; x++) {
-						let atr = l.attributes[x];
+					// store logs grouped by composite key of date+login ID
+					// each log connects to a single relation - a change spanning multiple relations is therefore grouped
+					let that        = this;
+					let logsGrouped = {};
+					let parseLogsForRelation = function(logs,request) {
 						
-						logsGrouped[g].values[that.getIndexAttributeId(
-							request.index,
-							atr.attributeId,
-							atr.outsideIn,
-							atr.attributeIdNm
-						)] = JSON.parse(atr.value);
+						for(let i = 0, j = logs.length; i < j; i++) {
+							let l = logs[i];
+							let g = `${l.dateChange}_${l.loginName}`;
+							
+							if(typeof logsGrouped[g] === 'undefined')
+								logsGrouped[g] = {
+									dateChange:l.dateChange,
+									loginName:l.loginName,
+									values:{}
+								};
+							
+							for(let x = 0, y = l.attributes.length; x < y; x++) {
+								let atr = l.attributes[x];
+								
+								logsGrouped[g].values[that.getIndexAttributeId(
+									request.index,
+									atr.attributeId,
+									atr.outsideIn,
+									atr.attributeIdNm
+								)] = JSON.parse(atr.value);
+							}
+						}
+					};
+					
+					for(let i = 0, j = res.length; i < j; i++) {
+						parseLogsForRelation(res[i].payload,requests[i].payload);
 					}
-				}
-			};
-			
-			for(let i = 0, j = res.length; i < j; i++) {
-				parseLogsForRelation(res[i].payload,req[i].payload);
-			}
-			
-			// sort groups by their composite key, effectively sorting by date
-			let keys = Object.keys(logsGrouped).sort().reverse();
-			for(let i = 0, j = keys.length; i < j; i++) {
-				this.logs.push(logsGrouped[keys[i]]);
-			}
-			
-			this.releaseLoadingOnNextTick();
+					
+					// sort groups by their composite key, effectively sorting by date
+					let keys = Object.keys(logsGrouped).sort().reverse();
+					for(let i = 0, j = keys.length; i < j; i++) {
+						this.logs.push(logsGrouped[keys[i]]);
+					}
+					
+					this.releaseLoadingOnNextTick();
+				},
+				(err) => this.handleError(err)
+			);
 		}
 	}
 };

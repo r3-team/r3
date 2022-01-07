@@ -215,18 +215,13 @@ let MyBuilderJsFunctionItem = {
 			});
 		},
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('jsFunction','del',{
-				id:this.jsFunction.id
-			},this.delOk);
-			trans.send(this.$root.genericError);
-		},
-		delOk:function(res) {
-			this.$root.schemaReload(this.module.id);
+			ws.send('jsFunction','del',{id:this.jsFunction.id},true).then(
+				(res) => this.$root.schemaReload(this.module.id),
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('jsFunction','set',{
+			ws.send('jsFunction','set',{
 				id:this.jsFunction.id,
 				moduleId:this.module.id,
 				formId:this.formId,
@@ -235,14 +230,15 @@ let MyBuilderJsFunctionItem = {
 				codeFunction:this.codeFunction,
 				codeReturns:this.codeReturns,
 				captions:this.captions
-			},this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			if(this.isNew)
-				this.name = '';
-			
-			this.$root.schemaReload(this.module.id);
+			},true).then(
+				(res) => {
+					if(this.isNew)
+						this.name = '';
+					
+					this.$root.schemaReload(this.module.id);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };
@@ -530,21 +526,16 @@ let MyBuilderPgFunctionItem = {
 			});
 		},
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('pgFunction','del',{
-				id:this.pgFunction.id
-			},this.delOk);
-			trans.send(this.$root.genericError);
-		},
-		delOk:function(res) {
-			this.$root.schemaReload(this.moduleId);
+			ws.send('pgFunction','del',{id:this.pgFunction.id},true).then(
+				(res) => this.$root.schemaReload(this.moduleId),
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
 			if(this.codeFunction === '')
 				this.codeFunction = this.getPgFunctionTemplate();
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('pgFunction','set',{
+			ws.send('pgFunction','set',{
 				id:this.pgFunction.id,
 				moduleId:this.moduleId,
 				name:this.name,
@@ -553,18 +544,20 @@ let MyBuilderPgFunctionItem = {
 				codeReturns:this.codeReturns,
 				schedules:this.schedules,
 				captions:this.captions
-			},this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			if(this.isNew)
-				this.name = '';
-			
-			this.$root.schemaReload(this.moduleId);
-			
-			let trans = new wsHub.transaction();
-			trans.add('scheduler','reload',{});
-			trans.send(this.$root.genericError);
+			},true).then(
+				(res) => {
+					if(this.isNew)
+						this.name = '';
+					
+					this.$root.schemaReload(this.moduleId);
+					
+					ws.send('scheduler','reload',{},false).then(
+						(res) => {},
+						(err) => this.$root.genericError(err)
+					);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

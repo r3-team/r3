@@ -797,8 +797,7 @@ let MyGantt = {
 			if(this.formLoading)
 				return;
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('data','get',{
+			ws.send('data','get',{
 				relationId:this.query.relationId,
 				joins:this.getRelationsJoined(this.joins),
 				expressions:this.getQueryExpressionsDateRange(
@@ -815,91 +814,92 @@ let MyGantt = {
 					this.getUnixFromDate(this.date1)
 				)).concat(this.choiceFilters),
 				orders:this.query.orders
-			},this.getOk);
-			trans.send(this.handleError);
-		},
-		getOk:function(res) {
-			// clear existing groups
-			this.groups = [];
-			
-			// parse result rows to gantt groups
-			let color    = null;
-			let date0    = 0;
-			let date1    = 0;
-			let groupBy  = []; // group by criteria (can be identical to label)
-			let groupMap = {}; // map of all groups, key: groupBy
-			let groupColumns = []; // group column values
-			let values   = [];
-			
-			for(let i = 0, j = res.payload.rows.length; i < j; i++) {
-				let r = res.payload.rows[i];
-				groupBy      = [];
-				groupColumns = [];
-				
-				// collect special calendar values first
-				date0 = this.getDateFromUnix(r.values[0]);
-				date1 = this.getDateFromUnix(r.values[1]);
-				
-				if(this.hasColor)
-					color = r.values[2];
-				
-				// parse non-calendar expression values
-				values = this.hasColor ? r.values.slice(3) : r.values.slice(2);
-				
-				for(let x = 0, y = values.length; x < y; x++) {
+			},true).then(
+				(res) => {
+					// clear existing groups
+					this.groups = [];
 					
-					if(!this.group0LabelExpressionIndexes.includes(x))
-						continue;
+					// parse result rows to gantt groups
+					let color    = null;
+					let date0    = 0;
+					let date1    = 0;
+					let groupBy  = []; // group by criteria (can be identical to label)
+					let groupMap = {}; // map of all groups, key: groupBy
+					let groupColumns = []; // group column values
+					let values   = [];
 					
-					// add non-file attributes as group criteria
-					let atr = this.attributeIdMap[this.columns[x].attributeId];
-					if(atr.content !== 'files')
-						groupBy.push(values[x]);
+					for(let i = 0, j = res.payload.rows.length; i < j; i++) {
+						let r = res.payload.rows[i];
+						groupBy      = [];
+						groupColumns = [];
+						
+						// collect special calendar values first
+						date0 = this.getDateFromUnix(r.values[0]);
+						date1 = this.getDateFromUnix(r.values[1]);
+						
+						if(this.hasColor)
+							color = r.values[2];
+						
+						// parse non-calendar expression values
+						values = this.hasColor ? r.values.slice(3) : r.values.slice(2);
+						
+						for(let x = 0, y = values.length; x < y; x++) {
+							
+							if(!this.group0LabelExpressionIndexes.includes(x))
+								continue;
+							
+							// add non-file attributes as group criteria
+							let atr = this.attributeIdMap[this.columns[x].attributeId];
+							if(atr.content !== 'files')
+								groupBy.push(values[x]);
+							
+							groupColumns.push({
+								index:x,
+								value:values[x]
+							});
+						}
+						let groupName = groupBy.join(' ');
+						
+						// add group if not there yet
+						if(typeof groupMap[groupName] === 'undefined') {
+							groupMap[groupName] = {
+								lines:[[]], // each line is an array of records
+								columns:groupColumns
+							};
+						}
+						
+						// check in which line record fits (no overlapping)
+						let lineIndex = this.getFreeLineIndex(groupMap[groupName].lines,date0,date1);
+						
+						if(lineIndex === -1) {
+							lineIndex = groupMap[groupName].lines.length;
+							groupMap[groupName].lines.push([]);
+						}
+						
+						groupMap[groupName].lines[lineIndex].push({
+							id:r.indexRecordIds['0'],
+							color:color,
+							date0:date0,
+							date1:date1,
+							values:values
+						});
+					}
 					
-					groupColumns.push({
-						index:x,
-						value:values[x]
-					});
-				}
-				let groupName = groupBy.join(' ');
-				
-				// add group if not there yet
-				if(typeof groupMap[groupName] === 'undefined') {
-					groupMap[groupName] = {
-						lines:[[]], // each line is an array of records
-						columns:groupColumns
-					};
-				}
-				
-				// check in which line record fits (no overlapping)
-				let lineIndex = this.getFreeLineIndex(groupMap[groupName].lines,date0,date1);
-				
-				if(lineIndex === -1) {
-					lineIndex = groupMap[groupName].lines.length;
-					groupMap[groupName].lines.push([]);
-				}
-				
-				groupMap[groupName].lines[lineIndex].push({
-					id:r.indexRecordIds['0'],
-					color:color,
-					date0:date0,
-					date1:date1,
-					values:values
-				});
-			}
-			
-			// store groups, sorted by group by criteria
-			let keysSorted = Object.keys(groupMap).sort();
-			for(let i = 0, j = keysSorted.length; i < j; i++) {
-				this.groups.push(groupMap[keysSorted[i]]);
-			}
-			
-			if(this.notScrolled) {
-				this.notScrolled = false;
-				
-				if(this.page === 0)
-					this.scrollToNow();
-			}
+					// store groups, sorted by group by criteria
+					let keysSorted = Object.keys(groupMap).sort();
+					for(let i = 0, j = keysSorted.length; i < j; i++) {
+						this.groups.push(groupMap[keysSorted[i]]);
+					}
+					
+					if(this.notScrolled) {
+						this.notScrolled = false;
+						
+						if(this.page === 0)
+							this.scrollToNow();
+					}
+				},
+				(err) => this.handleError(err)
+			);
 		}
 	}
 };

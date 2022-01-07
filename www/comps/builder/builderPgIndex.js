@@ -101,31 +101,27 @@ let MyBuilderPgIndex = {
 		},
 		
 		del:function(rel) {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('pgIndex','del',{
-				id:this.index.id
-			},this.delOk);
-			trans.send(this.$root.genericError);
-		},
-		delOk:function(res) {
-			this.$root.schemaReload(this.relation.moduleId);
+			ws.send('pgIndex','del',{id:this.index.id},true).then(
+				(res) => this.$root.schemaReload(this.relation.moduleId),
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('pgIndex','set',{
+			ws.send('pgIndex','set',{
 				id:this.index.id,
 				relationId:this.relation.id,
 				noDuplicates:this.noDuplicates,
 				attributes:this.attributes
-			},this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			if(this.isNew) {
-				this.attributes   = [];
-				this.noDuplicates = false;
-			}
-			this.$root.schemaReload(this.relation.moduleId);
+			},true).then(
+				(res) => {
+					if(this.isNew) {
+						this.attributes   = [];
+						this.noDuplicates = false;
+					}
+					this.$root.schemaReload(this.relation.moduleId);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

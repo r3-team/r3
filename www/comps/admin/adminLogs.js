@@ -192,20 +192,20 @@ let MyAdminLogs = {
 		
 		// backend calls
 		get:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('log','get',{
+			ws.send('log','get',{
 				byString:this.byString,
 				context:this.context,
 				dateFrom:this.unixFrom,
 				dateTo:this.unixTo,
 				limit:this.limit,
 				offset:this.offset
-			},this.getOk);
-			trans.send(this.$root.genericError);
-		},
-		getOk:function(res) {
-			this.logs  = res.payload.logs;
-			this.total = res.payload.total;
+			},true).then(
+				(res) => {
+					this.logs  = res.payload.logs;
+					this.total = res.payload.total;
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

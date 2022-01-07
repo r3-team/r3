@@ -293,7 +293,7 @@ let MyAdminLoginsItem = {
 		getValidLanguageCode,
 		srcBase64Icon,
 		
-		handleError:function(requests,message) {
+		handleError:function(message) {
 			
 			if(message.startsWith(this.backendCodes.errKnown)) {
 				
@@ -304,7 +304,7 @@ let MyAdminLoginsItem = {
 			}
 			
 			// display message with default error handler
-			this.$root.genericError(null,message);
+			this.$root.genericError(message);
 		},
 		openLoginForm:function(index) {
 			let frm = this.formIdMap[this.loginForms[index].formId];
@@ -338,20 +338,19 @@ let MyAdminLoginsItem = {
 			});
 		},
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('login','del',{id:this.login.id},this.delOk);
-			trans.send(this.handleError);
-		},
-		delOk:function(res,req) {
-			this.$emit('updated');
-			
-			let trans = new wsHub.transaction();
-			trans.add('login','kick',{id:req.payload.id});
-			trans.send(this.handleError);
+			ws.send('login','del',{id:this.login.id},true).then(
+				(res) => {
+					this.$emit('updated');
+					ws.send('login','kick',{id:this.login.id},true).then(
+						(res) => {},
+						(err) => this.handleError(err)
+					);
+				},
+				(err) => this.handleError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('login','set',{
+			ws.send('login','set',{
 				id:this.login.id,
 				ldapId:this.login.ldapId,
 				ldapKey:this.login.ldapKey,
@@ -362,29 +361,27 @@ let MyAdminLoginsItem = {
 				admin:this.admin,
 				noAuth:this.noAuth,
 				roleIds:this.roleIds
-			},this.setOk);
-			trans.send(this.handleError);
-		},
-		setOk:function(res,req) {
-			if(this.isNew) {
-				this.name      = '';
-				this.showRoles = false;
-			}
-			
-			this.pass = '';
-			this.$emit('updated');
-			
-			// login was changed, reauth. or kick client
-			if(req.payload.id !== 0) {
-				let trans = new wsHub.transaction();
-				
-				if(req.payload.active)
-					trans.add('login','reauth',{id:req.payload.id});
-				else
-					trans.add('login','kick',{id:req.payload.id});
-				
-				trans.send(this.handleError);
-			}
+			},true).then(
+				(res) => {
+					if(this.isNew) {
+						this.name      = '';
+						this.showRoles = false;
+					}
+					this.pass = '';
+					this.$emit('updated');
+					
+					if(this.login.id === 0)
+						return;
+					
+					// login was changed, reauth. or kick client
+					let action = this.active ? 'reauth' : 'kick';
+					ws.send('login',action,{id:this.login.id},false).then(
+						(res) => {},
+						(err) => this.handleError(err)
+					);
+				},
+				(err) => this.handleError(err)
+			);
 		},
 		
 		// record calls
@@ -395,16 +392,14 @@ let MyAdminLoginsItem = {
 			if(this.login.records[loginFormIndex].id !== null)
 				excludeIds.push(this.login.records[loginFormIndex].id);
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('login','getRecords',{
+			ws.send('login','getRecords',{
 				attributeIdLookup:loginForm.attributeIdLookup,
 				byString:this.loginRecordInput,
 				idsExclude:excludeIds
-			},this.getRecordsOk);
-			trans.send(this.$root.genericError);
-		},
-		getRecordsOk:function(res) {
-			this.loginRecordList = res.payload;
+			},true).then(
+				(res) => this.loginRecordList = res.payload,
+				(err) => this.handleError(err)
+			);
 		}
 	}
 };
@@ -655,47 +650,42 @@ let MyAdminLogins = {
 		
 		// backend calls
 		get:function() {
-			let trans    = new wsHub.transactionBlocking();
-			let requests = [];
-			
+			let forms = [];
 			for(let i = 0, j = this.loginForms.length; i < j; i++) {
-				requests.push({
+				forms.push({
 					attributeIdLogin:this.loginForms[i].attributeIdLogin,
 					attributeIdLookup:this.loginForms[i].attributeIdLookup
 				});
 			}
 			
-			trans.add('login','get',{
+			ws.send('login','get',{
 				byString:this.byString,
 				limit:this.limit,
 				offset:this.offset,
-				recordRequests:requests
-			},this.getOk);
-			trans.send(this.$root.genericError);
-		},
-		getOk:function(res) {
-			this.logins = res.payload.logins;
-			this.total  = res.payload.total;
+				recordRequests:forms
+			},true).then(
+				(res) => {
+					this.logins = res.payload.logins;
+					this.total  = res.payload.total;
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		getLdaps:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('ldap','get',{},this.getLdapsOk);
-			trans.send(this.$root.genericError);
-		},
-		getLdapsOk:function(res) {
-			this.ldaps = res.payload.ldaps;
+			ws.send('ldap','get',{},true).then(
+				(res) => this.ldaps = res.payload.ldaps,
+				(err) => this.$root.genericError(err)
+			);
 		},
 		setRecord:function(index,loginId,recordId) {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('login','setRecord',{
+			ws.send('login','setRecord',{
 				attributeIdLogin:this.loginForms[index].attributeIdLogin,
 				loginId:loginId,
 				recordId:recordId
-			},this.setRecordOk);
-			trans.send(this.$root.genericError);
-		},
-		setRecordOk:function(res) {
-			this.get();
+			},true).then(
+				(res) => this.get(),
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };
