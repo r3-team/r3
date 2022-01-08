@@ -49,10 +49,10 @@ let MyBuilderJsFunction = {
 						:darkBg="true"
 					/>
 					<my-button
-						@trigger="showDetails = !showDetails"
+						@trigger="showHeader = !showHeader"
 						:caption="capApp.button.details"
 						:darkBg="true"
-						:image="showDetails ? 'visible1.png' : 'visible0.png'"
+						:image="showHeader ? 'visible1.png' : 'visible0.png'"
 					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
@@ -64,45 +64,47 @@ let MyBuilderJsFunction = {
 			</div>
 			
 			<div class="content no-padding function-details default-inputs">
-				<table v-if="showDetails">
-					<tr>
-						<td>{{ capApp.codeArgs }}</td>
-						<td>
-							<input
-								v-model="codeArgs"
-								:placeholder="capApp.codeArgsHintJs"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.codeReturns }}</td>
-						<td>
-							<input
-								v-model="codeReturns"
-								:placeholder="capApp.codeReturnsHintJs"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.title }}</td>
-						<td>
-							<my-builder-caption
-								v-model="captions.jsFunctionTitle"
-								:language="builderLanguage"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.description }}</td>
-						<td>
-							<my-builder-caption
-								v-model="captions.jsFunctionDesc"
-								:language="builderLanguage"
-								:multiLine="true"
-							/>
-						</td>
-					</tr>
-				</table>
+				<div class="header" v-if="showHeader">
+					<table>
+						<tr>
+							<td>{{ capApp.codeArgs }}</td>
+							<td>
+								<input
+									v-model="codeArgs"
+									:placeholder="capApp.codeArgsHintJs"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.codeReturns }}</td>
+							<td>
+								<input
+									v-model="codeReturns"
+									:placeholder="capApp.codeReturnsHintJs"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.title }}</td>
+							<td>
+								<my-builder-caption
+									v-model="captions.jsFunctionTitle"
+									:language="builderLanguage"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.description }}</td>
+							<td>
+								<my-builder-caption
+									v-model="captions.jsFunctionDesc"
+									:language="builderLanguage"
+									:multiLine="true"
+								/>
+							</td>
+						</tr>
+					</table>
+				</div>
 				
 				<!-- function body input -->
 				<textarea class="input"
@@ -278,7 +280,7 @@ let MyBuilderJsFunction = {
 			entitySelected:'',
 			entitySelectedId:null,
 			moduleIdsOpen:[],
-			showDetails:false,
+			showHeader:false,
 			showPreview:false,
 			showSidebar:true
 		};

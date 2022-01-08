@@ -334,14 +334,16 @@ type Role struct {
 	Captions         CaptionMap        `json:"captions"`
 }
 type PgFunction struct {
-	Id           uuid.UUID            `json:"id"`
-	ModuleId     uuid.UUID            `json:"moduleId"`
-	Name         string               `json:"name"`
-	CodeArgs     string               `json:"codeArgs"`
-	CodeFunction string               `json:"codeFunction"`
-	CodeReturns  string               `json:"codeReturns"`
-	Schedules    []PgFunctionSchedule `json:"schedules"`
-	Captions     CaptionMap           `json:"captions"`
+	Id             uuid.UUID            `json:"id"`
+	ModuleId       uuid.UUID            `json:"moduleId"`
+	Name           string               `json:"name"`
+	CodeArgs       string               `json:"codeArgs"`
+	CodeFunction   string               `json:"codeFunction"`
+	CodeReturns    string               `json:"codeReturns"`
+	IsFrontendExec bool                 `json:"isFrontendExec"` // can be executed from frontend
+	IsTrigger      bool                 `json:"isTrigger"`      // is relation TRIGGER function
+	Schedules      []PgFunctionSchedule `json:"schedules"`
+	Captions       CaptionMap           `json:"captions"`
 }
 type PgFunctionSchedule struct {
 	Id            uuid.UUID `json:"id"`

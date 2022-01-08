@@ -375,24 +375,31 @@ let MyBuilderPgFunctionItem = {
 				<input disabled="disabled" :value="capApp.languagePg" />
 			</td>
 			<td>
+				<my-bool v-model="isTrigger" :readonly="!isNew" />
+			</td>
+			<td>
 				<input class="long"
 					v-model="codeArgs"
-					:disabled="!isNew"
+					:disabled="isTrigger"
 					:placeholder="capApp.codeArgsHintPg"
 				/>
 			</td>
 			<td>
 				<input
 					v-model="codeReturns"
-					:disabled="!isNew"
 					:placeholder="capApp.codeReturnsHintPg"
+					:disabled="isTrigger"
 				/>
 			</td>
 			<td>
 				<my-button
 					@trigger="showSchedules = !showSchedules"
+					:active="!isTrigger"
 					:caption="capApp.schedulesItem.replace('{CNT}',schedules.length)"
 				/>
+			</td>
+			<td>
+				<my-bool v-model="isFrontendExec" :readonly="isTrigger" />
 			</td>
 			<td>
 				<div class="row">
@@ -440,7 +447,9 @@ let MyBuilderPgFunctionItem = {
 				name:'',
 				codeArgs:'',
 				codeFunction:'',
-				codeReturns:'trigger',
+				codeReturns:'',
+				isFrontendExec:false,
+				isTrigger:false,
 				schedules:[],
 				captions:{
 					pgFunctionTitle:{},
@@ -455,6 +464,8 @@ let MyBuilderPgFunctionItem = {
 			codeFunction:this.pgFunction.codeFunction,
 			codeReturns:this.pgFunction.codeReturns,
 			name:this.pgFunction.name,
+			isFrontendExec:this.pgFunction.isFrontendExec,
+			isTrigger:this.pgFunction.isTrigger,
 			schedules:JSON.parse(JSON.stringify(this.pgFunction.schedules)),
 			captions:JSON.parse(JSON.stringify(this.pgFunction.captions)),
 			
@@ -464,9 +475,11 @@ let MyBuilderPgFunctionItem = {
 	},
 	computed:{
 		hasChanges:function() {
-			return this.name        !== this.pgFunction.name
-				|| this.codeArgs    !== this.pgFunction.codeArgs
-				|| this.codeReturns !== this.pgFunction.codeReturns
+			return this.name           !== this.pgFunction.name
+				|| this.codeArgs       !== this.pgFunction.codeArgs
+				|| this.codeReturns    !== this.pgFunction.codeReturns
+				|| this.isFrontendExec !== this.pgFunction.isFrontendExec
+				|| this.isTrigger      !== this.pgFunction.isTrigger
 				|| JSON.stringify(this.schedules) !== JSON.stringify(this.pgFunction.schedules)
 				|| JSON.stringify(this.captions)  !== JSON.stringify(this.pgFunction.captions)
 			;
@@ -542,6 +555,8 @@ let MyBuilderPgFunctionItem = {
 				codeArgs:this.codeArgs,
 				codeFunction:this.codeFunction,
 				codeReturns:this.codeReturns,
+				isFrontendExec:this.isFrontendExec,
+				isTrigger:this.isTrigger,
 				schedules:this.schedules,
 				captions:this.captions
 			},true).then(
@@ -593,9 +608,11 @@ let MyBuilderFunctions = {
 							<th>{{ capGen.id }}</th>
 							<th>{{ capGen.title }}</th>
 							<th>{{ capApp.language }}</th>
+							<th>{{ capApp.isTrigger }}</th>
 							<th>{{ capApp.codeArgs }}</th>
 							<th>{{ capApp.codeReturns }}</th>
 							<th>{{ capApp.schedules }}</th>
+							<th>{{ capApp.isFrontendExec }}</th>
 							<th></th>
 						</tr>
 					</thead>
@@ -669,10 +686,8 @@ let MyBuilderFunctions = {
 	},
 	computed:{
 		module:function() {
-			if(typeof this.moduleIdMap[this.id] === 'undefined')
-				return false;
-			
-			return this.moduleIdMap[this.id];
+			return typeof this.moduleIdMap[this.id] === 'undefined'
+				? false : this.moduleIdMap[this.id];
 		},
 		
 		// stores

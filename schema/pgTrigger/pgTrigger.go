@@ -172,7 +172,7 @@ func Set_tx(tx pgx.Tx, pgFunctionId uuid.UUID, id uuid.UUID,
 	}
 
 	// create trigger
-	_, nameFnc, argsFnc, err := lookups.GetPgFunctionDetailsById_tx(tx, pgFunctionId)
+	_, nameFnc, argsFnc, _, err := lookups.GetPgFunctionDetailsById_tx(tx, pgFunctionId)
 	if err != nil {
 		return err
 	}

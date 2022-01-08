@@ -41,6 +41,10 @@ func PgFunctionExec_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) 
 		return nil, fmt.Errorf("backend function (ID %s) does not exist", req.Id)
 	}
 
+	if !fnc.IsFrontendExec {
+		return nil, fmt.Errorf("backend function (ID %s) may not be called from the frontend", req.Id)
+	}
+
 	mod, exists := cache.ModuleIdMap[fnc.ModuleId]
 	if !exists {
 		return nil, fmt.Errorf("module (ID %s) does not exist", fnc.ModuleId)
@@ -82,5 +86,6 @@ func PgFunctionSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 	return nil, pgFunction.Set_tx(tx, req.ModuleId, req.Id, req.Name, req.CodeArgs,
-		req.CodeFunction, req.CodeReturns, req.Schedules, req.Captions)
+		req.CodeFunction, req.CodeReturns, req.IsFrontendExec, req.IsTrigger,
+		req.Schedules, req.Captions)
 }

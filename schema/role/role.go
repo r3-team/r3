@@ -122,13 +122,10 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.role
-			SET assignable = $1
-			WHERE id = $2
+			SET name = $1, assignable = $2
+			WHERE id = $3
 			AND name <> 'everyone' -- cannot update default role
-		`, assignable, id); err != nil {
-			return err
-		}
-		if err := SetName_tx(tx, id, name); err != nil {
+		`, name, assignable, id); err != nil {
 			return err
 		}
 	} else {
@@ -185,15 +182,6 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 		return err
 	}
 	return nil
-}
-
-func SetName_tx(tx pgx.Tx, id uuid.UUID, name string) error {
-	_, err := tx.Exec(db.Ctx, `
-		UPDATE app.role SET name = $1
-		WHERE id = $2
-		AND name <> 'everyone'
-	`, name, id)
-	return err
 }
 
 func setAccess_tx(tx pgx.Tx, roleId uuid.UUID, id uuid.UUID, entity string,

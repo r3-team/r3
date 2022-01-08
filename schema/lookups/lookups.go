@@ -131,17 +131,18 @@ func GetPgFunctionNameById_tx(tx pgx.Tx, id uuid.UUID) (string, error) {
 	}
 	return name, nil
 }
-func GetPgFunctionDetailsById_tx(tx pgx.Tx, id uuid.UUID) (string, string, string, error) {
+func GetPgFunctionDetailsById_tx(tx pgx.Tx, id uuid.UUID) (string, string, string, bool, error) {
 	var moduleName, name, args string
+	var isTrigger bool
 	if err := tx.QueryRow(db.Ctx, `
-		SELECT f.name, f.code_args, m.name
+		SELECT f.name, f.code_args, f.is_trigger, m.name
 		FROM app.pg_function AS f
 		INNER JOIN app.module AS m ON m.id = f.module_id
 		WHERE f.id = $1
-	`, id).Scan(&name, &args, &moduleName); err != nil {
-		return "", "", "", fmt.Errorf("failed to get PG function details by ID %s: %w", id, err)
+	`, id).Scan(&name, &args, &isTrigger, &moduleName); err != nil {
+		return "", "", "", false, fmt.Errorf("failed to get PG function details by ID %s: %w", id, err)
 	}
-	return moduleName, name, args, nil
+	return moduleName, name, args, isTrigger, nil
 }
 
 // returns module and relation names for given PG trigger ID

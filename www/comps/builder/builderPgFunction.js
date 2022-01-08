@@ -46,10 +46,10 @@ let MyBuilderPgFunction = {
 						:darkBg="true"
 					/>
 					<my-button
-						@trigger="showDetails = !showDetails"
+						@trigger="showHeader = !showHeader"
 						:caption="capApp.button.details"
 						:darkBg="true"
-						:image="showDetails ? 'visible1.png' : 'visible0.png'"
+						:image="showHeader ? 'visible1.png' : 'visible0.png'"
 					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
@@ -61,35 +61,41 @@ let MyBuilderPgFunction = {
 			</div>
 			
 			<div class="content no-padding function-details default-inputs">
-				<table v-if="showDetails">
-					<tr>
-						<td>{{ capApp.codeArgs }}</td>
-						<td><input disabled :value="pgFunction.codeArgs !== '' ? pgFunction.codeArgs : '-'" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.codeReturns }}</td>
-						<td><input disabled :value="pgFunction.codeReturns !== '' ? pgFunction.codeReturns : '-'" /></td>
-					</tr>
-					<tr>
-						<td>{{ capGen.title }}</td>
-						<td>
-							<my-builder-caption
-								v-model="captions.pgFunctionTitle"
-								:language="builderLanguage"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.description }}</td>
-						<td>
-							<my-builder-caption
-								v-model="captions.pgFunctionDesc"
-								:language="builderLanguage"
-								:multiLine="true"
-							/>
-						</td>
-					</tr>
-				</table>
+				<div class="header" v-if="showHeader">
+					<table>
+						<tr>
+							<td>{{ capApp.codeArgs }}</td>
+							<td><input class="long" v-model="codeArgs" :disabled="isTrigger" placeholder="-" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.codeReturns }}</td>
+							<td><input v-model="codeReturns" :disabled="isTrigger" placeholder="-" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.isFrontendExec }}</td>
+							<td><my-bool v-model="isFrontendExec" :readonly="isTrigger" /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.title }}</td>
+							<td>
+								<my-builder-caption
+									v-model="captions.pgFunctionTitle"
+									:language="builderLanguage"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.description }}</td>
+							<td>
+								<my-builder-caption
+									v-model="captions.pgFunctionDesc"
+									:language="builderLanguage"
+									:multiLine="true"
+								/>
+							</td>
+						</tr>
+					</table>
+				</div>
 				
 				<!-- function body input -->
 				<textarea class="input"
@@ -180,7 +186,7 @@ let MyBuilderPgFunction = {
 						<!-- PG functions -->
 						<div class="placeholders functions">
 							<my-builder-function-placeholder
-								v-for="f in mod.pgFunctions.filter(v => v.codeReturns !== 'trigger' && v.codeReturns !== 'TRIGGER')"
+								v-for="f in mod.pgFunctions.filter(v => !v.isTrigger)"
 								@show-help="showHelp(f.name+'()',$event)"
 								@toggle="toggleEntity('pgFunction',f.id)"
 								:builderLanguage="builderLanguage"
@@ -226,7 +232,11 @@ let MyBuilderPgFunction = {
 		return {
 			name:'',
 			captions:{},
+			codeArgs:'',
 			codeFunction:'',
+			codeReturns:'',
+			isFrontendExec:false,
+			isTrigger:false,
 			
 			instanceFunctionIds:[
 				'abort_show_message','get_name','get_login_id',
@@ -242,36 +252,30 @@ let MyBuilderPgFunction = {
 			entitySelected:'',
 			entitySelectedId:null,
 			moduleIdsOpen:[],
-			showDetails:false,
+			showHeader:false,
 			showPreview:false,
 			showSidebar:true
 		};
 	},
 	computed:{
-		module:function() {
-			if(this.pgFunction === false)
-				return false;
-			
-			return this.moduleIdMap[this.pgFunction.moduleId];
-		},
-		pgFunction:function() {
-			if(typeof this.pgFunctionIdMap[this.id] === 'undefined')
-				return false;
-			
-			return this.pgFunctionIdMap[this.id];
-		},
 		hasChanges:function() {
-			return this.codeFunction !== this.placeholdersSet(this.pgFunction.codeFunction)
+			return this.codeArgs       !== this.pgFunction.codeArgs
+				|| this.codeFunction   !== this.placeholdersSet(this.pgFunction.codeFunction)
+				|| this.codeReturns    !== this.pgFunction.codeReturns
+				|| this.isFrontendExec !== this.pgFunction.isFrontendExec
 				|| JSON.stringify(this.captions) !== JSON.stringify(this.pgFunction.captions);
 		},
-		preview:function() {
-			if(!this.showPreview) return '';
-			
-			return this.placeholdersUnset(true);
+		module:function() {
+			return this.pgFunction === false
+				? false : this.moduleIdMap[this.pgFunction.moduleId];
+		},
+		pgFunction:function() {
+			return typeof this.pgFunctionIdMap[this.id] === 'undefined'
+				? false : this.pgFunctionIdMap[this.id];
 		},
 		
 		// simple
-		isTrigger:function() { return this.pgFunction.codeReturns === 'trigger'; },
+		preview:function() { return !this.showPreview ? '' : this.placeholdersUnset(true); },
 		
 		// stores
 		modules:        function() { return this.$store.getters['schema/modules']; },
@@ -301,9 +305,13 @@ let MyBuilderPgFunction = {
 			field.selectionEnd   = startPos + 1;
 		},
 		reset:function() {
-			this.name         = this.pgFunction.name;
-			this.captions     = JSON.parse(JSON.stringify(this.pgFunction.captions));
-			this.codeFunction = this.placeholdersSet(this.pgFunction.codeFunction);
+			this.name           = this.pgFunction.name;
+			this.captions       = JSON.parse(JSON.stringify(this.pgFunction.captions));
+			this.codeArgs       = this.pgFunction.codeArgs;
+			this.codeFunction   = this.placeholdersSet(this.pgFunction.codeFunction);
+			this.codeReturns    = this.pgFunction.codeReturns;
+			this.isFrontendExec = this.pgFunction.isFrontendExec;
+			this.isTrigger      = this.pgFunction.isTrigger;
 		},
 		insertEntitySelected:function(evt) {
 			if(this.entitySelectedId === null)
@@ -542,11 +550,15 @@ let MyBuilderPgFunction = {
 				ws.prepare('pgFunction','set',{
 					id:this.pgFunction.id,
 					moduleId:this.pgFunction.moduleId,
-					name:this.pgFunction.name,
-					codeArgs:this.pgFunction.codeArgs,
-					codeFunction:this.placeholdersUnset(false),
-					codeReturns:this.pgFunction.codeReturns,
+					isTrigger:this.pgFunction.isTrigger,
 					schedules:this.pgFunction.schedules,
+					
+					// changable
+					name:this.name,
+					codeArgs:this.codeArgs,
+					codeFunction:this.placeholdersUnset(false),
+					codeReturns:this.codeReturns,
+					isFrontendExec:this.isFrontendExec,
 					captions:this.captions
 				}),
 				ws.prepare('schema','check',{moduleId:this.module.id})

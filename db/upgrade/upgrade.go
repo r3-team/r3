@@ -140,9 +140,22 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX fki_open_form_column_id_fkey
 				ON app.open_form USING btree (column_id ASC NULLS LAST);
 			
-			-- clean up PG functions
+			-- clean up missing NOT NULL constraints in PG functions
 			ALTER TABLE app.pg_function ALTER COLUMN code_args SET NOT NULL;
 			ALTER TABLE app.pg_function ALTER COLUMN code_returns SET NOT NULL;
+			
+			-- new options for PG functions
+			ALTER TABLE app.pg_function ADD COLUMN is_frontend_exec boolean NOT NULL DEFAULT false;
+			ALTER TABLE app.pg_function ALTER COLUMN is_frontend_exec DROP DEFAULT;
+			ALTER TABLE app.pg_function ADD COLUMN is_trigger boolean NOT NULL DEFAULT false;
+			ALTER TABLE app.pg_function ALTER COLUMN is_trigger DROP DEFAULT;
+			UPDATE app.pg_function
+			SET is_trigger = true, code_returns = 'TRIGGER'
+			WHERE id IN (
+				SELECT id
+				FROM app.pg_function
+				WHERE UPPER(code_returns) = 'TRIGGER'
+			);
 			
 			-- JS functions
 			CREATE TABLE IF NOT EXISTS app.js_function (

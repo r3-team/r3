@@ -17,7 +17,7 @@ let MyBuilderRolesItem = {
 				<input class="long"
 					v-model="name"
 					:placeholder="isNew ? capApp.newRole : ''"
-					:readonly="isEveryone"
+					:disabled="isEveryone"
 				/>
 			</td>
 			<td>

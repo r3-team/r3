@@ -402,7 +402,7 @@ func runPgFunction(pgFunctionId uuid.UUID) error {
 	}
 	defer tx.Rollback(db.Ctx)
 
-	modName, fncName, _, err := lookups.GetPgFunctionDetailsById_tx(tx, pgFunctionId)
+	modName, fncName, _, _, err := lookups.GetPgFunctionDetailsById_tx(tx, pgFunctionId)
 	if err != nil {
 		return err
 	}

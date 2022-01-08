@@ -269,7 +269,8 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 		if err := importCheckResultAndApply(tx, pgFunction.Set_tx(tx,
 			e.ModuleId, e.Id, e.Name, e.CodeArgs, e.CodeFunction, e.CodeReturns,
-			e.Schedules, e.Captions), e.Id, idMapSkipped); err != nil {
+			e.IsFrontendExec, e.IsTrigger, e.Schedules, e.Captions),
+			e.Id, idMapSkipped); err != nil {
 
 			return err
 		}
