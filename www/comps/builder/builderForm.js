@@ -667,6 +667,7 @@ let MyBuilderForm = {
 				min:null,
 				max:null,
 				regexCheck:null,
+				jsFunctionId:null,
 				captions:{
 					fieldTitle:{},
 					fieldHelp:{}

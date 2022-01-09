@@ -214,12 +214,12 @@ let MyBuilderJsFunction = {
 						</div>
 						
 						<!-- PG functions -->
-						<div class="functions-title" v-if="mod.pgFunctions.filter(v => v.codeReturns !== 'trigger' && v.codeReturns !== 'TRIGGER').length !== 0">
+						<div class="functions-title" v-if="mod.pgFunctions.filter(v => v.isFrontendExec).length !== 0">
 							{{ capApp.functionsBackend }}
 						</div>
 						<div class="placeholders functions">
 							<my-builder-function-placeholder
-								v-for="f in mod.pgFunctions.filter(v => v.codeReturns !== 'trigger' && v.codeReturns !== 'TRIGGER')"
+								v-for="f in mod.pgFunctions.filter(v => v.isFrontendExec)"
 								@show-help="showHelp(f.name+'()',$event)"
 								@toggle="toggleEntity('pgFunction',f.id)"
 								:builderLanguage="builderLanguage"

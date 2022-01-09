@@ -596,10 +596,8 @@ let MyField = {
 			return false;
 		},
 		link:function() {
-			if(!this.isData)
-				return false;
-			
-			return this.getLinkMeta(this.field.display,this.value);
+			return !this.isData
+				? false : this.getLinkMeta(this.field.display,this.value);
 		},
 		presetValue:function() {
 			if(!this.isData) return false;
@@ -766,10 +764,8 @@ let MyField = {
 			return true;
 		},
 		inputCheckRegex:function() {
-			if(!this.isData || this.field.regexCheck === null)
-				return null;
-			
-			return new RegExp(this.field.regexCheck);
+			return !this.isData || this.field.regexCheck === null
+				? null : new RegExp(this.field.regexCheck);
 		},
 		
 		// bool states
@@ -977,15 +973,6 @@ let MyField = {
 			}
 			this.value = valueNew.length !== 0 ? valueNew : null;
 		},
-		triggerButton:function(middleClick) {
-			if(this.field.openForm !== null)
-				this.openForm(0,[],middleClick);
-			
-			if(this.field.jsFunctionId !== null)
-				this.$emit('execute-function',this.field.jsFunctionId);
-		},
-		
-		// helpers
 		setValue:function(val,valOld,indexAttributeId) {
 			if(val === '')
 				val = null;
@@ -998,6 +985,16 @@ let MyField = {
 				this.notTouched = false;
 			
 			this.$emit('set-value',indexAttributeId,val);
+			
+			if(this.field.jsFunctionId !== null)
+				this.$emit('execute-function',this.field.jsFunctionId);
+		},
+		triggerButton:function(middleClick) {
+			if(this.field.openForm !== null)
+				this.openForm(0,[],middleClick);
+			
+			if(this.field.jsFunctionId !== null)
+				this.$emit('execute-function',this.field.jsFunctionId);
 		}
 	}
 };

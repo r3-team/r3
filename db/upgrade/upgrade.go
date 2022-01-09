@@ -266,6 +266,17 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX IF NOT EXISTS fki_field_button_js_function_id
 			    ON app.field_button USING btree (js_function_id ASC NULLS LAST);
+			
+			ALTER TABLE app.field_data ADD COLUMN js_function_id UUID;
+			ALTER TABLE app.field_data ADD CONSTRAINT field_data_js_function_id_fkey
+				FOREIGN KEY (js_function_id)
+				REFERENCES app.js_function (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_field_data_js_function_id
+			    ON app.field_data USING btree (js_function_id ASC NULLS LAST);
 		`)
 
 		// migrate existing form open actions to new 'open form' entity

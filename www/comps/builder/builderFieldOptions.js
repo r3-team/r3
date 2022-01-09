@@ -793,9 +793,10 @@ let MyBuilderFieldOptions = {
 			/>
 			
 			<!-- execute JS function -->
-			<template v-if="isButton">
+			<template v-if="isButton || isData">
 				<tr>
-					<td>{{ capApp.jsFunction }}</td>
+					<td v-if="isButton">{{ capApp.jsFunctionButton }}</td>
+					<td v-if="isData">{{ capApp.jsFunctionData }}</td>
 					<td>
 						<select
 							@input="setNull('jsFunctionId',$event.target.value)"
@@ -920,10 +921,8 @@ let MyBuilderFieldOptions = {
 	emits:['set'],
 	computed:{
 		attribute:function() {
-			if(!this.isData || typeof this.attributeIdMap[this.field.attributeId] === 'undefined')
-				return false;
-			
-			return this.attributeIdMap[this.field.attributeId];
+			return !this.isData || typeof this.attributeIdMap[this.field.attributeId] === 'undefined'
+				? false : this.attributeIdMap[this.field.attributeId];
 		},
 		openFormTargetAttributes:function() {
 			if(!this.isOpenForm)
@@ -992,30 +991,22 @@ let MyBuilderFieldOptions = {
 		},
 		
 		// simple states
-		hasCaption:   function() { return this.isData || this.isHeader; },
-		isButton:     function() { return this.field.content === 'button'; },
-		isCalendar:   function() { return this.field.content === 'calendar'; },
-		isChart:      function() { return this.field.content === 'chart'; },
-		isContainer:  function() { return this.field.content === 'container'; },
-		isData:       function() { return this.field.content === 'data'; },
-		isDate:       function() { return this.isData && this.field.display === 'date'; },
-		isDatetime:   function() { return this.isData && this.field.display === 'datetime'; },
-		isHeader:     function() { return this.field.content === 'header'; },
-		isList:       function() { return this.field.content === 'list'; },
-		isOpenForm:   function() { return typeof this.field.openForm !== 'undefined' && this.field.openForm !== null; },
-		isQuery:      function() { return this.isCalendar || this.isChart || this.isList || this.isRelationship },
-		isFiles:function() {
-			return this.isData && this.isAttributeFiles(this.attribute.content);
-		},
-		isInteger:function() {
-			return this.isData && this.isAttributeInteger(this.attribute.content);
-		},
-		isRelationship:function() {
-			return this.isData && this.isAttributeRelationship(this.attribute.content);
-		},
-		isString:function() {
-			return this.isData && this.isAttributeString(this.attribute.content);
-		},
+		hasCaption:    function() { return this.isData || this.isHeader; },
+		isButton:      function() { return this.field.content === 'button'; },
+		isCalendar:    function() { return this.field.content === 'calendar'; },
+		isChart:       function() { return this.field.content === 'chart'; },
+		isContainer:   function() { return this.field.content === 'container'; },
+		isData:        function() { return this.field.content === 'data'; },
+		isDate:        function() { return this.isData && this.field.display === 'date'; },
+		isDatetime:    function() { return this.isData && this.field.display === 'datetime'; },
+		isHeader:      function() { return this.field.content === 'header'; },
+		isList:        function() { return this.field.content === 'list'; },
+		isOpenForm:    function() { return typeof this.field.openForm !== 'undefined' && this.field.openForm !== null; },
+		isQuery:       function() { return this.isCalendar || this.isChart || this.isList || this.isRelationship },
+		isFiles:       function() { return this.isData && this.isAttributeFiles(this.attribute.content); },
+		isInteger:     function() { return this.isData && this.isAttributeInteger(this.attribute.content); },
+		isRelationship:function() { return this.isData && this.isAttributeRelationship(this.attribute.content); },
+		isString:      function() { return this.isData && this.isAttributeString(this.attribute.content); },
 		
 		// stores
 		module:        function() { return this.moduleIdMap[this.moduleId]; },

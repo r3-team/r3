@@ -54,7 +54,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		
 		-- data field
 		fd.attribute_id, fd.attribute_id_alt, fd.index, fd.display, fd.min,
-		fd.max, fd.def, fd.regex_check,
+		fd.max, fd.def, fd.regex_check, fd.js_function_id,
 		
 		-- data relationship field
 		fr.attribute_id_nm, fr.category, fr.filter_quick, fr.outside_in,
@@ -112,21 +112,22 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		var autoRenew, dateRange0, dateRange1, indexColor, min, max pgtype.Int4
 		var attributeId, attributeIdAlt, attributeIdNm, attributeIdDate0,
 			attributeIdDate1, attributeIdColor, fieldParentId, iconId,
-			jsFunctionIdButton pgtype.UUID
+			jsFunctionIdButton, jsFunctionIdData pgtype.UUID
 		var category, csvExport, csvImport, filterQuick, filterQuickList,
 			gantt, ganttStepsToggle, ics, outsideIn, wrap pgtype.Bool
 		var defPresetIds []uuid.UUID
 
 		if err := rows.Scan(&fieldId, &fieldParentId, &iconId, &content, &state,
-			&onMobile, &atrContent, &jsFunctionIdButton, &attributeIdDate0, &attributeIdDate1,
-			&attributeIdColor, &indexDate0, &indexDate1, &indexColor, &ics,
-			&gantt, &ganttSteps, &ganttStepsToggle, &dateRange0, &dateRange1,
-			&chartOption, &direction, &justifyContent, &alignItems,
-			&alignContent, &wrap, &grow, &shrink, &basis, &perMin, &perMax,
-			&size, &attributeId, &attributeIdAlt, &index, &display, &min, &max,
-			&def, &regexCheck, &attributeIdNm, &category, &filterQuick,
-			&outsideIn, &autoSelect, &defPresetIds, &autoRenew, &csvExport,
-			&csvImport, &layout, &filterQuickList, &resultLimit); err != nil {
+			&onMobile, &atrContent, &jsFunctionIdButton, &attributeIdDate0,
+			&attributeIdDate1, &attributeIdColor, &indexDate0, &indexDate1,
+			&indexColor, &ics, &gantt, &ganttSteps, &ganttStepsToggle,
+			&dateRange0, &dateRange1, &chartOption, &direction, &justifyContent,
+			&alignItems, &alignContent, &wrap, &grow, &shrink, &basis, &perMin,
+			&perMax, &size, &attributeId, &attributeIdAlt, &index, &display,
+			&min, &max, &def, &regexCheck, &jsFunctionIdData, &attributeIdNm,
+			&category, &filterQuick, &outsideIn, &autoSelect, &defPresetIds,
+			&autoRenew, &csvExport, &csvImport, &layout, &filterQuickList,
+			&resultLimit); err != nil {
 
 			rows.Close()
 			return fields, err
@@ -142,10 +143,10 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			fields = append(fields, types.FieldButton{
 				Id:           fieldId,
 				IconId:       iconId,
-				JsFunctionId: jsFunctionIdButton,
 				Content:      content,
 				State:        state,
 				OnMobile:     onMobile,
+				JsFunctionId: jsFunctionIdButton,
 				OpenForm:     types.OpenForm{},
 
 				// legacy
@@ -231,6 +232,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 					Min:            min,
 					Max:            max,
 					RegexCheck:     regexCheck,
+					JsFunctionId:   jsFunctionIdData,
 					Def:            def.String,
 					DefPresetIds:   defPresetIds,
 					Category:       category.Bool,
@@ -261,6 +263,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 					Min:            min,
 					Max:            max,
 					RegexCheck:     regexCheck,
+					JsFunctionId:   jsFunctionIdData,
 					Captions:       types.CaptionMap{},
 				})
 				posDataLookup = append(posDataLookup, pos)
@@ -595,7 +598,8 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 				return err
 			}
 			if err := setData_tx(tx, fieldId, f.AttributeId, f.AttributeIdAlt,
-				f.Index, f.Def, f.Display, f.Min, f.Max, f.RegexCheck); err != nil {
+				f.Index, f.Def, f.Display, f.Min, f.Max, f.RegexCheck,
+				f.JsFunctionId); err != nil {
 
 				return err
 			}
@@ -838,7 +842,8 @@ func setContainer_tx(tx pgx.Tx, fieldId uuid.UUID, direction string,
 }
 func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 	attributeIdAlt pgtype.UUID, index int, def string, display string,
-	min pgtype.Int4, max pgtype.Int4, regexCheck pgtype.Varchar) error {
+	min pgtype.Int4, max pgtype.Int4, regexCheck pgtype.Varchar,
+	jsFunctionId pgtype.UUID) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_data", "field_id")
 	if err != nil {
@@ -849,10 +854,11 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.field_data
 			SET attribute_id = $1, attribute_id_alt = $2, index = $3,
-				def = $4, display = $5,min = $6, max = $7, regex_check = $8
-			WHERE field_id = $9
+				def = $4, display = $5,min = $6, max = $7, regex_check = $8,
+				js_function_id = $9
+			WHERE field_id = $10
 		`, attributeId, attributeIdAlt, index, def, display, min, max,
-			regexCheck, fieldId); err != nil {
+			regexCheck, jsFunctionId, fieldId); err != nil {
 
 			return err
 		}
@@ -860,11 +866,11 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.field_data (
 				field_id, attribute_id, attribute_id_alt, index, def, display,
-				min, max, regex_check
+				min, max, regex_check, js_function_id
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
 		`, fieldId, attributeId, attributeIdAlt, index, def,
-			display, min, max, regexCheck); err != nil {
+			display, min, max, regexCheck, jsFunctionId); err != nil {
 
 			return err
 		}

@@ -164,10 +164,10 @@ type Field struct {
 type FieldButton struct {
 	Id           uuid.UUID   `json:"id"`
 	IconId       pgtype.UUID `json:"iconId"`
-	JsFunctionId pgtype.UUID `json:"jsFunctionId"`
 	Content      string      `json:"content"`
 	State        string      `json:"state"`
 	OnMobile     bool        `json:"onMobile"`
+	JsFunctionId pgtype.UUID `json:"jsFunctionId"` // JS function to executing when triggering button
 	OpenForm     OpenForm    `json:"openForm"`
 	Captions     CaptionMap  `json:"captions"`
 
@@ -242,7 +242,8 @@ type FieldData struct {
 	Def            string         `json:"def"`            // data field default value
 	Min            pgtype.Int4    `json:"min"`
 	Max            pgtype.Int4    `json:"max"`
-	RegexCheck     pgtype.Varchar `json:"regexCheck"` // regex expression to check field value against
+	RegexCheck     pgtype.Varchar `json:"regexCheck"`   // regex expression to check field value against
+	JsFunctionId   pgtype.UUID    `json:"jsFunctionId"` // JS function to exec when changing values
 	Captions       CaptionMap     `json:"captions"`
 }
 type FieldDataRelationship struct {
@@ -263,7 +264,8 @@ type FieldDataRelationship struct {
 	DefPresetIds []uuid.UUID    `json:"defPresetIds"` // data field default preset IDs
 	Min          pgtype.Int4    `json:"min"`
 	Max          pgtype.Int4    `json:"max"`
-	RegexCheck   pgtype.Varchar `json:"regexCheck"` // not used for relationships
+	RegexCheck   pgtype.Varchar `json:"regexCheck"`   // not used for relationships
+	JsFunctionId pgtype.UUID    `json:"jsFunctionId"` // JS function to exec when changing values
 	Columns      []Column       `json:"columns"`
 	Category     bool           `json:"category"`
 	FilterQuick  bool           `json:"filterQuick"`
