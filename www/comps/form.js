@@ -979,8 +979,15 @@ let MyForm = {
 			// limit function code access
 			// strict mode does not allow overwriting already defined variables
 			// also blocked, restoration of access to window: let win = (function() {return this;}())
-			code = `"use strict";let window = 'Access to window object denied';${code}`;
-			
+			code = `'use strict';
+				let document       = {};
+				let setInterval    = {};
+				let setTimeout     = {};
+				let XMLHttpRequest = {};
+				let WebSocket      = {};
+				let window         = {};
+				${code}
+			`;
 			return Function(argNames,code)(this.exposedFunctions,...args);
 		},
 		openBuilder:function() {
