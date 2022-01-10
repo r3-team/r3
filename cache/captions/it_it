@@ -397,8 +397,8 @@
 			"intervalTypeYears":"anno(i)",
 			"scheduleLine":"Ogni {VALUE} {TYPE}",
 			"scheduleLineDayMonths":"al {DAY}.",
-			"scheduleLineDayWeeks":"al {DAY}. weekday",
-			"scheduleLineDayYears":"al {DAY}. of the year",
+			"scheduleLineDayWeeks":"al {DAY}. giorno della settimana",
+			"scheduleLineDayYears":"al {DAY}. dell'anno",
 			"scheduleLineTime":"alle {HH}:{MM}:{SS}",
 			"systemTasks":"Attività di sistema"
 		},
@@ -566,20 +566,20 @@
 			"hidden":"Il campo è nascosto per impostazione predefinita",
 			"icon":"Icona modulo",
 			"ics":"Abbonamenti iCAL",
-			"jsFunctionButton":"Function on click",
-			"jsFunctionData":"Function on value change",
+			"jsFunctionButton":"Funzione on click",
+			"jsFunctionData":"Funzione on value change",
 			"layout":"Layout elenco",
 			"limit":"Limite risultato",
 			"new":"Nuovo modulo",
 			"onMobile":"Nella vista mobile",
 			"openForm":"Apri modulo",
-			"openFormAttributeApply":"...to set value on form",
-			"openFormFormIdOpen":"Form",
-			"openFormMaxHeight":"Maximum height (px)",
-			"openFormMaxWidth":"Maximum width (px)",
-			"openFormNewRecord":"When creating new records",
-			"openFormPopUp":"Pop-up form",
-			"openFormRelationIndex":"Use record from relation",
+			"openFormAttributeApply":"...per impopstare il valore sul modulo",
+			"openFormFormIdOpen":"Modulo",
+			"openFormMaxHeight":"Altezza massima (px)",
+			"openFormMaxWidth":"Larghezza massima (px)",
+			"openFormNewRecord":"Quando si creano nuovi record",
+			"openFormPopUp":"Modulo Pop-up",
+			"openFormRelationIndex":"Utilizza record da relazione",
 			"presetOpen":"Preimpostazione apertura",
 			"readonly":"Solo lettura",
 			"required":"Obbligatorio",
@@ -609,17 +609,17 @@
 				"delete":"Sei sicuro di voler eliminare questa funzione?"
 			},
 			"helpJs":{
-				"get_language_code":"app.get_language_code() => STRING<br /><br />Returns the 5-letter language code ('en_us', ...) of the current login.",
-				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Returns the ID of the current login.",
-				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Returns the record ID of the open form for the specified relation index (0 is default).",
-				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Returns all assigned role IDs for the current login (nested roles are included).",
-				"go_back":"app.go_back() => UNDEFINED<br /><br />Executes a browser-back navigation.",
-				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />Returns true if the current login has the assigned role (nested roles are included).",
-				"open_form":"app.open_form(form_id,record_id,new_tab,pop_up,max_height,max_width) => UNDEFINED<br /><br />Opens new form either in new browser tab or as pop-up window (with max-/minimum height).",
-				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Deletes the current form record.",
-				"record_new":"app.record_new() => UNDEFINED<br /><br />Opens new record.",
-				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Reloads the current form record.",
-				"record_save":"app.record_save() => UNDEFINED<br /><br />Saves the current form record."
+				"get_language_code":"app.get_language_code() => STRING<br /><br />Restituisce le 5 lettere del codice lingua ('en_us', ...) del login attuale.",
+				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Restituisce l'ID del login attuale.",
+				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Restituisce l'Id del record del modulo aperto per l'indice della relazione specificata (0 per predefinita).",
+				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Restituisce tutti gli ID dei ruoli assegnati al login attuale (i ruoli annidati sono inclusi).",
+				"go_back":"app.go_back() => UNDEFINED<br /><br />Esegue una navigazione indietro del browser.",
+				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />Restituisce true (vero) se il login corrente ha il ruolo assegnato (i ruoli annidati sono inclusi).",
+				"open_form":"app.open_form(form_id,record_id,new_tab,pop_up,max_height,max_width) => UNDEFINED<br /><br />Apre un nuovo modulo o in una nuova scheda del browser o come finestra pop-up (con altezza max/min).",
+				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Cancella il record presente sul modulo.",
+				"record_new":"app.record_new() => UNDEFINED<br /><br />Apre un nuovo record.",
+				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Ricarica il record attuale.",
+				"record_save":"app.record_save() => UNDEFINED<br /><br />Salva il record corrente."
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Interrompe l'operazione e invia un messaggio all'utente che lo esegue, che viene visualizzato nell'interfaccia utente.",
@@ -930,10 +930,10 @@
 			"whatIsSent":"Cosa viene inviato?"
 		},
 		"option":{
-			"codeBug":"Bug / Issue",
-			"codeGeneric":"General",
-			"codePraise":"Praise",
-			"codeSuggestion":"Suggestion"
+			"codeBug":"Bachi / Problema",
+			"codeGeneric":"Generale",
+			"codePraise":"Elogi",
+			"codeSuggestion":"Suggerimenti"
 		},
 		"moduleRelated":"Questo feedback è per l'applicazione aperta? ({NOME})",
 		"sendNok":"Non è stato possibile inviare il feedback. Per favore riprova più tardi.",
@@ -998,7 +998,7 @@
 			"retractLogs":"Ritira logs"
 		},
 		"dialog":{
-			"close":"There are unsaved changes.<br /><br />Do you still want to close this form?",
+			"close":"Ci sono modifiche non salvate.<br /><br />Chiudere comunque questo modulo?",
 			"delete":"Sei sicuro di voler eliminare questo record <b>in modo permanente</b>?",
 			"new":"Ci sono modifiche non salvate.<br /><br />Procedere con un nuovo record?",
 			"newReset":"Quest'azione azzererà ciò che è stato inserito.<br /><br />Continuare?",
@@ -1156,6 +1156,6 @@
 		"titleDisplay":"Visualizza",
 		"titleSecurity":"Sicurezza",
 		"titleTheme":"Tema",
-		"warnUnsaved":"Warnings for unsaved changes"
+		"warnUnsaved":"Avviso per cambiamenti non salvati"
 	}
 }
