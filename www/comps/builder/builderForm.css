@@ -235,6 +235,14 @@
 }
 
 
+/* form functions */
+.builder-form-functions{}
+.builder-form-functions table td{
+	padding:2px 8px;
+}
+.builder-form-function{}
+
+
 /* form states */
 .builder-form-states{
 	max-height:360px;

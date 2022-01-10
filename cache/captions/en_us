@@ -443,6 +443,17 @@
 			"dialog":{
 				"delete":"Are you sure you want to delete this form?"
 			},
+			"functions":{
+				"option":{
+					"delete":"Form record deleted",
+					"open":"Form opened",
+					"save":"Form record saved"
+				},
+				"event":"Event",
+				"eventBefore":"Before event",
+				"jsFunctionId":"Execute frontend function",
+				"title":"Form functions"
+			},
 			"option":{
 				"displayColor":"color",
 				"displayDefault":"default",
@@ -583,6 +594,7 @@
 			"presetOpen":"Open preset",
 			"readonly":"Read only",
 			"required":"Required",
+			"showFunctions":"Functions",
 			"showHelp":"Help",
 			"showOutsideIn":"Ref. relationships",
 			"showStates":"States",

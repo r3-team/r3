@@ -443,6 +443,17 @@
 			"dialog":{
 				"delete":"Sigur doriți să ștergeți acest formular?"
 			},
+			"functions":{
+				"option":{
+					"delete":"Form record deleted",
+					"open":"Form opened",
+					"save":"Form record saved"
+				},
+				"event":"Event",
+				"eventBefore":"Before event",
+				"jsFunctionId":"Execute frontend function",
+				"title":"Form functions"
+			},
 			"option":{
 				"displayColor":"culoare",
 				"displayDefault":"implicit",
@@ -583,6 +594,7 @@
 			"presetOpen":"Deschide presetarea",
 			"readonly":"Numai citire",
 			"required":"Necesar",
+			"showFunctions":"Functions",
 			"showHelp":"Ajutor",
 			"showOutsideIn":"Ref. relații",
 			"showStates":"Statuturi",

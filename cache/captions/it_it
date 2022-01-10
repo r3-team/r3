@@ -443,6 +443,17 @@
 			"dialog":{
 				"delete":"Sei sicuro di voler eliminare questo modulo?"
 			},
+			"functions":{
+				"option":{
+					"delete":"Form record deleted",
+					"open":"Form opened",
+					"save":"Form record saved"
+				},
+				"event":"Event",
+				"eventBefore":"Before event",
+				"jsFunctionId":"Execute frontend function",
+				"title":"Form functions"
+			},
 			"option":{
 				"displayColor":"colore",
 				"displayDefault":"predefinito",
@@ -583,6 +594,7 @@
 			"presetOpen":"Preimpostazione apertura",
 			"readonly":"Solo lettura",
 			"required":"Obbligatorio",
+			"showFunctions":"Functions",
 			"showHelp":"Aiuto",
 			"showOutsideIn":"Riferimento relazione",
 			"showStates":"Stati",

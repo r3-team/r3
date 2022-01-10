@@ -335,7 +335,8 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 		if err := importCheckResultAndApply(tx, form.Set_tx(tx,
 			e.ModuleId, e.Id, e.PresetIdOpen, e.IconId, e.Name, e.Query,
-			e.Fields, e.States, e.Captions), e.Id, idMapSkipped); err != nil {
+			e.Fields, e.Functions, e.States, e.Captions), e.Id,
+			idMapSkipped); err != nil {
 
 			return err
 		}

@@ -443,6 +443,17 @@
 			"dialog":{
 				"delete":"Bist du sicher, dass du dieses Formular löschen möchtest?"
 			},
+			"functions":{
+				"option":{
+					"delete":"Formulardatensatz gelöscht",
+					"open":"Formular geöffnet",
+					"save":"Formulardatensatz gespeichert"
+				},
+				"event":"Ereignis",
+				"eventBefore":"Vor Ereignis",
+				"jsFunctionId":"Frontend-Funktion ausführen",
+				"title":"Formularfunktionen"
+			},
 			"option":{
 				"displayColor":"Farbe",
 				"displayDefault":"Standard",
@@ -583,6 +594,7 @@
 			"presetOpen":"Vord. Datensatz öffnen",
 			"readonly":"Lesend",
 			"required":"Benötigt",
+			"showFunctions":"Funktionen",
 			"showHelp":"Hilfe",
 			"showOutsideIn":"Ref. Beziehungen",
 			"showStates":"Zustände",

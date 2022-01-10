@@ -119,15 +119,22 @@ type Icon struct {
 	File     []byte    `json:"file"`
 }
 type Form struct {
-	Id           uuid.UUID     `json:"id"`
-	ModuleId     uuid.UUID     `json:"moduleId"`
-	PresetIdOpen pgtype.UUID   `json:"presetIdOpen"`
-	IconId       pgtype.UUID   `json:"iconId"`
-	Name         string        `json:"name"`
-	Query        Query         `json:"query"`
-	Fields       []interface{} `json:"fields"`
-	States       []FormState   `json:"states"`
-	Captions     CaptionMap    `json:"captions"`
+	Id           uuid.UUID      `json:"id"`
+	ModuleId     uuid.UUID      `json:"moduleId"`
+	PresetIdOpen pgtype.UUID    `json:"presetIdOpen"`
+	IconId       pgtype.UUID    `json:"iconId"`
+	Name         string         `json:"name"`
+	Query        Query          `json:"query"`
+	Fields       []interface{}  `json:"fields"`
+	Functions    []FormFunction `json:"functions"`
+	States       []FormState    `json:"states"`
+	Captions     CaptionMap     `json:"captions"`
+}
+type FormFunction struct {
+	Position     int       `json:"position"`
+	JsFunctionId uuid.UUID `json:"jsFunctionId"`
+	Event        string    `json:"event"` // open, save, delete
+	EventBefore  bool      `json:"eventBefore"`
 }
 type FormState struct {
 	Id          uuid.UUID            `json:"id"`

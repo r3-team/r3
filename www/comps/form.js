@@ -783,9 +783,7 @@ let MyForm = {
 			this.valuesDef = {};
 			this.valuesOrg = {};
 			
-			let that = this;
-			
-			let fillFieldValueTemplates = function(fields) {
+			let fillFieldValueTemplates = (fields) => {
 				for(let i = 0, j = fields.length; i < j; i++) {
 					let f = fields[i];
 					
@@ -799,39 +797,39 @@ let MyForm = {
 					
 					// apply data field default value
 					let def       = null;
-					let attribute = that.attributeIdMap[f.attributeId];
-					let indexAttributeId = that.getIndexAttributeIdByField(f,false);
+					let attribute = this.attributeIdMap[f.attributeId];
+					let indexAttributeId = this.getIndexAttributeIdByField(f,false);
 					
 					if(f.def !== '')
-						def = that.getAttributeValueFromString(attribute.content,
-							 that.getResolvedPlaceholders(f.def));
+						def = this.getAttributeValueFromString(attribute.content,
+							 this.getResolvedPlaceholders(f.def));
 					
-					if(that.isAttributeRelationship(attribute.content) && f.defPresetIds.length > 0) {
+					if(this.isAttributeRelationship(attribute.content) && f.defPresetIds.length > 0) {
 						let multi = f.attributeIdNm !== null || (
-							f.outsideIn && that.isAttributeRelationshipN1(attribute.content)
+							f.outsideIn && this.isAttributeRelationshipN1(attribute.content)
 						);
 						if(!multi) {
-							def = that.presetIdMapRecordId[f.defPresetIds[0]];
+							def = this.presetIdMapRecordId[f.defPresetIds[0]];
 						}
 						else {
 							def = [];
 							for(let i = 0, j = f.defPresetIds.length; i < j; i++) {
-								def.push(that.presetIdMapRecordId[f.defPresetIds[i]]);
+								def.push(this.presetIdMapRecordId[f.defPresetIds[i]]);
 							}
 						}
 					}
 					
-					that.valuesDef[indexAttributeId] = def;
-					that.valueSet(indexAttributeId,def,true,false);
+					this.valuesDef[indexAttributeId] = def;
+					this.valueSet(indexAttributeId,def,true,false);
 					
 					// set value and default for altern. field attribute
 					if(f.attributeIdAlt !== null) {
 						
-						let indexAttributeIdAlt = that.getIndexAttributeId(
+						let indexAttributeIdAlt = this.getIndexAttributeId(
 							f.index,f.attributeIdAlt,false,null);
 						
-						that.valuesDef[indexAttributeIdAlt] = null;
-						that.valueSet(indexAttributeIdAlt,null,true,false);
+						this.valuesDef[indexAttributeIdAlt] = null;
+						this.valueSet(indexAttributeIdAlt,null,true,false);
 					}
 				}
 				return fields;
@@ -1087,17 +1085,29 @@ let MyForm = {
 			this.loading = true;
 			this.releaseLoadingOnNextTick();
 		},
-		recordStateChanged:function(code) {
+		recordMessageUpdate:function(code) {
 			clearTimeout(this.messageTimeout);
 			this.messageTimeout = setTimeout(() => this.messageCode = null,3000);
 			this.messageCode    = code;
 		},
 		scrollToInvalidField:function() {
-			if(this.fieldIdsInvalid.length === 0)
-				return;
-			
-			document.getElementById(this.getInputFieldName(
-				this.fieldIdsInvalid[0])).scrollIntoView();
+			if(this.fieldIdsInvalid.length !== 0)
+				document.getElementById(this.getInputFieldName(
+					this.fieldIdsInvalid[0])).scrollIntoView();
+		},
+		
+		// form function triggers
+		triggerEventAfter: function(e) { this.triggerEvent(e,false); },
+		triggerEventBefore:function(e) { this.triggerEvent(e,true); },
+		triggerEvent:function(event,before) {
+			for(let i = 0, j = this.form.functions.length; i < j; i++) {
+				let f = this.form.functions[i];
+				
+				if(f.event !== event || f.eventBefore !== before)
+					continue;
+				
+				this.executeFunction(f.jsFunctionId);
+			}
 		},
 		
 		// navigation
@@ -1207,6 +1217,8 @@ let MyForm = {
 			});
 		},
 		del:function() {
+			this.triggerEventBefore('delete');
+			
 			let requests = [];
 			for(let i = 0, j = this.joins.length; i < j; i++) {
 				let j = this.joins[i];
@@ -1225,16 +1237,21 @@ let MyForm = {
 					if(this.isInline)
 						this.$emit('record-deleted',this.recordId);
 					
+					this.triggerEventAfter('delete');
 					this.openForm();
-					this.recordStateChanged('deleted');
+					this.recordMessageUpdate('deleted');
 				},
 				(err) => this.handleError(err)
 			);
 		},
 		get:function() {
+			this.triggerEventBefore('open');
+			
 			// no record defined, form is done loading
-			if(this.recordId === 0)
+			if(this.recordId === 0) {
+				this.triggerEventAfter('open');
 				return this.releaseLoadingOnNextTick();
+			}
 			
 			// set base record ID, necessary for form filter 'newRecord'
 			this.recordIdIndexMap[0] = this.recordId;
@@ -1242,7 +1259,6 @@ let MyForm = {
 			// add index attributes to be retrieved
 			let expressions = [];
 			for(let ia in this.values) {
-				
 				let d = this.getDetailsFromIndexAttributeId(ia);
 				expressions.push({
 					attributeId:d.attributeId,
@@ -1295,6 +1311,7 @@ let MyForm = {
 					}
 					this.badSave = false;
 					this.badLoad = false;
+					this.triggerEventAfter('open');
 					this.releaseLoadingOnNextTick();
 				},
 				(err) => this.handleError(err)
@@ -1396,19 +1413,18 @@ let MyForm = {
 			if(this.fieldIdsInvalid.length !== 0)
 				return this.badSave = true;
 			
-			let that = this;
-			let req  = {};
+			this.triggerEventBefore('save');
 			
-			let addRelationByIndex = function(index) {
+			let req = {};
+			let addRelationByIndex = (index) => {
 				
 				// already added, ignore
 				if(typeof req[index] !== 'undefined')
 					return;
 				
-				let j = that.joinsIndexMap[index];
+				let j = this.joinsIndexMap[index];
 				
 				// ignore relation completely if record is new and creation is disallowed
-				// otherwise empty record is created
 				if(!j.applyCreate && j.recordId === 0)
 					return;
 				
@@ -1427,7 +1443,6 @@ let MyForm = {
 			
 			// add values by index attribute ID
 			for(let k in this.values) {
-				
 				let d     = this.getDetailsFromIndexAttributeId(k);
 				let j     = this.joinsIndexMap[d.index];
 				let isNew = j.recordId === 0;
@@ -1460,11 +1475,13 @@ let MyForm = {
 					this.$store.commit('formHasChanges',false);
 					
 					// set record-saved timestamp
-					if(this.isNew) this.recordStateChanged('created');
-					else           this.recordStateChanged('updated');
+					if(this.isNew) this.recordMessageUpdate('created');
+					else           this.recordMessageUpdate('updated');
 					
 					if(this.isInline)
 						this.$emit('record-updated',res.payload.indexRecordIds[0]);
+					
+					this.triggerEventAfter('save');
 					
 					// load empty record if requested
 					if(saveAndNew)

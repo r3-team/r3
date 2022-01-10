@@ -82,7 +82,8 @@ let MyBuilderFormsItem = {
 				iconId:null,
 				name:'',
 				fields:[],
-				query:{},
+				functions:[],
+				query:null,
 				captions:{
 					formTitle:{}
 				}
@@ -107,12 +108,11 @@ let MyBuilderFormsItem = {
 		},
 		presetCandidates:function() {
 			return this.isNew || !this.isQueryActive
-				? []
-				: this.relationIdMap[this.form.query.relationId].presets;
+				? [] : this.relationIdMap[this.form.query.relationId].presets;
 		},
 		
 		// simple states
-		isQueryActive:function() { return this.form.query.relationId !== null; },
+		isQueryActive:function() { return !this.isNew && this.form.query.relationId !== null; },
 		isNew:        function() { return this.form.id === null; },
 		
 		// stores
@@ -162,14 +162,19 @@ let MyBuilderFormsItem = {
 			);
 		},
 		set:function() {
+			let query = JSON.parse(JSON.stringify(this.form.query));
+			if(query === null)
+				query = this.getQueryTemplate();
+			
 			ws.send('form','set',{
 				id:this.form.id,
 				moduleId:this.moduleId,
 				presetIdOpen:this.presetIdOpen,
 				iconId:this.iconId,
 				name:this.name,
-				query:this.getQueryTemplate(),
+				query:query,
 				fields:this.form.fields,
+				functions:this.form.functions,
 				states:this.form.states,
 				captions:this.captions
 			},true).then(

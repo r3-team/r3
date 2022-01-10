@@ -1,10 +1,11 @@
-import MyBuilderCaption    from './builderCaption.js';
-import MyBuilderIconInput  from './builderIconInput.js';
-import MyBuilderFormStates from './builderFormStates.js';
-import MyBuilderQuery      from './builderQuery.js';
-import MyBuilderFields     from './builderFields.js';
-import {getNilUuid}        from '../shared/generic.js';
-import {getQueryTemplate}  from '../shared/query.js';
+import MyBuilderCaption       from './builderCaption.js';
+import MyBuilderIconInput     from './builderIconInput.js';
+import MyBuilderFormFunctions from './builderFormFunctions.js';
+import MyBuilderFormStates    from './builderFormStates.js';
+import MyBuilderQuery         from './builderQuery.js';
+import MyBuilderFields        from './builderFields.js';
+import {getNilUuid}           from '../shared/generic.js';
+import {getQueryTemplate}     from '../shared/query.js';
 import {
 	getDataFields,
 	getFormRoute
@@ -21,6 +22,7 @@ let MyBuilderForm = {
 	components:{
 		MyBuilderCaption,
 		MyBuilderFields,
+		MyBuilderFormFunctions,
 		MyBuilderFormStates,
 		MyBuilderIconInput,
 		MyBuilderQuery
@@ -82,16 +84,22 @@ let MyBuilderForm = {
 							:image="showCaptions ? 'visible1.png' : 'visible0.png'"
 						/>
 						<my-button
-							@trigger="showHelp = !showHelp"
-							:caption="capApp.showHelp"
+							@trigger="showFunctions = !showFunctions"
+							:caption="capApp.showFunctions"
 							:darkBg="true"
-							:image="showHelp ? 'visible1.png' : 'visible0.png'"
+							:image="showFunctions ? 'visible1.png' : 'visible0.png'"
 						/>
 						<my-button
 							@trigger="showStates = !showStates"
 							:caption="capApp.showStates"
 							:darkBg="true"
 							:image="showStates ? 'visible1.png' : 'visible0.png'"
+						/>
+						<my-button
+							@trigger="showHelp = !showHelp"
+							:caption="capApp.showHelp"
+							:darkBg="true"
+							:image="showHelp ? 'visible1.png' : 'visible0.png'"
 						/>
 					</div>
 				</div>
@@ -133,6 +141,14 @@ let MyBuilderForm = {
 					:richtext="true"
 				/>
 			</div>
+			
+			<!-- form functions -->
+			<my-builder-form-functions
+				v-if="showFunctions"
+				v-model="functions"
+				@close="showFunctions = false"
+				:formId="form.id"
+			/>
 			
 			<!-- form states -->
 			<my-builder-form-states
@@ -293,6 +309,7 @@ let MyBuilderForm = {
 			iconId:null,        // form icon
 			captions:{},        // form captions
 			fields:[],          // all fields (nested within each other)
+			functions:[],       // all functions
 			states:[],          // all states
 			fieldIdsRemove:[],  // IDs of fields to remove
 			columnIdsRemove:[], // IDs of columns to remove
@@ -313,26 +330,28 @@ let MyBuilderForm = {
 			fieldMoveList:null, // fields list from which to move field (move by click)
 			fieldMoveIndex:0,   // index of field which to move (move by click)
 			showCaptions:true,  // show caption inputs on non-container fields
+			showFunctions:false,// show form functions
 			showHelp:false,     // show form context help
 			showOutsideIn:false,// show outside-in data fields
-			showSidebar:true,
-			showStates:false
+			showSidebar:true,   // show form Builder sidebar
+			showStates:false    // show form states
 		};
 	},
 	computed:{
 		hasChanges:function() {
-			return this.fieldIdsRemove.length !== 0
-				|| this.columnIdsRemove.length !== 0
-				|| this.iconId !== this.form.iconId
-				|| JSON.stringify(this.captions) !== JSON.stringify(this.form.captions)
-				|| JSON.stringify(this.fields) !== JSON.stringify(this.form.fields)
-				|| JSON.stringify(this.states) !== JSON.stringify(this.form.states)
-				|| this.relationId !== this.form.query.relationId
-				|| JSON.stringify(this.joins) !== JSON.stringify(this.form.query.joins)
-				|| JSON.stringify(this.filters) !== JSON.stringify(this.form.query.filters)
-				|| JSON.stringify(this.orders) !== JSON.stringify(this.form.query.orders)
-				|| JSON.stringify(this.lookups) !== JSON.stringify(this.form.query.lookups)
-				|| JSON.stringify(this.choices) !== JSON.stringify(this.form.query.choices)
+			return this.fieldIdsRemove.length     !== 0
+				|| this.columnIdsRemove.length    !== 0
+				|| this.iconId                    !== this.form.iconId
+				|| JSON.stringify(this.captions)  !== JSON.stringify(this.form.captions)
+				|| JSON.stringify(this.fields)    !== JSON.stringify(this.form.fields)
+				|| JSON.stringify(this.functions) !== JSON.stringify(this.form.functions)
+				|| JSON.stringify(this.states)    !== JSON.stringify(this.form.states)
+				|| this.relationId                !== this.form.query.relationId
+				|| JSON.stringify(this.joins)     !== JSON.stringify(this.form.query.joins)
+				|| JSON.stringify(this.filters)   !== JSON.stringify(this.form.query.filters)
+				|| JSON.stringify(this.orders)    !== JSON.stringify(this.form.query.orders)
+				|| JSON.stringify(this.lookups)   !== JSON.stringify(this.form.query.lookups)
+				|| JSON.stringify(this.choices)   !== JSON.stringify(this.form.query.choices)
 			;
 		},
 		
@@ -537,12 +556,12 @@ let MyBuilderForm = {
 		reset:function() {
 			if(!this.form) return;
 			
-			this.iconId   = this.form.iconId;
-			this.captions = JSON.parse(JSON.stringify(this.form.captions));
-			this.fields   = JSON.parse(JSON.stringify(this.form.fields));
-			this.states   = JSON.parse(JSON.stringify(this.form.states));
-			
+			this.iconId     = this.form.iconId;
 			this.relationId = this.form.query.relationId;
+			this.captions   = JSON.parse(JSON.stringify(this.form.captions));
+			this.fields     = JSON.parse(JSON.stringify(this.form.fields));
+			this.functions  = JSON.parse(JSON.stringify(this.form.functions));
+			this.states     = JSON.parse(JSON.stringify(this.form.states));
 			this.joins      = JSON.parse(JSON.stringify(this.form.query.joins));
 			this.filters    = JSON.parse(JSON.stringify(this.form.query.filters));
 			this.orders     = JSON.parse(JSON.stringify(this.form.query.orders));
@@ -896,6 +915,7 @@ let MyBuilderForm = {
 					orders:this.orders
 				},
 				fields:fieldsCleaned,
+				functions:this.functions,
 				states:this.states,
 				captions:this.captions
 			}));

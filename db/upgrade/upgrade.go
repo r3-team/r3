@@ -277,6 +277,34 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX IF NOT EXISTS fki_field_data_js_function_id
 			    ON app.field_data USING btree (js_function_id ASC NULLS LAST);
+			
+			-- JS functions form events
+			CREATE TYPE app.form_function_event AS ENUM ('open', 'save', 'delete');
+			
+			CREATE TABLE IF NOT EXISTS app.form_function (
+			    form_id uuid NOT NULL,
+			    "position" integer NOT NULL,
+			    js_function_id uuid NOT NULL,
+			    event form_function_event NOT NULL,
+			    event_before boolean NOT NULL,
+			    CONSTRAINT form_function_pkey PRIMARY KEY (form_id, "position"),
+			    CONSTRAINT form_function_form_id_fkey FOREIGN KEY (form_id)
+			        REFERENCES app.form (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT form_function_js_function_id_fkey FOREIGN KEY (js_function_id)
+			        REFERENCES app.js_function (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_form_function_form_id
+			    ON app.form_function USING btree (form_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_form_function_js_function_id
+			    ON app.form_function USING btree (js_function_id ASC NULLS LAST);
 		`)
 
 		// migrate existing form open actions to new 'open form' entity
