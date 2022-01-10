@@ -850,6 +850,9 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 		return err
 	}
 
+	// fix imports < 2.6: New JS function reference
+	jsFunctionId = compatible.FixPgxNull(jsFunctionId).(pgtype.UUID)
+
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.field_data
