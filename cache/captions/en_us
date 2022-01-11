@@ -629,7 +629,7 @@
 				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Returns all assigned role IDs for the current login (nested roles are included).",
 				"go_back":"app.go_back() => UNDEFINED<br /><br />Executes a browser-back navigation.",
 				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />Returns true if the current login has the assigned role (nested roles are included).",
-				"open_form":"app.open_form(form_id,record_id,new_tab,pop_up,max_height,max_width) => UNDEFINED<br /><br />Opens new form either in new browser tab or as pop-up window (with max-/minimum height).",
+				"open_form":"app.open_form(form_id, record_id, new_tab, pop_up, max_height, max_width) => UNDEFINED<br /><br />Opens new form either in new browser tab or as pop-up window (with max-/minimum height).",
 				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Deletes the current form record.",
 				"record_new":"app.record_new() => UNDEFINED<br /><br />Opens new record.",
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Reloads the current form record.",
@@ -699,7 +699,10 @@
 			"titleJs":"Frontend functions ({CNT})",
 			"titlePg":"Backend functions ({CNT})",
 			"titleOne":"Function title",
-			"valueNewJsHint":", NEW_VALUE"
+			"valueJsHint":"VALUE",
+			"valueJsHintForm":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
+			"valueJsHintIndex":"RELATION_INDEX_NUMBER",
+			"valueJsHintRole":"ROLE_ID_STRING"
 		},
 		"help":{
 			"title":"Application help"

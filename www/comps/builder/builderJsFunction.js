@@ -171,12 +171,12 @@ let MyBuilderJsFunction = {
 					
 					<div class="placeholders fields">
 						<my-builder-function-placeholder
-							v-for="f in dataFieldMap"
-							@toggle="toggleEntity('field',f.id)"
+							v-for="fieldId in dataFieldIdsSorted"
+							@toggle="toggleEntity('field',fieldId)"
 							:builderLanguage="builderLanguage"
-							:key="f.id"
-							:name="displayFieldName(f)"
-							:selected="entitySelected === 'field' && entitySelectedId === f.id"
+							:key="fieldId"
+							:name="displayFieldName(fieldId)"
+							:selected="entitySelected === 'field' && entitySelectedId === fieldId"
 						/>
 					</div>
 				</template>
@@ -287,25 +287,33 @@ let MyBuilderJsFunction = {
 	},
 	computed:{
 		dataFieldMap:function() {
-			if(this.formId === null)
-				return {};
+			return this.formId === null
+				? {} : this.getDataFieldMap(this.formIdMap[this.formId].fields);
+		},
+		dataFieldIdsSorted:function() {
+			let map = {};
+			for(let k in this.dataFieldMap) {
+				let f = this.dataFieldMap[k];
+				map[`${f.index}_${this.attributeIdMap[f.attributeId].name}`] = f.id;
+			}
+			let keysSorted = Object.keys(map).sort();
 			
-			return this.getDataFieldMap(this.formIdMap[this.formId].fields);
+			let out = [];
+			for(let i = 0, j = keysSorted.length; i < j; i++) {
+				out.push(map[keysSorted[i]]);
+			}			
+			return out;
 		},
 		form:function() {
 			return this.formId === null ? false : this.formIdMap[this.formId];
 		},
 		module:function() {
-			if(this.jsFunction === false)
-				return false;
-			
-			return this.moduleIdMap[this.jsFunction.moduleId];
+			return this.jsFunction === false
+				? false : this.moduleIdMap[this.jsFunction.moduleId];
 		},
 		jsFunction:function() {
-			if(typeof this.jsFunctionIdMap[this.id] === 'undefined')
-				return false;
-			
-			return this.jsFunctionIdMap[this.id];
+			return typeof this.jsFunctionIdMap[this.id] === 'undefined'
+				? false : this.jsFunctionIdMap[this.id];
 		},
 		hasChanges:function() {
 			return this.codeArgs     !== this.jsFunction.codeArgs
@@ -336,7 +344,8 @@ let MyBuilderJsFunction = {
 		getItemTitle,
 		
 		// presentation
-		displayFieldName:function(f) {
+		displayFieldName:function(fieldId) {
+			let f   = this.dataFieldMap[fieldId];
 			let atr = this.attributeIdMap[f.attributeId];
 			let rel = this.relationIdMap[atr.relationId];
 			return this.getItemTitle(rel,atr,f.index,false,false);
@@ -369,18 +378,25 @@ let MyBuilderJsFunction = {
 			let field  = evt.target;
 			let text   = '';
 			let prefix = 'app';
-			let mod, rel, atr, fnc, frm, fld, args;
+			let mod, rel, atr, fnc, frm, fld, opt, args;
 			
 			// build unique placeholder name
 			switch(this.entitySelected) {
 				case 'appFunction':
-					text = `${prefix}.${this.entitySelectedId}()`;
+					opt = '';
+					switch(this.entitySelectedId) {
+						case 'copy_to_clipboard': opt = this.capApp.valueJsHint;      break;
+						case 'get_record_id':     opt = this.capApp.valueJsHintIndex; break;
+						case 'has_role':          opt = this.capApp.valueJsHintRole;  break;
+						case 'open_form':         opt = this.capApp.valueJsHintForm;  break;
+					}
+					text = `${prefix}.${this.entitySelectedId}(${opt})`;
 				break;
 				case 'field':
 					fld  = this.dataFieldMap[this.entitySelectedId];
 					atr  = this.attributeIdMap[fld.attributeId];
 					rel  = this.relationIdMap[atr.relationId];
-					let opt = this.fieldMode === 'get' ? '' : this.capApp.valueNewJsHint;
+					opt  = this.fieldMode === 'get' ? '' : ', '+this.capApp.valueJsHint;
 					text = `${prefix}.${this.fieldMode}_field_value({${fld.index}:${rel.name}.${atr.name}}${opt})`;
 				break;
 				case 'form':
@@ -402,13 +418,13 @@ let MyBuilderJsFunction = {
 					
 					// add argument names to show function interface
 					// remove argument type and default value to keep it easy to read
+					let argsOut = [];
 					args = fnc.codeArgs.split(',');
 					for(let i = 0, j = args.length; i < j; i++) {
-						if(args[i] === '') continue;
-						
-						args[i] = args[i].split(' ')[0].toUpperCase();
+						if(args[i] !== '')
+							argsOut.push(args[i].trim().split(' ')[0].toUpperCase());
 					}
-					let argsList = args.length === 0 ? '' : ', '+args.join(', ');
+					let argsList = argsOut.length === 0 ? '' : ', '+argsOut.join(', ');
 					
 					text = `${prefix}.call_backend({${mod.name}.${fnc.name}}${argsList}).then(`
 						+ `\n\t(res) => { // if success: return value in 'res' },`
