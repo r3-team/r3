@@ -69,7 +69,7 @@ let MyField = {
 					/>
 					
 					<!-- regular text line input (numeric, strings, etc.) -->
-					<input class="input" type="text"
+					<input class="input"
 						v-if="isLineInput"
 						v-model="value"
 						@blur="blur"
@@ -78,6 +78,15 @@ let MyField = {
 						:class="{ invalid:showInvalid }"
 						:disabled="isReadonly"
 						:placeholder="!focused ? caption : ''"
+						:type="!isPassword || showPassword ? 'text' : 'password'"
+					/>
+					
+					<!-- password show action -->
+					<my-button
+						v-if="isPassword"
+						@trigger="showPassword = !showPassword"
+						:image="showPassword ? 'visible0.png' : 'visible1.png'"
+						:naked="true"
 					/>
 					
 					<!-- link open action -->
@@ -413,8 +422,9 @@ let MyField = {
 	data:function() {
 		return {
 			focused:false,
-			notTouched:true, // data field was not touched by user
-			showColorPickerInput:false
+			notTouched:true,            // data field was not touched by user
+			showColorPickerInput:false, // for color picker fields
+			showPassword:false          // for password fields
 		};
 	},
 	watch:{
@@ -860,6 +870,7 @@ let MyField = {
 		isDate:    function() { return this.isData && this.field.display === 'date'; },
 		isDatetime:function() { return this.isData && this.field.display === 'datetime'; },
 		isLogin:   function() { return this.isData && this.field.display === 'login'; },
+		isPassword:function() { return this.isData && this.field.display === 'password'; },
 		isSlider:  function() { return this.isData && this.field.display === 'slider'; },
 		isTime:    function() { return this.isData && this.field.display === 'time'; },
 		isTextarea:function() { return this.isData && this.field.display === 'textarea'; },

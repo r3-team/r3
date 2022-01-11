@@ -463,6 +463,7 @@
 				"displayGallery":"galleria",
 				"displayHidden":"nascosto",
 				"displayLogin":"login",
+				"displayPassword":"password",
 				"displayPhone":"telefono",
 				"displayTime":"ora",
 				"displayTextarea":"area testo",
@@ -621,6 +622,7 @@
 				"delete":"Sei sicuro di voler eliminare questa funzione?"
 			},
 			"helpJs":{
+				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Copies text to the users clipboard.",
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Restituisce le 5 lettere del codice lingua ('en_us', ...) del login attuale.",
 				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Restituisce l'ID del login attuale.",
 				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Restituisce l'Id del record del modulo aperto per l'indice della relazione specificata (0 per predefinita).",

@@ -140,6 +140,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX fki_open_form_column_id_fkey
 				ON app.open_form USING btree (column_id ASC NULLS LAST);
 			
+			-- new data display type: password
+			ALTER TYPE app.data_display ADD VALUE 'password';
+			
 			-- clean up missing NOT NULL constraints in PG functions
 			ALTER TABLE app.pg_function ALTER COLUMN code_args SET NOT NULL;
 			ALTER TABLE app.pg_function ALTER COLUMN code_returns SET NOT NULL;

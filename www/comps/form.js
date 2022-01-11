@@ -322,6 +322,7 @@ let MyForm = {
 		exposedFunctions:function() {
 			return {
 				// simple functions
+				copy_to_clipboard:(v) => navigator.clipboard.writeText(v),
 				get_language_code:()  => this.settings.languageCode,
 				get_login_id:     ()  => this.loginId,
 				get_record_id:    (i) =>

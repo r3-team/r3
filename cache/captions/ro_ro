@@ -463,6 +463,7 @@
 				"displayGallery":"gallery",
 				"displayHidden":"ascuns",
 				"displayLogin":"autentificat",
+				"displayPassword":"password",
 				"displayPhone":"telefon",
 				"displayTime":"ora",
 				"displayTextarea":"zona textului",
@@ -621,6 +622,7 @@
 				"delete":"Sigur doriți să ștergeți această funcție?"
 			},
 			"helpJs":{
+				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Copies text to the users clipboard.",
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Returns the 5-letter language code ('en_us', ...) of the current login.",
 				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Returns the ID of the current login.",
 				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Returns the record ID of the open form for the specified relation index (0 is default).",

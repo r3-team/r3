@@ -347,6 +347,7 @@ let MyBuilderFieldOptions = {
 							<option v-if="isInteger" value="login"   >{{ capApp.option.displayLogin }}</option>
 							<option v-if="isString"  value="textarea">{{ capApp.option.displayTextarea }}</option>
 							<option v-if="isString"  value="richtext">{{ capApp.option.displayRichtext }}</option>
+							<option v-if="isString"  value="password">{{ capApp.option.displayPassword }}</option>
 							<option v-if="isString"  value="color"   >{{ capApp.option.displayColor }}</option>
 							<option v-if="isString"  value="email"   >{{ capApp.option.displayEmail }}</option>
 							<option v-if="isString"  value="phone"   >{{ capApp.option.displayPhone }}</option>

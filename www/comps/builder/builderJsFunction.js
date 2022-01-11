@@ -270,8 +270,8 @@ let MyBuilderJsFunction = {
 			codeReturns:'',
 			
 			appFunctions:[
-				'get_language_code','get_login_id','get_record_id',
-				'get_role_ids','go_back','has_role','open_form',
+				'copy_to_clipboard','get_language_code','get_login_id',
+				'get_record_id','get_role_ids','go_back','has_role','open_form',
 				'record_delete','record_new','record_reload','record_save'
 			],
 			
@@ -374,19 +374,19 @@ let MyBuilderJsFunction = {
 			// build unique placeholder name
 			switch(this.entitySelected) {
 				case 'appFunction':
-					text = `${prefix}.${this.entitySelectedId}();`;
+					text = `${prefix}.${this.entitySelectedId}()`;
 				break;
 				case 'field':
 					fld  = this.dataFieldMap[this.entitySelectedId];
 					atr  = this.attributeIdMap[fld.attributeId];
 					rel  = this.relationIdMap[atr.relationId];
 					let opt = this.fieldMode === 'get' ? '' : this.capApp.valueNewJsHint;
-					text = `${prefix}.${this.fieldMode}_field_value({${fld.index}:${rel.name}.${atr.name}}${opt});`;
+					text = `${prefix}.${this.fieldMode}_field_value({${fld.index}:${rel.name}.${atr.name}}${opt})`;
 				break;
 				case 'form':
 					frm  = this.formIdMap[this.entitySelectedId];
 					mod  = this.moduleIdMap[frm.moduleId];
-					text = `${prefix}.open_form({${mod.name}.${frm.name}},0,false);`;
+					text = `${prefix}.open_form({${mod.name}.${frm.name}},0,false)`;
 				break;
 				case 'jsFunction':
 					fnc  = this.jsFunctionIdMap[this.entitySelectedId];
@@ -394,7 +394,7 @@ let MyBuilderJsFunction = {
 					
 					// add argument names to show function interface
 					args = fnc.codeArgs === '' ? '' : ', '+fnc.codeArgs.toUpperCase();
-					text = `${prefix}.call_frontend({${mod.name}.${fnc.name}}${args});`;
+					text = `${prefix}.call_frontend({${mod.name}.${fnc.name}}${args})`;
 				break;
 				case 'pgFunction':
 					fnc  = this.pgFunctionIdMap[this.entitySelectedId];
@@ -412,7 +412,7 @@ let MyBuilderJsFunction = {
 					
 					text = `${prefix}.call_backend({${mod.name}.${fnc.name}}${argsList}).then(`
 						+ `\n\t(res) => { // if success: return value in 'res' },`
-						+ `\n\t(err) => { // if error: error message in 'err' }\n);`
+						+ `\n\t(err) => { // if error: error message in 'err' }\n)`
 					;
 				break;
 			}
