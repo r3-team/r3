@@ -423,6 +423,62 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 		return fmt.Errorf("dependency check failed, frontend functions accessing entities from independent module(s)")
 	}
 
+	// check field (button/data) & form function access to external JS functions
+	if err := tx.QueryRow(db.Ctx, `
+		SELECT COUNT(*)
+		FROM app.module
+		WHERE id IN (
+			-- dependent on JS functions
+			SELECT module_id
+			FROM app.js_function
+			WHERE id IN (
+				SELECT fb.js_function_id
+				FROM app.field_button AS fb
+				JOIN app.field        AS f ON f.id = fb.field_id
+				WHERE f.form_id IN (
+					SELECT id
+					FROM app.form
+					WHERE module_id = $1
+				)
+				
+				UNION
+				
+				SELECT fd.js_function_id
+				FROM app.field_data AS fd
+				JOIN app.field      AS f ON f.id = fd.field_id
+				WHERE f.form_id IN (
+					SELECT id
+					FROM app.form
+					WHERE module_id = $2
+				)
+				
+				UNION
+				
+				SELECT js_function_id
+				FROM app.form_function
+				WHERE form_id IN (
+					SELECT id
+					FROM app.form
+					WHERE module_id = $3
+				)
+			)
+		)
+	
+		-- dependency
+		AND id <> $4
+		AND id NOT IN (
+			SELECT module_id_on
+			FROM app.module_depends
+			WHERE module_id = $5
+		)
+	`, moduleId, moduleId, moduleId, moduleId, moduleId).Scan(&cnt); err != nil {
+		return err
+	}
+
+	if cnt != 0 {
+		return fmt.Errorf("dependency check failed, fields/forms accessing frontend functions from independent module(s)")
+	}
+
 	// check role membership inside external parent roles
 	if err := tx.QueryRow(db.Ctx, `
 		SELECT COUNT(*), STRING_AGG(r.name, ', ')
