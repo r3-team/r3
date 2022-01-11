@@ -622,18 +622,18 @@
 				"delete":"Bist du sicher, dass du diese Funktion löschen möchtest?"
 			},
 			"helpJs":{
-				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Copies text to the users clipboard.",
-				"get_language_code":"app.get_language_code() => STRING<br /><br />Returns the 5-letter language code ('en_us', ...) of the current login.",
-				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Returns the ID of the current login.",
-				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Returns the record ID of the open form for the specified relation index (0 is default).",
-				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Returns all assigned role IDs for the current login (nested roles are included).",
-				"go_back":"app.go_back() => UNDEFINED<br /><br />Executes a browser-back navigation.",
-				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />Returns true if the current login has the assigned role (nested roles are included).",
-				"open_form":"app.open_form(form_id, record_id, new_tab, pop_up, max_height, max_width) => UNDEFINED<br /><br />Opens new form either in new browser tab or as pop-up window (with max-/minimum height).",
-				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Deletes the current form record.",
-				"record_new":"app.record_new() => UNDEFINED<br /><br />Opens new record.",
-				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Reloads the current form record.",
-				"record_save":"app.record_save() => UNDEFINED<br /><br />Saves the current form record."
+				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Kopiert Text zur Zwischenablage des Benutzers.",
+				"get_language_code":"app.get_language_code() => STRING<br /><br />Liefert den 5-stelligen Sprach-Code ('en_us', ...) der aktuellen Anmeldung.",
+				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Liefert die ID der aktuellen Anmeldung.",
+				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Liefert die Datensatz-ID des offenen Formulars für den ausgewählten Relationsindex (0 ist der Standard).",
+				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Liefert die IDs aller zugewiesenen Rollen für die aktuelle Anmeldung (geerbte Rollen sind inkludiert).",
+				"go_back":"app.go_back() => UNDEFINED<br /><br />Führt eine Browser-zurück Navigation aus.",
+				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />Liefert zurück, ob die spezifizierte Anmeldung der spezifizierten Rolle zugewiesen ist (geerbte Rollen werden berücksichtigt).",
+				"open_form":"app.open_form(form_id, record_id, new_tab, pop_up, max_height, max_width) => UNDEFINED<br /><br />Öffnet ein Formular direkt, in einem neuen Browser-Tab oder als Pop-up-Fenster.",
+				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Löscht den aktuellen Formulardatensatz.",
+				"record_new":"app.record_new() => UNDEFINED<br /><br />Öffnet einen neuen Datensatz.",
+				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Lädt den aktuellen Formulardatensatz neu.",
+				"record_save":"app.record_save() => UNDEFINED<br /><br />Speichert den aktuellen Formulardatensatz."
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Bricht die Operation ab und sendet dem ausführenden Benutzer eine Nachricht, welche in der Benutzeroberfläche angezeigt wird.",

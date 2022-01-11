@@ -439,10 +439,8 @@ let MyField = {
 	},
 	computed:{
 		attribute:function() {
-			if(!this.isData || typeof this.attributeIdMap[this.field.attributeId] === 'undefined')
-				return false;
-			
-			return this.attributeIdMap[this.field.attributeId];
+			return !this.isData || typeof this.attributeIdMap[this.field.attributeId] === 'undefined'
+				? false : this.attributeIdMap[this.field.attributeId];
 		},
 		caption:function() {
 			let out = '';
@@ -500,10 +498,8 @@ let MyField = {
 			return '';
 		},
 		captionHelp:function() {
-			if(typeof this.field.captions.fieldHelp[this.moduleLanguage] !== 'undefined')
-				return this.field.captions.fieldHelp[this.moduleLanguage];
-			
-			return '';
+			return typeof this.field.captions.fieldHelp[this.moduleLanguage] !== 'undefined'
+				? this.field.captions.fieldHelp[this.moduleLanguage] : '';
 		},
 		domClass:function() {
 			let out = [];
@@ -649,8 +645,8 @@ let MyField = {
 			// default: field is shown, data field state is overwritten depending on circumstance
 			//  (no permissions = readonly, NOT NULL attribute = required)
 			// optional: data field only, input is optional
-			// readonly: data field only, input is readonly
 			// required: data field only, input is required
+			// readonly: data or button field, input is readonly
 			let state = this.field.state;
 			
 			// apply form state if available

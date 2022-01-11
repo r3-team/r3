@@ -629,7 +629,7 @@
 				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Restituisce tutti gli ID dei ruoli assegnati al login attuale (i ruoli annidati sono inclusi).",
 				"go_back":"app.go_back() => UNDEFINED<br /><br />Esegue una navigazione indietro del browser.",
 				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />Restituisce true (vero) se il login corrente ha il ruolo assegnato (i ruoli annidati sono inclusi).",
-				"open_form":"app.open_form(form_id, record_id, new_tab, pop_up, max_height, max_width) => UNDEFINED<br /><br />Apre un nuovo modulo o in una nuova scheda del browser o come finestra pop-up (con altezza max/min).",
+				"open_form":"app.open_form(form_id, record_id, new_tab, pop_up, max_height, max_width) => UNDEFINED<br /><br />Apre un modulo o in una nuova scheda del browser o come finestra pop-up.",
 				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Cancella il record presente sul modulo.",
 				"record_new":"app.record_new() => UNDEFINED<br /><br />Apre un nuovo record.",
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Ricarica il record attuale.",
