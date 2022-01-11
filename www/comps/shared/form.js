@@ -61,6 +61,19 @@ export function getDataFieldMap(fields) {
 	return out;
 };
 
+export function getFieldMap(fields) {
+	let out = {};
+	
+	for(let i = 0, j = fields.length; i < j; i++) {
+		let f = fields[i];
+		out[f.id] = f;
+		
+		if(f.content === 'container')
+			out = Object.assign(out,getFieldMap(f.fields));
+	}
+	return out;
+};
+
 export function getFormRoute(formId,recordId,stayInModule,getArgs) {
 	let moduleId = MyStore.getters['schema/formIdMap'][formId].moduleId;
 	

@@ -1,10 +1,13 @@
-import {getDataFieldMap} from '../shared/form.js';
-import {getNilUuid}      from '../shared/generic.js';
+import {getNilUuid}  from '../shared/generic.js';
 import {
 	MyFilterBrackets,
 	MyFilterConnector,
 	MyFilterOperator
 } from './../filters.js';
+import {
+	getDataFieldMap,
+	getFieldMap
+} from '../shared/form.js';
 export {MyBuilderFormStates as default};
 
 let MyBuilderFormStateCondition = {
@@ -51,7 +54,7 @@ let MyBuilderFormStateCondition = {
 				@input="update('fieldId0',$event.target.value)"
 				:value="condition.fieldId0"
 			>
-				<option v-for="f in dataFieldMap" :value="f.id">
+				<option v-for="f in fieldIdMapData" :value="f.id">
 					F{{ fieldIdMapRef[f.id] }}
 				</option>
 			</select>
@@ -94,7 +97,7 @@ let MyBuilderFormStateCondition = {
 					:value="condition.fieldId1"
 				>
 					<option :value="null">-</option>
-					<template v-for="f in dataFieldMap">
+					<template v-for="f in fieldIdMapData">
 						<option
 							v-if="f.id !== condition.fieldId0"
 							:value="f.id"
@@ -170,11 +173,11 @@ let MyBuilderFormStateCondition = {
 		/>
 	</div>`,
 	props:{
-		dataFieldMap: { type:Object,  required:true },
-		fieldIdMapRef:{ type:Object,  required:true },
-		form:         { type:Object,  required:true },
-		isFirst:      { type:Boolean, required:true },
-		modelValue:   { type:Object,  required:true }
+		fieldIdMapData:{ type:Object,  required:true },
+		fieldIdMapRef: { type:Object,  required:true },
+		form:          { type:Object,  required:true },
+		isFirst:       { type:Boolean, required:true },
+		modelValue:    { type:Object,  required:true }
 	},
 	watch:{
 		condition:{
@@ -203,7 +206,7 @@ let MyBuilderFormStateCondition = {
 	},
 	computed:{
 		anyDataFields:function() {
-			for(let f in this.dataFieldMap) {
+			for(let f in this.fieldIdMapData) {
 				return true;
 			}
 			return false;
@@ -215,7 +218,7 @@ let MyBuilderFormStateCondition = {
 			if(this.condition.fieldId0 === null)
 				return [];
 			
-			let f = this.dataFieldMap[this.condition.fieldId0];
+			let f = this.fieldIdMapData[this.condition.fieldId0];
 			let a = this.attributeIdMap[f.attributeId];
 			
 			if(a.relationshipId === null)
@@ -239,7 +242,7 @@ let MyBuilderFormStateCondition = {
 			this.mode = value;
 			
 			switch(value) {
-				case 'field':        this.update('fieldId0',this.dataFieldMap[Object.keys(this.dataFieldMap)[0]].id); break;
+				case 'field':        this.update('fieldId0',this.fieldIdMapData[Object.keys(this.fieldIdMapData)[0]].id); break;
 				case 'fieldChanged': this.update('fieldChanged',true); break;
 				case 'record':       this.update('newRecord',true); break;
 				case 'role':         this.update('roleId',this.module.roles[0].id); break;
@@ -290,6 +293,7 @@ let MyBuilderFormStateEffect = {
 		
 		<!-- affected field -->
 		<select @input="update('fieldId',$event.target.value)" :value="effect.fieldId">
+			<option value="">-</option>
 			<option
 				v-for="(ref,fieldId) in fieldIdMapRef"
 				:value="fieldId"
@@ -301,8 +305,8 @@ let MyBuilderFormStateEffect = {
 			<option value="hidden">{{ capApp.stateHidden }}</option>
 			<option value="default">{{ capApp.stateDefault }}</option>
 			<option v-if="isData" value="optional">{{ capApp.stateOptional }}</option>
-			<option v-if="isData" value="readonly">{{ capApp.stateReadonly }}</option>
 			<option v-if="isData" value="required">{{ capApp.stateRequired }}</option>
+			<option v-if="isData || isButton" value="readonly">{{ capApp.stateReadonly }}</option>
 		</select>
 		
 		<my-button image="cancel.png"
@@ -311,14 +315,16 @@ let MyBuilderFormStateEffect = {
 		/>
 	</div>`,
 	props:{
-		dataFieldMap: { type:Object, required:true },
+		fieldIdMap:   { type:Object, required:true },
 		fieldIdMapRef:{ type:Object, required:true },
 		modelValue:   { type:Object, required:true }
 	},
 	emits:['remove','update:modelValue'],
 	computed:{
-		effect:function() { return JSON.parse(JSON.stringify(this.modelValue)); },
-		isData:function() { return typeof this.dataFieldMap[this.effect.fieldId] !== 'undefined'; },
+		effect:  function() { return JSON.parse(JSON.stringify(this.modelValue)); },
+		fieldSet:function() { return this.effect.fieldId !== null; },
+		isButton:function() { return this.fieldSet && this.fieldIdMap[this.effect.fieldId].content === 'button'; },
+		isData:  function() { return this.fieldSet && this.fieldIdMap[this.effect.fieldId].content === 'data'; },
 		
 		// store
 		capApp:function() { return this.$store.getters.captions.builder.form; }
@@ -377,7 +383,7 @@ let MyBuilderFormState = {
 				v-for="(c,i) in state.conditions"
 				@remove="remove('conditions',i)"
 				@update:modelValue="update('conditions',i,$event)"
-				:dataFieldMap="dataFieldMap"
+				:fieldIdMapData="fieldIdMapData"
 				:fieldIdMapRef="fieldIdMapRef"
 				:form="form"
 				:isFirst="i === 0"
@@ -392,7 +398,7 @@ let MyBuilderFormState = {
 				v-for="(e,i) in state.effects"
 				@update:modelValue="update('effects',i,$event)"
 				@remove="remove('effects',i)"
-				:dataFieldMap="dataFieldMap"
+				:fieldIdMap="fieldIdMap"
 				:fieldIdMapRef="fieldIdMapRef"
 				:key="'effect'+i"
 				:modelValue="state.effects[i]"
@@ -400,11 +406,12 @@ let MyBuilderFormState = {
 		</template>
 	</div>`,
 	props:{
-		dataFieldMap: { type:Object,  required:true },
-		fieldIdMapRef:{ type:Object,  required:true },
-		form:         { type:Object,  required:true },
-		modelValue:   { type:Object,  required:true },
-		showAlways:   { type:Boolean, required:true }
+		fieldIdMap:    { type:Object,  required:true }, // all fields by ID
+		fieldIdMapData:{ type:Object,  required:true }, // data fields by ID
+		fieldIdMapRef: { type:Object,  required:true }, // field references by ID
+		form:          { type:Object,  required:true },
+		modelValue:    { type:Object,  required:true },
+		showAlways:    { type:Boolean, required:true }
 	},
 	emits:['remove','update:modelValue'],
 	data:function() {
@@ -518,7 +525,8 @@ let MyBuilderFormStates = {
 				v-show="stateShowIndex.includes(i)"
 				@remove="remove(i)"
 				@update:modelValue="update(i,$event)"
-				:dataFieldMap="dataFieldMap"
+				:fieldIdMap="fieldIdMap"
+				:fieldIdMapData="fieldIdMapData"
 				:fieldIdMapRef="fieldIdMapRef"
 				:form="form"
 				:key="s.id"
@@ -541,9 +549,6 @@ let MyBuilderFormStates = {
 		};
 	},
 	computed:{
-		dataFieldMap:function() {
-			return this.getDataFieldMap(this.form.fields);
-		},
 		fieldIdsUsed:function() {
 			let out = [];
 			
@@ -608,7 +613,9 @@ let MyBuilderFormStates = {
 		},
 		
 		// simple
-		states:function() { return JSON.parse(JSON.stringify(this.modelValue)); },
+		fieldIdMap:    function() { return this.getFieldMap(this.form.fields); },
+		fieldIdMapData:function() { return this.getDataFieldMap(this.form.fields); },
+		states:        function() { return JSON.parse(JSON.stringify(this.modelValue)); },
 		
 		// stores
 		capApp:function() { return this.$store.getters.captions.builder.form.states; },
@@ -617,6 +624,7 @@ let MyBuilderFormStates = {
 	methods:{
 		// externals
 		getDataFieldMap,
+		getFieldMap,
 		getNilUuid,
 		
 		// actions

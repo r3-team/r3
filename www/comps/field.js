@@ -273,6 +273,7 @@ let MyField = {
 			v-if="isButton"
 			@trigger="triggerButton(false)"
 			@trigger-middle="triggerButton(true)"
+			:active="!isReadonly"
 			:caption="caption"
 			:imageBase64="iconId ? srcBase64(iconIdMap[iconId].file) : ''"
 		/>
