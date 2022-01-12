@@ -358,22 +358,23 @@ let MyForm = {
 				
 				// field manipulation
 				get_field_value:(fieldId) => {
+					// if field cannot be found, return undefined
+					// NULL is a valid field value
 					if(typeof this.fieldIdMapData[fieldId] === 'undefined')
-						return;
+						return undefined;
 					
-					let ia = this.getIndexAttributeIdByField(
-						this.fieldIdMapData[fieldId],false)
-					
-					return this.values[ia];
+					return this.values[this.getIndexAttributeIdByField(
+						this.fieldIdMapData[fieldId],false)];
 				},
 				set_field_value:(fieldId,value) => {
+					// use common return codes: 0 = success, 1 = error
 					if(typeof this.fieldIdMapData[fieldId] === 'undefined')
-						return;
+						return 1;
 					
-					let ia = this.getIndexAttributeIdByField(
-						this.fieldIdMapData[fieldId],false)
+					this.valueSet(this.getIndexAttributeIdByField(
+						this.fieldIdMapData[fieldId],false),value,false,true);
 					
-					this.valueSet(ia,value,false,true);
+					return 0;
 				}
 			};
 		},
@@ -1140,9 +1141,9 @@ let MyForm = {
 				this.popUpAttributeIdMapDef = getter === '' ? {}
 					: this.getAttributeValuesFromGetter(getter);
 				
-				this.popUpFormId    = formIdOpen;
-				this.popUpRecordId  = recordId;
-				this.popUpFieldId   = null;
+				this.popUpFormId   = formIdOpen;
+				this.popUpRecordId = recordId;
+				this.popUpFieldId  = null;
 				
 				let styles = [];
 				if(options.maxWidth  !== 0) styles.push(`max-width:${options.maxWidth}px`);

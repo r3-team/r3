@@ -139,6 +139,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ON app.open_form USING btree (field_id ASC NULLS LAST);
 			CREATE INDEX fki_open_form_column_id_fkey
 				ON app.open_form USING btree (column_id ASC NULLS LAST);
+			CREATE INDEX fki_open_form_attribute_id_apply_fkey
+				ON app.open_form USING btree (attribute_id_apply ASC NULLS LAST);
 			
 			-- new data display type: password
 			ALTER TYPE app.data_display ADD VALUE 'password';
