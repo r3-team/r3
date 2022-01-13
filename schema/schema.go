@@ -2,8 +2,10 @@ package schema
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"r3/db"
+	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v4"
@@ -37,6 +39,42 @@ func ReplaceUuid(id uuid.UUID, idMapReplaced map[uuid.UUID]uuid.UUID) (uuid.UUID
 	}
 	idMapReplaced[id] = newId
 	return newId, nil
+}
+
+// attribute conversions
+func GetAttributeFilesFromInterface(in interface{}) (types.DataSetFiles, error) {
+	files := types.DataSetFiles{}
+
+	if in == nil {
+		return files, nil
+	}
+
+	inJson, err := json.Marshal(in)
+	if err != nil {
+		return files, err
+	}
+
+	if err := json.Unmarshal(inJson, &files); err != nil {
+		return files, err
+	}
+	return files, nil
+}
+
+// attribute checks
+func IsContentFiles(content string) bool {
+	return content == "files"
+}
+func IsContentNumeric(content string) bool {
+	return content == "numeric"
+}
+func IsContentRelationship(content string) bool {
+	return content == "1:1" || content == "n:1"
+}
+func IsContentRelationship11(content string) bool {
+	return content == "1:1"
+}
+func IsContentText(content string) bool {
+	return content == "varchar" || content == "text"
 }
 
 // fully validates module dependencies

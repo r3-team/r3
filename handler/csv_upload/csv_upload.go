@@ -17,7 +17,7 @@ import (
 	"r3/handler"
 	"r3/log"
 	"r3/login/login_auth"
-	"r3/schema/lookups"
+	"r3/schema"
 	"r3/tools"
 	"r3/types"
 	"regexp"
@@ -462,7 +462,7 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 
 				pgIndexAtr, _ := cache.AttributeIdMap[pgIndexAtrId]
 
-				if !lookups.IsContentRelationship(pgIndexAtr.Content) {
+				if !schema.IsContentRelationship(pgIndexAtr.Content) {
 					// PG index attribute is non-relationship, can directly be used
 					for _, setAtr := range dataSet.Attributes {
 						if setAtr.AttributeId == pgIndexAtr.Id {

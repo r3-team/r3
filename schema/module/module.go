@@ -7,7 +7,6 @@ import (
 	"r3/module_option"
 	"r3/schema"
 	"r3/schema/caption"
-	"r3/schema/lookups"
 	"r3/schema/pgFunction"
 	"r3/tools"
 	"r3/types"
@@ -20,7 +19,7 @@ import (
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
-	moduleName, err := lookups.GetModuleNameById_tx(tx, id)
+	moduleName, err := schema.GetModuleNameById_tx(tx, id)
 	if err != nil {
 		return err
 	}

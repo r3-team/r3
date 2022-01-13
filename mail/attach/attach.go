@@ -10,7 +10,7 @@ import (
 	"r3/cache"
 	"r3/config"
 	"r3/db"
-	"r3/schema/lookups"
+	"r3/schema"
 	"r3/tools"
 	"r3/types"
 
@@ -59,7 +59,7 @@ func do(mail types.Mail) error {
 			mail.AttributeId.Bytes)
 	}
 
-	if !lookups.IsContentFiles(atr.Content) {
+	if !schema.IsContentFiles(atr.Content) {
 		return fmt.Errorf("cannot attach file(s) to non-file attribute %s",
 			mail.AttributeId.Bytes)
 	}
@@ -109,7 +109,7 @@ func do(mail types.Mail) error {
 		SELECT "%s"
 		FROM "%s"."%s"
 		WHERE "%s" = $1
-	`, atr.Name, mod.Name, rel.Name, lookups.PkName),
+	`, atr.Name, mod.Name, rel.Name, schema.PkName),
 		mail.RecordId.Int).Scan(&filesValueIn)
 
 	if err != pgx.ErrNoRows && err != nil {
@@ -122,7 +122,7 @@ func do(mail types.Mail) error {
 	}
 
 	// prepare files attribute value
-	filesValue, err := lookups.GetAttributeFilesFromInterface(filesValueIn)
+	filesValue, err := schema.GetAttributeFilesFromInterface(filesValueIn)
 	if err != nil {
 		return err
 	}
@@ -175,7 +175,7 @@ func do(mail types.Mail) error {
 	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		UPDATE "%s"."%s" SET "%s" = $1
 		WHERE "%s" = $2
-	`, mod.Name, rel.Name, atr.Name, lookups.PkName),
+	`, mod.Name, rel.Name, atr.Name, schema.PkName),
 		filesValueJson, mail.RecordId.Int); err != nil {
 
 		return err

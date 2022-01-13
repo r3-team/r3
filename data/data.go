@@ -3,7 +3,7 @@ package data
 import (
 	"fmt"
 	"r3/cache"
-	"r3/schema/lookups"
+	"r3/schema"
 	"r3/tools"
 	"r3/types"
 	"strings"
@@ -101,7 +101,7 @@ func getPolicyFilter(loginId int64, action string, tableAlias string,
 			}
 
 			clauses = append(clauses, fmt.Sprintf(`"%s"."%s" <> ALL(%s())`,
-				tableAlias, lookups.PkName, fncName))
+				tableAlias, schema.PkName, fncName))
 		}
 
 		if p.PgFunctionIdIncl.Valid {
@@ -112,7 +112,7 @@ func getPolicyFilter(loginId int64, action string, tableAlias string,
 			}
 
 			clauses = append(clauses, fmt.Sprintf(`"%s"."%s" = ANY(%s())`,
-				tableAlias, lookups.PkName, fncName))
+				tableAlias, schema.PkName, fncName))
 		}
 
 		// first matching policy is applied

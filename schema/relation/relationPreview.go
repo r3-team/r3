@@ -3,6 +3,7 @@ package relation
 import (
 	"fmt"
 	"r3/db"
+	"r3/schema"
 	"reflect"
 	"strings"
 
@@ -33,10 +34,10 @@ func GetPreview(id uuid.UUID, limit int, offset int) (interface{}, error) {
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
 		SELECT "%s"
 		FROM "%s"."%s"
-		ORDER BY "id" ASC
+		ORDER BY "%s" ASC
 		LIMIT $1
 		OFFSET $2
-	`, strings.Join(atrNames, `", "`), modName, relName), limit, offset)
+	`, strings.Join(atrNames, `", "`), modName, relName, schema.PkName), limit, offset)
 	if err != nil {
 		return nil, err
 	}

@@ -9,7 +9,6 @@ import (
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/column"
-	"r3/schema/lookups"
 	"r3/schema/openForm"
 	"r3/schema/query"
 	"r3/tools"
@@ -216,7 +215,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			posContainerLookup = append(posContainerLookup, pos)
 
 		case "data":
-			if lookups.IsContentRelationship(atrContent.String) {
+			if schema.IsContentRelationship(atrContent.String) {
 				fields = append(fields, types.FieldDataRelationship{
 					Id:             fieldId,
 					IconId:         iconId,

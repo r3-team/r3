@@ -1,17 +1,12 @@
-package lookups
+package schema
 
 import (
-	"encoding/json"
 	"fmt"
 	"r3/db"
-	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v4"
 )
-
-// constants
-var PkName = "id"
 
 func GetModuleNameById_tx(tx pgx.Tx, id uuid.UUID) (string, error) {
 	var name string
@@ -173,54 +168,4 @@ func GetPgIndexNamesById_tx(tx pgx.Tx, id uuid.UUID) (string, string, error) {
 		return "", "", fmt.Errorf("failed to get relation/modules names by PG index ID %s: %w", id, err)
 	}
 	return moduleName, relationName, nil
-}
-
-// database entity names
-func GetPKConstraintName(relationId uuid.UUID) string {
-	return fmt.Sprintf("pk_%s", relationId.String())
-}
-func GetFKConstraintName(attributeId uuid.UUID) string {
-	return fmt.Sprintf("fk_%s", attributeId.String())
-}
-func GetSequenceName(relationId uuid.UUID) string {
-	return fmt.Sprintf("sq_%s", relationId.String())
-}
-func GetPgIndexName(pgIndexId uuid.UUID) string {
-	return fmt.Sprintf("ind_%s", pgIndexId.String())
-}
-
-// attribute checks
-func IsContentFiles(content string) bool {
-	return content == "files"
-}
-func IsContentNumeric(content string) bool {
-	return content == "numeric"
-}
-func IsContentRelationship(content string) bool {
-	return content == "1:1" || content == "n:1"
-}
-func IsContentRelationship11(content string) bool {
-	return content == "1:1"
-}
-func IsContentText(content string) bool {
-	return content == "varchar" || content == "text"
-}
-
-// attribute conversions
-func GetAttributeFilesFromInterface(in interface{}) (types.DataSetFiles, error) {
-	files := types.DataSetFiles{}
-
-	if in == nil {
-		return files, nil
-	}
-
-	inJson, err := json.Marshal(in)
-	if err != nil {
-		return files, err
-	}
-
-	if err := json.Unmarshal(inJson, &files); err != nil {
-		return files, err
-	}
-	return files, nil
 }

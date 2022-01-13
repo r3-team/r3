@@ -6,7 +6,6 @@ import (
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
-	"r3/schema/lookups"
 	"r3/tools"
 	"r3/types"
 	"regexp"
@@ -18,7 +17,7 @@ import (
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
-	nameMod, nameEx, _, _, err := lookups.GetPgFunctionDetailsById_tx(tx, id)
+	nameMod, nameEx, _, _, err := schema.GetPgFunctionDetailsById_tx(tx, id)
 	if err != nil {
 		return err
 	}
@@ -133,7 +132,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 		return err
 	}
 
-	nameMod, err := lookups.GetModuleNameById_tx(tx, moduleId)
+	nameMod, err := schema.GetModuleNameById_tx(tx, moduleId)
 	if err != nil {
 		return err
 	}
@@ -156,7 +155,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	}
 
 	if known {
-		_, nameEx, codeArgsEx, isTriggerEx, err := lookups.GetPgFunctionDetailsById_tx(tx, id)
+		_, nameEx, codeArgsEx, isTriggerEx, err := schema.GetPgFunctionDetailsById_tx(tx, id)
 		if err != nil {
 			return err
 		}
@@ -368,7 +367,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		}
 		idMap[modId] = true
 
-		modName, err := lookups.GetModuleNameById_tx(tx, modId)
+		modName, err := schema.GetModuleNameById_tx(tx, modId)
 		if err != nil {
 			return "", err
 		}
@@ -402,7 +401,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		}
 		idMap[fncId] = true
 
-		fncName, err := lookups.GetPgFunctionNameById_tx(tx, fncId)
+		fncName, err := schema.GetPgFunctionNameById_tx(tx, fncId)
 		if err != nil {
 			return "", err
 		}
@@ -436,7 +435,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		}
 		idMap[relId] = true
 
-		relName, err := lookups.GetRelationNameById_tx(tx, relId)
+		relName, err := schema.GetRelationNameById_tx(tx, relId)
 		if err != nil {
 			return "", err
 		}
@@ -470,7 +469,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		}
 		idMap[atrId] = true
 
-		atrName, err := lookups.GetAttributeNameById_tx(tx, atrId)
+		atrName, err := schema.GetAttributeNameById_tx(tx, atrId)
 		if err != nil {
 			return "", err
 		}

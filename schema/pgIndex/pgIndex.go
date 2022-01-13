@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"r3/db"
 	"r3/schema"
-	"r3/schema/lookups"
 	"r3/types"
 	"strings"
 
@@ -41,7 +40,7 @@ func DelAutoFkiForAttribute_tx(tx pgx.Tx, attributeId uuid.UUID) error {
 }
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
-	moduleName, _, err := lookups.GetPgIndexNamesById_tx(tx, id)
+	moduleName, _, err := schema.GetPgIndexNamesById_tx(tx, id)
 	if err != nil {
 		return err
 	}
@@ -50,7 +49,7 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 	// drop if it still exists
 	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		DROP INDEX IF EXISTS "%s"."%s"
-	`, moduleName, lookups.GetPgIndexName(id))); err != nil {
+	`, moduleName, schema.GetPgIndexName(id))); err != nil {
 		return err
 	}
 
@@ -168,7 +167,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, noDuplicates bool,
 
 	for position, atr := range attributes {
 
-		name, err := lookups.GetAttributeNameById_tx(tx, atr.AttributeId)
+		name, err := schema.GetAttributeNameById_tx(tx, atr.AttributeId)
 		if err != nil {
 			return err
 		}
@@ -191,12 +190,12 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, noDuplicates bool,
 	}
 
 	// create index in module
-	_, moduleName, err := lookups.GetModuleDetailsByRelationId_tx(tx, relationId)
+	_, moduleName, err := schema.GetModuleDetailsByRelationId_tx(tx, relationId)
 	if err != nil {
 		return err
 	}
 
-	relationName, err := lookups.GetRelationNameById_tx(tx, relationId)
+	relationName, err := schema.GetRelationNameById_tx(tx, relationId)
 	if err != nil {
 		return err
 	}
@@ -208,7 +207,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, noDuplicates bool,
 
 	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		CREATE %s "%s" ON "%s"."%s" (%s)
-	`, options, lookups.GetPgIndexName(id), moduleName, relationName,
+	`, options, schema.GetPgIndexName(id), moduleName, relationName,
 		strings.Join(indexCols, ","))); err != nil {
 
 		return err

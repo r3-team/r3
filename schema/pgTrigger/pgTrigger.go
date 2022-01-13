@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"r3/db"
 	"r3/schema"
-	"r3/schema/lookups"
 	"r3/tools"
 	"r3/types"
 	"strings"
@@ -16,7 +15,7 @@ import (
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
-	nameMod, nameRel, err := lookups.GetPgTriggerNamesById_tx(tx, id)
+	nameMod, nameRel, err := schema.GetPgTriggerNamesById_tx(tx, id)
 	if err != nil {
 		return err
 	}
@@ -73,7 +72,7 @@ func Set_tx(tx pgx.Tx, pgFunctionId uuid.UUID, id uuid.UUID,
 	isConstraint bool, isDeferrable bool, isDeferred bool, perRow bool,
 	fires string, codeCondition string) error {
 
-	nameMod, nameRel, err := lookups.GetRelationNamesById_tx(tx, relationId)
+	nameMod, nameRel, err := schema.GetRelationNamesById_tx(tx, relationId)
 	if err != nil {
 		return err
 	}
@@ -172,7 +171,7 @@ func Set_tx(tx pgx.Tx, pgFunctionId uuid.UUID, id uuid.UUID,
 	}
 
 	// create trigger
-	_, nameFnc, argsFnc, _, err := lookups.GetPgFunctionDetailsById_tx(tx, pgFunctionId)
+	_, nameFnc, argsFnc, _, err := schema.GetPgFunctionDetailsById_tx(tx, pgFunctionId)
 	if err != nil {
 		return err
 	}

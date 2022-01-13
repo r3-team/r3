@@ -7,7 +7,7 @@ import (
 	"r3/cache"
 	"r3/db"
 	"r3/handler"
-	"r3/schema/lookups"
+	"r3/schema"
 	"r3/tools"
 	"r3/types"
 	"regexp"
@@ -248,8 +248,9 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 			if _, exists := cache.RelationIdMap[relId]; !exists {
 				return "", "", errors.New("relation does not exist")
 			}
-			inSelect = append(inSelect, fmt.Sprintf(`"%s"."id" AS %s`,
+			inSelect = append(inSelect, fmt.Sprintf(`"%s"."%s" AS %s`,
 				getRelationCode(index, nestingLevel),
+				schema.PkName,
 				getTupelIdCode(index, nestingLevel)))
 		}
 	}
@@ -317,7 +318,7 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 		queryCount = fmt.Sprintf(
 			`SELECT COUNT(DISTINCT "%s"."%s")`+"\n"+
 				`FROM "%s"."%s" AS "%s" %s%s`,
-			getRelationCode(data.IndexSource, nestingLevel), lookups.PkName, // SELECT
+			getRelationCode(data.IndexSource, nestingLevel), schema.PkName, // SELECT
 			mod.Name, rel.Name, relCode, // FROM
 			strings.Join(inJoin, ""), // JOINS
 			queryWhere)               // WHERE
@@ -403,10 +404,10 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 
 		var selectExpr string
 
-		if lookups.IsContentRelationship11(atr.Content) {
-			selectExpr = fmt.Sprintf(`"%s"`, lookups.PkName)
+		if schema.IsContentRelationship11(atr.Content) {
+			selectExpr = fmt.Sprintf(`"%s"`, schema.PkName)
 		} else {
-			selectExpr = fmt.Sprintf(`JSON_AGG("%s")`, lookups.PkName)
+			selectExpr = fmt.Sprintf(`JSON_AGG("%s")`, schema.PkName)
 		}
 
 		// from other relation, collect tupel IDs in relationship with given index tupel
@@ -417,7 +418,7 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 		) AS %s`,
 			selectExpr,
 			shipMod.Name, shipRel.Name,
-			shipRel.Name, atr.Name, relCode, lookups.PkName,
+			shipRel.Name, atr.Name, relCode, schema.PkName,
 			codeSelect))
 
 	} else {
@@ -434,7 +435,7 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 		) AS %s`,
 			shipAtrNm.Name,
 			shipMod.Name, shipRel.Name,
-			shipRel.Name, atr.Name, relCode, lookups.PkName,
+			shipRel.Name, atr.Name, relCode, schema.PkName,
 			codeSelect))
 	}
 	return nil
@@ -505,7 +506,7 @@ func addJoin(mapIndex_relId map[int]uuid.UUID, join types.DataGetJoin,
 	*inJoin = append(*inJoin, fmt.Sprintf("\n"+`%s JOIN "%s"."%s" AS "%s" ON "%s"."%s" = "%s"."%s" %s`,
 		join.Connector, modTarget.Name, relTarget.Name, relCodeTarget,
 		relCodeFrom, atr.Name,
-		relCodeTo, lookups.PkName,
+		relCodeTo, schema.PkName,
 		policyFilter))
 
 	return nil

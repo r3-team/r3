@@ -7,7 +7,7 @@ import (
 	"r3/cache"
 	"r3/config"
 	"r3/db"
-	"r3/schema/lookups"
+	"r3/schema"
 	"r3/setting"
 	"r3/tools"
 	"r3/types"
@@ -57,7 +57,7 @@ func Get(byString string, limit int, offset int, recordRequests []types.LoginAdm
 		mod, _ := cache.ModuleIdMap[rel.ModuleId]
 
 		parts = append(parts, fmt.Sprintf(`SELECT COALESCE((SELECT CONCAT("%s",'%s',"%s") FROM "%s"."%s" WHERE "%s" = l.id),'')`,
-			lookups.PkName, separator, atrLookup.Name, mod.Name, rel.Name, atrLogin.Name))
+			schema.PkName, separator, atrLookup.Name, mod.Name, rel.Name, atrLogin.Name))
 	}
 	if len(parts) != 0 {
 		qb.Add("SELECT", fmt.Sprintf("ARRAY(%s)", strings.Join(parts, "\nUNION ALL\n")))

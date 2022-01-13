@@ -9,7 +9,7 @@ import (
 	"r3/config"
 	"r3/db"
 	"r3/log"
-	"r3/schema/lookups"
+	"r3/schema"
 	"r3/tools"
 	"r3/types"
 	"strings"
@@ -139,7 +139,7 @@ func do(m types.Mail) error {
 				m.AttributeId.Bytes)
 		}
 
-		if !lookups.IsContentFiles(atr.Content) {
+		if !schema.IsContentFiles(atr.Content) {
 			return fmt.Errorf("cannot attach file(s) from non-file attribute %s",
 				m.AttributeId.Bytes)
 		}
@@ -152,7 +152,7 @@ func do(m types.Mail) error {
 			SELECT "%s"
 			FROM "%s"."%s"
 			WHERE "%s" = $1
-		`, atr.Name, mod.Name, rel.Name, lookups.PkName),
+		`, atr.Name, mod.Name, rel.Name, schema.PkName),
 			m.RecordId.Int).Scan(&value)
 
 		if err != pgx.ErrNoRows && err != nil {
@@ -165,7 +165,7 @@ func do(m types.Mail) error {
 		}
 
 		// attachments are set
-		files, err := lookups.GetAttributeFilesFromInterface(value)
+		files, err := schema.GetAttributeFilesFromInterface(value)
 		if err != nil {
 			return err
 		}

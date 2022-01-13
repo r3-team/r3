@@ -14,7 +14,7 @@ import (
 	"r3/mail/receive"
 	"r3/mail/send"
 	"r3/repo"
-	"r3/schema/lookups"
+	"r3/schema"
 	"r3/tools"
 	"sync"
 	"time"
@@ -402,7 +402,7 @@ func runPgFunction(pgFunctionId uuid.UUID) error {
 	}
 	defer tx.Rollback(db.Ctx)
 
-	modName, fncName, _, _, err := lookups.GetPgFunctionDetailsById_tx(tx, pgFunctionId)
+	modName, fncName, _, _, err := schema.GetPgFunctionDetailsById_tx(tx, pgFunctionId)
 	if err != nil {
 		return err
 	}

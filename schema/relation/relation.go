@@ -5,7 +5,6 @@ import (
 	"r3/db"
 	"r3/schema"
 	"r3/schema/attribute"
-	"r3/schema/lookups"
 	"r3/schema/pgFunction"
 	"r3/types"
 
@@ -16,7 +15,7 @@ import (
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
-	modName, relName, err := lookups.GetRelationNamesById_tx(tx, id)
+	modName, relName, err := schema.GetRelationNamesById_tx(tx, id)
 	if err != nil {
 		return err
 	}
@@ -45,7 +44,7 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 func delPkSeq_tx(tx pgx.Tx, modName string, id uuid.UUID) error {
 	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		DROP SEQUENCE "%s"."%s"
-	`, modName, lookups.GetSequenceName(id)))
+	`, modName, schema.GetSequenceName(id)))
 	return err
 }
 
@@ -62,7 +61,7 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 		FROM app.relation
 		WHERE module_id = $2
 		ORDER BY name ASC
-	`, lookups.PkName, moduleId)
+	`, schema.PkName, moduleId)
 	if err != nil {
 		return relations, err
 	}
@@ -96,7 +95,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 		return err
 	}
 
-	moduleName, err := lookups.GetModuleNameById_tx(tx, moduleId)
+	moduleName, err := schema.GetModuleNameById_tx(tx, moduleId)
 	if err != nil {
 		return err
 	}
@@ -108,7 +107,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	}
 
 	if known {
-		_, nameEx, err := lookups.GetRelationNamesById_tx(tx, id)
+		_, nameEx, err := schema.GetRelationNamesById_tx(tx, id)
 		if err != nil {
 			return err
 		}
@@ -156,7 +155,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 			if err := attribute.Set_tx(tx, id, uuid.Nil,
 				pgtype.UUID{Status: pgtype.Null},
 				pgtype.UUID{Status: pgtype.Null},
-				lookups.PkName, "integer", 0, false, "", "", "",
+				schema.PkName, "integer", 0, false, "", "", "",
 				types.CaptionMap{}); err != nil {
 
 				return err
