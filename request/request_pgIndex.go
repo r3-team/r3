@@ -18,10 +18,7 @@ func PgIndexDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := pgIndex.Del_tx(tx, req.Id); err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return nil, pgIndex.Del_tx(tx, req.Id)
 }
 
 func PgIndexGet(reqJson json.RawMessage) (interface{}, error) {
@@ -43,10 +40,6 @@ func PgIndexSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := pgIndex.Set_tx(tx, req.RelationId, req.Id, req.NoDuplicates,
-		false, req.Attributes); err != nil {
-
-		return nil, err
-	}
-	return nil, nil
+	return nil, pgIndex.Set_tx(tx, req.RelationId,
+		req.Id, req.NoDuplicates, false, req.Attributes)
 }

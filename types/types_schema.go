@@ -30,6 +30,7 @@ type Module struct {
 	LoginForms      []LoginForm       `json:"loginForms"`
 	PgFunctions     []PgFunction      `json:"pgFunctions"`
 	JsFunctions     []JsFunction      `json:"jsFunctions"`
+	Collections     []Collection      `json:"collections"`
 	Captions        CaptionMap        `json:"captions"`
 }
 type ModuleStartForm struct {
@@ -295,24 +296,39 @@ type FieldHeader struct {
 	Captions CaptionMap  `json:"captions"`
 }
 type FieldList struct {
-	Id          uuid.UUID   `json:"id"`
-	IconId      pgtype.UUID `json:"iconId"`
-	Content     string      `json:"content"`
-	State       string      `json:"state"`
-	OnMobile    bool        `json:"onMobile"`
-	CsvExport   bool        `json:"csvExport"`
-	CsvImport   bool        `json:"csvImport"`
-	AutoRenew   pgtype.Int4 `json:"autoRenew"`   // automatic list refresh
-	Layout      string      `json:"layout"`      // list layout: table, cards
-	FilterQuick bool        `json:"filterQuick"` // enable quickfilter (uses all visible columns)
-	ResultLimit int         `json:"resultLimit"` // predefined limit, overwritable by user
-	Columns     []Column    `json:"columns"`
-	OpenForm    OpenForm    `json:"openForm"`
-	Query       Query       `json:"query"`
+	Id          uuid.UUID         `json:"id"`
+	IconId      pgtype.UUID       `json:"iconId"`
+	Content     string            `json:"content"`
+	State       string            `json:"state"`
+	OnMobile    bool              `json:"onMobile"`
+	CsvExport   bool              `json:"csvExport"`
+	CsvImport   bool              `json:"csvImport"`
+	AutoRenew   pgtype.Int4       `json:"autoRenew"`   // automatic list refresh
+	Layout      string            `json:"layout"`      // list layout: table, cards
+	FilterQuick bool              `json:"filterQuick"` // enable quickfilter (uses all visible columns)
+	ResultLimit int               `json:"resultLimit"` // predefined limit, overwritable by user
+	Collections []FieldCollection `json:"collections"` // filter by collections
+	Columns     []Column          `json:"columns"`
+	OpenForm    OpenForm          `json:"openForm"`
+	Query       Query             `json:"query"`
 
 	// legacy
 	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
 	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
+}
+type FieldCollection struct {
+	CollectionId              uuid.UUID   `json:"collectionId"`              // collection to filter field with
+	ColumnIdCollectionShow    pgtype.UUID `json:"columnIdCollectionShow"`    // column from collection that can be used as selector if set
+	ColumnIdCollectionFilter  pgtype.UUID `json:"columnIdCollectionFilter"`  // column from collection to be used as filter
+	AttributeIdFieldFilter    uuid.UUID   `json:"attributeIdFieldFilter"`    // attribute ID from field to be filtered
+	AttributeIndexFieldFilter int         `json:"attributeIndexFieldFilter"` // attribute index from field to be filtered
+}
+type Collection struct {
+	Id       uuid.UUID `json:"id"`
+	ModuleId uuid.UUID `json:"moduleId"`
+	Name     string    `json:"name"`
+	Columns  []Column  `json:"columns"`
+	Query    Query     `json:"query"`
 }
 type Column struct {
 	Id          uuid.UUID      `json:"id"`

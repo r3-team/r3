@@ -7,6 +7,7 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/schema/attribute"
+	"r3/schema/collection"
 	"r3/schema/column"
 	"r3/schema/field"
 	"r3/schema/form"
@@ -119,6 +120,26 @@ func importDeleteNotExisting_tx(tx pgx.Tx, module types.Module) error {
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del attribute %s", id.String()))
 		if err := attribute.Del_tx(tx, id); err != nil {
+			return err
+		}
+	}
+
+	// collections
+	idsKeep = make([]uuid.UUID, 0)
+	idsDelete = make([]uuid.UUID, 0)
+
+	for _, col := range module.Collections {
+		idsKeep = append(idsKeep, col.Id)
+	}
+
+	idsDelete, err = importGetIdsToDeleteFromModule_tx(tx, "collection", module.Id, idsKeep)
+	if err != nil {
+		return err
+	}
+
+	for _, id := range idsDelete {
+		log.Info("transfer", fmt.Sprintf("del collection %s", id.String()))
+		if err := collection.Del_tx(tx, id); err != nil {
 			return err
 		}
 	}
@@ -438,8 +459,8 @@ func importGetIdsToDeleteFromModule_tx(tx pgx.Tx, entity string,
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !tools.StringInSlice(entity, []string{"form", "icon", "js_function",
-		"login_form", "menu", "pg_function", "relation", "role"}) {
+	if !tools.StringInSlice(entity, []string{"collection", "form", "icon",
+		"js_function", "login_form", "menu", "pg_function", "relation", "role"}) {
 
 		return idsDelete, errors.New("unsupport type for delete check")
 	}

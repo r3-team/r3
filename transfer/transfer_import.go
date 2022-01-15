@@ -15,6 +15,7 @@ import (
 	"r3/scheduler"
 	"r3/schema"
 	"r3/schema/attribute"
+	"r3/schema/collection"
 	"r3/schema/form"
 	"r3/schema/icon"
 	"r3/schema/jsFunction"
@@ -252,6 +253,26 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 				return err
 			}
+		}
+	}
+
+	// collections
+	for _, e := range mod.Collections {
+
+		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info("transfer", fmt.Sprintf("set collection %s", e.Id))
+
+		if err := importCheckResultAndApply(tx, collection.Set_tx(tx,
+			e.ModuleId, e.Id, e.Name, e.Columns, e.Query), e.Id,
+			idMapSkipped); err != nil {
+
+			return err
 		}
 	}
 

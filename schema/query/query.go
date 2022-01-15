@@ -15,7 +15,7 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
-var allowedEntities = []string{"form", "field", "column", "query_filter_query"}
+var allowedEntities = []string{"form", "field", "collection", "column", "query_filter_query"}
 
 func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types.Query, error) {
 

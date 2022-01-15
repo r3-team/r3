@@ -19,10 +19,7 @@ func LdapDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := ldap.Del_tx(tx, req.Id); err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return nil, ldap.Del_tx(tx, req.Id)
 }
 
 func LdapGet() (interface{}, error) {
@@ -48,15 +45,11 @@ func LdapSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := ldap.Set_tx(tx, req.Id, req.Name, req.Host, req.Port,
+	return nil, ldap.Set_tx(tx, req.Id, req.Name, req.Host, req.Port,
 		req.BindUserDn, req.BindUserPw, req.SearchClass, req.SearchDn,
 		req.KeyAttribute, req.LoginAttribute, req.MemberAttribute,
 		req.AssignRoles, req.MsAdExt, req.Tls, req.TlsVerify,
-		req.Roles); err != nil {
-
-		return nil, err
-	}
-	return nil, nil
+		req.Roles)
 }
 
 func LdapImport(reqJson json.RawMessage) (interface{}, error) {
@@ -68,10 +61,7 @@ func LdapImport(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := ldap_import.Run(req.Id); err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return nil, ldap_import.Run(req.Id)
 }
 
 func LdapCheck(reqJson json.RawMessage) (interface{}, error) {
@@ -83,8 +73,5 @@ func LdapCheck(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := ldap_check.Run(req.Id); err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return nil, ldap_check.Run(req.Id)
 }

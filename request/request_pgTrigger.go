@@ -18,10 +18,7 @@ func PgTriggerDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := pgTrigger.Del_tx(tx, req.Id); err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return nil, pgTrigger.Del_tx(tx, req.Id)
 }
 
 func PgTriggerSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
@@ -31,12 +28,8 @@ func PgTriggerSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := pgTrigger.Set_tx(tx, req.PgFunctionId, req.Id, req.RelationId,
+	return nil, pgTrigger.Set_tx(tx, req.PgFunctionId, req.Id, req.RelationId,
 		req.OnInsert, req.OnUpdate, req.OnDelete, req.IsConstraint,
 		req.IsDeferrable, req.IsDeferred, req.PerRow, req.Fires,
-		req.CodeCondition); err != nil {
-
-		return nil, err
-	}
-	return nil, nil
+		req.CodeCondition)
 }

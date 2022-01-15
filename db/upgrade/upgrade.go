@@ -310,6 +310,108 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX IF NOT EXISTS fki_form_function_js_function_id
 			    ON app.form_function USING btree (js_function_id ASC NULLS LAST);
+			
+			-- new collection entity
+			CREATE TABLE IF NOT EXISTS app.collection (
+			    id uuid NOT NULL,
+				module_id uuid NOT NULL,
+			    name character varying(64) COLLATE pg_catalog."default" NOT NULL,
+			    CONSTRAINT collection_pkey PRIMARY KEY (id),
+			    CONSTRAINT collection_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_collection_module_id_fkey
+			    ON app.collection USING btree (module_id ASC NULLS LAST);
+			
+			-- updates to columns, allowing them to reference collections
+			ALTER TABLE app.column ALTER COLUMN field_id DROP NOT NULL;
+			ALTER TABLE app.column ADD COLUMN collection_id uuid;
+			ALTER TABLE app.column ADD CONSTRAINT column_collection_id_fkey FOREIGN KEY (collection_id)
+				REFERENCES app.collection (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+			    ON DELETE CASCADE
+			    DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_column_collection_id_fkey
+			    ON app.column USING btree (collection_id ASC NULLS LAST);
+			
+			ALTER TABLE app.column ADD CONSTRAINT column_single_parent
+			CHECK ((field_id IS NULL) <> (collection_id IS NULL));
+			
+			-- adding collection to query as parent
+			ALTER TABLE app.query ADD COLUMN collection_id uuid;
+			ALTER TABLE app.query ADD CONSTRAINT query_collection_id_fkey FOREIGN KEY (collection_id)
+				REFERENCES app.collection (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+			    ON DELETE CASCADE
+			    DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_query_collection_id_fkey
+			    ON app.query USING btree (collection_id ASC NULLS LAST);
+			
+			ALTER TABLE app.query ADD CONSTRAINT query_single_parent
+			CHECK (1 = (
+				(CASE WHEN collection_id         IS NULL THEN 0 ELSE 1 END) +
+				(CASE WHEN column_id             IS NULL THEN 0 ELSE 1 END) +
+				(CASE WHEN field_id              IS NULL THEN 0 ELSE 1 END) +
+				(CASE WHEN form_id               IS NULL THEN 0 ELSE 1 END) +
+				(CASE WHEN query_filter_query_id IS NULL THEN 0 ELSE 1 END)
+			));
+			
+			-- adding collection to fields as option
+			CREATE TABLE IF NOT EXISTS app.field_collection (
+			    field_id uuid NOT NULL,
+			    collection_id uuid NOT NULL,
+			    column_id_collection_show uuid,
+			    column_id_collection_filter uuid NOT NULL,
+				attribute_id_field_filter uuid NOT NULL,
+				attribute_index_field_filter integer NOT NULL,
+			    CONSTRAINT field_collection_pkey PRIMARY KEY (collection_id, field_id),
+			    CONSTRAINT field_collection_column_id_collection_show_fkey FOREIGN KEY (column_id_collection_show)
+			        REFERENCES app."column" (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT field_collection_column_id_collection_filter_fkey FOREIGN KEY (column_id_collection_filter)
+			        REFERENCES app."column" (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT field_collection_field_id_fkey FOREIGN KEY (field_id)
+			        REFERENCES app.field (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT field_collection_collection_id_fkey FOREIGN KEY (collection_id)
+			        REFERENCES app.collection (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT field_collection_attribute_id_field_filter_fkey FOREIGN KEY (attribute_id_field_filter)
+			        REFERENCES app.attribute (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_field_collection_field_id_fkey
+			    ON app.field_collection USING btree (field_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_field_collection_collection_id_fkey
+			    ON app.field_collection USING btree (collection_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_field_collection_column_id_collection_show_fkey
+			    ON app.field_collection USING btree (column_id_collection_show ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_field_collection_column_id_collection_filter_fkey
+			    ON app.field_collection USING btree (column_id_collection_filter ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_field_collection_attribute_id_field_filter_fkey
+			    ON app.field_collection USING btree (attribute_id_field_filter ASC NULLS LAST);
 		`)
 
 		// migrate existing form open actions to new 'open form' entity

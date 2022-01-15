@@ -11,6 +11,7 @@ import (
 	"r3/log"
 	"r3/module_option"
 	"r3/schema/attribute"
+	"r3/schema/collection"
 	"r3/schema/form"
 	"r3/schema/icon"
 	"r3/schema/jsFunction"
@@ -179,6 +180,7 @@ func reloadModule(id uuid.UUID) error {
 	mod.LoginForms = make([]types.LoginForm, 0)
 	mod.PgFunctions = make([]types.PgFunction, 0)
 	mod.JsFunctions = make([]types.JsFunction, 0)
+	mod.Collections = make([]types.Collection, 0)
 
 	// get relations
 	log.Info("cache", "load relations")
@@ -286,6 +288,14 @@ func reloadModule(id uuid.UUID) error {
 	log.Info("cache", "load JS functions")
 
 	mod.JsFunctions, err = jsFunction.Get(mod.Id)
+	if err != nil {
+		return err
+	}
+
+	// get collections
+	log.Info("cache", "load collections")
+
+	mod.Collections, err = collection.Get(mod.Id)
 	if err != nil {
 		return err
 	}
