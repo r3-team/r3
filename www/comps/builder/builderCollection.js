@@ -183,7 +183,7 @@ let MyBuilderCollection = {
 		// states
 		hasChanges:function() {
 			return this.relationId              !== this.collection.query.relationId
-				|| this.fixedLimit              !== JSON.stringify(this.collection.fixedLimit)
+				|| this.fixedLimit              !== this.collection.query.fixedLimit
 				|| JSON.stringify(this.joins)   !== JSON.stringify(this.collection.query.joins)
 				|| JSON.stringify(this.filters) !== JSON.stringify(this.collection.query.filters)
 				|| JSON.stringify(this.orders)  !== JSON.stringify(this.collection.query.orders)

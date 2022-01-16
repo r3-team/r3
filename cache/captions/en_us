@@ -881,6 +881,8 @@
 			"assignable":"Assignable",
 			"attribute":"Attribute",
 			"children":"Member of",
+			"collection":"Collection",
+			"collections":"Collections",
 			"data":"Data",
 			"legend":"Legend: No access (-), read (R), write (W), delete (D)",
 			"menu":"Menu",

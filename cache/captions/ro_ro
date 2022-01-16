@@ -881,6 +881,8 @@
 			"assignable":"Alocabil",
 			"attribute":"Atribut",
 			"children":"Membru al",
+			"collection":"Collection",
+			"collections":"Collections",
 			"data":"Data",
 			"legend":"Legendă: Fără acces (-), citire (R), scriere (W), ștergere (D)",
 			"menu":"Meniu",

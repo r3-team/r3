@@ -1,7 +1,34 @@
 export {MyBuilderRole as default};
 
-let MyBuilderRoleMenuAccess = {
-	name:'my-builder-role-menu-access',
+let MyBuilderRoleAccessCollection = {
+	name:'my-builder-role-access-collection',
+	template:`<tbody>
+		<tr class="entry">
+			<td class="maximum">{{ collection.name }}</td>
+			<td>
+				<my-bool
+					@update:modelValue="$emit('apply',collection.id,access === 1 ? -1 : 1)"
+					:modelValue="access === 1 ? true : false"
+				/>
+			</td>
+		</tr>
+	</tbody>`,
+	props:{
+		builderLanguage:{ type:String, required:true },
+		collection:     { type:Object, required:true },
+		idMapAccess:    { type:Object, required:true }
+	},
+	emits:['apply'],
+	computed:{
+		access:function() {
+			return typeof this.idMapAccess[this.collection.id] === 'undefined'
+				? -1 : this.idMapAccess[this.collection.id];
+		}
+	}
+};
+
+let MyBuilderRoleAccessMenu = {
+	name:'my-builder-role-access-menu',
 	template:`<tbody>
 		<tr class="entry">
 			<td class="minimum">
@@ -12,14 +39,12 @@ let MyBuilderRoleMenuAccess = {
 					:naked="true"
 				/>
 			</td>
-			<td class="maximum clickable"
-				@click="showSubs = !showSubs"
-			>
+			<td class="maximum clickable" @click="showSubs = !showSubs">
 				{{ title }}
 			</td>
 			<td>
 				<my-bool
-					@update:modelValue="$emit('apply-menu',menu.id,access === 1 ? -1 : 1)"
+					@update:modelValue="$emit('apply',menu.id,access === 1 ? -1 : 1)"
 					:modelValue="access === 1 ? true : false"
 				/>
 			</td>
@@ -29,9 +54,9 @@ let MyBuilderRoleMenuAccess = {
 			<td></td>
 			<td colspan="999">
 				<table class="box">
-					<my-builder-role-menu-access
+					<my-builder-role-access-menu
 						v-for="men in menu.menus"
-						@apply-menu="(...args) => $emit('apply-menu',...args)"
+						@apply="(...args) => $emit('apply',...args)"
 						:builder-language="builderLanguage"
 						:id-map-access="idMapAccess"
 						:key="men.id"
@@ -48,7 +73,7 @@ let MyBuilderRoleMenuAccess = {
 		menu:           { type:Object, required:true },
 		role:           { type:Object, required:true }
 	},
-	emits:['apply-menu'],
+	emits:['apply'],
 	data:function() {
 		return { showSubs:true };
 	},
@@ -83,8 +108,8 @@ let MyBuilderRoleMenuAccess = {
 	}
 };
 
-let MyBuilderRoleRelationAccess = {
-	name:'my-builder-role-relation-access',
+let MyBuilderRoleAccessRelation = {
+	name:'my-builder-role-access-relation',
 	template:`<tbody>
 		<tr>
 			<td class="minimum">
@@ -95,7 +120,7 @@ let MyBuilderRoleRelationAccess = {
 					:naked="true"
 				/>
 			</td>
-			<td colspan="2" class="clickable"
+			<td colspan="2" class="clickable maximum"
 				@click="$emit('relation-selected',relation.id)"
 			>
 				{{ relation.name + (brokenInheritance ? '*' : '') }}
@@ -180,8 +205,9 @@ let MyBuilderRoleRelationAccess = {
 let MyBuilderRole = {
 	name:'my-builder-role',
 	components:{
-		MyBuilderRoleMenuAccess,
-		MyBuilderRoleRelationAccess
+		MyBuilderRoleAccessCollection,
+		MyBuilderRoleAccessMenu,
+		MyBuilderRoleAccessRelation
 	},
 	template:`<div class="builder-role contentBox grow" v-if="ready">
 			
@@ -224,10 +250,10 @@ let MyBuilderRole = {
 						<th>{{ capApp.access }}*</th>
 					</thead>
 					
-					<my-builder-role-relation-access
+					<my-builder-role-access-relation
 						v-for="rel in module.relations"
-						@apply-attribute="applyAttribute"
-						@apply-relation="applyRelation"
+						@apply-attribute="(...args) => apply('attribute',args[0],args[1])"
+						@apply-relation="(...args) => apply('relation',args[0],args[1])"
 						@relation-selected="toggleRelationShow"
 						:attribute-id-map-access="accessAttributes"
 						:key="role.id + '_' + rel.id"
@@ -252,14 +278,36 @@ let MyBuilderRole = {
 						<th>{{ capApp.access }}</th>
 					</thead>
 					
-					<my-builder-role-menu-access
+					<my-builder-role-access-menu
 						v-for="men in module.menus"
-						@apply-menu="applyMenu"
+						@apply="(...args) => apply('menu',args[0],args[1])"
 						:builder-language="builderLanguage"
 						:id-map-access="accessMenus"
 						:key="role.id + '_' + men.id"
 						:menu="men"
 						:role="role"
+					/>
+				</table>
+			</div>
+			
+			<div class="contentPart">
+				<div class="contentPartHeader">
+					<h1>{{ capApp.collections }}</h1>
+				</div>
+				
+				<table class="default-inputs">
+					<thead>
+						<th>{{ capApp.collection }}</th>
+						<th>{{ capApp.access }}</th>
+					</thead>
+					
+					<my-builder-role-access-collection
+						v-for="c in module.collections"
+						@apply="(...args) => apply('collection',args[0],args[1])"
+						:builder-language="builderLanguage"
+						:collection="c"
+						:id-map-access="accessCollections"
+						:key="role.id + '_' + c.id"
 					/>
 				</table>
 			</div>
@@ -280,6 +328,7 @@ let MyBuilderRole = {
 	data:function() {
 		return {
 			accessAttributes:{},
+			accessCollections:{},
 			accessMenus:{},
 			accessRelations:{},
 			ready:false,
@@ -287,22 +336,22 @@ let MyBuilderRole = {
 		};
 	},
 	computed:{
+		// entities
 		module:function() {
-			if(this.role === false)
-				return false;
-			
-			return this.moduleIdMap[this.role.moduleId];
+			return this.role === false
+				? false : this.moduleIdMap[this.role.moduleId];
 		},
 		role:function() {
-			if(typeof this.roleIdMap[this.id] === 'undefined')
-				return false;
-			
-			return this.roleIdMap[this.id];
+			return typeof this.roleIdMap[this.id] === 'undefined'
+				? false : this.roleIdMap[this.id];
 		},
+		
+		// states
 		hasChanges:function() {
-			return JSON.stringify(this.accessRelations)  !== JSON.stringify(this.role.accessRelations)
-				|| JSON.stringify(this.accessAttributes) !== JSON.stringify(this.role.accessAttributes)
-				|| JSON.stringify(this.accessMenus)      !== JSON.stringify(this.role.accessMenus)
+			return JSON.stringify(this.accessAttributes)  !== JSON.stringify(this.role.accessAttributes)
+				|| JSON.stringify(this.accessCollections) !== JSON.stringify(this.role.accessCollections)
+				|| JSON.stringify(this.accessMenus)       !== JSON.stringify(this.role.accessMenus)
+				|| JSON.stringify(this.accessRelations)   !== JSON.stringify(this.role.accessRelations)
 			;
 		},
 		
@@ -313,19 +362,20 @@ let MyBuilderRole = {
 		capGen:     function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
-		applyAttribute:function(id,access) {
-			this.accessAttributes[id] = access;
-		},
-		applyMenu:function(id,access) {
-			this.accessMenus[id] = access;
-		},
-		applyRelation:function(id,access) {
-			this.accessRelations[id] = access;
+		// actions
+		apply:function(type,id,access) {
+			switch(type) {
+				case 'attribute':  this.accessAttributes[id]  = access; break;
+				case 'collection': this.accessCollections[id] = access; break;
+				case 'menu':       this.accessMenus[id]       = access; break;
+				case 'relation':   this.accessRelations[id]   = access; break;
+			}
 		},
 		reset:function() {
-			this.accessAttributes = JSON.parse(JSON.stringify(this.role.accessAttributes));
-			this.accessMenus      = JSON.parse(JSON.stringify(this.role.accessMenus));
-			this.accessRelations  = JSON.parse(JSON.stringify(this.role.accessRelations));
+			this.accessAttributes  = JSON.parse(JSON.stringify(this.role.accessAttributes));
+			this.accessCollections = JSON.parse(JSON.stringify(this.role.accessCollections));
+			this.accessMenus       = JSON.parse(JSON.stringify(this.role.accessMenus));
+			this.accessRelations   = JSON.parse(JSON.stringify(this.role.accessRelations));
 			this.ready = true;
 		},
 		toggleRelationShow:function(id) {
@@ -335,6 +385,7 @@ let MyBuilderRole = {
 			else           this.relationIdsShown.splice(pos,1);
 		},
 		
+		// backend calls
 		set:function() {
 			ws.send('role','set',{
 				id:this.role.id,
@@ -344,9 +395,10 @@ let MyBuilderRole = {
 				captions:this.role.captions,
 				
 				// changable values in this UI
-				accessRelations:this.accessRelations,
 				accessAttributes:this.accessAttributes,
-				accessMenus:this.accessMenus
+				accessCollections:this.accessCollections,
+				accessMenus:this.accessMenus,
+				accessRelations:this.accessRelations
 			},true).then(
 				(res) => this.$root.schemaReload(this.module.id),
 				(err) => this.$root.genericError(err)

@@ -125,9 +125,10 @@ let MyBuilderRolesItem = {
 					roleTitle:{},
 					roleDesc:{}
 				},
-				accessRelations:{},
 				accessAttributes:{},
-				accessMenus:{}
+				accessCollections:{},
+				accessMenus:{},
+				accessRelations:{}
 			}}
 		}
 	},
@@ -227,9 +228,10 @@ let MyBuilderRolesItem = {
 				captions:this.captions,
 				
 				// not changable values on this interface
-				accessRelations:this.role.accessRelations,
 				accessAttributes:this.role.accessAttributes,
-				accessMenus:this.role.accessMenus
+				accessCollections:this.role.accessCollections,
+				accessMenus:this.role.accessMenus,
+				accessRelations:this.role.accessRelations
 			},true).then(
 				(res) => {
 					if(this.isNew)

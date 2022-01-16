@@ -881,6 +881,8 @@
 			"assignable":"Assignabile",
 			"attribute":"Attributi",
 			"children":"Membro di",
+			"collection":"Collection",
+			"collections":"Collections",
 			"data":"Dati",
 			"legend":"Legenda: No accesso (-), lettura (R), scrittura (W), cancellazione (D)",
 			"menu":"Menu",
