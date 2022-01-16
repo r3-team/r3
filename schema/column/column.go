@@ -78,6 +78,21 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column
 		return errors.New("bad entity")
 	}
 
+	// delete removed columns
+	idsKeep := make([]uuid.UUID, 0)
+	for _, c := range columns {
+		idsKeep = append(idsKeep, c.Id)
+	}
+
+	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		DELETE FROM app.column
+		WHERE %s_id = $1
+		AND id <> ALL($2)
+	`, entity), entityId, idsKeep); err != nil {
+		return err
+	}
+
+	// insert new/update existing columns
 	for position, c := range columns {
 
 		known, err := schema.CheckCreateId_tx(tx, &c.Id, "column", "id")

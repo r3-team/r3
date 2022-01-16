@@ -31,6 +31,7 @@ func Get(moduleId uuid.UUID) ([]types.Collection, error) {
 
 	for rows.Next() {
 		var c types.Collection
+		c.ModuleId = moduleId
 
 		if err := rows.Scan(&c.Id, &c.Name); err != nil {
 			return collections, err
@@ -72,9 +73,9 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.collection (id,name)
-			VALUES ($1,$2)
-		`, id, name); err != nil {
+			INSERT INTO app.collection (id,module_id,name)
+			VALUES ($1,$2,$3)
+		`, id, moduleId, name); err != nil {
 			return err
 		}
 	}

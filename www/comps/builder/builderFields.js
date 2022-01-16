@@ -1,10 +1,13 @@
 import MyBuilderCaption          from './builderCaption.js';
 import MyBuilderIconInput        from './builderIconInput.js';
-import MyBuilderFieldColumns, {MyBuilderFieldColumnTemplates} from './builderFieldColumns.js';
 import MyBuilderFieldOptions     from './builderFieldOptions.js';
 import {getItemTitle}            from '../shared/builder.js';
 import {getFlexBasis}            from '../shared/form.js';
 import {isAttributeRelationship} from '../shared/attribute.js';
+import {
+	MyBuilderColumns,
+	MyBuilderColumnTemplates
+} from './builderColumns.js';
 import {
 	getQueryExpressions,
 	getRelationsJoined,
@@ -16,8 +19,8 @@ let MyBuilderFields = {
 	name:'my-builder-fields',
 	components:{
 		MyBuilderCaption,
-		MyBuilderFieldColumns,
-		MyBuilderFieldColumnTemplates,
+		MyBuilderColumns,
+		MyBuilderColumnTemplates,
 		MyBuilderFieldOptions,
 		MyBuilderIconInput
 	},
@@ -34,7 +37,7 @@ let MyBuilderFields = {
 				:key="element.id"
 				:style="getStyleParent(element)"
 			>
-				<div class="actions">
+				<div class="builder-drag-item" :class="{ container:element.content === 'container' }">
 					<!-- form state field reference -->
 					<span class="reference" v-if="!isTemplate && showStates">
 						F{{ typeof fieldIdMapRef[element.id] !== 'undefined' ? fieldIdMapRef[element.id] : '' }}
@@ -194,21 +197,22 @@ let MyBuilderFields = {
 					:moduleId="moduleId"
 				/>
 				
-				<!-- columns for list fields -->
+				<!-- columns for list/calendar/chart fields -->
 				<div class="columnsTarget"
 					v-if="!isTemplate && hasFieldColumns(element)"
 				>
-					<div v-if="element.columns.length === 0">{{ capApp.columnsTarget }}</div>
+					<div v-if="element.columns.length === 0">
+						{{ capApp.columnsTarget }}
+					</div>
 					
-					<my-builder-field-columns class="inList"
+					<my-builder-columns class="inList"
 						@columns-set="fieldPropertySet(index,'columns',$event)"
 						@column-id-query-set="$emit('field-column-query-set',element.id,$event)"
-						@column-remove="$emit('column-remove',$event)"
 						:builderLanguage="builderLanguage"
 						:columnIdQuery="columnIdQuery"
 						:columns="element.columns"
-						:dataFields="dataFields"
-						:field="element"
+						:groupName="element.id+'_columns'"
+						:hasCaptions="element.content === 'list'"
 						:joins="element.query.joins"
 						:isTemplate="false"
 						:moduleId="moduleId"
@@ -216,12 +220,12 @@ let MyBuilderFields = {
 					/>
 				</div>
 				
-				<!-- column templates for list fields -->
-				<my-builder-field-column-templates
+				<!-- column templates for list/calendar/chart fields -->
+				<my-builder-column-templates
 					v-if="fieldIdQuery === element.id"
 					:builderLanguage="builderLanguage"
-					:dataFields="dataFields"
-					:field="element"
+					:columns="element.columns"
+					:groupName="element.id+'_columns'"
 					:joins="element.query.joins"
 					:moduleId="moduleId"
 				/>
@@ -234,7 +238,6 @@ let MyBuilderFields = {
 					@field-id-query-set="$emit('field-id-query-set',$event)"
 					@field-remove="$emit('field-remove',$event)"
 					@field-move-store="$emit('field-move-store',$event)"
-					@column-remove="$emit('column-remove',$event)"
 					:builderLanguage="builderLanguage"
 					:class="element.direction"
 					:columnIdQuery="columnIdQuery"
@@ -278,8 +281,8 @@ let MyBuilderFields = {
 		showStates:     { type:Boolean, required:false, default:false }
 	},
 	emits:[
-		'column-remove','field-column-query-set','field-counter-set',
-		'field-id-query-set','field-remove','field-move-store'
+		'field-column-query-set','field-counter-set','field-id-query-set',
+		'field-remove','field-move-store'
 	],
 	data:function() {
 		return {

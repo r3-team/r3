@@ -423,6 +423,17 @@
 			},
 			"new":"Nuovo attributo"
 		},
+		"collection":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this collection?"
+			},
+			"columnsTarget":"Place columns here",
+			"contentColumn":"Column data sub query",
+			"new":"New collection",
+			"query":"Query",
+			"title":"Collections",
+			"titleOne":"Collection '{NAME}'"
+		},
 		"form":{
 			"chart":{
 				"axisType":"Tipo assi",
@@ -882,6 +893,8 @@
 		"backHint":"Torna alla panoramica dell'applicazione",
 		"language":"Traduzione",
 		"languageNextHint":"Passa alla lingua successiva (tasto di scelta rapida: CTRL + q)",
+		"navigationCollections":"Collections",
+		"navigationCollectionsSub":"Collection details",
 		"navigationFilterHint":"Filtra per testo",
 		"navigationForms":"Moduli",
 		"navigationFormsSub":"Disegna modulo",

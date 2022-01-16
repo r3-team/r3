@@ -423,6 +423,17 @@
 			},
 			"new":"Atribut nou"
 		},
+		"collection":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this collection?"
+			},
+			"columnsTarget":"Place columns here",
+			"contentColumn":"Column data sub query",
+			"new":"New collection",
+			"query":"Query",
+			"title":"Collections",
+			"titleOne":"Collection '{NAME}'"
+		},
 		"form":{
 			"chart":{
 				"axisType":"Tipul de axă",
@@ -882,6 +893,8 @@
 		"backHint":"Reveniți la prezentarea generală a aplicației",
 		"language":"Traduceri",
 		"languageNextHint":"Comutați la următoarea limbă (tasta rapidă: CTRL + q)",
+		"navigationCollections":"Collections",
+		"navigationCollectionsSub":"Collection details",
 		"navigationFilterHint":"Filtrează după text",
 		"navigationForms":"Formulare",
 		"navigationFormsSub":"Formular de proiectare",

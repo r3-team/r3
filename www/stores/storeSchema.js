@@ -13,6 +13,7 @@ const MyStoreSchema = {
 		
 		// references to specific entities
 		attributeIdMap:{},
+		collectionIdMap:{},
 		formIdMap:{},
 		iconIdMap:{},
 		jsFunctionIdMap:{},
@@ -39,6 +40,7 @@ const MyStoreSchema = {
 			// reset state
 			state.modules         = payload.modules;
 			state.attributeIdMap  = {};
+			state.collectionIdMap = {};
 			state.moduleIdMap     = {};
 			state.moduleNameMap   = {};
 			state.formIdMap       = {};
@@ -100,6 +102,11 @@ const MyStoreSchema = {
 					state.roleIdMap[mod.roles[x].id] = mod.roles[x];
 				}
 				
+				// process collections
+				for(let x = 0, y = mod.collections.length; x < y; x++) {
+					state.collectionIdMap[mod.collections[x].id] = mod.collections[x];
+				}
+				
 				// process PG functions
 				for(let x = 0, y = mod.pgFunctions.length; x < y; x++) {
 					state.pgFunctionIdMap[mod.pgFunctions[x].id] = mod.pgFunctions[x];
@@ -116,6 +123,7 @@ const MyStoreSchema = {
 	},
 	getters:{
 		attributeIdMap:     (state) => state.attributeIdMap,
+		collectionIdMap:    (state) => state.collectionIdMap,
 		formIdMap:          (state) => state.formIdMap,
 		formIdMapMenu:      (state) => state.formIdMapMenu,
 		iconIdMap:          (state) => state.iconIdMap,

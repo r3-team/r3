@@ -39,6 +39,8 @@ import MyBuilderForm        from './comps/builder/builderForm.js';
 import MyBuilderHelp        from './comps/builder/builderHelp.js';
 import MyBuilderRoles       from './comps/builder/builderRoles.js';
 import MyBuilderRole        from './comps/builder/builderRole.js';
+import MyBuilderCollections from './comps/builder/builderCollections.js';
+import MyBuilderCollection  from './comps/builder/builderCollection.js';
 import MyBuilderLoginForms  from './comps/builder/builderLoginForms.js';
 import MyBuilderFunctions   from './comps/builder/builderFunctions.js';
 import MyBuilderPgFunction  from './comps/builder/builderPgFunction.js';
@@ -133,6 +135,16 @@ const MyRouter = VueRouter.createRouter({
 				path:'role/:id',
 				meta:{ nav:'roles', target:'role' },
 				component:MyBuilderRole,
+				props:true
+			},{
+				path:'collections/:id',
+				meta:{ nav:'collections', target:'module' },
+				component:MyBuilderCollections,
+				props:true
+			},{
+				path:'collection/:id',
+				meta:{ nav:'collections', target:'collection' },
+				component:MyBuilderCollection,
 				props:true
 			},{
 				path:'login-forms/:id',

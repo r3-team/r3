@@ -15,11 +15,9 @@ import {
 	getCaptionByIndexAttributeId,
 	getQueryTemplate
 } from '../shared/query.js';
-export {MyBuilderFieldColumns as default};
-export {MyBuilderFieldColumnTemplates};
 
-let MyBuilderFieldColumnOptions = {
-	name:'my-builder-field-column-options',
+let MyBuilderColumnOptions = {
+	name:'my-builder-column-options',
 	components:{MyBuilderQuery},
 	template:`<div class="options">
 		<table class="fullWidth default-inputs"><tbody>
@@ -169,7 +167,6 @@ let MyBuilderFieldColumnOptions = {
 	props:{
 		builderLanguage:{ type:String, required:true },
 		column:         { type:Object, required:true },
-		dataFields:     { type:Array,  required:true },
 		joins:          { type:Array,  required:false, default:() => [] },
 		moduleId:       { type:String, required:true }
 	},
@@ -239,20 +236,19 @@ let MyBuilderFieldColumnOptions = {
 	}
 };
 
-let MyBuilderFieldColumns = {
-	name:'my-builder-field-columns',
+export let MyBuilderColumns = {
+	name:'my-builder-columns',
 	components:{
 		MyBuilderCaption,
-		MyBuilderFieldColumnOptions
+		MyBuilderColumnOptions
 	},
-	template:`<draggable class="columns" handle=".dragAnchor" animation="100" itemKey="id"
+	template:`<draggable class="builder-columns" handle=".dragAnchor" animation="100" itemKey="id"
 		v-model="columnsInput"
 		:group="group"
 	>
 		<template #item="{element,index}">
-	   	 	<div class="column">
-				<div class="actions">
-					
+	   	 	<div class="column-wrap">
+				<div class="builder-drag-item column">
 					<img class="action dragAnchor" src="images/drag.png" />
 					
 					<img class="action edit clickable" src="images/edit.png"
@@ -298,7 +294,7 @@ let MyBuilderFieldColumns = {
 					
 					<img class="action end clickable" src="images/cancel.png"
 						v-if="!isTemplate"
-						@click="remove(element.id,index)"
+						@click="remove(index)"
 					/>
 				</div>
 				
@@ -313,12 +309,11 @@ let MyBuilderFieldColumns = {
 				</div>
 				
 				<!-- column options -->
-				<my-builder-field-column-options
+				<my-builder-column-options
 					v-if="idEdit === element.id"
 					@set="(...args) => propertySet(index,args[0],args[1])"
 					:builderLanguage="builderLanguage"
 					:column="element"
-					:dataFields="dataFields"
 					:joins="joins"
 					:moduleId="moduleId"
 				/>
@@ -329,14 +324,14 @@ let MyBuilderFieldColumns = {
 		builderLanguage:{ type:String,  required:true },
 		columns:        { type:Array,   required:true },
 		columnIdQuery:  { required:false,default:null },
-		dataFields:     { type:Array,   required:true },
-		field:          { type:Object,  required:true },
+		groupName:      { type:String,  required:true },
+		hasCaptions:    { type:Boolean, required:true },
 		isTemplate:     { type:Boolean, required:true },
 		joins:          { type:Array,   required:false, default:() => [] },
 		moduleId:       { type:String,  required:true },
 		showCaptions:   { type:Boolean, required:false, default:false }
 	},
-	emits:['column-id-query-set','column-remove','columns-set'],
+	emits:['column-id-query-set','columns-set'],
 	data:function() {
 		return {
 			idEdit:'' // column ID in edit mode
@@ -347,17 +342,12 @@ let MyBuilderFieldColumns = {
 			get:function()  { return JSON.parse(JSON.stringify(this.columns)); },
 			set:function(v) { if(!this.isTemplate) this.$emit('columns-set',v); }
 		},
-		hasCaptions:function() {
-			return !this.isTemplate && this.field.content === 'list';
-		},
 		group:function() {
-			// group name must be unique or else columns could be moved between fields
-			let groupName = `${this.field.id}_columns`;
-			
+			// must be unique or else columns could be moved between separate entities
 			return {
-				name:groupName,
-				pull:[groupName],
-				put:this.isTemplate ? false : [groupName]
+				name:this.groupName,
+				pull:[this.groupName],
+				put:this.isTemplate ? false : [this.groupName]
 			};
 		},
 		
@@ -370,6 +360,16 @@ let MyBuilderFieldColumns = {
 		// externals
 		getFlexBasis,
 		getItemTitle,
+		
+		// presentation
+		getTitle:function(column) {
+			if(column.subQuery)
+				return this.capApp.subQuery;
+			
+			let atr = this.attributeIdMap[column.attributeId];
+			let rel = this.relationIdMap[atr.relationId];
+			return this.getItemTitle(rel,atr,column.index,false,false);
+		},
 		
 		// actions
 		columnIdQuerySet:function(columnId) {
@@ -407,48 +407,35 @@ let MyBuilderFieldColumns = {
 			// this forces setter to trigger
 			this.columnsInput = this.columnsInput;
 		},
-		getTitle:function(column) {
-			if(column.subQuery)
-				return this.capApp.subQuery;
-			
-			let atr = this.attributeIdMap[column.attributeId];
-			let rel = this.relationIdMap[atr.relationId];
-			return this.getItemTitle(rel,atr,column.index,false,false);
-		},
-		remove:function(id,i) {
+		remove:function(i) {
 			this.columnsInput.splice(i,1);
 			this.refreshColumnsInput();
-			
-			// ID must be handled separately as it must be deleted in backend
-			this.$emit('column-remove',id);
 		}
 	}
 };
 
-let MyBuilderFieldColumnTemplates = {
-	name:'my-builder-field-column-templates',
-	components:{
-		MyBuilderFieldColumns
-	},
-	template:`<div class="columTemplates">
+export let MyBuilderColumnTemplates = {
+	name:'my-builder-column-templates',
+	components:{MyBuilderColumns},
+	template:`<div class="builder-columns templates">
 		<span class="template-title">
 			{{ columnsTemplate.length !== 0 ? capApp.columnsTemplates : capGen.nothingThere }}
 		</span>
 		
 		<!-- template columns -->
-		<my-builder-field-columns
-			:builder-language="builderLanguage"
+		<my-builder-columns
+			:builderLanguage="builderLanguage"
 			:columns="columnsTemplate"
-			:data-fields="dataFields"
-			:field="field"
-			:is-template="true"
-			:module-id="moduleId"
+			:groupName="groupName"
+			:hasCaptions="false"
+			:isTemplate="true"
+			:moduleId="moduleId"
 		/>
 	</div>`,
 	props:{
 		builderLanguage:{ type:String, required:true },
-		dataFields:     { type:Array,  required:true },
-		field:          { type:Object, required:true },
+		columns:        { type:Array,  required:true },
+		groupName:      { type:String,  required:true },
 		joins:          { type:Array,  required:true },
 		moduleId:       { type:String, required:true }
 	},
@@ -478,8 +465,8 @@ let MyBuilderFieldColumnTemplates = {
 		indexAttributeIdsUsed:function() {
 			let indexIds = [];
 			
-			for(let i = 0, j = this.field.columns.length; i < j; i++) {
-				let col = this.field.columns[i];
+			for(let i = 0, j = this.columns.length; i < j; i++) {
+				let col = this.columns[i];
 				
 				indexIds.push(this.getIndexAttributeId(
 					col.index,col.attributeId,false,null
@@ -531,14 +518,10 @@ let MyBuilderFieldColumnTemplates = {
 			for(let i = 0, j = relation.attributes.length; i < j; i++) {
 				let atr = relation.attributes[i];
 				
-				if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,false,null)))
-					continue;
-				
-				if(this.isAttributeRelationship(atr.content))
-					continue;
-				
-				if(relation.attributeIdPk === atr.id)
-					continue;
+				if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,false,null))
+					|| this.isAttributeRelationship(atr.content)
+					|| relation.attributeIdPk === atr.id
+				) continue;
 				
 				columns.push(this.createColumn(index,atr.id,false));
 			}

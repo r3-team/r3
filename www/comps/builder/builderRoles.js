@@ -293,10 +293,8 @@ let MyBuilderRoles = {
 	},
 	computed:{
 		module:function() {
-			if(typeof this.moduleIdMap[this.id] === 'undefined')
-				return false;
-			
-			return this.moduleIdMap[this.id];
+			return typeof this.moduleIdMap[this.id] === 'undefined'
+				? false : this.moduleIdMap[this.id];
 		},
 		
 		// stores

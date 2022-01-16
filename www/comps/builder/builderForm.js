@@ -113,7 +113,6 @@ let MyBuilderForm = {
 					@field-id-query-set="setFieldColumnQuery($event,null)"
 					@field-move-store="fieldMoveStore"
 					@field-remove="removeById($event,'field')"
-					@column-remove="removeById($event,'column')"
 					:builderLanguage="builderLanguage"
 					:columnIdQuery="columnIdQuery"
 					:dataFields="dataFields"
@@ -221,7 +220,6 @@ let MyBuilderForm = {
 					</div>
 					
 					<my-builder-query
-						v-if="showColumnQuery"
 						@set-choices="fieldColumnQuerySet('choices',$event)"
 						@set-filters="fieldColumnQuerySet('filters',$event)"
 						@set-fixed-limit="fieldColumnQuerySet('fixedLimit',$event)"
@@ -306,13 +304,12 @@ let MyBuilderForm = {
 	data:function() {
 		return {
 			// form data
-			iconId:null,        // form icon
-			captions:{},        // form captions
-			fields:[],          // all fields (nested within each other)
-			functions:[],       // all functions
-			states:[],          // all states
-			fieldIdsRemove:[],  // IDs of fields to remove
-			columnIdsRemove:[], // IDs of columns to remove
+			iconId:null,       // form icon
+			captions:{},       // form captions
+			fields:[],         // all fields (nested within each other)
+			functions:[],      // all functions
+			states:[],         // all states
+			fieldIdsRemove:[], // IDs of fields to remove
 			
 			// form data from query
 			relationId:'', // source relation ID
@@ -338,9 +335,18 @@ let MyBuilderForm = {
 		};
 	},
 	computed:{
+		// entities
+		relation:function() {
+			return typeof this.relationIdMap[this.relationId] === 'undefined'
+				? false : this.relationIdMap[this.relationId];
+		},
+		form:function() {
+			return typeof this.formIdMap[this.id] === 'undefined'
+				? false : this.formIdMap[this.id];
+		},
+		
 		hasChanges:function() {
 			return this.fieldIdsRemove.length     !== 0
-				|| this.columnIdsRemove.length    !== 0
 				|| this.iconId                    !== this.form.iconId
 				|| JSON.stringify(this.captions)  !== JSON.stringify(this.form.captions)
 				|| JSON.stringify(this.fields)    !== JSON.stringify(this.form.fields)
@@ -354,20 +360,6 @@ let MyBuilderForm = {
 				|| JSON.stringify(this.choices)   !== JSON.stringify(this.form.query.choices)
 			;
 		},
-		
-		relation:function() {
-			if(typeof this.relationIdMap[this.relationId] === 'undefined')
-				return false;
-			
-			return this.relationIdMap[this.relationId];
-		},
-		form:function() {
-			if(typeof this.formIdMap[this.id] === 'undefined')
-				return false;
-			
-			return this.formIdMap[this.id];
-		},
-		
 		dataFields:function() {
 			return this.getDataFields(this.fields);
 		},
@@ -394,9 +386,8 @@ let MyBuilderForm = {
 			return map;
 		},
 		columnQueryEdit:function() {
-			if(this.columnIdQuery === null) return false;
-			
-			return this.columnIdMap[this.columnIdQuery];
+			return this.columnIdQuery === null
+				? false : this.columnIdMap[this.columnIdQuery];
 		},
 		fieldIdMapRef:function() {
 			// unique field reference counter for all fields (mapped by field ID)
@@ -568,7 +559,6 @@ let MyBuilderForm = {
 			this.lookups    = JSON.parse(JSON.stringify(this.form.query.lookups));
 			this.choices    = JSON.parse(JSON.stringify(this.form.query.choices));
 			this.fieldIdsRemove  = [];
-			this.columnIdsRemove = [];
 			this.columnIdQuery   = null;
 			this.fieldIdQuery    = null;
 		},
@@ -827,8 +817,7 @@ let MyBuilderForm = {
 			if(id.startsWith('new_')) return; // ignore new field/column
 			
 			switch(type) {
-				case 'field':  this.fieldIdsRemove.push(id);  break;
-				case 'column': this.columnIdsRemove.push(id); break;
+				case 'field': this.fieldIdsRemove.push(id); break;
 			}
 			
 			if(this.fieldIdQuery === id)
@@ -861,9 +850,7 @@ let MyBuilderForm = {
 			let colsCloned = JSON.parse(JSON.stringify(this.fieldQueryEdit.columns));
 			
 			for(let i = 0, j = colsCloned.length; i < j; i++) {
-				
 				if(colsCloned[i].index === index) {
-					this.removeById(colsCloned[i].id,'column');
 					colsCloned.splice(i,1);
 					i--; j--;
 				}
@@ -894,9 +881,6 @@ let MyBuilderForm = {
 			
 			// apply form
 			let requests = [];
-			for(let i = 0, j = this.columnIdsRemove.length; i < j; i++) {
-				requests.push(ws.prepare('column','del',{id:this.columnIdsRemove[i]}));
-			}
 			for(let i = 0, j = this.fieldIdsRemove.length; i < j; i++) {
 				requests.push(ws.prepare('field','del',{id:this.fieldIdsRemove[i]}));
 			}

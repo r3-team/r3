@@ -232,10 +232,12 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "get":
 			return BruteforceGet(reqJson)
 		}
-	case "column":
+	case "collection":
 		switch action {
 		case "del":
-			return ColumnDel_tx(tx, reqJson)
+			return CollectionDel_tx(tx, reqJson)
+		case "set":
+			return CollectionSet_tx(tx, reqJson)
 		}
 	case "config":
 		switch action {

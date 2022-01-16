@@ -423,6 +423,17 @@
 			},
 			"new":"Neues Attribut"
 		},
+		"collection":{
+			"dialog":{
+				"delete":"Bist du sicher, dass du diese Sammlung löschen möchtest?"
+			},
+			"columnsTarget":"Spalten hier ablegen",
+			"contentColumn":"Spalten-Datenabfrage",
+			"new":"Neue Sammlung",
+			"query":"Query",
+			"title":"Sammlungen",
+			"titleOne":"Sammlung \"{NAME}\""
+		},
 		"form":{
 			"chart":{
 				"axisType":"Achsentyp",
@@ -882,6 +893,8 @@
 		"backHint":"Zurück zur Anwendungsübersicht",
 		"language":"Übersetzung",
 		"languageNextHint":"Zur nächsten Übersetzung wechseln (Hotkey: STRG + q)",
+		"navigationCollections":"Sammlungen",
+		"navigationCollectionsSub":"Sammlungsdetails",
 		"navigationFilterHint":"Nach Text filtern",
 		"navigationForms":"Formulare",
 		"navigationFormsSub":"Formular-Design",

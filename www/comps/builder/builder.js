@@ -68,12 +68,16 @@ let MyBuilder = {
 							>{{ capApp.navigationRelations }}</router-link>
 							
 							<router-link class="entry center clickable"
-								:to="'/builder/functions/'+module.id" 
-							>{{ capApp.navigationFunctions }}</router-link>
-							
-							<router-link class="entry center clickable"
 								:to="'/builder/roles/'+module.id" 
 							>{{ capApp.navigationRoles }}</router-link>
+							
+							<router-link class="entry center clickable"
+								:to="'/builder/forms/'+module.id" 
+							>{{ capApp.navigationForms }}</router-link>
+							
+							<router-link class="entry center clickable"
+								:to="'/builder/menu/'+module.id" 
+							>{{ capApp.navigationMenu }}</router-link>
 							
 							<router-link class="entry center clickable"
 								:to="'/builder/icons/'+module.id" 
@@ -81,16 +85,16 @@ let MyBuilder = {
 						</div>
 						<div class="navigation-column">
 							<router-link class="entry center clickable"
-								:to="'/builder/forms/'+module.id" 
-							>{{ capApp.navigationForms }}</router-link>
+								:to="'/builder/functions/'+module.id" 
+							>{{ capApp.navigationFunctions }}</router-link>
+							
+							<router-link class="entry center clickable"
+								:to="'/builder/collections/'+module.id" 
+							>{{ capApp.navigationCollections }}</router-link>
 							
 							<router-link class="entry center clickable"
 								:to="'/builder/login-forms/'+module.id" 
 							>{{ capApp.navigationLoginForms }}</router-link>
-							
-							<router-link class="entry center clickable"
-								:to="'/builder/menu/'+module.id" 
-							>{{ capApp.navigationMenu }}</router-link>
 							
 							<router-link class="entry center clickable"
 								:to="'/builder/help/'+module.id" 
@@ -106,6 +110,7 @@ let MyBuilder = {
 						<h1 v-if="navigation === 'functions'">{{ capApp.navigationFunctionsSub }}</h1>
 						<h1 v-if="navigation === 'roles'">{{ capApp.navigationRolesSub }}</h1>
 						<h1 v-if="navigation === 'relations'">{{ capApp.navigationRelationsSub }}</h1>
+						<h1 v-if="navigation === 'collections'">{{ capApp.navigationCollectionsSub }}</h1>
 						<input class="lookup" placeholder="..."
 							v-model="filter"
 							:title="capApp.navigationFilterHint"
@@ -140,6 +145,15 @@ let MyBuilder = {
 								:key="rol.id"
 								:to="'/builder/role/'+rol.id" 
 							>{{ rol.name }}</router-link>
+						</template>
+						
+						<!-- collections -->
+						<template v-if="navigation === 'collections'">
+							<router-link class="entry clickable"
+								v-for="c in module.collections.filter(v => v.name.includes(filter))"
+								:key="c.id"
+								:to="'/builder/collection/'+c.id" 
+							>{{ c.name }}</router-link>
 						</template>
 						
 						<!-- functions -->
@@ -229,6 +243,7 @@ let MyBuilder = {
 					case 'relation':    id = this.relationIdMap[val.params.id].moduleId;   break;
 					case 'form':        id = this.formIdMap[val.params.id].moduleId;       break;
 					case 'role':        id = this.roleIdMap[val.params.id].moduleId;       break;
+					case 'collection':  id = this.collectionIdMap[val.params.id].moduleId; break;
 					case 'pg-function': id = this.pgFunctionIdMap[val.params.id].moduleId; break;
 					case 'js-function': id = this.jsFunctionIdMap[val.params.id].moduleId; break;
 				}
@@ -247,19 +262,12 @@ let MyBuilder = {
 	},
 	computed:{
 		subMenu:function() {
-			if(this.navigation === 'relations' && this.module.relations.length !== 0)
-				return true;
-			
-			if(this.navigation === 'forms' && this.module.forms.length !== 0)
-				return true;
-			
-			if(this.navigation === 'roles' && this.module.roles.length !== 0)
-				return true;
-			
-			if(this.navigation === 'functions' && (this.module.pgFunctions.length !== 0 || this.module.jsFunctions.length !== 0))
-				return true;
-			
-			return false;
+			return this.navigation === 'relations'   && this.module.relations.length !== 0
+				|| this.navigation === 'forms'       && this.module.forms.length !== 0
+				|| this.navigation === 'roles'       && this.module.roles.length !== 0
+				|| this.navigation === 'collections' && this.module.collections.length !== 0
+				|| this.navigation === 'functions'   && (this.module.pgFunctions.length !== 0 || this.module.jsFunctions.length !== 0)
+			;
 		},
 		module:function() {
 			if(this.moduleId === '') return false;
@@ -296,6 +304,7 @@ let MyBuilder = {
 		jsFunctionIdMap:function() { return this.$store.getters['schema/jsFunctionIdMap']; },
 		pgFunctionIdMap:function() { return this.$store.getters['schema/pgFunctionIdMap']; },
 		roleIdMap:      function() { return this.$store.getters['schema/roleIdMap']; },
+		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
 		builderEnabled: function() { return this.$store.getters.builderEnabled; },
 		capApp:         function() { return this.$store.getters.captions.builder; },
 		capGen:         function() { return this.$store.getters.captions.generic; },
