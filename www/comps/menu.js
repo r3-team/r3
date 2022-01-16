@@ -171,7 +171,7 @@ let MyMenu = {
 		menuAccess:    function() { return this.$store.getters.access.menu; },
 		moduleLanguage:function() { return this.$store.getters.moduleLanguage; },
 		productionMode:function() { return this.$store.getters.productionMode; },
-		settings:     function() { return this.$store.getters.settings; }
+		settings:      function() { return this.$store.getters.settings; }
 	},
 	methods:{
 		// externals

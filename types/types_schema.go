@@ -348,15 +348,16 @@ type Column struct {
 	Captions    CaptionMap     `json:"captions"`
 }
 type Role struct {
-	Id               uuid.UUID         `json:"id"`
-	ModuleId         uuid.UUID         `json:"moduleId"`
-	ChildrenIds      []uuid.UUID       `json:"childrenIds"`
-	Name             string            `json:"name"`
-	Assignable       bool              `json:"assignable"`
-	AccessRelations  map[uuid.UUID]int `json:"accessRelations"`
-	AccessAttributes map[uuid.UUID]int `json:"accessAttributes"`
-	AccessMenus      map[uuid.UUID]int `json:"accessMenus"`
-	Captions         CaptionMap        `json:"captions"`
+	Id                uuid.UUID         `json:"id"`
+	ModuleId          uuid.UUID         `json:"moduleId"`
+	ChildrenIds       []uuid.UUID       `json:"childrenIds"`
+	Name              string            `json:"name"`
+	Assignable        bool              `json:"assignable"`
+	AccessAttributes  map[uuid.UUID]int `json:"accessAttributes"`
+	AccessCollections map[uuid.UUID]int `json:"accessCollections"`
+	AccessMenus       map[uuid.UUID]int `json:"accessMenus"`
+	AccessRelations   map[uuid.UUID]int `json:"accessRelations"`
+	Captions          CaptionMap        `json:"captions"`
 }
 type PgFunction struct {
 	Id             uuid.UUID            `json:"id"`

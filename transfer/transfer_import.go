@@ -402,8 +402,8 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 		if err := importCheckResultAndApply(tx, role.Set_tx(tx,
 			e.ModuleId, e.Id, e.Name, e.Assignable, e.ChildrenIds,
-			e.AccessRelations, e.AccessAttributes, e.AccessMenus,
-			e.Captions), e.Id, idMapSkipped); err != nil {
+			e.AccessAttributes, e.AccessCollections, e.AccessMenus,
+			e.AccessRelations, e.Captions), e.Id, idMapSkipped); err != nil {
 
 			return err
 		}

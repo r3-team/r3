@@ -412,6 +412,18 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX IF NOT EXISTS fki_field_collection_attribute_id_field_filter_fkey
 			    ON app.field_collection USING btree (attribute_id_field_filter ASC NULLS LAST);
+			
+			-- add collection access via role
+			ALTER TABLE app.role_access ADD COLUMN collection_id uuid;
+			ALTER TABLE app.role_access ADD CONSTRAINT role_access_collection_id_fkey
+				FOREIGN KEY (collection_id)
+				REFERENCES app.collection (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_role_access_collection_id_fkey
+   				ON app.role_access USING btree(collection_id ASC NULLS LAST);
 		`)
 
 		// migrate existing form open actions to new 'open form' entity

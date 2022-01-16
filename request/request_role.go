@@ -52,6 +52,6 @@ func RoleSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 	return nil, role.Set_tx(tx, req.ModuleId, req.Id, req.Name, req.Assignable,
-		req.ChildrenIds, req.AccessRelations, req.AccessAttributes,
-		req.AccessMenus, req.Captions)
+		req.ChildrenIds, req.AccessAttributes, req.AccessCollections,
+		req.AccessMenus, req.AccessRelations, req.Captions)
 }
