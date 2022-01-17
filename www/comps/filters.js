@@ -1,6 +1,9 @@
 import MyBuilderQuery from './builder/builderQuery.js';
 import MyInputDate    from './inputDate.js';
-import {getItemTitle} from './shared/builder.js';
+import {
+	getDependentModules,
+	getItemTitle
+} from './shared/builder.js';
 import {
 	isAttributeFiles,
 	isAttributeString
@@ -224,6 +227,7 @@ let MyFilterSide = {
 					:value="content"
 				>
 					<option value="attribute"   >{{ capApp.option.content.attribute }}</option>
+					<option value="collection"  >{{ capApp.option.content.collection }}</option>
 					<option value="field"       >{{ capApp.option.content.field }}</option>
 					<option value="value"       >{{ capApp.option.content.value }}</option>
 					<option value="record"      >{{ capApp.option.content.record }}</option>
@@ -249,44 +253,59 @@ let MyFilterSide = {
 				
 				<!-- sub query aggregator input -->
 				<select v-model="queryAggregator" v-if="isSubQuery">
-					<option value="">-</option>
-					<option value="avg">{{ capGen.option.aggAvg }}</option>
+					<option value=""     >-</option>
+					<option value="avg"  >{{ capGen.option.aggAvg }}</option>
 					<option value="count">{{ capGen.option.aggCount }}</option>
-					<option value="list">{{ capGen.option.aggList }}</option>
-					<option value="max">{{ capGen.option.aggMax }}</option>
-					<option value="min">{{ capGen.option.aggMin }}</option>
-					<option value="sum">{{ capGen.option.aggSum }}</option>
+					<option value="list" >{{ capGen.option.aggList }}</option>
+					<option value="max"  >{{ capGen.option.aggMax }}</option>
+					<option value="min"  >{{ capGen.option.aggMin }}</option>
+					<option value="sum"  >{{ capGen.option.aggSum }}</option>
 				</select>
 				
 				<!-- nested index attribute input -->
 				<template v-if="isAttribute || isSubQuery">
 					<my-filter-attribute
 						v-model="nestedIndexAttribute"
-						:columns-mode="columnsMode"
-						:group-queries="nestingLevels !== 0 && !isSubQuery && builderMode"
-						:nested-index-attribute-ids="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
-						:nesting-levels="nestingLevels"
+						:columnsMode="columnsMode"
+						:groupQueries="nestingLevels !== 0 && !isSubQuery && builderMode"
+						:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
+						:nestingLevels="nestingLevels"
 					/>
 				</template>
 				
+				<!-- collection input -->
+				<select v-model="collectionId" v-if="!columnsMode && isCollection">
+					<option :value="null">-</option>
+					<optgroup
+						v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
+						:label="m.name"
+					>
+						<option v-for="c in m.collections" :value="c.id">
+							{{ c.name }}
+						</option>
+					</optgroup>
+				</select>
+				
+				<!-- collection column input -->
+				<select v-model="columnId" v-if="!columnsMode && isCollection && collectionId !== null">
+					<option :value="null">-</option>
+					<option v-for="c in collectionIdMap[collectionId].columns" :value="c.id">
+						{{ getTitle(c) }}
+					</option>
+				</select>
+				
 				<!-- field input -->
-				<select
-					v-if="!columnsMode && isField"
-					v-model="fieldId"
-				>
+				<select v-model="fieldId" v-if="!columnsMode && isField">
 					<option v-for="f in dataFields" :value="f.id">
 						{{ getFieldCaption(f) }}
 					</option>
 				</select>
 				
 				<!-- preset input -->
-				<select
-					v-if="!columnsMode && isPreset"
-					v-model="presetId"
-				>
+				<select v-model="presetId" v-if="!columnsMode && isPreset">
 					<option :value="null"></option>
 					<optgroup
-						v-for="r in moduleIdMap[moduleId].relations.filter(v => v.presets.length !== 0)"
+						v-for="r in module.relations.filter(v => v.presets.length !== 0)"
 						:label="r.name"
 					>
 						<option v-for="p in r.presets.filter(v => v.protected)" :value="p.id">
@@ -296,12 +315,9 @@ let MyFilterSide = {
 				</select>
 				
 				<!-- role input -->
-				<select
-					v-if="!columnsMode && isRole"
-					v-model="roleId"
-				>
+				<select v-model="roleId" v-if="!columnsMode && isRole">
 					<option :value="null"></option>
-					<option v-for="r in moduleIdMap[moduleId].roles" :value="r.id">
+					<option v-for="r in module.roles" :value="r.id">
 						{{ r.name }}
 					</option>
 				</select>
@@ -331,7 +347,6 @@ let MyFilterSide = {
 		<my-builder-query class="subQuery"
 			v-if="isSubQuery && showQuery"
 			@set-choices="setQuery('choices',$event)"
-			@set-collections="setQuery('collections',$event)"
 			@set-filters="setQuery('filters',$event)"
 			@set-fixed-limit="setQuery('fixedLimit',$event)"
 			@set-lookups="setQuery('lookups',$event)"
@@ -341,7 +356,6 @@ let MyFilterSide = {
 			:allowChoices="false"
 			:allowOrders="true"
 			:choices="query.choices"
-			:collections="query.collections"
 			:dataFields="dataFields"
 			:filters="query.filters"
 			:fixedLimit="query.fixedLimit"
@@ -376,12 +390,35 @@ let MyFilterSide = {
 		};
 	},
 	computed:{
+		// entities
+		module:function() {
+			return this.moduleId === ''
+				? false : this.moduleIdMap[this.moduleId];
+		},
+		nestedIndexAttributeIdsSubQuery:function() {
+			if(!this.isSubQuery) return [];
+			
+			return this.getNestedIndexAttributeIdsByJoins(
+				this.query.joins,
+				this.joinsParents.length
+			);
+		},
+		
+		// inputs
 		brackets:{
 			get:function()  { return this.modelValue.brackets; },
 			set:function(v) { this.set('brackets',v); }
 		},
 		content:{ // getter only
 			get:function() { return this.modelValue.content; }
+		},
+		collectionId:{
+			get:function()  { return this.modelValue.collectionId; },
+			set:function(v) { this.set('collectionId',v); }
+		},
+		columnId:{
+			get:function()  { return this.modelValue.columnId; },
+			set:function(v) { this.set('columnId',v); }
 		},
 		fieldId:{
 			get:function()  { return this.modelValue.fieldId; },
@@ -400,14 +437,6 @@ let MyFilterSide = {
 				let vs = v.split('_');
 				this.setAttribute(vs[2],parseInt(vs[1]),parseInt(vs[0]));
 			}
-		},
-		nestedIndexAttributeIdsSubQuery:function() {
-			if(!this.isSubQuery) return [];
-			
-			return this.getNestedIndexAttributeIdsByJoins(
-				this.query.joins,
-				this.joinsParents.length
-			);
 		},
 		presetId:{
 			get:function()  { return this.modelValue.presetId; },
@@ -439,8 +468,9 @@ let MyFilterSide = {
 			}
 		},
 		
-		// simple
+		// states
 		isAttribute:  function() { return this.content === 'attribute'; },
+		isCollection: function() { return this.content === 'collection'; },
 		isField:      function() { return this.content === 'field'; },
 		isJavascript: function() { return this.content === 'javascript'; },
 		isPreset:     function() { return this.content === 'preset'; },
@@ -450,14 +480,17 @@ let MyFilterSide = {
 		isNullPartner:function() { return !this.leftSide && this.isNullOperator; },
 		
 		// stores
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.filter; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		modules:        function() { return this.$store.getters['schema/modules']; },
+		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
+		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
+		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
+		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
+		capApp:         function() { return this.$store.getters.captions.filter; },
+		capGen:         function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
 		// externals
+		getDependentModules,
 		getItemTitle,
 		getNestedIndexAttributeIdsByJoins,
 		getQueryTemplate,
@@ -472,6 +505,11 @@ let MyFilterSide = {
 				atrNm = this.attributeIdMap[f.attributeIdNm];
 			
 			return this.getItemTitle(rel,atr,f.index,f.outsideIn,atrNm);
+		},
+		getTitle:function(column) {
+			let a = this.attributeIdMap[column.attributeId];
+			let r = this.relationIdMap[a.relationId];
+			return getItemTitle(r,a,column.index,false,false);
 		},
 		
 		// actions
@@ -499,6 +537,10 @@ let MyFilterSide = {
 			}
 			
 			// remove invalid references
+			if(v.content !== 'collection') {
+				v.collectionId = null;
+				v.columnId     = null;
+			}
 			if(v.content !== 'field')  v.fieldId  = null;
 			if(v.content !== 'preset') v.presetId = null;
 			if(v.content !== 'role')   v.roleId   = null; 
@@ -549,17 +591,17 @@ let MyFilter = {
 				<my-filter-side
 					v-model="side0Input"
 					@apply-value="$emit('apply-value')"
-					:allow-sub-query="allowSubQuery"
-					:builder-mode="builderMode"
-					:columns-mode="columnsMode"
-					:data-fields="dataFields"
-					:is-null-operator="isNullOperator"
+					:allowSubQuery="allowSubQuery"
+					:builderMode="builderMode"
+					:columnsMode="columnsMode"
+					:dataFields="dataFields"
+					:isNullOperator="isNullOperator"
 					:joins="joins"
-					:joins-parents="joinsParents"
-					:left-side="true"
-					:module-id="moduleId"
-					:nested-index-attribute-ids="nestedIndexAttributeIds"
-					:nesting-levels="nestingLevels"
+					:joinsParents="joinsParents"
+					:leftSide="true"
+					:moduleId="moduleId"
+					:nestedIndexAttributeIds="nestedIndexAttributeIds"
+					:nestingLevels="nestingLevels"
 				/>
 				<my-filter-operator class="operator"
 					v-model="operatorInput"
@@ -573,19 +615,19 @@ let MyFilter = {
 				<my-filter-side
 					v-model="side1Input"
 					@apply-value="$emit('apply-value')"
-					:allow-sub-query="allowSubQuery"
-					:builder-mode="builderMode"
-					:column-date="side0ColumDate"
-					:column-time="side0ColumTime"
-					:columns-mode="columnsMode"
-					:data-fields="dataFields"
-					:is-null-operator="isNullOperator"
+					:allowSubQuery="allowSubQuery"
+					:builderMode="builderMode"
+					:columnDate="side0ColumDate"
+					:columnTime="side0ColumTime"
+					:columnsMode="columnsMode"
+					:dataFields="dataFields"
+					:isNullOperator="isNullOperator"
 					:joins="joins"
-					:joins-parents="joinsParents"
-					:left-side="false"
-					:module-id="moduleId"
-					:nested-index-attribute-ids="nestedIndexAttributeIds"
-					:nesting-levels="nestingLevels"
+					:joinsParents="joinsParents"
+					:leftSide="false"
+					:moduleId="moduleId"
+					:nestedIndexAttributeIds="nestedIndexAttributeIds"
+					:nestingLevels="nestingLevels"
 				/>
 			</div>
 			
@@ -741,21 +783,21 @@ let MyFilters = {
 			@move-up="move(i,false)"
 			@remove="remove"
 			@update="update"
-			:allow-sub-query="allowSubQuery"
-			:builder-mode="builderMode"
+			:allowSubQuery="allowSubQuery"
+			:builderMode="builderMode"
 			:columns="columns"
-			:columns-mode="columnsMode"
+			:columnsMode="columnsMode"
 			:connector="f.connector"
-			:data-fields="dataFields"
-			:expert-mode="expertMode"
+			:dataFields="dataFields"
+			:expertMode="expertMode"
 			:joins="joins"
-			:joins-parents="joinsParents"
+			:joinsParents="joinsParents"
 			:key="i"
-			:module-id="moduleId"
-			:move-down="showMove && i < filters.length - 1"
-			:move-up="showMove && i !== 0"
-			:nested-index-attribute-ids="nestedIndexAttributeIds"
-			:nesting-levels="joinsParents.length+1"
+			:moduleId="moduleId"
+			:moveDown="showMove && i < filters.length - 1"
+			:moveUp="showMove && i !== 0"
+			:nestedIndexAttributeIds="nestedIndexAttributeIds"
+			:nestingLevels="joinsParents.length+1"
 			:operator="f.operator"
 			:position="i"
 			:side0="f.side0"
@@ -803,6 +845,13 @@ let MyFilters = {
 			this.add();
 	},
 	computed:{
+		// inputs
+		filters:{
+			get:function()    { return JSON.parse(JSON.stringify(this.modelValue)); },
+			set:function(val) { this.$emit('update:modelValue',val); }
+		},
+		
+		// states
 		anyFilters:function() {
 			return this.filters.length !== 0;
 		},
@@ -817,11 +866,6 @@ let MyFilters = {
 		},
 		columnsMode:function() {
 			return this.columns.length !== 0;
-		},
-		
-		filters:{
-			get:function()    { return JSON.parse(JSON.stringify(this.modelValue)); },
-			set:function(val) { this.$emit('update:modelValue',val); }
 		},
 		
 		// composite ID of
@@ -889,6 +933,8 @@ let MyFilters = {
 					attributeIndex:parseInt(v[1]),
 					attributeNested:parseInt(v[0]),
 					brackets:0,
+					collectionId:null,
+					columnId:null,
 					content:'attribute',
 					fieldId:null,
 					query:null,
@@ -901,6 +947,8 @@ let MyFilters = {
 					attributeIndex:0,
 					attributeNested:0,
 					brackets:0,
+					collectionId:null,
+					columnId:null,
 					content:'value',
 					fieldId:null,
 					query:null,

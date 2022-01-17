@@ -150,7 +150,6 @@ let MyBuilderJsFunction = {
 							:allowJoinEdit="false"
 							:builderLanguage="builderLanguage"
 							:choices="form.query.choices"
-							:collections="form.query.collections"
 							:filters="form.query.filters"
 							:fixedLimit="0"
 							:joins="form.query.joins"

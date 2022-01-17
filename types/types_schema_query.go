@@ -18,15 +18,14 @@ var (
 // because the same relation can join multiple times, an unique index is required to know which relation is refered to
 // via indexes, joins know their source (index from), filters can refer to attributes from specific relations, etc.
 type Query struct {
-	Id          uuid.UUID         `json:"id"`
-	RelationId  pgtype.UUID       `json:"relationId"`  // query source relation
-	FixedLimit  int               `json:"fixedLimit"`  // fixed limit, used for queries like 'top 5 of X'
-	Joins       []QueryJoin       `json:"joins"`       // query joins over multiple relations
-	Filters     []QueryFilter     `json:"filters"`     // default query filter
-	Orders      []QueryOrder      `json:"orders"`      // default query sort
-	Lookups     []QueryLookup     `json:"lookups"`     // import lookups via PG indexes
-	Choices     []QueryChoice     `json:"choices"`     // named filter sets, selectable by users
-	Collections []QueryCollection `json:"collections"` // collection to filter query by
+	Id         uuid.UUID     `json:"id"`
+	RelationId pgtype.UUID   `json:"relationId"` // query source relation
+	FixedLimit int           `json:"fixedLimit"` // fixed limit, used for queries like 'top 5 of X'
+	Joins      []QueryJoin   `json:"joins"`      // query joins over multiple relations
+	Filters    []QueryFilter `json:"filters"`    // default query filter
+	Orders     []QueryOrder  `json:"orders"`     // default query sort
+	Lookups    []QueryLookup `json:"lookups"`    // import lookups via PG indexes
+	Choices    []QueryChoice `json:"choices"`    // named filter sets, selectable by users
 }
 
 type QueryJoin struct {
@@ -57,6 +56,8 @@ type QueryFilterSide struct {
 	AttributeId     pgtype.UUID `json:"attributeId"`     // attribute (database value)
 	AttributeIndex  int         `json:"attributeIndex"`  // relation index of attribute
 	AttributeNested int         `json:"attributeNested"` // nesting level of attribute  (0=main query, 1=1st sub query)
+	CollectionId    pgtype.UUID `json:"collectionId"`    // collection ID of which column value to compare
+	ColumnId        pgtype.UUID `json:"columnId"`        // column ID from collection of which value to compare
 	FieldId         pgtype.UUID `json:"fieldId"`         // frontend field value
 	PresetId        pgtype.UUID `json:"presetId"`        // preset ID of record to be compared
 	RoleId          pgtype.UUID `json:"roleId"`          // role ID assigned to user
@@ -84,12 +85,4 @@ type QueryChoice struct {
 	Name     string        `json:"name"`
 	Filters  []QueryFilter `json:"filters"` // filters for this choice
 	Captions CaptionMap    `json:"captions"`
-}
-
-type QueryCollection struct {
-	CollectionId              uuid.UUID   `json:"collectionId"`              // collection to filter query with
-	ColumnIdCollectionDisplay pgtype.UUID `json:"columnIdCollectionDisplay"` // collection column, used as input to select records from collection
-	ColumnIdCollectionValue   pgtype.UUID `json:"columnIdCollectionValue"`   // collection column, used as filter value
-	AttributeId               uuid.UUID   `json:"attributeId"`               // query attribute ID to be filtered
-	AttributeIndex            int         `json:"attributeIndex"`            // query attribute index to be filtered
 }

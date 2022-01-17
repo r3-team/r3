@@ -134,6 +134,31 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,jo
 	
 	let getFilterSideProcessed = function(s) {
 		switch(s.content) {
+			case 'collection':
+				let colSchema = MyStore.getters['schema/collectionIdMap'][s.collectionId];
+				let colValues = MyStore.getters['collectionIdMap'][s.collectionId];
+				let out = [];
+				
+				// collection might not have been fetched yet
+				if(typeof colValues !== 'undefined') {
+					// get index of requested column
+					let columnIndex = -1;
+					for(let i = 0, j = colSchema.columns.length; i < j; i++) {
+						if(colSchema.columns[i].id === s.columnId) {
+							columnIndex = i;
+							break;
+						}
+					}
+					
+					// if column index was found, get collection value(s)
+					if(columnIndex !== -1) {
+						for(let i = 0, j = colValues.length; i < j; i++) {
+							out.push(colValues[i][columnIndex]);
+						}
+					}
+				}
+				s.value = out;
+			break;
 			case 'field':
 				let fld     = dataFieldIdMap[s.fieldId];
 				let atrIdNm = typeof fld.attributeIdNm !== 'undefined' ? fld.attributeIdNm : null;
@@ -262,8 +287,7 @@ export function getQueryAttributesPkFilter(relationId,recordIds,index,not) {
 export function getQueryTemplate() {
 	return {
 		id:'00000000-0000-0000-0000-000000000000',
-		relationId:null,fixedLimit:0,joins:[],filters:[],
-		orders:[],lookups:[],choices:[],collections:[]
+		relationId:null,fixedLimit:0,joins:[],filters:[],orders:[],lookups:[],choices:[]
 	};
 };
 

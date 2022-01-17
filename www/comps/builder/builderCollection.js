@@ -88,7 +88,6 @@ let MyBuilderCollection = {
 			<div class="content">
 				<my-builder-query
 					@index-removed="removeIndex($event)"
-					@set-collections="collections = $event"
 					@set-filters="filters = $event"
 					@set-fixed-limit="fixedLimit = $event"
 					@set-joins="joins = $event"
@@ -99,7 +98,6 @@ let MyBuilderCollection = {
 					:allowOrders="true"
 					:builderLanguage="builderLanguage"
 					:choices="[]"
-					:collections="collections"
 					:filters="filters"
 					:fixedLimit="fixedLimit"
 					:joins="joins"
@@ -123,7 +121,6 @@ let MyBuilderCollection = {
 					
 					<my-builder-query
 						@set-choices="columnQuerySet('choices',$event)"
-						@set-collections="columnQuerySet('collections',$event)"
 						@set-filters="columnQuerySet('filters',$event)"
 						@set-fixed-limit="columnQuerySet('fixedLimit',$event)"
 						@set-joins="columnQuerySet('joins',$event)"
@@ -134,7 +131,6 @@ let MyBuilderCollection = {
 						:allowOrders="true"
 						:builderLanguage="builderLanguage"
 						:choices="columnQueryEdit.query.choices"
-						:collections="columnQueryEdit.query.collections"
 						:filters="columnQueryEdit.query.filters"
 						:fixedLimit="columnQueryEdit.query.fixedLimit"
 						:joins="columnQueryEdit.query.joins"
@@ -159,7 +155,6 @@ let MyBuilderCollection = {
 			joins:[],
 			filters:[],
 			orders:[],
-			collections:[],
 			fixedLimit:0,
 			
 			// inputs
@@ -188,13 +183,12 @@ let MyBuilderCollection = {
 		
 		// states
 		hasChanges:function() {
-			return this.relationId                  !== this.collection.query.relationId
-				|| this.fixedLimit                  !== this.collection.query.fixedLimit
-				|| JSON.stringify(this.joins)       !== JSON.stringify(this.collection.query.joins)
-				|| JSON.stringify(this.filters)     !== JSON.stringify(this.collection.query.filters)
-				|| JSON.stringify(this.orders)      !== JSON.stringify(this.collection.query.orders)
-				|| JSON.stringify(this.collections) !== JSON.stringify(this.collection.query.collections)
-				|| JSON.stringify(this.columns)     !== JSON.stringify(this.collection.columns)
+			return this.relationId              !== this.collection.query.relationId
+				|| this.fixedLimit              !== this.collection.query.fixedLimit
+				|| JSON.stringify(this.joins)   !== JSON.stringify(this.collection.query.joins)
+				|| JSON.stringify(this.filters) !== JSON.stringify(this.collection.query.filters)
+				|| JSON.stringify(this.orders)  !== JSON.stringify(this.collection.query.orders)
+				|| JSON.stringify(this.columns) !== JSON.stringify(this.collection.columns)
 			;
 		},
 		showColumnQuery:function() {
@@ -238,13 +232,12 @@ let MyBuilderCollection = {
 		reset:function() {
 			if(!this.collection) return;
 			
-			this.relationId  = this.collection.query.relationId;
-			this.fixedLimit  = this.collection.query.fixedLimit;
-			this.joins       = JSON.parse(JSON.stringify(this.collection.query.joins));
-			this.filters     = JSON.parse(JSON.stringify(this.collection.query.filters));
-			this.orders      = JSON.parse(JSON.stringify(this.collection.query.orders));
-			this.collections = JSON.parse(JSON.stringify(this.collection.query.collections));
-			this.columns     = JSON.parse(JSON.stringify(this.collection.columns));
+			this.relationId = this.collection.query.relationId;
+			this.fixedLimit = this.collection.query.fixedLimit;
+			this.joins      = JSON.parse(JSON.stringify(this.collection.query.joins));
+			this.filters    = JSON.parse(JSON.stringify(this.collection.query.filters));
+			this.orders     = JSON.parse(JSON.stringify(this.collection.query.orders));
+			this.columns    = JSON.parse(JSON.stringify(this.collection.columns));
 		},
 		
 		// helpers
@@ -272,7 +265,6 @@ let MyBuilderCollection = {
 					relationId:this.relationId,
 					joins:this.joins,
 					filters:this.filters,
-					collections:this.collections,
 					orders:this.orders,
 					fixedLimit:this.fixedLimit
 				}

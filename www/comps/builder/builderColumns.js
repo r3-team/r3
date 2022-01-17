@@ -520,7 +520,6 @@ export let MyBuilderColumnTemplates = {
 				
 				if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,false,null))
 					|| this.isAttributeRelationship(atr.content)
-					|| relation.attributeIdPk === atr.id
 				) continue;
 				
 				columns.push(this.createColumn(index,atr.id,false));

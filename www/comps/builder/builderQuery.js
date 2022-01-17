@@ -1,171 +1,12 @@
 import MyBuilderCaption               from './builderCaption.js';
+import {getDependentModules}          from '../shared/builder.js';
 import {getNilUuid}                   from '../shared/generic.js';
 import {getCaptionByIndexAttributeId} from '../shared/query.js';
 import {
 	getIndexAttributeIdsByJoins,
 	isAttributeRelationship
 } from '../shared/attribute.js';
-import {
-	getDependentModules,
-	getItemTitle
-} from '../shared/builder.js';
 export {MyBuilderQuery as default};
-
-let MyBuilderQueryCollection = {
-	name:'my-builder-query-collection',
-	template:`<div class="query-collection">
-		<table>
-			<tbody>
-				<!-- used collection -->
-				<tr>
-					<td>{{ capApp.collection }}</td>
-					<td>
-						<select v-model="collectionId">
-							<option :value="null"></option>
-							<optgroup
-								v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
-								:label="m.name"
-							>
-								<option v-for="c in m.collections" :value="c.id">
-									{{ c.name }}
-								</option>
-							</optgroup>
-						</select>
-					</td>
-					<td>
-						<my-button image="cancel.png"
-							@trigger="$emit('remove')"
-							:naked="true"
-						/>
-					</td>
-				</tr>
-				
-				<template v-if="collectionId !== null">
-					
-					<!-- query attribute to filter -->
-					<tr>
-						<td>{{ capApp.collectionAttribute }}</td>
-						<td colspan="2">
-							<select 
-								@change="updateIndexAttribute($event.target.value)"
-								:value="attributeIndex+'_'+attributeId"
-							>
-								<option value="0_null">-</option>
-								<option v-for="ia in indexAttributeIds" :value="ia">
-									{{ getCaptionByIndexAttributeId(ia) }}
-								</option>
-							</select>
-						</td>
-					</tr>
-					
-					<!-- collection columns -->
-					<tr>
-						<td>{{ capApp.collectionValue }}</td>
-						<td colspan="2">
-							<select v-model="columnIdCollectionValue">
-								<option :value="null">-</option>
-								<option v-for="c in columns" :value="c.id">
-									{{ getTitle(c) }}
-								</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.collectionDisplay }}</td>
-						<td colspan="2">
-							<select v-model="columnIdCollectionDisplay">
-								<option :value="null">-</option>
-								<option v-for="c in columns" :value="c.id">
-									{{ getTitle(c) }}
-								</option>
-							</select>
-						</td>
-					</tr>
-				</template>
-			</tbody>
-		</table>
-	</div>`,
-	props:{
-		collection:{ type:Object, required:true },
-		joins:     { type:Array,  required:true },
-		module:    { type:Object, required:true }
-	},
-	emits:['remove','update'],
-	computed:{
-		// inputs
-		attributeId:{
-			get:function()  { return this.collection.attributeId; },
-			set:function(v) { this.update('attributeId',v); }
-		},
-		attributeIndex:{
-			get:function()  { return this.collection.attributeIndex; },
-			set:function(v) { this.update('attributeIndex',v); }
-		},
-		collectionId:{
-			get:function()  { return this.collection.collectionId; },
-			set:function(v) { this.update('collectionId',v); }
-		},
-		columnIdCollectionDisplay:{
-			get:function()  { return this.collection.columnIdCollectionDisplay; },
-			set:function(v) { this.update('columnIdCollectionDisplay',v); }
-		},
-		columnIdCollectionValue:{
-			get:function()  { return this.collection.columnIdCollectionValue; },
-			set:function(v) { this.update('columnIdCollectionValue',v); }
-		},
-		
-		// entities
-		columns:function() {
-			if(this.collectionId === null) return [];
-			
-			return this.collectionIdMap[this.collectionId]
-				.columns.filter(v => !v.subQuery);
-		},
-		indexAttributeIds:function() {
-			return this.getIndexAttributeIdsByJoins(this.joins);
-		},
-		
-		// stores
-		modules:        function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
-		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
-		capApp:         function() { return this.$store.getters.captions.builder.query; },
-		capGen:         function() { return this.$store.getters.captions.generic; }
-	},
-	methods:{
-		// externals
-		getCaptionByIndexAttributeId,
-		getDependentModules,
-		getIndexAttributeIdsByJoins,
-		getItemTitle,
-		
-		// presentation
-		getTitle:function(column) {
-			let a = this.attributeIdMap[column.attributeId];
-			let r = this.relationIdMap[a.relationId];
-			return getItemTitle(r,a,column.index,false,false);
-		},
-		
-		// actions
-		updateIndexAttribute:function(ia) {
-			let v     = ia.split('_');
-			let index = v[1] === 'null' ? 0    : parseInt(v[0]);
-			let id    = v[1] === 'null' ? null : v[1];
-			
-			v = JSON.parse(JSON.stringify(this.collection));
-			v.attributeIndex = index;
-			v.attributeId    = id;
-			this.$emit('update',v);
-		},
-		update:function(content,value) {
-			let v = JSON.parse(JSON.stringify(this.collection));
-			v[content] = value;
-			this.$emit('update',v);
-		}
-	}
-};
 
 let MyBuilderQueryChoice = {
 	name:'my-builder-query-choice',
@@ -690,7 +531,6 @@ let MyBuilderQuery = {
 	name:'my-builder-query',
 	components:{
 		MyBuilderQueryChoice,
-		MyBuilderQueryCollection,
 		MyBuilderQueryLookups,
 		MyBuilderQueryNestedJoin,
 		MyBuilderQueryOrders
@@ -849,36 +689,6 @@ let MyBuilderQuery = {
 			/>
 		</div>
 		
-		<!-- collections -->
-		<div class="query-component" v-if="joins.length !== 0">
-			<div class="query-title">
-				<my-button
-					@trigger="showCollections = !showCollections"
-					:active="collections.length !== 0"
-					:caption="capApp.collections.replace('{COUNT}',collections.length)"
-					:image="displayArrow(showCollections,collections.length)"
-					:large="true"
-					:naked="true"
-				/>
-				<my-button image="add.png"
-					@trigger="collectionAdd"
-					:caption="capGen.button.add"
-					:naked="true"
-				/>
-			</div>
-			
-			<my-builder-query-collection
-				v-show="showCollections"
-				v-for="(c,i) in collectionsInput"
-				@remove="collectionRemove(i)"
-				@update="collectionApply(i,$event)"
-				:collection="collectionsInput[i]"
-				:joins="joins"
-				:key="i+'_'+c.id"
-				:module="module"
-			/>
-		</div>
-		
 		<!-- lookups -->
 		<div class="query-component" v-if="allowLookups && joins.length !== 0">
 			<div class="query-title">
@@ -928,7 +738,6 @@ let MyBuilderQuery = {
 		allowOrders:    { type:Boolean, required:false, default:false },
 		builderLanguage:{ type:String,  required:false, default:'' },
 		choices:        { type:Array,   required:true },                    // choices for optional query filters (selectable by users)
-		collections:    { type:Array,   required:true },                    // filter by collection values with optional input
 		dataFields:     { type:Array,   required:false, default:() => [] }, // form fields for filter candidates
 		filters:        { type:Array,   required:true },
 		fixedLimit:     { type:Number,  required:true },
@@ -941,15 +750,13 @@ let MyBuilderQuery = {
 		relationIdStart:{ required:false, default:null }                    // when query starts with a defined relation
 	},
 	emits:[
-		'index-removed','set-choices','set-collections','set-filters',
-		'set-fixed-limit','set-joins','set-lookups','set-orders',
-		'set-relation-id'
+		'index-removed','set-choices','set-filters','set-fixed-limit',
+		'set-joins','set-lookups','set-orders','set-relation-id'
 	],
 	data:function() {
 		return {
 			filterAddCnt:0, // ugly hack to add filter
 			showChoices:false,
-			showCollections:false,
 			showFilters:false,
 			showLookups:false,
 			showOrders:false,
@@ -1025,10 +832,6 @@ let MyBuilderQuery = {
 		choicesInput:{
 			get:function()  { return this.choices; },
 			set:function(v) { this.$emit('set-choices',v); }
-		},
-		collectionsInput:{
-			get:function()  { return this.collections; },
-			set:function(v) { this.$emit('set-collections',v); }
 		},
 		filtersInput:{
 			get:function()  { return this.filters; },
@@ -1124,27 +927,6 @@ let MyBuilderQuery = {
 		choiceRemove:function(i) {
 			this.choicesInput.splice(i,1);
 			this.choicesInput = this.choicesInput;
-		},
-		collectionAdd:function() {
-			this.collectionsInput.push({
-				collectionId:null,
-				columnIdCollectionDisplay:null,
-				columnIdCollectionValue:null,
-				attributeId:null,
-				attributeIndex:0
-			});
-			this.collectionsInput = this.collectionsInput;
-			
-			if(!this.showCollections)
-				this.showCollections = true;
-		},
-		collectionApply:function(i,value) {
-			this.collectionsInput[i] = value;
-			this.collectionsInput = this.collectionsInput;
-		},
-		collectionRemove:function(i) {
-			this.collectionsInput.splice(i,1);
-			this.collectionsInput = this.collectionsInput;
 		},
 		filterAdd:function() {
 			this.filterAddCnt++;

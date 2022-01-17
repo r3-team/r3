@@ -25,7 +25,6 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	q.Orders = make([]types.QueryOrder, 0)
 	q.Lookups = make([]types.QueryLookup, 0)
 	q.Choices = make([]types.QueryChoice, 0)
-	q.Collections = make([]types.QueryCollection, 0)
 
 	if !tools.StringInSlice(entity, allowedEntities) {
 		return q, errors.New("bad entity")
@@ -169,30 +168,6 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 		}
 		q.Choices[i] = c
 	}
-
-	// retrieve collections
-	rows, err = db.Pool.Query(db.Ctx, `
-		SELECT collection_id, column_id_collection_display,
-			column_id_collection_value, attribute_id, attribute_index
-		FROM app.query_collection
-		WHERE query_id = $1
-	`, q.Id)
-	if err != nil {
-		return q, err
-	}
-
-	for rows.Next() {
-		var c types.QueryCollection
-
-		if err := rows.Scan(&c.CollectionId, &c.ColumnIdCollectionDisplay,
-			&c.ColumnIdCollectionValue, &c.AttributeId, &c.AttributeIndex); err != nil {
-
-			rows.Close()
-			return q, err
-		}
-		q.Collections = append(q.Collections, c)
-	}
-	rows.Close()
 	return q, nil
 }
 
@@ -379,28 +354,6 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 			return err
 		}
 	}
-
-	// reset collections
-	if _, err := tx.Exec(db.Ctx, `
-		DELETE FROM app.query_collection
-		WHERE query_id = $1
-	`, query.Id); err != nil {
-		return err
-	}
-
-	for _, c := range query.Collections {
-		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.query_collection (
-				query_id, collection_id, column_id_collection_display,
-				column_id_collection_value, attribute_id, attribute_index
-			)
-			VALUES ($1,$2,$3,$4,$5,$6)
-		`, query.Id, c.CollectionId, c.ColumnIdCollectionDisplay,
-			c.ColumnIdCollectionValue, c.AttributeId, c.AttributeIndex); err != nil {
-
-			return err
-		}
-	}
 	return nil
 }
 
@@ -464,14 +417,16 @@ func getFilterSide(queryId uuid.UUID, filterPosition int, side int) (types.Query
 
 	if err := db.Pool.QueryRow(db.Ctx, `
 		SELECT attribute_id, attribute_index, attribute_nested, brackets,
-			content, field_id, preset_id, role_id, query_aggregator, value
+			collection_id, column_id, content, field_id, preset_id, role_id,
+			query_aggregator, value
 		FROM app.query_filter_side
 		WHERE query_id = $1
 		AND query_filter_position = $2
 		AND side = $3
 	`, queryId, filterPosition, side).Scan(&s.AttributeId, &s.AttributeIndex,
-		&s.AttributeNested, &s.Brackets, &s.Content, &s.FieldId, &s.PresetId,
-		&s.RoleId, &s.QueryAggregator, &s.Value); err != nil {
+		&s.AttributeNested, &s.Brackets, &s.CollectionId, &s.ColumnId,
+		&s.Content, &s.FieldId, &s.PresetId, &s.RoleId, &s.QueryAggregator,
+		&s.Value); err != nil {
 
 		return s, err
 	}
@@ -525,16 +480,21 @@ func SetFilterSide_tx(tx pgx.Tx, queryId uuid.UUID, filterPosition int,
 	// fix imports < 2.5: New filter side option: Preset
 	s.PresetId = compatible.FixPgxNull(s.PresetId).(pgtype.UUID)
 
+	// fix imports < 2.6: New collection/column references
+	s.CollectionId = compatible.FixPgxNull(s.CollectionId).(pgtype.UUID)
+	s.ColumnId = compatible.FixPgxNull(s.ColumnId).(pgtype.UUID)
+
 	if _, err := tx.Exec(db.Ctx, `
 		INSERT INTO app.query_filter_side (
 			query_id, query_filter_position, side, attribute_id,
-			attribute_index, attribute_nested, brackets, content, field_id,
-			preset_id, role_id, query_aggregator, value
+			attribute_index, attribute_nested, brackets, collection_id,
+			column_id, content, field_id, preset_id, role_id,
+			query_aggregator, value
 		)
-		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
 	`, queryId, filterPosition, side, s.AttributeId, s.AttributeIndex,
-		s.AttributeNested, s.Brackets, s.Content, s.FieldId, s.PresetId,
-		s.RoleId, s.QueryAggregator, s.Value); err != nil {
+		s.AttributeNested, s.Brackets, s.CollectionId, s.ColumnId, s.Content,
+		s.FieldId, s.PresetId, s.RoleId, s.QueryAggregator, s.Value); err != nil {
 
 		return err
 	}
