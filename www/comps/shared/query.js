@@ -262,7 +262,8 @@ export function getQueryAttributesPkFilter(relationId,recordIds,index,not) {
 export function getQueryTemplate() {
 	return {
 		id:'00000000-0000-0000-0000-000000000000',
-		relationId:null,fixedLimit:0,joins:[],filters:[],orders:[],lookups:[],choices:[]
+		relationId:null,fixedLimit:0,joins:[],filters:[],
+		orders:[],lookups:[],choices:[],collections:[]
 	};
 };
 

@@ -296,6 +296,12 @@
 	flex-flow:row nowrap;
 	margin:0px 0px 6px 0px;
 }
+.builder-query .query-collection table{
+	width:100%;
+	padding-bottom:5px;
+	margin-bottom:5px;
+	border-bottom:2px dotted var(--color-border);
+}
 .builder-query .fixed-limit{
 	display:flex;
 	flex-flow:row nowrap;

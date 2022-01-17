@@ -362,56 +362,56 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				(CASE WHEN query_filter_query_id IS NULL THEN 0 ELSE 1 END)
 			));
 			
-			-- adding collection to fields as option
-			CREATE TABLE IF NOT EXISTS app.field_collection (
-			    field_id uuid NOT NULL,
+			-- add collection as filter option to query
+			CREATE TABLE IF NOT EXISTS app.query_collection (
+			    query_id uuid NOT NULL,
 			    collection_id uuid NOT NULL,
-			    column_id_collection_show uuid,
-			    column_id_collection_filter uuid NOT NULL,
-				attribute_id_field_filter uuid NOT NULL,
-				attribute_index_field_filter integer NOT NULL,
-			    CONSTRAINT field_collection_pkey PRIMARY KEY (collection_id, field_id),
-			    CONSTRAINT field_collection_column_id_collection_show_fkey FOREIGN KEY (column_id_collection_show)
+			    column_id_collection_display uuid,
+			    column_id_collection_value uuid NOT NULL,
+				attribute_id uuid NOT NULL,
+				attribute_index integer NOT NULL,
+			    CONSTRAINT query_collection_pkey PRIMARY KEY (collection_id, query_id),
+			    CONSTRAINT query_collection_column_id_collection_display_fkey FOREIGN KEY (column_id_collection_display)
 			        REFERENCES app."column" (id) MATCH SIMPLE
 			        ON UPDATE NO ACTION
 			        ON DELETE NO ACTION
 			        DEFERRABLE INITIALLY DEFERRED,
-			    CONSTRAINT field_collection_column_id_collection_filter_fkey FOREIGN KEY (column_id_collection_filter)
+			    CONSTRAINT query_collection_column_id_collection_value_fkey FOREIGN KEY (column_id_collection_value)
 			        REFERENCES app."column" (id) MATCH SIMPLE
 			        ON UPDATE NO ACTION
 			        ON DELETE NO ACTION
 			        DEFERRABLE INITIALLY DEFERRED,
-			    CONSTRAINT field_collection_field_id_fkey FOREIGN KEY (field_id)
-			        REFERENCES app.field (id) MATCH SIMPLE
+			    CONSTRAINT query_collection_query_id_fkey FOREIGN KEY (query_id)
+			        REFERENCES app.query (id) MATCH SIMPLE
 			        ON UPDATE CASCADE
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED,
-			    CONSTRAINT field_collection_collection_id_fkey FOREIGN KEY (collection_id)
+			    CONSTRAINT query_collection_collection_id_fkey FOREIGN KEY (collection_id)
 			        REFERENCES app.collection (id) MATCH SIMPLE
 			        ON UPDATE NO ACTION
 			        ON DELETE NO ACTION
 			        DEFERRABLE INITIALLY DEFERRED,
-				CONSTRAINT field_collection_attribute_id_field_filter_fkey FOREIGN KEY (attribute_id_field_filter)
+				CONSTRAINT query_collection_attribute_id_fkey FOREIGN KEY (attribute_id)
 			        REFERENCES app.attribute (id) MATCH SIMPLE
 			        ON UPDATE NO ACTION
 			        ON DELETE NO ACTION
 			        DEFERRABLE INITIALLY DEFERRED
 			);
 			
-			CREATE INDEX IF NOT EXISTS fki_field_collection_field_id_fkey
-			    ON app.field_collection USING btree (field_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_query_collection_query_id_fkey
+			    ON app.query_collection USING btree (query_id ASC NULLS LAST);
 			
-			CREATE INDEX IF NOT EXISTS fki_field_collection_collection_id_fkey
-			    ON app.field_collection USING btree (collection_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_query_collection_collection_id_fkey
+			    ON app.query_collection USING btree (collection_id ASC NULLS LAST);
 			
-			CREATE INDEX IF NOT EXISTS fki_field_collection_column_id_collection_show_fkey
-			    ON app.field_collection USING btree (column_id_collection_show ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_query_collection_column_id_collection_display_fkey
+			    ON app.query_collection USING btree (column_id_collection_display ASC NULLS LAST);
 			
-			CREATE INDEX IF NOT EXISTS fki_field_collection_column_id_collection_filter_fkey
-			    ON app.field_collection USING btree (column_id_collection_filter ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_query_collection_column_id_collection_value_fkey
+			    ON app.query_collection USING btree (column_id_collection_value ASC NULLS LAST);
 			
-			CREATE INDEX IF NOT EXISTS fki_field_collection_attribute_id_field_filter_fkey
-			    ON app.field_collection USING btree (attribute_id_field_filter ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_query_collection_attribute_id_fkey
+			    ON app.query_collection USING btree (attribute_id ASC NULLS LAST);
 			
 			-- add collection access via role
 			ALTER TABLE app.role_access ADD COLUMN collection_id uuid;

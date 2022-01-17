@@ -186,6 +186,7 @@ let MyBuilderForm = {
 				<my-builder-query
 					@index-removed="fieldQueryRemoveIndex($event)"
 					@set-choices="fieldQuerySet('choices',$event)"
+					@set-collections="fieldQuerySet('collections',$event)"
 					@set-filters="fieldQuerySet('filters',$event)"
 					@set-fixed-limit="fieldQuerySet('fixedLimit',$event)"
 					@set-joins="fieldQuerySet('joins',$event)"
@@ -196,6 +197,7 @@ let MyBuilderForm = {
 					:allowOrders="true"
 					:builderLanguage="builderLanguage"
 					:choices="fieldQueryEdit.query.choices"
+					:collections="fieldQueryEdit.query.collections"
 					:dataFields="dataFields"
 					:filters="fieldQueryEdit.query.filters"
 					:fixedLimit="fieldQueryEdit.query.fixedLimit"
@@ -221,6 +223,7 @@ let MyBuilderForm = {
 					
 					<my-builder-query
 						@set-choices="fieldColumnQuerySet('choices',$event)"
+						@set-collections="fieldColumnQuerySet('collections',$event)"
 						@set-filters="fieldColumnQuerySet('filters',$event)"
 						@set-fixed-limit="fieldColumnQuerySet('fixedLimit',$event)"
 						@set-joins="fieldColumnQuerySet('joins',$event)"
@@ -231,6 +234,7 @@ let MyBuilderForm = {
 						:allowOrders="true"
 						:builderLanguage="builderLanguage"
 						:choices="columnQueryEdit.query.choices"
+						:collections="columnQueryEdit.query.collections"
 						:dataFields="dataFields"
 						:filters="columnQueryEdit.query.filters"
 						:fixedLimit="columnQueryEdit.query.fixedLimit"
@@ -250,6 +254,7 @@ let MyBuilderForm = {
 				<my-builder-query
 					@index-removed="removeDataFields(fields,$event)"
 					@set-choices="choices = $event"
+					@set-collections="collections = $event"
 					@set-filters="filters = $event"
 					@set-joins="joins = $event"
 					@set-lookups="lookups = $event"
@@ -259,6 +264,7 @@ let MyBuilderForm = {
 					:allowFixedLimit="false"
 					:builderLanguage="builderLanguage"
 					:choices="choices"
+					:collections="collections"
 					:filters="filters"
 					:fixedLimit="0"
 					:joins="joins"
@@ -318,6 +324,7 @@ let MyBuilderForm = {
 			orders:[],
 			lookups:[],
 			choices:[],
+			collections:[],
 			
 			// state
 			columnIdQuery:null,
@@ -346,18 +353,19 @@ let MyBuilderForm = {
 		},
 		
 		hasChanges:function() {
-			return this.fieldIdsRemove.length     !== 0
-				|| this.iconId                    !== this.form.iconId
-				|| JSON.stringify(this.captions)  !== JSON.stringify(this.form.captions)
-				|| JSON.stringify(this.fields)    !== JSON.stringify(this.form.fields)
-				|| JSON.stringify(this.functions) !== JSON.stringify(this.form.functions)
-				|| JSON.stringify(this.states)    !== JSON.stringify(this.form.states)
-				|| this.relationId                !== this.form.query.relationId
-				|| JSON.stringify(this.joins)     !== JSON.stringify(this.form.query.joins)
-				|| JSON.stringify(this.filters)   !== JSON.stringify(this.form.query.filters)
-				|| JSON.stringify(this.orders)    !== JSON.stringify(this.form.query.orders)
-				|| JSON.stringify(this.lookups)   !== JSON.stringify(this.form.query.lookups)
-				|| JSON.stringify(this.choices)   !== JSON.stringify(this.form.query.choices)
+			return this.fieldIdsRemove.length       !== 0
+				|| this.iconId                      !== this.form.iconId
+				|| JSON.stringify(this.captions)    !== JSON.stringify(this.form.captions)
+				|| JSON.stringify(this.fields)      !== JSON.stringify(this.form.fields)
+				|| JSON.stringify(this.functions)   !== JSON.stringify(this.form.functions)
+				|| JSON.stringify(this.states)      !== JSON.stringify(this.form.states)
+				|| this.relationId                  !== this.form.query.relationId
+				|| JSON.stringify(this.joins)       !== JSON.stringify(this.form.query.joins)
+				|| JSON.stringify(this.filters)     !== JSON.stringify(this.form.query.filters)
+				|| JSON.stringify(this.orders)      !== JSON.stringify(this.form.query.orders)
+				|| JSON.stringify(this.lookups)     !== JSON.stringify(this.form.query.lookups)
+				|| JSON.stringify(this.choices)     !== JSON.stringify(this.form.query.choices)
+				|| JSON.stringify(this.collections) !== JSON.stringify(this.form.query.collections)
 			;
 		},
 		dataFields:function() {
@@ -547,17 +555,18 @@ let MyBuilderForm = {
 		reset:function() {
 			if(!this.form) return;
 			
-			this.iconId     = this.form.iconId;
-			this.relationId = this.form.query.relationId;
-			this.captions   = JSON.parse(JSON.stringify(this.form.captions));
-			this.fields     = JSON.parse(JSON.stringify(this.form.fields));
-			this.functions  = JSON.parse(JSON.stringify(this.form.functions));
-			this.states     = JSON.parse(JSON.stringify(this.form.states));
-			this.joins      = JSON.parse(JSON.stringify(this.form.query.joins));
-			this.filters    = JSON.parse(JSON.stringify(this.form.query.filters));
-			this.orders     = JSON.parse(JSON.stringify(this.form.query.orders));
-			this.lookups    = JSON.parse(JSON.stringify(this.form.query.lookups));
-			this.choices    = JSON.parse(JSON.stringify(this.form.query.choices));
+			this.iconId      = this.form.iconId;
+			this.relationId  = this.form.query.relationId;
+			this.captions    = JSON.parse(JSON.stringify(this.form.captions));
+			this.fields      = JSON.parse(JSON.stringify(this.form.fields));
+			this.functions   = JSON.parse(JSON.stringify(this.form.functions));
+			this.states      = JSON.parse(JSON.stringify(this.form.states));
+			this.joins       = JSON.parse(JSON.stringify(this.form.query.joins));
+			this.filters     = JSON.parse(JSON.stringify(this.form.query.filters));
+			this.orders      = JSON.parse(JSON.stringify(this.form.query.orders));
+			this.lookups     = JSON.parse(JSON.stringify(this.form.query.lookups));
+			this.choices     = JSON.parse(JSON.stringify(this.form.query.choices));
+			this.collections = JSON.parse(JSON.stringify(this.form.query.collections));
 			this.fieldIdsRemove  = [];
 			this.columnIdQuery   = null;
 			this.fieldIdQuery    = null;
@@ -896,6 +905,7 @@ let MyBuilderForm = {
 					relationId:this.relationId,
 					joins:this.joins,
 					filters:this.filters,
+					collections:this.collections,
 					orders:this.orders
 				},
 				fields:fieldsCleaned,

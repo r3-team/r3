@@ -417,10 +417,6 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		if err != nil {
 			return fields, err
 		}
-		field.Collections, err = getCollections(field.Id)
-		if err != nil {
-			return fields, err
-		}
 		fields[pos] = field
 	}
 
@@ -650,7 +646,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 			}
 			if err := setList_tx(tx, fieldId, f.AttributeIdRecord, f.FormIdOpen,
 				f.AutoRenew, f.CsvExport, f.CsvImport, f.Layout, f.FilterQuick,
-				f.ResultLimit, f.Collections, f.Columns, f.OpenForm); err != nil {
+				f.ResultLimit, f.Columns, f.OpenForm); err != nil {
 
 				return err
 			}
@@ -970,8 +966,7 @@ func setHeader_tx(tx pgx.Tx, fieldId uuid.UUID, size int) error {
 }
 func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	formIdOpen pgtype.UUID, autoRenew pgtype.Int4, csvExport bool, csvImport bool,
-	layout string, filterQuick bool, resultLimit int,
-	collections []types.FieldCollection, columns []types.Column,
+	layout string, filterQuick bool, resultLimit int, columns []types.Column,
 	oForm types.OpenForm) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_list", "field_id")
@@ -1008,11 +1003,6 @@ func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 
 	// set open form
 	if err := openForm.Set_tx(tx, "field", fieldId, oForm); err != nil {
-		return err
-	}
-
-	// set field collections
-	if err := setCollections_tx(tx, fieldId, collections); err != nil {
 		return err
 	}
 	return column.Set_tx(tx, "field", fieldId, columns)

@@ -25,6 +25,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	q.Orders = make([]types.QueryOrder, 0)
 	q.Lookups = make([]types.QueryLookup, 0)
 	q.Choices = make([]types.QueryChoice, 0)
+	q.Collections = make([]types.QueryCollection, 0)
 
 	if !tools.StringInSlice(entity, allowedEntities) {
 		return q, errors.New("bad entity")
@@ -144,6 +145,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 		var c types.QueryChoice
 
 		if err := rows.Scan(&c.Id, &c.Name); err != nil {
+			rows.Close()
 			return q, err
 		}
 		q.Choices = append(q.Choices, c)
@@ -156,15 +158,41 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 			Status: pgtype.Present,
 		})
 		if err != nil {
+			rows.Close()
 			return q, err
 		}
 
 		c.Captions, err = caption.Get("query_choice", c.Id, []string{"queryChoiceTitle"})
 		if err != nil {
+			rows.Close()
 			return q, err
 		}
 		q.Choices[i] = c
 	}
+
+	// retrieve collections
+	rows, err = db.Pool.Query(db.Ctx, `
+		SELECT collection_id, column_id_collection_display,
+			column_id_collection_value, attribute_id, attribute_index
+		FROM app.query_collection
+		WHERE query_id = $1
+	`, q.Id)
+	if err != nil {
+		return q, err
+	}
+
+	for rows.Next() {
+		var c types.QueryCollection
+
+		if err := rows.Scan(&c.CollectionId, &c.ColumnIdCollectionDisplay,
+			&c.ColumnIdCollectionValue, &c.AttributeId, &c.AttributeIndex); err != nil {
+
+			rows.Close()
+			return q, err
+		}
+		q.Collections = append(q.Collections, c)
+	}
+	rows.Close()
 	return q, nil
 }
 
@@ -348,6 +376,28 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 			return err
 		}
 		if err := caption.Set_tx(tx, c.Id, c.Captions); err != nil {
+			return err
+		}
+	}
+
+	// reset collections
+	if _, err := tx.Exec(db.Ctx, `
+		DELETE FROM app.query_collection
+		WHERE query_id = $1
+	`, query.Id); err != nil {
+		return err
+	}
+
+	for _, c := range query.Collections {
+		if _, err := tx.Exec(db.Ctx, `
+			INSERT INTO app.query_collection (
+				query_id, collection_id, column_id_collection_display,
+				column_id_collection_value, attribute_id, attribute_index
+			)
+			VALUES ($1,$2,$3,$4,$5,$6)
+		`, query.Id, c.CollectionId, c.ColumnIdCollectionDisplay,
+			c.ColumnIdCollectionValue, c.AttributeId, c.AttributeIndex); err != nil {
+
 			return err
 		}
 	}
