@@ -221,14 +221,16 @@ let MyBuilderFields = {
 				</div>
 				
 				<!-- column templates for list/calendar/chart fields -->
-				<my-builder-column-templates
-					v-if="fieldIdQuery === element.id"
-					:builderLanguage="builderLanguage"
-					:columns="element.columns"
-					:groupName="element.id+'_columns'"
-					:joins="element.query.joins"
-					:moduleId="moduleId"
-				/>
+				<div class="columnsTemplates">
+					<my-builder-column-templates
+						v-if="fieldIdQuery === element.id"
+						:builderLanguage="builderLanguage"
+						:columns="element.columns"
+						:groupName="element.id+'_columns'"
+						:joins="element.query.joins"
+						:moduleId="moduleId"
+					/>
+				</div>
 				
 				<!-- nested fields in container -->
 				<my-builder-fields class="container-nested"

@@ -794,21 +794,21 @@ let MyList = {
 		},
 		
 		// simple
-		anyInputRows:   function() { return this.inputRecordIds.length !== 0; },
-		autoSelect:     function() { return this.inputIsNew && this.inputAutoSelect !== 0 && !this.inputAutoSelectDone; },
-		choiceFilters:  function() { return this.getChoiceFilters(this.choices,this.choiceId); },
-		expressions:    function() { return this.getQueryExpressions(this.columns); },
-		joins:          function() { return this.fillRelationRecordIds(this.query.joins); },
+		anyInputRows: function() { return this.inputRecordIds.length !== 0; },
+		autoSelect:   function() { return this.inputIsNew && this.inputAutoSelect !== 0 && !this.inputAutoSelectDone; },
+		choiceFilters:function() { return this.getChoiceFilters(this.choices,this.choiceId); },
+		expressions:  function() { return this.getQueryExpressions(this.columns); },
+		joins:        function() { return this.fillRelationRecordIds(this.query.joins); },
 		
 		// stores
-		relationIdMap:   function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:  function() { return this.$store.getters['schema/attributeIdMap']; },
-		iconIdMap:       function() { return this.$store.getters['schema/iconIdMap']; },
-		capApp:          function() { return this.$store.getters.captions.list; },
-		capGen:          function() { return this.$store.getters.captions.generic; },
-		isMobile:        function() { return this.$store.getters.isMobile; },
-		moduleLanguage:  function() { return this.$store.getters.moduleLanguage; },
-		scrollFormId:    function() { return this.$store.getters.scrollFormId; }
+		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
+		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
+		iconIdMap:     function() { return this.$store.getters['schema/iconIdMap']; },
+		capApp:        function() { return this.$store.getters.captions.list; },
+		capGen:        function() { return this.$store.getters.captions.generic; },
+		isMobile:      function() { return this.$store.getters.isMobile; },
+		moduleLanguage:function() { return this.$store.getters.moduleLanguage; },
+		scrollFormId:  function() { return this.$store.getters.constants.scrollFormId; }
 	},
 	mounted:function() {
 		this.showTable = !this.isInput;

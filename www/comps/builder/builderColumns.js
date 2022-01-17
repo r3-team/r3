@@ -19,7 +19,7 @@ import {
 let MyBuilderColumnOptions = {
 	name:'my-builder-column-options',
 	components:{MyBuilderQuery},
-	template:`<div class="options">
+	template:`<div class="builder-column-options">
 		<table class="fullWidth default-inputs"><tbody>
 			<tr>
 				<td>{{ capApp.onMobile }}</td>

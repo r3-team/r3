@@ -262,7 +262,7 @@ let MyBuilderFieldOptionsChart = {
 let MyBuilderFieldOptions = {
 	name:'my-builder-field-options',
 	components:{MyBuilderFieldOptionsChart},
-	template:`<div class="options">
+	template:`<div class="builder-field-options">
 		<table class="fullWidth default-inputs"><tbody>
 			<tr>
 				<td>{{ capApp.onMobile }}</td>

@@ -1,14 +1,13 @@
-import MyCalendar                 from './calendar.js';
-import MyChart                    from './chart.js';
-import MyGantt                    from './gantt.js';
-import MyInputDate                from './inputDate.js';
-import MyInputFiles               from './inputFiles.js';
-import MyInputLogin               from './inputLogin.js';
-import MyInputRichtext            from './inputRichtext.js';
-import MyList                     from './list.js';
-import {hasAccessToAttribute}     from './shared/access.js';
-import {getQueryFiltersProcessed} from './shared/query.js';
-import {srcBase64}                from './shared/image.js';
+import MyCalendar             from './calendar.js';
+import MyChart                from './chart.js';
+import MyGantt                from './gantt.js';
+import MyInputDate            from './inputDate.js';
+import MyInputFiles           from './inputFiles.js';
+import MyInputLogin           from './inputLogin.js';
+import MyInputRichtext        from './inputRichtext.js';
+import MyList                 from './list.js';
+import {hasAccessToAttribute} from './shared/access.js';
+import {srcBase64}            from './shared/image.js';
 import {
 	getLinkMeta,
 	getNilUuid,
@@ -19,6 +18,10 @@ import {
 	getInputFieldName,
 	setGetterArgs
 } from './shared/form.js';
+import {
+	getQueryColumnsProcessed,
+	getQueryFiltersProcessed
+} from './shared/query.js';
 import {
 	getIndexAttributeId,
 	isAttributeBoolean,
@@ -551,21 +554,8 @@ let MyField = {
 		columnsProcessed:function() {
 			if(!this.isQuery) return [];
 			
-			let columns = JSON.parse(JSON.stringify(this.field.columns));
-			for(let i = 0, j = columns.length; i < j; i++) {
-				
-				if(!columns[i].subQuery)
-					continue;
-				
-				columns[i].query.filters = this.getQueryFiltersProcessed(
-					columns[i].query.filters,
-					this.dataFieldMap,
-					this.joinsIndexMap,
-					[],
-					this.values
-				);
-			}
-			return columns;
+			return this.getQueryColumnsProcessed(this.field.columns,
+				this.dataFieldMap,this.joinsIndexMap,this.values);
 		},
 		choicesProcessed:function() {
 			if(!this.isQuery) return [];
@@ -907,6 +897,7 @@ let MyField = {
 		getInputFieldName,
 		getLinkMeta,
 		getNilUuid,
+		getQueryColumnsProcessed,
 		getQueryFiltersProcessed,
 		hasAccessToAttribute,
 		isAttributeBoolean,

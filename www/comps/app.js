@@ -3,6 +3,7 @@ import MyFeedback            from './feedback.js';
 import MyHeader              from './header.js';
 import MyLogin               from './login.js';
 import {getStartFormId}      from './shared/access.js';
+import {updateCollections}   from './shared/collection.js';
 import {genericError}        from './shared/error.js';
 import {getCaptionForModule} from './shared/language.js';
 import {openLink}            from './shared/generic.js';
@@ -128,7 +129,7 @@ let MyApp = {
 				let accessible  = formIdStart !== null;
 				
 				// ignore hidden modules
-				if(that.moduleIdMapOptions[module.id].hidden)
+				if(that.moduleIdMapOpts[module.id].hidden)
 					return false;
 				
 				// ignore inaccessible and childless modules
@@ -164,7 +165,7 @@ let MyApp = {
 					iconId:module.iconId,
 					id:module.id,
 					name:module.name,
-					position:that.moduleIdMapOptions[module.id].position
+					position:that.moduleIdMapOpts[module.id].position
 				};
 			};
 			
@@ -194,24 +195,24 @@ let MyApp = {
 		httpMode:function() { return location.protocol === 'http:'; },
 		
 		// stores
-		access:       function() { return this.$store.getters.access; },
-		activated:    function() { return this.$store.getters['local/activated']; },
-		appVersion:   function() { return this.$store.getters['local/appVersion']; },
-		customLogo:   function() { return this.$store.getters['local/customLogo']; },
-		customLogoUrl:function() { return this.$store.getters['local/customLogoUrl']; },
+		access:         function() { return this.$store.getters.access; },
+		activated:      function() { return this.$store.getters['local/activated']; },
+		appVersion:     function() { return this.$store.getters['local/appVersion']; },
+		customLogo:     function() { return this.$store.getters['local/customLogo']; },
+		customLogoUrl:  function() { return this.$store.getters['local/customLogoUrl']; },
 		schemaTimestamp:function() { return this.$store.getters['schema/timestamp']; },
-		modules:      function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:  function() { return this.$store.getters['schema/moduleIdMap']; },
-		moduleIdMapOptions:function() { return this.$store.getters['schema/moduleIdMapOptions']; },
-		formIdMap:    function() { return this.$store.getters['schema/formIdMap']; },
-		blockInput:   function() { return this.$store.getters.blockInput; },
-		capGen:       function() { return this.$store.getters.captions.generic; },
-		isAdmin:      function() { return this.$store.getters.isAdmin; },
-		isAtDialog:   function() { return this.$store.getters.isAtDialog; },
-		isAtFeedback: function() { return this.$store.getters.isAtFeedback; },
-		isMobile:     function() { return this.$store.getters.isMobile; },
-		pageTitle:    function() { return this.$store.getters.pageTitle; },
-		settings:     function() { return this.$store.getters.settings; }
+		modules:        function() { return this.$store.getters['schema/modules']; },
+		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
+		moduleIdMapOpts:function() { return this.$store.getters['schema/moduleIdMapOptions']; },
+		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
+		blockInput:     function() { return this.$store.getters.blockInput; },
+		capGen:         function() { return this.$store.getters.captions.generic; },
+		isAdmin:        function() { return this.$store.getters.isAdmin; },
+		isAtDialog:     function() { return this.$store.getters.isAtDialog; },
+		isAtFeedback:   function() { return this.$store.getters.isAtFeedback; },
+		isMobile:       function() { return this.$store.getters.isMobile; },
+		pageTitle:      function() { return this.$store.getters.pageTitle; },
+		settings:       function() { return this.$store.getters.settings; }
 	},
 	created:function() {
 		window.addEventListener('resize',this.setMobileView);
@@ -230,6 +231,7 @@ let MyApp = {
 		getCaptionForModule,
 		getStartFormId,
 		openLink,
+		updateCollections,
 		
 		// general app states
 		stateChange:function() {
@@ -284,11 +286,15 @@ let MyApp = {
 				
 				// affects everyone logged in
 				case 'reauthorized':
-					if(this.appReady)
+					if(this.appReady) {
 						ws.send('lookup','get',{name:'access'},true).then(
-							(res) => this.$store.commit('access',res.payload),
+							(res) => {
+								this.$store.commit('access',res.payload);
+								this.updateCollections();
+							},
 							(err) => this.genericError(err)
 						);
+					}
 				break;
 			}
 		},
@@ -402,6 +408,7 @@ let MyApp = {
 						this.$store.commit('system',res[8].payload);
 					}
 					this.appReady = true;
+					this.updateCollections();
 					this.$store.commit('busyBlockInput',false);
 				},
 				(err) => this.genericError(err)

@@ -26,6 +26,7 @@ import {
 } from './shared/attribute.js';
 import {
 	fillRelationRecordIds,
+	getJoinIndexMapWithRecords,
 	getQueryAttributePkFilter,
 	getQueryFiltersProcessed,
 	getRelationsJoined
@@ -299,6 +300,7 @@ let MyForm = {
 		};
 	},
 	computed:{
+		// states
 		canDelete:function() {
 			if(this.isNew || this.badLoad || this.joins.length === 0
 				|| !this.joins[0].applyDelete
@@ -316,9 +318,88 @@ let MyForm = {
 			}
 			return true;
 		},
-		canSetNew:function() {
-			return this.joins.length !== 0 && this.joins[0].applyCreate;
+		hasChanges:function() {
+			for(let k in this.values) {
+				if(!this.isAttributeValueEqual(this.values[k],this.valuesOrg[k]))
+					return true;
+			}
+			return false;
 		},
+		helpAvailable:function() {
+			return typeof this.form.captions.formHelp[this.moduleLanguage] !== 'undefined'
+				|| typeof this.module.captions.moduleHelp[this.moduleLanguage] !== 'undefined';
+		},
+		isSingleField:function() {
+			return this.fields.length === 1 && ['calendar','chart','list'].includes(this.fields[0].content);
+		},
+		menuActive:function() {
+			return typeof this.formIdMapMenu[this.form.id] === 'undefined'
+				? null : this.formIdMapMenu[this.form.id];
+		},
+		
+		// states, simple
+		canSetNew:  function() { return this.joins.length !== 0 && this.joins[0].applyCreate; },
+		isData:     function() { return this.relationId !== null; },
+		isNew:      function() { return this.recordId === 0; },
+		warnUnsaved:function() { return this.hasChanges && this.settings.warnUnsaved; },
+		
+		// entities
+		fieldIdMapData:function() {
+			return this.getDataFieldMap(this.fields);
+		},
+		form:function() {
+			return this.formIdMap[this.formId];
+		},
+		iconId:function() {
+			if(this.form.iconId !== null)
+				return this.form.iconId;
+			
+			if(this.menuActive !== null && this.menuActive.formId === this.form.id)
+				return this.menuActive.iconId;
+			
+			return null;
+		},
+		relationsJoined:function() {
+			return this.getRelationsJoined(this.joins);
+		},
+		joinsIndexMap:function() {
+			// map of joins keyed by index (relation indexes are used to get/set data)
+			return this.getJoinIndexMapWithRecords(this.joins,this.recordIdIndexMap);
+		},
+		
+		// presentation
+		recordActionMessage:function() {
+			switch(this.messageCode) {
+				case 'created': return this.isMobile
+					? this.capApp.message.recordCreatedMobile
+					: this.capApp.message.recordCreated;
+				break;
+				case 'deleted': return this.isMobile
+					? this.capApp.message.recordDeletedMobile
+					: this.capApp.message.recordDeleted;
+				break;
+				case 'updated': return this.isMobile
+					? this.capApp.message.recordUpdatedMobile
+					: this.capApp.message.recordUpdated;
+				break;
+			}
+			return null;
+		},
+		title:function() {
+			// apply dedicated form title
+			if(typeof this.form.captions.formTitle[this.moduleLanguage] !== 'undefined')
+				return this.form.captions.formTitle[this.moduleLanguage];
+			
+			// no form title available, use menu title if corresponding menu is active
+			if(this.menuActive !== null && this.menuActive.formId === this.form.id &&
+				typeof this.menuActive.captions.menuTitle[this.moduleLanguage] !== 'undefined') {
+				
+				return this.menuActive.captions.menuTitle[this.moduleLanguage];
+			}
+			return '';
+		},
+		
+		// helpers
 		exposedFunctions:function() {
 			return {
 				// simple functions
@@ -377,84 +458,6 @@ let MyForm = {
 					return 0;
 				}
 			};
-		},
-		hasChanges:function() {
-			for(let k in this.values) {
-				if(!this.isAttributeValueEqual(this.values[k],this.valuesOrg[k]))
-					return true;
-			}
-			return false;
-		},
-		helpAvailable:function() {
-			return typeof this.form.captions.formHelp[this.moduleLanguage] !== 'undefined'
-				|| typeof this.module.captions.moduleHelp[this.moduleLanguage] !== 'undefined';
-		},
-		isSingleField:function() {
-			return this.fields.length === 1 && ['calendar','chart','list'].includes(this.fields[0].content);
-		},
-		iconId:function() {
-			if(this.form.iconId !== null)
-				return this.form.iconId;
-			
-			if(this.menuActive !== null && this.menuActive.formId === this.form.id)
-				return this.menuActive.iconId;
-			
-			return null;
-		},
-		menuActive:function() {
-			if(typeof this.formIdMapMenu[this.form.id] === 'undefined')
-				return null;
-			
-			return this.formIdMapMenu[this.form.id]
-		},
-		title:function() {
-			// apply dedicated form title
-			if(typeof this.form.captions.formTitle[this.moduleLanguage] !== 'undefined')
-				return this.form.captions.formTitle[this.moduleLanguage];
-			
-			// no form title available, use menu title if corresponding menu is active
-			if(this.menuActive !== null && this.menuActive.formId === this.form.id &&
-				typeof this.menuActive.captions.menuTitle[this.moduleLanguage] !== 'undefined') {
-				
-				return this.menuActive.captions.menuTitle[this.moduleLanguage];
-			}
-			return '';
-		},
-		relationsJoined:function() {
-			return this.getRelationsJoined(this.joins);
-		},
-		
-		// map of joins keyed by index (relation indexes are used to get/set data)
-		joinsIndexMap:function() {
-			let map = {};
-			for(let i = 0, j = this.joins.length; i < j; i++) {
-				
-				let join      = this.joins[i];
-				let recordId  = this.recordIdIndexMap[join.index];
-				join.recordId = Number.isInteger(recordId) ? recordId : 0;
-				
-				map[join.index] = join;
-			}
-			return map;
-		},
-		
-		// presentation
-		recordActionMessage:function() {
-			switch(this.messageCode) {
-				case 'created': return this.isMobile
-					? this.capApp.message.recordCreatedMobile
-					: this.capApp.message.recordCreated;
-				break;
-				case 'deleted': return this.isMobile
-					? this.capApp.message.recordDeletedMobile
-					: this.capApp.message.recordDeleted;
-				break;
-				case 'updated': return this.isMobile
-					? this.capApp.message.recordUpdatedMobile
-					: this.capApp.message.recordUpdated;
-				break;
-			}
-			return null;
 		},
 		
 		// field state overwrite
@@ -581,13 +584,6 @@ let MyForm = {
 			return out;
 		},
 		
-		// simple states
-		form:          function() { return this.formIdMap[this.formId]; },
-		fieldIdMapData:function() { return this.getDataFieldMap(this.fields); },
-		isData:        function() { return this.relationId !== null; },
-		isNew:         function() { return this.recordId === 0; },
-		warnUnsaved:   function() { return this.hasChanges && this.settings.warnUnsaved; },
-		
 		// stores
 		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
 		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
@@ -622,6 +618,7 @@ let MyForm = {
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
 		getInputFieldName,
+		getJoinIndexMapWithRecords,
 		getQueryAttributePkFilter,
 		getQueryFiltersProcessed,
 		getRelationsJoined,

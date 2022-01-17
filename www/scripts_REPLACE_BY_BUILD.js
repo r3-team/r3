@@ -176,7 +176,7 @@ const MyRouter = VueRouter.createRouter({
 		
 		// recover scroll position of form element if available
 		if(typeof MyRouterPositions[to.path] !== 'undefined') {
-			let e = document.getElementById(MyStore.getters.scrollFormId);
+			let e = document.getElementById(MyStore.getters.constants.scrollFormId);
 			
 			if(e !== null)
 				setTimeout(() => e.scrollTop = MyRouterPositions[to.path],50);
@@ -209,7 +209,7 @@ MyRouter.beforeEach((to,from) => {
 	}
 	
 	// store scroll position of form element if available
-	let e = document.getElementById(MyStore.getters.scrollFormId);
+	let e = document.getElementById(MyStore.getters.constants.scrollFormId);
 	if(e !== null)
 		MyRouterPositions[from.path] = e.scrollTop;
 	

@@ -64,7 +64,7 @@ let MyBuilderCollection = {
 					:showCaptions="true"
 				/>
 			</div>
-				
+			
 			<div class="columnsTemplates">
 				<my-builder-column-templates groupName="columns"
 					:builderLanguage="builderLanguage"
@@ -95,6 +95,7 @@ let MyBuilderCollection = {
 					@set-relation-id="relationId = $event"
 					:allowChoices="false"
 					:allowLookups="false"
+					:allowOrders="true"
 					:builderLanguage="builderLanguage"
 					:choices="[]"
 					:filters="filters"

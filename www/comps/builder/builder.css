@@ -353,6 +353,15 @@
 .builder-drag-item .action.edit.selected{
 	border:2px solid var(--color-border);
 }
+.builder-drag-item .title{
+	padding:0px 3px;
+	font-size:90%;
+	word-wrap:anywhere;
+}
+.builder-drag-item .reference{
+	margin-right:6px;
+	font-weight:bold;
+}
 
 /* collection */
 .builder-collection{
@@ -397,6 +406,10 @@
 	border:1px solid #000;
 	border-radius:3px;
 	margin:0px 5px 5px 0px;
+}
+.builder-column-options{
+	max-width:500px;
+	padding:8px 12px;
 }
 
 /* relation */

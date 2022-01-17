@@ -110,10 +110,27 @@ export function getSubQueryFilterExpressions(subQuery) {
 	}];
 };
 
+export function getQueryColumnsProcessed(columns,dataFieldIdMap,joinsIndexMap,values) {
+	columns = JSON.parse(JSON.stringify(columns));
+	for(let i = 0, j = columns.length; i < j; i++) {
+		
+		if(!columns[i].subQuery)
+			continue;
+		
+		columns[i].query.filters = getQueryFiltersProcessed(
+			columns[i].query.filters,
+			dataFieldIdMap,
+			joinsIndexMap,
+			[],
+			values
+		);
+	}
+	return columns;
+};
+
 export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,joinIndexesRemove,values) {
-	filters  = JSON.parse(JSON.stringify(filters));
-	let out  = [];
-	let that = this;
+	filters = JSON.parse(JSON.stringify(filters));
+	let out = [];
 	
 	let getFilterSideProcessed = function(s) {
 		switch(s.content) {
@@ -139,7 +156,6 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,jo
 				s.value = 0;
 				
 				let presetIdMap = MyStore.getters['schema/presetIdMapRecordId'];
-				
 				if(typeof presetIdMap[s.presetId] !== 'undefined')
 					s.value = presetIdMap[s.presetId];
 			break;
@@ -189,6 +205,26 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,jo
 		out.push(f);
 	}
 	return getFiltersEncapsulated(out);
+};
+
+export function getJoinIndexMap(joins) {
+	let map = {};
+	for(let i = 0, j = joins.length; i < j; i++) {
+		map[joins[i].index] = joins[i];
+	}
+	return map;
+};
+
+export function getJoinIndexMapWithRecords(joins,recordIdIndexMap) {
+	let map = {};
+	for(let i = 0, j = joins.length; i < j; i++) {
+		let join      = joins[i];
+		let recordId  = recordIdIndexMap[join.index];
+		join.recordId = Number.isInteger(recordId) ? recordId : 0;
+		
+		map[join.index] = join;
+	}
+	return map;
 };
 
 export function getQueryAttributePkFilter(relationId,recordId,index,not) {

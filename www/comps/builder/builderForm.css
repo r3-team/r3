@@ -90,15 +90,6 @@
 	border:none;
 	margin:0px;
 }
-.builder-field .title{
-	padding:0px 3px;
-	font-size:90%;
-	word-wrap:anywhere;
-}
-.builder-field .reference{
-	margin-right:6px;
-	font-weight:bold;
-}
 .builder-field .captionInputs{
 	display:flex;
 	flex-direction:row;
@@ -121,34 +112,32 @@
 	background-color:rgba(0,0,0,0.03);
 	border-bottom:1px dotted var(--color-border);
 }
+.builder-field .columnsTemplates{
+	flex:0 0 auto;
+	display:flex;
+	flex-flow:column nowrap;
+}
 
 /* options */
-.builder-field .options{
+.builder-field-options{
 	max-width:500px;
 	padding:8px 12px;
 }
-.builder-field .options .subQuery{
-	padding:6px;
-	margin:6px 0px;
-	border:1px solid var(--color-border);
-}
-
-/* chart options */
-.builder-field .options .chart-option{
+.builder-field-options .chart-option{
 	width:100%;
 	min-width:300px;
 	max-width:unset;
 	min-height:300px;
 }
-.builder-field .options .chart-option.error{
+.builder-field-options .chart-option.error{
 	border:2px solid var(--color-error);
 }
-.builder-field .options .chart-option-serie .line{
+.builder-field-options .chart-option-serie .line{
 	display:flex;
 	flex-flow:row wrap;
 }
-.builder-field .options .chart-option-serie .line input,
-.builder-field .options .chart-option-serie .line select{
+.builder-field-options .chart-option-serie .line input,
+.builder-field-options .chart-option-serie .line select{
 	width:unset;
 	max-width:unset;
 	margin:0px 6px 3px 0px;
