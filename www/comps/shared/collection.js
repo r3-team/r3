@@ -1,5 +1,6 @@
-import MyStore        from '../../stores/store.js';
-import {genericError} from './error.js';
+import MyStore                from '../../stores/store.js';
+import {genericError}         from './error.js';
+import {getValidLanguageCode} from './language.js';
 import {
 	getJoinIndexMap,
 	getQueryColumnsProcessed,
@@ -58,6 +59,10 @@ export function updateCollections() {
 		
 		let c = collectionIdMap[collectionId];
 		let q = c.query;
+		
+		// set module language so that language filters can work outside of module context
+		let m = MyStore.getters['schema/moduleIdMap'][c.moduleId];
+		MyStore.commit('moduleLanguage',getValidLanguageCode(m));
 		
 		let joinIndexMap = getJoinIndexMap(q.joins);
 		let filters      = getQueryFiltersProcessed(q.filters,{},joinIndexMap);
