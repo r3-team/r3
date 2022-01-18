@@ -137,12 +137,15 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 		return err
 	}
 
+	// fix imports < 2.6: New "isTrigger" state
+	if strings.ToUpper(codeReturns) == "TRIGGER" && !isTrigger {
+		isTrigger = true
+	}
+
 	// enforce trigger function
 	if isTrigger {
 		codeReturns = "TRIGGER"
 		isFrontendExec = false
-	} else if strings.ToUpper(codeReturns) == "TRIGGER" {
-		return errors.New("non-trigger function must not return 'TRIGGER'")
 	}
 
 	if codeFunction == "" || codeReturns == "" {
