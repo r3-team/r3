@@ -15,8 +15,16 @@ func GetPreview(id uuid.UUID, limit int, offset int) (interface{}, error) {
 
 	var modName, relName string
 	atrNames := make([]string, 0)
-	res := make([]interface{}, 0)
 
+	res := struct {
+		Rows     []interface{} `json:"rows"`
+		RowCount int64         `json:"rowCount"`
+	}{
+		make([]interface{}, 0),
+		0,
+	}
+
+	// get relation/attribute/module details
 	if err := db.Pool.QueryRow(db.Ctx, `
 		SELECT r.name, m.name, ARRAY(
 			SELECT name
@@ -31,6 +39,15 @@ func GetPreview(id uuid.UUID, limit int, offset int) (interface{}, error) {
 		return nil, err
 	}
 
+	// get total count of tupels from relation
+	if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+		SELECT COUNT(*)
+		FROM "%s"."%s"
+	`, modName, relName)).Scan(&res.RowCount); err != nil {
+		return nil, err
+	}
+
+	// get records from relation
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
 		SELECT "%s"
 		FROM "%s"."%s"
@@ -59,7 +76,7 @@ func GetPreview(id uuid.UUID, limit int, offset int) (interface{}, error) {
 				valuesAll[i] = db.PgxNumericToString(valuesAll[i].(pgtype.Numeric))
 			}
 		}
-		res = append(res, valuesAll)
+		res.Rows = append(res.Rows, valuesAll)
 	}
 	return res, nil
 }
