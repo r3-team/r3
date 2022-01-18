@@ -1007,7 +1007,7 @@ let MyBuilderFieldOptions = {
 			</template>
 			
 			<!-- consume collection -->
-			<template v-if="isList">
+			<template v-if="isList || isCalendar">
 				<tr>
 					<td>
 						<my-button

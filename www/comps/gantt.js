@@ -1,6 +1,7 @@
-import srcBase64Icon            from './shared/image.js';
-import {getCaption}             from './shared/language.js';
-import MyValueRich              from './valueRich.js';
+import MyInputCollection from './inputCollection.js';
+import MyValueRich       from './valueRich.js';
+import srcBase64Icon     from './shared/image.js';
+import {getCaption}      from './shared/language.js';
 import {
 	fieldOptionGet,
 	fieldOptionSet
@@ -179,6 +180,7 @@ let MyGantt = {
 	name:'my-gantt',
 	components:{
 		MyGanttLine,
+		MyInputCollection,
 		MyValueRich
 	},
 	template:`<div class="gantt shade" v-if="ready">
@@ -227,7 +229,7 @@ let MyGantt = {
 				/>
 			</div>
 			
-			<div class="area nowrap">
+			<div class="area nowrap default-inputs">
 				<my-button
 					v-if="stepTypeToggle"
 					@trigger="toggleStepType"
@@ -244,9 +246,18 @@ let MyGantt = {
 					:darkBg="true"
 					:naked="true"
 				/>
+				
 				<input class="zoom-factor clickable" type="range" min="3" max="12"
 					v-if="!isMobile"
 					v-model="stepZoom"
+				/>
+				
+				<my-input-collection class="selector"
+					v-for="c in collections"
+					@index-selected="$emit('set-collection-index-filter',c.collectionId,$event)"
+					:collectionId="c.collectionId"
+					:columnIdDisplay="c.columnIdDisplay"
+					:key="c.collectionId"
 				/>
 				
 				<select class="selector"
@@ -342,25 +353,26 @@ let MyGantt = {
 	</div>`,
 	props:{
 		attributeIdColor:{ required:true },
-		attributeIdDate0:{ type:String, required:true },
-		attributeIdDate1:{ type:String, required:true },
-		choices:    { type:Array,   required:false, default:() => [] },
-		columns:    { type:Array,   required:true }, // processed list columns
-		fieldId:    { type:String,  required:true },
-		filters:    { type:Array,   required:true }, // processed query filters
-		formLoading:{ type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
-		handleError:{ type:Function,required:true },
-		iconId:     { required:true },
-		indexColor: { required:true },
-		indexDate0: { type:Number,  required:true },
-		indexDate1: { type:Number,  required:true },
-		isFullPage: { type:Boolean, required:true },
-		query:      { type:Object,  required:true },
-		rowSelect:  { type:Boolean, required:true },
-		stepTypeDefault:{ type:String,  required:true },
-		stepTypeToggle: { type:Boolean, required:true }
+		attributeIdDate0:{ type:String,  required:true },
+		attributeIdDate1:{ type:String,  required:true },
+		choices:         { type:Array,   required:false, default:() => [] },
+		columns:         { type:Array,   required:true }, // processed list columns
+		collections:     { type:Array,   required:true },
+		fieldId:         { type:String,  required:true },
+		filters:         { type:Array,   required:true }, // processed query filters
+		formLoading:     { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
+		handleError:     { type:Function,required:true },
+		iconId:          { required:true },
+		indexColor:      { required:true },
+		indexDate0:      { type:Number,  required:true },
+		indexDate1:      { type:Number,  required:true },
+		isFullPage:      { type:Boolean, required:true },
+		query:           { type:Object,  required:true },
+		rowSelect:       { type:Boolean, required:true },
+		stepTypeDefault: { type:String,  required:true },
+		stepTypeToggle:  { type:Boolean, required:true }
 	},
-	emits:['open-form','record-selected','set-args'],
+	emits:['open-form','record-selected','set-args','set-collection-index-filter'],
 	data:function() {
 		return {
 			choiceId:null,

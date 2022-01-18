@@ -184,26 +184,27 @@ type FieldButton struct {
 	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
 }
 type FieldCalendar struct {
-	Id               uuid.UUID      `json:"id"`
-	IconId           pgtype.UUID    `json:"iconId"`
-	Content          string         `json:"content"`
-	State            string         `json:"state"`
-	OnMobile         bool           `json:"onMobile"`
-	AttributeIdDate0 uuid.UUID      `json:"attributeIdDate0"`
-	AttributeIdDate1 uuid.UUID      `json:"attributeIdDate1"`
-	AttributeIdColor pgtype.UUID    `json:"attributeIdColor"`
-	IndexDate0       int            `json:"indexDate0"`
-	IndexDate1       int            `json:"indexDate1"`
-	IndexColor       pgtype.Int4    `json:"indexColor"`
-	Gantt            bool           `json:"gantt"`            // gantt presentation
-	GanttSteps       pgtype.Varchar `json:"ganttSteps"`       // gantt step type (hours, days)
-	GanttStepsToggle bool           `json:"ganttStepsToggle"` // user can toggle between gantt step types
-	Ics              bool           `json:"ics"`              // calendar available as ICS download
-	DateRange0       int64          `json:"dateRange0"`       // ICS/gantt time range before NOW (seconds)
-	DateRange1       int64          `json:"dateRange1"`       // ICS/gantt time range after NOW (seconds)
-	OpenForm         OpenForm       `json:"openForm"`
-	Columns          []Column       `json:"columns"`
-	Query            Query          `json:"query"`
+	Id               uuid.UUID            `json:"id"`
+	IconId           pgtype.UUID          `json:"iconId"`
+	Content          string               `json:"content"`
+	State            string               `json:"state"`
+	OnMobile         bool                 `json:"onMobile"`
+	AttributeIdDate0 uuid.UUID            `json:"attributeIdDate0"`
+	AttributeIdDate1 uuid.UUID            `json:"attributeIdDate1"`
+	AttributeIdColor pgtype.UUID          `json:"attributeIdColor"`
+	IndexDate0       int                  `json:"indexDate0"`
+	IndexDate1       int                  `json:"indexDate1"`
+	IndexColor       pgtype.Int4          `json:"indexColor"`
+	Gantt            bool                 `json:"gantt"`            // gantt presentation
+	GanttSteps       pgtype.Varchar       `json:"ganttSteps"`       // gantt step type (hours, days)
+	GanttStepsToggle bool                 `json:"ganttStepsToggle"` // user can toggle between gantt step types
+	Ics              bool                 `json:"ics"`              // calendar available as ICS download
+	DateRange0       int64                `json:"dateRange0"`       // ICS/gantt time range before NOW (seconds)
+	DateRange1       int64                `json:"dateRange1"`       // ICS/gantt time range after NOW (seconds)
+	OpenForm         OpenForm             `json:"openForm"`
+	Columns          []Column             `json:"columns"`
+	Collections      []CollectionConsumer `json:"collections"`
+	Query            Query                `json:"query"`
 
 	// legacy
 	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`

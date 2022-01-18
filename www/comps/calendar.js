@@ -1,3 +1,4 @@
+import MyInputCollection from './inputCollection.js';
 import MyValueRich       from './valueRich.js';
 import {srcBase64}       from './shared/image.js';
 import {getCaption}      from './shared/language.js';
@@ -35,7 +36,10 @@ export {MyCalendarMonth};
 
 let MyCalendarMonth = {
 	name:'my-calendar-month',
-	components:{MyValueRich},
+	components:{
+		MyInputCollection,
+		MyValueRich
+	},
 	template:`<div class="month">
 		
 		<!-- header -->
@@ -53,7 +57,7 @@ let MyCalendarMonth = {
 				/>
 			</div>
 		
-			<div class="area nowrap navigation default-inputs">
+			<div class="area nowrap default-inputs">
 				<img class="icon"
 					v-if="iconId !== null"
 					:src="srcBase64(iconIdMap[iconId].file)"
@@ -87,7 +91,15 @@ let MyCalendarMonth = {
 				/>
 			</div>
 			
-			<div class="area nowrap">
+			<div class="area nowrap default-inputs">
+				<my-input-collection class="selector"
+					v-for="c in collections"
+					@index-selected="$emit('set-collection-index-filter',c.collectionId,$event)"
+					:collectionId="c.collectionId"
+					:columnIdDisplay="c.columnIdDisplay"
+					:key="c.collectionId"
+				/>
+				
 				<select class="selector"
 					v-if="hasChoices"
 					v-model="choiceIdInput"
@@ -216,6 +228,7 @@ let MyCalendarMonth = {
 		choiceId:   { required:false, default:null },
 		choices:    { type:Array,   required:false, default:() => [] },
 		columns:    { type:Array,   required:false, default:() => [] },
+		collections:{ type:Array,   required:false, default:() => [] },
 		date:       { type:Date,    required:true },                    // selected date to work around
 		date0:      { type:Date,    required:true },                    // start date of calendar
 		date1:      { type:Date,    required:true },                    // end date of calendar
@@ -235,7 +248,8 @@ let MyCalendarMonth = {
 		rowSelect:  { type:Boolean, required:false, default:false }
 	},
 	emits:[
-		'day-selected','open-form','record-selected','set-choice-id','set-date'
+		'day-selected','open-form','record-selected','set-choice-id',
+		'set-collection-index-filter','set-date'
 	],
 	data:function() {
 		return {
@@ -552,10 +566,12 @@ let MyCalendar = {
 			@open-form="(...args) => $emit('open-form',...args)"
 			@record-selected="(...args) => $emit('record-selected',...args)"
 			@set-choice-id="choiceIdSet"
+			@set-collection-index-filter="(...args) => $emit('set-collection-index-filter',...args)"
 			@set-date="dateSet"
 			:choiceId="choiceId"
 			:choices="choices"
 			:columns="columns"
+			:collections="collections"
 			:date="date"
 			:date0="date0"
 			:date1="date1"
@@ -579,6 +595,7 @@ let MyCalendar = {
 		attributeIdDate1:{ type:String,  required:true },
 		choices:         { type:Array,   required:false, default:() => [] },
 		columns:         { type:Array,   required:true },
+		collections:     { type:Array,   required:true },
 		fieldId:         { type:String,  required:false, default:'' },
 		filters:         { type:Array,   required:true },
 		formLoading:     { type:Boolean, required:false, default:false },
@@ -592,7 +609,7 @@ let MyCalendar = {
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:false, default:false }
 	},
-	emits:['open-form','record-selected','set-args'],
+	emits:['open-form','record-selected','set-args','set-collection-index-filter'],
 	data:function() {
 		return {
 			// calendar state

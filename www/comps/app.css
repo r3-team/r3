@@ -547,6 +547,10 @@ table td.maximum{
 	box-sizing:border-box;
 	flex:1 1 auto;
 }
+.default-inputs input[type=range]{
+	background-color:transparent;
+	box-shadow:none;
+}
 .default-inputs textarea{
 	height:120px;
 	padding-top:6px;
@@ -576,6 +580,10 @@ table td.maximum{
 	box-shadow:inset 0 -2px 0 0 var(--color-accent1),1px 1px 4px var(--color-shade);
 	transition:box-shadow 0.3s, background-color 0.3s;
 	outline:none;
+}
+.default-inputs input[type=range]:focus{
+	box-shadow:none;
+	transition:none;
 }
 .default-inputs input:disabled,
 .default-inputs select:disabled,

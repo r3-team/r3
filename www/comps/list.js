@@ -1,16 +1,14 @@
 import isDropdownUpwards  from './shared/layout.js';
 import MyFilters          from './filters.js';
+import MyInputCollection  from './inputCollection.js';
 import MyInputOffset      from './inputOffset.js';
 import MyListCsv          from './listCsv.js';
 import MyValueRich        from './valueRich.js';
+import {getColumnTitle}   from './shared/column.js';
 import {getChoiceFilters} from './shared/form.js';
 import {srcBase64}        from './shared/image.js';
 import {getCaption}       from './shared/language.js';
 import {isAttributeFiles} from './shared/attribute.js';
-import {
-	getCollectionColumn,
-	getCollectionOptions
-} from './shared/collection.js';
 import {
 	fieldOptionGet,
 	fieldOptionSet
@@ -32,6 +30,7 @@ let MyList = {
 	name:'my-list',
 	components:{
 		MyFilters,
+		MyInputCollection,
 		MyInputOffset,
 		MyListCsv,
 		MyValueRich
@@ -262,18 +261,13 @@ let MyList = {
 						placeholder="..."
 					/>
 					
-					<select class="selector"
+					<my-input-collection class="selector"
 						v-for="c in collections"
-						@input="$emit('set-collection-index-filter',c.collectionId,$event.target.value)"
+						@index-selected="$emit('set-collection-index-filter',c.collectionId,$event)"
+						:collectionId="c.collectionId"
+						:columnIdDisplay="c.columnIdDisplay"
 						:key="c.collectionId"
-					>
-						<option :value="-1">
-							- {{ getColumnCaption(getCollectionColumn(c.collectionId,c.columnIdDisplay)) }} -
-						</option>
-						<option v-for="(o,i) in getCollectionOptions(c.collectionId,c.columnIdDisplay)"
-							:value="i"
-						>{{ o }}</option>
-					</select>
+					/>
 					
 					<select class="selector"
 						v-if="hasChoices"
@@ -668,7 +662,7 @@ let MyList = {
 				// create even if first column is hidden as other columns in same batch might not be
 				out.push({
 					batch:column.batch,
-					caption:that.getColumnCaption(column),
+					caption:that.getColumnTitle(column),
 					columnIndexes:!hidden ? [index] : [],
 					style:'',
 					width:column.basis
@@ -822,7 +816,6 @@ let MyList = {
 		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
 		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
 		iconIdMap:      function() { return this.$store.getters['schema/iconIdMap']; },
-		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
 		capApp:         function() { return this.$store.getters.captions.list; },
 		capGen:         function() { return this.$store.getters.captions.generic; },
 		isMobile:       function() { return this.$store.getters.isMobile; },
@@ -893,8 +886,7 @@ let MyList = {
 		fillRelationRecordIds,
 		getCaption,
 		getChoiceFilters,
-		getCollectionColumn,
-		getCollectionOptions,
+		getColumnTitle,
 		getFiltersEncapsulated,
 		getQueryAttributesPkFilter,
 		getQueryExpressions,
@@ -1321,20 +1313,6 @@ let MyList = {
 			
 			// if no sortable columns are available, return false
 			return -1;
-		},
-		getColumnCaption:function(c) {
-			let a = this.attributeIdMap[c.attributeId];
-			
-			// 1st preference: dedicated column title
-			if(typeof c.captions.columnTitle[this.moduleLanguage] !== 'undefined')
-				return c.captions.columnTitle[this.moduleLanguage];
-			
-			// 2nd preference: dedicated attribute title
-			if(typeof a.captions.attributeTitle[this.moduleLanguage] !== 'undefined')
-				return a.captions.attributeTitle[this.moduleLanguage];
-			
-			// if nothing else is available: attribute name
-			return a.name;
 		},
 		getColumnPosInOrder:function(columnIndex) {
 			let col = this.columns[columnIndex];

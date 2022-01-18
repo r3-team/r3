@@ -338,6 +338,10 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		if err != nil {
 			return fields, err
 		}
+		field.Collections, err = getCollections(field.Id)
+		if err != nil {
+			return fields, err
+		}
 		fields[pos] = field
 	}
 
@@ -513,6 +517,10 @@ func GetCalendar(fieldId uuid.UUID) (types.FieldCalendar, error) {
 	if err != nil {
 		return f, err
 	}
+	f.Collections, err = getCollections(f.Id)
+	if err != nil {
+		return f, err
+	}
 	return f, nil
 }
 
@@ -560,7 +568,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 				f.AttributeIdDate0, f.AttributeIdDate1, f.AttributeIdColor,
 				f.AttributeIdRecord, f.IndexDate0, f.IndexDate1, f.IndexColor,
 				f.Gantt, f.GanttSteps, f.GanttStepsToggle, f.Ics, f.DateRange0,
-				f.DateRange1, f.Columns, f.OpenForm); err != nil {
+				f.DateRange1, f.Columns, f.Collections, f.OpenForm); err != nil {
 
 				return err
 			}
@@ -732,7 +740,8 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	attributeIdColor pgtype.UUID, attributeIdRecord pgtype.UUID, indexDate0 int,
 	indexDate1 int, indexColor pgtype.Int4, gantt bool, ganttSteps pgtype.Varchar,
 	ganttStepsToggle bool, ics bool, dateRange0 int64, dateRange1 int64,
-	columns []types.Column, oForm types.OpenForm) error {
+	columns []types.Column, collections []types.CollectionConsumer,
+	oForm types.OpenForm) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_calendar", "field_id")
 	if err != nil {
@@ -780,6 +789,13 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	if err := openForm.Set_tx(tx, "field", fieldId, oForm); err != nil {
 		return err
 	}
+
+	// set collection consumer
+	if err := setCollections_tx(tx, fieldId, collections); err != nil {
+		return err
+	}
+
+	// set columns
 	return column.Set_tx(tx, "field", fieldId, columns)
 }
 func setChart_tx(tx pgx.Tx, fieldId uuid.UUID, chartOption string, columns []types.Column) error {
