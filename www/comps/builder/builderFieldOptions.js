@@ -1,6 +1,7 @@
 import {
 	getDependentModules,
 	getItemTitle,
+	getItemTitleColumn,
 	getItemTitleRelation,
 	getValueFromJson,
 	setValueInJson
@@ -15,6 +16,81 @@ import {
 } from '../shared/attribute.js';
 
 export {MyBuilderFieldOptions as default};
+
+let MyBuilderFieldOptionsCollection = {
+	name:'my-builder-field-options-collection',
+	template:`
+		<tr>
+			<td>{{ capApp.collection }}</td>
+			<td>
+				<select v-model="collectionId">
+					<option :value="null">-</option>
+					<optgroup
+						v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
+						:label="m.name"
+					>
+						<option v-for="c in m.collections" :value="c.id">
+							{{ c.name }}
+						</option>
+					</optgroup>
+				</select>
+			</td>
+			<td>
+				<my-button image="cancel.png"
+					@trigger="$emit('remove')"
+					:naked="true"
+				/>
+			</td>
+		</tr>
+		<tr class="collections-line">
+			<td>{{ capApp.collectionColumnDisplay }}</td>
+			<td>
+				<select v-model="columnIdDisplay" :disabled="collectionId === null">
+					<option :value="null">-</option>
+					<option v-if="collectionId !== null" v-for="c in collectionIdMap[collectionId].columns" :value="c.id">
+						{{ getItemTitleColumn(c) }}
+					</option>
+				</select>
+			</td>
+			<td></td>
+		</tr>
+	`,
+	props:{
+		module:    { type:Object, required:true },
+		modelValue:{ type:Object, required:true }
+	},
+	emits:['remove','update:modelValue'],
+	computed:{
+		collectionId:{
+			get:function()  { return this.modelValue.collectionId; },
+			set:function(v) { this.set('collectionId',v); }
+		},
+		columnIdDisplay:{
+			get:function()  { return this.modelValue.columnIdDisplay; },
+			set:function(v) { this.set('columnIdDisplay',v); }
+		},
+		
+		// stores
+		modules:        function() { return this.$store.getters['schema/modules']; },
+		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
+		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
+		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
+		capApp:         function() { return this.$store.getters.captions.builder.form; },
+		capGen:         function() { return this.$store.getters.captions.generic; }
+	},
+	methods:{
+		// externals
+		getDependentModules,
+		getItemTitleColumn,
+		
+		// actions
+		set:function(name,value) {
+			let v = JSON.parse(JSON.stringify(this.modelValue));
+			v[name] = value;
+			this.$emit('update:modelValue',v);
+		}
+	}
+};
 
 let MyBuilderFieldOptionsChartSerie = {
 	name:'my-builder-field-options-chart-serie',
@@ -261,7 +337,10 @@ let MyBuilderFieldOptionsChart = {
 
 let MyBuilderFieldOptions = {
 	name:'my-builder-field-options',
-	components:{MyBuilderFieldOptionsChart},
+	components:{
+		MyBuilderFieldOptionsChart,
+		MyBuilderFieldOptionsCollection
+	},
 	template:`<div class="builder-field-options">
 		<table class="fullWidth default-inputs"><tbody>
 			<tr>
@@ -757,6 +836,25 @@ let MyBuilderFieldOptions = {
 					</td>
 				</tr>
 				<tr>
+					<td>{{ capApp.filterQuick }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="set('filterQuick',$event)"
+							:modelValue="field.filterQuick"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3">
+						<my-button
+							@trigger="showCsv = !showCsv"
+							:image="showCsv ? 'triangleDown.png' : 'triangleRight.png'"
+							:caption="capApp.csvTitle"
+							:naked="true"
+						/>
+					</td>
+				</tr>
+				<tr v-if="showCsv">
 					<td>{{ capApp.csvImport }}</td>
 					<td>
 						<my-bool
@@ -765,21 +863,12 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<tr>
+				<tr v-if="showCsv">
 					<td>{{ capApp.csvExport }}</td>
 					<td>
 						<my-bool
 							@update:modelValue="set('csvExport',$event)"
 							:modelValue="field.csvExport"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.filterQuick }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="set('filterQuick',$event)"
-							:modelValue="field.filterQuick"
 						/>
 					</td>
 				</tr>
@@ -823,9 +912,16 @@ let MyBuilderFieldOptions = {
 			<!-- open form -->
 			<template v-if="isButton || ((isList || isCalendar || isRelationship) && field.query.relationId !== null)">
 				<tr>
-					<td colspan="2"><br /><b>{{ capApp.openForm }}</b></td>
+					<td colspan="2">
+						<my-button
+							@trigger="showOpenForm = !showOpenForm"
+							:caption="capApp.openForm"
+							:image="showOpenForm ? 'triangleDown.png' : 'triangleRight.png'"
+							:naked="true"
+						/>
+					</td>
 				</tr>
-				<tr>
+				<tr v-if="showOpenForm">
 					<td>{{ capApp.openFormFormIdOpen }}</td>
 					<td>
 						<select
@@ -846,7 +942,7 @@ let MyBuilderFieldOptions = {
 				</tr>
 			</template>
 			
-			<template v-if="isOpenForm">
+			<template v-if="isOpenForm && showOpenForm">
 				<tr>
 					<td>{{ capApp.openFormPopUp }}</td>
 					<td>
@@ -909,6 +1005,39 @@ let MyBuilderFieldOptions = {
 					</td>
 				</tr>
 			</template>
+			
+			<!-- consume collection -->
+			<template v-if="isList">
+				<tr>
+					<td>
+						<my-button
+							@trigger="showCollections = !showCollections"
+							:image="showCollections ? 'triangleDown.png' : 'triangleRight.png'"
+							:caption="capApp.collectionTitle"
+							:naked="true"
+						/>
+					</td>
+					<td v-if="showCollections" colspan="2">
+						<my-button image="add.png"
+							@trigger="collectionAdd"
+							:caption="capGen.button.add"
+							:naked="true"
+						/>
+					</td>
+				</tr>
+				<template v-if="showCollections">
+					<my-builder-field-options-collection
+						v-for="(c,i) in field.collections"
+						@remove="collectionRemove(i)"
+						@update:modelValue="setCollection(i,$event)"
+						:modelValue="c"
+						:module="module"
+					/>
+					<tr v-if="field.collections.length !== 0">
+						<td colspan="3">{{ capApp.collectionHint }}</td>
+					</tr>
+				</template>
+			</template>
 		</tbody></table>
 	</div>`,
 	props:{
@@ -918,6 +1047,13 @@ let MyBuilderFieldOptions = {
 		formId:         { type:String,  required:true },
 		joinsIndexMap:  { type:Object,  required:true },
 		moduleId:       { type:String,  required:true }
+	},
+	data:function() {
+		return {
+			showCollections:false,
+			showCsv:false,
+			showOpenForm:false
+		};
 	},
 	emits:['set'],
 	computed:{
@@ -1016,7 +1152,8 @@ let MyBuilderFieldOptions = {
 		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
 		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
 		formIdMap:     function() { return this.$store.getters['schema/formIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.form; }
+		capApp:        function() { return this.$store.getters.captions.builder.form; },
+		capGen:        function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
 		// externals
@@ -1030,6 +1167,19 @@ let MyBuilderFieldOptions = {
 		isAttributeString,
 		
 		// actions
+		collectionAdd:function() {
+			let v = JSON.parse(JSON.stringify(this.field.collections));
+			v.push({
+				collectionId:null,
+				columnIdDisplay:null
+			});
+			this.set('collections',v);
+		},
+		collectionRemove:function(i) {
+			let v = JSON.parse(JSON.stringify(this.field.collections));
+			v.splice(i,1);
+			this.set('collections',v);
+		},
 		presetIdAdd:function(value) {
 			let ids = JSON.parse(JSON.stringify(this.field.defPresetIds));
 			
@@ -1048,6 +1198,56 @@ let MyBuilderFieldOptions = {
 			
 			ids.splice(pos,1);
 			this.set('defPresetIds',ids);
+		},
+		set:function(name,val) {
+			if(name === 'csvImport' && !val) {
+				// no CSV import, clear query lookups
+				let q = JSON.parse(JSON.stringify(this.field.query));
+				q.lookups = [];
+				this.$emit('set','query',q);
+			}
+			if(name === 'gantt') {
+				// gantt, set or remove gantt step option
+				if(!val) this.$emit('set','ganttSteps',null);
+				else     this.$emit('set','ganttSteps','days');
+			}
+			this.$emit('set',name,val);
+		},
+		setCollection:function(i,value) {
+			let v = JSON.parse(JSON.stringify(this.field.collections));
+			v[i] = value;
+			this.set('collections',v);
+		},
+		setIndexAttribute:function(name,indexAttributeId) {
+			let values = this.getDetailsFromIndexAttributeId(indexAttributeId);
+			
+			switch(name) {
+				case 'dateTo':
+					this.set('attributeIdAlt',values.attributeId);
+				break;
+				case 'date0':
+					this.set('attributeIdDate0',values.attributeId);
+					this.set('indexDate0',values.index);
+				break;
+				case 'date1':
+					this.set('attributeIdDate1',values.attributeId);
+					this.set('indexDate1',values.index);
+				break;
+				case 'color':
+					this.set('attributeIdColor',values.attributeId);
+					this.set('indexColor',values.index);
+				break;
+			}
+		},
+		setInt:function(name,val,allowNull) {
+			if(val !== '')
+				return this.set(name,parseInt(val));
+			
+			if(allowNull) return this.set(name,null);
+			else          return this.set(name,0);
+		},
+		setNull:function(name,val) {
+			this.set(name,val === '' ? null : val);
 		},
 		setOpenForm:function(name,val) {
 			
@@ -1081,51 +1281,6 @@ let MyBuilderFieldOptions = {
 			
 			v[name] = val;
 			this.set('openForm',v);
-		},
-		setInt:function(name,val,allowNull) {
-			if(val !== '')
-				return this.set(name,parseInt(val));
-			
-			if(allowNull) return this.set(name,null);
-			else          return this.set(name,0);
-		},
-		setNull:function(name,val) {
-			this.set(name,val === '' ? null : val);
-		},
-		setIndexAttribute:function(name,indexAttributeId) {
-			let values = this.getDetailsFromIndexAttributeId(indexAttributeId);
-			
-			switch(name) {
-				case 'dateTo':
-					this.set('attributeIdAlt',values.attributeId);
-				break;
-				case 'date0':
-					this.set('attributeIdDate0',values.attributeId);
-					this.set('indexDate0',values.index);
-				break;
-				case 'date1':
-					this.set('attributeIdDate1',values.attributeId);
-					this.set('indexDate1',values.index);
-				break;
-				case 'color':
-					this.set('attributeIdColor',values.attributeId);
-					this.set('indexColor',values.index);
-				break;
-			}
-		},
-		set:function(name,val) {
-			if(name === 'csvImport' && !val) {
-				// no CSV import, clear query lookups
-				let q = JSON.parse(JSON.stringify(this.field.query));
-				q.lookups = [];
-				this.$emit('set','query',q);
-			}
-			if(name === 'gantt') {
-				// gantt, set or remove gantt step option
-				if(!val) this.$emit('set','ganttSteps',null);
-				else     this.$emit('set','ganttSteps','days');
-			}
-			this.$emit('set',name,val);
 		}
 	}
 };

@@ -296,9 +296,11 @@ let MyField = {
 			@open-form="(...args) => openForm(args[0],[],args[1])"
 			@record-selected="(...args) => openForm(args[0],[],args[1])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
+			@set-collection-index-filter="setCollectionIndexFilter"
 			:allowPaging="field.query.fixedLimit === 0"
 			:autoRenew="field.autoRenew"
 			:choices="choicesProcessed"
+			:collections="field.collections"
 			:columns="columnsProcessed"
 			:csvExport="field.csvExport"
 			:csvImport="field.csvImport"
@@ -425,10 +427,11 @@ let MyField = {
 	emits:['execute-function','open-form','set-form-args','set-valid','set-value','set-value-init'],
 	data:function() {
 		return {
+			collectionIdMapIndexFilter:{}, // filter collections by their array index
 			focused:false,
-			notTouched:true,            // data field was not touched by user
-			showColorPickerInput:false, // for color picker fields
-			showPassword:false          // for password fields
+			notTouched:true,               // data field was not touched by user
+			showColorPickerInput:false,    // for color picker fields
+			showPassword:false             // for password fields
 		};
 	},
 	watch:{
@@ -566,8 +569,9 @@ let MyField = {
 					choices[i].filters,
 					this.dataFieldMap,
 					this.joinsIndexMap,
+					this.values,
 					[],
-					this.values
+					this.collectionIdMapIndexFilter
 				);
 			}
 			return choices;
@@ -579,8 +583,9 @@ let MyField = {
 				this.field.query.filters,
 				this.dataFieldMap,
 				this.joinsIndexMap,
+				this.values,
 				[],
-				this.values
+				this.collectionIdMapIndexFilter
 			);
 		},
 		iconId:function() {
@@ -971,6 +976,10 @@ let MyField = {
 					valueNew.push(this.value[i]);
 			}
 			this.value = valueNew.length !== 0 ? valueNew : null;
+		},
+		setCollectionIndexFilter:function(collectionId,index) {
+			if(index === '-1') delete(this.collectionIdMapIndexFilter[collectionId]);
+			else               this.collectionIdMapIndexFilter[collectionId] = index;
 		},
 		setValue:function(val,valOld,indexAttributeId) {
 			if(val === '')

@@ -121,16 +121,26 @@ export function getQueryColumnsProcessed(columns,dataFieldIdMap,joinsIndexMap,va
 			columns[i].query.filters,
 			dataFieldIdMap,
 			joinsIndexMap,
-			[],
 			values
 		);
 	}
 	return columns;
 };
 
-export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,joinIndexesRemove,values) {
+export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
+	values,joinIndexesRemove,collectionIdMapIndexFilter) {
+
 	filters = JSON.parse(JSON.stringify(filters));
 	let out = [];
+	
+	if(typeof values === 'undefined')
+		values = {};
+	
+	if(typeof joinIndexesRemove === 'undefined')
+		joinIndexesRemove = [];
+	
+	if(typeof collectionIdMapIndexFilter === 'undefined')
+		collectionIdMapIndexFilter = {};
 	
 	let getFilterSideProcessed = function(s) {
 		switch(s.content) {
@@ -141,6 +151,10 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,jo
 				
 				// collection might not have been fetched yet
 				if(typeof colValues !== 'undefined') {
+				
+					if(typeof collectionIdMapIndexFilter[s.collectionId] !== 'undefined')
+						colValues = [colValues[collectionIdMapIndexFilter[s.collectionId]]];
+					
 					// get index of requested column
 					let columnIndex = -1;
 					for(let i = 0, j = colSchema.columns.length; i < j; i++) {
@@ -201,8 +215,9 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,jo
 					s.query.filters,
 					dataFieldIdMap,
 					joinsIndexMap,
+					values,
 					joinIndexesRemove,
-					values
+					collectionIdMapIndexFilter
 				);
 			break;
 			case 'true':

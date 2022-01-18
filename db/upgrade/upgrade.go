@@ -396,6 +396,37 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX IF NOT EXISTS fki_role_access_collection_id_fkey
    				ON app.role_access USING btree(collection_id ASC NULLS LAST);
+			
+			-- add collection consumer: fields
+			CREATE TABLE IF NOT EXISTS app.collection_consumer (
+			    collection_id uuid NOT NULL,
+			    column_id_display uuid,
+			    field_id uuid,
+			    CONSTRAINT collection_consumer_collection_id_fkey FOREIGN KEY (collection_id)
+			        REFERENCES app.collection (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT collection_consumer_column_id_display_fkey FOREIGN KEY (column_id_display)
+			        REFERENCES app."column" (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT collection_consumer_field_id_fkey FOREIGN KEY (field_id)
+			        REFERENCES app.field (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_collection_consumer_collection_id_fkey
+   				ON app.collection_consumer USING btree(collection_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_collection_consumer_column_id_display_fkey
+   				ON app.collection_consumer USING btree(column_id_display ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_collection_consumer_field_id_fkey
+   				ON app.collection_consumer USING btree(field_id ASC NULLS LAST);
 		`)
 
 		// migrate existing form open actions to new 'open form' entity

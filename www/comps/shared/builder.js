@@ -55,6 +55,12 @@ export function getItemTitle(relation,attribute,index,outsideIn,attributeNm) {
 	return `${index}) ${relCap}${relation.name}.${attribute.name}${atrNmCap}`;
 };
 
+export function getItemTitleColumn(column) {
+	let a = MyStore.getters['schema/attributeIdMap'][column.attributeId];
+	let r = MyStore.getters['schema/relationIdMap'][a.relationId];
+	return getItemTitle(r,a,column.index,false,false);
+};
+
 export function getItemTitleRelation(relationId,index) {
 	return `${index}) ${MyStore.getters['schema/relationIdMap'][relationId].name}`;
 };

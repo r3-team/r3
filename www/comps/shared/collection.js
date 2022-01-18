@@ -8,6 +8,42 @@ import {
 	getRelationsJoined
 } from './query.js';
 
+export function getCollectionColumn(collectionId,columnIdDisplay) {
+	let colSchema = MyStore.getters['schema/collectionIdMap'][collectionId];
+	for(let i = 0, j = colSchema.columns.length; i < j; i++) {
+		if(colSchema.columns[i].id === columnIdDisplay) {
+			return colSchema.columns[i];
+		}
+	}
+	return false;
+};
+
+export function getCollectionOptions(collectionId,columnIdDisplay) {
+	let colSchema = MyStore.getters['schema/collectionIdMap'][collectionId];
+	let colValues = MyStore.getters['collectionIdMap'][collectionId];
+	
+	// collection might not have been retrieved yet
+	if(typeof colValues === 'undefined')
+		return [];
+	
+	// find requested column index by ID
+	let columnIndex = -1;
+	for(let i = 0, j = colSchema.columns.length; i < j; i++) {
+		if(colSchema.columns[i].id === columnIdDisplay) {
+			columnIndex = i;
+			break;
+		}
+	}
+	if(columnIndex === -1)
+		return [];
+	
+	let out = [];
+	for(let i = 0, j = colValues.length; i < j; i++) {
+		out.push(colValues[i][columnIndex]);
+	}
+	return out;
+};
+
 export function updateCollections() {
 	let access          = MyStore.getters.access.collection;
 	let collectionIdMap = MyStore.getters['schema/collectionIdMap'];
@@ -24,12 +60,8 @@ export function updateCollections() {
 		let q = c.query;
 		
 		let joinIndexMap = getJoinIndexMap(q.joins);
-		
-		let filters = getQueryFiltersProcessed(
-			q.filters,{},joinIndexMap,[],{});
-		
-		let columns = getQueryColumnsProcessed(
-			c.columns,{},joinIndexMap,{});
+		let filters      = getQueryFiltersProcessed(q.filters,{},joinIndexMap);
+		let columns      = getQueryColumnsProcessed(c.columns,{},joinIndexMap);
 		
 		ws.send('data','get',{
 			relationId:q.relationId,

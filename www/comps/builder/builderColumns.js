@@ -1,6 +1,5 @@
 import MyBuilderCaption from './builderCaption.js';
 import MyBuilderQuery   from './builderQuery.js';
-import {getItemTitle}   from '../shared/builder.js';
 import {getFlexBasis}   from '../shared/form.js';
 import {getRandomInt}   from '../shared/generic.js';
 import {
@@ -11,6 +10,10 @@ import {
 	isAttributeRelationship,
 	isAttributeString
 } from '../shared/attribute.js';
+import {
+	getItemTitle,
+	getItemTitleColumn
+} from '../shared/builder.js';
 import {
 	getCaptionByIndexAttributeId,
 	getQueryTemplate
@@ -360,15 +363,12 @@ export let MyBuilderColumns = {
 		// externals
 		getFlexBasis,
 		getItemTitle,
+		getItemTitleColumn,
 		
 		// presentation
 		getTitle:function(column) {
-			if(column.subQuery)
-				return this.capApp.subQuery;
-			
-			let atr = this.attributeIdMap[column.attributeId];
-			let rel = this.relationIdMap[atr.relationId];
-			return this.getItemTitle(rel,atr,column.index,false,false);
+			return column.subQuery
+				? this.capApp.subQuery : this.getItemTitleColumn(column);
 		},
 		
 		// actions

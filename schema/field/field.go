@@ -401,7 +401,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		fields[pos] = field
 	}
 
-	// lookup list fields: open form, query, columns
+	// lookup list fields: open form, query, columns, consumed collections
 	for _, pos := range posListLookup {
 		var field = fields[pos].(types.FieldList)
 
@@ -414,6 +414,10 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			return fields, err
 		}
 		field.Columns, err = column.Get("field", field.Id)
+		if err != nil {
+			return fields, err
+		}
+		field.Collections, err = getCollections(field.Id)
 		if err != nil {
 			return fields, err
 		}
@@ -646,7 +650,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 			}
 			if err := setList_tx(tx, fieldId, f.AttributeIdRecord, f.FormIdOpen,
 				f.AutoRenew, f.CsvExport, f.CsvImport, f.Layout, f.FilterQuick,
-				f.ResultLimit, f.Columns, f.OpenForm); err != nil {
+				f.ResultLimit, f.Columns, f.Collections, f.OpenForm); err != nil {
 
 				return err
 			}
@@ -967,7 +971,7 @@ func setHeader_tx(tx pgx.Tx, fieldId uuid.UUID, size int) error {
 func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	formIdOpen pgtype.UUID, autoRenew pgtype.Int4, csvExport bool, csvImport bool,
 	layout string, filterQuick bool, resultLimit int, columns []types.Column,
-	oForm types.OpenForm) error {
+	collections []types.CollectionConsumer, oForm types.OpenForm) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_list", "field_id")
 	if err != nil {
@@ -1005,5 +1009,58 @@ func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	if err := openForm.Set_tx(tx, "field", fieldId, oForm); err != nil {
 		return err
 	}
+
+	// set collection consumer
+	if err := setCollections_tx(tx, fieldId, collections); err != nil {
+		return err
+	}
+
+	// set columns
 	return column.Set_tx(tx, "field", fieldId, columns)
+}
+
+// consumed collections
+func getCollections(fieldId uuid.UUID) ([]types.CollectionConsumer, error) {
+
+	var collections = make([]types.CollectionConsumer, 0)
+
+	rows, err := db.Pool.Query(db.Ctx, `
+		SELECT collection_id, column_id_display
+		FROM app.collection_consumer
+		WHERE field_id = $1
+	`, fieldId)
+	if err != nil {
+		return collections, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var c types.CollectionConsumer
+
+		if err := rows.Scan(&c.CollectionId, &c.ColumnIdDisplay); err != nil {
+			return collections, err
+		}
+		collections = append(collections, c)
+	}
+	return collections, nil
+}
+func setCollections_tx(tx pgx.Tx, fieldId uuid.UUID, collections []types.CollectionConsumer) error {
+
+	if _, err := tx.Exec(db.Ctx, `
+		DELETE FROM app.collection_consumer
+		WHERE field_id = $1
+	`, fieldId); err != nil {
+		return err
+	}
+
+	for _, c := range collections {
+		if _, err := tx.Exec(db.Ctx, `
+			INSERT INTO app.collection_consumer (
+				collection_id, column_id_display, field_id)
+			VALUES ($1,$2,$3)
+		`, c.CollectionId, c.ColumnIdDisplay, fieldId); err != nil {
+			return err
+		}
+	}
+	return nil
 }

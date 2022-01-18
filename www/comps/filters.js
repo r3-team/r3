@@ -2,7 +2,8 @@ import MyBuilderQuery from './builder/builderQuery.js';
 import MyInputDate    from './inputDate.js';
 import {
 	getDependentModules,
-	getItemTitle
+	getItemTitle,
+	getItemTitleColumn
 } from './shared/builder.js';
 import {
 	isAttributeFiles,
@@ -290,7 +291,7 @@ let MyFilterSide = {
 				<select v-model="columnId" v-if="!columnsMode && isCollection && collectionId !== null">
 					<option :value="null">-</option>
 					<option v-for="c in collectionIdMap[collectionId].columns" :value="c.id">
-						{{ getTitle(c) }}
+						{{ getItemTitleColumn(c) }}
 					</option>
 				</select>
 				
@@ -492,6 +493,7 @@ let MyFilterSide = {
 		// externals
 		getDependentModules,
 		getItemTitle,
+		getItemTitleColumn,
 		getNestedIndexAttributeIdsByJoins,
 		getQueryTemplate,
 		
@@ -505,11 +507,6 @@ let MyFilterSide = {
 				atrNm = this.attributeIdMap[f.attributeIdNm];
 			
 			return this.getItemTitle(rel,atr,f.index,f.outsideIn,atrNm);
-		},
-		getTitle:function(column) {
-			let a = this.attributeIdMap[column.attributeId];
-			let r = this.relationIdMap[a.relationId];
-			return getItemTitle(r,a,column.index,false,false);
 		},
 		
 		// actions

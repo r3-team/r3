@@ -8,6 +8,10 @@ import {srcBase64}        from './shared/image.js';
 import {getCaption}       from './shared/language.js';
 import {isAttributeFiles} from './shared/attribute.js';
 import {
+	getCollectionColumn,
+	getCollectionOptions
+} from './shared/collection.js';
+import {
 	fieldOptionGet,
 	fieldOptionSet
 } from './shared/field.js';
@@ -257,6 +261,19 @@ let MyList = {
 						:title="capApp.quick"
 						placeholder="..."
 					/>
+					
+					<select class="selector"
+						v-for="c in collections"
+						@input="$emit('set-collection-index-filter',c.collectionId,$event.target.value)"
+						:key="c.collectionId"
+					>
+						<option :value="-1">
+							- {{ getColumnCaption(getCollectionColumn(c.collectionId,c.columnIdDisplay)) }} -
+						</option>
+						<option v-for="(o,i) in getCollectionOptions(c.collectionId,c.columnIdDisplay)"
+							:value="i"
+						>{{ o }}</option>
+					</select>
 					
 					<select class="selector"
 						v-if="hasChoices"
@@ -548,6 +565,7 @@ let MyList = {
 	props:{
 		autoRenew:   { required:false,default:null },                    // refresh list data every x seconds
 		choices:     { type:Array,   required:false, default:() => [] }, // processed query choices
+		collections: { type:Array,   required:false, default:() => [] }, // consumed collections to filter by user input
 		columns:     { type:Array,   required:true },                    // processed list columns
 		fieldId:     { type:String,  required:true },
 		filters:     { type:Array,   required:true },                    // processed query filters
@@ -579,8 +597,8 @@ let MyList = {
 		inputValid:     { type:Boolean, required:false, default:true }
 	},
 	emits:[
-		'blurred','focused','open-form','record-removed',
-		'record-selected','records-selected-init','set-args'
+		'blurred','focused','open-form','record-removed','record-selected',
+		'records-selected-init','set-args','set-collection-index-filter'
 	],
 	data:function() {
 		return {
@@ -801,14 +819,15 @@ let MyList = {
 		joins:        function() { return this.fillRelationRecordIds(this.query.joins); },
 		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		iconIdMap:     function() { return this.$store.getters['schema/iconIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.list; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		isMobile:      function() { return this.$store.getters.isMobile; },
-		moduleLanguage:function() { return this.$store.getters.moduleLanguage; },
-		scrollFormId:  function() { return this.$store.getters.constants.scrollFormId; }
+		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
+		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
+		iconIdMap:      function() { return this.$store.getters['schema/iconIdMap']; },
+		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
+		capApp:         function() { return this.$store.getters.captions.list; },
+		capGen:         function() { return this.$store.getters.captions.generic; },
+		isMobile:       function() { return this.$store.getters.isMobile; },
+		moduleLanguage: function() { return this.$store.getters.moduleLanguage; },
+		scrollFormId:   function() { return this.$store.getters.constants.scrollFormId; }
 	},
 	mounted:function() {
 		this.showTable = !this.isInput;
@@ -874,6 +893,8 @@ let MyList = {
 		fillRelationRecordIds,
 		getCaption,
 		getChoiceFilters,
+		getCollectionColumn,
+		getCollectionOptions,
 		getFiltersEncapsulated,
 		getQueryAttributesPkFilter,
 		getQueryExpressions,

@@ -755,8 +755,8 @@ let MyForm = {
 				this.form.query.filters,
 				this.fieldIdMapData,
 				this.joinsIndexMap,
-				joinIndexesRemove,
-				this.values
+				this.values,
+				joinIndexesRemove
 			);
 		},
 		reset:function() {

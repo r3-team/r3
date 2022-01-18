@@ -296,20 +296,21 @@ type FieldHeader struct {
 	Captions CaptionMap  `json:"captions"`
 }
 type FieldList struct {
-	Id          uuid.UUID   `json:"id"`
-	IconId      pgtype.UUID `json:"iconId"`
-	Content     string      `json:"content"`
-	State       string      `json:"state"`
-	OnMobile    bool        `json:"onMobile"`
-	CsvExport   bool        `json:"csvExport"`
-	CsvImport   bool        `json:"csvImport"`
-	AutoRenew   pgtype.Int4 `json:"autoRenew"`   // automatic list refresh
-	Layout      string      `json:"layout"`      // list layout: table, cards
-	FilterQuick bool        `json:"filterQuick"` // enable quickfilter (uses all visible columns)
-	ResultLimit int         `json:"resultLimit"` // predefined limit, overwritable by user
-	Columns     []Column    `json:"columns"`
-	OpenForm    OpenForm    `json:"openForm"`
-	Query       Query       `json:"query"`
+	Id          uuid.UUID            `json:"id"`
+	IconId      pgtype.UUID          `json:"iconId"`
+	Content     string               `json:"content"`
+	State       string               `json:"state"`
+	OnMobile    bool                 `json:"onMobile"`
+	CsvExport   bool                 `json:"csvExport"`
+	CsvImport   bool                 `json:"csvImport"`
+	AutoRenew   pgtype.Int4          `json:"autoRenew"`   // automatic list refresh
+	Layout      string               `json:"layout"`      // list layout: table, cards
+	FilterQuick bool                 `json:"filterQuick"` // enable quickfilter (uses all visible columns)
+	ResultLimit int                  `json:"resultLimit"` // predefined limit, overwritable by user
+	Columns     []Column             `json:"columns"`
+	Collections []CollectionConsumer `json:"collections"`
+	OpenForm    OpenForm             `json:"openForm"`
+	Query       Query                `json:"query"`
 
 	// legacy
 	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
@@ -321,6 +322,10 @@ type Collection struct {
 	Name     string    `json:"name"`
 	Columns  []Column  `json:"columns"`
 	Query    Query     `json:"query"`
+}
+type CollectionConsumer struct {
+	CollectionId    uuid.UUID   `json:"collectionId"`
+	ColumnIdDisplay pgtype.UUID `json:"columnIdDisplay"` // ID of collection column to display (inputs etc.)
 }
 type Column struct {
 	Id          uuid.UUID      `json:"id"`

@@ -142,6 +142,10 @@
 	max-width:unset;
 	margin:0px 6px 3px 0px;
 }
+.builder-field-options .collections-line td{
+	padding-bottom:6px;
+	border-bottom:1px dotted var(--color-border);
+}
 
 
 /* form functions */
