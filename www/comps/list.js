@@ -563,7 +563,6 @@ let MyList = {
 		columns:     { type:Array,   required:true },                    // processed list columns
 		fieldId:     { type:String,  required:true },
 		filters:     { type:Array,   required:true },                    // processed query filters
-		handleError: { type:Function,required:true },
 		iconId:      { required:false,default:null },
 		layout:      { type:String,  required:false, default:'table' },  // list layout: table, cards
 		limitDefault:{ type:Number,  required:false, default:10 },       // default list limit
@@ -1377,7 +1376,7 @@ let MyList = {
 			
 			ws.sendMultiple(requests,true).then(
 				(res) => this.get(),
-				(err) => this.handleError(err)
+				(err) => this.$root.genericError(err)
 			);
 		},
 		
@@ -1419,7 +1418,7 @@ let MyList = {
 					if(this.isInput)
 						this.$nextTick(this.updateDropdownDirection);
 				},
-				(err) => this.handleError(err)
+				(err) => this.$root.genericError(err)
 			);
 		},
 		
@@ -1504,7 +1503,7 @@ let MyList = {
 						this.inputAutoSelectDone = true;
 					}
 				},
-				(err) => this.handleError(err)
+				(err) => this.$root.genericError(err)
 			);
 		}
 	}

@@ -16,6 +16,7 @@ const MyStoreSchema = {
 		collectionIdMap:{},
 		formIdMap:{},
 		iconIdMap:{},
+		indexIdMap:{},
 		jsFunctionIdMap:{},
 		moduleIdMap:{},
 		moduleNameMap:{},
@@ -46,6 +47,7 @@ const MyStoreSchema = {
 			state.formIdMap       = {};
 			state.formIdMapMenu   = {};
 			state.iconIdMap       = {};
+			state.indexIdMap      = {};
 			state.jsFunctionIdMap = {};
 			state.pgFunctionIdMap = {};
 			state.relationIdMap   = {};
@@ -82,6 +84,11 @@ const MyStoreSchema = {
 					// process attributes
 					for(let a = 0, b = rel.attributes.length; a < b; a++) {
 						state.attributeIdMap[rel.attributes[a].id] = rel.attributes[a];
+					}
+					
+					// process indexes
+					for(let a = 0, b = rel.indexes.length; a < b; a++) {
+						state.indexIdMap[rel.indexes[a].id] = rel.indexes[a];
 					}
 				}
 				
@@ -127,6 +134,7 @@ const MyStoreSchema = {
 		formIdMap:          (state) => state.formIdMap,
 		formIdMapMenu:      (state) => state.formIdMapMenu,
 		iconIdMap:          (state) => state.iconIdMap,
+		indexIdMap:         (state) => state.indexIdMap,
 		jsFunctionIdMap:    (state) => state.jsFunctionIdMap,
 		languageCodes:      (state) => state.languageCodes,
 		modules:            (state) => state.modules,

@@ -12,44 +12,11 @@ import (
 	"r3/log"
 	"r3/scheduler"
 	"r3/types"
-	"regexp"
 	"strconv"
 	"time"
 
 	"github.com/jackc/pgx/v4"
 )
-
-var expectedErrorRx = []*regexp.Regexp{
-
-	// context timeouts
-	regexp.MustCompile(`^timeout\: context deadline exceeded$`),
-	regexp.MustCompile(`^timeout\: context canceled$`),
-
-	// unauthorized access attempt
-	regexp.MustCompile(fmt.Sprintf(`^%s$`, handler.ErrUnauthorized)),
-
-	// protected preset deletion attempt
-	regexp.MustCompile(fmt.Sprintf(`^%s$`, handler.ErrPresetProtected)),
-
-	// foreign key constraint violation
-	regexp.MustCompile(`^ERROR\: .+ on table \".+\" violates foreign key constraint \"fk_.{36}\"`),
-
-	// unique constraint violation
-	// do not limit regex to "ind_" prefixes for unique constraints, is used for app-schema indexes as well
-	regexp.MustCompile(`^ERROR\: duplicate key value violates unique constraint \".*\"`),
-
-	// custom error message from application, used in instance.abort_show_message()
-	regexp.MustCompile(`^ERROR\: R3_MSG\: `),
-}
-
-func isExpectedError(err error) bool {
-	for _, regex := range expectedErrorRx {
-		if regex.MatchString(err.Error()) {
-			return true
-		}
-	}
-	return false
-}
 
 func ExecTransaction(ctxClient context.Context, loginId int64, isAdmin bool,
 	isNoAuth bool, reqTrans types.RequestTransaction,
@@ -99,24 +66,15 @@ func ExecTransaction(ctxClient context.Context, loginId int64, isAdmin bool,
 			}
 		}
 
-		// request returned with error, check for expected error
-		if !isExpectedError(err) {
-			// unexpected errors during requests could be badly formed requests
-			//  from frontend, these are not necessarely system errors -> warning
+		// error case, convert to error code for requestor
+		returnErr, isExpectedErr := handler.ConvertToErrCode(err, !isAdmin)
+		if !isExpectedErr {
+			// unexpected errors are logged as warning
 			log.Warning("server", fmt.Sprintf("TRANSACTION %d, request %s %s failure (login ID %d)",
 				reqTrans.TransactionNr, req.Ressource, req.Action, loginId), err)
-
-			// overwrite error message for non-admins if unexpected
-			// non-admins should not get insight into the system
-			if !isAdmin {
-				err = errors.New(handler.ErrGeneral)
-			}
-		} else {
-			// expected errors can be sent back to requestor
-			err = fmt.Errorf("%s: %s", handler.ErrBackend, err.Error())
 		}
 
-		resTrans.Error = fmt.Sprintf("%v", err)
+		resTrans.Error = fmt.Sprintf("%v", returnErr)
 		resTrans.Responses = make([]types.Response, 0) // clear all responses
 		break
 	}

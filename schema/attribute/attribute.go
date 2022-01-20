@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"r3/db"
+	"r3/db/check"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/schema/pgFunction"
@@ -478,7 +479,7 @@ func getContentColumnDefinition(content string, length int, contentRel string) (
 
 func checkName(name string) error {
 	// check valid DB identifier as attribute also becomes column
-	if err := db.CheckIdentifier(name); err != nil {
+	if err := check.DbIdentifier(name); err != nil {
 		return err
 	}
 	return nil

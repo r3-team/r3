@@ -16,10 +16,6 @@ const MyStore = Vuex.createStore({
 		collectionIdMap:{},   // map of all collection values, key = collection ID
 		config:{},            // configuration values (admin only)
 		constants:{           // constant variables, codes/messages/IDs
-			backendCodes:{             // message codes coming from the backend, usually indicating an error
-				errGeneric:'general error',
-				errKnown:'backend error'
-			},
 			scrollFormId:'form-scroll' // ID of form page element (to recover scroll position during routing)
 		},
 		dialogCaptionTop:'',

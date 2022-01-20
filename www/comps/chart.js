@@ -42,7 +42,6 @@ let MyChart = {
 		columns:    { type:Array,   required:true },
 		filters:    { type:Array,   required:true },
 		formLoading:{ type:Boolean, required:true },
-		handleError:{ type:Function,required:true },
 		isFullPage: { type:Boolean, required:true },
 		limit:      { type:Number,  required:true },
 		optionJson: { type:String,  required:true },
@@ -167,7 +166,7 @@ let MyChart = {
 					}
 					this.ready = true;
 				},
-				(err) => this.handleError(err)
+				(err) => this.$root.genericError(err)
 			);
 		}
 	}

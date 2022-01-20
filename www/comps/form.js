@@ -210,7 +210,6 @@ let MyForm = {
 					:formBadSave="badSave"
 					:formIsInline="isInline"
 					:formLoading="loading"
-					:handleError="handleError"
 					:isFullPage="isSingleField"
 					:joinsIndexMap="joinsIndexMap"
 					:key="f.id"
@@ -227,7 +226,6 @@ let MyForm = {
 			:fieldIdMapState="fieldIdMapState"
 			:form="form"
 			:formLoading="loading"
-			:handleError="handleError"
 			:joinsIndexMap="joinsIndexMap"
 			:values="values"
 		/>
@@ -594,7 +592,6 @@ let MyForm = {
 		jsFunctionIdMap:function() { return this.$store.getters['schema/jsFunctionIdMap']; },
 		presetIdMapRecordId:function() { return this.$store.getters['schema/presetIdMapRecordId']; },
 		access:         function() { return this.$store.getters.access; },
-		backendCodes:   function() { return this.$store.getters.constants.backendCodes; },
 		builderEnabled: function() { return this.$store.getters.builderEnabled; },
 		capApp:         function() { return this.$store.getters.captions.form; },
 		capGen:         function() { return this.$store.getters.captions.generic; },
@@ -631,113 +628,6 @@ let MyForm = {
 		srcBase64,
 		
 		// form management
-		handleError:function(message) {
-			
-			// check for known error code from backend
-			if(message === this.backendCodes.errGeneric)
-				return this.$root.genericError(this.capGen.error.generalError);
-			
-			if(message.startsWith(this.backendCodes.errKnown)) {
-				
-				// foreign key constraint violation
-				// cannot break FK while non-cascading relationship attribute is referencing it
-				let matches = message.match(/ERROR\: .+ on table \".+\" violates foreign key constraint \"fk_(.{36})\"/);
-				if(matches !== null && matches.length === 2) {
-					
-					let atr = this.attributeIdMap[matches[1]];
-					let rel = this.relationIdMap[atr.relationId];
-					let mod = this.moduleIdMap[rel.moduleId];
-					let atrName = atr.name;
-					let modName = mod.name;
-					
-					if(typeof atr.captions.attributeTitle[this.moduleLanguage] !== 'undefined')
-						atrName = atr.captions.attributeTitle[this.moduleLanguage];
-					
-					if(typeof mod.captions.moduleTitle[this.moduleLanguage] !== 'undefined')
-						modName = mod.captions.moduleTitle[this.moduleLanguage];
-					
-					message = this.capGen.error.foreignKeyConstraint.replace('{ATR}',atrName).replace('{MOD}',modName);
-				}
-				
-				// foreign key not unique constraint violation
-				// example: two 1:1 attribute values are equal
-				matches = message.match(/ERROR\: duplicate key value violates unique constraint \"fki_(.{36})\"/);
-				if(matches !== null && matches.length === 2) {
-					
-					let atr     = this.attributeIdMap[matches[1]];
-					let atrName = atr.name;
-					
-					if(typeof atr.captions.attributeTitle[this.moduleLanguage] !== 'undefined')
-						atrName = atr.captions.attributeTitle[this.moduleLanguage];
-					
-					message = this.capGen.error.foreignKeyUniqueConstraint.replace('{NAME}',atrName);
-				}
-				
-				// unique constraint violation
-				// custom relation unique index violated
-				matches = message.match(/ERROR\: duplicate key value violates unique constraint \"ind_(.{36})\"/);
-				if(matches !== null && matches.length === 2) {
-					
-					// identify index to produce helpful error message
-					let indexId  = matches[1];
-					let atrNames = [];
-					
-					for(let k in this.joinsIndexMap) {
-						
-						let rel = this.relationIdMap[this.joinsIndexMap[k].relationId];
-						
-						for(let i = 0, j = rel.indexes.length; i < j; i++) {
-							
-							if(rel.indexes[i].id !== indexId)
-								continue;
-							
-							// index found, get attribute names
-							let index = rel.indexes[i];
-							
-							for(let x = 0, y = index.attributes.length; x < y; x++) {
-								
-								let atr = this.attributeIdMap[index.attributes[x].attributeId];
-								
-								if(typeof atr.captions.attributeTitle[this.moduleLanguage] !== 'undefined') {
-									atrNames.push(atr.captions.attributeTitle[this.moduleLanguage]);
-									continue;
-								}
-								atrNames.push(atr.name);
-							}
-							break;
-						}
-						
-						// end here, as index could be found twice (self-join)
-						if(atrNames.length !== 0)
-							break;
-					}
-					message = this.capGen.error.uniqueConstraint.replace('{NAMES}',atrNames.join('+'));
-				}
-				
-				// context deadline exceeded
-				matches = message.match(/timeout\: context deadline exceeded$/);
-				if(matches !== null)
-					message = this.capGen.error.contextDeadlineExceeded;
-				
-				// unauthorized access attempt
-				matches = message.match(/unauthorized$/);
-				if(matches !== null)
-					message = this.capGen.error.unauthorized;
-				
-				// protected preset deletion attempt
-				matches = message.match(/preset record is protected against deletion$/);
-				if(matches !== null)
-					message = this.capGen.error.presetProtected;
-				
-				// custom error message from application
-				matches = message.match(/ERROR\: R3_MSG\: (.*)/);
-				if(matches !== null && matches.length === 2)
-					message = matches[1].replace(/\(SQLSTATE .+\)/,'');
-			}
-			
-			// display message with default error handler
-			this.$root.genericError(message);
-		},
 		handleHotkeys:function(e) {
 			// not data or pop-up form open
 			if(!this.isData || this.popUpFormId !== null) return;
@@ -1240,7 +1130,7 @@ let MyForm = {
 					this.openForm();
 					this.recordMessageUpdate('deleted');
 				},
-				(err) => this.handleError(err)
+				(err) => this.$root.genericError(err)
 			);
 		},
 		get:function() {
@@ -1313,7 +1203,7 @@ let MyForm = {
 					this.triggerEventAfter('open');
 					this.releaseLoadingOnNextTick();
 				},
-				(err) => this.handleError(err)
+				(err) => this.$root.genericError(err)
 			);
 		},
 		getFromSubJoin:function(join,recordId) {
@@ -1393,7 +1283,7 @@ let MyForm = {
 							);
 						}
 					},
-					(err) => this.handleError(err)
+					(err) => this.$root.genericError(err)
 				);
 			}
 			else {
@@ -1495,7 +1385,7 @@ let MyForm = {
 					// if we knew nothing triggered, we could update our values without reload
 					this.get();
 				},
-				(err) => this.handleError(err)
+				(err) => this.$root.genericError(err)
 			);
 		}
 	}

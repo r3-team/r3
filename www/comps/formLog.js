@@ -59,7 +59,6 @@ let MyFormLog = {
 							:formBadSave="false"
 							:formIsInline="true"
 							:formLoading="loading"
-							:handleError="handleError"
 							:logViewer="true"
 							:isFullPage="false"
 							:joinsIndexMap="joinsIndexMap"
@@ -76,7 +75,6 @@ let MyFormLog = {
 		fieldIdMapState:{ type:Object,  required:true },
 		form:           { type:Object,  required:true },
 		formLoading:    { type:Boolean, required:true },
-		handleError:    { type:Function,required:true },
 		joinsIndexMap:  { type:Object,  required:true },
 		values:         { type:Object,  required:true }
 	},
@@ -247,7 +245,7 @@ let MyFormLog = {
 					
 					this.releaseLoadingOnNextTick();
 				},
-				(err) => this.handleError(err)
+				(err) => this.$root.genericError(err)
 			);
 		}
 	}

@@ -11,16 +11,6 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-var (
-	ErrAuthFailed       = "authentication failed"
-	ErrBackend          = "backend error"
-	ErrBruteforceBlock  = "blocked assumed bruteforce attempt"
-	ErrGeneral          = "general error"
-	ErrPresetProtected  = "preset record is protected against deletion"
-	ErrWsClientChanFull = "client channel is full, dropping response"
-	ErrUnauthorized     = "unauthorized"
-)
-
 func GetStringFromPart(part *multipart.Part) string {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(part)

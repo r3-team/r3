@@ -238,7 +238,6 @@ let MyCalendarMonth = {
 		fieldId:    { type:String,  required:false, default:'' },
 		filters:    { type:Array,   required:false, default:() => [] },
 		formLoading:{ type:Boolean, required:false, default:false },
-		handleError:{ type:Function,required:true },
 		ics:        { type:Boolean, required:false, default:false },
 		inputTime:  { type:Boolean, required:false, default:false },
 		isInput:    { type:Boolean, required:false, default:false },
@@ -550,7 +549,7 @@ let MyCalendarMonth = {
 		setIcsTokenFixed:function() {
 			ws.send('login','setTokenFixed',{context:'ics'},true).then(
 				(res) => this.icsToken = res.payload.tokenFixed,
-				(err) => this.handleError(err)
+				(err) => this.$root.genericError(err)
 			);
 		}
 	}
@@ -580,7 +579,6 @@ let MyCalendar = {
 			:fieldId="fieldId"
 			:filters="filters"
 			:formLoading="formLoading"
-			:handleError="handleError"
 			:hasColor="attributeIdColor !== null"
 			:hasCreate="hasCreate"
 			:iconId="iconId"
@@ -599,7 +597,6 @@ let MyCalendar = {
 		fieldId:         { type:String,  required:false, default:'' },
 		filters:         { type:Array,   required:true },
 		formLoading:     { type:Boolean, required:false, default:false },
-		handleError:     { type:Function,required:true },
 		iconId:          { required:false,default:null },
 		ics:             { type:Boolean, required:false, default:false },
 		indexColor:      { required:true },
@@ -832,7 +829,7 @@ let MyCalendar = {
 				orders:orders
 			},true).then(
 				(res) => this.rows = res.payload.rows,
-				(err) => this.handleError(err)
+				(err) => this.$root.genericError(err)
 			);
 		}
 	}

@@ -282,7 +282,6 @@ let MyAdminLoginsItem = {
 		moduleIdMap:  function() { return this.$store.getters['schema/moduleIdMap']; },
 		formIdMap:    function() { return this.$store.getters['schema/formIdMap']; },
 		roleIdMap:    function() { return this.$store.getters['schema/roleIdMap']; },
-		backendCodes: function() { return this.$store.getters.constants.backendCodes; },
 		capApp:       function() { return this.$store.getters.captions.admin.login; },
 		capGen:       function() { return this.$store.getters.captions.generic; },
 		config:       function() { return this.$store.getters.config; }
@@ -293,19 +292,7 @@ let MyAdminLoginsItem = {
 		getValidLanguageCode,
 		srcBase64Icon,
 		
-		handleError:function(message) {
-			
-			if(message.startsWith(this.backendCodes.errKnown)) {
-				
-				// unique constraint violation
-				let matches = message.match(/ERROR\: duplicate key value violates unique constraint \".*\"/);
-				if(matches !== null && matches.length === 1)
-					message = this.capApp.error.uniqueConstraint;
-			}
-			
-			// display message with default error handler
-			this.$root.genericError(message);
-		},
+		// actions
 		openLoginForm:function(index) {
 			let frm = this.formIdMap[this.loginForms[index].formId];
 			let mod = this.moduleIdMap[frm.moduleId];
@@ -343,10 +330,10 @@ let MyAdminLoginsItem = {
 					this.$emit('updated');
 					ws.send('login','kick',{id:this.login.id},true).then(
 						(res) => {},
-						(err) => this.handleError(err)
+						(err) => this.$root.genericError(err)
 					);
 				},
-				(err) => this.handleError(err)
+				(err) => this.$root.genericError(err)
 			);
 		},
 		set:function() {
@@ -377,10 +364,10 @@ let MyAdminLoginsItem = {
 					let action = this.active ? 'reauth' : 'kick';
 					ws.send('login',action,{id:this.login.id},false).then(
 						(res) => {},
-						(err) => this.handleError(err)
+						(err) => this.$root.genericError(err)
 					);
 				},
-				(err) => this.handleError(err)
+				(err) => this.$root.genericError(err)
 			);
 		},
 		
@@ -398,7 +385,7 @@ let MyAdminLoginsItem = {
 				idsExclude:excludeIds
 			},true).then(
 				(res) => this.loginRecordList = res.payload,
-				(err) => this.handleError(err)
+				(err) => this.$root.genericError(err)
 			);
 		}
 	}

@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"r3/db"
+	"r3/db/check"
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/tools"
@@ -128,7 +129,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	isFrontendExec bool, isTrigger bool, schedules []types.PgFunctionSchedule,
 	captions types.CaptionMap) error {
 
-	if err := db.CheckIdentifier(name); err != nil {
+	if err := check.DbIdentifier(name); err != nil {
 		return err
 	}
 

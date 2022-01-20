@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 	"r3/db"
+	"r3/db/check"
 	"r3/module_option"
 	"r3/schema"
 	"r3/schema/caption"
@@ -117,7 +118,7 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 	releaseDate int64, dependsOn []uuid.UUID, startForms []types.ModuleStartForm,
 	languages []string, captions types.CaptionMap) error {
 
-	if err := db.CheckIdentifier(name); err != nil {
+	if err := check.DbIdentifier(name); err != nil {
 		return err
 	}
 

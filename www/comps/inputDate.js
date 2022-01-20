@@ -380,7 +380,6 @@ let MyInputDate = {
 				:date1="date1"
 				:dateSelect0="dateSelect0"
 				:dateSelect1="dateSelect1"
-				:handleError="$root.genericError"
 				:inputTime="isTime"
 				:isInput="true"
 				:rowSelect="true"

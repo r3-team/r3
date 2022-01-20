@@ -32,17 +32,6 @@
 		"dialog":{
 			"confirm":"Bitte bestätigen"
 		},
-		"error":{
-			"contextDeadlineExceeded":"Aktion konnte nicht innerhalb des erlaubten Zeitraums abgeschlossen werden - bitte erneut versuchen",
-			"fileTooLarge":"Datei \"{NAME}\" kann nicht hochgeladen werden, maximal erlaubte Größe ist {SIZE}",
-			"foreignKeyConstraint":"Datensatz wird noch referenziert als \"{ATR}\" in \"{MOD}\"",
-			"foreignKeyUniqueConstraint":"\"{NAME}\" darf nur einmal referenziert werden",
-			"generalError":"Unerwarteter Fehler ist aufgetreten, bitte den Systemadministrator kontaktieren",
-			"generalErrorTitle":"Fehler",
-			"presetProtected":"Dieser Datensatz ist geschützt und kann nicht gelöscht werden",
-			"unauthorized":"Unberechtigter Zugriff",
-			"uniqueConstraint":"Wert für \"{NAMES}\" muss einzigartig sein"
-		},
 		"option":{
 			"aggArray":"Array",
 			"aggAvg":"Durchschnitt",
@@ -70,12 +59,12 @@
 		"busy":"Arbeitet - Zum Abbrechen hier klicken",
 		"date":"Datum",
 		"description":"Beschreibung",
+		"errorTitle":"Fehler",
 		"filters":"Filter",
 		"home":"Start",
 		"icon":"Icon",
 		"id":"ID",
 		"inputDecimal":"Wert muss dezimal sein",
-		"inputFileNotUploaded":"Datei ist noch nicht gespeichert",
 		"inputInvalid":"Wert ist ungültig",
 		"inputLarge":"Wert ist zu groß",
 		"inputLong":"Wert ist zu lang",
@@ -963,6 +952,38 @@
 		"weekDayShort5":"Fr",
 		"weekDayShort6":"Sa"
 	},
+	"error":{
+		"APP":{
+			"001":"Ein unerwarteter Fehler ist aufgetreten. Bitte erneut versuchen.",
+			"002":"Aktion konnte nicht innerhalb des erlaubten Zeitraums abgeschlossen werden. Wenn dies häufiger vorkommt, bitte den Systemadministrator informieren.",
+			"003":"Aktion wurde abgebrochen. Bitte erneut versuchen.",
+			"004":"Dieser Datensatz ist geschützt und kann nicht gelöscht werden.",
+			"005":"Entität konnte nicht erstellt werden, da kein Name eingegeben worden ist. Bitte einen Namen eingeben.",
+			"006":"Der gewählte Name ist ungültig. Bitte stelle sicher, dass...<ul><li>... er mit einen Buchstaben beginnt <b>(a-z)</b>.</li><li>... maximal <b>31</b> Zeichen lang ist.</li><li>... nur kleingeschriebene Buchstaben <b>(a-z)</b>, Unterstriche <b>(_)</b> oder Nummern <b>(0-9)</b> beinhaltet.</li></ul>Beispiele: storage_inventory_post21, facility_address, contact_book",
+			"007":"Ein referenziertes Modul ist unbekannt.",
+			"008":"Eine referenzierte Relation ist unbekannt.",
+			"009":"Ein referenziertes Attribut ist unbekannt."
+		},
+		"CSV":{
+			"001":"Ungültige Nummer '{VALUE}' (Integer wird erwartet).",
+			"002":"Ungültige Nummer '{VALUE}' (Dezimal wird erwartet).",
+			"003":"Ungültiger Datum-/Zeitwert '{VALUE}', erwartetes Format: {EXPECT}.",
+			"004":"Nicht unterstützter Attributtyp '{VALUE}'.",
+			"005":"Falsche Anzahl an Feldern in Zeile '{VALUE}'."
+		},
+		"DBS":{
+			"001":"{FNC_MSG}",
+			"002":"Der ausgewählte Wert für '{NAMES}' wird bereits von einem anderen Datensatz verwendet. Dieser ist als 'einzigartig' definiert und kann nur einmal verwendet werden.",
+			"003":"Dieser Anmeldename wird bereits verwendet.",
+			"004":"Datensatz kann nicht gelöscht werden - er wird noch referenziert als \"{ATR}\" in \"{MOD}\".",
+			"005":"Spalte \"{NAME}\" beinhaltet keinen Wert oder kann nicht aufgelöst werden.",
+			"006":"Einzigartiger Index kann nicht erstellt werden, weil bestehende Attributwerte nicht einzigartig sind.",
+			"007":"Ungültiger Wert \"{VALUE}\"."
+		},
+		"SEC":{
+			"001":"Du bist nicht berechtigt die Aktion auszuführen oder diese Ressource aufzurufen."
+		}
+	},
 	"feedback":{
 		"button":{
 			"whatIsSent":"Was wird gesendet?"
@@ -1098,7 +1119,9 @@
 			"inputMonth":"MM",
 			"inputSecond":"--",
 			"inputYear":"JJJJ"
-		}
+		},
+		"fileNotUploaded":"Datei ist noch nicht gespeichert.",
+		"fileTooLarge":"Datei \"{NAME}\" kann nicht hochgeladen werden, maximal erlaubte Größe ist {SIZE}."
 	},
 	"list":{
 		"button":{
@@ -1111,14 +1134,6 @@
 		},
 		"dialog":{
 			"delete":"Bist du sicher, dass du die ausgewählten Datensätze <b>permanent</b> löschen möchtest?"
-		},
-		"error":{
-			"csvDateParse":"Ungültiger Zeitwert \"{VALUE}\", erwartetes Format: {EXPECT}",
-			"csvFieldCount":"Falsche Anzahl an Feldern",
-			"csvLineError":"Fehler in Zeile {COUNT}: ",
-			"csvNotNull":"Spalte \"{NAME}\" beinhaltet keinen Wert oder kann nicht aufgelöst werden",
-			"csvNumberParse":"Ungültige Nummer \"{VALUE}\"",
-			"csvTypeSyntax":"Ungültiger Wert \"{VALUE}\""
 		},
 		"message":{
 			"csvExport":"Der CSV-Export verwendet Filter und Sortierung der aktuellen Liste.",
@@ -1139,6 +1154,7 @@
 		"csvDatetime":"Datum+Zeitformat",
 		"csvFile":"CSV-Datei",
 		"csvHasHeader":"Überschriftenzeile",
+		"csvLineError":"Fehler in Zeile {COUNT}: ",
 		"csvTime":"Uhrzeitsformat",
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Zeitzone",

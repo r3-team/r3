@@ -4,7 +4,6 @@ import (
 	"context"
 	"encoding/csv"
 	"encoding/json"
-	"errors"
 	"fmt"
 	"io"
 	"net/http"
@@ -177,11 +176,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			timezone, commaChar, ignoreHeader, columns, joins, lookups)
 
 		if err != nil {
-			if isExpectedError(err) {
-				res.Error = fmt.Sprintf("%s: %s", handler.ErrBackend, err)
-			} else {
+			err, expectedErr := handler.ConvertToErrCode(err, !admin)
+			res.Error = err.Error()
+
+			if !expectedErr {
 				log.Error("server", fmt.Sprintf("aborted %s request", handlerContext), err)
-				res.Error = handler.ErrGeneral
 			}
 		}
 	}
@@ -319,7 +318,7 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 
 		atr, exists := cache.AttributeIdMap[column.AttributeId]
 		if !exists {
-			return errors.New("unknown attribute")
+			return handler.CreateErrCode("APP", handler.ErrCodeAppUnknownAttribute)
 		}
 
 		var value interface{}
@@ -363,8 +362,9 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 
 					t, err := time.ParseInLocation(format, stringValues[i], loc)
 					if err != nil {
-						return fmt.Errorf("failed to parse date '%s', expected '%s'",
-							stringValues[i], format)
+						return handler.CreateErrCodeWithArgs("CSV",
+							handler.ErrCodeCsvParseDateTime,
+							map[string]string{"VALUE": stringValues[i], "EXPECT": format})
 					}
 					value = t.Unix()
 
@@ -375,15 +375,17 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 						fmt.Sprintf("1970-01-01 %s UTC", stringValues[i]))
 
 					if err != nil {
-						return fmt.Errorf("failed to parse date '%s', expected '15:04:05'",
-							stringValues[i])
+						return handler.CreateErrCodeWithArgs("CSV",
+							handler.ErrCodeCsvParseDateTime,
+							map[string]string{"VALUE": stringValues[i], "EXPECT": "15:04:05"})
 					}
 					value = t.Unix()
 				default:
 					value, err = strconv.ParseInt(stringValues[i], 10, 64)
 					if err != nil {
-						return fmt.Errorf("failed to parse number '%s' (expected integer)",
-							stringValues[i])
+						return handler.CreateErrCodeWithArgs("CSV",
+							handler.ErrCodeCsvParseInt,
+							map[string]string{"VALUE": stringValues[i]})
 					}
 				}
 
@@ -392,8 +394,10 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 			case "double":
 				value, err = strconv.ParseFloat(stringValues[i], 64)
 				if err != nil {
-					return fmt.Errorf("failed to parse number '%s' (expected float)",
-						stringValues[i])
+					return handler.CreateErrCodeWithArgs("CSV",
+						handler.ErrCodeCsvParseFloat,
+						map[string]string{"VALUE": stringValues[i]})
+
 				}
 
 			case "numeric":
@@ -406,7 +410,9 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 			case "boolean":
 				value = stringValues[i] == boolTrue
 			case "default":
-				return errors.New("unsupported attribute type")
+				return handler.CreateErrCodeWithArgs("CSV",
+					handler.ErrCodeCsvBadAttributeType,
+					map[string]string{"TYPE": atr.Content})
 			}
 		}
 
@@ -505,12 +511,12 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 			// execute lookup as values for all PG index attributes were found
 			rel, exists := cache.RelationIdMap[join.RelationId]
 			if !exists {
-				return errors.New("unknown relation")
+				return handler.CreateErrCode("APP", handler.ErrCodeAppUnknownRelation)
 			}
 
 			mod, exists := cache.ModuleIdMap[rel.ModuleId]
 			if !exists {
-				return errors.New("unknown module")
+				return handler.CreateErrCode("APP", handler.ErrCodeAppUnknownModule)
 			}
 
 			namesWhere := make([]string, 0)
@@ -582,7 +588,7 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 
 		joinAtr, exists := cache.AttributeIdMap[dataSet.AttributeId]
 		if !exists {
-			return errors.New("unknown attribute")
+			handler.CreateErrCode("APP", handler.ErrCodeAppUnknownAttribute)
 		}
 
 		if joinAtr.RelationId == dataSet.RelationId {

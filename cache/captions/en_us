@@ -32,17 +32,6 @@
 		"dialog":{
 			"confirm":"Please confirm"
 		},
-		"error":{
-			"contextDeadlineExceeded":"Action could not be completed within the allowed time frame - please try again",
-			"fileTooLarge":"Cannot upload file '{NAME}', max. allowed size is {SIZE}",
-			"foreignKeyConstraint":"Record is still being referenced as '{ATR}' in '{MOD}'",
-			"foreignKeyUniqueConstraint":"'{NAME}' may only be referenced once",
-			"generalError":"Unexpected error occurred, please contact the system administrator",
-			"generalErrorTitle":"Error",
-			"presetProtected":"This record is protected and cannot be deleted",
-			"unauthorized":"Unauthorized access",
-			"uniqueConstraint":"Value for '{NAMES}' must be unique"
-		},
 		"option":{
 			"aggArray":"array",
 			"aggAvg":"average",
@@ -70,12 +59,12 @@
 		"busy":"Working - Click here to abort",
 		"date":"Date",
 		"description":"Description",
+		"errorTitle":"Error",
 		"filters":"Filters",
 		"home":"Home",
 		"icon":"Icon",
 		"id":"ID",
 		"inputDecimal":"Value must be decimal",
-		"inputFileNotUploaded":"File is not saved yet",
 		"inputInvalid":"Value is invalid",
 		"inputLarge":"Value is too large",
 		"inputLong":"Value is too long",
@@ -963,6 +952,38 @@
 		"weekDayShort5":"Fri",
 		"weekDayShort6":"Sat"
 	},
+	"error":{
+		"APP":{
+			"001":"An unexpected error occurred. Please try again.",
+			"002":"Action could not be completed within the allowed time frame. If this happens often, please contact your system administrator.",
+			"003":"Action was aborted. Please try again.",
+			"004":"The record you attempted to delete is protected - it cannot be deleted.",
+			"005":"Failed to create entity because there was no name given. Please specify a name.",
+			"006":"The chosen name is invalid. Please make sure that the name...<ul><li>... starts with a letter <b>(a-z)</b>.</li><li>... is at most <b>31</b> characters long.</li><li>... contains only lower case letters <b>(a-z)</b>, underscores <b>(_)</b> or numbers <b>(0-9)</b>.</li></ul>Examples: storage_inventory_post21, facility_address, contact_book",
+			"007":"A referenced module is not known.",
+			"008":"A referenced relation is not known.",
+			"009":"A referenced attribute is not known."
+		},
+		"CSV":{
+			"001":"Invalid number '{VALUE}' (expected an integer).",
+			"002":"Invalid number '{VALUE}' (expected a decimal).",
+			"003":"Invalid date/time value '{VALUE}', expected format: {EXPECT}.",
+			"004":"Unsupported attribute type '{VALUE}'.",
+			"005":"Wrong number of fields in line '{VALUE}'."
+		},
+		"DBS":{
+			"001":"{FNC_MSG}",
+			"002":"The selected value for '{NAMES}' is already used by another record. It is defined as 'unique' and can only be used once.",
+			"003":"This login name is already taken.",
+			"004":"Record cannot be deleted - it is still being referenced as '{ATR}' in '{MOD}'.",
+			"005":"Column '{NAME}' has no value or could not be resolved.",
+			"006":"Failed to create unique index, because existing attribute values are not unique.",
+			"007":"Invalid value '{VALUE}'."
+		},
+		"SEC":{
+			"001":"You are not authorized to complete this action or access this resource."
+		}
+	},
 	"feedback":{
 		"button":{
 			"whatIsSent":"What is being sent?"
@@ -1098,7 +1119,9 @@
 			"inputMonth":"mm",
 			"inputSecond":"--",
 			"inputYear":"yyyy"
-		}
+		},
+		"fileNotUploaded":"File is not saved yet.",
+		"fileTooLarge":"Cannot upload file '{NAME}', max. allowed size is {SIZE}."
 	},
 	"list":{
 		"button":{
@@ -1111,14 +1134,6 @@
 		},
 		"dialog":{
 			"delete":"Are you sure that you want to <b>permanently</b> delete the selected records?"
-		},
-		"error":{
-			"csvDateParse":"Invalid time value '{VALUE}', expected format: {EXPECT}",
-			"csvFieldCount":"Wrong number of fields",
-			"csvLineError":"Error on line {COUNT}: ",
-			"csvNotNull":"Column '{NAME}' has no value or could not be resolved",
-			"csvNumberParse":"Invalid number '{VALUE}'",
-			"csvTypeSyntax":"Invalid value '{VALUE}'"
 		},
 		"message":{
 			"csvExport":"The CSV export uses filters and ordering from the current list.",
@@ -1139,6 +1154,7 @@
 		"csvDatetime":"Datetime format",
 		"csvFile":"CSV file",
 		"csvHasHeader":"Header line",
+		"csvLineError":"Error on line {COUNT}: ",
 		"csvTime":"Time format",
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Timezone",

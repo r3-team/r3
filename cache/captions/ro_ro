@@ -32,17 +32,6 @@
 		"dialog":{
 			"confirm":"Va rog confirmați"
 		},
-		"error":{
-			"contextDeadlineExceeded":"Acțiunea nu a putut fi finalizată în intervalul de timp permis - vă rugăm să încercați din nou",
-			"fileTooLarge":"Nu se poate încărca fișierul'{NAME}', mărimea maxim permisă este {SIZE}",
-			"foreignKeyConstraint":"Înregistrarea are încă ca referiță '{ATR}' în '{MOD}'",
-			"foreignKeyUniqueConstraint":"'{NAME}' poate avea o singură referință",
-			"generalError":"A apărut o eroare neașteptată, vă rugăm să contactați administratorul de sistem",
-			"generalErrorTitle":"Eroare",
-			"presetProtected":"Această înregistrare este protejată și nu poate fi ștearsă",
-			"unauthorized":"Acces neautorizat",
-			"uniqueConstraint":"Valoarea pentru '{NAMES}' trebuie să fie unică"
-		},
 		"option":{
 			"aggArray":"vector",
 			"aggAvg":"medie",
@@ -70,12 +59,12 @@
 		"busy":"Lucrează - Apasă aici pentru anulare",
 		"date":"Data",
 		"description":"Descriere",
+		"errorTitle":"Eroare",
 		"filters":"Filtre",
 		"home":"Acasă",
 		"icon":"Icoană",
 		"id":"ID",
 		"inputDecimal":"Trebuie să fie zecimal",
-		"inputFileNotUploaded":"Fișierul încă nu este salvat",
 		"inputInvalid":"Valoarea este nevalidă",
 		"inputLarge":"Valoarea este prea mare",
 		"inputLong":"Valoarea excede",
@@ -963,6 +952,38 @@
 		"weekDayShort5":"Vi",
 		"weekDayShort6":"Sâ"
 	},
+	"error":{
+		"APP":{
+			"001":"A apărut o eroare neașteptată. Vă rugăm să încercați din nou.",
+			"002":"Acțiunea nu a putut fi finalizată în intervalul de timp permis - vă rugăm să încercați din nou.",
+			"003":"Action was aborted. Please try again.",
+			"004":"Această înregistrare este protejată și nu poate fi ștearsă.",
+			"005":"Failed to create entity because there was no name given. Please specify a name.",
+			"006":"The chosen name is invalid. Please make sure that the name...<ul><li>... starts with a letter <b>(a-z)</b>.</li><li>... is at most <b>31</b> characters long.</li><li>... contains only lower case letters <b>(a-z)</b>, underscores <b>(_)</b> or numbers <b>(0-9)</b>.</li></ul>Examples: storage_inventory_post21, facility_address, contact_book",
+			"007":"A referenced module is not known.",
+			"008":"A referenced relation is not known.",
+			"009":"A referenced attribute is not known."
+		},
+		"CSV":{
+			"001":"Număr nevalid '{VALUE}' (număr întreg așteptat).",
+			"002":"Număr nevalid '{VALUE}' (zecimală așteptată).",
+			"003":"Valoare de timp nevalidă '{VALUE}', format așteptat: {EXPECT}.",
+			"004":"Unsupported attribute type '{VALUE}'.",
+			"005":"Număr greșit de câmpuri în linie '{VALUE}'."
+		},
+		"DBS":{
+			"001":"{FNC_MSG}",
+			"002":"The selected value for '{NAMES}' is already used by another record. It is defined as 'unique' and can only be used once.",
+			"003":"This login name is already taken.",
+			"004":"Înregistrarea are încă ca referiță '{ATR}' în '{MOD}'.",
+			"005":"Coloana '{NAME}' nu are valoare sau nu a putut fi soluționată.",
+			"006":"Failed to create unique index, because existing attribute values are not unique.",
+			"007":"Valoare nevalidă '{VALUE}'."
+		},
+		"SEC":{
+			"001":"Acces neautorizat."
+		}
+	},
 	"feedback":{
 		"button":{
 			"whatIsSent":"Ce se trimite?"
@@ -1098,7 +1119,9 @@
 			"inputMonth":"ll",
 			"inputSecond":"--",
 			"inputYear":"aaaa"
-		}
+		},
+		"fileNotUploaded":"Fișierul încă nu este salvat",
+		"fileTooLarge":"Nu se poate încărca fișierul'{NAME}', mărimea maxim permisă este {SIZE}."
 	},
 	"list":{
 		"button":{
@@ -1111,14 +1134,6 @@
 		},
 		"dialog":{
 			"delete":"Sunteți sigur că doriți să ștergeți <b>permanent</b> înregistrările selectate?"
-		},
-		"error":{
-			"csvDateParse":"Valoare de timp nevalidă '{VALUE}', format așteptat: {EXPECT}",
-			"csvFieldCount":"Număr greșit de câmpuri",
-			"csvLineError":"Eroare la rândul {COUNT}: ",
-			"csvNotNull":"Coloana '{NAME}' nu are valoare sau nu a putut fi soluționată",
-			"csvNumberParse":"Număr nevalid '{VALUE}'",
-			"csvTypeSyntax":"Valoare nevalidă '{VALUE}'"
 		},
 		"message":{
 			"csvExport":"Exportul CSV folosește filtre și ordonarea din lista curentă.",
@@ -1139,6 +1154,7 @@
 		"csvDatetime":"Format de dată și oră",
 		"csvFile":"Fișier CSV",
 		"csvHasHeader":"Linia antetului",
+		"csvLineError":"Eroare la rândul {COUNT}: ",
 		"csvTime":"Formatul orei",
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Zona de timp",

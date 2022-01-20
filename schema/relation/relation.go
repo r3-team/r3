@@ -3,6 +3,7 @@ package relation
 import (
 	"fmt"
 	"r3/db"
+	"r3/db/check"
 	"r3/schema"
 	"r3/schema/attribute"
 	"r3/schema/pgFunction"
@@ -91,7 +92,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	retentionCount pgtype.Int4, retentionDays pgtype.Int4,
 	policies []types.RelationPolicy) error {
 
-	if err := db.CheckIdentifier(name); err != nil {
+	if err := check.DbIdentifier(name); err != nil {
 		return err
 	}
 

@@ -361,7 +361,6 @@ let MyGantt = {
 		fieldId:         { type:String,  required:true },
 		filters:         { type:Array,   required:true }, // processed query filters
 		formLoading:     { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
-		handleError:     { type:Function,required:true },
 		iconId:          { required:true },
 		indexColor:      { required:true },
 		indexDate0:      { type:Number,  required:true },
@@ -910,7 +909,7 @@ let MyGantt = {
 							this.scrollToNow();
 					}
 				},
-				(err) => this.handleError(err)
+				(err) => this.$root.genericError(err)
 			);
 		}
 	}

@@ -32,17 +32,6 @@
 		"dialog":{
 			"confirm":"Si prega di confermare"
 		},
-		"error":{
-			"contextDeadlineExceeded":"Non è stato possibile completare l'azione entro il periodo di tempo consentito. Riprova",
-			"fileTooLarge":"Impossibile caricare il file '{NAME}', la dimensione massima consentita è {SIZE}",
-			"foreignKeyConstraint":"Il record è ancora referenziato come '{ATR}' in '{MOD}'",
-			"foreignKeyUniqueConstraint":"'{NAME}' può essere referenziato solo una volta",
-			"generalError":"Si è verificato un errore imprevisto, contattare l'amministratore di sistema",
-			"generalErrorTitle":"Errore",
-			"presetProtected":"Questo record è protetto e non può essere cancellato",
-			"unauthorized":"Accesso non autorizzato",
-			"uniqueConstraint":"Il valore oer '{NAMES}' deve essere univoco"
-		},
 		"option":{
 			"aggArray":"vettore",
 			"aggAvg":"media",
@@ -70,12 +59,12 @@
 		"busy":"Elaborazione - Clicca qui per annullare",
 		"date":"Data",
 		"description":"Descrizione",
+		"errorTitle":"Errore",
 		"filters":"Filtri",
 		"home":"Home",
 		"icon":"Icona",
 		"id":"ID",
 		"inputDecimal":"Il valore deve essere decimale",
-		"inputFileNotUploaded":"File non ancora salvato",
 		"inputInvalid":"Valore non valido",
 		"inputLarge":"Valore troppo grande",
 		"inputLong":"Valore troppo lungo",
@@ -963,6 +952,38 @@
 		"weekDayShort5":"Ven",
 		"weekDayShort6":"Sab"
 	},
+	"error":{
+		"APP":{
+			"001":"Si è verificato un errore imprevisto. Riprova.",
+			"002":"Non è stato possibile completare l'azione entro il periodo di tempo consentito. Riprova.",
+			"003":"Action was aborted. Please try again.",
+			"004":"Questo record è protetto e non può essere cancellato.",
+			"005":"Failed to create entity because there was no name given. Please specify a name.",
+			"006":"The chosen name is invalid. Please make sure that the name...<ul><li>... starts with a letter <b>(a-z)</b>.</li><li>... is at most <b>31</b> characters long.</li><li>... contains only lower case letters <b>(a-z)</b>, underscores <b>(_)</b> or numbers <b>(0-9)</b>.</li></ul>Examples: storage_inventory_post21, facility_address, contact_book",
+			"007":"A referenced module is not known.",
+			"008":"A referenced relation is not known.",
+			"009":"A referenced attribute is not known."
+		},
+		"CSV":{
+			"001":"Numero non valido '{VALUE}' (intero previsto).",
+			"002":"Numero non valido '{VALUE}' (decimale previsto).",
+			"003":"Valore temporale '{VALUE}' non valido, formato previsto: {EXPECT}.",
+			"004":"Unsupported attribute type '{VALUE}'.",
+			"005":"Numero di campi errato in linea '{VALUE}'."
+		},
+		"DBS":{
+			"001":"{FNC_MSG}",
+			"002":"The selected value for '{NAMES}' is already used by another record. It is defined as 'unique' and can only be used once.",
+			"003":"This login name is already taken.",
+			"004":"Il record è ancora referenziato come '{ATR}' in '{MOD}'.",
+			"005":"La colonna '{NAME}' non ha valori o non può essere risolto.",
+			"006":"Failed to create unique index, because existing attribute values are not unique.",
+			"007":"Valore non valido '{VALUE}'."
+		},
+		"SEC":{
+			"001":"Accesso non autorizzato."
+		}
+	},
 	"feedback":{
 		"button":{
 			"whatIsSent":"Cosa viene inviato?"
@@ -1098,7 +1119,9 @@
 			"inputMonth":"mm",
 			"inputSecond":"--",
 			"inputYear":"yyyy"
-		}
+		},
+		"fileNotUploaded":"File non ancora salvato.",
+		"fileTooLarge":"Impossibile caricare il file '{NAME}', la dimensione massima consentita è {SIZE}."
 	},
 	"list":{
 		"button":{
@@ -1111,14 +1134,6 @@
 		},
 		"dialog":{
 			"delete":"Sei sicuro di voler eliminare <b>in modo permanente</b> i record selezionati?"
-		},
-		"error":{
-			"csvDateParse":"Valore temporale '{VALUE}' non valido, formato previsto: {EXPECT}",
-			"csvFieldCount":"Numero di campi errato",
-			"csvLineError":"Errore alla linea {COUNT}: ",
-			"csvNotNull":"La colonna '{NAME}' non ha valori o non può essere risolto",
-			"csvNumberParse":"Numero non valido '{VALUE}'",
-			"csvTypeSyntax":"Valore non valido '{VALUE}'"
 		},
 		"message":{
 			"csvExport":"L'esportazione CSV utilizza filtri e ordini dall'elenco corrente.",
@@ -1139,6 +1154,7 @@
 		"csvDatetime":"Formato data-ora",
 		"csvFile":"File CSV",
 		"csvHasHeader":"Linea intestazione",
+		"csvLineError":"Errore alla linea {COUNT}: ",
 		"csvTime":"Formato tempo",
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Timezone",

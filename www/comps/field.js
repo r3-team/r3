@@ -201,7 +201,6 @@ let MyField = {
 						v-if="isFiles"
 						v-model="value"
 						:attributeId="field.attributeId"
-						:handleError="handleError"
 						:readonly="isReadonly"
 						:showGallery="field.display === 'gallery'"
 						:showNew="logViewer"
@@ -236,7 +235,6 @@ let MyField = {
 						:filterQuick="field.filterQuick"
 						:filters="filtersProcessed"
 						:formLoading="formLoading"
-						:handleError="handleError"
 						:header="false"
 						:inputAsCategory="field.category"
 						:inputAutoSelect="field.autoSelect"
@@ -308,7 +306,6 @@ let MyField = {
 			:filterQuick="field.filterQuick"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
-			:handleError="handleError"
 			:iconId="iconId ? iconId : null"
 			:isFullPage="isFullPage"
 			:layout="field.layout"
@@ -333,7 +330,6 @@ let MyField = {
 			:fieldId="field.id"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
-			:handleError="handleError"
 			:iconId="iconId ? iconId : null"
 			:ics="field.ics"
 			:indexColor="field.indexColor"
@@ -362,7 +358,6 @@ let MyField = {
 			:days1="field.dateRange1 / 86400"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
-			:handleError="handleError"
 			:iconId="iconId ? iconId : null"
 			:indexColor="field.indexColor"
 			:indexDate0="field.indexDate0"
@@ -381,7 +376,6 @@ let MyField = {
 			:columns="columnsProcessed"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
-			:handleError="handleError"
 			:isFullPage="isFullPage"
 			:limit="field.query.fixedLimit"
 			:optionJson="field.chartOption"
@@ -406,7 +400,6 @@ let MyField = {
 			:formIsInline="formIsInline"
 			:formLoading="formLoading"
 			:flexDirParent="field.direction"
-			:handleError="handleError"
 			:isFullPage="isFullPage"
 			:joinsIndexMap="joinsIndexMap"
 			:key="f.id"
@@ -422,7 +415,6 @@ let MyField = {
 		formIsInline:   { type:Boolean, required:true },
 		formLoading:    { type:Boolean, required:true },
 		flexDirParent:  { type:String,  required:true }, // flex direction (row/column) of parent
-		handleError:    { type:Function,required:true }, // function to handle errors
 		isFullPage:     { type:Boolean, required:true },
 		joinsIndexMap:  { type:Object,  required:true },
 		logViewer:      { type:Boolean, required:false, default:false }, // is part of log viewer
