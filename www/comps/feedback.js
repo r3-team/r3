@@ -3,7 +3,7 @@ export {MyFeedback as default};
 
 let MyFeedback = {
 	name:'my-feedback',
-	template:`<div class="app-sub-window">
+	template:`<div class="app-sub-window" @click.self="close">
 		<div class="feedback contentBox">
 			<div class="top">
 				<div class="area">
@@ -67,7 +67,7 @@ let MyFeedback = {
 						:naked="true"
 					/>
 					<my-button class="right" image="cancel.png"
-						@trigger="$store.commit('isAtFeedback',false)"
+						@trigger="close"
 						:cancel="true"
 						:caption="capGen.button.close"
 					/>
@@ -114,6 +114,11 @@ let MyFeedback = {
 	methods:{
 		// externals
 		getCaptionForModule,
+		
+		// actions
+		close:function() {
+			this.$store.commit('isAtFeedback',false);
+		},
 		
 		// backend calls
 		send:function(mood) {

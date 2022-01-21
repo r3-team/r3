@@ -4,7 +4,7 @@ export {MyDialog as default};
 let MyDialog = {
 	name:'my-dialog',
 	components:{MyInputRichtext},
-	template:`<div class="app-sub-window">
+	template:`<div class="app-sub-window" @click.self="close">
 		<div class="dialog contentBox" :style="styles">
 			<div class="top">
 				<div class="area">
@@ -12,6 +12,13 @@ let MyDialog = {
 						:src="image === null ? 'images/ok.png' : 'images/'+image"
 					/>
 					<div class="caption">{{ captionTop }}</div>
+				</div>
+				<div class="area">
+					<my-button
+						@trigger="close" image="cancel.png"
+						:cancel="true"
+						:darkBg="true"
+					/>
 				</div>
 			</div>
 			
@@ -100,6 +107,9 @@ let MyDialog = {
 		},
 		
 		// actions
+		close:function() {
+			this.$store.commit('isAtDialog',false);
+		},
 		executeButton:function(btn) {
 			// execute action if set
 			if(typeof btn.exec !== 'undefined') {
@@ -108,7 +118,7 @@ let MyDialog = {
 			}
 			
 			// close dialog window
-			this.$store.commit('isAtDialog',false)
+			this.close();
 		},
 		trigger:function(i) {
 			// richtext looses all styling during close
