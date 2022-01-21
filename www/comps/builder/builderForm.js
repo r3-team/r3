@@ -544,6 +544,16 @@ let MyBuilderForm = {
 			this.fieldMoveList  = evt.fieldList;
 			this.fieldMoveIndex = evt.fieldIndex;
 		},
+		showMessage:function(msg) {
+			this.$store.commit('dialog',{
+				captionBody:msg,
+				buttons:[{
+					caption:this.capGen.button.close,
+					cancel:true,
+					image:'cancel.png'
+				}]
+			});
+		},
 		reset:function() {
 			if(!this.form) return;
 			
@@ -879,7 +889,26 @@ let MyBuilderForm = {
 				JSON.parse(JSON.stringify(this.fields))
 			);
 			
-			// apply form
+			// check removed fields being referenced in form states
+			for(let i = 0, j = this.states.length; i < j; i++) {
+				let s = this.states[i];
+				
+				for(let x = 0, y = s.conditions.length; x < y; x++) {
+					let c = s.conditions[x];
+					
+					if(this.fieldIdsRemove.includes(c.fieldId0) || this.fieldIdsRemove.includes(c.fieldId1))
+						return this.showMessage(this.capApp.error.formStateFieldRemovedCondition.replace('{NAME}',s.description));
+				}
+				
+				for(let x = 0, y = s.effects.length; x < y; x++) {
+					let e = s.effects[x];
+					
+					if(this.fieldIdsRemove.includes(e.fieldId))
+						return this.showMessage(this.capApp.error.formStateFieldRemovedEffect.replace('{NAME}',s.description));
+				}
+			}
+			
+			// save form and delete removed fields
 			let requests = [];
 			for(let i = 0, j = this.fieldIdsRemove.length; i < j; i++) {
 				requests.push(ws.prepare('field','del',{id:this.fieldIdsRemove[i]}));

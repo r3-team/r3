@@ -443,6 +443,10 @@
 			"dialog":{
 				"delete":"Sei sicuro di voler eliminare questo modulo?"
 			},
+			"error":{
+				"formStateFieldRemovedCondition":"Deleted field is still referenced as condition of form state '{NAME}'.",
+				"formStateFieldRemovedEffect":"Deleted field is still referenced as effect of form state '{NAME}'."
+			},
 			"functions":{
 				"option":{
 					"delete":"Record modulo canellato",

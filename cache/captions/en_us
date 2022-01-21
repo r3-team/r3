@@ -443,6 +443,10 @@
 			"dialog":{
 				"delete":"Are you sure you want to delete this form?"
 			},
+			"error":{
+				"formStateFieldRemovedCondition":"Deleted field is still referenced as condition of form state '{NAME}'.",
+				"formStateFieldRemovedEffect":"Deleted field is still referenced as effect of form state '{NAME}'."
+			},
 			"functions":{
 				"option":{
 					"delete":"Form record deleted",

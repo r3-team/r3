@@ -443,6 +443,10 @@
 			"dialog":{
 				"delete":"Bist du sicher, dass du dieses Formular löschen möchtest?"
 			},
+			"error":{
+				"formStateFieldRemovedCondition":"Gelöschtes Feld wird noch als Kondition im Formularzustand \"{NAME}\" referenziert.",
+				"formStateFieldRemovedEffect":"Gelöschtes Feld wird noch als Effekt im Formularzustand \"{NAME}\" referenziert."
+			},
 			"functions":{
 				"option":{
 					"delete":"Formulardatensatz gelöscht",
