@@ -510,7 +510,6 @@ let MyAdminModules = {
 					that.$root.genericError(that.capApp.error.uploadFailed);
 					return;
 				}
-				this.$root.loginReauthAll(false);
 			}
 			formData.append('token',this.token);
 			formData.append('file',this.fileToUpload);

@@ -145,11 +145,6 @@ func ImportFromFiles(filePathsImport []string) error {
 	}
 	log.Info("transfer", "changes were commited successfully")
 
-	if err := cache.RenewAccessAll(); err != nil {
-		return err
-	}
-	log.Info("transfer", "access cache was renewed")
-
 	if err := cache.UpdateSchemaAll(true); err != nil {
 		return err
 	}
