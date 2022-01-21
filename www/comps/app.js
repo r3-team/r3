@@ -409,12 +409,11 @@ let MyApp = {
 					}
 					this.appReady = true;
 					this.updateCollections();
-					this.$store.commit('busyBlockInput',false);
 				},
 				(err) => this.genericError(err)
+			).finally(
+				() => this.$store.commit('busyBlockInput',false)
 			);
-			
-			// block input during init
 			this.$store.commit('busyBlockInput',true);
 		},
 		

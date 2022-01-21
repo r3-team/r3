@@ -127,14 +127,14 @@ let MyForm = {
 							v-if="allowNew"
 							@trigger="openNewAsk(false)"
 							@trigger-middle="openNewAsk(true)"
-							:active="(!isNew || hasChanges) && canSetNew"
+							:active="(!isNew || hasChanges) && canSetNew && !updatingRecord"
 							:caption="capGen.button.new"
 							:captionTitle="capGen.button.newHint"
 							:darkBg="true"
 						/>
 						<my-button image="save.png"
 							@trigger="set(false)"
-							:active="hasChanges && !badLoad"
+							:active="hasChanges && !badLoad && !updatingRecord"
 							:caption="capGen.button.save"
 							:captionTitle="capGen.button.saveHint"
 							:darkBg="true"
@@ -142,7 +142,7 @@ let MyForm = {
 						<my-button image="save_new.png"
 							v-if="!isInline && !isMobile && allowNew"
 							@trigger="set(true)"
-							:active="hasChanges && !badLoad && canSetNew"
+							:active="hasChanges && !badLoad && !updatingRecord && canSetNew"
 							:caption="capGen.button.saveNew"
 							:captionTitle="capGen.button.saveNewHint"
 							:darkBg="true"
@@ -150,6 +150,7 @@ let MyForm = {
 						<my-button image="upward.png"
 							v-if="!isMobile && !isInline"
 							@trigger="openPrevAsk"
+							:active="!updatingRecord"
 							:cancel="true"
 							:caption="capGen.button.goBack"
 							:darkBg="true"
@@ -157,7 +158,7 @@ let MyForm = {
 						<my-button image="shred.png"
 							v-if="allowDel"
 							@trigger="delAsk"
-							:active="canDelete"
+							:active="canDelete && !updatingRecord"
 							:cancel="true"
 							:caption="capGen.button.delete"
 							:captionTitle="capGen.button.deleteHint"
@@ -275,6 +276,7 @@ let MyForm = {
 			messageTimeout:null, // form message expiration timeout
 			showHelp:false,      // show form context help
 			showLog:false,       // show data change log
+			updatingRecord:false,// form is currently attempting to update the current record (saving/deleting)
 			
 			// pop-up form
 			popUpAttributeIdMapDef:{}, // default attribute values for pop-up form
@@ -1131,7 +1133,10 @@ let MyForm = {
 					this.recordMessageUpdate('deleted');
 				},
 				(err) => this.$root.genericError(err)
+			).finally(
+				() => this.updatingRecord = false
 			);
+			this.updatingRecord = true;
 		},
 		get:function() {
 			this.triggerEventBefore('open');
@@ -1386,7 +1391,10 @@ let MyForm = {
 					this.get();
 				},
 				(err) => this.$root.genericError(err)
+			).finally(
+				() => this.updatingRecord = false
 			);
+			this.updatingRecord = true;
 		}
 	}
 };
