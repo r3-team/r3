@@ -444,8 +444,8 @@
 				"delete":"Sei sicuro di voler eliminare questo modulo?"
 			},
 			"error":{
-				"formStateFieldRemovedCondition":"Deleted field is still referenced as condition of form state '{NAME}'.",
-				"formStateFieldRemovedEffect":"Deleted field is still referenced as effect of form state '{NAME}'."
+				"formStateFieldRemovedCondition":"I campi cancellati sono ancora referenziati come condizione della condizione del modulo '{NAME}'.",
+				"formStateFieldRemovedEffect":"I campi cancellati sono ancora referenziati come campo interessato dalla condizione del modulo '{NAME}'."
 			},
 			"functions":{
 				"option":{
@@ -495,7 +495,7 @@
 				"modeField2Fixed":"valore fisso",
 				"modeField2Login":"ID login",
 				"modeField2Preset":"preimpostato",
-				"modeFieldChanged":"Field value changed",
+				"modeFieldChanged":"Valore del campo cambiato",
 				"modeRecord":"Stato record",
 				"modeRole":"Ruolo",
 				"newRecord":"Nuovo",
@@ -589,7 +589,7 @@
 			"ics":"Abbonamenti iCAL",
 			"jsFunctionButton":"Funzione on click",
 			"jsFunctionData":"Funzione on value change",
-			"layout":"Layout elenco",
+			"layout":"Disposizione elenco",
 			"limit":"Limite risultato",
 			"new":"Nuovo modulo",
 			"onMobile":"Nella vista mobile",
@@ -604,12 +604,12 @@
 			"presetOpen":"Preimpostazione apertura",
 			"readonly":"Solo lettura",
 			"required":"Obbligatorio",
-			"showFunctions":"Functions",
+			"showFunctions":"Funzioni",
 			"showHelp":"Aiuto",
 			"showOutsideIn":"Riferimento relazione",
-			"showStates":"Stati",
+			"showStates":"Condizioni",
 			"sql":"Anteprima SQL",
-			"state":"Stato",
+			"state":"Condizione",
 			"stateDefault":"predefinito",
 			"stateHidden":"nascosto",
 			"stateOptional":"opzionale",
@@ -960,28 +960,28 @@
 		"APP":{
 			"001":"Si è verificato un errore imprevisto. Riprova.",
 			"002":"Non è stato possibile completare l'azione entro il periodo di tempo consentito. Riprova.",
-			"003":"Action was aborted. Please try again.",
+			"003":"Azione abortita. Si prega di riprovare.",
 			"004":"Questo record è protetto e non può essere cancellato.",
-			"005":"Failed to create entity because there was no name given. Please specify a name.",
-			"006":"The chosen name is invalid. Please make sure that the name...<ul><li>... starts with a letter <b>(a-z)</b>.</li><li>... is at most <b>31</b> characters long.</li><li>... contains only lower case letters <b>(a-z)</b>, underscores <b>(_)</b> or numbers <b>(0-9)</b>.</li></ul>Examples: storage_inventory_post21, facility_address, contact_book",
-			"007":"A referenced module is not known.",
-			"008":"A referenced relation is not known.",
-			"009":"A referenced attribute is not known."
+			"005":"Creazione entità fallita perchè non è stato indicato un nome. Si prega di specificare un nome.",
+			"006":"Il nome scelto non è valido. Assicurarsi che il nome ...<ul><li>... inizi con una lettera <b>(a-z)</b>.</li><li>... non sia più lungo di <b>31</b> caratteri.</li><li>... contenga solo lettere minuscole <b>(a-z)</b>, sottolineato <b>(_)</b> o numeri <b>(0-9)</b>.</li></ul>Esempio: storage_inventory_post21, facility_address, contact_book",
+			"007":"Il modulo referenziato non esiste.",
+			"008":"La relazione referenziata non esiste.",
+			"009":"L'attributo referenziato non esiste."
 		},
 		"CSV":{
 			"001":"Numero non valido '{VALUE}' (intero previsto).",
 			"002":"Numero non valido '{VALUE}' (decimale previsto).",
 			"003":"Valore temporale '{VALUE}' non valido, formato previsto: {EXPECT}.",
-			"004":"Unsupported attribute type '{VALUE}'.",
+			"004":"Tipo attributo non supportato '{VALUE}'.",
 			"005":"Numero di campi errato in linea '{VALUE}'."
 		},
 		"DBS":{
 			"001":"{FNC_MSG}",
-			"002":"The selected value for '{NAMES}' is already used by another record. It is defined as 'unique' and can only be used once.",
-			"003":"This login name is already taken.",
+			"002":"TIl valore selezionato per '{NAMES}' è già utilizzato da un'altro record. E' definito 'univoco' e può essere utilizzato solo una volta.",
+			"003":"Questo nome di login è già in uso.",
 			"004":"Il record è ancora referenziato come '{ATR}' in '{MOD}'.",
 			"005":"La colonna '{NAME}' non ha valori o non può essere risolto.",
-			"006":"Failed to create unique index, because existing attribute values are not unique.",
+			"006":"Creazione indice univoco fallita perchè l'attributo esistente non è univoco.",
 			"007":"Valore non valido '{VALUE}'."
 		},
 		"SEC":{
@@ -1161,7 +1161,7 @@
 		"csvLineError":"Errore alla linea {COUNT}: ",
 		"csvTime":"Formato tempo",
 		"csvTimeHint":"15:04:05",
-		"csvTimezone":"Timezone",
+		"csvTimezone":"Fuso orario",
 		"csvTotalLimit":"Conteggio righe (0 = tutte)",
 		"inputHintCreate":"Crea nuovo record",
 		"inputHintOpen":"Apri record",
