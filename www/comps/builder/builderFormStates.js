@@ -472,7 +472,7 @@ let MyBuilderFormState = {
 let MyBuilderFormStates = {
 	name:'my-builder-form-states',
 	components:{ MyBuilderFormState },
-	template:`<div class="builder-form-states contentBox">
+	template:`<div class="builder-form-states contentBox" :class="{fullscreen:fullscreen}">
 		
 		<div class="top">
 			<div class="area">
@@ -511,6 +511,10 @@ let MyBuilderFormStates = {
 					</template>
 				</select>
 				
+				<my-button image="expand.png"
+					@trigger="$emit('set-fullscreen')"
+					:darkBg="true"
+				/>
 				<my-button image="cancel.png"
 					@trigger="$emit('close')"
 					:cancel="true"
@@ -538,9 +542,10 @@ let MyBuilderFormStates = {
 	props:{
 		fieldIdMapRef:{ type:Object, required:false, default:() => {return {}} }, // field reference map (unique field counter for each ID)
 		form:         { type:Object, required:true },
+		fullscreen:   { type:Boolean,required:true },
 		modelValue:   { type:Array,  required:true }
 	},
-	emits:['close','update:modelValue'],
+	emits:['close','set-fullscreen','update:modelValue'],
 	data:function() {
 		return {
 			filter:'',

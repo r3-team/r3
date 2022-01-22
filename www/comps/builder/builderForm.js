@@ -29,13 +29,11 @@ let MyBuilderForm = {
 	},
 	template:`<div class="builder-form" v-if="form">
 	
+		<!-- form builder main area -->
 		<div class="contentBox builder-form-main">
-		
-			<div class="builder-form-content">
 			
-				<!-- form builder main area -->
+			<div class="builder-form-content" v-show="!showStatesFull || !showStates">
 				<div class="top">
-					
 					<div class="area nowrap">
 						<my-builder-icon-input
 							@input="iconId = $event"
@@ -154,8 +152,10 @@ let MyBuilderForm = {
 				v-if="showStates"
 				v-model="states"
 				@close="showStates = false"
+				@set-fullscreen="showStatesFull = !showStatesFull"
 				:fieldIdMapRef="fieldIdMapRef"
 				:form="form"
+				:fullscreen="showStatesFull"
 			/>
 		</div>
 		
@@ -321,17 +321,18 @@ let MyBuilderForm = {
 			
 			// state
 			columnIdQuery:null,
-			fieldCounter:0,     // counter to generate unique IDs for all fields
-			                    // used to populate new fields and for template fields
-			fieldIdQuery:null,  // field ID of which query is currently being edited
-			fieldMoveList:null, // fields list from which to move field (move by click)
-			fieldMoveIndex:0,   // index of field which to move (move by click)
-			showCaptions:true,  // show caption inputs on non-container fields
-			showFunctions:false,// show form functions
-			showHelp:false,     // show form context help
-			showOutsideIn:false,// show outside-in data fields
-			showSidebar:true,   // show form Builder sidebar
-			showStates:false    // show form states
+			fieldCounter:0,      // counter to generate unique IDs for all fields
+			                     // used to populate new fields and for template fields
+			fieldIdQuery:null,   // field ID of which query is currently being edited
+			fieldMoveList:null,  // fields list from which to move field (move by click)
+			fieldMoveIndex:0,    // index of field which to move (move by click)
+			showCaptions:true,   // show caption inputs on non-container fields
+			showFunctions:false, // show form functions
+			showHelp:false,      // show form context help
+			showOutsideIn:false, // show outside-in data fields
+			showSidebar:true,    // show form Builder sidebar
+			showStates:false,    // show form states
+			showStatesFull:false // sub content (states/functions) are full screen
 		};
 	},
 	computed:{

@@ -161,10 +161,15 @@
 	max-height:360px;
 	flex:1 1 auto;
 }
+.builder-form-states.fullscreen{
+	max-height:none;
+	overflow:auto;
+}
 .builder-form-states input,
 .builder-form-states select{
 	width:auto;
 	min-width:unset;
+	margin-right:6px;
 }
 .builder-form-state{
 	display:flex;

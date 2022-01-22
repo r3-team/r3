@@ -39,7 +39,7 @@ let MyBuilderFields = {
 			>
 				<div class="builder-drag-item" :class="{ container:element.content === 'container' }">
 					<!-- form state field reference -->
-					<span class="reference" v-if="!isTemplate && showStates">
+					<span class="reference" v-if="!isTemplate">
 						F{{ typeof fieldIdMapRef[element.id] !== 'undefined' ? fieldIdMapRef[element.id] : '' }}
 					</span>
 					
@@ -451,7 +451,7 @@ let MyBuilderFields = {
 			switch(field.content) {
 				case 'button':    cap = 'Button';    break;
 				case 'calendar':  cap = 'Calendar';  break;
-				case 'chart':     cap = 'Chart';  break;
+				case 'chart':     cap = 'Chart';     break;
 				case 'container': cap = 'Container'; break;
 				case 'list':      cap = 'List';      break;
 				case 'header':    cap = 'Header';    break;
