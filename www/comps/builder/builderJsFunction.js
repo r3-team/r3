@@ -532,7 +532,7 @@ let MyBuilderJsFunction = {
 			let body   = this.codeFunction;
 			let fields = this.dataFieldMap;
 			let prefix = 'app';
-			let dbName = '[a-z0-9_]+';
+			let dbName = '[a-z0-9_]+'; // valid chars, DB entities (PG functions, modules, attributes, ...)
 			let pat;
 			
 			// replace field get/set placeholders
@@ -582,44 +582,56 @@ let MyBuilderJsFunction = {
 				return `${prefix}\.${fldMode}_field_value('${fld.id}'`;
 			});
 			
-			// replace frontend/backend function placeholders
+			// replace backend function placeholders
 			// stored as: app.call_backend({r3_organizations.get_name_by_id},12...
-			pat = new RegExp(`${prefix}\.call_(frontend|backend)\\(\{(${dbName})\.(${dbName})\}`,'g');
-			body = body.replace(pat,function(match,fncMode,modName,fncName) {
+			pat = new RegExp(`${prefix}\.call_backend\\(\{(${dbName})\.(${dbName})\}`,'g');
+			body = body.replace(pat,function(match,modName,fncName) {
 				
-				// resolve module by name
 				if(typeof that.moduleNameMap[modName] === 'undefined')
 					return match;
 				
 				let mod = that.moduleNameMap[modName];
-				
-				// resolve function by name
 				let fnc = false;
 				
-				if(fncMode === 'backend') {
-					for(let i = 0, j = mod.pgFunctions.length; i < j; i++) {
-						if(mod.pgFunctions[i].name !== fncName)
-							continue;
-						
-						fnc = mod.pgFunctions[i];
-						break;
-					}
-				}
-				else if(fncMode === 'frontend') {
-					for(let i = 0, j = mod.jsFunctions.length; i < j; i++) {
-						if(mod.jsFunctions[i].name !== fncName)
-							continue;
-						
-						fnc = mod.jsFunctions[i];
-						break;
-					}
+				for(let i = 0, j = mod.pgFunctions.length; i < j; i++) {
+					if(mod.pgFunctions[i].name !== fncName)
+						continue;
+					
+					fnc = mod.pgFunctions[i];
+					break;
 				}
 				
 				if(fnc === false)
 					return match;
 				
 				// replace placeholder
-				return `${prefix}\.call_${fncMode}('${fnc.id}'`;
+				return `${prefix}\.call_backend('${fnc.id}'`;
+			});
+			
+			// replace frontend function placeholders
+			// stored as: app.call_frontend({r3_organizations.add_numbers},12...
+			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbName})\.(.+)\}`,'g');
+			body = body.replace(pat,function(match,modName,fncName) {
+				
+				if(typeof that.moduleNameMap[modName] === 'undefined')
+					return match;
+				
+				let mod = that.moduleNameMap[modName];
+				let fnc = false;
+				
+				for(let i = 0, j = mod.jsFunctions.length; i < j; i++) {
+					if(mod.jsFunctions[i].name !== fncName)
+						continue;
+					
+					fnc = mod.jsFunctions[i];
+					break;
+				}
+				
+				if(fnc === false)
+					return match;
+				
+				// replace placeholder
+				return `${prefix}\.call_frontend('${fnc.id}'`;
 			});
 			
 			return body;
