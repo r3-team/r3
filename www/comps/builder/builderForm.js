@@ -763,12 +763,11 @@ let MyBuilderForm = {
 				
 				// relationship attributes referencing this relation (can be self reference)
 				for(let i = 0, j = rel.attributes.length; i < j; i++) {
-					
 					let atr = rel.attributes[i];
 					
 					if(atr.relationshipId !== relation.id)
 						continue;
-				
+					
 					if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,true,null)))
 						continue;
 					
@@ -779,30 +778,31 @@ let MyBuilderForm = {
 				}
 				
 				// relationship attributes that are candidates for n:m relationships
-				// relation must contain exactly two n:1 relationship attributes
-				let atrs = [];
+				let atrsN1 = [];
 				for(let i = 0, j = rel.attributes.length; i < j; i++) {
 					if(!this.isAttributeRelationshipN1(rel.attributes[i].content))
 						continue;
 					
-					atrs.push(rel.attributes[i]);
+					atrsN1.push(rel.attributes[i]);
 				}
-				if(atrs.length === 2) {
+				
+				for(let i = 0, j = atrsN1.length; i < j; i++) {
 					
-					// one attribute must refer to the orignal relation
-					let atr   = false;
-					let atrNm = false;
-					if(atrs[0].relationshipId === relation.id) {
-						atr   = atrs[0];
-						atrNm = atrs[1];
-					} else if(atrs[1].relationshipId === relation.id) {
-						atr   = atrs[1];
-						atrNm = atrs[0];
-					}
+					// find attributes in relationship with us
+					let atr = atrsN1[i];
+					if(atr.relationshipId !== relation.id)
+						continue;
 					
-					if(atr !== false && !this.indexAttributeIdsUsed.includes(
-						this.getIndexAttributeId(index,atr.id,true,atrNm.id))
-					) {
+					for(let x = 0, y = atrsN1.length; x < y; x++) {
+						let atrNm = atrsN1[x];
+						
+						// offer n:m together with every other n:1 attribute
+						if(atrNm.id === atr.id)
+							continue;
+						
+						if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,true,atrNm.id)))
+							continue;
+						
 						fields.push(this.createFieldData(index,atr,true,atrNm.id));
 					}
 				}
