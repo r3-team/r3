@@ -21,6 +21,7 @@ let MyApp = {
 		
 		<my-login v-if="!appReady"
 			@authenticated="initApp"
+			:appInitErr="appInitErr"
 			:backendReady="wsConnected"
 			:httpMode="httpMode"
 			:loginReady="loginReady"
@@ -58,6 +59,7 @@ let MyApp = {
 	</div>`,
 	data:function() {
 		return {
+			appInitErr:'',      // error message returned by attempt to initialize app
 			appReady:false,     // app is loaded and user authenticated
 			loginReady:false,   // app is ready for authentication
 			publicLoaded:false, // public data has been loaded
@@ -242,6 +244,10 @@ let MyApp = {
 			if(!this.schemaLoaded) return this.initSchema(); // schema data
 			if(!this.loginReady)   return this.loginReady = true;
 		},
+		setInitErr:function(err) {
+			// generic error handler is not available yet
+			this.appInitErr = `${(new Date().getTime())}: An unexpected error occurred, ${err}`;
+		},
 		setMobileView:function() {
 			this.$store.commit('isMobile',window.innerWidth <= 800 || window.innerHeight <= 400);
 		},
@@ -288,11 +294,11 @@ let MyApp = {
 				case 'reauthorized':
 					if(this.appReady) {
 						ws.send('lookup','get',{name:'access'},true).then(
-							(res) => {
+							res => {
 								this.$store.commit('access',res.payload);
 								this.updateCollections();
 							},
-							(err) => this.genericError(err)
+							err => this.genericError(err)
 						);
 					}
 				break;
@@ -334,7 +340,7 @@ let MyApp = {
 		// public info retrieval
 		initPublic:function() {
 			ws.send('public','get',{},false).then(
-				(res) => {
+				res => {
 					this.$store.commit('local/activated',res.payload.activated);
 					this.$store.commit('local/appName',res.payload.appName);
 					this.$store.commit('local/appNameShort',res.payload.appNameShort);
@@ -353,7 +359,7 @@ let MyApp = {
 					this.publicLoaded = true;
 					this.stateChange();
 				},
-				(err) => this.genericError(err)
+				err => this.setInitErr(err)
 			);
 		},
 		
@@ -394,7 +400,7 @@ let MyApp = {
 			}
 			
 			ws.sendMultiple(requests,true).then(
-				(res) => {
+				res => {
 					this.$store.commit('settings',res[0].payload);
 					this.$store.commit('access',res[1].payload);
 					this.$store.commit('captions',res[2].payload);
@@ -407,10 +413,12 @@ let MyApp = {
 						this.$store.commit('license',res[7].payload);
 						this.$store.commit('system',res[8].payload);
 					}
-					this.appReady = true;
-					this.updateCollections();
+					return updateCollections();
 				},
-				(err) => this.genericError(err)
+				err => this.setInitErr(err)
+			).then(
+				res => this.appReady = true,
+				err => this.setInitErr(err)
 			).finally(
 				() => this.$store.commit('busyBlockInput',false)
 			);
@@ -420,8 +428,8 @@ let MyApp = {
 		// backend reloads
 		loginReauthAll:function(blocking) {
 			ws.send('login','reauthAll',{},blocking).then(
-				(res) => {},
-				(err) => this.genericError(err)
+				res => {},
+				err => this.genericError(err)
 			);
 		},
 		schemaReload:function(moduleId) {
@@ -431,14 +439,14 @@ let MyApp = {
 				? {} : {moduleId:moduleId};
 			
 			ws.send('schema','reload',payload,true).then(
-				(res) => {},
-				(err) => this.genericError(err)
+				res => {},
+				err => this.genericError(err)
 			);
 		},
 		schedulerReload:function(blocking) {
 			ws.send('scheduler','reload',{},blocking).then(
-				(res) => {},
-				(err) => this.genericError(err)
+				res => {},
+				err => this.genericError(err)
 			);
 		}
 	}

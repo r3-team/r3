@@ -1,5 +1,4 @@
 import MyStore                from '../../stores/store.js';
-import {genericError}         from './error.js';
 import {getValidLanguageCode} from './language.js';
 import {
 	getJoinIndexMap,
@@ -51,9 +50,8 @@ export function getCollectionValues(collectionId,columnId,singleValue) {
 export function updateCollections() {
 	let access          = MyStore.getters.access.collection;
 	let collectionIdMap = MyStore.getters['schema/collectionIdMap'];
-	
-	// clear existing collections, not all might receive new values (role changed)
-	MyStore.commit('collectionsClear',{});
+	let dataRequests    = []; // one request data GET for each valid collection
+	let requestIds      = []; // collection ID, in order, for each data GET request
 	
 	for(let collectionId in collectionIdMap) {
 		
@@ -71,7 +69,8 @@ export function updateCollections() {
 		let filters      = getQueryFiltersProcessed(q.filters,{},joinIndexMap);
 		let columns      = getQueryColumnsProcessed(c.columns,{},joinIndexMap);
 		
-		ws.send('data','get',{
+		requestIds.push(c.id);
+		dataRequests.push(ws.prepare('data','get',{
 			relationId:q.relationId,
 			joins:getRelationsJoined(q.joins),
 			expressions:getQueryExpressions(columns),
@@ -79,18 +78,30 @@ export function updateCollections() {
 			orders:q.orders,
 			limit:q.fixedLimit,
 			offset:0
-		},true).then(
-			(res) => {
+		}));
+	}
+	
+	// collections must be cleared on update as some might have been removed (roles changed)
+	MyStore.commit('collectionsClear',{});
+	
+	// no relevant collections to get data for, resolve
+	if(dataRequests.length === 0)
+		return Promise.resolve();
+	
+	return ws.sendMultiple(dataRequests).then(
+		(res) => {
+			for(let i = 0, j = res.length; i < j; i++) {
+				let rows = res[i].payload.rows;
+				
 				let recordValues = [];
-				for(let i = 0, j = res.payload.rows.length; i < j; i++) {
-					recordValues.push(res.payload.rows[i].values);
+				for(let x = 0, y = rows.length; x < y; x++) {
+					recordValues.push(rows[x].values);
 				}
 				MyStore.commit('collection',{
-					id:collectionId,
+					id:requestIds[i],
 					records:recordValues
 				});
-			},
-			(err) => genericError(err)
-		);
-	}
+			}
+		}
+	);
 };
