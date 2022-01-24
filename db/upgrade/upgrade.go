@@ -427,6 +427,30 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX IF NOT EXISTS fki_collection_consumer_field_id_fkey
    				ON app.collection_consumer USING btree(field_id ASC NULLS LAST);
+			
+			-- data field default values from collections
+			ALTER TABLE app.field_data ADD COLUMN collection_id_def uuid;
+			ALTER TABLE app.field_data ADD COLUMN column_id_def uuid;
+			
+			ALTER TABLE app.field_data ADD CONSTRAINT field_data_collection_id_def_fkey
+				FOREIGN KEY (collection_id_def)
+				REFERENCES app.collection (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			ALTER TABLE app.field_data ADD CONSTRAINT field_data_column_id_def_fkey
+				FOREIGN KEY (column_id_def)
+				REFERENCES app.column (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_field_data_collection_id_def_fkey
+				ON app.field_data USING btree (collection_id_def ASC NULLS LAST);
+			
+			CREATE INDEX fki_field_data_column_id_def_fkey
+				ON app.field_data USING btree (column_id_def ASC NULLS LAST);
 		`)
 
 		// migrate existing form open actions to new 'open form' entity

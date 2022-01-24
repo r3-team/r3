@@ -510,7 +510,7 @@
 			"captions":"Captions",
 			"category":"Category selector",
 			"collection":"Collection*",
-			"collectionColumnDisplay":"Display value",
+			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*Collection is only affected if selected as filter criteria in data query.",
 			"collectionTitle":"Filter collection by user input",
 			"columnsTarget":"Place columns here",

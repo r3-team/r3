@@ -1,7 +1,7 @@
 import {getColumnTitle} from './shared/column.js';
 import {
 	getCollectionColumn,
-	getCollectionOptions
+	getCollectionValues
 } from './shared/collection.js';
 export {MyInputCollection as default};
 
@@ -13,7 +13,7 @@ let MyInputCollection = {
 			- {{ getColumnTitle(getCollectionColumn(collectionId,columnIdDisplay)) }} -
 		</option>
 		
-		<option v-for="(o,i) in getCollectionOptions(collectionId,columnIdDisplay)"
+		<option v-for="(o,i) in getCollectionValues(collectionId,columnIdDisplay,false)"
 			:value="i"
 		>{{ o }}</option>
 	</select>`,
@@ -25,7 +25,7 @@ let MyInputCollection = {
 	methods:{
 		// externals
 		getCollectionColumn,
-		getCollectionOptions,
+		getCollectionValues,
 		getColumnTitle
 	}
 };

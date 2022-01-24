@@ -510,7 +510,7 @@
 			"captions":"Titlu",
 			"category":"Selector de categorie",
 			"collection":"Collection",
-			"collectionColumnDisplay":"Display value",
+			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*Collection is only affected if selected as filter criteria in data query.",
 			"collectionTitle":"Limit collection by user input",
 			"columnsTarget":"Așezați coloane aici",

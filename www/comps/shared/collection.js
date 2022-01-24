@@ -9,34 +9,37 @@ import {
 	getRelationsJoined
 } from './query.js';
 
-export function getCollectionColumn(collectionId,columnIdDisplay) {
+export function getCollectionColumn(collectionId,columnId) {
 	let colSchema = MyStore.getters['schema/collectionIdMap'][collectionId];
 	for(let i = 0, j = colSchema.columns.length; i < j; i++) {
-		if(colSchema.columns[i].id === columnIdDisplay) {
+		if(colSchema.columns[i].id === columnId) {
 			return colSchema.columns[i];
 		}
 	}
 	return false;
 };
 
-export function getCollectionOptions(collectionId,columnIdDisplay) {
+export function getCollectionValues(collectionId,columnId,singleValue) {
 	let colSchema = MyStore.getters['schema/collectionIdMap'][collectionId];
 	let colValues = MyStore.getters['collectionIdMap'][collectionId];
 	
-	// collection might not have been retrieved yet
-	if(typeof colValues === 'undefined')
-		return [];
+	// collection might not have been retrieved yet or are empty
+	if(typeof colValues === 'undefined' || colValues.length === 0)
+		return singleValue ? null : [];
 	
 	// find requested column index by ID
 	let columnIndex = -1;
 	for(let i = 0, j = colSchema.columns.length; i < j; i++) {
-		if(colSchema.columns[i].id === columnIdDisplay) {
+		if(colSchema.columns[i].id === columnId) {
 			columnIndex = i;
 			break;
 		}
 	}
 	if(columnIndex === -1)
-		return [];
+		return singleValue ? null : [];
+	
+	if(singleValue)
+		return colValues[0][columnIndex];
 	
 	let out = [];
 	for(let i = 0, j = colValues.length; i < j; i++) {

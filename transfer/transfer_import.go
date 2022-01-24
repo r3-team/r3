@@ -337,7 +337,7 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		}
 	}
 
-	// forms, refer to relations/attributes
+	// forms, refer to relations/attributes/collections/JS functions
 	for _, e := range mod.Forms {
 
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)

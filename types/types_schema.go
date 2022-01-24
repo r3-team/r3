@@ -239,21 +239,23 @@ type FieldContainer struct {
 	PerMax         int           `json:"perMax"`
 }
 type FieldData struct {
-	Id             uuid.UUID      `json:"id"`
-	IconId         pgtype.UUID    `json:"iconId"`
-	Content        string         `json:"content"`
-	State          string         `json:"state"`
-	OnMobile       bool           `json:"onMobile"`
-	AttributeId    uuid.UUID      `json:"attributeId"`    // data attribute
-	AttributeIdAlt pgtype.UUID    `json:"attributeIdAlt"` // altern. data attribute (currently used for date period only)
-	Index          int            `json:"index"`          // data attribute index
-	Display        string         `json:"display"`        // display mode (text, date, color, ...)
-	Def            string         `json:"def"`            // data field default value
-	Min            pgtype.Int4    `json:"min"`
-	Max            pgtype.Int4    `json:"max"`
-	RegexCheck     pgtype.Varchar `json:"regexCheck"`   // regex expression to check field value against
-	JsFunctionId   pgtype.UUID    `json:"jsFunctionId"` // JS function to exec when changing values
-	Captions       CaptionMap     `json:"captions"`
+	Id              uuid.UUID      `json:"id"`
+	IconId          pgtype.UUID    `json:"iconId"`
+	Content         string         `json:"content"`
+	State           string         `json:"state"`
+	OnMobile        bool           `json:"onMobile"`
+	AttributeId     uuid.UUID      `json:"attributeId"`    // data attribute
+	AttributeIdAlt  pgtype.UUID    `json:"attributeIdAlt"` // altern. data attribute (currently used for date period only)
+	Index           int            `json:"index"`          // data attribute index
+	Display         string         `json:"display"`        // display mode (text, date, color, ...)
+	Def             string         `json:"def"`            // data field default value
+	Min             pgtype.Int4    `json:"min"`
+	Max             pgtype.Int4    `json:"max"`
+	RegexCheck      pgtype.Varchar `json:"regexCheck"`      // regex expression to check field value against
+	JsFunctionId    pgtype.UUID    `json:"jsFunctionId"`    // JS function to exec when changing values
+	CollectionIdDef pgtype.UUID    `json:"collectionIdDef"` // collection to fill default values with
+	ColumnIdDef     pgtype.UUID    `json:"columnIdDef"`     // collection column to fill default values with
+	Captions        CaptionMap     `json:"captions"`
 }
 type FieldDataRelationship struct {
 	Id             uuid.UUID   `json:"id"`
@@ -269,19 +271,21 @@ type FieldDataRelationship struct {
 	AutoSelect     int         `json:"autoSelect"` // auto select record(s)
 	// 1:1, n:1: 0 = none, 2 = second, -3 = third last
 	// n:m: 0 = none, 2 = first two, -3 = last three
-	Def          string         `json:"def"`
-	DefPresetIds []uuid.UUID    `json:"defPresetIds"` // data field default preset IDs
-	Min          pgtype.Int4    `json:"min"`
-	Max          pgtype.Int4    `json:"max"`
-	RegexCheck   pgtype.Varchar `json:"regexCheck"`   // not used for relationships
-	JsFunctionId pgtype.UUID    `json:"jsFunctionId"` // JS function to exec when changing values
-	Columns      []Column       `json:"columns"`
-	Category     bool           `json:"category"`
-	FilterQuick  bool           `json:"filterQuick"`
-	OutsideIn    bool           `json:"outsideIn"`
-	Query        Query          `json:"query"`
-	OpenForm     OpenForm       `json:"openForm"`
-	Captions     CaptionMap     `json:"captions"`
+	Def             string         `json:"def"`
+	DefPresetIds    []uuid.UUID    `json:"defPresetIds"` // data field default preset IDs
+	Min             pgtype.Int4    `json:"min"`
+	Max             pgtype.Int4    `json:"max"`
+	RegexCheck      pgtype.Varchar `json:"regexCheck"` // not used for relationships
+	JsFunctionId    pgtype.UUID    `json:"jsFunctionId"`
+	CollectionIdDef pgtype.UUID    `json:"collectionIdDef"`
+	ColumnIdDef     pgtype.UUID    `json:"columnIdDef"`
+	Columns         []Column       `json:"columns"`
+	Category        bool           `json:"category"`
+	FilterQuick     bool           `json:"filterQuick"`
+	OutsideIn       bool           `json:"outsideIn"`
+	Query           Query          `json:"query"`
+	OpenForm        OpenForm       `json:"openForm"`
+	Captions        CaptionMap     `json:"captions"`
 
 	// legacy
 	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`

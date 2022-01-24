@@ -2,6 +2,7 @@ import MyField               from './field.js';
 import MyFormHelp            from './formHelp.js';
 import MyFormLog             from './formLog.js';
 import {hasAccessToRelation} from './shared/access.js';
+import {getCollectionValues} from './shared/collection.js';
 import {srcBase64}           from './shared/image.js';
 import {
 	filterIsCorrect,
@@ -610,6 +611,7 @@ let MyForm = {
 		filterIsCorrect,
 		getAttributeValueFromString,
 		getAttributeValuesFromGetter,
+		getCollectionValues,
 		getDataFieldMap,
 		getDetailsFromIndexAttributeId,
 		getFormRoute,
@@ -687,19 +689,26 @@ let MyForm = {
 						continue;
 					
 					// apply data field default value
-					let def       = null;
-					let attribute = this.attributeIdMap[f.attributeId];
+					let def              = null;
+					let attribute        = this.attributeIdMap[f.attributeId];
 					let indexAttributeId = this.getIndexAttributeIdByField(f,false);
+					let isRelationship   = this.isAttributeRelationship(attribute.content);
+					let isRelationshipN1 = this.isAttributeRelationshipN1(attribute.content);
+					let isRelMulti       = isRelationship && f.attributeIdNm !== null || (f.outsideIn && isRelationshipN1);
 					
 					if(f.def !== '')
 						def = this.getAttributeValueFromString(attribute.content,
 							 this.getResolvedPlaceholders(f.def));
 					
-					if(this.isAttributeRelationship(attribute.content) && f.defPresetIds.length > 0) {
-						let multi = f.attributeIdNm !== null || (
-							f.outsideIn && this.isAttributeRelationshipN1(attribute.content)
+					if(f.collectionIdDef !== null && f.columnIdDef !== null)
+						def = this.getCollectionValues(
+							f.collectionIdDef,
+							f.columnIdDef,
+							!isRelMulti
 						);
-						if(!multi) {
+					
+					if(isRelationship && f.defPresetIds.length > 0) {
+						if(!isRelMulti) {
 							def = this.presetIdMapRecordId[f.defPresetIds[0]];
 						}
 						else {

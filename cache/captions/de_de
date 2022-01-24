@@ -510,7 +510,7 @@
 			"captions":"Beschriftungen",
 			"category":"Kategorieauswahl",
 			"collection":"Sammlung*",
-			"collectionColumnDisplay":"Anzeigewert",
+			"collectionIdDef":"Standardwert(e) aus Sammlung",
 			"collectionHint":"*Sammlung wird nur beeinflusst, wenn sie als Filterkriterium in der Datenabfrage genutzt wird.",
 			"collectionTitle":"Sammlung durch Benutzereingabe filtern",
 			"columnsTarget":"Spalten hier ablegen",

@@ -21,9 +21,9 @@ let MyBuilderFieldOptionsCollection = {
 	name:'my-builder-field-options-collection',
 	template:`
 		<tr>
-			<td>{{ capApp.collection }}</td>
+			<td>{{ caption }}</td>
 			<td>
-				<select v-model="collectionId">
+				<select v-model="collectionIdInput">
 					<option :value="null">-</option>
 					<optgroup
 						v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
@@ -34,61 +34,47 @@ let MyBuilderFieldOptionsCollection = {
 						</option>
 					</optgroup>
 				</select>
-			</td>
-			<td>
-				<my-button image="cancel.png"
-					@trigger="$emit('remove')"
-					:naked="true"
-				/>
-			</td>
-		</tr>
-		<tr class="collections-line">
-			<td>{{ capApp.collectionColumnDisplay }}</td>
-			<td>
-				<select v-model="columnIdDisplay" :disabled="collectionId === null">
+				<select v-model="columnIdInput" :disabled="collectionId === null">
 					<option :value="null">-</option>
 					<option v-if="collectionId !== null" v-for="c in collectionIdMap[collectionId].columns" :value="c.id">
 						{{ getItemTitleColumn(c) }}
 					</option>
 				</select>
 			</td>
-			<td></td>
+			<td>
+				<my-button image="cancel.png"
+					v-if="allowRemove"
+					@trigger="$emit('remove')"
+					:naked="true"
+				/>
+			</td>
 		</tr>
 	`,
 	props:{
-		module:    { type:Object, required:true },
-		modelValue:{ type:Object, required:true }
+		allowRemove: { type:Boolean, required:true },
+		caption:     { type:String,  required:true },
+		collectionId:{ required:true },
+		columnId:    { required:true },
+		module:      { type:Object,  required:true }
 	},
-	emits:['remove','update:modelValue'],
+	emits:['remove','update:collectionId','update:columnId'],
 	computed:{
-		collectionId:{
-			get:function()  { return this.modelValue.collectionId; },
-			set:function(v) { this.set('collectionId',v); }
+		collectionIdInput:{
+			get:function()  { return this.collectionId; },
+			set:function(v) { this.$emit('update:collectionId',v); }
 		},
-		columnIdDisplay:{
-			get:function()  { return this.modelValue.columnIdDisplay; },
-			set:function(v) { this.set('columnIdDisplay',v); }
+		columnIdInput:{
+			get:function()  { return this.columnId; },
+			set:function(v) { this.$emit('update:columnId',v); }
 		},
 		
 		// stores
 		modules:        function() { return this.$store.getters['schema/modules']; },
-		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
-		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
-		capApp:         function() { return this.$store.getters.captions.builder.form; },
-		capGen:         function() { return this.$store.getters.captions.generic; }
+		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; }
 	},
 	methods:{
-		// externals
 		getDependentModules,
-		getItemTitleColumn,
-		
-		// actions
-		set:function(name,value) {
-			let v = JSON.parse(JSON.stringify(this.modelValue));
-			v[name] = value;
-			this.$emit('update:modelValue',v);
-		}
+		getItemTitleColumn
 	}
 };
 
@@ -393,6 +379,16 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
+				<my-builder-field-options-collection
+					v-if="!isFiles && field.def === ''"
+					@update:collectionId="setNull('collectionIdDef',$event)"
+					@update:columnId="setNull('columnIdDef',$event)"
+					:allowRemove="false"
+					:caption="capApp.collectionIdDef"
+					:collectionId="field.collectionIdDef"
+					:columnId="field.columnIdDef"
+					:module="module"
+				/>
 				<tr v-if="!isRelationship">
 					<td>{{ capApp.fieldMin }}</td>
 					<td>
@@ -1029,8 +1025,12 @@ let MyBuilderFieldOptions = {
 					<my-builder-field-options-collection
 						v-for="(c,i) in field.collections"
 						@remove="collectionRemove(i)"
-						@update:modelValue="setCollection(i,$event)"
-						:modelValue="c"
+						@update:collectionId="setCollection(i,'collectionId',$event)"
+						@update:columnId="setCollection(i,'columnIdDisplay',$event)"
+						:allowRemove="true"
+						:caption="capApp.collection"
+						:collectionId="c.collectionId"
+						:columnId="c.columnIdDisplay"
 						:module="module"
 					/>
 					<tr v-if="field.collections.length !== 0">
@@ -1213,9 +1213,9 @@ let MyBuilderFieldOptions = {
 			}
 			this.$emit('set',name,val);
 		},
-		setCollection:function(i,value) {
+		setCollection:function(i,name,value) {
 			let v = JSON.parse(JSON.stringify(this.field.collections));
-			v[i] = value;
+			v[i][name] = value;
 			this.set('collections',v);
 		},
 		setIndexAttribute:function(name,indexAttributeId) {
