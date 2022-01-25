@@ -211,7 +211,6 @@ let MyForm = {
 					:fieldIdMapState="fieldIdMapState"
 					:formBadLoad="badLoad"
 					:formBadSave="badSave"
-					:formIsInline="isInline"
 					:formLoading="loading"
 					:isFullPage="isSingleField"
 					:joinsIndexMap="joinsIndexMap"
@@ -1011,9 +1010,7 @@ let MyForm = {
 		
 		// navigation
 		openForm:function(recordId,options,getterArgs,newTab) {
-			
-			// stay on form if not otherwise specified
-			let formIdOpen = this.form.id;
+			let formIdOpen = this.form.id; // stay on form by default
 			
 			// set defaults if not given
 			if(typeof recordId === 'undefined' || recordId === null)
@@ -1027,8 +1024,10 @@ let MyForm = {
 			if(typeof getterArgs === 'undefined' || getterArgs === null)
 				getterArgs = []; // no getters specified, add empty array
 			
-			// inline forms can only refresh themselves
-			if(this.isInline)
+			let stayOnForm = this.form.id === formIdOpen;
+			
+			// if inline and on the same form, reload record
+			if(this.isInline && stayOnForm)
 				return this.$emit('record-open',recordId);
 			
 			// open pop-up form if desired
@@ -1054,7 +1053,7 @@ let MyForm = {
 			}
 			
 			// keep attribute default values from current getter if form does not change
-			if(formIdOpen === this.form.id && typeof this.$route.query.attributes !== 'undefined') {
+			if(stayOnForm && typeof this.$route.query.attributes !== 'undefined') {
 				
 				// ignore current getter, if new one is supplied with same name
 				let newAttributesGetter = false;
@@ -1079,7 +1078,7 @@ let MyForm = {
 				return this.reset();
 			
 			// different form
-			if(formIdOpen !== this.form.id)
+			if(!stayOnForm)
 				return this.$router.push(path);
 			
 			// switch between two existing records or from existing to new one

@@ -241,7 +241,7 @@ let MyField = {
 						:inputIsNew="isNew"
 						:inputIsReadonly="isReadonly"
 						:inputMulti="isRelationship1N"
-						:inputOpenForm="field.openForm !== null && !formIsInline"
+						:inputOpenForm="field.openForm !== null"
 						:inputRecordIds="relationshipRecordIds"
 						:inputValid="!showInvalid"
 						:isInput="true"
@@ -311,7 +311,7 @@ let MyField = {
 			:layout="field.layout"
 			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 			:query="field.query"
-			:rowSelect="field.openForm !== null && !formIsInline"
+			:rowSelect="field.openForm !== null"
 		/>
 		
 		<!-- calendar -->
@@ -397,7 +397,6 @@ let MyField = {
 			:fieldIdMapState="fieldIdMapState"
 			:formBadLoad="formBadLoad"
 			:formBadSave="formBadSave"
-			:formIsInline="formIsInline"
 			:formLoading="formLoading"
 			:flexDirParent="field.direction"
 			:isFullPage="isFullPage"
@@ -412,7 +411,6 @@ let MyField = {
 		fieldIdMapState:{ type:Object,  required:false, default:() => {return {};} }, // overwritten states
 		formBadLoad:    { type:Boolean, required:true }, // attempted record load with no return
 		formBadSave:    { type:Boolean, required:true }, // attempted save with invalid inputs
-		formIsInline:   { type:Boolean, required:true },
 		formLoading:    { type:Boolean, required:true },
 		flexDirParent:  { type:String,  required:true }, // flex direction (row/column) of parent
 		isFullPage:     { type:Boolean, required:true },
