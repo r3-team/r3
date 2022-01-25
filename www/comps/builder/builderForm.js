@@ -94,6 +94,13 @@ let MyBuilderForm = {
 							:image="showStates ? 'visible1.png' : 'visible0.png'"
 						/>
 						<my-button
+							@trigger="showReferences = !showReferences"
+							:active="!showStates"
+							:caption="capApp.showReferences"
+							:darkBg="true"
+							:image="showStates || showReferences ? 'visible1.png' : 'visible0.png'"
+						/>
+						<my-button
 							@trigger="showHelp = !showHelp"
 							:caption="capApp.showHelp"
 							:darkBg="true"
@@ -126,7 +133,7 @@ let MyBuilderForm = {
 					:moduleId="form.moduleId"
 					:showCaptions="showCaptions"
 					:showOutside-in="true"
-					:showStates="showStates"
+					:showReferences="showStates || showReferences"
 				/>
 				
 				<!-- form context help -->
@@ -330,6 +337,7 @@ let MyBuilderForm = {
 			showFunctions:false, // show form functions
 			showHelp:false,      // show form context help
 			showOutsideIn:false, // show outside-in data fields
+			showReferences:false,// show field references (F12, F343), used for form states
 			showSidebar:true,    // show form Builder sidebar
 			showStates:false,    // show form states
 			showStatesFull:false // sub content (states/functions) are full screen

@@ -41,7 +41,7 @@ export function resolveErrCode(message) {
 	if(typeof MyStore.getters.captions.error[errContext] === 'undefined'
 		|| typeof MyStore.getters.captions.error[errContext][errNumber] === 'undefined') {
 		
-		return message;	
+		return message;
 	}
 	let cap = MyStore.getters.captions.error[errContext][errNumber];
 	

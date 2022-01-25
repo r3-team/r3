@@ -607,6 +607,7 @@
 			"showFunctions":"Functions",
 			"showHelp":"Help",
 			"showOutsideIn":"Ref. relationships",
+			"showReferences":"References",
 			"showStates":"States",
 			"sql":"SQL preview",
 			"state":"State",

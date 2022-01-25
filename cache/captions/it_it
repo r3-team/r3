@@ -607,6 +607,7 @@
 			"showFunctions":"Funzioni",
 			"showHelp":"Aiuto",
 			"showOutsideIn":"Riferimento relazione",
+			"showReferences":"References",
 			"showStates":"Condizioni",
 			"sql":"Anteprima SQL",
 			"state":"Condizione",

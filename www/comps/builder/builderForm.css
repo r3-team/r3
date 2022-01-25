@@ -149,7 +149,9 @@
 
 
 /* form functions */
-.builder-form-functions{}
+.builder-form-functions{
+	min-height:360px;
+}
 .builder-form-functions table td{
 	padding:2px 8px;
 }

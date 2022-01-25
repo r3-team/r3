@@ -39,7 +39,7 @@ let MyBuilderFields = {
 			>
 				<div class="builder-drag-item" :class="{ container:element.content === 'container' }">
 					<!-- form state field reference -->
-					<span class="reference" v-if="!isTemplate">
+					<span class="reference" v-if="showReferences && !isTemplate">
 						F{{ typeof fieldIdMapRef[element.id] !== 'undefined' ? fieldIdMapRef[element.id] : '' }}
 					</span>
 					
@@ -257,7 +257,7 @@ let MyBuilderFields = {
 					:moduleId="moduleId"
 					:showCaptions="showCaptions"
 					:showOutside-in="showOutsideIn"
-					:showStates="showStates"
+					:showReferences="showReferences"
 					:style="getStyleChildren(element)"
 				/>
 			</div>
@@ -280,7 +280,7 @@ let MyBuilderFields = {
 		moduleId:       { type:String,  required:false, default:'' },
 		showCaptions:   { type:Boolean, required:false, default:false },
 		showOutsideIn:  { type:Boolean, required:false, default:false },
-		showStates:     { type:Boolean, required:false, default:false }
+		showReferences: { type:Boolean, required:false, default:false }
 	},
 	emits:[
 		'field-column-query-set','field-counter-set','field-id-query-set',
