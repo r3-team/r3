@@ -7,7 +7,6 @@ let MyBuilderIconInput = {
 	template:`<div class="builder-icon-input">
 		<div class="iconLine input-custom" :tabindex="readonly ? -1 : 0"
 			@click="click"
-			v-click-outside="escaped"
 			:class="{ clickable:!readonly, disabled:readonly }"
 		>
 			<img class="builder-icon"
@@ -19,26 +18,47 @@ let MyBuilderIconInput = {
 			/>
 		</div>
 		
-		<div class="anchor">
-			<div class="dropdown shade"
-				v-if="showDropdown && iconIdMap !== null"
-			>
-				<my-button image="cancel.png"
-					v-if="iconIdSelected"
-					@trigger="select(null)"
-					:cancel="true"
-				/>
-				
-				<div class="module"
-					v-for="mod in getDependentModules(module,modules).filter(v => v.icons.length !== 0)"
-				>
-					<span>{{ mod.name }}</span>
-					
-					<img class="builder-icon clickable"
-						v-for="icon in mod.icons"
-						@click="select(icon.id)"
-						:src="srcBase64(icon.file)"
-					/>
+		<div class="app-sub-window" v-if="showInput && iconIdMap !== null" @click.self="close">
+			<div class="build-icon-input-window shade">
+				<div class="contentBox">
+					<div class="top">
+						<div class="area">
+							<img class="icon"
+								v-if="iconSelected"
+								:src="srcBase64(iconSelected.file)"
+							/>
+							<img class="icon" src="images/noPic.png"
+								v-if="!iconSelected"
+							/>
+						</div>
+						<div class="area">
+							<my-button image="cancel.png"
+								@trigger="close"
+								:cancel="true"
+							/>
+						</div>
+					</div>
+					<div class="content">
+						<div class="module" :class="{ first:i === 0 }"
+							v-for="(mod,i) in getDependentModules(module,modules).filter(v => v.icons.length !== 0)"
+						>
+							<span>{{ mod.name }}</span>
+							
+							<img class="builder-icon clickable"
+								v-for="icon in mod.icons"
+								@click="select(icon.id)"
+								:src="srcBase64(icon.file)"
+							/>
+						</div>
+						<div class="actions">
+							<my-button image="remove.png"
+								@trigger="select(null)"
+								:active="iconSelected !== false"
+								:caption="capGen.button.clear"
+								:cancel="true"
+							/>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -51,19 +71,19 @@ let MyBuilderIconInput = {
 	emits:['input'],
 	data:function() {
 		return {
-			showDropdown:false
+			showInput:false
 		};
 	},
 	computed:{
 		iconSelected:function() {
-			if(this.iconIdSelected === null) return false;
-			
-			return this.iconIdMap[this.iconIdSelected];
+			return this.iconIdSelected === null
+				? false : this.iconIdMap[this.iconIdSelected];
 		},
 		
 		// stores
 		modules:  function() { return this.$store.getters['schema/modules']; },
-		iconIdMap:function() { return this.$store.getters['schema/iconIdMap']; }
+		iconIdMap:function() { return this.$store.getters['schema/iconIdMap']; },
+		capGen:   function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
 		// externals
@@ -73,14 +93,13 @@ let MyBuilderIconInput = {
 		// actions
 		click:function() {
 			if(!this.readonly)
-				this.showDropdown = !this.showDropdown;
+				this.showInput = !this.showInput;
+		},
+		close:function() {
+			this.showInput = false;
 		},
 		select:function(iconId) {
 			this.$emit('input',iconId);
-			this.showDropdown = false;
-		},
-		escaped:function() {
-			this.showDropdown = false;
 		}
 	}
 };

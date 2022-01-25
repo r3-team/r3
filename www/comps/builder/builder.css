@@ -524,9 +524,6 @@
 	display:flex;
 	flex-direction:column;
 }
-.builder-icon-input .anchor{
-	position:relative;
-}
 .builder-icon-input .iconLine{
 	width:40px;
 	height:30px;
@@ -543,46 +540,36 @@
 	outline:none;
 }
 .builder-icon-input .builder-icon{
-	width:24px;
-	height:24px;
-	margin:2px;
+	width:22px;
+	height:22px;
+	margin:3px;
 	filter:var(--image-filter);
-}
-.builder-icon-input .builder-icon:hover{
-	width:28px;
-	height:28px;
-	margin:0px;
 }
 .builder-icon-input .builder-icon.not-set{
 	--image-filter-contrast:50%;
 }
-.builder-icon-input .dropdown{
-	width:290px;
-	padding:6px 0px 0px 6px;
-	margin-top:-1px;
-	margin-left:-10px;
-	position:absolute;
-	top:0px;
-	left:0px;
-	display:flex;
-	flex-direction:column;
-	align-items:flex-start;
-	border:1px solid #888;
-	border-radius:5px;
-	background-color:var(--color-bg);
-	z-index:var(--z-index-builder-hover-input);
+.builder-icon-input .builder-icon:hover{
+	width:26px;
+	height:26px;
+	margin:1px;
 }
-.builder-icon-input .dropdown .module{
+.build-icon-input-window {
+	max-width:500px;
+}
+.build-icon-input-window .module{
 	display:flex;
 	flex-flow:row wrap;
 }
-.builder-icon-input .dropdown .module span{
+.build-icon-input-window .module span{
 	width:100%;
 	margin:8px 0px 0px;
 	color:var(--color-font) !important;
 }
-.builder-icon-input .dropdown .builder-icon{
-	padding:0px 6px 6px 0px;
+.build-icon-input-window .module.first span{
+	margin:0px;
+}
+.build-icon-input-window .actions{
+	margin-top:10px;
 }
 
 /* role */
