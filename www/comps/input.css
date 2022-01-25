@@ -5,9 +5,10 @@
 	justify-content:center;
 	flex:1 1 auto;
 	outline:none;
+	margin:0px 3px;
 }
 .bool>div{
-	width:30px;
+	min-width:30px;
 	height:26px;
 	line-height:26px;
 	box-sizing:border-box;

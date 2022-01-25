@@ -36,7 +36,6 @@
 }
 .button.background.darkBg{
 	border:2px solid var(--color-action-border);
-	box-shadow:none;
 }
 .button.background.darkBg.cancel{
 	border:2px solid var(--color-cancel-border);

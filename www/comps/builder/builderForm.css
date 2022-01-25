@@ -19,6 +19,11 @@
 	border-radius:5px;
 	overflow:auto;
 }
+.builder-form .sidebar .templates-filter{
+	display:flex;
+	flex-flow:row nowrap;
+	margin-bottom:10px;
+}
 
 /* form builder main area */
 .builder-form-main{

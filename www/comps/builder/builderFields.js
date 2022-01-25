@@ -32,7 +32,7 @@ let MyBuilderFields = {
 	>
 		<template #item="{element,index}">
 	    		<div class="builder-field"
-				v-show="!isRelationship(element) || element.outsideIn === false || showOutsideIn"
+				v-show="show(element)"
 				:class="getClass(element)"
 				:key="element.id"
 				:style="getStyleParent(element)"
@@ -127,7 +127,7 @@ let MyBuilderFields = {
 						>
 							<span>{{ getFlexBasis(element.basis) }}</span>
 						</div>
-					
+						
 						<div class="part clickable"
 							@click="fieldPropertySet(index,'grow',toggleSize(element.grow,1,1))"
 							@click.prevent.right="fieldPropertySet(index,'grow',toggleSize(element.grow,-1))"
@@ -176,7 +176,7 @@ let MyBuilderFields = {
 						:contentName="capApp.fieldTitle"
 						:language="builderLanguage"
 					/>
-				
+					
 					<my-builder-caption
 						v-if="element.content === 'data'"
 						v-model="element.captions.fieldHelp"
@@ -256,7 +256,6 @@ let MyBuilderFields = {
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="moduleId"
 					:showCaptions="showCaptions"
-					:showOutside-in="showOutsideIn"
 					:showReferences="showReferences"
 					:style="getStyleChildren(element)"
 				/>
@@ -279,8 +278,11 @@ let MyBuilderFields = {
 		joinsIndexMap:  { type:Object,  required:false, default:() => {return {}} },
 		moduleId:       { type:String,  required:false, default:'' },
 		showCaptions:   { type:Boolean, required:false, default:false },
-		showOutsideIn:  { type:Boolean, required:false, default:false },
-		showReferences: { type:Boolean, required:false, default:false }
+		showReferences: { type:Boolean, required:false, default:false },
+		template1n:     { type:Boolean, required:false, default:false },
+		templateIndex:  { type:Number,  required:false, default:-1 },
+		templateN1:     { type:Boolean, required:false, default:false },
+		templateNm:     { type:Boolean, required:false, default:false }
 	},
 	emits:[
 		'field-column-query-set','field-counter-set','field-id-query-set',
@@ -314,6 +316,24 @@ let MyBuilderFields = {
 		getRelationsJoined,
 		getSubQueryFilterExpressions,
 		isAttributeRelationship,
+		
+		// presentation
+		show:function(field) {
+			// filter only templates and only data fields
+			if(!this.isTemplate || field.content !== 'data') 
+				return true;
+			
+			// filter by selected index (if set)
+			if(this.templateIndex !== -1 && field.index !== this.templateIndex)
+				return false;
+			
+			// filter relationship fields
+			if(!this.isRelationship(field)) return true;
+			if(!field.outsideIn)            return this.templateN1; 
+			if(this.template1n && field.attributeIdNm === null) return true;
+			if(this.templateNm && field.attributeIdNm !== null) return true;
+			return false;
+		},
 		
 		// actions
 		fieldIdEditSet:function(fieldId) {
@@ -431,8 +451,8 @@ let MyBuilderFields = {
 		isRelationship:function(field) {
 			if(field.content !== 'data') return false;
 			
-			let atr = this.attributeIdMap[field.attributeId];
-			return this.isAttributeRelationship(atr.content);
+			return this.isAttributeRelationship(
+				this.attributeIdMap[field.attributeId].content);
 		},
 		
 		// getters

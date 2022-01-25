@@ -305,6 +305,7 @@
 
 /* movable elements */
 .builder-drag-item{
+	font-family: Consolas, monaco, monospace;
 	flex:0 1 24px;
 	padding:2px 2px 2px 6px;
 	line-height:24px;
@@ -355,7 +356,6 @@
 }
 .builder-drag-item .title{
 	padding:0px 3px;
-	font-size:90%;
 	word-wrap:anywhere;
 }
 .builder-drag-item .reference{
@@ -530,6 +530,7 @@
 .builder-icon-input .iconLine{
 	width:40px;
 	height:30px;
+	margin-right:4px;
 	display:flex;
 	flex-direction:row;
 	justify-content:center;

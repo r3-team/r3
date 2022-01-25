@@ -132,7 +132,6 @@ let MyBuilderForm = {
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="form.moduleId"
 					:showCaptions="showCaptions"
-					:showOutside-in="true"
 					:showReferences="showStates || showReferences"
 				/>
 				
@@ -277,12 +276,19 @@ let MyBuilderForm = {
 				
 				<!-- template fields -->
 				<div class="templates-wrap">
-					<div class="content-row">
+					<div class="content-row default-inputs">
 						<h2>{{ capApp.fields }}</h2>
 						
-						<div class="content-row">
-							<span>{{ capApp.showOutsideIn }}</span>
-							<my-bool v-model="showOutsideIn" />
+						<div class="templates-filter">
+							<my-bool caption0="n:1" caption1="n:1" v-model="showTemplateN1" />
+							<my-bool caption0="1:n" caption1="1:n" v-model="showTemplate1n" />
+							<my-bool caption0="n:m" caption1="n:m" v-model="showTemplateNm" />
+							<select v-model="templateIndex" class="short">
+								<option value="-1">{{ capGen.option.all }}</option>
+								<option v-for="j in joinsIndexMap" :value="j.index">
+									{{ j.index }})
+								</option>
+							</select>
 						</div>
 					</div>
 					
@@ -290,14 +296,17 @@ let MyBuilderForm = {
 						<my-builder-fields flexDirParent="column"
 							@field-counter-set="fieldCounter = $event"
 							@field-move-store="fieldMoveStore"
-							:builder-language="builderLanguage"
+							:builderLanguage="builderLanguage"
 							:fields="fieldsTemplate"
-							:field-move-list="fieldMoveList"
-							:field-move-index="fieldMoveIndex"
-							:field-counter="fieldCounter"
+							:fieldMoveList="fieldMoveList"
+							:fieldMoveIndex="fieldMoveIndex"
+							:fieldCounter="fieldCounter"
 							:formId="id"
-							:is-template="true"
-							:show-outside-in="showOutsideIn"
+							:isTemplate="true"
+							:template1n="showTemplate1n"
+							:templateIndex="parseInt(templateIndex)"
+							:templateN1="showTemplateN1"
+							:templateNm="showTemplateNm"
 						/>
 					</div>
 				</div>
@@ -336,11 +345,14 @@ let MyBuilderForm = {
 			showCaptions:true,   // show caption inputs on non-container fields
 			showFunctions:false, // show form functions
 			showHelp:false,      // show form context help
-			showOutsideIn:false, // show outside-in data fields
 			showReferences:false,// show field references (F12, F343), used for form states
 			showSidebar:true,    // show form Builder sidebar
 			showStates:false,    // show form states
-			showStatesFull:false // sub content (states/functions) are full screen
+			showStatesFull:false,// sub content (states/functions) are full screen
+			showTemplate1n:false,// show templates for 1:n relationship input fields
+			showTemplateN1:true, // show templates for n:1 relationship input fields
+			showTemplateNm:false,// show templates for n:m relationship input fields
+			templateIndex:'-1'
 		};
 	},
 	computed:{
@@ -463,7 +475,7 @@ let MyBuilderForm = {
 			let that = this;
 			let getIndexIds = function(fields) {
 				let indexIds = [];
-
+				
 				for(let i = 0, j = fields.length; i < j; i++) {
 					let f = fields[i];
 					
@@ -747,21 +759,31 @@ let MyBuilderForm = {
 		},
 		createFieldsForRelation:function(relation,index) {
 			let fields = [];
-			
 			// create data fields from all attributes from this relation
+			// non-relationship attributes
 			for(let i = 0, j = relation.attributes.length; i < j; i++) {
 				let atr = relation.attributes[i];
 				
-				if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,false,null)))
-					continue;
-				
-				if(relation.attributeIdPk === atr.id)
-					continue;
-				
-				fields.push(this.createFieldData(index,atr,false,null));
+				if(!this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,false,null))
+					&& relation.attributeIdPk !== atr.id
+					&& !this.isAttributeRelationship(atr.content)
+				) {
+					fields.push(this.createFieldData(index,atr,false,null));
+				}
 			}
 			
-			// create data fields with attributes from relationships (outside in)
+			// relationship attributes
+			for(let i = 0, j = relation.attributes.length; i < j; i++) {
+				let atr = relation.attributes[i];
+				
+				if(!this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,false,null))
+					&& this.isAttributeRelationship(atr.content)
+				) {
+					fields.push(this.createFieldData(index,atr,false,null));
+				}
+			}
+			
+			// relationship attributes from outside (1:n)
 			for(let relId in this.relationIdMap) {
 				let rel = this.relationIdMap[relId];
 				
@@ -785,13 +807,11 @@ let MyBuilderForm = {
 					fields.push(this.createFieldData(index,atr,true,null));
 				}
 				
-				// relationship attributes that are candidates for n:m relationships
+				// relationship attributes that can be used to build n:m relationships
 				let atrsN1 = [];
 				for(let i = 0, j = rel.attributes.length; i < j; i++) {
-					if(!this.isAttributeRelationshipN1(rel.attributes[i].content))
-						continue;
-					
-					atrsN1.push(rel.attributes[i]);
+					if(this.isAttributeRelationshipN1(rel.attributes[i].content))
+						atrsN1.push(rel.attributes[i]);
 				}
 				
 				for(let i = 0, j = atrsN1.length; i < j; i++) {
