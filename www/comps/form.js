@@ -951,39 +951,36 @@ let MyForm = {
 			window.history.back();
 		},
 		popUpRecordChanged:function(recordId,change) {
-			if(!this.isData)
-				return;
-			
-			// update data field value to reflect change of pop-up form record
-			let field = this.fieldIdMapData[this.popUpFieldId];
-			let atr   = this.attributeIdMap[field.attributeId];
-			let iaId  = this.getIndexAttributeIdByField(field,false);
-			
-			if(!this.isAttributeRelationship(atr.content))
-				return;
-			
-			let isMulti = field.attributeIdNm !== null ||
-				(field.outsideIn && this.isAttributeRelationshipN1(atr.content));
-			
-			switch(change) {
-				case 'deleted':
-					if(!isMulti)
-						return this.values[iaId] = null;
+			if(typeof this.fieldIdMapData[this.popUpFieldId] !== 'undefined') {
+				// update data field value to reflect change of pop-up form record
+				let field = this.fieldIdMapData[this.popUpFieldId];
+				let atr   = this.attributeIdMap[field.attributeId];
+				let iaId  = this.getIndexAttributeIdByField(field,false);
+				
+				if(this.isAttributeRelationship(atr.content)) {
+					let isDeleted = change === 'deleted';
+					let isUpdated = change === 'updated';
+					let isMulti = field.attributeIdNm !== null ||
+						(field.outsideIn && this.isAttributeRelationshipN1(atr.content));
 					
-					let pos = this.values[iaId].indexOf(this.popUpRecordId);
-					if(pos !== -1) this.values[iaId].splice(pos,1);
-				break;
-				case 'updated':
-					if(!isMulti)
-						return this.values[iaId] = recordId;
-					
-					if(this.values[iaId] === null)
-						return this.values[iaId] = [recordId];
-					
-					if(this.values[iaId].indexOf(recordId) === -1)
-						this.values[iaId].push(recordId);
-				break;
+					if(!isMulti) {
+						this.values[iaId] = isDeleted ? null : recordId;
+					}
+					else if(isDeleted) {
+						let pos = this.values[iaId].indexOf(this.popUpRecordId);
+						if(pos !== -1) this.values[iaId].splice(pos,1);
+					}
+					else if(isUpdated) {
+						if(this.values[iaId] === null) {
+							this.values[iaId] = [recordId];
+						}
+						else if(this.values[iaId].indexOf(recordId) === -1) {
+							this.values[iaId].push(recordId);
+						}
+					}
+				}
 			}
+			// reload form to update fields (incl. non-data field like lists)
 			this.loading = true;
 			this.releaseLoadingOnNextTick();
 		},
