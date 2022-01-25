@@ -128,7 +128,8 @@ let MyMenu = {
 				
 				<my-button image="builder.png"
 					v-if="isAdmin && builderEnabled && !isMobile && !productionMode"
-					@trigger="openBuilder"
+					@trigger="openBuilder(false)"
+					@trigger-middle="openBuilder(true)"
 					:darkBg="true"
 				/>
 			</div>
@@ -179,8 +180,9 @@ let MyMenu = {
 		srcBase64,
 		
 		// actions
-		openBuilder:function() {
-			this.$router.push('/builder/menu/'+this.module.id);
+		openBuilder:function(middle) {
+			if(!middle) this.$router.push('/builder/menu/'+this.module.id);
+			else        window.open('#/builder/menu/'+this.module.id,'_blank');
 		}
 	}
 };

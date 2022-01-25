@@ -107,7 +107,8 @@ let MyForm = {
 					/>
 					<my-button image="builder.png"
 						v-if="isAdmin && builderEnabled && !isMobile && !productionMode"
-						@trigger="openBuilder"
+						@trigger="openBuilder(false)"
+						@trigger-middle="openBuilder(true)"
 						:darkBg="true"
 					/>
 					<my-button image="cancel.png"
@@ -888,8 +889,9 @@ let MyForm = {
 			`;
 			return Function(argNames,code)(this.exposedFunctions,...args);
 		},
-		openBuilder:function() {
-			this.$router.push('/builder/form/'+this.form.id);
+		openBuilder:function(middle) {
+			if(!middle) this.$router.push('/builder/form/'+this.form.id);
+			else        window.open('#/builder/form/'+this.form.id,'_blank');
 		},
 		openNewAsk:function(middleClick) {
 			// middle click does not kill form inputs, no confirmation required
