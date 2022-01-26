@@ -369,26 +369,6 @@ let MyBuilderFieldOptions = {
 			</tr>
 			
 			<template v-if="isData">
-				<tr v-if="!isFiles && !isRelationship">
-					<td>{{ capApp.fieldDefault }}</td>
-					<td>
-						<input
-							@input="set('def',$event.target.value)"
-							:placeholder="capApp.fieldDefaultHint"
-							:value="field.def"
-						/>
-					</td>
-				</tr>
-				<my-builder-field-options-collection
-					v-if="!isFiles && field.def === ''"
-					@update:collectionId="setNull('collectionIdDef',$event)"
-					@update:columnId="setNull('columnIdDef',$event)"
-					:allowRemove="false"
-					:caption="capApp.collectionIdDef"
-					:collectionId="field.collectionIdDef"
-					:columnId="field.columnIdDef"
-					:module="module"
-				/>
 				<tr v-if="!isRelationship">
 					<td>{{ capApp.fieldMin }}</td>
 					<td>
@@ -440,6 +420,26 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
+				<tr v-if="!isFiles && !isRelationship">
+					<td>{{ capApp.fieldDefault }}</td>
+					<td>
+						<input
+							@input="set('def',$event.target.value)"
+							:placeholder="capApp.fieldDefaultHint"
+							:value="field.def"
+						/>
+					</td>
+				</tr>
+				<my-builder-field-options-collection
+					v-if="!isFiles && field.def === ''"
+					@update:collectionId="setNull('collectionIdDef',$event)"
+					@update:columnId="setNull('columnIdDef',$event)"
+					:allowRemove="false"
+					:caption="capApp.collectionIdDef"
+					:collectionId="field.collectionIdDef"
+					:columnId="field.columnIdDef"
+					:module="module"
+				/>
 				<tr v-if="isString && field.display === 'richtext'">
 					<td>{{ capApp.fieldAttributeIdAltRichtextFiles }}</td>
 					<td>

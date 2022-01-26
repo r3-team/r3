@@ -708,6 +708,8 @@ let MyBuilderForm = {
 				max:null,
 				regexCheck:null,
 				jsFunctionId:null,
+				collectionIdDef:null,
+				columnIdDef:null,
 				captions:{
 					fieldTitle:{},
 					fieldHelp:{}
