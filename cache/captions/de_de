@@ -86,6 +86,7 @@
 		"notice":"Hinweis",
 		"order":"Reihenf.",
 		"password":"Passwort",
+		"preview":"Vorschau",
 		"results":"{CNT} Ergebnisse",
 		"resultsNone":"- keine Ergebnisse -",
 		"resultsOf":"/ {CNT}",
@@ -421,6 +422,7 @@
 			"columnsTarget":"Spalten hier ablegen",
 			"contentColumn":"Spalten-Datenabfrage",
 			"new":"Neue Sammlung",
+			"previewHint":"Sammlungswerte für den eingeloggten Benutzer. Sammlungen werden beim Seitenaufruf geladen (F5 zum neu laden) wenn sie in zugewiesenen Rollen aktiviert sind.",
 			"query":"Query",
 			"title":"Sammlungen",
 			"titleOne":"Sammlung \"{NAME}\""
@@ -702,7 +704,6 @@
 			"placeholdersGlobal":"Global",
 			"placeholdersInstance":"Instanz",
 			"placeholdersModules":"Anwendungen",
-			"preview":"Vorschau",
 			"runOnce":"Einmal ausführen",
 			"schedules":"Wiederholung",
 			"schedulesItem":"{CNT} Zeitpläne",

@@ -86,6 +86,7 @@
 		"notice":"Notice",
 		"order":"Order",
 		"password":"Password",
+		"preview":"Preview",
 		"results":"{CNT} results",
 		"resultsNone":"- no results -",
 		"resultsOf":"/ {CNT}",
@@ -421,6 +422,7 @@
 			"columnsTarget":"Place columns here",
 			"contentColumn":"Column data sub query",
 			"new":"New collection",
+			"previewHint":"Collection values for the logged in user. Collections are retrieved on page load (F5 to reload) if they are enabled within assigned roles.",
 			"query":"Query",
 			"title":"Collections",
 			"titleOne":"Collection '{NAME}'"
@@ -702,7 +704,6 @@
 			"placeholdersGlobal":"Global",
 			"placeholdersInstance":"Instance",
 			"placeholdersModules":"Applications",
-			"preview":"Preview",
 			"runOnce":"Run once",
 			"schedules":"Recurrence",
 			"schedulesItem":"{CNT} schedules",

@@ -46,23 +46,50 @@ let MyBuilderCollection = {
 						:caption="capGen.button.refresh"
 						:darkBg="true"
 					/>
+					<my-button
+						@trigger="showPreview = !showPreview"
+						:caption="capGen.preview"
+						:darkBg="true"
+						:image="showPreview ? 'visible1.png' : 'visible0.png'"
+					/>
 				</div>
 			</div>
-			<div class="content columnsTarget">
-				<div v-if="columns.length === 0">{{ capApp.columnsTarget }}</div>
-				<my-builder-columns groupName="columns"
-					@columns-set="columns = $event"
-					@column-id-query-set="columnIdQuery = $event"
-					@column-remove=""
-					:builderLanguage="builderLanguage"
-					:columnIdQuery="columnIdQuery"
-					:columns="columns"
-					:hasCaptions="true"
-					:joins="joins"
-					:isTemplate="false"
-					:moduleId="module.id"
-					:showCaptions="true"
-				/>
+			
+			<div class="content no-padding">
+				<div class="preview" v-if="showPreview">
+					<table>
+						<thead>
+							<tr>
+								<th v-for="c in collection.columns">
+									{{ attributeIdMap[c.attributeId].name }}
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<tr v-for="r in collectionRows">
+								<td v-for="v in r">{{ v }}</td>
+							</tr>
+						</tbody>
+					</table>
+					<p>{{ capApp.previewHint }}</p>
+				</div>
+				
+				<div class="columnsTarget">
+					<div v-if="columns.length === 0">{{ capApp.columnsTarget }}</div>
+					<my-builder-columns groupName="columns"
+						@columns-set="columns = $event"
+						@column-id-query-set="columnIdQuery = $event"
+						@column-remove=""
+						:builderLanguage="builderLanguage"
+						:columnIdQuery="columnIdQuery"
+						:columns="columns"
+						:hasCaptions="true"
+						:joins="joins"
+						:isTemplate="false"
+						:moduleId="module.id"
+						:showCaptions="true"
+					/>
+				</div>
 			</div>
 			
 			<div class="columnsTemplates">
@@ -162,6 +189,7 @@ let MyBuilderCollection = {
 			columnIdQuery:null,
 			
 			// state
+			showPreview:false,
 			showSidebar:true
 		};
 	},
@@ -195,9 +223,18 @@ let MyBuilderCollection = {
 			return this.columnQueryEdit !== false;
 		},
 		
+		// entities
+		module:function() {
+			return this.moduleIdMap[this.collection.moduleId];
+		},
+		collectionRows:function() {
+			let col = this.$store.getters.collectionIdMap[this.collection.id];
+			return typeof col !== 'undefined' ? col : [];
+		},
+		
 		// stores
-		module:         function() { return this.moduleIdMap[this.collection.moduleId]; },
 		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
+		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
 		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
 		settings:       function() { return this.$store.getters.settings; },
 		capApp:         function() { return this.$store.getters.captions.builder.collection; },

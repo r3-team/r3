@@ -56,7 +56,7 @@ let MyBuilderJsFunction = {
 					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
-						:caption="capApp.preview"
+						:caption="capGen.preview"
 						:darkBg="true"
 						:image="showPreview ? 'visible1.png' : 'visible0.png'"
 					/>

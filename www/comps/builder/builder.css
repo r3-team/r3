@@ -369,6 +369,20 @@
 	display:flex;
 	flex-direction:row;
 }
+.builder-collection .preview{
+	padding:6px 8px;
+	border-bottom:2px solid var(--color-border);
+}
+.builder-collection .preview table{
+	min-width:200px;
+}
+.builder-collection .preview table th{
+	border-bottom:1px solid var(--color-border);
+}
+.builder-collection .preview table th,
+.builder-collection .preview table td{
+	padding:4px 8px;
+}
 .builder-collection .columnsTarget{
 	display:flex;
 	flex-flow:column nowrap;
