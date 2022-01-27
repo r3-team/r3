@@ -83,6 +83,7 @@ let MyBuilderCollection = {
 						:builderLanguage="builderLanguage"
 						:columnIdQuery="columnIdQuery"
 						:columns="columns"
+						:displayOptions="false"
 						:hasCaptions="true"
 						:joins="joins"
 						:isTemplate="false"

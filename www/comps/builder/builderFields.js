@@ -211,6 +211,7 @@ let MyBuilderFields = {
 						:builderLanguage="builderLanguage"
 						:columnIdQuery="columnIdQuery"
 						:columns="element.columns"
+						:displayOptions="true"
 						:groupName="element.id+'_columns'"
 						:hasCaptions="element.content === 'list'"
 						:joins="element.query.joins"

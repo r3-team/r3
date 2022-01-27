@@ -24,7 +24,7 @@ let MyBuilderColumnOptions = {
 	components:{MyBuilderQuery},
 	template:`<div class="builder-column-options">
 		<table class="fullWidth default-inputs"><tbody>
-			<tr>
+			<tr v-if="displayOptions">
 				<td>{{ capApp.onMobile }}</td>
 				<td>
 					<my-bool
@@ -33,7 +33,7 @@ let MyBuilderColumnOptions = {
 					/>
 				</td>
 			</tr>
-			<tr>
+			<tr v-if="displayOptions">
 				<td>{{ capApp.columnSize }}</td>
 				<td>
 					<input
@@ -49,7 +49,7 @@ let MyBuilderColumnOptions = {
 					/>
 				</td>
 			</tr>
-			<tr>
+			<tr v-if="displayOptions">
 				<td>{{ capApp.columnLength }}</td>
 				<td>
 					<input
@@ -65,7 +65,7 @@ let MyBuilderColumnOptions = {
 					/>
 				</td>
 			</tr>
-			<tr>
+			<tr v-if="displayOptions">
 				<td>{{ capApp.columnWrap }}</td>
 				<td>
 					<my-bool
@@ -74,7 +74,7 @@ let MyBuilderColumnOptions = {
 					/>
 				</td>
 			</tr>
-			<tr>
+			<tr v-if="displayOptions">
 				<td>{{ capApp.columnBatch }}</td>
 				<td>
 					<input
@@ -90,7 +90,7 @@ let MyBuilderColumnOptions = {
 					/>
 				</td>
 			</tr>
-			<tr>
+			<tr v-if="displayOptions">
 				<td>{{ capApp.display }}</td>
 				<td>
 					<select
@@ -170,6 +170,7 @@ let MyBuilderColumnOptions = {
 	props:{
 		builderLanguage:{ type:String, required:true },
 		column:         { type:Object, required:true },
+		displayOptions: { type:Boolean,required:true },
 		joins:          { type:Array,  required:false, default:() => [] },
 		moduleId:       { type:String, required:true }
 	},
@@ -262,7 +263,7 @@ export let MyBuilderColumns = {
 					
 					<!-- toggle: show on mobile -->
 					<img class="action edit clickable"
-						v-if="!isTemplate"
+						v-if="!isTemplate && displayOptions"
 						@click="propertySet(index,'onMobile',!element.onMobile)"
 						:src="element.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
 						:title="capApp.onMobile"
@@ -278,7 +279,7 @@ export let MyBuilderColumns = {
 					<div class="title">{{ getTitle(element) }}</div>
 					
 					<div class="part clickable"
-						v-if="!isTemplate"
+						v-if="!isTemplate && displayOptions"
 						@click="propertySet(index,'basis',toggleSize(element.basis,25))"
 						@click.prevent.right="propertySet(index,'basis',toggleSize(element.basis,-25))"
 						:title="capApp.columnSize"
@@ -287,7 +288,7 @@ export let MyBuilderColumns = {
 					</div>
 					
 					<div class="title clickable"
-						v-if="!isTemplate"
+						v-if="!isTemplate && displayOptions"
 						@click="batchSet(index,1)"
 						@click.right.prevent="batchSet(index,-1)"
 						:title="element.batch === null ? capApp.columnBatchHintNot : capApp.columnBatchHint.replace('{CNT}',element.batch)"
@@ -317,6 +318,7 @@ export let MyBuilderColumns = {
 					@set="(...args) => propertySet(index,args[0],args[1])"
 					:builderLanguage="builderLanguage"
 					:column="element"
+					:displayOptions="displayOptions"
 					:joins="joins"
 					:moduleId="moduleId"
 				/>
@@ -327,6 +329,7 @@ export let MyBuilderColumns = {
 		builderLanguage:{ type:String,  required:true },
 		columns:        { type:Array,   required:true },
 		columnIdQuery:  { required:false,default:null },
+		displayOptions: { type:Boolean, required:true },
 		groupName:      { type:String,  required:true },
 		hasCaptions:    { type:Boolean, required:true },
 		isTemplate:     { type:Boolean, required:true },
@@ -426,6 +429,7 @@ export let MyBuilderColumnTemplates = {
 		<my-builder-columns
 			:builderLanguage="builderLanguage"
 			:columns="columnsTemplate"
+			:displayOptions="false"
 			:groupName="groupName"
 			:hasCaptions="false"
 			:isTemplate="true"
@@ -435,7 +439,7 @@ export let MyBuilderColumnTemplates = {
 	props:{
 		builderLanguage:{ type:String, required:true },
 		columns:        { type:Array,  required:true },
-		groupName:      { type:String,  required:true },
+		groupName:      { type:String, required:true },
 		joins:          { type:Array,  required:true },
 		moduleId:       { type:String, required:true }
 	},
