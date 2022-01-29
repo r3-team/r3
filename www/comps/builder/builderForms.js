@@ -81,9 +81,10 @@ let MyBuilderFormsItem = {
 				presetIdOpen:null,
 				iconId:null,
 				name:'',
+				query:null,
 				fields:[],
 				functions:[],
-				query:null,
+				states:[],
 				captions:{
 					formTitle:{}
 				}
@@ -162,30 +163,26 @@ let MyBuilderFormsItem = {
 			);
 		},
 		set:function() {
-			let query = JSON.parse(JSON.stringify(this.form.query));
-			if(query === null)
-				query = this.getQueryTemplate();
+			let form = JSON.parse(JSON.stringify(this.form));
+			if(form.query === null)
+				form.query = this.getQueryTemplate();
 			
-			ws.send('form','set',{
-				id:this.form.id,
-				moduleId:this.moduleId,
-				presetIdOpen:this.presetIdOpen,
-				iconId:this.iconId,
-				name:this.name,
-				query:query,
-				fields:this.form.fields,
-				functions:this.form.functions,
-				states:this.form.states,
-				captions:this.captions
-			},true).then(
-				(res) => {
+			// set overwritable values
+			form.moduleId     = this.moduleId;
+			form.presetIdOpen = this.presetIdOpen;
+			form.iconId       = this.iconId;
+			form.name         = this.name;
+			form.captions     = this.captions;
+			
+			ws.send('form','set',form,true).then(
+				res => {
 					if(this.isNew) {
 						this.name     = '';
 						this.captions = {formTitle:{}};
 					}
 					this.$root.schemaReload(this.moduleId);
 				},
-				(err) => this.$root.genericError(err)
+				err => this.$root.genericError(err)
 			);
 		}
 	}

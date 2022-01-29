@@ -569,6 +569,7 @@
 }
 .build-icon-input-window {
 	max-width:500px;
+	min-width:300px;
 }
 .build-icon-input-window .module{
 	display:flex;
@@ -583,7 +584,7 @@
 	margin:0px;
 }
 .build-icon-input-window .actions{
-	margin-top:10px;
+	margin-top:20px;
 }
 
 /* role */
@@ -610,14 +611,13 @@
 .builder-roles .role-child{
 	margin:0px 0px 0px 0px;
 }
-.builder-role{
-	flex:1 1 auto;
-	display:flex;
-	flex-flow:column nowrap;
-}
+.builder-role{}
 .builder-role.contentBox .content{
 	display:flex;
 	flex-flow:row nowrap;
+}
+.builder-role table{
+	width:100%;
 }
 
 /* functions */

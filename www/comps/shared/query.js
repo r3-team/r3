@@ -1,5 +1,6 @@
 import {getIndexAttributeId} from './attribute.js';
 import {getItemTitle}        from './builder.js';
+import {getCollectionValues} from './collection.js';
 import MyStore               from '../../stores/store.js';
 
 let getQueryExpressionAttribute = function(column) {
@@ -142,36 +143,14 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 	if(typeof collectionIdMapIndexFilter === 'undefined')
 		collectionIdMapIndexFilter = {};
 	
-	let getFilterSideProcessed = function(s) {
+	let getFilterSideProcessed = function(s,operator) {
 		switch(s.content) {
 			case 'collection':
-				let colSchema = MyStore.getters['schema/collectionIdMap'][s.collectionId];
-				let colValues = MyStore.getters['collectionIdMap'][s.collectionId];
-				let out = [];
+				let singleValue = !['= ANY','<> ALL'].includes(operator);
+				let recordIndex = typeof collectionIdMapIndexFilter[s.collectionId] === 'undefined'
+					? -1 : collectionIdMapIndexFilter[s.collectionId];
 				
-				// collection might not have been fetched yet
-				if(typeof colValues !== 'undefined') {
-				
-					if(typeof collectionIdMapIndexFilter[s.collectionId] !== 'undefined')
-						colValues = [colValues[collectionIdMapIndexFilter[s.collectionId]]];
-					
-					// get index of requested column
-					let columnIndex = -1;
-					for(let i = 0, j = colSchema.columns.length; i < j; i++) {
-						if(colSchema.columns[i].id === s.columnId) {
-							columnIndex = i;
-							break;
-						}
-					}
-					
-					// if column index was found, get collection value(s)
-					if(columnIndex !== -1) {
-						for(let i = 0, j = colValues.length; i < j; i++) {
-							out.push(colValues[i][columnIndex]);
-						}
-					}
-				}
-				s.value = out;
+				s.value = getCollectionValues(s.collectionId,s.columnId,singleValue,recordIndex);
 			break;
 			case 'field':
 				let fld     = dataFieldIdMap[s.fieldId];
@@ -240,8 +219,8 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 		if(f.side1.attributeId !== null && joinIndexesRemove.includes(f.side1.attributeIndex))
 			continue;
 		
-		f.side0 = getFilterSideProcessed(f.side0);
-		f.side1 = getFilterSideProcessed(f.side1);
+		f.side0 = getFilterSideProcessed(f.side0,f.operator);
+		f.side1 = getFilterSideProcessed(f.side1,f.operator);
 		out.push(f);
 	}
 	return getFiltersEncapsulated(out);

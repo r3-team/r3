@@ -35,6 +35,7 @@ let MyBuilderIconInput = {
 							<my-button image="cancel.png"
 								@trigger="close"
 								:cancel="true"
+								:darkBg="true"
 							/>
 						</div>
 					</div>

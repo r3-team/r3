@@ -272,16 +272,16 @@ let MyAdminScheduler = {
 				}));
 			}
 			
-			ws.send(requests,true).then(
-				(res) => {
+			ws.sendMultiple(requests,true).then(
+				res => {
 					this.get();
 					
 					ws.send('scheduler','reload',{},false).then(
-						(res) => {},
-						(err) => this.$root.genericError(err)
+						res => {},
+						err => this.$root.genericError(err)
 					);
 				},
-				(err) => this.$root.genericError(err)
+				err => this.$root.genericError(err)
 			);
 		}
 	}

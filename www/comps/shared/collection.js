@@ -8,6 +8,9 @@ import {
 	getRelationsJoined
 } from './query.js';
 
+// a collection is an array of records
+// each record is an array of attribute values, retrieved and ordered following the collection columns
+
 export function getCollectionColumn(collectionId,columnId) {
 	let colSchema = MyStore.getters['schema/collectionIdMap'][collectionId];
 	for(let i = 0, j = colSchema.columns.length; i < j; i++) {
@@ -18,13 +21,22 @@ export function getCollectionColumn(collectionId,columnId) {
 	return false;
 };
 
-export function getCollectionValues(collectionId,columnId,singleValue) {
+// returns an array of column values from all records
+//  or the column value from the first record of the collection (singleValue)
+// can also be used to return the value of a specific record by index (recordIndex)
+export function getCollectionValues(collectionId,columnId,singleValue,recordIndex) {
 	let colSchema = MyStore.getters['schema/collectionIdMap'][collectionId];
 	let colValues = MyStore.getters['collectionIdMap'][collectionId];
 	
-	// collection might not have been retrieved yet or are empty
+	// fill missing inputs
+	if(typeof singleValue === 'undefined') singleValue = false;
+	if(typeof recordIndex === 'undefined') recordIndex = -1;
+	
+	let empty = singleValue ? null : [];
+	
+	// collection might not have been retrieved yet or is empty
 	if(typeof colValues === 'undefined' || colValues.length === 0)
-		return singleValue ? null : [];
+		return empty;
 	
 	// find requested column index by ID
 	let columnIndex = -1;
@@ -35,11 +47,19 @@ export function getCollectionValues(collectionId,columnId,singleValue) {
 		}
 	}
 	if(columnIndex === -1)
-		return singleValue ? null : [];
+		return empty;
 	
+	// return record value by index
+	if(recordIndex >= 0 && recordIndex < colValues.length)
+		return singleValue
+			? colValues[recordIndex][columnIndex]
+			: [colValues[recordIndex][columnIndex]];
+	
+	// return first value (usually used for collection with single record)
 	if(singleValue)
 		return colValues[0][columnIndex];
 	
+	// return all record values as array
 	let out = [];
 	for(let i = 0, j = colValues.length; i < j; i++) {
 		out.push(colValues[i][columnIndex]);

@@ -13,7 +13,7 @@ let MyInputCollection = {
 			- {{ getColumnTitle(getCollectionColumn(collectionId,columnIdDisplay)) }} -
 		</option>
 		
-		<option v-for="(o,i) in getCollectionValues(collectionId,columnIdDisplay,false)"
+		<option v-for="(o,i) in getCollectionValues(collectionId,columnIdDisplay)"
 			:value="i"
 		>{{ o }}</option>
 	</select>`,
