@@ -83,6 +83,9 @@ export function updateCollections(continueOnError,errFnc) {
 			let c = collectionIdMap[collectionId];
 			let q = c.query;
 			
+			if(q.relationId === null)
+				continue;
+			
 			// set module language so that language filters can work outside of module context
 			let m = MyStore.getters['schema/moduleIdMap'][c.moduleId];
 			MyStore.commit('moduleLanguage',getValidLanguageCode(m));
