@@ -989,7 +989,8 @@
 		},
 		"SEC":{
 			"001":"Acces neautorizat."
-		}
+		},
+		"initCollection":"Failed to load collections during login: {MSG}"
 	},
 	"feedback":{
 		"button":{

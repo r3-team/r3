@@ -208,6 +208,7 @@ let MyApp = {
 		moduleIdMapOpts:function() { return this.$store.getters['schema/moduleIdMapOptions']; },
 		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
 		blockInput:     function() { return this.$store.getters.blockInput; },
+		capErr:         function() { return this.$store.getters.captions.error; },
 		capGen:         function() { return this.$store.getters.captions.generic; },
 		isAdmin:        function() { return this.$store.getters.isAdmin; },
 		isAtDialog:     function() { return this.$store.getters.isAtDialog; },
@@ -296,7 +297,7 @@ let MyApp = {
 						ws.send('lookup','get',{name:'access'},true).then(
 							res => {
 								this.$store.commit('access',res.payload);
-								this.updateCollections();
+								this.updateCollections(false);
 							},
 							err => this.genericError(err)
 						);
@@ -366,18 +367,18 @@ let MyApp = {
 		// schema retrieval
 		initSchema:function() {
 			fetch(`./cache/download/schema_${this.schemaTimestamp}.json`).then(
-				(response) => {
-					if(response.status !== 200)
-						return;
+				res => {
+					if(res.status !== 200)
+						return this.setInitErr('Failed to load schema cache');
 					
-					response.json().then((data) => {
+					res.json().then((data) => {
 						this.$store.commit('schema/set',data);
 						this.schemaLoaded = true;
 						this.stateChange();
 					});
 				}
-			).catch(function(err) {
-				console.log('error fetching schema: '+err);
+			).catch(err => {
+				this.setInitErr('Failed to load schema cache: '+err);
 			});
 		},
 		
@@ -413,7 +414,12 @@ let MyApp = {
 						this.$store.commit('license',res[7].payload);
 						this.$store.commit('system',res[8].payload);
 					}
-					return updateCollections();
+					
+					// in case of errors during collection retrieval, continue
+					//  if user is admin, otherwise the error cannot be corrected
+					// normal users should not login as the system does not handle as expected
+					return updateCollections(this.isAdmin,
+						err => alert(this.capErr.initCollection.replace('{MSG}',err)));
 				},
 				err => this.setInitErr(err)
 			).then(

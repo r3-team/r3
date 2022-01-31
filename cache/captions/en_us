@@ -989,7 +989,8 @@
 		},
 		"SEC":{
 			"001":"You are not authorized to complete this action or access this resource."
-		}
+		},
+		"initCollection":"Failed to load collections during login: {MSG}"
 	},
 	"feedback":{
 		"button":{

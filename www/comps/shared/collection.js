@@ -67,61 +67,74 @@ export function getCollectionValues(collectionId,columnId,singleValue,recordInde
 	return out;
 };
 
-export function updateCollections() {
-	let access          = MyStore.getters.access.collection;
-	let collectionIdMap = MyStore.getters['schema/collectionIdMap'];
-	let dataRequests    = []; // one request data GET for each valid collection
-	let requestIds      = []; // collection ID, in order, for each data GET request
-	
-	for(let collectionId in collectionIdMap) {
+// update known collections by retrieving their data queries
+export function updateCollections(continueOnError,errFnc) {
+	return new Promise((resolve,reject) => {
+		let access          = MyStore.getters.access.collection;
+		let collectionIdMap = MyStore.getters['schema/collectionIdMap'];
+		let dataRequests    = []; // one request data GET for each valid collection
+		let requestIds      = []; // collection ID, in order, for each data GET request
 		
-		if(typeof access[collectionId] === 'undefined' || access[collectionId] < 1)
-			continue;
-		
-		let c = collectionIdMap[collectionId];
-		let q = c.query;
-		
-		// set module language so that language filters can work outside of module context
-		let m = MyStore.getters['schema/moduleIdMap'][c.moduleId];
-		MyStore.commit('moduleLanguage',getValidLanguageCode(m));
-		
-		let joinIndexMap = getJoinIndexMap(q.joins);
-		let filters      = getQueryFiltersProcessed(q.filters,{},joinIndexMap);
-		let columns      = getQueryColumnsProcessed(c.columns,{},joinIndexMap);
-		
-		requestIds.push(c.id);
-		dataRequests.push(ws.prepare('data','get',{
-			relationId:q.relationId,
-			joins:getRelationsJoined(q.joins),
-			expressions:getQueryExpressions(columns),
-			filters:filters,
-			orders:q.orders,
-			limit:q.fixedLimit,
-			offset:0
-		}));
-	}
-	
-	// collections must be cleared on update as some might have been removed (roles changed)
-	MyStore.commit('collectionsClear',{});
-	
-	// no relevant collections to get data for, resolve
-	if(dataRequests.length === 0)
-		return Promise.resolve();
-	
-	return ws.sendMultiple(dataRequests).then(
-		(res) => {
-			for(let i = 0, j = res.length; i < j; i++) {
-				let rows = res[i].payload.rows;
-				
-				let recordValues = [];
-				for(let x = 0, y = rows.length; x < y; x++) {
-					recordValues.push(rows[x].values);
-				}
-				MyStore.commit('collection',{
-					id:requestIds[i],
-					records:recordValues
-				});
-			}
+		for(let collectionId in collectionIdMap) {
+			
+			if(typeof access[collectionId] === 'undefined' || access[collectionId] < 1)
+				continue;
+			
+			let c = collectionIdMap[collectionId];
+			let q = c.query;
+			
+			// set module language so that language filters can work outside of module context
+			let m = MyStore.getters['schema/moduleIdMap'][c.moduleId];
+			MyStore.commit('moduleLanguage',getValidLanguageCode(m));
+			
+			let joinIndexMap = getJoinIndexMap(q.joins);
+			let filters      = getQueryFiltersProcessed(q.filters,{},joinIndexMap);
+			let columns      = getQueryColumnsProcessed(c.columns,{},joinIndexMap);
+			
+			requestIds.push(c.id);
+			dataRequests.push(ws.prepare('data','get',{
+				relationId:q.relationId,
+				joins:getRelationsJoined(q.joins),
+				expressions:getQueryExpressions(columns),
+				filters:filters,
+				orders:q.orders,
+				limit:q.fixedLimit,
+				offset:0
+			}));
 		}
-	);
+		
+		// collections must be cleared on update as some might have been removed (roles changed)
+		MyStore.commit('collectionsClear',{});
+		
+		// no relevant collections to get data for, resolve
+		if(dataRequests.length === 0)
+			return resolve();
+		
+		ws.sendMultiple(dataRequests).then(
+			res => {
+				for(let i = 0, j = res.length; i < j; i++) {
+					let rows = res[i].payload.rows;
+					
+					let recordValues = [];
+					for(let x = 0, y = rows.length; x < y; x++) {
+						recordValues.push(rows[x].values);
+					}
+					MyStore.commit('collection',{
+						id:requestIds[i],
+						records:recordValues
+					});
+				}
+				resolve();
+			},
+			err => {
+				if(!continueOnError)
+					return reject(err);
+				
+				if(typeof errFnc !== 'undefined')
+					errFnc(err);
+				
+				resolve();
+			}
+		);
+	});
 };

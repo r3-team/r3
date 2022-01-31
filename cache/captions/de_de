@@ -989,7 +989,8 @@
 		},
 		"SEC":{
 			"001":"Du bist nicht berechtigt die Aktion auszuführen oder diese Ressource aufzurufen."
-		}
+		},
+		"initCollection":"Fehler beim Laden von Sammlungen während der Anmeldung: {MSG}"
 	},
 	"feedback":{
 		"button":{
