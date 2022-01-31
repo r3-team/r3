@@ -514,7 +514,8 @@ func addJoin(mapIndex_relId map[int]uuid.UUID, join types.DataGetJoin,
 
 // parses filters to generate query lines and arguments
 func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
-	queryCountArgs *[]interface{}, loginId int64, inWhere *[]string, nestingLevel int) error {
+	queryCountArgs *[]interface{}, loginId int64, inWhere *[]string,
+	nestingLevel int) error {
 
 	if !tools.StringInSlice(filter.Connector, types.QueryFilterConnectors) {
 		return errors.New("bad filter connector")
@@ -599,11 +600,7 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 			*queryCountArgs = append(*queryCountArgs, s.Value)
 		}
 
-		if isArrayOperator(filter.Operator) {
-			*comp = fmt.Sprintf("($%d)", len(*queryArgs))
-		} else {
-			*comp = fmt.Sprintf("$%d", len(*queryArgs))
-		}
+		*comp = fmt.Sprintf("$%d", len(*queryArgs))
 		return nil
 	}
 
@@ -616,15 +613,19 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 		if err := getComp(filter.Side1, &comp1); err != nil {
 			return err
 		}
+
+		// array operator, add round brackets to right side comparison
+		if isArrayOperator(filter.Operator) {
+			comp1 = fmt.Sprintf("(%s)", comp1)
+		}
 	}
 
 	// generate WHERE line from parsed filter definition
-	line := fmt.Sprintf("\n%s %s%s %s %s%s", filter.Connector,
+	*inWhere = append(*inWhere, fmt.Sprintf("\n%s %s%s %s %s%s",
+		filter.Connector,
 		getBrackets(filter.Side0.Brackets, false),
 		comp0, filter.Operator, comp1,
-		getBrackets(filter.Side1.Brackets, true))
-
-	*inWhere = append(*inWhere, line)
+		getBrackets(filter.Side1.Brackets, true)))
 
 	return nil
 }

@@ -29,7 +29,7 @@ type DataGetFilterSide struct {
 	Brackets        int            `json:"brackets"`        // brackets before/after
 	Query           DataGet        `json:"query"`           // sub query, optional
 	QueryAggregator pgtype.Varchar `json:"queryAggregator"` // sub query aggregator, optional
-	Value           interface{}    `json:"value"`           // fixed value, optional, filled by frontend with field value / login ID value / record value
+	Value           interface{}    `json:"value"`           // fixed value, optional, filled by frontend with value of field/login ID/record/...
 }
 
 // a JOIN connects multiple relations via a relationship attribute
