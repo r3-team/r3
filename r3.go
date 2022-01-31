@@ -10,6 +10,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"os/signal"
 	"path/filepath"
 	"r3/activation"
 	"r3/bruteforce"
@@ -38,6 +39,7 @@ import (
 	"r3/scheduler"
 	"r3/tools"
 	"strings"
+	"syscall"
 	"time"
 
 	_ "time/tzdata" // to embed timezone DB
@@ -132,6 +134,18 @@ func main() {
 		return
 	}
 
+	// add shut down in case of SIGTERM
+	if service.Interactive() {
+		chanSigTerm := make(chan os.Signal)
+		signal.Notify(chanSigTerm, syscall.SIGTERM)
+		go func() {
+			select {
+			case <-chanSigTerm:
+				prg.executeAborted(svc, nil)
+			}
+		}()
+	}
+
 	// get path for executable
 	app, err := os.Executable()
 	if err != nil {
@@ -212,7 +226,6 @@ func main() {
 		config.File.Web.Port = 0
 	}
 	if cli.setData != "" {
-
 		config.File.Paths.Certificates = filepath.Join(cli.setData, "certificates")
 		config.File.Paths.EmbeddedDbData = filepath.Join(cli.setData, "database")
 		config.File.Paths.Files = filepath.Join(cli.setData, "files")
@@ -241,7 +254,7 @@ func main() {
 		return
 	}
 
-	// run() blocks until stop() is called
+	// Run() blocks until Stop() is called
 	if err := svc.Run(); err != nil {
 		prg.logger.Error(err)
 		return
@@ -252,7 +265,7 @@ func main() {
 func (prg *program) Start(svc service.Service) error {
 
 	if !service.Interactive() {
-		prg.logger.Info("Starting service")
+		prg.logger.Info("Starting service...")
 	} else {
 		log.SetOutputCli(true)
 	}
@@ -263,28 +276,13 @@ func (prg *program) Start(svc service.Service) error {
 // execute the application logic
 func (prg *program) execute(svc service.Service) {
 
-	// stop service when main execution function returns
-	defer func() {
-		if service.Interactive() {
-			// interactive session, not triggered by service manager, stop program
-			if err := prg.Stop(svc); err != nil {
-				prg.logger.Error(err)
-			}
-		} else {
-			// triggered by service manager, stop service
-			if err := svc.Stop(); err != nil {
-				prg.logger.Error(err)
-			}
-		}
-	}()
-
 	// start embedded database
 	if config.File.Db.Embedded {
 		prg.logger.Infof("start embedded database at '%s'", config.File.Paths.EmbeddedDbData)
 		embedded.SetPaths()
 
 		if err := embedded.Start(); err != nil {
-			prg.logger.Errorf("failed to start embedded database, %v", err)
+			prg.executeAborted(svc, fmt.Errorf("failed to start embedded database, %v", err))
 			return
 		}
 
@@ -296,19 +294,19 @@ func (prg *program) execute(svc service.Service) {
 	// connect to database
 	// wait X seconds at first start for database service to become ready
 	if err := db.OpenWait(15, config.File.Db); err != nil {
-		prg.logger.Errorf("failed to open database connection, %v", err)
+		prg.executeAborted(svc, fmt.Errorf("failed to open database connection, %v", err))
 		return
 	}
 
 	// check for first database start
 	if err := initialize.PrepareDbIfNew(); err != nil {
-		prg.logger.Errorf("failed to initiate database on first start, %v", err)
+		prg.executeAborted(svc, fmt.Errorf("failed to initiate database on first start, %v", err))
 		return
 	}
 
 	// load configuration from database
 	if err := config.LoadFromDb(); err != nil {
-		prg.logger.Errorf("failed to read configuration from database, %v", err)
+		prg.executeAborted(svc, fmt.Errorf("failed to read configuration from database, %v", err))
 		return
 	}
 
@@ -320,12 +318,13 @@ func (prg *program) execute(svc service.Service) {
 		adminInputs := strings.Split(prg.cli.adminCreate, ":")
 
 		if len(adminInputs) != 2 {
-			prg.logger.Errorf("invalid syntax for admin creation, required is username:password")
+			prg.executeAborted(svc, fmt.Errorf("invalid syntax for admin creation, required is username:password"))
 		} else {
 			if err := login.CreateAdmin(adminInputs[0], adminInputs[1]); err != nil {
-				prg.logger.Errorf("failed to create admin user, %v", err)
+				prg.executeAborted(svc, fmt.Errorf("failed to create admin user, %v", err))
 			} else {
 				prg.logger.Info("successfully created new admin user")
+				prg.executeAborted(svc, nil)
 			}
 		}
 		return
@@ -333,37 +332,37 @@ func (prg *program) execute(svc service.Service) {
 
 	// run automatic database upgrade if required
 	if err := upgrade.RunIfRequired(); err != nil {
-		prg.logger.Errorf("failed automatic upgrade of database, %v", err)
+		prg.executeAborted(svc, fmt.Errorf("failed automatic upgrade of database, %v", err))
 		return
 	}
 
 	// initialize module schema cache
 	if err := cache.UpdateSchemaAll(false); err != nil {
-		prg.logger.Errorf("failed to initialize schema cache, %v", err)
+		prg.executeAborted(svc, fmt.Errorf("failed to initialize schema cache, %v", err))
 		return
 	}
 
 	// initialize LDAP cache
 	if err := cache.LoadLdapMap(); err != nil {
-		prg.logger.Errorf("failed to initialize LDAP cache, %v", err)
+		prg.executeAborted(svc, fmt.Errorf("failed to initialize LDAP cache, %v", err))
 		return
 	}
 
 	// initialize mail account cache
 	if err := cache.LoadMailAccountMap(); err != nil {
-		prg.logger.Errorf("failed to initialize mail account cache, %v", err)
+		prg.executeAborted(svc, fmt.Errorf("failed to initialize mail account cache, %v", err))
 		return
 	}
 
 	// process token secret for future client authentication from database
 	if err := config.ProcessTokenSecret(); err != nil {
-		prg.logger.Errorf("failed to process token secret, %v", err)
+		prg.executeAborted(svc, fmt.Errorf("failed to process token secret, %v", err))
 		return
 	}
 
 	// set unique instance ID if empty
 	if err := config.SetInstanceIdIfEmpty(); err != nil {
-		prg.logger.Errorf("failed to set instance ID, %v", err)
+		prg.executeAborted(svc, fmt.Errorf("failed to set instance ID, %v", err))
 		return
 	}
 
@@ -375,7 +374,7 @@ func (prg *program) execute(svc service.Service) {
 
 	// start scheduler
 	if err := scheduler.Start(); err != nil {
-		prg.logger.Errorf("failed to start scheduler, %v", err)
+		prg.executeAborted(svc, fmt.Errorf("failed to start scheduler, %v", err))
 		return
 	}
 
@@ -387,7 +386,7 @@ func (prg *program) execute(svc service.Service) {
 	if prg.cli.wwwPath == "" {
 		fsStaticWww, err := fs.Sub(fs.FS(fsStatic), "www")
 		if err != nil {
-			prg.logger.Errorf("failed to access embedded web file directory, %v", err)
+			prg.executeAborted(svc, fmt.Errorf("failed to access embedded web file directory, %v", err))
 			return
 		}
 		mux.Handle("/", http.FileServer(http.FS(fsStaticWww)))
@@ -412,7 +411,7 @@ func (prg *program) execute(svc service.Service) {
 	webServerString := fmt.Sprintf("%s:%d", config.File.Web.Listen, config.File.Web.Port)
 	webListener, err := net.Listen("tcp", webServerString)
 	if err != nil {
-		prg.logger.Errorf("failed to register listener for HTTP server, %v", err)
+		prg.executeAborted(svc, fmt.Errorf("failed to register listener for HTTP server, %v", err))
 		return
 	}
 	config.File.Web.Port = webListener.Addr().(*net.TCPAddr).Port
@@ -434,27 +433,60 @@ func (prg *program) execute(svc service.Service) {
 		tools.OpenRessource(fmt.Sprintf("%s://localhost:%d", protocol, config.File.Web.Port), false)
 	}
 
+	// show interactive user that application is ready for connection
+	if service.Interactive() {
+		fmt.Printf("Starting web server for '%s'...\n", webServerString)
+	}
+
 	// start web server and block routine
 	if prg.cli.http {
 		if err := prg.webServer.Serve(webListener); err != nil && err != http.ErrServerClosed {
-			prg.logger.Error(err)
+			prg.executeAborted(svc, err)
 		}
 	} else {
 		certPath := filepath.Join(config.File.Paths.Certificates, config.File.Web.Cert)
 		keyPath := filepath.Join(config.File.Paths.Certificates, config.File.Web.Key)
 
 		if err := cert.CreateIfNotExist(certPath, keyPath); err != nil {
-			prg.logger.Error(err)
+			prg.executeAborted(svc, err)
 			return
 		}
 		if err := prg.webServer.ServeTLS(webListener, certPath, keyPath); err != nil && err != http.ErrServerClosed {
+			prg.executeAborted(svc, err)
+		}
+	}
+}
+
+// properly shuts down application, if execution is aborted prematurely
+func (prg *program) executeAborted(svc service.Service, err error) {
+
+	if err != nil {
+		prg.logger.Error(err)
+	}
+
+	// properly shut down
+	if service.Interactive() {
+		if err := prg.Stop(svc); err != nil {
+			prg.logger.Error(err)
+		}
+		os.Exit(0)
+	} else {
+		if err := svc.Stop(); err != nil {
 			prg.logger.Error(err)
 		}
 	}
 }
 
-// stop() is called when service is being shut down
+// Stop() is also called when service is being shut down
 func (prg *program) Stop(svc service.Service) error {
+
+	if !service.Interactive() {
+		prg.logger.Info("Stopping service...")
+	} else {
+		// keep shut down message visible for 1 second
+		fmt.Println("Shutting down...")
+		time.Sleep(1 * time.Second)
+	}
 
 	if prg.stopping {
 		return nil
@@ -488,11 +520,6 @@ func (prg *program) Stop(svc service.Service) error {
 			prg.logger.Error(err)
 		}
 		log.Info("server", "stopped embedded database")
-	}
-
-	// interactive session, os.Exit must be called to properly shutdown program
-	if service.Interactive() {
-		os.Exit(0)
 	}
 	return nil
 }
