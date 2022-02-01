@@ -1,4 +1,4 @@
-<p><em>Aktualisiert 2021-09-14</em></p>
+<p><em>Aktualisiert 2022-02-01</em></p>
 <h1 id="inhaltsverzeichnis">Inhaltsverzeichnis</h1>
 <ol type="1">
 <li><a href="#einführung">Einführung</a></li>
@@ -51,7 +51,7 @@
 <h2 id="eigenständig">Eigenständig</h2>
 <p>Dieses Modell wurde für kleine und mittlere Installationen (~250 Benutzer) erstellt und ist auf Windows Server beschränkt. Die eigenständige Bereitstellung weist fast keine externen Abhängigkeiten auf. Es ist das empfohlene Modell für Unternehmen mit kleineren IT-Teams, da es nur wenig Aufwand erfordert.</p>
 <p>Wenn REI3 eigenständig ausgeführt wird, enthält und verwaltet REI3 eine eigene interne Datenbank, wobei vollständige Sicherungen über die REI3-Adminoberfläche konfiguriert werden können. Dieses Bereitstellungsmodell unterstützt derzeit keine inkrementellen Sicherungen; eine Einschränkung für große Instanzen, da vollständige Sicherungen länger dauern.</p>
-<p>Es ist immer möglich, von einem eigenständigen zu einem dedizierten Bereitstellungsmodell zu migrieren, wenn die Situation dies erfordert.</p>
+<p>Es kann nachträglich von einem eigenständigen zu einem dedizierten Bereitstellungsmodell migriert werden.</p>
 <h2 id="dediziert">Dediziert</h2>
 <p>In diesem Modell wird REI3 getrennt von einem Datenbanksystem ausgeführt. Dies wird für große Instanzen empfohlen oder wenn eine Organisation ein Datenbankteam zur Verfügung hat. Diese Version kann auf Linux- und Windows-Servern bereitgestellt werden.</p>
 <p>Bei Nutzung dieses Modells erfordert REI3 ein separates PostgreSQL-Datenbank-System und verwaltet selbst keine Datenbanksicherungen.</p>
@@ -63,21 +63,30 @@
 <ul>
 <li>Betriebssystem
 <ul>
-<li>Linux Server (REI3 wird unter Debian, CentOS und Ubuntu Server getestet)</li>
+<li>Linux Server (getestet unter Debian, CentOS und Ubuntu Server)</li>
 <li>Windows Server 2016 oder höher</li>
+<li>Die Community hat REI3 auf anderen Betriebssystemen installieren können, die noch nicht offiziell unterstützt werden:
+<ul>
+<li>Darwin</li>
+<li>FreeBSD</li>
+</ul></li>
+</ul></li>
+<li>Prozessor
+<ul>
+<li>REI3 wird auf 64bit-Prozessoren von Intel &amp; AMD erstellt und getestet. Andere Architekturen (ARM32) konnten von der Community erfolgreich genutzt werden, werden aber aktuell nicht offiziell unterstützt.</li>
 </ul></li>
 <li>Arbeitsspeicher
 <ul>
 <li>Für mittelgroße Installationen (~250 Benutzer) sollten 4+ GB für die Anwendung verfügbar sein.</li>
 </ul></li>
-<li>Festplattenplatz
+<li>Speicherplatz
 <ul>
 <li>REI3 selbst benötigt weniger als 500 MB Speicherplatz.</li>
-<li>Neben der Anwendung wird Speicherplatz für die Datenbank (falls eigenständig) und das Hochladen von Dateien benötigt. Ein konservativer Plan würde mit 50 GB beginnen.</li>
+<li>Neben der Anwendung wird Speicherplatz für die Datenbank (falls eigenständige Bereitstellung) und das Hochladen von Dateien benötigt.</li>
 </ul></li>
 <li>Software
 <ul>
-<li>Unter Windows Server: Microsoft Visual C ++ 2015</li>
+<li>Unter Windows Server: Microsoft Visual C++ 2015</li>
 </ul></li>
 <li>Datenbank (nur dedizierte Bereitstellung)
 <ul>

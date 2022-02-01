@@ -1,4 +1,4 @@
-<p><em>Updated 2021-09-14</em></p>
+<p><em>Updated 2022-02-01</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -51,7 +51,7 @@
 <h2 id="stand-alone">Stand-alone</h2>
 <p>This model was created for small and medium size installations (~250 users) and is limited to Windows Server. The stand-alone deployment has almost no external dependencies. It is the recommended model for organizations with smaller IT teams as it requires little management.</p>
 <p>When running stand-alone, REI3 includes and manages its own internal database with full backups being configurable from within the REI3 admin UI. This deployment model does currently not support incremental backups; a limitation for large instances as full backups take longer to complete.</p>
-<p>It is always possible to migrate from stand-alone to the dedicated deployment model when the situation changes.</p>
+<p>It is always possible to migrate from stand-alone to the dedicated deployment model.</p>
 <h2 id="dedicated">Dedicated</h2>
 <p>In this model REI3 runs as an application separate from its database system. This is recommended for large instances or when an organization has a database team onhand. This version can be deployed to Linux and Windows servers.</p>
 <p>Running this model, REI3 will require a separate PostgreSQL database system and will not manage any database backups.</p>
@@ -63,8 +63,17 @@
 <ul>
 <li>Operating system
 <ul>
-<li>Linux server (REI3 is tested on Debian, CentOS and Ubuntu Server)</li>
+<li>Linux server (tested on Debian, CentOS and Ubuntu Server)</li>
 <li>Windows Server 2016 or later</li>
+<li>The community was able to install REI3 on other operating systems, which are not yet officially supported:
+<ul>
+<li>Darwin</li>
+<li>FreeBSD</li>
+</ul></li>
+</ul></li>
+<li>Processor
+<ul>
+<li>REI3 is built and tested on 64bit processors from Intel &amp; AMD. Other architectures were successfully used by the community (ARM32) but are not officially supported yet.</li>
 </ul></li>
 <li>Memory
 <ul>
@@ -73,7 +82,7 @@
 <li>Disk space
 <ul>
 <li>REI3 itself uses less than 500 MB of disk space.</li>
-<li>Besides the application, disk space is required for the database (if stand-alone) and file uploads. To be safe, a conservative estimation would start with 50 GB.</li>
+<li>Besides the application, disk space is required for the database (if stand-alone deployment) and file uploads.</li>
 </ul></li>
 <li>Software
 <ul>
