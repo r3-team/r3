@@ -55,7 +55,7 @@ let MyGanttLineRecord = {
 		<div class="record-values">
 			<template v-for="(v,i) in values">
 				<my-value-rich class="context-calendar-gantt"
-					v-if="!indexesHidden.includes(i)"
+					v-if="!indexesHidden.includes(i) && v !== null"
 					:attribute-id="columns[i].attributeId"
 					:basis="columns[i].basis"
 					:display="columns[i].display"
@@ -289,7 +289,7 @@ let MyGantt = {
 					:style="styleLabel(g)"
 				>
 					<my-value-rich class="context-calendar-gantt"
-						v-for="c in g.columns.filter(v => !columnIndexesHidden.includes(v.index) && (v.value !== null || columns[v.index].display === 'gallery'))"
+						v-for="c in g.columns.filter(v => !columnIndexesHidden.includes(v.index) && v.value !== null)"
 						:attribute-id="columns[c.index].attributeId"
 						:display="columns[c.index].display"
 						:key="c.index"

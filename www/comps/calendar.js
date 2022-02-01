@@ -147,9 +147,8 @@ let MyCalendarMonth = {
 		</div>
 		
 		<!-- weeks -->
-		<div class="week"
-			v-for="week in 6"
-		>
+		<div class="week" v-for="week in 6">
+			
 			<!-- days -->
 			<div class="day"
 				v-for="day in 7"
@@ -160,7 +159,7 @@ let MyCalendarMonth = {
 				:class="getDayClasses(((week-1)*7)+day-1,day)"
 			>
 				<h1 class="noHighlight">{{ getDayNumber(((week-1)*7)+day-1) }}</h1>
-			
+				
 				<!-- full day events -->
 				<div class="event"
 					@click.stop="clickRecord(e.recordId,false)"
@@ -179,15 +178,17 @@ let MyCalendarMonth = {
 							v-if="day === 1 || e.entryFirst"
 							:style="getFullDayTextStyles(day,e)"
 						>
-							<my-value-rich class="context-calendar"
-								v-for="(v,vi) in e.values"
-								:attributeId="columns[vi].attributeId"
-								:basis="columns[vi].basis"
-								:display="columns[vi].display"
-								:key="vi"
-								:length="columns[vi].length"
-								:value="v"
-							/>
+							<template v-for="(v,i) in e.values">
+								<my-value-rich class="context-calendar"
+									v-if="v !== null"
+									:attributeId="columns[i].attributeId"
+									:basis="columns[i].basis"
+									:display="columns[i].display"
+									:key="i"
+									:length="columns[i].length"
+									:value="v"
+								/>
+							</template>
 						</span>
 						
 						<!-- ending beam -->
@@ -209,16 +210,18 @@ let MyCalendarMonth = {
 						{{ getPartCaption(e.date0) }}
 					</span>
 					
-					<my-value-rich class="context-calendar"
-						v-for="(v,vi) in e.values"
-						:attributeId="columns[vi].attributeId"
-						:basis="columns[vi].basis"
-						:display="columns[vi].display"
-						:key="vi"
-						:length="columns[vi].length"
-						:wrap="true"
-						:value="v"
-					/>
+					<template v-for="(v,i) in e.values">
+						<my-value-rich class="context-calendar"
+							v-if="v !== null"
+							:attributeId="columns[i].attributeId"
+							:basis="columns[i].basis"
+							:display="columns[i].display"
+							:key="i"
+							:length="columns[i].length"
+							:wrap="true"
+							:value="v"
+						/>
+					</template>
 				</div>
 			</div>
 		</div>
