@@ -929,9 +929,10 @@ let MyBuilderFieldOptions = {
 								v-for="mod in getDependentModules(module,modules)"
 								:label="mod.name"
 							>
-								<option v-for="f in mod.forms" :value="f.id">
-									{{ f.name }}
-								</option>
+								<option
+									v-for="f in mod.forms.filter(v => isButton || v.query.relationId === field.query.relationId)" 
+									:value="f.id"
+								>{{ f.name }}</option>
 							</optgroup>
 						</select>
 					</td>
