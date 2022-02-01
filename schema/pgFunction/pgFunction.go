@@ -382,7 +382,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		`, id, modId); err != nil {
 			return "", err
 		}
-		body = strings.ReplaceAll(body, placeholder, modName)
+		body = strings.ReplaceAll(body, placeholder, fmt.Sprintf(`"%s"`, modName))
 	}
 
 	// pg function IDs, syntax: [PG_FUNCTION_ID](...
@@ -416,7 +416,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		`, id, fncId); err != nil {
 			return "", err
 		}
-		body = strings.ReplaceAll(body, placeholder, fmt.Sprintf("%s(", fncName))
+		body = strings.ReplaceAll(body, placeholder, fmt.Sprintf(`"%s"(`, fncName))
 	}
 
 	// relation IDs, syntax: [RELATION_ID]
@@ -450,7 +450,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		`, id, relId); err != nil {
 			return "", err
 		}
-		body = strings.ReplaceAll(body, placeholder, relName)
+		body = strings.ReplaceAll(body, placeholder, fmt.Sprintf(`"%s"`, relName))
 	}
 
 	// attribute IDs, syntax: (ATTRIBUTE_ID)
@@ -484,7 +484,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		`, id, atrId); err != nil {
 			return "", err
 		}
-		body = strings.ReplaceAll(body, placeholder, atrName)
+		body = strings.ReplaceAll(body, placeholder, fmt.Sprintf(`"%s"`, atrName))
 	}
 	return body, nil
 }
