@@ -66,10 +66,6 @@
 }
 
 /* calendar gantt context */
-.value-rich.context-calendar-gantt:hover{
-	overflow:visible;
-	font-weight:bold;
-}
 .value-rich.color.context-calendar-gantt,
 .value-rich.files.context-calendar-gantt{
 	flex-shrink:0;

@@ -129,14 +129,14 @@ let MyForm = {
 							v-if="allowNew"
 							@trigger="openNewAsk(false)"
 							@trigger-middle="openNewAsk(true)"
-							:active="(!isNew || hasChanges) && canSetNew && !updatingRecord"
+							:active="(!isNew || hasChanges) && canCreate"
 							:caption="capGen.button.new"
 							:captionTitle="capGen.button.newHint"
 							:darkBg="true"
 						/>
 						<my-button image="save.png"
 							@trigger="set(false)"
-							:active="hasChanges && !badLoad && !updatingRecord"
+							:active="canUpdate"
 							:caption="capGen.button.save"
 							:captionTitle="capGen.button.saveHint"
 							:darkBg="true"
@@ -144,7 +144,7 @@ let MyForm = {
 						<my-button image="save_new.png"
 							v-if="!isInline && !isMobile && allowNew"
 							@trigger="set(true)"
-							:active="hasChanges && !badLoad && !updatingRecord && canSetNew"
+							:active="canUpdate && canCreate"
 							:caption="capGen.button.saveNew"
 							:captionTitle="capGen.button.saveNewHint"
 							:darkBg="true"
@@ -160,7 +160,7 @@ let MyForm = {
 						<my-button image="shred.png"
 							v-if="allowDel"
 							@trigger="delAsk"
-							:active="canDelete && !updatingRecord"
+							:active="canDelete"
 							:cancel="true"
 							:caption="capGen.button.delete"
 							:captionTitle="capGen.button.deleteHint"
@@ -302,13 +302,20 @@ let MyForm = {
 	},
 	computed:{
 		// states
+		canCreate:function() {
+			return !this.updatingRecord
+				&& this.joins.length !== 0
+				&& this.joins[0].applyCreate
+				&& this.hasAccessToRelation(this.access,this.joins[0].relationId,2);
+		},
 		canDelete:function() {
-			if(this.isNew || this.badLoad || this.joins.length === 0
+			if(this.updatingRecord
+				|| this.isNew
+				|| this.badLoad
+				|| this.joins.length === 0
 				|| !this.joins[0].applyDelete
 				|| !this.hasAccessToRelation(this.access,this.joins[0].relationId,3)
-			) {
-				return false;
-			}
+			) return false;
 			
 			// check for protected preset record
 			let rel = this.relationIdMap[this.joins[0].relationId];
@@ -318,6 +325,9 @@ let MyForm = {
 					return false;
 			}
 			return true;
+		},
+		canUpdate:function() {
+			return this.hasChanges && !this.badLoad && !this.updatingRecord;
 		},
 		hasChanges:function() {
 			for(let k in this.values) {
@@ -339,7 +349,6 @@ let MyForm = {
 		},
 		
 		// states, simple
-		canSetNew:  function() { return this.joins.length !== 0 && this.joins[0].applyCreate; },
 		isData:     function() { return this.relationId !== null; },
 		isNew:      function() { return this.recordId === 0; },
 		warnUnsaved:function() { return this.hasChanges && this.settings.warnUnsaved; },
@@ -425,8 +434,8 @@ let MyForm = {
 				call_backend:(id,...args) => {
 					return new Promise((resolve,reject) => {
 						ws.send('pgFunction','exec',{id:id,args:args}).then(
-							(res) => resolve(res.payload),
-							(err) => reject(err)
+							res => resolve(res.payload),
+							err => reject(err)
 						);
 					});
 				},

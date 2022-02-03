@@ -311,7 +311,7 @@
 			},
 			"dialog":{
 				"delete":"Are you sure you want to delete this application? This will also delete all included data from your system.<br /><br /><b>This action is irreversible without current backups.</b>{APPS}",
-				"deleteApps":"<br /><br />The following applications are dependend on this one and will also be deleted:<ul>{LIST}</ul>",
+				"deleteApps":"<br /><br />The following applications are dependent on this one and will also be deleted:<ul>{LIST}</ul>",
 				"deleteMulti":"This action will <b>permanently</b> delete <b>{COUNT} application(s)</b> and corresponding data.<br /><br />Do you really want to continue?",
 				"deleteTitle":"Permanent deletion of application '{APP}'",
 				"owner":"With this option enabled, changes to this application can be exported as a new version. If you are not the original author, all changes will be LOST when a new version from the author is installed. This can also result in DATA LOSS.<br /><br />If you intend to change/extent applications from other authors, you can safely do so by 'building on them' - please refer to the Builder documentation for more details.",

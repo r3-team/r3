@@ -138,8 +138,7 @@ let MyBuilderJsFunction = {
 				
 				<div class="message" v-html="capApp.entityInput"></div>
 				
-				<template v-if="form !== false">
-				
+				<template v-if="form !== false && form.query.joins.length !== 0">
 					<div class="placeholders form-query-title">
 						<h2>{{ capApp.placeholdersFormQuery }}</h2>
 						

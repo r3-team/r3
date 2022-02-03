@@ -20,6 +20,7 @@
 	--z-index-calendar-day-event-ending-beam:3;
 	--z-index-calendar-line:2;
 	--z-index-calendar-caption:3;
+	--z-index-gantt-hover:3;
 	
 	/* input field elements */
 	--z-index-field-toggle-bool-first:3;

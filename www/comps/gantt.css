@@ -117,6 +117,14 @@
 	box-sizing:border-box;
 	border-radius:5px;
 }
+.gantt-line-record:hover{
+	width:unset !important;
+	color:var(--color-bg-font);
+	background:rgba(0,0,0,0.7);
+	z-index:var(--z-index-gantt-hover);
+	border-radius:3px;
+	overflow:visible;
+}
 .gantt-line-record .record-values{
 	height:24px;
 	line-height:24px;
@@ -127,9 +135,6 @@
 	position:relative;
 	padding:0px 6px;
 	z-index:var(--z-index-calendar-caption);
-}
-.gantt-line-record .record-values:hover{
-	overflow:visible;
 }
 .gantt-line-record .record-line{
 	position:absolute;
@@ -154,7 +159,4 @@
 	right:1px;
 	top:9px;
 	bottom:4px;
-}
-.gantt-line-record:hover .record-line.end{
-	opacity:0.3;
 }
