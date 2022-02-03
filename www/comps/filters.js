@@ -3,7 +3,8 @@ import MyInputDate    from './inputDate.js';
 import {
 	getDependentModules,
 	getItemTitle,
-	getItemTitleColumn
+	getItemTitleColumn,
+	getItemTitleNoRelationship
 } from './shared/builder.js';
 import {
 	isAttributeFiles,
@@ -182,7 +183,7 @@ let MyFilterAttribute = {
 	},
 	methods:{
 		// externals
-		getItemTitle,
+		getItemTitleNoRelationship,
 		
 		// presentation
 		getAttributeCaption:function(nestedIndexAttributeId) {
@@ -199,7 +200,7 @@ let MyFilterAttribute = {
 			}
 			
 			let rel = this.relationIdMap[atr.relationId];
-			return this.getItemTitle(rel,atr,v[1],false,false);
+			return this.getItemTitleNoRelationship(rel,atr,v[1]);
 		},
 		getQueryLabel:function(nestingLevel) {
 			if(nestingLevel === 0)

@@ -64,6 +64,10 @@ export function getItemTitle(relation,attribute,index,outsideIn,attributeNm) {
 	
 };
 
+export function getItemTitleNoRelationship(relation,attribute,index) {
+	return `${index}) ${relation.name}.${attribute.name}`;
+};
+
 export function getItemTitleColumn(column) {
 	let a = MyStore.getters['schema/attributeIdMap'][column.attributeId];
 	let r = MyStore.getters['schema/relationIdMap'][a.relationId];
