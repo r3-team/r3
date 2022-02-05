@@ -94,12 +94,12 @@ let MyBuilderIcons = {
 				requests.push(ws.prepare('icon','del',{id:this.iconIdsSelected[i]}));
 			}
 			
-			ws.send(requests,true).then(
-				(res) => {
+			ws.sendMultiple(requests,true).then(
+				res => {
 					this.$root.schemaReload(this.module.id);
 					this.iconIdsSelected = [];
 				},
-				(err) => this.$root.genericError(err)
+				err => this.$root.genericError(err)
 			);
 		},
 		add:function(evt) {

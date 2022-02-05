@@ -690,8 +690,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			-- new config settings
 			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutCsv','120');
-			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutDataRest','30');
-			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutDataWs','30');
+			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutDataRest','60');
+			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutDataWs','60');
 			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutIcs','30');
 			INSERT INTO instance.config (name,value) VALUES ('schemaTimestamp','0');
 			

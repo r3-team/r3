@@ -729,12 +729,11 @@ table td.maximum{
 	max-width:500px;
 	max-height:95%;
 }
-.dialog div.dialog-text{
-	max-height:90%;
+.dialog .dialog-text{
 	padding:12px;
 	overflow-y:auto;
 }
-.dialog div.dialog-text.richtext{
+.dialog .dialog-text.richtext{
 	height:600px;
 	padding:0px;
 	display:flex;

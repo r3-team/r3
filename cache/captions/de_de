@@ -1099,7 +1099,7 @@
 		},
 		"wizard":{
 			"installBundle":"Core Company",
-			"installBundleDesc":"Installiere eine vorselektierte Sammlung an Kernanwendungen für Organisationen. Die Sammlung \"Core Company\" inkludiert:<ul><li>Abwesenheitsverwaltung</li><li>Zeiterfassung</li><li>Aufgabenverwaltung</li><li>Werkzeuge zur Modellierung deiner Organisation</li></ul>Nach der Installation schaue dir bitte die Hilfeseiten der jeweiligen Anwendungen an, um die Ersteinrichtung durchzuführen.",
+			"installBundleDesc":"Installiere eine vorselektierte Sammlung an Kernanwendungen für Organisationen. Die Sammlung \"Core Company\" inkludiert:<ul><li>Abwesenheitsverwaltung</li><li>Zeiterfassung</li><li>Projekt- & Aufgabenverwaltung</li><li>Anfragenverwaltung</li><li>Werkzeuge zur Modellierung deiner Organisation</li></ul>Nach der Installation unterstützen die Hilfeseiten der jeweiligen Anwendungen bei der Ersteinrichtung.",
 			"installFile":"Von Datei",
 			"installFileDesc":"Installiere Anwendungen von lokalen REI3-Dateien. Für Offline-Systeme oder selbsterstellte Anwendungen.<br /><br />Dateien für öffentliche REI3-Anwendungen können vom offiziellen <a href=\"https://rei3.de/download\" target=\"_blank\">Repository</a> heruntergeladen werden.",
 			"installRepo":"Vom Repository",

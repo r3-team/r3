@@ -1,4 +1,4 @@
-<p><em>Aktualisiert 2022-02-01</em></p>
+<p><em>Aktualisiert 2022-02-05</em></p>
 <h1 id="inhaltsverzeichnis">Inhaltsverzeichnis</h1>
 <ol type="1">
 <li><a href="#einführung">Einführung</a></li>
@@ -21,12 +21,12 @@
 <li><a href="#erster-zugriff-auf-rei3">Erster Zugriff auf REI3</a></li>
 <li><a href="#konfiguration">Konfiguration</a>
 <ol type="1">
-<li><a href="#builder-option">Builder-Option</a></li>
 <li><a href="#ssl-zertifikate">SSL-Zertifikate</a></li>
 </ol></li>
 <li><a href="#allgemeine-administration">Allgemeine Administration</a>
 <ol type="1">
 <li><a href="#wartungsmodus">Wartungsmodus</a></li>
+<li><a href="#builder-modus">Builder-Modus</a></li>
 <li><a href="#authentifizierung-und-autorisierung">Authentifizierung und Autorisierung</a></li>
 <li><a href="#anmeldungen-mit-datensätzen-verbinden">Anmeldungen mit Datensätzen verbinden</a></li>
 <li><a href="#authentifizierung-und-autorisierung-über-ldap">Authentifizierung und Autorisierung über LDAP</a></li>
@@ -61,11 +61,11 @@
 <h2 id="server">Server</h2>
 <p>Um REI3 ausführen zu können, müssen folgende Anforderungen erfüllt sein:</p>
 <ul>
-<li>Betriebssystem
+<li>Betriebssystem (eines davon)
 <ul>
 <li>Linux Server (getestet unter Debian, CentOS und Ubuntu Server)</li>
 <li>Windows Server 2016 oder höher</li>
-<li>Die Community hat REI3 auf anderen Betriebssystemen installieren können, die noch nicht offiziell unterstützt werden:
+<li>Nicht offiziell unterstützt, aber kann genutzt werden:
 <ul>
 <li>Darwin</li>
 <li>FreeBSD</li>
@@ -73,24 +73,25 @@
 </ul></li>
 <li>Prozessor
 <ul>
-<li>REI3 wird auf 64bit-Prozessoren von Intel &amp; AMD erstellt und getestet. Andere Architekturen (ARM32) konnten von der Community erfolgreich genutzt werden, werden aber aktuell nicht offiziell unterstützt.</li>
+<li>Intel- oder AMD-Prozessoren (64bit), mehrere Kerne verbessern die Performanz</li>
+<li>ARM-Prozessoren werden nicht offiziell unterstützt, wurden aber schon erfolgreich für REI3 genutzt</li>
 </ul></li>
 <li>Arbeitsspeicher
 <ul>
-<li>Für mittelgroße Installationen (~250 Benutzer) sollten 4+ GB für die Anwendung verfügbar sein.</li>
+<li>4+ GB (mittelgroße Installation, ~250 Benutzer)</li>
 </ul></li>
 <li>Speicherplatz
 <ul>
-<li>REI3 selbst benötigt weniger als 500 MB Speicherplatz.</li>
-<li>Neben der Anwendung wird Speicherplatz für die Datenbank (falls eigenständige Bereitstellung) und das Hochladen von Dateien benötigt.</li>
+<li>500 MB für REI3 selbst</li>
+<li>20+ GB für die Datenbank und hochgeladene Dateien (skaliert mit Nutzung)</li>
 </ul></li>
 <li>Software
 <ul>
-<li>Unter Windows Server: Microsoft Visual C++ 2015</li>
+<li>Microsoft Visual C++ 2015 (nur Windows-Server)</li>
 </ul></li>
 <li>Datenbank (nur dedizierte Bereitstellung)
 <ul>
-<li>Eine PostgresSQL 12.2 oder neuer Datenbank mit vollen Berechtigungen</li>
+<li>PostgresSQL 12.2 oder neuer Datenbank mit vollen Berechtigungen</li>
 </ul></li>
 </ul>
 <h2 id="endgeräte">Endgeräte</h2>
@@ -107,24 +108,23 @@
 <p>Um REI3 als Dienst bei Ihrem Betriebssystem zu registrieren, führen Sie <code>r3 -install</code> mit erhöhten Berechtigungen aus. REI3 schreibt ins <code>syslog</code>, welches referenziert werden kann, falls der Dienst nicht startet.</p>
 <h1 id="erster-zugriff-auf-rei3">Erster Zugriff auf REI3</h1>
 <p>Während der Ausführung ist REI3 standardmäßig über Port 443 erreichbar. Sie können jeden modernen Browser verwenden, um lokal auf REI3 unter <code>https://localhost/</code> oder über das Netzwerk mit einer entsprechend konfigurierten Firewall zuzugreifen. Während der Installation wird ein einzelner Administratorbenutzer erstellt. Benutzername und Passwort sind jeweils auf "admin" gesetzt.</p>
-<p>Nach der Anmeldung kann auf die Adminoberfläche zugegriffen werden, um Benutzer zu verwalten, Anwendungen zu installieren, auf Systemprotokolle zuzugreifen usw. Das Standardkennwort sollte direkt nach der ersten Anmeldung geändert werden.</p>
+<p>Nach der Anmeldung kann auf die Adminoberfläche zugegriffen werden, um Benutzer zu verwalten, Anwendungen zu installieren, auf Systemprotokolle zuzugreifen usw. Das Standardkennwort sollte sofort nach der ersten Anmeldung geändert werden.</p>
 <h1 id="konfiguration">Konfiguration</h1>
 <p>Die Kernkonfiguration von REI3 kann in der Konfigurationsdatei (<code>config.json</code>) geändert werden, die sich im ausgewählten REI3-Installationsverzeichnis befindet. Das Festlegen von Dateipfaden, Webserver-Port und Datenbankverbindungsdetails ist unkompliziert. Änderungen werden beim Neustart des Anwendungsdienstes angewendet. Spezielle Konfigurationsoptionen und Zertifizierungsmanagement werden separat erläutert.</p>
-<h2 id="builder-option">Builder-Option</h2>
-<p>Die REI3-Plattform hostet in erster Linie vorgefertigte Anwendungen, auf die Benutzer zugreifen können. Es enthält zudem ein grafisches Werkzeug zur Anwendungserstellung, den "Builder". Diese Komponente kann aktiviert werden, indem die Builder-Option in der Konfigurationsdatei auf <code>true</code> gesetzt wird. Nach dem Neustart von REI3 können Administratorbenutzer auf den Builder zugreifen, indem sie in der Adminoberfläche in den Wartungsmodus wechseln.</p>
-<p>Der Builder ist ein umfangreiches Werkzeug. Alle REI3-Anwendungen werden ausschließlich über den Builder erstellt und geändert. Bitte beachten Sie, dass das Ändern von Anwendungen dauerhafte Konsequenzen bis hin zum Datenverlust hat. Versuchen Sie nicht, den Builder in einer produktiven Instanz zu verwenden. Zum Testen oder Entwickeln von Anwendungen sollte in jedem Fall eine separate Instanz verwendet werden. Die portable Version macht dies für Windows-Endgeräte einfach. Unter Linux dient ein separater Anwendungsdienst, der auf eine separate Datenbank zugreift, demselben Zweck.</p>
 <h2 id="ssl-zertifikate">SSL-Zertifikate</h2>
 <p>Während der Installation erstellt REI3 ein selbstsigniertes Zertifikat, um den verschlüsselten Zugriff auf die Anwendung zu ermöglichen. Es wird nicht empfohlen, dieses Zertifikat dauerhaft zu nutzen. Wenn möglich, sollte für REI3 ein ordnungsgemäß signiertes Zertifikat bereitgestellt werden, um eine sichere Kommunikation mit Vertrauen zwischen Endgeräten und Server zu gewährleisten.</p>
 <p>Wir können Unterstützung beim Aufbau der erforderlichen Infrastruktur anbieten. Die Verwaltung von Zertifikaten hängt jedoch von Ihrer Organisation ab. Cloud-basierte Angebote für REI3 umfassen Zertifizierungsdienste.</p>
 <h1 id="allgemeine-administration">Allgemeine Administration</h1>
 <p>Nach der Konfiguration werden grundsätzlich alle administrativen Aufgaben über die Adminoberfläche in der REI3-Hauptwebanwendung ausgeführt. Jeder Benutzer, der als "Administrator" definiert ist, hat vollen Zugriff auf diese Funktionen.</p>
 <h2 id="wartungsmodus">Wartungsmodus</h2>
-<p>Um tiefgreifende Systemänderungen sicher auszuführen, steht ein separater Betriebsmodus zur Verfügung, der als "Wartungsmodus" bezeichnet wird. Wenn diese Option aktiviert ist, werden alle Benutzer, die keine Administratoren sind, automatisch vom System abgemeldet. Neue Anmeldungen von Nicht-Administratoren werden ebenfalls abgelehnt.</p>
+<p>Um tiefgreifende Systemänderungen sicher auszuführen, steht ein separater Betriebsmodus zur Verfügung, der als "Wartungsmodus" bezeichnet wird. Wenn dieser aktiviert ist, werden alle Benutzer, die keine Administratoren sind, vom System abgemeldet. Neue Anmeldungen von Nicht-Administratoren werden abgelehnt.</p>
 <p>Im Wartungsmodus können Anwendungen installiert, konfiguriert und gelöscht werden. Bitte beachten Sie, dass durch das Löschen von Anwendungen alle entsprechenden Daten dauerhaft aus dem System gelöscht werden. Dies ist ohne aktuelle, funktionale Backups nicht rückgängig zu machen.</p>
+<h2 id="builder-modus">Builder-Modus</h2>
+<p>Wenn das System im Wartungsmodus ist, kann zusätzlich der Builder-Modus aktiviert werden. Dies ermöglicht Adminbenutzern Zugriff auf das integrierte, grafische Anwendungsentwicklungswerkzeug, kurz 'Builder' genannt. Der Builder ist ein umfangreiches Werkzeug. Alle REI3-Anwendungen werden ausschließlich über den Builder erstellt und geändert. Bitte beachten Sie, dass das Ändern von Anwendungen dauerhafte Konsequenzen bis hin zum Datenverlust hat. Versuchen Sie nicht, den Builder in einer produktiven Instanz zu verwenden. Zum Testen oder Entwickeln von Anwendungen sollte eine separate Instanz verwendet werden. Die portable Version macht dies für Windows-Endgeräte einfach. Unter Linux dient ein separater Anwendungsdienst, der auf eine separate Datenbank zugreift, demselben Zweck.</p>
 <h2 id="authentifizierung-und-autorisierung">Authentifizierung und Autorisierung</h2>
 <p>Über definierte Anmeldenamen und Passwörter werden Benutzer in REI3 authentifiziert. Neue Anmeldungen können nach Belieben erstellt werden. Es gibt keine Einschränkungen, außer dass Anmeldenamen eindeutig sein müssen. Um Zugriff zu gewähren, müssen Anwendungsrollen Anmeldungen zugewiesen werden. Rollen arbeiten kumulativ; Je mehr Rollen einer Anmeldung zugewiesen sind, desto mehr Berechtigungen werden erteilt. Kennwortkomplexitäts-Optionen stehen in der Admistratoroberfläche bereit.</p>
 <h2 id="anmeldungen-mit-datensätzen-verbinden">Anmeldungen mit Datensätzen verbinden</h2>
-<p>Einige Anwendungen ordnen Datensätze Anmeldungen zu, um Workflows zu ermöglichen. Ein Beispiel hierfür ist die offizielle Kernanwendung "Organisationen", welche Anmeldungen zu Mitarbeitern zuordnet. Diese Verbindung kann dann von allen auf "Organisationen" aufbauenden Anwendungen genutzt werden. Andere Entitäten können ebenfalls zu Anmeldungen zugeordnet werden, wie bspw. Anmeldungen zu Kunden-Accounts. Bitte referenzieren Sie hierzu die entsprechenden Anwendungs-Hilfeseiten.</p>
+<p>Einige Anwendungen ordnen Datensätze Anmeldungen zu, um Workflows zu ermöglichen. Ein Beispiel hierfür ist die Anwendung "Organisationen", welche Anmeldungen zu Mitarbeitern zuordnet. Diese Verbindung kann dann von allen auf "Organisationen" aufbauenden Anwendungen genutzt werden. Andere Entitäten können ebenfalls zu Anmeldungen zugeordnet werden, wie bspw. Anmeldungen zu Kunden-Accounts. Bitte referenzieren Sie hierzu die entsprechenden Anwendungs-Hilfeseiten.</p>
 <h2 id="authentifizierung-und-autorisierung-über-ldap">Authentifizierung und Autorisierung über LDAP</h2>
 <p>REI3 hostet ein internes Authentifizierungs-Backend. Zur Integration in vorhandene Infrastrukturen kann REI3 LDAP-Dienste nutzen, um folgendes anzubieten:</p>
 <ul>
