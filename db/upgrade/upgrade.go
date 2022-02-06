@@ -96,7 +96,7 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	"2.5": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(db.Ctx, `
 			-- new login setting
 			ALTER TABLE instance.login_setting ADD COLUMN warn_unsaved BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN warn_unsaved DROP DEFAULT;
@@ -290,7 +290,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			    form_id uuid NOT NULL,
 			    "position" integer NOT NULL,
 			    js_function_id uuid NOT NULL,
-			    event form_function_event NOT NULL,
+			    event app.form_function_event NOT NULL,
 			    event_before boolean NOT NULL,
 			    CONSTRAINT form_function_pkey PRIMARY KEY (form_id, "position"),
 			    CONSTRAINT form_function_form_id_fkey FOREIGN KEY (form_id)
@@ -451,7 +451,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX fki_field_data_column_id_def_fkey
 				ON app.field_data USING btree (column_id_def ASC NULLS LAST);
-		`)
+		`); err != nil {
+			return "", err
+		}
 
 		// migrate existing form open actions to new 'open form' entity
 		type result struct {
