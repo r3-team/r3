@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"r3/db"
+	"r3/db/check"
 	"r3/schema"
 	"r3/schema/caption"
-	"r3/schema/lookups"
 	"r3/schema/pgFunction"
 	"r3/schema/pgIndex"
 	"r3/tools"
@@ -25,13 +25,13 @@ var fkBreakActions = []string{"NO ACTION", "RESTRICT", "CASCADE", "SET NULL",
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
-	moduleName, relationName, name, content, err := lookups.GetAttributeDetailsById_tx(tx, id)
+	moduleName, relationName, name, content, err := schema.GetAttributeDetailsById_tx(tx, id)
 	if err != nil {
 		return err
 	}
 
 	// delete FK index if relationship attribute
-	if lookups.IsContentRelationship(content) {
+	if schema.IsContentRelationship(content) {
 		if err := pgIndex.DelAutoFkiForAttribute_tx(tx, id); err != nil {
 			return err
 		}
@@ -112,11 +112,11 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		return fmt.Errorf("invalid attribute content type '%s'", content)
 	}
 
-	_, moduleName, err := lookups.GetModuleDetailsByRelationId_tx(tx, relationId)
+	_, moduleName, err := schema.GetModuleDetailsByRelationId_tx(tx, relationId)
 	if err != nil {
 		return err
 	}
-	relationName, err := lookups.GetRelationNameById_tx(tx, relationId)
+	relationName, err := schema.GetRelationNameById_tx(tx, relationId)
 	if err != nil {
 		return err
 	}
@@ -125,7 +125,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 	var onUpdateNull = pgtype.Varchar{Status: pgtype.Null}
 	var onDeleteNull = pgtype.Varchar{Status: pgtype.Null}
 
-	if lookups.IsContentRelationship(content) {
+	if schema.IsContentRelationship(content) {
 		onUpdateNull.String = onUpdate
 		onUpdateNull.Status = pgtype.Present
 		onDeleteNull.String = onDelete
@@ -163,7 +163,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		}
 
 		// check for primary key attribute
-		if nameEx == lookups.PkName && (name != nameEx || length != lengthEx ||
+		if nameEx == schema.PkName && (name != nameEx || length != lengthEx ||
 			nullable != nullableEx || def != defEx) {
 
 			return errors.New("primary key attribute may only update: content, title")
@@ -233,7 +233,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 			// handle relationship attribute
 			var contentRel string
 
-			if lookups.IsContentRelationship(content) {
+			if schema.IsContentRelationship(content) {
 
 				// rebuild foreign key index if content changed (as in 1:1 -> n:1)
 				// this also adds/removes unique constraint, if required
@@ -246,7 +246,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 					}
 				}
 
-				contentRel, err = lookups.GetAttributeContentByRelationPk_tx(tx, relationshipId.Bytes)
+				contentRel, err = schema.GetAttributeContentByRelationPk_tx(tx, relationshipId.Bytes)
 				if err != nil {
 					return err
 				}
@@ -267,7 +267,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 			// default definition
 			defaultDef := "DROP DEFAULT"
 			if def != "" {
-				if lookups.IsContentText(content) {
+				if schema.IsContentText(content) {
 					// add quotes around default value for text
 					defaultDef = fmt.Sprintf("SET DEFAULT '%s'", def)
 				} else {
@@ -290,7 +290,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 
 		// update onUpdate / onDelete for relationship attributes
 		if (onUpdateEx.String != onUpdate || onDeleteEx.String != onDelete) &&
-			lookups.IsContentRelationship(content) {
+			schema.IsContentRelationship(content) {
 
 			if err := deleteFK_tx(tx, moduleName, relationName, id); err != nil {
 				return err
@@ -313,7 +313,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		}
 
 		// update PK characteristics, if PK attribute
-		if name == lookups.PkName && content != contentEx {
+		if name == schema.PkName && content != contentEx {
 			if err := updatePK_tx(tx, moduleName, relationName, relationId, content); err != nil {
 				return err
 			}
@@ -324,12 +324,12 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 	} else {
 		// check relationship target if relationship attribute
 		var contentRel string
-		if lookups.IsContentRelationship(content) {
+		if schema.IsContentRelationship(content) {
 			if relationshipId.Status != pgtype.Present {
 				return fmt.Errorf("relationship requires valid target")
 			}
 
-			contentRel, err = lookups.GetAttributeContentByRelationPk_tx(tx, relationshipId.Bytes)
+			contentRel, err = schema.GetAttributeContentByRelationPk_tx(tx, relationshipId.Bytes)
 			if err != nil {
 				return err
 			}
@@ -353,7 +353,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		// default definition
 		defaultDef := ""
 		if def != "" {
-			if lookups.IsContentText(content) {
+			if schema.IsContentText(content) {
 				// add quotes around default value for text
 				defaultDef = fmt.Sprintf("DEFAULT '%s'", def)
 			} else {
@@ -381,13 +381,13 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		}
 
 		// apply PK characteristics, if PK attribute
-		if name == lookups.PkName {
+		if name == schema.PkName {
 			if err := createPK_tx(tx, moduleName, relationName, id, relationId); err != nil {
 				return err
 			}
 		}
 
-		if lookups.IsContentRelationship(content) {
+		if schema.IsContentRelationship(content) {
 			// add FK constraint
 			if err := createFK_tx(tx, moduleName, relationName, id, name,
 				relationshipId.Bytes, onUpdate, onDelete); err != nil {
@@ -426,7 +426,7 @@ func SetName_tx(tx pgx.Tx, id uuid.UUID, name string, ignoreNameCheck bool) erro
 		return err
 	}
 
-	moduleName, relationName, nameEx, _, err := lookups.GetAttributeDetailsById_tx(tx, id)
+	moduleName, relationName, nameEx, _, err := schema.GetAttributeDetailsById_tx(tx, id)
 	if err != nil {
 		return err
 	}
@@ -471,7 +471,7 @@ func getContentColumnDefinition(content string, length int, contentRel string) (
 	}
 
 	// overwrite relationship column
-	if lookups.IsContentRelationship(content) {
+	if schema.IsContentRelationship(content) {
 		columnDef = contentRel
 	}
 	return columnDef, nil
@@ -479,7 +479,7 @@ func getContentColumnDefinition(content string, length int, contentRel string) (
 
 func checkName(name string) error {
 	// check valid DB identifier as attribute also becomes column
-	if err := db.CheckIdentifier(name); err != nil {
+	if err := check.DbIdentifier(name); err != nil {
 		return err
 	}
 	return nil
@@ -493,19 +493,19 @@ func createPK_tx(tx pgx.Tx, moduleName string, relationName string,
 	// default type is BIGINT if not otherwise specified (works in all our cases)
 	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		CREATE SEQUENCE "%s"."%s"
-	`, moduleName, lookups.GetSequenceName(relationId))); err != nil {
+	`, moduleName, schema.GetSequenceName(relationId))); err != nil {
 		return err
 	}
 
 	// define sequence as DEFAULT
 	// additional single quotes are required for nextval()
-	def := fmt.Sprintf(`NEXTVAL('"%s"."%s"')`, moduleName, lookups.GetSequenceName(relationId))
+	def := fmt.Sprintf(`NEXTVAL('"%s"."%s"')`, moduleName, schema.GetSequenceName(relationId))
 
 	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		ALTER TABLE "%s"."%s" ALTER COLUMN "%s" SET DEFAULT %s,
 			ADD CONSTRAINT "%s" PRIMARY KEY ("%s")
-	`, moduleName, relationName, lookups.PkName, def,
-		lookups.GetPKConstraintName(relationId), lookups.PkName)); err != nil {
+	`, moduleName, relationName, schema.PkName, def,
+		schema.GetPkConstraintName(relationId), schema.PkName)); err != nil {
 
 		return err
 	}
@@ -518,15 +518,15 @@ func updatePK_tx(tx pgx.Tx, moduleName string, relationName string,
 		ALTER TABLE "%s"."%s"
 			ALTER COLUMN "%s" TYPE %s,
 			ALTER COLUMN "%s" SET DEFAULT NEXTVAL('"%s"."%s"')
-	`, moduleName, relationName, lookups.PkName, content, lookups.PkName,
-		moduleName, lookups.GetSequenceName(relationId))); err != nil {
+	`, moduleName, relationName, schema.PkName, content, schema.PkName,
+		moduleName, schema.GetSequenceName(relationId))); err != nil {
 
 		return err
 	}
 
 	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		ALTER SEQUENCE "%s"."%s" AS %s
-	`, moduleName, lookups.GetSequenceName(relationId), content)); err != nil {
+	`, moduleName, schema.GetSequenceName(relationId), content)); err != nil {
 		return err
 	}
 	return nil
@@ -545,7 +545,7 @@ func createFK_tx(tx pgx.Tx, moduleName string, relationName string,
 	}
 
 	// get relationship relation & module names
-	modName, relName, err := lookups.GetRelationNamesById_tx(tx, relationshipId)
+	modName, relName, err := schema.GetRelationNamesById_tx(tx, relationshipId)
 	if err != nil {
 		return err
 	}
@@ -558,8 +558,8 @@ func createFK_tx(tx pgx.Tx, moduleName string, relationName string,
 		REFERENCES "%s"."%s" ("%s")
 		ON UPDATE %s
 		ON DELETE %s
-	`, moduleName, relationName, lookups.GetFKConstraintName(attributeId), attributeName,
-		modName, relName, lookups.PkName, onUpdate, onDelete)); err != nil {
+	`, moduleName, relationName, schema.GetFkConstraintName(attributeId), attributeName,
+		modName, relName, schema.PkName, onUpdate, onDelete)); err != nil {
 
 		return err
 	}
@@ -569,7 +569,7 @@ func deleteFK_tx(tx pgx.Tx, moduleName string, relationName string, attributeId 
 	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		ALTER TABLE "%s"."%s"
 		DROP CONSTRAINT "%s"
-	`, moduleName, relationName, lookups.GetFKConstraintName(attributeId)))
+	`, moduleName, relationName, schema.GetFkConstraintName(attributeId)))
 	return err
 }
 

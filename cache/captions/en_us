@@ -4,6 +4,7 @@
 			"add":"Add",
 			"apply":"Apply",
 			"cancel":"Cancel",
+			"clear":"Clear",
 			"close":"Close",
 			"create":"Create",
 			"delete":"Delete",
@@ -32,17 +33,6 @@
 		"dialog":{
 			"confirm":"Please confirm"
 		},
-		"error":{
-			"contextDeadlineExceeded":"Action could not be completed within the allowed time frame - please try again",
-			"fileTooLarge":"Cannot upload file '{NAME}', max. allowed size is {SIZE}",
-			"foreignKeyConstraint":"Record is still being referenced as '{ATR}' in '{MOD}'",
-			"foreignKeyUniqueConstraint":"'{NAME}' may only be referenced once",
-			"generalError":"Unexpected error occurred, please contact the system administrator",
-			"generalErrorTitle":"Error",
-			"presetProtected":"This record is protected and cannot be deleted",
-			"unauthorized":"Unauthorized access",
-			"uniqueConstraint":"Value for '{NAMES}' must be unique"
-		},
 		"option":{
 			"aggArray":"array",
 			"aggAvg":"average",
@@ -52,6 +42,7 @@
 			"aggMin":"minimum",
 			"aggRecord":"[single record]",
 			"aggSum":"sum",
+			"all":"all",
 			"no":"no",
 			"size0":"smallest",
 			"size1":"small",
@@ -70,12 +61,12 @@
 		"busy":"Working - Click here to abort",
 		"date":"Date",
 		"description":"Description",
+		"errorTitle":"Error",
 		"filters":"Filters",
 		"home":"Home",
 		"icon":"Icon",
 		"id":"ID",
 		"inputDecimal":"Value must be decimal",
-		"inputFileNotUploaded":"File is not saved yet",
 		"inputInvalid":"Value is invalid",
 		"inputLarge":"Value is too large",
 		"inputLong":"Value is too long",
@@ -95,6 +86,7 @@
 		"notice":"Notice",
 		"order":"Order",
 		"password":"Password",
+		"preview":"Preview",
 		"results":"{CNT} results",
 		"resultsNone":"- no results -",
 		"resultsOf":"/ {CNT}",
@@ -319,7 +311,7 @@
 			},
 			"dialog":{
 				"delete":"Are you sure you want to delete this application? This will also delete all included data from your system.<br /><br /><b>This action is irreversible without current backups.</b>{APPS}",
-				"deleteApps":"<br /><br />The following applications are dependend on this one and will also be deleted:<ul>{LIST}</ul>",
+				"deleteApps":"<br /><br />The following applications are dependent on this one and will also be deleted:<ul>{LIST}</ul>",
 				"deleteMulti":"This action will <b>permanently</b> delete <b>{COUNT} application(s)</b> and corresponding data.<br /><br />Do you really want to continue?",
 				"deleteTitle":"Permanent deletion of application '{APP}'",
 				"owner":"With this option enabled, changes to this application can be exported as a new version. If you are not the original author, all changes will be LOST when a new version from the author is installed. This can also result in DATA LOSS.<br /><br />If you intend to change/extent applications from other authors, you can safely do so by 'building on them' - please refer to the Builder documentation for more details.",
@@ -423,6 +415,18 @@
 			},
 			"new":"New attribute"
 		},
+		"collection":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this collection?"
+			},
+			"columnsTarget":"Place columns here",
+			"contentColumn":"Column data sub query",
+			"new":"New collection",
+			"previewHint":"Collection values for the logged in user. Collections are retrieved on page load (F5 to reload) if they are enabled within assigned roles.",
+			"query":"Query",
+			"title":"Collections",
+			"titleOne":"Collection '{NAME}'"
+		},
 		"form":{
 			"chart":{
 				"axisType":"Axis type",
@@ -443,6 +447,21 @@
 			"dialog":{
 				"delete":"Are you sure you want to delete this form?"
 			},
+			"error":{
+				"formStateFieldRemovedCondition":"Deleted field is still referenced as condition of form state '{NAME}'.",
+				"formStateFieldRemovedEffect":"Deleted field is still referenced as effect of form state '{NAME}'."
+			},
+			"functions":{
+				"option":{
+					"delete":"Form record deleted",
+					"open":"Form opened",
+					"save":"Form record saved"
+				},
+				"event":"Event",
+				"eventBefore":"Before event",
+				"jsFunctionId":"Execute frontend function",
+				"title":"Form functions"
+			},
 			"option":{
 				"displayColor":"color",
 				"displayDefault":"default",
@@ -452,6 +471,7 @@
 				"displayGallery":"gallery",
 				"displayHidden":"hidden",
 				"displayLogin":"login",
+				"displayPassword":"password",
 				"displayPhone":"telephone",
 				"displayTime":"time",
 				"displayTextarea":"textarea",
@@ -477,14 +497,15 @@
 				"modeField":"Field value",
 				"modeField2Field":"field value",
 				"modeField2Fixed":"fixed value",
+				"modeField2Login":"login ID",
 				"modeField2Preset":"preset",
+				"modeFieldChanged":"Field value changed",
 				"modeRecord":"Record state",
 				"modeRole":"Role",
 				"newRecord":"Is new",
 				"title":"Form states"
 			},
 			"aggregator":"Aggregate",
-			"attributeRecord":"Apply form record to",
 			"autoRenew":"Auto refresh",
 			"autoRenew0":"not active",
 			"autoRenewHint":"in seconds",
@@ -492,6 +513,10 @@
 			"autoSelectHint":"0=off, 2=first two, -3=last three",
 			"captions":"Captions",
 			"category":"Category selector",
+			"collection":"Collection*",
+			"collectionIdDef":"Default value(s) from collection",
+			"collectionHint":"*Collection is only affected if selected as filter criteria in data query.",
+			"collectionTitle":"Filter collection by user input",
 			"columnsTarget":"Place columns here",
 			"columnsTemplates":"Available columns",
 			"columnBatch":"Column batch",
@@ -514,6 +539,7 @@
 			"copyNewName":"New form name",
 			"csvExport":"CSV export",
 			"csvImport":"CSV import",
+			"csvTitle":"CSV processing",
 			"date0":"Date from",
 			"date1":"Date to",
 			"dateColor":"Color",
@@ -554,8 +580,6 @@
 			"flexSizeMin":"Shrinks to (percent)",
 			"flexSizeShrink":"Shrink factor",
 			"flexWrap":"Wrap content",
-			"formOpen":"Open record (relation 0)",
-			"formOpenEmpty":"Open form",
 			"formTitle":"Form title",
 			"gantt":"Gantt",
 			"ganttNotes":"Column batch 1 groups results.",
@@ -567,15 +591,26 @@
 			"hidden":"Field is hidden by default",
 			"icon":"Form icon",
 			"ics":"iCAL subscriptions",
+			"jsFunctionButton":"Function on click",
+			"jsFunctionData":"Function on value change",
 			"layout":"List layout",
 			"limit":"Result count",
 			"new":"New form",
 			"onMobile":"In mobile view",
+			"openForm":"Open form",
+			"openFormAttributeApply":"...to set value on form",
+			"openFormFormIdOpen":"Form",
+			"openFormMaxHeight":"Maximum height (px)",
+			"openFormMaxWidth":"Maximum width (px)",
+			"openFormNewRecord":"When creating new records",
+			"openFormPopUp":"Pop-up form",
+			"openFormRelationIndex":"Use record from relation",
 			"presetOpen":"Open preset",
 			"readonly":"Read only",
 			"required":"Required",
+			"showFunctions":"Functions",
 			"showHelp":"Help",
-			"showOutsideIn":"Ref. relationships",
+			"showReferences":"References",
 			"showStates":"States",
 			"sql":"SQL preview",
 			"state":"State",
@@ -587,6 +622,99 @@
 			"subQuery":"Sub query",
 			"subQueryAttribute":"Attribute",
 			"title":"Forms"
+		},
+		"function":{
+			"button":{
+				"addNew":"NEW prefix",
+				"addOld":"OLD prefix",
+				"addSchedule":"Add new schedule",
+				"details":"Details",
+				"template":"Template"
+			},
+			"dialog":{
+				"delete":"Are you sure you want to delete this function?"
+			},
+			"helpJs":{
+				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Copies text to the users clipboard.",
+				"get_language_code":"app.get_language_code() => STRING<br /><br />Returns the 5-letter language code ('en_us', ...) of the current login.",
+				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Returns the ID of the current login.",
+				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Returns the record ID of the open form for the specified relation index (0 is default).",
+				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Returns all assigned role IDs for the current login (nested roles are included).",
+				"go_back":"app.go_back() => UNDEFINED<br /><br />Executes a browser-back navigation.",
+				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />Returns true if the current login has the assigned role (nested roles are included).",
+				"open_form":"app.open_form(form_id, record_id, new_tab, pop_up, max_height, max_width) => UNDEFINED<br /><br />Opens a form directly, in a new browser tab or as pop-up window.",
+				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Deletes the current form record.",
+				"record_new":"app.record_new() => UNDEFINED<br /><br />Opens new record.",
+				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Reloads the current form record.",
+				"record_save":"app.record_save() => UNDEFINED<br /><br />Saves the current form record."
+			},
+			"helpPg":{
+				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Aborts the operation and sends a message to the executing user, which is displayed in the user interface.",
+				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Returns the ID of the login, which is executing the operation.",
+				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Returns the 5-letter language code ('en_us', ...) of the login, which is used to access the data backend.",
+				"get_name":"instance.get_name() => TEXT<br /><br />Returns the instance name, defined in the customization window of the admin panel.",
+				"get_public_hostname":"instance.get_public_hostname() => TEXT<br /><br />Returns the public hostname of the instance, defined in the system configuration.",
+				"get_role_ids":"instance.get_role_ids(<blockquote>login_id INTEGER,<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => UUID[]<br /><br />Get an array of role IDs assigned to the specified login.<br /><br />If 'inherited' is set to TRUE, parent roles are included. Nested memberships are fully resolved.",
+				"has_role":"instance.has_role(<blockquote>login_id INTEGER,<br />role_id UUID,<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => BOOLEAN<br /><br />Returns whether the specified login has the specified role ID assigned. <br /><br />If 'inherited' is set to TRUE, parent roles are included. Nested memberships are fully resolved.<br /><br />Example: SELECT instance.has_role(1,'00000000-0000-0000-0000-000000000001',FALSE)",
+				"has_role_any":"instance.has_role_any(<blockquote>login_id INTEGER,<br />role_ids UUID[],<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => BOOLEAN<br /><br />Returns whether the specified login has any of the specified role IDs assigned. <br /><br />If 'inherited' is set to TRUE, parent roles are included. Nested memberships are fully resolved.<br /><br />Example: SELECT instance.has_role_any(1,ARRAY['00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000002']::UUID[],FALSE)",
+				"log_error":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Logs error message. If application name can be resolved, log is associated with it.",
+				"log_info":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Logs info message. If application name can be resolved, log is associated with it.",
+				"log_warning":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Logs warning message. If application name can be resolved, log is associated with it.",
+				"mail_delete":"instance.mail_delete(mail_id INTEGER) => INTEGER<br /><br />Deletes the specified email, including attachments.",
+				"mail_delete_after_attach":"instance.mail_delete_after_attach(<blockquote>mail_id INTEGER,<br />attach_record_id INTEGER,<br />attach_attribute_id UUID</blockquote>) => INTEGER<br /><br />Flag email attachments to be added to a file attribute of the specified record; the email and its attachments are deleted afterwards.",
+				"mail_get_next":"instance.mail_get_next(account_name TEXT DEFAULT NULL) => instance.mail<br /><br />Returns the next email from the mail spooler; returns NULL if no email is available. When an account name is specified, returns only mails received with the given account.<br /><br />The returned type 'instance.mail' consists of:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>After processing an email it should be deleted; either directly (mail_delete) or after storing its attachments (mail_delete_after_attach).",
+				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Generates an outgoing email for the mail spooler. Optional parameters:<ul><li>Comma separated list of TO/CC/BCC recipients (one of these must be set)</li><li>Mail account name to send from (random account is used if not specified)</li><li>File attribute and record from which to attach files from</li></ul>"
+			},
+			"option":{
+				"fieldGet":"read value",
+				"fieldSet":"write value",
+				"intervalDays":"Days",
+				"intervalHours":"Hours",
+				"intervalMinutes":"Minutes",
+				"intervalMonths":"Months",
+				"intervalSeconds":"Seconds",
+				"intervalWeeks":"Weeks",
+				"intervalYears":"Years"
+			},
+			"code":"Function body",
+			"codeArgs":"Arguments",
+			"codeArgsHintJs":"optional, 'var1, var2, ...'",
+			"codeArgsHintPg":"optional, 'var1 integer, var2 bool, ...'",
+			"codeReturns":"Returns",
+			"codeReturnsHintJs":"optional, 'number', 'array',...",
+			"codeReturnsHintPg":"optional, 'text', 'integer',...",
+			"entityInput":"Select placeholder and click on function body to use <b>upgrade-safe</b> syntax.",
+			"form":"Bind to form",
+			"functionsBackend":"Backend functions",
+			"functionsFrontend":"Frontend functions",
+			"intervalAtDayForMonths":"at day of month",
+			"intervalAtDayForWeeks":"at day of week (0=su, 1=mo, ...)",
+			"intervalAtDayForYears":"at day of year",
+			"intervalAtTime":"at time",
+			"intervalEvery":"Run: Every",
+			"isFrontendExec":"Frontend call",
+			"isTrigger":"Trigger",
+			"language":"Language",
+			"languageJs":"JavaScript",
+			"languagePg":"PL/pgSQL",
+			"new":"New function",
+			"placeholders":"Placeholders",
+			"placeholdersFormFields":"Form data fields",
+			"placeholdersFormQuery":"Form data query",
+			"placeholdersGlobal":"Global",
+			"placeholdersInstance":"Instance",
+			"placeholdersModules":"Applications",
+			"runOnce":"Run once",
+			"schedules":"Recurrence",
+			"schedulesItem":"{CNT} schedules",
+			"title":"Functions",
+			"titleJs":"Frontend functions ({CNT})",
+			"titlePg":"Backend functions ({CNT})",
+			"titleOne":"Function title",
+			"valueJsHint":"VALUE",
+			"valueJsHintForm":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
+			"valueJsHintIndex":"RELATION_INDEX_NUMBER",
+			"valueJsHintRole":"ROLE_ID_STRING"
 		},
 		"help":{
 			"title":"Application help"
@@ -653,65 +781,6 @@
 			"startForms":"Start forms",
 			"startFormsExplanation":"The first start form is used that matches a role of the current login.",
 			"title":"Applications"
-		},
-		"pgFunction":{
-			"button":{
-				"addNew":"NEW prefix",
-				"addOld":"OLD prefix",
-				"addSchedule":"Add new schedule",
-				"details":"Details",
-				"template":"Template"
-			},
-			"dialog":{
-				"delete":"Are you sure you want to delete this function?"
-			},
-			"help":{
-				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Aborts the operation and sends a message to the executing user, which is displayed in the user interface.",
-				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Returns the ID of the login, which is executing the operation.",
-				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Returns the 5-letter language code ('en_us', ...) of the login, which is used to access the data backend.",
-				"get_name":"instance.get_name() => TEXT<br /><br />Returns the instance name, defined in the customization window of the admin panel.",
-				"get_public_hostname":"instance.get_public_hostname() => TEXT<br /><br />Returns the public hostname of the instance, defined in the system configuration.",
-				"get_role_ids":"instance.get_role_ids(<blockquote>login_id INTEGER,<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => UUID[]<br /><br />Get an array of role IDs assigned to the specified login.<br /><br />If 'inherited' is set to TRUE, parent roles are included. Nested memberships are fully resolved.",
-				"has_role":"instance.has_role(<blockquote>login_id INTEGER,<br />role_id UUID,<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => BOOLEAN<br /><br />Returns whether the specified login has the specified role ID assigned. <br /><br />If 'inherited' is set to TRUE, parent roles are included. Nested memberships are fully resolved.<br /><br />Example: SELECT instance.has_role(1,'00000000-0000-0000-0000-000000000001',FALSE)",
-				"has_role_any":"instance.has_role_any(<blockquote>login_id INTEGER,<br />role_ids UUID[],<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => BOOLEAN<br /><br />Returns whether the specified login has any of the specified role IDs assigned. <br /><br />If 'inherited' is set to TRUE, parent roles are included. Nested memberships are fully resolved.<br /><br />Example: SELECT instance.has_role_any(1,ARRAY['00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000002']::UUID[],FALSE)",
-				"log_error":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Logs error message. If application name can be resolved, log is associated with it.",
-				"log_info":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Logs info message. If application name can be resolved, log is associated with it.",
-				"log_warning":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Logs warning message. If application name can be resolved, log is associated with it.",
-				"mail_delete":"instance.mail_delete(mail_id INTEGER) => INTEGER<br /><br />Deletes the specified email, including attachments.",
-				"mail_delete_after_attach":"instance.mail_delete_after_attach(<blockquote>mail_id INTEGER,<br />attach_record_id INTEGER,<br />attach_attribute_id UUID</blockquote>) => INTEGER<br /><br />Flag email attachments to be added to a file attribute of the specified record; the email and its attachments are deleted afterwards.",
-				"mail_get_next":"instance.mail_get_next(account_name TEXT DEFAULT NULL) => instance.mail<br /><br />Returns the next email from the mail spooler; returns NULL if no email is available. When an account name is specified, returns only mails received with the given account.<br /><br />The returned type 'instance.mail' consists of:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>After processing an email it should be deleted; either directly (mail_delete) or after storing its attachments (mail_delete_after_attach).",
-				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Generates an outgoing email for the mail spooler. Optional parameters:<ul><li>Comma separated list of TO/CC/BCC recipients (one of these must be set)</li><li>Mail account name to send from (random account is used if not specified)</li><li>File attribute and record from which to attach files from</li></ul>"
-			},
-			"option":{
-				"intervalDays":"Days",
-				"intervalHours":"Hours",
-				"intervalMinutes":"Minutes",
-				"intervalMonths":"Months",
-				"intervalSeconds":"Seconds",
-				"intervalWeeks":"Weeks",
-				"intervalYears":"Years"
-			},
-			"code":"Function body",
-			"codeArgs":"Arguments",
-			"codeArgsHint":"optional, 'var1 integer'",
-			"codeReturns":"Returns",
-			"codeReturnsHint":"expression, 'trigger', 'integer',...",
-			"entityInput":"Select placeholder and click on function body to use <b>upgrade-safe</b> syntax.",
-			"intervalAtDayForMonths":"at day of month",
-			"intervalAtDayForWeeks":"at day of week (0=su, 1=mo, ...)",
-			"intervalAtDayForYears":"at day of year",
-			"intervalAtTime":"at time",
-			"intervalEvery":"Run: Every",
-			"new":"New function",
-			"placeholders":"Placeholders",
-			"placeholdersInstance":"Instance",
-			"placeholdersModules":"Applications",
-			"preview":"Preview",
-			"runOnce":"Run once",
-			"schedules":"Recurrence",
-			"schedulesItem":"{CNT} schedules",
-			"title":"Functions",
-			"titleOne":"Function title"
 		},
 		"pgTrigger":{
 			"dialog":{
@@ -788,8 +857,9 @@
 			"presetValues":"Values",
 			"presetValuesPreview":"Values preview",
 			"preview":"Data view",
-			"previewLimit":"Limit",
+			"previewLimit":"Records/page",
 			"previewPage":"Page",
+			"previewRowCount":"Record count",
 			"relationship":"Relationship",
 			"retention":"Change log",
 			"retentionCount":"Keep X changes",
@@ -813,6 +883,8 @@
 			"assignable":"Assignable",
 			"attribute":"Attribute",
 			"children":"Member of",
+			"collection":"Collection",
+			"collections":"Collections",
 			"data":"Data",
 			"legend":"Legend: No access (-), read (R), write (W), delete (D)",
 			"menu":"Menu",
@@ -825,15 +897,19 @@
 		"backHint":"Go back to application overview",
 		"language":"Translation",
 		"languageNextHint":"Switch to next language (hotkey: CTRL + q)",
+		"navigationCollections":"Collections",
+		"navigationCollectionsSub":"Collection details",
 		"navigationFilterHint":"Filter by text",
 		"navigationForms":"Forms",
 		"navigationFormsSub":"Form design",
+		"navigationFunctions":"Functions",
+		"navigationFunctionsSub":"Function details",
+		"navigationFunctionsSubBackend":"Backend",
+		"navigationFunctionsSubFrontend":"Frontend",
 		"navigationHelp":"Help",
 		"navigationIcons":"Icons",
 		"navigationLoginForms":"Login forms",
 		"navigationMenu":"Menus",
-		"navigationPgFunctions":"Functions",
-		"navigationPgFunctionsSub":"Function details",
 		"navigationRelations":"Relations",
 		"navigationRelationsSub":"Relation details",
 		"navigationRoles":"Roles",
@@ -883,6 +959,39 @@
 		"weekDayShort5":"Fri",
 		"weekDayShort6":"Sat"
 	},
+	"error":{
+		"APP":{
+			"001":"An unexpected error occurred. Please try again.",
+			"002":"Action could not be completed within the allowed time frame. If this happens often, please contact your system administrator.",
+			"003":"Action was aborted. Please try again.",
+			"004":"The record you attempted to delete is protected - it cannot be deleted.",
+			"005":"Failed to create entity because there was no name given. Please specify a name.",
+			"006":"The chosen name is invalid. Please make sure that the name...<ul><li>... starts with a letter <b>(a-z)</b>.</li><li>... is at most <b>31</b> characters long.</li><li>... contains only lower case letters <b>(a-z)</b>, underscores <b>(_)</b> or numbers <b>(0-9)</b>.</li></ul>Examples: storage_inventory_post21, facility_address, contact_book",
+			"007":"A referenced module is not known.",
+			"008":"A referenced relation is not known.",
+			"009":"A referenced attribute is not known."
+		},
+		"CSV":{
+			"001":"Invalid number '{VALUE}' (expected an integer).",
+			"002":"Invalid number '{VALUE}' (expected a decimal).",
+			"003":"Invalid date/time value '{VALUE}', expected format: {EXPECT}.",
+			"004":"Unsupported attribute type '{VALUE}'.",
+			"005":"Wrong number of fields in line '{VALUE}'."
+		},
+		"DBS":{
+			"001":"{FNC_MSG}",
+			"002":"The selected value for '{NAMES}' is already used by another record. It is defined as 'unique' and can only be used once.",
+			"003":"This login name is already taken.",
+			"004":"Record cannot be deleted - it is still being referenced as '{ATR}' in '{MOD}'.",
+			"005":"Column '{NAME}' has no value or could not be resolved.",
+			"006":"Failed to create unique index, because existing attribute values are not unique.",
+			"007":"Invalid value '{VALUE}'."
+		},
+		"SEC":{
+			"001":"You are not authorized to complete this action or access this resource."
+		},
+		"initCollection":"Failed to load collections during login: {MSG}"
+	},
 	"feedback":{
 		"button":{
 			"whatIsSent":"What is being sent?"
@@ -910,6 +1019,7 @@
 			},
 			"content":{
 				"attribute":"attribute value",
+				"collection":"collection value(s)",
 				"field":"field value",
 				"javascript":"JavaScript expression",
 				"languageCode":"login language code (en_us, ...)",
@@ -956,6 +1066,7 @@
 			"retractLogs":"Retract logs"
 		},
 		"dialog":{
+			"close":"There are unsaved changes.<br /><br />Do you still want to close this form?",
 			"delete":"Are you sure that you want to <b>permanently</b> delete this record?",
 			"new":"There are unsaved changes.<br /><br />Do you still want to open a new record?",
 			"newReset":"This will reset all your inputs.<br /><br />Do you want to continue?",
@@ -988,7 +1099,7 @@
 		},
 		"wizard":{
 			"installBundle":"Core Company",
-			"installBundleDesc":"Install a pre-packaged set of core applications, useful for any organization. The set 'Core Company' includes:<ul><li>Absence management</li><li>Time tracking</li><li>Task management</li><li>Tools to model your organization</li></ul>After installation, please have a look at the individual application help pages to learn more about the initial setup for each.",
+			"installBundleDesc":"Install a pre-packaged set of core applications, useful for any organization. The set 'Core Company' includes:<ul><li>Absence management</li><li>Time tracking</li><li>Project & task management</li><li>Request handling</li><li>Tools to model your organization</li></ul>After installation, please have a look at the individual application help pages to learn more about the initial setup for each.",
 			"installFile":"From file",
 			"installFileDesc":"Install applications from local REI3 files. For offline systems or self-made applications.<br /><br />Files for publicly offered REI3 applications can be downloaded from the official <a href=\"https://rei3.de/download_en\" target=\"_blank\">repository</a>.",
 			"installRepo":"From repository",
@@ -1016,7 +1127,9 @@
 			"inputMonth":"mm",
 			"inputSecond":"--",
 			"inputYear":"yyyy"
-		}
+		},
+		"fileNotUploaded":"File is not saved yet.",
+		"fileTooLarge":"Cannot upload file '{NAME}', max. allowed size is {SIZE}."
 	},
 	"list":{
 		"button":{
@@ -1029,14 +1142,6 @@
 		},
 		"dialog":{
 			"delete":"Are you sure that you want to <b>permanently</b> delete the selected records?"
-		},
-		"error":{
-			"csvDateParse":"Invalid time value '{VALUE}', expected format: {EXPECT}",
-			"csvFieldCount":"Wrong number of fields",
-			"csvLineError":"Error on line {COUNT}: ",
-			"csvNotNull":"Column '{NAME}' has no value or could not be resolved",
-			"csvNumberParse":"Invalid number '{VALUE}'",
-			"csvTypeSyntax":"Invalid value '{VALUE}'"
 		},
 		"message":{
 			"csvExport":"The CSV export uses filters and ordering from the current list.",
@@ -1057,6 +1162,7 @@
 		"csvDatetime":"Datetime format",
 		"csvFile":"CSV file",
 		"csvHasHeader":"Header line",
+		"csvLineError":"Error on line {COUNT}: ",
 		"csvTime":"Time format",
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Timezone",
@@ -1112,6 +1218,7 @@
 		"titleAdmin":"Admin",
 		"titleDisplay":"Display",
 		"titleSecurity":"Security",
-		"titleTheme":"Theme"
+		"titleTheme":"Theme",
+		"warnUnsaved":"Warnings for unsaved changes"
 	}
 }

@@ -475,46 +475,50 @@ let MyBuilderModulesItem = {
 		// backend calls
 		set:function() {
 			this.languages.sort(); // for change comparissons
-			let trans = new wsHub.transactionBlocking();
-			trans.add('module','set',{
-				id:this.id,
-				parentId:this.parentId,
-				formId:this.formId,
-				iconId:this.iconId,
-				name:this.name,
-				color1:this.color1,
-				position:this.position,
-				languageMain:this.languageMain,
-				releaseBuild:this.releaseBuild,
-				releaseBuildApp:this.releaseBuildApp,
-				releaseDate:this.releaseDate,
-				dependsOn:this.dependsOn,
-				startForms:this.startForms,
-				languages:this.languages,
-				captions:this.captions
-			},this.setOk);
+			
+			let requests = [
+				ws.prepare('module','set',{
+					id:this.id,
+					parentId:this.parentId,
+					formId:this.formId,
+					iconId:this.iconId,
+					name:this.name,
+					color1:this.color1,
+					position:this.position,
+					languageMain:this.languageMain,
+					releaseBuild:this.releaseBuild,
+					releaseBuildApp:this.releaseBuildApp,
+					releaseDate:this.releaseDate,
+					dependsOn:this.dependsOn,
+					startForms:this.startForms,
+					languages:this.languages,
+					captions:this.captions
+				})
+			];
 			
 			if(!this.isNew)
-				trans.add('schema','check',{moduleId:this.id});
+				requests.push(ws.prepare('schema','check',{moduleId:this.id}));
 			
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			if(this.isNew) {
-				this.name      = '';
-				this.captions  = { moduleTitle:{} };
-				this.dependsOn = [];
-			}
-			
-			// reload entire schema if new module or its parent has changed
-			if(this.isNew || this.parentId !== this.module.parentId)
-				this.$root.schemaReload();
-			else
-				this.$root.schemaReload(this.id);
-			
-			// sort array for change comparissons
-			this.dependsOn.sort();
-			this.languages.sort();
+			ws.sendMultiple(requests,true).then(
+				(res) => {
+					if(this.isNew) {
+						this.name      = '';
+						this.captions  = { moduleTitle:{} };
+						this.dependsOn = [];
+					}
+					
+					// reload entire schema if new module or its parent has changed
+					if(this.isNew || this.parentId !== this.module.parentId)
+						this.$root.schemaReload();
+					else
+						this.$root.schemaReload(this.id);
+					
+					// sort array for change comparissons
+					this.dependsOn.sort();
+					this.languages.sort();
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };
@@ -576,17 +580,15 @@ let MyBuilderModulesKeyCreate = {
 	methods:{
 		displayArrow,
 		createKey:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('key','create',{
-				keyLength:parseInt(this.keyLength)
-			},this.createKeyOk);
-			trans.send(this.$root.genericError);
+			ws.send('key','create',{keyLength:parseInt(this.keyLength)},true).then(
+				(res) => {
+					this.keyPrivate = res.payload.private;
+					this.keyPublic  = res.payload.public;
+					this.running    = false;
+				},
+				(err) => this.$root.genericError(err)
+			);
 			this.running = true;
-		},
-		createKeyOk:function(res) {
-			this.keyPrivate = res.payload.private;
-			this.keyPublic  = res.payload.public;
-			this.running    = false;
 		}
 	}
 };
@@ -822,31 +824,25 @@ let MyBuilderModulesExport = {
 	methods:{
 		displayArrow,
 		addVersion:function(moduleId) {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('transfer','addVersion',{moduleId:moduleId},this.addVersionOk);
-			trans.send(this.$root.genericError);
-		},
-		addVersionOk:function(res,req) {
-			this.moduleIdMapChanged = null;
-			this.$root.schemaReload(req.payload.moduleId);
+			ws.send('transfer','addVersion',{moduleId:moduleId},true).then(
+				(res) => {
+					this.moduleIdMapChanged = null;
+					this.$root.schemaReload(moduleId);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		check:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('module','checkChange',{id:this.id},this.checkOk);
-			trans.send(this.$root.genericError);
-		},
-		checkOk:function(res) {
-			this.moduleIdMapChanged = res.payload.moduleIdMapChanged;
+			ws.send('module','checkChange',{id:this.id},true).then(
+				(res) => this.moduleIdMapChanged = res.payload.moduleIdMapChanged,
+				(err) => this.$root.genericError(err)
+			);
 		},
 		setKey:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('transfer','storeExportKey',{
-				exportKey:this.exportPrivateKey
-			},this.setKeyOk);
-			trans.send(this.$root.genericError);
-		},
-		setKeyOk:function() {
-			this.keyIsSet = true;
+			ws.send('transfer','storeExportKey',{exportKey:this.exportPrivateKey},true).then(
+				(res) => this.keyIsSet = true,
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

@@ -235,6 +235,11 @@ let MyBuilderRelation = {
 							:active="previewRows.length === previewLimit"
 						/>
 						
+						<span>{{ capApp.previewPage }}</span>
+						<input class="short" disabled="true"
+							:value="(previewOffset / previewLimit) + 1"
+						/>
+						
 						<span>{{ capApp.previewLimit }}</span>
 						<select class="short"
 							v-model.number="previewLimit"
@@ -243,9 +248,9 @@ let MyBuilderRelation = {
 							<option v-for="i in 10" :value="i*10">{{ i*10 }}</option>
 						</select>
 						
-						<span>{{ capApp.previewPage }}</span>
+						<span>{{ capApp.previewRowCount }}</span>
 						<input class="short" disabled="true"
-							:value="(previewOffset / previewLimit) + 1"
+							:value="previewRowCount"
 						/>
 					</div>
 					
@@ -280,6 +285,7 @@ let MyBuilderRelation = {
 			previewLimit:10,
 			previewOffset:0,
 			previewRows:[],
+			previewRowCount:0,
 			showAttributes:true,
 			showExternal:false,
 			showGraph:false,
@@ -438,16 +444,17 @@ let MyBuilderRelation = {
 		
 		// backend calls
 		getPreview:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('relation','preview',{
+			ws.send('relation','preview',{
 				id:this.id,
 				limit:this.previewLimit,
 				offset:this.previewOffset
-			},this.getPreviewOk);
-			trans.send(this.$root.genericError);
-		},
-		getPreviewOk:function(res) {
-			this.previewRows = res.payload;
+			},true).then(
+				(res) => {
+					this.previewRows     = res.payload.rows;
+					this.previewRowCount = res.payload.rowCount;
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

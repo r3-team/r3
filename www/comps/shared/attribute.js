@@ -96,6 +96,28 @@ export function getAttributeValueFromString(content,value) {
 	return value;
 };
 
+// example: '7b9fecdc-d8c8-43b3-805a-3b276003c81_3,859a48cb-4358-4fd4-be1a-265d86930922_12'
+// (contains two attributes with one value each)
+export function getAttributeValuesFromGetter(getter) {
+	let map  = {};
+	let atrs = getter.split(',');
+	
+	for(let i = 0, j = atrs.length; i < j; i++) {
+		
+		let parts = atrs[i].split('_');
+		if(parts.length !== 2)
+			continue;
+		
+		let atrId = parts[0];
+		let value = parts[1];
+		
+		if(typeof MyStore.getters['schema/attributeIdMap'][atrId] !== 'undefined')
+			map[atrId] = getValueFromQuery(
+				MyStore.getters['schema/attributeIdMap'][atrId].content,value);
+	}
+	return map;
+};
+
 export function isAttributeBoolean(content) { return content === 'boolean'; };
 export function isAttributeDecimal(content) { return attributeContentNames.decimal.includes(content); };
 export function isAttributeFiles(content)   { return content === 'files'; };

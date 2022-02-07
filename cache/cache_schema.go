@@ -11,8 +11,10 @@ import (
 	"r3/log"
 	"r3/module_option"
 	"r3/schema/attribute"
+	"r3/schema/collection"
 	"r3/schema/form"
 	"r3/schema/icon"
+	"r3/schema/jsFunction"
 	"r3/schema/loginForm"
 	"r3/schema/menu"
 	"r3/schema/module"
@@ -177,6 +179,8 @@ func reloadModule(id uuid.UUID) error {
 	mod.Roles = make([]types.Role, 0)
 	mod.LoginForms = make([]types.LoginForm, 0)
 	mod.PgFunctions = make([]types.PgFunction, 0)
+	mod.JsFunctions = make([]types.JsFunction, 0)
+	mod.Collections = make([]types.Collection, 0)
 
 	// get relations
 	log.Info("cache", "load relations")
@@ -270,7 +274,7 @@ func reloadModule(id uuid.UUID) error {
 	}
 
 	// store & backfill PG functions
-	log.Info("cache", "load functions")
+	log.Info("cache", "load PG functions")
 
 	mod.PgFunctions, err = pgFunction.Get(mod.Id)
 	if err != nil {
@@ -278,6 +282,22 @@ func reloadModule(id uuid.UUID) error {
 	}
 	for _, fnc := range mod.PgFunctions {
 		PgFunctionIdMap[fnc.Id] = fnc
+	}
+
+	// get JS functions
+	log.Info("cache", "load JS functions")
+
+	mod.JsFunctions, err = jsFunction.Get(mod.Id)
+	if err != nil {
+		return err
+	}
+
+	// get collections
+	log.Info("cache", "load collections")
+
+	mod.Collections, err = collection.Get(mod.Id)
+	if err != nil {
+		return err
 	}
 
 	// update cache map with parsed module

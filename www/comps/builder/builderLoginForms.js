@@ -137,18 +137,13 @@ let MyBuilderLoginFormsItem = {
 		
 		// actions
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('loginForm','del',{
-				id:this.loginForm.id
-			},this.delOk);
-			trans.send(this.$root.genericError);
-		},
-		delOk:function(res) {
-			this.$root.schemaReload(this.module.id);
+			ws.send('loginForm','del',{id:this.loginForm.id},true).then(
+				(res) => this.$root.schemaReload(this.module.id),
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('loginForm','set',{
+			ws.send('loginForm','set',{
 				id:this.loginForm.id,
 				moduleId:this.module.id,
 				formId:this.formId,
@@ -156,17 +151,18 @@ let MyBuilderLoginFormsItem = {
 				attributeIdLookup:this.attributeIdLookup,
 				name:this.name,
 				captions:this.captions
-			},this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			if(this.isNew) {
-				this.attributeIdLogin  = null;
-				this.attributeIdLookup = null;
-				this.formId            = null;
-				this.name              = '';
-			}
-			this.$root.schemaReload(this.module.id);
+			},true).then(
+				(res) => {
+					if(this.isNew) {
+						this.attributeIdLogin  = null;
+						this.attributeIdLookup = null;
+						this.formId            = null;
+						this.name              = '';
+					}
+					this.$root.schemaReload(this.module.id);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

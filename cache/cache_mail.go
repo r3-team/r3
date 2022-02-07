@@ -42,11 +42,11 @@ func GetMailAccountAny(mode string) (types.MailAccount, error) {
 	return types.MailAccount{}, fmt.Errorf("no mail account is available for mode '%s'", mode)
 }
 
-func GetMailAccountCount() int {
+func GetMailAccountsExist() bool {
 	mail_mx.Lock()
 	defer mail_mx.Unlock()
 
-	return len(mailAccountIdMap)
+	return len(mailAccountIdMap) != 0
 }
 
 func LoadMailAccountMap() error {

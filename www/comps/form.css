@@ -9,6 +9,18 @@
 	/* setting overflow:auto kills box shadow */
 	padding-left:2px;
 }
+.form-pop-up{
+	width:100%;
+	max-width:1200px;
+	max-height:1200px;
+	overflow:auto;
+	box-sizing:border-box;
+}
+.form-pop-up .form{
+	margin:10px !important;
+	border:1px solid var(--color-border) !important;
+	border-radius:8px !important;
+}
 
 /* fields */
 .form .fields{
@@ -17,22 +29,22 @@
 	flex-direction:column;
 	padding:var(--spacing-parent);
 }
-.form .field{
+.form .fields .field{
 	margin:var(--spacing-child);
 }
-.form.singleField .fields{
+.form .fields.singleField{
 	padding:0px;
 }
-.form.singleField .field{
+.form .fields.singleField .field{
 	margin:0px;
 	overflow:auto;
 }
-.form.singleField .calendar .month,
-.form.singleField .chart,
-.form.singleField .list,
-.form.singleField .gantt{
+.form .fields.singleField .calendar .month,
+.form .fields.singleField .chart,
+.form .fields.singleField .list,
+.form .fields.singleField .gantt{
 	border-radius:0px;
-}
+}	
 
 /* data change log */
 .form-wrap div.log{
@@ -82,13 +94,21 @@
 }
 
 /* user overwrites */
-.user-bordersSquared div.form div.top div.state{
+.user-bordersAll .form .fields:not(.singleField) .calendar .month,
+.user-bordersAll .form .fields:not(.singleField) .gantt{
+	border:1px solid var(--color-border);
+}
+.user-bordersSquared .form .top .state,
+.user-bordersSquared .form-pop-up .form,
+.user-bordersSquared .calendar .month,
+.user-bordersSquared .calendar .month .day .part>span,
+.user-bordersSquared .gantt,
+.user-bordersSquared .gantt-line-record .record-line{
 	border-radius:0px;
 }
 .user-compact .form-wrap{
 	padding:0px !important;
 }
-
 
 /* mobile overwrites */
 .is-mobile .form-wrap{

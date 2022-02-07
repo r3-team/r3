@@ -1,10 +1,11 @@
-import MyBuilderCaption    from './builderCaption.js';
-import MyBuilderIconInput  from './builderIconInput.js';
-import MyBuilderFormStates from './builderFormStates.js';
-import MyBuilderQuery      from './builderQuery.js';
-import MyBuilderFields     from './builderFields.js';
-import {getNilUuid}        from '../shared/generic.js';
-import {getQueryTemplate}  from '../shared/query.js';
+import MyBuilderCaption       from './builderCaption.js';
+import MyBuilderIconInput     from './builderIconInput.js';
+import MyBuilderFormFunctions from './builderFormFunctions.js';
+import MyBuilderFormStates    from './builderFormStates.js';
+import MyBuilderQuery         from './builderQuery.js';
+import MyBuilderFields        from './builderFields.js';
+import {getNilUuid}           from '../shared/generic.js';
+import {getQueryTemplate}     from '../shared/query.js';
 import {
 	getDataFields,
 	getFormRoute
@@ -21,19 +22,18 @@ let MyBuilderForm = {
 	components:{
 		MyBuilderCaption,
 		MyBuilderFields,
+		MyBuilderFormFunctions,
 		MyBuilderFormStates,
 		MyBuilderIconInput,
 		MyBuilderQuery
 	},
 	template:`<div class="builder-form" v-if="form">
 	
+		<!-- form builder main area -->
 		<div class="contentBox builder-form-main">
-		
-			<div class="builder-form-content">
 			
-				<!-- form builder main area -->
+			<div class="builder-form-content" v-show="!showStatesFull || !showStates">
 				<div class="top">
-					
 					<div class="area nowrap">
 						<my-builder-icon-input
 							@input="iconId = $event"
@@ -82,16 +82,29 @@ let MyBuilderForm = {
 							:image="showCaptions ? 'visible1.png' : 'visible0.png'"
 						/>
 						<my-button
-							@trigger="showHelp = !showHelp"
-							:caption="capApp.showHelp"
+							@trigger="showFunctions = !showFunctions"
+							:caption="capApp.showFunctions"
 							:darkBg="true"
-							:image="showHelp ? 'visible1.png' : 'visible0.png'"
+							:image="showFunctions ? 'visible1.png' : 'visible0.png'"
 						/>
 						<my-button
 							@trigger="showStates = !showStates"
 							:caption="capApp.showStates"
 							:darkBg="true"
 							:image="showStates ? 'visible1.png' : 'visible0.png'"
+						/>
+						<my-button
+							@trigger="showReferences = !showReferences"
+							:active="!showStates"
+							:caption="capApp.showReferences"
+							:darkBg="true"
+							:image="showStates || showReferences ? 'visible1.png' : 'visible0.png'"
+						/>
+						<my-button
+							@trigger="showHelp = !showHelp"
+							:caption="capApp.showHelp"
+							:darkBg="true"
+							:image="showHelp ? 'visible1.png' : 'visible0.png'"
 						/>
 					</div>
 				</div>
@@ -105,7 +118,6 @@ let MyBuilderForm = {
 					@field-id-query-set="setFieldColumnQuery($event,null)"
 					@field-move-store="fieldMoveStore"
 					@field-remove="removeById($event,'field')"
-					@column-remove="removeById($event,'column')"
 					:builderLanguage="builderLanguage"
 					:columnIdQuery="columnIdQuery"
 					:dataFields="dataFields"
@@ -115,12 +127,12 @@ let MyBuilderForm = {
 					:fieldMoveList="fieldMoveList"
 					:fieldMoveIndex="fieldMoveIndex"
 					:fields="fields"
+					:formId="id"
 					:isTemplate="false"
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="form.moduleId"
 					:showCaptions="showCaptions"
-					:showOutside-in="true"
-					:showStates="showStates"
+					:showReferences="showStates || showReferences"
 				/>
 				
 				<!-- form context help -->
@@ -133,13 +145,23 @@ let MyBuilderForm = {
 				/>
 			</div>
 			
+			<!-- form functions -->
+			<my-builder-form-functions
+				v-if="showFunctions"
+				v-model="functions"
+				@close="showFunctions = false"
+				:formId="form.id"
+			/>
+			
 			<!-- form states -->
 			<my-builder-form-states
 				v-if="showStates"
 				v-model="states"
 				@close="showStates = false"
+				@set-fullscreen="showStatesFull = !showStatesFull"
 				:fieldIdMapRef="fieldIdMapRef"
 				:form="form"
+				:fullscreen="showStatesFull"
 			/>
 		</div>
 		
@@ -204,7 +226,6 @@ let MyBuilderForm = {
 					</div>
 					
 					<my-builder-query
-						v-if="showColumnQuery"
 						@set-choices="fieldColumnQuerySet('choices',$event)"
 						@set-filters="fieldColumnQuerySet('filters',$event)"
 						@set-fixed-limit="fieldColumnQuerySet('fixedLimit',$event)"
@@ -255,12 +276,19 @@ let MyBuilderForm = {
 				
 				<!-- template fields -->
 				<div class="templates-wrap">
-					<div class="content-row">
+					<div class="content-row default-inputs">
 						<h2>{{ capApp.fields }}</h2>
 						
-						<div class="content-row">
-							<span>{{ capApp.showOutsideIn }}</span>
-							<my-bool v-model="showOutsideIn" />
+						<div class="templates-filter">
+							<my-bool caption0="n:1" caption1="n:1" v-model="showTemplateN1" />
+							<my-bool caption0="1:n" caption1="1:n" v-model="showTemplate1n" />
+							<my-bool caption0="n:m" caption1="n:m" v-model="showTemplateNm" />
+							<select v-model="templateIndex" class="short">
+								<option value="-1">{{ capGen.option.all }}</option>
+								<option v-for="j in joinsIndexMap" :value="j.index">
+									{{ j.index }})
+								</option>
+							</select>
 						</div>
 					</div>
 					
@@ -268,13 +296,17 @@ let MyBuilderForm = {
 						<my-builder-fields flexDirParent="column"
 							@field-counter-set="fieldCounter = $event"
 							@field-move-store="fieldMoveStore"
-							:builder-language="builderLanguage"
+							:builderLanguage="builderLanguage"
 							:fields="fieldsTemplate"
-							:field-move-list="fieldMoveList"
-							:field-move-index="fieldMoveIndex"
-							:field-counter="fieldCounter"
-							:is-template="true"
-							:show-outside-in="showOutsideIn"
+							:fieldMoveList="fieldMoveList"
+							:fieldMoveIndex="fieldMoveIndex"
+							:fieldCounter="fieldCounter"
+							:formId="id"
+							:isTemplate="true"
+							:template1n="showTemplate1n"
+							:templateIndex="parseInt(templateIndex)"
+							:templateN1="showTemplateN1"
+							:templateNm="showTemplateNm"
 						/>
 					</div>
 				</div>
@@ -288,12 +320,12 @@ let MyBuilderForm = {
 	data:function() {
 		return {
 			// form data
-			iconId:null,        // form icon
-			captions:{},        // form captions
-			fields:[],          // all fields (nested within each other)
-			states:[],          // all states
-			fieldIdsRemove:[],  // IDs of fields to remove
-			columnIdsRemove:[], // IDs of columns to remove
+			iconId:null,       // form icon
+			captions:{},       // form captions
+			fields:[],         // all fields (nested within each other)
+			functions:[],      // all functions
+			states:[],         // all states
+			fieldIdsRemove:[], // IDs of fields to remove
 			
 			// form data from query
 			relationId:'', // source relation ID
@@ -305,48 +337,50 @@ let MyBuilderForm = {
 			
 			// state
 			columnIdQuery:null,
-			fieldCounter:0,     // counter to generate unique IDs for all fields
-			                    // used to populate new fields and for template fields
-			fieldIdQuery:null,  // field ID of which query is currently being edited
-			fieldMoveList:null, // fields list from which to move field (move by click)
-			fieldMoveIndex:0,   // index of field which to move (move by click)
-			showCaptions:true,  // show caption inputs on non-container fields
-			showHelp:false,     // show form context help
-			showOutsideIn:false,// show outside-in data fields
-			showSidebar:true,
-			showStates:false
+			fieldCounter:0,      // counter to generate unique IDs for all fields
+			                     // used to populate new fields and for template fields
+			fieldIdQuery:null,   // field ID of which query is currently being edited
+			fieldMoveList:null,  // fields list from which to move field (move by click)
+			fieldMoveIndex:0,    // index of field which to move (move by click)
+			showCaptions:true,   // show caption inputs on non-container fields
+			showFunctions:false, // show form functions
+			showHelp:false,      // show form context help
+			showReferences:false,// show field references (F12, F343), used for form states
+			showSidebar:true,    // show form Builder sidebar
+			showStates:false,    // show form states
+			showStatesFull:false,// sub content (states/functions) are full screen
+			showTemplate1n:false,// show templates for 1:n relationship input fields
+			showTemplateN1:true, // show templates for n:1 relationship input fields
+			showTemplateNm:false,// show templates for n:m relationship input fields
+			templateIndex:'-1'
 		};
 	},
 	computed:{
-		hasChanges:function() {
-			return this.fieldIdsRemove.length !== 0
-				|| this.columnIdsRemove.length !== 0
-				|| this.iconId !== this.form.iconId
-				|| JSON.stringify(this.captions) !== JSON.stringify(this.form.captions)
-				|| JSON.stringify(this.fields) !== JSON.stringify(this.form.fields)
-				|| JSON.stringify(this.states) !== JSON.stringify(this.form.states)
-				|| this.relationId !== this.form.query.relationId
-				|| JSON.stringify(this.joins) !== JSON.stringify(this.form.query.joins)
-				|| JSON.stringify(this.filters) !== JSON.stringify(this.form.query.filters)
-				|| JSON.stringify(this.orders) !== JSON.stringify(this.form.query.orders)
-				|| JSON.stringify(this.lookups) !== JSON.stringify(this.form.query.lookups)
-				|| JSON.stringify(this.choices) !== JSON.stringify(this.form.query.choices)
-			;
-		},
-		
+		// entities
 		relation:function() {
-			if(typeof this.relationIdMap[this.relationId] === 'undefined')
-				return false;
-			
-			return this.relationIdMap[this.relationId];
+			return typeof this.relationIdMap[this.relationId] === 'undefined'
+				? false : this.relationIdMap[this.relationId];
 		},
 		form:function() {
-			if(typeof this.formIdMap[this.id] === 'undefined')
-				return false;
-			
-			return this.formIdMap[this.id];
+			return typeof this.formIdMap[this.id] === 'undefined'
+				? false : this.formIdMap[this.id];
 		},
 		
+		hasChanges:function() {
+			return this.fieldIdsRemove.length     !== 0
+				|| this.iconId                    !== this.form.iconId
+				|| JSON.stringify(this.captions)  !== JSON.stringify(this.form.captions)
+				|| JSON.stringify(this.fields)    !== JSON.stringify(this.form.fields)
+				|| JSON.stringify(this.functions) !== JSON.stringify(this.form.functions)
+				|| JSON.stringify(this.states)    !== JSON.stringify(this.form.states)
+				|| this.relationId                !== this.form.query.relationId
+				|| JSON.stringify(this.joins)     !== JSON.stringify(this.form.query.joins)
+				|| JSON.stringify(this.filters)   !== JSON.stringify(this.form.query.filters)
+				|| JSON.stringify(this.orders)    !== JSON.stringify(this.form.query.orders)
+				|| JSON.stringify(this.lookups)   !== JSON.stringify(this.form.query.lookups)
+				|| JSON.stringify(this.choices)   !== JSON.stringify(this.form.query.choices)
+			;
+		},
 		dataFields:function() {
 			return this.getDataFields(this.fields);
 		},
@@ -373,9 +407,8 @@ let MyBuilderForm = {
 			return map;
 		},
 		columnQueryEdit:function() {
-			if(this.columnIdQuery === null) return false;
-			
-			return this.columnIdMap[this.columnIdQuery];
+			return this.columnIdQuery === null
+				? false : this.columnIdMap[this.columnIdQuery];
 		},
 		fieldIdMapRef:function() {
 			// unique field reference counter for all fields (mapped by field ID)
@@ -442,7 +475,7 @@ let MyBuilderForm = {
 			let that = this;
 			let getIndexIds = function(fields) {
 				let indexIds = [];
-
+				
 				for(let i = 0, j = fields.length; i < j; i++) {
 					let f = fields[i];
 					
@@ -532,22 +565,31 @@ let MyBuilderForm = {
 			this.fieldMoveList  = evt.fieldList;
 			this.fieldMoveIndex = evt.fieldIndex;
 		},
+		showMessage:function(msg) {
+			this.$store.commit('dialog',{
+				captionBody:msg,
+				buttons:[{
+					caption:this.capGen.button.close,
+					cancel:true,
+					image:'cancel.png'
+				}]
+			});
+		},
 		reset:function() {
 			if(!this.form) return;
 			
-			this.iconId   = this.form.iconId;
-			this.captions = JSON.parse(JSON.stringify(this.form.captions));
-			this.fields   = JSON.parse(JSON.stringify(this.form.fields));
-			this.states   = JSON.parse(JSON.stringify(this.form.states));
-			
+			this.iconId     = this.form.iconId;
 			this.relationId = this.form.query.relationId;
+			this.captions   = JSON.parse(JSON.stringify(this.form.captions));
+			this.fields     = JSON.parse(JSON.stringify(this.form.fields));
+			this.functions  = JSON.parse(JSON.stringify(this.form.functions));
+			this.states     = JSON.parse(JSON.stringify(this.form.states));
 			this.joins      = JSON.parse(JSON.stringify(this.form.query.joins));
 			this.filters    = JSON.parse(JSON.stringify(this.form.query.filters));
 			this.orders     = JSON.parse(JSON.stringify(this.form.query.orders));
 			this.lookups    = JSON.parse(JSON.stringify(this.form.query.lookups));
 			this.choices    = JSON.parse(JSON.stringify(this.form.query.choices));
 			this.fieldIdsRemove  = [];
-			this.columnIdsRemove = [];
 			this.columnIdQuery   = null;
 			this.fieldIdQuery    = null;
 		},
@@ -558,9 +600,8 @@ let MyBuilderForm = {
 				iconId:null,
 				content:'button',
 				state:'default',
+				openForm:null,
 				onMobile:true,
-				formIdOpen:null,
-				attributeIdRecord:null,
 				captions:{
 					fieldTitle:{}
 				}
@@ -579,12 +620,12 @@ let MyBuilderForm = {
 				indexDate0:null,
 				indexDate1:null,
 				indexColor:null,
-				formIdOpen:null,
 				gantt:false,
 				ganttSteps:null,
 				ics:false,
 				dateRange0:0,
 				dateRange1:0,
+				openForm:null,
 				query:this.getQueryTemplate(),
 				columns:[]
 			};
@@ -666,21 +707,23 @@ let MyBuilderForm = {
 				min:null,
 				max:null,
 				regexCheck:null,
+				jsFunctionId:null,
+				collectionIdDef:null,
+				columnIdDef:null,
 				captions:{
 					fieldTitle:{},
 					fieldHelp:{}
 				}
 			};
 			if(this.isAttributeRelationship(attribute.content)) {
-				field.formIdOpen    = null;
 				field.attributeIdNm = attributeIdNm;
-				field.attributeIdRecord = null;
 				field.columns       = [];
 				field.query         = this.getQueryTemplate();
 				field.category      = false;
 				field.filterQuick   = false;
 				field.outsideIn     = outsideIn;
 				field.defPresetIds  = [];
+				field.openForm      = null;
 			}
 			return field;
 		},
@@ -705,13 +748,12 @@ let MyBuilderForm = {
 				state:'default',
 				onMobile:true,
 				columns:[],
-				formIdOpen:null,
-				attributeIdRecord:null,
 				autoRenew:null,
 				csvExport:false,
 				csvImport:false,
 				filterQuick:false,
 				layout:'table',
+				openForm:null,
 				query:this.getQueryTemplate(),
 				recordSelector:false,
 				resultLimit:50
@@ -719,21 +761,31 @@ let MyBuilderForm = {
 		},
 		createFieldsForRelation:function(relation,index) {
 			let fields = [];
-			
 			// create data fields from all attributes from this relation
+			// non-relationship attributes
 			for(let i = 0, j = relation.attributes.length; i < j; i++) {
 				let atr = relation.attributes[i];
 				
-				if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,false,null)))
-					continue;
-				
-				if(relation.attributeIdPk === atr.id)
-					continue;
-				
-				fields.push(this.createFieldData(index,atr,false,null));
+				if(!this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,false,null))
+					&& relation.attributeIdPk !== atr.id
+					&& !this.isAttributeRelationship(atr.content)
+				) {
+					fields.push(this.createFieldData(index,atr,false,null));
+				}
 			}
 			
-			// create data fields with attributes from relationships (outside in)
+			// relationship attributes
+			for(let i = 0, j = relation.attributes.length; i < j; i++) {
+				let atr = relation.attributes[i];
+				
+				if(!this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,false,null))
+					&& this.isAttributeRelationship(atr.content)
+				) {
+					fields.push(this.createFieldData(index,atr,false,null));
+				}
+			}
+			
+			// relationship attributes from outside (1:n)
 			for(let relId in this.relationIdMap) {
 				let rel = this.relationIdMap[relId];
 				
@@ -743,12 +795,11 @@ let MyBuilderForm = {
 				
 				// relationship attributes referencing this relation (can be self reference)
 				for(let i = 0, j = rel.attributes.length; i < j; i++) {
-					
 					let atr = rel.attributes[i];
 					
 					if(atr.relationshipId !== relation.id)
 						continue;
-				
+					
 					if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,true,null)))
 						continue;
 					
@@ -758,31 +809,30 @@ let MyBuilderForm = {
 					fields.push(this.createFieldData(index,atr,true,null));
 				}
 				
-				// relationship attributes that are candidates for n:m relationships
-				// relation must contain exactly two n:1 relationship attributes
-				let atrs = [];
+				// relationship attributes that can be used to build n:m relationships
+				let atrsN1 = [];
 				for(let i = 0, j = rel.attributes.length; i < j; i++) {
-					if(!this.isAttributeRelationshipN1(rel.attributes[i].content))
+					if(this.isAttributeRelationshipN1(rel.attributes[i].content))
+						atrsN1.push(rel.attributes[i]);
+				}
+				
+				for(let i = 0, j = atrsN1.length; i < j; i++) {
+					
+					// find attributes in relationship with us
+					let atr = atrsN1[i];
+					if(atr.relationshipId !== relation.id)
 						continue;
 					
-					atrs.push(rel.attributes[i]);
-				}
-				if(atrs.length === 2) {
-					
-					// one attribute must refer to the orignal relation
-					let atr   = false;
-					let atrNm = false;
-					if(atrs[0].relationshipId === relation.id) {
-						atr   = atrs[0];
-						atrNm = atrs[1];
-					} else if(atrs[1].relationshipId === relation.id) {
-						atr   = atrs[1];
-						atrNm = atrs[0];
-					}
-					
-					if(atr !== false && !this.indexAttributeIdsUsed.includes(
-						this.getIndexAttributeId(index,atr.id,true,atrNm.id))
-					) {
+					for(let x = 0, y = atrsN1.length; x < y; x++) {
+						let atrNm = atrsN1[x];
+						
+						// offer n:m together with every other n:1 attribute
+						if(atrNm.id === atr.id)
+							continue;
+						
+						if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,true,atrNm.id)))
+							continue;
+						
 						fields.push(this.createFieldData(index,atr,true,atrNm.id));
 					}
 				}
@@ -808,8 +858,7 @@ let MyBuilderForm = {
 			if(id.startsWith('new_')) return; // ignore new field/column
 			
 			switch(type) {
-				case 'field':  this.fieldIdsRemove.push(id);  break;
-				case 'column': this.columnIdsRemove.push(id); break;
+				case 'field': this.fieldIdsRemove.push(id); break;
 			}
 			
 			if(this.fieldIdQuery === id)
@@ -842,9 +891,7 @@ let MyBuilderForm = {
 			let colsCloned = JSON.parse(JSON.stringify(this.fieldQueryEdit.columns));
 			
 			for(let i = 0, j = colsCloned.length; i < j; i++) {
-				
 				if(colsCloned[i].index === index) {
-					this.removeById(colsCloned[i].id,'column');
 					colsCloned.splice(i,1);
 					i--; j--;
 				}
@@ -873,17 +920,32 @@ let MyBuilderForm = {
 				JSON.parse(JSON.stringify(this.fields))
 			);
 			
-			// apply form
-			let trans = new wsHub.transactionBlocking();
-			
-			for(let i = 0, j = this.columnIdsRemove.length; i < j; i++) {
-				trans.add('column','del',{ id:this.columnIdsRemove[i] });
+			// check removed fields being referenced in form states
+			for(let i = 0, j = this.states.length; i < j; i++) {
+				let s = this.states[i];
+				
+				for(let x = 0, y = s.conditions.length; x < y; x++) {
+					let c = s.conditions[x];
+					
+					if(this.fieldIdsRemove.includes(c.fieldId0) || this.fieldIdsRemove.includes(c.fieldId1))
+						return this.showMessage(this.capApp.error.formStateFieldRemovedCondition.replace('{NAME}',s.description));
+				}
+				
+				for(let x = 0, y = s.effects.length; x < y; x++) {
+					let e = s.effects[x];
+					
+					if(this.fieldIdsRemove.includes(e.fieldId))
+						return this.showMessage(this.capApp.error.formStateFieldRemovedEffect.replace('{NAME}',s.description));
+				}
 			}
+			
+			// save form and delete removed fields
+			let requests = [];
 			for(let i = 0, j = this.fieldIdsRemove.length; i < j; i++) {
-				trans.add('field','del',{ id:this.fieldIdsRemove[i] });
+				requests.push(ws.prepare('field','del',{id:this.fieldIdsRemove[i]}));
 			}
 			
-			trans.add('form','set',{
+			requests.push(ws.prepare('form','set',{
 				id:this.form.id,
 				moduleId:this.form.moduleId,
 				presetIdOpen:this.form.presetIdOpen,
@@ -897,14 +959,18 @@ let MyBuilderForm = {
 					orders:this.orders
 				},
 				fields:fieldsCleaned,
+				functions:this.functions,
 				states:this.states,
 				captions:this.captions
-			},this.setOk);
-			trans.add('schema','check',{moduleId:this.form.moduleId});
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			this.$root.schemaReload(this.module.id);
+			}));
+			requests.push(ws.prepare('schema','check',{
+				moduleId:this.form.moduleId
+			}));
+			
+			ws.sendMultiple(requests,true).then(
+				(res) => this.$root.schemaReload(this.module.id),
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

@@ -8,17 +8,15 @@ const MyStore = Vuex.createStore({
 		schema:MyStoreSchema
 	},
 	state:{
-		access:{},            // access permissions for each entity (attribute, menu, relation), key: entity ID
+		access:{},            // access permissions for each entity (attribute, collection, menu, relation), key: entity ID
 		builder:false,        // builder mode enabled
 		busyBlockInput:false, // while active, input is blocked when busy
 		busyCounter:0,        // counter of calls making the app busy (WS requests, uploads, etc.)
 		captions:{},          // all application captions in the user interface language
+		collectionIdMap:{},   // map of all collection values, key = collection ID
 		config:{},            // configuration values (admin only)
-		constants:{
-			backendCodes:{    // message codes coming from the backend, usually indicating an error
-				errGeneric:'general error',
-				errKnown:'backend error'
-			}
+		constants:{           // constant variables, codes/messages/IDs
+			scrollFormId:'form-scroll' // ID of form page element (to recover scroll position during routing)
 		},
 		dialogCaptionTop:'',
 		dialogCaptionBody:'',
@@ -44,12 +42,11 @@ const MyStore = Vuex.createStore({
 		moduleLanguage:'',    // module language (either equal to user language or module fallback)
 		pageTitle:'',         // web page title
 		productionMode:1,     // system production mode (1=production, 0=maintenance)
-		scrollFormId:'form-scroll', // ID of form page element (to recover scroll position during routing)
 		settings:{},          // setting values for logged in user, key: settings name
 		system:{}             // system details (admin only)
 	},
 	mutations:{
-		dialog:function(state,payload) {
+		dialog:(state,payload) => {
 			state.dialogCaptionTop = typeof payload.captionTop !== 'undefined' ?
 				payload.captionTop : '';
 			
@@ -71,7 +68,7 @@ const MyStore = Vuex.createStore({
 			state.dialogButtons = payload.buttons;
 			state.isAtDialog    = true;
 		},
-		license:function(state,payload) {
+		license:(state,payload) => {
 			state.license = payload;
 			
 			if(typeof payload.validUntil === 'undefined')
@@ -79,7 +76,7 @@ const MyStore = Vuex.createStore({
 			
 			state.licenseValid = payload.validUntil > Math.floor(new Date().getTime() / 1000);
 		},
-		pageTitle:function(state,payload) {
+		pageTitle:(state,payload) => {
 			state.pageTitle = payload;
 			let names = [payload];
 			
@@ -89,38 +86,40 @@ const MyStore = Vuex.createStore({
 			document.title = names.join(' - ');
 		},
 		
-		// simple setters
-		access             (state,payload) { state.access              = payload; },
-		builder            (state,payload) { state.builder             = payload; },
-		busyAdd            (state,payload) { state.busyCounter++; },
-		busyBlockInput     (state,payload) { state.busyBlockInput      = payload; },
-		busyRemove         (state,payload) { state.busyCounter--; },
-		busyReset          (state,payload) { state.busyCounter=0; },
-		captions           (state,payload) { state.captions            = payload; },
-		config             (state,payload) { state.config              = payload; },
-		feedback           (state,payload) { state.feedback            = payload; },
-		formHasChanges     (state,payload) { state.formHasChanges      = payload; },
-		isAdmin            (state,payload) { state.isAdmin             = payload; },
-		isAtDialog         (state,payload) { state.isAtDialog          = payload; },
-		isAtFeedback       (state,payload) { state.isAtFeedback        = payload; },
-		isAtMenu           (state,payload) { state.isAtMenu            = payload; },
-		isNoAuth           (state,payload) { state.isNoAuth            = payload; },
-		isMobile           (state,payload) { state.isMobile            = payload; },
-		loginId            (state,payload) { state.loginId             = payload; },
-		loginName          (state,payload) { state.loginName           = payload; },
-		moduleColor1       (state,payload) { state.moduleColor1        = payload; },
-		moduleEntries      (state,payload) { state.moduleEntries       = payload; },
-		moduleLanguage     (state,payload) { state.moduleLanguage      = payload; },
-		productionMode     (state,payload) { state.productionMode      = payload; },
-		scrollFormId       (state,payload) { state.scrollFormId        = payload; },
-		settings           (state,payload) { state.settings            = payload; },
-		system             (state,payload) { state.system              = payload; }
+		// collections
+		collection:      (state,payload) => state.collectionIdMap[payload.id] = payload.records,
+		collectionsClear:(state,payload) => state.collectionIdMap = {},
+		
+		// counters
+		busyAdd:   (state,payload) => state.busyCounter++,
+		busyRemove:(state,payload) => state.busyCounter--,
+		busyReset: (state,payload) => state.busyCounter=0,
+		
+		// simple
+		access:        (state,payload) => state.access         = payload,
+		builder:       (state,payload) => state.builder        = payload,
+		busyBlockInput:(state,payload) => state.busyBlockInput = payload,
+		captions:      (state,payload) => state.captions       = payload,
+		config:        (state,payload) => state.config         = payload,
+		feedback:      (state,payload) => state.feedback       = payload,
+		formHasChanges:(state,payload) => state.formHasChanges = payload,
+		isAdmin:       (state,payload) => state.isAdmin        = payload,
+		isAtDialog:    (state,payload) => state.isAtDialog     = payload,
+		isAtFeedback:  (state,payload) => state.isAtFeedback   = payload,
+		isAtMenu:      (state,payload) => state.isAtMenu       = payload,
+		isNoAuth:      (state,payload) => state.isNoAuth       = payload,
+		isMobile:      (state,payload) => state.isMobile       = payload,
+		loginId:       (state,payload) => state.loginId        = payload,
+		loginName:     (state,payload) => state.loginName      = payload,
+		moduleColor1:  (state,payload) => state.moduleColor1   = payload,
+		moduleEntries: (state,payload) => state.moduleEntries  = payload,
+		moduleLanguage:(state,payload) => state.moduleLanguage = payload,
+		productionMode:(state,payload) => state.productionMode = payload,
+		settings:      (state,payload) => state.settings       = payload,
+		system:        (state,payload) => state.system         = payload
 	},
 	getters:{
-		blockInput:function(state) {
-			return state.busyBlockInput && state.busyCounter > 0;
-		},
-		licenseDays:function(state) {
+		licenseDays:(state) => {
 			if(!state.licenseValid)
 				return 0;
 			
@@ -128,39 +127,40 @@ const MyStore = Vuex.createStore({
 			return Math.round(seconds / 60 / 60 / 24);
 		},
 		
-		// simple getters
-		access:             (state) => state.access,
-		builderEnabled:     (state) => state.builder && state.productionMode === 0,
-		busyBlockInput:     (state) => state.busyBlockInput,
-		busyCounter:        (state) => state.busyCounter,
-		captions:           (state) => state.captions,
-		config:             (state) => state.config,
-		constants:          (state) => state.constants,
-		dialogCaptionTop:   (state) => state.dialogCaptionTop,
-		dialogCaptionBody:  (state) => state.dialogCaptionBody,
-		dialogButtons:      (state) => state.dialogButtons,
-		dialogImage:        (state) => state.dialogImage,
-		dialogStyles:       (state) => state.dialogStyles,
-		dialogTextDisplay:  (state) => state.dialogTextDisplay,
-		feedback:           (state) => state.feedback,
-		formHasChanges:     (state) => state.formHasChanges,
-		isAdmin:            (state) => state.isAdmin,
-		isAtDialog:         (state) => state.isAtDialog,
-		isAtFeedback:       (state) => state.isAtFeedback,
-		isAtMenu:           (state) => state.isAtMenu,
-		isMobile:           (state) => state.isMobile,
-		isNoAuth:           (state) => state.isNoAuth,
-		license:            (state) => state.license,
-		licenseValid:       (state) => state.licenseValid,
-		loginId:            (state) => state.loginId,
-		loginName:          (state) => state.loginName,
-		moduleColor1:       (state) => state.moduleColor1,
-		moduleEntries:      (state) => state.moduleEntries,
-		moduleLanguage:     (state) => state.moduleLanguage,
-		pageTitle:          (state) => state.pageTitle,
-		productionMode:     (state) => state.productionMode,
-		scrollFormId:       (state) => state.scrollFormId,
-		settings:           (state) => state.settings,
-		system:             (state) => state.system
+		// simple
+		access:           (state) => state.access,
+		blockInput:       (state) => state.busyBlockInput && state.busyCounter > 0,
+		builderEnabled:   (state) => state.builder && state.productionMode === 0,
+		busyBlockInput:   (state) => state.busyBlockInput,
+		busyCounter:      (state) => state.busyCounter,
+		captions:         (state) => state.captions,
+		collectionIdMap:  (state) => state.collectionIdMap,
+		config:           (state) => state.config,
+		constants:        (state) => state.constants,
+		dialogCaptionTop: (state) => state.dialogCaptionTop,
+		dialogCaptionBody:(state) => state.dialogCaptionBody,
+		dialogButtons:    (state) => state.dialogButtons,
+		dialogImage:      (state) => state.dialogImage,
+		dialogStyles:     (state) => state.dialogStyles,
+		dialogTextDisplay:(state) => state.dialogTextDisplay,
+		feedback:         (state) => state.feedback,
+		formHasChanges:   (state) => state.formHasChanges,
+		isAdmin:          (state) => state.isAdmin,
+		isAtDialog:       (state) => state.isAtDialog,
+		isAtFeedback:     (state) => state.isAtFeedback,
+		isAtMenu:         (state) => state.isAtMenu,
+		isMobile:         (state) => state.isMobile,
+		isNoAuth:         (state) => state.isNoAuth,
+		license:          (state) => state.license,
+		licenseValid:     (state) => state.licenseValid,
+		loginId:          (state) => state.loginId,
+		loginName:        (state) => state.loginName,
+		moduleColor1:     (state) => state.moduleColor1,
+		moduleEntries:    (state) => state.moduleEntries,
+		moduleLanguage:   (state) => state.moduleLanguage,
+		pageTitle:        (state) => state.pageTitle,
+		productionMode:   (state) => state.productionMode,
+		settings:         (state) => state.settings,
+		system:           (state) => state.system
 	}
 });

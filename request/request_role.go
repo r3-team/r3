@@ -18,10 +18,7 @@ func RoleDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := role.Del_tx(tx, req.Id); err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return nil, role.Del_tx(tx, req.Id)
 }
 
 func RoleGet(reqJson json.RawMessage) (interface{}, error) {
@@ -54,12 +51,7 @@ func RoleSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-
-	if err := role.Set_tx(tx, req.ModuleId, req.Id, req.Name, req.Assignable,
-		req.ChildrenIds, req.AccessRelations, req.AccessAttributes,
-		req.AccessMenus, req.Captions); err != nil {
-
-		return nil, err
-	}
-	return nil, nil
+	return nil, role.Set_tx(tx, req.ModuleId, req.Id, req.Name, req.Assignable,
+		req.ChildrenIds, req.AccessAttributes, req.AccessCollections,
+		req.AccessMenus, req.AccessRelations, req.Captions)
 }

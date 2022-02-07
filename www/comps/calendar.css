@@ -166,14 +166,3 @@
 	color:var(--color-bg-font);
 	background-color:var(--color-accent3-alt);
 }
-
-/* user overwrites */
-.user-bordersAll .form:not(.singleField) .calendar .month{
-	border:1px solid var(--color-border);
-}
-.user-bordersSquared .calendar .month{
-	border-radius:0px;
-}
-.user-bordersSquared .calendar .month .day .part>span{
-	border-radius:0px;
-}

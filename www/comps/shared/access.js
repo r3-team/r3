@@ -1,3 +1,10 @@
+export function hasAccessToRelation(access,relationId,requestedAccess) {
+	if(typeof access.relation[relationId] !== 'undefined')
+		return access.relation[relationId] >= requestedAccess;
+	
+	return false;
+};
+
 export function hasAccessToAttribute(access,attributeId,relationId,requestedAccess) {
 	
 	// use attribute access first if specified (more specific access wins)

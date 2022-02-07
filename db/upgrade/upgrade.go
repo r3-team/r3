@@ -8,6 +8,7 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/schema/pgIndex"
+	"r3/types"
 	"strconv"
 	"strings"
 
@@ -94,6 +95,434 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 // mapped by current database version string, returns new database version string
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
+	"2.5": func(tx pgx.Tx) (string, error) {
+		if _, err := tx.Exec(db.Ctx, `
+			-- new login setting
+			ALTER TABLE instance.login_setting ADD COLUMN warn_unsaved BOOLEAN NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.login_setting ALTER COLUMN warn_unsaved DROP DEFAULT;
+			
+			-- new form state condition
+			ALTER TABLE app.form_state_condition ADD COLUMN login1 BOOLEAN;
+			
+			-- new open form entity
+			CREATE TABLE IF NOT EXISTS app.open_form (
+			    field_id uuid,
+			    column_id uuid,
+			    form_id_open uuid NOT NULL,
+				attribute_id_apply uuid,
+				relation_index integer NOT NULL,
+			    pop_up boolean NOT NULL,
+			    max_height integer NOT NULL,
+			    max_width integer NOT NULL,
+			    CONSTRAINT open_form_column_id_fkey FOREIGN KEY (column_id)
+			        REFERENCES app."column" (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT open_form_field_id_fkey FOREIGN KEY (field_id)
+			        REFERENCES app.field (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT open_form_form_id_open_fkey FOREIGN KEY (form_id_open)
+			        REFERENCES app.form (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT open_form_attribute_id_apply_fkey FOREIGN KEY (attribute_id_apply)
+			        REFERENCES app.attribute (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX fki_open_form_field_id_fkey
+				ON app.open_form USING btree (field_id ASC NULLS LAST);
+			CREATE INDEX fki_open_form_column_id_fkey
+				ON app.open_form USING btree (column_id ASC NULLS LAST);
+			CREATE INDEX fki_open_form_attribute_id_apply_fkey
+				ON app.open_form USING btree (attribute_id_apply ASC NULLS LAST);
+			
+			-- new data display type: password
+			ALTER TYPE app.data_display ADD VALUE 'password';
+			
+			-- clean up missing NOT NULL constraints in PG functions
+			ALTER TABLE app.pg_function ALTER COLUMN code_args SET NOT NULL;
+			ALTER TABLE app.pg_function ALTER COLUMN code_returns SET NOT NULL;
+			
+			-- new options for PG functions
+			ALTER TABLE app.pg_function ADD COLUMN is_frontend_exec boolean NOT NULL DEFAULT false;
+			ALTER TABLE app.pg_function ALTER COLUMN is_frontend_exec DROP DEFAULT;
+			ALTER TABLE app.pg_function ADD COLUMN is_trigger boolean NOT NULL DEFAULT false;
+			ALTER TABLE app.pg_function ALTER COLUMN is_trigger DROP DEFAULT;
+			UPDATE app.pg_function
+			SET is_trigger = true, code_returns = 'TRIGGER'
+			WHERE id IN (
+				SELECT id
+				FROM app.pg_function
+				WHERE UPPER(code_returns) = 'TRIGGER'
+			);
+			
+			-- JS functions
+			CREATE TABLE IF NOT EXISTS app.js_function (
+			    id uuid NOT NULL,
+			    module_id uuid NOT NULL,
+			    form_id uuid,
+			    name character varying(64) COLLATE pg_catalog."default" NOT NULL,
+			    code_function text COLLATE pg_catalog."default" NOT NULL,
+			    code_args text COLLATE pg_catalog."default" NOT NULL,
+			    code_returns text COLLATE pg_catalog."default" NOT NULL,
+			    CONSTRAINT js_function_pkey PRIMARY KEY (id),
+			    CONSTRAINT js_function_module_id_name_key UNIQUE (module_id, name)
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT js_function_form_id_fkey FOREIGN KEY (form_id)
+			        REFERENCES app.form (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT js_function_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_js_function_form_id
+			    ON app.js_function USING btree (form_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_module_id
+			    ON app.js_function USING btree (module_id ASC NULLS LAST);
+				
+			CREATE TABLE IF NOT EXISTS app.js_function_depends (
+			    js_function_id uuid NOT NULL,
+			    js_function_id_on uuid,
+				pg_function_id_on uuid,
+			    field_id_on uuid,
+				form_id_on uuid,
+				role_id_on uuid,
+			    CONSTRAINT js_function_depends_field_id_on_fkey FOREIGN KEY (field_id_on)
+			        REFERENCES app.field (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT js_function_depends_form_id_on_fkey FOREIGN KEY (form_id_on)
+			        REFERENCES app.form (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT js_function_depends_role_id_on_fkey FOREIGN KEY (role_id_on)
+			        REFERENCES app.role (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT js_function_depends_js_function_id_fkey FOREIGN KEY (js_function_id)
+			        REFERENCES app.js_function (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT js_function_depends_js_function_id_on_fkey FOREIGN KEY (js_function_id_on)
+			        REFERENCES app.js_function (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT js_function_depends_pg_function_id_on_fkey FOREIGN KEY (pg_function_id_on)
+			        REFERENCES app.pg_function (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_field_id_on
+			    ON app.js_function_depends USING btree (field_id_on ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_form_id_on
+			    ON app.js_function_depends USING btree (form_id_on ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_role_id_on
+			    ON app.js_function_depends USING btree (role_id_on ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_js_function_id
+			    ON app.js_function_depends USING btree (js_function_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_js_function_id_on
+			    ON app.js_function_depends USING btree (js_function_id_on ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_pg_function_id_on
+			    ON app.js_function_depends USING btree (pg_function_id_on ASC NULLS LAST);
+			
+			-- caption updates for JS functions
+			ALTER TYPE app.caption_content ADD VALUE 'jsFunctionTitle';
+			ALTER TYPE app.caption_content ADD VALUE 'jsFunctionDesc';
+			
+			ALTER TABLE app.caption ADD COLUMN js_function_id uuid;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_js_function_id_fkey
+				FOREIGN KEY (js_function_id)
+				REFERENCES app.js_function (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			-- JS function triggers
+			ALTER TABLE app.field_button ADD COLUMN js_function_id UUID;
+			ALTER TABLE app.field_button ADD CONSTRAINT field_button_js_function_id_fkey
+				FOREIGN KEY (js_function_id)
+				REFERENCES app.js_function (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_field_button_js_function_id
+			    ON app.field_button USING btree (js_function_id ASC NULLS LAST);
+			
+			ALTER TABLE app.field_data ADD COLUMN js_function_id UUID;
+			ALTER TABLE app.field_data ADD CONSTRAINT field_data_js_function_id_fkey
+				FOREIGN KEY (js_function_id)
+				REFERENCES app.js_function (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_field_data_js_function_id
+			    ON app.field_data USING btree (js_function_id ASC NULLS LAST);
+			
+			-- JS functions form events
+			CREATE TYPE app.form_function_event AS ENUM ('open', 'save', 'delete');
+			
+			CREATE TABLE IF NOT EXISTS app.form_function (
+			    form_id uuid NOT NULL,
+			    "position" integer NOT NULL,
+			    js_function_id uuid NOT NULL,
+			    event app.form_function_event NOT NULL,
+			    event_before boolean NOT NULL,
+			    CONSTRAINT form_function_pkey PRIMARY KEY (form_id, "position"),
+			    CONSTRAINT form_function_form_id_fkey FOREIGN KEY (form_id)
+			        REFERENCES app.form (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT form_function_js_function_id_fkey FOREIGN KEY (js_function_id)
+			        REFERENCES app.js_function (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_form_function_form_id
+			    ON app.form_function USING btree (form_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_form_function_js_function_id
+			    ON app.form_function USING btree (js_function_id ASC NULLS LAST);
+			
+			-- new collection entity
+			CREATE TABLE IF NOT EXISTS app.collection (
+			    id uuid NOT NULL,
+				module_id uuid NOT NULL,
+			    name character varying(64) COLLATE pg_catalog."default" NOT NULL,
+			    CONSTRAINT collection_pkey PRIMARY KEY (id),
+			    CONSTRAINT collection_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_collection_module_id_fkey
+			    ON app.collection USING btree (module_id ASC NULLS LAST);
+			
+			-- updates to columns, allowing them to reference collections
+			ALTER TABLE app.column ALTER COLUMN field_id DROP NOT NULL;
+			ALTER TABLE app.column ADD COLUMN collection_id uuid;
+			ALTER TABLE app.column ADD CONSTRAINT column_collection_id_fkey FOREIGN KEY (collection_id)
+				REFERENCES app.collection (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+			    ON DELETE CASCADE
+			    DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_column_collection_id_fkey
+			    ON app.column USING btree (collection_id ASC NULLS LAST);
+			
+			ALTER TABLE app.column ADD CONSTRAINT column_single_parent
+			CHECK ((field_id IS NULL) <> (collection_id IS NULL));
+			
+			-- adding collection to query as parent
+			ALTER TABLE app.query ADD COLUMN collection_id uuid;
+			ALTER TABLE app.query ADD CONSTRAINT query_collection_id_fkey FOREIGN KEY (collection_id)
+				REFERENCES app.collection (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+			    ON DELETE CASCADE
+			    DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_query_collection_id_fkey
+			    ON app.query USING btree (collection_id ASC NULLS LAST);
+			
+			ALTER TABLE app.query ADD CONSTRAINT query_single_parent
+			CHECK (1 = (
+				(CASE WHEN collection_id         IS NULL THEN 0 ELSE 1 END) +
+				(CASE WHEN column_id             IS NULL THEN 0 ELSE 1 END) +
+				(CASE WHEN field_id              IS NULL THEN 0 ELSE 1 END) +
+				(CASE WHEN form_id               IS NULL THEN 0 ELSE 1 END) +
+				(CASE WHEN query_filter_query_id IS NULL THEN 0 ELSE 1 END)
+			));
+			
+			-- add collection as filter option
+			ALTER TYPE app.query_filter_side_content ADD VALUE 'collection';
+			
+			ALTER TABLE app.query_filter_side ADD COLUMN collection_id uuid;
+			ALTER TABLE app.query_filter_side ADD CONSTRAINT query_filter_side_collection_id_fkey FOREIGN KEY (collection_id)
+				REFERENCES app.collection (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+			    ON DELETE NO ACTION
+			    DEFERRABLE INITIALLY DEFERRED;
+			
+			ALTER TABLE app.query_filter_side ADD COLUMN column_id uuid;
+			ALTER TABLE app.query_filter_side ADD CONSTRAINT query_filter_side_column_id_fkey FOREIGN KEY (column_id)
+				REFERENCES app.column (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+			    ON DELETE NO ACTION
+			    DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_query_filter_side_collection_id_fkey
+			    ON app.query_filter_side USING btree (collection_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_query_filter_side_column_id_fkey
+			    ON app.query_filter_side USING btree (column_id ASC NULLS LAST);
+			
+			-- add collection access via role
+			ALTER TABLE app.role_access ADD COLUMN collection_id uuid;
+			ALTER TABLE app.role_access ADD CONSTRAINT role_access_collection_id_fkey
+				FOREIGN KEY (collection_id)
+				REFERENCES app.collection (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_role_access_collection_id_fkey
+   				ON app.role_access USING btree(collection_id ASC NULLS LAST);
+			
+			-- add collection consumer: fields
+			CREATE TABLE IF NOT EXISTS app.collection_consumer (
+			    collection_id uuid NOT NULL,
+			    column_id_display uuid,
+			    field_id uuid,
+			    CONSTRAINT collection_consumer_collection_id_fkey FOREIGN KEY (collection_id)
+			        REFERENCES app.collection (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT collection_consumer_column_id_display_fkey FOREIGN KEY (column_id_display)
+			        REFERENCES app."column" (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT collection_consumer_field_id_fkey FOREIGN KEY (field_id)
+			        REFERENCES app.field (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_collection_consumer_collection_id_fkey
+   				ON app.collection_consumer USING btree(collection_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_collection_consumer_column_id_display_fkey
+   				ON app.collection_consumer USING btree(column_id_display ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_collection_consumer_field_id_fkey
+   				ON app.collection_consumer USING btree(field_id ASC NULLS LAST);
+			
+			-- data field default values from collections
+			ALTER TABLE app.field_data ADD COLUMN collection_id_def uuid;
+			ALTER TABLE app.field_data ADD COLUMN column_id_def uuid;
+			
+			ALTER TABLE app.field_data ADD CONSTRAINT field_data_collection_id_def_fkey
+				FOREIGN KEY (collection_id_def)
+				REFERENCES app.collection (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			ALTER TABLE app.field_data ADD CONSTRAINT field_data_column_id_def_fkey
+				FOREIGN KEY (column_id_def)
+				REFERENCES app.column (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_field_data_collection_id_def_fkey
+				ON app.field_data USING btree (collection_id_def ASC NULLS LAST);
+			
+			CREATE INDEX fki_field_data_column_id_def_fkey
+				ON app.field_data USING btree (column_id_def ASC NULLS LAST);
+		`); err != nil {
+			return "", err
+		}
+
+		// migrate existing form open actions to new 'open form' entity
+		type result struct {
+			FieldId  uuid.UUID
+			OpenForm types.OpenForm
+		}
+		results := make([]result, 0)
+
+		rows, err := tx.Query(db.Ctx, `
+			SELECT field_id, form_id_open, attribute_id_record FROM app.field_button
+			WHERE form_id_open IS NOT NULL
+			UNION
+			SELECT field_id, form_id_open, attribute_id_record FROM app.field_calendar
+			WHERE form_id_open IS NOT NULL
+			UNION
+			SELECT field_id, form_id_open, attribute_id_record FROM app.field_data_relationship
+			WHERE form_id_open IS NOT NULL
+			UNION
+			SELECT field_id, form_id_open, attribute_id_record FROM app.field_list
+			WHERE form_id_open IS NOT NULL
+		`)
+		if err != nil {
+			return "", err
+		}
+
+		for rows.Next() {
+			var r result
+			var o types.OpenForm
+
+			if err := rows.Scan(&r.FieldId, &o.FormIdOpen, &o.AttributeIdApply); err != nil {
+				return "", err
+			}
+			r.OpenForm = o
+			results = append(results, r)
+		}
+		rows.Close()
+
+		for _, r := range results {
+
+			if _, err := tx.Exec(db.Ctx, `
+				INSERT INTO app.open_form (
+					field_id, form_id_open, attribute_id_apply,
+					relation_index, pop_up, max_height, max_width
+				)
+				VALUES ($1,$2,$3,0,false,0,0)
+			`, r.FieldId, r.OpenForm.FormIdOpen, r.OpenForm.AttributeIdApply); err != nil {
+				return "", err
+			}
+		}
+
+		if _, err := tx.Exec(db.Ctx, `
+			ALTER TABLE app.field_button
+				DROP COLUMN form_id_open,
+				DROP COLUMN attribute_id_record;
+			ALTER TABLE app.field_calendar
+				DROP COLUMN form_id_open,
+				DROP COLUMN attribute_id_record;
+			ALTER TABLE app.field_data_relationship
+				DROP COLUMN form_id_open,
+				DROP COLUMN attribute_id_record;
+			ALTER TABLE app.field_list
+				DROP COLUMN form_id_open,
+				DROP COLUMN attribute_id_record;
+		`); err != nil {
+			return "", err
+		}
+
+		return "2.6", err
+	},
 	"2.4": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
 			-- repo change logs
@@ -263,8 +692,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			-- new config settings
 			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutCsv','120');
-			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutDataRest','30');
-			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutDataWs','30');
+			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutDataRest','60');
+			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutDataWs','60');
 			INSERT INTO instance.config (name,value) VALUES ('dbTimeoutIcs','30');
 			INSERT INTO instance.config (name,value) VALUES ('schemaTimestamp','0');
 			

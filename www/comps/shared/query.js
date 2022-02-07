@@ -1,5 +1,6 @@
 import {getIndexAttributeId} from './attribute.js';
 import {getItemTitle}        from './builder.js';
+import {getCollectionValues} from './collection.js';
 import MyStore               from '../../stores/store.js';
 
 let getQueryExpressionAttribute = function(column) {
@@ -110,13 +111,47 @@ export function getSubQueryFilterExpressions(subQuery) {
 	}];
 };
 
-export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,joinIndexesRemove,values) {
-	filters  = JSON.parse(JSON.stringify(filters));
-	let out  = [];
-	let that = this;
+export function getQueryColumnsProcessed(columns,dataFieldIdMap,joinsIndexMap,values) {
+	columns = JSON.parse(JSON.stringify(columns));
+	for(let i = 0, j = columns.length; i < j; i++) {
+		
+		if(!columns[i].subQuery)
+			continue;
+		
+		columns[i].query.filters = getQueryFiltersProcessed(
+			columns[i].query.filters,
+			dataFieldIdMap,
+			joinsIndexMap,
+			values
+		);
+	}
+	return columns;
+};
+
+export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
+	values,joinIndexesRemove,collectionIdMapIndexFilter) {
+
+	filters = JSON.parse(JSON.stringify(filters));
+	let out = [];
 	
-	let getFilterSideProcessed = function(s) {
+	if(typeof values === 'undefined')
+		values = {};
+	
+	if(typeof joinIndexesRemove === 'undefined')
+		joinIndexesRemove = [];
+	
+	if(typeof collectionIdMapIndexFilter === 'undefined')
+		collectionIdMapIndexFilter = {};
+	
+	let getFilterSideProcessed = function(s,operator) {
 		switch(s.content) {
+			case 'collection':
+				let singleValue = !['= ANY','<> ALL'].includes(operator);
+				let recordIndex = typeof collectionIdMapIndexFilter[s.collectionId] === 'undefined'
+					? -1 : collectionIdMapIndexFilter[s.collectionId];
+				
+				s.value = getCollectionValues(s.collectionId,s.columnId,singleValue,recordIndex);
+			break;
 			case 'field':
 				let fld     = dataFieldIdMap[s.fieldId];
 				let atrIdNm = typeof fld.attributeIdNm !== 'undefined' ? fld.attributeIdNm : null;
@@ -139,7 +174,6 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,jo
 				s.value = 0;
 				
 				let presetIdMap = MyStore.getters['schema/presetIdMapRecordId'];
-				
 				if(typeof presetIdMap[s.presetId] !== 'undefined')
 					s.value = presetIdMap[s.presetId];
 			break;
@@ -160,8 +194,9 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,jo
 					s.query.filters,
 					dataFieldIdMap,
 					joinsIndexMap,
+					values,
 					joinIndexesRemove,
-					values
+					collectionIdMapIndexFilter
 				);
 			break;
 			case 'true':
@@ -184,11 +219,31 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,jo
 		if(f.side1.attributeId !== null && joinIndexesRemove.includes(f.side1.attributeIndex))
 			continue;
 		
-		f.side0 = getFilterSideProcessed(f.side0);
-		f.side1 = getFilterSideProcessed(f.side1);
+		f.side0 = getFilterSideProcessed(f.side0,f.operator);
+		f.side1 = getFilterSideProcessed(f.side1,f.operator);
 		out.push(f);
 	}
 	return getFiltersEncapsulated(out);
+};
+
+export function getJoinIndexMap(joins) {
+	let map = {};
+	for(let i = 0, j = joins.length; i < j; i++) {
+		map[joins[i].index] = joins[i];
+	}
+	return map;
+};
+
+export function getJoinIndexMapWithRecords(joins,recordIdIndexMap) {
+	let map = {};
+	for(let i = 0, j = joins.length; i < j; i++) {
+		let join      = joins[i];
+		let recordId  = recordIdIndexMap[join.index];
+		join.recordId = Number.isInteger(recordId) ? recordId : 0;
+		
+		map[join.index] = join;
+	}
+	return map;
 };
 
 export function getQueryAttributePkFilter(relationId,recordId,index,not) {

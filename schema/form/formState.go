@@ -1,11 +1,13 @@
 package form
 
 import (
+	"r3/compatible"
 	"r3/db"
 	"r3/schema"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -56,7 +58,7 @@ func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, erro
 
 	rows, err := db.Pool.Query(db.Ctx, `
 		SELECT position, field_id0, field_id1, preset_id1, role_id, field_changed,
-			new_record, brackets0, brackets1, connector, operator, value1
+			new_record, brackets0, brackets1, connector, login1, operator, value1
 		FROM app.form_state_condition
 		WHERE form_state_id = $1
 		ORDER BY position ASC
@@ -71,7 +73,7 @@ func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, erro
 
 		if err := rows.Scan(&c.Position, &c.FieldId0, &c.FieldId1, &c.PresetId1,
 			&c.RoleId, &c.FieldChanged, &c.NewRecord, &c.Brackets0, &c.Brackets1,
-			&c.Connector, &c.Operator, &c.Value1); err != nil {
+			&c.Connector, &c.Login1, &c.Operator, &c.Value1); err != nil {
 
 			return conditions, err
 		}
@@ -164,16 +166,20 @@ func setState_tx(tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID,
 	}
 
 	for i, c := range state.Conditions {
+
+		// fix imports < 2.6: New field comparisson: Login ID
+		c.Login1 = compatible.FixPgxNull(c.Login1).(pgtype.Bool)
+
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.form_state_condition (
 				form_state_id, position, field_id0, field_id1, preset_id1,
 				role_id, field_changed, new_record, brackets0, brackets1,
-				connector, operator, value1
+				connector, login1, operator, value1
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
 		`, state.Id, i, c.FieldId0, c.FieldId1, c.PresetId1, c.RoleId,
 			c.FieldChanged, c.NewRecord, c.Brackets0, c.Brackets1, c.Connector,
-			c.Operator, c.Value1); err != nil {
+			c.Login1, c.Operator, c.Value1); err != nil {
 
 			return state.Id, err
 		}

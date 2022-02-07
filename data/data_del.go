@@ -6,7 +6,7 @@ import (
 	"fmt"
 	"r3/cache"
 	"r3/handler"
-	"r3/schema/lookups"
+	"r3/schema"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v4"
@@ -28,7 +28,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	// check for protected preset record
 	for _, preset := range rel.Presets {
 		if preset.Protected && cache.GetPresetRecordId(preset.Id) == recordId {
-			return errors.New(handler.ErrPresetProtected)
+			return handler.CreateErrCode("APP", handler.ErrCodeAppPresetProtected)
 		}
 	}
 
@@ -49,7 +49,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 		WHERE "%s"."%s" = $1
 		%s
 	`, mod.Name, rel.Name, tableAlias, tableAlias,
-		lookups.PkName, policyFilter), recordId); err != nil {
+		schema.PkName, policyFilter), recordId); err != nil {
 
 		return err
 	}

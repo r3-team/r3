@@ -1,10 +1,13 @@
 import MyBuilderCaption          from './builderCaption.js';
 import MyBuilderIconInput        from './builderIconInput.js';
-import MyBuilderFieldColumns, {MyBuilderFieldColumnTemplates} from './builderFieldColumns.js';
 import MyBuilderFieldOptions     from './builderFieldOptions.js';
 import {getItemTitle}            from '../shared/builder.js';
 import {getFlexBasis}            from '../shared/form.js';
 import {isAttributeRelationship} from '../shared/attribute.js';
+import {
+	MyBuilderColumns,
+	MyBuilderColumnTemplates
+} from './builderColumns.js';
 import {
 	getQueryExpressions,
 	getRelationsJoined,
@@ -16,8 +19,8 @@ let MyBuilderFields = {
 	name:'my-builder-fields',
 	components:{
 		MyBuilderCaption,
-		MyBuilderFieldColumns,
-		MyBuilderFieldColumnTemplates,
+		MyBuilderColumns,
+		MyBuilderColumnTemplates,
 		MyBuilderFieldOptions,
 		MyBuilderIconInput
 	},
@@ -29,14 +32,14 @@ let MyBuilderFields = {
 	>
 		<template #item="{element,index}">
 	    		<div class="builder-field"
-				v-show="!isRelationship(element) || element.outsideIn === false || showOutsideIn"
+				v-show="show(element)"
 				:class="getClass(element)"
 				:key="element.id"
 				:style="getStyleParent(element)"
 			>
-				<div class="actions">
+				<div class="builder-drag-item" :class="{ container:element.content === 'container' }">
 					<!-- form state field reference -->
-					<span class="reference" v-if="!isTemplate && showStates">
+					<span class="reference" v-if="showReferences && !isTemplate">
 						F{{ typeof fieldIdMapRef[element.id] !== 'undefined' ? fieldIdMapRef[element.id] : '' }}
 					</span>
 					
@@ -124,7 +127,7 @@ let MyBuilderFields = {
 						>
 							<span>{{ getFlexBasis(element.basis) }}</span>
 						</div>
-					
+						
 						<div class="part clickable"
 							@click="fieldPropertySet(index,'grow',toggleSize(element.grow,1,1))"
 							@click.prevent.right="fieldPropertySet(index,'grow',toggleSize(element.grow,-1))"
@@ -173,7 +176,7 @@ let MyBuilderFields = {
 						:contentName="capApp.fieldTitle"
 						:language="builderLanguage"
 					/>
-				
+					
 					<my-builder-caption
 						v-if="element.content === 'data'"
 						v-model="element.captions.fieldHelp"
@@ -189,25 +192,28 @@ let MyBuilderFields = {
 					:builderLanguage="builderLanguage"
 					:dataFields="dataFields"
 					:field="element"
+					:formId="formId"
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="moduleId"
 				/>
 				
-				<!-- columns for list fields -->
+				<!-- columns for list/calendar/chart fields -->
 				<div class="columnsTarget"
 					v-if="!isTemplate && hasFieldColumns(element)"
 				>
-					<div v-if="element.columns.length === 0">{{ capApp.columnsTarget }}</div>
+					<div v-if="element.columns.length === 0">
+						{{ capApp.columnsTarget }}
+					</div>
 					
-					<my-builder-field-columns class="inList"
+					<my-builder-columns class="inList"
 						@columns-set="fieldPropertySet(index,'columns',$event)"
 						@column-id-query-set="$emit('field-column-query-set',element.id,$event)"
-						@column-remove="$emit('column-remove',$event)"
 						:builderLanguage="builderLanguage"
 						:columnIdQuery="columnIdQuery"
 						:columns="element.columns"
-						:dataFields="dataFields"
-						:field="element"
+						:displayOptions="true"
+						:groupName="element.id+'_columns'"
+						:hasCaptions="element.content === 'list'"
 						:joins="element.query.joins"
 						:isTemplate="false"
 						:moduleId="moduleId"
@@ -215,15 +221,17 @@ let MyBuilderFields = {
 					/>
 				</div>
 				
-				<!-- column templates for list fields -->
-				<my-builder-field-column-templates
-					v-if="fieldIdQuery === element.id"
-					:builderLanguage="builderLanguage"
-					:dataFields="dataFields"
-					:field="element"
-					:joins="element.query.joins"
-					:moduleId="moduleId"
-				/>
+				<!-- column templates for list/calendar/chart fields -->
+				<div class="columnsTemplates">
+					<my-builder-column-templates
+						v-if="fieldIdQuery === element.id"
+						:builderLanguage="builderLanguage"
+						:columns="element.columns"
+						:groupName="element.id+'_columns'"
+						:joins="element.query.joins"
+						:moduleId="moduleId"
+					/>
+				</div>
 				
 				<!-- nested fields in container -->
 				<my-builder-fields class="container-nested"
@@ -233,7 +241,6 @@ let MyBuilderFields = {
 					@field-id-query-set="$emit('field-id-query-set',$event)"
 					@field-remove="$emit('field-remove',$event)"
 					@field-move-store="$emit('field-move-store',$event)"
-					@column-remove="$emit('column-remove',$event)"
 					:builderLanguage="builderLanguage"
 					:class="element.direction"
 					:columnIdQuery="columnIdQuery"
@@ -245,12 +252,12 @@ let MyBuilderFields = {
 					:fieldMoveIndex="fieldMoveIndex"
 					:fields="element.fields"
 					:flexDirParent="element.direction"
+					:formId="formId"
 					:isTemplate="isTemplate"
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="moduleId"
 					:showCaptions="showCaptions"
-					:showOutside-in="showOutsideIn"
-					:showStates="showStates"
+					:showReferences="showReferences"
 					:style="getStyleChildren(element)"
 				/>
 			</div>
@@ -261,22 +268,26 @@ let MyBuilderFields = {
 		columnIdQuery:  { required:false,default:null },
 		dataFields:     { type:Array,   required:false, default:() => [] },          // all data fields from form
 		fields:         { type:Array,   required:true },                             // fields to handle
-		flexDirParent:  { type:String,  required:true },                             // flex direction of parent (row|column)
 		fieldIdMapRef:  { type:Object,  required:false, default:() => {return {}} }, // field reference map (unique field counter for each ID)
 		fieldIdQuery:   { required:false, default:null },
 		fieldMoveList:  { required:true },
 		fieldMoveIndex: { type:Number,  required:true },
 		fieldCounter:   { type:Number,  required:true },
+		flexDirParent:  { type:String,  required:true },                             // flex direction of parent (row|column)
+		formId:         { type:String,  required:true },
 		isTemplate:     { type:Boolean, required:true },                    // is template for fields
 		joinsIndexMap:  { type:Object,  required:false, default:() => {return {}} },
 		moduleId:       { type:String,  required:false, default:'' },
 		showCaptions:   { type:Boolean, required:false, default:false },
-		showOutsideIn:  { type:Boolean, required:false, default:false },
-		showStates:     { type:Boolean, required:false, default:false }
+		showReferences: { type:Boolean, required:false, default:false },
+		template1n:     { type:Boolean, required:false, default:false },
+		templateIndex:  { type:Number,  required:false, default:-1 },
+		templateN1:     { type:Boolean, required:false, default:false },
+		templateNm:     { type:Boolean, required:false, default:false }
 	},
 	emits:[
-		'column-remove','field-column-query-set','field-counter-set',
-		'field-id-query-set','field-remove','field-move-store'
+		'field-column-query-set','field-counter-set','field-id-query-set',
+		'field-remove','field-move-store'
 	],
 	data:function() {
 		return {
@@ -306,6 +317,24 @@ let MyBuilderFields = {
 		getRelationsJoined,
 		getSubQueryFilterExpressions,
 		isAttributeRelationship,
+		
+		// presentation
+		show:function(field) {
+			// filter only templates and only data fields
+			if(!this.isTemplate || field.content !== 'data') 
+				return true;
+			
+			// filter by selected index (if set)
+			if(this.templateIndex !== -1 && field.index !== this.templateIndex)
+				return false;
+			
+			// filter relationship fields
+			if(!this.isRelationship(field)) return true;
+			if(!field.outsideIn)            return this.templateN1; 
+			if(this.template1n && field.attributeIdNm === null) return true;
+			if(this.templateNm && field.attributeIdNm !== null) return true;
+			return false;
+		},
 		
 		// actions
 		fieldIdEditSet:function(fieldId) {
@@ -423,8 +452,8 @@ let MyBuilderFields = {
 		isRelationship:function(field) {
 			if(field.content !== 'data') return false;
 			
-			let atr = this.attributeIdMap[field.attributeId];
-			return this.isAttributeRelationship(atr.content);
+			return this.isAttributeRelationship(
+				this.attributeIdMap[field.attributeId].content);
 		},
 		
 		// getters
@@ -443,7 +472,7 @@ let MyBuilderFields = {
 			switch(field.content) {
 				case 'button':    cap = 'Button';    break;
 				case 'calendar':  cap = 'Calendar';  break;
-				case 'chart':     cap = 'Chart';  break;
+				case 'chart':     cap = 'Chart';     break;
 				case 'container': cap = 'Container'; break;
 				case 'list':      cap = 'List';      break;
 				case 'header':    cap = 'Header';    break;
@@ -539,8 +568,7 @@ let MyBuilderFields = {
 		
 		// backend calls
 		getSqlPreview:function(field) {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('dataSql','get',{
+			ws.send('dataSql','get',{
 				relationId:field.query.relationId,
 				joins:this.getRelationsJoined(field.query.joins),
 				expressions:this.sqlPreviewResolveExpressions(
@@ -551,22 +579,23 @@ let MyBuilderFields = {
 				),
 				orders:field.query.orders,
 				limit:field.query.fixedLimit !== 0 ? field.query.fixedLimit : 0
-			},this.getSqlPreviewOk);
-			trans.send(this.$root.genericError);
-		},
-		getSqlPreviewOk:function(res) {
-			this.$store.commit('dialog',{
-				captionTop:this.capApp.sql,
-				captionBody:res.payload,
-				image:'database.png',
-				textDisplay:'textarea',
-				width:800,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
-			});
+			},true).then(
+				(res) => {
+					this.$store.commit('dialog',{
+						captionTop:this.capApp.sql,
+						captionBody:res.payload,
+						image:'database.png',
+						textDisplay:'textarea',
+						width:800,
+						buttons:[{
+							caption:this.capGen.button.close,
+							cancel:true,
+							image:'cancel.png'
+						}]
+					});
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

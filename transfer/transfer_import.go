@@ -15,8 +15,10 @@ import (
 	"r3/scheduler"
 	"r3/schema"
 	"r3/schema/attribute"
+	"r3/schema/collection"
 	"r3/schema/form"
 	"r3/schema/icon"
+	"r3/schema/jsFunction"
 	"r3/schema/loginForm"
 	"r3/schema/menu"
 	"r3/schema/module"
@@ -143,11 +145,6 @@ func ImportFromFiles(filePathsImport []string) error {
 	}
 	log.Info("transfer", "changes were commited successfully")
 
-	if err := cache.RenewAccessAll(); err != nil {
-		return err
-	}
-	log.Info("transfer", "access cache was renewed")
-
 	if err := cache.UpdateSchemaAll(true); err != nil {
 		return err
 	}
@@ -254,7 +251,27 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		}
 	}
 
-	// pg functions, refer to relations/attributes/pg_functions (self reference)
+	// collections
+	for _, e := range mod.Collections {
+
+		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info("transfer", fmt.Sprintf("set collection %s", e.Id))
+
+		if err := importCheckResultAndApply(tx, collection.Set_tx(tx,
+			e.ModuleId, e.Id, e.Name, e.Columns, e.Query), e.Id,
+			idMapSkipped); err != nil {
+
+			return err
+		}
+	}
+
+	// PG functions, refer to relations/attributes/pg_functions (self reference)
 	for _, e := range mod.PgFunctions {
 
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
@@ -264,17 +281,18 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		if !run {
 			continue
 		}
-		log.Info("transfer", fmt.Sprintf("set function %s", e.Id))
+		log.Info("transfer", fmt.Sprintf("set PG function %s", e.Id))
 
 		if err := importCheckResultAndApply(tx, pgFunction.Set_tx(tx,
 			e.ModuleId, e.Id, e.Name, e.CodeArgs, e.CodeFunction, e.CodeReturns,
-			e.Schedules, e.Captions), e.Id, idMapSkipped); err != nil {
+			e.IsFrontendExec, e.IsTrigger, e.Schedules, e.Captions),
+			e.Id, idMapSkipped); err != nil {
 
 			return err
 		}
 	}
 
-	// pg triggers, refer to pg functions
+	// PG triggers, refer to PG functions
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Triggers {
 
@@ -297,7 +315,7 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		}
 	}
 
-	// pg indexes
+	// PG indexes
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Indexes {
 
@@ -319,7 +337,7 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		}
 	}
 
-	// forms, refer to relations/attributes
+	// forms, refer to relations/attributes/collections/JS functions
 	for _, e := range mod.Forms {
 
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
@@ -333,7 +351,8 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 		if err := importCheckResultAndApply(tx, form.Set_tx(tx,
 			e.ModuleId, e.Id, e.PresetIdOpen, e.IconId, e.Name, e.Query,
-			e.Fields, e.States, e.Captions), e.Id, idMapSkipped); err != nil {
+			e.Fields, e.Functions, e.States, e.Captions), e.Id,
+			idMapSkipped); err != nil {
 
 			return err
 		}
@@ -378,8 +397,28 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 		if err := importCheckResultAndApply(tx, role.Set_tx(tx,
 			e.ModuleId, e.Id, e.Name, e.Assignable, e.ChildrenIds,
-			e.AccessRelations, e.AccessAttributes, e.AccessMenus,
-			e.Captions), e.Id, idMapSkipped); err != nil {
+			e.AccessAttributes, e.AccessCollections, e.AccessMenus,
+			e.AccessRelations, e.Captions), e.Id, idMapSkipped); err != nil {
+
+			return err
+		}
+	}
+
+	// JS functions, refer to forms/fields/roles/pg_functions/js_functions (self reference)
+	for _, e := range mod.JsFunctions {
+
+		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info("transfer", fmt.Sprintf("set JS function %s", e.Id))
+
+		if err := importCheckResultAndApply(tx, jsFunction.Set_tx(tx,
+			e.ModuleId, e.Id, e.FormId, e.Name, e.CodeArgs, e.CodeFunction,
+			e.CodeReturns, e.Captions), e.Id, idMapSkipped); err != nil {
 
 			return err
 		}

@@ -3,9 +3,9 @@ package relation
 import (
 	"fmt"
 	"r3/db"
+	"r3/db/check"
 	"r3/schema"
 	"r3/schema/attribute"
-	"r3/schema/lookups"
 	"r3/schema/pgFunction"
 	"r3/types"
 
@@ -16,7 +16,7 @@ import (
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
-	modName, relName, err := lookups.GetRelationNamesById_tx(tx, id)
+	modName, relName, err := schema.GetRelationNamesById_tx(tx, id)
 	if err != nil {
 		return err
 	}
@@ -45,7 +45,7 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 func delPkSeq_tx(tx pgx.Tx, modName string, id uuid.UUID) error {
 	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		DROP SEQUENCE "%s"."%s"
-	`, modName, lookups.GetSequenceName(id)))
+	`, modName, schema.GetSequenceName(id)))
 	return err
 }
 
@@ -62,7 +62,7 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 		FROM app.relation
 		WHERE module_id = $2
 		ORDER BY name ASC
-	`, lookups.PkName, moduleId)
+	`, schema.PkName, moduleId)
 	if err != nil {
 		return relations, err
 	}
@@ -92,11 +92,11 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	retentionCount pgtype.Int4, retentionDays pgtype.Int4,
 	policies []types.RelationPolicy) error {
 
-	if err := db.CheckIdentifier(name); err != nil {
+	if err := check.DbIdentifier(name); err != nil {
 		return err
 	}
 
-	moduleName, err := lookups.GetModuleNameById_tx(tx, moduleId)
+	moduleName, err := schema.GetModuleNameById_tx(tx, moduleId)
 	if err != nil {
 		return err
 	}
@@ -108,35 +108,37 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	}
 
 	if known {
-		// get existing relation info
-		var nameEx string
-		if err := tx.QueryRow(db.Ctx, `
-			SELECT name
-			FROM app.relation
-			WHERE id = $1
-		`, id).Scan(&nameEx); err != nil {
+		_, nameEx, err := schema.GetRelationNamesById_tx(tx, id)
+		if err != nil {
 			return err
-		}
-
-		// keep order of following changes as they are interdependent!
-
-		// update relation name
-		if nameEx != name {
-			if err := SetName_tx(tx, id, name, false); err != nil {
-				return err
-			}
 		}
 
 		// update relation reference
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.relation
-			SET retention_count = $1, retention_days = $2
-			WHERE id = $3
-		`, retentionCount, retentionDays, id); err != nil {
+			SET name = $1, retention_count = $2, retention_days = $3
+			WHERE id = $4
+		`, name, retentionCount, retentionDays, id); err != nil {
 			return err
 		}
+
+		// if name changed, update relation and all affected entities
+		if nameEx != name {
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				ALTER TABLE "%s"."%s"
+				RENAME TO "%s"
+			`, moduleName, nameEx, name)); err != nil {
+				return err
+			}
+
+			if err := pgFunction.RecreateAffectedBy_tx(tx, "relation", id); err != nil {
+				return fmt.Errorf("failed to recreate affected PG functions, %s", err)
+			}
+		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`CREATE TABLE "%s"."%s" ()`, moduleName, name)); err != nil {
+		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`CREATE TABLE "%s"."%s" ()`,
+			moduleName, name)); err != nil {
+
 			return err
 		}
 
@@ -154,7 +156,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 			if err := attribute.Set_tx(tx, id, uuid.Nil,
 				pgtype.UUID{Status: pgtype.Null},
 				pgtype.UUID{Status: pgtype.Null},
-				lookups.PkName, "integer", 0, false, "", "", "",
+				schema.PkName, "integer", 0, false, "", "", "",
 				types.CaptionMap{}); err != nil {
 
 				return err
@@ -165,50 +167,6 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	// set policies
 	if err := setPolicies_tx(tx, id, policies); err != nil {
 		return err
-	}
-	return nil
-}
-
-func SetName_tx(tx pgx.Tx, id uuid.UUID, name string, ignoreNameCheck bool) error {
-
-	// name check can be ignored by internal tasks, never ignore for user input
-	if !ignoreNameCheck {
-		if err := db.CheckIdentifier(name); err != nil {
-			return err
-		}
-	}
-
-	known, err := schema.CheckCreateId_tx(tx, &id, "relation", "id")
-	if err != nil || !known {
-		return err
-	}
-
-	moduleName, nameEx, err := lookups.GetRelationNamesById_tx(tx, id)
-	if err != nil {
-		return err
-	}
-
-	if nameEx == name {
-		return nil
-	}
-
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-		ALTER TABLE "%s"."%s"
-		RENAME TO "%s"
-	`, moduleName, nameEx, name)); err != nil {
-		return err
-	}
-
-	if _, err := tx.Exec(db.Ctx, `
-		UPDATE app.relation
-		SET name = $1
-		WHERE id = $2
-	`, name, id); err != nil {
-		return err
-	}
-
-	if err := pgFunction.RecreateAffectedBy_tx(tx, "relation", id); err != nil {
-		return fmt.Errorf("failed to recreate affected PG functions, %s", err)
 	}
 	return nil
 }

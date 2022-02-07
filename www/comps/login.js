@@ -33,6 +33,7 @@ let MyLogin = {
 			</div>
 		</template>
 		
+		<!-- not ready for login yet (downloading schema/public data/...) -->
 		<template v-if="backendReady && !loginReady">
 			<div class="contentBox">
 				<div class="top" :style="customBgLogin">
@@ -50,6 +51,7 @@ let MyLogin = {
 			</div>
 		</template>
 		
+		<!-- ready for login -->
 		<template v-if="backendReady && loginReady">
 			
 			<!-- HTTP message -->
@@ -64,10 +66,20 @@ let MyLogin = {
 			
 			<!-- maintenance mode message -->
 			<div class="contentBox" v-if="productionMode === 0">
-				<div class="top warning" :style="customBgLogin">
+				<div class="top warning">
 					<div class="area">
 						<img class="icon" src="images/warning.png" />
 						<h1>{{ message.maintenanceMode[language] }}</h1>
+					</div>
+				</div>
+			</div>
+			
+			<!-- unexpected error message -->
+			<div class="contentBox" v-if="appInitErr !== ''">
+				<div class="top warning">
+					<div class="area">
+						<img class="icon" src="images/warning.png" />
+						<h1>{{ message.error[language] }}</h1>
 					</div>
 				</div>
 			</div>
@@ -134,6 +146,7 @@ let MyLogin = {
 		</div>
 	</div>`,
 	props:{
+		appInitErr:  { type:String,  required:true }, // app could not initialize
 		backendReady:{ type:Boolean, required:true }, // can talk to backend
 		httpMode:    { type:Boolean, required:true }, // unencrypted connection
 		loginReady:  { type:Boolean, required:true }  // can login
@@ -141,15 +154,23 @@ let MyLogin = {
 	emits:['authenticated'],
 	data:function() {
 		return {
-			username:'',
+			// inputs
 			password:'',
+			username:'',
+			
+			// states
 			badAuth:false,
 			loading:false,
+			showError:false,
 			
 			// default messages
 			language:'en_US',
 			languages:['de','en_US'],
 			message:{
+				error:{
+					de:'Ein Fehler ist aufgetreten. Bitte erneut versuchen.',
+					en_US:'An error occurred. Please try again.'
+				},
 				httpMode:{
 					de:'Verbindung ist nicht verschlüsselt',
 					en_US:'Connection is not encrypted'
@@ -166,10 +187,6 @@ let MyLogin = {
 					de:'Wartungsmodus ist aktiv',
 					en_US:'Maintenance mode is active'
 				},
-				reload:{
-					de:'Neu laden',
-					en_US:'Reload'
-				},
 				stayLoggedIn:{
 					de:'Angemeldet bleiben',
 					en_US:'Stay logged in'
@@ -182,16 +199,15 @@ let MyLogin = {
 		};
 	},
 	computed:{
-		isValid:function() {
-			return !this.badAuth && this.username !== '' && this.password !== '';
-		},
-		showCustom:function() {
-			return this.activated && (this.companyName !== '' || this.companyWelcome !== '');
-		},
+		// input
 		tokenKeepInput:{
 			get:function()  { return this.tokenKeep; },
 			set:function(v) { this.$store.commit('local/tokenKeep',v); }
 		},
+		
+		// states
+		isValid:   function() { return !this.badAuth && this.username !== '' && this.password !== ''; },
+		showCustom:function() { return this.activated && (this.companyName !== '' || this.companyWelcome !== ''); },
 		
 		// stores
 		activated:        function() { return this.$store.getters['local/activated']; },
@@ -208,6 +224,12 @@ let MyLogin = {
 		productionMode:   function() { return this.$store.getters.productionMode; }
 	},
 	watch:{
+		appInitErr:function(v) {
+			// updates when app encounters an unexpected error during initialization
+			// log to console (troubleshooting) and stop loading as something went wrong
+			console.log(v);
+			this.loading = false;
+		},
 		loginReady:function(v) {
 			if(!v) return;
 			
@@ -260,51 +282,50 @@ let MyLogin = {
 		openLink,
 		
 		// misc
-		handleError:function(req,message) {
-			if(req[0].action === 'user')
-				this.badAuth = true;
-			
+		handleError:function(action) {
+			switch(action) {
+				case 'authToken': break;                      // token auth failed, to be expected, can expire
+				case 'authUser':  this.badAuth = true; break; // user authorization failed, mark inputs invalid
+			}
 			this.loading = false;
-		},
-		reloadPage:function(clearCache) {
-			window.location.reload(clearCache);
 		},
 		
 		// authenticate by username/password or public user
 		authenticate:function() {
 			if(!this.isValid) return;
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('auth','user',{
+			ws.send('auth','user',{
 				username:this.username,
 				password:this.password
-			},this.authenticatedByUser);
-			trans.send(this.handleError);
+			},true).then(
+				(res) => this.authenticatedByUser(res.payload.token),
+				(err) => this.handleError('authUser')
+			);
 			this.loading = true;
 		},
 		authenticatePublic:function(username) {
 			// keep token as public user is not asked
 			this.$store.commit('local/tokenKeep',true);
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('auth','user',{
-				username:username
-			},this.authenticatedByUser);
-			trans.send(this.handleError);
+			ws.send('auth','user',{username:username},true).then(
+				(res) => this.authenticatedByUser(res.payload.token),
+				(err) => this.handleError('authUser')
+			);
 			this.loading = true;
 		},
 		authenticateByToken:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('auth','token',{token:this.token});
-			trans.send(this.handleError,this.appEnable);
+			ws.send('auth','token',{token:this.token},true).then(
+				(res) => this.appEnable(),
+				(err) => this.handleError('authToken')
+			);
 			this.loading = true;
 		},
-		authenticatedByUser:function(res,req) {
-			if(res.payload.token === '')
-				return this.handleError();
+		authenticatedByUser:function(token) {
+			if(token === '')
+				return this.handleError('authUser');
 			
 			// store token if valid
-			this.$store.commit('local/token',res.payload.token);
+			this.$store.commit('local/token',token);
 			this.appEnable();
 		},
 		

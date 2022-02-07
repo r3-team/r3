@@ -1,5 +1,5 @@
 /*!
-  * vue-router v4.0.11
+  * vue-router v4.0.12
   * (c) 2021 Eduardo San Martin Morote
   * @license MIT
   */
@@ -626,6 +626,7 @@ var VueRouter = (function (exports, vue) {
       let listeners = [];
       let queue = [START];
       let position = 0;
+      base = normalizeBase(base);
       function setLocation(location) {
           position++;
           if (position === queue.length) {
@@ -1856,7 +1857,7 @@ var VueRouter = (function (exports, vue) {
       // to avoid warning
       {}).value;
       if (!activeRecord) {
-          warn('No active route record was found. Are you missing a <router-view> component?');
+          warn('No active route record was found when calling `onBeforeRouteLeave()`. Make sure you call this function inside of a component child of <router-view>. Maybe you called it inside of App.vue?');
           return;
       }
       registerGuard(activeRecord, 'leaveGuards', leaveGuard);
@@ -1877,7 +1878,7 @@ var VueRouter = (function (exports, vue) {
       // to avoid warning
       {}).value;
       if (!activeRecord) {
-          warn('No active route record was found. Are you missing a <router-view> component?');
+          warn('No active route record was found when calling `onBeforeRouteUpdate()`. Make sure you call this function inside of a component child of <router-view>. Maybe you called it inside of App.vue?');
           return;
       }
       registerGuard(activeRecord, 'updateGuards', updateGuard);
@@ -2300,6 +2301,23 @@ var VueRouter = (function (exports, vue) {
                   onVnodeUnmounted,
                   ref: viewRef,
               }));
+              if (isBrowser &&
+                  component.ref) {
+                  // TODO: can display if it's an alias, its props
+                  const info = {
+                      depth,
+                      name: matchedRoute.name,
+                      path: matchedRoute.path,
+                      meta: matchedRoute.meta,
+                  };
+                  const internalInstances = Array.isArray(component.ref)
+                      ? component.ref.map(r => r.i)
+                      : [component.ref.i];
+                  internalInstances.forEach(instance => {
+                      // @ts-expect-error
+                      instance.__vrv_devtools = info;
+                  });
+              }
               return (
               // pass the vnode to the slot as a prop.
               // h and <component :is="..."> both accept vnodes
@@ -2343,27 +2361,135 @@ var VueRouter = (function (exports, vue) {
   }
   function getTarget() {
       // @ts-ignore
-      return typeof navigator !== 'undefined'
+      return (typeof navigator !== 'undefined' && typeof window !== 'undefined')
           ? window
           : typeof global !== 'undefined'
               ? global
               : {};
   }
+  const isProxyAvailable = typeof Proxy === 'function';
 
   const HOOK_SETUP = 'devtools-plugin:setup';
+  const HOOK_PLUGIN_SETTINGS_SET = 'plugin:settings:set';
+
+  class ApiProxy {
+      constructor(plugin, hook) {
+          this.target = null;
+          this.targetQueue = [];
+          this.onQueue = [];
+          this.plugin = plugin;
+          this.hook = hook;
+          const defaultSettings = {};
+          if (plugin.settings) {
+              for (const id in plugin.settings) {
+                  const item = plugin.settings[id];
+                  defaultSettings[id] = item.defaultValue;
+              }
+          }
+          const localSettingsSaveId = `__vue-devtools-plugin-settings__${plugin.id}`;
+          let currentSettings = { ...defaultSettings };
+          try {
+              const raw = localStorage.getItem(localSettingsSaveId);
+              const data = JSON.parse(raw);
+              Object.assign(currentSettings, data);
+          }
+          catch (e) {
+              // noop
+          }
+          this.fallbacks = {
+              getSettings() {
+                  return currentSettings;
+              },
+              setSettings(value) {
+                  try {
+                      localStorage.setItem(localSettingsSaveId, JSON.stringify(value));
+                  }
+                  catch (e) {
+                      // noop
+                  }
+                  currentSettings = value;
+              }
+          };
+          hook.on(HOOK_PLUGIN_SETTINGS_SET, (pluginId, value) => {
+              if (pluginId === this.plugin.id) {
+                  this.fallbacks.setSettings(value);
+              }
+          });
+          this.proxiedOn = new Proxy({}, {
+              get: (_target, prop) => {
+                  if (this.target) {
+                      return this.target.on[prop];
+                  }
+                  else {
+                      return (...args) => {
+                          this.onQueue.push({
+                              method: prop,
+                              args
+                          });
+                      };
+                  }
+              }
+          });
+          this.proxiedTarget = new Proxy({}, {
+              get: (_target, prop) => {
+                  if (this.target) {
+                      return this.target[prop];
+                  }
+                  else if (prop === 'on') {
+                      return this.proxiedOn;
+                  }
+                  else if (Object.keys(this.fallbacks).includes(prop)) {
+                      return (...args) => {
+                          this.targetQueue.push({
+                              method: prop,
+                              args,
+                              resolve: () => { }
+                          });
+                          return this.fallbacks[prop](...args);
+                      };
+                  }
+                  else {
+                      return (...args) => {
+                          return new Promise(resolve => {
+                              this.targetQueue.push({
+                                  method: prop,
+                                  args,
+                                  resolve
+                              });
+                          });
+                      };
+                  }
+              }
+          });
+      }
+      async setRealTarget(target) {
+          this.target = target;
+          for (const item of this.onQueue) {
+              this.target.on[item.method](...item.args);
+          }
+          for (const item of this.targetQueue) {
+              item.resolve(await this.target[item.method](...item.args));
+          }
+      }
+  }
 
   function setupDevtoolsPlugin(pluginDescriptor, setupFn) {
+      const target = getTarget();
       const hook = getDevtoolsGlobalHook();
-      if (hook) {
+      const enableProxy = isProxyAvailable && pluginDescriptor.enableEarlyProxy;
+      if (hook && (target.__VUE_DEVTOOLS_PLUGIN_API_AVAILABLE__ || !enableProxy)) {
           hook.emit(HOOK_SETUP, pluginDescriptor, setupFn);
       }
       else {
-          const target = getTarget();
+          const proxy = enableProxy ? new ApiProxy(pluginDescriptor, hook) : null;
           const list = target.__VUE_DEVTOOLS_PLUGINS__ = target.__VUE_DEVTOOLS_PLUGINS__ || [];
           list.push({
               pluginDescriptor,
-              setupFn
+              setupFn,
+              proxy
           });
+          if (proxy)
+              setupFn(proxy.proxiedTarget);
       }
   }
 
@@ -2419,8 +2545,17 @@ var VueRouter = (function (exports, vue) {
                   });
               }
           });
-          // mark router-link as active
+          // mark router-link as active and display tags on router views
           api.on.visitComponentTree(({ treeNode: node, componentInstance }) => {
+              if (componentInstance.__vrv_devtools) {
+                  const info = componentInstance.__vrv_devtools;
+                  node.tags.push({
+                      label: (info.name ? `${info.name.toString()}: ` : '') + info.path,
+                      textColor: 0,
+                      tooltip: 'This component is rendered by &lt;router-view&gt;',
+                      backgroundColor: PINK_500,
+                  });
+              }
               // if multiple useLink are used
               if (Array.isArray(componentInstance.__vrl_devtools)) {
                   componentInstance.__devtoolsApi = api;
@@ -2866,8 +3001,11 @@ var VueRouter = (function (exports, vue) {
           if ('path' in rawLocation) {
               if ('params' in rawLocation &&
                   !('name' in rawLocation) &&
+                  // @ts-expect-error: the type is never
                   Object.keys(rawLocation.params).length) {
-                  warn(`Path "${rawLocation.path}" was passed with params but they will be ignored. Use a named route alongside params instead.`);
+                  warn(`Path "${
+                // @ts-expect-error: the type is never
+                rawLocation.path}" was passed with params but they will be ignored. Use a named route alongside params instead.`);
               }
               matcherLocation = assign({}, rawLocation, {
                   path: parseURL(parseQuery$1, rawLocation.path, currentLocation.path).path,
@@ -3457,4 +3595,4 @@ var VueRouter = (function (exports, vue) {
 
   return exports;
 
-}({}, Vue));
+})({}, Vue);

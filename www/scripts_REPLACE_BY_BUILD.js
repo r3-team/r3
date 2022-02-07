@@ -4,8 +4,14 @@ import MyFilters  from './comps/filters.js';
 import MyHome     from './comps/home.js';
 import MySettings from './comps/settings.js';
 import MyStore    from './stores/store.js';
-import {MyGoForm,MyGoModule}       from './comps/go.js';
-import {MyBool,MyBoolStringNumber} from './comps/input.js';
+import {
+	MyGoForm,
+	MyGoModule
+} from './comps/go.js';
+import {
+	MyBool,
+	MyBoolStringNumber
+} from './comps/input.js';
 
 // admin
 import MyAdmin             from './comps/admin/admin.js';
@@ -33,9 +39,12 @@ import MyBuilderForm        from './comps/builder/builderForm.js';
 import MyBuilderHelp        from './comps/builder/builderHelp.js';
 import MyBuilderRoles       from './comps/builder/builderRoles.js';
 import MyBuilderRole        from './comps/builder/builderRole.js';
+import MyBuilderCollections from './comps/builder/builderCollections.js';
+import MyBuilderCollection  from './comps/builder/builderCollection.js';
 import MyBuilderLoginForms  from './comps/builder/builderLoginForms.js';
-import MyBuilderPgFunctions from './comps/builder/builderPgFunctions.js';
+import MyBuilderFunctions   from './comps/builder/builderFunctions.js';
 import MyBuilderPgFunction  from './comps/builder/builderPgFunction.js';
+import MyBuilderJsFunction  from './comps/builder/builderJsFunction.js';
 
 // router
 const MyRouterPositions = Object.create(null);
@@ -113,6 +122,11 @@ const MyRouter = VueRouter.createRouter({
 				component:MyBuilderForm,
 				props:true
 			},{
+				path:'functions/:id',
+				meta:{ nav:'functions', target:'module' },
+				component:MyBuilderFunctions,
+				props:true
+			},{
 				path:'roles/:id',
 				meta:{ nav:'roles', target:'module' },
 				component:MyBuilderRoles,
@@ -123,19 +137,29 @@ const MyRouter = VueRouter.createRouter({
 				component:MyBuilderRole,
 				props:true
 			},{
+				path:'collections/:id',
+				meta:{ nav:'collections', target:'module' },
+				component:MyBuilderCollections,
+				props:true
+			},{
+				path:'collection/:id',
+				meta:{ nav:'collections', target:'collection' },
+				component:MyBuilderCollection,
+				props:true
+			},{
 				path:'login-forms/:id',
 				meta:{ nav:'login-forms', target:'module' },
 				component:MyBuilderLoginForms,
 				props:true
 			},{
-				path:'pg-functions/:id',
-				meta:{ nav:'pg-functions', target:'module' },
-				component:MyBuilderPgFunctions,
+				path:'pg-function/:id',
+				meta:{ nav:'functions', target:'pg-function' },
+				component:MyBuilderPgFunction,
 				props:true
 			},{
-				path:'pg-function/:id',
-				meta:{ nav:'pg-functions', target:'pg-function' },
-				component:MyBuilderPgFunction,
+				path:'js-function/:id',
+				meta:{ nav:'functions', target:'js-function' },
+				component:MyBuilderJsFunction,
 				props:true
 			},{
 				path:'help/:id',
@@ -152,7 +176,7 @@ const MyRouter = VueRouter.createRouter({
 		
 		// recover scroll position of form element if available
 		if(typeof MyRouterPositions[to.path] !== 'undefined') {
-			let e = document.getElementById(MyStore.getters.scrollFormId);
+			let e = document.getElementById(MyStore.getters.constants.scrollFormId);
 			
 			if(e !== null)
 				setTimeout(() => e.scrollTop = MyRouterPositions[to.path],50);
@@ -175,8 +199,8 @@ const MyRouter = VueRouter.createRouter({
 	}
 });
 MyRouter.beforeEach((to,from) => {
-	// confirm unsaved data form changes
-	if(MyStore.getters.formHasChanges) {
+	// confirm unsaved form changes
+	if(MyStore.getters.formHasChanges && MyStore.getters.settings.warnUnsaved) {
 		
 		if(!confirm(MyStore.getters.captions.form.dialog.prevBrowser))
 			return false;
@@ -185,7 +209,7 @@ MyRouter.beforeEach((to,from) => {
 	}
 	
 	// store scroll position of form element if available
-	let e = document.getElementById(MyStore.getters.scrollFormId);
+	let e = document.getElementById(MyStore.getters.constants.scrollFormId);
 	if(e !== null)
 		MyRouterPositions[from.path] = e.scrollTop;
 	

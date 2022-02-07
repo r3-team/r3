@@ -4,9 +4,9 @@ import (
 	"errors"
 	"fmt"
 	"r3/db"
+	"r3/db/check"
 	"r3/schema"
 	"r3/schema/caption"
-	"r3/schema/lookups"
 	"r3/tools"
 	"r3/types"
 	"regexp"
@@ -18,7 +18,7 @@ import (
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
-	nameMod, nameEx, _, err := lookups.GetPgFunctionDetailsById_tx(tx, id)
+	nameMod, nameEx, _, _, err := schema.GetPgFunctionDetailsById_tx(tx, id)
 	if err != nil {
 		return err
 	}
@@ -44,7 +44,8 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 	functions := make([]types.PgFunction, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, name, code_args, code_function, code_returns
+		SELECT id, name, code_args, code_function, code_returns,
+			is_frontend_exec, is_trigger
 		FROM app.pg_function
 		WHERE module_id = $1
 		ORDER BY name ASC
@@ -57,7 +58,7 @@ func Get(moduleId uuid.UUID) ([]types.PgFunction, error) {
 		var f types.PgFunction
 
 		if err := rows.Scan(&f.Id, &f.Name, &f.CodeArgs, &f.CodeFunction,
-			&f.CodeReturns); err != nil {
+			&f.CodeReturns, &f.IsFrontendExec, &f.IsTrigger); err != nil {
 
 			return functions, err
 		}
@@ -125,15 +126,27 @@ func getSchedules_tx(tx pgx.Tx, pgFunctionId uuid.UUID) ([]types.PgFunctionSched
 
 func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	codeArgs string, codeFunction string, codeReturns string,
-	schedules []types.PgFunctionSchedule, captions types.CaptionMap) error {
+	isFrontendExec bool, isTrigger bool, schedules []types.PgFunctionSchedule,
+	captions types.CaptionMap) error {
 
-	if err := db.CheckIdentifier(name); err != nil {
+	if err := check.DbIdentifier(name); err != nil {
 		return err
 	}
 
-	nameMod, err := lookups.GetModuleNameById_tx(tx, moduleId)
+	nameMod, err := schema.GetModuleNameById_tx(tx, moduleId)
 	if err != nil {
 		return err
+	}
+
+	// fix imports < 2.6: New "isTrigger" state
+	if strings.ToUpper(codeReturns) == "TRIGGER" && !isTrigger {
+		isTrigger = true
+	}
+
+	// enforce trigger function
+	if isTrigger {
+		codeReturns = "TRIGGER"
+		isFrontendExec = false
 	}
 
 	if codeFunction == "" || codeReturns == "" {
@@ -146,36 +159,47 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	}
 
 	if known {
-		_, nameEx, codeArgsEx, err := lookups.GetPgFunctionDetailsById_tx(tx, id)
+		_, nameEx, codeArgsEx, isTriggerEx, err := schema.GetPgFunctionDetailsById_tx(tx, id)
 		if err != nil {
 			return err
 		}
 
-		// cannot change args, otherwise we cannot cleanly refer to existing function
-		// postgres supports function overloading, we do not
-		if codeArgs != codeArgsEx {
-			return errors.New("function arguments cannot be changed")
-		}
-
-		if name != nameEx {
-			if err := SetName_tx(tx, id, name, false); err != nil {
-				return err
-			}
+		if isTrigger != isTriggerEx {
+			return errors.New("cannot convert between trigger and non-trigger function")
 		}
 
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.pg_function
-			SET code_function = $1
-			WHERE id = $2
-		`, codeFunction, id); err != nil {
+			SET name = $1, code_args = $2, code_function = $3,
+				code_returns = $4, is_frontend_exec = $5
+			WHERE id = $6
+		`, name, codeArgs, codeFunction, codeReturns, isFrontendExec, id); err != nil {
 			return err
+		}
+
+		if name != nameEx {
+			if err := RecreateAffectedBy_tx(tx, "pg_function", id); err != nil {
+				return fmt.Errorf("failed to recreate affected PG functions, %s", err)
+			}
+		}
+
+		// PG functions are always recreated on SET to update function arguments
+		// trigger functions are not easily possible as all triggers would need recreation as well
+		if !isTrigger {
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				DROP FUNCTION "%s"."%s"(%s)
+			`, nameMod, nameEx, codeArgsEx)); err != nil {
+				return err
+			}
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.pg_function (id, module_id, name,
-				code_args, code_function, code_returns)
-			VALUES ($1,$2,$3,$4,$5,$6)
-		`, id, moduleId, name, codeArgs, codeFunction, codeReturns); err != nil {
+			INSERT INTO app.pg_function (id, module_id, name, code_args,
+				code_function, code_returns, is_frontend_exec, is_trigger)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+		`, id, moduleId, name, codeArgs, codeFunction,
+			codeReturns, isFrontendExec, isTrigger); err != nil {
+
 			return err
 		}
 	}
@@ -243,60 +267,14 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 		return fmt.Errorf("failed to process entity IDs, %s", err)
 	}
 
-	codeFunction = fmt.Sprintf("RETURNS %s LANGUAGE plpgsql AS %s",
-		codeReturns, codeFunction)
-
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-		CREATE OR REPLACE FUNCTION "%s"."%s"(%s) %s
-	`, nameMod, name, codeArgs, codeFunction)); err != nil {
-		return err
-	}
-	return nil
+	_, err = tx.Exec(db.Ctx, fmt.Sprintf(`
+		CREATE OR REPLACE FUNCTION "%s"."%s"(%s)
+		RETURNS %s LANGUAGE plpgsql AS %s
+	`, nameMod, name, codeArgs, codeReturns, codeFunction))
+	return err
 }
 
-func SetName_tx(tx pgx.Tx, id uuid.UUID, name string, ignoreNameCheck bool) error {
-
-	// name check can be ignored by internal tasks, never ignore for user input
-	if !ignoreNameCheck {
-		if err := db.CheckIdentifier(name); err != nil {
-			return err
-		}
-	}
-
-	known, err := schema.CheckCreateId_tx(tx, &id, "pg_function", "id")
-	if err != nil || !known {
-		return err
-	}
-
-	moduleName, nameEx, _, err := lookups.GetPgFunctionDetailsById_tx(tx, id)
-	if err != nil {
-		return err
-	}
-
-	if nameEx != name {
-
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-			ALTER FUNCTION "%s"."%s" RENAME TO "%s"
-		`, moduleName, nameEx, name)); err != nil {
-			return err
-		}
-
-		if _, err := tx.Exec(db.Ctx, `
-			UPDATE app.pg_function
-			SET name = $1
-			WHERE id = $2
-		`, name, id); err != nil {
-			return err
-		}
-
-		if err := RecreateAffectedBy_tx(tx, "pg_function", id); err != nil {
-			return fmt.Errorf("failed to recreate affected PG functions, %s", err)
-		}
-	}
-	return nil
-}
-
-// recreate all pg functions, affected by a changed entity for which a dependency exists
+// recreate all PG functions, affected by a changed entity for which a dependency exists
 // relevant entities: modules, relations, attributes, pg functions
 func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 
@@ -313,7 +291,8 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 		WHERE %s_id_on = $1
 	`, entity), entityId)
 	if err != nil {
-		return fmt.Errorf("failed to get PG function ID for %s ID %s: %w", entity, entityId, err)
+		return fmt.Errorf("failed to get PG function ID for %s ID %s: %w",
+			entity, entityId, err)
 	}
 
 	for rows.Next() {
@@ -329,10 +308,13 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 
 		var f types.PgFunction
 		if err := tx.QueryRow(db.Ctx, `
-			SELECT id, module_id, name, code_args, code_function, code_returns
+			SELECT id, module_id, name, code_args, code_function, code_returns,
+				is_frontend_exec, is_trigger
 			FROM app.pg_function
 			WHERE id = $1
-		`, id).Scan(&f.Id, &f.ModuleId, &f.Name, &f.CodeArgs, &f.CodeFunction, &f.CodeReturns); err != nil {
+		`, id).Scan(&f.Id, &f.ModuleId, &f.Name, &f.CodeArgs, &f.CodeFunction,
+			&f.CodeReturns, &f.IsFrontendExec, &f.IsTrigger); err != nil {
+
 			return err
 		}
 
@@ -346,7 +328,8 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 		}
 
 		if err := Set_tx(tx, f.ModuleId, f.Id, f.Name, f.CodeArgs,
-			f.CodeFunction, f.CodeReturns, f.Schedules, f.Captions); err != nil {
+			f.CodeFunction, f.CodeReturns, f.IsFrontendExec, f.IsTrigger,
+			f.Schedules, f.Captions); err != nil {
 
 			return err
 		}
@@ -354,14 +337,13 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 	return nil
 }
 
-// IDs of modules/relations/attributes can be used in function body to refer to existing entities
+// IDs of modules/relations/attributes/PG functions can be used in function body to refer to existing entities
 // as entity names can change any time, keeping IDs is safer
 // to create a PG function, we need to replace these IDs with proper names
 // we also store IDs of all entities so that we can create foreign keys and ensure consistency
 func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error) {
 
-	// clear all dependency records for this function
-	// rebuilt when parsing IDs below
+	// rebuilt dependency records for this function
 	if _, err := tx.Exec(db.Ctx, `
 		DELETE FROM app.pg_function_depends
 		WHERE pg_function_id = $1
@@ -389,7 +371,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		}
 		idMap[modId] = true
 
-		modName, err := lookups.GetModuleNameById_tx(tx, modId)
+		modName, err := schema.GetModuleNameById_tx(tx, modId)
 		if err != nil {
 			return "", err
 		}
@@ -400,7 +382,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		`, id, modId); err != nil {
 			return "", err
 		}
-		body = strings.ReplaceAll(body, placeholder, modName)
+		body = strings.ReplaceAll(body, placeholder, fmt.Sprintf(`"%s"`, modName))
 	}
 
 	// pg function IDs, syntax: [PG_FUNCTION_ID](...
@@ -423,7 +405,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		}
 		idMap[fncId] = true
 
-		fncName, err := lookups.GetPgFunctionNameById_tx(tx, fncId)
+		fncName, err := schema.GetPgFunctionNameById_tx(tx, fncId)
 		if err != nil {
 			return "", err
 		}
@@ -434,7 +416,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		`, id, fncId); err != nil {
 			return "", err
 		}
-		body = strings.ReplaceAll(body, placeholder, fmt.Sprintf("%s(", fncName))
+		body = strings.ReplaceAll(body, placeholder, fmt.Sprintf(`"%s"(`, fncName))
 	}
 
 	// relation IDs, syntax: [RELATION_ID]
@@ -457,7 +439,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		}
 		idMap[relId] = true
 
-		relName, err := lookups.GetRelationNameById_tx(tx, relId)
+		relName, err := schema.GetRelationNameById_tx(tx, relId)
 		if err != nil {
 			return "", err
 		}
@@ -468,7 +450,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		`, id, relId); err != nil {
 			return "", err
 		}
-		body = strings.ReplaceAll(body, placeholder, relName)
+		body = strings.ReplaceAll(body, placeholder, fmt.Sprintf(`"%s"`, relName))
 	}
 
 	// attribute IDs, syntax: (ATTRIBUTE_ID)
@@ -491,7 +473,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		}
 		idMap[atrId] = true
 
-		atrName, err := lookups.GetAttributeNameById_tx(tx, atrId)
+		atrName, err := schema.GetAttributeNameById_tx(tx, atrId)
 		if err != nil {
 			return "", err
 		}
@@ -502,7 +484,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		`, id, atrId); err != nil {
 			return "", err
 		}
-		body = strings.ReplaceAll(body, placeholder, atrName)
+		body = strings.ReplaceAll(body, placeholder, fmt.Sprintf(`"%s"`, atrName))
 	}
 	return body, nil
 }

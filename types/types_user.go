@@ -14,4 +14,5 @@ type Settings struct {
 	PageLimit         int    `json:"pageLimit"`
 	Spacing           int    `json:"spacing"`
 	SundayFirstDow    bool   `json:"sundayFirstDow"`
+	WarnUnsaved       bool   `json:"warnUnsaved"`
 }

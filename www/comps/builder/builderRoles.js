@@ -17,7 +17,7 @@ let MyBuilderRolesItem = {
 				<input class="long"
 					v-model="name"
 					:placeholder="isNew ? capApp.newRole : ''"
-					:readonly="isEveryone"
+					:disabled="isEveryone"
 				/>
 			</td>
 			<td>
@@ -125,9 +125,10 @@ let MyBuilderRolesItem = {
 					roleTitle:{},
 					roleDesc:{}
 				},
-				accessRelations:{},
 				accessAttributes:{},
-				accessMenus:{}
+				accessCollections:{},
+				accessMenus:{},
+				accessRelations:{}
 			}}
 		}
 	},
@@ -209,22 +210,16 @@ let MyBuilderRolesItem = {
 			});
 		},
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('role','del',{
-				id:this.role.id
-			},this.delOk);
-			trans.send(this.$root.genericError);
-		},
-		delOk:function(res) {
-			this.$root.schemaReload(this.moduleId);
-			
-			let trans = new wsHub.transaction();
-			trans.add('login','reauthAll',{});
-			trans.send(this.$root.genericError);
+			ws.send('role','del',{id:this.role.id},true).then(
+				(res) => {
+					this.$root.schemaReload(this.moduleId);
+					this.$root.loginReauthAll(false);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('role','set',{
+			ws.send('role','set',{
 				id:this.role.id,
 				moduleId:this.moduleId,
 				childrenIds:this.childrenIds,
@@ -233,21 +228,20 @@ let MyBuilderRolesItem = {
 				captions:this.captions,
 				
 				// not changable values on this interface
-				accessRelations:this.role.accessRelations,
 				accessAttributes:this.role.accessAttributes,
-				accessMenus:this.role.accessMenus
-			},this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			if(this.isNew)
-				this.name = '';
-			
-			this.$root.schemaReload(this.moduleId);
-			
-			let trans = new wsHub.transaction();
-			trans.add('login','reauthAll',{});
-			trans.send(this.$root.genericError);
+				accessCollections:this.role.accessCollections,
+				accessMenus:this.role.accessMenus,
+				accessRelations:this.role.accessRelations
+			},true).then(
+				(res) => {
+					if(this.isNew)
+						this.name = '';
+					
+					this.$root.schemaReload(this.moduleId);
+					this.$root.loginReauthAll(false);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };
@@ -301,10 +295,8 @@ let MyBuilderRoles = {
 	},
 	computed:{
 		module:function() {
-			if(typeof this.moduleIdMap[this.id] === 'undefined')
-				return false;
-			
-			return this.moduleIdMap[this.id];
+			return typeof this.moduleIdMap[this.id] === 'undefined'
+				? false : this.moduleIdMap[this.id];
 		},
 		
 		// stores

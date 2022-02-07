@@ -1,4 +1,4 @@
-package lookups
+package schema
 
 import (
 	"fmt"
@@ -7,9 +7,6 @@ import (
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v4"
 )
-
-// constants
-var PkName = "id"
 
 func GetModuleNameById_tx(tx pgx.Tx, id uuid.UUID) (string, error) {
 	var name string
@@ -129,17 +126,18 @@ func GetPgFunctionNameById_tx(tx pgx.Tx, id uuid.UUID) (string, error) {
 	}
 	return name, nil
 }
-func GetPgFunctionDetailsById_tx(tx pgx.Tx, id uuid.UUID) (string, string, string, error) {
+func GetPgFunctionDetailsById_tx(tx pgx.Tx, id uuid.UUID) (string, string, string, bool, error) {
 	var moduleName, name, args string
+	var isTrigger bool
 	if err := tx.QueryRow(db.Ctx, `
-		SELECT f.name, f.code_args, m.name
+		SELECT f.name, f.code_args, f.is_trigger, m.name
 		FROM app.pg_function AS f
 		INNER JOIN app.module AS m ON m.id = f.module_id
 		WHERE f.id = $1
-	`, id).Scan(&name, &args, &moduleName); err != nil {
-		return "", "", "", fmt.Errorf("failed to get PG function details by ID %s: %w", id, err)
+	`, id).Scan(&name, &args, &isTrigger, &moduleName); err != nil {
+		return "", "", "", false, fmt.Errorf("failed to get PG function details by ID %s: %w", id, err)
 	}
-	return moduleName, name, args, nil
+	return moduleName, name, args, isTrigger, nil
 }
 
 // returns module and relation names for given PG trigger ID
@@ -170,31 +168,4 @@ func GetPgIndexNamesById_tx(tx pgx.Tx, id uuid.UUID) (string, string, error) {
 		return "", "", fmt.Errorf("failed to get relation/modules names by PG index ID %s: %w", id, err)
 	}
 	return moduleName, relationName, nil
-}
-
-func GetPKConstraintName(relationId uuid.UUID) string {
-	return fmt.Sprintf("pk_%s", relationId.String())
-}
-func GetFKConstraintName(attributeId uuid.UUID) string {
-	return fmt.Sprintf("fk_%s", attributeId.String())
-}
-func GetSequenceName(relationId uuid.UUID) string {
-	return fmt.Sprintf("sq_%s", relationId.String())
-}
-func GetPgIndexName(pgIndexId uuid.UUID) string {
-	return fmt.Sprintf("ind_%s", pgIndexId.String())
-}
-
-// attribute checks
-func IsContentFiles(content string) bool {
-	return content == "files"
-}
-func IsContentNumeric(content string) bool {
-	return content == "numeric"
-}
-func IsContentRelationship(content string) bool {
-	return content == "1:1" || content == "n:1"
-}
-func IsContentText(content string) bool {
-	return content == "varchar" || content == "text"
 }

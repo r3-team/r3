@@ -1,22 +1,27 @@
-import MyCalendar                 from './calendar.js';
-import MyChart                    from './chart.js';
-import MyGantt                    from './gantt.js';
-import MyInputDate                from './inputDate.js';
-import MyInputFiles               from './inputFiles.js';
-import MyInputLogin               from './inputLogin.js';
-import MyInputRichtext            from './inputRichtext.js';
-import MyList                     from './list.js';
-import {hasAccessToAttribute}     from './shared/access.js';
-import {getLinkMeta,openLink}     from './shared/generic.js';
-import {getQueryFiltersProcessed} from './shared/query.js';
-import {srcBase64}                from './shared/image.js';
-
+import MyCalendar             from './calendar.js';
+import MyChart                from './chart.js';
+import MyGantt                from './gantt.js';
+import MyInputDate            from './inputDate.js';
+import MyInputFiles           from './inputFiles.js';
+import MyInputLogin           from './inputLogin.js';
+import MyInputRichtext        from './inputRichtext.js';
+import MyList                 from './list.js';
+import {hasAccessToAttribute} from './shared/access.js';
+import {srcBase64}            from './shared/image.js';
+import {
+	getLinkMeta,
+	getNilUuid,
+	openLink
+} from './shared/generic.js';
 import {
 	getFlexStyle,
 	getInputFieldName,
 	setGetterArgs
 } from './shared/form.js';
-
+import {
+	getQueryColumnsProcessed,
+	getQueryFiltersProcessed
+} from './shared/query.js';
 import {
 	getIndexAttributeId,
 	isAttributeBoolean,
@@ -26,7 +31,6 @@ import {
 	isAttributeRelationship,
 	isAttributeString
 } from './shared/attribute.js';
-
 export {MyField as default};
 
 let MyField = {
@@ -68,7 +72,7 @@ let MyField = {
 					/>
 					
 					<!-- regular text line input (numeric, strings, etc.) -->
-					<input class="input" type="text"
+					<input class="input"
 						v-if="isLineInput"
 						v-model="value"
 						@blur="blur"
@@ -77,6 +81,15 @@ let MyField = {
 						:class="{ invalid:showInvalid }"
 						:disabled="isReadonly"
 						:placeholder="!focused ? caption : ''"
+						:type="!isPassword || showPassword ? 'text' : 'password'"
+					/>
+					
+					<!-- password show action -->
+					<my-button
+						v-if="isPassword"
+						@trigger="showPassword = !showPassword"
+						:image="showPassword ? 'visible0.png' : 'visible1.png'"
+						:naked="true"
 					/>
 					
 					<!-- link open action -->
@@ -188,7 +201,6 @@ let MyField = {
 						v-if="isFiles"
 						v-model="value"
 						:attributeId="field.attributeId"
-						:handleError="handleError"
 						:readonly="isReadonly"
 						:showGallery="field.display === 'gallery'"
 						:showNew="logViewer"
@@ -213,8 +225,7 @@ let MyField = {
 						v-if="isRelationship"
 						@blurred="blur"
 						@focused="focus"
-						@form-open="$emit('set-form-record',$event,field.formIdOpen)"
-						@form-open-new="$emit('set-form-record',0,field.formIdOpen,addRecordAttributeArgs([]))"
+						@open-form="(...args) => openForm(args[0],[],args[1])"
 						@record-selected="relationshipRecordSelected"
 						@record-removed="relationshipRecordRemoved"
 						@records-selected-init="$emit('set-value-init',fieldAttributeId,$event,true,true)"
@@ -224,14 +235,13 @@ let MyField = {
 						:filterQuick="field.filterQuick"
 						:filters="filtersProcessed"
 						:formLoading="formLoading"
-						:handleError="handleError"
 						:header="false"
 						:inputAsCategory="field.category"
 						:inputAutoSelect="field.autoSelect"
 						:inputIsNew="isNew"
 						:inputIsReadonly="isReadonly"
 						:inputMulti="isRelationship1N"
-						:inputOpenForm="field.formIdOpen !== null"
+						:inputOpenForm="field.openForm !== null"
 						:inputRecordIds="relationshipRecordIds"
 						:inputValid="!showInvalid"
 						:isInput="true"
@@ -264,6 +274,7 @@ let MyField = {
 			v-if="isButton"
 			@trigger="triggerButton(false)"
 			@trigger-middle="triggerButton(true)"
+			:active="!isReadonly"
 			:caption="caption"
 			:imageBase64="iconId ? srcBase64(iconIdMap[iconId].file) : ''"
 		/>
@@ -280,11 +291,14 @@ let MyField = {
 		<!-- list -->
 		<my-list
 			v-if="isList"
-			@record-selected="(...args) => $emit('set-form-record',args[0],field.formIdOpen,addRecordAttributeArgs([]),args[1])"
+			@open-form="(...args) => openForm(args[0],[],args[1])"
+			@record-selected="(...args) => openForm(args[0],[],args[1])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
+			@set-collection-index-filter="setCollectionIndexFilter"
 			:allowPaging="field.query.fixedLimit === 0"
 			:autoRenew="field.autoRenew"
 			:choices="choicesProcessed"
+			:collections="field.collections"
 			:columns="columnsProcessed"
 			:csvExport="field.csvExport"
 			:csvImport="field.csvImport"
@@ -292,30 +306,30 @@ let MyField = {
 			:filterQuick="field.filterQuick"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
-			:handleError="handleError"
 			:iconId="iconId ? iconId : null"
 			:isFullPage="isFullPage"
 			:layout="field.layout"
 			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 			:query="field.query"
-			:rowSelect="field.formIdOpen !== null"
+			:rowSelect="field.openForm !== null"
 		/>
 		
 		<!-- calendar -->
 		<my-calendar
 			v-if="isCalendar && !field.gantt"
-			@form-open-new="(...args) => $emit('set-form-record',0,field.formIdOpen,addRecordAttributeArgs(args[0]),args[1])"
-			@record-selected="(...args) => $emit('set-form-record',args[0],field.formIdOpen,args[1],args[2])"
+			@open-form="(...args) => openForm(args[0],args[1],args[2])"
+			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
+			@set-collection-index-filter="setCollectionIndexFilter"
 			:attributeIdColor="field.attributeIdColor"
 			:attributeIdDate0="field.attributeIdDate0"
 			:attributeIdDate1="field.attributeIdDate1"
 			:choices="choicesProcessed"
 			:columns="columnsProcessed"
+			:collections="field.collections"
 			:fieldId="field.id"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
-			:handleError="handleError"
 			:iconId="iconId ? iconId : null"
 			:ics="field.ics"
 			:indexColor="field.indexColor"
@@ -323,32 +337,33 @@ let MyField = {
 			:indexDate1="field.indexDate1"
 			:isFullPage="isFullPage"
 			:query="field.query"
-			:rowSelect="field.formIdOpen !== null"
+			:rowSelect="field.openForm !== null"
 		/>
 		
 		<!-- gantt -->
 		<my-gantt
 			v-if="isCalendar && field.gantt"
-			@form-open-new="(...args) => $emit('set-form-record',0,field.formIdOpen,addRecordAttributeArgs(args[0]),args[1])"
-			@record-selected="(...args) => $emit('set-form-record',args[0],field.formIdOpen,args[1],args[2])"
+			@open-form="(...args) => openForm(args[0],args[1],args[2])"
+			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
+			@set-collection-index-filter="setCollectionIndexFilter"
 			:attributeIdColor="field.attributeIdColor"
 			:attributeIdDate0="field.attributeIdDate0"
 			:attributeIdDate1="field.attributeIdDate1"
 			:choices="choicesProcessed"
 			:columns="columnsProcessed"
+			:collections="field.collections"
 			:fieldId="field.id"
 			:days0="field.dateRange0 / 86400"
 			:days1="field.dateRange1 / 86400"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
-			:handleError="handleError"
 			:iconId="iconId ? iconId : null"
 			:indexColor="field.indexColor"
 			:indexDate0="field.indexDate0"
 			:indexDate1="field.indexDate1"
 			:isFullPage="isFullPage"
-			:rowSelect="field.formIdOpen !== null"
+			:rowSelect="field.openForm !== null"
 			:stepTypeDefault="field.ganttSteps"
 			:stepTypeToggle="field.ganttStepsToggle"
 			:query="field.query"
@@ -361,7 +376,6 @@ let MyField = {
 			:columns="columnsProcessed"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
-			:handleError="handleError"
 			:isFullPage="isFullPage"
 			:limit="field.query.fixedLimit"
 			:optionJson="field.chartOption"
@@ -372,8 +386,9 @@ let MyField = {
 		<my-field
 			v-if="isContainer"
 			v-for="f in field.fields"
+			@execute-function="$emit('execute-function',$event)"
+			@open-form="(...args) => $emit('open-form',...args)"
 			@set-form-args="(...args) => $emit('set-form-args',...args)"
-			@set-form-record="(...args) => $emit('set-form-record',...args)"
 			@set-valid="(...args) => $emit('set-valid',...args)"
 			@set-value="(...args) => $emit('set-value',...args)"
 			@set-value-init="(...args) => $emit('set-value-init',...args)"
@@ -384,7 +399,6 @@ let MyField = {
 			:formBadSave="formBadSave"
 			:formLoading="formLoading"
 			:flexDirParent="field.direction"
-			:handleError="handleError"
 			:isFullPage="isFullPage"
 			:joinsIndexMap="joinsIndexMap"
 			:key="f.id"
@@ -394,23 +408,24 @@ let MyField = {
 	props:{
 		dataFieldMap:   { type:Object,  required:true },
 		field:          { type:Object,  required:true },
-		fieldIdMapState:{ type:Object,  required:false, default:() => { return {}} }, // overwritten states
+		fieldIdMapState:{ type:Object,  required:false, default:() => {return {};} }, // overwritten states
 		formBadLoad:    { type:Boolean, required:true }, // attempted record load with no return
 		formBadSave:    { type:Boolean, required:true }, // attempted save with invalid inputs
 		formLoading:    { type:Boolean, required:true },
 		flexDirParent:  { type:String,  required:true }, // flex direction (row/column) of parent
-		handleError:    { type:Function,required:true }, // function to handle errors
 		isFullPage:     { type:Boolean, required:true },
 		joinsIndexMap:  { type:Object,  required:true },
 		logViewer:      { type:Boolean, required:false, default:false }, // is part of log viewer
 		values:         { type:Object,  required:true }
 	},
-	emits:['set-form-args','set-form-record','set-valid','set-value','set-value-init'],
+	emits:['execute-function','open-form','set-form-args','set-valid','set-value','set-value-init'],
 	data:function() {
 		return {
+			collectionIdMapIndexFilter:{}, // filter collections by their array index
 			focused:false,
-			notTouched:true, // data field was not touched by user
-			showColorPickerInput:false
+			notTouched:true,               // data field was not touched by user
+			showColorPickerInput:false,    // for color picker fields
+			showPassword:false             // for password fields
 		};
 	},
 	watch:{
@@ -424,10 +439,8 @@ let MyField = {
 	},
 	computed:{
 		attribute:function() {
-			if(!this.isData || typeof this.attributeIdMap[this.field.attributeId] === 'undefined')
-				return false;
-			
-			return this.attributeIdMap[this.field.attributeId];
+			return !this.isData || typeof this.attributeIdMap[this.field.attributeId] === 'undefined'
+				? false : this.attributeIdMap[this.field.attributeId];
 		},
 		caption:function() {
 			let out = '';
@@ -485,10 +498,8 @@ let MyField = {
 			return '';
 		},
 		captionHelp:function() {
-			if(typeof this.field.captions.fieldHelp[this.moduleLanguage] !== 'undefined')
-				return this.field.captions.fieldHelp[this.moduleLanguage];
-			
-			return '';
+			return typeof this.field.captions.fieldHelp[this.moduleLanguage] !== 'undefined'
+				? this.field.captions.fieldHelp[this.moduleLanguage] : '';
 		},
 		domClass:function() {
 			let out = [];
@@ -540,21 +551,8 @@ let MyField = {
 		columnsProcessed:function() {
 			if(!this.isQuery) return [];
 			
-			let columns = JSON.parse(JSON.stringify(this.field.columns));
-			for(let i = 0, j = columns.length; i < j; i++) {
-				
-				if(!columns[i].subQuery)
-					continue;
-				
-				columns[i].query.filters = this.getQueryFiltersProcessed(
-					columns[i].query.filters,
-					this.dataFieldMap,
-					this.joinsIndexMap,
-					[],
-					this.values
-				);
-			}
-			return columns;
+			return this.getQueryColumnsProcessed(this.field.columns,
+				this.dataFieldMap,this.joinsIndexMap,this.values);
 		},
 		choicesProcessed:function() {
 			if(!this.isQuery) return [];
@@ -565,8 +563,9 @@ let MyField = {
 					choices[i].filters,
 					this.dataFieldMap,
 					this.joinsIndexMap,
+					this.values,
 					[],
-					this.values
+					this.collectionIdMapIndexFilter
 				);
 			}
 			return choices;
@@ -578,8 +577,9 @@ let MyField = {
 				this.field.query.filters,
 				this.dataFieldMap,
 				this.joinsIndexMap,
+				this.values,
 				[],
-				this.values
+				this.collectionIdMapIndexFilter
 			);
 		},
 		iconId:function() {
@@ -592,10 +592,8 @@ let MyField = {
 			return false;
 		},
 		link:function() {
-			if(!this.isData)
-				return false;
-			
-			return this.getLinkMeta(this.field.display,this.value);
+			return !this.isData
+				? false : this.getLinkMeta(this.field.display,this.value);
 		},
 		presetValue:function() {
 			if(!this.isData) return false;
@@ -636,8 +634,8 @@ let MyField = {
 			// default: field is shown, data field state is overwritten depending on circumstance
 			//  (no permissions = readonly, NOT NULL attribute = required)
 			// optional: data field only, input is optional
-			// readonly: data field only, input is readonly
 			// required: data field only, input is required
+			// readonly: data or button field, input is readonly
 			let state = this.field.state;
 			
 			// apply form state if available
@@ -762,10 +760,8 @@ let MyField = {
 			return true;
 		},
 		inputCheckRegex:function() {
-			if(!this.isData || this.field.regexCheck === null)
-				return null;
-			
-			return new RegExp(this.field.regexCheck);
+			return !this.isData || this.field.regexCheck === null
+				? null : new RegExp(this.field.regexCheck);
 		},
 		
 		// bool states
@@ -839,6 +835,9 @@ let MyField = {
 			return true;
 		},
 		
+		// simple
+		showInvalid:function() { return !this.isValid && (this.formBadSave || !this.notTouched) },
+		
 		// content
 		isButton:   function() { return this.field.content === 'button'; },
 		isCalendar: function() { return this.field.content === 'calendar'; },
@@ -857,13 +856,13 @@ let MyField = {
 		isDate:    function() { return this.isData && this.field.display === 'date'; },
 		isDatetime:function() { return this.isData && this.field.display === 'datetime'; },
 		isLogin:   function() { return this.isData && this.field.display === 'login'; },
+		isPassword:function() { return this.isData && this.field.display === 'password'; },
 		isSlider:  function() { return this.isData && this.field.display === 'slider'; },
 		isTime:    function() { return this.isData && this.field.display === 'time'; },
 		isTextarea:function() { return this.isData && this.field.display === 'textarea'; },
 		isRichtext:function() { return this.isData && this.field.display === 'richtext'; },
 		
 		// composite
-		showInvalid:function() { return !this.isValid && (this.formBadSave || !this.notTouched) },
 		isActive:   function() { return !this.isMobile || this.field.onMobile; },
 		isNew:      function() { return this.isData && this.joinsIndexMap[this.field.index].recordId === 0; },
 		isBoolean:  function() { return this.isData && this.isAttributeBoolean(this.attribute.content); },
@@ -896,6 +895,8 @@ let MyField = {
 		getIndexAttributeId,
 		getInputFieldName,
 		getLinkMeta,
+		getNilUuid,
+		getQueryColumnsProcessed,
 		getQueryFiltersProcessed,
 		hasAccessToAttribute,
 		isAttributeBoolean,
@@ -923,10 +924,29 @@ let MyField = {
 			if(this.showColorPickerInput)
 				this.showColorPickerInput = false;
 		},
-		triggerButton:function(middleClick) {
-			if(this.field.formIdOpen !== null)
-				this.$emit('set-form-record',0,this.field.formIdOpen,
-					this.addRecordAttributeArgs([]),middleClick);
+		openForm:function(recordId,getters,middleClick) {
+			
+			// set defaults
+			if(typeof recordId    === 'undefined') recordId    = 0;
+			if(typeof getters     === 'undefined') getters     = [];
+			if(typeof middleClick === 'undefined') middleClick = false;
+			
+			// apply record from defined relation index as attribute value via getter
+			if(this.field.openForm.attributeIdApply !== null
+				&& typeof this.joinsIndexMap[this.field.openForm.relationIndex] !== 'undefined'
+				&& this.joinsIndexMap[this.field.openForm.relationIndex].recordId !== 0) {
+				
+				let atrId    = this.field.openForm.attributeIdApply;
+				let recordId = this.joinsIndexMap[this.field.openForm.relationIndex].recordId;
+				
+				getters = this.setGetterArgs(getters,'attributes',`${atrId}_${recordId}`);
+			}
+			
+			// apply source field ID
+			let options = JSON.parse(JSON.stringify(this.field.openForm));
+			options.fieldId = this.field.id;
+			
+			this.$emit('open-form',recordId,options,getters,middleClick);
 		},
 		relationshipRecordSelected:function(recordId,middleClick) {
 			if(recordId === null)
@@ -951,19 +971,9 @@ let MyField = {
 			}
 			this.value = valueNew.length !== 0 ? valueNew : null;
 		},
-		
-		// helpers
-		addRecordAttributeArgs:function(args) {
-			if(this.field.attributeIdRecord === null
-				|| typeof this.joinsIndexMap['0'] === 'undefined'
-				|| this.joinsIndexMap['0'].recordId === 0
-			) {
-				return args;
-			}
-			
-			// add record ID from primary relation join as default value for defined attribute
-			let atr = this.attributeIdMap[this.field.attributeIdRecord].id;
-			return this.setGetterArgs(args,'attributes',`${atr}_${this.joinsIndexMap['0'].recordId}`);
+		setCollectionIndexFilter:function(collectionId,index) {
+			if(index === '-1') delete(this.collectionIdMapIndexFilter[collectionId]);
+			else               this.collectionIdMapIndexFilter[collectionId] = index;
 		},
 		setValue:function(val,valOld,indexAttributeId) {
 			if(val === '')
@@ -977,6 +987,16 @@ let MyField = {
 				this.notTouched = false;
 			
 			this.$emit('set-value',indexAttributeId,val);
+			
+			if(this.field.jsFunctionId !== null)
+				this.$emit('execute-function',this.field.jsFunctionId);
+		},
+		triggerButton:function(middleClick) {
+			if(this.field.openForm !== null)
+				this.openForm(0,[],middleClick);
+			
+			if(this.field.jsFunctionId !== null)
+				this.$emit('execute-function',this.field.jsFunctionId);
 		}
 	}
 };
