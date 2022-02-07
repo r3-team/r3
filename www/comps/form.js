@@ -48,7 +48,7 @@ let MyForm = {
 			<!-- pop-up form -->
 			<div class="app-sub-window under-header"
 				v-if="popUpFormId !== null"
-				@click.self="$refs.popUpForm.closeAsk()"
+				@mousedown.self="$refs.popUpForm.closeAsk()"
 			>
 				<my-form class="form-pop-up" ref="popUpForm"
 					@close="closePopUp()"

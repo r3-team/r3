@@ -118,13 +118,12 @@ let MyGanttLineRecord = {
 			if(width < 1)
 				return 'display:none';
 			
-			return [`width:${width}px`,`left:${offset}px`].join(';');
+			// max-width is overwritten by CSS if hovered over (show full entry)
+			return [`min-width:${width}px`,`max-width:${width}px`,`left:${offset}px`].join(';');
 		},
 		styleBg:function(r) {
-			if(this.color === null)
-				return '';
-			
-			return `background-color:#${this.color};`;
+			return this.color === null
+				? '' : `background-color:#${this.color};`;
 		}
 	},
 	methods:{
@@ -651,14 +650,14 @@ let MyGantt = {
 		clickHeaderItem:function(unixTime,shift,middleClick) {
 			if(!this.hasCreate) return;
 			
+			if(this.isDays)
+				unixTime = this.getUnixShifted(unixTime,false);
+			
 			if(this.unixTimeRangeStart === null) {
 				this.unixTimeRangeStart = unixTime;
 				
 				if(shift) return;
 			}
-			
-			if(this.isDays)
-				unixTime = this.getUnixShifted(unixTime,false);
 			
 			let attributes = [
 				`${this.attributeIdDate0}_${this.unixTimeRangeStart}`,

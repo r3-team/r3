@@ -522,8 +522,11 @@ let MyAdminLogins = {
 				</thead>
 				
 				<!-- login form -->
-				<div class="app-sub-window under-header" v-if="loginFormIndexOpen !== null">
-					<my-form class="form-pop-up"
+				<div class="app-sub-window under-header"
+					v-if="loginFormIndexOpen !== null"
+					@mousedown.self="$refs.popUpForm.closeAsk()"
+				>
+					<my-form class="form-pop-up" ref="popUpForm"
 						@close="loginFormIndexOpen = null"
 						@record-updated="setRecord(loginFormIndexOpen,loginFormLogin,$event);loginFormIndexOpen = null"
 						:allowDel="false"

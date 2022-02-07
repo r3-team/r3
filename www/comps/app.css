@@ -15,12 +15,12 @@
 	--z-index-list-header:10;
 	
 	/* calendar elements */
+	--z-index-gantt-hover:5;
 	--z-index-calendar-day-event-text-hover:4;
 	--z-index-calendar-day-event-text:2;
 	--z-index-calendar-day-event-ending-beam:3;
 	--z-index-calendar-line:2;
 	--z-index-calendar-caption:3;
-	--z-index-gantt-hover:3;
 	
 	/* input field elements */
 	--z-index-field-toggle-bool-first:3;

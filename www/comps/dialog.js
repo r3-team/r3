@@ -4,7 +4,7 @@ export {MyDialog as default};
 let MyDialog = {
 	name:'my-dialog',
 	components:{MyInputRichtext},
-	template:`<div class="app-sub-window" @click.self="close">
+	template:`<div class="app-sub-window" @mousedown.self="close">
 		<div class="dialog contentBox" :style="styles">
 			<div class="top">
 				<div class="area">

@@ -118,7 +118,7 @@
 	border-radius:5px;
 }
 .gantt-line-record:hover{
-	width:unset !important;
+	max-width:unset !important;
 	color:var(--color-bg-font);
 	background:rgba(0,0,0,0.7);
 	z-index:var(--z-index-gantt-hover);
@@ -153,6 +153,9 @@
 	left:1px;
 	right:1px;
 	top:20px;
+}
+.gantt-line-record:hover .record-line.end{
+	display:none;
 }
 .gantt-line-record .record-line.end{
 	width:3px;
