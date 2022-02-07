@@ -13,8 +13,11 @@ const MyStoreSchema = {
 		
 		// references to specific entities
 		attributeIdMap:{},
+		collectionIdMap:{},
 		formIdMap:{},
 		iconIdMap:{},
+		indexIdMap:{},
+		jsFunctionIdMap:{},
 		moduleIdMap:{},
 		moduleNameMap:{},
 		pgFunctionIdMap:{},
@@ -38,11 +41,14 @@ const MyStoreSchema = {
 			// reset state
 			state.modules         = payload.modules;
 			state.attributeIdMap  = {};
+			state.collectionIdMap = {};
 			state.moduleIdMap     = {};
 			state.moduleNameMap   = {};
 			state.formIdMap       = {};
 			state.formIdMapMenu   = {};
 			state.iconIdMap       = {};
+			state.indexIdMap      = {};
+			state.jsFunctionIdMap = {};
 			state.pgFunctionIdMap = {};
 			state.relationIdMap   = {};
 			state.roleIdMap       = {};
@@ -79,6 +85,11 @@ const MyStoreSchema = {
 					for(let a = 0, b = rel.attributes.length; a < b; a++) {
 						state.attributeIdMap[rel.attributes[a].id] = rel.attributes[a];
 					}
+					
+					// process indexes
+					for(let a = 0, b = rel.indexes.length; a < b; a++) {
+						state.indexIdMap[rel.indexes[a].id] = rel.indexes[a];
+					}
 				}
 				
 				// process icons
@@ -98,9 +109,19 @@ const MyStoreSchema = {
 					state.roleIdMap[mod.roles[x].id] = mod.roles[x];
 				}
 				
-				// process pg functions
+				// process collections
+				for(let x = 0, y = mod.collections.length; x < y; x++) {
+					state.collectionIdMap[mod.collections[x].id] = mod.collections[x];
+				}
+				
+				// process PG functions
 				for(let x = 0, y = mod.pgFunctions.length; x < y; x++) {
 					state.pgFunctionIdMap[mod.pgFunctions[x].id] = mod.pgFunctions[x];
+				}
+				
+				// process JS functions
+				for(let x = 0, y = mod.jsFunctions.length; x < y; x++) {
+					state.jsFunctionIdMap[mod.jsFunctions[x].id] = mod.jsFunctions[x];
 				}
 			}
 		},
@@ -108,19 +129,22 @@ const MyStoreSchema = {
 		timestamp    (state,payload) { state.timestamp     = payload; }
 	},
 	getters:{
-		attributeIdMap: (state) => state.attributeIdMap,
-		formIdMap:      (state) => state.formIdMap,
-		formIdMapMenu:  (state) => state.formIdMapMenu,
-		iconIdMap:      (state) => state.iconIdMap,
-		languageCodes:  (state) => state.languageCodes,
-		modules:        (state) => state.modules,
-		moduleIdMap:    (state) => state.moduleIdMap,
+		attributeIdMap:     (state) => state.attributeIdMap,
+		collectionIdMap:    (state) => state.collectionIdMap,
+		formIdMap:          (state) => state.formIdMap,
+		formIdMapMenu:      (state) => state.formIdMapMenu,
+		iconIdMap:          (state) => state.iconIdMap,
+		indexIdMap:         (state) => state.indexIdMap,
+		jsFunctionIdMap:    (state) => state.jsFunctionIdMap,
+		languageCodes:      (state) => state.languageCodes,
+		modules:            (state) => state.modules,
+		moduleIdMap:        (state) => state.moduleIdMap,
 		moduleIdMapOptions: (state) => state.moduleIdMapOptions,
-		moduleNameMap:  (state) => state.moduleNameMap,
-		pgFunctionIdMap:(state) => state.pgFunctionIdMap,
+		moduleNameMap:      (state) => state.moduleNameMap,
+		pgFunctionIdMap:    (state) => state.pgFunctionIdMap,
 		presetIdMapRecordId:(state) => state.presetIdMapRecordId,
-		relationIdMap:  (state) => state.relationIdMap,
-		roleIdMap:      (state) => state.roleIdMap,
-		timestamp:      (state) => state.timestamp
+		relationIdMap:      (state) => state.relationIdMap,
+		roleIdMap:          (state) => state.roleIdMap,
+		timestamp:          (state) => state.timestamp
 	}
 };

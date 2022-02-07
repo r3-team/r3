@@ -322,39 +322,40 @@ let MyAdminLdaps = {
 		
 		// backend calls
 		runImport:function(id) {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('ldap','import',{id:id},this.runImportOK);
-			trans.send(this.$root.genericError);
-		},
-		runImportOK:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.importDone,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
-			});
+			ws.send('ldap','import',{id:id},true).then(
+				(res) => {
+					this.$store.commit('dialog',{
+						captionBody:this.capApp.dialog.importDone,
+						buttons:[{
+							caption:this.capGen.button.close,
+							cancel:true,
+							image:'cancel.png'
+						}]
+					});
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		runCheck:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('ldap','check',{id:this.idEdit},this.runCheckOK);
-			trans.send(this.$root.genericError);
-		},
-		runCheckOK:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.testDone,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
-			});
+			ws.send('ldap','check',{id:this.idEdit},true).then(
+				(res) => {
+					this.$store.commit('dialog',{
+						captionBody:this.capApp.dialog.testDone,
+						buttons:[{
+							caption:this.capGen.button.close,
+							cancel:true,
+							image:'cancel.png'
+						}]
+					});
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		reloadBackendCache:function() {
-			let trans = new wsHub.transaction();
-			trans.add('ldap','reload',{});
-			trans.send(this.$root.genericError);
+			ws.send('ldap','reload',{},false).then(
+				(res) => {},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		delAsk:function() {
 			this.$store.commit('dialog',{
@@ -371,26 +372,23 @@ let MyAdminLdaps = {
 			});
 		},
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('ldap','del',{id:this.idEdit},this.delOk);
-			trans.send(this.$root.genericError);
-		},
-		delOk:function() {
-			this.close();
-			this.get();
-			this.reloadBackendCache();
+			ws.send('ldap','del',{id:this.idEdit},true).then(
+				(res) => {
+					this.close();
+					this.get();
+					this.reloadBackendCache();
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		get:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('ldap','get',{},this.getOk);
-			trans.send(this.$root.genericError);
-		},
-		getOk:function(res) {
-			this.ldaps = res.payload.ldaps;
+			ws.send('ldap','get',{},true).then(
+				(res) => this.ldaps = res.payload.ldaps,
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('ldap','set',{
+			ws.send('ldap','set',{
 				id:this.idEdit,
 				name:this.inputs.name,
 				host:this.inputs.host,
@@ -407,15 +405,16 @@ let MyAdminLdaps = {
 				tls:this.inputs.tls,
 				tlsVerify:this.inputs.tlsVerify,
 				roles:this.inputs.roles
-			},this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function() {
-			if(this.isNew)
-				this.showEdit = false;
-			
-			this.get();
-			this.reloadBackendCache();
+			},true).then(
+				(res) => {
+					if(this.isNew)
+						this.showEdit = false;
+					
+					this.get();
+					this.reloadBackendCache();
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

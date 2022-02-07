@@ -64,5 +64,5 @@ func FormSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 	return nil, form.Set_tx(tx, req.ModuleId, req.Id, req.PresetIdOpen, req.IconId,
-		req.Name, req.Query, req.Fields, req.States, req.Captions)
+		req.Name, req.Query, req.Fields, req.Functions, req.States, req.Captions)
 }

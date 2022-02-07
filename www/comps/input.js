@@ -8,25 +8,27 @@ let MyBool = {
 	template:`<div class="bool" tabindex="0"
 		@click="trigger"
 		@keyup.enter.space="trigger"
-		:class="{ active:active, readonly:readonly }"
+		:class="{ active:boolOn, readonly:readonly }"
 	>
-		<div class="noHighlight left"  :class="{ small:!active }">{{ displayLeft }}</div>
-		<div class="noHighlight right" :class="{ small:active }" >{{ displayRight }}</div>
+		<div class="noHighlight left"  :class="{ small:!boolOn }">{{ displayLeft }}</div>
+		<div class="noHighlight right" :class="{ small:boolOn }" >{{ displayRight }}</div>
 	</div>`,
 	props:{
+		caption0:  { type:String, required:false, default:'0' },
+		caption1:  { type:String, required:false, default:'1' },
 		modelValue:{ required:true },
 		readonly:  { type:Boolean, required:false, default:false },
 		reversed:  { type:Boolean, required:false, default:false }
 	},
 	emits:['update:modelValue'],
 	computed:{
-		active:      function() { return this.modelValue === (!this.reversed ? true : false); },
-		displayLeft: function() { return this.active  ? '1' : ''; },
+		boolOn:      function() { return this.modelValue === (!this.reversed ? true : false); },
+		displayLeft: function() { return this.boolOn ? this.caption1 : ''; },
 		displayRight:function() {
 			if(this.modelValue === null)
 				return '-';
 			
-			return !this.active ? '0' : '';
+			return !this.boolOn ? this.caption0 : '';
 		},
 	},
 	methods:{

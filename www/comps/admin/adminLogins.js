@@ -10,10 +10,7 @@ export {MyAdminLogins as default};
 
 let MyAdminLoginsItem = {
 	name:'my-admin-logins-item',
-	components:{
-		MyInputSelect,
-		MyForm
-	},
+	components:{MyInputSelect},
 	template:`<tbody>
 		<tr class="default-inputs">
 			<td>
@@ -80,9 +77,9 @@ let MyAdminLoginsItem = {
 			<td class="left-border" v-for="(lf,lfi) in loginForms">
 				<div class="login-record" v-if="!isNew && !loginFormsHidden.includes(lfi)">
 					<my-button
-						@trigger="toggleLoginForm(lfi)"
+						@trigger="openLoginForm(lfi)"
 						:captionTitle="login.records[lfi].id !== null ? capGen.button.edit : capGen.button.create"
-						:image="loginFormOpenIndex === lfi ? 'triangleDown.png' : 'triangleRight.png'"
+						:image="login.records[lfi].id ? 'open.png' : 'add.png'"
 					/>
 					
 					<div class="login-record-input">
@@ -95,33 +92,18 @@ let MyAdminLoginsItem = {
 							v-if="login.records[lfi].id === null"
 							@request-data="getRecords(lfi)"
 							@updated-text-input="loginRecordInput = $event"
-							@update:selected="setRecord(lfi,login.id,$event)"
+							@update:selected="$emit('set-record',lfi,login.id,$event)"
 							:nakedIcons="false"
 							:options="loginRecordList"
 							:placeholder="capApp.recordSelectHint"
 						/>
 						<my-button image="cancel.png"
 							v-if="login.records[lfi].id !== null"
-							@trigger="setRecord(lfi,null,login.records[lfi].id)"
+							@trigger="$emit('set-record',lfi,null,login.records[lfi].id)"
 							:cancel="true"
 						/>
 					</div>
 				</div>
-			</td>
-		</tr>
-		
-		<tr v-if="!isNew && loginFormOpenIndex !== null">
-			<td colspan="999">
-				<my-form
-					@record-updated="setRecord(loginFormOpenIndex,login.id,$event);loginFormOpenIndex = null"
-					:allowDel="false"
-					:allowNew="false"
-					:formId="loginForms[loginFormOpenIndex].formId"
-					:isInline="true"
-					:key="login.records[loginFormOpenIndex].id"
-					:module="moduleIdMap[formIdMap[loginForms[loginFormOpenIndex].formId].moduleId]"
-					:recordId="login.records[loginFormOpenIndex].id !== null ? login.records[loginFormOpenIndex].id : 0"
-				/>
 			</td>
 		</tr>
 		
@@ -229,7 +211,7 @@ let MyAdminLoginsItem = {
 			immediate:true
 		}
 	},
-	emits:['updated'],
+	emits:['open-login-form','set-record','updated'],
 	data:function() {
 		return {
 			id:0,
@@ -245,7 +227,6 @@ let MyAdminLoginsItem = {
 			
 			// states
 			filter:'',
-			loginFormOpenIndex:null,
 			loginRecordInput:'',
 			loginRecordList:[],
 			showRoles:false
@@ -301,7 +282,6 @@ let MyAdminLoginsItem = {
 		moduleIdMap:  function() { return this.$store.getters['schema/moduleIdMap']; },
 		formIdMap:    function() { return this.$store.getters['schema/formIdMap']; },
 		roleIdMap:    function() { return this.$store.getters['schema/roleIdMap']; },
-		backendCodes: function() { return this.$store.getters.constants.backendCodes; },
 		capApp:       function() { return this.$store.getters.captions.admin.login; },
 		capGen:       function() { return this.$store.getters.captions.generic; },
 		config:       function() { return this.$store.getters.config; }
@@ -312,28 +292,13 @@ let MyAdminLoginsItem = {
 		getValidLanguageCode,
 		srcBase64Icon,
 		
-		handleError:function(requests,message) {
-			
-			if(message.startsWith(this.backendCodes.errKnown)) {
-				
-				// unique constraint violation
-				let matches = message.match(/ERROR\: duplicate key value violates unique constraint \".*\"/);
-				if(matches !== null && matches.length === 1)
-					message = this.capApp.error.uniqueConstraint;
-			}
-			
-			// display message with default error handler
-			this.$root.genericError(null,message);
-		},
-		toggleLoginForm:function(index) {
-			if(this.loginFormOpenIndex !== null)
-				return this.loginFormOpenIndex = null;
-			
+		// actions
+		openLoginForm:function(index) {
 			let frm = this.formIdMap[this.loginForms[index].formId];
 			let mod = this.moduleIdMap[frm.moduleId];
 			
 			this.$store.commit('moduleLanguage',this.getValidLanguageCode(mod));
-			this.loginFormOpenIndex = index;
+			this.$emit('open-login-form',index,this.id,this.login.records[index].id);
 		},
 		toggleRoleId:function(roleId) {
 			let pos = this.roleIds.indexOf(roleId);
@@ -360,20 +325,19 @@ let MyAdminLoginsItem = {
 			});
 		},
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('login','del',{id:this.login.id},this.delOk);
-			trans.send(this.handleError);
-		},
-		delOk:function(res,req) {
-			this.$emit('updated');
-			
-			let trans = new wsHub.transaction();
-			trans.add('login','kick',{id:req.payload.id});
-			trans.send(this.handleError);
+			ws.send('login','del',{id:this.login.id},true).then(
+				(res) => {
+					this.$emit('updated');
+					ws.send('login','kick',{id:this.login.id},true).then(
+						(res) => {},
+						(err) => this.$root.genericError(err)
+					);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('login','set',{
+			ws.send('login','set',{
 				id:this.login.id,
 				ldapId:this.login.ldapId,
 				ldapKey:this.login.ldapKey,
@@ -384,29 +348,27 @@ let MyAdminLoginsItem = {
 				admin:this.admin,
 				noAuth:this.noAuth,
 				roleIds:this.roleIds
-			},this.setOk);
-			trans.send(this.handleError);
-		},
-		setOk:function(res,req) {
-			if(this.isNew) {
-				this.name      = '';
-				this.showRoles = false;
-			}
-			
-			this.pass = '';
-			this.$emit('updated');
-			
-			// login was changed, reauth. or kick client
-			if(req.payload.id !== 0) {
-				let trans = new wsHub.transaction();
-				
-				if(req.payload.active)
-					trans.add('login','reauth',{id:req.payload.id});
-				else
-					trans.add('login','kick',{id:req.payload.id});
-				
-				trans.send(this.handleError);
-			}
+			},true).then(
+				(res) => {
+					if(this.isNew) {
+						this.name      = '';
+						this.showRoles = false;
+					}
+					this.pass = '';
+					this.$emit('updated');
+					
+					if(this.login.id === 0)
+						return;
+					
+					// login was changed, reauth. or kick client
+					let action = this.active ? 'reauth' : 'kick';
+					ws.send('login',action,{id:this.login.id},false).then(
+						(res) => {},
+						(err) => this.$root.genericError(err)
+					);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		
 		// record calls
@@ -417,30 +379,14 @@ let MyAdminLoginsItem = {
 			if(this.login.records[loginFormIndex].id !== null)
 				excludeIds.push(this.login.records[loginFormIndex].id);
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('login','getRecords',{
+			ws.send('login','getRecords',{
 				attributeIdLookup:loginForm.attributeIdLookup,
 				byString:this.loginRecordInput,
 				idsExclude:excludeIds
-			},this.getRecordsOk);
-			trans.send(this.$root.genericError);
-		},
-		getRecordsOk:function(res) {
-			this.loginRecordList = res.payload;
-		},
-		setRecord:function(loginFormIndex,loginId,recordId) {
-			let loginForm = this.loginForms[loginFormIndex];
-			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('login','setRecord',{
-				attributeIdLogin:loginForm.attributeIdLogin,
-				loginId:loginId,
-				recordId:recordId
-			},this.setRecordOk);
-			trans.send(this.$root.genericError);
-		},
-		setRecordOk:function(res) {
-			this.$emit('updated');
+			},true).then(
+				(res) => this.loginRecordList = res.payload,
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };
@@ -449,6 +395,7 @@ let MyAdminLogins = {
 	name:'my-admin-logins',
 	components:{
 		MyAdminLoginsItem,
+		MyForm,
 		MyInputOffset
 	},
 	template:`<div class="admin-logins contentBox grow">
@@ -574,6 +521,23 @@ let MyAdminLogins = {
 					</tr>
 				</thead>
 				
+				<!-- login form -->
+				<div class="app-sub-window under-header"
+					v-if="loginFormIndexOpen !== null"
+					@mousedown.self="$refs.popUpForm.closeAsk()"
+				>
+					<my-form class="form-pop-up" ref="popUpForm"
+						@close="loginFormIndexOpen = null"
+						@record-updated="setRecord(loginFormIndexOpen,loginFormLogin,$event);loginFormIndexOpen = null"
+						:allowDel="false"
+						:allowNew="false"
+						:formId="loginForms[loginFormIndexOpen].formId"
+						:isInline="true"
+						:module="moduleIdMap[formIdMap[loginForms[loginFormIndexOpen].formId].moduleId]"
+						:recordId="loginFormRecord"
+					/>
+				</div>
+				
 				<!-- new login -->
 				<my-admin-logins-item
 					@updated="get"
@@ -586,6 +550,8 @@ let MyAdminLogins = {
 				<!-- existing logins -->
 				<my-admin-logins-item
 					v-for="l in logins"
+					@open-login-form="openLoginForm"
+					@set-record="setRecord"
 					@updated="get"
 					:key="l.id"
 					:ldaps="ldaps"
@@ -604,6 +570,11 @@ let MyAdminLogins = {
 			logins:[],
 			ldaps:[],
 			total:0,
+			
+			// login form
+			loginFormIndexOpen:null,
+			loginFormLogin:null,
+			loginFormRecord:null,
 			
 			// state
 			byString:'',
@@ -631,6 +602,7 @@ let MyAdminLogins = {
 		// stores
 		modules:    function() { return this.$store.getters['schema/modules']; },
 		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
+		formIdMap:  function() { return this.$store.getters['schema/formIdMap']; },
 		capApp:     function() { return this.$store.getters.captions.admin.login; },
 		capGen:     function() { return this.$store.getters.captions.generic; }
 	},
@@ -652,6 +624,11 @@ let MyAdminLogins = {
 			this.offset = newOffset;
 			this.get();
 		},
+		openLoginForm:function(index,loginId,recordId) {
+			this.loginFormIndexOpen = index;
+			this.loginFormLogin     = loginId;
+			this.loginFormRecord    = recordId !== null ? recordId : 0;
+		},
 		toggleLoginForms:function(index) {
 			let pos = this.loginFormsHidden.indexOf(index);
 			
@@ -660,36 +637,45 @@ let MyAdminLogins = {
 			
 			this.loginFormsHidden.splice(pos,1);
 		},
+		
+		// backend calls
 		get:function() {
-			let trans    = new wsHub.transactionBlocking();
-			let requests = [];
-			
+			let forms = [];
 			for(let i = 0, j = this.loginForms.length; i < j; i++) {
-				requests.push({
+				forms.push({
 					attributeIdLogin:this.loginForms[i].attributeIdLogin,
 					attributeIdLookup:this.loginForms[i].attributeIdLookup
 				});
 			}
 			
-			trans.add('login','get',{
+			ws.send('login','get',{
 				byString:this.byString,
 				limit:this.limit,
 				offset:this.offset,
-				recordRequests:requests
-			},this.getOk);
-			trans.send(this.$root.genericError);
-		},
-		getOk:function(res) {
-			this.logins = res.payload.logins;
-			this.total  = res.payload.total;
+				recordRequests:forms
+			},true).then(
+				(res) => {
+					this.logins = res.payload.logins;
+					this.total  = res.payload.total;
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		getLdaps:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('ldap','get',{},this.getLdapsOk);
-			trans.send(this.$root.genericError);
+			ws.send('ldap','get',{},true).then(
+				(res) => this.ldaps = res.payload.ldaps,
+				(err) => this.$root.genericError(err)
+			);
 		},
-		getLdapsOk:function(res) {
-			this.ldaps = res.payload.ldaps;
+		setRecord:function(index,loginId,recordId) {
+			ws.send('login','setRecord',{
+				attributeIdLogin:this.loginForms[index].attributeIdLogin,
+				loginId:loginId,
+				recordId:recordId
+			},true).then(
+				(res) => this.get(),
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

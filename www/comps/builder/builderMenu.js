@@ -226,23 +226,23 @@ let MyBuilderMenu = {
 		
 		// backend functions
 		copy:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('menu','copy',{
+			ws.send('menu','copy',{
 				moduleId:this.menuIdCopy,
 				moduleIdNew:this.module.id
-			},this.copyOk);
-			trans.send(this.$root.genericError);
-		},
-		copyOk:function(res) {
-			this.menuIdCopy = null;
-			this.$root.schemaReload(this.module.id);
+			},true).then(
+				(res) => {
+					this.menuIdCopy = null;
+					this.$root.schemaReload(this.module.id);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let that  = this;
-			let trans = new wsHub.transactionBlocking();
+			let that     = this;
+			let requests = [];
 			
 			for(let i = 0, j = this.menuIdsRemove.length; i < j; i++) {
-				trans.add('menu','del',{ id:this.menuIdsRemove[i] });
+				requests.push(ws.prepare('menu','del',{ id:this.menuIdsRemove[i] }));
 			}
 			this.menuIdsRemove = [];
 			
@@ -259,14 +259,17 @@ let MyBuilderMenu = {
 				return menus;
 			}
 			
-			trans.add('menu','set',replaceIds(
+			requests.push(ws.prepare('menu','set',replaceIds(
 				JSON.parse(JSON.stringify(this.menus))
-			),this.setOk);
-			trans.add('schema','check',{moduleId:this.module.id});
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			this.$root.schemaReload(this.module.id);
+			)));
+			requests.push(ws.prepare('schema','check',
+				{moduleId:this.module.id}
+			));
+			
+			ws.sendMultiple(requests,true).then(
+				(res) => this.$root.schemaReload(this.module.id),
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

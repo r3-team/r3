@@ -19,6 +19,11 @@
 	border-radius:5px;
 	overflow:auto;
 }
+.builder-form .sidebar .templates-filter{
+	display:flex;
+	flex-flow:row nowrap;
+	margin-bottom:10px;
+}
 
 /* form builder main area */
 .builder-form-main{
@@ -71,54 +76,6 @@
 	min-width:200px !important;
 }
 
-/* moveable element */
-.builder-form .actions{
-	flex:0 1 24px;
-	padding:2px 2px 2px 6px;
-	line-height:24px;
-	display:flex;
-	flex-flow:row wrap;
-	align-items:center;
-	overflow:visible;
-	color:var(--color-font);
-	background-color:var(--color-form-builder-actions);
-	justify-content:flex-start;
-	border-radius:3px 3px 0px 0px;
-}
-.builder-form .container>.actions .part{
-	margin:0px 6px 0px 0px;
-	font-size:90%;
-}
-.builder-form .container>.actions img{
-	width:20px;
-	margin:0px 4px 0px 0px;
-	filter:var(--image-filter);
-}
-.builder-form .container>.actions{
-	background-color:var(--color-form-builder-container);
-}
-.builder-form div.sortable-ghost .actions{
-	background-color:var(--color-accent3);
-}
-.builder-form div.actions .action{
-	margin:0px 3px 0px 0px;
-	filter:var(--image-filter);
-}
-.builder-form div.actions .action.end{
-	width:20px;
-	margin:0px 0px 0px auto;
-}
-.builder-form div.actions .action.dragAnchor{
-	width:24px;
-	cursor:move;
-}
-.builder-form div.actions .action.edit{
-	width:24px;
-}
-.builder-form div.actions .action.edit.selected{
-	border:2px solid var(--color-border);
-}
-
 /* fields */
 .builder-field{
 	flex:1 1 auto;
@@ -137,15 +94,6 @@
 .builder-field.isTemplate{
 	border:none;
 	margin:0px;
-}
-.builder-field .title{
-	padding:0px 3px;
-	font-size:90%;
-	word-wrap:anywhere;
-}
-.builder-field .reference{
-	margin-right:6px;
-	font-weight:bold;
 }
 .builder-field .captionInputs{
 	display:flex;
@@ -169,70 +117,50 @@
 	background-color:rgba(0,0,0,0.03);
 	border-bottom:1px dotted var(--color-border);
 }
-
-/* columns */
-.builder-field .columns{
-	padding:5px 0px 0px 5px;
+.builder-field .columnsTemplates{
+	flex:0 0 auto;
 	display:flex;
-	flex-flow:row wrap;
-}
-.builder-field .columns .column{
-	white-space:nowrap;
-	border:1px solid #000;
-	border-radius:3px;
-	margin:0px 5px 5px 0px;
-}
-.builder-field .columns .actions{
-	background-color:var(--color-form-builder-columns);
-}
-.builder-field .columns.inList{
-	display:flex;
-	flex-direction:row;
-	flex-wrap:wrap;
-	align-items:flex-start;
-}
-.builder-field .columns.inList .column{
-	margin:0px 5px 5px 0px;
-	background-color:var(--color-bg);
-}
-.builder-field .columTemplates{
-	padding:5px;
-}
-.builder-field .columTemplates .template-title{
-	margin:3px 12px;
+	flex-flow:column nowrap;
 }
 
 /* options */
-.builder-field .options{
+.builder-field-options{
 	max-width:500px;
 	padding:8px 12px;
 }
-.builder-field .options .subQuery{
-	padding:6px;
-	margin:6px 0px;
-	border:1px solid var(--color-border);
-}
-
-/* chart options */
-.builder-field .options .chart-option{
+.builder-field-options .chart-option{
 	width:100%;
 	min-width:300px;
 	max-width:unset;
 	min-height:300px;
 }
-.builder-field .options .chart-option.error{
+.builder-field-options .chart-option.error{
 	border:2px solid var(--color-error);
 }
-.builder-field .options .chart-option-serie .line{
+.builder-field-options .chart-option-serie .line{
 	display:flex;
 	flex-flow:row wrap;
 }
-.builder-field .options .chart-option-serie .line input,
-.builder-field .options .chart-option-serie .line select{
+.builder-field-options .chart-option-serie .line input,
+.builder-field-options .chart-option-serie .line select{
 	width:unset;
 	max-width:unset;
 	margin:0px 6px 3px 0px;
 }
+.builder-field-options .collections-line td{
+	padding-bottom:6px;
+	border-bottom:1px dotted var(--color-border);
+}
+
+
+/* form functions */
+.builder-form-functions{
+	min-height:360px;
+}
+.builder-form-functions table td{
+	padding:2px 8px;
+}
+.builder-form-function{}
 
 
 /* form states */
@@ -240,10 +168,15 @@
 	max-height:360px;
 	flex:1 1 auto;
 }
+.builder-form-states.fullscreen{
+	max-height:none;
+	overflow:auto;
+}
 .builder-form-states input,
 .builder-form-states select{
 	width:auto;
 	min-width:unset;
+	margin-right:6px;
 }
 .builder-form-state{
 	display:flex;

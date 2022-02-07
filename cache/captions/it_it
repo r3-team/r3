@@ -4,6 +4,7 @@
 			"add":"Aggiungi",
 			"apply":"Applica",
 			"cancel":"Annulla",
+			"clear":"Clear",
 			"close":"Chiudi",
 			"create":"Crea",
 			"delete":"Cancella",
@@ -32,17 +33,6 @@
 		"dialog":{
 			"confirm":"Si prega di confermare"
 		},
-		"error":{
-			"contextDeadlineExceeded":"Non è stato possibile completare l'azione entro il periodo di tempo consentito. Riprova",
-			"fileTooLarge":"Impossibile caricare il file '{NAME}', la dimensione massima consentita è {SIZE}",
-			"foreignKeyConstraint":"Il record è ancora referenziato come '{ATR}' in '{MOD}'",
-			"foreignKeyUniqueConstraint":"'{NAME}' può essere referenziato solo una volta",
-			"generalError":"Si è verificato un errore imprevisto, contattare l'amministratore di sistema",
-			"generalErrorTitle":"Errore",
-			"presetProtected":"Questo record è protetto e non può essere cancellato",
-			"unauthorized":"Accesso non autorizzato",
-			"uniqueConstraint":"Il valore oer '{NAMES}' deve essere univoco"
-		},
 		"option":{
 			"aggArray":"vettore",
 			"aggAvg":"media",
@@ -52,6 +42,7 @@
 			"aggMin":"minimo",
 			"aggRecord":"[record singolo]",
 			"aggSum":"somma",
+			"all":"all",
 			"no":"no",
 			"size0":"più piccolo",
 			"size1":"minore",
@@ -70,12 +61,12 @@
 		"busy":"Elaborazione - Clicca qui per annullare",
 		"date":"Data",
 		"description":"Descrizione",
+		"errorTitle":"Errore",
 		"filters":"Filtri",
 		"home":"Home",
 		"icon":"Icona",
 		"id":"ID",
 		"inputDecimal":"Il valore deve essere decimale",
-		"inputFileNotUploaded":"File non ancora salvato",
 		"inputInvalid":"Valore non valido",
 		"inputLarge":"Valore troppo grande",
 		"inputLong":"Valore troppo lungo",
@@ -95,6 +86,7 @@
 		"notice":"Avviso",
 		"order":"Ordine",
 		"password":"Password",
+		"preview":"Anteprima",
 		"results":"{CNT} risultati",
 		"resultsNone":"- nessun risultato -",
 		"resultsOf":"/ {CNT}",
@@ -397,8 +389,8 @@
 			"intervalTypeYears":"anno(i)",
 			"scheduleLine":"Ogni {VALUE} {TYPE}",
 			"scheduleLineDayMonths":"al {DAY}.",
-			"scheduleLineDayWeeks":"al {DAY}. weekday",
-			"scheduleLineDayYears":"al {DAY}. of the year",
+			"scheduleLineDayWeeks":"al {DAY}. giorno della settimana",
+			"scheduleLineDayYears":"al {DAY}. dell'anno",
 			"scheduleLineTime":"alle {HH}:{MM}:{SS}",
 			"systemTasks":"Attività di sistema"
 		},
@@ -423,6 +415,18 @@
 			},
 			"new":"Nuovo attributo"
 		},
+		"collection":{
+			"dialog":{
+				"delete":"Sicuro di voler cancellare questa collezione?"
+			},
+			"columnsTarget":"Posiziona le colonne qui",
+			"contentColumn":"Sub query dati in colonna",
+			"new":"Nuova collezione",
+			"previewHint":"Collection values for the logged in user. Collections are retrieved on page load (F5 to reload) if they are enabled within assigned roles.",
+			"query":"Query",
+			"title":"Collezioni",
+			"titleOne":"Collezione '{NAME}'"
+		},
 		"form":{
 			"chart":{
 				"axisType":"Tipo assi",
@@ -443,6 +447,21 @@
 			"dialog":{
 				"delete":"Sei sicuro di voler eliminare questo modulo?"
 			},
+			"error":{
+				"formStateFieldRemovedCondition":"I campi cancellati sono ancora referenziati come condizione della condizione del modulo '{NAME}'.",
+				"formStateFieldRemovedEffect":"I campi cancellati sono ancora referenziati come campo interessato dalla condizione del modulo '{NAME}'."
+			},
+			"functions":{
+				"option":{
+					"delete":"Record modulo canellato",
+					"open":"Modulo aperto",
+					"save":"Record modulo salvato"
+				},
+				"event":"Evento",
+				"eventBefore":"Prima dell'evento",
+				"jsFunctionId":"Esegue la funzione nell'interfaccia",
+				"title":"Funzioni modulo"
+			},
 			"option":{
 				"displayColor":"colore",
 				"displayDefault":"predefinito",
@@ -452,6 +471,7 @@
 				"displayGallery":"galleria",
 				"displayHidden":"nascosto",
 				"displayLogin":"login",
+				"displayPassword":"password",
 				"displayPhone":"telefono",
 				"displayTime":"ora",
 				"displayTextarea":"area testo",
@@ -477,14 +497,15 @@
 				"modeField":"Valore campo",
 				"modeField2Field":"valore campo",
 				"modeField2Fixed":"valore fisso",
+				"modeField2Login":"ID login",
 				"modeField2Preset":"preimpostato",
+				"modeFieldChanged":"Valore del campo cambiato",
 				"modeRecord":"Stato record",
 				"modeRole":"Ruolo",
 				"newRecord":"Nuovo",
 				"title":"Stati modulo"
 			},
 			"aggregator":"Aggregato",
-			"attributeRecord":"Applica il record del modulo a",
 			"autoRenew":"Ricarica in automatico",
 			"autoRenew0":"non attivo",
 			"autoRenewHint":"in secondi",
@@ -492,6 +513,10 @@
 			"autoSelectHint":"0=off, 2=primi due, -3=ultimi tre",
 			"captions":"Titoli",
 			"category":"Selettore categoria",
+			"collection":"Collezione",
+			"collectionIdDef":"Default value(s) from collection",
+			"collectionHint":"*La collezione è influenzata solo se è selezionata come criterio filtrante nella query dei dati.",
+			"collectionTitle":"Limita la collezione dall'input dell'utente",
 			"columnsTarget":"Posiziona le colonne qui",
 			"columnsTemplates":"Colonne disponibili",
 			"columnBatch":"Raggruppamento di colonne",
@@ -514,6 +539,7 @@
 			"copyNewName":"Nuovo nome del modulo",
 			"csvExport":"Esporta CSV",
 			"csvImport":"Importa CSV",
+			"csvTitle":"CSV processing",
 			"date0":"Data da",
 			"date1":"Data a",
 			"dateColor":"Colore",
@@ -554,8 +580,6 @@
 			"flexSizeMin":"Ridurre a (percentuale)",
 			"flexSizeShrink":"Fattore riduzione",
 			"flexWrap":"Wrap contenuto",
-			"formOpen":"Apri record (relazione 0)",
-			"formOpenEmpty":"Apri modulo",
 			"formTitle":"Titolo modulo",
 			"gantt":"Gantt",
 			"ganttNotes":"Column batch 1 groups results.",
@@ -567,18 +591,29 @@
 			"hidden":"Il campo è nascosto per impostazione predefinita",
 			"icon":"Icona modulo",
 			"ics":"Abbonamenti iCAL",
-			"layout":"Layout elenco",
+			"jsFunctionButton":"Funzione on click",
+			"jsFunctionData":"Funzione on value change",
+			"layout":"Disposizione elenco",
 			"limit":"Limite risultato",
 			"new":"Nuovo modulo",
 			"onMobile":"Nella vista mobile",
+			"openForm":"Apri modulo",
+			"openFormAttributeApply":"...per impopstare il valore sul modulo",
+			"openFormFormIdOpen":"Modulo",
+			"openFormMaxHeight":"Altezza massima (px)",
+			"openFormMaxWidth":"Larghezza massima (px)",
+			"openFormNewRecord":"Quando si creano nuovi record",
+			"openFormPopUp":"Modulo Pop-up",
+			"openFormRelationIndex":"Utilizza record da relazione",
 			"presetOpen":"Preimpostazione apertura",
 			"readonly":"Solo lettura",
 			"required":"Obbligatorio",
+			"showFunctions":"Funzioni",
 			"showHelp":"Aiuto",
-			"showOutsideIn":"Riferimento relazione",
-			"showStates":"Stati",
+			"showReferences":"References",
+			"showStates":"Condizioni",
 			"sql":"Anteprima SQL",
-			"state":"Stato",
+			"state":"Condizione",
 			"stateDefault":"predefinito",
 			"stateHidden":"nascosto",
 			"stateOptional":"opzionale",
@@ -587,6 +622,99 @@
 			"subQuery":"Sub query",
 			"subQueryAttribute":"Attributo",
 			"title":"Moduli"
+		},
+		"function":{
+			"button":{
+				"addNew":"NUOVO prefisso",
+				"addOld":"VECCHIO prefisso",
+				"addSchedule":"Aggiungi nuova pianificazione",
+				"details":"Dettagli",
+				"template":"Template"
+			},
+			"dialog":{
+				"delete":"Sei sicuro di voler eliminare questa funzione?"
+			},
+			"helpJs":{
+				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Copia il testo negli appunti dell'utente.",
+				"get_language_code":"app.get_language_code() => STRING<br /><br />Restituisce le 5 lettere del codice lingua ('en_us', ...) del login attuale.",
+				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Restituisce l'ID del login attuale.",
+				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Restituisce l'Id del record del modulo aperto per l'indice della relazione specificata (0 per predefinita).",
+				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Restituisce tutti gli ID dei ruoli assegnati al login attuale (i ruoli annidati sono inclusi).",
+				"go_back":"app.go_back() => UNDEFINED<br /><br />Esegue una navigazione indietro del browser.",
+				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />Restituisce true (vero) se il login corrente ha il ruolo assegnato (i ruoli annidati sono inclusi).",
+				"open_form":"app.open_form(form_id, record_id, new_tab, pop_up, max_height, max_width) => UNDEFINED<br /><br />Apre un modulo o in una nuova scheda del browser o come finestra pop-up.",
+				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Cancella il record presente sul modulo.",
+				"record_new":"app.record_new() => UNDEFINED<br /><br />Apre un nuovo record.",
+				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Ricarica il record attuale.",
+				"record_save":"app.record_save() => UNDEFINED<br /><br />Salva il record corrente."
+			},
+			"helpPg":{
+				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Interrompe l'operazione e invia un messaggio all'utente che lo esegue, che viene visualizzato nell'interfaccia utente.",
+				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Restituisce l'ID del login che sta eseguendo l'operazione.",
+				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Restituisce il codice della lingua di 5 lettere ('en_us', ...) del login, utilizzato per accedere al backend dei dati.",
+				"get_name":"instance.get_name() => TEXT<br /><br />Restituisce il nome dell'istanza, definito nella finestra di personalizzazione del pannello di amministrazione.",
+				"get_public_hostname":"instance.get_public_hostname() => TEXT<br /><br />Restituisce il nome dell'host pubblico dell'istanza, definito nella configurazione del sistema.",
+				"get_role_ids":"instance.get_role_ids(<blockquote>login_id INTEGER,<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => UUID[]<br /><br />Ottieni un vettore con gli ID dei ruoli assegnati al login indicato.<br /><br />Se 'inherited' è impostato su TRUE, i ruoli principali sono inclusi. Le appartenenze nidificate sono state completamente risolte.",
+				"has_role":"instance.has_role(<blockquote>login_id INTEGER,<br />role_id UUID,<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => BOOLEAN<br /><br />Restituisce se al login indicato è assegnato l'ID di ruolo specificato. <br /><br />Se 'inherited' è impostato su TRUE, i ruoli padre sono inclusi. Le appartenenze nidificate sono state completamente risolte.<br /><br />Esempio: SELECT instance.has_role(1,'00000000-0000-0000-0000-00000000001',FALSE)",
+				"has_role_any":"instance.has_role_any(<blockquote>login_id INTEGER,<br />role_ids UUID[],<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => BOOLEAN<br /><br />Restituisce se al login indicato è assegnato uno degli ID di ruolo specificati. <br /><br />Se 'inherited' è impostato su TRUE, i ruoli padre sono inclusi. Le appartenenze nidificate sono state completamente risolte.<br /><br />Esempio: SELECT instance.has_role_any(1,ARRAY['00000000-0000-0000-0000-00000000001','00000000-0000  0000-0000-00000000002']: :UUID[],FALSE)",
+				"log_error":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Registra il messaggio di errore. Se il nome dell'applicazione può essere risolto, il log è associato ad esso.",
+				"log_info":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Registra il messaggio informativo. Se il nome dell'applicazione può essere risolto, il log è associato ad esso.",
+				"log_warning":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Messaggio di avviso dei registri. Se il nome dell'applicazione può essere risolto, il log è associato ad esso.",
+				"mail_delete":"instance.mail_delete(mail_id INTEGER) => INTEGER<br /><br />Elimina l'e-mail specificata, inclusi gli allegati.",
+				"mail_delete_after_attach":"instance.mail_delete_after_attach(<blockquote>mail_id INTEGER,<br />attach_record_id INTEGER,<br />attach_attribute_id UUID</blockquote>) => INTEGER<br /><br />Contrassegna gli allegati di posta elettronica da aggiungere a un attributo file del record specificato; l'e-mail e i relativi allegati vengono eliminati successivamente.",
+				"mail_get_next":"instance.mail_get_next(account_name TEXT DEFAULT NULL) => instance.mail<br /><br />Restituisce l'e-mail successiva dallo spooler di posta; restituisce NULL se non è disponibile alcuna email. Quando viene specificato un nome account, restituisce solo i messaggi ricevuti con l'account specificato.<br /><br />Il tipo restituito 'instance.mail' è composto da:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>Dopo aver elaborato un'email, questa dovrebbe essere eliminata; direttamente (mail_delete) o dopo aver memorizzato i suoi allegati (mail_delete_after_attach).",
+				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Genera un messaggio di posta elettronica in uscita per lo spooler di posta. Parametri opzionali:<ul><li>Elenco separato da virgole di destinatari TO/CC/BCC (uno di questi deve essere impostato)</li><li>Nome account di posta da cui inviare (se non specificato viene utilizzato un account casuale)< /li><li>Attributo file e record da cui allegare file</li></ul>"
+			},
+			"option":{
+				"fieldGet":"legge valore",
+				"fieldSet":"scrive valore",
+				"intervalDays":"Giorni",
+				"intervalHours":"Ore",
+				"intervalMinutes":"Minuti",
+				"intervalMonths":"Mesi",
+				"intervalSeconds":"Secondi",
+				"intervalWeeks":"Settimane",
+				"intervalYears":"Anni"
+			},
+			"code":"Corpo funzione",
+			"codeArgs":"Argomenti",
+			"codeArgsHintJs":"opzionale, 'var1, var2, ...'",
+			"codeArgsHintPg":"opzionale, 'var1 integer, var2 bool, ...'",
+			"codeReturns":"Risposta",
+			"codeReturnsHintJs":"opzionale, 'number', 'array',...",
+			"codeReturnsHintPg":"opzionale, 'text', 'integer',...",
+			"entityInput":"Seleziona il segnaposto e fai clic sul corpo della funzione per utilizzare la sintassi <b>upgrade-safe</b>.",
+			"form":"Lega al modulo",
+			"functionsBackend":"Funzioni backend",
+			"functionsFrontend":"Funzioni frontend",
+			"intervalAtDayForMonths":"al giorno del mese",
+			"intervalAtDayForWeeks":"al giorno della settimana (0=do, 1=lu, ...)",
+			"intervalAtDayForYears":"al giorno dell'anno",
+			"intervalAtTime":"alle ore",
+			"intervalEvery":"Esegui: Sempre",
+			"isFrontendExec":"Chiamata frontend",
+			"isTrigger":"Trigger",
+			"language":"linguaggio",
+			"languageJs":"JavaScript",
+			"languagePg":"PL/pgSQL",
+			"new":"Nuova funzione",
+			"placeholders":"Segnaposti",
+			"placeholdersFormFields":"Campi dati modulo",
+			"placeholdersFormQuery":"Query dati modulo",
+			"placeholdersGlobal":"Globale",
+			"placeholdersInstance":"Instanza",
+			"placeholdersModules":"Applicazioni",
+			"runOnce":"esegui una volta",
+			"schedules":"Ricorrente",
+			"schedulesItem":"{CNT} pianificazioni",
+			"title":"Funzioni",
+			"titleJs":"Funzioni frontend ({CNT})",
+			"titlePg":"Funzioni backend ({CNT})",
+			"titleOne":"titolo funzione",
+			"valueJsHint":"VALUE",
+			"valueJsHintForm":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
+			"valueJsHintIndex":"RELATION_INDEX_NUMBER",
+			"valueJsHintRole":"ROLE_ID_STRING"
 		},
 		"help":{
 			"title":"Aiuto Applicazione"
@@ -654,65 +782,6 @@
 			"startFormsExplanation":"Viene utilizzato il primo modulo iniziale che corrisponde a un ruolo del login corrente.",
 			"title":"Applicazioni"
 		},
-		"pgFunction":{
-			"button":{
-				"addNew":"NUOVO prefisso",
-				"addOld":"VECCHIO prefisso",
-				"addSchedule":"Aggiungi nuova pianificazione",
-				"details":"Dettagli",
-				"template":"Template"
-			},
-			"dialog":{
-				"delete":"Sei sicuro di voler eliminare questa funzione?"
-			},
-			"help":{
-				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Interrompe l'operazione e invia un messaggio all'utente che lo esegue, che viene visualizzato nell'interfaccia utente.",
-				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Restituisce l'ID del login che sta eseguendo l'operazione.",
-				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Restituisce il codice della lingua di 5 lettere ('en_us', ...) del login, utilizzato per accedere al backend dei dati.",
-				"get_name":"instance.get_name() => TEXT<br /><br />Restituisce il nome dell'istanza, definito nella finestra di personalizzazione del pannello di amministrazione.",
-				"get_public_hostname":"instance.get_public_hostname() => TEXT<br /><br />Restituisce il nome dell'host pubblico dell'istanza, definito nella configurazione del sistema.",
-				"get_role_ids":"instance.get_role_ids(<blockquote>login_id INTEGER,<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => UUID[]<br /><br />Ottieni un vettore con gli ID dei ruoli assegnati al login indicato.<br /><br />Se 'inherited' è impostato su TRUE, i ruoli principali sono inclusi. Le appartenenze nidificate sono state completamente risolte.",
-				"has_role":"instance.has_role(<blockquote>login_id INTEGER,<br />role_id UUID,<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => BOOLEAN<br /><br />Restituisce se al login indicato è assegnato l'ID di ruolo specificato. <br /><br />Se 'inherited' è impostato su TRUE, i ruoli padre sono inclusi. Le appartenenze nidificate sono state completamente risolte.<br /><br />Esempio: SELECT instance.has_role(1,'00000000-0000-0000-0000-00000000001',FALSE)",
-				"has_role_any":"instance.has_role_any(<blockquote>login_id INTEGER,<br />role_ids UUID[],<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => BOOLEAN<br /><br />Restituisce se al login indicato è assegnato uno degli ID di ruolo specificati. <br /><br />Se 'inherited' è impostato su TRUE, i ruoli padre sono inclusi. Le appartenenze nidificate sono state completamente risolte.<br /><br />Esempio: SELECT instance.has_role_any(1,ARRAY['00000000-0000-0000-0000-00000000001','00000000-0000  0000-0000-00000000002']: :UUID[],FALSE)",
-				"log_error":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Registra il messaggio di errore. Se il nome dell'applicazione può essere risolto, il log è associato ad esso.",
-				"log_info":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Registra il messaggio informativo. Se il nome dell'applicazione può essere risolto, il log è associato ad esso.",
-				"log_warning":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Messaggio di avviso dei registri. Se il nome dell'applicazione può essere risolto, il log è associato ad esso.",
-				"mail_delete":"instance.mail_delete(mail_id INTEGER) => INTEGER<br /><br />Elimina l'e-mail specificata, inclusi gli allegati.",
-				"mail_delete_after_attach":"instance.mail_delete_after_attach(<blockquote>mail_id INTEGER,<br />attach_record_id INTEGER,<br />attach_attribute_id UUID</blockquote>) => INTEGER<br /><br />Contrassegna gli allegati di posta elettronica da aggiungere a un attributo file del record specificato; l'e-mail e i relativi allegati vengono eliminati successivamente.",
-				"mail_get_next":"instance.mail_get_next(account_name TEXT DEFAULT NULL) => instance.mail<br /><br />Restituisce l'e-mail successiva dallo spooler di posta; restituisce NULL se non è disponibile alcuna email. Quando viene specificato un nome account, restituisce solo i messaggi ricevuti con l'account specificato.<br /><br />Il tipo restituito 'instance.mail' è composto da:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>Dopo aver elaborato un'email, questa dovrebbe essere eliminata; direttamente (mail_delete) o dopo aver memorizzato i suoi allegati (mail_delete_after_attach).",
-				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Genera un messaggio di posta elettronica in uscita per lo spooler di posta. Parametri opzionali:<ul><li>Elenco separato da virgole di destinatari TO/CC/BCC (uno di questi deve essere impostato)</li><li>Nome account di posta da cui inviare (se non specificato viene utilizzato un account casuale)< /li><li>Attributo file e record da cui allegare file</li></ul>"
-			},
-			"option":{
-				"intervalDays":"Giorni",
-				"intervalHours":"Ore",
-				"intervalMinutes":"Minuti",
-				"intervalMonths":"Mesi",
-				"intervalSeconds":"Secondi",
-				"intervalWeeks":"Settimane",
-				"intervalYears":"Anni"
-			},
-			"code":"Corpo funzione",
-			"codeArgs":"Argomenti",
-			"codeArgsHint":"opzionale, 'var1 integer'",
-			"codeReturns":"Risposta",
-			"codeReturnsHint":"espressione, 'trigger', 'integer',...",
-			"entityInput":"Seleziona il segnaposto e fai clic sul corpo della funzione per utilizzare la sintassi <b>upgrade-safe</b>.",
-			"intervalAtDayForMonths":"al giorno del mese",
-			"intervalAtDayForWeeks":"al giorno della settimana (0=do, 1=lu, ...)",
-			"intervalAtDayForYears":"al giorno dell'anno",
-			"intervalAtTime":"alle ore",
-			"intervalEvery":"Esegui: Sempre",
-			"new":"Nuova funzione",
-			"placeholders":"Segnaposti",
-			"placeholdersInstance":"Instanza",
-			"placeholdersModules":"Applicazioni",
-			"preview":"Anteprima",
-			"runOnce":"esegui una volta",
-			"schedules":"Ricorrente",
-			"schedulesItem":"{CNT} pianificazioni",
-			"title":"Funzioni",
-			"titleOne":"titolo funzione"
-		},
 		"pgTrigger":{
 			"dialog":{
 				"delete":"Sei sicuro di voler eliminare questo trigger?"
@@ -767,7 +836,7 @@
 			"isDeferrable":"DEFERRABLE",
 			"isDeferred":"INIT. DEFERRED",
 			"length":"Lunghezza",
-			"newRelation":"Nuova relazionen",
+			"newRelation":"Nuova relazione",
 			"nullable":"Vuoto",
 			"onDelete":"DELETE",
 			"onInsert":"INSERT",
@@ -788,8 +857,9 @@
 			"presetValues":"Valori",
 			"presetValuesPreview":"Anteprima valori",
 			"preview":"Visualizzazione dati",
-			"previewLimit":"Limite",
+			"previewLimit":"Record/pagina",
 			"previewPage":"Pagina",
+			"previewRowCount":"Numero record",
 			"relationship":"Relazioni",
 			"retention":"Log cambiamenti",
 			"retentionCount":"Mantieni X modifiche",
@@ -813,6 +883,8 @@
 			"assignable":"Assignabile",
 			"attribute":"Attributi",
 			"children":"Membro di",
+			"collection":"Collezione",
+			"collections":"Collezioni",
 			"data":"Dati",
 			"legend":"Legenda: No accesso (-), lettura (R), scrittura (W), cancellazione (D)",
 			"menu":"Menu",
@@ -825,15 +897,19 @@
 		"backHint":"Torna alla panoramica dell'applicazione",
 		"language":"Traduzione",
 		"languageNextHint":"Passa alla lingua successiva (tasto di scelta rapida: CTRL + q)",
+		"navigationCollections":"Collezioni",
+		"navigationCollectionsSub":"Dettagli collezione",
 		"navigationFilterHint":"Filtra per testo",
 		"navigationForms":"Moduli",
 		"navigationFormsSub":"Disegna modulo",
+		"navigationFunctions":"Funzioni",
+		"navigationFunctionsSub":"dettagli funzione",
+		"navigationFunctionsSubBackend":"Backend",
+		"navigationFunctionsSubFrontend":"Frontend",
 		"navigationHelp":"Aiuto",
 		"navigationIcons":"Icone",
 		"navigationLoginForms":"Modulo login",
 		"navigationMenu":"Menu",
-		"navigationPgFunctions":"Funzioni",
-		"navigationPgFunctionsSub":"dettagli funzione",
 		"navigationRelations":"Relazioni",
 		"navigationRelationsSub":"Dettagli Relazione",
 		"navigationRoles":"Ruoli",
@@ -883,15 +959,48 @@
 		"weekDayShort5":"Ven",
 		"weekDayShort6":"Sab"
 	},
+	"error":{
+		"APP":{
+			"001":"Si è verificato un errore imprevisto. Riprova.",
+			"002":"Non è stato possibile completare l'azione entro il periodo di tempo consentito. Riprova.",
+			"003":"Azione abortita. Si prega di riprovare.",
+			"004":"Questo record è protetto e non può essere cancellato.",
+			"005":"Creazione entità fallita perchè non è stato indicato un nome. Si prega di specificare un nome.",
+			"006":"Il nome scelto non è valido. Assicurarsi che il nome ...<ul><li>... inizi con una lettera <b>(a-z)</b>.</li><li>... non sia più lungo di <b>31</b> caratteri.</li><li>... contenga solo lettere minuscole <b>(a-z)</b>, sottolineato <b>(_)</b> o numeri <b>(0-9)</b>.</li></ul>Esempio: storage_inventory_post21, facility_address, contact_book",
+			"007":"Il modulo referenziato non esiste.",
+			"008":"La relazione referenziata non esiste.",
+			"009":"L'attributo referenziato non esiste."
+		},
+		"CSV":{
+			"001":"Numero non valido '{VALUE}' (intero previsto).",
+			"002":"Numero non valido '{VALUE}' (decimale previsto).",
+			"003":"Valore temporale '{VALUE}' non valido, formato previsto: {EXPECT}.",
+			"004":"Tipo attributo non supportato '{VALUE}'.",
+			"005":"Numero di campi errato in linea '{VALUE}'."
+		},
+		"DBS":{
+			"001":"{FNC_MSG}",
+			"002":"TIl valore selezionato per '{NAMES}' è già utilizzato da un'altro record. E' definito 'univoco' e può essere utilizzato solo una volta.",
+			"003":"Questo nome di login è già in uso.",
+			"004":"Il record è ancora referenziato come '{ATR}' in '{MOD}'.",
+			"005":"La colonna '{NAME}' non ha valori o non può essere risolto.",
+			"006":"Creazione indice univoco fallita perchè l'attributo esistente non è univoco.",
+			"007":"Valore non valido '{VALUE}'."
+		},
+		"SEC":{
+			"001":"Accesso non autorizzato."
+		},
+		"initCollection":"Failed to load collections during login: {MSG}"
+	},
 	"feedback":{
 		"button":{
 			"whatIsSent":"Cosa viene inviato?"
 		},
 		"option":{
-			"codeBug":"Bug / Issue",
-			"codeGeneric":"General",
-			"codePraise":"Praise",
-			"codeSuggestion":"Suggestion"
+			"codeBug":"Bachi / Problema",
+			"codeGeneric":"Generale",
+			"codePraise":"Elogi",
+			"codeSuggestion":"Suggerimenti"
 		},
 		"moduleRelated":"Questo feedback è per l'applicazione aperta? ({NOME})",
 		"sendNok":"Non è stato possibile inviare il feedback. Per favore riprova più tardi.",
@@ -910,6 +1019,7 @@
 			},
 			"content":{
 				"attribute":"valore attributo",
+				"collection":"valore(i) collezione",
 				"field":"valore campo",
 				"javascript":"Espressione JavaScript",
 				"languageCode":"codice lingua login (en_us, ...)",
@@ -956,6 +1066,7 @@
 			"retractLogs":"Ritira logs"
 		},
 		"dialog":{
+			"close":"Ci sono modifiche non salvate.<br /><br />Chiudere comunque questo modulo?",
 			"delete":"Sei sicuro di voler eliminare questo record <b>in modo permanente</b>?",
 			"new":"Ci sono modifiche non salvate.<br /><br />Procedere con un nuovo record?",
 			"newReset":"Quest'azione azzererà ciò che è stato inserito.<br /><br />Continuare?",
@@ -1016,7 +1127,9 @@
 			"inputMonth":"mm",
 			"inputSecond":"--",
 			"inputYear":"yyyy"
-		}
+		},
+		"fileNotUploaded":"File non ancora salvato.",
+		"fileTooLarge":"Impossibile caricare il file '{NAME}', la dimensione massima consentita è {SIZE}."
 	},
 	"list":{
 		"button":{
@@ -1029,14 +1142,6 @@
 		},
 		"dialog":{
 			"delete":"Sei sicuro di voler eliminare <b>in modo permanente</b> i record selezionati?"
-		},
-		"error":{
-			"csvDateParse":"Valore temporale '{VALUE}' non valido, formato previsto: {EXPECT}",
-			"csvFieldCount":"Numero di campi errato",
-			"csvLineError":"Errore alla linea {COUNT}: ",
-			"csvNotNull":"La colonna '{NAME}' non ha valori o non può essere risolto",
-			"csvNumberParse":"Numero non valido '{VALUE}'",
-			"csvTypeSyntax":"Valore non valido '{VALUE}'"
 		},
 		"message":{
 			"csvExport":"L'esportazione CSV utilizza filtri e ordini dall'elenco corrente.",
@@ -1057,9 +1162,10 @@
 		"csvDatetime":"Formato data-ora",
 		"csvFile":"File CSV",
 		"csvHasHeader":"Linea intestazione",
+		"csvLineError":"Errore alla linea {COUNT}: ",
 		"csvTime":"Formato tempo",
 		"csvTimeHint":"15:04:05",
-		"csvTimezone":"Timezone",
+		"csvTimezone":"Fuso orario",
 		"csvTotalLimit":"Conteggio righe (0 = tutte)",
 		"inputHintCreate":"Crea nuovo record",
 		"inputHintOpen":"Apri record",
@@ -1112,6 +1218,7 @@
 		"titleAdmin":"Amministrazione",
 		"titleDisplay":"Visualizza",
 		"titleSecurity":"Sicurezza",
-		"titleTheme":"Tema"
+		"titleTheme":"Tema",
+		"warnUnsaved":"Avviso per cambiamenti non salvati"
 	}
 }

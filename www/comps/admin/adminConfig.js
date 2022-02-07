@@ -707,7 +707,7 @@ let MyAdminConfig = {
 				that.configInput.companyLogo = reader.result.split(',')[1];
 			};
 			reader.onerror = function(error) {
-				that.$root.genericError(null,error);
+				that.$root.genericError(error);
 			};
 		},
 		informBuilderMode:function() {
@@ -764,40 +764,42 @@ let MyAdminConfig = {
 		
 		// backend calls
 		get:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('bruteforce','get',{},this.getOk);
-			trans.send(this.$root.genericError);
-		},
-		getOk:function(res) {
-			this.bruteforceCountBlocked = res.payload.hostsBlocked;
-			this.bruteforceCountTracked = res.payload.hostsTracked;
-			this.ready = true;
+			ws.send('bruteforce','get',{},true).then(
+				(res) => {
+					this.bruteforceCountBlocked = res.payload.hostsBlocked;
+					this.bruteforceCountTracked = res.payload.hostsTracked;
+					this.ready = true;
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('config','set',this.configInput,this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res,req) {
-			// switch to maintenance mode
-			if(req.payload.productionMode === '0' && this.config.productionMode === '1') {
-				let trans = new wsHub.transaction();
-				trans.add('login','kickNonAdmins',{});
-				trans.send(this.$root.genericError);
-			}
-			
-			// inform clients about changed builder mode
-			if(req.payload.builderMode !== this.config.builderMode) {
-				let trans = new wsHub.transaction();
-				trans.add('login','informBuilderState',{});
-				trans.send(this.$root.genericError);
-			}
-			
-			// update store config
-			this.$store.commit('config',JSON.parse(JSON.stringify(this.configInput)));
-			
-			// reload customizing
-			this.$root.initPublic(); 
+			ws.send('config','set',this.configInput,true).then(
+				(res) => {
+					// switch to maintenance mode
+					if(this.configInput.productionMode === '0' && this.config.productionMode === '1') {
+						ws.send('login','kickNonAdmins',{},false).then(
+							(res) => {},
+							(err) => this.$root.genericError(err)
+						);
+					}
+					
+					// inform clients about changed builder mode
+					if(this.configInput.builderMode !== this.config.builderMode) {
+						ws.send('login','informBuilderState',{},false).then(
+							(res) => {},
+							(err) => this.$root.genericError(err)
+						);
+					}
+					
+					// update store config
+					this.$store.commit('config',JSON.parse(JSON.stringify(this.configInput)));
+					
+					// reload customizing
+					this.$root.initPublic(); 
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

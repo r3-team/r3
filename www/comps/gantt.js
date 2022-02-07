@@ -1,6 +1,7 @@
-import srcBase64Icon            from './shared/image.js';
-import {getCaption}             from './shared/language.js';
-import MyValueRich              from './valueRich.js';
+import MyInputCollection from './inputCollection.js';
+import MyValueRich       from './valueRich.js';
+import srcBase64Icon     from './shared/image.js';
+import {getCaption}      from './shared/language.js';
 import {
 	fieldOptionGet,
 	fieldOptionSet
@@ -54,7 +55,7 @@ let MyGanttLineRecord = {
 		<div class="record-values">
 			<template v-for="(v,i) in values">
 				<my-value-rich class="context-calendar-gantt"
-					v-if="!indexesHidden.includes(i)"
+					v-if="!indexesHidden.includes(i) && v !== null"
 					:attribute-id="columns[i].attributeId"
 					:basis="columns[i].basis"
 					:display="columns[i].display"
@@ -117,13 +118,12 @@ let MyGanttLineRecord = {
 			if(width < 1)
 				return 'display:none';
 			
-			return [`width:${width}px`,`left:${offset}px`].join(';');
+			// max-width is overwritten by CSS if hovered over (show full entry)
+			return [`min-width:${width}px`,`max-width:${width}px`,`left:${offset}px`].join(';');
 		},
 		styleBg:function(r) {
-			if(this.color === null)
-				return '';
-			
-			return `background-color:#${this.color};`;
+			return this.color === null
+				? '' : `background-color:#${this.color};`;
 		}
 	},
 	methods:{
@@ -179,6 +179,7 @@ let MyGantt = {
 	name:'my-gantt',
 	components:{
 		MyGanttLine,
+		MyInputCollection,
 		MyValueRich
 	},
 	template:`<div class="gantt shade" v-if="ready">
@@ -190,8 +191,8 @@ let MyGantt = {
 			<div class="area nowrap">
 				<my-button image="new.png"
 					v-if="hasCreate"
-					@trigger="$emit('form-open-new',[],false)"
-					@trigger-middle="$emit('form-open-new',[],true)"
+					@trigger="$emit('open-form',0,[],false)"
+					@trigger-middle="$emit('open-form',0,[],true)"
 					:caption="!isMobile ? capGen.button.new : ''"
 					:captionTitle="capGen.button.newHint"
 					:darkBg="true"
@@ -227,7 +228,7 @@ let MyGantt = {
 				/>
 			</div>
 			
-			<div class="area nowrap">
+			<div class="area nowrap default-inputs">
 				<my-button
 					v-if="stepTypeToggle"
 					@trigger="toggleStepType"
@@ -244,9 +245,18 @@ let MyGantt = {
 					:darkBg="true"
 					:naked="true"
 				/>
+				
 				<input class="zoom-factor clickable" type="range" min="3" max="12"
 					v-if="!isMobile"
 					v-model="stepZoom"
+				/>
+				
+				<my-input-collection class="selector"
+					v-for="c in collections"
+					@index-selected="$emit('set-collection-index-filter',c.collectionId,$event)"
+					:collectionId="c.collectionId"
+					:columnIdDisplay="c.columnIdDisplay"
+					:key="c.collectionId"
 				/>
 				
 				<select class="selector"
@@ -278,7 +288,7 @@ let MyGantt = {
 					:style="styleLabel(g)"
 				>
 					<my-value-rich class="context-calendar-gantt"
-						v-for="c in g.columns.filter(v => !columnIndexesHidden.includes(v.index) && (v.value !== null || columns[v.index].display === 'gallery'))"
+						v-for="c in g.columns.filter(v => !columnIndexesHidden.includes(v.index) && v.value !== null)"
 						:attribute-id="columns[c.index].attributeId"
 						:display="columns[c.index].display"
 						:key="c.index"
@@ -305,8 +315,10 @@ let MyGantt = {
 					<div class="gantt-header lower">
 						<div class="gantt-header-item lower"
 							v-for="i in headerItems"
-							@click="clickHeaderItem(i.unixTime,false)"
-							@click.middle="clickHeaderItem(i.unixTime,true)"
+							@click.exact="clickHeaderItem(i.unixTime,false,false)"
+							@click.shift="clickHeaderItem(i.unixTime,true,false)"
+							@click.middle.exact="clickHeaderItem(i.unixTime,false,true)"
+							@click.middle.shift="clickHeaderItem(i.unixTime,true,true)"
 							:class="{ clickable:hasCreate, today:getUnixFromDate(dateStart) === i.unixTime, weekend:i.isWeekend }"
 							:style="'width:'+stepPixels+'px'"
 						>
@@ -340,44 +352,45 @@ let MyGantt = {
 	</div>`,
 	props:{
 		attributeIdColor:{ required:true },
-		attributeIdDate0:{ type:String, required:true },
-		attributeIdDate1:{ type:String, required:true },
-		choices:    { type:Array,   required:false, default:() => [] },
-		columns:    { type:Array,   required:true }, // processed list columns
-		fieldId:    { type:String,  required:true },
-		filters:    { type:Array,   required:true }, // processed query filters
-		formLoading:{ type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
-		handleError:{ type:Function,required:true },
-		iconId:     { required:true },
-		indexColor: { required:true },
-		indexDate0: { type:Number,  required:true },
-		indexDate1: { type:Number,  required:true },
-		isFullPage: { type:Boolean, required:true },
-		query:      { type:Object,  required:true },
-		rowSelect:  { type:Boolean, required:true },
-		stepTypeDefault:{ type:String,  required:true },
-		stepTypeToggle: { type:Boolean, required:true }
+		attributeIdDate0:{ type:String,  required:true },
+		attributeIdDate1:{ type:String,  required:true },
+		choices:         { type:Array,   required:false, default:() => [] },
+		columns:         { type:Array,   required:true }, // processed list columns
+		collections:     { type:Array,   required:true },
+		fieldId:         { type:String,  required:true },
+		filters:         { type:Array,   required:true }, // processed query filters
+		formLoading:     { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
+		iconId:          { required:true },
+		indexColor:      { required:true },
+		indexDate0:      { type:Number,  required:true },
+		indexDate1:      { type:Number,  required:true },
+		isFullPage:      { type:Boolean, required:true },
+		query:           { type:Object,  required:true },
+		rowSelect:       { type:Boolean, required:true },
+		stepTypeDefault: { type:String,  required:true },
+		stepTypeToggle:  { type:Boolean, required:true }
 	},
-	emits:['form-open-new','record-selected','set-args'],
+	emits:['open-form','record-selected','set-args','set-collection-index-filter'],
 	data:function() {
 		return {
 			choiceId:null,
 			dateStart:null,
 			notScrolled:true,
-			groups:[],       // gantt groups, by defined column, each with its lines of records
+			groups:[],        // gantt groups, by defined column, each with its lines of records
 			headerItems:[],
 			headerItemsMeta:[],
-			linePixels:30,   // line height in pixels
-			page:0,          // which page we are on (0: default, 1: next, -1: prev)
-			ready:false,     // component ready to be used
+			linePixels:30,    // line height in pixels
+			page:0,           // which page we are on (0: default, 1: next, -1: prev)
+			ready:false,      // component ready to be used
 			resizeTimer:null,
 			showGroupLabels:true,
-			startDate:0,     // start date (TZ), base for date ranges, set once to keep navigation clear
-			stepBase:8,      // base size of step width in pixels, used to multiply with zoom factor
-			stepType:'days', // gantt step type (hours, days)
-			stepZoom:7,      // zoom factor for step, 7 is default (7*8=56)
+			startDate:0,      // start date (TZ), base for date ranges, set once to keep navigation clear
+			stepBase:8,       // base size of step width in pixels, used to multiply with zoom factor
+			stepType:'days',  // gantt step type (hours, days)
+			stepZoom:7,       // zoom factor for step, 7 is default (7*8=56)
 			stepZoomDefault:7,
-			steps:0
+			steps:0,
+			unixTimeRangeStart:null // for time range input
 		};
 	},
 	computed:{
@@ -634,17 +647,23 @@ let MyGantt = {
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},
-		clickHeaderItem:function(unixTime,middleClick) {
+		clickHeaderItem:function(unixTime,shift,middleClick) {
 			if(!this.hasCreate) return;
 			
 			if(this.isDays)
 				unixTime = this.getUnixShifted(unixTime,false);
 			
+			if(this.unixTimeRangeStart === null) {
+				this.unixTimeRangeStart = unixTime;
+				
+				if(shift) return;
+			}
+			
 			let attributes = [
-				`${this.attributeIdDate0}_${unixTime}`,
+				`${this.attributeIdDate0}_${this.unixTimeRangeStart}`,
 				`${this.attributeIdDate1}_${unixTime}`
 			];
-			this.$emit('form-open-new',[`attributes=${attributes.join(',')}`],middleClick);
+			this.$emit('open-form',0,[`attributes=${attributes.join(',')}`],middleClick);
 		},
 		pageChange:function(factor) {
 			this.page += factor;
@@ -788,8 +807,7 @@ let MyGantt = {
 			if(this.formLoading)
 				return;
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('data','get',{
+			ws.send('data','get',{
 				relationId:this.query.relationId,
 				joins:this.getRelationsJoined(this.joins),
 				expressions:this.getQueryExpressionsDateRange(
@@ -806,91 +824,92 @@ let MyGantt = {
 					this.getUnixFromDate(this.date1)
 				)).concat(this.choiceFilters),
 				orders:this.query.orders
-			},this.getOk);
-			trans.send(this.handleError);
-		},
-		getOk:function(res) {
-			// clear existing groups
-			this.groups = [];
-			
-			// parse result rows to gantt groups
-			let color    = null;
-			let date0    = 0;
-			let date1    = 0;
-			let groupBy  = []; // group by criteria (can be identical to label)
-			let groupMap = {}; // map of all groups, key: groupBy
-			let groupColumns = []; // group column values
-			let values   = [];
-			
-			for(let i = 0, j = res.payload.rows.length; i < j; i++) {
-				let r = res.payload.rows[i];
-				groupBy      = [];
-				groupColumns = [];
-				
-				// collect special calendar values first
-				date0 = this.getDateFromUnix(r.values[0]);
-				date1 = this.getDateFromUnix(r.values[1]);
-				
-				if(this.hasColor)
-					color = r.values[2];
-				
-				// parse non-calendar expression values
-				values = this.hasColor ? r.values.slice(3) : r.values.slice(2);
-				
-				for(let x = 0, y = values.length; x < y; x++) {
+			},true).then(
+				(res) => {
+					// clear existing groups
+					this.groups = [];
 					
-					if(!this.group0LabelExpressionIndexes.includes(x))
-						continue;
+					// parse result rows to gantt groups
+					let color    = null;
+					let date0    = 0;
+					let date1    = 0;
+					let groupBy  = []; // group by criteria (can be identical to label)
+					let groupMap = {}; // map of all groups, key: groupBy
+					let groupColumns = []; // group column values
+					let values   = [];
 					
-					// add non-file attributes as group criteria
-					let atr = this.attributeIdMap[this.columns[x].attributeId];
-					if(atr.content !== 'files')
-						groupBy.push(values[x]);
+					for(let i = 0, j = res.payload.rows.length; i < j; i++) {
+						let r = res.payload.rows[i];
+						groupBy      = [];
+						groupColumns = [];
+						
+						// collect special calendar values first
+						date0 = this.getDateFromUnix(r.values[0]);
+						date1 = this.getDateFromUnix(r.values[1]);
+						
+						if(this.hasColor)
+							color = r.values[2];
+						
+						// parse non-calendar expression values
+						values = this.hasColor ? r.values.slice(3) : r.values.slice(2);
+						
+						for(let x = 0, y = values.length; x < y; x++) {
+							
+							if(!this.group0LabelExpressionIndexes.includes(x))
+								continue;
+							
+							// add non-file attributes as group criteria
+							let atr = this.attributeIdMap[this.columns[x].attributeId];
+							if(atr.content !== 'files')
+								groupBy.push(values[x]);
+							
+							groupColumns.push({
+								index:x,
+								value:values[x]
+							});
+						}
+						let groupName = groupBy.join(' ');
+						
+						// add group if not there yet
+						if(typeof groupMap[groupName] === 'undefined') {
+							groupMap[groupName] = {
+								lines:[[]], // each line is an array of records
+								columns:groupColumns
+							};
+						}
+						
+						// check in which line record fits (no overlapping)
+						let lineIndex = this.getFreeLineIndex(groupMap[groupName].lines,date0,date1);
+						
+						if(lineIndex === -1) {
+							lineIndex = groupMap[groupName].lines.length;
+							groupMap[groupName].lines.push([]);
+						}
+						
+						groupMap[groupName].lines[lineIndex].push({
+							id:r.indexRecordIds['0'],
+							color:color,
+							date0:date0,
+							date1:date1,
+							values:values
+						});
+					}
 					
-					groupColumns.push({
-						index:x,
-						value:values[x]
-					});
-				}
-				let groupName = groupBy.join(' ');
-				
-				// add group if not there yet
-				if(typeof groupMap[groupName] === 'undefined') {
-					groupMap[groupName] = {
-						lines:[[]], // each line is an array of records
-						columns:groupColumns
-					};
-				}
-				
-				// check in which line record fits (no overlapping)
-				let lineIndex = this.getFreeLineIndex(groupMap[groupName].lines,date0,date1);
-				
-				if(lineIndex === -1) {
-					lineIndex = groupMap[groupName].lines.length;
-					groupMap[groupName].lines.push([]);
-				}
-				
-				groupMap[groupName].lines[lineIndex].push({
-					id:r.indexRecordIds['0'],
-					color:color,
-					date0:date0,
-					date1:date1,
-					values:values
-				});
-			}
-			
-			// store groups, sorted by group by criteria
-			let keysSorted = Object.keys(groupMap).sort();
-			for(let i = 0, j = keysSorted.length; i < j; i++) {
-				this.groups.push(groupMap[keysSorted[i]]);
-			}
-			
-			if(this.notScrolled) {
-				this.notScrolled = false;
-				
-				if(this.page === 0)
-					this.scrollToNow();
-			}
+					// store groups, sorted by group by criteria
+					let keysSorted = Object.keys(groupMap).sort();
+					for(let i = 0, j = keysSorted.length; i < j; i++) {
+						this.groups.push(groupMap[keysSorted[i]]);
+					}
+					
+					if(this.notScrolled) {
+						this.notScrolled = false;
+						
+						if(this.page === 0)
+							this.scrollToNow();
+					}
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

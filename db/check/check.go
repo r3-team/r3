@@ -1,17 +1,17 @@
-package db
+package check
 
 import (
-	"errors"
+	"r3/handler"
 	"regexp"
 )
 
 // check if string input can be used as an identifier in database
 // all identifiers are quoted but we keep things lowercase for simplicity and easier SQL handling
 // keywords are not filtered
-func CheckIdentifier(input string) error {
+func DbIdentifier(input string) error {
 
 	if input == "" {
-		return errors.New("zero character identifier is not allowed")
+		return handler.CreateErrCode("APP", handler.ErrCodeAppNameEmpty)
 	}
 
 	// must start with [a-z], followed by [a-z0-9\_], max. 31 chars (max. identifier size in pgsql: 63)
@@ -21,7 +21,7 @@ func CheckIdentifier(input string) error {
 		return err
 	}
 	if input != rex.FindString(input) {
-		return errors.New("bad identifier, allowed: ^[a-z][a-z0-9\\_]{1,30}$")
+		return handler.CreateErrCode("APP", handler.ErrCodeAppNameInvalid)
 	}
 	return nil
 }

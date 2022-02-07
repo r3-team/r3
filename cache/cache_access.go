@@ -76,10 +76,11 @@ func load(loginId int64, renewal bool) error {
 	}
 
 	loginIdMapAccess[loginId] = types.LoginAccess{
-		RoleIds:   roleIds,
-		Relation:  make(map[uuid.UUID]int),
-		Attribute: make(map[uuid.UUID]int),
-		Menu:      make(map[uuid.UUID]int),
+		RoleIds:    roleIds,
+		Attribute:  make(map[uuid.UUID]int),
+		Collection: make(map[uuid.UUID]int),
+		Menu:       make(map[uuid.UUID]int),
+		Relation:   make(map[uuid.UUID]int),
 	}
 
 	for _, roleId := range roleIds {
@@ -87,13 +88,6 @@ func load(loginId int64, renewal bool) error {
 		role, _ := RoleIdMap[roleId]
 
 		// because access rights work cumulatively, apply highest right only
-		for id, access := range role.AccessRelations {
-			if _, exists := loginIdMapAccess[loginId].Relation[id]; !exists ||
-				loginIdMapAccess[loginId].Relation[id] < access {
-
-				loginIdMapAccess[loginId].Relation[id] = access
-			}
-		}
 		for id, access := range role.AccessAttributes {
 			if _, exists := loginIdMapAccess[loginId].Attribute[id]; !exists ||
 				loginIdMapAccess[loginId].Attribute[id] < access {
@@ -101,11 +95,25 @@ func load(loginId int64, renewal bool) error {
 				loginIdMapAccess[loginId].Attribute[id] = access
 			}
 		}
+		for id, access := range role.AccessCollections {
+			if _, exists := loginIdMapAccess[loginId].Collection[id]; !exists ||
+				loginIdMapAccess[loginId].Collection[id] < access {
+
+				loginIdMapAccess[loginId].Collection[id] = access
+			}
+		}
 		for id, access := range role.AccessMenus {
 			if _, exists := loginIdMapAccess[loginId].Menu[id]; !exists ||
 				loginIdMapAccess[loginId].Menu[id] < access {
 
 				loginIdMapAccess[loginId].Menu[id] = access
+			}
+		}
+		for id, access := range role.AccessRelations {
+			if _, exists := loginIdMapAccess[loginId].Relation[id]; !exists ||
+				loginIdMapAccess[loginId].Relation[id] < access {
+
+				loginIdMapAccess[loginId].Relation[id] = access
 			}
 		}
 	}

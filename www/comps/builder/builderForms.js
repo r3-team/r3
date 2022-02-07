@@ -81,8 +81,10 @@ let MyBuilderFormsItem = {
 				presetIdOpen:null,
 				iconId:null,
 				name:'',
+				query:null,
 				fields:[],
-				query:{},
+				functions:[],
+				states:[],
 				captions:{
 					formTitle:{}
 				}
@@ -107,12 +109,11 @@ let MyBuilderFormsItem = {
 		},
 		presetCandidates:function() {
 			return this.isNew || !this.isQueryActive
-				? []
-				: this.relationIdMap[this.form.query.relationId].presets;
+				? [] : this.relationIdMap[this.form.query.relationId].presets;
 		},
 		
 		// simple states
-		isQueryActive:function() { return this.form.query.relationId !== null; },
+		isQueryActive:function() { return !this.isNew && this.form.query.relationId !== null; },
 		isNew:        function() { return this.form.id === null; },
 		
 		// stores
@@ -156,38 +157,33 @@ let MyBuilderFormsItem = {
 			});
 		},
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('form','del',{
-				id:this.form.id
-			},this.delOk);
-			trans.send(this.$root.genericError);
-		},
-		delOk:function(res) {
-			this.$root.schemaReload(this.moduleId);
+			ws.send('form','del',{id:this.form.id},true).then(
+				(res) => this.$root.schemaReload(this.moduleId),
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('form','set',{
-				id:this.form.id,
-				moduleId:this.moduleId,
-				presetIdOpen:this.presetIdOpen,
-				iconId:this.iconId,
-				name:this.name,
-				query:this.getQueryTemplate(),
-				fields:this.form.fields,
-				states:this.form.states,
-				captions:this.captions
-			},this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			if(this.isNew) {
-				this.name     = '';
-				this.captions = {
-					formTitle:{}
-				};
-			}
-			this.$root.schemaReload(this.moduleId);
+			let form = JSON.parse(JSON.stringify(this.form));
+			if(form.query === null)
+				form.query = this.getQueryTemplate();
+			
+			// set overwritable values
+			form.moduleId     = this.moduleId;
+			form.presetIdOpen = this.presetIdOpen;
+			form.iconId       = this.iconId;
+			form.name         = this.name;
+			form.captions     = this.captions;
+			
+			ws.send('form','set',form,true).then(
+				res => {
+					if(this.isNew) {
+						this.name     = '';
+						this.captions = {formTitle:{}};
+					}
+					this.$root.schemaReload(this.moduleId);
+				},
+				err => this.$root.genericError(err)
+			);
 		}
 	}
 };
@@ -319,18 +315,18 @@ let MyBuilderForms = {
 			}
 		},
 		copy:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('form','copy',{
+			ws.send('form','copy',{
 				id:this.copyFormId,
 				moduleId:this.module.id,
 				newName:this.copyNewName
-			},this.copyOk);
-			trans.send(this.$root.genericError);
-		},
-		copyOk:function(res) {
-			this.copyFormId  = null;
-			this.copyNewName = '';
-			this.$root.schemaReload(this.module.id);
+			},true).then(
+				(res) => {
+					this.copyFormId  = null;
+					this.copyNewName = '';
+					this.$root.schemaReload(this.module.id);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

@@ -1,6 +1,8 @@
 import {
 	getDependentModules,
 	getItemTitle,
+	getItemTitleColumn,
+	getItemTitleRelation,
 	getValueFromJson,
 	setValueInJson
 } from '../shared/builder.js';
@@ -14,6 +16,67 @@ import {
 } from '../shared/attribute.js';
 
 export {MyBuilderFieldOptions as default};
+
+let MyBuilderFieldOptionsCollection = {
+	name:'my-builder-field-options-collection',
+	template:`
+		<tr>
+			<td>{{ caption }}</td>
+			<td>
+				<select v-model="collectionIdInput">
+					<option :value="null">-</option>
+					<optgroup
+						v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
+						:label="m.name"
+					>
+						<option v-for="c in m.collections" :value="c.id">
+							{{ c.name }}
+						</option>
+					</optgroup>
+				</select>
+				<select v-model="columnIdInput" :disabled="collectionId === null">
+					<option :value="null">-</option>
+					<option v-if="collectionId !== null" v-for="c in collectionIdMap[collectionId].columns" :value="c.id">
+						{{ getItemTitleColumn(c) }}
+					</option>
+				</select>
+			</td>
+			<td>
+				<my-button image="cancel.png"
+					v-if="allowRemove"
+					@trigger="$emit('remove')"
+					:naked="true"
+				/>
+			</td>
+		</tr>
+	`,
+	props:{
+		allowRemove: { type:Boolean, required:true },
+		caption:     { type:String,  required:true },
+		collectionId:{ required:true },
+		columnId:    { required:true },
+		module:      { type:Object,  required:true }
+	},
+	emits:['remove','update:collectionId','update:columnId'],
+	computed:{
+		collectionIdInput:{
+			get:function()  { return this.collectionId; },
+			set:function(v) { this.$emit('update:collectionId',v); }
+		},
+		columnIdInput:{
+			get:function()  { return this.columnId; },
+			set:function(v) { this.$emit('update:columnId',v); }
+		},
+		
+		// stores
+		modules:        function() { return this.$store.getters['schema/modules']; },
+		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; }
+	},
+	methods:{
+		getDependentModules,
+		getItemTitleColumn
+	}
+};
 
 let MyBuilderFieldOptionsChartSerie = {
 	name:'my-builder-field-options-chart-serie',
@@ -260,8 +323,11 @@ let MyBuilderFieldOptionsChart = {
 
 let MyBuilderFieldOptions = {
 	name:'my-builder-field-options',
-	components:{MyBuilderFieldOptionsChart},
-	template:`<div class="options">
+	components:{
+		MyBuilderFieldOptionsChart,
+		MyBuilderFieldOptionsCollection
+	},
+	template:`<div class="builder-field-options">
 		<table class="fullWidth default-inputs"><tbody>
 			<tr>
 				<td>{{ capApp.onMobile }}</td>
@@ -282,8 +348,8 @@ let MyBuilderFieldOptions = {
 						<option value="hidden">{{ capApp.stateHidden }}</option>
 						<option value="default">{{ capApp.stateDefault }}</option>
 						<option v-if="isData" value="optional">{{ capApp.stateOptional }}</option>
-						<option v-if="isData" value="readonly">{{ capApp.stateReadonly }}</option>
 						<option v-if="isData" value="required">{{ capApp.stateRequired }}</option>
+						<option v-if="isData || isButton" value="readonly">{{ capApp.stateReadonly }}</option>
 					</select>
 				</td>
 			</tr>
@@ -303,16 +369,6 @@ let MyBuilderFieldOptions = {
 			</tr>
 			
 			<template v-if="isData">
-				<tr v-if="!isFiles && !isRelationship">
-					<td>{{ capApp.fieldDefault }}</td>
-					<td>
-						<input
-							@input="set('def',$event.target.value)"
-							:placeholder="capApp.fieldDefaultHint"
-							:value="field.def"
-						/>
-					</td>
-				</tr>
 				<tr v-if="!isRelationship">
 					<td>{{ capApp.fieldMin }}</td>
 					<td>
@@ -346,6 +402,7 @@ let MyBuilderFieldOptions = {
 							<option v-if="isInteger" value="login"   >{{ capApp.option.displayLogin }}</option>
 							<option v-if="isString"  value="textarea">{{ capApp.option.displayTextarea }}</option>
 							<option v-if="isString"  value="richtext">{{ capApp.option.displayRichtext }}</option>
+							<option v-if="isString"  value="password">{{ capApp.option.displayPassword }}</option>
 							<option v-if="isString"  value="color"   >{{ capApp.option.displayColor }}</option>
 							<option v-if="isString"  value="email"   >{{ capApp.option.displayEmail }}</option>
 							<option v-if="isString"  value="phone"   >{{ capApp.option.displayPhone }}</option>
@@ -363,6 +420,26 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
+				<tr v-if="!isFiles && !isRelationship">
+					<td>{{ capApp.fieldDefault }}</td>
+					<td>
+						<input
+							@input="set('def',$event.target.value)"
+							:placeholder="capApp.fieldDefaultHint"
+							:value="field.def"
+						/>
+					</td>
+				</tr>
+				<my-builder-field-options-collection
+					v-if="!isFiles && field.def === ''"
+					@update:collectionId="setNull('collectionIdDef',$event)"
+					@update:columnId="setNull('columnIdDef',$event)"
+					:allowRemove="false"
+					:caption="capApp.collectionIdDef"
+					:collectionId="field.collectionIdDef"
+					:columnId="field.columnIdDef"
+					:module="module"
+				/>
 				<tr v-if="isString && field.display === 'richtext'">
 					<td>{{ capApp.fieldAttributeIdAltRichtextFiles }}</td>
 					<td>
@@ -755,6 +832,25 @@ let MyBuilderFieldOptions = {
 					</td>
 				</tr>
 				<tr>
+					<td>{{ capApp.filterQuick }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="set('filterQuick',$event)"
+							:modelValue="field.filterQuick"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="3">
+						<my-button
+							@trigger="showCsv = !showCsv"
+							:image="showCsv ? 'triangleDown.png' : 'triangleRight.png'"
+							:caption="capApp.csvTitle"
+							:naked="true"
+						/>
+					</td>
+				</tr>
+				<tr v-if="showCsv">
 					<td>{{ capApp.csvImport }}</td>
 					<td>
 						<my-bool
@@ -763,21 +859,12 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<tr>
+				<tr v-if="showCsv">
 					<td>{{ capApp.csvExport }}</td>
 					<td>
 						<my-bool
 							@update:modelValue="set('csvExport',$event)"
 							:modelValue="field.csvExport"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.filterQuick }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="set('filterQuick',$event)"
-							:modelValue="field.filterQuick"
 						/>
 					</td>
 				</tr>
@@ -791,22 +878,26 @@ let MyBuilderFieldOptions = {
 				:modelValue="field.chartOption"
 			/>
 			
-			<!-- open form with no record -->
-			<template v-if="isButton">
+			<!-- execute JS function -->
+			<template v-if="isButton || isData">
 				<tr>
-					<td>{{ capApp.formOpenEmpty }}</td>
+					<td v-if="isButton">{{ capApp.jsFunctionButton }}</td>
+					<td v-if="isData">{{ capApp.jsFunctionData }}</td>
 					<td>
 						<select
-							@input="setNull('formIdOpen',$event.target.value)"
-							:value="field.formIdOpen"
+							@input="setNull('jsFunctionId',$event.target.value)"
+							:value="field.jsFunctionId"
 						>
 							<option value="">-</option>
 							<optgroup
 								v-for="mod in getDependentModules(module,modules)"
 								:label="mod.name"
 							>
-								<option v-for="f in mod.forms" :value="f.id">
-									{{ f.name }}
+								<option
+									v-for="fnc in mod.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
+									:value="fnc.id"
+								>
+									{{ fnc.name }}
 								</option>
 							</optgroup>
 						</select>
@@ -814,88 +905,209 @@ let MyBuilderFieldOptions = {
 				</tr>
 			</template>
 			
-			<!-- open form with record -->
-			<tr v-if="(isList || isCalendar || isRelationship) && field.query.relationId !== null">
-				<td>{{ capApp.formOpen }}</td>
-				<td>
-					<select
-						@input="setNull('formIdOpen',$event.target.value)"
-						:value="field.formIdOpen"
-					>
-						<option value="">-</option>
-						<optgroup
-							v-for="mod in getDependentModules(module,modules)"
-							:label="mod.name"
+			<!-- open form -->
+			<template v-if="isButton || ((isList || isCalendar || isRelationship) && field.query.relationId !== null)">
+				<tr>
+					<td colspan="2">
+						<my-button
+							@trigger="showOpenForm = !showOpenForm"
+							:caption="capApp.openForm"
+							:image="showOpenForm ? 'triangleDown.png' : 'triangleRight.png'"
+							:naked="true"
+						/>
+					</td>
+				</tr>
+				<tr v-if="showOpenForm">
+					<td>{{ capApp.openFormFormIdOpen }}</td>
+					<td>
+						<select
+							@input="setOpenForm('formIdOpen',$event.target.value)"
+							:value="isOpenForm ? field.openForm.formIdOpen : ''"
+						>
+							<option value="">-</option>
+							<optgroup
+								v-for="mod in getDependentModules(module,modules)"
+								:label="mod.name"
+							>
+								<option
+									v-for="f in mod.forms.filter(v => isButton || v.query.relationId === field.query.relationId)" 
+									:value="f.id"
+								>{{ f.name }}</option>
+							</optgroup>
+						</select>
+					</td>
+				</tr>
+			</template>
+			
+			<template v-if="isOpenForm && showOpenForm">
+				<tr>
+					<td>{{ capApp.openFormPopUp }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="setOpenForm('popUp',$event)"
+							:modelValue="field.openForm.popUp"
+						/>
+					</td>
+				</tr>
+				<tr v-if="field.openForm.popUp">
+					<td>{{ capApp.openFormMaxHeight }}</td>
+					<td>
+						<input
+							@input="setOpenForm('maxHeight',$event.target.value)"
+							:value="field.openForm.maxHeight"
+						/>
+					</td>
+				</tr>
+				<tr v-if="field.openForm.popUp">
+					<td>{{ capApp.openFormMaxWidth }}</td>
+					<td>
+						<input
+							@input="setOpenForm('maxWidth',$event.target.value)"
+							:value="field.openForm.maxWidth"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td colspan="2"><b>{{ capApp.openFormNewRecord }}</b></td>
+				</tr>
+				<tr>
+					<td>{{ capApp.openFormRelationIndex }}</td>
+					<td>
+						<select
+							@input="setOpenForm('relationIndex',$event.target.value)"
+							:value="field.openForm.relationIndex"
 						>
 							<option
-								v-for="f in mod.forms.filter(v => v.query.relationId === field.query.relationId)"
-								:value="f.id"
-							>
-								{{ f.name }}
-							</option>
-						</optgroup>
-					</select>
-				</td>
-			</tr>
-			
-			<!-- apply record value as attribute value for opened form -->
-			<tr v-if="isFormOpenWithAttribute">
-				<td>{{ capApp.attributeRecord }}</td>
-				<td>
-					<select
-						@input="setNull('attributeIdRecord',$event.target.value)"
-						:value="field.attributeIdRecord"
-					>
-						<option value=""></option>
-						<optgroup
-							v-for="mod in getDependentModules(module,modules)"
-							:label="mod.name"
+								v-for="j in joinsIndexMap"
+								:value="j.index"
+							>{{ getItemTitleRelation(j.relationId,j.index) }}</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.openFormAttributeApply }}</td>
+					<td>
+						<select
+							@input="setOpenForm('attributeIdApply',$event.target.value)"
+							:value="field.openForm.attributeIdApply !== null ? field.openForm.attributeIdApply : ''"
 						>
-							<template v-for="r in mod.relations">
-								<option
-									v-for="a in r.attributes.filter(v => attributeIdsReferToFormRelation.includes(v.id))"
-									:value="a.id"
-								>
-									{{ r.name + '.' + a.name }}
-								</option>
-							</template>
-						</optgroup>
-					</select>
-				</td>
-			</tr>
+							<option value="">-</option>
+							<option
+								v-for="a in openFormTargetAttributes"
+								:value="a.id"
+							>
+								{{ relationIdMap[a.relationId].name + '.' + a.name }}
+							</option>
+						</select>
+					</td>
+				</tr>
+			</template>
+			
+			<!-- consume collection -->
+			<template v-if="isList || isCalendar">
+				<tr>
+					<td>
+						<my-button
+							@trigger="showCollections = !showCollections"
+							:image="showCollections ? 'triangleDown.png' : 'triangleRight.png'"
+							:caption="capApp.collectionTitle"
+							:naked="true"
+						/>
+					</td>
+					<td v-if="showCollections" colspan="2">
+						<my-button image="add.png"
+							@trigger="collectionAdd"
+							:caption="capGen.button.add"
+							:naked="true"
+						/>
+					</td>
+				</tr>
+				<template v-if="showCollections">
+					<my-builder-field-options-collection
+						v-for="(c,i) in field.collections"
+						@remove="collectionRemove(i)"
+						@update:collectionId="setCollection(i,'collectionId',$event)"
+						@update:columnId="setCollection(i,'columnIdDisplay',$event)"
+						:allowRemove="true"
+						:caption="capApp.collection"
+						:collectionId="c.collectionId"
+						:columnId="c.columnIdDisplay"
+						:module="module"
+					/>
+					<tr v-if="field.collections.length !== 0">
+						<td colspan="3">{{ capApp.collectionHint }}</td>
+					</tr>
+				</template>
+			</template>
 		</tbody></table>
 	</div>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		dataFields:     { type:Array,   required:true },
 		field:          { type:Object,  required:true },
+		formId:         { type:String,  required:true },
 		joinsIndexMap:  { type:Object,  required:true },
 		moduleId:       { type:String,  required:true }
+	},
+	data:function() {
+		return {
+			showCollections:false,
+			showCsv:false,
+			showOpenForm:false
+		};
 	},
 	emits:['set'],
 	computed:{
 		attribute:function() {
-			if(!this.isData || typeof this.attributeIdMap[this.field.attributeId] === 'undefined')
-				return false;
-			
-			return this.attributeIdMap[this.field.attributeId];
+			return !this.isData || typeof this.attributeIdMap[this.field.attributeId] === 'undefined'
+				? false : this.attributeIdMap[this.field.attributeId];
 		},
-		attributeIdsReferToFormRelation:function() {
-			if(typeof this.joinsIndexMap['0'] === 'undefined') return [];
+		openFormTargetAttributes:function() {
+			if(!this.isOpenForm)
+				return [];
 			
-			let atrIds = [];
-			let relId  = this.joinsIndexMap['0'].relationId;
-			
-			for(let k in this.attributeIdMap) {
-				let a = this.attributeIdMap[k];
+			// parse from which relation the record is applied, based on the chosen relation index
+			let recordRelationId = null;
+			for(let k in this.joinsIndexMap) {
 				
-				if(!this.isAttributeRelationship(a.content))
-					continue;
-				
-				if(a.relationshipId === relId)
-					atrIds.push(a.id);
+				if(this.joinsIndexMap[k].index === this.field.openForm.relationIndex) {
+					recordRelationId = this.joinsIndexMap[k].relationId;
+					break;
+				}
 			}
-			return atrIds;
+			if(recordRelationId === null)
+				return [];
+			
+			let form = this.formIdMap[this.field.openForm.formIdOpen];
+			let out  = [];
+			
+			// collect fitting attributes
+			for(let i = 0, j = form.query.joins.length; i < j; i++) {
+				let r = this.relationIdMap[form.query.joins[i].relationId];
+				
+				// attributes on relation from target form, in relationship with record relation
+				for(let x = 0, y = r.attributes.length; x < y; x++) {
+					let a = r.attributes[x];
+				
+					if(!this.isAttributeRelationship(a.content))
+						continue;
+					
+					if(a.relationshipId === recordRelationId)
+						out.push(a);
+				}
+				
+				// attributes on record relation, in relationship with relation from target form
+				for(let x = 0, y = this.relationIdMap[recordRelationId].attributes.length; x < y; x++) {
+					let a = this.relationIdMap[recordRelationId].attributes[x];
+				
+					if(!this.isAttributeRelationship(a.content))
+						continue;
+					
+					if(a.relationshipId === r.id)
+						out.push(a);
+				}
+			}
+			return out;
 		},
 		presetIdMap:function() {
 			if(!this.isRelationship)
@@ -917,33 +1129,22 @@ let MyBuilderFieldOptions = {
 		},
 		
 		// simple states
-		hasCaption:   function() { return this.isData || this.isHeader; },
-		isButton:     function() { return this.field.content === 'button'; },
-		isCalendar:   function() { return this.field.content === 'calendar'; },
-		isChart:      function() { return this.field.content === 'chart'; },
-		isContainer:  function() { return this.field.content === 'container'; },
-		isData:       function() { return this.field.content === 'data'; },
-		isDate:       function() { return this.isData && this.field.display === 'date'; },
-		isDatetime:   function() { return this.isData && this.field.display === 'datetime'; },
-		isHeader:     function() { return this.field.content === 'header'; },
-		isList:       function() { return this.field.content === 'list'; },
-		isQuery:      function() { return this.isCalendar || this.isChart || this.isList || this.isRelationship },
-		isFiles:function() {
-			return this.isData && this.isAttributeFiles(this.attribute.content);
-		},
-		isInteger:function() {
-			return this.isData && this.isAttributeInteger(this.attribute.content);
-		},
-		isRelationship:function() {
-			return this.isData && this.isAttributeRelationship(this.attribute.content);
-		},
-		isString:function() {
-			return this.isData && this.isAttributeString(this.attribute.content);
-		},
-		isFormOpenWithAttribute:function() {
-			return typeof this.field.attributeIdRecord !== 'undefined' &&
-				typeof this.field.formIdOpen !== 'undefined' && this.field.formIdOpen !== null;
-		},
+		hasCaption:    function() { return this.isData || this.isHeader; },
+		isButton:      function() { return this.field.content === 'button'; },
+		isCalendar:    function() { return this.field.content === 'calendar'; },
+		isChart:       function() { return this.field.content === 'chart'; },
+		isContainer:   function() { return this.field.content === 'container'; },
+		isData:        function() { return this.field.content === 'data'; },
+		isDate:        function() { return this.isData && this.field.display === 'date'; },
+		isDatetime:    function() { return this.isData && this.field.display === 'datetime'; },
+		isHeader:      function() { return this.field.content === 'header'; },
+		isList:        function() { return this.field.content === 'list'; },
+		isOpenForm:    function() { return typeof this.field.openForm !== 'undefined' && this.field.openForm !== null; },
+		isQuery:       function() { return this.isCalendar || this.isChart || this.isList || this.isRelationship },
+		isFiles:       function() { return this.isData && this.isAttributeFiles(this.attribute.content); },
+		isInteger:     function() { return this.isData && this.isAttributeInteger(this.attribute.content); },
+		isRelationship:function() { return this.isData && this.isAttributeRelationship(this.attribute.content); },
+		isString:      function() { return this.isData && this.isAttributeString(this.attribute.content); },
 		
 		// stores
 		module:        function() { return this.moduleIdMap[this.moduleId]; },
@@ -952,19 +1153,34 @@ let MyBuilderFieldOptions = {
 		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
 		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
 		formIdMap:     function() { return this.$store.getters['schema/formIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.form; }
+		capApp:        function() { return this.$store.getters.captions.builder.form; },
+		capGen:        function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
 		// externals
 		getDependentModules,
 		getDetailsFromIndexAttributeId,
 		getIndexAttributeId,
+		getItemTitleRelation,
 		isAttributeFiles,
 		isAttributeInteger,
 		isAttributeRelationship,
 		isAttributeString,
 		
 		// actions
+		collectionAdd:function() {
+			let v = JSON.parse(JSON.stringify(this.field.collections));
+			v.push({
+				collectionId:null,
+				columnIdDisplay:null
+			});
+			this.set('collections',v);
+		},
+		collectionRemove:function(i) {
+			let v = JSON.parse(JSON.stringify(this.field.collections));
+			v.splice(i,1);
+			this.set('collections',v);
+		},
 		presetIdAdd:function(value) {
 			let ids = JSON.parse(JSON.stringify(this.field.defPresetIds));
 			
@@ -984,15 +1200,24 @@ let MyBuilderFieldOptions = {
 			ids.splice(pos,1);
 			this.set('defPresetIds',ids);
 		},
-		setInt:function(name,val,allowNull) {
-			if(val !== '')
-				return this.set(name,parseInt(val));
-			
-			if(allowNull) return this.set(name,null);
-			else          return this.set(name,0);
+		set:function(name,val) {
+			if(name === 'csvImport' && !val) {
+				// no CSV import, clear query lookups
+				let q = JSON.parse(JSON.stringify(this.field.query));
+				q.lookups = [];
+				this.$emit('set','query',q);
+			}
+			if(name === 'gantt') {
+				// gantt, set or remove gantt step option
+				if(!val) this.$emit('set','ganttSteps',null);
+				else     this.$emit('set','ganttSteps','days');
+			}
+			this.$emit('set',name,val);
 		},
-		setNull:function(name,val) {
-			this.set(name,val === '' ? null : val);
+		setCollection:function(i,name,value) {
+			let v = JSON.parse(JSON.stringify(this.field.collections));
+			v[i][name] = value;
+			this.set('collections',v);
 		},
 		setIndexAttribute:function(name,indexAttributeId) {
 			let values = this.getDetailsFromIndexAttributeId(indexAttributeId);
@@ -1015,19 +1240,48 @@ let MyBuilderFieldOptions = {
 				break;
 			}
 		},
-		set:function(name,val) {
-			if(name === 'csvImport' && !val) {
-				// no CSV import, clear query lookups
-				let q = JSON.parse(JSON.stringify(this.field.query));
-				q.lookups = [];
-				this.$emit('set','query',q);
+		setInt:function(name,val,allowNull) {
+			if(val !== '')
+				return this.set(name,parseInt(val));
+			
+			if(allowNull) return this.set(name,null);
+			else          return this.set(name,0);
+		},
+		setNull:function(name,val) {
+			this.set(name,val === '' ? null : val);
+		},
+		setOpenForm:function(name,val) {
+			
+			// clear if no form is opened
+			if(name === 'formIdOpen' && val === '')
+				return this.set('openForm',null);
+			
+			let v = JSON.parse(JSON.stringify(this.field.openForm));
+			
+			// set initial value if empty
+			if(v === null) {
+				v = {
+					formIdOpen:null,
+					attributeIdApply:null,
+					relationIndex:0,
+					popUp:false,
+					maxHeight:0,
+					maxWidth:0
+				};
 			}
-			if(name === 'gantt') {
-				// gantt, set or remove gantt step option
-				if(!val) this.$emit('set','ganttSteps',null);
-				else     this.$emit('set','ganttSteps','days');
-			}
-			this.$emit('set',name,val);
+			
+			// set changed value
+			if(['relationIndex','maxHeight','maxWidth'].includes(name))
+				val = parseInt(val);
+			
+			if(name === 'attributeIdApply' && val === '')
+				val = null;
+			
+			if(name === 'formIdOpen')
+				v.attributeIdApply = null;
+			
+			v[name] = val;
+			this.set('openForm',v);
 		}
 	}
 };

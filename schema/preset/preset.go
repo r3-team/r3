@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"r3/db"
 	"r3/schema"
-	"r3/schema/lookups"
 	"r3/types"
 	"strings"
 
@@ -99,11 +98,11 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 	}
 
 	// resolve dependencies
-	_, modName, err := lookups.GetModuleDetailsByRelationId_tx(tx, relationId)
+	_, modName, err := schema.GetModuleDetailsByRelationId_tx(tx, relationId)
 	if err != nil {
 		return err
 	}
-	relName, err := lookups.GetRelationNameById_tx(tx, relationId)
+	relName, err := schema.GetRelationNameById_tx(tx, relationId)
 	if err != nil {
 		return err
 	}
@@ -156,7 +155,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 		)
 		FROM instance.preset_record
 		WHERE preset_id = $1
-	`, modName, relName, lookups.PkName), id).Scan(&recordId, &recordExists); err != nil && err != pgx.ErrNoRows {
+	`, modName, relName, schema.PkName), id).Scan(&recordId, &recordExists); err != nil && err != pgx.ErrNoRows {
 		return err
 	}
 	recordExisted := recordId != 0
@@ -261,7 +260,7 @@ func setRecord_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, recordId 
 			continue
 		}
 
-		atrName, err := lookups.GetAttributeNameById_tx(tx, value.AttributeId)
+		atrName, err := schema.GetAttributeNameById_tx(tx, value.AttributeId)
 		if err != nil {
 			return err
 		}

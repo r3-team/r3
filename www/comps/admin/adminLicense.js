@@ -80,12 +80,10 @@ let MyAdminLicense = {
 		
 		// backend calls
 		get:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('license','get',{},this.getOk);
-			trans.send(this.$root.genericError);
-		},
-		getOk:function(res) {
-			this.$store.commit('license',res.payload);
+			ws.send('license','get',{},true).then(
+				(res) => this.$store.commit('license',res.payload),
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function(evt) {
 			let that = this;
@@ -101,7 +99,7 @@ let MyAdminLicense = {
 				let res = JSON.parse(httpRequest.response);
 				
 				if(res.error !== '')
-					return that.$root.genericError(null,'license upload failed');
+					return that.$root.genericError('license upload failed');
 				
 				that.$root.initPublic();
 				that.get();

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"r3/cache"
 	"r3/db"
-	"r3/schema/lookups"
+	"r3/schema"
 	"r3/tools"
 	"r3/types"
 
@@ -27,12 +27,13 @@ func GetRecords(attributeIdLookup uuid.UUID, idsExclude []int64, byString string
 
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
-	qb.AddList("SELECT", []string{fmt.Sprintf(`"%s"`, lookups.PkName), fmt.Sprintf(`"%s"`, atr.Name)})
+	qb.AddList("SELECT", []string{fmt.Sprintf(`"%s"`, schema.PkName),
+		fmt.Sprintf(`"%s"`, atr.Name)})
 
 	qb.Set("FROM", fmt.Sprintf(`"%s"."%s"`, mod.Name, rel.Name))
 
 	if len(idsExclude) != 0 {
-		qb.Add("WHERE", fmt.Sprintf(`"%s" <> ALL({IDS_EXCLUDE})`, lookups.PkName))
+		qb.Add("WHERE", fmt.Sprintf(`"%s" <> ALL({IDS_EXCLUDE})`, schema.PkName))
 		qb.AddPara("{IDS_EXCLUDE}", idsExclude)
 	}
 
@@ -79,6 +80,6 @@ func SetRecord_tx(tx pgx.Tx, attributeIdLogin uuid.UUID, loginId pgtype.Int4, re
 		UPDATE "%s"."%s"
 		SET "%s" = $1
 		WHERE "%s" = $2
-	`, mod.Name, rel.Name, atr.Name, lookups.PkName), loginId, recordId)
+	`, mod.Name, rel.Name, atr.Name, schema.PkName), loginId, recordId)
 	return err
 }

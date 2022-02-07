@@ -114,15 +114,10 @@ let MyAdminRoleItem = {
 		
 		// backend calls
 		getNewName:function(id) {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('login','getNames',{ id:id },this.getNewNameOk);
-			trans.send(this.$root.genericError);
-		},
-		getNewNameOk:function(res,req) {
-			this.$emit('add',{
-				id:req.payload.id,
-				name:res.payload[0].name
-			});
+			ws.send('login','getNames',{id:id},true).then(
+				(res) => this.$emit('add',{id:id,name:res.payload[0].name}),
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };
@@ -280,26 +275,27 @@ let MyAdminRoles = {
 			// reset and get logins for all valid roles
 			this.roleIdMapLogins = {};
 			
-			let trans = new wsHub.transactionBlocking();
-			
+			let requests = [];
 			for(let i = 0, j = this.rolesValid.length; i < j; i++) {
-				
 				this.roleIdMapLogins[this.rolesValid[i].id] = [];
 				
-				trans.add('login','getMembers',{
+				requests.push(ws.prepare('login','getMembers',{
 					roleId:this.rolesValid[i].id
-				},this.getRoleOk);
+				}));
 			}
-			trans.send(this.$root.genericError,this.getOk);
-		},
-		getRoleOk:function(res,req) {
-			this.roleIdMapLogins[req.payload.roleId] = res.payload.logins;
-		},
-		getOk:function() {
-			this.loginIdsChanged = [];
+			
+			ws.sendMultiple(requests,true).then(
+				(res) => {
+					for(let i = 0, j = requests.length; i < j; i++) {
+						this.roleIdMapLogins[requests[i].payload.roleId] = res[i].payload.logins;
+					}
+					this.loginIdsChanged = [];
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
+			let requests = [];
 			for(let i = 0, j = this.rolesValid.length; i < j; i++) {
 				
 				let role     = this.rolesValid[i];
@@ -310,23 +306,30 @@ let MyAdminRoles = {
 					loginIds.push(logins[x].id);
 				}
 				
-				trans.add('login','setMembers',{
+				requests.push(ws.prepare('login','setMembers',{
 					roleId:role.id,
 					loginIds:loginIds
-				});
+				}));
 			}
-			trans.send(this.$root.genericError,this.setOk);
-		},
-		setOk:function() {
-			// reauth all affected logins
-			let trans = new wsHub.transaction();
-			for(let i = 0, j = this.loginIdsChanged.length; i < j; i++) {
-				trans.add('login','reauth',{id:this.loginIdsChanged[i]});
-			}
-			trans.send(this.$root.genericError);
 			
-			// reload data
-			this.get();
+			ws.sendMultiple(requests,true).then(
+				(res) => {
+					// reauth all affected logins
+					requests = [];
+					for(let i = 0, j = this.loginIdsChanged.length; i < j; i++) {
+						requests.push(ws.prepare('login','reauth',{id:this.loginIdsChanged[i]}));
+					}
+					
+					ws.sendMultiple(requests,false).then(
+						(res) => {},
+						(err) => this.$root.genericError(err)
+					);
+					
+					// reload data
+					this.get();
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

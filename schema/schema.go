@@ -2,8 +2,10 @@ package schema
 
 import (
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"r3/db"
+	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v4"
@@ -37,6 +39,42 @@ func ReplaceUuid(id uuid.UUID, idMapReplaced map[uuid.UUID]uuid.UUID) (uuid.UUID
 	}
 	idMapReplaced[id] = newId
 	return newId, nil
+}
+
+// attribute conversions
+func GetAttributeFilesFromInterface(in interface{}) (types.DataSetFiles, error) {
+	files := types.DataSetFiles{}
+
+	if in == nil {
+		return files, nil
+	}
+
+	inJson, err := json.Marshal(in)
+	if err != nil {
+		return files, err
+	}
+
+	if err := json.Unmarshal(inJson, &files); err != nil {
+		return files, err
+	}
+	return files, nil
+}
+
+// attribute checks
+func IsContentFiles(content string) bool {
+	return content == "files"
+}
+func IsContentNumeric(content string) bool {
+	return content == "numeric"
+}
+func IsContentRelationship(content string) bool {
+	return content == "1:1" || content == "n:1"
+}
+func IsContentRelationship11(content string) bool {
+	return content == "1:1"
+}
+func IsContentText(content string) bool {
+	return content == "varchar" || content == "text"
 }
 
 // fully validates module dependencies
@@ -75,11 +113,11 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 		INNER JOIN app.relation AS r
 			ON r.id = a.relation_id
 		INNER JOIN app.module AS m
-			ON m.id = r.module_id
-		WHERE m.id = $1
+			ON  m.id = r.module_id
+			AND m.id = $1
 		
 		-- dependency
-		AND a.relationship_id NOT IN (
+		WHERE a.relationship_id NOT IN (
 			SELECT id
 			FROM app.relation
 			WHERE module_id = m.id
@@ -135,19 +173,19 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 			name1.String)
 	}
 
-	// check list access to external forms
+	// check field access to external forms
 	if err := tx.QueryRow(db.Ctx, `
-		SELECT COUNT(*), STRING_AGG(f.name, ', '), STRING_AGG(f_open.name, ', ')
-		FROM app.field_list AS l
-		INNER JOIN app.field AS lf ON lf.id = l.field_id  -- field of list field
-		INNER JOIN app.form  AS f  ON f.id  = lf.form_id  -- form of list field
-		INNER JOIN app.form  AS f_open ON f_open.id = l.form_id_open
+		SELECT COUNT(*), STRING_AGG(f3.name, ', '), STRING_AGG(f1.name, ', ')
+		FROM app.open_form AS of
+		INNER JOIN app.form  AS f1 ON f1.id = of.form_id_open -- opened form
+		INNER JOIN app.field AS f2 ON f2.id = of.field_id     -- field that opens
+		INNER JOIN app.form  AS f3 ON f3.id = f2.form_id      -- form of field that opens
 		INNER JOIN app.module AS m
-			ON m.id = f.module_id
+			ON m.id  = f3.module_id
 			AND m.id = $1
 		
 		-- dependency
-		WHERE f_open.id NOT IN (
+		WHERE f1.id NOT IN (
 			SELECT id
 			FROM app.form
 			WHERE module_id = m.id
@@ -162,7 +200,7 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	if cnt != 0 {
-		return fmt.Errorf("dependency check failed, list field(s) on form(s) '%s' accessing form(s) '%s' from independent module(s)",
+		return fmt.Errorf("dependency check failed, fields(s) on form(s) '%s' opening form(s) '%s' from independent module(s)",
 			name1.String, name2.String)
 	}
 
@@ -342,7 +380,141 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	}
 
 	if cnt != 0 {
-		return fmt.Errorf("dependency check failed, PG functions accessing entities from independent module(s)")
+		return fmt.Errorf("dependency check failed, backend functions accessing entities from independent module(s)")
+	}
+
+	// check JS function access to external pgFunctions/jsFunctions/forms/fields/roles
+	if err := tx.QueryRow(db.Ctx, `
+		SELECT COUNT(*)
+		FROM app.module
+		WHERE id IN (
+			-- dependent on PG functions
+			SELECT module_id
+			FROM app.pg_function
+			WHERE id IN (
+				SELECT d.pg_function_id_on
+				FROM app.js_function_depends AS d
+				INNER JOIN app.js_function AS f ON f.id = d.js_function_id
+				WHERE f.module_id = $1
+			)
+			
+			UNION
+			
+			-- dependent on JS functions
+			SELECT module_id
+			FROM app.js_function
+			WHERE id IN (
+				SELECT d.js_function_id_on
+				FROM app.js_function_depends AS d
+				INNER JOIN app.js_function AS f ON f.id = d.js_function_id
+				WHERE f.module_id = $2
+			)
+			
+			UNION
+			
+			-- dependent on forms
+			SELECT module_id
+			FROM app.form
+			WHERE id IN (
+				SELECT d.form_id_on
+				FROM app.js_function_depends AS d
+				INNER JOIN app.js_function AS f ON f.id = d.js_function_id
+				WHERE f.module_id = $3
+			)
+			OR id IN (
+				-- dependent on fields
+				SELECT form_id
+				FROM app.field
+				WHERE id IN (
+					SELECT d.field_id_on
+					FROM app.js_function_depends AS d
+					INNER JOIN app.js_function AS f ON f.id = d.js_function_id
+					WHERE f.module_id = $4
+				)
+			)
+			
+			UNION
+			
+			-- dependent on roles
+			SELECT module_id
+			FROM app.role
+			WHERE id IN (
+				SELECT d.role_id_on
+				FROM app.js_function_depends AS d
+				INNER JOIN app.js_function AS f ON f.id = d.js_function_id
+				WHERE f.module_id = $5
+			)
+		)
+	
+		-- dependency
+		AND id <> $6
+		AND id NOT IN (
+			SELECT module_id_on
+			FROM app.module_depends
+			WHERE module_id = $7
+		)
+	`, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId).Scan(&cnt); err != nil {
+		return err
+	}
+
+	if cnt != 0 {
+		return fmt.Errorf("dependency check failed, frontend functions accessing entities from independent module(s)")
+	}
+
+	// check field (button/data) & form function access to external JS functions
+	if err := tx.QueryRow(db.Ctx, `
+		SELECT COUNT(*)
+		FROM app.module
+		WHERE id IN (
+			-- dependent on JS functions
+			SELECT module_id
+			FROM app.js_function
+			WHERE id IN (
+				SELECT fb.js_function_id
+				FROM app.field_button AS fb
+				JOIN app.field        AS f ON f.id = fb.field_id
+				WHERE f.form_id IN (
+					SELECT id
+					FROM app.form
+					WHERE module_id = $1
+				)
+				
+				UNION
+				
+				SELECT fd.js_function_id
+				FROM app.field_data AS fd
+				JOIN app.field      AS f ON f.id = fd.field_id
+				WHERE f.form_id IN (
+					SELECT id
+					FROM app.form
+					WHERE module_id = $2
+				)
+				
+				UNION
+				
+				SELECT js_function_id
+				FROM app.form_function
+				WHERE form_id IN (
+					SELECT id
+					FROM app.form
+					WHERE module_id = $3
+				)
+			)
+		)
+	
+		-- dependency
+		AND id <> $4
+		AND id NOT IN (
+			SELECT module_id_on
+			FROM app.module_depends
+			WHERE module_id = $5
+		)
+	`, moduleId, moduleId, moduleId, moduleId, moduleId).Scan(&cnt); err != nil {
+		return err
+	}
+
+	if cnt != 0 {
+		return fmt.Errorf("dependency check failed, fields/forms accessing frontend functions from independent module(s)")
 	}
 
 	// check role membership inside external parent roles

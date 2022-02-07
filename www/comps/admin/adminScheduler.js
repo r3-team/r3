@@ -228,31 +228,29 @@ let MyAdminScheduler = {
 		
 		// backend calls
 		get:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('scheduler','get',{},this.getOk);
-			trans.send(this.$root.genericError);
-		},
-		getOk:function(res) {
-			this.schedulers      = res.payload;
-			this.schedulersInput = JSON.parse(JSON.stringify(this.schedulers));
+			ws.send('scheduler','get',{},true).then(
+				(res) => {
+					this.schedulers      = res.payload;
+					this.schedulersInput = JSON.parse(JSON.stringify(this.schedulers));
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		runPgFunction:function(pgFunctionId,pgFunctionScheduleId) {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('scheduler','trigger',{
+			ws.send('scheduler','trigger',{
 				pgFunctionId:pgFunctionId,
 				pgFunctionScheduleId:pgFunctionScheduleId
-			},this.runOk);
-			trans.send(this.$root.genericError);
-			
+			},true).then(
+				(res) => this.runOk(),
+				(err) => this.$root.genericError(err)
+			);
 			this.taskRunning = true;
 		},
-		runSystemTask:function(systemTaskName) {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('scheduler','trigger',{
-				systemTaskName:systemTaskName
-			},this.runOk);
-			trans.send(this.$root.genericError);
-			
+		runSystemTask:function(name) {
+			ws.send('scheduler','trigger',{systemTaskName:name},true).then(
+				(res) => this.runOk(),
+				(err) => this.$root.genericError(err)
+			);
 			this.taskRunning = true;
 		},
 		runOk:function() {
@@ -260,28 +258,31 @@ let MyAdminScheduler = {
 			this.get();
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			
+			let requests = [];
 			for(let i = 0, j = this.schedulersInput.length; i < j; i++) {
 				let s = this.schedulersInput[i];
 				
 				if(s.taskName !== '' && JSON.stringify(s) === JSON.stringify(this.schedulers[i]))
 					continue;
 				
-				trans.add('task','set',{
+				requests.push(ws.prepare('task','set',{
 					active:s.active,
 					interval:s.intervalValue,
 					name:s.taskName
-				});
+				}));
 			}
-			trans.send(this.$root.genericError,this.setOk);
-		},
-		setOk:function() {
-			this.get();
 			
-			let trans = new wsHub.transaction();
-			trans.add('scheduler','reload',{});
-			trans.send(this.$root.genericError);
+			ws.sendMultiple(requests,true).then(
+				res => {
+					this.get();
+					
+					ws.send('scheduler','reload',{},false).then(
+						res => {},
+						err => this.$root.genericError(err)
+					);
+				},
+				err => this.$root.genericError(err)
+			);
 		}
 	}
 };

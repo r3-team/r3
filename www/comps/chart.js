@@ -38,14 +38,14 @@ let MyChart = {
 		/>
 	</div>`,
 	props:{
-		choices:    { type:Array,  required:false, default:() => [] },
-		columns:    { type:Array,  required:true },
-		filters:    { type:Array,  required:true },
-		formLoading:{ type:Boolean,required:true },
-		isFullPage: { type:Boolean,required:true },
-		limit:      { type:Number, required:true },
-		optionJson: { type:String, required:true },
-		query:      { type:Object, required:true }
+		choices:    { type:Array,   required:false, default:() => [] },
+		columns:    { type:Array,   required:true },
+		filters:    { type:Array,   required:true },
+		formLoading:{ type:Boolean, required:true },
+		isFullPage: { type:Boolean, required:true },
+		limit:      { type:Number,  required:true },
+		optionJson: { type:String,  required:true },
+		query:      { type:Object,  required:true }
 	},
 	data:function() {
 		return {
@@ -112,62 +112,62 @@ let MyChart = {
 		
 		// backend calls
 		get:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('data','get',{
+			ws.send('data','get',{
 				relationId:this.query.relationId,
 				joins:this.getRelationsJoined(this.query.joins),
 				expressions:this.getQueryExpressions(this.columns),
 				filters:this.filters.concat(this.choiceFilters),
 				orders:this.query.orders,
 				limit:this.limit
-			},this.getOk);
-			trans.send(this.handleError);
-		},
-		getOk:function(res) {
-			// option overwrites
-			this.option = JSON.parse(this.optionJson);
-			
-			// overwrite font styles
-			if(typeof this.option.textStyle === 'undefined')
-				this.option.textStyle = {};
-			
-			this.option.textStyle.fontFamily = 'Roboto,Arial,Helvetica,sans-serif';
-			this.option.textStyle.fontSize = 14 * this.settings.fontSize / 100;
-			
-			// overwrite background if not set (dark mode is not transparent)
-			if(typeof this.option.backgroundColor === 'undefined')
-				this.option.backgroundColor = 'transparent';
-			
-			// set dataset defaults if empty
-			// source header is false, otherwise first column will be used as dimension name
-			if(typeof this.option.dataset === 'undefined') 
-				this.option.dataset = {
-					source:[],
-					sourceHeader:false
-				};
-			
-			// overwrite dataset source with query data (currently only 1 dataset is usable)
-			this.option.dataset.source = [];
-			for(let i = 0, j = res.payload.rows.length; i < j; i++) {
-				
-				// apply date|time column display options
-				if(this.dateTimeColumnIndexes.length !== 0) {
-					for(let x = 0, y = this.dateTimeColumnIndexes.length; x < y; x++) {
-						let columnIndex = this.dateTimeColumnIndexes[x];
-						let column      = this.columns[columnIndex];
-						let value       = res.payload.rows[i].values[columnIndex];
+			},true).then(
+				(res) => {
+					// option overwrites
+					this.option = JSON.parse(this.optionJson);
+					
+					// overwrite font styles
+					if(typeof this.option.textStyle === 'undefined')
+						this.option.textStyle = {};
+					
+					this.option.textStyle.fontFamily = 'Roboto,Arial,Helvetica,sans-serif';
+					this.option.textStyle.fontSize = 14 * this.settings.fontSize / 100;
+					
+					// overwrite background if not set (dark mode is not transparent)
+					if(typeof this.option.backgroundColor === 'undefined')
+						this.option.backgroundColor = 'transparent';
+					
+					// set dataset defaults if empty
+					// source header is false, otherwise first column will be used as dimension name
+					if(typeof this.option.dataset === 'undefined') 
+						this.option.dataset = {
+							source:[],
+							sourceHeader:false
+						};
+					
+					// overwrite dataset source with query data (currently only 1 dataset is usable)
+					this.option.dataset.source = [];
+					for(let i = 0, j = res.payload.rows.length; i < j; i++) {
 						
-						switch(column.display) {
-							case 'date':     value = this.getUnixFormat(value,'Y-m-d');     break;
-							case 'datetime': value = this.getUnixFormat(value,'Y-m-d H:i'); break;
-							case 'time':     value = this.getUtcTimeStringFromUnix(value);  break;
+						// apply date|time column display options
+						if(this.dateTimeColumnIndexes.length !== 0) {
+							for(let x = 0, y = this.dateTimeColumnIndexes.length; x < y; x++) {
+								let columnIndex = this.dateTimeColumnIndexes[x];
+								let column      = this.columns[columnIndex];
+								let value       = res.payload.rows[i].values[columnIndex];
+								
+								switch(column.display) {
+									case 'date':     value = this.getUnixFormat(value,'Y-m-d');     break;
+									case 'datetime': value = this.getUnixFormat(value,'Y-m-d H:i'); break;
+									case 'time':     value = this.getUtcTimeStringFromUnix(value);  break;
+								}
+								res.payload.rows[i].values[columnIndex] = value;
+							}
 						}
-						res.payload.rows[i].values[columnIndex] = value;
+						this.option.dataset.source.push(res.payload.rows[i].values);
 					}
-				}
-				this.option.dataset.source.push(res.payload.rows[i].values);
-			}
-			this.ready = true;
+					this.ready = true;
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

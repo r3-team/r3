@@ -3,6 +3,7 @@ import MyFeedback            from './feedback.js';
 import MyHeader              from './header.js';
 import MyLogin               from './login.js';
 import {getStartFormId}      from './shared/access.js';
+import {updateCollections}   from './shared/collection.js';
 import {genericError}        from './shared/error.js';
 import {getCaptionForModule} from './shared/language.js';
 import {openLink}            from './shared/generic.js';
@@ -20,6 +21,7 @@ let MyApp = {
 		
 		<my-login v-if="!appReady"
 			@authenticated="initApp"
+			:appInitErr="appInitErr"
 			:backendReady="wsConnected"
 			:httpMode="httpMode"
 			:loginReady="loginReady"
@@ -57,6 +59,7 @@ let MyApp = {
 	</div>`,
 	data:function() {
 		return {
+			appInitErr:'',      // error message returned by attempt to initialize app
 			appReady:false,     // app is loaded and user authenticated
 			loginReady:false,   // app is ready for authentication
 			publicLoaded:false, // public data has been loaded
@@ -128,7 +131,7 @@ let MyApp = {
 				let accessible  = formIdStart !== null;
 				
 				// ignore hidden modules
-				if(that.moduleIdMapOptions[module.id].hidden)
+				if(that.moduleIdMapOpts[module.id].hidden)
 					return false;
 				
 				// ignore inaccessible and childless modules
@@ -164,7 +167,7 @@ let MyApp = {
 					iconId:module.iconId,
 					id:module.id,
 					name:module.name,
-					position:that.moduleIdMapOptions[module.id].position
+					position:that.moduleIdMapOpts[module.id].position
 				};
 			};
 			
@@ -194,24 +197,25 @@ let MyApp = {
 		httpMode:function() { return location.protocol === 'http:'; },
 		
 		// stores
-		access:       function() { return this.$store.getters.access; },
-		activated:    function() { return this.$store.getters['local/activated']; },
-		appVersion:   function() { return this.$store.getters['local/appVersion']; },
-		customLogo:   function() { return this.$store.getters['local/customLogo']; },
-		customLogoUrl:function() { return this.$store.getters['local/customLogoUrl']; },
+		access:         function() { return this.$store.getters.access; },
+		activated:      function() { return this.$store.getters['local/activated']; },
+		appVersion:     function() { return this.$store.getters['local/appVersion']; },
+		customLogo:     function() { return this.$store.getters['local/customLogo']; },
+		customLogoUrl:  function() { return this.$store.getters['local/customLogoUrl']; },
 		schemaTimestamp:function() { return this.$store.getters['schema/timestamp']; },
-		modules:      function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:  function() { return this.$store.getters['schema/moduleIdMap']; },
-		moduleIdMapOptions:function() { return this.$store.getters['schema/moduleIdMapOptions']; },
-		formIdMap:    function() { return this.$store.getters['schema/formIdMap']; },
-		blockInput:   function() { return this.$store.getters.blockInput; },
-		capGen:       function() { return this.$store.getters.captions.generic; },
-		isAdmin:      function() { return this.$store.getters.isAdmin; },
-		isAtDialog:   function() { return this.$store.getters.isAtDialog; },
-		isAtFeedback: function() { return this.$store.getters.isAtFeedback; },
-		isMobile:     function() { return this.$store.getters.isMobile; },
-		pageTitle:    function() { return this.$store.getters.pageTitle; },
-		settings:     function() { return this.$store.getters.settings; }
+		modules:        function() { return this.$store.getters['schema/modules']; },
+		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
+		moduleIdMapOpts:function() { return this.$store.getters['schema/moduleIdMapOptions']; },
+		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
+		blockInput:     function() { return this.$store.getters.blockInput; },
+		capErr:         function() { return this.$store.getters.captions.error; },
+		capGen:         function() { return this.$store.getters.captions.generic; },
+		isAdmin:        function() { return this.$store.getters.isAdmin; },
+		isAtDialog:     function() { return this.$store.getters.isAtDialog; },
+		isAtFeedback:   function() { return this.$store.getters.isAtFeedback; },
+		isMobile:       function() { return this.$store.getters.isMobile; },
+		pageTitle:      function() { return this.$store.getters.pageTitle; },
+		settings:       function() { return this.$store.getters.settings; }
 	},
 	created:function() {
 		window.addEventListener('resize',this.setMobileView);
@@ -230,6 +234,7 @@ let MyApp = {
 		getCaptionForModule,
 		getStartFormId,
 		openLink,
+		updateCollections,
 		
 		// general app states
 		stateChange:function() {
@@ -240,6 +245,10 @@ let MyApp = {
 			if(!this.schemaLoaded) return this.initSchema(); // schema data
 			if(!this.loginReady)   return this.loginReady = true;
 		},
+		setInitErr:function(err) {
+			// generic error handler is not available yet
+			this.appInitErr = `${(new Date().getTime())}: An unexpected error occurred, ${err}`;
+		},
 		setMobileView:function() {
 			this.$store.commit('isMobile',window.innerWidth <= 800 || window.innerHeight <= 400);
 		},
@@ -247,14 +256,14 @@ let MyApp = {
 		// web socket control
 		wsConnect:function() {
 			let protocol = this.httpMode ? 'ws:' : 'wss:';
-			wsHub.open(
+			ws.open(
 				`${protocol}//${window.location.host}/websocket`,
 				this.wsConnectOk,
 				this.wsBlocking,
 				this.wsBackendRequest,
 				this.wsBroken
 			);
-			window.addEventListener('onunload',() => wsHub.close());
+			window.addEventListener('onunload',() => ws.close());
 		},
 		wsConnectOk:function() {
 			this.wsConnected = true;
@@ -284,12 +293,15 @@ let MyApp = {
 				
 				// affects everyone logged in
 				case 'reauthorized':
-					if(!this.appReady)
-						return;
-					
-					let trans = new wsHub.transaction();
-					trans.add('lookup','get',{name:'access'},this.retrievedAccess);
-					trans.send(this.genericError);
+					if(this.appReady) {
+						ws.send('lookup','get',{name:'access'},true).then(
+							res => {
+								this.$store.commit('access',res.payload);
+								this.updateCollections(false);
+							},
+							err => this.genericError(err)
+						);
+					}
 				break;
 			}
 		},
@@ -297,7 +309,7 @@ let MyApp = {
 			this.$store.commit(state ? 'busyAdd' : 'busyRemove');
 		},
 		wsCancel:function() {
-			wsHub.closeTransactions();
+			ws.clear();
 		},
 		wsBroken:function() {
 			this.$store.commit('busyReset');
@@ -308,7 +320,7 @@ let MyApp = {
 		},
 		wsReconnect:function(killConnection) {
 			if(!this.wsConnected || killConnection === true) {
-				wsHub.close();
+				ws.close();
 				this.$store.commit('busyReset');
 				this.wsConnect();
 			}
@@ -328,97 +340,120 @@ let MyApp = {
 		
 		// public info retrieval
 		initPublic:function() {
-			let trans = new wsHub.transaction();
-			trans.add('public','get',{},this.initPublicOk);
-			trans.send(this.genericError);
-		},
-		initPublicOk:function(r) {
-			this.$store.commit('local/activated',r.payload.activated);
-			this.$store.commit('local/appName',r.payload.appName);
-			this.$store.commit('local/appNameShort',r.payload.appNameShort);
-			this.$store.commit('local/appVersion',r.payload.appVersion);
-			this.$store.commit('local/companyColorHeader',r.payload.companyColorHeader);
-			this.$store.commit('local/companyColorLogin',r.payload.companyColorLogin);
-			this.$store.commit('local/companyLogo',r.payload.companyLogo);
-			this.$store.commit('local/companyLogoUrl',r.payload.companyLogoUrl);
-			this.$store.commit('local/companyName',r.payload.companyName);
-			this.$store.commit('local/companyWelcome',r.payload.companyWelcome);
-			this.$store.commit('builder',r.payload.builder);
-			this.$store.commit('productionMode',r.payload.productionMode);
-			this.$store.commit('pageTitle',this.pageTitle); // apply new app short name to page
-			this.$store.commit('schema/languageCodes',r.payload.languageCodes);
-			this.$store.commit('schema/timestamp',r.payload.schemaTimestamp);
-			this.publicLoaded = true;
-			this.stateChange();
+			ws.send('public','get',{},false).then(
+				res => {
+					this.$store.commit('local/activated',res.payload.activated);
+					this.$store.commit('local/appName',res.payload.appName);
+					this.$store.commit('local/appNameShort',res.payload.appNameShort);
+					this.$store.commit('local/appVersion',res.payload.appVersion);
+					this.$store.commit('local/companyColorHeader',res.payload.companyColorHeader);
+					this.$store.commit('local/companyColorLogin',res.payload.companyColorLogin);
+					this.$store.commit('local/companyLogo',res.payload.companyLogo);
+					this.$store.commit('local/companyLogoUrl',res.payload.companyLogoUrl);
+					this.$store.commit('local/companyName',res.payload.companyName);
+					this.$store.commit('local/companyWelcome',res.payload.companyWelcome);
+					this.$store.commit('builder',res.payload.builder);
+					this.$store.commit('productionMode',res.payload.productionMode);
+					this.$store.commit('pageTitle',this.pageTitle); // apply new app short name to page
+					this.$store.commit('schema/languageCodes',res.payload.languageCodes);
+					this.$store.commit('schema/timestamp',res.payload.schemaTimestamp);
+					this.publicLoaded = true;
+					this.stateChange();
+				},
+				err => this.setInitErr(err)
+			);
 		},
 		
 		// schema retrieval
 		initSchema:function() {
-			let that = this;
 			fetch(`./cache/download/schema_${this.schemaTimestamp}.json`).then(
-				function(response) {
-					if(response.status !== 200)
-						return;
+				res => {
+					if(res.status !== 200)
+						return this.setInitErr('Failed to load schema cache');
 					
-					response.json().then(function(data) {
-						that.$store.commit('schema/set',data);
-						that.schemaLoaded = true;
-						that.stateChange();
+					res.json().then((data) => {
+						this.$store.commit('schema/set',data);
+						this.schemaLoaded = true;
+						this.stateChange();
 					});
 				}
-			).catch(function(err) {
-				console.log('error fetching schema: '+err);
+			).catch(err => {
+				this.setInitErr('Failed to load schema cache: '+err);
 			});
 		},
 		
 		// final app meta retrieval, after authentication
 		initApp:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('setting','get',{},this.retrievedSettings);
-			trans.add('lookup','get',{name:'access'},this.retrievedAccess);
-			trans.add('lookup','get',{name:'caption'},this.retrievedCaptions);
-			trans.add('lookup','get',{name:'feedback'},this.retrievedFeedback);
-			trans.add('lookup','get',{name:'loginId'},this.retrievedLoginId);
-			trans.add('lookup','get',{name:'loginName'},this.retrievedLoginName);
+			let requests = [
+				ws.prepare('setting','get',{}),
+				ws.prepare('lookup','get',{name:'access'}),
+				ws.prepare('lookup','get',{name:'caption'}),
+				ws.prepare('lookup','get',{name:'feedback'}),
+				ws.prepare('lookup','get',{name:'loginId'}),
+				ws.prepare('lookup','get',{name:'loginName'})
+			];
 			
 			// system meta data, admins only
 			if(this.isAdmin) {
-				trans.add('config','get',{},this.retrievedConfig);
-				trans.add('license','get',{},this.retrievedLicense);
-				trans.add('system','get',{},this.retrievedSystem);
+				requests.push(ws.prepare('config','get',{}));
+				requests.push(ws.prepare('license','get',{}));
+				requests.push(ws.prepare('system','get',{}));
 			}
-			trans.send(this.genericError,this.initAppOk);
 			
-			// block input during init
+			ws.sendMultiple(requests,true).then(
+				res => {
+					this.$store.commit('settings',res[0].payload);
+					this.$store.commit('access',res[1].payload);
+					this.$store.commit('captions',res[2].payload);
+					this.$store.commit('feedback',res[3].payload === 1);
+					this.$store.commit('loginId',res[4].payload);
+					this.$store.commit('loginName',res[5].payload);
+					
+					if(this.isAdmin) {
+						this.$store.commit('config',res[6].payload);
+						this.$store.commit('license',res[7].payload);
+						this.$store.commit('system',res[8].payload);
+					}
+					
+					// in case of errors during collection retrieval, continue
+					//  if user is admin, otherwise the error cannot be corrected
+					// normal users should not login as the system does not handle as expected
+					return updateCollections(this.isAdmin,
+						err => alert(this.capErr.initCollection.replace('{MSG}',err)));
+				},
+				err => this.setInitErr(err)
+			).then(
+				res => this.appReady = true,
+				err => this.setInitErr(err)
+			).finally(
+				() => this.$store.commit('busyBlockInput',false)
+			);
 			this.$store.commit('busyBlockInput',true);
-		},
-		initAppOk:function() {
-			this.appReady = true;
-			this.$store.commit('busyBlockInput',false);
 		},
 		
 		// backend reloads
-		schemaReload:function(moduleId) {
-			let trans = new wsHub.transactionBlocking();
-			
-			// reset all or a specific module
-			if(typeof moduleId === 'undefined')
-				trans.add('schema','reload',{});
-			else
-				trans.add('schema','reload',{moduleId:moduleId});
-			
-			trans.send(this.genericError);
+		loginReauthAll:function(blocking) {
+			ws.send('login','reauthAll',{},blocking).then(
+				res => {},
+				err => this.genericError(err)
+			);
 		},
-		
-		// lookups
-		retrievedAccess:   function(r) { this.$store.commit('access',r.payload); },
-		retrievedCaptions: function(r) { this.$store.commit('captions',r.payload); },
-		retrievedConfig:   function(r) { this.$store.commit('config',r.payload); },
-		retrievedFeedback: function(r) { this.$store.commit('feedback',r.payload === 1); },
-		retrievedLicense:  function(r) { this.$store.commit('license',r.payload); },
-		retrievedLoginId:  function(r) { this.$store.commit('loginId',r.payload); },
-		retrievedLoginName:function(r) { this.$store.commit('loginName',r.payload); },
-		retrievedSettings: function(r) { this.$store.commit('settings',r.payload); },
-		retrievedSystem:   function(r) { this.$store.commit('system',r.payload); }
+		schemaReload:function(moduleId) {
+			
+			// all or specific module
+			let payload = typeof moduleId === 'undefined'
+				? {} : {moduleId:moduleId};
+			
+			ws.send('schema','reload',payload,true).then(
+				res => {},
+				err => this.genericError(err)
+			);
+		},
+		schedulerReload:function(blocking) {
+			ws.send('scheduler','reload',{},blocking).then(
+				res => {},
+				err => this.genericError(err)
+			);
+		}
 	}
 };

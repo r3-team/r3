@@ -15,6 +15,7 @@
 	--z-index-list-header:10;
 	
 	/* calendar elements */
+	--z-index-gantt-hover:5;
 	--z-index-calendar-day-event-text-hover:4;
 	--z-index-calendar-day-event-text:2;
 	--z-index-calendar-day-event-ending-beam:3;
@@ -52,6 +53,7 @@
 	--color-container-title-upper:#606060;
 	--color-container-title-lower:#8c8c8c;
 	--color-header-border:hsl(0,0%,96%,1.00);
+	--color-hover-underlay:rgba(0,0,0,0.35);
 	--color-menu-border:hsl(0,0%,96%,1.00);
 	--color-navigation-default:#444;
 	
@@ -159,8 +161,6 @@ body                                         { --depth:9; }
 .admin-repo .repo-module .part.left          { --depth:0; }
 .admin-repo .repo-module .part.right         { --depth:3; }
 .builder .lookup                             { --depth:1; }
-.builder-pg-function .entity-title           { --depth:1; }
-.builder-pg-function .function-details table { --depth:3; }
 .builder-icon-input .iconLine                { --depth:2; }
 .builder-icon-input .iconLine:focus          { --depth:1; }
 .builder-icon-input .iconLine.disabled       { --depth:5; }
@@ -286,6 +286,24 @@ h3{
 	margin:5px;
 }
 
+/* sub windows in main app */
+.app-sub-window{
+	width:100%;
+	position:absolute;
+	top:0px;
+	bottom:0px;
+	left:0px;
+	background:var(--color-hover-underlay);
+	display:flex;
+	flex-direction:column;
+	justify-content:center;
+	align-items:center;
+	z-index:var(--z-index-dialog-wrap);
+}
+.app-sub-window.under-header{
+	padding-top:60px;
+}
+
 /* input block overlay */
 .input-block-overlay{
 	position:absolute;
@@ -303,21 +321,6 @@ h3{
 	left:50%;
 	top:50%;
 	position:absolute;
-}
-
-/* sub windows in main app */
-.app-sub-window{
-	width:100%;
-	position:absolute;
-	top:0px;
-	bottom:0px;
-	left:0px;
-	background:rgba(0,0,0,0.35);
-	display:flex;
-	flex-direction:column;
-	justify-content:center;
-	align-items:center;
-	z-index:var(--z-index-dialog-wrap);
 }
 
 /* generic boxes */
@@ -546,6 +549,10 @@ table td.maximum{
 	box-sizing:border-box;
 	flex:1 1 auto;
 }
+.default-inputs input[type=range]{
+	background-color:transparent;
+	box-shadow:none;
+}
 .default-inputs textarea{
 	height:120px;
 	padding-top:6px;
@@ -575,6 +582,10 @@ table td.maximum{
 	box-shadow:inset 0 -2px 0 0 var(--color-accent1),1px 1px 4px var(--color-shade);
 	transition:box-shadow 0.3s, background-color 0.3s;
 	outline:none;
+}
+.default-inputs input[type=range]:focus{
+	box-shadow:none;
+	transition:none;
 }
 .default-inputs input:disabled,
 .default-inputs select:disabled,
@@ -718,12 +729,11 @@ table td.maximum{
 	max-width:500px;
 	max-height:95%;
 }
-.dialog div.dialog-text{
-	max-height:90%;
+.dialog .dialog-text{
 	padding:12px;
 	overflow-y:auto;
 }
-.dialog div.dialog-text.richtext{
+.dialog .dialog-text.richtext{
 	height:600px;
 	padding:0px;
 	display:flex;
@@ -908,6 +918,7 @@ table td.maximum{
 	--color-accent3-alt:hsl(199,11%,calc(32% - (1.50% * var(--depth)) ));
 	--color-accent4:    hsl(339, 4%,calc(61% - (1.50% * var(--depth)) ));
 	
+	--color-hover-underlay:rgba(0,0,0,0.50);
 	--color-form-builder-actions:hsl(195,17%,29%,1.00);
 	--color-form-builder-columns:hsl(247,17%,46%,0.42);
 	--color-form-builder-container:hsl(99,18%,26%,1.00);

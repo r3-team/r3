@@ -50,7 +50,7 @@ let MyInputFiles = {
 					:style="'background-image:url('+getAttributeFileHref(attributeId,f.id,f.name,token)+')'"
 				/>
 				<div class="placeholder" v-if="f.new">
-					{{ capGen.inputFileNotUploaded }}
+					{{ capApp.fileNotUploaded }}
 				</div>
 			</template>
 			
@@ -94,7 +94,6 @@ let MyInputFiles = {
 	</div>`,
 	props:{
 		attributeId:{ type:String,  required:true },
-		handleError:{ type:Function,required:true },
 		modelValue: { required:true },
 		readonly:   { type:Boolean, required:false, default:false },
 		showGallery:{ type:Boolean, required:false, default:false },
@@ -132,7 +131,7 @@ let MyInputFiles = {
 		// store
 		token:         function() { return this.$store.getters['local/token']; },
 		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		capApp:        function() { return this.$store.getters.captions.input; }
 	},
 	methods:{
 		// externals
@@ -183,9 +182,8 @@ let MyInputFiles = {
 				
 				if(maxSize !== 0 && Math.floor(file.size/1024) > maxSize) {
 					file.hasProgress = 100;
-					that.handleError(null,
-						that.capGen.error.fileTooLarge.replace('{NAME}',file.name).replace('{SIZE}',
-							that.getSizeReadable(maxSize))
+					that.$root.genericError(that.capApp.fileTooLarge.replace(
+						'{NAME}',file.name).replace('{SIZE}',that.getSizeReadable(maxSize))
 					);
 					continue;
 				}
@@ -206,7 +204,7 @@ let MyInputFiles = {
 					let res = JSON.parse(xhr.response);
 					
 					if(typeof res.error !== 'undefined') {
-						that.handleError(null,'import failed');
+						that.$root.genericError('import failed');
 						return;
 					}
 					

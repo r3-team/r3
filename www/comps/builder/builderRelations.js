@@ -308,33 +308,29 @@ let MyBuilderRelationsItem = {
 			});
 		},
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('relation','del',{
-				id:this.relation.id
-			},this.delOk);
-			trans.send(this.$root.genericError);
-		},
-		delOk:function(res) {
-			this.$root.schemaReload(this.moduleId);
+			ws.send('relation','del',{id:this.relation.id},true).then(
+				(res) => this.$root.schemaReload(this.moduleId),
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('relation','set',{
+			ws.send('relation','set',{
 				id:this.relation.id,
 				moduleId:this.moduleId,
 				name:this.name,
 				retentionCount:this.retentionCount,
 				retentionDays:this.retentionDays,
 				policies:this.policies
-			},this.setOk);
-			trans.send(this.$root.genericError);
-		},
-		setOk:function(res) {
-			if(this.isNew) {
-				this.name     = '';
-				this.policies = [];
-			}
-			this.$root.schemaReload(this.moduleId);
+			},true).then(
+				(res) => {
+					if(this.isNew) {
+						this.name     = '';
+						this.policies = [];
+					}
+					this.$root.schemaReload(this.moduleId);
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

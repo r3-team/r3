@@ -61,6 +61,19 @@ export function getDataFieldMap(fields) {
 	return out;
 };
 
+export function getFieldMap(fields) {
+	let out = {};
+	
+	for(let i = 0, j = fields.length; i < j; i++) {
+		let f = fields[i];
+		out[f.id] = f;
+		
+		if(f.content === 'container')
+			out = Object.assign(out,getFieldMap(f.fields));
+	}
+	return out;
+};
+
 export function getFormRoute(formId,recordId,stayInModule,getArgs) {
 	let moduleId = MyStore.getters['schema/formIdMap'][formId].moduleId;
 	
@@ -138,7 +151,16 @@ export function getResolvedPlaceholders(value) {
 	return value;
 };
 
-// set getter argument values in array of empty/pre-existing getters
+// manipulate form getters
+// example: ['attributes=7b9fecdc-d8c8-43b3-805a-3b276003c81_3,859a48cb-4358-4fd4-be1a-265d86930922_12','month=12','year=2020']
+export function getGetterArg(argsArray,name) {
+	for(let i = 0, j = argsArray.length; i < j; i++) {
+		
+		if(argsArray[i].indexOf(`${name}=`) === 0)
+			return argsArray[i].substr(argsArray[i].indexOf(`=`)+1);
+	}
+	return '';
+};
 export function setGetterArgs(argsArray,name,value) {
 	
 	if(argsArray.length === 0)

@@ -97,23 +97,21 @@ let MyAdminRepoModule = {
 		
 		// backend calls
 		install:function(fileId) {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('repoModule','install',{
-				fileId:fileId
-			},this.installOk);
-			trans.send(this.$root.genericError);
+			ws.send('repoModule','install',{fileId:fileId},true).then(
+				(res) => {
+					this.$store.commit('dialog',{
+						captionBody:this.capApp.fetchDone,
+						buttons:[{
+							caption:this.capGen.button.close,
+							cancel:true,
+							image:'cancel.png'
+						}]
+					});
+					this.installStarted = false;
+				},
+				(err) => this.$root.genericError(err)
+			);
 			this.installStarted = true;
-		},
-		installOk:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.fetchDone,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
-			});
-			this.installStarted = false;
 		}
 	}
 };
@@ -238,35 +236,35 @@ let MyAdminRepo = {
 		
 		// backend calls
 		get:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('repoModule','get',{
+			ws.send('repoModule','get',{
 				byString:this.byString,
 				languageCode:this.settings.languageCode,
 				limit:this.limit,
-				offset:this.offset,
 				getInstalled:this.showInstalled,
 				getInStore:true,
-				getNew:true
-			},this.getOk);
-			trans.send(this.$root.genericError);
-		},
-		getOk:function(res) {
-			this.repoModules = res.payload.repoModules;
-			this.count       = res.payload.count;
-			
-			if(this.firstRetrieval && this.count === 0) {
-				this.firstRetrieval = false;
-				this.updateRepo();
-			}
+				getNew:true,
+				offset:this.offset
+			},true).then(
+				(res) => {
+					this.repoModules = res.payload.repoModules;
+					this.count       = res.payload.count;
+					
+					if(this.firstRetrieval && this.count === 0) {
+						this.firstRetrieval = false;
+						this.updateRepo();
+					}
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		updateRepo:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('repoModule','update',{},this.updateRepoOk);
-			trans.send(this.$root.genericError);
-		},
-		updateRepoOk:function() {
-			this.offset = 0;
-			this.get();
+			ws.send('repoModule','update',{},true).then(
+				(res) => {
+					this.offset = 0;
+					this.get();
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

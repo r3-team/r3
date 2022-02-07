@@ -10,7 +10,7 @@ import (
 	"r3/cache"
 	"r3/config"
 	"r3/handler"
-	"r3/schema/lookups"
+	"r3/schema"
 	"r3/tools"
 	"r3/types"
 	"sort"
@@ -166,7 +166,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 
 		// process relationship values from other relation
 		// (1:n, 1:1 relationships refering to this tupel)
-		if attribute.OutsideIn && lookups.IsContentRelationship(atr.Content) {
+		if attribute.OutsideIn && schema.IsContentRelationship(atr.Content) {
 
 			// store relationship values to apply later (tupel might need to be created first)
 			shipValues := relationshipValue{
@@ -189,7 +189,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 
 		// process data file values
 		// move new file uploads from temp to files destination
-		if attribute.Value != nil && lookups.IsContentFiles(atr.Content) {
+		if attribute.Value != nil && schema.IsContentFiles(atr.Content) {
 
 			vJson, err := json.Marshal(attribute.Value)
 			if err != nil {
@@ -265,7 +265,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 			WHERE "%s"."%s" = %s
 			%s
 		`, mod.Name, rel.Name, tableAlias, strings.Join(params, `, `), tableAlias,
-			lookups.PkName, fmt.Sprintf("$%d", len(values)), policyFilter),
+			schema.PkName, fmt.Sprintf("$%d", len(values)), policyFilter),
 			values...); err != nil {
 
 			return err
@@ -351,14 +351,14 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 			insertQuery = fmt.Sprintf(`
 				INSERT INTO "%s"."%s" DEFAULT VALUES
 				RETURNING "%s"
-			`, mod.Name, rel.Name, lookups.PkName)
+			`, mod.Name, rel.Name, schema.PkName)
 		} else {
 			insertQuery = fmt.Sprintf(`
 				INSERT INTO "%s"."%s" (%s)
 				VALUES (%s)
 				RETURNING "%s"
 			`, mod.Name, rel.Name, strings.Join(names, `, `),
-				strings.Join(params, `, `), lookups.PkName)
+				strings.Join(params, `, `), schema.PkName)
 		}
 
 		if err := tx.QueryRow(ctx, insertQuery, values...).Scan(&newRecordId); err != nil {
@@ -417,7 +417,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 				WHERE "%s" = $1
 				AND "%s" <> ALL($2)
 			`, shipMod.Name, shipRel.Name, shipAtr.Name,
-				shipAtr.Name, lookups.PkName), indexRecordIds[index],
+				shipAtr.Name, schema.PkName), indexRecordIds[index],
 				shipValues.values); err != nil {
 
 				return err
@@ -427,7 +427,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				UPDATE "%s"."%s" SET "%s" = $1
 				WHERE "%s" = ANY($2)
-			`, shipMod.Name, shipRel.Name, shipAtr.Name, lookups.PkName),
+			`, shipMod.Name, shipRel.Name, shipAtr.Name, schema.PkName),
 				indexRecordIds[index], shipValues.values); err != nil {
 
 				return err

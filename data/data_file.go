@@ -11,7 +11,7 @@ import (
 	"r3/cache"
 	"r3/config"
 	"r3/handler"
-	"r3/schema/lookups"
+	"r3/schema"
 	"r3/tools"
 
 	"github.com/gofrs/uuid"
@@ -21,7 +21,7 @@ import (
 func GetFilePath(loginId int64, attributeId uuid.UUID, fileId uuid.UUID) (string, error) {
 
 	attribute, exists := cache.AttributeIdMap[attributeId]
-	if !exists || !lookups.IsContentFiles(attribute.Content) {
+	if !exists || !schema.IsContentFiles(attribute.Content) {
 		return "", errors.New("not a file attribute")
 	}
 
@@ -39,7 +39,7 @@ func SetFile(loginId int64, attributeId uuid.UUID, part *multipart.Part) (uuid.U
 	var fileId uuid.UUID
 
 	attribute, exists := cache.AttributeIdMap[attributeId]
-	if !exists || !lookups.IsContentFiles(attribute.Content) {
+	if !exists || !schema.IsContentFiles(attribute.Content) {
 		return fileId, errors.New("attribute is invalid")
 	}
 

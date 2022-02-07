@@ -1,3 +1,4 @@
+import MyInputCollection from './inputCollection.js';
 import MyValueRich       from './valueRich.js';
 import {srcBase64}       from './shared/image.js';
 import {getCaption}      from './shared/language.js';
@@ -35,7 +36,10 @@ export {MyCalendarMonth};
 
 let MyCalendarMonth = {
 	name:'my-calendar-month',
-	components:{MyValueRich},
+	components:{
+		MyInputCollection,
+		MyValueRich
+	},
 	template:`<div class="month">
 		
 		<!-- header -->
@@ -45,15 +49,15 @@ let MyCalendarMonth = {
 			<div class="area nowrap">
 				<my-button image="new.png"
 					v-if="hasCreate"
-					@trigger="$emit('form-open-new',[],false)"
-					@trigger-middle="$emit('form-open-new',[],true)"
+					@trigger="$emit('open-form',0,[],false)"
+					@trigger-middle="$emit('open-form',0,[],true)"
 					:caption="!isMobile ? capGen.button.new : ''"
 					:captionTitle="capGen.button.newHint"
 					:darkBg="true"
 				/>
 			</div>
 		
-			<div class="area nowrap navigation default-inputs">
+			<div class="area nowrap default-inputs">
 				<img class="icon"
 					v-if="iconId !== null"
 					:src="srcBase64(iconIdMap[iconId].file)"
@@ -87,7 +91,15 @@ let MyCalendarMonth = {
 				/>
 			</div>
 			
-			<div class="area nowrap">
+			<div class="area nowrap default-inputs">
+				<my-input-collection class="selector"
+					v-for="c in collections"
+					@index-selected="$emit('set-collection-index-filter',c.collectionId,$event)"
+					:collectionId="c.collectionId"
+					:columnIdDisplay="c.columnIdDisplay"
+					:key="c.collectionId"
+				/>
+				
 				<select class="selector"
 					v-if="hasChoices"
 					v-model="choiceIdInput"
@@ -135,9 +147,8 @@ let MyCalendarMonth = {
 		</div>
 		
 		<!-- weeks -->
-		<div class="week"
-			v-for="week in 6"
-		>
+		<div class="week" v-for="week in 6">
+			
 			<!-- days -->
 			<div class="day"
 				v-for="day in 7"
@@ -148,7 +159,7 @@ let MyCalendarMonth = {
 				:class="getDayClasses(((week-1)*7)+day-1,day)"
 			>
 				<h1 class="noHighlight">{{ getDayNumber(((week-1)*7)+day-1) }}</h1>
-			
+				
 				<!-- full day events -->
 				<div class="event"
 					@click.stop="clickRecord(e.recordId,false)"
@@ -167,15 +178,17 @@ let MyCalendarMonth = {
 							v-if="day === 1 || e.entryFirst"
 							:style="getFullDayTextStyles(day,e)"
 						>
-							<my-value-rich class="context-calendar"
-								v-for="(v,vi) in e.values"
-								:attribute-id="columns[vi].attributeId"
-								:basis="columns[vi].basis"
-								:display="columns[vi].display"
-								:key="vi"
-								:length="columns[vi].length"
-								:value="v"
-							/>
+							<template v-for="(v,i) in e.values">
+								<my-value-rich class="context-calendar"
+									v-if="v !== null"
+									:attributeId="columns[i].attributeId"
+									:basis="columns[i].basis"
+									:display="columns[i].display"
+									:key="i"
+									:length="columns[i].length"
+									:value="v"
+								/>
+							</template>
 						</span>
 						
 						<!-- ending beam -->
@@ -197,16 +210,18 @@ let MyCalendarMonth = {
 						{{ getPartCaption(e.date0) }}
 					</span>
 					
-					<my-value-rich class="context-calendar"
-						v-for="(v,vi) in e.values"
-						:attribute-id="columns[vi].attributeId"
-						:basis="columns[vi].basis"
-						:display="columns[vi].display"
-						:key="vi"
-						:length="columns[vi].length"
-						:wrap="true"
-						:value="v"
-					/>
+					<template v-for="(v,i) in e.values">
+						<my-value-rich class="context-calendar"
+							v-if="v !== null"
+							:attributeId="columns[i].attributeId"
+							:basis="columns[i].basis"
+							:display="columns[i].display"
+							:key="i"
+							:length="columns[i].length"
+							:wrap="true"
+							:value="v"
+						/>
+					</template>
 				</div>
 			</div>
 		</div>
@@ -216,6 +231,7 @@ let MyCalendarMonth = {
 		choiceId:   { required:false, default:null },
 		choices:    { type:Array,   required:false, default:() => [] },
 		columns:    { type:Array,   required:false, default:() => [] },
+		collections:{ type:Array,   required:false, default:() => [] },
 		date:       { type:Date,    required:true },                    // selected date to work around
 		date0:      { type:Date,    required:true },                    // start date of calendar
 		date1:      { type:Date,    required:true },                    // end date of calendar
@@ -234,8 +250,8 @@ let MyCalendarMonth = {
 		rowSelect:  { type:Boolean, required:false, default:false }
 	},
 	emits:[
-		'day-selected','form-open-new','record-selected',
-		'set-choice-id','set-date'
+		'day-selected','open-form','record-selected','set-choice-id',
+		'set-collection-index-filter','set-date'
 	],
 	data:function() {
 		return {
@@ -534,14 +550,10 @@ let MyCalendarMonth = {
 		
 		// backend calls
 		setIcsTokenFixed:function() {
-			let trans = new wsHub.transaction();
-			trans.add('login','setTokenFixed',{
-				context:'ics'
-			},this.setIcsTokenFixedOk);
-			trans.send(this.handleError);
-		},
-		setIcsTokenFixedOk:function(res) {
-			this.icsToken = res.payload.tokenFixed;
+			ws.send('login','setTokenFixed',{context:'ics'},true).then(
+				(res) => this.icsToken = res.payload.tokenFixed,
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };
@@ -553,27 +565,29 @@ let MyCalendar = {
 		<my-calendar-month class="shade"
 			v-if="view === 'month'"
 			@day-selected="daySelected"
-			@form-open-new="(...args) => $emit('form-open-new',...args)"
+			@open-form="(...args) => $emit('open-form',...args)"
 			@record-selected="(...args) => $emit('record-selected',...args)"
 			@set-choice-id="choiceIdSet"
+			@set-collection-index-filter="(...args) => $emit('set-collection-index-filter',...args)"
 			@set-date="dateSet"
-			:choice-id="choiceId"
+			:choiceId="choiceId"
 			:choices="choices"
 			:columns="columns"
+			:collections="collections"
 			:date="date"
 			:date0="date0"
 			:date1="date1"
-			:date-select0="dateSelect0"
-			:date-select1="dateSelect1"
-			:field-id="fieldId"
+			:dateSelect0="dateSelect0"
+			:dateSelect1="dateSelect1"
+			:fieldId="fieldId"
 			:filters="filters"
 			:formLoading="formLoading"
-			:has-color="attributeIdColor !== null"
-			:has-create="hasCreate"
-			:icon-id="iconId"
+			:hasColor="attributeIdColor !== null"
+			:hasCreate="hasCreate"
+			:iconId="iconId"
 			:ics="ics"
 			:rows="rows"
-			:row-select="rowSelect"
+			:rowSelect="rowSelect"
 		/>
 	</div>`,
 	props:{
@@ -582,10 +596,10 @@ let MyCalendar = {
 		attributeIdDate1:{ type:String,  required:true },
 		choices:         { type:Array,   required:false, default:() => [] },
 		columns:         { type:Array,   required:true },
+		collections:     { type:Array,   required:true },
 		fieldId:         { type:String,  required:false, default:'' },
 		filters:         { type:Array,   required:true },
 		formLoading:     { type:Boolean, required:false, default:false },
-		handleError:     { type:Function,required:true },
 		iconId:          { required:false,default:null },
 		ics:             { type:Boolean, required:false, default:false },
 		indexColor:      { required:true },
@@ -595,7 +609,7 @@ let MyCalendar = {
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:false, default:false }
 	},
-	emits:['form-open-new','record-selected','set-args'],
+	emits:['open-form','record-selected','set-args','set-collection-index-filter'],
 	data:function() {
 		return {
 			// calendar state
@@ -725,7 +739,7 @@ let MyCalendar = {
 				`${this.attributeIdDate0}_${this.getUnixFromDate(this.dateSelect0)}`,
 				`${this.attributeIdDate1}_${this.getUnixFromDate(this.dateSelect1)}`
 			];
-			this.$emit('form-open-new',[`attributes=${attributes.join(',')}`],middleClick);
+			this.$emit('open-form',0,[`attributes=${attributes.join(',')}`],middleClick);
 		},
 		
 		// reloads
@@ -807,8 +821,7 @@ let MyCalendar = {
 				orders.push(this.query.orders[i]);
 			}
 			
-			let trans = new wsHub.transactionBlocking();
-			trans.add('data','get',{
+			ws.send('data','get',{
 				relationId:this.query.relationId,
 				joins:this.getRelationsJoined(this.query.joins),
 				expressions:this.expressions,
@@ -817,11 +830,10 @@ let MyCalendar = {
 					this.attributeIdDate1,this.indexDate1,dateEnd
 				)).concat(this.choiceFilters),
 				orders:orders
-			},this.getOk);
-			trans.send(this.handleError);
-		},
-		getOk:function(res,req) {
-			this.rows = res.payload.rows;
+			},true).then(
+				(res) => this.rows = res.payload.rows,
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

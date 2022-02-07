@@ -4,6 +4,7 @@
 			"add":"Hinzufügen",
 			"apply":"Ausführen",
 			"cancel":"Abbrechen",
+			"clear":"Entfernen",
 			"close":"Schließen",
 			"create":"Erstellen",
 			"delete":"Löschen",
@@ -32,17 +33,6 @@
 		"dialog":{
 			"confirm":"Bitte bestätigen"
 		},
-		"error":{
-			"contextDeadlineExceeded":"Aktion konnte nicht innerhalb des erlaubten Zeitraums abgeschlossen werden - bitte erneut versuchen",
-			"fileTooLarge":"Datei \"{NAME}\" kann nicht hochgeladen werden, maximal erlaubte Größe ist {SIZE}",
-			"foreignKeyConstraint":"Datensatz wird noch referenziert als \"{ATR}\" in \"{MOD}\"",
-			"foreignKeyUniqueConstraint":"\"{NAME}\" darf nur einmal referenziert werden",
-			"generalError":"Unerwarteter Fehler ist aufgetreten, bitte den Systemadministrator kontaktieren",
-			"generalErrorTitle":"Fehler",
-			"presetProtected":"Dieser Datensatz ist geschützt und kann nicht gelöscht werden",
-			"unauthorized":"Unberechtigter Zugriff",
-			"uniqueConstraint":"Wert für \"{NAMES}\" muss einzigartig sein"
-		},
 		"option":{
 			"aggArray":"Array",
 			"aggAvg":"Durchschnitt",
@@ -52,6 +42,7 @@
 			"aggMin":"Minimal",
 			"aggRecord":"[Einzelner Datensatz]",
 			"aggSum":"Summe",
+			"all":"alle",
 			"no":"nein",
 			"size0":"kleinste",
 			"size1":"klein",
@@ -70,12 +61,12 @@
 		"busy":"Arbeitet - Zum Abbrechen hier klicken",
 		"date":"Datum",
 		"description":"Beschreibung",
+		"errorTitle":"Fehler",
 		"filters":"Filter",
 		"home":"Start",
 		"icon":"Icon",
 		"id":"ID",
 		"inputDecimal":"Wert muss dezimal sein",
-		"inputFileNotUploaded":"Datei ist noch nicht gespeichert",
 		"inputInvalid":"Wert ist ungültig",
 		"inputLarge":"Wert ist zu groß",
 		"inputLong":"Wert ist zu lang",
@@ -95,6 +86,7 @@
 		"notice":"Hinweis",
 		"order":"Reihenf.",
 		"password":"Passwort",
+		"preview":"Vorschau",
 		"results":"{CNT} Ergebnisse",
 		"resultsNone":"- keine Ergebnisse -",
 		"resultsOf":"/ {CNT}",
@@ -423,6 +415,18 @@
 			},
 			"new":"Neues Attribut"
 		},
+		"collection":{
+			"dialog":{
+				"delete":"Bist du sicher, dass du diese Sammlung löschen möchtest?"
+			},
+			"columnsTarget":"Spalten hier ablegen",
+			"contentColumn":"Spalten-Datenabfrage",
+			"new":"Neue Sammlung",
+			"previewHint":"Sammlungswerte für den eingeloggten Benutzer. Sammlungen werden beim Seitenaufruf geladen (F5 zum neu laden) wenn sie in zugewiesenen Rollen aktiviert sind.",
+			"query":"Query",
+			"title":"Sammlungen",
+			"titleOne":"Sammlung \"{NAME}\""
+		},
 		"form":{
 			"chart":{
 				"axisType":"Achsentyp",
@@ -443,6 +447,21 @@
 			"dialog":{
 				"delete":"Bist du sicher, dass du dieses Formular löschen möchtest?"
 			},
+			"error":{
+				"formStateFieldRemovedCondition":"Gelöschtes Feld wird noch als Kondition im Formularzustand \"{NAME}\" referenziert.",
+				"formStateFieldRemovedEffect":"Gelöschtes Feld wird noch als Effekt im Formularzustand \"{NAME}\" referenziert."
+			},
+			"functions":{
+				"option":{
+					"delete":"Formulardatensatz gelöscht",
+					"open":"Formular geöffnet",
+					"save":"Formulardatensatz gespeichert"
+				},
+				"event":"Ereignis",
+				"eventBefore":"Vor Ereignis",
+				"jsFunctionId":"Frontend-Funktion ausführen",
+				"title":"Formularfunktionen"
+			},
 			"option":{
 				"displayColor":"Farbe",
 				"displayDefault":"Standard",
@@ -452,6 +471,7 @@
 				"displayGallery":"Gallerie",
 				"displayHidden":"Versteckt",
 				"displayLogin":"Anmeldung",
+				"displayPassword":"Passwort",
 				"displayPhone":"Telefon",
 				"displayTime":"Zeit",
 				"displayTextarea":"Textfeld",
@@ -476,15 +496,16 @@
 				"fieldChanged":"Wurde geändert",
 				"modeField":"Feldwert",
 				"modeField2Field":"Feldwert",
-				"modeField2Fixed":"fester Wert",
-				"modeField2Preset":"vordef. Datensatz",
+				"modeField2Fixed":"Fester Wert",
+				"modeField2Login":"Login-ID",
+				"modeField2Preset":"Vordef. Datensatz",
+				"modeFieldChanged":"Feldwert verändert",
 				"modeRecord":"Datensatzzustand",
 				"modeRole":"Rolle",
 				"newRecord":"Ist neu",
 				"title":"Formularzustände"
 			},
 			"aggregator":"Aggregieren",
-			"attributeRecord":"Formulardatensatz übern.",
 			"autoRenew":"Auto-Aktualisierung",
 			"autoRenew0":"nicht aktiv",
 			"autoRenewHint":"in Sekunden",
@@ -492,6 +513,10 @@
 			"autoSelectHint":"0=aus, 2=erste zwei, -3=letzten drei",
 			"captions":"Beschriftungen",
 			"category":"Kategorieauswahl",
+			"collection":"Sammlung*",
+			"collectionIdDef":"Standardwert(e) aus Sammlung",
+			"collectionHint":"*Sammlung wird nur beeinflusst, wenn sie als Filterkriterium in der Datenabfrage genutzt wird.",
+			"collectionTitle":"Sammlung durch Benutzereingabe filtern",
 			"columnsTarget":"Spalten hier ablegen",
 			"columnsTemplates":"Verfügbare Spalten",
 			"columnBatch":"Spaltenstapel",
@@ -514,6 +539,7 @@
 			"copyNewName":"Neuer Formularname",
 			"csvExport":"CSV-Export",
 			"csvImport":"CSV-Import",
+			"csvTitle":"CSV-Verarbeitung",
 			"date0":"Datum von",
 			"date1":"Datum zu",
 			"dateColor":"Farbe",
@@ -554,8 +580,6 @@
 			"flexSizeMin":"Schrumpft bis (Prozent)",
 			"flexSizeShrink":"Schrumpffaktor",
 			"flexWrap":"Inhalte umbrechen",
-			"formOpen":"Datensatz öffnen (Relation 0)",
-			"formOpenEmpty":"Formular öffnen",
 			"formTitle":"Formulartitel",
 			"gantt":"Gantt",
 			"ganttNotes":"Spaltenstapel 1 gruppiert Ergebnisse.",
@@ -567,15 +591,26 @@
 			"hidden":"Feld ist standardmäßig versteckt",
 			"icon":"Formular-Icon",
 			"ics":"iCAL-Abonnements",
+			"jsFunctionButton":"Funktion nack Klick",
+			"jsFunctionData":"Funktion nach Wertänderung",
 			"layout":"Listen-Layout",
 			"limit":"Ergebnisanzahl",
 			"new":"Neues Formular",
 			"onMobile":"In mobiler Ansicht",
+			"openForm":"Formular öffnen",
+			"openFormAttributeApply":"...um Wert auf Formular zu setzen",
+			"openFormFormIdOpen":"Formular",
+			"openFormMaxHeight":"Maximale Höhe (px)",
+			"openFormMaxWidth":"Maximale Breite (px)",
+			"openFormNewRecord":"Beim Erstellen neuer Datensätze",
+			"openFormPopUp":"Pop-up-Formular",
+			"openFormRelationIndex":"Verwende Datensatz von Relation",
 			"presetOpen":"Vord. Datensatz öffnen",
 			"readonly":"Lesend",
 			"required":"Benötigt",
+			"showFunctions":"Funktionen",
 			"showHelp":"Hilfe",
-			"showOutsideIn":"Ref. Beziehungen",
+			"showReferences":"Referenzen",
 			"showStates":"Zustände",
 			"sql":"SQL-Vorschau",
 			"state":"Status",
@@ -587,6 +622,99 @@
 			"subQuery":"Sub-Query",
 			"subQueryAttribute":"Attribut",
 			"title":"Formulare"
+		},
+		"function":{
+			"button":{
+				"addNew":"NEW-Präfix",
+				"addOld":"OLD-Präfix",
+				"addSchedule":"Zeitplan hinzufügen",
+				"details":"Details",
+				"template":"Vorlage"
+			},
+			"dialog":{
+				"delete":"Bist du sicher, dass du diese Funktion löschen möchtest?"
+			},
+			"helpJs":{
+				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Kopiert Text zur Zwischenablage des Benutzers.",
+				"get_language_code":"app.get_language_code() => STRING<br /><br />Liefert den 5-stelligen Sprach-Code ('en_us', ...) der aktuellen Anmeldung.",
+				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Liefert die ID der aktuellen Anmeldung.",
+				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Liefert die Datensatz-ID des offenen Formulars für den ausgewählten Relationsindex (0 ist der Standard).",
+				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Liefert die IDs aller zugewiesenen Rollen für die aktuelle Anmeldung (geerbte Rollen sind inkludiert).",
+				"go_back":"app.go_back() => UNDEFINED<br /><br />Führt eine Browser-zurück Navigation aus.",
+				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />Liefert zurück, ob die spezifizierte Anmeldung der spezifizierten Rolle zugewiesen ist (geerbte Rollen werden berücksichtigt).",
+				"open_form":"app.open_form(form_id, record_id, new_tab, pop_up, max_height, max_width) => UNDEFINED<br /><br />Öffnet ein Formular direkt, in einem neuen Browser-Tab oder als Pop-up-Fenster.",
+				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Löscht den aktuellen Formulardatensatz.",
+				"record_new":"app.record_new() => UNDEFINED<br /><br />Öffnet einen neuen Datensatz.",
+				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Lädt den aktuellen Formulardatensatz neu.",
+				"record_save":"app.record_save() => UNDEFINED<br /><br />Speichert den aktuellen Formulardatensatz."
+			},
+			"helpPg":{
+				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Bricht die Operation ab und sendet dem ausführenden Benutzer eine Nachricht, welche in der Benutzeroberfläche angezeigt wird.",
+				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Liefert die ID von der Anmeldung, welche die Operation ausführt.",
+				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Liefert den 5-stelligen Sprach-Code ('en_us', ...) von der Anmeldung, die auf das Daten-Backend zugreift.",
+				"get_name":"instance.get_name() => TEXT<br /><br />Liefert den Instanznamen, definiert im Anpassungs-Fenster im Adminbereich.",
+				"get_public_hostname":"instance.get_public_hostname() => TEXT<br /><br />Liefert den öffentlichen Hostnamen, definiert in der Systemkonfiguration im Adminbereich.",
+				"get_role_ids":"instance.get_role_ids(<blockquote>login_id INTEGER,<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => UUID[]<br /><br />Liefert ein Array von Rollen-IDs, die der spezifizierten Anmeldung zugewiesen sind.<br /><br />Wenn 'inherited' auf TRUE gesetzt ist werden übergeordnete Rollen inkludiert. Verschachtelte Mitgliedschaften werden vollständig aufgelöst.",
+				"has_role":"instance.has_role(<blockquote>login_id INTEGER,<br />role_id UUID,<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => BOOLEAN<br /><br />Liefert zurück, ob die spezifizierte Anmeldung der spezifizierten Rolle zugewiesen ist.<br /><br />Wenn 'inherited' auf TRUE gesetzt ist werden übergeordnete Rollen inkludiert. Verschachtelte Mitgliedschaften werden vollständig aufgelöst.<br /><br />Beispiel: SELECT instance.has_role(1,'00000000-0000-0000-0000-000000000001',FALSE)",
+				"has_role_any":"instance.has_role_any(<blockquote>login_id INTEGER,<br />role_ids UUID[],<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => BOOLEAN<br /><br />Liefert zurück, ob die spezifizierte Anmeldung einer der spezifizierten Rollen zugewiesen ist.<br /><br />Wenn 'inherited' auf TRUE gesetzt ist werden übergeordnete Rollen inkludiert. Verschachtelte Mitgliedschaften werden vollständig aufgelöst.<br /><br />Beispiel: SELECT instance.has_role_any(1,ARRAY['00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000002']::UUID[],FALSE)",
+				"log_error":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Logged Fehlermeldung. Falls der Anwendungsname aufgelöst werden kann, wird das Log damit assoziiert.",
+				"log_info":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Logged Information. Falls der Anwendungsname aufgelöst werden kann, wird das Log damit assoziiert.",
+				"log_warning":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Logged Warnmeldung. Falls der Anwendungsname aufgelöst werden kann, wird das Log damit assoziiert.",
+				"mail_delete":"instance.mail_delete(mail_id INTEGER) => INTEGER<br /><br />Löscht die spezifizierte E-Mail, inklusive Anhänge.",
+				"mail_delete_after_attach":"instance.mail_delete_after_attach(<blockquote>mail_id INTEGER,<br />attach_record_id INTEGER,<br />attach_attribute_id UUID</blockquote>) => INTEGER<br /><br />Markiert die E-Mail-Anhänge, zum Hinzufügen an das Dateiattribut eines spezifizierten Datensatzes; die E-Mail und Anhänge werden danach gelöscht.",
+				"mail_get_next":"instance.mail_get_next(account_name TEXT DEFAULT NULL) => instance.mail<br /><br />Liefert die nächste E-Mail vom Mail-Spooler; liefert NULL wenn keine E-Mail verfügbar ist. Falls ein Account-Name angegeben wird, werden nur E-Mails geliefert, die von diesem Account abgeholt worden sind.<br /><br />Der gelieferte Typ \"instance.mail\" besteht aus:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>Nachdem eine E-Mail verarbeitet worden ist, sollte diese gelöscht werden; entweder direkt (mail_delete) oder nachdem Anhänge gespeichert worden sind (mail_delete_after_attach).",
+				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Erzeugt eine ausgehende E-Mail für den Mail-Spooler. Optionale Parameter:<ul><li>Komma-getrennte Liste für TO/CC/BCC-Empfänger (einer davon muss gesetzt sein)</li><li>Name des sendenen Mail-Accounts (zufälliger Account wird verwendet, wenn nicht spezifiziert)</li><li>Dateiattribut und ID des Datensatzes, dessen Dateien an die E-Mail angehängt werden sollen</li></ul>"
+			},
+			"option":{
+				"fieldGet":"Wert lesen",
+				"fieldSet":"Wert schreiben",
+				"intervalDays":"Tage",
+				"intervalHours":"Stunden",
+				"intervalMinutes":"Minuten",
+				"intervalMonths":"Monate",
+				"intervalSeconds":"Sekunden",
+				"intervalWeeks":"Wochen",
+				"intervalYears":"Jahre"
+			},
+			"code":"Funktionsinhalt",
+			"codeArgs":"Argumente",
+			"codeArgsHintJs":"optional, \"var1, var2, ...\"",
+			"codeArgsHintPg":"optional, \"var1 integer, var2 bool, ...\"",
+			"codeReturns":"Rückgabe",
+			"codeReturnsHintJs":"optional, \"number\", \"array\",...",
+			"codeReturnsHintPg":"optional, \"text\", \"integer\",...",
+			"entityInput":"Platzhalter selektieren und in den Funktions-Code klicken, um <b>upgrade-sicheren</b> Syntax zu verwenden.",
+			"form":"An Formular knüpfen",
+			"functionsBackend":"Backend-Funktionen",
+			"functionsFrontend":"Frontend-Funktionen",
+			"intervalAtDayForMonths":"am Tag im Monat",
+			"intervalAtDayForWeeks":"am Wochentag (0=So, 1=Mo, ...)",
+			"intervalAtDayForYears":"am Tag im Jahr",
+			"intervalAtTime":"um Uhrzeit",
+			"intervalEvery":"Ausführen: Alle",
+			"isFrontendExec":"Frontend-Aufruf",
+			"isTrigger":"Trigger",
+			"language":"Language",
+			"languageJs":"JavaScript",
+			"languagePg":"PL/pgSQL",
+			"new":"Neue Funktion",
+			"placeholders":"Platzhalter",
+			"placeholdersFormFields":"Formular-Datenfelder",
+			"placeholdersFormQuery":"Formular-Datenabfrage",
+			"placeholdersGlobal":"Global",
+			"placeholdersInstance":"Instanz",
+			"placeholdersModules":"Anwendungen",
+			"runOnce":"Einmal ausführen",
+			"schedules":"Wiederholung",
+			"schedulesItem":"{CNT} Zeitpläne",
+			"title":"Funktionen",
+			"titleJs":"Frontend-Funktionen ({CNT})",
+			"titlePg":"Backend-Funktionen ({CNT})",
+			"titleOne":"Funktionstitel",
+			"valueJsHint":"VALUE",
+			"valueJsHintForm":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
+			"valueJsHintIndex":"RELATION_INDEX_NUMBER",
+			"valueJsHintRole":"ROLE_ID_STRING"
 		},
 		"help":{
 			"title":"Anwendungshilfe"
@@ -653,65 +781,6 @@
 			"startForms":"Startformulare",
 			"startFormsExplanation":"Das erste Startformular wird verwendet, das einer Rolle der aktuellen Anmeldung entspricht.",
 			"title":"Anwendungen"
-		},
-		"pgFunction":{
-			"button":{
-				"addNew":"NEW-Präfix",
-				"addOld":"OLD-Präfix",
-				"addSchedule":"Zeitplan hinzufügen",
-				"details":"Details",
-				"template":"Vorlage"
-			},
-			"dialog":{
-				"delete":"Bist du sicher, dass du diese Funktion löschen möchtest?"
-			},
-			"help":{
-				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Bricht die Operation ab und sendet dem ausführenden Benutzer eine Nachricht, welche in der Benutzeroberfläche angezeigt wird.",
-				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Liefert die ID von der Anmeldung, welche die Operation ausführt.",
-				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Liefert den 5-stelligen Sprach-Code ('en_us', ...) von der Anmeldung, die auf das Daten-Backend zugreift.",
-				"get_name":"instance.get_name() => TEXT<br /><br />Liefert den Instanznamen, definiert im Anpassungs-Fenster im Adminbereich.",
-				"get_public_hostname":"instance.get_public_hostname() => TEXT<br /><br />Liefert den öffentlichen Hostnamen, definiert in der Systemkonfiguration im Adminbereich.",
-				"get_role_ids":"instance.get_role_ids(<blockquote>login_id INTEGER,<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => UUID[]<br /><br />Liefert ein Array von Rollen-IDs, die der spezifizierten Anmeldung zugewiesen sind.<br /><br />Wenn 'inherited' auf TRUE gesetzt ist werden übergeordnete Rollen inkludiert. Verschachtelte Mitgliedschaften werden vollständig aufgelöst.",
-				"has_role":"instance.has_role(<blockquote>login_id INTEGER,<br />role_id UUID,<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => BOOLEAN<br /><br />Liefert zurück, ob die spezifizierte Anmeldung der spezifizierten Rolle zugewiesen ist.<br /><br />Wenn 'inherited' auf TRUE gesetzt ist werden übergeordnete Rollen inkludiert. Verschachtelte Mitgliedschaften werden vollständig aufgelöst.<br /><br />Beispiel: SELECT instance.has_role(1,'00000000-0000-0000-0000-000000000001',FALSE)",
-				"has_role_any":"instance.has_role_any(<blockquote>login_id INTEGER,<br />role_ids UUID[],<br />inherited BOOLEAN DEFAULT FALSE</blockquote>) => BOOLEAN<br /><br />Liefert zurück, ob die spezifizierte Anmeldung einer der spezifizierten Rollen zugewiesen ist.<br /><br />Wenn 'inherited' auf TRUE gesetzt ist werden übergeordnete Rollen inkludiert. Verschachtelte Mitgliedschaften werden vollständig aufgelöst.<br /><br />Beispiel: SELECT instance.has_role_any(1,ARRAY['00000000-0000-0000-0000-000000000001','00000000-0000-0000-0000-000000000002']::UUID[],FALSE)",
-				"log_error":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Logged Fehlermeldung. Falls der Anwendungsname aufgelöst werden kann, wird das Log damit assoziiert.",
-				"log_info":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Logged Information. Falls der Anwendungsname aufgelöst werden kann, wird das Log damit assoziiert.",
-				"log_warning":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Logged Warnmeldung. Falls der Anwendungsname aufgelöst werden kann, wird das Log damit assoziiert.",
-				"mail_delete":"instance.mail_delete(mail_id INTEGER) => INTEGER<br /><br />Löscht die spezifizierte E-Mail, inklusive Anhänge.",
-				"mail_delete_after_attach":"instance.mail_delete_after_attach(<blockquote>mail_id INTEGER,<br />attach_record_id INTEGER,<br />attach_attribute_id UUID</blockquote>) => INTEGER<br /><br />Markiert die E-Mail-Anhänge, zum Hinzufügen an das Dateiattribut eines spezifizierten Datensatzes; die E-Mail und Anhänge werden danach gelöscht.",
-				"mail_get_next":"instance.mail_get_next(account_name TEXT DEFAULT NULL) => instance.mail<br /><br />Liefert die nächste E-Mail vom Mail-Spooler; liefert NULL wenn keine E-Mail verfügbar ist. Falls ein Account-Name angegeben wird, werden nur E-Mails geliefert, die von diesem Account abgeholt worden sind.<br /><br />Der gelieferte Typ \"instance.mail\" besteht aus:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>Nachdem eine E-Mail verarbeitet worden ist, sollte diese gelöscht werden; entweder direkt (mail_delete) oder nachdem Anhänge gespeichert worden sind (mail_delete_after_attach).",
-				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Erzeugt eine ausgehende E-Mail für den Mail-Spooler. Optionale Parameter:<ul><li>Komma-getrennte Liste für TO/CC/BCC-Empfänger (einer davon muss gesetzt sein)</li><li>Name des sendenen Mail-Accounts (zufälliger Account wird verwendet, wenn nicht spezifiziert)</li><li>Dateiattribut und ID des Datensatzes, dessen Dateien an die E-Mail angehängt werden sollen</li></ul>"
-			},
-			"option":{
-				"intervalDays":"Tage",
-				"intervalHours":"Stunden",
-				"intervalMinutes":"Minuten",
-				"intervalMonths":"Monate",
-				"intervalSeconds":"Sekunden",
-				"intervalWeeks":"Wochen",
-				"intervalYears":"Jahre"
-			},
-			"code":"Funktionsinhalt",
-			"codeArgs":"Argumente",
-			"codeArgsHint":"optional, \"var1 integer\"",
-			"codeReturns":"Rückgabe",
-			"codeReturnsHint":"Ausdruck, \"trigger\", \"integer\",...",
-			"entityInput":"Platzhalter selektieren und in den Funktions-Code klicken, um <b>upgrade-sicheren</b> Syntax zu verwenden.",
-			"intervalAtDayForMonths":"am Tag im Monat",
-			"intervalAtDayForWeeks":"am Wochentag (0=So, 1=Mo, ...)",
-			"intervalAtDayForYears":"am Tag im Jahr",
-			"intervalAtTime":"um Uhrzeit",
-			"intervalEvery":"Ausführen: Alle",
-			"new":"Neue Funktion",
-			"placeholders":"Platzhalter",
-			"placeholdersInstance":"Instanz",
-			"placeholdersModules":"Anwendungen",
-			"preview":"Vorschau",
-			"runOnce":"Einmal ausführen",
-			"schedules":"Wiederholung",
-			"schedulesItem":"{CNT} Zeitpläne",
-			"title":"Funktionen",
-			"titleOne":"Funktionstitel"
 		},
 		"pgTrigger":{
 			"dialog":{
@@ -788,8 +857,9 @@
 			"presetValues":"Werte",
 			"presetValuesPreview":"Wertevorschau",
 			"preview":"Datenansicht",
-			"previewLimit":"Anzahl",
+			"previewLimit":"Datensätze/Seite",
 			"previewPage":"Seite",
+			"previewRowCount":"Datensatzanzahl",
 			"relationship":"Beziehung",
 			"retention":"Änderungshistorie",
 			"retentionCount":"X Änderungen behalten",
@@ -813,6 +883,8 @@
 			"assignable":"Zuweisbar",
 			"attribute":"Attribut",
 			"children":"Mitglied von",
+			"collection":"Sammlung",
+			"collections":"Sammlungen",
 			"data":"Data",
 			"legend":"Legende: Kein Zugriff (-), Lesen (R), Schreiben (W), Löschen (D)",
 			"menu":"Menü",
@@ -825,15 +897,19 @@
 		"backHint":"Zurück zur Anwendungsübersicht",
 		"language":"Übersetzung",
 		"languageNextHint":"Zur nächsten Übersetzung wechseln (Hotkey: STRG + q)",
+		"navigationCollections":"Sammlungen",
+		"navigationCollectionsSub":"Sammlungsdetails",
 		"navigationFilterHint":"Nach Text filtern",
 		"navigationForms":"Formulare",
 		"navigationFormsSub":"Formular-Design",
+		"navigationFunctions":"Funktionen",
+		"navigationFunctionsSub":"Funktionsdetails",
+		"navigationFunctionsSubBackend":"Backend",
+		"navigationFunctionsSubFrontend":"Frontend",
 		"navigationHelp":"Hilfe",
 		"navigationIcons":"Icons",
 		"navigationLoginForms":"Anmeldeformulare",
 		"navigationMenu":"Menüs",
-		"navigationPgFunctions":"Funktionen",
-		"navigationPgFunctionsSub":"Funktionsdetails",
 		"navigationRelations":"Relationen",
 		"navigationRelationsSub":"Relationsdetails",
 		"navigationRoles":"Rollen",
@@ -883,6 +959,39 @@
 		"weekDayShort5":"Fr",
 		"weekDayShort6":"Sa"
 	},
+	"error":{
+		"APP":{
+			"001":"Ein unerwarteter Fehler ist aufgetreten. Bitte erneut versuchen.",
+			"002":"Aktion konnte nicht innerhalb des erlaubten Zeitraums abgeschlossen werden. Wenn dies häufiger vorkommt, bitte den Systemadministrator informieren.",
+			"003":"Aktion wurde abgebrochen. Bitte erneut versuchen.",
+			"004":"Dieser Datensatz ist geschützt und kann nicht gelöscht werden.",
+			"005":"Entität konnte nicht erstellt werden, da kein Name eingegeben worden ist. Bitte einen Namen eingeben.",
+			"006":"Der gewählte Name ist ungültig. Bitte stelle sicher, dass...<ul><li>... er mit einen Buchstaben beginnt <b>(a-z)</b>.</li><li>... maximal <b>31</b> Zeichen lang ist.</li><li>... nur kleingeschriebene Buchstaben <b>(a-z)</b>, Unterstriche <b>(_)</b> oder Nummern <b>(0-9)</b> beinhaltet.</li></ul>Beispiele: storage_inventory_post21, facility_address, contact_book",
+			"007":"Ein referenziertes Modul ist unbekannt.",
+			"008":"Eine referenzierte Relation ist unbekannt.",
+			"009":"Ein referenziertes Attribut ist unbekannt."
+		},
+		"CSV":{
+			"001":"Ungültige Nummer '{VALUE}' (Integer wird erwartet).",
+			"002":"Ungültige Nummer '{VALUE}' (Dezimal wird erwartet).",
+			"003":"Ungültiger Datum-/Zeitwert '{VALUE}', erwartetes Format: {EXPECT}.",
+			"004":"Nicht unterstützter Attributtyp '{VALUE}'.",
+			"005":"Falsche Anzahl an Feldern in Zeile '{VALUE}'."
+		},
+		"DBS":{
+			"001":"{FNC_MSG}",
+			"002":"Der ausgewählte Wert für '{NAMES}' wird bereits von einem anderen Datensatz verwendet. Dieser ist als 'einzigartig' definiert und kann nur einmal verwendet werden.",
+			"003":"Dieser Anmeldename wird bereits verwendet.",
+			"004":"Datensatz kann nicht gelöscht werden - er wird noch referenziert als \"{ATR}\" in \"{MOD}\".",
+			"005":"Spalte \"{NAME}\" beinhaltet keinen Wert oder kann nicht aufgelöst werden.",
+			"006":"Einzigartiger Index kann nicht erstellt werden, weil bestehende Attributwerte nicht einzigartig sind.",
+			"007":"Ungültiger Wert \"{VALUE}\"."
+		},
+		"SEC":{
+			"001":"Du bist nicht berechtigt die Aktion auszuführen oder diese Ressource aufzurufen."
+		},
+		"initCollection":"Fehler beim Laden von Sammlungen während der Anmeldung: {MSG}"
+	},
 	"feedback":{
 		"button":{
 			"whatIsSent":"Was wird gesendet?"
@@ -910,6 +1019,7 @@
 			},
 			"content":{
 				"attribute":"Attributwert",
+				"collection":"Wert(e) aus Sammlung",
 				"field":"Feldwert",
 				"javascript":"JavaScript-Ausdruck",
 				"languageCode":"Login-Sprach-Code (en_us, ...)",
@@ -956,6 +1066,7 @@
 			"retractLogs":"Logs einklappen"
 		},
 		"dialog":{
+			"close":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem das Formular schließen?",
 			"delete":"Bist du sicher, dass du diesen Datensatz <b>permanent</b> löschen möchtest?",
 			"new":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem einen neuen Datensatz erstellen?",
 			"newReset":"Dies wird alle Eingaben zurücksetzen.<br /><br />Möchtest du fortfahren?",
@@ -988,7 +1099,7 @@
 		},
 		"wizard":{
 			"installBundle":"Core Company",
-			"installBundleDesc":"Installiere eine vorselektierte Sammlung an Kernanwendungen für Organisationen. Die Sammlung \"Core Company\" inkludiert:<ul><li>Abwesenheitsverwaltung</li><li>Zeiterfassung</li><li>Aufgabenverwaltung</li><li>Werkzeuge zur Modellierung deiner Organisation</li></ul>Nach der Installation schaue dir bitte die Hilfeseiten der jeweiligen Anwendungen an, um die Ersteinrichtung durchzuführen.",
+			"installBundleDesc":"Installiere eine vorselektierte Sammlung an Kernanwendungen für Organisationen. Die Sammlung \"Core Company\" inkludiert:<ul><li>Abwesenheitsverwaltung</li><li>Zeiterfassung</li><li>Projekt- & Aufgabenverwaltung</li><li>Anfragenverwaltung</li><li>Werkzeuge zur Modellierung deiner Organisation</li></ul>Nach der Installation unterstützen die Hilfeseiten der jeweiligen Anwendungen bei der Ersteinrichtung.",
 			"installFile":"Von Datei",
 			"installFileDesc":"Installiere Anwendungen von lokalen REI3-Dateien. Für Offline-Systeme oder selbsterstellte Anwendungen.<br /><br />Dateien für öffentliche REI3-Anwendungen können vom offiziellen <a href=\"https://rei3.de/download\" target=\"_blank\">Repository</a> heruntergeladen werden.",
 			"installRepo":"Vom Repository",
@@ -1016,7 +1127,9 @@
 			"inputMonth":"MM",
 			"inputSecond":"--",
 			"inputYear":"JJJJ"
-		}
+		},
+		"fileNotUploaded":"Datei ist noch nicht gespeichert.",
+		"fileTooLarge":"Datei \"{NAME}\" kann nicht hochgeladen werden, maximal erlaubte Größe ist {SIZE}."
 	},
 	"list":{
 		"button":{
@@ -1029,14 +1142,6 @@
 		},
 		"dialog":{
 			"delete":"Bist du sicher, dass du die ausgewählten Datensätze <b>permanent</b> löschen möchtest?"
-		},
-		"error":{
-			"csvDateParse":"Ungültiger Zeitwert \"{VALUE}\", erwartetes Format: {EXPECT}",
-			"csvFieldCount":"Falsche Anzahl an Feldern",
-			"csvLineError":"Fehler in Zeile {COUNT}: ",
-			"csvNotNull":"Spalte \"{NAME}\" beinhaltet keinen Wert oder kann nicht aufgelöst werden",
-			"csvNumberParse":"Ungültige Nummer \"{VALUE}\"",
-			"csvTypeSyntax":"Ungültiger Wert \"{VALUE}\""
 		},
 		"message":{
 			"csvExport":"Der CSV-Export verwendet Filter und Sortierung der aktuellen Liste.",
@@ -1057,6 +1162,7 @@
 		"csvDatetime":"Datum+Zeitformat",
 		"csvFile":"CSV-Datei",
 		"csvHasHeader":"Überschriftenzeile",
+		"csvLineError":"Fehler in Zeile {COUNT}: ",
 		"csvTime":"Uhrzeitsformat",
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Zeitzone",
@@ -1112,6 +1218,7 @@
 		"titleAdmin":"Admin",
 		"titleDisplay":"Anzeige",
 		"titleSecurity":"Sicherheit",
-		"titleTheme":"Darstellung"
+		"titleTheme":"Darstellung",
+		"warnUnsaved":"Warnung bei ungespeicherten Änderungen"
 	}
 }

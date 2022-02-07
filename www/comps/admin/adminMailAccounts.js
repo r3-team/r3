@@ -92,16 +92,13 @@ let MyAdminMailAccount = {
 	methods:{
 		// backend calls
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('mailAccount','del',{ id:this.id },this.delOk);
-			trans.send(this.$root.genericError);
-		},
-		delOk:function(res) {
-			this.reload();
+			ws.send('mailAccount','del',{id:this.id},true).then(
+				(res) => this.reload(),
+				(err) => this.$root.genericError(err)
+			);
 		},
 		set:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('mailAccount','set',{
+			ws.send('mailAccount','set',{
 				id:this.id,
 				name:this.name,
 				mode:this.mode,
@@ -111,24 +108,22 @@ let MyAdminMailAccount = {
 				sendAs:this.sendAs,
 				hostName:this.hostName,
 				hostPort:this.hostPort
-			},this.setOk);
-			trans.send(this.$root.genericError);
+			},true).then(
+				(res) => {
+					if(this.isNew)
+						this.name = '';
+					
+					this.reload();
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
-		setOk:function() {
-			if(this.isNew)
-				this.name = '';
-			
-			this.reload();
-		},
-		
 		reload:function() {
 			// reload mail account cache after change
-			let trans = new wsHub.transactionBlocking();
-			trans.add('mailAccount','reload',{},this.reloadOk);
-			trans.send(this.$root.genericError);
-		},
-		reloadOk:function() {
-			this.$emit('reloaded');
+			ws.send('mailAccount','reload',{},true).then(
+				(res) => this.$emit('reloaded'),
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };
@@ -233,33 +228,31 @@ let MyAdminMailAccounts = {
 	methods:{
 		// backend calls
 		get:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('mailAccount','get',{},this.getOk);
-			trans.send(this.$root.genericError);
-		},
-		getOk:function(res) {
-			this.accountIdMap = res.payload.accounts;
+			ws.send('mailAccount','get',{},true).then(
+				(res) => this.accountIdMap = res.payload.accounts,
+				(err) => this.$root.genericError(err)
+			);
 		},
 		test:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('mailAccount','test',{
+			ws.send('mailAccount','test',{
 				accountName:this.testAccountName,
 				recipient:this.testRecipient,
 				subject:this.testSubject
-			},this.testOk);
-			trans.send(this.$root.genericError);
-		},
-		testOk:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.testOk,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
-			});
-			this.testRecipient = '';
-			this.get();
+			},true).then(
+				(res) => {
+					this.$store.commit('dialog',{
+						captionBody:this.capApp.testOk,
+						buttons:[{
+							caption:this.capGen.button.close,
+							cancel:true,
+							image:'cancel.png'
+						}]
+					});
+					this.testRecipient = '';
+					this.get();
+				},
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };

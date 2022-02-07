@@ -1,3 +1,9 @@
+import {
+	isAttributeRelationship,
+	isAttributeRelationship11
+} from './attribute.js';
+import MyStore from '../../stores/store.js';
+
 export function getDependentModules(moduleSource,modulesAll) {
 	let out = [];
 	for(let i = 0, j = modulesAll.length; i < j; i++) {
@@ -44,13 +50,32 @@ export function setValueInJson(inputJson,nameChain,value) {
 };
 
 export function getItemTitle(relation,attribute,index,outsideIn,attributeNm) {
-	let relCap   = outsideIn ? '<-' : '';
-	let atrNmCap = '';
+	let isRel = isAttributeRelationship(attribute.content);
+	
+	if(!isRel)     return `${index}) ${relation.name}.${attribute.name}`;
+	if(!outsideIn) return `${index}) [${attribute.content}] ${relation.name}.${attribute.name}`;
 	
 	if(attributeNm !== false)
-		atrNmCap = `->${attributeNm.name}`;
+		return `${index}) [n:m] ${relation.name}.${attribute.name} -> ${attributeNm.name}`;
 	
-	return `${index}) ${relCap}${relation.name}.${attribute.name}${atrNmCap}`;
+	let relCap = isAttributeRelationship11(attribute.content) ? '1:1' : '1:n';
+	
+	return `${index}) [${relCap}] ${relation.name}.${attribute.name}`;
+	
+};
+
+export function getItemTitleNoRelationship(relation,attribute,index) {
+	return `${index}) ${relation.name}.${attribute.name}`;
+};
+
+export function getItemTitleColumn(column) {
+	let a = MyStore.getters['schema/attributeIdMap'][column.attributeId];
+	let r = MyStore.getters['schema/relationIdMap'][a.relationId];
+	return getItemTitle(r,a,column.index,false,false);
+};
+
+export function getItemTitleRelation(relationId,index) {
+	return `${index}) ${MyStore.getters['schema/relationIdMap'][relationId].name}`;
 };
 
 export function getPgFunctionTemplate() {

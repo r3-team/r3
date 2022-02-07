@@ -103,8 +103,8 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 			}
 		}
 	}
-	return Set_tx(tx, moduleId, form.Id, form.PresetIdOpen, form.IconId,
-		newName, form.Query, form.Fields, form.States, form.Captions)
+	return Set_tx(tx, moduleId, form.Id, form.PresetIdOpen, form.IconId, newName,
+		form.Query, form.Fields, form.Functions, form.States, form.Captions)
 }
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
@@ -152,24 +152,24 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 	}
 	rows.Close()
 
-	// collect form query, fields, states and captions
+	// collect form query, fields, functions, states and captions
 	for i, form := range forms {
-
 		form.Query, err = query.Get("form", form.Id, 0, 0)
 		if err != nil {
 			return forms, err
 		}
-
 		form.Fields, err = field.Get(form.Id)
 		if err != nil {
 			return forms, err
 		}
-
+		form.Functions, err = getFunctions(form.Id)
+		if err != nil {
+			return forms, err
+		}
 		form.States, err = getStates(form.Id)
 		if err != nil {
 			return forms, err
 		}
-
 		form.Captions, err = caption.Get("form", form.Id, []string{"formTitle", "formHelp"})
 		if err != nil {
 			return forms, err
@@ -181,7 +181,8 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 
 func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUID,
 	iconId pgtype.UUID, name string, queryIn types.Query, fields []interface{},
-	states []types.FormState, captions types.CaptionMap) error {
+	functions []types.FormFunction, states []types.FormState,
+	captions types.CaptionMap) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &id, "form", "id")
 	if err != nil {
@@ -191,13 +192,9 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUI
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.form
-				SET preset_id_open = $1, icon_id = $2
-			WHERE id = $3
-		`, presetIdOpen, iconId, id); err != nil {
-			return err
-		}
-
-		if err := SetName_tx(tx, id, name); err != nil {
+			SET name = $1, preset_id_open = $2, icon_id = $3
+			WHERE id = $4
+		`, name, presetIdOpen, iconId, id); err != nil {
 			return err
 		}
 	} else {
@@ -228,6 +225,11 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUI
 		}
 	}
 
+	// set form functions
+	if err := setFunctions_tx(tx, id, functions); err != nil {
+		return err
+	}
+
 	// set form states
 	if err := setStates_tx(tx, id, states); err != nil {
 		return err
@@ -238,14 +240,6 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUI
 		return err
 	}
 	return nil
-}
-
-func SetName_tx(tx pgx.Tx, id uuid.UUID, name string) error {
-	_, err := tx.Exec(db.Ctx, `
-		UPDATE app.form SET name = $1
-		WHERE id = $2
-	`, name, id)
-	return err
 }
 
 // replace field IDs (form duplication)

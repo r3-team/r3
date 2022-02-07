@@ -198,34 +198,28 @@ let MyAdminMails = {
 		
 		// backend calls
 		del:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('mail','del',{
-				ids:this.mailIdsSelected
-			},this.delOk);
-			trans.send(this.$root.genericError);
-		},
-		delOk:function(res) {
-			this.get();
+			ws.send('mail','del',{ids:this.mailIdsSelected},true).then(
+				(res) => this.get(),
+				(err) => this.$root.genericError(err)
+			);
 		},
 		get:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('mail','get',{
+			ws.send('mail','get',{
 				limit:this.limit,
 				offset:this.offset
-			},this.getOk);
-			trans.send(this.$root.genericError);
-		},
-		getOk:function(res) {
-			this.mails = res.payload.mails;
-			this.mailIdsSelected = [];
+			},true).then(
+				(res) => {
+					this.mails           = res.payload.mails;
+					this.mailIdsSelected = [];
+				},
+				(err) => this.$root.genericError(err)
+			);
 		},
 		getAccounts:function() {
-			let trans = new wsHub.transactionBlocking();
-			trans.add('mailAccount','get',{},this.getAccountsOk);
-			trans.send(this.$root.genericError);
-		},
-		getAccountsOk:function(res) {
-			this.accountIdMap = res.payload.accounts;
+			ws.send('mailAccount','get',{},true).then(
+				(res) => this.accountIdMap = res.payload.accounts,
+				(err) => this.$root.genericError(err)
+			);
 		}
 	}
 };
