@@ -692,7 +692,7 @@
 			"intervalAtDayForYears":"in ziua anului",
 			"intervalAtTime":"la ora",
 			"intervalEvery":"Rulează: La fiecare",
-			"isFrontendExec":"Frontend call",
+			"isFrontendExec":"Apelare Front-end",
 			"isTrigger":"Declanșator",
 			"language":"Limbajul",
 			"languageJs":"JavaScript",
