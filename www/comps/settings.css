@@ -11,6 +11,13 @@
 .settings td{
 	padding:2px 8px 2px 0px;
 }
+.settings .encryption .backup-code{
+	font-family:monospace;
+	margin:20px 10px;
+	padding:16px;
+	border:1px solid var(--color-border);
+	border-radius:5px;
+}
 .settings .message{
 	padding-top:10px;
 	color:var(--color-error);

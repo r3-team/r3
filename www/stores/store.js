@@ -8,14 +8,14 @@ const MyStore = Vuex.createStore({
 		schema:MyStoreSchema
 	},
 	state:{
-		access:{},            // access permissions for each entity (attribute, collection, menu, relation), key: entity ID
-		builder:false,        // builder mode enabled
-		busyBlockInput:false, // while active, input is blocked when busy
-		busyCounter:0,        // counter of calls making the app busy (WS requests, uploads, etc.)
-		captions:{},          // all application captions in the user interface language
-		collectionIdMap:{},   // map of all collection values, key = collection ID
-		config:{},            // configuration values (admin only)
-		constants:{           // constant variables, codes/messages/IDs
+		access:{},                     // access permissions for each entity (attribute, collection, menu, relation), key: entity ID
+		builder:false,                 // builder mode enabled
+		busyBlockInput:false,          // while active, input is blocked when busy
+		busyCounter:0,                 // counter of calls making the app busy (WS requests, uploads, etc.)
+		captions:{},                   // all application captions in the user interface language
+		collectionIdMap:{},            // map of all collection values, key = collection ID
+		config:{},                     // configuration values (admin only)
+		constants:{                    // constant variables, codes/messages/IDs
 			scrollFormId:'form-scroll' // ID of form page element (to recover scroll position during routing)
 		},
 		dialogCaptionTop:'',
@@ -34,8 +34,12 @@ const MyStore = Vuex.createStore({
 		isNoAuth:false,       // user logged in without authentication
 		license:{},           // license info (admin only)
 		licenseValid:false,   // license is valid (set and within validity period)
+		loginEncryption:false,// user login E2E encryption is used
 		loginId:-1,           // user login ID
 		loginName:'',         // user login name
+		loginPrivateKey:null, // user login private key for decryption (non-exportable key)
+		loginPrivateKeyEncBackup:null, // user login private key PEM, encrypted with backup code
+		loginPublicKey:null,  // user login public key for encryption for themselves
 		logo:'',
 		moduleColor1:'',      // color1 (header) of currently active module
 		moduleEntries:[],     // module entries for header/home page
@@ -96,27 +100,31 @@ const MyStore = Vuex.createStore({
 		busyReset: (state,payload) => state.busyCounter=0,
 		
 		// simple
-		access:        (state,payload) => state.access         = payload,
-		builder:       (state,payload) => state.builder        = payload,
-		busyBlockInput:(state,payload) => state.busyBlockInput = payload,
-		captions:      (state,payload) => state.captions       = payload,
-		config:        (state,payload) => state.config         = payload,
-		feedback:      (state,payload) => state.feedback       = payload,
-		formHasChanges:(state,payload) => state.formHasChanges = payload,
-		isAdmin:       (state,payload) => state.isAdmin        = payload,
-		isAtDialog:    (state,payload) => state.isAtDialog     = payload,
-		isAtFeedback:  (state,payload) => state.isAtFeedback   = payload,
-		isAtMenu:      (state,payload) => state.isAtMenu       = payload,
-		isNoAuth:      (state,payload) => state.isNoAuth       = payload,
-		isMobile:      (state,payload) => state.isMobile       = payload,
-		loginId:       (state,payload) => state.loginId        = payload,
-		loginName:     (state,payload) => state.loginName      = payload,
-		moduleColor1:  (state,payload) => state.moduleColor1   = payload,
-		moduleEntries: (state,payload) => state.moduleEntries  = payload,
-		moduleLanguage:(state,payload) => state.moduleLanguage = payload,
-		productionMode:(state,payload) => state.productionMode = payload,
-		settings:      (state,payload) => state.settings       = payload,
-		system:        (state,payload) => state.system         = payload
+		access:         (state,payload) => state.access          = payload,
+		builder:        (state,payload) => state.builder         = payload,
+		busyBlockInput: (state,payload) => state.busyBlockInput  = payload,
+		captions:       (state,payload) => state.captions        = payload,
+		config:         (state,payload) => state.config          = payload,
+		feedback:       (state,payload) => state.feedback        = payload,
+		formHasChanges: (state,payload) => state.formHasChanges  = payload,
+		isAdmin:        (state,payload) => state.isAdmin         = payload,
+		isAtDialog:     (state,payload) => state.isAtDialog      = payload,
+		isAtFeedback:   (state,payload) => state.isAtFeedback    = payload,
+		isAtMenu:       (state,payload) => state.isAtMenu        = payload,
+		isNoAuth:       (state,payload) => state.isNoAuth        = payload,
+		isMobile:       (state,payload) => state.isMobile        = payload,
+		loginEncryption:(state,payload) => state.loginEncryption = payload,
+		loginId:        (state,payload) => state.loginId         = payload,
+		loginName:      (state,payload) => state.loginName       = payload,
+		loginPrivateKey:(state,payload) => state.loginPrivateKey = payload,
+		loginPrivateKeyEncBackup:(state,payload) => state.loginPrivateKeyEncBackup = payload,
+		loginPublicKey: (state,payload) => state.loginPublicKey  = payload,
+		moduleColor1:   (state,payload) => state.moduleColor1    = payload,
+		moduleEntries:  (state,payload) => state.moduleEntries   = payload,
+		moduleLanguage: (state,payload) => state.moduleLanguage  = payload,
+		productionMode: (state,payload) => state.productionMode  = payload,
+		settings:       (state,payload) => state.settings        = payload,
+		system:         (state,payload) => state.system          = payload
 	},
 	getters:{
 		licenseDays:(state) => {
@@ -153,8 +161,12 @@ const MyStore = Vuex.createStore({
 		isNoAuth:         (state) => state.isNoAuth,
 		license:          (state) => state.license,
 		licenseValid:     (state) => state.licenseValid,
+		loginEncryption:  (state) => state.loginEncryption,
 		loginId:          (state) => state.loginId,
 		loginName:        (state) => state.loginName,
+		loginPrivateKey:  (state) => state.loginPrivateKey,
+		loginPrivateKeyEncBackup:(state) => state.loginPrivateKeyEncBackup,
+		loginPublicKey:   (state) => state.loginPublicKey,
 		moduleColor1:     (state) => state.moduleColor1,
 		moduleEntries:    (state) => state.moduleEntries,
 		moduleLanguage:   (state) => state.moduleLanguage,

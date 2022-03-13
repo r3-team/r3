@@ -143,6 +143,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "setTokenFixed":
 			return LoginSetTokenFixed_tx(tx, reqJson, loginId)
 		}
+	case "loginKeys":
+		switch action {
+		case "store":
+			return LoginKeysStore_tx(tx, reqJson, loginId)
+		}
 	case "lookup":
 		switch action {
 		case "get":

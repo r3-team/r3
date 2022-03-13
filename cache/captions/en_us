@@ -91,6 +91,7 @@
 		"resultsNone":"- no results -",
 		"resultsOf":"/ {CNT}",
 		"role":"Role",
+		"status":"Status",
 		"threeDots":"...",
 		"title":"Title",
 		"username":"Username",
@@ -988,7 +989,8 @@
 			"007":"Invalid value '{VALUE}'."
 		},
 		"SEC":{
-			"001":"You are not authorized to complete this action or access this resource."
+			"001":"You are not authorized to complete this action or access this resource.",
+			"002":"The system failed to unlock your personal key for end-to-end encryption. This can happen if someone changed your password for you or you have changed it outside this application.<br /><br />Please open the user settings and follow the instructions to regain access to your personal key."
 		},
 		"initCollection":"Failed to load collections during login: {MSG}"
 	},
@@ -1176,15 +1178,7 @@
 		"quick":"Filter results in all columns"
 	},
 	"settings":{
-		"button":{
-			"logout":"Logout"
-		},
-		"option":{
-			"cornerKeep":"- default -",
-			"cornerRounded":"rounded",
-			"cornerSquared":"squared"
-		},
-		"security":{
+		"account":{
 			"messagePwCurrentWrong":"Current password is invalid",
 			"messagePwDiff":"Passwords do not match",
 			"messagePwRequiresDigit":"Password must contain a digit",
@@ -1196,6 +1190,30 @@
 			"pwNew1":"New password (repeated)",
 			"pwOld":"Current password",
 			"titlePwChange":"Change password"
+		},
+		"button":{
+			"logout":"Logout"
+		},
+		"encryption":{
+			"button":{
+				"createKeys":"Create keys",
+				"storeKeys":"Enable encryption"
+			},
+			"status":{
+				"inactive":"Not enabled",
+				"locked":"Key is locked",
+				"unlocked":"Ready for use"
+			},
+			"backupCode":"Copy backup code",
+			"backupCodeDesc":"The backup code is <b>very important</b>. It serves to re-establish access if you forget your password.",
+			"confirmBackupCode":"I have copied the backup code to a secure location.",
+			"confirmEncryption":"I understand that if I loose access to both my password and my backup code, encrypted data becomes inaccessible to me permanently.",
+			"description":"Applications can encrypt sensitive data for exclusive access by specific individuals. Before data can be encrypted, each user has to create personal keys."
+		},
+		"option":{
+			"cornerKeep":"- default -",
+			"cornerRounded":"rounded",
+			"cornerSquared":"squared"
 		},
 		"bordersAll":"Add borders",
 		"bordersCorners":"Border corners",
@@ -1215,9 +1233,10 @@
 		"pageTitle":"Settings",
 		"spacing":"Spacing",
 		"sundayFirstDow":"Sunday is 1st weekday",
+		"titleAccount":"Account",
 		"titleAdmin":"Admin",
 		"titleDisplay":"Display",
-		"titleSecurity":"Security",
+		"titleEncryption":"End-to-end encryption",
 		"titleTheme":"Theme",
 		"warnUnsaved":"Warnings for unsaved changes"
 	}

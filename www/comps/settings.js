@@ -1,8 +1,202 @@
 import {set as setSetting} from './shared/settings.js';
+import {
+	aesGcmDecryptBase64,
+	aesGcmEncryptBase64,
+	aesGcmEncryptBase64WithPhrase,
+	aesGcmImportBase64,
+	pemExport,
+	rsaGenerateKeys
+} from './shared/crypto.js';
 export {MySettings as default};
 
-let MySettingsSecurity = {
-	name:'my-settings-security',
+let MySettingsEncryption = {
+	name:'my-settings-encryption',
+	template:`<div class="encryption">
+	
+		<p>{{ capApp.description }}</p>
+		
+		<table>
+			<tr>
+				<td>{{ capGen.status }}</td>
+				<td>{{ statusCaption }}</td>
+			</tr>
+		</table>
+		<br />
+		
+		<!-- create new key pair -->
+		<template v-if="loginKeyAes !== null && !loginEncryption">
+			<my-button
+				v-if="!newKeys"
+				@trigger="createKeys"
+				:active="!running"
+				:caption="capApp.button.createKeys"
+				:image="!running ? 'add.png' : 'load.gif'"
+			/>
+			
+			<!-- newly created keys ready for storage -->
+			<template v-if="newKeys">
+				<h2>{{ capApp.backupCode }}</h2>
+				<div class="backup-code">{{ newBackupCode }}</div>
+				<p v-html="capApp.backupCodeDesc"></p>
+				
+				<table>
+					<tr>
+						<td><my-bool v-model="confirmBackupCode" /></td>
+						<td>{{ capApp.confirmBackupCode }}</td>
+					</tr>
+					<tr>
+						<td><my-bool v-model="confirmEncryption" /></td>
+						<td>{{ capApp.confirmEncryption }}</td>
+					</tr>
+				</table>
+				<br />
+				<br />
+				
+				<my-button image="key.png"
+					@trigger="storeKeys"
+					:active="!running && confirmBackupCode && confirmEncryption"
+					:caption="capApp.button.storeKeys"
+				/>
+			</template>
+		</template>
+		
+		
+		<!-- recover access -->
+		<template v-if="locked">
+		</template>
+	</div>`,
+	data:function() {
+		return {
+			running:false,
+			
+			// user confirmations for enabling encryption
+			confirmBackupCode:false,
+			confirmEncryption:false,
+			
+			// newly created keys to be stored
+			newBackupCode:null,
+			newKeyPrivateEnc:null,
+			newKeyPrivateEncBackup:null,
+			newKeyPublic:null
+		};
+	},
+	computed:{
+		statusCaption:function() {
+			if(!this.active) return this.capApp.status.inactive;
+			if(this.locked)  return this.capApp.status.locked;
+			return this.capApp.status.unlocked;
+		},
+		
+		// states
+		active: function() { return this.loginEncryption; },
+		locked: function() { return this.active && this.loginPrivateKey === null; },
+		newKeys:function() { return this.newKeyPrivateEnc !== null; },
+		
+		// stores
+		loginKeyAes:    function() { return this.$store.getters['local/loginKeyAes']; },
+		loginEncryption:function() { return this.$store.getters.loginEncryption; },
+		loginPrivateKey:function() { return this.$store.getters.loginPrivateKey; },
+		capApp:         function() { return this.$store.getters.captions.settings.encryption; },
+		capGen:         function() { return this.$store.getters.captions.generic; }
+	},
+	methods:{
+		// externals
+		aesGcmDecryptBase64,
+		aesGcmEncryptBase64,
+		aesGcmEncryptBase64WithPhrase,
+		aesGcmImportBase64,
+		pemExport,
+		rsaGenerateKeys,
+		
+		//
+		handleErrUnexpected:function(err) {
+			// this error should not happen, log for troubleshooting purposes
+			console.log(err);
+		},
+		
+		generateBackupCode:function() {
+			let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+			let len   = 128;
+			let arr   = new Uint32Array(len);
+			let out   = '';
+			crypto.getRandomValues(arr);
+			for(let i = 0; i < len; i++) {
+				out += chars[arr[i] % chars.length];
+			}
+			
+			// add spaces for readability every 4 characters
+			out = out.replace(/.{4}/g, '$& ');
+			
+			return out;
+		},
+		createKeys:function() {
+			this.running = true;
+			const backupCode = this.generateBackupCode();
+			
+			// generate RSA key pair for user
+			// import login AES key for encryption of private key
+			Promise.all([
+				this.rsaGenerateKeys(true,4096),
+				this.aesGcmImportBase64(this.loginKeyAes)
+			]).then(
+				res => {
+					const keyPair  = res[0];
+					const keyLogin = res[1];
+					
+					// export both keys as PEM
+					Promise.all([
+						this.pemExport(keyPair.privateKey),
+						this.pemExport(keyPair.publicKey)
+					]).then(
+						res => {
+							const pemPrivate = res[0];
+							const pemPublic  = res[1];
+							
+							// encrypt private key twice (once with login key, once with backup code)
+							Promise.all([
+								this.aesGcmEncryptBase64(pemPrivate,keyLogin),
+								this.aesGcmEncryptBase64WithPhrase(pemPrivate,backupCode)
+							]).then(
+								res => {
+									this.newBackupCode          = backupCode;
+									this.newKeyPrivateEnc       = res[0];
+									this.newKeyPrivateEncBackup = res[1];
+									this.newKeyPublic           = pemPublic;
+									this.running                = false;
+								}
+							);
+						}
+					);
+				},
+				// none of these processes should fail
+				err => this.$root.genericError(err)
+			);
+		},
+		
+		// backend calls
+		storeKeys:function() {
+			this.running = true;
+			
+			ws.send('loginKeys','store',{
+				privateKeyEnc:this.newKeyPrivateEnc,
+				privateKeyEncBackup:this.newKeyPrivateEncBackup,
+				publicKey:this.newKeyPublic
+			},true).then(
+				res => {
+					this.newBackupCode          = null;
+					this.newKeyPrivateEnc       = null;
+					this.newKeyPrivateEncBackup = null;
+					this.newKeyPublic           = null;
+					this.running                = false;
+				},
+				err => this.$root.genericError(err)
+			);
+		}
+	}
+};
+
+let MySettingsAccount = {
+	name:'my-settings-account',
 	template:`<div>
 		<table class="default-inputs">
 			<tbody>
@@ -63,7 +257,7 @@ let MySettingsSecurity = {
 		
 		// stores
 		loginName:function() { return this.$store.getters.loginName; },
-		capApp:   function() { return this.$store.getters.captions.settings.security; },
+		capApp:   function() { return this.$store.getters.captions.settings.account; },
 		capGen:   function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
@@ -79,7 +273,7 @@ let MySettingsSecurity = {
 				pwNew1:this.pwNew1,
 				pwOld:this.pwOld
 			},true).then(
-				(res) => {
+				res => {
 					switch(res.payload.code){
 						case 'PW_CURRENT_WRONG':    this.message = this.capApp.messagePwCurrentWrong; break;
 						case 'PW_REQUIRES_DIGIT':   this.message = this.capApp.messagePwRequiresDigit; break;
@@ -92,7 +286,7 @@ let MySettingsSecurity = {
 					this.pwNew1 = '';
 					this.pwOld  = '';
 				},
-				(err) => this.$root.genericError(err)
+				err => this.$root.genericError(err)
 			);
 		}
 	}
@@ -100,7 +294,10 @@ let MySettingsSecurity = {
 
 let MySettings = {
 	name:'my-settings',
-	components:{MySettingsSecurity},
+	components:{
+		MySettingsAccount,
+		MySettingsEncryption
+	},
 	template:`<div class="settings">
 		
 		<div class="contentBox grow">
@@ -254,13 +451,22 @@ let MySettings = {
 					</table>
 				</div>
 				
-				<!-- security -->
+				<!-- account -->
 				<div class="contentPart short">
 					<div class="contentPartHeader">
 						<img class="icon" src="images/lock.png" />
-						<h1>{{ capApp.titleSecurity }}</h1>
+						<h1>{{ capApp.titleAccount }}</h1>
 					</div>
-					<my-settings-security />
+					<my-settings-account />
+				</div>
+				
+				<!-- encryption -->
+				<div class="contentPart short">
+					<div class="contentPartHeader">
+						<img class="icon" src="images/key.png" />
+						<h1>{{ capApp.titleEncryption }}</h1>
+					</div>
+					<my-settings-encryption />
 				</div>
 			</div>
 		</div>

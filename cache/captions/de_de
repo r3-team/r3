@@ -91,6 +91,7 @@
 		"resultsNone":"- keine Ergebnisse -",
 		"resultsOf":"/ {CNT}",
 		"role":"Rolle",
+		"status":"Status",
 		"title":"Titel",
 		"threeDots":"...",
 		"username":"Benutzername",
@@ -988,7 +989,8 @@
 			"007":"Ungültiger Wert \"{VALUE}\"."
 		},
 		"SEC":{
-			"001":"Du bist nicht berechtigt die Aktion auszuführen oder diese Ressource aufzurufen."
+			"001":"Du bist nicht berechtigt die Aktion auszuführen oder diese Ressource aufzurufen.",
+			"002":"Das System konnte den persönlichen Schlüssel für die Ende-Zu-Ende-Verschlüsselung nicht entsperren. Das kann passieren, wenn jemand für dich oder du dein Passwort außerhalb dieser Anwendung geändert hast.<br /><br />Bitte die Benutzereinstellungen öffnen und den Anweisungen folgen, um Zugriff auf deinen persönlichen Schlüssel wiederherzustellen."
 		},
 		"initCollection":"Fehler beim Laden von Sammlungen während der Anmeldung: {MSG}"
 	},
@@ -1176,15 +1178,7 @@
 		"quick":"Ergebnisse in allen Spalten filtern"
 	},
 	"settings":{
-		"button":{
-			"logout":"Abmelden"
-		},
-		"option":{
-			"cornerKeep":"- unverändert -",
-			"cornerRounded":"abgerundet",
-			"cornerSquared":"kantig"
-		},
-		"security":{
+		"account":{
 			"messagePwCurrentWrong":"Aktuelles Passwort ist inkorrekt",
 			"messagePwDiff":"Passwörter stimmen nicht überein",
 			"messagePwRequiresDigit":"Passwort muss eine Zahl beinhalten",
@@ -1196,6 +1190,30 @@
 			"pwNew1":"Neues Passwort (wiederholt)",
 			"pwOld":"Aktuelles Passwort",
 			"titlePwChange":"Passwort ändern"
+		},
+		"button":{
+			"logout":"Abmelden"
+		},
+		"encryption":{
+			"button":{
+				"createKeys":"Schlüssel erzeugen",
+				"storeKeys":"Verschlüsselung aktivieren"
+			},
+			"status":{
+				"inactive":"Nicht aktiviert",
+				"locked":"Schlüssel ist gesperrt",
+				"unlocked":"Bereit zur Nutzung"
+			},
+			"backupCode":"Backup-Code kopieren",
+			"backupCodeDesc":"Der Backup-Code ist <b>sehr wichtig</b>. Er stellt Zugriff wieder her, falls du dein Passwort vergessen hast.",
+			"confirmBackupCode":"Ich habe den Backup-Code an einen sicheren Ort kopiert.",
+			"confirmEncryption":"Ich verstehe, dass wenn ich sowohl mein Passwort als auch meinen Backup-Code verliere, permanent Zugriff auf verschlüsselte Daten verliere.",
+			"description":"Anwendungen können sensitive Daten für den exklusiven Zugriff spezifischer Personen verschlüsseln. Bevor Verschlüsselung genutzt werden kann, muss jeder Benutzer persönliche Schlüssel erzeugen."
+		},
+		"option":{
+			"cornerKeep":"- unverändert -",
+			"cornerRounded":"abgerundet",
+			"cornerSquared":"kantig"
 		},
 		"bordersAll":"Rahmen hinzufügen",
 		"bordersCorners":"Rahmenecken",
@@ -1215,9 +1233,10 @@
 		"pageTitle":"Einstellungen",
 		"spacing":"Abstände",
 		"sundayFirstDow":"Sonntag ist 1. Wochentag",
+		"titleAccount":"Konto",
 		"titleAdmin":"Admin",
 		"titleDisplay":"Anzeige",
-		"titleSecurity":"Sicherheit",
+		"titleEncryption":"Ende-zu-Ende-Verschlüsselung",
 		"titleTheme":"Darstellung",
 		"warnUnsaved":"Warnung bei ungespeicherten Änderungen"
 	}

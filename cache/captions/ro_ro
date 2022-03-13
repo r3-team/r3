@@ -91,6 +91,7 @@
 		"resultsNone":"- fără rezultate -",
 		"resultsOf":"/ {CNT}",
 		"role":"Rol",
+		"status":"Status",
 		"threeDots":"...",
 		"title":"Titlu",
 		"username":"Nume utilizator",
@@ -988,7 +989,8 @@
 			"007":"Valoare nevalidă '{VALUE}'."
 		},
 		"SEC":{
-			"001":"Acces neautorizat."
+			"001":"Acces neautorizat.",
+			"002":"The system failed to unlock your personal key for end-to-end encryption. This can happen if someone changed your password for you or you have changed it outside this application.<br /><br />Please open the user settings and follow the instructions to regain access to your personal key."
 		},
 		"initCollection":"Nu s-au putut încărca colecțiile în timpul autentificarii: {MSG}"
 	},
@@ -1176,15 +1178,7 @@
 		"quick":"Filtrați rezultatele în toate coloanele"
 	},
 	"settings":{
-		"button":{
-			"logout":"Deconectare"
-		},
-		"option":{
-			"cornerKeep":"- implicit -",
-			"cornerRounded":"rotunjit",
-			"cornerSquared":"colțuros"
-		},
-		"security":{
+		"account":{
 			"messagePwCurrentWrong":"Parola curentă este nevalidă",
 			"messagePwDiff":"Parolele nu se potrivesc",
 			"messagePwRequiresDigit":"Parola trebuie să conțină un număr",
@@ -1196,6 +1190,30 @@
 			"pwNew1":"Parola nouă (repetată)",
 			"pwOld":"Parola curentă",
 			"titlePwChange":"Schimbare parolă"
+		},
+		"button":{
+			"logout":"Deconectare"
+		},
+		"encryption":{
+			"button":{
+				"createKeys":"Create keys",
+				"storeKeys":"Enable encryption"
+			},
+			"status":{
+				"inactive":"Not enabled",
+				"locked":"Key is locked",
+				"unlocked":"Ready for use"
+			},
+			"backupCode":"Copy backup code",
+			"backupCodeDesc":"The backup code is <b>very important</b>. It serves to re-establish access if you forget your password.",
+			"confirmBackupCode":"I have copied the backup code to a secure location.",
+			"confirmEncryption":"I understand that if I loose access to both my password and my backup code, encrypted data becomes inaccessible to me permanently.",
+			"description":"Applications can encrypt sensitive data for exclusive access by specific individuals. Before data can be encrypted, each user has to create personal encryption keys."
+		},
+		"option":{
+			"cornerKeep":"- implicit -",
+			"cornerRounded":"rotunjit",
+			"cornerSquared":"colțuros"
 		},
 		"bordersAll":"Adăugați chenaruri",
 		"bordersCorners":"Colțuri la margine",
@@ -1215,9 +1233,10 @@
 		"pageTitle":"Setări",
 		"spacing":"Spaţierea",
 		"sundayFirstDow":"Duminică este prima zi a săptămânii",
+		"titleAccount":"Account",
 		"titleAdmin":"Administrare",
 		"titleDisplay":"Afișare",
-		"titleSecurity":"Securitate",
+		"titleEncryption":"End-to-end encryption",
 		"titleTheme":"Temă",
 		"warnUnsaved":"Avertismente pentru modificări nesalvate"
 	}

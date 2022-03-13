@@ -7,6 +7,11 @@ import {updateCollections}   from './shared/collection.js';
 import {genericError}        from './shared/error.js';
 import {getCaptionForModule} from './shared/language.js';
 import {openLink}            from './shared/generic.js';
+import {
+	aesGcmDecryptBase64,
+	aesGcmImportBase64,
+	pemImport,
+} from './shared/crypto.js';
 export {MyApp as default};
 
 let MyApp = {
@@ -29,6 +34,7 @@ let MyApp = {
 		
 		<template v-if="appReady">
 			<my-header
+				@encryptionUsed=""
 				@logout="sessionInvalid"
 				:moduleEntries="moduleEntries"
 			/>
@@ -197,16 +203,17 @@ let MyApp = {
 		httpMode:function() { return location.protocol === 'http:'; },
 		
 		// stores
-		access:         function() { return this.$store.getters.access; },
 		activated:      function() { return this.$store.getters['local/activated']; },
 		appVersion:     function() { return this.$store.getters['local/appVersion']; },
 		customLogo:     function() { return this.$store.getters['local/customLogo']; },
 		customLogoUrl:  function() { return this.$store.getters['local/customLogoUrl']; },
+		loginKeyAes:    function() { return this.$store.getters['local/loginKeyAes']; },
 		schemaTimestamp:function() { return this.$store.getters['schema/timestamp']; },
 		modules:        function() { return this.$store.getters['schema/modules']; },
 		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
 		moduleIdMapOpts:function() { return this.$store.getters['schema/moduleIdMapOptions']; },
 		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
+		access:         function() { return this.$store.getters.access; },
 		blockInput:     function() { return this.$store.getters.blockInput; },
 		capErr:         function() { return this.$store.getters.captions.error; },
 		capGen:         function() { return this.$store.getters.captions.generic; },
@@ -230,10 +237,13 @@ let MyApp = {
 	},
 	methods:{
 		// externals
+		aesGcmDecryptBase64,
+		aesGcmImportBase64,
 		genericError,
 		getCaptionForModule,
 		getStartFormId,
 		openLink,
+		pemImport,
 		updateCollections,
 		
 		// general app states
@@ -328,6 +338,7 @@ let MyApp = {
 		
 		// session control
 		sessionInvalid:function() {
+			this.$store.commit('local/loginKeyAes',null);
 			this.$store.commit('local/token','');
 			this.$store.commit('local/tokenKeep',false);
 			
@@ -389,8 +400,7 @@ let MyApp = {
 				ws.prepare('lookup','get',{name:'access'}),
 				ws.prepare('lookup','get',{name:'caption'}),
 				ws.prepare('lookup','get',{name:'feedback'}),
-				ws.prepare('lookup','get',{name:'loginId'}),
-				ws.prepare('lookup','get',{name:'loginName'})
+				ws.prepare('lookup','get',{name:'loginKeys'}),
 			];
 			
 			// system meta data, admins only
@@ -406,13 +416,15 @@ let MyApp = {
 					this.$store.commit('access',res[1].payload);
 					this.$store.commit('captions',res[2].payload);
 					this.$store.commit('feedback',res[3].payload === 1);
-					this.$store.commit('loginId',res[4].payload);
-					this.$store.commit('loginName',res[5].payload);
+					this.$store.commit('loginPublicKey',res[4].payload.publicKey);
+					this.$store.commit('loginPrivateKeyEncBackup',res[4].payload.privateEncBackup);
+					
+					this.decryptPrivateKey(res[4].payload.privateEnc);
 					
 					if(this.isAdmin) {
-						this.$store.commit('config',res[6].payload);
-						this.$store.commit('license',res[7].payload);
-						this.$store.commit('system',res[8].payload);
+						this.$store.commit('config',res[5].payload);
+						this.$store.commit('license',res[6].payload);
+						this.$store.commit('system',res[7].payload);
 					}
 					
 					// in case of errors during collection retrieval, continue
@@ -429,6 +441,48 @@ let MyApp = {
 				() => this.$store.commit('busyBlockInput',false)
 			);
 			this.$store.commit('busyBlockInput',true);
+		},
+		
+		// crypto
+		decryptPrivateKey:function(privateKeyPemEnc) {
+			if(this.loginKeyAes === null || privateKeyPemEnc === null)
+				return;
+			
+			// state: encryption is used at all
+			this.$store.commit('loginEncryption',true);
+			
+			// attempt to decrypt private key with personal login key
+			// prepare login AES key
+			this.aesGcmImportBase64(this.loginKeyAes).then(
+				loginKey => {
+					
+					// decrypt login private key PEM
+					this.aesGcmDecryptBase64(privateKeyPemEnc,loginKey).then(
+						privateKeyPem => {
+							
+							// import key PEM to store
+							this.pemImport(privateKeyPem,'RSA').then(
+								res => this.$store.commit('loginPrivateKey',res)
+							);
+						},
+						err => {
+							// decryption failed, expected error
+							this.$store.commit('dialog',{
+								captionBody:this.capErr.SEC['002'],
+								image:'key.png',
+								buttons:[{
+									cancel:true,
+									caption:this.capGen.button.close,
+									keyEscape:true,
+									image:'cancel.png'
+								}]
+							});
+						}
+					);
+				},
+				// non-caught errors should not occur (import of PEM to store)
+				err => this.setInitErr(err)
+			);
 		},
 		
 		// backend reloads

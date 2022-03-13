@@ -8,6 +8,7 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/schema/pgIndex"
+	"r3/tools"
 	"r3/types"
 	"strconv"
 	"strings"
@@ -95,6 +96,39 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 // mapped by current database version string, returns new database version string
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
+	"2.6": func(tx pgx.Tx) (string, error) {
+		if _, err := tx.Exec(db.Ctx, `
+			ALTER TABLE instance.login
+				ADD COLUMN salt_kdf TEXT NOT NULL DEFAULT 'PLACEHOLDER',
+				ADD COLUMN key_private_enc TEXT,
+				ADD COLUMN key_private_enc_backup TEXT,
+				ADD COLUMN key_public TEXT;
+			
+			ALTER TABLE instance.login ALTER COLUMN salt_kdf DROP DEFAULT;
+		`); err != nil {
+			return "", err
+		}
+
+		// set KDF salts for every login
+		loginIds := make([]int64, 0)
+		if err := tx.QueryRow(db.Ctx, `
+			SELECT ARRAY_AGG(id::INTEGER)
+			FROM instance.login
+		`).Scan(&loginIds); err != nil {
+			return "", err
+		}
+
+		for _, id := range loginIds {
+			if _, err := tx.Exec(db.Ctx, `
+				UPDATE instance.login
+				SET salt_kdf = $1
+				WHERE id = $2
+			`, tools.RandStringRunes(16), id); err != nil {
+				return "", err
+			}
+		}
+		return "2.7", nil
+	},
 	"2.5": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
 			-- new login setting

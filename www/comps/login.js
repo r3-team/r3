@@ -1,5 +1,9 @@
 import {getLineBreaksParsedToHtml} from './shared/generic.js';
 import {openLink}                  from './shared/generic.js';
+import {
+	aesGcmExportBase64,
+	pbkdf2PassToAesGcmKey
+} from './shared/crypto.js';
 export {MyLogin as default};
 
 let MyLogin = {
@@ -226,7 +230,7 @@ let MyLogin = {
 	watch:{
 		appInitErr:function(v) {
 			// updates when app encounters an unexpected error during initialization
-			// log to console (troubleshooting) and stop loading as something went wrong
+			// log to console (troubleshooting) and stop loading
 			console.log(v);
 			this.loading = false;
 		},
@@ -272,20 +276,26 @@ let MyLogin = {
 		// set page title
 		this.$store.commit('pageTitle',this.message.login[this.language]);
 		
-		// clear token, if available but not to be kept
-		if(!this.tokenKeep && this.token !== '')
+		// clear token & login key, if available but not to be kept
+		if(!this.tokenKeep && this.token !== '') {
+			this.$store.commit('local/loginKeyAes',null);
 			this.$store.commit('local/token','');
+		}
 	},
 	methods:{
 		// externals
+		aesGcmExportBase64,
 		getLineBreaksParsedToHtml,
+		pbkdf2PassToAesGcmKey,
 		openLink,
 		
 		// misc
 		handleError:function(action) {
 			switch(action) {
+				case 'aesExport': break;                      // very unexpected, should not happen
 				case 'authToken': break;                      // token auth failed, to be expected, can expire
 				case 'authUser':  this.badAuth = true; break; // user authorization failed, mark inputs invalid
+				case 'kdfCreate': break;                      // very unexpected, should not happen
 			}
 			this.loading = false;
 		},
@@ -298,8 +308,13 @@ let MyLogin = {
 				username:this.username,
 				password:this.password
 			},true).then(
-				(res) => this.authenticatedByUser(res.payload.token),
-				(err) => this.handleError('authUser')
+				res => this.authenticatedByUser(
+					res.payload.loginId,
+					res.payload.loginName,
+					res.payload.token,
+					res.payload.saltKdf
+				),
+				err => this.handleError('authUser')
 			);
 			this.loading = true;
 		},
@@ -308,32 +323,59 @@ let MyLogin = {
 			this.$store.commit('local/tokenKeep',true);
 			
 			ws.send('auth','user',{username:username},true).then(
-				(res) => this.authenticatedByUser(res.payload.token),
-				(err) => this.handleError('authUser')
+				res => this.authenticatedByUser(
+					res.payload.loginId,
+					res.payload.loginName,
+					res.payload.token,
+					null
+				),
+				err => this.handleError('authUser')
 			);
 			this.loading = true;
 		},
 		authenticateByToken:function() {
 			ws.send('auth','token',{token:this.token},true).then(
-				(res) => this.appEnable(),
-				(err) => this.handleError('authToken')
+				res => this.appEnable(
+					res.payload.loginId,
+					res.payload.loginName
+				),
+				err => this.handleError('authToken')
 			);
 			this.loading = true;
 		},
-		authenticatedByUser:function(token) {
+		authenticatedByUser:function(loginId,loginName,token,saltKdf) {
 			if(token === '')
 				return this.handleError('authUser');
 			
-			// store token if valid
+			// store authentication token
 			this.$store.commit('local/token',token);
-			this.appEnable();
+			
+			if(saltKdf === null)
+				return this.appEnable(loginId,loginName);
+			
+			// generate AES key from credentials and login private key salt
+			this.pbkdf2PassToAesGcmKey(this.password,saltKdf,10000,true).then(
+				aesKey => {
+					this.aesGcmExportBase64(aesKey).then(
+						res => {
+							// export AES key to local storage
+							this.$store.commit('local/loginKeyAes',res);
+							this.appEnable(loginId,loginName);
+						},
+						err => this.handleError('aesExport')
+					);
+				},
+				err => this.handleError('kdfCreate')
+			);
 		},
 		
 		// authentication successful, prepare appliation load
-		appEnable:function() {
+		appEnable:function(loginId,loginName) {
 			let token = JSON.parse(atob(this.token.split('.')[1]));
 			this.$store.commit('isAdmin',token.admin);
 			this.$store.commit('isNoAuth',token.noAuth);
+			this.$store.commit('loginId',loginId);
+			this.$store.commit('loginName',loginName);
 			this.$emit('authenticated');
 		}
 	}
