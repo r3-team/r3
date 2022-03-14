@@ -416,10 +416,15 @@ let MyApp = {
 					this.$store.commit('access',res[1].payload);
 					this.$store.commit('captions',res[2].payload);
 					this.$store.commit('feedback',res[3].payload === 1);
-					this.$store.commit('loginPublicKey',res[4].payload.publicKey);
-					this.$store.commit('loginPrivateKeyEncBackup',res[4].payload.privateEncBackup);
 					
-					this.decryptPrivateKey(res[4].payload.privateEnc);
+					if(this.loginKeyAes !== null && res[4].payload.privateEnc !== null) {
+						this.$store.commit('loginEncryption',true);
+						this.$store.commit('loginPrivateKeyEnc',res[4].payload.privateEnc);
+						this.$store.commit('loginPrivateKeyEncBackup',res[4].payload.privateEncBackup);
+						
+						this.importPrivateKey(res[4].payload.privateEnc);
+						this.importPublicKey(res[4].payload.public);
+					}
 					
 					if(this.isAdmin) {
 						this.$store.commit('config',res[5].payload);
@@ -444,13 +449,13 @@ let MyApp = {
 		},
 		
 		// crypto
-		decryptPrivateKey:function(privateKeyPemEnc) {
-			if(this.loginKeyAes === null || privateKeyPemEnc === null)
-				return;
-			
-			// state: encryption is used at all
-			this.$store.commit('loginEncryption',true);
-			
+		importPublicKey:function(publicKeyPem) {
+			this.pemImport(publicKeyPem,'RSA',true).then(
+				res => this.$store.commit('loginPublicKey',res),
+				err => this.setInitErr(err)
+			);
+		},
+		importPrivateKey:function(privateKeyPemEnc) {
 			// attempt to decrypt private key with personal login key
 			// prepare login AES key
 			this.aesGcmImportBase64(this.loginKeyAes).then(
@@ -461,7 +466,7 @@ let MyApp = {
 						privateKeyPem => {
 							
 							// import key PEM to store
-							this.pemImport(privateKeyPem,'RSA').then(
+							this.pemImport(privateKeyPem,'RSA',false).then(
 								res => this.$store.commit('loginPrivateKey',res)
 							);
 						},

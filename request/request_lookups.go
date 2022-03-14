@@ -51,14 +51,14 @@ func LookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 		var res struct {
 			PrivateEnc       pgtype.Varchar `json:"privateEnc"`
 			PrivateEncBackup pgtype.Varchar `json:"privateEncBackup"`
-			PublicKey        pgtype.Varchar `json:"publicKey"`
+			Public           pgtype.Varchar `json:"public"`
 		}
 
 		err := db.Pool.QueryRow(db.Ctx, `
 			SELECT key_private_enc, key_private_enc_backup, key_public
 			FROM instance.login
 			WHERE id = $1
-		`, loginId).Scan(&res.PrivateEnc, &res.PrivateEncBackup, &res.PublicKey)
+		`, loginId).Scan(&res.PrivateEnc, &res.PrivateEncBackup, &res.Public)
 
 		return res, err
 	}

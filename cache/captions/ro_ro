@@ -28,7 +28,8 @@
 			"saveNew":"Salvează+Nou",
 			"saveNewHint":"Salvează modificările și deschide o nouă înregistrare",
 			"send":"Trimite",
-			"show":"Arată"
+			"show":"Arată",
+			"unlock":"Unlock"
 		},
 		"dialog":{
 			"confirm":"Va rog confirmați"
@@ -1201,14 +1202,19 @@
 			},
 			"status":{
 				"inactive":"Not enabled",
-				"locked":"Key is locked",
+				"locked":"Keys are locked",
 				"unlocked":"Ready for use"
 			},
-			"backupCode":"Copy backup code",
-			"backupCodeDesc":"The backup code is <b>very important</b>. It serves to re-establish access if you forget your password.",
+			"backupCode":"Backup code",
+			"backupCodeDesc":"The backup code is <b>very important</b>; it serves to re-establish access if you forget your password.",
 			"confirmBackupCode":"I have copied the backup code to a secure location.",
-			"confirmEncryption":"I understand that if I loose access to both my password and my backup code, encrypted data becomes inaccessible to me permanently.",
-			"description":"Applications can encrypt sensitive data for exclusive access by specific individuals. Before data can be encrypted, each user has to create personal encryption keys."
+			"confirmEncryption":"I understand that if I loose access to both my password and my backup code, encrypted data becomes permanently inaccessible.",
+			"description":"Applications can encrypt sensitive data for exclusive access by specific individuals. Before data can be encrypted, each user has to create personal keys.",
+			"newKeys":"Keys created successfully",
+			"newKeysDesc":"To complete the setup, copy your personal backup code to a secure location.",
+			"prevPassword":"Previous password",
+			"regainAccess":"Regain access to personal keys",
+			"regainAccessDesc":"You can regain access to your personal keys by entering your previous password. If you do not know your previous password, you need to use your personal backup code."
 		},
 		"option":{
 			"cornerKeep":"- implicit -",

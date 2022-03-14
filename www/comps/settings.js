@@ -1,12 +1,18 @@
-import {set as setSetting} from './shared/settings.js';
 import {
 	aesGcmDecryptBase64,
+	aesGcmDecryptBase64WithPhrase,
 	aesGcmEncryptBase64,
 	aesGcmEncryptBase64WithPhrase,
 	aesGcmImportBase64,
+	pbkdf2PassToAesGcmKey,
 	pemExport,
+	pemImport,
 	rsaGenerateKeys
 } from './shared/crypto.js';
+import {
+	set as setSetting,
+	setLoginKeys
+} from './shared/settings.js';
 export {MySettings as default};
 
 let MySettingsEncryption = {
@@ -17,8 +23,8 @@ let MySettingsEncryption = {
 		
 		<table>
 			<tr>
-				<td>{{ capGen.status }}</td>
-				<td>{{ statusCaption }}</td>
+				<td class="minimum">{{ capGen.status }}:</td>
+				<td><b>{{ statusCaption }}</b></td>
 			</tr>
 		</table>
 		<br />
@@ -35,8 +41,11 @@ let MySettingsEncryption = {
 			
 			<!-- newly created keys ready for storage -->
 			<template v-if="newKeys">
+				<h2>{{ capApp.newKeys }}</h2>
+				<p>{{ capApp.newKeysDesc }}</p>
+				
 				<h2>{{ capApp.backupCode }}</h2>
-				<div class="backup-code">{{ newBackupCode }}</div>
+				<div class="backup-code shade">{{ newBackupCode }}</div>
 				<p v-html="capApp.backupCodeDesc"></p>
 				
 				<table>
@@ -53,16 +62,42 @@ let MySettingsEncryption = {
 				<br />
 				
 				<my-button image="key.png"
-					@trigger="storeKeys"
+					@trigger="updateKeys(newKeyPrivateEnc,newKeyPrivateEncBackup,newKeyPair.privateKey,newKeyPair.publicKey)"
 					:active="!running && confirmBackupCode && confirmEncryption"
 					:caption="capApp.button.storeKeys"
 				/>
 			</template>
 		</template>
 		
-		
 		<!-- recover access -->
 		<template v-if="locked">
+			<h2>{{ capApp.regainAccess }}</h2>
+			<p>{{ capApp.regainAccessDesc }}</p>
+			
+			<table class="default-inputs">
+				<tr>
+					<td>{{ capApp.prevPassword }}</td>
+					<td><input v-model="regainPassword" /></td>
+					<td>
+						<my-button image="key.png"
+							@trigger="unlockWithPassphrase"
+							:active="regainPassword !== ''"
+							:caption="capGen.button.unlock"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.backupCode }}</td>
+					<td><textarea v-model="regainBackupCode"></textarea></td>
+					<td>
+						<my-button image="key.png"
+							@trigger="unlockWithBackupCode"
+							:active="regainBackupCode !== ''"
+							:caption="capGen.button.unlock"
+						/>
+					</td>
+				</tr>
+			</table>
 		</template>
 	</div>`,
 	data:function() {
@@ -75,9 +110,13 @@ let MySettingsEncryption = {
 			
 			// newly created keys to be stored
 			newBackupCode:null,
+			newKeyPair:null,
 			newKeyPrivateEnc:null,
 			newKeyPrivateEncBackup:null,
-			newKeyPublic:null
+			
+			// regain access
+			regainBackupCode:'',
+			regainPassword:''
 		};
 	},
 	computed:{
@@ -93,26 +132,29 @@ let MySettingsEncryption = {
 		newKeys:function() { return this.newKeyPrivateEnc !== null; },
 		
 		// stores
-		loginKeyAes:    function() { return this.$store.getters['local/loginKeyAes']; },
-		loginEncryption:function() { return this.$store.getters.loginEncryption; },
-		loginPrivateKey:function() { return this.$store.getters.loginPrivateKey; },
-		capApp:         function() { return this.$store.getters.captions.settings.encryption; },
-		capGen:         function() { return this.$store.getters.captions.generic; }
+		loginKeyAes:       function() { return this.$store.getters['local/loginKeyAes']; },
+		loginKeySalt:      function() { return this.$store.getters['local/loginKeySalt']; },
+		loginEncryption:   function() { return this.$store.getters.loginEncryption; },
+		loginPrivateKey:   function() { return this.$store.getters.loginPrivateKey; },
+		loginPrivateKeyEnc:function() { return this.$store.getters.loginPrivateKeyEnc; },
+		loginPrivateKeyEncBackup:function() { return this.$store.getters.loginPrivateKeyEncBackup; },
+		loginPublicKey:    function() { return this.$store.getters.loginPublicKey; },
+		capApp:            function() { return this.$store.getters.captions.settings.encryption; },
+		capErr:            function() { return this.$store.getters.captions.error; },
+		capGen:            function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
 		// externals
 		aesGcmDecryptBase64,
+		aesGcmDecryptBase64WithPhrase,
 		aesGcmEncryptBase64,
 		aesGcmEncryptBase64WithPhrase,
 		aesGcmImportBase64,
+		pbkdf2PassToAesGcmKey,
 		pemExport,
+		pemImport,
 		rsaGenerateKeys,
-		
-		//
-		handleErrUnexpected:function(err) {
-			// this error should not happen, log for troubleshooting purposes
-			console.log(err);
-		},
+		setLoginKeys,
 		
 		generateBackupCode:function() {
 			let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -123,15 +165,12 @@ let MySettingsEncryption = {
 			for(let i = 0; i < len; i++) {
 				out += chars[arr[i] % chars.length];
 			}
-			
-			// add spaces for readability every 4 characters
-			out = out.replace(/.{4}/g, '$& ');
-			
 			return out;
 		},
 		createKeys:function() {
 			this.running = true;
-			const backupCode = this.generateBackupCode();
+			const backupCode     = this.generateBackupCode();
+			const backupCodeShow = backupCode.replace(/.{4}/g, '$& '); // add spaces every 4 chars
 			
 			// generate RSA key pair for user
 			// import login AES key for encryption of private key
@@ -148,9 +187,9 @@ let MySettingsEncryption = {
 						this.pemExport(keyPair.privateKey),
 						this.pemExport(keyPair.publicKey)
 					]).then(
-						res => {
-							const pemPrivate = res[0];
-							const pemPublic  = res[1];
+						keysPem => {
+							const pemPrivate = keysPem[0];
+							const pemPublic  = keysPem[1];
 							
 							// encrypt private key twice (once with login key, once with backup code)
 							Promise.all([
@@ -158,10 +197,10 @@ let MySettingsEncryption = {
 								this.aesGcmEncryptBase64WithPhrase(pemPrivate,backupCode)
 							]).then(
 								res => {
-									this.newBackupCode          = backupCode;
+									this.newBackupCode          = backupCodeShow;
+									this.newKeyPair             = keyPair;
 									this.newKeyPrivateEnc       = res[0];
 									this.newKeyPrivateEncBackup = res[1];
-									this.newKeyPublic           = pemPublic;
 									this.running                = false;
 								}
 							);
@@ -173,21 +212,72 @@ let MySettingsEncryption = {
 			);
 		},
 		
-		// backend calls
-		storeKeys:function() {
-			this.running = true;
+		unlockError:function() {
+			this.$store.commit('dialog',{
+				captionBody:this.capErr.SEC['002'],
+				image:'key.png',
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.close,
+					keyEscape:true,
+					image:'cancel.png'
+				}]
+			});
+		},
+		
+		unlockWithBackupCode:function() {
+			// remove spaces from backup code input
+			const backupCode = this.regainBackupCode.replace(/\s/g,'');
 			
-			ws.send('loginKeys','store',{
-				privateKeyEnc:this.newKeyPrivateEnc,
-				privateKeyEncBackup:this.newKeyPrivateEncBackup,
-				publicKey:this.newKeyPublic
-			},true).then(
+			// attempt to decrypt private key with backup code
+			this.aesGcmDecryptBase64WithPhrase(this.loginPrivateKeyEncBackup,backupCode).then(
+				res => this.renewPrivateKeyEnc(res),
+				err => this.unlockError()
+			);
+		},
+		unlockWithPassphrase:function() {
+			this.pbkdf2PassToAesGcmKey(this.regainPassword,this.loginKeySalt,10000,true).then(
+				loginKeyOld => {
+					// attempt to decrypt private key with login key based on previous password
+					this.aesGcmDecryptBase64(this.loginPrivateKeyEnc,loginKeyOld).then(
+						res => this.renewPrivateKeyEnc(res),
+						err => this.unlockError()
+					);
+				},
+				err => this.$root.genericError(err)
+			);
+		},
+		renewPrivateKeyEnc:function(privateKeyPem) {
+			Promise.all([
+				this.pemImport(privateKeyPem,'RSA',false), // import private key PEM
+				this.aesGcmImportBase64(this.loginKeyAes)  // import current login key
+			]).then(
+				res => {
+					const privateKey = res[0];
+					const loginKey   = res[1];
+					
+					// encrypt private key with current login key
+					this.aesGcmEncryptBase64(privateKeyPem,loginKey).then(
+						privateKeyEnc => this.setLoginKeys(
+							privateKeyEnc,                 // newly encrypted private key
+							this.loginPrivateKeyEncBackup, // backup code did not change
+							privateKey,
+							this.loginPublicKey
+						)
+					);
+				},
+				err => this.$root.genericError(err)
+			);
+		},
+		
+		// backend calls
+		updateKeys:function(privateKeyEnc,privateKeyEncBackup,privateKey,publicKey) {
+			this.setLoginKeys(privateKeyEnc,privateKeyEncBackup,privateKey,publicKey).then(
 				res => {
 					this.newBackupCode          = null;
+					this.newKeyPair             = null;
 					this.newKeyPrivateEnc       = null;
 					this.newKeyPrivateEncBackup = null;
-					this.newKeyPublic           = null;
-					this.running                = false;
 				},
 				err => this.$root.genericError(err)
 			);

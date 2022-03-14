@@ -355,11 +355,12 @@ let MyLogin = {
 			
 			// generate AES key from credentials and login private key salt
 			this.pbkdf2PassToAesGcmKey(this.password,saltKdf,10000,true).then(
-				aesKey => {
-					this.aesGcmExportBase64(aesKey).then(
-						res => {
+				key => {
+					this.aesGcmExportBase64(key).then(
+						keyBase64 => {
 							// export AES key to local storage
-							this.$store.commit('local/loginKeyAes',res);
+							this.$store.commit('local/loginKeyAes',keyBase64);
+							this.$store.commit('local/loginKeySalt',saltKdf);
 							this.appEnable(loginId,loginName);
 						},
 						err => this.handleError('aesExport')

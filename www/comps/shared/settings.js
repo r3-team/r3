@@ -18,3 +18,27 @@ export function setSingle(name,value) {
 	settings[name] = value;
 	set(settings);
 };
+
+export function setLoginKeys(privateKeyEnc,privateKeyEncBackup,privateKey,publicKey) {
+	return new Promise((resolve,reject) => {
+		this.pemExport(publicKey).then(
+			publicKeyPem => {
+				ws.send('loginKeys','store',{
+					privateKeyEnc:privateKeyEnc,
+					privateKeyEncBackup:privateKeyEncBackup,
+					publicKey:publicKeyPem
+				},true).then(
+					res => {
+						MyStore.commit('loginEncryption',true);
+						MyStore.commit('loginPrivateKey',privateKey);
+						MyStore.commit('loginPrivateKeyEnc',privateKeyEnc);
+						MyStore.commit('loginPrivateKeyEncBackup',privateKeyEncBackup);
+						MyStore.commit('loginPublicKey',publicKey);
+						resolve();
+					}
+				);
+			},
+			err => reject(err)
+		);
+	});
+};

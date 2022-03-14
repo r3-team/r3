@@ -24,7 +24,7 @@ export function pemExport(key) {
 		);
 	});
 };
-export function pemImport(pem,mode) {
+export function pemImport(pem,mode,exportable) {
 	
 	// strip newlines & pre/postfixes
     const byteString = window.atob(
@@ -51,7 +51,7 @@ export function pemImport(pem,mode) {
 		isPrivate ? 'pkcs8' : 'spki',
 		byteArray,
 		algo,
-		false,
+		exportable,
 		uses
 	);
 };
@@ -68,6 +68,44 @@ export function aesGcmDecryptBase64(ciphertext,key) {
 			stringToUint8Array(ctStr)
 		).then(
 			res => resolve(new TextDecoder().decode(res)),
+			err => reject(err)
+		);
+	});
+};
+export async function aesGcmDecryptBase64WithPhrase(ciphertext,passphrase) {
+	return new Promise((resolve,reject) => {
+		
+		// hash the passphrase
+	    crypto.subtle.digest(
+			aesPassHash,
+			(new TextEncoder().encode(passphrase))
+		).then(
+			hash => {
+				const ivStr = atob(ciphertext).slice(0,ivLength); // decode base64 iv
+				const ctStr = atob(ciphertext).slice(ivLength); // decode ciphertext
+				const iv    = stringToUint8Array(ivStr);
+				const algo = { name:'AES-GCM', iv:iv };
+				
+				// use hashed passphrase as AES key
+				crypto.subtle.importKey(
+					'raw',
+					hash,
+					algo,
+					false,
+					['decrypt']
+				).then(
+					key => {
+						crypto.subtle.decrypt(
+							algo,
+							key,
+							stringToUint8Array(ctStr)
+						).then(
+							res => resolve(new TextDecoder().decode(res)),
+							err => reject(err)
+						);
+					}
+				);
+			},
 			err => reject(err)
 		);
 	});

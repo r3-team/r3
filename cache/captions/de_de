@@ -28,7 +28,8 @@
 			"saveNew":"Speichern+Neu",
 			"saveNewHint":"Änderungen speichern und neuen Datensatz erstellen",
 			"send":"Senden",
-			"show":"Anzeigen"
+			"show":"Anzeigen",
+			"unlock":"Entsperren"
 		},
 		"dialog":{
 			"confirm":"Bitte bestätigen"
@@ -1201,14 +1202,19 @@
 			},
 			"status":{
 				"inactive":"Nicht aktiviert",
-				"locked":"Schlüssel ist gesperrt",
+				"locked":"Schlüssel sind gesperrt",
 				"unlocked":"Bereit zur Nutzung"
 			},
-			"backupCode":"Backup-Code kopieren",
-			"backupCodeDesc":"Der Backup-Code ist <b>sehr wichtig</b>. Er stellt Zugriff wieder her, falls du dein Passwort vergessen hast.",
+			"backupCode":"Backup-Code",
+			"backupCodeDesc":"Der Backup-Code ist <b>sehr wichtig</b>; er stellt Zugriff wieder her, falls du dein Passwort vergessen hast.",
 			"confirmBackupCode":"Ich habe den Backup-Code an einen sicheren Ort kopiert.",
 			"confirmEncryption":"Ich verstehe, dass wenn ich sowohl mein Passwort als auch meinen Backup-Code verliere, permanent Zugriff auf verschlüsselte Daten verliere.",
-			"description":"Anwendungen können sensitive Daten für den exklusiven Zugriff spezifischer Personen verschlüsseln. Bevor Verschlüsselung genutzt werden kann, muss jeder Benutzer persönliche Schlüssel erzeugen."
+			"description":"Anwendungen können sensitive Daten für den exklusiven Zugriff spezifischer Personen verschlüsseln. Bevor Verschlüsselung genutzt werden kann, muss jeder Benutzer persönliche Schlüssel erzeugen.",
+			"newKeys":"Schlüssel erfolgreich erzeugt",
+			"newKeysDesc":"Um die Einrichtung abzuschließen, kopiere deinen persönlichen Backup-Code an einen sicheren Ort.",
+			"prevPassword":"Vorheriges Passwort",
+			"regainAccess":"Zugriff auf persönliche Schlüssel wiederherstellen",
+			"regainAccessDesc":"Du kannst Zugriff auf deine persönliche Schlüssel wiederherstellen, indem du dein vorheriges Passwort eingibst. Wenn du dein vorheriges Passwort nicht kennst, musst du deinen persönlichen Backup-Code nutzen."
 		},
 		"option":{
 			"cornerKeep":"- unverändert -",

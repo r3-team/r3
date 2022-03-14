@@ -123,6 +123,7 @@ body                                         { --depth:9; }
 .login input:focus                           { --depth:0; }
 .menu .items                                 { --depth:7; }
 .menu .item .line.active                     { --depth:10; }
+.settings .backup-code                       { --depth:0; }
 .navigation                                  { --depth:7; }
 .field                                       { --depth:1; }
 .field .disabled                             { --depth:7; }

@@ -15,6 +15,7 @@ const MyStoreLocal = {
 		companyWelcome:'',    // custom welcome message on login screen
 		fieldIdMapOption:{},  // map of field IDs with field options
 		loginKeyAes:null,     // en-/decryption key for login private key
+		loginKeySalt:null,    // salt for login key KDF
 		menuIdMapOpen:{},     // map of menu IDs with open state (true/false)
 		token:'',             // JWT token
 		tokenKeep:false       // keep JWT token between sessions
@@ -76,6 +77,10 @@ const MyStoreLocal = {
 			state.loginKeyAes = payload;
 			set('loginKeyAes',payload);
 		},
+		loginKeySalt:function(state,payload) {
+			state.loginKeySalt = payload;
+			set('loginKeySalt',payload);
+		},
 		menuIdMapOpenToggle:function(state,payload) {
 			if(typeof state.menuIdMapOpen[payload] === 'undefined')
 				state.menuIdMapOpen[payload] = true;
@@ -132,6 +137,7 @@ const MyStoreLocal = {
 		companyWelcome:    (state) => state.companyWelcome,
 		fieldIdMapOption:  (state) => state.fieldIdMapOption,
 		loginKeyAes:       (state) => state.loginKeyAes,
+		loginKeySalt:      (state) => state.loginKeySalt,
 		menuIdMapOpen:     (state) => state.menuIdMapOpen,
 		token:             (state) => state.token,
 		tokenKeep:         (state) => state.tokenKeep

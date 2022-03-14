@@ -38,8 +38,9 @@ const MyStore = Vuex.createStore({
 		loginId:-1,           // user login ID
 		loginName:'',         // user login name
 		loginPrivateKey:null, // user login private key for decryption (non-exportable key)
+		loginPrivateKeyEnc:null,       // user login private key PEM, encrypted with login key
 		loginPrivateKeyEncBackup:null, // user login private key PEM, encrypted with backup code
-		loginPublicKey:null,  // user login public key for encryption for themselves
+		loginPublicKey:null,  // user login public key for encryption (exportable key)
 		logo:'',
 		moduleColor1:'',      // color1 (header) of currently active module
 		moduleEntries:[],     // module entries for header/home page
@@ -117,6 +118,7 @@ const MyStore = Vuex.createStore({
 		loginId:        (state,payload) => state.loginId         = payload,
 		loginName:      (state,payload) => state.loginName       = payload,
 		loginPrivateKey:(state,payload) => state.loginPrivateKey = payload,
+		loginPrivateKeyEnc:      (state,payload) => state.loginPrivateKeyEnc       = payload,
 		loginPrivateKeyEncBackup:(state,payload) => state.loginPrivateKeyEncBackup = payload,
 		loginPublicKey: (state,payload) => state.loginPublicKey  = payload,
 		moduleColor1:   (state,payload) => state.moduleColor1    = payload,
@@ -165,6 +167,7 @@ const MyStore = Vuex.createStore({
 		loginId:          (state) => state.loginId,
 		loginName:        (state) => state.loginName,
 		loginPrivateKey:  (state) => state.loginPrivateKey,
+		loginPrivateKeyEnc:      (state) => state.loginPrivateKeyEnc,
 		loginPrivateKeyEncBackup:(state) => state.loginPrivateKeyEncBackup,
 		loginPublicKey:   (state) => state.loginPublicKey,
 		moduleColor1:     (state) => state.moduleColor1,
