@@ -1,5 +1,5 @@
 ## REI3
-REI3 is a business application platform that anyone can use. It provides access to a growing range of free [business applications](https://rei3.de/applications_en/), which are built with the integrated, graphical application [Builder](https://rei3.de/docu_en/).
+REI3 is a business application platform that anyone can use. It provides access to a growing range of free [business applications](https://rei3.de/en/applications), which are built with the integrated, graphical application [Builder](https://rei3.de/en/docs).
 
 Individuals and organizations can freely build on or create completely new applications. Once created, applications can be exported and shared with others via files or public repositories.
 
@@ -22,16 +22,16 @@ Individuals and organizations can freely build on or create completely new appli
 ## 📀 How to install
 
 ### Windows
-1. [Download](https://rei3.de/download_en/) and execute the installer. If you choose the stand-alone mode, REI3 is automatically configured for you.
+1. [Download](https://rei3.de/en/downloads) and execute the installer. If you choose the stand-alone mode, REI3 is automatically configured for you.
 1. That´s it.
 
-If you want to use your own database server, you can install REI3 in dedicated mode - visit the [admin documentation](https://rei3.de/admindocu-en_us/) to learn more.
+If you want to use your own database server, you can install REI3 in dedicated mode - visit the [admin documentation](https://rei3.de/en/docs/admin) to learn more.
 
 A portable version is also available for Windows clients for testing and developing applications. 
 
 ### Linux
 1. Prepare a PostgreSQL server with a new, empty database.
-1. [Download](https://rei3.de/download_en/) and extract the precompiled Linux package.
+1. [Download](https://rei3.de/en/downloads) and extract the precompiled Linux package.
 1. Make the file `r3` executable.
 1. Rename the file `config_template.json` to `config.json` and enter connection details to the chosen database.
 1. Install REI3 as a service with `r3 -install`.
@@ -63,12 +63,12 @@ A portable version is also available for Windows clients for testing and develop
         }
 }
 ```
-For the full [admin documentation](https://rei3.de/admindocu-en_us/), please visit the website.
+For the full [admin documentation](https://rei3.de/en/docs/admin), please visit the website.
 
 ## 💡 How to build applications
 All versions of REI3 include the graphical Builder utility, which can create new or change existing applications. After installing REI3, an administrator can enable the Builder inside the system configuration page. The maintenance mode must be enabled first, which will kick all non-admin users from the system while changes are being made.
 
-For information about how to use the Builder, please visit the [Builder documentation](https://rei3.de/builderdocu-en_us/).
+For information about how to use the Builder, please visit the [Builder documentation](https://rei3.de/en/docs/builder).
 
 ## 📑 How to build your own version of REI3
 1. Install the latest version of [Golang](https://golang.org/dl/).
