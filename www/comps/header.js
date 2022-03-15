@@ -121,6 +121,15 @@ let MyHeader = {
 					<img src="images/pageNext.png" />
 				</div>
 				
+				<!-- keys locked -->
+				<div class="entry no-wrap clickable" tabindex="0"
+					v-if="keysLocked"
+					@click="keysLockedMsg"
+					@keyup.enter="keysLockedMsg"
+				>
+					<img src="images/key_locked.png" />
+				</div>
+				
 				<!-- feedback -->
 				<div class="entry no-wrap clickable" tabindex="0"
 					v-if="feedback && !isNoAuth"
@@ -149,7 +158,8 @@ let MyHeader = {
 		</div>
 	</div>`,
 	props:{
-		moduleEntries:{ type:Array, required:true }
+		keysLocked:   { type:Boolean, required:true },
+		moduleEntries:{ type:Array,   required:true }
 	},
 	emits:['logout'],
 	data:function() {
@@ -196,6 +206,7 @@ let MyHeader = {
 		moduleNameMap: function() { return this.$store.getters['schema/moduleNameMap']; },
 		builderEnabled:function() { return this.$store.getters.builderEnabled; },
 		busyCounter:   function() { return this.$store.getters.busyCounter; },
+		capErr:        function() { return this.$store.getters.captions.error; },
 		capGen:        function() { return this.$store.getters.captions.generic; },
 		feedback:      function() { return this.$store.getters.feedback; },
 		isAdmin:       function() { return this.$store.getters.isAdmin; },
@@ -220,6 +231,18 @@ let MyHeader = {
 		srcBase64Icon,
 		
 		// display
+		keysLockedMsg:function() {
+			this.$store.commit('dialog',{
+				captionBody:this.capErr.SEC['002'],
+				image:'key_locked.png',
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.close,
+					keyEscape:true,
+					image:'cancel.png'
+				}]
+			});
+		},
 		windowResized:function() {
 			if(this.sizeCheckTimedOut)
 				return;

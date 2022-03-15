@@ -34,8 +34,8 @@ let MyApp = {
 		
 		<template v-if="appReady">
 			<my-header
-				@encryptionUsed=""
 				@logout="sessionInvalid"
+				:keysLocked="loginEncryption && loginPrivateKey === null"
 				:moduleEntries="moduleEntries"
 			/>
 			
@@ -221,6 +221,8 @@ let MyApp = {
 		isAtDialog:     function() { return this.$store.getters.isAtDialog; },
 		isAtFeedback:   function() { return this.$store.getters.isAtFeedback; },
 		isMobile:       function() { return this.$store.getters.isMobile; },
+		loginEncryption:function() { return this.$store.getters.loginEncryption; },
+		loginPrivateKey:function() { return this.$store.getters.loginPrivateKey; },
 		pageTitle:      function() { return this.$store.getters.pageTitle; },
 		settings:       function() { return this.$store.getters.settings; }
 	},
@@ -470,19 +472,8 @@ let MyApp = {
 								res => this.$store.commit('loginPrivateKey',res)
 							);
 						},
-						err => {
-							// decryption failed, expected error
-							this.$store.commit('dialog',{
-								captionBody:this.capErr.SEC['002'],
-								image:'key.png',
-								buttons:[{
-									cancel:true,
-									caption:this.capGen.button.close,
-									keyEscape:true,
-									image:'cancel.png'
-								}]
-							});
-						}
+						// error is shown in header if private key cannot be decrypted
+						err => {}
 					);
 				},
 				// non-caught errors should not occur (import of PEM to store)
