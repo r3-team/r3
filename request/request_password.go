@@ -17,13 +17,13 @@ func PasswortSet_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interfac
 			PwOld  string `json:"pwOld"`
 		}
 		res struct {
-			Code string `json:"code"`
+			ErrCode string `json:"errCode"`
 		}
 	)
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	res.Code, err = password.Set_tx(tx, loginId, req.PwOld, req.PwNew0, req.PwNew1)
+	res.ErrCode, err = password.Set_tx(tx, loginId, req.PwOld, req.PwNew0, req.PwNew1)
 	if err != nil {
 		return nil, err
 	}

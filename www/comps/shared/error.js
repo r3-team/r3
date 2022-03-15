@@ -26,6 +26,9 @@ export function genericError(message) {
 
 export function resolveErrCode(message) {
 	
+	if(typeof message !== 'string')
+		return message;
+	
 	// check for error code in message, as in: "{ERR_DBS_069} My error message"
 	let matches = message.match(/^{ERR_([A-Z]{3})_(\d{3})}/);
 	if(matches === null || matches.length !== 3)

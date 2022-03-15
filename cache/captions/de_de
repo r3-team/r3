@@ -1198,6 +1198,7 @@
 		"encryption":{
 			"button":{
 				"createKeys":"Schlüssel erzeugen",
+				"resetKeys":"Persönliche Schlüssel zurücksetzen",
 				"storeKeys":"Verschlüsselung aktivieren"
 			},
 			"status":{
@@ -1214,7 +1215,10 @@
 			"newKeysDesc":"Um die Einrichtung abzuschließen, kopiere deinen persönlichen Backup-Code an einen sicheren Ort.",
 			"prevPassword":"Vorheriges Passwort",
 			"regainAccess":"Zugriff auf persönliche Schlüssel wiederherstellen",
-			"regainAccessDesc":"Du kannst Zugriff auf deine persönliche Schlüssel wiederherstellen, indem du dein vorheriges Passwort eingibst. Wenn du dein vorheriges Passwort nicht kennst, musst du deinen persönlichen Backup-Code nutzen."
+			"regainAccessDesc":"Du kannst Zugriff auf deine persönliche Schlüssel wiederherstellen, indem du dein vorheriges Passwort eingibst. Wenn du dein vorheriges Passwort nicht kennst, musst du deinen persönlichen Backup-Code nutzen.",
+			"resetAccess":"Persönliche Schlüssel zurücksetzen",
+			"resetAccessDesc":"Falls du weder Zugriff auf dein altes Passwort noch auf dein Backup-Code hast, ist Zugriff auf verschlüsselte Daten bereits verloren.<br /><br />In diesem Fall kannst du entscheiden, deine persönlichen Schlüssel zurückzusetzen, um neue Daten zu verschlüsseln - dies wird <b>NICHT</b> den Zugriff auf vorher verschlüsselte Daten wiederherstellen.",
+			"resetAccessHint":"Bist du sicher, dass du deine persönlichen Schlüssel zurücksetzen möchtest? Falls ja, kannst du nicht mehr zurück, selbst wenn du deinen alten Backup-Code später wiederfindest."
 		},
 		"option":{
 			"cornerKeep":"- unverändert -",

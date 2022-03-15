@@ -1198,6 +1198,7 @@
 		"encryption":{
 			"button":{
 				"createKeys":"Create keys",
+				"resetKeys":"Reset personal keys",
 				"storeKeys":"Enable encryption"
 			},
 			"status":{
@@ -1214,7 +1215,10 @@
 			"newKeysDesc":"To complete the setup, copy your personal backup code to a secure location.",
 			"prevPassword":"Previous password",
 			"regainAccess":"Regain access to personal keys",
-			"regainAccessDesc":"You can regain access to your personal keys by entering your previous password. If you do not know your previous password, you need to use your personal backup code."
+			"regainAccessDesc":"You can regain access to your personal keys by entering your previous password. If you do not know your previous password, you need to use your personal backup code.",
+			"resetAccess":"Reset personal keys",
+			"resetAccessDesc":"If you do not have access to either your old password nor your backup code, you permanently lost access to your encrypted data.<br /><br />If this is the case, you can decide to reset your personal keys to encrypt new data - this will <b>NOT</b> re-establish access to previously encrypted data.",
+			"resetAccessHint":"Are you sure you want to reset your personal keys? If you do this, there is no going back even if you find your old backup code later."
 		},
 		"option":{
 			"cornerKeep":"- predefinito -",

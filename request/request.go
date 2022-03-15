@@ -145,8 +145,12 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		}
 	case "loginKeys":
 		switch action {
+		case "reset":
+			return LoginKeysReset_tx(tx, loginId)
 		case "store":
 			return LoginKeysStore_tx(tx, reqJson, loginId)
+		case "storePrivate":
+			return LoginKeysStorePrivate_tx(tx, reqJson, loginId)
 		}
 	case "lookup":
 		switch action {

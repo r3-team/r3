@@ -100,5 +100,5 @@ func Set_tx(tx pgx.Tx, loginId int64, pwOld string, pwNew0 string, pwNew1 string
 	`, salt, hash, loginId); err != nil {
 		return "", err
 	}
-	return "SUCCESS", nil
+	return "", nil
 }
