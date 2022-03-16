@@ -53,7 +53,7 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 
 	relations := make([]types.Relation, 0)
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, name, retention_count, retention_days, (
+		SELECT id, name, encryption, retention_count, retention_days, (
 			SELECT id
 			FROM app.attribute
 			WHERE relation_id = app.relation.id
@@ -70,8 +70,8 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 
 	for rows.Next() {
 		var r types.Relation
-		if err := rows.Scan(&r.Id, &r.Name, &r.RetentionCount,
-			&r.RetentionDays, &r.AttributeIdPk); err != nil {
+		if err := rows.Scan(&r.Id, &r.Name, &r.Encryption,
+			&r.RetentionCount, &r.RetentionDays, &r.AttributeIdPk); err != nil {
 
 			return relations, err
 		}
@@ -89,7 +89,7 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 }
 
 func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
-	retentionCount pgtype.Int4, retentionDays pgtype.Int4,
+	encryption bool, retentionCount pgtype.Int4, retentionDays pgtype.Int4,
 	policies []types.RelationPolicy) error {
 
 	if err := check.DbIdentifier(name); err != nil {
@@ -116,9 +116,9 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 		// update relation reference
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.relation
-			SET name = $1, retention_count = $2, retention_days = $3
-			WHERE id = $4
-		`, name, retentionCount, retentionDays, id); err != nil {
+			SET name = $1, encryption = $2, retention_count = $3, retention_days = $4
+			WHERE id = $5
+		`, name, encryption, retentionCount, retentionDays, id); err != nil {
 			return err
 		}
 
@@ -145,9 +145,9 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 		// insert relation reference
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.relation
-				(id, module_id, name, retention_count, retention_days)
-			VALUES ($1,$2,$3,$4,$5)
-		`, id, moduleId, name, retentionCount, retentionDays); err != nil {
+				(id, module_id, name, encryption, retention_count, retention_days)
+			VALUES ($1,$2,$3,$4,$5,$6)
+		`, id, moduleId, name, encryption, retentionCount, retentionDays); err != nil {
 			return err
 		}
 
@@ -156,7 +156,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 			if err := attribute.Set_tx(tx, id, uuid.Nil,
 				pgtype.UUID{Status: pgtype.Null},
 				pgtype.UUID{Status: pgtype.Null},
-				schema.PkName, "integer", 0, false, "", "", "",
+				schema.PkName, "integer", 0, false, false, "", "", "",
 				types.CaptionMap{}); err != nil {
 
 				return err

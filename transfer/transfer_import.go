@@ -221,8 +221,8 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		log.Info("transfer", fmt.Sprintf("set relation %s", e.Id))
 
 		if err := importCheckResultAndApply(tx, relation.Set_tx(tx,
-			e.ModuleId, e.Id, e.Name, e.RetentionCount, e.RetentionDays,
-			e.Policies), e.Id, idMapSkipped); err != nil {
+			e.ModuleId, e.Id, e.Name, e.Encryption, e.RetentionCount,
+			e.RetentionDays, e.Policies), e.Id, idMapSkipped); err != nil {
 
 			return err
 		}
@@ -243,7 +243,7 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 			if err := importCheckResultAndApply(tx, attribute.Set_tx(tx,
 				e.RelationId, e.Id, e.RelationshipId, e.IconId, e.Name,
-				e.Content, e.Length, e.Nullable, e.Def, e.OnUpdate, e.OnDelete,
+				e.Content, e.Length, e.Nullable, e.Encrypted, e.Def, e.OnUpdate, e.OnDelete,
 				e.Captions), e.Id, idMapSkipped); err != nil {
 
 				return err

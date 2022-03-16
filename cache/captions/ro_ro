@@ -824,6 +824,8 @@
 			"codeCondition":"Condiție",
 			"content":"Conținut",
 			"def":"IMPLICIT",
+			"encrypted":"Encrypted",
+			"encryption":"Encryption",
 			"execute":"Execută",
 			"external":"Relații de referință ({CNT})",
 			"fires":"Fires",

@@ -98,6 +98,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	"2.6": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
+			-- user key management
 			ALTER TABLE instance.login
 				ADD COLUMN salt_kdf TEXT NOT NULL DEFAULT 'PLACEHOLDER',
 				ADD COLUMN key_private_enc TEXT,
@@ -105,6 +106,32 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ADD COLUMN key_public TEXT;
 			
 			ALTER TABLE instance.login ALTER COLUMN salt_kdf DROP DEFAULT;
+			
+			-- encrypted keys for hybrid encryption
+			CREATE TABLE IF NOT EXISTS instance.login_key (
+			    login_id integer NOT NULL,
+			    relation_id uuid NOT NULL,
+			    record_id_wofk integer NOT NULL,
+			    key_enc text COLLATE pg_catalog."default" NOT NULL,
+			    CONSTRAINT login_key_pkey PRIMARY KEY (login_id, relation_id, record_id_wofk),
+			    CONSTRAINT login_key_login_id_fkey FOREIGN KEY (login_id)
+			        REFERENCES instance.login (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT login_key_relation_id_fkey FOREIGN KEY (relation_id)
+			        REFERENCES app.relation (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			-- encryption options for storage entities
+			ALTER TABLE app.relation ADD COLUMN encryption BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.relation ALTER COLUMN encryption DROP DEFAULT;
+			
+			ALTER TABLE app.attribute ADD COLUMN encrypted BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.attribute ALTER COLUMN encrypted DROP DEFAULT;
 		`); err != nil {
 			return "", err
 		}

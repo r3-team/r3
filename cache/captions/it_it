@@ -824,6 +824,8 @@
 			"codeCondition":"Condizione",
 			"content":"Contenuto",
 			"def":"PREDDEFINITO",
+			"encrypted":"Encrypted",
+			"encryption":"Encryption",
 			"execute":"Eseguire",
 			"external":"Relazioni di riferimento ({CNT})",
 			"fires":"Accensioni",

@@ -43,13 +43,14 @@ type Relation struct {
 	ModuleId       uuid.UUID        `json:"moduleId"`
 	AttributeIdPk  uuid.UUID        `json:"attributeIdPk"` // read only, ID of PK attribute
 	Name           string           `json:"name"`
-	RetentionCount pgtype.Int4      `json:"retentionCount"`
-	RetentionDays  pgtype.Int4      `json:"retentionDays"`
-	Attributes     []Attribute      `json:"attributes"` // read only, all relation attributes
-	Indexes        []PgIndex        `json:"indexes"`    // read only, all relation indexes
-	Policies       []RelationPolicy `json:"policies"`   // read only, all relation policies
-	Presets        []Preset         `json:"presets"`    // read only, all relation presets
-	Triggers       []PgTrigger      `json:"triggers"`   // read only, all relation triggers
+	Encryption     bool             `json:"encryption"`     // relation supports encrypted attribute values
+	RetentionCount pgtype.Int4      `json:"retentionCount"` // minimum number of retained change events
+	RetentionDays  pgtype.Int4      `json:"retentionDays"`  // minimum age of retained change events
+	Attributes     []Attribute      `json:"attributes"`     // read only, all relation attributes
+	Indexes        []PgIndex        `json:"indexes"`        // read only, all relation indexes
+	Policies       []RelationPolicy `json:"policies"`       // read only, all relation policies
+	Presets        []Preset         `json:"presets"`        // read only, all relation presets
+	Triggers       []PgTrigger      `json:"triggers"`       // read only, all relation triggers
 }
 type RelationPolicy struct {
 	RoleId           uuid.UUID     `json:"roleId"`
@@ -83,6 +84,7 @@ type Attribute struct {
 	Content        string      `json:"content"`        // attribute content (integer, text, ...)
 	Length         int         `json:"length"`         // varchar length or max file size in KB (files attribute)
 	Nullable       bool        `json:"nullable"`
+	Encrypted      bool        `json:"encrypted"` // content is encrypted (end-to-end for logins)
 	Def            string      `json:"def"`
 	OnUpdate       string      `json:"onUpdate"`
 	OnDelete       string      `json:"onDelete"`

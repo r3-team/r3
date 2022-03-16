@@ -824,6 +824,8 @@
 			"codeCondition":"Kondition",
 			"content":"Inhalt",
 			"def":"DEFAULT",
+			"encrypted":"Verschlüsselt",
+			"encryption":"Verschlüsselung",
 			"execute":"Ausführen",
 			"external":"Referenzierende Beziehungen ({CNT})",
 			"fires":"Started",
