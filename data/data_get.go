@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"r3/cache"
+	"r3/data/data_enc"
 	"r3/db"
 	"r3/handler"
 	"r3/schema"
@@ -27,15 +28,31 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 	query *string) ([]types.DataGetResult, int, error) {
 
 	var err error
-	results := make([]types.DataGetResult, 0)
-	queryArgs := make([]interface{}, 0) // SQL arguments for data query
-	queryCount := ""
-	queryCountArgs := make([]interface{}, 0) // SQL arguments for count query (potentially less, no expressions besides COUNT)
+	indexRelationIds := make(map[int]uuid.UUID)    // map of accessed relation IDs, key: relation index
+	indexRelationIdsEnc := make(map[int]uuid.UUID) // map of encryption relation IDs, key: relation index
+	results := make([]types.DataGetResult, 0)      // data GET results
+	queryArgs := make([]interface{}, 0)            // SQL arguments for data query
+	queryCount := ""                               // SQL query to retrieve a total count
+	queryCountArgs := make([]interface{}, 0)       // SQL query arguments for count (potentially less, no expressions besides COUNT)
 
 	// prepare SQL query for data GET request
-	*query, queryCount, err = prepareQuery(data, &queryArgs, &queryCountArgs, loginId, 0)
+	*query, queryCount, err = prepareQuery(data, indexRelationIds,
+		&queryArgs, &queryCountArgs, loginId, 0)
+
 	if err != nil {
 		return results, 0, err
+	}
+
+	// check for relation encryption
+	for index, relId := range indexRelationIds {
+
+		rel, exists := cache.RelationIdMap[relId]
+		if !exists {
+			return results, 0, fmt.Errorf("unknown relation '%s'", relId)
+		}
+		if rel.Encryption {
+			indexRelationIdsEnc[index] = relId
+		}
 	}
 
 	// execute SQL query
@@ -59,6 +76,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 		}
 
 		indexRecordIds := make(map[int]interface{}) // ID for each relation tupel by index
+		indexRecordEncKeys := make(map[int]string)  // encrypted key for each relation tupel by index
 		values := make([]interface{}, 0)            // final values for selected attributes
 
 		// collect values for expressions
@@ -87,14 +105,53 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 		}
 
 		results = append(results, types.DataGetResult{
-			IndexRecordIds: indexRecordIds,
-			Values:         values,
+			IndexRecordIds:     indexRecordIds,
+			IndexRecordEncKeys: indexRecordEncKeys,
+			Values:             values,
 		})
 	}
 	if err := rows.Err(); err != nil {
 		return results, 0, err
 	}
 	rows.Close()
+
+	// get encryption keys for returned records
+	for relIndex, relId := range indexRelationIdsEnc {
+		recordIds := make([]int64, 0)
+
+		// collect all non-null record IDs for given relation index
+		for _, result := range results {
+			if result.IndexRecordIds[relIndex] != nil {
+
+				switch v := result.IndexRecordIds[relIndex].(type) {
+				case int32:
+					recordIds = append(recordIds, int64(v))
+				case int64:
+					recordIds = append(recordIds, v)
+				default:
+					return results, 0, handler.CreateErrCode("SEC", 5)
+				}
+			}
+		}
+
+		encKeys, err := data_enc.GetKeys_tx(ctx, tx, relId, recordIds, loginId)
+		if err != nil {
+			return results, 0, err
+		}
+
+		if len(encKeys) != len(recordIds) {
+			return results, 0, handler.CreateErrCode("SEC", 5)
+		}
+
+		// assign record keys in order
+		keyIndex := 0
+		for i, result := range results {
+			if result.IndexRecordIds[relIndex] != nil {
+				results[i].IndexRecordEncKeys[relIndex] = encKeys[keyIndex]
+				keyIndex++
+			}
+		}
+	}
 
 	// work out result count
 	count := len(results)
@@ -111,8 +168,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 // build SQL call from data GET request
 // also used for sub queries, a nesting level is included for separation (0 = main query)
 // returns data + count SQL query strings
-func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *[]interface{},
-	loginId int64, nestingLevel int) (string, string, error) {
+func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
+	queryArgs *[]interface{}, queryCountArgs *[]interface{}, loginId int64,
+	nestingLevel int) (string, string, error) {
 
 	// check for authorized access, READ(1) for GET
 	for _, expr := range data.Expressions {
@@ -122,10 +180,9 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 	}
 
 	var (
-		inJoin         []string                  // relation joins
-		inSelect       []string                  // select expressions
-		inWhere        []string                  // filters
-		mapIndex_relId = make(map[int]uuid.UUID) // map of all relations by index
+		inJoin   []string // relation joins
+		inSelect []string // select expressions
+		inWhere  []string // filters
 	)
 
 	// check source relation and module
@@ -144,13 +201,13 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 	relCode := getRelationCode(data.IndexSource, nestingLevel)
 
 	// add relations as joins via relationship attributes
-	mapIndex_relId[data.IndexSource] = data.RelationId
+	indexRelationIds[data.IndexSource] = data.RelationId
 	for _, join := range data.Joins {
 		if join.IndexFrom == -1 { // source relation need not be joined
 			continue
 		}
 
-		if err := addJoin(mapIndex_relId, join, &inJoin, loginId, nestingLevel); err != nil {
+		if err := addJoin(indexRelationIds, join, &inJoin, loginId, nestingLevel); err != nil {
 			return "", "", err
 		}
 	}
@@ -206,9 +263,10 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 			if nestingLevel == 0 {
 				queryCountArgsOptional = nil
 			}
+			indexRelationIdsSub := make(map[int]uuid.UUID)
 
-			subQuery, _, err := prepareQuery(expr.Query, queryArgs,
-				queryCountArgsOptional, loginId, nestingLevel+1)
+			subQuery, _, err := prepareQuery(expr.Query, indexRelationIdsSub,
+				queryArgs, queryCountArgsOptional, loginId, nestingLevel+1)
 
 			if err != nil {
 				return "", "", err
@@ -220,9 +278,7 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 		}
 
 		// attribute expression
-		if err := addSelect(pos, expr, mapIndex_relId, &inSelect,
-			nestingLevel); err != nil {
-
+		if err := addSelect(pos, expr, indexRelationIds, &inSelect, nestingLevel); err != nil {
 			return "", "", err
 		}
 
@@ -236,7 +292,7 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 
 	// add expressions for relation tupel IDs after attributes (on main query)
 	if nestingLevel == 0 {
-		for index, relId := range mapIndex_relId {
+		for index, relId := range indexRelationIds {
 
 			// if an aggregation function is used on any index, we cannot deliver record IDs
 			// unless a record aggregation functions is used on this specific relation index
@@ -338,7 +394,7 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 //  attribute value = tupel IDs in relation with given index via given attribute
 // 'outside in' is important in cases of self reference, where direction cannot be ascertained by attribute
 func addSelect(exprPos int, expr types.DataGetExpression,
-	mapIndex_relId map[int]uuid.UUID, inSelect *[]string, nestingLevel int) error {
+	indexRelationIds map[int]uuid.UUID, inSelect *[]string, nestingLevel int) error {
 
 	relCode := getRelationCode(expr.Index, nestingLevel)
 
@@ -441,7 +497,7 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 	return nil
 }
 
-func addJoin(mapIndex_relId map[int]uuid.UUID, join types.DataGetJoin,
+func addJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin,
 	inJoin *[]string, loginId int64, nestingLevel int) error {
 
 	// check join attribute
@@ -456,7 +512,7 @@ func addJoin(mapIndex_relId map[int]uuid.UUID, join types.DataGetJoin,
 
 	// is join attribute on source relation? (direction of relationship)
 	var relIdTarget uuid.UUID // relation ID that is to be joined
-	var relIdSource = mapIndex_relId[join.IndexFrom]
+	var relIdSource = indexRelationIds[join.IndexFrom]
 	var relCodeSource = getRelationCode(join.IndexFrom, nestingLevel)
 	var relCodeTarget = getRelationCode(join.Index, nestingLevel) // relation code that is to be joined
 	var relCodeFrom string                                        // relation code of where join attribute is from
@@ -477,7 +533,7 @@ func addJoin(mapIndex_relId map[int]uuid.UUID, join types.DataGetJoin,
 		relIdTarget = atr.RelationId
 	}
 
-	mapIndex_relId[join.Index] = relIdTarget
+	indexRelationIds[join.Index] = relIdTarget
 
 	// check other relation and corresponding module
 	relTarget, exists := cache.RelationIdMap[relIdTarget]
@@ -533,8 +589,10 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 
 		// sub query filter
 		if isQuery {
-			subQuery, _, err := prepareQuery(s.Query, queryArgs,
-				queryCountArgs, loginId, nestingLevel+1)
+			indexRelationIdsSub := make(map[int]uuid.UUID)
+
+			subQuery, _, err := prepareQuery(s.Query, indexRelationIdsSub,
+				queryArgs, queryCountArgs, loginId, nestingLevel+1)
 
 			if err != nil {
 				return err

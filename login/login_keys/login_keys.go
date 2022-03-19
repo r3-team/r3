@@ -8,16 +8,21 @@ import (
 
 func Reset_tx(tx pgx.Tx, loginId int64) error {
 
-	_, err := tx.Exec(db.Ctx, `
+	if _, err := tx.Exec(db.Ctx, `
 		UPDATE instance.login
 		SET key_private_enc = NULL, key_private_enc_backup = NULL, key_public = NULL
 		WHERE id = $1
-	`, loginId)
+	`, loginId); err != nil {
+		return err
+	}
 
-	// TEMP
-	// Missing: Delete existing user keys as they cannot be decrypted anymore
-
-	return err
+	if _, err := tx.Exec(db.Ctx, `
+		DELETE FROM instance.record_key
+		WHERE login_id = $1
+	`, loginId); err != nil {
+		return err
+	}
+	return nil
 }
 
 func Store_tx(tx pgx.Tx, loginId int64, privateKeyEnc string,

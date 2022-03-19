@@ -26,7 +26,7 @@ type DataGetFilterSide struct {
 	AttributeId     pgtype.UUID    `json:"attributeId"`     // attribute ID, optional
 	AttributeIndex  int            `json:"attributeIndex"`  // attribute relation index
 	AttributeNested int            `json:"attributeNested"` // attribute nesting level (0 = main query, 1 = 1st sub query)
-	Brackets        int            `json:"brackets"`        // brackets before/after
+	Brackets        int            `json:"brackets"`        // brackets before (side0) or after (side1)
 	Query           DataGet        `json:"query"`           // sub query, optional
 	QueryAggregator pgtype.Varchar `json:"queryAggregator"` // sub query aggregator, optional
 	Value           interface{}    `json:"value"`           // fixed value, optional, filled by frontend with value of field/login ID/record/...
@@ -85,8 +85,9 @@ type DataGet struct {
 }
 
 type DataGetResult struct {
-	IndexRecordIds map[int]interface{} `json:"indexRecordIds"` // record IDs, key: relation index
-	Values         []interface{}       `json:"values"`         // expression values, same order as requested expressions
+	IndexRecordIds     map[int]interface{} `json:"indexRecordIds"`     // record IDs, key: relation index
+	IndexRecordEncKeys map[int]string      `json:"indexRecordEncKeys"` // data encryption keys, encrypted with login´s public key, key: relation index
+	Values             []interface{}       `json:"values"`             // expression values, same order as requested expressions
 }
 
 // data set request
@@ -97,11 +98,17 @@ type DataSetAttribute struct {
 	Value         interface{} `json:"value"`
 }
 type DataSet struct {
-	RelationId  uuid.UUID          `json:"relationId"`  // relation ID to update
-	AttributeId uuid.UUID          `json:"attributeId"` // attribute ID of relationship to join with
-	IndexFrom   int                `json:"indexFrom"`   // from relation index
-	RecordId    int64              `json:"recordId"`    // record ID to update (0 if new)
-	Attributes  []DataSetAttribute `json:"attributes"`  // attribute values to set
+	RelationId         uuid.UUID          `json:"relationId"`         // relation ID to update
+	AttributeId        uuid.UUID          `json:"attributeId"`        // attribute ID of relationship to join with
+	IndexFrom          int                `json:"indexFrom"`          // from relation index
+	RecordId           int64              `json:"recordId"`           // record ID to update (0 if new)
+	Attributes         []DataSetAttribute `json:"attributes"`         // attribute values to set
+	EncKeysSet         []DataSetEncKeys   `json:"encKeysSet"`         // data encryption keys, encrypted with login´s public key
+	EncKeysDelLoginIds []int64            `json:"encKeysDelLoginIds"` // login IDs for which to delete the encrypted keys
+}
+type DataSetEncKeys struct {
+	LoginId int64  `json:"loginId"`
+	KeyEnc  string `json:"keyEnc"` // encrypted data key, stored as base64
 }
 type DataSetFile struct {
 	Id   uuid.UUID `json:"id"`

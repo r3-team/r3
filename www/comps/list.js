@@ -1375,8 +1375,8 @@ let MyList = {
 			}
 			
 			ws.sendMultiple(requests,true).then(
-				(res) => this.get(),
-				(err) => this.$root.genericError(err)
+				this.get,
+				this.$root.genericError
 			);
 		},
 		
@@ -1393,8 +1393,7 @@ let MyList = {
 			let filters = this.filters
 				.concat(this.filtersParsedQuick)
 				.concat(this.filtersParsedUser)
-				.concat(this.choiceFilters)
-			;
+				.concat(this.choiceFilters);
 			
 			if(this.anyInputRows)
 				filters.push(this.getQueryAttributesPkFilter(
@@ -1410,7 +1409,7 @@ let MyList = {
 				limit:this.limit,
 				offset:this.offset
 			},true).then(
-				(res) => {
+				res => {
 					this.count = res.payload.count;
 					this.rows  = res.payload.rows;
 					this.selectReset();
@@ -1418,7 +1417,7 @@ let MyList = {
 					if(this.isInput)
 						this.$nextTick(this.updateDropdownDirection);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		
@@ -1453,7 +1452,7 @@ let MyList = {
 				filters:filters,
 				orders:this.orders
 			},false).then(
-				(res) => {
+				res => {
 					// apply results to input rows if category or specific record IDs were retrieved
 					if(this.inputAsCategory || this.anyInputRows)
 						this.rowsInput = res.payload.rows;
@@ -1503,7 +1502,7 @@ let MyList = {
 						this.inputAutoSelectDone = true;
 					}
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

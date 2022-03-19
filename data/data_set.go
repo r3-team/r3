@@ -9,6 +9,7 @@ import (
 	"path/filepath"
 	"r3/cache"
 	"r3/config"
+	"r3/data/data_enc"
 	"r3/handler"
 	"r3/schema"
 	"r3/tools"
@@ -106,6 +107,20 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 			indexRecordIds, indexRecordsCreated, loginId); err != nil {
 
 			return indexRecordIds, err
+		}
+
+		// set encrypted record keys
+		if rel.Encryption {
+			if err := data_enc.StoreKeys_tx(ctx, tx, rel.Id,
+				indexRecordIds[index], dataSet.EncKeysSet); err != nil {
+
+				return indexRecordIds, err
+			}
+			if err := data_enc.DeleteKeys_tx(ctx, tx, rel.Id,
+				indexRecordIds[index], dataSet.EncKeysDelLoginIds); err != nil {
+
+				return indexRecordIds, err
+			}
 		}
 
 		// set data log if retention is enabled

@@ -82,7 +82,7 @@ export async function aesGcmDecryptBase64WithPhrase(ciphertext,passphrase) {
 		).then(
 			hash => {
 				const ivStr = atob(ciphertext).slice(0,ivLength); // decode base64 iv
-				const ctStr = atob(ciphertext).slice(ivLength); // decode ciphertext
+				const ctStr = atob(ciphertext).slice(ivLength);   // decode ciphertext
 				const iv    = stringToUint8Array(ivStr);
 				const algo = { name:'AES-GCM', iv:iv };
 				
@@ -195,6 +195,30 @@ export function rsaGenerateKeys(exportable,len) {
 		['encrypt','decrypt']
 	);
 };
+export function rsaEncrypt(publicKey,plaintext) {
+	return new Promise((resolve,reject) => {
+		window.crypto.subtle.encrypt(
+			{ name:'RSA-OAEP' },
+			publicKey,
+			(new TextEncoder().encode(plaintext))
+		).then(
+			res => resolve(btoa(arrayBufferToString(res))),
+			err => reject(err)
+		);
+	});
+};
+export function rsaDecrypt(privateKey,cipherBase64) {
+	return new Promise((resolve,reject) => {
+		window.crypto.subtle.decrypt(
+			{ name:'RSA-OAEP' },
+			privateKey,
+			stringToUint8Array(atob(cipherBase64))
+		).then(
+			res => resolve(new TextDecoder().decode(res)),
+			err => reject(err)
+		);
+	});
+};
 
 // PBKDF2
 export function pbkdf2DeriveAesGcmKey(salt,key,iterations,exportable){
@@ -234,6 +258,16 @@ export function pbkdf2PassToAesGcmKey(passphrase,salt,iterations,exportable) {
 };
 
 // helpers
+export function getRandomString(len) {
+	let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!"§$%&/()=?_-:;#*+<>';
+	let arr   = new Uint32Array(len);
+	let out   = '';
+	crypto.getRandomValues(arr);
+	for(let i = 0; i < len; i++) {
+		out += chars[arr[i] % chars.length];
+	}
+	return out;
+};
 function arrayBufferToString(arrayBuffer) {
 	const byteArray = Array.from(new Uint8Array(arrayBuffer));
 	return byteArray.map(byte => String.fromCharCode(byte)).join('');

@@ -993,7 +993,10 @@
 		},
 		"SEC":{
 			"001":"Du bist nicht berechtigt die Aktion auszuführen oder diese Ressource aufzurufen.",
-			"002":"Das System konnte den persönlichen Schlüssel für die Ende-Zu-Ende-Verschlüsselung nicht entsperren. Das kann passieren, wenn jemand für dich oder du dein Passwort außerhalb dieser Anwendung geändert hast.<br /><br />Bitte die Benutzereinstellungen öffnen und den Anweisungen folgen, um Zugriff auf deinen persönlichen Schlüssel wiederherzustellen."
+			"002":"Das System konnte den persönlichen Schlüssel für die Ende-Zu-Ende-Verschlüsselung nicht entsperren. Das kann passieren, wenn jemand für dich oder du dein Passwort außerhalb dieser Anwendung geändert hast.<br /><br />Bitte die Benutzereinstellungen öffnen und den Anweisungen folgen, um Zugriff auf deinen persönlichen Schlüssel wiederherzustellen.",
+			"003":"Das System konnte die Datensatzwerte nicht verschlüsseln. Bitte erneut versuchen.",
+			"004":"Das System konnte die Datensatzwerte nicht entschlüsseln. Bitte erneut versuchen.",
+			"005":"Das System konnte Entschlüsselungs-Codes für die ausgewählten Datensätze nicht laden."
 		},
 		"initCollection":"Fehler beim Laden von Sammlungen während der Anmeldung: {MSG}"
 	},

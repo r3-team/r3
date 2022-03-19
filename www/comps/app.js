@@ -4,7 +4,6 @@ import MyHeader              from './header.js';
 import MyLogin               from './login.js';
 import {getStartFormId}      from './shared/access.js';
 import {updateCollections}   from './shared/collection.js';
-import {genericError}        from './shared/error.js';
 import {getCaptionForModule} from './shared/language.js';
 import {openLink}            from './shared/generic.js';
 import {
@@ -12,6 +11,10 @@ import {
 	aesGcmImportBase64,
 	pemImport,
 } from './shared/crypto.js';
+import {
+	consoleError,
+	genericError
+} from './shared/error.js';
 export {MyApp as default};
 
 let MyApp = {
@@ -24,9 +27,8 @@ let MyApp = {
 	},
 	template:`<div :class="classes" id="app" :style="styles">
 		
-		<my-login v-if="!appReady"
+		<my-login ref="login" v-if="!appReady"
 			@authenticated="initApp"
-			:appInitErr="appInitErr"
 			:backendReady="wsConnected"
 			:httpMode="httpMode"
 			:loginReady="loginReady"
@@ -65,7 +67,6 @@ let MyApp = {
 	</div>`,
 	data:function() {
 		return {
-			appInitErr:'',      // error message returned by attempt to initialize app
 			appReady:false,     // app is loaded and user authenticated
 			loginReady:false,   // app is ready for authentication
 			publicLoaded:false, // public data has been loaded
@@ -241,6 +242,7 @@ let MyApp = {
 		// externals
 		aesGcmDecryptBase64,
 		aesGcmImportBase64,
+		consoleError,
 		genericError,
 		getCaptionForModule,
 		getStartFormId,
@@ -259,7 +261,9 @@ let MyApp = {
 		},
 		setInitErr:function(err) {
 			// generic error handler is not available yet
-			this.appInitErr = `${(new Date().getTime())}: An unexpected error occurred, ${err}`;
+			// log to console and release login routine
+			this.consoleError(err);
+			this.$refs.login.parentError();
 		},
 		setMobileView:function() {
 			this.$store.commit('isMobile',window.innerWidth <= 800 || window.innerHeight <= 400);
@@ -411,9 +415,10 @@ let MyApp = {
 				requests.push(ws.prepare('license','get',{}));
 				requests.push(ws.prepare('system','get',{}));
 			}
+			this.$store.commit('busyBlockInput',true);
 			
 			ws.sendMultiple(requests,true).then(
-				res => {
+				async res => {
 					this.$store.commit('settings',res[0].payload);
 					this.$store.commit('access',res[1].payload);
 					this.$store.commit('captions',res[2].payload);
@@ -424,8 +429,12 @@ let MyApp = {
 						this.$store.commit('loginPrivateKeyEnc',res[4].payload.privateEnc);
 						this.$store.commit('loginPrivateKeyEncBackup',res[4].payload.privateEncBackup);
 						
-						this.importPrivateKey(res[4].payload.privateEnc);
-						this.importPublicKey(res[4].payload.public);
+						await this.pemImport(res[4].payload.public,'RSA',true)
+							.then(res => this.$store.commit('loginPublicKey',res))
+							.catch(this.setInitErr);
+						
+						await this.pemImportPrivateEnc(res[4].payload.privateEnc)
+							.catch(this.setInitErr);
 					}
 					
 					if(this.isAdmin) {
@@ -437,7 +446,7 @@ let MyApp = {
 					// in case of errors during collection retrieval, continue
 					//  if user is admin, otherwise the error cannot be corrected
 					// normal users should not login as the system does not handle as expected
-					return updateCollections(this.isAdmin,
+					return this.updateCollections(this.isAdmin,
 						err => alert(this.capErr.initCollection.replace('{MSG}',err)));
 				},
 				err => this.setInitErr(err)
@@ -447,20 +456,13 @@ let MyApp = {
 			).finally(
 				() => this.$store.commit('busyBlockInput',false)
 			);
-			this.$store.commit('busyBlockInput',true);
 		},
 		
 		// crypto
-		importPublicKey:function(publicKeyPem) {
-			this.pemImport(publicKeyPem,'RSA',true).then(
-				res => this.$store.commit('loginPublicKey',res),
-				err => this.setInitErr(err)
-			);
-		},
-		importPrivateKey:function(privateKeyPemEnc) {
+		pemImportPrivateEnc:function(privateKeyPemEnc) {
 			// attempt to decrypt private key with personal login key
 			// prepare login AES key
-			this.aesGcmImportBase64(this.loginKeyAes).then(
+			return this.aesGcmImportBase64(this.loginKeyAes).then(
 				loginKey => {
 					
 					// decrypt login private key PEM
@@ -475,9 +477,7 @@ let MyApp = {
 						// error is shown in header if private key cannot be decrypted
 						err => {}
 					);
-				},
-				// non-caught errors should not occur (import of PEM to store)
-				err => this.setInitErr(err)
+				}
 			);
 		},
 		

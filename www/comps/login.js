@@ -79,7 +79,7 @@ let MyLogin = {
 			</div>
 			
 			<!-- unexpected error message -->
-			<div class="contentBox" v-if="appInitErr !== ''">
+			<div class="contentBox" v-if="appInitErr">
 				<div class="top warning">
 					<div class="area">
 						<img class="icon" src="images/warning.png" />
@@ -150,7 +150,6 @@ let MyLogin = {
 		</div>
 	</div>`,
 	props:{
-		appInitErr:  { type:String,  required:true }, // app could not initialize
 		backendReady:{ type:Boolean, required:true }, // can talk to backend
 		httpMode:    { type:Boolean, required:true }, // unencrypted connection
 		loginReady:  { type:Boolean, required:true }  // can login
@@ -163,7 +162,8 @@ let MyLogin = {
 			username:'',
 			
 			// states
-			badAuth:false,
+			appInitErr:false, // application failed to initialize
+			badAuth:false,    // authentication failed
 			loading:false,
 			showError:false,
 			
@@ -172,8 +172,8 @@ let MyLogin = {
 			languages:['de','en_US'],
 			message:{
 				error:{
-					de:'Ein Fehler ist aufgetreten. Bitte erneut versuchen.',
-					en_US:'An error occurred. Please try again.'
+					de:'Ein Fehler ist aufgetreten - bitte erneut versuchen',
+					en_US:'An error occurred - please try again'
 				},
 				httpMode:{
 					de:'Verbindung ist nicht verschlüsselt',
@@ -228,12 +228,6 @@ let MyLogin = {
 		productionMode:   function() { return this.$store.getters.productionMode; }
 	},
 	watch:{
-		appInitErr:function(v) {
-			// updates when app encounters an unexpected error during initialization
-			// log to console (troubleshooting) and stop loading
-			console.log(v);
-			this.loading = false;
-		},
 		loginReady:function(v) {
 			if(!v) return;
 			
@@ -298,6 +292,11 @@ let MyLogin = {
 				case 'kdfCreate': break;                      // very unexpected, should not happen
 			}
 			this.loading = false;
+		},
+		parentError:function() {
+			// stop loading, when parent caught error
+			this.loading    = false;
+			this.appInitErr = true;
 		},
 		
 		// authenticate by username/password or public user

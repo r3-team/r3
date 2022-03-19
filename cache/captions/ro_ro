@@ -993,7 +993,10 @@
 		},
 		"SEC":{
 			"001":"Acces neautorizat.",
-			"002":"The system failed to unlock your personal key for end-to-end encryption. This can happen if someone changed your password for you or you have changed it outside this application.<br /><br />Please open the user settings and follow the instructions to regain access to your personal key."
+			"002":"The system failed to unlock your personal key for end-to-end encryption. This can happen if someone changed your password for you or you have changed it outside this application.<br /><br />Please open the user settings and follow the instructions to regain access to your personal key.",
+			"003":"The system failed to encrypt the record values. Please try again.",
+			"004":"The system failed to decrypt the record values. Please try again.",
+			"005":"The system failed to retrieve decryption keys for the selected records."
 		},
 		"initCollection":"Nu s-au putut încărca colecțiile în timpul autentificarii: {MSG}"
 	},

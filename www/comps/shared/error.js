@@ -24,6 +24,12 @@ export function genericError(message) {
 	});
 };
 
+// these are errors that should not occur
+// they are printed to the console for troubleshooting
+export function consoleError(message) {
+	console.log(`${new Date().toLocaleString()}: An error occurred, ${message}`);
+};
+
 export function resolveErrCode(message) {
 	
 	if(typeof message !== 'string')

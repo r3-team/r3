@@ -108,7 +108,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE instance.login ALTER COLUMN salt_kdf DROP DEFAULT;
 			
 			-- encrypted keys for hybrid encryption
-			CREATE TABLE IF NOT EXISTS instance.login_key (
+			CREATE TABLE IF NOT EXISTS instance.record_key (
 			    login_id integer NOT NULL,
 			    relation_id uuid NOT NULL,
 			    record_id_wofk integer NOT NULL,
