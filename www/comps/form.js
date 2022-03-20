@@ -21,7 +21,8 @@ import {
 	getFormRoute,
 	getGetterArg,
 	getInputFieldName,
-	getResolvedPlaceholders
+	getResolvedPlaceholders,
+	getRowsDecrypted
 } from './shared/form.js';
 import {
 	isAttributeRelationship,
@@ -651,6 +652,7 @@ let MyForm = {
 		getRandomString,
 		getRelationsJoined,
 		getResolvedPlaceholders,
+		getRowsDecrypted,
 		hasAccessToRelation,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
@@ -822,12 +824,6 @@ let MyForm = {
 				}
 			}
 		},
-		valueSetByField:function(indexAttributeId,value) {
-			// block updates during form load
-			//  some fields (richtext) updated their values after form was already unloaded
-			if(!this.loading)
-				this.valueSet(indexAttributeId,value,false,true);
-		},
 		valuesSetAllDefault:function() {
 			for(let k in this.values) {
 				
@@ -845,6 +841,45 @@ let MyForm = {
 				// set default value
 				this.valueSet(k,this.valuesDef[k],true,true);
 			}
+		},
+		valueSetByField:function(indexAttributeId,value) {
+			// block updates during form load
+			//  some fields (richtext) updated their values after form was already unloaded
+			if(!this.loading)
+				this.valueSet(indexAttributeId,value,false,true);
+		},
+		valueSetByRows:async function(rows,expressions) {
+			if(rows.length !== 1)
+				throw new Error('expected 1 row, got: '+rows.length);
+			
+			// update record ID & record data key per relation index
+			for(let index in rows[0].indexRecordIds) {
+				this.recordIdIndexMap[index] = rows[0].indexRecordIds[index];
+			}
+			for(let index in rows[0].indexRecordEncKeys) {
+				this.recordKeyIndexMap[index] = await this.rsaDecrypt(
+					this.loginPrivateKey,
+					rows[0].indexRecordEncKeys[index]
+				).catch(
+					err => { throw new Error('failed to decrypt data key with private key, '+err); }
+				);
+			}
+			
+			return this.getRowsDecrypted(rows,expressions).then(
+				rows => {
+					for(let i = 0, j = rows[0].values.length; i < j; i++) {
+						const e = expressions[i];
+						
+						this.valueSet(
+							this.getIndexAttributeId(
+								e.index,e.attributeId,
+								e.outsideIn,e.attributeIdNm
+							),
+							rows[0].values[i],true,false
+						);
+					}
+				}
+			);
 		},
 		
 		// field validity control
@@ -1211,35 +1246,23 @@ let MyForm = {
 				])
 			},true).then(
 				res => {
-					const rows = res.payload.rows;
+					// reset states
+					this.badLoad = false;
+					this.badSave = false;
+					this.loading = true;
 					
-					// handle invalid record lookup
-					if(rows.length !== 1) {
-						
-						// more than 1 record returned
-						if(rows.length > 1)
-							return this.openForm();
-						
-						// no record returned (might have lost access after save)
-						this.badLoad = true;
-						return;
-					}
-					
-					this.loading           = true;
+					// reset record meta
 					this.recordIdIndexMap  = {};
 					this.recordKeyIndexMap = {};
 					
-					this.getUpdateRecord(rows[0],expressions).then(
-						res => {
-							if(!res)
-								return this.badLoad = true;
-							
-							this.badSave = false;
-							this.badLoad = false;
-							this.triggerEventAfter('open');
+					this.valueSetByRows(res.payload.rows,expressions).then(
+						res => this.triggerEventAfter('open'),
+						err => {
+							this.badLoad = true;
+							this.consoleError(err);
 						}
 					).finally(
-						() => this.releaseLoadingOnNextTick()
+						this.releaseLoadingOnNextTick
 					);
 				},
 				this.$root.genericError
@@ -1299,7 +1322,10 @@ let MyForm = {
 					let e = expressions[i];
 					
 					this.valueSet(
-						this.getIndexAttributeId(e.index,e.attributeId,e.outsideIn,e.attributeIdNm),
+						this.getIndexAttributeId(
+							e.index,e.attributeId,
+							e.outsideIn,e.attributeIdNm
+						),
 						null,true,false
 					);
 				}
@@ -1317,69 +1343,9 @@ let MyForm = {
 					)
 				])
 			},true).then(
-				res => {
-					if(res.payload.rows.length === 1)
-						this.getUpdateRecord(res.payload.rows[0],expressions).then(
-							res => { if(!res) this.badLoad = true; }
-						);
-				},
-				err => this.$root.genericError(err)
+				res => this.valueSetByRows(res.payload.rows,expressions),
+				this.$root.genericError
 			);
-		},
-		getUpdateRecord:async function(row,expressions) {
-			
-			// update relation record IDs
-			for(const index in row.indexRecordIds) {
-				this.recordIdIndexMap[index] = row.indexRecordIds[index];
-			}
-			
-			// update attribute values
-			for(let i = 0, j = row.values.length; i < j; i++) {
-				const e = expressions[i];
-				const a = this.attributeIdMap[e.attributeId];
-				let   v = row.values[i];
-				
-				// handle encrypted values
-				if(a.encrypted && v !== null) {
-					const genericDecErr = this.capErr.SEC['004'];
-					
-					// check whether encrypted data key is included
-					if(typeof row.indexRecordEncKeys[e.index] === 'undefined') {
-						this.$root.genericError(genericDecErr);
-						return false;
-					}
-					
-					// get data key from cache or decrypt included one
-					let keyStr = this.recordKeyIndexMap[e.index];
-					if(typeof keyStr === 'undefined') {
-						
-						keyStr = await this.rsaDecrypt(
-							this.loginPrivateKey,row.indexRecordEncKeys[e.index]
-						).catch(this.consoleError);
-						
-						if(typeof keyStr === 'undefined') {
-							this.$root.genericError(genericDecErr);
-							return false;
-						}
-						this.recordKeyIndexMap[e.index] = keyStr;
-					}
-					
-					v = await this.aesGcmDecryptBase64WithPhrase(v,keyStr)
-						.catch(this.consoleError);
-					
-					if(typeof v === 'undefined') {
-						this.$root.genericError(genericDecErr);
-						return false;
-					}
-				}
-				
-				// set attribute value
-				this.valueSet(
-					this.getIndexAttributeId(e.index,e.attributeId,e.outsideIn,e.attributeIdNm),
-					v,true,false
-				);
-			}
-			return true;
 		},
 		set:async function(saveAndNew) {
 			if(this.fieldIdsInvalid.length !== 0)
@@ -1392,7 +1358,7 @@ let MyForm = {
 			let addRelationByIndex = async index => {
 				
 				if(typeof relations[index] !== 'undefined')
-					return true;
+					return;
 				
 				const j     = this.joinsIndexMap[index];
 				const isNew = j.recordId === 0;
@@ -1401,13 +1367,12 @@ let MyForm = {
 				
 				// ignore relation if record is new and creation is disallowed
 				if(!j.applyCreate && isNew)
-					return true;
+					return;
 				
 				// recursively add relation parent, if one exists
-				if(j.indexFrom !== -1) {
-					if(!await addRelationByIndex(j.indexFrom))
-						return false;
-				}
+				if(j.indexFrom !== -1)
+					await addRelationByIndex(j.indexFrom)
+						.catch(err => { throw new Error(err); });
 				
 				// handle encryption key for record
 				if(this.relationIdMap[j.relationId].encryption) {
@@ -1417,11 +1382,8 @@ let MyForm = {
 						this.recordKeyIndexMap[index] = this.getRandomString(this.keyLength);
 					
 					const keyStr = this.recordKeyIndexMap[index];
-					if(typeof keyStr === 'undefined') {
-						this.consoleError('Encryption key for existing record is not available');
-						this.$root.genericError(genericEncErr);
-						return false;
-					}
+					if(typeof keyStr === 'undefined')
+						throw new Error('Encryption key for existing record is not available');
 					
 					// TEMP
 					// resolve new access
@@ -1429,12 +1391,7 @@ let MyForm = {
 					
 					if(isNew) {
 						const keyEnc = await this.rsaEncrypt(this.loginPublicKey,keyStr)
-							.catch(this.consoleError);
-						
-						if(typeof keyEnc === 'undefined') {
-							this.$root.genericError(genericEncErr);
-							return false;
-						}
+							.catch(err => { throw new Error(err); });
 						
 						encLoginKeys.push({
 							loginId:this.loginId,
@@ -1452,7 +1409,6 @@ let MyForm = {
 					encKeysSet:encLoginKeys,
 					encKeysDelLoginIds:encLoginIdsDel
 				};
-				return true;
 			};
 			
 			// add values by index attribute ID
@@ -1474,8 +1430,11 @@ let MyForm = {
 				if(!j.applyUpdate && j.recordId !== 0) continue;
 				
 				// add join to request to set attribute values
-				if(!await addRelationByIndex(d.index))
-					return;
+				await addRelationByIndex(d.index).catch(err => {
+					this.consoleError(err);
+					this.$root.genericError(genericEncErr);
+					throw new Error(err);
+				});
 				
 				let value = this.values[k];
 				
@@ -1485,10 +1444,11 @@ let MyForm = {
 					value = await this.aesGcmEncryptBase64WithPhrase(
 						this.values[k],
 						this.recordKeyIndexMap[d.index]
-					).catch(this.consoleError);
-					
-					if(typeof value === 'undefined')
-						return this.$root.genericError(genericEncErr);
+					).catch(	err => {
+						this.consoleError(err);
+						this.$root.genericError(genericEncErr);
+						throw new Error(err);
+					});
 				}
 				
 				relations[d.index].attributes.push({

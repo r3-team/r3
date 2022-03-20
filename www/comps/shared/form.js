@@ -1,9 +1,74 @@
 import MyStore from '../../stores/store.js';
 import {
+	aesGcmDecryptBase64WithPhrase,
+	rsaDecrypt
+} from './crypto.js';
+import {
 	getDateAtUtcZero,
 	getDateShifted,
 	getUnixFromDate
 } from './time.js';
+
+export async function getRowsDecrypted(rows,expressions) {
+	
+	// parse which expressions have encrypted attributes
+	let encryptionUsed          = false;
+	let encExprIndexMapRelIndex = {}; // key: encrypted expression index, value: relation index
+	
+	for(let i = 0, j = expressions.length; i < j; i++) {
+		const e = expressions[i];
+		const a = MyStore.getters['schema/attributeIdMap'][e.attributeId];
+		
+		if(e.attributeId !== null && a.encrypted) {
+			encryptionUsed = true;
+			encExprIndexMapRelIndex[i] = e.index;
+		}
+	}
+	
+	// nothing encrypted, just return rows
+	if(!encryptionUsed)
+		return rows;
+	
+	// decrypt row values
+	for(let i = 0, j = rows.length; i < j; i++) {
+		
+		// keep encryption keys, multiple attributes can be encrypted on the same relation
+		// key: relation index, value: decrypted base64 key
+		let keysByRelIndex = {};
+		
+		for(let exprIndex in encExprIndexMapRelIndex) {
+			
+			let relIndex = encExprIndexMapRelIndex[exprIndex];
+			let value    = rows[i].values[exprIndex];
+			
+			if(value === null)
+				continue;
+			
+			// check if data key for this relation is already available
+			if(typeof keysByRelIndex[relIndex] === 'undefined') {
+				
+				// no data key available, get from rows
+				if(typeof rows[i].indexRecordEncKeys[relIndex] === 'undefined')
+					throw new Error('no data key for record row '+i);
+				
+				// decrypt data key with private key
+				keysByRelIndex[relIndex] = await rsaDecrypt(
+					MyStore.getters.loginPrivateKey,
+					rows[i].indexRecordEncKeys[relIndex]
+				).catch(
+					err => { throw new Error('failed to decrypt data key with private key, '+err); }
+				);
+			}
+			
+			// decrypt data
+			value = await aesGcmDecryptBase64WithPhrase(value,keysByRelIndex[relIndex])
+				.catch(err => { throw new Error('failed to decrypt data with data key, '+err); });
+			
+			rows[i].values[exprIndex] = value;
+		}
+	}
+	return rows;
+};
 
 export function getColumnIndexesHidden(columns) {
 	let out = [];

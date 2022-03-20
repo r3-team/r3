@@ -4,8 +4,8 @@ import MyInputCollection  from './inputCollection.js';
 import MyInputOffset      from './inputOffset.js';
 import MyListCsv          from './listCsv.js';
 import MyValueRich        from './valueRich.js';
+import {consoleError}     from './shared/error.js';
 import {getColumnTitle}   from './shared/column.js';
-import {getChoiceFilters} from './shared/form.js';
 import {srcBase64}        from './shared/image.js';
 import {getCaption}       from './shared/language.js';
 import {isAttributeFiles} from './shared/attribute.js';
@@ -13,6 +13,10 @@ import {
 	fieldOptionGet,
 	fieldOptionSet
 } from './shared/field.js';
+import {
+	getChoiceFilters,
+	getRowsDecrypted
+} from './shared/form.js';
 import {
 	fillRelationRecordIds,
 	getFiltersEncapsulated,
@@ -352,7 +356,6 @@ let MyList = {
 				:id="isFullPage ? scrollFormId : null"
 			>
 				<!-- list results as HTML table -->
-				
 				<table :class="{ 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
 					<thead v-if="header">
 						<!-- attribute headers -->
@@ -880,6 +883,7 @@ let MyList = {
 	},
 	methods:{
 		// externals
+		consoleError,
 		fieldOptionGet,
 		fieldOptionSet,
 		fillRelationRecordIds,
@@ -890,6 +894,7 @@ let MyList = {
 		getQueryAttributesPkFilter,
 		getQueryExpressions,
 		getRelationsJoined,
+		getRowsDecrypted,
 		isAttributeFiles,
 		isDropdownUpwards,
 		routeChangeFieldReload,
@@ -1410,12 +1415,20 @@ let MyList = {
 				offset:this.offset
 			},true).then(
 				res => {
-					this.count = res.payload.count;
-					this.rows  = res.payload.rows;
-					this.selectReset();
+					const count = res.payload.count;
 					
-					if(this.isInput)
-						this.$nextTick(this.updateDropdownDirection);
+					this.getRowsDecrypted(res.payload.rows,this.expressions).then(
+						rows => {
+							this.count = count;
+							this.rows  = rows;
+							this.selectReset();
+							
+							if(this.isInput)
+								this.$nextTick(this.updateDropdownDirection);
+						},
+						this.consoleError
+					);
+					
 				},
 				this.$root.genericError
 			);
