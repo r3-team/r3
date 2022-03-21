@@ -145,7 +145,7 @@ let MyBuilderRelationsItem = {
 				/>
 			</td>
 			<td>
-				<my-bool v-model="encryption" />
+				<my-bool v-model="encryption" :readonly="!isNew" />
 			</td>
 			<td>
 				<my-button

@@ -108,6 +108,10 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		return err
 	}
 
+	if encrypted && content != "text" {
+		return fmt.Errorf("only text attributes can be encrypted")
+	}
+
 	if !tools.StringInSlice(content, contentTypes) {
 		return fmt.Errorf("invalid attribute content type '%s'", content)
 	}

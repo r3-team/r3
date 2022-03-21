@@ -1439,7 +1439,7 @@ let MyForm = {
 				let value = this.values[k];
 				
 				// handle encryption
-				if(this.attributeIdMap[d.attributeId].encrypted) {
+				if(this.attributeIdMap[d.attributeId].encrypted && value !== null) {
 					
 					value = await this.aesGcmEncryptBase64WithPhrase(
 						this.values[k],

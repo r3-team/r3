@@ -2,6 +2,8 @@ package data_enc
 
 import (
 	"context"
+	"fmt"
+	"r3/schema"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -17,21 +19,19 @@ func GetKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 		return encKeys, nil
 	}
 
-	if err := tx.QueryRow(ctx, `
+	err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT ARRAY(
 			SELECT k.key_enc
-			FROM instance.record_key AS k
+			FROM instance_e2e."%s" AS k
 			JOIN UNNEST($1::int[])
-				WITH ORDINALITY t(record_id_wofk,sort)
-				USING (record_id_wofk)
+				WITH ORDINALITY t(record_id,sort)
+				USING (record_id)
 			WHERE k.login_id = $2
-			AND k.relation_id = $3
 			ORDER BY t.sort
 		)
-	`, recordIds, loginId, relationId).Scan(&encKeys); err != nil {
-		return encKeys, err
-	}
-	return encKeys, nil
+	`, schema.GetEncKeyTableName(relationId)), recordIds, loginId).Scan(&encKeys)
+
+	return encKeys, err
 }
 
 func DeleteKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
@@ -41,12 +41,11 @@ func DeleteKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 		return nil
 	}
 
-	_, err := tx.Exec(ctx, `
-		DELETE FROM instance.record_key
-		WHERE relation_id = $1
-		AND record_id_wofk = $2
-		AND login_id ANY($3)
-	`, relationId, recordId, loginIds)
+	_, err := tx.Exec(ctx, fmt.Sprintf(`
+		DELETE FROM instance_e2e."%s"
+		WHERE record_id = $1
+		AND login_id ANY($2)
+	`, schema.GetEncKeyTableName(relationId)), recordId, loginIds)
 
 	return err
 }
@@ -58,15 +57,15 @@ func StoreKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 		return nil
 	}
 
-	if _, err := tx.Prepare(ctx, "store_keys", `
-		INSERT INTO instance.record_key (relation_id, record_id_wofk, login_id, key_enc)
-		VALUES ($1,$2,$3,$4)
-	`); err != nil {
+	if _, err := tx.Prepare(ctx, "store_keys", fmt.Sprintf(`
+		INSERT INTO instance_e2e."%s" (record_id, login_id, key_enc)
+		VALUES ($1,$2,$3)
+	`, schema.GetEncKeyTableName(relationId))); err != nil {
 		return err
 	}
 
 	for _, k := range keys {
-		if _, err := tx.Exec(ctx, "store_keys", relationId, recordId, k.LoginId, k.KeyEnc); err != nil {
+		if _, err := tx.Exec(ctx, "store_keys", recordId, k.LoginId, k.KeyEnc); err != nil {
 			return err
 		}
 	}

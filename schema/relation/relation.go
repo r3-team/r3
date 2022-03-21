@@ -21,6 +21,13 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 		return err
 	}
 
+	// delete encryption table
+	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		DROP TABLE IF EXISTS instance_e2e."%s"
+	`, schema.GetEncKeyTableName(id))); err != nil {
+		return err
+	}
+
 	// delete relation
 	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		DROP TABLE "%s"."%s"
@@ -116,9 +123,9 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 		// update relation reference
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.relation
-			SET name = $1, encryption = $2, retention_count = $3, retention_days = $4
-			WHERE id = $5
-		`, name, encryption, retentionCount, retentionDays, id); err != nil {
+			SET name = $1, retention_count = $2, retention_days = $3
+			WHERE id = $4
+		`, name, retentionCount, retentionDays, id); err != nil {
 			return err
 		}
 
@@ -136,9 +143,9 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 			}
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`CREATE TABLE "%s"."%s" ()`,
-			moduleName, name)); err != nil {
-
+		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			CREATE TABLE "%s"."%s" ()
+		`, moduleName, name)); err != nil {
 			return err
 		}
 
@@ -151,7 +158,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 			return err
 		}
 
-		// create primary key attribute if relation is new
+		// create primary key attribute if relation is new (e. g. not imported or updated)
 		if isNew {
 			if err := attribute.Set_tx(tx, id, uuid.Nil,
 				pgtype.UUID{Status: pgtype.Null},
@@ -159,6 +166,32 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 				schema.PkName, "integer", 0, false, false, "", "", "",
 				types.CaptionMap{}); err != nil {
 
+				return err
+			}
+		}
+
+		// create table for encrypted record keys
+		if encryption {
+			tName := schema.GetEncKeyTableName(id)
+
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				CREATE TABLE IF NOT EXISTS instance_e2e."%s" (
+				    record_id bigint NOT NULL,
+				    login_id integer NOT NULL,
+				    key_enc text COLLATE pg_catalog."default" NOT NULL,
+				    CONSTRAINT "%s_pkey" PRIMARY KEY (record_id,login_id),
+				    CONSTRAINT "%s_record_id_fkey" FOREIGN KEY (record_id)
+				        REFERENCES "%s"."%s" (%s) MATCH SIMPLE
+				        ON UPDATE CASCADE
+				        ON DELETE CASCADE
+				        DEFERRABLE INITIALLY DEFERRED,
+				    CONSTRAINT "%s_login_id_fkey" FOREIGN KEY (login_id)
+				        REFERENCES instance.login (id) MATCH SIMPLE
+				        ON UPDATE CASCADE
+				        ON DELETE CASCADE
+				        DEFERRABLE INITIALLY DEFERRED
+				);
+			`, tName, tName, tName, moduleName, name, schema.PkName, tName)); err != nil {
 				return err
 			}
 		}

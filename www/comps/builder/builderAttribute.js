@@ -100,7 +100,7 @@ let MyBuilderAttribute = {
 		<td v-if="relation.encryption">
 			<my-bool
 				v-model="encrypted"
-				:readonly="foreign || !isNew"
+				:readonly="foreign || !isNew || !canEncrypt"
 			/>
 		</td>
 		<td>
@@ -207,6 +207,7 @@ let MyBuilderAttribute = {
 		},
 		
 		// simple states
+		canEncrypt:    function() { return this.content === 'text'; },
 		hasLength:     function() { return ['varchar','text','files'].includes(this.content); },
 		isId:          function() { return !this.isNew && this.attribute.name === 'id'; },
 		isNew:         function() { return this.attribute.id === null; },
@@ -265,6 +266,9 @@ let MyBuilderAttribute = {
 			);
 		},
 		set:function() {
+			if(this.encrypted && !this.canEncrypt)
+				this.encrypted = false;
+			
 			ws.sendMultiple([
 				ws.prepare('attribute','set',{
 					id:this.attribute.id,
