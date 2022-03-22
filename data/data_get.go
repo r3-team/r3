@@ -129,7 +129,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 				case int64:
 					recordIds = append(recordIds, v)
 				default:
-					return results, 0, handler.CreateErrCode("SEC", 5)
+					return results, 0, handler.CreateErrCode("SEC", handler.ErrCodeSecDataKeysNotAvailable)
 				}
 			}
 		}
@@ -140,7 +140,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 		}
 
 		if len(encKeys) != len(recordIds) {
-			return results, 0, handler.CreateErrCode("SEC", 5)
+			return results, 0, handler.CreateErrCode("SEC", handler.ErrCodeSecDataKeysNotAvailable)
 		}
 
 		// assign record keys in order

@@ -44,7 +44,7 @@ func DeleteKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	_, err := tx.Exec(ctx, fmt.Sprintf(`
 		DELETE FROM instance_e2e."%s"
 		WHERE record_id = $1
-		AND login_id ANY($2)
+		AND login_id = ANY($2)
 	`, schema.GetEncKeyTableName(relationId)), recordId, loginIds)
 
 	return err

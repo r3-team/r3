@@ -145,6 +145,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		}
 	case "loginKeys":
 		switch action {
+		case "getPublic":
+			return LoginKeysGetPublic(ctx, reqJson)
 		case "reset":
 			return LoginKeysReset_tx(tx, loginId)
 		case "store":

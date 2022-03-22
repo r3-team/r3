@@ -9,6 +9,7 @@ import {
 	aesGcmDecryptBase64WithPhrase,
 	aesGcmEncryptBase64WithPhrase,
 	getRandomString,
+	pemImport,
 	rsaDecrypt,
 	rsaEncrypt
 } from './shared/crypto.js';
@@ -278,36 +279,37 @@ let MyForm = {
 	data:function() {
 		return {
 			// states
-			badLoad:false,       // attempted record load with no return (can happen if access is lost during save)
-			badSave:false,       // attempted save (data SET) with invalid fields, also updates data fields
-			lastFormId:'',       // when routing occurs: if ID is the same, no need to rebuild form
-			loading:false,       // form is currently loading, informs sub components when form is ready
-			messageCode:null,    // form message
-			messageTimeout:null, // form message expiration timeout
-			showHelp:false,      // show form context help
-			showLog:false,       // show data change log
-			updatingRecord:false,// form is currently attempting to update the current record (saving/deleting)
+			badLoad:false,        // attempted record load with no return (can happen if access is lost during save)
+			badSave:false,        // attempted save (data SET) with invalid fields, also updates data fields
+			lastFormId:'',        // when routing occurs: if ID is the same, no need to rebuild form
+			loading:false,        // form is currently loading, informs sub components when form is ready
+			messageCode:null,     // form message
+			messageTimeout:null,  // form message expiration timeout
+			showHelp:false,       // show form context help
+			showLog:false,        // show data change log
+			updatingRecord:false, // form is currently attempting to update the current record (saving/deleting)
 			
 			// pop-up form
 			popUpAttributeIdMapDef:{}, // default attribute values for pop-up form
-			popUpFieldId:null,   // field ID that opened pop-up form
-			popUpFormId:null,    // form ID to open in pop-up form
-			popUpRecordId:0,     // record ID to open in pop-up form
-			popUpStyles:'',      // CSS styles for pop-up form
+			popUpFieldId:null,    // field ID that opened pop-up form
+			popUpFormId:null,     // form ID to open in pop-up form
+			popUpRecordId:0,      // record ID to open in pop-up form
+			popUpStyles:'',       // CSS styles for pop-up form
 			
 			// form data
-			fields:[],           // all fields (nested within each other)
-			fieldIdsInvalid:[],  // IDs of fields with invalid values
-			recordIdIndexMap:{}, // record IDs for form, key: index
-			recordKeyIndexMap:{},// record en-/decryption keys, key: index
-			values:{},           // field values, key: index attribute ID
-			valuesDef:{},        // field value defaults (via field options)
-			valuesOrg:{},        // original field values, used to check for changes
+			fields:[],            // all fields (nested within each other)
+			fieldIdsInvalid:[],   // field IDs with invalid values
+			loginIdsEncryptFor:[],// login IDs for which data keys are encrypted for (e2ee), can be set by frontend functions
+			recordIdIndexMap:{},  // record IDs for form, key: index
+			recordKeyIndexMap:{}, // record en-/decryption keys, key: index
+			values:{},            // field values, key: index attribute ID
+			valuesDef:{},         // field value defaults (via field options)
+			valuesOrg:{},         // original field values, used to check for changes
 			
 			// query data
-			relationId:null,     // source relation ID
-			joins:[],            // joined relations, incl. source relation at index 0
-			filters:[]           // form filters
+			relationId:null,      // source relation ID
+			joins:[],             // joined relations, incl. source relation at index 0
+			filters:[]            // form filters
 		};
 	},
 	computed:{
@@ -456,6 +458,9 @@ let MyForm = {
 				record_new:   this.openNewAsk,
 				record_reload:this.get,
 				record_save:  this.set,
+				
+				// e2e encryption
+				set_e2ee_access_by_login_ids:ids => this.loginIdsEncryptFor = ids,
 				
 				// field manipulation
 				get_field_value:(fieldId) => {
@@ -658,6 +663,7 @@ let MyForm = {
 		isAttributeRelationshipN1,
 		isAttributeValueEqual,
 		openLink,
+		pemImport,
 		rsaDecrypt,
 		rsaEncrypt,
 		srcBase64,
@@ -790,8 +796,9 @@ let MyForm = {
 		resetRecord:function() {
 			this.badSave = false;
 			this.badLoad = false;
-			this.recordIdIndexMap  = {};
-			this.recordKeyIndexMap = {};
+			this.loginIdsEncryptFor = [];
+			this.recordIdIndexMap   = {};
+			this.recordKeyIndexMap  = {};
 			this.valuesSetAllDefault();
 			this.popUpFormId = null;
 			this.get();
@@ -1377,25 +1384,41 @@ let MyForm = {
 				// handle encryption key for record
 				if(this.relationIdMap[j.relationId].encryption) {
 					
-					// create (if new) or get known encryption key
+					// create (if new) or get known data key
 					if(isNew)
 						this.recordKeyIndexMap[index] = this.getRandomString(this.keyLength);
 					
-					const keyStr = this.recordKeyIndexMap[index];
-					if(typeof keyStr === 'undefined')
+					const dataKeyStr = this.recordKeyIndexMap[index];
+					if(typeof dataKeyStr === 'undefined')
 						throw new Error('Encryption key for existing record is not available');
 					
-					// TEMP
-					// resolve new access
-					// only store keys if they did not exist yet
+					// if list of logins for encryption of data keys is empty, add current login
+					if(this.loginIdsEncryptFor.length === 0)
+						this.loginIdsEncryptFor.push(this.loginId);
 					
-					if(isNew) {
-						const keyEnc = await this.rsaEncrypt(this.loginPublicKey,keyStr)
+					// get public keys for all logins to encrypt data key for
+					// call returns only public keys for logins that have no encrypted data key yet
+					// logins that are not listed but have data keys are returned as 'extra IDs'
+					const res = await ws.send('loginKeys','getPublic',{
+						relationId:j.relationId,
+						recordId:j.recordId,
+						loginIds:this.loginIdsEncryptFor
+					},true).catch(err => { throw new Error(err); });
+					
+					encLoginIdsDel = res.payload.loginIdsExtra;
+					const loginKeys = res.payload.keys;
+					
+					for(let i = 0, j = loginKeys.length; i < j; i++) {
+						
+						const publicKey = await this.pemImport(loginKeys[i].publicKey,'RSA',true)
+							.catch(err => { throw new Error(err); });
+						
+						const dataKeyEnc = await this.rsaEncrypt(publicKey,dataKeyStr)
 							.catch(err => { throw new Error(err); });
 						
 						encLoginKeys.push({
-							loginId:this.loginId,
-							keyEnc:keyEnc
+							loginId:loginKeys[i].loginId,
+							keyEnc:dataKeyEnc
 						});
 					}
 				}

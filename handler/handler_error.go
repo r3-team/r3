@@ -43,6 +43,8 @@ const (
 	ErrCodeDbsIndexFailUnique       int = 6
 	ErrCodeDbsInvalidTypeSyntax     int = 7
 	ErrCodeSecUnauthorized          int = 1
+	ErrCodeSecDataKeysNotAvailable  int = 5
+	ErrCodeSecNoPublicKeys          int = 6
 )
 
 var (
