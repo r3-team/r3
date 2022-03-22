@@ -959,6 +959,7 @@ let MyField = {
 				this.value = [];
 			
 			this.value.push(recordId);
+			this.value = this.value; // push does not trigger computed setter
 		},
 		relationshipRecordRemoved:function(recordId) {
 			if(!this.isRelationship1N)

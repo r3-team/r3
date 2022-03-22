@@ -28,12 +28,12 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 	query *string) ([]types.DataGetResult, int, error) {
 
 	var err error
-	indexRelationIds := make(map[int]uuid.UUID)    // map of accessed relation IDs, key: relation index
-	indexRelationIdsEnc := make(map[int]uuid.UUID) // map of encryption relation IDs, key: relation index
-	results := make([]types.DataGetResult, 0)      // data GET results
-	queryArgs := make([]interface{}, 0)            // SQL arguments for data query
-	queryCount := ""                               // SQL query to retrieve a total count
-	queryCountArgs := make([]interface{}, 0)       // SQL query arguments for count (potentially less, no expressions besides COUNT)
+	indexRelationIds := make(map[int]uuid.UUID) // map of accessed relation IDs, key: relation index
+	relationIndexesEnc := make([]int, 0)        // indexes of relations from encrypted attributes within expressions
+	results := make([]types.DataGetResult, 0)   // data GET results
+	queryArgs := make([]interface{}, 0)         // SQL arguments for data query
+	queryCount := ""                            // SQL query to retrieve a total count
+	queryCountArgs := make([]interface{}, 0)    // SQL query arguments for count (potentially less, no expressions besides COUNT)
 
 	// prepare SQL query for data GET request
 	*query, queryCount, err = prepareQuery(data, indexRelationIds,
@@ -41,18 +41,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 
 	if err != nil {
 		return results, 0, err
-	}
-
-	// check for relation encryption
-	for index, relId := range indexRelationIds {
-
-		rel, exists := cache.RelationIdMap[relId]
-		if !exists {
-			return results, 0, fmt.Errorf("unknown relation '%s'", relId)
-		}
-		if rel.Encryption {
-			indexRelationIdsEnc[index] = relId
-		}
 	}
 
 	// execute SQL query
@@ -115,8 +103,25 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 	}
 	rows.Close()
 
-	// get encryption keys for returned records
-	for relIndex, relId := range indexRelationIdsEnc {
+	// check for encrypted attributes in expressions
+	for _, expr := range data.Expressions {
+		if expr.AttributeId.Status == pgtype.Null {
+			continue
+		}
+
+		atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
+		if !exists {
+			return results, 0, fmt.Errorf("unknown attribute '%s'", expr.AttributeId)
+		}
+
+		if !atr.Encrypted || tools.IntInSlice(expr.Index, relationIndexesEnc) {
+			continue
+		}
+		relationIndexesEnc = append(relationIndexesEnc, expr.Index)
+	}
+
+	// get data keys for encrypted relation records
+	for _, relIndex := range relationIndexesEnc {
 		recordIds := make([]int64, 0)
 
 		// collect all non-null record IDs for given relation index
@@ -129,18 +134,22 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 				case int64:
 					recordIds = append(recordIds, v)
 				default:
-					return results, 0, handler.CreateErrCode("SEC", handler.ErrCodeSecDataKeysNotAvailable)
+					return results, 0, handler.CreateErrCode("SEC",
+						handler.ErrCodeSecDataKeysNotAvailable)
 				}
 			}
 		}
 
-		encKeys, err := data_enc.GetKeys_tx(ctx, tx, relId, recordIds, loginId)
+		encKeys, err := data_enc.GetKeys_tx(ctx, tx,
+			indexRelationIds[relIndex], recordIds, loginId)
+
 		if err != nil {
 			return results, 0, err
 		}
 
 		if len(encKeys) != len(recordIds) {
-			return results, 0, handler.CreateErrCode("SEC", handler.ErrCodeSecDataKeysNotAvailable)
+			return results, 0, handler.CreateErrCode("SEC",
+				handler.ErrCodeSecDataKeysNotAvailable)
 		}
 
 		// assign record keys in order

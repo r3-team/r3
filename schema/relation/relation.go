@@ -191,7 +191,14 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 				        ON DELETE CASCADE
 				        DEFERRABLE INITIALLY DEFERRED
 				);
-			`, tName, tName, tName, moduleName, name, schema.PkName, tName)); err != nil {
+				CREATE INDEX "fki_%s_record_id_fkey"
+					ON instance_e2e."%s" USING btree (record_id ASC NULLS LAST);
+				
+				CREATE INDEX "fki_%s_login_id_fkey"
+					ON instance_e2e."%s" USING btree (login_id ASC NULLS LAST);
+			`, tName, tName, tName, moduleName, name, schema.PkName,
+				tName, tName, tName, tName, tName)); err != nil {
+
 				return err
 			}
 		}
