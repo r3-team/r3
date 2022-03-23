@@ -460,7 +460,7 @@ let MyForm = {
 				record_save:  this.set,
 				
 				// e2e encryption
-				set_e2ee_access_by_login_ids:ids => this.loginIdsEncryptFor = ids,
+				set_e2ee_by_login_ids:ids => this.loginIdsEncryptFor = ids,
 				
 				// field manipulation
 				get_field_value:(fieldId) => {
@@ -1384,42 +1384,45 @@ let MyForm = {
 				// handle encryption key for record
 				if(this.relationIdMap[j.relationId].encryption) {
 					
-					// create (if new) or get known data key
+					// create if new or get known data key
 					if(isNew)
 						this.recordKeyIndexMap[index] = this.getRandomString(this.keyLength);
 					
 					const dataKeyStr = this.recordKeyIndexMap[index];
 					if(typeof dataKeyStr === 'undefined')
-						throw new Error('Encryption key for existing record is not available');
+						throw new Error('encryption key for existing record is not available');
 					
-					// if list of logins for encryption of data keys is empty, add current login
-					if(this.loginIdsEncryptFor.length === 0)
+					// new records need at least one encryption recipient
+					if(isNew && this.loginIdsEncryptFor.length === 0)
 						this.loginIdsEncryptFor.push(this.loginId);
 					
-					// get public keys for all logins to encrypt data key for
-					// call returns only public keys for logins that have no encrypted data key yet
-					// logins that are not listed but have data keys are returned as 'extra IDs'
-					const res = await ws.send('loginKeys','getPublic',{
-						relationId:j.relationId,
-						recordId:j.recordId,
-						loginIds:this.loginIdsEncryptFor
-					},true).catch(err => { throw new Error(err); });
-					
-					encLoginIdsDel = res.payload.loginIdsExtra;
-					const loginKeys = res.payload.keys;
-					
-					for(let i = 0, j = loginKeys.length; i < j; i++) {
+					// if no encryption recipients are set, keys are not updated
+					if(this.loginIdsEncryptFor.length !== 0) {
+						// get public keys for all logins to encrypt data key for
+						// call returns only public keys for logins that have no encrypted data key yet
+						// logins that are not listed but have data keys are returned as 'extra IDs'
+						const res = await ws.send('loginKeys','getPublic',{
+							relationId:j.relationId,
+							recordId:j.recordId,
+							loginIds:this.loginIdsEncryptFor
+						},true).catch(err => { throw new Error(err); });
 						
-						const publicKey = await this.pemImport(loginKeys[i].publicKey,'RSA',true)
-							.catch(err => { throw new Error(err); });
+						encLoginIdsDel = res.payload.loginIdsExtra;
+						const loginKeys = res.payload.keys;
 						
-						const dataKeyEnc = await this.rsaEncrypt(publicKey,dataKeyStr)
-							.catch(err => { throw new Error(err); });
-						
-						encLoginKeys.push({
-							loginId:loginKeys[i].loginId,
-							keyEnc:dataKeyEnc
-						});
+						for(let i = 0, j = loginKeys.length; i < j; i++) {
+							
+							const publicKey = await this.pemImport(loginKeys[i].publicKey,'RSA',true)
+								.catch(err => { throw new Error(err); });
+							
+							const dataKeyEnc = await this.rsaEncrypt(publicKey,dataKeyStr)
+								.catch(err => { throw new Error(err); });
+							
+							encLoginKeys.push({
+								loginId:loginKeys[i].loginId,
+								keyEnc:dataKeyEnc
+							});
+						}
 					}
 				}
 				

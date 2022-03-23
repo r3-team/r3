@@ -648,7 +648,8 @@
 				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Löscht den aktuellen Formulardatensatz.",
 				"record_new":"app.record_new() => UNDEFINED<br /><br />Öffnet einen neuen Datensatz.",
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Lädt den aktuellen Formulardatensatz neu.",
-				"record_save":"app.record_save() => UNDEFINED<br /><br />Speichert den aktuellen Formulardatensatz."
+				"record_save":"app.record_save() => UNDEFINED<br /><br />Speichert den aktuellen Formulardatensatz.",
+				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />Wenn aufgerufen, wird die Ende-Zu-Ende-Verschlüsselung beim nächsten Speichern des Formulares aktualisiert. Datenschlüssel für Relationen auf dem Formular mit aktivierter Verschlüsselung werden mit den öffentlichen Schlüssel von jeder definierten Anmeldung verschlüsselt. Hiermit können Benutzer Datensätze später entschlüsseln.<br /><br />Schlüssel von nicht-definierten Anmeldungen werden gelöscht, womit betroffene Datensätze nicht mehr entschlüsselt werden können.<br /><br />Wenn diese Funktion nicht aufgerufen wird, werden Schlüssel nicht verändert und der Status-Quo beibehalten."
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Bricht die Operation ab und sendet dem ausführenden Benutzer eine Nachricht, welche in der Benutzeroberfläche angezeigt wird.",
