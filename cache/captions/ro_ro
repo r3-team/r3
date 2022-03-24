@@ -1078,6 +1078,7 @@
 		"dialog":{
 			"close":"Există modificări nesalvate.<br /><br />Doriți în continuare să închideți acest formular?",
 			"delete":"Sunteți sigur că doriți să ștergeți <b>permanent</b> această înregistrare?",
+			"encrypted":"This field value will be encrypted on your system before it is being sent to the server.<br /><br />Only you, or people that you give access to, can decrypt this value later.",
 			"new":"Există modificări nesalvate.<br /><br />Doriți în continuare să deschideți o înregistrare nouă?",
 			"newReset":"Aceasta vă va reseta toate introducerile.<br /><br />Doriți să continuați?",
 			"prev":"Există modificări nesalvate.<br /><br />Totuși, doriți să reveniți?",
@@ -1088,6 +1089,8 @@
 			"recordCreatedMobile":"Creat!",
 			"recordDeleted":"înregistrarea a fost ștearsă",
 			"recordDeletedMobile":"Șters!",
+			"recordEncrypting":"Record is being encrypted...",
+			"recordEncryptingMobile":"Encrypting...",
 			"recordUpdated":"înregistrarea a fost actualizată",
 			"recordUpdatedMobile":"Actualizat"
 		},

@@ -105,7 +105,12 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 
 	// check for encrypted attributes in expressions
 	for _, expr := range data.Expressions {
-		if expr.AttributeId.Status == pgtype.Null {
+
+		// ignore non-attribute and sub query expressions
+		if expr.AttributeId.Status != pgtype.Present {
+			continue
+		}
+		if expr.Query.RelationId != uuid.Nil {
 			continue
 		}
 

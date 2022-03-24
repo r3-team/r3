@@ -13,7 +13,8 @@ import {
 } from './shared/crypto.js';
 import {
 	consoleError,
-	genericError
+	genericError,
+	genericErrorWithFallback
 } from './shared/error.js';
 export {MyApp as default};
 
@@ -244,6 +245,7 @@ let MyApp = {
 		aesGcmImportBase64,
 		consoleError,
 		genericError,
+		genericErrorWithFallback,
 		getCaptionForModule,
 		getStartFormId,
 		openLink,
@@ -485,7 +487,7 @@ let MyApp = {
 		loginReauthAll:function(blocking) {
 			ws.send('login','reauthAll',{},blocking).then(
 				res => {},
-				err => this.genericError(err)
+				this.genericError
 			);
 		},
 		schemaReload:function(moduleId) {
@@ -496,13 +498,13 @@ let MyApp = {
 			
 			ws.send('schema','reload',payload,true).then(
 				res => {},
-				err => this.genericError(err)
+				this.genericError
 			);
 		},
 		schedulerReload:function(blocking) {
 			ws.send('scheduler','reload',{},blocking).then(
 				res => {},
-				err => this.genericError(err)
+				this.genericError
 			);
 		}
 	}

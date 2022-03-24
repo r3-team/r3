@@ -1078,6 +1078,7 @@
 		"dialog":{
 			"close":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem das Formular schließen?",
 			"delete":"Bist du sicher, dass du diesen Datensatz <b>permanent</b> löschen möchtest?",
+			"encrypted":"Dieser Feldwert wird auf deinem System verschlüsselt bevor er zum Server geschickt wird.<br /><br />Nur du, oder Personen denen du Zugriff gibst, können den Wert später entschlüsseln.",
 			"new":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem einen neuen Datensatz erstellen?",
 			"newReset":"Dies wird alle Eingaben zurücksetzen.<br /><br />Möchtest du fortfahren?",
 			"prev":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem zurückgehen?",
@@ -1088,6 +1089,8 @@
 			"recordCreatedMobile":"Erstellt!",
 			"recordDeleted":"Datensatz wurde gelöscht",
 			"recordDeletedMobile":"Gelöscht!",
+			"recordEncrypting":"Datensatz wird verschlüsselt...",
+			"recordEncryptingMobile":"Am Verschlüsseln...",
 			"recordUpdated":"Datensatz wurde aktualisiert",
 			"recordUpdatedMobile":"Aktualisiert!"
 		},

@@ -400,6 +400,9 @@ let MyForm = {
 					? this.capApp.message.recordDeletedMobile
 					: this.capApp.message.recordDeleted;
 				break;
+				case 'encrypting': return this.isMobile
+					? this.capApp.message.recordEncryptingMobile
+					: this.capApp.message.recordEncrypting;
 				case 'updated': return this.isMobile
 					? this.capApp.message.recordUpdatedMobile
 					: this.capApp.message.recordUpdated;
@@ -1359,8 +1362,14 @@ let MyForm = {
 				return this.badSave = true;
 			
 			this.triggerEventBefore('save');
+			this.updatingRecord = true;
 			
-			const genericEncErr = this.capErr.SEC['003'];
+			const handleErr = err => {
+				this.updatingRecord = false;
+				this.consoleError(err); // full error for troubleshooting
+				this.$root.genericErrorWithFallback(err.message,'SEC','003');
+			};
+			
 			let relations = {};
 			let addRelationByIndex = async index => {
 				
@@ -1398,6 +1407,8 @@ let MyForm = {
 					
 					// if no encryption recipients are set, keys are not updated
 					if(this.loginIdsEncryptFor.length !== 0) {
+						this.recordMessageUpdate('encrypting');
+						
 						// get public keys for all logins to encrypt data key for
 						// call returns only public keys for logins that have no encrypted data key yet
 						// logins that are not listed but have data keys are returned as 'extra IDs'
@@ -1412,7 +1423,7 @@ let MyForm = {
 						
 						for(let i = 0, j = loginKeys.length; i < j; i++) {
 							
-							const publicKey = await this.pemImport(loginKeys[i].publicKey,'RSA',true)
+							const publicKey = await this.pemImport(loginKeys[i].publicKey2,'RSA',true)
 								.catch(err => { throw new Error(err); });
 							
 							const dataKeyEnc = await this.rsaEncrypt(publicKey,dataKeyStr)
@@ -1455,26 +1466,19 @@ let MyForm = {
 				if(!j.applyCreate && j.recordId === 0) continue;
 				if(!j.applyUpdate && j.recordId !== 0) continue;
 				
-				// add join to request to set attribute values
-				await addRelationByIndex(d.index).catch(err => {
-					this.consoleError(err);
-					this.$root.genericError(genericEncErr);
-					throw new Error(err);
-				});
+				// add join to request to set attribute values and handle encryption keys
+				try        { await addRelationByIndex(d.index); }
+				catch(err) { return handleErr(err); }
 				
 				let value = this.values[k];
 				
 				// handle encryption
 				if(this.attributeIdMap[d.attributeId].encrypted && value !== null) {
-					
-					value = await this.aesGcmEncryptBase64WithPhrase(
-						this.values[k],
-						this.recordKeyIndexMap[d.index]
-					).catch(	err => {
-						this.consoleError(err);
-						this.$root.genericError(genericEncErr);
-						throw new Error(err);
-					});
+					try {
+						value = await this.aesGcmEncryptBase64WithPhrase(
+							this.values[k],this.recordKeyIndexMap[d.index]);
+					}
+					catch(err) { return handleErr(err); }
 				}
 				
 				relations[d.index].attributes.push({
@@ -1515,7 +1519,6 @@ let MyForm = {
 			).finally(
 				() => this.updatingRecord = false
 			);
-			this.updatingRecord = true;
 		}
 	}
 };

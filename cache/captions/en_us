@@ -1078,6 +1078,7 @@
 		"dialog":{
 			"close":"There are unsaved changes.<br /><br />Do you still want to close this form?",
 			"delete":"Are you sure that you want to <b>permanently</b> delete this record?",
+			"encrypted":"This field value will be encrypted on your system before it is being sent to the server.<br /><br />Only you, or people that you give access to, can decrypt this value later.",
 			"new":"There are unsaved changes.<br /><br />Do you still want to open a new record?",
 			"newReset":"This will reset all your inputs.<br /><br />Do you want to continue?",
 			"prev":"There are unsaved changes.<br /><br />Do you still want to go back?",
@@ -1088,6 +1089,8 @@
 			"recordCreatedMobile":"Created!",
 			"recordDeleted":"Record has been deleted",
 			"recordDeletedMobile":"Deleted!",
+			"recordEncrypting":"Record is being encrypted...",
+			"recordEncryptingMobile":"Encrypting...",
 			"recordUpdated":"Record has been updated",
 			"recordUpdatedMobile":"Updated!"
 		},

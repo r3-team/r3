@@ -348,7 +348,7 @@ type Column struct {
 	Distincted  bool           `json:"distincted"` // attribute values are distinct
 	SubQuery    bool           `json:"subQuery"`   // column uses sub query
 	OnMobile    bool           `json:"onMobile"`   // display this column on mobile?
-	Query       Query          `json:"query"`
+	Query       Query          `json:"query"`      // sub query
 	Captions    CaptionMap     `json:"captions"`
 }
 type Role struct {

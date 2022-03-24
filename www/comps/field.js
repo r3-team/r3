@@ -255,6 +255,13 @@ let MyField = {
 							/>
 						</template>
 					</my-list>
+					
+					<!-- encryption indicator -->
+					<my-button image="lock.png"
+						v-if="isEncrypted"
+						@trigger="clickEncryption"
+						:naked="true"
+					/>
 				</div>
 			</div>
 			
@@ -864,6 +871,7 @@ let MyField = {
 		
 		// composite
 		isActive:   function() { return !this.isMobile || this.field.onMobile; },
+		isEncrypted:function() { return this.isData && this.attribute.encrypted; },
 		isNew:      function() { return this.isData && this.joinsIndexMap[this.field.index].recordId === 0; },
 		isBoolean:  function() { return this.isData && this.isAttributeBoolean(this.attribute.content); },
 		isCategory: function() { return this.isData && this.isRelationship && this.field.category; },
@@ -919,6 +927,18 @@ let MyField = {
 		click:function() {
 			if(this.field.display === 'color' && !this.isReadonly)
 				this.showColorPickerInput = !this.showColorPickerInput;
+		},
+		clickEncryption:function() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.encrypted,
+				image:'lock.png',
+				buttons:[{
+					caption:this.capGen.button.close,
+					keyEnter:true,
+					keyEscape:true,
+					image:'ok.png'
+				}]
+			});
 		},
 		clickOutside:function() {
 			if(this.showColorPickerInput)
