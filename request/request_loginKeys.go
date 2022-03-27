@@ -12,15 +12,15 @@ import (
 func LoginKeysGetPublic(ctx context.Context, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
-		RelationId uuid.UUID `json:"relationId"`
-		RecordId   int64     `json:"recordId"`
 		LoginIds   []int64   `json:"loginIds"`
+		RelationId uuid.UUID `json:"relationId"`
+		RecordIds  []int64   `json:"recordIds"`
 	}
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return login_keys.GetPublic(ctx, req.RelationId, req.RecordId, req.LoginIds)
+	return login_keys.GetPublic(ctx, req.RelationId, req.RecordIds, req.LoginIds)
 }
 
 func LoginKeysReset_tx(tx pgx.Tx, loginId int64) (interface{}, error) {

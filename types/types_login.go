@@ -17,11 +17,8 @@ type LoginRecord struct {
 	Id   int64  `json:"id"`   // ID of relation record
 	Name string `json:"name"` // name for relation record (based on lookup attribute)
 }
-type LoginPublicKeyRetrievalKey struct {
-	LoginId   int64  `json:"loginId"`   // ID of login
-	PublicKey string `json:"publicKey"` // public key of login (not encrypted)
-}
-type LoginPublicKeyRetrieval struct {
-	Keys          []LoginPublicKeyRetrievalKey `json:"keys"`
-	LoginIdsExtra []int64                      `json:"loginIdsExtra"` // login IDs that have access but were not requested
+type LoginPublicKey struct {
+	LoginId   int64   `json:"loginId"`   // ID of login
+	PublicKey string  `json:"publicKey"` // public key of login (not encrypted)
+	RecordIds []int64 `json:"recordIds"` // IDs of record not yet encrypted with public key
 }

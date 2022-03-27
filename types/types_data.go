@@ -98,13 +98,12 @@ type DataSetAttribute struct {
 	Value         interface{} `json:"value"`
 }
 type DataSet struct {
-	RelationId         uuid.UUID          `json:"relationId"`         // relation ID to update
-	AttributeId        uuid.UUID          `json:"attributeId"`        // attribute ID of relationship to join with
-	IndexFrom          int                `json:"indexFrom"`          // from relation index
-	RecordId           int64              `json:"recordId"`           // record ID to update (0 if new)
-	Attributes         []DataSetAttribute `json:"attributes"`         // attribute values to set
-	EncKeysSet         []DataSetEncKeys   `json:"encKeysSet"`         // data encryption keys to store, encrypted with login´s public key
-	EncKeysDelLoginIds []int64            `json:"encKeysDelLoginIds"` // login IDs for which to delete data encrypted keys
+	RelationId  uuid.UUID          `json:"relationId"`  // relation ID to update
+	AttributeId uuid.UUID          `json:"attributeId"` // attribute ID of relationship to join with
+	IndexFrom   int                `json:"indexFrom"`   // from relation index
+	RecordId    int64              `json:"recordId"`    // record ID to update (0 if new)
+	Attributes  []DataSetAttribute `json:"attributes"`  // attribute values to set
+	EncKeysSet  []DataSetEncKeys   `json:"encKeysSet"`  // data encryption keys to store, encrypted with login´s public key
 }
 type DataSetEncKeys struct {
 	LoginId int64  `json:"loginId"`

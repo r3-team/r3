@@ -10,22 +10,6 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
-func DeleteKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
-	recordId int64, loginIds []int64) error {
-
-	if len(loginIds) == 0 {
-		return nil
-	}
-
-	_, err := tx.Exec(ctx, fmt.Sprintf(`
-		DELETE FROM instance_e2e."%s"
-		WHERE record_id = $1
-		AND login_id = ANY($2)
-	`, schema.GetEncKeyTableName(relationId)), recordId, loginIds)
-
-	return err
-}
-
 func GetKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	recordIds []int64, loginId int64) ([]string, error) {
 
@@ -50,7 +34,7 @@ func GetKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	return encKeys, err
 }
 
-func StoreKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
+func SetKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	recordId int64, keys []types.DataSetEncKeys) error {
 
 	if len(keys) == 0 {

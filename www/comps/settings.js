@@ -218,7 +218,7 @@ let MySettingsEncryption = {
 					);
 				},
 				// none of these processes should fail
-				err => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		resetAsk:function() {
@@ -268,7 +268,7 @@ let MySettingsEncryption = {
 						err => this.unlockError()
 					);
 				},
-				err => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		
@@ -295,7 +295,7 @@ let MySettingsEncryption = {
 						}
 					);
 				},
-				err => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		reset:function() {
@@ -330,7 +330,7 @@ let MySettingsEncryption = {
 						}
 					);
 				},
-				err => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}
@@ -440,10 +440,10 @@ let MySettingsAccount = {
 								newPrivateKeyEnc => this.set(newPrivateKeyEnc,newLoginKey)
 							);
 						},
-						err => this.$root.genericError(err)
+						this.$root.genericError
 					);
 				},
-				err => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		
@@ -493,7 +493,7 @@ let MySettingsAccount = {
 						}
 					}
 				},
-				err => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

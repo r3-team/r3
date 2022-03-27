@@ -272,7 +272,7 @@ let MyBuilderJsFunction = {
 				'copy_to_clipboard','get_language_code','get_login_id',
 				'get_record_id','get_role_ids','go_back','has_role','open_form',
 				'record_delete','record_new','record_reload','record_save',
-				'set_e2ee_by_login_ids'
+				'set_e2ee_by_login_ids','set_e2ee_by_login_ids_and_relation'
 			],
 			
 			// states

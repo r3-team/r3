@@ -111,13 +111,8 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 
 		// set encrypted record keys
 		if rel.Encryption {
-			if err := data_enc.StoreKeys_tx(ctx, tx, rel.Id,
+			if err := data_enc.SetKeys_tx(ctx, tx, rel.Id,
 				indexRecordIds[index], dataSet.EncKeysSet); err != nil {
-
-				return indexRecordIds, err
-			}
-			if err := data_enc.DeleteKeys_tx(ctx, tx, rel.Id,
-				indexRecordIds[index], dataSet.EncKeysDelLoginIds); err != nil {
 
 				return indexRecordIds, err
 			}

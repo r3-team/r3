@@ -299,7 +299,9 @@ let MyForm = {
 			// form data
 			fields:[],            // all fields (nested within each other)
 			fieldIdsInvalid:[],   // field IDs with invalid values
-			loginIdsEncryptFor:[],// login IDs for which data keys are encrypted for (e2ee), can be set by frontend functions
+			loginIdsEncryptFor:[],        // login IDs for which data keys are encrypted (e2ee), for current form relations/records
+			loginIdsEncryptForOutside:{}, // login IDs for which data keys are encrypted (e2ee), for outside relation and record IDs
+			                              // [{loginIds:[5,12],relationId:'A-B-C-D',recordIds:[1,2]},{...}]
 			recordIdIndexMap:{},  // record IDs for form, key: index
 			recordKeyIndexMap:{}, // record en-/decryption keys, key: index
 			values:{},            // field values, key: index attribute ID
@@ -464,6 +466,13 @@ let MyForm = {
 				
 				// e2e encryption
 				set_e2ee_by_login_ids:ids => this.loginIdsEncryptFor = ids,
+				set_e2ee_by_login_ids_and_relation:(loginIds,relationId,recordIds) => {
+					this.loginIdsEncryptForOutside.push({
+						loginIds:loginIds,
+						relationId:relationId,
+						recordIds:recordIds
+					});
+				},
 				
 				// field manipulation
 				get_field_value:(fieldId) => {
@@ -799,9 +808,10 @@ let MyForm = {
 		resetRecord:function() {
 			this.badSave = false;
 			this.badLoad = false;
-			this.loginIdsEncryptFor = [];
-			this.recordIdIndexMap   = {};
-			this.recordKeyIndexMap  = {};
+			this.loginIdsEncryptFor        = [];
+			this.loginIdsEncryptForOutside = [];
+			this.recordIdIndexMap          = {};
+			this.recordKeyIndexMap         = {};
 			this.valuesSetAllDefault();
 			this.popUpFormId = null;
 			this.get();
@@ -1364,7 +1374,7 @@ let MyForm = {
 			this.triggerEventBefore('save');
 			this.updatingRecord = true;
 			
-			const handleErr = err => {
+			const handleEncErr = err => {
 				this.updatingRecord = false;
 				this.consoleError(err); // full error for troubleshooting
 				this.$root.genericErrorWithFallback(err.message,'SEC','003');
@@ -1378,8 +1388,7 @@ let MyForm = {
 				
 				const j     = this.joinsIndexMap[index];
 				const isNew = j.recordId === 0;
-				let encLoginKeys   = [];
-				let encLoginIdsDel = [];
+				let encLoginKeys = [];
 				
 				// ignore relation if record is new and creation is disallowed
 				if(!j.applyCreate && isNew)
@@ -1387,8 +1396,7 @@ let MyForm = {
 				
 				// recursively add relation parent, if one exists
 				if(j.indexFrom !== -1)
-					await addRelationByIndex(j.indexFrom)
-						.catch(err => { throw new Error(err); });
+					await addRelationByIndex(j.indexFrom);
 				
 				// handle encryption key for record
 				if(this.relationIdMap[j.relationId].encryption) {
@@ -1405,29 +1413,22 @@ let MyForm = {
 					if(isNew && this.loginIdsEncryptFor.length === 0)
 						this.loginIdsEncryptFor.push(this.loginId);
 					
-					// if no encryption recipients are set, keys are not updated
 					if(this.loginIdsEncryptFor.length !== 0) {
 						this.recordMessageUpdate('encrypting');
 						
 						// get public keys for all logins to encrypt data key for
-						// call returns only public keys for logins that have no encrypted data key yet
-						// logins that are not listed but have data keys are returned as 'extra IDs'
 						const res = await ws.send('loginKeys','getPublic',{
+							loginIds:this.loginIdsEncryptFor,
 							relationId:j.relationId,
-							recordId:j.recordId,
-							loginIds:this.loginIdsEncryptFor
-						},true).catch(err => { throw new Error(err); });
+							recordIds:[j.recordId]
+						},true);
 						
-						encLoginIdsDel = res.payload.loginIdsExtra;
-						const loginKeys = res.payload.keys;
+						// send encrypted data keys
+						const loginKeys = res.payload;
 						
 						for(let i = 0, j = loginKeys.length; i < j; i++) {
-							
-							const publicKey = await this.pemImport(loginKeys[i].publicKey2,'RSA',true)
-								.catch(err => { throw new Error(err); });
-							
-							const dataKeyEnc = await this.rsaEncrypt(publicKey,dataKeyStr)
-								.catch(err => { throw new Error(err); });
+							const publicKey  = await this.pemImport(loginKeys[i].publicKey,'RSA',true);
+							const dataKeyEnc = await this.rsaEncrypt(publicKey,dataKeyStr);
 							
 							encLoginKeys.push({
 								loginId:loginKeys[i].loginId,
@@ -1443,8 +1444,7 @@ let MyForm = {
 					indexFrom:j.indexFrom,
 					recordId:j.recordId,
 					attributes:[],
-					encKeysSet:encLoginKeys,
-					encKeysDelLoginIds:encLoginIdsDel
+					encKeysSet:encLoginKeys
 				};
 			};
 			
@@ -1468,7 +1468,7 @@ let MyForm = {
 				
 				// add join to request to set attribute values and handle encryption keys
 				try        { await addRelationByIndex(d.index); }
-				catch(err) { return handleErr(err); }
+				catch(err) { return handleEncErr(err); }
 				
 				let value = this.values[k];
 				
@@ -1478,7 +1478,7 @@ let MyForm = {
 						value = await this.aesGcmEncryptBase64WithPhrase(
 							this.values[k],this.recordKeyIndexMap[d.index]);
 					}
-					catch(err) { return handleErr(err); }
+					catch(err) { return handleEncErr(err); }
 				}
 				
 				relations[d.index].attributes.push({
@@ -1489,8 +1489,82 @@ let MyForm = {
 				});
 			}
 			
-			ws.send('data','set',relations,true).then(
+			// prepare websocket requests
+			let requests = [ws.prepare('data','set',relations)];
+			
+			// encrypt for outside relations
+			// run in same transaction as data SET to keep data consistent
+			for(let i = 0, j = this.loginIdsEncryptForOutside.length; i < j; i++) {
+				try {
+					// get data keys for all affected records
+					const loginIds   = this.loginIdsEncryptForOutside[i].loginIds;
+					const relationId = this.loginIdsEncryptForOutside[i].relationId;
+					const recordIds  = this.loginIdsEncryptForOutside[i].recordIds;
+					
+					let [resDataKeys,resLoginKeys] = await Promise.all([
+						ws.send('data','getKeys',{
+							relationId:relationId,
+							recordIds:recordIds
+						},true),
+						ws.send('loginKeys','getPublic',{
+							loginIds:loginIds,
+							relationId:relationId,
+							recordIds:recordIds
+						},true)
+					]);
+					
+					const dataKeys  = resDataKeys.payload;
+					const loginKeys = resLoginKeys.payload;
+					
+					let recordIdMapKeyStr  = {}; // data key, by record ID, unencrypted
+					let recordIdMapKeysEnc = {}; // data keys, by record ID, encrypted with public keys
+					
+					if(dataKeys.length !== recordIds.length)
+						throw new Error(`current login has only access to ${dataKeys.length} of ${recordIds.length} records`);
+					
+					// decrypt data keys
+					for(let x = 0, y = dataKeys.length; x < y; x++) {
+						recordIdMapKeyStr[recordIds[x]] = await this.rsaDecrypt(
+							this.loginPrivateKey,
+							dataKeys[x]
+						);
+					}
+					
+					// encrypt data keys for all requested logins
+					for(const loginKey of loginKeys) {
+						const publicKey = await this.pemImport(loginKey.publicKey,'RSA',true);
+						
+						for(const recordId of loginKey.recordIds) {
+							const dataKeyEnc = await this.rsaEncrypt(
+								publicKey,
+								recordIdMapKeyStr[recordId]
+							);
+							
+							if(typeof recordIdMapKeysEnc[recordId] === 'undefined')
+								recordIdMapKeysEnc[recordId] = [];
+							
+							recordIdMapKeysEnc[recordId].push({
+								loginId:loginKey.loginId,
+								keyEnc:dataKeyEnc
+							});
+						}
+					}
+					
+					for(let recordId in recordIdMapKeysEnc) {
+						requests.push(ws.prepare('data','setKeys',{
+							relationId:relationId,
+							recordId:parseInt(recordId),
+							encKeys:recordIdMapKeysEnc[recordId]
+						}));
+					}
+				}
+				catch(err) { return handleEncErr(err); }
+			}
+			
+			ws.sendMultiple(requests,true).then(
 				res => {
+					const resSet = res[0];
+					
 					this.$store.commit('formHasChanges',false);
 					
 					// set record-saved timestamp
@@ -1498,7 +1572,7 @@ let MyForm = {
 					else           this.recordMessageUpdate('updated');
 					
 					if(this.isInline)
-						this.$emit('record-updated',res.payload.indexRecordIds[0]);
+						this.$emit('record-updated',resSet.payload.indexRecordIds[0]);
 					
 					this.triggerEventAfter('save');
 					
@@ -1508,7 +1582,7 @@ let MyForm = {
 					
 					// load newly created record
 					if(this.isNew)
-						return this.openForm(res.payload.indexRecordIds[0]);
+						return this.openForm(resSet.payload.indexRecordIds[0]);
 					
 					// reload same record
 					// unfortunately necessary as update trigger in backend can change values

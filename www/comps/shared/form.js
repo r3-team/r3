@@ -17,9 +17,11 @@ export async function getRowsDecrypted(rows,expressions) {
 	
 	for(let i = 0, j = expressions.length; i < j; i++) {
 		const e = expressions[i];
-		const a = MyStore.getters['schema/attributeIdMap'][e.attributeId];
 		
-		if(e.attributeId !== null && a.encrypted) {
+		if(typeof e.attributeId === 'undefined' || e.attributeId === null)
+			continue;
+		
+		if(MyStore.getters['schema/attributeIdMap'][e.attributeId].encrypted) {
 			encryptionUsed = true;
 			encExprIndexMapRelIndex[i] = e.index;
 		}

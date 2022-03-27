@@ -126,10 +126,14 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return DataDel_tx(ctx, tx, reqJson, loginId)
 		case "get":
 			return DataGet_tx(ctx, tx, reqJson, loginId)
+		case "getKeys":
+			return DataGetKeys_tx(ctx, tx, reqJson, loginId)
 		case "getLog":
 			return DataLogGet_tx(ctx, tx, reqJson, loginId)
 		case "set":
 			return DataSet_tx(ctx, tx, reqJson, loginId)
+		case "setKeys":
+			return DataSetKeys_tx(ctx, tx, reqJson)
 		}
 	case "feedback":
 		switch action {
