@@ -1,6 +1,8 @@
-import MyField         from './field.js';
-import {getDataFields} from './shared/form.js';
-import {getUnixFormat} from './shared/time.js';
+import MyField                         from './field.js';
+import {aesGcmDecryptBase64WithPhrase} from './shared/crypto.js';
+import {consoleError}                  from './shared/error.js';
+import {getDataFields}                 from './shared/form.js';
+import {getUnixFormat}                 from './shared/time.js';
 import {
 	getDetailsFromIndexAttributeId,
 	getIndexAttributeId,
@@ -71,12 +73,13 @@ let MyFormLog = {
 		</div>
 	</div>`,
 	props:{
-		dataFieldMap:   { type:Object,  required:true },
-		fieldIdMapState:{ type:Object,  required:true },
-		form:           { type:Object,  required:true },
-		formLoading:    { type:Boolean, required:true },
-		joinsIndexMap:  { type:Object,  required:true },
-		values:         { type:Object,  required:true }
+		dataFieldMap:     { type:Object,  required:true },
+		fieldIdMapState:  { type:Object,  required:true },
+		form:             { type:Object,  required:true },
+		formLoading:      { type:Boolean, required:true },
+		joinsIndexMap:    { type:Object,  required:true },
+		recordKeyIndexMap:{ type:Object, required:true },
+		values:           { type:Object,  required:true }
 	},
 	emits:['close-log'],
 	watch:{
@@ -95,15 +98,18 @@ let MyFormLog = {
 		dataFields:function() { return this.getDataFields(this.form.fields); },
 		
 		// stores
-		capApp:  function() { return this.$store.getters.captions.form; },
-		capGen:  function() { return this.$store.getters.captions.generic; },
-		settings:function() { return this.$store.getters.settings; }
+		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
+		capApp:        function() { return this.$store.getters.captions.form; },
+		capGen:        function() { return this.$store.getters.captions.generic; },
+		settings:      function() { return this.$store.getters.settings; }
 	},
 	mounted:function() {
 		this.get();
 	},
 	methods:{
 		// externals
+		aesGcmDecryptBase64WithPhrase,
+		consoleError,
 		getDataFields,
 		getDetailsFromIndexAttributeId,
 		getIndexAttributeId,
@@ -127,10 +133,8 @@ let MyFormLog = {
 		toggleLog:function(i) {
 			let pos = this.logsHidden.indexOf(i);
 			
-			if(pos === -1)
-				this.logsHidden.push(i);
-			else
-				this.logsHidden.splice(pos,1);
+			if(pos === -1) this.logsHidden.push(i);
+			else           this.logsHidden.splice(pos,1);
 		},
 		toggleAll:function() {
 			if(this.logsHidden.length < this.logs.length) {
@@ -158,7 +162,8 @@ let MyFormLog = {
 			if(this.formLoading)
 				return;
 			
-			let relations = [];
+			let attributeIdsEnc = [];
+			let requests        = [];
 			
 			for(let index in this.joinsIndexMap) {
 				let j = this.joinsIndexMap[index];
@@ -172,45 +177,39 @@ let MyFormLog = {
 				for(let k in this.values) {
 					let d = this.getDetailsFromIndexAttributeId(k);
 					
-					if(d.index === parseInt(index))
-						attributeIds.push(d.attributeId);
+					if(d.index !== parseInt(index))
+						continue;
+					
+					let a = this.attributeIdMap[d.attributeId];
+					
+					if(a.encrypted)
+						attributeIdsEnc.push(a.id);
+					
+					attributeIds.push(a.id);
 				}
 				
 				// get logs for this relation if any attributes are available and record is set
 				if(attributeIds.length !== 0 && j.recordId !== 0)
-					relations.push({
+					requests.push(ws.prepare('data','getLog',{
 						recordId:j.recordId,
 						index:parseInt(index),
 						attributeIds:attributeIds
-					});
+					}));
 			}
 			
-			if(relations.length === 0)
+			if(requests.length === 0)
 				return this.reset();
 			
-			let requests = [];
-			for(let i = 0, j = relations.length; i < j; i++) {
-				
-				let r = relations[i];
-				requests.push(ws.prepare('data','getLog',{
-					recordId:r.recordId,
-					attributeIds:r.attributeIds,
-					index:r.index
-				}));
-			}
 			ws.sendMultiple(requests,true).then(
-				(res) => {
+				async (res) => {
 					this.loading = true;
 					this.reset();
 					
 					// store logs grouped by composite key of date+login ID
 					// each log connects to a single relation - a change spanning multiple relations is therefore grouped
-					let that        = this;
 					let logsGrouped = {};
-					let parseLogsForRelation = function(logs,request) {
-						
-						for(let i = 0, j = logs.length; i < j; i++) {
-							let l = logs[i];
+					let parseLogsForRelation = async (logs,request) => {
+						for(const l of logs) {
 							let g = `${l.dateChange}_${l.loginName}`;
 							
 							if(typeof logsGrouped[g] === 'undefined')
@@ -220,21 +219,35 @@ let MyFormLog = {
 									values:{}
 								};
 							
-							for(let x = 0, y = l.attributes.length; x < y; x++) {
-								let atr = l.attributes[x];
+							for(const a of l.attributes) {
+								let value = JSON.parse(a.value);
 								
-								logsGrouped[g].values[that.getIndexAttributeId(
+								if(attributeIdsEnc.includes(a.attributeId)) {
+									const keyStr = this.recordKeyIndexMap[request.index];
+									
+									if(typeof keyStr === 'undefined')
+										throw new Error('no data key for record');
+									
+									value = await this.aesGcmDecryptBase64WithPhrase(value,keyStr);
+								}
+								
+								logsGrouped[g].values[this.getIndexAttributeId(
 									request.index,
-									atr.attributeId,
-									atr.outsideIn,
-									atr.attributeIdNm
-								)] = JSON.parse(atr.value);
+									a.attributeId,
+									a.outsideIn,
+									a.attributeIdNm
+								)] = value;
 							}
 						}
 					};
 					
 					for(let i = 0, j = res.length; i < j; i++) {
-						parseLogsForRelation(res[i].payload,requests[i].payload);
+						try      { await parseLogsForRelation(res[i].payload,requests[i].payload); }
+						catch(e) {
+							this.consoleError(e); // full error for troubleshooting
+							this.$root.genericErrorWithFallback(e.message,'SEC','003');
+							return;
+						}
 					}
 					
 					// sort groups by their composite key, effectively sorting by date
@@ -242,10 +255,9 @@ let MyFormLog = {
 					for(let i = 0, j = keys.length; i < j; i++) {
 						this.logs.push(logsGrouped[keys[i]]);
 					}
-					
 					this.releaseLoadingOnNextTick();
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

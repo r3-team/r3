@@ -239,6 +239,7 @@ let MyForm = {
 			:form="form"
 			:formLoading="loading"
 			:joinsIndexMap="joinsIndexMap"
+			:recordKeyIndexMap="recordKeyIndexMap"
 			:values="values"
 		/>
 		
