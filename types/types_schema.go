@@ -345,9 +345,10 @@ type Column struct {
 	Display     string         `json:"display"`    // how to display value (text, date, color, etc.)
 	GroupBy     bool           `json:"groupBy"`    // group by column attribute value?
 	Aggregator  pgtype.Varchar `json:"aggregator"` // aggregator (SUM, COUNT, etc.)
-	Distincted  bool           `json:"distincted"` // attribute values are distinct
-	SubQuery    bool           `json:"subQuery"`   // column uses sub query
+	Distincted  bool           `json:"distincted"` // attribute values are distinct?
+	SubQuery    bool           `json:"subQuery"`   // column uses sub query?
 	OnMobile    bool           `json:"onMobile"`   // display this column on mobile?
+	Clipboard   bool           `json:"clipboard"`  // show copy-to-clipboard action?
 	Query       Query          `json:"query"`      // sub query
 	Captions    CaptionMap     `json:"captions"`
 }

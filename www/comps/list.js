@@ -445,8 +445,9 @@ let MyList = {
 								<div class="batch">
 									<my-value-rich class="context-list-table"
 										v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
-										:attribute-id="columns[ind].attributeId"
+										:attributeId="columns[ind].attributeId"
 										:basis="b.columnIndexes.length === 1 ? columns[ind].basis : 0"
+										:clipboard="columns[ind].clipboard"
 										:display="columns[ind].display"
 										:key="ind"
 										:length="columns[ind].length"
@@ -543,8 +544,9 @@ let MyList = {
 								<div class="batch">
 									<my-value-rich class="context-list-cards"
 										v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null || columns[v].display === 'gallery')"
-										:attribute-id="columns[ind].attributeId"
+										:attributeId="columns[ind].attributeId"
 										:basis="b.columnIndexes.length === 1 ? columns[ind].basis : 0"
+										:clipboard="columns[ind].clipboard"
 										:display="columns[ind].display"
 										:key="ind"
 										:length="columns[ind].length"
@@ -815,14 +817,14 @@ let MyList = {
 		joins:        function() { return this.fillRelationRecordIds(this.query.joins); },
 		
 		// stores
-		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
-		iconIdMap:      function() { return this.$store.getters['schema/iconIdMap']; },
-		capApp:         function() { return this.$store.getters.captions.list; },
-		capGen:         function() { return this.$store.getters.captions.generic; },
-		isMobile:       function() { return this.$store.getters.isMobile; },
-		moduleLanguage: function() { return this.$store.getters.moduleLanguage; },
-		scrollFormId:   function() { return this.$store.getters.constants.scrollFormId; }
+		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
+		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
+		iconIdMap:     function() { return this.$store.getters['schema/iconIdMap']; },
+		capApp:        function() { return this.$store.getters.captions.list; },
+		capGen:        function() { return this.$store.getters.captions.generic; },
+		isMobile:      function() { return this.$store.getters.isMobile; },
+		moduleLanguage:function() { return this.$store.getters.moduleLanguage; },
+		scrollFormId:  function() { return this.$store.getters.constants.scrollFormId; }
 	},
 	mounted:function() {
 		this.showTable = !this.isInput;

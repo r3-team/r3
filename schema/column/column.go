@@ -31,7 +31,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
 		SELECT id, attribute_id, index, batch, basis, length, wrap, display,
-			group_by, aggregator, distincted, sub_query, on_mobile
+			group_by, aggregator, distincted, sub_query, on_mobile, clipboard
 		FROM app.column
 		WHERE %s_id = $1
 		ORDER BY position ASC
@@ -44,7 +44,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 		var c types.Column
 		if err := rows.Scan(&c.Id, &c.AttributeId, &c.Index, &c.Batch, &c.Basis,
 			&c.Length, &c.Wrap, &c.Display, &c.GroupBy, &c.Aggregator,
-			&c.Distincted, &c.SubQuery, &c.OnMobile); err != nil {
+			&c.Distincted, &c.SubQuery, &c.OnMobile, &c.Clipboard); err != nil {
 
 			return columns, err
 		}
@@ -106,11 +106,11 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column
 				SET attribute_id = $1, index = $2, position = $3, batch = $4,
 					basis = $5, length = $6, wrap = $7, display = $8,
 					group_by = $9, aggregator = $10, distincted = $11,
-					sub_query = $12, on_mobile = $13
-				WHERE id = $14
+					sub_query = $12, on_mobile = $13, clipboard = $14
+				WHERE id = $15
 			`, c.AttributeId, c.Index, position, c.Batch, c.Basis, c.Length,
 				c.Wrap, c.Display, c.GroupBy, c.Aggregator, c.Distincted,
-				c.SubQuery, c.OnMobile, c.Id); err != nil {
+				c.SubQuery, c.OnMobile, c.Clipboard, c.Id); err != nil {
 
 				return err
 			}
@@ -119,12 +119,12 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column
 				INSERT INTO app.column (
 					id, %s_id, attribute_id, index, position, batch, basis,
 					length, wrap, display, group_by, aggregator, distincted,
-					on_mobile, sub_query
+					on_mobile, sub_query, clipboard
 				)
-				VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+				VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
 			`, entity), c.Id, entityId, c.AttributeId, c.Index, position, c.Batch,
 				c.Basis, c.Length, c.Wrap, c.Display, c.GroupBy, c.Aggregator,
-				c.Distincted, c.OnMobile, c.SubQuery); err != nil {
+				c.Distincted, c.OnMobile, c.SubQuery, c.Clipboard); err != nil {
 
 				return err
 			}

@@ -98,6 +98,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	"2.6": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
+			-- new column option: copy to clipboard
+			ALTER TABLE app.column ADD COLUMN clipboard BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.column ALTER COLUMN clipboard DROP DEFAULT;
+			
 			-- user key management
 			ALTER TABLE instance.login
 				ADD COLUMN salt_kdf TEXT NOT NULL DEFAULT 'PLACEHOLDER',
