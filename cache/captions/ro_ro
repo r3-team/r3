@@ -654,6 +654,7 @@
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Anulează operația și trimite un mesaj utilizatorului care rulează acum și care este afișat pe ecranul utilizatorului.",
+				"clean_up_e2ee_keys":"instance.clean_up_e2ee_keys(<blockquote>login_id INTEGER,<br />relation_id UUID,<br />record_ids_access INTEGER[]</blockquote>) => VOID<br /><br />Deletes end-to-end encryption data keys for records that a login has no longer access to. This makes decryption impossible for the login.",
 				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Returnează ID-ul login-ului, care execută operațiunea.",
 				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Returnează codul de limbă din 5 caractere ('en_us', ...) al login-ului, care este utilizat pentru a accesa backend-ul de date.",
 				"get_name":"instance.get_name() => TEXT<br /><br />Returnează numele instanței, definit în fereastra de personalizare a panoului de administrare.",
@@ -1079,7 +1080,8 @@
 		"dialog":{
 			"close":"Există modificări nesalvate.<br /><br />Doriți în continuare să închideți acest formular?",
 			"delete":"Sunteți sigur că doriți să ștergeți <b>permanent</b> această înregistrare?",
-			"encrypted":"This field value will be encrypted on your system before it is being sent to the server.<br /><br />Only you, or people that you give access to, can decrypt this value later.",
+			"encrypted":"The field content will be encrypted on your system before it is being sent to the server.<br /><br />Only you, or people that you give access to, can decrypt it later.",
+			"encryptedTitle":"Encrypted content",
 			"new":"Există modificări nesalvate.<br /><br />Doriți în continuare să deschideți o înregistrare nouă?",
 			"newReset":"Aceasta vă va reseta toate introducerile.<br /><br />Doriți să continuați?",
 			"prev":"Există modificări nesalvate.<br /><br />Totuși, doriți să reveniți?",

@@ -115,7 +115,28 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.attribute ALTER COLUMN encrypted DROP DEFAULT;
 			
 			-- new schema for e2e encryption keys
-			CREATE SCHEMA instance_e2e;
+			CREATE SCHEMA instance_e2ee;
+			
+			-- key management instance function
+			CREATE OR REPLACE FUNCTION instance.clean_up_e2ee_keys(
+				login_id INTEGER,
+				relation_id UUID,
+				record_ids_access INTEGER[])
+			    RETURNS void
+			    LANGUAGE 'plpgsql'
+			AS $BODY$
+			DECLARE
+			BEGIN
+				EXECUTE '
+					DELETE FROM instance_e2ee."keys_' || relation_id || '"
+					WHERE login_id = $1
+					AND (
+						ARRAY_LENGTH($2,1) IS NULL -- empty array
+						OR record_id <> ALL($3)
+					)
+				' USING login_id, record_ids_access, record_ids_access;
+			END;
+			$BODY$;
 		`); err != nil {
 			return "", err
 		}

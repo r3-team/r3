@@ -24,7 +24,7 @@ func GetPublic(ctx context.Context, relationId uuid.UUID,
 	rows, err := db.Pool.Query(ctx, fmt.Sprintf(`
 		SELECT l.id, l.name, l.key_public, ARRAY(
 			SELECT record_id
-			FROM instance_e2e."%s"
+			FROM instance_e2ee."%s"
 			WHERE record_id = ANY($1)
 			AND   login_id  = l.id
 		)

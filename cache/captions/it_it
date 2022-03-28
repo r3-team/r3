@@ -654,6 +654,7 @@
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Interrompe l'operazione e invia un messaggio all'utente che lo esegue, che viene visualizzato nell'interfaccia utente.",
+				"clean_up_e2ee_keys":"instance.clean_up_e2ee_keys(<blockquote>login_id INTEGER,<br />relation_id UUID,<br />record_ids_access INTEGER[]</blockquote>) => VOID<br /><br />Deletes end-to-end encryption data keys for records that a login has no longer access to. This makes decryption impossible for the login.",
 				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Restituisce l'ID del login che sta eseguendo l'operazione.",
 				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Restituisce il codice della lingua di 5 lettere ('en_us', ...) del login, utilizzato per accedere al backend dei dati.",
 				"get_name":"instance.get_name() => TEXT<br /><br />Restituisce il nome dell'istanza, definito nella finestra di personalizzazione del pannello di amministrazione.",
@@ -1079,7 +1080,8 @@
 		"dialog":{
 			"close":"Ci sono modifiche non salvate.<br /><br />Chiudere comunque questo modulo?",
 			"delete":"Sei sicuro di voler eliminare questo record <b>in modo permanente</b>?",
-			"encrypted":"This field value will be encrypted on your system before it is being sent to the server.<br /><br />Only you, or people that you give access to, can decrypt this value later.",
+			"encrypted":"The field content will be encrypted on your system before it is being sent to the server.<br /><br />Only you, or people that you give access to, can decrypt it later.",
+			"encryptedTitle":"Encrypted content",
 			"new":"Ci sono modifiche non salvate.<br /><br />Procedere con un nuovo record?",
 			"newReset":"Quest'azione azzererà ciò che è stato inserito.<br /><br />Continuare?",
 			"prev":"Ci sono modifiche non salvate.<br /><br />Abbandonare e tornare indietro?",

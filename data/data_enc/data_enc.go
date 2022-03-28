@@ -22,7 +22,7 @@ func GetKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	err := tx.QueryRow(ctx, fmt.Sprintf(`
 		SELECT ARRAY(
 			SELECT k.key_enc
-			FROM instance_e2e."%s" AS k
+			FROM instance_e2ee."%s" AS k
 			JOIN UNNEST($1::int[])
 				WITH ORDINALITY t(record_id,sort)
 				USING (record_id)
@@ -42,7 +42,7 @@ func SetKeys_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	}
 
 	if _, err := tx.Prepare(ctx, "store_keys", fmt.Sprintf(`
-		INSERT INTO instance_e2e."%s" (record_id, login_id, key_enc)
+		INSERT INTO instance_e2ee."%s" (record_id, login_id, key_enc)
 		VALUES ($1,$2,$3)
 	`, schema.GetEncKeyTableName(relationId))); err != nil {
 		return err

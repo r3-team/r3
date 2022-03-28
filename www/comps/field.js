@@ -931,6 +931,7 @@ let MyField = {
 		clickEncryption:function() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.encrypted,
+				captionTop:this.capApp.dialog.encryptedTitle,
 				image:'lock.png',
 				buttons:[{
 					caption:this.capGen.button.close,

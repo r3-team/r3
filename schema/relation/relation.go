@@ -23,7 +23,7 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
 	// delete encryption table
 	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-		DROP TABLE IF EXISTS instance_e2e."%s"
+		DROP TABLE IF EXISTS instance_e2ee."%s"
 	`, schema.GetEncKeyTableName(id))); err != nil {
 		return err
 	}
@@ -175,7 +175,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 			tName := schema.GetEncKeyTableName(id)
 
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-				CREATE TABLE IF NOT EXISTS instance_e2e."%s" (
+				CREATE TABLE IF NOT EXISTS instance_e2ee."%s" (
 				    record_id bigint NOT NULL,
 				    login_id integer NOT NULL,
 				    key_enc text COLLATE pg_catalog."default" NOT NULL,
@@ -192,10 +192,10 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 				        DEFERRABLE INITIALLY DEFERRED
 				);
 				CREATE INDEX "fki_%s_record_id_fkey"
-					ON instance_e2e."%s" USING btree (record_id ASC NULLS LAST);
+					ON instance_e2ee."%s" USING btree (record_id ASC NULLS LAST);
 				
 				CREATE INDEX "fki_%s_login_id_fkey"
-					ON instance_e2e."%s" USING btree (login_id ASC NULLS LAST);
+					ON instance_e2ee."%s" USING btree (login_id ASC NULLS LAST);
 			`, tName, tName, tName, moduleName, name, schema.PkName,
 				tName, tName, tName, tName, tName)); err != nil {
 

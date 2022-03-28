@@ -654,6 +654,7 @@
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Aborts the operation and sends a message to the executing user, which is displayed in the user interface.",
+				"clean_up_e2ee_keys":"instance.clean_up_e2ee_keys(<blockquote>login_id INTEGER,<br />relation_id UUID,<br />record_ids_access INTEGER[]</blockquote>) => VOID<br /><br />Deletes end-to-end encryption data keys for records that a login has no longer access to. This makes decryption impossible for the login.",
 				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Returns the ID of the login, which is executing the operation.",
 				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Returns the 5-letter language code ('en_us', ...) of the login, which is used to access the data backend.",
 				"get_name":"instance.get_name() => TEXT<br /><br />Returns the instance name, defined in the customization window of the admin panel.",
@@ -1079,7 +1080,8 @@
 		"dialog":{
 			"close":"There are unsaved changes.<br /><br />Do you still want to close this form?",
 			"delete":"Are you sure that you want to <b>permanently</b> delete this record?",
-			"encrypted":"This field value will be encrypted on your system before it is being sent to the server.<br /><br />Only you, or people that you give access to, can decrypt this value later.",
+			"encrypted":"The field content will be encrypted on your system before it is being sent to the server.<br /><br />Only you, or people that you give access to, can decrypt it later.",
+			"encryptedTitle":"Encrypted content",
 			"new":"There are unsaved changes.<br /><br />Do you still want to open a new record?",
 			"newReset":"This will reset all your inputs.<br /><br />Do you want to continue?",
 			"prev":"There are unsaved changes.<br /><br />Do you still want to go back?",
