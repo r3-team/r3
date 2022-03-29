@@ -35,6 +35,7 @@ const (
 	ErrCodeCsvParseDateTime         int = 3
 	ErrCodeCsvBadAttributeType      int = 4
 	ErrCodeCsvWrongFieldNumber      int = 5
+	ErrCodeCsvEncryptedAttribute    int = 6
 	ErrCodeDbsFunctionMessage       int = 1
 	ErrCodeDbsConstraintUnique      int = 2
 	ErrCodeDbsConstraintUniqueLogin int = 3

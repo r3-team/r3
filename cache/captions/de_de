@@ -985,7 +985,8 @@
 			"002":"Ungültige Nummer '{VALUE}' (Dezimal wird erwartet).",
 			"003":"Ungültiger Datum-/Zeitwert '{VALUE}', erwartetes Format: {EXPECT}.",
 			"004":"Nicht unterstützter Attributtyp '{VALUE}'.",
-			"005":"Falsche Anzahl an Feldern in Zeile '{VALUE}'."
+			"005":"Falsche Anzahl an Feldern in Zeile '{VALUE}'.",
+			"006":"Verschlüsselte Attribute werden nicht unterstützt"
 		},
 		"DBS":{
 			"001":"{FNC_MSG}",
@@ -1226,6 +1227,7 @@
 			"confirmBackupCode":"Ich habe den Backup-Code an einen sicheren Ort kopiert.",
 			"confirmEncryption":"Ich verstehe, dass wenn ich sowohl mein Passwort als auch meinen Backup-Code verliere, permanent Zugriff auf verschlüsselte Daten verliere.",
 			"description":"Anwendungen können sensitive Daten für den exklusiven Zugriff spezifischer Personen verschlüsseln. Bevor Verschlüsselung genutzt werden kann, muss jeder Benutzer persönliche Schlüssel erzeugen.",
+			"modulesEnc":"Anwendungen, die Verschlüsselung nutzen",
 			"newKeys":"Schlüssel erfolgreich erzeugt",
 			"newKeysDesc":"Um die Einrichtung abzuschließen, kopiere deinen persönlichen Backup-Code an einen sicheren Ort.",
 			"prevPassword":"Vorheriges Passwort",

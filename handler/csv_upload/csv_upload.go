@@ -320,6 +320,9 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 		if !exists {
 			return handler.CreateErrCode("APP", handler.ErrCodeAppUnknownAttribute)
 		}
+		if atr.Encrypted {
+			return handler.CreateErrCode("CSV", handler.ErrCodeCsvEncryptedAttribute)
+		}
 
 		var value interface{}
 

@@ -985,7 +985,8 @@
 			"002":"Numero non valido '{VALUE}' (decimale previsto).",
 			"003":"Valore temporale '{VALUE}' non valido, formato previsto: {EXPECT}.",
 			"004":"Tipo attributo non supportato '{VALUE}'.",
-			"005":"Numero di campi errato in linea '{VALUE}'."
+			"005":"Numero di campi errato in linea '{VALUE}'.",
+			"006":"Encrypted attributes are not supported"
 		},
 		"DBS":{
 			"001":"{FNC_MSG}",
@@ -1226,6 +1227,7 @@
 			"confirmBackupCode":"I have copied the backup code to a secure location.",
 			"confirmEncryption":"I understand that if I loose access to both my password and my backup code, encrypted data becomes permanently inaccessible.",
 			"description":"Applications can encrypt sensitive data for exclusive access by specific individuals. Before data can be encrypted, each user has to create personal keys.",
+			"modulesEnc":"Applications that use encryption",
 			"newKeys":"Keys created successfully",
 			"newKeysDesc":"To complete the setup, copy your personal backup code to a secure location.",
 			"prevPassword":"Previous password",

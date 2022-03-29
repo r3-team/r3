@@ -27,6 +27,16 @@ let MySettingsEncryption = {
 		</table>
 		<br />
 		
+		<!-- list of modules with encryption enabled -->
+		<template v-if="anyEnc && !locked">
+			<h2>{{ capApp.modulesEnc }}</h2>
+			<ul>
+				<li v-for="mei in moduleEntriesIndexesEnc">
+					{{ moduleEntries[mei].caption }}
+				</li>
+			</ul>
+		</template>
+		
 		<!-- create new key pair -->
 		<template v-if="loginKeyAes !== null && !loginEncryption">
 			<my-button
@@ -111,6 +121,9 @@ let MySettingsEncryption = {
 			/>
 		</template>
 	</div>`,
+	props:{
+		moduleEntries:{ type:Array, required:true }
+	},
 	data:function() {
 		return {
 			running:false,
@@ -131,6 +144,21 @@ let MySettingsEncryption = {
 		};
 	},
 	computed:{
+		// indexes of module entries with any relation with enabled encryption
+		moduleEntriesIndexesEnc:function() {
+			let out = [];
+			for(let i = 0, j = this.moduleEntries.length; i < j; i++) {
+				for(const r of this.moduleIdMap[this.moduleEntries[i].id].relations) {
+					if(r.encryption) {
+						out.push(i);
+						break;
+					}
+				}
+			}
+			return out;
+		},
+		
+		// e2e encryption status
 		statusCaption:function() {
 			if(!this.active) return this.capApp.status.inactive;
 			if(this.locked)  return this.capApp.status.locked;
@@ -139,10 +167,12 @@ let MySettingsEncryption = {
 		
 		// states
 		active: function() { return this.loginEncryption; },
+		anyEnc: function() { return this.moduleEntriesIndexesEnc.length !== 0; },
 		locked: function() { return this.active && this.loginPrivateKey === null; },
 		newKeys:function() { return this.newKeyPrivateEnc !== null; },
 		
 		// stores
+		moduleIdMap:       function() { return this.$store.getters['schema/moduleIdMap']; },
 		loginKeyAes:       function() { return this.$store.getters['local/loginKeyAes']; },
 		loginKeySalt:      function() { return this.$store.getters['local/loginKeySalt']; },
 		loginEncryption:   function() { return this.$store.getters.loginEncryption; },
@@ -673,11 +703,16 @@ let MySettings = {
 						<img class="icon" src="images/key.png" />
 						<h1>{{ capApp.titleEncryption }}</h1>
 					</div>
-					<my-settings-encryption />
+					<my-settings-encryption
+						:moduleEntries="moduleEntries"
+					/>
 				</div>
 			</div>
 		</div>
 	</div>`,
+	props:{
+		moduleEntries:{ type:Array, required:true }
+	},
 	emits:['logout'],
 	data:function() {
 		return {
