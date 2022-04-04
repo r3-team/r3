@@ -77,8 +77,8 @@ let MyFormLog = {
 		fieldIdMapState:  { type:Object,  required:true },
 		form:             { type:Object,  required:true },
 		formLoading:      { type:Boolean, required:true },
+		indexMapRecordKey:{ type:Object,  required:true },
 		joinsIndexMap:    { type:Object,  required:true },
-		recordKeyIndexMap:{ type:Object, required:true },
 		values:           { type:Object,  required:true }
 	},
 	emits:['close-log'],
@@ -223,7 +223,7 @@ let MyFormLog = {
 								let value = JSON.parse(a.value);
 								
 								if(attributeIdsEnc.includes(a.attributeId)) {
-									const keyStr = this.recordKeyIndexMap[request.index];
+									const keyStr = this.indexMapRecordKey[request.index];
 									
 									if(typeof keyStr === 'undefined')
 										throw new Error('no data key for record');

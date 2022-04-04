@@ -22,7 +22,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 
 	rel, exists := cache.RelationIdMap[relationId]
 	if !exists {
-		return fmt.Errorf("unknown relation '%s'", relationId)
+		return handler.ErrSchemaUnknownRelation(relationId)
 	}
 
 	// check for protected preset record
@@ -34,7 +34,7 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 
 	mod, exists := cache.ModuleIdMap[rel.ModuleId]
 	if !exists {
-		return fmt.Errorf("unknown module '%s'", rel.ModuleId)
+		return handler.ErrSchemaUnknownModule(rel.ModuleId)
 	}
 
 	// get policy filter if applicable

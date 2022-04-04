@@ -95,6 +95,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 		results = append(results, types.DataGetResult{
 			IndexRecordIds:     indexRecordIds,
 			IndexRecordEncKeys: indexRecordEncKeys,
+			IndexesPermNoDel:   make([]int, 0),
+			IndexesPermNoSet:   make([]int, 0),
 			Values:             values,
 		})
 	}
@@ -102,6 +104,97 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 		return results, 0, err
 	}
 	rows.Close()
+
+	// resolve relation policy access permissions for retrieved result records
+	// DEL/SET actions only; records not allowed to GET are not retrieved as results
+	// purely to inform requestor as DEL/SET are checked again when executed
+	if data.GetPerm && len(results) != 0 {
+
+		indexMapDelBlacklist := make(map[int][]int64)  // record IDs not do delete
+		indexMapDelWhitelist := make(map[int][]int64)  // record IDs to delete
+		indexMapDelWhitelistUsed := make(map[int]bool) // whether whitelist was used
+		indexMapSetBlacklist := make(map[int][]int64)  // record IDs not do update
+		indexMapSetWhitelist := make(map[int][]int64)  // record IDs to update
+		indexMapSetWhitelistUsed := make(map[int]bool) // whether whitelist was used
+
+		var getPolicyLists = func(relationId uuid.UUID, index int) error {
+
+			indexMapDelBlacklist[index],
+				indexMapDelWhitelist[index],
+				indexMapDelWhitelistUsed[index],
+				err = getPolicyValues_tx(ctx, tx, loginId, relationId, "delete")
+
+			if err != nil {
+				return err
+			}
+
+			indexMapSetBlacklist[index],
+				indexMapSetWhitelist[index],
+				indexMapSetWhitelistUsed[index],
+				err = getPolicyValues_tx(ctx, tx, loginId, relationId, "update")
+
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+
+		// get record ID black-/whitelists for all relations (base & joined)
+		if err := getPolicyLists(data.RelationId, 0); err != nil {
+			return results, 0, err
+		}
+
+		for _, j := range data.Joins {
+
+			atr, exists := cache.AttributeIdMap[j.AttributeId]
+			if !exists {
+				return results, 0, handler.ErrSchemaUnknownAttribute(j.AttributeId)
+			}
+
+			// join attribute is from other relation, use relationship partner
+			relId := atr.RelationId
+			if atr.RelationId == indexRelationIds[j.IndexFrom] {
+				relId = atr.RelationshipId.Bytes
+			}
+
+			if err := getPolicyLists(relId, j.Index); err != nil {
+				return results, 0, err
+			}
+		}
+
+		for i, res := range results {
+			for index, recordIdIf := range res.IndexRecordIds {
+				var recordId int64
+
+				switch v := recordIdIf.(type) {
+				case int32:
+					recordId = int64(v)
+				case int64:
+					recordId = v
+				default:
+					return results, 0, fmt.Errorf("record ID has invalid type")
+				}
+
+				if recordId == 0 {
+					continue
+				}
+
+				// deny DEL if record ID is in blacklist or not in whitelist (if used)
+				if tools.Int64InSlice(recordId, indexMapDelBlacklist[index]) ||
+					(indexMapDelWhitelistUsed[index] && !tools.Int64InSlice(recordId, indexMapDelWhitelist[index])) {
+
+					results[i].IndexesPermNoDel = append(results[i].IndexesPermNoDel, index)
+				}
+
+				// deny SET if record ID is in blacklist or not in whitelist (if used)
+				if tools.Int64InSlice(recordId, indexMapSetBlacklist[index]) ||
+					(indexMapSetWhitelistUsed[index] && !tools.Int64InSlice(recordId, indexMapSetWhitelist[index])) {
+
+					results[i].IndexesPermNoSet = append(results[i].IndexesPermNoSet, index)
+				}
+			}
+		}
+	}
 
 	// check for encrypted attributes in expressions
 	for _, expr := range data.Expressions {
@@ -116,7 +209,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 
 		atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
 		if !exists {
-			return results, 0, fmt.Errorf("unknown attribute '%s'", expr.AttributeId)
+			return results, 0, handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes)
 		}
 
 		if !atr.Encrypted || tools.IntInSlice(expr.Index, relationIndexesEnc) {
@@ -202,12 +295,12 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 	// check source relation and module
 	rel, exists := cache.RelationIdMap[data.RelationId]
 	if !exists {
-		return "", "", fmt.Errorf("unknown relation '%s'", data.RelationId)
+		return "", "", handler.ErrSchemaUnknownRelation(data.RelationId)
 	}
 
 	mod, exists := cache.ModuleIdMap[rel.ModuleId]
 	if !exists {
-		return "", "", fmt.Errorf("unknown module '%s'", rel.ModuleId)
+		return "", "", handler.ErrSchemaUnknownModule(rel.ModuleId)
 	}
 
 	// define relation code for source relation
@@ -541,9 +634,6 @@ func addJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin,
 		// join attribute comes from other relation, other relation is the source relation for this join
 		relCodeFrom = relCodeTarget
 		relCodeTo = relCodeSource
-		if !exists {
-			return errors.New("relation does not exist")
-		}
 		relIdTarget = atr.RelationId
 	}
 
@@ -552,12 +642,12 @@ func addJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin,
 	// check other relation and corresponding module
 	relTarget, exists := cache.RelationIdMap[relIdTarget]
 	if !exists {
-		return errors.New("relation does not exist")
+		return handler.ErrSchemaUnknownRelation(relIdTarget)
 	}
 
 	modTarget, exists := cache.ModuleIdMap[relTarget.ModuleId]
 	if !exists {
-		return errors.New("module does not exist")
+		return handler.ErrSchemaUnknownModule(relTarget.ModuleId)
 	}
 
 	// define JOIN type

@@ -481,27 +481,17 @@ let MyField = {
 			if(!this.isValidMin) {
 				if(this.isString) return this.capGen.inputShort;
 				if(this.isFiles)  return this.capGen.inputTooFewFiles;
-				
 				return this.capGen.inputSmall;
 			}
-			
 			if(!this.isValidMax) {
 				if(this.isString) return this.capGen.inputLong;
 				if(this.isFiles)  return this.capGen.inputTooManyFiles;
-				
 				return this.capGen.inputLarge;
 			}
 			
-			if(this.isDecimal)
-				return this.capGen.inputDecimal;
-			
-			if(this.isRequired)
-				return this.capGen.inputRequired;
-			
-			// generic error, if nothing fits
-			if(!this.isValidValue)
-				return this.capGen.inputInvalid;
-			
+			if(this.isDecimal)     return this.capGen.inputDecimal;
+			if(this.isRequired)    return this.capGen.inputRequired;
+			if(!this.isValidValue) return this.capGen.inputInvalid; // generic error
 			return '';
 		},
 		captionHelp:function() {
@@ -639,7 +629,6 @@ let MyField = {
 			// field state has a default value, which can be overwritten by form states
 			// hidden: field is not shown
 			// default: field is shown, data field state is overwritten depending on circumstance
-			//  (no permissions = readonly, NOT NULL attribute = required)
 			// optional: data field only, input is optional
 			// required: data field only, input is required
 			// readonly: data or button field, input is readonly
@@ -720,15 +709,15 @@ let MyField = {
 				return false;
 			}
 			
-			// field attribute relation join has record ID
-			let r = this.joinsIndexMap[this.field.index];
-			if(r.recordId !== 0)
-				return r.applyUpdate; // is join allowed to update record?
+			// check join of field attribute
+			let join = this.joinsIndexMap[this.field.index];
+			if(join.recordNoSet)    return false;            // SET denied on join due to relation policy
+			if(join.recordId !== 0) return join.applyUpdate; // SET dependent on join allowing record update
 			
 			// field attribute relation has no record ID
 			// collect relationship chain until source relation
-			let indexChain = [r.index];
-			for(let index = r.indexFrom; index !== -1; index = this.joinsIndexMap[index].indexFrom) {
+			let indexChain = [join.index];
+			for(let index = join.indexFrom; index !== -1; index = this.joinsIndexMap[index].indexFrom) {
 				indexChain.push(index);
 			}
 			
@@ -748,22 +737,12 @@ let MyField = {
 			return !chainBroken;
 		},
 		inputIsRequired:function() {
-			if(!this.inputCanWrite)
-				return false;
+			if(!this.inputCanWrite                           // cannot write
+				|| this.attribute.nullable                   // value optional
+				|| this.isRelationship1N                     // 0...n partners (optional)
+				|| (this.isNew && this.attribute.def !== '') // new record and has defaults
+			) return false;
 			
-			// no data needed
-			if(this.attribute.nullable)
-				return false;
-			
-			// 0...n partners (ergo optional)
-			if(this.isRelationship1N)
-				return false;
-			
-			// new record with default value available
-			if(this.isNew && this.attribute.def !== '')
-				return false;
-			
-			// input is required
 			return true;
 		},
 		inputCheckRegex:function() {

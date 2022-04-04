@@ -201,6 +201,20 @@ export function getInputFieldName(fieldId) {
 	return `input_${fieldId}`;
 };
 
+export function getJoinIndexMapExpanded(joins,indexMapRecordId,indexesNoDel,indexesNoSet) {
+	let map = {};
+	for(let i = 0, j = joins.length; i < j; i++) {
+		let join         = joins[i];
+		let recordId     = indexMapRecordId[join.index];
+		join.recordId    = Number.isInteger(recordId) ? recordId : 0;
+		join.recordNoDel = indexesNoDel.includes(join.index);
+		join.recordNoSet = indexesNoSet.includes(join.index);
+		
+		map[join.index] = join;
+	}
+	return map;
+};
+
 export function getResolvedPlaceholders(value) {
 	switch(value) {
 		case '{CURR_TIME}':

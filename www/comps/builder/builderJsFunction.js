@@ -427,8 +427,8 @@ let MyBuilderJsFunction = {
 					let argsList = argsOut.length === 0 ? '' : ', '+argsOut.join(', ');
 					
 					text = `${prefix}.call_backend({${mod.name}.${fnc.name}}${argsList}).then(`
-						+ `\n\t(res) => { // if success: return value in 'res' },`
-						+ `\n\t(err) => { // if error: error message in 'err' }\n)`
+						+ `\n\tres => { // if success: return value in 'res' },`
+						+ `\n\terr => { // if error: error message in 'err' }\n)`
 					;
 				break;
 			}

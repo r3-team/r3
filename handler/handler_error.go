@@ -5,6 +5,8 @@ import (
 	"fmt"
 	"r3/tools"
 	"regexp"
+
+	"github.com/gofrs/uuid"
 )
 
 type errExpected struct {
@@ -197,4 +199,21 @@ func ConvertToErrCode(err error, anonymizeIfUnexpected bool) (error, bool) {
 		return CreateErrCode("APP", ErrCodeAppUnknown), false
 	}
 	return err, false
+}
+
+// default schema errors
+func ErrSchemaUnknownModule(id uuid.UUID) error {
+	return fmt.Errorf("unknown module '%s'", id)
+}
+func ErrSchemaUnknownRelation(id uuid.UUID) error {
+	return fmt.Errorf("unknown relation '%s'", id)
+}
+func ErrSchemaUnknownAttribute(id uuid.UUID) error {
+	return fmt.Errorf("unknown attribute '%s'", id)
+}
+func ErrSchemaUnknownFunction(id uuid.UUID) error {
+	return fmt.Errorf("unknown function '%s'", id)
+}
+func ErrSchemaUnknownPolicyAction(name string) error {
+	return fmt.Errorf("unknown policy action '%s'", name)
 }

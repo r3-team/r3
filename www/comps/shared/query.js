@@ -234,18 +234,6 @@ export function getJoinIndexMap(joins) {
 	return map;
 };
 
-export function getJoinIndexMapWithRecords(joins,recordIdIndexMap) {
-	let map = {};
-	for(let i = 0, j = joins.length; i < j; i++) {
-		let join      = joins[i];
-		let recordId  = recordIdIndexMap[join.index];
-		join.recordId = Number.isInteger(recordId) ? recordId : 0;
-		
-		map[join.index] = join;
-	}
-	return map;
-};
-
 export function getQueryAttributePkFilter(relationId,recordId,index,not) {
 	return {
 		connector:'AND',

@@ -50,7 +50,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 
 		rel, exists := cache.RelationIdMap[dataSet.RelationId]
 		if !exists {
-			return indexRecordIds, errors.New("relation does not exist")
+			return indexRecordIds, handler.ErrSchemaUnknownRelation(dataSet.RelationId)
 		}
 
 		// check write access for tupel creation
@@ -77,7 +77,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 
 						atr, exists := cache.AttributeIdMap[attribute.AttributeId]
 						if !exists {
-							return indexRecordIds, errors.New("attribute does not exist")
+							return indexRecordIds, handler.ErrSchemaUnknownAttribute(attribute.AttributeId)
 						}
 
 						return indexRecordIds, fmt.Errorf("cannot change attribute value '%s' of protected preset '%s'",
@@ -148,11 +148,11 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 
 	rel, exists := cache.RelationIdMap[dataSet.RelationId]
 	if !exists {
-		return errors.New("relation does not exist")
+		return handler.ErrSchemaUnknownRelation(dataSet.RelationId)
 	}
 	mod, exists := cache.ModuleIdMap[rel.ModuleId]
 	if !exists {
-		return errors.New("module does not exist")
+		return handler.ErrSchemaUnknownModule(rel.ModuleId)
 	}
 
 	// process values
@@ -171,7 +171,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 	for ai, attribute := range dataSet.Attributes {
 		atr, exists := cache.AttributeIdMap[attribute.AttributeId]
 		if !exists {
-			return errors.New("attribute does not exist")
+			return handler.ErrSchemaUnknownAttribute(attribute.AttributeId)
 		}
 
 		// process relationship values from other relation
@@ -298,7 +298,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 				// check on which side the relationship attribute resides
 				relAtrOther, exists := cache.AttributeIdMap[dataSetOther.AttributeId]
 				if !exists {
-					return errors.New("attribute does not exist")
+					return handler.ErrSchemaUnknownAttribute(dataSetOther.AttributeId)
 				}
 
 				// if attribute is on our side, we need to add its value to this tupel
@@ -339,7 +339,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 				// check on which side the relationship attribute resides
 				relAtr, exists := cache.AttributeIdMap[dataSet.AttributeId]
 				if !exists {
-					return errors.New("attribute does not exist")
+					return handler.ErrSchemaUnknownAttribute(dataSet.AttributeId)
 				}
 
 				// if attribute is on this side, add to this record
@@ -382,15 +382,15 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 
 		shipAtr, exists := cache.AttributeIdMap[shipValues.attributeId]
 		if !exists {
-			return errors.New("attribute does not exist")
+			return handler.ErrSchemaUnknownAttribute(shipValues.attributeId)
 		}
 		shipRel, exists := cache.RelationIdMap[shipAtr.RelationId]
 		if !exists {
-			return errors.New("relation does not exist")
+			return handler.ErrSchemaUnknownRelation(shipAtr.RelationId)
 		}
 		shipMod, exists := cache.ModuleIdMap[shipRel.ModuleId]
 		if !exists {
-			return errors.New("module does not exist")
+			return handler.ErrSchemaUnknownModule(shipRel.ModuleId)
 		}
 
 		if len(shipValues.values) == 0 {
@@ -445,7 +445,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 		} else {
 			shipAtrNm, exists := cache.AttributeIdMap[shipValues.attributeIdNm.Bytes]
 			if !exists {
-				return errors.New("attribute does not exist")
+				return handler.ErrSchemaUnknownAttribute(shipValues.attributeIdNm.Bytes)
 			}
 
 			// get current references to this tupel
@@ -504,7 +504,7 @@ func collectCurrentValues_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUI
 	var result types.DataGetResult
 	rel, exists := cache.RelationIdMap[relationId]
 	if !exists {
-		return result, fmt.Errorf("unknown relation %s during data log check", relationId)
+		return result, fmt.Errorf("unknown relation '%s' during data log check", relationId)
 	}
 
 	// get old attribute values

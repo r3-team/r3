@@ -22,6 +22,7 @@ import {
 	getFormRoute,
 	getGetterArg,
 	getInputFieldName,
+	getJoinIndexMapExpanded,
 	getResolvedPlaceholders,
 	getRowsDecrypted
 } from './shared/form.js';
@@ -37,7 +38,6 @@ import {
 } from './shared/attribute.js';
 import {
 	fillRelationRecordIds,
-	getJoinIndexMapWithRecords,
 	getQueryAttributePkFilter,
 	getQueryFiltersProcessed,
 	getRelationsJoined
@@ -238,8 +238,8 @@ let MyForm = {
 			:fieldIdMapState="fieldIdMapState"
 			:form="form"
 			:formLoading="loading"
+			:indexMapRecordKey="indexMapRecordKey"
 			:joinsIndexMap="joinsIndexMap"
-			:recordKeyIndexMap="recordKeyIndexMap"
 			:values="values"
 		/>
 		
@@ -300,11 +300,13 @@ let MyForm = {
 			// form data
 			fields:[],            // all fields (nested within each other)
 			fieldIdsInvalid:[],   // field IDs with invalid values
+			indexMapRecordId:{},  // record IDs for form, key: relation index
+			indexMapRecordKey:{}, // record en-/decryption keys, key: relation index
+			indexesNoDel:{},      // relation indexes with no DEL permission (via relation policy)
+			indexesNoSet:{},      // relation indexes with no SET permission (via relation policy)
 			loginIdsEncryptFor:[],        // login IDs for which data keys are encrypted (e2ee), for current form relations/records
 			loginIdsEncryptForOutside:{}, // login IDs for which data keys are encrypted (e2ee), for outside relation and record IDs
 			                              // [{loginIds:[5,12],relationId:'A-B-C-D',recordIds:[1,2]},{...}]
-			recordIdIndexMap:{},  // record IDs for form, key: index
-			recordKeyIndexMap:{}, // record en-/decryption keys, key: index
 			values:{},            // field values, key: index attribute ID
 			valuesDef:{},         // field value defaults (via field options)
 			valuesOrg:{},         // original field values, used to check for changes
@@ -327,9 +329,7 @@ let MyForm = {
 			if(this.updatingRecord
 				|| this.isNew
 				|| this.badLoad
-				|| this.joins.length === 0
-				|| !this.joins[0].applyDelete
-				|| !this.hasAccessToRelation(this.access,this.joins[0].relationId,3)
+				|| this.joinsIndexesDel.length === 0
 			) return false;
 			
 			// check for protected preset record
@@ -388,8 +388,28 @@ let MyForm = {
 			return this.getRelationsJoined(this.joins);
 		},
 		joinsIndexMap:function() {
-			// map of joins keyed by index (relation indexes are used to get/set data)
-			return this.getJoinIndexMapWithRecords(this.joins,this.recordIdIndexMap);
+			// map of joins keyed by index (relation indexes are used to GET/SET/DEL data)
+			return this.getJoinIndexMapExpanded(
+				this.joins,
+				this.indexMapRecordId,
+				this.indexesNoDel,
+				this.indexesNoSet
+			);
+		},
+		joinsIndexesDel:function() {
+			let out = [];
+			for(let k in this.joinsIndexMap) {
+				const join = this.joinsIndexMap[k];
+				
+				if(join.applyDelete
+					&& !join.recordNoDel
+					&& join.recordId !== 0
+					&& this.hasAccessToRelation(this.access,join.relationId,3)) {
+					
+					out.push(join);
+				}
+			}
+			return out;
 		},
 		
 		// presentation
@@ -435,8 +455,8 @@ let MyForm = {
 				get_language_code:()  => this.settings.languageCode,
 				get_login_id:     ()  => this.loginId,
 				get_record_id:    (i) =>
-					typeof this.recordIdIndexMap[i] !== 'undefined'
-						? this.recordIdIndexMap[i] : -1,
+					typeof this.indexMapRecordId[i] !== 'undefined'
+						? this.indexMapRecordId[i] : -1,
 				get_role_ids:     ()  => this.access.roleIds,
 				go_back:          ()  => window.history.back(),
 				has_role:         (v) => this.access.roleIds.includes(v),
@@ -664,7 +684,7 @@ let MyForm = {
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
 		getInputFieldName,
-		getJoinIndexMapWithRecords,
+		getJoinIndexMapExpanded,
 		getQueryAttributePkFilter,
 		getQueryFiltersProcessed,
 		getRandomString,
@@ -811,8 +831,10 @@ let MyForm = {
 			this.badLoad = false;
 			this.loginIdsEncryptFor        = [];
 			this.loginIdsEncryptForOutside = [];
-			this.recordIdIndexMap          = {};
-			this.recordKeyIndexMap         = {};
+			this.indexesNoDel              = [];
+			this.indexesNoSet              = [];
+			this.indexMapRecordId          = {};
+			this.indexMapRecordKey         = {};
 			this.valuesSetAllDefault();
 			this.popUpFormId = null;
 			this.get();
@@ -873,22 +895,42 @@ let MyForm = {
 			if(rows.length !== 1)
 				throw new Error('expected 1 row, got: '+rows.length);
 			
-			// update record ID & record data key per relation index
-			for(let index in rows[0].indexRecordIds) {
-				this.recordIdIndexMap[index] = rows[0].indexRecordIds[index];
+			const row = rows[0];
+			
+			// update record IDs & DEL/SET permission for each relation index
+			for(let index in row.indexRecordIds) {
+				this.indexMapRecordId[index] = row.indexRecordIds[index];
+				
+				const indexInt = parseInt(index);
+				let pos = this.indexesNoDel.indexOf(indexInt);
+				if(pos === -1 && row.indexesPermNoDel.includes(indexInt))
+					this.indexesNoDel.push(indexInt);
+				
+				if(pos !== -1 && !row.indexesPermNoDel.includes(indexInt))
+					this.indexesNoDel.splice(pos,1);
+				
+				pos = this.indexesNoSet.indexOf(indexInt);
+				if(pos === -1 && row.indexesPermNoSet.includes(indexInt))
+					this.indexesNoSet.push(indexInt);
+				
+				if(pos !== -1 && !row.indexesPermNoSet.includes(indexInt))
+					this.indexesNoSet.splice(pos,1);
 			}
-			for(let index in rows[0].indexRecordEncKeys) {
-				this.recordKeyIndexMap[index] = await this.rsaDecrypt(
+			
+			// update record data keys for each relation index
+			for(let index in row.indexRecordEncKeys) {
+				this.indexMapRecordKey[index] = await this.rsaDecrypt(
 					this.loginPrivateKey,
-					rows[0].indexRecordEncKeys[index]
+					row.indexRecordEncKeys[index]
 				).catch(
 					err => { throw new Error('failed to decrypt data key with private key, '+err); }
 				);
 			}
 			
+			// set row values (decrypt first if necessary)
 			return this.getRowsDecrypted(rows,expressions).then(
 				rows => {
-					for(let i = 0, j = rows[0].values.length; i < j; i++) {
+					for(let i = 0, j = row.values.length; i < j; i++) {
 						const e = expressions[i];
 						
 						this.valueSet(
@@ -896,7 +938,7 @@ let MyForm = {
 								e.index,e.attributeId,
 								e.outsideIn,e.attributeIdNm
 							),
-							rows[0].values[i],true,false
+							row.values[i],true,false
 						);
 					}
 				}
@@ -1204,15 +1246,10 @@ let MyForm = {
 			this.triggerEventBefore('delete');
 			
 			let requests = [];
-			for(let i = 0, j = this.joins.length; i < j; i++) {
-				let j = this.joins[i];
-				
-				if(!j.applyDelete || this.recordIdIndexMap[i] === 0)
-					continue;
-				
+			for(const join of this.joinsIndexesDel) {
 				requests.push(ws.prepare('data','del',{
-					relationId:j.relationId,
-					recordId:j.recordId
+					relationId:join.relationId,
+					recordId:join.recordId
 				}));
 			}
 			
@@ -1241,7 +1278,7 @@ let MyForm = {
 			}
 			
 			// set base record ID, necessary for form filter 'newRecord'
-			this.recordIdIndexMap[0] = this.recordId;
+			this.indexMapRecordId[0] = this.recordId;
 			
 			// add index attributes to be retrieved
 			let expressions = [];
@@ -1264,7 +1301,8 @@ let MyForm = {
 					this.getQueryAttributePkFilter(
 						this.relationId,this.recordId,0,false
 					)
-				])
+				]),
+				getPerm:true
 			},true).then(
 				res => {
 					// reset states
@@ -1273,8 +1311,10 @@ let MyForm = {
 					this.loading = true;
 					
 					// reset record meta
-					this.recordIdIndexMap  = {};
-					this.recordKeyIndexMap = {};
+					this.indexMapRecordId  = {};
+					this.indexMapRecordKey = {};
+					this.indexesNoDel      = [];
+					this.indexesNoSet      = [];
 					
 					this.valueSetByRows(res.payload.rows,expressions).then(
 						res => this.triggerEventAfter('open'),
@@ -1362,7 +1402,8 @@ let MyForm = {
 					this.getQueryAttributePkFilter(
 						this.relationId,recordId,join.index,false
 					)
-				])
+				]),
+				getPerm:true
 			},true).then(
 				res => this.valueSetByRows(res.payload.rows,expressions),
 				this.$root.genericError
@@ -1404,9 +1445,9 @@ let MyForm = {
 					
 					// create if new or get known data key
 					if(isNew)
-						this.recordKeyIndexMap[index] = this.getRandomString(this.keyLength);
+						this.indexMapRecordKey[index] = this.getRandomString(this.keyLength);
 					
-					const dataKeyStr = this.recordKeyIndexMap[index];
+					const dataKeyStr = this.indexMapRecordKey[index];
 					if(typeof dataKeyStr === 'undefined')
 						throw new Error('encryption key for existing record is not available');
 					
@@ -1477,7 +1518,7 @@ let MyForm = {
 				if(this.attributeIdMap[d.attributeId].encrypted && value !== null) {
 					try {
 						value = await this.aesGcmEncryptBase64WithPhrase(
-							this.values[k],this.recordKeyIndexMap[d.index]);
+							this.values[k],this.indexMapRecordKey[d.index]);
 					}
 					catch(err) { return handleEncErr(err); }
 				}

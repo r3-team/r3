@@ -170,7 +170,7 @@ func main() {
 		fmt.Printf("%s can be installed as service (-install) or run from the console (-run).\n\n", appName)
 		fmt.Printf("When %s is running, use any modern browser to access it (port 443 by default).\n\n", appName)
 		fmt.Printf("For installation instructions, please refer to the included README file or visit\n")
-		fmt.Printf("https://rei3.de/admindocu-en_us/ for the full admin documentation.\n")
+		fmt.Printf("https://rei3.de/en/docs/admin/ for the full admin documentation.\n")
 		fmt.Printf("################################################################################\n\n")
 
 		// wait for user input to keep console open

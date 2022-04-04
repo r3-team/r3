@@ -1,4 +1,4 @@
-<p><em>Updated 2022-01-31</em></p>
+<p><em>Updated 2022-04-04</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -73,7 +73,7 @@
 <li><a href="#troubleshooting">Troubleshooting</a></li>
 </ol>
 <h1 id="introduction">Introduction</h1>
-<p>This is the documentation for building REI3 applications. REI3 is a free, open-source business application platform, which can run on-premise or from the cloud, on Windows and Linux. To learn how to setup and administrate REI3, please refer to the <a href="https://rei3.de/admindocu-en_us/">admin documentation</a>.</p>
+<p>This is the documentation for building REI3 applications. REI3 is a free, open-source business application platform, which can run on-premise or from the cloud, on Windows and Linux. To learn how to setup and administrate REI3, please refer to the <a href="https://rei3.de/en/docs/admin">admin documentation</a>.</p>
 <p>REI3´s primary purpose is to fulfill business software requirements. Simple applications, like a system that manages company event attendance, can be built within a single hour. More complex applications, like absence management or a system to execute mail campaigns, require more time but are also easily buildable with REI3. Organizations using REI3 can save time and money by reducing dependency on costly software solutions for simple requirements, while cheaply addressing complex, niche requirements that no fitting solution is available for.</p>
 <p>Most people with IT administration skills can utilize REI3 to address software requirements; it is however very useful to know and understand relational databases to make use of all features. REI3 provides access to low-level entities, such as database indexes, triggers, sub queries, functions and so on. With some background knowledge, complex relationships, business logic, access control as well as performance tuning can be implemented to build powerful, fast and scalable applications.</p>
 <h1 id="the-builder">The Builder</h1>
@@ -215,10 +215,17 @@
 <li>Execute: The function to execute. Must be a function that returns 'trigger'.</li>
 </ul>
 <h2 id="policies">Policies</h2>
-<p>A relation policy can limit what specific records are accessible to a logged in user via their <a href="#roles-and-access-management">role memberships</a>. This is done by using <a href="#backend-functions">backend functions</a> that serve as filter for specific actions. While forms, lists, input fields and other frontend elements can also <a href="#query-filters">filter records</a>, relation polices are applied globally and cannot be circumvented by changing the frontend. Relation policies are also 'quiet', meaning that users are not informed about missing access - they simply see different records.</p>
+<p>A relation policy can limit what specific records are accessible to a logged in user via their <a href="#roles-and-access-management">role memberships</a>. This is done by using <a href="#backend-functions">backend functions</a> that serve as filter for specific actions. While forms, lists and other frontend elements can also <a href="#query-filters">filter records</a>, relation policies are applied globally and cannot be circumvented by changing the frontend.</p>
+<p>A policy can be set for different actions, these are:</p>
+<ul>
+<li>Select: Users can only see records based on the results of the policy; they have no way of knowing whether or how many other records exist.</li>
+<li>Update: Users can only change values of records based on the results of the policy.</li>
+<li>Delete: Users can only delete records based on the results of the policy.</li>
+</ul>
+<p>Depending on the action, the frontend will either not show records (no select), disable inputs (select but no update) or block record deletion (no delete). Regardless of the frontend, relation policies will also be enforced on the backend when users attempt to select, update or delete records.</p>
 <p><img src="en_us_builder_pics/policies.png" alt="Policies" /></p>
-<p>To create a policy, a role must be connected to at least one action (display, change, delete). If records should be filtered, an 'allow' (whitelist) or 'block' (blacklist) filter function is used. A filter function is just a regular <a href="#backend-functions">backend function</a> that returns an array of record IDs (as in 'INTEGER[]' or 'bigint ARRAY'); the record IDs must match the relation for which the policy is defined. With the help of instance functions, such as 'has_role()' or 'get_login_id()', filter functions limit what records are accessible based on the currently logged in user.</p>
-<p>Polices have a defined order. The first policy matching the attempted action of the logged in user with the selected role, is applied. If the user has multiple roles, only the first matching policy is applied. If no filtering is desired, a role can be assigned all actions and both filter functions kept empty; this enables full access. If no policy is matched, full access is also granted.</p>
+<p>To create a policy, a role must be connected to at least one action. An 'allow' (whitelist) or 'block' (blacklist) filter function is used to define which records should be accessible. A filter function is a <a href="#backend-functions">backend function</a> that returns an array of record IDs (as in 'INTEGER[]' or 'bigint ARRAY'); the record IDs must match the relation for which the policy is defined. With the help of instance functions, such as 'has_role()' or 'get_login_id()', filter functions limit what records are accessible based on the currently logged in user.</p>
+<p>Polices have a defined order. The first policy matching the attempted action of the logged in user with the selected role, is applied. If the user has multiple roles, only the first matching policy is applied. If full access is desired, a role can be assigned all actions and both filter functions kept empty (e. g. 'unfiltered'). If no policy is matched, full access is also granted.</p>
 <h2 id="change-logs">Change logs</h2>
 <p>When data is changed in REI3 you can choose to automatically keep copies of these changes. These change retention settings are defined for <a href="#relations">relations</a>. If nothing is set, no data changes are kept. Every relation has 2 settings for defining data change retention:</p>
 <ol type="1">

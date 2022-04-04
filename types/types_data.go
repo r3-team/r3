@@ -71,8 +71,7 @@ type DataGetOrder struct {
 	Ascending bool `json:"ascending"` // ascending/descending
 }
 
-// main call for data GET
-// includes all options and variations
+// data GET request
 type DataGet struct {
 	RelationId  uuid.UUID           `json:"relationId"`  // source relation ID
 	IndexSource int                 `json:"indexSource"` // defines which index is source relation (usually 0 but can be different for getting data from specific, joined relations)
@@ -82,15 +81,17 @@ type DataGet struct {
 	Orders      []DataGetOrder      `json:"orders"`      // result order criteria (keep order)
 	Limit       int                 `json:"limit"`       // result limit
 	Offset      int                 `json:"offset"`      // result offset
+	GetPerm     bool                `json:"getPerm"`     // get result permissions (SET/DEL) from relation policy, GET is ignored as results are filtered by it already
 }
-
 type DataGetResult struct {
-	IndexRecordIds     map[int]interface{} `json:"indexRecordIds"`     // record IDs, key: relation index
-	IndexRecordEncKeys map[int]string      `json:"indexRecordEncKeys"` // data encryption keys, encrypted with login´s public key, key: relation index
+	IndexRecordIds     map[int]interface{} `json:"indexRecordIds"`     // IDs of relation records, key: relation index
+	IndexRecordEncKeys map[int]string      `json:"indexRecordEncKeys"` // record data keys, encrypted with login´s public key, key: relation index
+	IndexesPermNoDel   []int               `json:"indexesPermNoDel"`   // if getPerm, relation indexes of which records may not be deleted
+	IndexesPermNoSet   []int               `json:"indexesPermNoSet"`   // if getPerm, relation indexes of which records may not be updated
 	Values             []interface{}       `json:"values"`             // expression values, same order as requested expressions
 }
 
-// data set request
+// data SET request
 type DataSetAttribute struct {
 	AttributeId   uuid.UUID   `json:"attributeId"`   // attribute ID
 	AttributeIdNm pgtype.UUID `json:"attributeIdNm"` // attribute ID for n:m relationship
@@ -119,10 +120,10 @@ type DataSetFiles struct {
 	Files []DataSetFile `json:"files"`
 }
 type DataSetResult struct {
-	IndexRecordIds map[int]int64 `json:"indexRecordIds"` // record IDs, key: relation index
+	IndexRecordIds map[int]int64 `json:"indexRecordIds"` // IDs of relation records, key: relation index
 }
 
-// data log requests
+// data LOG request
 type DataLog struct {
 	Id         uuid.UUID          `json:"id"`
 	RelationId uuid.UUID          `json:"relationId"`
