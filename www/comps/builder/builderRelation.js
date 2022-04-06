@@ -138,6 +138,7 @@ let MyBuilderRelation = {
 					<thead>
 						<tr>
 							<th>{{ capApp.fires }}</th>
+							<th>{{ capGen.id }}</th>
 							<th>{{ capApp.onInsert }}</th>
 							<th>{{ capApp.onUpdate }}</th>
 							<th>{{ capApp.onDelete }}</th>

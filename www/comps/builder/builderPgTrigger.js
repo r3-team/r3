@@ -9,6 +9,12 @@ let MyBuilderPgTrigger = {
 				<option value="AFTER">AFTER</option>
 			</select>
 		</td>
+		<td class="minimum">
+			<my-button image="visible1.png"
+				@trigger="showInfo"
+				:active="!isNew"
+			/>
+		</td>
 		<td><my-bool v-model="onInsert" /></td>
 		<td><my-bool v-model="onUpdate" /></td>
 		<td><my-bool v-model="onDelete" /></td>
@@ -109,9 +115,21 @@ let MyBuilderPgTrigger = {
 		capGen:     function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
+		// actions
 		open:function() {
 			this.$router.push('/builder/pg-function/'+this.pgFunctionId);
 		},
+		showInfo:function() {
+			this.$store.commit('dialog',{
+				captionBody:this.pgTrigger.id,
+				buttons:[{
+					caption:this.capGen.button.cancel,
+					image:'cancel.png'
+				}]
+			});
+		},
+		
+		// backend calls
 		delAsk:function() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.delete,

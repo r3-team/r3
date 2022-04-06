@@ -10,7 +10,7 @@ let MyBuilderPresetValue = {
 			<select v-if="isRelationship" v-model="presetIdReferInput">
 				<option :value="null">[{{ attribute.content }}]</option>
 				<option v-for="p in relationship.presets" :value="p.id">
-					{{ relationship.name + '->' + p.name }}
+					{{ p.name }}
 				</option>
 			</select>
 			
@@ -34,10 +34,8 @@ let MyBuilderPresetValue = {
 			return this.isAttributeRelationship(this.attribute.content);
 		},
 		relationship:function() {
-			if(!this.isRelationship)
-				return false;
-			
-			return this.relationIdMap[this.attribute.relationshipId];
+			return !this.isRelationship
+				? false : this.relationIdMap[this.attribute.relationshipId];
 		},
 		
 		// inputs
@@ -184,7 +182,7 @@ let MyBuilderPreset = {
 		isAttributeRelationship,
 		
 		childGet:function(atrId,mode) {
-			let exists = typeof this.attributeIdMapValue[atrId] !== 'undefined';
+			const exists = typeof this.attributeIdMapValue[atrId] !== 'undefined';
 			
 			switch(mode) {
 				case 'presetIdRefer':
@@ -251,8 +249,8 @@ let MyBuilderPreset = {
 		},
 		del:function(rel) {
 			ws.send('preset','del',{id:this.preset.id},true).then(
-				(res) => this.$root.schemaReload(this.relation.moduleId),
-				(err) => this.$root.genericError(err)
+				res => this.$root.schemaReload(this.relation.moduleId),
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -263,14 +261,14 @@ let MyBuilderPreset = {
 				protected:this.protected,
 				values:this.values
 			},true).then(
-				(res) => {
+				res => {
 					if(this.isNew) {
 						this.name   = '';
 						this.values = [];
 					}
 					this.$root.schemaReload(this.relation.moduleId);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

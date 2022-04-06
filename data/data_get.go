@@ -164,8 +164,11 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 
 		for i, res := range results {
 			for index, recordIdIf := range res.IndexRecordIds {
-				var recordId int64
+				if recordIdIf == nil {
+					continue
+				}
 
+				var recordId int64
 				switch v := recordIdIf.(type) {
 				case int32:
 					recordId = int64(v)
