@@ -364,11 +364,11 @@ let MyGantt = {
 		indexColor:      { required:true },
 		indexDate0:      { type:Number,  required:true },
 		indexDate1:      { type:Number,  required:true },
-		isFullPage:      { type:Boolean, required:true },
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:true },
 		stepTypeDefault: { type:String,  required:true },
-		stepTypeToggle:  { type:Boolean, required:true }
+		stepTypeToggle:  { type:Boolean, required:true },
+		usesPageHistory: { type:Boolean, required:true }
 	},
 	emits:['open-form','record-selected','set-args','set-collection-index-filter'],
 	data:function() {
@@ -519,7 +519,7 @@ let MyGantt = {
 					return this.reloadOutside();
 			}
 		});
-		if(this.isFullPage) {
+		if(this.usesPageHistory) {
 			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
 				if(this.routeChangeFieldReload(newVals,oldVals)) {
 					this.paramsUpdated();
@@ -535,8 +535,8 @@ let MyGantt = {
 			this.$nextTick(this.setSteps);
 		});
 		
-		// if fullpage: set initial states via route parameters
-		if(this.isFullPage) {
+		if(this.usesPageHistory) {
+			// set initial states via route parameters
 			this.paramsUpdated();     // load existing parameters from route query
 			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
 		} else {
@@ -702,7 +702,7 @@ let MyGantt = {
 		reloadInside:function() {
 			// reload full page gantt by updating route parameters
 			// enables browser history for fullpage list navigation
-			if(this.isFullPage)
+			if(this.usesPageHistory)
 				return this.paramsUpdate(true);
 			
 			this.createHeaderItems();

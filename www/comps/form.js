@@ -221,8 +221,9 @@ let MyForm = {
 					:fieldIdMapState="fieldIdMapState"
 					:formBadLoad="badLoad"
 					:formBadSave="badSave"
+					:formIsInline="isInline"
+					:formIsSingleField="isSingleField"
 					:formLoading="loading"
-					:isFullPage="isSingleField"
 					:joinsIndexMap="joinsIndexMap"
 					:key="f.id"
 					:values="values"
@@ -1160,7 +1161,7 @@ let MyForm = {
 			
 			// open pop-up form if desired
 			if(options.popUp) {
-				let getter = this.getGetterArg(getterArgs,'attributes');
+				const getter = this.getGetterArg(getterArgs,'attributes');
 				
 				this.popUpAttributeIdMapDef = getter === '' ? {}
 					: this.getAttributeValuesFromGetter(getter);
@@ -1196,7 +1197,7 @@ let MyForm = {
 					getterArgs.push(`attributes=${this.$route.query.attributes}`);
 			}
 			
-			let path = this.getFormRoute(formIdOpen,recordId,true,getterArgs);
+			const path = this.getFormRoute(formIdOpen,recordId,true,getterArgs);
 			
 			if(newTab)
 				return this.openLink('#'+path,true);
@@ -1216,10 +1217,10 @@ let MyForm = {
 			return this.$router.replace(path);
 		},
 		setFormArgs:function(args,push) {
-			let path = this.getFormRoute(this.form.id,this.recordId,true,args);
+			const path = this.getFormRoute(this.form.id,this.recordId,true,args);
 			
-			if(this.$route.fullPath === path)
-				return; // nothing changed, ignore
+			if(this.$route.fullPath === path || this.isInline)
+				return; // nothing changed or inline form, ignore
 			
 			if(push) this.$router.push(path);
 			else     this.$router.replace(path);

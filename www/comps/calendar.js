@@ -605,9 +605,9 @@ let MyCalendar = {
 		indexColor:      { required:true },
 		indexDate0:      { type:Number,  required:true },
 		indexDate1:      { type:Number,  required:true },
-		isFullPage:      { type:Boolean, required:true },
 		query:           { type:Object,  required:true },
-		rowSelect:       { type:Boolean, required:false, default:false }
+		rowSelect:       { type:Boolean, required:false, default:false },
+		usesPageHistory: { type:Boolean, required:true }
 	},
 	emits:['open-form','record-selected','set-args','set-collection-index-filter'],
 	data:function() {
@@ -672,7 +672,7 @@ let MyCalendar = {
 					return this.reloadOutside();
 			}
 		});
-		if(this.isFullPage) {
+		if(this.usesPageHistory) {
 			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
 				if(this.routeChangeFieldReload(newVals,oldVals)) {
 					this.paramsUpdated();
@@ -681,8 +681,8 @@ let MyCalendar = {
 			});
 		}
 		
-		// if fullpage: set initial states via route parameters
-		if(this.isFullPage) {
+		if(this.usesPageHistory) {
+			// set initial states via route parameters
 			this.paramsUpdated();     // load existing parameters from route query
 			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
 		} else {
@@ -748,8 +748,8 @@ let MyCalendar = {
 		},
 		reloadInside:function() {
 			// reload full page calendar by updating route parameters
-			// enables browser history for fullpage list navigation
-			if(this.isFullPage)
+			// enables browser history for fullpage navigation
+			if(this.usesPageHistory)
 				return this.paramsUpdate(true);
 			
 			this.get();

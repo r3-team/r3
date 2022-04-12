@@ -293,7 +293,7 @@
 
 
 /* user overwrites */
-.user-bordersAll .list:not(.isFullPage):not(.asInput){
+.user-bordersAll .list:not(.singleField):not(.asInput){
 	border:1px solid var(--color-border);
 }
 .user-bordersRounded .list-input-row-empty{

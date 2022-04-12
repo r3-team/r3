@@ -42,7 +42,7 @@ let MyList = {
 	template:`<div class="list"
 		@keydown="keyDown"
 		v-click-outside="escape"
-		:class="{shade:!isInput, isFullPage:isFullPage, asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly }"
+		:class="{shade:!isInput, singleField:isSingleField, asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly }"
 	>
 		<!-- list as input field (showing record(s) from active field value) -->
 		<template v-if="isInput">
@@ -250,7 +250,7 @@ let MyList = {
 					/>
 					
 					<my-button image="filter.png"
-						v-if="isFullPage"
+						v-if="isSingleField"
 						@trigger="toggleUserFilters"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
@@ -284,7 +284,7 @@ let MyList = {
 					</select>
 					
 					<select class="selector"
-						v-if="isFullPage && allowPaging && !isMobile"
+						v-if="isSingleField && allowPaging && !isMobile"
 						v-model.number="limit"
 						@change="reloadInside()"
 					>
@@ -353,7 +353,7 @@ let MyList = {
 			<div class="layoutTable"
 				v-if="layout === 'table'"
 				:class="{ 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
-				:id="isFullPage ? scrollFormId : null"
+				:id="usesPageHistory ? scrollFormId : null"
 			>
 				<!-- list results as HTML table -->
 				<table :class="{ 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
@@ -471,7 +471,7 @@ let MyList = {
 			<!-- list results as cards -->
 			<div class="layoutCards"
 				v-if="layout === 'cards'"
-				:id="isFullPage ? scrollFormId : null"
+				:id="usesPageHistory ? scrollFormId : null"
 			>
 				<!-- actions -->
 				<div class="top-actions default-inputs">
@@ -574,15 +574,16 @@ let MyList = {
 		query:       { type:Object,  required:true },                    // list query
 		
 		// toggles
-		allowPaging:{ type:Boolean, required:false, default:true },  // enable paging
-		csvExport:  { type:Boolean, required:false, default:false },
-		csvImport:  { type:Boolean, required:false, default:false },
-		filterQuick:{ type:Boolean, required:false, default:false }, // enable quick filter
-		formLoading:{ type:Boolean, required:false, default:false }, // trigger and control list reloads
-		header:     { type:Boolean, required:false, default:true  }, // show list header
-		isFullPage: { type:Boolean, required:false, default:false }, // list fill entire form
-		isInput:    { type:Boolean, required:false, default:false }, // use list as input
-		rowSelect:  { type:Boolean, required:false, default:false }, // list rows can be selected (to open record in form)
+		allowPaging:    { type:Boolean, required:false, default:true },  // enable paging
+		csvExport:      { type:Boolean, required:false, default:false },
+		csvImport:      { type:Boolean, required:false, default:false },
+		filterQuick:    { type:Boolean, required:false, default:false }, // enable quick filter
+		formLoading:    { type:Boolean, required:false, default:false }, // trigger and control list reloads
+		header:         { type:Boolean, required:false, default:true  }, // show list header
+		isInput:        { type:Boolean, required:false, default:false }, // use list as input
+		isSingleField:  { type:Boolean, required:false, default:false }, // list fills entire form
+		rowSelect:      { type:Boolean, required:false, default:false }, // list rows can be selected (to open record in form)
+		usesPageHistory:{ type:Boolean, required:false, default:false }, // list uses page getters for filtering/sorting/etc.
 		
 		// list as input field
 		inputAsCategory:{ type:Boolean, required:false, default:false },    // input is category selector (all records are shown, active ones are checked off)
@@ -854,7 +855,7 @@ let MyList = {
 					return this.reloadOutside();
 			}
 		});
-		if(this.isFullPage) {
+		if(this.usesPageHistory) {
 			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
 				if(this.routeChangeFieldReload(newVals,oldVals)) {
 					this.paramsUpdated();
@@ -863,8 +864,8 @@ let MyList = {
 			});
 		}
 		
-		// if fullpage: set initial states via route parameters
-		if(this.isFullPage) {
+		if(this.usesPageHistory) {
+			// set initial states via route parameters
 			this.paramsUpdated();     // load existing parameters from route query
 			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
 		} else {
@@ -959,10 +960,10 @@ let MyList = {
 				default: break; // no special treatment
 			}
 			
-			// reload full page list by updating route parameters
+			// update route parameters, reloads list via watcher
 			// enables browser history for fullpage list navigation
 			//  special cases: user filters & manuel reloads (no page param change)
-			if(this.isFullPage && entity !== 'filtersUser' && entity !== 'manual')
+			if(this.usesPageHistory && entity !== 'filtersUser' && entity !== 'manual')
 				return this.paramsUpdate(true);
 			
 			this.get();
@@ -1190,7 +1191,7 @@ let MyList = {
 			this.reloadInside('order');
 		},
 		clickRow:function(row,middleClick) {
-			let recordId = row.indexRecordIds['0'];
+			const recordId = row.indexRecordIds['0'];
 			
 			if(this.isInput && !this.inputAsCategory) {
 				

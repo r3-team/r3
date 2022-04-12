@@ -314,11 +314,12 @@ let MyField = {
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
 			:iconId="iconId ? iconId : null"
-			:isFullPage="isFullPage"
+			:isSingleField="formIsSingleField"
 			:layout="field.layout"
 			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
+			:usesPageHistory="formIsSingleField && !formIsInline"
 		/>
 		
 		<!-- calendar -->
@@ -342,9 +343,9 @@ let MyField = {
 			:indexColor="field.indexColor"
 			:indexDate0="field.indexDate0"
 			:indexDate1="field.indexDate1"
-			:isFullPage="isFullPage"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
+			:usesPageHistory="formIsSingleField && !formIsInline"
 		/>
 		
 		<!-- gantt -->
@@ -369,11 +370,11 @@ let MyField = {
 			:indexColor="field.indexColor"
 			:indexDate0="field.indexDate0"
 			:indexDate1="field.indexDate1"
-			:isFullPage="isFullPage"
 			:rowSelect="field.openForm !== null"
 			:stepTypeDefault="field.ganttSteps"
 			:stepTypeToggle="field.ganttStepsToggle"
 			:query="field.query"
+			:usesPageHistory="formIsSingleField && !formIsInline"
 		/>
 		
 		<!-- chart -->
@@ -383,7 +384,7 @@ let MyField = {
 			:columns="columnsProcessed"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
-			:isFullPage="isFullPage"
+			:isSingleField="formIsSingleField"
 			:limit="field.query.fixedLimit"
 			:optionJson="field.chartOption"
 			:query="field.query"
@@ -404,26 +405,28 @@ let MyField = {
 			:fieldIdMapState="fieldIdMapState"
 			:formBadLoad="formBadLoad"
 			:formBadSave="formBadSave"
+			:formIsInline="formIsInline"
+			:formIsSingleField="formIsSingleField"
 			:formLoading="formLoading"
 			:flexDirParent="field.direction"
-			:isFullPage="isFullPage"
 			:joinsIndexMap="joinsIndexMap"
 			:key="f.id"
 			:values="values"
 		/>
 	</div>`,
 	props:{
-		dataFieldMap:   { type:Object,  required:true },
-		field:          { type:Object,  required:true },
-		fieldIdMapState:{ type:Object,  required:false, default:() => {return {};} }, // overwritten states
-		formBadLoad:    { type:Boolean, required:true }, // attempted record load with no return
-		formBadSave:    { type:Boolean, required:true }, // attempted save with invalid inputs
-		formLoading:    { type:Boolean, required:true },
-		flexDirParent:  { type:String,  required:true }, // flex direction (row/column) of parent
-		isFullPage:     { type:Boolean, required:true },
-		joinsIndexMap:  { type:Object,  required:true },
-		logViewer:      { type:Boolean, required:false, default:false }, // is part of log viewer
-		values:         { type:Object,  required:true }
+		dataFieldMap:     { type:Object,  required:true },
+		field:            { type:Object,  required:true },
+		fieldIdMapState:  { type:Object,  required:false, default:() => {return {};} }, // overwritten states
+		formBadLoad:      { type:Boolean, required:true }, // attempted record load with no return
+		formBadSave:      { type:Boolean, required:true }, // attempted save with invalid inputs
+		formIsInline:     { type:Boolean, required:true }, // parent form is part of another element (sub form)
+		formIsSingleField:{ type:Boolean, required:true }, // parent form contains a single field
+		formLoading:      { type:Boolean, required:true },
+		flexDirParent:    { type:String,  required:true }, // flex direction (row/column) of parent
+		joinsIndexMap:    { type:Object,  required:true },
+		logViewer:        { type:Boolean, required:false, default:false }, // is part of log viewer
+		values:           { type:Object,  required:true }
 	},
 	emits:['execute-function','open-form','set-form-args','set-valid','set-value','set-value-init'],
 	data:function() {
