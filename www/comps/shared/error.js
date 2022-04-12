@@ -26,7 +26,7 @@ export function genericError(message) {
 
 export function genericErrorWithFallback(message,fallbackContext,fallbackNumber) {
 	// message has proper error code, resolve normally
-	if(/^{ERR_[A-Z]{3}_\d{3}}/.test(message))
+	if(typeof message === 'string' && /^{ERR_[A-Z]{3}_\d{3}}/.test(message))
 		return genericError(message);
 	
 	// no proper error code available, resolve with fallback
@@ -36,7 +36,8 @@ export function genericErrorWithFallback(message,fallbackContext,fallbackNumber)
 // these are errors that should not occur
 // they are printed to the console for troubleshooting
 export function consoleError(err) {
-	console.log(`${new Date().toLocaleString()}: An error occurred`,err);
+	console.log(`${new Date().toLocaleString()}: An error occurred`,
+		resolveErrCode(err));
 };
 
 export function resolveErrCode(message) {

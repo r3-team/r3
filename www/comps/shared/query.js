@@ -84,13 +84,14 @@ export function getQueryExpressionsDateRange(attributeId0,index0,attributeId1,in
 	return expr;
 };
 
-export function getNestedIndexAttributeIdsByJoins(joins,nestingLevel) {
+export function getNestedIndexAttributeIdsByJoins(joins,nestingLevel,inclEncrypted) {
 	let out = [];
-	for(let i = 0, j = joins.length; i < j; i++) {
-		let r = MyStore.getters['schema/relationIdMap'][joins[i].relationId];
+	for(const join of joins) {
+		let r = MyStore.getters['schema/relationIdMap'][join.relationId];
 		
-		for(let x = 0, y = r.attributes.length; x < y; x++) {
-			out.push(`${nestingLevel}_${joins[i].index}_${r.attributes[x].id}`);
+		for(const atr of r.attributes) {
+			if(!atr.encrypted || inclEncrypted)
+				out.push(`${nestingLevel}_${join.index}_${atr.id}`);
 		}
 	}
 	return out;

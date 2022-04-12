@@ -451,7 +451,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		}
 		idMap[relId] = true
 
-		relName, err := schema.GetRelationNameById_tx(tx, relId)
+		_, relName, err := schema.GetRelationNamesById_tx(tx, relId)
 		if err != nil {
 			return "", err
 		}

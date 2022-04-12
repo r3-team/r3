@@ -117,14 +117,14 @@ let MyApp = {
 			let that          = this;
 			
 			// collect assigned modules
-			for(let i = 0, j = this.modules.length; i < j; i++) {
-				if(this.modules[i].parentId === null)
+			for(const mod of this.modules) {
+				if(mod.parentId === null)
 					continue;
 				
-				if(typeof idMapChildren[this.modules[i].parentId] === 'undefined')
-					idMapChildren[this.modules[i].parentId] = [];
+				if(typeof idMapChildren[mod.parentId] === 'undefined')
+					idMapChildren[mod.parentId] = [];
 				
-				idMapChildren[this.modules[i].parentId].push(this.modules[i]);
+				idMapChildren[mod.parentId].push(mod);
 			}
 			
 			// parse module details for valid header entries
@@ -180,8 +180,8 @@ let MyApp = {
 			};
 			
 			// parse module entries
-			for(let i = 0, j = this.modules.length; i < j; i++) {
-				let m = parseModule(this.modules[i],true);
+			for(const mod of this.modules) {
+				let m = parseModule(mod,true);
 				
 				if(m !== false)
 					entries.push(m);
@@ -349,6 +349,10 @@ let MyApp = {
 			this.$store.commit('local/loginKeyAes',null);
 			this.$store.commit('local/token','');
 			this.$store.commit('local/tokenKeep',false);
+			this.$store.commit('loginPrivateKey',null);
+			this.$store.commit('loginPrivateKeyEnc',null);
+			this.$store.commit('loginPrivateKeyEncBackup',null);
+			this.$store.commit('loginPublicKey',null);
 			
 			// reconnect for another login attempt
 			this.wsReconnect(true);
@@ -428,6 +432,7 @@ let MyApp = {
 					
 					if(this.loginKeyAes !== null && res[4].payload.privateEnc !== null) {
 						this.$store.commit('loginEncryption',true);
+						this.$store.commit('loginPrivateKey',null);
 						this.$store.commit('loginPrivateKeyEnc',res[4].payload.privateEnc);
 						this.$store.commit('loginPrivateKeyEncBackup',res[4].payload.privateEncBackup);
 						

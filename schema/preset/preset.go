@@ -98,11 +98,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 	}
 
 	// resolve dependencies
-	_, modName, err := schema.GetModuleDetailsByRelationId_tx(tx, relationId)
-	if err != nil {
-		return err
-	}
-	relName, err := schema.GetRelationNameById_tx(tx, relationId)
+	modName, relName, err := schema.GetRelationNamesById_tx(tx, relationId)
 	if err != nil {
 		return err
 	}

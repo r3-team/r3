@@ -1419,7 +1419,7 @@ let MyForm = {
 			const handleEncErr = err => {
 				this.updatingRecord = false;
 				this.consoleError(err); // full error for troubleshooting
-				this.$root.genericErrorWithFallback(err.message,'SEC','003');
+				this.$root.genericErrorWithFallback(err,'SEC','003');
 			};
 			
 			let relations = {};

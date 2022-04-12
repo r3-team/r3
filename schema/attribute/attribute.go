@@ -120,7 +120,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 	if err != nil {
 		return err
 	}
-	relationName, err := schema.GetRelationNameById_tx(tx, relationId)
+	relationName, relEncryption, err := schema.GetRelationDetailsById_tx(tx, relationId)
 	if err != nil {
 		return err
 	}
@@ -389,6 +389,39 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		if name == schema.PkName {
 			if err := createPK_tx(tx, moduleName, relationName, id, relationId); err != nil {
 				return err
+			}
+
+			// create table for encrypted record keys if relation supports encryption
+			if relEncryption {
+				tName := schema.GetEncKeyTableName(relationId)
+
+				if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+					CREATE TABLE IF NOT EXISTS instance_e2ee."%s" (
+					    record_id bigint NOT NULL,
+					    login_id integer NOT NULL,
+					    key_enc text COLLATE pg_catalog."default" NOT NULL,
+					    CONSTRAINT "%s_pkey" PRIMARY KEY (record_id,login_id),
+					    CONSTRAINT "%s_record_id_fkey" FOREIGN KEY (record_id)
+					        REFERENCES "%s"."%s" (%s) MATCH SIMPLE
+					        ON UPDATE CASCADE
+					        ON DELETE CASCADE
+					        DEFERRABLE INITIALLY DEFERRED,
+					    CONSTRAINT "%s_login_id_fkey" FOREIGN KEY (login_id)
+					        REFERENCES instance.login (id) MATCH SIMPLE
+					        ON UPDATE CASCADE
+					        ON DELETE CASCADE
+					        DEFERRABLE INITIALLY DEFERRED
+					);
+					CREATE INDEX "fki_%s_record_id_fkey"
+						ON instance_e2ee."%s" USING btree (record_id ASC NULLS LAST);
+					
+					CREATE INDEX "fki_%s_login_id_fkey"
+						ON instance_e2ee."%s" USING btree (login_id ASC NULLS LAST);
+				`, tName, tName, tName, moduleName, relationName, schema.PkName,
+					tName, tName, tName, tName, tName)); err != nil {
+
+					return err
+				}
 			}
 		}
 

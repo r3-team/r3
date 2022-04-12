@@ -402,7 +402,8 @@ let MyFilterSide = {
 			
 			return this.getNestedIndexAttributeIdsByJoins(
 				this.query.joins,
-				this.joinsParents.length
+				this.joinsParents.length,
+				false
 			);
 		},
 		
@@ -877,16 +878,16 @@ let MyFilters = {
 			// used for user filters on list fields
 			//  user filters can only ever access main query (no access to sub queries)
 			if(this.columnsMode) {
-				for(let i = 0, j = this.columns.length; i < j; i++) {
-					let col = this.columns[i];
+				for(const col of this.columns) {
+					const atr = this.attributeIdMap[col.attributeId];
 					
 					if(col.subQuery || (col.aggregator !== null && col.aggregator !== 'record'))
 						continue;
 					
-					if(this.isAttributeFiles(this.attributeIdMap[col.attributeId].content))
+					if(this.isAttributeFiles(atr.content) || atr.encrypted)
 						continue;
 					
-					out.push(`0_${col.index}_${col.attributeId}`);
+					out.push(`0_${col.index}_${atr.id}`);
 				}
 				return out;
 			}
@@ -894,9 +895,9 @@ let MyFilters = {
 			// no columns defined, provide filter criteria based on attributes from joined relation
 			//  as filters can be used in sub queries, we access all joins from all parent queries
 			// used for pre-defining list filters for queries
-			out = this.getNestedIndexAttributeIdsByJoins(this.joins,this.joinsParents.length);
+			out = this.getNestedIndexAttributeIdsByJoins(this.joins,this.joinsParents.length,false);
 			for(let i = 0, j = this.joinsParents.length; i < j; i++) {
-				out = out.concat(this.getNestedIndexAttributeIdsByJoins(this.joinsParents[i],i));
+				out = out.concat(this.getNestedIndexAttributeIdsByJoins(this.joinsParents[i],i,false));
 			}
 			return out;
 		},

@@ -225,6 +225,7 @@ let MyLogin = {
 		customLogoUrl:    function() { return this.$store.getters['local/customLogoUrl']; },
 		token:            function() { return this.$store.getters['local/token']; },
 		tokenKeep:        function() { return this.$store.getters['local/tokenKeep']; },
+		kdfIterations:    function() { return this.$store.getters.constants.kdfIterations; },
 		productionMode:   function() { return this.$store.getters.productionMode; }
 	},
 	watch:{
@@ -353,7 +354,7 @@ let MyLogin = {
 				return this.appEnable(loginId,loginName);
 			
 			// generate AES key from credentials and login private key salt
-			this.pbkdf2PassToAesGcmKey(this.password,saltKdf,10000,true).then(
+			this.pbkdf2PassToAesGcmKey(this.password,saltKdf,this.kdfIterations,true).then(
 				key => {
 					this.aesGcmExportBase64(key).then(
 						keyBase64 => {

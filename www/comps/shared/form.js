@@ -46,19 +46,21 @@ export async function getRowsDecrypted(rows,expressions) {
 			if(value === null)
 				continue;
 			
-			// check if data key for this relation is already available
+			// check if data key for this relation is already available, get from rows if not
 			if(typeof keysByRelIndex[relIndex] === 'undefined') {
 				
-				// no data key available, get from rows
+				if(MyStore.getters.loginPrivateKey === null)
+					throw new Error('failed to decrypt data, private key is unavailable');
+				
 				if(typeof rows[i].indexRecordEncKeys[relIndex] === 'undefined')
-					throw new Error('no data key for record row '+i);
+					throw new Error('failed to decrypt data, no data key for record row '+i);
 				
 				// decrypt data key with private key
 				keysByRelIndex[relIndex] = await rsaDecrypt(
 					MyStore.getters.loginPrivateKey,
 					rows[i].indexRecordEncKeys[relIndex]
 				).catch(
-					err => { throw new Error('failed to decrypt data key with private key, '+err); }
+					err => { throw new Error('failed to decrypt data, '+err); }
 				);
 			}
 			

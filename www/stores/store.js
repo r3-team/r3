@@ -16,6 +16,7 @@ const MyStore = Vuex.createStore({
 		collectionIdMap:{},            // map of all collection values, key = collection ID
 		config:{},                     // configuration values (admin only)
 		constants:{                    // constant variables, codes/messages/IDs
+			kdfIterations:10000,       // number of iterations for PBKDF2 key derivation function
 			keyLength:64,              // length of new symmetric keys for data encryption
 			scrollFormId:'form-scroll' // ID of form page element (to recover scroll position during routing)
 		},

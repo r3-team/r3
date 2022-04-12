@@ -180,6 +180,7 @@ let MySettingsEncryption = {
 		loginPrivateKeyEnc:function() { return this.$store.getters.loginPrivateKeyEnc; },
 		loginPrivateKeyEncBackup:function() { return this.$store.getters.loginPrivateKeyEncBackup; },
 		loginPublicKey:    function() { return this.$store.getters.loginPublicKey; },
+		kdfIterations:     function() { return this.$store.getters.constants.kdfIterations; },
 		capApp:            function() { return this.$store.getters.captions.settings.encryption; },
 		capErr:            function() { return this.$store.getters.captions.error; },
 		capGen:            function() { return this.$store.getters.captions.generic; }
@@ -290,7 +291,7 @@ let MySettingsEncryption = {
 			);
 		},
 		unlockWithPassphrase:function() {
-			this.pbkdf2PassToAesGcmKey(this.regainPassword,this.loginKeySalt,10000,true).then(
+			this.pbkdf2PassToAesGcmKey(this.regainPassword,this.loginKeySalt,this.kdfIterations,true).then(
 				loginKeyOld => {
 					// attempt to decrypt private key with login key based on previous password
 					this.aesGcmDecryptBase64(this.loginPrivateKeyEnc,loginKeyOld).then(
@@ -433,6 +434,7 @@ let MySettingsAccount = {
 		loginName:         function() { return this.$store.getters.loginName; },
 		loginPrivateKey:   function() { return this.$store.getters.loginPrivateKey; },
 		loginPrivateKeyEnc:function() { return this.$store.getters.loginPrivateKeyEnc; },
+		kdfIterations:     function() { return this.$store.getters.constants.kdfIterations; },
 		capApp:            function() { return this.$store.getters.captions.settings.account; },
 		capGen:            function() { return this.$store.getters.captions.generic; }
 	},
@@ -459,7 +461,7 @@ let MySettingsAccount = {
 					// generate login key from new password for re-encryption
 					Promise.all([
 						this.aesGcmDecryptBase64(this.loginPrivateKeyEnc,loginKey),
-						this.pbkdf2PassToAesGcmKey(this.pwNew0,this.loginKeySalt,10000,true)
+						this.pbkdf2PassToAesGcmKey(this.pwNew0,this.loginKeySalt,this.kdfIterations,true)
 					]).then(
 						res => {
 							const privateKeyPem = res[0]; // private key PEM to be encrypted
