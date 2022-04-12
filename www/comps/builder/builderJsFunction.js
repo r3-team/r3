@@ -362,6 +362,7 @@ let MyBuilderJsFunction = {
 			
 			field.selectionStart = startPos + 1;
 			field.selectionEnd   = startPos + 1;
+			this.codeFunction    = field.value;
 		},
 		reset:function() {
 			this.name         = this.jsFunction.name;
