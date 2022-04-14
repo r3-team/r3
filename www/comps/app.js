@@ -83,10 +83,11 @@ let MyApp = {
 			
 			let classes = ['user-spacing',`spacing-value${this.settings.spacing}`];
 			
-			if(this.settings.bordersAll) classes.push('user-bordersAll');
-			if(this.settings.compact)    classes.push('user-compact');
-			if(this.settings.dark)       classes.push('user-dark');
-			if(this.isMobile)            classes.push('is-mobile');
+			if(this.settings.bordersAll)       classes.push('user-bordersAll');
+			if(this.settings.compact)          classes.push('user-compact');
+			if(this.settings.dark)             classes.push('user-dark');
+			if(this.settings.mobileScrollForm) classes.push('user-mobile-scroll-form');
+			if(this.isMobile)                  classes.push('is-mobile');
 			
 			switch(this.settings.bordersCorner) {
 				case 'rounded': classes.push('user-bordersRounded'); break;

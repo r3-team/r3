@@ -1113,8 +1113,7 @@
 			"goToApps":"Open file import",
 			"goToLogins":"Assign roles",
 			"goToRepo":"Open repository",
-			"installBundle":"Install Core Company",
-			"openHelp":"Help page"
+			"installBundle":"Install Core Company"
 		},
 		"wizard":{
 			"installBundle":"Core Company",
@@ -1126,8 +1125,6 @@
 			"intro":"Welcome to REI3<br /><br />There are currently no applications installed. To start using REI3, please choose one of the installation options below.",
 			"title":"Setup"
 		},
-		"firstSteps":"First steps",
-		"firstStepsIntro":"Most applications require some initial configuration and or standing data to be useful. Please refer to the individual help pages to get started:",
 		"newVersion":"Update notification",
 		"newVersionText":"A new version of REI3 is available.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">Download REI3 v{VERSION}</a>",
 		"noAccess":"No access has been granted yet.<br />Please contact your system administrator.",
@@ -1254,14 +1251,13 @@
 		"dark":"Dark mode",
 		"fontSize":"Font size",
 		"headerCaptions":"Show main menu titles",
-		"hintFirstSteps":"Show 'first-steps'",
 		"languageCode":"Language",
+		"mobileScrollForm":"Mobile: Scroll entire form",
 		"pageLimit":"Max. page width",
 		"pageTitle":"Settings",
 		"spacing":"Spacing",
 		"sundayFirstDow":"Sunday is 1st weekday",
 		"titleAccount":"Account",
-		"titleAdmin":"Admin",
 		"titleDisplay":"Display",
 		"titleEncryption":"End-to-end encryption",
 		"titleTheme":"Theme",

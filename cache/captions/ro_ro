@@ -1113,8 +1113,7 @@
 			"goToApps":"Deschideți fișierul de import",
 			"goToLogins":"Atribuiți roluri",
 			"goToRepo":"Deschideți depozitul",
-			"installBundle":"Instalați Core Company",
-			"openHelp":"Pagina de ajutor"
+			"installBundle":"Instalați Core Company"
 		},
 		"wizard":{
 			"installBundle":"Core Company",
@@ -1126,8 +1125,6 @@
 			"intro":"Bun venit la REI3<br /><br />În prezent, nu există aplicații instalate. Pentru a începe să utilizați REI3, vă rugăm să alegeți una dintre opțiunile de instalare de mai jos.",
 			"title":"Setare"
 		},
-		"firstSteps":"Primii pași",
-		"firstStepsIntro":"Majoritatea aplicațiilor necesită o configurație inițială și/sau date permanente pentru a fi utile. Vă rugăm să consultați paginile individuale de ajutor pentru a începe:",
 		"newVersion":"Notificare de actualizare",
 		"newVersionText":"Este disponibilă o nouă versiune de REI3.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">Descărcați REI3 v{VERSION}</a >",
 		"noAccess":"Nu a fost acordat încă acces.<br />Vă rugăm să contactați administratorul de sistem.",
@@ -1254,14 +1251,13 @@
 		"dark":"Mod întunecat",
 		"fontSize":"Mărime font",
 		"headerCaptions":"Afișează titlurile din meniul principal",
-		"hintFirstSteps":"Afișați „primii pași”",
 		"languageCode":"Limba",
+		"mobileScrollForm":"Mobile: Scroll entire form",
 		"pageLimit":"Lățimea paginii maximă",
 		"pageTitle":"Setări",
 		"spacing":"Spaţierea",
 		"sundayFirstDow":"Duminică este prima zi a săptămânii",
 		"titleAccount":"Account",
-		"titleAdmin":"Administrare",
 		"titleDisplay":"Afișare",
 		"titleEncryption":"End-to-end encryption",
 		"titleTheme":"Temă",

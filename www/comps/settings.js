@@ -670,21 +670,9 @@ let MySettings = {
 									</div>
 								</td>
 							</tr>
-						</tbody>
-					</table>
-				</div>
-				
-				<!-- admin -->
-				<div class="contentPart short" v-if="isAdmin">
-					<div class="contentPartHeader">
-						<img class="icon" src="images/settings.png" />
-						<h1>{{ capApp.titleAdmin }}</h1>
-					</div>
-					<table class="default-inputs">
-						<tbody>
 							<tr>
-								<td>{{ capApp.hintFirstSteps }}</td>
-								<td><my-bool v-model="settingsInput.hintFirstSteps" /></td>
+								<td>{{ capApp.mobileScrollForm }}</td>
+								<td><my-bool v-model="settingsInput.mobileScrollForm" /></td>
 							</tr>
 						</tbody>
 					</table>
@@ -736,7 +724,6 @@ let MySettings = {
 		languageCodes:function() { return this.$store.getters['schema/languageCodes']; },
 		capGen:       function() { return this.$store.getters.captions.generic; },
 		capApp:       function() { return this.$store.getters.captions.settings; },
-		isAdmin:      function() { return this.$store.getters.isAdmin; },
 		settings:     function() { return this.$store.getters.settings; }
 	},
 	mounted:function() {

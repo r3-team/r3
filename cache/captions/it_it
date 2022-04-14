@@ -1113,8 +1113,7 @@
 			"goToApps":"Apri file import",
 			"goToLogins":"Assegna ruoli",
 			"goToRepo":"Apri archivio",
-			"installBundle":"Installa Core Company",
-			"openHelp":"Pagina aiuto"
+			"installBundle":"Installa Core Company"
 		},
 		"wizard":{
 			"installBundle":"Core Company",
@@ -1126,8 +1125,6 @@
 			"intro":"Benvenuto in REI3<br /><br />Al momento non ci sono applicazioni installate. Per iniziare a utilizzare REI3, scegli una delle opzioni di installazione di seguito.",
 			"title":"Setup"
 		},
-		"firstSteps":"Primi passi",
-		"firstStepsIntro":"La maggior parte delle applicazioni richiede una configurazione iniziale e/o dati permanenti per essere utili. Si prega di fare riferimento alle singole pagine di aiuto per iniziare:",
 		"newVersion":"Notifica aggiornamento",
 		"newVersionText":"È disponibile una nuova versione di REI3.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">Scarica REI3 v{VERSION}</a >",
 		"noAccess":"Non è stato ancora concesso l'accesso.<br />Contatta il tuo amministratore di sistema.",
@@ -1254,14 +1251,13 @@
 		"dark":"Modalità scura",
 		"fontSize":"Dimensione font",
 		"headerCaptions":"Mostra titolo menu principale",
-		"hintFirstSteps":"Mostra 'primi-passi'",
 		"languageCode":"Lingua",
+		"mobileScrollForm":"Mobile: Scroll entire form",
 		"pageLimit":"Max. larghezza della pagina",
 		"pageTitle":"Impostazioni",
 		"spacing":"Spaziatura",
 		"sundayFirstDow":"Domenica è il primo giorno della settimana",
 		"titleAccount":"Account",
-		"titleAdmin":"Amministrazione",
 		"titleDisplay":"Visualizza",
 		"titleEncryption":"End-to-end encryption",
 		"titleTheme":"Tema",

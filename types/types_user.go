@@ -8,9 +8,9 @@ type Settings struct {
 	Dark              bool   `json:"dark"`
 	FontSize          int    `json:"fontSize"`
 	HeaderCaptions    bool   `json:"headerCaptions"`
-	HintFirstSteps    bool   `json:"hintFirstSteps"`
 	HintUpdateVersion int    `json:"hintUpdateVersion"`
 	LanguageCode      string `json:"languageCode"`
+	MobileScrollForm  bool   `json:"mobileScrollForm"`
 	PageLimit         int    `json:"pageLimit"`
 	Spacing           int    `json:"spacing"`
 	SundayFirstDow    bool   `json:"sundayFirstDow"`
