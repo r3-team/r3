@@ -224,15 +224,16 @@
 			"msAdExtHint":"Nested group memberships, user account control",
 			"nameHint":"Unique name",
 			"port":"Port",
-			"portHint":"By default 389 if no TLS, 636 for TLS",
+			"portHint":"By default 389, 636 for SSL/TLS",
 			"role":"Role",
 			"searchClass":"Object class",
 			"searchClassHint":"Example: user",
 			"searchDn":"Search DN",
 			"searchDnHint":"Example: OU=User,DC=mycompany,DC=local",
+			"starttls":"Use StartTLS",
 			"title":"Create/edit connection",
 			"titleRoles":"Roles per group membership",
-			"tls":"Use TLS",
+			"tls":"Use SSL/TLS",
 			"tlsVerify":"Verify TLS"
 		},
 		"license":{

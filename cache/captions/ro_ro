@@ -224,15 +224,16 @@
 			"msAdExtHint":"Apartenența la grupuri imbricate, controlul contului de utilizator",
 			"nameHint":"Nume unic",
 			"port":"Portul",
-			"portHint":"În mod implicit, 389 dacă nu există TLS sau 636 pentru TLS",
+			"portHint":"În mod implicit, 389 sau 636 pentru SSL/TLS",
 			"role":"Rol",
 			"searchClass":"Clasa de obiecte",
 			"searchClassHint":"Exemplu: user",
 			"searchDn":"Cauta DN",
 			"searchDnHint":"Exemplu: OU=User,DC=mycompany,DC=local",
+			"starttls":"Utilizați StartTLS",
 			"title":"Creați/editați conexiunea",
 			"titleRoles":"Roluri pentru apartenența la un grup",
-			"tls":"Utilizați TLS",
+			"tls":"Utilizați SSL/TLS",
 			"tlsVerify":"Verifică TLS"
 		},
 		"license":{

@@ -105,6 +105,11 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- remove deprecated login setting
 			ALTER TABLE instance.login_setting DROP COLUMN hint_first_steps;
 			
+			-- new LDAP option
+			ALTER TABLE instance.ldap RENAME COLUMN tls TO starttls;
+			ALTER TABLE instance.ldap ADD COLUMN tls BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE instance.ldap ALTER COLUMN tls DROP DEFAULT;
+			
 			-- query table changes
 			DELETE FROM app.query WHERE relation_id IS NULL;
 			ALTER TABLE app.query ALTER COLUMN relation_id SET NOT NULL;

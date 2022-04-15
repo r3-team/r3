@@ -48,7 +48,7 @@ func LdapSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	return nil, ldap.Set_tx(tx, req.Id, req.Name, req.Host, req.Port,
 		req.BindUserDn, req.BindUserPw, req.SearchClass, req.SearchDn,
 		req.KeyAttribute, req.LoginAttribute, req.MemberAttribute,
-		req.AssignRoles, req.MsAdExt, req.Tls, req.TlsVerify,
+		req.AssignRoles, req.MsAdExt, req.Starttls, req.Tls, req.TlsVerify,
 		req.Roles)
 }
 

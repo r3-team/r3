@@ -18,25 +18,36 @@ func ConnectAndBind(ldapId int32) (*goldap.Conn, types.Ldap, error) {
 		return nil, ldap, err
 	}
 
-	bind := fmt.Sprintf("ldap://%s:%d", ldap.Host, ldap.Port)
+	// prepare bind string
+	protocol := "ldap"
+	if ldap.Tls {
+		protocol = "ldaps"
+	}
+	bind := fmt.Sprintf("%s://%s:%d", protocol, ldap.Host, ldap.Port)
 
-	log.Info("ldap", fmt.Sprintf("connecting to %s (TLS: %v)", bind, ldap.Tls))
-
-	ldapConn, err := goldap.DialURL(bind)
-	if err != nil {
-		return nil, ldap, err
+	// prepare TLS config
+	tlsConfig := tls.Config{
+		InsecureSkipVerify: !ldap.TlsVerify,
+		ServerName:         ldap.Host,
 	}
 
-	// reconnect with TLS if requested
+	log.Info("ldap", fmt.Sprintf("connecting to '%s'", bind))
+
+	var ldapConn *goldap.Conn
 	if ldap.Tls {
-
-		tlsConfig := tls.Config{}
-
-		if !ldap.TlsVerify {
-			tlsConfig.InsecureSkipVerify = true
-		}
-		if err := ldapConn.StartTLS(&tlsConfig); err != nil {
+		ldapConn, err = goldap.DialURL(bind, goldap.DialWithTLSConfig(&tlsConfig))
+		if err != nil {
 			return nil, ldap, err
+		}
+	} else {
+		ldapConn, err = goldap.DialURL(bind)
+		if err != nil {
+			return nil, ldap, err
+		}
+		if ldap.Starttls {
+			if err := ldapConn.StartTLS(&tlsConfig); err != nil {
+				return nil, ldap, err
+			}
 		}
 	}
 

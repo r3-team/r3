@@ -48,8 +48,9 @@ type Ldap struct {
 	MemberAttribute string     `json:"memberAttribute"` // name of attribute used as membership, example: 'memberOf'
 	AssignRoles     bool       `json:"assignRoles"`     // assign roles from group membership (see member attribute)
 	MsAdExt         bool       `json:"msAdExt"`         // Microsoft AD extensions (nested group memberships, user account control)
-	Tls             bool       `json:"tls"`
-	TlsVerify       bool       `json:"tlsVerify"`
+	Starttls        bool       `json:"starttls"`        // upgrade unencrypted LDAP connection with TLS (STARTTLS)
+	Tls             bool       `json:"tls"`             // connect to LDAP via SSL/TLS (LDAPS)
+	TlsVerify       bool       `json:"tlsVerify"`       // verify TLS connection, can be used to allow non-trusted certificates
 	Roles           []LdapRole `json:"roles"`
 }
 type LdapRole struct {

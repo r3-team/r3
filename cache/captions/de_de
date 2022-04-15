@@ -224,15 +224,16 @@
 			"msAdExtHint":"Verschachtelte Gruppenzugehör., Benutzer-Account-Kontrolle",
 			"nameHint":"Einzigartiger Name",
 			"port":"Port",
-			"portHint":"Normalerw. 389 wenn kein TLS, 636 für TLS",
+			"portHint":"Standardmäßig 389, 636 für SSL/TLS",
 			"role":"Rolle",
 			"searchClass":"Objektklasse",
 			"searchClassHint":"Beispiel: user",
 			"searchDn":"Such-DN",
 			"searchDnHint":"Beispiel: OU=User,DC=mycompany,DC=local",
+			"starttls":"StartTLS verwenden",
 			"title":"Verbindung erstellen/bearbeiten",
 			"titleRoles":"Rollen nach Gruppenmitgliedschaft",
-			"tls":"TLS verwenden",
+			"tls":"SSL/TLS verwenden",
 			"tlsVerify":"TLS überprüfen"
 		},
 		"license":{

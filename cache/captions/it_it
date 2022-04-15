@@ -224,15 +224,16 @@
 			"msAdExtHint":"Appartenenze a gruppi nidificati, controllo dell'account utente",
 			"nameHint":"Nome univoco",
 			"port":"Porta",
-			"portHint":"Predefinito 389 se no TLS, 636 per TLS",
+			"portHint":"Predefinito 389, 636 per SSL/TLS",
 			"role":"Ruolo",
 			"searchClass":"Classe oggetto",
 			"searchClassHint":"Esempio: user",
 			"searchDn":"Cerca DN",
 			"searchDnHint":"Esempio: OU=User,DC=miaazienda,DC=local",
+			"starttls":"Usa StartTLS",
 			"title":"Crea/modifica connessione",
 			"titleRoles":"Ruoli per appartenenza al gruppo",
-			"tls":"Usa TLS",
+			"tls":"Usa SSL/TLS",
 			"tlsVerify":"Verifica TLS"
 		},
 		"license":{
