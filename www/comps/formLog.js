@@ -60,6 +60,7 @@ let MyFormLog = {
 							:formBadLoad="false"
 							:formBadSave="false"
 							:formIsInline="true"
+							:formIsSingleField="false"
 							:formLoading="loading"
 							:logViewer="true"
 							:isFullPage="false"

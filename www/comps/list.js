@@ -1469,9 +1469,12 @@ let MyList = {
 				orders:this.orders
 			},false).then(
 				res => {
-					// apply results to input rows if category or specific record IDs were retrieved
+					// apply results to input rows if input is category or specific record IDs were retrieved
 					if(this.inputAsCategory || this.anyInputRows)
-						this.rowsInput = res.payload.rows;
+						this.getRowsDecrypted(res.payload.rows,this.expressions).then(
+							rows => { this.rowsInput = rows; },
+							this.consoleError
+						);
 					
 					// remove invalid records (due to field filters)
 					let recordIdsValid = [];
