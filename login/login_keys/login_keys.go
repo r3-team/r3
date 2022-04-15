@@ -3,6 +3,7 @@ package login_keys
 import (
 	"context"
 	"fmt"
+	"r3/cache"
 	"r3/db"
 	"r3/handler"
 	"r3/schema"
@@ -90,11 +91,16 @@ func Reset_tx(tx pgx.Tx, loginId int64) error {
 		return err
 	}
 
-	if _, err := tx.Exec(db.Ctx, `
-		DELETE FROM instance.record_key
-		WHERE login_id = $1
-	`, loginId); err != nil {
-		return err
+	// delete unusable data keys
+	for _, rel := range cache.RelationIdMap {
+		if rel.Encryption {
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				DELETE FROM instance_e2ee."%s"
+				WHERE login_id = $1
+			`, schema.GetEncKeyTableName(rel.Id)), loginId); err != nil {
+				return err
+			}
+		}
 	}
 	return nil
 }
