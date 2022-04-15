@@ -274,6 +274,10 @@ export function getQueryTemplate() {
 	};
 };
 
+export function getQueryTemplateIfNull(query) {
+	return query === null ? getQueryTemplate() : query;
+};
+
 export function getQueryFiltersDateRange(attributeId0,index0,date0,attributeId1,index1,date1) {
 	// set query filters for records which attribute value range (attribute 0 to 1)
 	//  occur within defined date range (date 0 to 1)

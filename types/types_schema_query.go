@@ -1,6 +1,8 @@
 package types
 
 import (
+	"encoding/json"
+
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"
 )
@@ -85,4 +87,16 @@ type QueryChoice struct {
 	Name     string        `json:"name"`
 	Filters  []QueryFilter `json:"filters"` // filters for this choice
 	Captions CaptionMap    `json:"captions"`
+}
+
+// custom marshallers
+// use local type to avoid marshal loop (has same fields but none of the original methods)
+func (src Query) MarshalJSON() ([]byte, error) {
+
+	// if relation is not set, query is empty
+	if src.RelationId.Status != pgtype.Present {
+		return []byte("null"), nil
+	}
+	type alias Query
+	return json.Marshal(alias(src))
 }

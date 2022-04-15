@@ -105,6 +105,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- remove deprecated login setting
 			ALTER TABLE instance.login_setting DROP COLUMN hint_first_steps;
 			
+			-- query table changes
+			DELETE FROM app.query WHERE relation_id IS NULL;
+			ALTER TABLE app.query ALTER COLUMN relation_id SET NOT NULL;
+			
 			-- new column option: copy to clipboard
 			ALTER TABLE app.column ADD COLUMN clipboard BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.column ALTER COLUMN clipboard DROP DEFAULT;
