@@ -98,6 +98,13 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	"2.6": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
+			-- new instance task
+			INSERT INTO instance.task (name,interval_seconds,embedded_only,active) VALUES
+				('httpCertRenew',86400,false,true);
+			
+			INSERT INTO instance.scheduler (task_name,date_attempt,date_success) VALUES
+				('httpCertRenew',0,0);
+			
 			-- new login setting
 			ALTER TABLE instance.login_setting ADD COLUMN mobile_scroll_form BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN mobile_scroll_form DROP DEFAULT;

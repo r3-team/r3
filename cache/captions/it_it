@@ -372,6 +372,7 @@
 				"cleanupLogs":"Pulisci i log di sistema scaduti",
 				"cleanupTempDir":"Pulisci cartella temporanea",
 				"embeddedBackup":"Gestisci backup integrati",
+				"httpCertRenew":"Load renewed HTTP certificate",
 				"importLdapLogins":"Importa login e ruoli tramite LDAP",
 				"mailAttach":"Trasferimento allegati e-mail",
 				"mailRetrieve":"Recupero e-mail",

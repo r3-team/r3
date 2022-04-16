@@ -158,16 +158,11 @@ let MyAdminScheduler = {
 		
 		// presentation
 		displayTime:function(unixTime) {
-			if(unixTime === 0)
-				return '-';
-			
-			return this.getUnixFormat(unixTime,'Y-m-d H:i:S');
+			return unixTime === 0 ? '-' : this.getUnixFormat(unixTime,'Y-m-d H:i:S');
 		},
 		displayName:function(name) {
-			if(typeof this.capApp.names[name] === 'undefined')
-				return name;
-			
-			return this.capApp.names[name];
+			return typeof this.capApp.names[name] === 'undefined'
+				? name : this.capApp.names[name];
 		},
 		displayModuleName:function(pgFunctionId) {
 			let m = this.moduleIdMap[this.pgFunctionIdMap[pgFunctionId].moduleId];
@@ -229,11 +224,11 @@ let MyAdminScheduler = {
 		// backend calls
 		get:function() {
 			ws.send('scheduler','get',{},true).then(
-				(res) => {
+				res => {
 					this.schedulers      = res.payload;
 					this.schedulersInput = JSON.parse(JSON.stringify(this.schedulers));
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		runPgFunction:function(pgFunctionId,pgFunctionScheduleId) {
@@ -241,15 +236,15 @@ let MyAdminScheduler = {
 				pgFunctionId:pgFunctionId,
 				pgFunctionScheduleId:pgFunctionScheduleId
 			},true).then(
-				(res) => this.runOk(),
-				(err) => this.$root.genericError(err)
+				res => this.runOk(),
+				this.$root.genericError
 			);
 			this.taskRunning = true;
 		},
 		runSystemTask:function(name) {
 			ws.send('scheduler','trigger',{systemTaskName:name},true).then(
-				(res) => this.runOk(),
-				(err) => this.$root.genericError(err)
+				res => this.runOk(),
+				this.$root.genericError
 			);
 			this.taskRunning = true;
 		},
@@ -281,7 +276,7 @@ let MyAdminScheduler = {
 						err => this.$root.genericError(err)
 					);
 				},
-				err => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

@@ -372,6 +372,7 @@
 				"cleanupLogs":"Bereinigung abgelaufener Systemlogs",
 				"cleanupTempDir":"Bereinigung des temporären Verzeichnisses",
 				"embeddedBackup":"Integrierte Backups steuern",
+				"httpCertRenew":"Laden eines erneuerten HTTP-Zertifikates",
 				"importLdapLogins":"Import von Anmeldungen und Rollen über LDAP",
 				"mailAttach":"E-Mail-Anhänge transferieren",
 				"mailRetrieve":"E-Mails abholen",
