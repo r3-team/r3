@@ -267,10 +267,11 @@ let MyList = {
 					
 					<my-input-collection class="selector"
 						v-for="c in collections"
-						@index-selected="$emit('set-collection-index-filter',c.collectionId,$event)"
+						@update:indexes="$emit('set-collection-indexes',c.collectionId,$event)"
 						:collectionId="c.collectionId"
 						:columnIdDisplay="c.columnIdDisplay"
 						:key="c.collectionId"
+						:multiValue="c.multiValue"
 					/>
 					
 					<select class="selector"
@@ -597,7 +598,7 @@ let MyList = {
 	},
 	emits:[
 		'blurred','focused','open-form','record-removed','record-selected',
-		'records-selected-init','set-args','set-collection-index-filter'
+		'records-selected-init','set-args','set-collection-indexes'
 	],
 	data:function() {
 		return {

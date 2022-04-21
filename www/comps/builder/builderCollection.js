@@ -293,6 +293,7 @@ let MyBuilderCollection = {
 			let requests = [];
 			requests.push(ws.prepare('collection','set',{
 				id:this.collection.id,
+				iconId:this.collection.iconId,
 				moduleId:this.collection.moduleId,
 				name:this.collection.name,
 				columns:this.replaceBuilderId(
@@ -312,8 +313,8 @@ let MyBuilderCollection = {
 			}));
 			
 			ws.sendMultiple(requests,true).then(
-				(res) => this.$root.schemaReload(this.module.id),
-				(err) => this.$root.genericError(err)
+				res => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		}
 	}

@@ -1054,7 +1054,7 @@ func getCollections(fieldId uuid.UUID) ([]types.CollectionConsumer, error) {
 	var collections = make([]types.CollectionConsumer, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT collection_id, column_id_display
+		SELECT collection_id, column_id_display, multi_value
 		FROM app.collection_consumer
 		WHERE field_id = $1
 	`, fieldId)
@@ -1066,7 +1066,7 @@ func getCollections(fieldId uuid.UUID) ([]types.CollectionConsumer, error) {
 	for rows.Next() {
 		var c types.CollectionConsumer
 
-		if err := rows.Scan(&c.CollectionId, &c.ColumnIdDisplay); err != nil {
+		if err := rows.Scan(&c.CollectionId, &c.ColumnIdDisplay, &c.MultiValue); err != nil {
 			return collections, err
 		}
 		collections = append(collections, c)
@@ -1085,9 +1085,9 @@ func setCollections_tx(tx pgx.Tx, fieldId uuid.UUID, collections []types.Collect
 	for _, c := range collections {
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.collection_consumer (
-				collection_id, column_id_display, field_id)
-			VALUES ($1,$2,$3)
-		`, c.CollectionId, c.ColumnIdDisplay, fieldId); err != nil {
+				collection_id, column_id_display, field_id, multi_value)
+			VALUES ($1,$2,$3,$4)
+		`, c.CollectionId, c.ColumnIdDisplay, fieldId, c.MultiValue); err != nil {
 			return err
 		}
 	}

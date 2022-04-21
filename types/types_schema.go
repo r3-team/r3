@@ -324,15 +324,17 @@ type FieldList struct {
 	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
 }
 type Collection struct {
-	Id       uuid.UUID `json:"id"`
-	ModuleId uuid.UUID `json:"moduleId"`
-	Name     string    `json:"name"`
-	Columns  []Column  `json:"columns"`
-	Query    Query     `json:"query"`
+	Id       uuid.UUID   `json:"id"`
+	ModuleId uuid.UUID   `json:"moduleId"`
+	IconId   pgtype.UUID `json:"iconId"`
+	Name     string      `json:"name"`
+	Columns  []Column    `json:"columns"`
+	Query    Query       `json:"query"`
 }
 type CollectionConsumer struct {
 	CollectionId    uuid.UUID   `json:"collectionId"`
 	ColumnIdDisplay pgtype.UUID `json:"columnIdDisplay"` // ID of collection column to display (inputs etc.)
+	MultiValue      bool        `json:"multiValue"`      // if active, values of multiple record rows can be selected
 }
 type Column struct {
 	Id          uuid.UUID      `json:"id"`

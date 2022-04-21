@@ -11,7 +11,8 @@ var (
 	QueryJoinConnectors   = []string{"INNER", "LEFT", "RIGHT", "FULL", "CROSS"}
 	QueryFilterConnectors = []string{"AND", "OR"}
 	QueryFilterOperators  = []string{"=", "<>", "<", ">", "<=", ">=", "IS NULL",
-		"IS NOT NULL", "LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE", "= ANY", "<> ALL"}
+		"IS NOT NULL", "LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE", "= ANY",
+		"<> ALL", "@>", "<@", "&&"}
 )
 
 // a query starts at a relation to retrieve attribute values

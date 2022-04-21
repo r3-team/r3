@@ -20,7 +20,7 @@ let MyBuilderFormsItem = {
 		<td>
 			<my-builder-icon-input
 				@input="iconId = $event"
-				:icon-id-selected="iconId"
+				:iconIdSelected="iconId"
 				:module="moduleIdMap[moduleId]"
 			/>
 		</td>

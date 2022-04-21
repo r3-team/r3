@@ -65,8 +65,8 @@ let MyInputLogin = {
 				idsExclude:idsExclude,
 				noLdapAssign:this.noLdapAssign
 			},true).then(
-				(res) => this.logins = res.payload,
-				(err) => this.$root.genericError(err)
+				res => this.logins = res.payload,
+				this.$root.genericError
 			);
 		},
 		getName:function() {
@@ -74,11 +74,11 @@ let MyInputLogin = {
 				id:this.loginId,
 				noLdapAssign:this.noLdapAssign
 			},true).then(
-				(res) => {
+				res => {
 					if(res.payload.length === 1)
 						this.inputTextSet = res.payload[0].name;
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

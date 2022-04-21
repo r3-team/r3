@@ -98,6 +98,29 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	"2.6": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
+			-- new collection icon
+			ALTER TABLE app.collection ADD COLUMN icon_id uuid;
+			ALTER TABLE app.collection ADD CONSTRAINT collection_icon_id_fkey FOREIGN KEY (icon_id)
+				REFERENCES app.icon (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_collection_icon_id_fkey
+				ON app.collection USING btree (icon_id ASC NULLS LAST);
+			
+			-- new collection consumer option
+			ALTER TABLE app.collection_consumer ADD COLUMN multi_value BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.collection_consumer ALTER COLUMN multi_value DROP DEFAULT;
+			
+			-- new condition operators
+			ALTER TYPE app.condition_operator ADD VALUE '@>';
+			ALTER TYPE app.condition_operator ADD VALUE '<@';
+			ALTER TYPE app.condition_operator ADD VALUE '&&';
+			
+			-- new aggregator
+			ALTER TYPE app.aggregator ADD VALUE 'json';
+			
 			-- new instance task
 			INSERT INTO instance.task (name,interval_seconds,embedded_only,active) VALUES
 				('httpCertRenew',86400,false,true);

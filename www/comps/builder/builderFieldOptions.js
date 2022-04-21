@@ -35,11 +35,16 @@ let MyBuilderFieldOptionsCollection = {
 					</optgroup>
 				</select>
 				<select v-model="columnIdInput" :disabled="collectionId === null">
-					<option :value="null">-</option>
+					<option :value="null" disabled="disabled">{{ capApp.collectionColumn }}</option>
 					<option v-if="collectionId !== null" v-for="c in collectionIdMap[collectionId].columns" :value="c.id">
 						{{ getItemTitleColumn(c) }}
 					</option>
 				</select>
+				
+				<div class="collections-option" v-if="showMultiValue">
+					<span>{{ capApp.collectionMultiValue }}</span>
+					<my-bool v-model="multiValueInput" />
+				</div>
 			</td>
 			<td>
 				<my-button image="cancel.png"
@@ -51,28 +56,36 @@ let MyBuilderFieldOptionsCollection = {
 		</tr>
 	`,
 	props:{
-		allowRemove: { type:Boolean, required:true },
-		caption:     { type:String,  required:true },
-		collectionId:{ required:true },
-		columnId:    { required:true },
-		module:      { type:Object,  required:true }
+		allowRemove:   { type:Boolean, required:true },
+		caption:       { type:String,  required:true },
+		collectionId:  { required:true },
+		columnId:      { required:true },
+		module:        { type:Object,  required:true },
+		multiValue:    { required:true },
+		showMultiValue:{ type:Boolean, required:true }
 	},
-	emits:['remove','update:collectionId','update:columnId'],
+	emits:['remove','update:collectionId','update:columnId','update:multiValue'],
 	computed:{
 		collectionIdInput:{
-			get:function()  { return this.collectionId; },
-			set:function(v) { this.$emit('update:collectionId',v); }
+			get()  { return this.collectionId },
+			set(v) { this.$emit('update:collectionId',v) }
 		},
 		columnIdInput:{
-			get:function()  { return this.columnId; },
-			set:function(v) { this.$emit('update:columnId',v); }
+			get()  { return this.columnId },
+			set(v) { this.$emit('update:columnId',v) }
+		},
+		multiValueInput:{
+			get()  { return this.multiValue },
+			set(v) { this.$emit('update:multiValue',v) }
 		},
 		
 		// stores
 		modules:        function() { return this.$store.getters['schema/modules']; },
-		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; }
+		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
+		capApp:         function() { return this.$store.getters.captions.builder.form; }
 	},
 	methods:{
+		// externals
 		getDependentModules,
 		getItemTitleColumn
 	}
@@ -439,6 +452,8 @@ let MyBuilderFieldOptions = {
 					:collectionId="field.collectionIdDef"
 					:columnId="field.columnIdDef"
 					:module="module"
+					:multiValue="false"
+					:showMultiValue="false"
 				/>
 				<tr v-if="isString && field.display === 'richtext'">
 					<td>{{ capApp.fieldAttributeIdAltRichtextFiles }}</td>
@@ -1028,11 +1043,14 @@ let MyBuilderFieldOptions = {
 						@remove="collectionRemove(i)"
 						@update:collectionId="setCollection(i,'collectionId',$event)"
 						@update:columnId="setCollection(i,'columnIdDisplay',$event)"
+						@update:multiValue="setCollection(i,'multiValue',$event)"
 						:allowRemove="true"
 						:caption="capApp.collection"
 						:collectionId="c.collectionId"
 						:columnId="c.columnIdDisplay"
 						:module="module"
+						:multiValue="c.multiValue"
+						:showMultiValue="true"
 					/>
 					<tr v-if="field.collections.length !== 0">
 						<td colspan="3">{{ capApp.collectionHint }}</td>

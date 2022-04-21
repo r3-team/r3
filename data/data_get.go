@@ -531,11 +531,13 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 		// apply aggregator if desired
 		switch expr.Aggregator.String {
 		case "array":
-			*inSelect = append(*inSelect, fmt.Sprintf("JSON_AGG(%s%s) AS %s", distinct, code, codeSelect))
+			*inSelect = append(*inSelect, fmt.Sprintf("ARRAY_AGG(%s%s) AS %s", distinct, code, codeSelect))
 		case "avg":
 			*inSelect = append(*inSelect, fmt.Sprintf("AVG(%s%s)::NUMERIC(20,2) AS %s", distinct, code, codeSelect))
 		case "count":
 			*inSelect = append(*inSelect, fmt.Sprintf("COUNT(%s%s) AS %s", distinct, code, codeSelect))
+		case "json":
+			*inSelect = append(*inSelect, fmt.Sprintf("JSON_AGG(%s%s) AS %s", distinct, code, codeSelect))
 		case "list":
 			*inSelect = append(*inSelect, fmt.Sprintf("STRING_AGG(%s%s::TEXT, ', ') AS %s", distinct, code, codeSelect))
 		case "max":

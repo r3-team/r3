@@ -80,23 +80,38 @@ let MyFilterOperator = {
 	name:'my-filter-operator',
 	components:{ MyFilterOperatorOption },
 	template:`<select v-model="value">
-		<my-filter-operator-option value="="  :caption="capApp.option.operator.eq" :builder-mode="builderMode" />
-		<my-filter-operator-option value="<>" :caption="capApp.option.operator.ne" :builder-mode="builderMode" />
+		<my-filter-operator-option value="="  :caption="capApp.option.operator.eq" :builderMode="builderMode" />
+		<my-filter-operator-option value="<>" :caption="capApp.option.operator.ne" :builderMode="builderMode" />
 		
-		<template v-if="!onlyEquals">
-			<my-filter-operator-option v-if="!onlyString" value="<"         :caption="capApp.option.operator.st"        :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="!onlyString" value=">"         :caption="capApp.option.operator.lt"        :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="!onlyString" value="<="        :caption="capApp.option.operator.se"        :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="!onlyString" value=">="        :caption="capApp.option.operator.le"        :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="builderMode" value="= ANY"     :caption="capApp.option.operator.eqAny"     :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="builderMode" value="<> ALL"    :caption="capApp.option.operator.neAll"     :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="!onlyDates"  value="ILIKE"     :caption="capApp.option.operator.ilike"     :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="!onlyDates"  value="NOT ILIKE" :caption="capApp.option.operator.not_ilike" :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="!onlyDates"  value="LIKE"      :caption="capApp.option.operator.like"      :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="!onlyDates"  value="NOT LIKE"  :caption="capApp.option.operator.not_like"  :builder-mode="builderMode" />
-			<my-filter-operator-option value="IS NULL"     :caption="capApp.option.operator.null"     :builder-mode="builderMode" />
-			<my-filter-operator-option value="IS NOT NULL" :caption="capApp.option.operator.not_null" :builder-mode="builderMode" />
-		</template>
+		<optgroup v-if="!onlyEquals && !onlyString" :label="capApp.operatorsSize">
+			<my-filter-operator-option value="<"  :caption="capApp.option.operator.st" :builderMode="builderMode" />
+			<my-filter-operator-option value=">"  :caption="capApp.option.operator.lt" :builderMode="builderMode" />
+			<my-filter-operator-option value="<=" :caption="capApp.option.operator.se" :builderMode="builderMode" />
+			<my-filter-operator-option value=">=" :caption="capApp.option.operator.le" :builderMode="builderMode" />
+		</optgroup>
+		
+		<optgroup v-if="!onlyEquals && !onlyDates" :label="capApp.operatorsText">
+			<my-filter-operator-option value="LIKE"      :caption="capApp.option.operator.like"      :builderMode="builderMode" />
+			<my-filter-operator-option value="ILIKE"     :caption="capApp.option.operator.ilike"     :builderMode="builderMode" />
+			<my-filter-operator-option value="NOT LIKE"  :caption="capApp.option.operator.not_like"  :builderMode="builderMode" />
+			<my-filter-operator-option value="NOT ILIKE" :caption="capApp.option.operator.not_ilike" :builderMode="builderMode" />
+		</optgroup>
+		
+		<optgroup v-if="!onlyEquals" :label="capApp.operatorsNull">
+			<my-filter-operator-option value="IS NULL"     :caption="capApp.option.operator.null"     :builderMode="builderMode" />
+			<my-filter-operator-option value="IS NOT NULL" :caption="capApp.option.operator.not_null" :builderMode="builderMode" />
+		</optgroup>
+		
+		<optgroup v-if="!onlyEquals && builderMode" :label="capApp.operatorsSets">
+			<my-filter-operator-option value="= ANY"  caption="= ANY"  :builderMode="builderMode" />
+			<my-filter-operator-option value="<> ALL" caption="<> ALL" :builderMode="builderMode" />
+		</optgroup>
+		
+		<optgroup v-if="!onlyEquals && builderMode" :label="capApp.operatorsArray">
+			<my-filter-operator-option value="@>" caption="@>" :builderMode="builderMode" />
+			<my-filter-operator-option value="<@" caption="<@" :builderMode="builderMode" />
+			<my-filter-operator-option value="&&" caption="&&" :builderMode="builderMode" />
+		</optgroup>
 	</select>`,
 	watch:{
 		onlyDates:function(v) {
@@ -105,7 +120,7 @@ let MyFilterOperator = {
 		}
 	},
 	props:{
-		builderMode:{ type:Boolean, required:true },
+		builderMode:{ type:Boolean, required:true },                 // only show in Builder mode (e. g. not for regular users)
 		modelValue: { type:String,  required:true },
 		onlyDates:  { type:Boolean, required:false, default:false }, // only show operators that can be used for date values (e. g. unix time)
 		onlyEquals: { type:Boolean, required:false, default:false }, // only show equal/non-equal operators
@@ -256,8 +271,10 @@ let MyFilterSide = {
 				<!-- sub query aggregator input -->
 				<select v-model="queryAggregator" v-if="isSubQuery">
 					<option value=""     >-</option>
+					<option value="array">{{ capGen.option.aggArray }}</option>
 					<option value="avg"  >{{ capGen.option.aggAvg }}</option>
 					<option value="count">{{ capGen.option.aggCount }}</option>
+					<option value="json" >{{ capGen.option.aggJson }}</option>
 					<option value="list" >{{ capGen.option.aggList }}</option>
 					<option value="max"  >{{ capGen.option.aggMax }}</option>
 					<option value="min"  >{{ capGen.option.aggMin }}</option>

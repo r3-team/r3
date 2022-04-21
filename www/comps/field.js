@@ -301,7 +301,7 @@ let MyField = {
 			@open-form="(...args) => openForm(args[0],[],args[1])"
 			@record-selected="(...args) => openForm(args[0],[],args[1])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
-			@set-collection-index-filter="setCollectionIndexFilter"
+			@set-collection-indexes="setCollectionIndexes"
 			:allowPaging="field.query.fixedLimit === 0"
 			:autoRenew="field.autoRenew"
 			:choices="choicesProcessed"
@@ -328,7 +328,7 @@ let MyField = {
 			@open-form="(...args) => openForm(args[0],args[1],args[2])"
 			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
-			@set-collection-index-filter="setCollectionIndexFilter"
+			@set-collection-indexes="setCollectionIndexes"
 			:attributeIdColor="field.attributeIdColor"
 			:attributeIdDate0="field.attributeIdDate0"
 			:attributeIdDate1="field.attributeIdDate1"
@@ -354,7 +354,7 @@ let MyField = {
 			@open-form="(...args) => openForm(args[0],args[1],args[2])"
 			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
-			@set-collection-index-filter="setCollectionIndexFilter"
+			@set-collection-indexes="setCollectionIndexes"
 			:attributeIdColor="field.attributeIdColor"
 			:attributeIdDate0="field.attributeIdDate0"
 			:attributeIdDate1="field.attributeIdDate1"
@@ -431,11 +431,11 @@ let MyField = {
 	emits:['execute-function','open-form','set-form-args','set-valid','set-value','set-value-init'],
 	data:function() {
 		return {
-			collectionIdMapIndexFilter:{}, // filter collections by their array index
+			collectionIdMapIndexes:{},  // active record indexes of collection, used to filter with
 			focused:false,
-			notTouched:true,               // data field was not touched by user
-			showColorPickerInput:false,    // for color picker fields
-			showPassword:false             // for password fields
+			notTouched:true,            // data field was not touched by user
+			showColorPickerInput:false, // for color picker fields
+			showPassword:false          // for password fields
 		};
 	},
 	watch:{
@@ -565,7 +565,7 @@ let MyField = {
 					this.joinsIndexMap,
 					this.values,
 					[],
-					this.collectionIdMapIndexFilter
+					this.collectionIdMapIndexes
 				);
 			}
 			return choices;
@@ -579,7 +579,7 @@ let MyField = {
 				this.joinsIndexMap,
 				this.values,
 				[],
-				this.collectionIdMapIndexFilter
+				this.collectionIdMapIndexes
 			);
 		},
 		iconId:function() {
@@ -975,9 +975,9 @@ let MyField = {
 			}
 			this.value = valueNew.length !== 0 ? valueNew : null;
 		},
-		setCollectionIndexFilter:function(collectionId,index) {
-			if(index === '-1') delete(this.collectionIdMapIndexFilter[collectionId]);
-			else               this.collectionIdMapIndexFilter[collectionId] = index;
+		setCollectionIndexes:function(collectionId,indexes) {
+			if(indexes.length === 0) delete(this.collectionIdMapIndexes[collectionId]);
+			else                     this.collectionIdMapIndexes[collectionId] = indexes;
 		},
 		setValue:function(val,valOld,indexAttributeId) {
 			if(val === '')

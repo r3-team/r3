@@ -94,7 +94,7 @@ const MyStore = Vuex.createStore({
 		},
 		
 		// collections
-		collection:      (state,payload) => state.collectionIdMap[payload.id] = payload.records,
+		collection:      (state,payload) => state.collectionIdMap[payload.id] = payload.rows,
 		collectionsClear:(state,payload) => state.collectionIdMap = {},
 		
 		// counters

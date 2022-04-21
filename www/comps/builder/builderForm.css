@@ -151,6 +151,11 @@
 	padding-bottom:6px;
 	border-bottom:1px dotted var(--color-border);
 }
+.builder-field-options .collections-option{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+}
 
 
 /* form functions */

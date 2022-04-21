@@ -29,5 +29,5 @@ func CollectionSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 	return nil, collection.Set_tx(tx, req.ModuleId, req.Id,
-		req.Name, req.Columns, req.Query)
+		req.IconId, req.Name, req.Columns, req.Query)
 }

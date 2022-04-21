@@ -94,10 +94,11 @@ let MyCalendarMonth = {
 			<div class="area nowrap default-inputs">
 				<my-input-collection class="selector"
 					v-for="c in collections"
-					@index-selected="$emit('set-collection-index-filter',c.collectionId,$event)"
+					@update:indexes="$emit('set-collection-indexes',c.collectionId,$event)"
 					:collectionId="c.collectionId"
 					:columnIdDisplay="c.columnIdDisplay"
 					:key="c.collectionId"
+					:multiValue="c.multiValue"
 				/>
 				
 				<select class="selector"
@@ -251,7 +252,7 @@ let MyCalendarMonth = {
 	},
 	emits:[
 		'day-selected','open-form','record-selected','set-choice-id',
-		'set-collection-index-filter','set-date'
+		'set-collection-indexes','set-date'
 	],
 	data:function() {
 		return {
@@ -568,7 +569,7 @@ let MyCalendar = {
 			@open-form="(...args) => $emit('open-form',...args)"
 			@record-selected="(...args) => $emit('record-selected',...args)"
 			@set-choice-id="choiceIdSet"
-			@set-collection-index-filter="(...args) => $emit('set-collection-index-filter',...args)"
+			@set-collection-indexes="(...args) => $emit('set-collection-indexes',...args)"
 			@set-date="dateSet"
 			:choiceId="choiceId"
 			:choices="choices"
@@ -609,7 +610,7 @@ let MyCalendar = {
 		rowSelect:       { type:Boolean, required:false, default:false },
 		usesPageHistory: { type:Boolean, required:true }
 	},
-	emits:['open-form','record-selected','set-args','set-collection-index-filter'],
+	emits:['open-form','record-selected','set-args','set-collection-indexes'],
 	data:function() {
 		return {
 			// calendar state

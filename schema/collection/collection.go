@@ -8,6 +8,7 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -20,7 +21,7 @@ func Get(moduleId uuid.UUID) ([]types.Collection, error) {
 	collections := make([]types.Collection, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, name
+		SELECT id, icon_id, name
 		FROM app.collection
 		WHERE module_id = $1
 		ORDER BY name ASC
@@ -33,7 +34,7 @@ func Get(moduleId uuid.UUID) ([]types.Collection, error) {
 		var c types.Collection
 		c.ModuleId = moduleId
 
-		if err := rows.Scan(&c.Id, &c.Name); err != nil {
+		if err := rows.Scan(&c.Id, &c.IconId, &c.Name); err != nil {
 			return collections, err
 		}
 		collections = append(collections, c)
@@ -55,7 +56,7 @@ func Get(moduleId uuid.UUID) ([]types.Collection, error) {
 	return collections, nil
 }
 
-func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
+func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, iconId pgtype.UUID, name string,
 	columns []types.Column, queryIn types.Query) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &id, "collection", "id")
@@ -66,16 +67,16 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.collection
-			SET name = $1
-			WHERE id = $2
-		`, name, id); err != nil {
+			SET icon_id = $1, name = $2
+			WHERE id = $3
+		`, iconId, name, id); err != nil {
 			return err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.collection (id,module_id,name)
-			VALUES ($1,$2,$3)
-		`, id, moduleId, name); err != nil {
+			INSERT INTO app.collection (id,icon_id,module_id,name)
+			VALUES ($1,$2,$3,$4)
+		`, id, iconId, moduleId, name); err != nil {
 			return err
 		}
 	}
