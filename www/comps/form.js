@@ -487,6 +487,12 @@ let MyForm = {
 				record_save:  this.set,
 				
 				// e2e encryption
+				get_e2ee_data_key:(dataKeyEnc) => {
+					return this.rsaDecrypt(this.loginPrivateKey,dataKeyEnc);
+				},
+				get_e2ee_data_value:(dataKey,value) => {
+					return this.aesGcmDecryptBase64WithPhrase(value,dataKey);
+				},
 				set_e2ee_by_login_ids:ids => this.loginIdsEncryptFor = ids,
 				set_e2ee_by_login_ids_and_relation:(loginIds,relationId,recordIds) => {
 					this.loginIdsEncryptForOutside.push({

@@ -648,6 +648,8 @@
 			},
 			"helpJs":{
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Kopiert Text zur Zwischenablage des Benutzers.",
+				"get_e2ee_data_key":"app.get_e2ee_data_key(dataKeyEncrypted) => STRING<br /><br />Entschlüsselt den beigefügten Datenschlüssel mit dem privaten Schlüssel der aktuellen Anmeldung.",
+				"get_e2ee_data_value":"app.get_e2ee_data_value(dataKey,valueEncrypted) => STRING<br /><br />Entschlüsselt einen Datenwert mit dem beigefügten Datenschlüssel.",
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Liefert den 5-stelligen Sprach-Code ('en_us', ...) der aktuellen Anmeldung.",
 				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Liefert die ID der aktuellen Anmeldung.",
 				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Liefert die Datensatz-ID des offenen Formulars für den ausgewählten Relationsindex (0 ist der Standard).",
@@ -727,6 +729,8 @@
 			"titlePg":"Backend-Funktionen ({CNT})",
 			"titleOne":"Funktionstitel",
 			"valueJsHint":"VALUE",
+			"valueJsHintDecryptDataKey":"DATA_KEY_ENCRYPTED",
+			"valueJsHintDecryptDataValue":"DATA_KEY, VALUE_ENCRYPTED",
 			"valueJsHintForm":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
 			"valueJsHintIndex":"RELATION_INDEX_NUMBER",
 			"valueJsHintRole":"ROLE_ID_STRING"

@@ -648,6 +648,8 @@
 			},
 			"helpJs":{
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Copiază textul în clipboard-ul utilizatorului.",
+				"get_e2ee_data_key":"app.get_e2ee_data_key(dataKeyEncrypted) => STRING<br /><br />Decrypts provided data key with the private key of the current login.",
+				"get_e2ee_data_value":"app.get_e2ee_data_value(dataKey,valueEncrypted) => STRING<br /><br />Decrypts data value with the provided data key.",
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Returnează codul de limbă din 5 litere („en_us”, ...) al autentificarii curente.",
 				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Returnează ID-ul autentificării curente.",
 				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Returnează ID-ul înregistrării din formularul deschis pentru indexul de relație specificat (0 este implicit).",
@@ -727,6 +729,8 @@
 			"titlePg":"Funcții back-end ({CNT})",
 			"titleOne":"Titlu funcției",
 			"valueJsHint":"VALUE",
+			"valueJsHintDecryptDataKey":"DATA_KEY_ENCRYPTED",
+			"valueJsHintDecryptDataValue":"DATA_KEY, VALUE_ENCRYPTED",
 			"valueJsHintForm":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
 			"valueJsHintIndex":"RELATION_INDEX_NUMBER",
 			"valueJsHintRole":"ROLE_ID_STRING"

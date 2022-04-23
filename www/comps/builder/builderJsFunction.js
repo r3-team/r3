@@ -269,11 +269,13 @@ let MyBuilderJsFunction = {
 			codeReturns:'',
 			
 			appFunctions:[
-				'copy_to_clipboard','get_language_code','get_login_id',
-				'get_record_id','get_role_ids','go_back','has_role','open_form',
-				'record_delete','record_new','record_reload','record_save',
-				'set_e2ee_by_login_ids','set_e2ee_by_login_ids_and_relation'
+				'copy_to_clipboard','get_e2ee_data_key','get_e2ee_data_value',
+				'get_language_code','get_login_id','get_record_id','get_role_ids',
+				'go_back','has_role','open_form','record_delete','record_new',
+				'record_reload','record_save','set_e2ee_by_login_ids',
+				'set_e2ee_by_login_ids_and_relation'
 			],
+			appFunctionsAsync:['get_e2ee_data_key','get_e2ee_data_value'],
 			
 			// states
 			fieldMode:'get',
@@ -376,22 +378,36 @@ let MyBuilderJsFunction = {
 			if(this.entitySelectedId === null)
 				return;
 			
-			let field  = evt.target;
-			let text   = '';
-			let prefix = 'app';
+			let field   = evt.target;
+			let text    = '';
+			let prefix  = 'app';
+			let postfix = '';
+			let postfixAsync = '.then('
+				+ '\n\tres => { // if success: return value in \'res\' },'
+				+ '\n\terr => { // if error: error message in \'err\' }\n)'
+			;
 			let mod, rel, atr, fnc, frm, fld, opt, args;
 			
 			// build unique placeholder name
 			switch(this.entitySelected) {
 				case 'appFunction':
-					opt = '';
+					opt     = '';
+					postfix = '';
 					switch(this.entitySelectedId) {
 						case 'copy_to_clipboard': opt = this.capApp.valueJsHint;      break;
 						case 'get_record_id':     opt = this.capApp.valueJsHintIndex; break;
 						case 'has_role':          opt = this.capApp.valueJsHintRole;  break;
 						case 'open_form':         opt = this.capApp.valueJsHintForm;  break;
+						case 'get_e2ee_data_key':
+							opt     = this.capApp.valueJsHintDecryptDataKey;
+							postfix = postfixAsync;
+						break;
+						case 'get_e2ee_data_value':
+							opt     = this.capApp.valueJsHintDecryptDataValue;
+							postfix = postfixAsync;
+						break;
 					}
-					text = `${prefix}.${this.entitySelectedId}(${opt})`;
+					text = `${prefix}.${this.entitySelectedId}(${opt})${postfix}`;
 				break;
 				case 'field':
 					fld  = this.dataFieldMap[this.entitySelectedId];
@@ -408,8 +424,6 @@ let MyBuilderJsFunction = {
 				case 'jsFunction':
 					fnc  = this.jsFunctionIdMap[this.entitySelectedId];
 					mod  = this.moduleIdMap[fnc.moduleId];
-					
-					// add argument names to show function interface
 					args = fnc.codeArgs === '' ? '' : ', '+fnc.codeArgs.toUpperCase();
 					text = `${prefix}.call_frontend({${mod.name}.${fnc.name}}${args})`;
 				break;
@@ -427,21 +441,17 @@ let MyBuilderJsFunction = {
 					}
 					let argsList = argsOut.length === 0 ? '' : ', '+argsOut.join(', ');
 					
-					text = `${prefix}.call_backend({${mod.name}.${fnc.name}}${argsList}).then(`
-						+ `\n\tres => { // if success: return value in 'res' },`
-						+ `\n\terr => { // if error: error message in 'err' }\n)`
-					;
+					text = `${prefix}.call_backend({${mod.name}.${fnc.name}}${argsList})${postfixAsync}`;
 				break;
 			}
 			
 			if(field.selectionStart || field.selectionStart === '0') {
-				
 				let startPos = field.selectionStart;
 				let endPos   = field.selectionEnd;
 				
 				field.value = field.value.substring(0,startPos)
 					+ text
-					+ field.value.substring(endPos, field.value.length);
+					+ field.value.substring(endPos,field.value.length);
 				
 				field.selectionStart = startPos + text.length;
 				field.selectionEnd   = startPos + text.length;
@@ -462,12 +472,10 @@ let MyBuilderJsFunction = {
 			this.entitySelectedId = id;
 		},
 		toggleModule:function(id) {
-			let pos = this.moduleIdsOpen.indexOf(id);
+			const pos = this.moduleIdsOpen.indexOf(id);
 			
-			if(pos === -1)
-				return this.moduleIdsOpen.push(id);
-			
-			this.moduleIdsOpen.splice(pos,1);
+			return pos === -1 ? this.moduleIdsOpen.push(id)
+				: this.moduleIdsOpen.splice(pos,1);
 		},
 		showHelp:function(top,text) {
 			this.$store.commit('dialog',{
@@ -653,8 +661,8 @@ let MyBuilderJsFunction = {
 				}),
 				ws.prepare('schema','check',{moduleId:this.module.id})
 			],true).then(
-				(res) => this.$root.schemaReload(this.module.id),
-				(err) => this.$root.genericError(err)
+				res => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		}
 	}
