@@ -608,6 +608,7 @@
 			"layout":"Aspectul listei",
 			"limit":"Numărul rezultatelor",
 			"new":"Formular nou",
+			"noDataActions":"No data actions",
 			"onMobile":"Vizualizare dispozitiv mobil",
 			"openForm":"Deschideți formularul",
 			"openFormAttributeApply":"...pentru a seta valoare formularului",

@@ -136,7 +136,7 @@ let MyForm = {
 				<template v-if="isData">
 					<div class="area">
 						<my-button image="new.png"
-							v-if="allowNew"
+							v-if="allowNew && !noDataActions"
 							@trigger="openNewAsk(false)"
 							@trigger-middle="openNewAsk(true)"
 							:active="(!isNew || hasChanges) && canCreate"
@@ -145,6 +145,7 @@ let MyForm = {
 							:darkBg="true"
 						/>
 						<my-button image="save.png"
+							v-if="!noDataActions"
 							@trigger="set(false)"
 							:active="canUpdate"
 							:caption="capGen.button.save"
@@ -152,7 +153,7 @@ let MyForm = {
 							:darkBg="true"
 						/>
 						<my-button image="save_new.png"
-							v-if="!isInline && !isMobile && allowNew"
+							v-if="!isInline && !isMobile && allowNew && !noDataActions"
 							@trigger="set(true)"
 							:active="canUpdate && canCreate"
 							:caption="capGen.button.saveNew"
@@ -168,7 +169,7 @@ let MyForm = {
 							:darkBg="true"
 						/>
 						<my-button image="shred.png"
-							v-if="allowDel"
+							v-if="allowDel && !noDataActions"
 							@trigger="delAsk"
 							:active="canDelete"
 							:cancel="true"
@@ -346,6 +347,9 @@ let MyForm = {
 			return this.hasChanges && !this.badLoad && !this.updatingRecord;
 		},
 		hasChanges:function() {
+			if(this.noDataActions)
+				return false;
+			
 			for(let k in this.values) {
 				if(!this.isAttributeValueEqual(this.values[k],this.valuesOrg[k]))
 					return true;
@@ -365,9 +369,10 @@ let MyForm = {
 		},
 		
 		// states, simple
-		isData:     function() { return this.relationId !== null; },
-		isNew:      function() { return this.recordId === 0; },
-		warnUnsaved:function() { return this.hasChanges && this.settings.warnUnsaved; },
+		isData:       function() { return this.relationId !== null; },
+		isNew:        function() { return this.recordId === 0; },
+		noDataActions:function() { return this.form.noDataActions; },
+		warnUnsaved:  function() { return this.hasChanges && this.settings.warnUnsaved; },
 		
 		// entities
 		fieldIdMapData:function() {

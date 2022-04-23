@@ -608,6 +608,7 @@
 			"layout":"List layout",
 			"limit":"Result count",
 			"new":"New form",
+			"noDataActions":"No data actions",
 			"onMobile":"In mobile view",
 			"openForm":"Open form",
 			"openFormAttributeApply":"...to set value on form",

@@ -98,6 +98,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	"2.6": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
+			-- new form option
+			ALTER TABLE app.form ADD COLUMN no_data_actions BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.form ALTER COLUMN no_data_actions DROP DEFAULT;
+			
 			-- new collection icon
 			ALTER TABLE app.collection ADD COLUMN icon_id uuid;
 			ALTER TABLE app.collection ADD CONSTRAINT collection_icon_id_fkey FOREIGN KEY (icon_id)

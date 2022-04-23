@@ -1,6 +1,7 @@
 package collection
 
 import (
+	"r3/compatible"
 	"r3/db"
 	"r3/schema"
 	"r3/schema/column"
@@ -63,6 +64,9 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, iconId pgtype.UUID, nam
 	if err != nil {
 		return err
 	}
+
+	// fix imports < 2.7: New collection option: Icon ID
+	iconId = compatible.FixPgxNull(iconId).(pgtype.UUID)
 
 	if known {
 		if _, err := tx.Exec(db.Ctx, `

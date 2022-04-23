@@ -350,8 +350,8 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		log.Info("transfer", fmt.Sprintf("set form %s", e.Id))
 
 		if err := importCheckResultAndApply(tx, form.Set_tx(tx,
-			e.ModuleId, e.Id, e.PresetIdOpen, e.IconId, e.Name, e.Query,
-			e.Fields, e.Functions, e.States, e.Captions), e.Id,
+			e.ModuleId, e.Id, e.PresetIdOpen, e.IconId, e.Name, e.NoDataActions,
+			e.Query, e.Fields, e.Functions, e.States, e.Captions), e.Id,
 			idMapSkipped); err != nil {
 
 			return err

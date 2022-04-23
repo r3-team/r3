@@ -951,6 +951,7 @@ let MyBuilderForm = {
 				presetIdOpen:this.form.presetIdOpen,
 				iconId:this.iconId,
 				name:this.form.name,
+				noDataActions:this.form.noDataActions,
 				query:{
 					id:this.form.query.id,
 					relationId:this.relationId,

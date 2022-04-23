@@ -267,7 +267,6 @@ let MyBuilderJsFunction = {
 			codeArgs:'',
 			codeFunction:'',
 			codeReturns:'',
-			
 			appFunctions:[
 				'copy_to_clipboard','get_e2ee_data_key','get_e2ee_data_value',
 				'get_language_code','get_login_id','get_record_id','get_role_ids',

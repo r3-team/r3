@@ -608,6 +608,7 @@
 			"layout":"Disposizione elenco",
 			"limit":"Limite risultato",
 			"new":"Nuovo modulo",
+			"noDataActions":"No data actions",
 			"onMobile":"Nella vista mobile",
 			"openForm":"Apri modulo",
 			"openFormAttributeApply":"...per impopstare il valore sul modulo",

@@ -608,6 +608,7 @@
 			"layout":"Listen-Layout",
 			"limit":"Ergebnisanzahl",
 			"new":"Neues Formular",
+			"noDataActions":"Keine Datenaktionen",
 			"onMobile":"In mobiler Ansicht",
 			"openForm":"Formular öffnen",
 			"openFormAttributeApply":"...um Wert auf Formular zu setzen",
