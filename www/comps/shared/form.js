@@ -1,4 +1,5 @@
-import MyStore from '../../stores/store.js';
+import MyStore        from '../../stores/store.js';
+import {consoleError} from './error.js';
 import {
 	aesGcmDecryptBase64WithPhrase,
 	rsaDecrypt
@@ -33,42 +34,42 @@ export async function getRowsDecrypted(rows,expressions) {
 	
 	// decrypt row values
 	for(let i = 0, j = rows.length; i < j; i++) {
-		
 		// keep encryption keys, multiple attributes can be encrypted on the same relation
 		// key: relation index, value: decrypted base64 key
-		let keysByRelIndex = {};
+		let keysByRelIndex  = {};
 		
-		for(let exprIndex in encExprIndexMapRelIndex) {
-			
-			let relIndex = encExprIndexMapRelIndex[exprIndex];
-			let value    = rows[i].values[exprIndex];
-			
-			if(value === null)
-				continue;
-			
-			// check if data key for this relation is already available, get from rows if not
-			if(typeof keysByRelIndex[relIndex] === 'undefined') {
+		try{
+			for(let exprIndex in encExprIndexMapRelIndex) {
+				let relIndex = encExprIndexMapRelIndex[exprIndex];
+				let value    = rows[i].values[exprIndex];
 				
-				if(MyStore.getters.loginPrivateKey === null)
-					throw new Error('failed to decrypt data, private key is unavailable');
+				if(value === null)
+					continue;
 				
-				if(typeof rows[i].indexRecordEncKeys[relIndex] === 'undefined')
-					throw new Error('failed to decrypt data, no data key for record row '+i);
+				// check if data key for this relation is already available, get from rows if not
+				if(typeof keysByRelIndex[relIndex] === 'undefined') {
+					
+					if(MyStore.getters.loginPrivateKey === null)
+						throw new Error('private key is unavailable');
+					
+					if(typeof rows[i].indexRecordEncKeys[relIndex] === 'undefined')
+						throw new Error('no data key for record row '+i);
+					
+					// decrypt data key with private key
+					keysByRelIndex[relIndex] = await rsaDecrypt(
+						MyStore.getters.loginPrivateKey,
+						rows[i].indexRecordEncKeys[relIndex]
+					);
+				}
 				
-				// decrypt data key with private key
-				keysByRelIndex[relIndex] = await rsaDecrypt(
-					MyStore.getters.loginPrivateKey,
-					rows[i].indexRecordEncKeys[relIndex]
-				).catch(
-					err => { throw new Error('failed to decrypt data, '+err); }
-				);
+				// decrypt data
+				rows[i].values[exprIndex] =
+					await aesGcmDecryptBase64WithPhrase(value,keysByRelIndex[relIndex]);
 			}
-			
-			// decrypt data
-			value = await aesGcmDecryptBase64WithPhrase(value,keysByRelIndex[relIndex])
-				.catch(err => { throw new Error('failed to decrypt data with data key, '+err); });
-			
-			rows[i].values[exprIndex] = value;
+		} catch(err) {
+			consoleError('failed to decrypt data, ' + err); // log to console for troubleshooting
+			rows.splice(i,1);                               // remove affected row
+			i--; j--;
 		}
 	}
 	return rows;
