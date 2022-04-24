@@ -291,13 +291,6 @@ func setRecord_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, recordId 
 		sqlValues = append(sqlValues, recordId)
 	}
 
-	// disable triggers during record manipulation (is rolled back if tx is aborted)
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-		ALTER TABLE %s DISABLE TRIGGER ALL
-	`, fullRelName)); err != nil {
-		return err
-	}
-
 	if isNew {
 		for i, _ := range sqlNames {
 			sqlRefs = append(sqlRefs, fmt.Sprintf(`$%d`, i+1))
@@ -346,13 +339,6 @@ func setRecord_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, recordId 
 				return err
 			}
 		}
-	}
-
-	// enable triggers after record manipulation
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-		ALTER TABLE %s ENABLE TRIGGER ALL
-	`, fullRelName)); err != nil {
-		return err
 	}
 	return nil
 }
