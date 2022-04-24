@@ -2,7 +2,6 @@ import MyField               from './field.js';
 import MyFormHelp            from './formHelp.js';
 import MyFormLog             from './formLog.js';
 import {hasAccessToRelation} from './shared/access.js';
-import {getCollectionValues} from './shared/collection.js';
 import {consoleError}        from './shared/error.js';
 import {srcBase64}           from './shared/image.js';
 import {
@@ -36,6 +35,10 @@ import {
 	getIndexAttributeId,
 	getIndexAttributeIdByField
 } from './shared/attribute.js';
+import {
+	getCollectionValues,
+	updateCollections
+} from './shared/collection.js';
 import {
 	fillRelationRecordIds,
 	getQueryAttributePkFilter,
@@ -473,6 +476,7 @@ let MyForm = {
 						maxHeight:maxY,
 						maxWidth:maxX
 					},[],newTab),
+				update_collection:(v) => this.updateCollections(false,undefined,v),
 				
 				// call other functions
 				call_backend:(id,...args) => {
@@ -712,6 +716,7 @@ let MyForm = {
 		rsaDecrypt,
 		rsaEncrypt,
 		srcBase64,
+		updateCollections,
 		
 		// form management
 		handleHotkeys:function(e) {

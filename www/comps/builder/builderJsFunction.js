@@ -272,9 +272,11 @@ let MyBuilderJsFunction = {
 				'get_language_code','get_login_id','get_record_id','get_role_ids',
 				'go_back','has_role','open_form','record_delete','record_new',
 				'record_reload','record_save','set_e2ee_by_login_ids',
-				'set_e2ee_by_login_ids_and_relation'
+				'set_e2ee_by_login_ids_and_relation','update_collection'
 			],
-			appFunctionsAsync:['get_e2ee_data_key','get_e2ee_data_value'],
+			appFunctionsAsync:[
+				'get_e2ee_data_key','get_e2ee_data_value','update_collection'
+			],
 			
 			// states
 			fieldMode:'get',
@@ -393,19 +395,18 @@ let MyBuilderJsFunction = {
 					opt     = '';
 					postfix = '';
 					switch(this.entitySelectedId) {
-						case 'copy_to_clipboard': opt = this.capApp.valueJsHint;      break;
-						case 'get_record_id':     opt = this.capApp.valueJsHintIndex; break;
-						case 'has_role':          opt = this.capApp.valueJsHintRole;  break;
-						case 'open_form':         opt = this.capApp.valueJsHintForm;  break;
-						case 'get_e2ee_data_key':
-							opt     = this.capApp.valueJsHintDecryptDataKey;
-							postfix = postfixAsync;
-						break;
-						case 'get_e2ee_data_value':
-							opt     = this.capApp.valueJsHintDecryptDataValue;
-							postfix = postfixAsync;
-						break;
+						case 'copy_to_clipboard':   opt = this.capApp.valueJsHint;      break;
+						case 'get_record_id':       opt = this.capApp.valueJsHintIndex; break;
+						case 'has_role':            opt = this.capApp.valueJsHintRole;  break;
+						case 'open_form':           opt = this.capApp.valueJsHintForm;  break;
+						case 'get_e2ee_data_key':   opt = this.capApp.valueJsHintDecryptDataKey;   break;
+						case 'get_e2ee_data_value': opt = this.capApp.valueJsHintDecryptDataValue; break;
+						case 'update_collection':   opt = this.capApp.valueJsHintUpdateCollection; break;
 					}
+					
+					if(this.appFunctionsAsync.includes(this.entitySelectedId))
+						postfix = postfixAsync;
+					
 					text = `${prefix}.${this.entitySelectedId}(${opt})${postfix}`;
 				break;
 				case 'field':

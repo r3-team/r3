@@ -663,7 +663,8 @@
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Reloads the current form record.",
 				"record_save":"app.record_save() => UNDEFINED<br /><br />Saves the current form record.",
 				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated on the next form save. Data keys for relations on the form with encryption enabled will be encrypted with the public key of each defined login. This enables later decryption of these records for users.<br /><br />If this function is not used, decryption is only ever possible for the creator.",
-				"set_e2ee_by_login_ids_and_relation":"set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated for the specified relation and records on the next form save. Data keys for relation records will be encrypted with the public key of each defined login. This enables later decryption of these records for users."
+				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated for the specified relation and records on the next form save. Data keys for relation records will be encrypted with the public key of each defined login. This enables later decryption of these records for users.",
+				"update_collection":"app.update_collection(collection_id) => UNDEFINED<br /><br />Retrieves and updates values for the specified collection."
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Aborts the operation and sends a message to the executing user, which is displayed in the user interface.",
@@ -734,7 +735,8 @@
 			"valueJsHintDecryptDataValue":"DATA_KEY, VALUE_ENCRYPTED",
 			"valueJsHintForm":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
 			"valueJsHintIndex":"RELATION_INDEX_NUMBER",
-			"valueJsHintRole":"ROLE_ID_STRING"
+			"valueJsHintRole":"ROLE_ID_STRING",
+			"valueJsHintUpdateCollection":"COLLECTION_ID"
 		},
 		"help":{
 			"title":"Application help"

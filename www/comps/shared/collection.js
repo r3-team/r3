@@ -79,31 +79,33 @@ export function getCollectionValues(collectionId,columnId,singleValue,recordInde
 };
 
 // update known collections by retrieving their data queries
-export function updateCollections(continueOnError,errFnc) {
+// can continue on error or reject immediately, if desired
+// can optionally call a specific error function when rejected
+// can optionally update only a single collection instead of all collections
+export function updateCollections(continueOnError,errFnc,collectionId) {
 	return new Promise((resolve,reject) => {
-		let access          = MyStore.getters.access.collection;
-		let collectionIdMap = MyStore.getters['schema/collectionIdMap'];
+		const access          = MyStore.getters.access.collection;
+		const collectionIdMap = MyStore.getters['schema/collectionIdMap'];
 		let dataRequests    = []; // one request data GET for each valid collection
 		let requestIds      = []; // collection ID, in order, for each data GET request
 		
-		for(let collectionId in collectionIdMap) {
-			
+		const addCollection = function(collectionId) {
 			if(typeof access[collectionId] === 'undefined' || access[collectionId] < 1)
-				continue;
+				return;
 			
-			let c = collectionIdMap[collectionId];
-			let q = c.query;
+			const c = collectionIdMap[collectionId];
+			const q = c.query;
 			
 			if(q.relationId === null)
-				continue;
+				return;
 			
 			// set module language so that language filters can work outside of module context
-			let m = MyStore.getters['schema/moduleIdMap'][c.moduleId];
-			MyStore.commit('moduleLanguage',getValidLanguageCode(m));
+			MyStore.commit('moduleLanguage',getValidLanguageCode(
+				MyStore.getters['schema/moduleIdMap'][c.moduleId]));
 			
-			let joinIndexMap = getJoinIndexMap(q.joins);
-			let filters      = getQueryFiltersProcessed(q.filters,{},joinIndexMap);
-			let columns      = getQueryColumnsProcessed(c.columns,{},joinIndexMap);
+			const joinIndexMap = getJoinIndexMap(q.joins);
+			const filters      = getQueryFiltersProcessed(q.filters,{},joinIndexMap);
+			const columns      = getQueryColumnsProcessed(c.columns,{},joinIndexMap);
 			
 			requestIds.push(c.id);
 			dataRequests.push(ws.prepare('data','get',{
@@ -115,6 +117,15 @@ export function updateCollections(continueOnError,errFnc) {
 				limit:q.fixedLimit,
 				offset:0
 			}));
+		};
+		
+		// either update specific or all collections
+		if(typeof collectionId !== 'undefined') {
+			addCollection(collectionId);
+		} else {
+			for(let k in collectionIdMap) {
+				addCollection(k);
+			}
 		}
 		
 		// collections must be cleared on update as some might have been removed (roles changed)
@@ -141,7 +152,7 @@ export function updateCollections(continueOnError,errFnc) {
 				if(typeof errFnc !== 'undefined')
 					errFnc(err);
 				
-				resolve();
+				reject(err);
 			}
 		);
 	});

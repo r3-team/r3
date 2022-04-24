@@ -663,7 +663,8 @@
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Lädt den aktuellen Formulardatensatz neu.",
 				"record_save":"app.record_save() => UNDEFINED<br /><br />Speichert den aktuellen Formulardatensatz.",
 				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />Wenn aufgerufen, wird die Ende-Zu-Ende-Verschlüsselung beim nächsten Speichern des Formulares aktualisiert. Datenschlüssel für Relationen auf dem Formular mit aktivierter Verschlüsselung werden mit den öffentlichen Schlüssel von jeder definierten Anmeldung verschlüsselt. Hiermit können Benutzer Datensätze später entschlüsseln.<br /><br />Wenn diese Funktion nicht aufgerufen wird, kann nur der Ersteller entschlüsseln.",
-				"set_e2ee_by_login_ids_and_relation":"set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />Wenn aufgerufen, wird die Ende-Zu-Ende-Verschlüsselung für die definierte Relation und Datensätze beim nächsten Speichern des Formulares aktualisiert. Datenschlüssel für Datensätze der Relation werden mit den öffentlichen Schlüssel von jeder definierten Anmeldung verschlüsselt. Hiermit können Benutzer Datensätze später entschlüsseln."
+				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />Wenn aufgerufen, wird die Ende-Zu-Ende-Verschlüsselung für die definierte Relation und Datensätze beim nächsten Speichern des Formulares aktualisiert. Datenschlüssel für Datensätze der Relation werden mit den öffentlichen Schlüssel von jeder definierten Anmeldung verschlüsselt. Hiermit können Benutzer Datensätze später entschlüsseln.",
+				"update_collection":"app.update_collection(collection_id) => UNDEFINED<br /><br />Holt und aktualisiert Werte für die spezifizierte Sammlung."
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Bricht die Operation ab und sendet dem ausführenden Benutzer eine Nachricht, welche in der Benutzeroberfläche angezeigt wird.",
@@ -734,7 +735,8 @@
 			"valueJsHintDecryptDataValue":"DATA_KEY, VALUE_ENCRYPTED",
 			"valueJsHintForm":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
 			"valueJsHintIndex":"RELATION_INDEX_NUMBER",
-			"valueJsHintRole":"ROLE_ID_STRING"
+			"valueJsHintRole":"ROLE_ID_STRING",
+			"valueJsHintUpdateCollection":"COLLECTION_ID"
 		},
 		"help":{
 			"title":"Anwendungshilfe"
