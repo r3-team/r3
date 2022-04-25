@@ -564,8 +564,8 @@ let MyBuilderPgFunction = {
 				}),
 				ws.prepare('schema','check',{moduleId:this.module.id})
 			],true).then(
-				(res) => this.$root.schemaReload(this.module.id),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		}
 	}

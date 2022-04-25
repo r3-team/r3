@@ -239,8 +239,8 @@ let MyHome = {
 		// actions
 		installPackage:function() {
 			ws.send('package','install',{},true).then(
-				(res) => {},
-				(err) => this.$root.genericError(err)
+				() => {},
+				this.$root.genericError
 			);
 			this.installStarted = true;
 		},

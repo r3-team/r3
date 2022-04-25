@@ -102,8 +102,8 @@ let MyBuilderPgIndex = {
 		
 		del:function(rel) {
 			ws.send('pgIndex','del',{id:this.index.id},true).then(
-				(res) => this.$root.schemaReload(this.relation.moduleId),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.relation.moduleId),
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -113,14 +113,14 @@ let MyBuilderPgIndex = {
 				noDuplicates:this.noDuplicates,
 				attributes:this.attributes
 			},true).then(
-				(res) => {
+				() => {
 					if(this.isNew) {
 						this.attributes   = [];
 						this.noDuplicates = false;
 					}
 					this.$root.schemaReload(this.relation.moduleId);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

@@ -236,14 +236,14 @@ let MyAdminScheduler = {
 				pgFunctionId:pgFunctionId,
 				pgFunctionScheduleId:pgFunctionScheduleId
 			},true).then(
-				res => this.runOk(),
+				() => this.runOk(),
 				this.$root.genericError
 			);
 			this.taskRunning = true;
 		},
 		runSystemTask:function(name) {
 			ws.send('scheduler','trigger',{systemTaskName:name},true).then(
-				res => this.runOk(),
+				() => this.runOk(),
 				this.$root.genericError
 			);
 			this.taskRunning = true;
@@ -268,12 +268,12 @@ let MyAdminScheduler = {
 			}
 			
 			ws.sendMultiple(requests,true).then(
-				res => {
+				() => {
 					this.get();
 					
 					ws.send('scheduler','reload',{},false).then(
-						res => {},
-						err => this.$root.genericError(err)
+						() => {},
+						this.$root.genericError
 					);
 				},
 				this.$root.genericError

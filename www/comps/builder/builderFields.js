@@ -9,7 +9,9 @@ import {
 	MyBuilderColumnTemplates
 } from './builderColumns.js';
 import {
+	getJoinsIndexMap,
 	getQueryExpressions,
+	getQueryFiltersProcessed,
 	getRelationsJoined,
 	getSubQueryFilterExpressions
 } from '../shared/query.js';
@@ -275,7 +277,7 @@ let MyBuilderFields = {
 		fieldCounter:   { type:Number,  required:true },
 		flexDirParent:  { type:String,  required:true },                             // flex direction of parent (row|column)
 		formId:         { type:String,  required:true },
-		isTemplate:     { type:Boolean, required:true },                    // is template for fields
+		isTemplate:     { type:Boolean, required:true },                             // is template for fields
 		joinsIndexMap:  { type:Object,  required:false, default:() => {return {}} },
 		moduleId:       { type:String,  required:false, default:'' },
 		showCaptions:   { type:Boolean, required:false, default:false },
@@ -313,7 +315,9 @@ let MyBuilderFields = {
 		// externals
 		getFlexBasis,
 		getItemTitle,
+		getJoinsIndexMap,
 		getQueryExpressions,
+		getQueryFiltersProcessed,
 		getRelationsJoined,
 		getSubQueryFilterExpressions,
 		isAttributeRelationship,
@@ -527,60 +531,18 @@ let MyBuilderFields = {
 			return out.join(';');
 		},
 		
-		// SQL preview
-		sqlPreviewResolveFilters:function(filters) {
-			let out  = [];
-			let that = this;
-			let processSide = function(s) {
-				
-				// workaround for missing filter values (collected from live form)
-				// NULL comparison is always valid
-				if(['field','javascript','languageCode','login','record','recordNew','role'].includes(s.content))
-					s.value = null;
-				
-				if(s.content === 'subQuery') {
-					s.query.filters     = that.sqlPreviewResolveFilters(s.query.filters);
-					s.query.expressions = that.getSubQueryFilterExpressions(s);
-				}
-				return s;
-			};
-			
-			for(let i = 0, j = filters.length; i < j; i++) {
-				let f = filters[i];
-				f.side0 = processSide(f.side0);
-				f.side1 = processSide(f.side1);
-				out.push(f);
-			}
-			return out;
-		},
-		sqlPreviewResolveExpressions:function(expressions) {
-			let out = [];
-			for(let i = 0, j = expressions.length; i < j; i++) {
-				let e = expressions[i];
-				
-				if(typeof e.query !== 'undefined')
-					e.query.filters = this.sqlPreviewResolveFilters(e.query.filters);
-				
-				out.push(e);
-			}
-			return out;
-		},
-		
 		// backend calls
 		getSqlPreview:function(field) {
 			ws.send('dataSql','get',{
 				relationId:field.query.relationId,
 				joins:this.getRelationsJoined(field.query.joins),
-				expressions:this.sqlPreviewResolveExpressions(
-					this.getQueryExpressions(field.columns)
-				),
-				filters:this.sqlPreviewResolveFilters(
-					JSON.parse(JSON.stringify(field.query.filters))
-				),
+				expressions:this.getQueryExpressions(field.columns),
+				filters:this.getQueryFiltersProcessed(field.query.filters,
+					{},this.getJoinsIndexMap(field.query.joins)),
 				orders:field.query.orders,
 				limit:field.query.fixedLimit !== 0 ? field.query.fixedLimit : 0
 			},true).then(
-				(res) => {
+				res => {
 					this.$store.commit('dialog',{
 						captionTop:this.capApp.sql,
 						captionBody:res.payload,
@@ -594,7 +556,7 @@ let MyBuilderFields = {
 						}]
 					});
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

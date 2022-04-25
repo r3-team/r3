@@ -459,8 +459,8 @@ let MyApp = {
 				},
 				err => this.setInitErr(err)
 			).then(
-				res => this.appReady = true,
-				err => this.setInitErr(err)
+				() => this.appReady = true,
+				this.setInitErr
 			).finally(
 				() => this.$store.commit('busyBlockInput',false)
 			);
@@ -492,7 +492,7 @@ let MyApp = {
 		// backend reloads
 		loginReauthAll:function(blocking) {
 			ws.send('login','reauthAll',{},blocking).then(
-				res => {},
+				() => {},
 				this.genericError
 			);
 		},
@@ -503,13 +503,13 @@ let MyApp = {
 				? {} : {moduleId:moduleId};
 			
 			ws.send('schema','reload',payload,true).then(
-				res => {},
+				() => {},
 				this.genericError
 			);
 		},
 		schedulerReload:function(blocking) {
 			ws.send('scheduler','reload',{},blocking).then(
-				res => {},
+				() => {},
 				this.genericError
 			);
 		}

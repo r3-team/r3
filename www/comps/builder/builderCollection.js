@@ -313,7 +313,7 @@ let MyBuilderCollection = {
 			}));
 			
 			ws.sendMultiple(requests,true).then(
-				res => this.$root.schemaReload(this.module.id),
+				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);
 		}

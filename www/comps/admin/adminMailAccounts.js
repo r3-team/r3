@@ -93,8 +93,8 @@ let MyAdminMailAccount = {
 		// backend calls
 		del:function() {
 			ws.send('mailAccount','del',{id:this.id},true).then(
-				(res) => this.reload(),
-				(err) => this.$root.genericError(err)
+				() => this.reload(),
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -109,20 +109,20 @@ let MyAdminMailAccount = {
 				hostName:this.hostName,
 				hostPort:this.hostPort
 			},true).then(
-				(res) => {
+				() => {
 					if(this.isNew)
 						this.name = '';
 					
 					this.reload();
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		reload:function() {
 			// reload mail account cache after change
 			ws.send('mailAccount','reload',{},true).then(
-				(res) => this.$emit('reloaded'),
-				(err) => this.$root.genericError(err)
+				() => this.$emit('reloaded'),
+				this.$root.genericError
 			);
 		}
 	}
@@ -229,8 +229,8 @@ let MyAdminMailAccounts = {
 		// backend calls
 		get:function() {
 			ws.send('mailAccount','get',{},true).then(
-				(res) => this.accountIdMap = res.payload.accounts,
-				(err) => this.$root.genericError(err)
+				res => this.accountIdMap = res.payload.accounts,
+				this.$root.genericError
 			);
 		},
 		test:function() {
@@ -239,7 +239,7 @@ let MyAdminMailAccounts = {
 				recipient:this.testRecipient,
 				subject:this.testSubject
 			},true).then(
-				(res) => {
+				() => {
 					this.$store.commit('dialog',{
 						captionBody:this.capApp.testOk,
 						buttons:[{
@@ -251,7 +251,7 @@ let MyAdminMailAccounts = {
 					this.testRecipient = '';
 					this.get();
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

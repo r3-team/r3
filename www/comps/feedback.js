@@ -131,8 +131,8 @@ let MyFeedback = {
 				mood:mood,
 				text:this.text
 			},true).then(
-				(res) => this.message = this.capApp.sendOk,
-				(err) => {
+				() => this.message = this.capApp.sendOk,
+				() => {
 					this.message      = this.capApp.sendNok;
 					this.messageError = true;
 				}

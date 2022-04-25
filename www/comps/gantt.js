@@ -826,7 +826,7 @@ let MyGantt = {
 				)).concat(this.choiceFilters),
 				orders:this.query.orders
 			},true).then(
-				(res) => {
+				res => {
 					// clear existing groups
 					this.groups = [];
 					
@@ -909,7 +909,7 @@ let MyGantt = {
 							this.scrollToNow();
 					}
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

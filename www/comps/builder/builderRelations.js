@@ -315,8 +315,8 @@ let MyBuilderRelationsItem = {
 		},
 		del:function() {
 			ws.send('relation','del',{id:this.relation.id},true).then(
-				res => this.$root.schemaReload(this.moduleId),
-				err => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.moduleId),
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -329,14 +329,14 @@ let MyBuilderRelationsItem = {
 				retentionDays:this.retentionDays,
 				policies:this.policies
 			},true).then(
-				res => {
+				() => {
 					if(this.isNew) {
 						this.name     = '';
 						this.policies = [];
 					}
 					this.$root.schemaReload(this.moduleId);
 				},
-				err => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

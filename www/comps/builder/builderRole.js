@@ -400,8 +400,8 @@ let MyBuilderRole = {
 				accessMenus:this.accessMenus,
 				accessRelations:this.accessRelations
 			},true).then(
-				(res) => this.$root.schemaReload(this.module.id),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		}
 	}

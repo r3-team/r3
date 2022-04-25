@@ -261,8 +261,8 @@ let MyBuilderAttribute = {
 		},
 		del:function(rel) {
 			ws.send('attribute','del',{id:this.attribute.id},true).then(
-				res => this.$root.schemaReload(this.module.id),
-				err => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -290,7 +290,7 @@ let MyBuilderAttribute = {
 					moduleId:this.relation.moduleId
 				})
 			],true).then(
-				res => {
+				() => {
 					if(this.isNew) {
 						this.name   = '';
 						this.iconId = null;
@@ -303,7 +303,7 @@ let MyBuilderAttribute = {
 					}
 					this.$root.schemaReload(this.module.id);
 				},
-				err => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

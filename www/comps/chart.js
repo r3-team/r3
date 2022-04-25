@@ -120,7 +120,7 @@ let MyChart = {
 				orders:this.query.orders,
 				limit:this.limit
 			},true).then(
-				(res) => {
+				res => {
 					// option overwrites
 					this.option = JSON.parse(this.optionJson);
 					
@@ -166,7 +166,7 @@ let MyChart = {
 					}
 					this.ready = true;
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

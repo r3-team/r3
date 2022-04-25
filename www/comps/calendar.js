@@ -552,8 +552,8 @@ let MyCalendarMonth = {
 		// backend calls
 		setIcsTokenFixed:function() {
 			ws.send('login','setTokenFixed',{context:'ics'},true).then(
-				(res) => this.icsToken = res.payload.tokenFixed,
-				(err) => this.$root.genericError(err)
+				res => this.icsToken = res.payload.tokenFixed,
+				this.$root.genericError
 			);
 		}
 	}
@@ -832,8 +832,8 @@ let MyCalendar = {
 				)).concat(this.choiceFilters),
 				orders:orders
 			},true).then(
-				(res) => this.rows = res.payload.rows,
-				(err) => this.$root.genericError(err)
+				res => this.rows = res.payload.rows,
+				this.$root.genericError
 			);
 		}
 	}

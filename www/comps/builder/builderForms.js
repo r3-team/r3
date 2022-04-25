@@ -164,7 +164,7 @@ let MyBuilderFormsItem = {
 		},
 		del:function() {
 			ws.send('form','del',{id:this.form.id},true).then(
-				res => this.$root.schemaReload(this.moduleId),
+				() => this.$root.schemaReload(this.moduleId),
 				this.$root.genericError
 			);
 		},
@@ -182,7 +182,7 @@ let MyBuilderFormsItem = {
 			form.captions      = this.captions;
 			
 			ws.send('form','set',form,true).then(
-				res => {
+				() => {
 					if(this.isNew) {
 						this.name     = '';
 						this.captions = {formTitle:{}};
@@ -328,12 +328,12 @@ let MyBuilderForms = {
 				moduleId:this.module.id,
 				newName:this.copyNewName
 			},true).then(
-				(res) => {
+				() => {
 					this.copyFormId  = null;
 					this.copyNewName = '';
 					this.$root.schemaReload(this.module.id);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

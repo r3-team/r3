@@ -314,7 +314,7 @@ let MyLogin = {
 					res.payload.token,
 					res.payload.saltKdf
 				),
-				err => this.handleError('authUser')
+				() => this.handleError('authUser')
 			);
 			this.loading = true;
 		},
@@ -329,7 +329,7 @@ let MyLogin = {
 					res.payload.token,
 					null
 				),
-				err => this.handleError('authUser')
+				() => this.handleError('authUser')
 			);
 			this.loading = true;
 		},
@@ -339,7 +339,7 @@ let MyLogin = {
 					res.payload.loginId,
 					res.payload.loginName
 				),
-				err => this.handleError('authToken')
+				() => this.handleError('authToken')
 			);
 			this.loading = true;
 		},

@@ -290,11 +290,11 @@ let MyAdminModulesItem = {
 			}
 			
 			ws.sendMultiple(requests,true).then(
-				(res) => {
+				() => {
 					this.$root.schemaReload();
 					this.$root.schedulerReload(false);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -304,8 +304,8 @@ let MyAdminModulesItem = {
 				owner:this.owner,
 				position:this.position
 			},true).then(
-				(res) => this.$root.schemaReload(),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(),
+				this.$root.genericError
 			);
 		}
 	}
@@ -520,21 +520,21 @@ let MyAdminModules = {
 		// backend calls
 		getRepo:function() {
 			ws.send('repoModule','get',{getInstalled:true,getNew:false},true).then(
-				(res) => this.repoModules = res.payload.repoModules,
-				(err) => this.$root.genericError(err)
+				res => this.repoModules = res.payload.repoModules,
+				this.$root.genericError
 			);
 		},
 		install:function(fileId) {
 			ws.send('repoModule','install',{fileId:fileId},true).then(
-				(res) => this.installOk(),
-				(err) => this.installError(err)
+				() => this.installOk(),
+				this.installError
 			);
 			this.installStarted = true;
 		},
 		installAll:function() {
 			ws.send('repoModule','installAll',{},true).then(
-				(res) => this.installOk(),
-				(err) => this.installError(err)
+				() => this.installOk(),
+				this.installError
 			);
 			this.installStarted = true;
 		},

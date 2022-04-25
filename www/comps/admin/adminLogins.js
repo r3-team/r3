@@ -326,14 +326,14 @@ let MyAdminLoginsItem = {
 		},
 		del:function() {
 			ws.send('login','del',{id:this.login.id},true).then(
-				(res) => {
+				() => {
 					this.$emit('updated');
 					ws.send('login','kick',{id:this.login.id},true).then(
-						(res) => {},
-						(err) => this.$root.genericError(err)
+						() => {},
+						this.$root.genericError
 					);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -349,7 +349,7 @@ let MyAdminLoginsItem = {
 				noAuth:this.noAuth,
 				roleIds:this.roleIds
 			},true).then(
-				(res) => {
+				() => {
 					if(this.isNew) {
 						this.name      = '';
 						this.showRoles = false;
@@ -363,11 +363,11 @@ let MyAdminLoginsItem = {
 					// login was changed, reauth. or kick client
 					let action = this.active ? 'reauth' : 'kick';
 					ws.send('login',action,{id:this.login.id},false).then(
-						(res) => {},
-						(err) => this.$root.genericError(err)
+						() => {},
+						this.$root.genericError
 					);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		
@@ -384,8 +384,8 @@ let MyAdminLoginsItem = {
 				byString:this.loginRecordInput,
 				idsExclude:excludeIds
 			},true).then(
-				(res) => this.loginRecordList = res.payload,
-				(err) => this.$root.genericError(err)
+				res => this.loginRecordList = res.payload,
+				this.$root.genericError
 			);
 		}
 	}
@@ -654,17 +654,17 @@ let MyAdminLogins = {
 				offset:this.offset,
 				recordRequests:forms
 			},true).then(
-				(res) => {
+				res => {
 					this.logins = res.payload.logins;
 					this.total  = res.payload.total;
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		getLdaps:function() {
 			ws.send('ldap','get',{},true).then(
-				(res) => this.ldaps = res.payload.ldaps,
-				(err) => this.$root.genericError(err)
+				res => this.ldaps = res.payload.ldaps,
+				this.$root.genericError
 			);
 		},
 		setRecord:function(index,loginId,recordId) {
@@ -673,8 +673,8 @@ let MyAdminLogins = {
 				loginId:loginId,
 				recordId:recordId
 			},true).then(
-				(res) => this.get(),
-				(err) => this.$root.genericError(err)
+				() => this.get(),
+				this.$root.genericError
 			);
 		}
 	}

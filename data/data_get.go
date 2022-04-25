@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"r3/cache"
 	"r3/data/data_enc"
+	"r3/data/data_sql"
 	"r3/db"
 	"r3/handler"
 	"r3/schema"
@@ -381,8 +382,9 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 			if err != nil {
 				return "", "", err
 			}
-			inSelect = append(inSelect, fmt.Sprintf("(\n%s\n) AS %s",
-				subQuery, getExpressionCodeSelect(pos)))
+
+			inSelect = append(inSelect, data_sql.GetExpression(
+				expr, subQuery, data_sql.GetExpressionAlias(pos)))
 
 			continue
 		}
@@ -441,7 +443,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 
 		// group by requested attribute
 		if expr.GroupBy {
-			groupByItems = append(groupByItems, getExpressionCodeSelect(i))
+			groupByItems = append(groupByItems, data_sql.GetExpressionAlias(i))
 		}
 	}
 	if len(groupByItems) != 0 {
@@ -510,10 +512,10 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 
 	atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
 	if !exists {
-		return errors.New("attribute does not exist")
+		return handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes)
 	}
 
-	codeSelect := getExpressionCodeSelect(exprPos)
+	alias := data_sql.GetExpressionAlias(exprPos)
 
 	if !expr.OutsideIn {
 		// attribute is from index relation
@@ -521,50 +523,19 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 		if err != nil {
 			return err
 		}
-
-		// prepare distinct paramenter, not useful for min/max/record
-		var distinct = ""
-		if expr.Distincted {
-			distinct = "DISTINCT "
-		}
-
-		// apply aggregator if desired
-		switch expr.Aggregator.String {
-		case "array":
-			*inSelect = append(*inSelect, fmt.Sprintf("ARRAY_AGG(%s%s) AS %s", distinct, code, codeSelect))
-		case "avg":
-			*inSelect = append(*inSelect, fmt.Sprintf("AVG(%s%s)::NUMERIC(20,2) AS %s", distinct, code, codeSelect))
-		case "count":
-			*inSelect = append(*inSelect, fmt.Sprintf("COUNT(%s%s) AS %s", distinct, code, codeSelect))
-		case "json":
-			*inSelect = append(*inSelect, fmt.Sprintf("JSON_AGG(%s%s) AS %s", distinct, code, codeSelect))
-		case "list":
-			*inSelect = append(*inSelect, fmt.Sprintf("STRING_AGG(%s%s::TEXT, ', ') AS %s", distinct, code, codeSelect))
-		case "max":
-			*inSelect = append(*inSelect, fmt.Sprintf("MAX(%s) AS %s", code, codeSelect))
-		case "min":
-			*inSelect = append(*inSelect, fmt.Sprintf("MIN(%s) AS %s", code, codeSelect))
-		case "sum":
-			*inSelect = append(*inSelect, fmt.Sprintf("SUM(%s%s) AS %s", distinct, code, codeSelect))
-		case "record":
-			// groups record IDs for attribute relation (via index)
-			// allows access to individual record IDs and attribute values while other aggregations are active
-			*inSelect = append(*inSelect, fmt.Sprintf("FIRST(%s) AS %s", code, codeSelect))
-		default:
-			*inSelect = append(*inSelect, fmt.Sprintf("%s%s AS %s", distinct, code, codeSelect))
-		}
+		*inSelect = append(*inSelect, data_sql.GetExpression(expr, code, alias))
 		return nil
 	}
 
 	// attribute comes via relationship from other relation (or self reference from same relation)
 	shipRel, exists := cache.RelationIdMap[atr.RelationId]
 	if !exists {
-		return errors.New("relation does not exist")
+		return handler.ErrSchemaUnknownRelation(atr.RelationId)
 	}
 
 	shipMod, exists := cache.ModuleIdMap[shipRel.ModuleId]
 	if !exists {
-		return errors.New("module does not exist")
+		return handler.ErrSchemaUnknownModule(shipRel.ModuleId)
 	}
 
 	// get tupel IDs from other relation
@@ -587,7 +558,7 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 			selectExpr,
 			shipMod.Name, shipRel.Name,
 			shipRel.Name, atr.Name, relCode, schema.PkName,
-			codeSelect))
+			alias))
 
 	} else {
 		shipAtrNm, exists := cache.AttributeIdMap[expr.AttributeIdNm.Bytes]
@@ -604,7 +575,7 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 			shipAtrNm.Name,
 			shipMod.Name, shipRel.Name,
 			shipRel.Name, atr.Name, relCode, schema.PkName,
-			codeSelect))
+			alias))
 	}
 	return nil
 }
@@ -700,12 +671,15 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 		if isQuery {
 			indexRelationIdsSub := make(map[int]uuid.UUID)
 
+			fmt.Println(s.Query.Limit)
+
 			subQuery, _, err := prepareQuery(s.Query, indexRelationIdsSub,
 				queryArgs, queryCountArgs, loginId, nestingLevel+1)
 
 			if err != nil {
 				return err
 			}
+			fmt.Println(subQuery)
 
 			*comp = fmt.Sprintf("(\n%s\n)", subQuery)
 			return nil
@@ -804,7 +778,7 @@ func addOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 	}
 
 	orderItems := make([]string, len(data.Orders))
-	var codeSelect string
+	var alias string
 	var err error
 
 	for i, ord := range data.Orders {
@@ -825,9 +799,9 @@ func addOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 			}
 
 			if expressionPosAlias != -1 {
-				codeSelect = getExpressionCodeSelect(expressionPosAlias)
+				alias = data_sql.GetExpressionAlias(expressionPosAlias)
 			} else {
-				codeSelect, err = getAttributeCode(ord.AttributeId.Bytes,
+				alias, err = getAttributeCode(ord.AttributeId.Bytes,
 					getRelationCode(int(ord.Index.Int), nestingLevel))
 
 				if err != nil {
@@ -837,15 +811,15 @@ func addOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 
 		} else if ord.ExpressionPos.Status == pgtype.Present {
 			// order by chosen expression (by position in array)
-			codeSelect = getExpressionCodeSelect(int(ord.ExpressionPos.Int))
+			alias = data_sql.GetExpressionAlias(int(ord.ExpressionPos.Int))
 		} else {
 			return "", errors.New("unknown data GET order parameter")
 		}
 
 		if ord.Ascending == true {
-			orderItems[i] = fmt.Sprintf("%s ASC", codeSelect)
+			orderItems[i] = fmt.Sprintf("%s ASC", alias)
 		} else {
-			orderItems[i] = fmt.Sprintf("%s DESC NULLS LAST", codeSelect)
+			orderItems[i] = fmt.Sprintf("%s DESC NULLS LAST", alias)
 		}
 	}
 	return fmt.Sprintf("\nORDER BY %s", strings.Join(orderItems, ", ")), nil
@@ -875,15 +849,9 @@ func getTupelIdCode(relationIndex int, nestingLevel int) string {
 func getAttributeCode(attributeId uuid.UUID, relCode string) (string, error) {
 	atr, exists := cache.AttributeIdMap[attributeId]
 	if !exists {
-		return "", errors.New("attribute does not exist")
+		return "", handler.ErrSchemaUnknownAttribute(attributeId)
 	}
 	return fmt.Sprintf(`"%s"."%s"`, relCode, atr.Name), nil
-}
-
-// alias for SELECT expression
-// set for all expressions, needed for grouped/aggregated/sub query expressions
-func getExpressionCodeSelect(expressionPos int) string {
-	return fmt.Sprintf(`"_e%d"`, expressionPos)
 }
 
 func getBrackets(count int, right bool) string {

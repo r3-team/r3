@@ -661,7 +661,7 @@ let MyBuilderJsFunction = {
 				}),
 				ws.prepare('schema','check',{moduleId:this.module.id})
 			],true).then(
-				res => this.$root.schemaReload(this.module.id),
+				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);
 		}

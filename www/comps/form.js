@@ -21,7 +21,6 @@ import {
 	getFormRoute,
 	getGetterArg,
 	getInputFieldName,
-	getJoinIndexMapExpanded,
 	getResolvedPlaceholders,
 	getRowsDecrypted
 } from './shared/form.js';
@@ -41,6 +40,7 @@ import {
 } from './shared/collection.js';
 import {
 	fillRelationRecordIds,
+	getJoinIndexMapExpanded,
 	getQueryAttributePkFilter,
 	getQueryFiltersProcessed,
 	getRelationsJoined
@@ -397,7 +397,6 @@ let MyForm = {
 			return this.getRelationsJoined(this.joins);
 		},
 		joinsIndexMap:function() {
-			// map of joins keyed by index (relation indexes are used to GET/SET/DEL data)
 			return this.getJoinIndexMapExpanded(
 				this.joins,
 				this.indexMapRecordId,
@@ -1271,7 +1270,7 @@ let MyForm = {
 			}
 			
 			ws.sendMultiple(requests,true).then(
-				res => {
+				() => {
 					if(this.isInline)
 						this.$emit('record-deleted',this.recordId);
 					
@@ -1334,7 +1333,7 @@ let MyForm = {
 					this.indexesNoSet      = [];
 					
 					this.valueSetByRows(res.payload.rows,expressions).then(
-						res => this.triggerEventAfter('open'),
+						() => this.triggerEventAfter('open'),
 						err => {
 							this.badLoad = true;
 							this.consoleError(err);

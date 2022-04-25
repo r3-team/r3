@@ -115,7 +115,7 @@ let MyBuilderCollectionsItem = {
 		},
 		del:function() {
 			ws.send('collection','del',{id:this.collection.id},true).then(
-				res => this.$root.schemaReload(this.module.id),
+				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);
 		},
@@ -134,7 +134,7 @@ let MyBuilderCollectionsItem = {
 				columns:this.collection.columns,
 				query:query
 			},true).then(
-				res => {
+				() => {
 					if(this.isNew)
 						this.name = '';
 					

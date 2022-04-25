@@ -765,30 +765,30 @@ let MyAdminConfig = {
 		// backend calls
 		get:function() {
 			ws.send('bruteforce','get',{},true).then(
-				(res) => {
+				res => {
 					this.bruteforceCountBlocked = res.payload.hostsBlocked;
 					this.bruteforceCountTracked = res.payload.hostsTracked;
 					this.ready = true;
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		set:function() {
 			ws.send('config','set',this.configInput,true).then(
-				(res) => {
+				() => {
 					// switch to maintenance mode
 					if(this.configInput.productionMode === '0' && this.config.productionMode === '1') {
 						ws.send('login','kickNonAdmins',{},false).then(
-							(res) => {},
-							(err) => this.$root.genericError(err)
+							() => {},
+							this.$root.genericError
 						);
 					}
 					
 					// inform clients about changed builder mode
 					if(this.configInput.builderMode !== this.config.builderMode) {
 						ws.send('login','informBuilderState',{},false).then(
-							(res) => {},
-							(err) => this.$root.genericError(err)
+							() => {},
+							this.$root.genericError
 						);
 					}
 					
@@ -798,7 +798,7 @@ let MyAdminConfig = {
 					// reload customizing
 					this.$root.initPublic(); 
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

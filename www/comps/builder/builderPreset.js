@@ -249,7 +249,7 @@ let MyBuilderPreset = {
 		},
 		del:function(rel) {
 			ws.send('preset','del',{id:this.preset.id},true).then(
-				res => this.$root.schemaReload(this.relation.moduleId),
+				() => this.$root.schemaReload(this.relation.moduleId),
 				this.$root.genericError
 			);
 		},
@@ -261,7 +261,7 @@ let MyBuilderPreset = {
 				protected:this.protected,
 				values:this.values
 			},true).then(
-				res => {
+				() => {
 					if(this.isNew) {
 						this.name   = '';
 						this.values = [];

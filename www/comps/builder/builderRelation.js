@@ -453,7 +453,7 @@ let MyBuilderRelation = {
 					this.previewRows     = res.payload.rows;
 					this.previewRowCount = res.payload.rowCount;
 				},
-				err => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

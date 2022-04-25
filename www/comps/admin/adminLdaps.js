@@ -329,7 +329,7 @@ let MyAdminLdaps = {
 		// backend calls
 		runImport:function(id) {
 			ws.send('ldap','import',{id:id},true).then(
-				res => {
+				() => {
 					this.$store.commit('dialog',{
 						captionBody:this.capApp.dialog.importDone,
 						buttons:[{
@@ -344,7 +344,7 @@ let MyAdminLdaps = {
 		},
 		runCheck:function() {
 			ws.send('ldap','check',{id:this.idEdit},true).then(
-				res => {
+				() => {
 					this.$store.commit('dialog',{
 						captionBody:this.capApp.dialog.testDone,
 						buttons:[{
@@ -359,7 +359,7 @@ let MyAdminLdaps = {
 		},
 		reloadBackendCache:function() {
 			ws.send('ldap','reload',{},false).then(
-				res => {},
+				() => {},
 				this.$root.genericError
 			);
 		},
@@ -379,7 +379,7 @@ let MyAdminLdaps = {
 		},
 		del:function() {
 			ws.send('ldap','del',{id:this.idEdit},true).then(
-				res => {
+				() => {
 					this.close();
 					this.get();
 					this.reloadBackendCache();
@@ -413,7 +413,7 @@ let MyAdminLdaps = {
 				tlsVerify:this.inputs.tlsVerify,
 				roles:this.inputs.roles
 			},true).then(
-				res => {
+				() => {
 					if(this.isNew)
 						this.showEdit = false;
 					

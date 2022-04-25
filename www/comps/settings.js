@@ -287,7 +287,7 @@ let MySettingsEncryption = {
 			// attempt to decrypt private key with backup code
 			this.aesGcmDecryptBase64WithPhrase(this.loginPrivateKeyEncBackup,backupCode).then(
 				res => this.reencrypt(res),
-				err => this.unlockError()
+				()  => this.unlockError()
 			);
 		},
 		unlockWithPassphrase:function() {
@@ -296,7 +296,7 @@ let MySettingsEncryption = {
 					// attempt to decrypt private key with login key based on previous password
 					this.aesGcmDecryptBase64(this.loginPrivateKeyEnc,loginKeyOld).then(
 						res => this.reencrypt(res),
-						err => this.unlockError()
+						()  => this.unlockError()
 					);
 				},
 				this.$root.genericError
@@ -348,7 +348,7 @@ let MySettingsEncryption = {
 						privateKeyEncBackup:this.newKeyPrivateEncBackup,
 						publicKey:publicKeyPem
 					},true).then(
-						res => {
+						() => {
 							this.$store.commit('loginEncryption',true);
 							this.$store.commit('loginPrivateKey',this.newKeyPair.privateKey);
 							this.$store.commit('loginPrivateKeyEnc',this.newKeyPrivateEnc);

@@ -5,16 +5,19 @@ import MyBuilderFormStates    from './builderFormStates.js';
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderFields        from './builderFields.js';
 import {getNilUuid}           from '../shared/generic.js';
-import {getQueryTemplate}     from '../shared/query.js';
-import {
-	getDataFields,
-	getFormRoute
-} from '../shared/form.js';
 import {
 	getIndexAttributeId,
 	isAttributeRelationship,
 	isAttributeRelationshipN1
 } from '../shared/attribute.js';
+import {
+	getDataFields,
+	getFormRoute
+} from '../shared/form.js';
+import {
+	getJoinsIndexMap,
+	getQueryTemplate
+} from '../shared/query.js';
 export {MyBuilderForm as default};
 
 let MyBuilderForm = {
@@ -496,13 +499,6 @@ let MyBuilderForm = {
 			};
 			return getIndexIds(this.fields);
 		},
-		joinsIndexMap:function() {
-			let map = {};
-			for(let i = 0, j = this.joins.length; i < j; i++) {
-				map[this.joins[i].index] = this.joins[i];
-			}
-			return map;
-		},
 		fieldQueryEdit:function() {
 			if(this.fieldIdQuery === null) return false;
 			
@@ -522,12 +518,11 @@ let MyBuilderForm = {
 			
 			return atr.relationId;
 		},
-		showColumnQuery:function() {
-			return this.columnQueryEdit !== false;
-		},
-		showFieldQuery:function() {
-			return this.fieldQueryEdit !== false;
-		},
+		
+		// simple
+		joinsIndexMap:  function() { return this.getJoinsIndexMap(this.joins); },
+		showColumnQuery:function() { return this.columnQueryEdit !== false; },
+		showFieldQuery: function() { return this.fieldQueryEdit !== false; },
 		
 		// stores
 		module:        function() { return this.moduleIdMap[this.form.moduleId]; },
@@ -552,6 +547,7 @@ let MyBuilderForm = {
 		getDataFields,
 		getFormRoute,
 		getIndexAttributeId,
+		getJoinsIndexMap,
 		getNilUuid,
 		getQueryTemplate,
 		isAttributeRelationship,
@@ -969,8 +965,8 @@ let MyBuilderForm = {
 			}));
 			
 			ws.sendMultiple(requests,true).then(
-				(res) => this.$root.schemaReload(this.module.id),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		}
 	}

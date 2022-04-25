@@ -37,9 +37,11 @@ type QueryJoin struct {
 	IndexFrom   int         `json:"indexFrom"`   // index that we joined from (always lower than own index)
 	Index       int         `json:"index"`       // this relation index
 	Connector   string      `json:"connector"`   // join connector (INNER, LEFT, RIGHT, FULL)
-	ApplyCreate bool        `json:"applyCreate"` // allow new records to be created
-	ApplyUpdate bool        `json:"applyUpdate"` // allow existing records to be updated
-	ApplyDelete bool        `json:"applyDelete"` // allow existing records to be deleted
+
+	// for frontend processing
+	ApplyCreate bool `json:"applyCreate"` // allow new records to be created
+	ApplyUpdate bool `json:"applyUpdate"` // allow existing records to be updated
+	ApplyDelete bool `json:"applyDelete"` // allow existing records to be deleted
 }
 
 // a filter compares two values from left & right sides (0/1)
@@ -56,20 +58,21 @@ type QueryFilter struct {
 	Side1     QueryFilterSide `json:"side1"`     // comparison: right side
 }
 type QueryFilterSide struct {
-	AttributeId     pgtype.UUID `json:"attributeId"`     // attribute (database value)
-	AttributeIndex  int         `json:"attributeIndex"`  // relation index of attribute
-	AttributeNested int         `json:"attributeNested"` // nesting level of attribute  (0=main query, 1=1st sub query)
-	CollectionId    pgtype.UUID `json:"collectionId"`    // collection ID of which column value to compare
-	ColumnId        pgtype.UUID `json:"columnId"`        // column ID from collection of which value to compare
-	FieldId         pgtype.UUID `json:"fieldId"`         // frontend field value
-	PresetId        pgtype.UUID `json:"presetId"`        // preset ID of record to be compared
-	RoleId          pgtype.UUID `json:"roleId"`          // role ID assigned to user
-
+	AttributeId     pgtype.UUID    `json:"attributeId"`     // attribute (database value)
+	AttributeIndex  int            `json:"attributeIndex"`  // relation index of attribute
+	AttributeNested int            `json:"attributeNested"` // nesting level of attribute  (0=main query, 1=1st sub query)
 	Brackets        int            `json:"brackets"`        // opening/closing brackets (side 0/1)
-	Content         string         `json:"content"`         // attribute, field, role, language code, login, record, record new, sub query, true
 	Query           Query          `json:"query"`           // sub query
 	QueryAggregator pgtype.Varchar `json:"queryAggregator"` // sub query aggregator (COUNT, AGG, etc.)
 	Value           pgtype.Varchar `json:"value"`           // fixed value, can be anything including NULL
+
+	// for frontend processing
+	Content      string      `json:"content"`      // attribute, field, role, language code, login, record, record new, sub query, true
+	CollectionId pgtype.UUID `json:"collectionId"` // collection ID of which column value to compare
+	ColumnId     pgtype.UUID `json:"columnId"`     // column ID from collection of which value to compare
+	FieldId      pgtype.UUID `json:"fieldId"`      // frontend field value
+	PresetId     pgtype.UUID `json:"presetId"`     // preset ID of record to be compared
+	RoleId       pgtype.UUID `json:"roleId"`       // role ID assigned to user
 }
 
 type QueryOrder struct {

@@ -146,8 +146,8 @@ let MyBuilderPgTrigger = {
 		},
 		del:function() {
 			ws.send('pgTrigger','del',{id:this.pgTrigger.id},true).then(
-				(res) => this.$root.schemaReload(this.module.id),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		},
 		set:function(atr) {
@@ -177,14 +177,14 @@ let MyBuilderPgTrigger = {
 				perRow:this.perRow,
 				codeCondition:this.codeCondition
 			},true).then(
-				(res) => {
+				() => {
 					if(this.isNew) {
 						this.codeCondition = '';
 						this.pgFunctionId  = null;
 					}
 					this.$root.schemaReload(this.module.id);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}
