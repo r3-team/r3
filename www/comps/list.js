@@ -368,10 +368,11 @@ let MyList = {
 									:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkbox1.png' : 'images/checkbox0.png'"
 								/>
 							</th>
-							<th class="clickable"
+							<th
 								v-for="b in columnBatches"
 								@click.left="clickColumn(b)"
 								@click.right.prevent="clickColumnRight(b)"
+								:class="{ clickable:b.columnIndexSortBy !== -1 }"
 								:style="b.style"
 							>
 								{{ b.caption+displaySortDir(b) }}
@@ -494,8 +495,8 @@ let MyList = {
 						>
 							<option value="-1">-</option>
 							<option
-								v-for="(b,i) in columnBatches"
-								:value="i"
+								v-for="(b,i) in columnBatches.filter(v => v.columnIndexSortBy !== -1)"
+								:value="b.columnIndexSortBy"
 							>
 								{{ b.caption }}
 							</option>
@@ -642,22 +643,27 @@ let MyList = {
 		// first column in batch is used for header caption and ordering
 		columnBatches:function() {
 			let out  = [];
-			let that = this;
 			
-			let addColumn = function(column,index) {
+			let addColumn = (column,index) => {
+				const hidden = column.display === 'hidden' || (this.isMobile && !column.onMobile);
+				const atr    = this.attributeIdMap[column.attributeId];
 				
-				let hidden = column.display === 'hidden' || (that.isMobile && !column.onMobile);
+				// first non-encrypted/non-file attribute in batch can be sorted by
+				const noSort = atr.encrypted || this.isAttributeFiles(atr.content);
 				
 				if(column.batch !== null) {
 					for(let i = 0, j = out.length; i < j; i++) {
 						
 						if(out[i].batch === column.batch) {
-							// batch already exists, do not create new one
+							// batch already exists
 							
 							// do not add column if its hidden
 							if(hidden) return;
 							
+							// add its own column index + sort setting + width to batch
 							out[i].columnIndexes.push(index);
+							out[i].columnIndexSortBy = out[i].columnIndexSortBy !== -1 || noSort
+								? out[i].columnIndexSortBy : index;
 							out[i].width += column.basis;
 							return;
 						}
@@ -668,8 +674,9 @@ let MyList = {
 				// create even if first column is hidden as other columns in same batch might not be
 				out.push({
 					batch:column.batch,
-					caption:that.getColumnTitle(column),
+					caption:this.getColumnTitle(column),
 					columnIndexes:!hidden ? [index] : [],
+					columnIndexSortBy:noSort ? -1 : index,
 					style:'',
 					width:column.basis
 				});
@@ -913,12 +920,7 @@ let MyList = {
 			return state ? 'radio1.png' : 'radio0.png';
 		},
 		displaySortDir:function(columnBatch) {
-			let colIndex = this.getFirstSortableColumnIndexInBatch(columnBatch);
-			
-			if(colIndex === -1)
-				return '';
-				
-			let orderPos = this.getColumnPosInOrder(colIndex);
+			const orderPos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
 			
 			if(orderPos !== -1) {
 				let postfix = this.orders.length === 1 ? '' : (orderPos+1);
@@ -1020,12 +1022,7 @@ let MyList = {
 			// apply first order for card layout selector
 			this.orderByColumnBatchIndex = -1;
 			for(let i = 0, j = this.columnBatches.length; i < j; i++) {
-				
-				let colIndex = this.getFirstSortableColumnIndexInBatch(this.columnBatches[i]);
-				if(colIndex === -1)
-					continue;
-				
-				if(this.getColumnPosInOrder(colIndex) !== -1) {
+				if(this.getColumnPosInOrder(this.columnBatches[i].columnIndexSortBy) !== -1) {
 					this.orderByColumnBatchIndex = i;
 					break;
 				}
@@ -1143,19 +1140,17 @@ let MyList = {
 		
 		// user actions, table layout
 		clickColumn:function(columnBatch) {
-			let colIndex = this.getFirstSortableColumnIndexInBatch(columnBatch);
-			
-			if(colIndex === -1)
+			if(columnBatch.columnIndexSortBy === -1)
 				return;
 			
-			let col      = this.columns[colIndex];
-			let orderPos = this.getColumnPosInOrder(colIndex);
+			const orderPos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
 			if(orderPos === -1) {
+				const col = this.columns[columnBatch.columnIndexSortBy];
 				
 				// not ordered by this column -> add as ascending order
 				if(col.subQuery) {
 					this.orders.push({
-						expressionPos:colIndex, // equal to expression index
+						expressionPos:columnBatch.columnIndexSortBy, // equal to expression index
 						ascending:true
 					});
 				}
@@ -1179,17 +1174,11 @@ let MyList = {
 			this.reloadInside('order');
 		},
 		clickColumnRight:function(columnBatch) {
-			let colIndex = this.getFirstSortableColumnIndexInBatch(columnBatch);
-			
-			if(colIndex === -1)
-				return;
-			
-			let orderPos = this.getColumnPosInOrder(colIndex);
-			if(orderPos === -1)
-				return;
-			
-			this.orders.splice(orderPos,1);
-			this.reloadInside('order');
+			const orderPos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
+			if(orderPos !== -1) {
+				this.orders.splice(orderPos,1);
+				this.reloadInside('order');
+			}
 		},
 		clickRow:function(row,middleClick) {
 			const recordId = row.indexRecordIds['0'];
@@ -1215,22 +1204,15 @@ let MyList = {
 		},
 		
 		// user actions, card layout
-		selectOrderBy:function(colBatchIndexString) {
-			let colBatchIndex = parseInt(colBatchIndexString);
+		selectOrderBy:function(columnIndexSortByString) {
+			const columnIndexSortBy = parseInt(columnIndexSortByString);
 			this.orders = [];
 			
-			if(colBatchIndex !== -1) {
-				let colBatch = this.columnBatches[colBatchIndex];
-				let colIndex = this.getFirstSortableColumnIndexInBatch(colBatch);
-				
-				if(colIndex === -1)
-					return;
-				
-				let col = this.columns[colIndex];
-				
+			if(columnIndexSortBy !== -1) {
+				const col = this.columns[columnIndexSortBy];
 				if(col.subQuery) {
 					this.orders.push({
-						expressionPos:colIndex, // equal to expression index
+						expressionPos:columnIndexSortBy, // equal to expression index
 						ascending:true
 					});
 				}
@@ -1306,25 +1288,11 @@ let MyList = {
 		},
 		
 		// helpers
-		getFirstSortableColumnIndexInBatch:function(columnBatch) {
-			// if only 1 column is available in batch, return it
-			if(columnBatch.columnIndexes.length === 1)
-				return columnBatch.columnIndexes[0];
-			
-			for(let i = 0, j = columnBatch.columnIndexes.length; i < j; i++) {
-				let col = this.columns[columnBatch.columnIndexes[i]];
-				let atr = this.attributeIdMap[col.attributeId];
-				
-				if(!this.isAttributeFiles(atr.content))
-					return columnBatch.columnIndexes[i];
-			}
-			
-			// if no sortable columns are available, return false
-			return -1;
-		},
 		getColumnPosInOrder:function(columnIndex) {
-			let col = this.columns[columnIndex];
+			if(columnIndex === -1)
+				return -1;
 			
+			let col = this.columns[columnIndex];
 			for(let i = 0, j = this.orders.length; i < j; i++) {
 				
 				if(col.subQuery) {

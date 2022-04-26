@@ -163,12 +163,11 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 	let getFilterSideProcessed = function(s,operator) {
 		switch(s.content) {
 			case 'collection':
-				if(typeof collectionIdMapIndexFilter[s.collectionId] !== 'undefined')
-					s.value = getCollectionValues(
-						s.collectionId,
-						s.columnId,
-						!['= ANY','<> ALL','@>','<@','&&'].includes(operator),
-						collectionIdMapIndexFilter[s.collectionId]);
+				s.value = getCollectionValues(
+					s.collectionId,
+					s.columnId,
+					!['= ANY','<> ALL','@>','<@','&&'].includes(operator),
+					collectionIdMapIndexFilter[s.collectionId]);
 			break;
 			case 'field':
 				const fld = dataFieldIdMap[s.fieldId];
