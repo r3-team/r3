@@ -7,11 +7,12 @@ let MyInputRichtext = {
 	template:`<div class="input-richtext" :key="key">
 		<editor api-key="API_KEY" ref="editor"
 			v-model="input"
+			@keyDown="handleHotkeys"
 			:disabled="readonly"
 			:init="init"
 		/>
 	</div>`,
-	emits:['update:modelValue'],
+	emits:['hotkey','update:modelValue'],
 	props:{
 		attributeIdFile:{ type:String, required:false, default:'' },
 		modelValue:     { required:true },
@@ -139,6 +140,14 @@ let MyInputRichtext = {
 	},
 	methods:{
 		// externals
-		getAttributeFileHref
+		getAttributeFileHref,
+		
+		// actions
+		handleHotkeys:function(e) {
+			if(e.key === 's' && e.ctrlKey) {
+				this.$emit('hotkey',e);
+				e.preventDefault();
+			}
+		}
 	}
 };

@@ -145,6 +145,7 @@ let MyField = {
 					<my-input-richtext
 						v-if="isRichtext"
 						v-model="value"
+						@hotkey="$emit('hotkey',$event)"
 						:attributeIdFile="field.attributeIdAlt"
 						:readonly="isReadonly"
 						:valueFiles="valueAlt"
@@ -395,6 +396,7 @@ let MyField = {
 			v-if="isContainer"
 			v-for="f in field.fields"
 			@execute-function="$emit('execute-function',$event)"
+			@hotkey="$emit('hotkey',$event)"
 			@open-form="(...args) => $emit('open-form',...args)"
 			@set-form-args="(...args) => $emit('set-form-args',...args)"
 			@set-valid="(...args) => $emit('set-valid',...args)"
@@ -428,7 +430,10 @@ let MyField = {
 		logViewer:        { type:Boolean, required:false, default:false }, // is part of log viewer
 		values:           { type:Object,  required:true }
 	},
-	emits:['execute-function','open-form','set-form-args','set-valid','set-value','set-value-init'],
+	emits:[
+		'execute-function','hotkey','open-form','set-form-args',
+		'set-valid','set-value','set-value-init'
+	],
 	data:function() {
 		return {
 			collectionIdMapIndexes:{},  // active record indexes of collection, used to filter with

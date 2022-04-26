@@ -215,6 +215,7 @@ let MyForm = {
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
 					@execute-function="executeFunction"
+					@hotkey="handleHotkeys"
 					@open-form="openForm"
 					@set-form-args="setFormArgs"
 					@set-valid="validSet"
@@ -725,9 +726,11 @@ let MyForm = {
 			if(this.isInline && e.key === 'Escape')
 				this.closeAsk();
 			
-			if(e.key === 's' && e.ctrlKey && this.hasChanges) {
-				this.set(false);
+			if(e.key === 's' && e.ctrlKey) {
 				e.preventDefault();
+				
+				if(this.hasChanges)
+					this.set(false);
 			}
 		},
 		processFilters:function(joinIndexesRemove) {
