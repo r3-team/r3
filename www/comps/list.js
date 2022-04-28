@@ -1453,7 +1453,6 @@ let MyList = {
 					}
 					
 					for(let i = 0, j = this.inputRecordIds.length; i < j; i++) {
-						
 						if(!recordIdsValid.includes(this.inputRecordIds[i])) {
 							this.$emit('record-removed',this.inputRecordIds[i]);
 							recordsRemoved++;

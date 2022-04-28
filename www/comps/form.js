@@ -766,9 +766,7 @@ let MyForm = {
 			this.valuesOrg = {};
 			
 			let fillFieldValueTemplates = (fields) => {
-				for(let i = 0, j = fields.length; i < j; i++) {
-					let f = fields[i];
-					
+				for(const f of fields) {
 					if(f.content === 'container') {
 						fillFieldValueTemplates(f.fields);
 						continue;
@@ -809,23 +807,23 @@ let MyForm = {
 					}
 					
 					this.valuesDef[indexAttributeId] = def;
-					this.valueSet(indexAttributeId,def,true,false);
+					this.valueSet(indexAttributeId,JSON.parse(JSON.stringify(def)),true,false);
 					
 					// set value and default for altern. field attribute
 					if(f.attributeIdAlt !== null) {
 						
-						let indexAttributeIdAlt = this.getIndexAttributeId(
+						const indexAttributeIdAlt = this.getIndexAttributeId(
 							f.index,f.attributeIdAlt,false,null);
 						
 						this.valuesDef[indexAttributeIdAlt] = null;
 						this.valueSet(indexAttributeIdAlt,null,true,false);
 					}
 				}
-				return fields;
 			};
 			
-			this.fields = fillFieldValueTemplates(JSON.parse(JSON.stringify(this.form.fields)));
+			this.fields = this.form.fields;
 			this.fieldIdsInvalid = [];
+			fillFieldValueTemplates(this.fields);
 			
 			this.relationId = this.form.query.relationId;
 			this.joins      = this.fillRelationRecordIds(this.form.query.joins);
@@ -833,14 +831,9 @@ let MyForm = {
 			
 			// set preset record to open, if defined
 			if(this.form.presetIdOpen !== null && this.relationId !== null) {
-				
-				let presets = this.relationIdMap[this.relationId].presets;
-				
-				for(let i = 0, j = presets.length; i < j; i++) {
-					if(presets[i].id === this.form.presetIdOpen) {
-						this.openForm(this.presetIdMapRecordId[presets[i].id]);
-						return;
-					}
+				for(const p of this.relationIdMap[this.relationId].presets) {
+					if(p.id === this.form.presetIdOpen)
+						return this.openForm(this.presetIdMapRecordId[p.id]);
 				}
 			}
 			this.resetRecord();
@@ -860,9 +853,7 @@ let MyForm = {
 		},
 		releaseLoadingOnNextTick:function() {
 			// releases state on next tick for watching components to react to with updated data
-			this.$nextTick(function() {
-				this.loading = false;
-			});
+			this.$nextTick(() => this.loading = false);
 		},
 		
 		// field value control
@@ -888,20 +879,16 @@ let MyForm = {
 		},
 		valuesSetAllDefault:function() {
 			for(let k in this.values) {
-				
 				// overwrite default attribute default values
 				let ia = this.getDetailsFromIndexAttributeId(k);
 				
 				if(typeof this.attributeIdMapDef[ia.attributeId] !== 'undefined') {
-					
-					if(ia.outsideIn && this.isAttributeRelationshipN1(this.attributeIdMap[ia.attributeId].content))
-						this.valuesDef[k] = [this.attributeIdMapDef[ia.attributeId]];
-					else
-						this.valuesDef[k] = this.attributeIdMapDef[ia.attributeId];
+					this.valuesDef[k] = ia.outsideIn && this.isAttributeRelationshipN1(this.attributeIdMap[ia.attributeId].content)
+						? [this.attributeIdMapDef[ia.attributeId]] : this.attributeIdMapDef[ia.attributeId];
 				}
 				
-				// set default value
-				this.valueSet(k,this.valuesDef[k],true,true);
+				// set default value, default value can be an object so it should be cloned as to not overwrite it
+				this.valueSet(k,JSON.parse(JSON.stringify(this.valuesDef[k])),true,true);
 			}
 		},
 		valueSetByField:function(indexAttributeId,value) {
@@ -967,12 +954,8 @@ let MyForm = {
 		// field validity control
 		validSet:function(state,fieldId) {
 			let pos = this.fieldIdsInvalid.indexOf(fieldId);
-			
-			if(state && pos !== -1)
-				return this.fieldIdsInvalid.splice(pos,1);
-			
-			if(!state && pos === -1)
-				return this.fieldIdsInvalid.push(fieldId);
+			if(state  && pos !== -1) return this.fieldIdsInvalid.splice(pos,1); 
+			if(!state && pos === -1) return this.fieldIdsInvalid.push(fieldId);
 		},
 		
 		// actions
