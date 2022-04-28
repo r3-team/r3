@@ -963,11 +963,9 @@ let MyField = {
 			if(!this.isRelationship1N)
 				return this.value = recordId;
 			
-			if(this.value === null)
-				this.value = [];
-			
-			this.value.push(recordId);
-			this.value = this.value; // push does not trigger computed setter
+			let v = this.value === null ? [] : this.value;
+			v.push(recordId);
+			this.value = v;
 		},
 		relationshipRecordRemoved:function(recordId) {
 			if(!this.isRelationship1N)

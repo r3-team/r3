@@ -1470,12 +1470,12 @@ let MyForm = {
 						// send encrypted data keys
 						const loginKeys = res.payload;
 						
-						for(let i = 0, j = loginKeys.length; i < j; i++) {
-							const publicKey  = await this.pemImport(loginKeys[i].publicKey,'RSA',true);
+						for(const lk of loginKeys) {
+							const publicKey  = await this.pemImport(lk.publicKey,'RSA',true);
 							const dataKeyEnc = await this.rsaEncrypt(publicKey,dataKeyStr);
 							
 							encLoginKeys.push({
-								loginId:loginKeys[i].loginId,
+								loginId:lk.loginId,
 								keyEnc:dataKeyEnc
 							});
 						}
