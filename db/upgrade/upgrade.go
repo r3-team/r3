@@ -117,6 +117,15 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.collection_consumer ADD COLUMN multi_value BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.collection_consumer ALTER COLUMN multi_value DROP DEFAULT;
 			
+			-- fix collection consumer constraint
+			ALTER TABLE app.collection_consumer DROP CONSTRAINT collection_consumer_field_id_fkey;
+			ALTER TABLE app.collection_consumer ADD CONSTRAINT collection_consumer_field_id_fkey
+				FOREIGN KEY (field_id)
+				REFERENCES app.field (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
 			-- new condition operators
 			ALTER TYPE app.condition_operator ADD VALUE '@>';
 			ALTER TYPE app.condition_operator ADD VALUE '<@';
