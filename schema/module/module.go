@@ -25,6 +25,25 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 		return err
 	}
 
+	// drop e2ee data key tables for module relations with encryption
+	relIdsEncrypted := make([]uuid.UUID, 0)
+	if err := tx.QueryRow(db.Ctx, `
+		SELECT ARRAY_AGG(id)
+		FROM app.relation
+		WHERE module_id = $1
+		AND encryption
+	`, id).Scan(&relIdsEncrypted); err != nil {
+		return err
+	}
+
+	for _, relId := range relIdsEncrypted {
+		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			DROP TABLE IF EXISTS instance_e2ee."%s"
+		`, schema.GetEncKeyTableName(relId))); err != nil {
+			return err
+		}
+	}
+
 	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		DROP SCHEMA "%s" CASCADE
 	`, moduleName)); err != nil {

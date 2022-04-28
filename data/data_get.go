@@ -671,16 +671,12 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 		if isQuery {
 			indexRelationIdsSub := make(map[int]uuid.UUID)
 
-			fmt.Println(s.Query.Limit)
-
 			subQuery, _, err := prepareQuery(s.Query, indexRelationIdsSub,
 				queryArgs, queryCountArgs, loginId, nestingLevel+1)
 
 			if err != nil {
 				return err
 			}
-			fmt.Println(subQuery)
-
 			*comp = fmt.Sprintf("(\n%s\n)", subQuery)
 			return nil
 		}
