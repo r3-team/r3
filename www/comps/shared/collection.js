@@ -36,7 +36,7 @@ export function getCollectionValues(collectionId,columnId,singleValue,recordInde
 	if(typeof singleValue   === 'undefined') singleValue   = false;
 	if(typeof recordIndexes === 'undefined') recordIndexes = [];
 	
-	let empty = singleValue ? null : [];
+	const empty = singleValue ? null : [];
 	
 	// collection might not have been retrieved yet or is empty
 	if(typeof colRows === 'undefined' || colRows.length === 0)
@@ -72,8 +72,8 @@ export function getCollectionValues(collectionId,columnId,singleValue,recordInde
 	
 	// return all record values
 	let out = [];
-	for(let i = 0, j = colRows.length; i < j; i++) {
-		out.push(colRows[i].values[columnIndex]);
+	for(const c of colRows) {
+		out.push(c.values[columnIndex]);
 	}
 	return out;
 };
@@ -123,13 +123,13 @@ export function updateCollections(continueOnError,errFnc,collectionId) {
 		if(typeof collectionId !== 'undefined') {
 			addCollection(collectionId);
 		} else {
+			// collections are cleared on update as some might have been removed (roles changed)
+			MyStore.commit('collectionsClear',{});
+			
 			for(let k in collectionIdMap) {
 				addCollection(k);
 			}
 		}
-		
-		// collections must be cleared on update as some might have been removed (roles changed)
-		MyStore.commit('collectionsClear',{});
 		
 		// no relevant collections to get data for, resolve
 		if(dataRequests.length === 0)
