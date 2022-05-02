@@ -504,6 +504,7 @@
 				"effects":"Consecințe",
 				"fieldChanged":"Este modificată",
 				"modeField":"Valoarea câmpului",
+				"modeField2Collection":"collection value(s)",
 				"modeField2Field":"valoarea câmpului",
 				"modeField2Fixed":"valoarea fixă",
 				"modeField2Login":"login ID",

@@ -117,9 +117,6 @@ let MyInputCollection = {
 		};
 	},
 	computed:{
-		placeholder:(s) => {
-			return s.getColumnTitle(s.getCollectionColumn(s.collectionId,s.columnIdDisplay));
-		},
 		rowIndexesVisible:(s) => {
 			let out = [];
 			for(let i = 0, j = s.rows.length; i < j; i++) {
@@ -135,6 +132,7 @@ let MyInputCollection = {
 		
 		// simple states
 		collection:       (s) => s.collectionIdMapSchema[s.collectionId],
+		placeholder:      (s) => s.getColumnTitle(s.getCollectionColumn(s.collectionId,s.columnIdDisplay)),
 		rows:             (s) => s.collectionIdMap[s.collectionId],
 		valueIndexDisplay:(s) => s.getCollectionColumnIndex(s.collectionId,s.columnIdDisplay),
 		

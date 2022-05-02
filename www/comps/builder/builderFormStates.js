@@ -1,4 +1,5 @@
-import {getNilUuid}  from '../shared/generic.js';
+import MyBuilderCollectionInput from './builderCollectionInput.js';
+import {getNilUuid}             from '../shared/generic.js';
 import {
 	MyFilterBrackets,
 	MyFilterConnector,
@@ -13,6 +14,7 @@ export {MyBuilderFormStates as default};
 let MyBuilderFormStateCondition = {
 	name:'my-builder-form-state-condition',
 	components:{
+		MyBuilderCollectionInput,
 		MyFilterBrackets,
 		MyFilterConnector,
 		MyFilterOperator
@@ -31,21 +33,15 @@ let MyBuilderFormStateCondition = {
 			:modelValue="condition.brackets0"
 		/>
 		
-		<!-- condition mode selector -->
+		<!-- mode selector -->
 		<select
 			@input="changeMode($event.target.value)"
 			:value="mode"
 		>
+			<option value="field"        :disabled="!anyDataFields">{{ capApp.modeField }}</option>
+			<option value="fieldChanged" :disabled="!anyDataFields">{{ capApp.modeFieldChanged }}</option>
 			<option value="record">{{ capApp.modeRecord }}</option>
-			<option value="field"
-				:disabled="!anyDataFields"
-			>{{ capApp.modeField }}</option>
-			<option value="fieldChanged"
-				:disabled="!anyDataFields"
-			>{{ capApp.modeFieldChanged }}</option>
-			<option value="role"
-				:disabled="module.roles.length === 0"
-			>{{ capApp.modeRole }}</option>
+			<option value="role"  >{{ capApp.modeRole }}</option>
 		</select>
 		
 		<!-- field selector -->
@@ -66,7 +62,7 @@ let MyBuilderFormStateCondition = {
 			<!-- field value option -->
 			<my-filter-operator class="operator"
 				@update:modelValue="update('operator',$event)"
-				:builderMode="false"
+				:builderMode="true"
 				:modelValue="condition.operator"
 				:onlyEquals="mode2Field === 'preset' || mode2Field === 'login'"
 			/>
@@ -77,19 +73,25 @@ let MyBuilderFormStateCondition = {
 					@input="changeMode2Field($event.target.value)"
 					:value="mode2Field"
 				>
-					<option value="fixed">
-						{{ capApp.modeField2Fixed }}
-					</option>
-					<option value="field"
-						:disabled="!anyDataFields"
-					>{{ capApp.modeField2Field }}</option>
-					<option value="preset"
-						:disabled="field0Presets.length === 0"
-					>{{ capApp.modeField2Preset }}</option>
-					<option value="login">
-						{{ capApp.modeField2Login }}
-					</option>
+					<option value="fixed">{{ capApp.modeField2Fixed }}</option>
+					<option value="field"  :disabled="!anyDataFields">{{ capApp.modeField2Field }}</option>
+					<option value="preset" :disabled="field0Presets.length === 0">{{ capApp.modeField2Preset }}</option>
+					<option value="login">{{ capApp.modeField2Login }}</option>
+					<option value="collection">{{ capApp.modeField2Collection }}</option>
 				</select>
+				
+				<my-builder-collection-input
+					v-if="mode2Field === 'collection'"
+					@update:collectionId="update('collectionId1',$event)"
+					@update:columnId="update('collectionColumnId1',$event)"
+					:allowRemove="false"
+					:caption="''"
+					:collectionId="condition.collectionId1"
+					:columnId="condition.collectionColumnId1"
+					:module="module"
+					:multiValue="false"
+					:showMultiValue="false"
+				/>
 				
 				<select
 					v-if="mode2Field === 'field'"
@@ -189,10 +191,11 @@ let MyBuilderFormStateCondition = {
 				else if(c.fieldId0     !== null) this.mode = 'field';
 				
 				// set field comparisson mode
-				if     (c.login1    !== null) this.mode2Field = 'login';
-				else if(c.presetId1 !== null) this.mode2Field = 'preset';
-				else if(c.value1    !== null) this.mode2Field = 'fixed';
-				else                          this.mode2Field = 'field';
+				if     (c.collectionId1 !== null) this.mode2Field = 'collection';
+				else if(c.login1        !== null) this.mode2Field = 'login';
+				else if(c.presetId1     !== null) this.mode2Field = 'preset';
+				else if(c.value1        !== null) this.mode2Field = 'fixed';
+				else                              this.mode2Field = 'field';
 			},
 			immediate:true
 		}
@@ -200,8 +203,8 @@ let MyBuilderFormStateCondition = {
 	emits:['remove','update:modelValue'],
 	data:function() {
 		return {
-			mode:'record',
-			mode2Field:'fixed'
+			mode:'record',     // left side of comparison: record state, role, field value, field changed
+			mode2Field:'fixed' // right side of comparison: login ID, preset ID, fixed value, other field value, collection value(s)
 		};
 	},
 	computed:{
@@ -266,21 +269,26 @@ let MyBuilderFormStateCondition = {
 				v.fieldId0 = null;
 			}
 			if(this.mode !== 'field') {
-				v.fieldId1  = null;
-				v.login1    = null;
-				v.presetId1 = null;
-				v.value1    = null;
+				v.collectionId1       = null;
+				v.collectionColumnId1 = null;
+				v.fieldId1            = null;
+				v.login1              = null;
+				v.presetId1           = null;
+				v.value1              = null;
 			}
-			if(this.mode !== 'fieldChanged') v.fieldChanged = null;
-			if(this.mode !== 'record')       v.newRecord    = null;
-			if(this.mode !== 'role')         v.roleId       = null;
-			
-			if(this.mode === 'field') {
+			else {
+				if(this.mode2Field !== 'collection') {
+					v.collectionId1       = null;
+					v.collectionColumnId1 = null;
+				}
 				if(this.mode2Field !== 'field')  v.fieldId1  = null;
 				if(this.mode2Field !== 'fixed')  v.value1    = null;
 				if(this.mode2Field !== 'login')  v.login1    = null;
 				if(this.mode2Field !== 'preset') v.presetId1 = null;
 			}
+			if(this.mode !== 'fieldChanged') v.fieldChanged = null;
+			if(this.mode !== 'record')       v.newRecord    = null;
+			if(this.mode !== 'role')         v.roleId       = null;
 			
 			this.$emit('update:modelValue',v);
 		}

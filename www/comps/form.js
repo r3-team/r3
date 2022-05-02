@@ -14,6 +14,7 @@ import {
 } from './shared/crypto.js';
 import {
 	filterIsCorrect,
+	filterOperatorIsSingleValue,
 	openLink
 } from './shared/generic.js';
 import {
@@ -538,9 +539,7 @@ let MyForm = {
 		fieldIdMapState:function() {
 			let out = {};
 			
-			for(let i = 0, j = this.form.states.length; i < j; i++) {
-				let s = this.form.states[i];
-				
+			for(const s of this.form.states) {
 				// no conditions, no effects, nothing to do
 				if(s.conditions.length === 0 || s.effects.length === 0)
 					continue;
@@ -548,10 +547,10 @@ let MyForm = {
 				let line = 'return ';
 				
 				// parse conditions
-				for(let x = 0, y = s.conditions.length; x < y; x++) {
-					let c = s.conditions[x];
+				for(let i = 0, j = s.conditions.length; i < j; i++) {
+					let c = s.conditions[i];
 					
-					if(x !== 0)
+					if(i !== 0)
 						line += c.connector === 'AND' ? '&&' : '||';
 					
 					// brackets open
@@ -608,22 +607,29 @@ let MyForm = {
 								// equals looks for value and is false unless found
 								// !equals looks for value and is true unless found
 								let equals = c.operator === '=';
-								let found = false;
+								let found  = false;
 								
-								let presets = this.relationIdMap[a.relationshipId].presets;
-								
-								for(let i = 0, j = presets.length; i < j; i++) {
-									
-									if(presets[i].id !== c.presetId1)
+								for(const p of this.relationIdMap[a.relationshipId].presets) {
+									if(p.id !== c.presetId1)
 										continue;
 									
-									if(this.presetIdMapRecordId[presets[i].id] === f0value)
+									if(this.presetIdMapRecordId[p.id] === f0value)
 										found = true;
 									
 									break;
 								}
 								line += (equals && found) || (!equals && !found) ? 'true' : 'false';
 							}
+						}
+						else if(c.collectionId1 !== null && c.collectionColumnId1 !== null) {
+							
+							// field value to collection value(s)
+							const v = getCollectionValues(
+								c.collectionId1,
+								c.collectionColumnId1,
+								this.filterOperatorIsSingleValue(c.operator));
+							
+							line += this.filterIsCorrect(c.operator,f0value,v) ? 'true' : 'false';
 						}
 					}
 					else if(c.roleId !== null) {
@@ -649,8 +655,7 @@ let MyForm = {
 					return Function(line)();
 				};
 				if(check()) {
-					for(let x = 0, y = s.effects.length; x < y; x++) {
-						let e = s.effects[x];
+					for(const e of s.effects) {
 						out[e.fieldId] = e.newState;
 					}
 				}
@@ -690,6 +695,7 @@ let MyForm = {
 		consoleError,
 		fillRelationRecordIds,
 		filterIsCorrect,
+		filterOperatorIsSingleValue,
 		getAttributeValueFromString,
 		getAttributeValuesFromGetter,
 		getCollectionValues,

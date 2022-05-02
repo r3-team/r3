@@ -1,7 +1,8 @@
-import {getIndexAttributeId} from './attribute.js';
-import {getItemTitle}        from './builder.js';
-import {getCollectionValues} from './collection.js';
-import MyStore               from '../../stores/store.js';
+import {getIndexAttributeId}         from './attribute.js';
+import {getItemTitle}                from './builder.js';
+import {getCollectionValues}         from './collection.js';
+import {filterOperatorIsSingleValue} from './generic.js';
+import MyStore                       from '../../stores/store.js';
 
 let getQueryExpressionAttribute = function(column) {
 	return {
@@ -166,7 +167,7 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 				s.value = getCollectionValues(
 					s.collectionId,
 					s.columnId,
-					!['= ANY','<> ALL','@>','<@','&&'].includes(operator),
+					filterOperatorIsSingleValue(operator),
 					collectionIdMapIndexFilter[s.collectionId]);
 			break;
 			case 'field':

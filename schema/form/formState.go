@@ -57,8 +57,10 @@ func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, erro
 	conditions := make([]types.FormStateCondition, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT position, field_id0, field_id1, preset_id1, role_id, field_changed,
-			new_record, brackets0, brackets1, connector, login1, operator, value1
+		SELECT position, field_id0, field_id1, collection_id1,
+			collection_column_id1, preset_id1, role_id, field_changed,
+			new_record, brackets0, brackets1, connector, login1, operator,
+			value1
 		FROM app.form_state_condition
 		WHERE form_state_id = $1
 		ORDER BY position ASC
@@ -71,8 +73,9 @@ func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, erro
 	for rows.Next() {
 		var c types.FormStateCondition
 
-		if err := rows.Scan(&c.Position, &c.FieldId0, &c.FieldId1, &c.PresetId1,
-			&c.RoleId, &c.FieldChanged, &c.NewRecord, &c.Brackets0, &c.Brackets1,
+		if err := rows.Scan(&c.Position, &c.FieldId0, &c.FieldId1,
+			&c.CollectionId1, &c.CollectionColumnId1, &c.PresetId1, &c.RoleId,
+			&c.FieldChanged, &c.NewRecord, &c.Brackets0, &c.Brackets1,
 			&c.Connector, &c.Login1, &c.Operator, &c.Value1); err != nil {
 
 			return conditions, err
@@ -170,16 +173,22 @@ func setState_tx(tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID,
 		// fix imports < 2.6: New field comparisson: Login ID
 		c.Login1 = compatible.FixPgxNull(c.Login1).(pgtype.Bool)
 
+		// fix imports < 2.7: New field comparisson: Collection values
+		c.CollectionId1 = compatible.FixPgxNull(c.CollectionId1).(pgtype.UUID)
+		c.CollectionColumnId1 = compatible.FixPgxNull(c.CollectionColumnId1).(pgtype.UUID)
+
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.form_state_condition (
-				form_state_id, position, field_id0, field_id1, preset_id1,
-				role_id, field_changed, new_record, brackets0, brackets1,
-				connector, login1, operator, value1
+				form_state_id, position, field_id0, field_id1, collection_id1,
+				collection_column_id1, preset_id1, role_id, field_changed,
+				new_record, brackets0, brackets1, connector, login1, operator,
+				value1
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
-		`, state.Id, i, c.FieldId0, c.FieldId1, c.PresetId1, c.RoleId,
-			c.FieldChanged, c.NewRecord, c.Brackets0, c.Brackets1, c.Connector,
-			c.Login1, c.Operator, c.Value1); err != nil {
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+		`, state.Id, i, c.FieldId0, c.FieldId1, c.CollectionId1,
+			c.CollectionColumnId1, c.PresetId1, c.RoleId, c.FieldChanged,
+			c.NewRecord, c.Brackets0, c.Brackets1, c.Connector, c.Login1,
+			c.Operator, c.Value1); err != nil {
 
 			return state.Id, err
 		}

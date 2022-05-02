@@ -98,6 +98,27 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	"2.6": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
+			-- new form state condition option
+			ALTER TABLE app.form_state_condition ADD COLUMN collection_id1 uuid;
+			ALTER TABLE app.form_state_condition ADD CONSTRAINT form_state_condition_collection_id1_fkey FOREIGN KEY (collection_id1)
+				REFERENCES app.collection (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_form_state_condition_collection_id1_fkey
+				ON app.form_state_condition USING btree (collection_id1 ASC NULLS LAST);
+			
+			ALTER TABLE app.form_state_condition ADD COLUMN collection_column_id1 uuid;
+			ALTER TABLE app.form_state_condition ADD CONSTRAINT form_state_condition_collection_column_id1_fkey FOREIGN KEY (collection_column_id1)
+				REFERENCES app.column (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_form_state_condition_collection_column_id1_fkey
+				ON app.form_state_condition USING btree (collection_column_id1 ASC NULLS LAST);
+			
 			-- new form option
 			ALTER TABLE app.form ADD COLUMN no_data_actions BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.form ALTER COLUMN no_data_actions DROP DEFAULT;

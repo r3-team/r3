@@ -504,6 +504,7 @@
 				"effects":"Effects",
 				"fieldChanged":"Has changed",
 				"modeField":"Field value",
+				"modeField2Collection":"collection value(s)",
 				"modeField2Field":"field value",
 				"modeField2Fixed":"fixed value",
 				"modeField2Login":"login ID",

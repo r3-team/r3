@@ -1,7 +1,7 @@
+import MyBuilderCollectionInput from './builderCollectionInput.js';
 import {
 	getDependentModules,
 	getItemTitle,
-	getItemTitleColumn,
 	getItemTitleRelation,
 	getValueFromJson,
 	setValueInJson
@@ -16,80 +16,6 @@ import {
 } from '../shared/attribute.js';
 
 export {MyBuilderFieldOptions as default};
-
-let MyBuilderFieldOptionsCollection = {
-	name:'my-builder-field-options-collection',
-	template:`
-		<tr>
-			<td>{{ caption }}</td>
-			<td>
-				<select v-model="collectionIdInput">
-					<option :value="null">-</option>
-					<optgroup
-						v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
-						:label="m.name"
-					>
-						<option v-for="c in m.collections" :value="c.id">
-							{{ c.name }}
-						</option>
-					</optgroup>
-				</select>
-				<select v-model="columnIdInput" :disabled="collectionId === null">
-					<option :value="null" disabled="disabled">{{ capApp.collectionColumn }}</option>
-					<option v-if="collectionId !== null" v-for="c in collectionIdMap[collectionId].columns" :value="c.id">
-						{{ getItemTitleColumn(c) }}
-					</option>
-				</select>
-				
-				<div class="collections-option" v-if="showMultiValue">
-					<span>{{ capApp.collectionMultiValue }}</span>
-					<my-bool v-model="multiValueInput" />
-				</div>
-			</td>
-			<td>
-				<my-button image="cancel.png"
-					v-if="allowRemove"
-					@trigger="$emit('remove')"
-					:naked="true"
-				/>
-			</td>
-		</tr>
-	`,
-	props:{
-		allowRemove:   { type:Boolean, required:true },
-		caption:       { type:String,  required:true },
-		collectionId:  { required:true },
-		columnId:      { required:true },
-		module:        { type:Object,  required:true },
-		multiValue:    { required:true },
-		showMultiValue:{ type:Boolean, required:true }
-	},
-	emits:['remove','update:collectionId','update:columnId','update:multiValue'],
-	computed:{
-		collectionIdInput:{
-			get()  { return this.collectionId },
-			set(v) { this.$emit('update:collectionId',v) }
-		},
-		columnIdInput:{
-			get()  { return this.columnId },
-			set(v) { this.$emit('update:columnId',v) }
-		},
-		multiValueInput:{
-			get()  { return this.multiValue },
-			set(v) { this.$emit('update:multiValue',v) }
-		},
-		
-		// stores
-		modules:        function() { return this.$store.getters['schema/modules']; },
-		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
-		capApp:         function() { return this.$store.getters.captions.builder.form; }
-	},
-	methods:{
-		// externals
-		getDependentModules,
-		getItemTitleColumn
-	}
-};
 
 let MyBuilderFieldOptionsChartSerie = {
 	name:'my-builder-field-options-chart-serie',
@@ -337,8 +263,8 @@ let MyBuilderFieldOptionsChart = {
 let MyBuilderFieldOptions = {
 	name:'my-builder-field-options',
 	components:{
-		MyBuilderFieldOptionsChart,
-		MyBuilderFieldOptionsCollection
+		MyBuilderCollectionInput,
+		MyBuilderFieldOptionsChart
 	},
 	template:`<div class="builder-field-options">
 		<table class="fullWidth default-inputs"><tbody>
@@ -443,7 +369,7 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<my-builder-field-options-collection
+				<my-builder-collection-input
 					v-if="!isFiles && field.def === ''"
 					@update:collectionId="setNull('collectionIdDef',$event)"
 					@update:columnId="setNull('columnIdDef',$event)"
@@ -1038,7 +964,7 @@ let MyBuilderFieldOptions = {
 					</td>
 				</tr>
 				<template v-if="showCollections">
-					<my-builder-field-options-collection
+					<my-builder-collection-input
 						v-for="(c,i) in field.collections"
 						@remove="collectionRemove(i)"
 						@update:collectionId="setCollection(i,'collectionId',$event)"

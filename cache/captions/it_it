@@ -504,6 +504,7 @@
 				"effects":"Effetti",
 				"fieldChanged":"Modificato",
 				"modeField":"Valore campo",
+				"modeField2Collection":"collection value(s)",
 				"modeField2Field":"valore campo",
 				"modeField2Fixed":"valore fisso",
 				"modeField2Login":"ID login",
