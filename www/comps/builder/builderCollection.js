@@ -229,8 +229,15 @@ let MyBuilderCollection = {
 			return this.moduleIdMap[this.collection.moduleId];
 		},
 		collectionRows:function() {
-			let col = this.$store.getters.collectionIdMap[this.collection.id];
-			return typeof col !== 'undefined' ? col : [];
+			const col = this.$store.getters.collectionIdMap[this.collection.id];
+			if(typeof col === 'undefined')
+				return [];
+			
+			let out = [];
+			for(const r of col) {
+				out.push(r.values);
+			}
+			return out;
 		},
 		
 		// stores
