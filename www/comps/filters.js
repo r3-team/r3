@@ -138,12 +138,13 @@ let MyFilterOperator = {
 
 let MyFilterConnector = {
 	name:'my-filter-connector',
-	template:`<select class="and" v-model="value">
+	template:`<select class="and" :disabled="readonly" v-model="value">
 		<option value="AND">{{ capApp.option.connector.AND }}</option>
 		<option value="OR">{{ capApp.option.connector.OR }}</option>
 	</select>`,
 	props:{
-		modelValue:{ type:String, required:true }
+		modelValue:{ type:String,  required:true },
+		readonly:  { type:Boolean, required:false, default:false }
 	},
 	emits:['update:modelValue'],
 	computed:{
@@ -234,7 +235,7 @@ let MyFilterSide = {
 		MyInputDate
 	},
 	template:`<div class="filter-side">
-		<div class="filter-side-inputs">
+		<div class="filter-side-inputs default-inputs">
 			<template v-if="!isNullPartner">
 				
 				<!-- content input -->
@@ -256,29 +257,15 @@ let MyFilterSide = {
 					:image="!showQuery ? 'visible0.png' : 'visible1.png'"
 				/>
 				
-				<!-- sub query aggregator input -->
-				<select v-model="queryAggregator" v-if="isSubQuery">
-					<option value=""     >-</option>
-					<option value="array">{{ capGen.option.aggArray }}</option>
-					<option value="avg"  >{{ capGen.option.aggAvg }}</option>
-					<option value="count">{{ capGen.option.aggCount }}</option>
-					<option value="json" >{{ capGen.option.aggJson }}</option>
-					<option value="list" >{{ capGen.option.aggList }}</option>
-					<option value="max"  >{{ capGen.option.aggMax }}</option>
-					<option value="min"  >{{ capGen.option.aggMin }}</option>
-					<option value="sum"  >{{ capGen.option.aggSum }}</option>
-				</select>
-				
 				<!-- nested index attribute input -->
-				<template v-if="isAttribute || isSubQuery">
-					<my-filter-attribute
-						v-model="nestedIndexAttribute"
-						:columnsMode="columnsMode"
-						:groupQueries="nestingLevels !== 0 && !isSubQuery && builderMode"
-						:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
-						:nestingLevels="nestingLevels"
-					/>
-				</template>
+				<my-filter-attribute
+					v-if="isAttribute"
+					v-model="nestedIndexAttribute"
+					:columnsMode="columnsMode"
+					:groupQueries="nestingLevels !== 0 && !isSubQuery && builderMode"
+					:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
+					:nestingLevels="nestingLevels"
+				/>
 				
 				<!-- collection input -->
 				<select v-model="collectionId" v-if="!columnsMode && isCollection">
@@ -350,29 +337,64 @@ let MyFilterSide = {
 			</template>
 		</div>
 		
-		<!-- filter sub query -->
-		<my-builder-query class="subQuery"
-			v-if="isSubQuery && showQuery"
-			@set-choices="setQuery('choices',$event)"
-			@set-filters="setQuery('filters',$event)"
-			@set-fixed-limit="setQuery('fixedLimit',$event)"
-			@set-lookups="setQuery('lookups',$event)"
-			@set-joins="setQuery('joins',$event)"
-			@set-orders="setQuery('orders',$event)"
-			@set-relation-id="setQuery('relationId',$event)"
-			:allowChoices="false"
-			:allowOrders="true"
-			:choices="query.choices"
-			:dataFields="dataFields"
-			:filters="query.filters"
-			:fixedLimit="query.fixedLimit"
-			:joins="query.joins"
-			:joinsParents="joinsParents.concat([joins])"
-			:lookups="query.lookups"
-			:moduleId="moduleId"
-			:orders="query.orders"
-			:relationId="query.relationId"
-		/>
+		<!-- sub query inputs -->
+		<div class="subQuery shade" v-if="isSubQuery && showQuery">
+			<table class="default-inputs">
+				<tr>
+					<td>{{ capApp.subQueryAttribute }}</td>
+					<td>
+						<!-- sub query attribute input -->
+						<my-filter-attribute
+							v-model="nestedIndexAttribute"
+							:columnsMode="columnsMode"
+							:groupQueries="nestingLevels !== 0 && !isSubQuery && builderMode"
+							:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
+							:nestingLevels="nestingLevels"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.subQueryAggregator }}</td>
+					<td>
+						<!-- sub query aggregator input -->
+						<select v-model="queryAggregator">
+							<option value=""     >-</option>
+							<option value="array">{{ capGen.option.aggArray }}</option>
+							<option value="avg"  >{{ capGen.option.aggAvg }}</option>
+							<option value="count">{{ capGen.option.aggCount }}</option>
+							<option value="json" >{{ capGen.option.aggJson }}</option>
+							<option value="list" >{{ capGen.option.aggList }}</option>
+							<option value="max"  >{{ capGen.option.aggMax }}</option>
+							<option value="min"  >{{ capGen.option.aggMin }}</option>
+							<option value="sum"  >{{ capGen.option.aggSum }}</option>
+						</select>
+					</td>
+				</tr>
+			</table>
+			
+			<!-- filter sub query -->
+			<my-builder-query
+				@set-choices="setQuery('choices',$event)"
+				@set-filters="setQuery('filters',$event)"
+				@set-fixed-limit="setQuery('fixedLimit',$event)"
+				@set-lookups="setQuery('lookups',$event)"
+				@set-joins="setQuery('joins',$event)"
+				@set-orders="setQuery('orders',$event)"
+				@set-relation-id="setQuery('relationId',$event)"
+				:allowChoices="false"
+				:allowOrders="true"
+				:choices="query.choices"
+				:dataFields="dataFields"
+				:filters="query.filters"
+				:fixedLimit="query.fixedLimit"
+				:joins="query.joins"
+				:joinsParents="joinsParents.concat([joins])"
+				:lookups="query.lookups"
+				:moduleId="moduleId"
+				:orders="query.orders"
+				:relationId="query.relationId"
+			/>
+		</div>
 	</div>`,
 	props:{
 		builderMode:   { type:Boolean, required:true },
@@ -586,86 +608,72 @@ let MyFilter = {
 		MyFilterSide
 	},
 	template:`<div class="filter">
-		<div class="filter-sides" :class="{ inRow:columnsMode }">
-			
-			<div class="filter-side-line-top">
-				<my-filter-connector class="connector"
-					v-show="position !== 0"
-					v-model="connectorInput"
-				/>
-				<my-filter-brackets class="brackets"
-					v-if="expertMode"
-					v-model="brackets0Input"
-					:left="true"
-				/>
-			</div>
-			
-			<div class="filter-side-line" :class="{ inRow:columnsMode }">
-				<my-filter-side
-					v-model="side0Input"
-					@apply-value="$emit('apply-value')"
-					:builderMode="builderMode"
-					:columnsMode="columnsMode"
-					:dataFields="dataFields"
-					:disableContent="disableContent"
-					:isNullOperator="isNullOperator"
-					:joins="joins"
-					:joinsParents="joinsParents"
-					:leftSide="true"
-					:moduleId="moduleId"
-					:nestedIndexAttributeIds="nestedIndexAttributeIds"
-					:nestingLevels="nestingLevels"
-				/>
-				<my-filter-operator class="operator"
-					v-model="operatorInput"
-					:builderMode="builderMode"
-					:onlyDates="side0ColumDate || side0ColumTime"
-					:onlyString="isStringInput"
-				/>
-			</div>
-			
-			<div class="filter-side-line" :class="{ inRow:columnsMode }">
-				<my-filter-side
-					v-model="side1Input"
-					@apply-value="$emit('apply-value')"
-					:builderMode="builderMode"
-					:columnDate="side0ColumDate"
-					:columnTime="side0ColumTime"
-					:columnsMode="columnsMode"
-					:dataFields="dataFields"
-					:disableContent="disableContent"
-					:isNullOperator="isNullOperator"
-					:joins="joins"
-					:joinsParents="joinsParents"
-					:leftSide="false"
-					:moduleId="moduleId"
-					:nestedIndexAttributeIds="nestedIndexAttributeIds"
-					:nestingLevels="nestingLevels"
-				/>
-			</div>
-			
-			<div class="filter-side-line-top">
-				<my-filter-brackets class="brackets"
-					v-if="expertMode"
-					v-model="brackets1Input"
-					:left="false"
-				/>
-				<my-button image="arrowDown.png"
-					v-if="moveDown"
-					@trigger="$emit('move-down')"
-					:naked="true"
-				/>
-				<my-button image="arrowUp.png"
-					v-if="moveUp"
-					@trigger="$emit('move-up')"
-					:naked="true"
-				/>
-				<my-button image="cancel.png"
-					@trigger="$emit('remove',position)"
-					:naked="true"
-				/>
-			</div>
-		</div>
+		<my-filter-connector class="connector"
+			v-model="connectorInput"
+			:readonly="position === 0"
+		/>
+		<my-filter-brackets class="brackets"
+			v-if="expertMode"
+			v-model="brackets0Input"
+			:left="true"
+		/>
+		<my-filter-side
+			v-model="side0Input"
+			@apply-value="$emit('apply-value')"
+			:builderMode="builderMode"
+			:columnsMode="columnsMode"
+			:dataFields="dataFields"
+			:disableContent="disableContent"
+			:isNullOperator="isNullOperator"
+			:joins="joins"
+			:joinsParents="joinsParents"
+			:leftSide="true"
+			:moduleId="moduleId"
+			:nestedIndexAttributeIds="nestedIndexAttributeIds"
+			:nestingLevels="nestingLevels"
+		/>
+		<my-filter-operator class="operator"
+			v-model="operatorInput"
+			:builderMode="builderMode"
+			:onlyDates="side0ColumDate || side0ColumTime"
+			:onlyString="isStringInput"
+		/>
+		<my-filter-side
+			v-model="side1Input"
+			@apply-value="$emit('apply-value')"
+			:builderMode="builderMode"
+			:columnDate="side0ColumDate"
+			:columnTime="side0ColumTime"
+			:columnsMode="columnsMode"
+			:dataFields="dataFields"
+			:disableContent="disableContent"
+			:isNullOperator="isNullOperator"
+			:joins="joins"
+			:joinsParents="joinsParents"
+			:leftSide="false"
+			:moduleId="moduleId"
+			:nestedIndexAttributeIds="nestedIndexAttributeIds"
+			:nestingLevels="nestingLevels"
+		/>
+		<my-filter-brackets class="brackets"
+			v-if="expertMode"
+			v-model="brackets1Input"
+			:left="false"
+		/>
+		<my-button image="arrowDown.png"
+			v-if="moveDown"
+			@trigger="$emit('move-down')"
+			:naked="true"
+		/>
+		<my-button image="arrowUp.png"
+			v-if="moveUp"
+			@trigger="$emit('move-up')"
+			:naked="true"
+		/>
+		<my-button image="cancel.png"
+			@trigger="$emit('remove',position)"
+			:naked="true"
+		/>
 	</div>`,
 	props:{
 		builderMode:   { type:Boolean, required:true },
@@ -769,8 +777,7 @@ let MyFilter = {
 let MyFilters = {
 	name:'my-filters',
 	components:{MyFilter},
-	template:`<div class="filters default-inputs">
-		
+	template:`<div class="filters">
 		<div class="filter-actions" v-if="nestedIndexAttributeIds.length !== 0">
 			<slot name="title" />
 			
@@ -810,7 +817,7 @@ let MyFilters = {
 			:key="i"
 			:moduleId="moduleId"
 			:moveDown="showMove && i < filters.length - 1"
-			:moveUp="showMove && i !== 0"
+			:moveUp="showMove && i === filters.length -1"
 			:nestedIndexAttributeIds="nestedIndexAttributeIds"
 			:nestingLevels="joinsParents.length+1"
 			:operator="f.operator"
@@ -928,6 +935,12 @@ let MyFilters = {
 		getNestedIndexAttributeIdsByJoins,
 		isAttributeFiles,
 		
+		forceFirstAnd() {
+			// overwrite first filter with only valid connector
+			if(this.filters.length > 0)
+				this.filters[0].connector = 'AND';
+		},
+		
 		// actions
 		apply() {
 			if(!this.bracketsEqual)
@@ -985,14 +998,12 @@ let MyFilters = {
 			this.filters.splice(i,1);
 			this.filters.splice((down ? i + 1 : i - 1),0,f);
 			this.filters = this.filters;
+			this.forceFirstAnd();
 		},
 		remove(position) {
 			this.filters.splice(position,1);
 			this.filters = this.filters;
-			
-			// overwrite first filter with only valid connector
-			if(this.filters.length > 0)
-				this.filters[0].connector = 'AND';
+			this.forceFirstAnd();
 			
 			// inform parent when filter has been reset
 			if(this.filters.length === 0)

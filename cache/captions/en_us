@@ -1079,6 +1079,8 @@
 		"operatorsText":"Text",
 		"queryAggregatorNull":"no aggregation",
 		"queryShow":"Show sub query",
+		"subQueryAttribute":"Attribute",
+		"subQueryAggregator":"Aggregate",
 		"valueHint":"Text or number value"
 	},
 	"form":{

@@ -1079,6 +1079,8 @@
 		"operatorsText":"Text",
 		"queryAggregatorNull":"fără agregare",
 		"queryShow":"Afișează subinterogarea",
+		"subQueryAttribute":"Attribute",
+		"subQueryAggregator":"Aggregate",
 		"valueHint":"Valoare text sau număr"
 	},
 	"form":{

@@ -317,7 +317,7 @@ let MyList = {
 					</div>
 				</div>
 				
-				<div class="list-header" v-if="showFilters">
+				<div class="list-header default-inputs" v-if="showFilters">
 					<my-filters
 						v-model="filtersUser"
 						@apply="reloadInside('filtersUser')"

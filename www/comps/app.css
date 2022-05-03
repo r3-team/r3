@@ -161,6 +161,7 @@ body                                         { --depth:9; }
 .admin-roles .admin-role-title               { --depth:7; }
 .admin-repo .repo-module .part.left          { --depth:0; }
 .admin-repo .repo-module .part.right         { --depth:3; }
+.builder .filter .filter-side>.subQuery      { --depth:5; }
 .builder .lookup                             { --depth:1; }
 .builder-icon-input .iconLine                { --depth:2; }
 .builder-icon-input .iconLine:focus          { --depth:1; }

@@ -1039,7 +1039,7 @@
 			},
 			"content":{
 				"attribute":"Attributwert",
-				"collection":"Wert(e) aus Sammlung",
+				"collection":"Sammlungswert(e)",
 				"field":"Feldwert",
 				"fieldChanged":"Feldwert geändert (TRUE/FALSE)",
 				"javascript":"JavaScript-Ausdruck",
@@ -1079,6 +1079,8 @@
 		"operatorsText":"Text",
 		"queryAggregatorNull":"keine Aggregation",
 		"queryShow":"Sub-Query anzeigen",
+		"subQueryAttribute":"Attribut",
+		"subQueryAggregator":"Aggregieren",
 		"valueHint":"Text oder Zahlenwert"
 	},
 	"form":{

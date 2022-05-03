@@ -189,7 +189,7 @@ let MyBuilderForm = {
 			
 			<div class="top lower" v-if="settings.compact" />
 			
-			<div class="content" v-if="showFieldQuery">
+			<div class="content grow" v-if="showFieldQuery">
 				
 				<!-- field query (lists, relationship inputs, calendars, charts, ...) -->
 				<my-builder-query
@@ -253,7 +253,7 @@ let MyBuilderForm = {
 				</template>
 			</div>
 			
-			<div class="content" v-if="!showFieldQuery">
+			<div class="content grow" v-if="!showFieldQuery">
 				
 				<!-- form record query -->
 				<my-builder-query

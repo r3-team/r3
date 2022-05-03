@@ -97,8 +97,16 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 // mapped by current database version string, returns new database version string
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
+	// clean up next release
+	// ALTER TABLE app.form_state_condition_side ALTER COLUMN content
+	//	TYPE app.filter_side_content USING content::text::app.filter_side_content;
+
 	"2.6": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
+			-- extend and rename query filter side content (to be used by form state condition as well)
+			ALTER TYPE app.query_filter_side_content ADD VALUE 'fieldChanged';
+			ALTER TYPE app.query_filter_side_content RENAME TO filter_side_content;
+		
 			-- clean up of form state conditions
 			CREATE TABLE IF NOT EXISTS app.form_state_condition_side (
 			    form_state_id uuid NOT NULL,
