@@ -160,8 +160,9 @@
 	overflow:visible !important;
 	z-index:var(--z-index-dropdown);
 }
-.input-dropdown-wrap.left-overhang{
-	left:-120px;
+.input-dropdown-wrap.overhang{
+	left:-40px;
+	right:-40px;
 }
 .input-dropdown-wrap.left-overhang .input-dropdown{
 	border-radius:5px 0px 0px 0px;
@@ -432,4 +433,9 @@
 .user-bordersSquared .button,
 .user-bordersSquared .input-dropdown-wrap.left-overhang .input-dropdown{
 	border-radius:0px !important;
+}
+
+/* mobile overwrites */
+.is-mobile .input-collection input{
+	width:60px;
 }

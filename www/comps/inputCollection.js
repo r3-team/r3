@@ -32,7 +32,7 @@ let MyInputCollection = {
 		<div class="entries preview">
 			<template v-for="(recIndex,i) in rowIndexesSelected">
 				<div class="entry clickable"
-					v-if="i < 2"
+					v-if="i < resultPreviewCnt"
 					@click="entryRemove(recIndex)"
 				>
 					{{ rows[recIndex].values[valueIndexDisplay] }}
@@ -40,10 +40,10 @@ let MyInputCollection = {
 			</template>
 				
 			<div class="entry clickable"
-				v-if="rowIndexesSelected.length > 2"
+				v-if="rowIndexesSelected.length > resultPreviewCnt"
 				@click="toggle"
 			>
-				{{ '+' + (rowIndexesSelected.length-2).toString() }}
+				{{ '+' + (rowIndexesSelected.length-resultPreviewCnt).toString() }}
 			</div>
 		</div>
 		
@@ -54,7 +54,7 @@ let MyInputCollection = {
 		/>
 		
 		<!-- context menu dropdown -->
-		<div class="input-dropdown-wrap left-overhang">
+		<div class="input-dropdown-wrap overhang">
 			<div v-if="showDropdown" class="input-dropdown context">
 				
 				<!-- search results -->
@@ -133,6 +133,7 @@ let MyInputCollection = {
 		// simple states
 		collection:       (s) => s.collectionIdMapSchema[s.collectionId],
 		placeholder:      (s) => s.getColumnTitle(s.getCollectionColumn(s.collectionId,s.columnIdDisplay)),
+		resultPreviewCnt: (s) => !s.isMobile ? 2 : 0,
 		rows:             (s) => s.collectionIdMap[s.collectionId],
 		valueIndexDisplay:(s) => s.getCollectionColumnIndex(s.collectionId,s.columnIdDisplay),
 		
@@ -140,7 +141,8 @@ let MyInputCollection = {
 		collectionIdMap:      (s) => s.$store.getters['collectionIdMap'],
 		collectionIdMapSchema:(s) => s.$store.getters['schema/collectionIdMap'],
 		iconIdMap:            (s) => s.$store.getters['schema/iconIdMap'],
-		capGen:               (s) => s.$store.getters.captions.generic
+		capGen:               (s) => s.$store.getters.captions.generic,
+		isMobile:             (s) => s.$store.getters.isMobile
 	},
 	methods:{
 		// externals
