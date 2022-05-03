@@ -58,16 +58,18 @@ type QueryFilter struct {
 	Side1     QueryFilterSide `json:"side1"`     // comparison: right side
 }
 type QueryFilterSide struct {
+	Brackets int            `json:"brackets"` // opening/closing brackets (side 0/1)
+	Value    pgtype.Varchar `json:"value"`    // fixed value, can be anything including NULL
+
+	// for backend processing
 	AttributeId     pgtype.UUID    `json:"attributeId"`     // attribute (database value)
 	AttributeIndex  int            `json:"attributeIndex"`  // relation index of attribute
 	AttributeNested int            `json:"attributeNested"` // nesting level of attribute  (0=main query, 1=1st sub query)
-	Brackets        int            `json:"brackets"`        // opening/closing brackets (side 0/1)
 	Query           Query          `json:"query"`           // sub query
 	QueryAggregator pgtype.Varchar `json:"queryAggregator"` // sub query aggregator (COUNT, AGG, etc.)
-	Value           pgtype.Varchar `json:"value"`           // fixed value, can be anything including NULL
 
 	// for frontend processing
-	Content      string      `json:"content"`      // attribute, field, role, language code, login, record, record new, sub query, true
+	Content      string      `json:"content"`      // attribute, collection, field, language code, login, preset, record, record new, role, sub query, true, value
 	CollectionId pgtype.UUID `json:"collectionId"` // collection ID of which column value to compare
 	ColumnId     pgtype.UUID `json:"columnId"`     // column ID from collection of which value to compare
 	FieldId      pgtype.UUID `json:"fieldId"`      // frontend field value

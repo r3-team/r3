@@ -243,20 +243,8 @@ let MyFilterSide = {
 					@input="setContent"
 					:value="content"
 				>
-					<option value="attribute"   >{{ capApp.option.content.attribute }}</option>
-					<option value="collection"  >{{ capApp.option.content.collection }}</option>
-					<option value="field"       >{{ capApp.option.content.field }}</option>
-					<option value="value"       >{{ capApp.option.content.value }}</option>
-					<option value="record"      >{{ capApp.option.content.record }}</option>
-					<option value="recordNew"   >{{ capApp.option.content.recordNew }}</option>
-					<option value="login"       >{{ capApp.option.content.login }}</option>
-					<option value="preset"      >{{ capApp.option.content.preset }}</option>
-					<option value="role"        >{{ capApp.option.content.role }}</option>
-					<option value="languageCode">{{ capApp.option.content.languageCode }}</option>
-					<option value="javascript"  >{{ capApp.option.content.javascript }}</option>
-					<option value="true"        >{{ capApp.option.content.true }}</option>
-					<option v-if="allowSubQuery" value="subQuery">
-						{{ capApp.option.content.subQuery }}
+					<option v-for="c in contentEnabled" :value="c">
+						{{ capApp.option.content[c] }}
 					</option>
 				</select>
 				
@@ -387,12 +375,12 @@ let MyFilterSide = {
 		/>
 	</div>`,
 	props:{
-		allowSubQuery: { type:Boolean, required:true },
 		builderMode:   { type:Boolean, required:true },
 		columnDate:    { type:Boolean, required:false, default:false },
 		columnTime:    { type:Boolean, required:false, default:false },
 		columnsMode:   { type:Boolean, required:true },
 		dataFields:    { type:Array,   required:true },
+		disableContent:{ type:Array,   required:true },
 		isNullOperator:{ type:Boolean, required:true },
 		joins:         { type:Array,   required:true },
 		joinsParents:  { type:Array,   required:true },
@@ -410,6 +398,13 @@ let MyFilterSide = {
 	},
 	computed:{
 		// entities
+		contentEnabled:function() {
+			return [
+				'attribute','field','fieldChanged','value','record',
+				'recordNew','login','preset','role','languageCode',
+				'javascript','true','collection','subQuery'
+			].filter(v => !this.disableContent.includes(v));
+		},
 		module:function() {
 			return this.moduleId === ''
 				? false : this.moduleIdMap[this.moduleId];
@@ -491,7 +486,7 @@ let MyFilterSide = {
 		// states
 		isAttribute:  function() { return this.content === 'attribute'; },
 		isCollection: function() { return this.content === 'collection'; },
-		isField:      function() { return this.content === 'field'; },
+		isField:      function() { return this.content === 'field' || this.content === 'fieldChanged'; },
 		isJavascript: function() { return this.content === 'javascript'; },
 		isPreset:     function() { return this.content === 'preset'; },
 		isRole:       function() { return this.content === 'role'; },
@@ -557,7 +552,9 @@ let MyFilterSide = {
 				v.collectionId = null;
 				v.columnId     = null;
 			}
-			if(v.content !== 'field')  v.fieldId  = null;
+			if(v.content !== 'field' && v.content !== 'fieldChanged')
+				v.fieldId  = null;
+			
 			if(v.content !== 'preset') v.presetId = null;
 			if(v.content !== 'role')   v.roleId   = null; 
 			if(v.content !== 'value')  v.value    = null;
@@ -607,10 +604,10 @@ let MyFilter = {
 				<my-filter-side
 					v-model="side0Input"
 					@apply-value="$emit('apply-value')"
-					:allowSubQuery="allowSubQuery"
 					:builderMode="builderMode"
 					:columnsMode="columnsMode"
 					:dataFields="dataFields"
+					:disableContent="disableContent"
 					:isNullOperator="isNullOperator"
 					:joins="joins"
 					:joinsParents="joinsParents"
@@ -631,12 +628,12 @@ let MyFilter = {
 				<my-filter-side
 					v-model="side1Input"
 					@apply-value="$emit('apply-value')"
-					:allowSubQuery="allowSubQuery"
 					:builderMode="builderMode"
 					:columnDate="side0ColumDate"
 					:columnTime="side0ColumTime"
 					:columnsMode="columnsMode"
 					:dataFields="dataFields"
+					:disableContent="disableContent"
 					:isNullOperator="isNullOperator"
 					:joins="joins"
 					:joinsParents="joinsParents"
@@ -671,11 +668,11 @@ let MyFilter = {
 		</div>
 	</div>`,
 	props:{
-		allowSubQuery: { type:Boolean, required:false, default:false },
 		builderMode:   { type:Boolean, required:true },
 		columns:       { type:Array,   required:false, default:() => [] },
 		columnsMode:   { type:Boolean, required:true },
 		dataFields:    { type:Array,   required:true },
+		disableContent:{ type:Array,   required:true },
 		expertMode:    { type:Boolean, required:true },
 		joins:         { type:Array,   required:true },
 		joinsParents:  { type:Array,   required:true },
@@ -751,9 +748,11 @@ let MyFilter = {
 		},
 		isStringInput:function() {
 			return (
+				typeof this.side0.attributeId !== 'undefined' &&
 				this.side0.attributeId !== null &&
 				this.isAttributeString(this.attributeIdMap[this.side0.attributeId].content)
 			) || (
+				typeof this.side1.attributeId !== 'undefined' &&
 				this.side1.attributeId !== null &&
 				this.isAttributeString(this.attributeIdMap[this.side1.attributeId].content)
 			);
@@ -799,12 +798,12 @@ let MyFilters = {
 			@move-up="move(i,false)"
 			@remove="remove"
 			@update="update"
-			:allowSubQuery="allowSubQuery"
 			:builderMode="builderMode"
 			:columns="columns"
 			:columnsMode="columnsMode"
 			:connector="f.connector"
 			:dataFields="dataFields"
+			:disableContent="disableContent"
 			:expertMode="expertMode"
 			:joins="joins"
 			:joinsParents="joinsParents"
@@ -829,79 +828,74 @@ let MyFilters = {
 		</div>
 	</div>`,
 	props:{
-		addOnStart:   { type:Boolean, required:false, default:false },
-		allowSubQuery:{ type:Boolean, required:false, default:false },
-		builderMode:  { type:Boolean, required:false, default:false },
-		columns:      { type:Array,   required:false, default:() => [] },
-		dataFields:   { type:Array,   required:false, default:() => [] },
-		filterAddCnt: { type:Number,  required:false, default:0 },
-		joins:        { type:Array,   required:true },
-		joinsParents: { type:Array,   required:false, default:() => [] },
-		modelValue:   { type:Array,   required:true },
-		moduleId:     { type:String,  required:false, default:'' },
-		showAdd:      { type:Boolean, required:false, default:true },
-		showApply:    { type:Boolean, required:false, default:false },
-		showMove:     { type:Boolean, required:false, default:false },
-		showReset:    { type:Boolean, required:false, default:false }
+		addOnStart:    { type:Boolean, required:false, default:false },
+		builderMode:   { type:Boolean, required:false, default:false },
+		columns:       { type:Array,   required:false, default:() => [] },
+		dataFields:    { type:Array,   required:false, default:() => [] },
+		disableContent:{ type:Array,   required:false, default:() => [] }, // content to disable (attribute, record, field, true, ...)
+		filterAddCnt:  { type:Number,  required:false, default:0 },
+		frontendOnly:  { type:Boolean, required:false, default:false },    // filter criteria must not contain backend types (attributes/queries)
+		joins:         { type:Array,   required:false, default:() => [] },
+		joinsParents:  { type:Array,   required:false, default:() => [] },
+		modelValue:    { type:Array,   required:true },
+		moduleId:      { type:String,  required:false, default:'' },
+		showAdd:       { type:Boolean, required:false, default:true },
+		showApply:     { type:Boolean, required:false, default:false },
+		showMove:      { type:Boolean, required:false, default:false },
+		showReset:     { type:Boolean, required:false, default:false }
 	},
 	emits:['apply','reset','update:modelValue'],
 	watch:{
 		// ugly hack to trigger inside this component
-		filterAddCnt:function() {
+		filterAddCnt() {
 			this.add();
 		}
 	},
-	data:function() {
+	data() {
 		return {
 			expertMode:this.builderMode
 		};
 	},
-	mounted:function() {
+	mounted() {
 		if(this.addOnStart)
 			this.add();
 	},
 	computed:{
 		// inputs
 		filters:{
-			get:function()    { return JSON.parse(JSON.stringify(this.modelValue)); },
-			set:function(val) { this.$emit('update:modelValue',val); }
+			get()  { return JSON.parse(JSON.stringify(this.modelValue)); },
+			set(v) { this.$emit('update:modelValue',v); }
 		},
 		
 		// states
-		anyFilters:function() {
-			return this.filters.length !== 0;
-		},
-		bracketsEqual:function() {
+		bracketsEqual:(s) => {
 			let cnt0 = 0;
 			let cnt1 = 0;
-			for(let i = 0, j = this.filters.length; i < j; i++) {
-				cnt0 += this.filters[i].side0.brackets;
-				cnt1 += this.filters[i].side1.brackets;
+			for(const f of s.filters) {
+				cnt0 += f.side0.brackets;
+				cnt1 += f.side1.brackets;
 			}
 			return cnt0 === cnt1;
-		},
-		columnsMode:function() {
-			return this.columns.length !== 0;
 		},
 		
 		// composite ID of
 		//  nesting level (0=main query, 1=1st sub query)
 		//  relation join index
 		//  attribute ID
-		nestedIndexAttributeIds:function() {
+		nestedIndexAttributeIds:(s) => {
 			let out = [];
 			
 			// columns defined, provide filter criteria based on column attributes
 			// used for user filters on list fields
 			//  user filters can only ever access main query (no access to sub queries)
-			if(this.columnsMode) {
-				for(const col of this.columns) {
-					const atr = this.attributeIdMap[col.attributeId];
+			if(s.columnsMode) {
+				for(const col of s.columns) {
+					const atr = s.attributeIdMap[col.attributeId];
 					
 					if(col.subQuery || (col.aggregator !== null && col.aggregator !== 'record'))
 						continue;
 					
-					if(this.isAttributeFiles(atr.content) || atr.encrypted)
+					if(s.isAttributeFiles(atr.content) || atr.encrypted)
 						continue;
 					
 					out.push(`0_${col.index}_${atr.id}`);
@@ -912,18 +906,22 @@ let MyFilters = {
 			// no columns defined, provide filter criteria based on attributes from joined relation
 			//  as filters can be used in sub queries, we access all joins from all parent queries
 			// used for pre-defining list filters for queries
-			out = this.getNestedIndexAttributeIdsByJoins(this.joins,this.joinsParents.length,false);
-			for(let i = 0, j = this.joinsParents.length; i < j; i++) {
-				out = out.concat(this.getNestedIndexAttributeIdsByJoins(this.joinsParents[i],i,false));
+			out = s.getNestedIndexAttributeIdsByJoins(s.joins,s.joinsParents.length,false);
+			for(let i = 0, j = s.joinsParents.length; i < j; i++) {
+				out = out.concat(s.getNestedIndexAttributeIdsByJoins(s.joinsParents[i],i,false));
 			}
 			return out;
 		},
 		
+		// simple states
+		anyFilters: (s) => s.filters.length !== 0,
+		columnsMode:(s) => s.columns.length !== 0,
+		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.filter; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.filter,
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -931,57 +929,64 @@ let MyFilters = {
 		isAttributeFiles,
 		
 		// actions
-		apply:function() {
+		apply() {
 			if(!this.bracketsEqual)
 				return;
 			
 			this.$emit('apply');
 		},
-		add:function() {
-			// add first available attribute as left side filter value
-			let v = this.nestedIndexAttributeIds[0].split('_');
-			
-			this.filters.push({
+		add() {
+			let v = {
 				connector:'AND',
 				operator:'ILIKE',
 				side0:{
-					attributeId:v[2],
-					attributeIndex:parseInt(v[1]),
-					attributeNested:parseInt(v[0]),
 					brackets:0,
 					collectionId:null,
 					columnId:null,
-					content:'attribute',
+					content:'field',
 					fieldId:null,
-					query:null,
-					queryAggregator:null,
+					presetId:null,
 					roleId:null,
 					value:''
 				},
 				side1:{
-					attributeId:null,
-					attributeIndex:0,
-					attributeNested:0,
 					brackets:0,
 					collectionId:null,
 					columnId:null,
 					content:'value',
 					fieldId:null,
-					query:null,
-					queryAggregator:null,
+					presetId:null,
 					roleId:null,
 					value:''
 				}
-			});
-			this.filters = this.filters;
+			};
+			
+			if(!this.frontendOnly) {
+				// add first available attribute as left side filter value
+				let p = this.nestedIndexAttributeIds[0].split('_');
+				v.side0.attributeId     = p[2];
+				v.side0.attributeIndex  = parseInt(p[1]);
+				v.side0.attributeNested = parseInt(p[0]);
+				v.side0.content         = 'attribute';
+				v.side0.query           = null;
+				v.side0.queryAggregator = null;
+				v.side1.attributeId     = null;
+				v.side1.attributeIndex  = 0;
+				v.side1.attributeNested = 0;
+				v.side1.query           = null;
+				v.side1.queryAggregator = null;
+			}
+			let f = JSON.parse(JSON.stringify(this.filters));
+			f.push(v);
+			this.filters = f;
 		},
-		move:function(i,down) {
+		move(i,down) {
 			let f = this.filters[i];
 			this.filters.splice(i,1);
 			this.filters.splice((down ? i + 1 : i - 1),0,f);
 			this.filters = this.filters;
 		},
-		remove:function(position) {
+		remove(position) {
 			this.filters.splice(position,1);
 			this.filters = this.filters;
 			
@@ -993,7 +998,7 @@ let MyFilters = {
 			if(this.filters.length === 0)
 				this.$emit('reset');
 		},
-		update:function(position,name,value) {
+		update(position,name,value) {
 			this.filters[position][name] = value;
 			this.filters = this.filters;
 		}

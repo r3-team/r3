@@ -106,7 +106,7 @@ export function filterIsCorrect(operator,value0,value1) {
 		const isOverlapOp = operator === '&&';
 		
 		// with @> operator, value0 (left side) must contain all values of value1 (right side)
-		// with && operator, any value must be in both arrays (does not matter which side)
+		// with && operator, any single value must be in both arrays (does not matter which side)
 		const arr0 = operator === '@>' ? value0 : value1;
 		const arr1 = operator === '@>' ? value1 : value0;
 		

@@ -14,6 +14,7 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -98,31 +99,79 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	"2.6": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
-			-- new form state condition option
-			ALTER TABLE app.form_state_condition ADD COLUMN collection_id1 uuid;
-			ALTER TABLE app.form_state_condition ADD CONSTRAINT form_state_condition_collection_id1_fkey FOREIGN KEY (collection_id1)
-				REFERENCES app.collection (id) MATCH SIMPLE
-				ON UPDATE NO ACTION
-				ON DELETE NO ACTION
-				DEFERRABLE INITIALLY DEFERRED;
-			
-			CREATE INDEX fki_form_state_condition_collection_id1_fkey
-				ON app.form_state_condition USING btree (collection_id1 ASC NULLS LAST);
-			
-			ALTER TABLE app.form_state_condition ADD COLUMN collection_column_id1 uuid;
-			ALTER TABLE app.form_state_condition ADD CONSTRAINT form_state_condition_collection_column_id1_fkey FOREIGN KEY (collection_column_id1)
-				REFERENCES app.column (id) MATCH SIMPLE
-				ON UPDATE NO ACTION
-				ON DELETE NO ACTION
-				DEFERRABLE INITIALLY DEFERRED;
-			
-			CREATE INDEX fki_form_state_condition_collection_column_id1_fkey
-				ON app.form_state_condition USING btree (collection_column_id1 ASC NULLS LAST);
-			
+			-- clean up of form state conditions
+			CREATE TABLE IF NOT EXISTS app.form_state_condition_side (
+			    form_state_id uuid NOT NULL,
+			    form_state_condition_position smallint NOT NULL,
+			    collection_id uuid,
+			    column_id uuid,
+			    field_id uuid,
+			    preset_id uuid,
+			    role_id uuid,
+			    side smallint NOT NULL,
+			    brackets smallint NOT NULL,
+			    content TEXT COLLATE pg_catalog."default" NOT NULL,
+			    value text COLLATE pg_catalog."default",
+			    CONSTRAINT form_state_condition_side_pkey PRIMARY KEY (form_state_id, form_state_condition_position, side),
+			    CONSTRAINT form_state_condition_side_collection_id_fkey FOREIGN KEY (collection_id)
+			        REFERENCES app.collection (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT form_state_condition_side_column_id_fkey FOREIGN KEY (column_id)
+			        REFERENCES app."column" (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT form_state_condition_side_field_id_fkey FOREIGN KEY (field_id)
+			        REFERENCES app.field (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT form_state_condition_side_preset_id_fkey FOREIGN KEY (preset_id)
+			        REFERENCES app.preset (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT form_state_condition_side_form_state_id_fkey FOREIGN KEY (form_state_id)
+			        REFERENCES app.form_state (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT form_state_condition_side_form_state_id_form_state_con_pos_fkey FOREIGN KEY (form_state_condition_position, form_state_id)
+			        REFERENCES app.form_state_condition ("position", form_state_id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT form_state_condition_side_role_id_fkey FOREIGN KEY (role_id)
+			        REFERENCES app.role (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+
+			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_collection_id_fkey
+			    ON app.form_state_condition_side USING btree (collection_id ASC NULLS LAST);
+
+			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_column_id_fkey
+			    ON app.form_state_condition_side USING btree (column_id ASC NULLS LAST);
+
+			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_field_id_fkey
+			    ON app.form_state_condition_side USING btree (field_id ASC NULLS LAST);
+
+			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_form_state_id_fkey
+			    ON app.form_state_condition_side USING btree (form_state_id ASC NULLS LAST);
+
+			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_preset_id_fkey
+			    ON app.form_state_condition_side USING btree (preset_id ASC NULLS LAST);
+
+			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_role_id_fkey
+			    ON app.form_state_condition_side USING btree (role_id ASC NULLS LAST);
+
 			-- new form option
 			ALTER TABLE app.form ADD COLUMN no_data_actions BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.form ALTER COLUMN no_data_actions DROP DEFAULT;
-			
+
 			-- new collection icon
 			ALTER TABLE app.collection ADD COLUMN icon_id uuid;
 			ALTER TABLE app.collection ADD CONSTRAINT collection_icon_id_fkey FOREIGN KEY (icon_id)
@@ -130,14 +179,14 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			CREATE INDEX fki_collection_icon_id_fkey
 				ON app.collection USING btree (icon_id ASC NULLS LAST);
-			
+
 			-- new collection consumer option
 			ALTER TABLE app.collection_consumer ADD COLUMN multi_value BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.collection_consumer ALTER COLUMN multi_value DROP DEFAULT;
-			
+
 			-- fix collection consumer constraint
 			ALTER TABLE app.collection_consumer DROP CONSTRAINT collection_consumer_field_id_fkey;
 			ALTER TABLE app.collection_consumer ADD CONSTRAINT collection_consumer_field_id_fkey
@@ -146,61 +195,61 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			
+
 			-- new condition operators
 			ALTER TYPE app.condition_operator ADD VALUE '@>';
 			ALTER TYPE app.condition_operator ADD VALUE '<@';
 			ALTER TYPE app.condition_operator ADD VALUE '&&';
-			
+
 			-- new aggregator
 			ALTER TYPE app.aggregator ADD VALUE 'json';
-			
+
 			-- new instance task
 			INSERT INTO instance.task (name,interval_seconds,embedded_only,active) VALUES
 				('httpCertRenew',86400,false,true);
-			
+
 			INSERT INTO instance.scheduler (task_name,date_attempt,date_success) VALUES
 				('httpCertRenew',0,0);
-			
+
 			-- new login setting
 			ALTER TABLE instance.login_setting ADD COLUMN mobile_scroll_form BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN mobile_scroll_form DROP DEFAULT;
-			
+
 			-- remove deprecated login setting
 			ALTER TABLE instance.login_setting DROP COLUMN hint_first_steps;
-			
+
 			-- new LDAP option
 			ALTER TABLE instance.ldap RENAME COLUMN tls TO starttls;
 			ALTER TABLE instance.ldap ADD COLUMN tls BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.ldap ALTER COLUMN tls DROP DEFAULT;
-			
+
 			-- query table changes
 			DELETE FROM app.query WHERE relation_id IS NULL;
 			ALTER TABLE app.query ALTER COLUMN relation_id SET NOT NULL;
-			
+
 			-- new column option: copy to clipboard
 			ALTER TABLE app.column ADD COLUMN clipboard BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.column ALTER COLUMN clipboard DROP DEFAULT;
-			
+
 			-- user key management
 			ALTER TABLE instance.login
 				ADD COLUMN salt_kdf TEXT NOT NULL DEFAULT 'PLACEHOLDER',
 				ADD COLUMN key_private_enc TEXT,
 				ADD COLUMN key_private_enc_backup TEXT,
 				ADD COLUMN key_public TEXT;
-			
+
 			ALTER TABLE instance.login ALTER COLUMN salt_kdf DROP DEFAULT;
-			
+
 			-- encryption options for storage entities
 			ALTER TABLE app.relation ADD COLUMN encryption BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.relation ALTER COLUMN encryption DROP DEFAULT;
-			
+
 			ALTER TABLE app.attribute ADD COLUMN encrypted BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.attribute ALTER COLUMN encrypted DROP DEFAULT;
-			
+
 			-- new schema for e2e encryption keys
 			CREATE SCHEMA instance_e2ee;
-			
+
 			-- key management instance function
 			CREATE OR REPLACE FUNCTION instance.clean_up_e2ee_keys(
 				login_id INTEGER,
@@ -242,6 +291,162 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			`, tools.RandStringRunes(16), id); err != nil {
 				return "", err
 			}
+		}
+
+		// migrate form state conditions
+		type condition struct {
+			FormStateId  uuid.UUID
+			Position     int
+			Brackets0    int
+			Brackets1    int
+			Operator     string
+			FieldId0     pgtype.UUID
+			FieldId1     pgtype.UUID
+			PresetId1    pgtype.UUID
+			RoleId       pgtype.UUID
+			FieldChanged pgtype.Bool
+			NewRecord    pgtype.Bool
+			Login1       pgtype.Bool
+			Value1       pgtype.Varchar
+		}
+		rows, err := tx.Query(db.Ctx, `
+			SELECT form_state_id, position, field_id0, field_id1, preset_id1, role_id,
+				brackets0, brackets1, operator, field_changed, login1, new_record, value1
+			FROM app.form_state_condition
+			ORDER BY form_state_id, position
+		`)
+		if err != nil {
+			return "", err
+		}
+
+		conditions := make([]condition, 0)
+		for rows.Next() {
+			var c condition
+
+			if err := rows.Scan(&c.FormStateId, &c.Position, &c.FieldId0,
+				&c.FieldId1, &c.PresetId1, &c.RoleId, &c.Brackets0, &c.Brackets1,
+				&c.Operator, &c.FieldChanged, &c.Login1, &c.NewRecord,
+				&c.Value1); err != nil {
+
+				return "", err
+			}
+			conditions = append(conditions, c)
+		}
+		rows.Close()
+
+		var insertSide = func(formStateId uuid.UUID, position int, side int,
+			brackets int, content string, value pgtype.Varchar,
+			fieldId pgtype.UUID, presetId pgtype.UUID, roleId pgtype.UUID) error {
+
+			_, err := tx.Exec(db.Ctx, `
+				INSERT INTO app.form_state_condition_side (
+					form_state_id, form_state_condition_position, side,
+					brackets, content, value, field_id, preset_id, role_id
+				)
+				VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+			`, formStateId, position, side, brackets, content, value,
+				fieldId, presetId, roleId)
+
+			return err
+		}
+
+		for _, c := range conditions {
+			content0 := ""
+			content1 := ""
+			operatorOverwrite := ""
+			value0 := pgtype.Varchar{}
+			value0.Status = pgtype.Null
+			value1 := pgtype.Varchar{}
+			value1.Status = pgtype.Null
+			emptyId := pgtype.UUID{}
+			emptyId.Status = pgtype.Null
+			field0 := pgtype.UUID{}
+			field0.Status = pgtype.Null
+			field1 := pgtype.UUID{}
+			field1.Status = pgtype.Null
+			preset1 := pgtype.UUID{}
+			preset1.Status = pgtype.Null
+			role := pgtype.UUID{}
+			role.Status = pgtype.Null
+
+			// field, value
+			if c.FieldChanged.Status == pgtype.Present {
+				content0 = "fieldChanged"
+				content1 = "true"
+				field0 = c.FieldId0
+				operatorOverwrite = "="
+				if !c.FieldChanged.Bool {
+					operatorOverwrite = "<>"
+				}
+			} else if c.NewRecord.Status == pgtype.Present {
+				content0 = "recordNew"
+				content1 = "true"
+				operatorOverwrite = "="
+				if !c.NewRecord.Bool {
+					operatorOverwrite = "<>"
+				}
+			} else if c.RoleId.Status == pgtype.Present {
+				content0 = "role"
+				content1 = "true"
+				role = c.RoleId
+			} else {
+				if c.FieldId0.Status == pgtype.Present {
+					content0 = "field"
+					field0 = c.FieldId0
+				}
+				if c.FieldId1.Status == pgtype.Present {
+					content1 = "field"
+					field1 = c.FieldId1
+				}
+				if c.Login1.Status == pgtype.Present {
+					content1 = "login"
+				}
+				if c.PresetId1.Status == pgtype.Present {
+					content1 = "preset"
+					preset1 = c.PresetId1
+				}
+				if c.Value1.Status == pgtype.Present && c.Value1.String != "" {
+					content1 = "value"
+					value1 = c.Value1
+				}
+			}
+
+			if c.Operator == "IS NULL" || c.Operator == "IS NOT NULL" {
+				content1 = "value"
+			}
+
+			if err := insertSide(c.FormStateId, c.Position, 0, c.Brackets0, content0, value0, field0, emptyId, role); err != nil {
+				return "", err
+			}
+			if err := insertSide(c.FormStateId, c.Position, 1, c.Brackets1, content1, value1, field1, preset1, emptyId); err != nil {
+				return "", err
+			}
+
+			if operatorOverwrite != "" {
+				if _, err := tx.Exec(db.Ctx, `
+					UPDATE app.form_state_condition
+					SET operator = $1
+					WHERE form_state_id = $2
+					AND position = $3
+				`, operatorOverwrite, c.FormStateId, c.Position); err != nil {
+					return "", err
+				}
+			}
+		}
+		if _, err := tx.Exec(db.Ctx, `
+			ALTER TABLE app.form_state_condition
+				DROP COLUMN field_id0,
+				DROP COLUMN field_id1,
+				DROP COLUMN preset_id1,
+				DROP COLUMN role_id,
+				DROP COLUMN field_changed,
+				DROP COLUMN new_record,
+				DROP COLUMN brackets0,
+				DROP COLUMN brackets1,
+				DROP COLUMN login1,
+				DROP COLUMN value1;
+		`); err != nil {
+			return "", err
 		}
 		return "2.7", nil
 	},

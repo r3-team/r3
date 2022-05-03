@@ -537,16 +537,58 @@ let MyForm = {
 		
 		// field state overwrite
 		fieldIdMapState:function() {
-			let out = {};
+			const valueChangeComp = (value) => {
+				if(!Array.isArray(value))
+					return value;
+				
+				value.sort();
+				return JSON.stringify(value);
+			};
+			const getValueFromConditionSide = (side,operator) => {
+				switch(side.content) {
+					case 'languageCode':return this.settings.languageCode;                break;
+					case 'login':       return this.loginId;                              break;
+					case 'preset':      return this.presetIdMapRecordId[side.presetId];   break;
+					case 'recordNew':   return this.isNew;                                break;
+					case 'role':        return this.access.roleIds.includes(side.roleId); break;
+					case 'true':        return true;                                      break;
+					case 'value':       return side.value;                                break;
+					
+					case 'collection':
+						return getCollectionValues(
+							side.collectionId,
+							side.columnId,
+							this.filterOperatorIsSingleValue(operator));
+					break;
+					case 'field':
+						return this.values[this.getIndexAttributeIdByField(
+							this.fieldIdMapData[side.fieldId],false)];
+					break;
+					case 'fieldChanged':
+						return valueChangeComp(
+								this.values[this.getIndexAttributeIdByField(
+								this.fieldIdMapData[side.fieldId],false)]
+							) != valueChangeComp(
+								this.valuesOrg[this.getIndexAttributeIdByField(
+								this.fieldIdMapData[side.fieldId],false)]
+							);
+					break;
+					case 'record':
+						return typeof this.joinsIndexMap['0'] !== 'undefined'
+							? this.joinsIndexMap['0'].recordId : false;
+					break;
+				}
+				return false;
+			};
 			
+			let out = {};
 			for(const s of this.form.states) {
-				// no conditions, no effects, nothing to do
 				if(s.conditions.length === 0 || s.effects.length === 0)
 					continue;
 				
 				let line = 'return ';
 				
-				// parse conditions
+				// parse condition expressions
 				for(let i = 0, j = s.conditions.length; i < j; i++) {
 					let c = s.conditions[i];
 					
@@ -554,107 +596,20 @@ let MyForm = {
 						line += c.connector === 'AND' ? '&&' : '||';
 					
 					// brackets open
-					line += '('.repeat(c.brackets0);
+					line += '('.repeat(c.side0.brackets);
 					
-					if(c.fieldId0 !== null) {
-						
-						// field value conditions
-						let f0value = this.values[this.getIndexAttributeIdByField(
-							this.fieldIdMapData[c.fieldId0],false)];
-						
-						if(c.fieldChanged !== null) {
-							let f0valueOrg = this.valuesOrg[this.getIndexAttributeIdByField(
-								this.fieldIdMapData[c.fieldId0],false)];
-							
-							line += this.filterIsCorrect(c.fieldChanged ? '<>' : '=',f0value,f0valueOrg) ? 'true' : 'false';
-						}
-						else if(c.operator === 'IS NULL') {
-							line += f0value === null ? 'true' : 'false';
-						}
-						else if(c.operator === 'IS NOT NULL') {
-							line += f0value !== null ? 'true' : 'false';
-						}
-						else if(c.login1 !== null) {
-							line += this.filterIsCorrect(c.operator,f0value,this.loginId) ? 'true' : 'false';
-						}
-						else if(c.value1 !== null) {
-							
-							// field value to fixed value
-							let f = this.fieldIdMapData[c.fieldId0];
-							let a = this.attributeIdMap[f.attributeId];
-							
-							line += this.filterIsCorrect(c.operator,this.getAttributeValueFromString(
-								a.content,c.value1),f0value) ? 'true' : 'false';
-						}
-						else if(c.fieldId1 !== null) {
-							
-							// field value to field value
-							let f1value = this.values[this.getIndexAttributeIdByField(
-								this.fieldIdMapData[c.fieldId1],false)];
-							
-							line += this.filterIsCorrect(c.operator,f0value,f1value) ? 'true' : 'false';
-						}
-						else if(c.presetId1 !== null) {
-							
-							// field value to preset record
-							let f = this.fieldIdMapData[c.fieldId0];
-							let a = this.attributeIdMap[f.attributeId];
-							
-							if(a.relationshipId === null || f0value === null) {
-								line += 'false';
-							}
-							else{
-								// equals looks for value and is false unless found
-								// !equals looks for value and is true unless found
-								let equals = c.operator === '=';
-								let found  = false;
-								
-								for(const p of this.relationIdMap[a.relationshipId].presets) {
-									if(p.id !== c.presetId1)
-										continue;
-									
-									if(this.presetIdMapRecordId[p.id] === f0value)
-										found = true;
-									
-									break;
-								}
-								line += (equals && found) || (!equals && !found) ? 'true' : 'false';
-							}
-						}
-						else if(c.collectionId1 !== null && c.collectionColumnId1 !== null) {
-							
-							// field value to collection value(s)
-							const v = getCollectionValues(
-								c.collectionId1,
-								c.collectionColumnId1,
-								this.filterOperatorIsSingleValue(c.operator));
-							
-							line += this.filterIsCorrect(c.operator,f0value,v) ? 'true' : 'false';
-						}
-					}
-					else if(c.roleId !== null) {
-						
-						// role membership condition
-						if(c.operator === '=')
-							line += this.access.roleIds.includes(c.roleId) ? 'true' : 'false';
-						else
-							line += !this.access.roleIds.includes(c.roleId) ? 'true' : 'false';
-					}
-					else if(c.newRecord !== null) {
-						
-						// new record condition
-						line += this.isNew === c.newRecord ? 'true' : 'false';
-					}
+					// get boolean expression by checking filter condition
+					line += this.filterIsCorrect(c.operator,
+						getValueFromConditionSide(c.side0,c.operator),
+						getValueFromConditionSide(c.side1,c.operator)
+					) ? 'true' : 'false';
 					
 					// brackets close
-					line += ')'.repeat(c.brackets1);
+					line += ')'.repeat(c.side1.brackets);
 				}
 				
 				// apply effects if conditions are met
-				let check = function() {
-					return Function(line)();
-				};
-				if(check()) {
+				if(Function(line)()) {
 					for(const e of s.effects) {
 						out[e.fieldId] = e.newState;
 					}
@@ -1285,7 +1240,7 @@ let MyForm = {
 				return this.releaseLoadingOnNextTick();
 			}
 			
-			// set base record ID, necessary for form filter 'newRecord'
+			// set base record ID, necessary for form filter 'recordNew'
 			this.indexMapRecordId[0] = this.recordId;
 			
 			// add index attributes to be retrieved

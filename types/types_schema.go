@@ -142,26 +142,38 @@ type FormFunction struct {
 }
 type FormState struct {
 	Id          uuid.UUID            `json:"id"`
-	Description string               `json:"description"` // builder reference, used to order by
-	Conditions  []FormStateCondition `json:"conditions"`
-	Effects     []FormStateEffect    `json:"effects"`
+	Description string               `json:"description"` // builder reference, used to order and search by
+	Conditions  []FormStateCondition `json:"conditions"`  // conditions to be met for effects to be applied
+	Effects     []FormStateEffect    `json:"effects"`     // effects to apply when conditions are met
 }
 type FormStateCondition struct {
-	Position            int            `json:"position"`
-	FieldId0            pgtype.UUID    `json:"fieldId0"`            // if set: field0 value for match (not required for: newRecord, roleId)
-	FieldId1            pgtype.UUID    `json:"fieldId1"`            // if set: field0 value must match field1 value
-	CollectionId1       pgtype.UUID    `json:"collectionId1"`       // if set: field0 value is compared against collection value(s)
-	CollectionColumnId1 pgtype.UUID    `json:"collectionColumnId1"` // if set: field0 value is compared against collection value(s)
-	PresetId1           pgtype.UUID    `json:"presetId1"`           // if set: field0 value must match preset record value
-	RoleId              pgtype.UUID    `json:"roleId"`              // if set: with operator '=' login must have role ('<>' must not have role)
-	FieldChanged        pgtype.Bool    `json:"fieldChanged"`        // if set: true matches field value changed, false matches unchanged
-	NewRecord           pgtype.Bool    `json:"newRecord"`           // if set: true matches new, false existing record
-	Brackets0           int            `json:"brackets0"`
-	Brackets1           int            `json:"brackets1"`
-	Connector           string         `json:"connector"` // AND, OR
-	Login1              pgtype.Bool    `json:"login1"`    // if set: true matches login ID of current user
-	Operator            string         `json:"operator"`  // comparisson operator (=, <>, etc.)
-	Value1              pgtype.Varchar `json:"value1"`    // fixed value for direct field0 match
+	Position  int                    `json:"position"`
+	Connector string                 `json:"connector"` // AND, OR
+	Operator  string                 `json:"operator"`  // comparison operator (=, <>, etc.)
+	Side0     FormStateConditionSide `json:"side0"`     // comparison: left side
+	Side1     FormStateConditionSide `json:"side1"`     // comparison: right side
+
+	// legacy, replaced by FormStateConditionSide
+	Brackets0    int            `json:"brackets0"`
+	Brackets1    int            `json:"brackets1"`
+	FieldId0     pgtype.UUID    `json:"fieldId0"`     // if set: field0 value for match (not required for: newRecord, roleId)
+	FieldId1     pgtype.UUID    `json:"fieldId1"`     // if set: field0 value must match field1 value
+	PresetId1    pgtype.UUID    `json:"presetId1"`    // if set: field0 value must match preset record value
+	RoleId       pgtype.UUID    `json:"roleId"`       // if set: with operator '=' login must have role ('<>' must not have role)
+	FieldChanged pgtype.Bool    `json:"fieldChanged"` // if set: true matches field value changed, false matches unchanged
+	NewRecord    pgtype.Bool    `json:"newRecord"`    // if set: true matches new, false existing record
+	Login1       pgtype.Bool    `json:"login1"`       // if set: true matches login ID of current user
+	Value1       pgtype.Varchar `json:"value1"`       // fixed value for direct field0 match
+}
+type FormStateConditionSide struct {
+	Brackets     int            `json:"brackets"`     // opening/closing brackets (side 0/1)
+	Content      string         `json:"content"`      // collection, field, fieldChanged, login, preset, recordNew, role, true, value
+	CollectionId pgtype.UUID    `json:"collectionId"` // collection ID of which column value to compare
+	ColumnId     pgtype.UUID    `json:"columnId"`     // column ID from collection of which value to compare
+	FieldId      pgtype.UUID    `json:"fieldId"`      // field for value/has changed?
+	PresetId     pgtype.UUID    `json:"presetId"`     // preset ID of record to be compared
+	RoleId       pgtype.UUID    `json:"roleId"`       // role ID assigned to user
+	Value        pgtype.Varchar `json:"value"`        // fixed value, can be anything including NULL
 }
 type FormStateEffect struct {
 	FieldId  uuid.UUID `json:"fieldId"`  // affected field

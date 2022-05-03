@@ -48,9 +48,9 @@ let MyBuilderQueryChoice = {
 		
 		<my-filters
 			v-model="filtersInput"
-			:allowSubQuery="true"
 			:builderMode="true"
 			:dataFields="dataFields"
+			:disableContent="['fieldChanged']"
 			:joins="joins"
 			:joinsParents="joinsParents"
 			:moduleId="moduleId"
@@ -635,9 +635,9 @@ let MyBuilderQuery = {
 			<my-filters
 				v-model="filtersInput"
 				v-show="showFilters"
-				:allowSubQuery="true"
 				:builderMode="true"
 				:dataFields="dataFields"
+				:disableContent="['fieldChanged']"
 				:filterAddCnt="filterAddCnt"
 				:joins="joins"
 				:joinsParents="joinsParents"

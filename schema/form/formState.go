@@ -53,14 +53,10 @@ func getStates(formId uuid.UUID) ([]types.FormState, error) {
 }
 
 func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, error) {
-
 	conditions := make([]types.FormStateCondition, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT position, field_id0, field_id1, collection_id1,
-			collection_column_id1, preset_id1, role_id, field_changed,
-			new_record, brackets0, brackets1, connector, login1, operator,
-			value1
+		SELECT position, connector, operator
 		FROM app.form_state_condition
 		WHERE form_state_id = $1
 		ORDER BY position ASC
@@ -68,21 +64,56 @@ func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, erro
 	if err != nil {
 		return conditions, err
 	}
-	defer rows.Close()
 
 	for rows.Next() {
 		var c types.FormStateCondition
-
-		if err := rows.Scan(&c.Position, &c.FieldId0, &c.FieldId1,
-			&c.CollectionId1, &c.CollectionColumnId1, &c.PresetId1, &c.RoleId,
-			&c.FieldChanged, &c.NewRecord, &c.Brackets0, &c.Brackets1,
-			&c.Connector, &c.Login1, &c.Operator, &c.Value1); err != nil {
-
+		if err := rows.Scan(&c.Position, &c.Connector, &c.Operator); err != nil {
 			return conditions, err
 		}
 		conditions = append(conditions, c)
 	}
+	rows.Close()
+
+	for i, c := range conditions {
+
+		// fix old state conditions < 2.7: Pre-migration values, replaced by left/right sides
+		c.FieldId0 = compatible.FixPgxNull(c.FieldId0).(pgtype.UUID)
+		c.FieldId1 = compatible.FixPgxNull(c.FieldId1).(pgtype.UUID)
+		c.FieldChanged = compatible.FixPgxNull(c.FieldChanged).(pgtype.Bool)
+		c.PresetId1 = compatible.FixPgxNull(c.PresetId1).(pgtype.UUID)
+		c.RoleId = compatible.FixPgxNull(c.RoleId).(pgtype.UUID)
+		c.Login1 = compatible.FixPgxNull(c.Login1).(pgtype.Bool)
+		c.NewRecord = compatible.FixPgxNull(c.NewRecord).(pgtype.Bool)
+		c.Value1 = compatible.FixPgxNull(c.Value1).(pgtype.Varchar)
+
+		c.Side0, err = getStateConditionSide(formStateId, c.Position, 0)
+		if err != nil {
+			return conditions, err
+		}
+		c.Side1, err = getStateConditionSide(formStateId, c.Position, 1)
+		if err != nil {
+			return conditions, err
+		}
+		conditions[i] = c
+	}
+
 	return conditions, nil
+}
+func getStateConditionSide(formStateId uuid.UUID, position int, side int) (types.FormStateConditionSide, error) {
+	var s types.FormStateConditionSide
+
+	err := db.Pool.QueryRow(db.Ctx, `
+		SELECT collection_id, column_id, field_id, preset_id,
+			role_id, brackets, content, value
+		FROM app.form_state_condition_side
+		WHERE form_state_id = $1
+		AND form_state_condition_position = $2
+		AND side = $3
+	`, formStateId, position, side).Scan(&s.CollectionId, &s.ColumnId,
+		&s.FieldId, &s.PresetId, &s.RoleId, &s.Brackets, &s.Content,
+		&s.Value)
+
+	return s, err
 }
 
 func getStateEffects(formStateId uuid.UUID) ([]types.FormStateEffect, error) {
@@ -170,26 +201,21 @@ func setState_tx(tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID,
 
 	for i, c := range state.Conditions {
 
-		// fix imports < 2.6: New field comparisson: Login ID
-		c.Login1 = compatible.FixPgxNull(c.Login1).(pgtype.Bool)
-
-		// fix imports < 2.7: New field comparisson: Collection values
-		c.CollectionId1 = compatible.FixPgxNull(c.CollectionId1).(pgtype.UUID)
-		c.CollectionColumnId1 = compatible.FixPgxNull(c.CollectionColumnId1).(pgtype.UUID)
+		// fix legacy conditions format < 2.7
+		c = compatible.MigrateNewConditions(c)
 
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.form_state_condition (
-				form_state_id, position, field_id0, field_id1, collection_id1,
-				collection_column_id1, preset_id1, role_id, field_changed,
-				new_record, brackets0, brackets1, connector, login1, operator,
-				value1
+				form_state_id, position, connector, operator
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
-		`, state.Id, i, c.FieldId0, c.FieldId1, c.CollectionId1,
-			c.CollectionColumnId1, c.PresetId1, c.RoleId, c.FieldChanged,
-			c.NewRecord, c.Brackets0, c.Brackets1, c.Connector, c.Login1,
-			c.Operator, c.Value1); err != nil {
-
+			VALUES ($1,$2,$3,$4)
+		`, state.Id, i, c.Connector, c.Operator); err != nil {
+			return state.Id, err
+		}
+		if err := setStateConditionSide_tx(tx, state.Id, i, 0, c.Side0); err != nil {
+			return state.Id, err
+		}
+		if err := setStateConditionSide_tx(tx, state.Id, i, 1, c.Side1); err != nil {
 			return state.Id, err
 		}
 	}
@@ -213,4 +239,19 @@ func setState_tx(tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID,
 		}
 	}
 	return state.Id, nil
+}
+func setStateConditionSide_tx(tx pgx.Tx, formStateId uuid.UUID,
+	position int, side int, s types.FormStateConditionSide) error {
+
+	_, err := tx.Exec(db.Ctx, `
+		INSERT INTO app.form_state_condition_side (
+			form_state_id, form_state_condition_position, side,
+			collection_id, column_id, field_id, preset_id, role_id,
+			brackets, content, value
+		)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+	`, formStateId, position, side, s.CollectionId, s.ColumnId, s.FieldId,
+		s.PresetId, s.RoleId, s.Brackets, s.Content, s.Value)
+
+	return err
 }
