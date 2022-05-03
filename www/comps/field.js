@@ -71,6 +71,12 @@ let MyField = {
 						:src="srcBase64(iconIdMap[iconId].file)"
 					/>
 					
+					<!-- encryption indicator -->
+					<img class="field-icon" src="images/lock.png"
+						v-if="isEncrypted"
+						:title="capApp.dialog.encrypted"
+					/>
+					
 					<!-- regular text line input (numeric, strings, etc.) -->
 					<input class="input"
 						v-if="isLineInput"
@@ -256,13 +262,6 @@ let MyField = {
 							/>
 						</template>
 					</my-list>
-					
-					<!-- encryption indicator -->
-					<my-button image="lock.png"
-						v-if="isEncrypted"
-						@trigger="clickEncryption"
-						:naked="true"
-					/>
 				</div>
 			</div>
 			
@@ -487,14 +486,14 @@ let MyField = {
 			if(!this.showInvalid) return '';
 			
 			if(!this.isValidMin) {
-				if(this.isString) return this.capGen.inputShort;
+				if(this.isString) return this.capGen.inputShort.replace('{MIN}',this.field.min);
 				if(this.isFiles)  return this.capGen.inputTooFewFiles;
-				return this.capGen.inputSmall;
+				return this.capGen.inputSmall.replace('{MIN}',this.field.min);
 			}
 			if(!this.isValidMax) {
-				if(this.isString) return this.capGen.inputLong;
+				if(this.isString) return this.capGen.inputLong.replace('{MAX}',this.field.max);
 				if(this.isFiles)  return this.capGen.inputTooManyFiles;
-				return this.capGen.inputLarge;
+				return this.capGen.inputLarge.replace('{MAX}',this.field.max);
 			}
 			
 			if(this.isDecimal)     return this.capGen.inputDecimal;
@@ -914,19 +913,6 @@ let MyField = {
 		click:function() {
 			if(this.field.display === 'color' && !this.isReadonly)
 				this.showColorPickerInput = !this.showColorPickerInput;
-		},
-		clickEncryption:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.encrypted,
-				captionTop:this.capApp.dialog.encryptedTitle,
-				image:'lock.png',
-				buttons:[{
-					caption:this.capGen.button.close,
-					keyEnter:true,
-					keyEscape:true,
-					image:'ok.png'
-				}]
-			});
 		},
 		clickOutside:function() {
 			if(this.showColorPickerInput)

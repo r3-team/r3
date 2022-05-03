@@ -552,7 +552,6 @@ let MyForm = {
 					case 'recordNew':   return this.isNew;                                break;
 					case 'role':        return this.access.roleIds.includes(side.roleId); break;
 					case 'true':        return true;                                      break;
-					case 'value':       return side.value;                                break;
 					
 					case 'collection':
 						return getCollectionValues(
@@ -576,6 +575,12 @@ let MyForm = {
 					case 'record':
 						return typeof this.joinsIndexMap['0'] !== 'undefined'
 							? this.joinsIndexMap['0'].recordId : false;
+					break;
+					case 'value':
+						// compatibility fix, true value should be used instead
+						if(side.value.toLowerCase() === 'true')  return true;
+						if(side.value.toLowerCase() === 'false') return false;
+						return side.value;
 					break;
 				}
 				return false;
