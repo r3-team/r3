@@ -578,8 +578,10 @@ let MyForm = {
 					break;
 					case 'value':
 						// compatibility fix, true value should be used instead
-						if(side.value.toLowerCase() === 'true')  return true;
-						if(side.value.toLowerCase() === 'false') return false;
+						if(typeof side.value === 'string') {
+							if(side.value.toLowerCase() === 'true')  return true;
+							if(side.value.toLowerCase() === 'false') return false;
+						}
 						return side.value;
 					break;
 				}
