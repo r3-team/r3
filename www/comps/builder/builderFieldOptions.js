@@ -350,6 +350,15 @@ let MyBuilderFieldOptions = {
 						</select>
 					</td>
 				</tr>
+				<tr v-if="!isFiles && !isRelationship">
+					<td>{{ capApp.fieldClipboard }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="set('clipboard',$event)"
+							:modelValue="field.clipboard"
+						/>
+					</td>
+				</tr>
 				<tr v-if="!isRelationship">
 					<td>{{ capApp.fieldRegexCheck }}</td>
 					<td>

@@ -553,6 +553,7 @@
 			"fields":"Felder",
 			"fieldAttributeIdAltDateTo":"Datum bis (Zeitraum)",
 			"fieldAttributeIdAltRichtextFiles":"Rich-Text Dateizugriff",
+			"fieldClipboard":"Zwischenablage",
 			"fieldDefault":"Standardwert",
 			"fieldDefaultHint":"Doku lesen für Platzhalter",
 			"fieldDefaultPresetIds":"Standard vord. Datensätze",
@@ -1107,6 +1108,8 @@
 			"recordDeletedMobile":"Gelöscht!",
 			"recordEncrypting":"Datensatz wird verschlüsselt...",
 			"recordEncryptingMobile":"Am Verschlüsseln...",
+			"recordValueCopied":"Wert wurde in die Zwischenablage kopiert",
+			"recordValueCopiedMobile":"Kopiert!",
 			"recordUpdated":"Datensatz wurde aktualisiert",
 			"recordUpdatedMobile":"Aktualisiert!"
 		},

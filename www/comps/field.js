@@ -262,6 +262,15 @@ let MyField = {
 							/>
 						</template>
 					</my-list>
+					
+					<!-- copy to clipboard action -->
+					<my-button image="copyClipboard.png"
+						v-if="isClipboard && !isFiles"
+						@trigger="copyToClipboard"
+						:active="value !== null"
+						:captionTitle="capGen.button.copyClipboard"
+						:naked="true"
+					/>
 				</div>
 			</div>
 			
@@ -298,6 +307,7 @@ let MyField = {
 		<!-- list -->
 		<my-list
 			v-if="isList"
+			@clipboard="$emit('clipboard')"
 			@open-form="(...args) => openForm(args[0],[],args[1])"
 			@record-selected="(...args) => openForm(args[0],[],args[1])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
@@ -394,6 +404,7 @@ let MyField = {
 		<my-field
 			v-if="isContainer"
 			v-for="f in field.fields"
+			@clipboard="$emit('clipboard')"
 			@execute-function="$emit('execute-function',$event)"
 			@hotkey="$emit('hotkey',$event)"
 			@open-form="(...args) => $emit('open-form',...args)"
@@ -430,7 +441,7 @@ let MyField = {
 		values:           { type:Object,  required:true }
 	},
 	emits:[
-		'execute-function','hotkey','open-form','set-form-args',
+		'clipboard','execute-function','hotkey','open-form','set-form-args',
 		'set-valid','set-value','set-value-init'
 	],
 	data:function() {
@@ -861,6 +872,7 @@ let MyField = {
 		isNew:      function() { return this.isData && this.joinsIndexMap[this.field.index].recordId === 0; },
 		isBoolean:  function() { return this.isData && this.isAttributeBoolean(this.attribute.content); },
 		isCategory: function() { return this.isData && this.isRelationship && this.field.category; },
+		isClipboard:function() { return this.isData && this.field.clipboard && !this.isFiles && !this.isRelationship; },
 		isDateInput:function() { return this.isData && this.isDatetime || this.isDate || this.isTime; },
 		isDateRange:function() { return this.isDateInput && this.field.attributeIdAlt !== null; },
 		isDecimal:  function() { return this.isData && this.isAttributeDecimal(this.attribute.content); },
@@ -906,6 +918,10 @@ let MyField = {
 		// actions
 		blur:function() {
 			this.focused = false;
+		},
+		copyToClipboard:function() {
+			navigator.clipboard.writeText(this.value);
+			this.$emit('clipboard');
 		},
 		focus:function() {
 			this.focused = true;

@@ -553,6 +553,7 @@
 			"fields":"Câmpuri",
 			"fieldAttributeIdAltDateTo":"Data până la (perioada)",
 			"fieldAttributeIdAltRichtextFiles":"Acces la fișierul Richtext",
+			"fieldClipboard":"Clipboard",
 			"fieldDefault":"Valoarea implicită",
 			"fieldDefaultHint":"Verificați documentele pentru substituenți",
 			"fieldDefaultPresetIds":"Presetare implicit(e)",
@@ -1107,6 +1108,8 @@
 			"recordDeletedMobile":"Șters!",
 			"recordEncrypting":"Record is being encrypted...",
 			"recordEncryptingMobile":"Encrypting...",
+			"recordValueCopied":"Value has been copied to clipboard",
+			"recordValueCopiedMobile":"Copied!",
 			"recordUpdated":"înregistrarea a fost actualizată",
 			"recordUpdatedMobile":"Actualizat"
 		},

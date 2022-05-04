@@ -54,7 +54,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		-- data field
 		fd.attribute_id, fd.attribute_id_alt, fd.index, fd.display, fd.min,
 		fd.max, fd.def, fd.regex_check, fd.js_function_id, fd.collection_id_def,
-		fd.column_id_def,
+		fd.column_id_def, fd.clipboard,
 		
 		-- data relationship field
 		fr.attribute_id_nm, fr.category, fr.filter_quick, fr.outside_in,
@@ -114,8 +114,9 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			attributeIdDate1, attributeIdColor, fieldParentId, iconId,
 			jsFunctionIdButton, jsFunctionIdData, collectionIdDef,
 			columnIdDef pgtype.UUID
-		var category, csvExport, csvImport, filterQuick, filterQuickList,
-			gantt, ganttStepsToggle, ics, outsideIn, wrap pgtype.Bool
+		var category, clipboard, csvExport, csvImport, filterQuick,
+			filterQuickList, gantt, ganttStepsToggle, ics, outsideIn,
+			wrap pgtype.Bool
 		var defPresetIds []uuid.UUID
 
 		if err := rows.Scan(&fieldId, &fieldParentId, &iconId, &content, &state,
@@ -126,9 +127,9 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			&alignItems, &alignContent, &wrap, &grow, &shrink, &basis, &perMin,
 			&perMax, &size, &attributeId, &attributeIdAlt, &index, &display,
 			&min, &max, &def, &regexCheck, &jsFunctionIdData, &collectionIdDef,
-			&columnIdDef, &attributeIdNm, &category, &filterQuick, &outsideIn,
-			&autoSelect, &defPresetIds, &autoRenew, &csvExport, &csvImport,
-			&layout, &filterQuickList, &resultLimit); err != nil {
+			&columnIdDef, &clipboard, &attributeIdNm, &category, &filterQuick,
+			&outsideIn, &autoSelect, &defPresetIds, &autoRenew, &csvExport,
+			&csvImport, &layout, &filterQuickList, &resultLimit); err != nil {
 
 			rows.Close()
 			return fields, err
@@ -224,6 +225,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 					Content:         content,
 					State:           state,
 					OnMobile:        onMobile,
+					Clipboard:       clipboard.Bool,
 					AttributeId:     attributeId.Bytes,
 					AttributeIdAlt:  attributeIdAlt,
 					AttributeIdNm:   attributeIdNm,
@@ -258,6 +260,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 					Content:         content,
 					State:           state,
 					OnMobile:        onMobile,
+					Clipboard:       clipboard.Bool,
 					AttributeId:     attributeId.Bytes,
 					AttributeIdAlt:  attributeIdAlt,
 					Index:           int(index.Int),
@@ -615,8 +618,8 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 				return err
 			}
 			if err := setData_tx(tx, fieldId, f.AttributeId, f.AttributeIdAlt,
-				f.Index, f.Def, f.Display, f.Min, f.Max, f.RegexCheck,
-				f.JsFunctionId, f.CollectionIdDef, f.ColumnIdDef); err != nil {
+				f.Index, f.Def, f.Display, f.Min, f.Max, f.RegexCheck, f.JsFunctionId,
+				f.CollectionIdDef, f.ColumnIdDef, f.Clipboard); err != nil {
 
 				return err
 			}
@@ -869,7 +872,7 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 	attributeIdAlt pgtype.UUID, index int, def string, display string,
 	min pgtype.Int4, max pgtype.Int4, regexCheck pgtype.Varchar,
 	jsFunctionId pgtype.UUID, collectionIdDef pgtype.UUID,
-	columnIdDef pgtype.UUID) error {
+	columnIdDef pgtype.UUID, clipboard bool) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_data", "field_id")
 	if err != nil {
@@ -887,10 +890,10 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 			SET attribute_id = $1, attribute_id_alt = $2, index = $3,
 				def = $4, display = $5,min = $6, max = $7, regex_check = $8,
 				js_function_id = $9, collection_id_def = $10,
-				column_id_def = $11
-			WHERE field_id = $12
+				column_id_def = $11, clipboard = $12
+			WHERE field_id = $13
 		`, attributeId, attributeIdAlt, index, def, display, min, max,
-			regexCheck, jsFunctionId, collectionIdDef, columnIdDef,
+			regexCheck, jsFunctionId, collectionIdDef, columnIdDef, clipboard,
 			fieldId); err != nil {
 
 			return err
@@ -900,12 +903,12 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 			INSERT INTO app.field_data (
 				field_id, attribute_id, attribute_id_alt, index, def, display,
 				min, max, regex_check, js_function_id, collection_id_def,
-				column_id_def
+				column_id_def, clipboard
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
 		`, fieldId, attributeId, attributeIdAlt, index, def,
 			display, min, max, regexCheck, jsFunctionId,
-			collectionIdDef, columnIdDef); err != nil {
+			collectionIdDef, columnIdDef, clipboard); err != nil {
 
 			return err
 		}

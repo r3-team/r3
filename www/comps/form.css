@@ -89,7 +89,8 @@
 }
 
 /* messages */
-.form-save-message{
+.form-message{
+	font-style:italic;
 	margin:0px 0px 0px 12px;
 }
 

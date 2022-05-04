@@ -89,9 +89,20 @@ let MyForm = {
 						v-if="iconId === null"
 					/>
 					
-					<h1 v-if="title !== ''" class="title">
-						{{ title }}
-					</h1>
+					<!-- form title / message -->
+					<transition name="fade" mode="out-in">
+						<h1 v-if="title !== '' && recordActionMessage === null" class="title">
+							{{ title }}
+						</h1>
+						<h1 class="form-message" v-else-if="recordActionMessage !== null">
+							<my-button
+								:active="false"
+								:caption="recordActionMessage"
+								:darkBg="true"
+								:naked="true"
+							/>
+						</h1>
+					</transition>
 				</div>
 				
 				<div class="area">
@@ -181,18 +192,6 @@ let MyForm = {
 							:captionTitle="capGen.button.deleteHint"
 							:darkBg="true"
 						/>
-						
-						<!-- record saved message -->
-						<transition name="fade" class="slow-out">
-							<div class="form-save-message" v-if="recordActionMessage !== null">
-								<my-button
-									:active="false"
-									:caption="recordActionMessage"
-									:darkBg="true"
-									:naked="true"
-								/>
-							</div>
-						</transition>
 					</div>
 					<div class="area">
 						<my-button image="warning.png"
@@ -212,9 +211,11 @@ let MyForm = {
 				</template>
 			</div>
 			
+			<!-- form fields -->
 			<div class="content grow fields" :class="{ singleField:isSingleField }">
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
+					@clipboard="recordMessageUpdate('clipboard')"
 					@execute-function="executeFunction"
 					@hotkey="handleHotkeys"
 					@open-form="openForm"
@@ -425,6 +426,7 @@ let MyForm = {
 		// presentation
 		recordActionMessage:function() {
 			switch(this.messageCode) {
+				// record handling
 				case 'created': return this.isMobile
 					? this.capApp.message.recordCreatedMobile
 					: this.capApp.message.recordCreated;
@@ -433,12 +435,18 @@ let MyForm = {
 					? this.capApp.message.recordDeletedMobile
 					: this.capApp.message.recordDeleted;
 				break;
-				case 'encrypting': return this.isMobile
-					? this.capApp.message.recordEncryptingMobile
-					: this.capApp.message.recordEncrypting;
 				case 'updated': return this.isMobile
 					? this.capApp.message.recordUpdatedMobile
 					: this.capApp.message.recordUpdated;
+				break;
+				// form actions
+				case 'clipboard': return this.isMobile
+					? this.capApp.message.recordValueCopiedMobile
+					: this.capApp.message.recordValueCopied;
+				break;
+				case 'encrypting': return this.isMobile
+					? this.capApp.message.recordEncryptingMobile
+					: this.capApp.message.recordEncrypting;
 				break;
 			}
 			return null;

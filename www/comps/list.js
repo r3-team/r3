@@ -448,6 +448,7 @@ let MyList = {
 								<div class="batch">
 									<my-value-rich class="context-list-table"
 										v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
+										@clipboard="$emit('clipboard')"
 										:attributeId="columns[ind].attributeId"
 										:basis="b.columnIndexes.length === 1 ? columns[ind].basis : 0"
 										:clipboard="columns[ind].clipboard"
@@ -547,6 +548,7 @@ let MyList = {
 								<div class="batch">
 									<my-value-rich class="context-list-cards"
 										v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null || columns[v].display === 'gallery')"
+										@clipboard="$emit('clipboard')"
 										:attributeId="columns[ind].attributeId"
 										:basis="b.columnIndexes.length === 1 ? columns[ind].basis : 0"
 										:clipboard="columns[ind].clipboard"
@@ -599,8 +601,9 @@ let MyList = {
 		inputValid:     { type:Boolean, required:false, default:true }
 	},
 	emits:[
-		'blurred','focused','open-form','record-removed','record-selected',
-		'records-selected-init','set-args','set-collection-indexes'
+		'blurred','clipboard','focused','open-form','record-removed',
+		'record-selected','records-selected-init','set-args',
+		'set-collection-indexes'
 	],
 	data:function() {
 		return {

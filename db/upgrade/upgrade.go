@@ -106,7 +106,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- extend and rename query filter side content (to be used by form state condition as well)
 			ALTER TYPE app.query_filter_side_content ADD VALUE 'fieldChanged';
 			ALTER TYPE app.query_filter_side_content RENAME TO filter_side_content;
-		
+			
 			-- clean up of form state conditions
 			CREATE TABLE IF NOT EXISTS app.form_state_condition_side (
 			    form_state_id uuid NOT NULL,
@@ -157,29 +157,29 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			        ON DELETE NO ACTION
 			        DEFERRABLE INITIALLY DEFERRED
 			);
-
+			
 			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_collection_id_fkey
 			    ON app.form_state_condition_side USING btree (collection_id ASC NULLS LAST);
-
+			
 			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_column_id_fkey
 			    ON app.form_state_condition_side USING btree (column_id ASC NULLS LAST);
-
+			
 			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_field_id_fkey
 			    ON app.form_state_condition_side USING btree (field_id ASC NULLS LAST);
-
+			
 			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_form_state_id_fkey
 			    ON app.form_state_condition_side USING btree (form_state_id ASC NULLS LAST);
-
+			
 			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_preset_id_fkey
 			    ON app.form_state_condition_side USING btree (preset_id ASC NULLS LAST);
-
+			
 			CREATE INDEX IF NOT EXISTS fki_form_state_condition_side_role_id_fkey
 			    ON app.form_state_condition_side USING btree (role_id ASC NULLS LAST);
-
+			
 			-- new form option
 			ALTER TABLE app.form ADD COLUMN no_data_actions BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.form ALTER COLUMN no_data_actions DROP DEFAULT;
-
+			
 			-- new collection icon
 			ALTER TABLE app.collection ADD COLUMN icon_id uuid;
 			ALTER TABLE app.collection ADD CONSTRAINT collection_icon_id_fkey FOREIGN KEY (icon_id)
@@ -187,14 +187,14 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
-
+			
 			CREATE INDEX fki_collection_icon_id_fkey
 				ON app.collection USING btree (icon_id ASC NULLS LAST);
-
+			
 			-- new collection consumer option
 			ALTER TABLE app.collection_consumer ADD COLUMN multi_value BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.collection_consumer ALTER COLUMN multi_value DROP DEFAULT;
-
+			
 			-- fix collection consumer constraint
 			ALTER TABLE app.collection_consumer DROP CONSTRAINT collection_consumer_field_id_fkey;
 			ALTER TABLE app.collection_consumer ADD CONSTRAINT collection_consumer_field_id_fkey
@@ -203,42 +203,46 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-
+			
 			-- new condition operators
 			ALTER TYPE app.condition_operator ADD VALUE '@>';
 			ALTER TYPE app.condition_operator ADD VALUE '<@';
 			ALTER TYPE app.condition_operator ADD VALUE '&&';
-
+			
 			-- new aggregator
 			ALTER TYPE app.aggregator ADD VALUE 'json';
-
+			
 			-- new instance task
 			INSERT INTO instance.task (name,interval_seconds,embedded_only,active) VALUES
 				('httpCertRenew',86400,false,true);
-
+			
 			INSERT INTO instance.scheduler (task_name,date_attempt,date_success) VALUES
 				('httpCertRenew',0,0);
-
+			
 			-- new login setting
 			ALTER TABLE instance.login_setting ADD COLUMN mobile_scroll_form BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN mobile_scroll_form DROP DEFAULT;
-
+			
 			-- remove deprecated login setting
 			ALTER TABLE instance.login_setting DROP COLUMN hint_first_steps;
-
+			
 			-- new LDAP option
 			ALTER TABLE instance.ldap RENAME COLUMN tls TO starttls;
 			ALTER TABLE instance.ldap ADD COLUMN tls BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.ldap ALTER COLUMN tls DROP DEFAULT;
-
+			
 			-- query table changes
 			DELETE FROM app.query WHERE relation_id IS NULL;
 			ALTER TABLE app.query ALTER COLUMN relation_id SET NOT NULL;
-
+			
 			-- new column option: copy to clipboard
 			ALTER TABLE app.column ADD COLUMN clipboard BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.column ALTER COLUMN clipboard DROP DEFAULT;
-
+			
+			-- new data field option: copy to clipboard
+			ALTER TABLE app.field_data ADD COLUMN clipboard BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.field_data ALTER COLUMN clipboard DROP DEFAULT;
+			
 			-- user key management
 			ALTER TABLE instance.login
 				ADD COLUMN salt_kdf TEXT NOT NULL DEFAULT 'PLACEHOLDER',

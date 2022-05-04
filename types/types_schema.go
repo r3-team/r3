@@ -261,6 +261,7 @@ type FieldData struct {
 	Content         string         `json:"content"`
 	State           string         `json:"state"`
 	OnMobile        bool           `json:"onMobile"`
+	Clipboard       bool           `json:"clipboard"`
 	AttributeId     uuid.UUID      `json:"attributeId"`    // data attribute
 	AttributeIdAlt  pgtype.UUID    `json:"attributeIdAlt"` // altern. data attribute (currently used for date period only)
 	Index           int            `json:"index"`          // data attribute index
@@ -280,6 +281,7 @@ type FieldDataRelationship struct {
 	Content        string      `json:"content"`
 	State          string      `json:"state"`
 	OnMobile       bool        `json:"onMobile"`
+	Clipboard      bool        `json:"clipboard"`
 	AttributeId    uuid.UUID   `json:"attributeId"`
 	AttributeIdAlt pgtype.UUID `json:"attributeIdAlt"`
 	AttributeIdNm  pgtype.UUID `json:"attributeIdNm"`

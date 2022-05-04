@@ -82,7 +82,7 @@ let MyValueRich = {
 		value:      { required:true },
 		wrap:       { type:Boolean, required:false, default:false }      // wrap string value
 	},
-	emits:['focus','trigger'],
+	emits:['clipboard','focus','trigger'],
 	watch:{
 		value:{
 			handler:function() { this.setValue(); },
@@ -139,6 +139,7 @@ let MyValueRich = {
 			navigator.clipboard.writeText(
 				!this.isPassword ? this.stringValueFull : this.value
 			);
+			this.$emit('clipboard');
 		},
 		setValue:function() {
 			// special values based on attribute content
