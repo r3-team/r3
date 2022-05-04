@@ -1089,7 +1089,7 @@
 			"helpHint":"Hilfeseiten anzeigen",
 			"log":"Historie",
 			"logHint":"Änderungshistorie anzeigen",
-			"retractLogs":"Logs einklappen"
+			"logShowAll":"Alle anzeigen ({CNT})"
 		},
 		"dialog":{
 			"close":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem das Formular schließen?",

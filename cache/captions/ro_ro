@@ -1089,7 +1089,7 @@
 			"helpHint":"Afișați paginile de ajutor",
 			"log":"Jurnale",
 			"logHint":"Deschideți jurnalele de modificări",
-			"retractLogs":"Retrageți jurnalele"
+			"logShowAll":"Show all ({CNT})"
 		},
 		"dialog":{
 			"close":"Există modificări nesalvate.<br /><br />Doriți în continuare să închideți acest formular?",

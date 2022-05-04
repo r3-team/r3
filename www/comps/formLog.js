@@ -31,9 +31,9 @@ let MyFormLog = {
 				<my-button 
 					@trigger="toggleAll"
 					:active="logs.length !== 0"
-					:caption="capApp.button.retractLogs"
+					:caption="capApp.button.logShowAll.replace('{CNT}',logs.length)"
 					:darkBg="true"
-					:image="logsHidden.length === logs.length ? 'checkbox1.png' : 'checkbox0.png'"
+					:image="logsShown.length === logs.length ? 'triangleDown.png' : 'triangleRight.png'"
 				/>
 			</div>
 		</div>
@@ -50,7 +50,7 @@ let MyFormLog = {
 					/>
 				</div>
 				
-				<div class="log-fields" v-show="!logsHidden.includes(i)">
+				<div class="log-fields" v-if="logsShown.includes(i)">
 					<template v-for="f in dataFields">
 						<my-field flexDirParent="column"
 							v-if="hasValueInLog(l,f)"
@@ -92,7 +92,7 @@ let MyFormLog = {
 		return {
 			loading:false,
 			logs:[],
-			logsHidden:[]
+			logsShown:[]
 		};
 	},
 	computed:{
@@ -120,7 +120,7 @@ let MyFormLog = {
 		// presentation
 		displayTitle:function(i,unixTime,name) {
 			if(name === '') name = this.capApp.deletedUser;
-			let prefix = this.logsHidden.includes(i) ? '\u2BC8' : '\u2BC6';
+			let prefix = this.logsShown.includes(i) ? '\u2BC6' : '\u2BC8';
 			let format = [this.settings.dateFormat,'H:i:S'];
 			return `${prefix} ${this.getUnixFormat(unixTime,format.join(' '))} (${name})`;
 		},
@@ -132,30 +132,33 @@ let MyFormLog = {
 		
 		// actions
 		toggleLog:function(i) {
-			let pos = this.logsHidden.indexOf(i);
+			const pos = this.logsShown.indexOf(i);
 			
-			if(pos === -1) this.logsHidden.push(i);
-			else           this.logsHidden.splice(pos,1);
+			if(pos === -1) this.logsShown.push(i);
+			else           this.logsShown.splice(pos,1);
+			
+			this.loading = true;
+			this.releaseLoadingOnNextTick();
 		},
 		toggleAll:function() {
-			if(this.logsHidden.length < this.logs.length) {
-				this.logsHidden = [];
-				
+			if(this.logsShown.length < this.logs.length) {
 				for(let i = this.logs.length - 1; i >= 0; i--) {
-					this.logsHidden.push(i);
+					this.logsShown.push(i);
 				}
+				this.loading = true;
+				this.releaseLoadingOnNextTick();
 				return;
 			}
-			this.logsHidden = [];
-		},
-		reset:function() {
-			this.logs       = [];
-			this.logsHidden = [];
+			this.logsShown = [];
 		},
 		releaseLoadingOnNextTick:function() {
 			this.$nextTick(function() {
 				this.loading = false;
 			});
+		},
+		reset:function() {
+			this.logs      = [];
+			this.logsShown = [];
 		},
 		
 		// backend calls
@@ -181,7 +184,7 @@ let MyFormLog = {
 					if(d.index !== parseInt(index))
 						continue;
 					
-					let a = this.attributeIdMap[d.attributeId];
+					const a = this.attributeIdMap[d.attributeId];
 					
 					if(a.encrypted)
 						attributeIdsEnc.push(a.id);

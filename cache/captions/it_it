@@ -1089,7 +1089,7 @@
 			"helpHint":"Mostra pagine aiuto",
 			"log":"Log",
 			"logHint":"Apri log modifiche",
-			"retractLogs":"Ritira logs"
+			"logShowAll":"Show all ({CNT})"
 		},
 		"dialog":{
 			"close":"Ci sono modifiche non salvate.<br /><br />Chiudere comunque questo modulo?",

@@ -1089,7 +1089,7 @@
 			"helpHint":"Show help pages",
 			"log":"Logs",
 			"logHint":"Open change logs",
-			"retractLogs":"Retract logs"
+			"logShowAll":"Show all ({CNT})"
 		},
 		"dialog":{
 			"close":"There are unsaved changes.<br /><br />Do you still want to close this form?",
