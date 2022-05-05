@@ -34,7 +34,9 @@ export function getJoinIndexMapExpanded(joins,indexMapRecordId,indexesNoDel,inde
 	return map;
 };
 
-export function fillRelationRecordIds(joins) {
+export function fillRelationRecordIds(joinsOrg) {
+	// clone to not update referenced joins
+	let joins = JSON.parse(JSON.stringify(joinsOrg));
 	for(let i = 0, j = joins.length; i < j; i++) {
 		joins[i].recordId = 0;
 	}
