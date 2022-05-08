@@ -655,7 +655,18 @@
 				"record_save":"app.record_save() => UNDEFINED<br /><br />Salvați înregistrarea formularului curent.",
 				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated on the next form save. Data keys for relations on the form with encryption enabled will be encrypted with the public key of each defined login. This enables later decryption of these records for users.<br /><br />If this function is not used, decryption is only ever possible for the creator.",
 				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated for the specified relation and records on the next form save. Data keys for relation records will be encrypted with the public key of each defined login. This enables later decryption of these records for users.",
+				"show_form_message":"app.show_form_message(message,duration_in_ms) => UNDEFINED<br /><br />Temporarily replaces the form title with a custom message. The second argument defines in milli-seconds how long the message is shown (3000 by default).",
 				"update_collection":"app.update_collection(collection_id) => UNDEFINED<br /><br />Retrieves and updates values for the specified collection."
+			},
+			"helpJsHint":{
+				"copy_to_clipboard":"VALUE",
+				"get_e2ee_data_key":"DATA_KEY_ENCRYPTED",
+				"get_e2ee_data_value":"DATA_KEY, VALUE_ENCRYPTED",
+				"get_record_id":"RELATION_INDEX_NUMBER",
+				"has_role":"ROLE_ID_STRING",
+				"open_form":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
+				"show_form_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
+				"update_collection":"COLLECTION_ID"
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Anulează operația și trimite un mesaj utilizatorului care rulează acum și care este afișat pe ecranul utilizatorului.",
@@ -721,13 +732,7 @@
 			"titleJs":"Funcții front-end ({CNT})",
 			"titlePg":"Funcții back-end ({CNT})",
 			"titleOne":"Titlu funcției",
-			"valueJsHint":"VALUE",
-			"valueJsHintDecryptDataKey":"DATA_KEY_ENCRYPTED",
-			"valueJsHintDecryptDataValue":"DATA_KEY, VALUE_ENCRYPTED",
-			"valueJsHintForm":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
-			"valueJsHintIndex":"RELATION_INDEX_NUMBER",
-			"valueJsHintRole":"ROLE_ID_STRING",
-			"valueJsHintUpdateCollection":"COLLECTION_ID"
+			"value":"VALUE"
 		},
 		"help":{
 			"title":"Ajutorul aplicației"
@@ -1103,15 +1108,10 @@
 		},
 		"message":{
 			"recordCreated":"Înregistrarea a fost creată",
-			"recordCreatedMobile":"Creat!",
 			"recordDeleted":"înregistrarea a fost ștearsă",
-			"recordDeletedMobile":"Șters!",
-			"recordEncrypting":"Record is being encrypted...",
-			"recordEncryptingMobile":"Encrypting...",
-			"recordValueCopied":"Value has been copied to clipboard",
-			"recordValueCopiedMobile":"Copied!",
-			"recordUpdated":"înregistrarea a fost actualizată",
-			"recordUpdatedMobile":"Actualizat"
+			"recordEncrypting":"Encrypting record...",
+			"recordValueCopied":"Copied to clipboard",
+			"recordUpdated":"înregistrarea a fost actualizată"
 		},
 		"dataLog":"Schimbă jurnalele",
 		"deletedUser":"utilizator șters",

@@ -91,13 +91,13 @@ let MyForm = {
 					
 					<!-- form title / message -->
 					<transition name="fade" mode="out-in">
-						<h1 v-if="title !== '' && recordActionMessage === null" class="title">
+						<h1 v-if="title !== '' && message === null" class="title">
 							{{ title }}
 						</h1>
-						<h1 class="form-message" v-else-if="recordActionMessage !== null">
+						<h1 class="form-message" v-else-if="message !== null">
 							<my-button
 								:active="false"
-								:caption="recordActionMessage"
+								:caption="message"
 								:darkBg="true"
 								:naked="true"
 							/>
@@ -215,7 +215,7 @@ let MyForm = {
 			<div class="content grow fields" :class="{ singleField:isSingleField }">
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
-					@clipboard="recordMessageUpdate('clipboard')"
+					@clipboard="messageSet('[CLIPBOARD]')"
 					@execute-function="executeFunction"
 					@hotkey="handleHotkeys"
 					@open-form="openForm"
@@ -292,7 +292,7 @@ let MyForm = {
 			badSave:false,        // attempted save (data SET) with invalid fields, also updates data fields
 			lastFormId:'',        // when routing occurs: if ID is the same, no need to rebuild form
 			loading:false,        // form is currently loading, informs sub components when form is ready
-			messageCode:null,     // form message
+			message:null,         // form message
 			messageTimeout:null,  // form message expiration timeout
 			showHelp:false,       // show form context help
 			showLog:false,        // show data change log
@@ -424,33 +424,6 @@ let MyForm = {
 		},
 		
 		// presentation
-		recordActionMessage:function() {
-			switch(this.messageCode) {
-				// record handling
-				case 'created': return this.isMobile
-					? this.capApp.message.recordCreatedMobile
-					: this.capApp.message.recordCreated;
-				break;
-				case 'deleted': return this.isMobile
-					? this.capApp.message.recordDeletedMobile
-					: this.capApp.message.recordDeleted;
-				break;
-				case 'updated': return this.isMobile
-					? this.capApp.message.recordUpdatedMobile
-					: this.capApp.message.recordUpdated;
-				break;
-				// form actions
-				case 'clipboard': return this.isMobile
-					? this.capApp.message.recordValueCopiedMobile
-					: this.capApp.message.recordValueCopied;
-				break;
-				case 'encrypting': return this.isMobile
-					? this.capApp.message.recordEncryptingMobile
-					: this.capApp.message.recordEncrypting;
-				break;
-			}
-			return null;
-		},
 		title:function() {
 			// apply dedicated form title
 			if(typeof this.form.captions.formTitle[this.moduleLanguage] !== 'undefined')
@@ -485,7 +458,8 @@ let MyForm = {
 						maxHeight:maxY,
 						maxWidth:maxX
 					},[],newTab),
-				update_collection:(v) => this.updateCollections(false,undefined,v),
+				show_form_message:(v,i) => this.messageSet(v,i),
+				update_collection:(v)   => this.updateCollections(false,undefined,v),
 				
 				// call other functions
 				call_backend:(id,...args) => {
@@ -709,6 +683,22 @@ let MyForm = {
 					this.set(false);
 			}
 		},
+		messageSet:function(message,duration) {
+			// convert message codes
+			switch(message) {
+				case '[CREATED]':    this.message = this.capApp.message.recordCreated;     break;
+				case '[DELETED]':    this.message = this.capApp.message.recordDeleted;     break;
+				case '[UPDATED]':    this.message = this.capApp.message.recordUpdated;     break;
+				case '[CLIPBOARD]':  this.message = this.capApp.message.recordValueCopied; break;
+				case '[ENCRYPTING]': this.message = this.capApp.message.recordEncrypting;  break;
+				default: this.message = message; break;
+			}
+			
+			// reset message after timeout
+			clearTimeout(this.messageTimeout);
+			this.messageTimeout = setTimeout(() => this.message = null,
+				typeof duration !== 'undefined' ? duration : 3000);
+		},
 		processFilters:function(joinIndexesRemove) {
 			return this.getQueryFiltersProcessed(
 				this.form.query.filters,
@@ -730,8 +720,8 @@ let MyForm = {
 			
 			// reset form states
 			this.$store.commit('pageTitle',this.title);
-			this.messageCode = null;
-			this.showLog     = false;
+			this.message = null;
+			this.showLog = false;
 			
 			// build form
 			this.lastFormId = this.form.id;
@@ -1089,11 +1079,6 @@ let MyForm = {
 			this.loading = true;
 			this.releaseLoadingOnNextTick();
 		},
-		recordMessageUpdate:function(code) {
-			clearTimeout(this.messageTimeout);
-			this.messageTimeout = setTimeout(() => this.messageCode = null,3000);
-			this.messageCode    = code;
-		},
 		scrollToInvalidField:function() {
 			if(this.fieldIdsInvalid.length !== 0)
 				document.getElementById(this.getInputFieldName(
@@ -1238,7 +1223,7 @@ let MyForm = {
 					
 					this.triggerEventAfter('delete');
 					this.openForm();
-					this.recordMessageUpdate('deleted');
+					this.messageSet('[DELETED]');
 				},
 				this.$root.genericError
 			).finally(
@@ -1434,7 +1419,7 @@ let MyForm = {
 						this.loginIdsEncryptFor.push(this.loginId);
 					
 					if(this.loginIdsEncryptFor.length !== 0) {
-						this.recordMessageUpdate('encrypting');
+						this.messageSet('[ENCRYPTING]');
 						
 						// get public keys for all logins to encrypt data key for
 						const res = await ws.send('loginKeys','getPublic',{
@@ -1588,8 +1573,8 @@ let MyForm = {
 					this.$store.commit('formHasChanges',false);
 					
 					// set record-saved timestamp
-					if(this.isNew) this.recordMessageUpdate('created');
-					else           this.recordMessageUpdate('updated');
+					if(this.isNew) this.messageSet('[CREATED]');
+					else           this.messageSet('[UPDATED]');
 					
 					if(this.isInline)
 						this.$emit('record-updated',resSet.payload.indexRecordIds[0]);

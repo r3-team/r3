@@ -272,7 +272,8 @@ let MyBuilderJsFunction = {
 				'get_language_code','get_login_id','get_record_id','get_role_ids',
 				'go_back','has_role','open_form','record_delete','record_new',
 				'record_reload','record_save','set_e2ee_by_login_ids',
-				'set_e2ee_by_login_ids_and_relation','update_collection'
+				'set_e2ee_by_login_ids_and_relation','show_form_message',
+				'update_collection'
 			],
 			appFunctionsAsync:[
 				'get_e2ee_data_key','get_e2ee_data_value','update_collection'
@@ -394,15 +395,9 @@ let MyBuilderJsFunction = {
 				case 'appFunction':
 					opt     = '';
 					postfix = '';
-					switch(this.entitySelectedId) {
-						case 'copy_to_clipboard':   opt = this.capApp.valueJsHint;      break;
-						case 'get_record_id':       opt = this.capApp.valueJsHintIndex; break;
-						case 'has_role':            opt = this.capApp.valueJsHintRole;  break;
-						case 'open_form':           opt = this.capApp.valueJsHintForm;  break;
-						case 'get_e2ee_data_key':   opt = this.capApp.valueJsHintDecryptDataKey;   break;
-						case 'get_e2ee_data_value': opt = this.capApp.valueJsHintDecryptDataValue; break;
-						case 'update_collection':   opt = this.capApp.valueJsHintUpdateCollection; break;
-					}
+					
+					if(typeof this.capApp.helpJsHint[this.entitySelectedId] !== 'undefined')
+						opt = this.capApp.helpJsHint[this.entitySelectedId];
 					
 					if(this.appFunctionsAsync.includes(this.entitySelectedId))
 						postfix = postfixAsync;
@@ -413,7 +408,7 @@ let MyBuilderJsFunction = {
 					fld  = this.dataFieldMap[this.entitySelectedId];
 					atr  = this.attributeIdMap[fld.attributeId];
 					rel  = this.relationIdMap[atr.relationId];
-					opt  = this.fieldMode === 'get' ? '' : ', '+this.capApp.valueJsHint;
+					opt  = this.fieldMode === 'get' ? '' : ', '+this.capApp.value;
 					text = `${prefix}.${this.fieldMode}_field_value({${fld.index}:${rel.name}.${atr.name}}${opt})`;
 				break;
 				case 'form':

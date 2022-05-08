@@ -655,7 +655,18 @@
 				"record_save":"app.record_save() => UNDEFINED<br /><br />Speichert den aktuellen Formulardatensatz.",
 				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />Wenn aufgerufen, wird die Ende-Zu-Ende-Verschlüsselung beim nächsten Speichern des Formulares aktualisiert. Datenschlüssel für Relationen auf dem Formular mit aktivierter Verschlüsselung werden mit den öffentlichen Schlüssel von jeder definierten Anmeldung verschlüsselt. Hiermit können Benutzer Datensätze später entschlüsseln.<br /><br />Wenn diese Funktion nicht aufgerufen wird, kann nur der Ersteller entschlüsseln.",
 				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />Wenn aufgerufen, wird die Ende-Zu-Ende-Verschlüsselung für die definierte Relation und Datensätze beim nächsten Speichern des Formulares aktualisiert. Datenschlüssel für Datensätze der Relation werden mit den öffentlichen Schlüssel von jeder definierten Anmeldung verschlüsselt. Hiermit können Benutzer Datensätze später entschlüsseln.",
+				"show_form_message":"app.show_form_message(message,duration_in_ms) => UNDEFINED<br /><br />Ersetzt den Formtitel für eine kurze Zeit mit einer definierten Meldung. Das 2. Argument legt fest, in Millisekunden, wie lange die Meldung angezeigt wird.",
 				"update_collection":"app.update_collection(collection_id) => UNDEFINED<br /><br />Holt und aktualisiert Werte für die spezifizierte Sammlung."
+			},
+			"helpJsHint":{
+				"copy_to_clipboard":"VALUE",
+				"get_e2ee_data_key":"DATA_KEY_ENCRYPTED",
+				"get_e2ee_data_value":"DATA_KEY, VALUE_ENCRYPTED",
+				"get_record_id":"RELATION_INDEX_NUMBER",
+				"has_role":"ROLE_ID_STRING",
+				"open_form":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
+				"show_form_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
+				"update_collection":"COLLECTION_ID"
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Bricht die Operation ab und sendet dem ausführenden Benutzer eine Nachricht, welche in der Benutzeroberfläche angezeigt wird.",
@@ -721,13 +732,7 @@
 			"titleJs":"Frontend-Funktionen ({CNT})",
 			"titlePg":"Backend-Funktionen ({CNT})",
 			"titleOne":"Funktionstitel",
-			"valueJsHint":"VALUE",
-			"valueJsHintDecryptDataKey":"DATA_KEY_ENCRYPTED",
-			"valueJsHintDecryptDataValue":"DATA_KEY, VALUE_ENCRYPTED",
-			"valueJsHintForm":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
-			"valueJsHintIndex":"RELATION_INDEX_NUMBER",
-			"valueJsHintRole":"ROLE_ID_STRING",
-			"valueJsHintUpdateCollection":"COLLECTION_ID"
+			"value":"VALUE"
 		},
 		"help":{
 			"title":"Anwendungshilfe"
@@ -1102,16 +1107,11 @@
 			"prevBrowser":"Es existieren ungespeicherte Änderungen - diese gehen verloren, wenn du fortfahrst. Möchtest du trotzdem fortfahren?"
 		},
 		"message":{
-			"recordCreated":"Datensatz wurde erstellt",
-			"recordCreatedMobile":"Erstellt!",
-			"recordDeleted":"Datensatz wurde gelöscht",
-			"recordDeletedMobile":"Gelöscht!",
-			"recordEncrypting":"Datensatz wird verschlüsselt...",
-			"recordEncryptingMobile":"Am Verschlüsseln...",
-			"recordValueCopied":"Wert wurde in die Zwischenablage kopiert",
-			"recordValueCopiedMobile":"Kopiert!",
-			"recordUpdated":"Datensatz wurde aktualisiert",
-			"recordUpdatedMobile":"Aktualisiert!"
+			"recordCreated":"Datensatz erstellt",
+			"recordDeleted":"Datensatz gelöscht",
+			"recordEncrypting":"Verschlüssele Datensatz...",
+			"recordValueCopied":"In die Zwischenablage kopiert",
+			"recordUpdated":"Datensatz aktualisiert"
 		},
 		"dataLog":"Verändungen",
 		"deletedUser":"gelöschter Benutzer",
