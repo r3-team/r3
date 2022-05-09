@@ -376,7 +376,7 @@
 				"cleanupLogs":"Curățați jurnalele de sistem expirate",
 				"cleanupTempDir":"Curățați directorul temporar",
 				"embeddedBackup":"Gestionați copiile de siguranță integrate",
-				"httpCertRenew":"Load renewed HTTP certificate",
+				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Importați autentificări și roluri prin LDAP",
 				"mailAttach":"Transfer de atașamente prin e-mail",
 				"mailRetrieve":"Preluare e-mail",

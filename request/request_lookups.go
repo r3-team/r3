@@ -61,6 +61,20 @@ func LookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 		`, loginId).Scan(&res.PrivateEnc, &res.PrivateEncBackup, &res.Public)
 
 		return res, err
+	case "passwordSettings":
+		var res struct {
+			Length         uint64 `json:"length"`
+			RequireDigits  bool   `json:"requireDigits"`
+			RequireLower   bool   `json:"requireLower"`
+			RequireSpecial bool   `json:"requireSpecial"`
+			RequireUpper   bool   `json:"requireUpper"`
+		}
+		res.Length = config.GetUint64("pwLengthMin")
+		res.RequireDigits = config.GetUint64("pwForceDigit") == 1
+		res.RequireLower = config.GetUint64("pwForceLower") == 1
+		res.RequireSpecial = config.GetUint64("pwForceSpecial") == 1
+		res.RequireUpper = config.GetUint64("pwForceUpper") == 1
+		return res, nil
 	}
 	return nil, fmt.Errorf("unknown lookup name")
 }

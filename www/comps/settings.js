@@ -379,15 +379,15 @@ let MySettingsAccount = {
 				</tr>
 				<tr>
 					<td>{{ capApp.pwOld }}</td>
-					<td>	<input v-model="pwOld" @input="messageClear" type="password" /></td>
+					<td>	<input v-model="pwOld" @input="newInput = true; generateOldPwKey()" type="password" /></td>
 				</tr>
 				<tr>
 					<td>{{ capApp.pwNew0 }}</td>
-					<td>	<input v-model="pwNew0" @input="messageClear" type="password" /></td>
+					<td>	<input v-model="pwNew0" @input="newInput = true" type="password" /></td>
 				</tr>
 				<tr>
 					<td>{{ capApp.pwNew1 }}</td>
-					<td>	<input v-model="pwNew1" @input="messageClear" type="password" /></td>
+					<td>	<input v-model="pwNew1" @input="newInput = true" type="password" /></td>
 				</tr>
 			</tbody>
 		</table>
@@ -400,43 +400,73 @@ let MySettingsAccount = {
 			/>
 		</div>
 		
-		<div class="message" v-if="messageOutput !== ''">{{ messageOutput }}</div>
+		<div class="message" v-if="message !== ''">{{ message }}</div>
 	</div>`,
 	data:function() {
 		return {
-			message:'',
+			// states
+			newInput:false,  // new input was entered by user
+			pwSettings:null, // server side password settings (require digits, minimum length, etc.)
+			
+			// inputs
 			pwNew0:'',
 			pwNew1:'',
-			pwOld:''
+			pwOld:'',
+			pwOldKey:''
 		};
 	},
 	computed:{
-		canSave:function() {
-			return this.pwMatch && this.pwNew0.length !== 0 && this.pwOld.length !== 0;
-		},
-		pwMatch:function() {
-			return this.pwNew0 === this.pwNew1;
-		},
-		messageOutput:function() {
-			if(this.message !== '')
-				return this.message;
+		canSave:(s) => s.pwOldValid
+			&& s.pwMatch
+			&& s.pwMetDigits
+			&& s.pwMetLength
+			&& s.pwMetLower
+			&& s.pwMetUpper
+			&& s.pwMetSpecial,
+		message:(s) => {
+			if(!s.newInput || s.pwSettings === null)
+				return '';
 			
-			if(this.pwNew0 !== '' && !this.pwMatch)
-				return this.capApp.messagePwDiff;
+			if(!s.pwOldValid)
+				return s.capApp.messagePwCurrentWrong;
 			
+			if(s.pwNew0 === '')
+				return '';
+			
+			if(!s.pwMatch)      return s.capApp.messagePwDiff;
+			if(!s.pwMetDigits)  return s.capApp.messagePwRequiresDigit;
+			if(!s.pwMetLength)  return s.capApp.messagePwShort;
+			if(!s.pwMetLower)   return s.capApp.messagePwRequiresLower;
+			if(!s.pwMetUpper)   return s.capApp.messagePwRequiresUpper;
+			if(!s.pwMetSpecial) return s.capApp.messagePwRequiresSpecial;
 			return '';
 		},
 		
+		// password criteria
+		pwMatch:     (s) => s.pwNew0.length !== 0        && s.pwNew0 === s.pwNew1,
+		pwMetLength: (s) => s.pwSettings.length          <= s.pwNew0.length,
+		pwOldValid:  (s) => s.loginKeyAes                === s.pwOldKey,
+		pwMetDigits: (s) => !s.pwSettings.requireDigits  || /\p{Nd}/u.test(s.pwNew0),
+		pwMetLower:  (s) => !s.pwSettings.requireLower   || /\p{Ll}/u.test(s.pwNew0),
+		pwMetSpecial:(s) => !s.pwSettings.requireSpecial || /[\p{P}\p{M}\p{S}\p{Z}]+/u.test(s.pwNew0),
+		pwMetUpper:  (s) => !s.pwSettings.requireUpper   || /\p{Lu}/u.test(s.pwNew0),
+		
 		// stores
-		loginKeyAes:       function() { return this.$store.getters['local/loginKeyAes']; },
-		loginKeySalt:      function() { return this.$store.getters['local/loginKeySalt']; },
-		loginEncryption:   function() { return this.$store.getters.loginEncryption; },
-		loginName:         function() { return this.$store.getters.loginName; },
-		loginPrivateKey:   function() { return this.$store.getters.loginPrivateKey; },
-		loginPrivateKeyEnc:function() { return this.$store.getters.loginPrivateKeyEnc; },
-		kdfIterations:     function() { return this.$store.getters.constants.kdfIterations; },
-		capApp:            function() { return this.$store.getters.captions.settings.account; },
-		capGen:            function() { return this.$store.getters.captions.generic; }
+		loginKeyAes:       (s) => s.$store.getters['local/loginKeyAes'],
+		loginKeySalt:      (s) => s.$store.getters['local/loginKeySalt'],
+		loginEncryption:   (s) => s.$store.getters.loginEncryption,
+		loginName:         (s) => s.$store.getters.loginName,
+		loginPrivateKey:   (s) => s.$store.getters.loginPrivateKey,
+		loginPrivateKeyEnc:(s) => s.$store.getters.loginPrivateKeyEnc,
+		kdfIterations:     (s) => s.$store.getters.constants.kdfIterations,
+		capApp:            (s) => s.$store.getters.captions.settings.account,
+		capGen:            (s) => s.$store.getters.captions.generic
+	},
+	mounted:function() {
+		ws.send('lookup','get',{name:'passwordSettings'},true).then(
+			res => this.pwSettings = res.payload,
+			this.$root.genericError
+		);
 	},
 	methods:{
 		// externals
@@ -446,10 +476,19 @@ let MySettingsAccount = {
 		aesGcmImportBase64,
 		pbkdf2PassToAesGcmKey,
 		
-		// actions
-		messageClear:function() {
-			this.message = '';
+		generateOldPwKey:function() {
+			this.pbkdf2PassToAesGcmKey(this.pwOld,this.loginKeySalt,this.kdfIterations,true).then(
+				key => {
+					this.aesGcmExportBase64(key).then(
+						keyBase64 => this.pwOldKey = keyBase64,
+						this.$root.genericError
+					);
+				},
+				this.$root.genericError
+			);
 		},
+		
+		// actions
 		setCheck:function() {
 			// encryption not enabled (or private key locked), just save new credentials
 			if(!this.loginEncryption || this.loginPrivateKey === null)
@@ -481,7 +520,6 @@ let MySettingsAccount = {
 		
 		// backend calls
 		set:function(newPrivateKeyEnc,newLoginKey) {
-			
 			let requests = [
 				ws.prepare('password','set',{
 					pwNew0:this.pwNew0,
@@ -491,39 +529,25 @@ let MySettingsAccount = {
 			];
 			
 			// update encrypted private key if given
-			if(newPrivateKeyEnc !== null) {
+			if(newPrivateKeyEnc !== null)
 				requests.push(ws.prepare('loginKeys','storePrivate',{
 					privateKeyEnc:newPrivateKeyEnc
 				}));
-			}
 			
 			// use same request/transaction to update password & encrypted private key
 			// one must not change without the other
 			ws.sendMultiple(requests,true).then(
 				res => {
-					switch(res[0].payload.errCode){
-						case 'PW_CURRENT_WRONG':    this.message = this.capApp.messagePwCurrentWrong; break;
-						case 'PW_REQUIRES_DIGIT':   this.message = this.capApp.messagePwRequiresDigit; break;
-						case 'PW_REQUIRES_LOWER':   this.message = this.capApp.messagePwRequiresLower; break;
-						case 'PW_REQUIRES_SPECIAL': this.message = this.capApp.messagePwRequiresSpecial; break;
-						case 'PW_REQUIRES_UPPER':   this.message = this.capApp.messagePwRequiresUpper; break;
-						case 'PW_TOO_SHORT':        this.message = this.capApp.messagePwShort; break;
-					}
+					this.pwNew0   = '';
+					this.pwNew1   = '';
+					this.pwOld    = '';
+					this.newInput = false;
 					
-					if(res[0].payload.errCode === '') {
-						this.pwNew0 = '';
-						this.pwNew1 = '';
-						this.pwOld  = '';
-						
-						if(res.length > 1) {
-							this.aesGcmExportBase64(newLoginKey).then(
-								keyBase64 => {
-									this.$store.commit('loginPrivateKeyEnc',newPrivateKeyEnc);
-									this.$store.commit('local/loginKeyAes',keyBase64);
-								}
-							);
-						}
-					}
+					if(res.length > 1)
+						this.aesGcmExportBase64(newLoginKey).then(keyBase64 => {
+							this.$store.commit('loginPrivateKeyEnc',newPrivateKeyEnc);
+							this.$store.commit('local/loginKeyAes',keyBase64);
+						});
 				},
 				this.$root.genericError
 			);
