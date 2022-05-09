@@ -22,6 +22,16 @@
 .list .lookup.small{
 	width:30px !important;
 }
+.list .fetching{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+}
+.list .fetching img{
+	height:24px;
+	margin-right:8px;
+	filter:var(--image-filter);
+}
 
 /* list as lookup or dropdown */
 /* HTML table view */

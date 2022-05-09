@@ -462,9 +462,15 @@ let MyList = {
 							</td>
 						</tr>
 						
-						<!-- no results -->
+						<!-- no results message -->
 						<tr v-if="rows.length === 0">
-							<td colspan="999">
+							<td v-if="rowsFetching" colspan="999">
+								<div class="fetching">
+									<img src="images/load.gif">
+									<span>{{ capApp.fetching }}</span>
+								</div>
+							</td>
+							<td v-if="!rowsFetching" colspan="999">
 								{{ capGen.resultsNone }}
 							</td>
 						</tr>
@@ -511,10 +517,16 @@ let MyList = {
 						/>
 					</template>
 					
-					<!-- no results -->
-					<div class="no-results" v-if="rowsClear.length === 0">
-						{{ capGen.resultsNone }}
-					</div>
+					<!-- no results message -->
+					<template v-if="rowsClear.length === 0">
+						<div class="no-results" v-if="!rowsFetching">
+							{{ capGen.resultsNone }}
+						</div>
+						<div class="no-results fetching" v-if="rowsFetching">
+							<img src="images/load.gif">
+							<span>{{ capApp.fetching }}</span>
+						</div>
+					</template>
 				</div>
 				
 				<div class="card"
@@ -611,11 +623,12 @@ let MyList = {
 			autoRenewInput:null,     // current auto renew input value
 			autoRenewInputLast:null, // last set auto renew input value (to compare against)
 			autoRenewTimer:null,     // interval timer for auto renew
-			choiceId:null,
+			choiceId:null,           // currently active choice
 			focused:false,
 			inputAutoSelectDone:false,
 			inputDropdownUpwards:false, // show dropdown above input
 			orderOverwritten:false,
+			rowsFetching:false,  // row values are being fetched
 			selectedRows:[],     // bulk selected rows by row index
 			showAutoRenew:false, // show UI for auto list renew
 			showCsv:false,       // show UI for CSV import/export
@@ -1392,11 +1405,13 @@ let MyList = {
 			},true).then(
 				res => {
 					const count = res.payload.count;
+					this.rowsFetching = true;
 					
 					this.getRowsDecrypted(res.payload.rows,this.expressions).then(
 						rows => {
-							this.count = count;
-							this.rows  = rows;
+							this.count        = count;
+							this.rows         = rows;
+							this.rowsFetching = false;
 							this.selectReset();
 							
 							if(this.isInput)
@@ -1445,7 +1460,7 @@ let MyList = {
 					// apply results to input rows if input is category or specific record IDs were retrieved
 					if(this.inputAsCategory || this.anyInputRows)
 						this.getRowsDecrypted(res.payload.rows,this.expressions).then(
-							rows => { this.rowsInput = rows; },
+							rows => this.rowsInput = rows,
 							this.consoleError
 						);
 					

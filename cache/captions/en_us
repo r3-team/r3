@@ -1196,6 +1196,7 @@
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Timezone",
 		"csvTotalLimit":"Row count (0 = all)",
+		"fetching":"Data is being retrieved...",
 		"inputHintCreate":"Create new record",
 		"inputHintOpen":"Open record",
 		"inputHintRemove":"Remove record",

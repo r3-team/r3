@@ -1196,6 +1196,7 @@
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Zona de timp",
 		"csvTotalLimit":"Număr de rânduri (0 = toate)",
+		"fetching":"Data is being retrieved...",
 		"inputHintCreate":"Creați o înregistrare nouă",
 		"inputHintOpen":"Deschideți înregistrarea",
 		"inputHintRemove":"Ștergeți înregistrarea",
