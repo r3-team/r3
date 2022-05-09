@@ -226,11 +226,11 @@ let MyForm = {
 					:dataFieldMap="fieldIdMapData"
 					:field="f"
 					:fieldIdMapState="fieldIdMapState"
-					:formBadLoad="badLoad"
 					:formBadSave="badSave"
 					:formIsInline="isInline"
 					:formIsSingleField="isSingleField"
 					:formLoading="loading"
+					:formReadonly="badLoad || blockInputs"
 					:joinsIndexMap="joinsIndexMap"
 					:key="f.id"
 					:values="values"
@@ -290,6 +290,7 @@ let MyForm = {
 			// states
 			badLoad:false,        // attempted record load with no return (can happen if access is lost during save)
 			badSave:false,        // attempted save (data SET) with invalid fields, also updates data fields
+			blockInputs:false,    // disable all user inputs, set by frontend functions
 			lastFormId:'',        // when routing occurs: if ID is the same, no need to rebuild form
 			loading:false,        // form is currently loading, informs sub components when form is ready
 			message:null,         // form message
@@ -377,7 +378,7 @@ let MyForm = {
 		// states, simple
 		isData:       function() { return this.relationId !== null; },
 		isNew:        function() { return this.recordId === 0; },
-		noDataActions:function() { return this.form.noDataActions; },
+		noDataActions:function() { return this.form.noDataActions || this.blockInputs; },
 		warnUnsaved:  function() { return this.hasChanges && this.settings.warnUnsaved; },
 		
 		// entities
@@ -442,6 +443,7 @@ let MyForm = {
 		exposedFunctions:function() {
 			return {
 				// simple functions
+				block_inputs:     (v) => this.blockInputs = v,
 				copy_to_clipboard:(v) => navigator.clipboard.writeText(v),
 				get_language_code:()  => this.settings.languageCode,
 				get_login_id:     ()  => this.loginId,
@@ -679,7 +681,7 @@ let MyForm = {
 			if(e.key === 's' && e.ctrlKey) {
 				e.preventDefault();
 				
-				if(this.hasChanges)
+				if(this.hasChanges && !this.blockInputs)
 					this.set(false);
 			}
 		},
@@ -805,8 +807,9 @@ let MyForm = {
 			this.resetRecord();
 		},
 		resetRecord:function() {
-			this.badSave = false;
-			this.badLoad = false;
+			this.badSave     = false;
+			this.badLoad     = false;
+			this.blockInputs = false;
 			this.loginIdsEncryptFor        = [];
 			this.loginIdsEncryptForOutside = [];
 			this.indexesNoDel              = [];

@@ -639,6 +639,7 @@
 				"delete":"Sei sicuro di voler eliminare questa funzione?"
 			},
 			"helpJs":{
+				"block_inputs":"app.block_inputs(true/false) => UNDEFINED<br /><br />Blocks or unblocks all inputs on the current form.",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Copia il testo negli appunti dell'utente.",
 				"get_e2ee_data_key":"app.get_e2ee_data_key(dataKeyEncrypted) => STRING<br /><br />Decrypts provided data key with the private key of the current login.",
 				"get_e2ee_data_value":"app.get_e2ee_data_value(dataKey,valueEncrypted) => STRING<br /><br />Decrypts data value with the provided data key.",

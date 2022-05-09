@@ -639,6 +639,7 @@
 				"delete":"Bist du sicher, dass du diese Funktion löschen möchtest?"
 			},
 			"helpJs":{
+				"block_inputs":"app.block_inputs(true/false) => UNDEFINED<br /><br />Sperrt alle Eingaben auf dem aktuellen Formular oder gibt diese wieder frei.",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Kopiert Text zur Zwischenablage des Benutzers.",
 				"get_e2ee_data_key":"app.get_e2ee_data_key(dataKeyEncrypted) => STRING<br /><br />Entschlüsselt den beigefügten Datenschlüssel mit dem privaten Schlüssel der aktuellen Anmeldung.",
 				"get_e2ee_data_value":"app.get_e2ee_data_value(dataKey,valueEncrypted) => STRING<br /><br />Entschlüsselt einen Datenwert mit dem beigefügten Datenschlüssel.",

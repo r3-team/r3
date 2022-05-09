@@ -415,11 +415,11 @@ let MyField = {
 			:dataFieldMap="dataFieldMap"
 			:field="f"
 			:fieldIdMapState="fieldIdMapState"
-			:formBadLoad="formBadLoad"
 			:formBadSave="formBadSave"
 			:formIsInline="formIsInline"
 			:formIsSingleField="formIsSingleField"
 			:formLoading="formLoading"
+			:formReadonly="formReadonly"
 			:flexDirParent="field.direction"
 			:joinsIndexMap="joinsIndexMap"
 			:key="f.id"
@@ -430,11 +430,11 @@ let MyField = {
 		dataFieldMap:     { type:Object,  required:true },
 		field:            { type:Object,  required:true },
 		fieldIdMapState:  { type:Object,  required:false, default:() => {return {};} }, // overwritten states
-		formBadLoad:      { type:Boolean, required:true }, // attempted record load with no return
 		formBadSave:      { type:Boolean, required:true }, // attempted save with invalid inputs
 		formIsInline:     { type:Boolean, required:true }, // parent form is part of another element (sub form)
 		formIsSingleField:{ type:Boolean, required:true }, // parent form contains a single field
 		formLoading:      { type:Boolean, required:true },
+		formReadonly:     { type:Boolean, required:true }, // form is read only, disable all inputs
 		flexDirParent:    { type:String,  required:true }, // flex direction (row/column) of parent
 		joinsIndexMap:    { type:Object,  required:true },
 		logViewer:        { type:Boolean, required:false, default:false }, // is part of log viewer
@@ -667,7 +667,7 @@ let MyField = {
 				state = 'readonly';
 			
 			// overwrite visible data field to readonly if form could not load record
-			if(this.isData && this.formBadLoad && state !== 'hidden')
+			if(this.isData && this.formReadonly && state !== 'hidden')
 				state = 'readonly';
 			
 			return state;
