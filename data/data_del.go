@@ -20,6 +20,9 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 		return errors.New(handler.ErrUnauthorized)
 	}
 
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
+
 	rel, exists := cache.RelationIdMap[relationId]
 	if !exists {
 		return handler.ErrSchemaUnknownRelation(relationId)

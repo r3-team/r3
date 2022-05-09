@@ -18,6 +18,9 @@ import (
 // delete data change logs according to retention settings
 func DelLogsBackground() error {
 
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
+
 	for _, r := range cache.RelationIdMap {
 
 		// delete logs for relations with no retention

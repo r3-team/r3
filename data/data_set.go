@@ -31,6 +31,9 @@ import (
 func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSet,
 	loginId int64) (map[int]int64, error) {
 
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
+
 	var err error
 	var indexes = make([]int, 0)                 // all relation indexes
 	var indexRecordIds = make(map[int]int64)     // record IDs by index

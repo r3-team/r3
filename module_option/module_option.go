@@ -9,7 +9,6 @@ import (
 )
 
 func Get() ([]types.ModuleOption, error) {
-
 	options := make([]types.ModuleOption, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
@@ -33,20 +32,16 @@ func Get() ([]types.ModuleOption, error) {
 }
 
 func GetHashById(moduleId uuid.UUID) (string, error) {
-
 	var hash string
-	if err := db.Pool.QueryRow(db.Ctx, `
+	err := db.Pool.QueryRow(db.Ctx, `
 		SELECT hash
 		FROM instance.module_option
 		WHERE module_id = $1
-	`, moduleId).Scan(&hash); err != nil {
-		return hash, err
-	}
-	return hash, nil
+	`, moduleId).Scan(&hash)
+	return hash, err
 }
 
 func Set_tx(tx pgx.Tx, moduleId uuid.UUID, hidden bool, owner bool, position int) error {
-
 	exists := false
 
 	if err := tx.QueryRow(db.Ctx, `
@@ -79,12 +74,10 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, hidden bool, owner bool, position int
 }
 
 func SetHashById_tx(tx pgx.Tx, moduleId uuid.UUID, hash string) error {
-	if _, err := tx.Exec(db.Ctx, `
+	_, err := tx.Exec(db.Ctx, `
 		UPDATE instance.module_option
 		SET hash = $1
 		WHERE module_id = $2
-	`, hash, moduleId); err != nil {
-		return err
-	}
-	return nil
+	`, hash, moduleId)
+	return err
 }

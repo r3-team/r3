@@ -504,6 +504,9 @@ func importCheckResultAndApply(tx pgx.Tx, resultErr error, entityId uuid.UUID,
 }
 
 func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]importMeta) ([]types.Module, error) {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
+
 	modules := make([]types.Module, 0)
 
 	log.Info("transfer", fmt.Sprintf("import is parsing %d module files", len(filePaths)))

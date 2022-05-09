@@ -151,6 +151,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// start work
+		cache.Schema_mx.RLock()
+		defer cache.Schema_mx.RUnlock()
+
 		// store file in temporary directory
 		filePath, err := tools.GetUniqueFilePath(config.File.Paths.Temp, 8999999, 9999999)
 		if err != nil {

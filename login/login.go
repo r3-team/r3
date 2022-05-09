@@ -27,6 +27,8 @@ func Del_tx(tx pgx.Tx, id int64) error {
 
 // get logins with meta data and total count
 func Get(byString string, limit int, offset int, recordRequests []types.LoginAdminRecordRequest) ([]types.LoginAdmin, int, error) {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
 
 	logins := make([]types.LoginAdmin, 0)
 

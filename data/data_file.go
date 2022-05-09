@@ -19,6 +19,8 @@ import (
 
 // returns path to downloadable file
 func GetFilePath(loginId int64, attributeId uuid.UUID, fileId uuid.UUID) (string, error) {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
 
 	attribute, exists := cache.AttributeIdMap[attributeId]
 	if !exists || !schema.IsContentFiles(attribute.Content) {
@@ -35,6 +37,8 @@ func GetFilePath(loginId int64, attributeId uuid.UUID, fileId uuid.UUID) (string
 // attempts to store file upload
 // returns file ID if successful
 func SetFile(loginId int64, attributeId uuid.UUID, part *multipart.Part) (uuid.UUID, error) {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
 
 	var fileId uuid.UUID
 

@@ -37,10 +37,15 @@ func StoreExportKey(key string) {
 }
 
 func AddVersion_tx(tx pgx.Tx, moduleId uuid.UUID) error {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
 
-	file, err := getTransferFile(moduleId)
-	if err != nil {
-		return err
+	var exists bool
+	var file types.TransferFile
+
+	file.Content.Module, exists = cache.ModuleIdMap[moduleId]
+	if !exists {
+		return errors.New("module does not exist")
 	}
 
 	_, _, appBuild, _ := config.GetAppVersions()
@@ -81,6 +86,9 @@ func AddVersion_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 // start with 1 module and check whether it or its dependend upon modules had changed
 // returns map of module IDs, changed yes/no
 func GetModuleChangedWithDependencies(moduleId uuid.UUID) (map[uuid.UUID]bool, error) {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
+
 	mapChecked := make(map[uuid.UUID]bool)
 
 	var checkRecursive func(id uuid.UUID, moduleIdMapChecked map[uuid.UUID]bool) error
@@ -96,10 +104,9 @@ func GetModuleChangedWithDependencies(moduleId uuid.UUID) (map[uuid.UUID]bool, e
 			return errors.New("unknown module")
 		}
 
-		file, err := getTransferFile(id)
-		if err != nil {
-			return err
-		}
+		var err error
+		var file types.TransferFile
+		file.Content.Module = module
 
 		moduleIdMapChecked[id], err = hasModuleChanged(file)
 		if err != nil {
@@ -120,18 +127,6 @@ func GetModuleChangedWithDependencies(moduleId uuid.UUID) (map[uuid.UUID]bool, e
 		return nil, err
 	}
 	return mapChecked, nil
-}
-
-func getTransferFile(moduleId uuid.UUID) (types.TransferFile, error) {
-
-	var exists bool
-	var file types.TransferFile
-
-	file.Content.Module, exists = cache.ModuleIdMap[moduleId]
-	if !exists {
-		return file, errors.New("module does not exist")
-	}
-	return file, nil
 }
 
 // verifies that the importing module matches the running application build

@@ -82,6 +82,8 @@ func GetPublic(ctx context.Context, relationId uuid.UUID,
 }
 
 func Reset_tx(tx pgx.Tx, loginId int64) error {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
 
 	if _, err := tx.Exec(db.Ctx, `
 		UPDATE instance.login

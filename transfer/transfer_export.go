@@ -13,11 +13,13 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"r3/cache"
 	"r3/config"
 	"r3/db"
 	"r3/log"
 	"r3/module_option"
 	"r3/tools"
+	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v4"
@@ -27,6 +29,8 @@ import (
 // if the exported module had any changes, the module meta (version,
 //  dependent app version, release date) will be updated
 func ExportToFile(moduleId uuid.UUID, zipFilePath string) error {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
 
 	log.Info("transfer", fmt.Sprintf("start export for module %s", moduleId))
 
@@ -67,14 +71,16 @@ func export_tx(tx pgx.Tx, moduleId uuid.UUID, original bool, filePaths *[]string
 	}
 	*moduleIdsExported = append(*moduleIdsExported, moduleId)
 
-	file, err := getTransferFile(moduleId)
-	if err != nil {
-		return err
+	var exists bool
+	var file types.TransferFile
+
+	file.Content.Module, exists = cache.ModuleIdMap[moduleId]
+	if !exists {
+		return errors.New("module does not exist")
 	}
 
 	// export all modules that this module is dependent on
 	for _, modId := range file.Content.Module.DependsOn {
-
 		if err := export_tx(tx, modId, false, filePaths, moduleIdsExported); err != nil {
 			return err
 		}

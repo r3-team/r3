@@ -28,6 +28,9 @@ var regexRelId = regexp.MustCompile(`^\_r(\d+)id`) // finds: _r3id
 func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 	query *string) ([]types.DataGetResult, int, error) {
 
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
+
 	var err error
 	indexRelationIds := make(map[int]uuid.UUID) // map of accessed relation IDs, key: relation index
 	relationIndexesEnc := make([]int, 0)        // indexes of relations from encrypted attributes within expressions

@@ -117,6 +117,9 @@ func getPolicyFunctionNames(loginId int64, policies []types.RelationPolicy, acti
 func getPolicyValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 	relationId uuid.UUID, action string) ([]int64, []int64, bool, error) {
 
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
+
 	idsBlacklist := make([]int64, 0)
 	idsWhitelist := make([]int64, 0)
 

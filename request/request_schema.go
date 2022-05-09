@@ -31,5 +31,10 @@ func SchemaReload(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, cache.UpdateSchema(req.ModuleId, true)
+
+	modIds := make([]uuid.UUID, 0)
+	if req.ModuleId.Status == pgtype.Present {
+		modIds = append(modIds, req.ModuleId.Bytes)
+	}
+	return nil, cache.UpdateSchema(modIds, true)
 }

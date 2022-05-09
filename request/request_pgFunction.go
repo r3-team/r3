@@ -26,6 +26,8 @@ func PgFunctionDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 }
 
 func PgFunctionExec_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
 
 	var req struct {
 		Id   uuid.UUID     `json:"id"`

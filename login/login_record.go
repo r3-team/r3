@@ -16,6 +16,9 @@ import (
 // get relation records as login associate
 // returns slice of up to 10 records
 func GetRecords(attributeIdLookup uuid.UUID, idsExclude []int64, byString string) ([]types.LoginRecord, error) {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
+
 	records := make([]types.LoginRecord, 0)
 
 	atr, exists := cache.AttributeIdMap[attributeIdLookup]

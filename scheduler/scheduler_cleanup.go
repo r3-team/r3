@@ -66,6 +66,8 @@ func cleanupLogs() error {
 // deletes files that have no reference anymore
 // files are stored in subfolders, one for each attribute ID
 func cleanUpFiles() error {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
 
 	srcPath := config.File.Paths.Files
 
