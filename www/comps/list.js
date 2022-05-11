@@ -1096,10 +1096,10 @@ let MyList = {
 				if(this.showTable && this.rows.length !== 0) {
 					e.preventDefault();
 					
-					if(e.target !== this.$refs[this.refTabindex+'0'])
-						return this.$refs[this.refTabindex+'0'].focus();
+					if(e.target !== this.$refs[this.refTabindex+'0'][0])
+						return this.$refs[this.refTabindex+'0'][0].focus();
 					
-					return this.$refs[this.refTabindex+String(this.rows.length-1)].focus();
+					return this.$refs[this.refTabindex+String(this.rows.length-1)][0].focus();
 				}
 			}
 		},
