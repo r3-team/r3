@@ -6,7 +6,8 @@ import {getUnixFormat}                 from './shared/time.js';
 import {
 	getDetailsFromIndexAttributeId,
 	getIndexAttributeId,
-	getIndexAttributeIdByField
+	getIndexAttributeIdByField,
+	isAttributeFiles
 } from './shared/attribute.js';
 export {MyFormLog as default};
 
@@ -116,6 +117,7 @@ let MyFormLog = {
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
 		getUnixFormat,
+		isAttributeFiles,
 		
 		// presentation
 		displayTitle:function(i,unixTime,name) {
@@ -166,8 +168,9 @@ let MyFormLog = {
 			if(this.formLoading)
 				return;
 			
-			let attributeIdsEnc = [];
-			let requests        = [];
+			let attributeIdsEnc   = [];
+			let attributeIdsFiles = [];
+			let requests          = [];
 			
 			for(let index in this.joinsIndexMap) {
 				let j = this.joinsIndexMap[index];
@@ -188,6 +191,9 @@ let MyFormLog = {
 					
 					if(a.encrypted)
 						attributeIdsEnc.push(a.id);
+					
+					if(this.isAttributeFiles(a.content))
+						attributeIdsFiles.push(a.id);
 					
 					attributeIds.push(a.id);
 				}
@@ -234,6 +240,9 @@ let MyFormLog = {
 									
 									value = await this.aesGcmDecryptBase64WithPhrase(value,keyStr);
 								}
+								
+								if(attributeIdsFiles.includes(a.attributeId) && value !== null)
+									value = JSON.parse(value);
 								
 								logsGrouped[g].values[this.getIndexAttributeId(
 									request.index,
