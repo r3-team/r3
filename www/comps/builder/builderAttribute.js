@@ -97,6 +97,12 @@ let MyBuilderAttribute = {
 				:readonly="foreign || isId"
 			/>
 		</td>
+		<td v-if="relation.encryption">
+			<my-bool
+				v-model="encrypted"
+				:readonly="foreign || !isNew || !canEncrypt"
+			/>
+		</td>
 		<td>
 			<input placeholder="NO DEFAULT"
 				v-if="!isId"
@@ -156,6 +162,7 @@ let MyBuilderAttribute = {
 				length:0,
 				name:'',
 				nullable:true,
+				encrypted:false,
 				def:'',
 				onUpdate:'NO ACTION',
 				onDelete:'NO ACTION',
@@ -176,6 +183,7 @@ let MyBuilderAttribute = {
 			length:this.attribute.length,
 			name:this.attribute.name,
 			nullable:this.attribute.nullable,
+			encrypted:this.attribute.encrypted,
 			def:this.attribute.def,
 			onUpdate:this.attribute.onUpdate,
 			onDelete:this.attribute.onDelete,
@@ -184,20 +192,22 @@ let MyBuilderAttribute = {
 	},
 	computed:{
 		hasChanges:function() {
-			return this.iconId !== this.attribute.iconId
+			return this.iconId         !== this.attribute.iconId
 				|| this.relationshipId !== this.attribute.relationshipId
-				|| this.content !== this.attribute.content
-				|| this.length !== this.attribute.length
-				|| this.name !== this.attribute.name
-				|| this.nullable !== this.attribute.nullable
-				|| this.def !== this.attribute.def
-				|| this.onUpdate !== this.attribute.onUpdate
-				|| this.onDelete !== this.attribute.onDelete
+				|| this.content        !== this.attribute.content
+				|| this.length         !== this.attribute.length
+				|| this.name           !== this.attribute.name
+				|| this.nullable       !== this.attribute.nullable
+				|| this.encrypted      !== this.attribute.encrypted
+				|| this.def            !== this.attribute.def
+				|| this.onUpdate       !== this.attribute.onUpdate
+				|| this.onDelete       !== this.attribute.onDelete
 				|| JSON.stringify(this.captions) !== JSON.stringify(this.attribute.captions)
 			;
 		},
 		
 		// simple states
+		canEncrypt:    function() { return this.content === 'text'; },
 		hasLength:     function() { return ['varchar','text','files'].includes(this.content); },
 		isId:          function() { return !this.isNew && this.attribute.name === 'id'; },
 		isNew:         function() { return this.attribute.id === null; },
@@ -251,11 +261,14 @@ let MyBuilderAttribute = {
 		},
 		del:function(rel) {
 			ws.send('attribute','del',{id:this.attribute.id},true).then(
-				(res) => this.$root.schemaReload(this.module.id),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		},
 		set:function() {
+			if(this.encrypted && !this.canEncrypt)
+				this.encrypted = false;
+			
 			ws.sendMultiple([
 				ws.prepare('attribute','set',{
 					id:this.attribute.id,
@@ -267,6 +280,7 @@ let MyBuilderAttribute = {
 					content:this.content,
 					length:this.length,
 					nullable:this.nullable,
+					encrypted:this.encrypted,
 					def:this.def,
 					onUpdate:this.onUpdate,
 					onDelete:this.onDelete,
@@ -276,7 +290,7 @@ let MyBuilderAttribute = {
 					moduleId:this.relation.moduleId
 				})
 			],true).then(
-				(res) => {
+				() => {
 					if(this.isNew) {
 						this.name   = '';
 						this.iconId = null;
@@ -289,7 +303,7 @@ let MyBuilderAttribute = {
 					}
 					this.$root.schemaReload(this.module.id);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

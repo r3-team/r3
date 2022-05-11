@@ -216,8 +216,8 @@ let MyBuilderJsFunctionItem = {
 		},
 		del:function() {
 			ws.send('jsFunction','del',{id:this.jsFunction.id},true).then(
-				(res) => this.$root.schemaReload(this.module.id),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -231,13 +231,13 @@ let MyBuilderJsFunctionItem = {
 				codeReturns:this.codeReturns,
 				captions:this.captions
 			},true).then(
-				(res) => {
+				() => {
 					if(this.isNew)
 						this.name = '';
 					
 					this.$root.schemaReload(this.module.id);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}
@@ -540,8 +540,8 @@ let MyBuilderPgFunctionItem = {
 		},
 		del:function() {
 			ws.send('pgFunction','del',{id:this.pgFunction.id},true).then(
-				(res) => this.$root.schemaReload(this.moduleId),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.moduleId),
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -560,18 +560,18 @@ let MyBuilderPgFunctionItem = {
 				schedules:this.schedules,
 				captions:this.captions
 			},true).then(
-				(res) => {
+				() => {
 					if(this.isNew)
 						this.name = '';
 					
 					this.$root.schemaReload(this.moduleId);
 					
 					ws.send('scheduler','reload',{},false).then(
-						(res) => {},
-						(err) => this.$root.genericError(err)
+						() => {},
+						this.$root.genericError
 					);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

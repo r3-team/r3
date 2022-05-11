@@ -27,6 +27,8 @@ func Del_tx(tx pgx.Tx, id int64) error {
 
 // get logins with meta data and total count
 func Get(byString string, limit int, offset int, recordRequests []types.LoginAdminRecordRequest) ([]types.LoginAdmin, int, error) {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
 
 	logins := make([]types.LoginAdmin, 0)
 
@@ -186,6 +188,8 @@ func Set_tx(tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Varchar,
 	var salt, hash = pgtype.Varchar{Status: pgtype.Null},
 		pgtype.Varchar{Status: pgtype.Null}
 
+	var saltKdf = tools.RandStringRunes(16)
+
 	if pass != "" {
 		salt.String = tools.RandStringRunes(32)
 		salt.Status = pgtype.Present
@@ -197,11 +201,14 @@ func Set_tx(tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Varchar,
 	if !exists {
 		if err := tx.QueryRow(db.Ctx, `
 			INSERT INTO instance.login (
-				ldap_id, ldap_key, name, salt, hash, admin, no_auth, active
+				ldap_id, ldap_key, name, salt, hash,
+				salt_kdf, admin, no_auth, active
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
 			RETURNING id
-		`, ldapId, ldapKey, name, &salt, &hash, admin, noAuth, active).Scan(&id); err != nil {
+		`, ldapId, ldapKey, name, &salt, &hash, saltKdf,
+			admin, noAuth, active).Scan(&id); err != nil {
+
 			return err
 		}
 		if err := setting.SetDefaults_tx(tx, id, languageCode); err != nil {

@@ -211,11 +211,11 @@ let MyBuilderRolesItem = {
 		},
 		del:function() {
 			ws.send('role','del',{id:this.role.id},true).then(
-				(res) => {
+				() => {
 					this.$root.schemaReload(this.moduleId);
 					this.$root.loginReauthAll(false);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -233,14 +233,14 @@ let MyBuilderRolesItem = {
 				accessMenus:this.role.accessMenus,
 				accessRelations:this.role.accessRelations
 			},true).then(
-				(res) => {
+				() => {
 					if(this.isNew)
 						this.name = '';
 					
 					this.$root.schemaReload(this.moduleId);
 					this.$root.loginReauthAll(false);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

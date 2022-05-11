@@ -32,12 +32,12 @@ func authCheckSystemMode(admin bool) error {
 }
 
 // performs authentication attempt for user by using username and password
-// returns JWT if successful
+// returns JWT, KDF salt
 func User(username string, password string, grantLoginId *int64,
-	grantAdmin *bool, grantNoAuth *bool) (string, error) {
+	grantAdmin *bool, grantNoAuth *bool) (string, string, error) {
 
 	if username == "" {
-		return "", errors.New("username not given")
+		return "", "", errors.New("username not given")
 	}
 
 	// usernames are case insensitive
@@ -47,40 +47,41 @@ func User(username string, password string, grantLoginId *int64,
 	var ldapId pgtype.Int4
 	var salt sql.NullString
 	var hash sql.NullString
+	var saltKdf string
 	var admin bool
 	var noAuth bool
 
 	err := db.Pool.QueryRow(db.Ctx, `
-		SELECT id, ldap_id, salt, hash, admin, no_auth
+		SELECT id, ldap_id, salt, hash, salt_kdf, admin, no_auth
 		FROM instance.login
 		WHERE active
 		AND name = $1
-	`, username).Scan(&loginId, &ldapId, &salt, &hash, &admin, &noAuth)
+	`, username).Scan(&loginId, &ldapId, &salt, &hash, &saltKdf, &admin, &noAuth)
 
 	if err != nil && err != pgx.ErrNoRows {
-		return "", err
+		return "", "", err
 	}
 
 	// username not found must result in same response as authentication failed
 	// otherwise we can probe the system for valid user names
 	if err == pgx.ErrNoRows {
-		return "", errors.New(handler.ErrAuthFailed)
+		return "", "", errors.New(handler.ErrAuthFailed)
 	}
 
 	if !noAuth && password == "" {
-		return "", errors.New("password not given")
+		return "", "", errors.New("password not given")
 	}
 
 	if !noAuth {
 		if ldapId.Status == pgtype.Present {
 			// authentication against LDAP
 			if err := ldap_auth.Check(ldapId.Int, username, password); err != nil {
-				return "", errors.New(handler.ErrAuthFailed)
+				return "", "", errors.New(handler.ErrAuthFailed)
 			}
 		} else {
 			// authentication against stored hash
 			if !hash.Valid || !salt.Valid || hash.String != tools.Hash(salt.String+password) {
-				return "", errors.New(handler.ErrAuthFailed)
+				return "", "", errors.New(handler.ErrAuthFailed)
 			}
 		}
 	}
@@ -103,60 +104,61 @@ func User(username string, password string, grantLoginId *int64,
 	}, config.GetTokenSecret())
 
 	if err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	if err := authCheckSystemMode(admin); err != nil {
-		return "", err
+		return "", "", err
 	}
 
 	// everything in order, auth successful
 	*grantLoginId = loginId
 	*grantAdmin = admin
 	*grantNoAuth = noAuth
-	return string(token), nil
+	return string(token), saltKdf, nil
 }
 
 // performs authentication attempt for user by using existing JWT token, signed by server
-func Token(token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *bool) error {
+// returns username
+func Token(token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *bool) (string, error) {
 
 	if token == "" {
-		return errors.New("empty token")
+		return "", errors.New("empty token")
 	}
 
 	var tp tokenPayload
-	_, err := jwt.Verify([]byte(token), config.GetTokenSecret(), &tp)
-	if err != nil {
-		return err
+	if _, err := jwt.Verify([]byte(token), config.GetTokenSecret(), &tp); err != nil {
+		return "", err
 	}
 
 	if tools.GetTimeUnix() > tp.ExpirationTime.Unix() {
-		return errors.New("token expired")
+		return "", errors.New("token expired")
 	}
 
 	if err := authCheckSystemMode(tp.Admin); err != nil {
-		return err
+		return "", err
 	}
 
 	// check if login is active
 	active := false
+	name := ""
 
 	if err := db.Pool.QueryRow(db.Ctx, `
-		SELECT active
+		SELECT name, active
 		FROM instance.login
 		WHERE id = $1
-	`, tp.LoginId).Scan(&active); err != nil {
-		return err
+	`, tp.LoginId).Scan(&name, &active); err != nil {
+		return "", err
 	}
 	if !active {
-		return errors.New("login inactive")
+		return "", errors.New("login inactive")
 	}
 
 	// everything in order, auth successful
 	*grantLoginId = tp.LoginId
 	*grantAdmin = tp.Admin
 	*grantNoAuth = tp.NoAuth
-	return nil
+	return name, nil
 }
 
 // performs authentication for user by using fixed (permanent) token

@@ -27,7 +27,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var loginId int64
 	var admin bool
 	var noAuth bool
-	if err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
+	if _, err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
 		log.Error("server", genErr, err)
 		return
 	}

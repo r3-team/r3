@@ -21,6 +21,13 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 		return err
 	}
 
+	// delete encryption table
+	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		DROP TABLE IF EXISTS instance_e2ee."%s"
+	`, schema.GetEncKeyTableName(id))); err != nil {
+		return err
+	}
+
 	// delete relation
 	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		DROP TABLE "%s"."%s"
@@ -53,7 +60,7 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 
 	relations := make([]types.Relation, 0)
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, name, retention_count, retention_days, (
+		SELECT id, name, encryption, retention_count, retention_days, (
 			SELECT id
 			FROM app.attribute
 			WHERE relation_id = app.relation.id
@@ -70,8 +77,8 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 
 	for rows.Next() {
 		var r types.Relation
-		if err := rows.Scan(&r.Id, &r.Name, &r.RetentionCount,
-			&r.RetentionDays, &r.AttributeIdPk); err != nil {
+		if err := rows.Scan(&r.Id, &r.Name, &r.Encryption,
+			&r.RetentionCount, &r.RetentionDays, &r.AttributeIdPk); err != nil {
 
 			return relations, err
 		}
@@ -89,7 +96,7 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 }
 
 func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
-	retentionCount pgtype.Int4, retentionDays pgtype.Int4,
+	encryption bool, retentionCount pgtype.Int4, retentionDays pgtype.Int4,
 	policies []types.RelationPolicy) error {
 
 	if err := check.DbIdentifier(name); err != nil {
@@ -136,27 +143,27 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 			}
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`CREATE TABLE "%s"."%s" ()`,
-			moduleName, name)); err != nil {
-
+		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			CREATE TABLE "%s"."%s" ()
+		`, moduleName, name)); err != nil {
 			return err
 		}
 
 		// insert relation reference
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.relation
-				(id, module_id, name, retention_count, retention_days)
-			VALUES ($1,$2,$3,$4,$5)
-		`, id, moduleId, name, retentionCount, retentionDays); err != nil {
+				(id, module_id, name, encryption, retention_count, retention_days)
+			VALUES ($1,$2,$3,$4,$5,$6)
+		`, id, moduleId, name, encryption, retentionCount, retentionDays); err != nil {
 			return err
 		}
 
-		// create primary key attribute if relation is new
+		// create primary key attribute if relation is new (e. g. not imported or updated)
 		if isNew {
 			if err := attribute.Set_tx(tx, id, uuid.Nil,
 				pgtype.UUID{Status: pgtype.Null},
 				pgtype.UUID{Status: pgtype.Null},
-				schema.PkName, "integer", 0, false, "", "", "",
+				schema.PkName, "integer", 0, false, false, "", "", "",
 				types.CaptionMap{}); err != nil {
 
 				return err

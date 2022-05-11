@@ -45,6 +45,7 @@ let MyBuilderRelation = {
 							<th>{{ capApp.relationship }}</th>
 							<th>{{ capApp.length }}</th>
 							<th>{{ capApp.nullable }}</th>
+							<th v-if="relation.encryption">{{ capApp.encrypted }}</th>
 							<th>{{ capApp.def }}</th>
 							<th>{{ capApp.onUpdate }}</th>
 							<th>{{ capApp.onDelete }}</th>
@@ -137,6 +138,7 @@ let MyBuilderRelation = {
 					<thead>
 						<tr>
 							<th>{{ capApp.fires }}</th>
+							<th>{{ capGen.id }}</th>
 							<th>{{ capApp.onInsert }}</th>
 							<th>{{ capApp.onUpdate }}</th>
 							<th>{{ capApp.onDelete }}</th>
@@ -297,10 +299,8 @@ let MyBuilderRelation = {
 	},
 	computed:{
 		relation:function() {
-			if(typeof this.relationIdMap[this.id] === 'undefined')
-				return false;
-			
-			return this.relationIdMap[this.id];
+			return typeof this.relationIdMap[this.id] === 'undefined'
+				? false : this.relationIdMap[this.id];
 		},
 		relationshipAttributes:function() {
 			let atrs = [];
@@ -449,11 +449,11 @@ let MyBuilderRelation = {
 				limit:this.previewLimit,
 				offset:this.previewOffset
 			},true).then(
-				(res) => {
+				res => {
 					this.previewRows     = res.payload.rows;
 					this.previewRowCount = res.payload.rowCount;
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

@@ -219,7 +219,10 @@ func AuthUser(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth *bool
 			Password string `json:"password"`
 		}
 		res struct {
-			Token string `json:"token"`
+			LoginId   int64  `json:"loginId"`
+			LoginName string `json:"loginName"`
+			SaltKdf   string `json:"saltKdf"`
+			Token     string `json:"token"`
 		}
 	)
 
@@ -227,10 +230,13 @@ func AuthUser(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth *bool
 		return nil, err
 	}
 
-	res.Token, err = login_auth.User(req.Username, req.Password, loginId, admin, noAuth)
+	res.Token, res.SaltKdf, err = login_auth.User(req.Username, req.Password, loginId, admin, noAuth)
 	if err != nil {
 		return nil, err
 	}
+
+	res.LoginId = *loginId
+	res.LoginName = req.Username
 	return res, nil
 }
 
@@ -238,12 +244,26 @@ func AuthUser(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth *bool
 // applies login ID, admin and no auth state to provided parameters if successful
 func AuthToken(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth *bool) (interface{}, error) {
 
-	var req struct {
-		Token string `json:"token"`
-	}
+	var (
+		err error
+		req struct {
+			Token string `json:"token"`
+		}
+		res struct {
+			LoginId   int64  `json:"loginId"`
+			LoginName string `json:"loginName"`
+		}
+	)
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login_auth.Token(req.Token, loginId, admin, noAuth)
+
+	res.LoginName, err = login_auth.Token(req.Token, loginId, admin, noAuth)
+	if err != nil {
+		return nil, err
+	}
+
+	res.LoginId = *loginId
+	return res, nil
 }

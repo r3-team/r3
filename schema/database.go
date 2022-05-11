@@ -22,3 +22,6 @@ func GetSequenceName(relationId uuid.UUID) string {
 func GetPgIndexName(pgIndexId uuid.UUID) string {
 	return fmt.Sprintf("ind_%s", pgIndexId.String())
 }
+func GetEncKeyTableName(relationId uuid.UUID) string {
+	return fmt.Sprintf("keys_%s", relationId.String())
+}

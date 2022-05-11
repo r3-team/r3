@@ -1,0 +1,131 @@
+package login_keys
+
+import (
+	"context"
+	"fmt"
+	"r3/cache"
+	"r3/db"
+	"r3/handler"
+	"r3/schema"
+	"r3/tools"
+	"r3/types"
+	"strings"
+
+	"github.com/gofrs/uuid"
+	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v4"
+)
+
+func GetPublic(ctx context.Context, relationId uuid.UUID,
+	recordIds []int64, loginIds []int64) ([]types.LoginPublicKey, error) {
+
+	keys := make([]types.LoginPublicKey, 0)
+	loginNamesNoPublicKey := make([]string, 0)
+
+	rows, err := db.Pool.Query(ctx, fmt.Sprintf(`
+		SELECT l.id, l.name, l.key_public, ARRAY(
+			SELECT record_id
+			FROM instance_e2ee."%s"
+			WHERE record_id = ANY($1)
+			AND   login_id  = l.id
+		)
+		FROM instance.login AS l
+		WHERE l.id = ANY($2)
+	`, schema.GetEncKeyTableName(relationId)), recordIds, loginIds)
+	if err != nil {
+		return keys, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var loginId int64
+		var name string
+		var key pgtype.Varchar
+		var recordIdsReady []int64
+
+		if err := rows.Scan(&loginId, &name, &key, &recordIdsReady); err != nil {
+			return keys, err
+		}
+
+		// login already has encrypted data keys for all records
+		if len(recordIdsReady) == len(recordIds) {
+			continue
+		}
+
+		// login has no public key, error
+		if key.Status == pgtype.Null {
+			loginNamesNoPublicKey = append(loginNamesNoPublicKey, name)
+			continue
+		}
+
+		recordIdsMissing := make([]int64, 0)
+		for _, recordId := range recordIds {
+			if !tools.Int64InSlice(recordId, recordIdsReady) {
+				recordIdsMissing = append(recordIdsMissing, recordId)
+			}
+		}
+
+		// add to key list for encryption
+		keys = append(keys, types.LoginPublicKey{
+			LoginId:   loginId,
+			PublicKey: key.String,
+			RecordIds: recordIdsMissing,
+		})
+	}
+
+	if len(loginNamesNoPublicKey) != 0 {
+		return keys, handler.CreateErrCodeWithArgs("SEC",
+			handler.ErrCodeSecNoPublicKeys,
+			map[string]string{"NAMES": strings.Join(loginNamesNoPublicKey, ", ")})
+	}
+	return keys, nil
+}
+
+func Reset_tx(tx pgx.Tx, loginId int64) error {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
+
+	if _, err := tx.Exec(db.Ctx, `
+		UPDATE instance.login
+		SET key_private_enc = NULL, key_private_enc_backup = NULL, key_public = NULL
+		WHERE id = $1
+	`, loginId); err != nil {
+		return err
+	}
+
+	// delete unusable data keys
+	for _, rel := range cache.RelationIdMap {
+		if rel.Encryption {
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				DELETE FROM instance_e2ee."%s"
+				WHERE login_id = $1
+			`, schema.GetEncKeyTableName(rel.Id)), loginId); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func Store_tx(tx pgx.Tx, loginId int64, privateKeyEnc string,
+	privateKeyEncBackup string, publicKey string) error {
+
+	_, err := tx.Exec(db.Ctx, `
+		UPDATE instance.login
+		SET key_private_enc = $1, key_private_enc_backup = $2, key_public = $3
+		WHERE id = $4
+	`, privateKeyEnc, privateKeyEncBackup, publicKey, loginId)
+
+	return err
+}
+
+func StorePrivate_tx(tx pgx.Tx, loginId int64, privateKeyEnc string) error {
+
+	_, err := tx.Exec(db.Ctx, `
+		UPDATE instance.login
+		SET key_private_enc = $1
+		WHERE id = $2
+	`, privateKeyEnc, loginId)
+
+	return err
+}

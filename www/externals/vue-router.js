@@ -1,6 +1,6 @@
 /*!
-  * vue-router v4.0.12
-  * (c) 2021 Eduardo San Martin Morote
+  * vue-router v4.0.14
+  * (c) 2022 Eduardo San Martin Morote
   * @license MIT
   */
 var VueRouter = (function (exports, vue) {
@@ -523,7 +523,7 @@ var VueRouter = (function (exports, vue) {
            * if a base tag is provided and we are on a normal domain, we have to
            * respect the provided `base` attribute because pushState() will use it and
            * potentially erase anything before the `#` like at
-           * https://github.com/vuejs/vue-router-next/issues/685 where a base of
+           * https://github.com/vuejs/router/issues/685 where a base of
            * `/folder/#` but a base of `/` would erase the `/folder/` section. If
            * there is no host, the `<base>` tag makes no sense and if there isn't a
            * base tag we can just use everything after the `#`.
@@ -561,7 +561,7 @@ var VueRouter = (function (exports, vue) {
           const currentState = assign({}, 
           // use current history state to gracefully handle a wrong call to
           // history.replaceState
-          // https://github.com/vuejs/vue-router-next/issues/366
+          // https://github.com/vuejs/router/issues/366
           historyState.value, history.state, {
               forward: to,
               scroll: computeScrollPosition(),
@@ -1380,12 +1380,13 @@ var VueRouter = (function (exports, vue) {
       }
       function insertMatcher(matcher) {
           let i = 0;
-          // console.log('i is', { i })
           while (i < matchers.length &&
-              comparePathParserScore(matcher, matchers[i]) >= 0)
+              comparePathParserScore(matcher, matchers[i]) >= 0 &&
+              // Adding children with empty path should still appear before the parent
+              // https://github.com/vuejs/router/issues/1124
+              (matcher.record.path !== matchers[i].record.path ||
+                  !isRecordChildOf(matcher, matchers[i])))
               i++;
-          // console.log('END i is', { i })
-          // while (i < matchers.length && matcher.score <= matchers[i].score) i++
           matchers.splice(i, 0, matcher);
           // only add the original record to the name map
           if (matcher.record.name && !isAliasRecord(matcher))
@@ -1417,7 +1418,7 @@ var VueRouter = (function (exports, vue) {
               // this also allows the user to control the encoding
               path = location.path;
               if (!path.startsWith('/')) {
-                  warn(`The Matcher cannot resolve relative paths but received "${path}". Unless you directly called \`matcher.resolve("${path}")\`, this is probably a bug in vue-router. Please open an issue at https://new-issue.vuejs.org/?repo=vuejs/vue-router-next.`);
+                  warn(`The Matcher cannot resolve relative paths but received "${path}". Unless you directly called \`matcher.resolve("${path}")\`, this is probably a bug in vue-router. Please open an issue at https://new-issue.vuejs.org/?repo=vuejs/router.`);
               }
               matcher = matchers.find(m => m.re.test(path));
               // matcher should have a value after the loop
@@ -1570,6 +1571,9 @@ var VueRouter = (function (exports, vue) {
           if (!record.keys.find(isSameParam.bind(null, key)))
               return warn(`Absolute path "${record.record.path}" should have the exact same param named "${key.name}" as its parent "${parent.record.path}".`);
       }
+  }
+  function isRecordChildOf(record, parent) {
+      return parent.children.some(child => child === record || isRecordChildOf(record, child));
   }
 
   /**
@@ -2387,7 +2391,7 @@ var VueRouter = (function (exports, vue) {
               }
           }
           const localSettingsSaveId = `__vue-devtools-plugin-settings__${plugin.id}`;
-          let currentSettings = { ...defaultSettings };
+          let currentSettings = Object.assign({}, defaultSettings);
           try {
               const raw = localStorage.getItem(localSettingsSaveId);
               const data = JSON.parse(raw);
@@ -2408,13 +2412,15 @@ var VueRouter = (function (exports, vue) {
                       // noop
                   }
                   currentSettings = value;
-              }
+              },
           };
-          hook.on(HOOK_PLUGIN_SETTINGS_SET, (pluginId, value) => {
-              if (pluginId === this.plugin.id) {
-                  this.fallbacks.setSettings(value);
-              }
-          });
+          if (hook) {
+              hook.on(HOOK_PLUGIN_SETTINGS_SET, (pluginId, value) => {
+                  if (pluginId === this.plugin.id) {
+                      this.fallbacks.setSettings(value);
+                  }
+              });
+          }
           this.proxiedOn = new Proxy({}, {
               get: (_target, prop) => {
                   if (this.target) {
@@ -2424,11 +2430,11 @@ var VueRouter = (function (exports, vue) {
                       return (...args) => {
                           this.onQueue.push({
                               method: prop,
-                              args
+                              args,
                           });
                       };
                   }
-              }
+              },
           });
           this.proxiedTarget = new Proxy({}, {
               get: (_target, prop) => {
@@ -2443,7 +2449,7 @@ var VueRouter = (function (exports, vue) {
                           this.targetQueue.push({
                               method: prop,
                               args,
-                              resolve: () => { }
+                              resolve: () => { },
                           });
                           return this.fallbacks[prop](...args);
                       };
@@ -2454,12 +2460,12 @@ var VueRouter = (function (exports, vue) {
                               this.targetQueue.push({
                                   method: prop,
                                   args,
-                                  resolve
+                                  resolve,
                               });
                           });
                       };
                   }
-              }
+              },
           });
       }
       async setRealTarget(target) {
@@ -2474,19 +2480,20 @@ var VueRouter = (function (exports, vue) {
   }
 
   function setupDevtoolsPlugin(pluginDescriptor, setupFn) {
+      const descriptor = pluginDescriptor;
       const target = getTarget();
       const hook = getDevtoolsGlobalHook();
-      const enableProxy = isProxyAvailable && pluginDescriptor.enableEarlyProxy;
+      const enableProxy = isProxyAvailable && descriptor.enableEarlyProxy;
       if (hook && (target.__VUE_DEVTOOLS_PLUGIN_API_AVAILABLE__ || !enableProxy)) {
           hook.emit(HOOK_SETUP, pluginDescriptor, setupFn);
       }
       else {
-          const proxy = enableProxy ? new ApiProxy(pluginDescriptor, hook) : null;
+          const proxy = enableProxy ? new ApiProxy(descriptor, hook) : null;
           const list = target.__VUE_DEVTOOLS_PLUGINS__ = target.__VUE_DEVTOOLS_PLUGINS__ || [];
           list.push({
-              pluginDescriptor,
+              pluginDescriptor: descriptor,
               setupFn,
-              proxy
+              proxy,
           });
           if (proxy)
               setupFn(proxy.proxiedTarget);
@@ -2529,8 +2536,8 @@ var VueRouter = (function (exports, vue) {
           id: 'org.vuejs.router' + (id ? '.' + id : ''),
           label: 'Vue Router',
           packageName: 'vue-router',
-          homepage: 'https://next.router.vuejs.org/',
-          logo: 'https://vuejs.org/images/icons/favicon-96x96.png',
+          homepage: 'https://router.vuejs.org',
+          logo: 'https://router.vuejs.org/logo.png',
           componentStateTypes: ['Routing'],
           app,
       }, api => {
@@ -2605,7 +2612,7 @@ var VueRouter = (function (exports, vue) {
                       title: 'Error during Navigation',
                       subtitle: to.fullPath,
                       logType: 'error',
-                      time: Date.now(),
+                      time: api.now(),
                       data: { error },
                       groupId: to.meta.__navigationId,
                   },
@@ -2626,7 +2633,7 @@ var VueRouter = (function (exports, vue) {
               api.addTimelineEvent({
                   layerId: navigationsLayerId,
                   event: {
-                      time: Date.now(),
+                      time: api.now(),
                       title: 'Start of navigation',
                       subtitle: to.fullPath,
                       data,
@@ -2661,7 +2668,7 @@ var VueRouter = (function (exports, vue) {
                   event: {
                       title: 'End of navigation',
                       subtitle: to.fullPath,
-                      time: Date.now(),
+                      time: api.now(),
                       data,
                       logType: failure ? 'warning' : 'default',
                       groupId: to.meta.__navigationId,
@@ -3058,7 +3065,7 @@ var VueRouter = (function (exports, vue) {
               // nested objects, so we keep the query as is, meaning it can contain
               // numbers at `$route.query`, but at the point, the user will have to
               // use their own type anyway.
-              // https://github.com/vuejs/vue-router-next/issues/328#issuecomment-649481567
+              // https://github.com/vuejs/router/issues/328#issuecomment-649481567
               stringifyQuery$1 === stringifyQuery
                   ? normalizeQuery(rawLocation.query)
                   : (rawLocation.query || {}),
@@ -3146,7 +3153,10 @@ var VueRouter = (function (exports, vue) {
           }
           return (failure ? Promise.resolve(failure) : navigate(toLocation, from))
               .catch((error) => isNavigationFailure(error)
-              ? error
+              ? // navigation redirects still mark the router as ready
+                  isNavigationFailure(error, 2 /* NAVIGATION_GUARD_REDIRECT */)
+                      ? error
+                      : markAsReady(error) // also returns the error
               : // reject any unknown error
                   triggerError(error, toLocation, from))
               .then((failure) => {
@@ -3423,20 +3433,17 @@ var VueRouter = (function (exports, vue) {
               readyHandlers.add([resolve, reject]);
           });
       }
-      /**
-       * Mark the router as ready, resolving the promised returned by isReady(). Can
-       * only be called once, otherwise does nothing.
-       * @param err - optional error
-       */
       function markAsReady(err) {
-          if (ready)
-              return;
-          ready = true;
-          setupListeners();
-          readyHandlers
-              .list()
-              .forEach(([resolve, reject]) => (err ? reject(err) : resolve()));
-          readyHandlers.reset();
+          if (!ready) {
+              // still not ready if an error happened
+              ready = !err;
+              setupListeners();
+              readyHandlers
+                  .list()
+                  .forEach(([resolve, reject]) => (err ? reject(err) : resolve()));
+              readyHandlers.reset();
+          }
+          return err;
       }
       // Scroll behavior
       function handleScroll(to, from, isPush, isFirstNavigation) {

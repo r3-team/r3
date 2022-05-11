@@ -160,11 +160,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var loginId int64
 	var admin bool
 	var noAuth bool
-	if err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
+	if _, err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrUnauthorized)
 		bruteforce.BadAttempt(r)
 		return
 	}
+
+	// start work
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
 
 	// prepare CSV file
 	filePath, err := tools.GetUniqueFilePath(config.File.Paths.Temp, 8999999, 9999999)

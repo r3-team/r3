@@ -145,6 +145,9 @@ let MyBuilderRelationsItem = {
 				/>
 			</td>
 			<td>
+				<my-bool v-model="encryption" :readonly="!isNew" />
+			</td>
+			<td>
 				<my-button
 					@trigger="showPolicies = !showPolicies"
 					:caption="String(policies.length)"
@@ -226,6 +229,7 @@ let MyBuilderRelationsItem = {
 			default:function() { return{
 				id:null,
 				name:'',
+				encryption:false,
 				retentionCount:null,
 				retentionDays:null,
 				policies:[]
@@ -235,6 +239,7 @@ let MyBuilderRelationsItem = {
 	data:function() {
 		return {
 			name:this.relation.name,
+			encryption:this.relation.encryption,
 			retentionCount:this.relation.retentionCount,
 			retentionDays:this.relation.retentionDays,
 			policies:JSON.parse(JSON.stringify(this.relation.policies)),
@@ -245,9 +250,10 @@ let MyBuilderRelationsItem = {
 	},
 	computed:{
 		hasChanges:function() {
-			return this.name !== this.relation.name
-				|| this.retentionCount !== this.relation.retentionCount
-				|| this.retentionDays !== this.relation.retentionDays
+			return this.name                     !== this.relation.name
+				|| this.encryption               !== this.relation.encryption
+				|| this.retentionCount           !== this.relation.retentionCount
+				|| this.retentionDays            !== this.relation.retentionDays
 				|| JSON.stringify(this.policies) !== JSON.stringify(this.relation.policies)
 			;
 		},
@@ -309,8 +315,8 @@ let MyBuilderRelationsItem = {
 		},
 		del:function() {
 			ws.send('relation','del',{id:this.relation.id},true).then(
-				(res) => this.$root.schemaReload(this.moduleId),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.moduleId),
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -318,18 +324,19 @@ let MyBuilderRelationsItem = {
 				id:this.relation.id,
 				moduleId:this.moduleId,
 				name:this.name,
+				encryption:this.encryption,
 				retentionCount:this.retentionCount,
 				retentionDays:this.retentionDays,
 				policies:this.policies
 			},true).then(
-				(res) => {
+				() => {
 					if(this.isNew) {
 						this.name     = '';
 						this.policies = [];
 					}
 					this.$root.schemaReload(this.moduleId);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}
@@ -353,6 +360,7 @@ let MyBuilderRelations = {
 						<th>{{ capGen.button.open }}</th>
 						<th>{{ capGen.name }}</th>
 						<th>{{ capGen.id }}</th>
+						<th>{{ capApp.encryption }}</th>
 						<th>{{ capApp.policies }}</th>
 						<th colspan="2">{{ capApp.retention }}</th>
 						<th></th>
@@ -361,14 +369,14 @@ let MyBuilderRelations = {
 				
 				<!-- new record -->
 				<my-builder-relations-item
-					:module-id="module.id"
+					:moduleId="module.id"
 				/>
 				
 				<!-- existing records -->
 				<my-builder-relations-item
 					v-for="rel in module.relations"
 					:key="rel.id"
-					:module-id="module.id"
+					:moduleId="module.id"
 					:relation="rel"
 				/>
 			</table>
@@ -379,10 +387,8 @@ let MyBuilderRelations = {
 	},
 	computed:{
 		module:function() {
-			if(typeof this.moduleIdMap[this.id] === 'undefined')
-				return false;
-			
-			return this.moduleIdMap[this.id];
+			return typeof this.moduleIdMap[this.id] === 'undefined'
+				? false : this.moduleIdMap[this.id];
 		},
 		
 		// stores

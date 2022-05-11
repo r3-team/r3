@@ -138,8 +138,8 @@ let MyBuilderLoginFormsItem = {
 		// actions
 		del:function() {
 			ws.send('loginForm','del',{id:this.loginForm.id},true).then(
-				(res) => this.$root.schemaReload(this.module.id),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -152,7 +152,7 @@ let MyBuilderLoginFormsItem = {
 				name:this.name,
 				captions:this.captions
 			},true).then(
-				(res) => {
+				() => {
 					if(this.isNew) {
 						this.attributeIdLogin  = null;
 						this.attributeIdLookup = null;
@@ -161,7 +161,7 @@ let MyBuilderLoginFormsItem = {
 					}
 					this.$root.schemaReload(this.module.id);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

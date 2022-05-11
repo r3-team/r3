@@ -239,7 +239,7 @@ let MyBuilderPgFunction = {
 			isTrigger:false,
 			
 			instanceFunctionIds:[
-				'abort_show_message','get_name','get_login_id',
+				'abort_show_message','clean_up_e2ee_keys','get_name','get_login_id',
 				'get_login_language_code','get_public_hostname','get_role_ids',
 				'has_role','has_role_any','log_error','log_info','log_warning',
 				'mail_delete','mail_delete_after_attach','mail_get_next',
@@ -303,6 +303,7 @@ let MyBuilderPgFunction = {
 			
 			field.selectionStart = startPos + 1;
 			field.selectionEnd   = startPos + 1;
+			this.codeFunction    = field.value;
 		},
 		reset:function() {
 			this.name           = this.pgFunction.name;
@@ -563,8 +564,8 @@ let MyBuilderPgFunction = {
 				}),
 				ws.prepare('schema','check',{moduleId:this.module.id})
 			],true).then(
-				(res) => this.$root.schemaReload(this.module.id),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		}
 	}

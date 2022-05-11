@@ -38,14 +38,14 @@ let MyChart = {
 		/>
 	</div>`,
 	props:{
-		choices:    { type:Array,   required:false, default:() => [] },
-		columns:    { type:Array,   required:true },
-		filters:    { type:Array,   required:true },
-		formLoading:{ type:Boolean, required:true },
-		isFullPage: { type:Boolean, required:true },
-		limit:      { type:Number,  required:true },
-		optionJson: { type:String,  required:true },
-		query:      { type:Object,  required:true }
+		choices:      { type:Array,   required:false, default:() => [] },
+		columns:      { type:Array,   required:true },
+		filters:      { type:Array,   required:true },
+		formLoading:  { type:Boolean, required:true },
+		isSingleField:{ type:Boolean, required:true },
+		limit:        { type:Number,  required:true },
+		optionJson:   { type:String,  required:true },
+		query:        { type:Object,  required:true }
 	},
 	data:function() {
 		return {
@@ -67,7 +67,7 @@ let MyChart = {
 		// simple
 		choiceFilters:function() { return this.getChoiceFilters(this.choices,this.choiceId); },
 		hasChoices:   function() { return this.choices.length > 1; },
-		showTopBar:   function() { return this.hasChoices || this.isFullPage; },
+		showTopBar:   function() { return this.hasChoices || this.isSingleField; },
 		
 		// stores
 		settings:function() { return this.$store.getters.settings; }
@@ -120,7 +120,7 @@ let MyChart = {
 				orders:this.query.orders,
 				limit:this.limit
 			},true).then(
-				(res) => {
+				res => {
 					// option overwrites
 					this.option = JSON.parse(this.optionJson);
 					
@@ -166,7 +166,7 @@ let MyChart = {
 					}
 					this.ready = true;
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

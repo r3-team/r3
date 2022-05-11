@@ -14,6 +14,9 @@ import (
 func SendFeedback(isAdmin bool, moduleRelated bool, moduleId pgtype.UUID,
 	formId pgtype.UUID, mood int, code int, text string) error {
 
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
+
 	baseUrl := config.GetString("repoUrl")
 
 	dataAuthUrl := fmt.Sprintf("%s/data/auth", baseUrl)

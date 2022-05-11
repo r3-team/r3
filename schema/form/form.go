@@ -104,7 +104,8 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 		}
 	}
 	return Set_tx(tx, moduleId, form.Id, form.PresetIdOpen, form.IconId, newName,
-		form.Query, form.Fields, form.Functions, form.States, form.Captions)
+		form.NoDataActions, form.Query, form.Fields, form.Functions, form.States,
+		form.Captions)
 }
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
@@ -131,7 +132,7 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 	}
 
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
-		SELECT id, preset_id_open, icon_id, name
+		SELECT id, preset_id_open, icon_id, name, no_data_actions
 		FROM app.form
 		WHERE true
 		%s
@@ -144,7 +145,7 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 	for rows.Next() {
 		var f types.Form
 
-		if err := rows.Scan(&f.Id, &f.PresetIdOpen, &f.IconId, &f.Name); err != nil {
+		if err := rows.Scan(&f.Id, &f.PresetIdOpen, &f.IconId, &f.Name, &f.NoDataActions); err != nil {
 			return forms, err
 		}
 		f.ModuleId = moduleId
@@ -180,8 +181,8 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 }
 
 func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUID,
-	iconId pgtype.UUID, name string, queryIn types.Query, fields []interface{},
-	functions []types.FormFunction, states []types.FormState,
+	iconId pgtype.UUID, name string, noDataActions bool, queryIn types.Query,
+	fields []interface{}, functions []types.FormFunction, states []types.FormState,
 	captions types.CaptionMap) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &id, "form", "id")
@@ -192,16 +193,18 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUI
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.form
-			SET name = $1, preset_id_open = $2, icon_id = $3
-			WHERE id = $4
-		`, name, presetIdOpen, iconId, id); err != nil {
+			SET preset_id_open = $1, icon_id = $2, name = $3, no_data_actions = $4
+			WHERE id = $5
+		`, presetIdOpen, iconId, name, noDataActions, id); err != nil {
 			return err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.form (id, module_id, preset_id_open, icon_id, name)
-			VALUES ($1,$2,$3,$4,$5)
-		`, id, moduleId, presetIdOpen, iconId, name); err != nil {
+			INSERT INTO app.form (
+				id, module_id, preset_id_open, icon_id, name, no_data_actions
+			)
+			VALUES ($1,$2,$3,$4,$5,$6)
+		`, id, moduleId, presetIdOpen, iconId, name, noDataActions); err != nil {
 			return err
 		}
 	}

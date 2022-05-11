@@ -145,11 +145,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		var loginId int64
 		var admin bool
 		var noAuth bool
-		if err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
+		if _, err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
 			handler.AbortRequest(w, handlerContext, err, handler.ErrUnauthorized)
 			bruteforce.BadAttempt(r)
 			return
 		}
+
+		// start work
+		cache.Schema_mx.RLock()
+		defer cache.Schema_mx.RUnlock()
 
 		// store file in temporary directory
 		filePath, err := tools.GetUniqueFilePath(config.File.Paths.Temp, 8999999, 9999999)
@@ -319,6 +323,9 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 		atr, exists := cache.AttributeIdMap[column.AttributeId]
 		if !exists {
 			return handler.CreateErrCode("APP", handler.ErrCodeAppUnknownAttribute)
+		}
+		if atr.Encrypted {
+			return handler.CreateErrCode("CSV", handler.ErrCodeCsvEncryptedAttribute)
 		}
 
 		var value interface{}

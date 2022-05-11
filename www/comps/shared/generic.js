@@ -68,21 +68,76 @@ export function openLink(href,blank) {
 };
 
 export function filterIsCorrect(operator,value0,value1) {
-	if(operator === 'IS NULL' && value0 === null)
-		return true;
-	
-	if(operator === 'IS NOT NULL' && value0 !== null)
-		return true;
-	
 	switch(operator) {
-		case '=':  return value0 == value1; break;
-		case '<>': return value0 != value1; break;
-		case '<':  return value0 <  value1; break;
-		case '>':  return value0 >  value1; break;
-		case '<=': return value0 <= value1; break;
-		case '>=': return value0 >= value1; break;
-		case 'LIKE':  return new RegExp(value0).test(value1);     break;
-		case 'ILIKE': return new RegExp(value0,'i').test(value1); break;
+		case 'IS NULL':     return value0 === null;  break;
+		case 'IS NOT NULL': return value0 !== null;  break;
+		case '=':           return value0 == value1; break;
+		case '<>':          return value0 != value1; break;
+		case '<':           return value0 <  value1; break;
+		case '>':           return value0 >  value1; break;
+		case '<=':          return value0 <= value1; break;
+		case '>=':          return value0 >= value1; break;
+		case 'LIKE':        return new RegExp(value0).test(value1); break;
+		case 'ILIKE':       return new RegExp(value0,'i').test(value1); break;
+	}
+	
+	// subset operators
+	if(['= ANY','<> ALL'].includes(operator)) {
+		
+		//  = ANY: value0 must be any value of value1 set
+		// <> ALL: value0 must not be any value of value1 set
+		const isAny = operator === '= ANY';
+		
+		if(value1 === null || value1.length === 0)
+			return isAny ? false : true;
+		
+		for(const v of value1) {
+			if(v == value0)
+				return isAny ? true : false;
+		}
+		return isAny ? false : true;
+	}
+	
+	// array operators
+	if(['<@','@>','&&'].includes(operator)) {
+		if(value0 === null || value0.length === 0 || value1 === null || value1.length === 0)
+			return false;
+		
+		const isOverlapOp = operator === '&&';
+		
+		// with @> operator, value0 (left side) must contain all values of value1 (right side)
+		// with && operator, any single value must be in both arrays (does not matter which side)
+		const arr0 = operator === '@>' ? value0 : value1;
+		const arr1 = operator === '@>' ? value1 : value0;
+		
+		for(const v1 of arr1) {
+			let found = false;
+			
+			for(const v0 of arr0) {
+				// value types are inferred
+				if(v0 == v1) {
+					
+					// if overlap operator: any match is enough
+					if(isOverlapOp)
+						return true;
+					
+					found = true;
+					break;
+				}
+			}
+			
+			// non-overlap operator and value is not found, no match
+			if(!isOverlapOp && !found)
+				return false;
+		}
+		
+		// if overlap operator:  if no values matched so far, no array match
+		// non overlap operator: if all values matched so far, array match
+		return isOverlapOp ? false : true;
 	}
 	return false;
+};
+
+export function filterOperatorIsSingleValue(operator) {
+	return !['= ANY','<> ALL','@>','<@','&&'].includes(operator);
 };

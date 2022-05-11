@@ -1,6 +1,8 @@
 package types
 
 import (
+	"encoding/json"
+
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"
 )
@@ -9,7 +11,8 @@ var (
 	QueryJoinConnectors   = []string{"INNER", "LEFT", "RIGHT", "FULL", "CROSS"}
 	QueryFilterConnectors = []string{"AND", "OR"}
 	QueryFilterOperators  = []string{"=", "<>", "<", ">", "<=", ">=", "IS NULL",
-		"IS NOT NULL", "LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE", "= ANY", "<> ALL"}
+		"IS NOT NULL", "LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE", "= ANY",
+		"<> ALL", "@>", "<@", "&&"}
 )
 
 // a query starts at a relation to retrieve attribute values
@@ -34,9 +37,11 @@ type QueryJoin struct {
 	IndexFrom   int         `json:"indexFrom"`   // index that we joined from (always lower than own index)
 	Index       int         `json:"index"`       // this relation index
 	Connector   string      `json:"connector"`   // join connector (INNER, LEFT, RIGHT, FULL)
-	ApplyCreate bool        `json:"applyCreate"` // allow new records to be created
-	ApplyUpdate bool        `json:"applyUpdate"` // allow existing records to be updated
-	ApplyDelete bool        `json:"applyDelete"` // allow existing records to be deleted
+
+	// for frontend processing
+	ApplyCreate bool `json:"applyCreate"` // allow new records to be created
+	ApplyUpdate bool `json:"applyUpdate"` // allow existing records to be updated
+	ApplyDelete bool `json:"applyDelete"` // allow existing records to be deleted
 }
 
 // a filter compares two values from left & right sides (0/1)
@@ -53,20 +58,23 @@ type QueryFilter struct {
 	Side1     QueryFilterSide `json:"side1"`     // comparison: right side
 }
 type QueryFilterSide struct {
-	AttributeId     pgtype.UUID `json:"attributeId"`     // attribute (database value)
-	AttributeIndex  int         `json:"attributeIndex"`  // relation index of attribute
-	AttributeNested int         `json:"attributeNested"` // nesting level of attribute  (0=main query, 1=1st sub query)
-	CollectionId    pgtype.UUID `json:"collectionId"`    // collection ID of which column value to compare
-	ColumnId        pgtype.UUID `json:"columnId"`        // column ID from collection of which value to compare
-	FieldId         pgtype.UUID `json:"fieldId"`         // frontend field value
-	PresetId        pgtype.UUID `json:"presetId"`        // preset ID of record to be compared
-	RoleId          pgtype.UUID `json:"roleId"`          // role ID assigned to user
+	Brackets int            `json:"brackets"` // opening/closing brackets (side 0/1)
+	Value    pgtype.Varchar `json:"value"`    // fixed value, can be anything including NULL
 
-	Brackets        int            `json:"brackets"`        // opening/closing brackets (side 0/1)
-	Content         string         `json:"content"`         // attribute, field, role, language code, login, record, record new, sub query, true
+	// for backend processing
+	AttributeId     pgtype.UUID    `json:"attributeId"`     // attribute (database value)
+	AttributeIndex  int            `json:"attributeIndex"`  // relation index of attribute
+	AttributeNested int            `json:"attributeNested"` // nesting level of attribute  (0=main query, 1=1st sub query)
 	Query           Query          `json:"query"`           // sub query
 	QueryAggregator pgtype.Varchar `json:"queryAggregator"` // sub query aggregator (COUNT, AGG, etc.)
-	Value           pgtype.Varchar `json:"value"`           // fixed value, can be anything including NULL
+
+	// for frontend processing
+	Content      string      `json:"content"`      // attribute, collection, field, language code, login, preset, record, record new, role, sub query, true, value
+	CollectionId pgtype.UUID `json:"collectionId"` // collection ID of which column value to compare
+	ColumnId     pgtype.UUID `json:"columnId"`     // column ID from collection of which value to compare
+	FieldId      pgtype.UUID `json:"fieldId"`      // frontend field value
+	PresetId     pgtype.UUID `json:"presetId"`     // preset ID of record to be compared
+	RoleId       pgtype.UUID `json:"roleId"`       // role ID assigned to user
 }
 
 type QueryOrder struct {
@@ -85,4 +93,16 @@ type QueryChoice struct {
 	Name     string        `json:"name"`
 	Filters  []QueryFilter `json:"filters"` // filters for this choice
 	Captions CaptionMap    `json:"captions"`
+}
+
+// custom marshallers
+// use local type to avoid marshal loop (has same fields but none of the original methods)
+func (src Query) MarshalJSON() ([]byte, error) {
+
+	// if relation is not set, query is empty
+	if src.RelationId.Status != pgtype.Present {
+		return []byte("null"), nil
+	}
+	type alias Query
+	return json.Marshal(alias(src))
 }

@@ -15,7 +15,6 @@ var (
 func GetPresetRecordIds() map[uuid.UUID]int64 {
 	preset_mx.Lock()
 	defer preset_mx.Unlock()
-
 	return presetIdMapRecordId
 }
 func GetPresetRecordId(presetId uuid.UUID) int64 {
@@ -23,7 +22,6 @@ func GetPresetRecordId(presetId uuid.UUID) int64 {
 	defer preset_mx.Unlock()
 
 	v, exists := presetIdMapRecordId[presetId]
-
 	if !exists {
 		return 0
 	}

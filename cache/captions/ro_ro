@@ -6,6 +6,7 @@
 			"cancel":"Anulează",
 			"clear":"Clear",
 			"close":"Închide",
+			"copyClipboard":"Copy to clipboard",
 			"create":"Crează",
 			"delete":"Șterge",
 			"deleteHint":"Șterge definitiv înregistrarea selectată",
@@ -28,7 +29,8 @@
 			"saveNew":"Salvează+Nou",
 			"saveNewHint":"Salvează modificările și deschide o nouă înregistrare",
 			"send":"Trimite",
-			"show":"Arată"
+			"show":"Arată",
+			"unlock":"Unlock"
 		},
 		"dialog":{
 			"confirm":"Va rog confirmați"
@@ -37,6 +39,7 @@
 			"aggArray":"vector",
 			"aggAvg":"medie",
 			"aggCount":"număr",
+			"aggJson":"JSON",
 			"aggList":"listă separată de virgule",
 			"aggMax":"maximum",
 			"aggMin":"minimum",
@@ -58,6 +61,7 @@
 		"applications":"Aplicații",
 		"appName":"REI3",
 		"appWebsite":"https://rei3.de",
+		"available":"Available",
 		"busy":"Lucrează - Apasă aici pentru anulare",
 		"date":"Data",
 		"description":"Descriere",
@@ -68,18 +72,19 @@
 		"id":"ID",
 		"inputDecimal":"Trebuie să fie zecimal",
 		"inputInvalid":"Valoarea este nevalidă",
-		"inputLarge":"Valoarea este prea mare",
-		"inputLong":"Valoarea excede",
+		"inputLarge":"Valoarea este prea mare (max. {MAX})",
+		"inputLong":"Valoarea excede (max. {MAX})",
 		"inputRequired":"Implică o intrare",
 		"inputSelectMore":"...introdu un text pentru a filtra rezultatele",
-		"inputShort":"Valoarea este prea scurtă",
-		"inputSmall":"Valoarea este prea mică",
+		"inputShort":"Valoarea este prea scurtă (min. {MIN})",
+		"inputSmall":"Valoarea este prea mică (min. {MIN})",
 		"inputTooFewFiles":"Prea puține fișiere",
 		"inputTooManyFiles":"Prea mult fișiere",
 		"licenseRequired":"Implică o licență",
 		"limit":"Limita",
 		"menu":"Menu",
 		"missingCaption":"TITLU LIPSĂ",
+		"more":"More...",
 		"name":"Nume",
 		"nothingSelected":"Nimic selectat",
 		"nothingThere":"Rezultate lipsă",
@@ -91,6 +96,8 @@
 		"resultsNone":"- fără rezultate -",
 		"resultsOf":"/ {CNT}",
 		"role":"Rol",
+		"selected":"Selected",
+		"status":"Status",
 		"threeDots":"...",
 		"title":"Titlu",
 		"username":"Nume utilizator",
@@ -221,15 +228,16 @@
 			"msAdExtHint":"Apartenența la grupuri imbricate, controlul contului de utilizator",
 			"nameHint":"Nume unic",
 			"port":"Portul",
-			"portHint":"În mod implicit, 389 dacă nu există TLS sau 636 pentru TLS",
+			"portHint":"În mod implicit, 389 sau 636 pentru SSL/TLS",
 			"role":"Rol",
 			"searchClass":"Clasa de obiecte",
 			"searchClassHint":"Exemplu: user",
 			"searchDn":"Cauta DN",
 			"searchDnHint":"Exemplu: OU=User,DC=mycompany,DC=local",
+			"starttls":"Utilizați StartTLS",
 			"title":"Creați/editați conexiunea",
 			"titleRoles":"Roluri pentru apartenența la un grup",
-			"tls":"Utilizați TLS",
+			"tls":"Utilizați SSL/TLS",
 			"tlsVerify":"Verifică TLS"
 		},
 		"license":{
@@ -368,6 +376,7 @@
 				"cleanupLogs":"Curățați jurnalele de sistem expirate",
 				"cleanupTempDir":"Curățați directorul temporar",
 				"embeddedBackup":"Gestionați copiile de siguranță integrate",
+				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Importați autentificări și roluri prin LDAP",
 				"mailAttach":"Transfer de atașamente prin e-mail",
 				"mailRetrieve":"Preluare e-mail",
@@ -493,16 +502,6 @@
 				"conditions":"Condiții",
 				"descriptionHint":"Descriere",
 				"effects":"Consecințe",
-				"fieldChanged":"Este modificată",
-				"modeField":"Valoarea câmpului",
-				"modeField2Field":"valoarea câmpului",
-				"modeField2Fixed":"valoarea fixă",
-				"modeField2Login":"login ID",
-				"modeField2Preset":"prestabilit",
-				"modeFieldChanged":"Field value changed",
-				"modeRecord":"Status înregistrare",
-				"modeRole":"Rol",
-				"newRecord":"Este nou",
 				"title":"Stările formularului"
 			},
 			"aggregator":"Agrega",
@@ -514,8 +513,10 @@
 			"captions":"Titlu",
 			"category":"Selector de categorie",
 			"collection":"Collection",
+			"collectionColumn":"Value(s) from column",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*Collection is only affected if selected as filter criteria in data query.",
+			"collectionMultiValue":"Multi input",
 			"collectionTitle":"Limit collection by user input",
 			"columnsTarget":"Așezați coloane aici",
 			"columnsTemplates":"Coloane disponibile",
@@ -523,6 +524,7 @@
 			"columnBatchNot":"negrupate",
 			"columnBatchHint":"Coloana este parte a lotului {CNT}",
 			"columnBatchHintNot":"Coloana nu este grupată cu altele",
+			"columnClipboard":"Clipboard",
 			"columnHeaderData":"Preluarea datelor",
 			"columnLength":"Lungime (caractere)",
 			"columnLength0":"fără limită",
@@ -551,6 +553,7 @@
 			"fields":"Câmpuri",
 			"fieldAttributeIdAltDateTo":"Data până la (perioada)",
 			"fieldAttributeIdAltRichtextFiles":"Acces la fișierul Richtext",
+			"fieldClipboard":"Clipboard",
 			"fieldDefault":"Valoarea implicită",
 			"fieldDefaultHint":"Verificați documentele pentru substituenți",
 			"fieldDefaultPresetIds":"Presetare implicit(e)",
@@ -596,6 +599,7 @@
 			"layout":"Aspectul listei",
 			"limit":"Numărul rezultatelor",
 			"new":"Formular nou",
+			"noDataActions":"No data actions",
 			"onMobile":"Vizualizare dispozitiv mobil",
 			"openForm":"Deschideți formularul",
 			"openFormAttributeApply":"...pentru a seta valoare formularului",
@@ -635,7 +639,10 @@
 				"delete":"Sigur doriți să ștergeți această funcție?"
 			},
 			"helpJs":{
+				"block_inputs":"app.block_inputs(true/false) => UNDEFINED<br /><br />Blocks or unblocks all inputs on the current form.",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Copiază textul în clipboard-ul utilizatorului.",
+				"get_e2ee_data_key":"app.get_e2ee_data_key(dataKeyEncrypted) => STRING<br /><br />Decrypts provided data key with the private key of the current login.",
+				"get_e2ee_data_value":"app.get_e2ee_data_value(dataKey,valueEncrypted) => STRING<br /><br />Decrypts data value with the provided data key.",
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Returnează codul de limbă din 5 litere („en_us”, ...) al autentificarii curente.",
 				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Returnează ID-ul autentificării curente.",
 				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Returnează ID-ul înregistrării din formularul deschis pentru indexul de relație specificat (0 este implicit).",
@@ -646,10 +653,25 @@
 				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Şterge înregistrarea formularului curent.",
 				"record_new":"app.record_new() => UNDEFINED<br /><br />Deschideți nouă înregistrare.",
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Reîncărcați înregistrarea formularului curent.",
-				"record_save":"app.record_save() => UNDEFINED<br /><br />Salvați înregistrarea formularului curent."
+				"record_save":"app.record_save() => UNDEFINED<br /><br />Salvați înregistrarea formularului curent.",
+				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated on the next form save. Data keys for relations on the form with encryption enabled will be encrypted with the public key of each defined login. This enables later decryption of these records for users.<br /><br />If this function is not used, decryption is only ever possible for the creator.",
+				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated for the specified relation and records on the next form save. Data keys for relation records will be encrypted with the public key of each defined login. This enables later decryption of these records for users.",
+				"show_form_message":"app.show_form_message(message,duration_in_ms) => UNDEFINED<br /><br />Temporarily replaces the form title with a custom message. The second argument defines in milli-seconds how long the message is shown (3000 by default).",
+				"update_collection":"app.update_collection(collection_id) => UNDEFINED<br /><br />Retrieves and updates values for the specified collection."
+			},
+			"helpJsHint":{
+				"copy_to_clipboard":"VALUE",
+				"get_e2ee_data_key":"DATA_KEY_ENCRYPTED",
+				"get_e2ee_data_value":"DATA_KEY, VALUE_ENCRYPTED",
+				"get_record_id":"RELATION_INDEX_NUMBER",
+				"has_role":"ROLE_ID_STRING",
+				"open_form":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
+				"show_form_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
+				"update_collection":"COLLECTION_ID"
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Anulează operația și trimite un mesaj utilizatorului care rulează acum și care este afișat pe ecranul utilizatorului.",
+				"clean_up_e2ee_keys":"instance.clean_up_e2ee_keys(<blockquote>login_id INTEGER,<br />relation_id UUID,<br />record_ids_access INTEGER[]</blockquote>) => VOID<br /><br />Deletes end-to-end encryption data keys for records that a login has no longer access to. This makes decryption impossible for the login.",
 				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Returnează ID-ul login-ului, care execută operațiunea.",
 				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Returnează codul de limbă din 5 caractere ('en_us', ...) al login-ului, care este utilizat pentru a accesa backend-ul de date.",
 				"get_name":"instance.get_name() => TEXT<br /><br />Returnează numele instanței, definit în fereastra de personalizare a panoului de administrare.",
@@ -711,10 +733,7 @@
 			"titleJs":"Funcții front-end ({CNT})",
 			"titlePg":"Funcții back-end ({CNT})",
 			"titleOne":"Titlu funcției",
-			"valueJsHint":"VALUE",
-			"valueJsHintForm":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
-			"valueJsHintIndex":"RELATION_INDEX_NUMBER",
-			"valueJsHintRole":"ROLE_ID_STRING"
+			"value":"VALUE"
 		},
 		"help":{
 			"title":"Ajutorul aplicației"
@@ -822,6 +841,8 @@
 			"codeCondition":"Condiție",
 			"content":"Conținut",
 			"def":"IMPLICIT",
+			"encrypted":"E2E encrypted",
+			"encryption":"E2E encryption",
 			"execute":"Execută",
 			"external":"Relații de referință ({CNT})",
 			"fires":"Fires",
@@ -976,7 +997,8 @@
 			"002":"Număr nevalid '{VALUE}' (zecimală așteptată).",
 			"003":"Valoare de timp nevalidă '{VALUE}', format așteptat: {EXPECT}.",
 			"004":"Tip de atribut neacceptat '{VALUE}'.",
-			"005":"Număr greșit de câmpuri în linie '{VALUE}'."
+			"005":"Număr greșit de câmpuri în linie '{VALUE}'.",
+			"006":"Encrypted attributes are not supported"
 		},
 		"DBS":{
 			"001":"{FNC_MSG}",
@@ -988,7 +1010,12 @@
 			"007":"Valoare nevalidă '{VALUE}'."
 		},
 		"SEC":{
-			"001":"Acces neautorizat."
+			"001":"Acces neautorizat.",
+			"002":"The system failed to unlock your personal key for end-to-end encryption. This can happen if someone changed your password for you or you have changed it outside this application.<br /><br />Please open the user settings and follow the instructions to regain access to your personal key.",
+			"003":"The system failed to encrypt the record values. Please try again.",
+			"004":"The system failed to decrypt the record values. Please try again.",
+			"005":"The system failed to retrieve decryption keys for the selected records.",
+			"006":"Not all selected users have end-to-end encryption enabled - these are: {NAMES}"
 		},
 		"initCollection":"Nu s-au putut încărca colecțiile în timpul autentificarii: {MSG}"
 	},
@@ -1021,6 +1048,7 @@
 				"attribute":"valoarea atributului",
 				"collection":"collection value(s)",
 				"field":"valoarea câmpului",
+				"fieldChanged":"field has changed (TRUE/FALSE)",
 				"javascript":"Expresie JavaScript",
 				"languageCode":"codul limbii de conectare (en_us, ...)",
 				"login":"ID-ul autentificării (întreg)",
@@ -1034,13 +1062,11 @@
 			},
 			"operator":{
 				"eq":"egal",
-				"eqAny":"include",
 				"le":"mai mare sau egal",
 				"lt":"mai mare",
 				"ilike":"conține",
 				"like":"conține (potrivire exactă)",
 				"ne":"diferit",
-				"neAll":"exclude",
 				"not_ilike":"nu conține",
 				"not_like":"nu conține (potrivire exactă)",
 				"not_null":"ne nul",
@@ -1053,8 +1079,15 @@
 		"javascriptHint":"Ex.: return new Date().getFullYear();",
 		"nestingMain":"Interogare eprincipală",
 		"nestingSub":"Sub înterogare",
+		"operatorsArray":"Array",
+		"operatorsNull":"Empty value",
+		"operatorsSets":"Subset",
+		"operatorsSize":"Number",
+		"operatorsText":"Text",
 		"queryAggregatorNull":"fără agregare",
 		"queryShow":"Afișează subinterogarea",
+		"subQueryAttribute":"Attribute",
+		"subQueryAggregator":"Aggregate",
 		"valueHint":"Valoare text sau număr"
 	},
 	"form":{
@@ -1063,11 +1096,12 @@
 			"helpHint":"Afișați paginile de ajutor",
 			"log":"Jurnale",
 			"logHint":"Deschideți jurnalele de modificări",
-			"retractLogs":"Retrageți jurnalele"
+			"logShowAll":"Show all ({CNT})"
 		},
 		"dialog":{
 			"close":"Există modificări nesalvate.<br /><br />Doriți în continuare să închideți acest formular?",
 			"delete":"Sunteți sigur că doriți să ștergeți <b>permanent</b> această înregistrare?",
+			"encrypted":"The field content will be encrypted on your system before it is being sent to the server.",
 			"new":"Există modificări nesalvate.<br /><br />Doriți în continuare să deschideți o înregistrare nouă?",
 			"newReset":"Aceasta vă va reseta toate introducerile.<br /><br />Doriți să continuați?",
 			"prev":"Există modificări nesalvate.<br /><br />Totuși, doriți să reveniți?",
@@ -1075,11 +1109,10 @@
 		},
 		"message":{
 			"recordCreated":"Înregistrarea a fost creată",
-			"recordCreatedMobile":"Creat!",
 			"recordDeleted":"înregistrarea a fost ștearsă",
-			"recordDeletedMobile":"Șters!",
-			"recordUpdated":"înregistrarea a fost actualizată",
-			"recordUpdatedMobile":"Actualizat"
+			"recordEncrypting":"Encrypting record...",
+			"recordValueCopied":"Copied to clipboard",
+			"recordUpdated":"înregistrarea a fost actualizată"
 		},
 		"dataLog":"Schimbă jurnalele",
 		"deletedUser":"utilizator șters",
@@ -1094,8 +1127,7 @@
 			"goToApps":"Deschideți fișierul de import",
 			"goToLogins":"Atribuiți roluri",
 			"goToRepo":"Deschideți depozitul",
-			"installBundle":"Instalați Core Company",
-			"openHelp":"Pagina de ajutor"
+			"installBundle":"Instalați Core Company"
 		},
 		"wizard":{
 			"installBundle":"Core Company",
@@ -1107,8 +1139,6 @@
 			"intro":"Bun venit la REI3<br /><br />În prezent, nu există aplicații instalate. Pentru a începe să utilizați REI3, vă rugăm să alegeți una dintre opțiunile de instalare de mai jos.",
 			"title":"Setare"
 		},
-		"firstSteps":"Primii pași",
-		"firstStepsIntro":"Majoritatea aplicațiilor necesită o configurație inițială și/sau date permanente pentru a fi utile. Vă rugăm să consultați paginile individuale de ajutor pentru a începe:",
 		"newVersion":"Notificare de actualizare",
 		"newVersionText":"Este disponibilă o nouă versiune de REI3.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">Descărcați REI3 v{VERSION}</a >",
 		"noAccess":"Nu a fost acordat încă acces.<br />Vă rugăm să contactați administratorul de sistem.",
@@ -1167,6 +1197,7 @@
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Zona de timp",
 		"csvTotalLimit":"Număr de rânduri (0 = toate)",
+		"fetching":"Data is being retrieved...",
 		"inputHintCreate":"Creați o înregistrare nouă",
 		"inputHintOpen":"Deschideți înregistrarea",
 		"inputHintRemove":"Ștergeți înregistrarea",
@@ -1176,15 +1207,7 @@
 		"quick":"Filtrați rezultatele în toate coloanele"
 	},
 	"settings":{
-		"button":{
-			"logout":"Deconectare"
-		},
-		"option":{
-			"cornerKeep":"- implicit -",
-			"cornerRounded":"rotunjit",
-			"cornerSquared":"colțuros"
-		},
-		"security":{
+		"account":{
 			"messagePwCurrentWrong":"Parola curentă este nevalidă",
 			"messagePwDiff":"Parolele nu se potrivesc",
 			"messagePwRequiresDigit":"Parola trebuie să conțină un număr",
@@ -1196,6 +1219,40 @@
 			"pwNew1":"Parola nouă (repetată)",
 			"pwOld":"Parola curentă",
 			"titlePwChange":"Schimbare parolă"
+		},
+		"button":{
+			"logout":"Deconectare"
+		},
+		"encryption":{
+			"button":{
+				"createKeys":"Create keys",
+				"resetKeys":"Reset personal keys",
+				"storeKeys":"Enable encryption"
+			},
+			"status":{
+				"inactive":"Not enabled",
+				"locked":"Keys are locked",
+				"unlocked":"Ready for use"
+			},
+			"backupCode":"Backup code",
+			"backupCodeDesc":"The backup code is <b>very important</b>; it serves to re-establish access if you forget your password.",
+			"confirmBackupCode":"I have copied the backup code to a secure location.",
+			"confirmEncryption":"I understand that if I loose access to both my password and my backup code, encrypted data becomes permanently inaccessible.",
+			"description":"Applications can encrypt sensitive data for exclusive access by specific individuals. Before data can be encrypted, each user has to create personal keys.",
+			"modulesEnc":"Applications that use encryption",
+			"newKeys":"Keys created successfully",
+			"newKeysDesc":"To complete the setup, copy your personal backup code to a secure location.",
+			"prevPassword":"Previous password",
+			"regainAccess":"Regain access to personal keys",
+			"regainAccessDesc":"You can regain access to your personal keys by entering your previous password. If you do not know your previous password, you need to use your personal backup code.",
+			"resetAccess":"Reset personal keys",
+			"resetAccessDesc":"If you do not have access to either your previous password nor your backup code, you permanently lost access to your encrypted data.<br /><br />If this is the case, you can decide to reset your personal keys to encrypt new data - this will <b>NOT</b> re-establish access to previously encrypted data.",
+			"resetAccessHint":"Are you sure you want to reset your personal keys? If you do this, there is no going back even if you find your old backup code later."
+		},
+		"option":{
+			"cornerKeep":"- implicit -",
+			"cornerRounded":"rotunjit",
+			"cornerSquared":"colțuros"
 		},
 		"bordersAll":"Adăugați chenaruri",
 		"bordersCorners":"Colțuri la margine",
@@ -1209,15 +1266,15 @@
 		"dark":"Mod întunecat",
 		"fontSize":"Mărime font",
 		"headerCaptions":"Afișează titlurile din meniul principal",
-		"hintFirstSteps":"Afișați „primii pași”",
 		"languageCode":"Limba",
+		"mobileScrollForm":"Mobile: Scroll entire form",
 		"pageLimit":"Lățimea paginii maximă",
 		"pageTitle":"Setări",
 		"spacing":"Spaţierea",
 		"sundayFirstDow":"Duminică este prima zi a săptămânii",
-		"titleAdmin":"Administrare",
+		"titleAccount":"Account",
 		"titleDisplay":"Afișare",
-		"titleSecurity":"Securitate",
+		"titleEncryption":"End-to-end encryption",
 		"titleTheme":"Temă",
 		"warnUnsaved":"Avertismente pentru modificări nesalvate"
 	}

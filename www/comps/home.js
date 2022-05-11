@@ -116,60 +116,6 @@ let MyHome = {
 			</div>
 		</div>
 		
-		<!-- first steps -->
-		<div class="contentBox scroll home-standardBox home-firstSteps"
-			v-if="isAdmin && settings.hintFirstSteps && !isMobile && !noNavigation"
-		>
-			<div class="top">
-				<div class="area">
-					<img class="icon" src="images/question.png" />
-					<h1>{{ capApp.firstSteps }}</h1>
-				</div>
-				<div class="area">
-					<my-button image="cancel.png"
-						@trigger="setSettingSingle('hintFirstSteps',false)"
-						:cancel="true"
-						:darkBg="true"
-					/>
-				</div>
-			</div>
-			
-			<div class="content">
-				<span>{{ capApp.firstStepsIntro }}</span>
-				<br /><br />
-				<div class="wrap" v-for="me in moduleEntries">
-				
-					<div class="entry">
-						<div>
-							<img :src="srcBase64Icon(me.iconId,'images/module.png')" />
-							<span>{{ me.caption }}</span>
-						</div>
-						
-						<my-button image="question.png"
-							v-if="typeof moduleIdMap[me.id].captions.moduleHelp[settings.languageCode] !== 'undefined'"
-							@trigger="showHelp(me.caption,moduleIdMap[me.id].captions.moduleHelp[settings.languageCode])"
-							:caption="capApp.button.openHelp"
-							:naked="true"
-						/>
-					</div>
-					
-					<div class="entry child" v-for="mec in me.children">
-						<div>
-							<img :src="srcBase64Icon(mec.iconId,'images/module.png')" />
-							<span>{{ mec.caption }}</span>
-						</div>
-						
-						<my-button class="right" image="question.png"
-							v-if="typeof moduleIdMap[mec.id].captions.moduleHelp[settings.languageCode] !== 'undefined'"
-							@trigger="showHelp(mec.caption,moduleIdMap[mec.id].captions.moduleHelp[settings.languageCode])"
-							:caption="capApp.button.openHelp"
-							:naked="true"
-						/>
-					</div>
-				</div>
-			</div>
-		</div>
-		
 		<!-- module navigation -->
 		<span class="home-title" v-if="!isMobile && !noNavigation">
 			{{ capGen.applications }}
@@ -182,22 +128,39 @@ let MyHome = {
 				<div class="module-title" :style="bgStyle(me.id)"></div>
 				
 				<div class="entries">
-					<router-link class="entry clickable"
-						:to="'/app/'+me.name"
-					>
-						<img :src="srcBase64Icon(me.iconId,'images/module.png')" />
-						<span>{{ me.caption }}</span>
-					</router-link>
+					<div class="entry">
+						<router-link class="clickable"
+							:to="'/app/'+me.name"
+						>
+							<img :src="srcBase64Icon(me.iconId,'images/module.png')" />
+							<span>{{ me.caption }}</span>
+						</router-link>
+						
+						<my-button class="right" image="question.png"
+							v-if="typeof moduleIdMap[me.id].captions.moduleHelp[settings.languageCode] !== 'undefined'"
+							@trigger="showHelp(me.caption,moduleIdMap[me.id].captions.moduleHelp[settings.languageCode])"
+							:blockBubble="true"
+							:naked="true"
+						/>
+					</div>
 					
 					<div class="children">
-						<router-link class="entry clickable"
-							v-for="mec in me.children"
-							:key="mec.id"
-							:to="'/app/'+me.name+'/'+mec.name"
-						>
-							<img :src="srcBase64Icon(mec.iconId,'images/module.png')" />
-							<span>{{ mec.caption }}</span>
-						</router-link>
+						<div class="entry" v-for="mec in me.children">
+							<router-link class="clickable"
+								:key="mec.id"
+								:to="'/app/'+me.name+'/'+mec.name"
+							>
+								<img :src="srcBase64Icon(mec.iconId,'images/module.png')" />
+								<span>{{ mec.caption }}</span>
+								
+							</router-link>
+							<my-button class="right" image="question.png"
+								v-if="typeof moduleIdMap[mec.id].captions.moduleHelp[settings.languageCode] !== 'undefined'"
+								@trigger="showHelp(mec.caption,moduleIdMap[mec.id].captions.moduleHelp[settings.languageCode])"
+								:blockBubble="true"
+								:naked="true"
+							/>
+						</div>
 					</div>
 					
 					<img class="watermark" :src="srcBase64Icon(me.iconId,'images/module.png')" />
@@ -276,8 +239,8 @@ let MyHome = {
 		// actions
 		installPackage:function() {
 			ws.send('package','install',{},true).then(
-				(res) => {},
-				(err) => this.$root.genericError(err)
+				() => {},
+				this.$root.genericError
 			);
 			this.installStarted = true;
 		},

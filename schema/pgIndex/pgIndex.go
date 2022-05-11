@@ -190,12 +190,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, noDuplicates bool,
 	}
 
 	// create index in module
-	_, moduleName, err := schema.GetModuleDetailsByRelationId_tx(tx, relationId)
-	if err != nil {
-		return err
-	}
-
-	relationName, err := schema.GetRelationNameById_tx(tx, relationId)
+	moduleName, relationName, err := schema.GetRelationNamesById_tx(tx, relationId)
 	if err != nil {
 		return err
 	}

@@ -500,7 +500,7 @@ let MyBuilderModulesItem = {
 				requests.push(ws.prepare('schema','check',{moduleId:this.id}));
 			
 			ws.sendMultiple(requests,true).then(
-				(res) => {
+				() => {
 					if(this.isNew) {
 						this.name      = '';
 						this.captions  = { moduleTitle:{} };
@@ -517,7 +517,7 @@ let MyBuilderModulesItem = {
 					this.dependsOn.sort();
 					this.languages.sort();
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}
@@ -581,12 +581,12 @@ let MyBuilderModulesKeyCreate = {
 		displayArrow,
 		createKey:function() {
 			ws.send('key','create',{keyLength:parseInt(this.keyLength)},true).then(
-				(res) => {
+				res => {
 					this.keyPrivate = res.payload.private;
 					this.keyPublic  = res.payload.public;
 					this.running    = false;
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 			this.running = true;
 		}
@@ -825,23 +825,23 @@ let MyBuilderModulesExport = {
 		displayArrow,
 		addVersion:function(moduleId) {
 			ws.send('transfer','addVersion',{moduleId:moduleId},true).then(
-				(res) => {
+				() => {
 					this.moduleIdMapChanged = null;
 					this.$root.schemaReload(moduleId);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		check:function() {
 			ws.send('module','checkChange',{id:this.id},true).then(
-				(res) => this.moduleIdMapChanged = res.payload.moduleIdMapChanged,
-				(err) => this.$root.genericError(err)
+				res => this.moduleIdMapChanged = res.payload.moduleIdMapChanged,
+				this.$root.genericError
 			);
 		},
 		setKey:function() {
 			ws.send('transfer','storeExportKey',{exportKey:this.exportPrivateKey},true).then(
-				(res) => this.keyIsSet = true,
-				(err) => this.$root.genericError(err)
+				() => this.keyIsSet = true,
+				this.$root.genericError
 			);
 		}
 	}

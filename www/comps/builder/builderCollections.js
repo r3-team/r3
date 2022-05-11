@@ -1,14 +1,23 @@
+import MyBuilderIconInput from './builderIconInput.js';
 import {getQueryTemplate} from '../shared/query.js';
 export {MyBuilderCollections as default};
 
 let MyBuilderCollectionsItem = {
 	name:'my-builder-collections-item',
+	components:{MyBuilderIconInput},
 	template:`<tbody>
 		<tr>
 			<td>
 				<my-button image="open.png"
 					v-if="!isNew"
 					@trigger="open"
+				/>
+			</td>
+			<td>
+				<my-builder-icon-input
+					@input="iconId = $event"
+					:iconIdSelected="iconId"
+					:module="module"
 				/>
 			</td>
 			<td>
@@ -43,6 +52,7 @@ let MyBuilderCollectionsItem = {
 		collection:{ type:Object, required:false,
 			default:function() { return{
 				id:null,
+				iconId:null,
 				moduleId:null,
 				name:'',
 				columns:[],
@@ -52,13 +62,18 @@ let MyBuilderCollectionsItem = {
 	},
 	data:function() {
 		return {
+			iconId:this.collection.iconId,
 			name:this.collection.name
 		};
 	},
 	computed:{
+		hasChanges:function() {
+			return this.iconId !== this.collection.iconId
+				|| this.name   !== this.collection.name;
+		},
+		
 		// simple states
-		hasChanges:function() { return this.name !== this.collection.name; },
-		isNew:     function() { return this.collection.id === null; },
+		isNew:function() { return this.collection.id === null; },
 		
 		// stores
 		capApp:function() { return this.$store.getters.captions.builder.collection; },
@@ -100,8 +115,8 @@ let MyBuilderCollectionsItem = {
 		},
 		del:function() {
 			ws.send('collection','del',{id:this.collection.id},true).then(
-				(res) => this.$root.schemaReload(this.module.id),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -112,19 +127,20 @@ let MyBuilderCollectionsItem = {
 			ws.send('collection','set',{
 				id:this.collection.id,
 				moduleId:this.module.id,
+				iconId:this.iconId,
 				name:this.name,
 				
 				// not changable values on this interface
 				columns:this.collection.columns,
 				query:query
 			},true).then(
-				(res) => {
+				() => {
 					if(this.isNew)
 						this.name = '';
 					
 					this.$root.schemaReload(this.module.id);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}
@@ -146,6 +162,7 @@ let MyBuilderCollections = {
 				<thead>
 					<tr>
 						<th>{{ capGen.button.open }}</th>
+						<th>{{ capGen.icon }}</th>
 						<th>{{ capGen.name }}</th>
 						<th>{{ capGen.id }}</th>
 						<th></th>

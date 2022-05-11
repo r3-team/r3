@@ -69,7 +69,6 @@ func ExecTransaction(ctxClient context.Context, loginId int64, isAdmin bool,
 		// error case, convert to error code for requestor
 		returnErr, isExpectedErr := handler.ConvertToErrCode(err, !isAdmin)
 		if !isExpectedErr {
-			// unexpected errors are logged as warning
 			log.Warning("server", fmt.Sprintf("TRANSACTION %d, request %s %s failure (login ID %d)",
 				reqTrans.TransactionNr, req.Ressource, req.Action, loginId), err)
 		}
@@ -82,17 +81,14 @@ func ExecTransaction(ctxClient context.Context, loginId int64, isAdmin bool,
 	// check if error occured in any request
 	if resTrans.Error == "" {
 		if err := tx.Commit(ctx); err != nil {
-			// for normal users, there are no expected errors causing a commit issue
-			// admins get original error message
-			if isAdmin {
-				resTrans.Error = err.Error()
-			} else {
-				resTrans.Error = handler.ErrGeneral
-			}
-			resTrans.Responses = make([]types.Response, 0)
 
-			log.Warning("server", fmt.Sprintf("TRANSACTION %d, commit failure (login ID %d)",
-				reqTrans.TransactionNr, loginId), err)
+			returnErr, isExpectedErr := handler.ConvertToErrCode(err, !isAdmin)
+			if !isExpectedErr {
+				log.Warning("server", fmt.Sprintf("TRANSACTION %d, commit failure (login ID %d)",
+					reqTrans.TransactionNr, loginId), err)
+			}
+			resTrans.Error = fmt.Sprintf("%v", returnErr)
+			resTrans.Responses = make([]types.Response, 0) // clear all responses
 
 			tx.Rollback(ctx)
 		}
@@ -126,10 +122,14 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return DataDel_tx(ctx, tx, reqJson, loginId)
 		case "get":
 			return DataGet_tx(ctx, tx, reqJson, loginId)
+		case "getKeys":
+			return DataGetKeys_tx(ctx, tx, reqJson, loginId)
 		case "getLog":
 			return DataLogGet_tx(ctx, tx, reqJson, loginId)
 		case "set":
 			return DataSet_tx(ctx, tx, reqJson, loginId)
+		case "setKeys":
+			return DataSetKeys_tx(ctx, tx, reqJson)
 		}
 	case "feedback":
 		switch action {
@@ -142,6 +142,17 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return LoginGetNames(reqJson)
 		case "setTokenFixed":
 			return LoginSetTokenFixed_tx(tx, reqJson, loginId)
+		}
+	case "loginKeys":
+		switch action {
+		case "getPublic":
+			return LoginKeysGetPublic(ctx, reqJson)
+		case "reset":
+			return LoginKeysReset_tx(tx, loginId)
+		case "store":
+			return LoginKeysStore_tx(tx, reqJson, loginId)
+		case "storePrivate":
+			return LoginKeysStorePrivate_tx(tx, reqJson, loginId)
 		}
 	case "lookup":
 		switch action {

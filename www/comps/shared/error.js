@@ -24,7 +24,26 @@ export function genericError(message) {
 	});
 };
 
+export function genericErrorWithFallback(message,fallbackContext,fallbackNumber) {
+	// message has proper error code, resolve normally
+	if(typeof message === 'string' && /^{ERR_[A-Z]{3}_\d{3}}/.test(message))
+		return genericError(message);
+	
+	// no proper error code available, resolve with fallback
+	return genericError(`{ERR_${fallbackContext}_${fallbackNumber}}`);
+};
+
+// these are errors that should not occur
+// they are printed to the console for troubleshooting
+export function consoleError(err) {
+	console.log(`${new Date().toLocaleString()}: An error occurred`,
+		resolveErrCode(err));
+};
+
 export function resolveErrCode(message) {
+	
+	if(typeof message !== 'string')
+		return message;
 	
 	// check for error code in message, as in: "{ERR_DBS_069} My error message"
 	let matches = message.match(/^{ERR_([A-Z]{3})_(\d{3})}/);
@@ -128,6 +147,16 @@ export function resolveErrCode(message) {
 					return message;
 				
 				return cap.replace('{NAME}',matches[1]);
+			break;
+		}
+	}
+	if(errContext === 'SEC') {
+		switch(errNumber) {
+			case '006':
+				matches = message.match(/\[NAMES\:([^\]]*)\]/);
+				return matches === null || matches.length !== 2
+					? message
+					: cap.replace('{NAMES}',matches[1]);
 			break;
 		}
 	}

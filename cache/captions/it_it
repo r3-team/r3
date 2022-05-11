@@ -6,6 +6,7 @@
 			"cancel":"Annulla",
 			"clear":"Clear",
 			"close":"Chiudi",
+			"copyClipboard":"Copy to clipboard",
 			"create":"Crea",
 			"delete":"Cancella",
 			"deleteHint":"Cancella il record definitivamente",
@@ -28,7 +29,8 @@
 			"saveNew":"Salva+Nuovo",
 			"saveNewHint":"Salva il record e ne crea uno nuovo",
 			"send":"Invia",
-			"show":"Mostra"
+			"show":"Mostra",
+			"unlock":"Unlock"
 		},
 		"dialog":{
 			"confirm":"Si prega di confermare"
@@ -37,6 +39,7 @@
 			"aggArray":"vettore",
 			"aggAvg":"media",
 			"aggCount":"conta",
+			"aggJson":"JSON",
 			"aggList":"elenco separato da virgole",
 			"aggMax":"massimo",
 			"aggMin":"minimo",
@@ -58,6 +61,7 @@
 		"applications":"Applicazioni",
 		"appName":"REI3",
 		"appWebsite":"https://rei3.de",
+		"available":"Available",
 		"busy":"Elaborazione - Clicca qui per annullare",
 		"date":"Data",
 		"description":"Descrizione",
@@ -68,18 +72,19 @@
 		"id":"ID",
 		"inputDecimal":"Il valore deve essere decimale",
 		"inputInvalid":"Valore non valido",
-		"inputLarge":"Valore troppo grande",
-		"inputLong":"Valore troppo lungo",
+		"inputLarge":"Valore troppo grande (max. {MAX})",
+		"inputLong":"Valore troppo lungo (max. {MAX})",
 		"inputRequired":"Obbligatorio",
 		"inputSelectMore":"...inserisci il testo per filtrare i risultati",
-		"inputShort":"Valore troppo corto",
-		"inputSmall":"Valore troppo piccolo",
+		"inputShort":"Valore troppo corto (min. {MIN})",
+		"inputSmall":"Valore troppo piccolo (min. {MIN})",
 		"inputTooFewFiles":"Troppo pochi file",
 		"inputTooManyFiles":"Troppi file",
 		"licenseRequired":"Richiede licenza",
 		"limit":"Limite",
 		"menu":"Menu",
 		"missingCaption":"TITOLO MANCANTE",
+		"more":"More...",
 		"name":"Nome",
 		"nothingSelected":"Niente selezionato",
 		"nothingThere":"Nessun risultato disponibile",
@@ -91,6 +96,8 @@
 		"resultsNone":"- nessun risultato -",
 		"resultsOf":"/ {CNT}",
 		"role":"Ruolo",
+		"selected":"Selected",
+		"status":"Status",
 		"threeDots":"...",
 		"title":"Titolo",
 		"username":"Username",
@@ -221,15 +228,16 @@
 			"msAdExtHint":"Appartenenze a gruppi nidificati, controllo dell'account utente",
 			"nameHint":"Nome univoco",
 			"port":"Porta",
-			"portHint":"Predefinito 389 se no TLS, 636 per TLS",
+			"portHint":"Predefinito 389, 636 per SSL/TLS",
 			"role":"Ruolo",
 			"searchClass":"Classe oggetto",
 			"searchClassHint":"Esempio: user",
 			"searchDn":"Cerca DN",
 			"searchDnHint":"Esempio: OU=User,DC=miaazienda,DC=local",
+			"starttls":"Usa StartTLS",
 			"title":"Crea/modifica connessione",
 			"titleRoles":"Ruoli per appartenenza al gruppo",
-			"tls":"Usa TLS",
+			"tls":"Usa SSL/TLS",
 			"tlsVerify":"Verifica TLS"
 		},
 		"license":{
@@ -368,6 +376,7 @@
 				"cleanupLogs":"Pulisci i log di sistema scaduti",
 				"cleanupTempDir":"Pulisci cartella temporanea",
 				"embeddedBackup":"Gestisci backup integrati",
+				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Importa login e ruoli tramite LDAP",
 				"mailAttach":"Trasferimento allegati e-mail",
 				"mailRetrieve":"Recupero e-mail",
@@ -493,16 +502,6 @@
 				"conditions":"Condizioni",
 				"descriptionHint":"Descrizione",
 				"effects":"Effetti",
-				"fieldChanged":"Modificato",
-				"modeField":"Valore campo",
-				"modeField2Field":"valore campo",
-				"modeField2Fixed":"valore fisso",
-				"modeField2Login":"ID login",
-				"modeField2Preset":"preimpostato",
-				"modeFieldChanged":"Valore del campo cambiato",
-				"modeRecord":"Stato record",
-				"modeRole":"Ruolo",
-				"newRecord":"Nuovo",
 				"title":"Stati modulo"
 			},
 			"aggregator":"Aggregato",
@@ -514,8 +513,10 @@
 			"captions":"Titoli",
 			"category":"Selettore categoria",
 			"collection":"Collezione",
+			"collectionColumn":"Value(s) from column",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*La collezione è influenzata solo se è selezionata come criterio filtrante nella query dei dati.",
+			"collectionMultiValue":"Multi input",
 			"collectionTitle":"Limita la collezione dall'input dell'utente",
 			"columnsTarget":"Posiziona le colonne qui",
 			"columnsTemplates":"Colonne disponibili",
@@ -523,6 +524,7 @@
 			"columnBatchNot":"non raggruppata",
 			"columnBatchHint":"La colonna fa parte del gruppo {CNT}",
 			"columnBatchHintNot":"La colonna non è raggruppata con altre",
+			"columnClipboard":"Clipboard",
 			"columnHeaderData":"Recupero dei dati",
 			"columnLength":"Lunghezza (carat.)",
 			"columnLength0":"senza limite",
@@ -551,6 +553,7 @@
 			"fields":"Campi",
 			"fieldAttributeIdAltDateTo":"Data a (periodo)",
 			"fieldAttributeIdAltRichtextFiles":"Accesso file Richtext",
+			"fieldClipboard":"Clipboard",
 			"fieldDefault":"Valore predefinito",
 			"fieldDefaultHint":"Controlla i documenti per i segnaposto",
 			"fieldDefaultPresetIds":"Preimpostazioni predefinite",
@@ -596,6 +599,7 @@
 			"layout":"Disposizione elenco",
 			"limit":"Limite risultato",
 			"new":"Nuovo modulo",
+			"noDataActions":"No data actions",
 			"onMobile":"Nella vista mobile",
 			"openForm":"Apri modulo",
 			"openFormAttributeApply":"...per impopstare il valore sul modulo",
@@ -635,7 +639,10 @@
 				"delete":"Sei sicuro di voler eliminare questa funzione?"
 			},
 			"helpJs":{
+				"block_inputs":"app.block_inputs(true/false) => UNDEFINED<br /><br />Blocks or unblocks all inputs on the current form.",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Copia il testo negli appunti dell'utente.",
+				"get_e2ee_data_key":"app.get_e2ee_data_key(dataKeyEncrypted) => STRING<br /><br />Decrypts provided data key with the private key of the current login.",
+				"get_e2ee_data_value":"app.get_e2ee_data_value(dataKey,valueEncrypted) => STRING<br /><br />Decrypts data value with the provided data key.",
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Restituisce le 5 lettere del codice lingua ('en_us', ...) del login attuale.",
 				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Restituisce l'ID del login attuale.",
 				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Restituisce l'Id del record del modulo aperto per l'indice della relazione specificata (0 per predefinita).",
@@ -646,10 +653,25 @@
 				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Cancella il record presente sul modulo.",
 				"record_new":"app.record_new() => UNDEFINED<br /><br />Apre un nuovo record.",
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Ricarica il record attuale.",
-				"record_save":"app.record_save() => UNDEFINED<br /><br />Salva il record corrente."
+				"record_save":"app.record_save() => UNDEFINED<br /><br />Salva il record corrente.",
+				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated on the next form save. Data keys for relations on the form with encryption enabled will be encrypted with the public key of each defined login. This enables later decryption of these records for users.<br /><br />If this function is not used, decryption is only ever possible for the creator.",
+				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated for the specified relation and records on the next form save. Data keys for relation records will be encrypted with the public key of each defined login. This enables later decryption of these records for users.",
+				"show_form_message":"app.show_form_message(message,duration_in_ms) => UNDEFINED<br /><br />Temporarily replaces the form title with a custom message. The second argument defines in milli-seconds how long the message is shown (3000 by default).",
+				"update_collection":"app.update_collection(collection_id) => UNDEFINED<br /><br />Retrieves and updates values for the specified collection."
+			},
+			"helpJsHint":{
+				"copy_to_clipboard":"VALUE",
+				"get_e2ee_data_key":"DATA_KEY_ENCRYPTED",
+				"get_e2ee_data_value":"DATA_KEY, VALUE_ENCRYPTED",
+				"get_record_id":"RELATION_INDEX_NUMBER",
+				"has_role":"ROLE_ID_STRING",
+				"open_form":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
+				"show_form_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
+				"update_collection":"COLLECTION_ID"
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Interrompe l'operazione e invia un messaggio all'utente che lo esegue, che viene visualizzato nell'interfaccia utente.",
+				"clean_up_e2ee_keys":"instance.clean_up_e2ee_keys(<blockquote>login_id INTEGER,<br />relation_id UUID,<br />record_ids_access INTEGER[]</blockquote>) => VOID<br /><br />Deletes end-to-end encryption data keys for records that a login has no longer access to. This makes decryption impossible for the login.",
 				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Restituisce l'ID del login che sta eseguendo l'operazione.",
 				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Restituisce il codice della lingua di 5 lettere ('en_us', ...) del login, utilizzato per accedere al backend dei dati.",
 				"get_name":"instance.get_name() => TEXT<br /><br />Restituisce il nome dell'istanza, definito nella finestra di personalizzazione del pannello di amministrazione.",
@@ -711,10 +733,7 @@
 			"titleJs":"Funzioni frontend ({CNT})",
 			"titlePg":"Funzioni backend ({CNT})",
 			"titleOne":"titolo funzione",
-			"valueJsHint":"VALUE",
-			"valueJsHintForm":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
-			"valueJsHintIndex":"RELATION_INDEX_NUMBER",
-			"valueJsHintRole":"ROLE_ID_STRING"
+			"value":"VALUE"
 		},
 		"help":{
 			"title":"Aiuto Applicazione"
@@ -822,6 +841,8 @@
 			"codeCondition":"Condizione",
 			"content":"Contenuto",
 			"def":"PREDDEFINITO",
+			"encrypted":"E2E encrypted",
+			"encryption":"E2E encryption",
 			"execute":"Eseguire",
 			"external":"Relazioni di riferimento ({CNT})",
 			"fires":"Accensioni",
@@ -976,7 +997,8 @@
 			"002":"Numero non valido '{VALUE}' (decimale previsto).",
 			"003":"Valore temporale '{VALUE}' non valido, formato previsto: {EXPECT}.",
 			"004":"Tipo attributo non supportato '{VALUE}'.",
-			"005":"Numero di campi errato in linea '{VALUE}'."
+			"005":"Numero di campi errato in linea '{VALUE}'.",
+			"006":"Encrypted attributes are not supported"
 		},
 		"DBS":{
 			"001":"{FNC_MSG}",
@@ -988,7 +1010,12 @@
 			"007":"Valore non valido '{VALUE}'."
 		},
 		"SEC":{
-			"001":"Accesso non autorizzato."
+			"001":"Accesso non autorizzato.",
+			"002":"The system failed to unlock your personal key for end-to-end encryption. This can happen if someone changed your password for you or you have changed it outside this application.<br /><br />Please open the user settings and follow the instructions to regain access to your personal key.",
+			"003":"The system failed to encrypt the record values. Please try again.",
+			"004":"The system failed to decrypt the record values. Please try again.",
+			"005":"The system failed to retrieve decryption keys for the selected records.",
+			"006":"Not all selected users have end-to-end encryption enabled - these are: {NAMES}"
 		},
 		"initCollection":"Failed to load collections during login: {MSG}"
 	},
@@ -1021,6 +1048,7 @@
 				"attribute":"valore attributo",
 				"collection":"valore(i) collezione",
 				"field":"valore campo",
+				"fieldChanged":"field has changed (TRUE/FALSE)",
 				"javascript":"Espressione JavaScript",
 				"languageCode":"codice lingua login (en_us, ...)",
 				"login":"ID login (integer)",
@@ -1034,13 +1062,11 @@
 			},
 			"operator":{
 				"eq":"uguale",
-				"eqAny":"include",
 				"le":"maggiore/uguale",
 				"lt":"maggiore",
 				"ilike":"contiene",
 				"like":"contiene (corrispondenza maiuscole)",
 				"ne":"diverso",
-				"neAll":"escluso",
 				"not_ilike":"non contiene",
 				"not_like":"non contiene (corrispondenza maiuscole)",
 				"not_null":"non vuoto",
@@ -1053,8 +1079,15 @@
 		"javascriptHint":"Es.: return new Date().getFullYear();",
 		"nestingMain":"Query principale",
 		"nestingSub":"Sub query",
+		"operatorsArray":"Array",
+		"operatorsNull":"Empty value",
+		"operatorsSets":"Subset",
+		"operatorsSize":"Number",
+		"operatorsText":"Text",
 		"queryAggregatorNull":"no aggregazione",
 		"queryShow":"Mostra sub query",
+		"subQueryAttribute":"Attribute",
+		"subQueryAggregator":"Aggregate",
 		"valueHint":"Valore testo o numero"
 	},
 	"form":{
@@ -1063,11 +1096,12 @@
 			"helpHint":"Mostra pagine aiuto",
 			"log":"Log",
 			"logHint":"Apri log modifiche",
-			"retractLogs":"Ritira logs"
+			"logShowAll":"Show all ({CNT})"
 		},
 		"dialog":{
 			"close":"Ci sono modifiche non salvate.<br /><br />Chiudere comunque questo modulo?",
 			"delete":"Sei sicuro di voler eliminare questo record <b>in modo permanente</b>?",
+			"encrypted":"The field content will be encrypted on your system before it is being sent to the server.",
 			"new":"Ci sono modifiche non salvate.<br /><br />Procedere con un nuovo record?",
 			"newReset":"Quest'azione azzererà ciò che è stato inserito.<br /><br />Continuare?",
 			"prev":"Ci sono modifiche non salvate.<br /><br />Abbandonare e tornare indietro?",
@@ -1075,11 +1109,10 @@
 		},
 		"message":{
 			"recordCreated":"Il record è stato creato",
-			"recordCreatedMobile":"Creato!",
 			"recordDeleted":"Il record è stato cancellato",
-			"recordDeletedMobile":"Cancellato!",
-			"recordUpdated":"Il record è stato aggiornato",
-			"recordUpdatedMobile":"Aggiornato!"
+			"recordEncrypting":"Encrypting record...",
+			"recordValueCopied":"Copied to clipboard",
+			"recordUpdated":"Il record è stato aggiornato"
 		},
 		"dataLog":"Registri delle modifiche",
 		"deletedUser":"Utenti cancellati",
@@ -1094,8 +1127,7 @@
 			"goToApps":"Apri file import",
 			"goToLogins":"Assegna ruoli",
 			"goToRepo":"Apri archivio",
-			"installBundle":"Installa Core Company",
-			"openHelp":"Pagina aiuto"
+			"installBundle":"Installa Core Company"
 		},
 		"wizard":{
 			"installBundle":"Core Company",
@@ -1107,8 +1139,6 @@
 			"intro":"Benvenuto in REI3<br /><br />Al momento non ci sono applicazioni installate. Per iniziare a utilizzare REI3, scegli una delle opzioni di installazione di seguito.",
 			"title":"Setup"
 		},
-		"firstSteps":"Primi passi",
-		"firstStepsIntro":"La maggior parte delle applicazioni richiede una configurazione iniziale e/o dati permanenti per essere utili. Si prega di fare riferimento alle singole pagine di aiuto per iniziare:",
 		"newVersion":"Notifica aggiornamento",
 		"newVersionText":"È disponibile una nuova versione di REI3.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">Scarica REI3 v{VERSION}</a >",
 		"noAccess":"Non è stato ancora concesso l'accesso.<br />Contatta il tuo amministratore di sistema.",
@@ -1167,6 +1197,7 @@
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Fuso orario",
 		"csvTotalLimit":"Conteggio righe (0 = tutte)",
+		"fetching":"Data is being retrieved...",
 		"inputHintCreate":"Crea nuovo record",
 		"inputHintOpen":"Apri record",
 		"inputHintRemove":"Rimuovi record",
@@ -1176,15 +1207,7 @@
 		"quick":"Filtra risultati in tutte le colonne"
 	},
 	"settings":{
-		"button":{
-			"logout":"Logout"
-		},
-		"option":{
-			"cornerKeep":"- predefinito -",
-			"cornerRounded":"arrotondato",
-			"cornerSquared":"squadrato"
-		},
-		"security":{
+		"account":{
 			"messagePwCurrentWrong":"La password attuale non è valida",
 			"messagePwDiff":"Le password non corrispondono",
 			"messagePwRequiresDigit":"La password deve contenere una cifra",
@@ -1196,6 +1219,40 @@
 			"pwNew1":"Nuova password (ripetere)",
 			"pwOld":"Password attuale",
 			"titlePwChange":"Cambia password"
+		},
+		"button":{
+			"logout":"Logout"
+		},
+		"encryption":{
+			"button":{
+				"createKeys":"Create keys",
+				"resetKeys":"Reset personal keys",
+				"storeKeys":"Enable encryption"
+			},
+			"status":{
+				"inactive":"Not enabled",
+				"locked":"Keys are locked",
+				"unlocked":"Ready for use"
+			},
+			"backupCode":"Backup code",
+			"backupCodeDesc":"The backup code is <b>very important</b>; it serves to re-establish access if you forget your password.",
+			"confirmBackupCode":"I have copied the backup code to a secure location.",
+			"confirmEncryption":"I understand that if I loose access to both my password and my backup code, encrypted data becomes permanently inaccessible.",
+			"description":"Applications can encrypt sensitive data for exclusive access by specific individuals. Before data can be encrypted, each user has to create personal keys.",
+			"modulesEnc":"Applications that use encryption",
+			"newKeys":"Keys created successfully",
+			"newKeysDesc":"To complete the setup, copy your personal backup code to a secure location.",
+			"prevPassword":"Previous password",
+			"regainAccess":"Regain access to personal keys",
+			"regainAccessDesc":"You can regain access to your personal keys by entering your previous password. If you do not know your previous password, you need to use your personal backup code.",
+			"resetAccess":"Reset personal keys",
+			"resetAccessDesc":"If you do not have access to either your previous password nor your backup code, you permanently lost access to your encrypted data.<br /><br />If this is the case, you can decide to reset your personal keys to encrypt new data - this will <b>NOT</b> re-establish access to previously encrypted data.",
+			"resetAccessHint":"Are you sure you want to reset your personal keys? If you do this, there is no going back even if you find your old backup code later."
+		},
+		"option":{
+			"cornerKeep":"- predefinito -",
+			"cornerRounded":"arrotondato",
+			"cornerSquared":"squadrato"
 		},
 		"bordersAll":"Aggiungi bordi",
 		"bordersCorners":"Angoli del bordo",
@@ -1209,15 +1266,15 @@
 		"dark":"Modalità scura",
 		"fontSize":"Dimensione font",
 		"headerCaptions":"Mostra titolo menu principale",
-		"hintFirstSteps":"Mostra 'primi-passi'",
 		"languageCode":"Lingua",
+		"mobileScrollForm":"Mobile: Scroll entire form",
 		"pageLimit":"Max. larghezza della pagina",
 		"pageTitle":"Impostazioni",
 		"spacing":"Spaziatura",
 		"sundayFirstDow":"Domenica è il primo giorno della settimana",
-		"titleAdmin":"Amministrazione",
+		"titleAccount":"Account",
 		"titleDisplay":"Visualizza",
-		"titleSecurity":"Sicurezza",
+		"titleEncryption":"End-to-end encryption",
 		"titleTheme":"Tema",
 		"warnUnsaved":"Avviso per cambiamenti non salvati"
 	}

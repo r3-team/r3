@@ -98,7 +98,7 @@ let MyAdminRepoModule = {
 		// backend calls
 		install:function(fileId) {
 			ws.send('repoModule','install',{fileId:fileId},true).then(
-				(res) => {
+				() => {
 					this.$store.commit('dialog',{
 						captionBody:this.capApp.fetchDone,
 						buttons:[{
@@ -109,7 +109,7 @@ let MyAdminRepoModule = {
 					});
 					this.installStarted = false;
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 			this.installStarted = true;
 		}
@@ -245,7 +245,7 @@ let MyAdminRepo = {
 				getNew:true,
 				offset:this.offset
 			},true).then(
-				(res) => {
+				res => {
 					this.repoModules = res.payload.repoModules;
 					this.count       = res.payload.count;
 					
@@ -254,16 +254,16 @@ let MyAdminRepo = {
 						this.updateRepo();
 					}
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		updateRepo:function() {
 			ws.send('repoModule','update',{},true).then(
-				(res) => {
+				() => {
 					this.offset = 0;
 					this.get();
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

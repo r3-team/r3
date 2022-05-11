@@ -2,10 +2,19 @@ import MyField               from './field.js';
 import MyFormHelp            from './formHelp.js';
 import MyFormLog             from './formLog.js';
 import {hasAccessToRelation} from './shared/access.js';
-import {getCollectionValues} from './shared/collection.js';
+import {consoleError}        from './shared/error.js';
 import {srcBase64}           from './shared/image.js';
 import {
+	aesGcmDecryptBase64WithPhrase,
+	aesGcmEncryptBase64WithPhrase,
+	getRandomString,
+	pemImport,
+	rsaDecrypt,
+	rsaEncrypt
+} from './shared/crypto.js';
+import {
 	filterIsCorrect,
+	filterOperatorIsSingleValue,
 	openLink
 } from './shared/generic.js';
 import {
@@ -13,7 +22,8 @@ import {
 	getFormRoute,
 	getGetterArg,
 	getInputFieldName,
-	getResolvedPlaceholders
+	getResolvedPlaceholders,
+	getRowsDecrypted
 } from './shared/form.js';
 import {
 	isAttributeRelationship,
@@ -26,8 +36,12 @@ import {
 	getIndexAttributeIdByField
 } from './shared/attribute.js';
 import {
+	getCollectionValues,
+	updateCollections
+} from './shared/collection.js';
+import {
 	fillRelationRecordIds,
-	getJoinIndexMapWithRecords,
+	getJoinIndexMapExpanded,
 	getQueryAttributePkFilter,
 	getQueryFiltersProcessed,
 	getRelationsJoined
@@ -75,9 +89,20 @@ let MyForm = {
 						v-if="iconId === null"
 					/>
 					
-					<h1 v-if="title !== ''" class="title">
-						{{ title }}
-					</h1>
+					<!-- form title / message -->
+					<transition name="fade" mode="out-in">
+						<h1 v-if="title !== '' && message === null" class="title">
+							{{ title }}
+						</h1>
+						<h1 class="form-message" v-else-if="message !== null">
+							<my-button
+								:active="false"
+								:caption="message"
+								:darkBg="true"
+								:naked="true"
+							/>
+						</h1>
+					</transition>
 				</div>
 				
 				<div class="area">
@@ -126,7 +151,7 @@ let MyForm = {
 				<template v-if="isData">
 					<div class="area">
 						<my-button image="new.png"
-							v-if="allowNew"
+							v-if="allowNew && !noDataActions"
 							@trigger="openNewAsk(false)"
 							@trigger-middle="openNewAsk(true)"
 							:active="(!isNew || hasChanges) && canCreate"
@@ -135,6 +160,7 @@ let MyForm = {
 							:darkBg="true"
 						/>
 						<my-button image="save.png"
+							v-if="!noDataActions"
 							@trigger="set(false)"
 							:active="canUpdate"
 							:caption="capGen.button.save"
@@ -142,7 +168,7 @@ let MyForm = {
 							:darkBg="true"
 						/>
 						<my-button image="save_new.png"
-							v-if="!isInline && !isMobile && allowNew"
+							v-if="!isInline && !isMobile && allowNew && !noDataActions"
 							@trigger="set(true)"
 							:active="canUpdate && canCreate"
 							:caption="capGen.button.saveNew"
@@ -158,7 +184,7 @@ let MyForm = {
 							:darkBg="true"
 						/>
 						<my-button image="shred.png"
-							v-if="allowDel"
+							v-if="allowDel && !noDataActions"
 							@trigger="delAsk"
 							:active="canDelete"
 							:cancel="true"
@@ -166,18 +192,6 @@ let MyForm = {
 							:captionTitle="capGen.button.deleteHint"
 							:darkBg="true"
 						/>
-						
-						<!-- record saved message -->
-						<transition name="fade" class="slow-out">
-							<div class="form-save-message" v-if="recordActionMessage !== null">
-								<my-button
-									:active="false"
-									:caption="recordActionMessage"
-									:darkBg="true"
-									:naked="true"
-								/>
-							</div>
-						</transition>
 					</div>
 					<div class="area">
 						<my-button image="warning.png"
@@ -197,10 +211,13 @@ let MyForm = {
 				</template>
 			</div>
 			
+			<!-- form fields -->
 			<div class="content grow fields" :class="{ singleField:isSingleField }">
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
+					@clipboard="messageSet('[CLIPBOARD]')"
 					@execute-function="executeFunction"
+					@hotkey="handleHotkeys"
 					@open-form="openForm"
 					@set-form-args="setFormArgs"
 					@set-valid="validSet"
@@ -209,10 +226,11 @@ let MyForm = {
 					:dataFieldMap="fieldIdMapData"
 					:field="f"
 					:fieldIdMapState="fieldIdMapState"
-					:formBadLoad="badLoad"
 					:formBadSave="badSave"
+					:formIsInline="isInline"
+					:formIsSingleField="isSingleField"
 					:formLoading="loading"
-					:isFullPage="isSingleField"
+					:formReadonly="badLoad || blockInputs"
 					:joinsIndexMap="joinsIndexMap"
 					:key="f.id"
 					:values="values"
@@ -228,6 +246,7 @@ let MyForm = {
 			:fieldIdMapState="fieldIdMapState"
 			:form="form"
 			:formLoading="loading"
+			:indexMapRecordKey="indexMapRecordKey"
 			:joinsIndexMap="joinsIndexMap"
 			:values="values"
 		/>
@@ -269,35 +288,42 @@ let MyForm = {
 	data:function() {
 		return {
 			// states
-			badLoad:false,       // attempted record load with no return (can happen if access is lost during save)
-			badSave:false,       // attempted save (data SET) with invalid fields, also updates data fields
-			lastFormId:'',       // when routing occurs: if ID is the same, no need to rebuild form
-			loading:false,       // form is currently loading, informs sub components when form is ready
-			messageCode:null,    // form message
-			messageTimeout:null, // form message expiration timeout
-			showHelp:false,      // show form context help
-			showLog:false,       // show data change log
-			updatingRecord:false,// form is currently attempting to update the current record (saving/deleting)
+			badLoad:false,        // attempted record load with no return (can happen if access is lost during save)
+			badSave:false,        // attempted save (data SET) with invalid fields, also updates data fields
+			blockInputs:false,    // disable all user inputs, set by frontend functions
+			lastFormId:'',        // when routing occurs: if ID is the same, no need to rebuild form
+			loading:false,        // form is currently loading, informs sub components when form is ready
+			message:null,         // form message
+			messageTimeout:null,  // form message expiration timeout
+			showHelp:false,       // show form context help
+			showLog:false,        // show data change log
+			updatingRecord:false, // form is currently attempting to update the current record (saving/deleting)
 			
 			// pop-up form
 			popUpAttributeIdMapDef:{}, // default attribute values for pop-up form
-			popUpFieldId:null,   // field ID that opened pop-up form
-			popUpFormId:null,    // form ID to open in pop-up form
-			popUpRecordId:0,     // record ID to open in pop-up form
-			popUpStyles:'',      // CSS styles for pop-up form
+			popUpFieldId:null,    // field ID that opened pop-up form
+			popUpFormId:null,     // form ID to open in pop-up form
+			popUpRecordId:0,      // record ID to open in pop-up form
+			popUpStyles:'',       // CSS styles for pop-up form
 			
 			// form data
-			fields:[],           // all fields (nested within each other)
-			fieldIdsInvalid:[],  // IDs of fields with invalid values
-			recordIdIndexMap:{}, // record IDs for form, key: index
-			values:{},           // field values, key: index attribute ID
-			valuesDef:{},        // field value defaults (via field options)
-			valuesOrg:{},        // original field values, used to check for changes
+			fields:[],            // all fields (nested within each other)
+			fieldIdsInvalid:[],   // field IDs with invalid values
+			indexMapRecordId:{},  // record IDs for form, key: relation index
+			indexMapRecordKey:{}, // record en-/decryption keys, key: relation index
+			indexesNoDel:{},      // relation indexes with no DEL permission (via relation policy)
+			indexesNoSet:{},      // relation indexes with no SET permission (via relation policy)
+			loginIdsEncryptFor:[],        // login IDs for which data keys are encrypted (e2ee), for current form relations/records
+			loginIdsEncryptForOutside:{}, // login IDs for which data keys are encrypted (e2ee), for outside relation and record IDs
+			                              // [{loginIds:[5,12],relationId:'A-B-C-D',recordIds:[1,2]},{...}]
+			values:{},            // field values, key: index attribute ID
+			valuesDef:{},         // field value defaults (via field options)
+			valuesOrg:{},         // original field values, used to check for changes
 			
 			// query data
-			relationId:null,     // source relation ID
-			joins:[],            // joined relations, incl. source relation at index 0
-			filters:[]           // form filters
+			relationId:null,      // source relation ID
+			joins:[],             // joined relations, incl. source relation at index 0
+			filters:[]            // form filters
 		};
 	},
 	computed:{
@@ -312,9 +338,7 @@ let MyForm = {
 			if(this.updatingRecord
 				|| this.isNew
 				|| this.badLoad
-				|| this.joins.length === 0
-				|| !this.joins[0].applyDelete
-				|| !this.hasAccessToRelation(this.access,this.joins[0].relationId,3)
+				|| this.joinsIndexesDel.length === 0
 			) return false;
 			
 			// check for protected preset record
@@ -330,6 +354,9 @@ let MyForm = {
 			return this.hasChanges && !this.badLoad && !this.updatingRecord;
 		},
 		hasChanges:function() {
+			if(this.noDataActions)
+				return false;
+			
 			for(let k in this.values) {
 				if(!this.isAttributeValueEqual(this.values[k],this.valuesOrg[k]))
 					return true;
@@ -349,9 +376,10 @@ let MyForm = {
 		},
 		
 		// states, simple
-		isData:     function() { return this.relationId !== null; },
-		isNew:      function() { return this.recordId === 0; },
-		warnUnsaved:function() { return this.hasChanges && this.settings.warnUnsaved; },
+		isData:       function() { return this.relationId !== null; },
+		isNew:        function() { return this.recordId === 0; },
+		noDataActions:function() { return this.form.noDataActions || this.blockInputs; },
+		warnUnsaved:  function() { return this.hasChanges && this.settings.warnUnsaved; },
 		
 		// entities
 		fieldIdMapData:function() {
@@ -373,28 +401,30 @@ let MyForm = {
 			return this.getRelationsJoined(this.joins);
 		},
 		joinsIndexMap:function() {
-			// map of joins keyed by index (relation indexes are used to get/set data)
-			return this.getJoinIndexMapWithRecords(this.joins,this.recordIdIndexMap);
+			return this.getJoinIndexMapExpanded(
+				this.joins,
+				this.indexMapRecordId,
+				this.indexesNoDel,
+				this.indexesNoSet
+			);
+		},
+		joinsIndexesDel:function() {
+			let out = [];
+			for(let k in this.joinsIndexMap) {
+				const join = this.joinsIndexMap[k];
+				
+				if(join.applyDelete
+					&& !join.recordNoDel
+					&& join.recordId !== 0
+					&& this.hasAccessToRelation(this.access,join.relationId,3)) {
+					
+					out.push(join);
+				}
+			}
+			return out;
 		},
 		
 		// presentation
-		recordActionMessage:function() {
-			switch(this.messageCode) {
-				case 'created': return this.isMobile
-					? this.capApp.message.recordCreatedMobile
-					: this.capApp.message.recordCreated;
-				break;
-				case 'deleted': return this.isMobile
-					? this.capApp.message.recordDeletedMobile
-					: this.capApp.message.recordDeleted;
-				break;
-				case 'updated': return this.isMobile
-					? this.capApp.message.recordUpdatedMobile
-					: this.capApp.message.recordUpdated;
-				break;
-			}
-			return null;
-		},
 		title:function() {
 			// apply dedicated form title
 			if(typeof this.form.captions.formTitle[this.moduleLanguage] !== 'undefined')
@@ -413,12 +443,13 @@ let MyForm = {
 		exposedFunctions:function() {
 			return {
 				// simple functions
+				block_inputs:     (v) => this.blockInputs = v,
 				copy_to_clipboard:(v) => navigator.clipboard.writeText(v),
 				get_language_code:()  => this.settings.languageCode,
 				get_login_id:     ()  => this.loginId,
 				get_record_id:    (i) =>
-					typeof this.recordIdIndexMap[i] !== 'undefined'
-						? this.recordIdIndexMap[i] : -1,
+					typeof this.indexMapRecordId[i] !== 'undefined'
+						? this.indexMapRecordId[i] : -1,
 				get_role_ids:     ()  => this.access.roleIds,
 				go_back:          ()  => window.history.back(),
 				has_role:         (v) => this.access.roleIds.includes(v),
@@ -429,6 +460,8 @@ let MyForm = {
 						maxHeight:maxY,
 						maxWidth:maxX
 					},[],newTab),
+				show_form_message:(v,i) => this.messageSet(v,i),
+				update_collection:(v)   => this.updateCollections(false,undefined,v),
 				
 				// call other functions
 				call_backend:(id,...args) => {
@@ -446,6 +479,22 @@ let MyForm = {
 				record_new:   this.openNewAsk,
 				record_reload:this.get,
 				record_save:  this.set,
+				
+				// e2e encryption
+				get_e2ee_data_key:(dataKeyEnc) => {
+					return this.rsaDecrypt(this.loginPrivateKey,dataKeyEnc);
+				},
+				get_e2ee_data_value:(dataKey,value) => {
+					return this.aesGcmDecryptBase64WithPhrase(value,dataKey);
+				},
+				set_e2ee_by_login_ids:ids => this.loginIdsEncryptFor = ids,
+				set_e2ee_by_login_ids_and_relation:(loginIds,relationId,recordIds) => {
+					this.loginIdsEncryptForOutside.push({
+						loginIds:loginIds,
+						relationId:relationId,
+						recordIds:recordIds
+					});
+				},
 				
 				// field manipulation
 				get_field_value:(fieldId) => {
@@ -472,121 +521,87 @@ let MyForm = {
 		
 		// field state overwrite
 		fieldIdMapState:function() {
-			let out = {};
-			
-			for(let i = 0, j = this.form.states.length; i < j; i++) {
-				let s = this.form.states[i];
+			const valueChangeComp = (value) => {
+				if(!Array.isArray(value))
+					return value;
 				
-				// no conditions, no effects, nothing to do
+				value.sort();
+				return JSON.stringify(value);
+			};
+			const getValueFromConditionSide = (side,operator) => {
+				switch(side.content) {
+					case 'languageCode':return this.settings.languageCode;                break;
+					case 'login':       return this.loginId;                              break;
+					case 'preset':      return this.presetIdMapRecordId[side.presetId];   break;
+					case 'recordNew':   return this.isNew;                                break;
+					case 'role':        return this.access.roleIds.includes(side.roleId); break;
+					case 'true':        return true;                                      break;
+					
+					case 'collection':
+						return getCollectionValues(
+							side.collectionId,
+							side.columnId,
+							this.filterOperatorIsSingleValue(operator));
+					break;
+					case 'field':
+						return this.values[this.getIndexAttributeIdByField(
+							this.fieldIdMapData[side.fieldId],false)];
+					break;
+					case 'fieldChanged':
+						return valueChangeComp(
+								this.values[this.getIndexAttributeIdByField(
+								this.fieldIdMapData[side.fieldId],false)]
+							) != valueChangeComp(
+								this.valuesOrg[this.getIndexAttributeIdByField(
+								this.fieldIdMapData[side.fieldId],false)]
+							);
+					break;
+					case 'record':
+						return typeof this.joinsIndexMap['0'] !== 'undefined'
+							? this.joinsIndexMap['0'].recordId : false;
+					break;
+					case 'value':
+						// compatibility fix, true value should be used instead
+						if(typeof side.value === 'string') {
+							if(side.value.toLowerCase() === 'true')  return true;
+							if(side.value.toLowerCase() === 'false') return false;
+						}
+						return side.value;
+					break;
+				}
+				return false;
+			};
+			
+			let out = {};
+			for(const s of this.form.states) {
 				if(s.conditions.length === 0 || s.effects.length === 0)
 					continue;
 				
 				let line = 'return ';
 				
-				// parse conditions
-				for(let x = 0, y = s.conditions.length; x < y; x++) {
-					let c = s.conditions[x];
+				// parse condition expressions
+				for(let i = 0, j = s.conditions.length; i < j; i++) {
+					let c = s.conditions[i];
 					
-					if(x !== 0)
+					if(i !== 0)
 						line += c.connector === 'AND' ? '&&' : '||';
 					
 					// brackets open
-					line += '('.repeat(c.brackets0);
+					line += '('.repeat(c.side0.brackets);
 					
-					if(c.fieldId0 !== null) {
-						
-						// field value conditions
-						let f0value = this.values[this.getIndexAttributeIdByField(
-							this.fieldIdMapData[c.fieldId0],false)];
-						
-						if(c.fieldChanged !== null) {
-							let f0valueOrg = this.valuesOrg[this.getIndexAttributeIdByField(
-								this.fieldIdMapData[c.fieldId0],false)];
-							
-							line += this.filterIsCorrect(c.fieldChanged ? '<>' : '=',f0value,f0valueOrg) ? 'true' : 'false';
-						}
-						else if(c.operator === 'IS NULL') {
-							line += f0value === null ? 'true' : 'false';
-						}
-						else if(c.operator === 'IS NOT NULL') {
-							line += f0value !== null ? 'true' : 'false';
-						}
-						else if(c.login1 !== null) {
-							line += this.filterIsCorrect(c.operator,f0value,this.loginId) ? 'true' : 'false';
-						}
-						else if(c.value1 !== null) {
-							
-							// field value to fixed value
-							let f = this.fieldIdMapData[c.fieldId0];
-							let a = this.attributeIdMap[f.attributeId];
-							
-							line += this.filterIsCorrect(c.operator,this.getAttributeValueFromString(
-								a.content,c.value1),f0value) ? 'true' : 'false';
-						}
-						else if(c.fieldId1 !== null) {
-							
-							// field value to field value
-							let f1value = this.values[this.getIndexAttributeIdByField(
-								this.fieldIdMapData[c.fieldId1],false)];
-							
-							line += this.filterIsCorrect(c.operator,f0value,f1value) ? 'true' : 'false';
-						}
-						else if(c.presetId1 !== null) {
-							
-							// field value to preset record
-							let f = this.fieldIdMapData[c.fieldId0];
-							let a = this.attributeIdMap[f.attributeId];
-							
-							if(a.relationshipId === null || f0value === null) {
-								line += 'false';
-							}
-							else{
-								// equals looks for value and is false unless found
-								// !equals looks for value and is true unless found
-								let equals = c.operator === '=';
-								let found = false;
-								
-								let presets = this.relationIdMap[a.relationshipId].presets;
-								
-								for(let i = 0, j = presets.length; i < j; i++) {
-									
-									if(presets[i].id !== c.presetId1)
-										continue;
-									
-									if(this.presetIdMapRecordId[presets[i].id] === f0value)
-										found = true;
-									
-									break;
-								}
-								line += (equals && found) || (!equals && !found) ? 'true' : 'false';
-							}
-						}
-					}
-					else if(c.roleId !== null) {
-						
-						// role membership condition
-						if(c.operator === '=')
-							line += this.access.roleIds.includes(c.roleId) ? 'true' : 'false';
-						else
-							line += !this.access.roleIds.includes(c.roleId) ? 'true' : 'false';
-					}
-					else if(c.newRecord !== null) {
-						
-						// new record condition
-						line += this.isNew === c.newRecord ? 'true' : 'false';
-					}
+					// get boolean expression by checking filter condition
+					line += this.filterIsCorrect(c.operator,
+						getValueFromConditionSide(c.side0,c.operator),
+						getValueFromConditionSide(c.side1,c.operator)
+					) ? 'true' : 'false';
 					
 					// brackets close
-					line += ')'.repeat(c.brackets1);
+					line += ')'.repeat(c.side1.brackets);
 				}
 				
 				// apply effects if conditions are met
-				let check = function() {
-					return Function(line)();
-				};
-				if(check()) {
-					for(let x = 0, y = s.effects.length; x < y; x++) {
-						let e = s.effects[x];
+				if(Function(line)()) {
+					for(const e of s.effects) {
 						out[e.fieldId] = e.newState;
 					}
 				}
@@ -606,18 +621,27 @@ let MyForm = {
 		access:         function() { return this.$store.getters.access; },
 		builderEnabled: function() { return this.$store.getters.builderEnabled; },
 		capApp:         function() { return this.$store.getters.captions.form; },
+		capErr:         function() { return this.$store.getters.captions.error; },
 		capGen:         function() { return this.$store.getters.captions.generic; },
 		isAdmin:        function() { return this.$store.getters.isAdmin; },
 		isMobile:       function() { return this.$store.getters.isMobile; },
+		keyLength:      function() { return this.$store.getters.constants.keyLength; },
+		loginEncryption:function() { return this.$store.getters.loginEncryption; },
 		loginId:        function() { return this.$store.getters.loginId; },
+		loginPublicKey: function() { return this.$store.getters.loginPublicKey; },
+		loginPrivateKey:function() { return this.$store.getters.loginPrivateKey; },
 		moduleLanguage: function() { return this.$store.getters.moduleLanguage; },
 		productionMode: function() { return this.$store.getters.productionMode; },
 		settings:       function() { return this.$store.getters.settings; }
 	},
 	methods:{
 		// externals
+		aesGcmDecryptBase64WithPhrase,
+		aesGcmEncryptBase64WithPhrase,
+		consoleError,
 		fillRelationRecordIds,
 		filterIsCorrect,
+		filterOperatorIsSingleValue,
 		getAttributeValueFromString,
 		getAttributeValuesFromGetter,
 		getCollectionValues,
@@ -628,17 +652,23 @@ let MyForm = {
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
 		getInputFieldName,
-		getJoinIndexMapWithRecords,
+		getJoinIndexMapExpanded,
 		getQueryAttributePkFilter,
 		getQueryFiltersProcessed,
+		getRandomString,
 		getRelationsJoined,
 		getResolvedPlaceholders,
+		getRowsDecrypted,
 		hasAccessToRelation,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
 		isAttributeValueEqual,
 		openLink,
+		pemImport,
+		rsaDecrypt,
+		rsaEncrypt,
 		srcBase64,
+		updateCollections,
 		
 		// form management
 		handleHotkeys:function(e) {
@@ -648,10 +678,28 @@ let MyForm = {
 			if(this.isInline && e.key === 'Escape')
 				this.closeAsk();
 			
-			if(e.key === 's' && e.ctrlKey && this.hasChanges) {
-				this.set(false);
+			if(e.key === 's' && e.ctrlKey) {
 				e.preventDefault();
+				
+				if(this.hasChanges && !this.blockInputs)
+					this.set(false);
 			}
+		},
+		messageSet:function(message,duration) {
+			// convert message codes
+			switch(message) {
+				case '[CREATED]':    this.message = this.capApp.message.recordCreated;     break;
+				case '[DELETED]':    this.message = this.capApp.message.recordDeleted;     break;
+				case '[UPDATED]':    this.message = this.capApp.message.recordUpdated;     break;
+				case '[CLIPBOARD]':  this.message = this.capApp.message.recordValueCopied; break;
+				case '[ENCRYPTING]': this.message = this.capApp.message.recordEncrypting;  break;
+				default: this.message = message; break;
+			}
+			
+			// reset message after timeout
+			clearTimeout(this.messageTimeout);
+			this.messageTimeout = setTimeout(() => this.message = null,
+				typeof duration !== 'undefined' ? duration : 3000);
 		},
 		processFilters:function(joinIndexesRemove) {
 			return this.getQueryFiltersProcessed(
@@ -674,8 +722,8 @@ let MyForm = {
 			
 			// reset form states
 			this.$store.commit('pageTitle',this.title);
-			this.messageCode = null;
-			this.showLog     = false;
+			this.message = null;
+			this.showLog = false;
 			
 			// build form
 			this.lastFormId = this.form.id;
@@ -686,9 +734,7 @@ let MyForm = {
 			this.valuesOrg = {};
 			
 			let fillFieldValueTemplates = (fields) => {
-				for(let i = 0, j = fields.length; i < j; i++) {
-					let f = fields[i];
-					
+				for(const f of fields) {
 					if(f.content === 'container') {
 						fillFieldValueTemplates(f.fields);
 						continue;
@@ -729,23 +775,23 @@ let MyForm = {
 					}
 					
 					this.valuesDef[indexAttributeId] = def;
-					this.valueSet(indexAttributeId,def,true,false);
+					this.valueSet(indexAttributeId,JSON.parse(JSON.stringify(def)),true,false);
 					
 					// set value and default for altern. field attribute
 					if(f.attributeIdAlt !== null) {
 						
-						let indexAttributeIdAlt = this.getIndexAttributeId(
+						const indexAttributeIdAlt = this.getIndexAttributeId(
 							f.index,f.attributeIdAlt,false,null);
 						
 						this.valuesDef[indexAttributeIdAlt] = null;
 						this.valueSet(indexAttributeIdAlt,null,true,false);
 					}
 				}
-				return fields;
 			};
 			
-			this.fields = fillFieldValueTemplates(JSON.parse(JSON.stringify(this.form.fields)));
+			this.fields = this.form.fields;
 			this.fieldIdsInvalid = [];
+			fillFieldValueTemplates(this.fields);
 			
 			this.relationId = this.form.query.relationId;
 			this.joins      = this.fillRelationRecordIds(this.form.query.joins);
@@ -753,31 +799,30 @@ let MyForm = {
 			
 			// set preset record to open, if defined
 			if(this.form.presetIdOpen !== null && this.relationId !== null) {
-				
-				let presets = this.relationIdMap[this.relationId].presets;
-				
-				for(let i = 0, j = presets.length; i < j; i++) {
-					if(presets[i].id === this.form.presetIdOpen) {
-						this.openForm(this.presetIdMapRecordId[presets[i].id]);
-						return;
-					}
+				for(const p of this.relationIdMap[this.relationId].presets) {
+					if(p.id === this.form.presetIdOpen)
+						return this.openForm(this.presetIdMapRecordId[p.id]);
 				}
 			}
 			this.resetRecord();
 		},
 		resetRecord:function() {
-			this.badSave = false;
-			this.badLoad = false;
-			this.recordIdIndexMap = {};
+			this.badSave     = false;
+			this.badLoad     = false;
+			this.blockInputs = false;
+			this.loginIdsEncryptFor        = [];
+			this.loginIdsEncryptForOutside = [];
+			this.indexesNoDel              = [];
+			this.indexesNoSet              = [];
+			this.indexMapRecordId          = {};
+			this.indexMapRecordKey         = {};
 			this.valuesSetAllDefault();
 			this.popUpFormId = null;
 			this.get();
 		},
 		releaseLoadingOnNextTick:function() {
 			// releases state on next tick for watching components to react to with updated data
-			this.$nextTick(function() {
-				this.loading = false;
-			});
+			this.$nextTick(() => this.loading = false);
 		},
 		
 		// field value control
@@ -801,40 +846,85 @@ let MyForm = {
 				}
 			}
 		},
+		valuesSetAllDefault:function() {
+			for(let k in this.values) {
+				// overwrite default attribute default values
+				let ia = this.getDetailsFromIndexAttributeId(k);
+				
+				if(typeof this.attributeIdMapDef[ia.attributeId] !== 'undefined') {
+					this.valuesDef[k] = ia.outsideIn && this.isAttributeRelationshipN1(this.attributeIdMap[ia.attributeId].content)
+						? [this.attributeIdMapDef[ia.attributeId]] : this.attributeIdMapDef[ia.attributeId];
+				}
+				
+				// set default value, default value can be an object so it should be cloned as to not overwrite it
+				this.valueSet(k,JSON.parse(JSON.stringify(this.valuesDef[k])),true,true);
+			}
+		},
 		valueSetByField:function(indexAttributeId,value) {
 			// block updates during form load
 			//  some fields (richtext) updated their values after form was already unloaded
 			if(!this.loading)
 				this.valueSet(indexAttributeId,value,false,true);
 		},
-		valuesSetAllDefault:function() {
-			for(let k in this.values) {
+		valueSetByRows:async function(rows,expressions) {
+			if(rows.length !== 1)
+				throw new Error('expected 1 row, got: '+rows.length);
+			
+			const row = rows[0];
+			
+			// update record IDs & DEL/SET permission for each relation index
+			for(let index in row.indexRecordIds) {
+				this.indexMapRecordId[index] = row.indexRecordIds[index];
 				
-				// overwrite default attribute default values
-				let ia = this.getDetailsFromIndexAttributeId(k);
+				const indexInt = parseInt(index);
+				let pos = this.indexesNoDel.indexOf(indexInt);
+				if(pos === -1 && row.indexesPermNoDel.includes(indexInt))
+					this.indexesNoDel.push(indexInt);
 				
-				if(typeof this.attributeIdMapDef[ia.attributeId] !== 'undefined') {
-					
-					if(ia.outsideIn && this.isAttributeRelationshipN1(this.attributeIdMap[ia.attributeId].content))
-						this.valuesDef[k] = [this.attributeIdMapDef[ia.attributeId]];
-					else
-						this.valuesDef[k] = this.attributeIdMapDef[ia.attributeId];
-				}
+				if(pos !== -1 && !row.indexesPermNoDel.includes(indexInt))
+					this.indexesNoDel.splice(pos,1);
 				
-				// set default value
-				this.valueSet(k,this.valuesDef[k],true,true);
+				pos = this.indexesNoSet.indexOf(indexInt);
+				if(pos === -1 && row.indexesPermNoSet.includes(indexInt))
+					this.indexesNoSet.push(indexInt);
+				
+				if(pos !== -1 && !row.indexesPermNoSet.includes(indexInt))
+					this.indexesNoSet.splice(pos,1);
 			}
+			
+			// update record data keys for each relation index
+			for(let index in row.indexRecordEncKeys) {
+				this.indexMapRecordKey[index] = await this.rsaDecrypt(
+					this.loginPrivateKey,
+					row.indexRecordEncKeys[index]
+				).catch(
+					err => { throw new Error('failed to decrypt data key with private key, '+err); }
+				);
+			}
+			
+			// set row values (decrypt first if necessary)
+			return this.getRowsDecrypted(rows,expressions).then(
+				rows => {
+					for(let i = 0, j = row.values.length; i < j; i++) {
+						const e = expressions[i];
+						
+						this.valueSet(
+							this.getIndexAttributeId(
+								e.index,e.attributeId,
+								e.outsideIn,e.attributeIdNm
+							),
+							row.values[i],true,false
+						);
+					}
+				}
+			);
 		},
 		
 		// field validity control
 		validSet:function(state,fieldId) {
 			let pos = this.fieldIdsInvalid.indexOf(fieldId);
-			
-			if(state && pos !== -1)
-				return this.fieldIdsInvalid.splice(pos,1);
-			
-			if(!state && pos === -1)
-				return this.fieldIdsInvalid.push(fieldId);
+			if(state  && pos !== -1) return this.fieldIdsInvalid.splice(pos,1); 
+			if(!state && pos === -1) return this.fieldIdsInvalid.push(fieldId);
 		},
 		
 		// actions
@@ -992,11 +1082,6 @@ let MyForm = {
 			this.loading = true;
 			this.releaseLoadingOnNextTick();
 		},
-		recordMessageUpdate:function(code) {
-			clearTimeout(this.messageTimeout);
-			this.messageTimeout = setTimeout(() => this.messageCode = null,3000);
-			this.messageCode    = code;
-		},
 		scrollToInvalidField:function() {
 			if(this.fieldIdsInvalid.length !== 0)
 				document.getElementById(this.getInputFieldName(
@@ -1041,7 +1126,7 @@ let MyForm = {
 			
 			// open pop-up form if desired
 			if(options.popUp) {
-				let getter = this.getGetterArg(getterArgs,'attributes');
+				const getter = this.getGetterArg(getterArgs,'attributes');
 				
 				this.popUpAttributeIdMapDef = getter === '' ? {}
 					: this.getAttributeValuesFromGetter(getter);
@@ -1077,7 +1162,7 @@ let MyForm = {
 					getterArgs.push(`attributes=${this.$route.query.attributes}`);
 			}
 			
-			let path = this.getFormRoute(formIdOpen,recordId,true,getterArgs);
+			const path = this.getFormRoute(formIdOpen,recordId,true,getterArgs);
 			
 			if(newTab)
 				return this.openLink('#'+path,true);
@@ -1097,10 +1182,10 @@ let MyForm = {
 			return this.$router.replace(path);
 		},
 		setFormArgs:function(args,push) {
-			let path = this.getFormRoute(this.form.id,this.recordId,true,args);
+			const path = this.getFormRoute(this.form.id,this.recordId,true,args);
 			
-			if(this.$route.fullPath === path)
-				return; // nothing changed, ignore
+			if(this.$route.fullPath === path || this.isInline)
+				return; // nothing changed or inline form, ignore
 			
 			if(push) this.$router.push(path);
 			else     this.$router.replace(path);
@@ -1127,28 +1212,23 @@ let MyForm = {
 			this.triggerEventBefore('delete');
 			
 			let requests = [];
-			for(let i = 0, j = this.joins.length; i < j; i++) {
-				let j = this.joins[i];
-				
-				if(!j.applyDelete || this.recordIdIndexMap[i] === 0)
-					continue;
-				
+			for(const join of this.joinsIndexesDel) {
 				requests.push(ws.prepare('data','del',{
-					relationId:j.relationId,
-					recordId:j.recordId
+					relationId:join.relationId,
+					recordId:join.recordId
 				}));
 			}
 			
 			ws.sendMultiple(requests,true).then(
-				(res) => {
+				() => {
 					if(this.isInline)
 						this.$emit('record-deleted',this.recordId);
 					
 					this.triggerEventAfter('delete');
 					this.openForm();
-					this.recordMessageUpdate('deleted');
+					this.messageSet('[DELETED]');
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			).finally(
 				() => this.updatingRecord = false
 			);
@@ -1163,8 +1243,8 @@ let MyForm = {
 				return this.releaseLoadingOnNextTick();
 			}
 			
-			// set base record ID, necessary for form filter 'newRecord'
-			this.recordIdIndexMap[0] = this.recordId;
+			// set base record ID, necessary for form filter 'recordNew'
+			this.indexMapRecordId[0] = this.recordId;
 			
 			// add index attributes to be retrieved
 			let expressions = [];
@@ -1187,44 +1267,32 @@ let MyForm = {
 					this.getQueryAttributePkFilter(
 						this.relationId,this.recordId,0,false
 					)
-				])
+				]),
+				getPerm:true
 			},true).then(
-				(res) => {
-					// handle invalid record lookup
-					if(res.payload.rows.length !== 1) {
-						
-						// more than 1 record returned
-						if(res.payload.rows.length > 1)
-							return this.openForm();
-						
-						// no record returned (might have lost access after save)
-						this.badLoad = true;
-						return;
-					}
-					
+				res => {
+					// reset states
+					this.badLoad = false;
+					this.badSave = false;
 					this.loading = true;
 					
-					// update relation record IDs
-					this.recordIdIndexMap = {};
-					for(let index in res.payload.rows[0].indexRecordIds) {
-						this.recordIdIndexMap[index] = res.payload.rows[0].indexRecordIds[index];
-					}
+					// reset record meta
+					this.indexMapRecordId  = {};
+					this.indexMapRecordKey = {};
+					this.indexesNoDel      = [];
+					this.indexesNoSet      = [];
 					
-					// update attribute values
-					for(let i = 0, j = res.payload.rows[0].values.length; i < j; i++) {
-						let a = expressions[i];
-						
-						this.valueSet(
-							this.getIndexAttributeId(a.index,a.attributeId,a.outsideIn,a.attributeIdNm),
-							res.payload.rows[0].values[i],true,false
-						);
-					}
-					this.badSave = false;
-					this.badLoad = false;
-					this.triggerEventAfter('open');
-					this.releaseLoadingOnNextTick();
+					this.valueSetByRows(res.payload.rows,expressions).then(
+						() => this.triggerEventAfter('open'),
+						err => {
+							this.badLoad = true;
+							this.consoleError(err);
+						}
+					).finally(
+						this.releaseLoadingOnNextTick
+					);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		getFromSubJoin:function(join,recordId) {
@@ -1275,79 +1343,116 @@ let MyForm = {
 					joinIndexesRemove.push(id);
 			}
 			
-			if(recordId !== null) {
-				ws.send('data','get',{
-					relationId:join.relationId,
-					indexSource:join.index,
-					joins:joins,
-					expressions:expressions,
-					filters:	this.processFilters(joinIndexesRemove).concat([
-						this.getQueryAttributePkFilter(
-							this.relationId,recordId,join.index,false
-						)
-					])
-				},true).then(
-					(res) => {
-						if(res.payload.rows.length !== 1)
-							return;
-						
-						for(let index in res.payload.rows[0].indexRecordIds) {
-							this.recordIdIndexMap[index] = res.payload.rows[0].indexRecordIds[index];
-						}
-						
-						for(let i = 0, j = res.payload.rows[0].values.length; i < j; i++) {
-							let e = expressions[i];
-							
-							this.valueSet(
-								this.getIndexAttributeId(e.index,e.attributeId,e.outsideIn,e.attributeIdNm),
-								res.payload.rows[0].values[i],true,false
-							);
-						}
-					},
-					(err) => this.$root.genericError(err)
-				);
-			}
-			else {
+			if(recordId === null) {
 				// reset index attribute values
 				for(let i = 0, j = expressions.length; i < j; i++) {
 					let e = expressions[i];
 					
 					this.valueSet(
-						this.getIndexAttributeId(e.index,e.attributeId,e.outsideIn,e.attributeIdNm),
+						this.getIndexAttributeId(
+							e.index,e.attributeId,
+							e.outsideIn,e.attributeIdNm
+						),
 						null,true,false
 					);
 				}
+				return;
 			}
+			
+			ws.send('data','get',{
+				relationId:join.relationId,
+				indexSource:join.index,
+				joins:joins,
+				expressions:expressions,
+				filters:	this.processFilters(joinIndexesRemove).concat([
+					this.getQueryAttributePkFilter(
+						this.relationId,recordId,join.index,false
+					)
+				]),
+				getPerm:true
+			},true).then(
+				res => this.valueSetByRows(res.payload.rows,expressions),
+				this.$root.genericError
+			);
 		},
-		set:function(saveAndNew) {
+		set:async function(saveAndNew) {
 			if(this.fieldIdsInvalid.length !== 0)
 				return this.badSave = true;
 			
 			this.triggerEventBefore('save');
+			this.updatingRecord = true;
 			
-			let req = {};
-			let addRelationByIndex = (index) => {
+			const handleEncErr = err => {
+				this.updatingRecord = false;
+				this.consoleError(err); // full error for troubleshooting
+				this.$root.genericErrorWithFallback(err,'SEC','003');
+			};
+			
+			let relations = {};
+			let addRelationByIndex = async index => {
 				
-				// already added, ignore
-				if(typeof req[index] !== 'undefined')
+				if(typeof relations[index] !== 'undefined')
 					return;
 				
-				let j = this.joinsIndexMap[index];
+				const j     = this.joinsIndexMap[index];
+				const isNew = j.recordId === 0;
+				let encLoginKeys = [];
 				
-				// ignore relation completely if record is new and creation is disallowed
-				if(!j.applyCreate && j.recordId === 0)
+				// ignore relation if record is new and creation is disallowed
+				if(!j.applyCreate && isNew)
 					return;
 				
-				// recursively add parent index, if one exists
+				// recursively add relation parent, if one exists
 				if(j.indexFrom !== -1)
-					addRelationByIndex(j.indexFrom);
+					await addRelationByIndex(j.indexFrom);
 				
-				req[j.index] = {
+				// handle encryption key for record
+				if(this.relationIdMap[j.relationId].encryption) {
+					
+					// create if new or get known data key
+					if(isNew)
+						this.indexMapRecordKey[index] = this.getRandomString(this.keyLength);
+					
+					const dataKeyStr = this.indexMapRecordKey[index];
+					if(typeof dataKeyStr === 'undefined')
+						throw new Error('encryption key for existing record is not available');
+					
+					// new records need at least one encryption recipient
+					if(isNew && this.loginIdsEncryptFor.length === 0)
+						this.loginIdsEncryptFor.push(this.loginId);
+					
+					if(this.loginIdsEncryptFor.length !== 0) {
+						this.messageSet('[ENCRYPTING]');
+						
+						// get public keys for all logins to encrypt data key for
+						const res = await ws.send('loginKeys','getPublic',{
+							loginIds:this.loginIdsEncryptFor,
+							relationId:j.relationId,
+							recordIds:[j.recordId]
+						},true);
+						
+						// send encrypted data keys
+						const loginKeys = res.payload;
+						
+						for(const lk of loginKeys) {
+							const publicKey  = await this.pemImport(lk.publicKey,'RSA',true);
+							const dataKeyEnc = await this.rsaEncrypt(publicKey,dataKeyStr);
+							
+							encLoginKeys.push({
+								loginId:lk.loginId,
+								keyEnc:dataKeyEnc
+							});
+						}
+					}
+				}
+				
+				relations[j.index] = {
 					relationId:j.relationId,
 					attributeId:j.attributeId,
 					indexFrom:j.indexFrom,
 					recordId:j.recordId,
-					attributes:[]
+					attributes:[],
+					encKeysSet:encLoginKeys
 				};
 			};
 			
@@ -1369,27 +1474,113 @@ let MyForm = {
 				if(!j.applyCreate && j.recordId === 0) continue;
 				if(!j.applyUpdate && j.recordId !== 0) continue;
 				
-				// add join to request to set attribute values
-				addRelationByIndex(d.index);
+				// add join to request to set attribute values and handle encryption keys
+				try        { await addRelationByIndex(d.index); }
+				catch(err) { return handleEncErr(err); }
 				
-				req[d.index].attributes.push({
+				let value = this.values[k];
+				
+				// handle encryption
+				if(this.attributeIdMap[d.attributeId].encrypted && value !== null) {
+					try {
+						value = await this.aesGcmEncryptBase64WithPhrase(
+							this.values[k],this.indexMapRecordKey[d.index]);
+					}
+					catch(err) { return handleEncErr(err); }
+				}
+				
+				relations[d.index].attributes.push({
 					attributeId:d.attributeId,
 					attributeIdNm:d.attributeIdNm,
 					outsideIn:d.outsideIn,
-					value:this.values[k]
+					value:value
 				});
 			}
 			
-			ws.send('data','set',req,true).then(
-				(res) => {
+			// prepare websocket requests
+			let requests = [ws.prepare('data','set',relations)];
+			
+			// encrypt for outside relations
+			// run in same transaction as data SET to keep data consistent
+			for(let i = 0, j = this.loginIdsEncryptForOutside.length; i < j; i++) {
+				try {
+					// get data keys for all affected records
+					const loginIds   = this.loginIdsEncryptForOutside[i].loginIds;
+					const relationId = this.loginIdsEncryptForOutside[i].relationId;
+					const recordIds  = this.loginIdsEncryptForOutside[i].recordIds;
+					
+					let [resDataKeys,resLoginKeys] = await Promise.all([
+						ws.send('data','getKeys',{
+							relationId:relationId,
+							recordIds:recordIds
+						},true),
+						ws.send('loginKeys','getPublic',{
+							loginIds:loginIds,
+							relationId:relationId,
+							recordIds:recordIds
+						},true)
+					]);
+					
+					const dataKeys  = resDataKeys.payload;
+					const loginKeys = resLoginKeys.payload;
+					
+					let recordIdMapKeyStr  = {}; // data key, by record ID, unencrypted
+					let recordIdMapKeysEnc = {}; // data keys, by record ID, encrypted with public keys
+					
+					if(dataKeys.length !== recordIds.length)
+						throw new Error(`current login has only access to ${dataKeys.length} of ${recordIds.length} records`);
+					
+					// decrypt data keys
+					for(let x = 0, y = dataKeys.length; x < y; x++) {
+						recordIdMapKeyStr[recordIds[x]] = await this.rsaDecrypt(
+							this.loginPrivateKey,
+							dataKeys[x]
+						);
+					}
+					
+					// encrypt data keys for all requested logins
+					for(const loginKey of loginKeys) {
+						const publicKey = await this.pemImport(loginKey.publicKey,'RSA',true);
+						
+						for(const recordId of loginKey.recordIds) {
+							const dataKeyEnc = await this.rsaEncrypt(
+								publicKey,
+								recordIdMapKeyStr[recordId]
+							);
+							
+							if(typeof recordIdMapKeysEnc[recordId] === 'undefined')
+								recordIdMapKeysEnc[recordId] = [];
+							
+							recordIdMapKeysEnc[recordId].push({
+								loginId:loginKey.loginId,
+								keyEnc:dataKeyEnc
+							});
+						}
+					}
+					
+					for(let recordId in recordIdMapKeysEnc) {
+						requests.push(ws.prepare('data','setKeys',{
+							relationId:relationId,
+							recordId:parseInt(recordId),
+							encKeys:recordIdMapKeysEnc[recordId]
+						}));
+					}
+				}
+				catch(err) { return handleEncErr(err); }
+			}
+			
+			ws.sendMultiple(requests,true).then(
+				res => {
+					const resSet = res[0];
+					
 					this.$store.commit('formHasChanges',false);
 					
 					// set record-saved timestamp
-					if(this.isNew) this.recordMessageUpdate('created');
-					else           this.recordMessageUpdate('updated');
+					if(this.isNew) this.messageSet('[CREATED]');
+					else           this.messageSet('[UPDATED]');
 					
 					if(this.isInline)
-						this.$emit('record-updated',res.payload.indexRecordIds[0]);
+						this.$emit('record-updated',resSet.payload.indexRecordIds[0]);
 					
 					this.triggerEventAfter('save');
 					
@@ -1399,18 +1590,17 @@ let MyForm = {
 					
 					// load newly created record
 					if(this.isNew)
-						return this.openForm(res.payload.indexRecordIds[0]);
+						return this.openForm(resSet.payload.indexRecordIds[0]);
 					
 					// reload same record
 					// unfortunately necessary as update trigger in backend can change values
 					// if we knew nothing triggered, we could update our values without reload
 					this.get();
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			).finally(
 				() => this.updatingRecord = false
 			);
-			this.updatingRecord = true;
 		}
 	}
 };

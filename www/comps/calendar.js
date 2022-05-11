@@ -94,10 +94,11 @@ let MyCalendarMonth = {
 			<div class="area nowrap default-inputs">
 				<my-input-collection class="selector"
 					v-for="c in collections"
-					@index-selected="$emit('set-collection-index-filter',c.collectionId,$event)"
+					@update:indexes="$emit('set-collection-indexes',c.collectionId,$event)"
 					:collectionId="c.collectionId"
 					:columnIdDisplay="c.columnIdDisplay"
 					:key="c.collectionId"
+					:multiValue="c.multiValue"
 				/>
 				
 				<select class="selector"
@@ -251,7 +252,7 @@ let MyCalendarMonth = {
 	},
 	emits:[
 		'day-selected','open-form','record-selected','set-choice-id',
-		'set-collection-index-filter','set-date'
+		'set-collection-indexes','set-date'
 	],
 	data:function() {
 		return {
@@ -551,8 +552,8 @@ let MyCalendarMonth = {
 		// backend calls
 		setIcsTokenFixed:function() {
 			ws.send('login','setTokenFixed',{context:'ics'},true).then(
-				(res) => this.icsToken = res.payload.tokenFixed,
-				(err) => this.$root.genericError(err)
+				res => this.icsToken = res.payload.tokenFixed,
+				this.$root.genericError
 			);
 		}
 	}
@@ -568,7 +569,7 @@ let MyCalendar = {
 			@open-form="(...args) => $emit('open-form',...args)"
 			@record-selected="(...args) => $emit('record-selected',...args)"
 			@set-choice-id="choiceIdSet"
-			@set-collection-index-filter="(...args) => $emit('set-collection-index-filter',...args)"
+			@set-collection-indexes="(...args) => $emit('set-collection-indexes',...args)"
 			@set-date="dateSet"
 			:choiceId="choiceId"
 			:choices="choices"
@@ -605,11 +606,11 @@ let MyCalendar = {
 		indexColor:      { required:true },
 		indexDate0:      { type:Number,  required:true },
 		indexDate1:      { type:Number,  required:true },
-		isFullPage:      { type:Boolean, required:true },
 		query:           { type:Object,  required:true },
-		rowSelect:       { type:Boolean, required:false, default:false }
+		rowSelect:       { type:Boolean, required:false, default:false },
+		usesPageHistory: { type:Boolean, required:true }
 	},
-	emits:['open-form','record-selected','set-args','set-collection-index-filter'],
+	emits:['open-form','record-selected','set-args','set-collection-indexes'],
 	data:function() {
 		return {
 			// calendar state
@@ -672,7 +673,7 @@ let MyCalendar = {
 					return this.reloadOutside();
 			}
 		});
-		if(this.isFullPage) {
+		if(this.usesPageHistory) {
 			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
 				if(this.routeChangeFieldReload(newVals,oldVals)) {
 					this.paramsUpdated();
@@ -681,8 +682,8 @@ let MyCalendar = {
 			});
 		}
 		
-		// if fullpage: set initial states via route parameters
-		if(this.isFullPage) {
+		if(this.usesPageHistory) {
+			// set initial states via route parameters
 			this.paramsUpdated();     // load existing parameters from route query
 			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
 		} else {
@@ -748,8 +749,8 @@ let MyCalendar = {
 		},
 		reloadInside:function() {
 			// reload full page calendar by updating route parameters
-			// enables browser history for fullpage list navigation
-			if(this.isFullPage)
+			// enables browser history for fullpage navigation
+			if(this.usesPageHistory)
 				return this.paramsUpdate(true);
 			
 			this.get();
@@ -831,8 +832,8 @@ let MyCalendar = {
 				)).concat(this.choiceFilters),
 				orders:orders
 			},true).then(
-				(res) => this.rows = res.payload.rows,
-				(err) => this.$root.genericError(err)
+				res => this.rows = res.payload.rows,
+				this.$root.genericError
 			);
 		}
 	}

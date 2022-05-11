@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"r3/data"
+	"r3/data/data_enc"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -102,4 +103,32 @@ func DataSqlGet_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage,
 		return nil, err
 	}
 	return query, nil
+}
+
+// data keys
+func DataGetKeys_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage,
+	loginId int64) (interface{}, error) {
+
+	var req struct {
+		RelationId uuid.UUID `json:"relationId"`
+		RecordIds  []int64   `json:"recordIds"`
+	}
+
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+	return data_enc.GetKeys_tx(ctx, tx, req.RelationId, req.RecordIds, loginId)
+}
+func DataSetKeys_tx(ctx context.Context, tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+
+	var req struct {
+		RelationId uuid.UUID              `json:"relationId"`
+		RecordId   int64                  `json:"recordId"`
+		EncKeys    []types.DataSetEncKeys `json:"encKeys"`
+	}
+
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+	return nil, data_enc.SetKeys_tx(ctx, tx, req.RelationId, req.RecordId, req.EncKeys)
 }

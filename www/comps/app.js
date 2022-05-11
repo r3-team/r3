@@ -4,9 +4,18 @@ import MyHeader              from './header.js';
 import MyLogin               from './login.js';
 import {getStartFormId}      from './shared/access.js';
 import {updateCollections}   from './shared/collection.js';
-import {genericError}        from './shared/error.js';
 import {getCaptionForModule} from './shared/language.js';
 import {openLink}            from './shared/generic.js';
+import {
+	aesGcmDecryptBase64,
+	aesGcmImportBase64,
+	pemImport,
+} from './shared/crypto.js';
+import {
+	consoleError,
+	genericError,
+	genericErrorWithFallback
+} from './shared/error.js';
 export {MyApp as default};
 
 let MyApp = {
@@ -19,9 +28,8 @@ let MyApp = {
 	},
 	template:`<div :class="classes" id="app" :style="styles">
 		
-		<my-login v-if="!appReady"
+		<my-login ref="login" v-if="!appReady"
 			@authenticated="initApp"
-			:appInitErr="appInitErr"
 			:backendReady="wsConnected"
 			:httpMode="httpMode"
 			:loginReady="loginReady"
@@ -30,6 +38,7 @@ let MyApp = {
 		<template v-if="appReady">
 			<my-header
 				@logout="sessionInvalid"
+				:keysLocked="loginEncryption && loginPrivateKey === null"
 				:moduleEntries="moduleEntries"
 			/>
 			
@@ -59,7 +68,6 @@ let MyApp = {
 	</div>`,
 	data:function() {
 		return {
-			appInitErr:'',      // error message returned by attempt to initialize app
 			appReady:false,     // app is loaded and user authenticated
 			loginReady:false,   // app is ready for authentication
 			publicLoaded:false, // public data has been loaded
@@ -75,10 +83,11 @@ let MyApp = {
 			
 			let classes = ['user-spacing',`spacing-value${this.settings.spacing}`];
 			
-			if(this.settings.bordersAll) classes.push('user-bordersAll');
-			if(this.settings.compact)    classes.push('user-compact');
-			if(this.settings.dark)       classes.push('user-dark');
-			if(this.isMobile)            classes.push('is-mobile');
+			if(this.settings.bordersAll)       classes.push('user-bordersAll');
+			if(this.settings.compact)          classes.push('user-compact');
+			if(this.settings.dark)             classes.push('user-dark');
+			if(this.settings.mobileScrollForm) classes.push('user-mobile-scroll-form');
+			if(this.isMobile)                  classes.push('is-mobile');
 			
 			switch(this.settings.bordersCorner) {
 				case 'rounded': classes.push('user-bordersRounded'); break;
@@ -109,14 +118,14 @@ let MyApp = {
 			let that          = this;
 			
 			// collect assigned modules
-			for(let i = 0, j = this.modules.length; i < j; i++) {
-				if(this.modules[i].parentId === null)
+			for(const mod of this.modules) {
+				if(mod.parentId === null)
 					continue;
 				
-				if(typeof idMapChildren[this.modules[i].parentId] === 'undefined')
-					idMapChildren[this.modules[i].parentId] = [];
+				if(typeof idMapChildren[mod.parentId] === 'undefined')
+					idMapChildren[mod.parentId] = [];
 				
-				idMapChildren[this.modules[i].parentId].push(this.modules[i]);
+				idMapChildren[mod.parentId].push(mod);
 			}
 			
 			// parse module details for valid header entries
@@ -172,8 +181,8 @@ let MyApp = {
 			};
 			
 			// parse module entries
-			for(let i = 0, j = this.modules.length; i < j; i++) {
-				let m = parseModule(this.modules[i],true);
+			for(const mod of this.modules) {
+				let m = parseModule(mod,true);
 				
 				if(m !== false)
 					entries.push(m);
@@ -197,16 +206,17 @@ let MyApp = {
 		httpMode:function() { return location.protocol === 'http:'; },
 		
 		// stores
-		access:         function() { return this.$store.getters.access; },
 		activated:      function() { return this.$store.getters['local/activated']; },
 		appVersion:     function() { return this.$store.getters['local/appVersion']; },
 		customLogo:     function() { return this.$store.getters['local/customLogo']; },
 		customLogoUrl:  function() { return this.$store.getters['local/customLogoUrl']; },
+		loginKeyAes:    function() { return this.$store.getters['local/loginKeyAes']; },
 		schemaTimestamp:function() { return this.$store.getters['schema/timestamp']; },
 		modules:        function() { return this.$store.getters['schema/modules']; },
 		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
 		moduleIdMapOpts:function() { return this.$store.getters['schema/moduleIdMapOptions']; },
 		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
+		access:         function() { return this.$store.getters.access; },
 		blockInput:     function() { return this.$store.getters.blockInput; },
 		capErr:         function() { return this.$store.getters.captions.error; },
 		capGen:         function() { return this.$store.getters.captions.generic; },
@@ -214,6 +224,8 @@ let MyApp = {
 		isAtDialog:     function() { return this.$store.getters.isAtDialog; },
 		isAtFeedback:   function() { return this.$store.getters.isAtFeedback; },
 		isMobile:       function() { return this.$store.getters.isMobile; },
+		loginEncryption:function() { return this.$store.getters.loginEncryption; },
+		loginPrivateKey:function() { return this.$store.getters.loginPrivateKey; },
 		pageTitle:      function() { return this.$store.getters.pageTitle; },
 		settings:       function() { return this.$store.getters.settings; }
 	},
@@ -230,10 +242,15 @@ let MyApp = {
 	},
 	methods:{
 		// externals
+		aesGcmDecryptBase64,
+		aesGcmImportBase64,
+		consoleError,
 		genericError,
+		genericErrorWithFallback,
 		getCaptionForModule,
 		getStartFormId,
 		openLink,
+		pemImport,
 		updateCollections,
 		
 		// general app states
@@ -247,7 +264,9 @@ let MyApp = {
 		},
 		setInitErr:function(err) {
 			// generic error handler is not available yet
-			this.appInitErr = `${(new Date().getTime())}: An unexpected error occurred, ${err}`;
+			// log to console and release login routine
+			this.consoleError(err);
+			this.$refs.login.parentError();
 		},
 		setMobileView:function() {
 			this.$store.commit('isMobile',window.innerWidth <= 800 || window.innerHeight <= 400);
@@ -328,8 +347,13 @@ let MyApp = {
 		
 		// session control
 		sessionInvalid:function() {
+			this.$store.commit('local/loginKeyAes',null);
 			this.$store.commit('local/token','');
 			this.$store.commit('local/tokenKeep',false);
+			this.$store.commit('loginPrivateKey',null);
+			this.$store.commit('loginPrivateKeyEnc',null);
+			this.$store.commit('loginPrivateKeyEncBackup',null);
+			this.$store.commit('loginPublicKey',null);
 			
 			// reconnect for another login attempt
 			this.wsReconnect(true);
@@ -389,8 +413,7 @@ let MyApp = {
 				ws.prepare('lookup','get',{name:'access'}),
 				ws.prepare('lookup','get',{name:'caption'}),
 				ws.prepare('lookup','get',{name:'feedback'}),
-				ws.prepare('lookup','get',{name:'loginId'}),
-				ws.prepare('lookup','get',{name:'loginName'})
+				ws.prepare('lookup','get',{name:'loginKeys'}),
 			];
 			
 			// system meta data, admins only
@@ -399,43 +422,78 @@ let MyApp = {
 				requests.push(ws.prepare('license','get',{}));
 				requests.push(ws.prepare('system','get',{}));
 			}
+			this.$store.commit('busyBlockInput',true);
 			
 			ws.sendMultiple(requests,true).then(
-				res => {
+				async res => {
 					this.$store.commit('settings',res[0].payload);
 					this.$store.commit('access',res[1].payload);
 					this.$store.commit('captions',res[2].payload);
 					this.$store.commit('feedback',res[3].payload === 1);
-					this.$store.commit('loginId',res[4].payload);
-					this.$store.commit('loginName',res[5].payload);
+					
+					if(this.loginKeyAes !== null && res[4].payload.privateEnc !== null) {
+						this.$store.commit('loginEncryption',true);
+						this.$store.commit('loginPrivateKey',null);
+						this.$store.commit('loginPrivateKeyEnc',res[4].payload.privateEnc);
+						this.$store.commit('loginPrivateKeyEncBackup',res[4].payload.privateEncBackup);
+						
+						await this.pemImport(res[4].payload.public,'RSA',true)
+							.then(res => this.$store.commit('loginPublicKey',res))
+							.catch(this.setInitErr);
+						
+						await this.pemImportPrivateEnc(res[4].payload.privateEnc)
+							.catch(this.setInitErr);
+					}
 					
 					if(this.isAdmin) {
-						this.$store.commit('config',res[6].payload);
-						this.$store.commit('license',res[7].payload);
-						this.$store.commit('system',res[8].payload);
+						this.$store.commit('config',res[5].payload);
+						this.$store.commit('license',res[6].payload);
+						this.$store.commit('system',res[7].payload);
 					}
 					
 					// in case of errors during collection retrieval, continue
 					//  if user is admin, otherwise the error cannot be corrected
 					// normal users should not login as the system does not handle as expected
-					return updateCollections(this.isAdmin,
+					return this.updateCollections(this.isAdmin,
 						err => alert(this.capErr.initCollection.replace('{MSG}',err)));
 				},
 				err => this.setInitErr(err)
 			).then(
-				res => this.appReady = true,
-				err => this.setInitErr(err)
+				() => this.appReady = true,
+				this.setInitErr
 			).finally(
 				() => this.$store.commit('busyBlockInput',false)
 			);
-			this.$store.commit('busyBlockInput',true);
+		},
+		
+		// crypto
+		pemImportPrivateEnc:function(privateKeyPemEnc) {
+			// attempt to decrypt private key with personal login key
+			// prepare login AES key
+			return this.aesGcmImportBase64(this.loginKeyAes).then(
+				loginKey => {
+					
+					// decrypt login private key PEM
+					this.aesGcmDecryptBase64(privateKeyPemEnc,loginKey).then(
+						privateKeyPem => {
+							
+							// import key PEM to store
+							this.pemImport(privateKeyPem,'RSA',false).then(
+								res => this.$store.commit('loginPrivateKey',res)
+							);
+						},
+						// error is shown in header if private key cannot be decrypted
+						err => {}
+					);
+				}
+			);
 		},
 		
 		// backend reloads
 		loginReauthAll:function(blocking) {
 			ws.send('login','reauthAll',{},blocking).then(
-				res => {},
-				err => this.genericError(err)
+				() => {},
+				this.genericError
 			);
 		},
 		schemaReload:function(moduleId) {
@@ -445,14 +503,14 @@ let MyApp = {
 				? {} : {moduleId:moduleId};
 			
 			ws.send('schema','reload',payload,true).then(
-				res => {},
-				err => this.genericError(err)
+				() => {},
+				this.genericError
 			);
 		},
 		schedulerReload:function(blocking) {
 			ws.send('scheduler','reload',{},blocking).then(
-				res => {},
-				err => this.genericError(err)
+				() => {},
+				this.genericError
 			);
 		}
 	}

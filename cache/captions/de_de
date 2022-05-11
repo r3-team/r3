@@ -6,6 +6,7 @@
 			"cancel":"Abbrechen",
 			"clear":"Entfernen",
 			"close":"Schließen",
+			"copyClipboard":"In Zwischenablage kopieren",
 			"create":"Erstellen",
 			"delete":"Löschen",
 			"deleteHint":"Datensatz dauerhaft löschen",
@@ -28,7 +29,8 @@
 			"saveNew":"Speichern+Neu",
 			"saveNewHint":"Änderungen speichern und neuen Datensatz erstellen",
 			"send":"Senden",
-			"show":"Anzeigen"
+			"show":"Anzeigen",
+			"unlock":"Entsperren"
 		},
 		"dialog":{
 			"confirm":"Bitte bestätigen"
@@ -37,6 +39,7 @@
 			"aggArray":"Array",
 			"aggAvg":"Durchschnitt",
 			"aggCount":"Anzahl",
+			"aggJson":"JSON",
 			"aggList":"Kommaliste",
 			"aggMax":"Maximal",
 			"aggMin":"Minimal",
@@ -58,6 +61,7 @@
 		"applications":"Anwendungen",
 		"appName":"REI3",
 		"appWebsite":"https://rei3.de",
+		"available":"Verfügbar",
 		"busy":"Arbeitet - Zum Abbrechen hier klicken",
 		"date":"Datum",
 		"description":"Beschreibung",
@@ -68,18 +72,19 @@
 		"id":"ID",
 		"inputDecimal":"Wert muss dezimal sein",
 		"inputInvalid":"Wert ist ungültig",
-		"inputLarge":"Wert ist zu groß",
-		"inputLong":"Wert ist zu lang",
+		"inputLarge":"Wert ist zu groß (max. {MAX})",
+		"inputLong":"Wert ist zu lang (max. {MAX})",
 		"inputRequired":"Pflichtfeld",
 		"inputSelectMore":"...Text eingeben, um Ergebnisse zu filtern",
-		"inputShort":"Wert ist zu kurz",
-		"inputSmall":"Wert ist zu klein",
+		"inputShort":"Wert ist zu kurz (min. {MIN})",
+		"inputSmall":"Wert ist zu klein (min. {MIN})",
 		"inputTooFewFiles":"Zu wenige Dateien",
 		"inputTooManyFiles":"Zu viele Dateien",
 		"licenseRequired":"Lizenz erforderlich",
 		"limit":"Anzahl",
 		"menu":"Menü",
 		"missingCaption":"MISSING CAPTION",
+		"more":"Weitere...",
 		"name":"Name",
 		"nothingSelected":"Keine Auswahl getroffen",
 		"nothingThere":"Keine Ergebnisse verfügbar",
@@ -91,6 +96,8 @@
 		"resultsNone":"- keine Ergebnisse -",
 		"resultsOf":"/ {CNT}",
 		"role":"Rolle",
+		"selected":"Ausgewählt",
+		"status":"Status",
 		"title":"Titel",
 		"threeDots":"...",
 		"username":"Benutzername",
@@ -221,15 +228,16 @@
 			"msAdExtHint":"Verschachtelte Gruppenzugehör., Benutzer-Account-Kontrolle",
 			"nameHint":"Einzigartiger Name",
 			"port":"Port",
-			"portHint":"Normalerw. 389 wenn kein TLS, 636 für TLS",
+			"portHint":"Standardmäßig 389, 636 für SSL/TLS",
 			"role":"Rolle",
 			"searchClass":"Objektklasse",
 			"searchClassHint":"Beispiel: user",
 			"searchDn":"Such-DN",
 			"searchDnHint":"Beispiel: OU=User,DC=mycompany,DC=local",
+			"starttls":"StartTLS verwenden",
 			"title":"Verbindung erstellen/bearbeiten",
 			"titleRoles":"Rollen nach Gruppenmitgliedschaft",
-			"tls":"TLS verwenden",
+			"tls":"SSL/TLS verwenden",
 			"tlsVerify":"TLS überprüfen"
 		},
 		"license":{
@@ -368,6 +376,7 @@
 				"cleanupLogs":"Bereinigung abgelaufener Systemlogs",
 				"cleanupTempDir":"Bereinigung des temporären Verzeichnisses",
 				"embeddedBackup":"Integrierte Backups steuern",
+				"httpCertRenew":"Neuladen des SSL-Zertifikates falls es erneuert wurde",
 				"importLdapLogins":"Import von Anmeldungen und Rollen über LDAP",
 				"mailAttach":"E-Mail-Anhänge transferieren",
 				"mailRetrieve":"E-Mails abholen",
@@ -493,16 +502,6 @@
 				"conditions":"Konditionen",
 				"descriptionHint":"Beschreibung",
 				"effects":"Effekte",
-				"fieldChanged":"Wurde geändert",
-				"modeField":"Feldwert",
-				"modeField2Field":"Feldwert",
-				"modeField2Fixed":"Fester Wert",
-				"modeField2Login":"Login-ID",
-				"modeField2Preset":"Vordef. Datensatz",
-				"modeFieldChanged":"Feldwert verändert",
-				"modeRecord":"Datensatzzustand",
-				"modeRole":"Rolle",
-				"newRecord":"Ist neu",
 				"title":"Formularzustände"
 			},
 			"aggregator":"Aggregieren",
@@ -514,8 +513,10 @@
 			"captions":"Beschriftungen",
 			"category":"Kategorieauswahl",
 			"collection":"Sammlung*",
+			"collectionColumn":"Wert(e) aus Spalte",
 			"collectionIdDef":"Standardwert(e) aus Sammlung",
 			"collectionHint":"*Sammlung wird nur beeinflusst, wenn sie als Filterkriterium in der Datenabfrage genutzt wird.",
+			"collectionMultiValue":"Mehrfachauswahl",
 			"collectionTitle":"Sammlung durch Benutzereingabe filtern",
 			"columnsTarget":"Spalten hier ablegen",
 			"columnsTemplates":"Verfügbare Spalten",
@@ -523,6 +524,7 @@
 			"columnBatchNot":"nicht gestapelt",
 			"columnBatchHint":"Spalte ist Teil von Stapel {CNT}",
 			"columnBatchHintNot":"Spalte ist nicht gestapelt",
+			"columnClipboard":"Zwischenablage",
 			"columnHeaderData":"Datenabfrage",
 			"columnLength":"Länge (Charakt.)",
 			"columnLength0":"kein Limit",
@@ -551,6 +553,7 @@
 			"fields":"Felder",
 			"fieldAttributeIdAltDateTo":"Datum bis (Zeitraum)",
 			"fieldAttributeIdAltRichtextFiles":"Rich-Text Dateizugriff",
+			"fieldClipboard":"Zwischenablage",
 			"fieldDefault":"Standardwert",
 			"fieldDefaultHint":"Doku lesen für Platzhalter",
 			"fieldDefaultPresetIds":"Standard vord. Datensätze",
@@ -596,6 +599,7 @@
 			"layout":"Listen-Layout",
 			"limit":"Ergebnisanzahl",
 			"new":"Neues Formular",
+			"noDataActions":"Keine Datenaktionen",
 			"onMobile":"In mobiler Ansicht",
 			"openForm":"Formular öffnen",
 			"openFormAttributeApply":"...um Wert auf Formular zu setzen",
@@ -635,7 +639,10 @@
 				"delete":"Bist du sicher, dass du diese Funktion löschen möchtest?"
 			},
 			"helpJs":{
+				"block_inputs":"app.block_inputs(true/false) => UNDEFINED<br /><br />Sperrt alle Eingaben auf dem aktuellen Formular oder gibt diese wieder frei.",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Kopiert Text zur Zwischenablage des Benutzers.",
+				"get_e2ee_data_key":"app.get_e2ee_data_key(dataKeyEncrypted) => STRING<br /><br />Entschlüsselt den beigefügten Datenschlüssel mit dem privaten Schlüssel der aktuellen Anmeldung.",
+				"get_e2ee_data_value":"app.get_e2ee_data_value(dataKey,valueEncrypted) => STRING<br /><br />Entschlüsselt einen Datenwert mit dem beigefügten Datenschlüssel.",
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Liefert den 5-stelligen Sprach-Code ('en_us', ...) der aktuellen Anmeldung.",
 				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Liefert die ID der aktuellen Anmeldung.",
 				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Liefert die Datensatz-ID des offenen Formulars für den ausgewählten Relationsindex (0 ist der Standard).",
@@ -646,10 +653,25 @@
 				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Löscht den aktuellen Formulardatensatz.",
 				"record_new":"app.record_new() => UNDEFINED<br /><br />Öffnet einen neuen Datensatz.",
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Lädt den aktuellen Formulardatensatz neu.",
-				"record_save":"app.record_save() => UNDEFINED<br /><br />Speichert den aktuellen Formulardatensatz."
+				"record_save":"app.record_save() => UNDEFINED<br /><br />Speichert den aktuellen Formulardatensatz.",
+				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />Wenn aufgerufen, wird die Ende-Zu-Ende-Verschlüsselung beim nächsten Speichern des Formulares aktualisiert. Datenschlüssel für Relationen auf dem Formular mit aktivierter Verschlüsselung werden mit den öffentlichen Schlüssel von jeder definierten Anmeldung verschlüsselt. Hiermit können Benutzer Datensätze später entschlüsseln.<br /><br />Wenn diese Funktion nicht aufgerufen wird, kann nur der Ersteller entschlüsseln.",
+				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />Wenn aufgerufen, wird die Ende-Zu-Ende-Verschlüsselung für die definierte Relation und Datensätze beim nächsten Speichern des Formulares aktualisiert. Datenschlüssel für Datensätze der Relation werden mit den öffentlichen Schlüssel von jeder definierten Anmeldung verschlüsselt. Hiermit können Benutzer Datensätze später entschlüsseln.",
+				"show_form_message":"app.show_form_message(message,duration_in_ms) => UNDEFINED<br /><br />Ersetzt den Formtitel für eine kurze Zeit mit einer definierten Meldung. Das 2. Argument legt fest, in Millisekunden, wie lange die Meldung angezeigt wird.",
+				"update_collection":"app.update_collection(collection_id) => UNDEFINED<br /><br />Holt und aktualisiert Werte für die spezifizierte Sammlung."
+			},
+			"helpJsHint":{
+				"copy_to_clipboard":"VALUE",
+				"get_e2ee_data_key":"DATA_KEY_ENCRYPTED",
+				"get_e2ee_data_value":"DATA_KEY, VALUE_ENCRYPTED",
+				"get_record_id":"RELATION_INDEX_NUMBER",
+				"has_role":"ROLE_ID_STRING",
+				"open_form":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
+				"show_form_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
+				"update_collection":"COLLECTION_ID"
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Bricht die Operation ab und sendet dem ausführenden Benutzer eine Nachricht, welche in der Benutzeroberfläche angezeigt wird.",
+				"clean_up_e2ee_keys":"instance.clean_up_e2ee_keys(<blockquote>login_id INTEGER,<br />relation_id UUID,<br />record_ids_access INTEGER[]</blockquote>) => VOID<br /><br />Löscht Ende-Zu-Ende-Datenschlüssel für Datensätze, auf die eine Anmeldung keinen Zugriff mehr hat. Dies macht Entschlüsselung für die Anmeldung unmöglich.",
 				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Liefert die ID von der Anmeldung, welche die Operation ausführt.",
 				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Liefert den 5-stelligen Sprach-Code ('en_us', ...) von der Anmeldung, die auf das Daten-Backend zugreift.",
 				"get_name":"instance.get_name() => TEXT<br /><br />Liefert den Instanznamen, definiert im Anpassungs-Fenster im Adminbereich.",
@@ -711,10 +733,7 @@
 			"titleJs":"Frontend-Funktionen ({CNT})",
 			"titlePg":"Backend-Funktionen ({CNT})",
 			"titleOne":"Funktionstitel",
-			"valueJsHint":"VALUE",
-			"valueJsHintForm":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
-			"valueJsHintIndex":"RELATION_INDEX_NUMBER",
-			"valueJsHintRole":"ROLE_ID_STRING"
+			"value":"VALUE"
 		},
 		"help":{
 			"title":"Anwendungshilfe"
@@ -822,6 +841,8 @@
 			"codeCondition":"Kondition",
 			"content":"Inhalt",
 			"def":"DEFAULT",
+			"encrypted":"E2E-Verschlüsselt",
+			"encryption":"E2E-Verschlüsselung",
 			"execute":"Ausführen",
 			"external":"Referenzierende Beziehungen ({CNT})",
 			"fires":"Started",
@@ -845,7 +866,7 @@
 			"policies":"Richtlinien",
 			"policyActions":"Handlung",
 			"policyActionDelete":"Löschen",
-			"policyActionSelect":"Anzeigen",
+			"policyActionSelect":"Auswählen",
 			"policyActionUpdate":"Verändern",
 			"policyExplanation":"Die erste Richtlinie, die einer Rolle der aktuellen Anmeldung entspricht, wird angewendet, solange die versuchte Handlung für diese Richtlinie aktiviert ist. Um bspw. einer Rolle vollen Zugriff zu erlauben, kann eine Richtlinie mit allen Handlungen aktiviert und keinen Filtern an oberster Stelle gesetzt werden.",
 			"policyFunctions":"Filterfunktionen",
@@ -976,7 +997,8 @@
 			"002":"Ungültige Nummer '{VALUE}' (Dezimal wird erwartet).",
 			"003":"Ungültiger Datum-/Zeitwert '{VALUE}', erwartetes Format: {EXPECT}.",
 			"004":"Nicht unterstützter Attributtyp '{VALUE}'.",
-			"005":"Falsche Anzahl an Feldern in Zeile '{VALUE}'."
+			"005":"Falsche Anzahl an Feldern in Zeile '{VALUE}'.",
+			"006":"Verschlüsselte Attribute werden nicht unterstützt"
 		},
 		"DBS":{
 			"001":"{FNC_MSG}",
@@ -988,7 +1010,12 @@
 			"007":"Ungültiger Wert \"{VALUE}\"."
 		},
 		"SEC":{
-			"001":"Du bist nicht berechtigt die Aktion auszuführen oder diese Ressource aufzurufen."
+			"001":"Du bist nicht berechtigt die Aktion auszuführen oder diese Ressource aufzurufen.",
+			"002":"Das System konnte den persönlichen Schlüssel für die Ende-Zu-Ende-Verschlüsselung nicht entsperren. Das kann passieren, wenn jemand für dich oder du dein Passwort außerhalb dieser Anwendung geändert hast.<br /><br />Bitte die Benutzereinstellungen öffnen und den Anweisungen folgen, um Zugriff auf deinen persönlichen Schlüssel wiederherzustellen.",
+			"003":"Das System konnte die Datensatzwerte nicht verschlüsseln. Bitte erneut versuchen.",
+			"004":"Das System konnte die Datensatzwerte nicht entschlüsseln. Bitte erneut versuchen.",
+			"005":"Das System konnte Entschlüsselungs-Codes für die ausgewählten Datensätze nicht laden.",
+			"006":"Nicht alle ausgewählten Benutzer haben Ende-Zu-Ende-Verschlüsselung aktiviert - diese sind: {NAMES}"
 		},
 		"initCollection":"Fehler beim Laden von Sammlungen während der Anmeldung: {MSG}"
 	},
@@ -1019,8 +1046,9 @@
 			},
 			"content":{
 				"attribute":"Attributwert",
-				"collection":"Wert(e) aus Sammlung",
+				"collection":"Sammlungswert(e)",
 				"field":"Feldwert",
+				"fieldChanged":"Feldwert geändert (TRUE/FALSE)",
 				"javascript":"JavaScript-Ausdruck",
 				"languageCode":"Login-Sprach-Code (en_us, ...)",
 				"login":"Login-ID (Integer)",
@@ -1034,13 +1062,11 @@
 			},
 			"operator":{
 				"eq":"gleich",
-				"eqAny":"inkludiert",
 				"le":"größer/gleich",
 				"lt":"größer",
 				"ilike":"enthält",
 				"like":"enthält (groß/klein)",
 				"ne":"ungleich",
-				"neAll":"exkludiert",
 				"not_ilike":"enthält nicht",
 				"not_like":"enthält nicht (groß/klein)",
 				"not_null":"nicht leer",
@@ -1053,8 +1079,15 @@
 		"javascriptHint":"Bsp.: return new Date().getFullYear();",
 		"nestingMain":"Main-Query",
 		"nestingSub":"Sub-Query",
+		"operatorsArray":"Array",
+		"operatorsNull":"Leerer Wert",
+		"operatorsSets":"Subset",
+		"operatorsSize":"Nummer",
+		"operatorsText":"Text",
 		"queryAggregatorNull":"keine Aggregation",
 		"queryShow":"Sub-Query anzeigen",
+		"subQueryAttribute":"Attribut",
+		"subQueryAggregator":"Aggregieren",
 		"valueHint":"Text oder Zahlenwert"
 	},
 	"form":{
@@ -1063,23 +1096,23 @@
 			"helpHint":"Hilfeseiten anzeigen",
 			"log":"Historie",
 			"logHint":"Änderungshistorie anzeigen",
-			"retractLogs":"Logs einklappen"
+			"logShowAll":"Alle anzeigen ({CNT})"
 		},
 		"dialog":{
 			"close":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem das Formular schließen?",
 			"delete":"Bist du sicher, dass du diesen Datensatz <b>permanent</b> löschen möchtest?",
+			"encrypted":"Der Feldinhalt wird auf deinem System verschlüsselt bevor er zum Server geschickt wird.",
 			"new":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem einen neuen Datensatz erstellen?",
 			"newReset":"Dies wird alle Eingaben zurücksetzen.<br /><br />Möchtest du fortfahren?",
 			"prev":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem zurückgehen?",
 			"prevBrowser":"Es existieren ungespeicherte Änderungen - diese gehen verloren, wenn du fortfahrst. Möchtest du trotzdem fortfahren?"
 		},
 		"message":{
-			"recordCreated":"Datensatz wurde erstellt",
-			"recordCreatedMobile":"Erstellt!",
-			"recordDeleted":"Datensatz wurde gelöscht",
-			"recordDeletedMobile":"Gelöscht!",
-			"recordUpdated":"Datensatz wurde aktualisiert",
-			"recordUpdatedMobile":"Aktualisiert!"
+			"recordCreated":"Datensatz erstellt",
+			"recordDeleted":"Datensatz gelöscht",
+			"recordEncrypting":"Verschlüssele Datensatz...",
+			"recordValueCopied":"In die Zwischenablage kopiert",
+			"recordUpdated":"Datensatz aktualisiert"
 		},
 		"dataLog":"Verändungen",
 		"deletedUser":"gelöschter Benutzer",
@@ -1094,8 +1127,7 @@
 			"goToApps":"Dateiimporter öffnen",
 			"goToLogins":"Rollen zuweisen",
 			"goToRepo":"Repository öffnen",
-			"installBundle":"Core Company installieren",
-			"openHelp":"Hilfeseite"
+			"installBundle":"Core Company installieren"
 		},
 		"wizard":{
 			"installBundle":"Core Company",
@@ -1107,8 +1139,6 @@
 			"intro":"Willkommen in REI3<br /><br />Aktuell sind keine Anwendungen installiert. Um REI3 zu benutzen, wähle bitte eine der unteren Installationsoptionen.",
 			"title":"Einrichtung"
 		},
-		"firstSteps":"Erste Schritte",
-		"firstStepsIntro":"Die meisten Anwendungen erfordern eine initiale Einrichtung und oder Stammdaten, um zu funktionieren. Anleitungen hierzu sind in den individuellen Hilfeseiten zu finden:",
 		"newVersion":"Update-Notifikation",
 		"newVersionText":"Eine neue Version von REI3 ist verfügbar.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">REI3 v{VERSION} herunterladen</a>",
 		"noAccess":"Es ist noch kein Zugriff eingerichtet.<br />Bitte kontaktiere deinen Systemadministrator.",
@@ -1167,6 +1197,7 @@
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Zeitzone",
 		"csvTotalLimit":"Zeilenanzahl (0 = alle)",
+		"fetching":"Daten werden geladen...",
 		"inputHintCreate":"Neuen Datensatz anlegen",
 		"inputHintOpen":"Datensatz öffnen",
 		"inputHintRemove":"Datensatz entfernen",
@@ -1176,15 +1207,7 @@
 		"quick":"Ergebnisse in allen Spalten filtern"
 	},
 	"settings":{
-		"button":{
-			"logout":"Abmelden"
-		},
-		"option":{
-			"cornerKeep":"- unverändert -",
-			"cornerRounded":"abgerundet",
-			"cornerSquared":"kantig"
-		},
-		"security":{
+		"account":{
 			"messagePwCurrentWrong":"Aktuelles Passwort ist inkorrekt",
 			"messagePwDiff":"Passwörter stimmen nicht überein",
 			"messagePwRequiresDigit":"Passwort muss eine Zahl beinhalten",
@@ -1196,6 +1219,40 @@
 			"pwNew1":"Neues Passwort (wiederholt)",
 			"pwOld":"Aktuelles Passwort",
 			"titlePwChange":"Passwort ändern"
+		},
+		"button":{
+			"logout":"Abmelden"
+		},
+		"encryption":{
+			"button":{
+				"createKeys":"Schlüssel erzeugen",
+				"resetKeys":"Persönliche Schlüssel zurücksetzen",
+				"storeKeys":"Verschlüsselung aktivieren"
+			},
+			"status":{
+				"inactive":"Nicht aktiviert",
+				"locked":"Schlüssel sind gesperrt",
+				"unlocked":"Bereit zur Nutzung"
+			},
+			"backupCode":"Backup-Code",
+			"backupCodeDesc":"Der Backup-Code ist <b>sehr wichtig</b>; er stellt Zugriff wieder her, falls du dein Passwort vergessen hast.",
+			"confirmBackupCode":"Ich habe den Backup-Code an einen sicheren Ort kopiert.",
+			"confirmEncryption":"Ich verstehe, dass wenn ich sowohl mein Passwort als auch meinen Backup-Code verliere, permanent Zugriff auf verschlüsselte Daten verliere.",
+			"description":"Anwendungen können sensitive Daten für den exklusiven Zugriff spezifischer Personen verschlüsseln. Bevor Verschlüsselung genutzt werden kann, muss jeder Benutzer persönliche Schlüssel erzeugen.",
+			"modulesEnc":"Anwendungen, die Verschlüsselung nutzen",
+			"newKeys":"Schlüssel erfolgreich erzeugt",
+			"newKeysDesc":"Um die Einrichtung abzuschließen, kopiere deinen persönlichen Backup-Code an einen sicheren Ort.",
+			"prevPassword":"Vorheriges Passwort",
+			"regainAccess":"Zugriff auf persönliche Schlüssel wiederherstellen",
+			"regainAccessDesc":"Du kannst Zugriff auf deine persönliche Schlüssel wiederherstellen, indem du dein vorheriges Passwort eingibst. Wenn du dein vorheriges Passwort nicht kennst, musst du deinen persönlichen Backup-Code nutzen.",
+			"resetAccess":"Persönliche Schlüssel zurücksetzen",
+			"resetAccessDesc":"Falls du weder Zugriff auf dein vorheriges Passwort noch auf dein Backup-Code hast, ist Zugriff auf verschlüsselte Daten bereits verloren.<br /><br />In diesem Fall kannst du entscheiden, deine persönlichen Schlüssel zurückzusetzen, um neue Daten zu verschlüsseln - dies wird <b>NICHT</b> den Zugriff auf vorher verschlüsselte Daten wiederherstellen.",
+			"resetAccessHint":"Bist du sicher, dass du deine persönlichen Schlüssel zurücksetzen möchtest? Falls ja, kannst du nicht mehr zurück, selbst wenn du deinen alten Backup-Code später wiederfindest."
+		},
+		"option":{
+			"cornerKeep":"- unverändert -",
+			"cornerRounded":"abgerundet",
+			"cornerSquared":"kantig"
 		},
 		"bordersAll":"Rahmen hinzufügen",
 		"bordersCorners":"Rahmenecken",
@@ -1209,15 +1266,15 @@
 		"dark":"Dunkle Ansicht",
 		"fontSize":"Schriftgröße",
 		"headerCaptions":"Hauptmenütitel anzeigen",
-		"hintFirstSteps":"\"Erste Schritte\" anzeigen",
 		"languageCode":"Sprache",
+		"mobileScrollForm":"Mobil: Gesamtes Formular scrollen",
 		"pageLimit":"Max. Seitenbreite",
 		"pageTitle":"Einstellungen",
 		"spacing":"Abstände",
 		"sundayFirstDow":"Sonntag ist 1. Wochentag",
-		"titleAdmin":"Admin",
+		"titleAccount":"Konto",
 		"titleDisplay":"Anzeige",
-		"titleSecurity":"Sicherheit",
+		"titleEncryption":"Ende-zu-Ende-Verschlüsselung",
 		"titleTheme":"Darstellung",
 		"warnUnsaved":"Warnung bei ungespeicherten Änderungen"
 	}

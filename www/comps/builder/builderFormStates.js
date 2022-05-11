@@ -1,291 +1,9 @@
-import {getNilUuid}  from '../shared/generic.js';
+import {getNilUuid} from '../shared/generic.js';
 import {
-	MyFilterBrackets,
-	MyFilterConnector,
-	MyFilterOperator
-} from './../filters.js';
-import {
-	getDataFieldMap,
+	getDataFields,
 	getFieldMap
 } from '../shared/form.js';
 export {MyBuilderFormStates as default};
-
-let MyBuilderFormStateCondition = {
-	name:'my-builder-form-state-condition',
-	components:{
-		MyFilterBrackets,
-		MyFilterConnector,
-		MyFilterOperator
-	},
-	template:`<div class="builder-form-state-condition">
-		
-		<my-filter-connector
-			@update:modelValue="update('connector',$event)"
-			:disabled="isFirst"
-			:modelValue="condition.connector"
-		/>
-		
-		<my-filter-brackets
-			@update:modelValue="update('brackets0',$event)"
-			:left="true"
-			:modelValue="condition.brackets0"
-		/>
-		
-		<!-- condition mode selector -->
-		<select
-			@input="changeMode($event.target.value)"
-			:value="mode"
-		>
-			<option value="record">{{ capApp.modeRecord }}</option>
-			<option value="field"
-				:disabled="!anyDataFields"
-			>{{ capApp.modeField }}</option>
-			<option value="fieldChanged"
-				:disabled="!anyDataFields"
-			>{{ capApp.modeFieldChanged }}</option>
-			<option value="role"
-				:disabled="module.roles.length === 0"
-			>{{ capApp.modeRole }}</option>
-		</select>
-		
-		<!-- field selector -->
-		<template v-if="mode === 'field' || mode === 'fieldChanged'">
-			<select
-				@input="update('fieldId0',$event.target.value)"
-				:value="condition.fieldId0"
-			>
-				<option v-for="f in fieldIdMapData" :value="f.id">
-					F{{ fieldIdMapRef[f.id] }}
-				</option>
-			</select>
-		</template>
-		
-		<!-- field value condition -->
-		<template v-if="mode === 'field'">
-			
-			<!-- field value option -->
-			<my-filter-operator class="operator"
-				@update:modelValue="update('operator',$event)"
-				:builderMode="false"
-				:modelValue="condition.operator"
-				:onlyEquals="mode2Field === 'preset' || mode2Field === 'login'"
-			/>
-			
-			<!-- field value comparissons -->
-			<template v-if="!hasNullOperator">
-				<select
-					@input="changeMode2Field($event.target.value)"
-					:value="mode2Field"
-				>
-					<option value="fixed">
-						{{ capApp.modeField2Fixed }}
-					</option>
-					<option value="field"
-						:disabled="!anyDataFields"
-					>{{ capApp.modeField2Field }}</option>
-					<option value="preset"
-						:disabled="field0Presets.length === 0"
-					>{{ capApp.modeField2Preset }}</option>
-					<option value="login">
-						{{ capApp.modeField2Login }}
-					</option>
-				</select>
-				
-				<select
-					v-if="mode2Field === 'field'"
-					@input="update('fieldId1',$event.target.value)"
-					:value="condition.fieldId1"
-				>
-					<option :value="null">-</option>
-					<template v-for="f in fieldIdMapData">
-						<option
-							v-if="f.id !== condition.fieldId0"
-							:value="f.id"
-						>F{{ fieldIdMapRef[f.id] }}</option>
-					</template>
-				</select>
-				
-				<select
-					v-if="mode2Field === 'preset'"
-					@input="update('presetId1',$event.target.value)"
-					:value="condition.presetId1"
-				>
-					<option :value="null">-</option>
-					<option
-						v-for="p in field0Presets"
-						:value="p.id"
-					>{{ p.name }}</option>
-				</select>
-				
-				<input class="short"
-					v-if="mode2Field === 'fixed'"
-					@input="update('value1',$event.target.value)"
-					:value="condition.value1"
-				>
-			</template>
-		</template>
-		
-		<!-- role condition -->
-		<template v-if="mode === 'role'">
-			<my-filter-operator class="operator"
-				@update:modelValue="update('operator',$event)"
-				:builderMode="false"
-				:modelValue="condition.operator"
-				:onlyEquals="true"
-			/>
-			<select
-				@input="update('roleId',$event.target.value)"
-				:value="condition.roleId"
-			>
-				<option v-for="r in module.roles" :value="r.id">
-					{{ r.name }}
-				</option>
-			</select>
-		</template>
-		
-		<!-- new record condition -->
-		<template v-if="mode === 'record'">
-			<span>{{ capApp.newRecord }}</span>
-			<my-bool
-				@update:modelValue="update('newRecord',$event)"
-				:modelValue="condition.newRecord"
-			/>
-		</template>
-		
-		<!-- field changed option -->
-		<template v-if="mode === 'fieldChanged'">
-			<span>{{ capApp.fieldChanged }}</span>
-			<my-bool
-				@update:modelValue="update('fieldChanged',$event)"
-				:modelValue="condition.fieldChanged"
-			/>
-		</template>
-		
-		<my-filter-brackets
-			@update:modelValue="update('brackets1',$event)"
-			:left="false"
-			:modelValue="condition.brackets1"
-		/>
-		
-		<my-button image="cancel.png"
-			@trigger="$emit('remove')"
-			:naked="true"
-		/>
-	</div>`,
-	props:{
-		fieldIdMapData:{ type:Object,  required:true },
-		fieldIdMapRef: { type:Object,  required:true },
-		form:          { type:Object,  required:true },
-		isFirst:       { type:Boolean, required:true },
-		modelValue:    { type:Object,  required:true }
-	},
-	watch:{
-		condition:{
-			handler:function(c) {
-				// set main mode
-				if     (c.newRecord    !== null) this.mode = 'record';
-				else if(c.roleId       !== null) this.mode = 'role';
-				else if(c.fieldChanged !== null) this.mode = 'fieldChanged';
-				else if(c.fieldId0     !== null) this.mode = 'field';
-				
-				// set field comparisson mode
-				if     (c.login1    !== null) this.mode2Field = 'login';
-				else if(c.presetId1 !== null) this.mode2Field = 'preset';
-				else if(c.value1    !== null) this.mode2Field = 'fixed';
-				else                          this.mode2Field = 'field';
-			},
-			immediate:true
-		}
-	},
-	emits:['remove','update:modelValue'],
-	data:function() {
-		return {
-			mode:'record',
-			mode2Field:'fixed'
-		};
-	},
-	computed:{
-		anyDataFields:function() {
-			for(let f in this.fieldIdMapData) {
-				return true;
-			}
-			return false;
-		},
-		hasNullOperator:function() {
-			return ['IS NULL','IS NOT NULL'].includes(this.condition.operator);
-		},
-		field0Presets:function() {
-			if(this.condition.fieldId0 === null)
-				return [];
-			
-			let f = this.fieldIdMapData[this.condition.fieldId0];
-			let a = this.attributeIdMap[f.attributeId];
-			
-			if(a.relationshipId === null)
-				return [];
-			
-			return this.relationIdMap[a.relationshipId].presets;
-		},
-		
-		// simple
-		condition:function() { return JSON.parse(JSON.stringify(this.modelValue)); },
-		
-		// stores
-		module:        function() { return this.moduleIdMap[this.form.moduleId]; },
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.form.states; }
-	},
-	methods:{
-		changeMode:function(value) {
-			this.mode = value;
-			
-			switch(value) {
-				case 'field':        this.update('fieldId0',this.fieldIdMapData[Object.keys(this.fieldIdMapData)[0]].id); break;
-				case 'fieldChanged': this.update('fieldChanged',true); break;
-				case 'record':       this.update('newRecord',true); break;
-				case 'role':         this.update('roleId',this.module.roles[0].id); break;
-			}
-		},
-		changeMode2Field:function(value) {
-			this.mode2Field = value;
-			
-			switch(value) {
-				case 'fixed':  this.update('value1',''); break;
-				case 'login':  this.update('login1',true); break;
-				case 'preset': this.update('presetId1',this.field0Presets[0].id); break;
-			}
-		},
-		update:function(name,value) {
-			let v = JSON.parse(JSON.stringify(this.condition));
-			v[name] = value;
-			
-			// clean up invalid parameter values
-			if(this.mode !== 'field' && this.mode !== 'fieldChanged') {
-				v.fieldId0 = null;
-			}
-			if(this.mode !== 'field') {
-				v.fieldId1  = null;
-				v.login1    = null;
-				v.presetId1 = null;
-				v.value1    = null;
-			}
-			if(this.mode !== 'fieldChanged') v.fieldChanged = null;
-			if(this.mode !== 'record')       v.newRecord    = null;
-			if(this.mode !== 'role')         v.roleId       = null;
-			
-			if(this.mode === 'field') {
-				if(this.mode2Field !== 'field')  v.fieldId1  = null;
-				if(this.mode2Field !== 'fixed')  v.value1    = null;
-				if(this.mode2Field !== 'login')  v.login1    = null;
-				if(this.mode2Field !== 'preset') v.presetId1 = null;
-			}
-			
-			this.$emit('update:modelValue',v);
-		}
-	}
-};
 
 let MyBuilderFormStateEffect = {
 	name:'my-builder-form-state-effect',
@@ -340,10 +58,7 @@ let MyBuilderFormStateEffect = {
 
 let MyBuilderFormState = {
 	name:'my-builder-form-state',
-	components:{
-		MyBuilderFormStateCondition,
-		MyBuilderFormStateEffect
-	},
+	components:{MyBuilderFormStateEffect},
 	template:`<div class="builder-form-state" :class="{ 'show-details':detailsShow || showAlways }">
 		<div class="details">
 			<my-button
@@ -379,16 +94,15 @@ let MyBuilderFormState = {
 			<span class="title" v-if="state.conditions.length !== 0">
 				{{ capApp.conditions }}
 			</span>
-			<my-builder-form-state-condition
-				v-for="(c,i) in state.conditions"
-				@remove="remove('conditions',i)"
-				@update:modelValue="update('conditions',i,$event)"
-				:fieldIdMapData="fieldIdMapData"
-				:fieldIdMapRef="fieldIdMapRef"
-				:form="form"
-				:isFirst="i === 0"
-				:key="'cond'+i"
-				:modelValue="state.conditions[i]"
+			<my-filters
+				v-model="conditions"
+				:builderMode="true"
+				:dataFields="dataFields"
+				:disableContent="['attribute','javascript','subQuery']"
+				:filterAddCnt="filterAddCnt"
+				:moduleId="form.moduleId"
+				:showAdd="true"
+				:showMove="true"
 			/>
 			
 			<span class="title" v-if="state.effects.length !== 0">
@@ -406,46 +120,68 @@ let MyBuilderFormState = {
 		</template>
 	</div>`,
 	props:{
+		dataFields:    { type:Array,   required:true }, // all data fields
 		fieldIdMap:    { type:Object,  required:true }, // all fields by ID
-		fieldIdMapData:{ type:Object,  required:true }, // data fields by ID
 		fieldIdMapRef: { type:Object,  required:true }, // field references by ID
 		form:          { type:Object,  required:true },
 		modelValue:    { type:Object,  required:true },
 		showAlways:    { type:Boolean, required:true }
 	},
 	emits:['remove','update:modelValue'],
-	data:function() {
+	data() {
 		return {
-			detailsShow:false
+			detailsShow:false,
+			filterAddCnt:0 // ugly hack to add filter
 		};
 	},
 	computed:{
-		state:function() { return JSON.parse(JSON.stringify(this.modelValue)); },
+		// inputs
+		conditions:{
+			get()  { return this.state.conditions; },
+			set(v) {
+				let s = JSON.parse(JSON.stringify(this.state));
+				s.conditions = v;
+				this.$emit('update:modelValue',s);
+			}
+		},
+		
+		// simple
+		state:(s) => JSON.parse(JSON.stringify(s.modelValue)),
 		
 		// store
-		capApp:function() { return this.$store.getters.captions.builder.form.states; },
-		capGen:function() { return this.$store.getters.captions.generic; }
+		capApp:(s) => s.$store.getters.captions.builder.form.states,
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
-		addCondition:function() {
+		addCondition() {
 			let v = JSON.parse(JSON.stringify(this.state));
 			v.conditions.push({
-				fieldId0:null,
-				fieldId1:null,
-				fieldChanged:null,
-				presetId1:null,
-				roleId:null,
-				newRecord:null,
-				brackets0:0,
-				brackets1:0,
 				connector:'AND',
-				login1:null,
 				operator:'=',
-				value1:''
+				side0:{
+					brackets:0,
+					collectionId:null,
+					columnId:null,
+					content:'field',
+					fieldId:null,
+					presetId:null,
+					roleId:null,
+					value:''
+				},
+				side1:{
+					brackets:0,
+					collectionId:null,
+					columnId:null,
+					content:'value',
+					fieldId:null,
+					presetId:null,
+					roleId:null,
+					value:''
+				}
 			});
 			this.$emit('update:modelValue',v);
 		},
-		addEffect:function() {
+		addEffect() {
 			let v = JSON.parse(JSON.stringify(this.state));
 			v.effects.push({
 				fieldId:null,
@@ -453,12 +189,12 @@ let MyBuilderFormState = {
 			});
 			this.$emit('update:modelValue',v);
 		},
-		remove:function(name,i) {
+		remove(name,i) {
 			let v = JSON.parse(JSON.stringify(this.state));
 			v[name].splice(i,1);
 			this.$emit('update:modelValue',v);
 		},
-		update:function(name,i,value) {
+		update(name,i,value) {
 			let v = JSON.parse(JSON.stringify(this.state));
 			
 			if(i !== -1) v[name][i] = value;
@@ -529,8 +265,8 @@ let MyBuilderFormStates = {
 				v-show="stateShowIndex.includes(i)"
 				@remove="remove(i)"
 				@update:modelValue="update(i,$event)"
+				:dataFields="dataFields"
 				:fieldIdMap="fieldIdMap"
-				:fieldIdMapData="fieldIdMapData"
 				:fieldIdMapRef="fieldIdMapRef"
 				:form="form"
 				:key="s.id"
@@ -554,7 +290,7 @@ let MyBuilderFormStates = {
 		};
 	},
 	computed:{
-		fieldIdsUsed:function() {
+		fieldIdsUsed() {
 			let out = [];
 			
 			for(let i = 0, j = this.states.length; i < j; i++) {
@@ -577,7 +313,7 @@ let MyBuilderFormStates = {
 			}
 			return out;
 		},
-		stateShowIndex:function() {
+		stateShowIndex() {
 			let out = [];
 			for(let i = 0, j = this.states.length; i < j; i++) {
 				let s = this.states[i];
@@ -618,22 +354,22 @@ let MyBuilderFormStates = {
 		},
 		
 		// simple
-		fieldIdMap:    function() { return this.getFieldMap(this.form.fields); },
-		fieldIdMapData:function() { return this.getDataFieldMap(this.form.fields); },
-		states:        function() { return JSON.parse(JSON.stringify(this.modelValue)); },
+		dataFields:(s) => s.getDataFields(s.form.fields),
+		fieldIdMap:(s) => s.getFieldMap(s.form.fields),
+		states:    (s) => JSON.parse(JSON.stringify(s.modelValue)),
 		
 		// stores
-		capApp:function() { return this.$store.getters.captions.builder.form.states; },
-		capGen:function() { return this.$store.getters.captions.generic; }
+		capApp:(s) => s.$store.getters.captions.builder.form.states,
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
-		getDataFieldMap,
+		getDataFields,
 		getFieldMap,
 		getNilUuid,
 		
 		// actions
-		add:function() {
+		add() {
 			let v = JSON.parse(JSON.stringify(this.states));
 			v.unshift({
 				id:this.getNilUuid(),
@@ -643,12 +379,12 @@ let MyBuilderFormStates = {
 			});
 			this.$emit('update:modelValue',v);
 		},
-		remove:function(i) {
+		remove(i) {
 			let v = JSON.parse(JSON.stringify(this.states));
 			v.splice(i,1);
 			this.$emit('update:modelValue',v);
 		},
-		update:function(i,value) {
+		update(i,value) {
 			let v = JSON.parse(JSON.stringify(this.states));
 			v[i] = value;
 			this.$emit('update:modelValue',v);

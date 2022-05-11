@@ -81,8 +81,8 @@ let MyAdminLicense = {
 		// backend calls
 		get:function() {
 			ws.send('license','get',{},true).then(
-				(res) => this.$store.commit('license',res.payload),
-				(err) => this.$root.genericError(err)
+				res => this.$store.commit('license',res.payload),
+				this.$root.genericError
 			);
 		},
 		set:function(evt) {

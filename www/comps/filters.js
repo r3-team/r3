@@ -80,23 +80,38 @@ let MyFilterOperator = {
 	name:'my-filter-operator',
 	components:{ MyFilterOperatorOption },
 	template:`<select v-model="value">
-		<my-filter-operator-option value="="  :caption="capApp.option.operator.eq" :builder-mode="builderMode" />
-		<my-filter-operator-option value="<>" :caption="capApp.option.operator.ne" :builder-mode="builderMode" />
+		<my-filter-operator-option value="="  :caption="capApp.option.operator.eq" :builderMode="builderMode" />
+		<my-filter-operator-option value="<>" :caption="capApp.option.operator.ne" :builderMode="builderMode" />
 		
-		<template v-if="!onlyEquals">
-			<my-filter-operator-option v-if="!onlyString" value="<"         :caption="capApp.option.operator.st"        :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="!onlyString" value=">"         :caption="capApp.option.operator.lt"        :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="!onlyString" value="<="        :caption="capApp.option.operator.se"        :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="!onlyString" value=">="        :caption="capApp.option.operator.le"        :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="builderMode" value="= ANY"     :caption="capApp.option.operator.eqAny"     :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="builderMode" value="<> ALL"    :caption="capApp.option.operator.neAll"     :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="!onlyDates"  value="ILIKE"     :caption="capApp.option.operator.ilike"     :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="!onlyDates"  value="NOT ILIKE" :caption="capApp.option.operator.not_ilike" :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="!onlyDates"  value="LIKE"      :caption="capApp.option.operator.like"      :builder-mode="builderMode" />
-			<my-filter-operator-option v-if="!onlyDates"  value="NOT LIKE"  :caption="capApp.option.operator.not_like"  :builder-mode="builderMode" />
-			<my-filter-operator-option value="IS NULL"     :caption="capApp.option.operator.null"     :builder-mode="builderMode" />
-			<my-filter-operator-option value="IS NOT NULL" :caption="capApp.option.operator.not_null" :builder-mode="builderMode" />
-		</template>
+		<optgroup v-if="!onlyEquals && !onlyString" :label="capApp.operatorsSize">
+			<my-filter-operator-option value="<"  :caption="capApp.option.operator.st" :builderMode="builderMode" />
+			<my-filter-operator-option value=">"  :caption="capApp.option.operator.lt" :builderMode="builderMode" />
+			<my-filter-operator-option value="<=" :caption="capApp.option.operator.se" :builderMode="builderMode" />
+			<my-filter-operator-option value=">=" :caption="capApp.option.operator.le" :builderMode="builderMode" />
+		</optgroup>
+		
+		<optgroup v-if="!onlyEquals && !onlyDates" :label="capApp.operatorsText">
+			<my-filter-operator-option value="LIKE"      :caption="capApp.option.operator.like"      :builderMode="builderMode" />
+			<my-filter-operator-option value="ILIKE"     :caption="capApp.option.operator.ilike"     :builderMode="builderMode" />
+			<my-filter-operator-option value="NOT LIKE"  :caption="capApp.option.operator.not_like"  :builderMode="builderMode" />
+			<my-filter-operator-option value="NOT ILIKE" :caption="capApp.option.operator.not_ilike" :builderMode="builderMode" />
+		</optgroup>
+		
+		<optgroup v-if="!onlyEquals" :label="capApp.operatorsNull">
+			<my-filter-operator-option value="IS NULL"     :caption="capApp.option.operator.null"     :builderMode="builderMode" />
+			<my-filter-operator-option value="IS NOT NULL" :caption="capApp.option.operator.not_null" :builderMode="builderMode" />
+		</optgroup>
+		
+		<optgroup v-if="!onlyEquals && builderMode" :label="capApp.operatorsSets">
+			<my-filter-operator-option value="= ANY"  caption="= ANY"  :builderMode="builderMode" />
+			<my-filter-operator-option value="<> ALL" caption="<> ALL" :builderMode="builderMode" />
+		</optgroup>
+		
+		<optgroup v-if="!onlyEquals && builderMode" :label="capApp.operatorsArray">
+			<my-filter-operator-option value="@>" caption="@>" :builderMode="builderMode" />
+			<my-filter-operator-option value="<@" caption="<@" :builderMode="builderMode" />
+			<my-filter-operator-option value="&&" caption="&&" :builderMode="builderMode" />
+		</optgroup>
 	</select>`,
 	watch:{
 		onlyDates:function(v) {
@@ -105,7 +120,7 @@ let MyFilterOperator = {
 		}
 	},
 	props:{
-		builderMode:{ type:Boolean, required:true },
+		builderMode:{ type:Boolean, required:true },                 // only show in Builder mode (e. g. not for regular users)
 		modelValue: { type:String,  required:true },
 		onlyDates:  { type:Boolean, required:false, default:false }, // only show operators that can be used for date values (e. g. unix time)
 		onlyEquals: { type:Boolean, required:false, default:false }, // only show equal/non-equal operators
@@ -123,12 +138,13 @@ let MyFilterOperator = {
 
 let MyFilterConnector = {
 	name:'my-filter-connector',
-	template:`<select class="and" v-model="value">
+	template:`<select class="and" :disabled="readonly" v-model="value">
 		<option value="AND">{{ capApp.option.connector.AND }}</option>
 		<option value="OR">{{ capApp.option.connector.OR }}</option>
 	</select>`,
 	props:{
-		modelValue:{ type:String, required:true }
+		modelValue:{ type:String,  required:true },
+		readonly:  { type:Boolean, required:false, default:false }
 	},
 	emits:['update:modelValue'],
 	computed:{
@@ -219,7 +235,7 @@ let MyFilterSide = {
 		MyInputDate
 	},
 	template:`<div class="filter-side">
-		<div class="filter-side-inputs">
+		<div class="filter-side-inputs default-inputs">
 			<template v-if="!isNullPartner">
 				
 				<!-- content input -->
@@ -228,20 +244,8 @@ let MyFilterSide = {
 					@input="setContent"
 					:value="content"
 				>
-					<option value="attribute"   >{{ capApp.option.content.attribute }}</option>
-					<option value="collection"  >{{ capApp.option.content.collection }}</option>
-					<option value="field"       >{{ capApp.option.content.field }}</option>
-					<option value="value"       >{{ capApp.option.content.value }}</option>
-					<option value="record"      >{{ capApp.option.content.record }}</option>
-					<option value="recordNew"   >{{ capApp.option.content.recordNew }}</option>
-					<option value="login"       >{{ capApp.option.content.login }}</option>
-					<option value="preset"      >{{ capApp.option.content.preset }}</option>
-					<option value="role"        >{{ capApp.option.content.role }}</option>
-					<option value="languageCode">{{ capApp.option.content.languageCode }}</option>
-					<option value="javascript"  >{{ capApp.option.content.javascript }}</option>
-					<option value="true"        >{{ capApp.option.content.true }}</option>
-					<option v-if="allowSubQuery" value="subQuery">
-						{{ capApp.option.content.subQuery }}
+					<option v-for="c in contentEnabled" :value="c">
+						{{ capApp.option.content[c] }}
 					</option>
 				</select>
 				
@@ -253,27 +257,15 @@ let MyFilterSide = {
 					:image="!showQuery ? 'visible0.png' : 'visible1.png'"
 				/>
 				
-				<!-- sub query aggregator input -->
-				<select v-model="queryAggregator" v-if="isSubQuery">
-					<option value=""     >-</option>
-					<option value="avg"  >{{ capGen.option.aggAvg }}</option>
-					<option value="count">{{ capGen.option.aggCount }}</option>
-					<option value="list" >{{ capGen.option.aggList }}</option>
-					<option value="max"  >{{ capGen.option.aggMax }}</option>
-					<option value="min"  >{{ capGen.option.aggMin }}</option>
-					<option value="sum"  >{{ capGen.option.aggSum }}</option>
-				</select>
-				
 				<!-- nested index attribute input -->
-				<template v-if="isAttribute || isSubQuery">
-					<my-filter-attribute
-						v-model="nestedIndexAttribute"
-						:columnsMode="columnsMode"
-						:groupQueries="nestingLevels !== 0 && !isSubQuery && builderMode"
-						:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
-						:nestingLevels="nestingLevels"
-					/>
-				</template>
+				<my-filter-attribute
+					v-if="isAttribute"
+					v-model="nestedIndexAttribute"
+					:columnsMode="columnsMode"
+					:groupQueries="nestingLevels !== 0 && !isSubQuery && builderMode"
+					:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
+					:nestingLevels="nestingLevels"
+				/>
 				
 				<!-- collection input -->
 				<select v-model="collectionId" v-if="!columnsMode && isCollection">
@@ -345,37 +337,72 @@ let MyFilterSide = {
 			</template>
 		</div>
 		
-		<!-- filter sub query -->
-		<my-builder-query class="subQuery"
-			v-if="isSubQuery && showQuery"
-			@set-choices="setQuery('choices',$event)"
-			@set-filters="setQuery('filters',$event)"
-			@set-fixed-limit="setQuery('fixedLimit',$event)"
-			@set-lookups="setQuery('lookups',$event)"
-			@set-joins="setQuery('joins',$event)"
-			@set-orders="setQuery('orders',$event)"
-			@set-relation-id="setQuery('relationId',$event)"
-			:allowChoices="false"
-			:allowOrders="true"
-			:choices="query.choices"
-			:dataFields="dataFields"
-			:filters="query.filters"
-			:fixedLimit="query.fixedLimit"
-			:joins="query.joins"
-			:joinsParents="joinsParents.concat([joins])"
-			:lookups="query.lookups"
-			:moduleId="moduleId"
-			:orders="query.orders"
-			:relationId="query.relationId"
-		/>
+		<!-- sub query inputs -->
+		<div class="subQuery shade" v-if="isSubQuery && showQuery">
+			<table class="default-inputs">
+				<tr>
+					<td>{{ capApp.subQueryAttribute }}</td>
+					<td>
+						<!-- sub query attribute input -->
+						<my-filter-attribute
+							v-model="nestedIndexAttribute"
+							:columnsMode="columnsMode"
+							:groupQueries="nestingLevels !== 0 && !isSubQuery && builderMode"
+							:nestedIndexAttributeIds="!isSubQuery ? nestedIndexAttributeIds : nestedIndexAttributeIdsSubQuery"
+							:nestingLevels="nestingLevels"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.subQueryAggregator }}</td>
+					<td>
+						<!-- sub query aggregator input -->
+						<select v-model="queryAggregator">
+							<option value=""     >-</option>
+							<option value="array">{{ capGen.option.aggArray }}</option>
+							<option value="avg"  >{{ capGen.option.aggAvg }}</option>
+							<option value="count">{{ capGen.option.aggCount }}</option>
+							<option value="json" >{{ capGen.option.aggJson }}</option>
+							<option value="list" >{{ capGen.option.aggList }}</option>
+							<option value="max"  >{{ capGen.option.aggMax }}</option>
+							<option value="min"  >{{ capGen.option.aggMin }}</option>
+							<option value="sum"  >{{ capGen.option.aggSum }}</option>
+						</select>
+					</td>
+				</tr>
+			</table>
+			
+			<!-- filter sub query -->
+			<my-builder-query
+				@set-choices="setQuery('choices',$event)"
+				@set-filters="setQuery('filters',$event)"
+				@set-fixed-limit="setQuery('fixedLimit',$event)"
+				@set-lookups="setQuery('lookups',$event)"
+				@set-joins="setQuery('joins',$event)"
+				@set-orders="setQuery('orders',$event)"
+				@set-relation-id="setQuery('relationId',$event)"
+				:allowChoices="false"
+				:allowOrders="true"
+				:choices="query.choices"
+				:dataFields="dataFields"
+				:filters="query.filters"
+				:fixedLimit="query.fixedLimit"
+				:joins="query.joins"
+				:joinsParents="joinsParents.concat([joins])"
+				:lookups="query.lookups"
+				:moduleId="moduleId"
+				:orders="query.orders"
+				:relationId="query.relationId"
+			/>
+		</div>
 	</div>`,
 	props:{
-		allowSubQuery: { type:Boolean, required:true },
 		builderMode:   { type:Boolean, required:true },
 		columnDate:    { type:Boolean, required:false, default:false },
 		columnTime:    { type:Boolean, required:false, default:false },
 		columnsMode:   { type:Boolean, required:true },
 		dataFields:    { type:Array,   required:true },
+		disableContent:{ type:Array,   required:true },
 		isNullOperator:{ type:Boolean, required:true },
 		joins:         { type:Array,   required:true },
 		joinsParents:  { type:Array,   required:true },
@@ -393,6 +420,13 @@ let MyFilterSide = {
 	},
 	computed:{
 		// entities
+		contentEnabled:function() {
+			return [
+				'attribute','field','fieldChanged','value','record',
+				'recordNew','login','preset','role','languageCode',
+				'javascript','true','collection','subQuery'
+			].filter(v => !this.disableContent.includes(v));
+		},
 		module:function() {
 			return this.moduleId === ''
 				? false : this.moduleIdMap[this.moduleId];
@@ -402,7 +436,8 @@ let MyFilterSide = {
 			
 			return this.getNestedIndexAttributeIdsByJoins(
 				this.query.joins,
-				this.joinsParents.length
+				this.joinsParents.length,
+				false
 			);
 		},
 		
@@ -473,7 +508,7 @@ let MyFilterSide = {
 		// states
 		isAttribute:  function() { return this.content === 'attribute'; },
 		isCollection: function() { return this.content === 'collection'; },
-		isField:      function() { return this.content === 'field'; },
+		isField:      function() { return this.content === 'field' || this.content === 'fieldChanged'; },
 		isJavascript: function() { return this.content === 'javascript'; },
 		isPreset:     function() { return this.content === 'preset'; },
 		isRole:       function() { return this.content === 'role'; },
@@ -539,7 +574,9 @@ let MyFilterSide = {
 				v.collectionId = null;
 				v.columnId     = null;
 			}
-			if(v.content !== 'field')  v.fieldId  = null;
+			if(v.content !== 'field' && v.content !== 'fieldChanged')
+				v.fieldId  = null;
+			
 			if(v.content !== 'preset') v.presetId = null;
 			if(v.content !== 'role')   v.roleId   = null; 
 			if(v.content !== 'value')  v.value    = null;
@@ -571,93 +608,79 @@ let MyFilter = {
 		MyFilterSide
 	},
 	template:`<div class="filter">
-		<div class="filter-sides" :class="{ inRow:columnsMode }">
-			
-			<div class="filter-side-line-top">
-				<my-filter-connector class="connector"
-					v-show="position !== 0"
-					v-model="connectorInput"
-				/>
-				<my-filter-brackets class="brackets"
-					v-if="expertMode"
-					v-model="brackets0Input"
-					:left="true"
-				/>
-			</div>
-			
-			<div class="filter-side-line" :class="{ inRow:columnsMode }">
-				<my-filter-side
-					v-model="side0Input"
-					@apply-value="$emit('apply-value')"
-					:allowSubQuery="allowSubQuery"
-					:builderMode="builderMode"
-					:columnsMode="columnsMode"
-					:dataFields="dataFields"
-					:isNullOperator="isNullOperator"
-					:joins="joins"
-					:joinsParents="joinsParents"
-					:leftSide="true"
-					:moduleId="moduleId"
-					:nestedIndexAttributeIds="nestedIndexAttributeIds"
-					:nestingLevels="nestingLevels"
-				/>
-				<my-filter-operator class="operator"
-					v-model="operatorInput"
-					:builderMode="builderMode"
-					:onlyDates="side0ColumDate || side0ColumTime"
-					:onlyString="isStringInput"
-				/>
-			</div>
-			
-			<div class="filter-side-line" :class="{ inRow:columnsMode }">
-				<my-filter-side
-					v-model="side1Input"
-					@apply-value="$emit('apply-value')"
-					:allowSubQuery="allowSubQuery"
-					:builderMode="builderMode"
-					:columnDate="side0ColumDate"
-					:columnTime="side0ColumTime"
-					:columnsMode="columnsMode"
-					:dataFields="dataFields"
-					:isNullOperator="isNullOperator"
-					:joins="joins"
-					:joinsParents="joinsParents"
-					:leftSide="false"
-					:moduleId="moduleId"
-					:nestedIndexAttributeIds="nestedIndexAttributeIds"
-					:nestingLevels="nestingLevels"
-				/>
-			</div>
-			
-			<div class="filter-side-line-top">
-				<my-filter-brackets class="brackets"
-					v-if="expertMode"
-					v-model="brackets1Input"
-					:left="false"
-				/>
-				<my-button image="arrowDown.png"
-					v-if="moveDown"
-					@trigger="$emit('move-down')"
-					:naked="true"
-				/>
-				<my-button image="arrowUp.png"
-					v-if="moveUp"
-					@trigger="$emit('move-up')"
-					:naked="true"
-				/>
-				<my-button image="cancel.png"
-					@trigger="$emit('remove',position)"
-					:naked="true"
-				/>
-			</div>
-		</div>
+		<my-filter-connector class="connector"
+			v-model="connectorInput"
+			:readonly="position === 0"
+		/>
+		<my-filter-brackets class="brackets"
+			v-if="expertMode"
+			v-model="brackets0Input"
+			:left="true"
+		/>
+		<my-filter-side
+			v-model="side0Input"
+			@apply-value="$emit('apply-value')"
+			:builderMode="builderMode"
+			:columnsMode="columnsMode"
+			:dataFields="dataFields"
+			:disableContent="disableContent"
+			:isNullOperator="isNullOperator"
+			:joins="joins"
+			:joinsParents="joinsParents"
+			:leftSide="true"
+			:moduleId="moduleId"
+			:nestedIndexAttributeIds="nestedIndexAttributeIds"
+			:nestingLevels="nestingLevels"
+		/>
+		<my-filter-operator class="operator"
+			v-model="operatorInput"
+			:builderMode="builderMode"
+			:onlyDates="side0ColumDate || side0ColumTime"
+			:onlyString="isStringInput"
+		/>
+		<my-filter-side
+			v-model="side1Input"
+			@apply-value="$emit('apply-value')"
+			:builderMode="builderMode"
+			:columnDate="side0ColumDate"
+			:columnTime="side0ColumTime"
+			:columnsMode="columnsMode"
+			:dataFields="dataFields"
+			:disableContent="disableContent"
+			:isNullOperator="isNullOperator"
+			:joins="joins"
+			:joinsParents="joinsParents"
+			:leftSide="false"
+			:moduleId="moduleId"
+			:nestedIndexAttributeIds="nestedIndexAttributeIds"
+			:nestingLevels="nestingLevels"
+		/>
+		<my-filter-brackets class="brackets"
+			v-if="expertMode"
+			v-model="brackets1Input"
+			:left="false"
+		/>
+		<my-button image="arrowDown.png"
+			v-if="moveDown"
+			@trigger="$emit('move-down')"
+			:naked="true"
+		/>
+		<my-button image="arrowUp.png"
+			v-if="moveUp"
+			@trigger="$emit('move-up')"
+			:naked="true"
+		/>
+		<my-button image="cancel.png"
+			@trigger="$emit('remove',position)"
+			:naked="true"
+		/>
 	</div>`,
 	props:{
-		allowSubQuery: { type:Boolean, required:false, default:false },
 		builderMode:   { type:Boolean, required:true },
 		columns:       { type:Array,   required:false, default:() => [] },
 		columnsMode:   { type:Boolean, required:true },
 		dataFields:    { type:Array,   required:true },
+		disableContent:{ type:Array,   required:true },
 		expertMode:    { type:Boolean, required:true },
 		joins:         { type:Array,   required:true },
 		joinsParents:  { type:Array,   required:true },
@@ -733,9 +756,11 @@ let MyFilter = {
 		},
 		isStringInput:function() {
 			return (
+				typeof this.side0.attributeId !== 'undefined' &&
 				this.side0.attributeId !== null &&
 				this.isAttributeString(this.attributeIdMap[this.side0.attributeId].content)
 			) || (
+				typeof this.side1.attributeId !== 'undefined' &&
 				this.side1.attributeId !== null &&
 				this.isAttributeString(this.attributeIdMap[this.side1.attributeId].content)
 			);
@@ -752,8 +777,7 @@ let MyFilter = {
 let MyFilters = {
 	name:'my-filters',
 	components:{MyFilter},
-	template:`<div class="filters default-inputs">
-		
+	template:`<div class="filters">
 		<div class="filter-actions" v-if="nestedIndexAttributeIds.length !== 0">
 			<slot name="title" />
 			
@@ -781,19 +805,19 @@ let MyFilters = {
 			@move-up="move(i,false)"
 			@remove="remove"
 			@update="update"
-			:allowSubQuery="allowSubQuery"
 			:builderMode="builderMode"
 			:columns="columns"
 			:columnsMode="columnsMode"
 			:connector="f.connector"
 			:dataFields="dataFields"
+			:disableContent="disableContent"
 			:expertMode="expertMode"
 			:joins="joins"
 			:joinsParents="joinsParents"
 			:key="i"
 			:moduleId="moduleId"
 			:moveDown="showMove && i < filters.length - 1"
-			:moveUp="showMove && i !== 0"
+			:moveUp="showMove && i === filters.length -1"
 			:nestedIndexAttributeIds="nestedIndexAttributeIds"
 			:nestingLevels="joinsParents.length+1"
 			:operator="f.operator"
@@ -811,82 +835,77 @@ let MyFilters = {
 		</div>
 	</div>`,
 	props:{
-		addOnStart:   { type:Boolean, required:false, default:false },
-		allowSubQuery:{ type:Boolean, required:false, default:false },
-		builderMode:  { type:Boolean, required:false, default:false },
-		columns:      { type:Array,   required:false, default:() => [] },
-		dataFields:   { type:Array,   required:false, default:() => [] },
-		filterAddCnt: { type:Number,  required:false, default:0 },
-		joins:        { type:Array,   required:true },
-		joinsParents: { type:Array,   required:false, default:() => [] },
-		modelValue:   { type:Array,   required:true },
-		moduleId:     { type:String,  required:false, default:'' },
-		showAdd:      { type:Boolean, required:false, default:true },
-		showApply:    { type:Boolean, required:false, default:false },
-		showMove:     { type:Boolean, required:false, default:false },
-		showReset:    { type:Boolean, required:false, default:false }
+		addOnStart:    { type:Boolean, required:false, default:false },
+		builderMode:   { type:Boolean, required:false, default:false },
+		columns:       { type:Array,   required:false, default:() => [] },
+		dataFields:    { type:Array,   required:false, default:() => [] },
+		disableContent:{ type:Array,   required:false, default:() => [] }, // content to disable (attribute, record, field, true, ...)
+		filterAddCnt:  { type:Number,  required:false, default:0 },
+		frontendOnly:  { type:Boolean, required:false, default:false },    // filter criteria must not contain backend types (attributes/queries)
+		joins:         { type:Array,   required:false, default:() => [] },
+		joinsParents:  { type:Array,   required:false, default:() => [] },
+		modelValue:    { type:Array,   required:true },
+		moduleId:      { type:String,  required:false, default:'' },
+		showAdd:       { type:Boolean, required:false, default:true },
+		showApply:     { type:Boolean, required:false, default:false },
+		showMove:      { type:Boolean, required:false, default:false },
+		showReset:     { type:Boolean, required:false, default:false }
 	},
 	emits:['apply','reset','update:modelValue'],
 	watch:{
 		// ugly hack to trigger inside this component
-		filterAddCnt:function() {
+		filterAddCnt() {
 			this.add();
 		}
 	},
-	data:function() {
+	data() {
 		return {
 			expertMode:this.builderMode
 		};
 	},
-	mounted:function() {
+	mounted() {
 		if(this.addOnStart)
 			this.add();
 	},
 	computed:{
 		// inputs
 		filters:{
-			get:function()    { return JSON.parse(JSON.stringify(this.modelValue)); },
-			set:function(val) { this.$emit('update:modelValue',val); }
+			get()  { return JSON.parse(JSON.stringify(this.modelValue)); },
+			set(v) { this.$emit('update:modelValue',v); }
 		},
 		
 		// states
-		anyFilters:function() {
-			return this.filters.length !== 0;
-		},
-		bracketsEqual:function() {
+		bracketsEqual:(s) => {
 			let cnt0 = 0;
 			let cnt1 = 0;
-			for(let i = 0, j = this.filters.length; i < j; i++) {
-				cnt0 += this.filters[i].side0.brackets;
-				cnt1 += this.filters[i].side1.brackets;
+			for(const f of s.filters) {
+				cnt0 += f.side0.brackets;
+				cnt1 += f.side1.brackets;
 			}
 			return cnt0 === cnt1;
-		},
-		columnsMode:function() {
-			return this.columns.length !== 0;
 		},
 		
 		// composite ID of
 		//  nesting level (0=main query, 1=1st sub query)
 		//  relation join index
 		//  attribute ID
-		nestedIndexAttributeIds:function() {
+		nestedIndexAttributeIds:(s) => {
 			let out = [];
 			
 			// columns defined, provide filter criteria based on column attributes
 			// used for user filters on list fields
 			//  user filters can only ever access main query (no access to sub queries)
-			if(this.columnsMode) {
-				for(let i = 0, j = this.columns.length; i < j; i++) {
-					let col = this.columns[i];
+			if(s.columnsMode) {
+				for(const col of s.columns) {
+					const atr = s.attributeIdMap[col.attributeId];
 					
 					if(col.subQuery || (col.aggregator !== null && col.aggregator !== 'record'))
 						continue;
 					
-					if(this.isAttributeFiles(this.attributeIdMap[col.attributeId].content))
+					if(s.isAttributeFiles(atr.content) || atr.encrypted)
 						continue;
 					
-					out.push(`0_${col.index}_${col.attributeId}`);
+					out.push(`0_${col.index}_${atr.id}`);
 				}
 				return out;
 			}
@@ -894,88 +913,103 @@ let MyFilters = {
 			// no columns defined, provide filter criteria based on attributes from joined relation
 			//  as filters can be used in sub queries, we access all joins from all parent queries
 			// used for pre-defining list filters for queries
-			out = this.getNestedIndexAttributeIdsByJoins(this.joins,this.joinsParents.length);
-			for(let i = 0, j = this.joinsParents.length; i < j; i++) {
-				out = out.concat(this.getNestedIndexAttributeIdsByJoins(this.joinsParents[i],i));
+			out = s.getNestedIndexAttributeIdsByJoins(s.joins,s.joinsParents.length,false);
+			for(let i = 0, j = s.joinsParents.length; i < j; i++) {
+				out = out.concat(s.getNestedIndexAttributeIdsByJoins(s.joinsParents[i],i,false));
 			}
 			return out;
 		},
 		
+		// simple states
+		anyFilters: (s) => s.filters.length !== 0,
+		columnsMode:(s) => s.columns.length !== 0,
+		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.filter; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.filter,
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
 		getNestedIndexAttributeIdsByJoins,
 		isAttributeFiles,
 		
+		forceFirstAnd() {
+			// overwrite first filter with only valid connector
+			if(this.filters.length > 0)
+				this.filters[0].connector = 'AND';
+		},
+		
 		// actions
-		apply:function() {
+		apply() {
 			if(!this.bracketsEqual)
 				return;
 			
 			this.$emit('apply');
 		},
-		add:function() {
-			// add first available attribute as left side filter value
-			let v = this.nestedIndexAttributeIds[0].split('_');
-			
-			this.filters.push({
+		add() {
+			let v = {
 				connector:'AND',
 				operator:'ILIKE',
 				side0:{
-					attributeId:v[2],
-					attributeIndex:parseInt(v[1]),
-					attributeNested:parseInt(v[0]),
 					brackets:0,
 					collectionId:null,
 					columnId:null,
-					content:'attribute',
+					content:'field',
 					fieldId:null,
-					query:null,
-					queryAggregator:null,
+					presetId:null,
 					roleId:null,
 					value:''
 				},
 				side1:{
-					attributeId:null,
-					attributeIndex:0,
-					attributeNested:0,
 					brackets:0,
 					collectionId:null,
 					columnId:null,
 					content:'value',
 					fieldId:null,
-					query:null,
-					queryAggregator:null,
+					presetId:null,
 					roleId:null,
 					value:''
 				}
-			});
-			this.filters = this.filters;
+			};
+			
+			if(!this.frontendOnly) {
+				// add first available attribute as left side filter value
+				let p = this.nestedIndexAttributeIds[0].split('_');
+				v.side0.attributeId     = p[2];
+				v.side0.attributeIndex  = parseInt(p[1]);
+				v.side0.attributeNested = parseInt(p[0]);
+				v.side0.content         = 'attribute';
+				v.side0.query           = null;
+				v.side0.queryAggregator = null;
+				v.side1.attributeId     = null;
+				v.side1.attributeIndex  = 0;
+				v.side1.attributeNested = 0;
+				v.side1.query           = null;
+				v.side1.queryAggregator = null;
+			}
+			let f = JSON.parse(JSON.stringify(this.filters));
+			f.push(v);
+			this.filters = f;
 		},
-		move:function(i,down) {
+		move(i,down) {
 			let f = this.filters[i];
 			this.filters.splice(i,1);
 			this.filters.splice((down ? i + 1 : i - 1),0,f);
 			this.filters = this.filters;
+			this.forceFirstAnd();
 		},
-		remove:function(position) {
+		remove(position) {
 			this.filters.splice(position,1);
 			this.filters = this.filters;
-			
-			// overwrite first filter with only valid connector
-			if(this.filters.length > 0)
-				this.filters[0].connector = 'AND';
+			this.forceFirstAnd();
 			
 			// inform parent when filter has been reset
 			if(this.filters.length === 0)
 				this.$emit('reset');
 		},
-		update:function(position,name,value) {
+		update(position,name,value) {
 			this.filters[position][name] = value;
 			this.filters = this.filters;
 		}

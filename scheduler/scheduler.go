@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"r3/backup"
 	"r3/bruteforce"
+	"r3/cache"
 	"r3/config"
 	"r3/data"
 	"r3/db"
@@ -125,6 +126,9 @@ func Start() error {
 		case "embeddedBackup":
 			t.nameLog = "Integrated full backups"
 			t.fn = backup.Run
+		case "httpCertRenew":
+			t.nameLog = "Reload of updated HTTP certificate"
+			t.fn = cache.CheckRenewCert
 		case "importLdapLogins":
 			t.nameLog = "Import from LDAP connections"
 			t.fn = ldap_import.RunAll

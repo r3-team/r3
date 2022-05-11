@@ -95,7 +95,7 @@ let MyBuilderIcons = {
 			}
 			
 			ws.sendMultiple(requests,true).then(
-				res => {
+				() => {
 					this.$root.schemaReload(this.module.id);
 					this.iconIdsSelected = [];
 				},

@@ -199,8 +199,8 @@ let MyAdminMails = {
 		// backend calls
 		del:function() {
 			ws.send('mail','del',{ids:this.mailIdsSelected},true).then(
-				(res) => this.get(),
-				(err) => this.$root.genericError(err)
+				() => this.get(),
+				this.$root.genericError
 			);
 		},
 		get:function() {
@@ -208,17 +208,17 @@ let MyAdminMails = {
 				limit:this.limit,
 				offset:this.offset
 			},true).then(
-				(res) => {
+				res => {
 					this.mails           = res.payload.mails;
 					this.mailIdsSelected = [];
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		getAccounts:function() {
 			ws.send('mailAccount','get',{},true).then(
-				(res) => this.accountIdMap = res.payload.accounts,
-				(err) => this.$root.genericError(err)
+				res => this.accountIdMap = res.payload.accounts,
+				this.$root.genericError
 			);
 		}
 	}

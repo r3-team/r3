@@ -71,6 +71,12 @@ let MyField = {
 						:src="srcBase64(iconIdMap[iconId].file)"
 					/>
 					
+					<!-- encryption indicator -->
+					<img class="field-icon" src="images/lock.png"
+						v-if="isEncrypted"
+						:title="capApp.dialog.encrypted"
+					/>
+					
 					<!-- regular text line input (numeric, strings, etc.) -->
 					<input class="input"
 						v-if="isLineInput"
@@ -145,6 +151,7 @@ let MyField = {
 					<my-input-richtext
 						v-if="isRichtext"
 						v-model="value"
+						@hotkey="$emit('hotkey',$event)"
 						:attributeIdFile="field.attributeIdAlt"
 						:readonly="isReadonly"
 						:valueFiles="valueAlt"
@@ -255,6 +262,15 @@ let MyField = {
 							/>
 						</template>
 					</my-list>
+					
+					<!-- copy to clipboard action -->
+					<my-button image="copyClipboard.png"
+						v-if="isClipboard && !isFiles"
+						@trigger="copyToClipboard"
+						:active="value !== null"
+						:captionTitle="capGen.button.copyClipboard"
+						:naked="true"
+					/>
 				</div>
 			</div>
 			
@@ -291,10 +307,11 @@ let MyField = {
 		<!-- list -->
 		<my-list
 			v-if="isList"
+			@clipboard="$emit('clipboard')"
 			@open-form="(...args) => openForm(args[0],[],args[1])"
 			@record-selected="(...args) => openForm(args[0],[],args[1])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
-			@set-collection-index-filter="setCollectionIndexFilter"
+			@set-collection-indexes="setCollectionIndexes"
 			:allowPaging="field.query.fixedLimit === 0"
 			:autoRenew="field.autoRenew"
 			:choices="choicesProcessed"
@@ -307,11 +324,12 @@ let MyField = {
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
 			:iconId="iconId ? iconId : null"
-			:isFullPage="isFullPage"
+			:isSingleField="formIsSingleField"
 			:layout="field.layout"
 			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
+			:usesPageHistory="formIsSingleField && !formIsInline"
 		/>
 		
 		<!-- calendar -->
@@ -320,7 +338,7 @@ let MyField = {
 			@open-form="(...args) => openForm(args[0],args[1],args[2])"
 			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
-			@set-collection-index-filter="setCollectionIndexFilter"
+			@set-collection-indexes="setCollectionIndexes"
 			:attributeIdColor="field.attributeIdColor"
 			:attributeIdDate0="field.attributeIdDate0"
 			:attributeIdDate1="field.attributeIdDate1"
@@ -335,9 +353,9 @@ let MyField = {
 			:indexColor="field.indexColor"
 			:indexDate0="field.indexDate0"
 			:indexDate1="field.indexDate1"
-			:isFullPage="isFullPage"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
+			:usesPageHistory="formIsSingleField && !formIsInline"
 		/>
 		
 		<!-- gantt -->
@@ -346,7 +364,7 @@ let MyField = {
 			@open-form="(...args) => openForm(args[0],args[1],args[2])"
 			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
-			@set-collection-index-filter="setCollectionIndexFilter"
+			@set-collection-indexes="setCollectionIndexes"
 			:attributeIdColor="field.attributeIdColor"
 			:attributeIdDate0="field.attributeIdDate0"
 			:attributeIdDate1="field.attributeIdDate1"
@@ -362,11 +380,11 @@ let MyField = {
 			:indexColor="field.indexColor"
 			:indexDate0="field.indexDate0"
 			:indexDate1="field.indexDate1"
-			:isFullPage="isFullPage"
 			:rowSelect="field.openForm !== null"
 			:stepTypeDefault="field.ganttSteps"
 			:stepTypeToggle="field.ganttStepsToggle"
 			:query="field.query"
+			:usesPageHistory="formIsSingleField && !formIsInline"
 		/>
 		
 		<!-- chart -->
@@ -376,7 +394,7 @@ let MyField = {
 			:columns="columnsProcessed"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
-			:isFullPage="isFullPage"
+			:isSingleField="formIsSingleField"
 			:limit="field.query.fixedLimit"
 			:optionJson="field.chartOption"
 			:query="field.query"
@@ -386,7 +404,9 @@ let MyField = {
 		<my-field
 			v-if="isContainer"
 			v-for="f in field.fields"
+			@clipboard="$emit('clipboard')"
 			@execute-function="$emit('execute-function',$event)"
+			@hotkey="$emit('hotkey',$event)"
 			@open-form="(...args) => $emit('open-form',...args)"
 			@set-form-args="(...args) => $emit('set-form-args',...args)"
 			@set-valid="(...args) => $emit('set-valid',...args)"
@@ -395,37 +415,42 @@ let MyField = {
 			:dataFieldMap="dataFieldMap"
 			:field="f"
 			:fieldIdMapState="fieldIdMapState"
-			:formBadLoad="formBadLoad"
 			:formBadSave="formBadSave"
+			:formIsInline="formIsInline"
+			:formIsSingleField="formIsSingleField"
 			:formLoading="formLoading"
+			:formReadonly="formReadonly"
 			:flexDirParent="field.direction"
-			:isFullPage="isFullPage"
 			:joinsIndexMap="joinsIndexMap"
 			:key="f.id"
 			:values="values"
 		/>
 	</div>`,
 	props:{
-		dataFieldMap:   { type:Object,  required:true },
-		field:          { type:Object,  required:true },
-		fieldIdMapState:{ type:Object,  required:false, default:() => {return {};} }, // overwritten states
-		formBadLoad:    { type:Boolean, required:true }, // attempted record load with no return
-		formBadSave:    { type:Boolean, required:true }, // attempted save with invalid inputs
-		formLoading:    { type:Boolean, required:true },
-		flexDirParent:  { type:String,  required:true }, // flex direction (row/column) of parent
-		isFullPage:     { type:Boolean, required:true },
-		joinsIndexMap:  { type:Object,  required:true },
-		logViewer:      { type:Boolean, required:false, default:false }, // is part of log viewer
-		values:         { type:Object,  required:true }
+		dataFieldMap:     { type:Object,  required:true },
+		field:            { type:Object,  required:true },
+		fieldIdMapState:  { type:Object,  required:false, default:() => {return {};} }, // overwritten states
+		formBadSave:      { type:Boolean, required:true }, // attempted save with invalid inputs
+		formIsInline:     { type:Boolean, required:true }, // parent form is part of another element (sub form)
+		formIsSingleField:{ type:Boolean, required:true }, // parent form contains a single field
+		formLoading:      { type:Boolean, required:true },
+		formReadonly:     { type:Boolean, required:true }, // form is read only, disable all inputs
+		flexDirParent:    { type:String,  required:true }, // flex direction (row/column) of parent
+		joinsIndexMap:    { type:Object,  required:true },
+		logViewer:        { type:Boolean, required:false, default:false }, // is part of log viewer
+		values:           { type:Object,  required:true }
 	},
-	emits:['execute-function','open-form','set-form-args','set-valid','set-value','set-value-init'],
+	emits:[
+		'clipboard','execute-function','hotkey','open-form','set-form-args',
+		'set-valid','set-value','set-value-init'
+	],
 	data:function() {
 		return {
-			collectionIdMapIndexFilter:{}, // filter collections by their array index
+			collectionIdMapIndexes:{},  // active record indexes of collection, used to filter with
 			focused:false,
-			notTouched:true,               // data field was not touched by user
-			showColorPickerInput:false,    // for color picker fields
-			showPassword:false             // for password fields
+			notTouched:true,            // data field was not touched by user
+			showColorPickerInput:false, // for color picker fields
+			showPassword:false          // for password fields
 		};
 	},
 	watch:{
@@ -472,29 +497,19 @@ let MyField = {
 			if(!this.showInvalid) return '';
 			
 			if(!this.isValidMin) {
-				if(this.isString) return this.capGen.inputShort;
+				if(this.isString) return this.capGen.inputShort.replace('{MIN}',this.field.min);
 				if(this.isFiles)  return this.capGen.inputTooFewFiles;
-				
-				return this.capGen.inputSmall;
+				return this.capGen.inputSmall.replace('{MIN}',this.field.min);
 			}
-			
 			if(!this.isValidMax) {
-				if(this.isString) return this.capGen.inputLong;
+				if(this.isString) return this.capGen.inputLong.replace('{MAX}',this.field.max);
 				if(this.isFiles)  return this.capGen.inputTooManyFiles;
-				
-				return this.capGen.inputLarge;
+				return this.capGen.inputLarge.replace('{MAX}',this.field.max);
 			}
 			
-			if(this.isDecimal)
-				return this.capGen.inputDecimal;
-			
-			if(this.isRequired)
-				return this.capGen.inputRequired;
-			
-			// generic error, if nothing fits
-			if(!this.isValidValue)
-				return this.capGen.inputInvalid;
-			
+			if(this.isDecimal)     return this.capGen.inputDecimal;
+			if(this.isRequired)    return this.capGen.inputRequired;
+			if(!this.isValidValue) return this.capGen.inputInvalid; // generic error
 			return '';
 		},
 		captionHelp:function() {
@@ -565,7 +580,7 @@ let MyField = {
 					this.joinsIndexMap,
 					this.values,
 					[],
-					this.collectionIdMapIndexFilter
+					this.collectionIdMapIndexes
 				);
 			}
 			return choices;
@@ -579,7 +594,7 @@ let MyField = {
 				this.joinsIndexMap,
 				this.values,
 				[],
-				this.collectionIdMapIndexFilter
+				this.collectionIdMapIndexes
 			);
 		},
 		iconId:function() {
@@ -632,7 +647,6 @@ let MyField = {
 			// field state has a default value, which can be overwritten by form states
 			// hidden: field is not shown
 			// default: field is shown, data field state is overwritten depending on circumstance
-			//  (no permissions = readonly, NOT NULL attribute = required)
 			// optional: data field only, input is optional
 			// required: data field only, input is required
 			// readonly: data or button field, input is readonly
@@ -653,7 +667,7 @@ let MyField = {
 				state = 'readonly';
 			
 			// overwrite visible data field to readonly if form could not load record
-			if(this.isData && this.formBadLoad && state !== 'hidden')
+			if(this.isData && this.formReadonly && state !== 'hidden')
 				state = 'readonly';
 			
 			return state;
@@ -713,15 +727,15 @@ let MyField = {
 				return false;
 			}
 			
-			// field attribute relation join has record ID
-			let r = this.joinsIndexMap[this.field.index];
-			if(r.recordId !== 0)
-				return r.applyUpdate; // is join allowed to update record?
+			// check join of field attribute
+			let join = this.joinsIndexMap[this.field.index];
+			if(join.recordNoSet)    return false;            // SET denied on join due to relation policy
+			if(join.recordId !== 0) return join.applyUpdate; // SET dependent on join allowing record update
 			
 			// field attribute relation has no record ID
 			// collect relationship chain until source relation
-			let indexChain = [r.index];
-			for(let index = r.indexFrom; index !== -1; index = this.joinsIndexMap[index].indexFrom) {
+			let indexChain = [join.index];
+			for(let index = join.indexFrom; index !== -1; index = this.joinsIndexMap[index].indexFrom) {
 				indexChain.push(index);
 			}
 			
@@ -741,22 +755,12 @@ let MyField = {
 			return !chainBroken;
 		},
 		inputIsRequired:function() {
-			if(!this.inputCanWrite)
-				return false;
+			if(!this.inputCanWrite                           // cannot write
+				|| this.attribute.nullable                   // value optional
+				|| this.isRelationship1N                     // 0...n partners (optional)
+				|| (this.isNew && this.attribute.def !== '') // new record and has defaults
+			) return false;
 			
-			// no data needed
-			if(this.attribute.nullable)
-				return false;
-			
-			// 0...n partners (ergo optional)
-			if(this.isRelationship1N)
-				return false;
-			
-			// new record with default value available
-			if(this.isNew && this.attribute.def !== '')
-				return false;
-			
-			// input is required
 			return true;
 		},
 		inputCheckRegex:function() {
@@ -864,9 +868,11 @@ let MyField = {
 		
 		// composite
 		isActive:   function() { return !this.isMobile || this.field.onMobile; },
+		isEncrypted:function() { return this.isData && this.attribute.encrypted; },
 		isNew:      function() { return this.isData && this.joinsIndexMap[this.field.index].recordId === 0; },
 		isBoolean:  function() { return this.isData && this.isAttributeBoolean(this.attribute.content); },
 		isCategory: function() { return this.isData && this.isRelationship && this.field.category; },
+		isClipboard:function() { return this.isData && this.field.clipboard && !this.isFiles && !this.isRelationship; },
 		isDateInput:function() { return this.isData && this.isDatetime || this.isDate || this.isTime; },
 		isDateRange:function() { return this.isDateInput && this.field.attributeIdAlt !== null; },
 		isDecimal:  function() { return this.isData && this.isAttributeDecimal(this.attribute.content); },
@@ -913,6 +919,10 @@ let MyField = {
 		blur:function() {
 			this.focused = false;
 		},
+		copyToClipboard:function() {
+			navigator.clipboard.writeText(this.value);
+			this.$emit('clipboard');
+		},
 		focus:function() {
 			this.focused = true;
 		},
@@ -955,10 +965,9 @@ let MyField = {
 			if(!this.isRelationship1N)
 				return this.value = recordId;
 			
-			if(this.value === null)
-				this.value = [];
-			
-			this.value.push(recordId);
+			let v = this.value === null ? [] : this.value;
+			v.push(recordId);
+			this.value = v;
 		},
 		relationshipRecordRemoved:function(recordId) {
 			if(!this.isRelationship1N)
@@ -971,9 +980,9 @@ let MyField = {
 			}
 			this.value = valueNew.length !== 0 ? valueNew : null;
 		},
-		setCollectionIndexFilter:function(collectionId,index) {
-			if(index === '-1') delete(this.collectionIdMapIndexFilter[collectionId]);
-			else               this.collectionIdMapIndexFilter[collectionId] = index;
+		setCollectionIndexes:function(collectionId,indexes) {
+			if(indexes.length === 0) delete(this.collectionIdMapIndexes[collectionId]);
+			else                     this.collectionIdMapIndexes[collectionId] = indexes;
 		},
 		setValue:function(val,valOld,indexAttributeId) {
 			if(val === '')

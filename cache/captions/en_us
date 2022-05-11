@@ -6,6 +6,7 @@
 			"cancel":"Cancel",
 			"clear":"Clear",
 			"close":"Close",
+			"copyClipboard":"Copy to clipboard",
 			"create":"Create",
 			"delete":"Delete",
 			"deleteHint":"Permanently delete record",
@@ -28,7 +29,8 @@
 			"saveNew":"Save+New",
 			"saveNewHint":"Save changes and open new record",
 			"send":"Send",
-			"show":"Show"
+			"show":"Show",
+			"unlock":"Unlock"
 		},
 		"dialog":{
 			"confirm":"Please confirm"
@@ -37,6 +39,7 @@
 			"aggArray":"array",
 			"aggAvg":"average",
 			"aggCount":"count",
+			"aggJson":"JSON",
 			"aggList":"comma list",
 			"aggMax":"maximum",
 			"aggMin":"minimum",
@@ -58,6 +61,7 @@
 		"applications":"Applications",
 		"appName":"REI3",
 		"appWebsite":"https://rei3.de",
+		"available":"Available",
 		"busy":"Working - Click here to abort",
 		"date":"Date",
 		"description":"Description",
@@ -68,18 +72,19 @@
 		"id":"ID",
 		"inputDecimal":"Value must be decimal",
 		"inputInvalid":"Value is invalid",
-		"inputLarge":"Value is too large",
-		"inputLong":"Value is too long",
+		"inputLarge":"Value is too large (max. {MAX})",
+		"inputLong":"Value is too long (max. {MAX})",
 		"inputRequired":"Required input",
 		"inputSelectMore":"...enter text to filter results",
-		"inputShort":"Value is too short",
-		"inputSmall":"Value is too small",
+		"inputShort":"Value is too short (min. {MIN})",
+		"inputSmall":"Value is too small (min. {MIN})",
 		"inputTooFewFiles":"Too few files",
 		"inputTooManyFiles":"Too many files",
 		"licenseRequired":"Requires license",
 		"limit":"Limit",
 		"menu":"Menu",
 		"missingCaption":"MISSING CAPTION",
+		"more":"More...",
 		"name":"Name",
 		"nothingSelected":"Nothing selected",
 		"nothingThere":"No results available",
@@ -91,6 +96,8 @@
 		"resultsNone":"- no results -",
 		"resultsOf":"/ {CNT}",
 		"role":"Role",
+		"selected":"Selected",
+		"status":"Status",
 		"threeDots":"...",
 		"title":"Title",
 		"username":"Username",
@@ -221,15 +228,16 @@
 			"msAdExtHint":"Nested group memberships, user account control",
 			"nameHint":"Unique name",
 			"port":"Port",
-			"portHint":"By default 389 if no TLS, 636 for TLS",
+			"portHint":"By default 389, 636 for SSL/TLS",
 			"role":"Role",
 			"searchClass":"Object class",
 			"searchClassHint":"Example: user",
 			"searchDn":"Search DN",
 			"searchDnHint":"Example: OU=User,DC=mycompany,DC=local",
+			"starttls":"Use StartTLS",
 			"title":"Create/edit connection",
 			"titleRoles":"Roles per group membership",
-			"tls":"Use TLS",
+			"tls":"Use SSL/TLS",
 			"tlsVerify":"Verify TLS"
 		},
 		"license":{
@@ -368,6 +376,7 @@
 				"cleanupLogs":"Cleanup expired system logs",
 				"cleanupTempDir":"Cleanup temporary directory",
 				"embeddedBackup":"Manage integrated backups",
+				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Import logins and roles via LDAP",
 				"mailAttach":"Email attachment transfer",
 				"mailRetrieve":"Email retrieval",
@@ -493,16 +502,6 @@
 				"conditions":"Conditions",
 				"descriptionHint":"Description",
 				"effects":"Effects",
-				"fieldChanged":"Has changed",
-				"modeField":"Field value",
-				"modeField2Field":"field value",
-				"modeField2Fixed":"fixed value",
-				"modeField2Login":"login ID",
-				"modeField2Preset":"preset",
-				"modeFieldChanged":"Field value changed",
-				"modeRecord":"Record state",
-				"modeRole":"Role",
-				"newRecord":"Is new",
 				"title":"Form states"
 			},
 			"aggregator":"Aggregate",
@@ -514,8 +513,10 @@
 			"captions":"Captions",
 			"category":"Category selector",
 			"collection":"Collection*",
+			"collectionColumn":"Value(s) from column",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*Collection is only affected if selected as filter criteria in data query.",
+			"collectionMultiValue":"Multi input",
 			"collectionTitle":"Filter collection by user input",
 			"columnsTarget":"Place columns here",
 			"columnsTemplates":"Available columns",
@@ -523,6 +524,7 @@
 			"columnBatchNot":"not batched",
 			"columnBatchHint":"Column is part of batch {CNT}",
 			"columnBatchHintNot":"Column is not batched with others",
+			"columnClipboard":"Clipboard",
 			"columnHeaderData":"Data retrieval",
 			"columnLength":"Length (chars.)",
 			"columnLength0":"no limit",
@@ -551,6 +553,7 @@
 			"fields":"Fields",
 			"fieldAttributeIdAltDateTo":"Date to (period)",
 			"fieldAttributeIdAltRichtextFiles":"Richtext file access",
+			"fieldClipboard":"Clipboard",
 			"fieldDefault":"Default value",
 			"fieldDefaultHint":"Check docs for placeholders",
 			"fieldDefaultPresetIds":"Default preset(s)",
@@ -596,6 +599,7 @@
 			"layout":"List layout",
 			"limit":"Result count",
 			"new":"New form",
+			"noDataActions":"No data actions",
 			"onMobile":"In mobile view",
 			"openForm":"Open form",
 			"openFormAttributeApply":"...to set value on form",
@@ -635,7 +639,10 @@
 				"delete":"Are you sure you want to delete this function?"
 			},
 			"helpJs":{
+				"block_inputs":"app.block_inputs(true/false) => UNDEFINED<br /><br />Blocks or unblocks all inputs on the current form.",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Copies text to the users clipboard.",
+				"get_e2ee_data_key":"app.get_e2ee_data_key(dataKeyEncrypted) => STRING<br /><br />Decrypts provided data key with the private key of the current login.",
+				"get_e2ee_data_value":"app.get_e2ee_data_value(dataKey,valueEncrypted) => STRING<br /><br />Decrypts data value with the provided data key.",
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Returns the 5-letter language code ('en_us', ...) of the current login.",
 				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Returns the ID of the current login.",
 				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Returns the record ID of the open form for the specified relation index (0 is default).",
@@ -646,10 +653,25 @@
 				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Deletes the current form record.",
 				"record_new":"app.record_new() => UNDEFINED<br /><br />Opens new record.",
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Reloads the current form record.",
-				"record_save":"app.record_save() => UNDEFINED<br /><br />Saves the current form record."
+				"record_save":"app.record_save() => UNDEFINED<br /><br />Saves the current form record.",
+				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated on the next form save. Data keys for relations on the form with encryption enabled will be encrypted with the public key of each defined login. This enables later decryption of these records for users.<br /><br />If this function is not used, decryption is only ever possible for the creator.",
+				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated for the specified relation and records on the next form save. Data keys for relation records will be encrypted with the public key of each defined login. This enables later decryption of these records for users.",
+				"show_form_message":"app.show_form_message(message,duration_in_ms) => UNDEFINED<br /><br />Temporarily replaces the form title with a custom message. The second argument defines in milli-seconds how long the message is shown (3000 by default).",
+				"update_collection":"app.update_collection(collection_id) => UNDEFINED<br /><br />Retrieves and updates values for the specified collection."
+			},
+			"helpJsHint":{
+				"copy_to_clipboard":"VALUE",
+				"get_e2ee_data_key":"DATA_KEY_ENCRYPTED",
+				"get_e2ee_data_value":"DATA_KEY, VALUE_ENCRYPTED",
+				"get_record_id":"RELATION_INDEX_NUMBER",
+				"has_role":"ROLE_ID_STRING",
+				"open_form":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
+				"show_form_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
+				"update_collection":"COLLECTION_ID"
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Aborts the operation and sends a message to the executing user, which is displayed in the user interface.",
+				"clean_up_e2ee_keys":"instance.clean_up_e2ee_keys(<blockquote>login_id INTEGER,<br />relation_id UUID,<br />record_ids_access INTEGER[]</blockquote>) => VOID<br /><br />Deletes end-to-end encryption data keys for records that a login has no longer access to. This makes decryption impossible for the login.",
 				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Returns the ID of the login, which is executing the operation.",
 				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Returns the 5-letter language code ('en_us', ...) of the login, which is used to access the data backend.",
 				"get_name":"instance.get_name() => TEXT<br /><br />Returns the instance name, defined in the customization window of the admin panel.",
@@ -711,10 +733,7 @@
 			"titleJs":"Frontend functions ({CNT})",
 			"titlePg":"Backend functions ({CNT})",
 			"titleOne":"Function title",
-			"valueJsHint":"VALUE",
-			"valueJsHintForm":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
-			"valueJsHintIndex":"RELATION_INDEX_NUMBER",
-			"valueJsHintRole":"ROLE_ID_STRING"
+			"value":"VALUE"
 		},
 		"help":{
 			"title":"Application help"
@@ -822,6 +841,8 @@
 			"codeCondition":"Condition",
 			"content":"Content",
 			"def":"DEFAULT",
+			"encrypted":"E2E encrypted",
+			"encryption":"E2E encryption",
 			"execute":"Execute",
 			"external":"Refering relationships ({CNT})",
 			"fires":"Fires",
@@ -845,8 +866,8 @@
 			"policies":"Policies",
 			"policyActions":"Action",
 			"policyActionDelete":"Delete",
-			"policyActionSelect":"Display",
-			"policyActionUpdate":"Change",
+			"policyActionSelect":"Select",
+			"policyActionUpdate":"Update",
 			"policyExplanation":"The first policy that matches a role of the current login is applied, if the attempted action is enabled for this policy. To give full access to a role for example, a policy with all actions enabled and no filters can be placed at the top.",
 			"policyFunctions":"Filter functions",
 			"policyFunctionExcl":"Block record IDs",
@@ -976,7 +997,8 @@
 			"002":"Invalid number '{VALUE}' (expected a decimal).",
 			"003":"Invalid date/time value '{VALUE}', expected format: {EXPECT}.",
 			"004":"Unsupported attribute type '{VALUE}'.",
-			"005":"Wrong number of fields in line '{VALUE}'."
+			"005":"Wrong number of fields in line '{VALUE}'.",
+			"006":"Encrypted attributes are not supported"
 		},
 		"DBS":{
 			"001":"{FNC_MSG}",
@@ -988,7 +1010,12 @@
 			"007":"Invalid value '{VALUE}'."
 		},
 		"SEC":{
-			"001":"You are not authorized to complete this action or access this resource."
+			"001":"You are not authorized to complete this action or access this resource.",
+			"002":"The system failed to unlock your personal key for end-to-end encryption. This can happen if someone changed your password for you or you have changed it outside this application.<br /><br />Please open the user settings and follow the instructions to regain access to your personal key.",
+			"003":"The system failed to encrypt the record values. Please try again.",
+			"004":"The system failed to decrypt the record values. Please try again.",
+			"005":"The system failed to retrieve decryption keys for the selected records.",
+			"006":"Not all selected users have end-to-end encryption enabled - these are: {NAMES}"
 		},
 		"initCollection":"Failed to load collections during login: {MSG}"
 	},
@@ -1021,6 +1048,7 @@
 				"attribute":"attribute value",
 				"collection":"collection value(s)",
 				"field":"field value",
+				"fieldChanged":"field has changed (TRUE/FALSE)",
 				"javascript":"JavaScript expression",
 				"languageCode":"login language code (en_us, ...)",
 				"login":"login ID (integer)",
@@ -1034,13 +1062,11 @@
 			},
 			"operator":{
 				"eq":"equal",
-				"eqAny":"includes",
 				"le":"larger/equal",
 				"lt":"larger",
 				"ilike":"contains",
 				"like":"contains (match case)",
 				"ne":"unequal",
-				"neAll":"excludes",
 				"not_ilike":"not contains",
 				"not_like":"not contains (match case)",
 				"not_null":"not empty",
@@ -1053,8 +1079,15 @@
 		"javascriptHint":"Ex.: return new Date().getFullYear();",
 		"nestingMain":"Main query",
 		"nestingSub":"Sub query",
+		"operatorsArray":"Array",
+		"operatorsNull":"Empty value",
+		"operatorsSets":"Subset",
+		"operatorsSize":"Number",
+		"operatorsText":"Text",
 		"queryAggregatorNull":"no aggregation",
 		"queryShow":"Show sub query",
+		"subQueryAttribute":"Attribute",
+		"subQueryAggregator":"Aggregate",
 		"valueHint":"Text or number value"
 	},
 	"form":{
@@ -1063,23 +1096,23 @@
 			"helpHint":"Show help pages",
 			"log":"Logs",
 			"logHint":"Open change logs",
-			"retractLogs":"Retract logs"
+			"logShowAll":"Show all ({CNT})"
 		},
 		"dialog":{
 			"close":"There are unsaved changes.<br /><br />Do you still want to close this form?",
 			"delete":"Are you sure that you want to <b>permanently</b> delete this record?",
+			"encrypted":"The field content will be encrypted on your system before it is being sent to the server.",
 			"new":"There are unsaved changes.<br /><br />Do you still want to open a new record?",
 			"newReset":"This will reset all your inputs.<br /><br />Do you want to continue?",
 			"prev":"There are unsaved changes.<br /><br />Do you still want to go back?",
 			"prevBrowser":"There are unsaved changes - if you continue these will be lost. Do you still want to continue?"
 		},
 		"message":{
-			"recordCreated":"Record has been created",
-			"recordCreatedMobile":"Created!",
-			"recordDeleted":"Record has been deleted",
-			"recordDeletedMobile":"Deleted!",
-			"recordUpdated":"Record has been updated",
-			"recordUpdatedMobile":"Updated!"
+			"recordCreated":"Record created",
+			"recordDeleted":"Record deleted",
+			"recordEncrypting":"Encrypting record...",
+			"recordValueCopied":"Copied to clipboard",
+			"recordUpdated":"Record updated"
 		},
 		"dataLog":"Change logs",
 		"deletedUser":"deleted User",
@@ -1094,8 +1127,7 @@
 			"goToApps":"Open file import",
 			"goToLogins":"Assign roles",
 			"goToRepo":"Open repository",
-			"installBundle":"Install Core Company",
-			"openHelp":"Help page"
+			"installBundle":"Install Core Company"
 		},
 		"wizard":{
 			"installBundle":"Core Company",
@@ -1107,8 +1139,6 @@
 			"intro":"Welcome to REI3<br /><br />There are currently no applications installed. To start using REI3, please choose one of the installation options below.",
 			"title":"Setup"
 		},
-		"firstSteps":"First steps",
-		"firstStepsIntro":"Most applications require some initial configuration and or standing data to be useful. Please refer to the individual help pages to get started:",
 		"newVersion":"Update notification",
 		"newVersionText":"A new version of REI3 is available.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">Download REI3 v{VERSION}</a>",
 		"noAccess":"No access has been granted yet.<br />Please contact your system administrator.",
@@ -1167,6 +1197,7 @@
 		"csvTimeHint":"15:04:05",
 		"csvTimezone":"Timezone",
 		"csvTotalLimit":"Row count (0 = all)",
+		"fetching":"Data is being retrieved...",
 		"inputHintCreate":"Create new record",
 		"inputHintOpen":"Open record",
 		"inputHintRemove":"Remove record",
@@ -1176,26 +1207,52 @@
 		"quick":"Filter results in all columns"
 	},
 	"settings":{
-		"button":{
-			"logout":"Logout"
-		},
-		"option":{
-			"cornerKeep":"- default -",
-			"cornerRounded":"rounded",
-			"cornerSquared":"squared"
-		},
-		"security":{
+		"account":{
 			"messagePwCurrentWrong":"Current password is invalid",
 			"messagePwDiff":"Passwords do not match",
 			"messagePwRequiresDigit":"Password must contain a digit",
-			"messagePwRequiresLower":"Password must a lower case letter",
+			"messagePwRequiresLower":"Password must contain a lower case letter",
 			"messagePwRequiresSpecial":"Password must contain a special character (!, ?, #, etc.)",
-			"messagePwRequiresUpper":"Password must an upper case letter",
+			"messagePwRequiresUpper":"Password must contain an upper case letter",
 			"messagePwShort":"Password is too short",
 			"pwNew0":"New password",
 			"pwNew1":"New password (repeated)",
 			"pwOld":"Current password",
 			"titlePwChange":"Change password"
+		},
+		"button":{
+			"logout":"Logout"
+		},
+		"encryption":{
+			"button":{
+				"createKeys":"Create keys",
+				"resetKeys":"Reset personal keys",
+				"storeKeys":"Enable encryption"
+			},
+			"status":{
+				"inactive":"Not enabled",
+				"locked":"Keys are locked",
+				"unlocked":"Ready for use"
+			},
+			"backupCode":"Backup code",
+			"backupCodeDesc":"The backup code is <b>very important</b>; it serves to re-establish access if you forget your password.",
+			"confirmBackupCode":"I have copied the backup code to a secure location.",
+			"confirmEncryption":"I understand that if I loose access to both my password and my backup code, encrypted data becomes permanently inaccessible.",
+			"description":"Applications can encrypt sensitive data for exclusive access by specific individuals. Before data can be encrypted, each user has to create personal keys.",
+			"modulesEnc":"Applications that use encryption",
+			"newKeys":"Keys created successfully",
+			"newKeysDesc":"To complete the setup, copy your personal backup code to a secure location.",
+			"prevPassword":"Previous password",
+			"regainAccess":"Regain access to personal keys",
+			"regainAccessDesc":"You can regain access to your personal keys by entering your previous password. If you do not know your previous password, you need to use your personal backup code.",
+			"resetAccess":"Reset personal keys",
+			"resetAccessDesc":"If you do not have access to either your previous password nor your backup code, you permanently lost access to your encrypted data.<br /><br />If this is the case, you can decide to reset your personal keys to encrypt new data - this will <b>NOT</b> re-establish access to previously encrypted data.",
+			"resetAccessHint":"Are you sure you want to reset your personal keys? If you do this, there is no going back even if you find your old backup code later."
+		},
+		"option":{
+			"cornerKeep":"- default -",
+			"cornerRounded":"rounded",
+			"cornerSquared":"squared"
 		},
 		"bordersAll":"Add borders",
 		"bordersCorners":"Border corners",
@@ -1209,15 +1266,15 @@
 		"dark":"Dark mode",
 		"fontSize":"Font size",
 		"headerCaptions":"Show main menu titles",
-		"hintFirstSteps":"Show 'first-steps'",
 		"languageCode":"Language",
+		"mobileScrollForm":"Mobile: Scroll entire form",
 		"pageLimit":"Max. page width",
 		"pageTitle":"Settings",
 		"spacing":"Spacing",
 		"sundayFirstDow":"Sunday is 1st weekday",
-		"titleAdmin":"Admin",
+		"titleAccount":"Account",
 		"titleDisplay":"Display",
-		"titleSecurity":"Security",
+		"titleEncryption":"End-to-end encryption",
 		"titleTheme":"Theme",
 		"warnUnsaved":"Warnings for unsaved changes"
 	}

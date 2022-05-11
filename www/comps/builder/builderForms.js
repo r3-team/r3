@@ -20,7 +20,7 @@ let MyBuilderFormsItem = {
 		<td>
 			<my-builder-icon-input
 				@input="iconId = $event"
-				:icon-id-selected="iconId"
+				:iconIdSelected="iconId"
 				:module="moduleIdMap[moduleId]"
 			/>
 		</td>
@@ -38,6 +38,9 @@ let MyBuilderFormsItem = {
 				v-model="captions.formTitle"
 				:language="builderLanguage"
 			/>
+		</td>
+		<td>
+			<my-bool v-model="noDataActions" />
 		</td>
 		<td>
 			<select v-model="presetIdOpen">
@@ -81,6 +84,7 @@ let MyBuilderFormsItem = {
 				presetIdOpen:null,
 				iconId:null,
 				name:'',
+				noDataActions:false,
 				query:null,
 				fields:[],
 				functions:[],
@@ -95,15 +99,17 @@ let MyBuilderFormsItem = {
 		return {
 			captions:JSON.parse(JSON.stringify(this.form.captions)),
 			name:this.form.name,
+			noDataActions:this.form.noDataActions,
 			presetIdOpen:this.form.presetIdOpen,
 			iconId:this.form.iconId
 		};
 	},
 	computed:{
 		hasChanges:function() {
-			return this.name !== this.form.name
-				|| this.presetIdOpen !== this.form.presetIdOpen
-				|| this.iconId !== this.form.iconId
+			return this.name          !== this.form.name
+				|| this.noDataActions !== this.form.noDataActions
+				|| this.presetIdOpen  !== this.form.presetIdOpen
+				|| this.iconId        !== this.form.iconId
 				|| JSON.stringify(this.captions) !== JSON.stringify(this.form.captions)
 			;
 		},
@@ -158,8 +164,8 @@ let MyBuilderFormsItem = {
 		},
 		del:function() {
 			ws.send('form','del',{id:this.form.id},true).then(
-				(res) => this.$root.schemaReload(this.moduleId),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.moduleId),
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -168,21 +174,22 @@ let MyBuilderFormsItem = {
 				form.query = this.getQueryTemplate();
 			
 			// set overwritable values
-			form.moduleId     = this.moduleId;
-			form.presetIdOpen = this.presetIdOpen;
-			form.iconId       = this.iconId;
-			form.name         = this.name;
-			form.captions     = this.captions;
+			form.moduleId      = this.moduleId;
+			form.presetIdOpen  = this.presetIdOpen;
+			form.iconId        = this.iconId;
+			form.name          = this.name;
+			form.noDataActions = this.noDataActions;
+			form.captions      = this.captions;
 			
 			ws.send('form','set',form,true).then(
-				res => {
+				() => {
 					if(this.isNew) {
 						this.name     = '';
 						this.captions = {formTitle:{}};
 					}
 					this.$root.schemaReload(this.moduleId);
 				},
-				err => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}
@@ -208,6 +215,7 @@ let MyBuilderForms = {
 						<th>{{ capGen.name }}</th>
 						<th>{{ capGen.id }}</th>
 						<th>{{ capGen.title }}</th>
+						<th>{{ capApp.noDataActions }}</th>
 						<th>{{ capApp.presetOpen }}</th>
 						<th></th>
 					</tr>
@@ -320,12 +328,12 @@ let MyBuilderForms = {
 				moduleId:this.module.id,
 				newName:this.copyNewName
 			},true).then(
-				(res) => {
+				() => {
 					this.copyFormId  = null;
 					this.copyNewName = '';
 					this.$root.schemaReload(this.module.id);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

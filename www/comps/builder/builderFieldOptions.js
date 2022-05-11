@@ -1,7 +1,7 @@
+import MyBuilderCollectionInput from './builderCollectionInput.js';
 import {
 	getDependentModules,
 	getItemTitle,
-	getItemTitleColumn,
 	getItemTitleRelation,
 	getValueFromJson,
 	setValueInJson
@@ -16,67 +16,6 @@ import {
 } from '../shared/attribute.js';
 
 export {MyBuilderFieldOptions as default};
-
-let MyBuilderFieldOptionsCollection = {
-	name:'my-builder-field-options-collection',
-	template:`
-		<tr>
-			<td>{{ caption }}</td>
-			<td>
-				<select v-model="collectionIdInput">
-					<option :value="null">-</option>
-					<optgroup
-						v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
-						:label="m.name"
-					>
-						<option v-for="c in m.collections" :value="c.id">
-							{{ c.name }}
-						</option>
-					</optgroup>
-				</select>
-				<select v-model="columnIdInput" :disabled="collectionId === null">
-					<option :value="null">-</option>
-					<option v-if="collectionId !== null" v-for="c in collectionIdMap[collectionId].columns" :value="c.id">
-						{{ getItemTitleColumn(c) }}
-					</option>
-				</select>
-			</td>
-			<td>
-				<my-button image="cancel.png"
-					v-if="allowRemove"
-					@trigger="$emit('remove')"
-					:naked="true"
-				/>
-			</td>
-		</tr>
-	`,
-	props:{
-		allowRemove: { type:Boolean, required:true },
-		caption:     { type:String,  required:true },
-		collectionId:{ required:true },
-		columnId:    { required:true },
-		module:      { type:Object,  required:true }
-	},
-	emits:['remove','update:collectionId','update:columnId'],
-	computed:{
-		collectionIdInput:{
-			get:function()  { return this.collectionId; },
-			set:function(v) { this.$emit('update:collectionId',v); }
-		},
-		columnIdInput:{
-			get:function()  { return this.columnId; },
-			set:function(v) { this.$emit('update:columnId',v); }
-		},
-		
-		// stores
-		modules:        function() { return this.$store.getters['schema/modules']; },
-		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; }
-	},
-	methods:{
-		getDependentModules,
-		getItemTitleColumn
-	}
-};
 
 let MyBuilderFieldOptionsChartSerie = {
 	name:'my-builder-field-options-chart-serie',
@@ -324,8 +263,8 @@ let MyBuilderFieldOptionsChart = {
 let MyBuilderFieldOptions = {
 	name:'my-builder-field-options',
 	components:{
-		MyBuilderFieldOptionsChart,
-		MyBuilderFieldOptionsCollection
+		MyBuilderCollectionInput,
+		MyBuilderFieldOptionsChart
 	},
 	template:`<div class="builder-field-options">
 		<table class="fullWidth default-inputs"><tbody>
@@ -411,6 +350,15 @@ let MyBuilderFieldOptions = {
 						</select>
 					</td>
 				</tr>
+				<tr v-if="!isFiles && !isRelationship">
+					<td>{{ capApp.fieldClipboard }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="set('clipboard',$event)"
+							:modelValue="field.clipboard"
+						/>
+					</td>
+				</tr>
 				<tr v-if="!isRelationship">
 					<td>{{ capApp.fieldRegexCheck }}</td>
 					<td>
@@ -430,7 +378,7 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<my-builder-field-options-collection
+				<my-builder-collection-input
 					v-if="!isFiles && field.def === ''"
 					@update:collectionId="setNull('collectionIdDef',$event)"
 					@update:columnId="setNull('columnIdDef',$event)"
@@ -439,6 +387,8 @@ let MyBuilderFieldOptions = {
 					:collectionId="field.collectionIdDef"
 					:columnId="field.columnIdDef"
 					:module="module"
+					:multiValue="false"
+					:showMultiValue="false"
 				/>
 				<tr v-if="isString && field.display === 'richtext'">
 					<td>{{ capApp.fieldAttributeIdAltRichtextFiles }}</td>
@@ -1023,16 +973,19 @@ let MyBuilderFieldOptions = {
 					</td>
 				</tr>
 				<template v-if="showCollections">
-					<my-builder-field-options-collection
+					<my-builder-collection-input
 						v-for="(c,i) in field.collections"
 						@remove="collectionRemove(i)"
 						@update:collectionId="setCollection(i,'collectionId',$event)"
 						@update:columnId="setCollection(i,'columnIdDisplay',$event)"
+						@update:multiValue="setCollection(i,'multiValue',$event)"
 						:allowRemove="true"
 						:caption="capApp.collection"
 						:collectionId="c.collectionId"
 						:columnId="c.columnIdDisplay"
 						:module="module"
+						:multiValue="c.multiValue"
+						:showMultiValue="true"
 					/>
 					<tr v-if="field.collections.length !== 0">
 						<td colspan="3">{{ capApp.collectionHint }}</td>

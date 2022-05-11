@@ -1,6 +1,6 @@
 module r3
 
-go 1.17
+go 1.18
 
 require (
 	github.com/arran4/golang-ical v0.0.0-20211212012649-32b67e209c4f

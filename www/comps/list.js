@@ -4,8 +4,8 @@ import MyInputCollection  from './inputCollection.js';
 import MyInputOffset      from './inputOffset.js';
 import MyListCsv          from './listCsv.js';
 import MyValueRich        from './valueRich.js';
+import {consoleError}     from './shared/error.js';
 import {getColumnTitle}   from './shared/column.js';
-import {getChoiceFilters} from './shared/form.js';
 import {srcBase64}        from './shared/image.js';
 import {getCaption}       from './shared/language.js';
 import {isAttributeFiles} from './shared/attribute.js';
@@ -13,6 +13,10 @@ import {
 	fieldOptionGet,
 	fieldOptionSet
 } from './shared/field.js';
+import {
+	getChoiceFilters,
+	getRowsDecrypted
+} from './shared/form.js';
 import {
 	fillRelationRecordIds,
 	getFiltersEncapsulated,
@@ -38,7 +42,7 @@ let MyList = {
 	template:`<div class="list"
 		@keydown="keyDown"
 		v-click-outside="escape"
-		:class="{shade:!isInput, isFullPage:isFullPage, asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly }"
+		:class="{shade:!isInput, singleField:isSingleField, asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly }"
 	>
 		<!-- list as input field (showing record(s) from active field value) -->
 		<template v-if="isInput">
@@ -154,7 +158,7 @@ let MyList = {
 							<td class="minimum">
 								<div class="list-input-row-items nowrap">
 									<my-button image="add.png"
-										v-if="inputOpenForm && hasCreate"
+										v-if="inputOpenForm && !inputIsReadonly && hasCreate"
 										@trigger="$emit('open-form',0,false)"
 										@trigger-middle="$emit('open-form',0,true)"
 										:captionTitle="capApp.inputHintCreate"
@@ -246,7 +250,7 @@ let MyList = {
 					/>
 					
 					<my-button image="filter.png"
-						v-if="isFullPage"
+						v-if="isSingleField"
 						@trigger="toggleUserFilters"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
@@ -263,10 +267,11 @@ let MyList = {
 					
 					<my-input-collection class="selector"
 						v-for="c in collections"
-						@index-selected="$emit('set-collection-index-filter',c.collectionId,$event)"
+						@update:indexes="$emit('set-collection-indexes',c.collectionId,$event)"
 						:collectionId="c.collectionId"
 						:columnIdDisplay="c.columnIdDisplay"
 						:key="c.collectionId"
+						:multiValue="c.multiValue"
 					/>
 					
 					<select class="selector"
@@ -280,7 +285,7 @@ let MyList = {
 					</select>
 					
 					<select class="selector"
-						v-if="isFullPage && allowPaging && !isMobile"
+						v-if="isSingleField && allowPaging && !isMobile"
 						v-model.number="limit"
 						@change="reloadInside()"
 					>
@@ -312,13 +317,14 @@ let MyList = {
 					</div>
 				</div>
 				
-				<div class="list-header" v-if="showFilters">
+				<div class="list-header default-inputs" v-if="showFilters">
 					<my-filters
 						v-model="filtersUser"
 						@apply="reloadInside('filtersUser')"
 						@reset="reloadInside('filtersUser')"
 						:addOnStart="true"
 						:columns="columns"
+						:disableContent="['fieldChanged','subQuery']"
 						:joins="joins"
 						:showApply="true"
 						:showReset="true"
@@ -349,10 +355,9 @@ let MyList = {
 			<div class="layoutTable"
 				v-if="layout === 'table'"
 				:class="{ 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
-				:id="isFullPage ? scrollFormId : null"
+				:id="usesPageHistory ? scrollFormId : null"
 			>
 				<!-- list results as HTML table -->
-				
 				<table :class="{ 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
 					<thead v-if="header">
 						<!-- attribute headers -->
@@ -364,10 +369,11 @@ let MyList = {
 									:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkbox1.png' : 'images/checkbox0.png'"
 								/>
 							</th>
-							<th class="clickable"
+							<th
 								v-for="b in columnBatches"
 								@click.left="clickColumn(b)"
 								@click.right.prevent="clickColumnRight(b)"
+								:class="{ clickable:b.columnIndexSortBy !== -1 }"
 								:style="b.style"
 							>
 								{{ b.caption+displaySortDir(b) }}
@@ -442,8 +448,10 @@ let MyList = {
 								<div class="batch">
 									<my-value-rich class="context-list-table"
 										v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
-										:attribute-id="columns[ind].attributeId"
+										@clipboard="$emit('clipboard')"
+										:attributeId="columns[ind].attributeId"
 										:basis="b.columnIndexes.length === 1 ? columns[ind].basis : 0"
+										:clipboard="columns[ind].clipboard"
 										:display="columns[ind].display"
 										:key="ind"
 										:length="columns[ind].length"
@@ -454,9 +462,15 @@ let MyList = {
 							</td>
 						</tr>
 						
-						<!-- no results -->
+						<!-- no results message -->
 						<tr v-if="rows.length === 0">
-							<td colspan="999">
+							<td v-if="rowsFetching" colspan="999">
+								<div class="fetching">
+									<img src="images/load.gif">
+									<span>{{ capApp.fetching }}</span>
+								</div>
+							</td>
+							<td v-if="!rowsFetching" colspan="999">
 								{{ capGen.resultsNone }}
 							</td>
 						</tr>
@@ -467,7 +481,7 @@ let MyList = {
 			<!-- list results as cards -->
 			<div class="layoutCards"
 				v-if="layout === 'cards'"
-				:id="isFullPage ? scrollFormId : null"
+				:id="usesPageHistory ? scrollFormId : null"
 			>
 				<!-- actions -->
 				<div class="top-actions default-inputs">
@@ -489,8 +503,8 @@ let MyList = {
 						>
 							<option value="-1">-</option>
 							<option
-								v-for="(b,i) in columnBatches"
-								:value="i"
+								v-for="(b,i) in columnBatches.filter(v => v.columnIndexSortBy !== -1)"
+								:value="b.columnIndexSortBy"
 							>
 								{{ b.caption }}
 							</option>
@@ -503,10 +517,16 @@ let MyList = {
 						/>
 					</template>
 					
-					<!-- no results -->
-					<div class="no-results" v-if="rowsClear.length === 0">
-						{{ capGen.resultsNone }}
-					</div>
+					<!-- no results message -->
+					<template v-if="rowsClear.length === 0">
+						<div class="no-results" v-if="!rowsFetching">
+							{{ capGen.resultsNone }}
+						</div>
+						<div class="no-results fetching" v-if="rowsFetching">
+							<img src="images/load.gif">
+							<span>{{ capApp.fetching }}</span>
+						</div>
+					</template>
 				</div>
 				
 				<div class="card"
@@ -540,8 +560,10 @@ let MyList = {
 								<div class="batch">
 									<my-value-rich class="context-list-cards"
 										v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null || columns[v].display === 'gallery')"
-										:attribute-id="columns[ind].attributeId"
+										@clipboard="$emit('clipboard')"
+										:attributeId="columns[ind].attributeId"
 										:basis="b.columnIndexes.length === 1 ? columns[ind].basis : 0"
+										:clipboard="columns[ind].clipboard"
 										:display="columns[ind].display"
 										:key="ind"
 										:length="columns[ind].length"
@@ -569,15 +591,16 @@ let MyList = {
 		query:       { type:Object,  required:true },                    // list query
 		
 		// toggles
-		allowPaging:{ type:Boolean, required:false, default:true },  // enable paging
-		csvExport:  { type:Boolean, required:false, default:false },
-		csvImport:  { type:Boolean, required:false, default:false },
-		filterQuick:{ type:Boolean, required:false, default:false }, // enable quick filter
-		formLoading:{ type:Boolean, required:false, default:false }, // trigger and control list reloads
-		header:     { type:Boolean, required:false, default:true  }, // show list header
-		isFullPage: { type:Boolean, required:false, default:false }, // list fill entire form
-		isInput:    { type:Boolean, required:false, default:false }, // use list as input
-		rowSelect:  { type:Boolean, required:false, default:false }, // list rows can be selected (to open record in form)
+		allowPaging:    { type:Boolean, required:false, default:true },  // enable paging
+		csvExport:      { type:Boolean, required:false, default:false },
+		csvImport:      { type:Boolean, required:false, default:false },
+		filterQuick:    { type:Boolean, required:false, default:false }, // enable quick filter
+		formLoading:    { type:Boolean, required:false, default:false }, // trigger and control list reloads
+		header:         { type:Boolean, required:false, default:true  }, // show list header
+		isInput:        { type:Boolean, required:false, default:false }, // use list as input
+		isSingleField:  { type:Boolean, required:false, default:false }, // list fills entire form
+		rowSelect:      { type:Boolean, required:false, default:false }, // list rows can be selected (to open record in form)
+		usesPageHistory:{ type:Boolean, required:false, default:false }, // list uses page getters for filtering/sorting/etc.
 		
 		// list as input field
 		inputAsCategory:{ type:Boolean, required:false, default:false },    // input is category selector (all records are shown, active ones are checked off)
@@ -590,8 +613,9 @@ let MyList = {
 		inputValid:     { type:Boolean, required:false, default:true }
 	},
 	emits:[
-		'blurred','focused','open-form','record-removed','record-selected',
-		'records-selected-init','set-args','set-collection-index-filter'
+		'blurred','clipboard','focused','open-form','record-removed',
+		'record-selected','records-selected-init','set-args',
+		'set-collection-indexes'
 	],
 	data:function() {
 		return {
@@ -599,11 +623,12 @@ let MyList = {
 			autoRenewInput:null,     // current auto renew input value
 			autoRenewInputLast:null, // last set auto renew input value (to compare against)
 			autoRenewTimer:null,     // interval timer for auto renew
-			choiceId:null,
+			choiceId:null,           // currently active choice
 			focused:false,
 			inputAutoSelectDone:false,
 			inputDropdownUpwards:false, // show dropdown above input
 			orderOverwritten:false,
+			rowsFetching:false,  // row values are being fetched
 			selectedRows:[],     // bulk selected rows by row index
 			showAutoRenew:false, // show UI for auto list renew
 			showCsv:false,       // show UI for CSV import/export
@@ -635,22 +660,27 @@ let MyList = {
 		// first column in batch is used for header caption and ordering
 		columnBatches:function() {
 			let out  = [];
-			let that = this;
 			
-			let addColumn = function(column,index) {
+			let addColumn = (column,index) => {
+				const hidden = column.display === 'hidden' || (this.isMobile && !column.onMobile);
+				const atr    = this.attributeIdMap[column.attributeId];
 				
-				let hidden = column.display === 'hidden' || (that.isMobile && !column.onMobile);
+				// first non-encrypted/non-file attribute in batch can be sorted by
+				const noSort = atr.encrypted || this.isAttributeFiles(atr.content);
 				
 				if(column.batch !== null) {
 					for(let i = 0, j = out.length; i < j; i++) {
 						
 						if(out[i].batch === column.batch) {
-							// batch already exists, do not create new one
+							// batch already exists
 							
 							// do not add column if its hidden
 							if(hidden) return;
 							
+							// add its own column index + sort setting + width to batch
 							out[i].columnIndexes.push(index);
+							out[i].columnIndexSortBy = out[i].columnIndexSortBy !== -1 || noSort
+								? out[i].columnIndexSortBy : index;
 							out[i].width += column.basis;
 							return;
 						}
@@ -661,8 +691,9 @@ let MyList = {
 				// create even if first column is hidden as other columns in same batch might not be
 				out.push({
 					batch:column.batch,
-					caption:that.getColumnTitle(column),
+					caption:this.getColumnTitle(column),
 					columnIndexes:!hidden ? [index] : [],
+					columnIndexSortBy:noSort ? -1 : index,
 					style:'',
 					width:column.basis
 				});
@@ -812,14 +843,14 @@ let MyList = {
 		joins:        function() { return this.fillRelationRecordIds(this.query.joins); },
 		
 		// stores
-		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
-		iconIdMap:      function() { return this.$store.getters['schema/iconIdMap']; },
-		capApp:         function() { return this.$store.getters.captions.list; },
-		capGen:         function() { return this.$store.getters.captions.generic; },
-		isMobile:       function() { return this.$store.getters.isMobile; },
-		moduleLanguage: function() { return this.$store.getters.moduleLanguage; },
-		scrollFormId:   function() { return this.$store.getters.constants.scrollFormId; }
+		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
+		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
+		iconIdMap:     function() { return this.$store.getters['schema/iconIdMap']; },
+		capApp:        function() { return this.$store.getters.captions.list; },
+		capGen:        function() { return this.$store.getters.captions.generic; },
+		isMobile:      function() { return this.$store.getters.isMobile; },
+		moduleLanguage:function() { return this.$store.getters.moduleLanguage; },
+		scrollFormId:  function() { return this.$store.getters.constants.scrollFormId; }
 	},
 	mounted:function() {
 		this.showTable = !this.isInput;
@@ -849,7 +880,7 @@ let MyList = {
 					return this.reloadOutside();
 			}
 		});
-		if(this.isFullPage) {
+		if(this.usesPageHistory) {
 			this.$watch(() => [this.$route.path,this.$route.query],(newVals,oldVals) => {
 				if(this.routeChangeFieldReload(newVals,oldVals)) {
 					this.paramsUpdated();
@@ -858,8 +889,8 @@ let MyList = {
 			});
 		}
 		
-		// if fullpage: set initial states via route parameters
-		if(this.isFullPage) {
+		if(this.usesPageHistory) {
+			// set initial states via route parameters
 			this.paramsUpdated();     // load existing parameters from route query
 			this.paramsUpdate(false); // overwrite parameters (in case defaults are set)
 		} else {
@@ -880,6 +911,7 @@ let MyList = {
 	},
 	methods:{
 		// externals
+		consoleError,
 		fieldOptionGet,
 		fieldOptionSet,
 		fillRelationRecordIds,
@@ -890,6 +922,7 @@ let MyList = {
 		getQueryAttributesPkFilter,
 		getQueryExpressions,
 		getRelationsJoined,
+		getRowsDecrypted,
 		isAttributeFiles,
 		isDropdownUpwards,
 		routeChangeFieldReload,
@@ -904,12 +937,7 @@ let MyList = {
 			return state ? 'radio1.png' : 'radio0.png';
 		},
 		displaySortDir:function(columnBatch) {
-			let colIndex = this.getFirstSortableColumnIndexInBatch(columnBatch);
-			
-			if(colIndex === -1)
-				return '';
-				
-			let orderPos = this.getColumnPosInOrder(colIndex);
+			const orderPos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
 			
 			if(orderPos !== -1) {
 				let postfix = this.orders.length === 1 ? '' : (orderPos+1);
@@ -952,10 +980,10 @@ let MyList = {
 				default: break; // no special treatment
 			}
 			
-			// reload full page list by updating route parameters
+			// update route parameters, reloads list via watcher
 			// enables browser history for fullpage list navigation
 			//  special cases: user filters & manuel reloads (no page param change)
-			if(this.isFullPage && entity !== 'filtersUser' && entity !== 'manual')
+			if(this.usesPageHistory && entity !== 'filtersUser' && entity !== 'manual')
 				return this.paramsUpdate(true);
 			
 			this.get();
@@ -1011,12 +1039,7 @@ let MyList = {
 			// apply first order for card layout selector
 			this.orderByColumnBatchIndex = -1;
 			for(let i = 0, j = this.columnBatches.length; i < j; i++) {
-				
-				let colIndex = this.getFirstSortableColumnIndexInBatch(this.columnBatches[i]);
-				if(colIndex === -1)
-					continue;
-				
-				if(this.getColumnPosInOrder(colIndex) !== -1) {
+				if(this.getColumnPosInOrder(this.columnBatches[i].columnIndexSortBy) !== -1) {
 					this.orderByColumnBatchIndex = i;
 					break;
 				}
@@ -1073,10 +1096,10 @@ let MyList = {
 				if(this.showTable && this.rows.length !== 0) {
 					e.preventDefault();
 					
-					if(e.target !== this.$refs[this.refTabindex+'0'])
-						return this.$refs[this.refTabindex+'0'].focus();
+					if(e.target !== this.$refs[this.refTabindex+'0'][0])
+						return this.$refs[this.refTabindex+'0'][0].focus();
 					
-					return this.$refs[this.refTabindex+String(this.rows.length-1)].focus();
+					return this.$refs[this.refTabindex+String(this.rows.length-1)][0].focus();
 				}
 			}
 		},
@@ -1134,19 +1157,17 @@ let MyList = {
 		
 		// user actions, table layout
 		clickColumn:function(columnBatch) {
-			let colIndex = this.getFirstSortableColumnIndexInBatch(columnBatch);
-			
-			if(colIndex === -1)
+			if(columnBatch.columnIndexSortBy === -1)
 				return;
 			
-			let col      = this.columns[colIndex];
-			let orderPos = this.getColumnPosInOrder(colIndex);
+			const orderPos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
 			if(orderPos === -1) {
+				const col = this.columns[columnBatch.columnIndexSortBy];
 				
 				// not ordered by this column -> add as ascending order
 				if(col.subQuery) {
 					this.orders.push({
-						expressionPos:colIndex, // equal to expression index
+						expressionPos:columnBatch.columnIndexSortBy, // equal to expression index
 						ascending:true
 					});
 				}
@@ -1170,20 +1191,14 @@ let MyList = {
 			this.reloadInside('order');
 		},
 		clickColumnRight:function(columnBatch) {
-			let colIndex = this.getFirstSortableColumnIndexInBatch(columnBatch);
-			
-			if(colIndex === -1)
-				return;
-			
-			let orderPos = this.getColumnPosInOrder(colIndex);
-			if(orderPos === -1)
-				return;
-			
-			this.orders.splice(orderPos,1);
-			this.reloadInside('order');
+			const orderPos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
+			if(orderPos !== -1) {
+				this.orders.splice(orderPos,1);
+				this.reloadInside('order');
+			}
 		},
 		clickRow:function(row,middleClick) {
-			let recordId = row.indexRecordIds['0'];
+			const recordId = row.indexRecordIds['0'];
 			
 			if(this.isInput && !this.inputAsCategory) {
 				
@@ -1206,22 +1221,15 @@ let MyList = {
 		},
 		
 		// user actions, card layout
-		selectOrderBy:function(colBatchIndexString) {
-			let colBatchIndex = parseInt(colBatchIndexString);
+		selectOrderBy:function(columnIndexSortByString) {
+			const columnIndexSortBy = parseInt(columnIndexSortByString);
 			this.orders = [];
 			
-			if(colBatchIndex !== -1) {
-				let colBatch = this.columnBatches[colBatchIndex];
-				let colIndex = this.getFirstSortableColumnIndexInBatch(colBatch);
-				
-				if(colIndex === -1)
-					return;
-				
-				let col = this.columns[colIndex];
-				
+			if(columnIndexSortBy !== -1) {
+				const col = this.columns[columnIndexSortBy];
 				if(col.subQuery) {
 					this.orders.push({
-						expressionPos:colIndex, // equal to expression index
+						expressionPos:columnIndexSortBy, // equal to expression index
 						ascending:true
 					});
 				}
@@ -1297,25 +1305,11 @@ let MyList = {
 		},
 		
 		// helpers
-		getFirstSortableColumnIndexInBatch:function(columnBatch) {
-			// if only 1 column is available in batch, return it
-			if(columnBatch.columnIndexes.length === 1)
-				return columnBatch.columnIndexes[0];
-			
-			for(let i = 0, j = columnBatch.columnIndexes.length; i < j; i++) {
-				let col = this.columns[columnBatch.columnIndexes[i]];
-				let atr = this.attributeIdMap[col.attributeId];
-				
-				if(!this.isAttributeFiles(atr.content))
-					return columnBatch.columnIndexes[i];
-			}
-			
-			// if no sortable columns are available, return false
-			return -1;
-		},
 		getColumnPosInOrder:function(columnIndex) {
-			let col = this.columns[columnIndex];
+			if(columnIndex === -1)
+				return -1;
 			
+			let col = this.columns[columnIndex];
 			for(let i = 0, j = this.orders.length; i < j; i++) {
 				
 				if(col.subQuery) {
@@ -1375,8 +1369,8 @@ let MyList = {
 			}
 			
 			ws.sendMultiple(requests,true).then(
-				(res) => this.get(),
-				(err) => this.$root.genericError(err)
+				this.get,
+				this.$root.genericError
 			);
 		},
 		
@@ -1393,8 +1387,7 @@ let MyList = {
 			let filters = this.filters
 				.concat(this.filtersParsedQuick)
 				.concat(this.filtersParsedUser)
-				.concat(this.choiceFilters)
-			;
+				.concat(this.choiceFilters);
 			
 			if(this.anyInputRows)
 				filters.push(this.getQueryAttributesPkFilter(
@@ -1410,15 +1403,25 @@ let MyList = {
 				limit:this.limit,
 				offset:this.offset
 			},true).then(
-				(res) => {
-					this.count = res.payload.count;
-					this.rows  = res.payload.rows;
-					this.selectReset();
+				res => {
+					const count = res.payload.count;
+					this.rowsFetching = true;
 					
-					if(this.isInput)
-						this.$nextTick(this.updateDropdownDirection);
+					this.getRowsDecrypted(res.payload.rows,this.expressions).then(
+						rows => {
+							this.count        = count;
+							this.rows         = rows;
+							this.rowsFetching = false;
+							this.selectReset();
+							
+							if(this.isInput)
+								this.$nextTick(this.updateDropdownDirection);
+						},
+						this.consoleError
+					);
+					
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		
@@ -1453,10 +1456,13 @@ let MyList = {
 				filters:filters,
 				orders:this.orders
 			},false).then(
-				(res) => {
-					// apply results to input rows if category or specific record IDs were retrieved
+				res => {
+					// apply results to input rows if input is category or specific record IDs were retrieved
 					if(this.inputAsCategory || this.anyInputRows)
-						this.rowsInput = res.payload.rows;
+						this.getRowsDecrypted(res.payload.rows,this.expressions).then(
+							rows => this.rowsInput = rows,
+							this.consoleError
+						);
 					
 					// remove invalid records (due to field filters)
 					let recordIdsValid = [];
@@ -1466,7 +1472,6 @@ let MyList = {
 					}
 					
 					for(let i = 0, j = this.inputRecordIds.length; i < j; i++) {
-						
 						if(!recordIdsValid.includes(this.inputRecordIds[i])) {
 							this.$emit('record-removed',this.inputRecordIds[i]);
 							recordsRemoved++;
@@ -1503,7 +1508,7 @@ let MyList = {
 						this.inputAutoSelectDone = true;
 					}
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

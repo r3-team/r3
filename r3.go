@@ -3,6 +3,7 @@ package main
 import (
 	"bufio"
 	"context"
+	"crypto/tls"
 	"embed"
 	"flag"
 	"fmt"
@@ -15,7 +16,6 @@ import (
 	"r3/activation"
 	"r3/bruteforce"
 	"r3/cache"
-	"r3/cert"
 	"r3/config"
 	"r3/db"
 	"r3/db/embedded"
@@ -170,7 +170,7 @@ func main() {
 		fmt.Printf("%s can be installed as service (-install) or run from the console (-run).\n\n", appName)
 		fmt.Printf("When %s is running, use any modern browser to access it (port 443 by default).\n\n", appName)
 		fmt.Printf("For installation instructions, please refer to the included README file or visit\n")
-		fmt.Printf("https://rei3.de/admindocu-en_us/ for the full admin documentation.\n")
+		fmt.Printf("https://rei3.de/en/docs/admin/ for the full admin documentation.\n")
 		fmt.Printf("################################################################################\n\n")
 
 		// wait for user input to keep console open
@@ -444,14 +444,18 @@ func (prg *program) execute(svc service.Service) {
 			prg.executeAborted(svc, err)
 		}
 	} else {
-		certPath := filepath.Join(config.File.Paths.Certificates, config.File.Web.Cert)
-		keyPath := filepath.Join(config.File.Paths.Certificates, config.File.Web.Key)
+		cache.SetCertPaths(
+			filepath.Join(config.File.Paths.Certificates, config.File.Web.Cert),
+			filepath.Join(config.File.Paths.Certificates, config.File.Web.Key))
 
-		if err := cert.CreateIfNotExist(certPath, keyPath); err != nil {
+		if err := cache.CheckRenewCert(); err != nil {
 			prg.executeAborted(svc, err)
 			return
 		}
-		if err := prg.webServer.ServeTLS(webListener, certPath, keyPath); err != nil && err != http.ErrServerClosed {
+		prg.webServer.TLSConfig = &tls.Config{
+			GetCertificate: cache.GetCert,
+		}
+		if err := prg.webServer.ServeTLS(webListener, "", ""); err != nil && err != http.ErrServerClosed {
 			prg.executeAborted(svc, err)
 		}
 	}

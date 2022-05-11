@@ -5,6 +5,8 @@ import (
 	"errors"
 	"fmt"
 	"r3/cache"
+	"r3/data/data_enc"
+	"r3/data/data_sql"
 	"r3/db"
 	"r3/handler"
 	"r3/schema"
@@ -26,14 +28,21 @@ var regexRelId = regexp.MustCompile(`^\_r(\d+)id`) // finds: _r3id
 func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 	query *string) ([]types.DataGetResult, int, error) {
 
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
+
 	var err error
-	results := make([]types.DataGetResult, 0)
-	queryArgs := make([]interface{}, 0) // SQL arguments for data query
-	queryCount := ""
-	queryCountArgs := make([]interface{}, 0) // SQL arguments for count query (potentially less, no expressions besides COUNT)
+	indexRelationIds := make(map[int]uuid.UUID) // map of accessed relation IDs, key: relation index
+	relationIndexesEnc := make([]int, 0)        // indexes of relations from encrypted attributes within expressions
+	results := make([]types.DataGetResult, 0)   // data GET results
+	queryArgs := make([]interface{}, 0)         // SQL arguments for data query
+	queryCount := ""                            // SQL query to retrieve a total count
+	queryCountArgs := make([]interface{}, 0)    // SQL query arguments for count (potentially less, no expressions besides COUNT)
 
 	// prepare SQL query for data GET request
-	*query, queryCount, err = prepareQuery(data, &queryArgs, &queryCountArgs, loginId, 0)
+	*query, queryCount, err = prepareQuery(data, indexRelationIds,
+		&queryArgs, &queryCountArgs, loginId, 0)
+
 	if err != nil {
 		return results, 0, err
 	}
@@ -59,6 +68,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 		}
 
 		indexRecordIds := make(map[int]interface{}) // ID for each relation tupel by index
+		indexRecordEncKeys := make(map[int]string)  // encrypted key for each relation tupel by index
 		values := make([]interface{}, 0)            // final values for selected attributes
 
 		// collect values for expressions
@@ -87,14 +97,175 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 		}
 
 		results = append(results, types.DataGetResult{
-			IndexRecordIds: indexRecordIds,
-			Values:         values,
+			IndexRecordIds:     indexRecordIds,
+			IndexRecordEncKeys: indexRecordEncKeys,
+			IndexesPermNoDel:   make([]int, 0),
+			IndexesPermNoSet:   make([]int, 0),
+			Values:             values,
 		})
 	}
 	if err := rows.Err(); err != nil {
 		return results, 0, err
 	}
 	rows.Close()
+
+	// resolve relation policy access permissions for retrieved result records
+	// DEL/SET actions only; records not allowed to GET are not retrieved as results
+	// purely to inform requestor as DEL/SET are checked again when executed
+	if data.GetPerm && len(results) != 0 {
+
+		indexMapDelBlacklist := make(map[int][]int64)  // record IDs not do delete
+		indexMapDelWhitelist := make(map[int][]int64)  // record IDs to delete
+		indexMapDelWhitelistUsed := make(map[int]bool) // whether whitelist was used
+		indexMapSetBlacklist := make(map[int][]int64)  // record IDs not do update
+		indexMapSetWhitelist := make(map[int][]int64)  // record IDs to update
+		indexMapSetWhitelistUsed := make(map[int]bool) // whether whitelist was used
+
+		var getPolicyLists = func(relationId uuid.UUID, index int) error {
+
+			indexMapDelBlacklist[index],
+				indexMapDelWhitelist[index],
+				indexMapDelWhitelistUsed[index],
+				err = getPolicyValues_tx(ctx, tx, loginId, relationId, "delete")
+
+			if err != nil {
+				return err
+			}
+
+			indexMapSetBlacklist[index],
+				indexMapSetWhitelist[index],
+				indexMapSetWhitelistUsed[index],
+				err = getPolicyValues_tx(ctx, tx, loginId, relationId, "update")
+
+			if err != nil {
+				return err
+			}
+			return nil
+		}
+
+		// get record ID black-/whitelists for all relations (base & joined)
+		if err := getPolicyLists(data.RelationId, 0); err != nil {
+			return results, 0, err
+		}
+
+		for _, j := range data.Joins {
+
+			atr, exists := cache.AttributeIdMap[j.AttributeId]
+			if !exists {
+				return results, 0, handler.ErrSchemaUnknownAttribute(j.AttributeId)
+			}
+
+			// join attribute is from other relation, use relationship partner
+			relId := atr.RelationId
+			if atr.RelationId == indexRelationIds[j.IndexFrom] {
+				relId = atr.RelationshipId.Bytes
+			}
+
+			if err := getPolicyLists(relId, j.Index); err != nil {
+				return results, 0, err
+			}
+		}
+
+		for i, res := range results {
+			for index, recordIdIf := range res.IndexRecordIds {
+				if recordIdIf == nil {
+					continue
+				}
+
+				var recordId int64
+				switch v := recordIdIf.(type) {
+				case int32:
+					recordId = int64(v)
+				case int64:
+					recordId = v
+				default:
+					return results, 0, fmt.Errorf("record ID has invalid type")
+				}
+
+				if recordId == 0 {
+					continue
+				}
+
+				// deny DEL if record ID is in blacklist or not in whitelist (if used)
+				if tools.Int64InSlice(recordId, indexMapDelBlacklist[index]) ||
+					(indexMapDelWhitelistUsed[index] && !tools.Int64InSlice(recordId, indexMapDelWhitelist[index])) {
+
+					results[i].IndexesPermNoDel = append(results[i].IndexesPermNoDel, index)
+				}
+
+				// deny SET if record ID is in blacklist or not in whitelist (if used)
+				if tools.Int64InSlice(recordId, indexMapSetBlacklist[index]) ||
+					(indexMapSetWhitelistUsed[index] && !tools.Int64InSlice(recordId, indexMapSetWhitelist[index])) {
+
+					results[i].IndexesPermNoSet = append(results[i].IndexesPermNoSet, index)
+				}
+			}
+		}
+	}
+
+	// check for encrypted attributes in expressions
+	for _, expr := range data.Expressions {
+
+		// ignore non-attribute and sub query expressions
+		if expr.AttributeId.Status != pgtype.Present {
+			continue
+		}
+		if expr.Query.RelationId != uuid.Nil {
+			continue
+		}
+
+		atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
+		if !exists {
+			return results, 0, handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes)
+		}
+
+		if !atr.Encrypted || tools.IntInSlice(expr.Index, relationIndexesEnc) {
+			continue
+		}
+		relationIndexesEnc = append(relationIndexesEnc, expr.Index)
+	}
+
+	// get data keys for encrypted relation records
+	for _, relIndex := range relationIndexesEnc {
+		recordIds := make([]int64, 0)
+
+		// collect all non-null record IDs for given relation index
+		for _, result := range results {
+			if result.IndexRecordIds[relIndex] != nil {
+
+				switch v := result.IndexRecordIds[relIndex].(type) {
+				case int32:
+					recordIds = append(recordIds, int64(v))
+				case int64:
+					recordIds = append(recordIds, v)
+				default:
+					return results, 0, handler.CreateErrCode("SEC",
+						handler.ErrCodeSecDataKeysNotAvailable)
+				}
+			}
+		}
+
+		encKeys, err := data_enc.GetKeys_tx(ctx, tx,
+			indexRelationIds[relIndex], recordIds, loginId)
+
+		if err != nil {
+			return results, 0, err
+		}
+
+		if len(encKeys) != len(recordIds) {
+			return results, 0, handler.CreateErrCode("SEC",
+				handler.ErrCodeSecDataKeysNotAvailable)
+		}
+
+		// assign record keys in order
+		keyIndex := 0
+		for i, result := range results {
+			if result.IndexRecordIds[relIndex] != nil {
+				results[i].IndexRecordEncKeys[relIndex] = encKeys[keyIndex]
+				keyIndex++
+			}
+		}
+	}
 
 	// work out result count
 	count := len(results)
@@ -111,8 +282,9 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 // build SQL call from data GET request
 // also used for sub queries, a nesting level is included for separation (0 = main query)
 // returns data + count SQL query strings
-func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *[]interface{},
-	loginId int64, nestingLevel int) (string, string, error) {
+func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
+	queryArgs *[]interface{}, queryCountArgs *[]interface{}, loginId int64,
+	nestingLevel int) (string, string, error) {
 
 	// check for authorized access, READ(1) for GET
 	for _, expr := range data.Expressions {
@@ -122,21 +294,20 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 	}
 
 	var (
-		inJoin         []string                  // relation joins
-		inSelect       []string                  // select expressions
-		inWhere        []string                  // filters
-		mapIndex_relId = make(map[int]uuid.UUID) // map of all relations by index
+		inJoin   []string // relation joins
+		inSelect []string // select expressions
+		inWhere  []string // filters
 	)
 
 	// check source relation and module
 	rel, exists := cache.RelationIdMap[data.RelationId]
 	if !exists {
-		return "", "", fmt.Errorf("unknown relation '%s'", data.RelationId)
+		return "", "", handler.ErrSchemaUnknownRelation(data.RelationId)
 	}
 
 	mod, exists := cache.ModuleIdMap[rel.ModuleId]
 	if !exists {
-		return "", "", fmt.Errorf("unknown module '%s'", rel.ModuleId)
+		return "", "", handler.ErrSchemaUnknownModule(rel.ModuleId)
 	}
 
 	// define relation code for source relation
@@ -144,13 +315,13 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 	relCode := getRelationCode(data.IndexSource, nestingLevel)
 
 	// add relations as joins via relationship attributes
-	mapIndex_relId[data.IndexSource] = data.RelationId
+	indexRelationIds[data.IndexSource] = data.RelationId
 	for _, join := range data.Joins {
 		if join.IndexFrom == -1 { // source relation need not be joined
 			continue
 		}
 
-		if err := addJoin(mapIndex_relId, join, &inJoin, loginId, nestingLevel); err != nil {
+		if err := addJoin(indexRelationIds, join, &inJoin, loginId, nestingLevel); err != nil {
 			return "", "", err
 		}
 	}
@@ -206,23 +377,23 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 			if nestingLevel == 0 {
 				queryCountArgsOptional = nil
 			}
+			indexRelationIdsSub := make(map[int]uuid.UUID)
 
-			subQuery, _, err := prepareQuery(expr.Query, queryArgs,
-				queryCountArgsOptional, loginId, nestingLevel+1)
+			subQuery, _, err := prepareQuery(expr.Query, indexRelationIdsSub,
+				queryArgs, queryCountArgsOptional, loginId, nestingLevel+1)
 
 			if err != nil {
 				return "", "", err
 			}
-			inSelect = append(inSelect, fmt.Sprintf("(\n%s\n) AS %s",
-				subQuery, getExpressionCodeSelect(pos)))
+
+			inSelect = append(inSelect, data_sql.GetExpression(
+				expr, subQuery, data_sql.GetExpressionAlias(pos)))
 
 			continue
 		}
 
 		// attribute expression
-		if err := addSelect(pos, expr, mapIndex_relId, &inSelect,
-			nestingLevel); err != nil {
-
+		if err := addSelect(pos, expr, indexRelationIds, &inSelect, nestingLevel); err != nil {
 			return "", "", err
 		}
 
@@ -236,7 +407,7 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 
 	// add expressions for relation tupel IDs after attributes (on main query)
 	if nestingLevel == 0 {
-		for index, relId := range mapIndex_relId {
+		for index, relId := range indexRelationIds {
 
 			// if an aggregation function is used on any index, we cannot deliver record IDs
 			// unless a record aggregation functions is used on this specific relation index
@@ -275,7 +446,7 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 
 		// group by requested attribute
 		if expr.GroupBy {
-			groupByItems = append(groupByItems, getExpressionCodeSelect(i))
+			groupByItems = append(groupByItems, data_sql.GetExpressionAlias(i))
 		}
 	}
 	if len(groupByItems) != 0 {
@@ -338,16 +509,16 @@ func prepareQuery(data types.DataGet, queryArgs *[]interface{}, queryCountArgs *
 //  attribute value = tupel IDs in relation with given index via given attribute
 // 'outside in' is important in cases of self reference, where direction cannot be ascertained by attribute
 func addSelect(exprPos int, expr types.DataGetExpression,
-	mapIndex_relId map[int]uuid.UUID, inSelect *[]string, nestingLevel int) error {
+	indexRelationIds map[int]uuid.UUID, inSelect *[]string, nestingLevel int) error {
 
 	relCode := getRelationCode(expr.Index, nestingLevel)
 
 	atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
 	if !exists {
-		return errors.New("attribute does not exist")
+		return handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes)
 	}
 
-	codeSelect := getExpressionCodeSelect(exprPos)
+	alias := data_sql.GetExpressionAlias(exprPos)
 
 	if !expr.OutsideIn {
 		// attribute is from index relation
@@ -355,48 +526,19 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 		if err != nil {
 			return err
 		}
-
-		// prepare distinct paramenter, not useful for min/max/record
-		var distinct = ""
-		if expr.Distincted {
-			distinct = "DISTINCT "
-		}
-
-		// apply aggregator if desired
-		switch expr.Aggregator.String {
-		case "array":
-			*inSelect = append(*inSelect, fmt.Sprintf("JSON_AGG(%s%s) AS %s", distinct, code, codeSelect))
-		case "avg":
-			*inSelect = append(*inSelect, fmt.Sprintf("AVG(%s%s)::NUMERIC(20,2) AS %s", distinct, code, codeSelect))
-		case "count":
-			*inSelect = append(*inSelect, fmt.Sprintf("COUNT(%s%s) AS %s", distinct, code, codeSelect))
-		case "list":
-			*inSelect = append(*inSelect, fmt.Sprintf("STRING_AGG(%s%s::TEXT, ', ') AS %s", distinct, code, codeSelect))
-		case "max":
-			*inSelect = append(*inSelect, fmt.Sprintf("MAX(%s) AS %s", code, codeSelect))
-		case "min":
-			*inSelect = append(*inSelect, fmt.Sprintf("MIN(%s) AS %s", code, codeSelect))
-		case "sum":
-			*inSelect = append(*inSelect, fmt.Sprintf("SUM(%s%s) AS %s", distinct, code, codeSelect))
-		case "record":
-			// groups record IDs for attribute relation (via index)
-			// allows access to individual record IDs and attribute values while other aggregations are active
-			*inSelect = append(*inSelect, fmt.Sprintf("FIRST(%s) AS %s", code, codeSelect))
-		default:
-			*inSelect = append(*inSelect, fmt.Sprintf("%s%s AS %s", distinct, code, codeSelect))
-		}
+		*inSelect = append(*inSelect, data_sql.GetExpression(expr, code, alias))
 		return nil
 	}
 
 	// attribute comes via relationship from other relation (or self reference from same relation)
 	shipRel, exists := cache.RelationIdMap[atr.RelationId]
 	if !exists {
-		return errors.New("relation does not exist")
+		return handler.ErrSchemaUnknownRelation(atr.RelationId)
 	}
 
 	shipMod, exists := cache.ModuleIdMap[shipRel.ModuleId]
 	if !exists {
-		return errors.New("module does not exist")
+		return handler.ErrSchemaUnknownModule(shipRel.ModuleId)
 	}
 
 	// get tupel IDs from other relation
@@ -419,7 +561,7 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 			selectExpr,
 			shipMod.Name, shipRel.Name,
 			shipRel.Name, atr.Name, relCode, schema.PkName,
-			codeSelect))
+			alias))
 
 	} else {
 		shipAtrNm, exists := cache.AttributeIdMap[expr.AttributeIdNm.Bytes]
@@ -436,12 +578,12 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 			shipAtrNm.Name,
 			shipMod.Name, shipRel.Name,
 			shipRel.Name, atr.Name, relCode, schema.PkName,
-			codeSelect))
+			alias))
 	}
 	return nil
 }
 
-func addJoin(mapIndex_relId map[int]uuid.UUID, join types.DataGetJoin,
+func addJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin,
 	inJoin *[]string, loginId int64, nestingLevel int) error {
 
 	// check join attribute
@@ -456,7 +598,7 @@ func addJoin(mapIndex_relId map[int]uuid.UUID, join types.DataGetJoin,
 
 	// is join attribute on source relation? (direction of relationship)
 	var relIdTarget uuid.UUID // relation ID that is to be joined
-	var relIdSource = mapIndex_relId[join.IndexFrom]
+	var relIdSource = indexRelationIds[join.IndexFrom]
 	var relCodeSource = getRelationCode(join.IndexFrom, nestingLevel)
 	var relCodeTarget = getRelationCode(join.Index, nestingLevel) // relation code that is to be joined
 	var relCodeFrom string                                        // relation code of where join attribute is from
@@ -471,23 +613,20 @@ func addJoin(mapIndex_relId map[int]uuid.UUID, join types.DataGetJoin,
 		// join attribute comes from other relation, other relation is the source relation for this join
 		relCodeFrom = relCodeTarget
 		relCodeTo = relCodeSource
-		if !exists {
-			return errors.New("relation does not exist")
-		}
 		relIdTarget = atr.RelationId
 	}
 
-	mapIndex_relId[join.Index] = relIdTarget
+	indexRelationIds[join.Index] = relIdTarget
 
 	// check other relation and corresponding module
 	relTarget, exists := cache.RelationIdMap[relIdTarget]
 	if !exists {
-		return errors.New("relation does not exist")
+		return handler.ErrSchemaUnknownRelation(relIdTarget)
 	}
 
 	modTarget, exists := cache.ModuleIdMap[relTarget.ModuleId]
 	if !exists {
-		return errors.New("module does not exist")
+		return handler.ErrSchemaUnknownModule(relTarget.ModuleId)
 	}
 
 	// define JOIN type
@@ -533,13 +672,14 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 
 		// sub query filter
 		if isQuery {
-			subQuery, _, err := prepareQuery(s.Query, queryArgs,
-				queryCountArgs, loginId, nestingLevel+1)
+			indexRelationIdsSub := make(map[int]uuid.UUID)
+
+			subQuery, _, err := prepareQuery(s.Query, indexRelationIdsSub,
+				queryArgs, queryCountArgs, loginId, nestingLevel+1)
 
 			if err != nil {
 				return err
 			}
-
 			*comp = fmt.Sprintf("(\n%s\n)", subQuery)
 			return nil
 		}
@@ -637,7 +777,7 @@ func addOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 	}
 
 	orderItems := make([]string, len(data.Orders))
-	var codeSelect string
+	var alias string
 	var err error
 
 	for i, ord := range data.Orders {
@@ -658,9 +798,9 @@ func addOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 			}
 
 			if expressionPosAlias != -1 {
-				codeSelect = getExpressionCodeSelect(expressionPosAlias)
+				alias = data_sql.GetExpressionAlias(expressionPosAlias)
 			} else {
-				codeSelect, err = getAttributeCode(ord.AttributeId.Bytes,
+				alias, err = getAttributeCode(ord.AttributeId.Bytes,
 					getRelationCode(int(ord.Index.Int), nestingLevel))
 
 				if err != nil {
@@ -670,15 +810,15 @@ func addOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 
 		} else if ord.ExpressionPos.Status == pgtype.Present {
 			// order by chosen expression (by position in array)
-			codeSelect = getExpressionCodeSelect(int(ord.ExpressionPos.Int))
+			alias = data_sql.GetExpressionAlias(int(ord.ExpressionPos.Int))
 		} else {
 			return "", errors.New("unknown data GET order parameter")
 		}
 
 		if ord.Ascending == true {
-			orderItems[i] = fmt.Sprintf("%s ASC", codeSelect)
+			orderItems[i] = fmt.Sprintf("%s ASC", alias)
 		} else {
-			orderItems[i] = fmt.Sprintf("%s DESC NULLS LAST", codeSelect)
+			orderItems[i] = fmt.Sprintf("%s DESC NULLS LAST", alias)
 		}
 	}
 	return fmt.Sprintf("\nORDER BY %s", strings.Join(orderItems, ", ")), nil
@@ -708,15 +848,9 @@ func getTupelIdCode(relationIndex int, nestingLevel int) string {
 func getAttributeCode(attributeId uuid.UUID, relCode string) (string, error) {
 	atr, exists := cache.AttributeIdMap[attributeId]
 	if !exists {
-		return "", errors.New("attribute does not exist")
+		return "", handler.ErrSchemaUnknownAttribute(attributeId)
 	}
 	return fmt.Sprintf(`"%s"."%s"`, relCode, atr.Name), nil
-}
-
-// alias for SELECT expression
-// set for all expressions, needed for grouped/aggregated/sub query expressions
-func getExpressionCodeSelect(expressionPos int) string {
-	return fmt.Sprintf(`"_e%d"`, expressionPos)
 }
 
 func getBrackets(count int, right bool) string {

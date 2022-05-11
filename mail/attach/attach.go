@@ -51,6 +51,8 @@ func DoAll() error {
 }
 
 func do(mail types.Mail) error {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
 
 	// check validity of record and attributes to attach files to
 	atr, exists := cache.AttributeIdMap[mail.AttributeId.Bytes]

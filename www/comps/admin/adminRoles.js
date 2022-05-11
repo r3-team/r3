@@ -115,8 +115,8 @@ let MyAdminRoleItem = {
 		// backend calls
 		getNewName:function(id) {
 			ws.send('login','getNames',{id:id},true).then(
-				(res) => this.$emit('add',{id:id,name:res.payload[0].name}),
-				(err) => this.$root.genericError(err)
+				res => this.$emit('add',{id:id,name:res.payload[0].name}),
+				this.$root.genericError
 			);
 		}
 	}
@@ -285,13 +285,13 @@ let MyAdminRoles = {
 			}
 			
 			ws.sendMultiple(requests,true).then(
-				(res) => {
+				res => {
 					for(let i = 0, j = requests.length; i < j; i++) {
 						this.roleIdMapLogins[requests[i].payload.roleId] = res[i].payload.logins;
 					}
 					this.loginIdsChanged = [];
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -313,22 +313,21 @@ let MyAdminRoles = {
 			}
 			
 			ws.sendMultiple(requests,true).then(
-				(res) => {
+				() => {
 					// reauth all affected logins
 					requests = [];
 					for(let i = 0, j = this.loginIdsChanged.length; i < j; i++) {
 						requests.push(ws.prepare('login','reauth',{id:this.loginIdsChanged[i]}));
 					}
-					
 					ws.sendMultiple(requests,false).then(
-						(res) => {},
-						(err) => this.$root.genericError(err)
+						() => {},
+						this.$root.genericError
 					);
 					
 					// reload data
 					this.get();
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

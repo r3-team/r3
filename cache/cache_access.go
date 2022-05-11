@@ -45,7 +45,6 @@ func RenewAccessAll() error {
 
 // renew permissions for one login
 func RenewAccessById(loginId int64) error {
-
 	access_mx.Lock()
 	defer access_mx.Unlock()
 
@@ -69,6 +68,8 @@ func ChangedBuilderMode(modeActive bool) {
 
 // load access permissions for login ID into cache
 func load(loginId int64, renewal bool) error {
+	Schema_mx.RLock()
+	defer Schema_mx.RUnlock()
 
 	roleIds, err := loadRoleIds(loginId)
 	if err != nil {

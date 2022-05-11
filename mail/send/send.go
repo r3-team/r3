@@ -93,6 +93,8 @@ func DoAll() error {
 }
 
 func do(m types.Mail) error {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
 
 	// get mail account to send with
 	var err error

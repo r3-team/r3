@@ -23,7 +23,7 @@ func Get() ([]types.Ldap, error) {
 	rows, err := db.Pool.Query(db.Ctx, `
 		SELECT id, name, host, port, bind_user_dn, bind_user_pw, search_class,
 			search_dn, key_attribute, login_attribute, member_attribute,
-			assign_roles, ms_ad_ext, tls, tls_verify
+			assign_roles, ms_ad_ext, starttls, tls, tls_verify
 		FROM instance.ldap
 		ORDER BY name ASC
 	`)
@@ -36,7 +36,7 @@ func Get() ([]types.Ldap, error) {
 		if err := rows.Scan(&l.Id, &l.Name, &l.Host, &l.Port, &l.BindUserDn,
 			&l.BindUserPw, &l.SearchClass, &l.SearchDn, &l.KeyAttribute,
 			&l.LoginAttribute, &l.MemberAttribute, &l.AssignRoles, &l.MsAdExt,
-			&l.Tls, &l.TlsVerify); err != nil {
+			&l.Starttls, &l.Tls, &l.TlsVerify); err != nil {
 
 			rows.Close()
 			return ldaps, err
@@ -57,7 +57,7 @@ func Get() ([]types.Ldap, error) {
 func Set_tx(tx pgx.Tx, id int32, name string, host string, port int,
 	bindUserDn string, bindUserPw string, searchClass string, searchDn string,
 	keyAttribute string, loginAttribute string, memberAttribute string,
-	assignRoles bool, msAdExt bool, tls bool, tlsVerify bool,
+	assignRoles bool, msAdExt bool, starttls bool, tls bool, tlsVerify bool,
 	roles []types.LdapRole) error {
 
 	if id == 0 {
@@ -65,13 +65,13 @@ func Set_tx(tx pgx.Tx, id int32, name string, host string, port int,
 			INSERT INTO instance.ldap (
 				name, host, port, bind_user_dn, bind_user_pw, search_class,
 				search_dn, key_attribute, login_attribute, member_attribute,
-				assign_roles, ms_ad_ext, tls, tls_verify
+				assign_roles, ms_ad_ext, starttls, tls, tls_verify
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
 			RETURNING id
 		`, name, host, port, bindUserDn, bindUserPw, searchClass, searchDn,
 			keyAttribute, loginAttribute, memberAttribute, assignRoles, msAdExt,
-			tls, tlsVerify).Scan(&id); err != nil {
+			starttls, tls, tlsVerify).Scan(&id); err != nil {
 
 			return err
 		}
@@ -81,11 +81,12 @@ func Set_tx(tx pgx.Tx, id int32, name string, host string, port int,
 			SET name = $1, host = $2, port = $3, bind_user_dn = $4,
 				bind_user_pw = $5, search_class = $6, search_dn = $7,
 				key_attribute = $8, login_attribute = $9, member_attribute = $10,
-				assign_roles = $11, ms_ad_ext = $12, tls = $13, tls_verify = $14
-			WHERE id = $15
+				assign_roles = $11, ms_ad_ext = $12, starttls = $13, tls = $14,
+				tls_verify = $15
+			WHERE id = $16
 		`, name, host, port, bindUserDn, bindUserPw, searchClass, searchDn,
 			keyAttribute, loginAttribute, memberAttribute, assignRoles, msAdExt,
-			tls, tlsVerify, id); err != nil {
+			starttls, tls, tlsVerify, id); err != nil {
 
 			return err
 		}

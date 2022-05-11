@@ -123,6 +123,7 @@ body                                         { --depth:9; }
 .login input:focus                           { --depth:0; }
 .menu .items                                 { --depth:7; }
 .menu .item .line.active                     { --depth:10; }
+.settings .backup-code                       { --depth:0; }
 .navigation                                  { --depth:7; }
 .field                                       { --depth:1; }
 .field .disabled                             { --depth:7; }
@@ -160,6 +161,7 @@ body                                         { --depth:9; }
 .admin-roles .admin-role-title               { --depth:7; }
 .admin-repo .repo-module .part.left          { --depth:0; }
 .admin-repo .repo-module .part.right         { --depth:3; }
+.builder .filter .filter-side>.subQuery      { --depth:5; }
 .builder .lookup                             { --depth:1; }
 .builder-icon-input .iconLine                { --depth:2; }
 .builder-icon-input .iconLine:focus          { --depth:1; }
@@ -578,7 +580,8 @@ table td.maximum{
 }
 .default-inputs input:focus,
 .default-inputs select:focus,
-.default-inputs textarea:focus{
+.default-inputs textarea:focus,
+.default-inputs .input-custom:focus-within{
 	box-shadow:inset 0 -2px 0 0 var(--color-accent1),1px 1px 4px var(--color-shade);
 	transition:box-shadow 0.3s, background-color 0.3s;
 	outline:none;

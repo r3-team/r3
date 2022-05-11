@@ -19,6 +19,16 @@ let MyValueRich = {
 		:class="{ color:isColor, files:isFiles, wrap:wrap }"
 		:style="style"
 	>
+		<!-- copy to clipboard action -->
+		<my-button image="copyClipboard.png"
+			v-if="clipboard && !isFiles && !isGallery"
+			@trigger="copyToClipboard"
+			:active="value !== null"
+			:blockBubble="true"
+			:captionTitle="capGen.button.copyClipboard"
+			:naked="true"
+		/>
+		
 		<!-- link open action -->
 		<my-button
 			v-if="isLink"
@@ -66,12 +76,13 @@ let MyValueRich = {
 	props:{
 		attributeId:{ type:String,  required:true },
 		basis:      { type:Number,  required:false, default:0 },         // size basis (usually column width)
+		clipboard:  { type:Boolean, required:false, default:false },     // copy-to-clipboard action
 		display:    { type:String,  required:false, default:'default' }, // variant (color, url, gallery, ...)
 		length:     { type:Number,  required:false, default:0 },         // string length limit
 		value:      { required:true },
 		wrap:       { type:Boolean, required:false, default:false }      // wrap string value
 	},
-	emits:['focus','trigger'],
+	emits:['clipboard','focus','trigger'],
 	watch:{
 		value:{
 			handler:function() { this.setValue(); },
@@ -84,6 +95,7 @@ let MyValueRich = {
 			isFiles:false,
 			isGallery:false,
 			isLink:false,
+			isPassword:false,
 			isString:false,
 			stringValue:'',    // processed value, shown directly
 			stringValueFull:'' // processed value, shown as title, no length limit
@@ -91,16 +103,12 @@ let MyValueRich = {
 	},
 	computed:{
 		files:function() {
-			if(!this.isFiles || this.value === null)
-				return [];
-			
-			return this.value.files;
+			return !this.isFiles || this.value === null
+				? [] : this.value.files;
 		},
 		link:function() {
-			if(!this.isLink || this.value === null)
-				return false;
-			
-			return this.getLinkMeta(this.display,this.value);
+			return !this.isLink || this.value === null
+				? false : this.getLinkMeta(this.display,this.value);
 		},
 		
 		// styles
@@ -127,6 +135,12 @@ let MyValueRich = {
 		getUtcTimeStringFromUnix,
 		openLink,
 		
+		copyToClipboard:function() {
+			navigator.clipboard.writeText(
+				!this.isPassword ? this.stringValueFull : this.value
+			);
+			this.$emit('clipboard');
+		},
 		setValue:function() {
 			// special values based on attribute content
 			switch(this.attributeIdMap[this.attributeId].content) {
@@ -165,7 +179,13 @@ let MyValueRich = {
 					if(this.value !== null)
 						this.stringValueFull = this.value;
 				break;
-			
+				
+				case 'password':
+					this.isString        = true;
+					this.isPassword      = true;
+					this.stringValueFull = '**********';
+				break;
+				
 				case 'richtext':
 					this.isString = true;
 					

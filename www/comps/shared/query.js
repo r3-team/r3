@@ -1,7 +1,8 @@
-import {getIndexAttributeId} from './attribute.js';
-import {getItemTitle}        from './builder.js';
-import {getCollectionValues} from './collection.js';
-import MyStore               from '../../stores/store.js';
+import {getIndexAttributeId}         from './attribute.js';
+import {getItemTitle}                from './builder.js';
+import {getCollectionValues}         from './collection.js';
+import {filterOperatorIsSingleValue} from './generic.js';
+import MyStore                       from '../../stores/store.js';
 
 let getQueryExpressionAttribute = function(column) {
 	return {
@@ -13,7 +14,29 @@ let getQueryExpressionAttribute = function(column) {
 	};
 };
 
-export function fillRelationRecordIds(joins) {
+// map of joins keyed by relation index
+export function getJoinsIndexMap(joins) {
+	let map = {};
+	for(const j of joins) {
+		map[j.index] = j;
+	}
+	return map;
+};
+export function getJoinIndexMapExpanded(joins,indexMapRecordId,indexesNoDel,indexesNoSet) {
+	let map = {};
+	for(let j of joins) {
+		const recordId = indexMapRecordId[j.index];
+		j.recordId     = Number.isInteger(recordId) ? recordId : 0;
+		j.recordNoDel  = indexesNoDel.includes(j.index);
+		j.recordNoSet  = indexesNoSet.includes(j.index);
+		map[j.index] = j;
+	}
+	return map;
+};
+
+export function fillRelationRecordIds(joinsOrg) {
+	// clone to not update referenced joins
+	let joins = JSON.parse(JSON.stringify(joinsOrg));
 	for(let i = 0, j = joins.length; i < j; i++) {
 		joins[i].recordId = 0;
 	}
@@ -21,47 +44,46 @@ export function fillRelationRecordIds(joins) {
 };
 
 export function getRelationsJoined(joins) {
-	let relsJoined = [];
-	
-	for(let i = 0, j = joins.length; i < j; i++) {
-		let join = joins[i];
-		
-		if(join.index === 0) // ignore source relation
+	let out = [];
+	for(const j of joins) {
+		if(j.index === 0) // ignore source relation
 			continue;
 		
-		relsJoined.push({
-			attributeId:join.attributeId,
-			index:join.index,
-			indexFrom:join.indexFrom,
-			connector:join.connector
+		out.push({
+			attributeId:j.attributeId,
+			index:j.index,
+			indexFrom:j.indexFrom,
+			connector:j.connector
 		});
 	}
-	return relsJoined;
+	return out;
 };
 
 export function getQueryExpressions(columns) {
-	let expr = [];
-	for(let i = 0, j = columns.length; i < j; i++) {
-		let c = columns[i];
-		
+	let out = [];
+	for(const c of columns) {
 		if(!c.subQuery) {
-			expr.push(getQueryExpressionAttribute(c));
+			out.push(getQueryExpressionAttribute(c));
 			continue;
 		}
 		
-		expr.push({
+		// move expression aggregator to query (allows ORDER BY in aggregation)
+		let expr = getQueryExpressionAttribute(c);
+		expr.aggregator = null;
+		
+		out.push({
+			aggregator:c.aggregator,
 			query:{
-				queryId:c.query.id,
 				relationId:c.query.relationId,
 				limit:c.query.fixedLimit,
 				joins:c.query.joins,
-				expressions:[getQueryExpressionAttribute(c)],
+				expressions:[expr],
 				filters:c.query.filters,
 				orders:c.query.orders
 			}
 		});
 	}
-	return expr;
+	return out;
 };
 
 export function getQueryExpressionsDateRange(attributeId0,index0,attributeId1,index1,attributeIdColor,indexColor) {
@@ -84,13 +106,14 @@ export function getQueryExpressionsDateRange(attributeId0,index0,attributeId1,in
 	return expr;
 };
 
-export function getNestedIndexAttributeIdsByJoins(joins,nestingLevel) {
+export function getNestedIndexAttributeIdsByJoins(joins,nestingLevel,inclEncrypted) {
 	let out = [];
-	for(let i = 0, j = joins.length; i < j; i++) {
-		let r = MyStore.getters['schema/relationIdMap'][joins[i].relationId];
+	for(const join of joins) {
+		let r = MyStore.getters['schema/relationIdMap'][join.relationId];
 		
-		for(let x = 0, y = r.attributes.length; x < y; x++) {
-			out.push(`${nestingLevel}_${joins[i].index}_${r.attributes[x].id}`);
+		for(const atr of r.attributes) {
+			if(!atr.encrypted || inclEncrypted)
+				out.push(`${nestingLevel}_${join.index}_${atr.id}`);
 		}
 	}
 	return out;
@@ -130,9 +153,6 @@ export function getQueryColumnsProcessed(columns,dataFieldIdMap,joinsIndexMap,va
 
 export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 	values,joinIndexesRemove,collectionIdMapIndexFilter) {
-
-	filters = JSON.parse(JSON.stringify(filters));
-	let out = [];
 	
 	if(typeof values === 'undefined')
 		values = {};
@@ -146,19 +166,22 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 	let getFilterSideProcessed = function(s,operator) {
 		switch(s.content) {
 			case 'collection':
-				let singleValue = !['= ANY','<> ALL'].includes(operator);
-				let recordIndex = typeof collectionIdMapIndexFilter[s.collectionId] === 'undefined'
-					? -1 : collectionIdMapIndexFilter[s.collectionId];
-				
-				s.value = getCollectionValues(s.collectionId,s.columnId,singleValue,recordIndex);
+				s.value = getCollectionValues(
+					s.collectionId,
+					s.columnId,
+					filterOperatorIsSingleValue(operator),
+					collectionIdMapIndexFilter[s.collectionId]);
 			break;
 			case 'field':
-				let fld     = dataFieldIdMap[s.fieldId];
-				let atrIdNm = typeof fld.attributeIdNm !== 'undefined' ? fld.attributeIdNm : null;
-				
-				s.value = values[getIndexAttributeId(
-					fld.index,fld.attributeId,fld.outsideIn === true,atrIdNm
-				)];
+				const fld = dataFieldIdMap[s.fieldId];
+				if(typeof fld !== 'undefined') {
+					const atrIdNm = typeof fld.attributeIdNm !== 'undefined'
+						? fld.attributeIdNm : null;
+					
+					s.value = values[getIndexAttributeId(
+						fld.index,fld.attributeId,fld.outsideIn === true,atrIdNm
+					)];
+				}
 			break;
 			case 'javascript':
 				s.value = Function(s.value)();
@@ -173,7 +196,7 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 				// unprotected presets can be deleted, 0 as fallback
 				s.value = 0;
 				
-				let presetIdMap = MyStore.getters['schema/presetIdMapRecordId'];
+				const presetIdMap = MyStore.getters['schema/presetIdMapRecordId'];
 				if(typeof presetIdMap[s.presetId] !== 'undefined')
 					s.value = presetIdMap[s.presetId];
 			break;
@@ -198,21 +221,35 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 					joinIndexesRemove,
 					collectionIdMapIndexFilter
 				);
+				s.query.limit = s.query.fixedLimit;
 			break;
 			case 'true':
 				s.value = true;
 			break;
 		}
 		
+		// remove unnecessary data
 		if(s.content !== 'subQuery') {
 			delete(s.query);
 			delete(s.queryAggregator);
+		} else {
+			delete(s.query.choices);
+			delete(s.query.fixedLimit);
+			delete(s.query.id);
+			delete(s.query.lookups);
 		}
+		delete(s.collectionId);
+		delete(s.columnId);
+		delete(s.content);
+		delete(s.fieldId);
+		delete(s.presetId);
+		delete(s.roleId);
 		return s;
 	};
-	for(let i = 0, j = filters.length; i < j; i++) {
-		let f = filters[i];
-		
+	
+	let out = [];
+	filters = JSON.parse(JSON.stringify(filters));
+	for(let f of filters) {
 		if(f.side0.attributeId !== null && joinIndexesRemove.includes(f.side0.attributeIndex))
 			continue;
 		
@@ -230,18 +267,6 @@ export function getJoinIndexMap(joins) {
 	let map = {};
 	for(let i = 0, j = joins.length; i < j; i++) {
 		map[joins[i].index] = joins[i];
-	}
-	return map;
-};
-
-export function getJoinIndexMapWithRecords(joins,recordIdIndexMap) {
-	let map = {};
-	for(let i = 0, j = joins.length; i < j; i++) {
-		let join      = joins[i];
-		let recordId  = recordIdIndexMap[join.index];
-		join.recordId = Number.isInteger(recordId) ? recordId : 0;
-		
-		map[join.index] = join;
 	}
 	return map;
 };
@@ -283,6 +308,10 @@ export function getQueryTemplate() {
 		id:'00000000-0000-0000-0000-000000000000',
 		relationId:null,fixedLimit:0,joins:[],filters:[],orders:[],lookups:[],choices:[]
 	};
+};
+
+export function getQueryTemplateIfNull(query) {
+	return query === null ? getQueryTemplate() : query;
 };
 
 export function getQueryFiltersDateRange(attributeId0,index0,date0,attributeId1,index1,date1) {

@@ -234,35 +234,33 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 			return []byte("{}")
 		}
 
-		switch req.Action {
-		case "token":
-			// authentication via token
-			if _, err := request.AuthToken(req.Payload, &client.loginId,
-				&client.admin, &client.noAuth); err != nil {
+		var err error
+		var resPayload interface{}
 
-				log.Warning("server", "failed to authenticate user", err)
-				bruteforce.BadAttemptByHost(client.address)
-				resTrans.Error = "AUTH_ERROR"
-			}
-		case "user":
-			// authentication via credentials
-			resPayload, err := request.AuthUser(req.Payload, &client.loginId,
+		switch req.Action {
+		case "token": // authentication via token
+			resPayload, err = request.AuthToken(req.Payload, &client.loginId,
 				&client.admin, &client.noAuth)
 
+		case "user": // authentication via credentials
+			resPayload, err = request.AuthUser(req.Payload, &client.loginId,
+				&client.admin, &client.noAuth)
+		}
+
+		if err != nil {
+			log.Warning("server", "failed to authenticate user", err)
+			bruteforce.BadAttemptByHost(client.address)
+			resTrans.Error = "AUTH_ERROR"
+		} else {
+			var res types.Response
+			res.Payload, err = json.Marshal(resPayload)
 			if err != nil {
-				log.Warning("server", "failed to authenticate user", err)
-				bruteforce.BadAttemptByHost(client.address)
-				resTrans.Error = "AUTH_ERROR"
+				resTrans.Error = handler.ErrGeneral
 			} else {
-				var res types.Response
-				res.Payload, err = json.Marshal(resPayload)
-				if err != nil {
-					resTrans.Error = handler.ErrGeneral
-				} else {
-					resTrans.Responses = append(resTrans.Responses, res)
-				}
+				resTrans.Responses = append(resTrans.Responses, res)
 			}
 		}
+
 		if resTrans.Error == "" {
 			log.Info("server", fmt.Sprintf("authenticated client (login ID %d, admin: %v)",
 				client.loginId, client.admin))

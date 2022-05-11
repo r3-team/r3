@@ -89,7 +89,8 @@
 }
 
 /* messages */
-.form-save-message{
+.form-message{
+	font-style:italic;
 	margin:0px 0px 0px 12px;
 }
 
@@ -115,6 +116,8 @@
 	flex-direction:column;
 	padding-left:0px;
 }
-.is-mobile .form .fields{
+
+/* combined mobile & user overwrites */
+.user-mobile-scroll-form.is-mobile .form .fields{
 	overflow:unset;
 }

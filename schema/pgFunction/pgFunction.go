@@ -159,7 +159,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	}
 
 	if known {
-		_, nameEx, codeArgsEx, isTriggerEx, err := schema.GetPgFunctionDetailsById_tx(tx, id)
+		_, nameEx, _, isTriggerEx, err := schema.GetPgFunctionDetailsById_tx(tx, id)
 		if err != nil {
 			return err
 		}
@@ -183,13 +183,25 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 			}
 		}
 
-		// PG functions are always recreated on SET to update function arguments
-		// trigger functions are not easily possible as all triggers would need recreation as well
 		if !isTrigger {
+			// drop and recreate non-trigger function because function arguments can change
+			// two functions with the same name but different interfaces can exist (overloading)
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-				DROP FUNCTION "%s"."%s"(%s)
-			`, nameMod, nameEx, codeArgsEx)); err != nil {
+				DROP FUNCTION "%s"."%s"
+			`, nameMod, nameEx)); err != nil {
 				return err
+			}
+		} else {
+			if name != nameEx {
+				// rename instead of drop function if trigger
+				// we cannot drop trigger functions without recreating triggers
+				// renaming changes the function name in the trigger and allows us to replace it
+				// as triggers do not take arguments, overloading is not a problem
+				if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+					ALTER FUNCTION "%s"."%s" RENAME TO "%s"
+				`, nameMod, nameEx, name)); err != nil {
+					return err
+				}
 			}
 		}
 	} else {
@@ -439,7 +451,7 @@ func processDependentIds_tx(tx pgx.Tx, id uuid.UUID, body string) (string, error
 		}
 		idMap[relId] = true
 
-		relName, err := schema.GetRelationNameById_tx(tx, relId)
+		_, relName, err := schema.GetRelationNamesById_tx(tx, relId)
 		if err != nil {
 			return "", err
 		}

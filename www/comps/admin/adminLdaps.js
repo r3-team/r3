@@ -142,11 +142,15 @@ let MyAdminLdaps = {
 						</tr>
 						<tr>
 							<td>{{ capApp.tls }}</td>
-							<td><my-bool v-model="inputs.tls" /></td>
+							<td><my-bool v-model="inputs.tls" :readonly="inputs.starttls" /></td>
 						</tr>
-						<tr v-if="inputs.tls">
+						<tr>
+							<td>{{ capApp.starttls }}</td>
+							<td><my-bool v-model="inputs.starttls" :readonly="inputs.tls" /></td>
+						</tr>
+						<tr>
 							<td>{{ capApp.tlsVerify }}</td>
-							<td><my-bool v-model="inputs.tlsVerify" /></td>
+							<td><my-bool v-model="inputs.tlsVerify" :readonly="!inputs.tls && !inputs.starttls" /></td>
 						</tr>
 						<tr v-if="showExpert">
 							<td>{{ capApp.msAdExt }}</td>
@@ -243,20 +247,21 @@ let MyAdminLdaps = {
 	},
 	computed:{
 		hasChanges:function() {
-			return this.ldap.name !== this.inputs.name
-				|| this.ldap.host !== this.inputs.host
-				|| this.ldap.port !== this.inputs.port
-				|| this.ldap.bindUserDn !== this.inputs.bindUserDn
-				|| this.ldap.bindUserPw !== this.inputs.bindUserPw
-				|| this.ldap.keyAttribute !== this.inputs.keyAttribute
-				|| this.ldap.loginAttribute !== this.inputs.loginAttribute
+			return this.ldap.name            !== this.inputs.name
+				|| this.ldap.host            !== this.inputs.host
+				|| this.ldap.port            !== this.inputs.port
+				|| this.ldap.bindUserDn      !== this.inputs.bindUserDn
+				|| this.ldap.bindUserPw      !== this.inputs.bindUserPw
+				|| this.ldap.keyAttribute    !== this.inputs.keyAttribute
+				|| this.ldap.loginAttribute  !== this.inputs.loginAttribute
 				|| this.ldap.memberAttribute !== this.inputs.memberAttribute
-				|| this.ldap.searchClass !== this.inputs.searchClass
-				|| this.ldap.searchDn !== this.inputs.searchDn
-				|| this.ldap.assignRoles !== this.inputs.assignRoles
-				|| this.ldap.msAdExt !== this.inputs.msAdExt
-				|| this.ldap.tls !== this.inputs.tls
-				|| this.ldap.tlsVerify !== this.inputs.tlsVerify
+				|| this.ldap.searchClass     !== this.inputs.searchClass
+				|| this.ldap.searchDn        !== this.inputs.searchDn
+				|| this.ldap.assignRoles     !== this.inputs.assignRoles
+				|| this.ldap.msAdExt         !== this.inputs.msAdExt
+				|| this.ldap.starttls        !== this.inputs.starttls
+				|| this.ldap.tls             !== this.inputs.tls
+				|| this.ldap.tlsVerify       !== this.inputs.tlsVerify
 				|| JSON.stringify(this.ldap.roles) !== JSON.stringify(this.inputs.roles)
 			;
 		},
@@ -272,7 +277,7 @@ let MyAdminLdaps = {
 			return {
 				name:'',
 				host:'',
-				port:'',
+				port:636,
 				bindUserDn:'',
 				bindUserPw:'',
 				keyAttribute:'objectGUID',
@@ -282,8 +287,9 @@ let MyAdminLdaps = {
 				searchDn:'',
 				assignRoles:false,
 				msAdExt:true,
+				starttls:false,
 				tls:true,
-				tlsVerify:false,
+				tlsVerify:true,
 				roles:[]
 			};
 		},
@@ -323,7 +329,7 @@ let MyAdminLdaps = {
 		// backend calls
 		runImport:function(id) {
 			ws.send('ldap','import',{id:id},true).then(
-				(res) => {
+				() => {
 					this.$store.commit('dialog',{
 						captionBody:this.capApp.dialog.importDone,
 						buttons:[{
@@ -333,12 +339,12 @@ let MyAdminLdaps = {
 						}]
 					});
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		runCheck:function() {
 			ws.send('ldap','check',{id:this.idEdit},true).then(
-				(res) => {
+				() => {
 					this.$store.commit('dialog',{
 						captionBody:this.capApp.dialog.testDone,
 						buttons:[{
@@ -348,13 +354,13 @@ let MyAdminLdaps = {
 						}]
 					});
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		reloadBackendCache:function() {
 			ws.send('ldap','reload',{},false).then(
-				(res) => {},
-				(err) => this.$root.genericError(err)
+				() => {},
+				this.$root.genericError
 			);
 		},
 		delAsk:function() {
@@ -373,18 +379,18 @@ let MyAdminLdaps = {
 		},
 		del:function() {
 			ws.send('ldap','del',{id:this.idEdit},true).then(
-				(res) => {
+				() => {
 					this.close();
 					this.get();
 					this.reloadBackendCache();
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		get:function() {
 			ws.send('ldap','get',{},true).then(
-				(res) => this.ldaps = res.payload.ldaps,
-				(err) => this.$root.genericError(err)
+				res => this.ldaps = res.payload.ldaps,
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -402,18 +408,19 @@ let MyAdminLdaps = {
 				searchDn:this.inputs.searchDn,
 				assignRoles:this.inputs.assignRoles,
 				msAdExt:this.inputs.msAdExt,
+				starttls:this.inputs.starttls,
 				tls:this.inputs.tls,
 				tlsVerify:this.inputs.tlsVerify,
 				roles:this.inputs.roles
 			},true).then(
-				(res) => {
+				() => {
 					if(this.isNew)
 						this.showEdit = false;
 					
 					this.get();
 					this.reloadBackendCache();
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

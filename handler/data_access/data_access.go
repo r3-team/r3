@@ -62,7 +62,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var loginId int64
 	var isAdmin bool
 	var noAuth bool
-	if err := login_auth.Token(req.Token, &loginId, &isAdmin, &noAuth); err != nil {
+	if _, err := login_auth.Token(req.Token, &loginId, &isAdmin, &noAuth); err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrAuthFailed)
 		bruteforce.BadAttempt(r)
 		return

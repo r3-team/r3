@@ -230,11 +230,11 @@ let MyBuilderMenu = {
 				moduleId:this.menuIdCopy,
 				moduleIdNew:this.module.id
 			},true).then(
-				(res) => {
+				() => {
 					this.menuIdCopy = null;
 					this.$root.schemaReload(this.module.id);
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		},
 		set:function() {
@@ -267,8 +267,8 @@ let MyBuilderMenu = {
 			));
 			
 			ws.sendMultiple(requests,true).then(
-				(res) => this.$root.schemaReload(this.module.id),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		}
 	}

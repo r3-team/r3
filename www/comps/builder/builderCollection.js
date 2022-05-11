@@ -229,8 +229,15 @@ let MyBuilderCollection = {
 			return this.moduleIdMap[this.collection.moduleId];
 		},
 		collectionRows:function() {
-			let col = this.$store.getters.collectionIdMap[this.collection.id];
-			return typeof col !== 'undefined' ? col : [];
+			const col = this.$store.getters.collectionIdMap[this.collection.id];
+			if(typeof col === 'undefined')
+				return [];
+			
+			let out = [];
+			for(const r of col) {
+				out.push(r.values);
+			}
+			return out;
 		},
 		
 		// stores
@@ -293,6 +300,7 @@ let MyBuilderCollection = {
 			let requests = [];
 			requests.push(ws.prepare('collection','set',{
 				id:this.collection.id,
+				iconId:this.collection.iconId,
 				moduleId:this.collection.moduleId,
 				name:this.collection.name,
 				columns:this.replaceBuilderId(
@@ -312,8 +320,8 @@ let MyBuilderCollection = {
 			}));
 			
 			ws.sendMultiple(requests,true).then(
-				(res) => this.$root.schemaReload(this.module.id),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		}
 	}

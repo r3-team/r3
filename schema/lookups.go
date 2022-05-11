@@ -49,16 +49,17 @@ func GetRelationNamesById_tx(tx pgx.Tx, id uuid.UUID) (string, string, error) {
 	}
 	return moduleName, name, nil
 }
-func GetRelationNameById_tx(tx pgx.Tx, id uuid.UUID) (string, error) {
+func GetRelationDetailsById_tx(tx pgx.Tx, id uuid.UUID) (string, bool, error) {
 	var name string
+	var encryption bool
 	if err := tx.QueryRow(db.Ctx, `
-		SELECT name
+		SELECT name, encryption
 		FROM app.relation
 		WHERE id = $1
-	`, id).Scan(&name); err != nil {
-		return "", fmt.Errorf("failed to get relation name by ID %s: %w", id, err)
+	`, id).Scan(&name, &encryption); err != nil {
+		return "", false, fmt.Errorf("failed to get relation details by ID %s: %w", id, err)
 	}
-	return name, nil
+	return name, encryption, nil
 }
 
 // returns module, relation and attribute names as well as attribute content for given attribute ID

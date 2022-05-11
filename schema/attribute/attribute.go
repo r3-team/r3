@@ -64,7 +64,7 @@ func Get(relationId uuid.UUID) ([]types.Attribute, error) {
 	attributes := make([]types.Attribute, 0)
 	rows, err := db.Pool.Query(db.Ctx, `
 		SELECT id, relationship_id, icon_id, name, content, length, nullable,
-			def, on_update, on_delete
+			encrypted, def, on_update, on_delete
 		FROM app.attribute
 		WHERE relation_id = $1
 		ORDER BY CASE WHEN name = 'id' THEN 0 END, name ASC
@@ -76,8 +76,8 @@ func Get(relationId uuid.UUID) ([]types.Attribute, error) {
 	for rows.Next() {
 		var atr types.Attribute
 		if err := rows.Scan(&atr.Id, &atr.RelationshipId, &atr.IconId,
-			&atr.Name, &atr.Content, &atr.Length, &atr.Nullable, &atr.Def,
-			&onUpdateNull, &onDeleteNull); err != nil {
+			&atr.Name, &atr.Content, &atr.Length, &atr.Nullable, &atr.Encrypted,
+			&atr.Def, &onUpdateNull, &onDeleteNull); err != nil {
 
 			return attributes, err
 		}
@@ -101,11 +101,15 @@ func Get(relationId uuid.UUID) ([]types.Attribute, error) {
 
 func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 	relationshipId pgtype.UUID, iconId pgtype.UUID, name string,
-	content string, length int, nullable bool, def string, onUpdate string,
-	onDelete string, captions types.CaptionMap) error {
+	content string, length int, nullable bool, encrypted bool, def string,
+	onUpdate string, onDelete string, captions types.CaptionMap) error {
 
 	if err := checkName(name); err != nil {
 		return err
+	}
+
+	if encrypted && content != "text" {
+		return fmt.Errorf("only text attributes can be encrypted")
 	}
 
 	if !tools.StringInSlice(content, contentTypes) {
@@ -116,7 +120,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 	if err != nil {
 		return err
 	}
-	relationName, err := schema.GetRelationNameById_tx(tx, relationId)
+	relationName, relEncryption, err := schema.GetRelationDetailsById_tx(tx, relationId)
 	if err != nil {
 		return err
 	}
@@ -303,6 +307,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		}
 
 		// update attribute reference
+		// encrypted option cannot be updated
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.attribute
 			SET icon_id = $1, content = $2, length = $3, nullable = $4,
@@ -372,10 +377,10 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		// insert attribute reference
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.attribute (id, relation_id, relationship_id, icon_id,
-				name, content, length, nullable, def, on_update, on_delete)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+				name, content, length, nullable, encrypted, def, on_update, on_delete)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
 		`, id, relationId, relationshipId, iconId, name, content, length,
-			nullable, def, onUpdateNull, onDeleteNull); err != nil {
+			nullable, encrypted, def, onUpdateNull, onDeleteNull); err != nil {
 
 			return err
 		}
@@ -384,6 +389,39 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		if name == schema.PkName {
 			if err := createPK_tx(tx, moduleName, relationName, id, relationId); err != nil {
 				return err
+			}
+
+			// create table for encrypted record keys if relation supports encryption
+			if relEncryption {
+				tName := schema.GetEncKeyTableName(relationId)
+
+				if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+					CREATE TABLE IF NOT EXISTS instance_e2ee."%s" (
+					    record_id bigint NOT NULL,
+					    login_id integer NOT NULL,
+					    key_enc text COLLATE pg_catalog."default" NOT NULL,
+					    CONSTRAINT "%s_pkey" PRIMARY KEY (record_id,login_id),
+					    CONSTRAINT "%s_record_id_fkey" FOREIGN KEY (record_id)
+					        REFERENCES "%s"."%s" (%s) MATCH SIMPLE
+					        ON UPDATE CASCADE
+					        ON DELETE CASCADE
+					        DEFERRABLE INITIALLY DEFERRED,
+					    CONSTRAINT "%s_login_id_fkey" FOREIGN KEY (login_id)
+					        REFERENCES instance.login (id) MATCH SIMPLE
+					        ON UPDATE CASCADE
+					        ON DELETE CASCADE
+					        DEFERRABLE INITIALLY DEFERRED
+					);
+					CREATE INDEX "fki_%s_record_id_fkey"
+						ON instance_e2ee."%s" USING btree (record_id ASC NULLS LAST);
+					
+					CREATE INDEX "fki_%s_login_id_fkey"
+						ON instance_e2ee."%s" USING btree (login_id ASC NULLS LAST);
+				`, tName, tName, tName, moduleName, relationName, schema.PkName,
+					tName, tName, tName, tName, tName)); err != nil {
+
+					return err
+				}
 			}
 		}
 

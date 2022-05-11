@@ -200,11 +200,11 @@ let MyAdminLogs = {
 				limit:this.limit,
 				offset:this.offset
 			},true).then(
-				(res) => {
+				res => {
 					this.logs  = res.payload.logs;
 					this.total = res.payload.total;
 				},
-				(err) => this.$root.genericError(err)
+				this.$root.genericError
 			);
 		}
 	}

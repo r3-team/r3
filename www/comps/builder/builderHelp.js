@@ -82,8 +82,8 @@ let MyBuilderHelp = {
 			mod.captions.moduleHelp = this.helpInput;
 			
 			ws.send('module','set',mod,true).then(
-				(res) => this.$root.schemaReload(this.module.id),
-				(err) => this.$root.genericError(err)
+				() => this.$root.schemaReload(this.module.id),
+				this.$root.genericError
 			);
 		}
 	}

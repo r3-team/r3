@@ -98,11 +98,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 	}
 
 	// resolve dependencies
-	_, modName, err := schema.GetModuleDetailsByRelationId_tx(tx, relationId)
-	if err != nil {
-		return err
-	}
-	relName, err := schema.GetRelationNameById_tx(tx, relationId)
+	modName, relName, err := schema.GetRelationNamesById_tx(tx, relationId)
 	if err != nil {
 		return err
 	}
@@ -148,21 +144,23 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 	// get existing preset record ID, if available
 	var recordId int64 = 0
 	var recordExists bool = false
+	var fullRelName = fmt.Sprintf(`"%s"."%s"`, modName, relName)
+
 	if err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
 		SELECT record_id_wofk, EXISTS(
-			SELECT FROM "%s"."%s"
+			SELECT FROM %s
 			WHERE "%s" = record_id_wofk
 		)
 		FROM instance.preset_record
 		WHERE preset_id = $1
-	`, modName, relName, schema.PkName), id).Scan(&recordId, &recordExists); err != nil && err != pgx.ErrNoRows {
+	`, fullRelName, schema.PkName), id).Scan(&recordId, &recordExists); err != nil && err != pgx.ErrNoRows {
 		return err
 	}
 	recordExisted := recordId != 0
 
 	if recordExists {
 		// update preset record if available
-		if err := setRecord_tx(tx, relationId, id, recordId, values, modName, relName); err != nil {
+		if err := setRecord_tx(tx, relationId, id, recordId, values, fullRelName); err != nil {
 			return err
 		}
 
@@ -171,7 +169,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 		// * it did not exist before or
 		// * it did exist, but not anymore and is currently a protected preset
 		//   (preset record was deleted before it was protected)
-		if err := setRecord_tx(tx, relationId, id, 0, values, modName, relName); err != nil {
+		if err := setRecord_tx(tx, relationId, id, 0, values, fullRelName); err != nil {
 			return err
 		}
 	}
@@ -243,7 +241,7 @@ func setValues_tx(tx pgx.Tx, presetId uuid.UUID, values []types.PresetValue) err
 // set preset record
 // returns whether record could be created/updated
 func setRecord_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, recordId int64,
-	values []types.PresetValue, modName string, relName string) error {
+	values []types.PresetValue, fullRelName string) error {
 
 	sqlRefs := make([]string, 0)
 	sqlNames := make([]string, 0)
@@ -299,10 +297,13 @@ func setRecord_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, recordId 
 		}
 
 		if err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
-			INSERT INTO "%s"."%s" (%s)
+			INSERT INTO %s (%s)
 			VALUES (%s)
-			RETURNING id
-		`, modName, relName, strings.Join(sqlNames, ","), strings.Join(sqlRefs, ",")),
+			RETURNING "%s"
+		`, fullRelName,
+			strings.Join(sqlNames, ","),
+			strings.Join(sqlRefs, ","),
+			schema.PkName),
 			sqlValues...).Scan(&recordId); err != nil {
 
 			return err
@@ -326,10 +327,15 @@ func setRecord_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, recordId 
 			sqlValues = append(sqlValues, recordId)
 
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-				UPDATE "%s"."%s"
+				UPDATE %s
 				SET %s
-				WHERE id = %s
-			`, modName, relName, strings.Join(sqlRefs, ","), refId), sqlValues...); err != nil {
+				WHERE "%s" = %s
+			`, fullRelName,
+				strings.Join(sqlRefs, ","),
+				schema.PkName,
+				refId),
+				sqlValues...); err != nil {
+
 				return err
 			}
 		}

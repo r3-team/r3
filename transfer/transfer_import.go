@@ -221,8 +221,8 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		log.Info("transfer", fmt.Sprintf("set relation %s", e.Id))
 
 		if err := importCheckResultAndApply(tx, relation.Set_tx(tx,
-			e.ModuleId, e.Id, e.Name, e.RetentionCount, e.RetentionDays,
-			e.Policies), e.Id, idMapSkipped); err != nil {
+			e.ModuleId, e.Id, e.Name, e.Encryption, e.RetentionCount,
+			e.RetentionDays, e.Policies), e.Id, idMapSkipped); err != nil {
 
 			return err
 		}
@@ -243,7 +243,7 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 			if err := importCheckResultAndApply(tx, attribute.Set_tx(tx,
 				e.RelationId, e.Id, e.RelationshipId, e.IconId, e.Name,
-				e.Content, e.Length, e.Nullable, e.Def, e.OnUpdate, e.OnDelete,
+				e.Content, e.Length, e.Nullable, e.Encrypted, e.Def, e.OnUpdate, e.OnDelete,
 				e.Captions), e.Id, idMapSkipped); err != nil {
 
 				return err
@@ -264,7 +264,7 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		log.Info("transfer", fmt.Sprintf("set collection %s", e.Id))
 
 		if err := importCheckResultAndApply(tx, collection.Set_tx(tx,
-			e.ModuleId, e.Id, e.Name, e.Columns, e.Query), e.Id,
+			e.ModuleId, e.Id, e.IconId, e.Name, e.Columns, e.Query), e.Id,
 			idMapSkipped); err != nil {
 
 			return err
@@ -350,8 +350,8 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		log.Info("transfer", fmt.Sprintf("set form %s", e.Id))
 
 		if err := importCheckResultAndApply(tx, form.Set_tx(tx,
-			e.ModuleId, e.Id, e.PresetIdOpen, e.IconId, e.Name, e.Query,
-			e.Fields, e.Functions, e.States, e.Captions), e.Id,
+			e.ModuleId, e.Id, e.PresetIdOpen, e.IconId, e.Name, e.NoDataActions,
+			e.Query, e.Fields, e.Functions, e.States, e.Captions), e.Id,
 			idMapSkipped); err != nil {
 
 			return err
@@ -504,6 +504,9 @@ func importCheckResultAndApply(tx pgx.Tx, resultErr error, entityId uuid.UUID,
 }
 
 func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]importMeta) ([]types.Module, error) {
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
+
 	modules := make([]types.Module, 0)
 
 	log.Info("transfer", fmt.Sprintf("import is parsing %d module files", len(filePaths)))

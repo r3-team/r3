@@ -1,5 +1,9 @@
 import {getLineBreaksParsedToHtml} from './shared/generic.js';
 import {openLink}                  from './shared/generic.js';
+import {
+	aesGcmExportBase64,
+	pbkdf2PassToAesGcmKey
+} from './shared/crypto.js';
 export {MyLogin as default};
 
 let MyLogin = {
@@ -75,7 +79,7 @@ let MyLogin = {
 			</div>
 			
 			<!-- unexpected error message -->
-			<div class="contentBox" v-if="appInitErr !== ''">
+			<div class="contentBox" v-if="appInitErr">
 				<div class="top warning">
 					<div class="area">
 						<img class="icon" src="images/warning.png" />
@@ -146,7 +150,6 @@ let MyLogin = {
 		</div>
 	</div>`,
 	props:{
-		appInitErr:  { type:String,  required:true }, // app could not initialize
 		backendReady:{ type:Boolean, required:true }, // can talk to backend
 		httpMode:    { type:Boolean, required:true }, // unencrypted connection
 		loginReady:  { type:Boolean, required:true }  // can login
@@ -159,7 +162,8 @@ let MyLogin = {
 			username:'',
 			
 			// states
-			badAuth:false,
+			appInitErr:false, // application failed to initialize
+			badAuth:false,    // authentication failed
 			loading:false,
 			showError:false,
 			
@@ -168,8 +172,8 @@ let MyLogin = {
 			languages:['de','en_US'],
 			message:{
 				error:{
-					de:'Ein Fehler ist aufgetreten. Bitte erneut versuchen.',
-					en_US:'An error occurred. Please try again.'
+					de:'Ein Fehler ist aufgetreten - bitte erneut versuchen',
+					en_US:'An error occurred - please try again'
 				},
 				httpMode:{
 					de:'Verbindung ist nicht verschlüsselt',
@@ -221,15 +225,10 @@ let MyLogin = {
 		customLogoUrl:    function() { return this.$store.getters['local/customLogoUrl']; },
 		token:            function() { return this.$store.getters['local/token']; },
 		tokenKeep:        function() { return this.$store.getters['local/tokenKeep']; },
+		kdfIterations:    function() { return this.$store.getters.constants.kdfIterations; },
 		productionMode:   function() { return this.$store.getters.productionMode; }
 	},
 	watch:{
-		appInitErr:function(v) {
-			// updates when app encounters an unexpected error during initialization
-			// log to console (troubleshooting) and stop loading as something went wrong
-			console.log(v);
-			this.loading = false;
-		},
 		loginReady:function(v) {
 			if(!v) return;
 			
@@ -272,22 +271,33 @@ let MyLogin = {
 		// set page title
 		this.$store.commit('pageTitle',this.message.login[this.language]);
 		
-		// clear token, if available but not to be kept
-		if(!this.tokenKeep && this.token !== '')
+		// clear token & login key, if available but not to be kept
+		if(!this.tokenKeep && this.token !== '') {
+			this.$store.commit('local/loginKeyAes',null);
 			this.$store.commit('local/token','');
+		}
 	},
 	methods:{
 		// externals
+		aesGcmExportBase64,
 		getLineBreaksParsedToHtml,
+		pbkdf2PassToAesGcmKey,
 		openLink,
 		
 		// misc
 		handleError:function(action) {
 			switch(action) {
+				case 'aesExport': break;                      // very unexpected, should not happen
 				case 'authToken': break;                      // token auth failed, to be expected, can expire
 				case 'authUser':  this.badAuth = true; break; // user authorization failed, mark inputs invalid
+				case 'kdfCreate': break;                      // very unexpected, should not happen
 			}
 			this.loading = false;
+		},
+		parentError:function() {
+			// stop loading, when parent caught error
+			this.loading    = false;
+			this.appInitErr = true;
 		},
 		
 		// authenticate by username/password or public user
@@ -298,8 +308,13 @@ let MyLogin = {
 				username:this.username,
 				password:this.password
 			},true).then(
-				(res) => this.authenticatedByUser(res.payload.token),
-				(err) => this.handleError('authUser')
+				res => this.authenticatedByUser(
+					res.payload.loginId,
+					res.payload.loginName,
+					res.payload.token,
+					res.payload.saltKdf
+				),
+				() => this.handleError('authUser')
 			);
 			this.loading = true;
 		},
@@ -308,32 +323,60 @@ let MyLogin = {
 			this.$store.commit('local/tokenKeep',true);
 			
 			ws.send('auth','user',{username:username},true).then(
-				(res) => this.authenticatedByUser(res.payload.token),
-				(err) => this.handleError('authUser')
+				res => this.authenticatedByUser(
+					res.payload.loginId,
+					res.payload.loginName,
+					res.payload.token,
+					null
+				),
+				() => this.handleError('authUser')
 			);
 			this.loading = true;
 		},
 		authenticateByToken:function() {
 			ws.send('auth','token',{token:this.token},true).then(
-				(res) => this.appEnable(),
-				(err) => this.handleError('authToken')
+				res => this.appEnable(
+					res.payload.loginId,
+					res.payload.loginName
+				),
+				() => this.handleError('authToken')
 			);
 			this.loading = true;
 		},
-		authenticatedByUser:function(token) {
+		authenticatedByUser:function(loginId,loginName,token,saltKdf) {
 			if(token === '')
 				return this.handleError('authUser');
 			
-			// store token if valid
+			// store authentication token
 			this.$store.commit('local/token',token);
-			this.appEnable();
+			
+			if(saltKdf === null)
+				return this.appEnable(loginId,loginName);
+			
+			// generate AES key from credentials and login private key salt
+			this.pbkdf2PassToAesGcmKey(this.password,saltKdf,this.kdfIterations,true).then(
+				key => {
+					this.aesGcmExportBase64(key).then(
+						keyBase64 => {
+							// export AES key to local storage
+							this.$store.commit('local/loginKeyAes',keyBase64);
+							this.$store.commit('local/loginKeySalt',saltKdf);
+							this.appEnable(loginId,loginName);
+						},
+						err => this.handleError('aesExport')
+					);
+				},
+				err => this.handleError('kdfCreate')
+			);
 		},
 		
 		// authentication successful, prepare appliation load
-		appEnable:function() {
+		appEnable:function(loginId,loginName) {
 			let token = JSON.parse(atob(this.token.split('.')[1]));
 			this.$store.commit('isAdmin',token.admin);
 			this.$store.commit('isNoAuth',token.noAuth);
+			this.$store.commit('loginId',loginId);
+			this.$store.commit('loginName',loginName);
 			this.$emit('authenticated');
 		}
 	}

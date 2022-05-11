@@ -75,6 +75,15 @@ let MyBuilderColumnOptions = {
 				</td>
 			</tr>
 			<tr v-if="displayOptions">
+				<td>{{ capApp.columnClipboard }}</td>
+				<td>
+					<my-bool
+						@update:modelValue="set('clipboard',$event)"
+						:modelValue="column.clipboard"
+					/>
+				</td>
+			</tr>
+			<tr v-if="displayOptions">
 				<td>{{ capApp.columnBatch }}</td>
 				<td>
 					<input
@@ -103,6 +112,7 @@ let MyBuilderColumnOptions = {
 						<option v-if="isInteger" value="time"    >{{ capApp.option.displayTime }}</option>
 						<option v-if="isString"  value="color"   >{{ capApp.option.displayColor }}</option>
 						<option v-if="isString"  value="email"   >{{ capApp.option.displayEmail }}</option>
+						<option v-if="isString"  value="password">{{ capApp.option.displayPassword }}</option>
 						<option v-if="isString"  value="phone"   >{{ capApp.option.displayPhone }}</option>
 						<option v-if="isString"  value="richtext">{{ capApp.option.displayRichtext }}</option>
 						<option v-if="isString"  value="url"     >{{ capApp.option.displayUrl }}</option>
@@ -177,29 +187,19 @@ let MyBuilderColumnOptions = {
 	emits:['set'],
 	computed:{
 		attribute:function() {
-			if(typeof this.attributeIdMap[this.column.attributeId] === 'undefined')
-				return false;
-			
-			return this.attributeIdMap[this.column.attributeId];
+			return typeof this.attributeIdMap[this.column.attributeId] === 'undefined'
+				? false : this.attributeIdMap[this.column.attributeId];
 		},
 		indexAttributeIds:function() {
-			if(!this.isSubQuery) return [];
-			return this.getIndexAttributeIdsByJoins(this.column.query.joins);
+			return !this.isSubQuery
+				? [] : this.getIndexAttributeIdsByJoins(this.column.query.joins);
 		},
 		
 		// simple states
-		isFiles:function() {
-			return this.isAttributeFiles(this.attribute.content);
-		},
-		isInteger:function() {
-			return this.isAttributeInteger(this.attribute.content);
-		},
-		isString:function() {
-			return this.isAttributeString(this.attribute.content);
-		},
-		isSubQuery:function() {
-			return this.column.subQuery;
-		},
+		isFiles:   function() { return this.isAttributeFiles(this.attribute.content); },
+		isInteger: function() { return this.isAttributeInteger(this.attribute.content); },
+		isString:  function() { return this.isAttributeString(this.attribute.content); },
+		isSubQuery:function() { return this.column.subQuery; },
 		
 		// stores
 		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
@@ -376,16 +376,11 @@ export let MyBuilderColumns = {
 		
 		// actions
 		columnIdQuerySet:function(columnId) {
-			if(this.columnIdQuery === columnId)
-				return this.$emit('column-id-query-set',null);
-			
-			this.$emit('column-id-query-set',columnId);
+			this.$emit('column-id-query-set',
+				this.columnIdQuery === columnId ? null : columnId);
 		},
 		idEditSet:function(columnId) {
-			if(this.idEdit === columnId)
-				return this.idEdit = '';
-			
-			this.idEdit = columnId;
+			this.idEdit = this.idEdit === columnId ? '' : columnId;
 		},
 		propertySet:function(columnIndex,name,value) {
 			this.columnsInput[columnIndex][name] = value;
@@ -512,6 +507,7 @@ export let MyBuilderColumnTemplates = {
 				subQuery:subQuery,
 				query:this.getQueryTemplate(),
 				onMobile:true,
+				clipboard:false,
 				captions:{
 					columnTitle:{}
 				}

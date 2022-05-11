@@ -39,17 +39,19 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 		`, filterPosition, filterSide)
 	}
 
-	if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+	err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
 		SELECT id, relation_id, fixed_limit
 		FROM app.query
 		WHERE %s_id = $1
 		%s
-	`, entity, filterClause), id).Scan(&q.Id, &q.RelationId, &q.FixedLimit); err != nil {
+	`, entity, filterClause), id).Scan(&q.Id, &q.RelationId, &q.FixedLimit)
+
+	if err != nil && err != pgx.ErrNoRows {
 		return q, err
 	}
 
-	// if base relation is not set, no other entities exist to be retrieved
-	if q.RelationId.Status != pgtype.Present {
+	// query does not exist for this entity, return empty query
+	if err == pgx.ErrNoRows {
 		return q, nil
 	}
 
@@ -175,7 +177,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 	filterSide int, query types.Query) error {
 
 	if !tools.StringInSlice(entity, allowedEntities) {
-		return errors.New("bad entity")
+		return fmt.Errorf("unknown query parent entity '%s'", entity)
 	}
 
 	// sub query (via query filter) requires second element for key
@@ -202,6 +204,19 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 		}
 	}
 
+	// query without a base relation is not used and therefore not needed
+	if query.RelationId.Status != pgtype.Present {
+		if known {
+			if _, err := tx.Exec(db.Ctx, `
+				DELETE FROM app.query
+				WHERE id = $1
+			`, query.Id); err != nil {
+				return err
+			}
+		}
+		return nil
+	}
+
 	if !known {
 		if query.Id == uuid.Nil {
 			query.Id, err = uuid.NewV4()
@@ -210,32 +225,33 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 			}
 		}
 
-		if subQuery {
+		if !subQuery {
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				INSERT INTO app.query (id, relation_id, fixed_limit, %s_id)
+				VALUES ($1,$2,$3,$4)
+			`, entity), query.Id, query.RelationId, query.FixedLimit, entityId); err != nil {
+				return err
+			}
+		} else {
 			if _, err := tx.Exec(db.Ctx, `
-				INSERT INTO app.query (id, fixed_limit, query_filter_query_id,
-					query_filter_position, query_filter_side)
-				VALUES ($1,$2,$3,$4,$5)
-			`, query.Id, query.FixedLimit, entityId,
+				INSERT INTO app.query (id, relation_id, fixed_limit,
+					query_filter_query_id, query_filter_position,
+					query_filter_side)
+				VALUES ($1,$2,$3,$4,$5,$6)
+			`, query.Id, query.RelationId, query.FixedLimit, entityId,
 				filterPosition, filterSide); err != nil {
 
 				return err
 			}
-		} else {
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-				INSERT INTO app.query (id, fixed_limit, %s_id)
-				VALUES ($1,$2,$3)
-			`, entity), query.Id, query.FixedLimit, entityId); err != nil {
-				return err
-			}
 		}
-	}
-
-	if _, err := tx.Exec(db.Ctx, `
-		UPDATE app.query
-		SET relation_id = $1, fixed_limit = $2
-		WHERE id = $3
-	`, query.RelationId, query.FixedLimit, query.Id); err != nil {
-		return err
+	} else {
+		if _, err := tx.Exec(db.Ctx, `
+			UPDATE app.query
+			SET relation_id = $1, fixed_limit = $2
+			WHERE id = $3
+		`, query.RelationId, query.FixedLimit, query.Id); err != nil {
+			return err
+		}
 	}
 
 	// reset joins
