@@ -1131,7 +1131,7 @@
 		},
 		"wizard":{
 			"installBundle":"Core Company",
-			"installBundleDesc":"Install a pre-packaged set of core applications, useful for any organization. The set 'Core Company' includes:<ul><li>Absence management</li><li>Time tracking</li><li>Project & task management</li><li>Request handling</li><li>Tools to model your organization</li></ul>After installation, please have a look at the individual application help pages to learn more about the initial setup for each.",
+			"installBundleDesc":"Install a pre-packaged set of core applications, useful for any organization. The set 'Core Company' includes:<ul><li>Absence management</li><li>Time tracking</li><li>Project & task management</li><li>Request handling</li><li>A password safe</li><li>IT asset management</li></ul>After installation, please have a look at the individual application help pages to learn more about the initial setup for each.",
 			"installFile":"From file",
 			"installFileDesc":"Install applications from local REI3 files. For offline systems or self-made applications.<br /><br />Files for publicly offered REI3 applications can be downloaded from the official <a href=\"https://rei3.de/download_en\" target=\"_blank\">repository</a>.",
 			"installRepo":"From repository",

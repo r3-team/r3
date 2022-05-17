@@ -1131,7 +1131,7 @@
 		},
 		"wizard":{
 			"installBundle":"Core Company",
-			"installBundleDesc":"Instalați un set de aplicații de bază, utile pentru orice organizație. Setul „Core Company” include:<ul><li>Gestionarea absențelor</li><li>Urmărirea timpului</li><li>Gestionarea sarcinilor</li><li>Instrumente pentru modelarea organizației dvs.</li> </ul>După instalare, vă rugăm să aruncați o privire la paginile individuale de ajutor ale aplicației pentru a afla mai multe despre configurarea inițială pentru fiecare.",
+			"installBundleDesc":"Instalați un set de aplicații de bază, utile pentru orice organizație. Setul „Core Company” include:<ul><li>Gestionarea absențelor</li><li>Urmărirea timpului</li><li>Gestionarea sarcinilor</li><li>A password safe</li><li>IT asset management</li></ul>După instalare, vă rugăm să aruncați o privire la paginile individuale de ajutor ale aplicației pentru a afla mai multe despre configurarea inițială pentru fiecare.",
 			"installFile":"Din fișierul",
 			"installFileDesc":"Instalați aplicații din fișierele locale REI3. Pentru sisteme offline sau aplicații create de sine stătător.<br /><br />Fișierele pentru aplicațiile REI3 oferite public pot fi descărcate de la <a href=\"https://rei3.de/download_en\" target=\" oficial _blank\">repository</a>.",
 			"installRepo":"Din depozitul",
