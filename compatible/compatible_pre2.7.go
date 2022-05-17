@@ -57,6 +57,10 @@ func MigrateNewConditions(c types.FormStateCondition) types.FormStateCondition {
 		if c.FieldId0.Status == pgtype.Present {
 			c.Side0.Content = "field"
 			c.Side0.FieldId = c.FieldId0
+
+			if c.Operator == "IS NULL" || c.Operator == "IS NOT NULL" {
+				c.Side1.Content = "value"
+			}
 		}
 		if c.FieldId1.Status == pgtype.Present {
 			c.Side1.Content = "field"
@@ -73,9 +77,6 @@ func MigrateNewConditions(c types.FormStateCondition) types.FormStateCondition {
 			c.Side1.Content = "value"
 			c.Side1.Value = c.Value1
 		}
-	}
-	if c.Operator == "IS NULL" || c.Operator == "IS NOT NULL" {
-		c.Side1.Content = "value"
 	}
 	return c
 }

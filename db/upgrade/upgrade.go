@@ -405,6 +405,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				if c.FieldId0.Status == pgtype.Present {
 					content0 = "field"
 					field0 = c.FieldId0
+
+					if c.Operator == "IS NULL" || c.Operator == "IS NOT NULL" {
+						content1 = "value"
+					}
 				}
 				if c.FieldId1.Status == pgtype.Present {
 					content1 = "field"
@@ -421,10 +425,6 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					content1 = "value"
 					value1 = c.Value1
 				}
-			}
-
-			if c.Operator == "IS NULL" || c.Operator == "IS NOT NULL" {
-				content1 = "value"
 			}
 
 			if err := insertSide(c.FormStateId, c.Position, 0, c.Brackets0, content0, value0, field0, emptyId, role); err != nil {
