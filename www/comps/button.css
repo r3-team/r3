@@ -1,4 +1,3 @@
-/* button */
 .button{
 	height:30px;
 	margin:0px 8px 0px 0px;
@@ -16,9 +15,8 @@
 	height:40px;
 	font-size:120%;
 }
-.button.inactive{
-	/*filter:brightness(70%)*/;
-}
+
+/* button with background styling */
 .button.background{
 	margin:0px 4px 0px 0px;
 	padding:4px 0px 4px 10px;
@@ -27,6 +25,13 @@
 	box-shadow:0px 1px 2px var(--color-shade);
 	color:var(--color-bg-font);
 	transition:color 0.1s, box-shadow 0.1s, background-color 0.1s;
+}
+.button.background:active:not(.noMargin):not(.inactive){
+	height:28px;
+	margin:1px 5px 1px 1px;
+}
+.button.background.large:active:not(.noMargin):not(.inactive){
+	height:38px;
 }
 .button.background.inactive{
 	filter:grayscale(100%);
@@ -40,15 +45,16 @@
 .button.background.darkBg.cancel{
 	border:2px solid var(--color-cancel-border);
 }
+
+/* layout overwrites */
 .button.right{
 	float:right;
 }
-.button.spaced{
-	margin:10px 18px 10px 10px;
-}
-.button.not-spaced{
+.button.noMargin{
 	margin:0px;
 }
+
+/* button content */
 .button img{
 	height:22px;
 	margin:3px;
@@ -69,6 +75,11 @@
 }
 .button:focus:not(.background):not(.inactive) img,
 .button:hover:not(.background):not(.inactive) img{
+	height:26px;
+	margin:1px;
+	transition:height 0.2s, margin 0.2s;
+}
+.button:active:not(.background):not(.inactive) img{
 	height:28px;
 	margin:0px;
 	transition:height 0.2s, margin 0.2s;

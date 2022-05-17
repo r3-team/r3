@@ -40,7 +40,8 @@ let MyButton = {
 		darkBg:{ type:Boolean, required:false, default:false },
 		large: { type:Boolean, required:false, default:false },
 		naked: { type:Boolean, required:false, default:false },
-		right: { type:Boolean, required:false, default:false }
+		right: { type:Boolean, required:false, default:false },
+		tight: { type:Boolean, required:false, default:false }
 	},
 	emits:['trigger','trigger-middle','trigger-right'],
 	computed:{
@@ -53,6 +54,7 @@ let MyButton = {
 				inactive:!this.active,
 				large:this.large,
 				noHighlight:!this.active,
+				noMargin:this.tight,
 				right:this.right
 			};
 		}

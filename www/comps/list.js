@@ -540,14 +540,16 @@ let MyList = {
 					:tabindex="isInput ? '0' : '-1'"
 				>
 					<div class="actions" v-if="hasBulkActions" @click.stop="">
-						<my-button class="not-spaced"
+						<my-button
 							@trigger="selectRow(ri)"
 							:image="selectedRows.includes(ri) ? 'checkbox1.png' : 'checkbox0.png'"
 							:naked="true"
+							:tight="true"
 						/>
-						<my-button class="not-spaced" image="delete.png"
+						<my-button image="delete.png"
 							@trigger="delAsk([ri])"
 							:naked="true"
+							:tight="true"
 						/>
 					</div>
 					<div class="header"></div>

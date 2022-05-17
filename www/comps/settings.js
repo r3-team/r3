@@ -392,8 +392,8 @@ let MySettingsAccount = {
 			</tbody>
 		</table>
 		
-		<div>
-			<my-button image="save.png" class="right spaced"
+		<div class="account-action">
+			<my-button image="save.png" class="right"
 				@trigger="setCheck"
 				:active="canSave"
 				:caption="capGen.button.save"
