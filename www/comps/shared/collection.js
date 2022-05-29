@@ -146,12 +146,10 @@ export function updateCollections(continueOnError,errFnc,collectionId) {
 				resolve();
 			},
 			err => {
-				if(!continueOnError)
-					return reject(err);
-				
-				if(typeof errFnc !== 'undefined')
+				if(continueOnError && typeof errFnc !== 'undefined') {
 					errFnc(err);
-				
+					return resolve();
+				}
 				reject(err);
 			}
 		);
