@@ -226,7 +226,6 @@ let MyApp = {
 		isMobile:       function() { return this.$store.getters.isMobile; },
 		loginEncryption:function() { return this.$store.getters.loginEncryption; },
 		loginPrivateKey:function() { return this.$store.getters.loginPrivateKey; },
-		pageTitle:      function() { return this.$store.getters.pageTitle; },
 		settings:       function() { return this.$store.getters.settings; }
 	},
 	created:function() {
@@ -378,7 +377,7 @@ let MyApp = {
 					this.$store.commit('local/companyWelcome',res.payload.companyWelcome);
 					this.$store.commit('builder',res.payload.builder);
 					this.$store.commit('productionMode',res.payload.productionMode);
-					this.$store.commit('pageTitle',this.pageTitle); // apply new app short name to page
+					this.$store.commit('pageTitleRefresh'); // update page title with new app name
 					this.$store.commit('schema/languageCodes',res.payload.languageCodes);
 					this.$store.commit('schema/timestamp',res.payload.schemaTimestamp);
 					this.publicLoaded = true;

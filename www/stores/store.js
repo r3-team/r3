@@ -47,7 +47,8 @@ const MyStore = Vuex.createStore({
 		moduleColor1:'',      // color1 (header) of currently active module
 		moduleEntries:[],     // module entries for header/home page
 		moduleLanguage:'',    // module language (either equal to user language or module fallback)
-		pageTitle:'',         // web page title
+		pageTitle:'',         // web page title, set by app/form depending on navigation
+		pageTitleFull:'',     // web page title + instance name
 		productionMode:1,     // system production mode (1=production, 0=maintenance)
 		settings:{},          // setting values for logged in user, key: settings name
 		system:{}             // system details (admin only)
@@ -90,7 +91,13 @@ const MyStore = Vuex.createStore({
 			if(MyStoreLocal.state.appNameShort !== '')
 				names.push(MyStoreLocal.state.appNameShort);
 			
-			document.title = names.join(' - ');
+			state.pageTitleFull = names.join(' - ');
+			
+			// update document title whenever page title changes
+			document.title = state.pageTitleFull;
+		},
+		pageTitleRefresh:(state,payload) => {
+			MyStore.commit('pageTitle',state.pageTitle);
 		},
 		
 		// collections
@@ -175,7 +182,7 @@ const MyStore = Vuex.createStore({
 		moduleColor1:     (state) => state.moduleColor1,
 		moduleEntries:    (state) => state.moduleEntries,
 		moduleLanguage:   (state) => state.moduleLanguage,
-		pageTitle:        (state) => state.pageTitle,
+		pageTitleFull:    (state) => state.pageTitleFull,
 		productionMode:   (state) => state.productionMode,
 		settings:         (state) => state.settings,
 		system:           (state) => state.system

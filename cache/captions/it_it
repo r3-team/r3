@@ -650,6 +650,7 @@
 				"go_back":"app.go_back() => UNDEFINED<br /><br />Esegue una navigazione indietro del browser.",
 				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />Restituisce true (vero) se il login corrente ha il ruolo assegnato (i ruoli annidati sono inclusi).",
 				"open_form":"app.open_form(form_id, record_id, new_tab, pop_up, max_height, max_width) => UNDEFINED<br /><br />Apre un modulo o in una nuova scheda del browser o come finestra pop-up.",
+				"pdf_create":"app.pdf_create(filename, pageFormat, pageOrientation, pageMarginX, pageMarginY, htmlHeader, htmlBody, htmlFooter, cssStyles) => UNDEFINED<br /><br />Generates a PDF file from given HTML templates and CSS styles. Parameters:<ul><li>filename: Any filename ending in '.pdf'</li><li>pageFormat: Format of page, such as: 'a4', 'letter', 'legal'</li><li>pageOrientation: 'portrait' or 'landscape'</li><li>pageMarginX: Left/right side page margins in pixel</li><li>pageMarginY: Top/bottom side page margins in pixel</li><li>htmlHeader: HTML template, applied to top of each page</li><li>htmlBody: HTML template, fills out document</li><li>htmlFooter: HTML template, applied to bottom of each page</li><li>cssStyles: CSS rules, applied to HTML templates</li></ul>",
 				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Cancella il record presente sul modulo.",
 				"record_new":"app.record_new() => UNDEFINED<br /><br />Apre un nuovo record.",
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Ricarica il record attuale.",
@@ -666,6 +667,7 @@
 				"get_record_id":"RELATION_INDEX_NUMBER",
 				"has_role":"ROLE_ID_STRING",
 				"open_form":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
+				"pdf_create":"FILE_NAME, PAGE_FORMAT, PAGE_ORIENTATION, PAGE_MARGIN_X, PAGE_MARGIN_Y, HTML_HEADER, HTML_BODY, HTML_FOOTER, CSS_STYLES",
 				"show_form_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
 				"update_collection":"COLLECTION_ID"
 			},

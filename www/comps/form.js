@@ -4,6 +4,7 @@ import MyFormLog             from './formLog.js';
 import {hasAccessToRelation} from './shared/access.js';
 import {consoleError}        from './shared/error.js';
 import {srcBase64}           from './shared/image.js';
+import {generatePdf}         from './shared/pdf.js';
 import {
 	aesGcmDecryptBase64WithPhrase,
 	aesGcmEncryptBase64WithPhrase,
@@ -480,6 +481,9 @@ let MyForm = {
 				record_reload:this.get,
 				record_save:  this.set,
 				
+				// PDF functions
+				pdf_create:this.generatePdf,
+				
 				// e2e encryption
 				get_e2ee_data_key:(dataKeyEnc) => {
 					return this.rsaDecrypt(this.loginPrivateKey,dataKeyEnc);
@@ -642,6 +646,7 @@ let MyForm = {
 		fillRelationRecordIds,
 		filterIsCorrect,
 		filterOperatorIsSingleValue,
+		generatePdf,
 		getAttributeValueFromString,
 		getAttributeValuesFromGetter,
 		getCollectionValues,
