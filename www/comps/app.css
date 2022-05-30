@@ -180,6 +180,9 @@ body{
 	font-family:'Roboto','Arial','Helvetica',sans-serif;
 	font-size:11pt;
 	color:var(--color-font);
+	
+	/* disable pull-down-to-refresh on mobile */
+	overscroll-behavior-y:contain;
 }
 a {
 	color:var(--color-accent1);
