@@ -97,13 +97,6 @@ let MyBuilderForm = {
 							:image="showStates ? 'visible1.png' : 'visible0.png'"
 						/>
 						<my-button
-							@trigger="showReferences = !showReferences"
-							:active="!showStates"
-							:caption="capApp.showReferences"
-							:darkBg="true"
-							:image="showStates || showReferences ? 'visible1.png' : 'visible0.png'"
-						/>
-						<my-button
 							@trigger="showHelp = !showHelp"
 							:caption="capApp.showHelp"
 							:darkBg="true"
@@ -135,7 +128,6 @@ let MyBuilderForm = {
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="form.moduleId"
 					:showCaptions="showCaptions"
-					:showReferences="showStates || showReferences"
 				/>
 				
 				<!-- form context help -->
@@ -205,7 +197,8 @@ let MyBuilderForm = {
 					:allowOrders="true"
 					:builderLanguage="builderLanguage"
 					:choices="fieldQueryEdit.query.choices"
-					:dataFields="dataFields"
+					:fieldIdMap="fieldIdMap"
+					:fieldIdMapRef="fieldIdMapRef"
 					:filters="fieldQueryEdit.query.filters"
 					:fixedLimit="fieldQueryEdit.query.fixedLimit"
 					:joins="fieldQueryEdit.query.joins"
@@ -240,7 +233,8 @@ let MyBuilderForm = {
 						:allowOrders="true"
 						:builderLanguage="builderLanguage"
 						:choices="columnQueryEdit.query.choices"
-						:dataFields="dataFields"
+						:fieldIdMap="fieldIdMap"
+						:fieldIdMapRef="fieldIdMapRef"
 						:filters="columnQueryEdit.query.filters"
 						:fixedLimit="columnQueryEdit.query.fixedLimit"
 						:joins="columnQueryEdit.query.joins"
@@ -348,7 +342,6 @@ let MyBuilderForm = {
 			showCaptions:true,   // show caption inputs on non-container fields
 			showFunctions:false, // show form functions
 			showHelp:false,      // show form context help
-			showReferences:false,// show field references (F12, F343), used for form states
 			showSidebar:true,    // show form Builder sidebar
 			showStates:false,    // show form states
 			showStatesFull:false,// sub content (states/functions) are full screen

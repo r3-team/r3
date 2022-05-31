@@ -2,7 +2,6 @@ import MyBuilderQuery from './builder/builderQuery.js';
 import MyInputDate    from './inputDate.js';
 import {
 	getDependentModules,
-	getItemTitle,
 	getItemTitleColumn,
 	getItemTitleNoRelationship
 } from './shared/builder.js';
@@ -290,9 +289,12 @@ let MyFilterSide = {
 				
 				<!-- field input -->
 				<select v-model="fieldId" v-if="!columnsMode && isField">
-					<option v-for="f in dataFields" :value="f.id">
-						{{ getFieldCaption(f) }}
-					</option>
+					<template v-for="(ref,fieldId) in fieldIdMapRef">
+						<option
+							v-if="fieldIdMap[fieldId].content === 'data'"
+							:value="fieldId"
+						>F{{ ref }}</option>
+					</template>
 				</select>
 				
 				<!-- preset input -->
@@ -384,7 +386,6 @@ let MyFilterSide = {
 				:allowChoices="false"
 				:allowOrders="true"
 				:choices="query.choices"
-				:dataFields="dataFields"
 				:filters="query.filters"
 				:fixedLimit="query.fixedLimit"
 				:joins="query.joins"
@@ -401,8 +402,9 @@ let MyFilterSide = {
 		columnDate:    { type:Boolean, required:false, default:false },
 		columnTime:    { type:Boolean, required:false, default:false },
 		columnsMode:   { type:Boolean, required:true },
-		dataFields:    { type:Array,   required:true },
 		disableContent:{ type:Array,   required:true },
+		fieldIdMap:    { type:Object,  required:true },
+		fieldIdMapRef: { type:Object,  required:true },
 		isNullOperator:{ type:Boolean, required:true },
 		joins:         { type:Array,   required:true },
 		joinsParents:  { type:Array,   required:true },
@@ -519,8 +521,6 @@ let MyFilterSide = {
 		// stores
 		modules:        function() { return this.$store.getters['schema/modules']; },
 		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
 		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
 		capApp:         function() { return this.$store.getters.captions.filter; },
 		capGen:         function() { return this.$store.getters.captions.generic; }
@@ -528,22 +528,9 @@ let MyFilterSide = {
 	methods:{
 		// externals
 		getDependentModules,
-		getItemTitle,
 		getItemTitleColumn,
 		getNestedIndexAttributeIdsByJoins,
 		getQueryTemplate,
-		
-		// presentation
-		getFieldCaption:function(f) {
-			let atr   = this.attributeIdMap[f.attributeId];
-			let rel   = this.relationIdMap[atr.relationId];
-			let atrNm = false;
-			
-			if(typeof f.attributeIdNm !== 'undefined' && f.attributeIdNm !== null)
-				atrNm = this.attributeIdMap[f.attributeIdNm];
-			
-			return this.getItemTitle(rel,atr,f.index,f.outsideIn,atrNm);
-		},
 		
 		// actions
 		set:function(name,newValue) {
@@ -622,8 +609,9 @@ let MyFilter = {
 			@apply-value="$emit('apply-value')"
 			:builderMode="builderMode"
 			:columnsMode="columnsMode"
-			:dataFields="dataFields"
 			:disableContent="disableContent"
+			:fieldIdMap="fieldIdMap"
+			:fieldIdMapRef="fieldIdMapRef"
 			:isNullOperator="isNullOperator"
 			:joins="joins"
 			:joinsParents="joinsParents"
@@ -645,8 +633,9 @@ let MyFilter = {
 			:columnDate="side0ColumDate"
 			:columnTime="side0ColumTime"
 			:columnsMode="columnsMode"
-			:dataFields="dataFields"
 			:disableContent="disableContent"
+			:fieldIdMap="fieldIdMap"
+			:fieldIdMapRef="fieldIdMapRef"
 			:isNullOperator="isNullOperator"
 			:joins="joins"
 			:joinsParents="joinsParents"
@@ -679,9 +668,10 @@ let MyFilter = {
 		builderMode:   { type:Boolean, required:true },
 		columns:       { type:Array,   required:false, default:() => [] },
 		columnsMode:   { type:Boolean, required:true },
-		dataFields:    { type:Array,   required:true },
 		disableContent:{ type:Array,   required:true },
 		expertMode:    { type:Boolean, required:true },
+		fieldIdMap:    { type:Object,  required:true },
+		fieldIdMapRef: { type:Object,  required:true },
 		joins:         { type:Array,   required:true },
 		joinsParents:  { type:Array,   required:true },
 		moduleId:      { type:String,  required:true },
@@ -809,9 +799,10 @@ let MyFilters = {
 			:columns="columns"
 			:columnsMode="columnsMode"
 			:connector="f.connector"
-			:dataFields="dataFields"
 			:disableContent="disableContent"
 			:expertMode="expertMode"
+			:fieldIdMap="fieldIdMap"
+			:fieldIdMapRef="fieldIdMapRef"
 			:joins="joins"
 			:joinsParents="joinsParents"
 			:key="i"
@@ -838,8 +829,9 @@ let MyFilters = {
 		addOnStart:    { type:Boolean, required:false, default:false },
 		builderMode:   { type:Boolean, required:false, default:false },
 		columns:       { type:Array,   required:false, default:() => [] },
-		dataFields:    { type:Array,   required:false, default:() => [] },
 		disableContent:{ type:Array,   required:false, default:() => [] }, // content to disable (attribute, record, field, true, ...)
+		fieldIdMap:    { type:Object,  required:false, default:() => {return {}} },
+		fieldIdMapRef: { type:Object,  required:false, default:() => {return {}} },
 		filterAddCnt:  { type:Number,  required:false, default:0 },
 		frontendOnly:  { type:Boolean, required:false, default:false },    // filter criteria must not contain backend types (attributes/queries)
 		joins:         { type:Array,   required:false, default:() => [] },
@@ -925,7 +917,6 @@ let MyFilters = {
 		columnsMode:(s) => s.columns.length !== 0,
 		
 		// stores
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		capApp:        (s) => s.$store.getters.captions.filter,
 		capGen:        (s) => s.$store.getters.captions.generic

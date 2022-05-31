@@ -614,7 +614,6 @@
 			"required":"Required",
 			"showFunctions":"Functions",
 			"showHelp":"Help",
-			"showReferences":"References",
 			"showStates":"States",
 			"sql":"SQL preview",
 			"state":"State",

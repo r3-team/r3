@@ -97,8 +97,9 @@ let MyBuilderFormState = {
 			<my-filters
 				v-model="conditions"
 				:builderMode="true"
-				:dataFields="dataFields"
 				:disableContent="['attribute','javascript','subQuery']"
+				:fieldIdMap="fieldIdMap"
+				:fieldIdMapRef="fieldIdMapRef"
 				:filterAddCnt="filterAddCnt"
 				:moduleId="form.moduleId"
 				:showAdd="true"

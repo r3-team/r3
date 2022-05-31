@@ -140,6 +140,8 @@ let MyBuilderJsFunction = {
 				
 				<template v-if="form !== false && form.query.joins.length !== 0">
 					<div class="placeholders form-query-title">
+						
+						<!-- read only form query view -->
 						<h2>{{ capApp.placeholdersFormQuery }}</h2>
 						
 						<my-builder-query

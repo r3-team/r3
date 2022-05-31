@@ -41,7 +41,7 @@ let MyBuilderFields = {
 			>
 				<div class="builder-drag-item" :class="{ container:element.content === 'container' }">
 					<!-- form state field reference -->
-					<span class="reference" v-if="showReferences && !isTemplate">
+					<span class="reference" v-if="!isTemplate">
 						F{{ typeof fieldIdMapRef[element.id] !== 'undefined' ? fieldIdMapRef[element.id] : '' }}
 					</span>
 					
@@ -259,7 +259,6 @@ let MyBuilderFields = {
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="moduleId"
 					:showCaptions="showCaptions"
-					:showReferences="showReferences"
 					:style="getStyleChildren(element)"
 				/>
 			</div>
@@ -281,7 +280,6 @@ let MyBuilderFields = {
 		joinsIndexMap:  { type:Object,  required:false, default:() => {return {}} },
 		moduleId:       { type:String,  required:false, default:'' },
 		showCaptions:   { type:Boolean, required:false, default:false },
-		showReferences: { type:Boolean, required:false, default:false },
 		template1n:     { type:Boolean, required:false, default:false },
 		templateIndex:  { type:Number,  required:false, default:-1 },
 		templateN1:     { type:Boolean, required:false, default:false },

@@ -49,8 +49,9 @@ let MyBuilderQueryChoice = {
 		<my-filters
 			v-model="filtersInput"
 			:builderMode="true"
-			:dataFields="dataFields"
 			:disableContent="['fieldChanged']"
+			:fieldIdMap="fieldIdMap"
+			:fieldIdMapRef="fieldIdMapRef"
 			:joins="joins"
 			:joinsParents="joinsParents"
 			:moduleId="moduleId"
@@ -66,7 +67,8 @@ let MyBuilderQueryChoice = {
 	props:{
 		builderLanguage:{ type:String, required:true },
 		choice:         { type:Object, required:true },
-		dataFields:     { type:Array,  required:true },
+		fieldIdMap:     { type:Object, required:true },
+		fieldIdMapRef:  { type:Object, required:true },
 		joins:          { type:Array,  required:true },
 		joinsParents:   { type:Array,  required:true },
 		moduleId:       { type:String, required:true },
@@ -636,8 +638,9 @@ let MyBuilderQuery = {
 				v-model="filtersInput"
 				v-show="showFilters"
 				:builderMode="true"
-				:dataFields="dataFields"
 				:disableContent="['fieldChanged']"
+				:fieldIdMap="fieldIdMap"
+				:fieldIdMapRef="fieldIdMapRef"
 				:filterAddCnt="filterAddCnt"
 				:joins="joins"
 				:joinsParents="joinsParents"
@@ -679,7 +682,8 @@ let MyBuilderQuery = {
 				@update="choiceApply(i,$event)"
 				:builderLanguage="builderLanguage"
 				:choice="choicesInput[i]"
-				:dataFields="dataFields"
+				:fieldIdMap="fieldIdMap"
+				:fieldIdMapRef="fieldIdMapRef"
 				:joins="joins"
 				:joinsParents="joinsParents"
 				:key="i+'_'+c.id"
@@ -738,7 +742,8 @@ let MyBuilderQuery = {
 		allowOrders:    { type:Boolean, required:false, default:false },
 		builderLanguage:{ type:String,  required:false, default:'' },
 		choices:        { type:Array,   required:true },                    // choices for optional query filters (selectable by users)
-		dataFields:     { type:Array,   required:false, default:() => [] }, // form fields for filter candidates
+		fieldIdMap:     { type:Object,  required:false, default:() => {return {}} }, // form field map, key: field ID
+		fieldIdMapRef:  { type:Object,  required:false, default:() => {return {}} }, // form field reference number map, key: field ID
 		filters:        { type:Array,   required:true },
 		fixedLimit:     { type:Number,  required:true },
 		lookups:        { type:Array,   required:true },

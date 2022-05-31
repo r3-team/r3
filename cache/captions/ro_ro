@@ -614,7 +614,6 @@
 			"required":"Necesar",
 			"showFunctions":"Funcțiile",
 			"showHelp":"Ajutor",
-			"showReferences":"Referințe",
 			"showStates":"Statuturi",
 			"sql":"Previzualizare SQL",
 			"state":"Statut",

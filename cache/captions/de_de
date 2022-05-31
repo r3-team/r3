@@ -614,7 +614,6 @@
 			"required":"Benötigt",
 			"showFunctions":"Funktionen",
 			"showHelp":"Hilfe",
-			"showReferences":"Referenzen",
 			"showStates":"Zustände",
 			"sql":"SQL-Vorschau",
 			"state":"Status",
