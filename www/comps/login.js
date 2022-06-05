@@ -69,7 +69,7 @@ let MyLogin = {
 			</div>
 			
 			<!-- maintenance mode message -->
-			<div class="contentBox" v-if="productionMode === 0">
+			<div class="contentBox" v-if="!productionMode">
 				<div class="top warning">
 					<div class="area">
 						<img class="icon" src="images/warning.png" />

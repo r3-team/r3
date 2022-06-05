@@ -9,7 +9,7 @@ const MyStore = Vuex.createStore({
 	},
 	state:{
 		access:{},                     // access permissions for each entity (attribute, collection, menu, relation), key: entity ID
-		builder:false,                 // builder mode enabled
+		builderMode:false,             // builder mode active
 		busyBlockInput:false,          // while active, input is blocked when busy
 		busyCounter:0,                 // counter of calls making the app busy (WS requests, uploads, etc.)
 		captions:{},                   // all application captions in the user interface language
@@ -49,11 +49,15 @@ const MyStore = Vuex.createStore({
 		moduleLanguage:'',    // module language (either equal to user language or module fallback)
 		pageTitle:'',         // web page title, set by app/form depending on navigation
 		pageTitleFull:'',     // web page title + instance name
-		productionMode:1,     // system production mode (1=production, 0=maintenance)
+		productionMode:false, // system in production mode, false if maintenance
 		settings:{},          // setting values for logged in user, key: settings name
 		system:{}             // system details (admin only)
 	},
 	mutations:{
+		config:(state,payload) => {
+			state.builderMode = payload.builderMode === '1';
+			state.config      = payload;
+		},
 		dialog:(state,payload) => {
 			state.dialogCaptionTop = typeof payload.captionTop !== 'undefined' ?
 				payload.captionTop : '';
@@ -111,10 +115,8 @@ const MyStore = Vuex.createStore({
 		
 		// simple
 		access:         (state,payload) => state.access          = payload,
-		builder:        (state,payload) => state.builder         = payload,
 		busyBlockInput: (state,payload) => state.busyBlockInput  = payload,
 		captions:       (state,payload) => state.captions        = payload,
-		config:         (state,payload) => state.config          = payload,
 		feedback:       (state,payload) => state.feedback        = payload,
 		formHasChanges: (state,payload) => state.formHasChanges  = payload,
 		isAdmin:        (state,payload) => state.isAdmin         = payload,
@@ -149,7 +151,7 @@ const MyStore = Vuex.createStore({
 		// simple
 		access:           (state) => state.access,
 		blockInput:       (state) => state.busyBlockInput && state.busyCounter > 0,
-		builderEnabled:   (state) => state.builder && state.productionMode === 0,
+		builderEnabled:   (state) => state.builderMode && !state.productionMode,
 		busyBlockInput:   (state) => state.busyBlockInput,
 		busyCounter:      (state) => state.busyCounter,
 		captions:         (state) => state.captions,

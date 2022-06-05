@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"r3/cache"
+	"r3/cluster/tasks"
 	"r3/config"
 	"r3/db"
 	"r3/log"
@@ -145,7 +146,7 @@ func ImportFromFiles(filePathsImport []string) error {
 	}
 	log.Info("transfer", "changes were commited successfully")
 
-	if err := cache.UpdateSchemaAll(true); err != nil {
+	if err := tasks.SchemaLoadAll(true, true); err != nil {
 		return err
 	}
 	log.Info("transfer", "schema cache was renewed")

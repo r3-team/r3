@@ -1,6 +1,10 @@
 package types
 
 type FileType struct {
+	Cluster struct {
+		NodeId string `json:"nodeId"`
+	} `json:"cluster"`
+
 	Db FileTypeDb `json:"db"`
 
 	Paths struct {

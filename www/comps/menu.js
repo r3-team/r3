@@ -127,7 +127,7 @@ let MyMenu = {
 				</div>
 				
 				<my-button image="builder.png"
-					v-if="isAdmin && builderEnabled && !isMobile && !productionMode"
+					v-if="isAdmin && builderEnabled && !isMobile"
 					@trigger="openBuilder(false)"
 					@trigger-middle="openBuilder(true)"
 					:darkBg="true"
@@ -171,7 +171,6 @@ let MyMenu = {
 		isMobile:      function() { return this.$store.getters.isMobile; },
 		menuAccess:    function() { return this.$store.getters.access.menu; },
 		moduleLanguage:function() { return this.$store.getters.moduleLanguage; },
-		productionMode:function() { return this.$store.getters.productionMode; },
 		settings:      function() { return this.$store.getters.settings; }
 	},
 	methods:{

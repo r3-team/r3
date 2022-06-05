@@ -24,7 +24,7 @@ let MyAdminRepoModule = {
 				<my-button
 					v-if="!isInstalled"
 					@trigger="install(repoModule.fileId)"
-					:active="!installStarted && isCompatible && productionMode === 0"
+					:active="!installStarted && isCompatible && !productionMode"
 					:caption="capApp.button.install"
 					:darkBg="true"
 				/>
@@ -38,7 +38,7 @@ let MyAdminRepoModule = {
 				<p v-if="!isCompatible" class="bad-state">
 					{{ capApp.notCompatible }}
 				</p>
-				<p v-if="!isInstalled && isCompatible && productionMode === 1">
+				<p v-if="!isInstalled && isCompatible && productionMode">
 					{{ capApp.maintenanceBlock }}
 				</p>
 			</div>

@@ -290,14 +290,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return LoginGetMembers(reqJson)
 		case "getRecords":
 			return LoginGetRecords(reqJson)
-		case "informBuilderState":
-			cache.ChangedBuilderMode(config.GetUint64("builderMode") == 1)
-			return nil, nil
 		case "kick":
 			return LoginKick(reqJson)
-		case "kickNonAdmins":
-			cache.KickNonAdmins()
-			return nil, nil
 		case "reauth":
 			return LoginReauth(reqJson)
 		case "reauthAll":

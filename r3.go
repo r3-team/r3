@@ -16,6 +16,8 @@ import (
 	"r3/activation"
 	"r3/bruteforce"
 	"r3/cache"
+	"r3/cluster"
+	"r3/cluster/tasks"
 	"r3/config"
 	"r3/db"
 	"r3/db/embedded"
@@ -310,6 +312,12 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
+	// setup cluster node with shared database
+	if err := cluster.SetupNode(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to setup cluster node, %v", err))
+		return
+	}
+
 	// set log levels from configuration
 	config.SetLogLevels()
 
@@ -337,7 +345,7 @@ func (prg *program) execute(svc service.Service) {
 	}
 
 	// initialize module schema cache
-	if err := cache.UpdateSchemaAll(false); err != nil {
+	if err := tasks.SchemaLoadAll(false, false); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize schema cache, %v", err))
 		return
 	}
@@ -372,7 +380,11 @@ func (prg *program) execute(svc service.Service) {
 	bruteforce.SetConfig()
 	activation.SetLicense()
 
-	// start scheduler
+	// start recurring cluster tasks
+	go cluster.StatUpdater()
+	go tasks.TaskCollector()
+
+	// start scheduler for system jobs and schedule module functions
 	if err := scheduler.Start(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to start scheduler, %v", err))
 		return

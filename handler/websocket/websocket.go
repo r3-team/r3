@@ -55,6 +55,9 @@ var (
 func StartBackgroundTasks() {
 	go hub.start()
 }
+func GetClientCount() int {
+	return len(hub.clients)
+}
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 
@@ -130,8 +133,8 @@ func (hub *hubType) start() {
 				// if clients are not kicked, prepare response
 				var err error
 
-				if event.BuilderOff || event.BuilderOn {
-					jsonMsg, err = prepareUnrequested("builder_mode_changed", event.BuilderOn)
+				if event.ConfigChanged {
+					jsonMsg, err = prepareUnrequested("config_changed", nil)
 				}
 				if event.Renew {
 					jsonMsg, err = prepareUnrequested("reauthorized", nil)

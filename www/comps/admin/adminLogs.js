@@ -78,6 +78,7 @@ let MyAdminLogs = {
 							<th class="minimum">{{ capApp.level }}</th>
 							<th class="minimum">{{ capApp.context }}</th>
 							<th class="minimum">{{ capApp.module }}</th>
+							<th class="minimum">{{ capApp.node }}</th>
 							<th>{{ capApp.message }}</th>
 						</tr>
 					</thead>
@@ -97,6 +98,7 @@ let MyAdminLogs = {
 							<td class="minimum">{{ displayLevel(l.level) }}</td>
 							<td class="minimum">{{ l.context }}</td>
 							<td class="minimum">{{ l.moduleName }}</td>
+							<td class="minimum">{{ l.nodeName }}</td>
 							<td>{{ displayMessage(l.message) }}</td>
 						</tr>
 					</tbody>

@@ -10,6 +10,7 @@ type Log struct {
 	Context    string         `json:"context"`
 	Message    string         `json:"message"`
 	ModuleName pgtype.Varchar `json:"moduleName"`
+	NodeName   pgtype.Varchar `json:"nodeName"`
 	Date       int64          `json:"date"`
 }
 

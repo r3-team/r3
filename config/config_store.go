@@ -26,11 +26,11 @@ var (
 		"bruteforceAttempts", "bruteforceProtection", "builderMode",
 		"dbTimeoutCsv", "dbTimeoutDataRest", "dbTimeoutDataWs", "dbTimeoutIcs",
 		"icsDaysPost", "icsDaysPre", "icsDownload", "logApplication",
-		"logBackup", "logCache", "logCsv", "logLdap", "logMail", "logServer",
-		"logScheduler", "logTransfer", "logsKeepDays", "productionMode",
-		"pwForceDigit", "pwForceLower", "pwForceSpecial", "pwForceUpper",
-		"pwLengthMin", "schemaTimestamp", "repoChecked", "repoFeedback",
-		"repoSkipVerify", "tokenExpiryHours"}
+		"logBackup", "logCache", "logCluster", "logCsv", "logLdap", "logMail",
+		"logServer", "logScheduler", "logTransfer", "logsKeepDays",
+		"productionMode", "pwForceDigit", "pwForceLower", "pwForceSpecial",
+		"pwForceUpper", "pwLengthMin", "schemaTimestamp", "repoChecked",
+		"repoFeedback", "repoSkipVerify", "tokenExpiryHours"}
 )
 
 // store setters

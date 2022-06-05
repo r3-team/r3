@@ -372,6 +372,16 @@ let MyAdminConfig = {
 						</td>
 					</tr>
 					<tr>
+						<td>{{ capApp.logLevelCluster }}</td>
+						<td>
+							<select v-model="configInput.logCluster">
+								<option value="1">{{ capApp.logLevel1 }}</option>
+								<option value="2">{{ capApp.logLevel2 }}</option>
+								<option value="3">{{ capApp.logLevel3 }}</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
 						<td>{{ capApp.logsKeepDays }}</td>
 						<td><input v-model="configInput.logsKeepDays" /></td>
 					</tr>
@@ -775,29 +785,7 @@ let MyAdminConfig = {
 		},
 		set:function() {
 			ws.send('config','set',this.configInput,true).then(
-				() => {
-					// switch to maintenance mode
-					if(this.configInput.productionMode === '0' && this.config.productionMode === '1') {
-						ws.send('login','kickNonAdmins',{},false).then(
-							() => {},
-							this.$root.genericError
-						);
-					}
-					
-					// inform clients about changed builder mode
-					if(this.configInput.builderMode !== this.config.builderMode) {
-						ws.send('login','informBuilderState',{},false).then(
-							() => {},
-							this.$root.genericError
-						);
-					}
-					
-					// update store config
-					this.$store.commit('config',JSON.parse(JSON.stringify(this.configInput)));
-					
-					// reload customizing
-					this.$root.initPublic(); 
-				},
+				() => {},
 				this.$root.genericError
 			);
 		}

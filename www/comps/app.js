@@ -289,9 +289,9 @@ let MyApp = {
 		},
 		wsBackendRequest:function(res) {
 			switch(res.ressource) {
-				// affects admins only (reloads happen in maintenance mode only)
-				// add busy counters to also block admins that did not request the schema reload
+				// affects admins only
 				case 'schema_loading':
+					// add busy counters to also block admins that did not request the schema reload
 					this.$store.commit('busyAdd');
 					this.$store.commit('busyBlockInput',true);
 				break;
@@ -304,12 +304,16 @@ let MyApp = {
 					this.initSchema();
 				break;
 				
-				// affects admins only (builder can be actived only in maintenance mode)
-				case 'builder_mode_changed':
-					this.$store.commit('builder',res.payload);
-				break;
-				
 				// affects everyone logged in
+				case 'config_changed':
+					if(this.isAdmin) {
+						ws.send('config','get',{},true).then(
+							res => this.$store.commit('config',res.payload),
+							this.genericError
+						);
+					}
+					this.initPublic(); // reload customizing
+				break;
 				case 'reauthorized':
 					if(this.appReady) {
 						ws.send('lookup','get',{name:'access'},true).then(
@@ -317,7 +321,7 @@ let MyApp = {
 								this.$store.commit('access',res.payload);
 								this.updateCollections(false);
 							},
-							err => this.genericError(err)
+							this.genericError
 						);
 					}
 				break;
@@ -375,7 +379,6 @@ let MyApp = {
 					this.$store.commit('local/companyLogoUrl',res.payload.companyLogoUrl);
 					this.$store.commit('local/companyName',res.payload.companyName);
 					this.$store.commit('local/companyWelcome',res.payload.companyWelcome);
-					this.$store.commit('builder',res.payload.builder);
 					this.$store.commit('productionMode',res.payload.productionMode);
 					this.$store.commit('pageTitleRefresh'); // update page title with new app name
 					this.$store.commit('schema/languageCodes',res.payload.languageCodes);
@@ -383,7 +386,7 @@ let MyApp = {
 					this.publicLoaded = true;
 					this.stateChange();
 				},
-				err => this.setInitErr(err)
+				this.setInitErr
 			);
 		},
 		
@@ -456,7 +459,7 @@ let MyApp = {
 					return this.updateCollections(this.isAdmin,
 						err => alert(this.capErr.initCollection.replace('{MSG}',err)));
 				},
-				err => this.setInitErr(err)
+				this.setInitErr
 			).then(
 				() => this.appReady = true,
 				this.setInitErr

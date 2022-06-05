@@ -132,7 +132,7 @@ let MyForm = {
 						:darkBg="true"
 					/>
 					<my-button image="builder.png"
-						v-if="isAdmin && builderEnabled && !isMobile && !productionMode"
+						v-if="isAdmin && builderEnabled && !isMobile"
 						@trigger="openBuilder(false)"
 						@trigger-middle="openBuilder(true)"
 						:darkBg="true"
@@ -635,7 +635,6 @@ let MyForm = {
 		loginPublicKey: function() { return this.$store.getters.loginPublicKey; },
 		loginPrivateKey:function() { return this.$store.getters.loginPrivateKey; },
 		moduleLanguage: function() { return this.$store.getters.moduleLanguage; },
-		productionMode: function() { return this.$store.getters.productionMode; },
 		settings:       function() { return this.$store.getters.settings; }
 	},
 	methods:{

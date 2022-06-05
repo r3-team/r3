@@ -13,7 +13,7 @@ let MyHeader = {
 				<template v-if="!isMobile && isAdmin" >
 					
 					<router-link class="entry no-wrap clickable" to="/builder"
-						v-if="builderEnabled && !productionMode"
+						v-if="builderEnabled"
 					>
 						<img src="images/builder.png" />
 					</router-link>
@@ -214,7 +214,6 @@ let MyHeader = {
 		isMobile:      function() { return this.$store.getters.isMobile; },
 		isNoAuth:      function() { return this.$store.getters.isNoAuth; },
 		moduleColor1:  function() { return this.$store.getters.moduleColor1; },
-		productionMode:function() { return this.$store.getters.productionMode; },
 		settings:      function() { return this.$store.getters.settings; }
 	},
 	created:function() {

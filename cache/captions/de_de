@@ -157,6 +157,7 @@
 			"logLevelApplication":"Anwendungen",
 			"logLevelBackup":"Backup",
 			"logLevelCache":"Cache",
+			"logLevelCluster":"Cluster",
 			"logLevelCsv":"CSV-Import/Export",
 			"logLevelLdap":"LDAP",
 			"logLevelMail":"Mail",
@@ -280,7 +281,8 @@
 			"level2":"Warnung",
 			"level3":"Info",
 			"message":"Nachricht",
-			"module":"Anwendung"
+			"module":"Anwendung",
+			"node":"Cluster-Knoten"
 		},
 		"mails":{
 			"account":"E-Mail-Account",

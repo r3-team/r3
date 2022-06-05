@@ -69,10 +69,7 @@ func GetSchemaCacheJson() json.RawMessage {
 // update module schema cache in memory
 // takes either single module ID for specific update or NULL for updating all modules
 // can just load schema or create a new version timestamp, which forces reload on clients
-func UpdateSchemaAll(newVersion bool) error {
-	return UpdateSchema(make([]uuid.UUID, 0), newVersion)
-}
-func UpdateSchema(moduleIdsUpdateOnly []uuid.UUID, newVersion bool) error {
+func UpdateSchema(newVersion bool, moduleIdsUpdateOnly []uuid.UUID) error {
 	var err error
 
 	// inform all clients about schema reloading

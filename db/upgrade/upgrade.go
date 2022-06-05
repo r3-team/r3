@@ -101,6 +101,52 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 	// ALTER TABLE app.form_state_condition_side ALTER COLUMN content
 	//	TYPE app.filter_side_content USING content::text::app.filter_side_content;
 
+	"2.7": func(tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(db.Ctx, `
+			-- new schema for cluster operation
+			CREATE SCHEMA instance_cluster;
+			
+			-- new cluster tables
+			CREATE TABLE IF NOT EXISTS instance_cluster.node (
+			    id uuid NOT NULL,
+			    name text COLLATE pg_catalog."default" NOT NULL,
+			    date_check_in bigint NOT NULL,
+			    stat_sessions integer NOT NULL,
+			    stat_memory integer NOT NULL,
+			    stat_uptime integer NOT NULL,
+			    CONSTRAINT node_pkey PRIMARY KEY (id)
+			);
+			
+			CREATE TABLE IF NOT EXISTS instance_cluster.node_task (
+			    node_id uuid NOT NULL,
+				action TEXT NOT NULL,
+				payload TEXT NOT NULL,
+			    CONSTRAINT node_task_node_id_fkey FOREIGN KEY (node_id)
+			        REFERENCES instance_cluster.node (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_node_task_node_fkey ON instance_cluster.node_task
+				USING BTREE (node_id ASC NULLS LAST);
+			
+			// new cluster logging context
+			ALTER TYPE instance.log_context ADD VALUE 'cluster';
+			INSERT INTO instance.config (name,value) VALUES ('logCluster',2);
+			
+			ALTER TABLE instance.log ADD COLUMN node_id UUID;
+			ALTER TABLE instance.log ADD CONSTRAINT log_node_id_fkey FOREIGN KEY (node_id)
+		        REFERENCES instance_cluster.node (id) MATCH SIMPLE
+		        ON UPDATE CASCADE
+		        ON DELETE CASCADE
+		        DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_log_node_fkey ON instance.log
+				USING BTREE (node_id ASC NULLS LAST);
+		`)
+		return "3.0", err
+	},
 	"2.6": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
 			-- extend and rename query filter side content (to be used by form state condition as well)

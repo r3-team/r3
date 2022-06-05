@@ -1,4 +1,7 @@
 {
+	"cluster": {
+		"nodeId": ""
+	},
 	"db": {
 		"embedded": false,
 		"host": "localhost",
