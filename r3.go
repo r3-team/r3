@@ -381,7 +381,7 @@ func (prg *program) execute(svc service.Service) {
 	activation.SetLicense()
 
 	// start recurring cluster tasks
-	go cluster.StatUpdater()
+	go cluster.CheckIn()
 	go tasks.TaskCollector()
 
 	// start scheduler for system jobs and schedule module functions

@@ -111,9 +111,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			    id uuid NOT NULL,
 			    name text COLLATE pg_catalog."default" NOT NULL,
 			    date_check_in bigint NOT NULL,
+			    date_started bigint NOT NULL,
 			    stat_sessions integer NOT NULL,
 			    stat_memory integer NOT NULL,
-			    stat_uptime integer NOT NULL,
+				cluster_master bool NOT NULL,
 			    CONSTRAINT node_pkey PRIMARY KEY (id)
 			);
 			
@@ -131,7 +132,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX IF NOT EXISTS fki_node_task_node_fkey ON instance_cluster.node_task
 				USING BTREE (node_id ASC NULLS LAST);
 			
-			// new cluster logging context
+			-- new cluster logging context
 			ALTER TYPE instance.log_context ADD VALUE 'cluster';
 			INSERT INTO instance.config (name,value) VALUES ('logCluster',2);
 			
@@ -144,6 +145,62 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX IF NOT EXISTS fki_log_node_fkey ON instance.log
 				USING BTREE (node_id ASC NULLS LAST);
+			
+			-- new task option: Execute only by cluster master
+			ALTER TABLE instance.task ADD COLUMN cluster_master_only BOOL NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.task ALTER COLUMN cluster_master_only DROP DEFAULT;
+			UPDATE instance.task SET cluster_master_only = FALSE
+			WHERE name IN ('cleanupBruteforce','httpCertRenew');
+			
+			-- new cluster config options
+			INSERT INTO instance.config (name,value)
+			VALUES ('clusterCheckIn',60), ('clusterTasksCollect',5);
+			
+			-- new function: Request master role
+			CREATE OR REPLACE FUNCTION instance_cluster.master_role_request(
+				node_id_requested uuid)
+			    RETURNS integer
+			    LANGUAGE 'plpgsql'
+			    COST 100
+			    VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			    check_in_seconds     INT;
+			    unix_master_check_in BIGINT;
+			BEGIN
+			    SELECT value::INT INTO check_in_seconds
+			    FROM instance.config
+			    WHERE name = 'clusterCheckIn';
+				
+			    SELECT date_check_in INTO unix_master_check_in
+			    FROM instance_cluster.node
+			    WHERE cluster_master;
+			    
+			    IF EXTRACT(EPOCH FROM NOW()) < unix_master_check_in + (check_in_seconds*3) THEN
+			        -- current master checked in within last 3 cycles
+			        RETURN 0;
+			    END IF;
+			    
+			    -- new master accepted, switch over
+			    UPDATE instance_cluster.node
+			    SET cluster_master = FALSE;
+			    
+			    UPDATE instance_cluster.node
+			    SET cluster_master = TRUE
+			    WHERE id = node_id_requested;
+			    
+			    -- assign master switch over tasks to all nodes
+			    INSERT INTO instance_cluster.node_task (node_id,action,payload)
+			        SELECT id, 'masterAssigned', '{"state":false}'
+			        FROM instance_cluster.node
+			        WHERE cluster_master = FALSE;
+			    
+			    INSERT INTO instance_cluster.node_task (node_id,action,payload)
+			    VALUES (node_id_requested, 'masterAssigned', '{"state":true}');
+				
+				RETURN 0;
+			END;
+			$BODY$;
 		`)
 		return "3.0", err
 	},

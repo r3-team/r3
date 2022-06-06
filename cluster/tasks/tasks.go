@@ -8,6 +8,7 @@ import (
 	"r3/config"
 	"r3/db"
 	"r3/log"
+	"r3/scheduler"
 	"time"
 
 	"github.com/gofrs/uuid"
@@ -20,8 +21,8 @@ type task struct {
 type taskConfigApply struct {
 	SwitchToMaintenance bool `json:"switchToMaintenance"`
 }
-type taskSchemaLoadAll struct {
-	NewVersion bool `json:"newVersion"`
+type taskMasterAssigned struct {
+	State bool `json:"state"`
 }
 type taskSchemaLoad struct {
 	ModuleIdsUpdateOnly []uuid.UUID `json:"moduleIdsUpdateOnly"`
@@ -34,7 +35,7 @@ func TaskCollector() {
 	var tasks []task
 
 	for {
-		time.Sleep(time.Second * time.Duration(3))
+		time.Sleep(time.Second * time.Duration(config.GetUint64("clusterTasksCollect")))
 
 		tasks = make([]task, 0)
 
@@ -84,26 +85,31 @@ func TaskCollector() {
 					log.Error("cluster", "failed to unmarshal task", err)
 					continue
 				}
-				if err := ConfigApply(false, true, p.SwitchToMaintenance); err != nil {
-					log.Error("cluster", fmt.Sprintf("failed to start task '%s'", t.action), err)
+				err = ConfigApply(false, true, p.SwitchToMaintenance)
+			case "masterAssigned":
+				var p taskMasterAssigned
+				if err := json.Unmarshal(t.payload, &p); err != nil {
+					log.Error("cluster", "failed to unmarshal task", err)
 					continue
 				}
+				err = MasterAssigned(p.State)
 			case "schemaLoad":
 				var p taskSchemaLoad
 				if err := json.Unmarshal(t.payload, &p); err != nil {
 					log.Error("cluster", "failed to unmarshal task", err)
 					continue
 				}
-				if err := SchemaLoad(false, p.NewVersion, p.ModuleIdsUpdateOnly); err != nil {
-					log.Error("cluster", fmt.Sprintf("failed to start task '%s'", t.action), err)
-					continue
-				}
+				err = SchemaLoad(false, p.NewVersion, p.ModuleIdsUpdateOnly)
+			}
+			if err != nil {
+				log.Error("cluster", fmt.Sprintf("failed to start task '%s'", t.action), err)
+				continue
 			}
 		}
 	}
 }
 
-func setTasks(action string, payload interface{}) error {
+func createTasksForOtherNodes(action string, payload interface{}) error {
 	payloadJson, err := json.Marshal(payload)
 	if err != nil {
 		return err
@@ -125,7 +131,7 @@ func ConfigApply(updateNodes bool, fromOtherNode bool, switchToMaintenance bool)
 		payload := taskConfigApply{
 			SwitchToMaintenance: switchToMaintenance,
 		}
-		if err := setTasks("configApply", payload); err != nil {
+		if err := createTasksForOtherNodes("configApply", payload); err != nil {
 			return err
 		}
 	}
@@ -146,6 +152,14 @@ func ConfigApply(updateNodes bool, fromOtherNode bool, switchToMaintenance bool)
 	config.SetLogLevels()
 	return nil
 }
+func MasterAssigned(state bool) error {
+	log.Info("cluster", fmt.Sprintf("master role updated to: %v", state))
+	cache.SetIsClusterMaster(state)
+
+	// reload scheduler as most tasks should only be executed by the cluster master
+	scheduler.Start()
+	return nil
+}
 func SchemaLoadAll(updateNodes bool, newVersion bool) error {
 	return SchemaLoad(updateNodes, newVersion, make([]uuid.UUID, 0))
 }
@@ -155,7 +169,7 @@ func SchemaLoad(updateNodes bool, newVersion bool, moduleIdsUpdateOnly []uuid.UU
 			ModuleIdsUpdateOnly: moduleIdsUpdateOnly,
 			NewVersion:          newVersion,
 		}
-		if err := setTasks("schemaLoad", payload); err != nil {
+		if err := createTasksForOtherNodes("schemaLoad", payload); err != nil {
 			return err
 		}
 	}

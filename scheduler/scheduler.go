@@ -64,13 +64,16 @@ func Start() error {
 	change_mx.Lock()
 	defer change_mx.Unlock()
 
+	log.Info("scheduler", "is updating its configuration")
+
 	// (re)build task list
 	runEarliestUnix = 0
 	tasks = make([]task, 0)
 
 	// get system tasks and their states
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT t.name, t.embedded_only, t.interval_seconds, s.date_attempt
+		SELECT t.name, t.embedded_only, t.cluster_master_only,
+			t.interval_seconds, s.date_attempt
 		FROM instance.task AS t
 		INNER JOIN instance.scheduler AS s ON s.task_name = t.name
 		WHERE t.active
@@ -84,11 +87,17 @@ func Start() error {
 		var t task
 		var s schedule
 		var embeddedOnly bool
+		var clusterMasterOnly bool
 
-		if err := rows.Scan(&t.name, &embeddedOnly, &s.interval, &s.runLastUnix); err != nil {
+		if err := rows.Scan(&t.name, &embeddedOnly, &clusterMasterOnly,
+			&s.interval, &s.runLastUnix); err != nil {
+
 			return err
 		}
 
+		if clusterMasterOnly && !cache.GetIsClusterMaster() {
+			continue
+		}
 		if embeddedOnly && !config.File.Db.Embedded {
 			continue
 		}
@@ -153,46 +162,48 @@ func Start() error {
 		tasks = append(tasks, t)
 	}
 
-	// get PG function schedules
-	pgFunctionIdMapTasks := make(map[uuid.UUID]task)
+	// get PG function schedules (only cluster master)
+	if cache.GetIsClusterMaster() {
+		pgFunctionIdMapTasks := make(map[uuid.UUID]task)
 
-	rows, err = db.Pool.Query(db.Ctx, `
-		SELECT f.name, f.name, fs.pg_function_id, fs.id, fs.at_hour, fs.at_minute,
-			fs.at_second, fs.at_day, fs.interval_type, fs.interval_value,
-			s.date_attempt
-		FROM app.pg_function AS f
-		INNER JOIN app.pg_function_schedule AS fs ON fs.pg_function_id         = f.id
-		INNER JOIN instance.scheduler       AS s  ON s.pg_function_schedule_id = fs.id
-	`)
-	if err != nil {
-		return err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var t task
-		var s schedule
-		var scheduleId uuid.UUID
-
-		t.scheduleIdMap = make(map[uuid.UUID]schedule)
-
-		if err := rows.Scan(&t.name, &t.nameLog, &t.pgFunctionId,
-			&scheduleId, &s.atHour, &s.atMinute, &s.atSecond, &s.atDay,
-			&s.intervalType, &s.interval, &s.runLastUnix); err != nil {
-
+		rows, err = db.Pool.Query(db.Ctx, `
+			SELECT f.name, f.name, fs.pg_function_id, fs.id, fs.at_hour, fs.at_minute,
+				fs.at_second, fs.at_day, fs.interval_type, fs.interval_value,
+				s.date_attempt
+			FROM app.pg_function AS f
+			INNER JOIN app.pg_function_schedule AS fs ON fs.pg_function_id         = f.id
+			INNER JOIN instance.scheduler       AS s  ON s.pg_function_schedule_id = fs.id
+		`)
+		if err != nil {
 			return err
 		}
+		defer rows.Close()
 
-		if _, exists := pgFunctionIdMapTasks[t.pgFunctionId]; exists {
-			t = pgFunctionIdMapTasks[t.pgFunctionId]
+		for rows.Next() {
+			var t task
+			var s schedule
+			var scheduleId uuid.UUID
+
+			t.scheduleIdMap = make(map[uuid.UUID]schedule)
+
+			if err := rows.Scan(&t.name, &t.nameLog, &t.pgFunctionId,
+				&scheduleId, &s.atHour, &s.atMinute, &s.atSecond, &s.atDay,
+				&s.intervalType, &s.interval, &s.runLastUnix); err != nil {
+
+				return err
+			}
+
+			if _, exists := pgFunctionIdMapTasks[t.pgFunctionId]; exists {
+				t = pgFunctionIdMapTasks[t.pgFunctionId]
+			}
+
+			t.scheduleIdMap[scheduleId] = s
+			pgFunctionIdMapTasks[t.pgFunctionId] = t
 		}
-
-		t.scheduleIdMap[scheduleId] = s
-		pgFunctionIdMapTasks[t.pgFunctionId] = t
-	}
-	for _, t := range pgFunctionIdMapTasks {
-		t.runNextUnix, t.runNextScheduleId = getNextRunScheduleFromTask(t)
-		tasks = append(tasks, t)
+		for _, t := range pgFunctionIdMapTasks {
+			t.runNextUnix, t.runNextScheduleId = getNextRunScheduleFromTask(t)
+			tasks = append(tasks, t)
+		}
 	}
 
 	// start main task loop
