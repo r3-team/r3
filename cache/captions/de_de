@@ -377,6 +377,8 @@
 				"cleanupFiles":"Bereinigung abgelaufener Datei-Uploads",
 				"cleanupLogs":"Bereinigung abgelaufener Systemlogs",
 				"cleanupTempDir":"Bereinigung des temporären Verzeichnisses",
+				"clusterCheckIn":"Einchecken vom Cluster-Knoten",
+				"clusterProcessEvents":"Verarbeitung von Cluster-Ereignissen",
 				"embeddedBackup":"Integrierte Backups steuern",
 				"httpCertRenew":"Neuladen des SSL-Zertifikates falls es erneuert wurde",
 				"importLdapLogins":"Import von Anmeldungen und Rollen über LDAP",

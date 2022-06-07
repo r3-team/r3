@@ -8,12 +8,11 @@ import (
 	"os"
 	"path/filepath"
 	"r3/cache"
-	"r3/cluster/tasks"
+	"r3/cluster"
 	"r3/config"
 	"r3/db"
 	"r3/log"
 	"r3/module_option"
-	"r3/scheduler"
 	"r3/schema"
 	"r3/schema/attribute"
 	"r3/schema/collection"
@@ -146,14 +145,9 @@ func ImportFromFiles(filePathsImport []string) error {
 	}
 	log.Info("transfer", "changes were commited successfully")
 
-	if err := tasks.SchemaLoadAll(true, true); err != nil {
+	if err := cluster.SchemaChangedAll(true, true); err != nil {
 		return err
 	}
-	log.Info("transfer", "schema cache was renewed")
-
-	scheduler.Start()
-	log.Info("transfer", "scheduler was reloaded")
-
 	return nil
 }
 

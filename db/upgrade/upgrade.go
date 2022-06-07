@@ -106,6 +106,12 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- new schema for cluster operation
 			CREATE SCHEMA instance_cluster;
 			
+			-- new type for cluster event
+			CREATE TYPE instance_cluster.node_event_content AS ENUM (
+   				'configChanged', 'loginDisabled', 'loginReauthorized',
+				'loginReauthorizedAll', 'masterAssigned', 'schemaChanged'
+			);
+			
 			-- new cluster tables
 			CREATE TABLE IF NOT EXISTS instance_cluster.node (
 			    id uuid NOT NULL,
@@ -118,18 +124,18 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			    CONSTRAINT node_pkey PRIMARY KEY (id)
 			);
 			
-			CREATE TABLE IF NOT EXISTS instance_cluster.node_task (
+			CREATE TABLE IF NOT EXISTS instance_cluster.node_event (
 			    node_id uuid NOT NULL,
-				action TEXT NOT NULL,
+				content instance_cluster.node_event_content NOT NULL,
 				payload TEXT NOT NULL,
-			    CONSTRAINT node_task_node_id_fkey FOREIGN KEY (node_id)
+			    CONSTRAINT node_event_node_id_fkey FOREIGN KEY (node_id)
 			        REFERENCES instance_cluster.node (id) MATCH SIMPLE
 			        ON UPDATE CASCADE
 			        ON DELETE CASCADE
 			        DEFERRABLE INITIALLY DEFERRED
 			);
 			
-			CREATE INDEX IF NOT EXISTS fki_node_task_node_fkey ON instance_cluster.node_task
+			CREATE INDEX IF NOT EXISTS fki_node_event_node_fkey ON instance_cluster.node_event
 				USING BTREE (node_id ASC NULLS LAST);
 			
 			-- new cluster logging context
@@ -152,9 +158,16 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			UPDATE instance.task SET cluster_master_only = FALSE
 			WHERE name IN ('cleanupBruteforce','httpCertRenew');
 			
-			-- new cluster config options
+			-- new tasks
+			INSERT INTO instance.task (name,interval_seconds,embedded_only,active,cluster_master_only)
+			VALUES ('clusterCheckIn',60,false,true,false),('clusterProcessEvents',5,false,true,false);
+			
+			INSERT INTO instance.scheduler (task_name,date_attempt,date_success)
+			VALUES ('clusterCheckIn',0,0),('clusterProcessEvents',0,0);
+			
+			-- new config option
 			INSERT INTO instance.config (name,value)
-			VALUES ('clusterCheckIn',60), ('clusterTasksCollect',5);
+			VALUES ('clusterMasterMissingAfter','180');
 			
 			-- new function: Request master role
 			CREATE OR REPLACE FUNCTION instance_cluster.master_role_request(
@@ -165,19 +178,19 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			    VOLATILE PARALLEL UNSAFE
 			AS $BODY$
 			DECLARE
-			    check_in_seconds     INT;
+			    master_missing_after INT;
 			    unix_master_check_in BIGINT;
 			BEGIN
-			    SELECT value::INT INTO check_in_seconds
+			    SELECT value::INT INTO master_missing_after
 			    FROM instance.config
-			    WHERE name = 'clusterCheckIn';
+			    WHERE name = 'clusterMasterMissingAfter';
 				
 			    SELECT date_check_in INTO unix_master_check_in
 			    FROM instance_cluster.node
 			    WHERE cluster_master;
 			    
-			    IF EXTRACT(EPOCH FROM NOW()) < unix_master_check_in + (check_in_seconds*3) THEN
-			        -- current master checked in within last 3 cycles
+			    IF EXTRACT(EPOCH FROM NOW()) < unix_master_check_in + master_missing_after THEN
+			        -- current master is not missing
 			        RETURN 0;
 			    END IF;
 			    
@@ -190,12 +203,12 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			    WHERE id = node_id_requested;
 			    
 			    -- assign master switch over tasks to all nodes
-			    INSERT INTO instance_cluster.node_task (node_id,action,payload)
+			    INSERT INTO instance_cluster.node_event (node_id,content,payload)
 			        SELECT id, 'masterAssigned', '{"state":false}'
 			        FROM instance_cluster.node
 			        WHERE cluster_master = FALSE;
 			    
-			    INSERT INTO instance_cluster.node_task (node_id,action,payload)
+			    INSERT INTO instance_cluster.node_event (node_id,content,payload)
 			    VALUES (node_id_requested, 'masterAssigned', '{"state":true}');
 				
 				RETURN 0;

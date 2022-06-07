@@ -377,6 +377,8 @@
 				"cleanupFiles":"Elimina i caricamenti di file scaduti",
 				"cleanupLogs":"Pulisci i log di sistema scaduti",
 				"cleanupTempDir":"Pulisci cartella temporanea",
+				"clusterCheckIn":"Check-in of cluster node",
+				"clusterProcessEvents":"Processing of cluster events",
 				"embeddedBackup":"Gestisci backup integrati",
 				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Importa login e ruoli tramite LDAP",

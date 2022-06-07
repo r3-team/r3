@@ -18,8 +18,5 @@ func TaskSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := task.Set_tx(tx, req.Name, req.Interval, req.Active); err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return nil, task.Set_tx(tx, req.Name, req.Interval, req.Active)
 }

@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"r3/cache"
+	"r3/cluster"
 	"r3/config"
 	"r3/db"
 	"r3/ldap/ldap_conn"
@@ -212,7 +213,7 @@ func importLogin(l loginType, key string, ldapId int32, assignRoles bool) error 
 
 	if changed {
 		if l.active {
-			if err := cache.RenewAccessById(loginId); err != nil {
+			if err := cluster.LoginReauthorized(true, loginId); err != nil {
 				log.Warning("ldap", fmt.Sprintf("could not renew access permissions for '%s'",
 					l.name), err)
 			}
@@ -220,7 +221,7 @@ func importLogin(l loginType, key string, ldapId int32, assignRoles bool) error 
 			log.Info("ldap", fmt.Sprintf("user account '%s' is locked, kicking active sessions",
 				l.name))
 
-			cache.KickLoginById(loginId)
+			cluster.LoginDisabled(true, loginId)
 		}
 	}
 	return nil

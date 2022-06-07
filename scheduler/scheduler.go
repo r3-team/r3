@@ -6,6 +6,7 @@ import (
 	"r3/backup"
 	"r3/bruteforce"
 	"r3/cache"
+	"r3/cluster"
 	"r3/config"
 	"r3/data"
 	"r3/db"
@@ -132,6 +133,12 @@ func Start() error {
 		case "cleanupFiles":
 			t.nameLog = "Cleanup of not-referenced files"
 			t.fn = cleanUpFiles
+		case "clusterCheckIn":
+			t.nameLog = "Check-in of cluster node to shared database"
+			t.fn = cluster.CheckInNode
+		case "clusterProcessEvents":
+			t.nameLog = "Processing of cluster events"
+			t.fn = cluster.ProcessEvents
 		case "embeddedBackup":
 			t.nameLog = "Integrated full backups"
 			t.fn = backup.Run
@@ -210,6 +217,7 @@ func Start() error {
 	if !loopRunning && len(tasks) != 0 {
 		loopRunning = true
 		initCounter++
+		go restartCheck()
 		go mainLoop()
 	}
 	return nil
@@ -258,6 +266,17 @@ func TriggerTask(systemTaskName string, pgFunctionId uuid.UUID, pgFunctionSchedu
 	}
 }
 
+func restartCheck() {
+	for {
+		select {
+		case <-cluster.SchedulerRestart:
+			if err := Start(); err != nil {
+				log.Error("scheduler", "failed to restart", err)
+			}
+		}
+	}
+}
+
 func mainLoop() {
 	// wait after startup for background tasks to start
 	time.Sleep(loopIntervalStartWait)
@@ -289,7 +308,7 @@ func mainLoop() {
 					taskNameNext = t.nameLog
 				}
 			}
-			log.Info("scheduler", fmt.Sprintf("set earliest next task execution time at %s for '%s'",
+			log.Info("scheduler", fmt.Sprintf("will start next task at %s ('%s')",
 				time.Unix(runEarliestUnix, 0), taskNameNext))
 		}
 
@@ -346,7 +365,7 @@ func runTaskByIndex(taskIndex int) {
 		taskType, t.nameLog, time.Unix(t.runNextUnix, 0)))
 
 	if err := storeTaskDate(t, "attempt"); err != nil {
-		log.Error("scheduler", fmt.Sprintf("'%s' failed to update meta data",
+		log.Error("scheduler", fmt.Sprintf("failed to update meta data for '%s'",
 			t.nameLog), err)
 	}
 
@@ -358,12 +377,12 @@ func runTaskByIndex(taskIndex int) {
 
 	if err == nil {
 		if err := storeTaskDate(t, "success"); err != nil {
-			log.Error("scheduler", fmt.Sprintf("'%s' failed to update meta data", t.nameLog), err)
+			log.Error("scheduler", fmt.Sprintf("failed to update meta data for '%s'", t.nameLog), err)
 		} else {
-			log.Info("scheduler", fmt.Sprintf("'%s' executed successfully", t.nameLog))
+			log.Info("scheduler", fmt.Sprintf("successfully executed '%s'", t.nameLog))
 		}
 	} else {
-		log.Error("scheduler", fmt.Sprintf("'%s' failed to execute", t.nameLog), err)
+		log.Error("scheduler", fmt.Sprintf("failed to execute '%s'", t.nameLog), err)
 	}
 
 	// store last successful run time for schedule

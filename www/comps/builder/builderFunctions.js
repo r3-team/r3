@@ -565,11 +565,6 @@ let MyBuilderPgFunctionItem = {
 						this.name = '';
 					
 					this.$root.schemaReload(this.moduleId);
-					
-					ws.send('scheduler','reload',{},false).then(
-						() => {},
-						this.$root.genericError
-					);
 				},
 				this.$root.genericError
 			);

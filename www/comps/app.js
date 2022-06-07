@@ -307,8 +307,14 @@ let MyApp = {
 				// affects everyone logged in
 				case 'config_changed':
 					if(this.isAdmin) {
-						ws.send('config','get',{},true).then(
-							res => this.$store.commit('config',res.payload),
+						ws.sendMultiple([
+							ws.prepare('config','get',{}),
+							ws.prepare('license','get',{})
+						],true).then(
+							res => {
+								this.$store.commit('config',res[0].payload);
+								this.$store.commit('license',res[1].payload);
+							},
 							this.genericError
 						);
 					}
@@ -379,7 +385,7 @@ let MyApp = {
 					this.$store.commit('local/companyLogoUrl',res.payload.companyLogoUrl);
 					this.$store.commit('local/companyName',res.payload.companyName);
 					this.$store.commit('local/companyWelcome',res.payload.companyWelcome);
-					this.$store.commit('productionMode',res.payload.productionMode);
+					this.$store.commit('productionMode',res.payload.productionMode === '1');
 					this.$store.commit('pageTitleRefresh'); // update page title with new app name
 					this.$store.commit('schema/languageCodes',res.payload.languageCodes);
 					this.$store.commit('schema/timestamp',res.payload.schemaTimestamp);

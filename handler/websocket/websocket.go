@@ -7,7 +7,7 @@ import (
 	"net"
 	"net/http"
 	"r3/bruteforce"
-	"r3/cache"
+	"r3/cluster"
 	"r3/handler"
 	"r3/log"
 	"r3/request"
@@ -54,9 +54,6 @@ var (
 
 func StartBackgroundTasks() {
 	go hub.start()
-}
-func GetClientCount() int {
-	return len(hub.clients)
 }
 
 func Handler(w http.ResponseWriter, r *http.Request) {
@@ -112,6 +109,7 @@ func (hub *hubType) start() {
 			client.ws.Close()
 			client.ctxCancel()
 			delete(hub.clients, client)
+			cluster.SetWebsocketClientCount(len(hub.clients))
 		}
 	}
 
@@ -120,11 +118,12 @@ func (hub *hubType) start() {
 		select {
 		case client := <-hub.clientAdd:
 			hub.clients[client] = true
+			cluster.SetWebsocketClientCount(len(hub.clients))
 
 		case client := <-hub.clientDel:
 			removeClient(client)
 
-		case event := <-cache.ClientEvent_handlerChan:
+		case event := <-cluster.WebsocketClientEvents:
 
 			jsonMsg := []byte{} // message back to client
 			kickEvent := event.Kick || event.KickNonAdmin

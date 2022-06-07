@@ -13,11 +13,8 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"r3/activation"
-	"r3/bruteforce"
 	"r3/cache"
 	"r3/cluster"
-	"r3/cluster/tasks"
 	"r3/config"
 	"r3/db"
 	"r3/db/embedded"
@@ -306,9 +303,9 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
-	// load configuration from database
-	if err := config.LoadFromDb(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to read configuration from database, %v", err))
+	// apply configuration from database
+	if err := cluster.ConfigChanged(false, true, false); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to apply configuration from database, %v", err))
 		return
 	}
 
@@ -317,9 +314,6 @@ func (prg *program) execute(svc service.Service) {
 		prg.executeAborted(svc, fmt.Errorf("failed to setup cluster node, %v", err))
 		return
 	}
-
-	// set log levels from configuration
-	config.SetLogLevels()
 
 	// process cli commands
 	if prg.cli.adminCreate != "" {
@@ -345,7 +339,7 @@ func (prg *program) execute(svc service.Service) {
 	}
 
 	// initialize module schema cache
-	if err := tasks.SchemaLoadAll(false, false); err != nil {
+	if err := cluster.SchemaChangedAll(false, false); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize schema cache, %v", err))
 		return
 	}
@@ -375,14 +369,6 @@ func (prg *program) execute(svc service.Service) {
 	}
 
 	log.Info("server", fmt.Sprintf("is ready to start application (%s)", appVersion))
-
-	// apply configuration parameters
-	bruteforce.SetConfig()
-	activation.SetLicense()
-
-	// start recurring cluster tasks
-	go cluster.CheckIn()
-	go tasks.TaskCollector()
 
 	// start scheduler for system jobs and schedule module functions
 	if err := scheduler.Start(); err != nil {

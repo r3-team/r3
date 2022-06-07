@@ -26,7 +26,7 @@ func GetAccessById(loginId int64) (types.LoginAccess, error) {
 
 	_, exists := loginIdMapAccess[loginId]
 	if !exists {
-		if err := load(loginId, false); err != nil {
+		if err := load(loginId); err != nil {
 			return types.LoginAccess{}, err
 		}
 	}
@@ -48,22 +48,14 @@ func RenewAccessById(loginId int64) error {
 	access_mx.Lock()
 	defer access_mx.Unlock()
 
-	return load(loginId, true)
-}
-
-// update clients
-func ChangedConfig() {
-	ClientEvent_handlerChan <- types.ClientEvent{LoginId: 0, ConfigChanged: true}
-}
-func KickLoginById(loginId int64) { // kick single login
-	ClientEvent_handlerChan <- types.ClientEvent{LoginId: loginId, Kick: true}
-}
-func KickNonAdmins() { // kick all non-admins
-	ClientEvent_handlerChan <- types.ClientEvent{LoginId: 0, KickNonAdmin: true}
+	if _, exists := loginIdMapAccess[loginId]; !exists {
+		return nil
+	}
+	return load(loginId)
 }
 
 // load access permissions for login ID into cache
-func load(loginId int64, renewal bool) error {
+func load(loginId int64) error {
 	Schema_mx.RLock()
 	defer Schema_mx.RUnlock()
 
@@ -113,10 +105,6 @@ func load(loginId int64, renewal bool) error {
 				loginIdMapAccess[loginId].Relation[id] = access
 			}
 		}
-	}
-
-	if renewal {
-		ClientEvent_handlerChan <- types.ClientEvent{LoginId: loginId, Renew: true}
 	}
 	return nil
 }

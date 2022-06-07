@@ -377,6 +377,8 @@
 				"cleanupFiles":"Cleanup expired file uploads",
 				"cleanupLogs":"Cleanup expired system logs",
 				"cleanupTempDir":"Cleanup temporary directory",
+				"clusterCheckIn":"Check-in of cluster node",
+				"clusterProcessEvents":"Processing of cluster events",
 				"embeddedBackup":"Manage integrated backups",
 				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Import logins and roles via LDAP",

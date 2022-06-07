@@ -3,7 +3,7 @@ package request
 import (
 	"encoding/json"
 	"fmt"
-	"r3/cluster/tasks"
+	"r3/cluster"
 	"r3/config"
 	"r3/tools"
 	"strconv"
@@ -70,5 +70,5 @@ func ConfigSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 			}
 		}
 	}
-	return nil, tasks.ConfigApply(true, false, switchToMaintenance)
+	return nil, cluster.ConfigChanged(true, false, switchToMaintenance)
 }
