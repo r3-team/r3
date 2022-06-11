@@ -157,18 +157,27 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			INSERT INTO instance.config (name,value)
 			VALUES ('clusterMasterMissingAfter','180');
 			
-			-- new scheduler option: Execute only by cluster master
-			ALTER TABLE instance.scheduler ADD COLUMN cluster_master_only BOOL NOT NULL DEFAULT TRUE;
-			ALTER TABLE instance.scheduler ALTER COLUMN cluster_master_only DROP DEFAULT;
-			UPDATE instance.scheduler SET cluster_master_only = FALSE
-			WHERE task_name IN ('cleanupBruteforce','httpCertRenew');
+			-- new task option: Execute only by cluster master
+			ALTER TABLE instance.task ADD COLUMN cluster_master_only BOOL NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.task ALTER COLUMN cluster_master_only DROP DEFAULT;
+			UPDATE instance.task SET cluster_master_only = FALSE
+			WHERE name IN ('cleanupBruteforce','httpCertRenew');
+			
+			-- new task option: Cannot be disabled
+			ALTER TABLE instance.task ADD COLUMN active_only BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE instance.task ALTER COLUMN active_only DROP DEFAULT;
 			
 			-- new tasks
-			INSERT INTO instance.task (name,interval_seconds,embedded_only,active)
-			VALUES ('clusterCheckIn',60,false,true),('clusterProcessEvents',5,false,true);
+			INSERT INTO instance.task (
+				name,interval_seconds,cluster_master_only,
+				embedded_only,active_only,active
+			)
+			VALUES
+				('clusterCheckIn',60,false,false,true,true),
+				('clusterProcessEvents',5,false,false,true,true);
 			
-			INSERT INTO instance.scheduler (task_name,date_attempt,date_success,cluster_master_only)
-			VALUES ('clusterCheckIn',0,0,false),('clusterProcessEvents',0,0,false);
+			INSERT INTO instance.scheduler (task_name,date_attempt,date_success)
+			VALUES ('clusterCheckIn',0,0),('clusterProcessEvents',0,0);
 			
 			-- rename instance schedule, add PK
 			ALTER TABLE instance.scheduler RENAME TO schedule;

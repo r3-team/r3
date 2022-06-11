@@ -57,7 +57,12 @@ let MyAdminScheduler = {
 							<td><input v-model.number="schedulersInput[i].intervalValue" /></td>
 							<td>{{ displayTime(s.dateAttempt) }}</td>
 							<td>{{ displayTime(s.dateSuccess) }}</td>
-							<td><my-bool v-model="schedulersInput[i].active" /></td>
+							<td>
+								<my-bool
+									v-if="!schedulersInput[i].activeOnly"
+									v-model="schedulersInput[i].active"
+								/>
+							</td>
 							<td>
 								<my-button image="clock.png"
 									@trigger="runSystemTask(s.taskName)"
@@ -257,7 +262,7 @@ let MyAdminScheduler = {
 			for(let i = 0, j = this.schedulersInput.length; i < j; i++) {
 				let s = this.schedulersInput[i];
 				
-				if(s.taskName !== '' && JSON.stringify(s) === JSON.stringify(this.schedulers[i]))
+				if(s.taskName === '' || JSON.stringify(s) === JSON.stringify(this.schedulers[i]))
 					continue;
 				
 				requests.push(ws.prepare('task','set',{

@@ -279,7 +279,7 @@ func load() error {
 	// get system tasks and their states
 	rows, err := db.Pool.Query(db.Ctx, `
 		SELECT t.name, t.embedded_only, t.interval_seconds,
-			s.id, s.cluster_master_only, s.date_attempt, ns.date_attempt
+			t.cluster_master_only, s.id, s.date_attempt, ns.date_attempt
 		FROM instance.task AS t
 		INNER JOIN instance.schedule AS s
 			ON s.task_name = t.name
@@ -299,7 +299,7 @@ func load() error {
 		var runLastUnixNode pgtype.Int8
 
 		if err := rows.Scan(&t.name, &embeddedOnly, &s.interval,
-			&s.id, &s.clusterMasterOnly, &s.runLastUnix, &runLastUnixNode); err != nil {
+			&s.clusterMasterOnly, &s.id, &s.runLastUnix, &runLastUnixNode); err != nil {
 
 			return err
 		}

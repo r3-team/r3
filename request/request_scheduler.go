@@ -12,6 +12,7 @@ func Get() (interface{}, error) {
 
 	type task struct {
 		Active               bool          `json:"active"`
+		ActiveOnly           bool          `json:"activeOnly"`
 		DateAttempt          int64         `json:"dateAttempt"`
 		DateSuccess          int64         `json:"dateSuccess"`
 		IntervalType         string        `json:"intervalType"`
@@ -31,6 +32,7 @@ func Get() (interface{}, error) {
 			COALESCE(s.task_name,''),
 			COALESCE(fs.interval_type,'seconds'),
 			COALESCE(fs.interval_value,t.interval_seconds),
+			COALESCE(t.active_only,true),
 			COALESCE(t.active,true)
 		FROM instance.schedule AS s
 		LEFT JOIN app.pg_function_schedule AS fs ON fs.id  = s.pg_function_schedule_id
@@ -50,7 +52,7 @@ func Get() (interface{}, error) {
 
 		if err := rows.Scan(&t.PgFunctionId, &t.PgFunctionScheduleId,
 			&t.DateAttempt, &t.DateSuccess, &t.TaskName, &t.IntervalType,
-			&t.IntervalValue, &t.Active); err != nil {
+			&t.IntervalValue, &t.ActiveOnly, &t.Active); err != nil {
 
 			return tasks, err
 		}
