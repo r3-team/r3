@@ -32,7 +32,7 @@ func Get() (interface{}, error) {
 			COALESCE(fs.interval_type,'seconds'),
 			COALESCE(fs.interval_value,t.interval_seconds),
 			COALESCE(t.active,true)
-		FROM instance.scheduler AS s
+		FROM instance.schedule AS s
 		LEFT JOIN app.pg_function_schedule AS fs ON fs.id  = s.pg_function_schedule_id
 		LEFT JOIN instance.task            AS t  ON t.name = s.task_name
 		ORDER BY

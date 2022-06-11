@@ -514,12 +514,6 @@ let MyApp = {
 				() => {},
 				this.genericError
 			);
-		},
-		schedulerReload:function(blocking) {
-			ws.send('scheduler','reload',{},blocking).then(
-				() => {},
-				this.genericError
-			);
 		}
 	}
 };

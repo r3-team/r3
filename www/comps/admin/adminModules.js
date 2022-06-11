@@ -290,10 +290,7 @@ let MyAdminModulesItem = {
 			}
 			
 			ws.sendMultiple(requests,true).then(
-				() => {
-					this.$root.schemaReload();
-					this.$root.schedulerReload(false);
-				},
+				() => this.$root.schemaReload(),
 				this.$root.genericError
 			);
 		},

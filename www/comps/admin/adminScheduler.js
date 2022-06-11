@@ -271,7 +271,7 @@ let MyAdminScheduler = {
 				() => {
 					this.get();
 					
-					ws.send('scheduler','reload',{},false).then(
+					ws.send('task','informChanged',{},false).then(
 						() => {},
 						this.$root.genericError
 					);

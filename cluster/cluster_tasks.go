@@ -92,7 +92,7 @@ func LoginReauthorizedAll(updateNodes bool) error {
 	return nil
 }
 func MasterAssigned(state bool) error {
-	log.Info("cluster", fmt.Sprintf("master role updated to: %v", state))
+	log.Info("cluster", fmt.Sprintf("node has changed its master state to '%v'", state))
 	cache.SetIsClusterMaster(state)
 
 	// reload scheduler as most events should only be executed by the cluster master
@@ -136,5 +136,16 @@ func SchemaChanged(updateNodes bool, newVersion bool, moduleIdsUpdateOnly []uuid
 
 	// inform clients to retrieve new access cache
 	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, Renew: true}
+	return nil
+}
+func TasksChanged(updateNodes bool) error {
+	if updateNodes {
+		if err := createEventsForOtherNodes("tasksChanged", nil); err != nil {
+			return err
+		}
+	}
+
+	// reload scheduler as tasks have changed
+	SchedulerRestart <- true
 	return nil
 }

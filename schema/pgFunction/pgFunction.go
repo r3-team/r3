@@ -249,10 +249,11 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 				return err
 			}
 			if _, err := tx.Exec(db.Ctx, `
-				INSERT INTO instance.scheduler (
-					pg_function_schedule_id,date_attempt,date_success
+				INSERT INTO instance.schedule (
+					pg_function_schedule_id,date_attempt,
+					date_success,cluster_master_only
 				)
-				VALUES ($1,0,0)
+				VALUES ($1,0,0,TRUE)
 			`, s.Id); err != nil {
 				return err
 			}

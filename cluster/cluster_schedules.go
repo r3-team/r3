@@ -41,7 +41,7 @@ func CheckInNode() error {
 	}
 
 	if tools.GetTimeUnix() > masterLastCheckIn+(int64(config.GetUint64("clusterMasterMissingAfter"))) {
-		log.Info("cluster", "is missing its master, requesting switch-over")
+		log.Info("cluster", "node has recognized an absent master, requesting role for itself")
 
 		// cluster master missing, request cluster master role for this node
 		if _, err := db.Pool.Exec(db.Ctx, `
@@ -90,7 +90,7 @@ func ProcessEvents() error {
 
 	// react to collected events
 	for _, e := range events {
-		log.Info("cluster", fmt.Sprintf("executing event '%s'", e.Content))
+		log.Info("cluster", fmt.Sprintf("node is reacting to event '%s'", e.Content))
 
 		switch e.Content {
 		case "configChanged":
@@ -125,6 +125,8 @@ func ProcessEvents() error {
 				return err
 			}
 			err = SchemaChanged(false, p.NewVersion, p.ModuleIdsUpdateOnly)
+		case "tasksChanged":
+			err = TasksChanged(false)
 		}
 		if err != nil {
 			return err

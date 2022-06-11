@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"r3/cache"
+	"r3/cluster"
 	"r3/config"
 	"r3/db"
 	"r3/handler"
 	"r3/log"
-	"r3/scheduler"
 	"r3/types"
 	"strconv"
 	"time"
@@ -433,8 +433,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		switch action {
 		case "get":
 			return Get()
-		case "reload":
-			return nil, scheduler.Start()
 		case "trigger":
 			return Trigger(reqJson)
 		}
@@ -452,6 +450,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		}
 	case "task":
 		switch action {
+		case "informChanged":
+			return nil, cluster.TasksChanged(true)
 		case "set":
 			return TaskSet_tx(tx, reqJson)
 		}

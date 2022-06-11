@@ -370,12 +370,6 @@ func (prg *program) execute(svc service.Service) {
 
 	log.Info("server", fmt.Sprintf("is ready to start application (%s)", appVersion))
 
-	// start scheduler for system jobs and schedule module functions
-	if err := scheduler.Start(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to start scheduler, %v", err))
-		return
-	}
-
 	// prepare web server
 	go websocket.StartBackgroundTasks()
 

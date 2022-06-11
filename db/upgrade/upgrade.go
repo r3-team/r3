@@ -109,7 +109,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- new type for cluster event
 			CREATE TYPE instance_cluster.node_event_content AS ENUM (
    				'configChanged', 'loginDisabled', 'loginReauthorized',
-				'loginReauthorizedAll', 'masterAssigned', 'schemaChanged'
+				'loginReauthorizedAll', 'masterAssigned', 'schemaChanged',
+				'tasksChanged'
 			);
 			
 			-- new cluster tables
@@ -152,22 +153,51 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX IF NOT EXISTS fki_log_node_fkey ON instance.log
 				USING BTREE (node_id ASC NULLS LAST);
 			
-			-- new task option: Execute only by cluster master
-			ALTER TABLE instance.task ADD COLUMN cluster_master_only BOOL NOT NULL DEFAULT TRUE;
-			ALTER TABLE instance.task ALTER COLUMN cluster_master_only DROP DEFAULT;
-			UPDATE instance.task SET cluster_master_only = FALSE
-			WHERE name IN ('cleanupBruteforce','httpCertRenew');
-			
-			-- new tasks
-			INSERT INTO instance.task (name,interval_seconds,embedded_only,active,cluster_master_only)
-			VALUES ('clusterCheckIn',60,false,true,false),('clusterProcessEvents',5,false,true,false);
-			
-			INSERT INTO instance.scheduler (task_name,date_attempt,date_success)
-			VALUES ('clusterCheckIn',0,0),('clusterProcessEvents',0,0);
-			
 			-- new config option
 			INSERT INTO instance.config (name,value)
 			VALUES ('clusterMasterMissingAfter','180');
+			
+			-- new scheduler option: Execute only by cluster master
+			ALTER TABLE instance.scheduler ADD COLUMN cluster_master_only BOOL NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.scheduler ALTER COLUMN cluster_master_only DROP DEFAULT;
+			UPDATE instance.scheduler SET cluster_master_only = FALSE
+			WHERE task_name IN ('cleanupBruteforce','httpCertRenew');
+			
+			-- new tasks
+			INSERT INTO instance.task (name,interval_seconds,embedded_only,active)
+			VALUES ('clusterCheckIn',60,false,true),('clusterProcessEvents',5,false,true);
+			
+			INSERT INTO instance.scheduler (task_name,date_attempt,date_success,cluster_master_only)
+			VALUES ('clusterCheckIn',0,0,false),('clusterProcessEvents',0,0,false);
+			
+			-- rename instance schedule, add PK
+			ALTER TABLE instance.scheduler RENAME TO schedule;
+			ALTER TABLE instance.schedule ADD COLUMN id SERIAL PRIMARY KEY;
+			
+			-- add node schedule table
+			CREATE TABLE IF NOT EXISTS instance_cluster.node_schedule (
+			    node_id uuid NOT NULL,
+			    schedule_id integer NOT NULL,
+			    date_attempt bigint NOT NULL,
+			    date_success bigint NOT NULL,
+			    CONSTRAINT node_schedule_pkey PRIMARY KEY (node_id, schedule_id),
+			    CONSTRAINT node_schedule_node_id_fkey FOREIGN KEY (node_id)
+			        REFERENCES instance_cluster.node (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT node_schedule_schedule_id_fkey FOREIGN KEY (schedule_id)
+			        REFERENCES instance.schedule (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_node_schedule_node_id_fkey ON instance_cluster.node_schedule
+				USING BTREE (node_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_node_schedule_schedule_id_fkey ON instance_cluster.node_schedule
+				USING BTREE (schedule_id ASC NULLS LAST);
 			
 			-- new function: Request master role
 			CREATE OR REPLACE FUNCTION instance_cluster.master_role_request(
