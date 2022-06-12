@@ -377,8 +377,8 @@
 				"cleanupFiles":"Curățați fișierele încărcate expirate",
 				"cleanupLogs":"Curățați jurnalele de sistem expirate",
 				"cleanupTempDir":"Curățați directorul temporar",
-				"clusterCheckIn":"Check-in of cluster node",
-				"clusterProcessEvents":"Processing of cluster events",
+				"clusterCheckIn":"Cluster check-in",
+				"clusterProcessEvents":"Cluster event processing",
 				"embeddedBackup":"Gestionați copiile de siguranță integrate",
 				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Importați autentificări și roluri prin LDAP",
@@ -405,7 +405,8 @@
 			"scheduleLineDayWeeks":"pe {DAY}. pe săptămână",
 			"scheduleLineDayYears":"pe {DAY}. pe an",
 			"scheduleLineTime":"la {HH}:{MM}:{SS}",
-			"systemTasks":"Sarcini de sistem"
+			"systemTasks":"System tasks (global)",
+			"systemTasksNode":"System tasks (cluster nodes)"
 		},
 		"navigationConfig":"Sistem",
 		"navigationLdaps":"Autentificări-LDAP",

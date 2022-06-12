@@ -377,8 +377,8 @@
 				"cleanupFiles":"Elimina i caricamenti di file scaduti",
 				"cleanupLogs":"Pulisci i log di sistema scaduti",
 				"cleanupTempDir":"Pulisci cartella temporanea",
-				"clusterCheckIn":"Check-in of cluster node",
-				"clusterProcessEvents":"Processing of cluster events",
+				"clusterCheckIn":"Cluster check-in",
+				"clusterProcessEvents":"Cluster event processing",
 				"embeddedBackup":"Gestisci backup integrati",
 				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Importa login e ruoli tramite LDAP",
@@ -405,7 +405,8 @@
 			"scheduleLineDayWeeks":"al {DAY}. giorno della settimana",
 			"scheduleLineDayYears":"al {DAY}. dell'anno",
 			"scheduleLineTime":"alle {HH}:{MM}:{SS}",
-			"systemTasks":"Attività di sistema"
+			"systemTasks":"System tasks (global)",
+			"systemTasksNode":"System tasks (cluster nodes)"
 		},
 		"navigationConfig":"Sistema",
 		"navigationLdaps":"LDAP-Logins",

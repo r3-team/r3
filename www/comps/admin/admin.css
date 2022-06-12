@@ -392,6 +392,12 @@
 }
 
 
+/* schedules */
+.admin-scheduler table{
+	max-width:1300px;
+}
+
+
 /* mails */
 .admin-mails{}
 .admin-mails .row-actions{

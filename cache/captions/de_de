@@ -377,8 +377,8 @@
 				"cleanupFiles":"Bereinigung abgelaufener Datei-Uploads",
 				"cleanupLogs":"Bereinigung abgelaufener Systemlogs",
 				"cleanupTempDir":"Bereinigung des temporären Verzeichnisses",
-				"clusterCheckIn":"Einchecken vom Cluster-Knoten",
-				"clusterProcessEvents":"Verarbeitung von Cluster-Ereignissen",
+				"clusterCheckIn":"Cluster-Knoten einchecken",
+				"clusterProcessEvents":"Cluster-Ereignisse verarbeiten",
 				"embeddedBackup":"Integrierte Backups steuern",
 				"httpCertRenew":"Neuladen des SSL-Zertifikates falls es erneuert wurde",
 				"importLdapLogins":"Import von Anmeldungen und Rollen über LDAP",
@@ -389,7 +389,7 @@
 				"updateCheck":"Nach Plattform-Updates suchen"
 			},
 			"dateAttempt":"Letzter Start",
-			"dateSuccess":"Letzter, erfolgreicher Abschluss",
+			"dateSuccess":"Letzter erfolgreicher Abschluss",
 			"functions":"Aufgaben von Anwendungen",
 			"interval":"Ausführungsinterval",
 			"intervalSeconds":"Ausführungsinterval (in Sekunden)",
@@ -405,7 +405,8 @@
 			"scheduleLineDayWeeks":"am {DAY}. Wochentag",
 			"scheduleLineDayYears":"am {DAY}. des Jahres",
 			"scheduleLineTime":"um {HH}:{MM}:{SS}",
-			"systemTasks":"Systemaufgaben"
+			"systemTasks":"Systemaufgaben (global)",
+			"systemTasksNode":"Systemaufgaben (Clusterknoten)"
 		},
 		"navigationConfig":"System",
 		"navigationLdaps":"LDAP-Anmeldungen",

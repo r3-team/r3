@@ -377,8 +377,8 @@
 				"cleanupFiles":"Cleanup expired file uploads",
 				"cleanupLogs":"Cleanup expired system logs",
 				"cleanupTempDir":"Cleanup temporary directory",
-				"clusterCheckIn":"Check-in of cluster node",
-				"clusterProcessEvents":"Processing of cluster events",
+				"clusterCheckIn":"Cluster check-in",
+				"clusterProcessEvents":"Cluster event processing",
 				"embeddedBackup":"Manage integrated backups",
 				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Import logins and roles via LDAP",
@@ -389,7 +389,7 @@
 				"updateCheck":"Check for platform updates"
 			},
 			"dateAttempt":"Last start",
-			"dateSuccess":"Last, successful completion",
+			"dateSuccess":"Last successful completion",
 			"functions":"Application tasks",
 			"interval":"Execution interval",
 			"intervalSeconds":"Execution interval (in seconds)",
@@ -405,7 +405,8 @@
 			"scheduleLineDayWeeks":"on the {DAY}. weekday",
 			"scheduleLineDayYears":"on the {DAY}. of the year",
 			"scheduleLineTime":"at {HH}:{MM}:{SS}",
-			"systemTasks":"System tasks"
+			"systemTasks":"System tasks (global)",
+			"systemTasksNode":"System tasks (cluster nodes)"
 		},
 		"navigationConfig":"System",
 		"navigationLdaps":"LDAP-Logins",

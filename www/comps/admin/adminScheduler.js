@@ -33,7 +33,8 @@ let MyAdminScheduler = {
 		</div>
 		
 		<div class="content no-padding">
-			
+		
+			<!-- cluster master schedules -->
 			<div class="contentPart full">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/settings.png" />
@@ -47,34 +48,96 @@ let MyAdminScheduler = {
 							<th>{{ capApp.intervalSeconds }}</th>
 							<th>{{ capApp.dateAttempt }}</th>
 							<th>{{ capApp.dateSuccess }}</th>
-							<th>{{ capGen.active }}</th>
-							<th></th>
+							<th colspan="2">{{ capGen.active }}</th>
 						</tr>
 					</thead>
 					<tbody>
-						<tr v-for="(s,i) in schedulersInput.filter(v => v.taskName !== '')">
-							<td>{{ displayName(s.taskName) }}</td>
-							<td><input v-model.number="schedulersInput[i].intervalValue" /></td>
-							<td>{{ displayTime(s.dateAttempt) }}</td>
-							<td>{{ displayTime(s.dateSuccess) }}</td>
-							<td>
-								<my-bool
-									v-if="!schedulersInput[i].activeOnly"
-									v-model="schedulersInput[i].active"
-								/>
-							</td>
-							<td>
-								<my-button image="clock.png"
-									@trigger="runSystemTask(s.taskName)"
-									:active="!taskRunning && schedulersInput[i].active"
-									:caption="capApp.button.runNow"
-								/>
-							</td>
-						</tr>
+						<template v-for="(s,i) in schedulersInput.filter(v => v.taskName !== '')">
+							<tr v-if="s.clusterMasterOnly">
+								<td>{{ displayName(s.taskName) }}</td>
+								<td><input class="short" v-model.number="schedulersInput[i].intervalValue" /></td>
+								<td>{{ displayTime(s.dateAttempt) }}</td>
+								<td>{{ displayTime(s.dateSuccess) }}</td>
+								<td>
+									<my-bool
+										v-if="!schedulersInput[i].activeOnly"
+										v-model="schedulersInput[i].active"
+									/>
+								</td>
+								<td>
+									<my-button image="clock.png"
+										@trigger="runSystemTask(s.taskName)"
+										:active="schedulers[i].active"
+										:caption="capApp.button.runNow"
+									/>
+								</td>
+							</tr>
+						</template>
 					</tbody>
 				</table>
 			</div>
 			
+			<!-- cluster node schedules -->
+			<div class="contentPart full">
+				<div class="contentPartHeader">
+					<img class="icon" src="images/settings.png" />
+					<h1>{{ capApp.systemTasksNode }}</h1>
+				</div>
+				
+				<table class="table-default default-inputs shade">
+					<thead>
+						<tr>
+							<th></th>
+							<th>{{ capGen.name }}</th>
+							<th>{{ capApp.intervalSeconds }}</th>
+							<th>{{ capApp.dateAttempt }}</th>
+							<th>{{ capApp.dateSuccess }}</th>
+							<th colspan="2">{{ capGen.active }}</th>
+						</tr>
+					</thead>
+					<tbody>
+						<template v-for="(s,i) in schedulersInput.filter(v => v.taskName !== '')">
+							<template v-if="!s.clusterMasterOnly">
+								<tr>
+									<td class="minimum">
+										<my-button
+											@trigger="expandScheduler(i)"
+											:image="schedulersExpanded.includes(i) ? 'triangleDown.png' : 'triangleRight.png'"
+											:naked="true"
+										/>
+									</td>
+									<td>{{ displayName(s.taskName) }}</td>
+									<td><input class="short" v-model.number="schedulersInput[i].intervalValue" /></td>
+									<td>{{ displayTime(s.dateAttempt) }}</td>
+									<td>{{ displayTime(s.dateSuccess) }}</td>
+									<td>
+										<my-bool
+											v-if="!schedulersInput[i].activeOnly"
+											v-model="schedulersInput[i].active"
+										/>
+									</td>
+									<td>
+										<my-button image="clock.png"
+											@trigger="runSystemTask(s.taskName)"
+											:active="schedulers[i].active"
+											:caption="capApp.button.runNow"
+										/>
+									</td>
+								</tr>
+								<tr v-if="schedulersExpanded.includes(i)" v-for="meta in s.nodeMeta">
+									<td></td>
+									<td colspan="2">{{ meta.name }}</td>
+									<td>{{ displayTime(meta.dateAttempt) }}</td>
+									<td>{{ displayTime(meta.dateSuccess) }}</td>
+									<td colspan="3"></td>
+								</tr>
+							</template>
+						</template>
+					</tbody>
+				</table>
+			</div>
+			
+			<!-- module schedules -->
 			<div class="contentPart full" v-if="hasAppSchedules">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/builder.png" />
@@ -102,7 +165,6 @@ let MyAdminScheduler = {
 							<td>
 								<my-button image="clock.png"
 									@trigger="runPgFunction(s.pgFunctionId,s.pgFunctionScheduleId)"
-									:active="!taskRunning"
 									:caption="capApp.button.runNow"
 								/>
 							</td>
@@ -119,7 +181,7 @@ let MyAdminScheduler = {
 		return {
 			schedulers:[],
 			schedulersInput:[],
-			taskRunning:false
+			schedulersExpanded:[] // indexes of schedules that show all nodes
 		};
 	},
 	mounted:function() {
@@ -225,6 +287,12 @@ let MyAdminScheduler = {
 			
 			return parts.join(', ');
 		},
+		expandScheduler:function(i) {
+			let pos = this.schedulersExpanded.indexOf(i);
+			
+			if(pos === -1) this.schedulersExpanded.push(i);
+			else           this.schedulersExpanded.splice(pos,1);
+		},
 		
 		// backend calls
 		get:function() {
@@ -237,25 +305,23 @@ let MyAdminScheduler = {
 			);
 		},
 		runPgFunction:function(pgFunctionId,pgFunctionScheduleId) {
-			ws.send('scheduler','trigger',{
+			ws.send('task','run',{
+				clusterMasterOnly:true,
 				pgFunctionId:pgFunctionId,
 				pgFunctionScheduleId:pgFunctionScheduleId
 			},true).then(
-				() => this.runOk(),
+				() => {},
 				this.$root.genericError
 			);
-			this.taskRunning = true;
 		},
-		runSystemTask:function(name) {
-			ws.send('scheduler','trigger',{systemTaskName:name},true).then(
-				() => this.runOk(),
+		runSystemTask:function(name,clusterMasterOnly) {
+			ws.send('task','run',{
+				clusterMasterOnly:clusterMasterOnly,
+				taskName:name
+			},true).then(
+				() => {},
 				this.$root.genericError
 			);
-			this.taskRunning = true;
-		},
-		runOk:function() {
-			this.taskRunning = false;
-			this.get();
 		},
 		set:function() {
 			let requests = [];
