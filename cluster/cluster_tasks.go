@@ -6,16 +6,54 @@ import (
 	"r3/bruteforce"
 	"r3/cache"
 	"r3/config"
+	"r3/db"
 	"r3/log"
+	"r3/tools"
 	"r3/types"
+	"runtime"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v4"
 )
 
-var (
-	SchedulerRestart      = make(chan bool, 10)
-	WebsocketClientEvents = make(chan types.ClusterWebsocketClientEvent, 10)
-)
+// check in cluster node to shared database
+// update statistics and check for missing master while we´re at it
+func CheckInNode() error {
+	var m runtime.MemStats
+	runtime.ReadMemStats(&m)
+
+	if _, err := db.Pool.Exec(db.Ctx, `
+		UPDATE instance_cluster.node
+		SET date_check_in = $1, stat_sessions = $2, stat_memory = $3
+		WHERE id = $4
+	`, tools.GetTimeUnix(), websocketClientCount,
+		(m.Sys / 1024 / 1024), cache.GetNodeId()); err != nil {
+
+		return err
+	}
+
+	// check whether current cluster master is doing its job
+	var masterLastCheckIn int64
+	if err := db.Pool.QueryRow(db.Ctx, `
+		SELECT date_check_in
+		FROM instance_cluster.node
+		WHERE cluster_master
+	`).Scan(&masterLastCheckIn); err != nil && err != pgx.ErrNoRows {
+		return err
+	}
+
+	if tools.GetTimeUnix() > masterLastCheckIn+(int64(config.GetUint64("clusterMasterMissingAfter"))) {
+		log.Info("cluster", "node has recognized an absent master, requesting role for itself")
+
+		// cluster master missing, request cluster master role for this node
+		if _, err := db.Pool.Exec(db.Ctx, `
+			SELECT instance_cluster.master_role_request($1)
+		`, cache.GetNodeId()); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 
 // events relevant to all cluster nodes
 func ConfigChanged(updateNodes bool, loadConfigFromDb bool, switchToMaintenance bool) error {

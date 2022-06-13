@@ -1,7 +1,6 @@
 package request
 
 import (
-	"encoding/json"
 	"r3/db"
 
 	"github.com/gofrs/uuid"
@@ -79,22 +78,4 @@ func Get() (interface{}, error) {
 		tasks = append(tasks, t)
 	}
 	return tasks, nil
-}
-
-func Trigger(reqJson json.RawMessage) (interface{}, error) {
-
-	var req struct {
-		// trigger PG function scheduler by ID
-		PgFunctionId         uuid.UUID `json:"pgFunctionId"`
-		PgFunctionScheduleId uuid.UUID `json:"pgFunctionScheduleId"`
-
-		// trigger system task by name
-		SystemTaskName string `json:"systemTaskName"`
-	}
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-
-	scheduler.TriggerTask(req.SystemTaskName, req.PgFunctionId, req.PgFunctionScheduleId)
-	return nil, nil
 }

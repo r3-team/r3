@@ -19,6 +19,11 @@ type ClusterEventSchemaChanged struct {
 	ModuleIdsUpdateOnly []uuid.UUID `json:"moduleIdsUpdateOnly"`
 	NewVersion          bool        `json:"newVersion"`
 }
+type ClusterEventTaskTriggered struct {
+	PgFunctionId         uuid.UUID `json:"pgFunctionId"`
+	PgFunctionScheduleId uuid.UUID `json:"pgFunctionScheduleId"`
+	TaskName             string    `json:"taskName"`
+}
 
 // a server side event, affecting one or many clients (by associated login ID)
 type ClusterWebsocketClientEvent struct {

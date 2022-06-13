@@ -433,8 +433,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		switch action {
 		case "get":
 			return Get()
-		case "trigger":
-			return Trigger(reqJson)
 		}
 	case "schema":
 		switch action {
@@ -452,6 +450,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		switch action {
 		case "informChanged":
 			return nil, cluster.TasksChanged(true)
+		case "run":
+			return TaskRun(reqJson)
 		case "set":
 			return TaskSet_tx(tx, reqJson)
 		}

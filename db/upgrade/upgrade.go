@@ -110,7 +110,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE TYPE instance_cluster.node_event_content AS ENUM (
    				'configChanged', 'loginDisabled', 'loginReauthorized',
 				'loginReauthorizedAll', 'masterAssigned', 'schemaChanged',
-				'tasksChanged'
+				'tasksChanged','taskTriggered'
 			);
 			
 			-- new cluster tables
@@ -249,6 +249,46 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			    
 			    INSERT INTO instance_cluster.node_event (node_id,content,payload)
 			    VALUES (node_id_requested, 'masterAssigned', '{"state":true}');
+				
+				RETURN 0;
+			END;
+			$BODY$;
+			CREATE OR REPLACE FUNCTION instance_cluster.run_task(
+				task_name text,
+				pg_function_id uuid,
+				pg_function_schedule_id uuid)
+			    RETURNS integer
+			    LANGUAGE 'plpgsql'
+			    COST 100
+			    VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+				needs_master BOOLEAN;
+			BEGIN
+				IF task_name <> '' THEN
+					SELECT cluster_master_only INTO needs_master
+					FROM instance.task
+					WHERE name = task_name;
+					
+					IF needs_master IS NULL THEN
+						RETURN 1;
+					END IF;
+				
+					-- run system task
+					INSERT INTO instance_cluster.node_event (node_id, content, payload)
+						SELECT id, 'taskTriggered', CONCAT('{"taskName":"',task_name,'"}')
+						FROM instance_cluster.node
+						WHERE needs_master = FALSE
+						OR cluster_master;
+					
+					RETURN 0;
+				END IF;
+				
+				-- run PG function by schedule (always run by cluster master)
+				INSERT INTO instance_cluster.node_event (node_id, content, payload)
+					SELECT id, 'taskTriggered', CONCAT('{"pgFunctionId":"',pg_function_id,'","pgFunctionScheduleId":"',pg_function_schedule_id,'"}')
+					FROM instance_cluster.node
+					WHERE cluster_master;
 				
 				RETURN 0;
 			END;

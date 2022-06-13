@@ -167,10 +167,8 @@ func init() {
 }
 
 // trigger task directly from outside
-// either by name of system task or by choosing a PG function scheduler
-func TriggerTask(systemTaskName string, pgFunctionId uuid.UUID, pgFunctionScheduleId uuid.UUID) {
-	return
-
+// either by name of system task or by choosing a PG function schedule
+func runTask(systemTaskName string, pgFunctionId uuid.UUID, pgFunctionScheduleId uuid.UUID) {
 	taskIndexToRun := -1
 
 	// identify task index to run
@@ -197,9 +195,9 @@ func TriggerTask(systemTaskName string, pgFunctionId uuid.UUID, pgFunctionSchedu
 	}
 	change_mx.Unlock()
 
-	// if task was found, run it and wait for it to finish
+	// if task was found, run it
 	if taskIndexToRun != -1 {
-		runTaskByIndex(taskIndexToRun)
+		go runTaskByIndex(taskIndexToRun)
 	}
 }
 
@@ -220,16 +218,12 @@ func runTaskByIndex(taskIndex int) {
 
 	// run task and store schedule meta data
 	var err error
-	taskType := "system task"
-	if !t.isSystemTask {
-		taskType = "function"
-	}
 
-	log.Info("scheduler", fmt.Sprintf("started %s '%s' (scheduled for: %s)",
-		taskType, t.nameLog, time.Unix(t.runNextUnix, 0)))
+	log.Info("scheduler", fmt.Sprintf("task '%s' started (scheduled for: %s)",
+		t.nameLog, time.Unix(t.runNextUnix, 0)))
 
 	if err := storeTaskDate(t, "attempt"); err != nil {
-		log.Error("scheduler", fmt.Sprintf("failed to update meta data for '%s'",
+		log.Error("scheduler", fmt.Sprintf("task '%s' failed to update its meta data",
 			t.nameLog), err)
 	}
 
@@ -241,12 +235,12 @@ func runTaskByIndex(taskIndex int) {
 
 	if err == nil {
 		if err := storeTaskDate(t, "success"); err != nil {
-			log.Error("scheduler", fmt.Sprintf("failed to update meta data for '%s'", t.nameLog), err)
+			log.Error("scheduler", fmt.Sprintf("task '%s' failed to update its meta data", t.nameLog), err)
 		} else {
-			log.Info("scheduler", fmt.Sprintf("executed '%s' successfully", t.nameLog))
+			log.Info("scheduler", fmt.Sprintf("task '%s' executed successfully", t.nameLog))
 		}
 	} else {
-		log.Error("scheduler", fmt.Sprintf("failed to execute '%s'", t.nameLog), err)
+		log.Error("scheduler", fmt.Sprintf("task '%s' failed to execute", t.nameLog), err)
 	}
 
 	// store last successful run time for schedule and set next run time
@@ -350,11 +344,11 @@ func load() error {
 			t.nameLog = "Cleanup of not-referenced files"
 			t.fn = cleanUpFiles
 		case "clusterCheckIn":
-			t.nameLog = "Check-in of cluster node to shared database"
+			t.nameLog = "Cluster node check-in to database"
 			t.fn = cluster.CheckInNode
 		case "clusterProcessEvents":
-			t.nameLog = "Processing of cluster events"
-			t.fn = cluster.ProcessEvents
+			t.nameLog = "Cluster event processing"
+			t.fn = clusterProcessEvents
 		case "embeddedBackup":
 			t.nameLog = "Integrated full backups"
 			t.fn = backup.Run
