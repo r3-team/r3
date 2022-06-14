@@ -215,6 +215,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "set":
 			return ConfigSet_tx(tx, reqJson)
 		}
+	case "cluster":
+		switch action {
+		case "getNodes":
+			return ClusterNodesGet()
+		case "setNode":
+			return ClusterNodeSet_tx(tx, reqJson)
+		}
 	case "dataSql":
 		switch action {
 		case "get":

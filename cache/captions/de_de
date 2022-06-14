@@ -104,6 +104,15 @@
 		"version":"Version"
 	},
 	"admin":{
+		"cluster":{
+			"dateCheckIn":"Letzter Check-in",
+			"dateStarted":"Knoten gestartet",
+			"hostname":"Hostname",
+			"master":"Cluster-Master",
+			"nodes":"Cluster-Knoten",
+			"statMemory":"Speicherverbrauch",
+			"statSessions":"Benutzersitzungen"
+		},
 		"config":{
 			"button":{
 				"apply":"Änderungen übernehmen",
@@ -408,6 +417,7 @@
 			"systemTasks":"Systemaufgaben (global)",
 			"systemTasksNode":"Systemaufgaben (Clusterknoten)"
 		},
+		"navigationCluster":"Cluster",
 		"navigationConfig":"System",
 		"navigationLdaps":"LDAP-Anmeldungen",
 		"navigationLicense":"Lizenz",

@@ -10,6 +10,7 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v4"
 )
 
 var (
@@ -47,7 +48,10 @@ func SetupNode() error {
 		return err
 	}
 
-	// store node ID for other uses
+	// store node details
+	if err := cache.SetHostnameFromOs(); err != nil {
+		return err
+	}
 	cache.SetNodeId(nodeId)
 	log.SetNodeId(nodeId)
 
@@ -92,6 +96,42 @@ func SetupNode() error {
 		}
 	}
 	return nil
+}
+
+func GetNodes() ([]types.ClusterNode, error) {
+	nodes := make([]types.ClusterNode, 0)
+
+	rows, err := db.Pool.Query(db.Ctx, `
+		SELECT id, name, hostname, cluster_master, date_check_in,
+			date_started, stat_memory, stat_sessions
+		FROM instance_cluster.node
+		ORDER BY name
+	`)
+	if err != nil {
+		return nodes, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var n types.ClusterNode
+
+		if err := rows.Scan(&n.Id, &n.Name, &n.Hostname, &n.ClusterMaster,
+			&n.DateCheckIn, &n.DateStarted, &n.StatMemory, &n.StatSessions); err != nil {
+
+			return nodes, err
+		}
+		nodes = append(nodes, n)
+	}
+	return nodes, nil
+}
+func SetNode_tx(tx pgx.Tx, id uuid.UUID, name string) error {
+
+	_, err := db.Pool.Exec(db.Ctx, `
+		UPDATE instance_cluster.node
+		SET name = $1
+		WHERE id = $2
+	`, name, id)
+	return err
 }
 
 // helper

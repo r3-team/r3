@@ -24,7 +24,7 @@ var (
 	NamesUint64 = []string{"backupDaily", "backupMonthly", "backupWeekly",
 		"backupCountDaily", "backupCountMonthly", "backupCountWeekly",
 		"bruteforceAttempts", "bruteforceProtection", "builderMode",
-		"clusterMasterMissingAfter", "dbTimeoutCsv", "dbTimeoutDataRest",
+		"clusterNodeMissingAfter", "dbTimeoutCsv", "dbTimeoutDataRest",
 		"dbTimeoutDataWs", "dbTimeoutIcs", "icsDaysPost", "icsDaysPre",
 		"icsDownload", "logApplication", "logBackup", "logCache",
 		"logCluster", "logCsv", "logLdap", "logMail", "logServer",

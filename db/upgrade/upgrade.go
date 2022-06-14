@@ -117,6 +117,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE TABLE IF NOT EXISTS instance_cluster.node (
 			    id uuid NOT NULL,
 			    name text COLLATE pg_catalog."default" NOT NULL,
+				hostname text COLLATE pg_catalog."default" NOT NULL,
 			    date_check_in bigint NOT NULL,
 			    date_started bigint NOT NULL,
 			    stat_sessions integer NOT NULL,
@@ -155,7 +156,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			-- new config option
 			INSERT INTO instance.config (name,value)
-			VALUES ('clusterMasterMissingAfter','180');
+			VALUES ('clusterNodeMissingAfter','180');
 			
 			-- new task option: Execute only by cluster master
 			ALTER TABLE instance.task ADD COLUMN cluster_master_only BOOL NOT NULL DEFAULT TRUE;
@@ -222,7 +223,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			BEGIN
 			    SELECT value::INT INTO master_missing_after
 			    FROM instance.config
-			    WHERE name = 'clusterMasterMissingAfter';
+			    WHERE name = 'clusterNodeMissingAfter';
 				
 			    SELECT date_check_in INTO unix_master_check_in
 			    FROM instance_cluster.node

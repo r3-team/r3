@@ -104,6 +104,15 @@
 		"version":"Version"
 	},
 	"admin":{
+		"cluster":{
+			"dateCheckIn":"Last check-in",
+			"dateStarted":"Node started",
+			"hostname":"Hostname",
+			"master":"Cluster master",
+			"nodes":"Cluster nodes",
+			"statMemory":"Memory usage",
+			"statSessions":"User sessions"
+		},
 		"config":{
 			"button":{
 				"apply":"Apply changes",
@@ -408,6 +417,7 @@
 			"systemTasks":"System tasks (global)",
 			"systemTasksNode":"System tasks (cluster nodes)"
 		},
+		"navigationCluster":"Cluster",
 		"navigationConfig":"System",
 		"navigationLdaps":"LDAP-Logins",
 		"navigationLicense":"License",

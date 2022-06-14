@@ -104,6 +104,15 @@
 		"version":"Versiune"
 	},
 	"admin":{
+		"cluster":{
+			"dateCheckIn":"Last check-in",
+			"dateStarted":"Node started",
+			"hostname":"Hostname",
+			"master":"Cluster master",
+			"nodes":"Cluster nodes",
+			"statMemory":"Memory usage",
+			"statSessions":"User sessions"
+		},
 		"config":{
 			"button":{
 				"apply":"Aplică modificările",
@@ -408,6 +417,7 @@
 			"systemTasks":"System tasks (global)",
 			"systemTasksNode":"System tasks (cluster nodes)"
 		},
+		"navigationCluster":"Cluster",
 		"navigationConfig":"Sistem",
 		"navigationLdaps":"Autentificări-LDAP",
 		"navigationLicense":"Licență",

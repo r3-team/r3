@@ -411,3 +411,61 @@
 .admin-mails .mail-testing h1{
 	margin-right:9px;
 }
+
+
+/* cluster */
+.admin-cluster .master{
+	margin-bottom:20px;
+}
+.admin-cluster .nodes{
+	margin-top:10px;
+	display:flex;
+	flex-flow:row wrap;
+	gap:10px;
+}
+.admin-cluster-node{
+	flex:1 0 300px;
+	padding:22px 12px;
+	display:flex;
+	flex-flow:column nowrap;
+	border:1px solid var(--color-border);
+	border-radius:5px;
+	background-color:var(--color-bg);
+	position:relative;
+}
+.admin-cluster-node.master{
+	max-width:600px;
+}
+.admin-cluster-node img.server{
+	align-self:center;
+	width:90px;
+	height:90px;
+	margin:0px auto 22px;
+	filter:var(--image-filter);
+}
+.admin-cluster-node img.server.missing{
+	filter:var(--image-filter) opacity(30%);
+}
+.admin-cluster-node img.status{
+	width:32px;
+	height:32px;
+	position:absolute;
+	top:10px;
+	right:10px;
+}
+.admin-cluster-node img.status.ok{
+	filter:invert(51%) sepia(98%) saturate(233%) hue-rotate(81deg) brightness(77%) contrast(86%);
+}
+.admin-cluster-node img.status.missing{
+	filter:invert(79%) sepia(51%) saturate(374%) hue-rotate(15deg) brightness(83%) contrast(87%);
+}
+.admin-cluster-node table{
+	margin:0px auto;
+}
+.admin-cluster-node table td{
+	padding:3px 9px;
+}
+.admin-cluster-node table td.node-id{
+	text-align:center;
+	padding:0px 0px 12px;
+}

@@ -156,6 +156,8 @@ body                                         { --depth:9; }
 .admin .logs .actions                        { --depth:7; }
 .admin .table-default th                     { --depth:6; }
 .admin .table-default tr.grouping td         { --depth:3; }
+.admin-cluster-node                          { --depth:2; }
+.admin-cluster-node img                      { --depth:5; }
 .admin-license .file                         { --depth:1; }
 .admin-modules .message                      { --depth:7; }
 .admin-roles .admin-role-title               { --depth:7; }

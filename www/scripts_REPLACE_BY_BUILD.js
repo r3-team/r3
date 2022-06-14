@@ -15,6 +15,7 @@ import {
 
 // admin
 import MyAdmin             from './comps/admin/admin.js';
+import MyAdminCluster      from './comps/admin/adminCluster.js';
 import MyAdminConfig       from './comps/admin/adminConfig.js';
 import MyAdminLdaps        from './comps/admin/adminLdaps.js';
 import MyAdminLicense      from './comps/admin/adminLicense.js';
@@ -71,6 +72,7 @@ const MyRouter = VueRouter.createRouter({
 		redirect:'/admin/config',
 		component:MyAdmin,
 		children:[
+			{ path:'cluster',     component:MyAdminCluster },
 			{ path:'config',      component:MyAdminConfig },
 			{ path:'ldaps',       component:MyAdminLdaps },
 			{ path:'license',     component:MyAdminLicense },

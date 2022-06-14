@@ -24,10 +24,11 @@ func CheckInNode() error {
 
 	if _, err := db.Pool.Exec(db.Ctx, `
 		UPDATE instance_cluster.node
-		SET date_check_in = $1, stat_sessions = $2, stat_memory = $3
-		WHERE id = $4
-	`, tools.GetTimeUnix(), websocketClientCount,
-		(m.Sys / 1024 / 1024), cache.GetNodeId()); err != nil {
+		SET date_check_in = $1, hostname = $2,
+			stat_memory = $3, stat_sessions = $4
+		WHERE id = $5
+	`, tools.GetTimeUnix(), cache.GetHostname(), (m.Sys / 1024 / 1024),
+		websocketClientCount, cache.GetNodeId()); err != nil {
 
 		return err
 	}
@@ -42,7 +43,7 @@ func CheckInNode() error {
 		return err
 	}
 
-	if tools.GetTimeUnix() > masterLastCheckIn+(int64(config.GetUint64("clusterMasterMissingAfter"))) {
+	if tools.GetTimeUnix() > masterLastCheckIn+(int64(config.GetUint64("clusterNodeMissingAfter"))) {
 		log.Info("cluster", "node has recognized an absent master, requesting role for itself")
 
 		// cluster master missing, request cluster master role for this node

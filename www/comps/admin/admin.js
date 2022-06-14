@@ -80,6 +80,12 @@ let MyAdmin = {
 						<span>{{ capApp.navigationMails }}</span>
 					</router-link>
 					
+					<!-- cluster -->
+					<router-link class="entry clickable" tag="div" to="/admin/cluster">
+						<img src="images/cluster.png" />
+						<span>{{ capApp.navigationCluster }}</span>
+					</router-link>
+					
 					<!-- logs -->
 					<router-link class="entry clickable" tag="div" to="/admin/logs">
 						<img src="images/log.png" />
@@ -127,6 +133,9 @@ let MyAdmin = {
 	},
 	computed:{
 		contentTitle:function() {
+			if(this.$route.path.includes('cluster'))
+				return this.capApp.navigationCluster;
+			
 			if(this.$route.path.includes('config'))
 				return this.capApp.navigationConfig;
 			

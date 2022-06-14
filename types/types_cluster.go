@@ -25,7 +25,18 @@ type ClusterEventTaskTriggered struct {
 	TaskName             string    `json:"taskName"`
 }
 
-// a server side event, affecting one or many clients (by associated login ID)
+type ClusterNode struct {
+	ClusterMaster bool      `json:"clusterMaster"`
+	DateCheckIn   int64     `json:"dateCheckIn"`
+	DateStarted   int64     `json:"dateStarted"`
+	Hostname      string    `json:"hostname"`
+	Id            uuid.UUID `json:"id"`
+	Name          string    `json:"name"`
+	StatSessions  int64     `json:"statSessions"`
+	StatMemory    int64     `json:"statMemory"`
+}
+
+// a server side event, affecting one or many websocket clients (by associated login ID)
 type ClusterWebsocketClientEvent struct {
 	ConfigChanged   bool  // system config has changed (only relevant for admins)
 	LoginId         int64 // affected login (0=all logins)
