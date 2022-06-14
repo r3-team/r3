@@ -148,6 +148,9 @@ let MyLogin = {
 				<span v-html="getLineBreaksParsedToHtml(companyWelcome)"></span>
 			</div>
 		</div>
+		
+		<!-- cluster node ID -->
+		<div class="clusterNodeId">{{ message.clusterNodeId[language] + clusterNodeId }}</div>
 	</div>`,
 	props:{
 		backendReady:{ type:Boolean, required:true }, // can talk to backend
@@ -171,6 +174,10 @@ let MyLogin = {
 			language:'en_US',
 			languages:['de','en_US'],
 			message:{
+				clusterNodeId:{
+					de:'Verbunden mit: ',
+					en_US:'Connected with: '
+				},
 				error:{
 					de:'Ein Fehler ist aufgetreten - bitte erneut versuchen',
 					en_US:'An error occurred - please try again'
@@ -205,28 +212,29 @@ let MyLogin = {
 	computed:{
 		// input
 		tokenKeepInput:{
-			get:function()  { return this.tokenKeep; },
-			set:function(v) { this.$store.commit('local/tokenKeep',v); }
+			get()  { return this.tokenKeep; },
+			set(v) { return this.$store.commit('local/tokenKeep',v); } 
 		},
 		
 		// states
-		isValid:   function() { return !this.badAuth && this.username !== '' && this.password !== ''; },
-		showCustom:function() { return this.activated && (this.companyName !== '' || this.companyWelcome !== ''); },
+		isValid:   (s) => !s.badAuth && s.username !== '' && s.password !== '',
+		showCustom:(s) => s.activated && (s.companyName !== '' || s.companyWelcome !== ''),
 		
 		// stores
-		activated:        function() { return this.$store.getters['local/activated']; },
-		appName:          function() { return this.$store.getters['local/appName']; },
-		appVersion:       function() { return this.$store.getters['local/appVersion']; },
-		companyColorLogin:function() { return this.$store.getters['local/companyColorLogin']; },
-		companyName:      function() { return this.$store.getters['local/companyName']; },
-		companyWelcome:   function() { return this.$store.getters['local/companyWelcome']; },
-		customBgLogin:    function() { return this.$store.getters['local/customBgLogin']; },
-		customLogo:       function() { return this.$store.getters['local/customLogo']; },
-		customLogoUrl:    function() { return this.$store.getters['local/customLogoUrl']; },
-		token:            function() { return this.$store.getters['local/token']; },
-		tokenKeep:        function() { return this.$store.getters['local/tokenKeep']; },
-		kdfIterations:    function() { return this.$store.getters.constants.kdfIterations; },
-		productionMode:   function() { return this.$store.getters.productionMode; }
+		activated:        (s) => s.$store.getters['local/activated'],
+		appName:          (s) => s.$store.getters['local/appName'],
+		appVersion:       (s) => s.$store.getters['local/appVersion'],
+		companyColorLogin:(s) => s.$store.getters['local/companyColorLogin'],
+		companyName:      (s) => s.$store.getters['local/companyName'],
+		companyWelcome:   (s) => s.$store.getters['local/companyWelcome'],
+		customBgLogin:    (s) => s.$store.getters['local/customBgLogin'],
+		customLogo:       (s) => s.$store.getters['local/customLogo'],
+		customLogoUrl:    (s) => s.$store.getters['local/customLogoUrl'],
+		token:            (s) => s.$store.getters['local/token'],
+		tokenKeep:        (s) => s.$store.getters['local/tokenKeep'],
+		clusterNodeId:    (s) => s.$store.getters.clusterNodeId,
+		kdfIterations:    (s) => s.$store.getters.constants.kdfIterations,
+		productionMode:   (s) => s.$store.getters.productionMode
 	},
 	watch:{
 		loginReady:function(v) {
@@ -285,7 +293,7 @@ let MyLogin = {
 		openLink,
 		
 		// misc
-		handleError:function(action) {
+		handleError(action) {
 			switch(action) {
 				case 'aesExport': break;                      // very unexpected, should not happen
 				case 'authToken': break;                      // token auth failed, to be expected, can expire
@@ -294,14 +302,14 @@ let MyLogin = {
 			}
 			this.loading = false;
 		},
-		parentError:function() {
+		parentError() {
 			// stop loading, when parent caught error
 			this.loading    = false;
 			this.appInitErr = true;
 		},
 		
 		// authenticate by username/password or public user
-		authenticate:function() {
+		authenticate() {
 			if(!this.isValid) return;
 			
 			ws.send('auth','user',{
@@ -318,7 +326,7 @@ let MyLogin = {
 			);
 			this.loading = true;
 		},
-		authenticatePublic:function(username) {
+		authenticatePublic(username) {
 			// keep token as public user is not asked
 			this.$store.commit('local/tokenKeep',true);
 			
@@ -333,7 +341,7 @@ let MyLogin = {
 			);
 			this.loading = true;
 		},
-		authenticateByToken:function() {
+		authenticateByToken() {
 			ws.send('auth','token',{token:this.token},true).then(
 				res => this.appEnable(
 					res.payload.loginId,
@@ -343,7 +351,7 @@ let MyLogin = {
 			);
 			this.loading = true;
 		},
-		authenticatedByUser:function(loginId,loginName,token,saltKdf) {
+		authenticatedByUser(loginId,loginName,token,saltKdf) {
 			if(token === '')
 				return this.handleError('authUser');
 			
@@ -371,7 +379,7 @@ let MyLogin = {
 		},
 		
 		// authentication successful, prepare appliation load
-		appEnable:function(loginId,loginName) {
+		appEnable(loginId,loginName) {
 			let token = JSON.parse(atob(this.token.split('.')[1]));
 			this.$store.commit('isAdmin',token.admin);
 			this.$store.commit('isNoAuth',token.noAuth);

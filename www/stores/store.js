@@ -13,6 +13,7 @@ const MyStore = Vuex.createStore({
 		busyBlockInput:false,          // while active, input is blocked when busy
 		busyCounter:0,                 // counter of calls making the app busy (WS requests, uploads, etc.)
 		captions:{},                   // all application captions in the user interface language
+		clusterNodeId:'',              // ID of the cluster node that session is connected to
 		collectionIdMap:{},            // map of all collection values, key = collection ID
 		config:{},                     // configuration values (admin only)
 		constants:{                    // constant variables, codes/messages/IDs
@@ -117,6 +118,7 @@ const MyStore = Vuex.createStore({
 		access:         (state,payload) => state.access          = payload,
 		busyBlockInput: (state,payload) => state.busyBlockInput  = payload,
 		captions:       (state,payload) => state.captions        = payload,
+		clusterNodeId:  (state,payload) => state.clusterNodeId   = payload,
 		feedback:       (state,payload) => state.feedback        = payload,
 		formHasChanges: (state,payload) => state.formHasChanges  = payload,
 		isAdmin:        (state,payload) => state.isAdmin         = payload,
@@ -155,6 +157,7 @@ const MyStore = Vuex.createStore({
 		busyBlockInput:   (state) => state.busyBlockInput,
 		busyCounter:      (state) => state.busyCounter,
 		captions:         (state) => state.captions,
+		clusterNodeId:    (state) => state.clusterNodeId,
 		collectionIdMap:  (state) => state.collectionIdMap,
 		config:           (state) => state.config,
 		constants:        (state) => state.constants,

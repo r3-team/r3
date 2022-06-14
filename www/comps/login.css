@@ -58,3 +58,9 @@
 .login .warning{
 	background-color:#bd2828 !important;
 }
+.login .clusterNodeId{
+	position:absolute;
+	right:10px;
+	bottom:10px;
+	font-style:italic;
+}
