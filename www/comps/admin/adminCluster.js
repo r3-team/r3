@@ -175,9 +175,33 @@ let MyAdminCluster = {
 		
 		<div class="content">
 			
+			<div class="contentPart config">
+				<div class="contentPartHeader">
+					<img class="icon" src="images/settings.png" />
+					<h1>{{ capApp.title.config }}</h1>
+				</div>
+				<table>
+					<tr class="default-inputs">
+						<td>{{ capApp.configNodeMissing }}</td>
+						<td><input v-model="configInput.clusterNodeMissingAfter" /></td>
+					</tr>
+				</table>
+				
+				<div>
+					<my-button image="save.png"
+						@trigger="setConfig"
+						:active="config.clusterNodeMissingAfter !== configInput.clusterNodeMissingAfter"
+						:caption="capGen.button.save"
+					/>
+				</div>
+			</div>
+			
+			<hr />
+			<br />
+			
 			<!-- cluster master -->
 			<div class="master" v-if="nodeIndexMaster !== -1">
-				<h2>{{ capApp.master }}</h2>
+				<h2>{{ capApp.title.master }}</h2>
 				<my-admin-cluster-node
 					@del="del(nodes[nodeIndexMaster].id)"
 					@set="set(nodes[nodeIndexMaster].id,$event)"
@@ -195,7 +219,7 @@ let MyAdminCluster = {
 			
 			<!-- cluster nodes -->
 			<template v-if="nodes.length > 1">
-				<h2>{{ capApp.nodes }}</h2>
+				<h2>{{ capApp.title.nodes }}</h2>
 				<div class="nodes">
 					<my-admin-cluster-node
 						v-for="n in nodes.filter(v => !v.clusterMaster)"
@@ -229,14 +253,17 @@ let MyAdminCluster = {
 		
 		// stores
 		capApp:function() { return this.$store.getters.captions.admin.cluster; },
-		capGen:function() { return this.$store.getters.captions.generic; }
+		capGen:function() { return this.$store.getters.captions.generic; },
+		config:function() { return this.$store.getters.config; }
 	},
 	data:function() {
 		return {
+			configInput:{},
 			nodes:[]
 		};
 	},
 	mounted:function() {
+		this.configInput = JSON.parse(JSON.stringify(this.config));
 		this.get();
 	},
 	methods:{
@@ -260,6 +287,12 @@ let MyAdminCluster = {
 				name:name
 			},true).then(
 				this.get,
+				this.$root.genericError
+			);
+		},
+		setConfig:function() {
+			ws.send('config','set',this.configInput,true).then(
+				() => {},
 				this.$root.genericError
 			);
 		},

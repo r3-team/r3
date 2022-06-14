@@ -414,6 +414,13 @@
 
 
 /* cluster */
+.admin-cluster .config{
+	max-width:400px !important;
+	margin:0px 0px 20px !important;
+}
+.admin-cluster .config table{
+	margin:12px 0px;
+}
 .admin-cluster .master{
 	margin-bottom:20px;
 }

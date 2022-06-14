@@ -113,15 +113,17 @@
 				"shutdown":"Bist du sicher, dass du diesen Cluster-Knoten herunterfahren möchtest?<br /><br />Ein Cluster-Knoten kann von dieser Oberfläche nicht wieder gestartet werden."
 			},
 			"title":{
+				"config":"Globale Konfiguration",
 				"connected":"verbunden",
+				"master":"Cluster-Master",
 				"missing":"vermisst",
+				"nodes":"Cluster-Knoten",
 				"offline":"offline"
 			},
+			"configNodeMissing":"Cluster-Knoten wird als vermisst angesehen nach X Sekunden",
 			"dateCheckIn":"Letzter Check-in",
 			"dateStarted":"Knoten gestartet",
 			"hostname":"Hostname",
-			"master":"Cluster-Master",
-			"nodes":"Cluster-Knoten",
 			"statMemory":"Speicherverbrauch",
 			"statSessions":"Benutzersitzungen"
 		},

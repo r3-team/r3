@@ -113,15 +113,17 @@
 				"shutdown":"Are you sure you want to shutdown this cluster node?<br /><br />A cluster node cannot be started up again from this interface."
 			},
 			"title":{
+				"config":"Global configuration",
 				"connected":"connected",
+				"master":"Cluster master",
 				"missing":"missing",
+				"nodes":"Cluster nodes",
 				"offline":"offline"
 			},
+			"configNodeMissing":"Cluster node assumed missing after X seconds",
 			"dateCheckIn":"Last check-in",
 			"dateStarted":"Node started",
 			"hostname":"Hostname",
-			"master":"Cluster master",
-			"nodes":"Cluster nodes",
 			"statMemory":"Memory usage",
 			"statSessions":"User sessions"
 		},
