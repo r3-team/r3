@@ -32,6 +32,7 @@ type ClusterNode struct {
 	Hostname      string    `json:"hostname"`
 	Id            uuid.UUID `json:"id"`
 	Name          string    `json:"name"`
+	Running       bool      `json:"running"`
 	StatSessions  int64     `json:"statSessions"`
 	StatMemory    int64     `json:"statMemory"`
 }

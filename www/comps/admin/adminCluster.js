@@ -8,12 +8,37 @@ let MyAdminClusterNode = {
 	name:'my-admin-cluster-node',
 	template:`<div class="admin-cluster-node shade">
 		<img class="server" src="images/server.png"
-			:class="{ missing:isMissing }"
+			:class="{ missing:!available }"
 		/>
 		
 		<!-- node status -->
-		<img v-if="!isMissing" class="status ok"      src="images/circle_ok.png" />
-		<img v-if="isMissing"  class="status missing" src="images/circle_question.png" />
+		<div class="icons">
+			<img class="status running" src="images/circle_ok.png"
+				v-if="available"
+				:title="displayTitle"
+			/>
+			<img class="status offline" src="images/circle_cancel.png"
+				v-if="!running"
+				:title="displayTitle"
+			/>
+			<img class="status missing" src="images/circle_question.png"
+				v-if="running && missing"
+				:title="displayTitle"
+			/>
+			
+			<my-button image="logoff.png"
+				v-if="available"
+				@trigger="shutdownAsk"
+				:naked="true"
+				:tight="true"
+			/>
+			<my-button image="delete.png"
+				v-if="!available"
+				@trigger="delAsk"
+				:naked="true"
+				:tight="true"
+			/>
+		</div>
 		
 		<table>
 			<tr>
@@ -25,7 +50,7 @@ let MyAdminClusterNode = {
 				<td>
 					<my-button image="save.png"
 						v-if="name !== nameInput"
-						@trigger="$emit('setName',nameInput)"
+						@trigger="$emit('set',nameInput)"
 						:naked="true"
 					/>
 				</td>
@@ -52,18 +77,27 @@ let MyAdminClusterNode = {
 			</tr>
 		</table>
 	</div>`,
-	emits:['setName'],
+	emits:['del','set','shutdown'],
 	props:{
-		dateCheckIn: { type:Number, required:true },
-		dateStarted: { type:Number, required:true },
-		hostname:    { type:String, required:true },
-		id:          { type:String, required:true },
-		name:        { type:String, required:true },
-		statMemory:  { type:Number, required:true },
-		statSessions:{ type:Number, required:true }
+		dateCheckIn: { type:Number,  required:true },
+		dateStarted: { type:Number,  required:true },
+		hostname:    { type:String,  required:true },
+		id:          { type:String,  required:true },
+		name:        { type:String,  required:true },
+		running:     { type:Boolean, required:true },
+		statMemory:  { type:Number,  required:true },
+		statSessions:{ type:Number,  required:true }
 	},
 	computed:{
-		isMissing:function() {
+		available:function() {
+			return this.running && !this.missing;
+		},
+		displayTitle:function() {
+			if(!this.running) return this.capApp.title.offline;
+			if(!this.missing) return this.capApp.title.connected;
+			return this.capApp.title.missing;
+		},
+		missing:function() {
 			return this.dateCheckIn + parseInt(this.config.clusterNodeMissingAfter) < this.getUnixFromDate(new Date());
 		},
 		
@@ -86,6 +120,36 @@ let MyAdminClusterNode = {
 		// presentation
 		displayDate:function(date) {
 			return this.getUnixFormat(date,[this.settings.dateFormat,'H:i:S'].join(' '));
+		},
+		
+		// actions
+		delAsk:function() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.delete,
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.delete,
+					exec:() => { this.$emit('del'); },
+					image:'delete.png'
+				},{
+					caption:this.capGen.button.cancel,
+					image:'cancel.png'
+				}]
+			});
+		},
+		shutdownAsk:function() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.shutdown,
+				buttons:[{
+					cancel:true,
+					caption:this.capApp.button.shutdown,
+					exec:() => { this.$emit('shutdown'); },
+					image:'logoff.png'
+				},{
+					caption:this.capGen.button.cancel,
+					image:'cancel.png'
+				}]
+			});
 		}
 	}
 };
@@ -114,13 +178,16 @@ let MyAdminCluster = {
 			<!-- cluster master -->
 			<div class="master" v-if="nodeIndexMaster !== -1">
 				<h2>{{ capApp.master }}</h2>
-				<my-admin-cluster-node class="master"
-					@setName="setName(nodes[nodeIndexMaster].id,$event)"
+				<my-admin-cluster-node
+					@del="del(nodes[nodeIndexMaster].id)"
+					@set="set(nodes[nodeIndexMaster].id,$event)"
+					@shutdown="shutdown(nodes[nodeIndexMaster].id)"
 					:dateCheckIn="nodes[nodeIndexMaster].dateCheckIn"
 					:dateStarted="nodes[nodeIndexMaster].dateStarted"
 					:hostname="nodes[nodeIndexMaster].hostname"
 					:id="nodes[nodeIndexMaster].id"
 					:name="nodes[nodeIndexMaster].name"
+					:running="nodes[nodeIndexMaster].running"
 					:statMemory="nodes[nodeIndexMaster].statMemory"
 					:statSessions="nodes[nodeIndexMaster].statSessions"
 				/>
@@ -132,12 +199,15 @@ let MyAdminCluster = {
 				<div class="nodes">
 					<my-admin-cluster-node
 						v-for="n in nodes.filter(v => !v.clusterMaster)"
-						@setName="setName(n.id,$event)"
+						@del="del(n.id)"
+						@set="set(n.id,$event)"
+						@shutdown="shutdown(n.id)"
 						:dateCheckIn="n.dateCheckIn"
 						:dateStarted="n.dateStarted"
 						:hostname="n.hostname"
 						:id="n.id"
 						:name="n.name"
+						:running="n.running"
 						:statMemory="n.statMemory"
 						:statSessions="n.statSessions"
 					/>
@@ -170,7 +240,13 @@ let MyAdminCluster = {
 		this.get();
 	},
 	methods:{
-		// backend calls
+		// backend calls,
+		del:function(id) {
+			ws.send('cluster','delNode',{id:id},true).then(
+				this.get,
+				this.$root.genericError
+			);
+		},
 		get:function() {
 			this.nodes = [];
 			ws.send('cluster','getNodes',{},true).then(
@@ -178,12 +254,18 @@ let MyAdminCluster = {
 				this.$root.genericError
 			);
 		},
-		setName:function(id,name) {
+		set:function(id,name) {
 			ws.send('cluster','setNode',{
 				id:id,
 				name:name
 			},true).then(
 				this.get,
+				this.$root.genericError
+			);
+		},
+		shutdown:function(id) {
+			ws.send('cluster','shutdownNode',{id:id},true).then(
+				() => {},
 				this.$root.genericError
 			);
 		}

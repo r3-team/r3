@@ -425,6 +425,7 @@
 }
 .admin-cluster-node{
 	flex:1 0 300px;
+	max-width:600px;
 	padding:22px 12px;
 	display:flex;
 	flex-flow:column nowrap;
@@ -432,9 +433,6 @@
 	border-radius:5px;
 	background-color:var(--color-bg);
 	position:relative;
-}
-.admin-cluster-node.master{
-	max-width:600px;
 }
 .admin-cluster-node img.server{
 	align-self:center;
@@ -446,18 +444,27 @@
 .admin-cluster-node img.server.missing{
 	filter:var(--image-filter) opacity(30%);
 }
-.admin-cluster-node img.status{
-	width:32px;
-	height:32px;
+.admin-cluster-node .icons{
+	display:flex;
+	flex-flow:column nowrap;
+	align-items:center;
 	position:absolute;
 	top:10px;
 	right:10px;
 }
-.admin-cluster-node img.status.ok{
-	filter:invert(51%) sepia(98%) saturate(233%) hue-rotate(81deg) brightness(77%) contrast(86%);
+.admin-cluster-node .icons img.status{
+	width:32px;
+	height:32px;
+	margin-bottom:12px;
 }
-.admin-cluster-node img.status.missing{
+.admin-cluster-node .icons img.status.missing{
 	filter:invert(79%) sepia(51%) saturate(374%) hue-rotate(15deg) brightness(83%) contrast(87%);
+}
+.admin-cluster-node .icons img.status.offline{
+	filter:invert(29%) sepia(6%) saturate(5380%) hue-rotate(314deg) brightness(116%) contrast(111%);
+}
+.admin-cluster-node .icons img.status.running{
+	filter:invert(51%) sepia(98%) saturate(233%) hue-rotate(81deg) brightness(77%) contrast(86%);
 }
 .admin-cluster-node table{
 	margin:0px auto;

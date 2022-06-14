@@ -105,6 +105,18 @@
 	},
 	"admin":{
 		"cluster":{
+			"button":{
+				"shutdown":"Shutdown"
+			},
+			"dialog":{
+				"delete":"Are you sure you want to delete this cluster node?<br /><br />If a deleted node restarts and still has access to the cluster database, it will re-register itself as a cluster node.",
+				"shutdown":"Are you sure you want to shutdown this cluster node?<br /><br />A cluster node cannot be started up again from this interface."
+			},
+			"title":{
+				"connected":"connected",
+				"missing":"missing",
+				"offline":"offline"
+			},
 			"dateCheckIn":"Last check-in",
 			"dateStarted":"Node started",
 			"hostname":"Hostname",

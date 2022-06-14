@@ -110,7 +110,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE TYPE instance_cluster.node_event_content AS ENUM (
    				'configChanged', 'loginDisabled', 'loginReauthorized',
 				'loginReauthorizedAll', 'masterAssigned', 'schemaChanged',
-				'tasksChanged','taskTriggered'
+				'shutdownTriggered','tasksChanged','taskTriggered'
 			);
 			
 			-- new cluster tables
@@ -123,6 +123,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			    stat_sessions integer NOT NULL,
 			    stat_memory integer NOT NULL,
 				cluster_master bool NOT NULL,
+				running bool NOT NULL,
 			    CONSTRAINT node_pkey PRIMARY KEY (id)
 			);
 			

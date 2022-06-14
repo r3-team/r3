@@ -105,6 +105,18 @@
 	},
 	"admin":{
 		"cluster":{
+			"button":{
+				"shutdown":"Herunterfahren"
+			},
+			"dialog":{
+				"delete":"Bist du sicher, dass du diesen Cluster-Knoten löschen möchtest?<br /><br />Falls ein gelöschter Knoten neu startet und weiterhin Zugriff auf die Cluster-Datenbank hat, wird er sich erneut als Cluster-Knoten registrieren.",
+				"shutdown":"Bist du sicher, dass du diesen Cluster-Knoten herunterfahren möchtest?<br /><br />Ein Cluster-Knoten kann von dieser Oberfläche nicht wieder gestartet werden."
+			},
+			"title":{
+				"connected":"verbunden",
+				"missing":"vermisst",
+				"offline":"offline"
+			},
 			"dateCheckIn":"Letzter Check-in",
 			"dateStarted":"Knoten gestartet",
 			"hostname":"Hostname",

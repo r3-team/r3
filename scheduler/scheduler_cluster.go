@@ -8,6 +8,7 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/types"
+	"syscall"
 )
 
 // collect cluster events from shared database for node to react to
@@ -90,6 +91,8 @@ func clusterProcessEvents() error {
 				return err
 			}
 			runTask(p.TaskName, p.PgFunctionId, p.PgFunctionScheduleId)
+		case "shutdownTriggered":
+			OsExit <- syscall.SIGTERM
 		}
 		if err != nil {
 			return err

@@ -217,10 +217,14 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		}
 	case "cluster":
 		switch action {
+		case "delNode":
+			return ClusterNodeDel_tx(tx, reqJson)
 		case "getNodes":
 			return ClusterNodesGet()
 		case "setNode":
 			return ClusterNodeSet_tx(tx, reqJson)
+		case "shutdownNode":
+			return ClusterNodeShutdown(reqJson)
 		}
 	case "dataSql":
 		switch action {

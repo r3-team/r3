@@ -3,6 +3,7 @@ package scheduler
 import (
 	"errors"
 	"fmt"
+	"os"
 	"r3/backup"
 	"r3/bruteforce"
 	"r3/cache"
@@ -59,10 +60,11 @@ type taskSchedule struct {
 }
 
 var (
-	change_mx          = &sync.Mutex{}
-	loadTasks          = false // load tasks from database
-	loadCounter int    = 0     // counter of times tasks were initialized
-	tasks       []task         // all tasks
+	change_mx                  = &sync.Mutex{}
+	loadTasks                  = false // load tasks from database
+	loadCounter int            = 0     // counter of times tasks were initialized
+	tasks       []task                 // all tasks
+	OsExit      chan os.Signal = make(chan os.Signal)
 
 	// main loop
 	loopInterval          = time.Second * time.Duration(1)  // loop interval

@@ -133,16 +133,17 @@ func main() {
 		return
 	}
 
+	// listen to global shutdown channel
+	go func() {
+		select {
+		case <-scheduler.OsExit:
+			prg.executeAborted(svc, nil)
+		}
+	}()
+
 	// add shut down in case of SIGTERM
 	if service.Interactive() {
-		chanSigTerm := make(chan os.Signal)
-		signal.Notify(chanSigTerm, syscall.SIGTERM)
-		go func() {
-			select {
-			case <-chanSigTerm:
-				prg.executeAborted(svc, nil)
-			}
-		}()
+		signal.Notify(scheduler.OsExit, syscall.SIGTERM)
 	}
 
 	// get path for executable
@@ -310,7 +311,7 @@ func (prg *program) execute(svc service.Service) {
 	}
 
 	// setup cluster node with shared database
-	if err := cluster.SetupNode(); err != nil {
+	if err := cluster.StartNode(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to setup cluster node, %v", err))
 		return
 	}
@@ -488,6 +489,11 @@ func (prg *program) Stop(svc service.Service) error {
 		return nil
 	}
 	prg.stopping = true
+
+	// stop cluster node
+	if err := cluster.StopNode(); err != nil {
+		prg.logger.Error(err)
+	}
 
 	// stop scheduler
 	scheduler.Stop()
