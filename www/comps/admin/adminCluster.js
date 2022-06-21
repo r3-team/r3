@@ -169,7 +169,6 @@ let MyAdminCluster = {
 			<my-button image="refresh.png"
 				@trigger="get"
 				:caption="capGen.button.refresh"
-				:darkBg="true"
 			/>
 		</div>
 		

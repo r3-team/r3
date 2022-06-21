@@ -26,13 +26,11 @@ let MyAdminRepoModule = {
 					@trigger="install(repoModule.fileId)"
 					:active="!installStarted && isCompatible && !productionMode"
 					:caption="capApp.button.install"
-					:darkBg="true"
 				/>
 				<my-button
 					v-if="isInstalled"
 					:active="false"
 					:caption="capApp.button.installed"
-					:darkBg="true"
 				/>
 				
 				<p v-if="!isCompatible" class="bad-state">
@@ -135,12 +133,10 @@ let MyAdminRepo = {
 				<my-button image="refresh.png"
 					@trigger="updateRepo"
 					:caption="capGen.button.refresh"
-					:darkBg="true"
 				/>
 				<my-button
 					@trigger="toggleShowInstalled"
 					:caption="capApp.button.showInstalled"
-					:darkBg="true"
 					:image="showInstalled ? 'checkbox1.png' : 'checkbox0.png'" 
 				/>
 			</div>
@@ -150,7 +146,6 @@ let MyAdminRepo = {
 					v-if="repoModules.length !== 0"
 					@input="offsetSet"
 					:caption="true"
-					:darkBg="true"
 					:limit="limit"
 					:offset="offset"
 					:total="count"
@@ -161,7 +156,6 @@ let MyAdminRepo = {
 				<my-button
 					@trigger="limit = 10;limitSet()"
 					:caption="capGen.limit"
-					:darkBg="true"
 					:naked="true"
 				/>
 				<select class="entry short selector"

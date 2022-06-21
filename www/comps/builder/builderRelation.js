@@ -19,9 +19,9 @@ let MyBuilderRelation = {
 		MyBuilderPgIndex
 	},
 	template:`<div class="contentBox builder-relation" v-if="relation">
-		<div class="top nowrap clickable">
+		<div class="top lower nowrap">
 			<div class="area">
-				{{ capApp.titleOne.replace('{NAME}',relation.name) }}
+				<h1 class="title">{{ capApp.titleOne.replace('{NAME}',relation.name) }}</h1>
 			</div>
 		</div>
 		

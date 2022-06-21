@@ -181,7 +181,7 @@ let MyList = {
 		<template v-if="showTable && !inputAsCategory">
 			<!-- regular list view (either view or input dropdown) -->
 			
-			<div class="top lower" v-if="header">
+			<div class="top lower gvhtest" v-if="header">
 				<!-- list header line -->
 				
 				<div class="area nowrap">
@@ -193,14 +193,12 @@ let MyList = {
 						@trigger-middle="$emit('open-form',0,true)"
 						:caption="!isMobile ? capGen.button.new : ''"
 						:captionTitle="capGen.button.newHint"
-						:darkBg="true"
 					/>
 					<my-button image="sheet.png"
 						v-if="csvImport || csvExport"
 						@trigger="showCsv = !showCsv"
 						:caption="!isMobile ? capApp.button.csv : ''"
 						:captionTitle="capApp.button.csvHint"
-						:darkBg="true"
 					/>
 					<my-button image="delete.png"
 						v-if="hasBulkActions"
@@ -209,7 +207,6 @@ let MyList = {
 						:cancel="true"
 						:caption="!isMobile ? capGen.button.delete : ''"
 						:captionTitle="capGen.button.deleteHint"
-						:darkBg="true"
 					/>
 				</div>
 				
@@ -224,7 +221,6 @@ let MyList = {
 						v-if="allowPaging"
 						@input="offset = $event;reloadInside()"
 						:caption="!isMobile ? true : false"
-						:darkBg="true"
 						:limit="limit"
 						:offset="offset"
 						:total="count"
@@ -239,14 +235,14 @@ let MyList = {
 						@trigger="showAutoRenew = !showAutoRenew"
 						:caption="capApp.button.autoRenew.replace('{VALUE}',autoRenewInput)"
 						:captionTitle="capApp.button.autoRenewHint.replace('{VALUE}',autoRenewInput)"
-						:darkBg="true"
+						:naked="true"
 					/>
 					
 					<my-button image="refresh.png"
 						v-if="!isMobile"
 						@trigger="reloadInside('manual')"
 						:captionTitle="capGen.button.refresh"
-						:darkBg="true"
+						:naked="true"
 					/>
 					
 					<my-button image="filter.png"
@@ -254,7 +250,7 @@ let MyList = {
 						@trigger="toggleUserFilters"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
-						:darkBg="true"
+						:naked="true"
 					/>
 					
 					<input class="selector lookup" type="text"

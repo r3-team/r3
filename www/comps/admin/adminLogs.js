@@ -9,7 +9,7 @@ let MyAdminLogs = {
 	components:{MyInputDate,MyInputOffset},
 	template:`<div class="contentBox grow">
 		
-		<div class="top">
+		<div class="top lower">
 			<div class="area">
 				<img class="icon" src="images/log.png" />
 				<h1>{{ menuTitle }}</h1>

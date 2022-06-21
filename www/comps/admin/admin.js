@@ -10,7 +10,7 @@ let MyAdmin = {
 	
 		<div class="navigationWrap">
 			<div class="navigation contentBox">
-				<div class="top">
+				<div class="top lower">
 					<div class="area">
 						<img class="icon" src="images/settings.png" />
 						<h1>{{ capApp.title }}</h1>
@@ -18,12 +18,10 @@ let MyAdmin = {
 					<div class="area">
 						<my-button image="question.png"
 							@trigger="showDocs = !showDocs"
-							:darkBg="true"
+							:tight="true"
 						/>
 					</div>
 				</div>
-				
-				<div class="top lower" v-if="settings.compact" />
 				
 				<div class="content no-padding">
 					<!-- system configuration -->
@@ -177,7 +175,6 @@ let MyAdmin = {
 		
 		// stores
 		capApp:  function() { return this.$store.getters.captions.admin; },
-		isAdmin: function() { return this.$store.getters.isAdmin; },
-		settings:function() { return this.$store.getters.settings; }
+		isAdmin: function() { return this.$store.getters.isAdmin; }
 	}
 };

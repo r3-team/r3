@@ -151,7 +151,7 @@ let MyBuilderCollections = {
 	components:{MyBuilderCollectionsItem},
 	template:`<div class="builder-collections contentBox grow">
 		
-		<div class="top">
+		<div class="top lower">
 			<div class="area nowrap">
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>

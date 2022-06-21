@@ -19,7 +19,6 @@ let MyBuilderIcons = {
 					:active="iconIdsSelected.length !== 0"
 					:cancel="true"
 					:caption="capGen.button.deleteSelected"
-					:darkBg="true"
 				/>
 			</div>
 		</div>

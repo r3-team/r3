@@ -149,6 +149,11 @@ const MyStore = Vuex.createStore({
 			let seconds = state.license.validUntil - (new Date().getTime() / 1000);
 			return Math.round(seconds / 60 / 60 / 24);
 		},
+		patternStyle:(state) => {
+			return state.settings.pattern !== null
+				? `background-image:url('images/pattern_${state.settings.pattern}.png');background-repeat:repeat-x`
+				: '';
+		},
 		
 		// simple
 		access:           (state) => state.access,

@@ -115,9 +115,12 @@ let MyMenuItem = {
 let MyMenu = {
 	name:'my-menu',
 	components:{MyMenuItem},
-	template:`<div class="menu" v-if="hasAccessToAnyMenu(module.menus,menuAccess)">
-		<div class="contentBox scroll">
-			<div class="top">
+	template:`<div class="menu"
+		:class="{ colored:settings.menuColored }"
+		v-if="hasAccessToAnyMenu(module.menus,menuAccess)"
+	>
+		<div class="contentBox scroll relative">
+			<div class="top lower">
 				<div class="area">
 					<img class="icon"
 						v-if="module.iconId !== null"
@@ -126,17 +129,20 @@ let MyMenu = {
 					<h1>{{ moduleCaption }}</h1>
 				</div>
 				
-				<my-button image="builder.png"
-					v-if="isAdmin && builderEnabled && !isMobile"
-					@trigger="openBuilder(false)"
-					@trigger-middle="openBuilder(true)"
-					:darkBg="true"
-				/>
+				<div class="area">
+					<my-button image="builder.png"
+						v-if="isAdmin && builderEnabled && !isMobile"
+						@trigger="openBuilder(false)"
+						@trigger-middle="openBuilder(true)"
+						:naked="true"
+						:tight="true"
+					/>
+				</div>
 			</div>
 			
-			<!-- empty top row in menu for compact mode -->
-			<div class="top lower" v-if="settings.compact && !isMobile" />
-			
+			<div class="items-bg"
+				:style="settings.menuColored ? bgStyle : ''"
+			></div>
 			<div class="items">
 				<my-menu-item
 					v-for="m in module.menus"
@@ -149,6 +155,7 @@ let MyMenu = {
 		</div>
 	</div>`,
 	props:{
+		bgStyle:       { type:String,  required:true },
 		isActiveModule:{ type:Boolean, required:true },
 		formId:        { type:String,  required:false, default:'' },
 		module:        { type:Object,  required:true }

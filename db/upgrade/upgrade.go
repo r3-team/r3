@@ -96,13 +96,19 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 // upgrade functions for database
 // mapped by current database version string, returns new database version string
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
-
-	// clean up next release
-	// ALTER TABLE app.form_state_condition_side ALTER COLUMN content
-	//	TYPE app.filter_side_content USING content::text::app.filter_side_content;
-
 	"2.7": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
+			-- cleanup from last release
+			ALTER TABLE app.form_state_condition_side ALTER COLUMN content
+				TYPE app.filter_side_content USING content::text::app.filter_side_content;
+			
+			-- new login settings
+			ALTER TABLE instance.login_setting ADD COLUMN menu_colored BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE instance.login_setting ALTER COLUMN menu_colored DROP DEFAULT;
+			
+			CREATE TYPE instance.login_setting_pattern AS ENUM ('bubbles','waves');
+			ALTER TABLE instance.login_setting ADD COLUMN pattern instance.login_setting_pattern;
+			
 			-- new schema for cluster operation
 			CREATE SCHEMA instance_cluster;
 			
@@ -169,18 +175,6 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE instance.task ADD COLUMN active_only BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.task ALTER COLUMN active_only DROP DEFAULT;
 			
-			-- new tasks
-			INSERT INTO instance.task (
-				name,interval_seconds,cluster_master_only,
-				embedded_only,active_only,active
-			)
-			VALUES
-				('clusterCheckIn',60,false,false,true,true),
-				('clusterProcessEvents',5,false,false,true,true);
-			
-			INSERT INTO instance.scheduler (task_name,date_attempt,date_success)
-			VALUES ('clusterCheckIn',0,0),('clusterProcessEvents',0,0);
-			
 			-- rename instance schedule, add PK
 			ALTER TABLE instance.scheduler RENAME TO schedule;
 			ALTER TABLE instance.schedule ADD COLUMN id SERIAL PRIMARY KEY;
@@ -209,6 +203,18 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX IF NOT EXISTS fki_node_schedule_schedule_id_fkey ON instance_cluster.node_schedule
 				USING BTREE (schedule_id ASC NULLS LAST);
+			
+			-- new tasks
+			INSERT INTO instance.task (
+				name,interval_seconds,cluster_master_only,
+				embedded_only,active_only,active
+			)
+			VALUES
+				('clusterCheckIn',60,false,false,true,true),
+				('clusterProcessEvents',5,false,false,true,true);
+			
+			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
+			VALUES ('clusterCheckIn',0,0),('clusterProcessEvents',0,0);
 			
 			-- new function: Request master role
 			CREATE OR REPLACE FUNCTION instance_cluster.master_role_request(

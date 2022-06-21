@@ -14,7 +14,6 @@ let MyFormHelp = {
 			<my-button image="cancel.png"
 				@trigger="$emit('close')"
 				:cancel="true"
-				:darkBg="true"
 			/>
 		</div>
 		<div class="top lower">
@@ -23,14 +22,12 @@ let MyFormHelp = {
 					@trigger="showContext = !showContext"
 					:active="contextHelp !== null"
 					:caption="capApp.helpContextTitle"
-					:darkBg="true"
 					:image="showContext ? 'checkbox1.png' : 'checkbox0.png'"
 				/>
 				<my-button
 					@trigger="showModule = !showModule"
 					:active="moduleHelp !== null"
 					:caption="capApp.helpModuleTitle"
-					:darkBg="true"
 					:image="showModule ? 'checkbox1.png' : 'checkbox0.png'"
 				/>
 			</div>

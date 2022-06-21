@@ -20,13 +20,11 @@ let MyAdminConfig = {
 					@trigger="set"
 					:active="hasChanges"
 					:caption="capApp.button.apply"
-					:darkBg="true"
 				/>
 				<my-button image="refresh.png"
 					@trigger="configInput = JSON.parse(JSON.stringify(config))"
 					:active="hasChanges"
 					:caption="capGen.button.refresh"
-					:darkBg="true"
 				/>
 			</div>
 		</div>

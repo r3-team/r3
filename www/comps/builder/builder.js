@@ -13,7 +13,7 @@ let MyBuilder = {
 		
 		<div class="navigationWrap" v-if="module">
 			<div class="navigation contentBox">
-				<div class="top nowrap">
+				<div class="top lower nowrap">
 					<div class="area">
 						<img class="icon"
 							v-if="module.iconId !== null"
@@ -24,7 +24,7 @@ let MyBuilder = {
 					<div class="area">
 						<my-button image="question.png"
 							@trigger="showDocs = !showDocs"
-							:darkBg="true"
+							:tight="true"
 						/>
 					</div>
 				</div>

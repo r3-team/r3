@@ -24,7 +24,6 @@ let MyFormLog = {
 			<my-button image="cancel.png"
 				@trigger="$emit('close-log')"
 				:cancel="true"
-				:darkBg="true"
 			/>
 		</div>
 		<div class="top lower">
@@ -33,7 +32,6 @@ let MyFormLog = {
 					@trigger="toggleAll"
 					:active="logs.length !== 0"
 					:caption="capApp.button.logShowAll.replace('{CNT}',logs.length)"
-					:darkBg="true"
 					:image="logsShown.length === logs.length ? 'triangleDown.png' : 'triangleRight.png'"
 				/>
 			</div>

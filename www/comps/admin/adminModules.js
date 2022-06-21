@@ -323,13 +323,11 @@ let MyAdminModules = {
 				<my-button image="box.png"
 					@trigger="goToRepo"
 					:caption="capApp.button.repository"
-					:darkBg="true"
 				/>
 				<my-button
 					@trigger="installAll"
 					:active="moduleIdsUpdate.length !== 0 && !installStarted && !productionMode"
 					:caption="capApp.button.updateAll.replace('{COUNT}',moduleIdsUpdate.length)"
-					:darkBg="true"
 					:image="!installStarted ? 'download.png' : 'load.gif'"
 				/>
 			</div>
@@ -344,7 +342,6 @@ let MyAdminModules = {
 					@trigger="importModule"
 					:active="canUploadFile && fileToUpload !== null"
 					:caption="capGen.button.apply"
-					:darkBg="true"
 					:image="fileUploading ? 'load.gif' : 'ok.png'"
 				/>
 			</div>

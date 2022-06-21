@@ -93,25 +93,22 @@ let MyBuilderFormFunctions = {
 	name:'my-builder-form-functions',
 	components:{ MyBuilderFormFunction },
 	template:`<div class="builder-form-functions contentBox">
-		<div class="top">
+		<div class="top lower">
 			<div class="area">
 				<my-button
 					:active="true"
 					:caption="capApp.title"
-					:darkBg="true"
 					:naked="true"
 				/>
 				<my-button image="add.png"
 					@trigger="add"
 					:caption="capGen.button.add"
-					:darkBg="true"
 				/>
 			</div>
 			<div class="area">
 				<my-button image="cancel.png"
 					@trigger="$emit('close')"
 					:cancel="true"
-					:darkBg="true"
 				/>
 			</div>
 		</div>

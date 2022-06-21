@@ -99,7 +99,6 @@ let MyForm = {
 							<my-button
 								:active="false"
 								:caption="message"
-								:darkBg="true"
 								:naked="true"
 							/>
 						</h1>
@@ -113,14 +112,12 @@ let MyForm = {
 							@trigger-middle="openForm(recordId,null,null,true)"
 							:active="!isNew"
 							:captionTitle="capGen.button.refreshHint"
-							:darkBg="true"
 						/>
 						<my-button image="time.png"
 							v-if="!isInline"
 							@trigger="showLog = !showLog"
 							:active="!isNew"
 							:captionTitle="capApp.button.logHint"
-							:darkBg="true"
 						/>
 					</template>
 					
@@ -129,20 +126,17 @@ let MyForm = {
 						@trigger="showHelp = !showHelp"
 						:active="helpAvailable"
 						:captionTitle="capApp.button.helpHint"
-						:darkBg="true"
 					/>
 					<my-button image="builder.png"
 						v-if="isAdmin && builderEnabled && !isMobile"
 						@trigger="openBuilder(false)"
 						@trigger-middle="openBuilder(true)"
-						:darkBg="true"
 					/>
 					<my-button image="cancel.png"
 						v-if="isInline"
 						@trigger="closeAsk"
 						:cancel="true"
 						:captionTitle="capGen.button.close"
-						:darkBg="true"
 					/>
 				</div>
 			</div>
@@ -158,7 +152,6 @@ let MyForm = {
 							:active="(!isNew || hasChanges) && canCreate"
 							:caption="capGen.button.new"
 							:captionTitle="capGen.button.newHint"
-							:darkBg="true"
 						/>
 						<my-button image="save.png"
 							v-if="!noDataActions"
@@ -166,7 +159,6 @@ let MyForm = {
 							:active="canUpdate"
 							:caption="capGen.button.save"
 							:captionTitle="capGen.button.saveHint"
-							:darkBg="true"
 						/>
 						<my-button image="save_new.png"
 							v-if="!isInline && !isMobile && allowNew && !noDataActions"
@@ -174,7 +166,6 @@ let MyForm = {
 							:active="canUpdate && canCreate"
 							:caption="capGen.button.saveNew"
 							:captionTitle="capGen.button.saveNewHint"
-							:darkBg="true"
 						/>
 						<my-button image="upward.png"
 							v-if="!isMobile && !isInline"
@@ -182,7 +173,6 @@ let MyForm = {
 							:active="!updatingRecord"
 							:cancel="true"
 							:caption="capGen.button.goBack"
-							:darkBg="true"
 						/>
 						<my-button image="shred.png"
 							v-if="allowDel && !noDataActions"
@@ -191,7 +181,6 @@ let MyForm = {
 							:cancel="true"
 							:caption="capGen.button.delete"
 							:captionTitle="capGen.button.deleteHint"
-							:darkBg="true"
 						/>
 					</div>
 					<div class="area">
@@ -199,21 +188,19 @@ let MyForm = {
 							v-if="badLoad"
 							:caption="capApp.noAccess"
 							:cancel="true"
-							:darkBg="true"
 						/>
 						<my-button image="warning.png"
 							v-if="badSave && fieldIdsInvalid.length !== 0"
 							@trigger="scrollToInvalidField"
 							:caption="capApp.invalidInputs"
 							:cancel="true"
-							:darkBg="true"
 						/>
 					</div>
 				</template>
 			</div>
 			
 			<!-- form fields -->
-			<div class="content grow fields" :class="{ singleField:isSingleField }">
+			<div class="content grow fields" :class="{ singleField:isSingleField }" :style="patternStyle">
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
 					@clipboard="messageSet('[CLIPBOARD]')"
@@ -635,6 +622,7 @@ let MyForm = {
 		loginPublicKey: function() { return this.$store.getters.loginPublicKey; },
 		loginPrivateKey:function() { return this.$store.getters.loginPrivateKey; },
 		moduleLanguage: function() { return this.$store.getters.moduleLanguage; },
+		patternStyle:   function() { return this.$store.getters.patternStyle; },
 		settings:       function() { return this.$store.getters.settings; }
 	},
 	methods:{

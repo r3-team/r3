@@ -251,7 +251,7 @@ let MyBuilderRoles = {
 	components:{MyBuilderRolesItem},
 	template:`<div class="builder-roles contentBox grow">
 		
-		<div class="top">
+		<div class="top lower">
 			<div class="area nowrap">
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>

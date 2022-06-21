@@ -564,7 +564,7 @@ let MySettings = {
 	template:`<div class="settings">
 		
 		<div class="contentBox grow">
-			<div class="top">
+			<div class="top lower">
 				<div class="area">
 					<img class="icon" src="images/person.png" />
 					<h1>{{ capApp.pageTitle }}</h1>
@@ -574,11 +574,10 @@ let MySettings = {
 						@trigger="$emit('logout')"
 						:cancel="true"
 						:caption="capApp.button.logout"
-						:darkBg="true"
 					/>
 				</div>
 			</div>
-			<div class="content no-padding">
+			<div class="content" :style="patternStyle">
 			
 				<!-- display -->
 				<div class="contentPart short">
@@ -588,6 +587,10 @@ let MySettings = {
 					</div>
 					<table class="default-inputs">
 						<tbody>
+							<tr>
+								<td>{{ capApp.headerCaptions }}</td>
+								<td><my-bool v-model="settingsInput.headerCaptions" /></td>
+							</tr>
 							<tr>
 								<td>{{ capApp.languageCode }}</td>
 								<td>
@@ -632,10 +635,6 @@ let MySettings = {
 					<table class="default-inputs">
 						<tbody>
 							<tr>
-								<td>{{ capApp.headerCaptions }}</td>
-								<td><my-bool v-model="settingsInput.headerCaptions" /></td>
-							</tr>
-							<tr>
 								<td>{{ capApp.bordersAll }}</td>
 								<td><my-bool v-model="settingsInput.bordersAll" /></td>
 							</tr>
@@ -670,6 +669,20 @@ let MySettings = {
 										<option :value="5">{{ capGen.option.size4 }}</option>
 									</select>
 								</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.pattern }}</td>
+								<td>
+									<select v-model="settingsInput.pattern">
+										<option :value="null">-</option>
+										<option value="bubbles">Bubbles</option>
+										<option value="waves">Waves</option>
+									</select>
+								</td>
+							</tr>
+							<tr>
+								<td>{{ capApp.menuColored }}</td>
+								<td><my-bool v-model="settingsInput.menuColored" /></td>
 							</tr>
 							<tr>
 								<td>{{ capApp.dark }}</td>
@@ -748,6 +761,7 @@ let MySettings = {
 		languageCodes:function() { return this.$store.getters['schema/languageCodes']; },
 		capGen:       function() { return this.$store.getters.captions.generic; },
 		capApp:       function() { return this.$store.getters.captions.settings; },
+		patternStyle: function() { return this.$store.getters.patternStyle; },
 		settings:     function() { return this.$store.getters.settings; }
 	},
 	mounted:function() {

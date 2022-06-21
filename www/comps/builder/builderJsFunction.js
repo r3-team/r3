@@ -24,12 +24,12 @@ let MyBuilderJsFunction = {
 						v-model="captions.jsFunctionTitle"
 						:contentName="capApp.titleOne"
 						:language="builderLanguage"
+						:longInput="true"
 					/>
 				</div>
 				<div class="area">
 					<my-button
 						@trigger="showSidebar = !showSidebar"
-						:darkBg="true"
 						:image="showSidebar ? 'toggleRight.png' : 'toggleLeft.png'"
 					/>
 				</div>
@@ -40,24 +40,20 @@ let MyBuilderJsFunction = {
 						@trigger="set"
 						:active="hasChanges"
 						:caption="capGen.button.save"
-						:darkBg="true"
 					/>
 					<my-button image="refresh.png"
 						@trigger="reset"
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
-						:darkBg="true"
 					/>
 					<my-button
 						@trigger="showHeader = !showHeader"
 						:caption="capApp.button.details"
-						:darkBg="true"
 						:image="showHeader ? 'visible1.png' : 'visible0.png'"
 					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
 						:caption="capGen.preview"
-						:darkBg="true"
 						:image="showPreview ? 'visible1.png' : 'visible0.png'"
 					/>
 				</div>
@@ -124,14 +120,10 @@ let MyBuilderJsFunction = {
 		</div>
 		
 		<div class="contentBox right" v-if="jsFunction && showSidebar">
-			<div class="top">
+			<div class="top lower">
 				<div class="area nowrap">
 					<img class="icon" src="images/database.png" />
 					<h1 class="title">{{ capApp.placeholders }}</h1>
-				</div>
-			</div>
-			<div class="top lower">
-				<div class="area nowrap">
 				</div>
 			</div>
 			<div class="content padding default-inputs">

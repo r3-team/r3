@@ -38,6 +38,7 @@
 .list .layoutTable{
 	flex:1 1 auto;
 	overflow:auto;
+	background-color:var(--color-bg);
 }
 .list .layoutTable table{
 	width:100%;
@@ -59,11 +60,11 @@
 	transition:box-shadow 0.5s;
 }
 .list .layoutTable th{
-	padding:6px;
+	padding:6px 10px;
 	margin-bottom:-1px;
 	position:sticky;
 	top:0px;
-	border-bottom:1px solid var(--color-border);
+	border-bottom:2px solid var(--color-border);
 	background-color:var(--color-bg);
 	border-collapse:separate;
 	z-index:var(--z-index-list-header);
@@ -85,7 +86,7 @@
 	filter:var(--image-filter);
 }
 .list .layoutTable td{
-	padding:4px 8px;
+	padding:4px 10px;
 	border-bottom:1px solid var(--color-border);
 	border-right:1px solid var(--color-border);
 }
@@ -151,7 +152,7 @@
 	min-height:90px;
 	margin:0px 16px 16px 0px;
 	position:relative;
-	border:2px solid var(--color-border);
+	border:1px solid var(--color-border);
 	border-radius:5px;
 	overflow:hidden;
 	box-shadow:1px 1px 4px var(--color-shade);
@@ -162,7 +163,7 @@
 	height:8px;
 	margin:0px 0px 12px 0px;
 	background-color:var(--color-bg);
-	border-bottom:2px solid var(--color-border);
+	border-bottom:1px solid var(--color-border);
 }
 .list .layoutCards .card .actions{
 	position:absolute;

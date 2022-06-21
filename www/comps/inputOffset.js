@@ -2,13 +2,12 @@ export {MyInputOffset as default};
 
 let MyInputOffset = {
 	name:'my-input-offset',
-	template:`<div class="input-offset" :class="{ darkBg:darkBg }">
+	template:`<div class="input-offset">
 		<!-- prev page -->
 		<my-button image="pagePrev.png"
 			v-if="arrows && limit < total"
 			@trigger="pageChanged(false)"
 			:active="offset !== 0"
-			:darkBg="darkBg"
 			:naked="true"
 		/>
 		
@@ -33,7 +32,6 @@ let MyInputOffset = {
 			v-if="arrows && limit < total"
 			@trigger="pageChanged(true)"
 			:active="(offset + limit) < total"
-			:darkBg="darkBg"
 			:naked="true"
 		/>
 	</div>`,
@@ -41,7 +39,6 @@ let MyInputOffset = {
 		arrows:    { type:Boolean, required:false, default:true },
 		caption:   { type:Boolean, required:false, default:false },
 		classInput:{ type:String,  required:false, default: '' },
-		darkBg:    { type:Boolean, required:false, default:false },
 		limit:     { type:Number,  required:true },
 		offset:    { type:Number,  required:true },
 		total:     { type:Number,  required:true }

@@ -1,52 +1,96 @@
 .button{
 	height:30px;
-	margin:0px 8px 0px 0px;
-	padding:4px 0px 4px 0px;
+	margin:0px var(--spacing-button-horz-outside) 0px 0px;
+	padding:4px var(--spacing-button-horz-inside) 4px var(--spacing-button-horz-inside);
 	font-size:inherit;
-	color:inherit;
-	box-sizing:border-box;
+	color:var(--color-bg-font);
 	display:flex;
 	flex-direction:row;
 	align-items:center;
 	float:left;
 	outline:none;
+	background-color:var(--color-action);
+	box-sizing:border-box;
+	box-shadow:1px 1px 3px var(--color-shade);
+	border-radius:4px;
 }
+.button.cancel{
+	background-color:var(--color-cancel);
+}
+.button.naked{
+	color:inherit;
+	background-color:transparent;
+	box-shadow:unset;
+}
+
+/* regular button styles */
+.button.inactive:not(.naked){
+	background-color:var(--color-action-disable);
+}
+.button:focus:not(.naked):not(.inactive),
+.button:hover:not(.naked):not(.inactive){
+	filter:brightness(120%);
+	box-shadow:1px 2px 6px var(--color-shade);
+	border-bottom:2px solid var(--color-border-bg);
+	transition:box-shadow 0.1s, border-bottom 0.1s;
+}
+.button:active:hover:not(.naked):not(.noMargin):not(.inactive){
+	height:28px;
+	margin:1px calc(var(--spacing-button-horz-outside) + 2px) 1px 2px;
+	padding-left:calc(var(--spacing-button-horz-inside) - 2px);
+	padding-right:calc(var(--spacing-button-horz-inside) - 2px);
+	box-shadow:1px 1px 3px var(--color-shade);
+	filter:brightness(90%);
+	transition:height 0.1s, margin 0.1s, padding 0.1s, filter 0.1s;
+}
+.button.large:active:hover:not(.naked):not(.noMargin):not(.inactive){
+	height:38px;
+}
+
+/* naked button styles */
+.button.naked.inactive{
+	color:var(--color-font-alt);
+}
+.button.naked:focus:not(.inactive),
+.button.naked:hover:not(.inactive){
+	text-decoration:underline;
+}
+
+
+/* button content */
+.button *:not(*:last-child){
+	padding-right:var(--spacing-button-horz-inside);
+}
+.button span{
+	white-space:nowrap;
+}
+.button img{
+	width:20px;
+	height:20px;
+	filter:var(--image-filter-bg);
+	transition:height 0.2s, width 0.2s, margin 0.2s;
+}
+.button.naked img{
+	filter:var(--image-filter);
+}
+.button.naked.inactive img{
+	filter:var(--image-filter-alt);
+}
+.button.naked:focus:not(.inactive) img,
+.button.naked:hover:not(.inactive) img{
+	width:24px;
+	height:24px;
+	margin-left:-2px;
+	margin-right:-2px;
+}
+
+
+
+/* layout overwrites */
 .button.large{
 	height:40px;
 	font-size:120%;
 }
-
-/* button with background styling */
-.button.background{
-	margin:0px 4px 0px 0px;
-	padding:4px 0px 4px 10px;
-	border-radius:4px;
-	background-color:var(--color-action);
-	box-shadow:0px 1px 2px var(--color-shade);
-	color:var(--color-bg-font);
-	transition:color 0.1s, box-shadow 0.1s, background-color 0.1s;
-}
-.button.background:active:not(.noMargin):not(.inactive){
-	height:28px;
-	margin:1px 5px 1px 1px;
-}
-.button.background.large:active:not(.noMargin):not(.inactive){
-	height:38px;
-}
-.button.background.inactive{
-	filter:grayscale(100%);
-}
-.button.background.cancel{
-	background-color:var(--color-cancel);
-}
-.button.background.darkBg{
-	border:2px solid var(--color-action-border);
-}
-.button.background.darkBg.cancel{
-	border:2px solid var(--color-cancel-border);
-}
-
-/* layout overwrites */
 .button.right{
 	float:right;
 }
@@ -54,36 +98,8 @@
 	margin:0px;
 }
 
-/* button content */
-.button img{
-	height:22px;
-	margin:3px;
-	filter:var(--image-filter);
-	transition:height 0.2s, margin 0.2s;
-}
-.button.inactive img{
-	filter:var(--image-filter-alt);
-}
-.button.background img,
-.button.background span{
-	margin:0px 10px 0px 0px;
-}
-.button.background img,
-.button.darkBg img{
-	height:100%;
-	filter:var(--image-filter-bg);
-}
-.button:focus:not(.background):not(.inactive) img,
-.button:hover:not(.background):not(.inactive) img{
-	height:26px;
-	margin:1px;
-	transition:height 0.2s, margin 0.2s;
-}
-.button:active:not(.background):not(.inactive) img{
-	height:28px;
-	margin:0px;
-	transition:height 0.2s, margin 0.2s;
-}
-.button span{
-	white-space:nowrap;
+
+/* user overwrites */
+.user-dark .button.background.inactive{
+	filter:grayscale(100%) brightness(85%);
 }

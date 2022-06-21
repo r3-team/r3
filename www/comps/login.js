@@ -20,9 +20,9 @@ let MyLogin = {
 		<template v-if="!backendReady">
 			
 			<div class="contentBox">
-				<div class="top" :style="customBgLogin">
+				<div class="top lower" :style="customBgLogin">
 					<div class="area">
-						<img class="icon" src="images/lock.png" />
+						<img class="icon bg" src="images/lock.png" />
 						<h1>{{ appName }}</h1>
 					</div>
 				</div>
@@ -40,9 +40,9 @@ let MyLogin = {
 		<!-- not ready for login yet (downloading schema/public data/...) -->
 		<template v-if="backendReady && !loginReady">
 			<div class="contentBox">
-				<div class="top" :style="customBgLogin">
+				<div class="top lower" :style="customBgLogin">
 					<div class="area">
-						<img class="icon" src="images/lock.png" />
+						<img class="icon bg" src="images/lock.png" />
 						<h1>{{ appName }}</h1>
 					</div>
 				</div>
@@ -62,7 +62,7 @@ let MyLogin = {
 			<div class="contentBox" v-if="httpMode">
 				<div class="top warning">
 					<div class="area">
-						<img class="icon" src="images/warning.png" />
+						<img class="icon bg" src="images/warning.png" />
 						<h1>{{ message.httpMode[language] }}</h1>
 					</div>
 				</div>
@@ -72,7 +72,7 @@ let MyLogin = {
 			<div class="contentBox" v-if="!productionMode">
 				<div class="top warning">
 					<div class="area">
-						<img class="icon" src="images/warning.png" />
+						<img class="icon bg" src="images/warning.png" />
 						<h1>{{ message.maintenanceMode[language] }}</h1>
 					</div>
 				</div>
@@ -82,7 +82,7 @@ let MyLogin = {
 			<div class="contentBox" v-if="appInitErr">
 				<div class="top warning">
 					<div class="area">
-						<img class="icon" src="images/warning.png" />
+						<img class="icon bg" src="images/warning.png" />
 						<h1>{{ message.error[language] }}</h1>
 					</div>
 				</div>
@@ -90,9 +90,9 @@ let MyLogin = {
 			
 			<!-- login dialog -->
 			<div class="contentBox">
-				<div class="top" :style="customBgLogin">
+				<div class="top lower" :style="customBgLogin">
 					<div class="area">
-						<img class="icon" src="images/lock.png" />
+						<img class="icon bg" src="images/lock.png" />
 						<h1>{{ appName }}</h1>
 					</div>
 				</div>
@@ -137,9 +137,9 @@ let MyLogin = {
 			
 		<!-- custom company message -->
 		<div class="contentBox" v-if="showCustom">
-			<div class="top" :style="customBgLogin">
+			<div class="top lower" :style="customBgLogin">
 				<div class="area">
-					<img class="icon" src="images/home.png" />
+					<img class="icon bg" src="images/home.png" />
 					<h1>{{ companyName }}</h1>
 				</div>
 			</div>

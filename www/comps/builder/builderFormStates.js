@@ -211,23 +211,20 @@ let MyBuilderFormStates = {
 	components:{ MyBuilderFormState },
 	template:`<div class="builder-form-states contentBox" :class="{fullscreen:fullscreen}">
 		
-		<div class="top">
+		<div class="top lower">
 			<div class="area">
 				<my-button
 					:active="true"
 					:caption="capApp.title"
-					:darkBg="true"
 					:naked="true"
 				/>
 				<my-button image="add.png"
 					@trigger="add"
 					:caption="capGen.button.add"
-					:darkBg="true"
 				/>
 				<my-button
 					@trigger="showAll = !showAll"
 					:caption="capApp.button.showAll"
-					:darkBg="true"
 					:image="showAll ? 'triangleDown.png' : 'triangleRight.png'"
 				/>
 			</div>
@@ -250,12 +247,10 @@ let MyBuilderFormStates = {
 				
 				<my-button image="expand.png"
 					@trigger="$emit('set-fullscreen')"
-					:darkBg="true"
 				/>
 				<my-button image="cancel.png"
 					@trigger="$emit('close')"
 					:cancel="true"
-					:darkBg="true"
 				/>
 			</div>
 		</div>

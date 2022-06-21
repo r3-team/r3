@@ -580,7 +580,7 @@ let MyBuilderFunctions = {
 	},
 	template:`<div class="contentBox grow builder-functions">
 		
-		<div class="top">
+		<div class="top lower">
 			<div class="area nowrap">
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>

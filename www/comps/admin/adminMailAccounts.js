@@ -160,7 +160,6 @@ let MyAdminMailAccounts = {
 					@trigger="test"
 					:active="accountIdMap.length !== 0 && testRecipient !== ''"
 					:caption="capGen.button.send"
-					:darkBg="true"
 				/>
 			</div>
 		</div>

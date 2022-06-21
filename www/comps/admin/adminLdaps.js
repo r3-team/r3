@@ -17,7 +17,6 @@ let MyAdminLdaps = {
 					@trigger="open(0)"
 					:active="licenseValid"
 					:caption="capApp.button.new"
-					:darkBg="true"
 				/>
 			</div>
 		</div>

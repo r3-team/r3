@@ -172,7 +172,7 @@ let MyBuilderLoginForms = {
 	components:{MyBuilderLoginFormsItem},
 	template:`<div class="contentBox grow">
 		
-		<div class="top">
+		<div class="top lower">
 			<div class="area nowrap">
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>

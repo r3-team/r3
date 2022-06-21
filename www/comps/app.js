@@ -38,12 +38,14 @@ let MyApp = {
 		<template v-if="appReady">
 			<my-header
 				@logout="sessionInvalid"
+				:bgStyle="bgStyle"
 				:keysLocked="loginEncryption && loginPrivateKey === null"
 				:moduleEntries="moduleEntries"
 			/>
 			
 			<router-view class="app-content"
 				@logout="sessionInvalid"
+				:bgStyle="bgStyle"
 				:moduleEntries="moduleEntries"
 				:style="stylesContent"
 			/>
@@ -77,6 +79,16 @@ let MyApp = {
 	},
 	computed:{
 		// presentation
+		bgStyle:function() {
+			// custom color before specific module color
+			if(this.customBgHeader !== '')
+				return this.customBgHeader;
+			
+			if(this.moduleColor1 !== '')
+				return `background-color:#${this.moduleColor1};`;
+			
+			return '';
+		},
 		classes:function() {
 			if(!this.appReady)
 				return 'is-not-ready';
@@ -98,17 +110,18 @@ let MyApp = {
 		styles:function() {
 			if(!this.appReady) return '';
 			
-			let styles = [];
-			styles.push(`font-size:${this.settings.fontSize}%`);
+			let styles = [`font-size:${this.settings.fontSize}%`];
+			
+			if(this.patternStyle !== '')
+				styles.push(this.patternStyle);
+			
 			return styles.join(';');
 		},
 		stylesContent:function() {
 			if(!this.appReady || this.settings.compact)
 				return '';
 			
-			let styles = [];
-			styles.push(`max-width:${this.settings.pageLimit}px`);
-			return styles.join(';');
+			return [`max-width:${this.settings.pageLimit}px`].join(';');
 		},
 		
 		// navigation
@@ -208,6 +221,7 @@ let MyApp = {
 		// stores
 		activated:      function() { return this.$store.getters['local/activated']; },
 		appVersion:     function() { return this.$store.getters['local/appVersion']; },
+		customBgHeader: function() { return this.$store.getters['local/customBgHeader']; },
 		customLogo:     function() { return this.$store.getters['local/customLogo']; },
 		customLogoUrl:  function() { return this.$store.getters['local/customLogoUrl']; },
 		loginKeyAes:    function() { return this.$store.getters['local/loginKeyAes']; },
@@ -226,6 +240,8 @@ let MyApp = {
 		isMobile:       function() { return this.$store.getters.isMobile; },
 		loginEncryption:function() { return this.$store.getters.loginEncryption; },
 		loginPrivateKey:function() { return this.$store.getters.loginPrivateKey; },
+		moduleColor1:   function() { return this.$store.getters.moduleColor1; },
+		patternStyle:   function() { return this.$store.getters.patternStyle; },
 		settings:       function() { return this.$store.getters.settings; }
 	},
 	created:function() {

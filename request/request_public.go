@@ -13,6 +13,7 @@ func PublicGet() (interface{}, error) {
 		AppName            string    `json:"appName"`
 		AppNameShort       string    `json:"appNameShort"`
 		AppVersion         string    `json:"appVersion"`
+		ClusterNodeId      uuid.UUID `json:"clusterNodeId"`
 		CompanyColorHeader string    `json:"companyColorHeader"`
 		CompanyColorLogin  string    `json:"companyColorLogin"`
 		CompanyLogo        string    `json:"companyLogo"`
@@ -20,7 +21,6 @@ func PublicGet() (interface{}, error) {
 		CompanyName        string    `json:"companyName"`
 		CompanyWelcome     string    `json:"companyWelcome"`
 		LanguageCodes      []string  `json:"languageCodes"`
-		ClusterNodeId      uuid.UUID `json:"clusterNodeId"`
 		ProductionMode     uint64    `json:"productionMode"`
 		SchemaTimestamp    int64     `json:"schemaTimestamp"`
 	}
@@ -28,6 +28,7 @@ func PublicGet() (interface{}, error) {
 	res.AppName = config.GetString("appName")
 	res.AppNameShort = config.GetString("appNameShort")
 	res.AppVersion, _, _, _ = config.GetAppVersions()
+	res.ClusterNodeId = cache.GetNodeId()
 	res.CompanyColorHeader = config.GetString("companyColorHeader")
 	res.CompanyColorLogin = config.GetString("companyColorLogin")
 	res.CompanyLogo = config.GetString("companyLogo")
@@ -36,7 +37,6 @@ func PublicGet() (interface{}, error) {
 	res.CompanyWelcome = config.GetString("companyWelcome")
 	res.LanguageCodes = cache.GetCaptionLanguageCodes()
 	res.ProductionMode = config.GetUint64("productionMode")
-	res.ClusterNodeId = cache.GetNodeId()
 	res.SchemaTimestamp = cache.GetSchemaTimestamp()
 	return res, nil
 }

@@ -27,7 +27,6 @@ let MyBuilderCollection = {
 				<div class="area">
 					<my-button
 						@trigger="showSidebar = !showSidebar"
-						:darkBg="true"
 						:image="showSidebar ? 'toggleRight.png' : 'toggleLeft.png'"
 					/>
 				</div>
@@ -38,18 +37,15 @@ let MyBuilderCollection = {
 						@trigger="set"
 						:active="hasChanges"
 						:caption="capGen.button.save"
-						:darkBg="true"
 					/>
 					<my-button image="refresh.png"
 						@trigger="reset"
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
-						:darkBg="true"
 					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
 						:caption="capGen.preview"
-						:darkBg="true"
 						:image="showPreview ? 'visible1.png' : 'visible0.png'"
 					/>
 				</div>

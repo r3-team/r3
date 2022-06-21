@@ -48,13 +48,13 @@ let MyBuilderForm = {
 							v-model="captions.formTitle"
 							:contentName="capApp.formTitle"
 							:language="builderLanguage"
+							:longInput="true"
 						/>
 					</div>
 					
 					<div class="area">
 						<my-button
 							@trigger="showSidebar = !showSidebar"
-							:darkBg="true"
 							:image="showSidebar ? 'toggleRight.png' : 'toggleLeft.png'"
 						/>
 					</div>
@@ -65,41 +65,34 @@ let MyBuilderForm = {
 							@trigger="set"
 							:active="hasChanges"
 							:caption="capGen.button.save"
-							:darkBg="true"
 						/>
 						<my-button image="refresh.png"
 							@trigger="reset"
 							:active="hasChanges"
 							:caption="capGen.button.refresh"
-							:darkBg="true"
 						/>
 						<my-button image="open.png"
 							@trigger="open"
 							:caption="capGen.button.open"
-							:darkBg="true"
 						/>
 						<my-button
 							@trigger="showCaptions = !showCaptions"
 							:caption="capApp.captions"
-							:darkBg="true"
 							:image="showCaptions ? 'visible1.png' : 'visible0.png'"
 						/>
 						<my-button
 							@trigger="showFunctions = !showFunctions"
 							:caption="capApp.showFunctions"
-							:darkBg="true"
 							:image="showFunctions ? 'visible1.png' : 'visible0.png'"
 						/>
 						<my-button
 							@trigger="showStates = !showStates"
 							:caption="capApp.showStates"
-							:darkBg="true"
 							:image="showStates ? 'visible1.png' : 'visible0.png'"
 						/>
 						<my-button
 							@trigger="showHelp = !showHelp"
 							:caption="capApp.showHelp"
-							:darkBg="true"
 							:image="showHelp ? 'visible1.png' : 'visible0.png'"
 						/>
 					</div>
@@ -163,7 +156,7 @@ let MyBuilderForm = {
 		<div class="contentBox sidebar scroll" v-if="showSidebar">
 		
 			<!-- form builder sidebar -->
-			<div class="top">
+			<div class="top lower">
 				<div class="area">
 					<img class="icon" src="images/database.png" />
 					<h1 v-if="showFieldQuery">{{ capApp.contentField }}</h1>
@@ -174,12 +167,9 @@ let MyBuilderForm = {
 						v-if="showFieldQuery"
 						@trigger="fieldIdQuery = null"
 						:cancel="true"
-						:darkBg="true"
 					/>
 				</div>
 			</div>
-			
-			<div class="top lower" v-if="settings.compact" />
 			
 			<div class="content grow" v-if="showFieldQuery">
 				
@@ -523,7 +513,6 @@ let MyBuilderForm = {
 		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
 		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
 		formIdMap:     function() { return this.$store.getters['schema/formIdMap']; },
-		settings:      function() { return this.$store.getters.settings; },
 		capApp:        function() { return this.$store.getters.captions.builder.form; },
 		capFldTitle:   function() { return this.$store.getters.captions.fieldTitle; },
 		capFldHelp:    function() { return this.$store.getters.captions.fieldHelp; },

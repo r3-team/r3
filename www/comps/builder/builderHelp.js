@@ -17,13 +17,11 @@ let MyBuilderHelp = {
 					@trigger="set"
 					:active="hasChanges"
 					:caption="capGen.button.save"
-					:darkBg="true"
 				/>
 				<my-button image="refresh.png"
 					@trigger="reset"
 					:active="hasChanges"
 					:caption="capGen.button.refresh"
-					:darkBg="true"
 				/>
 			</div>
 		</div>

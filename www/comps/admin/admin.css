@@ -288,6 +288,7 @@
 .admin-repo .repo-module .part{
 	display:flex;
 	flex-flow:column nowrap;
+	background-color:var(--color-bg);
 }
 .admin-repo .repo-module .bad-state{
 	color:var(--color-error);
@@ -319,7 +320,6 @@
 	padding:12px;
 	padding-right:18px;
 	line-height:150%;
-	background-color:var(--color-bg);
 }
 .admin-repo .repo-module .part.right{
 	padding:12px 16px;
@@ -328,9 +328,7 @@
 	display:flex;
 	flex-flow:column;
 	align-items:flex-start;
-	color:var(--color-bg-font);
 	border-left:2px solid var(--color-border);
-	background-color:var(--color-container-title-lower);
 	flex:0 1 300px;
 }
 

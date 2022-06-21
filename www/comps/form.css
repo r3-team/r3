@@ -4,10 +4,6 @@
 	flex-flow:row nowrap;
 	overflow:visible;
 	z-index:var(--z-index-form);
-	
-	/* box-shadow fix */
-	/* setting overflow:auto kills box shadow */
-	padding-left:2px;
 }
 .form-pop-up{
 	width:100%;
@@ -107,8 +103,8 @@
 .user-bordersSquared .gantt-line-record .record-line{
 	border-radius:0px;
 }
-.user-compact .form-wrap{
-	padding:0px !important;
+.user-compact .form{
+	padding-left:2px;
 }
 
 /* mobile overwrites */

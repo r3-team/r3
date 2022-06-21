@@ -4,7 +4,7 @@ let MyAdminDocs = {
 	name:'my-admin-docs',
 	template:`<div class="contentBox grow">
 		
-		<div class="top">
+		<div class="top lower">
 			<div class="area">
 				<img class="icon" src="images/question.png" />
 				<h1>{{ capApp.titleDocs }}</h1>
@@ -14,7 +14,7 @@ let MyAdminDocs = {
 				<my-button image="cancel.png"
 					@trigger="$emit('close')"
 					:cancel="true"
-					:darkBg="true"
+					:tight="true"
 				/>
 			</div>
 		</div>

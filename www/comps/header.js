@@ -158,6 +158,7 @@ let MyHeader = {
 		</div>
 	</div>`,
 	props:{
+		bgStyle:      { type:String,  required:true },
 		keysLocked:   { type:Boolean, required:true },
 		moduleEntries:{ type:Array,   required:true }
 	},
@@ -171,16 +172,6 @@ let MyHeader = {
 		};
 	},
 	computed:{
-		bgStyle:function() {
-			// custom color before specific module color
-			if(this.customBgHeader !== '')
-				return this.customBgHeader;
-			
-			if(this.moduleColor1 !== '')
-				return `background-color:#${this.moduleColor1};`;
-			
-			return '';
-		},
 		styles:function() {
 			if(this.settings.compact)
 				return '';
@@ -201,7 +192,6 @@ let MyHeader = {
 		},
 		
 		// stores
-		customBgHeader:function() { return this.$store.getters['local/customBgHeader']; },
 		modules:       function() { return this.$store.getters['schema/modules']; },
 		moduleNameMap: function() { return this.$store.getters['schema/moduleNameMap']; },
 		builderEnabled:function() { return this.$store.getters.builderEnabled; },
@@ -213,7 +203,6 @@ let MyHeader = {
 		isAtMenu:      function() { return this.$store.getters.isAtMenu; },
 		isMobile:      function() { return this.$store.getters.isMobile; },
 		isNoAuth:      function() { return this.$store.getters.isNoAuth; },
-		moduleColor1:  function() { return this.$store.getters.moduleColor1; },
 		settings:      function() { return this.$store.getters.settings; }
 	},
 	created:function() {

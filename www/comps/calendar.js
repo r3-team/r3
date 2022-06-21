@@ -53,7 +53,6 @@ let MyCalendarMonth = {
 					@trigger-middle="$emit('open-form',0,[],true)"
 					:caption="!isMobile ? capGen.button.new : ''"
 					:captionTitle="capGen.button.newHint"
-					:darkBg="true"
 				/>
 			</div>
 		
@@ -64,7 +63,6 @@ let MyCalendarMonth = {
 				/>
 				<my-button image="pagePrev.png"
 					@trigger="monthInput -= 1"
-					:darkBg="true"
 					:naked="true"
 				/>
 				<input class="selector date-input" type="text"
@@ -86,7 +84,6 @@ let MyCalendarMonth = {
 				</select>
 				<my-button image="pageNext.png"
 					@trigger="monthInput += 1"
-					:darkBg="true"
 					:naked="true"
 				/>
 			</div>
@@ -115,14 +112,12 @@ let MyCalendarMonth = {
 					@trigger="showIcs = !showIcs"
 					:caption="!isMobile ? capApp.button.ics : ''"
 					:captionTitle="capApp.button.icsHint"
-					:darkBg="true"
 				/>
 				
 				<my-button image="calendar.png"
 					@trigger="goToToday()"
 					:caption="!isMobile && !isInput ? capApp.today : ''"
 					:captionTitle="capApp.todayHint"
-					:darkBg="true"
 				/>
 			</div>
 		</div>

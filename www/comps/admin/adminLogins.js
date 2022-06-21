@@ -411,14 +411,12 @@ let MyAdminLogins = {
 				<my-button image="refresh.png"
 					@trigger="get"
 					:caption="capGen.button.refresh"
-					:darkBg="true"
 				/>
 			</div>
 			<div class="area default-inputs">
 				<my-input-offset class-input="selector"
 					@input="offsetSet"
 					:caption="true"
-					:darkBg="true"
 					:limit="limit"
 					:offset="offset"
 					:total="total"
@@ -428,7 +426,6 @@ let MyAdminLogins = {
 				<my-button
 					@trigger="limitSet(20)"
 					:caption="capGen.limit"
-					:darkBg="true"
 					:naked="true"
 				/>
 				<select class="short selector"
