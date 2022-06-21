@@ -14,6 +14,7 @@ let MyFormHelp = {
 			<my-button image="cancel.png"
 				@trigger="$emit('close')"
 				:cancel="true"
+				:tight="true"
 			/>
 		</div>
 		<div class="top lower">

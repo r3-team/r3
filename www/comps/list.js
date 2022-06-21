@@ -76,6 +76,7 @@ let MyList = {
 								:active="!inputIsReadonly"
 								:image="displayRecordCheck(inputRecordIds.includes(r.indexRecordIds['0']))"
 								:naked="true"
+								:tight="true"
 							/>
 						</div>
 					</td>
@@ -112,6 +113,7 @@ let MyList = {
 								@trigger="inputTriggerRowRemove(i)"
 								:captionTitle="capApp.inputHintRemove"
 								:naked="true"
+								:tight="true"
 							/>
 							<my-button image="open.png"
 								v-if="inputOpenForm && hasUpdate"
@@ -119,6 +121,7 @@ let MyList = {
 								@trigger-middle="$emit('open-form',r.indexRecordIds['0'],true)"
 								:captionTitle="capApp.inputHintOpen"
 								:naked="true"
+								:tight="true"
 							/>
 							
 							<!-- show dropdown toggle if single input -->
@@ -126,6 +129,7 @@ let MyList = {
 								v-if="!inputAsCategory && !showInputAddLine && !inputIsReadonly"
 								@trigger="toggleDropdown"
 								:naked="true"
+								:tight="true"
 							/>
 						</div>
 					</td>
@@ -163,12 +167,14 @@ let MyList = {
 										@trigger-middle="$emit('open-form',0,true)"
 										:captionTitle="capApp.inputHintCreate"
 										:naked="true"
+										:tight="true"
 									/>
 									<my-button image="arrowDown.png"
 										v-if="!inputIsReadonly"
 										@trigger="toggleDropdown"
 										:captionTitle="capApp.inputHintSelect"
 										:naked="true"
+										:tight="true"
 									/>
 								</div>
 							</td>
@@ -236,6 +242,7 @@ let MyList = {
 						:caption="capApp.button.autoRenew.replace('{VALUE}',autoRenewInput)"
 						:captionTitle="capApp.button.autoRenewHint.replace('{VALUE}',autoRenewInput)"
 						:naked="true"
+						:tight="true"
 					/>
 					
 					<my-button image="refresh.png"
@@ -243,6 +250,7 @@ let MyList = {
 						@trigger="reloadInside('manual')"
 						:captionTitle="capGen.button.refresh"
 						:naked="true"
+						:tight="true"
 					/>
 					
 					<my-button image="filter.png"
@@ -251,6 +259,7 @@ let MyList = {
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
 						:naked="true"
+						:tight="true"
 					/>
 					
 					<input class="selector lookup" type="text"
@@ -412,6 +421,7 @@ let MyList = {
 										:caption="capApp.button.all"
 										:captionTitle="capApp.button.allHint"
 										:naked="true"
+										:tight="true"
 									/>
 								</div>
 							</td>

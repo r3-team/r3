@@ -85,6 +85,7 @@ let MyInputCollection = {
 						:blockBubble="true"
 						:caption="capGen.more"
 						:naked="true"
+						:tight="true"
 					/>
 				</div>
 			

@@ -110,6 +110,7 @@ body                                         { --depth:6; }
 .app-header                                  { --depth:0; }
 .contentBox                                  { --depth:3; }
 .contentBox .top                             { --depth:4; }
+.contentBox .top .selector                   { --depth:0; }
 .contentBox .contentPart                     { --depth:5; }
 .default-inputs                              { --depth:0; }
 .default-inputs *:disabled                   { --depth:6; }

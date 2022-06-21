@@ -2,13 +2,14 @@ export {MyInputOffset as default};
 
 let MyInputOffset = {
 	name:'my-input-offset',
-	template:`<div class="input-offset">
+	template:`<div class="input-offset default-inputs">
 		<!-- prev page -->
 		<my-button image="pagePrev.png"
 			v-if="arrows && limit < total"
 			@trigger="pageChanged(false)"
 			:active="offset !== 0"
 			:naked="true"
+			:tight="true"
 		/>
 		
 		<!-- offset selector -->
@@ -33,6 +34,7 @@ let MyInputOffset = {
 			@trigger="pageChanged(true)"
 			:active="(offset + limit) < total"
 			:naked="true"
+			:tight="true"
 		/>
 	</div>`,
 	props:{

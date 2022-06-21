@@ -24,6 +24,7 @@ let MyFormLog = {
 			<my-button image="cancel.png"
 				@trigger="$emit('close-log')"
 				:cancel="true"
+				:tight="true"
 			/>
 		</div>
 		<div class="top lower">

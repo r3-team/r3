@@ -13,6 +13,7 @@
 	box-sizing:border-box;
 	box-shadow:1px 1px 3px var(--color-shade);
 	border-radius:4px;
+	transition:height 0.1s, margin 0.1s, padding 0.1s, box-shadow 0.1s, border-bottom 0.1s, filter 0.1s;
 }
 .button.cancel{
 	background-color:var(--color-cancel);
@@ -32,7 +33,6 @@
 	filter:brightness(120%);
 	box-shadow:1px 2px 6px var(--color-shade);
 	border-bottom:2px solid var(--color-border-bg);
-	transition:box-shadow 0.1s, border-bottom 0.1s;
 }
 .button:active:hover:not(.naked):not(.noMargin):not(.inactive){
 	height:28px;
@@ -41,7 +41,6 @@
 	padding-right:calc(var(--spacing-button-horz-inside) - 2px);
 	box-shadow:1px 1px 3px var(--color-shade);
 	filter:brightness(90%);
-	transition:height 0.1s, margin 0.1s, padding 0.1s, filter 0.1s;
 }
 .button.large:active:hover:not(.naked):not(.noMargin):not(.inactive){
 	height:38px;
