@@ -1245,6 +1245,7 @@
 			"messagePwRequiresSpecial":"Passwort muss ein Sonderzeichen beinhalten (!, ?, #, usw.)",
 			"messagePwRequiresUpper":"Passwort muss einen Großbuchstaben beinhalten",
 			"messagePwShort":"Password is too short",
+			"nodeName":"Verbunden mit: {NAME}",
 			"pwNew0":"Neues Passwort",
 			"pwNew1":"Neues Passwort (wiederholt)",
 			"pwOld":"Aktuelles Passwort",

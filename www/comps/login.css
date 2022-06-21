@@ -1,5 +1,6 @@
 .login{
-	max-width:380px;
+	width:100%;
+	max-width:420px;
 	min-width:240px;
 	margin:10px;
 	padding:16px 0px 0px 16px;
@@ -65,7 +66,7 @@
 .login .warning{
 	background-color:#bd2828 !important;
 }
-.login .clusterNodeId{
+.login .clusterNode{
 	position:absolute;
 	right:10px;
 	bottom:10px;

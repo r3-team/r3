@@ -401,7 +401,7 @@ let MyApp = {
 					this.$store.commit('local/companyLogoUrl',res.payload.companyLogoUrl);
 					this.$store.commit('local/companyName',res.payload.companyName);
 					this.$store.commit('local/companyWelcome',res.payload.companyWelcome);
-					this.$store.commit('clusterNodeId',res.payload.clusterNodeId);
+					this.$store.commit('clusterNodeName',res.payload.clusterNodeName);
 					this.$store.commit('productionMode',res.payload.productionMode === '1');
 					this.$store.commit('pageTitleRefresh'); // update page title with new app name
 					this.$store.commit('schema/languageCodes',res.payload.languageCodes);

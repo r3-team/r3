@@ -1245,6 +1245,7 @@
 			"messagePwRequiresSpecial":"Password must contain a special character (!, ?, #, etc.)",
 			"messagePwRequiresUpper":"Password must contain an upper case letter",
 			"messagePwShort":"Password is too short",
+			"nodeName":"Connected with: {NAME}",
 			"pwNew0":"New password",
 			"pwNew1":"New password (repeated)",
 			"pwOld":"Current password",

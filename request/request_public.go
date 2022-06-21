@@ -3,32 +3,30 @@ package request
 import (
 	"r3/cache"
 	"r3/config"
-
-	"github.com/gofrs/uuid"
 )
 
 func PublicGet() (interface{}, error) {
 	var res struct {
-		Activated          bool      `json:"activated"`
-		AppName            string    `json:"appName"`
-		AppNameShort       string    `json:"appNameShort"`
-		AppVersion         string    `json:"appVersion"`
-		ClusterNodeId      uuid.UUID `json:"clusterNodeId"`
-		CompanyColorHeader string    `json:"companyColorHeader"`
-		CompanyColorLogin  string    `json:"companyColorLogin"`
-		CompanyLogo        string    `json:"companyLogo"`
-		CompanyLogoUrl     string    `json:"companyLogoUrl"`
-		CompanyName        string    `json:"companyName"`
-		CompanyWelcome     string    `json:"companyWelcome"`
-		LanguageCodes      []string  `json:"languageCodes"`
-		ProductionMode     uint64    `json:"productionMode"`
-		SchemaTimestamp    int64     `json:"schemaTimestamp"`
+		Activated          bool     `json:"activated"`
+		AppName            string   `json:"appName"`
+		AppNameShort       string   `json:"appNameShort"`
+		AppVersion         string   `json:"appVersion"`
+		ClusterNodeName    string   `json:"clusterNodeName"`
+		CompanyColorHeader string   `json:"companyColorHeader"`
+		CompanyColorLogin  string   `json:"companyColorLogin"`
+		CompanyLogo        string   `json:"companyLogo"`
+		CompanyLogoUrl     string   `json:"companyLogoUrl"`
+		CompanyName        string   `json:"companyName"`
+		CompanyWelcome     string   `json:"companyWelcome"`
+		LanguageCodes      []string `json:"languageCodes"`
+		ProductionMode     uint64   `json:"productionMode"`
+		SchemaTimestamp    int64    `json:"schemaTimestamp"`
 	}
 	res.Activated = config.GetLicenseActive()
 	res.AppName = config.GetString("appName")
 	res.AppNameShort = config.GetString("appNameShort")
 	res.AppVersion, _, _, _ = config.GetAppVersions()
-	res.ClusterNodeId = cache.GetNodeId()
+	res.ClusterNodeName = cache.GetNodeName()
 	res.CompanyColorHeader = config.GetString("companyColorHeader")
 	res.CompanyColorLogin = config.GetString("companyColorLogin")
 	res.CompanyLogo = config.GetString("companyLogo")

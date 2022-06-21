@@ -480,6 +480,9 @@ h3{
 .contentBox .content .contentPart.no-padding{
 	padding:0px;
 }
+.contentBox .content .contentPart.relative{
+	position:relative;
+}
 .contentBox .content .contentPartHeader{
 	margin:0px 0px 12px;
 	display:flex;

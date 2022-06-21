@@ -392,12 +392,16 @@ let MySettingsAccount = {
 			</tbody>
 		</table>
 		
-		<div class="account-action">
+		<div class="settings-account-action">
 			<my-button image="save.png" class="right"
 				@trigger="setCheck"
 				:active="canSave"
 				:caption="capGen.button.save"
 			/>
+		</div>
+		
+		<div class="settings-account-cluster-node">
+			{{ capApp.nodeName.replace('{NAME}',clusterNodeName) }}
 		</div>
 		
 		<div class="message" v-if="message !== ''">{{ message }}</div>
@@ -460,7 +464,8 @@ let MySettingsAccount = {
 		loginPrivateKeyEnc:(s) => s.$store.getters.loginPrivateKeyEnc,
 		kdfIterations:     (s) => s.$store.getters.constants.kdfIterations,
 		capApp:            (s) => s.$store.getters.captions.settings.account,
-		capGen:            (s) => s.$store.getters.captions.generic
+		capGen:            (s) => s.$store.getters.captions.generic,
+		clusterNodeName:   (s) => s.$store.getters.clusterNodeName
 	},
 	mounted:function() {
 		ws.send('lookup','get',{name:'passwordSettings'},true).then(
@@ -622,6 +627,10 @@ let MySettings = {
 								<td>{{ capApp.warnUnsaved }}</td>
 								<td><my-bool v-model="settingsInput.warnUnsaved" /></td>
 							</tr>
+							<tr>
+								<td>{{ capApp.mobileScrollForm }}</td>
+								<td><my-bool v-model="settingsInput.mobileScrollForm" /></td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
@@ -707,16 +716,12 @@ let MySettings = {
 									</div>
 								</td>
 							</tr>
-							<tr>
-								<td>{{ capApp.mobileScrollForm }}</td>
-								<td><my-bool v-model="settingsInput.mobileScrollForm" /></td>
-							</tr>
 						</tbody>
 					</table>
 				</div>
 				
 				<!-- account -->
-				<div class="contentPart short">
+				<div class="contentPart short relative">
 					<div class="contentPartHeader">
 						<img class="icon" src="images/lock.png" />
 						<h1>{{ capApp.titleAccount }}</h1>
@@ -741,7 +746,7 @@ let MySettings = {
 		moduleEntries:{ type:Array, required:true }
 	},
 	emits:['logout'],
-	data:function() {
+	data() {
 		return {
 			settingsInput:{},
 			settingsLoaded:false
@@ -758,13 +763,13 @@ let MySettings = {
 	},
 	computed:{
 		// stores
-		languageCodes:function() { return this.$store.getters['schema/languageCodes']; },
-		capGen:       function() { return this.$store.getters.captions.generic; },
-		capApp:       function() { return this.$store.getters.captions.settings; },
-		patternStyle: function() { return this.$store.getters.patternStyle; },
-		settings:     function() { return this.$store.getters.settings; }
+		languageCodes:(s) => s.$store.getters['schema/languageCodes'],
+		capGen:       (s) => s.$store.getters.captions.generic,
+		capApp:       (s) => s.$store.getters.captions.settings,
+		patternStyle: (s) => s.$store.getters.patternStyle,
+		settings:     (s) => s.$store.getters.settings
 	},
-	mounted:function() {
+	mounted() {
 		this.settingsInput = JSON.parse(JSON.stringify(this.settings));
 		this.$store.commit('moduleColor1','');
 		this.$store.commit('pageTitle',this.capApp.pageTitle);

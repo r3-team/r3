@@ -1245,6 +1245,7 @@
 			"messagePwRequiresSpecial":"Parola trebuie să conțină un caracter special (!, ?, #, etc.)",
 			"messagePwRequiresUpper":"Parola trebuie să conțină o literă mare",
 			"messagePwShort":"Parola este prea scurtă",
+			"nodeName":"Connected with: {NAME}",
 			"pwNew0":"Parola nouă",
 			"pwNew1":"Parola nouă (repetată)",
 			"pwOld":"Parola curentă",

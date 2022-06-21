@@ -34,6 +34,12 @@
 .settings .settings-page-limit div{
 	margin-right:16px;
 }
-.settings .account-action{
+.settings .settings-account-action{
 	margin:10px 5px 10px 10px;
+}
+.settings .settings-account-cluster-node{
+	position:absolute;
+	bottom:10px;
+	left:10px;
+	font-style:italic;
 }

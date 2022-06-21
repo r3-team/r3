@@ -48,34 +48,33 @@ func StartNode() error {
 		return err
 	}
 
-	// store node details
-	if err := cache.SetHostnameFromOs(); err != nil {
-		return err
-	}
-	cache.SetNodeId(nodeId)
-	log.SetNodeId(nodeId)
-
 	// check whether node is already registered
-	var exists bool
-	if err := db.Pool.QueryRow(db.Ctx, `
-		SELECT EXISTS(
-			SELECT id
-			FROM instance_cluster.node
-			WHERE id = $1
-		)
-	`, nodeId).Scan(&exists); err != nil {
+	var nodeName string
+	err = db.Pool.QueryRow(db.Ctx, `
+		SELECT name
+		FROM instance_cluster.node
+		WHERE id = $1
+	`, nodeId).Scan(&nodeName)
+
+	if err != nil && err != pgx.ErrNoRows {
 		return err
 	}
+	exists := err != pgx.ErrNoRows
 
 	if !exists {
+		// generate new node name
+		if err := db.Pool.QueryRow(db.Ctx, `
+			SELECT CONCAT('node',(COUNT(*)+1)::TEXT)
+			FROM instance_cluster.node
+		`).Scan(&nodeName); err != nil {
+			return err
+		}
+
 		if _, err := db.Pool.Exec(db.Ctx, `
-			INSERT INTO instance_cluster.node (name,id,hostname,date_started,
+			INSERT INTO instance_cluster.node (id,name,hostname,date_started,
 				date_check_in,stat_sessions,stat_memory,cluster_master,running)
-			VALUES ((
-				SELECT CONCAT('node',(COUNT(*)+1)::TEXT)
-				FROM instance_cluster.node
-			),$1,$2,$3,0,-1,-1,false,true)
-		`, nodeId, cache.GetHostname(), tools.GetTimeUnix()); err != nil {
+			VALUES ($1,$2,$3,$4,0,-1,-1,false,true)
+		`, nodeId, nodeName, cache.GetHostname(), tools.GetTimeUnix()); err != nil {
 			return err
 		}
 	} else {
@@ -95,6 +94,11 @@ func StartNode() error {
 			return err
 		}
 	}
+
+	// store node details
+	cache.SetNodeId(nodeId)
+	cache.SetNodeName(nodeName)
+	log.SetNodeId(nodeId)
 	return nil
 }
 func StopNode() error {

@@ -150,7 +150,7 @@ let MyLogin = {
 		</div>
 		
 		<!-- cluster node ID -->
-		<div class="clusterNodeId">{{ message.clusterNodeId[language] + clusterNodeId }}</div>
+		<div class="clusterNode">{{ message.clusterNode[language] + clusterNodeName }}</div>
 	</div>`,
 	props:{
 		backendReady:{ type:Boolean, required:true }, // can talk to backend
@@ -174,7 +174,7 @@ let MyLogin = {
 			language:'en_US',
 			languages:['de','en_US'],
 			message:{
-				clusterNodeId:{
+				clusterNode:{
 					de:'Verbunden mit: ',
 					en_US:'Connected with: '
 				},
@@ -232,7 +232,7 @@ let MyLogin = {
 		customLogoUrl:    (s) => s.$store.getters['local/customLogoUrl'],
 		token:            (s) => s.$store.getters['local/token'],
 		tokenKeep:        (s) => s.$store.getters['local/tokenKeep'],
-		clusterNodeId:    (s) => s.$store.getters.clusterNodeId,
+		clusterNodeName:  (s) => s.$store.getters.clusterNodeName,
 		kdfIterations:    (s) => s.$store.getters.constants.kdfIterations,
 		productionMode:   (s) => s.$store.getters.productionMode
 	},

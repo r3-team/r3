@@ -310,6 +310,12 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
+	// store host details in cache (before cluster node startup)
+	if err := cache.SetHostnameFromOs(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to load host details, %v", err))
+		return
+	}
+
 	// setup cluster node with shared database
 	if err := cluster.StartNode(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to setup cluster node, %v", err))
