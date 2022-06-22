@@ -47,6 +47,7 @@
 	flex: 1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
+	background-color:var(--color-bg);
 }
 .gantt-lines{
 	flex:1 1 auto;

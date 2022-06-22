@@ -34,7 +34,7 @@ let MyAdminLicense = {
 						<td>{{ getUnixFormat(license.validUntil,settings.dateFormat) }}</td>
 					</tr>
 				</table>
-				<img src="images/logo_license.png" />
+				<img src="images/logo_license.webp" />
 			</div>
 			
 			<span v-if="!licenseInstalled">
