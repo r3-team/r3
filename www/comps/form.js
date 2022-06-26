@@ -747,10 +747,10 @@ let MyForm = {
 						def = this.getAttributeValueFromString(attribute.content,
 							 this.getResolvedPlaceholders(f.def));
 					
-					if(f.collectionIdDef !== null && f.columnIdDef !== null)
+					if(f.defCollection !== null)
 						def = this.getCollectionValues(
-							f.collectionIdDef,
-							f.columnIdDef,
+							f.defCollection.collectionId,
+							f.defCollection.columnIdDisplay,
 							!isRelMulti
 						);
 					

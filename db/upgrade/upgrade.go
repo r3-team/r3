@@ -96,11 +96,32 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 // upgrade functions for database
 // mapped by current database version string, returns new database version string
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
+
+	// clean up on next release
+	// ALTER TABLE app.collection_consumer ALTER COLUMN content
+	//		TYPE app.collection_consumer_content USING content::text::app.collection_consumer_content;
+
 	"2.7": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
 			-- cleanup from last release
 			ALTER TABLE app.form_state_condition_side ALTER COLUMN content
 				TYPE app.filter_side_content USING content::text::app.filter_side_content;
+			
+			-- collection consumer changes / additions
+			CREATE TYPE app.collection_consumer_content AS ENUM(
+				'fieldDataDefault','fieldFilterSelector')
+			
+			ALTER TABLE app.collection_consumer ADD COLUMN content TEXT NOT NULL DEFAULT 'fieldFilterSelector';
+			ALTER TABLE app.collection_consumer ALTER COLUMN content DROP DEFAULT;
+			
+			INSERT INTO app.collection_consumer (collection_id, column_id_display, field_id, content, multi_value)
+				SELECT collection_id_def, column_id_def, field_id, 'fieldDataDefault', false
+				FROM app.field_data
+				WHERE collection_id_def IS NOT NULL;
+			
+			ALTER TABLE app.field_data
+				DROP COLUMN collection_id_def,
+				DROP COLUMN column_id_def;
 			
 			-- new login settings
 			ALTER TABLE instance.login_setting ADD COLUMN menu_colored BOOLEAN NOT NULL DEFAULT FALSE;

@@ -21,9 +21,9 @@ let MyBuilderCollectionInput = {
 						</option>
 					</optgroup>
 				</select>
-				<select v-model="columnIdInput" :disabled="collectionId === null">
+				<select v-model="columnIdInput" v-if="collectionIdInput !== null">
 					<option :value="null" disabled="disabled">{{ capApp.collectionColumn }}</option>
-					<option v-if="collectionId !== null" v-for="c in collectionIdMap[collectionId].columns" :value="c.id">
+					<option v-if="collectionIdInput !== null" v-for="c in collectionIdMap[collectionIdInput].columns" :value="c.id">
 						{{ getItemTitleColumn(c) }}
 					</option>
 				</select>
@@ -45,25 +45,35 @@ let MyBuilderCollectionInput = {
 	props:{
 		allowRemove:   { type:Boolean, required:true },
 		caption:       { type:String,  required:true },
-		collectionId:  { required:true },
-		columnId:      { required:true },
+		consumer:      { required:true },
 		module:        { type:Object,  required:true },
-		multiValue:    { required:true },
 		showMultiValue:{ type:Boolean, required:true }
 	},
-	emits:['remove','update:collectionId','update:columnId','update:multiValue'],
+	emits:['remove','update:consumer'],
 	computed:{
+		consumerInput:{
+			get() {
+				return this.consumer !== null
+					? JSON.parse(JSON.stringify(this.consumer))
+					: {
+						collectionId:null,
+						columnIdDisplay:null,
+						multiValue:false
+					};
+			}
+		},
+		
 		collectionIdInput:{
-			get()  { return this.collectionId },
-			set(v) { this.$emit('update:collectionId',v) }
+			get()  { return this.consumerInput.collectionId },
+			set(v) { this.set('collectionId',v) }
 		},
 		columnIdInput:{
-			get()  { return this.columnId },
-			set(v) { this.$emit('update:columnId',v) }
+			get()  { return this.consumerInput.columnIdDisplay },
+			set(v) { this.set('columnIdDisplay',v) }
 		},
 		multiValueInput:{
-			get()  { return this.multiValue },
-			set(v) { this.$emit('update:multiValue',v) }
+			get()  { return this.consumerInput.multiValue },
+			set(v) { this.set('multiValue',v) }
 		},
 		
 		// stores
@@ -74,6 +84,18 @@ let MyBuilderCollectionInput = {
 	methods:{
 		// externals
 		getDependentModules,
-		getItemTitleColumn
+		getItemTitleColumn,
+		
+		// actions
+		set(name,value) {
+			let v = JSON.parse(JSON.stringify(this.consumerInput));
+			v[name] = value;
+			
+			if(name === 'collectionId') {
+				if(value === 'null') v = null;
+				else                 v.columnIdDisplay = null;
+			}
+			this.$emit('update:consumer',v);
+		}
 	}
 };

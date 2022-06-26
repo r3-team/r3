@@ -380,14 +380,11 @@ let MyBuilderFieldOptions = {
 				</tr>
 				<my-builder-collection-input
 					v-if="!isFiles && field.def === ''"
-					@update:collectionId="setNull('collectionIdDef',$event)"
-					@update:columnId="setNull('columnIdDef',$event)"
+					@update:consumer="set('defCollection',$event)"
 					:allowRemove="false"
 					:caption="capApp.collectionIdDef"
-					:collectionId="field.collectionIdDef"
-					:columnId="field.columnIdDef"
+					:consumer="field.defCollection"
 					:module="module"
-					:multiValue="false"
 					:showMultiValue="false"
 				/>
 				<tr v-if="isString && field.display === 'richtext'">
@@ -976,15 +973,11 @@ let MyBuilderFieldOptions = {
 					<my-builder-collection-input
 						v-for="(c,i) in field.collections"
 						@remove="collectionRemove(i)"
-						@update:collectionId="setCollection(i,'collectionId',$event)"
-						@update:columnId="setCollection(i,'columnIdDisplay',$event)"
-						@update:multiValue="setCollection(i,'multiValue',$event)"
+						@update:consumer="setCollection(i,$event)"
 						:allowRemove="true"
 						:caption="capApp.collection"
-						:collectionId="c.collectionId"
-						:columnId="c.columnIdDisplay"
+						:consumer="c"
 						:module="module"
-						:multiValue="c.multiValue"
 						:showMultiValue="true"
 					/>
 					<tr v-if="field.collections.length !== 0">
@@ -1167,9 +1160,9 @@ let MyBuilderFieldOptions = {
 			}
 			this.$emit('set',name,val);
 		},
-		setCollection:function(i,name,value) {
+		setCollection:function(i,value) {
 			let v = JSON.parse(JSON.stringify(this.field.collections));
-			v[i][name] = value;
+			v[i] = value;
 			this.set('collections',v);
 		},
 		setIndexAttribute:function(name,indexAttributeId) {

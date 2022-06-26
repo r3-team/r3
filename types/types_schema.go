@@ -220,7 +220,7 @@ type FieldCalendar struct {
 	DateRange1       int64                `json:"dateRange1"`       // ICS/gantt time range after NOW (seconds)
 	OpenForm         OpenForm             `json:"openForm"`
 	Columns          []Column             `json:"columns"`
-	Collections      []CollectionConsumer `json:"collections"`
+	Collections      []CollectionConsumer `json:"collections"` // collections to select values for query filters
 	Query            Query                `json:"query"`
 
 	// legacy
@@ -256,24 +256,27 @@ type FieldContainer struct {
 	PerMax         int           `json:"perMax"`
 }
 type FieldData struct {
-	Id              uuid.UUID      `json:"id"`
-	IconId          pgtype.UUID    `json:"iconId"`
-	Content         string         `json:"content"`
-	State           string         `json:"state"`
-	OnMobile        bool           `json:"onMobile"`
-	Clipboard       bool           `json:"clipboard"`
-	AttributeId     uuid.UUID      `json:"attributeId"`    // data attribute
-	AttributeIdAlt  pgtype.UUID    `json:"attributeIdAlt"` // altern. data attribute (currently used for date period only)
-	Index           int            `json:"index"`          // data attribute index
-	Display         string         `json:"display"`        // display mode (text, date, color, ...)
-	Def             string         `json:"def"`            // data field default value
-	Min             pgtype.Int4    `json:"min"`
-	Max             pgtype.Int4    `json:"max"`
-	RegexCheck      pgtype.Varchar `json:"regexCheck"`      // regex expression to check field value against
-	JsFunctionId    pgtype.UUID    `json:"jsFunctionId"`    // JS function to exec when changing values
-	CollectionIdDef pgtype.UUID    `json:"collectionIdDef"` // collection to fill default values with
-	ColumnIdDef     pgtype.UUID    `json:"columnIdDef"`     // collection column to fill default values with
-	Captions        CaptionMap     `json:"captions"`
+	Id             uuid.UUID          `json:"id"`
+	IconId         pgtype.UUID        `json:"iconId"`
+	Content        string             `json:"content"`
+	State          string             `json:"state"`
+	OnMobile       bool               `json:"onMobile"`
+	Clipboard      bool               `json:"clipboard"`      // enable copy-to-clipboard action
+	AttributeId    uuid.UUID          `json:"attributeId"`    // data attribute
+	AttributeIdAlt pgtype.UUID        `json:"attributeIdAlt"` // altern. data attribute (currently used for date period only)
+	Index          int                `json:"index"`          // data attribute index
+	Display        string             `json:"display"`        // display mode (text, date, color, ...)
+	Def            string             `json:"def"`            // data field default value
+	DefCollection  CollectionConsumer `json:"defCollection"`  // data field default value from collection
+	Min            pgtype.Int4        `json:"min"`
+	Max            pgtype.Int4        `json:"max"`
+	RegexCheck     pgtype.Varchar     `json:"regexCheck"`   // regex expression to check field value against
+	JsFunctionId   pgtype.UUID        `json:"jsFunctionId"` // JS function to exec when changing values
+	Captions       CaptionMap         `json:"captions"`
+
+	// legacy
+	CollectionIdDef pgtype.UUID `json:"collectionIdDef"` // collection to fill default values with
+	ColumnIdDef     pgtype.UUID `json:"columnIdDef"`     // collection column to fill default values with
 }
 type FieldDataRelationship struct {
 	Id             uuid.UUID   `json:"id"`
@@ -290,25 +293,26 @@ type FieldDataRelationship struct {
 	AutoSelect     int         `json:"autoSelect"` // auto select record(s)
 	// 1:1, n:1: 0 = none, 2 = second, -3 = third last
 	// n:m: 0 = none, 2 = first two, -3 = last three
-	Def             string         `json:"def"`
-	DefPresetIds    []uuid.UUID    `json:"defPresetIds"` // data field default preset IDs
-	Min             pgtype.Int4    `json:"min"`
-	Max             pgtype.Int4    `json:"max"`
-	RegexCheck      pgtype.Varchar `json:"regexCheck"` // not used for relationships
-	JsFunctionId    pgtype.UUID    `json:"jsFunctionId"`
-	CollectionIdDef pgtype.UUID    `json:"collectionIdDef"`
-	ColumnIdDef     pgtype.UUID    `json:"columnIdDef"`
-	Columns         []Column       `json:"columns"`
-	Category        bool           `json:"category"`
-	FilterQuick     bool           `json:"filterQuick"`
-	OutsideIn       bool           `json:"outsideIn"`
-	Query           Query          `json:"query"`
-	OpenForm        OpenForm       `json:"openForm"`
-	Captions        CaptionMap     `json:"captions"`
+	Def           string             `json:"def"`
+	DefCollection CollectionConsumer `json:"defCollection"` // data field default value from collection
+	DefPresetIds  []uuid.UUID        `json:"defPresetIds"`  // data field default from record IDs via presets
+	Min           pgtype.Int4        `json:"min"`
+	Max           pgtype.Int4        `json:"max"`
+	RegexCheck    pgtype.Varchar     `json:"regexCheck"` // not used for relationships
+	JsFunctionId  pgtype.UUID        `json:"jsFunctionId"`
+	Columns       []Column           `json:"columns"`
+	Category      bool               `json:"category"`
+	FilterQuick   bool               `json:"filterQuick"`
+	OutsideIn     bool               `json:"outsideIn"`
+	Query         Query              `json:"query"`
+	OpenForm      OpenForm           `json:"openForm"`
+	Captions      CaptionMap         `json:"captions"`
 
 	// legacy
 	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
 	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
+	CollectionIdDef   pgtype.UUID `json:"collectionIdDef"`
+	ColumnIdDef       pgtype.UUID `json:"columnIdDef"`
 }
 type FieldHeader struct {
 	Id       uuid.UUID   `json:"id"`
@@ -332,7 +336,7 @@ type FieldList struct {
 	FilterQuick bool                 `json:"filterQuick"` // enable quickfilter (uses all visible columns)
 	ResultLimit int                  `json:"resultLimit"` // predefined limit, overwritable by user
 	Columns     []Column             `json:"columns"`
-	Collections []CollectionConsumer `json:"collections"`
+	Collections []CollectionConsumer `json:"collections"` // collections to select values for query filters
 	OpenForm    OpenForm             `json:"openForm"`
 	Query       Query                `json:"query"`
 
@@ -455,5 +459,13 @@ func (src OpenForm) MarshalJSON() ([]byte, error) {
 		return []byte("null"), nil
 	}
 	type alias OpenForm
+	return json.Marshal(alias(src))
+}
+func (src CollectionConsumer) MarshalJSON() ([]byte, error) {
+
+	if src.CollectionId == uuid.Nil {
+		return []byte("null"), nil
+	}
+	type alias CollectionConsumer
 	return json.Marshal(alias(src))
 }
