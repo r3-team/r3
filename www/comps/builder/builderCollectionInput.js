@@ -7,77 +7,82 @@ export {MyBuilderCollectionInput as default};
 
 let MyBuilderCollectionInput = {
 	name:'my-builder-collection-input',
-	template:`
+	template:`<table class="builder-collection-input">
 		<tr>
-			<td v-if="caption !== ''">{{ caption }}</td>
+			<!-- collection input -->
+			<td>{{ capApp.collection }}</td>
 			<td>
-				<div class="builder-collection-input">
-					<!-- collection input -->
-					<select v-if="!fixedCollection" v-model="collectionIdInput">
-						<option :value="null">-</option>
-						<optgroup
-							v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
-							:label="m.name"
-						>
-							<option v-for="c in m.collections" :value="c.id">
-								{{ c.name }}
-							</option>
-						</optgroup>
-					</select>
-					
-					<!-- collection column input -->
-					<select v-model="columnIdInput" v-if="collectionIdInput !== null">
-						<option :value="null" disabled="disabled">{{ capApp.collectionColumn }}</option>
-						<option v-if="collectionIdInput !== null" v-for="c in collectionIdMap[collectionIdInput].columns" :value="c.id">
-							{{ getItemTitleColumn(c) }}
+				<select v-model="collectionIdInput" :disabled="fixedCollection">
+					<option :value="null">-</option>
+					<optgroup
+						v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
+						:label="m.name"
+					>
+						<option v-for="c in m.collections" :value="c.id">
+							{{ c.name }}
 						</option>
-					</select>
-					
-					<!-- form open input -->
-					<select v-model="formIdOpenInput" v-if="allowFormOpen">
-						<option :value="null" disabled="disabled">{{ capApp.formIdOpen }}</option>
-						<optgroup
-							v-for="mod in getDependentModules(module,modules)"
-							:label="mod.name"
-						>
-							<option v-for="f in mod.forms" :value="f.id">
-								{{ f.name }}
-							</option>
-						</optgroup>
-					</select>
-					
-					<!-- allow multi-value input -->
-					<div class="collections-option" v-if="showMultiValue">
-						<span>{{ capApp.multiValue }}</span>
-						<my-bool v-model="multiValueInput" />
-					</div>
-					
-					<!-- do not display if value is empty input -->
-					<div class="collections-option" v-if="showNoDisplayEmpty">
-						<span>{{ capApp.noDisplayEmpty }}</span>
-						<my-bool v-model="noDisplayEmptyInput" />
-					</div>
-					
-					<!-- show on mobile input -->
-					<div class="collections-option" v-if="showOnMobile">
-						<span>{{ capApp.onMobile }}</span>
-						<my-bool v-model="onMobileInput" />
-					</div>
-				</div>
+					</optgroup>
+				</select>
 			</td>
+		</tr>
+		<tr v-if="collectionSet">
+			<!-- collection column input -->
+			<td>{{ capApp.column }}</td>
+			<td>
+				<select v-model="columnIdInput">
+					<option :value="null" disabled="disabled">-</option>
+					<option v-if="collectionIdInput !== null" v-for="c in collectionIdMap[collectionIdInput].columns" :value="c.id">
+						{{ getItemTitleColumn(c) }}
+					</option>
+				</select>
+			</td>
+		</tr>
+		<tr v-if="collectionSet && allowFormOpen">
+			<!-- form open input -->
+			<td>{{ capApp.formIdOpen }}</td>
+			<td>
+				<select v-model="formIdOpenInput">
+					<option :value="null" disabled="disabled">-</option>
+					<optgroup
+						v-for="mod in getDependentModules(module,modules)"
+						:label="mod.name"
+					>
+						<option v-for="f in mod.forms" :value="f.id">
+							{{ f.name }}
+						</option>
+					</optgroup>
+				</select>
+			</td>
+		</tr>
+		<tr v-if="collectionSet && showMultiValue">
+			<!-- allow multi-value input -->
+			<td>{{ capApp.multiValue }}</td>
+			<td><my-bool v-model="multiValueInput" /></td>
+		</tr>
+		<tr v-if="collectionSet && showNoDisplayEmpty">
+			<!-- do not display if value is empty input -->
+			<td>{{ capApp.noDisplayEmpty }}</td>
+			<td><my-bool v-model="noDisplayEmptyInput" /></td>
+		</tr>
+		<tr v-if="collectionSet && showOnMobile">
+			<!-- show on mobile input -->
+			<td>{{ capApp.onMobile }}</td>
+			<td><my-bool v-model="onMobileInput" /></td>
+		</tr>
+		<tr>
 			<td>
 				<my-button image="cancel.png"
 					v-if="allowRemove"
 					@trigger="$emit('remove')"
+					:caption="capGen.button.delete"
 					:naked="true"
 				/>
 			</td>
 		</tr>
-	`,
+	</table>`,
 	props:{
 		allowFormOpen:     { type:Boolean, required:true },
 		allowRemove:       { type:Boolean, required:true },
-		caption:           { type:String,  required:true },
 		consumer:          { required:true },
 		fixedCollection:   { type:Boolean, required:true },
 		module:            { type:Object,  required:true },
@@ -120,10 +125,14 @@ let MyBuilderCollectionInput = {
 			set(v) { this.set('onMobile',v) }
 		},
 		
+		// simple
+		collectionSet:(s) => s.collectionIdInput !== null,
+		
 		// stores
 		modules:        (s) => s.$store.getters['schema/modules'],
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
-		capApp:         (s) => s.$store.getters.captions.builder.collectionInput
+		capApp:         (s) => s.$store.getters.captions.builder.collectionInput,
+		capGen:         (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals

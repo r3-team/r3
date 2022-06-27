@@ -469,6 +469,7 @@
 			"titleOne":"Collection '{NAME}'"
 		},
 		"collectionInput":{
+			"collection":"Collection",
 			"column":"Value(s) from column",
 			"formIdOpen":"Open form",
 			"multiValue":"Multi input",
@@ -551,7 +552,6 @@
 			"autoSelectHint":"0=off, 2=first two, -3=last three",
 			"captions":"Captions",
 			"category":"Category selector",
-			"collection":"Collection*",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*Collection is only affected if selected as filter criteria in data query.",
 			"collectionTitle":"Filter collection by user input",
@@ -792,6 +792,7 @@
 			"button":{
 				"add":"Add entry"
 			},
+			"collections":"Collections",
 			"copy":"Copy all menu items from",
 			"formId":"- Select form -",
 			"showChildrenHint":"Show sub entries by default",

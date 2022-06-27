@@ -469,6 +469,7 @@
 			"titleOne":"Collezione '{NAME}'"
 		},
 		"collectionInput":{
+			"collection":"Collection",
 			"column":"Value(s) from column",
 			"formIdOpen":"Open form",
 			"multiValue":"Multi input",
@@ -551,7 +552,6 @@
 			"autoSelectHint":"0=off, 2=primi due, -3=ultimi tre",
 			"captions":"Titoli",
 			"category":"Selettore categoria",
-			"collection":"Collezione",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*La collezione è influenzata solo se è selezionata come criterio filtrante nella query dei dati.",
 			"collectionTitle":"Limita la collezione dall'input dell'utente",
@@ -792,6 +792,7 @@
 			"button":{
 				"add":"Aggiungi voce"
 			},
+			"collections":"Collections",
 			"copy":"Copia tutte le voci di menu da",
 			"formId":"- Seleziona modulo -",
 			"showChildrenHint":"Mostra le voci secondarie per impostazione predefinita",

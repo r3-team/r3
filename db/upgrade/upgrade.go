@@ -108,6 +108,16 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				TYPE app.filter_side_content USING content::text::app.filter_side_content;
 			
 			-- collection consumer changes / additions
+			ALTER TABLE app.collection_consumer ADD COLUMN menu_id UUID;
+			ALTER TABLE app.collection_consumer
+				ADD CONSTRAINT collection_consumer_menu_id_fkey FOREIGN KEY (menu_id)
+				REFERENCES app.menu (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			CREATE INDEX IF NOT EXISTS fki_collection_consumer_menu_id_fkey ON app.collection_consumer
+				USING BTREE (menu_id ASC NULLS LAST);
+			
 			ALTER TABLE app.collection_consumer ADD COLUMN form_id_open UUID;
 			ALTER TABLE app.collection_consumer
 				ADD CONSTRAINT collection_consumer_form_id_open_fkey FOREIGN KEY (form_id_open)
@@ -115,16 +125,16 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
+			CREATE INDEX IF NOT EXISTS fki_collection_consumer_form_id_open_fkey ON app.collection_consumer
+				USING BTREE (form_id_open ASC NULLS LAST);
+			
 			ALTER TABLE app.collection_consumer ADD COLUMN on_mobile BOOLEAN NOT NULL DEFAULT false;
 			ALTER TABLE app.collection_consumer ALTER COLUMN on_mobile DROP DEFAULT;
 			ALTER TABLE app.collection_consumer ADD COLUMN no_display_empty BOOLEAN NOT NULL DEFAULT false;
 			ALTER TABLE app.collection_consumer ALTER COLUMN no_display_empty DROP DEFAULT;
 			
-			CREATE INDEX IF NOT EXISTS fki_collection_consumer_form_id_open_fkey ON app.collection_consumer
-				USING BTREE (form_id_open ASC NULLS LAST);
-			
 			CREATE TYPE app.collection_consumer_content AS ENUM(
-				'fieldDataDefault','fieldFilterSelector','headerDisplay')
+				'fieldDataDefault','fieldFilterSelector','headerDisplay','menuDisplay')
 			
 			ALTER TABLE app.collection_consumer ADD COLUMN content TEXT NOT NULL DEFAULT 'fieldFilterSelector';
 			ALTER TABLE app.collection_consumer ALTER COLUMN content DROP DEFAULT;

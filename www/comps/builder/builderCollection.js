@@ -92,20 +92,23 @@ let MyBuilderCollection = {
 								/>
 							</td>
 						</tr>
-						<my-builder-collection-input
-							v-for="(c,i) in inHeader"
-							@remove="collectionRemove(i)"
-							@update:consumer="collectionSet(i,$event)"
-							:allowFormOpen="true"
-							:allowRemove="true"
-							:caption="''"
-							:consumer="c"
-							:fixedCollection="true"
-							:module="module"
-							:showMultiValue="false"
-							:showNoDisplayEmpty="true"
-							:showOnMobile="true"
-						/>
+						<tr>
+							<td>
+								<my-builder-collection-input
+									v-for="(c,i) in inHeader"
+									@remove="collectionRemove(i)"
+									@update:consumer="collectionSet(i,$event)"
+									:allowFormOpen="true"
+									:allowRemove="true"
+									:consumer="c"
+									:fixedCollection="true"
+									:module="module"
+									:showMultiValue="false"
+									:showNoDisplayEmpty="true"
+									:showOnMobile="true"
+								/>
+							</td>
+						</tr>
 					</table>
 				</div>
 				

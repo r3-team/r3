@@ -1,6 +1,13 @@
-import {hasAccessToAnyMenu} from './shared/access.js';
-import {getFormRoute}       from './shared/form.js';
+import srcBase64Icon        from './shared/image.js';
 import {srcBase64}          from './shared/image.js';
+import {hasAccessToAnyMenu} from './shared/access.js';
+import {getColumnTitle}     from './shared/column.js';
+import {getFormRoute}       from './shared/form.js';
+import {
+	getCollectionColumn,
+	getCollectionValues
+} from './shared/collection.js';
+
 export {MyMenu as default};
 
 let MyMenuItem = {
@@ -20,6 +27,12 @@ let MyMenuItem = {
 			
 			<!-- menu item caption -->
 			<div class="caption">{{ title }}</div>
+			
+			<!-- collection values -->
+			<div class="collectionEntry" v-for="e in collectionEntries" :title="e.title">
+				<img v-if="e.iconId !== null" :src="srcBase64Icon(e.iconId,'')" />
+				<span>{{ e.value }}</span>
+			</div>
 			
 			<!-- sub menu indicator -->
 			<img
@@ -64,6 +77,34 @@ let MyMenuItem = {
 			}
 			return false;
 		},
+		collectionEntries:function() {
+			let out = [];
+			for(let i = 0, j = this.menu.collections.length; i < j; i++) {
+				let consumer   = this.menu.collections[i];
+				let collection = this.collectionIdMap[consumer.collectionId];
+				
+				if(!consumer.onMobile && this.isMobile)
+					continue;
+				
+				let value = this.getCollectionValues(
+					collection.id,
+					consumer.columnIdDisplay,
+					true
+				);
+				if(consumer.noDisplayEmpty && (value === null || value === 0 || value === ''))
+					continue;
+				
+				out.push({
+					iconId:collection.iconId,
+					title:this.getColumnTitle(this.getCollectionColumn(
+						collection.id,
+						consumer.columnIdDisplay
+					)),
+					value:value
+				});
+			}
+			return out;
+		},
 		showChildren:function() {
 			return this.hasChildren && this.menuIdMapOpen[this.menu.id];
 		},
@@ -75,17 +116,22 @@ let MyMenuItem = {
 		},
 		
 		// stores
-		menuIdMapOpen: function() { return this.$store.getters['local/menuIdMapOpen']; },
-		iconIdMap:     function() { return this.$store.getters['schema/iconIdMap']; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		isMobile:      function() { return this.$store.getters.isMobile; },
-		menuAccess:    function() { return this.$store.getters.access.menu; },
-		moduleLanguage:function() { return this.$store.getters.moduleLanguage; }
+		menuIdMapOpen:  function() { return this.$store.getters['local/menuIdMapOpen']; },
+		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
+		iconIdMap:      function() { return this.$store.getters['schema/iconIdMap']; },
+		capGen:         function() { return this.$store.getters.captions.generic; },
+		isMobile:       function() { return this.$store.getters.isMobile; },
+		menuAccess:     function() { return this.$store.getters.access.menu; },
+		moduleLanguage: function() { return this.$store.getters.moduleLanguage; }
 	},
 	methods:{
 		// externals
+		getCollectionColumn,
+		getCollectionValues,
+		getColumnTitle,
 		getFormRoute,
 		srcBase64,
+		srcBase64Icon,
 		
 		// actions
 		click:function() {

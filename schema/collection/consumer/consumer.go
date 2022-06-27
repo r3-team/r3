@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
-var entitiesAllowed = []string{"collection", "field"}
+var entitiesAllowed = []string{"collection", "field", "menu"}
 
 func GetOne(entity string, id uuid.UUID, content string) (types.CollectionConsumer, error) {
 
@@ -84,25 +84,24 @@ func Set_tx(tx pgx.Tx, entity string, id uuid.UUID, content string, collections 
 			continue
 		}
 
-		switch entity {
-		case "field":
-			if _, err := tx.Exec(db.Ctx, `
-				INSERT INTO app.collection_consumer (collection_id,
-					field_id, column_id_display, form_id_open, content,
-					multi_value, no_display_empty, on_mobile)
-				VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-			`, c.CollectionId, id, c.ColumnIdDisplay, c.FormIdOpen, content,
-				c.MultiValue, c.NoDisplayEmpty, c.OnMobile); err != nil {
-
-				return err
-			}
-		case "collection":
+		if entity == "collection" {
 			if _, err := tx.Exec(db.Ctx, `
 				INSERT INTO app.collection_consumer (collection_id,
 					column_id_display, form_id_open, content,
 					multi_value, no_display_empty, on_mobile)
 				VALUES ($1,$2,$3,$4,$5,$6,$7)
 			`, c.CollectionId, c.ColumnIdDisplay, c.FormIdOpen, content,
+				c.MultiValue, c.NoDisplayEmpty, c.OnMobile); err != nil {
+
+				return err
+			}
+		} else {
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				INSERT INTO app.collection_consumer (collection_id,
+					%s_id, column_id_display, form_id_open, content,
+					multi_value, no_display_empty, on_mobile)
+				VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+			`, entity), c.CollectionId, id, c.ColumnIdDisplay, c.FormIdOpen, content,
 				c.MultiValue, c.NoDisplayEmpty, c.OnMobile); err != nil {
 
 				return err

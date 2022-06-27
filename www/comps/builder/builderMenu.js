@@ -1,13 +1,16 @@
-import MyBuilderCaption      from './builderCaption.js';
-import MyBuilderIconInput    from './builderIconInput.js';
-import {getDependentModules} from '../shared/builder.js';
-import {getNilUuid}          from '../shared/generic.js';
+import MyBuilderCaption                from './builderCaption.js';
+import MyBuilderCollectionInput        from './builderCollectionInput.js';
+import MyBuilderIconInput              from './builderIconInput.js';
+import {getCollectionConsumerTemplate} from '../shared/collection.js';
+import {getDependentModules}           from '../shared/builder.js';
+import {getNilUuid}                    from '../shared/generic.js';
 export {MyBuilderMenu as default};
 
 let MyBuilderMenuItems = {
 	name:'my-builder-menu-items',
 	components:{
 		MyBuilderCaption,
+		MyBuilderCollectionInput,
 		MyBuilderIconInput
 	},
 	template:`<draggable handle=".dragAnchor" group="menu" itemKey="id" animation="100"
@@ -15,43 +18,81 @@ let MyBuilderMenuItems = {
 		:list="menus"
 	>
 		<template #item="{element,index}">
-	    		<div class="builder-menu">
+	    		<div class="builder-menu shade">
 				<img class="action dragAnchor" src="images/drag.png" />
 				
 				<div class="inputs">
-					<my-button
-						@trigger="element.showChildren = !element.showChildren"
-						:captionTitle="capApp.showChildrenHint"
-						:image="element.showChildren ? 'visible1.png' : 'visible0.png'"
-						:naked="true"
-					/>
+					<div class="line">
+						<my-button
+							@trigger="element.showChildren = !element.showChildren"
+							:captionTitle="capApp.showChildrenHint"
+							:image="element.showChildren ? 'visible1.png' : 'visible0.png'"
+							:naked="true"
+						/>
+						
+						<!-- show collections -->
+						<my-button image="triangleDown.png"
+							v-if="showCollectionsIndex === index"
+							@trigger="showCollectionsIndex = -1"
+							:caption="capApp.collections + ' (' + element.collections.length + ')'"
+							:naked="true"
+						/>
+						<my-button image="triangleRight.png"
+							v-if="showCollectionsIndex !== index"
+							@trigger="showCollectionsIndex = index"
+							:caption="capApp.collections + ' (' + element.collections.length + ')'"
+							:naked="true"
+						/>
+						
+						<!-- icon input -->
+						<my-builder-icon-input
+							@input="element.iconId = $event"
+							:icon-id-selected="element.iconId"
+							:module="module"
+						/>
+						
+						<!-- caption inputs -->
+						<my-builder-caption
+							v-model="element.captions.menuTitle"
+							:contentName="capGen.title"
+							:language="builderLanguage"
+						/>
+						
+						<!-- form open input -->
+						<select v-model="element.formId">
+							<option :value="null">{{ capApp.formId }}</option>
+							<optgroup
+								v-for="mod in getDependentModules(module,modules)"
+								:label="mod.name"
+							>
+								<option v-for="f in mod.forms" :value="f.id">
+									{{ f.name }}
+								</option>
+							</optgroup>
+						</select>
+					</div>
 					
-					<!-- icon input -->
-					<my-builder-icon-input
-						@input="element.iconId = $event"
-						:icon-id-selected="element.iconId"
-						:module="module"
-					/>
-					
-					<!-- caption inputs -->
-					<my-builder-caption
-						v-model="element.captions.menuTitle"
-						:contentName="capGen.title"
-						:language="builderLanguage"
-					/>
-					
-					<!-- form open input -->
-					<select v-model="element.formId">
-						<option :value="null">{{ capApp.formId }}</option>
-						<optgroup
-							v-for="mod in getDependentModules(module,modules)"
-							:label="mod.name"
-						>
-							<option v-for="f in mod.forms" :value="f.id">
-								{{ f.name }}
-							</option>
-						</optgroup>
-					</select>
+					<!-- collections -->
+					<div class="line column" v-if="showCollectionsIndex === index">
+						<my-button image="add.png"
+							@trigger="element.collections.push(getCollectionConsumerTemplate())"
+							:caption="capGen.button.add"
+							:naked="true"
+						/>
+						<my-builder-collection-input
+							v-for="(c,i) in element.collections"
+							@remove="element.collections.splice(i,1)"
+							@update:consumer="element.collections[i] = $event"
+							:allowFormOpen="false"
+							:allowRemove="true"
+							:consumer="c"
+							:fixedCollection="false"
+							:module="module"
+							:showMultiValue="false"
+							:showNoDisplayEmpty="true"
+							:showOnMobile="true"
+						/>
+					</div>
 				</div>
 				
 				<!-- nested menus -->
@@ -75,6 +116,11 @@ let MyBuilderMenuItems = {
 		menus:          { type:Array,  required:true }
 	},
 	emits:['remove'],
+	data:function() {
+		return {
+			showCollectionsIndex:-1
+		};
+	},
 	computed:{
 		// stores
 		modules:       function() { return this.$store.getters['schema/modules']; },
@@ -86,9 +132,20 @@ let MyBuilderMenuItems = {
 	},
 	methods:{
 		// externals
+		getCollectionConsumerTemplate,
 		getDependentModules,
 		
 		// actions
+		/*collectionAdd:function() {
+			let v = JSON.parse(JSON.stringify(this.field.collections));
+			v.push(this.getCollectionConsumerTemplate());
+			this.set('collections',v);
+		},
+		collectionRemove:function(i) {
+			let v = JSON.parse(JSON.stringify(this.field.collections));
+			v.splice(i,1);
+			this.set('collections',v);
+		},*/
 		remove:function(id,i) {
 			this.menus.splice(i,1);
 			
@@ -206,6 +263,7 @@ let MyBuilderMenu = {
 				iconId:null,
 				menus:[],
 				showChildren:false,
+				collections:[],
 				captions:{
 					menuTitle:{}
 				}
@@ -216,9 +274,8 @@ let MyBuilderMenu = {
 				this.menuIdsRemove.push(menuId);
 		},
 		reset:function() {
-			if(!this.module) return;
-			
-			this.menus = JSON.parse(JSON.stringify(this.module.menus));
+			if(this.module)
+				this.menus = JSON.parse(JSON.stringify(this.module.menus));
 		},
 		
 		// backend functions

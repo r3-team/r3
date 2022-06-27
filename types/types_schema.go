@@ -91,13 +91,14 @@ type Attribute struct {
 	Captions       CaptionMap  `json:"captions"`
 }
 type Menu struct {
-	Id           uuid.UUID   `json:"id"`
-	ModuleId     uuid.UUID   `json:"moduleId"`
-	FormId       pgtype.UUID `json:"formId"`
-	IconId       pgtype.UUID `json:"iconId"`
-	Menus        []Menu      `json:"menus"`
-	ShowChildren bool        `json:"showChildren"`
-	Captions     CaptionMap  `json:"captions"`
+	Id           uuid.UUID            `json:"id"`
+	ModuleId     uuid.UUID            `json:"moduleId"`
+	FormId       pgtype.UUID          `json:"formId"`
+	IconId       pgtype.UUID          `json:"iconId"`
+	Menus        []Menu               `json:"menus"`
+	ShowChildren bool                 `json:"showChildren"`
+	Collections  []CollectionConsumer `json:"collections"` // collection values to display on menu entry
+	Captions     CaptionMap           `json:"captions"`
 }
 type LoginForm struct {
 	Id                uuid.UUID  `json:"id"`

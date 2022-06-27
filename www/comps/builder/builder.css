@@ -411,8 +411,14 @@
 
 /* collection input */
 .builder-collection-input{
-	display:flex;
-	flex-flow:row wrap;
+	padding:5px;
+	margin-bottom:5px;
+	border:1px solid var(--color-border);
+	border-radius:4px;
+	box-shadow:1px 1px 4px var(--color-shade);
+}
+.builder-collection-input td{
+	padding:3px 5px;
 }
 
 /* columns */
@@ -788,10 +794,17 @@
 }
 .builder-menu .inputs{
 	display:flex;
+	flex-flow:column nowrap;
+}
+.builder-menu .inputs .line{
+	display:flex;
 	flex-flow:row nowrap;
 	align-content:flex-start;
 	align-items:flex-start;
 	flex:0 1 auto;
+}
+.builder-menu .inputs .line.column{
+	flex-direction:column;
 }
 .builder-menu input,
 .builder-menu select{

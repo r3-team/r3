@@ -5,6 +5,7 @@ import (
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
+	"r3/schema/collection/consumer"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -61,17 +62,17 @@ func Get(moduleId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 	}
 	rows.Close()
 
-	// get children
 	for i, m := range menus {
+
+		// get children & collections & captions
 		m.Menus, err = Get(moduleId, pgtype.UUID{Bytes: m.Id, Status: pgtype.Present})
 		if err != nil {
 			return menus, err
 		}
-		menus[i] = m
-	}
-
-	// get captions
-	for i, m := range menus {
+		m.Collections, err = consumer.Get("menu", m.Id, "menuDisplay")
+		if err != nil {
+			return menus, err
+		}
 		m.Captions, err = caption.Get("menu", m.Id, []string{"menuTitle"})
 		if err != nil {
 			return menus, err
@@ -84,7 +85,6 @@ func Get(moduleId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 func Set_tx(tx pgx.Tx, parentId pgtype.UUID, menus []types.Menu) error {
 
 	for i, m := range menus {
-
 		known, err := schema.CheckCreateId_tx(tx, &m.Id, "menu", "id")
 		if err != nil {
 			return err
@@ -111,6 +111,11 @@ func Set_tx(tx pgx.Tx, parentId pgtype.UUID, menus []types.Menu) error {
 
 		// set children
 		if err := Set_tx(tx, pgtype.UUID{Bytes: m.Id, Status: pgtype.Present}, m.Menus); err != nil {
+			return err
+		}
+
+		// set collections
+		if err := consumer.Set_tx(tx, "menu", m.Id, "menuDisplay", m.Collections); err != nil {
 			return err
 		}
 

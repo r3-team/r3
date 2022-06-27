@@ -469,6 +469,7 @@
 			"titleOne":"Sammlung \"{NAME}\""
 		},
 		"collectionInput":{
+			"collection":"Sammlung",
 			"column":"Wert(e) aus Spalte",
 			"formIdOpen":"Formular öffnen",
 			"multiValue":"Mehrfachauswahl",
@@ -551,7 +552,6 @@
 			"autoSelectHint":"0=aus, 2=erste zwei, -3=letzten drei",
 			"captions":"Beschriftungen",
 			"category":"Kategorieauswahl",
-			"collection":"Sammlung*",
 			"collectionIdDef":"Standardwert(e) aus Sammlung",
 			"collectionHint":"*Sammlung wird nur beeinflusst, wenn sie als Filterkriterium in der Datenabfrage genutzt wird.",
 			"collectionTitle":"Sammlung durch Benutzereingabe filtern",
@@ -792,6 +792,7 @@
 			"button":{
 				"add":"Eintrag hinzufügen"
 			},
+			"collections":"Sammlungen",
 			"copy":"Alle Menüeintrage kopieren von",
 			"formId":"- Formular auswählen -",
 			"showChildrenHint":"Standardmäßig Untereinträge anzeigen",

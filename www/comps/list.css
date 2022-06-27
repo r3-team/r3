@@ -255,6 +255,7 @@
 	align-items:flex-start;
 	padding:12px 16px 20px 16px;
 	border-bottom:1px solid #d2d2d2;
+	background-color:var(--color-bg);
 }
 .list-header span.message{
 	margin:0px 0px 12px 0px;

@@ -379,19 +379,22 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<my-builder-collection-input
-					v-if="!isFiles && field.def === ''"
-					@update:consumer="set('defCollection',$event)"
-					:allowFormOpen="false"
-					:allowRemove="false"
-					:caption="capApp.collectionIdDef"
-					:consumer="field.defCollection"
-					:fixedCollection="false"
-					:module="module"
-					:showMultiValue="false"
-					:showNoDisplayEmpty="false"
-					:showOnMobile="false"
-				/>
+				<tr v-if="!isFiles && field.def === ''">
+					<td>{{ capApp.collectionIdDef }}</td>
+					<td>
+						<my-builder-collection-input
+							@update:consumer="set('defCollection',$event)"
+							:allowFormOpen="false"
+							:allowRemove="false"
+							:consumer="field.defCollection"
+							:fixedCollection="false"
+							:module="module"
+							:showMultiValue="false"
+							:showNoDisplayEmpty="false"
+							:showOnMobile="false"
+						/>
+					</td>
+				</tr>
 				<tr v-if="isString && field.display === 'richtext'">
 					<td>{{ capApp.fieldAttributeIdAltRichtextFiles }}</td>
 					<td>
@@ -974,25 +977,26 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<template v-if="showCollections">
-					<my-builder-collection-input
-						v-for="(c,i) in field.collections"
-						@remove="collectionRemove(i)"
-						@update:consumer="setCollection(i,$event)"
-						:allowFormOpen="false"
-						:allowRemove="true"
-						:caption="capApp.collection"
-						:consumer="c"
-						:fixedCollection="false"
-						:module="module"
-						:showMultiValue="true"
-						:showNoDisplayEmpty="false"
-						:showOnMobile="false"
-					/>
-					<tr v-if="field.collections.length !== 0">
-						<td colspan="3">{{ capApp.collectionHint }}</td>
-					</tr>
-				</template>
+				<tr v-if="showCollections">
+					<td colspan="3">
+						<my-builder-collection-input
+							v-for="(c,i) in field.collections"
+							@remove="collectionRemove(i)"
+							@update:consumer="setCollection(i,$event)"
+							:allowFormOpen="false"
+							:allowRemove="true"
+							:consumer="c"
+							:fixedCollection="false"
+							:module="module"
+							:showMultiValue="true"
+							:showNoDisplayEmpty="false"
+							:showOnMobile="false"
+						/>
+					</td>
+				</tr>
+				<tr v-if="showCollections && field.collections.length !== 0">
+					<td colspan="3">{{ capApp.collectionHint }}</td>
+				</tr>
 			</template>
 		</tbody></table>
 	</div>`,
