@@ -4,6 +4,7 @@ import (
 	"r3/compatible"
 	"r3/db"
 	"r3/schema"
+	"r3/schema/collection/consumer"
 	"r3/schema/column"
 	"r3/schema/query"
 	"r3/types"
@@ -52,13 +53,17 @@ func Get(moduleId uuid.UUID) ([]types.Collection, error) {
 		if err != nil {
 			return collections, err
 		}
+		c.InHeader, err = consumer.Get("collection", c.Id, "headerDisplay")
+		if err != nil {
+			return collections, err
+		}
 		collections[i] = c
 	}
 	return collections, nil
 }
 
 func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, iconId pgtype.UUID, name string,
-	columns []types.Column, queryIn types.Query) error {
+	columns []types.Column, queryIn types.Query, inHeader []types.CollectionConsumer) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &id, "collection", "id")
 	if err != nil {
@@ -87,5 +92,8 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, iconId pgtype.UUID, nam
 	if err := query.Set_tx(tx, "collection", id, 0, 0, queryIn); err != nil {
 		return err
 	}
-	return column.Set_tx(tx, "collection", id, columns)
+	if err := column.Set_tx(tx, "collection", id, columns); err != nil {
+		return err
+	}
+	return consumer.Set_tx(tx, "collection", id, "headerDisplay", inHeader)
 }

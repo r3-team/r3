@@ -454,6 +454,9 @@
 			"new":"New attribute"
 		},
 		"collection":{
+			"button":{
+				"inHeader":"Show in header"
+			},
 			"dialog":{
 				"delete":"Are you sure you want to delete this collection?"
 			},
@@ -464,6 +467,13 @@
 			"query":"Query",
 			"title":"Collections",
 			"titleOne":"Collection '{NAME}'"
+		},
+		"collectionInput":{
+			"column":"Value(s) from column",
+			"formIdOpen":"Open form",
+			"multiValue":"Multi input",
+			"noDisplayEmpty":"Hide if empty",
+			"onMobile":"Show on mobile"
 		},
 		"form":{
 			"chart":{
@@ -542,10 +552,8 @@
 			"captions":"Captions",
 			"category":"Category selector",
 			"collection":"Collection*",
-			"collectionColumn":"Value(s) from column",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*Collection is only affected if selected as filter criteria in data query.",
-			"collectionMultiValue":"Multi input",
 			"collectionTitle":"Filter collection by user input",
 			"columnsTarget":"Place columns here",
 			"columnsTemplates":"Available columns",
@@ -1298,7 +1306,7 @@
 		"fontSize":"Font size",
 		"headerCaptions":"Show main menu titles",
 		"languageCode":"Language",
-		"menuColored":"Farbiges Menü",
+		"menuColored":"Colored menu",
 		"mobileScrollForm":"Mobile: Scroll entire form",
 		"pageLimit":"Max. page width",
 		"pageTitle":"Settings",

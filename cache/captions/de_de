@@ -454,6 +454,9 @@
 			"new":"Neues Attribut"
 		},
 		"collection":{
+			"button":{
+				"inHeader":"In Titelzeile anzeigen"
+			},
 			"dialog":{
 				"delete":"Bist du sicher, dass du diese Sammlung löschen möchtest?"
 			},
@@ -464,6 +467,13 @@
 			"query":"Query",
 			"title":"Sammlungen",
 			"titleOne":"Sammlung \"{NAME}\""
+		},
+		"collectionInput":{
+			"column":"Wert(e) aus Spalte",
+			"formIdOpen":"Formular öffnen",
+			"multiValue":"Mehrfachauswahl",
+			"noDisplayEmpty":"Verstecken wenn leer",
+			"onMobile":"In mobiler Ansicht"
 		},
 		"form":{
 			"chart":{
@@ -542,10 +552,8 @@
 			"captions":"Beschriftungen",
 			"category":"Kategorieauswahl",
 			"collection":"Sammlung*",
-			"collectionColumn":"Wert(e) aus Spalte",
 			"collectionIdDef":"Standardwert(e) aus Sammlung",
 			"collectionHint":"*Sammlung wird nur beeinflusst, wenn sie als Filterkriterium in der Datenabfrage genutzt wird.",
-			"collectionMultiValue":"Mehrfachauswahl",
 			"collectionTitle":"Sammlung durch Benutzereingabe filtern",
 			"columnsTarget":"Spalten hier ablegen",
 			"columnsTemplates":"Verfügbare Spalten",
@@ -1298,7 +1306,7 @@
 		"fontSize":"Schriftgröße",
 		"headerCaptions":"Hauptmenütitel anzeigen",
 		"languageCode":"Sprache",
-		"menuColored":"Colored menu",
+		"menuColored":"Farbiges Menü",
 		"mobileScrollForm":"Mobil: Gesamtes Formular scrollen",
 		"pageLimit":"Max. Seitenbreite",
 		"pageTitle":"Einstellungen",

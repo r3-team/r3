@@ -11,6 +11,16 @@ import {
 // a collection is an array of records
 // each record is an array of attribute values, retrieved and ordered following the collection columns
 
+export function getCollectionConsumerTemplate() {
+	return {
+		collectionId:null,
+		columnIdDisplay:null,
+		formIdOpen:null,
+		multiValue:false,
+		noDisplayEmpty:false,
+		onMobile:false
+	};
+};
 export function getCollectionColumnIndex(collectionId,columnId) {
 	let colSchema = MyStore.getters['schema/collectionIdMap'][collectionId];
 	for(let i = 0, j = colSchema.columns.length; i < j; i++) {

@@ -8,6 +8,7 @@ import (
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
+	"r3/schema/collection/consumer"
 	"r3/schema/column"
 	"r3/schema/openForm"
 	"r3/schema/query"
@@ -347,7 +348,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		if err != nil {
 			return fields, err
 		}
-		field.Collections, err = getCollections(field.Id, "fieldFilterSelector")
+		field.Collections, err = consumer.Get("field", field.Id, "fieldFilterSelector")
 		if err != nil {
 			return fields, err
 		}
@@ -373,7 +374,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posDataLookup {
 		var field = fields[pos].(types.FieldData)
 
-		field.DefCollection, err = getCollection(field.Id, "fieldDataDefault")
+		field.DefCollection, err = consumer.GetOne("field", field.Id, "fieldDataDefault")
 		if err != nil {
 			return fields, err
 		}
@@ -400,7 +401,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		if err != nil {
 			return fields, err
 		}
-		field.DefCollection, err = getCollection(field.Id, "fieldDataDefault")
+		field.DefCollection, err = consumer.GetOne("field", field.Id, "fieldDataDefault")
 		if err != nil {
 			return fields, err
 		}
@@ -438,7 +439,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		if err != nil {
 			return fields, err
 		}
-		field.Collections, err = getCollections(field.Id, "fieldFilterSelector")
+		field.Collections, err = consumer.Get("field", field.Id, "fieldFilterSelector")
 		if err != nil {
 			return fields, err
 		}
@@ -534,7 +535,7 @@ func GetCalendar(fieldId uuid.UUID) (types.FieldCalendar, error) {
 	if err != nil {
 		return f, err
 	}
-	f.Collections, err = getCollections(f.Id, "fieldFilterSelector")
+	f.Collections, err = consumer.Get("field", f.Id, "fieldFilterSelector")
 	if err != nil {
 		return f, err
 	}
@@ -747,10 +748,7 @@ func setButton_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	}
 
 	// set open form
-	if err := openForm.Set_tx(tx, "field", fieldId, oForm); err != nil {
-		return err
-	}
-	return nil
+	return openForm.Set_tx(tx, "field", fieldId, oForm)
 }
 func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	attributeIdDate0 uuid.UUID, attributeIdDate1 uuid.UUID,
@@ -808,7 +806,7 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	}
 
 	// set collection consumer
-	if err := setCollections_tx(tx, fieldId, "fieldFilterSelector", collections); err != nil {
+	if err := consumer.Set_tx(tx, "field", fieldId, "fieldFilterSelector", collections); err != nil {
 		return err
 	}
 
@@ -896,6 +894,7 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 	if collectionIdDef.Status != pgtype.Null {
 		defCollection.CollectionId = collectionIdDef.Bytes
 		defCollection.ColumnIdDisplay = columnIdDef
+		defCollection.FormIdOpen = compatible.GetNullUuid()
 		defCollection.MultiValue = false
 	}
 
@@ -926,12 +925,8 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 	}
 
 	// set collection consumer
-	if err := setCollections_tx(tx, fieldId, "fieldDataDefault",
-		[]types.CollectionConsumer{defCollection}); err != nil {
-
-		return err
-	}
-	return nil
+	return consumer.Set_tx(tx, "field", fieldId, "fieldDataDefault",
+		[]types.CollectionConsumer{defCollection})
 }
 func setDataRelationship_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	attributeIdRecord pgtype.UUID, attributeIdNm pgtype.UUID,
@@ -1061,76 +1056,10 @@ func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	}
 
 	// set collection consumer
-	if err := setCollections_tx(tx, fieldId, "fieldFilterSelector", collections); err != nil {
+	if err := consumer.Set_tx(tx, "field", fieldId, "fieldFilterSelector", collections); err != nil {
 		return err
 	}
 
 	// set columns
 	return column.Set_tx(tx, "field", fieldId, columns)
-}
-
-// consumed collections
-func getCollection(fieldId uuid.UUID, content string) (types.CollectionConsumer, error) {
-	c := types.CollectionConsumer{
-		ColumnIdDisplay: compatible.GetNullUuid(),
-	}
-	if err := db.Pool.QueryRow(db.Ctx, `
-		SELECT collection_id, column_id_display, multi_value
-		FROM app.collection_consumer
-		WHERE field_id = $1
-		AND   content  = $2
-	`, fieldId, content).Scan(&c.CollectionId, &c.ColumnIdDisplay,
-		&c.MultiValue); err != nil && err != pgx.ErrNoRows {
-
-		return c, err
-	}
-	return c, nil
-}
-func getCollections(fieldId uuid.UUID, content string) ([]types.CollectionConsumer, error) {
-	var collections = make([]types.CollectionConsumer, 0)
-
-	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT collection_id, column_id_display, multi_value
-		FROM app.collection_consumer
-		WHERE field_id = $1
-		AND   content  = $2
-	`, fieldId, content)
-	if err != nil {
-		return collections, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var c types.CollectionConsumer
-
-		if err := rows.Scan(&c.CollectionId, &c.ColumnIdDisplay, &c.MultiValue); err != nil {
-			return collections, err
-		}
-		collections = append(collections, c)
-	}
-	return collections, nil
-}
-func setCollections_tx(tx pgx.Tx, fieldId uuid.UUID, content string, collections []types.CollectionConsumer) error {
-	if _, err := tx.Exec(db.Ctx, `
-		DELETE FROM app.collection_consumer
-		WHERE field_id = $1
-		AND   content  = $2
-	`, fieldId, content); err != nil {
-		return err
-	}
-
-	for _, c := range collections {
-		if c.CollectionId == uuid.Nil {
-			continue
-		}
-
-		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.collection_consumer (collection_id,
-				column_id_display, field_id, content, multi_value)
-			VALUES ($1,$2,$3,$4,$5)
-		`, c.CollectionId, c.ColumnIdDisplay, fieldId, content, c.MultiValue); err != nil {
-			return err
-		}
-	}
-	return nil
 }

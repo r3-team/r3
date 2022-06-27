@@ -21,11 +21,13 @@ let MyFormLog = {
 				<h1>{{ capApp.dataLog }}</h1>
 			</div>
 			
-			<my-button image="cancel.png"
-				@trigger="$emit('close-log')"
-				:cancel="true"
-				:tight="true"
-			/>
+			<div class="area">
+				<my-button image="cancel.png"
+					@trigger="$emit('close-log')"
+					:cancel="true"
+					:tight="true"
+				/>
+			</div>
 		</div>
 		<div class="top lower">
 			<div class="area">

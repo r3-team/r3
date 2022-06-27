@@ -1,4 +1,5 @@
-import MyBuilderCollectionInput from './builderCollectionInput.js';
+import MyBuilderCollectionInput        from './builderCollectionInput.js';
+import {getCollectionConsumerTemplate} from '../shared/collection.js';
 import {
 	getDependentModules,
 	getItemTitle,
@@ -381,11 +382,15 @@ let MyBuilderFieldOptions = {
 				<my-builder-collection-input
 					v-if="!isFiles && field.def === ''"
 					@update:consumer="set('defCollection',$event)"
+					:allowFormOpen="false"
 					:allowRemove="false"
 					:caption="capApp.collectionIdDef"
 					:consumer="field.defCollection"
+					:fixedCollection="false"
 					:module="module"
 					:showMultiValue="false"
+					:showNoDisplayEmpty="false"
+					:showOnMobile="false"
 				/>
 				<tr v-if="isString && field.display === 'richtext'">
 					<td>{{ capApp.fieldAttributeIdAltRichtextFiles }}</td>
@@ -974,11 +979,15 @@ let MyBuilderFieldOptions = {
 						v-for="(c,i) in field.collections"
 						@remove="collectionRemove(i)"
 						@update:consumer="setCollection(i,$event)"
+						:allowFormOpen="false"
 						:allowRemove="true"
 						:caption="capApp.collection"
 						:consumer="c"
+						:fixedCollection="false"
 						:module="module"
 						:showMultiValue="true"
+						:showNoDisplayEmpty="false"
+						:showOnMobile="false"
 					/>
 					<tr v-if="field.collections.length !== 0">
 						<td colspan="3">{{ capApp.collectionHint }}</td>
@@ -1104,6 +1113,7 @@ let MyBuilderFieldOptions = {
 	},
 	methods:{
 		// externals
+		getCollectionConsumerTemplate,
 		getDependentModules,
 		getDetailsFromIndexAttributeId,
 		getIndexAttributeId,
@@ -1116,10 +1126,7 @@ let MyBuilderFieldOptions = {
 		// actions
 		collectionAdd:function() {
 			let v = JSON.parse(JSON.stringify(this.field.collections));
-			v.push({
-				collectionId:null,
-				columnIdDisplay:null
-			});
+			v.push(this.getCollectionConsumerTemplate());
 			this.set('collections',v);
 		},
 		collectionRemove:function(i) {

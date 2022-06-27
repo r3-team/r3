@@ -454,6 +454,9 @@
 			"new":"Nuovo attributo"
 		},
 		"collection":{
+			"button":{
+				"inHeader":"Show in header"
+			},
 			"dialog":{
 				"delete":"Sicuro di voler cancellare questa collezione?"
 			},
@@ -464,6 +467,13 @@
 			"query":"Query",
 			"title":"Collezioni",
 			"titleOne":"Collezione '{NAME}'"
+		},
+		"collectionInput":{
+			"column":"Value(s) from column",
+			"formIdOpen":"Open form",
+			"multiValue":"Multi input",
+			"noDisplayEmpty":"Hide if empty",
+			"onMobile":"Show on mobile"
 		},
 		"form":{
 			"chart":{
@@ -542,10 +552,8 @@
 			"captions":"Titoli",
 			"category":"Selettore categoria",
 			"collection":"Collezione",
-			"collectionColumn":"Value(s) from column",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*La collezione è influenzata solo se è selezionata come criterio filtrante nella query dei dati.",
-			"collectionMultiValue":"Multi input",
 			"collectionTitle":"Limita la collezione dall'input dell'utente",
 			"columnsTarget":"Posiziona le colonne qui",
 			"columnsTemplates":"Colonne disponibili",

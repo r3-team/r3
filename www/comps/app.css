@@ -128,7 +128,6 @@ body                                         { --depth:6; }
 .settings .backup-code                       { --depth:0; }
 .field                                       { --depth:0; }
 .field .disabled                             { --depth:6; }
-.list .layoutTable                           { --depth:2; }
 .list .layoutTable th                        { --depth:0; }
 .list .layoutTable tbody tr                  { --depth:1; }
 .list .layoutTable tbody tr:nth-child(odd)   { --depth:0; }

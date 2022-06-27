@@ -108,8 +108,23 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				TYPE app.filter_side_content USING content::text::app.filter_side_content;
 			
 			-- collection consumer changes / additions
+			ALTER TABLE app.collection_consumer ADD COLUMN form_id_open UUID;
+			ALTER TABLE app.collection_consumer
+				ADD CONSTRAINT collection_consumer_form_id_open_fkey FOREIGN KEY (form_id_open)
+				REFERENCES app.form (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE app.collection_consumer ADD COLUMN on_mobile BOOLEAN NOT NULL DEFAULT false;
+			ALTER TABLE app.collection_consumer ALTER COLUMN on_mobile DROP DEFAULT;
+			ALTER TABLE app.collection_consumer ADD COLUMN no_display_empty BOOLEAN NOT NULL DEFAULT false;
+			ALTER TABLE app.collection_consumer ALTER COLUMN no_display_empty DROP DEFAULT;
+			
+			CREATE INDEX IF NOT EXISTS fki_collection_consumer_form_id_open_fkey ON app.collection_consumer
+				USING BTREE (form_id_open ASC NULLS LAST);
+			
 			CREATE TYPE app.collection_consumer_content AS ENUM(
-				'fieldDataDefault','fieldFilterSelector')
+				'fieldDataDefault','fieldFilterSelector','headerDisplay')
 			
 			ALTER TABLE app.collection_consumer ADD COLUMN content TEXT NOT NULL DEFAULT 'fieldFilterSelector';
 			ALTER TABLE app.collection_consumer ALTER COLUMN content DROP DEFAULT;

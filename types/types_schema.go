@@ -345,17 +345,21 @@ type FieldList struct {
 	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
 }
 type Collection struct {
-	Id       uuid.UUID   `json:"id"`
-	ModuleId uuid.UUID   `json:"moduleId"`
-	IconId   pgtype.UUID `json:"iconId"`
-	Name     string      `json:"name"`
-	Columns  []Column    `json:"columns"`
-	Query    Query       `json:"query"`
+	Id       uuid.UUID            `json:"id"`
+	ModuleId uuid.UUID            `json:"moduleId"`
+	IconId   pgtype.UUID          `json:"iconId"`
+	Name     string               `json:"name"`
+	Columns  []Column             `json:"columns"`
+	Query    Query                `json:"query"`
+	InHeader []CollectionConsumer `json:"inHeader"` // collection consumers used by application header
 }
 type CollectionConsumer struct {
 	CollectionId    uuid.UUID   `json:"collectionId"`
 	ColumnIdDisplay pgtype.UUID `json:"columnIdDisplay"` // ID of collection column to display (inputs etc.)
+	FormIdOpen      pgtype.UUID `json:"formIdOpen"`      // ID of form to open when clicked on collection consumer value (used in: application header)
 	MultiValue      bool        `json:"multiValue"`      // if active, values of multiple record rows can be selected
+	NoDisplayEmpty  bool        `json:"noDisplayEmpty"`  // if collection is used for display and value is 'empty' (0, '', null), it is not shown
+	OnMobile        bool        `json:"onMobile"`        // if collection is used for display and mobile view is active, decides whether to show collection
 }
 type Column struct {
 	Id          uuid.UUID      `json:"id"`

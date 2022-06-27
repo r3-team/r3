@@ -204,6 +204,36 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 			name1.String, name2.String)
 	}
 
+	// check collection access to external forms
+	if err := tx.QueryRow(db.Ctx, `
+		SELECT COUNT(*), STRING_AGG(f.name, ', ')
+		FROM app.form AS f
+		INNER JOIN app.collection_consumer AS cc ON cc.form_id_open = f.id
+		INNER JOIN app.collection          AS c  ON c.id = cc.collection_id
+		INNER JOIN app.module AS m
+			ON  m.id = c.module_id
+			AND m.id = $1
+		
+		-- dependency
+		WHERE f.id NOT IN (
+			SELECT id
+			FROM app.form
+			WHERE module_id = m.id
+			OR module_id IN (
+				SELECT module_id_on
+				FROM app.module_depends
+				WHERE module_id = m.id
+			)
+		)
+	`, moduleId).Scan(&cnt, &name1); err != nil {
+		return err
+	}
+
+	if cnt != 0 {
+		return fmt.Errorf("dependency check failed, collection(s) accessing form(s) '%s' from independent module(s)",
+			name1.String)
+	}
+
 	// check relation policy access to external roles
 	if err := tx.QueryRow(db.Ctx, `
 		SELECT COUNT(*), STRING_AGG(r.name, ', ')

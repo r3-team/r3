@@ -56,7 +56,8 @@ let MyBuilderCollectionsItem = {
 				moduleId:null,
 				name:'',
 				columns:[],
-				query:null
+				query:null,
+				inHeader:[]
 			}}
 		}
 	},
@@ -132,7 +133,8 @@ let MyBuilderCollectionsItem = {
 				
 				// not changable values on this interface
 				columns:this.collection.columns,
-				query:query
+				query:query,
+				inHeader:this.collection.inHeader
 			},true).then(
 				() => {
 					if(this.isNew)
