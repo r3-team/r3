@@ -51,6 +51,12 @@ func clusterProcessEvents() error {
 		log.Info("cluster", fmt.Sprintf("node is reacting to event '%s'", e.Content))
 
 		switch e.Content {
+		case "collectionUpdated":
+			var p types.ClusterEventCollectionUpdated
+			if err := json.Unmarshal(e.Payload, &p); err != nil {
+				return err
+			}
+			err = cluster.CollectionUpdated(p.CollectionId, p.LoginIds)
 		case "configChanged":
 			var p types.ClusterEventConfigChanged
 			if err := json.Unmarshal(e.Payload, &p); err != nil {

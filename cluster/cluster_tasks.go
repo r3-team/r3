@@ -57,6 +57,20 @@ func CheckInNode() error {
 }
 
 // events relevant to all cluster nodes
+func CollectionUpdated(collectionId uuid.UUID, loginIds []int64) error {
+
+	if len(loginIds) == 0 {
+		// no logins defined, update for all
+		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, CollectionChanged: collectionId}
+		return nil
+	}
+
+	// logins defined, update for specific logins
+	for _, id := range loginIds {
+		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: id, CollectionChanged: collectionId}
+	}
+	return nil
+}
 func ConfigChanged(updateNodes bool, loadConfigFromDb bool, switchToMaintenance bool) error {
 	if updateNodes {
 		if err := createEventsForOtherNodes("configChanged", types.ClusterEventConfigChanged{

@@ -160,9 +160,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			-- new type for cluster event
 			CREATE TYPE instance_cluster.node_event_content AS ENUM (
-   				'configChanged', 'loginDisabled', 'loginReauthorized',
-				'loginReauthorizedAll', 'masterAssigned', 'schemaChanged',
-				'shutdownTriggered','tasksChanged','taskTriggered'
+				'collectionUpdated','configChanged','loginDisabled',
+				'loginReauthorized','loginReauthorizedAll','masterAssigned',
+				'schemaChanged','shutdownTriggered','tasksChanged','taskTriggered'
 			);
 			
 			-- new cluster tables
@@ -343,6 +343,25 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					SELECT id, 'taskTriggered', CONCAT('{"pgFunctionId":"',pg_function_id,'","pgFunctionScheduleId":"',pg_function_schedule_id,'"}')
 					FROM instance_cluster.node
 					WHERE cluster_master;
+				
+				RETURN 0;
+			END;
+			$BODY$;
+			
+			-- new collection update call
+			CREATE OR REPLACE FUNCTION instance.update_collection(
+				collection_id UUID,
+				login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[])
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+				COST 100
+				VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				INSERT INTO instance_cluster.node_event (node_id,content,payload)
+					SELECT id, 'collectionUpdated', CONCAT('{"collectionId":"',collection_id,'","loginIds":',TO_JSON(login_ids),'}')
+					FROM instance_cluster.node;
 				
 				RETURN 0;
 			END;

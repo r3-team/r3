@@ -14,6 +14,7 @@ import (
 	"r3/types"
 	"sync"
 
+	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -132,6 +133,9 @@ func (hub *hubType) start() {
 				// if clients are not kicked, prepare response
 				var err error
 
+				if event.CollectionChanged != uuid.Nil {
+					jsonMsg, err = prepareUnrequested("collection_changed", event.CollectionChanged)
+				}
 				if event.ConfigChanged {
 					jsonMsg, err = prepareUnrequested("config_changed", nil)
 				}

@@ -6,6 +6,10 @@ type ClusterEvent struct {
 	Content string
 	Payload []byte
 }
+type ClusterEventCollectionUpdated struct {
+	CollectionId uuid.UUID `json:"collectionId"`
+	LoginIds     []int64   `json:"loginIds"`
+}
 type ClusterEventConfigChanged struct {
 	SwitchToMaintenance bool `json:"switchToMaintenance"`
 }
@@ -39,11 +43,12 @@ type ClusterNode struct {
 
 // a server side event, affecting one or many websocket clients (by associated login ID)
 type ClusterWebsocketClientEvent struct {
-	ConfigChanged   bool  // system config has changed (only relevant for admins)
-	LoginId         int64 // affected login (0=all logins)
-	Kick            bool  // kick login (usually because it was disabled)
-	KickNonAdmin    bool  // kick login if not admin (usually because maintenance mode was enabled)
-	Renew           bool  // renew login (permissions changed)
-	SchemaLoading   bool  // inform client: schema is loading
-	SchemaTimestamp int64 // inform client: schema has a new timestamp (new version)
+	CollectionChanged uuid.UUID // inform client: collection has changed (should update it)
+	ConfigChanged     bool      // system config has changed (only relevant for admins)
+	LoginId           int64     // affected login (0=all logins)
+	Kick              bool      // kick login (usually because it was disabled)
+	KickNonAdmin      bool      // kick login if not admin (usually because maintenance mode was enabled)
+	Renew             bool      // renew login (permissions changed)
+	SchemaLoading     bool      // inform client: schema is loading
+	SchemaTimestamp   int64     // inform client: schema has a new timestamp (new version)
 }

@@ -136,16 +136,6 @@ let MyBuilderMenuItems = {
 		getDependentModules,
 		
 		// actions
-		/*collectionAdd:function() {
-			let v = JSON.parse(JSON.stringify(this.field.collections));
-			v.push(this.getCollectionConsumerTemplate());
-			this.set('collections',v);
-		},
-		collectionRemove:function(i) {
-			let v = JSON.parse(JSON.stringify(this.field.collections));
-			v.splice(i,1);
-			this.set('collections',v);
-		},*/
 		remove:function(id,i) {
 			this.menus.splice(i,1);
 			
