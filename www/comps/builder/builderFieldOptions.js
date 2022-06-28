@@ -1,4 +1,5 @@
 import MyBuilderCollectionInput        from './builderCollectionInput.js';
+import MyBuilderOpenFormInput          from './builderOpenFormInput.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
 import {
 	getDependentModules,
@@ -265,7 +266,8 @@ let MyBuilderFieldOptions = {
 	name:'my-builder-field-options',
 	components:{
 		MyBuilderCollectionInput,
-		MyBuilderFieldOptionsChart
+		MyBuilderFieldOptionsChart,
+		MyBuilderOpenFormInput
 	},
 	template:`<div class="builder-field-options">
 		<table class="fullWidth default-inputs"><tbody>
@@ -369,6 +371,8 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
+				
+				<!-- default values -->
 				<tr v-if="!isFiles && !isRelationship">
 					<td>{{ capApp.fieldDefault }}</td>
 					<td>
@@ -395,6 +399,30 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
+				<tr v-if="isRelationship">
+					<td>{{ capApp.fieldDefaultPresetIds }}</td>
+					<td>
+						<select @change="presetIdAdd($event.target.value)">
+							<option value="">-</option>
+							<template v-for="p in presetIdMap">
+								<option
+									v-if="!field.defPresetIds.includes(p.id)"
+									:key="p.id"
+									:value="p.id"
+								>{{ p.name }}</option>
+							</template>
+						</select>
+						
+						<my-button image="cancel.png"
+							v-for="presetId in field.defPresetIds"
+							@trigger="presetIdRemove(presetId)"
+							:caption="presetIdMap[presetId].name"
+							:key="presetId"
+						/>
+					</td>
+				</tr>
+				
+				<!-- alternative field inputs -->
 				<tr v-if="isString && field.display === 'richtext'">
 					<td>{{ capApp.fieldAttributeIdAltRichtextFiles }}</td>
 					<td>
@@ -429,6 +457,8 @@ let MyBuilderFieldOptions = {
 						</select>
 					</td>
 				</tr>
+				
+				<!-- relationship inputs -->
 				<template v-if="isRelationship">
 					<tr>
 						<td>{{ capApp.category }}</td>
@@ -456,28 +486,6 @@ let MyBuilderFieldOptions = {
 							:placeholder="capApp.autoSelectHint"
 							:value="field.autoSelect"
 						/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.fieldDefaultPresetIds }}</td>
-						<td>
-							<select @change="presetIdAdd($event.target.value)">
-								<option value="">-</option>
-								<template v-for="p in presetIdMap">
-									<option
-										v-if="!field.defPresetIds.includes(p.id)"
-										:key="p.id"
-										:value="p.id"
-									>{{ p.name }}</option>
-								</template>
-							</select>
-							
-							<my-button image="cancel.png"
-								v-for="presetId in field.defPresetIds"
-								@trigger="presetIdRemove(presetId)"
-								:caption="presetIdMap[presetId].name"
-								:key="presetId"
-							/>
 						</td>
 					</tr>
 				</template>
@@ -796,16 +804,6 @@ let MyBuilderFieldOptions = {
 					</td>
 				</tr>
 				<tr>
-					<td colspan="3">
-						<my-button
-							@trigger="showCsv = !showCsv"
-							:image="showCsv ? 'triangleDown.png' : 'triangleRight.png'"
-							:caption="capApp.csvTitle"
-							:naked="true"
-						/>
-					</td>
-				</tr>
-				<tr v-if="showCsv">
 					<td>{{ capApp.csvImport }}</td>
 					<td>
 						<my-bool
@@ -814,7 +812,7 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<tr v-if="showCsv">
+				<tr>
 					<td>{{ capApp.csvExport }}</td>
 					<td>
 						<my-bool
@@ -861,141 +859,47 @@ let MyBuilderFieldOptions = {
 			</template>
 			
 			<!-- open form -->
-			<template v-if="isButton || ((isList || isCalendar || isRelationship) && field.query.relationId !== null)">
-				<tr>
-					<td colspan="2">
-						<my-button
-							@trigger="showOpenForm = !showOpenForm"
-							:caption="capApp.openForm"
-							:image="showOpenForm ? 'triangleDown.png' : 'triangleRight.png'"
-							:naked="true"
-						/>
-					</td>
-				</tr>
-				<tr v-if="showOpenForm">
-					<td>{{ capApp.openFormFormIdOpen }}</td>
-					<td>
-						<select
-							@input="setOpenForm('formIdOpen',$event.target.value)"
-							:value="isOpenForm ? field.openForm.formIdOpen : ''"
-						>
-							<option value="">-</option>
-							<optgroup
-								v-for="mod in getDependentModules(module,modules)"
-								:label="mod.name"
-							>
-								<option
-									v-for="f in mod.forms.filter(v => isButton || v.query.relationId === field.query.relationId)" 
-									:value="f.id"
-								>{{ f.name }}</option>
-							</optgroup>
-						</select>
-					</td>
-				</tr>
-			</template>
-			
-			<template v-if="isOpenForm && showOpenForm">
-				<tr>
-					<td>{{ capApp.openFormPopUp }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="setOpenForm('popUp',$event)"
-							:modelValue="field.openForm.popUp"
-						/>
-					</td>
-				</tr>
-				<tr v-if="field.openForm.popUp">
-					<td>{{ capApp.openFormMaxHeight }}</td>
-					<td>
-						<input
-							@input="setOpenForm('maxHeight',$event.target.value)"
-							:value="field.openForm.maxHeight"
-						/>
-					</td>
-				</tr>
-				<tr v-if="field.openForm.popUp">
-					<td>{{ capApp.openFormMaxWidth }}</td>
-					<td>
-						<input
-							@input="setOpenForm('maxWidth',$event.target.value)"
-							:value="field.openForm.maxWidth"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="2"><b>{{ capApp.openFormNewRecord }}</b></td>
-				</tr>
-				<tr>
-					<td>{{ capApp.openFormRelationIndex }}</td>
-					<td>
-						<select
-							@input="setOpenForm('relationIndex',$event.target.value)"
-							:value="field.openForm.relationIndex"
-						>
-							<option
-								v-for="j in joinsIndexMap"
-								:value="j.index"
-							>{{ getItemTitleRelation(j.relationId,j.index) }}</option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.openFormAttributeApply }}</td>
-					<td>
-						<select
-							@input="setOpenForm('attributeIdApply',$event.target.value)"
-							:value="field.openForm.attributeIdApply !== null ? field.openForm.attributeIdApply : ''"
-						>
-							<option value="">-</option>
-							<option
-								v-for="a in openFormTargetAttributes"
-								:value="a.id"
-							>
-								{{ relationIdMap[a.relationId].name + '.' + a.name }}
-							</option>
-						</select>
-					</td>
-				</tr>
-			</template>
+			<tr v-if="isButton || ((isList || isCalendar || isRelationship) && field.query.relationId !== null)">
+				<td>{{ capApp.openForm }}</td>
+				<td>
+					<my-builder-open-form-input
+						@update:openForm="set('openForm',$event)"
+						:allowAllForms="isButton"
+						:joinsIndexMap="joinsIndexMap"
+						:module="module"
+						:openForm="field.openForm"
+						:relationIdSource="isButton ? null : field.query.relationId"
+					/>
+				</td>
+			</tr>
 			
 			<!-- consume collection -->
 			<template v-if="isList || isCalendar">
 				<tr>
+					<td><span>{{ capApp.collectionTitle }}</span></td>
 					<td>
-						<my-button
-							@trigger="showCollections = !showCollections"
-							:image="showCollections ? 'triangleDown.png' : 'triangleRight.png'"
-							:caption="capApp.collectionTitle"
-							:naked="true"
-						/>
+						<div class="builder-field-options-collection-label">
+							<my-button image="add.png"
+								@trigger="collectionAdd"
+								:caption="capGen.button.add"
+								:naked="true"
+							/>
+							<my-builder-collection-input
+								v-for="(c,i) in field.collections"
+								@remove="collectionRemove(i)"
+								@update:consumer="setCollection(i,$event)"
+								:allowFormOpen="false"
+								:allowRemove="true"
+								:consumer="c"
+								:fixedCollection="false"
+								:module="module"
+								:showMultiValue="true"
+								:showNoDisplayEmpty="false"
+								:showOnMobile="false"
+							/>
+							<span v-if="field.collections.length !== 0">{{ capApp.collectionHint }}</span>
+						</div>
 					</td>
-					<td v-if="showCollections" colspan="2">
-						<my-button image="add.png"
-							@trigger="collectionAdd"
-							:caption="capGen.button.add"
-							:naked="true"
-						/>
-					</td>
-				</tr>
-				<tr v-if="showCollections">
-					<td colspan="3">
-						<my-builder-collection-input
-							v-for="(c,i) in field.collections"
-							@remove="collectionRemove(i)"
-							@update:consumer="setCollection(i,$event)"
-							:allowFormOpen="false"
-							:allowRemove="true"
-							:consumer="c"
-							:fixedCollection="false"
-							:module="module"
-							:showMultiValue="true"
-							:showNoDisplayEmpty="false"
-							:showOnMobile="false"
-						/>
-					</td>
-				</tr>
-				<tr v-if="showCollections && field.collections.length !== 0">
-					<td colspan="3">{{ capApp.collectionHint }}</td>
 				</tr>
 			</template>
 		</tbody></table>
@@ -1008,65 +912,11 @@ let MyBuilderFieldOptions = {
 		joinsIndexMap:  { type:Object,  required:true },
 		moduleId:       { type:String,  required:true }
 	},
-	data:function() {
-		return {
-			showCollections:false,
-			showCsv:false,
-			showOpenForm:false
-		};
-	},
 	emits:['set'],
 	computed:{
 		attribute:function() {
 			return !this.isData || typeof this.attributeIdMap[this.field.attributeId] === 'undefined'
 				? false : this.attributeIdMap[this.field.attributeId];
-		},
-		openFormTargetAttributes:function() {
-			if(!this.isOpenForm)
-				return [];
-			
-			// parse from which relation the record is applied, based on the chosen relation index
-			let recordRelationId = null;
-			for(let k in this.joinsIndexMap) {
-				
-				if(this.joinsIndexMap[k].index === this.field.openForm.relationIndex) {
-					recordRelationId = this.joinsIndexMap[k].relationId;
-					break;
-				}
-			}
-			if(recordRelationId === null)
-				return [];
-			
-			let form = this.formIdMap[this.field.openForm.formIdOpen];
-			let out  = [];
-			
-			// collect fitting attributes
-			for(let i = 0, j = form.query.joins.length; i < j; i++) {
-				let r = this.relationIdMap[form.query.joins[i].relationId];
-				
-				// attributes on relation from target form, in relationship with record relation
-				for(let x = 0, y = r.attributes.length; x < y; x++) {
-					let a = r.attributes[x];
-				
-					if(!this.isAttributeRelationship(a.content))
-						continue;
-					
-					if(a.relationshipId === recordRelationId)
-						out.push(a);
-				}
-				
-				// attributes on record relation, in relationship with relation from target form
-				for(let x = 0, y = this.relationIdMap[recordRelationId].attributes.length; x < y; x++) {
-					let a = this.relationIdMap[recordRelationId].attributes[x];
-				
-					if(!this.isAttributeRelationship(a.content))
-						continue;
-					
-					if(a.relationshipId === r.id)
-						out.push(a);
-				}
-			}
-			return out;
 		},
 		presetIdMap:function() {
 			if(!this.isRelationship)
@@ -1206,39 +1056,6 @@ let MyBuilderFieldOptions = {
 		},
 		setNull:function(name,val) {
 			this.set(name,val === '' ? null : val);
-		},
-		setOpenForm:function(name,val) {
-			
-			// clear if no form is opened
-			if(name === 'formIdOpen' && val === '')
-				return this.set('openForm',null);
-			
-			let v = JSON.parse(JSON.stringify(this.field.openForm));
-			
-			// set initial value if empty
-			if(v === null) {
-				v = {
-					formIdOpen:null,
-					attributeIdApply:null,
-					relationIndex:0,
-					popUp:false,
-					maxHeight:0,
-					maxWidth:0
-				};
-			}
-			
-			// set changed value
-			if(['relationIndex','maxHeight','maxWidth'].includes(name))
-				val = parseInt(val);
-			
-			if(name === 'attributeIdApply' && val === '')
-				val = null;
-			
-			if(name === 'formIdOpen')
-				v.attributeIdApply = null;
-			
-			v[name] = val;
-			this.set('openForm',v);
 		}
 	}
 };

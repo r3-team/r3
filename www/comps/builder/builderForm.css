@@ -156,6 +156,10 @@
 	flex-flow:row nowrap;
 	align-items:center;
 }
+.builder-field-options-collection-label{
+	display:flex;
+	flex-flow:column nowrap;
+}
 
 
 /* form functions */

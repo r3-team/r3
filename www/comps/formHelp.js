@@ -53,8 +53,8 @@ let MyFormHelp = {
 		</div>
 	</div>`,
 	props:{
-		form:  { type:Object, required:true },
-		module:{ type:Object, required:true }
+		form:    { type:Object, required:true },
+		moduleId:{ type:Object, required:true }
 	},
 	emits:['close'],
 	data:function() {
@@ -65,26 +65,23 @@ let MyFormHelp = {
 	},
 	computed:{
 		contextHelp:function() {
-			if(typeof this.form.captions.formHelp[this.moduleLanguage] === 'undefined')
-				return null;
-			
-			return this.form.captions.formHelp[this.moduleLanguage];
+			return typeof this.form.captions.formHelp[this.moduleLanguage] === 'undefined'
+				? null
+				: this.form.captions.formHelp[this.moduleLanguage];
 		},
 		moduleHelp:function() {
-			if(typeof this.module.captions.moduleHelp[this.moduleLanguage] === 'undefined')
-				return null;
-			
-			return this.module.captions.moduleHelp[this.moduleLanguage];
+			return typeof this.moduleIdMap[this.moduleId].captions.moduleHelp[this.moduleLanguage] === 'undefined'
+				? null
+				: this.moduleIdMap[this.moduleId].captions.moduleHelp[this.moduleLanguage];
 		},
 		
 		// stores
+		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
 		capApp:        function() { return this.$store.getters.captions.form; },
 		moduleLanguage:function() { return this.$store.getters.moduleLanguage; }
 	},
 	mounted:function() {
-		if(this.contextHelp !== null)
-			this.showContext = true;
-		else if(this.moduleHelp !== null)
-			this.showModule = true;
+		if     (this.contextHelp !== null) this.showContext = true;
+		else if(this.moduleHelp  !== null) this.showModule  = true;
 	}
 };

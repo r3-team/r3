@@ -554,7 +554,7 @@
 			"category":"Selector de categorie",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*Collection is only affected if selected as filter criteria in data query.",
-			"collectionTitle":"Limit collection by user input",
+			"collectionTitle":"Filter collection by input",
 			"columnsTarget":"Așezați coloane aici",
 			"columnsTemplates":"Coloane disponibile",
 			"columnBatch":"Grup de coloane",
@@ -578,7 +578,6 @@
 			"copyNewName":"Numele formularului nou",
 			"csvExport":"Export CSV",
 			"csvImport":"Import CSV",
-			"csvTitle":"CSV processing",
 			"date0":"Data de la",
 			"date1":"Data până la",
 			"dateColor":"Culoare",
@@ -639,13 +638,6 @@
 			"noDataActions":"No data actions",
 			"onMobile":"Vizualizare dispozitiv mobil",
 			"openForm":"Deschideți formularul",
-			"openFormAttributeApply":"...pentru a seta valoare formularului",
-			"openFormFormIdOpen":"Formular",
-			"openFormMaxHeight":"Înălțimea maximă (px)",
-			"openFormMaxWidth":"Lățimea maximă (px)",
-			"openFormNewRecord":"La crearea înregistrărilor noi",
-			"openFormPopUp":"Formular de tip pop-up",
-			"openFormRelationIndex":"Folosește înregistrarea din relația",
 			"presetOpen":"Deschide presetarea",
 			"readonly":"Numai citire",
 			"required":"Necesar",
@@ -840,6 +832,15 @@
 			"startForms":"Formulare de început",
 			"startFormsExplanation":"Se utilizează primul formular de pornire care se potrivește cu un rol al autentificarii curente.",
 			"title":"Aplicații"
+		},
+		"openFormInput":{
+			"attributeApply":"...pentru a seta valoare formularului",
+			"formIdOpen":"Formular",
+			"maxHeight":"Înălțimea maximă (px)",
+			"maxWidth":"Lățimea maximă (px)",
+			"newRecord":"La crearea înregistrărilor noi",
+			"popUp":"Formular de tip pop-up",
+			"relationIndex":"Folosește înregistrarea din relația"
 		},
 		"pgTrigger":{
 			"dialog":{

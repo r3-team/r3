@@ -1,5 +1,6 @@
 import MyDialog              from './dialog.js';
 import MyFeedback            from './feedback.js';
+import MyForm                from './form.js';
 import MyHeader              from './header.js';
 import MyLogin               from './login.js';
 import {getStartFormId}      from './shared/access.js';
@@ -23,6 +24,7 @@ let MyApp = {
 	components:{
 		MyDialog,
 		MyFeedback,
+		MyForm,
 		MyHeader,
 		MyLogin
 	},
@@ -55,14 +57,33 @@ let MyApp = {
 				@click="openLink(customLogoUrl,true)"
 				:src="customLogo"
 			/>
+			
+			<!-- dialog window -->
 			<transition name="fade">
 				<my-dialog v-if="isAtDialog" />
 			</transition>
 			
+			<!-- feedback window -->
 			<transition name="fade">
 				<my-feedback v-if="isAtFeedback" />
 			</transition>
 			
+			<!-- pop-up form window -->
+			<div class="app-sub-window under-header"
+				v-if="popUpFormGlobal !== null"
+				@mousedown.self="$refs.popUpForm.closeAsk()"
+			>
+				<my-form class="form-pop-up" ref="popUpForm"
+					@close="$store.commit('popUpFormGlobal',null)"
+					:formId="popUpFormGlobal.formId"
+					:isInline="true"
+					:moduleId="popUpFormGlobal.moduleId"
+					:recordId="popUpFormGlobal.recordId"
+					:style="popUpFormGlobal.style"
+				/>
+			</div>
+			
+			<!-- loading input blocker overlay -->
 			<div class="input-block-overlay" v-if="blockInput">
 				<img src="images/load.gif" />
 			</div>
@@ -242,6 +263,7 @@ let MyApp = {
 		loginPrivateKey:function() { return this.$store.getters.loginPrivateKey; },
 		moduleColor1:   function() { return this.$store.getters.moduleColor1; },
 		patternStyle:   function() { return this.$store.getters.patternStyle; },
+		popUpFormGlobal:function() { return this.$store.getters.popUpFormGlobal; },
 		settings:       function() { return this.$store.getters.settings; }
 	},
 	created:function() {

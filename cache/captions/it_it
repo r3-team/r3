@@ -554,7 +554,7 @@
 			"category":"Selettore categoria",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*La collezione è influenzata solo se è selezionata come criterio filtrante nella query dei dati.",
-			"collectionTitle":"Limita la collezione dall'input dell'utente",
+			"collectionTitle":"Filtrare la collezione dall'input",
 			"columnsTarget":"Posiziona le colonne qui",
 			"columnsTemplates":"Colonne disponibili",
 			"columnBatch":"Raggruppamento di colonne",
@@ -578,7 +578,6 @@
 			"copyNewName":"Nuovo nome del modulo",
 			"csvExport":"Esporta CSV",
 			"csvImport":"Importa CSV",
-			"csvTitle":"CSV processing",
 			"date0":"Data da",
 			"date1":"Data a",
 			"dateColor":"Colore",
@@ -639,13 +638,6 @@
 			"noDataActions":"No data actions",
 			"onMobile":"Nella vista mobile",
 			"openForm":"Apri modulo",
-			"openFormAttributeApply":"...per impopstare il valore sul modulo",
-			"openFormFormIdOpen":"Modulo",
-			"openFormMaxHeight":"Altezza massima (px)",
-			"openFormMaxWidth":"Larghezza massima (px)",
-			"openFormNewRecord":"Quando si creano nuovi record",
-			"openFormPopUp":"Modulo Pop-up",
-			"openFormRelationIndex":"Utilizza record da relazione",
 			"presetOpen":"Preimpostazione apertura",
 			"readonly":"Solo lettura",
 			"required":"Obbligatorio",
@@ -840,6 +832,15 @@
 			"startForms":"Moduli iniziali",
 			"startFormsExplanation":"Viene utilizzato il primo modulo iniziale che corrisponde a un ruolo del login corrente.",
 			"title":"Applicazioni"
+		},
+		"openFormInput":{
+			"attributeApply":"...per impopstare il valore sul modulo",
+			"formIdOpen":"Modulo",
+			"maxHeight":"Altezza massima (px)",
+			"maxWidth":"Larghezza massima (px)",
+			"newRecord":"Quando si creano nuovi record",
+			"popUp":"Modulo Pop-up",
+			"relationIndex":"Utilizza record da relazione"
 		},
 		"pgTrigger":{
 			"dialog":{

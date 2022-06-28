@@ -20,6 +20,7 @@ import {
 } from './shared/generic.js';
 import {
 	getDataFieldMap,
+	getFormPopUpTemplate,
 	getFormRoute,
 	getGetterArg,
 	getInputFieldName,
@@ -60,22 +61,22 @@ let MyForm = {
 		<div class="form contentBox grow scroll"
 			v-if="!isMobile || (!showLog && !showHelp)"
 		>
-			<!-- pop-up form -->
+			<!-- pop-up sub-form -->
 			<div class="app-sub-window under-header"
-				v-if="popUpFormId !== null"
+				v-if="popUp !== null"
 				@mousedown.self="$refs.popUpForm.closeAsk()"
 			>
 				<my-form class="form-pop-up" ref="popUpForm"
-					@close="closePopUp()"
-					@record-deleted="popUpRecordChanged($event,'deleted')"
-					@record-open="popUpRecordId = $event"
-					@record-updated="popUpRecordChanged($event,'updated')"
-					:attributeIdMapDef="popUpAttributeIdMapDef"
-					:formId="popUpFormId"
+					@close="popUp = null; $store.commit('formHasChanges',hasChanges)"
+					@record-deleted="popUpRecordChanged('deleted',$event)"
+					@record-open="popUp.recordId = $event"
+					@record-updated="popUpRecordChanged('updated',$event)"
+					:attributeIdMapDef="popUp.attributeIdMapDef"
+					:formId="popUp.formId"
 					:isInline="true"
-					:module="module"
-					:recordId="popUpRecordId"
-					:style="popUpStyles"
+					:moduleId="popUp.moduleId"
+					:recordId="popUp.recordId"
+					:style="popUp.style"
 				/>
 			</div>
 			
@@ -244,7 +245,7 @@ let MyForm = {
 			v-if="showHelp && helpAvailable"
 			@close="showHelp = false"
 			:form="form"
-			:module="module"
+			:moduleId="moduleId"
 		/>
 	</div>`,
 	props:{
@@ -253,7 +254,7 @@ let MyForm = {
 		attributeIdMapDef:{ type:Object, required:false, default:() => {return {};} }, // map of attribute default values (new record)
 		formId:           { type:String, required:true },
 		isInline:         { type:Boolean,required:false, default:false },              // opened within another element
-		module:           { type:Object, required:true },
+		moduleId:         { type:String, required:true },
 		recordId:         { type:Number, required:true }
 	},
 	emits:['close','record-deleted','record-open','record-updated'],
@@ -283,16 +284,10 @@ let MyForm = {
 			loading:false,        // form is currently loading, informs sub components when form is ready
 			message:null,         // form message
 			messageTimeout:null,  // form message expiration timeout
+			popUp:null,           // configuration for pop-up sub-form
 			showHelp:false,       // show form context help
 			showLog:false,        // show data change log
 			updatingRecord:false, // form is currently attempting to update the current record (saving/deleting)
-			
-			// pop-up form
-			popUpAttributeIdMapDef:{}, // default attribute values for pop-up form
-			popUpFieldId:null,    // field ID that opened pop-up form
-			popUpFormId:null,     // form ID to open in pop-up form
-			popUpRecordId:0,      // record ID to open in pop-up form
-			popUpStyles:'',       // CSS styles for pop-up form
 			
 			// form data
 			fields:[],            // all fields (nested within each other)
@@ -353,7 +348,7 @@ let MyForm = {
 		},
 		helpAvailable:function() {
 			return typeof this.form.captions.formHelp[this.moduleLanguage] !== 'undefined'
-				|| typeof this.module.captions.moduleHelp[this.moduleLanguage] !== 'undefined';
+				|| typeof this.moduleIdMap[this.moduleId].captions.moduleHelp[this.moduleLanguage] !== 'undefined';
 		},
 		isSingleField:function() {
 			return this.fields.length === 1 && ['calendar','chart','list'].includes(this.fields[0].content);
@@ -639,6 +634,7 @@ let MyForm = {
 		getCollectionValues,
 		getDataFieldMap,
 		getDetailsFromIndexAttributeId,
+		getFormPopUpTemplate,
 		getFormRoute,
 		getGetterArg,
 		getIndexAttributeId,
@@ -665,7 +661,7 @@ let MyForm = {
 		// form management
 		handleHotkeys:function(e) {
 			// not data or pop-up form open
-			if(!this.isData || this.popUpFormId !== null) return;
+			if(!this.isData || this.popUp !== null) return;
 			
 			if(this.isInline && e.key === 'Escape')
 				this.closeAsk();
@@ -809,7 +805,7 @@ let MyForm = {
 			this.indexMapRecordId          = {};
 			this.indexMapRecordKey         = {};
 			this.valuesSetAllDefault();
-			this.popUpFormId = null;
+			this.popUp = null;
 			this.get();
 		},
 		releaseLoadingOnNextTick:function() {
@@ -942,12 +938,6 @@ let MyForm = {
 		close:function() {
 			this.$emit('close');
 		},
-		closePopUp:function() {
-			this.popUpFormId = null;
-			
-			// reset form change state to main form
-			this.$store.commit('formHasChanges',this.hasChanges);
-		},
 		executeFunction:function(jsFunctionId,args) {
 			if(typeof this.jsFunctionIdMap[jsFunctionId] === 'undefined')
 				return;
@@ -1040,10 +1030,10 @@ let MyForm = {
 			this.$store.commit('formHasChanges',false);
 			window.history.back();
 		},
-		popUpRecordChanged:function(recordId,change) {
-			if(typeof this.fieldIdMapData[this.popUpFieldId] !== 'undefined') {
+		popUpRecordChanged:function(change,recordId) {
+			if(typeof this.fieldIdMapData[this.popUp.fieldId] !== 'undefined') {
 				// update data field value to reflect change of pop-up form record
-				let field = this.fieldIdMapData[this.popUpFieldId];
+				let field = this.fieldIdMapData[this.popUp.fieldId];
 				let atr   = this.attributeIdMap[field.attributeId];
 				let iaId  = this.getIndexAttributeIdByField(field,false);
 				
@@ -1057,7 +1047,7 @@ let MyForm = {
 						this.values[iaId] = isDeleted ? null : recordId;
 					}
 					else if(isDeleted) {
-						let pos = this.values[iaId].indexOf(this.popUpRecordId);
+						let pos = this.values[iaId].indexOf(recordId);
 						if(pos !== -1) this.values[iaId].splice(pos,1);
 					}
 					else if(isUpdated) {
@@ -1118,23 +1108,24 @@ let MyForm = {
 			
 			// open pop-up form if desired
 			if(options.popUp) {
+				let popUpConfig = this.getFormPopUpTemplate();
+				popUpConfig.formId   = formIdOpen;
+				popUpConfig.recordId = recordId;
+				popUpConfig.moduleId = this.moduleId;
+				
 				const getter = this.getGetterArg(getterArgs,'attributes');
-				
-				this.popUpAttributeIdMapDef = getter === '' ? {}
+				popUpConfig.attributeIdMapDef = getter === '' ? {}
 					: this.getAttributeValuesFromGetter(getter);
-				
-				this.popUpFormId   = formIdOpen;
-				this.popUpRecordId = recordId;
-				this.popUpFieldId  = null;
 				
 				let styles = [];
 				if(options.maxWidth  !== 0) styles.push(`max-width:${options.maxWidth}px`);
 				if(options.maxHeight !== 0) styles.push(`max-height:${options.maxHeight}px`);
-				this.popUpStyles = styles.join(';');
+				popUpConfig.style = styles.join(';');
 				
 				if(typeof this.fieldIdMapData[options.fieldId] !== 'undefined')
-					this.popUpFieldId = options.fieldId;
+					popUpConfig.fieldId = options.fieldId;
 				
+				this.popUp = popUpConfig;
 				return;
 			}
 			

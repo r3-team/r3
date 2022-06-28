@@ -50,6 +50,7 @@ const MyStore = Vuex.createStore({
 		moduleLanguage:'',    // module language (either equal to user language or module fallback)
 		pageTitle:'',         // web page title, set by app/form depending on navigation
 		pageTitleFull:'',     // web page title + instance name
+		popUpFormGlobal:null, // configuration of global pop-up form
 		productionMode:false, // system in production mode, false if maintenance
 		settings:{},          // setting values for logged in user, key: settings name
 		system:{}             // system details (admin only)
@@ -137,6 +138,7 @@ const MyStore = Vuex.createStore({
 		moduleColor1:   (state,payload) => state.moduleColor1    = payload,
 		moduleEntries:  (state,payload) => state.moduleEntries   = payload,
 		moduleLanguage: (state,payload) => state.moduleLanguage  = payload,
+		popUpFormGlobal:(state,payload) => state.popUpFormGlobal = payload,
 		productionMode: (state,payload) => state.productionMode  = payload,
 		settings:       (state,payload) => state.settings        = payload,
 		system:         (state,payload) => state.system          = payload
@@ -193,6 +195,7 @@ const MyStore = Vuex.createStore({
 		moduleEntries:    (state) => state.moduleEntries,
 		moduleLanguage:   (state) => state.moduleLanguage,
 		pageTitleFull:    (state) => state.pageTitleFull,
+		popUpFormGlobal:  (state) => state.popUpFormGlobal,
 		productionMode:   (state) => state.productionMode,
 		settings:         (state) => state.settings,
 		system:           (state) => state.system

@@ -554,7 +554,7 @@
 			"category":"Category selector",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*Collection is only affected if selected as filter criteria in data query.",
-			"collectionTitle":"Filter collection by user input",
+			"collectionTitle":"Filter collection by input",
 			"columnsTarget":"Place columns here",
 			"columnsTemplates":"Available columns",
 			"columnBatch":"Column batch",
@@ -578,7 +578,6 @@
 			"copyNewName":"New form name",
 			"csvExport":"CSV export",
 			"csvImport":"CSV import",
-			"csvTitle":"CSV processing",
 			"date0":"Date from",
 			"date1":"Date to",
 			"dateColor":"Color",
@@ -639,13 +638,6 @@
 			"noDataActions":"No data actions",
 			"onMobile":"In mobile view",
 			"openForm":"Open form",
-			"openFormAttributeApply":"...to set value on form",
-			"openFormFormIdOpen":"Form",
-			"openFormMaxHeight":"Maximum height (px)",
-			"openFormMaxWidth":"Maximum width (px)",
-			"openFormNewRecord":"When creating new records",
-			"openFormPopUp":"Pop-up form",
-			"openFormRelationIndex":"Use record from relation",
 			"presetOpen":"Open preset",
 			"readonly":"Read only",
 			"required":"Required",
@@ -840,6 +832,15 @@
 			"startForms":"Start forms",
 			"startFormsExplanation":"The first start form is used that matches a role of the current login.",
 			"title":"Applications"
+		},
+		"openFormInput":{
+			"attributeApply":"...to set value on form",
+			"formIdOpen":"Form",
+			"maxHeight":"Max. height (px)",
+			"maxWidth":"Max. width (px)",
+			"newRecord":"When creating new records",
+			"popUp":"Pop-up form",
+			"relationIndex":"Use record from relation"
 		},
 		"pgTrigger":{
 			"dialog":{

@@ -554,7 +554,7 @@
 			"category":"Kategorieauswahl",
 			"collectionIdDef":"Standardwert(e) aus Sammlung",
 			"collectionHint":"*Sammlung wird nur beeinflusst, wenn sie als Filterkriterium in der Datenabfrage genutzt wird.",
-			"collectionTitle":"Sammlung durch Benutzereingabe filtern",
+			"collectionTitle":"Sammlung durch Eingabe filtern",
 			"columnsTarget":"Spalten hier ablegen",
 			"columnsTemplates":"Verfügbare Spalten",
 			"columnBatch":"Spaltenstapel",
@@ -578,7 +578,6 @@
 			"copyNewName":"Neuer Formularname",
 			"csvExport":"CSV-Export",
 			"csvImport":"CSV-Import",
-			"csvTitle":"CSV-Verarbeitung",
 			"date0":"Datum von",
 			"date1":"Datum zu",
 			"dateColor":"Farbe",
@@ -639,13 +638,6 @@
 			"noDataActions":"Keine Datenaktionen",
 			"onMobile":"In mobiler Ansicht",
 			"openForm":"Formular öffnen",
-			"openFormAttributeApply":"...um Wert auf Formular zu setzen",
-			"openFormFormIdOpen":"Formular",
-			"openFormMaxHeight":"Maximale Höhe (px)",
-			"openFormMaxWidth":"Maximale Breite (px)",
-			"openFormNewRecord":"Beim Erstellen neuer Datensätze",
-			"openFormPopUp":"Pop-up-Formular",
-			"openFormRelationIndex":"Verwende Datensatz von Relation",
 			"presetOpen":"Vord. Datensatz öffnen",
 			"readonly":"Lesend",
 			"required":"Benötigt",
@@ -840,6 +832,15 @@
 			"startForms":"Startformulare",
 			"startFormsExplanation":"Das erste Startformular wird verwendet, das einer Rolle der aktuellen Anmeldung entspricht.",
 			"title":"Anwendungen"
+		},
+		"openFormInput":{
+			"attributeApply":"...um Wert auf Formular zu setzen",
+			"formIdOpen":"Formular",
+			"maxHeight":"Max. Höhe (px)",
+			"maxWidth":"Max. Breite (px)",
+			"newRecord":"Beim Erstellen neuer Datensätze",
+			"popUp":"Pop-up-Formular",
+			"relationIndex":"Verwende Datensatz von Relation"
 		},
 		"pgTrigger":{
 			"dialog":{
