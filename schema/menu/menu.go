@@ -133,6 +133,10 @@ func NilIds(menus []types.Menu, moduleIdNew uuid.UUID) []types.Menu {
 	for i, _ := range menus {
 		menus[i].Id = uuid.Nil
 		menus[i].ModuleId = moduleIdNew
+
+		for j, _ := range menus[i].Collections {
+			menus[i].Collections[j].Id = uuid.Nil
+		}
 		menus[i].Menus = NilIds(menus[i].Menus, moduleIdNew)
 	}
 	return menus

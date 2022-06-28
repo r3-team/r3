@@ -1086,21 +1086,17 @@ let MyForm = {
 		
 		// navigation
 		openForm:function(recordId,options,getterArgs,newTab) {
-			let formIdOpen = this.form.id; // stay on form by default
-			
 			// set defaults if not given
 			if(typeof recordId === 'undefined' || recordId === null)
 				recordId = 0; // open empty record if none is given
 			
 			if(typeof options === 'undefined' || options === null)
-				options = { formIdOpen:null, popUp:false };
-			else
-				formIdOpen = options.formIdOpen;
+				options = { formIdOpen:this.form.id, popUp:false }; // stay on form by default
 			
 			if(typeof getterArgs === 'undefined' || getterArgs === null)
 				getterArgs = []; // no getters specified, add empty array
 			
-			let stayOnForm = this.form.id === formIdOpen;
+			let stayOnForm = this.form.id === options.formIdOpen;
 			
 			// if inline and on the same form, reload record
 			if(this.isInline && stayOnForm)
@@ -1109,7 +1105,7 @@ let MyForm = {
 			// open pop-up form if desired
 			if(options.popUp) {
 				let popUpConfig = this.getFormPopUpTemplate();
-				popUpConfig.formId   = formIdOpen;
+				popUpConfig.formId   = options.formIdOpen;
 				popUpConfig.recordId = recordId;
 				popUpConfig.moduleId = this.moduleId;
 				
@@ -1145,7 +1141,7 @@ let MyForm = {
 					getterArgs.push(`attributes=${this.$route.query.attributes}`);
 			}
 			
-			const path = this.getFormRoute(formIdOpen,recordId,true,getterArgs);
+			const path = this.getFormRoute(options.formIdOpen,recordId,true,getterArgs);
 			
 			if(newTab)
 				return this.openLink('#'+path,true);

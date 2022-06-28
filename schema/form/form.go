@@ -316,16 +316,21 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 	var err error
 
 	// replace form ID to open if it was replaced (field opening its own form)
-	// if different form was opened, nothing to do
-	replaceFormIdOpen := func(formIdOpen pgtype.UUID) pgtype.UUID {
-		if formIdOpen.Status != pgtype.Present {
-			return formIdOpen
+	replaceOpenForm := func(openForm types.OpenForm) types.OpenForm {
+		if openForm.FormIdOpen == uuid.Nil {
+			return openForm
 		}
 
-		if _, exists := idMapReplaced[formIdOpen.Bytes]; exists {
-			formIdOpen.Bytes = idMapReplaced[formIdOpen.Bytes]
+		if _, exists := idMapReplaced[openForm.FormIdOpen]; exists {
+			openForm.FormIdOpen = idMapReplaced[openForm.FormIdOpen]
 		}
-		return formIdOpen
+		return openForm
+	}
+
+	replaceCollectionConsumer := func(consumer types.CollectionConsumer) types.CollectionConsumer {
+		consumer.Id = uuid.Nil
+		consumer.OpenForm = replaceOpenForm(consumer.OpenForm)
+		return consumer
 	}
 
 	replaceColumnIds := func(columns []types.Column) ([]types.Column, error) {
@@ -354,7 +359,7 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 				return nil, err
 			}
 		} else {
-			field.FormIdOpen = replaceFormIdOpen(field.FormIdOpen)
+			field.OpenForm = replaceOpenForm(field.OpenForm)
 		}
 		fieldIf = field
 
@@ -365,7 +370,7 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 				return nil, err
 			}
 		} else {
-			field.FormIdOpen = replaceFormIdOpen(field.FormIdOpen)
+			field.OpenForm = replaceOpenForm(field.OpenForm)
 			field.Columns, err = replaceColumnIds(field.Columns)
 			if err != nil {
 				return nil, err
@@ -373,6 +378,9 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 			field.Query, err = replaceQueryIds(field.Query, idMapReplaced)
 			if err != nil {
 				return nil, err
+			}
+			for i, _ := range field.Collections {
+				field.Collections[i] = replaceCollectionConsumer(field.Collections[i])
 			}
 		}
 		fieldIf = field
@@ -416,6 +424,8 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 			if err != nil {
 				return nil, err
 			}
+		} else {
+			field.DefCollection = replaceCollectionConsumer(field.DefCollection)
 		}
 		fieldIf = field
 
@@ -426,7 +436,7 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 				return nil, err
 			}
 		} else {
-			field.FormIdOpen = replaceFormIdOpen(field.FormIdOpen)
+			field.OpenForm = replaceOpenForm(field.OpenForm)
 			field.Columns, err = replaceColumnIds(field.Columns)
 			if err != nil {
 				return nil, err
@@ -435,6 +445,7 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 			if err != nil {
 				return nil, err
 			}
+			field.DefCollection = replaceCollectionConsumer(field.DefCollection)
 		}
 		fieldIf = field
 
@@ -454,7 +465,7 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 				return nil, err
 			}
 		} else {
-			field.FormIdOpen = replaceFormIdOpen(field.FormIdOpen)
+			field.OpenForm = replaceOpenForm(field.OpenForm)
 			field.Columns, err = replaceColumnIds(field.Columns)
 			if err != nil {
 				return nil, err
@@ -462,6 +473,9 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 			field.Query, err = replaceQueryIds(field.Query, idMapReplaced)
 			if err != nil {
 				return nil, err
+			}
+			for i, _ := range field.Collections {
+				field.Collections[i] = replaceCollectionConsumer(field.Collections[i])
 			}
 		}
 		fieldIf = field

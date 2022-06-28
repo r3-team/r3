@@ -54,7 +54,7 @@ let MyFormHelp = {
 	</div>`,
 	props:{
 		form:    { type:Object, required:true },
-		moduleId:{ type:Object, required:true }
+		moduleId:{ type:String, required:true }
 	},
 	emits:['close'],
 	data:function() {
