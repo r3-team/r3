@@ -1,6 +1,9 @@
 import srcBase64Icon    from './shared/image.js';
 import {getColumnTitle} from './shared/column.js';
-import {getFormRoute}   from './shared/form.js';
+import {
+	getFormPopUpTemplate,
+	getFormRoute
+} from './shared/form.js';
 import {
 	getCollectionColumn,
 	getCollectionValues
@@ -115,8 +118,8 @@ let MyHeader = {
 				<!-- collection entries -->
 				<div class="entry no-wrap clickable" tabindex="0"
 					v-for="e in collectionEntries"
-					@click="openForm(e.formIdOpen)"
-					@keyup.enter="openForm(e.formIdOpen)"
+					@click="openForm(e.openForm)"
+					@keyup.enter="openForm(e.openForm)"
 					:title="e.title"
 				>
 					<img v-if="e.iconId !== null" :src="srcBase64Icon(e.iconId,'')" />
@@ -208,8 +211,8 @@ let MyHeader = {
 						continue;
 					
 					out.push({
-						formIdOpen:consumer.formIdOpen,
 						iconId:collection.iconId,
+						openForm:consumer.openForm,
 						title:this.getColumnTitle(this.getCollectionColumn(
 							collection.id,
 							consumer.columnIdDisplay
@@ -242,6 +245,7 @@ let MyHeader = {
 		// stores
 		modules:        function() { return this.$store.getters['schema/modules']; },
 		moduleNameMap:  function() { return this.$store.getters['schema/moduleNameMap']; },
+		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
 		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
 		builderEnabled: function() { return this.$store.getters.builderEnabled; },
 		busyCounter:    function() { return this.$store.getters.busyCounter; },
@@ -268,6 +272,7 @@ let MyHeader = {
 		getCollectionColumn,
 		getCollectionValues,
 		getColumnTitle,
+		getFormPopUpTemplate,
 		getFormRoute,
 		srcBase64Icon,
 		
@@ -311,9 +316,27 @@ let MyHeader = {
 		openFeedback: function() { this.$store.commit('isAtFeedback',true); },
 		pagePrev:     function() { window.history.back(); },
 		pageNext:     function() { window.history.forward(); },
-		openForm:function(formId) {
-			if(formId !== null)
-				this.$router.push(this.getFormRoute(formId,0,false));
+		openForm:function(options) {
+			if(options === null)
+				return;
+			
+			// pop-up form
+			if(options.popUp) {
+				let popUpConfig = this.getFormPopUpTemplate();
+				popUpConfig.formId   = options.formIdOpen;
+				popUpConfig.moduleId = this.formIdMap[options.formIdOpen].moduleId;
+				
+				let styles = [];
+				if(options.maxWidth  !== 0) styles.push(`max-width:${options.maxWidth}px`);
+				if(options.maxHeight !== 0) styles.push(`max-height:${options.maxHeight}px`);
+				popUpConfig.style = styles.join(';');
+				
+				this.$store.commit('popUpFormGlobal',popUpConfig);
+				return;
+			}
+			
+			// regular form navigation
+			this.$router.push(this.getFormRoute(options.formIdOpen,0,false));
 		}
 	}
 };

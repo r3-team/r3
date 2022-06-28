@@ -405,9 +405,6 @@
 	padding:6px 8px;
 	border-bottom:2px solid var(--color-border);
 }
-.builder-collection .inHeader table{
-	width:700px;
-}
 
 /* collection input */
 .builder-collection-input{

@@ -894,7 +894,6 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 	if collectionIdDef.Status != pgtype.Null {
 		defCollection.CollectionId = collectionIdDef.Bytes
 		defCollection.ColumnIdDisplay = columnIdDef
-		defCollection.FormIdOpen = compatible.GetNullUuid()
 		defCollection.MultiValue = false
 	}
 

@@ -57,45 +57,48 @@ let MyBuilderOpenFormInput = {
 					/>
 				</td>
 			</tr>
-			<tr>
-				<td colspan="2"><b>{{ capApp.newRecord }}</b></td>
-			</tr>
-			<tr>
-				<td>{{ capApp.relationIndex }}</td>
-				<td>
-					<select
-						@input="set('relationIndex',$event.target.value)"
-						:value="openForm.relationIndex"
-					>
-						<option :value="-1">-</option>
-						<option
-							v-for="j in joinsIndexMap"
-							:value="j.index"
-						>{{ getItemTitleRelation(j.relationId,j.index) }}</option>
-					</select>
-				</td>
-			</tr>
-			<tr v-if="openForm.relationIndex !== -1">
-				<td>{{ capApp.attributeApply }}</td>
-				<td>
-					<select
-						@input="set('attributeIdApply',$event.target.value)"
-						:value="openForm.attributeIdApply !== null ? openForm.attributeIdApply : ''"
-					>
-						<option value="">-</option>
-						<option
-							v-for="a in targetAttributes"
-							:value="a.id"
+			<template v-if="allowNewRecords">
+				<tr>
+					<td colspan="2"><b>{{ capApp.newRecord }}</b></td>
+				</tr>
+				<tr>
+					<td>{{ capApp.relationIndex }}</td>
+					<td>
+						<select
+							@input="set('relationIndex',$event.target.value)"
+							:value="openForm.relationIndex"
 						>
-							{{ relationIdMap[a.relationId].name + '.' + a.name }}
-						</option>
-					</select>
-				</td>
-			</tr>
+							<option :value="-1">-</option>
+							<option
+								v-for="j in joinsIndexMap"
+								:value="j.index"
+							>{{ getItemTitleRelation(j.relationId,j.index) }}</option>
+						</select>
+					</td>
+				</tr>
+				<tr v-if="openForm.relationIndex !== -1">
+					<td>{{ capApp.attributeApply }}</td>
+					<td>
+						<select
+							@input="set('attributeIdApply',$event.target.value)"
+							:value="openForm.attributeIdApply !== null ? openForm.attributeIdApply : ''"
+						>
+							<option value="">-</option>
+							<option
+								v-for="a in targetAttributes"
+								:value="a.id"
+							>
+								{{ relationIdMap[a.relationId].name + '.' + a.name }}
+							</option>
+						</select>
+					</td>
+				</tr>
+			</template>
 		</template>
 	</table>`,
 	props:{
 		allowAllForms:   { type:Boolean, required:false, default:false },
+		allowNewRecords: { type:Boolean, required:false, default:false },
 		joinsIndexMap:   { type:Object,  required:false, default:function() { return {}; } },
 		module:          { type:Object,  required:true },
 		openForm:        { required:true },

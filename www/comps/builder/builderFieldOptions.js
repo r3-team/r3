@@ -864,6 +864,7 @@ let MyBuilderFieldOptions = {
 				<td>
 					<my-builder-open-form-input
 						@update:openForm="set('openForm',$event)"
+						:allowNewRecords="true"
 						:allowAllForms="isButton"
 						:joinsIndexMap="joinsIndexMap"
 						:module="module"

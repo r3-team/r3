@@ -1,12 +1,14 @@
+import MyBuilderOpenFormInput          from './builderOpenFormInput.js';
+import {getCollectionConsumerTemplate} from '../shared/collection.js';
 import {
 	getDependentModules,
 	getItemTitleColumn
 } from '../shared/builder.js';
-import {getCollectionConsumerTemplate} from '../shared/collection.js';
 export {MyBuilderCollectionInput as default};
 
 let MyBuilderCollectionInput = {
 	name:'my-builder-collection-input',
+	components:{MyBuilderOpenFormInput},
 	template:`<table class="builder-collection-input">
 		<tr>
 			<!-- collection input -->
@@ -41,17 +43,11 @@ let MyBuilderCollectionInput = {
 			<!-- form open input -->
 			<td>{{ capApp.formIdOpen }}</td>
 			<td>
-				<select v-model="formIdOpenInput">
-					<option :value="null" disabled="disabled">-</option>
-					<optgroup
-						v-for="mod in getDependentModules(module,modules)"
-						:label="mod.name"
-					>
-						<option v-for="f in mod.forms" :value="f.id">
-							{{ f.name }}
-						</option>
-					</optgroup>
-				</select>
+				<my-builder-open-form-input
+					@update:openForm="openFormInput = $event"
+					:module="module"
+					:openForm="openFormInput"
+				/>
 			</td>
 		</tr>
 		<tr v-if="collectionSet && showMultiValue">
@@ -108,10 +104,6 @@ let MyBuilderCollectionInput = {
 			get()  { return this.consumerInput.columnIdDisplay },
 			set(v) { this.set('columnIdDisplay',v) }
 		},
-		formIdOpenInput:{
-			get()  { return this.consumerInput.formIdOpen },
-			set(v) { this.set('formIdOpen',v) }
-		},
 		multiValueInput:{
 			get()  { return this.consumerInput.multiValue },
 			set(v) { this.set('multiValue',v) }
@@ -123,6 +115,10 @@ let MyBuilderCollectionInput = {
 		onMobileInput:{
 			get()  { return this.consumerInput.onMobile },
 			set(v) { this.set('onMobile',v) }
+		},
+		openFormInput:{
+			get()  { return this.consumerInput.openForm },
+			set(v) { this.set('openForm',v) }
 		},
 		
 		// simple

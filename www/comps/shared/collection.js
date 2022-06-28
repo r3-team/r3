@@ -1,4 +1,5 @@
 import MyStore                from '../../stores/store.js';
+import {getNilUuid}           from './generic.js';
 import {getValidLanguageCode} from './language.js';
 import {
 	getJoinIndexMap,
@@ -13,12 +14,13 @@ import {
 
 export function getCollectionConsumerTemplate() {
 	return {
+		id:getNilUuid(),
 		collectionId:null,
 		columnIdDisplay:null,
-		formIdOpen:null,
 		multiValue:false,
 		noDisplayEmpty:false,
-		onMobile:false
+		onMobile:false,
+		openForm:null
 	};
 };
 export function getCollectionColumnIndex(collectionId,columnId) {

@@ -11,7 +11,7 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
-var entitiesAllowed = []string{"field", "column"}
+var entitiesAllowed = []string{"column", "collection_consumer", "field"}
 
 func Get(entity string, id uuid.UUID) (f types.OpenForm, err error) {
 

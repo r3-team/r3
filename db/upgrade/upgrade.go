@@ -108,6 +108,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				TYPE app.filter_side_content USING content::text::app.filter_side_content;
 			
 			-- collection consumer changes / additions
+			ALTER TABLE app.collection_consumer ADD COLUMN id UUID PRIMARY KEY DEFAULT gen_random_uuid();
+			ALTER TABLE app.collection_consumer ALTER COLUMN id DROP DEFAULT;
+			
 			ALTER TABLE app.collection_consumer ADD COLUMN menu_id UUID;
 			ALTER TABLE app.collection_consumer
 				ADD CONSTRAINT collection_consumer_menu_id_fkey FOREIGN KEY (menu_id)
@@ -117,16 +120,6 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				DEFERRABLE INITIALLY DEFERRED;
 			CREATE INDEX IF NOT EXISTS fki_collection_consumer_menu_id_fkey ON app.collection_consumer
 				USING BTREE (menu_id ASC NULLS LAST);
-			
-			ALTER TABLE app.collection_consumer ADD COLUMN form_id_open UUID;
-			ALTER TABLE app.collection_consumer
-				ADD CONSTRAINT collection_consumer_form_id_open_fkey FOREIGN KEY (form_id_open)
-				REFERENCES app.form (id) MATCH SIMPLE
-				ON UPDATE NO ACTION
-				ON DELETE NO ACTION
-				DEFERRABLE INITIALLY DEFERRED;
-			CREATE INDEX IF NOT EXISTS fki_collection_consumer_form_id_open_fkey ON app.collection_consumer
-				USING BTREE (form_id_open ASC NULLS LAST);
 			
 			ALTER TABLE app.collection_consumer ADD COLUMN on_mobile BOOLEAN NOT NULL DEFAULT false;
 			ALTER TABLE app.collection_consumer ALTER COLUMN on_mobile DROP DEFAULT;
@@ -147,6 +140,15 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.field_data
 				DROP COLUMN collection_id_def,
 				DROP COLUMN column_id_def;
+			
+			ALTER TABLE app.open_form ADD COLUMN collection_consumer_id UUID;
+			ALTER TABLE app.open_form ADD CONSTRAINT open_form_collection_consumer_id_fkey FOREIGN KEY (collection_consumer_id)
+				REFERENCES app.collection_consumer (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			CREATE INDEX IF NOT EXISTS fki_open_form_collection_consumer_id_fkey ON app.open_form
+				USING BTREE (collection_consumer_id ASC NULLS LAST);
 			
 			-- new login settings
 			ALTER TABLE instance.login_setting ADD COLUMN menu_colored BOOLEAN NOT NULL DEFAULT FALSE;

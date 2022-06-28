@@ -207,11 +207,12 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 	// check collection access to external forms
 	if err := tx.QueryRow(db.Ctx, `
 		SELECT COUNT(*), STRING_AGG(f.name, ', ')
-		FROM app.form AS f
-		INNER JOIN app.collection_consumer AS cc ON cc.form_id_open = f.id
-		INNER JOIN app.collection          AS c  ON c.id = cc.collection_id
+		FROM app.open_form AS of
+		INNER JOIN app.form                AS f  ON f.id  = of.form_id_open
+		INNER JOIN app.collection_consumer AS cc ON cc.id = of.collection_consumer_id
+		INNER JOIN app.collection          AS c  ON c.id  = cc.collection_id
 		INNER JOIN app.module AS m
-			ON  m.id = c.module_id
+			ON m.id  = c.module_id
 			AND m.id = $1
 		
 		-- dependency
