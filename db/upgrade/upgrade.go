@@ -100,6 +100,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 	// clean up on next release
 	// ALTER TABLE app.collection_consumer ALTER COLUMN content
 	//		TYPE app.collection_consumer_content USING content::text::app.collection_consumer_content;
+	// ALTER TABLE instance.login_setting ALTER COLUMN font_family
+	//		TYPE instance.login_setting_font_family USING font_family::text::instance.login_setting_font_family;
 
 	"2.7": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
@@ -153,6 +155,14 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- new login settings
 			ALTER TABLE instance.login_setting ADD COLUMN menu_colored BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.login_setting ALTER COLUMN menu_colored DROP DEFAULT;
+			ALTER TABLE instance.login_setting ADD COLUMN font_family TEXT NOT NULL DEFAULT 'helvetica';
+			ALTER TABLE instance.login_setting ALTER COLUMN font_family DROP DEFAULT;
+			
+			CREATE TYPE instance.login_setting_font_family AS ENUM (
+				'calibri','comic_sans_ms','consolas','georgia','helvetica',
+				'lucida_console','segoe_script','segoe_ui','times_new_roman',
+				'trebuchet_ms','verdana'
+			);
 			
 			CREATE TYPE instance.login_setting_pattern AS ENUM ('bubbles','waves');
 			ALTER TABLE instance.login_setting ADD COLUMN pattern instance.login_setting_pattern;

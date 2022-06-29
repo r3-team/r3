@@ -114,7 +114,10 @@ let MyApp = {
 			if(!this.appReady)
 				return 'is-not-ready';
 			
-			let classes = ['user-spacing',`spacing-value${this.settings.spacing}`];
+			let classes = [
+				'user-spacing',`spacing-value${this.settings.spacing}`,
+				'user-font',this.settings.fontFamily
+			];
 			
 			if(this.settings.bordersAll)       classes.push('user-bordersAll');
 			if(this.settings.compact)          classes.push('user-compact');

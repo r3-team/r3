@@ -343,7 +343,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
-	font-family:"Lucida Console",Monaco,monospace;
+	font-family:'Lucida Console',Monaco,monospace;
 }
 .input-date .date-inputs .time-separator{
 	margin:0px 8px 0px 0px;
@@ -358,7 +358,6 @@
 	color:var(--color-font);
 	border:none;
 	background-color:transparent;
-	box-shadow:none;
 }
 .input-date span{
 	line-height:28px;

@@ -1306,6 +1306,7 @@
 		"dateFormat3":"d/m/Y (30/12/2012)",
 		"dateFormat4":"m/d/Y (12/30/2012)",
 		"dark":"Dunkle Ansicht",
+		"fontFamily":"Schriftart",
 		"fontSize":"Schriftgröße",
 		"headerCaptions":"Hauptmenütitel anzeigen",
 		"languageCode":"Sprache",

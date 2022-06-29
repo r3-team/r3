@@ -1306,6 +1306,7 @@
 		"dateFormat3":"aaaa/ll/zz (30/12/2012)",
 		"dateFormat4":"ll/zz/aa (12/30/2012)",
 		"dark":"Mod întunecat",
+		"fontFamily":"Font",
 		"fontSize":"Mărime font",
 		"headerCaptions":"Afișează titlurile din meniul principal",
 		"languageCode":"Limba",

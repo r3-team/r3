@@ -21,5 +21,5 @@ func SettingsSet_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interfac
 		req.SundayFirstDow, req.FontSize, req.BordersAll, req.BordersCorner,
 		req.PageLimit, req.HeaderCaptions, req.Spacing, req.Dark, req.Compact,
 		req.HintUpdateVersion, req.MobileScrollForm, req.WarnUnsaved,
-		req.MenuColored, req.Pattern)
+		req.MenuColored, req.Pattern, req.FontFamily)
 }

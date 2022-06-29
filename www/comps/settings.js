@@ -658,6 +658,32 @@ let MySettings = {
 								</td>
 							</tr>
 							<tr>
+								<td>{{ capApp.fontFamily }}</td>
+								<td>
+									<select v-model="settingsInput.fontFamily">
+										<optgroup label="sans-serif">
+											<option value="calibri">Calibri</option>
+											<option value="helvetica">Helvetica</option>
+											<option value="segoe_ui">Segoe UI</option>
+											<option value="trebuchet_ms">Trebuchet MS</option>
+											<option value="verdana">Verdana</option>
+										</optgroup>
+										<optgroup label="serif">
+											<option value="georgia">Georgia</option>
+											<option value="times_new_roman">Times New Roman</option>
+										</optgroup>
+										<optgroup label="cursive">
+											<option value="comic_sans_ms">Comic Sans</option>
+											<option value="segoe_script">Segoe Script</option>
+										</optgroup>
+										<optgroup label="monospace">
+											<option value="consolas">Consolas</option>
+											<option value="lucida_console">Lucida Console</option>
+										</optgroup>
+									</select>
+								</td>
+							</tr>
+							<tr>
 								<td>{{ capApp.fontSize }}</td>
 								<td>
 									<select v-model="settingsInput.fontSize">
