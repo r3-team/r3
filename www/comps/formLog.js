@@ -14,7 +14,7 @@ export {MyFormLog as default};
 let MyFormLog = {
 	name:'my-form-log',
 	components:{MyField},
-	template:`<div class="log contentBox">
+	template:`<div class="form-log contentBox">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/time.png" />

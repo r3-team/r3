@@ -58,6 +58,21 @@ let MyApp = {
 				:src="customLogo"
 			/>
 			
+			<!-- global pop-up form window -->
+			<div class="app-sub-window under-header"
+				v-if="popUpFormGlobal !== null"
+				@mousedown.self="$refs.popUpForm.closeAsk()"
+			>
+				<my-form ref="popUpForm"
+					@close="$store.commit('popUpFormGlobal',null)"
+					:formId="popUpFormGlobal.formId"
+					:isInline="true"
+					:moduleId="popUpFormGlobal.moduleId"
+					:recordId="popUpFormGlobal.recordId"
+					:style="popUpFormGlobal.style"
+				/>
+			</div>
+			
 			<!-- dialog window -->
 			<transition name="fade">
 				<my-dialog v-if="isAtDialog" />
@@ -67,21 +82,6 @@ let MyApp = {
 			<transition name="fade">
 				<my-feedback v-if="isAtFeedback" />
 			</transition>
-			
-			<!-- pop-up form window -->
-			<div class="app-sub-window under-header"
-				v-if="popUpFormGlobal !== null"
-				@mousedown.self="$refs.popUpForm.closeAsk()"
-			>
-				<my-form class="form-pop-up" ref="popUpForm"
-					@close="$store.commit('popUpFormGlobal',null)"
-					:formId="popUpFormGlobal.formId"
-					:isInline="true"
-					:moduleId="popUpFormGlobal.moduleId"
-					:recordId="popUpFormGlobal.recordId"
-					:style="popUpFormGlobal.style"
-				/>
-			</div>
 			
 			<!-- loading input blocker overlay -->
 			<div class="input-block-overlay" v-if="blockInput">

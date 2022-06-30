@@ -523,14 +523,14 @@ let MyAdminLogins = {
 					v-if="loginFormIndexOpen !== null"
 					@mousedown.self="$refs.popUpForm.closeAsk()"
 				>
-					<my-form class="form-pop-up" ref="popUpForm"
+					<my-form ref="popUpForm"
 						@close="loginFormIndexOpen = null"
 						@record-updated="setRecord(loginFormIndexOpen,loginFormLogin,$event);loginFormIndexOpen = null"
 						:allowDel="false"
 						:allowNew="false"
 						:formId="loginForms[loginFormIndexOpen].formId"
 						:isInline="true"
-						:module="moduleIdMap[formIdMap[loginForms[loginFormIndexOpen].formId].moduleId]"
+						:moduleId="formIdMap[loginForms[loginFormIndexOpen].formId].moduleId"
 						:recordId="loginFormRecord"
 					/>
 				</div>

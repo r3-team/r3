@@ -4,7 +4,7 @@ export {MyFormHelp as default};
 let MyFormHelp = {
 	name:'my-form-help',
 	components:{MyInputRichtext},
-	template:`<div class="help contentBox">
+	template:`<div class="form-help contentBox">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/question.png" />

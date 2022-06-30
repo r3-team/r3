@@ -57,29 +57,31 @@ let MyForm = {
 		MyFormHelp,
 		MyFormLog
 	},
-	template:`<div class="form-wrap" :key="form.id">
+	template:`<div class="form-wrap" :class="{ 'pop-up':isInline }" :key="form.id">
+		
+		<!-- pop-up sub-form -->
+		<div class="app-sub-window under-header"
+			v-if="popUp !== null"
+			@mousedown.self="$refs.popUpForm.closeAsk()"
+		>
+			<my-form ref="popUpForm"
+				@close="popUp = null; $store.commit('formHasChanges',hasChanges)"
+				@record-deleted="popUpRecordChanged('deleted',$event)"
+				@record-open="popUp.recordId = $event"
+				@record-updated="popUpRecordChanged('updated',$event)"
+				:attributeIdMapDef="popUp.attributeIdMapDef"
+				:formId="popUp.formId"
+				:isInline="true"
+				:moduleId="popUp.moduleId"
+				:recordId="popUp.recordId"
+				:style="popUp.style"
+			/>
+		</div>
+		
+		<!-- form proper -->
 		<div class="form contentBox grow scroll"
 			v-if="!isMobile || (!showLog && !showHelp)"
 		>
-			<!-- pop-up sub-form -->
-			<div class="app-sub-window under-header"
-				v-if="popUp !== null"
-				@mousedown.self="$refs.popUpForm.closeAsk()"
-			>
-				<my-form class="form-pop-up" ref="popUpForm"
-					@close="popUp = null; $store.commit('formHasChanges',hasChanges)"
-					@record-deleted="popUpRecordChanged('deleted',$event)"
-					@record-open="popUp.recordId = $event"
-					@record-updated="popUpRecordChanged('updated',$event)"
-					:attributeIdMapDef="popUp.attributeIdMapDef"
-					:formId="popUp.formId"
-					:isInline="true"
-					:moduleId="popUp.moduleId"
-					:recordId="popUp.recordId"
-					:style="popUp.style"
-				/>
-			</div>
-			
 			<!-- title bar upper -->
 			<div class="top">
 				<div class="area">
@@ -115,7 +117,6 @@ let MyForm = {
 							:captionTitle="capGen.button.refreshHint"
 						/>
 						<my-button image="time.png"
-							v-if="!isInline"
 							@trigger="showLog = !showLog"
 							:active="!isNew"
 							:captionTitle="capApp.button.logHint"
@@ -123,7 +124,6 @@ let MyForm = {
 					</template>
 					
 					<my-button image="question.png"
-						v-if="!isInline"
 						@trigger="showHelp = !showHelp"
 						:active="helpAvailable"
 						:captionTitle="capApp.button.helpHint"
@@ -1098,11 +1098,15 @@ let MyForm = {
 			
 			let stayOnForm = this.form.id === options.formIdOpen;
 			
-			// if inline and on the same form, reload record
-			if(this.isInline && stayOnForm)
-				return this.$emit('record-open',recordId);
+			if(this.isInline) {
+				if(stayOnForm)
+					return this.$emit('record-open',recordId);
+				
+				if(!options.popUp)
+					options.popUp = true;
+			}
 			
-			// open pop-up form if desired
+			// open pop-up form if configured
 			if(options.popUp) {
 				let popUpConfig = this.getFormPopUpTemplate();
 				popUpConfig.formId   = options.formIdOpen;
