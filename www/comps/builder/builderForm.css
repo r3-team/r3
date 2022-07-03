@@ -165,6 +165,7 @@
 /* form functions */
 .builder-form-functions{
 	min-height:360px;
+	margin:0px;
 }
 .builder-form-functions table td{
 	padding:2px 8px;
@@ -175,6 +176,7 @@
 /* form states */
 .builder-form-states{
 	max-height:360px;
+	margin:0px;
 	flex:1 1 auto;
 }
 .builder-form-states.fullscreen{

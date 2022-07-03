@@ -7,11 +7,15 @@
 }
 .form-wrap.pop-up{
 	width:100%;
-	padding:10px;
+	padding:var(--spacing) 0px 0px var(--spacing);
 	max-width:1200px;
 	max-height:1200px;
 	overflow:auto;
 	box-sizing:border-box;
+}
+.form-wrap.pop-up.fullscreen{
+	max-width:unset !important;
+	max-height:unset !important;
 }
 .form-wrap.pop-up .form,
 .form-wrap.pop-up .form-help,

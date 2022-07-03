@@ -441,7 +441,7 @@
 		"navigationMails":"E-Mail-Warteschlange",
 		"navigationModules":"Anwendungen",
 		"navigationRepo":"Repository",
-		"navigationRoles":"Rollen",
+		"navigationRoles":"Mitgliedschaften",
 		"navigationScheduler":"Aufgabenplaner",
 		"title":"Admin",
 		"titleDocs":"Admin-Dokumentation"
@@ -1133,6 +1133,7 @@
 	},
 	"form":{
 		"button":{
+			"fullscreenHint":"Vollbildmodus wechseln",
 			"help":"Hilfe",
 			"helpHint":"Hilfeseiten anzeigen",
 			"log":"Historie",

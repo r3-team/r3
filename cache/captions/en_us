@@ -441,7 +441,7 @@
 		"navigationMails":"Email spooler",
 		"navigationModules":"Applications",
 		"navigationRepo":"Repository",
-		"navigationRoles":"Roles",
+		"navigationRoles":"Memberships",
 		"navigationScheduler":"Scheduler",
 		"title":"Admin",
 		"titleDocs":"Admin documentation"
@@ -1133,6 +1133,7 @@
 	},
 	"form":{
 		"button":{
+			"fullscreenHint":"Toggle fullscreen mode",
 			"help":"Help",
 			"helpHint":"Show help pages",
 			"log":"Logs",

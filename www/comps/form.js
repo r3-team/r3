@@ -57,7 +57,7 @@ let MyForm = {
 		MyFormHelp,
 		MyFormLog
 	},
-	template:`<div class="form-wrap" :class="{ 'pop-up':isInline }" :key="form.id">
+	template:`<div class="form-wrap" :class="{ 'pop-up':isInline, 'fullscreen':popUpFullscreen }" :key="form.id">
 		
 		<!-- pop-up sub-form -->
 		<div class="app-sub-window under-header"
@@ -127,6 +127,12 @@ let MyForm = {
 						@trigger="showHelp = !showHelp"
 						:active="helpAvailable"
 						:captionTitle="capApp.button.helpHint"
+					/>
+					<my-button
+						v-if="isInline"
+						@trigger="popUpFullscreen = !popUpFullscreen"
+						:captionTitle="capApp.button.fullscreenHint"
+						:image="popUpFullscreen ? 'shrink.png' : 'expand.png'"
 					/>
 					<my-button image="builder.png"
 						v-if="isAdmin && builderEnabled && !isMobile"
@@ -285,6 +291,7 @@ let MyForm = {
 			message:null,         // form message
 			messageTimeout:null,  // form message expiration timeout
 			popUp:null,           // configuration for pop-up sub-form
+			popUpFullscreen:false,// set this pop-up form to fullscreen mode
 			showHelp:false,       // show form context help
 			showLog:false,        // show data change log
 			updatingRecord:false, // form is currently attempting to update the current record (saving/deleting)

@@ -245,8 +245,9 @@ let MyBuilderFormStates = {
 					</template>
 				</select>
 				
-				<my-button image="expand.png"
+				<my-button
 					@trigger="$emit('set-fullscreen')"
+					:image="fullscreen ? 'shrink.png' : 'expand.png'"
 				/>
 				<my-button image="cancel.png"
 					@trigger="$emit('close')"

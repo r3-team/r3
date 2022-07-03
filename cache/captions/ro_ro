@@ -441,7 +441,7 @@
 		"navigationMails":"Spooler de e-mail",
 		"navigationModules":"Aplicații",
 		"navigationRepo":"Depozit",
-		"navigationRoles":"Roluri",
+		"navigationRoles":"Memberships",
 		"navigationScheduler":"Planificatorul",
 		"title":"Admin",
 		"titleDocs":"Documentația admin"
@@ -1133,6 +1133,7 @@
 	},
 	"form":{
 		"button":{
+			"fullscreenHint":"Toggle fullscreen mode",
 			"help":"Ajutor",
 			"helpHint":"Afișați paginile de ajutor",
 			"log":"Jurnale",

@@ -441,7 +441,7 @@
 		"navigationMails":"Spooler Email",
 		"navigationModules":"Applicazioni",
 		"navigationRepo":"Archivio",
-		"navigationRoles":"Ruolo",
+		"navigationRoles":"Memberships",
 		"navigationScheduler":"Pianificatore",
 		"title":"Amministrazione",
 		"titleDocs":"Documentazione amministrazione"
@@ -1133,6 +1133,7 @@
 	},
 	"form":{
 		"button":{
+			"fullscreenHint":"Toggle fullscreen mode",
 			"help":"Aiuto",
 			"helpHint":"Mostra pagine aiuto",
 			"log":"Log",
