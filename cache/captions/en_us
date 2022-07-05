@@ -293,7 +293,10 @@
 			"passwordHint":"Set new password",
 			"passwordHintNoAuth":"No authentication",
 			"recordSelectHint":"...",
-			"roles":"Roles"
+			"roles":"Roles",
+			"roleContentAdmin":"Admin",
+			"roleContentOther":"Special",
+			"roleContentUser":"User"
 		},
 		"logs":{
 			"byString":"Text search",
@@ -939,7 +942,11 @@
 				"accessInherit":"[inherit]",
 				"accessNone":"-",
 				"accessRead":"R",
-				"accessWrite":"RW"
+				"accessWrite":"RW",
+				"contentAdmin":"Administrative user",
+				"contentEveryone":"[Assigned to all]",
+				"contentOther":"Special user",
+				"contentUser":"Regular user"
 			},
 			"access":"Access",
 			"assignable":"Assignable",
@@ -947,6 +954,7 @@
 			"children":"Member of",
 			"collection":"Collection",
 			"collections":"Collections",
+			"content":"Type",
 			"data":"Data",
 			"legend":"Legend: No access (-), read (R), write (W), delete (D)",
 			"menu":"Menu",

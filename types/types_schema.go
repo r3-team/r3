@@ -386,6 +386,7 @@ type Role struct {
 	ModuleId          uuid.UUID         `json:"moduleId"`
 	ChildrenIds       []uuid.UUID       `json:"childrenIds"`
 	Name              string            `json:"name"`
+	Content           string            `json:"content"`
 	Assignable        bool              `json:"assignable"`
 	AccessAttributes  map[uuid.UUID]int `json:"accessAttributes"`
 	AccessCollections map[uuid.UUID]int `json:"accessCollections"`

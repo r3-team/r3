@@ -143,7 +143,7 @@ func loadRoleIds(loginId int64) ([]uuid.UUID, error) {
 		-- get 'everyone' roles from all modules
 		SELECT id
 		FROM app.role
-		WHERE name = 'everyone'
+		WHERE content = 'everyone'
 	`, loginId, loginId)
 	if err != nil {
 		return roleIds, err

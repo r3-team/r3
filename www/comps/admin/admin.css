@@ -102,12 +102,16 @@
 	margin-right:5px;
 }
 .admin-logins .role-select{
-	max-width:1200px;
+	max-width:1100px;
 	min-width:300px;
-	margin:0px 5px 10px;
+	margin:-4px 5px 12px;
 	border:1px solid var(--color-border);
-	border-top:none;
-	border-radius:0px 0px 5px 5px;
+	border-radius:0px 0px 9px 9px;
+	background-color:var(--color-bg);
+	overflow:hidden;
+}
+.admin-logins .role-select .role-content{
+	border-left:1px solid var(--color-border);
 }
 .admin-logins .module-icon{
 	width:24px;

@@ -293,7 +293,10 @@
 			"passwordHint":"Alege o parolă nouă",
 			"passwordHintNoAuth":"Fără autentificare",
 			"recordSelectHint":"...",
-			"roles":"Roluri"
+			"roles":"Roluri",
+			"roleContentAdmin":"Admin",
+			"roleContentOther":"Special",
+			"roleContentUser":"User"
 		},
 		"logs":{
 			"byString":"Text search",
@@ -939,7 +942,11 @@
 				"accessInherit":"[moştenit]",
 				"accessNone":"-",
 				"accessRead":"R",
-				"accessWrite":"RW"
+				"accessWrite":"RW",
+				"contentAdmin":"Administrative user",
+				"contentEveryone":"[Assigned to all]",
+				"contentOther":"Special user",
+				"contentUser":"Regular user"
 			},
 			"access":"Acces",
 			"assignable":"Alocabil",
@@ -947,6 +954,7 @@
 			"children":"Membru al",
 			"collection":"Colecție",
 			"collections":"Colecții",
+			"content":"Type",
 			"data":"Data",
 			"legend":"Legendă: Fără acces (-), citire (R), scriere (W), ștergere (D)",
 			"menu":"Meniu",

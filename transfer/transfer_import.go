@@ -391,7 +391,7 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		log.Info("transfer", fmt.Sprintf("set role %s", e.Id))
 
 		if err := importCheckResultAndApply(tx, role.Set_tx(tx,
-			e.ModuleId, e.Id, e.Name, e.Assignable, e.ChildrenIds,
+			e.ModuleId, e.Id, e.Name, e.Content, e.Assignable, e.ChildrenIds,
 			e.AccessAttributes, e.AccessCollections, e.AccessMenus,
 			e.AccessRelations, e.Captions), e.Id, idMapSkipped); err != nil {
 

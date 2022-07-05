@@ -45,13 +45,13 @@ func RoleGet(reqJson json.RawMessage) (interface{}, error) {
 }
 
 func RoleSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
 	var req types.Role
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, role.Set_tx(tx, req.ModuleId, req.Id, req.Name, req.Assignable,
-		req.ChildrenIds, req.AccessAttributes, req.AccessCollections,
-		req.AccessMenus, req.AccessRelations, req.Captions)
+	return nil, role.Set_tx(tx, req.ModuleId, req.Id, req.Name, req.Content,
+		req.Assignable, req.ChildrenIds, req.AccessAttributes,
+		req.AccessCollections, req.AccessMenus, req.AccessRelations,
+		req.Captions)
 }

@@ -388,6 +388,7 @@ let MyBuilderRole = {
 			ws.send('role','set',{
 				id:this.role.id,
 				name:this.role.name,
+				content:this.role.content,
 				assignable:this.role.assignable,
 				childrenIds:this.role.childrenIds,
 				captions:this.role.captions,

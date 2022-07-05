@@ -293,7 +293,10 @@
 			"passwordHint":"Neues Passwort setzen",
 			"passwordHintNoAuth":"Keine Authentifizierung",
 			"recordSelectHint":"...",
-			"roles":"Rollen"
+			"roles":"Rollen",
+			"roleContentAdmin":"Admin",
+			"roleContentOther":"Besonders",
+			"roleContentUser":"Benutzer"
 		},
 		"logs":{
 			"byString":"Textsuche",
@@ -939,7 +942,11 @@
 				"accessInherit":"[erben]",
 				"accessNone":"-",
 				"accessRead":"R",
-				"accessWrite":"RW"
+				"accessWrite":"RW",
+				"contentAdmin":"Administrativer Benutzer",
+				"contentEveryone":"[Zugewiesen an alle]",
+				"contentOther":"Besonderer Benutzer",
+				"contentUser":"Regulärer Benutzer"
 			},
 			"access":"Zugriff",
 			"assignable":"Zuweisbar",
@@ -947,6 +954,7 @@
 			"children":"Mitglied von",
 			"collection":"Sammlung",
 			"collections":"Sammlungen",
+			"content":"Typ",
 			"data":"Data",
 			"legend":"Legende: Kein Zugriff (-), Lesen (R), Schreiben (W), Löschen (D)",
 			"menu":"Menü",

@@ -98,6 +98,8 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	// clean up on next release
+	// ALTER TABLE app.role ALTER COLUMN content
+	//		TYPE app.role_content USING content::text::app.role_content;
 	// ALTER TABLE app.collection_consumer ALTER COLUMN content
 	//		TYPE app.collection_consumer_content USING content::text::app.collection_consumer_content;
 	// ALTER TABLE instance.login_setting ALTER COLUMN font_family
@@ -108,6 +110,14 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- cleanup from last release
 			ALTER TABLE app.form_state_condition_side ALTER COLUMN content
 				TYPE app.filter_side_content USING content::text::app.filter_side_content;
+			
+			-- new role content
+			ALTER TABLE app.role ADD COLUMN content TEXT NOT NULL DEFAULT 'user';
+			ALTER TABLE app.role ALTER COLUMN content DROP DEFAULT;
+			UPDATE app.role SET content = 'admin' WHERE name ILIKE '%admin%';
+			UPDATE app.role SET content = 'other' WHERE name ILIKE '%data%' OR name ILIKE '%csv%';
+			UPDATE app.role SET content = 'everyone' WHERE name = 'everyone';
+			CREATE TYPE app.role_content AS ENUM ('admin','everyone','other','user');
 			
 			-- collection consumer changes / additions
 			ALTER TABLE app.collection_consumer ADD COLUMN id UUID PRIMARY KEY DEFAULT gen_random_uuid();

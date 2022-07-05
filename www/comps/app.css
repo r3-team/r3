@@ -159,6 +159,8 @@ body                                         { --depth:6; }
 .admin-cluster-node                          { --depth:2; }
 .admin-cluster-node img                      { --depth:5; }
 .admin-license .file                         { --depth:1; }
+.admin-logins .role-select                   { --depth:4; }
+.admin-logins .role-select .app-filter       { --depth:0; }
 .admin-modules .message                      { --depth:7; }
 .admin-roles .admin-role-title               { --depth:7; }
 .admin-roles .admin-role-members             { --depth:1; }
