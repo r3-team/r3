@@ -306,6 +306,8 @@ let MyBuilderPgFunction = {
 			this.codeReturns    = this.pgFunction.codeReturns;
 			this.isFrontendExec = this.pgFunction.isFrontendExec;
 			this.isTrigger      = this.pgFunction.isTrigger;
+			this.addNew         = false;
+			this.addOld         = false;
 		},
 		insertEntitySelected:function(evt) {
 			if(this.entitySelectedId === null)
