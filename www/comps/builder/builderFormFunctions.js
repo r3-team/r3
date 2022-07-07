@@ -15,16 +15,22 @@ let MyBuilderFormFunction = {
 			<my-bool v-model="eventBefore" />
 		</td>
 		<td>
-			<select v-model="jsFunctionId">
-				<option value="">-</option>
-				<optgroup v-for="mod in getDependentModules(module,modules).filter(v => v.jsFunctions.length !== 0)"
-					:label="mod.name"
-				>
-					<option v-for="f in mod.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
-						:value="f.id"
-					>{{ f.name }}</option>
-				</optgroup>
-			</select>
+			<div class="row">
+				<my-button image="open.png"
+					@trigger="openFunction"
+					:active="jsFunctionId !== ''"
+				/>
+				<select v-model="jsFunctionId">
+					<option value="">-</option>
+					<optgroup v-for="mod in getDependentModules(module,modules).filter(v => v.jsFunctions.length !== 0)"
+						:label="mod.name"
+					>
+						<option v-for="f in mod.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
+							:value="f.id"
+						>{{ f.name }}</option>
+					</optgroup>
+				</select>
+			</div>
 		</td>
 		<td>
 			<my-button image="arrowDown.png"
@@ -81,6 +87,9 @@ let MyBuilderFormFunction = {
 		getDependentModules,
 		
 		// actions
+		openFunction:function() {
+			this.$router.push('/builder/js-function/'+this.jsFunctionId);
+		},
 		update:function(name,value) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = value;

@@ -113,12 +113,18 @@ let MyBuilderJsFunctionItem = {
 				/>
 			</td>
 			<td>
-				<select :disabled="!isNew" v-model="formId">
-					<option :value="null">-</option>
-					<option v-for="f in module.forms" :value="f.id">
-						{{ f.name }}
-					</option>
-				</select>
+				<div class="row">
+					<my-button image="open.png"
+						@trigger="openForm"
+						:active="formId !== null"
+					/>
+					<select :disabled="!isNew" v-model="formId">
+						<option :value="null">-</option>
+						<option v-for="f in module.forms" :value="f.id">
+							{{ f.name }}
+						</option>
+					</select>
+				</div>
 			</td>
 			<td>
 				<div class="row">
@@ -187,6 +193,9 @@ let MyBuilderJsFunctionItem = {
 		// actions
 		open:function() {
 			this.$router.push('/builder/js-function/'+this.jsFunction.id);
+		},
+		openForm:function() {
+			this.$router.push('/builder/form/'+this.formId);
 		},
 		showInfo:function() {
 			this.$store.commit('dialog',{
