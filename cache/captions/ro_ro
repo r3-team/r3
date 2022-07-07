@@ -726,8 +726,9 @@
 				"update_collection":"instance.update_collection(collection_id, login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]) => INTEGER<br /><br />Informs connected clients to update the specified collection. If login IDs are given, only clients that belong to these logins are affected."
 			},
 			"option":{
-				"fieldGet":"citește valoarea",
-				"fieldSet":"scrie valoarea",
+				"fieldGetValue":"citește valoarea",
+				"fieldSetCaption":"write caption",
+				"fieldSetValue":"scrie valoarea",
 				"intervalDays":"Zile",
 				"intervalHours":"Ore",
 				"intervalMinutes":"Minute",

@@ -726,8 +726,9 @@
 				"update_collection":"instance.update_collection(collection_id, login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]) => INTEGER<br /><br />Informiert verbundene Clients, die angegebene Sammlung zu aktualisieren. Wenn Anmelde-IDs mitgegeben worden sind, werden nur Clients informiert, die zu den jeweiligen Anmeldungen gehören."
 			},
 			"option":{
-				"fieldGet":"Wert lesen",
-				"fieldSet":"Wert schreiben",
+				"fieldGetValue":"Wert lesen",
+				"fieldSetCaption":"Titel setzen",
+				"fieldSetValue":"Wert setzen",
 				"intervalDays":"Tage",
 				"intervalHours":"Stunden",
 				"intervalMinutes":"Minuten",

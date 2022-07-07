@@ -220,6 +220,7 @@ let MyForm = {
 					@set-value-init="valueSet"
 					:dataFieldMap="fieldIdMapData"
 					:field="f"
+					:fieldIdMapCaption="fieldIdMapCaption"
 					:fieldIdMapState="fieldIdMapState"
 					:formBadSave="badSave"
 					:formIsInline="isInline"
@@ -299,6 +300,7 @@ let MyForm = {
 			// form data
 			fields:[],            // all fields (nested within each other)
 			fieldIdsInvalid:[],   // field IDs with invalid values
+			fieldIdMapCaption:{}, // overwrites for field captions
 			indexMapRecordId:{},  // record IDs for form, key: relation index
 			indexMapRecordKey:{}, // record en-/decryption keys, key: relation index
 			indexesNoDel:{},      // relation indexes with no DEL permission (via relation policy)
@@ -511,6 +513,9 @@ let MyForm = {
 					
 					return this.values[this.getIndexAttributeIdByField(
 						this.fieldIdMapData[fieldId],false)];
+				},
+				set_field_caption:(fieldId,caption) => {
+					this.fieldIdMapCaption[fieldId] = caption;
 				},
 				set_field_value:(fieldId,value) => {
 					// use common return codes: 0 = success, 1 = error
@@ -817,6 +822,7 @@ let MyForm = {
 			this.badSave     = false;
 			this.badLoad     = false;
 			this.blockInputs = false;
+			this.fieldIdMapCaption         = {};
 			this.loginIdsEncryptFor        = [];
 			this.loginIdsEncryptForOutside = [];
 			this.indexesNoDel              = [];

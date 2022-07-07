@@ -157,8 +157,9 @@ let MyBuilderJsFunction = {
 						<h2>{{ capApp.placeholdersFormFields }}</h2>
 						
 						<select v-model="fieldMode">
-							<option value="get">{{ capApp.option.fieldGet }}</option>
-							<option value="set">{{ capApp.option.fieldSet }}</option>
+							<option value="get_field_value"  >{{ capApp.option.fieldGetValue   }}</option>
+							<option value="set_field_value"  >{{ capApp.option.fieldSetValue   }}</option>
+							<option value="set_field_caption">{{ capApp.option.fieldSetCaption }}</option>
 						</select>
 					</div>
 					
@@ -275,7 +276,7 @@ let MyBuilderJsFunction = {
 			],
 			
 			// states
-			fieldMode:'get',
+			fieldMode:'get_field_value',
 			entitySelected:'',
 			entitySelectedId:null,
 			moduleIdsOpen:[],
@@ -344,10 +345,10 @@ let MyBuilderJsFunction = {
 		
 		// presentation
 		displayFieldName:function(fieldId) {
-			let f   = this.dataFieldMap[fieldId];
-			let atr = this.attributeIdMap[f.attributeId];
-			let rel = this.relationIdMap[atr.relationId];
-			return this.getItemTitle(rel,atr,f.index,false,false);
+			let f = this.dataFieldMap[fieldId];
+			let a = this.attributeIdMap[f.attributeId];
+			let r = this.relationIdMap[a.relationId];
+			return this.getItemTitle(r,a,f.index,false,false);
 		},
 		
 		// actions
@@ -403,8 +404,8 @@ let MyBuilderJsFunction = {
 					fld  = this.dataFieldMap[this.entitySelectedId];
 					atr  = this.attributeIdMap[fld.attributeId];
 					rel  = this.relationIdMap[atr.relationId];
-					opt  = this.fieldMode === 'get' ? '' : ', '+this.capApp.value;
-					text = `${prefix}.${this.fieldMode}_field_value({${fld.index}:${rel.name}.${atr.name}}${opt})`;
+					opt  = this.fieldMode.includes('set') ? ', '+this.capApp.value : '';
+					text = `${prefix}.${this.fieldMode}({${fld.index}:${rel.name}.${atr.name}}${opt})`;
 				break;
 				case 'form':
 					frm  = this.formIdMap[this.entitySelectedId];
@@ -488,10 +489,10 @@ let MyBuilderJsFunction = {
 			let pat;
 			
 			// replace field IDs with placeholders
-			pat = new RegExp(`${prefix}\.(get|set)_field_value\\(\'(${uuid})'`,'g');
-			body = body.replace(pat,function(match,fldMode,id) {
-				let fld = false;
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption)\\(\'(${uuid})'`,'g');
+			body = body.replace(pat,function(match,mode,part,id) {
 				
+				let fld = false;
 				for(let k in fields) {
 					if(fields[k].id === id) {
 						fld = fields[k];
@@ -503,14 +504,14 @@ let MyBuilderJsFunction = {
 				
 				let atr = that.attributeIdMap[fld.attributeId];
 				let rel = that.relationIdMap[atr.relationId];
-				return `${prefix}.${fldMode}_field_value({${fld.index}:${rel.name}.${atr.name}}`;
+				return `${prefix}.${mode}_field_${part}({${fld.index}:${rel.name}.${atr.name}}`;
 			});
 			
 			// replace function IDs with placeholders
 			pat = new RegExp(`${prefix}\.call_(backend|frontend)\\(\'(${uuid})'`,'g');
 			body = body.replace(pat,function(match,fncMode,id) {
-				let fnc = false;
 				
+				let fnc = false;
 				if(fncMode === 'backend' && that.pgFunctionIdMap[id] !== 'undefined') {
 					fnc = that.pgFunctionIdMap[id];
 				}
@@ -534,14 +535,13 @@ let MyBuilderJsFunction = {
 			let dbName = '[a-z0-9_]+'; // valid chars, DB entities (PG functions, modules, attributes, ...)
 			let pat;
 			
-			// replace field get/set placeholders
+			// replace field value/caption get/set placeholders
 			// stored as: app.get_field_value({0:contact.is_active}...
-			pat = new RegExp(`${prefix}\.(get|set)_field_value\\(\{(\\d+)\:(${dbName})\.(${dbName})\}`,'g');
-			body = body.replace(pat,function(match,fldMode,index,relName,atrName) {
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption)\\(\{(\\d+)\:(${dbName})\.(${dbName})\}`,'g');
+			body = body.replace(pat,function(match,mode,part,index,relName,atrName) {
 				
 				// resolve relation by name
 				let rel = false;
-				
 				for(let i = 0, j = that.module.relations.length; i < j; i++) {
 					if(that.module.relations[i].name !== relName)
 						continue;
@@ -554,7 +554,6 @@ let MyBuilderJsFunction = {
 				
 				// resolve attribute by name
 				let atr = false;
-				
 				for(let i = 0, j = rel.attributes.length; i < j; i++) {
 					if(rel.attributes[i].name !== atrName)
 						continue;
@@ -567,7 +566,6 @@ let MyBuilderJsFunction = {
 				
 				// data field
 				let fld = false;
-				
 				for(let k in fields) {
 					if(fields[k].index === parseInt(index) && fields[k].attributeId === atr.id) {
 						fld = fields[k];
@@ -578,7 +576,7 @@ let MyBuilderJsFunction = {
 					return match;
 				
 				// replace placeholder
-				return `${prefix}\.${fldMode}_field_value('${fld.id}'`;
+				return `${prefix}\.${mode}_field_${part}('${fld.id}'`;
 			});
 			
 			// replace backend function placeholders
