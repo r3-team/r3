@@ -689,6 +689,8 @@
 				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />Wenn aufgerufen, wird die Ende-Zu-Ende-Verschlüsselung beim nächsten Speichern des Formulares aktualisiert. Datenschlüssel für Relationen auf dem Formular mit aktivierter Verschlüsselung werden mit den öffentlichen Schlüssel von jeder definierten Anmeldung verschlüsselt. Hiermit können Benutzer Datensätze später entschlüsseln.<br /><br />Wenn diese Funktion nicht aufgerufen wird, kann nur der Ersteller entschlüsseln.",
 				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />Wenn aufgerufen, wird die Ende-Zu-Ende-Verschlüsselung für die definierte Relation und Datensätze beim nächsten Speichern des Formulares aktualisiert. Datenschlüssel für Datensätze der Relation werden mit den öffentlichen Schlüssel von jeder definierten Anmeldung verschlüsselt. Hiermit können Benutzer Datensätze später entschlüsseln.",
 				"show_form_message":"app.show_form_message(message,duration_in_ms) => UNDEFINED<br /><br />Ersetzt den Formtitel für eine kurze Zeit mit einer definierten Meldung. Das 2. Argument legt fest, in Millisekunden, wie lange die Meldung angezeigt wird.",
+				"timer_clear":"app.timer_clear(name) => UNDEFINED<br /><br />Bricht einen Timer mit dem angegebenen Namen ab, welcher vorher mit \"app.timer_set()\" erstellt worden ist.",
+				"timer_set":"app.timer_set(name,isInterval,function,milliseconds) => UNDEFINED<br /><br />Führt eine Funktion nach einer definierten Zeit in Millisekunden aus. Wenn \"isInterval\" auf TRUE gestellt ist, wird die Funktion wiederholt ausgeführt.<br /><br />Ein Timer ist immer an das aktuelle Formular gebunden. Wenn das Formular zurückgesetzt oder verlassen wird, werden auch Timer zurückgesetzt.<br /><br />Jeder Timer braucht einen einzigartigen Namen, welcher später genutzt werden kann, um den Timer mit \"app.timer_clear()\" abzubrechen; Timer mit dem gleichen Namen überschreiben sich gegenseitig.",
 				"update_collection":"app.update_collection(collection_id) => UNDEFINED<br /><br />Holt und aktualisiert Werte für die spezifizierte Sammlung."
 			},
 			"helpJsHint":{
@@ -700,6 +702,8 @@
 				"open_form":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
 				"pdf_create":"FILE_NAME, PAGE_FORMAT, PAGE_ORIENTATION, PAGE_MARGIN_X, PAGE_MARGIN_Y, HTML_HEADER, HTML_BODY, HTML_FOOTER, CSS_STYLES",
 				"show_form_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
+				"timer_clear":"TIMER_NAME",
+				"timer_set":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS",
 				"update_collection":"COLLECTION_ID"
 			},
 			"helpPg":{

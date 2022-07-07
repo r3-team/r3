@@ -306,6 +306,7 @@ let MyForm = {
 			loginIdsEncryptFor:[],        // login IDs for which data keys are encrypted (e2ee), for current form relations/records
 			loginIdsEncryptForOutside:{}, // login IDs for which data keys are encrypted (e2ee), for outside relation and record IDs
 			                              // [{loginIds:[5,12],relationId:'A-B-C-D',recordIds:[1,2]},{...}]
+			timers:{},            // frontend function timers, key = name, value = { id:XY, isInterval:true }
 			values:{},            // field values, key: index attribute ID
 			valuesDef:{},         // field value defaults (via field options)
 			valuesOrg:{},         // original field values, used to check for changes
@@ -472,6 +473,18 @@ let MyForm = {
 				
 				// PDF functions
 				pdf_create:this.generatePdf,
+				
+				// timeout/interval function calls
+				timer_clear:this.timerClear,
+				timer_set:(name,isInterval,fnc,milliseconds) => {
+					this.timerClear(name);
+					this.timers[name] = {
+						id:isInterval
+							? setInterval(fnc,milliseconds)
+							: setTimeout(fnc,milliseconds),
+						isInterval:isInterval
+					};
+				},
 				
 				// e2e encryption
 				get_e2ee_data_key:(dataKeyEnc) => {
@@ -711,97 +724,96 @@ let MyForm = {
 			this.loading = true;
 			this.$store.commit('isAtMenu',false);
 			
-			// if form does not change, we do not need to build it
-			if(this.lastFormId === this.form.id)
-				return this.resetRecord();
-			
-			// reset form states
-			this.$store.commit('pageTitle',this.title);
-			this.message = null;
-			this.showLog = false;
-			
-			// build form
-			this.lastFormId = this.form.id;
-			
-			// reset value stores
-			this.values    = {};
-			this.valuesDef = {};
-			this.valuesOrg = {};
-			
-			let fillFieldValueTemplates = (fields) => {
-				for(const f of fields) {
-					if(f.content === 'container') {
-						fillFieldValueTemplates(f.fields);
-						continue;
-					}
-					
-					if(f.content !== 'data')
-						continue;
-					
-					// apply data field default value
-					let def              = null;
-					let attribute        = this.attributeIdMap[f.attributeId];
-					let indexAttributeId = this.getIndexAttributeIdByField(f,false);
-					let isRelationship   = this.isAttributeRelationship(attribute.content);
-					let isRelationshipN1 = this.isAttributeRelationshipN1(attribute.content);
-					let isRelMulti       = isRelationship && f.attributeIdNm !== null || (f.outsideIn && isRelationshipN1);
-					
-					if(f.def !== '')
-						def = this.getAttributeValueFromString(attribute.content,
-							 this.getResolvedPlaceholders(f.def));
-					
-					if(f.defCollection !== null)
-						def = this.getCollectionValues(
-							f.defCollection.collectionId,
-							f.defCollection.columnIdDisplay,
-							!isRelMulti
-						);
-					
-					if(isRelationship && f.defPresetIds.length > 0) {
-						if(!isRelMulti) {
-							def = this.presetIdMapRecordId[f.defPresetIds[0]];
+			// rebuild entire form if ID changed
+			if(this.lastFormId !== this.form.id) {
+				
+				// reset form states
+				this.$store.commit('pageTitle',this.title);
+				this.message = null;
+				this.showLog = false;
+				
+				// build form
+				this.lastFormId = this.form.id;
+				
+				// reset value stores
+				this.values    = {};
+				this.valuesDef = {};
+				this.valuesOrg = {};
+				
+				let fillFieldValueTemplates = (fields) => {
+					for(const f of fields) {
+						if(f.content === 'container') {
+							fillFieldValueTemplates(f.fields);
+							continue;
 						}
-						else {
-							def = [];
-							for(let i = 0, j = f.defPresetIds.length; i < j; i++) {
-								def.push(this.presetIdMapRecordId[f.defPresetIds[i]]);
+						
+						if(f.content !== 'data')
+							continue;
+						
+						// apply data field default value
+						let def              = null;
+						let attribute        = this.attributeIdMap[f.attributeId];
+						let indexAttributeId = this.getIndexAttributeIdByField(f,false);
+						let isRelationship   = this.isAttributeRelationship(attribute.content);
+						let isRelationshipN1 = this.isAttributeRelationshipN1(attribute.content);
+						let isRelMulti       = isRelationship && f.attributeIdNm !== null || (f.outsideIn && isRelationshipN1);
+						
+						if(f.def !== '')
+							def = this.getAttributeValueFromString(attribute.content,
+								 this.getResolvedPlaceholders(f.def));
+						
+						if(f.defCollection !== null)
+							def = this.getCollectionValues(
+								f.defCollection.collectionId,
+								f.defCollection.columnIdDisplay,
+								!isRelMulti
+							);
+						
+						if(isRelationship && f.defPresetIds.length > 0) {
+							if(!isRelMulti) {
+								def = this.presetIdMapRecordId[f.defPresetIds[0]];
+							}
+							else {
+								def = [];
+								for(let i = 0, j = f.defPresetIds.length; i < j; i++) {
+									def.push(this.presetIdMapRecordId[f.defPresetIds[i]]);
+								}
 							}
 						}
-					}
-					
-					this.valuesDef[indexAttributeId] = def;
-					this.valueSet(indexAttributeId,JSON.parse(JSON.stringify(def)),true,false);
-					
-					// set value and default for altern. field attribute
-					if(f.attributeIdAlt !== null) {
 						
-						const indexAttributeIdAlt = this.getIndexAttributeId(
-							f.index,f.attributeIdAlt,false,null);
+						this.valuesDef[indexAttributeId] = def;
+						this.valueSet(indexAttributeId,JSON.parse(JSON.stringify(def)),true,false);
 						
-						this.valuesDef[indexAttributeIdAlt] = null;
-						this.valueSet(indexAttributeIdAlt,null,true,false);
+						// set value and default for altern. field attribute
+						if(f.attributeIdAlt !== null) {
+							
+							const indexAttributeIdAlt = this.getIndexAttributeId(
+								f.index,f.attributeIdAlt,false,null);
+							
+							this.valuesDef[indexAttributeIdAlt] = null;
+							this.valueSet(indexAttributeIdAlt,null,true,false);
+						}
 					}
-				}
-			};
-			
-			this.fields = this.form.fields;
-			this.fieldIdsInvalid = [];
-			fillFieldValueTemplates(this.fields);
-			
-			this.relationId = this.form.query.relationId;
-			this.joins      = this.fillRelationRecordIds(this.form.query.joins);
-			this.filters    = this.form.query.filters;
-			
-			// set preset record to open, if defined
-			if(this.form.presetIdOpen !== null && this.relationId !== null) {
-				for(const p of this.relationIdMap[this.relationId].presets) {
-					if(p.id === this.form.presetIdOpen)
-						return this.openForm(this.presetIdMapRecordId[p.id]);
+				};
+				
+				this.fields = this.form.fields;
+				this.fieldIdsInvalid = [];
+				fillFieldValueTemplates(this.fields);
+				
+				this.relationId = this.form.query.relationId;
+				this.joins      = this.fillRelationRecordIds(this.form.query.joins);
+				this.filters    = this.form.query.filters;
+				
+				// set preset record to open, if defined
+				if(this.form.presetIdOpen !== null && this.relationId !== null) {
+					for(const p of this.relationIdMap[this.relationId].presets) {
+						if(p.id === this.form.presetIdOpen)
+							return this.openForm(this.presetIdMapRecordId[p.id]);
+					}
 				}
 			}
-			this.resetRecord();
-		},
-		resetRecord:function() {
+			
+			// reset record
 			this.badSave     = false;
 			this.badLoad     = false;
 			this.blockInputs = false;
@@ -812,6 +824,7 @@ let MyForm = {
 			this.indexMapRecordId          = {};
 			this.indexMapRecordKey         = {};
 			this.valuesSetAllDefault();
+			this.timerClearAll();
 			this.popUp = null;
 			this.get();
 		},
@@ -967,6 +980,9 @@ let MyForm = {
 			// also blocked, restoration of access to window: let win = (function() {return this;}())
 			code = `'use strict';
 				let document       = {};
+				let history        = {};
+				let location       = {};
+				let navigator      = {};
 				let setInterval    = {};
 				let setTimeout     = {};
 				let XMLHttpRequest = {};
@@ -1075,6 +1091,23 @@ let MyForm = {
 			if(this.fieldIdsInvalid.length !== 0)
 				document.getElementById(this.getInputFieldName(
 					this.fieldIdsInvalid[0])).scrollIntoView();
+		},
+		
+		// timer
+		timerClear:function(name) {
+			if(typeof this.timers[name] !== 'undefined') {
+				if(this.timers[name].isInterval)
+					clearInterval(this.timers[name].id);
+				else
+					clearTimeout(this.timers[name].id);
+				
+				delete(this.timers[name]);
+			}
+		},
+		timerClearAll:function() {
+			for(let k in this.timers) {
+				this.timerClear(k);
+			}
 		},
 		
 		// form function triggers

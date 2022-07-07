@@ -689,6 +689,8 @@
 				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated on the next form save. Data keys for relations on the form with encryption enabled will be encrypted with the public key of each defined login. This enables later decryption of these records for users.<br /><br />If this function is not used, decryption is only ever possible for the creator.",
 				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated for the specified relation and records on the next form save. Data keys for relation records will be encrypted with the public key of each defined login. This enables later decryption of these records for users.",
 				"show_form_message":"app.show_form_message(message,duration_in_ms) => UNDEFINED<br /><br />Temporarily replaces the form title with a custom message. The second argument defines in milli-seconds how long the message is shown (3000 by default).",
+				"timer_clear":"app.timer_clear(name) => UNDEFINED<br /><br />Aborts a timer with the given name, previously created with 'app.timer_set()'.",
+				"timer_set":"app.timer_set(name,isInterval,function,milliseconds) => UNDEFINED<br /><br />Executes a given function after a specified time in milliseconds. If 'isInterval' is set to TRUE, the function is repeatedly called.<br /><br />A timer is always bound to the current form. When resetting or leaving the form, timers are reset as well.<br /><br />Each timer must have a unique name, which can be used to later abort the timer with 'timer_clear()'; timers with the same name overwrite each other.",
 				"update_collection":"app.update_collection(collection_id) => UNDEFINED<br /><br />Retrieves and updates values for the specified collection."
 			},
 			"helpJsHint":{
@@ -700,6 +702,8 @@
 				"open_form":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
 				"pdf_create":"FILE_NAME, PAGE_FORMAT, PAGE_ORIENTATION, PAGE_MARGIN_X, PAGE_MARGIN_Y, HTML_HEADER, HTML_BODY, HTML_FOOTER, CSS_STYLES",
 				"show_form_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
+				"timer_clear":"TIMER_NAME",
+				"timer_set":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS",
 				"update_collection":"COLLECTION_ID"
 			},
 			"helpPg":{
