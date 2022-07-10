@@ -671,6 +671,7 @@
 			},
 			"helpJs":{
 				"block_inputs":"app.block_inputs(true/false) => UNDEFINED<br /><br />Sperrt alle Eingaben auf dem aktuellen Formular oder gibt diese wieder frei.",
+				"collection_update":"app.collection_update(collection_id) => UNDEFINED<br /><br />Aktualisiert Werte für die spezifizierte Sammlung.",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Kopiert Text zur Zwischenablage des Benutzers.",
 				"get_e2ee_data_key":"app.get_e2ee_data_key(dataKeyEncrypted) => STRING<br /><br />Entschlüsselt den beigefügten Datenschlüssel mit dem privaten Schlüssel der aktuellen Anmeldung.",
 				"get_e2ee_data_value":"app.get_e2ee_data_value(dataKey,valueEncrypted) => STRING<br /><br />Entschlüsselt einen Datenwert mit dem beigefügten Datenschlüssel.",
@@ -690,10 +691,10 @@
 				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />Wenn aufgerufen, wird die Ende-Zu-Ende-Verschlüsselung für die definierte Relation und Datensätze beim nächsten Speichern des Formulares aktualisiert. Datenschlüssel für Datensätze der Relation werden mit den öffentlichen Schlüssel von jeder definierten Anmeldung verschlüsselt. Hiermit können Benutzer Datensätze später entschlüsseln.",
 				"show_form_message":"app.show_form_message(message,duration_in_ms) => UNDEFINED<br /><br />Ersetzt den Formtitel für eine kurze Zeit mit einer definierten Meldung. Das 2. Argument legt fest, in Millisekunden, wie lange die Meldung angezeigt wird.",
 				"timer_clear":"app.timer_clear(name) => UNDEFINED<br /><br />Bricht einen Timer mit dem angegebenen Namen ab, welcher vorher mit \"app.timer_set()\" erstellt worden ist.",
-				"timer_set":"app.timer_set(name,isInterval,function,milliseconds) => UNDEFINED<br /><br />Führt eine Funktion nach einer definierten Zeit in Millisekunden aus. Wenn \"isInterval\" auf TRUE gestellt ist, wird die Funktion wiederholt ausgeführt.<br /><br />Ein Timer ist immer an das aktuelle Formular gebunden. Wenn das Formular zurückgesetzt oder verlassen wird, werden auch Timer zurückgesetzt.<br /><br />Jeder Timer braucht einen einzigartigen Namen, welcher später genutzt werden kann, um den Timer mit \"app.timer_clear()\" abzubrechen; Timer mit dem gleichen Namen überschreiben sich gegenseitig.",
-				"update_collection":"app.update_collection(collection_id) => UNDEFINED<br /><br />Holt und aktualisiert Werte für die spezifizierte Sammlung."
+				"timer_set":"app.timer_set(name,isInterval,function,milliseconds) => UNDEFINED<br /><br />Führt eine Funktion nach einer definierten Zeit in Millisekunden aus. Wenn \"isInterval\" auf TRUE gestellt ist, wird die Funktion wiederholt ausgeführt.<br /><br />Ein Timer ist immer an das aktuelle Formular gebunden. Wenn das Formular zurückgesetzt oder verlassen wird, werden auch Timer zurückgesetzt.<br /><br />Jeder Timer braucht einen einzigartigen Namen, welcher später genutzt werden kann, um den Timer mit \"app.timer_clear()\" abzubrechen; Timer mit dem gleichen Namen überschreiben sich gegenseitig."
 			},
 			"helpJsHint":{
+				"collection_update":"COLLECTION_ID",
 				"copy_to_clipboard":"VALUE",
 				"get_e2ee_data_key":"DATA_KEY_ENCRYPTED",
 				"get_e2ee_data_value":"DATA_KEY, VALUE_ENCRYPTED",
@@ -703,8 +704,7 @@
 				"pdf_create":"FILE_NAME, PAGE_FORMAT, PAGE_ORIENTATION, PAGE_MARGIN_X, PAGE_MARGIN_Y, HTML_HEADER, HTML_BODY, HTML_FOOTER, CSS_STYLES",
 				"show_form_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
 				"timer_clear":"TIMER_NAME",
-				"timer_set":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS",
-				"update_collection":"COLLECTION_ID"
+				"timer_set":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS"
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Bricht die Operation ab und sendet dem ausführenden Benutzer eine Nachricht, welche in der Benutzeroberfläche angezeigt wird.",
@@ -726,6 +726,8 @@
 				"update_collection":"instance.update_collection(collection_id, login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]) => INTEGER<br /><br />Informiert verbundene Clients, die angegebene Sammlung zu aktualisieren. Wenn Anmelde-IDs mitgegeben worden sind, werden nur Clients informiert, die zu den jeweiligen Anmeldungen gehören."
 			},
 			"option":{
+				"collectionRead":"Werte lesen",
+				"collectionUpdate":"Werte aktualisieren",
 				"fieldGetValue":"Wert lesen",
 				"fieldSetCaption":"Titel setzen",
 				"fieldSetValue":"Wert setzen",
@@ -744,7 +746,9 @@
 			"codeReturns":"Rückgabe",
 			"codeReturnsHintJs":"optional, \"number\", \"array\",...",
 			"codeReturnsHintPg":"optional, \"text\", \"integer\",...",
+			"collectionId":"[Sammlung auswählen]",
 			"entityInput":"Platzhalter selektieren und in den Funktions-Code klicken, um <b>upgrade-sicheren</b> Syntax zu verwenden.",
+			"fieldId":"[Feld auswählen]",
 			"form":"An Formular knüpfen",
 			"functionsBackend":"Backend-Funktionen",
 			"functionsFrontend":"Frontend-Funktionen",
@@ -759,10 +763,11 @@
 			"languageJs":"JavaScript",
 			"languagePg":"PL/pgSQL",
 			"new":"Neue Funktion",
+			"placeholderInsert":"Auf Funktionskörper klicken, um Referenz einzufügen",
 			"placeholders":"Platzhalter",
+			"placeholdersCollections":"Sammlungen",
 			"placeholdersFormFields":"Formular-Datenfelder",
 			"placeholdersFormQuery":"Formular-Datenabfrage",
-			"placeholdersGlobal":"Global",
 			"placeholdersInstance":"Instanz",
 			"placeholdersModules":"Anwendungen",
 			"runOnce":"Einmal ausführen",

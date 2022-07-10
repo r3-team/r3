@@ -671,6 +671,7 @@
 			},
 			"helpJs":{
 				"block_inputs":"app.block_inputs(true/false) => UNDEFINED<br /><br />Blocks or unblocks all inputs on the current form.",
+				"collection_update":"app.collection_update(collection_id) => UNDEFINED<br /><br />Updates values for the specified collection.",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Copiază textul în clipboard-ul utilizatorului.",
 				"get_e2ee_data_key":"app.get_e2ee_data_key(dataKeyEncrypted) => STRING<br /><br />Decrypts provided data key with the private key of the current login.",
 				"get_e2ee_data_value":"app.get_e2ee_data_value(dataKey,valueEncrypted) => STRING<br /><br />Decrypts data value with the provided data key.",
@@ -690,10 +691,10 @@
 				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated for the specified relation and records on the next form save. Data keys for relation records will be encrypted with the public key of each defined login. This enables later decryption of these records for users.",
 				"show_form_message":"app.show_form_message(message,duration_in_ms) => UNDEFINED<br /><br />Temporarily replaces the form title with a custom message. The second argument defines in milli-seconds how long the message is shown (3000 by default).",
 				"timer_clear":"app.timer_clear(name) => UNDEFINED<br /><br />Aborts a timer with the given name, previously created with 'app.timer_set()'.",
-				"timer_set":"app.timer_set(name,isInterval,function,milliseconds) => UNDEFINED<br /><br />Executes a given function after a specified time in milliseconds. If 'isInterval' is set to TRUE, the function is repeatedly called.<br /><br />A timer is always bound to the current form. When resetting or leaving the form, timers are reset as well.<br /><br />Each timer must have a unique name, which can be used to later abort the timer with 'timer_clear()'; timers with the same name overwrite each other.",
-				"update_collection":"app.update_collection(collection_id) => UNDEFINED<br /><br />Retrieves and updates values for the specified collection."
+				"timer_set":"app.timer_set(name,isInterval,function,milliseconds) => UNDEFINED<br /><br />Executes a given function after a specified time in milliseconds. If 'isInterval' is set to TRUE, the function is repeatedly called.<br /><br />A timer is always bound to the current form. When resetting or leaving the form, timers are reset as well.<br /><br />Each timer must have a unique name, which can be used to later abort the timer with 'timer_clear()'; timers with the same name overwrite each other."
 			},
 			"helpJsHint":{
+				"collection_update":"COLLECTION_ID",
 				"copy_to_clipboard":"VALUE",
 				"get_e2ee_data_key":"DATA_KEY_ENCRYPTED",
 				"get_e2ee_data_value":"DATA_KEY, VALUE_ENCRYPTED",
@@ -703,8 +704,7 @@
 				"pdf_create":"FILE_NAME, PAGE_FORMAT, PAGE_ORIENTATION, PAGE_MARGIN_X, PAGE_MARGIN_Y, HTML_HEADER, HTML_BODY, HTML_FOOTER, CSS_STYLES",
 				"show_form_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
 				"timer_clear":"TIMER_NAME",
-				"timer_set":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS",
-				"update_collection":"COLLECTION_ID"
+				"timer_set":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS"
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Anulează operația și trimite un mesaj utilizatorului care rulează acum și care este afișat pe ecranul utilizatorului.",
@@ -726,6 +726,8 @@
 				"update_collection":"instance.update_collection(collection_id, login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]) => INTEGER<br /><br />Informs connected clients to update the specified collection. If login IDs are given, only clients that belong to these logins are affected."
 			},
 			"option":{
+				"collectionRead":"read values",
+				"collectionUpdate":"update values",
 				"fieldGetValue":"citește valoarea",
 				"fieldSetCaption":"write caption",
 				"fieldSetValue":"scrie valoarea",
@@ -744,7 +746,9 @@
 			"codeReturns":"Se intoarce",
 			"codeReturnsHintJs":"opțional, 'number', 'array',...",
 			"codeReturnsHintPg":"opțional, 'text', 'integer',...",
+			"collectionId":"[Select collection]",
 			"entityInput":"Selectați înlocuitor și faceți clic pe corpul funcției pentru a utiliza sintaxa <b>upgrade-safe</b>.",
+			"fieldId":"[Select field]",
 			"form":"Leagă la formular",
 			"functionsBackend":"Funcții back-end",
 			"functionsFrontend":"Funcții front-end",
@@ -759,10 +763,11 @@
 			"languageJs":"JavaScript",
 			"languagePg":"PL/pgSQL",
 			"new":"Funcție nouă",
+			"placeholderInsert":"Click on the function body to insert reference",
 			"placeholders":"Înlocuitori",
-			"placeholdersFormFields":"Câmpurile de date din formular",
+			"placeholdersCollections":"Collections",
+			"placeholdersFormFields":"Form data fields",
 			"placeholdersFormQuery":"Câmpurile de date din înterogare",
-			"placeholdersGlobal":"Global",
 			"placeholdersInstance":"Instanță",
 			"placeholdersModules":"Aplicații",
 			"runOnce":"Rulează o dată",

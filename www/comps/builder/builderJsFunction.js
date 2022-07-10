@@ -153,28 +153,61 @@ let MyBuilderJsFunction = {
 						/>
 					</div>
 					
+					<!-- current form data field input -->
 					<div class="placeholders fields-title">
 						<h2>{{ capApp.placeholdersFormFields }}</h2>
 						
-						<select v-model="fieldMode">
-							<option value="get_field_value"  >{{ capApp.option.fieldGetValue   }}</option>
-							<option value="set_field_value"  >{{ capApp.option.fieldSetValue   }}</option>
-							<option value="set_field_caption">{{ capApp.option.fieldSetCaption }}</option>
-						</select>
-					</div>
-					
-					<div class="placeholders fields">
-						<my-builder-function-placeholder
-							v-for="fieldId in dataFieldIdsSorted"
-							@toggle="toggleEntity('field',fieldId)"
-							:builderLanguage="builderLanguage"
-							:key="fieldId"
-							:name="displayFieldName(fieldId)"
-							:selected="entitySelected === 'field' && entitySelectedId === fieldId"
-						/>
+						<div class="row">
+							<select v-model="fieldMode">
+								<option value="get_field_value"  >{{ capApp.option.fieldGetValue   }}</option>
+								<option value="set_field_value"  >{{ capApp.option.fieldSetValue   }}</option>
+								<option value="set_field_caption">{{ capApp.option.fieldSetCaption }}</option>
+							</select>
+							<select
+								@change="toggleEntity('field',$event.target.value)"
+								:value="entitySelected === 'field' ? entitySelectedId : ''"
+							>
+								<option value="" disabled>{{ capApp.fieldId }}</option>
+								<option v-for="fieldId in dataFieldIdsSorted" :value="fieldId">
+									{{ displayFieldName(fieldId) }}
+								</option>
+							</select>
+						</div>
+						<span v-if="entitySelected === 'field' && entitySelectedId !== null">
+							{{ capApp.placeholderInsert }}
+						</span>
 					</div>
 				</template>
 				
+				<!-- collection input -->
+				<div class="placeholders collections-title">
+					<h2>{{ capApp.placeholdersCollections }}</h2>
+					<div class="row">
+						<select v-model="collectionMode">
+							<option value="read"  >{{ capApp.option.collectionRead   }}</option>
+							<option value="update">{{ capApp.option.collectionUpdate }}</option>
+						</select>
+						<select
+							@change="toggleEntity('collection',$event.target.value)"
+							:value="entitySelected === 'collection' ? entitySelectedId : ''"
+						>
+							<option value="" disabled>{{ capApp.collectionId }}</option>
+							<optgroup
+								v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
+								:label="m.name"
+							>
+								<option v-for="c in m.collections" :value="c.id">
+									{{ c.name }}
+								</option>
+							</optgroup>
+						</select>
+					</div>
+					<span v-if="entitySelected === 'collection' && entitySelectedId !== null">
+						{{ capApp.placeholderInsert }}
+					</span>
+				</div>
+				
+				<!-- other module functions input -->
 				<h2>{{ capApp.placeholdersModules }}</h2>
 				<div class="placeholders modules"
 					v-for="mod in getDependentModules(module,modules).filter(v => v.pgFunctions.length !== 0 || v.jsFunctions.length !== 0)"
@@ -227,8 +260,7 @@ let MyBuilderJsFunction = {
 					</template>
 				</div>
 				
-				<h2>{{ capApp.placeholdersGlobal }}</h2>
-				
+				<h2>{{ capApp.placeholdersInstance }}</h2>
 				<div class="placeholders functions">
 					<my-builder-function-placeholder
 						v-for="f in appFunctions"
@@ -265,17 +297,18 @@ let MyBuilderJsFunction = {
 			appFunctions:[
 				'block_inputs','copy_to_clipboard','get_e2ee_data_key',
 				'get_e2ee_data_value','get_language_code','get_login_id',
-				'get_record_id','get_role_ids','go_back','has_role','open_form',
+				'get_record_id','get_role_ids','go_back',	'has_role','open_form',
 				'pdf_create','record_delete','record_new','record_reload',
 				'record_save','set_e2ee_by_login_ids',
 				'set_e2ee_by_login_ids_and_relation','show_form_message',
-				'timer_clear','timer_set','update_collection'
+				'timer_clear','timer_set'
 			],
 			appFunctionsAsync:[
-				'get_e2ee_data_key','get_e2ee_data_value','update_collection'
+				'get_e2ee_data_key','get_e2ee_data_value'
 			],
 			
 			// states
+			collectionMode:'read',
 			fieldMode:'get_field_value',
 			entitySelected:'',
 			entitySelectedId:null,
@@ -331,6 +364,7 @@ let MyBuilderJsFunction = {
 		moduleNameMap:  function() { return this.$store.getters['schema/moduleNameMap']; },
 		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
 		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
+		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
 		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
 		jsFunctionIdMap:function() { return this.$store.getters['schema/jsFunctionIdMap']; },
 		pgFunctionIdMap:function() { return this.$store.getters['schema/pgFunctionIdMap']; },
@@ -381,10 +415,10 @@ let MyBuilderJsFunction = {
 			let prefix  = 'app';
 			let postfix = '';
 			let postfixAsync = '.then('
-				+ '\n\tres => { // if success: return value in \'res\' },'
-				+ '\n\terr => { // if error: error message in \'err\' }\n)'
+				+ '\n\tres => { }, // if success: return value in \'res\''
+				+ '\n\terr => { }  // if error: error message in \'err\'\n)'
 			;
-			let mod, rel, atr, fnc, frm, fld, opt, args;
+			let mod, rel, atr, col, fnc, frm, fld, opt, args;
 			
 			// build unique placeholder name
 			switch(this.entitySelected) {
@@ -399,6 +433,18 @@ let MyBuilderJsFunction = {
 						postfix = postfixAsync;
 					
 					text = `${prefix}.${this.entitySelectedId}(${opt})${postfix}`;
+				break;
+				case 'collection':
+					col = this.collectionIdMap[this.entitySelectedId];
+					mod = this.moduleIdMap[col.moduleId];
+					let columns = [];
+					for(let i = 0, j = col.columns.length; i < j; i++) {
+						columns.push(`{column:${i}}`);
+					}
+					switch(this.collectionMode) {
+						case 'read':   text = `${prefix}.collection_read({${mod.name}.${col.name}},[${columns.join(',')}])`; break;
+						case 'update': text = `${prefix}.collection_update({${mod.name}.${col.name}})${postfixAsync}`; break;
+					}
 				break;
 				case 'field':
 					fld  = this.dataFieldMap[this.entitySelectedId];
@@ -488,8 +534,31 @@ let MyBuilderJsFunction = {
 			let prefix = 'app';
 			let pat;
 			
+			// replace collection & column IDs with placeholders
+			pat = new RegExp(`${prefix}\.collection_(read|update)\\('(${uuid})'(,\\[([a-z0-9\\-\\s,']*)\\])?`,'g');
+			body = body.replace(pat,function(match,mode,collectionId,optional,columnArray) {
+				if(that.collectionIdMap[collectionId] === 'undefined')
+					return match;
+				
+				let collection = that.collectionIdMap[collectionId];
+				let module     = that.moduleIdMap[collection.moduleId];
+				
+				if(mode === 'update')
+					return `${prefix}.collection_update({${module.name}.${collection.name}}`;
+				
+				let columns = [];
+				let matches = columnArray.match(new RegExp(`${uuid}`,'g'));
+				for(let i = 0, j = matches.length; i < j; i++) {
+					for(let x = 0, y = collection.columns.length; x < y; x++) {
+						if(collection.columns[x].id === matches[i])
+							columns.push(`{column:${x}}`);
+					}
+				}
+				return `${prefix}.collection_read({${module.name}.${collection.name}},[${columns.join(',')}]`;
+			});
+			
 			// replace field IDs with placeholders
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption)\\(\'(${uuid})'`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption)\\('(${uuid})'`,'g');
 			body = body.replace(pat,function(match,mode,part,id) {
 				
 				let fld = false;
@@ -508,7 +577,7 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace function IDs with placeholders
-			pat = new RegExp(`${prefix}\.call_(backend|frontend)\\(\'(${uuid})'`,'g');
+			pat = new RegExp(`${prefix}\.call_(backend|frontend)\\('(${uuid})'`,'g');
 			body = body.replace(pat,function(match,fncMode,id) {
 				
 				let fnc = false;
@@ -534,6 +603,40 @@ let MyBuilderJsFunction = {
 			let prefix = 'app';
 			let dbName = '[a-z0-9_]+'; // valid chars, DB entities (PG functions, modules, attributes, ...)
 			let pat;
+			
+			// replace collection & column placeholders
+			// stored as: app.collection_read({module.collection},[column1,column2,...])
+			pat = new RegExp(`${prefix}\.collection_(read|update)\\(\{(${dbName})\.(${dbName})\}(,\\[(.*)\\])?`,'g');
+			body = body.replace(pat,function(match,mode,modName,colName,optional,columnArray) {
+				if(typeof that.moduleNameMap[modName] === 'undefined')
+					return match;
+				
+				let mod = that.moduleNameMap[modName];
+				let col = false;
+				
+				for(let k in that.collectionIdMap) {
+					if(that.collectionIdMap[k].moduleId === mod.id && that.collectionIdMap[k].name === colName)
+						col = that.collectionIdMap[k];
+				}
+				if(col === false)
+					return false;
+				
+				if(mode === 'update')
+					return `${prefix}\.collection_update('${col.id}'`;
+				
+				let columnIds = [];
+				let columns   = columnArray.split(',');
+				
+				for(let c of columns) {
+					let columnIndex = parseInt(c.replace('{column:','').replace('}',''));
+					
+					if(col.columns.length <= columnIndex)
+						return match;
+					
+					columnIds.push(`'${col.columns[columnIndex].id}'`);
+				}
+				return `${prefix}\.collection_read('${col.id}',[${columnIds.join(',')}]`;
+			});
 			
 			// replace field value/caption get/set placeholders
 			// stored as: app.get_field_value({0:contact.is_active}...
@@ -575,7 +678,6 @@ let MyBuilderJsFunction = {
 				if(fld === false)
 					return match;
 				
-				// replace placeholder
 				return `${prefix}\.${mode}_field_${part}('${fld.id}'`;
 			});
 			
@@ -601,7 +703,6 @@ let MyBuilderJsFunction = {
 				if(fnc === false)
 					return match;
 				
-				// replace placeholder
 				return `${prefix}\.call_backend('${fnc.id}'`;
 			});
 			
@@ -627,7 +728,6 @@ let MyBuilderJsFunction = {
 				if(fnc === false)
 					return match;
 				
-				// replace placeholder
 				return `${prefix}\.call_frontend('${fnc.id}'`;
 			});
 			

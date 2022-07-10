@@ -17,6 +17,7 @@ let MyBuilderFunctionPlaceholder = {
 			v-if="help !== ''"
 			@trigger="$emit('show-help',help)"
 			:naked="true"
+			:tight="true"
 		/>
 	</span>`,
 	props:{

@@ -119,6 +119,16 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			UPDATE app.role SET content = 'everyone' WHERE name = 'everyone';
 			CREATE TYPE app.role_content AS ENUM ('admin','everyone','other','user');
 			
+			-- new JS function dependency
+			ALTER TABLE app.js_function_depends ADD COLUMN collection_id_on UUID;
+			ALTER TABLE app.js_function_depends ADD CONSTRAINT js_function_depends_collection_id_on_fkey FOREIGN KEY (collection_id_on)
+				REFERENCES app.collection (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_collection_id_on_fkey ON app.js_function_depends
+				USING BTREE (collection_id_on ASC NULLS LAST);
+			
 			-- collection consumer changes / additions
 			ALTER TABLE app.collection_consumer ADD COLUMN id UUID PRIMARY KEY DEFAULT gen_random_uuid();
 			ALTER TABLE app.collection_consumer ALTER COLUMN id DROP DEFAULT;

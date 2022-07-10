@@ -38,6 +38,7 @@ import {
 	getIndexAttributeIdByField
 } from './shared/attribute.js';
 import {
+	getCollectionMultiValues,
 	getCollectionValues,
 	updateCollections
 } from './shared/collection.js';
@@ -454,7 +455,10 @@ let MyForm = {
 						maxWidth:maxX
 					},[],newTab),
 				show_form_message:(v,i) => this.messageSet(v,i),
-				update_collection:(v)   => this.updateCollections(false,undefined,v),
+				
+				// collection functions
+				collection_read:this.getCollectionMultiValues,
+				collection_update:(v) => this.updateCollections(false,undefined,v),
 				
 				// call other functions
 				call_backend:(id,...args) => {
@@ -526,7 +530,10 @@ let MyForm = {
 						this.fieldIdMapData[fieldId],false),value,false,true);
 					
 					return 0;
-				}
+				},
+				
+				// legacy calls (pre 3.0)
+				update_collection:(v) => this.updateCollections(false,undefined,v)
 			};
 		},
 		
@@ -656,6 +663,7 @@ let MyForm = {
 		generatePdf,
 		getAttributeValueFromString,
 		getAttributeValuesFromGetter,
+		getCollectionMultiValues,
 		getCollectionValues,
 		getDataFieldMap,
 		getDetailsFromIndexAttributeId,

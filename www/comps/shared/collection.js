@@ -90,6 +90,35 @@ export function getCollectionValues(collectionId,columnId,singleValue,recordInde
 	return out;
 };
 
+// returns multiple column values for all records of an collection (array of values in array of records)
+export function getCollectionMultiValues(collectionId,columnIds) {
+	let colSchema = MyStore.getters['schema/collectionIdMap'][collectionId];
+	let colRows   = MyStore.getters['collectionIdMap'][collectionId];
+	
+	if(typeof colRows === 'undefined' || colRows.length === 0)
+		return [];
+	
+	let columnIndexes = [];
+	for(let columnId of columnIds) {
+		for(let i = 0, j = colSchema.columns.length; i < j; i++) {
+			if(colSchema.columns[i].id === columnId)
+				columnIndexes.push(i);
+		}
+	}
+	if(columnIndexes.length === 0)
+		return [];
+	
+	let records = [];
+	for(const c of colRows) {
+		let values = [];
+		for(let i = 0, j = columnIndexes.length; i < j; i++) {
+			values.push(c.values[columnIndexes[i]]);
+		}
+		records.push(values);
+	}
+	return records;
+};
+
 // update known collections by retrieving their data queries
 // can continue on error or reject immediately, if desired
 // can optionally call a specific error function when rejected

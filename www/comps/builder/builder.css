@@ -711,26 +711,18 @@
 	flex-flow:column nowrap;
 }
 .builder-function .placeholders.modules{
-	margin:0px 0px 12px 0px;
+	margin:0px 0px 8px 0px;
 }
-.builder-function .placeholders.form-query-title{
-	margin:0px 0px 12px 0px;
-}
-.builder-function .placeholders.fields-title{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	justify-content:space-between;
-	margin:0px 0px 12px 0px;
-}
-.builder-function .placeholders.fields-title h2{
-	margin:0px 12px 0px 0px;
-}
-.builder-function .placeholders.fields-title select{
-	flex:0 1 120px;
-}
+.builder-function .placeholders.collections-title,
+.builder-function .placeholders.form-query-title,
+.builder-function .placeholders.fields-title,
 .builder-function .placeholders.fields{
-	margin:0px 0px 12px 0px;
+	margin:0px 0px 16px 0px;
+}
+.builder-function .placeholders.collections-title span,
+.builder-function .placeholders.fields-title span{
+	font-style:italic;
+	margin:12px 0px 0px 0px;
 }
 .builder-function .placeholders.fields,
 .builder-function .placeholders.relations,
