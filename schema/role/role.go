@@ -7,6 +7,7 @@ import (
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
+	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v4"
@@ -121,9 +122,19 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 		return errors.New("missing name")
 	}
 
-	// compatibility fix: missing content <3.0
+	// compatibility fix: missing role content <3.0
 	if content == "" {
-		content = "user"
+		if name == "everyone" {
+			content = "everyone"
+		} else if strings.Contains(strings.ToLower(name), "admin") {
+			content = "admin"
+		} else if strings.Contains(strings.ToLower(name), "data") {
+			content = "other"
+		} else if strings.Contains(strings.ToLower(name), "csv") {
+			content = "other"
+		} else {
+			content = "user"
+		}
 	}
 
 	known, err := schema.CheckCreateId_tx(tx, &id, "role", "id")

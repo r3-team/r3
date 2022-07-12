@@ -190,7 +190,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			);
 			
 			CREATE TYPE instance.login_setting_pattern AS ENUM ('bubbles','waves');
-			ALTER TABLE instance.login_setting ADD COLUMN pattern TEXT NOT NULL DEFAULT 'bubbles';
+			ALTER TABLE instance.login_setting ADD COLUMN pattern TEXT DEFAULT 'bubbles';
 			ALTER TABLE instance.login_setting ALTER COLUMN pattern DROP DEFAULT;
 			
 			-- new schema for cluster operation
