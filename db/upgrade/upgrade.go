@@ -104,6 +104,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 	//		TYPE app.collection_consumer_content USING content::text::app.collection_consumer_content;
 	// ALTER TABLE instance.login_setting ALTER COLUMN font_family
 	//		TYPE instance.login_setting_font_family USING font_family::text::instance.login_setting_font_family;
+	// ALTER TABLE instance.login_setting ALTER COLUMN pattern
+	//      TYPE instance.login_setting_pattern USING pattern::text::instance.login_setting_pattern;
 
 	"2.7": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
@@ -130,8 +132,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				USING BTREE (collection_id_on ASC NULLS LAST);
 			
 			-- collection consumer changes / additions
-			ALTER TABLE app.collection_consumer ADD COLUMN id UUID PRIMARY KEY DEFAULT gen_random_uuid();
-			ALTER TABLE app.collection_consumer ALTER COLUMN id DROP DEFAULT;
+			CREATE TYPE app.collection_consumer_content AS ENUM(
+				'fieldDataDefault','fieldFilterSelector','headerDisplay','menuDisplay');
 			
 			ALTER TABLE app.collection_consumer ADD COLUMN menu_id UUID;
 			ALTER TABLE app.collection_consumer
@@ -143,19 +145,21 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX IF NOT EXISTS fki_collection_consumer_menu_id_fkey ON app.collection_consumer
 				USING BTREE (menu_id ASC NULLS LAST);
 			
+			ALTER TABLE app.collection_consumer ADD COLUMN id UUID PRIMARY KEY DEFAULT gen_random_uuid();
 			ALTER TABLE app.collection_consumer ADD COLUMN on_mobile BOOLEAN NOT NULL DEFAULT false;
-			ALTER TABLE app.collection_consumer ALTER COLUMN on_mobile DROP DEFAULT;
 			ALTER TABLE app.collection_consumer ADD COLUMN no_display_empty BOOLEAN NOT NULL DEFAULT false;
-			ALTER TABLE app.collection_consumer ALTER COLUMN no_display_empty DROP DEFAULT;
-			
-			CREATE TYPE app.collection_consumer_content AS ENUM(
-				'fieldDataDefault','fieldFilterSelector','headerDisplay','menuDisplay')
-			
 			ALTER TABLE app.collection_consumer ADD COLUMN content TEXT NOT NULL DEFAULT 'fieldFilterSelector';
+			ALTER TABLE app.collection_consumer ALTER COLUMN id DROP DEFAULT;
+			ALTER TABLE app.collection_consumer ALTER COLUMN on_mobile DROP DEFAULT;
+			ALTER TABLE app.collection_consumer ALTER COLUMN no_display_empty DROP DEFAULT;
 			ALTER TABLE app.collection_consumer ALTER COLUMN content DROP DEFAULT;
 			
-			INSERT INTO app.collection_consumer (collection_id, column_id_display, field_id, content, multi_value)
-				SELECT collection_id_def, column_id_def, field_id, 'fieldDataDefault', false
+			INSERT INTO app.collection_consumer (
+				id, collection_id, column_id_display, field_id, content,
+				multi_value, on_mobile, no_display_empty
+			)
+				SELECT gen_random_uuid(), collection_id_def, column_id_def,
+					field_id, 'fieldDataDefault', false, false, false
 				FROM app.field_data
 				WHERE collection_id_def IS NOT NULL;
 			
@@ -163,6 +167,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				DROP COLUMN collection_id_def,
 				DROP COLUMN column_id_def;
 			
+			-- open form collection consumer
 			ALTER TABLE app.open_form ADD COLUMN collection_consumer_id UUID;
 			ALTER TABLE app.open_form ADD CONSTRAINT open_form_collection_consumer_id_fkey FOREIGN KEY (collection_consumer_id)
 				REFERENCES app.collection_consumer (id) MATCH SIMPLE
@@ -185,7 +190,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			);
 			
 			CREATE TYPE instance.login_setting_pattern AS ENUM ('bubbles','waves');
-			ALTER TABLE instance.login_setting ADD COLUMN pattern instance.login_setting_pattern;
+			ALTER TABLE instance.login_setting ADD COLUMN pattern TEXT NOT NULL DEFAULT 'bubbles';
+			ALTER TABLE instance.login_setting ALTER COLUMN pattern DROP DEFAULT;
 			
 			-- new schema for cluster operation
 			CREATE SCHEMA instance_cluster;

@@ -316,12 +316,6 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
-	// setup cluster node with shared database
-	if err := cluster.StartNode(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to setup cluster node, %v", err))
-		return
-	}
-
 	// process cli commands
 	if prg.cli.adminCreate != "" {
 		adminInputs := strings.Split(prg.cli.adminCreate, ":")
@@ -342,6 +336,12 @@ func (prg *program) execute(svc service.Service) {
 	// run automatic database upgrade if required
 	if err := upgrade.RunIfRequired(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed automatic upgrade of database, %v", err))
+		return
+	}
+
+	// setup cluster node with shared database
+	if err := cluster.StartNode(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to setup cluster node, %v", err))
 		return
 	}
 
