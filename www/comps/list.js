@@ -187,7 +187,7 @@ let MyList = {
 		<template v-if="showTable && !inputAsCategory">
 			<!-- regular list view (either view or input dropdown) -->
 			
-			<div class="top lower gvhtest" v-if="header">
+			<div class="top lower" v-if="header">
 				<!-- list header line -->
 				
 				<div class="area nowrap">
@@ -303,13 +303,13 @@ let MyList = {
 				<!-- list header functions -->
 				
 				<!-- auto renew -->
-				<div class="list-header default-inputs" v-if="showAutoRenew">
+				<div class="list-header" v-if="showAutoRenew">
 					<div class="list-header-title">
 						<img src="images/autoRenew.png" />
 						<span>{{ capApp.autoRenew }}</span>
 					</div>
 					
-					<div class="list-auto-renew-line">
+					<div class="list-auto-renew-line default-inputs">
 						<span>{{ capApp.autoRenewInput }}</span>
 						<input class="short"
 							v-model.number="autoRenewInput"
@@ -322,8 +322,8 @@ let MyList = {
 					</div>
 				</div>
 				
-				<div class="list-header default-inputs" v-if="showFilters">
-					<my-filters
+				<div class="list-header" v-if="showFilters">
+					<my-filters class="default-inputs"
 						v-model="filtersUser"
 						@apply="reloadInside('filtersUser')"
 						@reset="reloadInside('filtersUser')"
@@ -343,18 +343,19 @@ let MyList = {
 					</my-filters>
 				</div>
 				
-				<my-list-csv class="default-inputs"
-					v-if="showCsv"
-					@reload="get"
-					:columns="columns"
-					:expressions="expressions"
-					:filters="filters.concat(filtersParsedQuick).concat(filtersParsedUser)"
-					:isExport="csvExport"
-					:isImport="csvImport"
-					:joins="getRelationsJoined(joins)"
-					:orders="orders"
-					:query="query"
-				/>
+				<div class="list-header" v-if="showCsv">
+					<my-list-csv
+						@reload="get"
+						:columns="columns"
+						:expressions="expressions"
+						:filters="filters.concat(filtersParsedQuick).concat(filtersParsedUser)"
+						:isExport="csvExport"
+						:isImport="csvImport"
+						:joins="getRelationsJoined(joins)"
+						:orders="orders"
+						:query="query"
+					/>
+				</div>
 			</div>
 			
 			<div class="layoutTable"
