@@ -301,7 +301,7 @@ let MyBuilderJsFunction = {
 				'pdf_create','record_delete','record_new','record_reload',
 				'record_save','set_e2ee_by_login_ids',
 				'set_e2ee_by_login_ids_and_relation','show_form_message',
-				'timer_clear','timer_set'
+				'timer_clear','timer_set','value_store_get','value_store_set'
 			],
 			appFunctionsAsync:[
 				'get_e2ee_data_key','get_e2ee_data_value'

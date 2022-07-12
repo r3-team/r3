@@ -53,6 +53,7 @@ const MyStore = Vuex.createStore({
 		popUpFormGlobal:null, // configuration of global pop-up form
 		productionMode:false, // system in production mode, false if maintenance
 		settings:{},          // setting values for logged in user, key: settings name
+		sessionValueStore:{}, // user session key-value store for frontend functions, { moduleId1:{ key1:value1, key2:value2 }, moduleId2:{ ... } }
 		system:{}             // system details (admin only)
 	},
 	mutations:{
@@ -104,6 +105,12 @@ const MyStore = Vuex.createStore({
 		},
 		pageTitleRefresh:(state,payload) => {
 			MyStore.commit('pageTitle',state.pageTitle);
+		},
+		sessionValueStore:(state,payload) => {
+			if(typeof state.sessionValueStore[payload.moduleId] === 'undefined')
+				state.sessionValueStore[payload.moduleId] = {};
+			
+			state.sessionValueStore[payload.moduleId][payload.key] = payload.value;
 		},
 		
 		// collections
@@ -197,6 +204,7 @@ const MyStore = Vuex.createStore({
 		pageTitleFull:    (state) => state.pageTitleFull,
 		popUpFormGlobal:  (state) => state.popUpFormGlobal,
 		productionMode:   (state) => state.productionMode,
+		sessionValueStore:(state) => state.sessionValueStore,
 		settings:         (state) => state.settings,
 		system:           (state) => state.system
 	}

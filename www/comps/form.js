@@ -492,6 +492,19 @@ let MyForm = {
 					};
 				},
 				
+				// session value store
+				value_store_get:(k) => {
+					return typeof this.$store.getters.sessionValueStore[this.moduleId] !== 'undefined'
+						&& typeof this.$store.getters.sessionValueStore[this.moduleId][k] !== 'undefined'
+						? this.$store.getters.sessionValueStore[this.moduleId][k]
+						: undefined;
+				},
+				value_store_set:(k,v) => this.$store.commit('sessionValueStore',{
+					moduleId:this.moduleId,
+					key:k,
+					value:v
+				}),
+				
 				// e2e encryption
 				get_e2ee_data_key:(dataKeyEnc) => {
 					return this.rsaDecrypt(this.loginPrivateKey,dataKeyEnc);
