@@ -14,7 +14,7 @@ export {MyFormLog as default};
 let MyFormLog = {
 	name:'my-form-log',
 	components:{MyField},
-	template:`<div class="form-log contentBox">
+	template:`<div class="form-log contentBox" :class="{ 'pop-up':isPopUp }">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/time.png" />
@@ -60,7 +60,7 @@ let MyFormLog = {
 							:field="f"
 							:fieldIdMapState="fieldIdMapState"
 							:formBadSave="false"
-							:formIsInline="true"
+							:formIsPopUp="true"
 							:formIsSingleField="false"
 							:formLoading="loading"
 							:formReadonly="false"
@@ -80,6 +80,7 @@ let MyFormLog = {
 		fieldIdMapState:  { type:Object,  required:true },
 		form:             { type:Object,  required:true },
 		formLoading:      { type:Boolean, required:true },
+		isPopUp:          { type:Boolean, required:true },
 		indexMapRecordKey:{ type:Object,  required:true },
 		joinsIndexMap:    { type:Object,  required:true },
 		values:           { type:Object,  required:true }

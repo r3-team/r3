@@ -58,7 +58,7 @@ let MyForm = {
 		MyFormHelp,
 		MyFormLog
 	},
-	template:`<div class="form-wrap" :class="{ 'pop-up':isInline, 'fullscreen':popUpFullscreen }" :key="form.id">
+	template:`<div class="form-wrap" :class="{ 'pop-up':isPopUp, 'fullscreen':popUpFullscreen }" :key="form.id">
 		
 		<!-- pop-up sub-form -->
 		<div class="app-sub-window under-header"
@@ -72,7 +72,7 @@ let MyForm = {
 				@record-updated="popUpRecordChanged('updated',$event)"
 				:attributeIdMapDef="popUp.attributeIdMapDef"
 				:formId="popUp.formId"
-				:isInline="true"
+				:isPopUp="true"
 				:moduleId="popUp.moduleId"
 				:recordId="popUp.recordId"
 				:style="popUp.style"
@@ -82,6 +82,7 @@ let MyForm = {
 		<!-- form proper -->
 		<div class="form contentBox grow scroll"
 			v-if="!isMobile || (!showLog && !showHelp)"
+			:class="{ 'pop-up':isPopUp }"
 		>
 			<!-- title bar upper -->
 			<div class="top">
@@ -130,7 +131,7 @@ let MyForm = {
 						:captionTitle="capApp.button.helpHint"
 					/>
 					<my-button
-						v-if="isInline"
+						v-if="isPopUp"
 						@trigger="popUpFullscreen = !popUpFullscreen"
 						:captionTitle="capApp.button.fullscreenHint"
 						:image="popUpFullscreen ? 'shrink.png' : 'expand.png'"
@@ -141,7 +142,7 @@ let MyForm = {
 						@trigger-middle="openBuilder(true)"
 					/>
 					<my-button image="cancel.png"
-						v-if="isInline"
+						v-if="isPopUp"
 						@trigger="closeAsk"
 						:cancel="true"
 						:captionTitle="capGen.button.close"
@@ -169,14 +170,14 @@ let MyForm = {
 							:captionTitle="capGen.button.saveHint"
 						/>
 						<my-button image="save_new.png"
-							v-if="!isInline && !isMobile && allowNew && !noDataActions"
+							v-if="!isPopUp && !isMobile && allowNew && !noDataActions"
 							@trigger="set(true)"
 							:active="canUpdate && canCreate"
 							:caption="capGen.button.saveNew"
 							:captionTitle="capGen.button.saveNewHint"
 						/>
 						<my-button image="upward.png"
-							v-if="!isMobile && !isInline"
+							v-if="!isMobile && !isPopUp"
 							@trigger="openPrevAsk"
 							:active="!updatingRecord"
 							:cancel="true"
@@ -224,7 +225,7 @@ let MyForm = {
 					:fieldIdMapCaption="fieldIdMapCaption"
 					:fieldIdMapState="fieldIdMapState"
 					:formBadSave="badSave"
-					:formIsInline="isInline"
+					:formIsPopUp="isPopUp"
 					:formIsSingleField="isSingleField"
 					:formLoading="loading"
 					:formReadonly="badLoad || blockInputs"
@@ -243,6 +244,7 @@ let MyForm = {
 			:fieldIdMapState="fieldIdMapState"
 			:form="form"
 			:formLoading="loading"
+			:isPopUp="isPopUp"
 			:indexMapRecordKey="indexMapRecordKey"
 			:joinsIndexMap="joinsIndexMap"
 			:values="values"
@@ -253,6 +255,7 @@ let MyForm = {
 			v-if="showHelp && helpAvailable"
 			@close="showHelp = false"
 			:form="form"
+			:isPopUp="isPopUp"
 			:moduleId="moduleId"
 		/>
 	</div>`,
@@ -261,7 +264,7 @@ let MyForm = {
 		allowNew:         { type:Boolean,required:false, default:true },
 		attributeIdMapDef:{ type:Object, required:false, default:() => {return {};} }, // map of attribute default values (new record)
 		formId:           { type:String, required:true },
-		isInline:         { type:Boolean,required:false, default:false },              // opened within another element
+		isPopUp:          { type:Boolean,required:false, default:false },
 		moduleId:         { type:String, required:true },
 		recordId:         { type:Number, required:true }
 	},
@@ -709,7 +712,7 @@ let MyForm = {
 			// not data or pop-up form open
 			if(!this.isData || this.popUp !== null) return;
 			
-			if(this.isInline && e.key === 'Escape')
+			if(this.isPopUp && e.key === 'Escape')
 				this.closeAsk();
 			
 			if(e.key === 's' && e.ctrlKey) {
@@ -1165,7 +1168,7 @@ let MyForm = {
 			
 			let stayOnForm = this.form.id === options.formIdOpen;
 			
-			if(this.isInline) {
+			if(this.isPopUp) {
 				if(stayOnForm)
 					return this.$emit('record-open',recordId);
 				
@@ -1234,8 +1237,8 @@ let MyForm = {
 		setFormArgs:function(args,push) {
 			const path = this.getFormRoute(this.form.id,this.recordId,true,args);
 			
-			if(this.$route.fullPath === path || this.isInline)
-				return; // nothing changed or inline form, ignore
+			if(this.$route.fullPath === path || this.isPopUp)
+				return; // nothing changed or pop-up form, ignore
 			
 			if(push) this.$router.push(path);
 			else     this.$router.replace(path);
@@ -1271,7 +1274,7 @@ let MyForm = {
 			
 			ws.sendMultiple(requests,true).then(
 				() => {
-					if(this.isInline)
+					if(this.isPopUp)
 						this.$emit('record-deleted',this.recordId);
 					
 					this.triggerEventAfter('delete');
@@ -1629,7 +1632,7 @@ let MyForm = {
 					if(this.isNew) this.messageSet('[CREATED]');
 					else           this.messageSet('[UPDATED]');
 					
-					if(this.isInline)
+					if(this.isPopUp)
 						this.$emit('record-updated',resSet.payload.indexRecordIds[0]);
 					
 					this.triggerEventAfter('save');

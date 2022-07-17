@@ -4,7 +4,7 @@ export {MyFormHelp as default};
 let MyFormHelp = {
 	name:'my-form-help',
 	components:{MyInputRichtext},
-	template:`<div class="form-help contentBox">
+	template:`<div class="form-help contentBox" :class="{ 'pop-up':isPopUp }">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/question.png" />
@@ -53,8 +53,9 @@ let MyFormHelp = {
 		</div>
 	</div>`,
 	props:{
-		form:    { type:Object, required:true },
-		moduleId:{ type:String, required:true }
+		form:    { type:Object,  required:true },
+		isPopUp: { type:Boolean, required:true },
+		moduleId:{ type:String,  required:true }
 	},
 	emits:['close'],
 	data:function() {

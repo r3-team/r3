@@ -329,7 +329,7 @@ let MyField = {
 			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
-			:usesPageHistory="formIsSingleField && !formIsInline"
+			:usesPageHistory="formIsSingleField && !formIsPopUp"
 		/>
 		
 		<!-- calendar -->
@@ -355,7 +355,7 @@ let MyField = {
 			:indexDate1="field.indexDate1"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
-			:usesPageHistory="formIsSingleField && !formIsInline"
+			:usesPageHistory="formIsSingleField && !formIsPopUp"
 		/>
 		
 		<!-- gantt -->
@@ -384,7 +384,7 @@ let MyField = {
 			:stepTypeDefault="field.ganttSteps"
 			:stepTypeToggle="field.ganttStepsToggle"
 			:query="field.query"
-			:usesPageHistory="formIsSingleField && !formIsInline"
+			:usesPageHistory="formIsSingleField && !formIsPopUp"
 		/>
 		
 		<!-- chart -->
@@ -417,7 +417,7 @@ let MyField = {
 			:fieldIdMapCaption="fieldIdMapCaption"
 			:fieldIdMapState="fieldIdMapState"
 			:formBadSave="formBadSave"
-			:formIsInline="formIsInline"
+			:formIsPopUp="formIsPopUp"
 			:formIsSingleField="formIsSingleField"
 			:formLoading="formLoading"
 			:formReadonly="formReadonly"
@@ -433,7 +433,7 @@ let MyField = {
 		fieldIdMapCaption:{ type:Object,  required:false, default:() => {return {}} }, // overwritten captions
 		fieldIdMapState:  { type:Object,  required:false, default:() => {return {}} }, // overwritten states
 		formBadSave:      { type:Boolean, required:true }, // attempted save with invalid inputs
-		formIsInline:     { type:Boolean, required:true }, // parent form is part of another element (sub form)
+		formIsPopUp:      { type:Boolean, required:true }, // parent form is a pop-up form
 		formIsSingleField:{ type:Boolean, required:true }, // parent form contains a single field
 		formLoading:      { type:Boolean, required:true },
 		formReadonly:     { type:Boolean, required:true }, // form is read only, disable all inputs

@@ -911,7 +911,7 @@ table td.maximum{
 .user-compact .app-content{
 	padding:0px;
 }
-.user-compact .app-content .contentBox{
+.user-compact .app-content .contentBox:not(.pop-up){
 	margin:0px;
 	border:none;
 	border-bottom:1px solid var(--color-border);
@@ -920,10 +920,10 @@ table td.maximum{
 	box-shadow:none;
 	--content-box-max-width:unset;
 }
-.user-compact .app-content .contentBox:last-child{
+.user-compact .app-content .contentBox:not(.pop-up):last-child{
 	border-right:none;
 }
-.user-compact .app-content .contentBox .top{
+.user-compact .app-content .contentBox:not(.pop-up) .top{
 	border-radius:0px;
 }
 .user-compact .navigationWrap{

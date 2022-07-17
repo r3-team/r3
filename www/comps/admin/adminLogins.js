@@ -576,7 +576,7 @@ let MyAdminLogins = {
 						:allowDel="false"
 						:allowNew="false"
 						:formId="loginForms[loginFormIndexOpen].formId"
-						:isInline="true"
+						:isPopUp="true"
 						:moduleId="formIdMap[loginForms[loginFormIndexOpen].formId].moduleId"
 						:recordId="loginFormRecord"
 					/>
