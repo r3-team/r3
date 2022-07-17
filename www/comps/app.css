@@ -88,8 +88,8 @@
 	
 	--color-accent1:       hsl(311,57%,calc(40% - var(--light-depth))); /* field captions */
 	--color-accent2:       hsl(127,86%,calc(96% - var(--light-depth))); /* calendar/gantt weekend */
-	--color-accent3:       hsl(199,11%,calc(92% - var(--light-depth))); /* menu/list/calendar entry hover */
-	--color-accent3-alt:   hsl(199,11%,calc(88% - var(--light-depth))); /* menu/list/calendar entry active */
+	--color-accent3:       hsl(199,11%,calc(96% - var(--light-depth))); /* menu/list/calendar entry hover */
+	--color-accent3-alt:   hsl(199,11%,calc(93% - var(--light-depth))); /* menu/list/calendar entry active */
 	--color-accent4:       hsl(339, 4%,calc(61% - var(--light-depth))); /* gantt entry */
 	--color-error:         hsl(0,  84%,calc(61% - var(--light-depth)));
 	--color-success:       hsl(113,44%,calc(44% - var(--light-depth)));

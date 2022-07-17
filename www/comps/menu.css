@@ -30,7 +30,7 @@
 	left:0px;
 }
 .menu.colored .items-bg{
-	filter:brightness(110%) saturate(50%);
+	filter:brightness(105%) saturate(60%);
 }
 .menu .items{
 	font-size:105%;
@@ -41,30 +41,42 @@
 }
 .menu .item .line{
 	height:34px;
-	margin:0px 0px 4px;
+	margin:0px 0px 4px 5px;
 	cursor:pointer;
-	padding:0px 0px 0px var(--spacing);
+	padding:0px 0px 0px 10px;
 	outline:none;
 	display:flex;
 	flex-direction:row;
 	box-sizing:border-box;
+	border-radius:4px 0px 0px 4px;
 	align-items:center;
 }
 .menu .item .line:focus,
 .menu .item .line:hover{
 	padding-right:0px;
-	padding-left:calc(var(--spacing) * 1.3);
+	padding-left:13px;
 	transition:padding-left 0.2s;
 	background-color:var(--color-accent3);
+	border-bottom:2px solid var(--color-border);
+}
+.menu .item .line.noForm:focus,
+.menu .item .line.noForm:hover{
+	border-bottom:2px dotted var(--color-border);
 }
 .menu.colored .item .line:focus,
 .menu.colored .item .line:hover{
 	background-color:rgba(255,255,255,0.10);
+	border-bottom:2px solid var(--color-border-bg);
+}
+.menu.colored .item .line.noForm:focus,
+.menu.colored .item .line.noForm:hover{
+	border-bottom:2px dotted var(--color-border-bg);
 }
 .menu .item .line.active{
 	padding-right:0px;
 	transition:font-weight 0.2s;
 	background-color:var(--color-accent3-alt);
+	border-bottom:2px solid var(--color-border);
 }
 .menu.colored .item .line.active{
 	background-color:rgba(255,255,255,0.20);
@@ -86,9 +98,6 @@
 }
 .menu .item.sub{
 	padding-left:12px;
-}
-.menu .item.sub .line{
-	border-radius:4px 0px 0px 4px;
 }
 .menu .collectionEntry{
 	display:flex;
