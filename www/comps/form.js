@@ -1412,6 +1412,7 @@ let MyForm = {
 				return;
 			}
 			
+			this.triggerEventBefore('open');
 			ws.send('data','get',{
 				relationId:join.relationId,
 				indexSource:join.index,
@@ -1424,7 +1425,12 @@ let MyForm = {
 				]),
 				getPerm:true
 			},true).then(
-				res => this.valueSetByRows(res.payload.rows,expressions),
+				res => {
+					this.valueSetByRows(res.payload.rows,expressions).then(
+						() => this.triggerEventAfter('open'),
+						err => this.$root.genericError
+					);
+				},
 				this.$root.genericError
 			);
 		},
