@@ -358,6 +358,7 @@
 	color:var(--color-font);
 	border:none;
 	background-color:transparent;
+	box-shadow:none;
 }
 .input-date span{
 	line-height:28px;

@@ -1,7 +1,8 @@
 .home{
 	flex-flow:column nowrap !important;
-	justify-content:center !important;
-	padding:16px !important;
+	padding:0px !important;
+	margin:auto 16px !important;
+	flex-grow:0 !important;
 }
 .home .message{
 	display:flex;
