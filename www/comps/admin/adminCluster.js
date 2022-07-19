@@ -29,12 +29,14 @@ let MyAdminClusterNode = {
 			<my-button image="logoff.png"
 				v-if="available"
 				@trigger="shutdownAsk"
+				:active="licenseValid"
 				:naked="true"
 				:tight="true"
 			/>
 			<my-button image="delete.png"
 				v-if="!available"
 				@trigger="delAsk"
+				:active="licenseValid"
 				:naked="true"
 				:tight="true"
 			/>
@@ -46,7 +48,7 @@ let MyAdminClusterNode = {
 			</tr>
 			<tr class="default-inputs">
 				<td>{{ capGen.name }}</td>
-				<td><input v-model="nameInput" /></td>
+				<td><input v-model="nameInput" :disabled="!licenseValid" /></td>
 				<td>
 					<my-button image="save.png"
 						v-if="name !== nameInput"
@@ -102,10 +104,11 @@ let MyAdminClusterNode = {
 		},
 		
 		// stores
-		capApp:  function() { return this.$store.getters.captions.admin.cluster; },
-		capGen:  function() { return this.$store.getters.captions.generic; },
-		config:  function() { return this.$store.getters.config; },
-		settings:function() { return this.$store.getters.settings; }
+		capApp:      function() { return this.$store.getters.captions.admin.cluster; },
+		capGen:      function() { return this.$store.getters.captions.generic; },
+		config:      function() { return this.$store.getters.config; },
+		licenseValid:function() { return this.$store.getters.licenseValid; },
+		settings:    function() { return this.$store.getters.settings; }
 	},
 	data:function() {
 		return {
@@ -173,6 +176,9 @@ let MyAdminCluster = {
 		</div>
 		
 		<div class="content">
+			<div v-if="!licenseValid" class="license-required">
+				{{ capGen.licenseRequired }}
+			</div>
 			
 			<div class="contentPart config">
 				<div class="contentPartHeader">
@@ -182,7 +188,12 @@ let MyAdminCluster = {
 				<table>
 					<tr class="default-inputs">
 						<td>{{ capApp.configNodeMissing }}</td>
-						<td><input v-model="configInput.clusterNodeMissingAfter" /></td>
+						<td>
+							<input
+								v-model="configInput.clusterNodeMissingAfter"
+								:disabled="!licenseValid"
+							/>
+						</td>
 					</tr>
 				</table>
 				
@@ -251,9 +262,10 @@ let MyAdminCluster = {
 		},
 		
 		// stores
-		capApp:function() { return this.$store.getters.captions.admin.cluster; },
-		capGen:function() { return this.$store.getters.captions.generic; },
-		config:function() { return this.$store.getters.config; }
+		capApp:      function() { return this.$store.getters.captions.admin.cluster; },
+		capGen:      function() { return this.$store.getters.captions.generic; },
+		config:      function() { return this.$store.getters.config; },
+		licenseValid:function() { return this.$store.getters.licenseValid; }
 	},
 	data:function() {
 		return {
