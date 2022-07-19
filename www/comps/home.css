@@ -83,13 +83,13 @@
 	background-color:var(--color-bg);
 	position:relative;
 	overflow:hidden; /* hide watermark */
+	z-index:var(--z-index-home-entry);
 }
 .home .module-title{
 	height:22px;
 	margin-bottom:10px;
 	border-bottom:2px solid var(--color-border);
 	position:relative;
-	z-index:var(--z-index-home-entry);
 }
 .home .module-title.lower{
 	height:6px;

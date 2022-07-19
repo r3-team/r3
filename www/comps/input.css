@@ -20,6 +20,7 @@
 	box-shadow:0px 1px 2px var(--color-shade);
 	cursor:pointer;
 	outline:none;
+	transition:box-shadow 0.1s, border-bottom 0.1s;
 }
 .bool>div.small{
 	height:20px;
@@ -28,8 +29,9 @@
 	background-color:var(--color-action-bright);
 	box-shadow:0px 1px 2px var(--color-shade);
 }
-.bool:focus>div,
-.bool:hover>div{
+.bool:not(.readonly):focus>div,
+.bool:not(.readonly):hover>div{
+	border-bottom:2px solid var(--color-border-bg);
 	box-shadow:0px 2px 5px var(--color-shade);
 }
 .bool>div.left{

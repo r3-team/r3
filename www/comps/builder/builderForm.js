@@ -605,7 +605,8 @@ let MyBuilderForm = {
 				dateRange1:0,
 				openForm:null,
 				query:this.getQueryTemplate(),
-				columns:[]
+				columns:[],
+				collections:[]
 			};
 		},
 		createFieldChart:function() {
@@ -726,6 +727,7 @@ let MyBuilderForm = {
 				state:'default',
 				onMobile:true,
 				columns:[],
+				collections:[],
 				autoRenew:null,
 				csvExport:false,
 				csvImport:false,
