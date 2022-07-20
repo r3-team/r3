@@ -1,4 +1,4 @@
-<p><em>Updated 2022-02-05</em></p>
+<p><em>Updated 2022-07-19</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -41,16 +41,16 @@
 <ol type="1">
 <li><a href="#platform-updates">Platform updates</a></li>
 </ol></li>
-<li><a href="#hosting-your-own-rei3-instance-in-the-cloud">Hosting your own REI3 instance in the cloud</a></li>
+<li><a href="#clustering-and-system-performance">Clustering and system performance</a></li>
+<li><a href="#cloud-operations">Cloud operations</a></li>
 </ol>
 <h1 id="introduction">Introduction</h1>
 <p>This is the documentation for deploying, configurating and operating the REI3 application platform. It assumes some system administration knowledge for the target infrastructure (Windows Server or Linux). Once running, administrators can deploy REI3 applications from online or local repositories in infrastructures with or without internet access.</p>
-<p>REI3 itself is an application service that serves pre-build web applications. REI3 applications build upon each other to reuse data and expand functionality.</p>
 <h1 id="deployment-models">Deployment models</h1>
 <p>To work within various customer environments, multiple deployment models are available for the REI3 platform; these are listed below in detail. Installation and configuration instructions follow afterwards.</p>
 <h2 id="stand-alone">Stand-alone</h2>
 <p>This model was created for small and medium size installations (~250 users) and is limited to Windows Server. The stand-alone deployment has almost no external dependencies. It is the recommended model for organizations with smaller IT teams as it requires little management.</p>
-<p>When running stand-alone, REI3 includes and manages its own internal database with full backups being configurable from within the REI3 admin UI. This deployment model does currently not support incremental backups; a limitation for large instances as full backups take longer to complete.</p>
+<p>When running stand-alone, REI3 includes and manages its own internal database with full backups being configurable from within the REI3 admin user interface. This deployment model does currently not support incremental backups; a limitation for large instances as full backups take longer to complete.</p>
 <p>It is always possible to migrate from stand-alone to the dedicated deployment model.</p>
 <h2 id="dedicated">Dedicated</h2>
 <p>In this model REI3 runs as an application separate from its database system. This is recommended for large instances or when an organization has a database team onhand. This version can be deployed to Linux and Windows servers.</p>
@@ -87,42 +87,42 @@
 </ul></li>
 <li>Software
 <ul>
-<li>Microsoft Visual C++ 2015 (Windows Server only)</li>
+<li>Microsoft Visual C++ 2015 (or newer - Windows Server only)</li>
 </ul></li>
 <li>Databases (dedicated deployment only)
 <ul>
-<li>PostgresSQL 12.2 or newer database with full permissions</li>
+<li>PostgresSQL 13.0 database (or newer) with full permissions</li>
 </ul></li>
 </ul>
 <h2 id="clients">Clients</h2>
-<p>To access a running REI3 instance, any modern browser can be used. This includes mobile browsers. REI3 uses modern web standards; it does not support <code>Internet Explorer</code>.</p>
+<p>To access a running REI3 instance, any modern browser can be used, like Firefox, Chrome or Safari. This includes mobile browsers. REI3 uses modern web standards; it does not support <code>Internet Explorer</code>.</p>
 <h1 id="installation">Installation</h1>
 <h2 id="on-windows-server">On Windows Server</h2>
-<p>REI3 comes with a graphical installer for Windows Server with installed desktop experience. The installer supports both stand-alone and dedicated deployment models.</p>
-<p>When choosing the stand-alone deployment model, following this installer is sufficient for the basic installation and REI3 can be started immediately.</p>
-<p>When choosing the dedicated model, database connection details for a running, empty PostgreSQL database must be entered into the configuration file <code>config.json</code>, inside the chosen application directory. With valid connection details to its database, REI3 will automatically complete the setup process on its first start.</p>
-<p>Independent of deployment model, on Windows Server, REI3 is handled as a Windows service and can be started as such. Should the service not start, REI3 will write to the Windows application log.</p>
+<p>REI3 comes with a graphical installer for Windows Server with installed desktop experience. The installer supports both <a href="#stand-alone">stand-alone</a> and <a href="#dedicated">dedicated</a> deployment models.</p>
+<p>When choosing the <a href="#stand-alone">stand-alone</a> deployment model, following this installer is sufficient for the basic installation and REI3 can be started immediately.</p>
+<p>When choosing the <a href="#dedicated">dedicated</a> model, database connection details for a running, empty PostgreSQL database must be entered into the configuration file <code>config.json</code>, inside the chosen application directory. With valid connection details to its database, REI3 will automatically complete the setup process on its first start.</p>
+<p>Independent of deployment model, on Windows Server, REI3 is handled as a Windows service and can be started as such. REI3 will write to the Windows application log, if the service does not start correctly.</p>
 <h2 id="on-a-linux-server">On a Linux server</h2>
-<p>For Linux servers REI3 currently provides a compressed archive with pre-compiled binaries. After extraction at a location of your choice, the file <code>r3</code> must be made executable and the configuration file <code>config.json</code> copied from its template file <code>config_template.json</code>.</p>
+<p>For Linux servers, REI3 currently provides a compressed archive with pre-compiled binaries. After extraction at a location of your choice, the file <code>r3</code> must be made executable and the configuration file <code>config.json</code> copied from its template file <code>config_template.json</code>.</p>
 <p>Before running REI3, you must enter valid connection details to a running, empty PostgreSQL database inside <code>config.json</code>. With valid connection details to its database, REI3 will automatically complete the setup process on its first start.</p>
 <p>To register REI3 as a service with your operating system, execute <code>r3 -install</code> with elevated permissions. REI3 writes to <code>syslog</code>, which can be referenced should the service not start.</p>
 <h1 id="first-access-to-rei3">First access to REI3</h1>
 <p>When running, REI3 is by default reachable on port 443. You can use any modern browser to access REI3 locally at <code>https://localhost/</code> or from the network, given a configured firewall. During installation, a single admin user is created; username and password are both 'admin'.</p>
-<p>After login, an admin user can access the admin UI to manage users, install applications, access system logs and so on. The default password should be changed immediately.</p>
+<p>After login, an admin user can access the admin user interface to manage users, install applications, access system logs and so on. The default password should be changed immediately.</p>
 <h1 id="configuration">Configuration</h1>
 <p>REI3s core configuration can be changed within its configuration file (<code>config.json</code>), which is located in the chosen REI3 installation directory. Setting file paths, web server port and database connection details is straightforward. Changes are applied when the application service restarts. Special configuration options and certification management is explained separately.</p>
 <h2 id="ssl-certificates">SSL certificates</h2>
 <p>During installation, REI3 creates a self-signed certificate to allow encrypted access to the application. It is not recommended to keep this certificate. If at all possible, a properly signed certificate should be provided for REI3 to ensure secure communication with trust between clients and server.</p>
 <p>We can offer support for setting up necessary infrastructure; it is however dependent on your organization to manage certificates. Cloud based offerings for REI3 include certification services.</p>
 <h1 id="general-administration">General administration</h1>
-<p>After configuration, basically all administrative tasks are executed via the admin UI inside the main REI3 web application. Any user defined as 'admin' has full access to these features.</p>
+<p>After configuration, basically all administrative tasks are executed via the admin user interface inside the main REI3 web application. Any user defined as 'admin' has full access to these features.</p>
 <h2 id="maintenance-mode">Maintenance mode</h2>
 <p>To execute deep system changes safely, a separate operation mode is available, called 'maintenance mode'. When enabled, all non-admin users are automatically logged off from the system; new logins are also rejected from non-admin users.</p>
 <p>In maintenance mode, applications may be installed, configured and deleted. Please be aware that deleting applications will permanently delete all corresponding data from the system. This is irreversable without current, functional backups.</p>
 <h2 id="builder-mode">Builder mode</h2>
 <p>When the maintenance mode is active, Builder mode can also be enabled. This gives admin users access to the integrated, graphical application builder utility, called 'Builder' for short. The Builder is a powerful tool. All REI3 applications are exclusively created and changed via the Builder. Please be aware that changing applications has permanent consequences up to and including data loss. Do not attempt to use the Builder in any productive instance. For testing or developing applications, a separated instance should be used. The portable version makes this easy on Windows clients. On Linux a separated application service, accessing a separate database, serves the same purpose.</p>
 <h2 id="authentication-and-authorization">Authentication and authorization</h2>
-<p>Users are authenticated in REI3 via defined login names and passwords. New logins can be created at will; there are no limits except that login names need to be unique. To grant access, application roles need to be assigned to logins. Roles work cumulatively; the more roles a login is assigned to, the more permissions are granted. Options for password complexity are available in the admin UI.</p>
+<p>Users are authenticated in REI3 via defined login names and passwords. New logins can be created at will; there are no limits except that login names need to be unique. To grant access, application roles need to be assigned to logins. Roles work cumulatively; the more roles a login is assigned to, the more permissions are granted. Options for password complexity are available in the admin user interface.</p>
 <h2 id="connecting-logins-to-data-sets">Connecting logins to data sets</h2>
 <p>Some applications relate data sets to logged in users to facilitate workflows. One example is the application 'Organizations', which connects logins to employees. This connection can then be used by all applications building on 'Organizations'. Other entities can be connected to logins as well, like connecting logins to customer accounts. Please refer to the corresponding application help pages to learn more.</p>
 <h2 id="authentication-and-authorization-via-ldap">Authentication and authorization via LDAP</h2>
@@ -133,14 +133,14 @@
 <li>Using multiple LDAD connections (or mixing local with LDAP logins), can cause name duplications to occur. The LDAP connection can be configured to use email addresses or other attributes for login names instead.</li>
 <li>Microsoft AD only: When a user account is disabled, active sessions are automatically closed during the next LDAP import.</li>
 </ul></li>
-<li>LDAP-Authorization: By reading group memberships application roles can automatically be assigned to logins.
+<li>LDAP-Authorization: By reading group memberships, application roles can automatically be assigned to logins.
 <ul>
 <li>Microsoft AD only: Nested group memberships are automatically resolved.</li>
 </ul></li>
 </ul>
 <h1 id="manage-applications">Manage applications</h1>
 <p>To get use out of REI3, applications need to be installed. To manage applications, the maintenance mode must be enabled first.</p>
-<p>Applications are installed via the admin UI. They can be retrieved from multiple sources:</p>
+<p>Applications are installed via the admin user interface. They can be retrieved from multiple sources:</p>
 <ul>
 <li>Official repository: Pre-installed repository for official REI3 applications. Internet access is required to access this online service.</li>
 <li>Local repository: For organizations running multiple REI3 instances and/or needing full control over all releases. A repository can be installed on any REI3 instance as it is a REI3 application as well.</li>
@@ -175,13 +175,40 @@
 </ul>
 <p>Incremental backups are useful for larger instances but are not covered by this documentation. Organizations large enough to require these, should either use their existing backup solutions or follow documented PostgreSQL practices for executing incremental backups.</p>
 <h1 id="updates">Updates</h1>
-<p>There are 2 kinds of updates to be handled - application updates and platform updates. Application updates are more common and serve to expand functionality for REI3 applications. These updates can be installed directly from the admin UI, when the maintenance mode is active. If the updates are received via repository, its a single-click operation. Manual updates must be provided via packaged application files. It is good practice to install updates in testing environments first as looks and behaviour can change between application releases.</p>
+<p>There are 2 kinds of updates to be handled - application updates and platform updates. Application updates are more common and serve to expand functionality for REI3 applications. These updates can be installed directly from the admin user interface, when the maintenance mode is active. If the updates are received via repository, its a single-click operation. Manual updates must be provided via packaged application files. It is good practice to install updates in testing environments first as looks and behaviour can change between application releases.</p>
 <p>Platform updates address the underlying platform software and might be necessary for application updates as well, if these require newer platform features. Because security and stability issues are fixed with platform updates, it is always good to update the platform itself.</p>
 <h2 id="platform-updates">Platform updates</h2>
 <p>If the graphical installer for Windows is used, an update can be directly started by executing a later version of the installer. The platform service will automatically be restarted.</p>
 <p>For Linux servers, stopping the service and overwriting files in the chosen application directory with the latest extractable package is required. Afterwards the service can be restarted.</p>
 <p>To update the portable version, stop any running REI3 instance and extract the contents of a later portable version into the portable application directory.</p>
-<h1 id="hosting-your-own-rei3-instance-in-the-cloud">Hosting your own REI3 instance in the cloud</h1>
+<h1 id="clustering-and-system-performance">Clustering and system performance</h1>
+<p>REI3 servers can be clustered to enable more requests and users to be handled at the same time. Before considering clustering, it is important to learn where perceived performance issues are coming from. REI3 is built to handle many users concurrently and is also able to use multiple processor cores and more memory to improve performance. Only if the CPU load/memory usage of the REI3 service is often very high, clustering multiple REI3 servers can make sense.</p>
+<p>In most cases, performance issues come from other sources:</p>
+<ul>
+<li>High database load. When running larger REI3 instances, the amount of requests can be too much for the database system. This can be seen by connecting to the database server and looking at its statistics. In this scenario, the REI3 service will be idle, while the database is overworked. To improve performance, the database system would need to be upgraded - either with better hardware or with clustering of the database system itself. Note that REI3 only supports clustered databases with the <a href="#dedicated">dedicated</a> deployment model. Clustering REI3 itself would not improve performance in this case.</li>
+<li>Missing or badly used indexes on database relations. This can be seen when connecting to the database server and running benchmarks on problematic requests. If indexes are not optimized, the author of the affected application can easily improve performance by updating them. Clustering REI3 would not result in any performance improvement in this case.</li>
+<li>Slow storage. Either the database system or REI3 itself is accessing slow storage systems. This can be seen, when both the REI3 application service and database system have very little load but requests still take a long time. In this case, improving latency/throughput of the underlying storage system will have the most impact on performance. Clustering REI3 servers would not help.</li>
+</ul>
+<p>Is the REI3 service actually the bottleneck, clustering can help - for this, the following requirements must be met:</p>
+<ul>
+<li>REI3 must be running in <a href="#dedicated">dedicated</a> deployment mode, meaning the database system must be separate from REI3 itself. Switching from <a href="#stand-alone">stand-alone</a> deployment to dedicated is always possible.</li>
+<li>REI3 servers must access the same storage location for their file paths.</li>
+<li>REI3 servers must access the same database.</li>
+<li>It does NOT matter, whether REI3 servers are running on different operating systems or processor architectures.</li>
+</ul>
+<p>Setting up clustering itself is very simple:</p>
+<ol type="1">
+<li>The already running REI3 server is by default already part of a one-server cluster, with itself as the cluster master. Nothing needs to be done here.</li>
+<li>To add additional server nodes, install REI3 on other servers and use the same database and file path settings in the REI3 configuration file <code>config.json</code>.
+<ul>
+<li>The file paths for the entire cluster must point to the same storage location - usually networks shares work well for this requirement.</li>
+<li>Choose any configuration in the 'web' part of the configuration file that fits with your infrastructure (which port to use, how certificate files are named, etc.).</li>
+<li>The <code>cluster/nodeId</code> must be left empty for new server nodes.</li>
+</ul></li>
+<li>As soon as a new server node connects to the existing REI3 database, it will register itself as a new cluster node and assigns itself a unique node ID.</li>
+</ol>
+<p>This is the entire setup. The cluster auto-configures and also automatically assigns cluster master role and tasks depending on which nodes are checking in.</p>
+<h1 id="cloud-operations">Cloud operations</h1>
 <p>REI3 can be made accessible on the internet by opening up corresponding firewall ports. We, the REI3 manufacturers, aim to make the platform as secure as possible. As with any other application, it is always possible that undiscovered security flaws are exploited and unauthorized access achieved. Besides regularly updating REI3 itself, it is our view that additional safety measures are necessary to safely run web applications in the cloud, such as:</p>
 <ul>
 <li>Running intrusion detection and prevention on the application server or firewalls</li>
