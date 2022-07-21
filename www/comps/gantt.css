@@ -59,6 +59,7 @@
 .gantt-headers{
 	height:60px;
 	position:relative;
+	background-color:var(--color-bg);
 }
 .gantt-header{
 	height:30px;

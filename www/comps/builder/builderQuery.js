@@ -649,7 +649,7 @@ let MyBuilderQuery = {
 				:showMove="true"
 			/>
 		</div>
-			
+		
 		<!-- choice filters -->
 		<div class="query-component" v-if="allowChoices && allowFilters && joins.length !== 0">
 			<div class="query-title">

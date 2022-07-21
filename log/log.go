@@ -7,20 +7,22 @@ import (
 	"r3/types"
 	"sync"
 
+	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"
 )
 
 var (
 	access_mx = sync.Mutex{}
 
-	// log outputs
-	outputCli bool
+	nodeId    uuid.UUID // ID of the current node
+	outputCli bool      // write logs also to command line
 
 	// log levels
 	contextLevel = map[string]int{
 		"application": 1,
 		"backup":      1,
 		"cache":       1,
+		"cluster":     1,
 		"csv":         1,
 		"mail":        1,
 		"ldap":        1,
@@ -38,9 +40,10 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
-	qb.AddList("SELECT", []string{"l.level", "l.context", "l.message", "l.date_milli", "m.name"})
+	qb.AddList("SELECT", []string{"l.level", "l.context", "l.message", "l.date_milli", "m.name", "n.name"})
 	qb.Set("FROM", "instance.log AS l")
 	qb.Add("JOIN", "LEFT JOIN app.module AS m ON m.id = l.module_id")
+	qb.Add("JOIN", "LEFT JOIN instance_cluster.node AS n ON n.id = l.node_id")
 
 	if context != "" {
 		qb.Add("WHERE", `l.context::TEXT = {CONTEXT}`)
@@ -83,7 +86,9 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 		var l types.Log
 		var dateMilli int64
 
-		if err := rows.Scan(&l.Level, &l.Context, &l.Message, &dateMilli, &l.ModuleName); err != nil {
+		if err := rows.Scan(&l.Level, &l.Context, &l.Message,
+			&dateMilli, &l.ModuleName, &l.NodeName); err != nil {
+
 			return nil, 0, err
 		}
 		l.Date = int64(dateMilli / 1000)
@@ -124,6 +129,12 @@ func SetLogLevel(context string, level int) {
 		return
 	}
 	contextLevel[context] = level
+}
+func SetNodeId(id uuid.UUID) {
+	access_mx.Lock()
+	defer access_mx.Unlock()
+
+	nodeId = id
 }
 
 func Info(context string, message string) {
@@ -171,9 +182,9 @@ func write(level int, context string, message string, err error) {
 		}
 
 		if _, err := db.Pool.Exec(db.Ctx, `
-			INSERT INTO instance.log (level, context, message, date_milli)
-			VALUES ($1,$2,$3,$4)
-		`, level, context, message, tools.GetTimeUnixMilli()); err != nil {
+			INSERT INTO instance.log (level, context, message, date_milli, node_id)
+			VALUES ($1,$2,$3,$4,$5)
+		`, level, context, message, tools.GetTimeUnixMilli(), nodeId); err != nil {
 
 			// if database logging fails, output error to CLI if available
 			if outputCli {

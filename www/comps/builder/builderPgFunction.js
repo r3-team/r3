@@ -21,12 +21,12 @@ let MyBuilderPgFunction = {
 						v-model="captions.pgFunctionTitle"
 						:contentName="capApp.titleOne"
 						:language="builderLanguage"
+						:longInput="true"
 					/>
 				</div>
 				<div class="area">
 					<my-button
 						@trigger="showSidebar = !showSidebar"
-						:darkBg="true"
 						:image="showSidebar ? 'toggleRight.png' : 'toggleLeft.png'"
 					/>
 				</div>
@@ -37,24 +37,20 @@ let MyBuilderPgFunction = {
 						@trigger="set"
 						:active="hasChanges"
 						:caption="capGen.button.save"
-						:darkBg="true"
 					/>
 					<my-button image="refresh.png"
 						@trigger="reset"
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
-						:darkBg="true"
 					/>
 					<my-button
 						@trigger="showHeader = !showHeader"
 						:caption="capApp.button.details"
-						:darkBg="true"
 						:image="showHeader ? 'visible1.png' : 'visible0.png'"
 					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
 						:caption="capGen.preview"
-						:darkBg="true"
 						:image="showPreview ? 'visible1.png' : 'visible0.png'"
 					/>
 				</div>
@@ -127,20 +123,17 @@ let MyBuilderPgFunction = {
 						v-if="isTrigger"
 						@trigger="addNew = !addNew"
 						:caption="capApp.button.addNew"
-						:darkBg="true"
 						:image="addNew ? 'checkbox1.png' : 'checkbox0.png'"
 					/>
 					<my-button
 						v-if="isTrigger"
 						@trigger="addOld = !addOld"
 						:caption="capApp.button.addOld"
-						:darkBg="true"
 						:image="addOld ? 'checkbox1.png' : 'checkbox0.png'"
 					/>
 					<my-button image="refresh.png"
 						@trigger="codeFunction = getPgFunctionTemplate()"
 						:caption="capApp.button.template"
-						:darkBg="true"
 					/>
 				</div>
 			</div>
@@ -243,7 +236,7 @@ let MyBuilderPgFunction = {
 				'get_login_language_code','get_public_hostname','get_role_ids',
 				'has_role','has_role_any','log_error','log_info','log_warning',
 				'mail_delete','mail_delete_after_attach','mail_get_next',
-				'mail_send'
+				'mail_send','update_collection'
 			],
 			
 			// states
@@ -313,6 +306,8 @@ let MyBuilderPgFunction = {
 			this.codeReturns    = this.pgFunction.codeReturns;
 			this.isFrontendExec = this.pgFunction.isFrontendExec;
 			this.isTrigger      = this.pgFunction.isTrigger;
+			this.addNew         = false;
+			this.addOld         = false;
 		},
 		insertEntitySelected:function(evt) {
 			if(this.entitySelectedId === null)

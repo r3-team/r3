@@ -20,6 +20,7 @@
 	box-shadow:0px 1px 2px var(--color-shade);
 	cursor:pointer;
 	outline:none;
+	transition:box-shadow 0.1s, border-bottom 0.1s;
 }
 .bool>div.small{
 	height:20px;
@@ -28,8 +29,9 @@
 	background-color:var(--color-action-bright);
 	box-shadow:0px 1px 2px var(--color-shade);
 }
-.bool:focus>div,
-.bool:hover>div{
+.bool:not(.readonly):focus>div,
+.bool:not(.readonly):hover>div{
+	border-bottom:2px solid var(--color-border-bg);
 	box-shadow:0px 2px 5px var(--color-shade);
 }
 .bool>div.left{
@@ -148,6 +150,7 @@
 .input-collection .context{
 	display:flex;
 	flex-flow:column nowrap;
+	border-top:1px solid var(--color-border);
 }
 
 /* input dropdown */
@@ -178,7 +181,7 @@
 	border-top:none;
 	border-bottom-width:2px;
 	background-color:var(--color-bg);
-	box-shadow:1px 1px 3px var(--color-shade);
+	box-shadow:1px 6px 6px var(--color-shade);
 }
 .input-dropdown.upwards{
 	bottom:0px;
@@ -203,7 +206,6 @@
 }
 .input-offset .input-offset-caption{
 	flex:0 0 auto;
-	margin:0px 4px 0px 0px;
 }
 .input-offset .input-offset-selector{
 	width:auto;
@@ -343,12 +345,12 @@
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
-	font-family:"Lucida Console",Monaco,monospace;
+	font-family:'Lucida Console',Monaco,monospace;
 }
 .input-date .date-inputs .time-separator{
 	margin:0px 8px 0px 0px;
 }
-.input-date input.date-input{
+.input-date .date-inputs input{
 	min-width:unset;
 	margin:0px;
 	padding:0px;
@@ -375,7 +377,7 @@
 	border:1px solid var(--color-border);
 	border-top:none;
 	border-bottom-width:2px;
-	box-shadow:1px 1px 3px var(--color-shade);
+	box-shadow:1px 6px 12px var(--color-shade);
 	z-index:var(--z-index-input-date-month);
 }
 .input-date .month.upwards{

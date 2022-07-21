@@ -97,10 +97,316 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 // mapped by current database version string, returns new database version string
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
-	// clean up next release
-	// ALTER TABLE app.form_state_condition_side ALTER COLUMN content
-	//	TYPE app.filter_side_content USING content::text::app.filter_side_content;
+	// clean up on next release
+	// ALTER TABLE app.role ALTER COLUMN content
+	//		TYPE app.role_content USING content::text::app.role_content;
+	// ALTER TABLE app.collection_consumer ALTER COLUMN content
+	//		TYPE app.collection_consumer_content USING content::text::app.collection_consumer_content;
+	// ALTER TABLE instance.login_setting ALTER COLUMN font_family
+	//		TYPE instance.login_setting_font_family USING font_family::text::instance.login_setting_font_family;
+	// ALTER TABLE instance.login_setting ALTER COLUMN pattern
+	//      TYPE instance.login_setting_pattern USING pattern::text::instance.login_setting_pattern;
 
+	"2.7": func(tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(db.Ctx, `
+			-- cleanup from last release
+			ALTER TABLE app.form_state_condition_side ALTER COLUMN content
+				TYPE app.filter_side_content USING content::text::app.filter_side_content;
+			
+			-- new role content
+			ALTER TABLE app.role ADD COLUMN content TEXT NOT NULL DEFAULT 'user';
+			ALTER TABLE app.role ALTER COLUMN content DROP DEFAULT;
+			UPDATE app.role SET content = 'admin' WHERE name ILIKE '%admin%';
+			UPDATE app.role SET content = 'other' WHERE name ILIKE '%data%' OR name ILIKE '%csv%';
+			UPDATE app.role SET content = 'everyone' WHERE name = 'everyone';
+			CREATE TYPE app.role_content AS ENUM ('admin','everyone','other','user');
+			
+			-- new JS function dependency
+			ALTER TABLE app.js_function_depends ADD COLUMN collection_id_on UUID;
+			ALTER TABLE app.js_function_depends ADD CONSTRAINT js_function_depends_collection_id_on_fkey FOREIGN KEY (collection_id_on)
+				REFERENCES app.collection (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			CREATE INDEX IF NOT EXISTS fki_js_function_depends_collection_id_on_fkey ON app.js_function_depends
+				USING BTREE (collection_id_on ASC NULLS LAST);
+			
+			-- collection consumer changes / additions
+			CREATE TYPE app.collection_consumer_content AS ENUM(
+				'fieldDataDefault','fieldFilterSelector','headerDisplay','menuDisplay');
+			
+			ALTER TABLE app.collection_consumer ADD COLUMN menu_id UUID;
+			ALTER TABLE app.collection_consumer
+				ADD CONSTRAINT collection_consumer_menu_id_fkey FOREIGN KEY (menu_id)
+				REFERENCES app.menu (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			CREATE INDEX IF NOT EXISTS fki_collection_consumer_menu_id_fkey ON app.collection_consumer
+				USING BTREE (menu_id ASC NULLS LAST);
+			
+			ALTER TABLE app.collection_consumer ADD COLUMN id UUID PRIMARY KEY DEFAULT gen_random_uuid();
+			ALTER TABLE app.collection_consumer ADD COLUMN on_mobile BOOLEAN NOT NULL DEFAULT false;
+			ALTER TABLE app.collection_consumer ADD COLUMN no_display_empty BOOLEAN NOT NULL DEFAULT false;
+			ALTER TABLE app.collection_consumer ADD COLUMN content TEXT NOT NULL DEFAULT 'fieldFilterSelector';
+			ALTER TABLE app.collection_consumer ALTER COLUMN id DROP DEFAULT;
+			ALTER TABLE app.collection_consumer ALTER COLUMN on_mobile DROP DEFAULT;
+			ALTER TABLE app.collection_consumer ALTER COLUMN no_display_empty DROP DEFAULT;
+			ALTER TABLE app.collection_consumer ALTER COLUMN content DROP DEFAULT;
+			
+			INSERT INTO app.collection_consumer (
+				id, collection_id, column_id_display, field_id, content,
+				multi_value, on_mobile, no_display_empty
+			)
+				SELECT gen_random_uuid(), collection_id_def, column_id_def,
+					field_id, 'fieldDataDefault', false, false, false
+				FROM app.field_data
+				WHERE collection_id_def IS NOT NULL;
+			
+			ALTER TABLE app.field_data
+				DROP COLUMN collection_id_def,
+				DROP COLUMN column_id_def;
+			
+			-- open form collection consumer
+			ALTER TABLE app.open_form ADD COLUMN collection_consumer_id UUID;
+			ALTER TABLE app.open_form ADD CONSTRAINT open_form_collection_consumer_id_fkey FOREIGN KEY (collection_consumer_id)
+				REFERENCES app.collection_consumer (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			CREATE INDEX IF NOT EXISTS fki_open_form_collection_consumer_id_fkey ON app.open_form
+				USING BTREE (collection_consumer_id ASC NULLS LAST);
+			
+			-- new login settings
+			ALTER TABLE instance.login_setting ADD COLUMN menu_colored BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE instance.login_setting ALTER COLUMN menu_colored DROP DEFAULT;
+			ALTER TABLE instance.login_setting ADD COLUMN font_family TEXT NOT NULL DEFAULT 'helvetica';
+			ALTER TABLE instance.login_setting ALTER COLUMN font_family DROP DEFAULT;
+			
+			CREATE TYPE instance.login_setting_font_family AS ENUM (
+				'calibri','comic_sans_ms','consolas','georgia','helvetica',
+				'lucida_console','segoe_script','segoe_ui','times_new_roman',
+				'trebuchet_ms','verdana'
+			);
+			
+			CREATE TYPE instance.login_setting_pattern AS ENUM ('bubbles','waves');
+			ALTER TABLE instance.login_setting ADD COLUMN pattern TEXT DEFAULT 'bubbles';
+			ALTER TABLE instance.login_setting ALTER COLUMN pattern DROP DEFAULT;
+			
+			-- new schema for cluster operation
+			CREATE SCHEMA instance_cluster;
+			
+			-- new type for cluster event
+			CREATE TYPE instance_cluster.node_event_content AS ENUM (
+				'collectionUpdated','configChanged','loginDisabled',
+				'loginReauthorized','loginReauthorizedAll','masterAssigned',
+				'schemaChanged','shutdownTriggered','tasksChanged','taskTriggered'
+			);
+			
+			-- new cluster tables
+			CREATE TABLE IF NOT EXISTS instance_cluster.node (
+			    id uuid NOT NULL,
+			    name text COLLATE pg_catalog."default" NOT NULL,
+				hostname text COLLATE pg_catalog."default" NOT NULL,
+			    date_check_in bigint NOT NULL,
+			    date_started bigint NOT NULL,
+			    stat_sessions integer NOT NULL,
+			    stat_memory integer NOT NULL,
+				cluster_master bool NOT NULL,
+				running bool NOT NULL,
+			    CONSTRAINT node_pkey PRIMARY KEY (id)
+			);
+			
+			CREATE TABLE IF NOT EXISTS instance_cluster.node_event (
+			    node_id uuid NOT NULL,
+				content instance_cluster.node_event_content NOT NULL,
+				payload TEXT NOT NULL,
+			    CONSTRAINT node_event_node_id_fkey FOREIGN KEY (node_id)
+			        REFERENCES instance_cluster.node (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_node_event_node_fkey ON instance_cluster.node_event
+				USING BTREE (node_id ASC NULLS LAST);
+			
+			-- new cluster logging context
+			ALTER TYPE instance.log_context ADD VALUE 'cluster';
+			INSERT INTO instance.config (name,value) VALUES ('logCluster',2);
+			
+			ALTER TABLE instance.log ADD COLUMN node_id UUID;
+			ALTER TABLE instance.log ADD CONSTRAINT log_node_id_fkey FOREIGN KEY (node_id)
+		        REFERENCES instance_cluster.node (id) MATCH SIMPLE
+		        ON UPDATE CASCADE
+		        ON DELETE CASCADE
+		        DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_log_node_fkey ON instance.log
+				USING BTREE (node_id ASC NULLS LAST);
+			
+			-- new config option
+			INSERT INTO instance.config (name,value)
+			VALUES ('clusterNodeMissingAfter','180');
+			
+			-- new task option: Execute only by cluster master
+			ALTER TABLE instance.task ADD COLUMN cluster_master_only BOOL NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.task ALTER COLUMN cluster_master_only DROP DEFAULT;
+			UPDATE instance.task SET cluster_master_only = FALSE
+			WHERE name IN ('cleanupBruteforce','httpCertRenew');
+			
+			-- new task option: Cannot be disabled
+			ALTER TABLE instance.task ADD COLUMN active_only BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE instance.task ALTER COLUMN active_only DROP DEFAULT;
+			
+			-- rename instance schedule, add PK
+			ALTER TABLE instance.scheduler RENAME TO schedule;
+			ALTER TABLE instance.schedule ADD COLUMN id SERIAL PRIMARY KEY;
+			
+			-- add node schedule table
+			CREATE TABLE IF NOT EXISTS instance_cluster.node_schedule (
+			    node_id uuid NOT NULL,
+			    schedule_id integer NOT NULL,
+			    date_attempt bigint NOT NULL,
+			    date_success bigint NOT NULL,
+			    CONSTRAINT node_schedule_pkey PRIMARY KEY (node_id, schedule_id),
+			    CONSTRAINT node_schedule_node_id_fkey FOREIGN KEY (node_id)
+			        REFERENCES instance_cluster.node (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT node_schedule_schedule_id_fkey FOREIGN KEY (schedule_id)
+			        REFERENCES instance.schedule (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_node_schedule_node_id_fkey ON instance_cluster.node_schedule
+				USING BTREE (node_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_node_schedule_schedule_id_fkey ON instance_cluster.node_schedule
+				USING BTREE (schedule_id ASC NULLS LAST);
+			
+			-- new tasks
+			INSERT INTO instance.task (
+				name,interval_seconds,cluster_master_only,
+				embedded_only,active_only,active
+			)
+			VALUES
+				('clusterCheckIn',60,false,false,true,true),
+				('clusterProcessEvents',5,false,false,true,true);
+			
+			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
+			VALUES ('clusterCheckIn',0,0),('clusterProcessEvents',0,0);
+			
+			-- new function: Request master role
+			CREATE OR REPLACE FUNCTION instance_cluster.master_role_request(
+				node_id_requested uuid)
+			    RETURNS integer
+			    LANGUAGE 'plpgsql'
+			    COST 100
+			    VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			    master_missing_after INT;
+			    unix_master_check_in BIGINT;
+			BEGIN
+			    SELECT value::INT INTO master_missing_after
+			    FROM instance.config
+			    WHERE name = 'clusterNodeMissingAfter';
+				
+			    SELECT date_check_in INTO unix_master_check_in
+			    FROM instance_cluster.node
+			    WHERE cluster_master;
+			    
+			    IF EXTRACT(EPOCH FROM NOW()) < unix_master_check_in + master_missing_after THEN
+			        -- current master is not missing
+			        RETURN 0;
+			    END IF;
+			    
+			    -- new master accepted, switch over
+			    UPDATE instance_cluster.node
+			    SET cluster_master = FALSE;
+			    
+			    UPDATE instance_cluster.node
+			    SET cluster_master = TRUE
+			    WHERE id = node_id_requested;
+			    
+			    -- assign master switch over tasks to all nodes
+			    INSERT INTO instance_cluster.node_event (node_id,content,payload)
+			        SELECT id, 'masterAssigned', '{"state":false}'
+			        FROM instance_cluster.node
+			        WHERE cluster_master = FALSE;
+			    
+			    INSERT INTO instance_cluster.node_event (node_id,content,payload)
+			    VALUES (node_id_requested, 'masterAssigned', '{"state":true}');
+				
+				RETURN 0;
+			END;
+			$BODY$;
+			CREATE OR REPLACE FUNCTION instance_cluster.run_task(
+				task_name text,
+				pg_function_id uuid,
+				pg_function_schedule_id uuid)
+			    RETURNS integer
+			    LANGUAGE 'plpgsql'
+			    COST 100
+			    VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+				needs_master BOOLEAN;
+			BEGIN
+				IF task_name <> '' THEN
+					SELECT cluster_master_only INTO needs_master
+					FROM instance.task
+					WHERE name = task_name;
+					
+					IF needs_master IS NULL THEN
+						RETURN 1;
+					END IF;
+				
+					-- run system task
+					INSERT INTO instance_cluster.node_event (node_id, content, payload)
+						SELECT id, 'taskTriggered', CONCAT('{"taskName":"',task_name,'"}')
+						FROM instance_cluster.node
+						WHERE needs_master = FALSE
+						OR cluster_master;
+					
+					RETURN 0;
+				END IF;
+				
+				-- run PG function by schedule (always run by cluster master)
+				INSERT INTO instance_cluster.node_event (node_id, content, payload)
+					SELECT id, 'taskTriggered', CONCAT('{"pgFunctionId":"',pg_function_id,'","pgFunctionScheduleId":"',pg_function_schedule_id,'"}')
+					FROM instance_cluster.node
+					WHERE cluster_master;
+				
+				RETURN 0;
+			END;
+			$BODY$;
+			
+			-- new collection update call
+			CREATE OR REPLACE FUNCTION instance.update_collection(
+				collection_id UUID,
+				login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[])
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+				COST 100
+				VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				INSERT INTO instance_cluster.node_event (node_id,content,payload)
+					SELECT id, 'collectionUpdated', CONCAT('{"collectionId":"',collection_id,'","loginIds":',TO_JSON(login_ids),'}')
+					FROM instance_cluster.node;
+				
+				RETURN 0;
+			END;
+			$BODY$;
+		`)
+		return "3.0", err
+	},
 	"2.6": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
 			-- extend and rename query filter side content (to be used by form state condition as well)

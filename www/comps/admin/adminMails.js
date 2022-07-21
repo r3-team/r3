@@ -17,7 +17,6 @@ let MyAdminMails = {
 				<my-button image="refresh.png"
 					@trigger="get"
 					:caption="capGen.button.refresh"
-					:darkBg="true"
 				/>
 				<my-button image="delete.png"
 					v-if="!noMails"
@@ -25,26 +24,22 @@ let MyAdminMails = {
 					:active="mailIdsSelected.length !== 0"
 					:cancel="true"
 					:caption="capGen.button.delete"
-					:darkBg="true"
 				/>
 			</div>
 			<div class="area" v-if="!noMails">
 				<my-button image="triangleLeft.png"
 					@trigger="offsetSet(false)"
 					:active="offset-limit >= 0"
-					:darkBg="true"
 					:naked="true"
 				/>
 				<my-button
 					@trigger="startSet"
 					:caption="String((offset / limit) + 1)"
-					:darkBg="true"
 					:naked="true"
 				/>
 				<my-button image="triangleRight.png"
 					@trigger="offsetSet(true)"
 					:active="mails.length === limit"
-					:darkBg="true"
 					:naked="true"
 				/>
 			</div>

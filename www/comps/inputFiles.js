@@ -42,7 +42,6 @@ let MyInputFiles = {
 					v-if="!readonly"
 					@trigger="remove(f.id)"
 					:cancel="true"
-					:darkBg="true"
 				/>
 				<a class="slide" target="_blank"
 					v-if="!f.new || showNew"
@@ -58,17 +57,14 @@ let MyInputFiles = {
 				<my-button image="arrowLeft.png"
 					@trigger="galleryIndex--"
 					:active="galleryIndex !== 0"
-					:darkBg="true"
 				/>
 				<my-button
 					@trigger="galleryIndex !== 0 ? galleryIndex = 0 : galleryIndex = files.length -1"
 					:caption="(galleryIndex+1) + '/' + files.length"
-					:darkBg="true"
 				/>
 				<my-button image="arrowRight.png"
 					@trigger="galleryIndex++"
 					:active="galleryIndex < files.length-1"
-					:darkBg="true"
 				/>
 			</div>
 		</div>

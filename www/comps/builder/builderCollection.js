@@ -1,6 +1,8 @@
-import MyBuilderQuery     from './builderQuery.js';
-import {getNilUuid}       from '../shared/generic.js';
-import {getQueryTemplate} from '../shared/query.js';
+import MyBuilderQuery                  from './builderQuery.js';
+import MyBuilderCollectionInput        from './builderCollectionInput.js';
+import {getCollectionConsumerTemplate} from '../shared/collection.js';
+import {getNilUuid}                    from '../shared/generic.js';
+import {getQueryTemplate}              from '../shared/query.js';
 import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
@@ -10,6 +12,7 @@ export {MyBuilderCollection as default};
 let MyBuilderCollection = {
 	name:'my-builder-collection',
 	components:{
+		MyBuilderCollectionInput,
 		MyBuilderColumns,
 		MyBuilderColumnTemplates,
 		MyBuilderQuery
@@ -27,7 +30,6 @@ let MyBuilderCollection = {
 				<div class="area">
 					<my-button
 						@trigger="showSidebar = !showSidebar"
-						:darkBg="true"
 						:image="showSidebar ? 'toggleRight.png' : 'toggleLeft.png'"
 					/>
 				</div>
@@ -38,24 +40,28 @@ let MyBuilderCollection = {
 						@trigger="set"
 						:active="hasChanges"
 						:caption="capGen.button.save"
-						:darkBg="true"
 					/>
 					<my-button image="refresh.png"
 						@trigger="reset"
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
-						:darkBg="true"
+					/>
+					<my-button
+						@trigger="showInHeader = !showInHeader"
+						:caption="capApp.button.inHeader"
+						:image="showInHeader ? 'visible1.png' : 'visible0.png'"
 					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
 						:caption="capGen.preview"
-						:darkBg="true"
 						:image="showPreview ? 'visible1.png' : 'visible0.png'"
 					/>
 				</div>
 			</div>
 			
 			<div class="content no-padding">
+			
+				<!-- collection value preview -->
 				<div class="preview" v-if="showPreview">
 					<table>
 						<thead>
@@ -74,6 +80,39 @@ let MyBuilderCollection = {
 					<p>{{ capApp.previewHint }}</p>
 				</div>
 				
+				<!-- collection to be shown in application header -->
+				<div class="inHeader default-inputs" v-if="showInHeader">
+					<table>
+						<tr>
+							<td>
+								<my-button image="add.png"
+									@trigger="collectionAdd"
+									:caption="capGen.button.add"
+									:naked="true"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>
+								<my-builder-collection-input
+									v-for="(c,i) in inHeader"
+									@remove="collectionRemove(i)"
+									@update:consumer="collectionSet(i,$event)"
+									:allowFormOpen="true"
+									:allowRemove="true"
+									:consumer="c"
+									:fixedCollection="true"
+									:module="module"
+									:showMultiValue="false"
+									:showNoDisplayEmpty="true"
+									:showOnMobile="true"
+								/>
+							</td>
+						</tr>
+					</table>
+				</div>
+				
+				<!-- collection query columns -->
 				<div class="columnsTarget">
 					<div v-if="columns.length === 0">{{ capApp.columnsTarget }}</div>
 					<my-builder-columns groupName="columns"
@@ -188,8 +227,10 @@ let MyBuilderCollection = {
 			// inputs
 			columns:[],
 			columnIdQuery:null,
+			inHeader:[],
 			
 			// state
+			showInHeader:false,
 			showPreview:false,
 			showSidebar:true
 		};
@@ -212,12 +253,13 @@ let MyBuilderCollection = {
 		
 		// states
 		hasChanges:function() {
-			return this.relationId              !== this.collection.query.relationId
-				|| this.fixedLimit              !== this.collection.query.fixedLimit
-				|| JSON.stringify(this.joins)   !== JSON.stringify(this.collection.query.joins)
-				|| JSON.stringify(this.filters) !== JSON.stringify(this.collection.query.filters)
-				|| JSON.stringify(this.orders)  !== JSON.stringify(this.collection.query.orders)
-				|| JSON.stringify(this.columns) !== JSON.stringify(this.collection.columns)
+			return this.relationId               !== this.collection.query.relationId
+				|| this.fixedLimit               !== this.collection.query.fixedLimit
+				|| JSON.stringify(this.joins)    !== JSON.stringify(this.collection.query.joins)
+				|| JSON.stringify(this.filters)  !== JSON.stringify(this.collection.query.filters)
+				|| JSON.stringify(this.orders)   !== JSON.stringify(this.collection.query.orders)
+				|| JSON.stringify(this.columns)  !== JSON.stringify(this.collection.columns)
+				|| JSON.stringify(this.inHeader) !== JSON.stringify(this.collection.inHeader)
 			;
 		},
 		showColumnQuery:function() {
@@ -256,9 +298,23 @@ let MyBuilderCollection = {
 	},
 	methods:{
 		// externals
+		getCollectionConsumerTemplate,
 		getNilUuid,
 		
 		// actions
+		collectionAdd:function() {
+			let v = JSON.parse(JSON.stringify(this.inHeader));
+			let c = this.getCollectionConsumerTemplate();
+			c.collectionId = this.collection.id;
+			v.push(c);
+			this.inHeader = v;
+		},
+		collectionRemove:function(i) {
+			this.inHeader.splice(i,1);
+		},
+		collectionSet:function(i,value) {
+			this.inHeader[i] = value;
+		},
 		columnQuerySet:function(name,value) {
 			let v = JSON.parse(JSON.stringify(this.columnQueryEdit.query));
 			v[name] = value;
@@ -283,6 +339,7 @@ let MyBuilderCollection = {
 			this.filters    = JSON.parse(JSON.stringify(this.collection.query.filters));
 			this.orders     = JSON.parse(JSON.stringify(this.collection.query.orders));
 			this.columns    = JSON.parse(JSON.stringify(this.collection.columns));
+			this.inHeader   = JSON.parse(JSON.stringify(this.collection.inHeader));
 		},
 		
 		// helpers
@@ -297,29 +354,27 @@ let MyBuilderCollection = {
 		
 		// backend calls
 		set:function() {
-			let requests = [];
-			requests.push(ws.prepare('collection','set',{
-				id:this.collection.id,
-				iconId:this.collection.iconId,
-				moduleId:this.collection.moduleId,
-				name:this.collection.name,
-				columns:this.replaceBuilderId(
-					JSON.parse(JSON.stringify(this.columns))
-				),
-				query:{
-					id:this.collection.query.id,
-					relationId:this.relationId,
-					joins:this.joins,
-					filters:this.filters,
-					orders:this.orders,
-					fixedLimit:this.fixedLimit
-				}
-			}));
-			requests.push(ws.prepare('schema','check',{
-				moduleId:this.collection.moduleId
-			}));
-			
-			ws.sendMultiple(requests,true).then(
+			ws.sendMultiple([
+				ws.prepare('collection','set',{
+					id:this.collection.id,
+					iconId:this.collection.iconId,
+					moduleId:this.collection.moduleId,
+					name:this.collection.name,
+					columns:this.replaceBuilderId(
+						JSON.parse(JSON.stringify(this.columns))
+					),
+					query:{
+						id:this.collection.query.id,
+						relationId:this.relationId,
+						joins:this.joins,
+						filters:this.filters,
+						orders:this.orders,
+						fixedLimit:this.fixedLimit
+					},
+					inHeader:this.inHeader
+				}),
+				ws.prepare('schema','check',{moduleId:this.module.id})
+			],true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);

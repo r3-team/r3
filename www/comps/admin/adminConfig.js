@@ -20,13 +20,11 @@ let MyAdminConfig = {
 					@trigger="set"
 					:active="hasChanges"
 					:caption="capApp.button.apply"
-					:darkBg="true"
 				/>
 				<my-button image="refresh.png"
 					@trigger="configInput = JSON.parse(JSON.stringify(config))"
 					:active="hasChanges"
 					:caption="capGen.button.refresh"
-					:darkBg="true"
 				/>
 			</div>
 		</div>
@@ -365,6 +363,16 @@ let MyAdminConfig = {
 						<td>{{ capApp.logLevelScheduler }}</td>
 						<td>
 							<select v-model="configInput.logScheduler">
+								<option value="1">{{ capApp.logLevel1 }}</option>
+								<option value="2">{{ capApp.logLevel2 }}</option>
+								<option value="3">{{ capApp.logLevel3 }}</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.logLevelCluster }}</td>
+						<td>
+							<select v-model="configInput.logCluster">
 								<option value="1">{{ capApp.logLevel1 }}</option>
 								<option value="2">{{ capApp.logLevel2 }}</option>
 								<option value="3">{{ capApp.logLevel3 }}</option>
@@ -775,29 +783,7 @@ let MyAdminConfig = {
 		},
 		set:function() {
 			ws.send('config','set',this.configInput,true).then(
-				() => {
-					// switch to maintenance mode
-					if(this.configInput.productionMode === '0' && this.config.productionMode === '1') {
-						ws.send('login','kickNonAdmins',{},false).then(
-							() => {},
-							this.$root.genericError
-						);
-					}
-					
-					// inform clients about changed builder mode
-					if(this.configInput.builderMode !== this.config.builderMode) {
-						ws.send('login','informBuilderState',{},false).then(
-							() => {},
-							this.$root.genericError
-						);
-					}
-					
-					// update store config
-					this.$store.commit('config',JSON.parse(JSON.stringify(this.configInput)));
-					
-					// reload customizing
-					this.$root.initPublic(); 
-				},
+				() => {},
 				this.$root.genericError
 			);
 		}

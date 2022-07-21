@@ -76,6 +76,7 @@ let MyList = {
 								:active="!inputIsReadonly"
 								:image="displayRecordCheck(inputRecordIds.includes(r.indexRecordIds['0']))"
 								:naked="true"
+								:tight="true"
 							/>
 						</div>
 					</td>
@@ -112,6 +113,7 @@ let MyList = {
 								@trigger="inputTriggerRowRemove(i)"
 								:captionTitle="capApp.inputHintRemove"
 								:naked="true"
+								:tight="true"
 							/>
 							<my-button image="open.png"
 								v-if="inputOpenForm && hasUpdate"
@@ -119,6 +121,7 @@ let MyList = {
 								@trigger-middle="$emit('open-form',r.indexRecordIds['0'],true)"
 								:captionTitle="capApp.inputHintOpen"
 								:naked="true"
+								:tight="true"
 							/>
 							
 							<!-- show dropdown toggle if single input -->
@@ -126,6 +129,7 @@ let MyList = {
 								v-if="!inputAsCategory && !showInputAddLine && !inputIsReadonly"
 								@trigger="toggleDropdown"
 								:naked="true"
+								:tight="true"
 							/>
 						</div>
 					</td>
@@ -163,12 +167,14 @@ let MyList = {
 										@trigger-middle="$emit('open-form',0,true)"
 										:captionTitle="capApp.inputHintCreate"
 										:naked="true"
+										:tight="true"
 									/>
 									<my-button image="arrowDown.png"
 										v-if="!inputIsReadonly"
 										@trigger="toggleDropdown"
 										:captionTitle="capApp.inputHintSelect"
 										:naked="true"
+										:tight="true"
 									/>
 								</div>
 							</td>
@@ -193,14 +199,12 @@ let MyList = {
 						@trigger-middle="$emit('open-form',0,true)"
 						:caption="!isMobile ? capGen.button.new : ''"
 						:captionTitle="capGen.button.newHint"
-						:darkBg="true"
 					/>
 					<my-button image="sheet.png"
 						v-if="csvImport || csvExport"
 						@trigger="showCsv = !showCsv"
 						:caption="!isMobile ? capApp.button.csv : ''"
 						:captionTitle="capApp.button.csvHint"
-						:darkBg="true"
 					/>
 					<my-button image="delete.png"
 						v-if="hasBulkActions"
@@ -209,7 +213,6 @@ let MyList = {
 						:cancel="true"
 						:caption="!isMobile ? capGen.button.delete : ''"
 						:captionTitle="capGen.button.deleteHint"
-						:darkBg="true"
 					/>
 				</div>
 				
@@ -224,7 +227,6 @@ let MyList = {
 						v-if="allowPaging"
 						@input="offset = $event;reloadInside()"
 						:caption="!isMobile ? true : false"
-						:darkBg="true"
 						:limit="limit"
 						:offset="offset"
 						:total="count"
@@ -239,14 +241,16 @@ let MyList = {
 						@trigger="showAutoRenew = !showAutoRenew"
 						:caption="capApp.button.autoRenew.replace('{VALUE}',autoRenewInput)"
 						:captionTitle="capApp.button.autoRenewHint.replace('{VALUE}',autoRenewInput)"
-						:darkBg="true"
+						:naked="true"
+						:tight="true"
 					/>
 					
 					<my-button image="refresh.png"
 						v-if="!isMobile"
 						@trigger="reloadInside('manual')"
 						:captionTitle="capGen.button.refresh"
-						:darkBg="true"
+						:naked="true"
+						:tight="true"
 					/>
 					
 					<my-button image="filter.png"
@@ -254,7 +258,8 @@ let MyList = {
 						@trigger="toggleUserFilters"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
-						:darkBg="true"
+						:naked="true"
+						:tight="true"
 					/>
 					
 					<input class="selector lookup" type="text"
@@ -298,13 +303,13 @@ let MyList = {
 				<!-- list header functions -->
 				
 				<!-- auto renew -->
-				<div class="list-header default-inputs" v-if="showAutoRenew">
+				<div class="list-header" v-if="showAutoRenew">
 					<div class="list-header-title">
 						<img src="images/autoRenew.png" />
 						<span>{{ capApp.autoRenew }}</span>
 					</div>
 					
-					<div class="list-auto-renew-line">
+					<div class="list-auto-renew-line default-inputs">
 						<span>{{ capApp.autoRenewInput }}</span>
 						<input class="short"
 							v-model.number="autoRenewInput"
@@ -317,8 +322,8 @@ let MyList = {
 					</div>
 				</div>
 				
-				<div class="list-header default-inputs" v-if="showFilters">
-					<my-filters
+				<div class="list-header" v-if="showFilters">
+					<my-filters class="default-inputs"
 						v-model="filtersUser"
 						@apply="reloadInside('filtersUser')"
 						@reset="reloadInside('filtersUser')"
@@ -338,18 +343,19 @@ let MyList = {
 					</my-filters>
 				</div>
 				
-				<my-list-csv class="default-inputs"
-					v-if="showCsv"
-					@reload="get"
-					:columns="columns"
-					:expressions="expressions"
-					:filters="filters.concat(filtersParsedQuick).concat(filtersParsedUser)"
-					:isExport="csvExport"
-					:isImport="csvImport"
-					:joins="getRelationsJoined(joins)"
-					:orders="orders"
-					:query="query"
-				/>
+				<div class="list-header" v-if="showCsv">
+					<my-list-csv
+						@reload="get"
+						:columns="columns"
+						:expressions="expressions"
+						:filters="filters.concat(filtersParsedQuick).concat(filtersParsedUser)"
+						:isExport="csvExport"
+						:isImport="csvImport"
+						:joins="getRelationsJoined(joins)"
+						:orders="orders"
+						:query="query"
+					/>
+				</div>
 			</div>
 			
 			<div class="layoutTable"
@@ -416,6 +422,7 @@ let MyList = {
 										:caption="capApp.button.all"
 										:captionTitle="capApp.button.allHint"
 										:naked="true"
+										:tight="true"
 									/>
 								</div>
 							</td>

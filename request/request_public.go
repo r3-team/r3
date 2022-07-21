@@ -11,7 +11,7 @@ func PublicGet() (interface{}, error) {
 		AppName            string   `json:"appName"`
 		AppNameShort       string   `json:"appNameShort"`
 		AppVersion         string   `json:"appVersion"`
-		Builder            bool     `json:"builder"`
+		ClusterNodeName    string   `json:"clusterNodeName"`
 		CompanyColorHeader string   `json:"companyColorHeader"`
 		CompanyColorLogin  string   `json:"companyColorLogin"`
 		CompanyLogo        string   `json:"companyLogo"`
@@ -26,7 +26,7 @@ func PublicGet() (interface{}, error) {
 	res.AppName = config.GetString("appName")
 	res.AppNameShort = config.GetString("appNameShort")
 	res.AppVersion, _, _, _ = config.GetAppVersions()
-	res.Builder = config.GetUint64("builderMode") == 1
+	res.ClusterNodeName = cache.GetNodeName()
 	res.CompanyColorHeader = config.GetString("companyColorHeader")
 	res.CompanyColorLogin = config.GetString("companyColorLogin")
 	res.CompanyLogo = config.GetString("companyLogo")

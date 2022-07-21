@@ -4,18 +4,20 @@ export {MyFormHelp as default};
 let MyFormHelp = {
 	name:'my-form-help',
 	components:{MyInputRichtext},
-	template:`<div class="help contentBox">
+	template:`<div class="form-help contentBox" :class="{ 'pop-up':isPopUp }">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/question.png" />
 				<h1>{{ capApp.help }}</h1>
 			</div>
 			
-			<my-button image="cancel.png"
-				@trigger="$emit('close')"
-				:cancel="true"
-				:darkBg="true"
-			/>
+			<div class="area">
+				<my-button image="cancel.png"
+					@trigger="$emit('close')"
+					:cancel="true"
+					:tight="true"
+				/>
+			</div>
 		</div>
 		<div class="top lower">
 			<div class="area">
@@ -23,14 +25,12 @@ let MyFormHelp = {
 					@trigger="showContext = !showContext"
 					:active="contextHelp !== null"
 					:caption="capApp.helpContextTitle"
-					:darkBg="true"
 					:image="showContext ? 'checkbox1.png' : 'checkbox0.png'"
 				/>
 				<my-button
 					@trigger="showModule = !showModule"
 					:active="moduleHelp !== null"
 					:caption="capApp.helpModuleTitle"
-					:darkBg="true"
 					:image="showModule ? 'checkbox1.png' : 'checkbox0.png'"
 				/>
 			</div>
@@ -53,8 +53,9 @@ let MyFormHelp = {
 		</div>
 	</div>`,
 	props:{
-		form:  { type:Object, required:true },
-		module:{ type:Object, required:true }
+		form:    { type:Object,  required:true },
+		isPopUp: { type:Boolean, required:true },
+		moduleId:{ type:String,  required:true }
 	},
 	emits:['close'],
 	data:function() {
@@ -65,26 +66,23 @@ let MyFormHelp = {
 	},
 	computed:{
 		contextHelp:function() {
-			if(typeof this.form.captions.formHelp[this.moduleLanguage] === 'undefined')
-				return null;
-			
-			return this.form.captions.formHelp[this.moduleLanguage];
+			return typeof this.form.captions.formHelp[this.moduleLanguage] === 'undefined'
+				? null
+				: this.form.captions.formHelp[this.moduleLanguage];
 		},
 		moduleHelp:function() {
-			if(typeof this.module.captions.moduleHelp[this.moduleLanguage] === 'undefined')
-				return null;
-			
-			return this.module.captions.moduleHelp[this.moduleLanguage];
+			return typeof this.moduleIdMap[this.moduleId].captions.moduleHelp[this.moduleLanguage] === 'undefined'
+				? null
+				: this.moduleIdMap[this.moduleId].captions.moduleHelp[this.moduleLanguage];
 		},
 		
 		// stores
+		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
 		capApp:        function() { return this.$store.getters.captions.form; },
 		moduleLanguage:function() { return this.$store.getters.moduleLanguage; }
 	},
 	mounted:function() {
-		if(this.contextHelp !== null)
-			this.showContext = true;
-		else if(this.moduleHelp !== null)
-			this.showModule = true;
+		if     (this.contextHelp !== null) this.showContext = true;
+		else if(this.moduleHelp  !== null) this.showModule  = true;
 	}
 };

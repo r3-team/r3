@@ -329,7 +329,7 @@ let MyField = {
 			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
-			:usesPageHistory="formIsSingleField && !formIsInline"
+			:usesPageHistory="formIsSingleField && !formIsPopUp"
 		/>
 		
 		<!-- calendar -->
@@ -355,7 +355,7 @@ let MyField = {
 			:indexDate1="field.indexDate1"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
-			:usesPageHistory="formIsSingleField && !formIsInline"
+			:usesPageHistory="formIsSingleField && !formIsPopUp"
 		/>
 		
 		<!-- gantt -->
@@ -384,7 +384,7 @@ let MyField = {
 			:stepTypeDefault="field.ganttSteps"
 			:stepTypeToggle="field.ganttStepsToggle"
 			:query="field.query"
-			:usesPageHistory="formIsSingleField && !formIsInline"
+			:usesPageHistory="formIsSingleField && !formIsPopUp"
 		/>
 		
 		<!-- chart -->
@@ -414,9 +414,10 @@ let MyField = {
 			@set-value-init="(...args) => $emit('set-value-init',...args)"
 			:dataFieldMap="dataFieldMap"
 			:field="f"
+			:fieldIdMapCaption="fieldIdMapCaption"
 			:fieldIdMapState="fieldIdMapState"
 			:formBadSave="formBadSave"
-			:formIsInline="formIsInline"
+			:formIsPopUp="formIsPopUp"
 			:formIsSingleField="formIsSingleField"
 			:formLoading="formLoading"
 			:formReadonly="formReadonly"
@@ -429,9 +430,10 @@ let MyField = {
 	props:{
 		dataFieldMap:     { type:Object,  required:true },
 		field:            { type:Object,  required:true },
-		fieldIdMapState:  { type:Object,  required:false, default:() => {return {};} }, // overwritten states
+		fieldIdMapCaption:{ type:Object,  required:false, default:() => {return {}} }, // overwritten captions
+		fieldIdMapState:  { type:Object,  required:false, default:() => {return {}} }, // overwritten states
 		formBadSave:      { type:Boolean, required:true }, // attempted save with invalid inputs
-		formIsInline:     { type:Boolean, required:true }, // parent form is part of another element (sub form)
+		formIsPopUp:      { type:Boolean, required:true }, // parent form is a pop-up form
 		formIsSingleField:{ type:Boolean, required:true }, // parent form contains a single field
 		formLoading:      { type:Boolean, required:true },
 		formReadonly:     { type:Boolean, required:true }, // form is read only, disable all inputs
@@ -470,20 +472,23 @@ let MyField = {
 		caption:function() {
 			let out = '';
 			
-			// 1st preference: dedicated field title
-			if(typeof this.field.captions.fieldTitle[this.moduleLanguage] !== 'undefined') {
+			if(typeof this.fieldIdMapCaption[this.field.id] !== 'undefined') {
+				// 1st preference: field caption overwrite
+				out = this.fieldIdMapCaption[this.field.id];
+			}
+			else if(typeof this.field.captions.fieldTitle[this.moduleLanguage] !== 'undefined') {
+				// 2nd preference: field caption
 				out = this.field.captions.fieldTitle[this.moduleLanguage];
 			}
 			else if(this.attribute) {
-				
-				// 2nd / 3rd preference: dedicated attribute title / name
+				// 3rd / 4th preference: dedicated attribute title / name
 				if(typeof this.attribute.captions.attributeTitle[this.moduleLanguage] !== 'undefined')
 					out = this.attribute.captions.attributeTitle[this.moduleLanguage];
 				else
 					out = this.attribute.name;
 			}
 			
-			// if nothing else is available: mark as missing
+			// if empty: mark as missing
 			if(out === '')
 				out = this.capGen.missingCaption;
 			

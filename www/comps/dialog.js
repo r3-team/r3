@@ -6,7 +6,7 @@ let MyDialog = {
 	components:{MyInputRichtext},
 	template:`<div class="app-sub-window" @mousedown.self="close">
 		<div class="dialog contentBox" :style="styles">
-			<div class="top">
+			<div class="top lower">
 				<div class="area">
 					<img class="icon"
 						:src="image === null ? 'images/ok.png' : 'images/'+image"
@@ -17,7 +17,7 @@ let MyDialog = {
 					<my-button
 						@trigger="close" image="cancel.png"
 						:cancel="true"
-						:darkBg="true"
+						:tight="true"
 					/>
 				</div>
 			</div>

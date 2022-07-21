@@ -144,6 +144,17 @@ export function getFieldMap(fields) {
 	return out;
 };
 
+export function getFormPopUpTemplate() {
+	return {
+		attributeIdMapDef:null, // default attribute values for pop-up form
+		fieldId:null,           // field ID that pop-up form was opened from
+		formId:null,            // form ID to show as pop-up
+		moduleId:null,
+		recordId:0,
+		style:''                // CSS styles for pop-up form
+	};
+};
+
 export function getFormRoute(formId,recordId,stayInModule,getArgs) {
 	let moduleId = MyStore.getters['schema/formIdMap'][formId].moduleId;
 	

@@ -1,5 +1,6 @@
 import MyDialog              from './dialog.js';
 import MyFeedback            from './feedback.js';
+import MyForm                from './form.js';
 import MyHeader              from './header.js';
 import MyLogin               from './login.js';
 import {getStartFormId}      from './shared/access.js';
@@ -23,6 +24,7 @@ let MyApp = {
 	components:{
 		MyDialog,
 		MyFeedback,
+		MyForm,
 		MyHeader,
 		MyLogin
 	},
@@ -38,12 +40,14 @@ let MyApp = {
 		<template v-if="appReady">
 			<my-header
 				@logout="sessionInvalid"
+				:bgStyle="bgStyle"
 				:keysLocked="loginEncryption && loginPrivateKey === null"
 				:moduleEntries="moduleEntries"
 			/>
 			
 			<router-view class="app-content"
 				@logout="sessionInvalid"
+				:bgStyle="bgStyle"
 				:moduleEntries="moduleEntries"
 				:style="stylesContent"
 			/>
@@ -53,14 +57,33 @@ let MyApp = {
 				@click="openLink(customLogoUrl,true)"
 				:src="customLogo"
 			/>
+			
+			<!-- global pop-up form window -->
+			<div class="app-sub-window under-header"
+				v-if="popUpFormGlobal !== null"
+				@mousedown.self="$refs.popUpForm.closeAsk()"
+			>
+				<my-form ref="popUpForm"
+					@close="$store.commit('popUpFormGlobal',null)"
+					:formId="popUpFormGlobal.formId"
+					:isPopUp="true"
+					:moduleId="popUpFormGlobal.moduleId"
+					:recordId="popUpFormGlobal.recordId"
+					:style="popUpFormGlobal.style"
+				/>
+			</div>
+			
+			<!-- dialog window -->
 			<transition name="fade">
 				<my-dialog v-if="isAtDialog" />
 			</transition>
 			
+			<!-- feedback window -->
 			<transition name="fade">
 				<my-feedback v-if="isAtFeedback" />
 			</transition>
 			
+			<!-- loading input blocker overlay -->
 			<div class="input-block-overlay" v-if="blockInput">
 				<img src="images/load.gif" />
 			</div>
@@ -77,11 +100,24 @@ let MyApp = {
 	},
 	computed:{
 		// presentation
+		bgStyle:function() {
+			// custom color before specific module color
+			if(this.customBgHeader !== '')
+				return this.customBgHeader;
+			
+			if(this.moduleColor1 !== '')
+				return `background-color:#${this.moduleColor1};`;
+			
+			return '';
+		},
 		classes:function() {
 			if(!this.appReady)
 				return 'is-not-ready';
 			
-			let classes = ['user-spacing',`spacing-value${this.settings.spacing}`];
+			let classes = [
+				'user-spacing',`spacing-value${this.settings.spacing}`,
+				'user-font',this.settings.fontFamily
+			];
 			
 			if(this.settings.bordersAll)       classes.push('user-bordersAll');
 			if(this.settings.compact)          classes.push('user-compact');
@@ -98,17 +134,18 @@ let MyApp = {
 		styles:function() {
 			if(!this.appReady) return '';
 			
-			let styles = [];
-			styles.push(`font-size:${this.settings.fontSize}%`);
+			let styles = [`font-size:${this.settings.fontSize}%`];
+			
+			if(this.patternStyle !== '')
+				styles.push(this.patternStyle);
+			
 			return styles.join(';');
 		},
 		stylesContent:function() {
 			if(!this.appReady || this.settings.compact)
 				return '';
 			
-			let styles = [];
-			styles.push(`max-width:${this.settings.pageLimit}px`);
-			return styles.join(';');
+			return [`max-width:${this.settings.pageLimit}px`].join(';');
 		},
 		
 		// navigation
@@ -208,6 +245,7 @@ let MyApp = {
 		// stores
 		activated:      function() { return this.$store.getters['local/activated']; },
 		appVersion:     function() { return this.$store.getters['local/appVersion']; },
+		customBgHeader: function() { return this.$store.getters['local/customBgHeader']; },
 		customLogo:     function() { return this.$store.getters['local/customLogo']; },
 		customLogoUrl:  function() { return this.$store.getters['local/customLogoUrl']; },
 		loginKeyAes:    function() { return this.$store.getters['local/loginKeyAes']; },
@@ -226,6 +264,9 @@ let MyApp = {
 		isMobile:       function() { return this.$store.getters.isMobile; },
 		loginEncryption:function() { return this.$store.getters.loginEncryption; },
 		loginPrivateKey:function() { return this.$store.getters.loginPrivateKey; },
+		moduleColor1:   function() { return this.$store.getters.moduleColor1; },
+		patternStyle:   function() { return this.$store.getters.patternStyle; },
+		popUpFormGlobal:function() { return this.$store.getters.popUpFormGlobal; },
 		settings:       function() { return this.$store.getters.settings; }
 	},
 	created:function() {
@@ -289,9 +330,9 @@ let MyApp = {
 		},
 		wsBackendRequest:function(res) {
 			switch(res.ressource) {
-				// affects admins only (reloads happen in maintenance mode only)
-				// add busy counters to also block admins that did not request the schema reload
+				// affects admins only
 				case 'schema_loading':
+					// add busy counters to also block admins that did not request the schema reload
 					this.$store.commit('busyAdd');
 					this.$store.commit('busyBlockInput',true);
 				break;
@@ -304,12 +345,24 @@ let MyApp = {
 					this.initSchema();
 				break;
 				
-				// affects admins only (builder can be actived only in maintenance mode)
-				case 'builder_mode_changed':
-					this.$store.commit('builder',res.payload);
-				break;
-				
 				// affects everyone logged in
+				case 'collection_changed':
+					this.updateCollections(false,undefined,res.payload);
+				case 'config_changed':
+					if(this.isAdmin) {
+						ws.sendMultiple([
+							ws.prepare('config','get',{}),
+							ws.prepare('license','get',{})
+						],true).then(
+							res => {
+								this.$store.commit('config',res[0].payload);
+								this.$store.commit('license',res[1].payload);
+							},
+							this.genericError
+						);
+					}
+					this.initPublic(); // reload customizing
+				break;
 				case 'reauthorized':
 					if(this.appReady) {
 						ws.send('lookup','get',{name:'access'},true).then(
@@ -317,7 +370,7 @@ let MyApp = {
 								this.$store.commit('access',res.payload);
 								this.updateCollections(false);
 							},
-							err => this.genericError(err)
+							this.genericError
 						);
 					}
 				break;
@@ -375,15 +428,15 @@ let MyApp = {
 					this.$store.commit('local/companyLogoUrl',res.payload.companyLogoUrl);
 					this.$store.commit('local/companyName',res.payload.companyName);
 					this.$store.commit('local/companyWelcome',res.payload.companyWelcome);
-					this.$store.commit('builder',res.payload.builder);
-					this.$store.commit('productionMode',res.payload.productionMode);
+					this.$store.commit('clusterNodeName',res.payload.clusterNodeName);
+					this.$store.commit('productionMode',res.payload.productionMode === 1);
 					this.$store.commit('pageTitleRefresh'); // update page title with new app name
 					this.$store.commit('schema/languageCodes',res.payload.languageCodes);
 					this.$store.commit('schema/timestamp',res.payload.schemaTimestamp);
 					this.publicLoaded = true;
 					this.stateChange();
 				},
-				err => this.setInitErr(err)
+				this.setInitErr
 			);
 		},
 		
@@ -456,7 +509,7 @@ let MyApp = {
 					return this.updateCollections(this.isAdmin,
 						err => alert(this.capErr.initCollection.replace('{MSG}',err)));
 				},
-				err => this.setInitErr(err)
+				this.setInitErr
 			).then(
 				() => this.appReady = true,
 				this.setInitErr
@@ -502,12 +555,6 @@ let MyApp = {
 				? {} : {moduleId:moduleId};
 			
 			ws.send('schema','reload',payload,true).then(
-				() => {},
-				this.genericError
-			);
-		},
-		schedulerReload:function(blocking) {
-			ws.send('scheduler','reload',{},blocking).then(
 				() => {},
 				this.genericError
 			);

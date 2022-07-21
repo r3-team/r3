@@ -142,13 +142,11 @@ let MyAdminRoles = {
 					@trigger="set"
 					:active="hasChanges"
 					:caption="capGen.button.save"
-					:darkBg="true"
 				/>
 				<my-button image="refresh.png"
 					@trigger="get"
 					:active="hasChanges"
 					:caption="capGen.button.refresh"
-					:darkBg="true"
 				/>
 			</div>
 			<div class="area nowrap">
@@ -167,13 +165,11 @@ let MyAdminRoles = {
 				<my-button
 					@trigger="showAll = !showAll"
 					:caption="capApp.button.all"
-					:darkBg="true"
 					:image="showAll ? 'visible1.png' : 'visible0.png'"
 				/>
 				<my-button
 					@trigger="showDesc = !showDesc"
 					:caption="capApp.button.descriptions"
-					:darkBg="true"
 					:image="showDesc ? 'visible1.png' : 'visible0.png'"
 				/>
 			</div>

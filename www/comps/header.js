@@ -1,4 +1,13 @@
-import srcBase64Icon from './shared/image.js';
+import srcBase64Icon    from './shared/image.js';
+import {getColumnTitle} from './shared/column.js';
+import {
+	getFormPopUpTemplate,
+	getFormRoute
+} from './shared/form.js';
+import {
+	getCollectionColumn,
+	getCollectionValues
+} from './shared/collection.js';
 export {MyHeader as default};
 
 let MyHeader = {
@@ -13,7 +22,7 @@ let MyHeader = {
 				<template v-if="!isMobile && isAdmin" >
 					
 					<router-link class="entry no-wrap clickable" to="/builder"
-						v-if="builderEnabled && !productionMode"
+						v-if="builderEnabled"
 					>
 						<img src="images/builder.png" />
 					</router-link>
@@ -106,6 +115,17 @@ let MyHeader = {
 					</div>
 				</transition>
 				
+				<!-- collection entries -->
+				<div class="entry no-wrap clickable" tabindex="0"
+					v-for="e in collectionEntries"
+					@click="openForm(e.openForm)"
+					@keyup.enter="openForm(e.openForm)"
+					:title="e.title"
+				>
+					<img v-if="e.iconId !== null" :src="srcBase64Icon(e.iconId,'')" />
+					<span>{{ e.value }}</span>
+				</div>
+				
 				<!-- navigation -->
 				<div class="entry no-wrap clickable" tabindex="0"
 					@click="pagePrev"
@@ -158,6 +178,7 @@ let MyHeader = {
 		</div>
 	</div>`,
 	props:{
+		bgStyle:      { type:String,  required:true },
 		keysLocked:   { type:Boolean, required:true },
 		moduleEntries:{ type:Array,   required:true }
 	},
@@ -171,21 +192,36 @@ let MyHeader = {
 		};
 	},
 	computed:{
-		bgStyle:function() {
-			// custom color before specific module color
-			if(this.customBgHeader !== '')
-				return this.customBgHeader;
-			
-			if(this.moduleColor1 !== '')
-				return `background-color:#${this.moduleColor1};`;
-			
-			return '';
-		},
-		styles:function() {
-			if(this.settings.compact)
-				return '';
-			
-			return `max-width:${this.settings.pageLimit}px;`;
+		collectionEntries:function() {
+			let out = [];
+			for(let k in this.collectionIdMap) {
+				for(let i = 0, j = this.collectionIdMap[k].inHeader.length; i < j; i++) {
+					let collection = this.collectionIdMap[k];
+					let consumer   = collection.inHeader[i];
+					
+					if(!consumer.onMobile && this.isMobile)
+						continue;
+					
+					let value = this.getCollectionValues(
+						collection.id,
+						consumer.columnIdDisplay,
+						true
+					);
+					if(consumer.noDisplayEmpty && (value === null || value === 0 || value === ''))
+						continue;
+					
+					out.push({
+						iconId:collection.iconId,
+						openForm:consumer.openForm,
+						title:this.getColumnTitle(this.getCollectionColumn(
+							collection.id,
+							consumer.columnIdDisplay
+						)),
+						value:value
+					});
+				}
+			}
+			return out;
 		},
 		menuAvailable:function() {
 			return typeof this.$route.meta.menu !== 'undefined';
@@ -199,23 +235,28 @@ let MyHeader = {
 			
 			return this.moduleNameMap[this.$route.params.moduleName];
 		},
+		styles:function() {
+			if(this.settings.compact)
+				return '';
+			
+			return `max-width:${this.settings.pageLimit}px;`;
+		},
 		
 		// stores
-		customBgHeader:function() { return this.$store.getters['local/customBgHeader']; },
-		modules:       function() { return this.$store.getters['schema/modules']; },
-		moduleNameMap: function() { return this.$store.getters['schema/moduleNameMap']; },
-		builderEnabled:function() { return this.$store.getters.builderEnabled; },
-		busyCounter:   function() { return this.$store.getters.busyCounter; },
-		capErr:        function() { return this.$store.getters.captions.error; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		feedback:      function() { return this.$store.getters.feedback; },
-		isAdmin:       function() { return this.$store.getters.isAdmin; },
-		isAtMenu:      function() { return this.$store.getters.isAtMenu; },
-		isMobile:      function() { return this.$store.getters.isMobile; },
-		isNoAuth:      function() { return this.$store.getters.isNoAuth; },
-		moduleColor1:  function() { return this.$store.getters.moduleColor1; },
-		productionMode:function() { return this.$store.getters.productionMode; },
-		settings:      function() { return this.$store.getters.settings; }
+		modules:        function() { return this.$store.getters['schema/modules']; },
+		moduleNameMap:  function() { return this.$store.getters['schema/moduleNameMap']; },
+		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
+		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
+		builderEnabled: function() { return this.$store.getters.builderEnabled; },
+		busyCounter:    function() { return this.$store.getters.busyCounter; },
+		capErr:         function() { return this.$store.getters.captions.error; },
+		capGen:         function() { return this.$store.getters.captions.generic; },
+		feedback:       function() { return this.$store.getters.feedback; },
+		isAdmin:        function() { return this.$store.getters.isAdmin; },
+		isAtMenu:       function() { return this.$store.getters.isAtMenu; },
+		isMobile:       function() { return this.$store.getters.isMobile; },
+		isNoAuth:       function() { return this.$store.getters.isNoAuth; },
+		settings:       function() { return this.$store.getters.settings; }
 	},
 	created:function() {
 		window.addEventListener('resize',this.windowResized);
@@ -228,6 +269,11 @@ let MyHeader = {
 	},
 	methods:{
 		// externals
+		getCollectionColumn,
+		getCollectionValues,
+		getColumnTitle,
+		getFormPopUpTemplate,
+		getFormRoute,
 		srcBase64Icon,
 		
 		// display
@@ -269,6 +315,28 @@ let MyHeader = {
 		cancelRequest:function() { this.$root.wsCancel(); },
 		openFeedback: function() { this.$store.commit('isAtFeedback',true); },
 		pagePrev:     function() { window.history.back(); },
-		pageNext:     function() { window.history.forward(); }
+		pageNext:     function() { window.history.forward(); },
+		openForm:function(options) {
+			if(options === null)
+				return;
+			
+			// pop-up form
+			if(options.popUp) {
+				let popUpConfig = this.getFormPopUpTemplate();
+				popUpConfig.formId   = options.formIdOpen;
+				popUpConfig.moduleId = this.formIdMap[options.formIdOpen].moduleId;
+				
+				let styles = [];
+				if(options.maxWidth  !== 0) styles.push(`max-width:${options.maxWidth}px`);
+				if(options.maxHeight !== 0) styles.push(`max-height:${options.maxHeight}px`);
+				popUpConfig.style = styles.join(';');
+				
+				this.$store.commit('popUpFormGlobal',popUpConfig);
+				return;
+			}
+			
+			// regular form navigation
+			this.$router.push(this.getFormRoute(options.formIdOpen,0,false));
+		}
 	}
 };

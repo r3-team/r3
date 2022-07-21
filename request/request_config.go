@@ -3,7 +3,7 @@ package request
 import (
 	"encoding/json"
 	"fmt"
-	"r3/bruteforce"
+	"r3/cluster"
 	"r3/config"
 	"r3/tools"
 	"strconv"
@@ -39,11 +39,19 @@ func ConfigGet() (interface{}, error) {
 func ConfigSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req map[string]string
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
 
+	// check for config changes that have specific consequences
+	switchToMaintenance := false
+	if value, exists := req["productionMode"]; exists &&
+		value != strconv.FormatInt(int64(config.GetUint64("productionMode")), 10) {
+
+		switchToMaintenance = true
+	}
+
+	// update config values in DB and local config store
 	for name, value := range req {
 
 		if tools.StringInSlice(name, config.NamesString) {
@@ -62,9 +70,5 @@ func ConfigSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 			}
 		}
 	}
-
-	// update system state
-	bruteforce.SetConfig()
-	config.SetLogLevels()
-	return nil, nil
+	return nil, cluster.ConfigChanged(true, false, switchToMaintenance)
 }

@@ -63,11 +63,12 @@ let MyGoModule = {
 let MyGoForm = {
 	name:'my-go-form',
 	components:{ MyForm, MyMenu },
-	template:`<div v-if="module">
+	template:`<div v-if="moduleId !== null">
 		<my-menu class="noPrint"
 			v-if="!isMobile || isAtMenu"
-			v-for="m in modules.filter(v => v.id === module.id)"
-			:isActiveModule="m.id === module.id"
+			v-for="m in modules.filter(v => v.id === moduleId)"
+			:bgStyle="bgStyle"
+			:isActiveModule="m.id === moduleId"
 			:formId="formId"
 			:key="m.id"
 			:module="m"
@@ -76,11 +77,12 @@ let MyGoForm = {
 			v-show="!isMobile || !isAtMenu"
 			:attributeIdMapDef="getterAttributeIdMapDefaults"
 			:formId="formId"
-			:module="module"
+			:moduleId="moduleId"
 			:recordId="recordId"
 		/>
 	</div>`,
 	props:{
+		bgStyle:        { type:String, required:true },
 		formId:         { type:String, required:true },
 		moduleName:     { type:String, required:true },
 		moduleNameChild:{ type:String, required:false, default:'' },
@@ -88,7 +90,7 @@ let MyGoForm = {
 	},
 	data:function() {
 		return {
-			module:false
+			moduleId:null
 		};
 	},
 	watch:{
@@ -98,10 +100,10 @@ let MyGoForm = {
 				if(typeof this.moduleNameMap[this.moduleNameActive] === 'undefined')
 					return this.$router.replace('/');
 				
-				this.module = this.moduleNameMap[this.moduleNameActive];
-				
-				this.$store.commit('moduleColor1',this.module.color1);
-				this.$store.commit('moduleLanguage',this.getValidLanguageCode(this.module));
+				let module = this.moduleNameMap[this.moduleNameActive];
+				this.moduleId = module.id;
+				this.$store.commit('moduleColor1',module.color1);
+				this.$store.commit('moduleLanguage',this.getValidLanguageCode(module));
 			},
 			immediate:true
 		}

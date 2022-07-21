@@ -4,7 +4,7 @@ let MyBuilderDocs = {
 	name:'my-builder-docs',
 	template:`<div class="contentBox grow">
 		
-		<div class="top">
+		<div class="top lower">
 			<div class="area">
 				<img class="icon" src="images/question.png" />
 				<h1>{{ capApp.pageTitleDocs }}</h1>
@@ -14,7 +14,7 @@ let MyBuilderDocs = {
 				<my-button image="cancel.png"
 					@trigger="$emit('close')"
 					:cancel="true"
-					:darkBg="true"
+					:tight="true"
 				/>
 			</div>
 		</div>

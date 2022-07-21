@@ -56,7 +56,8 @@ let MyBuilderCollectionsItem = {
 				moduleId:null,
 				name:'',
 				columns:[],
-				query:null
+				query:null,
+				inHeader:[]
 			}}
 		}
 	},
@@ -132,7 +133,8 @@ let MyBuilderCollectionsItem = {
 				
 				// not changable values on this interface
 				columns:this.collection.columns,
-				query:query
+				query:query,
+				inHeader:this.collection.inHeader
 			},true).then(
 				() => {
 					if(this.isNew)
@@ -151,7 +153,7 @@ let MyBuilderCollections = {
 	components:{MyBuilderCollectionsItem},
 	template:`<div class="builder-collections contentBox grow">
 		
-		<div class="top">
+		<div class="top lower">
 			<div class="area nowrap">
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>

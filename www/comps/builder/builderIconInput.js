@@ -21,7 +21,7 @@ let MyBuilderIconInput = {
 		<div class="app-sub-window" v-if="showInput && iconIdMap !== null" @click.self="close">
 			<div class="build-icon-input-window shade">
 				<div class="contentBox">
-					<div class="top">
+					<div class="top lower">
 						<div class="area">
 							<img class="icon"
 								v-if="iconSelected"
@@ -35,7 +35,6 @@ let MyBuilderIconInput = {
 							<my-button image="cancel.png"
 								@trigger="close"
 								:cancel="true"
-								:darkBg="true"
 							/>
 						</div>
 					</div>

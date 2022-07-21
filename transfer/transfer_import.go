@@ -8,11 +8,11 @@ import (
 	"os"
 	"path/filepath"
 	"r3/cache"
+	"r3/cluster"
 	"r3/config"
 	"r3/db"
 	"r3/log"
 	"r3/module_option"
-	"r3/scheduler"
 	"r3/schema"
 	"r3/schema/attribute"
 	"r3/schema/collection"
@@ -145,14 +145,9 @@ func ImportFromFiles(filePathsImport []string) error {
 	}
 	log.Info("transfer", "changes were commited successfully")
 
-	if err := cache.UpdateSchemaAll(true); err != nil {
+	if err := cluster.SchemaChangedAll(true, true); err != nil {
 		return err
 	}
-	log.Info("transfer", "schema cache was renewed")
-
-	scheduler.Start()
-	log.Info("transfer", "scheduler was reloaded")
-
 	return nil
 }
 
@@ -264,8 +259,8 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		log.Info("transfer", fmt.Sprintf("set collection %s", e.Id))
 
 		if err := importCheckResultAndApply(tx, collection.Set_tx(tx,
-			e.ModuleId, e.Id, e.IconId, e.Name, e.Columns, e.Query), e.Id,
-			idMapSkipped); err != nil {
+			e.ModuleId, e.Id, e.IconId, e.Name, e.Columns, e.Query, e.InHeader),
+			e.Id, idMapSkipped); err != nil {
 
 			return err
 		}
@@ -396,7 +391,7 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		log.Info("transfer", fmt.Sprintf("set role %s", e.Id))
 
 		if err := importCheckResultAndApply(tx, role.Set_tx(tx,
-			e.ModuleId, e.Id, e.Name, e.Assignable, e.ChildrenIds,
+			e.ModuleId, e.Id, e.Name, e.Content, e.Assignable, e.ChildrenIds,
 			e.AccessAttributes, e.AccessCollections, e.AccessMenus,
 			e.AccessRelations, e.Captions), e.Id, idMapSkipped); err != nil {
 

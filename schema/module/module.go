@@ -211,8 +211,8 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 			}
 
 			if _, err := tx.Exec(db.Ctx, `
-				INSERT INTO app.role (id, module_id, name, assignable)
-				VALUES ($1,$2,'everyone',false)
+				INSERT INTO app.role (id, module_id, name, content, assignable)
+				VALUES ($1,$2,'everyone','everyone',false)
 			`, roleId, id); err != nil {
 				return err
 			}

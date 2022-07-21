@@ -2,7 +2,7 @@ package request
 
 import (
 	"encoding/json"
-	"r3/cache"
+	"r3/cluster"
 	"r3/login"
 	"r3/login/login_auth"
 	"r3/types"
@@ -187,8 +187,7 @@ func LoginKick(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	cache.KickLoginById(req.Id)
-	return nil, nil
+	return nil, cluster.LoginDisabled(true, req.Id)
 }
 
 func LoginReauth(reqJson json.RawMessage) (interface{}, error) {
@@ -200,11 +199,11 @@ func LoginReauth(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, cache.RenewAccessById(req.Id)
+	return nil, cluster.LoginReauthorized(true, req.Id)
 }
 
 func LoginReauthAll() (interface{}, error) {
-	return nil, cache.RenewAccessAll()
+	return nil, cluster.LoginReauthorizedAll(true)
 }
 
 // attempt login via user credentials

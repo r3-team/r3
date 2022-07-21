@@ -104,6 +104,29 @@
 		"version":"Version"
 	},
 	"admin":{
+		"cluster":{
+			"button":{
+				"shutdown":"Shutdown"
+			},
+			"dialog":{
+				"delete":"Are you sure you want to delete this cluster node?<br /><br />If a deleted node restarts and still has access to the cluster database, it will re-register itself as a cluster node.",
+				"shutdown":"Are you sure you want to shutdown this cluster node?<br /><br />A cluster node cannot be started up again from this interface."
+			},
+			"title":{
+				"config":"Global configuration",
+				"connected":"connected",
+				"master":"Cluster master",
+				"missing":"missing",
+				"nodes":"Cluster nodes",
+				"offline":"offline"
+			},
+			"configNodeMissing":"Cluster node assumed missing after X seconds",
+			"dateCheckIn":"Last check-in",
+			"dateStarted":"Node started",
+			"hostname":"Hostname",
+			"statMemory":"Memory usage",
+			"statSessions":"User sessions"
+		},
 		"config":{
 			"button":{
 				"apply":"Apply changes",
@@ -157,6 +180,7 @@
 			"logLevelApplication":"Applications",
 			"logLevelBackup":"Backup",
 			"logLevelCache":"Cache",
+			"logLevelCluster":"Cluster",
 			"logLevelCsv":"CSV import/export",
 			"logLevelLdap":"LDAP",
 			"logLevelMail":"Mail",
@@ -269,7 +293,10 @@
 			"passwordHint":"Set new password",
 			"passwordHintNoAuth":"No authentication",
 			"recordSelectHint":"...",
-			"roles":"Roles"
+			"roles":"Roles",
+			"roleContentAdmin":"Admin",
+			"roleContentOther":"Special",
+			"roleContentUser":"User"
 		},
 		"logs":{
 			"byString":"Text search",
@@ -280,7 +307,8 @@
 			"level2":"Warning",
 			"level3":"Info",
 			"message":"Message",
-			"module":"Application"
+			"module":"Application",
+			"node":"Cluster node"
 		},
 		"mails":{
 			"account":"Email account",
@@ -375,6 +403,8 @@
 				"cleanupFiles":"Cleanup expired file uploads",
 				"cleanupLogs":"Cleanup expired system logs",
 				"cleanupTempDir":"Cleanup temporary directory",
+				"clusterCheckIn":"Cluster check-in",
+				"clusterProcessEvents":"Cluster event processing",
 				"embeddedBackup":"Manage integrated backups",
 				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Import logins and roles via LDAP",
@@ -385,7 +415,7 @@
 				"updateCheck":"Check for platform updates"
 			},
 			"dateAttempt":"Last start",
-			"dateSuccess":"Last, successful completion",
+			"dateSuccess":"Last successful completion",
 			"functions":"Application tasks",
 			"interval":"Execution interval",
 			"intervalSeconds":"Execution interval (in seconds)",
@@ -401,8 +431,10 @@
 			"scheduleLineDayWeeks":"on the {DAY}. weekday",
 			"scheduleLineDayYears":"on the {DAY}. of the year",
 			"scheduleLineTime":"at {HH}:{MM}:{SS}",
-			"systemTasks":"System tasks"
+			"systemTasks":"System tasks (global)",
+			"systemTasksNode":"System tasks (cluster nodes)"
 		},
+		"navigationCluster":"Cluster",
 		"navigationConfig":"System",
 		"navigationLdaps":"LDAP-Logins",
 		"navigationLicense":"License",
@@ -412,7 +444,7 @@
 		"navigationMails":"Email spooler",
 		"navigationModules":"Applications",
 		"navigationRepo":"Repository",
-		"navigationRoles":"Roles",
+		"navigationRoles":"Memberships",
 		"navigationScheduler":"Scheduler",
 		"title":"Admin",
 		"titleDocs":"Admin documentation"
@@ -425,6 +457,9 @@
 			"new":"New attribute"
 		},
 		"collection":{
+			"button":{
+				"inHeader":"Show in header"
+			},
 			"dialog":{
 				"delete":"Are you sure you want to delete this collection?"
 			},
@@ -435,6 +470,14 @@
 			"query":"Query",
 			"title":"Collections",
 			"titleOne":"Collection '{NAME}'"
+		},
+		"collectionInput":{
+			"collection":"Collection",
+			"column":"Value(s) from column",
+			"formIdOpen":"Open form",
+			"multiValue":"Multi input",
+			"noDisplayEmpty":"Hide if empty",
+			"onMobile":"Show on mobile"
 		},
 		"form":{
 			"chart":{
@@ -512,12 +555,9 @@
 			"autoSelectHint":"0=off, 2=first two, -3=last three",
 			"captions":"Captions",
 			"category":"Category selector",
-			"collection":"Collection*",
-			"collectionColumn":"Value(s) from column",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*Collection is only affected if selected as filter criteria in data query.",
-			"collectionMultiValue":"Multi input",
-			"collectionTitle":"Filter collection by user input",
+			"collectionTitle":"Filter collection by input",
 			"columnsTarget":"Place columns here",
 			"columnsTemplates":"Available columns",
 			"columnBatch":"Column batch",
@@ -541,7 +581,6 @@
 			"copyNewName":"New form name",
 			"csvExport":"CSV export",
 			"csvImport":"CSV import",
-			"csvTitle":"CSV processing",
 			"date0":"Date from",
 			"date1":"Date to",
 			"dateColor":"Color",
@@ -602,13 +641,6 @@
 			"noDataActions":"No data actions",
 			"onMobile":"In mobile view",
 			"openForm":"Open form",
-			"openFormAttributeApply":"...to set value on form",
-			"openFormFormIdOpen":"Form",
-			"openFormMaxHeight":"Maximum height (px)",
-			"openFormMaxWidth":"Maximum width (px)",
-			"openFormNewRecord":"When creating new records",
-			"openFormPopUp":"Pop-up form",
-			"openFormRelationIndex":"Use record from relation",
 			"presetOpen":"Open preset",
 			"readonly":"Read only",
 			"required":"Required",
@@ -639,6 +671,7 @@
 			},
 			"helpJs":{
 				"block_inputs":"app.block_inputs(true/false) => UNDEFINED<br /><br />Blocks or unblocks all inputs on the current form.",
+				"collection_update":"app.collection_update(collection_id) => UNDEFINED<br /><br />Updates values for the specified collection.",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Copies text to the users clipboard.",
 				"get_e2ee_data_key":"app.get_e2ee_data_key(dataKeyEncrypted) => STRING<br /><br />Decrypts provided data key with the private key of the current login.",
 				"get_e2ee_data_value":"app.get_e2ee_data_value(dataKey,valueEncrypted) => STRING<br /><br />Decrypts data value with the provided data key.",
@@ -657,7 +690,10 @@
 				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated on the next form save. Data keys for relations on the form with encryption enabled will be encrypted with the public key of each defined login. This enables later decryption of these records for users.<br /><br />If this function is not used, decryption is only ever possible for the creator.",
 				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated for the specified relation and records on the next form save. Data keys for relation records will be encrypted with the public key of each defined login. This enables later decryption of these records for users.",
 				"show_form_message":"app.show_form_message(message,duration_in_ms) => UNDEFINED<br /><br />Temporarily replaces the form title with a custom message. The second argument defines in milli-seconds how long the message is shown (3000 by default).",
-				"update_collection":"app.update_collection(collection_id) => UNDEFINED<br /><br />Retrieves and updates values for the specified collection."
+				"timer_clear":"app.timer_clear(name) => UNDEFINED<br /><br />Aborts a timer with the given name, previously created with 'app.timer_set()'.",
+				"timer_set":"app.timer_set(name,isInterval,function,milliseconds) => UNDEFINED<br /><br />Executes a given function after a specified time in milliseconds. If 'isInterval' is set to TRUE, the function is repeatedly called.<br /><br />A timer is always bound to the current form. When resetting or leaving the form, timers are reset as well.<br /><br />Each timer must have a unique name, which can be used to later abort the timer with 'timer_clear()'; timers with the same name overwrite each other.",
+				"value_store_get":"app.value_store_get(key) => VALUE_ANY_TYPE<br /><br />Returns a value, previously stored with the given key.",
+				"value_store_set":"app.value_store_set(key,value) => UNDEFINED<br /><br />Stores a value for later use. Values are stored with a reference key (an arbitrary name) and can only be accessed within the same application.<br /><br />The value store is session based; values are not available on another device or when the user refreshes the page."
 			},
 			"helpJsHint":{
 				"copy_to_clipboard":"VALUE",
@@ -668,7 +704,10 @@
 				"open_form":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
 				"pdf_create":"FILE_NAME, PAGE_FORMAT, PAGE_ORIENTATION, PAGE_MARGIN_X, PAGE_MARGIN_Y, HTML_HEADER, HTML_BODY, HTML_FOOTER, CSS_STYLES",
 				"show_form_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
-				"update_collection":"COLLECTION_ID"
+				"timer_clear":"TIMER_NAME",
+				"timer_set":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS",
+				"value_store_get":"KEY",
+				"value_store_set":"KEY, VALUE"
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Aborts the operation and sends a message to the executing user, which is displayed in the user interface.",
@@ -686,11 +725,15 @@
 				"mail_delete":"instance.mail_delete(mail_id INTEGER) => INTEGER<br /><br />Deletes the specified email, including attachments.",
 				"mail_delete_after_attach":"instance.mail_delete_after_attach(<blockquote>mail_id INTEGER,<br />attach_record_id INTEGER,<br />attach_attribute_id UUID</blockquote>) => INTEGER<br /><br />Flag email attachments to be added to a file attribute of the specified record; the email and its attachments are deleted afterwards.",
 				"mail_get_next":"instance.mail_get_next(account_name TEXT DEFAULT NULL) => instance.mail<br /><br />Returns the next email from the mail spooler; returns NULL if no email is available. When an account name is specified, returns only mails received with the given account.<br /><br />The returned type 'instance.mail' consists of:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>After processing an email it should be deleted; either directly (mail_delete) or after storing its attachments (mail_delete_after_attach).",
-				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Generates an outgoing email for the mail spooler. Optional parameters:<ul><li>Comma separated list of TO/CC/BCC recipients (one of these must be set)</li><li>Mail account name to send from (random account is used if not specified)</li><li>File attribute and record from which to attach files from</li></ul>"
+				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Generates an outgoing email for the mail spooler. Optional parameters:<ul><li>Comma separated list of TO/CC/BCC recipients (one of these must be set)</li><li>Mail account name to send from (random account is used if not specified)</li><li>File attribute and record from which to attach files from</li></ul>",
+				"update_collection":"instance.update_collection(collection_id, login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]) => INTEGER<br /><br />Informs connected clients to update the specified collection. If login IDs are given, only clients that belong to these logins are affected."
 			},
 			"option":{
-				"fieldGet":"read value",
-				"fieldSet":"write value",
+				"collectionRead":"read values",
+				"collectionUpdate":"update values",
+				"fieldGetValue":"read value",
+				"fieldSetCaption":"write caption",
+				"fieldSetValue":"write value",
 				"intervalDays":"Days",
 				"intervalHours":"Hours",
 				"intervalMinutes":"Minutes",
@@ -706,7 +749,9 @@
 			"codeReturns":"Returns",
 			"codeReturnsHintJs":"optional, 'number', 'array',...",
 			"codeReturnsHintPg":"optional, 'text', 'integer',...",
+			"collectionId":"[Select collection]",
 			"entityInput":"Select placeholder and click on function body to use <b>upgrade-safe</b> syntax.",
+			"fieldId":"[Select field]",
 			"form":"Bind to form",
 			"functionsBackend":"Backend functions",
 			"functionsFrontend":"Frontend functions",
@@ -721,11 +766,12 @@
 			"languageJs":"JavaScript",
 			"languagePg":"PL/pgSQL",
 			"new":"New function",
+			"placeholderInsert":"Click on the function body to insert reference",
 			"placeholders":"Placeholders",
+			"placeholdersCollections":"Collections",
 			"placeholdersFormFields":"Form data fields",
 			"placeholdersFormQuery":"Form data query",
-			"placeholdersGlobal":"Global",
-			"placeholdersInstance":"Instance",
+			"placeholdersInstance":"Instance functions",
 			"placeholdersModules":"Applications",
 			"runOnce":"Run once",
 			"schedules":"Recurrence",
@@ -755,6 +801,7 @@
 			"button":{
 				"add":"Add entry"
 			},
+			"collections":"Collections",
 			"copy":"Copy all menu items from",
 			"formId":"- Select form -",
 			"showChildrenHint":"Show sub entries by default",
@@ -801,6 +848,15 @@
 			"startForms":"Start forms",
 			"startFormsExplanation":"The first start form is used that matches a role of the current login.",
 			"title":"Applications"
+		},
+		"openFormInput":{
+			"attributeApply":"...to set value on form",
+			"formIdOpen":"Form",
+			"maxHeight":"Max. height (px)",
+			"maxWidth":"Max. width (px)",
+			"newRecord":"When creating new records",
+			"popUp":"Pop-up form",
+			"relationIndex":"Use record from relation"
 		},
 		"pgTrigger":{
 			"dialog":{
@@ -899,7 +955,11 @@
 				"accessInherit":"[inherit]",
 				"accessNone":"-",
 				"accessRead":"R",
-				"accessWrite":"RW"
+				"accessWrite":"RW",
+				"contentAdmin":"Administrative user",
+				"contentEveryone":"[Assigned to all]",
+				"contentOther":"Special user",
+				"contentUser":"Regular user"
 			},
 			"access":"Access",
 			"assignable":"Assignable",
@@ -907,6 +967,7 @@
 			"children":"Member of",
 			"collection":"Collection",
 			"collections":"Collections",
+			"content":"Type",
 			"data":"Data",
 			"legend":"Legend: No access (-), read (R), write (W), delete (D)",
 			"menu":"Menu",
@@ -1093,6 +1154,7 @@
 	},
 	"form":{
 		"button":{
+			"fullscreenHint":"Toggle fullscreen mode",
 			"help":"Help",
 			"helpHint":"Show help pages",
 			"log":"Logs",
@@ -1216,6 +1278,7 @@
 			"messagePwRequiresSpecial":"Password must contain a special character (!, ?, #, etc.)",
 			"messagePwRequiresUpper":"Password must contain an upper case letter",
 			"messagePwShort":"Password is too short",
+			"nodeName":"Connected with: {NAME}",
 			"pwNew0":"New password",
 			"pwNew1":"New password (repeated)",
 			"pwOld":"Current password",
@@ -1265,12 +1328,15 @@
 		"dateFormat3":"d/m/Y (30/12/2012)",
 		"dateFormat4":"m/d/Y (12/30/2012)",
 		"dark":"Dark mode",
+		"fontFamily":"Font",
 		"fontSize":"Font size",
 		"headerCaptions":"Show main menu titles",
 		"languageCode":"Language",
+		"menuColored":"Colored menu",
 		"mobileScrollForm":"Mobile: Scroll entire form",
 		"pageLimit":"Max. page width",
 		"pageTitle":"Settings",
+		"pattern":"Background pattern",
 		"spacing":"Spacing",
 		"sundayFirstDow":"Sunday is 1st weekday",
 		"titleAccount":"Account",

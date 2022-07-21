@@ -5,8 +5,8 @@ import (
 	"errors"
 	"io"
 	"net/http"
-	"r3/activation"
 	"r3/bruteforce"
+	"r3/cluster"
 	"r3/config"
 	"r3/db"
 	"r3/handler"
@@ -89,8 +89,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 		tx.Commit(db.Ctx)
 
-		// reset license
-		activation.SetLicense()
+		// apply new config
+		if err := cluster.ConfigChanged(true, false, false); err != nil {
+			handler.AbortRequest(w, context, err, handler.ErrGeneral)
+			return
+		}
 	}
 	w.Write([]byte(`{"error": ""}`))
 }

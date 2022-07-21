@@ -11,12 +11,12 @@ let MyButton = {
 		:tabindex="active ? 0 : -1"
 		:title="captionTitle"
 	>
-		<img
+		<img draggable="false"
 			v-if="image !== ''"
 			:src="'images/'+image"
 			:title="captionTitle"
 		/>
-		<img
+		<img draggable="false"
 			v-if="imageBase64 !== ''"
 			:src="imageBase64"
 			:title="captionTitle"
@@ -37,7 +37,6 @@ let MyButton = {
 		
 		// style props
 		cancel:{ type:Boolean, required:false, default:false },
-		darkBg:{ type:Boolean, required:false, default:false },
 		large: { type:Boolean, required:false, default:false },
 		naked: { type:Boolean, required:false, default:false },
 		right: { type:Boolean, required:false, default:false },
@@ -47,12 +46,11 @@ let MyButton = {
 	computed:{
 		classes:function() {
 			return {
-				background:!this.naked,
-				darkBg:this.darkBg,
 				cancel:this.cancel,
 				clickable:this.active,
 				inactive:!this.active,
 				large:this.large,
+				naked:this.naked,
 				noHighlight:!this.active,
 				noMargin:this.tight,
 				right:this.right

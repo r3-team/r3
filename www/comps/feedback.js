@@ -5,7 +5,7 @@ let MyFeedback = {
 	name:'my-feedback',
 	template:`<div class="app-sub-window" @click.self="close">
 		<div class="feedback contentBox">
-			<div class="top">
+			<div class="top lower">
 				<div class="area">
 					<img class="icon" src="images/feedback.png" />
 					<div class="caption">{{ capApp.title }}</div>

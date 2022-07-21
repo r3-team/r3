@@ -7,6 +7,7 @@ import (
 	"r3/schema"
 	"r3/schema/caption"
 	"r3/types"
+	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v4"
@@ -16,24 +17,23 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 	_, err := tx.Exec(db.Ctx, `
 		DELETE FROM app.role
 		WHERE id = $1
-		AND name <> 'everyone' -- cannot delete default role
+		AND content <> 'everyone' -- cannot delete default role
 	`, id)
 	return err
 }
 
 func Get(moduleId uuid.UUID) ([]types.Role, error) {
-
 	roles := make([]types.Role, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT r.id, name, r.assignable, ARRAY(
+		SELECT r.id, r.name, r.content, r.assignable, ARRAY(
 			SELECT role_id_child
 			FROM app.role_child
 			WHERE role_id = r.id
 		)
 		FROM app.role AS r
 		WHERE r.module_id = $1
-		ORDER BY r.name = 'everyone' DESC, r.name ASC
+		ORDER BY r.content = 'everyone' DESC, r.name ASC
 	`, moduleId)
 	if err != nil {
 		return roles, err
@@ -42,7 +42,7 @@ func Get(moduleId uuid.UUID) ([]types.Role, error) {
 	for rows.Next() {
 		var r types.Role
 
-		if err := rows.Scan(&r.Id, &r.Name, &r.Assignable, &r.ChildrenIds); err != nil {
+		if err := rows.Scan(&r.Id, &r.Name, &r.Content, &r.Assignable, &r.ChildrenIds); err != nil {
 			return roles, err
 		}
 		r.ModuleId = moduleId
@@ -113,12 +113,28 @@ func getAccess(role types.Role) (types.Role, error) {
 }
 
 func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
-	assignable bool, childrenIds []uuid.UUID, accessAttributes map[uuid.UUID]int,
-	accessCollections map[uuid.UUID]int, accessMenus map[uuid.UUID]int,
-	accessRelations map[uuid.UUID]int, captions types.CaptionMap) error {
+	content string, assignable bool, childrenIds []uuid.UUID,
+	accessAttributes map[uuid.UUID]int, accessCollections map[uuid.UUID]int,
+	accessMenus map[uuid.UUID]int, accessRelations map[uuid.UUID]int,
+	captions types.CaptionMap) error {
 
 	if name == "" {
 		return errors.New("missing name")
+	}
+
+	// compatibility fix: missing role content <3.0
+	if content == "" {
+		if name == "everyone" {
+			content = "everyone"
+		} else if strings.Contains(strings.ToLower(name), "admin") {
+			content = "admin"
+		} else if strings.Contains(strings.ToLower(name), "data") {
+			content = "other"
+		} else if strings.Contains(strings.ToLower(name), "csv") {
+			content = "other"
+		} else {
+			content = "user"
+		}
 	}
 
 	known, err := schema.CheckCreateId_tx(tx, &id, "role", "id")
@@ -129,17 +145,17 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.role
-			SET name = $1, assignable = $2
-			WHERE id = $3
-			AND name <> 'everyone' -- cannot update default role
-		`, name, assignable, id); err != nil {
+			SET name = $1, content = $2, assignable = $3
+			WHERE id = $4
+			AND content <> 'everyone' -- cannot update default role
+		`, name, content, assignable, id); err != nil {
 			return err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.role (id, module_id, name, assignable)
-			VALUES ($1,$2,$3,$4)
-		`, id, moduleId, name, assignable); err != nil {
+			INSERT INTO app.role (id, module_id, name, content, assignable)
+			VALUES ($1,$2,$3,$4,$5)
+		`, id, moduleId, name, content, assignable); err != nil {
 			return err
 		}
 	}

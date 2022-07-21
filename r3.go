@@ -13,9 +13,8 @@ import (
 	"os"
 	"os/signal"
 	"path/filepath"
-	"r3/activation"
-	"r3/bruteforce"
 	"r3/cache"
+	"r3/cluster"
 	"r3/config"
 	"r3/db"
 	"r3/db/embedded"
@@ -134,16 +133,17 @@ func main() {
 		return
 	}
 
+	// listen to global shutdown channel
+	go func() {
+		select {
+		case <-scheduler.OsExit:
+			prg.executeAborted(svc, nil)
+		}
+	}()
+
 	// add shut down in case of SIGTERM
 	if service.Interactive() {
-		chanSigTerm := make(chan os.Signal)
-		signal.Notify(chanSigTerm, syscall.SIGTERM)
-		go func() {
-			select {
-			case <-chanSigTerm:
-				prg.executeAborted(svc, nil)
-			}
-		}()
+		signal.Notify(scheduler.OsExit, syscall.SIGTERM)
 	}
 
 	// get path for executable
@@ -304,14 +304,17 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
-	// load configuration from database
-	if err := config.LoadFromDb(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to read configuration from database, %v", err))
+	// apply configuration from database
+	if err := cluster.ConfigChanged(false, true, false); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to apply configuration from database, %v", err))
 		return
 	}
 
-	// set log levels from configuration
-	config.SetLogLevels()
+	// store host details in cache (before cluster node startup)
+	if err := cache.SetHostnameFromOs(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to load host details, %v", err))
+		return
+	}
 
 	// process cli commands
 	if prg.cli.adminCreate != "" {
@@ -336,8 +339,14 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
+	// setup cluster node with shared database
+	if err := cluster.StartNode(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to setup cluster node, %v", err))
+		return
+	}
+
 	// initialize module schema cache
-	if err := cache.UpdateSchemaAll(false); err != nil {
+	if err := cluster.SchemaChangedAll(false, false); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize schema cache, %v", err))
 		return
 	}
@@ -367,16 +376,6 @@ func (prg *program) execute(svc service.Service) {
 	}
 
 	log.Info("server", fmt.Sprintf("is ready to start application (%s)", appVersion))
-
-	// apply configuration parameters
-	bruteforce.SetConfig()
-	activation.SetLicense()
-
-	// start scheduler
-	if err := scheduler.Start(); err != nil {
-		prg.executeAborted(svc, fmt.Errorf("failed to start scheduler, %v", err))
-		return
-	}
 
 	// prepare web server
 	go websocket.StartBackgroundTasks()
@@ -496,6 +495,11 @@ func (prg *program) Stop(svc service.Service) error {
 		return nil
 	}
 	prg.stopping = true
+
+	// stop cluster node
+	if err := cluster.StopNode(); err != nil {
+		prg.logger.Error(err)
+	}
 
 	// stop scheduler
 	scheduler.Stop()

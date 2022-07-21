@@ -10,7 +10,7 @@ let MyAdmin = {
 	
 		<div class="navigationWrap">
 			<div class="navigation contentBox">
-				<div class="top">
+				<div class="top lower">
 					<div class="area">
 						<img class="icon" src="images/settings.png" />
 						<h1>{{ capApp.title }}</h1>
@@ -18,12 +18,10 @@ let MyAdmin = {
 					<div class="area">
 						<my-button image="question.png"
 							@trigger="showDocs = !showDocs"
-							:darkBg="true"
+							:tight="true"
 						/>
 					</div>
 				</div>
-				
-				<div class="top lower" v-if="settings.compact" />
 				
 				<div class="content no-padding">
 					<!-- system configuration -->
@@ -80,6 +78,12 @@ let MyAdmin = {
 						<span>{{ capApp.navigationMails }}</span>
 					</router-link>
 					
+					<!-- cluster -->
+					<router-link class="entry clickable" tag="div" to="/admin/cluster">
+						<img src="images/cluster.png" />
+						<span>{{ capApp.navigationCluster }}</span>
+					</router-link>
+					
 					<!-- logs -->
 					<router-link class="entry clickable" tag="div" to="/admin/logs">
 						<img src="images/log.png" />
@@ -127,6 +131,9 @@ let MyAdmin = {
 	},
 	computed:{
 		contentTitle:function() {
+			if(this.$route.path.includes('cluster'))
+				return this.capApp.navigationCluster;
+			
 			if(this.$route.path.includes('config'))
 				return this.capApp.navigationConfig;
 			
@@ -168,7 +175,6 @@ let MyAdmin = {
 		
 		// stores
 		capApp:  function() { return this.$store.getters.captions.admin; },
-		isAdmin: function() { return this.$store.getters.isAdmin; },
-		settings:function() { return this.$store.getters.settings; }
+		isAdmin: function() { return this.$store.getters.isAdmin; }
 	}
 };

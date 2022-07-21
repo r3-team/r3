@@ -9,10 +9,11 @@ const MyStore = Vuex.createStore({
 	},
 	state:{
 		access:{},                     // access permissions for each entity (attribute, collection, menu, relation), key: entity ID
-		builder:false,                 // builder mode enabled
+		builderMode:false,             // builder mode active
 		busyBlockInput:false,          // while active, input is blocked when busy
 		busyCounter:0,                 // counter of calls making the app busy (WS requests, uploads, etc.)
 		captions:{},                   // all application captions in the user interface language
+		clusterNodeName:'',            // name of the cluster node that session is connected to
 		collectionIdMap:{},            // map of all collection values, key = collection ID
 		config:{},                     // configuration values (admin only)
 		constants:{                    // constant variables, codes/messages/IDs
@@ -49,11 +50,17 @@ const MyStore = Vuex.createStore({
 		moduleLanguage:'',    // module language (either equal to user language or module fallback)
 		pageTitle:'',         // web page title, set by app/form depending on navigation
 		pageTitleFull:'',     // web page title + instance name
-		productionMode:1,     // system production mode (1=production, 0=maintenance)
+		popUpFormGlobal:null, // configuration of global pop-up form
+		productionMode:false, // system in production mode, false if maintenance
 		settings:{},          // setting values for logged in user, key: settings name
+		sessionValueStore:{}, // user session key-value store for frontend functions, { moduleId1:{ key1:value1, key2:value2 }, moduleId2:{ ... } }
 		system:{}             // system details (admin only)
 	},
 	mutations:{
+		config:(state,payload) => {
+			state.builderMode = payload.builderMode === '1';
+			state.config      = payload;
+		},
 		dialog:(state,payload) => {
 			state.dialogCaptionTop = typeof payload.captionTop !== 'undefined' ?
 				payload.captionTop : '';
@@ -99,6 +106,12 @@ const MyStore = Vuex.createStore({
 		pageTitleRefresh:(state,payload) => {
 			MyStore.commit('pageTitle',state.pageTitle);
 		},
+		sessionValueStore:(state,payload) => {
+			if(typeof state.sessionValueStore[payload.moduleId] === 'undefined')
+				state.sessionValueStore[payload.moduleId] = {};
+			
+			state.sessionValueStore[payload.moduleId][payload.key] = payload.value;
+		},
 		
 		// collections
 		collection:      (state,payload) => state.collectionIdMap[payload.id] = payload.rows,
@@ -111,10 +124,9 @@ const MyStore = Vuex.createStore({
 		
 		// simple
 		access:         (state,payload) => state.access          = payload,
-		builder:        (state,payload) => state.builder         = payload,
 		busyBlockInput: (state,payload) => state.busyBlockInput  = payload,
 		captions:       (state,payload) => state.captions        = payload,
-		config:         (state,payload) => state.config          = payload,
+		clusterNodeName:(state,payload) => state.clusterNodeName = payload,
 		feedback:       (state,payload) => state.feedback        = payload,
 		formHasChanges: (state,payload) => state.formHasChanges  = payload,
 		isAdmin:        (state,payload) => state.isAdmin         = payload,
@@ -133,6 +145,7 @@ const MyStore = Vuex.createStore({
 		moduleColor1:   (state,payload) => state.moduleColor1    = payload,
 		moduleEntries:  (state,payload) => state.moduleEntries   = payload,
 		moduleLanguage: (state,payload) => state.moduleLanguage  = payload,
+		popUpFormGlobal:(state,payload) => state.popUpFormGlobal = payload,
 		productionMode: (state,payload) => state.productionMode  = payload,
 		settings:       (state,payload) => state.settings        = payload,
 		system:         (state,payload) => state.system          = payload
@@ -145,14 +158,20 @@ const MyStore = Vuex.createStore({
 			let seconds = state.license.validUntil - (new Date().getTime() / 1000);
 			return Math.round(seconds / 60 / 60 / 24);
 		},
+		patternStyle:(state) => {
+			return state.settings.pattern !== null
+				? `background-image:url('images/pattern_${state.settings.pattern}.webp');background-repeat:repeat-x`
+				: '';
+		},
 		
 		// simple
 		access:           (state) => state.access,
 		blockInput:       (state) => state.busyBlockInput && state.busyCounter > 0,
-		builderEnabled:   (state) => state.builder && state.productionMode === 0,
+		builderEnabled:   (state) => state.builderMode && !state.productionMode,
 		busyBlockInput:   (state) => state.busyBlockInput,
 		busyCounter:      (state) => state.busyCounter,
 		captions:         (state) => state.captions,
+		clusterNodeName:  (state) => state.clusterNodeName,
 		collectionIdMap:  (state) => state.collectionIdMap,
 		config:           (state) => state.config,
 		constants:        (state) => state.constants,
@@ -183,7 +202,9 @@ const MyStore = Vuex.createStore({
 		moduleEntries:    (state) => state.moduleEntries,
 		moduleLanguage:   (state) => state.moduleLanguage,
 		pageTitleFull:    (state) => state.pageTitleFull,
+		popUpFormGlobal:  (state) => state.popUpFormGlobal,
 		productionMode:   (state) => state.productionMode,
+		sessionValueStore:(state) => state.sessionValueStore,
 		settings:         (state) => state.settings,
 		system:           (state) => state.system
 	}

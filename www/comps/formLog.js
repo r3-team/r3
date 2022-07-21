@@ -14,18 +14,20 @@ export {MyFormLog as default};
 let MyFormLog = {
 	name:'my-form-log',
 	components:{MyField},
-	template:`<div class="log contentBox">
+	template:`<div class="form-log contentBox" :class="{ 'pop-up':isPopUp }">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/time.png" />
 				<h1>{{ capApp.dataLog }}</h1>
 			</div>
 			
-			<my-button image="cancel.png"
-				@trigger="$emit('close-log')"
-				:cancel="true"
-				:darkBg="true"
-			/>
+			<div class="area">
+				<my-button image="cancel.png"
+					@trigger="$emit('close-log')"
+					:cancel="true"
+					:tight="true"
+				/>
+			</div>
 		</div>
 		<div class="top lower">
 			<div class="area">
@@ -33,7 +35,6 @@ let MyFormLog = {
 					@trigger="toggleAll"
 					:active="logs.length !== 0"
 					:caption="capApp.button.logShowAll.replace('{CNT}',logs.length)"
-					:darkBg="true"
 					:image="logsShown.length === logs.length ? 'triangleDown.png' : 'triangleRight.png'"
 				/>
 			</div>
@@ -59,7 +60,7 @@ let MyFormLog = {
 							:field="f"
 							:fieldIdMapState="fieldIdMapState"
 							:formBadSave="false"
-							:formIsInline="true"
+							:formIsPopUp="true"
 							:formIsSingleField="false"
 							:formLoading="loading"
 							:formReadonly="false"
@@ -79,6 +80,7 @@ let MyFormLog = {
 		fieldIdMapState:  { type:Object,  required:true },
 		form:             { type:Object,  required:true },
 		formLoading:      { type:Boolean, required:true },
+		isPopUp:          { type:Boolean, required:true },
 		indexMapRecordKey:{ type:Object,  required:true },
 		joinsIndexMap:    { type:Object,  required:true },
 		values:           { type:Object,  required:true }

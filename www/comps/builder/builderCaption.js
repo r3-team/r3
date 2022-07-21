@@ -9,11 +9,13 @@ let MyBuilderCaption = {
 		<template v-if="!richtext">
 			<input v-model="valueInput"
 				v-if="!multiLine"
+				:class="{ long:longInput }"
 				:disabled="readonly"
 				:placeholder="placeholder"
 			/>
 			<textarea v-model="valueInput"
 				v-else
+				:class="{ long:longInput }"
 				:disabled="readonly"
 				:placeholder="placeholder"
 			></textarea>
@@ -28,6 +30,7 @@ let MyBuilderCaption = {
 	props:{
 		contentName:{ type:String,  required:false, default:'' },
 		language:   { type:String,  required:true },
+		longInput:  { type:Boolean, required:false, default:false },
 		modelValue: { type:Object,  required:true },
 		multiLine:  { type:Boolean, required:false, default:false },
 		readonly:   { type:Boolean, required:false, default:false },

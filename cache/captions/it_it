@@ -104,6 +104,29 @@
 		"version":"Versione"
 	},
 	"admin":{
+		"cluster":{
+			"button":{
+				"shutdown":"Shutdown"
+			},
+			"dialog":{
+				"delete":"Are you sure you want to delete this cluster node?<br /><br />If a deleted node restarts and still has access to the cluster database, it will re-register itself as a cluster node.",
+				"shutdown":"Are you sure you want to shutdown this cluster node?<br /><br />A cluster node cannot be started up again from this interface."
+			},
+			"title":{
+				"config":"Global configuration",
+				"connected":"connected",
+				"master":"Cluster master",
+				"missing":"missing",
+				"nodes":"Cluster nodes",
+				"offline":"offline"
+			},
+			"configNodeMissing":"Cluster node assumed missing after X seconds",
+			"dateCheckIn":"Last check-in",
+			"dateStarted":"Node started",
+			"hostname":"Hostname",
+			"statMemory":"Memory usage",
+			"statSessions":"User sessions"
+		},
 		"config":{
 			"button":{
 				"apply":"Applica modifiche",
@@ -157,6 +180,7 @@
 			"logLevelApplication":"Applicazioni",
 			"logLevelBackup":"Backup",
 			"logLevelCache":"Cache",
+			"logLevelCluster":"Cluster",
 			"logLevelCsv":"Importa/esporta CSV",
 			"logLevelLdap":"LDAP",
 			"logLevelMail":"Posta",
@@ -269,7 +293,10 @@
 			"passwordHint":"Imposta nuova password",
 			"passwordHintNoAuth":"Nessuna autenticazione",
 			"recordSelectHint":"...",
-			"roles":"Ruoli"
+			"roles":"Ruoli",
+			"roleContentAdmin":"Admin",
+			"roleContentOther":"Special",
+			"roleContentUser":"User"
 		},
 		"logs":{
 			"byString":"Cerca testo",
@@ -280,7 +307,8 @@
 			"level2":"Avvertimento",
 			"level3":"Informazione",
 			"message":"Messaggio",
-			"module":"Applicazione"
+			"module":"Applicazione",
+			"node":"Cluster node"
 		},
 		"mails":{
 			"account":"Account email",
@@ -375,6 +403,8 @@
 				"cleanupFiles":"Elimina i caricamenti di file scaduti",
 				"cleanupLogs":"Pulisci i log di sistema scaduti",
 				"cleanupTempDir":"Pulisci cartella temporanea",
+				"clusterCheckIn":"Cluster check-in",
+				"clusterProcessEvents":"Cluster event processing",
 				"embeddedBackup":"Gestisci backup integrati",
 				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Importa login e ruoli tramite LDAP",
@@ -401,8 +431,10 @@
 			"scheduleLineDayWeeks":"al {DAY}. giorno della settimana",
 			"scheduleLineDayYears":"al {DAY}. dell'anno",
 			"scheduleLineTime":"alle {HH}:{MM}:{SS}",
-			"systemTasks":"Attività di sistema"
+			"systemTasks":"System tasks (global)",
+			"systemTasksNode":"System tasks (cluster nodes)"
 		},
+		"navigationCluster":"Cluster",
 		"navigationConfig":"Sistema",
 		"navigationLdaps":"LDAP-Logins",
 		"navigationLicense":"Licenza",
@@ -412,7 +444,7 @@
 		"navigationMails":"Spooler Email",
 		"navigationModules":"Applicazioni",
 		"navigationRepo":"Archivio",
-		"navigationRoles":"Ruolo",
+		"navigationRoles":"Memberships",
 		"navigationScheduler":"Pianificatore",
 		"title":"Amministrazione",
 		"titleDocs":"Documentazione amministrazione"
@@ -425,6 +457,9 @@
 			"new":"Nuovo attributo"
 		},
 		"collection":{
+			"button":{
+				"inHeader":"Show in header"
+			},
 			"dialog":{
 				"delete":"Sicuro di voler cancellare questa collezione?"
 			},
@@ -435,6 +470,14 @@
 			"query":"Query",
 			"title":"Collezioni",
 			"titleOne":"Collezione '{NAME}'"
+		},
+		"collectionInput":{
+			"collection":"Collection",
+			"column":"Value(s) from column",
+			"formIdOpen":"Open form",
+			"multiValue":"Multi input",
+			"noDisplayEmpty":"Hide if empty",
+			"onMobile":"Show on mobile"
 		},
 		"form":{
 			"chart":{
@@ -512,12 +555,9 @@
 			"autoSelectHint":"0=off, 2=primi due, -3=ultimi tre",
 			"captions":"Titoli",
 			"category":"Selettore categoria",
-			"collection":"Collezione",
-			"collectionColumn":"Value(s) from column",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*La collezione è influenzata solo se è selezionata come criterio filtrante nella query dei dati.",
-			"collectionMultiValue":"Multi input",
-			"collectionTitle":"Limita la collezione dall'input dell'utente",
+			"collectionTitle":"Filtrare la collezione dall'input",
 			"columnsTarget":"Posiziona le colonne qui",
 			"columnsTemplates":"Colonne disponibili",
 			"columnBatch":"Raggruppamento di colonne",
@@ -541,7 +581,6 @@
 			"copyNewName":"Nuovo nome del modulo",
 			"csvExport":"Esporta CSV",
 			"csvImport":"Importa CSV",
-			"csvTitle":"CSV processing",
 			"date0":"Data da",
 			"date1":"Data a",
 			"dateColor":"Colore",
@@ -602,13 +641,6 @@
 			"noDataActions":"No data actions",
 			"onMobile":"Nella vista mobile",
 			"openForm":"Apri modulo",
-			"openFormAttributeApply":"...per impopstare il valore sul modulo",
-			"openFormFormIdOpen":"Modulo",
-			"openFormMaxHeight":"Altezza massima (px)",
-			"openFormMaxWidth":"Larghezza massima (px)",
-			"openFormNewRecord":"Quando si creano nuovi record",
-			"openFormPopUp":"Modulo Pop-up",
-			"openFormRelationIndex":"Utilizza record da relazione",
 			"presetOpen":"Preimpostazione apertura",
 			"readonly":"Solo lettura",
 			"required":"Obbligatorio",
@@ -639,6 +671,7 @@
 			},
 			"helpJs":{
 				"block_inputs":"app.block_inputs(true/false) => UNDEFINED<br /><br />Blocks or unblocks all inputs on the current form.",
+				"collection_update":"app.collection_update(collection_id) => UNDEFINED<br /><br />Updates values for the specified collection.",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Copia il testo negli appunti dell'utente.",
 				"get_e2ee_data_key":"app.get_e2ee_data_key(dataKeyEncrypted) => STRING<br /><br />Decrypts provided data key with the private key of the current login.",
 				"get_e2ee_data_value":"app.get_e2ee_data_value(dataKey,valueEncrypted) => STRING<br /><br />Decrypts data value with the provided data key.",
@@ -657,7 +690,10 @@
 				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated on the next form save. Data keys for relations on the form with encryption enabled will be encrypted with the public key of each defined login. This enables later decryption of these records for users.<br /><br />If this function is not used, decryption is only ever possible for the creator.",
 				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated for the specified relation and records on the next form save. Data keys for relation records will be encrypted with the public key of each defined login. This enables later decryption of these records for users.",
 				"show_form_message":"app.show_form_message(message,duration_in_ms) => UNDEFINED<br /><br />Temporarily replaces the form title with a custom message. The second argument defines in milli-seconds how long the message is shown (3000 by default).",
-				"update_collection":"app.update_collection(collection_id) => UNDEFINED<br /><br />Retrieves and updates values for the specified collection."
+				"timer_clear":"app.timer_clear(name) => UNDEFINED<br /><br />Aborts a timer with the given name, previously created with 'app.timer_set()'.",
+				"timer_set":"app.timer_set(name,isInterval,function,milliseconds) => UNDEFINED<br /><br />Executes a given function after a specified time in milliseconds. If 'isInterval' is set to TRUE, the function is repeatedly called.<br /><br />A timer is always bound to the current form. When resetting or leaving the form, timers are reset as well.<br /><br />Each timer must have a unique name, which can be used to later abort the timer with 'timer_clear()'; timers with the same name overwrite each other.",
+				"value_store_get":"app.value_store_get(key) => VALUE_ANY_TYPE<br /><br />Returns a value, previously stored with the given key.",
+				"value_store_set":"app.value_store_set(key,value) => UNDEFINED<br /><br />Stores a value for later use. Values are stored with a reference key (an arbitrary name) and can only be accessed within the same application.<br /><br />The value store is session based; values are not available on another device or when the user refreshes the page."
 			},
 			"helpJsHint":{
 				"copy_to_clipboard":"VALUE",
@@ -668,7 +704,10 @@
 				"open_form":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
 				"pdf_create":"FILE_NAME, PAGE_FORMAT, PAGE_ORIENTATION, PAGE_MARGIN_X, PAGE_MARGIN_Y, HTML_HEADER, HTML_BODY, HTML_FOOTER, CSS_STYLES",
 				"show_form_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
-				"update_collection":"COLLECTION_ID"
+				"timer_clear":"TIMER_NAME",
+				"timer_set":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS",
+				"value_store_get":"KEY",
+				"value_store_set":"KEY, VALUE"
 			},
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Interrompe l'operazione e invia un messaggio all'utente che lo esegue, che viene visualizzato nell'interfaccia utente.",
@@ -686,11 +725,15 @@
 				"mail_delete":"instance.mail_delete(mail_id INTEGER) => INTEGER<br /><br />Elimina l'e-mail specificata, inclusi gli allegati.",
 				"mail_delete_after_attach":"instance.mail_delete_after_attach(<blockquote>mail_id INTEGER,<br />attach_record_id INTEGER,<br />attach_attribute_id UUID</blockquote>) => INTEGER<br /><br />Contrassegna gli allegati di posta elettronica da aggiungere a un attributo file del record specificato; l'e-mail e i relativi allegati vengono eliminati successivamente.",
 				"mail_get_next":"instance.mail_get_next(account_name TEXT DEFAULT NULL) => instance.mail<br /><br />Restituisce l'e-mail successiva dallo spooler di posta; restituisce NULL se non è disponibile alcuna email. Quando viene specificato un nome account, restituisce solo i messaggi ricevuti con l'account specificato.<br /><br />Il tipo restituito 'instance.mail' è composto da:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>Dopo aver elaborato un'email, questa dovrebbe essere eliminata; direttamente (mail_delete) o dopo aver memorizzato i suoi allegati (mail_delete_after_attach).",
-				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Genera un messaggio di posta elettronica in uscita per lo spooler di posta. Parametri opzionali:<ul><li>Elenco separato da virgole di destinatari TO/CC/BCC (uno di questi deve essere impostato)</li><li>Nome account di posta da cui inviare (se non specificato viene utilizzato un account casuale)< /li><li>Attributo file e record da cui allegare file</li></ul>"
+				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Genera un messaggio di posta elettronica in uscita per lo spooler di posta. Parametri opzionali:<ul><li>Elenco separato da virgole di destinatari TO/CC/BCC (uno di questi deve essere impostato)</li><li>Nome account di posta da cui inviare (se non specificato viene utilizzato un account casuale)< /li><li>Attributo file e record da cui allegare file</li></ul>",
+				"update_collection":"instance.update_collection(collection_id, login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]) => INTEGER<br /><br />Informs connected clients to update the specified collection. If login IDs are given, only clients that belong to these logins are affected."
 			},
 			"option":{
-				"fieldGet":"legge valore",
-				"fieldSet":"scrive valore",
+				"collectionRead":"read values",
+				"collectionUpdate":"update values",
+				"fieldGetValue":"legge valore",
+				"fieldSetCaption":"write caption",
+				"fieldSetValue":"scrive valore",
 				"intervalDays":"Giorni",
 				"intervalHours":"Ore",
 				"intervalMinutes":"Minuti",
@@ -706,7 +749,9 @@
 			"codeReturns":"Risposta",
 			"codeReturnsHintJs":"opzionale, 'number', 'array',...",
 			"codeReturnsHintPg":"opzionale, 'text', 'integer',...",
+			"collectionId":"[Select collection]",
 			"entityInput":"Seleziona il segnaposto e fai clic sul corpo della funzione per utilizzare la sintassi <b>upgrade-safe</b>.",
+			"fieldId":"[Select field]",
 			"form":"Lega al modulo",
 			"functionsBackend":"Funzioni backend",
 			"functionsFrontend":"Funzioni frontend",
@@ -721,11 +766,12 @@
 			"languageJs":"JavaScript",
 			"languagePg":"PL/pgSQL",
 			"new":"Nuova funzione",
+			"placeholderInsert":"Click on the function body to insert reference",
 			"placeholders":"Segnaposti",
-			"placeholdersFormFields":"Campi dati modulo",
+			"placeholdersCollections":"Collections",
+			"placeholdersFormFields":"Form data fields",
 			"placeholdersFormQuery":"Query dati modulo",
-			"placeholdersGlobal":"Globale",
-			"placeholdersInstance":"Instanza",
+			"placeholdersInstance":"Funzioni instanza",
 			"placeholdersModules":"Applicazioni",
 			"runOnce":"esegui una volta",
 			"schedules":"Ricorrente",
@@ -755,6 +801,7 @@
 			"button":{
 				"add":"Aggiungi voce"
 			},
+			"collections":"Collections",
 			"copy":"Copia tutte le voci di menu da",
 			"formId":"- Seleziona modulo -",
 			"showChildrenHint":"Mostra le voci secondarie per impostazione predefinita",
@@ -801,6 +848,15 @@
 			"startForms":"Moduli iniziali",
 			"startFormsExplanation":"Viene utilizzato il primo modulo iniziale che corrisponde a un ruolo del login corrente.",
 			"title":"Applicazioni"
+		},
+		"openFormInput":{
+			"attributeApply":"...per impopstare il valore sul modulo",
+			"formIdOpen":"Modulo",
+			"maxHeight":"Altezza massima (px)",
+			"maxWidth":"Larghezza massima (px)",
+			"newRecord":"Quando si creano nuovi record",
+			"popUp":"Modulo Pop-up",
+			"relationIndex":"Utilizza record da relazione"
 		},
 		"pgTrigger":{
 			"dialog":{
@@ -899,7 +955,11 @@
 				"accessInherit":"[inherit]",
 				"accessNone":"-",
 				"accessRead":"R",
-				"accessWrite":"RW"
+				"accessWrite":"RW",
+				"contentAdmin":"Administrative user",
+				"contentEveryone":"[Assigned to all]",
+				"contentOther":"Special user",
+				"contentUser":"Regular user"
 			},
 			"access":"Accesso",
 			"assignable":"Assignabile",
@@ -907,6 +967,7 @@
 			"children":"Membro di",
 			"collection":"Collezione",
 			"collections":"Collezioni",
+			"content":"Type",
 			"data":"Dati",
 			"legend":"Legenda: No accesso (-), lettura (R), scrittura (W), cancellazione (D)",
 			"menu":"Menu",
@@ -1093,6 +1154,7 @@
 	},
 	"form":{
 		"button":{
+			"fullscreenHint":"Toggle fullscreen mode",
 			"help":"Aiuto",
 			"helpHint":"Mostra pagine aiuto",
 			"log":"Log",
@@ -1216,6 +1278,7 @@
 			"messagePwRequiresSpecial":"La password deve contenere un carattere speciale (!, ?, #, ecc.)",
 			"messagePwRequiresUpper":"La password deve contente una lettera maiuscola",
 			"messagePwShort":"Password troppo corta",
+			"nodeName":"Connected with: {NAME}",
 			"pwNew0":"Nuova password",
 			"pwNew1":"Nuova password (ripetere)",
 			"pwOld":"Password attuale",
@@ -1265,12 +1328,15 @@
 		"dateFormat3":"d/m/Y (30/12/2012)",
 		"dateFormat4":"m/d/Y (12/30/2012)",
 		"dark":"Modalità scura",
+		"fontFamily":"Font",
 		"fontSize":"Dimensione font",
 		"headerCaptions":"Mostra titolo menu principale",
 		"languageCode":"Lingua",
+		"menuColored":"Colored menu",
 		"mobileScrollForm":"Mobile: Scroll entire form",
 		"pageLimit":"Max. larghezza della pagina",
 		"pageTitle":"Impostazioni",
+		"pattern":"Background pattern",
 		"spacing":"Spaziatura",
 		"sundayFirstDow":"Domenica è il primo giorno della settimana",
 		"titleAccount":"Account",

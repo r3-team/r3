@@ -867,7 +867,6 @@ let MyBuilderModules = {
 				<div class="area">
 					<my-button image="question.png"
 						@trigger="$emit('toggle-docs')"
-						:darkBg="true"
 					/>
 				</div>
 			</div>

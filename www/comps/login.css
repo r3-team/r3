@@ -1,5 +1,6 @@
 .login{
-	max-width:380px;
+	width:100%;
+	max-width:420px;
 	min-width:240px;
 	margin:10px;
 	padding:16px 0px 0px 16px;
@@ -9,6 +10,10 @@
 }
 .login .contentBox{
 	min-width:350px;
+}
+.login .contentBox .top{
+	color:var(--color-bg-font);
+	background-color:#444;
 }
 .login .content{
 	padding:16px;
@@ -24,9 +29,12 @@
 	border:1px solid #888;
 	background-color:var(--color-bg);
 	outline:none;
+	box-shadow:1px 1px 3px var(--color-shade);
 }
 .login input:focus{
-	outline:none;
+	outline:1px solid var(--color-accent1);
+	box-shadow:1px 1px 5px var(--color-shade);
+	transition:outline 0.3s, box-shadow 0.3;
 }
 .login .actions{
 	margin:6px 0px;
@@ -57,4 +65,10 @@
 }
 .login .warning{
 	background-color:#bd2828 !important;
+}
+.login .clusterNode{
+	position:absolute;
+	right:10px;
+	bottom:10px;
+	font-style:italic;
 }

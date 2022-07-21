@@ -38,7 +38,7 @@ let MyAdminModulesItem = {
 			<my-button
 				v-if="isReadyForUpdate"
 				@trigger="$emit('install',repoModule.fileId)"
-				:active="!installStarted && productionMode === 0"
+				:active="!installStarted && !productionMode"
 				:caption="capApp.button.update.replace('{VERSION}',repoModule.releaseBuild)"
 				:image="!installStarted ? 'download.png' : 'load.gif'"
 			/>
@@ -55,28 +55,28 @@ let MyAdminModulesItem = {
 			<my-bool
 				@update:modelValue="ownerWarning"
 				:modelValue="owner"
-				:readonly="productionMode !== 0"
+				:readonly="productionMode"
 			/>
 		</td>
 		<td class="noWrap">
 			<my-bool
 				v-model="hidden"
-				:readonly="productionMode !== 0"
+				:readonly="productionMode"
 			/>
 		</td>
 		<td class="default-inputs">
-			<input class="short" v-model.number="position" :disabled="productionMode !== 0" />
+			<input class="short" v-model.number="position" :disabled="productionMode" />
 		</td>
 		<td>
 			<div class="row">
 				<my-button image="save.png"
 					@trigger="set"
-					:active="hasChanges && productionMode === 0"
+					:active="hasChanges && !productionMode"
 					:captionTitle="capGen.button.save"
 				/>
 				<my-button image="delete.png"
 					@trigger="delAsk"
-					:active="productionMode === 0"
+					:active="!productionMode"
 					:cancel="true"
 				/>
 			</div>
@@ -290,10 +290,7 @@ let MyAdminModulesItem = {
 			}
 			
 			ws.sendMultiple(requests,true).then(
-				() => {
-					this.$root.schemaReload();
-					this.$root.schedulerReload(false);
-				},
+				() => this.$root.schemaReload(),
 				this.$root.genericError
 			);
 		},
@@ -326,13 +323,11 @@ let MyAdminModules = {
 				<my-button image="box.png"
 					@trigger="goToRepo"
 					:caption="capApp.button.repository"
-					:darkBg="true"
 				/>
 				<my-button
 					@trigger="installAll"
-					:active="moduleIdsUpdate.length !== 0 && !installStarted && productionMode === 0"
+					:active="moduleIdsUpdate.length !== 0 && !installStarted && !productionMode"
 					:caption="capApp.button.updateAll.replace('{COUNT}',moduleIdsUpdate.length)"
-					:darkBg="true"
 					:image="!installStarted ? 'download.png' : 'load.gif'"
 				/>
 			</div>
@@ -347,7 +342,6 @@ let MyAdminModules = {
 					@trigger="importModule"
 					:active="canUploadFile && fileToUpload !== null"
 					:caption="capGen.button.apply"
-					:darkBg="true"
 					:image="fileUploading ? 'load.gif' : 'ok.png'"
 				/>
 			</div>
@@ -356,7 +350,7 @@ let MyAdminModules = {
 		<div class="content no-padding">
 			
 			<!-- production mode notice -->
-			<p class="message error" v-if="productionMode === 1">
+			<p class="message error" v-if="productionMode">
 				{{ capApp.productionMode }}
 			</p>
 			
@@ -445,7 +439,7 @@ let MyAdminModules = {
 	},
 	computed:{
 		canUploadFile:function() {
-			return !this.installStarted && !this.fileUploading && this.productionMode !== 1;
+			return !this.installStarted && !this.fileUploading && !this.productionMode;
 		},
 		moduleIdsUpdate:function() {
 			let out = [];

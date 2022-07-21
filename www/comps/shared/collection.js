@@ -1,4 +1,5 @@
 import MyStore                from '../../stores/store.js';
+import {getNilUuid}           from './generic.js';
 import {getValidLanguageCode} from './language.js';
 import {
 	getJoinIndexMap,
@@ -11,6 +12,17 @@ import {
 // a collection is an array of records
 // each record is an array of attribute values, retrieved and ordered following the collection columns
 
+export function getCollectionConsumerTemplate() {
+	return {
+		id:getNilUuid(),
+		collectionId:null,
+		columnIdDisplay:null,
+		multiValue:false,
+		noDisplayEmpty:false,
+		onMobile:false,
+		openForm:null
+	};
+};
 export function getCollectionColumnIndex(collectionId,columnId) {
 	let colSchema = MyStore.getters['schema/collectionIdMap'][collectionId];
 	for(let i = 0, j = colSchema.columns.length; i < j; i++) {
@@ -76,6 +88,35 @@ export function getCollectionValues(collectionId,columnId,singleValue,recordInde
 		out.push(c.values[columnIndex]);
 	}
 	return out;
+};
+
+// returns multiple column values for all records of an collection (array of values in array of records)
+export function getCollectionMultiValues(collectionId,columnIds) {
+	let colSchema = MyStore.getters['schema/collectionIdMap'][collectionId];
+	let colRows   = MyStore.getters['collectionIdMap'][collectionId];
+	
+	if(typeof colRows === 'undefined' || colRows.length === 0)
+		return [];
+	
+	let columnIndexes = [];
+	for(let columnId of columnIds) {
+		for(let i = 0, j = colSchema.columns.length; i < j; i++) {
+			if(colSchema.columns[i].id === columnId)
+				columnIndexes.push(i);
+		}
+	}
+	if(columnIndexes.length === 0)
+		return [];
+	
+	let records = [];
+	for(const c of colRows) {
+		let values = [];
+		for(let i = 0, j = columnIndexes.length; i < j; i++) {
+			values.push(c.values[columnIndexes[i]]);
+		}
+		records.push(values);
+	}
+	return records;
 };
 
 // update known collections by retrieving their data queries

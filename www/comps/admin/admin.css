@@ -102,12 +102,16 @@
 	margin-right:5px;
 }
 .admin-logins .role-select{
-	max-width:1200px;
+	max-width:1100px;
 	min-width:300px;
-	margin:0px 5px 10px;
+	margin:-4px 5px 12px;
 	border:1px solid var(--color-border);
-	border-top:none;
-	border-radius:0px 0px 5px 5px;
+	border-radius:0px 0px 9px 9px;
+	background-color:var(--color-bg);
+	overflow:hidden;
+}
+.admin-logins .role-select .role-content{
+	border-left:1px solid var(--color-border);
 }
 .admin-logins .module-icon{
 	width:24px;
@@ -288,6 +292,7 @@
 .admin-repo .repo-module .part{
 	display:flex;
 	flex-flow:column nowrap;
+	background-color:var(--color-bg);
 }
 .admin-repo .repo-module .bad-state{
 	color:var(--color-error);
@@ -319,7 +324,6 @@
 	padding:12px;
 	padding-right:18px;
 	line-height:150%;
-	background-color:var(--color-bg);
 }
 .admin-repo .repo-module .part.right{
 	padding:12px 16px;
@@ -328,9 +332,7 @@
 	display:flex;
 	flex-flow:column;
 	align-items:flex-start;
-	color:var(--color-bg-font);
 	border-left:2px solid var(--color-border);
-	background-color:var(--color-container-title-lower);
 	flex:0 1 300px;
 }
 
@@ -392,6 +394,12 @@
 }
 
 
+/* schedules */
+.admin-scheduler table{
+	max-width:1300px;
+}
+
+
 /* mails */
 .admin-mails{}
 .admin-mails .row-actions{
@@ -404,4 +412,76 @@
 }
 .admin-mails .mail-testing h1{
 	margin-right:9px;
+}
+
+
+/* cluster */
+.admin-cluster .config{
+	max-width:400px !important;
+	margin:0px 0px 20px !important;
+}
+.admin-cluster .config table{
+	margin:12px 0px;
+}
+.admin-cluster .master{
+	margin-bottom:20px;
+}
+.admin-cluster .nodes{
+	margin-top:10px;
+	display:flex;
+	flex-flow:row wrap;
+	gap:10px;
+}
+.admin-cluster-node{
+	flex:1 0 300px;
+	max-width:600px;
+	padding:22px 12px;
+	display:flex;
+	flex-flow:column nowrap;
+	border:1px solid var(--color-border);
+	border-radius:5px;
+	background-color:var(--color-bg);
+	position:relative;
+}
+.admin-cluster-node img.server{
+	align-self:center;
+	width:90px;
+	height:90px;
+	margin:0px auto 22px;
+	filter:var(--image-filter);
+}
+.admin-cluster-node img.server.missing{
+	filter:var(--image-filter) opacity(30%);
+}
+.admin-cluster-node .icons{
+	display:flex;
+	flex-flow:column nowrap;
+	align-items:center;
+	position:absolute;
+	top:10px;
+	right:10px;
+}
+.admin-cluster-node .icons img.status{
+	width:32px;
+	height:32px;
+	margin-bottom:12px;
+}
+.admin-cluster-node .icons img.status.missing{
+	filter:invert(79%) sepia(51%) saturate(374%) hue-rotate(15deg) brightness(83%) contrast(87%);
+}
+.admin-cluster-node .icons img.status.offline{
+	filter:invert(29%) sepia(6%) saturate(5380%) hue-rotate(314deg) brightness(116%) contrast(111%);
+}
+.admin-cluster-node .icons img.status.running{
+	filter:invert(51%) sepia(98%) saturate(233%) hue-rotate(81deg) brightness(77%) contrast(86%);
+}
+.admin-cluster-node table{
+	margin:0px auto;
+}
+.admin-cluster-node table td{
+	padding:3px 9px;
+}
+.admin-cluster-node table td.node-id{
+	text-align:center;
+	padding:0px 0px 12px;
 }

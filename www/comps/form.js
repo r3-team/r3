@@ -20,6 +20,7 @@ import {
 } from './shared/generic.js';
 import {
 	getDataFieldMap,
+	getFormPopUpTemplate,
 	getFormRoute,
 	getGetterArg,
 	getInputFieldName,
@@ -37,6 +38,7 @@ import {
 	getIndexAttributeIdByField
 } from './shared/attribute.js';
 import {
+	getCollectionMultiValues,
 	getCollectionValues,
 	updateCollections
 } from './shared/collection.js';
@@ -56,29 +58,32 @@ let MyForm = {
 		MyFormHelp,
 		MyFormLog
 	},
-	template:`<div class="form-wrap" :key="form.id">
+	template:`<div class="form-wrap" :class="{ 'pop-up':isPopUp, 'fullscreen':popUpFullscreen }" :key="form.id">
+		
+		<!-- pop-up sub-form -->
+		<div class="app-sub-window under-header"
+			v-if="popUp !== null"
+			@mousedown.self="$refs.popUpForm.closeAsk()"
+		>
+			<my-form ref="popUpForm"
+				@close="popUp = null; $store.commit('formHasChanges',hasChanges)"
+				@record-deleted="popUpRecordChanged('deleted',$event)"
+				@record-open="popUp.recordId = $event"
+				@record-updated="popUpRecordChanged('updated',$event)"
+				:attributeIdMapDef="popUp.attributeIdMapDef"
+				:formId="popUp.formId"
+				:isPopUp="true"
+				:moduleId="popUp.moduleId"
+				:recordId="popUp.recordId"
+				:style="popUp.style"
+			/>
+		</div>
+		
+		<!-- form proper -->
 		<div class="form contentBox grow scroll"
 			v-if="!isMobile || (!showLog && !showHelp)"
+			:class="{ 'pop-up':isPopUp }"
 		>
-			<!-- pop-up form -->
-			<div class="app-sub-window under-header"
-				v-if="popUpFormId !== null"
-				@mousedown.self="$refs.popUpForm.closeAsk()"
-			>
-				<my-form class="form-pop-up" ref="popUpForm"
-					@close="closePopUp()"
-					@record-deleted="popUpRecordChanged($event,'deleted')"
-					@record-open="popUpRecordId = $event"
-					@record-updated="popUpRecordChanged($event,'updated')"
-					:attributeIdMapDef="popUpAttributeIdMapDef"
-					:formId="popUpFormId"
-					:isInline="true"
-					:module="module"
-					:recordId="popUpRecordId"
-					:style="popUpStyles"
-				/>
-			</div>
-			
 			<!-- title bar upper -->
 			<div class="top">
 				<div class="area">
@@ -99,7 +104,6 @@ let MyForm = {
 							<my-button
 								:active="false"
 								:caption="message"
-								:darkBg="true"
 								:naked="true"
 							/>
 						</h1>
@@ -113,36 +117,35 @@ let MyForm = {
 							@trigger-middle="openForm(recordId,null,null,true)"
 							:active="!isNew"
 							:captionTitle="capGen.button.refreshHint"
-							:darkBg="true"
 						/>
 						<my-button image="time.png"
-							v-if="!isInline"
 							@trigger="showLog = !showLog"
 							:active="!isNew"
 							:captionTitle="capApp.button.logHint"
-							:darkBg="true"
 						/>
 					</template>
 					
 					<my-button image="question.png"
-						v-if="!isInline"
 						@trigger="showHelp = !showHelp"
 						:active="helpAvailable"
 						:captionTitle="capApp.button.helpHint"
-						:darkBg="true"
+					/>
+					<my-button
+						v-if="isPopUp"
+						@trigger="popUpFullscreen = !popUpFullscreen"
+						:captionTitle="capApp.button.fullscreenHint"
+						:image="popUpFullscreen ? 'shrink.png' : 'expand.png'"
 					/>
 					<my-button image="builder.png"
-						v-if="isAdmin && builderEnabled && !isMobile && !productionMode"
+						v-if="isAdmin && builderEnabled && !isMobile"
 						@trigger="openBuilder(false)"
 						@trigger-middle="openBuilder(true)"
-						:darkBg="true"
 					/>
 					<my-button image="cancel.png"
-						v-if="isInline"
+						v-if="isPopUp"
 						@trigger="closeAsk"
 						:cancel="true"
 						:captionTitle="capGen.button.close"
-						:darkBg="true"
 					/>
 				</div>
 			</div>
@@ -158,7 +161,6 @@ let MyForm = {
 							:active="(!isNew || hasChanges) && canCreate"
 							:caption="capGen.button.new"
 							:captionTitle="capGen.button.newHint"
-							:darkBg="true"
 						/>
 						<my-button image="save.png"
 							v-if="!noDataActions"
@@ -166,23 +168,20 @@ let MyForm = {
 							:active="canUpdate"
 							:caption="capGen.button.save"
 							:captionTitle="capGen.button.saveHint"
-							:darkBg="true"
 						/>
 						<my-button image="save_new.png"
-							v-if="!isInline && !isMobile && allowNew && !noDataActions"
+							v-if="!isPopUp && !isMobile && allowNew && !noDataActions"
 							@trigger="set(true)"
 							:active="canUpdate && canCreate"
 							:caption="capGen.button.saveNew"
 							:captionTitle="capGen.button.saveNewHint"
-							:darkBg="true"
 						/>
 						<my-button image="upward.png"
-							v-if="!isMobile && !isInline"
+							v-if="!isMobile && !isPopUp"
 							@trigger="openPrevAsk"
 							:active="!updatingRecord"
 							:cancel="true"
 							:caption="capGen.button.goBack"
-							:darkBg="true"
 						/>
 						<my-button image="shred.png"
 							v-if="allowDel && !noDataActions"
@@ -191,7 +190,6 @@ let MyForm = {
 							:cancel="true"
 							:caption="capGen.button.delete"
 							:captionTitle="capGen.button.deleteHint"
-							:darkBg="true"
 						/>
 					</div>
 					<div class="area">
@@ -199,21 +197,19 @@ let MyForm = {
 							v-if="badLoad"
 							:caption="capApp.noAccess"
 							:cancel="true"
-							:darkBg="true"
 						/>
 						<my-button image="warning.png"
 							v-if="badSave && fieldIdsInvalid.length !== 0"
 							@trigger="scrollToInvalidField"
 							:caption="capApp.invalidInputs"
 							:cancel="true"
-							:darkBg="true"
 						/>
 					</div>
 				</template>
 			</div>
 			
 			<!-- form fields -->
-			<div class="content grow fields" :class="{ singleField:isSingleField }">
+			<div class="content grow fields" :class="{ singleField:isSingleField }" :style="patternStyle">
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
 					@clipboard="messageSet('[CLIPBOARD]')"
@@ -226,9 +222,10 @@ let MyForm = {
 					@set-value-init="valueSet"
 					:dataFieldMap="fieldIdMapData"
 					:field="f"
+					:fieldIdMapCaption="fieldIdMapCaption"
 					:fieldIdMapState="fieldIdMapState"
 					:formBadSave="badSave"
-					:formIsInline="isInline"
+					:formIsPopUp="isPopUp"
 					:formIsSingleField="isSingleField"
 					:formLoading="loading"
 					:formReadonly="badLoad || blockInputs"
@@ -247,6 +244,7 @@ let MyForm = {
 			:fieldIdMapState="fieldIdMapState"
 			:form="form"
 			:formLoading="loading"
+			:isPopUp="isPopUp"
 			:indexMapRecordKey="indexMapRecordKey"
 			:joinsIndexMap="joinsIndexMap"
 			:values="values"
@@ -257,7 +255,8 @@ let MyForm = {
 			v-if="showHelp && helpAvailable"
 			@close="showHelp = false"
 			:form="form"
-			:module="module"
+			:isPopUp="isPopUp"
+			:moduleId="moduleId"
 		/>
 	</div>`,
 	props:{
@@ -265,8 +264,8 @@ let MyForm = {
 		allowNew:         { type:Boolean,required:false, default:true },
 		attributeIdMapDef:{ type:Object, required:false, default:() => {return {};} }, // map of attribute default values (new record)
 		formId:           { type:String, required:true },
-		isInline:         { type:Boolean,required:false, default:false },              // opened within another element
-		module:           { type:Object, required:true },
+		isPopUp:          { type:Boolean,required:false, default:false },
+		moduleId:         { type:String, required:true },
 		recordId:         { type:Number, required:true }
 	},
 	emits:['close','record-deleted','record-open','record-updated'],
@@ -296,20 +295,16 @@ let MyForm = {
 			loading:false,        // form is currently loading, informs sub components when form is ready
 			message:null,         // form message
 			messageTimeout:null,  // form message expiration timeout
+			popUp:null,           // configuration for pop-up sub-form
+			popUpFullscreen:false,// set this pop-up form to fullscreen mode
 			showHelp:false,       // show form context help
 			showLog:false,        // show data change log
 			updatingRecord:false, // form is currently attempting to update the current record (saving/deleting)
 			
-			// pop-up form
-			popUpAttributeIdMapDef:{}, // default attribute values for pop-up form
-			popUpFieldId:null,    // field ID that opened pop-up form
-			popUpFormId:null,     // form ID to open in pop-up form
-			popUpRecordId:0,      // record ID to open in pop-up form
-			popUpStyles:'',       // CSS styles for pop-up form
-			
 			// form data
 			fields:[],            // all fields (nested within each other)
 			fieldIdsInvalid:[],   // field IDs with invalid values
+			fieldIdMapCaption:{}, // overwrites for field captions
 			indexMapRecordId:{},  // record IDs for form, key: relation index
 			indexMapRecordKey:{}, // record en-/decryption keys, key: relation index
 			indexesNoDel:{},      // relation indexes with no DEL permission (via relation policy)
@@ -317,6 +312,7 @@ let MyForm = {
 			loginIdsEncryptFor:[],        // login IDs for which data keys are encrypted (e2ee), for current form relations/records
 			loginIdsEncryptForOutside:{}, // login IDs for which data keys are encrypted (e2ee), for outside relation and record IDs
 			                              // [{loginIds:[5,12],relationId:'A-B-C-D',recordIds:[1,2]},{...}]
+			timers:{},            // frontend function timers, key = name, value = { id:XY, isInterval:true }
 			values:{},            // field values, key: index attribute ID
 			valuesDef:{},         // field value defaults (via field options)
 			valuesOrg:{},         // original field values, used to check for changes
@@ -366,7 +362,7 @@ let MyForm = {
 		},
 		helpAvailable:function() {
 			return typeof this.form.captions.formHelp[this.moduleLanguage] !== 'undefined'
-				|| typeof this.module.captions.moduleHelp[this.moduleLanguage] !== 'undefined';
+				|| typeof this.moduleIdMap[this.moduleId].captions.moduleHelp[this.moduleLanguage] !== 'undefined';
 		},
 		isSingleField:function() {
 			return this.fields.length === 1 && ['calendar','chart','list'].includes(this.fields[0].content);
@@ -462,7 +458,10 @@ let MyForm = {
 						maxWidth:maxX
 					},[],newTab),
 				show_form_message:(v,i) => this.messageSet(v,i),
-				update_collection:(v)   => this.updateCollections(false,undefined,v),
+				
+				// collection functions
+				collection_read:this.getCollectionMultiValues,
+				collection_update:(v) => this.updateCollections(false,undefined,v),
 				
 				// call other functions
 				call_backend:(id,...args) => {
@@ -483,6 +482,31 @@ let MyForm = {
 				
 				// PDF functions
 				pdf_create:this.generatePdf,
+				
+				// timeout/interval function calls
+				timer_clear:this.timerClear,
+				timer_set:(name,isInterval,fnc,milliseconds) => {
+					this.timerClear(name);
+					this.timers[name] = {
+						id:isInterval
+							? setInterval(fnc,milliseconds)
+							: setTimeout(fnc,milliseconds),
+						isInterval:isInterval
+					};
+				},
+				
+				// session value store
+				value_store_get:(k) => {
+					return typeof this.$store.getters.sessionValueStore[this.moduleId] !== 'undefined'
+						&& typeof this.$store.getters.sessionValueStore[this.moduleId][k] !== 'undefined'
+						? this.$store.getters.sessionValueStore[this.moduleId][k]
+						: undefined;
+				},
+				value_store_set:(k,v) => this.$store.commit('sessionValueStore',{
+					moduleId:this.moduleId,
+					key:k,
+					value:v
+				}),
 				
 				// e2e encryption
 				get_e2ee_data_key:(dataKeyEnc) => {
@@ -510,6 +534,9 @@ let MyForm = {
 					return this.values[this.getIndexAttributeIdByField(
 						this.fieldIdMapData[fieldId],false)];
 				},
+				set_field_caption:(fieldId,caption) => {
+					this.fieldIdMapCaption[fieldId] = caption;
+				},
 				set_field_value:(fieldId,value) => {
 					// use common return codes: 0 = success, 1 = error
 					if(typeof this.fieldIdMapData[fieldId] === 'undefined')
@@ -519,7 +546,10 @@ let MyForm = {
 						this.fieldIdMapData[fieldId],false),value,false,true);
 					
 					return 0;
-				}
+				},
+				
+				// legacy calls (pre 3.0)
+				update_collection:(v) => this.updateCollections(false,undefined,v)
 			};
 		},
 		
@@ -635,7 +665,7 @@ let MyForm = {
 		loginPublicKey: function() { return this.$store.getters.loginPublicKey; },
 		loginPrivateKey:function() { return this.$store.getters.loginPrivateKey; },
 		moduleLanguage: function() { return this.$store.getters.moduleLanguage; },
-		productionMode: function() { return this.$store.getters.productionMode; },
+		patternStyle:   function() { return this.$store.getters.patternStyle; },
 		settings:       function() { return this.$store.getters.settings; }
 	},
 	methods:{
@@ -649,9 +679,11 @@ let MyForm = {
 		generatePdf,
 		getAttributeValueFromString,
 		getAttributeValuesFromGetter,
+		getCollectionMultiValues,
 		getCollectionValues,
 		getDataFieldMap,
 		getDetailsFromIndexAttributeId,
+		getFormPopUpTemplate,
 		getFormRoute,
 		getGetterArg,
 		getIndexAttributeId,
@@ -678,9 +710,9 @@ let MyForm = {
 		// form management
 		handleHotkeys:function(e) {
 			// not data or pop-up form open
-			if(!this.isData || this.popUpFormId !== null) return;
+			if(!this.isData || this.popUp !== null) return;
 			
-			if(this.isInline && e.key === 'Escape')
+			if(this.isPopUp && e.key === 'Escape')
 				this.closeAsk();
 			
 			if(e.key === 's' && e.ctrlKey) {
@@ -721,100 +753,100 @@ let MyForm = {
 			this.loading = true;
 			this.$store.commit('isAtMenu',false);
 			
-			// if form does not change, we do not need to build it
-			if(this.lastFormId === this.form.id)
-				return this.resetRecord();
-			
-			// reset form states
-			this.$store.commit('pageTitle',this.title);
-			this.message = null;
-			this.showLog = false;
-			
-			// build form
-			this.lastFormId = this.form.id;
-			
-			// reset value stores
-			this.values    = {};
-			this.valuesDef = {};
-			this.valuesOrg = {};
-			
-			let fillFieldValueTemplates = (fields) => {
-				for(const f of fields) {
-					if(f.content === 'container') {
-						fillFieldValueTemplates(f.fields);
-						continue;
-					}
-					
-					if(f.content !== 'data')
-						continue;
-					
-					// apply data field default value
-					let def              = null;
-					let attribute        = this.attributeIdMap[f.attributeId];
-					let indexAttributeId = this.getIndexAttributeIdByField(f,false);
-					let isRelationship   = this.isAttributeRelationship(attribute.content);
-					let isRelationshipN1 = this.isAttributeRelationshipN1(attribute.content);
-					let isRelMulti       = isRelationship && f.attributeIdNm !== null || (f.outsideIn && isRelationshipN1);
-					
-					if(f.def !== '')
-						def = this.getAttributeValueFromString(attribute.content,
-							 this.getResolvedPlaceholders(f.def));
-					
-					if(f.collectionIdDef !== null && f.columnIdDef !== null)
-						def = this.getCollectionValues(
-							f.collectionIdDef,
-							f.columnIdDef,
-							!isRelMulti
-						);
-					
-					if(isRelationship && f.defPresetIds.length > 0) {
-						if(!isRelMulti) {
-							def = this.presetIdMapRecordId[f.defPresetIds[0]];
+			// rebuild entire form if ID changed
+			if(this.lastFormId !== this.form.id) {
+				
+				// reset form states
+				this.$store.commit('pageTitle',this.title);
+				this.message = null;
+				this.showLog = false;
+				
+				// build form
+				this.lastFormId = this.form.id;
+				
+				// reset value stores
+				this.values    = {};
+				this.valuesDef = {};
+				this.valuesOrg = {};
+				
+				let fillFieldValueTemplates = (fields) => {
+					for(const f of fields) {
+						if(f.content === 'container') {
+							fillFieldValueTemplates(f.fields);
+							continue;
 						}
-						else {
-							def = [];
-							for(let i = 0, j = f.defPresetIds.length; i < j; i++) {
-								def.push(this.presetIdMapRecordId[f.defPresetIds[i]]);
+						
+						if(f.content !== 'data')
+							continue;
+						
+						// apply data field default value
+						let def              = null;
+						let attribute        = this.attributeIdMap[f.attributeId];
+						let indexAttributeId = this.getIndexAttributeIdByField(f,false);
+						let isRelationship   = this.isAttributeRelationship(attribute.content);
+						let isRelationshipN1 = this.isAttributeRelationshipN1(attribute.content);
+						let isRelMulti       = isRelationship && f.attributeIdNm !== null || (f.outsideIn && isRelationshipN1);
+						
+						if(f.def !== '')
+							def = this.getAttributeValueFromString(attribute.content,
+								 this.getResolvedPlaceholders(f.def));
+						
+						if(f.defCollection !== null)
+							def = this.getCollectionValues(
+								f.defCollection.collectionId,
+								f.defCollection.columnIdDisplay,
+								!isRelMulti
+							);
+						
+						if(isRelationship && f.defPresetIds.length > 0) {
+							if(!isRelMulti) {
+								def = this.presetIdMapRecordId[f.defPresetIds[0]];
+							}
+							else {
+								def = [];
+								for(let i = 0, j = f.defPresetIds.length; i < j; i++) {
+									def.push(this.presetIdMapRecordId[f.defPresetIds[i]]);
+								}
 							}
 						}
-					}
-					
-					this.valuesDef[indexAttributeId] = def;
-					this.valueSet(indexAttributeId,JSON.parse(JSON.stringify(def)),true,false);
-					
-					// set value and default for altern. field attribute
-					if(f.attributeIdAlt !== null) {
 						
-						const indexAttributeIdAlt = this.getIndexAttributeId(
-							f.index,f.attributeIdAlt,false,null);
+						this.valuesDef[indexAttributeId] = def;
+						this.valueSet(indexAttributeId,JSON.parse(JSON.stringify(def)),true,false);
 						
-						this.valuesDef[indexAttributeIdAlt] = null;
-						this.valueSet(indexAttributeIdAlt,null,true,false);
+						// set value and default for altern. field attribute
+						if(f.attributeIdAlt !== null) {
+							
+							const indexAttributeIdAlt = this.getIndexAttributeId(
+								f.index,f.attributeIdAlt,false,null);
+							
+							this.valuesDef[indexAttributeIdAlt] = null;
+							this.valueSet(indexAttributeIdAlt,null,true,false);
+						}
 					}
-				}
-			};
-			
-			this.fields = this.form.fields;
-			this.fieldIdsInvalid = [];
-			fillFieldValueTemplates(this.fields);
-			
-			this.relationId = this.form.query.relationId;
-			this.joins      = this.fillRelationRecordIds(this.form.query.joins);
-			this.filters    = this.form.query.filters;
-			
-			// set preset record to open, if defined
-			if(this.form.presetIdOpen !== null && this.relationId !== null) {
-				for(const p of this.relationIdMap[this.relationId].presets) {
-					if(p.id === this.form.presetIdOpen)
-						return this.openForm(this.presetIdMapRecordId[p.id]);
+				};
+				
+				this.fields = this.form.fields;
+				this.fieldIdsInvalid = [];
+				fillFieldValueTemplates(this.fields);
+				
+				this.relationId = this.form.query.relationId;
+				this.joins      = this.fillRelationRecordIds(this.form.query.joins);
+				this.filters    = this.form.query.filters;
+				
+				// set preset record to open, if defined
+				if(this.form.presetIdOpen !== null && this.relationId !== null) {
+					for(const p of this.relationIdMap[this.relationId].presets) {
+						if(p.id === this.form.presetIdOpen)
+							return this.openForm(this.presetIdMapRecordId[p.id]);
+					}
 				}
 			}
-			this.resetRecord();
-		},
-		resetRecord:function() {
+			
+			// reset record
 			this.badSave     = false;
 			this.badLoad     = false;
 			this.blockInputs = false;
+			this.fieldIdMapCaption         = {};
 			this.loginIdsEncryptFor        = [];
 			this.loginIdsEncryptForOutside = [];
 			this.indexesNoDel              = [];
@@ -822,7 +854,8 @@ let MyForm = {
 			this.indexMapRecordId          = {};
 			this.indexMapRecordKey         = {};
 			this.valuesSetAllDefault();
-			this.popUpFormId = null;
+			this.timerClearAll();
+			this.popUp = null;
 			this.get();
 		},
 		releaseLoadingOnNextTick:function() {
@@ -955,12 +988,6 @@ let MyForm = {
 		close:function() {
 			this.$emit('close');
 		},
-		closePopUp:function() {
-			this.popUpFormId = null;
-			
-			// reset form change state to main form
-			this.$store.commit('formHasChanges',this.hasChanges);
-		},
 		executeFunction:function(jsFunctionId,args) {
 			if(typeof this.jsFunctionIdMap[jsFunctionId] === 'undefined')
 				return;
@@ -983,6 +1010,9 @@ let MyForm = {
 			// also blocked, restoration of access to window: let win = (function() {return this;}())
 			code = `'use strict';
 				let document       = {};
+				let history        = {};
+				let location       = {};
+				let navigator      = {};
 				let setInterval    = {};
 				let setTimeout     = {};
 				let XMLHttpRequest = {};
@@ -1053,10 +1083,10 @@ let MyForm = {
 			this.$store.commit('formHasChanges',false);
 			window.history.back();
 		},
-		popUpRecordChanged:function(recordId,change) {
-			if(typeof this.fieldIdMapData[this.popUpFieldId] !== 'undefined') {
+		popUpRecordChanged:function(change,recordId) {
+			if(typeof this.fieldIdMapData[this.popUp.fieldId] !== 'undefined') {
 				// update data field value to reflect change of pop-up form record
-				let field = this.fieldIdMapData[this.popUpFieldId];
+				let field = this.fieldIdMapData[this.popUp.fieldId];
 				let atr   = this.attributeIdMap[field.attributeId];
 				let iaId  = this.getIndexAttributeIdByField(field,false);
 				
@@ -1070,7 +1100,7 @@ let MyForm = {
 						this.values[iaId] = isDeleted ? null : recordId;
 					}
 					else if(isDeleted) {
-						let pos = this.values[iaId].indexOf(this.popUpRecordId);
+						let pos = this.values[iaId].indexOf(recordId);
 						if(pos !== -1) this.values[iaId].splice(pos,1);
 					}
 					else if(isUpdated) {
@@ -1093,6 +1123,23 @@ let MyForm = {
 					this.fieldIdsInvalid[0])).scrollIntoView();
 		},
 		
+		// timer
+		timerClear:function(name) {
+			if(typeof this.timers[name] !== 'undefined') {
+				if(this.timers[name].isInterval)
+					clearInterval(this.timers[name].id);
+				else
+					clearTimeout(this.timers[name].id);
+				
+				delete(this.timers[name]);
+			}
+		},
+		timerClearAll:function() {
+			for(let k in this.timers) {
+				this.timerClear(k);
+			}
+		},
+		
 		// form function triggers
 		triggerEventAfter: function(e) { this.triggerEvent(e,false); },
 		triggerEventBefore:function(e) { this.triggerEvent(e,true); },
@@ -1109,45 +1156,46 @@ let MyForm = {
 		
 		// navigation
 		openForm:function(recordId,options,getterArgs,newTab) {
-			let formIdOpen = this.form.id; // stay on form by default
-			
 			// set defaults if not given
 			if(typeof recordId === 'undefined' || recordId === null)
 				recordId = 0; // open empty record if none is given
 			
 			if(typeof options === 'undefined' || options === null)
-				options = { formIdOpen:null, popUp:false };
-			else
-				formIdOpen = options.formIdOpen;
+				options = { formIdOpen:this.form.id, popUp:false }; // stay on form by default
 			
 			if(typeof getterArgs === 'undefined' || getterArgs === null)
 				getterArgs = []; // no getters specified, add empty array
 			
-			let stayOnForm = this.form.id === formIdOpen;
+			let stayOnForm = this.form.id === options.formIdOpen;
 			
-			// if inline and on the same form, reload record
-			if(this.isInline && stayOnForm)
-				return this.$emit('record-open',recordId);
+			if(this.isPopUp) {
+				if(stayOnForm)
+					return this.$emit('record-open',recordId);
+				
+				if(!options.popUp)
+					options.popUp = true;
+			}
 			
-			// open pop-up form if desired
+			// open pop-up form if configured
 			if(options.popUp) {
+				let popUpConfig = this.getFormPopUpTemplate();
+				popUpConfig.formId   = options.formIdOpen;
+				popUpConfig.recordId = recordId;
+				popUpConfig.moduleId = this.moduleId;
+				
 				const getter = this.getGetterArg(getterArgs,'attributes');
-				
-				this.popUpAttributeIdMapDef = getter === '' ? {}
+				popUpConfig.attributeIdMapDef = getter === '' ? {}
 					: this.getAttributeValuesFromGetter(getter);
-				
-				this.popUpFormId   = formIdOpen;
-				this.popUpRecordId = recordId;
-				this.popUpFieldId  = null;
 				
 				let styles = [];
 				if(options.maxWidth  !== 0) styles.push(`max-width:${options.maxWidth}px`);
 				if(options.maxHeight !== 0) styles.push(`max-height:${options.maxHeight}px`);
-				this.popUpStyles = styles.join(';');
+				popUpConfig.style = styles.join(';');
 				
 				if(typeof this.fieldIdMapData[options.fieldId] !== 'undefined')
-					this.popUpFieldId = options.fieldId;
+					popUpConfig.fieldId = options.fieldId;
 				
+				this.popUp = popUpConfig;
 				return;
 			}
 			
@@ -1167,7 +1215,7 @@ let MyForm = {
 					getterArgs.push(`attributes=${this.$route.query.attributes}`);
 			}
 			
-			const path = this.getFormRoute(formIdOpen,recordId,true,getterArgs);
+			const path = this.getFormRoute(options.formIdOpen,recordId,true,getterArgs);
 			
 			if(newTab)
 				return this.openLink('#'+path,true);
@@ -1189,8 +1237,8 @@ let MyForm = {
 		setFormArgs:function(args,push) {
 			const path = this.getFormRoute(this.form.id,this.recordId,true,args);
 			
-			if(this.$route.fullPath === path || this.isInline)
-				return; // nothing changed or inline form, ignore
+			if(this.$route.fullPath === path || this.isPopUp)
+				return; // nothing changed or pop-up form, ignore
 			
 			if(push) this.$router.push(path);
 			else     this.$router.replace(path);
@@ -1226,7 +1274,7 @@ let MyForm = {
 			
 			ws.sendMultiple(requests,true).then(
 				() => {
-					if(this.isInline)
+					if(this.isPopUp)
 						this.$emit('record-deleted',this.recordId);
 					
 					this.triggerEventAfter('delete');
@@ -1364,6 +1412,7 @@ let MyForm = {
 				return;
 			}
 			
+			this.triggerEventBefore('open');
 			ws.send('data','get',{
 				relationId:join.relationId,
 				indexSource:join.index,
@@ -1376,7 +1425,12 @@ let MyForm = {
 				]),
 				getPerm:true
 			},true).then(
-				res => this.valueSetByRows(res.payload.rows,expressions),
+				res => {
+					this.valueSetByRows(res.payload.rows,expressions).then(
+						() => this.triggerEventAfter('open'),
+						err => this.$root.genericError
+					);
+				},
 				this.$root.genericError
 			);
 		},
@@ -1584,7 +1638,7 @@ let MyForm = {
 					if(this.isNew) this.messageSet('[CREATED]');
 					else           this.messageSet('[UPDATED]');
 					
-					if(this.isInline)
+					if(this.isPopUp)
 						this.$emit('record-updated',resSet.payload.indexRecordIds[0]);
 					
 					this.triggerEventAfter('save');

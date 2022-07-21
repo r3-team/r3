@@ -8,6 +8,7 @@ import (
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
+	"r3/schema/collection/consumer"
 	"r3/schema/column"
 	"r3/schema/openForm"
 	"r3/schema/query"
@@ -53,8 +54,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		
 		-- data field
 		fd.attribute_id, fd.attribute_id_alt, fd.index, fd.display, fd.min,
-		fd.max, fd.def, fd.regex_check, fd.js_function_id, fd.collection_id_def,
-		fd.column_id_def, fd.clipboard,
+		fd.max, fd.def, fd.regex_check, fd.js_function_id, fd.clipboard,
 		
 		-- data relationship field
 		fr.attribute_id_nm, fr.category, fr.filter_quick, fr.outside_in,
@@ -112,8 +112,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		var autoRenew, dateRange0, dateRange1, indexColor, min, max pgtype.Int4
 		var attributeId, attributeIdAlt, attributeIdNm, attributeIdDate0,
 			attributeIdDate1, attributeIdColor, fieldParentId, iconId,
-			jsFunctionIdButton, jsFunctionIdData, collectionIdDef,
-			columnIdDef pgtype.UUID
+			jsFunctionIdButton, jsFunctionIdData pgtype.UUID
 		var category, clipboard, csvExport, csvImport, filterQuick,
 			filterQuickList, gantt, ganttStepsToggle, ics, outsideIn,
 			wrap pgtype.Bool
@@ -126,10 +125,10 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			&dateRange0, &dateRange1, &chartOption, &direction, &justifyContent,
 			&alignItems, &alignContent, &wrap, &grow, &shrink, &basis, &perMin,
 			&perMax, &size, &attributeId, &attributeIdAlt, &index, &display,
-			&min, &max, &def, &regexCheck, &jsFunctionIdData, &collectionIdDef,
-			&columnIdDef, &clipboard, &attributeIdNm, &category, &filterQuick,
-			&outsideIn, &autoSelect, &defPresetIds, &autoRenew, &csvExport,
-			&csvImport, &layout, &filterQuickList, &resultLimit); err != nil {
+			&min, &max, &def, &regexCheck, &jsFunctionIdData, &clipboard,
+			&attributeIdNm, &category, &filterQuick, &outsideIn, &autoSelect,
+			&defPresetIds, &autoRenew, &csvExport, &csvImport, &layout,
+			&filterQuickList, &resultLimit); err != nil {
 
 			rows.Close()
 			return fields, err
@@ -220,59 +219,61 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		case "data":
 			if schema.IsContentRelationship(atrContent.String) {
 				fields = append(fields, types.FieldDataRelationship{
-					Id:              fieldId,
-					IconId:          iconId,
-					Content:         content,
-					State:           state,
-					OnMobile:        onMobile,
-					Clipboard:       clipboard.Bool,
-					AttributeId:     attributeId.Bytes,
-					AttributeIdAlt:  attributeIdAlt,
-					AttributeIdNm:   attributeIdNm,
-					Index:           int(index.Int),
-					Display:         display.String,
-					AutoSelect:      int(autoSelect.Int),
-					Min:             min,
-					Max:             max,
-					RegexCheck:      regexCheck,
-					JsFunctionId:    jsFunctionIdData,
-					Def:             def.String,
-					DefPresetIds:    defPresetIds,
-					CollectionIdDef: collectionIdDef,
-					ColumnIdDef:     columnIdDef,
-					Category:        category.Bool,
-					FilterQuick:     filterQuick.Bool,
-					OutsideIn:       outsideIn.Bool,
-					Columns:         []types.Column{},
-					Query:           types.Query{},
-					OpenForm:        types.OpenForm{},
-					Captions:        types.CaptionMap{},
+					Id:             fieldId,
+					IconId:         iconId,
+					Content:        content,
+					State:          state,
+					OnMobile:       onMobile,
+					Clipboard:      clipboard.Bool,
+					AttributeId:    attributeId.Bytes,
+					AttributeIdAlt: attributeIdAlt,
+					AttributeIdNm:  attributeIdNm,
+					Index:          int(index.Int),
+					Display:        display.String,
+					AutoSelect:     int(autoSelect.Int),
+					Min:            min,
+					Max:            max,
+					RegexCheck:     regexCheck,
+					JsFunctionId:   jsFunctionIdData,
+					Def:            def.String,
+					DefPresetIds:   defPresetIds,
+					Category:       category.Bool,
+					FilterQuick:    filterQuick.Bool,
+					OutsideIn:      outsideIn.Bool,
+					Columns:        []types.Column{},
+					Query:          types.Query{},
+					OpenForm:       types.OpenForm{},
+					Captions:       types.CaptionMap{},
 
 					// legacy
 					FormIdOpen:        compatible.GetNullUuid(),
 					AttributeIdRecord: compatible.GetNullUuid(),
+					CollectionIdDef:   compatible.GetNullUuid(),
+					ColumnIdDef:       compatible.GetNullUuid(),
 				})
 				posDataRelLookup = append(posDataRelLookup, pos)
 			} else {
 				fields = append(fields, types.FieldData{
-					Id:              fieldId,
-					IconId:          iconId,
-					Content:         content,
-					State:           state,
-					OnMobile:        onMobile,
-					Clipboard:       clipboard.Bool,
-					AttributeId:     attributeId.Bytes,
-					AttributeIdAlt:  attributeIdAlt,
-					Index:           int(index.Int),
-					Display:         display.String,
-					Def:             def.String,
-					Min:             min,
-					Max:             max,
-					RegexCheck:      regexCheck,
-					JsFunctionId:    jsFunctionIdData,
-					CollectionIdDef: collectionIdDef,
-					ColumnIdDef:     columnIdDef,
-					Captions:        types.CaptionMap{},
+					Id:             fieldId,
+					IconId:         iconId,
+					Content:        content,
+					State:          state,
+					OnMobile:       onMobile,
+					Clipboard:      clipboard.Bool,
+					AttributeId:    attributeId.Bytes,
+					AttributeIdAlt: attributeIdAlt,
+					Index:          int(index.Int),
+					Display:        display.String,
+					Def:            def.String,
+					Min:            min,
+					Max:            max,
+					RegexCheck:     regexCheck,
+					JsFunctionId:   jsFunctionIdData,
+					Captions:       types.CaptionMap{},
+
+					// legacy
+					CollectionIdDef: compatible.GetNullUuid(),
+					ColumnIdDef:     compatible.GetNullUuid(),
 				})
 				posDataLookup = append(posDataLookup, pos)
 			}
@@ -347,7 +348,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		if err != nil {
 			return fields, err
 		}
-		field.Collections, err = getCollections(field.Id)
+		field.Collections, err = consumer.Get("field", field.Id, "fieldFilterSelector")
 		if err != nil {
 			return fields, err
 		}
@@ -369,10 +370,14 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		fields[pos] = field
 	}
 
-	// lookup data fields: captions
+	// lookup data fields: default value collection, captions
 	for _, pos := range posDataLookup {
 		var field = fields[pos].(types.FieldData)
 
+		field.DefCollection, err = consumer.GetOne("field", field.Id, "fieldDataDefault")
+		if err != nil {
+			return fields, err
+		}
 		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle", "fieldHelp"})
 		if err != nil {
 			return fields, err
@@ -380,7 +385,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		fields[pos] = field
 	}
 
-	// lookup data relationship fields: open form, query, columns, captions
+	// lookup data relationship fields: open form, query, columns, efault value collection, captions
 	for _, pos := range posDataRelLookup {
 		var field = fields[pos].(types.FieldDataRelationship)
 
@@ -393,6 +398,10 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			return fields, err
 		}
 		field.Columns, err = column.Get("field", field.Id)
+		if err != nil {
+			return fields, err
+		}
+		field.DefCollection, err = consumer.GetOne("field", field.Id, "fieldDataDefault")
 		if err != nil {
 			return fields, err
 		}
@@ -430,7 +439,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		if err != nil {
 			return fields, err
 		}
-		field.Collections, err = getCollections(field.Id)
+		field.Collections, err = consumer.Get("field", field.Id, "fieldFilterSelector")
 		if err != nil {
 			return fields, err
 		}
@@ -526,7 +535,7 @@ func GetCalendar(fieldId uuid.UUID) (types.FieldCalendar, error) {
 	if err != nil {
 		return f, err
 	}
-	f.Collections, err = getCollections(f.Id)
+	f.Collections, err = consumer.Get("field", f.Id, "fieldFilterSelector")
 	if err != nil {
 		return f, err
 	}
@@ -619,7 +628,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 			}
 			if err := setData_tx(tx, fieldId, f.AttributeId, f.AttributeIdAlt,
 				f.Index, f.Def, f.Display, f.Min, f.Max, f.RegexCheck, f.JsFunctionId,
-				f.CollectionIdDef, f.ColumnIdDef, f.Clipboard); err != nil {
+				f.Clipboard, f.DefCollection, f.CollectionIdDef, f.ColumnIdDef); err != nil {
 
 				return err
 			}
@@ -739,10 +748,7 @@ func setButton_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	}
 
 	// set open form
-	if err := openForm.Set_tx(tx, "field", fieldId, oForm); err != nil {
-		return err
-	}
-	return nil
+	return openForm.Set_tx(tx, "field", fieldId, oForm)
 }
 func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	attributeIdDate0 uuid.UUID, attributeIdDate1 uuid.UUID,
@@ -800,7 +806,7 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	}
 
 	// set collection consumer
-	if err := setCollections_tx(tx, fieldId, collections); err != nil {
+	if err := consumer.Set_tx(tx, "field", fieldId, "fieldFilterSelector", collections); err != nil {
 		return err
 	}
 
@@ -871,8 +877,8 @@ func setContainer_tx(tx pgx.Tx, fieldId uuid.UUID, direction string,
 func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 	attributeIdAlt pgtype.UUID, index int, def string, display string,
 	min pgtype.Int4, max pgtype.Int4, regexCheck pgtype.Varchar,
-	jsFunctionId pgtype.UUID, collectionIdDef pgtype.UUID,
-	columnIdDef pgtype.UUID, clipboard bool) error {
+	jsFunctionId pgtype.UUID, clipboard bool, defCollection types.CollectionConsumer,
+	collectionIdDef pgtype.UUID, columnIdDef pgtype.UUID) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_data", "field_id")
 	if err != nil {
@@ -884,17 +890,22 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 	collectionIdDef = compatible.FixPgxNull(collectionIdDef).(pgtype.UUID)
 	columnIdDef = compatible.FixPgxNull(columnIdDef).(pgtype.UUID)
 
+	// fix imports < 3.0: Migrate legacy definitions
+	if collectionIdDef.Status != pgtype.Null {
+		defCollection.CollectionId = collectionIdDef.Bytes
+		defCollection.ColumnIdDisplay = columnIdDef
+		defCollection.MultiValue = false
+	}
+
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.field_data
 			SET attribute_id = $1, attribute_id_alt = $2, index = $3,
 				def = $4, display = $5,min = $6, max = $7, regex_check = $8,
-				js_function_id = $9, collection_id_def = $10,
-				column_id_def = $11, clipboard = $12
-			WHERE field_id = $13
+				js_function_id = $9, clipboard = $10
+			WHERE field_id = $11
 		`, attributeId, attributeIdAlt, index, def, display, min, max,
-			regexCheck, jsFunctionId, collectionIdDef, columnIdDef, clipboard,
-			fieldId); err != nil {
+			regexCheck, jsFunctionId, clipboard, fieldId); err != nil {
 
 			return err
 		}
@@ -902,18 +913,19 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.field_data (
 				field_id, attribute_id, attribute_id_alt, index, def, display,
-				min, max, regex_check, js_function_id, collection_id_def,
-				column_id_def, clipboard
+				min, max, regex_check, js_function_id, clipboard
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
 		`, fieldId, attributeId, attributeIdAlt, index, def,
-			display, min, max, regexCheck, jsFunctionId,
-			collectionIdDef, columnIdDef, clipboard); err != nil {
+			display, min, max, regexCheck, jsFunctionId, clipboard); err != nil {
 
 			return err
 		}
 	}
-	return nil
+
+	// set collection consumer
+	return consumer.Set_tx(tx, "field", fieldId, "fieldDataDefault",
+		[]types.CollectionConsumer{defCollection})
 }
 func setDataRelationship_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	attributeIdRecord pgtype.UUID, attributeIdNm pgtype.UUID,
@@ -1043,56 +1055,10 @@ func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	}
 
 	// set collection consumer
-	if err := setCollections_tx(tx, fieldId, collections); err != nil {
+	if err := consumer.Set_tx(tx, "field", fieldId, "fieldFilterSelector", collections); err != nil {
 		return err
 	}
 
 	// set columns
 	return column.Set_tx(tx, "field", fieldId, columns)
-}
-
-// consumed collections
-func getCollections(fieldId uuid.UUID) ([]types.CollectionConsumer, error) {
-
-	var collections = make([]types.CollectionConsumer, 0)
-
-	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT collection_id, column_id_display, multi_value
-		FROM app.collection_consumer
-		WHERE field_id = $1
-	`, fieldId)
-	if err != nil {
-		return collections, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var c types.CollectionConsumer
-
-		if err := rows.Scan(&c.CollectionId, &c.ColumnIdDisplay, &c.MultiValue); err != nil {
-			return collections, err
-		}
-		collections = append(collections, c)
-	}
-	return collections, nil
-}
-func setCollections_tx(tx pgx.Tx, fieldId uuid.UUID, collections []types.CollectionConsumer) error {
-
-	if _, err := tx.Exec(db.Ctx, `
-		DELETE FROM app.collection_consumer
-		WHERE field_id = $1
-	`, fieldId); err != nil {
-		return err
-	}
-
-	for _, c := range collections {
-		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.collection_consumer (
-				collection_id, column_id_display, field_id, multi_value)
-			VALUES ($1,$2,$3,$4)
-		`, c.CollectionId, c.ColumnIdDisplay, fieldId, c.MultiValue); err != nil {
-			return err
-		}
-	}
-	return nil
 }

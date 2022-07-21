@@ -17,6 +17,7 @@ let MyBuilderFunctionPlaceholder = {
 			v-if="help !== ''"
 			@trigger="$emit('show-help',help)"
 			:naked="true"
+			:tight="true"
 		/>
 	</span>`,
 	props:{
@@ -113,12 +114,18 @@ let MyBuilderJsFunctionItem = {
 				/>
 			</td>
 			<td>
-				<select :disabled="!isNew" v-model="formId">
-					<option :value="null">-</option>
-					<option v-for="f in module.forms" :value="f.id">
-						{{ f.name }}
-					</option>
-				</select>
+				<div class="row">
+					<my-button image="open.png"
+						@trigger="openForm"
+						:active="formId !== null"
+					/>
+					<select :disabled="!isNew" v-model="formId">
+						<option :value="null">-</option>
+						<option v-for="f in module.forms" :value="f.id">
+							{{ f.name }}
+						</option>
+					</select>
+				</div>
 			</td>
 			<td>
 				<div class="row">
@@ -187,6 +194,9 @@ let MyBuilderJsFunctionItem = {
 		// actions
 		open:function() {
 			this.$router.push('/builder/js-function/'+this.jsFunction.id);
+		},
+		openForm:function() {
+			this.$router.push('/builder/form/'+this.formId);
 		},
 		showInfo:function() {
 			this.$store.commit('dialog',{
@@ -565,11 +575,6 @@ let MyBuilderPgFunctionItem = {
 						this.name = '';
 					
 					this.$root.schemaReload(this.moduleId);
-					
-					ws.send('scheduler','reload',{},false).then(
-						() => {},
-						this.$root.genericError
-					);
 				},
 				this.$root.genericError
 			);
@@ -585,7 +590,7 @@ let MyBuilderFunctions = {
 	},
 	template:`<div class="contentBox grow builder-functions">
 		
-		<div class="top">
+		<div class="top lower">
 			<div class="area nowrap">
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>

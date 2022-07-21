@@ -1,6 +1,13 @@
-import {hasAccessToAnyMenu} from './shared/access.js';
-import {getFormRoute}       from './shared/form.js';
+import srcBase64Icon        from './shared/image.js';
 import {srcBase64}          from './shared/image.js';
+import {hasAccessToAnyMenu} from './shared/access.js';
+import {getColumnTitle}     from './shared/column.js';
+import {getFormRoute}       from './shared/form.js';
+import {
+	getCollectionColumn,
+	getCollectionValues
+} from './shared/collection.js';
+
 export {MyMenu as default};
 
 let MyMenuItem = {
@@ -20,6 +27,12 @@ let MyMenuItem = {
 			
 			<!-- menu item caption -->
 			<div class="caption">{{ title }}</div>
+			
+			<!-- collection values -->
+			<div class="collectionEntry" v-for="e in collectionEntries" :title="e.title">
+				<img v-if="e.iconId !== null" :src="srcBase64Icon(e.iconId,'')" />
+				<span>{{ e.value }}</span>
+			</div>
 			
 			<!-- sub menu indicator -->
 			<img
@@ -64,6 +77,34 @@ let MyMenuItem = {
 			}
 			return false;
 		},
+		collectionEntries:function() {
+			let out = [];
+			for(let i = 0, j = this.menu.collections.length; i < j; i++) {
+				let consumer   = this.menu.collections[i];
+				let collection = this.collectionIdMap[consumer.collectionId];
+				
+				if(!consumer.onMobile && this.isMobile)
+					continue;
+				
+				let value = this.getCollectionValues(
+					collection.id,
+					consumer.columnIdDisplay,
+					true
+				);
+				if(consumer.noDisplayEmpty && (value === null || value === 0 || value === ''))
+					continue;
+				
+				out.push({
+					iconId:collection.iconId,
+					title:this.getColumnTitle(this.getCollectionColumn(
+						collection.id,
+						consumer.columnIdDisplay
+					)),
+					value:value
+				});
+			}
+			return out;
+		},
 		showChildren:function() {
 			return this.hasChildren && this.menuIdMapOpen[this.menu.id];
 		},
@@ -75,17 +116,22 @@ let MyMenuItem = {
 		},
 		
 		// stores
-		menuIdMapOpen: function() { return this.$store.getters['local/menuIdMapOpen']; },
-		iconIdMap:     function() { return this.$store.getters['schema/iconIdMap']; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		isMobile:      function() { return this.$store.getters.isMobile; },
-		menuAccess:    function() { return this.$store.getters.access.menu; },
-		moduleLanguage:function() { return this.$store.getters.moduleLanguage; }
+		menuIdMapOpen:  function() { return this.$store.getters['local/menuIdMapOpen']; },
+		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
+		iconIdMap:      function() { return this.$store.getters['schema/iconIdMap']; },
+		capGen:         function() { return this.$store.getters.captions.generic; },
+		isMobile:       function() { return this.$store.getters.isMobile; },
+		menuAccess:     function() { return this.$store.getters.access.menu; },
+		moduleLanguage: function() { return this.$store.getters.moduleLanguage; }
 	},
 	methods:{
 		// externals
+		getCollectionColumn,
+		getCollectionValues,
+		getColumnTitle,
 		getFormRoute,
 		srcBase64,
+		srcBase64Icon,
 		
 		// actions
 		click:function() {
@@ -115,9 +161,12 @@ let MyMenuItem = {
 let MyMenu = {
 	name:'my-menu',
 	components:{MyMenuItem},
-	template:`<div class="menu" v-if="hasAccessToAnyMenu(module.menus,menuAccess)">
-		<div class="contentBox scroll">
-			<div class="top">
+	template:`<div class="menu"
+		:class="{ colored:settings.menuColored }"
+		v-if="hasAccessToAnyMenu(module.menus,menuAccess)"
+	>
+		<div class="contentBox scroll relative">
+			<div class="top lower">
 				<div class="area">
 					<img class="icon"
 						v-if="module.iconId !== null"
@@ -126,17 +175,20 @@ let MyMenu = {
 					<h1>{{ moduleCaption }}</h1>
 				</div>
 				
-				<my-button image="builder.png"
-					v-if="isAdmin && builderEnabled && !isMobile && !productionMode"
-					@trigger="openBuilder(false)"
-					@trigger-middle="openBuilder(true)"
-					:darkBg="true"
-				/>
+				<div class="area">
+					<my-button image="builder.png"
+						v-if="isAdmin && builderEnabled && !isMobile"
+						@trigger="openBuilder(false)"
+						@trigger-middle="openBuilder(true)"
+						:naked="true"
+						:tight="true"
+					/>
+				</div>
 			</div>
 			
-			<!-- empty top row in menu for compact mode -->
-			<div class="top lower" v-if="settings.compact && !isMobile" />
-			
+			<div class="items-bg"
+				:style="settings.menuColored ? bgStyle : ''"
+			></div>
 			<div class="items">
 				<my-menu-item
 					v-for="m in module.menus"
@@ -149,6 +201,7 @@ let MyMenu = {
 		</div>
 	</div>`,
 	props:{
+		bgStyle:       { type:String,  required:true },
 		isActiveModule:{ type:Boolean, required:true },
 		formId:        { type:String,  required:false, default:'' },
 		module:        { type:Object,  required:true }
@@ -171,7 +224,6 @@ let MyMenu = {
 		isMobile:      function() { return this.$store.getters.isMobile; },
 		menuAccess:    function() { return this.$store.getters.access.menu; },
 		moduleLanguage:function() { return this.$store.getters.moduleLanguage; },
-		productionMode:function() { return this.$store.getters.productionMode; },
 		settings:      function() { return this.$store.getters.settings; }
 	},
 	methods:{

@@ -9,7 +9,7 @@ let MyAdminLogs = {
 	components:{MyInputDate,MyInputOffset},
 	template:`<div class="contentBox grow">
 		
-		<div class="top">
+		<div class="top lower">
 			<div class="area">
 				<img class="icon" src="images/log.png" />
 				<h1>{{ menuTitle }}</h1>
@@ -43,6 +43,7 @@ let MyAdminLogs = {
 						<option value="application">Applications</option>
 						<option value="backup">Backup</option>
 						<option value="cache">Cache</option>
+						<option value="cluster">Cluster</option>
 						<option value="csv">CSV</option>
 						<option value="ldap">LDAP</option>
 						<option value="mail">Mail</option>
@@ -76,8 +77,9 @@ let MyAdminLogs = {
 							<th></th>
 							<th class="minimum">{{ capApp.date }}</th>
 							<th class="minimum">{{ capApp.level }}</th>
-							<th class="minimum">{{ capApp.context }}</th>
+							<th class="minimum">{{ capApp.node }}</th>
 							<th class="minimum">{{ capApp.module }}</th>
+							<th class="minimum">{{ capApp.context }}</th>
 							<th>{{ capApp.message }}</th>
 						</tr>
 					</thead>
@@ -95,8 +97,9 @@ let MyAdminLogs = {
 							</td>
 							<td class="minimum">{{ displayDate(l.date) }}</td>
 							<td class="minimum">{{ displayLevel(l.level) }}</td>
-							<td class="minimum">{{ l.context }}</td>
+							<td class="minimum">{{ l.nodeName }}</td>
 							<td class="minimum">{{ l.moduleName }}</td>
+							<td class="minimum">{{ l.context }}</td>
 							<td>{{ displayMessage(l.message) }}</td>
 						</tr>
 					</tbody>

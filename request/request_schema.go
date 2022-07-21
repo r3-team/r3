@@ -2,7 +2,7 @@ package request
 
 import (
 	"encoding/json"
-	"r3/cache"
+	"r3/cluster"
 	"r3/schema"
 
 	"github.com/gofrs/uuid"
@@ -36,5 +36,5 @@ func SchemaReload(reqJson json.RawMessage) (interface{}, error) {
 	if req.ModuleId.Status == pgtype.Present {
 		modIds = append(modIds, req.ModuleId.Bytes)
 	}
-	return nil, cache.UpdateSchema(modIds, true)
+	return nil, cluster.SchemaChanged(true, true, modIds)
 }

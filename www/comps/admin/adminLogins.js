@@ -8,9 +8,35 @@ import {
 } from '../shared/language.js';
 export {MyAdminLogins as default};
 
+let MyAdminLoginsItemRole = {
+	name:'my-admin-logins-item-role',
+	template:`<td class="minimum role-content">
+		<my-button
+			v-for="r in module.roles.filter(v => v.assignable && v.content === content)"
+			@trigger="$emit('toggle',r.id)"
+			:caption="getCaptionForModule(r.captions['roleTitle'],r.name,module)"
+			:captionTitle="getCaptionForModule(r.captions['roleDesc'],'',module)"
+			:image="roleIds.includes(r.id) ? 'checkbox1.png' : 'checkbox0.png'"
+			:naked="true"
+		/>
+	</td>`,
+	props:{
+		content:{ type:String, required:true }, // role content to filter by
+		module: { type:Object, required:true }, // current module
+		roleIds:{ type:Array,  required:true }  // already enabled roles by ID
+	},
+	emits:['toggle'],
+	methods:{
+		getCaptionForModule
+	}
+};
+
 let MyAdminLoginsItem = {
 	name:'my-admin-logins-item',
-	components:{MyInputSelect},
+	components:{
+		MyAdminLoginsItemRole,
+		MyInputSelect
+	},
 	template:`<tbody>
 		<tr class="default-inputs">
 			<td>
@@ -107,69 +133,67 @@ let MyAdminLoginsItem = {
 			</td>
 		</tr>
 		
-		<tr v-if="showRoles" class="default-inputs">
+		<tr v-if="showRoles">
 			<td colspan="999">
-				<div class="role-select shade">
-					<table class="table-default">
-						<thead>
-							<tr>
-								<th>
-									<div class="row">
-										<my-button image="save.png"
-											@trigger="set"
-											:active="hasChanges"
-											:caption="capGen.button.save"
-										/>
-										<my-button image="cancel.png"
-											@trigger="showRoles = false"
-											:cancel="true"
-											:caption="capGen.button.close"
-										/>
-									</div>
-								</th>
-								<th>{{ capApp.roles }}</th>
-								<th class="minimum"><input v-model="filter" placeholder="..." /></th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr
-								v-for="m in modules.filter(v => getCaptionForModule(v.captions['moduleTitle'],v.name,v).includes(filter))"
-								:class="{ grouping:m.parentId === null }"
-								:key="m.id"
-							>
-								<td class="minimum">
-									<div class="row centered">
-										<my-button image="dash.png"
-											v-if="m.parentId !== null"
-											:active="false"
-											:naked="true"
-										/>
-										<img class="module-icon"
-											:src="srcBase64Icon(m.iconId,'images/module.png')"
-										/>
-										<span>
-											{{ getCaptionForModule(m.captions['moduleTitle'],m.name,m) }}
-										</span>
-									</div>
-								</td>
-								<td class="module-roles" colspan="2" v-if="!m.hidden">
-									<div
-										v-for="r in m.roles.filter(v => v.assignable && v.name !== 'everyone')"
-										:key="r.id"
-									>
-										<my-button
-											@trigger="toggleRoleId(r.id)"
-											:caption="getCaptionForModule(r.captions['roleTitle'],r.name,m)"
-											:captionTitle="getCaptionForModule(r.captions['roleDesc'],'',m)"
-											:image="roleIds.includes(r.id) ? 'checkbox1.png' : 'checkbox0.png'"
-											:naked="true"
-										/>
-									</div>
-								</td>
-							</tr>
-						</tbody>
-					</table>
-				</div>
+				<table class="table-default role-select shade">
+					<thead>
+						<tr>
+							<th colspan="3">
+								<div class="row">
+									<my-button image="save.png"
+										@trigger="set"
+										:active="hasChanges"
+										:caption="capGen.button.save"
+									/>
+									<my-button image="cancel.png"
+										@trigger="showRoles = false"
+										:cancel="true"
+										:caption="capGen.button.close"
+									/>
+								</div>
+							</th>
+							<th class="minimum default-inputs">
+								<input v-model="filter" class="app-filter" placeholder="..." />
+							</th>
+						</tr>
+						<tr>
+							<th>{{ capGen.application }}</th>
+							<th class="role-content"><my-button @trigger="toggleRolesByContent('admin')" :caption="capApp.roleContentAdmin" :naked="true" /></th>
+							<th class="role-content"><my-button @trigger="toggleRolesByContent('user')"  :caption="capApp.roleContentUser"  :naked="true" /></th>
+							<th class="role-content"><my-button @trigger="toggleRolesByContent('other')" :caption="capApp.roleContentOther" :naked="true" /></th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr
+							v-for="m in modules.filter(v => getCaptionForModule(v.captions['moduleTitle'],v.name,v).includes(filter))"
+							:class="{ grouping:m.parentId === null }"
+							:key="m.id"
+						>
+							<td class="minimum">
+								<div class="row centered">
+									<my-button image="dash.png"
+										v-if="m.parentId !== null"
+										:active="false"
+										:naked="true"
+									/>
+									<img class="module-icon"
+										:src="srcBase64Icon(m.iconId,'images/module.png')"
+									/>
+									<span>
+										{{ getCaptionForModule(m.captions['moduleTitle'],m.name,m) }}
+									</span>
+								</div>
+							</td>
+							
+							<!-- roles to toggle -->
+							<template v-if="!m.hidden">
+								<my-admin-logins-item-role content="admin" @toggle="toggleRoleId($event)" :module="m" :roleIds="roleIds" />
+								<my-admin-logins-item-role content="user"  @toggle="toggleRoleId($event)" :module="m" :roleIds="roleIds" />
+								<my-admin-logins-item-role content="other" @toggle="toggleRoleId($event)" :module="m" :roleIds="roleIds" />
+							</template>
+						</tr>
+					</tbody>
+				</table>
 			</td>
 		</tr>
 	</tbody>`,
@@ -261,7 +285,7 @@ let MyAdminLoginsItem = {
 				|| this.admin !== this.login.admin
 				|| this.noAuth !== this.login.noAuth
 				|| this.pass !== ''
-				|| JSON.stringify(this.roleIds) !== JSON.stringify(this.login.roleIds)
+				|| JSON.stringify([...this.roleIds].sort()) !== JSON.stringify([...this.login.roleIds].sort())
 			;
 		},
 		roleTotalNonHidden:function() {
@@ -303,10 +327,33 @@ let MyAdminLoginsItem = {
 		toggleRoleId:function(roleId) {
 			let pos = this.roleIds.indexOf(roleId);
 			
-			if(pos === -1)
-				this.roleIds.push(roleId);
-			else if(pos !== -1)
-				this.roleIds.splice(pos,1);
+			if(pos === -1)      this.roleIds.push(roleId);
+			else if(pos !== -1) this.roleIds.splice(pos,1);
+		},
+		toggleRolesByContent:function(content) {
+			let roleIdsByContent = [];
+			for(let i = 0, j = this.modules.length; i < j; i++) {
+				for(let x = 0, y = this.modules[i].roles.length; x < y; x++) {
+					let r = this.modules[i].roles[x];
+					
+					if(r.assignable && r.content === content)
+						roleIdsByContent.push(r.id);
+				}
+			}
+			
+			// has all roles, remove all
+			if(roleIdsByContent.length === this.roleIds.filter(v => roleIdsByContent.includes(v)).length) {
+				for(let i = 0, j = roleIdsByContent.length; i < j; i++) {
+					this.roleIds.splice(this.roleIds.indexOf(roleIdsByContent[i]),1);
+				}
+				return;
+			}
+			
+			// does not have all roles, add missing
+			for(let i = 0, j = roleIdsByContent.length; i < j; i++) {
+				if(!this.roleIds.includes(roleIdsByContent[i]))
+					this.roleIds.push(roleIdsByContent[i]);
+			}
 		},
 		
 		// backend calls
@@ -411,14 +458,12 @@ let MyAdminLogins = {
 				<my-button image="refresh.png"
 					@trigger="get"
 					:caption="capGen.button.refresh"
-					:darkBg="true"
 				/>
 			</div>
 			<div class="area default-inputs">
 				<my-input-offset class-input="selector"
 					@input="offsetSet"
 					:caption="true"
-					:darkBg="true"
 					:limit="limit"
 					:offset="offset"
 					:total="total"
@@ -428,7 +473,6 @@ let MyAdminLogins = {
 				<my-button
 					@trigger="limitSet(20)"
 					:caption="capGen.limit"
-					:darkBg="true"
 					:naked="true"
 				/>
 				<select class="short selector"
@@ -526,14 +570,14 @@ let MyAdminLogins = {
 					v-if="loginFormIndexOpen !== null"
 					@mousedown.self="$refs.popUpForm.closeAsk()"
 				>
-					<my-form class="form-pop-up" ref="popUpForm"
+					<my-form ref="popUpForm"
 						@close="loginFormIndexOpen = null"
 						@record-updated="setRecord(loginFormIndexOpen,loginFormLogin,$event);loginFormIndexOpen = null"
 						:allowDel="false"
 						:allowNew="false"
 						:formId="loginForms[loginFormIndexOpen].formId"
-						:isInline="true"
-						:module="moduleIdMap[formIdMap[loginForms[loginFormIndexOpen].formId].moduleId]"
+						:isPopUp="true"
+						:moduleId="formIdMap[loginForms[loginFormIndexOpen].formId].moduleId"
 						:recordId="loginFormRecord"
 					/>
 				</div>

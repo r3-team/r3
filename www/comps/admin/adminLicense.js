@@ -5,16 +5,14 @@ let MyAdminLicense = {
 	name:'my-admin-license',
 	template:`<div class="admin-license contentBox grow">
 		
-		<div class="top">
+		<div class="top lower">
 			<div class="area">
 				<img class="icon" src="images/key.png" />
 				<h1>{{ menuTitle }}</h1>
 			</div>
 		</div>
-		<div class="top lower"></div>
 		
 		<div class="content">
-			
 			<h2>{{ capApp.active }}</h2>
 			
 			<div class="file shade" v-if="licenseInstalled">
@@ -36,7 +34,7 @@ let MyAdminLicense = {
 						<td>{{ getUnixFormat(license.validUntil,settings.dateFormat) }}</td>
 					</tr>
 				</table>
-				<img src="images/logo_license.png" />
+				<img src="images/logo_license.webp" />
 			</div>
 			
 			<span v-if="!licenseInstalled">

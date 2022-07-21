@@ -33,8 +33,11 @@
 	--z-index-home-entry:3;
 	--z-index-home-watermark:2;
 	
+	/* menu */
+	
 	/* main content */
 	--z-index-form:2;
+	--z-index-menu-items:2;
 	--z-index-menu:1;
 	--z-index-content:1;
 	
@@ -43,6 +46,8 @@
 	--spacing:16px;
 	--spacing-child:0px var(--spacing) var(--spacing) 0px;
 	--spacing-parent:var(--spacing) 0px 0px var(--spacing);
+	--spacing-button-horz-outside:6px;
+	--spacing-button-horz-inside:10px;
 	
 	/**/
 	/* heights */
@@ -50,8 +55,6 @@
 	
 	/**/
 	/* colors */
-	--color-container-title-upper:#606060;
-	--color-container-title-lower:#8c8c8c;
 	--color-header-border:hsl(0,0%,96%,1.00);
 	--color-hover-underlay:rgba(0,0,0,0.35);
 	--color-menu-border:hsl(0,0%,96%,1.00);
@@ -64,7 +67,7 @@
 	/**/
 	/* images */
 	--image-filter-contrast:100%;
-	--image-list-cards:     url('../images/texture_paper01.jpg');
+	--image-list-cards:     url('../images/texture_paper01.webp');
 }
 
 *{
@@ -78,20 +81,21 @@
 	--color-bg:            hsl(315,10%,var(--light-contrast));
 	--color-bg-font:       hsl(0,  0%, var(--light-contrast));
 	--color-border:        hsl(0,  0%, calc(60% - (var(--light-depth) * 3) ));
+	--color-border-bg:     hsl(0,  0%, var(--light-contrast));
 	--color-font:          hsl(0,  0%, var(--light-read));
 	--color-font-alt:      hsl(0,  0%, var(--light-read-less));
-	--color-shade:         hsl(0,  0%, calc(55% - var(--light-depth)));
+	--color-shade:         hsl(0,  0%, calc(25% - var(--light-depth)));
 	
 	--color-accent1:       hsl(311,57%,calc(40% - var(--light-depth))); /* field captions */
 	--color-accent2:       hsl(127,86%,calc(96% - var(--light-depth))); /* calendar/gantt weekend */
-	--color-accent3:       hsl(199,11%,calc(92% - var(--light-depth))); /* menu/list/calendar entry hover */
-	--color-accent3-alt:   hsl(199,11%,calc(86% - var(--light-depth))); /* menu/list/calendar entry active */
+	--color-accent3:       hsl(199,11%,calc(96% - var(--light-depth))); /* menu/list/calendar entry hover */
+	--color-accent3-alt:   hsl(199,11%,calc(93% - var(--light-depth))); /* menu/list/calendar entry active */
 	--color-accent4:       hsl(339, 4%,calc(61% - var(--light-depth))); /* gantt entry */
 	--color-error:         hsl(0,  84%,calc(61% - var(--light-depth)));
 	--color-success:       hsl(113,44%,calc(44% - var(--light-depth)));
-	--color-action:        hsl(146,37%,calc(37% - var(--light-depth)));
-	--color-action-border: hsl(146,37%,calc(62% - var(--light-depth)));
-	--color-action-bright: hsl(146,22%,calc(72% - var(--light-depth)));
+	--color-action:        hsl(196,27%,calc(47% - var(--light-depth)));
+	--color-action-bright: hsl(196,22%,calc(72% - var(--light-depth)));
+	--color-action-disable:hsl(0,   0%,calc(77% - var(--light-depth)));
 	--color-cancel:        hsl(0,  57%,calc(40% - var(--light-depth)));
 	--color-cancel-border: hsl(0,  57%,calc(71% - var(--light-depth)));
 	
@@ -102,39 +106,36 @@
 }
 
 /* depth association */
-body                                         { --depth:9; }
+body                                         { --depth:6; }
 .app-header                                  { --depth:0; }
-.contentBox                                  { --depth:5; }
-.contentBox .top                             { --depth:8; }
-.contentBox .top.lower                       { --depth:7; }
-.contentBox .top .selector                   { --depth:3; }
-.contentBox .top .selector:focus             { --depth:2; }
-.contentBox .contentPart                     { --depth:4; }
-.default-inputs                              { --depth:1; }
-.default-inputs *:focus                      { --depth:0; }
-.default-inputs *:disabled                   { --depth:5; }
+.contentBox                                  { --depth:3; }
+.contentBox .top                             { --depth:4; }
+.contentBox .top .selector                   { --depth:0; }
+.contentBox .contentPart                     { --depth:5; }
+.default-inputs                              { --depth:0; }
+.default-inputs *:disabled                   { --depth:6; }
 .home .modules-title                         { --depth:0; }
 .home .module                                { --depth:4; }
 .home-wizard                                 { --depth:7; }
 .home-wizard .tabBar .entry.active           { --depth:3; }
 .home-wizard .tabBar .entry:hover            { --depth:1; }
 .home-wizardAction                           { --depth:3; }
-.login input                                 { --depth:3; }
-.login input:focus                           { --depth:0; }
-.menu .items                                 { --depth:7; }
-.menu .item .line.active                     { --depth:10; }
+.login input                                 { --depth:0; }
+.menu .items-bg                              { --depth:5; }
+.menu .item .line:focus,
+.menu .item .line:hover                      { --depth:7; }
+.menu .item .line.active                     { --depth:9; }
 .settings .backup-code                       { --depth:0; }
-.navigation                                  { --depth:7; }
-.field                                       { --depth:1; }
-.field .disabled                             { --depth:7; }
-.field .input-box:focus-within:not(.disabled){ --depth:0; }
-.list .layoutTable th                        { --depth:6; }
-.list .layoutTable tbody tr                  { --depth:3; }
-.list .layoutTable tbody tr:nth-child(odd)   { --depth:2; }
+.field                                       { --depth:0; }
+.field .disabled                             { --depth:6; }
+.list .layoutTable th                        { --depth:0; }
+.list .layoutTable tbody tr                  { --depth:1; }
+.list .layoutTable tbody tr:nth-child(odd)   { --depth:0; }
 .list .layoutCards .card                     { --depth:7; }
 .list .layoutCards .card.rowSelect:hover     { --depth:2; }
 .list .layoutCards .card .actions            { --depth:7; }
 .list .layoutCards .card .header             { --depth:7; }
+.list-header                                 { --depth:3; }
 .calendar .month .days                       { --depth:6; }
 .calendar .month .day                        { --depth:0; }
 .calendar .month .day.outside                { --depth:3; }
@@ -156,18 +157,23 @@ body                                         { --depth:9; }
 .admin .logs .actions                        { --depth:7; }
 .admin .table-default th                     { --depth:6; }
 .admin .table-default tr.grouping td         { --depth:3; }
+.admin-cluster-node                          { --depth:2; }
+.admin-cluster-node img                      { --depth:5; }
 .admin-license .file                         { --depth:1; }
+.admin-logins .role-select                   { --depth:4; }
+.admin-logins .role-select .app-filter       { --depth:0; }
 .admin-modules .message                      { --depth:7; }
 .admin-roles .admin-role-title               { --depth:7; }
+.admin-roles .admin-role-members             { --depth:1; }
 .admin-repo .repo-module .part.left          { --depth:0; }
-.admin-repo .repo-module .part.right         { --depth:3; }
+.admin-repo .repo-module .part.right         { --depth:6; }
 .builder .filter .filter-side>.subQuery      { --depth:5; }
 .builder .lookup                             { --depth:1; }
-.builder-icon-input .iconLine                { --depth:2; }
-.builder-icon-input .iconLine:focus          { --depth:1; }
+.builder-icon-input .iconLine                { --depth:0; }
 .builder-icon-input .iconLine.disabled       { --depth:5; }
 .builder-field                               { --depth:5; }
 .builder-field .column                       { --depth:4; }
+.builder-menu                                { --depth:4; }
 
 
 html,body{
@@ -264,7 +270,7 @@ h3{
 #app.is-not-ready{
 	height:auto;
 	min-height:100%;
-	background-image:url('../images/login_bg.jpg');
+	background-image:url('../images/login_bg.webp');
 	background-repeat:no-repeat;
 	background-size:cover;
 	justify-content:center;
@@ -362,21 +368,21 @@ h3{
 .contentBox.scroll{
 	overflow:auto;
 }
+.contentBox.relative{
+	position:relative;
+}
 .contentBox .top{
-	min-height:40px;
-	padding:0px 5px 0px 10px;
+	padding:8px var(--spacing) 8px var(--spacing);
 	line-height:30px;
-	background-color:var(--color-container-title-upper);
-	border-bottom:1px solid var(--color-border);
+	background-color:var(--color-bg);
 	flex:0 0 auto;
 	display:flex;
 	flex-flow:row wrap;
 	justify-content:space-between;
 	align-content:center;
-	color:var(--color-bg-font);
 }
 .contentBox .top.lower{
-	background-color:var(--color-container-title-lower);
+	border-bottom:1px solid var(--color-border);
 }
 .contentBox .top.lower .area>input,
 .contentBox .top.lower .area>select{
@@ -384,15 +390,12 @@ h3{
 	margin:0px 5px 0px 0px;
 	min-width:unset;
 }
-.contentBox .top.lower .area>.icon{
-	margin:0px 12px 5px 0px;
-}
 .contentBox .top.nowrap{
 	flex-wrap:nowrap;
 }
 .contentBox .top h1{
 	margin:0px;
-	font-size:110%;
+	font-size:135%;
 	font-weight:normal;
 }
 .contentBox .top .separator{
@@ -400,6 +403,11 @@ h3{
 	height:auto;
 }
 .contentBox .top .icon {
+	height:22px;
+    margin:4px 12px 4px 0px;
+    filter:var(--image-filter);
+}
+.contentBox .top .icon.bg {
 	height:22px;
     margin:4px 12px 4px 0px;
     filter:var(--image-filter-bg);
@@ -424,6 +432,7 @@ h3{
 	display:flex;
 	flex-flow:row wrap;
 	align-items:center;
+	padding:4px 0px;
 }
 .contentBox .top .area.nowrap{
 	flex-wrap:nowrap;
@@ -449,8 +458,9 @@ h3{
 	padding:12px;
 	display:flex;
 	flex-flow:column nowrap;
-	border-radius:6px;
 	box-shadow:1px 1px 3px var(--color-shade);
+	border-radius:6px;
+	border-color:var(--color-border);
 	background-color:var(--color-bg);
 	overflow:auto;
 }
@@ -472,6 +482,9 @@ h3{
 }
 .contentBox .content .contentPart.no-padding{
 	padding:0px;
+}
+.contentBox .content .contentPart.relative{
+	position:relative;
 }
 .contentBox .content .contentPartHeader{
 	margin:0px 0px 12px;
@@ -544,6 +557,7 @@ table td.maximum{
 	line-height:30px;
 	margin:0px;
 	padding:0px 8px;
+	font-family:inherit;
 	font-size:inherit;
 	color:var(--color-font);
 	background-color:var(--color-bg);
@@ -625,7 +639,7 @@ table td.maximum{
 	color:var(--color-font);
 }
 .navigation .entry{
-	padding:6px 10px;
+	padding:10px var(--spacing);
 	margin:0px;
 	display:flex;
 	color:inherit;
@@ -835,7 +849,8 @@ table td.maximum{
 .user-bordersAll .default-inputs input,
 .user-bordersAll .default-inputs select,
 .user-bordersAll .default-inputs textarea,
-.user-bordersAll .default-inputs .input-custom{
+.user-bordersAll .default-inputs .input-custom,
+.user-bordersAll .contentBox .contentPart{
 	border-width:1px;
 	border-style:solid;
 }
@@ -857,23 +872,23 @@ table td.maximum{
 .user-bordersRounded .contentBox{
 	border-radius:4px;
 }
-.user-bordersRounded .contentBox .top:not(.lower){
+.user-bordersRounded .contentBox .top{
 	border-radius:4px 4px 0px 0px;
 }
 .user-spacing.spacing-value1{
-	--spacing:8px;
+	--spacing:10px;
 }
 .user-spacing.spacing-value2{
-	--spacing:12px;
+	--spacing:13px;
 }
 .user-spacing.spacing-value3{
 	--spacing:16px;
 }
 .user-spacing.spacing-value4{
-	--spacing:20px;
+	--spacing:19px;
 }
 .user-spacing.spacing-value5{
-	--spacing:24px;
+	--spacing:22px;
 }
 .user-spacing{
 	/* needs to overwrite again, otherwise not recognized */
@@ -881,10 +896,22 @@ table td.maximum{
 	--spacing-parent:var(--spacing) 0px 0px var(--spacing);
 }
 
+.user-font.calibri        { font-family:Calibri,Arial,sans-serif; }
+.user-font.comic_sans_ms  { font-family:'Comic Sans MS','Comic Sans',cursive; }
+.user-font.consolas       { font-family:Consolas,Courier,monospace,cursive; }
+.user-font.georgia        { font-family:Georgia,Times,serif; }
+.user-font.helvetica      { font-family:Helvetica,Arial,sans-serif; }
+.user-font.lucida_console { font-family:'Lucida Console',Courier,monospace; }
+.user-font.segoe_script   { font-family:'Segoe Script',cursive; }
+.user-font.segoe_ui       { font-family:'Segoe UI',SegoeUI,Arial,sans-serif; }
+.user-font.times_new_roman{ font-family:'Times New Roman',Times,serif; }
+.user-font.trebuchet_ms   { font-family:'Trebuchet MS',Arial,sans-serif; }
+.user-font.verdana        { font-family:Verdana,Arial,sans-serif; }
+
 .user-compact .app-content{
 	padding:0px;
 }
-.user-compact .app-content .contentBox{
+.user-compact .app-content .contentBox:not(.pop-up){
 	margin:0px;
 	border:none;
 	border-bottom:1px solid var(--color-border);
@@ -893,10 +920,10 @@ table td.maximum{
 	box-shadow:none;
 	--content-box-max-width:unset;
 }
-.user-compact .app-content .contentBox:last-child{
+.user-compact .app-content .contentBox:not(.pop-up):last-child{
 	border-right:none;
 }
-.user-compact .app-content .contentBox .top{
+.user-compact .app-content .contentBox:not(.pop-up) .top{
 	border-radius:0px;
 }
 .user-compact .navigationWrap{
@@ -913,32 +940,32 @@ table td.maximum{
 	--light-depth:      calc(2% * var(--depth));
 	--light-read:       calc(90% - var(--light-depth));
 	--light-read-less:  calc(78% - (var(--light-depth) * 2.5));
-	--light-contrast:   calc(27% - var(--light-depth));
+	--light-contrast:   calc(23% - var(--light-depth));
 	
 	--color-border:     hsl(0,0%,calc(10% - var(--light-depth)));
+	--color-border-bg:  hsl(0,0%,calc(70% - var(--light-depth)));
 	--color-shade:      #000;
 	
-	--color-accent1:    hsl(311,47%,calc(70% - (1.50% * var(--depth)) ));
-	--color-accent2:    hsl(127,06%,calc(25% - (1.50% * var(--depth)) ));
-	--color-accent3:    hsl(199,11%,calc(39% - (1.50% * var(--depth)) ));
-	--color-accent3-alt:hsl(199,11%,calc(32% - (1.50% * var(--depth)) ));
-	--color-accent4:    hsl(339, 4%,calc(61% - (1.50% * var(--depth)) ));
+	--color-accent1:       hsl(311,47%,calc(70% - (1.50% * var(--depth)) ));
+	--color-accent2:       hsl(127,06%,calc(25% - (1.50% * var(--depth)) ));
+	--color-accent3:       hsl(199,11%,calc(35% - (1.50% * var(--depth)) ));
+	--color-accent3-alt:   hsl(199,11%,calc(45% - (1.50% * var(--depth)) ));
+	--color-accent4:       hsl(339, 4%,calc(61% - (1.50% * var(--depth)) ));
+	--color-action:        hsl(196,27%,calc(37% - var(--light-depth)) );
+	--color-action-disable:hsl(0,   0%,calc(40% - var(--light-depth)) );
 	
 	--color-hover-underlay:rgba(0,0,0,0.50);
 	--color-form-builder-actions:hsl(195,17%,29%,1.00);
 	--color-form-builder-columns:hsl(247,17%,46%,0.42);
 	--color-form-builder-container:hsl(99,18%,26%,1.00);
 	
-	--image-list-cards: url('../images/texture_paper02.jpg');
+	--image-list-cards: url('../images/texture_paper02.webp');
 	
 	/* dark mode is simpler, overwrite some cases */
 	--color-bg:                    hsl(315,1%,var(--light-contrast));
 	--color-bg-font:               var(--color-font);
-	--color-container-title-upper: var(--color-bg);
-	--color-container-title-lower: var(--color-bg);
 	--color-menu-border:           var(--color-border);
 	--color-header-border:         hsl(0,0%,55%,1.00);
-	--color-action-border:         var(--color-action);
 	--color-cancel-border:         var(--color-cancel);
 	--image-filter-bg:             var(--image-filter);
 }

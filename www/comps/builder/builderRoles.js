@@ -41,6 +41,16 @@ let MyBuilderRolesItem = {
 				/>
 			</td>
 			<td>
+				<select v-model="content" :disabled="isEveryone">
+					<option value="admin">{{ capApp.option.contentAdmin }}</option>
+					<option value="user">{{ capApp.option.contentUser }}</option>
+					<option value="other">{{ capApp.option.contentOther }}</option>
+					<option v-if="isEveryone" value="everyone">
+						{{ capApp.option.contentEveryone }}
+					</option>
+				</select>
+			</td>
+			<td>
 				<my-bool
 					v-model="assignable"
 					:readonly="isEveryone"
@@ -119,6 +129,7 @@ let MyBuilderRolesItem = {
 			default:function() { return{
 				id:null,
 				name:'',
+				content:'user',
 				assignable:true,
 				childrenIds:[],
 				captions:{
@@ -135,6 +146,7 @@ let MyBuilderRolesItem = {
 	data:function() {
 		return {
 			name:this.role.name,
+			content:this.role.content,
 			assignable:this.role.assignable,
 			childrenIds:JSON.parse(JSON.stringify(this.role.childrenIds)),
 			captions:JSON.parse(JSON.stringify(this.role.captions)),
@@ -145,7 +157,8 @@ let MyBuilderRolesItem = {
 	},
 	computed:{
 		hasChanges:function() {
-			return this.name !== this.role.name
+			return this.name       !== this.role.name
+				|| this.content    !== this.role.content
 				|| this.assignable !== this.role.assignable
 				|| JSON.stringify(this.childrenIds) !== JSON.stringify(this.role.childrenIds)
 				|| JSON.stringify(this.captions)    !== JSON.stringify(this.role.captions)
@@ -224,6 +237,7 @@ let MyBuilderRolesItem = {
 				moduleId:this.moduleId,
 				childrenIds:this.childrenIds,
 				name:this.name,
+				content:this.content,
 				assignable:this.assignable,
 				captions:this.captions,
 				
@@ -251,7 +265,7 @@ let MyBuilderRoles = {
 	components:{MyBuilderRolesItem},
 	template:`<div class="builder-roles contentBox grow">
 		
-		<div class="top">
+		<div class="top lower">
 			<div class="area nowrap">
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
@@ -266,6 +280,7 @@ let MyBuilderRoles = {
 						<th>{{ capGen.id }}</th>
 						<th>{{ capGen.title }}</th>
 						<th>{{ capGen.description }}</th>
+						<th>{{ capApp.content }}</th>
 						<th>{{ capApp.assignable }}</th>
 						<th>{{ capApp.children }}</th>
 						<th></th>

@@ -1,4 +1,4 @@
-<p><em>Aktualisiert 2022-02-05</em></p>
+<p><em>Aktualisiert 2022-07-19</em></p>
 <h1 id="inhaltsverzeichnis">Inhaltsverzeichnis</h1>
 <ol type="1">
 <li><a href="#einführung">Einführung</a></li>
@@ -41,11 +41,11 @@
 <ol type="1">
 <li><a href="#plattformaktualisierung">Plattformaktualisierung</a></li>
 </ol></li>
-<li><a href="#betreiben-einer-eigenen-rei3-instanz-in-der-cloud">Betreiben einer eigenen REI3-Instanz in der Cloud</a></li>
+<li><a href="#clusterbetrieb-und-systemleistung">Clusterbetrieb und Systemleistung</a></li>
+<li><a href="#cloudbetrieb">Cloudbetrieb</a></li>
 </ol>
 <h1 id="einführung">Einführung</h1>
 <p>Dies ist die Dokumentation zum Bereitstellen, Konfigurieren und Betreiben der REI3-Anwendungsplattform. Administrationskenntnisse für die Zielinfrastruktur (Windows Server oder Linux) werden vorausgesetzt. Nach der Installation können Administratoren REI3-Anwendungen aus Online- oder lokalen Repositorys in Infrastrukturen mit oder ohne Internetzugang bereitstellen.</p>
-<p>REI3 selbst ist ein Serverdienst mit dem vorgefertigte Webanwendungen bereitgestellt werden. REI3-Anwendungen bauen aufeinander auf, um Daten wiederzuverwenden und Funktionalität zu erweitern.</p>
 <h1 id="bereitstellungsmodelle">Bereitstellungsmodelle</h1>
 <p>Für den Einsatz in verschiedenen Kundenumgebungen stehen mehrere Bereitstellungsmodelle für die REI3-Plattform zur Verfügung; diese sind unten im Detail aufgeführt. Installations- und Konfigurationsanweisungen folgen anschließend.</p>
 <h2 id="eigenständig">Eigenständig</h2>
@@ -73,7 +73,7 @@
 </ul></li>
 <li>Prozessor
 <ul>
-<li>Intel- oder AMD-Prozessoren (64bit), mehrere Kerne verbessern die Performanz</li>
+<li>Intel- oder AMD-Prozessoren (64bit), mehrere Kerne verbessern die Leistung</li>
 <li>ARM-Prozessoren werden nicht offiziell unterstützt, wurden aber schon erfolgreich für REI3 genutzt</li>
 </ul></li>
 <li>Arbeitsspeicher
@@ -87,21 +87,21 @@
 </ul></li>
 <li>Software
 <ul>
-<li>Microsoft Visual C++ 2015 (nur Windows-Server)</li>
+<li>Microsoft Visual C++ 2015 (oder neuer - nur Windows-Server)</li>
 </ul></li>
 <li>Datenbank (nur dedizierte Bereitstellung)
 <ul>
-<li>PostgresSQL 12.2 oder neuer Datenbank mit vollen Berechtigungen</li>
+<li>PostgresSQL 13.0 Datenbank (oder neuer) mit vollen Berechtigungen</li>
 </ul></li>
 </ul>
 <h2 id="endgeräte">Endgeräte</h2>
-<p>Für den Zugriff auf eine laufende REI3-Instanz kann jeder moderne Browser verwendet werden. Dies schließt mobile Browser ein. REI3 verwendet moderne Webstandards; "Internet Explorer" wird nicht unterstützt.</p>
+<p>Für den Zugriff auf eine laufende REI3-Instanz kann jeder moderne Browser verwendet werden, wie bspw. Firefox, Chrome oder Safari. Dies schließt mobile Browser ein. REI3 verwendet moderne Webstandards; "Internet Explorer" wird nicht unterstützt.</p>
 <h1 id="installation">Installation</h1>
 <h2 id="unter-windows-server">Unter Windows Server</h2>
-<p>REI3 wird mit einem grafischen Installationsprogramm für Windows Server mit installierter Desktop-Erfahrung geliefert. Das Installationsprogramm unterstützt sowohl eigenständige als auch dedizierte Bereitstellungsmodelle.</p>
-<p>Bei der Auswahl des eigenständigen Bereitstellungsmodells reicht es aus, dem Installationsprogramm für die Basisinstallation zu folgen, und REI3 kann sofort gestartet werden.</p>
-<p>Bei der Auswahl des dedizierten Modells müssen die Datenbankverbindungsdetails für eine leere, laufende PostgreSQL-Datenbank in die Konfigurationsdatei <code>config.json</code> im ausgewählten Anwendungsverzeichnis eingegeben werden. Mit gültigen Verbindungsdetails zu seiner Datenbank wird REI3 beim ersten Start das Setup automatisch abschließen.</p>
-<p>Unabhängig vom Bereitstellungsmodell wird REI3 unter Windows Server als Windows-Dienst behandelt und kann als solcher gestartet werden. Falls der Dienst nicht starten sollte, schreibt REI3 in das Windows-Applikationslog.</p>
+<p>REI3 wird mit einem grafischen Installationsprogramm für Windows Server mit installierter Desktop-Erfahrung geliefert. Das Installationsprogramm unterstützt sowohl <a href="#eigenständig">eigenständige</a> als auch <a href="#dediziert">dedizierte</a> Bereitstellungsmodelle.</p>
+<p>Bei der Auswahl des <a href="#eigenständigen">eigenständige</a> Bereitstellungsmodells reicht es aus, dem Installationsprogramm für die Basisinstallation zu folgen, und REI3 kann sofort gestartet werden.</p>
+<p>Bei der Auswahl des <a href="#dediziert">dedizierten</a> Modells müssen die Datenbankverbindungsdetails für eine leere, laufende PostgreSQL-Datenbank in die Konfigurationsdatei <code>config.json</code> im ausgewählten Anwendungsverzeichnis eingegeben werden. Mit gültigen Verbindungsdetails zu seiner Datenbank wird REI3 beim ersten Start das Setup automatisch abschließen.</p>
+<p>Unabhängig vom Bereitstellungsmodell, wird REI3 unter Windows Server als Windows-Dienst behandelt und kann als solcher gestartet werden. Falls der Dienst nicht starten sollte, schreibt REI3 in das Windows-Applikationslog.</p>
 <h2 id="auf-einem-linux-server">Auf einem Linux-Server</h2>
 <p>Für Linux-Server bietet REI3 derzeit ein komprimiertes Archiv mit vorkompilierten Binärdateien. Nach dem Extrahieren an einem Ort Ihrer Wahl muss die Datei <code>r3</code> ausführbar gemacht und die Konfigurationsdatei <code>config.json</code> von der Vorlagendatei <code>config_template.json</code> kopiert werden.</p>
 <p>Bevor Sie REI3 ausführen, müssen Sie gültige Verbindungsdetails zu einer leeren, laufenden PostgreSQL-Datenbank in <code>config.json</code> eingeben. Mit gültigen Verbindungsdetails zu seiner Datenbank wird REI3 beim ersten Start das Setup automatisch abschließen.</p>
@@ -181,7 +181,34 @@
 <p>Wenn das grafische Installationsprogramm für Windows verwendet wird, kann durch Ausführen einer neueren Version die Aktualisierung gestartet werden. Der Plattformdienst wird automatisch neu gestartet.</p>
 <p>Bei Linux-Servern ist es erforderlich, den Dienst zu stoppen und Dateien im ausgewählten Anwendungsverzeichnis mit dem neuesten extrahierbaren Paket zu überschreiben. Danach kann der Dienst neu gestartet werden.</p>
 <p>Um die portable Version zu aktualisieren, stoppen Sie alle laufenden REI3-Instanzen und extrahieren Sie den Inhalt einer neueren, portablen Version in das Anwendungsverzeichnis.</p>
-<h1 id="betreiben-einer-eigenen-rei3-instanz-in-der-cloud">Betreiben einer eigenen REI3-Instanz in der Cloud</h1>
+<h1 id="clusterbetrieb-und-systemleistung">Clusterbetrieb und Systemleistung</h1>
+<p>REI3-Server können in Clustern betrieben werden, um mehr Anfragen und Benutzer gleichzeitig zu verarbeiten. Bevor Sie ein Clusterbetrieb in Erwägung ziehen, ist es wichtig zu wissen, woher wahrgenommene Leistungsprobleme kommen. REI3 ist für die gleichzeitige Bearbeitung vieler Benutzer ausgelegt und kann auch mehrere Prozessorkerne sowie mehr Arbeitsspeicher nutzen, um die Leistung zu verbessern. Nur wenn die CPU-Last/Speichernutzung des REI3-Dienstes häufig sehr hoch ist, kann der Clusterbetrieb mehrerer REI3-Server sinnvoll sein.</p>
+<p>In den meisten Fällen sind die Leistungsprobleme auf andere Ursachen zurückzuführen:</p>
+<ul>
+<li>Hohe Datenbanklast. Beim Betrieb größerer REI3-Instanzen kann die Menge der Anfragen das Datenbanksystem überfordern. Dies lässt sich feststellen, indem man sich mit dem Datenbankserver verbindet und sich seine Statistiken ansieht. In diesem Szenario befindet sich der REI3-Dienst im Leerlauf, während die Datenbank überlastet ist. Um die Leistung zu verbessern, müsste das Datenbanksystem aufgerüstet werden - entweder mit besserer Hardware oder mit Clusterbetrieb des Datenbanksystems selbst. Beachten Sie, dass REI3 nur geclusterte Datenbanken mit dem <a href="#dediziert">dedizierten</a> Bereitstellungsmodell unterstützt. Ein Clusterbetrieb von REI3 selbst würde die Leistung in diesem Fall nicht verbessern.</li>
+<li>Fehlende oder schlecht genutzte Indizes auf Datenbankrelationen. Dies lässt sich erkennen, wenn man sich mit dem Datenbankserver verbindet und Benchmarks mit problematischen Anfragen durchführt. Wenn Indizes nicht optimiert sind, kann der Autor der betroffenen Anwendung die Leistung einfach verbessern, indem er sie anpasst. Der Clusterbetrieb von REI3 würde in diesem Fall zu keiner Leistungsverbesserung führen.</li>
+<li>Langsamer Speicher. Entweder das Datenbanksystem oder REI3 selbst greift auf langsame Speichersysteme zu. Dies zeigt sich, wenn sowohl der REI3-Anwendungsdienst als auch das Datenbanksystem nur sehr wenig belastet sind, die Anfragen aber trotzdem lange dauern. In diesem Fall hat die Verbesserung der Latenz/Durchsatzrate des zugrunde liegenden Speichersystems die größten Auswirkungen auf die Leistung. Ein Clusterbetrieb der REI3-Server würde nicht helfen.</li>
+</ul>
+<p>Ist der REI3-Dienst tatsächlich der Engpass, kann ein Clusterbetrieb helfen - hierfür müssen folgende Voraussetzungen erfüllt sein:</p>
+<ul>
+<li>REI3 muss im <a href="#dediziert">dedizierten</a> Bereitstellungsmodell laufen, d.h. das Datenbanksystem muss von REI3 selbst getrennt sein. Ein Wechsel vom <a href="#eigenständig">eigenständigen</a> Bereitstellungsmodell zum dedizierten ist jederzeit möglich.</li>
+<li>REI3-Server müssen auf denselben Speicherort für ihre Dateipfade zugreifen.</li>
+<li>REI3-Server müssen auf dieselbe Datenbank zugreifen.</li>
+<li>Es spielt KEINE Rolle, ob die REI3-Server auf unterschiedlichen Betriebssystemen oder Prozessorarchitekturen laufen.</li>
+</ul>
+<p>Die Einrichtung des Clusters selbst ist sehr einfach:</p>
+<ol type="1">
+<li>Der bereits laufende REI3-Server ist standardmäßig bereits Teil eines Ein-Server-Clusters, mit sich selbst als Clustermaster. Hier muss nichts weiter getan werden.</li>
+<li>Um weitere Serverknoten hinzuzufügen, installieren Sie REI3 auf anderen Servern und verwenden Sie die gleichen Datenbank- und Dateipfadeinstellungen in der REI3-Konfigurationsdatei <code>config.json</code>.
+<ul>
+<li>Die Dateipfade für den gesamten Cluster müssen auf denselben Speicherort verweisen - normalerweise eignen sich Netzwerkfreigaben gut für diese Anforderung.</li>
+<li>Wählen Sie eine beliebige Konfiguration im "Web"-Teil der Konfigurationsdatei, die zu Ihrer Infrastruktur passt (welcher Port verwendet werden soll, wie die Zertifikatsdateien benannt werden, usw.).</li>
+<li>Die <code>cluster/nodeId</code> muss für neue Serverknoten leer gelassen werden.</li>
+</ul></li>
+<li>Sobald sich ein neuer Serverknoten mit der bestehenden REI3-Datenbank verbindet, registriert er sich als neuer Clusterknoten und weist sich selbst eine eindeutige Knoten-ID zu.</li>
+</ol>
+<p>Dies ist die gesamte Einrichtung. Das Cluster konfiguriert sich automatisch und weist auch automatisch die Rolle des Clustermasters und die Aufgaben zu, je nachdem, welche Knoten einchecken.</p>
+<h1 id="cloudbetrieb">Cloudbetrieb</h1>
 <p>REI3 kann im Internet zugänglich gemacht werden, indem entsprechende Firewall-Ports geöffnet werden. Wir, die REI3-Hersteller, sind bestrebt, die Plattform so sicher wie möglich zu gestalten. Wie bei jeder anderen Anwendung ist es immer möglich, dass unentdeckte Sicherheitslücken ausgenutzt und unbefugter Zugriff erreicht wird. Neben der regelmäßigen Aktualisierung von REI3 selbst sind wir der Ansicht, dass zusätzliche Sicherheitsmaßnahmen erforderlich sind, um Webanwendungen in der Cloud sicher auszuführen. Diese sind u. A.:</p>
 <ul>
 <li>Ausführen von Intrusion-Detection-Software auf dem Anwendungsserver oder Firewalls</li>

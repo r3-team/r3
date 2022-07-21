@@ -69,19 +69,8 @@ func GetSchemaCacheJson() json.RawMessage {
 // update module schema cache in memory
 // takes either single module ID for specific update or NULL for updating all modules
 // can just load schema or create a new version timestamp, which forces reload on clients
-func UpdateSchemaAll(newVersion bool) error {
-	return UpdateSchema(make([]uuid.UUID, 0), newVersion)
-}
-func UpdateSchema(moduleIdsUpdateOnly []uuid.UUID, newVersion bool) error {
+func UpdateSchema(newVersion bool, moduleIdsUpdateOnly []uuid.UUID) error {
 	var err error
-
-	// inform all clients about schema reloading
-	ClientEvent_handlerChan <- types.ClientEvent{LoginId: 0, SchemaLoading: true}
-
-	defer func() {
-		// inform regardless of success or error
-		ClientEvent_handlerChan <- types.ClientEvent{LoginId: 0, SchemaTimestamp: schemaTimestamp}
-	}()
 
 	// update schema cache
 	if err := updateSchemaCache(moduleIdsUpdateOnly); err != nil {
@@ -91,9 +80,6 @@ func UpdateSchema(moduleIdsUpdateOnly []uuid.UUID, newVersion bool) error {
 	// renew caches, affected by potentially changed modules (preset records, login access)
 	renewIcsFields()
 	if err := renewPresetRecordIds(); err != nil {
-		return err
-	}
-	if err := RenewAccessAll(); err != nil {
 		return err
 	}
 

@@ -4,22 +4,24 @@
 	flex-flow:row nowrap;
 	overflow:visible;
 	z-index:var(--z-index-form);
-	
-	/* box-shadow fix */
-	/* setting overflow:auto kills box shadow */
-	padding-left:2px;
 }
-.form-pop-up{
+.form-wrap.pop-up{
 	width:100%;
+	padding:var(--spacing) 0px 0px var(--spacing);
 	max-width:1200px;
 	max-height:1200px;
 	overflow:auto;
 	box-sizing:border-box;
 }
-.form-pop-up .form{
-	margin:10px !important;
-	border:1px solid var(--color-border) !important;
-	border-radius:8px !important;
+.form-wrap.pop-up.fullscreen{
+	max-width:unset !important;
+	max-height:unset !important;
+}
+.form-wrap.pop-up .form,
+.form-wrap.pop-up .form-help,
+.form-wrap.pop-up .form-log{
+	border:1px solid var(--color-border);
+	border-radius:8px;
 }
 
 /* fields */
@@ -44,46 +46,49 @@
 .form .fields.singleField .list,
 .form .fields.singleField .gantt{
 	border-radius:0px;
-}	
+}
 
 /* data change log */
-.form-wrap div.log{
+.form-log{
 	flex:1 1 auto;
+	min-width:400px;
 	max-width:500px;
 	display:flex;
 	flex-direction:column;
+	overflow:auto;
 }
-.form-wrap div.log div.log-entries{
+.form-log .log-entries{
 	flex:1 1 auto;
 	display:flex;
 	flex-direction:column;
 	padding:var(--spacing-parent);
 	overflow-y:auto;
 }
-.form-wrap div.log div.entry{
+.form-log .entry{
 	display:flex;
 	flex-direction:column;
 }
-.form-wrap div.log div.log-entries div.log-fields{
+.form-log .log-entries .log-fields{
 	display:flex;
 	flex-flow:column nowrap;
 	margin:10px 0px 0px 0px;
 }
-.form-wrap div.log div.log-entries .field{
+.form-log .log-entries .field{
 	min-width:150px;
 	max-width:500px;
 	margin:var(--spacing-child);
 }
 
 /* context help */
-.form-wrap .help{
+.form-help{
 	flex:1 0 auto;
-	max-width:500px;
 	min-width:400px;
+	max-width:500px;
 	display:flex;
 	flex-direction:column;
+	overflow:auto;
 }
-.form-wrap .help .help-content{
+.form-help .help-content{
 	flex:1 1 auto;
 	display:flex;
 }
@@ -100,15 +105,17 @@
 	border:1px solid var(--color-border);
 }
 .user-bordersSquared .form .top .state,
-.user-bordersSquared .form-pop-up .form,
+.user-bordersSquared .form-wrap.pop-up .form,
+.user-bordersSquared .form-wrap.pop-up .form-help,
+.user-bordersSquared .form-wrap.pop-up .form-log,
 .user-bordersSquared .calendar .month,
 .user-bordersSquared .calendar .month .day .part>span,
 .user-bordersSquared .gantt,
 .user-bordersSquared .gantt-line-record .record-line{
 	border-radius:0px;
 }
-.user-compact .form-wrap{
-	padding:0px !important;
+.user-compact .form{
+	padding-left:2px;
 }
 
 /* mobile overwrites */

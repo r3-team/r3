@@ -195,13 +195,11 @@ let MyGantt = {
 					@trigger-middle="$emit('open-form',0,[],true)"
 					:caption="!isMobile ? capGen.button.new : ''"
 					:captionTitle="capGen.button.newHint"
-					:darkBg="true"
 				/>
 				<my-button
 					@trigger="showGroupLabels = !showGroupLabels"
 					:caption="!isMobile ? capApp.button.ganttShowLabels : ''"
 					:captionTitle="capApp.button.ganttShowLabelsHint"
-					:darkBg="true"
 					:image="showGroupLabels ? 'visible1.png' : 'visible0.png'"
 				/>
 			</div>
@@ -213,7 +211,6 @@ let MyGantt = {
 				/>
 				<my-button image="pagePrev.png"
 					@trigger="pageChange(-1)"
-					:darkBg="true"
 					:naked="true"
 				/>
 				
@@ -223,7 +220,6 @@ let MyGantt = {
 				
 				<my-button image="pageNext.png"
 					@trigger="pageChange(1)"
-					:darkBg="true"
 					:naked="true"
 				/>
 			</div>
@@ -233,7 +229,6 @@ let MyGantt = {
 					v-if="stepTypeToggle"
 					@trigger="toggleStepType"
 					:captionTitle="capApp.button.ganttToggleHint"
-					:darkBg="true"
 					:image="isDays ? 'clock.png' : 'clock24.png'"
 					:naked="true"
 				/>
@@ -242,7 +237,6 @@ let MyGantt = {
 					v-if="!isMobile"
 					@trigger="stepZoom = stepZoomDefault"
 					:captionTitle="capApp.button.zoomResetHint"
-					:darkBg="true"
 					:naked="true"
 				/>
 				
@@ -274,7 +268,6 @@ let MyGantt = {
 					@trigger="scrollToNow"
 					:caption="!isMobile ? capApp.now : ''"
 					:captionTitle="capApp.nowHint"
-					:darkBg="true"
 				/>
 			</div>
 		</div>

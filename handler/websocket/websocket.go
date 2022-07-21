@@ -7,13 +7,14 @@ import (
 	"net"
 	"net/http"
 	"r3/bruteforce"
-	"r3/cache"
+	"r3/cluster"
 	"r3/handler"
 	"r3/log"
 	"r3/request"
 	"r3/types"
 	"sync"
 
+	"github.com/gofrs/uuid"
 	"github.com/gorilla/websocket"
 )
 
@@ -109,6 +110,7 @@ func (hub *hubType) start() {
 			client.ws.Close()
 			client.ctxCancel()
 			delete(hub.clients, client)
+			cluster.SetWebsocketClientCount(len(hub.clients))
 		}
 	}
 
@@ -117,11 +119,12 @@ func (hub *hubType) start() {
 		select {
 		case client := <-hub.clientAdd:
 			hub.clients[client] = true
+			cluster.SetWebsocketClientCount(len(hub.clients))
 
 		case client := <-hub.clientDel:
 			removeClient(client)
 
-		case event := <-cache.ClientEvent_handlerChan:
+		case event := <-cluster.WebsocketClientEvents:
 
 			jsonMsg := []byte{} // message back to client
 			kickEvent := event.Kick || event.KickNonAdmin
@@ -130,8 +133,11 @@ func (hub *hubType) start() {
 				// if clients are not kicked, prepare response
 				var err error
 
-				if event.BuilderOff || event.BuilderOn {
-					jsonMsg, err = prepareUnrequested("builder_mode_changed", event.BuilderOn)
+				if event.CollectionChanged != uuid.Nil {
+					jsonMsg, err = prepareUnrequested("collection_changed", event.CollectionChanged)
+				}
+				if event.ConfigChanged {
+					jsonMsg, err = prepareUnrequested("config_changed", nil)
 				}
 				if event.Renew {
 					jsonMsg, err = prepareUnrequested("reauthorized", nil)

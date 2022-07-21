@@ -10,7 +10,7 @@ let MyHome = {
 		
 		<!-- instance setup wizard -->
 		<div class="home-standardBox contentBox home-wizard" v-if="noModules && isAdmin">
-			<div class="top">
+			<div class="top lower">
 				<div class="area">
 					<img class="icon" src="images/settings.png" />
 					<h1>{{ capApp.wizard.title }}</h1>
@@ -69,7 +69,7 @@ let MyHome = {
 		
 		<!-- no access message -->
 		<div class="contentBox home-standardBox home-noAccess" v-if="noAccess">
-			<div class="top">
+			<div class="top lower">
 				<div class="area">
 					<img class="icon" src="images/key.png" />
 					<h1>{{ capApp.noAccessTitle }}</h1>
@@ -97,7 +97,7 @@ let MyHome = {
 		
 		<!-- update notification -->
 		<div class="contentBox scroll home-standardBox" v-if="showUpdate && !isMobile">
-			<div class="top">
+			<div class="top lower">
 				<div class="area">
 					<img class="icon" src="images/download.png" />
 					<h1>{{ capApp.newVersion }}</h1>
@@ -106,7 +106,6 @@ let MyHome = {
 					<my-button image="cancel.png"
 						@trigger="setSettingSingle('hintUpdateVersion',versionBuildNew)"
 						:cancel="true"
-						:darkBg="true"
 					/>
 				</div>
 			</div>

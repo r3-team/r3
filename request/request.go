@@ -6,11 +6,11 @@ import (
 	"errors"
 	"fmt"
 	"r3/cache"
+	"r3/cluster"
 	"r3/config"
 	"r3/db"
 	"r3/handler"
 	"r3/log"
-	"r3/scheduler"
 	"r3/types"
 	"strconv"
 	"time"
@@ -215,6 +215,17 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "set":
 			return ConfigSet_tx(tx, reqJson)
 		}
+	case "cluster":
+		switch action {
+		case "delNode":
+			return ClusterNodeDel_tx(tx, reqJson)
+		case "getNodes":
+			return ClusterNodesGet()
+		case "setNode":
+			return ClusterNodeSet_tx(tx, reqJson)
+		case "shutdownNode":
+			return ClusterNodeShutdown(reqJson)
+		}
 	case "dataSql":
 		switch action {
 		case "get":
@@ -290,14 +301,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return LoginGetMembers(reqJson)
 		case "getRecords":
 			return LoginGetRecords(reqJson)
-		case "informBuilderState":
-			cache.ChangedBuilderMode(config.GetUint64("builderMode") == 1)
-			return nil, nil
 		case "kick":
 			return LoginKick(reqJson)
-		case "kickNonAdmins":
-			cache.KickNonAdmins()
-			return nil, nil
 		case "reauth":
 			return LoginReauth(reqJson)
 		case "reauthAll":
@@ -439,10 +444,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		switch action {
 		case "get":
 			return Get()
-		case "reload":
-			return nil, scheduler.Start()
-		case "trigger":
-			return Trigger(reqJson)
 		}
 	case "schema":
 		switch action {
@@ -458,6 +459,10 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		}
 	case "task":
 		switch action {
+		case "informChanged":
+			return nil, cluster.TasksChanged(true)
+		case "run":
+			return TaskRun(reqJson)
 		case "set":
 			return TaskSet_tx(tx, reqJson)
 		}
