@@ -350,7 +350,7 @@
 .input-date .date-inputs .time-separator{
 	margin:0px 8px 0px 0px;
 }
-.input-date input.date-input{
+.input-date .date-inputs input{
 	min-width:unset;
 	margin:0px;
 	padding:0px;

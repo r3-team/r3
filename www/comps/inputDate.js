@@ -17,7 +17,7 @@ export {MyInputDate as default};
 
 let MyInputDateEntryInput = {
 	name:'my-input-date-entry-input',
-	template:`<input class="date-input"
+	template:`<input
 		v-model="value"
 		@change="$emit('update:modelValue',$event.target.value)"
 		@keyup.enter.stop="$emit('update:modelValue',$event.target.value)"
@@ -54,19 +54,19 @@ let MyInputDateEntry = {
 	
 		<!-- mobile date inputs -->
 		<template v-if="isMobile">
-			<input class="date-input" type="datetime-local" step="1"
+			<input type="datetime-local" step="1"
 				v-if="isDate && isTime"
 				v-model="valueDatetimeInput"
 				:disabled="isReadonly"
 			/>
 			
-			<input class="date-input" type="date" step="1"
+			<input type="date" step="1"
 				v-if="isDate && !isTime"
 				v-model="valueDateInput"
 				:disabled="isReadonly"
 			/>
 			
-			<input class="date-input" type="time" step="1"
+			<input type="time" step="1"
 				v-if="!isDate && isTime"
 				v-model="valueTimeInput"
 				:disabled="isReadonly"
