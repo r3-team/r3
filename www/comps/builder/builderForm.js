@@ -242,22 +242,16 @@ let MyBuilderForm = {
 				<!-- form record query -->
 				<my-builder-query
 					@index-removed="removeDataFields(fields,$event)"
-					@set-choices="choices = $event"
 					@set-filters="filters = $event"
 					@set-joins="joins = $event"
-					@set-lookups="lookups = $event"
-					@set-orders="orders = $event"
 					@set-relation-id="relationId = $event"
 					:allowChoices="false"
 					:allowFixedLimit="false"
 					:builderLanguage="builderLanguage"
-					:choices="choices"
 					:filters="filters"
 					:fixedLimit="0"
 					:joins="joins"
-					:lookups="lookups"
 					:moduleId="form.moduleId"
-					:orders="orders"
 					:relationId="relationId"
 				/>
 				
@@ -318,9 +312,6 @@ let MyBuilderForm = {
 			relationId:'', // source relation ID
 			joins:[],      // joined relations, incl. source relation
 			filters:[],
-			orders:[],
-			lookups:[],
-			choices:[],
 			
 			// state
 			columnIdQuery:null,
@@ -362,9 +353,6 @@ let MyBuilderForm = {
 				|| this.relationId                !== this.form.query.relationId
 				|| JSON.stringify(this.joins)     !== JSON.stringify(this.form.query.joins)
 				|| JSON.stringify(this.filters)   !== JSON.stringify(this.form.query.filters)
-				|| JSON.stringify(this.orders)    !== JSON.stringify(this.form.query.orders)
-				|| JSON.stringify(this.lookups)   !== JSON.stringify(this.form.query.lookups)
-				|| JSON.stringify(this.choices)   !== JSON.stringify(this.form.query.choices)
 			;
 		},
 		dataFields:function() {
@@ -564,9 +552,6 @@ let MyBuilderForm = {
 			this.states     = JSON.parse(JSON.stringify(this.form.states));
 			this.joins      = JSON.parse(JSON.stringify(this.form.query.joins));
 			this.filters    = JSON.parse(JSON.stringify(this.form.query.filters));
-			this.orders     = JSON.parse(JSON.stringify(this.form.query.orders));
-			this.lookups    = JSON.parse(JSON.stringify(this.form.query.lookups));
-			this.choices    = JSON.parse(JSON.stringify(this.form.query.choices));
 			this.fieldIdsRemove  = [];
 			this.columnIdQuery   = null;
 			this.fieldIdQuery    = null;
@@ -936,8 +921,7 @@ let MyBuilderForm = {
 					id:this.form.query.id,
 					relationId:this.relationId,
 					joins:this.joins,
-					filters:this.filters,
-					orders:this.orders
+					filters:this.filters
 				},
 				fields:fieldsCleaned,
 				functions:this.functions,

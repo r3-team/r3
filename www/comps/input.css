@@ -309,6 +309,7 @@
 	flex:1 1 auto;
 }
 .input-date .content-wrap .entries .entry{
+	flex:1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
 	margin:0px 12px 0px 0px;
@@ -351,9 +352,6 @@
 	margin:0px 8px 0px 0px;
 }
 .input-date .date-inputs input{
-	min-width:unset;
-	margin:0px;
-	padding:0px;
 	line-height:28px;
 	font-size:inherit;
 	text-align:center;
@@ -361,6 +359,12 @@
 	border:none;
 	background-color:transparent;
 	box-shadow:none;
+}
+.input-date .date-inputs .mobile-inputs input{
+	min-width:100px;
+	height:28px;
+	text-align:left;
+	border-bottom:1px solid var(--color-border);
 }
 .input-date span{
 	line-height:28px;

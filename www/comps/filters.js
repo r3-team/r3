@@ -243,7 +243,11 @@ let MyFilterSide = {
 					@input="setContent"
 					:value="content"
 				>
-					<option v-for="c in contentEnabled" :value="c">
+					<option
+						v-for="c in contentEnabled"
+						:disabled="contentUnusable.includes(c)"
+						:value="c"
+					>
 						{{ capApp.option.content[c] }}
 					</option>
 				</select>
@@ -430,6 +434,14 @@ let MyFilterSide = {
 				'recordNew','login','preset','role','languageCode',
 				'javascript','true','collection','subQuery'
 			].filter(v => !this.disableContent.includes(v));
+		},
+		contentUnusable:function() {
+			let out = [];
+			if(Object.keys(this.fieldIdMap).length === 0) {
+				out.push('field');
+				out.push('fieldChanged');
+			}
+			return out;
 		},
 		module:function() {
 			return this.moduleId === ''

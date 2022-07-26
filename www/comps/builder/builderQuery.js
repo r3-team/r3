@@ -741,15 +741,15 @@ let MyBuilderQuery = {
 		allowLookups:   { type:Boolean, required:false, default:false },
 		allowOrders:    { type:Boolean, required:false, default:false },
 		builderLanguage:{ type:String,  required:false, default:'' },
-		choices:        { type:Array,   required:true },                    // choices for optional query filters (selectable by users)
+		choices:        { type:Array,   required:false, default:() => [] },          // choices for optional query filters (selectable by users)
 		fieldIdMap:     { type:Object,  required:false, default:() => {return {}} }, // form field map, key: field ID
 		fieldIdMapRef:  { type:Object,  required:false, default:() => {return {}} }, // form field reference number map, key: field ID
 		filters:        { type:Array,   required:true },
 		fixedLimit:     { type:Number,  required:true },
-		lookups:        { type:Array,   required:true },
+		lookups:        { type:Array,   required:false, default:() => [] },
 		joins:          { type:Array,   required:true },                    // available relations, incl. source relation
 		joinsParents:   { type:Array,   required:false, default:() => [] }, // each item is an array of joins from a parent query
-		orders:         { type:Array,   required:true },
+		orders:         { type:Array,   required:false, default:() => [] },
 		moduleId:       { type:String,  required:true },
 		relationId:     { required:true },                                  // source relation
 		relationIdStart:{ required:false, default:null }                    // when query starts with a defined relation

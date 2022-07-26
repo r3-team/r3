@@ -46,90 +46,71 @@ let MyInputDateEntryInput = {
 let MyInputDateEntry = {
 	name:'my-input-date-entry',
 	components:{MyInputDateEntryInput},
-	template:`<div class="entry">
+	template:`<div class="entry date-inputs">
 		
-		<span v-if="captionPrefix !== ''" class="date-inputs prefix">
+		<span v-if="captionPrefix !== ''" class="prefix">
 			{{ captionPrefix }}
 		</span>
 	
 		<!-- mobile date inputs -->
-		<template v-if="isMobile">
-			<input type="datetime-local" step="1"
-				v-if="isDate && isTime"
-				v-model="valueDatetimeInput"
-				:disabled="isReadonly"
-			/>
-			
-			<input type="date" step="1"
-				v-if="isDate && !isTime"
-				v-model="valueDateInput"
-				:disabled="isReadonly"
-			/>
-			
-			<input type="time" step="1"
-				v-if="!isDate && isTime"
-				v-model="valueTimeInput"
-				:disabled="isReadonly"
-			/>
-		</template>
+		<div class="mobile-inputs" v-if="isMobile">
+			<input step="1" type="datetime-local" v-if="isDate && isTime" v-model="valueDatetimeInput" :disabled="isReadonly" />
+			<input step="1" type="date" v-if="isDate && !isTime" v-model="valueDateInput" :disabled="isReadonly" />
+			<input step="1" type="time" v-if="!isDate && isTime" v-model="valueTimeInput" :disabled="isReadonly" />
+		</div>
 		
 		<!-- non-mobile date inputs -->
 		<template v-if="!isMobile && isDate">
-			<div class="date-inputs">
-				
-				<!-- year, month, day - ordered by user setting -->
-				<template v-for="i in 5">
-					<my-input-date-entry-input
-						v-if="i % 2 !== 0"
-						@update:modelValue="parseInput(getInputType(i-1),$event)"
-						:caption="getInputCaption(i-1)"
-						:isReadonly="isReadonly"
-						:modelValue="getInputValue(i-1)"
-						:size="getInputSize(i-1)"
-					/>
-					<span v-if="i === 1 || i === 3">{{ inputSeparatorSymbol }}</span>
-				</template>
-			</div>
+			
+			<!-- year, month, day - ordered by user setting -->
+			<template v-for="i in 5">
+				<my-input-date-entry-input
+					v-if="i % 2 !== 0"
+					@update:modelValue="parseInput(getInputType(i-1),$event)"
+					:caption="getInputCaption(i-1)"
+					:isReadonly="isReadonly"
+					:modelValue="getInputValue(i-1)"
+					:size="getInputSize(i-1)"
+				/>
+				<span v-if="i === 1 || i === 3">{{ inputSeparatorSymbol }}</span>
+			</template>
 		</template>
 		
 		<!-- non-mobile time inputs -->
 		<template v-if="!isMobile && isTime">
+			<span v-if="isDate" class="time-separator"></span>
 			
-			<div class="date-inputs">
-				<span v-if="isDate" class="time-separator"></span>
-				
-				<my-input-date-entry-input
-					@update:modelValue="parseInput('H',$event)"
-					:caption="capApp.inputHour"
-					:isReadonly="isReadonly"
-					:modelValue="hour"
-					:size="2"
-				/>
-				<span>:</span>
-				<my-input-date-entry-input
-					@update:modelValue="parseInput('M',$event)"
-					:caption="capApp.inputMinute"
-					:isReadonly="isReadonly"
-					:modelValue="minute"
-					:size="2"
-				/>
-				<span>:</span>
-				<my-input-date-entry-input
-					@update:modelValue="parseInput('S',$event)"
-					:caption="capApp.inputSecond"
-					:isReadonly="isReadonly"
-					:modelValue="second"
-					:size="2"
-				/>
-			</div>
+			<my-input-date-entry-input
+				@update:modelValue="parseInput('H',$event)"
+				:caption="capApp.inputHour"
+				:isReadonly="isReadonly"
+				:modelValue="hour"
+				:size="2"
+			/>
+			<span>:</span>
+			<my-input-date-entry-input
+				@update:modelValue="parseInput('M',$event)"
+				:caption="capApp.inputMinute"
+				:isReadonly="isReadonly"
+				:modelValue="minute"
+				:size="2"
+			/>
+			<span>:</span>
+			<my-input-date-entry-input
+				@update:modelValue="parseInput('S',$event)"
+				:caption="capApp.inputSecond"
+				:isReadonly="isReadonly"
+				:modelValue="second"
+				:size="2"
+			/>
 		</template>
 	</div>`,
 	props:{
-		captionPrefix:{ type:String, required:false, default:'' },
-		isDate:    { type:Boolean, required:false, default:false },
-		isTime:    { type:Boolean, required:false, default:false },
-		isReadonly:{ type:Boolean, required:false, default:false },
-		modelValue:{ required:true }
+		captionPrefix:{ type:String,  required:false, default:'' },
+		isDate:       { type:Boolean, required:false, default:false },
+		isTime:       { type:Boolean, required:false, default:false },
+		isReadonly:   { type:Boolean, required:false, default:false },
+		modelValue:   { required:true }
 	},
 	emits:['update:modelValue'],
 	watch:{
@@ -182,12 +163,13 @@ let MyInputDateEntry = {
 		},
 		
 		/* alternative inputs for mobile devices */
-		/* uses datetime-local for native inputs on mobile devices */
+		/* uses datetime-local for native datetime inputs on mobile devices */
 		/* works reliably with format 2019-12-31T12:12:00 */
 		valueDatetimeInput:{
 			get:function() {
-				let d = new Date(this.modelValue * 1000);
-				return `${this.year}-${this.month}-${this.day}T${this.hour}:${this.minute}:${this.second}`;
+				return this.modelValue !== null
+					? `${this.year}-${this.month}-${this.day}T${this.hour}:${this.minute}:${this.second}`
+					: '';
 			},
 			set:function(v) {
 				let d = new Date(v);
@@ -197,8 +179,9 @@ let MyInputDateEntry = {
 		},
 		valueDateInput:{
 			get:function() {
-				let d = new Date(this.modelValue * 1000);
-				return `${this.year}-${this.month}-${this.day}`;
+				return this.modelValue !== null
+					? `${this.year}-${this.month}-${this.day}`
+					: '';
 			},
 			set:function(v) {
 				let d = new Date(v);
@@ -208,25 +191,23 @@ let MyInputDateEntry = {
 		},
 		valueTimeInput:{
 			get:function() {
-				let d = new Date(this.modelValue * 1000);
-				
-				if(this.modelValue !== null)
-					d = this.getDateShifted(d,true);
-				
-				return `${this.hour}:${this.minute}:${this.second}`;
+				return this.modelValue !== null
+					? `${this.hour}:${this.minute}:${this.second}`
+					: '';
 			},
 			set:function(v) {
 				let m = v.match(/^(\d+)\:(\d+)\:(\d+)$/);
+				if(m !== null && m.length === 4)
+					return this.$emit('update:modelValue',
+						(parseInt(m[1]) * 60 * 60) + (parseInt(m[2]) * 60) + parseInt(m[3])
+					);
 				
-				if(m === null || m.length !== 4)
-					return;
-				
-				let d = new Date(this.modelValue * 1000);
-				d.setHours(m[1]);
-				d.setMinutes(m[2]);
-				d.setSeconds(m[3]);
-				d = this.getDateShifted(d,false);
-				this.$emit('update:modelValue',d.getTime() / 1000);
+				// iOS fix: Safari mobile ignores input steps and shows only hours/minutes
+				m = v.match(/^(\d+)\:(\d+)$/);
+				if(m !== null && m.length === 3)
+					return this.$emit('update:modelValue',
+						(parseInt(m[1]) * 60 * 60) + (parseInt(m[2]) * 60)
+					);
 			}
 		},
 		
