@@ -692,6 +692,7 @@
 }
 .builder-function .input{
 	max-width:none;
+	font-family:'Lucida Console',Courier,monospace;
 	border:none !important;
 	border-radius:0px !important;
 	background-color:transparent;
