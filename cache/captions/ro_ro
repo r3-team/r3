@@ -819,6 +819,7 @@
 			"color":"Culoarea",
 			"dependsOn":"Depinde",
 			"export":"Transfer - Exportați aplicația într-un fișier",
+			"exportKeyBad":"Signing key seems invalid. Make sure to use the private key for exporting applications.",
 			"exportKeyEmpty":"Pentru export este necesară cheia pentru semnătură",
 			"exportKeySet":"Cheie este stocată în memorie",
 			"exportOwner":"Exportați modificările",

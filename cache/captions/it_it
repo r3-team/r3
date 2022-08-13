@@ -819,6 +819,7 @@
 			"color":"Colore",
 			"dependsOn":"Depende da",
 			"export":"Trasferisci - Esporta l'applicazione in un file",
+			"exportKeyBad":"Signing key seems invalid. Make sure to use the private key for exporting applications.",
 			"exportKeyEmpty":"La chiave di firma è necessaria per l'esportazione",
 			"exportKeySet":"Chiave salvata in memoria",
 			"exportOwner":"Esporta modifiche",

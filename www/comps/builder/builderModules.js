@@ -839,6 +839,18 @@ let MyBuilderModulesExport = {
 			);
 		},
 		setKey:function() {
+			// check validity
+			if(!this.exportPrivateKey.includes('-----BEGIN RSA PRIVATE KEY-----'))
+				return this.$store.commit('dialog',{
+					captionBody:this.capApp.exportKeyBad,
+					buttons:[{
+						cancel:true,
+						caption:this.capGen.button.cancel,
+						image:'cancel.png'
+					}]
+				});
+			
+			// store export key
 			ws.send('transfer','storeExportKey',{exportKey:this.exportPrivateKey},true).then(
 				() => this.keyIsSet = true,
 				this.$root.genericError

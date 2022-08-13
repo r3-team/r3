@@ -819,6 +819,7 @@
 			"color":"Color",
 			"dependsOn":"Dependent",
 			"export":"Transfer - Export application to file",
+			"exportKeyBad":"Signing key seems invalid. Make sure to use the private key for exporting applications.",
 			"exportKeyEmpty":"Signing key is required for export",
 			"exportKeySet":"Key stored in memory",
 			"exportOwner":"Export changes",

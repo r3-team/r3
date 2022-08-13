@@ -819,6 +819,7 @@
 			"color":"Farbe",
 			"dependsOn":"Abhängig",
 			"export":"Transfer - Anwendung in Datei exportieren",
+			"exportKeyBad":"Signierschlüssel scheint ungültig zu sein. Stelle sicher, dass du den privaten Schlüssel für den Export verwendest.",
 			"exportKeyEmpty":"Export erfordert einen Signierschlüssel",
 			"exportKeySet":"Schlüssel zwischengespeichert",
 			"exportOwner":"Änderungen exportieren",
