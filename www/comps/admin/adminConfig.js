@@ -62,6 +62,16 @@ let MyAdminConfig = {
 						<td><input v-model="configInput.publicHostName" /></td>
 					</tr>
 					<tr>
+						<td>{{ capApp.defaultLanguageCode }}</td>
+						<td>
+							<select v-model="configInput.defaultLanguageCode">
+								<option v-for="l in languageCodes" :value="l">
+									{{ l }}
+								</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
 						<td>{{ capApp.productionMode }}</td>
 						<td>
 							<my-bool-string-number
@@ -108,19 +118,6 @@ let MyAdminConfig = {
 					<tr>
 						<td>{{ capApp.companyName }}</td>
 						<td><input :disabled="!activated" v-model="configInput.companyName" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.defaultLanguageCode }}</td>
-						<td>
-							<select
-								v-model="configInput.defaultLanguageCode"
-								:disabled="!activated"
-							>
-								<option v-for="l in languageCodes" :value="l">
-									{{ l }}
-								</option>
-							</select>
-						</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.companyColorLogin }}</td>
