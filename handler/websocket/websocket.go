@@ -20,14 +20,15 @@ import (
 
 // a websocket client
 type clientType struct {
-	address   string             // IP address, no port
-	admin     bool               // belongs to admin login?
-	ctx       context.Context    // global context for client requests
-	ctxCancel context.CancelFunc // to abort requests in case of disconnect
-	loginId   int64              // client login ID, 0 = not logged in yet
-	noAuth    bool               // logged in without authentication (username only)
-	write_mx  sync.Mutex
-	ws        *websocket.Conn // websocket connection
+	address    string             // IP address, no port
+	admin      bool               // belongs to admin login?
+	ctx        context.Context    // global context for client requests
+	ctxCancel  context.CancelFunc // to abort requests in case of disconnect
+	fixedToken bool               // logged in with fixed token (limited access, only auth and server messages)
+	loginId    int64              // client login ID, 0 = not logged in yet
+	noAuth     bool               // logged in without authentication (public auth, username only)
+	write_mx   sync.Mutex         // to force sequential writes
+	ws         *websocket.Conn    // websocket connection
 }
 
 // a hub for all active websocket clients
@@ -86,14 +87,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	ctx, ctxCancel := context.WithCancel(context.Background())
 
 	client := &clientType{
-		address:   host,
-		admin:     false,
-		ctx:       ctx,
-		ctxCancel: ctxCancel,
-		loginId:   0,
-		noAuth:    false,
-		write_mx:  sync.Mutex{},
-		ws:        ws,
+		address:    host,
+		admin:      false,
+		ctx:        ctx,
+		ctxCancel:  ctxCancel,
+		fixedToken: false,
+		loginId:    0,
+		noAuth:     false,
+		write_mx:   sync.Mutex{},
+		ws:         ws,
 	}
 
 	hub.clientAdd <- client
@@ -222,10 +224,17 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 	// take over transaction number for response so client can match it locally
 	resTrans.TransactionNr = reqTrans.TransactionNr
 
-	// user can either authenticate or execute requests
+	// client can either authenticate or execute requests
 	authRequest := len(reqTrans.Requests) == 1 && reqTrans.Requests[0].Ressource == "auth"
 
 	if !authRequest {
+		if client.fixedToken {
+			log.Warning("server", "blocked client request",
+				fmt.Errorf("only authentication allowed for fixed token clients"))
+
+			return []byte("{}")
+		}
+
 		// execute non-authentication transaction
 		resTrans = request.ExecTransaction(client.ctx, client.loginId,
 			client.admin, client.noAuth, reqTrans, resTrans)
@@ -244,9 +253,15 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 		var resPayload interface{}
 
 		switch req.Action {
-		case "token": // authentication via token
+		case "token": // authentication via JSON web token
 			resPayload, err = request.LoginAuthToken(req.Payload, &client.loginId,
 				&client.admin, &client.noAuth)
+
+		case "tokenFixed": // authentication via fixed token
+			resPayload, err = request.LoginAuthTokenFixed(req.Payload, &client.loginId)
+			if err == nil {
+				client.fixedToken = true
+			}
 
 		case "user": // authentication via credentials
 			resPayload, err = request.LoginAuthUser(req.Payload, &client.loginId,

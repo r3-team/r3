@@ -65,3 +65,26 @@ func LoginAuthToken(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth
 	res.LoginId = *loginId
 	return res, nil
 }
+
+// attempt login via fixed token
+func LoginAuthTokenFixed(reqJson json.RawMessage, loginId *int64) (interface{}, error) {
+
+	var (
+		req struct {
+			LoginId    int64  `json:"loginId"`
+			TokenFixed string `json:"tokenFixed"`
+		}
+		res struct {
+			LanguageCode string `json:"languageCode"`
+		}
+	)
+
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+	if err := login_auth.TokenFixed(req.LoginId, req.TokenFixed, &res.LanguageCode); err != nil {
+		return nil, err
+	}
+	*loginId = req.LoginId
+	return res, nil
+}
