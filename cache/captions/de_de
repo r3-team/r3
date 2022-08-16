@@ -886,7 +886,7 @@
 			"joinApplyDeleteHint":"(D) Datensatz löschen auf dieser Relation",
 			"joinApplyUpdateHint":"(U) Datensatz aktualisieren auf dieser Relation",
 			"joinConnectorHint":"(L)eft/(I)nner/(R)ight/(F)ull join",
-			"lookups":"Importauflösung durch eindeutigen Index ({COUNT})",
+			"lookups":"Importauflösung durch einzigartigen Index ({COUNT})",
 			"lookupWarning":"When Beziehungsattribute (n:1, 1:1) in Indexen genutzt werden,<br />müssen die referenzierten Relationen im Import inkludiert sein.",
 			"orders":"Sortierung ({COUNT})",
 			"relations":"Relationen ({COUNT})",
