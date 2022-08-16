@@ -332,10 +332,42 @@ func GetNames(id int64, idsExclude []int64, byString string, noLdapAssign bool) 
 }
 
 // user creatable fixed (permanent) tokens for less sensitive access permissions
-// currently used for ICS downloads
-func SetTokenFixed_tx(tx pgx.Tx, loginId int64, context string) (string, error) {
+func DelTokenFixed(loginId int64, token string) error {
+	_, err := db.Pool.Exec(db.Ctx, `
+		DELETE FROM instance.login_token_fixed
+		WHERE login_id = $1
+		AND   token    = $2
+	`, loginId, token)
+	return err
+}
+func GetTokensFixed(loginId int64) ([]types.LoginTokenFixed, error) {
+	tokens := make([]types.LoginTokenFixed, 0)
 
-	if !tools.StringInSlice(context, []string{"ics"}) {
+	rows, err := db.Pool.Query(db.Ctx, `
+		SELECT name, context, token, date_create
+		FROM instance.login_token_fixed
+		WHERE login_id = $1
+		ORDER BY date_create ASC
+	`, loginId)
+	if err != nil {
+		return tokens, err
+	}
+	defer rows.Close()
+
+	for rows.Next() {
+		var t types.LoginTokenFixed
+		var n pgtype.Varchar
+		if err := rows.Scan(&n, &t.Context, &t.Token, &t.DateCreate); err != nil {
+			return tokens, err
+		}
+		t.Name = n.String
+		tokens = append(tokens, t)
+	}
+	return tokens, nil
+}
+func SetTokenFixed_tx(tx pgx.Tx, loginId int64, name string, context string) (string, error) {
+
+	if !tools.StringInSlice(context, []string{"client", "ics"}) {
 		return "", errors.New("unknown fixed token context")
 	}
 
@@ -343,14 +375,15 @@ func SetTokenFixed_tx(tx pgx.Tx, loginId int64, context string) (string, error) 
 	tokenFixed := tools.RandStringRunes(rand.Intn(max-min+1) + min)
 
 	if _, err := tx.Exec(db.Ctx, `
-		INSERT INTO instance.login_token_fixed (login_id,token,context,date_create)
-			VALUES ($1,$2,$3,$4)
-	`, loginId, tokenFixed, context, tools.GetTimeUnix()); err != nil {
+		INSERT INTO instance.login_token_fixed (login_id,token,name,context,date_create)
+			VALUES ($1,$2,$3,$4,$5)
+	`, loginId, tokenFixed, name, context, tools.GetTimeUnix()); err != nil {
 		return "", err
 	}
 	return tokenFixed, nil
 }
 
+// create new admin user
 func CreateAdmin(username string, password string) error {
 
 	tx, err := db.Pool.Begin(db.Ctx)

@@ -97,16 +97,24 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 // mapped by current database version string, returns new database version string
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
-	// clean up on next release
-	// ALTER TABLE app.role ALTER COLUMN content
-	//		TYPE app.role_content USING content::text::app.role_content;
-	// ALTER TABLE app.collection_consumer ALTER COLUMN content
-	//		TYPE app.collection_consumer_content USING content::text::app.collection_consumer_content;
-	// ALTER TABLE instance.login_setting ALTER COLUMN font_family
-	//		TYPE instance.login_setting_font_family USING font_family::text::instance.login_setting_font_family;
-	// ALTER TABLE instance.login_setting ALTER COLUMN pattern
-	//      TYPE instance.login_setting_pattern USING pattern::text::instance.login_setting_pattern;
-
+	"3.0": func(tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(db.Ctx, `
+			-- clean up from last upgrade
+			ALTER TABLE app.role ALTER COLUMN content
+				TYPE app.role_content USING content::text::app.role_content;
+			ALTER TABLE app.collection_consumer ALTER COLUMN content
+				TYPE app.collection_consumer_content USING content::text::app.collection_consumer_content;
+			ALTER TABLE instance.login_setting ALTER COLUMN font_family
+				TYPE instance.login_setting_font_family USING font_family::text::instance.login_setting_font_family;
+			ALTER TABLE instance.login_setting ALTER COLUMN pattern
+				TYPE instance.login_setting_pattern USING pattern::text::instance.login_setting_pattern;
+			
+			-- changes to fixed tokens
+			ALTER TYPE instance.token_fixed_context ADD VALUE 'client';
+			ALTER TABLE instance.login_token_fixed ADD COLUMN name CHARACTER VARYING(64);
+		`)
+		return "3.1", err
+	},
 	"2.7": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
 			-- cleanup from last release

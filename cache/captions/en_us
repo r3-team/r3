@@ -100,6 +100,7 @@
 		"status":"Status",
 		"threeDots":"...",
 		"title":"Title",
+		"token":"Token",
 		"username":"Username",
 		"version":"Version"
 	},
@@ -1012,6 +1013,7 @@
 			"zoomResetHint":"Reset zoom level"
 		},
 		"icsDesc":"Use this URL to subscribe to this calendar (iCalendar, ICS).",
+		"icsTokenNameHint":"Device name (optional)",
 		"month0":"January",
 		"month1":"February",
 		"month2":"March",
@@ -1319,6 +1321,11 @@
 			"cornerRounded":"rounded",
 			"cornerSquared":"squared"
 		},
+		"tokensFixed":{
+			"titleContext":"Use",
+			"titleDateCreate":"Created",
+			"titleName":"Device name"
+		},
 		"bordersAll":"Add borders",
 		"bordersCorners":"Border corners",
 		"compact":"Compact layout",
@@ -1343,6 +1350,7 @@
 		"titleAccount":"Account",
 		"titleDisplay":"Display",
 		"titleEncryption":"End-to-end encryption",
+		"titleFixedTokens":"Device access",
 		"titleTheme":"Theme",
 		"warnUnsaved":"Warnings for unsaved changes"
 	}

@@ -235,12 +235,18 @@ h3{
 .column.centered{
 	align-items:center;
 }
+.column.gap{
+	gap:10px;
+}
 .row{
 	display:flex;
 	flex-direction:row;
 }
 .row.centered{
 	align-items:center;
+}
+.row.gap{
+	gap:10px;
 }
 .shade{
 	box-shadow:1px 1px 4px var(--color-shade);

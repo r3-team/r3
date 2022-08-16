@@ -13,12 +13,18 @@ type LoginAccess struct {
 	Menu       map[uuid.UUID]int `json:"menu"`       // effective access to specific menus
 	Relation   map[uuid.UUID]int `json:"relation"`   // effective access to specific relations
 }
-type LoginRecord struct {
-	Id   int64  `json:"id"`   // ID of relation record
-	Name string `json:"name"` // name for relation record (based on lookup attribute)
-}
 type LoginPublicKey struct {
 	LoginId   int64   `json:"loginId"`   // ID of login
 	PublicKey string  `json:"publicKey"` // public key of login (not encrypted)
 	RecordIds []int64 `json:"recordIds"` // IDs of record not yet encrypted with public key
+}
+type LoginRecord struct {
+	Id   int64  `json:"id"`   // ID of relation record
+	Name string `json:"name"` // name for relation record (based on lookup attribute)
+}
+type LoginTokenFixed struct {
+	Name       string `json:"name"`    // to identify token user/device
+	Context    string `json:"context"` // what is being used for
+	Token      string `json:"token"`
+	DateCreate int64  `json:"dateCreate"`
 }

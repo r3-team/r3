@@ -1,4 +1,5 @@
 import {set as setSetting} from './shared/settings.js';
+import {getUnixFormat}     from './shared/time.js';
 import {
 	aesGcmDecryptBase64,
 	aesGcmDecryptBase64WithPhrase,
@@ -560,11 +561,109 @@ let MySettingsAccount = {
 	}
 };
 
+let MySettingsFixedTokens = {
+	name:'my-settings-fixed-tokens',
+	template:`<div>
+		<template v-if="tokensFixed.length !== 0">
+			<table class="default-inputs">
+				<thead>
+					<tr>
+						<th>{{ capApp.titleName }}</th>
+						<th>{{ capApp.titleContext }}</th>
+						<th colspan="2">{{ capApp.titleDateCreate }}</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="t in tokensFixed">
+						<td>{{ t.name }}</td>
+						<td>{{ t.context }}</td>
+						<td><span :title="getUnixFormat(t.dateCreate,'Y-m-d H:i:S')">{{ getUnixFormat(t.dateCreate,'Y-m-d') }}</span></td>
+						<td>
+							<div class="row">
+								<my-button image="copyClipboard.png"
+									@trigger="copyToClipboard(t.token)"
+									:caption="capGen.token"
+									:captionTitle="capGen.button.copyClipboard"
+								/>
+								<my-button image="delete.png"
+									@trigger="del(t.token)"
+									:cancel="true"
+								/>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<br />
+		</template>
+		
+		<div class="default-inputs row gap">
+			<input v-model="tokenName" :placeholder="capApp.titleName" />
+			<my-button image="add.png"
+				@trigger="set"
+				:active="tokenName !== ''"
+				:caption="capGen.button.create"
+			/>
+		</div>
+	</div>`,
+	data:function() {
+		return {
+			tokensFixed:[],
+			
+			// inputs
+			tokenName:''
+		};
+	},
+	computed:{
+		// stores
+		capApp:(s) => s.$store.getters.captions.settings.tokensFixed,
+		capGen:(s) => s.$store.getters.captions.generic
+	},
+	mounted:function() {
+		this.get();
+	},
+	methods:{
+		// externals
+		getUnixFormat,
+		
+		// actions
+		copyToClipboard:function(token) {
+			navigator.clipboard.writeText(token);
+		},
+		
+		// backend calls
+		del:function(token) {
+			ws.send('login','delTokenFixed',{token:token},true).then(
+				this.get,
+				this.$root.genericError
+			);
+		},
+		get:function() {
+			ws.send('login','getTokensFixed',{},true).then(
+				res => this.tokensFixed = res.payload,
+				this.$root.genericError
+			);
+		},
+		set:function() {
+			ws.send('login','setTokenFixed',{
+				context:'client',
+				name:this.tokenName
+			},true).then(
+				this.get,
+				this.$root.genericError
+			);
+			this.tokenName = '';
+		}
+	}
+};
+
 let MySettings = {
 	name:'my-settings',
 	components:{
 		MySettingsAccount,
-		MySettingsEncryption
+		MySettingsEncryption,
+		MySettingsFixedTokens,
 	},
 	template:`<div class="settings">
 		
@@ -753,6 +852,15 @@ let MySettings = {
 						<h1>{{ capApp.titleAccount }}</h1>
 					</div>
 					<my-settings-account />
+				</div>
+				
+				<!-- Fixed tokens (device access) -->
+				<div class="contentPart short relative">
+					<div class="contentPartHeader">
+						<img class="icon" src="images/screen.png" />
+						<h1>{{ capApp.titleFixedTokens }}</h1>
+					</div>
+					<my-settings-fixed-tokens />
 				</div>
 				
 				<!-- encryption -->

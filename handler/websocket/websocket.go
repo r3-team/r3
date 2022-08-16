@@ -245,11 +245,11 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 
 		switch req.Action {
 		case "token": // authentication via token
-			resPayload, err = request.AuthToken(req.Payload, &client.loginId,
+			resPayload, err = request.LoginAuthToken(req.Payload, &client.loginId,
 				&client.admin, &client.noAuth)
 
 		case "user": // authentication via credentials
-			resPayload, err = request.AuthUser(req.Payload, &client.loginId,
+			resPayload, err = request.LoginAuthUser(req.Payload, &client.loginId,
 				&client.admin, &client.noAuth)
 		}
 

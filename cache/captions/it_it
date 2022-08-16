@@ -100,6 +100,7 @@
 		"status":"Status",
 		"threeDots":"...",
 		"title":"Titolo",
+		"token":"Token",
 		"username":"Username",
 		"version":"Versione"
 	},
@@ -1012,6 +1013,7 @@
 			"zoomResetHint":"Ripristina livello di zoom"
 		},
 		"icsDesc":"Usa questo URL per iscriverti a questo calendario (iCalendar, ICS).",
+		"icsTokenNameHint":"Device name (optional)",
 		"month0":"Gennaio",
 		"month1":"Febbraio",
 		"month2":"Marzo",
@@ -1319,6 +1321,11 @@
 			"cornerRounded":"arrotondato",
 			"cornerSquared":"squadrato"
 		},
+		"tokensFixed":{
+			"titleContext":"Use",
+			"titleDateCreate":"Created",
+			"titleName":"Device name"
+		},
 		"bordersAll":"Aggiungi bordi",
 		"bordersCorners":"Angoli del bordo",
 		"compact":"Layout compatto",
@@ -1343,6 +1350,7 @@
 		"titleAccount":"Account",
 		"titleDisplay":"Visualizza",
 		"titleEncryption":"End-to-end encryption",
+		"titleFixedTokens":"Device access",
 		"titleTheme":"Tema",
 		"warnUnsaved":"Avviso per cambiamenti non salvati"
 	}

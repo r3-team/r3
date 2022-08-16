@@ -140,6 +140,10 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		switch action {
 		case "getNames":
 			return LoginGetNames(reqJson)
+		case "delTokenFixed":
+			return LoginDelTokenFixed(reqJson, loginId)
+		case "getTokensFixed":
+			return LoginGetTokensFixed(loginId)
 		case "setTokenFixed":
 			return LoginSetTokenFixed_tx(tx, reqJson, loginId)
 		}

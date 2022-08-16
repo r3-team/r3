@@ -100,6 +100,7 @@
 		"status":"Status",
 		"threeDots":"...",
 		"title":"Titlu",
+		"token":"Token",
 		"username":"Nume utilizator",
 		"version":"Versiune"
 	},
@@ -1012,6 +1013,7 @@
 			"zoomResetHint":"Resetați nivelul de zoom"
 		},
 		"icsDesc":"Utilizați această adresă URL pentru a vă abona la calendar (iCalendar, ICS).",
+		"icsTokenNameHint":"Device name (optional)",
 		"month0":"Ianuarie",
 		"month1":"Februarie",
 		"month2":"Martie",
@@ -1319,6 +1321,11 @@
 			"cornerRounded":"rotunjit",
 			"cornerSquared":"colțuros"
 		},
+		"tokensFixed":{
+			"titleContext":"Use",
+			"titleDateCreate":"Created",
+			"titleName":"Device name"
+		},
 		"bordersAll":"Adăugați chenaruri",
 		"bordersCorners":"Colțuri la margine",
 		"compact":"Aspect compact",
@@ -1343,6 +1350,7 @@
 		"titleAccount":"Account",
 		"titleDisplay":"Afișare",
 		"titleEncryption":"End-to-end encryption",
+		"titleFixedTokens":"Device access",
 		"titleTheme":"Temă",
 		"warnUnsaved":"Avertismente pentru modificări nesalvate"
 	}

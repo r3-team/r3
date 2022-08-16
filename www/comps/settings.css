@@ -8,7 +8,8 @@
 	width:100%;
 	margin-top:10px;
 }
-.settings td{
+.settings td,
+.settings th{
 	padding:2px 8px 2px 0px;
 }
 .settings .encryption .backup-code{
