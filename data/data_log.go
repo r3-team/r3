@@ -148,8 +148,9 @@ func getLogValues_tx(ctx context.Context, tx pgx.Tx, logId uuid.UUID,
 }
 
 // set data change log for specific record that was either created or updated
-func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, attributes []types.DataSetAttribute,
-	wasCreated bool, oldData types.DataGetResult, recordId int64, loginId int64) error {
+func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
+	attributes []types.DataSetAttribute, wasCreated bool,
+	valuesOld types.DataGetResult, recordId int64, loginId int64) error {
 
 	// new record, apply logs for record and its attribute values
 	// even with no attribute values, record creation must be logged
@@ -171,10 +172,9 @@ func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, attributes 
 	}
 
 	// existing record, apply log if any attribute values changed
-
 	// compare old to new attribute values
 	attributesChangedPos := make([]int, 0)
-	for i, value := range oldData.Values {
+	for i, value := range valuesOld.Values {
 
 		// both values are nil, no change
 		if value == nil && attributes[i].Value == nil {
@@ -210,15 +210,22 @@ func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID, attributes 
 	if err != nil {
 		return err
 	}
-	for i, attribute := range attributes {
 
+	// log value even if null, as a change to null is still a change
+	for _, i := range attributesChangedPos {
+		if err := setLogValue_tx(ctx, tx, logId, attributes[i]); err != nil {
+			return err
+		}
+	}
+
+	/*for i, attribute := range attributes {
 		if tools.IntInSlice(i, attributesChangedPos) {
 			// log value even if null, as a change to null is still a change
 			if err := setLogValue_tx(ctx, tx, logId, attribute); err != nil {
 				return err
 			}
 		}
-	}
+	}*/
 	return nil
 }
 func setLogRecord_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,

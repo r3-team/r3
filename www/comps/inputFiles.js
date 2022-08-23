@@ -1,5 +1,8 @@
 import {getAttributeFileHref} from './shared/attribute.js';
-import {getSizeReadable}      from './shared/generic.js';
+import {
+	getNilUuid,
+	getSizeReadable
+} from './shared/generic.js';
 export {MyInputFiles as default};
 
 let MyInputFiles = {
@@ -22,8 +25,14 @@ let MyInputFiles = {
 				:naked="true"
 			/>
 			
+			<my-button image="form.png"
+				v-if="!readonly"
+				@trigger="fileRequest(f.id,f.hash,f.name,false)"
+				@trigger-shift="fileRequest(f.id,f.hash,f.name,true)"
+				:naked="true"
+			/>
+			
 			<a target="_blank"
-				v-if="!f.new"
 				:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
 			>
 				<my-button image="download.png"
@@ -44,13 +53,9 @@ let MyInputFiles = {
 					:cancel="true"
 				/>
 				<a class="slide" target="_blank"
-					v-if="!f.new || showNew"
 					:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
 					:style="'background-image:url('+getAttributeFileHref(attributeId,f.id,f.name,token)+')'"
 				/>
-				<div class="placeholder" v-if="f.new">
-					{{ capApp.fileNotUploaded }}
-				</div>
 			</template>
 			
 			<div class="gallery-navigation" v-if="files.length > 1">
@@ -92,8 +97,7 @@ let MyInputFiles = {
 		attributeId:{ type:String,  required:true },
 		modelValue: { required:true },
 		readonly:   { type:Boolean, required:false, default:false },
-		showGallery:{ type:Boolean, required:false, default:false },
-		showNew:    { type:Boolean, required:false, default:false }
+		showGallery:{ type:Boolean, required:false, default:false }
 	},
 	emits:['update:modelValue'],
 	data:function() {
@@ -105,16 +109,8 @@ let MyInputFiles = {
 	computed:{
 		files:{
 			get:	function() {
-				if(this.modelValue === null)
-					return [];
-				
-				// special case
-				// by default, files attributes are stored as JSONB and returned as object
-				// but form log reads from data log which stores values as JSON text
-				if(typeof this.modelValue === 'string')
-					return JSON.parse(this.modelValue).files;
-				
-				return this.modelValue.files;
+				return this.modelValue === null
+					? [] : this.modelValue.files;
 			},
 			set:function(v) {
 				if(v.length === 0)
@@ -132,9 +128,19 @@ let MyInputFiles = {
 	methods:{
 		// externals
 		getAttributeFileHref,
+		getNilUuid,
 		getSizeReadable,
 		
 		// actions
+		fileRequest:function(fileId,fileHash,fileName,chooseApp) {
+			ws.send('file','request',{
+				attributeId:this.attributeId,
+				chooseApp:chooseApp,
+				fileId:fileId,
+				fileHash:fileHash,
+				fileName:fileName
+			},false);
+		},
 		remove:function(fileId) {
 			for(let i = 0, j = this.files.length; i < j; i++) {
 				if(this.files[i].id === fileId) {
@@ -207,13 +213,13 @@ let MyInputFiles = {
 					that.files.push({
 						id:res.id,
 						name:file.name,
-						new:true,
 						size:Math.floor(file.size/1024)
 					});
 					that.files = that.files;
 				}
 				formData.append('token',this.token);
 				formData.append('attributeId',this.attributeId);
+				formData.append('fileId',this.getNilUuid())
 				formData.append('file',file);
 				xhr.open('POST','data/upload',true);
 				xhr.send(formData);

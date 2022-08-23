@@ -76,13 +76,14 @@ func LoginAuthTokenFixed(reqJson json.RawMessage, loginId *int64) (interface{}, 
 		}
 		res struct {
 			LanguageCode string `json:"languageCode"`
+			Token        string `json:"token"`
 		}
 	)
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := login_auth.TokenFixed(req.LoginId, req.TokenFixed, &res.LanguageCode); err != nil {
+	if err := login_auth.TokenFixed(req.LoginId, req.TokenFixed, &res.LanguageCode, &res.Token); err != nil {
 		return nil, err
 	}
 	*loginId = req.LoginId

@@ -136,6 +136,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "send":
 			return FeedbackSend_tx(tx, reqJson)
 		}
+	case "file":
+		switch action {
+		case "request":
+			return FileRequest(reqJson, loginId)
+		}
 	case "login":
 		switch action {
 		case "getNames":

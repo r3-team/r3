@@ -1224,7 +1224,6 @@
 			"inputSecond":"--",
 			"inputYear":"yyyy"
 		},
-		"fileNotUploaded":"File is not saved yet.",
 		"fileTooLarge":"Cannot upload file '{NAME}', max. allowed size is {SIZE}."
 	},
 	"list":{

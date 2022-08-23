@@ -1224,7 +1224,6 @@
 			"inputSecond":"--",
 			"inputYear":"yyyy"
 		},
-		"fileNotUploaded":"File non ancora salvato.",
 		"fileTooLarge":"Impossibile caricare il file '{NAME}', la dimensione massima consentita è {SIZE}."
 	},
 	"list":{

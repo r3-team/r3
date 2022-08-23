@@ -7,6 +7,7 @@ import (
 	"r3/config"
 	"r3/db"
 	"r3/log"
+	"r3/schema"
 	"r3/schema/pgIndex"
 	"r3/tools"
 	"r3/types"
@@ -98,7 +99,7 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	"3.0": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(db.Ctx, `
 			-- clean up from last upgrade
 			ALTER TABLE app.role ALTER COLUMN content
 				TYPE app.role_content USING content::text::app.role_content;
@@ -108,11 +109,157 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				TYPE instance.login_setting_font_family USING font_family::text::instance.login_setting_font_family;
 			ALTER TABLE instance.login_setting ALTER COLUMN pattern
 				TYPE instance.login_setting_pattern USING pattern::text::instance.login_setting_pattern;
-			
+
 			-- changes to fixed tokens
 			ALTER TYPE instance.token_fixed_context ADD VALUE 'client';
 			ALTER TABLE instance.login_token_fixed ADD COLUMN name CHARACTER VARYING(64);
+
+			-- new cluster events
+			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'fileRequested';
+
+			-- new schema
+			CREATE SCHEMA instance_file;
+		`); err != nil {
+			return "", err
+		}
+
+		type fileAtr struct {
+			moduleName    string
+			relationName  string
+			attributeName string
+			attributeId   uuid.UUID
+		}
+		fileAtrs := make([]fileAtr, 0)
+
+		rows, err := tx.Query(db.Ctx, `
+			SELECT a.id, a.name, r.name, m.name
+			FROM app.attribute AS a
+			JOIN app.relation  AS r ON r.id = a.relation_id
+			JOIN app.module    AS m ON m.id = r.module_id
+			WHERE a.content = 'files'
 		`)
+		if err != nil {
+			return "", err
+		}
+
+		for rows.Next() {
+			var fa fileAtr
+			if err := rows.Scan(&fa.attributeId, &fa.attributeName,
+				&fa.relationName, &fa.moduleName); err != nil {
+
+				rows.Close()
+				return "", err
+			}
+			fileAtrs = append(fileAtrs, fa)
+		}
+		rows.Close()
+
+		for _, fa := range fileAtrs {
+			// create instance_file tables for each files attribute
+			tName := fmt.Sprintf("%s_file", fa.attributeId)
+			tNameV := fmt.Sprintf("%s_version", fa.attributeId)
+
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				CREATE TABLE instance_file."%s" (
+					id uuid NOT NULL,
+					record_id bigint,
+					name text NOT NULL,
+				    CONSTRAINT "%s_pkey" PRIMARY KEY (id),
+				    CONSTRAINT "%s_record_id_fkey" FOREIGN KEY (record_id)
+				        REFERENCES "%s"."%s" ("%s") MATCH SIMPLE
+				        ON UPDATE SET NULL
+				        ON DELETE SET NULL
+				        DEFERRABLE INITIALLY DEFERRED
+				);
+				
+				CREATE INDEX "fki_%s_record_id_fkey"
+					ON instance_file."%s" USING btree (record_id ASC NULLS LAST);
+				
+				-- file versions
+				CREATE TABLE instance_file."%s" (
+					file_id uuid NOT NULL,
+					version int NOT NULL,
+					login_id integer,
+					hash char(64),
+					size_kb int NOT NULL,
+					date_change bigint NOT NULL,
+				    CONSTRAINT "%s_pkey" PRIMARY KEY (file_id, version),
+				    CONSTRAINT "%s_file_id_fkey" FOREIGN KEY (file_id)
+				        REFERENCES instance_file."%s" (id) MATCH SIMPLE
+				        ON UPDATE CASCADE
+				        ON DELETE CASCADE
+				        DEFERRABLE INITIALLY DEFERRED,
+				    CONSTRAINT "%s_login_id_fkey" FOREIGN KEY (login_id)
+				        REFERENCES instance.login (id) MATCH SIMPLE
+				        ON UPDATE SET NULL
+				        ON DELETE SET NULL
+				        DEFERRABLE INITIALLY DEFERRED
+				);
+				
+				CREATE INDEX "fki_%s_file_id_fkey"
+					ON instance_file."%s" USING btree (file_id ASC NULLS LAST);
+				
+				CREATE INDEX "fki_%s_login_id_fkey"
+					ON instance_file."%s" USING btree (login_id ASC NULLS LAST);
+			`, tName, tName, tName, fa.moduleName, fa.relationName, schema.PkName,
+				tName, tName, tNameV, tNameV, tNameV, tName, tNameV, tNameV,
+				tNameV, tNameV, tNameV)); err != nil {
+
+				return "", err
+			}
+
+			// insert JSON files references
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				INSERT INTO instance_file."%s" (record_id, id, name)
+				SELECT r.id, j.id, j.name
+				FROM %s.%s AS r
+				CROSS JOIN LATERAL JSON_TO_RECORDSET((r.%s->>'files')::JSON)
+					AS j(id UUID, name TEXT, size INT)
+				WHERE r.%s IS NOT NULL
+			`, tName, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
+				return "", err
+			}
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				INSERT INTO instance_file."%s" (file_id, version, size_kb, date_change)
+				SELECT j.id, 0, j.size, EXTRACT(EPOCH FROM NOW())
+				FROM %s.%s AS r
+				CROSS JOIN LATERAL JSON_TO_RECORDSET((r.%s->>'files')::JSON)
+					AS j(id UUID, name TEXT, size INT)
+				WHERE r.%s IS NOT NULL
+			`, tNameV, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
+				return "", err
+			}
+
+			// delete original files attribute columns
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				ALTER TABLE %s.%s DROP COLUMN %s
+			`, fa.moduleName, fa.relationName, fa.attributeName)); err != nil {
+				return "", err
+			}
+		}
+
+		// delete original files attribute change logs (+ logs that would be empty afterwards)
+		if _, err := tx.Exec(db.Ctx, `
+			DELETE FROM instance.data_log_value
+			WHERE attribute_id IN (
+			    SELECT id
+			    FROM app.attribute
+			    WHERE content = 'files'
+			)
+		`); err != nil {
+			return "", err
+		}
+		if _, err := tx.Exec(db.Ctx, `
+			DELETE FROM instance.data_log AS l
+			WHERE (
+			    SELECT COUNT(*)
+			    FROM instance.data_log_value
+			    WHERE data_log_id = l.id
+			) = 0
+		`); err != nil {
+			return "", err
+		}
+
 		return "3.1", err
 	},
 	"2.7": func(tx pgx.Tx) (string, error) {

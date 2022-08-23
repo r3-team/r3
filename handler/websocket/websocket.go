@@ -141,6 +141,15 @@ func (hub *hubType) start() {
 				if event.ConfigChanged {
 					jsonMsg, err = prepareUnrequested("config_changed", nil)
 				}
+				if event.FileRequestedAttributeId != uuid.Nil {
+					jsonMsg, err = prepareUnrequested("fileRequested", types.ClusterEventFileRequested{
+						AttributeId: event.FileRequestedAttributeId,
+						ChooseApp:   event.FileRequestedChooseApp,
+						FileId:      event.FileRequestedFileId,
+						FileHash:    event.FileRequestedFileHash,
+						FileName:    event.FileRequestedFileName,
+					})
+				}
 				if event.Renew {
 					jsonMsg, err = prepareUnrequested("reauthorized", nil)
 				}

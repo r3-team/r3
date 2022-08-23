@@ -2,13 +2,9 @@ package data
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
-	"os"
-	"path/filepath"
 	"r3/cache"
-	"r3/config"
 	"r3/data/data_enc"
 	"r3/handler"
 	"r3/schema"
@@ -50,6 +46,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 
 		// check for authorized access, WRITE(2) for SET
 		dataSet := dataSetsByIndex[index]
+		isNewRecord := dataSet.RecordId == 0
 
 		rel, exists := cache.RelationIdMap[dataSet.RelationId]
 		if !exists {
@@ -57,7 +54,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 		}
 
 		// check write access for tupel creation
-		if dataSet.RecordId == 0 && !authorizedRelation(loginId, dataSet.RelationId, 2) {
+		if isNewRecord && !authorizedRelation(loginId, dataSet.RelationId, 2) {
 			return indexRecordIds, errors.New(handler.ErrUnauthorized)
 		}
 
@@ -91,14 +88,25 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 		}
 
 		// set data for record of given relation index
-		// log data if retention is enabled
+		// log data changes if retention is enabled
 		useLog := rel.RetentionCount.Status == pgtype.Present || rel.RetentionDays.Status == pgtype.Present
+		var logAttributes = make([]types.DataSetAttribute, 0)
+		for _, a := range dataSet.Attributes {
+			atr, exists := cache.AttributeIdMap[a.AttributeId]
+			if !exists {
+				return indexRecordIds, handler.ErrSchemaUnknownAttribute(a.AttributeId)
+			}
+			// no change logs for files attribute
+			if !schema.IsContentFiles(atr.Content) {
+				logAttributes = append(logAttributes, a)
+			}
+		}
 
 		// if existing record, get current values for log comparison after change
-		var oldData types.DataGetResult
-		if useLog && dataSet.RecordId != 0 {
-			oldData, err = collectCurrentValues_tx(ctx, tx, dataSet.RelationId,
-				dataSet.Attributes, dataSet.RecordId, loginId)
+		var logValuesOld types.DataGetResult
+		if useLog && !isNewRecord {
+			logValuesOld, err = collectCurrentValuesForLog_tx(ctx, tx,
+				dataSet.RelationId, logAttributes, dataSet.RecordId, loginId)
 
 			if err != nil {
 				return indexRecordIds, err
@@ -123,8 +131,8 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 
 		// set data log if retention is enabled
 		if useLog {
-			if err := setLog_tx(ctx, tx, dataSet.RelationId, dataSet.Attributes,
-				dataSet.RecordId == 0, oldData, indexRecordIds[index], loginId); err != nil {
+			if err := setLog_tx(ctx, tx, dataSet.RelationId, logAttributes,
+				isNewRecord, logValuesOld, indexRecordIds[index], loginId); err != nil {
 
 				return indexRecordIds, fmt.Errorf("failed to set data log, %v", err)
 			}
@@ -148,6 +156,9 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 	// store record ID for this data set as reference for relationships
 	indexRecordIds[index] = dataSet.RecordId
 	isNewRecord := dataSet.RecordId == 0
+
+	// store index of files attributes in data set
+	attributeFilesIndexes := make([]int, 0)
 
 	rel, exists := cache.RelationIdMap[dataSet.RelationId]
 	if !exists {
@@ -200,54 +211,11 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 			continue
 		}
 
-		// process data file values
-		// move new file uploads from temp to files destination
-		if attribute.Value != nil && schema.IsContentFiles(atr.Content) {
-
-			vJson, err := json.Marshal(attribute.Value)
-			if err != nil {
-				return err
-			}
-
-			var v types.DataSetFiles
-			if err := json.Unmarshal([]byte(vJson), &v); err != nil {
-				return err
-			}
-
-			for i, file := range v.Files {
-				if !file.New {
-					continue
-				}
-
-				// move file to final destination
-				filePath := filepath.Join(config.File.Paths.Temp, file.Id.String())
-				filePathFinalDir := filepath.Join(config.File.Paths.Files, attribute.AttributeId.String())
-				filePathFinal := filepath.Join(filePathFinalDir, file.Id.String())
-
-				exists, err = tools.Exists(filePathFinalDir)
-				if err != nil {
-					return err
-				}
-				if !exists {
-					if err := os.Mkdir(filePathFinalDir, 0600); err != nil {
-						return err
-					}
-				}
-
-				if err := tools.FileMove(filePath, filePathFinal, false); err != nil {
-					return err
-				}
-				v.Files[i].New = false
-			}
-
-			vJson, err = json.Marshal(v)
-			if err != nil {
-				return err
-			}
-
-			// apply updated attribute value
-			dataSet.Attributes[ai].Value = string(vJson) // for data logs
-			attribute.Value = string(vJson)              // for data SET below
+		// store indexes of files attributes for later processing
+		// skip the actual value (no column for files attributes)
+		if schema.IsContentFiles(atr.Content) {
+			attributeFilesIndexes = append(attributeFilesIndexes, ai)
+			continue
 		}
 
 		// process attribute values for this relation tupel
@@ -284,9 +252,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 			return err
 		}
 	} else if isNewRecord {
-
 		// insert new record
-
 		// first check whether this relation is part of any joined relationship
 		for indexOther, dataSetOther := range dataSetsByIndex {
 
@@ -380,7 +346,16 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 		indexRecordIds[index] = newRecordId
 	}
 
-	// apply relationship references to this tupel via attributes from partner relations
+	// assign/remove record from files based on files attributes
+	for _, i := range attributeFilesIndexes {
+		if err := setFileRecord_tx(ctx, tx, isNewRecord, indexRecordIds[index],
+			dataSet.Attributes[i].AttributeId, dataSet.Attributes[i].Value); err != nil {
+
+			return err
+		}
+	}
+
+	// assign relationship references to this tupel via attributes from partner relations
 	for _, shipValues := range relationshipValues {
 
 		shipAtr, exists := cache.AttributeIdMap[shipValues.attributeId]
@@ -501,13 +476,13 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 	return nil
 }
 
-func collectCurrentValues_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
+func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	attributes []types.DataSetAttribute, recordId int64, loginId int64) (types.DataGetResult, error) {
 
 	var result types.DataGetResult
 	rel, exists := cache.RelationIdMap[relationId]
 	if !exists {
-		return result, fmt.Errorf("unknown relation '%s' during data log check", relationId)
+		return result, handler.ErrSchemaUnknownRelation(relationId)
 	}
 
 	// get old attribute values
@@ -553,7 +528,8 @@ func collectCurrentValues_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUI
 	}
 
 	if len(results) != 1 {
-		return result, fmt.Errorf("1 record (ID %d) expected but got: %d", recordId, len(results))
+		return result, fmt.Errorf("1 record (ID %d) expected but got: %d",
+			recordId, len(results))
 	}
 	return results[0], nil
 }

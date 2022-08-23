@@ -1224,7 +1224,6 @@
 			"inputSecond":"--",
 			"inputYear":"aaaa"
 		},
-		"fileNotUploaded":"Fișierul încă nu este salvat",
 		"fileTooLarge":"Nu se poate încărca fișierul'{NAME}', mărimea maxim permisă este {SIZE}."
 	},
 	"list":{

@@ -167,9 +167,9 @@ func Token(token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *boo
 }
 
 // performs authentication for user by using fixed (permanent) token
-// used for less sensitive, permanent access (like ICS download)
+// used for application access (like ICS download or fat-client access)
 // cannot grant admin access
-func TokenFixed(loginId int64, tokenFixed string, grantLanguageCode *string) error {
+func TokenFixed(loginId int64, tokenFixed string, grantLanguageCode *string, grantToken *string) error {
 
 	if tokenFixed == "" {
 		return errors.New("empty token")
@@ -177,15 +177,16 @@ func TokenFixed(loginId int64, tokenFixed string, grantLanguageCode *string) err
 
 	// check for existing token
 	languageCode := ""
+	username := ""
 	err := db.Pool.QueryRow(db.Ctx, `
-		SELECT s.language_code
+		SELECT s.language_code, l.name
 		FROM instance.login_token_fixed AS t
 		INNER JOIN instance.login_setting AS s ON s.login_id = t.login_id
 		INNER JOIN instance.login         AS l ON l.id       = t.login_id
 		WHERE t.login_id = $1
 		AND   t.token    = $2
 		AND   l.active
-	`, loginId, tokenFixed).Scan(&languageCode)
+	`, loginId, tokenFixed).Scan(&languageCode, &username)
 
 	if err == pgx.ErrNoRows {
 		return errors.New("login inactive")
@@ -196,5 +197,6 @@ func TokenFixed(loginId int64, tokenFixed string, grantLanguageCode *string) err
 
 	// everything in order, auth successful
 	*grantLanguageCode = languageCode
-	return nil
+	*grantToken, err = createToken(loginId, username, false, false)
+	return err
 }

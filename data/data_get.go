@@ -288,7 +288,9 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 
 	// check for authorized access, READ(1) for GET
 	for _, expr := range data.Expressions {
-		if expr.AttributeId.Status == pgtype.Present && !authorizedAttribute(loginId, expr.AttributeId.Bytes, 1) {
+		if expr.AttributeId.Status == pgtype.Present &&
+			!authorizedAttribute(loginId, expr.AttributeId.Bytes, 1) {
+
 			return "", "", errors.New(handler.ErrUnauthorized)
 		}
 	}
@@ -519,6 +521,32 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 	}
 
 	alias := data_sql.GetExpressionAlias(exprPos)
+
+	if schema.IsContentFiles(atr.Content) {
+		// attribute is files attribute
+		tName := schema.GetFilesTableName(atr.Id)
+		tNameV := schema.GetFilesTableNameVersions(atr.Id)
+
+		*inSelect = append(*inSelect, fmt.Sprintf(`JSON_BUILD_OBJECT(
+			'files',(
+				SELECT COALESCE(ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(t))),'[]'::JSON)
+				FROM (
+					SELECT f.id, f.name, COALESCE(v.hash,'') AS hash,
+						v.size_kb AS size, v.date_change AS changed
+					FROM instance_file."%s" AS f
+					JOIN instance_file."%s" AS v
+						ON  v.file_id = f.id
+						AND v.version = (
+						    SELECT MAX(VERSION)
+						    FROM instance_file."%s"
+						    WHERE file_id = f.id
+						)
+					WHERE f.record_id = "%s"."%s"
+				) AS t
+			)
+		)`, tName, tNameV, tNameV, relCode, schema.PkName))
+		return nil
+	}
 
 	if !expr.OutsideIn {
 		// attribute is from index relation

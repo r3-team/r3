@@ -1224,7 +1224,6 @@
 			"inputSecond":"--",
 			"inputYear":"JJJJ"
 		},
-		"fileNotUploaded":"Datei ist noch nicht gespeichert.",
 		"fileTooLarge":"Datei \"{NAME}\" kann nicht hochgeladen werden, maximal erlaubte Größe ist {SIZE}."
 	},
 	"list":{

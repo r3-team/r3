@@ -210,7 +210,6 @@ let MyField = {
 						:attributeId="field.attributeId"
 						:readonly="isReadonly"
 						:showGallery="field.display === 'gallery'"
-						:showNew="logViewer"
 					>
 						<template #input-icon>
 							<img class="field-icon"

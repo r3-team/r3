@@ -3,7 +3,8 @@ export {MyButton as default};
 let MyButton = {
 	name:'my-button',
 	template:`<div class="button"
-		@click="trigger"
+		@click.exact="trigger"
+		@click.shift="triggerShift"
 		@click.prevent.middle="triggerMiddle"
 		@click.prevent.right="triggerRight"
 		@keyup.enter.space="trigger"
@@ -42,7 +43,7 @@ let MyButton = {
 		right: { type:Boolean, required:false, default:false },
 		tight: { type:Boolean, required:false, default:false }
 	},
-	emits:['trigger','trigger-middle','trigger-right'],
+	emits:['trigger','trigger-middle','trigger-right','trigger-shift'],
 	computed:{
 		classes:function() {
 			return {
@@ -81,6 +82,14 @@ let MyButton = {
 				ev.stopPropagation();
 			
 			this.$emit('trigger-right');
+		},
+		triggerShift:function(ev) {
+			if(!this.active) return;
+			
+			if(this.blockBubble)
+				ev.stopPropagation();
+			
+			this.$emit('trigger-shift');
 		}
 	}
 };

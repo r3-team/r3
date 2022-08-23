@@ -35,15 +35,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// loop form reader until empty
-	// fixed order: token, attribute ID, file
 	var token string
 	var attributeIdString string
+	var fileIdString string
 	for {
 		part, err := reader.NextPart()
 		if err == io.EOF {
 			break
 		}
 
+		// fixed order: token, attribute ID, file ID (nil if new), file
 		switch part.FormName() {
 		case "token":
 			buf := new(bytes.Buffer)
@@ -54,6 +55,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			buf := new(bytes.Buffer)
 			buf.ReadFrom(part)
 			attributeIdString = buf.String()
+			continue
+		case "fileId":
+			buf := new(bytes.Buffer)
+			buf.ReadFrom(part)
+			fileIdString = buf.String()
 			continue
 		}
 
@@ -67,15 +73,22 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// parse attribute
+		// parse attribute ID
 		attributeId, err := uuid.FromString(attributeIdString)
 		if err != nil {
 			handler.AbortRequest(w, context, err, handler.ErrGeneral)
 			return
 		}
 
+		// parse file ID
+		fileId, err := uuid.FromString(fileIdString)
+		if err != nil {
+			handler.AbortRequest(w, context, err, handler.ErrGeneral)
+			return
+		}
+
 		// save file
-		response.Id, err = data.SetFile(loginId, attributeId, part)
+		response.Id, err = data.SetFile(loginId, attributeId, fileId, part)
 		if err != nil {
 			handler.AbortRequest(w, context, err, handler.ErrGeneral)
 			return
