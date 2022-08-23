@@ -159,8 +159,6 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 func setFileRecord_tx(ctx context.Context, tx pgx.Tx, isNewRecord bool,
 	recordId int64, attributeId uuid.UUID, filesValue interface{}) error {
 
-	tName := schema.GetFilesTableName(attributeId)
-
 	fileIds := make([]uuid.UUID, 0)
 	if filesValue != nil {
 		vJson, err := json.Marshal(filesValue)
@@ -176,11 +174,13 @@ func setFileRecord_tx(ctx context.Context, tx pgx.Tx, isNewRecord bool,
 		}
 	}
 
+	tName := schema.GetFilesTableName(attributeId)
+
 	if len(fileIds) != 0 {
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			UPDATE instance_file."%s"
 			SET record_id = $1
-			WHERE file_id = ANY($2)
+			WHERE id = ANY($2)
 		`, tName), recordId, fileIds); err != nil {
 			return err
 		}
@@ -190,7 +190,7 @@ func setFileRecord_tx(ctx context.Context, tx pgx.Tx, isNewRecord bool,
 			UPDATE instance_file."%s"
 			SET record_id = NULL
 			WHERE record_id = $1
-			AND file_id <> ALL($2)
+			AND id <> ALL($2)
 		`, tName), recordId, fileIds); err != nil {
 			return err
 		}
