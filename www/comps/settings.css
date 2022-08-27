@@ -43,3 +43,9 @@
 	left:10px;
 	font-style:italic;
 }
+.settings img.settings-install{
+	max-width:420px;
+	margin:10px 0px;
+	box-shadow:1px 1px 3px #000;
+	border-radius:6px;
+}

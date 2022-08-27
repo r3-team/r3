@@ -21,6 +21,7 @@ import (
 	"r3/db/initialize"
 	"r3/db/upgrade"
 	"r3/handler/cache_download"
+	"r3/handler/client_download"
 	"r3/handler/csv_download"
 	"r3/handler/csv_upload"
 	"r3/handler/data_access"
@@ -396,6 +397,8 @@ func (prg *program) execute(svc service.Service) {
 	mux.HandleFunc("/cache/download/", cache_download.Handler)
 	mux.HandleFunc("/csv/download/", csv_download.Handler)
 	mux.HandleFunc("/csv/upload", csv_upload.Handler)
+	mux.HandleFunc("/client/download/", client_download.Handler)
+	mux.HandleFunc("/client/download/config/", client_download.HandlerConfig)
 	mux.HandleFunc("/data/access", data_access.Handler)
 	mux.HandleFunc("/data/auth", data_auth.Handler)
 	mux.HandleFunc("/data/download/", data_download.Handler)

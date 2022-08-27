@@ -1321,9 +1321,26 @@
 			"cornerSquared":"squadrato"
 		},
 		"tokensFixed":{
+			"button":{
+				"loadApp":"Application",
+				"loadCnf":"Config file",
+				"install":"Install client application"
+			},
+			"install":{
+				"intro":"With the client application you can directly open and edit files from within REI3.",
+				"steps":"Installation steps",
+				"step1":"Choose a device name:",
+				"step2":"Select your operating system:",
+				"step3":"Download the application:",
+				"step4":"Download the application config file to the same folder:",
+				"step5":"Start the application.",
+				"step6":"It is now installed and will appear in your system tray.",
+				"title":"Install client application"
+			},
+			"titleAdd":"Install client application",
 			"titleContext":"Use",
 			"titleDateCreate":"Created",
-			"titleName":"Device name"
+			"titleName":"'My Work PC'"
 		},
 		"bordersAll":"Aggiungi bordi",
 		"bordersCorners":"Angoli del bordo",

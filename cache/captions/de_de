@@ -1321,9 +1321,26 @@
 			"cornerSquared":"kantig"
 		},
 		"tokensFixed":{
+			"button":{
+				"loadApp":"Anwendung",
+				"loadCnf":"Konfigdatei",
+				"install":"Client-Anwendung installieren"
+			},
+			"install":{
+				"intro":"Mit der Client-Anwendung können Dateien direkt aus REI3 geöffnet und bearbeitet werden.",
+				"steps":"Installationsschritte",
+				"step1":"Gerätename auswählen:",
+				"step2":"Betriebssystem auswählen:",
+				"step3":"Anwendung herunterladen:",
+				"step4":"Konfigdatei in den gleichen Ordner herunterladen:",
+				"step5":"Die Anwendung starten",
+				"step6":"Sie ist jetzt installiert und erscheint im Systemtray.",
+				"title":"Client-Anwendung installieren"
+			},
+			"titleAdd":"Client-Anwendung installieren",
 			"titleContext":"Verwendung",
 			"titleDateCreate":"Erstellt",
-			"titleName":"Gerätename"
+			"titleName":"'Mein Arbeits-PC'"
 		},
 		"bordersAll":"Rahmen hinzufügen",
 		"bordersCorners":"Rahmenecken",
