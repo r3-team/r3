@@ -27,8 +27,8 @@ let MyInputFiles = {
 			
 			<my-button image="form.png"
 				v-if="!readonly"
-				@trigger="fileRequest(f.id,f.hash,f.name,false)"
-				@trigger-shift="fileRequest(f.id,f.hash,f.name,true)"
+				@trigger="fileRequest(f.id,false)"
+				@trigger-shift="fileRequest(f.id,true)"
 				:naked="true"
 			/>
 			
@@ -132,13 +132,11 @@ let MyInputFiles = {
 		getSizeReadable,
 		
 		// actions
-		fileRequest:function(fileId,fileHash,fileName,chooseApp) {
+		fileRequest:function(fileId,chooseApp) {
 			ws.send('file','request',{
 				attributeId:this.attributeId,
-				chooseApp:chooseApp,
 				fileId:fileId,
-				fileHash:fileHash,
-				fileName:fileName
+				chooseApp:chooseApp
 			},false);
 		},
 		remove:function(fileId) {
