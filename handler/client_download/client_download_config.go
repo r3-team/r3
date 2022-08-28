@@ -4,8 +4,11 @@ import (
 	"encoding/json"
 	"net/http"
 	"r3/bruteforce"
+	"r3/config"
 	"r3/handler"
 	"r3/login/login_auth"
+
+	"github.com/gofrs/uuid"
 )
 
 func HandlerConfig(w http.ResponseWriter, r *http.Request) {
@@ -67,31 +70,39 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.Header().Set("Content-Disposition", "attachment; filename=r3_client.conf")
 
+	type instance struct {
+		DeviceName string `json:"deviceName"`
+		HostName   string `json:"hostName"`
+		HostPort   int    `json:"hostPort"`
+		LoginId    int64  `json:"loginId"`
+		TokenFixed string `json:"tokenFixed"`
+	}
+
 	type configFile struct {
-		AutoStart    bool   `json:"autoStart"`
-		Debug        bool   `json:"debug"`
-		DeviceName   string `json:"deviceName"`
-		HostName     string `json:"hostName"`
-		HostPort     int    `json:"hostPort"`
-		KeepFilesSec int64  `json:"keepFilesSec`
-		LanguageCode string `json:"languageCode"`
-		LoginId      int64  `json:"loginId"`
-		Ssl          bool   `json:"ssl"`
-		SslVerify    bool   `json:"sslVerify"`
-		TokenFixed   string `json:"tokenFixed"`
+		AutoStart    bool                   `json:"autoStart"`
+		Debug        bool                   `json:"debug"`
+		Instances    map[uuid.UUID]instance `json:"instances"`
+		KeepFilesSec int64                  `json:"keepFilesSec`
+		LanguageCode string                 `json:"languageCode"`
+		Ssl          bool                   `json:"ssl"`
+		SslVerify    bool                   `json:"sslVerify"`
 	}
 	f := configFile{
-		AutoStart:    true,
-		Debug:        false,
-		DeviceName:   deviceName,
-		HostName:     hostName,
-		HostPort:     int(hostPort),
+		AutoStart: true,
+		Debug:     false,
+		Instances: map[uuid.UUID]instance{
+			uuid.FromStringOrNil(config.GetString("instanceId")): instance{
+				DeviceName: deviceName,
+				HostName:   hostName,
+				HostPort:   int(hostPort),
+				LoginId:    loginId,
+				TokenFixed: tokenFixed,
+			},
+		},
 		KeepFilesSec: 86400,
 		LanguageCode: languageCode,
-		LoginId:      loginId,
 		Ssl:          ssl == 1,
 		SslVerify:    true,
-		TokenFixed:   tokenFixed,
 	}
 
 	fJson, err := json.MarshalIndent(f, "", "\t")
