@@ -28,6 +28,32 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 		return err
 	}
 
+	// delete file relations for file attributes
+	atrIdsFile := make([]uuid.UUID, 0)
+	rows, err := db.Pool.Query(db.Ctx, `
+		SELECT id
+		FROM app.attribute
+		WHERE relation_id = $1
+		AND content = 'files'
+	`, id)
+	if err != nil {
+		return err
+	}
+	for rows.Next() {
+		var atrId uuid.UUID
+		if err := rows.Scan(&atrId); err != nil {
+			return err
+		}
+		atrIdsFile = append(atrIdsFile, atrId)
+	}
+	rows.Close()
+
+	for _, atrId := range atrIdsFile {
+		if err := attribute.FileRelationsDelete_tx(tx, atrId); err != nil {
+			return err
+		}
+	}
+
 	// delete relation
 	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		DROP TABLE "%s"."%s"
