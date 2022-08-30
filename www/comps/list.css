@@ -42,6 +42,12 @@
 .list .layoutTable table{
 	width:100%;
 }
+.list .layoutTable.scrolls{
+	position:relative;
+}
+.list .layoutTable.scrolls table{
+	position:absolute; /* to keep table from growing over its parent */
+}
 .list .layoutTable tbody tr{
 	color:var(--color-font);
 	background-color:var(--color-bg);

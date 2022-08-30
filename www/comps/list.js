@@ -360,7 +360,7 @@ let MyList = {
 			
 			<div class="layoutTable"
 				v-if="layout === 'table'"
-				:class="{ 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
+				:class="{ scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
 				:id="usesPageHistory ? scrollFormId : null"
 			>
 				<!-- list results as HTML table -->
