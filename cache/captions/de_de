@@ -1224,7 +1224,12 @@
 			"inputSecond":"--",
 			"inputYear":"JJJJ"
 		},
-		"fileTooLarge":"Datei \"{NAME}\" kann nicht hochgeladen werden, maximal erlaubte Größe ist {SIZE}."
+		"files":{
+			"fileChanged":"Geändert",
+			"fileName":"Dateiname",
+			"fileSize":"Dateigröße",
+			"tooLarge":"Datei \"{NAME}\" kann nicht hochgeladen werden, maximal erlaubte Größe ist {SIZE}."
+		}
 	},
 	"list":{
 		"button":{

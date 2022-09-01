@@ -1,4 +1,5 @@
 import {getAttributeFileHref} from './shared/attribute.js';
+import {getUnixFormat}        from './shared/time.js';
 import {
 	getNilUuid,
 	getSizeReadable
@@ -8,69 +9,184 @@ export {MyInputFiles as default};
 let MyInputFiles = {
 	name:'my-input-files',
 	template:`<div class="input-files">
+	
+		<!-- header -->
+		<div class="input-files-header default-inputs">
 		
-		<!-- file list view -->
-		<div class="item" v-if="!showGallery" v-for="f in files">
-			
-			<slot name="input-icon" />
-			<input
-				@input="update(f.id,$event.target.value)"
-				:disabled="readonly"
-				:value="f.name"
-			/>
-			
-			<my-button image="cancel.png"
-				v-if="!readonly"
-				@trigger="remove(f.id)"
-				:naked="true"
-			/>
-			
-			<my-button image="form.png"
-				v-if="!readonly"
-				@trigger="fileRequest(f.id,false)"
-				@trigger-shift="fileRequest(f.id,true)"
-				:naked="true"
-			/>
-			
-			<a target="_blank"
-				:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
-			>
-				<my-button image="download.png"
-					:naked="true"
+			<!-- file upload -->
+			<div class="upload" v-if="!readonly">
+				<input type="file" multiple="multiple"
+					@change="upload"
 				/>
-			</a>
-			<div class="size">{{ getSizeReadable(f.size) }}</div>
+				
+	   			<transition name="fade_out">
+					<div v-if="progress !== 100" class="counter">
+						{{ progress + '%' }}
+					</div>
+				</transition>
+			</div>
+			
+			<!-- file name filter -->
+			<div class="row">
+				<div class="view-toggle">
+					<img src="images/files_list1.png" @click="viewMode = 'listCompact'" />
+					<img src="images/files_list2.png" @click="viewMode = 'listComfortable'" />
+					<img src="images/files_list3.png" @click="viewMode = 'gallery'" />
+				</div>
+				<input v-model="filterName" class="short" placeholder="..." />
+			</div>
 		</div>
 		
-		<!-- gallery view -->
-		<div class="gallery" v-if="showGallery && files.length !== 0" >
+		<div class="input-files-content">
 			
-			<template v-for="(f,i) in files.filter((v,i) => galleryIndex === i)">
-				
-				<my-button class="img-remove" image="cancel.png"
-					v-if="!readonly"
-					@trigger="remove(f.id)"
-					:cancel="true"
-				/>
-				<a class="slide" target="_blank"
-					:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
-					:style="'background-image:url('+getAttributeFileHref(attributeId,f.id,f.name,token)+')'"
-				/>
-			</template>
+			<!-- listCompact -->
+			<table class="listCompact" v-if="viewMode === 'listCompact'">
+				<thead>
+					<tr>
+						<th>
+							<my-button
+								@trigger="setSortMode('name')"
+								@trigger-right="setSortModeClear('name')"
+								:caption="capApp.fileName + displaySortDir('name')"
+								:naked="true"
+								:tight="true"
+							/>
+						</th>
+						<th>
+							<my-button
+								@trigger="setSortMode('size')"
+								@trigger-right="setSortModeClear('size')"
+								:caption="capApp.fileSize + displaySortDir('size')"
+								:naked="true"
+								:tight="true"
+							/>
+						</th>
+						<th>
+							<my-button
+								@trigger="setSortMode('changed')"
+								@trigger-right="setSortModeClear('changed')"
+								:caption="capApp.fileChanged + displaySortDir('changed')"
+								:naked="true"
+								:tight="true"
+							/>
+						</th>
+						<th></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="f in files">
+						<td>
+							<div class="row">
+								<slot name="input-icon" />
+								<input
+									@input="update(f.id,$event.target.value)"
+									:disabled="readonly"
+									:value="f.name"
+								/>
+							</div>
+						</td>
+						<td>{{ getSizeReadable(f.size) }}</td>
+						<td>{{ displayDate(f.changed) }}</td>
+						<td>
+							<div class="row">
+								<my-button image="form.png"
+									v-if="!readonly"
+									@trigger="fileRequest(f.id,false)"
+									@trigger-shift="fileRequest(f.id,true)"
+									:naked="true"
+									:tight="true"
+								/>
+								<a target="_blank"
+									:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
+								>
+									<my-button image="download.png"
+										:naked="true"
+										:tight="true"
+									/>
+								</a>
+								<my-button image="cancel.png"
+									v-if="!readonly"
+									@trigger="remove(f.id)"
+									:naked="true"
+									:tight="true"
+								/>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
 			
-			<div class="gallery-navigation" v-if="files.length > 1">
-				<my-button image="arrowLeft.png"
-					@trigger="galleryIndex--"
-					:active="galleryIndex !== 0"
-				/>
-				<my-button
-					@trigger="galleryIndex !== 0 ? galleryIndex = 0 : galleryIndex = files.length -1"
-					:caption="(galleryIndex+1) + '/' + files.length"
-				/>
-				<my-button image="arrowRight.png"
-					@trigger="galleryIndex++"
-					:active="galleryIndex < files.length-1"
-				/>
+			<!-- list comfortable -->
+			<div class="listComfortable" v-if="viewMode === 'listComfortable'">
+				<div class="item" v-for="f in files">
+					<a target="_blank"
+						:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
+					>
+						<img class="prev" :src="imagePreview(f.id,f.name)" />
+					</a>
+					<div class="item-content">
+						<input
+							@input="update(f.id,$event.target.value)"
+							:disabled="readonly"
+							:value="f.name"
+						/>
+						<div class="item-meta">
+							<span>{{ displayDate(f.changed) }}</span>
+							<span>{{ getSizeReadable(f.size) }}</span>
+						</div>
+					</div>
+					<div class="item-actions">
+						<my-button image="form.png"
+							v-if="!readonly"
+							@trigger="fileRequest(f.id,false)"
+							@trigger-shift="fileRequest(f.id,true)"
+							:naked="true"
+							:tight="true"
+						/>
+						<my-button image="cancel.png"
+							v-if="!readonly"
+							@trigger="remove(f.id)"
+							:naked="true"
+							:tight="true"
+						/>
+					</div>
+				</div>
+			</div>
+			
+			<!-- gallery -->
+			<div class="gallery" v-if="viewMode === 'gallery'" >
+			
+				<div class="item" v-for="f in files">
+					<a target="_blank"
+						:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
+					>
+						<img class="prev" :src="imagePreview(f.id,f.name)">
+					</a>
+					<div class="item-meta">
+						<input
+							@input="update(f.id,$event.target.value)"
+							:disabled="readonly"
+							:value="f.name"
+						/>
+						<span>{{ displayDate(f.changed) }}</span>
+						<span>{{ getSizeReadable(f.size) }}</span>
+					</div>
+					<div class="item-actions shade">
+						<my-button image="form.png"
+							v-if="!readonly"
+							@trigger="fileRequest(f.id,false)"
+							@trigger-shift="fileRequest(f.id,true)"
+							:naked="true"
+							:tight="true"
+						/>
+						<my-button image="cancel.png"
+							v-if="!readonly"
+							@trigger="remove(f.id)"
+							:naked="true"
+							:tight="true"
+						/>
+					</div>
+				</div>
 			</div>
 		</div>
 		
@@ -78,19 +194,6 @@ let MyInputFiles = {
 		<div class="item" v-if="modelValue === null">
 			<slot name="input-icon" />
 			<slot name="input-empty" />
-		</div>
-		
-		<!-- file upload -->
-		<div class="upload" v-if="!readonly">
-			<input type="file" multiple="multiple"
-				@change="upload"
-			/>
-			
-   			<transition name="fade_out">
-				<div v-if="progress !== 100" class="counter">
-					{{ progress + '%' }}
-				</div>
-			</transition>
 		</div>
 	</div>`,
 	props:{
@@ -102,15 +205,50 @@ let MyInputFiles = {
 	emits:['update:modelValue'],
 	data:function() {
 		return {
+			extPreview:['bmp','gif','jpg','jpeg','png','webp'],
+			extRegex:/(?:\.([^.]+))?$/,
+			filterName:'',         // filter files by name
 			galleryIndex:0,
-			progress:100
+			progress:100,
+			sortDirAsc:true,
+			sortMode:'name',       // name, size, changed
+			viewMode:'gallery' // listCompact, listComfortable, gallery
 		};
+	},
+	mounted:function() {
+		// TEMP
+		// check for field options
+		
+		// apply defaults
+		if(this.showGallery)
+			this.viewMode = 'gallery';
 	},
 	computed:{
 		files:{
 			get:	function() {
-				return this.modelValue === null
-					? [] : this.modelValue.files;
+				if(this.modelValue === null)
+					return [];
+				
+				let v = JSON.parse(JSON.stringify(this.modelValue.files));
+				
+				if(this.filterName !== '')
+					v = v.filter(f => f.name.includes(this.filterName))
+				
+				switch(this.sortMode) {
+					case 'changed':
+						if(this.sortDirAsc)  v.sort((a, b) => a.changed - b.changed);
+						if(!this.sortDirAsc) v.sort((a, b) => b.changed - a.changed);
+					break;
+					case 'name':
+						if(this.sortDirAsc)  v.sort((a, b) => a.name.localeCompare(b.name));
+						if(!this.sortDirAsc) v.sort((a, b) => b.name.localeCompare(a.name));
+					break;
+					case 'size':
+						if(this.sortDirAsc)  v.sort((a, b) => a.size - b.size);
+						if(!this.sortDirAsc) v.sort((a, b) => b.size - a.size);
+					break;
+				}
+				return v;
 			},
 			set:function(v) {
 				if(v.length === 0)
@@ -121,15 +259,47 @@ let MyInputFiles = {
 		},
 		
 		// store
+		settings:      function() { return this.$store.getters.settings; },
 		token:         function() { return this.$store.getters['local/token']; },
 		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.input; }
+		capApp:        function() { return this.$store.getters.captions.input.files; }
 	},
 	methods:{
 		// externals
 		getAttributeFileHref,
 		getNilUuid,
 		getSizeReadable,
+		getUnixFormat,
+		
+		// presentation
+		displayDate:function(date) {
+			return date !== 0
+				? this.getUnixFormat(date,[this.settings.dateFormat,'H:i:S'].join(' '))
+				: '-';
+		},
+		displaySortDir:function(mode) {
+			if(this.sortMode !== mode)
+				return '';
+			
+			return this.sortDirAsc ? ' \u25B2' : ' \u25BC';
+		},
+		imagePreview:function(fileId,fileName) {
+			if(!this.extPreview.includes(this.extRegex.exec(fileName)[1]))
+				return 'images/noPic.png';
+			
+			return this.getAttributeFileHref(this.attributeId,fileId,fileName,this.token);
+		},
+		setSortMode:function(mode) {
+			if(this.sortMode === mode)
+				return this.sortDirAsc = !this.sortDirAsc;
+			
+			this.sortMode   = mode;
+			this.sortDirAsc = true;
+		},
+		setSortModeClear:function(mode) {
+			if(this.sortMode === mode)
+				this.sortMode = '';
+		},
 		
 		// actions
 		fileRequest:function(fileId,chooseApp) {
@@ -182,7 +352,7 @@ let MyInputFiles = {
 				
 				if(maxSize !== 0 && Math.floor(file.size/1024) > maxSize) {
 					file.hasProgress = 100;
-					that.$root.genericError(that.capApp.fileTooLarge.replace(
+					that.$root.genericError(that.capApp.tooLarge.replace(
 						'{NAME}',file.name).replace('{SIZE}',that.getSizeReadable(maxSize))
 					);
 					continue;
@@ -211,7 +381,8 @@ let MyInputFiles = {
 					that.files.push({
 						id:res.id,
 						name:file.name,
-						size:Math.floor(file.size/1024)
+						size:Math.floor(file.size/1024),
+						changed:0
 					});
 					that.files = that.files;
 				}

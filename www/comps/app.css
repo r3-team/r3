@@ -154,6 +154,12 @@ body                                         { --depth:6; }
 .input-dropdown                              { --depth:1; }
 .input-dropdown .entry:focus                 { --depth:0; }
 .input-dropdown .entry:hover                 { --depth:0; }
+.input-files-header                          { --depth:2; }
+.input-files-header input                    { --depth:0; }
+.input-files .gallery .item                  { --depth:2; }
+.input-files .gallery .item img.prev         { --depth:5; }
+.input-files .listComfortable .item          { --depth:2; }
+.input-files .listComfortable .item img.prev { --depth:5; }
 .admin .logs .actions                        { --depth:7; }
 .admin .table-default th                     { --depth:6; }
 .admin .table-default tr.grouping td         { --depth:3; }

@@ -1224,7 +1224,12 @@
 			"inputSecond":"--",
 			"inputYear":"yyyy"
 		},
-		"fileTooLarge":"Cannot upload file '{NAME}', max. allowed size is {SIZE}."
+		"files":{
+			"fileChanged":"Changed",
+			"fileName":"File name",
+			"fileSize":"File size",
+			"tooLarge":"Cannot upload file '{NAME}', max. allowed size is {SIZE}."
+		}
 	},
 	"list":{
 		"button":{

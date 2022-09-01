@@ -1224,7 +1224,12 @@
 			"inputSecond":"--",
 			"inputYear":"aaaa"
 		},
-		"fileTooLarge":"Nu se poate încărca fișierul'{NAME}', mărimea maxim permisă este {SIZE}."
+		"files":{
+			"fileChanged":"Changed",
+			"fileName":"File name",
+			"fileSize":"File size",
+			"tooLarge":"Nu se poate încărca fișierul'{NAME}', mărimea maxim permisă este {SIZE}."
+		}
 	},
 	"list":{
 		"button":{
