@@ -31,6 +31,7 @@
 			"saveNew":"Speichern+Neu",
 			"saveNewHint":"Änderungen speichern und neuen Datensatz erstellen",
 			"selectAll":"Alles auswählen",
+			"selectAllShort":"Alles",
 			"send":"Senden",
 			"show":"Anzeigen",
 			"unlock":"Entsperren"
@@ -69,6 +70,7 @@
 		"date":"Datum",
 		"description":"Beschreibung",
 		"errorTitle":"Fehler",
+		"files":"Dateien",
 		"filters":"Filter",
 		"home":"Start",
 		"icon":"Icon",

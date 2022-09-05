@@ -1,6 +1,6 @@
 .input-files{
 	height:100%;
-	min-height:100px;
+	min-height:280px;
 	display:flex;
 	flex-flow:column nowrap;
 	flex:1 1 auto;
@@ -8,6 +8,7 @@
 
 .input-files-header{
 	display:flex;
+	height:42px;
 	margin:10px 0px 3px 0px;
 	padding:3px 9px;
 	border-top:1px solid var(--color-border);
@@ -26,6 +27,11 @@
 	min-width:30px;
 	background-color:var(--color-bg);
 }
+.input-files-header .right-side{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+}
 .input-files-header .view-toggle{
 	display:flex;
 	flex-flow:row nowrap;
@@ -33,22 +39,28 @@
 	margin-right:5px;
 }
 .input-files-header .view-toggle img{
-	width:22px;
-	height:22px;
+	width:24px;
+	height:24px;
 	margin:0px 3px;
+	padding:2px 2px 3px;
 	filter:var(--image-filter);
 	cursor:pointer;
 }
+.input-files-header .view-toggle img.active{
+	border-radius:2px;
+	border-bottom:2px solid var(--color-border);
+}
 .input-files-header .view-toggle img:focus,
 .input-files-header .view-toggle img:hover{
-	width:26px;
-	height:26px;
+	width:28px;
+	height:28px;
 	margin:0px 1px;
 	transition:width:0.3s, height:0.3s, margin:0.3s;
 }
 .input-files-actions{
 	display:flex;
-	flex-flow:row nowrap;
+	flex-flow:row wrap;
+	gap:8px;
 	justify-content:space-between;
 	align-items:center;
 	margin:8px 0px;
@@ -164,7 +176,7 @@
 	border-bottom:1px solid var(--color-border);
 }
 .input-files .listComfort input{
-	min-width:240px;
+	min-width:230px;
 	padding:0px 3px;
 	margin:2px;
 	color:var(--color-font);
@@ -190,7 +202,6 @@
 	gap:10px;
 }
 .input-files .gallery .item{
-	width:200px;
 	padding:0px 7px;
 	position:relative;
 	display:flex;
@@ -226,7 +237,7 @@
 .input-files .gallery .item img.prev{
 	width:auto;
 	max-width:100%;
-	height:220px;
+	height:240px;
 	object-fit:contain;
 	background-color:var(--color-bg);
 	border:1px solid var(--color-border);
@@ -235,9 +246,10 @@
 	box-sizing:border-box;
 }
 .input-files .gallery .item-meta{
-	margin-bottom:5px;
+	margin:0px 5px 5px;
 	display:flex;
 	flex-flow:column nowrap;
+	align-self:stretch;
 	gap:5px;
 }
 .input-files .gallery .item-actions{

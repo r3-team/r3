@@ -31,6 +31,7 @@
 			"saveNew":"Save+New",
 			"saveNewHint":"Save changes and open new record",
 			"selectAll":"Select all",
+			"selectAllShort":"All",
 			"send":"Send",
 			"show":"Show",
 			"unlock":"Unlock"
@@ -69,6 +70,7 @@
 		"date":"Date",
 		"description":"Description",
 		"errorTitle":"Error",
+		"files":"Files",
 		"filters":"Filters",
 		"home":"Home",
 		"icon":"Icon",

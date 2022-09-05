@@ -31,6 +31,7 @@
 			"saveNew":"Salvează+Nou",
 			"saveNewHint":"Salvează modificările și deschide o nouă înregistrare",
 			"selectAll":"Select all",
+			"selectAllShort":"All",
 			"send":"Trimite",
 			"show":"Arată",
 			"unlock":"Unlock"
@@ -69,6 +70,7 @@
 		"date":"Data",
 		"description":"Descriere",
 		"errorTitle":"Eroare",
+		"files":"Files",
 		"filters":"Filtre",
 		"home":"Acasă",
 		"icon":"Icoană",

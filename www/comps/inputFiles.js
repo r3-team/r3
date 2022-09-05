@@ -1,6 +1,10 @@
 import {getAttributeFileHref} from './shared/attribute.js';
 import {getUnixFormat}        from './shared/time.js';
 import {
+	fieldOptionGet,
+	fieldOptionSet
+} from './shared/field.js';
+import {
 	getNilUuid,
 	getSizeReadable
 } from './shared/generic.js';
@@ -34,19 +38,25 @@ let MyInputFiles = {
 	
 		<!-- header -->
 		<div class="input-files-header default-inputs">
-			<my-button image="delete.png"
-				@trigger="removeSelected"
-				:active="fileIdsSelected.length !== 0"
-				:caption="capGen.button.delete"
-				:naked="true"
-			/>
+			<div class="row">
+				<slot name="input-icon" />
+				<my-button image="delete.png"
+					@trigger="removeSelected"
+					:active="fileIdsSelected.length !== 0"
+					:caption="!noSpace ? capGen.button.delete : ''"
+					:naked="true"
+				/>
+			</div>
+			
+			<!-- file count -->
+			<div>{{ fileCountCaption }}</div>
 			
 			<!-- file name filter -->
-			<div class="row">
+			<div class="right-side">
 				<div class="view-toggle">
-					<img src="images/files_list1.png" @click="viewMode = 'listCompact'" />
-					<img src="images/files_list2.png" @click="viewMode = 'listComfort'" />
-					<img src="images/files_list3.png" @click="viewMode = 'gallery'" />
+					<img src="images/files_list1.png" :class="{ active:viewListCompact }" @click="setViewMode('listCompact')" />
+					<img src="images/files_list2.png" :class="{ active:viewListComfort }" @click="setViewMode('listComfort')" />
+					<img src="images/files_list3.png" :class="{ active:viewGallery }"     @click="setViewMode('gallery')" />
 				</div>
 				<input v-if="!noSpace" v-model="filterName" class="short" placeholder="..." />
 			</div>
@@ -59,7 +69,7 @@ let MyInputFiles = {
 				<!-- file upload -->
 				<div class="input-files-upload">
 					<input type="file" multiple="multiple"
-						v-if="!readonly"
+						v-if="!readonly && !maxFiles"
 						@change="upload"
 					/>
 					
@@ -72,16 +82,16 @@ let MyInputFiles = {
 				
 				<!-- toggle all -->
 				<my-button
-					v-if="!viewListCompact && !readonly"
+					v-if="!viewListCompact && !noFiles && !readonly"
 					@trigger="toggleAll"
-					:caption="capGen.button.selectAll"
+					:caption="!noSpace ? capGen.button.selectAll : capGen.button.selectAllShort"
 					:image="files.length === fileIdsSelected.length ? 'checkBox1.png' : 'checkBox0.png'"
 					:naked="true"
 					:tight="true"
 				/>
 				
 				<!-- sort mode -->
-				<div class="row default-inputs" v-if="!viewListCompact">
+				<div class="row default-inputs" v-if="!viewListCompact && !fewFiles && !noSpace">
 					<my-button
 						@trigger="toggleSortDir"
 						:image="sortDirAsc ? 'triangleUp.png' : 'triangleDown.png'"
@@ -97,7 +107,7 @@ let MyInputFiles = {
 			</div>
 			
 			<!-- listCompact -->
-			<table class="listCompact" v-if="viewListCompact">
+			<table class="listCompact" v-if="viewListCompact && !noFiles">
 				<thead>
 					<tr>
 						<th v-if="!readonly" class="minimum">
@@ -149,15 +159,12 @@ let MyInputFiles = {
 							/>
 						</td>
 						<td>
-							<div class="row">
-								<slot name="input-icon" />
-								<my-input-files-name
-									@update:name="update([f.id],'name',$event)"
-									:change="fileIdMapChange[f.id]"
-									:name="f.name"
-									:readonly="readonly"
-								/>
-							</div>
+							<my-input-files-name
+								@update:name="update([f.id],'name',$event)"
+								:change="fileIdMapChange[f.id]"
+								:name="f.name"
+								:readonly="readonly"
+							/>
 						</td>
 						<td>{{ getSizeReadable(f.size) }}</td>
 						<td v-if="!noSpace">{{ displayDate(f.changed) }}</td>
@@ -223,7 +230,6 @@ let MyInputFiles = {
 			
 			<!-- gallery -->
 			<div class="gallery" v-if="viewGallery" >
-			
 				<div class="item" v-for="f in files">
 					<a target="_blank"
 						:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
@@ -257,19 +263,15 @@ let MyInputFiles = {
 				</div>
 			</div>
 		</div>
-		
-		<!-- nothing here -->
-		<div class="item" v-if="modelValue === null">
-			<slot name="input-icon" />
-			<slot name="input-empty" />
-		</div>
 	</div>`,
 	props:{
-		attributeId:{ type:String,  required:true },
-		formLoading:{ type:Boolean, required:true },
-		modelValue: { required:true },
-		readonly:   { type:Boolean, required:false, default:false },
-		showGallery:{ type:Boolean, required:false, default:false }
+		attributeId: { type:String,  required:true },
+		countAllowed:{ type:Number,  required:true }, // number of allowed files
+		fieldId:     { type:String,  required:true },
+		formLoading: { type:Boolean, required:true }, // to react to form load events
+		modelValue:  { required:true },
+		readonly:    { type:Boolean, required:false, default:false },
+		showGallery: { type:Boolean, required:false, default:false }
 	},
 	emits:['update:modelValue'],
 	data:function() {
@@ -277,7 +279,8 @@ let MyInputFiles = {
 			extPreview:['bmp','gif','jpg','jpeg','png','webp'],
 			extRegex:/(?:\.([^.]+))?$/,
 			progress:100,
-			noSpace:false,       // if input field is tiny, reduces clutter
+			noSpace:false,       // if input field is tiny, reduces clutter,
+			viewModes:['listCompact','listComfort','gallery'],
 			
 			// inputs
 			fileIdMapChange:{},    // map of file changes done inside this component, key: file ID
@@ -285,27 +288,30 @@ let MyInputFiles = {
 			filterName:'',         // filter files by name
 			sortDirAsc:true,
 			sortMode:'name',       // name, size, changed
-			viewMode:'listCompact' // listCompact, listComfort, gallery
+			viewMode:'listCompact' // active view mode
 		};
 	},
 	created:function() {
-		window.addEventListener('resize',this.setDisplayMode);
+		window.addEventListener('resize',this.setNoSpaceMode);
 	},
 	mounted:function() {
-		// TEMP
-		// check for field options
-		
 		// setup watchers
 		this.$watch('formLoading',(val) => {
 			if(!val) this.fileIdMapChange = {};
 		});
 		
+		// apply initial view size
+		this.setNoSpaceMode();
+		
 		// apply defaults
 		if(this.showGallery)
 			this.viewMode = 'gallery';
+		
+		// apply last chosen view mode
+		this.setViewMode(this.fieldOptionGet(this.fieldId,'fileViewMode',this.viewMode));
 	},
 	unmounted:function() {
-		window.removeEventListener('resize',this.setDisplayMode);
+		window.removeEventListener('resize',this.setNoSpaceMode);
 	},
 	computed:{
 		files:{
@@ -337,8 +343,17 @@ let MyInputFiles = {
 				});
 			}
 		},
+		fileCountCaption:(s) => {
+			let out = `${s.files.length}`;
+			if(s.countAllowed !== 0) out += ` / ${s.countAllowed}`;
+			if(!s.noSpace)           out += ` ${s.capGen.files}`;
+			return out;
+		},
 		
 		// simple
+		fewFiles:       (s) => s.files.length <= 5,
+		maxFiles:       (s) => s.countAllowed !== 0 && s.countAllowed <= s.files.length,
+		noFiles:        (s) => s.files.length === 0,
 		sortByChanged:  (s) => s.sortMode === 'changed',
 		sortByName:     (s) => s.sortMode === 'name',
 		sortBySize:     (s) => s.sortMode === 'size',
@@ -355,6 +370,8 @@ let MyInputFiles = {
 	},
 	methods:{
 		// externals
+		fieldOptionGet,
+		fieldOptionSet,
 		getAttributeFileHref,
 		getNilUuid,
 		getSizeReadable,
@@ -378,7 +395,7 @@ let MyInputFiles = {
 			
 			return this.getAttributeFileHref(this.attributeId,fileId,fileName,this.token);
 		},
-		setDisplayMode() {
+		setNoSpaceMode() {
 			this.noSpace = this.$refs.main.clientWidth <= 700;
 		},
 		
@@ -423,6 +440,13 @@ let MyInputFiles = {
 		setSortModeClear(mode) {
 			if(this.sortMode === mode)
 				this.setSortMode('');
+		},
+		setViewMode(mode) {
+			if(!this.viewModes.includes(mode))
+				return this.viewMode = 'listCompact';
+			
+			this.viewMode = mode;
+			this.fieldOptionSet(this.fieldId,'fileViewMode',mode);
 		},
 		toggle(fileId) {
 			let pos = this.fileIdsSelected.indexOf(fileId);

@@ -59,7 +59,7 @@ let MyField = {
 				:id="getInputFieldName(field.id)"
 			>
 				<div class="caption"
-					v-if="focused || value !== null || isBoolean || isDateInput || isSlider || isRichtext || isCategory || isRelationship"
+					v-if="focused || value !== null || isBoolean || isDateInput || isSlider || isRichtext || isCategory || isRelationship || isFiles"
 					:class="{ invalid:showInvalid }"
 				>{{ caption }}</div>
 				
@@ -208,6 +208,8 @@ let MyField = {
 						v-if="isFiles"
 						v-model="value"
 						:attributeId="field.attributeId"
+						:countAllowed="field.max !== null ? field.max : 0"
+						:fieldId="field.id"
 						:formLoading="formLoading"
 						:readonly="isReadonly"
 						:showGallery="field.display === 'gallery'"
@@ -216,13 +218,6 @@ let MyField = {
 							<img class="field-icon"
 								v-if="iconId"
 								:src="srcBase64(iconIdMap[iconId].file)"
-							/>
-						</template>
-						
-						<template #input-empty>
-							<input class="input" type="text"
-								:disabled="true"
-								:placeholder="caption"
 							/>
 						</template>
 					</my-input-files>
