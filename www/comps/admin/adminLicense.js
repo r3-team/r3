@@ -72,6 +72,9 @@ let MyAdminLicense = {
 		licenseValid:function() { return this.$store.getters.licenseValid; },
 		settings:    function() { return this.$store.getters.settings; }
 	},
+	mounted:function() {
+		this.$store.commit('pageTitle',this.menuTitle);
+	},
 	methods:{
 		// externals
 		getUnixFormat,

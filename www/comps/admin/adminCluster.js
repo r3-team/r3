@@ -276,6 +276,7 @@ let MyAdminCluster = {
 	mounted:function() {
 		this.configInput = JSON.parse(JSON.stringify(this.config));
 		this.get();
+		this.$store.commit('pageTitle',this.menuTitle);
 	},
 	methods:{
 		// backend calls,
