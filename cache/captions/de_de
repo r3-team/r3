@@ -11,6 +11,7 @@
 			"delete":"Löschen",
 			"deleteHint":"Datensatz dauerhaft löschen",
 			"deleteSelected":"Ausgewählte löschen",
+			"download":"Herunterladen",
 			"edit":"Bearbeiten",
 			"expert":"Erweitert",
 			"export":"Exportieren",
@@ -24,10 +25,12 @@
 			"refresh":"Neu laden",
 			"refreshHint":"Datensatz neu laden",
 			"reset":"Zurücksetzen",
+			"restore":"Wiederherstellen",
 			"save":"Speichern",
 			"saveHint":"Änderungen speichern",
 			"saveNew":"Speichern+Neu",
 			"saveNewHint":"Änderungen speichern und neuen Datensatz erstellen",
+			"selectAll":"Alles auswählen",
 			"send":"Senden",
 			"show":"Anzeigen",
 			"unlock":"Entsperren"
@@ -92,6 +95,7 @@
 		"order":"Reihenf.",
 		"password":"Passwort",
 		"preview":"Vorschau",
+		"record":"Datensatz",
 		"results":"{CNT} Ergebnisse",
 		"resultsNone":"- keine Ergebnisse -",
 		"resultsOf":"/ {CNT}",
@@ -221,6 +225,15 @@
 			"updateCheckNewer":"Cutting-Edge",
 			"updateCheckOlder":"Update verfügbar",
 			"updateCheckUnknown":"Unbekannt"
+		},
+		"files":{
+			"deleteDate":"Datei gelöscht",
+			"filesKeepDaysDeleted":"Gelöschte Dateien für X Tage aufheben",
+			"filesKeepDaysUnassigned":"Nicht-zugewiesene Dateien aufheben, solange aktuellste Version jünger ist als X Tage",
+			"hintUnassigned":"Dateien, die Datensätzen zugewiesen waren, die gelöscht worden sind.",
+			"titleConfig":"Globale Konfiguration",
+			"titleDeleted":"Gelöschte Dateien",
+			"titleUnassigned":"Nicht-zugewiesene Dateien"
 		},
 		"ldaps":{
 			"button":{
@@ -437,6 +450,7 @@
 		},
 		"navigationCluster":"Cluster",
 		"navigationConfig":"System",
+		"navigationFiles":"Dateien",
 		"navigationLdaps":"LDAP-Anmeldungen",
 		"navigationLicense":"Lizenz",
 		"navigationLogins":"Anmeldungen",

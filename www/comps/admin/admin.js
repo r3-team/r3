@@ -84,6 +84,12 @@ let MyAdmin = {
 						<span>{{ capApp.navigationCluster }}</span>
 					</router-link>
 					
+					<!-- files -->
+					<router-link class="entry clickable" tag="div" to="/admin/files">
+						<img src="images/files.png" />
+						<span>{{ capApp.navigationFiles }}</span>
+					</router-link>
+					
 					<!-- logs -->
 					<router-link class="entry clickable" tag="div" to="/admin/logs">
 						<img src="images/log.png" />
@@ -139,6 +145,9 @@ let MyAdmin = {
 			
 			if(this.$route.path.includes('docs'))
 				return this.capApp.navigationDocs;
+			
+			if(this.$route.path.includes('files'))
+				return this.capApp.navigationFiles;
 			
 			if(this.$route.path.includes('license'))
 				return this.capApp.navigationLicense;

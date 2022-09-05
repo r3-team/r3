@@ -8,7 +8,7 @@
 
 .input-files-header{
 	display:flex;
-	margin:10px 0px 0px 0px;
+	margin:10px 0px 3px 0px;
 	padding:3px 9px;
 	border-top:1px solid var(--color-border);
 	border-bottom:1px solid var(--color-border);
@@ -18,6 +18,7 @@
 	align-items:center;
 	justify-content:space-between;
 	background-color:var(--color-bg);
+	box-shadow:1px 1px 3px var(--color-shade);
 }
 .input-files-header input{
 	width:100%;
@@ -45,6 +46,14 @@
 	margin:0px 1px;
 	transition:width:0.3s, height:0.3s, margin:0.3s;
 }
+.input-files-actions{
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:space-between;
+	align-items:center;
+	margin:8px 0px;
+	padding:0px 9px 0px 3px;
+}
 
 .input-files-content{
 	flex:1 1 auto;
@@ -56,13 +65,6 @@
 .input-files table.listCompact{
 	width:100%;
 	position:absolute;
-}
-.input-files table.listCompact tr{
-	background-color:var(--color-bg);
-    --depth:1;
-}
-.input-files table.listCompact tr:nth-child(odd){
-    --depth:0;
 }
 .input-files table.listCompact th{
 	top:0px;
@@ -101,30 +103,34 @@
 
 
 /* list comfortable */
-.input-files .listComfortable{
+.input-files .listComfort{
 	display:flex;
 	position:absolute;
 	flex-flow:row wrap;
-	padding:5px 0px;
+	padding:3px 0px 5px;
 	gap:6px;
 }
-.input-files .listComfortable .item{
+.input-files .listComfort .item{
 	display:flex;
 	flex-flow:row nowrap;
+	position:relative;
 	padding:5px;
 	background-color:var(--color-bg);
 	border:1px solid var(--color-border);
 	border-radius:5px;
 	box-shadow:1px 1px 3px var(--color-shade);
 }
-.input-files .listComfortable .item:focus,
-.input-files .listComfortable .item:hover{
+.input-files .listComfort .item:focus,
+.input-files .listComfort .item:hover{
 	margin-top:-2px;
 	margin-bottom:2px;
 	box-shadow:1px 1px 6px var(--color-shade);
 	transition:box-shadow 0.3s, margin 0.3s;
 }
-.input-files .listComfortable .item img.prev{
+.input-files .listComfort .item a{
+	margin-left:24px;
+}
+.input-files .listComfort .item img.prev{
 	width:70px;
 	height:70px;
 	object-fit:contain;
@@ -133,12 +139,12 @@
 	border:1px solid var(--color-border);
 	border-radius:3px;
 }
-.input-files .listComfortable .item-content{
+.input-files .listComfort .item-content{
 	display:flex;
 	flex-flow:column nowrap;
 	gap:6px;
 }
-.input-files .listComfortable .item-meta{
+.input-files .listComfort .item-meta{
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
@@ -146,12 +152,18 @@
 	padding:0px 6px;
 	gap:10px;
 }
-.input-files .listComfortable .item-actions{
+.input-files .listComfort .item-actions{
 	display:flex;
 	flex-flow:column nowrap;
-	justify-content:center;
+	position:absolute;
+	top:0px;
+	left:0px;
+	background-color:var(--color-bg);
+	border-radius:5px 0px 5px 0px;
+	border-right:1px solid var(--color-border);
+	border-bottom:1px solid var(--color-border);
 }
-.input-files .listComfortable input{
+.input-files .listComfort input{
 	min-width:240px;
 	padding:0px 3px;
 	margin:2px;
@@ -161,8 +173,8 @@
 	background-color:var(--color-bg);
 	flex:1 1 auto;
 }
-.input-files .listComfortable input:focus,
-.input-files .listComfortable input:hover{
+.input-files .listComfort input:focus,
+.input-files .listComfort input:hover{
 	margin:0px;
 	border:2px solid var(--color-border);
 	border-radius:3px;
@@ -174,7 +186,7 @@
 	display:flex;
 	position:absolute;
 	flex-flow:row wrap;
-	padding:6px 0px 0px;
+	padding:3px 0px 5px;
 	gap:10px;
 }
 .input-files .gallery .item{
@@ -187,13 +199,13 @@
 	border-radius:5px;
 	background-color:var(--color-bg);
 	border:1px solid var(--color-border);
-	box-shadow:1px 1px 5px var(--color-shade);
+	box-shadow:1px 1px 3px var(--color-shade);
 }
 .input-files .gallery .item:focus,
 .input-files .gallery .item:hover{
 	margin-top:-3px;
 	margin-bottom:3px;
-	box-shadow:1px 1px 8px var(--color-shade);
+	box-shadow:1px 1px 6px var(--color-shade);
 	transition:box-shadow 0.3s, margin 0.3s;
 }
 .input-files .gallery input{
@@ -233,9 +245,17 @@
 	flex-flow:column nowrap;
 	position:absolute;
 	top:0px;
-	right:0px;
+	left:0px;
 	background-color:var(--color-bg);
-	border-radius:0px 5px 0px 5px;
-	border-left:1px solid var(--color-border);
+	border-radius:5px 0px 5px 0px;
+	border-right:1px solid var(--color-border);
 	border-bottom:1px solid var(--color-border);
+}
+
+
+/* user overwrites */
+.user-bordersSquared .input-files-header,
+.user-bordersSquared .input-files .item,
+.user-bordersSquared .input-files .item-actions{
+	border-radius:0px !important;
 }

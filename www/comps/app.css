@@ -112,7 +112,10 @@ body                                         { --depth:6; }
 .contentBox .top                             { --depth:4; }
 .contentBox .top .selector                   { --depth:0; }
 .contentBox .contentPart                     { --depth:5; }
-.default-inputs                              { --depth:0; }
+.default-inputs input,
+.default-inputs select,
+.default-inputs textarea,
+.default-inputs .input-custom                { --depth:0; }
 .default-inputs *:disabled                   { --depth:6; }
 .home .modules-title                         { --depth:0; }
 .home .module                                { --depth:4; }
@@ -161,8 +164,9 @@ body                                         { --depth:6; }
 .input-files .listComfortable .item          { --depth:2; }
 .input-files .listComfortable .item img.prev { --depth:5; }
 .admin .logs .actions                        { --depth:7; }
-.admin .table-default th                     { --depth:6; }
-.admin .table-default tr.grouping td         { --depth:3; }
+.admin .table-default th                     { --depth:4; }
+.admin .table-default td                     { --depth:2; }
+.admin .table-default tr.grouping td         { --depth:6; }
 .admin-cluster-node                          { --depth:2; }
 .admin-cluster-node img                      { --depth:5; }
 .admin-license .file                         { --depth:1; }

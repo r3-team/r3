@@ -245,6 +245,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "del":
 			return FieldDel_tx(tx, reqJson)
 		}
+	case "file":
+		switch action {
+		case "get":
+			return FileGet()
+		case "restore":
+			return FileRestore(reqJson)
+		}
 	case "form":
 		switch action {
 		case "copy":

@@ -17,6 +17,7 @@ import (
 	"r3/schema"
 	"r3/tools"
 	"r3/types"
+	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v4"
@@ -156,42 +157,66 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 }
 
 // assigns record to files based on attribute value
-func setFileRecord_tx(ctx context.Context, tx pgx.Tx, isNewRecord bool,
+func setFileRecord_tx(ctx context.Context, tx pgx.Tx,
 	recordId int64, attributeId uuid.UUID, filesValue interface{}) error {
 
-	fileIds := make([]uuid.UUID, 0)
-	if filesValue != nil {
-		vJson, err := json.Marshal(filesValue)
-		if err != nil {
-			return err
+	if filesValue == nil {
+		return nil
+	}
+	tName := schema.GetFilesTableName(attributeId)
+
+	vJson, err := json.Marshal(filesValue)
+	if err != nil {
+		return err
+	}
+	var v types.DataSetFiles
+	if err := json.Unmarshal(vJson, &v); err != nil {
+		return err
+	}
+
+	fileIdsCreated := make([]uuid.UUID, 0)
+	fileIdsDeleted := make([]uuid.UUID, 0)
+
+	for fileId, change := range v.FileIdMapChange {
+
+		// trim whitespace
+		change.Name = strings.Trim(change.Name, " ")
+
+		if change.Delete {
+			// if file is deleted, nothing more to do for this file
+			fileIdsDeleted = append(fileIdsDeleted, fileId)
+			continue
 		}
-		var v types.DataSetFiles
-		if err := json.Unmarshal(vJson, &v); err != nil {
-			return err
+		if change.Create {
+			fileIdsCreated = append(fileIdsCreated, fileId)
 		}
-		for _, file := range v.Files {
-			fileIds = append(fileIds, file.Id)
+		if change.Name != "" {
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
+				UPDATE instance_file."%s"
+				SET   name = $1
+				WHERE id   = $2
+			`, tName), change.Name, fileId); err != nil {
+				return err
+			}
 		}
 	}
 
-	tName := schema.GetFilesTableName(attributeId)
-
-	if len(fileIds) != 0 {
+	if len(fileIdsCreated) != 0 {
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			UPDATE instance_file."%s"
 			SET record_id = $1
 			WHERE id = ANY($2)
-		`, tName), recordId, fileIds); err != nil {
+		`, tName), recordId, fileIdsCreated); err != nil {
 			return err
 		}
 	}
-	if !isNewRecord {
+	if len(fileIdsDeleted) != 0 {
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			UPDATE instance_file."%s"
-			SET record_id = NULL
-			WHERE record_id = $1
-			AND id <> ALL($2)
-		`, tName), recordId, fileIds); err != nil {
+			SET date_delete = $1
+			WHERE record_id = $2
+			AND id = ANY($3)
+		`, tName), tools.GetTimeUnix(), recordId, fileIdsDeleted); err != nil {
 			return err
 		}
 	}

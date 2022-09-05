@@ -348,7 +348,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 
 	// assign/remove record from files based on files attributes
 	for _, i := range attributeFilesIndexes {
-		if err := setFileRecord_tx(ctx, tx, isNewRecord, indexRecordIds[index],
+		if err := setFileRecord_tx(ctx, tx, indexRecordIds[index],
 			dataSet.Attributes[i].AttributeId, dataSet.Attributes[i].Value); err != nil {
 
 			return err

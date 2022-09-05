@@ -208,6 +208,7 @@ let MyField = {
 						v-if="isFiles"
 						v-model="value"
 						:attributeId="field.attributeId"
+						:formLoading="formLoading"
 						:readonly="isReadonly"
 						:showGallery="field.display === 'gallery'"
 					>

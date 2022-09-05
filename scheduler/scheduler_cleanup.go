@@ -60,8 +60,7 @@ func cleanupLogs() error {
 	return nil
 }
 
-// deletes files that have no reference anymore
-// files are stored in subfolders, one for each attribute ID
+// removes files that were deleted from their attribute or that are not assigned to a record
 func cleanUpFiles() error {
 
 	attributeIdsFile := make([]uuid.UUID, 0)
@@ -77,79 +76,122 @@ func cleanUpFiles() error {
 		relFile := schema.GetFilesTableName(atrId)
 		relVersion := schema.GetFilesTableNameVersions(atrId)
 
-		// find all unreferenced files, with latest version older than x
 		fileIds := make([]uuid.UUID, 0)
+		fileLimit := 100 // at most 100 files at a time
+		now := tools.GetTimeUnix()
+		unixKeepDeleted := now - (oneDayInSeconds * int64(config.GetUint64("filesKeepDaysDeleted")))
+		unixKeepUnassigned := now - (oneDayInSeconds * int64(config.GetUint64("filesKeepDaysUnassigned")))
 
-		if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
-			SELECT ARRAY_AGG(f.id)
-			FROM instance_file."%s" AS f
-			WHERE f.record_id IS NULL
-			AND EXTRACT(EPOCH FROM NOW())::BIGINT > ((
-				SELECT MAX(date_change)
-				FROM instance_file."%s"
-				WHERE file_id = f.id
-			) + $1)
-		`, relFile, relVersion), oneDayInSeconds).Scan(&fileIds); err != nil {
-			return err
-		}
-
-		for _, fileId := range fileIds {
-
-			versions := make([]int64, 0)
+		// execute in steps to reduce memory load
+		for {
+			// find files either deleted or unassigned outside their keep limits
 			if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
-				SELECT ARRAY_AGG(version)
-				FROM instance_file."%s"
-				WHERE file_id = $1
-			`, relVersion), fileId).Scan(&versions); err != nil {
+				SELECT ARRAY_AGG(f.id)
+				FROM instance_file."%s" AS f
+				WHERE ( -- assigned but deleted to far in the past
+					f.record_id IS NOT NULL
+					AND f.date_delete < $1
+				)
+				OR ( -- unassigned and last file version is too old
+					f.record_id IS NULL
+					AND (
+						SELECT MAX(date_change)
+						FROM instance_file."%s"
+						WHERE file_id = f.id
+					) < $2
+				)
+				LIMIT $3
+			`, relFile, relVersion), unixKeepDeleted, unixKeepUnassigned,
+				fileLimit).Scan(&fileIds); err != nil {
+
 				return err
 			}
 
-			for _, version := range versions {
+			if len(fileIds) == 0 {
+				break
+			}
 
-				// either file version is latest one (no suffix) or not (version-1 suffix)
-				//  as in: [UUID] (latest) or [UUID]_6 (version 6)
-				// since latest version could have been deleted before, we check both
-				paths := []string{
-					filepath.Join(config.File.Paths.Files, atrId.String(),
-						fileId.String()),
-					filepath.Join(config.File.Paths.Files, atrId.String(),
-						fmt.Sprintf("%s_%d", fileId.String(), version-1)),
+			for _, fileId := range fileIds {
+
+				versions := make([]int64, 0)
+				if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+					SELECT ARRAY_AGG(version)
+					FROM instance_file."%s"
+					WHERE file_id = $1
+				`, relVersion), fileId).Scan(&versions); err != nil {
+					return err
 				}
 
-				for _, path := range paths {
-					exists, _ := tools.Exists(path)
-					if !exists {
-						continue
+				for _, version := range versions {
+
+					// files are stored in subfolders, one for each attribute ID
+					// either file version is latest one (no suffix) or not (version nr. suffix)
+					//  as in: "[UUID]" (latest) or "[UUID]_6" (version 6)
+					// since latest version could have been deleted before, we check both
+					paths := []string{
+						filepath.Join(config.File.Paths.Files, atrId.String(),
+							fileId.String()),
+						filepath.Join(config.File.Paths.Files, atrId.String(),
+							fmt.Sprintf("%s_%d", fileId.String(), version-1)),
 					}
 
-					if err := os.Remove(path); err != nil {
-						log.Error("server", "failed to remove old file version", err)
-						continue
+					filePath := ""
+					for _, p := range paths {
+						exists, err := tools.Exists(p)
+						if err != nil {
+							log.Error("server", "failed to check file existence", err)
+							return err
+						}
+						if exists {
+							filePath = p
+							break
+						}
 					}
 
-					// delete version reference
+					if filePath != "" {
+						// referenced file version exists, attempt to delete it
+						// if deletion fails, abort and keep its reference as file might be in access
+						if err := os.Remove(filePath); err != nil {
+							log.Warning("server", "failed to remove old file version", err)
+							continue
+						}
+					}
+
+					// either file version existed on disk and could be deleted or it didn´t exist
+					// either case we delete the file reference
 					if _, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
-						DELETE FROM instance_file."%s"
-						WHERE file_id = $1
-						AND   version = $2
-					`, relVersion), fileId, version); err != nil {
+							DELETE FROM instance_file."%s"
+							WHERE file_id = $1
+							AND   version = $2
+						`, relVersion), fileId, version); err != nil {
 						return err
 					}
-					break
 				}
 			}
-		}
 
-		// delete unreferenced file records with no versions left
-		if _, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
-			DELETE FROM instance_file."%s" AS f
-			WHERE (
-				SELECT COUNT(*)
-				FROM instance_file."%s"
-				WHERE file_id = f.id
-			) = 0
-		`, relFile, relVersion)); err != nil {
-			return err
+			// delete file records with no versions left
+			tag, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
+				DELETE FROM instance_file."%s" AS f
+				WHERE (
+					SELECT COUNT(*)
+					FROM instance_file."%s"
+					WHERE file_id = f.id
+				) = 0
+			`, relFile, relVersion))
+			if err != nil {
+				return err
+			}
+
+			// if not a single file was deleted this loop, nothing more we can do
+			if tag.RowsAffected() == 0 {
+				break
+			}
+			log.Info("server", fmt.Sprintf("successfully cleaned up %d files", tag.RowsAffected()))
+
+			// file limit not reached this loop, we are done
+			if len(fileIds) < fileLimit {
+				break
+			}
 		}
 	}
 	return nil

@@ -28,6 +28,7 @@ import {
 	getRowsDecrypted
 } from './shared/form.js';
 import {
+	isAttributeFiles,
 	isAttributeRelationship,
 	isAttributeRelationshipN1,
 	isAttributeValueEqual,
@@ -697,6 +698,7 @@ let MyForm = {
 		getResolvedPlaceholders,
 		getRowsDecrypted,
 		hasAccessToRelation,
+		isAttributeFiles,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
 		isAttributeValueEqual,
@@ -1538,15 +1540,20 @@ let MyForm = {
 				catch(err) { return handleEncErr(err); }
 				
 				let value = this.values[k];
+				let atr   = this.attributeIdMap[d.attributeId];
 				
 				// handle encryption
-				if(this.attributeIdMap[d.attributeId].encrypted && value !== null) {
+				if(value !== null && atr.encrypted) {
 					try {
 						value = await this.aesGcmEncryptBase64WithPhrase(
 							this.values[k],this.indexMapRecordKey[d.index]);
 					}
 					catch(err) { return handleEncErr(err); }
 				}
+				
+				// handle file attributes (ignore files, just send changes)
+				if(value !== null && this.isAttributeFiles(atr.content))
+					value.files = [];
 				
 				relations[d.index].attributes.push({
 					attributeId:d.attributeId,

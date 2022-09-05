@@ -11,6 +11,7 @@
 			"delete":"Șterge",
 			"deleteHint":"Șterge definitiv înregistrarea selectată",
 			"deleteSelected":"Șterge selecția",
+			"download":"Download",
 			"edit":"Editare",
 			"expert":"Avansat",
 			"export":"Exportă",
@@ -24,10 +25,12 @@
 			"refresh":"Reîncarcă",
 			"refreshHint":"Reîncarcă înregistrarea",
 			"reset":"Resetează",
+			"restore":"Restore",
 			"save":"Salvare",
 			"saveHint":"Salvează modificările",
 			"saveNew":"Salvează+Nou",
 			"saveNewHint":"Salvează modificările și deschide o nouă înregistrare",
+			"selectAll":"Select all",
 			"send":"Trimite",
 			"show":"Arată",
 			"unlock":"Unlock"
@@ -92,6 +95,7 @@
 		"order":"Comandă",
 		"password":"Parolă",
 		"preview":"Previzualizare",
+		"record":"Record",
 		"results":"{CNT} rezultate",
 		"resultsNone":"- fără rezultate -",
 		"resultsOf":"/ {CNT}",
@@ -221,6 +225,15 @@
 			"updateCheckNewer":"De ultimă oră",
 			"updateCheckOlder":"Actualizare disponibilă",
 			"updateCheckUnknown":"Necunoscut"
+		},
+		"files":{
+			"deleteDate":"File deleted",
+			"filesKeepDaysDeleted":"Keep deleted files for X days",
+			"filesKeepDaysUnassigned":"Keep unassigned files if last version is younger than X days",
+			"hintUnassigned":"Files that were assigned to records that have been deleted.",
+			"titleConfig":"Global configuration",
+			"titleDeleted":"Deleted files",
+			"titleUnassigned":"Unassigned files"
 		},
 		"ldaps":{
 			"button":{
@@ -437,6 +450,7 @@
 		},
 		"navigationCluster":"Cluster",
 		"navigationConfig":"Sistem",
+		"navigationFiles":"Files",
 		"navigationLdaps":"Autentificări-LDAP",
 		"navigationLicense":"Licență",
 		"navigationLogins":"Autentificări",

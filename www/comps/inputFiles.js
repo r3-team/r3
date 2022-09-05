@@ -6,43 +6,108 @@ import {
 } from './shared/generic.js';
 export {MyInputFiles as default};
 
+let MyInputFilesName = {
+	name:'my-input-files-name',
+	template:`<input
+		@input="$emit('update:name',$event.target.value)"
+		:disabled="readonly"
+		:value="value"
+	/>`,
+	props:{
+		change:  { required:true },               // file change object (not affected by sort)
+		name:    { type:String,  required:true }, // file name
+		readonly:{ type:Boolean, required:true }
+	},
+	emits:['update:name'],
+	computed:{
+		value:(s) => {
+			return typeof s.change !== 'undefined' && s.change.name !== ''
+				? s.change.name : s.name;
+		}
+	}
+};
+
 let MyInputFiles = {
 	name:'my-input-files',
-	template:`<div class="input-files">
+	components:{MyInputFilesName},
+	template:`<div class="input-files" ref="main">
 	
 		<!-- header -->
 		<div class="input-files-header default-inputs">
-		
-			<!-- file upload -->
-			<div class="upload" v-if="!readonly">
-				<input type="file" multiple="multiple"
-					@change="upload"
-				/>
-				
-	   			<transition name="fade_out">
-					<div v-if="progress !== 100" class="counter">
-						{{ progress + '%' }}
-					</div>
-				</transition>
-			</div>
+			<my-button image="delete.png"
+				@trigger="removeSelected"
+				:active="fileIdsSelected.length !== 0"
+				:caption="capGen.button.delete"
+				:naked="true"
+			/>
 			
 			<!-- file name filter -->
 			<div class="row">
 				<div class="view-toggle">
 					<img src="images/files_list1.png" @click="viewMode = 'listCompact'" />
-					<img src="images/files_list2.png" @click="viewMode = 'listComfortable'" />
+					<img src="images/files_list2.png" @click="viewMode = 'listComfort'" />
 					<img src="images/files_list3.png" @click="viewMode = 'gallery'" />
 				</div>
-				<input v-model="filterName" class="short" placeholder="..." />
+				<input v-if="!noSpace" v-model="filterName" class="short" placeholder="..." />
 			</div>
 		</div>
 		
 		<div class="input-files-content">
+		
+			<div class="input-files-actions">
+				
+				<!-- file upload -->
+				<div class="input-files-upload">
+					<input type="file" multiple="multiple"
+						v-if="!readonly"
+						@change="upload"
+					/>
+					
+		   			<transition name="fade_out">
+						<div v-if="progress !== 100" class="counter">
+							{{ progress + '%' }}
+						</div>
+					</transition>
+				</div>
+				
+				<!-- toggle all -->
+				<my-button
+					v-if="!viewListCompact && !readonly"
+					@trigger="toggleAll"
+					:caption="capGen.button.selectAll"
+					:image="files.length === fileIdsSelected.length ? 'checkBox1.png' : 'checkBox0.png'"
+					:naked="true"
+					:tight="true"
+				/>
+				
+				<!-- sort mode -->
+				<div class="row default-inputs" v-if="!viewListCompact">
+					<my-button
+						@trigger="toggleSortDir"
+						:image="sortDirAsc ? 'triangleUp.png' : 'triangleDown.png'"
+						:naked="true"
+						:tight="true"
+					/>
+					<select @change="setSortMode($event.target.value)" :value="sortMode">
+						<option value="name">{{ capApp.fileName }}</option>
+						<option value="size">{{ capApp.fileSize }}</option>
+						<option value="changed">{{ capApp.fileChanged }}</option>
+					</select>
+				</div>
+			</div>
 			
 			<!-- listCompact -->
-			<table class="listCompact" v-if="viewMode === 'listCompact'">
+			<table class="listCompact" v-if="viewListCompact">
 				<thead>
 					<tr>
+						<th v-if="!readonly" class="minimum">
+							<my-button
+								@trigger="toggleAll"
+								:image="files.length === fileIdsSelected.length ? 'checkBox1.png' : 'checkBox0.png'"
+								:naked="true"
+								:tight="true"
+							/>
+						</th>
 						<th>
 							<my-button
 								@trigger="setSortMode('name')"
@@ -61,7 +126,7 @@ let MyInputFiles = {
 								:tight="true"
 							/>
 						</th>
-						<th>
+						<th v-if="!noSpace">
 							<my-button
 								@trigger="setSortMode('changed')"
 								@trigger-right="setSortModeClear('changed')"
@@ -75,18 +140,27 @@ let MyInputFiles = {
 				</thead>
 				<tbody>
 					<tr v-for="f in files">
+						<td v-if="!readonly" class="minimum">
+							<my-button
+								@trigger="toggle(f.id)"
+								:image="fileIdsSelected.includes(f.id) ? 'checkBox1.png' : 'checkBox0.png'"
+								:naked="true"
+								:tight="true"
+							/>
+						</td>
 						<td>
 							<div class="row">
 								<slot name="input-icon" />
-								<input
-									@input="update(f.id,$event.target.value)"
-									:disabled="readonly"
-									:value="f.name"
+								<my-input-files-name
+									@update:name="update([f.id],'name',$event)"
+									:change="fileIdMapChange[f.id]"
+									:name="f.name"
+									:readonly="readonly"
 								/>
 							</div>
 						</td>
 						<td>{{ getSizeReadable(f.size) }}</td>
-						<td>{{ displayDate(f.changed) }}</td>
+						<td v-if="!noSpace">{{ displayDate(f.changed) }}</td>
 						<td>
 							<div class="row">
 								<my-button image="form.png"
@@ -104,12 +178,6 @@ let MyInputFiles = {
 										:tight="true"
 									/>
 								</a>
-								<my-button image="cancel.png"
-									v-if="!readonly"
-									@trigger="remove(f.id)"
-									:naked="true"
-									:tight="true"
-								/>
 							</div>
 						</td>
 					</tr>
@@ -117,7 +185,7 @@ let MyInputFiles = {
 			</table>
 			
 			<!-- list comfortable -->
-			<div class="listComfortable" v-if="viewMode === 'listComfortable'">
+			<div class="listComfort" v-if="viewListComfort">
 				<div class="item" v-for="f in files">
 					<a target="_blank"
 						:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
@@ -125,27 +193,27 @@ let MyInputFiles = {
 						<img class="prev" :src="imagePreview(f.id,f.name)" />
 					</a>
 					<div class="item-content">
-						<input
-							@input="update(f.id,$event.target.value)"
-							:disabled="readonly"
-							:value="f.name"
+						<my-input-files-name
+							@update:name="update([f.id],'name',$event)"
+							:change="fileIdMapChange[f.id]"
+							:name="f.name"
+							:readonly="readonly"
 						/>
 						<div class="item-meta">
 							<span>{{ displayDate(f.changed) }}</span>
 							<span>{{ getSizeReadable(f.size) }}</span>
 						</div>
 					</div>
-					<div class="item-actions">
-						<my-button image="form.png"
-							v-if="!readonly"
-							@trigger="fileRequest(f.id,false)"
-							@trigger-shift="fileRequest(f.id,true)"
+					<div v-if="!readonly" class="item-actions shade">
+						<my-button
+							@trigger="toggle(f.id)"
+							:image="fileIdsSelected.includes(f.id) ? 'checkBox1.png' : 'checkBox0.png'"
 							:naked="true"
 							:tight="true"
 						/>
-						<my-button image="cancel.png"
-							v-if="!readonly"
-							@trigger="remove(f.id)"
+						<my-button image="form.png"
+							@trigger="fileRequest(f.id,false)"
+							@trigger-shift="fileRequest(f.id,true)"
 							:naked="true"
 							:tight="true"
 						/>
@@ -154,7 +222,7 @@ let MyInputFiles = {
 			</div>
 			
 			<!-- gallery -->
-			<div class="gallery" v-if="viewMode === 'gallery'" >
+			<div class="gallery" v-if="viewGallery" >
 			
 				<div class="item" v-for="f in files">
 					<a target="_blank"
@@ -163,25 +231,25 @@ let MyInputFiles = {
 						<img class="prev" :src="imagePreview(f.id,f.name)">
 					</a>
 					<div class="item-meta">
-						<input
-							@input="update(f.id,$event.target.value)"
-							:disabled="readonly"
-							:value="f.name"
+						<my-input-files-name
+							@update:name="update([f.id],'name',$event)"
+							:change="fileIdMapChange[f.id]"
+							:name="f.name"
+							:readonly="readonly"
 						/>
 						<span>{{ displayDate(f.changed) }}</span>
 						<span>{{ getSizeReadable(f.size) }}</span>
 					</div>
-					<div class="item-actions shade">
-						<my-button image="form.png"
-							v-if="!readonly"
-							@trigger="fileRequest(f.id,false)"
-							@trigger-shift="fileRequest(f.id,true)"
+					<div v-if="!readonly" class="item-actions shade">
+						<my-button
+							@trigger="toggle(f.id)"
+							:image="fileIdsSelected.includes(f.id) ? 'checkBox1.png' : 'checkBox0.png'"
 							:naked="true"
 							:tight="true"
 						/>
-						<my-button image="cancel.png"
-							v-if="!readonly"
-							@trigger="remove(f.id)"
+						<my-button image="form.png"
+							@trigger="fileRequest(f.id,false)"
+							@trigger-shift="fileRequest(f.id,true)"
 							:naked="true"
 							:tight="true"
 						/>
@@ -198,6 +266,7 @@ let MyInputFiles = {
 	</div>`,
 	props:{
 		attributeId:{ type:String,  required:true },
+		formLoading:{ type:Boolean, required:true },
 		modelValue: { required:true },
 		readonly:   { type:Boolean, required:false, default:false },
 		showGallery:{ type:Boolean, required:false, default:false }
@@ -207,21 +276,36 @@ let MyInputFiles = {
 		return {
 			extPreview:['bmp','gif','jpg','jpeg','png','webp'],
 			extRegex:/(?:\.([^.]+))?$/,
-			filterName:'',         // filter files by name
-			galleryIndex:0,
 			progress:100,
+			noSpace:false,       // if input field is tiny, reduces clutter
+			
+			// inputs
+			fileIdMapChange:{},    // map of file changes done inside this component, key: file ID
+			fileIdsSelected:[],    // all file IDs selected by checkbox
+			filterName:'',         // filter files by name
 			sortDirAsc:true,
 			sortMode:'name',       // name, size, changed
-			viewMode:'gallery' // listCompact, listComfortable, gallery
+			viewMode:'listCompact' // listCompact, listComfort, gallery
 		};
+	},
+	created:function() {
+		window.addEventListener('resize',this.setDisplayMode);
 	},
 	mounted:function() {
 		// TEMP
 		// check for field options
 		
+		// setup watchers
+		this.$watch('formLoading',(val) => {
+			if(!val) this.fileIdMapChange = {};
+		});
+		
 		// apply defaults
 		if(this.showGallery)
 			this.viewMode = 'gallery';
+	},
+	unmounted:function() {
+		window.removeEventListener('resize',this.setDisplayMode);
 	},
 	computed:{
 		files:{
@@ -234,35 +318,40 @@ let MyInputFiles = {
 				if(this.filterName !== '')
 					v = v.filter(f => f.name.includes(this.filterName))
 				
-				switch(this.sortMode) {
-					case 'changed':
-						if(this.sortDirAsc)  v.sort((a, b) => a.changed - b.changed);
-						if(!this.sortDirAsc) v.sort((a, b) => b.changed - a.changed);
-					break;
-					case 'name':
-						if(this.sortDirAsc)  v.sort((a, b) => a.name.localeCompare(b.name));
-						if(!this.sortDirAsc) v.sort((a, b) => b.name.localeCompare(a.name));
-					break;
-					case 'size':
-						if(this.sortDirAsc)  v.sort((a, b) => a.size - b.size);
-						if(!this.sortDirAsc) v.sort((a, b) => b.size - a.size);
-					break;
+				if(this.sortByChanged) {
+					if(this.sortDirAsc)  v.sort((a, b) => a.changed - b.changed);
+					if(!this.sortDirAsc) v.sort((a, b) => b.changed - a.changed);
+				} else if(this.sortByName) {
+					if(this.sortDirAsc)  v.sort((a, b) => a.name.localeCompare(b.name));
+					if(!this.sortDirAsc) v.sort((a, b) => b.name.localeCompare(a.name));
+				} else if(this.sortBySize) {
+					if(this.sortDirAsc)  v.sort((a, b) => a.size - b.size);
+					if(!this.sortDirAsc) v.sort((a, b) => b.size - a.size);
 				}
 				return v;
 			},
 			set:function(v) {
-				if(v.length === 0)
-					return this.$emit('update:modelValue',null);
-				
-				this.$emit('update:modelValue',{files:v});
+				this.$emit('update:modelValue',{
+					files:v,
+					fileIdMapChange:this.fileIdMapChange
+				});
 			}
 		},
 		
+		// simple
+		sortByChanged:  (s) => s.sortMode === 'changed',
+		sortByName:     (s) => s.sortMode === 'name',
+		sortBySize:     (s) => s.sortMode === 'size',
+		viewListComfort:(s) => s.viewMode === 'listComfort',
+		viewListCompact:(s) => s.viewMode === 'listCompact',
+		viewGallery:    (s) => s.viewMode === 'gallery',
+		
 		// store
-		settings:      function() { return this.$store.getters.settings; },
-		token:         function() { return this.$store.getters['local/token']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.input.files; }
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.input.files,
+		capGen:        (s) => s.$store.getters.captions.generic,
+		settings:      (s) => s.$store.getters.settings,
+		token:         (s) => s.$store.getters['local/token']
 	},
 	methods:{
 		// externals
@@ -272,68 +361,125 @@ let MyInputFiles = {
 		getUnixFormat,
 		
 		// presentation
-		displayDate:function(date) {
+		displayDate(date) {
 			return date !== 0
 				? this.getUnixFormat(date,[this.settings.dateFormat,'H:i:S'].join(' '))
 				: '-';
 		},
-		displaySortDir:function(mode) {
+		displaySortDir(mode) {
 			if(this.sortMode !== mode)
 				return '';
 			
 			return this.sortDirAsc ? ' \u25B2' : ' \u25BC';
 		},
-		imagePreview:function(fileId,fileName) {
+		imagePreview(fileId,fileName) {
 			if(!this.extPreview.includes(this.extRegex.exec(fileName)[1]))
 				return 'images/noPic.png';
 			
 			return this.getAttributeFileHref(this.attributeId,fileId,fileName,this.token);
 		},
-		setSortMode:function(mode) {
-			if(this.sortMode === mode)
-				return this.sortDirAsc = !this.sortDirAsc;
-			
-			this.sortMode   = mode;
-			this.sortDirAsc = true;
-		},
-		setSortModeClear:function(mode) {
-			if(this.sortMode === mode)
-				this.sortMode = '';
+		setDisplayMode() {
+			this.noSpace = this.$refs.main.clientWidth <= 700;
 		},
 		
 		// actions
-		fileRequest:function(fileId,chooseApp) {
+		fileRequest(fileId,chooseApp) {
 			ws.send('file','request',{
 				attributeId:this.attributeId,
 				fileId:fileId,
 				chooseApp:chooseApp
 			},false);
 		},
-		remove:function(fileId) {
+		removeSelected() {
+			this.update(this.fileIdsSelected,'delete',true);
+			this.fileIdsSelected = [];
+		},
+		setSortMode(mode) {
+			if(this.sortMode === mode) {
+				this.sortDirAsc = !this.sortDirAsc;
+			} else {
+				this.sortMode   = mode;
+				this.sortDirAsc = true;
+			}
+			
+			if(mode === 'name') {
+				// apply changed file names locally to update sorting
+				let files = JSON.parse(JSON.stringify(this.files));
+				
+				for(let fileId in this.fileIdMapChange) {
+					if(this.fileIdMapChange[fileId].name === '')
+						continue;
+					
+					for(let i = 0, j = files.length; i < j; i++) {
+						if(files[i].id === fileId) {
+							files[i].name = this.fileIdMapChange[fileId].name;
+							break;
+						}
+					}
+				}
+				this.files = files;
+			}
+		},
+		setSortModeClear(mode) {
+			if(this.sortMode === mode)
+				this.setSortMode('');
+		},
+		toggle(fileId) {
+			let pos = this.fileIdsSelected.indexOf(fileId);
+			if(pos === -1) this.fileIdsSelected.push(fileId);
+			else           this.fileIdsSelected.splice(pos,1);
+		},
+		toggleAll() {
+			if(this.fileIdsSelected.length === this.files.length)
+				return this.fileIdsSelected = [];
+			
+			this.fileIdsSelected = [];
 			for(let i = 0, j = this.files.length; i < j; i++) {
-				if(this.files[i].id === fileId) {
-					this.files.splice(i,1);
+				this.fileIdsSelected.push(this.files[i].id);
+			}
+		},
+		toggleSortDir(){
+			this.sortDirAsc = !this.sortDirAsc;
+		},
+		update(fileIds,key,value) {
+			let files = JSON.parse(JSON.stringify(this.files));
+			
+			for(let fileId of fileIds) {
+				if(typeof this.fileIdMapChange[fileId] === 'undefined')
+					this.fileIdMapChange[fileId] = {
+						name:'',
+						create:false,
+						delete:false
+					};
+				
+				switch(key) {
+					case 'create':
+						files.push(value);
+						this.fileIdMapChange[fileId].create = true;
+					break;
+					case 'name':
+						// name is not immediately updated in files list to conserve sorting
+						// when form is reloaded or sort updated, file name changes are applied
+						this.fileIdMapChange[fileId].name = value;
+					break;
+					case 'delete':
+						for(let i = 0, j = files.length; i < j; i++) {
+							if(files[i].id === fileId) {
+								files.splice(i,1);
+								break;
+							}
+						}
+						this.fileIdMapChange[fileId].delete = true;
 					break;
 				}
 			}
-			this.files = this.files;
 			
-			if(this.galleryIndex > 0)
-				this.galleryIndex--;
-		},
-		update:function(fileId,name) {
-			for(let i = 0, j = this.files.length; i < j; i++) {
-				if(this.files[i].id === fileId) {
-					this.files[i].name = name;
-					break;
-				}
-			}
-			this.files = this.files;
+			if(files.length === 0 && JSON.stringify(this.fileIdMapChange) === '{}')
+				return this.$emit('update:modelValue',null);
 			
-			if(this.galleryIndex > 0)
-				this.galleryIndex--;
+			this.files = files;
 		},
-		upload:function(evt) {
+		upload(evt) {
 			let that    = this;
 			let maxSize = this.attributeIdMap[this.attributeId].length;
 			
@@ -378,13 +524,12 @@ let MyInputFiles = {
 						return;
 					}
 					
-					that.files.push({
+					that.update([res.id],'create',{
 						id:res.id,
 						name:file.name,
 						size:Math.floor(file.size/1024),
 						changed:0
 					});
-					that.files = that.files;
 				}
 				formData.append('token',this.token);
 				formData.append('attributeId',this.attributeId);

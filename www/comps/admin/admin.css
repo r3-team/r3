@@ -41,12 +41,10 @@
 .admin .table-default>tbody>tr>td{
 	padding:3px 8px;
 	border-top:1px solid var(--color-border);
+	background-color:var(--color-bg);
 }
 .admin .table-default>tbody>tr>td.left-border{
 	border-left:3px double var(--color-border);
-}
-.admin .table-default>tbody>tr.grouping>td{
-	background-color:var(--color-bg);
 }
 .admin .table-default.no-padding>tbody>tr>td{
 	padding:3px 2px 3px 4px;
@@ -391,6 +389,18 @@
 	outline:none;
 	color:var(--color-font);
 	background-color:var(--color-bg);
+}
+
+
+/* files */
+.admin-files{}
+.admin-files td.file-name{
+	text-indent:6px;
+}
+.admin-files tr.attribute-title td{
+	font-weight:bold;
+	padding-top:16px;
+	padding-bottom:16px;
 }
 
 

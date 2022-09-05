@@ -21,6 +21,7 @@ func fileRelationsCreate_tx(tx pgx.Tx, attributeId uuid.UUID,
 			id uuid NOT NULL,
 			record_id bigint,
 			name text NOT NULL,
+			date_delete bigint,
 		    CONSTRAINT "%s_pkey" PRIMARY KEY (id),
 		    CONSTRAINT "%s_record_id_fkey" FOREIGN KEY (record_id)
 		        REFERENCES "%s"."%s" ("%s") MATCH SIMPLE

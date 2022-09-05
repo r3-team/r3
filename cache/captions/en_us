@@ -11,6 +11,7 @@
 			"delete":"Delete",
 			"deleteHint":"Permanently delete record",
 			"deleteSelected":"Delete selected",
+			"download":"Download",
 			"edit":"Edit",
 			"expert":"Advanced",
 			"export":"Export",
@@ -24,10 +25,12 @@
 			"refresh":"Reload",
 			"refreshHint":"Reload record",
 			"reset":"Reset",
+			"restore":"Restore",
 			"save":"Save",
 			"saveHint":"Save changes",
 			"saveNew":"Save+New",
 			"saveNewHint":"Save changes and open new record",
+			"selectAll":"Select all",
 			"send":"Send",
 			"show":"Show",
 			"unlock":"Unlock"
@@ -92,6 +95,7 @@
 		"order":"Order",
 		"password":"Password",
 		"preview":"Preview",
+		"record":"Record",
 		"results":"{CNT} results",
 		"resultsNone":"- no results -",
 		"resultsOf":"/ {CNT}",
@@ -221,6 +225,15 @@
 			"updateCheckNewer":"Cutting edge",
 			"updateCheckOlder":"Update available",
 			"updateCheckUnknown":"Unknown"
+		},
+		"files":{
+			"deleteDate":"File deleted",
+			"filesKeepDaysDeleted":"Keep deleted files for X days",
+			"filesKeepDaysUnassigned":"Keep unassigned files if last version is younger than X days",
+			"hintUnassigned":"Files that were assigned to records that have been deleted.",
+			"titleConfig":"Global configuration",
+			"titleDeleted":"Deleted files",
+			"titleUnassigned":"Unassigned files"
 		},
 		"ldaps":{
 			"button":{
@@ -437,6 +450,7 @@
 		},
 		"navigationCluster":"Cluster",
 		"navigationConfig":"System",
+		"navigationFiles":"Files",
 		"navigationLdaps":"LDAP-Logins",
 		"navigationLicense":"License",
 		"navigationLogins":"Logins",

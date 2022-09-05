@@ -117,7 +117,12 @@ type DataSetFile struct {
 	Size int64     `json:"size"`
 }
 type DataSetFiles struct {
-	Files []DataSetFile `json:"files"`
+	Files           []DataSetFile `json:"files"`
+	FileIdMapChange map[uuid.UUID]struct {
+		Name   string `json:"name"`
+		Create bool   `json:"create"`
+		Delete bool   `json:"delete"`
+	} `json:"fileIdMapChange"`
 }
 type DataSetResult struct {
 	IndexRecordIds map[int]int64 `json:"indexRecordIds"` // IDs of relation records, key: relation index

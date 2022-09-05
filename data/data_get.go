@@ -542,6 +542,7 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 						    WHERE file_id = f.id
 						)
 					WHERE f.record_id = "%s"."%s"
+					AND   date_delete IS NULL
 				) AS t
 			)
 		)`, tName, tNameV, tNameV, relCode, schema.PkName))

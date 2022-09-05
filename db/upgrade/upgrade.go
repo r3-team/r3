@@ -109,6 +109,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				TYPE instance.login_setting_font_family USING font_family::text::instance.login_setting_font_family;
 			ALTER TABLE instance.login_setting ALTER COLUMN pattern
 				TYPE instance.login_setting_pattern USING pattern::text::instance.login_setting_pattern;
+			
+			-- new config
+			INSERT INTO instance.config (name,value) VALUES ('filesKeepDaysDeleted','90');
+			INSERT INTO instance.config (name,value) VALUES ('filesKeepDaysUnassigned','90');
 
 			-- changes to fixed tokens
 			ALTER TYPE instance.token_fixed_context ADD VALUE 'client';
@@ -164,6 +168,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					id uuid NOT NULL,
 					record_id bigint,
 					name text NOT NULL,
+					date_delete bigint,
 				    CONSTRAINT "%s_pkey" PRIMARY KEY (id),
 				    CONSTRAINT "%s_record_id_fkey" FOREIGN KEY (record_id)
 				        REFERENCES "%s"."%s" ("%s") MATCH SIMPLE
