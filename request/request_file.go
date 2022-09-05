@@ -16,6 +16,7 @@ func FileGet() (interface{}, error) {
 	type file struct {
 		Id       uuid.UUID   `json:"id"`
 		Name     string      `json:"name"`
+		Size     int64       `json:"size"`
 		Deleted  pgtype.Int8 `json:"deleted"`
 		RecordId pgtype.Int8 `json:"recordId"`
 	}
@@ -38,17 +39,24 @@ func FileGet() (interface{}, error) {
 
 	for _, atrId := range attributeIdsFile {
 		rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
-			SELECT id, name, date_delete, record_id
+			SELECT id, name, date_delete, record_id, (
+				SELECT size_kb
+				FROM instance_file."%s"
+				WHERE file_id = f.id
+				ORDER BY version DESC
+				LIMIT 1
+			)
 			FROM instance_file."%s" AS f
 			WHERE date_delete IS NOT NULL -- file deleted
 			OR    record_id   IS NULL     -- file not assigned to any record
-		`, schema.GetFilesTableName(atrId)))
+			ORDER BY date_delete ASC NULLS LAST, name ASC
+		`, schema.GetFilesTableNameVersions(atrId), schema.GetFilesTableName(atrId)))
 		if err != nil {
 			return nil, err
 		}
 		for rows.Next() {
 			var f file
-			if err := rows.Scan(&f.Id, &f.Name, &f.Deleted, &f.RecordId); err != nil {
+			if err := rows.Scan(&f.Id, &f.Name, &f.Deleted, &f.RecordId, &f.Size); err != nil {
 				return nil, err
 			}
 

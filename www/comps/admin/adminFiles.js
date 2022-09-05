@@ -1,4 +1,5 @@
 import {getAttributeFileHref} from '../shared/attribute.js';
+import {getSizeReadable}      from '../shared/generic.js';
 import {getUnixFormat}        from '../shared/time.js';
 export {MyAdminFiles as default};
 
@@ -60,6 +61,7 @@ let MyAdminFiles = {
 					<thead>
 						<tr>
 							<th>{{ capGen.name }}</th>
+							<th>{{ capGen.size }}</th>
 							<th>{{ capApp.deleteDate }}</th>
 							<th>{{ capGen.record }}</th>
 							<th></th>
@@ -67,10 +69,19 @@ let MyAdminFiles = {
 					</thead>
 					<tbody v-for="(files,atrId) in attributeIdMapDeleted">
 						<tr class="attribute-title">
-							<td colspan="999">{{ displayAttribute(atrId) }}</td>
+							<td class="minimum" colspan="999">
+								<my-button
+									@trigger="toggleShow(atrId,'deleted')"
+									:caption="displayAttribute(atrId,files.length)"
+									:image="attributeIdsShowDeleted.includes(atrId) ? 'triangleDown.png' : 'triangleRight.png'"
+									:naked="true"
+									:tight="true"
+								/>
+							</td>
 						</tr>
-						<tr v-for="f in files">
+						<tr v-if="attributeIdsShowDeleted.includes(atrId)" v-for="f in files">
 							<td class="file-name">{{ f.name }}</td>
+							<td>{{ getSizeReadable(f.size) }}</td>
 							<td>{{ displayTime(f.deleted) }}</td>
 							<td>{{ f.recordId }}</td>
 							<td>
@@ -106,15 +117,25 @@ let MyAdminFiles = {
 					<thead>
 						<tr>
 							<th>{{ capGen.name }}</th>
+							<th>{{ capGen.size }}</th>
 							<th></th>
 						</tr>
 					</thead>
 					<tbody v-for="(files,atrId) in attributeIdMapUnassigned">
 						<tr class="attribute-title">
-							<td colspan="999">{{ displayAttribute(atrId) }}</td>
+							<td class="minimum" colspan="999">
+								<my-button
+									@trigger="toggleShow(atrId,'unassigned')"
+									:caption="displayAttribute(atrId,files.length)"
+									:image="attributeIdsShowUnassigned.includes(atrId) ? 'triangleDown.png' : 'triangleRight.png'"
+									:naked="true"
+									:tight="true"
+								/>
+							</td>
 						</tr>
-						<tr v-for="f in files">
+						<tr v-if="attributeIdsShowUnassigned.includes(atrId)" v-for="f in files">
 							<td class="file-name">{{ f.name }}</td>
+							<td>{{ getSizeReadable(f.size) }}</td>
 							<td>
 								<div class="row">
 									<a target="_blank"
@@ -139,6 +160,8 @@ let MyAdminFiles = {
 		return {
 			attributeIdMapDeleted:{},
 			attributeIdMapUnassigned:{},
+			attributeIdsShowDeleted:[],
+			attributeIdsShowUnassigned:[],
 			configInput:{}
 		};
 	},
@@ -148,37 +171,48 @@ let MyAdminFiles = {
 		this.$store.commit('pageTitle',this.menuTitle);
 	},
 	computed:{
-		hasChanged:function() {
-			return JSON.stringify(this.config) !== JSON.stringify(this.configInput);
-		},
+		// simple
+		hasChanged:(s) => JSON.stringify(s.config) !== JSON.stringify(s.configInput),
 		
 		// stores
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.admin.files; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		config:        function() { return this.$store.getters.config; },
-		token:         function() { return this.$store.getters['local/token']; }
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.admin.files,
+		capGen:        (s) => s.$store.getters.captions.generic,
+		config:        (s) => s.$store.getters.config,
+		token:         (s) => s.$store.getters['local/token']
 	},
 	methods:{
 		// externals
 		getAttributeFileHref,
+		getSizeReadable,
 		getUnixFormat,
 		
 		// presentation
-		displayAttribute:function(atrId) {
+		displayAttribute(atrId,cnt) {
 			let a = this.attributeIdMap[atrId];
 			let r = this.relationIdMap[a.relationId];
 			let m = this.moduleIdMap[r.moduleId];
-			return `${m.name} -> ${r.name} -> ${a.name}`;
+			return `${m.name} -> ${r.name} -> ${a.name} (${cnt})`;
 		},
-		displayTime:function(unixTime) {
+		displayTime(unixTime) {
 			return unixTime === 0 ? '-' : this.getUnixFormat(unixTime,'Y-m-d H:i:S');
 		},
 		
+		// actions
+		toggleShow(atrId,mode) {
+			let v = mode === 'deleted'
+				? this.attributeIdsShowDeleted
+				: this.attributeIdsShowUnassigned;
+			
+			let pos = v.indexOf(atrId);
+			if(pos === -1) v.push(atrId);
+			else           v.splice(pos,1);
+		},
+		
 		// backend calls
-		get:function() {
+		get() {
 			ws.send('file','get',{},true).then(
 				res => {
 					this.attributeIdMapDeleted    = res.payload.attributeIdMapDeleted;
@@ -187,7 +221,7 @@ let MyAdminFiles = {
 				this.$root.genericError
 			);
 		},
-		restore:function(attributeId,fileId) {
+		restore(attributeId,fileId) {
 			ws.send('file','restore',{
 				attributeId:attributeId,
 				fileId:fileId
@@ -196,7 +230,7 @@ let MyAdminFiles = {
 				this.$root.genericError
 			);
 		},
-		setConfig:function() {
+		setConfig() {
 			ws.send('config','set',this.configInput,true).then(
 				() => {},
 				this.$root.genericError
