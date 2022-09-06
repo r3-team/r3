@@ -1,4 +1,5 @@
-import {getUnixFormat} from './shared/time.js';
+import {getFilesFromDataItems} from './shared/drop.js';
+import {getUnixFormat}         from './shared/time.js';
 import {
 	getAttributeFileHref,
 	getAttributeFileHrefThumb
@@ -37,10 +38,14 @@ let MyInputFilesName = {
 let MyInputFiles = {
 	name:'my-input-files',
 	components:{MyInputFilesName},
-	template:`<div class="input-files" ref="main">
-	
+	template:`<div class="input-files" ref="main"
+			v-on:dragleave.stop.prevent="dragLeave"
+			v-on:dragenter.stop.prevent="dragEnter"
+			v-on:dragover.stop.prevent="dragOver"
+			v-on:drop.stop.prevent="drop"
+		>
 		<!-- header -->
-		<div class="input-files-header default-inputs">
+		<div v-if="!dragActive" class="input-files-header default-inputs">
 			<div class="row">
 				<slot name="input-icon" />
 				<my-button image="delete.png"
@@ -65,15 +70,17 @@ let MyInputFiles = {
 			</div>
 		</div>
 		
-		<div class="input-files-content">
+		<!-- drag&drop display -->
+		<div v-if="dragActive" class="input-files-drop">{{ capApp.dropTarget }}</div>
 		
+		<div v-if="!dragActive" class="input-files-content">
 			<div class="input-files-actions">
 				
 				<!-- file upload -->
 				<div class="input-files-upload">
 					<input type="file" multiple="multiple"
 						v-if="!readonly && !maxFiles"
-						@change="upload"
+						@change="upload($event.target.files)"
 					/>
 					
 		   			<transition name="fade_out">
@@ -286,11 +293,13 @@ let MyInputFiles = {
 			],
 			
 			extRegex:/(?:\.([^.]+))?$/,
-			progress:100,
 			noSpace:false,       // if input field is tiny, reduces clutter,
+			progress:100,
 			viewModes:['listCompact','listComfort','gallery'],
 			
 			// inputs
+			dragActive:false,
+			dragTarget:{},
 			fileIdMapChange:{},    // map of file changes done inside this component, key: file ID
 			fileIdsSelected:[],    // all file IDs selected by checkbox
 			filterName:'',         // filter files by name
@@ -382,6 +391,7 @@ let MyInputFiles = {
 		fieldOptionSet,
 		getAttributeFileHref,
 		getAttributeFileHrefThumb,
+		getFilesFromDataItems,
 		getNilUuid,
 		getSizeReadable,
 		getUnixFormat,
@@ -406,6 +416,27 @@ let MyInputFiles = {
 		},
 		setNoSpaceMode() {
 			this.noSpace = this.$refs.main.clientWidth <= 700;
+		},
+		
+		// drag&drop
+		dragEnter(event) {
+			this.dragTarget = event.target;
+			this.dragActive = true;
+		},
+		dragLeave(event) {
+			if(event.target === this.dragTarget)
+				this.dragActive = false;
+		},
+		dragOver(event) {
+			// needs to be defined, otherwise drag and drop does not work
+		},
+		drop(event) {
+			this.getFilesFromDataItems(event.dataTransfer.items).then(
+				files => {
+					this.upload(files);
+					this.dragActive = false;
+				}
+			);
 		},
 		
 		// actions
@@ -512,27 +543,25 @@ let MyInputFiles = {
 			
 			this.files = files;
 		},
-		upload(evt) {
-			let that    = this;
+		upload(files) {
 			let maxSize = this.attributeIdMap[this.attributeId].length;
-			
-			let updateTotal = function() {
+			let updateTotal = () => {
 				let total = 0;
-				for(let i = 0, j = evt.target.files.length; i < j; i++) {
-					total += evt.target.files[i].hasProgress;
+				for(let i = 0, j = files.length; i < j; i++) {
+					total += files[i].hasProgress;
 				}
-				that.progress = Math.floor(total / evt.target.files.length);
+				this.progress = Math.floor(total / files.length);
 			}
 			
-			for(let i = 0, j = evt.target.files.length; i < j; i++) {
+			for(let i = 0, j = files.length; i < j; i++) {
 				
 				// check file
-				let file = evt.target.files[i];
+				let file = files[i];
 				
 				if(maxSize !== 0 && Math.floor(file.size/1024) > maxSize) {
 					file.hasProgress = 100;
-					that.$root.genericError(that.capApp.tooLarge.replace(
-						'{NAME}',file.name).replace('{SIZE}',that.getSizeReadable(maxSize))
+					this.$root.genericError(this.capApp.tooLarge.replace(
+						'{NAME}',file.name).replace('{SIZE}',this.getSizeReadable(maxSize))
 					);
 					continue;
 				}
@@ -548,22 +577,22 @@ let MyInputFiles = {
 						file.hasProgress = Math.floor(event.loaded / event.total * 100);
 						updateTotal();
 					}
-				}
-				xhr.onload = function(event) {
+				};
+				xhr.onload = event => {
 					let res = JSON.parse(xhr.response);
 					
 					if(typeof res.error !== 'undefined') {
-						that.$root.genericError('import failed');
+						this.$root.genericError('import failed');
 						return;
 					}
 					
-					that.update([res.id],'create',{
+					this.update([res.id],'create',{
 						id:res.id,
 						name:file.name,
 						size:Math.floor(file.size/1024),
 						changed:0
 					});
-				}
+				};
 				formData.append('token',this.token);
 				formData.append('attributeId',this.attributeId);
 				formData.append('fileId',this.getNilUuid())

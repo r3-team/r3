@@ -66,12 +66,20 @@
 	margin:8px 0px;
 	padding:0px 9px 0px 3px;
 }
-
 .input-files-content{
 	flex:1 1 auto;
 	margin-bottom:3px;
 	position:relative;
 	overflow:auto;
+}
+.input-files-drop{
+	flex:1 1 auto;
+	line-height:50px;
+	font-size:120%;
+	text-align:center;
+	vertical-align:middle;
+	margin:6px 6px 6px 0px;
+	border:3px dashed var(--color-border);
 }
 
 .input-files table.listCompact{

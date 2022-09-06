@@ -1243,6 +1243,7 @@
 			"inputYear":"JJJJ"
 		},
 		"files":{
+			"dropTarget":"Dateien hier ablegen, um sie hochzuladen",
 			"fileChanged":"Geändert",
 			"fileName":"Dateiname",
 			"fileSize":"Dateigröße",

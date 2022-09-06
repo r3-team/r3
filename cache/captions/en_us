@@ -1243,6 +1243,7 @@
 			"inputYear":"yyyy"
 		},
 		"files":{
+			"dropTarget":"Drop files here for upload",
 			"fileChanged":"Changed",
 			"fileName":"File name",
 			"fileSize":"File size",
