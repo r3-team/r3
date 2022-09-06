@@ -67,6 +67,10 @@ export function getAttributeFileHref(attributeId,fileId,fileName,token) {
 	return `/data/download/${fileName}?attribute_id=${attributeId}&file_id=${fileId}&token=${token}`;
 };
 
+export function getAttributeFileHrefThumb(attributeId,fileId,fileName,token) {
+	return `/data/download/thumb/${fileName}?attribute_id=${attributeId}&file_id=${fileId}&token=${token}`;
+};
+
 export function getValueFromQuery(content,queryValue) {
 	if(isAttributeInteger(content) || isAttributeRelationship(content))
 		return parseInt(queryValue);

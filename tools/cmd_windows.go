@@ -1,12 +1,12 @@
-// +build windows
+//go:build windows
 
-package embedded
+package tools
 
 import (
 	"os/exec"
 	"syscall"
 )
 
-func addSysProgAttrs(cmd *exec.Cmd) {
+func CmdAddSysProgAttrs(cmd *exec.Cmd) {
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
 }

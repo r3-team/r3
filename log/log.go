@@ -24,6 +24,7 @@ var (
 		"cache":       1,
 		"cluster":     1,
 		"csv":         1,
+		"imager":      1,
 		"mail":        1,
 		"ldap":        1,
 		"scheduler":   1,

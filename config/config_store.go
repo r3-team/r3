@@ -27,11 +27,12 @@ var (
 		"clusterNodeMissingAfter", "dbTimeoutCsv", "dbTimeoutDataRest",
 		"dbTimeoutDataWs", "dbTimeoutIcs", "filesKeepDaysDeleted",
 		"filesKeepDaysUnassigned", "icsDaysPost", "icsDaysPre", "icsDownload",
-		"logApplication", "logBackup", "logCache", "logCluster", "logCsv",
-		"logLdap", "logMail", "logServer", "logScheduler", "logTransfer",
-		"logsKeepDays", "productionMode", "pwForceDigit", "pwForceLower",
-		"pwForceSpecial", "pwForceUpper", "pwLengthMin", "schemaTimestamp",
-		"repoChecked", "repoFeedback", "repoSkipVerify", "tokenExpiryHours"}
+		"imagerThumbWidth", "logApplication", "logBackup", "logCache",
+		"logCluster", "logCsv", "logImager", "logLdap", "logMail", "logServer",
+		"logScheduler", "logTransfer", "logsKeepDays", "productionMode",
+		"pwForceDigit", "pwForceLower", "pwForceSpecial", "pwForceUpper",
+		"pwLengthMin", "schemaTimestamp", "repoChecked", "repoFeedback",
+		"repoSkipVerify", "tokenExpiryHours"}
 )
 
 // store setters

@@ -190,6 +190,7 @@
 			"logLevelCache":"Tampon",
 			"logLevelCluster":"Cluster",
 			"logLevelCsv":"CSV import/export",
+			"logLevelImager":"Image processing",
 			"logLevelLdap":"LDAP",
 			"logLevelMail":"Mail",
 			"logLevelScheduler":"Programare",

@@ -84,6 +84,7 @@ func SetLogLevels() {
 	log.SetLogLevel("cache", int(GetUint64("logCache")))
 	log.SetLogLevel("cluster", int(GetUint64("logCluster")))
 	log.SetLogLevel("csv", int(GetUint64("logCsv")))
+	log.SetLogLevel("imager", int(GetUint64("logImager")))
 	log.SetLogLevel("ldap", int(GetUint64("logLdap")))
 	log.SetLogLevel("mail", int(GetUint64("logMail")))
 	log.SetLogLevel("scheduler", int(GetUint64("logScheduler")))

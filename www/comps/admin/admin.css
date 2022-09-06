@@ -393,7 +393,9 @@
 
 
 /* files */
-.admin-files{}
+.admin-files table{
+	max-width:1300px;
+}
 .admin-files td.file-name{
 	text-indent:6px;
 }

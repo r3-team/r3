@@ -1,4 +1,7 @@
-import {getAttributeFileHref} from './shared/attribute.js';
+import {
+	getAttributeFileHref,
+	getAttributeFileHrefThumb
+} from './shared/attribute.js';
 import {
 	getUnixFormat,
 	getUtcTimeStringFromUnix
@@ -63,7 +66,7 @@ let MyValueRich = {
 		<template v-if="isGallery">
 			<img class="gallery-item"
 				v-for="f in files"
-				:src="getAttributeFileHref(attributeId,f.id,f.name,token)"
+				:src="getAttributeFileHrefThumb(attributeId,f.id,f.name,token)"
 				:style="styleGallery"
 			/>
 			
@@ -129,6 +132,7 @@ let MyValueRich = {
 	methods:{
 		// externals
 		getAttributeFileHref,
+		getAttributeFileHrefThumb,
 		getHtmlStripped,
 		getLinkMeta,
 		getUnixFormat,

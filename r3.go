@@ -20,6 +20,7 @@ import (
 	"r3/db/embedded"
 	"r3/db/initialize"
 	"r3/db/upgrade"
+	"r3/handler"
 	"r3/handler/cache_download"
 	"r3/handler/client_download"
 	"r3/handler/csv_download"
@@ -27,6 +28,7 @@ import (
 	"r3/handler/data_access"
 	"r3/handler/data_auth"
 	"r3/handler/data_download"
+	"r3/handler/data_download_thumb"
 	"r3/handler/data_upload"
 	"r3/handler/icon_upload"
 	"r3/handler/ics_download"
@@ -34,6 +36,7 @@ import (
 	"r3/handler/transfer_export"
 	"r3/handler/transfer_import"
 	"r3/handler/websocket"
+	"r3/image"
 	"r3/log"
 	"r3/login"
 	"r3/scheduler"
@@ -56,12 +59,16 @@ var (
 	// embed static web files
 	//go:embed www/*
 	fsStatic embed.FS
+
+	//go:embed www/images/noPic.png
+	fsStaticNoPic []byte
 )
 
 type cliInput struct {
 	adminCreate      string
 	configFile       string
 	dynamicPort      bool
+	imageMagick      string
 	http             bool
 	open             bool
 	run              bool
@@ -92,6 +99,7 @@ func main() {
 	flag.StringVar(&cli.adminCreate, "newadmin", "", "Create new admin user (username:password), password must not contain spaces or colons")
 	flag.StringVar(&cli.configFile, "config", "config.json", "Location of configuration file (combined with -run)")
 	flag.BoolVar(&cli.dynamicPort, "dynamicport", false, "Start with a port provided by the operating system (combined with -run)")
+	flag.StringVar(&cli.imageMagick, "imagemagick", "", "Alternative location for the ImageMagick convert utility")
 	flag.BoolVar(&cli.http, "http", false, "Start with HTTP (not encrypted, for testing/development only, combined with -run)")
 	flag.BoolVar(&cli.open, "open", false, fmt.Sprintf("Open URL of %s in default browser (combined with -run)", appName))
 	flag.BoolVar(&cli.run, "run", false, fmt.Sprintf("Run %s from within this console (see 'config.json' for configuration)", appName))
@@ -247,7 +255,7 @@ func main() {
 		if cli.http {
 			protocol = "http"
 		}
-		tools.OpenRessource(fmt.Sprintf("%s://localhost:%d", protocol, config.File.Web.Port), false)
+		tools.OpenRessource(fmt.Sprintf("%s://localhost:%d", protocol, config.File.Web.Port))
 	}
 
 	// interactive, app only starts if to be run from console or when creating an admin user
@@ -376,6 +384,9 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
+	// prepare image processing
+	image.PrepareProcessing(prg.cli.imageMagick)
+
 	log.Info("server", fmt.Sprintf("is ready to start application (%s)", appVersion))
 
 	// prepare web server
@@ -393,6 +404,7 @@ func (prg *program) execute(svc service.Service) {
 	} else {
 		mux.Handle("/", http.FileServer(http.Dir(prg.cli.wwwPath)))
 	}
+	handler.SetNoImage(fsStaticNoPic)
 
 	mux.HandleFunc("/cache/download/", cache_download.Handler)
 	mux.HandleFunc("/csv/download/", csv_download.Handler)
@@ -402,6 +414,7 @@ func (prg *program) execute(svc service.Service) {
 	mux.HandleFunc("/data/access", data_access.Handler)
 	mux.HandleFunc("/data/auth", data_auth.Handler)
 	mux.HandleFunc("/data/download/", data_download.Handler)
+	mux.HandleFunc("/data/download/thumb/", data_download_thumb.Handler)
 	mux.HandleFunc("/data/upload", data_upload.Handler)
 	mux.HandleFunc("/icon/upload", icon_upload.Handler)
 	mux.HandleFunc("/ics/download/", ics_download.Handler)
@@ -432,7 +445,7 @@ func (prg *program) execute(svc service.Service) {
 		if prg.cli.http {
 			protocol = "http"
 		}
-		tools.OpenRessource(fmt.Sprintf("%s://localhost:%d", protocol, config.File.Web.Port), false)
+		tools.OpenRessource(fmt.Sprintf("%s://localhost:%d", protocol, config.File.Web.Port))
 	}
 
 	// show interactive user that application is ready for connection

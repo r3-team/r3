@@ -190,6 +190,7 @@
 			"logLevelCache":"Cache",
 			"logLevelCluster":"Cluster",
 			"logLevelCsv":"CSV-Import/Export",
+			"logLevelImager":"Bildverarbeitung",
 			"logLevelLdap":"LDAP",
 			"logLevelMail":"Mail",
 			"logLevelScheduler":"Aufgabenplaner",

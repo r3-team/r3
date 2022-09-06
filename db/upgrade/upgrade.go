@@ -110,9 +110,14 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE instance.login_setting ALTER COLUMN pattern
 				TYPE instance.login_setting_pattern USING pattern::text::instance.login_setting_pattern;
 			
-			-- new config
+			-- new log context
+			ALTER TYPE instance.log_context ADD VALUE 'imager';
+			
+			-- new config options
 			INSERT INTO instance.config (name,value) VALUES ('filesKeepDaysDeleted','90');
 			INSERT INTO instance.config (name,value) VALUES ('filesKeepDaysUnassigned','90');
+			INSERT INTO instance.config (name,value) VALUES ('imagerThumbWidth','300');
+			INSERT INTO instance.config (name,value) VALUES ('logImager',2);
 
 			-- changes to fixed tokens
 			ALTER TYPE instance.token_fixed_context ADD VALUE 'client';

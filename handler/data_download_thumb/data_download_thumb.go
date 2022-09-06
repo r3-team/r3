@@ -1,19 +1,31 @@
-package data_download
+package data_download_thumb
 
 import (
+	"fmt"
 	"net/http"
+	"os"
+	"path/filepath"
 	"r3/bruteforce"
+	"r3/config"
 	"r3/data"
 	"r3/handler"
+	"r3/image"
 	"r3/login/login_auth"
+	"strings"
 )
 
-var context = "data_download"
+var context = "data_download_thumb"
 
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if blocked := bruteforce.Check(r); blocked {
 		handler.AbortRequestNoLog(w, handler.ErrBruteforceBlock)
+		return
+	}
+
+	// check if thumbnail processing is available
+	if !image.GetCanProcess() {
+		w.Write(handler.NoImage)
 		return
 	}
 
@@ -48,10 +60,34 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// check file access
 	if err := data.CanAccessFile(loginId, attributeId); err != nil {
+		fmt.Println("bad access")
 		handler.AbortRequest(w, context, err, handler.ErrUnauthorized)
 		return
 	}
 
-	// serve file
-	http.ServeFile(w, r, data.GetFilePath(attributeId, fileId))
+	// check whether thumbnail file exists
+	filePath := data.GetFilePathThumb(attributeId, fileId)
+
+	_, err = os.Stat(filePath)
+	if err != nil && !os.IsNotExist(err) {
+		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		return
+	}
+
+	// thumbnail file does not exist, attempt to create it
+	if os.IsNotExist(err) {
+		fmt.Println("no existence, create")
+
+		urlElms := strings.Split(r.URL.Path, "/")
+		fileExt := filepath.Ext(urlElms[len(urlElms)-1])
+
+		filePathSrc := filepath.Join(config.File.Paths.Files,
+			attributeId.String(), fileId.String())
+
+		if err := image.CreateThumbnail(fileId, fileExt, filePathSrc, filePath, true); err != nil {
+			w.Write(handler.NoImage)
+			return
+		}
+	}
+	http.ServeFile(w, r, filePath)
 }

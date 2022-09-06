@@ -1,5 +1,8 @@
-import {getAttributeFileHref} from './shared/attribute.js';
-import {getUnixFormat}        from './shared/time.js';
+import {getUnixFormat} from './shared/time.js';
+import {
+	getAttributeFileHref,
+	getAttributeFileHrefThumb
+} from './shared/attribute.js';
 import {
 	fieldOptionGet,
 	fieldOptionSet
@@ -276,7 +279,12 @@ let MyInputFiles = {
 	emits:['update:modelValue'],
 	data:function() {
 		return {
-			extPreview:['bmp','gif','jpg','jpeg','png','webp'],
+			extPreview:[
+				'bmp','gif','jpg','jpeg','pdf','png','psd','svg','xcf','webp',
+				'cfg','css','csv','go','html','ini','java','js','json','log',
+				'md','php','sql','txt','xml'
+			],
+			
 			extRegex:/(?:\.([^.]+))?$/,
 			progress:100,
 			noSpace:false,       // if input field is tiny, reduces clutter,
@@ -373,6 +381,7 @@ let MyInputFiles = {
 		fieldOptionGet,
 		fieldOptionSet,
 		getAttributeFileHref,
+		getAttributeFileHrefThumb,
 		getNilUuid,
 		getSizeReadable,
 		getUnixFormat,
@@ -393,7 +402,7 @@ let MyInputFiles = {
 			if(!this.extPreview.includes(this.extRegex.exec(fileName)[1]))
 				return 'images/noPic.png';
 			
-			return this.getAttributeFileHref(this.attributeId,fileId,fileName,this.token);
+			return this.getAttributeFileHrefThumb(this.attributeId,fileId,fileName,this.token);
 		},
 		setNoSpaceMode() {
 			this.noSpace = this.$refs.main.clientWidth <= 700;

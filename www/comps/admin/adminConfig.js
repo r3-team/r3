@@ -357,6 +357,16 @@ let MyAdminConfig = {
 						</td>
 					</tr>
 					<tr>
+						<td>{{ capApp.logLevelImager }}</td>
+						<td>
+							<select v-model="configInput.logImager">
+								<option value="1">{{ capApp.logLevel1 }}</option>
+								<option value="2">{{ capApp.logLevel2 }}</option>
+								<option value="3">{{ capApp.logLevel3 }}</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
 						<td>{{ capApp.logLevelScheduler }}</td>
 						<td>
 							<select v-model="configInput.logScheduler">

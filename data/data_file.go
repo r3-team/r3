@@ -14,6 +14,7 @@ import (
 	"r3/config"
 	"r3/db"
 	"r3/handler"
+	"r3/image"
 	"r3/schema"
 	"r3/tools"
 	"r3/types"
@@ -23,21 +24,32 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
-// returns path to downloadable file, if access is granted
-func GetFilePath(loginId int64, attributeId uuid.UUID, fileId uuid.UUID) (string, error) {
+func CanAccessFile(loginId int64, attributeId uuid.UUID) error {
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
 	attribute, exists := cache.AttributeIdMap[attributeId]
 	if !exists || !schema.IsContentFiles(attribute.Content) {
-		return "", errors.New("not a file attribute")
+		return errors.New("not a file attribute")
 	}
 
 	// check for authorized access, READ(1) for GET
 	if !authorizedAttribute(loginId, attributeId, 1) {
-		return "", errors.New(handler.ErrUnauthorized)
+		return errors.New(handler.ErrUnauthorized)
 	}
-	return filepath.Join(config.File.Paths.Files, attribute.Id.String(), fileId.String()), nil
+	return nil
+}
+
+// returns path to downloadable file
+func GetFilePath(attributeId uuid.UUID, fileId uuid.UUID) string {
+	return filepath.Join(config.File.Paths.Files, attributeId.String(),
+		fileId.String())
+}
+
+// returns path to thumbnail of downloadable file
+func GetFilePathThumb(attributeId uuid.UUID, fileId uuid.UUID) string {
+	return filepath.Join(config.File.Paths.Files, attributeId.String(),
+		fmt.Sprintf("%s.webp", fileId.String()))
 }
 
 // attempts to store file upload
@@ -133,6 +145,10 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 	if err != nil {
 		return fileId, err
 	}
+
+	// create/update thumbnail - failure should not block progress
+	image.CreateThumbnail(fileId, filepath.Ext(part.FileName()), filePath,
+		GetFilePathThumb(attributeId, fileId), false)
 
 	// store file reference
 	if isNewFile {

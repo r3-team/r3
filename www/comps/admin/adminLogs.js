@@ -45,6 +45,7 @@ let MyAdminLogs = {
 						<option value="cache">Cache</option>
 						<option value="cluster">Cluster</option>
 						<option value="csv">CSV</option>
+						<option value="imager">Imager</option>
 						<option value="ldap">LDAP</option>
 						<option value="mail">Mail</option>
 						<option value="scheduler">Scheduler</option>
