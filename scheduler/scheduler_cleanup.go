@@ -5,6 +5,7 @@ import (
 	"os"
 	"path/filepath"
 	"r3/config"
+	"r3/data"
 	"r3/db"
 	"r3/log"
 	"r3/schema"
@@ -129,10 +130,8 @@ func cleanUpFiles() error {
 					//  as in: "[UUID]" (latest) or "[UUID]_6" (version 6)
 					// since latest version could have been deleted before, we check both
 					paths := []string{
-						filepath.Join(config.File.Paths.Files, atrId.String(),
-							fileId.String()),
-						filepath.Join(config.File.Paths.Files, atrId.String(),
-							fmt.Sprintf("%s_%d", fileId.String(), version-1)),
+						data.GetFilePath(atrId, fileId),
+						data.GetFilePathVersion(atrId, fileId, version-1),
 					}
 
 					filePath := ""
@@ -153,6 +152,15 @@ func cleanUpFiles() error {
 						// if deletion fails, abort and keep its reference as file might be in access
 						if err := os.Remove(filePath); err != nil {
 							log.Warning("server", "failed to remove old file version", err)
+							continue
+						}
+					}
+
+					// clean up thumbnail, if there
+					filePathThumb := data.GetFilePathThumb(atrId, fileId)
+					if exists, _ := tools.Exists(filePathThumb); exists {
+						if err := os.Remove(filePathThumb); err != nil {
+							log.Warning("server", "failed to remove old file thumbnail", err)
 							continue
 						}
 					}

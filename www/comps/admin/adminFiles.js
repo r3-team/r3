@@ -67,39 +67,44 @@ let MyAdminFiles = {
 							<th></th>
 						</tr>
 					</thead>
-					<tbody v-for="(files,atrId) in attributeIdMapDeleted">
-						<tr class="attribute-title">
-							<td class="minimum" colspan="999">
-								<my-button
-									@trigger="toggleShow(atrId,'deleted')"
-									:caption="displayAttribute(atrId,files.length)"
-									:image="attributeIdsShowDeleted.includes(atrId) ? 'triangleDown.png' : 'triangleRight.png'"
-									:naked="true"
-									:tight="true"
-								/>
-							</td>
+					<tbody>
+						<tr v-if="Object.keys(attributeIdMapDeleted).length === 0">
+							<td colspan="999">{{ capGen.nothingThere }}</td>
 						</tr>
-						<tr v-if="attributeIdsShowDeleted.includes(atrId)" v-for="f in files">
-							<td class="file-name">{{ f.name }}</td>
-							<td>{{ getSizeReadable(f.size) }}</td>
-							<td>{{ displayTime(f.deleted) }}</td>
-							<td>{{ f.recordId }}</td>
-							<td>
-								<div class="row">
-									<my-button image="time.png"
-										@trigger="restore(atrId,f.id)"
-										:caption="capGen.button.restore"
+						<template v-for="(files,atrId) in attributeIdMapDeleted">
+							<tr class="attribute-title">
+								<td class="minimum" colspan="999">
+									<my-button
+										@trigger="toggleShow(atrId,'deleted')"
+										:caption="displayAttribute(atrId,files.length)"
+										:image="attributeIdsShowDeleted.includes(atrId) ? 'triangleDown.png' : 'triangleRight.png'"
+										:naked="true"
+										:tight="true"
 									/>
-									<a target="_blank"
-										:href="getAttributeFileHref(atrId,f.id,f.name,token)"
-									>
-										<my-button image="download.png"
-											:caption="capGen.button.download"
+								</td>
+							</tr>
+							<tr v-if="attributeIdsShowDeleted.includes(atrId)" v-for="f in files">
+								<td class="file-name">{{ f.name }}</td>
+								<td>{{ getSizeReadable(f.size) }}</td>
+								<td>{{ displayTime(f.deleted) }}</td>
+								<td>{{ f.recordId }}</td>
+								<td>
+									<div class="row">
+										<my-button image="time.png"
+											@trigger="restore(atrId,f.id)"
+											:caption="capGen.button.restore"
 										/>
-									</a>
-								</div>
-							</td>
-						</tr>
+										<a target="_blank"
+											:href="getAttributeFileHref(atrId,f.id,f.name,token)"
+										>
+											<my-button image="download.png"
+												:caption="capGen.button.download"
+											/>
+										</a>
+									</div>
+								</td>
+							</tr>
+						</template>
 					</tbody>
 				</table>
 			</div>
@@ -121,33 +126,38 @@ let MyAdminFiles = {
 							<th></th>
 						</tr>
 					</thead>
-					<tbody v-for="(files,atrId) in attributeIdMapUnassigned">
-						<tr class="attribute-title">
-							<td class="minimum" colspan="999">
-								<my-button
-									@trigger="toggleShow(atrId,'unassigned')"
-									:caption="displayAttribute(atrId,files.length)"
-									:image="attributeIdsShowUnassigned.includes(atrId) ? 'triangleDown.png' : 'triangleRight.png'"
-									:naked="true"
-									:tight="true"
-								/>
-							</td>
+					<tbody>
+						<tr v-if="Object.keys(attributeIdMapUnassigned).length === 0">
+							<td colspan="999">{{ capGen.nothingThere }}</td>
 						</tr>
-						<tr v-if="attributeIdsShowUnassigned.includes(atrId)" v-for="f in files">
-							<td class="file-name">{{ f.name }}</td>
-							<td>{{ getSizeReadable(f.size) }}</td>
-							<td>
-								<div class="row">
-									<a target="_blank"
-										:href="getAttributeFileHref(atrId,f.id,f.name,token)"
-									>
-										<my-button image="download.png"
-											:caption="capGen.button.download"
-										/>
-									</a>
-								</div>
-							</td>
-						</tr>
+						<template v-for="(files,atrId) in attributeIdMapUnassigned">
+							<tr class="attribute-title">
+								<td class="minimum" colspan="999">
+									<my-button
+										@trigger="toggleShow(atrId,'unassigned')"
+										:caption="displayAttribute(atrId,files.length)"
+										:image="attributeIdsShowUnassigned.includes(atrId) ? 'triangleDown.png' : 'triangleRight.png'"
+										:naked="true"
+										:tight="true"
+									/>
+								</td>
+							</tr>
+							<tr v-if="attributeIdsShowUnassigned.includes(atrId)" v-for="f in files">
+								<td class="file-name">{{ f.name }}</td>
+								<td>{{ getSizeReadable(f.size) }}</td>
+								<td>
+									<div class="row">
+										<a target="_blank"
+											:href="getAttributeFileHref(atrId,f.id,f.name,token)"
+										>
+											<my-button image="download.png"
+												:caption="capGen.button.download"
+											/>
+										</a>
+									</div>
+								</td>
+							</tr>
+						</template>
 					</tbody>
 				</table>
 			</div>

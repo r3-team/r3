@@ -40,16 +40,18 @@ func CanAccessFile(loginId int64, attributeId uuid.UUID) error {
 	return nil
 }
 
-// returns path to downloadable file
+// returns path to downloadable file, a specific version or its thumbnail
 func GetFilePath(attributeId uuid.UUID, fileId uuid.UUID) string {
 	return filepath.Join(config.File.Paths.Files, attributeId.String(),
 		fileId.String())
 }
-
-// returns path to thumbnail of downloadable file
 func GetFilePathThumb(attributeId uuid.UUID, fileId uuid.UUID) string {
 	return filepath.Join(config.File.Paths.Files, attributeId.String(),
 		fmt.Sprintf("%s.webp", fileId.String()))
+}
+func GetFilePathVersion(attributeId uuid.UUID, fileId uuid.UUID, version int64) string {
+	return filepath.Join(config.File.Paths.Files, attributeId.String(),
+		fmt.Sprintf("%s_%d", fileId.String(), version))
 }
 
 // attempts to store file upload
