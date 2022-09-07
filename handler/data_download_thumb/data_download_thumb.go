@@ -76,8 +76,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// thumbnail file does not exist, attempt to create it
 	if os.IsNotExist(err) {
-		fmt.Println("no existence, create")
-
 		urlElms := strings.Split(r.URL.Path, "/")
 		fileExt := filepath.Ext(urlElms[len(urlElms)-1])
 

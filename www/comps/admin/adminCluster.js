@@ -169,10 +169,12 @@ let MyAdminCluster = {
 			</div>
 		</div>
 		<div class="top lower">
-			<my-button image="refresh.png"
-				@trigger="get"
-				:caption="capGen.button.refresh"
-			/>
+			<div class="area">
+				<my-button image="refresh.png"
+					@trigger="get"
+					:caption="capGen.button.refresh"
+				/>
+			</div>
 		</div>
 		
 		<div class="content">

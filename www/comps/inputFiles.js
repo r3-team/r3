@@ -71,7 +71,9 @@ let MyInputFiles = {
 		</div>
 		
 		<!-- drag&drop display -->
-		<div v-if="dragActive" class="input-files-drop">{{ capApp.dropTarget }}</div>
+		<div v-if="dragActive" class="input-files-drop">
+			{{ !maxFiles ? capApp.dropTarget : capGen.inputTooManyFiles }}
+		</div>
 		
 		<div v-if="!dragActive" class="input-files-content">
 			<div class="input-files-actions">
@@ -92,7 +94,7 @@ let MyInputFiles = {
 				
 				<!-- toggle all -->
 				<my-button
-					v-if="!viewListCompact && !noFiles && !readonly"
+					v-if="!viewListCompact && !noFiles && !oneFile && !readonly"
 					@trigger="toggleAll"
 					:caption="!noSpace ? capGen.button.selectAll : capGen.button.selectAllShort"
 					:image="files.length === fileIdsSelected.length ? 'checkBox1.png' : 'checkBox0.png'"
@@ -288,8 +290,8 @@ let MyInputFiles = {
 		return {
 			extPreview:[
 				'bmp','gif','jpg','jpeg','pdf','png','psd','svg','xcf','webp',
-				'cfg','css','csv','go','html','ini','java','js','json','log',
-				'md','php','sql','txt','xml'
+				'cfg','conf','css','csv','go','html','ini','java','js','json',
+				'log','md','php','sql','txt','xml'
 			],
 			
 			extRegex:/(?:\.([^.]+))?$/,
@@ -371,6 +373,7 @@ let MyInputFiles = {
 		fewFiles:       (s) => s.files.length <= 5,
 		maxFiles:       (s) => s.countAllowed !== 0 && s.countAllowed <= s.files.length,
 		noFiles:        (s) => s.files.length === 0,
+		oneFile:        (s) => s.files.length === 1,
 		sortByChanged:  (s) => s.sortMode === 'changed',
 		sortByName:     (s) => s.sortMode === 'name',
 		sortBySize:     (s) => s.sortMode === 'size',
@@ -431,12 +434,12 @@ let MyInputFiles = {
 			// needs to be defined, otherwise drag and drop does not work
 		},
 		drop(event) {
-			this.getFilesFromDataItems(event.dataTransfer.items).then(
-				files => {
-					this.upload(files);
-					this.dragActive = false;
-				}
-			);
+			this.dragActive = false;
+			if(!this.maxFiles) {
+				this.getFilesFromDataItems(event.dataTransfer.items).then(
+					files => this.upload(files)
+				);
+			}
 		},
 		
 		// actions

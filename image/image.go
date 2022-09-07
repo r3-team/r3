@@ -148,7 +148,7 @@ func processFile(fileId uuid.UUID, ext string, src string, dst string) {
 			"-resize", fmt.Sprintf("x%d", sizeWidth), fmt.Sprintf("%s[0]", src), dst}
 
 	// text based, drawn thumbnails
-	case "cfg", "css", "csv", "go", "html", "ini", "java", "js",
+	case "cfg", "conf", "css", "csv", "go", "html", "ini", "java", "js",
 		"json", "log", "md", "php", "sql", "txt", "xml":
 
 		textThumb := ""

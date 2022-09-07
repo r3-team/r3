@@ -30,7 +30,7 @@ let MyAdminLogs = {
 					:unixTo="unixTo"
 				/>
 				
-				<div class="right-bar default-inputs">
+				<div class="action-bar">
 					<my-input-offset
 						@input="offset = $event;get()"
 						:caption="true"
@@ -38,39 +38,81 @@ let MyAdminLogs = {
 						:offset="offset"
 						:total="total"
 					/>
-					<select class="entry" v-model="context" @change="offset = 0;get()">
-						<option value="">[{{ capApp.context }}]</option>
-						<option value="application">Applications</option>
-						<option value="backup">Backup</option>
-						<option value="cache">Cache</option>
-						<option value="cluster">Cluster</option>
-						<option value="csv">CSV</option>
-						<option value="imager">Imager</option>
-						<option value="ldap">LDAP</option>
-						<option value="mail">Mail</option>
-						<option value="scheduler">Scheduler</option>
-						<option value="server">Server</option>
-						<option value="transfer">Transfer</option>
-					</select>
-					<input class="entry"
-						v-model="byString"
-						@keyup.enter="offset = 0;get()"
-						:placeholder="capApp.byString"
-					/>
-					<span>{{ capGen.limit }}</span>
-					<select class="entry short" v-model.number="limit" @change="offset = 0;get()">
-						<option value="100">100</option>
-						<option value="250">250</option>
-						<option value="500">500</option>
-						<option value="1000">1000</option>
-					</select>
-					<my-button image="refresh.png"
-						@trigger="get"
-						:caption="capGen.button.refresh"
-					/>
+				</div>
+				
+				<div class="right-bar default-inputs">
+					<div class="action-bar">
+						<!-- log filters -->
+						<span>{{ capGen.filters }}</span>
+						<select class="entry" v-model="context" @change="offset = 0;get()">
+							<option value="">[{{ capApp.context }}]</option>
+							<option value="application">{{ capApp.logLevelApplication }}</option>
+							<option value="backup">{{ capApp.logLevelBackup }}</option>
+							<option value="cache">{{ capApp.logLevelCache }}</option>
+							<option value="cluster">{{ capApp.logLevelCluster }}</option>
+							<option value="csv">{{ capApp.logLevelCsv }}</option>
+							<option value="imager">{{ capApp.logLevelImager }}</option>
+							<option value="ldap">{{ capApp.logLevelLdap }}</option>
+							<option value="mail">{{ capApp.logLevelMail }}</option>
+							<option value="scheduler">{{ capApp.logLevelScheduler }}</option>
+							<option value="server">{{ capApp.logLevelServer }}</option>
+							<option value="transfer">{{ capApp.logLevelTransfer }}</option>
+						</select>
+						<input class="entry"
+							v-model="byString"
+							@keyup.enter="offset = 0;get()"
+							:placeholder="capApp.byString"
+						/>
+						<span>{{ capGen.limit }}</span>
+						<select class="entry short" v-model.number="limit" @change="offset = 0;get()">
+							<option value="100">100</option>
+							<option value="250">250</option>
+							<option value="500">500</option>
+							<option value="1000">1000</option>
+						</select>
+						<my-button image="refresh.png"
+							@trigger="get"
+							:caption="capGen.button.refresh"
+						/>
+					</div>
+				
+					<div class="action-bar default-inputs">
+						<!-- log configs -->
+						<span>{{ capApp.keepDays }}</span>
+						<input class="short" v-model="configInput.logsKeepDays" />
+						<my-button image="save.png"
+							@trigger="setConfig"
+							:active="config.logsKeepDays !== configInput.logsKeepDays"
+						/>
+						
+						<span>{{ capApp.logLevel }}</span>
+						<select class="short" v-model="levelContext" @change="levelValue = config[$event.target.value]">
+							<option value="logApplication">{{ capApp.logLevelApplication }}</option>
+							<option value="logBackup">{{ capApp.logLevelBackup }}</option>
+							<option value="logCache">{{ capApp.logLevelCache }}</option>
+							<option value="logCluster">{{ capApp.logLevelCluster }}</option>
+							<option value="logCsv">{{ capApp.logLevelCsv }}</option>
+							<option value="logImager">{{ capApp.logLevelImager }}</option>
+							<option value="logLdap">{{ capApp.logLevelLdap }}</option>
+							<option value="logMail">{{ capApp.logLevelMail }}</option>
+							<option value="logScheduler">{{ capApp.logLevelScheduler }}</option>
+							<option value="logServer">{{ capApp.logLevelServer }}</option>
+							<option value="logTransfer">{{ capApp.logLevelTransfer }}</option>
+						</select>
+						<select v-model="configInput[levelContext]">
+							<option value="1">{{ capApp.logLevel1 }}</option>
+							<option value="2">{{ capApp.logLevel2 }}</option>
+							<option value="3">{{ capApp.logLevel3 }}</option>
+						</select>
+						<my-button image="save.png"
+							@trigger="setConfig"
+							:active="config[levelContext] !== configInput[levelContext]"
+						/>
+					</div>
 				</div>
 			</div>
-		
+			
+			<!-- logs -->
 			<div class="table-default-wrap shade">
 				<table class="table-default">
 					<thead>
@@ -118,6 +160,7 @@ let MyAdminLogs = {
 			// inputs
 			byString:'',
 			context:'',
+			levelContext:'logServer',
 			limit:100,
 			offset:0,
 			total:0,
@@ -125,11 +168,13 @@ let MyAdminLogs = {
 			unixTo:null,
 			
 			// data
+			configInput:{},
 			logs:[]
 		};
 	},
 	mounted:function() {
 		this.$store.commit('pageTitle',this.menuTitle);
+		this.configInput = JSON.parse(JSON.stringify(this.config));
 		
 		// set date range for log retrieval (7 days ago to now)
 		let d = new Date();
@@ -141,7 +186,8 @@ let MyAdminLogs = {
 		// stores
 		settings:function() { return this.$store.getters.settings; },
 		capApp:  function() { return this.$store.getters.captions.admin.logs; },
-		capGen:  function() { return this.$store.getters.captions.generic; }
+		capGen:  function() { return this.$store.getters.captions.generic; },
+		config:  function() { return this.$store.getters.config; }
 	},
 	methods:{
 		// externals
@@ -208,6 +254,12 @@ let MyAdminLogs = {
 					this.logs  = res.payload.logs;
 					this.total = res.payload.total;
 				},
+				this.$root.genericError
+			);
+		},
+		setConfig:function() {
+			ws.send('config','set',this.configInput,true).then(
+				() => {},
 				this.$root.genericError
 			);
 		}

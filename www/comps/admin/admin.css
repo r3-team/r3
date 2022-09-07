@@ -60,17 +60,28 @@
 	flex:0 0 auto;
 	padding:12px;
 	display:flex;
-	flex-direction:row;
+	flex-flow:row wrap;
 	justify-content:space-between;
 	background-color:var(--color-bg);
+	gap:6px;
+}
+.admin .logs .actions .action-bar{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:6px;
 }
 .admin .logs .actions .right-bar{
 	display:flex;
-	flex-direction:row;
-	align-items:center;
+	flex-flow:column nowrap;
+	gap:8px;
+}
+.admin .logs .actions .right-bar input,
+.admin .logs .actions .right-bar select{
+	width:auto;
+	min-width:unset;
 }
 .admin .logs .actions .entry{
-	margin:0px 6px;
 	flex:0 1 200px;
 }
 .admin .logs .actions .entry input{
