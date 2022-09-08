@@ -80,6 +80,7 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 
 	type configFile struct {
 		AutoStart    bool                   `json:"autoStart"`
+		DarkIcon     bool                   `json:"darkIcon"`
 		Debug        bool                   `json:"debug"`
 		Instances    map[uuid.UUID]instance `json:"instances"`
 		KeepFilesSec int64                  `json:"keepFilesSec`
@@ -89,6 +90,7 @@ func HandlerConfig(w http.ResponseWriter, r *http.Request) {
 	}
 	f := configFile{
 		AutoStart: true,
+		DarkIcon:  false,
 		Debug:     false,
 		Instances: map[uuid.UUID]instance{
 			uuid.FromStringOrNil(config.GetString("instanceId")): instance{

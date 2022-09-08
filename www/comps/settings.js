@@ -639,6 +639,7 @@ let MySettingsFixedTokens = {
 										<option value="amd64_windows">Windows (x64)</option>
 										<option value="amd64_linux">Linux (x64)</option>
 										<option value="arm64_linux">Linux (ARM64)</option>
+										<option value="amd64_mac">MacOS (x64)</option>
 									</select>
 									<br />
 								</div>
@@ -703,6 +704,7 @@ let MySettingsFixedTokens = {
 		// set default client
 		if     (navigator.userAgent.includes('Win64'))        this.deviceOs = 'amd64_windows';
 		else if(navigator.userAgent.includes('WOW64'))        this.deviceOs = 'amd64_windows';
+		else if(navigator.userAgent.includes('Mac OS'))       this.deviceOs = 'amd64_mac';
 		else if(navigator.userAgent.includes('Linux x86_64')) this.deviceOs = 'amd64_linux';
 		else if(navigator.userAgent.includes('ARM64'))        this.deviceOs = 'arm64_linux';
 	},

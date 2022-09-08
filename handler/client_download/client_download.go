@@ -53,6 +53,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	case "arm64_linux":
 		w.Header().Set("Content-Disposition", "attachment; filename=r3_client.bin")
 		_, err = w.Write(cache.Client_arm64_linux)
+	case "amd64_mac":
+		w.Header().Set("Content-Disposition", "attachment; filename=r3_client.dmg")
+		_, err = w.Write(cache.Client_amd64_mac)
 	default:
 		handler.AbortRequest(w, context, err, handler.ErrGeneral)
 		return
