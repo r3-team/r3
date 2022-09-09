@@ -38,6 +38,7 @@ const MyStore = Vuex.createStore({
 		license:{},           // license info (admin only)
 		licenseValid:false,   // license is valid (set and within validity period)
 		loginEncryption:false,// user login E2E encryption is used
+		loginHasClient:false, // login has an associated client (to allow for local file handling)
 		loginId:-1,           // user login ID
 		loginName:'',         // user login name
 		loginPrivateKey:null, // user login private key for decryption (non-exportable key)
@@ -136,6 +137,7 @@ const MyStore = Vuex.createStore({
 		isNoAuth:       (state,payload) => state.isNoAuth        = payload,
 		isMobile:       (state,payload) => state.isMobile        = payload,
 		loginEncryption:(state,payload) => state.loginEncryption = payload,
+		loginHasClient: (state,payload) => state.loginHasClient  = payload,
 		loginId:        (state,payload) => state.loginId         = payload,
 		loginName:      (state,payload) => state.loginName       = payload,
 		loginPrivateKey:(state,payload) => state.loginPrivateKey = payload,
@@ -192,6 +194,7 @@ const MyStore = Vuex.createStore({
 		license:          (state) => state.license,
 		licenseValid:     (state) => state.licenseValid,
 		loginEncryption:  (state) => state.loginEncryption,
+		loginHasClient:   (state) => state.loginHasClient,
 		loginId:          (state) => state.loginId,
 		loginName:        (state) => state.loginName,
 		loginPrivateKey:  (state) => state.loginPrivateKey,

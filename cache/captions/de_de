@@ -1244,11 +1244,16 @@
 			"inputYear":"JJJJ"
 		},
 		"files":{
+			"button":{
+				"download":"Datei herunterladen",
+				"fileRequestHint":"Datei lokal auf dem Computer bearbeiten. Erfordert die R3-Client-Anwendung - installierbar über die Benutzereinstellungen."
+			},
 			"dropTarget":"Dateien hier ablegen, um sie hochzuladen",
 			"fileChanged":"Geändert",
 			"fileName":"Dateiname",
 			"fileSize":"Dateigröße",
-			"tooLarge":"Datei \"{NAME}\" kann nicht hochgeladen werden, maximal erlaubte Größe ist {SIZE}."
+			"tooLarge":"Datei \"{NAME}\" kann nicht hochgeladen werden, maximal erlaubte Größe ist {SIZE}.",
+			"unsaved":"(ungespeichert)"
 		}
 	},
 	"list":{

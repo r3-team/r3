@@ -81,7 +81,34 @@
 	margin:6px 6px 6px 0px;
 	border:3px dashed var(--color-border);
 }
+.input-files-name{
+	margin:0px 5px 0px 0px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+}
+.input-files-name input{
+	padding:4px 3px;
+	margin:2px;
+	color:var(--color-font);
+	border:none;
+	outline:none;
+	background-color:var(--color-bg);
+	flex:1 1 auto;
+}
+.input-files-name input:focus,
+.input-files-name input:hover{
+	margin:0px;
+	border:2px solid var(--color-border);
+	border-radius:3px;
+}
+.input-files-name .error{
+	flex:1 1 auto;
+	margin:0px 3px;
+	color:var(--color-error);
+}
 
+/* list compact */
 .input-files table.listCompact{
 	width:100%;
 	position:absolute;
@@ -105,8 +132,8 @@
 }
 .input-files table.listCompact input{
 	width:100%;
-	min-width:100px;
-	padding:0px 3px;
+	min-width:60px;
+	padding:5px 3px;
 	margin:0px 2px;
 	color:var(--color-font);
 	border:none;
@@ -160,6 +187,7 @@
 	border-radius:3px;
 }
 .input-files .listComfort .item-content{
+	width:260px;
 	display:flex;
 	flex-flow:column nowrap;
 	gap:6px;
@@ -182,22 +210,6 @@
 	border-radius:5px 0px 5px 0px;
 	border-right:1px solid var(--color-border);
 	border-bottom:1px solid var(--color-border);
-}
-.input-files .listComfort input{
-	min-width:230px;
-	padding:0px 3px;
-	margin:2px;
-	color:var(--color-font);
-	border:none;
-	outline:none;
-	background-color:var(--color-bg);
-	flex:1 1 auto;
-}
-.input-files .listComfort input:focus,
-.input-files .listComfort input:hover{
-	margin:0px;
-	border:2px solid var(--color-border);
-	border-radius:3px;
 }
 
 
@@ -226,21 +238,6 @@
 	margin-bottom:3px;
 	box-shadow:1px 1px 6px var(--color-shade);
 	transition:box-shadow 0.3s, margin 0.3s;
-}
-.input-files .gallery input{
-	padding:5px 3px;
-	margin:2px;
-	color:var(--color-font);
-	border:none;
-	outline:none;
-	background-color:var(--color-bg);
-	flex:1 1 auto;
-}
-.input-files .gallery input:focus,
-.input-files .gallery input:hover{
-	margin:0px;
-	border:2px solid var(--color-border);
-	border-radius:3px;
 }
 .input-files .gallery .item img.prev{
 	width:auto;

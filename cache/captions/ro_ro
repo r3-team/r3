@@ -1244,11 +1244,16 @@
 			"inputYear":"aaaa"
 		},
 		"files":{
+			"button":{
+				"download":"Download file",
+				"fileRequestHint":"Edit file locally on your computer. Requires the R3 client application - installable from the user settings."
+			},
 			"dropTarget":"Drop files here for upload",
 			"fileChanged":"Changed",
 			"fileName":"File name",
 			"fileSize":"File size",
-			"tooLarge":"Nu se poate încărca fișierul'{NAME}', mărimea maxim permisă este {SIZE}."
+			"tooLarge":"Nu se poate încărca fișierul'{NAME}', mărimea maxim permisă este {SIZE}.",
+			"unsaved":"(unsaved)"
 		}
 	},
 	"list":{

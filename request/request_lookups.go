@@ -47,6 +47,20 @@ func LookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 	case "feedback":
 		return config.GetUint64("repoFeedback"), nil
 
+	case "loginHasClient":
+		var hasClient bool
+		err := db.Pool.QueryRow(db.Ctx, `
+			SELECT EXISTS(
+				SELECT *
+				FROM instance.login_token_fixed
+				WHERE login_id = $1
+				AND   context  = 'client'
+				LIMIT 1
+			)
+		`, loginId).Scan(&hasClient)
+
+		return hasClient, err
+
 	case "loginKeys":
 		var res struct {
 			PrivateEnc       pgtype.Varchar `json:"privateEnc"`
@@ -61,6 +75,7 @@ func LookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 		`, loginId).Scan(&res.PrivateEnc, &res.PrivateEncBackup, &res.Public)
 
 		return res, err
+
 	case "passwordSettings":
 		var res struct {
 			Length         uint64 `json:"length"`

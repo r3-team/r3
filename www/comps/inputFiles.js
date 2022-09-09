@@ -16,11 +16,16 @@ export {MyInputFiles as default};
 
 let MyInputFilesName = {
 	name:'my-input-files-name',
-	template:`<input
-		@input="$emit('update:name',$event.target.value)"
-		:disabled="readonly"
-		:value="value"
-	/>`,
+	template:`<div class="input-files-name">
+		<input
+			@input="$emit('update:name',$event.target.value)"
+			:disabled="readonly"
+			:value="value"
+		/>
+		<span v-if="unsaved" class="error">
+			{{ capApp.unsaved }}
+		</span>
+	</div>`,
 	props:{
 		change:  { required:true },               // file change object (not affected by sort)
 		name:    { type:String,  required:true }, // file name
@@ -28,10 +33,16 @@ let MyInputFilesName = {
 	},
 	emits:['update:name'],
 	computed:{
+		unsaved:(s) => {
+			return typeof s.change !== 'undefined' && s.change.create;
+		},
 		value:(s) => {
 			return typeof s.change !== 'undefined' && s.change.name !== ''
 				? s.change.name : s.name;
-		}
+		},
+		
+		// store
+		capApp:(s) => s.$store.getters.captions.input.files
 	}
 };
 
@@ -182,21 +193,24 @@ let MyInputFiles = {
 						<td v-if="!noSpace">{{ displayDate(f.changed) }}</td>
 						<td>
 							<div class="row">
-								<my-button image="form.png"
-									v-if="!readonly"
-									@trigger="fileRequest(f.id,false)"
-									@trigger-shift="fileRequest(f.id,true)"
-									:naked="true"
-									:tight="true"
-								/>
 								<a target="_blank"
 									:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
 								>
 									<my-button image="download.png"
+										:captionTitle="capApp.button.download"
 										:naked="true"
 										:tight="true"
 									/>
 								</a>
+								<my-button image="screenFile.png"
+									v-if="!readonly"
+									@trigger="fileRequest(f.id,false)"
+									@trigger-shift="fileRequest(f.id,true)"
+									:captionTitle="capApp.button.fileRequestHint"
+									:active="hasClient"
+									:naked="true"
+									:tight="true"
+								/>
 							</div>
 						</td>
 					</tr>
@@ -208,6 +222,7 @@ let MyInputFiles = {
 				<div class="item" v-for="f in files">
 					<a target="_blank"
 						:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
+						:title="capApp.button.download"
 					>
 						<img class="prev" :src="imagePreview(f.id,f.name)" />
 					</a>
@@ -230,9 +245,11 @@ let MyInputFiles = {
 							:naked="true"
 							:tight="true"
 						/>
-						<my-button image="form.png"
+						<my-button image="screenFile.png"
 							@trigger="fileRequest(f.id,false)"
 							@trigger-shift="fileRequest(f.id,true)"
+							:active="hasClient"
+							:captionTitle="capApp.button.fileRequestHint"
 							:naked="true"
 							:tight="true"
 						/>
@@ -245,6 +262,7 @@ let MyInputFiles = {
 				<div class="item" v-for="f in files">
 					<a target="_blank"
 						:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
+						:title="capApp.button.download"
 					>
 						<img class="prev" :src="imagePreview(f.id,f.name)">
 					</a>
@@ -265,9 +283,11 @@ let MyInputFiles = {
 							:naked="true"
 							:tight="true"
 						/>
-						<my-button image="form.png"
+						<my-button image="screenFile.png"
 							@trigger="fileRequest(f.id,false)"
 							@trigger-shift="fileRequest(f.id,true)"
+							:captionTitle="capApp.button.fileRequestHint"
+							:active="hasClient"
 							:naked="true"
 							:tight="true"
 						/>
@@ -385,6 +405,7 @@ let MyInputFiles = {
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		capApp:        (s) => s.$store.getters.captions.input.files,
 		capGen:        (s) => s.$store.getters.captions.generic,
+		hasClient:     (s) => s.$store.getters.loginHasClient,
 		settings:      (s) => s.$store.getters.settings,
 		token:         (s) => s.$store.getters['local/token']
 	},
