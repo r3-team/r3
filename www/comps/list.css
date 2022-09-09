@@ -246,7 +246,7 @@
 .list-input-row-empty{
 	position:absolute;
 	padding-left:8px;
-	bottom:0px;
+	bottom:2px; /* keep field underline visible */
 	left:0px;
 	right:0px;
 	background-color:var(--color-bg);

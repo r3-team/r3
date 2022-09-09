@@ -372,7 +372,7 @@ let MyList = {
 								<img class="clickable" tabindex="0"
 									@click="selectRowsAllToggle"
 									@keyup.enter.space.stop="selectRowsAllToggle"
-									:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkbox1.png' : 'images/checkbox0.png'"
+									:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
 								/>
 							</th>
 							<th
@@ -443,7 +443,7 @@ let MyList = {
 								<img class="clickable" tabindex="0"
 									@click="selectRow(ri)"
 									@keyup.enter.space.stop="selectRow(ri)"
-									:src="selectedRows.includes(ri) ? 'images/checkbox1.png' : 'images/checkbox0.png'"
+									:src="selectedRows.includes(ri) ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
 								/>
 							</td>
 							
@@ -823,12 +823,16 @@ let MyList = {
 			let out = [];
 			for(let i = 0, j = this.columns.length; i < j; i++) {
 				let c = this.columns[i];
+				let a = this.attributeIdMap[c.attributeId];
 				
-				if(c.aggregator !== null && c.aggregator !== 'record')
+				if(c.subQuery || this.isAttributeFiles(a.content) ||
+					(c.aggregator !== null && c.aggregator !== 'record')) {
+					
 					continue;
+				}
 				
 				out.push({
-					connector:i === 0 ? 'AND' : 'OR',
+					connector:out.length === 0 ? 'AND' : 'OR',
 					operator:'ILIKE',
 					side0:{
 						attributeId:c.attributeId,

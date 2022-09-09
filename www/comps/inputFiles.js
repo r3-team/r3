@@ -108,7 +108,7 @@ let MyInputFiles = {
 					v-if="!viewListCompact && !noFiles && !oneFile && !readonly"
 					@trigger="toggleAll"
 					:caption="!noSpace ? capGen.button.selectAll : capGen.button.selectAllShort"
-					:image="files.length === fileIdsSelected.length ? 'checkBox1.png' : 'checkBox0.png'"
+					:image="displayChecked(files.length === fileIdsSelected.length)"
 					:naked="true"
 					:tight="true"
 				/>
@@ -136,7 +136,7 @@ let MyInputFiles = {
 						<th v-if="!readonly" class="minimum">
 							<my-button
 								@trigger="toggleAll"
-								:image="files.length === fileIdsSelected.length ? 'checkBox1.png' : 'checkBox0.png'"
+								:image="displayChecked(files.length === fileIdsSelected.length)"
 								:naked="true"
 								:tight="true"
 							/>
@@ -176,7 +176,7 @@ let MyInputFiles = {
 						<td v-if="!readonly" class="minimum">
 							<my-button
 								@trigger="toggle(f.id)"
-								:image="fileIdsSelected.includes(f.id) ? 'checkBox1.png' : 'checkBox0.png'"
+								:image="displayChecked(fileIdsSelected.includes(f.id))"
 								:naked="true"
 								:tight="true"
 							/>
@@ -241,7 +241,7 @@ let MyInputFiles = {
 					<div v-if="!readonly" class="item-actions shade">
 						<my-button
 							@trigger="toggle(f.id)"
-							:image="fileIdsSelected.includes(f.id) ? 'checkBox1.png' : 'checkBox0.png'"
+							:image="displayChecked(fileIdsSelected.includes(f.id))"
 							:naked="true"
 							:tight="true"
 						/>
@@ -279,7 +279,7 @@ let MyInputFiles = {
 					<div v-if="!readonly" class="item-actions shade">
 						<my-button
 							@trigger="toggle(f.id)"
-							:image="fileIdsSelected.includes(f.id) ? 'checkBox1.png' : 'checkBox0.png'"
+							:image="displayChecked(fileIdsSelected.includes(f.id))"
 							:naked="true"
 							:tight="true"
 						/>
@@ -421,6 +421,9 @@ let MyInputFiles = {
 		getUnixFormat,
 		
 		// presentation
+		displayChecked(state) {
+			return state ? 'checkbox1.png' : 'checkbox0.png';
+		},
 		displayDate(date) {
 			return date !== 0
 				? this.getUnixFormat(date,[this.settings.dateFormat,'H:i:S'].join(' '))
