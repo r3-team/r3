@@ -1,9 +1,9 @@
 import MyField                         from './field.js';
 import {aesGcmDecryptBase64WithPhrase} from './shared/crypto.js';
 import {consoleError}                  from './shared/error.js';
-import {getDataFields}                 from './shared/form.js';
 import {getUnixFormat}                 from './shared/time.js';
 import {
+	getAttributeFileHref,
 	getDetailsFromIndexAttributeId,
 	getIndexAttributeId,
 	getIndexAttributeIdByField,
@@ -18,7 +18,7 @@ let MyFormLog = {
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/time.png" />
-				<h1>{{ capApp.dataLog }}</h1>
+				<h1>{{ capApp.title }}</h1>
 			</div>
 			
 			<div class="area">
@@ -34,7 +34,7 @@ let MyFormLog = {
 				<my-button 
 					@trigger="toggleAll"
 					:active="logs.length !== 0"
-					:caption="capApp.button.logShowAll.replace('{CNT}',logs.length)"
+					:caption="capApp.button.showAll.replace('{CNT}',logs.length)"
 					:image="logsShown.length === logs.length ? 'triangleDown.png' : 'triangleRight.png'"
 				/>
 			</div>
@@ -53,11 +53,13 @@ let MyFormLog = {
 				</div>
 				
 				<div class="log-fields" v-if="logsShown.includes(i)">
-					<template v-for="f in dataFields">
+					<template v-for="(v,ia) in l.values">
+						
+						<!-- regular attribute logs -->
 						<my-field flexDirParent="column"
-							v-if="hasValueInLog(l,f)"
+							v-if="!isFiles(ia)"
 							:dataFieldMap="dataFieldMap"
-							:field="f"
+							:field="indexAttributeIdMapField[ia]"
 							:fieldIdMapState="fieldIdMapState"
 							:formBadSave="false"
 							:formIsPopUp="true"
@@ -67,9 +69,36 @@ let MyFormLog = {
 							:logViewer="true"
 							:isFullPage="false"
 							:joinsIndexMap="joinsIndexMap"
-							:key="f.id"
+							:key="indexAttributeIdMapField[ia].id"
 							:values="{ ...values, ...l.values }"
 						/>
+						
+						<!-- file attribute logs -->
+						<div class="field readonly" v-else>
+							<div class="input-box disabled">
+								<div class="caption">
+									{{ displayFieldCaption(indexAttributeIdMapField[ia]) }}
+								</div>
+								<div class="input-line">
+									<table class="file-changes">
+										<tr v-for="(c,fileId) in v.fileIdMapChange">
+											<td v-if="c.action === 'create'">{{ capApp.fileCreated }}</td>
+											<td v-if="c.action === 'delete'">{{ capApp.fileDeleted }}</td>
+											<td v-if="c.action === 'rename'">{{ capApp.fileRenamed }}</td>
+											<td v-if="c.action === 'update'">{{ capApp.fileUpdated }}</td>
+											<td>
+												<a target="_blank" :href="getAttributeFileHref(indexAttributeIdMapField[ia].attributeId,fileId,c.name,token)">
+													<my-button image="download.png"
+														:caption="c.name"
+														:naked="true"
+													/>
+												</a>
+											</td>
+										</tr>
+									</table>
+								</div>
+							</div>
+						</div>
 					</template>
 				</div>
 			</div>
@@ -99,13 +128,36 @@ let MyFormLog = {
 		};
 	},
 	computed:{
-		dataFields:function() { return this.getDataFields(this.form.fields); },
+		attributeIdsFiles:(s) => {
+			let out = [];
+			for(let k in s.dataFieldMap) {
+				let atr = s.attributeIdMap[s.dataFieldMap[k].attributeId];
+				
+				if(s.isAttributeFiles(atr.content))
+					out.push(atr.id);
+			}
+			return out;
+		},
+		indexAttributeIdMapField:(s) => {
+			let out = {};
+			for(let k in s.dataFieldMap) {
+				let f   = s.dataFieldMap[k];
+				let ia1 = s.getIndexAttributeIdByField(f,false);
+				let ia2 = s.getIndexAttributeIdByField(f,true);
+				
+				if(typeof ia1 !== 'undefined') out[ia1] = f;
+				if(typeof ia2 !== 'undefined') out[ia2] = f;
+			}
+			return out;
+		},
 		
 		// stores
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.form; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		settings:      function() { return this.$store.getters.settings; }
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.formLog,
+		capGen:        (s) => s.$store.getters.captions.generic,
+		moduleLanguage:(s) => s.$store.getters.moduleLanguage,
+		settings:      (s) => s.$store.getters.settings,
+		token:         (s) => s.$store.getters['local/token']
 	},
 	mounted:function() {
 		this.get();
@@ -114,7 +166,7 @@ let MyFormLog = {
 		// externals
 		aesGcmDecryptBase64WithPhrase,
 		consoleError,
-		getDataFields,
+		getAttributeFileHref,
 		getDetailsFromIndexAttributeId,
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
@@ -122,16 +174,26 @@ let MyFormLog = {
 		isAttributeFiles,
 		
 		// presentation
+		displayFieldCaption:function(f) {
+			if(typeof f.captions.fieldTitle[this.moduleLanguage] !== 'undefined')
+				return f.captions.fieldTitle[this.moduleLanguage];
+			
+			let atr = this.attributeIdMap[f.attributeId];
+			
+			return typeof atr.captions.attributeTitle[this.moduleLanguage] !== 'undefined'
+				? atr.captions.attributeTitle[this.moduleLanguage]
+				: atr.name;
+		},
 		displayTitle:function(i,unixTime,name) {
 			if(name === '') name = this.capApp.deletedUser;
 			let prefix = this.logsShown.includes(i) ? '\u2BC6' : '\u2BC8';
 			let format = [this.settings.dateFormat,'H:i:S'];
 			return `${prefix} ${this.getUnixFormat(unixTime,format.join(' '))} (${name})`;
 		},
-		hasValueInLog:function(l,f) {
-			return typeof l.values[this.getIndexAttributeIdByField(f,false)] !== 'undefined'
-				|| typeof l.values[this.getIndexAttributeIdByField(f,true)] !== 'undefined'
-			;
+		isFiles:function(ia) {
+			let d = this.getDetailsFromIndexAttributeId(ia);
+			let a = this.attributeIdMap[d.attributeId];
+			return this.isAttributeFiles(a.content);
 		},
 		
 		// actions

@@ -1180,8 +1180,7 @@
 			"help":"Hilfe",
 			"helpHint":"Hilfeseiten anzeigen",
 			"log":"Historie",
-			"logHint":"Änderungshistorie anzeigen",
-			"logShowAll":"Alle anzeigen ({CNT})"
+			"logHint":"Änderungshistorie anzeigen"
 		},
 		"dialog":{
 			"close":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem das Formular schließen?",
@@ -1199,13 +1198,22 @@
 			"recordValueCopied":"In die Zwischenablage kopiert",
 			"recordUpdated":"Datensatz aktualisiert"
 		},
-		"dataLog":"Verändungen",
-		"deletedUser":"gelöschter Benutzer",
 		"help":"Hilfeseiten",
 		"helpContextTitle":"Kontext",
 		"helpModuleTitle":"Anwendung",
 		"invalidInputs":"Eingaben prüfen!",
 		"noAccess":"Kein Zugriff"
+	},
+	"formLog":{
+		"button":{
+			"showAll":"Alle anzeigen ({CNT})"
+		},
+		"deletedUser":"gelöschter Benutzer",
+		"fileCreated":"Datei erstellt",
+		"fileDeleted":"Datei gelöscht",
+		"fileRenamed":"Datei umbenannt",
+		"fileUpdated":"Datei verändert",
+		"title":"Verändungen"
 	},
 	"home":{
 		"button":{

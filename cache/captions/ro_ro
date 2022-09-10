@@ -1180,8 +1180,7 @@
 			"help":"Ajutor",
 			"helpHint":"Afișați paginile de ajutor",
 			"log":"Jurnale",
-			"logHint":"Deschideți jurnalele de modificări",
-			"logShowAll":"Show all ({CNT})"
+			"logHint":"Deschideți jurnalele de modificări"
 		},
 		"dialog":{
 			"close":"Există modificări nesalvate.<br /><br />Doriți în continuare să închideți acest formular?",
@@ -1199,13 +1198,22 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"înregistrarea a fost actualizată"
 		},
-		"dataLog":"Schimbă jurnalele",
-		"deletedUser":"utilizator șters",
 		"help":"Pagini de ajutor",
 		"helpContextTitle":"Context",
 		"helpModuleTitle":"Aplicație",
 		"invalidInputs":"Verificați intrările!",
 		"noAccess":"Fără acces"
+	},
+	"formLog":{
+		"button":{
+			"showAll":"Show all ({CNT})"
+		},
+		"deletedUser":"utilizator șters",
+		"fileCreated":"File created",
+		"fileDeleted":"File deleted",
+		"fileRenamed":"File renamed",
+		"fileUpdated":"File updated",
+		"title":"Schimbă jurnalele"
 	},
 	"home":{
 		"button":{

@@ -893,7 +893,7 @@ let MyField = {
 		capApp:        function() { return this.$store.getters.captions.form; },
 		capGen:        function() { return this.$store.getters.captions.generic; },
 		isMobile:      function() { return this.$store.getters.isMobile; },
-		moduleLanguage:function() { return this.$store.getters.moduleLanguage; },
+		moduleLanguage:function() { return this.$store.getters.moduleLanguage; }
 	},
 	methods:{
 		// externals

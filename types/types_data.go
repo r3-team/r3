@@ -119,9 +119,8 @@ type DataSetFile struct {
 type DataSetFiles struct {
 	Files           []DataSetFile `json:"files"`
 	FileIdMapChange map[uuid.UUID]struct {
-		Name   string `json:"name"`
-		Create bool   `json:"create"`
-		Delete bool   `json:"delete"`
+		Action string `json:"action"` // create, delete, rename, update
+		Name   string `json:"name"`   // file name for reference in change logs (new name if rename action)
 	} `json:"fileIdMapChange"`
 }
 type DataSetResult struct {

@@ -161,6 +161,7 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 			return fileId, err
 		}
 	}
+
 	if _, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
 		INSERT INTO instance_file."%s" (
 			file_id,version,login_id,hash,size_kb,date_change
@@ -196,24 +197,19 @@ func setFileRecord_tx(ctx context.Context, tx pgx.Tx,
 	fileIdsDeleted := make([]uuid.UUID, 0)
 
 	for fileId, change := range v.FileIdMapChange {
-
-		// trim whitespace
-		change.Name = strings.Trim(change.Name, " ")
-
-		if change.Delete {
-			// if file is deleted, nothing more to do for this file
-			fileIdsDeleted = append(fileIdsDeleted, fileId)
-			continue
-		}
-		if change.Create {
+		switch change.Action {
+		case "create":
 			fileIdsCreated = append(fileIdsCreated, fileId)
+		case "delete":
+			fileIdsDeleted = append(fileIdsDeleted, fileId)
 		}
-		if change.Name != "" {
+
+		if (change.Action == "create" || change.Action == "rename") && change.Name != "" {
 			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				UPDATE instance_file."%s"
 				SET   name = $1
 				WHERE id   = $2
-			`, tName), change.Name, fileId); err != nil {
+			`, tName), strings.TrimSpace(change.Name), fileId); err != nil {
 				return err
 			}
 		}

@@ -27,14 +27,14 @@ let MyInputFilesName = {
 		</span>
 	</div>`,
 	props:{
-		change:  { required:true },               // file change object (not affected by sort)
+		change:  { required:true },               // known file change (not affected by sort)
 		name:    { type:String,  required:true }, // file name
 		readonly:{ type:Boolean, required:true }
 	},
 	emits:['update:name'],
 	computed:{
 		unsaved:(s) => {
-			return typeof s.change !== 'undefined' && s.change.create;
+			return typeof s.change !== 'undefined' && s.change.action === 'create';
 		},
 		value:(s) => {
 			return typeof s.change !== 'undefined' && s.change.name !== ''
@@ -183,7 +183,7 @@ let MyInputFiles = {
 						</td>
 						<td>
 							<my-input-files-name
-								@update:name="update([f.id],'name',$event)"
+								@update:name="update([f.id],'rename',$event)"
 								:change="fileIdMapChange[f.id]"
 								:name="f.name"
 								:readonly="readonly"
@@ -228,7 +228,7 @@ let MyInputFiles = {
 					</a>
 					<div class="item-content">
 						<my-input-files-name
-							@update:name="update([f.id],'name',$event)"
+							@update:name="update([f.id],'rename',$event)"
 							:change="fileIdMapChange[f.id]"
 							:name="f.name"
 							:readonly="readonly"
@@ -268,7 +268,7 @@ let MyInputFiles = {
 					</a>
 					<div class="item-meta">
 						<my-input-files-name
-							@update:name="update([f.id],'name',$event)"
+							@update:name="update([f.id],'rename',$event)"
 							:change="fileIdMapChange[f.id]"
 							:name="f.name"
 							:readonly="readonly"
@@ -491,7 +491,7 @@ let MyInputFiles = {
 				let files = JSON.parse(JSON.stringify(this.files));
 				
 				for(let fileId in this.fileIdMapChange) {
-					if(this.fileIdMapChange[fileId].name === '')
+					if(this.fileIdMapChange[fileId].action !== 'rename')
 						continue;
 					
 					for(let i = 0, j = files.length; i < j; i++) {
@@ -532,35 +532,39 @@ let MyInputFiles = {
 		toggleSortDir(){
 			this.sortDirAsc = !this.sortDirAsc;
 		},
-		update(fileIds,key,value) {
+		update(fileIds,action,value) {
 			let files = JSON.parse(JSON.stringify(this.files));
 			
+			// regardless of change, store file name as well (reference in change logs)
 			for(let fileId of fileIds) {
 				if(typeof this.fileIdMapChange[fileId] === 'undefined')
 					this.fileIdMapChange[fileId] = {
-						name:'',
-						create:false,
-						delete:false
+						action:action,
+						name:''
 					};
 				
-				switch(key) {
+				switch(action) {
 					case 'create':
 						files.push(value);
-						this.fileIdMapChange[fileId].create = true;
-					break;
-					case 'name':
-						// name is not immediately updated in files list to conserve sorting
-						// when form is reloaded or sort updated, file name changes are applied
-						this.fileIdMapChange[fileId].name = value;
+						this.fileIdMapChange[fileId].name = value.name;
 					break;
 					case 'delete':
+						// remove deleted file from files list
 						for(let i = 0, j = files.length; i < j; i++) {
 							if(files[i].id === fileId) {
+								this.fileIdMapChange[fileId].name = files[i].name;
 								files.splice(i,1);
 								break;
 							}
 						}
-						this.fileIdMapChange[fileId].delete = true;
+						
+						// delete action always takes priority, even if another action occurred first
+						this.fileIdMapChange[fileId].action = action;
+					break;
+					case 'rename':
+						// name is not immediately updated in files list to conserve sorting
+						// when form is reloaded or sort updated, file name changes are applied
+						this.fileIdMapChange[fileId].name = value;
 					break;
 				}
 			}

@@ -1180,8 +1180,7 @@
 			"help":"Help",
 			"helpHint":"Show help pages",
 			"log":"Logs",
-			"logHint":"Open change logs",
-			"logShowAll":"Show all ({CNT})"
+			"logHint":"Open change logs"
 		},
 		"dialog":{
 			"close":"There are unsaved changes.<br /><br />Do you still want to close this form?",
@@ -1199,13 +1198,22 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"Record updated"
 		},
-		"dataLog":"Change logs",
-		"deletedUser":"deleted User",
 		"help":"Help pages",
 		"helpContextTitle":"Context",
 		"helpModuleTitle":"Application",
 		"invalidInputs":"Check inputs!",
 		"noAccess":"No access"
+	},
+	"formLog":{
+		"button":{
+			"showAll":"Show all ({CNT})"
+		},
+		"deletedUser":"deleted User",
+		"fileCreated":"File created",
+		"fileDeleted":"File deleted",
+		"fileRenamed":"File renamed",
+		"fileUpdated":"File updated",
+		"title":"Change logs"
 	},
 	"home":{
 		"button":{

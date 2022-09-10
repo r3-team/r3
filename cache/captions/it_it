@@ -1180,8 +1180,7 @@
 			"help":"Aiuto",
 			"helpHint":"Mostra pagine aiuto",
 			"log":"Log",
-			"logHint":"Apri log modifiche",
-			"logShowAll":"Show all ({CNT})"
+			"logHint":"Apri log modifiche"
 		},
 		"dialog":{
 			"close":"Ci sono modifiche non salvate.<br /><br />Chiudere comunque questo modulo?",
@@ -1199,13 +1198,22 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"Il record è stato aggiornato"
 		},
-		"dataLog":"Registri delle modifiche",
-		"deletedUser":"Utenti cancellati",
 		"help":"Pagine aiuto",
 		"helpContextTitle":"Contesto",
 		"helpModuleTitle":"Applicazione",
 		"invalidInputs":"Controlla input!",
 		"noAccess":"Nessun accesso"
+	},
+	"formLog":{
+		"button":{
+			"showAll":"Show all ({CNT})"
+		},
+		"deletedUser":"Utenti cancellati",
+		"fileCreated":"File created",
+		"fileDeleted":"File deleted",
+		"fileRenamed":"File renamed",
+		"fileUpdated":"File updated",
+		"title":"Registri delle modifiche"
 	},
 	"home":{
 		"button":{
