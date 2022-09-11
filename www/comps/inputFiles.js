@@ -540,7 +540,8 @@ let MyInputFiles = {
 				if(typeof this.fileIdMapChange[fileId] === 'undefined')
 					this.fileIdMapChange[fileId] = {
 						action:action,
-						name:''
+						name:'',
+						version:-1
 					};
 				
 				switch(action) {

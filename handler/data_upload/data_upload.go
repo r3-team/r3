@@ -88,11 +88,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		// save file
-		response.Id, err = data.SetFile(loginId, attributeId, fileId, part)
-		if err != nil {
+		isNewFile := fileId == uuid.Nil
+		if isNewFile {
+			fileId, err = uuid.NewV4()
+			if err != nil {
+				handler.AbortRequest(w, context, err, handler.ErrGeneral)
+				return
+			}
+		}
+
+		if err := data.SetFile(loginId, attributeId, fileId, part, isNewFile); err != nil {
 			handler.AbortRequest(w, context, err, handler.ErrGeneral)
 			return
 		}
+		response.Id = fileId
 	}
 
 	responseJson, err := json.Marshal(response)

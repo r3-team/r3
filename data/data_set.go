@@ -91,10 +91,10 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 
 		// log data changes if retention is enabled
 		// if existing record, get current values for log comparison after change
-		useLog := rel.RetentionCount.Status == pgtype.Present || rel.RetentionDays.Status == pgtype.Present
+		useLog := relationUsesLogging(rel.RetentionCount, rel.RetentionDays)
 		logAttributes := make([]types.DataSetAttribute, 0)
 		logFileAttributeIndexes := make([]int, 0)
-		logValuesOld := types.DataGetResult{}
+		logRecordOld := types.DataGetResult{}
 
 		for i, a := range dataSet.Attributes {
 			atr, exists := cache.AttributeIdMap[a.AttributeId]
@@ -110,7 +110,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 		}
 
 		if useLog && !isNewRecord {
-			logValuesOld, err = collectCurrentValuesForLog_tx(ctx, tx,
+			logRecordOld, err = collectCurrentValuesForLog_tx(ctx, tx,
 				dataSet.RelationId, logAttributes, logFileAttributeIndexes,
 				dataSet.RecordId, loginId)
 
@@ -138,7 +138,7 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 		// set data log
 		if useLog {
 			if err := setLog_tx(ctx, tx, dataSet.RelationId, logAttributes,
-				logFileAttributeIndexes, isNewRecord, logValuesOld,
+				logFileAttributeIndexes, isNewRecord, logRecordOld.Values,
 				indexRecordIds[index], loginId); err != nil {
 
 				return indexRecordIds, fmt.Errorf("failed to set data log, %v", err)
@@ -355,7 +355,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 
 	// assign/remove record from files based on files attributes
 	for _, i := range attributeFilesIndexes {
-		if err := setFileRecord_tx(ctx, tx, indexRecordIds[index],
+		if err := assignFilesToRecord_tx(ctx, tx, indexRecordIds[index],
 			dataSet.Attributes[i].AttributeId, dataSet.Attributes[i].Value); err != nil {
 
 			return err

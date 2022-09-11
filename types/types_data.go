@@ -116,12 +116,14 @@ type DataSetFile struct {
 	New  bool      `json:"new"`
 	Size int64     `json:"size"`
 }
+type DataSetFileChange struct {
+	Action  string `json:"action"`  // create, delete, rename, update
+	Name    string `json:"name"`    // file name for reference in change logs (new name if rename action)
+	Version int64  `json:"version"` // file version (specific version if update action, -1 otherwise)
+}
 type DataSetFiles struct {
-	Files           []DataSetFile `json:"files"`
-	FileIdMapChange map[uuid.UUID]struct {
-		Action string `json:"action"` // create, delete, rename, update
-		Name   string `json:"name"`   // file name for reference in change logs (new name if rename action)
-	} `json:"fileIdMapChange"`
+	Files           []DataSetFile                   `json:"files"`
+	FileIdMapChange map[uuid.UUID]DataSetFileChange `json:"fileIdMapChange"`
 }
 type DataSetResult struct {
 	IndexRecordIds map[int]int64 `json:"indexRecordIds"` // IDs of relation records, key: relation index

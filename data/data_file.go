@@ -1,7 +1,6 @@
 package data
 
 import (
-	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
@@ -21,10 +20,11 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 )
 
-func CanAccessFile(loginId int64, attributeId uuid.UUID) error {
+func MayAccessFile(loginId int64, attributeId uuid.UUID) error {
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
@@ -57,7 +57,7 @@ func GetFilePathVersion(attributeId uuid.UUID, fileId uuid.UUID, version int64) 
 // attempts to store file upload
 // returns file ID if successful
 func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
-	part *multipart.Part) (uuid.UUID, error) {
+	part *multipart.Part, isNewFile bool) error {
 
 	var err error
 
@@ -65,118 +65,178 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 	attribute, exists := cache.AttributeIdMap[attributeId]
 	if !exists || !schema.IsContentFiles(attribute.Content) {
 		cache.Schema_mx.RUnlock()
-		return fileId, errors.New("attribute is invalid")
+		return handler.ErrSchemaUnknownAttribute(attributeId)
 	}
 	cache.Schema_mx.RUnlock()
 
 	// check for authorized access, WRITE(2) for SET
 	if !authorizedAttribute(loginId, attributeId, 2) {
-		return fileId, errors.New(handler.ErrUnauthorized)
+		return errors.New(handler.ErrUnauthorized)
 	}
 
-	// store file with its UUID
-	isNewFile := fileId == uuid.Nil
-	version := 0
-	if isNewFile {
-		fileId, err = uuid.NewV4()
-		if err != nil {
-			return fileId, err
-		}
-	} else {
+	// if existing file: check latest version and currently assigned record
+	var recordId int64
+	var version int64
+	if !isNewFile {
 		if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
-			SELECT MAX(version)+1
-			FROM instance_file."%s"
-			WHERE file_id = $1
-		`, schema.GetFilesTableNameVersions(attributeId)), fileId).Scan(&version); err != nil {
-			return fileId, err
+			SELECT v.version+1, f.record_id
+			FROM instance_file."%s" AS v
+			JOIN instance_file."%s" AS f ON f.id = v.file_id
+			WHERE v.file_id = $1
+			ORDER BY v.version DESC
+			LIMIT 1
+		`, schema.GetFilesTableNameVersions(attributeId),
+			schema.GetFilesTableName(attributeId)),
+			fileId).Scan(&version, &recordId); err != nil {
+
+			return err
 		}
 	}
 	filePathDir := filepath.Join(config.File.Paths.Files, attributeId.String())
 
 	exists, err = tools.Exists(filePathDir)
 	if err != nil {
-		return fileId, err
+		return err
 	}
 	if !exists {
 		if err := os.Mkdir(filePathDir, 0600); err != nil {
-			return fileId, err
+			return err
 		}
 	}
 
 	// set final file path
-	filePath := filepath.Join(filePathDir, fileId.String())
+	filePath := GetFilePath(attributeId, fileId)
 	if version != 0 {
-		// not the first version, move the previous version to an older file
-		filePathLast := filepath.Join(filePathDir, fmt.Sprintf("%s_%d", fileId.String(), version-1))
+		// not the first version, add a version number to the current file version
+		if err := tools.FileMove(filePath, GetFilePathVersion(
+			attributeId, fileId, version-1), false); err != nil {
 
-		if err := tools.FileMove(filePath, filePathLast, false); err != nil {
-			return fileId, err
+			return err
 		}
 	}
 
 	dest, err := os.Create(filePath)
 	if err != nil {
-		return fileId, err
+		return err
 	}
 
 	if _, err := io.Copy(dest, part); err != nil {
 		dest.Close()
-		return fileId, err
+		return err
 	}
-	dest.Close()
-
-	// write file
-	buf := new(bytes.Buffer)
-	if _, err := buf.ReadFrom(part); err != nil {
-		return fileId, err
+	if err := dest.Close(); err != nil {
+		return err
 	}
 
 	// check size
 	fileInfo, err := os.Stat(filePath)
 	if err != nil {
-		return fileId, err
+		return err
 	}
 	fileSizeKb := int64(fileInfo.Size() / 1024)
 
 	if attribute.Length != 0 && fileSizeKb > int64(attribute.Length) {
-		return fileId, errors.New("file size limit reached")
+		return errors.New("file size limit reached")
 	}
 
 	// get file hash
 	hash, err := tools.GetFileHash(filePath)
 	if err != nil {
-		return fileId, err
+		return err
 	}
 
 	// create/update thumbnail - failure should not block progress
 	image.CreateThumbnail(fileId, filepath.Ext(part.FileName()), filePath,
 		GetFilePathThumb(attributeId, fileId), false)
 
-	// store file reference
+	// store file meta data in database
+	tx, err := db.Pool.Begin(db.Ctx)
+	if err != nil {
+		return err
+	}
+
+	if err := storeFileChanges_tx(tx, isNewFile, attributeId,
+		attribute.RelationId, fileId, hash, part.FileName(),
+		fileSizeKb, version, recordId, loginId); err != nil {
+
+		tx.Rollback(db.Ctx)
+		return err
+	}
+	return tx.Commit(db.Ctx)
+}
+
+// stores database changes for updated files
+func storeFileChanges_tx(tx pgx.Tx, isNewFile bool, attributeId uuid.UUID,
+	relationId uuid.UUID, fileId uuid.UUID, fileHash string, fileName string,
+	fileSizeKb int64, fileVersion int64, recordId int64, loginId int64) error {
+
 	if isNewFile {
-		if _, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
+		// store file reference
+		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 			INSERT INTO instance_file."%s" (id,name)
 			VALUES ($1,$2)
-		`, schema.GetFilesTableName(attributeId)), fileId, part.FileName()); err != nil {
-			return fileId, err
+		`, schema.GetFilesTableName(attributeId)), fileId, fileName); err != nil {
+			return err
 		}
 	}
 
-	if _, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
+	// store file version reference
+	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		INSERT INTO instance_file."%s" (
 			file_id,version,login_id,hash,size_kb,date_change
 		)
 		VALUES ($1,$2,$3,$4,$5,$6)
-	`, schema.GetFilesTableNameVersions(attributeId)), fileId, version, loginId,
-		hash, fileSizeKb, tools.GetTimeUnix()); err != nil {
+	`, schema.GetFilesTableNameVersions(attributeId)), fileId, fileVersion,
+		loginId, fileHash, fileSizeKb, tools.GetTimeUnix()); err != nil {
 
-		return fileId, err
+		return err
 	}
-	return fileId, nil
+
+	// skip change log if new file or file is not attached to a record
+	// new file change logs are stored when record is saved
+	if isNewFile || recordId == 0 {
+		return nil
+	}
+
+	cache.Schema_mx.RLock()
+	relation, exists := cache.RelationIdMap[relationId]
+	if !exists {
+		cache.Schema_mx.RUnlock()
+		return handler.ErrSchemaUnknownRelation(relationId)
+	}
+	cache.Schema_mx.RUnlock()
+
+	if !relationUsesLogging(relation.RetentionCount, relation.RetentionDays) {
+		return nil
+	}
+
+	logAttributes := []types.DataSetAttribute{
+		types.DataSetAttribute{
+			AttributeId: attributeId,
+			AttributeIdNm: pgtype.UUID{
+				Status: pgtype.Null,
+			},
+			Value: types.DataSetFiles{
+				Files: make([]types.DataSetFile, 0),
+				FileIdMapChange: map[uuid.UUID]types.DataSetFileChange{
+					fileId: types.DataSetFileChange{
+						Action:  "update",
+						Name:    fileName,
+						Version: fileVersion,
+					},
+				},
+			},
+		},
+	}
+	logAttributeFileIndexes := []int{0}
+	logValuesOld := []interface{}{nil}
+
+	return setLog_tx(db.Ctx, tx, relationId, logAttributes,
+		logAttributeFileIndexes, false, logValuesOld, recordId, loginId)
 }
 
 // assigns record to files based on attribute value
-func setFileRecord_tx(ctx context.Context, tx pgx.Tx,
+func assignFilesToRecord_tx(ctx context.Context, tx pgx.Tx,
 	recordId int64, attributeId uuid.UUID, filesValue interface{}) error {
 
 	if filesValue == nil {

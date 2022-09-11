@@ -46,12 +46,26 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// version is only required, if a specific file version is requested
+	// if not set, open the latest one
+	version, err := handler.ReadInt64GetterFromUrl(r, "version")
+	if err != nil {
+		version = -1
+	}
+
 	// check file access
-	if err := data.CanAccessFile(loginId, attributeId); err != nil {
+	if err := data.MayAccessFile(loginId, attributeId); err != nil {
 		handler.AbortRequest(w, context, err, handler.ErrUnauthorized)
 		return
 	}
 
+	var filePath string
+	if version == -1 {
+		filePath = data.GetFilePath(attributeId, fileId)
+	} else {
+		filePath = data.GetFilePathVersion(attributeId, fileId, version)
+	}
+
 	// serve file
-	http.ServeFile(w, r, data.GetFilePath(attributeId, fileId))
+	http.ServeFile(w, r, filePath)
 }

@@ -11,6 +11,7 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
 )
 
@@ -53,6 +54,12 @@ func authorizedRelation(loginId int64, relationId uuid.UUID, requestedAccess int
 		return access.Relation[relationId] >= requestedAccess
 	}
 	return false
+}
+
+// check whether a relation uses logging
+func relationUsesLogging(retentionCount pgtype.Int4, retentionDays pgtype.Int4) bool {
+	return retentionCount.Status == pgtype.Present ||
+		retentionDays.Status == pgtype.Present
 }
 
 // get the names of policy blacklist & whitelist functions (empty strings if no functions are available)

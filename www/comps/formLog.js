@@ -4,6 +4,7 @@ import {consoleError}                  from './shared/error.js';
 import {getUnixFormat}                 from './shared/time.js';
 import {
 	getAttributeFileHref,
+	getAttributeFileVersionHref,
 	getDetailsFromIndexAttributeId,
 	getIndexAttributeId,
 	getIndexAttributeIdByField,
@@ -87,7 +88,21 @@ let MyFormLog = {
 											<td v-if="c.action === 'rename'">{{ capApp.fileRenamed }}</td>
 											<td v-if="c.action === 'update'">{{ capApp.fileUpdated }}</td>
 											<td>
-												<a target="_blank" :href="getAttributeFileHref(indexAttributeIdMapField[ia].attributeId,fileId,c.name,token)">
+												<!-- latest file version -->
+												<a target="_blank"
+													v-if="c.action !== 'update'"
+													:href="getAttributeFileHref(indexAttributeIdMapField[ia].attributeId,fileId,c.name,token)"
+												>
+													<my-button image="download.png"
+														:caption="c.name"
+														:naked="true"
+													/>
+												</a>
+												<!-- specific file version -->
+												<a target="_blank"
+													v-else
+													:href="getAttributeFileVersionHref(indexAttributeIdMapField[ia].attributeId,fileId,c.name,token,c.version)"
+												>
 													<my-button image="download.png"
 														:caption="c.name"
 														:naked="true"
@@ -167,6 +182,7 @@ let MyFormLog = {
 		aesGcmDecryptBase64WithPhrase,
 		consoleError,
 		getAttributeFileHref,
+		getAttributeFileVersionHref,
 		getDetailsFromIndexAttributeId,
 		getIndexAttributeId,
 		getIndexAttributeIdByField,

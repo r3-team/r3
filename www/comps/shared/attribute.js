@@ -66,9 +66,11 @@ export function getDetailsFromIndexAttributeId(indexAttributeId) {
 export function getAttributeFileHref(attributeId,fileId,fileName,token) {
 	return `/data/download/${fileName}?attribute_id=${attributeId}&file_id=${fileId}&token=${token}`;
 };
-
 export function getAttributeFileHrefThumb(attributeId,fileId,fileName,token) {
 	return `/data/download/thumb/${fileName}?attribute_id=${attributeId}&file_id=${fileId}&token=${token}`;
+};
+export function getAttributeFileVersionHref(attributeId,fileId,fileName,token,version) {
+	return `/data/download/${fileName}?attribute_id=${attributeId}&file_id=${fileId}&token=${token}&version=${version}`;
 };
 
 export function getValueFromQuery(content,queryValue) {

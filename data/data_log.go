@@ -150,11 +150,10 @@ func getLogValues_tx(ctx context.Context, tx pgx.Tx, logId uuid.UUID,
 // set data change log for specific record that was either created or updated
 func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	attributes []types.DataSetAttribute, fileAttributesIndexes []int,
-	wasCreated bool, valuesOld types.DataGetResult, recordId int64,
+	wasCreated bool, valuesOld []interface{}, recordId int64,
 	loginId int64) error {
 
 	// new record, apply logs for record and its attribute values
-	// even with no attribute values, record creation must be logged
 	if wasCreated {
 		logId, err := setLogRecord_tx(ctx, tx, relationId, loginId, recordId)
 		if err != nil {
@@ -183,18 +182,18 @@ func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 		}
 
 		// both values are nil, no change
-		if valuesOld.Values[i] == nil && atr.Value == nil {
+		if valuesOld[i] == nil && atr.Value == nil {
 			continue
 		}
 
 		// only one value is nil, definite change
-		if valuesOld.Values[i] == nil || atr.Value == nil {
+		if valuesOld[i] == nil || atr.Value == nil {
 			attributesChangedIndexes = append(attributesChangedIndexes, i)
 			continue
 		}
 
 		// compare JSON representations of old and new values
-		jsonOld, err := json.Marshal(valuesOld.Values[i])
+		jsonOld, err := json.Marshal(valuesOld[i])
 		if err != nil {
 			return err
 		}
