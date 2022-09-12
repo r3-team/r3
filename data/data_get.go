@@ -532,7 +532,7 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 				SELECT COALESCE(ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(t))),'[]'::JSON)
 				FROM (
 					SELECT f.id, f.name, COALESCE(v.hash,'') AS hash,
-						v.size_kb AS size, v.date_change AS changed
+						v.size_kb AS size, v.version, v.date_change AS changed
 					FROM instance_file."%s" AS f
 					JOIN instance_file."%s" AS v
 						ON  v.file_id = f.id

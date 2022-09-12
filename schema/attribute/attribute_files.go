@@ -65,7 +65,11 @@ func fileRelationsCreate_tx(tx pgx.Tx, attributeId uuid.UUID,
 		
 		CREATE INDEX "fki_%s_login_id_fkey"
 			ON instance_file."%s" USING btree (login_id ASC NULLS LAST);
-	`, tNameV, tNameV, tNameV, tName, tNameV, tNameV, tNameV, tNameV, tNameV))
+		
+		CREATE INDEX "ind_%s_version"
+			ON instance_file."%s" USING btree (version ASC NULLS LAST);
+	`, tNameV, tNameV, tNameV, tName, tNameV,
+		tNameV, tNameV, tNameV, tNameV, tNameV, tNameV))
 
 	return err
 }

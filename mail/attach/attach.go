@@ -2,20 +2,19 @@ package attach
 
 import (
 	"bytes"
-	"encoding/json"
 	"fmt"
 	"io"
 	"os"
 	"path/filepath"
 	"r3/cache"
 	"r3/config"
+	"r3/data"
 	"r3/db"
 	"r3/schema"
 	"r3/tools"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
 )
 
 func DoAll() error {
@@ -67,6 +66,7 @@ func do(mail types.Mail) error {
 	}
 
 	// get files from spooler
+	fileIds := make([]uuid.UUID, 0)
 	filesMail := make([]types.MailFile, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
@@ -89,6 +89,7 @@ func do(mail types.Mail) error {
 		if err := rows.Scan(&f.File, &f.Name, &f.Size); err != nil {
 			return err
 		}
+		fileIds = append(fileIds, f.Id)
 		filesMail = append(filesMail, f)
 	}
 	rows.Close()
@@ -102,48 +103,7 @@ func do(mail types.Mail) error {
 		return err
 	}
 
-	// get files attribute value for record
-	rel, _ := cache.RelationIdMap[atr.RelationId]
-	mod, _ := cache.ModuleIdMap[rel.ModuleId]
-	var filesValueIn interface{}
-
-	err = db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
-		SELECT "%s"
-		FROM "%s"."%s"
-		WHERE "%s" = $1
-	`, atr.Name, mod.Name, rel.Name, schema.PkName),
-		mail.RecordId.Int).Scan(&filesValueIn)
-
-	if err != pgx.ErrNoRows && err != nil {
-		return err
-	}
-
-	if err == pgx.ErrNoRows {
-		return fmt.Errorf("cannot attach file(s) to non-existing record (ID: %d)",
-			mail.RecordId.Int)
-	}
-
-	// prepare files attribute value
-	filesValue, err := schema.GetAttributeFilesFromInterface(filesValueIn)
-	if err != nil {
-		return err
-	}
-
-	for _, f := range filesMail {
-		filesValue.Files = append(filesValue.Files, types.DataSetFile{
-			Id:   f.Id,
-			Name: f.Name,
-			New:  false,
-			Size: f.Size,
-		})
-	}
-
-	filesValueJson, err := json.Marshal(filesValue)
-	if err != nil {
-		return err
-	}
-
-	// create physical files
+	// create base path if not there
 	basePath := filepath.Join(config.File.Paths.Files, atr.Id.String())
 
 	exists, err = tools.Exists(basePath)
@@ -156,40 +116,55 @@ func do(mail types.Mail) error {
 		}
 	}
 
-	for _, f := range filesMail {
-		file, err := os.Create(filepath.Join(basePath, f.Id.String()))
+	// copy files
+	for i, f := range filesMail {
+		filePath := data.GetFilePathVersion(atr.Id, f.Id, 0)
+		file, err := os.Create(filePath)
 		if err != nil {
 			return err
 		}
-
 		if _, err := io.Copy(file, bytes.NewReader(f.File)); err != nil {
+			return err
+		}
+		if err := file.Close(); err != nil {
+			return err
+		}
+		filesMail[i].Hash, err = tools.GetFileHash(filePath)
+		if err != nil {
 			return err
 		}
 	}
 
-	// set files attribute for record and then delete mail
+	// store file changes
+	// update the database only after all files have physically been saved
 	tx, err := db.Pool.Begin(db.Ctx)
 	if err != nil {
 		return err
 	}
 	defer tx.Rollback(db.Ctx)
 
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-		UPDATE "%s"."%s" SET "%s" = $1
-		WHERE "%s" = $2
-	`, mod.Name, rel.Name, atr.Name, schema.PkName),
-		filesValueJson, mail.RecordId.Int); err != nil {
+	rel, _ := cache.RelationIdMap[atr.RelationId]
+	for _, f := range filesMail {
+		if err := data.FileApplyVersion_tx(db.Ctx, tx, true, atr.Id, rel.Id,
+			f.Id, f.Hash, f.Name, f.Size, 0, mail.RecordId, -1); err != nil {
+
+			return err
+		}
+	}
+
+	// assign files to record
+	if err := data.FilesAssignToRecord_tx(db.Ctx, tx, atr.Id,
+		fileIds, mail.RecordId.Int); err != nil {
 
 		return err
 	}
 
+	// all done, delete mail
 	if _, err := tx.Exec(db.Ctx, `
 		DELETE FROM instance.mail_spool
 		WHERE id = $1
 	`, mail.Id); err != nil {
 		return err
 	}
-
-	// commit DB changes
 	return tx.Commit(db.Ctx)
 }

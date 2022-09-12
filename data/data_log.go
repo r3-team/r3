@@ -212,7 +212,7 @@ func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 			continue
 		}
 
-		var v types.DataSetFiles
+		var v types.DataSetFileChanges
 		vJson, err := json.Marshal(attributes[atrIndex].Value)
 		if err != nil {
 			return err

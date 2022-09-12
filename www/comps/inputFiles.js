@@ -1,8 +1,8 @@
 import {getFilesFromDataItems} from './shared/drop.js';
 import {getUnixFormat}         from './shared/time.js';
 import {
-	getAttributeFileHref,
-	getAttributeFileHrefThumb
+	getAttributeFileThumbHref,
+	getAttributeFileVersionHref
 } from './shared/attribute.js';
 import {
 	fieldOptionGet,
@@ -194,7 +194,7 @@ let MyInputFiles = {
 						<td>
 							<div class="row">
 								<a target="_blank"
-									:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
+									:href="getAttributeFileVersionHref(attributeId,f.id,f.name,token,f.version)"
 								>
 									<my-button image="download.png"
 										:captionTitle="capApp.button.download"
@@ -221,7 +221,7 @@ let MyInputFiles = {
 			<div class="listComfort" v-if="viewListComfort">
 				<div class="item" v-for="f in files">
 					<a target="_blank"
-						:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
+						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,token,f.version)"
 						:title="capApp.button.download"
 					>
 						<img class="prev" :src="imagePreview(f.id,f.name)" />
@@ -261,7 +261,7 @@ let MyInputFiles = {
 			<div class="gallery" v-if="viewGallery" >
 				<div class="item" v-for="f in files">
 					<a target="_blank"
-						:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
+						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,token,f.version)"
 						:title="capApp.button.download"
 					>
 						<img class="prev" :src="imagePreview(f.id,f.name)">
@@ -413,8 +413,8 @@ let MyInputFiles = {
 		// externals
 		fieldOptionGet,
 		fieldOptionSet,
-		getAttributeFileHref,
-		getAttributeFileHrefThumb,
+		getAttributeFileThumbHref,
+		getAttributeFileVersionHref,
 		getFilesFromDataItems,
 		getNilUuid,
 		getSizeReadable,
@@ -439,7 +439,7 @@ let MyInputFiles = {
 			if(!this.extPreview.includes(this.extRegex.exec(fileName)[1]))
 				return 'images/noPic.png';
 			
-			return this.getAttributeFileHrefThumb(this.attributeId,fileId,fileName,this.token);
+			return this.getAttributeFileThumbHref(this.attributeId,fileId,fileName,this.token);
 		},
 		setNoSpaceMode() {
 			this.noSpace = this.$refs.main.clientWidth <= 700;

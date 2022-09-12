@@ -41,10 +41,6 @@ func MayAccessFile(loginId int64, attributeId uuid.UUID) error {
 }
 
 // returns path to downloadable file, a specific version or its thumbnail
-func GetFilePath(attributeId uuid.UUID, fileId uuid.UUID) string {
-	return filepath.Join(config.File.Paths.Files, attributeId.String(),
-		fileId.String())
-}
 func GetFilePathThumb(attributeId uuid.UUID, fileId uuid.UUID) string {
 	return filepath.Join(config.File.Paths.Files, attributeId.String(),
 		fmt.Sprintf("%s.webp", fileId.String()))
@@ -55,7 +51,6 @@ func GetFilePathVersion(attributeId uuid.UUID, fileId uuid.UUID, version int64) 
 }
 
 // attempts to store file upload
-// returns file ID if successful
 func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 	part *multipart.Part, isNewFile bool) error {
 
@@ -75,8 +70,8 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 	}
 
 	// if existing file: check latest version and currently assigned record
-	var recordId int64
-	var version int64
+	var recordId pgtype.Int8
+	var version int64 = 0
 	if !isNewFile {
 		if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
 			SELECT v.version+1, f.record_id
@@ -104,17 +99,8 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 		}
 	}
 
-	// set final file path
-	filePath := GetFilePath(attributeId, fileId)
-	if version != 0 {
-		// not the first version, add a version number to the current file version
-		if err := tools.FileMove(filePath, GetFilePathVersion(
-			attributeId, fileId, version-1), false); err != nil {
-
-			return err
-		}
-	}
-
+	// write file
+	filePath := GetFilePathVersion(attributeId, fileId, version)
 	dest, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -155,7 +141,7 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 		return err
 	}
 
-	if err := storeFileChanges_tx(tx, isNewFile, attributeId,
+	if err := FileApplyVersion_tx(db.Ctx, tx, isNewFile, attributeId,
 		attribute.RelationId, fileId, hash, part.FileName(),
 		fileSizeKb, version, recordId, loginId); err != nil {
 
@@ -165,10 +151,11 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 	return tx.Commit(db.Ctx)
 }
 
-// stores database changes for updated files
-func storeFileChanges_tx(tx pgx.Tx, isNewFile bool, attributeId uuid.UUID,
-	relationId uuid.UUID, fileId uuid.UUID, fileHash string, fileName string,
-	fileSizeKb int64, fileVersion int64, recordId int64, loginId int64) error {
+// stores database changes for uploaded/updated files
+func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool,
+	attributeId uuid.UUID, relationId uuid.UUID, fileId uuid.UUID, fileHash string,
+	fileName string, fileSizeKb int64, fileVersion int64, recordId pgtype.Int8,
+	loginId int64) error {
 
 	if isNewFile {
 		// store file reference
@@ -181,6 +168,14 @@ func storeFileChanges_tx(tx pgx.Tx, isNewFile bool, attributeId uuid.UUID,
 	}
 
 	// store file version reference
+	loginNull := pgtype.Int4{
+		Int:    int32(loginId),
+		Status: pgtype.Present,
+	}
+	if loginId == -1 {
+		loginNull.Status = pgtype.Null
+	}
+
 	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		INSERT INTO instance_file."%s" (
 			file_id,version,login_id,hash,size_kb,date_change
@@ -194,7 +189,7 @@ func storeFileChanges_tx(tx pgx.Tx, isNewFile bool, attributeId uuid.UUID,
 
 	// skip change log if new file or file is not attached to a record
 	// new file change logs are stored when record is saved
-	if isNewFile || recordId == 0 {
+	if isNewFile || recordId.Status != pgtype.Present {
 		return nil
 	}
 
@@ -216,8 +211,7 @@ func storeFileChanges_tx(tx pgx.Tx, isNewFile bool, attributeId uuid.UUID,
 			AttributeIdNm: pgtype.UUID{
 				Status: pgtype.Null,
 			},
-			Value: types.DataSetFiles{
-				Files: make([]types.DataSetFile, 0),
+			Value: types.DataSetFileChanges{
 				FileIdMapChange: map[uuid.UUID]types.DataSetFileChange{
 					fileId: types.DataSetFileChange{
 						Action:  "update",
@@ -232,11 +226,11 @@ func storeFileChanges_tx(tx pgx.Tx, isNewFile bool, attributeId uuid.UUID,
 	logValuesOld := []interface{}{nil}
 
 	return setLog_tx(db.Ctx, tx, relationId, logAttributes,
-		logAttributeFileIndexes, false, logValuesOld, recordId, loginId)
+		logAttributeFileIndexes, false, logValuesOld, recordId.Int, loginId)
 }
 
-// assigns record to files based on attribute value
-func assignFilesToRecord_tx(ctx context.Context, tx pgx.Tx,
+// updates file record assignment or deletion state based on file attribute changes
+func filesApplyAttributChanges_tx(ctx context.Context, tx pgx.Tx,
 	recordId int64, attributeId uuid.UUID, filesValue interface{}) error {
 
 	if filesValue == nil {
@@ -248,7 +242,7 @@ func assignFilesToRecord_tx(ctx context.Context, tx pgx.Tx,
 	if err != nil {
 		return err
 	}
-	var v types.DataSetFiles
+	var v types.DataSetFileChanges
 	if err := json.Unmarshal(vJson, &v); err != nil {
 		return err
 	}
@@ -276,23 +270,37 @@ func assignFilesToRecord_tx(ctx context.Context, tx pgx.Tx,
 	}
 
 	if len(fileIdsCreated) != 0 {
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`
-			UPDATE instance_file."%s"
-			SET record_id = $1
-			WHERE id = ANY($2)
-		`, tName), recordId, fileIdsCreated); err != nil {
+		if err := FilesAssignToRecord_tx(ctx, tx, attributeId, fileIdsCreated, recordId); err != nil {
 			return err
 		}
 	}
 	if len(fileIdsDeleted) != 0 {
-		if _, err := tx.Exec(ctx, fmt.Sprintf(`
-			UPDATE instance_file."%s"
-			SET date_delete = $1
-			WHERE record_id = $2
-			AND id = ANY($3)
-		`, tName), tools.GetTimeUnix(), recordId, fileIdsDeleted); err != nil {
+		if err := FilesSetDeletedForRecord_tx(ctx, tx, attributeId, fileIdsDeleted, recordId); err != nil {
 			return err
 		}
 	}
 	return nil
+}
+
+func FilesAssignToRecord_tx(ctx context.Context, tx pgx.Tx,
+	attributeId uuid.UUID, fileIds []uuid.UUID, recordId int64) error {
+
+	_, err := tx.Exec(ctx, fmt.Sprintf(`
+		UPDATE instance_file."%s"
+		SET record_id = $1
+		WHERE id = ANY($2)
+	`, schema.GetFilesTableName(attributeId)), recordId, fileIds)
+	return err
+}
+
+func FilesSetDeletedForRecord_tx(ctx context.Context, tx pgx.Tx,
+	attributeId uuid.UUID, fileIds []uuid.UUID, recordId int64) error {
+
+	_, err := tx.Exec(ctx, fmt.Sprintf(`
+		UPDATE instance_file."%s"
+		SET date_delete = $1
+		WHERE record_id = $2
+		AND   id        = ANY($3)
+	`, schema.GetFilesTableName(attributeId)), tools.GetTimeUnix(), recordId, fileIds)
+	return err
 }

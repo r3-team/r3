@@ -37,6 +37,7 @@ type MailAccount struct {
 type MailFile struct {
 	Id   uuid.UUID `json:"id"`
 	File []byte    `json:"file"`
+	Hash string    `json:"hash"`
 	Name string    `json:"name"`
 	Size int64     `json:"size"`
 }

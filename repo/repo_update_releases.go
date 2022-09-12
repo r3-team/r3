@@ -154,7 +154,7 @@ func getModuleReleases(token string, url string, skipVerify bool,
 					return errors.New("invalid value type for files attribute")
 				}
 
-				files := types.DataSetFiles{}
+				files := types.DataGetValueFiles{}
 				if err := json.Unmarshal(filesJson, &files); err != nil {
 					return err
 				}

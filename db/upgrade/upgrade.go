@@ -211,9 +211,12 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				
 				CREATE INDEX "fki_%s_login_id_fkey"
 					ON instance_file."%s" USING btree (login_id ASC NULLS LAST);
+				
+				CREATE INDEX "ind_%s_version"
+					ON instance_file."%s" USING btree (version ASC NULLS LAST);
 			`, tName, tName, tName, fa.moduleName, fa.relationName, schema.PkName,
 				tName, tName, tNameV, tNameV, tNameV, tName, tNameV, tNameV,
-				tNameV, tNameV, tNameV)); err != nil {
+				tNameV, tNameV, tNameV, tNameV, tNameV)); err != nil {
 
 				return "", err
 			}
@@ -245,6 +248,25 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ALTER TABLE %s.%s DROP COLUMN %s
 			`, fa.moduleName, fa.relationName, fa.attributeName)); err != nil {
 				return "", err
+			}
+
+			// rename files on disk
+			fileIds := make([]uuid.UUID, 0)
+			if err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
+				SELECT ARRAY_AGG(id)
+				FROM instance_file."%s"
+			`, tName)).Scan(&fileIds); err != nil {
+				return "", err
+			}
+
+			for _, fileId := range fileIds {
+				if err := os.Rename(
+					filepath.Join(config.File.Paths.Files, fa.attributeId.String(), fileId.String()),
+					filepath.Join(config.File.Paths.Files, fa.attributeId.String(), fmt.Sprintf("%s_0", fileId))); err != nil {
+
+					log.Warning("server", fmt.Sprintf("failed to rename file '%s/%s' during platform upgrade",
+						fa.attributeId, fileId), err)
+				}
 			}
 		}
 

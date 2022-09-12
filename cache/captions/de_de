@@ -1209,7 +1209,7 @@
 			"showAll":"Alle anzeigen ({CNT})"
 		},
 		"deletedUser":"gelöschter Benutzer",
-		"fileCreated":"Datei erstellt",
+		"fileCreated":"Datei hinzugefügt",
 		"fileDeleted":"Datei gelöscht",
 		"fileRenamed":"Datei umbenannt",
 		"fileUpdated":"Datei verändert",

@@ -1,11 +1,14 @@
 package data_download
 
 import (
+	"fmt"
 	"net/http"
 	"r3/bruteforce"
 	"r3/data"
+	"r3/db"
 	"r3/handler"
 	"r3/login/login_auth"
+	"r3/schema"
 )
 
 var context = "data_download"
@@ -53,19 +56,26 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		version = -1
 	}
 
-	// check file access
+	// check file access privilege
 	if err := data.MayAccessFile(loginId, attributeId); err != nil {
 		handler.AbortRequest(w, context, err, handler.ErrUnauthorized)
 		return
 	}
 
-	var filePath string
 	if version == -1 {
-		filePath = data.GetFilePath(attributeId, fileId)
-	} else {
-		filePath = data.GetFilePathVersion(attributeId, fileId, version)
-	}
+		// retrieve latest file version
+		if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+			SELECT version
+			FROM instance_file."%s"
+			WHERE file_id = $1
+			ORDER BY version DESC
+			LIMIT 1
+		`, schema.GetFilesTableNameVersions(attributeId)),
+			fileId).Scan(&version); err != nil {
 
-	// serve file
-	http.ServeFile(w, r, filePath)
+			handler.AbortRequest(w, context, err, handler.ErrGeneral)
+			return
+		}
+	}
+	http.ServeFile(w, r, data.GetFilePathVersion(attributeId, fileId, version))
 }

@@ -1209,7 +1209,7 @@
 			"showAll":"Show all ({CNT})"
 		},
 		"deletedUser":"utilizator șters",
-		"fileCreated":"File created",
+		"fileCreated":"File added",
 		"fileDeleted":"File deleted",
 		"fileRenamed":"File renamed",
 		"fileUpdated":"File updated",

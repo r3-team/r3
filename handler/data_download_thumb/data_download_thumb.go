@@ -58,7 +58,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// check file access
+	// check file access privilege
 	if err := data.MayAccessFile(loginId, attributeId); err != nil {
 		fmt.Println("bad access")
 		handler.AbortRequest(w, context, err, handler.ErrUnauthorized)

@@ -124,36 +124,22 @@ func cleanUpFiles() error {
 				}
 
 				for _, version := range versions {
+					filePath := data.GetFilePathVersion(atrId, fileId, version)
 
-					// files are stored in subfolders, one for each attribute ID
-					// either file version is latest one (no suffix) or not (version nr. suffix)
-					//  as in: "[UUID]" (latest) or "[UUID]_6" (version 6)
-					// since latest version could have been deleted before, we check both
-					paths := []string{
-						data.GetFilePath(atrId, fileId),
-						data.GetFilePathVersion(atrId, fileId, version-1),
+					exists, err := tools.Exists(filePath)
+					if err != nil {
+						return err
+					}
+					if !exists {
+						// file not available, skip and continue
+						continue
 					}
 
-					filePath := ""
-					for _, p := range paths {
-						exists, err := tools.Exists(p)
-						if err != nil {
-							log.Error("server", "failed to check file existence", err)
-							return err
-						}
-						if exists {
-							filePath = p
-							break
-						}
-					}
-
-					if filePath != "" {
-						// referenced file version exists, attempt to delete it
-						// if deletion fails, abort and keep its reference as file might be in access
-						if err := os.Remove(filePath); err != nil {
-							log.Warning("server", "failed to remove old file version", err)
-							continue
-						}
+					// referenced file version exists, attempt to delete it
+					// if deletion fails, abort and keep its reference as file might be in access
+					if err := os.Remove(filePath); err != nil {
+						log.Warning("server", "failed to remove old file version", err)
+						continue
 					}
 
 					// clean up thumbnail, if there
