@@ -301,6 +301,20 @@
 			"roleContentUser":"User"
 		},
 		"logs":{
+			"contextLabel":{
+				"backup":"Backup",
+				"cache":"Cache",
+				"cluster":"Cluster",
+				"csv":"CSV import/export",
+				"imager":"Image processing",
+				"ldap":"LDAP",
+				"mail":"Mail",
+				"module":"Applications",
+				"scheduler":"Scheduler",
+				"server":"Server",
+				"transfer":"Transfer",
+				"websocket":"Websocket clients"
+			},
 			"byString":"Text search",
 			"context":"Context",
 			"date":"Timestamp",
@@ -313,17 +327,6 @@
 			"logLevel1":"Errors only",
 			"logLevel2":"Errors & warnings",
 			"logLevel3":"Everything",
-			"logLevelApplication":"Applications",
-			"logLevelBackup":"Backup",
-			"logLevelCache":"Cache",
-			"logLevelCluster":"Cluster",
-			"logLevelCsv":"CSV import/export",
-			"logLevelImager":"Image processing",
-			"logLevelLdap":"LDAP",
-			"logLevelMail":"Mail",
-			"logLevelScheduler":"Scheduler",
-			"logLevelServer":"Server",
-			"logLevelTransfer":"Transfer",
 			"message":"Message",
 			"module":"Application",
 			"node":"Cluster node"

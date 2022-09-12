@@ -10,18 +10,13 @@ import (
 )
 
 func AttributeDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
 	var req struct {
 		Id uuid.UUID `json:"id"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := attribute.Del_tx(tx, req.Id); err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return nil, attribute.Del_tx(tx, req.Id)
 }
 
 func AttributeGet(reqJson json.RawMessage) (interface{}, error) {
@@ -50,15 +45,10 @@ func AttributeGet(reqJson json.RawMessage) (interface{}, error) {
 func AttributeSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req types.Attribute
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := attribute.Set_tx(tx, req.RelationId, req.Id, req.RelationshipId,
+	return nil, attribute.Set_tx(tx, req.RelationId, req.Id, req.RelationshipId,
 		req.IconId, req.Name, req.Content, req.Length, req.Nullable,
-		req.Encrypted, req.Def, req.OnUpdate, req.OnDelete, req.Captions); err != nil {
-
-		return nil, err
-	}
-	return nil, nil
+		req.Encrypted, req.Def, req.OnUpdate, req.OnDelete, req.Captions)
 }

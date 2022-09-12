@@ -81,7 +81,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info("server", fmt.Sprintf("new client connecting from %s", host))
+	log.Info(handlerContext, fmt.Sprintf("new client connecting from %s", host))
 
 	// create global request context with abort function
 	ctx, ctxCancel := context.WithCancel(context.Background())
@@ -107,7 +107,7 @@ func (hub *hubType) start() {
 
 	var removeClient = func(client *clientType) {
 		if _, exists := hub.clients[client]; exists {
-			log.Info("server", fmt.Sprintf("disconnecting client at %s", client.address))
+			log.Info(handlerContext, fmt.Sprintf("disconnecting client at %s", client.address))
 			client.ws.WriteMessage(websocket.CloseMessage, []byte{}) // optional
 			client.ws.Close()
 			client.ctxCancel()
@@ -160,7 +160,7 @@ func (hub *hubType) start() {
 					jsonMsg, err = prepareUnrequested("schema_loaded", event.SchemaTimestamp)
 				}
 				if err != nil {
-					log.Error("server", "could not prepare unrequested transaction", err)
+					log.Error(handlerContext, "could not prepare unrequested transaction", err)
 					continue
 				}
 			}
@@ -179,7 +179,7 @@ func (hub *hubType) start() {
 
 				// kick client, if requested
 				if event.Kick || (event.KickNonAdmin && !client.admin) {
-					log.Info("server", fmt.Sprintf("kicking client (login ID %d)",
+					log.Info(handlerContext, fmt.Sprintf("kicking client (login ID %d)",
 						client.loginId))
 
 					removeClient(client)
@@ -223,11 +223,11 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 
 	// umarshal user input, this can always fail (never trust user input)
 	if err := json.Unmarshal(reqTransJson, &reqTrans); err != nil {
-		log.Error("server", "failed to unmarshal transaction", err)
+		log.Error(handlerContext, "failed to unmarshal transaction", err)
 		return []byte("{}")
 	}
 
-	log.Info("server", fmt.Sprintf("TRANSACTION %d, started by login ID %d (%s)",
+	log.Info(handlerContext, fmt.Sprintf("TRANSACTION %d, started by login ID %d (%s)",
 		reqTrans.TransactionNr, client.loginId, client.address))
 
 	// take over transaction number for response so client can match it locally
@@ -238,7 +238,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 
 	if !authRequest {
 		if client.fixedToken {
-			log.Warning("server", "blocked client request",
+			log.Warning(handlerContext, "blocked client request",
 				fmt.Errorf("only authentication allowed for fixed token clients"))
 
 			return []byte("{}")
@@ -278,7 +278,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 		}
 
 		if err != nil {
-			log.Warning("server", "failed to authenticate user", err)
+			log.Warning(handlerContext, "failed to authenticate user", err)
 			bruteforce.BadAttemptByHost(client.address)
 			resTrans.Error = "AUTH_ERROR"
 		} else {
@@ -292,7 +292,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 		}
 
 		if resTrans.Error == "" {
-			log.Info("server", fmt.Sprintf("authenticated client (login ID %d, admin: %v)",
+			log.Info(handlerContext, fmt.Sprintf("authenticated client (login ID %d, admin: %v)",
 				client.loginId, client.admin))
 		}
 	}
@@ -300,7 +300,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 	// marshal response transaction
 	resTransJson, err := json.Marshal(resTrans)
 	if err != nil {
-		log.Error("server", "cannot marshal responses", err)
+		log.Error(handlerContext, "cannot marshal responses", err)
 		return []byte("{}")
 	}
 	return resTransJson

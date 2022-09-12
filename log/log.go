@@ -19,17 +19,18 @@ var (
 
 	// log levels
 	contextLevel = map[string]int{
-		"application": 1,
-		"backup":      1,
-		"cache":       1,
-		"cluster":     1,
-		"csv":         1,
-		"imager":      1,
-		"mail":        1,
-		"ldap":        1,
-		"scheduler":   1,
-		"server":      1,
-		"transfer":    1,
+		"backup":    1,
+		"cache":     1,
+		"cluster":   1,
+		"csv":       1,
+		"imager":    1,
+		"mail":      1,
+		"module":    1,
+		"ldap":      1,
+		"scheduler": 1,
+		"server":    1,
+		"transfer":  1,
+		"websocket": 1,
 	}
 )
 
@@ -41,7 +42,7 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
-	qb.AddList("SELECT", []string{"l.level", "l.context", "l.message", "l.date_milli", "m.name", "n.name"})
+	qb.AddList("SELECT", []string{"l.level", "l.context", "l.message", "l.date_milli", "COALESCE(m.name,'-')", "n.name"})
 	qb.Set("FROM", "instance.log AS l")
 	qb.Add("JOIN", "LEFT JOIN app.module AS m ON m.id = l.module_id")
 	qb.Add("JOIN", "LEFT JOIN instance_cluster.node AS n ON n.id = l.node_id")
@@ -92,6 +93,7 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 
 			return nil, 0, err
 		}
+
 		l.Date = int64(dateMilli / 1000)
 		logs = append(logs, l)
 	}

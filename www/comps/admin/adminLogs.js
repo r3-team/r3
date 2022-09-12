@@ -46,17 +46,9 @@ let MyAdminLogs = {
 						<span>{{ capGen.filters }}</span>
 						<select class="entry" v-model="context" @change="offset = 0;get()">
 							<option value="">[{{ capApp.context }}]</option>
-							<option value="application">{{ capApp.logLevelApplication }}</option>
-							<option value="backup">{{ capApp.logLevelBackup }}</option>
-							<option value="cache">{{ capApp.logLevelCache }}</option>
-							<option value="cluster">{{ capApp.logLevelCluster }}</option>
-							<option value="csv">{{ capApp.logLevelCsv }}</option>
-							<option value="imager">{{ capApp.logLevelImager }}</option>
-							<option value="ldap">{{ capApp.logLevelLdap }}</option>
-							<option value="mail">{{ capApp.logLevelMail }}</option>
-							<option value="scheduler">{{ capApp.logLevelScheduler }}</option>
-							<option value="server">{{ capApp.logLevelServer }}</option>
-							<option value="transfer">{{ capApp.logLevelTransfer }}</option>
+							<option v-for="c in contextsValid" :value="c">
+								{{ capApp.contextLabel[c] }}
+							</option>
 						</select>
 						<input class="entry"
 							v-model="byString"
@@ -86,23 +78,15 @@ let MyAdminLogs = {
 						/>
 						
 						<span>{{ capApp.logLevel }}</span>
-						<select class="short" v-model="levelContext" @change="levelValue = config[$event.target.value]">
-							<option value="logApplication">{{ capApp.logLevelApplication }}</option>
-							<option value="logBackup">{{ capApp.logLevelBackup }}</option>
-							<option value="logCache">{{ capApp.logLevelCache }}</option>
-							<option value="logCluster">{{ capApp.logLevelCluster }}</option>
-							<option value="logCsv">{{ capApp.logLevelCsv }}</option>
-							<option value="logImager">{{ capApp.logLevelImager }}</option>
-							<option value="logLdap">{{ capApp.logLevelLdap }}</option>
-							<option value="logMail">{{ capApp.logLevelMail }}</option>
-							<option value="logScheduler">{{ capApp.logLevelScheduler }}</option>
-							<option value="logServer">{{ capApp.logLevelServer }}</option>
-							<option value="logTransfer">{{ capApp.logLevelTransfer }}</option>
+						<select class="short" v-model="levelContext">
+							<option v-for="c in contextsValid" :value="getConfigLogContextName(c)">
+								{{ capApp.contextLabel[c] }}
+							</option>
 						</select>
 						<select v-model="configInput[levelContext]">
-							<option value="1">{{ capApp.logLevel1 }}</option>
-							<option value="2">{{ capApp.logLevel2 }}</option>
-							<option value="3">{{ capApp.logLevel3 }}</option>
+							<option value="1">(1) {{ capApp.logLevel1 }}</option>
+							<option value="2">(2) {{ capApp.logLevel2 }}</option>
+							<option value="3">(3) {{ capApp.logLevel3 }}</option>
 						</select>
 						<my-button image="save.png"
 							@trigger="setConfig"
@@ -142,7 +126,7 @@ let MyAdminLogs = {
 							<td class="minimum">{{ displayLevel(l.level) }}</td>
 							<td class="minimum">{{ l.nodeName }}</td>
 							<td class="minimum">{{ l.moduleName }}</td>
-							<td class="minimum">{{ l.context }}</td>
+							<td class="minimum">{{ capApp.contextLabel[l.context] }}</td>
 							<td>{{ displayMessage(l.message) }}</td>
 						</tr>
 					</tbody>
@@ -155,12 +139,16 @@ let MyAdminLogs = {
 	},
 	data:function() {
 		return {
+			contextsValid:[
+				'module','backup','cache','cluster','csv','imager','ldap',
+				'mail','scheduler','server','transfer','websocket'
+			],
 			messageLengthShow:200,
 			
 			// inputs
 			byString:'',
 			context:'',
-			levelContext:'logServer',
+			levelContext:'logModule',
 			limit:100,
 			offset:0,
 			total:0,
@@ -194,18 +182,15 @@ let MyAdminLogs = {
 		getLineBreaksParsedToHtml,
 		getUnixFormat,
 		
-		// presentation
+		getConfigLogContextName:function(context) {
+			return `log${context[0].toUpperCase() + context.slice(1)}`;
+		},
 		displayDate:function(date) {
 			let format = [this.settings.dateFormat,'H:i:S'];
 			return this.getUnixFormat(date,format.join(' '));
 		},
 		displayLevel:function(level) {
-			switch(level) {
-				case 1: return this.capApp.level1; break;
-				case 2: return this.capApp.level2; break;
-				case 3: return this.capApp.level3; break;
-				default: '';
-			}
+			return `(${level}) ` + this.capApp['level'+level];
 		},
 		displayMessage:function(msg) {
 			if(msg.length > this.messageLengthShow)

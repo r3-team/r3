@@ -110,14 +110,50 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE instance.login_setting ALTER COLUMN pattern
 				TYPE instance.login_setting_pattern USING pattern::text::instance.login_setting_pattern;
 			
-			-- new log context
+			-- new log contexts
 			ALTER TYPE instance.log_context ADD VALUE 'imager';
+			ALTER TYPE instance.log_context ADD VALUE 'websocket';
+			
+			-- fix bad config name
+			UPDATE instance.config SET name = 'logModule' WHERE name = 'logApplication';
+			
+			-- fix logging function
+			CREATE OR REPLACE FUNCTION instance.log(level integer,message text,app_name text DEFAULT NULL::text)
+			    RETURNS void
+			    LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+					module_id UUID;
+					level_show INT;
+				BEGIN
+					-- check log level
+					SELECT value::INT INTO level_show
+					FROM instance.config
+					WHERE name = 'logModule';
+					
+					IF level_show < level THEN
+						RETURN;
+					END IF;
+				
+					-- resolve module ID if possible
+					-- if not possible: log with module_id = NULL (better than not to log)
+					IF app_name IS NOT NULL THEN
+						SELECT id INTO module_id
+						FROM app.module
+						WHERE name = app_name;
+					END IF;
+				
+					INSERT INTO instance.log (level,context,module_id,message,date_milli)
+					VALUES (level,'module',module_id,message,(EXTRACT(EPOCH FROM CLOCK_TIMESTAMP()) * 1000)::BIGINT);
+				END;	
+			$BODY$;
 			
 			-- new config options
 			INSERT INTO instance.config (name,value) VALUES ('filesKeepDaysDeleted','90');
 			INSERT INTO instance.config (name,value) VALUES ('filesKeepDaysUnassigned','90');
 			INSERT INTO instance.config (name,value) VALUES ('imagerThumbWidth','300');
 			INSERT INTO instance.config (name,value) VALUES ('logImager',2);
+			INSERT INTO instance.config (name,value) VALUES ('logWebsocket',2);
 
 			-- changes to fixed tokens
 			ALTER TYPE instance.token_fixed_context ADD VALUE 'client';

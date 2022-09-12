@@ -79,7 +79,6 @@ func SetConfigFilePath(path string) {
 	filePath = path
 }
 func SetLogLevels() {
-	log.SetLogLevel("application", int(GetUint64("logApplication")))
 	log.SetLogLevel("backup", int(GetUint64("logBackup")))
 	log.SetLogLevel("cache", int(GetUint64("logCache")))
 	log.SetLogLevel("cluster", int(GetUint64("logCluster")))
@@ -87,9 +86,11 @@ func SetLogLevels() {
 	log.SetLogLevel("imager", int(GetUint64("logImager")))
 	log.SetLogLevel("ldap", int(GetUint64("logLdap")))
 	log.SetLogLevel("mail", int(GetUint64("logMail")))
+	log.SetLogLevel("module", int(GetUint64("logModule")))
 	log.SetLogLevel("scheduler", int(GetUint64("logScheduler")))
 	log.SetLogLevel("server", int(GetUint64("logServer")))
 	log.SetLogLevel("transfer", int(GetUint64("logTransfer")))
+	log.SetLogLevel("websocket", int(GetUint64("logWebsocket")))
 }
 
 func SetInstanceIdIfEmpty() error {

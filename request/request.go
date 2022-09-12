@@ -30,7 +30,7 @@ func ExecTransaction(ctxClient context.Context, loginId int64, isAdmin bool,
 
 	tx, err := db.Pool.Begin(ctx)
 	if err != nil {
-		log.Error("server", "cannot begin transaction", err)
+		log.Error("websocket", "cannot begin transaction", err)
 		resTrans.Error = handler.ErrGeneral
 		return resTrans
 	}
@@ -41,7 +41,7 @@ func ExecTransaction(ctxClient context.Context, loginId int64, isAdmin bool,
 		SELECT SET_CONFIG('r3.login_id',$1,TRUE)
 	`, strconv.FormatInt(loginId, 10)); err != nil {
 
-		log.Error("server", fmt.Sprintf("TRANSACTION %d, transaction config failure (login ID %d)",
+		log.Error("websocket", fmt.Sprintf("TRANSACTION %d, transaction config failure (login ID %d)",
 			reqTrans.TransactionNr, loginId), err)
 
 		return resTrans
@@ -50,7 +50,7 @@ func ExecTransaction(ctxClient context.Context, loginId int64, isAdmin bool,
 	// work through requests
 	for _, req := range reqTrans.Requests {
 
-		log.Info("server", fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s",
+		log.Info("websocket", fmt.Sprintf("TRANSACTION %d, %s %s, payload: %s",
 			reqTrans.TransactionNr, req.Action, req.Ressource, req.Payload))
 
 		payload, err := Exec_tx(ctx, tx, loginId, isAdmin, isNoAuth,
@@ -69,7 +69,7 @@ func ExecTransaction(ctxClient context.Context, loginId int64, isAdmin bool,
 		// error case, convert to error code for requestor
 		returnErr, isExpectedErr := handler.ConvertToErrCode(err, !isAdmin)
 		if !isExpectedErr {
-			log.Warning("server", fmt.Sprintf("TRANSACTION %d, request %s %s failure (login ID %d)",
+			log.Warning("websocket", fmt.Sprintf("TRANSACTION %d, request %s %s failure (login ID %d)",
 				reqTrans.TransactionNr, req.Ressource, req.Action, loginId), err)
 		}
 
@@ -84,7 +84,7 @@ func ExecTransaction(ctxClient context.Context, loginId int64, isAdmin bool,
 
 			returnErr, isExpectedErr := handler.ConvertToErrCode(err, !isAdmin)
 			if !isExpectedErr {
-				log.Warning("server", fmt.Sprintf("TRANSACTION %d, commit failure (login ID %d)",
+				log.Warning("websocket", fmt.Sprintf("TRANSACTION %d, commit failure (login ID %d)",
 					reqTrans.TransactionNr, loginId), err)
 			}
 			resTrans.Error = fmt.Sprintf("%v", returnErr)

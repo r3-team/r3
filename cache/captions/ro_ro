@@ -301,6 +301,20 @@
 			"roleContentUser":"User"
 		},
 		"logs":{
+			"contextLabel":{
+				"backup":"Backup",
+				"cache":"Tampon",
+				"cluster":"Cluster",
+				"csv":"CSV import/export",
+				"imager":"Image processing",
+				"ldap":"LDAP",
+				"mail":"Mail",
+				"module":"Aplicații",
+				"scheduler":"Programare",
+				"server":"Server",
+				"transfer":"Transfer",
+				"websocket":"Websocket clients"
+			},
 			"byString":"Text search",
 			"context":"Context",
 			"date":"Timestamp",
@@ -313,17 +327,6 @@
 			"logLevel1":"Numai erori",
 			"logLevel2":"Erori & atenționări",
 			"logLevel3":"Toate",
-			"logLevelApplication":"Aplicații",
-			"logLevelBackup":"Backup",
-			"logLevelCache":"Tampon",
-			"logLevelCluster":"Cluster",
-			"logLevelCsv":"CSV import/export",
-			"logLevelImager":"Image processing",
-			"logLevelLdap":"LDAP",
-			"logLevelMail":"Mail",
-			"logLevelScheduler":"Programare",
-			"logLevelServer":"Server",
-			"logLevelTransfer":"Transfer",
 			"message":"Message",
 			"module":"Application",
 			"node":"Cluster node"
