@@ -4,14 +4,17 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"r3/cache"
 	"r3/config"
 	"r3/data"
 	"r3/db"
+	"r3/handler"
 	"r3/log"
 	"r3/schema"
 	"r3/tools"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgtype"
 )
 
 var oneDayInSeconds int64 = 60 * 60 * 24
@@ -78,14 +81,14 @@ func cleanUpFiles() error {
 		relVersion := schema.GetFilesTableNameVersions(atrId)
 
 		fileIds := make([]uuid.UUID, 0)
-		fileLimit := 100 // at most 100 files at a time
+		limit := 100 // at most 100 entries at a time
 		now := tools.GetTimeUnix()
 		unixKeepDeleted := now - (oneDayInSeconds * int64(config.GetUint64("filesKeepDaysDeleted")))
 		unixKeepUnassigned := now - (oneDayInSeconds * int64(config.GetUint64("filesKeepDaysUnassigned")))
 
+		// find files either deleted or unassigned and that are outside their keep limits
 		// execute in steps to reduce memory load
 		for {
-			// find files either deleted or unassigned outside their keep limits
 			if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
 				SELECT ARRAY_AGG(f.id)
 				FROM instance_file."%s" AS f
@@ -103,7 +106,7 @@ func cleanUpFiles() error {
 				)
 				LIMIT $3
 			`, relFile, relVersion), unixKeepDeleted, unixKeepUnassigned,
-				fileLimit).Scan(&fileIds); err != nil {
+				limit).Scan(&fileIds); err != nil {
 
 				return err
 			}
@@ -142,15 +145,6 @@ func cleanUpFiles() error {
 						continue
 					}
 
-					// clean up thumbnail, if there
-					filePathThumb := data.GetFilePathThumb(atrId, fileId)
-					if exists, _ := tools.Exists(filePathThumb); exists {
-						if err := os.Remove(filePathThumb); err != nil {
-							log.Warning("server", "failed to remove old file thumbnail", err)
-							continue
-						}
-					}
-
 					// either file version existed on disk and could be deleted or it didn´t exist
 					// either case we delete the file reference
 					if _, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
@@ -159,6 +153,15 @@ func cleanUpFiles() error {
 							AND   version = $2
 						`, relVersion), fileId, version); err != nil {
 						return err
+					}
+				}
+
+				// clean up thumbnail, if there
+				filePathThumb := data.GetFilePathThumb(atrId, fileId)
+				if exists, _ := tools.Exists(filePathThumb); exists {
+					if err := os.Remove(filePathThumb); err != nil {
+						log.Warning("server", "failed to remove old file thumbnail", err)
+						continue
 					}
 				}
 			}
@@ -180,10 +183,120 @@ func cleanUpFiles() error {
 			if tag.RowsAffected() == 0 {
 				break
 			}
-			log.Info("server", fmt.Sprintf("successfully cleaned up %d files", tag.RowsAffected()))
+			log.Info("server", fmt.Sprintf("successfully cleaned up %d files (deleted/unassigned)", tag.RowsAffected()))
 
-			// file limit not reached this loop, we are done
-			if len(fileIds) < fileLimit {
+			// limit not reached this loop, we are done
+			if len(fileIds) < limit {
+				break
+			}
+		}
+
+		// find file versions that do not fulfill the relation retention settings
+		cache.Schema_mx.RLock()
+		atr, exists := cache.AttributeIdMap[atrId]
+		if !exists {
+			cache.Schema_mx.RUnlock()
+			return handler.ErrSchemaUnknownAttribute(atrId)
+		}
+		rel, exists := cache.RelationIdMap[atr.RelationId]
+		if !exists {
+			cache.Schema_mx.RUnlock()
+			return handler.ErrSchemaUnknownRelation(atr.RelationId)
+		}
+		cache.Schema_mx.RUnlock()
+
+		type fileVersion struct {
+			fileId  uuid.UUID
+			version int64
+		}
+
+		for {
+			removeCnt := 0
+			fileVersions := make([]fileVersion, 0)
+
+			var keepVersionsCnt int32 = 0
+			if rel.RetentionCount.Status == pgtype.Present {
+				keepVersionsCnt = rel.RetentionCount.Int
+			}
+
+			var keepVersionsAfter int64 = now
+			if rel.RetentionDays.Status == pgtype.Present {
+				keepVersionsAfter = now - (int64(rel.RetentionDays.Int) * 86400)
+			}
+
+			rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+				SELECT v.file_id, v.version
+				FROM instance_file."%s" AS v
+				
+				-- never touch the latest version
+				WHERE v.version <> (
+					SELECT MAX(s.version)
+					FROM instance_file."%s" AS s
+					WHERE s.file_id = v.file_id
+				)
+				
+				-- retention count not fulfilled
+				AND (
+					SELECT COUNT(*) AS newer_version_cnt
+					FROM instance_file."%s" AS c
+					WHERE c.file_id = v.file_id
+					AND   c.version > v.version
+				) > $1
+				
+				-- retention days not fulfilled
+				AND v.date_change < $2
+				
+				ORDER BY file_id ASC, version DESC
+				LIMIT $3
+			`, relVersion, relVersion, relVersion),
+				keepVersionsCnt, keepVersionsAfter, limit)
+
+			if err != nil {
+				return err
+			}
+			for rows.Next() {
+				var fv fileVersion
+				if err := rows.Scan(&fv.fileId, &fv.version); err != nil {
+					return err
+				}
+				fileVersions = append(fileVersions, fv)
+			}
+			rows.Close()
+
+			for _, fv := range fileVersions {
+				filePath := data.GetFilePathVersion(atrId, fv.fileId, fv.version)
+
+				// if file version exists, attempt to delete it
+				// if not, skip deletion and remove reference
+				if exists, _ := tools.Exists(filePath); exists {
+
+					// if deletion fails, abort and keep its reference as file might be in access
+					if err := os.Remove(filePath); err != nil {
+						log.Warning("server", "failed to remove old file version", err)
+						continue
+					}
+				}
+
+				if _, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
+						DELETE FROM instance_file."%s"
+						WHERE file_id = $1
+						AND   version = $2
+					`, relVersion), fv.fileId, fv.version); err != nil {
+					return err
+				}
+				removeCnt++
+			}
+
+			// if not a single file version was deleted this loop, nothing more we can do
+			if removeCnt == 0 {
+				break
+			}
+
+			log.Info("server", fmt.Sprintf("successfully cleaned up %d file versions (no retention)",
+				removeCnt))
+
+			// limit not reached this loop, we are done
+			if len(fileVersions) < limit {
 				break
 			}
 		}
