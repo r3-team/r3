@@ -250,7 +250,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				return "", err
 			}
 
-			// rename files on disk
+			// rename files on disk to new versioning
 			fileIds := make([]uuid.UUID, 0)
 			if err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
 				SELECT ARRAY_AGG(id)
