@@ -63,6 +63,12 @@ func clusterProcessEvents() error {
 				return err
 			}
 			err = cluster.ConfigChanged(false, true, p.SwitchToMaintenance)
+		case "filesCopied":
+			var p types.ClusterEventFilesCopied
+			if err := json.Unmarshal(e.Payload, &p); err != nil {
+				return err
+			}
+			err = cluster.FilesCopied(false, p.LoginId, p.AttributeId, p.FileIds)
 		case "fileRequested":
 			var p types.ClusterEventFileRequested
 			if err := json.Unmarshal(e.Payload, &p); err != nil {

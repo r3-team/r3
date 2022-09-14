@@ -59,11 +59,28 @@ let MyInputFiles = {
 		<div v-if="!dragActive" class="input-files-header default-inputs">
 			<div class="row">
 				<slot name="input-icon" />
+				<my-button image="files.png"
+					v-if="fileIdsSelected.length !== 0"
+					@trigger="copyFilesSelected"
+					:caption="!noSpace ? capGen.button.copy : ''"
+					:captionTitle="capApp.button.copyHint"
+					:naked="true"
+					:tight="true"
+				/>
+				<my-button image="paste.png"
+					v-if="filesCopy.attributeId !== null"
+					@trigger="pasteFilesStored"
+					:caption="!noSpace ? capGen.button.paste : ''"
+					:captionTitle="capApp.button.pasteHint"
+					:naked="true"
+					:tight="true"
+				/>
 				<my-button image="delete.png"
+					v-if="fileIdsSelected.length !== 0"
 					@trigger="removeSelected"
-					:active="fileIdsSelected.length !== 0"
 					:caption="!noSpace ? capGen.button.delete : ''"
 					:naked="true"
+					:tight="true"
 				/>
 			</div>
 			
@@ -183,7 +200,7 @@ let MyInputFiles = {
 						</td>
 						<td>
 							<my-input-files-name
-								@update:name="update([f.id],'rename',$event)"
+								@update:name="updateName(f.id,$event)"
 								:change="fileIdMapChange[f.id]"
 								:name="f.name"
 								:readonly="readonly"
@@ -197,7 +214,7 @@ let MyInputFiles = {
 									:href="getAttributeFileVersionHref(attributeId,f.id,f.name,token,f.version)"
 								>
 									<my-button image="download.png"
-										:captionTitle="capApp.button.download"
+										:captionTitle="capApp.button.downloadHint"
 										:naked="true"
 										:tight="true"
 									/>
@@ -222,13 +239,13 @@ let MyInputFiles = {
 				<div class="item" v-for="f in files">
 					<a target="_blank"
 						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,token,f.version)"
-						:title="capApp.button.download"
+						:title="capApp.button.downloadHint"
 					>
 						<img class="prev" :src="imagePreview(f.id,f.name)" />
 					</a>
 					<div class="item-content">
 						<my-input-files-name
-							@update:name="update([f.id],'rename',$event)"
+							@update:name="updateName(f.id,$event)"
 							:change="fileIdMapChange[f.id]"
 							:name="f.name"
 							:readonly="readonly"
@@ -262,13 +279,13 @@ let MyInputFiles = {
 				<div class="item" v-for="f in files">
 					<a target="_blank"
 						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,token,f.version)"
-						:title="capApp.button.download"
+						:title="capApp.button.downloadHint"
 					>
 						<img class="prev" :src="imagePreview(f.id,f.name)">
 					</a>
 					<div class="item-meta">
 						<my-input-files-name
-							@update:name="update([f.id],'rename',$event)"
+							@update:name="updateName(f.id,$event)"
 							:change="fileIdMapChange[f.id]"
 							:name="f.name"
 							:readonly="readonly"
@@ -315,7 +332,7 @@ let MyInputFiles = {
 			],
 			
 			extRegex:/(?:\.([^.]+))?$/,
-			noSpace:false,       // if input field is tiny, reduces clutter,
+			noSpace:false,         // if input field is tiny, reduces clutter,
 			progress:100,
 			viewModes:['listCompact','listComfort','gallery'],
 			
@@ -323,7 +340,7 @@ let MyInputFiles = {
 			dragActive:false,
 			dragTarget:{},
 			fileIdMapChange:{},    // map of file changes done inside this component, key: file ID
-			fileIdsSelected:[],    // all file IDs selected by checkbox
+			fileIdsSelected:[],    // file IDs selected by checkbox
 			filterName:'',         // filter files by name
 			sortDirAsc:true,
 			sortMode:'name',       // name, size, changed
@@ -376,6 +393,9 @@ let MyInputFiles = {
 				return v;
 			},
 			set:function(v) {
+				if(v.length === 0 && JSON.stringify(this.fileIdMapChange) === '{}')
+					return this.$emit('update:modelValue',null);
+				
 				this.$emit('update:modelValue',{
 					files:v,
 					fileIdMapChange:this.fileIdMapChange
@@ -405,6 +425,7 @@ let MyInputFiles = {
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		capApp:        (s) => s.$store.getters.captions.input.files,
 		capGen:        (s) => s.$store.getters.captions.generic,
+		filesCopy:     (s) => s.$store.getters.filesCopy,
 		hasClient:     (s) => s.$store.getters.loginHasClient,
 		settings:      (s) => s.$store.getters.settings,
 		token:         (s) => s.$store.getters['local/token']
@@ -474,8 +495,40 @@ let MyInputFiles = {
 				chooseApp:chooseApp
 			},false);
 		},
+		copyFilesSelected() {
+			let v = {
+				attributeId:this.attributeId,
+				fileIds:this.fileIdsSelected
+			};
+			ws.send('file','copy',v,true);
+			this.$store.commit('filesCopy',v);
+			this.fileIdsSelected = [];
+		},
+		pasteFilesStored() {
+			ws.send('file','paste',{
+				srcAttributeId:this.filesCopy.attributeId,
+				srcFileIds:this.filesCopy.fileIds,
+				dstAttributeId:this.attributeId
+			},true).then(
+				res => {
+					let files = [];
+					for(let i = 0, j = res.payload.length; i < j; i++) {
+						let f = res.payload[i];
+						files.push({
+							id:f.id,
+							name:f.name,
+							size:f.size,
+							changed:f.changed
+						});
+					}
+					this.updateCreate(files);
+					this.$store.commit('filesCopyReset');
+				},
+				this.$root.genericError
+			);
+		},
 		removeSelected() {
-			this.update(this.fileIdsSelected,'delete',true);
+			this.updateDelete(this.fileIdsSelected);
 			this.fileIdsSelected = [];
 		},
 		setSortMode(mode) {
@@ -532,48 +585,47 @@ let MyInputFiles = {
 		toggleSortDir(){
 			this.sortDirAsc = !this.sortDirAsc;
 		},
-		update(fileIds,action,value) {
-			let files = JSON.parse(JSON.stringify(this.files));
+		update(fileId,action,name) {
+			if(typeof this.fileIdMapChange[fileId] === 'undefined')
+				return this.fileIdMapChange[fileId] = {
+					action:action,
+					name:name,
+					version:-1
+				};
 			
-			// regardless of change, store file name as well (reference in change logs)
+			// delete action always takes priority, even if another already existed
+			if(action === 'delete')
+				this.fileIdMapChange[fileId].action = action;
+			
+			// file name is used for file reference in change logs regardless of action
+			this.fileIdMapChange[fileId].name = name;
+		},
+		updateCreate(filesNew) {
+			let files = JSON.parse(JSON.stringify(this.files));
+			for(let f of filesNew) {
+				files.push(f);
+				this.update(f.id,'create',f.name);
+			}
+			this.files = files;
+		},
+		updateDelete(fileIds) {
+			let files = JSON.parse(JSON.stringify(this.files));
 			for(let fileId of fileIds) {
-				if(typeof this.fileIdMapChange[fileId] === 'undefined')
-					this.fileIdMapChange[fileId] = {
-						action:action,
-						name:'',
-						version:-1
-					};
-				
-				switch(action) {
-					case 'create':
-						files.push(value);
-						this.fileIdMapChange[fileId].name = value.name;
-					break;
-					case 'delete':
-						// remove deleted file from files list
-						for(let i = 0, j = files.length; i < j; i++) {
-							if(files[i].id === fileId) {
-								this.fileIdMapChange[fileId].name = files[i].name;
-								files.splice(i,1);
-								break;
-							}
-						}
-						
-						// delete action always takes priority, even if another action occurred first
-						this.fileIdMapChange[fileId].action = action;
-					break;
-					case 'rename':
-						// name is not immediately updated in files list to conserve sorting
-						// when form is reloaded or sort updated, file name changes are applied
-						this.fileIdMapChange[fileId].name = value;
-					break;
+				for(let i = 0, j = files.length; i < j; i++) {
+					if(files[i].id === fileId) {
+						this.update(fileId,'delete',files[i].name);
+						files.splice(i,1);
+						break;
+					}
 				}
 			}
-			
-			if(files.length === 0 && JSON.stringify(this.fileIdMapChange) === '{}')
-				return this.$emit('update:modelValue',null);
-			
 			this.files = files;
+		},
+		updateName(fileId,name) {
+			// name is not immediately updated in files list to conserve sorting
+			// when form is reloaded or sort updated, file name changes are applied
+			this.update(fileId,'rename',name);
+			this.files = this.files;
 		},
 		upload(files) {
 			let maxSize = this.attributeIdMap[this.attributeId].length;
@@ -618,12 +670,12 @@ let MyInputFiles = {
 						return;
 					}
 					
-					this.update([res.id],'create',{
+					this.updateCreate([{
 						id:res.id,
 						name:file.name,
 						size:Math.floor(file.size/1024),
 						changed:0
-					});
+					}]);
 				};
 				formData.append('token',this.token);
 				formData.append('attributeId',this.attributeId);

@@ -99,6 +99,24 @@ func ConfigChanged(updateNodes bool, loadConfigFromDb bool, switchToMaintenance 
 	config.SetLogLevels()
 	return nil
 }
+func FilesCopied(updateNodes bool, loginId int64, attributeId uuid.UUID, fileIds []uuid.UUID) error {
+
+	if updateNodes {
+		if err := createEventsForOtherNodes("filesCopied", types.ClusterEventFilesCopied{
+			LoginId:     loginId,
+			AttributeId: attributeId,
+			FileIds:     fileIds,
+		}); err != nil {
+			return err
+		}
+	}
+	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{
+		LoginId:                loginId,
+		FilesCopiedAttributeId: attributeId,
+		FilesCopiedFileIds:     fileIds,
+	}
+	return nil
+}
 func FileRequested(updateNodes bool, loginId int64, attributeId uuid.UUID,
 	fileId uuid.UUID, fileHash string, fileName string, chooseApp bool) error {
 
@@ -123,7 +141,6 @@ func FileRequested(updateNodes bool, loginId int64, attributeId uuid.UUID,
 		FileRequestedFileName:    fileName,
 	}
 	return nil
-
 }
 func LoginDisabled(updateNodes bool, loginId int64) error {
 	if updateNodes {

@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"r3/bruteforce"
-	"r3/config"
 	"r3/data"
 	"r3/handler"
 	"r3/image"
@@ -79,8 +78,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		urlElms := strings.Split(r.URL.Path, "/")
 		fileExt := filepath.Ext(urlElms[len(urlElms)-1])
 
-		filePathSrc := filepath.Join(config.File.Paths.Files,
-			attributeId.String(), fileId.String())
+		version, err := data.FileGetLatestVersion(attributeId, fileId)
+		if err != nil {
+			handler.AbortRequest(w, context, err, handler.ErrGeneral)
+			return
+		}
+		filePathSrc := data.GetFilePathVersion(attributeId, fileId, version)
 
 		if err := image.CreateThumbnail(fileId, fileExt, filePathSrc, filePath, true); err != nil {
 			w.Write(handler.NoImage)

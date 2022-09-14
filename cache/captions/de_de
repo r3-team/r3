@@ -6,6 +6,7 @@
 			"cancel":"Abbrechen",
 			"clear":"Entfernen",
 			"close":"Schließen",
+			"copy":"Kopieren",
 			"copyClipboard":"In Zwischenablage kopieren",
 			"create":"Erstellen",
 			"delete":"Löschen",
@@ -22,6 +23,7 @@
 			"new":"Neu",
 			"newHint":"Neuen Datensatz erstellen",
 			"open":"Öffnen",
+			"paste":"Einfügen",
 			"refresh":"Neu laden",
 			"refreshHint":"Datensatz neu laden",
 			"reset":"Zurücksetzen",
@@ -1256,8 +1258,10 @@
 		},
 		"files":{
 			"button":{
-				"download":"Datei herunterladen",
-				"fileRequestHint":"Datei lokal auf dem Computer bearbeiten. Erfordert die R3-Client-Anwendung - installierbar über die Benutzereinstellungen."
+				"copyHint":"Ausgewählte Dateien kopieren, um sie in ein anderen Dateiinput einzufügen.",
+				"downloadHint":"Datei herunterladen",
+				"fileRequestHint":"Datei lokal auf dem Computer bearbeiten. Erfordert die R3-Client-Anwendung - installierbar über die Benutzereinstellungen.",
+				"pasteHint":"Kopierte Dateien in diesen Dateiinput einfügen."
 			},
 			"dropTarget":"Dateien hier ablegen, um sie hochzuladen",
 			"fileChanged":"Geändert",

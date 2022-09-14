@@ -138,6 +138,10 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		}
 	case "file":
 		switch action {
+		case "copy":
+			return FilesCopy(reqJson, loginId)
+		case "paste":
+			return FilesPaste(reqJson, loginId)
 		case "request":
 			return FileRequest(reqJson, loginId)
 		}

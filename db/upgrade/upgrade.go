@@ -148,6 +148,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				END;	
 			$BODY$;
 			
+			-- new cluster event
+			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'filesCopied';
+			
 			-- new config options
 			INSERT INTO instance.config (name,value) VALUES ('filesKeepDaysDeleted','90');
 			INSERT INTO instance.config (name,value) VALUES ('filesKeepDaysUnassigned','90');

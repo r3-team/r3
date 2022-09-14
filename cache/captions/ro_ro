@@ -6,6 +6,7 @@
 			"cancel":"Anulează",
 			"clear":"Clear",
 			"close":"Închide",
+			"copy":"Copy",
 			"copyClipboard":"Copy to clipboard",
 			"create":"Crează",
 			"delete":"Șterge",
@@ -22,6 +23,7 @@
 			"new":"Nou",
 			"newHint":"Crează o nouă înregistrare",
 			"open":"Deschide",
+			"paste":"Paste",
 			"refresh":"Reîncarcă",
 			"refreshHint":"Reîncarcă înregistrarea",
 			"reset":"Resetează",
@@ -1256,8 +1258,10 @@
 		},
 		"files":{
 			"button":{
-				"download":"Download file",
-				"fileRequestHint":"Edit file locally on your computer. Requires the R3 client application - installable from the user settings."
+				"copyHint":"Copy selected files to paste them into another file input.",
+				"downloadHint":"Download file",
+				"fileRequestHint":"Edit file locally on your computer. Requires the R3 client application - installable from the user settings.",
+				"pasteHint":"Paste copied files into this file input."
 			},
 			"dropTarget":"Drop files here for upload",
 			"fileChanged":"Changed",

@@ -304,3 +304,15 @@ func FilesSetDeletedForRecord_tx(ctx context.Context, tx pgx.Tx,
 	`, schema.GetFilesTableName(attributeId)), tools.GetTimeUnix(), recordId, fileIds)
 	return err
 }
+
+func FileGetLatestVersion(attributeId uuid.UUID, fileId uuid.UUID) (int64, error) {
+	var version int64
+	err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+		SELECT version
+		FROM instance_file."%s"
+		WHERE file_id = $1
+		ORDER BY version DESC
+		LIMIT 1
+	`, schema.GetFilesTableNameVersions(attributeId)), fileId).Scan(&version)
+	return version, err
+}

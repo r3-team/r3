@@ -1,14 +1,11 @@
 package data_download
 
 import (
-	"fmt"
 	"net/http"
 	"r3/bruteforce"
 	"r3/data"
-	"r3/db"
 	"r3/handler"
 	"r3/login/login_auth"
-	"r3/schema"
 )
 
 var context = "data_download"
@@ -63,16 +60,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if version == -1 {
-		// retrieve latest file version
-		if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
-			SELECT version
-			FROM instance_file."%s"
-			WHERE file_id = $1
-			ORDER BY version DESC
-			LIMIT 1
-		`, schema.GetFilesTableNameVersions(attributeId)),
-			fileId).Scan(&version); err != nil {
-
+		version, err = data.FileGetLatestVersion(attributeId, fileId)
+		if err != nil {
 			handler.AbortRequest(w, context, err, handler.ErrGeneral)
 			return
 		}

@@ -28,6 +28,11 @@ type ClusterEventTaskTriggered struct {
 	PgFunctionScheduleId uuid.UUID `json:"pgFunctionScheduleId"`
 	TaskName             string    `json:"taskName"`
 }
+type ClusterEventFilesCopied struct {
+	LoginId     int64       `json:"loginId"`
+	AttributeId uuid.UUID   `json:"attributeId"`
+	FileIds     []uuid.UUID `json:"fileIds"`
+}
 type ClusterEventFileRequested struct {
 	LoginId     int64     `json:"loginId"`
 	AttributeId uuid.UUID `json:"attributeId"`
@@ -67,4 +72,8 @@ type ClusterWebsocketClientEvent struct {
 	FileRequestedFileId      uuid.UUID
 	FileRequestedFileHash    string
 	FileRequestedFileName    string
+
+	// file copy request
+	FilesCopiedAttributeId uuid.UUID
+	FilesCopiedFileIds     []uuid.UUID
 }

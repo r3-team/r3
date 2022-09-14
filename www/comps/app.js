@@ -345,6 +345,11 @@ let MyApp = {
 					this.initSchema();
 				break;
 				
+				// affects current login only
+				case 'files_copied':
+					this.$store.commit('filesCopy',res.payload);
+				break;
+				
 				// affects everyone logged in
 				case 'collection_changed':
 					this.updateCollections(false,undefined,res.payload);

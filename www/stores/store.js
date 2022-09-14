@@ -28,6 +28,10 @@ const MyStore = Vuex.createStore({
 		dialogStyles:'',
 		dialogTextDisplay:'', // display option (html, textarea, richtext)
 		feedback:false,       // feedback function is enabled
+		filesCopy:{           // meta data for file copy (filled on copy, emptied on paste)
+			attributeId:null,
+			fileIds:[]
+		},
 		formHasChanges:false, // a data form has unsaved changes
 		isAdmin:false,        // user is admin
 		isAtDialog:false,     // app shows generic dialog
@@ -84,6 +88,12 @@ const MyStore = Vuex.createStore({
 			state.dialogButtons = payload.buttons;
 			state.isAtDialog    = true;
 		},
+		filesCopyReset:(state,payload) => {
+			state.filesCopy = {
+				attributeId:null,
+				fileIds:[]
+			};
+		},
 		license:(state,payload) => {
 			state.license = payload;
 			
@@ -129,6 +139,7 @@ const MyStore = Vuex.createStore({
 		captions:       (state,payload) => state.captions        = payload,
 		clusterNodeName:(state,payload) => state.clusterNodeName = payload,
 		feedback:       (state,payload) => state.feedback        = payload,
+		filesCopy:      (state,payload) => state.filesCopy       = payload,
 		formHasChanges: (state,payload) => state.formHasChanges  = payload,
 		isAdmin:        (state,payload) => state.isAdmin         = payload,
 		isAtDialog:     (state,payload) => state.isAtDialog      = payload,
@@ -184,6 +195,7 @@ const MyStore = Vuex.createStore({
 		dialogStyles:     (state) => state.dialogStyles,
 		dialogTextDisplay:(state) => state.dialogTextDisplay,
 		feedback:         (state) => state.feedback,
+		filesCopy:        (state) => state.filesCopy,
 		formHasChanges:   (state) => state.formHasChanges,
 		isAdmin:          (state) => state.isAdmin,
 		isAtDialog:       (state) => state.isAtDialog,
