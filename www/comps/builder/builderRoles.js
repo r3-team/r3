@@ -9,10 +9,26 @@ let MyBuilderRolesItem = {
 	template:`<tbody>
 		<tr>
 			<td>
-				<my-button image="open.png"
-					v-if="!isNew"
-					@trigger="open"
-				/>
+				<div class="row">
+					<my-button image="save.png"
+						@trigger="set"
+						:active="hasChanges"
+						:caption="isNew ? capGen.button.create : ''"
+						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+					/>
+					<my-button image="open.png"
+						v-if="!isNew"
+						@trigger="open"
+						:captionTitle="capGen.button.open"
+					/>
+					<my-button image="delete.png"
+						v-if="!isNew"
+						@trigger="delAsk"
+						:active="!isEveryone"
+						:cancel="true"
+						:captionTitle="capGen.button.delete"
+					/>
+				</div>
 			</td>
 			<td>
 				<input class="long"
@@ -67,20 +83,6 @@ let MyBuilderRolesItem = {
 					v-if="isEveryone"
 					:active="false"
 				/>
-			</td>
-			<td>
-				<div class="row">
-					<my-button image="save.png"
-						@trigger="set"
-						:active="hasChanges"
-					/>
-					<my-button image="delete.png"
-						v-if="!isNew"
-						@trigger="delAsk"
-						:active="!isEveryone"
-						:cancel="true"
-					/>
-				</div>
 			</td>
 		</tr>
 		
@@ -267,7 +269,7 @@ let MyBuilderRoles = {
 			<table>
 				<thead>
 					<tr>
-						<th>{{ capGen.button.open }}</th>
+						<th>{{ capGen.actions }}</th>
 						<th>{{ capGen.name }}</th>
 						<th>{{ capGen.id }}</th>
 						<th>{{ capGen.title }}</th>
@@ -275,7 +277,6 @@ let MyBuilderRoles = {
 						<th>{{ capApp.content }}</th>
 						<th>{{ capApp.assignable }}</th>
 						<th>{{ capApp.children }}</th>
-						<th></th>
 					</tr>
 				</thead>
 				

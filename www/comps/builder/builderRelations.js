@@ -131,10 +131,25 @@ let MyBuilderRelationsItem = {
 	template:`<tbody>
 		<tr>
 			<td>
-				<my-button image="open.png"
-					v-if="!isNew"
-					@trigger="open"
-				/>
+				<div class="row">
+					<my-button image="save.png"
+						@trigger="set"
+						:active="hasChanges"
+						:caption="isNew ? capGen.button.create : ''"
+						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+					/>
+					<my-button image="open.png"
+						v-if="!isNew"
+						@trigger="open"
+						:captionTitle="capGen.button.open"
+					/>
+					<my-button image="delete.png"
+						v-if="!isNew"
+						@trigger="delAsk"
+						:cancel="true"
+						:captionTitle="capGen.button.delete"
+					/>
+				</div>
 			</td>
 			<td>
 				<input class="long" v-model="name" :placeholder="isNew ? capApp.newRelation : ''" />
@@ -160,19 +175,6 @@ let MyBuilderRelationsItem = {
 			</td>
 			<td>
 				<input v-model.number="retentionDaysInput" :placeholder="capApp.retentionDays" />
-			</td>
-			<td>
-				<div class="row">
-					<my-button image="save.png"
-						@trigger="set"
-						:active="hasChanges"
-					/>
-					<my-button image="delete.png"
-						v-if="!isNew"
-						@trigger="delAsk"
-						:cancel="true"
-					/>
-				</div>
 			</td>
 		</tr>
 		<tr v-if="showPolicies">
@@ -352,13 +354,12 @@ let MyBuilderRelations = {
 			<table>
 				<thead>
 					<tr>
-						<th>{{ capGen.button.open }}</th>
+						<th>{{ capGen.actions }}</th>
 						<th>{{ capGen.name }}</th>
 						<th>{{ capGen.id }}</th>
 						<th>{{ capApp.encryption }}</th>
 						<th>{{ capApp.policies }}</th>
 						<th colspan="2">{{ capApp.retention }}</th>
-						<th></th>
 					</tr>
 				</thead>
 				

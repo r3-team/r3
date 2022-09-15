@@ -9,10 +9,25 @@ let MyBuilderCollectionsItem = {
 	template:`<tbody>
 		<tr>
 			<td>
-				<my-button image="open.png"
-					v-if="!isNew"
-					@trigger="open"
-				/>
+				<div class="row">
+					<my-button image="save.png"
+						@trigger="set"
+						:active="hasChanges"
+						:caption="isNew ? capGen.button.create : ''"
+						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+					/>
+					<my-button image="open.png"
+						v-if="!isNew"
+						@trigger="open"
+						:captionTitle="capGen.button.open"
+					/>
+					<my-button image="delete.png"
+						v-if="!isNew"
+						@trigger="delAsk"
+						:cancel="true"
+						:captionTitle="capGen.button.delete"
+					/>
+				</div>
 			</td>
 			<td>
 				<my-builder-icon-input
@@ -32,19 +47,6 @@ let MyBuilderCollectionsItem = {
 					@trigger="copyValueDialog(collection.name,collection.id,collection.id)"
 					:active="!isNew"
 				/>
-			</td>
-			<td>
-				<div class="row">
-					<my-button image="save.png"
-						@trigger="set"
-						:active="hasChanges"
-					/>
-					<my-button image="delete.png"
-						v-if="!isNew"
-						@trigger="delAsk"
-						:cancel="true"
-					/>
-				</div>
 			</td>
 		</tr>
 	</tbody>`,
@@ -155,11 +157,10 @@ let MyBuilderCollections = {
 			<table>
 				<thead>
 					<tr>
-						<th>{{ capGen.button.open }}</th>
+						<th>{{ capGen.actions }}</th>
 						<th>{{ capGen.icon }}</th>
 						<th>{{ capGen.name }}</th>
 						<th>{{ capGen.id }}</th>
-						<th></th>
 					</tr>
 				</thead>
 				

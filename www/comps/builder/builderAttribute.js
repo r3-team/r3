@@ -21,6 +21,23 @@ let MyBuilderAttribute = {
 	},
 	template:`<tr>
 		<td>
+			<div class="row">
+				<my-button image="save.png"
+					@trigger="set"
+					:active="hasChanges && !foreign"
+					:caption="isNew ? capGen.button.create : ''"
+					:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+				/>
+				<my-button image="delete.png"
+					v-if="!isNew"
+					@trigger="delAsk"
+					:active="!isId"
+					:cancel="true"
+					:captionTitle="capGen.button.delete"
+				/>
+			</div>
+		</td>
+		<td>
 			<my-builder-icon-input
 				@input="iconId = $event"
 				:icon-id-selected="iconId"
@@ -135,20 +152,6 @@ let MyBuilderAttribute = {
 					<option value="SET DEFAULT">SET DEFAULT</option>
 				</template>
 			</select>
-		</td>
-		<td>
-			<div class="row">
-				<my-button image="save.png"
-					@trigger="set"
-					:active="hasChanges && !foreign"
-				/>
-				<my-button image="delete.png"
-					v-if="!isNew"
-					@trigger="delAsk"
-					:active="!isId"
-					:cancel="true"
-				/>
-			</div>
 		</td>
 	</tr>`,
 	props:{

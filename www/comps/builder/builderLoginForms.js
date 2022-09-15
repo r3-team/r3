@@ -10,6 +10,22 @@ let MyBuilderLoginFormsItem = {
 	components:{ MyBuilderCaption },
 	template:`<tr>
 		<td>
+			<div class="row">
+				<my-button image="save.png"
+					@trigger="set"
+					:active="hasChanges && formId !== null && attributeIdLogin !== null && attributeIdLookup !== null && name !== ''"
+					:caption="isNew ? capGen.button.create : ''"
+					:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+				/>
+				<my-button image="delete.png"
+					v-if="!isNew"
+					@trigger="del"
+					:cancel="true"
+					:captionTitle="capGen.button.delete"
+				/>
+			</div>
+		</td>
+		<td>
 			<input class="long" v-model="name" :placeholder="isNew ? capApp.newLoginForm : ''" />
 		</td>
 		<td>
@@ -41,19 +57,6 @@ let MyBuilderLoginFormsItem = {
 					{{ f.name }}
 				</option>
 			</select>
-		</td>
-		<td>
-			<div class="row">
-				<my-button image="save.png"
-					@trigger="set"
-					:active="hasChanges && formId !== null && attributeIdLogin !== null && attributeIdLookup !== null && name !== ''"
-				/>
-				<my-button image="delete.png"
-					v-if="!isNew"
-					@trigger="del"
-					:cancel="true"
-				/>
-			</div>
 		</td>
 	</tr>`,
 	props:{
@@ -128,7 +131,8 @@ let MyBuilderLoginFormsItem = {
 		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
 		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
 		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.loginForm; }
+		capApp:        function() { return this.$store.getters.captions.builder.loginForm; },
+		capGen:        function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
 		// externals
@@ -182,12 +186,12 @@ let MyBuilderLoginForms = {
 			<table>
 				<thead>
 					<tr>
+						<th>{{ capGen.actions }}</th>
 						<th>{{ capGen.name }}</th>
 						<th>{{ capGen.title }}</th>
 						<th>{{ capApp.attributeLogin }}</th>
 						<th>{{ capApp.attributeLookup }}</th>
 						<th>{{ capApp.formOpen }}</th>
-						<th></th>
 					</tr>
 				</thead>
 				<tbody>

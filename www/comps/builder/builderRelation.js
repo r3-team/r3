@@ -37,6 +37,7 @@ let MyBuilderRelation = {
 				<table class="default-inputs" v-if="showAttributes">
 					<thead>
 						<tr>
+							<th>{{ capGen.actions }}</th>
 							<th>{{ capGen.icon }}</th>
 							<th>{{ capGen.name }}</th>
 							<th>{{ capGen.id }}</th>
@@ -49,7 +50,6 @@ let MyBuilderRelation = {
 							<th>{{ capApp.def }}</th>
 							<th>{{ capApp.onUpdate }}</th>
 							<th>{{ capApp.onDelete }}</th>
-							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -104,10 +104,10 @@ let MyBuilderRelation = {
 				<table class="indexes default-inputs" v-if="showIndexes">
 					<thead>
 						<tr>
+							<th>{{ capGen.actions }}</th>
 							<th>{{ capApp.indexAttributes }}</th>
 							<th>{{ capApp.indexAutoFki }}</th>
 							<th>{{ capApp.indexUnique }}</th>
-							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -137,6 +137,7 @@ let MyBuilderRelation = {
 				<table class="default-inputs" v-if="showTriggers">
 					<thead>
 						<tr>
+							<th>{{ capGen.actions }}</th>
 							<th>{{ capApp.fires }}</th>
 							<th>{{ capGen.id }}</th>
 							<th>{{ capApp.onInsert }}</th>
@@ -149,7 +150,6 @@ let MyBuilderRelation = {
 							<th>{{ capApp.codeCondition }}</th>
 							<th>{{ capGen.button.open }}</th>
 							<th>{{ capApp.execute }}</th>
-							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -179,11 +179,11 @@ let MyBuilderRelation = {
 				<table class="preset-records default-inputs" v-if="showPresets">
 					<thead>
 						<tr>
+							<th>{{ capGen.actions }}</th>
 							<th>{{ capGen.name }}</th>
 							<th>{{ capApp.presetProtected }}</th>
 							<th>{{ capApp.presetValues }}</th>
 							<th>{{ capApp.presetValuesPreview }}</th>
-							<th></th>
 						</tr>
 					</thead>
 					

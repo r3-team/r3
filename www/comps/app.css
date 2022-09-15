@@ -550,10 +550,10 @@ table{
 table th{
 	font-weight:normal;
 	text-align:left;
-	padding:0px 8px;
+	padding:2px 4px;
 }
 table td{
-	padding:2px;
+	padding:2px 4px;
 }
 table th.no-padding,
 table td.no-padding{

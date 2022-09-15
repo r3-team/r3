@@ -62,6 +62,7 @@
 			"sortDesc":"descending",
 			"yes":"yes"
 		},
+		"actions":"Actions",
 		"active":"Active",
 		"application":"Application",
 		"applications":"Applications",

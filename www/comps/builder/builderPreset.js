@@ -66,6 +66,22 @@ let MyBuilderPreset = {
 	template:`<tbody class="builder-preset">
 		<tr>
 			<td>
+				<div class="row">
+					<my-button image="save.png"
+						@trigger="set"
+						:active="hasChanges"
+						:caption="isNew ? capGen.button.create : ''"
+						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+					/>
+					<my-button image="delete.png"
+						v-if="!isNew"
+						@trigger="delAsk"
+						:cancel="true"
+						:captionTitle="capGen.button.delete"
+					/>
+				</div>
+			</td>
+			<td>
 				<input v-model="name" :placeholder="isNew ? capApp.new : ''" />
 			</td>
 			<td><my-bool v-model="protected" /></td>
@@ -77,19 +93,6 @@ let MyBuilderPreset = {
 			</td>
 			<td>
 				<input disabled="readonly" :value="previewLine" />
-			</td>
-			<td>
-				<div class="row">
-					<my-button image="save.png"
-						@trigger="set"
-						:active="hasChanges"
-					/>
-					<my-button image="delete.png"
-						v-if="!isNew"
-						@trigger="delAsk"
-						:cancel="true"
-					/>
-				</div>
 			</td>
 		</tr>
 		<tr v-if="showValues">

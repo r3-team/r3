@@ -93,9 +93,16 @@ let MyBuilderModulesItem = {
 	template:`<tbody>
 		<tr>
 			<td>
+				<my-button image="save.png"
+					@trigger="set"
+					:active="hasChanges"
+					:caption="isNew ? capGen.button.create : ''"
+					:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+				/>
 				<my-button image="open.png"
 					v-if="!isNew"
 					@trigger="open"
+					:captionTitle="capGen.button.open"
 				/>
 			</td>
 			<td>
@@ -181,12 +188,6 @@ let MyBuilderModulesItem = {
 			</td>
 			<td>
 				<input class="short" v-model="releaseBuildApp" disabled="disabled" />
-			</td>
-			<td>
-				<my-button image="save.png"
-					@trigger="set"
-					:active="hasChanges"
-				/>
 			</td>
 		</tr>
 		
@@ -879,7 +880,7 @@ let MyBuilderModules = {
 				<table class="marginBottom">
 					<thead>
 						<tr>
-							<th>{{ capGen.button.open }}</th>
+							<th>{{ capGen.actions }}</th>
 							<th>{{ capGen.icon }}</th>
 							<th>{{ capGen.name }}</th>
 							<th>{{ capGen.id }}</th>
@@ -892,7 +893,6 @@ let MyBuilderModules = {
 							<th>{{ capApp.releaseDate }}</th>
 							<th>{{ capApp.releaseBuild }}</th>
 							<th>{{ capApp.releaseBuildApp }}</th>
-							<th></th>
 						</tr>
 					</thead>
 					

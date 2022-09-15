@@ -78,10 +78,25 @@ let MyBuilderJsFunctionItem = {
 	template:`<tbody>
 		<tr>
 			<td>
-				<my-button image="open.png"
-					v-if="!isNew"
-					@trigger="open"
-				/>
+				<div class="row">
+					<my-button image="save.png"
+						@trigger="set"
+						:active="hasChanges && name !== ''"
+						:caption="isNew ? capGen.button.create : ''"
+						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+					/>
+					<my-button image="open.png"
+						v-if="!isNew"
+						@trigger="open"
+						:captionTitle="capGen.button.open"
+					/>
+					<my-button image="delete.png"
+						v-if="!isNew"
+						@trigger="delAsk"
+						:cancel="true"
+						:captionTitle="capGen.button.delete"
+					/>
+				</div>
 			</td>
 			<td>
 				<input class="long"
@@ -128,19 +143,6 @@ let MyBuilderJsFunctionItem = {
 							{{ f.name }}
 						</option>
 					</select>
-				</div>
-			</td>
-			<td>
-				<div class="row">
-					<my-button image="save.png"
-						@trigger="set"
-						:active="hasChanges && name !== ''"
-					/>
-					<my-button image="delete.png"
-						v-if="!isNew"
-						@trigger="delAsk"
-						:cancel="true"
-					/>
 				</div>
 			</td>
 		</tr>
@@ -354,10 +356,25 @@ let MyBuilderPgFunctionItem = {
 	template:`<tbody>
 		<tr>
 			<td>
-				<my-button image="open.png"
-					v-if="!isNew"
-					@trigger="open"
-				/>
+				<div class="row">
+					<my-button image="save.png"
+						@trigger="set"
+						:active="hasChanges"
+						:caption="isNew ? capGen.button.create : ''"
+						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+					/>
+					<my-button image="open.png"
+						v-if="!isNew"
+						@trigger="open"
+						:captionTitle="capGen.button.open"
+					/>
+					<my-button image="delete.png"
+						v-if="!isNew"
+						@trigger="delAsk"
+						:cancel="true"
+						:captionTitle="capGen.button.delete"
+					/>
+				</div>
 			</td>
 			<td>
 				<input class="long"
@@ -406,19 +423,6 @@ let MyBuilderPgFunctionItem = {
 			</td>
 			<td>
 				<my-bool v-model="isFrontendExec" :readonly="isTrigger" />
-			</td>
-			<td>
-				<div class="row">
-					<my-button image="save.png"
-						@trigger="set"
-						:active="hasChanges"
-					/>
-					<my-button image="delete.png"
-						v-if="!isNew"
-						@trigger="delAsk"
-						:cancel="true"
-					/>
-				</div>
 			</td>
 		</tr>
 		
@@ -595,7 +599,7 @@ let MyBuilderFunctions = {
 				<table class="default-inputs" v-if="showPg">
 					<thead>
 						<tr>
-							<th>{{ capGen.button.open }}</th>
+							<th>{{ capGen.actions }}</th>
 							<th>{{ capGen.name }}</th>
 							<th>{{ capGen.id }}</th>
 							<th>{{ capGen.title }}</th>
@@ -605,7 +609,6 @@ let MyBuilderFunctions = {
 							<th>{{ capApp.codeReturns }}</th>
 							<th>{{ capApp.schedules }}</th>
 							<th>{{ capApp.isFrontendExec }}</th>
-							<th></th>
 						</tr>
 					</thead>
 					
@@ -636,7 +639,7 @@ let MyBuilderFunctions = {
 				<table class="default-inputs" v-if="showJs">
 					<thead>
 						<tr>
-							<th>{{ capGen.button.open }}</th>
+							<th>{{ capGen.actions }}</th>
 							<th>{{ capGen.name }}</th>
 							<th>{{ capGen.id }}</th>
 							<th>{{ capGen.title }}</th>
@@ -644,7 +647,6 @@ let MyBuilderFunctions = {
 							<th>{{ capApp.codeArgs }}</th>
 							<th>{{ capApp.codeReturns }}</th>
 							<th>{{ capApp.form }}</th>
-							<th></th>
 						</tr>
 					</thead>
 					
