@@ -336,16 +336,25 @@ h3{
 	right:0px;
 	top:0px;
 	bottom:0px;
+	visibility:hidden;
+	opacity:0;
 	z-index:var(--z-index-block-full-page);
 	background-color:#000;
-	opacity:0.2;
+	transition:opacity 0.2s, visibility 0.2s;
 }
 .input-block-overlay img{
-	width:40px;
-	margin:-20px 0px 0px -20px;
+	width:64px;
+	margin:-32px 0px 0px -32px;
 	left:50%;
 	top:50%;
 	position:absolute;
+}
+.input-block-overlay.show{
+	visibility:visible;
+	opacity:0.3;
+	transition-property:opacity;
+	transition-duration:2s;
+	transition-delay:0.3s;
 }
 
 /* generic boxes */

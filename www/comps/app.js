@@ -84,7 +84,7 @@ let MyApp = {
 			</transition>
 			
 			<!-- loading input blocker overlay -->
-			<div class="input-block-overlay" v-if="blockInput">
+			<div class="input-block-overlay" :class="{show:blockInput}">
 				<img src="images/load.gif" />
 			</div>
 		</template>
@@ -332,13 +332,10 @@ let MyApp = {
 			switch(res.ressource) {
 				// affects admins only
 				case 'schema_loading':
-					// add busy counters to also block admins that did not request the schema reload
 					this.$store.commit('busyAdd');
-					this.$store.commit('busyBlockInput',true);
 				break;
 				case 'schema_loaded':
 					this.$store.commit('busyRemove');
-					this.$store.commit('busyBlockInput',false);
 					
 					// reload new schema
 					this.$store.commit('schema/timestamp',res.payload);
@@ -480,7 +477,6 @@ let MyApp = {
 				requests.push(ws.prepare('license','get',{}));
 				requests.push(ws.prepare('system','get',{}));
 			}
-			this.$store.commit('busyBlockInput',true);
 			
 			ws.sendMultiple(requests,true).then(
 				async res => {
@@ -520,8 +516,6 @@ let MyApp = {
 			).then(
 				() => this.appReady = true,
 				this.setInitErr
-			).finally(
-				() => this.$store.commit('busyBlockInput',false)
 			);
 		},
 		

@@ -10,7 +10,6 @@ const MyStore = Vuex.createStore({
 	state:{
 		access:{},                     // access permissions for each entity (attribute, collection, menu, relation), key: entity ID
 		builderMode:false,             // builder mode active
-		busyBlockInput:false,          // while active, input is blocked when busy
 		busyCounter:0,                 // counter of calls making the app busy (WS requests, uploads, etc.)
 		captions:{},                   // all application captions in the user interface language
 		clusterNodeName:'',            // name of the cluster node that session is connected to
@@ -135,7 +134,6 @@ const MyStore = Vuex.createStore({
 		
 		// simple
 		access:         (state,payload) => state.access          = payload,
-		busyBlockInput: (state,payload) => state.busyBlockInput  = payload,
 		captions:       (state,payload) => state.captions        = payload,
 		clusterNodeName:(state,payload) => state.clusterNodeName = payload,
 		feedback:       (state,payload) => state.feedback        = payload,
@@ -179,9 +177,8 @@ const MyStore = Vuex.createStore({
 		
 		// simple
 		access:           (state) => state.access,
-		blockInput:       (state) => state.busyBlockInput && state.busyCounter > 0,
+		blockInput:       (state) => state.busyCounter > 0,
 		builderEnabled:   (state) => state.builderMode && !state.productionMode,
-		busyBlockInput:   (state) => state.busyBlockInput,
 		busyCounter:      (state) => state.busyCounter,
 		captions:         (state) => state.captions,
 		clusterNodeName:  (state) => state.clusterNodeName,
