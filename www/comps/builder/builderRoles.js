@@ -1,5 +1,6 @@
 import MyBuilderCaption      from './builderCaption.js';
 import {getDependentModules} from '../shared/builder.js';
+import {copyValueDialog}     from '../shared/generic.js';
 export {MyBuilderRoles as default};
 
 let MyBuilderRolesItem = {
@@ -22,7 +23,7 @@ let MyBuilderRolesItem = {
 			</td>
 			<td>
 				<my-button image="visible1.png"
-					@trigger="showInfo"
+					@trigger="copyValueDialog(role.name,role.id,role.id)"
 					:active="!isNew"
 				/>
 			</td>
@@ -182,6 +183,7 @@ let MyBuilderRolesItem = {
 	},
 	methods:{
 		// externals
+		copyValueDialog,
 		getDependentModules,
 		
 		// actions
@@ -195,16 +197,6 @@ let MyBuilderRolesItem = {
 			let pos = this.childrenIds.indexOf(id);
 			if(pos !== -1)
 				this.childrenIds.splice(pos,1);
-		},
-		showInfo:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.role.id,
-				captionTop:this.role.name,
-				buttons:[{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
 		},
 		
 		// backend calls

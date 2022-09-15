@@ -1,3 +1,4 @@
+import {copyValueDialog} from '../shared/generic.js';
 export {MyBuilderPgTrigger as default};
 
 let MyBuilderPgTrigger = {
@@ -11,7 +12,7 @@ let MyBuilderPgTrigger = {
 		</td>
 		<td class="minimum">
 			<my-button image="visible1.png"
-				@trigger="showInfo"
+				@trigger="copyValueDialog('',pgTrigger.id,pgTrigger.id)"
 				:active="!isNew"
 			/>
 		</td>
@@ -115,18 +116,12 @@ let MyBuilderPgTrigger = {
 		capGen:     function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
+		// externals
+		copyValueDialog,
+		
 		// actions
 		open:function() {
 			this.$router.push('/builder/pg-function/'+this.pgFunctionId);
-		},
-		showInfo:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.pgTrigger.id,
-				buttons:[{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
 		},
 		
 		// backend calls

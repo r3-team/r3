@@ -1,5 +1,6 @@
 import MyBuilderIconInput from './builderIconInput.js';
 import {getQueryTemplate} from '../shared/query.js';
+import {copyValueDialog}  from '../shared/generic.js';
 export {MyBuilderCollections as default};
 
 let MyBuilderCollectionsItem = {
@@ -28,7 +29,7 @@ let MyBuilderCollectionsItem = {
 			</td>
 			<td>
 				<my-button image="visible1.png"
-					@trigger="showInfo"
+					@trigger="copyValueDialog(collection.name,collection.id,collection.id)"
 					:active="!isNew"
 				/>
 			</td>
@@ -82,21 +83,12 @@ let MyBuilderCollectionsItem = {
 	},
 	methods:{
 		// externals
+		copyValueDialog,
 		getQueryTemplate,
 		
 		// actions
 		open:function() {
 			this.$router.push('/builder/collection/'+this.collection.id);
-		},
-		showInfo:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.collection.id,
-				captionTop:this.collection.name,
-				buttons:[{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
 		},
 		
 		// backend calls

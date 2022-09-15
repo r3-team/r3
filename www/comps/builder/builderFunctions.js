@@ -1,6 +1,9 @@
 import MyBuilderCaption        from './builderCaption.js';
 import {getPgFunctionTemplate} from '../shared/builder.js';
-import {getNilUuid}            from '../shared/generic.js';
+import {
+	copyValueDialog,
+	getNilUuid
+} from '../shared/generic.js';
 export {MyBuilderFunctions as default};
 export {MyBuilderFunctionPlaceholder};
 
@@ -88,7 +91,7 @@ let MyBuilderJsFunctionItem = {
 			</td>
 			<td>
 				<my-button image="visible1.png"
-					@trigger="showInfo"
+					@trigger="copyValueDialog(jsFunction.name,jsFunction.id,jsFunction.id)"
 					:active="!isNew"
 				/>
 			</td>
@@ -191,22 +194,15 @@ let MyBuilderJsFunctionItem = {
 		capGen:function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
+		// externals
+		copyValueDialog,
+		
 		// actions
 		open:function() {
 			this.$router.push('/builder/js-function/'+this.jsFunction.id);
 		},
 		openForm:function() {
 			this.$router.push('/builder/form/'+this.formId);
-		},
-		showInfo:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.jsFunction.id,
-				captionTop:this.jsFunction.name,
-				buttons:[{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
 		},
 		
 		// backend calls
@@ -371,7 +367,7 @@ let MyBuilderPgFunctionItem = {
 			</td>
 			<td>
 				<my-button image="visible1.png"
-					@trigger="showInfo"
+					@trigger="copyValueDialog(pgFunction.name,pgFunction.id,pgFunction.id)"
 					:active="!isNew"
 				/>
 			</td>
@@ -504,6 +500,7 @@ let MyBuilderPgFunctionItem = {
 	},
 	methods:{
 		// externals
+		copyValueDialog,
 		getNilUuid,
 		getPgFunctionTemplate,
 	
@@ -521,16 +518,6 @@ let MyBuilderPgFunctionItem = {
 		},
 		open:function() {
 			this.$router.push('/builder/pg-function/'+this.pgFunction.id);
-		},
-		showInfo:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.pgFunction.id,
-				captionTop:this.pgFunction.name,
-				buttons:[{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
 		},
 		
 		// backend calls

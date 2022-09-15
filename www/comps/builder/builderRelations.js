@@ -1,4 +1,5 @@
 import {getDependentModules} from '../shared/builder.js';
+import {copyValueDialog}     from '../shared/generic.js';
 export {MyBuilderRelations as default};
 
 let MyBuilderRelationsItemPolicy = {
@@ -140,7 +141,7 @@ let MyBuilderRelationsItem = {
 			</td>
 			<td>
 				<my-button image="visible1.png"
-					@trigger="showInfo"
+					@trigger="copyValueDialog(relation.name,relation.id,relation.id)"
 					:active="!isNew"
 				/>
 			</td>
@@ -274,6 +275,10 @@ let MyBuilderRelationsItem = {
 		capGen:function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
+		// externals
+		copyValueDialog,
+		
+		// actions
 		addPolicy:function() {
 			this.policies.push({
 				roleId:null,
@@ -286,16 +291,6 @@ let MyBuilderRelationsItem = {
 		},
 		open:function() {
 			this.$router.push('/builder/relation/'+this.relation.id);
-		},
-		showInfo:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.relation.id,
-				captionTop:this.relation.name,
-				buttons:[{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
 		},
 		
 		// backend calls

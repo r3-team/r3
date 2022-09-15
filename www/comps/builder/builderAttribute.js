@@ -1,6 +1,7 @@
 import MyBuilderCaption      from './builderCaption.js';
 import MyBuilderIconInput    from './builderIconInput.js';
 import {getDependentModules} from '../shared/builder.js';
+import {copyValueDialog}     from '../shared/generic.js';
 import {
 	isAttributeBoolean,
 	isAttributeFiles,
@@ -36,7 +37,7 @@ let MyBuilderAttribute = {
 		</td>
 		<td class="minimum">
 			<my-button image="visible1.png"
-				@trigger="showInfo"
+				@trigger="copyValueDialog(attribute.name,attribute.id,attribute.id)"
 				:active="!isNew"
 			/>
 		</td>
@@ -223,6 +224,7 @@ let MyBuilderAttribute = {
 	},
 	methods:{
 		// externals
+		copyValueDialog,
 		isAttributeBoolean,
 		isAttributeFiles,
 		isAttributeFloat,
@@ -231,18 +233,6 @@ let MyBuilderAttribute = {
 		isAttributeRelationship,
 		isAttributeString,
 		getDependentModules,
-		
-		// actions
-		showInfo:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.attribute.id,
-				captionTop:this.attribute.name,
-				buttons:[{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		
 		// backend calls
 		delAsk:function() {

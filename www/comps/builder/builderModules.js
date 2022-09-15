@@ -2,6 +2,7 @@ import MyBuilderCaption      from './builderCaption.js';
 import MyBuilderIconInput    from './builderIconInput.js';
 import {MyModuleSelect}      from '../input.js';
 import {getDependentModules} from '../shared/builder.js';
+import {copyValueDialog}     from '../shared/generic.js';
 import {getUnixFormat}       from '../shared/time.js';
 export {MyBuilderModules as default};
 
@@ -110,7 +111,7 @@ let MyBuilderModulesItem = {
 			</td>
 			<td>
 				<my-button image="visible1.png"
-					@trigger="showInfo"
+					@trigger="copyValueDialog(module.name,module.id,module.id)"
 					:active="!isNew"
 				/>
 			</td>
@@ -416,6 +417,7 @@ let MyBuilderModulesItem = {
 	},
 	methods:{
 		// externals
+		copyValueDialog,
 		getDependentModules,
 		getUnixFormat,
 		
@@ -435,16 +437,6 @@ let MyBuilderModulesItem = {
 		},
 		setColor:function(newVal) {
 			this.color1 = newVal.hex.substr(1);
-		},
-		showInfo:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.module.id,
-				captionTop:this.module.name,
-				buttons:[{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
 		},
 		toggleDependsOn:function(moduleId,state) {
 			let pos = this.dependsOn.indexOf(moduleId);

@@ -1,6 +1,7 @@
 import MyBuilderCaption      from './builderCaption.js';
 import MyBuilderIconInput    from './builderIconInput.js';
 import {getDependentModules} from '../shared/builder.js';
+import {copyValueDialog}     from '../shared/generic.js';
 import {getQueryTemplate}    from '../shared/query.js';
 export {MyBuilderForms as default};
 
@@ -29,7 +30,7 @@ let MyBuilderFormsItem = {
 		</td>
 		<td>
 			<my-button image="visible1.png"
-				@trigger="showInfo"
+				@trigger="copyValueDialog(form.name,form.id,form.id)"
 				:active="!isNew"
 			/>
 		</td>
@@ -130,21 +131,12 @@ let MyBuilderFormsItem = {
 	},
 	methods:{
 		// externals
+		copyValueDialog,
 		getQueryTemplate,
 		
 		// actions
 		open:function() {
 			this.$router.push('/builder/form/'+this.form.id);
-		},
-		showInfo:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.form.id,
-				captionTop:this.form.name,
-				buttons:[{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
 		},
 		
 		// backend calls
