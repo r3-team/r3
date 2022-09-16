@@ -1,4 +1,4 @@
-<p><em>Updated 2022-07-19</em></p>
+<p><em>Updated 2022-09-16</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -45,15 +45,14 @@
 <li><a href="#cloud-operations">Cloud operations</a></li>
 </ol>
 <h1 id="introduction">Introduction</h1>
-<p>This is the documentation for deploying, configurating and operating the REI3 application platform. It assumes some system administration knowledge for the target infrastructure (Windows Server or Linux). Once running, administrators can deploy REI3 applications from online or local repositories in infrastructures with or without internet access.</p>
+<p>This is the documentation for deploying and operating the REI3 application platform. It assumes system administration knowledge for the target infrastructure (Windows Server or Linux). Once running, administrators can deploy REI3 applications from online or local repositories in infrastructures with or without internet access.</p>
 <h1 id="deployment-models">Deployment models</h1>
 <p>To work within various customer environments, multiple deployment models are available for the REI3 platform; these are listed below in detail. Installation and configuration instructions follow afterwards.</p>
 <h2 id="stand-alone">Stand-alone</h2>
-<p>This model was created for small and medium size installations (~250 users) and is limited to Windows Server. The stand-alone deployment has almost no external dependencies. It is the recommended model for organizations with smaller IT teams as it requires little management.</p>
-<p>When running stand-alone, REI3 includes and manages its own internal database with full backups being configurable from within the REI3 admin user interface. This deployment model does currently not support incremental backups; a limitation for large instances as full backups take longer to complete.</p>
-<p>It is always possible to migrate from stand-alone to the dedicated deployment model.</p>
+<p>This model was created for small and medium size installations (~250 users) and is available for Windows Server. The stand-alone deployment has almost no external dependencies. It is the recommended model for organizations with smaller IT teams as it requires little management.</p>
+<p>When running stand-alone, REI3 manages an internal database and can also execute full backups.</p>
 <h2 id="dedicated">Dedicated</h2>
-<p>In this model REI3 runs as an application separate from its database system. This is recommended for large instances or when an organization has a database team onhand. This version can be deployed to Linux and Windows servers.</p>
+<p>In this model REI3 runs as an application separate from its database system. This is recommended for large instances or when an organization has a database team onhand. This version can be deployed on Linux and Windows servers.</p>
 <p>Running this model, REI3 will require a separate PostgreSQL database system and will not manage any database backups.</p>
 <h2 id="portable">Portable</h2>
 <p>An option for development, demo and test instances. With the portable version, REI3 can be started on Windows servers or clients directly without any setup. Like the stand-alone model, the portable version includes its own database. It is not recommended to run anything productive from a portable instance.</p>
@@ -73,12 +72,11 @@
 </ul></li>
 <li>Processor
 <ul>
-<li>Intel or AMD processors (64bit), multiple cores provide better performance</li>
-<li>ARM processors are not officially supported but were successfully used for REI3 in the past</li>
+<li>Intel, AMD or ARM processors (x64 or ARM64), multiple cores provide better performance</li>
 </ul></li>
 <li>Memory
 <ul>
-<li>4+ GB (medium size installation, ~250 users)</li>
+<li>4+ GB</li>
 </ul></li>
 <li>Disk space
 <ul>
@@ -87,33 +85,51 @@
 </ul></li>
 <li>Software
 <ul>
-<li>Microsoft Visual C++ 2015 (or newer - Windows Server only)</li>
+<li>Linux server
+<ul>
+<li>Optional: ImageMagick &amp; Ghostscript (for thumbnails)</li>
+</ul></li>
+<li>Windows Server
+<ul>
+<li>Required: Microsoft Visual C++ 2015 (or newer)</li>
+<li>Optional: Ghostscript (for PDF thumbnails)</li>
+</ul></li>
 </ul></li>
 <li>Databases (dedicated deployment only)
 <ul>
-<li>PostgresSQL 13.0 database (or newer) with full permissions</li>
+<li>PostgresSQL 13.0 database (or newer), UTF8 encoded, with full permissions</li>
 </ul></li>
 </ul>
 <h2 id="clients">Clients</h2>
 <p>To access a running REI3 instance, any modern browser can be used, like Firefox, Chrome or Safari. This includes mobile browsers. REI3 uses modern web standards; it does not support <code>Internet Explorer</code>.</p>
 <h1 id="installation">Installation</h1>
 <h2 id="on-windows-server">On Windows Server</h2>
-<p>REI3 comes with a graphical installer for Windows Server with installed desktop experience. The installer supports both <a href="#stand-alone">stand-alone</a> and <a href="#dedicated">dedicated</a> deployment models.</p>
-<p>When choosing the <a href="#stand-alone">stand-alone</a> deployment model, following this installer is sufficient for the basic installation and REI3 can be started immediately.</p>
-<p>When choosing the <a href="#dedicated">dedicated</a> model, database connection details for a running, empty PostgreSQL database must be entered into the configuration file <code>config.json</code>, inside the chosen application directory. With valid connection details to its database, REI3 will automatically complete the setup process on its first start.</p>
-<p>Independent of deployment model, on Windows Server, REI3 is handled as a Windows service and can be started as such. REI3 will write to the Windows application log, if the service does not start correctly.</p>
+<p>REI3 comes with a graphical installer for Windows Server. The installer supports both <a href="#stand-alone">stand-alone</a> and <a href="#dedicated">dedicated</a> deployment models.</p>
+<ul>
+<li><a href="#stand-alone">Stand-alone</a>: After following the installer, REI3 can be started immediately.</li>
+<li><a href="#dedicated">Dedicated</a>: After the installation, database connection details for an empty PostgreSQL database must be entered into the configuration file <code>config.json</code>. The file <code>config.json</code> is located inside the chosen application directory. The database user must have full permissions for the chosen database.</li>
+</ul>
+<p>Independent of deployment model, REI3 is handled as a Windows service and can be started with the service manager (command: <code>service.msc</code>). REI3 will write to the Windows application log, should the service not start correctly.</p>
 <h2 id="on-a-linux-server">On a Linux server</h2>
-<p>For Linux servers, REI3 currently provides a compressed archive with pre-compiled binaries. After extraction at a location of your choice, the file <code>r3</code> must be made executable and the configuration file <code>config.json</code> copied from its template file <code>config_template.json</code>.</p>
-<p>Before running REI3, you must enter valid connection details to a running, empty PostgreSQL database inside <code>config.json</code>. With valid connection details to its database, REI3 will automatically complete the setup process on its first start.</p>
-<p>To register REI3 as a service with your operating system, execute <code>r3 -install</code> with elevated permissions. REI3 writes to <code>syslog</code>, which can be referenced should the service not start.</p>
+<p>For Linux servers, REI3 is available as a compressed archive with pre-compiled binary. The installation steps are:</p>
+<ol type="1">
+<li>Extract the REI3 archive file to a location of your choice (<code>/opt/rei3/</code> for example).</li>
+<li>Make the file <code>r3</code> executable (<code>chmod u+x r3</code>).</li>
+<li>Copy the file <code>config_template.json</code> to <code>config.json</code> - keep it in the same directory as the <code>r3</code> executable.</li>
+<li>Add connection details to an empty, UTF8 encoded PostgreSQL database to <code>config.json</code>. The database user must have full permissions for the chosen database.</li>
+<li>Optional: Install ImageMagick and Ghostscript if you want to have thumbnails (<code>sudo apt install imagemagick ghostscript</code>).</li>
+<li>Register REI3 with your service manager (<code>sudo r3 -install</code>).</li>
+<li>Start the REI3 service (<code>systemctl start rei3</code> for example).</li>
+</ol>
+<p>If the service does not start, REI3 writes to <code>syslog</code>.</p>
 <h1 id="first-access-to-rei3">First access to REI3</h1>
 <p>When running, REI3 is by default reachable on port 443. You can use any modern browser to access REI3 locally at <code>https://localhost/</code> or from the network, given a configured firewall. During installation, a single admin user is created; username and password are both 'admin'.</p>
-<p>After login, an admin user can access the admin user interface to manage users, install applications, access system logs and so on. The default password should be changed immediately.</p>
+<p>After login, an admin user can access the admin panel to manage users, install applications, access system logs and so on. The default password should be changed immediately.</p>
 <h1 id="configuration">Configuration</h1>
 <p>REI3s core configuration can be changed within its configuration file (<code>config.json</code>), which is located in the chosen REI3 installation directory. Setting file paths, web server port and database connection details is straightforward. Changes are applied when the application service restarts. Special configuration options and certification management is explained separately.</p>
 <h2 id="ssl-certificates">SSL certificates</h2>
 <p>During installation, REI3 creates a self-signed certificate to allow encrypted access to the application. It is not recommended to keep this certificate. If at all possible, a properly signed certificate should be provided for REI3 to ensure secure communication with trust between clients and server.</p>
-<p>We can offer support for setting up necessary infrastructure; it is however dependent on your organization to manage certificates. Cloud based offerings for REI3 include certification services.</p>
+<p>We can offer support for setting up necessary infrastructure; it is however dependent on your organization to manage certificates. Cloud based offerings for REI3 can include certification services.</p>
 <h1 id="general-administration">General administration</h1>
 <p>After configuration, basically all administrative tasks are executed via the admin user interface inside the main REI3 web application. Any user defined as 'admin' has full access to these features.</p>
 <h2 id="maintenance-mode">Maintenance mode</h2>
@@ -156,7 +172,6 @@
 <li>The used SSL certificates</li>
 </ul>
 <p>When running stand-alone, the integrated backup addresses all of the above and allows for full recovery as long as the target backup directory is separate from the application server. If not running in stand-alone or more control is required, more details are given below.</p>
-<p>If required, we also offer support services for organizations for setting up sensible backup solutions and for recovery scenarios.</p>
 <h2 id="files">Files</h2>
 <p>The configuration file <code>config.json</code> is located in the chosen application directory for REI3. Certificates and file paths are referenced within the configuration file itself. For full recovery, copies of these are required.</p>
 <p>Other directories besides the stated ones, do not need to be backed up but are not very large and can be included to keep backup jobs simple.</p>
