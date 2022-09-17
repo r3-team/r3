@@ -98,9 +98,6 @@ type DataGetValueFile struct {
 	Version int64     `json:"version"`
 	Changed int64     `json:"changed"`
 }
-type DataGetValueFiles struct {
-	Files []DataGetValueFile `json:"files"`
-}
 
 // data SET request
 type DataSetAttribute struct {

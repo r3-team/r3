@@ -107,7 +107,7 @@ let MyValueRich = {
 	computed:{
 		files:function() {
 			return !this.isFiles || this.value === null
-				? [] : this.value.files;
+				? [] : this.value;
 		},
 		link:function() {
 			return !this.isLink || this.value === null

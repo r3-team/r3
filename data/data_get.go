@@ -527,25 +527,22 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 		tName := schema.GetFilesTableName(atr.Id)
 		tNameV := schema.GetFilesTableNameVersions(atr.Id)
 
-		*inSelect = append(*inSelect, fmt.Sprintf(`JSON_BUILD_OBJECT(
-			'files',(
-				SELECT COALESCE(ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(t))),'[]'::JSON)
-				FROM (
-					SELECT f.id, f.name, COALESCE(v.hash,'') AS hash,
-						v.size_kb AS size, v.version, v.date_change AS changed
-					FROM instance_file."%s" AS f
-					JOIN instance_file."%s" AS v
-						ON  v.file_id = f.id
-						AND v.version = (
-						    SELECT MAX(VERSION)
-						    FROM instance_file."%s"
-						    WHERE file_id = f.id
-						)
-					WHERE f.record_id = "%s"."%s"
-					AND   date_delete IS NULL
-				) AS t
-			)
-		)`, tName, tNameV, tNameV, relCode, schema.PkName))
+		*inSelect = append(*inSelect, fmt.Sprintf(`(
+			SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(t)))
+			FROM (
+				SELECT f.id, f.name, COALESCE(v.hash,'') AS hash,
+					v.size_kb AS size, v.version, v.date_change AS changed
+				FROM instance_file."%s" AS f
+				JOIN instance_file."%s" AS v
+					ON  v.file_id = f.id
+					AND v.version = (
+					    SELECT MAX(VERSION)
+					    FROM instance_file."%s"
+					    WHERE file_id = f.id
+					)
+				WHERE f.record_id = "%s"."%s"
+				AND   date_delete IS NULL
+			) AS t)`, tName, tNameV, tNameV, relCode, schema.PkName))
 		return nil
 	}
 

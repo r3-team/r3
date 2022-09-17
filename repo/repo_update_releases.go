@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"r3/compatible"
 	"r3/tools"
 	"r3/types"
 
@@ -14,7 +15,6 @@ import (
 func getModuleReleases(token string, url string, skipVerify bool,
 	repoModuleMap map[uuid.UUID]types.RepoModule, lastRun uint64) error {
 
-	var err error
 	var req struct {
 		Token   string        `json:"token"`
 		Action  string        `json:"action"`
@@ -118,6 +118,7 @@ func getModuleReleases(token string, url string, skipVerify bool,
 		repoModule := types.RepoModule{}
 
 		for i, value := range row.Values {
+
 			switch i {
 			case 0:
 				moduleId := uuid.FromStringOrNil(value.(string))
@@ -138,32 +139,22 @@ func getModuleReleases(token string, url string, skipVerify bool,
 			case 3:
 				repoModule.ReleaseDate = int(value.(float64))
 			case 4:
-				var filesJson []byte
-
-				switch v := value.(type) {
-				case string: // 2.3 and older (before pgx), files attributes were encoded as JSON string
-					filesJson = []byte(v)
-
-				case map[string]interface{}: // 2.4 and newer
-					filesJson, err = json.Marshal(v)
-					if err != nil {
-						return err
-					}
-
-				default:
-					return errors.New("invalid value type for files attribute")
+				if value == nil {
+					return fmt.Errorf("no files for module release")
 				}
 
-				files := types.DataGetValueFiles{}
-				if err := json.Unmarshal(filesJson, &files); err != nil {
+				filesJson, err := json.Marshal(value)
+				if err != nil {
 					return err
 				}
 
-				if len(files.Files) != 1 {
+				files := compatible.FixLegacyFileAttributeValue(filesJson)
+
+				if len(files) != 1 {
 					return fmt.Errorf("module release must have exactly 1 file, count: %d",
-						len(files.Files))
+						len(files))
 				}
-				repoModule.FileId = files.Files[0].Id
+				repoModule.FileId = files[0].Id
 				moduleIdsAdded = append(moduleIdsAdded, repoModule.ModuleId)
 			}
 		}

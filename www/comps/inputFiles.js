@@ -125,7 +125,7 @@ let MyInputFiles = {
 					v-if="!viewListCompact && !noFiles && !oneFile && !readonly"
 					@trigger="toggleAll"
 					:caption="!noSpace ? capGen.button.selectAll : capGen.button.selectAllShort"
-					:image="displayChecked(files.length === fileIdsSelected.length)"
+					:image="displayChecked(allSelected)"
 					:naked="true"
 					:tight="true"
 				/>
@@ -153,7 +153,7 @@ let MyInputFiles = {
 						<th v-if="!readonly" class="minimum">
 							<my-button
 								@trigger="toggleAll"
-								:image="displayChecked(files.length === fileIdsSelected.length)"
+								:image="displayChecked(allSelected)"
 								:naked="true"
 								:tight="true"
 							/>
@@ -189,7 +189,7 @@ let MyInputFiles = {
 					</tr>
 				</thead>
 				<tbody>
-					<tr v-for="f in files">
+					<tr v-for="f in filesProcessed">
 						<td v-if="!readonly" class="minimum">
 							<my-button
 								@trigger="toggle(f.id)"
@@ -236,7 +236,7 @@ let MyInputFiles = {
 			
 			<!-- list comfortable -->
 			<div class="listComfort" v-if="viewListComfort">
-				<div class="item" v-for="f in files">
+				<div class="item" v-for="f in filesProcessed">
 					<a target="_blank"
 						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,token,f.version)"
 						:title="capApp.button.downloadHint"
@@ -276,7 +276,7 @@ let MyInputFiles = {
 			
 			<!-- gallery -->
 			<div class="gallery" v-if="viewGallery" >
-				<div class="item" v-for="f in files">
+				<div class="item" v-for="f in filesProcessed">
 					<a target="_blank"
 						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,token,f.version)"
 						:title="capApp.button.downloadHint"
@@ -339,6 +339,7 @@ let MyInputFiles = {
 			// inputs
 			dragActive:false,
 			dragTarget:{},
+			files:[],              // files from value
 			fileIdMapChange:{},    // map of file changes done inside this component, key: file ID
 			fileIdsSelected:[],    // file IDs selected by checkbox
 			filterName:'',         // filter files by name
@@ -353,7 +354,11 @@ let MyInputFiles = {
 	mounted:function() {
 		// setup watchers
 		this.$watch('formLoading',(val) => {
-			if(!val) this.fileIdMapChange = {};
+			if(val) return;
+			
+			let v = JSON.parse(JSON.stringify(this.modelValue));
+			this.files = v !== null ? v : [];
+			this.fileIdMapChange = {};
 		});
 		
 		// apply initial view size
@@ -370,12 +375,9 @@ let MyInputFiles = {
 		window.removeEventListener('resize',this.setNoSpaceMode);
 	},
 	computed:{
-		files:{
+		filesProcessed:{
 			get:	function() {
-				if(this.modelValue === null)
-					return [];
-				
-				let v = JSON.parse(JSON.stringify(this.modelValue.files));
+				let v = JSON.parse(JSON.stringify(this.files));
 				
 				if(this.filterName !== '')
 					v = v.filter(f => f.name.includes(this.filterName))
@@ -391,15 +393,6 @@ let MyInputFiles = {
 					if(!this.sortDirAsc) v.sort((a, b) => b.size - a.size);
 				}
 				return v;
-			},
-			set:function(v) {
-				if(v.length === 0 && JSON.stringify(this.fileIdMapChange) === '{}')
-					return this.$emit('update:modelValue',null);
-				
-				this.$emit('update:modelValue',{
-					files:v,
-					fileIdMapChange:this.fileIdMapChange
-				});
 			}
 		},
 		fileCountCaption:(s) => {
@@ -410,6 +403,7 @@ let MyInputFiles = {
 		},
 		
 		// simple
+		allSelected:    (s) => s.filesProcessed.length === s.fileIdsSelected.length,
 		fewFiles:       (s) => s.files.length <= 5,
 		maxFiles:       (s) => s.countAllowed !== 0 && s.countAllowed <= s.files.length,
 		noFiles:        (s) => s.files.length === 0,
@@ -540,9 +534,6 @@ let MyInputFiles = {
 			}
 			
 			if(mode === 'name') {
-				// apply changed file names locally to update sorting
-				let files = JSON.parse(JSON.stringify(this.files));
-				
 				for(let fileId in this.fileIdMapChange) {
 					if(this.fileIdMapChange[fileId].action !== 'rename')
 						continue;
@@ -554,7 +545,6 @@ let MyInputFiles = {
 						}
 					}
 				}
-				this.files = files;
 			}
 		},
 		setSortModeClear(mode) {
@@ -578,7 +568,7 @@ let MyInputFiles = {
 				return this.fileIdsSelected = [];
 			
 			this.fileIdsSelected = [];
-			for(let i = 0, j = this.files.length; i < j; i++) {
+			for(let i = 0, j = this.filesProcessed.length; i < j; i++) {
 				this.fileIdsSelected.push(this.files[i].id);
 			}
 		},
@@ -586,46 +576,48 @@ let MyInputFiles = {
 			this.sortDirAsc = !this.sortDirAsc;
 		},
 		update(fileId,action,name) {
-			if(typeof this.fileIdMapChange[fileId] === 'undefined')
-				return this.fileIdMapChange[fileId] = {
+			if(typeof this.fileIdMapChange[fileId] === 'undefined') {
+				this.fileIdMapChange[fileId] = {
 					action:action,
 					name:name,
 					version:-1
 				};
+			} else {
+				// delete action always takes priority, even if another already existed
+				if(action === 'delete')
+					this.fileIdMapChange[fileId].action = action;
+				
+				// file name is used for file reference in change logs regardless of action
+				this.fileIdMapChange[fileId].name = name;
+			}
 			
-			// delete action always takes priority, even if another already existed
-			if(action === 'delete')
-				this.fileIdMapChange[fileId].action = action;
-			
-			// file name is used for file reference in change logs regardless of action
-			this.fileIdMapChange[fileId].name = name;
+			// update parent
+			this.$emit('update:modelValue',{
+				fileCount:this.files.length,
+				fileIdMapChange:this.fileIdMapChange
+			});
 		},
 		updateCreate(filesNew) {
-			let files = JSON.parse(JSON.stringify(this.files));
 			for(let f of filesNew) {
-				files.push(f);
+				this.files.push(f);
 				this.update(f.id,'create',f.name);
 			}
-			this.files = files;
 		},
 		updateDelete(fileIds) {
-			let files = JSON.parse(JSON.stringify(this.files));
 			for(let fileId of fileIds) {
-				for(let i = 0, j = files.length; i < j; i++) {
-					if(files[i].id === fileId) {
-						this.update(fileId,'delete',files[i].name);
-						files.splice(i,1);
+				for(let i = 0, j = this.files.length; i < j; i++) {
+					if(this.files[i].id === fileId) {
+						this.update(fileId,'delete',this.files[i].name);
+						this.files.splice(i,1);
 						break;
 					}
 				}
 			}
-			this.files = files;
 		},
 		updateName(fileId,name) {
 			// name is not immediately updated in files list to conserve sorting
 			// when form is reloaded or sort updated, file name changes are applied
 			this.update(fileId,'rename',name);
-			this.files = this.files;
 		},
 		upload(files) {
 			let maxSize = this.attributeIdMap[this.attributeId].length;

@@ -818,8 +818,11 @@ let MyField = {
 			if(this.isString && this.value.length < this.field.min)
 				return false;
 			
+			if(this.isFiles && typeof this.value.fileCount !== 'undefined')
+				return this.value.fileCount >= this.field.min;
+			
 			if(this.isFiles)
-				return this.value.files.length >= this.field.min;
+				return this.value.length >= this.field.min;
 			
 			return true;
 		},
@@ -833,8 +836,11 @@ let MyField = {
 			if(this.isString && this.value.length > this.field.max)
 				return false;
 			
+			if(this.isFiles && typeof this.value.fileCount !== 'undefined')
+				return this.value.fileCount <= this.field.max;
+			
 			if(this.isFiles)
-				return this.value.files.length <= this.field.max;
+				return this.value.length <= this.field.max;
 			
 			return true;
 		},
