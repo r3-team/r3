@@ -17,11 +17,18 @@ import (
 	"r3/schema"
 	"r3/tools"
 	"r3/types"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
+)
+
+var (
+	// finds: '17' from file names such as 'my_file_(17).jpg'
+	regexRenameSchema = regexp.MustCompile(`_\((\d+)\)`)
 )
 
 func MayAccessFile(loginId int64, attributeId uuid.UUID) error {
@@ -247,6 +254,7 @@ func filesApplyAttributChanges_tx(ctx context.Context, tx pgx.Tx,
 		return err
 	}
 
+	// apply created & deleted files
 	fileIdsCreated := make([]uuid.UUID, 0)
 	fileIdsDeleted := make([]uuid.UUID, 0)
 
@@ -256,16 +264,6 @@ func filesApplyAttributChanges_tx(ctx context.Context, tx pgx.Tx,
 			fileIdsCreated = append(fileIdsCreated, fileId)
 		case "delete":
 			fileIdsDeleted = append(fileIdsDeleted, fileId)
-		}
-
-		if (change.Action == "create" || change.Action == "rename") && change.Name != "" {
-			if _, err := tx.Exec(ctx, fmt.Sprintf(`
-				UPDATE instance_file."%s"
-				SET   name = $1
-				WHERE id   = $2
-			`, tName), strings.TrimSpace(change.Name), fileId); err != nil {
-				return err
-			}
 		}
 	}
 
@@ -277,6 +275,74 @@ func filesApplyAttributChanges_tx(ctx context.Context, tx pgx.Tx,
 	if len(fileIdsDeleted) != 0 {
 		if err := FilesSetDeletedForRecord_tx(ctx, tx, attributeId, fileIdsDeleted, recordId); err != nil {
 			return err
+		}
+	}
+
+	// execute file rename actions after files were assigned to records (created files)
+	// rename is dependent on other files assigned to the same record
+	for fileId, change := range v.FileIdMapChange {
+		if (change.Action == "create" || change.Action == "rename") && change.Name != "" {
+
+			// trim spaces
+			change.Name = strings.TrimSpace(change.Name)
+
+			// check whether name is free to use within context of record
+			nameCandidate := change.Name
+			nameExt := filepath.Ext(nameCandidate)
+			nameExists := false
+
+			for attempts := 0; attempts < 20; attempts++ {
+				if err := tx.QueryRow(ctx, fmt.Sprintf(`
+					SELECT EXISTS(
+						SELECT id
+						FROM instance_file."%s"
+						WHERE record_id   =  $1
+						AND   name        =  $2
+						AND   id          <> $3
+						AND   date_delete IS NULL
+					)
+				`, tName), recordId, nameCandidate, fileId).Scan(&nameExists); err != nil {
+					return err
+				}
+
+				if !nameExists {
+					// name not taken yet, can be used
+					break
+				}
+				nameOnly := strings.Replace(nameCandidate, nameExt, "", -1)
+
+				// check if taken name already has rename schema
+				matches := regexRenameSchema.FindStringSubmatch(nameOnly)
+				if len(matches) == 2 {
+					// schema used, increment counter and try again
+					counter, err := strconv.ParseInt(matches[1], 10, 0)
+					if err != nil {
+						return err
+					}
+
+					nameCandidate = regexRenameSchema.ReplaceAllString(nameOnly,
+						fmt.Sprintf("_(%d)%s", counter+1, nameExt))
+
+					continue
+				}
+
+				// schema not used, apply it by adding counter
+				nameCandidate = fmt.Sprintf("%s_(1)%s", nameOnly, nameExt)
+			}
+
+			if nameExists {
+				// name is still taken, abort rename
+				continue
+			}
+
+			if _, err := tx.Exec(ctx, fmt.Sprintf(`
+				UPDATE instance_file."%s"
+				SET   name      = $1
+				WHERE id        = $2
+				AND   record_id = $3
+			`, tName), nameCandidate, fileId, recordId); err != nil {
+				return err
+			}
 		}
 	}
 	return nil
