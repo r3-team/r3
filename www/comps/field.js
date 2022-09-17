@@ -530,7 +530,7 @@ let MyField = {
 			if(this.isReadonly)
 				out.push('readonly');
 			
-			if(this.isTextarea || this.isRichtext)
+			if(this.isTextarea || this.isRichtext || this.isFiles)
 				out.push('top-aligned');
 			
 			if(this.isRichtext)
