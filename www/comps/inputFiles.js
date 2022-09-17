@@ -564,12 +564,12 @@ let MyInputFiles = {
 			else           this.fileIdsSelected.splice(pos,1);
 		},
 		toggleAll() {
-			if(this.fileIdsSelected.length === this.files.length)
+			if(this.allSelected)
 				return this.fileIdsSelected = [];
 			
 			this.fileIdsSelected = [];
 			for(let i = 0, j = this.filesProcessed.length; i < j; i++) {
-				this.fileIdsSelected.push(this.files[i].id);
+				this.fileIdsSelected.push(this.filesProcessed[i].id);
 			}
 		},
 		toggleSortDir(){
