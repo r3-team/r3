@@ -330,7 +330,7 @@ h3{
 }
 
 /* input block overlay */
-.input-block-overlay{
+.input-block-overlay-bg{
 	position:absolute;
 	left:0px;
 	right:0px;
@@ -342,19 +342,35 @@ h3{
 	background-color:#000;
 	transition:opacity 0.2s, visibility 0.2s;
 }
-.input-block-overlay img{
-	width:64px;
-	margin:-32px 0px 0px -32px;
+.input-block-overlay-bg.show{
+	visibility:visible;
+	opacity:0.35;
+	transition:opacity 2s 0.3s;
+}
+.input-block-overlay{
+	width:320px;
+	height:200px;
+	margin:-100px 0px 0px -160px;
 	left:50%;
 	top:50%;
 	position:absolute;
+	display:flex;
+	flex-flow:column nowrap;
+	justify-content:center;
+	align-items:center;
 }
-.input-block-overlay.show{
+.input-block-overlay img.busy{
+	width:64px;
+	margin:0px 0px 20px 0px;
+}
+.input-block-overlay .cancel-action{
+	visibility:hidden;
+	opacity:0;
+}
+.input-block-overlay-bg.show .cancel-action{
 	visibility:visible;
-	opacity:0.3;
-	transition-property:opacity;
-	transition-duration:2s;
-	transition-delay:0.3s;
+	opacity:1;
+	transition:opacity 1s 4s;
 }
 
 /* generic boxes */

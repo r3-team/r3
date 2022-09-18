@@ -84,8 +84,15 @@ let MyApp = {
 			</transition>
 			
 			<!-- loading input blocker overlay -->
-			<div class="input-block-overlay" :class="{show:blockInput}">
-				<img src="images/load.gif" />
+			<div class="input-block-overlay-bg" :class="{show:blockInput}">
+				<div class="input-block-overlay">
+					<img class="busy" src="images/load.gif" />
+					<my-button class="cancel-action" image="cancel.png"
+						@trigger="wsCancel"
+						:cancel="true"
+						:caption="capGen.button.cancel"
+					/>
+				</div>
 			</div>
 		</template>
 	</div>`,
