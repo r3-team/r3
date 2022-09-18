@@ -6,6 +6,20 @@ export {MyAdminModules as default};
 let MyAdminModulesItem = {
 	name:'my-admin-modules-item',
 	template:`<tr :class="{ grouping:module.parentId === null }">
+		<td>
+			<div class="row">
+				<my-button image="save.png"
+					@trigger="set"
+					:active="hasChanges && !productionMode"
+					:captionTitle="capGen.button.save"
+				/>
+				<my-button image="delete.png"
+					@trigger="delAsk"
+					:active="!productionMode"
+					:cancel="true"
+				/>
+			</div>
+		</td>
 		<td class="noWrap">
 			<div class="row centered">
 				<my-button image="dash.png"
@@ -66,20 +80,6 @@ let MyAdminModulesItem = {
 		</td>
 		<td class="default-inputs">
 			<input class="short" v-model.number="position" :disabled="productionMode" />
-		</td>
-		<td>
-			<div class="row">
-				<my-button image="save.png"
-					@trigger="set"
-					:active="hasChanges && !productionMode"
-					:captionTitle="capGen.button.save"
-				/>
-				<my-button image="delete.png"
-					@trigger="delAsk"
-					:active="!productionMode"
-					:cancel="true"
-				/>
-			</div>
 		</td>
 		<td></td>
 	</tr>`,
@@ -362,6 +362,12 @@ let MyAdminModules = {
 			<table class="table-default" v-if="modules.length !== 0">
 				<thead>
 					<tr>
+						<th>
+							<div class="mixed-header">
+								<img src="images/ok.png" />
+								<span>{{ capGen.actions }}</span>
+							</div>
+						</th>
 						<th class="noWrap">
 							<div class="mixed-header">
 								<img src="images/module.png" />
@@ -404,7 +410,6 @@ let MyAdminModules = {
 								<span>{{ capApp.position }}</span>
 							</div>
 						</th>
-						<th></th>
 						<th class="maximum"></th>
 					</tr>
 				</thead>
