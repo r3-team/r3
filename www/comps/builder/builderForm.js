@@ -297,10 +297,17 @@ let MyBuilderForm = {
 			</div>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		id:             { type:String,  required:false, default:'' },
 		readonly:       { type:Boolean, required:true }
+	},
+	mounted:function() {
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted:function() {
+		this.$emit('hotkeysRegister',[]);
 	},
 	data:function() {
 		return {

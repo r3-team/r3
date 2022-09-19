@@ -281,6 +281,7 @@ let MyBuilderJsFunction = {
 			</div>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		id:             { type:String,  required:true },
@@ -291,6 +292,12 @@ let MyBuilderJsFunction = {
 			handler:function() { this.reset(); },
 			immediate:true
 		}
+	},
+	mounted:function() {
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted:function() {
+		this.$emit('hotkeysRegister',[]);
 	},
 	data:function() {
 		return {

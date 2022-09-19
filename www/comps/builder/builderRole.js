@@ -322,6 +322,7 @@ let MyBuilderRole = {
 			</div>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		id:             { type:String,  required:true },
@@ -329,11 +330,15 @@ let MyBuilderRole = {
 	},
 	watch:{
 		role:{
-			handler:function(v) {
-				if(v !== false) this.reset();
-			},
+			handler:function(v) { if(v !== false) this.reset(); },
 			immediate:true
 		}
+	},
+	mounted:function() {
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted:function() {
+		this.$emit('hotkeysRegister',[]);
 	},
 	data:function() {
 		return {
@@ -347,33 +352,33 @@ let MyBuilderRole = {
 	},
 	computed:{
 		// entities
-		module:function() {
-			return this.role === false
-				? false : this.moduleIdMap[this.role.moduleId];
+		module:(s) => {
+			return s.role === false
+				? false : s.moduleIdMap[s.role.moduleId];
 		},
-		role:function() {
-			return typeof this.roleIdMap[this.id] === 'undefined'
-				? false : this.roleIdMap[this.id];
+		role:(s) => {
+			return typeof s.roleIdMap[s.id] === 'undefined'
+				? false : s.roleIdMap[s.id];
 		},
 		
 		// states
-		hasChanges:function() {
-			return JSON.stringify(this.accessAttributes)  !== JSON.stringify(this.role.accessAttributes)
-				|| JSON.stringify(this.accessCollections) !== JSON.stringify(this.role.accessCollections)
-				|| JSON.stringify(this.accessMenus)       !== JSON.stringify(this.role.accessMenus)
-				|| JSON.stringify(this.accessRelations)   !== JSON.stringify(this.role.accessRelations)
+		hasChanges:(s) => {
+			return JSON.stringify(s.accessAttributes)  !== JSON.stringify(s.role.accessAttributes)
+				|| JSON.stringify(s.accessCollections) !== JSON.stringify(s.role.accessCollections)
+				|| JSON.stringify(s.accessMenus)       !== JSON.stringify(s.role.accessMenus)
+				|| JSON.stringify(s.accessRelations)   !== JSON.stringify(s.role.accessRelations)
 			;
 		},
 		
 		// stores
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		roleIdMap:  function() { return this.$store.getters['schema/roleIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.builder.role; },
-		capGen:     function() { return this.$store.getters.captions.generic; }
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		roleIdMap:  (s) => s.$store.getters['schema/roleIdMap'],
+		capApp:     (s) => s.$store.getters.captions.builder.role,
+		capGen:     (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// actions
-		apply:function(type,id,access) {
+		apply(type,id,access) {
 			switch(type) {
 				case 'attribute':  this.accessAttributes[id]  = access; break;
 				case 'collection': this.accessCollections[id] = access; break;
@@ -381,14 +386,14 @@ let MyBuilderRole = {
 				case 'relation':   this.accessRelations[id]   = access; break;
 			}
 		},
-		reset:function() {
+		reset() {
 			this.accessAttributes  = JSON.parse(JSON.stringify(this.role.accessAttributes));
 			this.accessCollections = JSON.parse(JSON.stringify(this.role.accessCollections));
 			this.accessMenus       = JSON.parse(JSON.stringify(this.role.accessMenus));
 			this.accessRelations   = JSON.parse(JSON.stringify(this.role.accessRelations));
 			this.ready = true;
 		},
-		toggleRelationShow:function(id) {
+		toggleRelationShow(id) {
 			let pos = this.relationIdsShown.indexOf(id);
 			
 			if(pos === -1) this.relationIdsShown.push(id);
@@ -396,7 +401,7 @@ let MyBuilderRole = {
 		},
 		
 		// backend calls
-		set:function() {
+		set() {
 			ws.send('role','set',{
 				id:this.role.id,
 				name:this.role.name,

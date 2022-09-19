@@ -26,8 +26,8 @@ let MyInputRichtext = {
 	},
 	data:function() {
 		return {
-			// key is used to force update richtext editor
-			key:0,
+			key:0, // key is used to force update richtext editor
+			knownHotkeys:['q','s'],
 			
 			// tokens are used to authenticate with the current user session
 			// we cannot store sensitive tokens inside richtext, but tokens are required for accessing files
@@ -144,7 +144,7 @@ let MyInputRichtext = {
 		
 		// actions
 		handleHotkeys:function(e) {
-			if(e.key === 's' && e.ctrlKey) {
+			if(e.ctrlKey && this.knownHotkeys.includes(e.key)) {
 				this.$emit('hotkey',e);
 				e.preventDefault();
 			}

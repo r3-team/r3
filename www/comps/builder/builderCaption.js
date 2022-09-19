@@ -24,6 +24,7 @@ let MyBuilderCaption = {
 		<my-input-richtext
 			v-if="richtext"
 			v-model="valueInput"
+			@hotkey="$emit('hotkey',$event)"
 			:readonly="readonly"
 		/>
 	</div>`,
@@ -36,7 +37,7 @@ let MyBuilderCaption = {
 		readonly:   { type:Boolean, required:false, default:false },
 		richtext:   { type:Boolean, required:false, default:false }
 	},
-	emits:['update:modelValue'],
+	emits:['hotkey','update:modelValue'],
 	computed:{
 		valueInput:{
 			get:function() {

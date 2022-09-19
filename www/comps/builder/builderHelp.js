@@ -28,11 +28,13 @@ let MyBuilderHelp = {
 		
 		<my-builder-caption
 			v-model="helpInput"
+			@hotkey="$emit('hotkey',$event)"
 			:language="builderLanguage"
 			:readonly="readonly"
 			:richtext="true"
 		/>
 	</div>`,
+	emits:['hotkey','hotkeysRegister'],
 	data:function() {
 		return {
 			helpInput:{}
@@ -49,17 +51,23 @@ let MyBuilderHelp = {
 			immediate:true
 		}
 	},
+	mounted:function() {
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted:function() {
+		this.$emit('hotkeysRegister',[]);
+	},
 	computed:{
 		module:(s) => {
 			return typeof s.moduleIdMap[s.id] === 'undefined'
 				? false : s.moduleIdMap[s.id];
 		},
+		hasChanges:(s) => {
+			return JSON.stringify(s.helpInput) !== JSON.stringify(s.help);
+		},
 		help:(s) => {
 			return s.module === false
 				? '' : s.module.captions.moduleHelp;
-		},
-		hasChanges:(s) => {
-			return JSON.stringify(s.helpInput) !== JSON.stringify(s.help);
 		},
 		
 		// stores

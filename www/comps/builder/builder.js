@@ -197,6 +197,8 @@ let MyBuilder = {
 		<router-view
 			v-if="ready"
 			v-show="!showDocs"
+			@hotkey="handleHotkeys"
+			@hotkeysRegister="hotkeysChild = $event"
 			@toggleDocs="showDocs = !showDocs"
 			:builderLanguage="builderLanguage"
 			:readonly="!moduleOwner"
@@ -217,6 +219,7 @@ let MyBuilder = {
 		return {
 			builderLanguage:'', // selected language for translations
 			filter:'',          // simple text filter for menu
+			hotkeysChild:[],    // hotkeys from child components
 			moduleId:'',        // selected module ID
 			navigation:'relations',
 			ready:false,
@@ -323,11 +326,24 @@ let MyBuilder = {
 		// externals
 		srcBase64,
 		
-		handleHotkeys:function(evt) {
+		handleHotkeys(evt) {
+			// language switch
 			if(evt.ctrlKey && evt.key === 'q')
 				this.nextLanguage();
+			
+			// registered child hotkeys
+			for(let k of this.hotkeysChild) {
+				if(k.keyCtrl && !evt.ctrlKey)
+					continue;
+				
+				if(k.key === evt.key) {
+					evt.preventDefault();
+					k.fnc();
+					console.log(456);
+				}
+			}
 		},
-		nextLanguage:function() {
+		nextLanguage() {
 			let pos = this.module.languages.indexOf(this.builderLanguage);
 			
 			if(pos === -1 || pos >= this.module.languages.length - 1)
