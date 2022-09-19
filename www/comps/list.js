@@ -39,7 +39,7 @@ let MyList = {
 		MyListCsv,
 		MyValueRich
 	},
-	template:`<div class="list"
+	template:`<div class="list" ref="content"
 		@keydown="keyDown"
 		v-click-outside="escape"
 		:class="{shade:!isInput, singleField:isSingleField, asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly }"
@@ -254,7 +254,7 @@ let MyList = {
 					/>
 					
 					<my-button image="filter.png"
-						v-if="isSingleField"
+						v-if="showFiltersAction"
 						@trigger="toggleUserFilters"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
@@ -637,12 +637,13 @@ let MyList = {
 			inputAutoSelectDone:false,
 			inputDropdownUpwards:false, // show dropdown above input
 			orderOverwritten:false,
-			rowsFetching:false,  // row values are being fetched
-			selectedRows:[],     // bulk selected rows by row index
-			showAutoRenew:false, // show UI for auto list renew
-			showCsv:false,       // show UI for CSV import/export
-			showFilters:false,   // show UI for user filters
-			showTable:false,     // show regular list table as view or input dropdown
+			rowsFetching:false,      // row values are being fetched
+			selectedRows:[],         // bulk selected rows by row index
+			showAutoRenew:false,     // show UI for auto list renew
+			showCsv:false,           // show UI for CSV import/export
+			showFilters:false,       // show UI for user filters
+			showFiltersAction:false, // show UI for expert filters
+			showTable:false,         // show regular list table as view or input dropdown
 			
 			// list card layout state
 			orderByColumnBatchIndex:-1,
@@ -868,6 +869,12 @@ let MyList = {
 	mounted:function() {
 		this.showTable = !this.isInput;
 		
+		// react to field resize
+		if(!this.Input) {
+			window.addEventListener('resize',this.resize);
+			this.resize();
+		}
+		
 		// setup watchers
 		this.$watch('formLoading',(val) => {
 			if(val) return;
@@ -922,6 +929,10 @@ let MyList = {
 	beforeUnmount:function() {
 		this.setAutoRenewTimer(true);
 	},
+	unmounted:function() {
+		if(!this.Input)
+			window.removeEventListener('resize',this.resize);
+	},
 	methods:{
 		// externals
 		consoleError,
@@ -957,6 +968,9 @@ let MyList = {
 				return (this.orders[orderPos].ascending ? ' \u25B2' : ' \u25BC') + postfix;
 			}
 			return '';
+		},
+		resize:function() {
+			this.showFiltersAction = this.$refs.content.offsetWidth > 700;
 		},
 		updateDropdownDirection:function() {
 			let headersPx  = 200; // rough height in px of all headers (menu/form) combined
