@@ -712,7 +712,7 @@
 	background-color:transparent;
 }
 .builder-function .input:disabled{
-	border:3px solid var(--color-cancel-border) !important;
+	border:3px solid var(--color-border) !important;
 }
 .builder-function .message{
 	margin:0px 0px 18px;

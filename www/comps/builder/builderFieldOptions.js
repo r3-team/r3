@@ -878,14 +878,16 @@ let MyBuilderFieldOptions = {
 			<!-- consume collection -->
 			<template v-if="isList || isCalendar">
 				<tr>
-					<td><span>{{ capApp.collectionTitle }}</span></td>
+					<td>
+						<my-button image="add.png"
+							@trigger="collectionAdd"
+							:caption="capApp.collectionTitle"
+							:naked="true"
+							:tight="true"
+						/>
+					</td>
 					<td>
 						<div class="builder-field-options-collection-label">
-							<my-button image="add.png"
-								@trigger="collectionAdd"
-								:caption="capGen.button.add"
-								:naked="true"
-							/>
 							<my-builder-collection-input
 								v-for="(c,i) in field.collections"
 								@remove="collectionRemove(i)"
