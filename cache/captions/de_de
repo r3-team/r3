@@ -776,7 +776,7 @@
 			"codeArgsHintPg":"optional, \"var1 integer, var2 bool, ...\"",
 			"codeReturns":"Rückgabe",
 			"codeReturnsHintJs":"optional, \"number\", \"array\",...",
-			"codeReturnsHintPg":"optional, \"text\", \"integer\",...",
+			"codeReturnsHintPg":"\"text\", \"integer\",...",
 			"collectionId":"[Sammlung auswählen]",
 			"entityInput":"Platzhalter selektieren und in den Funktions-Code klicken, um <b>upgrade-sicheren</b> Syntax zu verwenden.",
 			"fieldId":"[Feld auswählen]",

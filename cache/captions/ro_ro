@@ -776,7 +776,7 @@
 			"codeArgsHintPg":"opțional, 'var1 integer, var2 bool, ...'",
 			"codeReturns":"Se intoarce",
 			"codeReturnsHintJs":"opțional, 'number', 'array',...",
-			"codeReturnsHintPg":"opțional, 'text', 'integer',...",
+			"codeReturnsHintPg":"'text', 'integer',...",
 			"collectionId":"[Select collection]",
 			"entityInput":"Selectați înlocuitor și faceți clic pe corpul funcției pentru a utiliza sintaxa <b>upgrade-safe</b>.",
 			"fieldId":"[Select field]",

@@ -470,7 +470,7 @@ let MyBuilderPgFunctionItem = {
 				name:'',
 				codeArgs:'',
 				codeFunction:'',
-				codeReturns:'',
+				codeReturns:'INTEGER',
 				isFrontendExec:false,
 				isTrigger:false,
 				schedules:[],

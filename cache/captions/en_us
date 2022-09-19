@@ -776,7 +776,7 @@
 			"codeArgsHintPg":"optional, 'var1 integer, var2 bool, ...'",
 			"codeReturns":"Returns",
 			"codeReturnsHintJs":"optional, 'number', 'array',...",
-			"codeReturnsHintPg":"optional, 'text', 'integer',...",
+			"codeReturnsHintPg":"'text', 'integer',...",
 			"collectionId":"[Select collection]",
 			"entityInput":"Select placeholder and click on function body to use <b>upgrade-safe</b> syntax.",
 			"fieldId":"[Select field]",

@@ -776,7 +776,7 @@
 			"codeArgsHintPg":"opzionale, 'var1 integer, var2 bool, ...'",
 			"codeReturns":"Risposta",
 			"codeReturnsHintJs":"opzionale, 'number', 'array',...",
-			"codeReturnsHintPg":"opzionale, 'text', 'integer',...",
+			"codeReturnsHintPg":"'text', 'integer',...",
 			"collectionId":"[Select collection]",
 			"entityInput":"Seleziona il segnaposto e fai clic sul corpo della funzione per utilizzare la sintassi <b>upgrade-safe</b>.",
 			"fieldId":"[Select field]",
