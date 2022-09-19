@@ -125,7 +125,7 @@ let MyBuilderAttribute = {
 			<input placeholder="NO DEFAULT"
 				v-if="!isId"
 				v-model="def"
-				:disabled="readonly || isId"
+				:disabled="readonly || isId || isFiles"
 			/>
 			<input v-if="isId" placeholder="SYSTEM" disabled="disabled" />
 		</td>
@@ -214,6 +214,7 @@ let MyBuilderAttribute = {
 		// simple states
 		canEncrypt:    function() { return this.content === 'text'; },
 		hasLength:     function() { return ['varchar','text','files'].includes(this.content); },
+		isFiles:       function() { return this.isAttributeFiles(this.content); },
 		isId:          function() { return !this.isNew && this.attribute.name === 'id'; },
 		isNew:         function() { return this.attribute.id === null; },
 		isRelationship:function() { return this.isAttributeRelationship(this.content); },
