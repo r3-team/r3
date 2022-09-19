@@ -43,12 +43,14 @@ let MyBuilderForm = {
 							:icon-id-selected="iconId"
 							:module="module"
 							:title="capApp.icon"
+							:readonly="readonly"
 						/>
 						<my-builder-caption class="title"
 							v-model="captions.formTitle"
 							:contentName="capApp.formTitle"
 							:language="builderLanguage"
 							:longInput="true"
+							:readonly="readonly"
 						/>
 					</div>
 					
@@ -63,7 +65,7 @@ let MyBuilderForm = {
 					<div class="area nowrap">
 						<my-button image="save.png"
 							@trigger="set"
-							:active="hasChanges"
+							:active="hasChanges && !readonly"
 							:caption="capGen.button.save"
 						/>
 						<my-button image="refresh.png"
@@ -129,6 +131,7 @@ let MyBuilderForm = {
 					v-model="captions.formHelp"
 					:contentName="capApp.formHelp"
 					:language="builderLanguage"
+					:readonly="readonly"
 					:richtext="true"
 				/>
 			</div>
@@ -295,8 +298,9 @@ let MyBuilderForm = {
 		</div>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:false, default:'' }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:false, default:'' },
+		readonly:       { type:Boolean, required:true }
 	},
 	data:function() {
 		return {

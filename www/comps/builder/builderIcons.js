@@ -16,7 +16,7 @@ let MyBuilderIcons = {
 				<my-button image="delete.png" class="deleteAction"
 					v-if="module.icons.length !== 0"
 					@trigger="del"
-					:active="iconIdsSelected.length !== 0"
+					:active="iconIdsSelected.length !== 0 && !readonly"
 					:cancel="true"
 					:caption="capGen.button.deleteSelected"
 				/>
@@ -29,6 +29,7 @@ let MyBuilderIcons = {
 				<div class="icon" v-for="icon in module.icons">
 					<my-button
 						@trigger="toggleSelect(icon.id)"
+						:active="!readonly"
 						:image="iconIdsSelected.includes(icon.id) ? 'checkbox1.png' : 'checkbox0.png'"
 					/>
 					<img class="preview" :src="srcBase64(icon.file)" />
@@ -41,14 +42,15 @@ let MyBuilderIcons = {
 				<div>
 					<span v-if="iconIdUpdate === -1">{{ capGen.button.add }}: </span>
 					<span v-if="iconIdUpdate !== -1">{{ capGen.button.edit }}: </span>
-					<input type="file" @change="add" />
+					<input type="file" @change="add" :disabled="readonly" />
 				</div>
 				<p>{{ capApp.addHelp }}</p>
 			</div>
 		</div>
 	</div>`,
 	props:{
-		id:{ type:String, required:true }
+		id:      { type:String,  required:true },
+		readonly:{ type:Boolean, required:true }
 	},
 	data:function() {
 		return {

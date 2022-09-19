@@ -8,20 +8,21 @@ let MyBuilderPgTrigger = {
 			<div class="row">
 				<my-button image="save.png"
 					@trigger="set"
-					:active="hasChanges"
+					:active="hasChanges && !readonly"
 					:caption="isNew ? capGen.button.create : ''"
 					:captionTitle="isNew ? capGen.button.create : capGen.button.save"
 				/>
 				<my-button image="delete.png"
 					v-if="!isNew"
 					@trigger="delAsk"
+					:active="!readonly"
 					:cancel="true"
 					:captionTitle="capGen.button.delete"
 				/>
 			</div>
 		</td>
 		<td>
-			<select v-model="fires">
+			<select v-model="fires" :disabled="readonly">
 				<option value="BEFORE">BEFORE</option>
 				<option value="AFTER">AFTER</option>
 			</select>
@@ -32,29 +33,28 @@ let MyBuilderPgTrigger = {
 				:active="!isNew"
 			/>
 		</td>
-		<td><my-bool v-model="onInsert" /></td>
-		<td><my-bool v-model="onUpdate" /></td>
-		<td><my-bool v-model="onDelete" /></td>
-		<td><my-bool v-model="perRow" /></td>
-		<td><my-bool v-model="isConstraint" :readonly="!constraintOk" /></td>
-		<td><my-bool v-model="isDeferrable" :readonly="!constraintOk || !isConstraint" /></td>
-		<td><my-bool v-model="isDeferred"   :readonly="!constraintOk || !isConstraint || !isDeferrable" /></td>
-		<td><input v-model="codeCondition" /></td>
+		<td><my-bool v-model="onInsert" :readonly="readonly" /></td>
+		<td><my-bool v-model="onUpdate" :readonly="readonly" /></td>
+		<td><my-bool v-model="onDelete" :readonly="readonly" /></td>
+		<td><my-bool v-model="perRow"   :readonly="readonly" /></td>
+		<td><my-bool v-model="isConstraint" :readonly="!constraintOk || readonly" /></td>
+		<td><my-bool v-model="isDeferrable" :readonly="!constraintOk || !isConstraint || readonly" /></td>
+		<td><my-bool v-model="isDeferred"   :readonly="!constraintOk || !isConstraint || !isDeferrable || readonly" /></td>
 		<td>
-			<my-button image="open.png"
-				@trigger="open"
-				:active="pgFunctionId !== null"
-			/>
-		</td>
-		<td>
-			<select v-model="pgFunctionId">
-				<option
-					v-for="fnc in module.pgFunctions.filter(v => v.codeReturns === 'trigger' || v.codeReturns === 'TRIGGER')"
-					:value="fnc.id"
-				>
-					{{ fnc.name }}
-				</option>
-			</select>
+			<div class="row">
+				<my-button image="open.png"
+					@trigger="open"
+					:active="pgFunctionId !== null"
+				/>
+				<select v-model="pgFunctionId" :disabled="readonly">
+					<option
+						v-for="fnc in module.pgFunctions.filter(v => v.codeReturns === 'trigger' || v.codeReturns === 'TRIGGER')"
+						:value="fnc.id"
+					>
+						{{ fnc.name }}
+					</option>
+				</select>
+			</div>
 		</td>
 	</tr>`,
 	props:{
@@ -76,7 +76,8 @@ let MyBuilderPgTrigger = {
 				codeCondition:null
 			}}
 		},
-		relation:{ type:Object, required:true }
+		readonly:{ type:Boolean, required:true },
+		relation:{ type:Object,  required:true }
 	},
 	data:function() {
 		return {

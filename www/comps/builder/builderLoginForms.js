@@ -13,29 +13,35 @@ let MyBuilderLoginFormsItem = {
 			<div class="row">
 				<my-button image="save.png"
 					@trigger="set"
-					:active="hasChanges && formId !== null && attributeIdLogin !== null && attributeIdLookup !== null && name !== ''"
+					:active="hasChanges && formId !== null && attributeIdLogin !== null && attributeIdLookup !== null && name !== '' && !readonly"
 					:caption="isNew ? capGen.button.create : ''"
 					:captionTitle="isNew ? capGen.button.create : capGen.button.save"
 				/>
 				<my-button image="delete.png"
 					v-if="!isNew"
 					@trigger="del"
+					:active="!readonly"
 					:cancel="true"
 					:captionTitle="capGen.button.delete"
 				/>
 			</div>
 		</td>
 		<td>
-			<input class="long" v-model="name" :placeholder="isNew ? capApp.newLoginForm : ''" />
+			<input class="long"
+				v-model="name"
+				:disabled="readonly"
+				:placeholder="isNew ? capApp.newLoginForm : ''"
+			/>
 		</td>
 		<td>
 			<my-builder-caption
 				v-model="captions.loginFormTitle"
 				:language="builderLanguage"
+				:readonly="readonly"
 			/>
 		</td>
 		<td>
-			<select v-model="attributeIdLogin" @change="attributeIdLookup = null">
+			<select v-model="attributeIdLogin" @change="attributeIdLookup = null" :disabled="readonly">
 				<option :value="null">-</option>
 				<option v-for="a in loginAttributeCandidates" :value="a.id">
 					{{ relationIdMap[a.relationId].name + ': ' + a.name }}
@@ -43,7 +49,7 @@ let MyBuilderLoginFormsItem = {
 			</select>
 		</td>
 		<td>
-			<select v-model="attributeIdLookup">
+			<select v-model="attributeIdLookup" :disabled="readonly">
 				<option :value="null">-</option>
 				<option v-for="a in lookupAttributeCandidates" :value="a.id">
 					{{ relationIdMap[a.relationId].name + ': ' + a.name }}
@@ -51,7 +57,7 @@ let MyBuilderLoginFormsItem = {
 			</select>
 		</td>
 		<td>
-			<select v-model="formId">
+			<select v-model="formId" :disabled="readonly">
 				<option :value="null">-</option>
 				<option v-for="f in module.forms" :value="f.id">
 					{{ f.name }}
@@ -73,7 +79,8 @@ let MyBuilderLoginFormsItem = {
 					loginFormTitle:{}
 				}
 			}}
-		}
+		},
+		readonly:{ type:Boolean, required:true }
 	},
 	data:function() {
 		return {
@@ -199,6 +206,7 @@ let MyBuilderLoginForms = {
 					<my-builder-login-forms-item
 						:builderLanguage="builderLanguage"
 						:module="module"
+						:readonly="readonly"
 					/>
 					
 					<!-- existing records -->
@@ -208,14 +216,16 @@ let MyBuilderLoginForms = {
 						:loginForm="l"
 						:key="l.id"
 						:module="module"
+						:readonly="readonly"
 					/>
 				</tbody>
 			</table>
 		</div>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	computed:{
 		module:function() {

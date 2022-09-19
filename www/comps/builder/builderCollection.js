@@ -38,7 +38,7 @@ let MyBuilderCollection = {
 				<div class="area nowrap">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="hasChanges"
+						:active="hasChanges && !readonly"
 						:caption="capGen.button.save"
 					/>
 					<my-button image="refresh.png"
@@ -87,6 +87,7 @@ let MyBuilderCollection = {
 							<td>
 								<my-button image="add.png"
 									@trigger="collectionAdd"
+									:active="!readonly"
 									:caption="capGen.button.add"
 									:naked="true"
 								/>
@@ -103,6 +104,7 @@ let MyBuilderCollection = {
 									:consumer="c"
 									:fixedCollection="true"
 									:module="module"
+									:readonly="readonly"
 									:showMultiValue="false"
 									:showNoDisplayEmpty="true"
 									:showOnMobile="true"
@@ -212,8 +214,9 @@ let MyBuilderCollection = {
 		</div>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:false, default:'' }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:false, default:'' },
+		readonly:       { type:Boolean, required:true }
 	},
 	data:function() {
 		return {

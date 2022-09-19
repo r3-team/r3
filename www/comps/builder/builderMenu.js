@@ -19,12 +19,13 @@ let MyBuilderMenuItems = {
 	>
 		<template #item="{element,index}">
 	    		<div class="builder-menu shade">
-				<img class="action dragAnchor" src="images/drag.png" />
+				<img v-if="!readonly" class="action dragAnchor" src="images/drag.png" />
 				
 				<div class="inputs">
 					<div class="line">
 						<my-button
 							@trigger="element.showChildren = !element.showChildren"
+							:active="!readonly"
 							:captionTitle="capApp.showChildrenHint"
 							:image="element.showChildren ? 'visible1.png' : 'visible0.png'"
 							:naked="true"
@@ -49,6 +50,7 @@ let MyBuilderMenuItems = {
 							@input="element.iconId = $event"
 							:icon-id-selected="element.iconId"
 							:module="module"
+							:readonly="readonly"
 						/>
 						
 						<!-- caption inputs -->
@@ -56,10 +58,11 @@ let MyBuilderMenuItems = {
 							v-model="element.captions.menuTitle"
 							:contentName="capGen.title"
 							:language="builderLanguage"
+							:readonly="readonly"
 						/>
 						
 						<!-- form open input -->
-						<select v-model="element.formId">
+						<select v-model="element.formId" :disabled="readonly">
 							<option :value="null">{{ capApp.formId }}</option>
 							<optgroup
 								v-for="mod in getDependentModules(module,modules)"
@@ -76,6 +79,7 @@ let MyBuilderMenuItems = {
 					<div class="line column" v-if="showCollectionsIndex === index">
 						<my-button image="add.png"
 							@trigger="element.collections.push(getCollectionConsumerTemplate())"
+							:active="!readonly"
 							:caption="capGen.button.add"
 							:naked="true"
 						/>
@@ -88,6 +92,7 @@ let MyBuilderMenuItems = {
 							:consumer="c"
 							:fixedCollection="false"
 							:module="module"
+							:readonly="readonly"
 							:showMultiValue="false"
 							:showNoDisplayEmpty="true"
 							:showOnMobile="true"
@@ -101,19 +106,22 @@ let MyBuilderMenuItems = {
 					:builderLanguage="builderLanguage"
 					:menus="element.menus"
 					:module="module"
+					:readonly="readonly"
 				/>
 				
 				<my-button image="cancel.png"
 					@trigger="remove(element.id,index)"
+					:active="!readonly"
 					:naked="true"
 				/>
 			</div>
 		</template>
 	</draggable>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		module:         { type:Object, required:true },
-		menus:          { type:Array,  required:true }
+		builderLanguage:{ type:String,  required:true },
+		module:         { type:Object,  required:true },
+		menus:          { type:Array,   required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	emits:['remove'],
 	data:function() {
@@ -159,7 +167,7 @@ let MyBuilderMenu = {
 			<div class="area nowrap">
 				<my-button image="save.png"
 					@trigger="set"
-					:active="hasChanges"
+					:active="hasChanges && !readonly"
 					:caption="capGen.button.save"
 				/>
 				<my-button image="refresh.png"
@@ -169,6 +177,7 @@ let MyBuilderMenu = {
 				/>
 				<my-button image="add.png"
 					@trigger="add"
+					:active="!readonly"
 					:caption="capApp.button.add"
 				/>
 			</div>
@@ -180,11 +189,12 @@ let MyBuilderMenu = {
 				:builder-language="builderLanguage"
 				:menus="menus"
 				:module="module"
+				:readonly="readonly"
 			/>
 			
 			<div class="builder-menus-actions">
 				<span>{{ capApp.copy }}</span>
-				<select v-model="menuIdCopy">
+				<select v-model="menuIdCopy" :disabled="readonly">
 					<option :value="null">-</option>
 					<option
 						v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id)"
@@ -195,15 +205,16 @@ let MyBuilderMenu = {
 				</select>
 				<my-button image="ok.png"
 					@trigger="copy"
-					:active="menuIdCopy !== null"
+					:active="menuIdCopy !== null && !readonly"
 					:caption="capGen.button.apply"
 				/>
 			</div>
 		</div>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	data:function() {
 		return {

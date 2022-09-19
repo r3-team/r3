@@ -15,7 +15,7 @@ let MyBuilderHelp = {
 			<div class="area nowrap">
 				<my-button image="save.png"
 					@trigger="set"
-					:active="hasChanges"
+					:active="hasChanges && !readonly"
 					:caption="capGen.button.save"
 				/>
 				<my-button image="refresh.png"
@@ -29,6 +29,7 @@ let MyBuilderHelp = {
 		<my-builder-caption
 			v-model="helpInput"
 			:language="builderLanguage"
+			:readonly="readonly"
 			:richtext="true"
 		/>
 	</div>`,
@@ -38,44 +39,39 @@ let MyBuilderHelp = {
 		};
 	},
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	watch:{
 		help:{
-			handler:function(v) {
-				this.reset();
-			},
+			handler:function(v) { this.reset(); },
 			immediate:true
 		}
 	},
 	computed:{
-		module:function() {
-			if(typeof this.moduleIdMap[this.id] === 'undefined')
-				return false;
-			
-			return this.moduleIdMap[this.id];
+		module:(s) => {
+			return typeof s.moduleIdMap[s.id] === 'undefined'
+				? false : s.moduleIdMap[s.id];
 		},
-		help:function() {
-			if(this.module === false)
-				return '';
-			
-			return this.module.captions.moduleHelp;
+		help:(s) => {
+			return s.module === false
+				? '' : s.module.captions.moduleHelp;
 		},
-		hasChanges:function() {
-			return JSON.stringify(this.helpInput) !== JSON.stringify(this.help);
+		hasChanges:(s) => {
+			return JSON.stringify(s.helpInput) !== JSON.stringify(s.help);
 		},
 		
 		// stores
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.builder.help; },
-		capGen:     function() { return this.$store.getters.captions.generic; }
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:     (s) => s.$store.getters.captions.builder.help,
+		capGen:     (s) => s.$store.getters.captions.generic
 	},
 	methods:{
-		reset:function() {
+		reset() {
 			this.helpInput = JSON.parse(JSON.stringify(this.help));
 		},
-		set:function() {
+		set() {
 			let mod = JSON.parse(JSON.stringify(this.module));
 			mod.captions.moduleHelp = this.helpInput;
 			

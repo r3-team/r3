@@ -16,7 +16,7 @@ let MyBuilderFormsItem = {
 			<div class="row">
 				<my-button image="save.png"
 					@trigger="set"
-					:active="hasChanges"
+					:active="hasChanges && !readonly"
 					:caption="isNew ? capGen.button.create : ''"
 					:captionTitle="isNew ? capGen.button.create : capGen.button.save"
 				/>
@@ -28,6 +28,7 @@ let MyBuilderFormsItem = {
 				<my-button image="delete.png"
 					v-if="!isNew"
 					@trigger="delAsk"
+					:active="!readonly"
 					:cancel="true"
 					:captionTitle="capGen.button.delete"
 				/>
@@ -38,10 +39,15 @@ let MyBuilderFormsItem = {
 				@input="iconId = $event"
 				:iconIdSelected="iconId"
 				:module="moduleIdMap[moduleId]"
+				:readonly="readonly"
 			/>
 		</td>
 		<td>
-			<input class="long" v-model="name" :placeholder="isNew ? capApp.new : ''" />
+			<input class="long"
+				v-model="name"
+				:disabled="readonly"
+				:placeholder="isNew ? capApp.new : ''"
+			/>
 		</td>
 		<td>
 			<my-button image="visible1.png"
@@ -53,13 +59,14 @@ let MyBuilderFormsItem = {
 			<my-builder-caption
 				v-model="captions.formTitle"
 				:language="builderLanguage"
+				:readonly="readonly"
 			/>
 		</td>
 		<td>
-			<my-bool v-model="noDataActions" />
+			<my-bool v-model="noDataActions" :readonly="readonly" />
 		</td>
 		<td>
-			<select v-model="presetIdOpen">
+			<select v-model="presetIdOpen" :disabled="readonly">
 				
 				<option :value="null" v-if="presetCandidates.length === 0">
 					{{ capGen.nothingThere }}
@@ -96,7 +103,8 @@ let MyBuilderFormsItem = {
 					formTitle:{}
 				}
 			}}
-		}
+		},
+		readonly:{ type:Boolean, required:true }
 	},
 	data:function() {
 		return {
@@ -218,6 +226,7 @@ let MyBuilderForms = {
 					<my-builder-forms-item
 						:builder-language="builderLanguage"
 						:module-id="module.id"
+						:readonly="readonly"
 					/>
 					
 					<!-- existing records -->
@@ -227,6 +236,7 @@ let MyBuilderForms = {
 						:form="frm"
 						:key="frm.id"
 						:module-id="module.id"
+						:readonly="readonly"
 					/>
 				</tbody>
 			</table>
@@ -237,7 +247,7 @@ let MyBuilderForms = {
 				<table>
 					<tr>
 						<td>
-							<select v-model="copyFormId" @change="copySelected">
+							<select v-model="copyFormId" @change="copySelected" :disabled="readonly">
 								<option :value="null">{{ capApp.copyForm }}</option>
 								<optgroup
 									v-for="mod in getDependentModules(module,modules)"
@@ -252,13 +262,14 @@ let MyBuilderForms = {
 						<td>
 							<input
 								v-model="copyNewName"
+								:disabled="readonly"
 								:placeholder="capApp.copyNewName"
 							/>
 						</td>
 						<td>
 							<my-button image="save.png"
 								@trigger="copy"
-								:active="canCopy"
+								:active="canCopy && !readonly"
 							/>
 						</td>
 					</tr>
@@ -267,8 +278,9 @@ let MyBuilderForms = {
 		</div>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	data:function() {
 		return {

@@ -57,6 +57,7 @@ let MyBuilderRelation = {
 						<my-builder-attribute
 							:builder-language="builderLanguage"
 							:foreign="false"
+							:readonly="readonly"
 							:relation="relation"
 						/>
 						
@@ -67,6 +68,7 @@ let MyBuilderRelation = {
 							:builder-language="builderLanguage"
 							:foreign="false"
 							:key="atr.id"
+							:readonly="readonly"
 							:relation="relation"
 						/>
 						
@@ -87,6 +89,7 @@ let MyBuilderRelation = {
 								:builder-language="builderLanguage"
 								:foreign="true"
 								:key="atr.id+'_outsideIn'"
+								:readonly="true"
 								:relation="relationIdMap[atr.relationId]"
 							/>
 						</template>
@@ -113,6 +116,7 @@ let MyBuilderRelation = {
 					<tbody>
 						<!-- new index -->
 						<my-builder-pg-index
+							:readonly="readonly"
 							:relation="relation"
 						/>
 						
@@ -121,6 +125,7 @@ let MyBuilderRelation = {
 							v-for="ind in relation.indexes"
 							:key="ind.id"
 							:index="ind"
+							:readonly="readonly"
 							:relation="relation"
 						/>
 					</tbody>
@@ -147,14 +152,13 @@ let MyBuilderRelation = {
 							<th>{{ capApp.isConstraint }}</th>
 							<th>{{ capApp.isDeferrable }}</th>
 							<th>{{ capApp.isDeferred }}</th>
-							<th>{{ capApp.codeCondition }}</th>
-							<th>{{ capGen.button.open }}</th>
-							<th>{{ capApp.execute }}</th>
+							<th colspan="2">{{ capApp.execute }}</th>
 						</tr>
 					</thead>
 					<tbody>
 						<!-- new record -->
 						<my-builder-pg-trigger
+							:readonly="readonly"
 							:relation="relation"
 						/>
 						
@@ -162,6 +166,7 @@ let MyBuilderRelation = {
 						<my-builder-pg-trigger
 							v-for="trg in relation.triggers"
 							:key="trg.id"
+							:readonly="readonly"
 							:relation="relation"
 							:pg-trigger="trg"
 						/>
@@ -190,6 +195,7 @@ let MyBuilderRelation = {
 					<!-- new record -->
 					<my-builder-preset
 						:builder-language="builderLanguage"
+						:readonly="readonly"
 						:relation="relation"
 					/>
 					
@@ -199,6 +205,7 @@ let MyBuilderRelation = {
 						:builder-language="builderLanguage"
 						:key="p.id"
 						:preset="p"
+						:readonly="readonly"
 						:relation="relation"
 					/>
 				</table>
@@ -279,8 +286,9 @@ let MyBuilderRelation = {
 		}
 	},
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	data:function() {
 		return {

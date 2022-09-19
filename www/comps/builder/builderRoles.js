@@ -12,7 +12,7 @@ let MyBuilderRolesItem = {
 				<div class="row">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="hasChanges"
+						:active="hasChanges && !readonly"
 						:caption="isNew ? capGen.button.create : ''"
 						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
 					/>
@@ -24,7 +24,7 @@ let MyBuilderRolesItem = {
 					<my-button image="delete.png"
 						v-if="!isNew"
 						@trigger="delAsk"
-						:active="!isEveryone"
+						:active="!isEveryone && !readonly"
 						:cancel="true"
 						:captionTitle="capGen.button.delete"
 					/>
@@ -33,32 +33,32 @@ let MyBuilderRolesItem = {
 			<td>
 				<input class="long"
 					v-model="name"
+					:disabled="isEveryone || readonly"
 					:placeholder="isNew ? capApp.newRole : ''"
-					:disabled="isEveryone"
 				/>
 			</td>
 			<td>
 				<my-button image="visible1.png"
 					@trigger="copyValueDialog(role.name,role.id,role.id)"
-					:active="!isNew"
+					:active="!isNew && !readonly"
 				/>
 			</td>
 			<td>
 				<my-builder-caption
 					v-model="captions.roleTitle"
 					:language="builderLanguage"
-					:readonly="isEveryone"
+					:readonly="isEveryone || readonly"
 				/>
 			</td>
 			<td>
 				<my-builder-caption
 					v-model="captions.roleDesc"
 					:language="builderLanguage"
-					:readonly="isEveryone"
+					:readonly="isEveryone || readonly"
 				/>
 			</td>
 			<td>
-				<select v-model="content" :disabled="isEveryone">
+				<select v-model="content" :disabled="isEveryone || readonly">
 					<option value="admin">{{ capApp.option.contentAdmin }}</option>
 					<option value="user">{{ capApp.option.contentUser }}</option>
 					<option value="other">{{ capApp.option.contentOther }}</option>
@@ -70,7 +70,7 @@ let MyBuilderRolesItem = {
 			<td>
 				<my-bool
 					v-model="assignable"
-					:readonly="isEveryone"
+					:readonly="isEveryone || readonly"
 				/>
 			</td>
 			<td>
@@ -78,8 +78,9 @@ let MyBuilderRolesItem = {
 					v-if="!isEveryone"
 					@trigger="showChildren = !showChildren"
 					:caption="String(childrenIds.length)"
+					:image="showChildren ? 'triangleDown.png' : 'triangleRight.png'"
 				/>
-				<my-button caption="-"
+				<my-button caption="0" image="triangleRight.png"
 					v-if="isEveryone"
 					:active="false"
 				/>
@@ -94,6 +95,7 @@ let MyBuilderRolesItem = {
 						<span>{{ capGen.button.add }}</span>
 						<select
 							@change="addChild($event.target.value)"
+							:disabled="readonly"
 							:value="null"
 						>
 							<option :value="null">-</option>
@@ -114,6 +116,7 @@ let MyBuilderRolesItem = {
 					<div class="role-child" v-for="c in childrenIds">
 						<my-button image="cancel.png"
 							@trigger="removeChild(c)"
+							:active="!readonly"
 							:naked="true"
 						/>
 						<my-button
@@ -126,9 +129,10 @@ let MyBuilderRolesItem = {
 		</tr>
 	</tbody>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		moduleId:       { type:String, required:true },
-		role:           { type:Object, required:false,
+		builderLanguage:{ type:String,  required:true },
+		moduleId:       { type:String,  required:true },
+		readonly:       { type:Boolean, required:true },
+		role:           { type:Object,  required:false,
 			default:function() { return{
 				id:null,
 				name:'',
@@ -274,7 +278,7 @@ let MyBuilderRoles = {
 						<th>{{ capGen.id }}</th>
 						<th>{{ capGen.title }}</th>
 						<th>{{ capGen.description }}</th>
-						<th>{{ capApp.content }}</th>
+						<th>{{ capGen.category }}</th>
 						<th>{{ capApp.assignable }}</th>
 						<th>{{ capApp.children }}</th>
 					</tr>
@@ -282,24 +286,27 @@ let MyBuilderRoles = {
 				
 				<!-- new role -->
 				<my-builder-roles-item
-					:builder-language="builderLanguage"
-					:module-id="module.id"
+					:builderLanguage="builderLanguage"
+					:moduleId="module.id"
+					:readonly="readonly"
 				/>
 				
 				<!-- existing roles -->
 				<my-builder-roles-item
 					v-for="rol in module.roles"
-					:builder-language="builderLanguage"
+					:builderLanguage="builderLanguage"
 					:key="rol.id"
-					:module-id="module.id"
+					:moduleId="module.id"
+					:readonly="readonly"
 					:role="rol"
 				/>
 			</table>
 		</div>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	computed:{
 		module:function() {

@@ -14,8 +14,8 @@ let MyBool = {
 		<div class="noHighlight right" :class="{ small:boolOn }" >{{ displayRight }}</div>
 	</div>`,
 	props:{
-		caption0:  { type:String, required:false, default:'0' },
-		caption1:  { type:String, required:false, default:'1' },
+		caption0:  { type:String,  required:false, default:'0' },
+		caption1:  { type:String,  required:false, default:'1' },
 		modelValue:{ required:true },
 		readonly:  { type:Boolean, required:false, default:false },
 		reversed:  { type:Boolean, required:false, default:false }

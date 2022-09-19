@@ -33,6 +33,7 @@ let MyAdminModulesItem = {
 				</span>
 			</div>
 		</td>
+		<td class="minimum">v{{ module.releaseBuild }}</td>
 		<td class="noWrap">
 			{{ module.releaseDate === 0 ? '-' : getUnixFormat(module.releaseDate,'Y-m-d') }}
 		</td>
@@ -58,11 +59,11 @@ let MyAdminModulesItem = {
 			/>
 		</td>
 		<td class="noWrap">
-			<my-button image="question.png"
+			<my-button image="time.png"
+				v-if="changeLog !== '' && changeLog !== null"
 				@trigger="changeLogShow"
-				:active="changeLog !== '' && changeLog !== null"
-				:caption="module.name+' v'+module.releaseBuild"
-				:naked="true"
+				:caption="capApp.changeLog"
+				:tight="true"
 			/>
 		</td>
 		<td class="noWrap" v-if="builderEnabled">
@@ -70,6 +71,7 @@ let MyAdminModulesItem = {
 				@update:modelValue="ownerWarning"
 				:modelValue="owner"
 				:readonly="productionMode"
+				:reversed="true"
 			/>
 		</td>
 		<td class="noWrap">
@@ -368,7 +370,7 @@ let MyAdminModules = {
 								<span>{{ capGen.actions }}</span>
 							</div>
 						</th>
-						<th class="noWrap">
+						<th class="noWrap" colspan="2">
 							<div class="mixed-header">
 								<img src="images/module.png" />
 								<span>{{ capGen.application }}</span>
@@ -382,7 +384,7 @@ let MyAdminModules = {
 						</th>
 						<th class="noWrap">
 							<div class="mixed-header">
-								<img src="images/ok.png" />
+								<img src="images/download.png" />
 								<span>{{ capApp.update }}</span>
 							</div>
 						</th>

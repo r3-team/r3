@@ -24,7 +24,7 @@ let MyBuilderCaption = {
 		<my-input-richtext
 			v-if="richtext"
 			v-model="valueInput"
-			:disabled="readonly"
+			:readonly="readonly"
 		/>
 	</div>`,
 	props:{

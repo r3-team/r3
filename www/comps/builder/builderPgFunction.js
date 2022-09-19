@@ -35,7 +35,7 @@ let MyBuilderPgFunction = {
 				<div class="area nowrap">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="hasChanges"
+						:active="hasChanges && !readonly"
 						:caption="capGen.button.save"
 					/>
 					<my-button image="refresh.png"
@@ -61,15 +61,15 @@ let MyBuilderPgFunction = {
 					<table>
 						<tr>
 							<td>{{ capApp.codeArgs }}</td>
-							<td><input class="long" v-model="codeArgs" :disabled="isTrigger" placeholder="-" /></td>
+							<td><input class="long" v-model="codeArgs" :disabled="isTrigger || readonly" placeholder="-" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.codeReturns }}</td>
-							<td><input v-model="codeReturns" :disabled="isTrigger" placeholder="-" /></td>
+							<td><input v-model="codeReturns" :disabled="isTrigger || readonly" placeholder="-" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.isFrontendExec }}</td>
-							<td><my-bool v-model="isFrontendExec" :readonly="isTrigger" /></td>
+							<td><my-bool v-model="isFrontendExec" :readonly="isTrigger || readonly" /></td>
 						</tr>
 						<tr>
 							<td>{{ capGen.title }}</td>
@@ -77,6 +77,7 @@ let MyBuilderPgFunction = {
 								<my-builder-caption
 									v-model="captions.pgFunctionTitle"
 									:language="builderLanguage"
+									:readonly="readonly"
 								/>
 							</td>
 						</tr>
@@ -87,6 +88,7 @@ let MyBuilderPgFunction = {
 									v-model="captions.pgFunctionDesc"
 									:language="builderLanguage"
 									:multiLine="true"
+									:readonly="readonly"
 								/>
 							</td>
 						</tr>
@@ -99,6 +101,7 @@ let MyBuilderPgFunction = {
 					v-model="codeFunction"
 					@click="insertEntitySelected"
 					@keydown.tab.prevent="addTab"
+					:disabled="readonly"
 					:placeholder="capApp.code"
 				></textarea>
 				
@@ -122,17 +125,20 @@ let MyBuilderPgFunction = {
 					<my-button
 						v-if="isTrigger"
 						@trigger="addNew = !addNew"
+						:active="!readonly"
 						:caption="capApp.button.addNew"
 						:image="addNew ? 'checkbox1.png' : 'checkbox0.png'"
 					/>
 					<my-button
 						v-if="isTrigger"
 						@trigger="addOld = !addOld"
+						:active="!readonly"
 						:caption="capApp.button.addOld"
 						:image="addOld ? 'checkbox1.png' : 'checkbox0.png'"
 					/>
 					<my-button image="refresh.png"
 						@trigger="codeFunction = getPgFunctionTemplate()"
+						:active="!readonly"
 						:caption="capApp.button.template"
 					/>
 				</div>
@@ -212,8 +218,9 @@ let MyBuilderPgFunction = {
 		</div>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	watch:{
 		pgFunction:{

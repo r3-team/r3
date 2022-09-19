@@ -6,14 +6,14 @@ let MyBuilderPgIndex = {
 		<td>
 			<my-button image="save.png"
 				@trigger="set"
-				:active="isNew && attributes.length !== 0"
+				:active="isNew && attributes.length !== 0 && !readonly"
 				:caption="isNew ? capGen.button.create : ''"
 				:captionTitle="isNew ? capGen.button.create : capGen.button.save"
 			/>
 			<my-button image="delete.png"
 				v-if="!isNew"
 				@trigger="del"
-				:active="!autoFki"
+				:active="!autoFki && !readonly"
 				:cancel="true"
 				:captionTitle="capGen.button.delete"
 			/>
@@ -21,7 +21,7 @@ let MyBuilderPgIndex = {
 		<td>
 			<span>{{ pgIndexAttributesCaption }}</span>
 			
-			<select v-model="attributeInput" v-if="isNew" @change="addAttribute">
+			<select v-model="attributeInput" v-if="isNew" @change="addAttribute" :disabled="readonly">
 				<option value="">{{ capApp.indexCreate }}</option>
 				
 				<template
@@ -37,7 +37,7 @@ let MyBuilderPgIndex = {
 			</select>
 		</td>
 		<td><my-bool v-model="autoFki" :readonly="true" /></td>
-		<td><my-bool v-model="noDuplicates" :readonly="!isNew" /></td>
+		<td><my-bool v-model="noDuplicates" :readonly="!isNew || readonly" /></td>
 	</tr>`,
 	props:{
 		index:{ type:Object, required:false,
@@ -48,7 +48,8 @@ let MyBuilderPgIndex = {
 				attributes:[]
 			}}
 		},
-		relation:{ type:Object, required:true }
+		readonly:{ type:Boolean, required:true },
+		relation:{ type:Object,  required:true }
 	},
 	data:function() {
 		return {

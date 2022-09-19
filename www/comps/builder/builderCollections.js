@@ -12,7 +12,7 @@ let MyBuilderCollectionsItem = {
 				<div class="row">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="hasChanges"
+						:active="hasChanges && !readonly"
 						:caption="isNew ? capGen.button.create : ''"
 						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
 					/>
@@ -24,6 +24,7 @@ let MyBuilderCollectionsItem = {
 					<my-button image="delete.png"
 						v-if="!isNew"
 						@trigger="delAsk"
+						:active="!readonly"
 						:cancel="true"
 						:captionTitle="capGen.button.delete"
 					/>
@@ -34,11 +35,13 @@ let MyBuilderCollectionsItem = {
 					@input="iconId = $event"
 					:iconIdSelected="iconId"
 					:module="module"
+					:readonly="readonly"
 				/>
 			</td>
 			<td>
 				<input class="long"
 					v-model="name"
+					:disabled="readonly"
 					:placeholder="isNew ? capApp.new : ''"
 				/>
 			</td>
@@ -62,7 +65,8 @@ let MyBuilderCollectionsItem = {
 				query:null,
 				inHeader:[]
 			}}
-		}
+		},
+		readonly:{ type:Boolean, required:true }
 	},
 	data:function() {
 		return {
@@ -167,6 +171,7 @@ let MyBuilderCollections = {
 				<!-- new collection -->
 				<my-builder-collections-item
 					:module="module"
+					:readonly="readonly"
 				/>
 				
 				<!-- existing collections -->
@@ -175,12 +180,14 @@ let MyBuilderCollections = {
 					:collection="c"
 					:key="c.id"
 					:module="module"
+					:readonly="readonly"
 				/>
 			</table>
 		</div>
 	</div>`,
 	props:{
-		id:{ type:String, required:true }
+		id:      { type:String,  required:true },
+		readonly:{ type:Boolean, required:true }
 	},
 	computed:{
 		module:function() {

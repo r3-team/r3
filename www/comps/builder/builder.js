@@ -60,6 +60,14 @@ let MyBuilder = {
 						/>
 					</div>
 					
+					<!-- module read only -->
+					<div class="moduleNoOwner" v-if="!moduleOwner" :title="capApp.noOwnerHint">
+						<span>{{ capApp.noOwner }}</span>
+						<my-button image="settings.png"
+							@trigger="$router.push('/admin/modules')"
+						/>
+					</div>
+					
 					<!-- module component navigation -->
 					<div class="navigation-two-columns">
 						<div class="navigation-column">
@@ -191,6 +199,7 @@ let MyBuilder = {
 			v-show="!showDocs"
 			@toggleDocs="showDocs = !showDocs"
 			:builderLanguage="builderLanguage"
+			:readonly="!moduleOwner"
 		/>
 		
 		<my-builder-docs
@@ -261,32 +270,27 @@ let MyBuilder = {
 		}
 	},
 	computed:{
-		subMenu:function() {
-			return this.navigation === 'relations'   && this.module.relations.length !== 0
-				|| this.navigation === 'forms'       && this.module.forms.length !== 0
-				|| this.navigation === 'roles'       && this.module.roles.length !== 0
-				|| this.navigation === 'collections' && this.module.collections.length !== 0
-				|| this.navigation === 'functions'   && (this.module.pgFunctions.length !== 0 || this.module.jsFunctions.length !== 0)
-			;
+		subMenu:(s) => {
+			return s.navigation === 'relations' && s.module.relations.length !== 0
+			|| s.navigation === 'forms'         && s.module.forms.length !== 0
+			|| s.navigation === 'roles'         && s.module.roles.length !== 0
+			|| s.navigation === 'collections'   && s.module.collections.length !== 0
+			|| s.navigation === 'functions'     && (s.module.pgFunctions.length !== 0 || s.module.jsFunctions.length !== 0)
 		},
-		module:function() {
-			if(this.moduleId === '') return false;
-			return this.moduleIdMap[this.moduleId];
-		},
-		moduleCaption:function() {
+		moduleCaption:(s) => {
 			// 1st preference: dedicated module title
-			if(typeof this.module.captions.moduleTitle[this.builderLanguage] !== 'undefined')
-				return this.module.captions.moduleTitle[this.builderLanguage];
+			if(typeof s.module.captions.moduleTitle[s.builderLanguage] !== 'undefined')
+				return s.module.captions.moduleTitle[s.builderLanguage];
 			
 			// if nothing else is available: module name
-			return this.moduleIdMap[this.module.id].name;
+			return s.moduleIdMap[s.module.id].name;
 		},
 		moduleIdInput:{
-			get:function() {
+			get() {
 				if(!this.module) return '';
 				return this.module.id;
 			},
-			set:function(value) {
+			set(value) {
 				if(value === '')
 					this.$router.push(`/builder/modules`);
 				else
@@ -294,21 +298,26 @@ let MyBuilder = {
 			}
 		},
 		
+		// simple
+		module:     (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
+		moduleOwner:(s) => s.moduleId === '' ? false : s.moduleIdMapOptions[s.moduleId].owner,
+		
 		// stores
-		modules:        function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
-		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
-		iconIdMap:      function() { return this.$store.getters['schema/iconIdMap']; },
-		jsFunctionIdMap:function() { return this.$store.getters['schema/jsFunctionIdMap']; },
-		pgFunctionIdMap:function() { return this.$store.getters['schema/pgFunctionIdMap']; },
-		roleIdMap:      function() { return this.$store.getters['schema/roleIdMap']; },
-		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
-		builderEnabled: function() { return this.$store.getters.builderEnabled; },
-		capApp:         function() { return this.$store.getters.captions.builder; },
-		capGen:         function() { return this.$store.getters.captions.generic; },
-		settings:       function() { return this.$store.getters.settings; }
+		modules:           (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleIdMapOptions:(s) => s.$store.getters['schema/moduleIdMapOptions'],
+		relationIdMap:     (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:    (s) => s.$store.getters['schema/attributeIdMap'],
+		formIdMap:         (s) => s.$store.getters['schema/formIdMap'],
+		iconIdMap:         (s) => s.$store.getters['schema/iconIdMap'],
+		jsFunctionIdMap:   (s) => s.$store.getters['schema/jsFunctionIdMap'],
+		pgFunctionIdMap:   (s) => s.$store.getters['schema/pgFunctionIdMap'],
+		roleIdMap:         (s) => s.$store.getters['schema/roleIdMap'],
+		collectionIdMap:   (s) => s.$store.getters['schema/collectionIdMap'],
+		builderEnabled:    (s) => s.$store.getters.builderEnabled,
+		capApp:            (s) => s.$store.getters.captions.builder,
+		capGen:            (s) => s.$store.getters.captions.generic,
+		settings:          (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals

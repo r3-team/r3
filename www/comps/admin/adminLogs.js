@@ -101,7 +101,7 @@ let MyAdminLogs = {
 				<table class="table-default">
 					<thead>
 						<tr class="title">
-							<th></th>
+							<th class="minimum">{{ capGen.button.show }}</th>
 							<th class="minimum">{{ capApp.date }}</th>
 							<th class="minimum">{{ capApp.level }}</th>
 							<th class="minimum">{{ capApp.node }}</th>

@@ -24,14 +24,14 @@ let MyBuilderAttribute = {
 			<div class="row">
 				<my-button image="save.png"
 					@trigger="set"
-					:active="hasChanges && !foreign"
+					:active="hasChanges && !readonly"
 					:caption="isNew ? capGen.button.create : ''"
 					:captionTitle="isNew ? capGen.button.create : capGen.button.save"
 				/>
 				<my-button image="delete.png"
 					v-if="!isNew"
 					@trigger="delAsk"
-					:active="!isId"
+					:active="!isId && !readonly"
 					:cancel="true"
 					:captionTitle="capGen.button.delete"
 				/>
@@ -42,14 +42,14 @@ let MyBuilderAttribute = {
 				@input="iconId = $event"
 				:icon-id-selected="iconId"
 				:module="module"
-				:readonly="foreign"
+				:readonly="readonly"
 			/>
 		</td>
 		<td>
 			<input
 				v-model="name"
 				:placeholder="isNew ? capApp.new : ''"
-				:disabled="foreign || isId"
+				:disabled="readonly || isId"
 			/>
 		</td>
 		<td class="minimum">
@@ -62,11 +62,11 @@ let MyBuilderAttribute = {
 			<my-builder-caption
 				v-model="captions.attributeTitle"
 				:language="builderLanguage"
-				:readonly="foreign"
+				:readonly="readonly"
 			/>
 		</td>
 		<td>
-			<select v-model="content" :disabled="foreign">
+			<select v-model="content" :disabled="readonly">
 				<option v-if="isNew || isAttributeInteger(content)" value="integer">integer</option>
 				<option v-if="isNew || isAttributeInteger(content)" value="bigint">bigint</option>
 				<option v-if="isNew || isAttributeNumeric(content)" value="numeric">numeric</option>
@@ -85,7 +85,7 @@ let MyBuilderAttribute = {
 		<td>
 			<select
 				v-model="relationshipId"
-				:disabled="!isNew || foreign || !isRelationship || isId"
+				:disabled="!isNew || readonly || !isRelationship || isId"
 			>
 				<option :value="null">-</option>
 				<option v-for="rel in module.relations" :value="rel.id">
@@ -106,31 +106,31 @@ let MyBuilderAttribute = {
 		<td>
 			<input class="short"
 				v-model.number="length"
-				:disabled="foreign || isId || !hasLength"
+				:disabled="readonly || isId || !hasLength"
 			/>
 		</td>
 		<td>
 			<my-bool
 				v-model="nullable"
-				:readonly="foreign || isId"
+				:readonly="readonly || isId"
 			/>
 		</td>
 		<td v-if="relation.encryption">
 			<my-bool
 				v-model="encrypted"
-				:readonly="foreign || !isNew || !canEncrypt"
+				:readonly="readonly || !isNew || !canEncrypt"
 			/>
 		</td>
 		<td>
 			<input placeholder="NO DEFAULT"
 				v-if="!isId"
 				v-model="def"
-				:disabled="foreign || isId"
+				:disabled="readonly || isId"
 			/>
 			<input v-if="isId" placeholder="SYSTEM" disabled="disabled" />
 		</td>
 		<td>
-			<select v-model="onUpdate" :disabled="foreign || !isRelationship || isId">
+			<select v-model="onUpdate" :disabled="readonly || !isRelationship || isId">
 				<option v-if="!isRelationship" value="">-</option>
 				<template v-if="isRelationship">
 					<option value="NO ACTION">NO ACTION</option>
@@ -142,7 +142,7 @@ let MyBuilderAttribute = {
 			</select>
 		</td>
 		<td>
-			<select v-model="onDelete" :disabled="foreign || !isRelationship || isId">
+			<select v-model="onDelete" :disabled="readonly || !isRelationship || isId">
 				<option v-if="!isRelationship" value="">-</option>
 				<template v-if="isRelationship">
 					<option value="NO ACTION">NO ACTION</option>
@@ -176,8 +176,9 @@ let MyBuilderAttribute = {
 			}}
 		},
 		builderLanguage:{ type:String,  required:true },
+		foreign:        { type:Boolean, required:true },
 		relation:       { type:Object,  required:true },
-		foreign:        { type:Boolean, required:true }
+		readonly:       { type:Boolean, required:true }
 	},
 	data:function() {
 		return {

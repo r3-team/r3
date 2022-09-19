@@ -9,14 +9,16 @@ let MyBuilderRoleAccessCollection = {
 				<my-bool
 					@update:modelValue="$emit('apply',collection.id,access === 1 ? -1 : 1)"
 					:modelValue="access === 1 ? true : false"
+					:readonly="readonly"
 				/>
 			</td>
 		</tr>
 	</tbody>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		collection:     { type:Object, required:true },
-		idMapAccess:    { type:Object, required:true }
+		builderLanguage:{ type:String,  required:true },
+		collection:     { type:Object,  required:true },
+		idMapAccess:    { type:Object,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	emits:['apply'],
 	computed:{
@@ -46,6 +48,7 @@ let MyBuilderRoleAccessMenu = {
 				<my-bool
 					@update:modelValue="$emit('apply',menu.id,access === 1 ? -1 : 1)"
 					:modelValue="access === 1 ? true : false"
+					:readonly="readonly"
 				/>
 			</td>
 		</tr>
@@ -61,6 +64,7 @@ let MyBuilderRoleAccessMenu = {
 						:id-map-access="idMapAccess"
 						:key="men.id"
 						:menu="men"
+						:readonly="readonly"
 						:role="role"
 					/>
 				</table>
@@ -68,10 +72,11 @@ let MyBuilderRoleAccessMenu = {
 		</tr>
 	</tbody>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		idMapAccess:    { type:Object, required:true },
-		menu:           { type:Object, required:true },
-		role:           { type:Object, required:true }
+		builderLanguage:{ type:String,  required:true },
+		idMapAccess:    { type:Object,  required:true },
+		menu:           { type:Object,  required:true },
+		readonly:       { type:Boolean, required:true },
+		role:           { type:Object,  required:true }
 	},
 	emits:['apply'],
 	data:function() {
@@ -128,6 +133,7 @@ let MyBuilderRoleAccessRelation = {
 			<td>
 				<select
 					@input="$emit('apply-relation',relation.id,parseInt($event.target.value))"
+					:disabled="readonly"
 					:value="access"
 				>
 					<!-- null state (-1) for relation means: no access -->
@@ -147,8 +153,9 @@ let MyBuilderRoleAccessRelation = {
 			<td>{{ attributeIdMap[atr.id].name }}</td>
 			<td>
 				<select
-					:value="attributeIdMapAccessParsed[atr.id]"
 					@input="$emit('apply-attribute',atr.id,parseInt($event.target.value))"
+					:disabled="readonly"
+					:value="attributeIdMapAccessParsed[atr.id]"
 				>
 					<!-- null state (-1) for attribute means: follow relation -->
 					<option value="-1">{{ capApp.option.accessInherit }}</option>
@@ -160,6 +167,7 @@ let MyBuilderRoleAccessRelation = {
 		</tr>
 	</tbody>`,
 	props:{
+		readonly:            { type:Boolean, required:true },
 		relation:            { type:Object,  required:true },
 		role:                { type:Object,  required:true },
 		showEntries:         { type:Boolean, required:true },
@@ -223,7 +231,7 @@ let MyBuilderRole = {
 			<div class="area">
 				<my-button image="save.png"
 					@trigger="set"
-					:active="hasChanges"
+					:active="hasChanges && !readonly"
 					:caption="capGen.button.save"
 				/>
 				<my-button image="refresh.png"
@@ -257,6 +265,7 @@ let MyBuilderRole = {
 						:key="role.id + '_' + rel.id"
 						:relation="rel"
 						:role="role"
+						:readonly="readonly"
 						:relation-id-map-access="accessRelations"
 						:show-entries="relationIdsShown.includes(rel.id)"
 					/>
@@ -284,6 +293,7 @@ let MyBuilderRole = {
 						:key="role.id + '_' + men.id"
 						:menu="men"
 						:role="role"
+						:readonly="readonly"
 					/>
 				</table>
 			</div>
@@ -306,14 +316,16 @@ let MyBuilderRole = {
 						:collection="c"
 						:id-map-access="accessCollections"
 						:key="role.id + '_' + c.id"
+						:readonly="readonly"
 					/>
 				</table>
 			</div>
 		</div>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	watch:{
 		role:{

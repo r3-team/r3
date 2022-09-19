@@ -18,6 +18,7 @@
 }
 .admin .table-default>thead>tr>th{
 	height:36px;
+	padding:3px 8px;
 	border-bottom:1px solid var(--color-border);
 	background-color:var(--color-bg);
 }

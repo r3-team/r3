@@ -7,7 +7,7 @@ let MyBuilderPresetValue = {
 	template:`<tr>
 		<td><span>{{ attribute.name }}</span></td>
 		<td>
-			<select v-if="isRelationship" v-model="presetIdReferInput">
+			<select v-if="isRelationship" v-model="presetIdReferInput" :disabled="readonly">
 				<option :value="null">[{{ attribute.content }}]</option>
 				<option v-for="p in relationship.presets" :value="p.id">
 					{{ p.name }}
@@ -17,16 +17,18 @@ let MyBuilderPresetValue = {
 			<textarea
 				v-if="!isRelationship"
 				v-model="valueInput"
+				:disabled="readonly"
 				:placeholder="attribute.content"
 			></textarea>
 		</td>
-		<td><my-bool v-model="protectedInput" /></td>
+		<td><my-bool v-model="protectedInput" :readonly="readonly" /></td>
 	</tr>`,
 	props:{
-		attribute:    { type:Object, required:true },
+		attribute:    { type:Object,  required:true },
 		presetIdRefer:{ required:true },
-		protected:    { type:Boolean,required:true },
-		value:        { type:String, required:true }
+		protected:    { type:Boolean, required:true },
+		readonly:     { type:Boolean, required:true },
+		value:        { type:String,  required:true }
 	},
 	emits:['set'],
 	computed:{
@@ -69,22 +71,23 @@ let MyBuilderPreset = {
 				<div class="row">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="hasChanges"
+						:active="hasChanges && !readonly"
 						:caption="isNew ? capGen.button.create : ''"
 						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
 					/>
 					<my-button image="delete.png"
 						v-if="!isNew"
 						@trigger="delAsk"
+						:active="!readonly"
 						:cancel="true"
 						:captionTitle="capGen.button.delete"
 					/>
 				</div>
 			</td>
 			<td>
-				<input v-model="name" :placeholder="isNew ? capApp.new : ''" />
+				<input v-model="name" :disabled="readonly" :placeholder="isNew ? capApp.new : ''" />
 			</td>
-			<td><my-bool v-model="protected" /></td>
+			<td><my-bool v-model="protected" :readonly="readonly" /></td>
 			<td class="minimum">
 				<my-button
 					@trigger="showValues = !showValues"
@@ -113,6 +116,7 @@ let MyBuilderPreset = {
 								:key="a.id"
 								:preset-id-refer="childGet(a.id,'presetIdRefer')"
 								:protected="childGet(a.id,'protected')"
+								:readonly="readonly"
 								:value="childGet(a.id,'value')"
 							/>
 						</tbody>
@@ -122,7 +126,8 @@ let MyBuilderPreset = {
 		</tr>
 	</tbody>`,
 	props:{
-		relation:{ type:Object, required:true },
+		readonly:{ type:Boolean, required:true },
+		relation:{ type:Object,  required:true },
 		preset:{
 			type:Object,
 			required:false,

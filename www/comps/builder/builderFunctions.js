@@ -81,7 +81,7 @@ let MyBuilderJsFunctionItem = {
 				<div class="row">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="hasChanges && name !== ''"
+						:active="hasChanges && name !== '' && !readonly"
 						:caption="isNew ? capGen.button.create : ''"
 						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
 					/>
@@ -93,6 +93,7 @@ let MyBuilderJsFunctionItem = {
 					<my-button image="delete.png"
 						v-if="!isNew"
 						@trigger="delAsk"
+						:active="!readonly"
 						:cancel="true"
 						:captionTitle="capGen.button.delete"
 					/>
@@ -101,6 +102,7 @@ let MyBuilderJsFunctionItem = {
 			<td>
 				<input class="long"
 					v-model="name"
+					:disabled="readonly"
 					:placeholder="isNew ? capApp.new : ''"
 				/>
 			</td>
@@ -114,6 +116,7 @@ let MyBuilderJsFunctionItem = {
 				<my-builder-caption
 					v-model="captions.jsFunctionTitle"
 					:language="builderLanguage"
+					:readonly="readonly"
 				/>
 			</td>
 			<td>
@@ -122,12 +125,14 @@ let MyBuilderJsFunctionItem = {
 			<td>
 				<input class="long"
 					v-model="codeArgs"
+					:disabled="readonly"
 					:placeholder="capApp.codeArgsHintJs"
 				/>
 			</td>
 			<td>
 				<input
 					v-model="codeReturns"
+					:disabled="readonly"
 					:placeholder="capApp.codeReturnsHintJs"
 				/>
 			</td>
@@ -137,7 +142,7 @@ let MyBuilderJsFunctionItem = {
 						@trigger="openForm"
 						:active="formId !== null"
 					/>
-					<select :disabled="!isNew" v-model="formId">
+					<select :disabled="!isNew || readonly" v-model="formId">
 						<option :value="null">-</option>
 						<option v-for="f in module.forms" :value="f.id">
 							{{ f.name }}
@@ -165,7 +170,8 @@ let MyBuilderJsFunctionItem = {
 					jsFunctionDesc:{}
 				}
 			}}
-		}
+		},
+		readonly:{ type:Boolean, required:true }
 	},
 	data:function() {
 		return {
@@ -257,18 +263,19 @@ let MyBuilderPgFunctionItemSchedule = {
 		
 		<my-button image="cancel.png"
 			@trigger="$emit('remove')"
+			:active="!readonly"
 			:naked="true"
 		/>
 		
 		<!-- interval at which to run -->
 		<span>{{ capApp.runOnce }}</span>
-		<div><my-bool v-model="runOnce" /></div>
+		<div><my-bool v-model="runOnce" :readonly="readonly" /></div>
 		
 		<template v-if="intervalType !== 'once'">
 			<span>{{ capApp.intervalEvery }}</span>
-			<input class="short" v-model.number="intervalValue" />
+			<input class="short" v-model.number="intervalValue" :disabled="readonly" />
 			
-			<select class="short" v-model="intervalType">
+			<select class="short" v-model="intervalType" :disabled="readonly">
 				<option value="seconds">{{ capApp.option.intervalSeconds }}</option>
 				<option value="minutes">{{ capApp.option.intervalMinutes }}</option>
 				<option value="hours"  >{{ capApp.option.intervalHours   }}</option>
@@ -284,21 +291,22 @@ let MyBuilderPgFunctionItemSchedule = {
 			<span v-if="intervalType === 'weeks'" >{{ capApp.intervalAtDayForWeeks  }}</span>
 			<span v-if="intervalType === 'months'">{{ capApp.intervalAtDayForMonths }}</span>
 			<span v-if="intervalType === 'years'" >{{ capApp.intervalAtDayForYears }}</span>
-			<input class="short" v-model.number="atDay" placeholder="DD" />
+			<input class="short" v-model.number="atDay" :disabled="readonly" placeholder="DD" />
 		</template>
 		
 		<!-- target time, at which hour:minute:second to run -->
 		<template v-if="['days','weeks','months','years'].includes(intervalType)">
 			<span>{{ capApp.intervalAtTime }}</span>
-			<input class="short" placeholder="HH" v-model.number="atHour" />
+			<input class="short" placeholder="HH" :disabled="readonly" v-model.number="atHour" />
 			<div>:</div>
-			<input class="short" placeholder="MM" v-model.number="atMinute" />
+			<input class="short" placeholder="MM" :disabled="readonly" v-model.number="atMinute" />
 			<div>:</div>
-			<input class="short" placeholder="SS" v-model.number="atSecond" />
+			<input class="short" placeholder="SS" :disabled="readonly" v-model.number="atSecond" />
 		</template>
 	</div>`,
 	props:{
-		modelValue:{ type:Object, required:true }
+		modelValue:{ type:Object,  required:true },
+		readonly:  { type:Boolean, required:true }
 	},
 	emits:['update:modelValue','remove'],
 	computed:{
@@ -359,7 +367,7 @@ let MyBuilderPgFunctionItem = {
 				<div class="row">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="hasChanges"
+						:active="hasChanges && !readonly"
 						:caption="isNew ? capGen.button.create : ''"
 						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
 					/>
@@ -371,6 +379,7 @@ let MyBuilderPgFunctionItem = {
 					<my-button image="delete.png"
 						v-if="!isNew"
 						@trigger="delAsk"
+						:active="!readonly"
 						:cancel="true"
 						:captionTitle="capGen.button.delete"
 					/>
@@ -379,6 +388,7 @@ let MyBuilderPgFunctionItem = {
 			<td>
 				<input class="long"
 					v-model="name"
+					:disabled="readonly"
 					:placeholder="isNew ? capApp.new : ''"
 				/>
 			</td>
@@ -392,37 +402,38 @@ let MyBuilderPgFunctionItem = {
 				<my-builder-caption
 					v-model="captions.pgFunctionTitle"
 					:language="builderLanguage"
+					:readonly="readonly"
 				/>
 			</td>
 			<td>
-				<input disabled="disabled" :value="capApp.languagePg" />
+				<input disabled="disabled || readonly" :value="capApp.languagePg" />
 			</td>
 			<td>
-				<my-bool v-model="isTrigger" :readonly="!isNew" />
+				<my-bool v-model="isTrigger" :readonly="!isNew || readonly" />
 			</td>
 			<td>
 				<input class="long"
 					v-model="codeArgs"
-					:disabled="isTrigger"
+					:disabled="isTrigger || readonly"
 					:placeholder="capApp.codeArgsHintPg"
 				/>
 			</td>
 			<td>
 				<input
 					v-model="codeReturns"
+					:disabled="isTrigger || readonly"
 					:placeholder="capApp.codeReturnsHintPg"
-					:disabled="isTrigger"
 				/>
 			</td>
 			<td>
 				<my-button
 					@trigger="showSchedules = !showSchedules"
-					:active="!isTrigger"
+					:active="!isTrigger && !readonly"
 					:caption="capApp.schedulesItem.replace('{CNT}',schedules.length)"
 				/>
 			</td>
 			<td>
-				<my-bool v-model="isFrontendExec" :readonly="isTrigger" />
+				<my-bool v-model="isFrontendExec" :readonly="isTrigger || readonly" />
 			</td>
 		</tr>
 		
@@ -434,11 +445,13 @@ let MyBuilderPgFunctionItem = {
 						v-model="schedules[i]"
 						@remove="schedules.splice(i,1)"
 						:key="i"
+						:readonly="readonly"
 					/>
 					
 					<div>
 						<my-button image="add.png"
 							@trigger="addSchedule"
+							:active="!readonly"
 							:caption="capApp.button.addSchedule"
 						/>
 					</div>
@@ -466,7 +479,8 @@ let MyBuilderPgFunctionItem = {
 					pgFunctionDesc:{}
 				}
 			}}
-		}
+		},
+		readonly:{ type:Boolean, required:true }
 	},
 	data:function() {
 		return {
@@ -616,6 +630,7 @@ let MyBuilderFunctions = {
 					<my-builder-pg-function-item
 						:builderLanguage="builderLanguage"
 						:moduleId="module.id"
+						:readonly="readonly"
 					/>
 					
 					<!-- existing records -->
@@ -625,6 +640,7 @@ let MyBuilderFunctions = {
 						:key="fnc.id"
 						:moduleId="module.id"
 						:pgFunction="fnc"
+						:readonly="readonly"
 					/>
 				</table>
 			</div>
@@ -654,6 +670,7 @@ let MyBuilderFunctions = {
 					<my-builder-js-function-item
 						:builderLanguage="builderLanguage"
 						:module="module"
+						:readonly="readonly"
 					/>
 					
 					<!-- existing records -->
@@ -663,14 +680,16 @@ let MyBuilderFunctions = {
 						:key="fnc.id"
 						:module="module"
 						:jsFunction="fnc"
+						:readonly="readonly"
 					/>
 				</table>
 			</div>
 		</div>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	data:function() {
 		return {
