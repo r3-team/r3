@@ -51,6 +51,10 @@ let MyBuilderIconInput = {
 							/>
 						</div>
 						<div class="actions">
+							<my-button image="ok.png"
+								@trigger="close"
+								:caption="capGen.button.ok"
+							/>
 							<my-button image="remove.png"
 								@trigger="select(null)"
 								:active="iconSelected !== false"

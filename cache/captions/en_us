@@ -23,6 +23,7 @@
 			"new":"New",
 			"newHint":"Create new record",
 			"open":"Open",
+			"ok":"Ok",
 			"paste":"Paste",
 			"refresh":"Reload",
 			"refreshHint":"Reload record",
