@@ -14,6 +14,7 @@
 			"deleteSelected":"Delete selected",
 			"download":"Download",
 			"edit":"Edit",
+			"empty":"Empty",
 			"expert":"Advanced",
 			"export":"Export",
 			"filter":"Filter",
@@ -1283,6 +1284,9 @@
 			"autoRenewHint":"Refresh data every {VALUE} seconds",
 			"csv":"CSV",
 			"csvHint":"Import/export records via comma separated values file"
+		},
+		"columnFilter":{
+			"contains":"Contains"
 		},
 		"dialog":{
 			"delete":"Are you sure that you want to <b>permanently</b> delete the selected records?"

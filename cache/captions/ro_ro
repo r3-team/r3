@@ -14,6 +14,7 @@
 			"deleteSelected":"Șterge selecția",
 			"download":"Download",
 			"edit":"Editare",
+			"empty":"Empty",
 			"expert":"Avansat",
 			"export":"Exportă",
 			"filter":"Filtru",
@@ -1283,6 +1284,9 @@
 			"autoRenewHint":"Actualizează datele la fiecare {VALUE} secunde",
 			"csv":"CSV",
 			"csvHint":"Importați/exportați înregistrări prin fișier cu valori separate prin virgulă"
+		},
+		"columnFilter":{
+			"contains":"Contains"
 		},
 		"dialog":{
 			"delete":"Sunteți sigur că doriți să ștergeți <b>permanent</b> înregistrările selectate?"

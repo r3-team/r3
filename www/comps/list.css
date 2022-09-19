@@ -65,7 +65,7 @@
 	transition:box-shadow 0.5s;
 }
 .list .layoutTable th{
-	padding:6px 10px;
+	padding:6px 2px 6px 10px;
 	margin-bottom:-1px;
 	position:sticky;
 	top:0px;
@@ -78,6 +78,32 @@
 .list .layoutTable td{
 	height:var(--row-height);
 	box-sizing:border-box;
+}
+.list .layoutTable th .columnBatch{
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:space-between;
+	align-items:center;
+}
+.list .layoutTable th .columnBatch span{
+	flex:1 1 auto;
+}
+.list .layoutTable th .columnFilter{
+	max-width:400px;
+	min-width:220px;
+	padding:6px;
+	box-sizing:border-box;
+	display:flex;
+	flex-flow:column nowrap;
+	gap:6px;
+}
+.list .layoutTable th .columnFilterValues{
+	display:flex;
+	flex-flow:column nowrap;
+	max-height:300px;
+	border-top:1px solid var(--color-border);
+	border-bottom:1px solid var(--color-border);
+	overflow-y:scroll;
 }
 .list .layoutTable th.checkbox,
 .list .layoutTable td.checkbox{

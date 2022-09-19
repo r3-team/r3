@@ -14,6 +14,7 @@
 			"deleteSelected":"Ausgewählte löschen",
 			"download":"Herunterladen",
 			"edit":"Bearbeiten",
+			"empty":"Leer",
 			"expert":"Erweitert",
 			"export":"Exportieren",
 			"filter":"Filtern",
@@ -1283,6 +1284,9 @@
 			"autoRenewHint":"Alle {VALUE} Sekunden Daten erneuern",
 			"csv":"CSV",
 			"csvHint":"Datensätze über kommaseparierte Werte-Datei importieren/exportieren"
+		},
+		"columnFilter":{
+			"contains":"Beinhaltet"
 		},
 		"dialog":{
 			"delete":"Bist du sicher, dass du die ausgewählten Datensätze <b>permanent</b> löschen möchtest?"

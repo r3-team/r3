@@ -14,6 +14,7 @@
 			"deleteSelected":"Cancella selezionati",
 			"download":"Download",
 			"edit":"Modifica",
+			"empty":"Empty",
 			"expert":"Avanzato",
 			"export":"Esporta",
 			"filter":"Filtra",
@@ -1283,6 +1284,9 @@
 			"autoRenewHint":"Aggiorna i dati ogni {VALUE} secondi",
 			"csv":"CSV",
 			"csvHint":"Importa/esporta record tramite file di valori separati da virgole"
+		},
+		"columnFilter":{
+			"contains":"Contains"
 		},
 		"dialog":{
 			"delete":"Sei sicuro di voler eliminare <b>in modo permanente</b> i record selezionati?"

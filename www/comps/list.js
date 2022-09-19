@@ -363,10 +363,9 @@ let MyList = {
 				:class="{ scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
 				:id="usesPageHistory ? scrollFormId : null"
 			>
-				<!-- list results as HTML table -->
+				<!-- list results as table -->
 				<table :class="{ 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
 					<thead v-if="header">
-						<!-- attribute headers -->
 						<tr>
 							<th v-if="hasBulkActions" class="minimum checkbox">
 								<img class="clickable" tabindex="0"
@@ -375,14 +374,77 @@ let MyList = {
 									:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
 								/>
 							</th>
-							<th
-								v-for="b in columnBatches"
-								@click.left="clickColumn(b)"
-								@click.right.prevent="clickColumnRight(b)"
-								:class="{ clickable:b.columnIndexSortBy !== -1 }"
-								:style="b.style"
-							>
-								{{ b.caption+displaySortDir(b) }}
+							<th v-for="(b,i) in columnBatches" :style="b.style">
+								<div class="columnBatch">
+									<span
+										@click.left="clickColumn(b)"
+										@click.right.prevent="clickColumnRight(b)"
+										:class="{ clickable:b.columnIndexSortBy !== -1 }"
+									>{{ b.caption+displaySortDir(b) }}</span>
+									
+									<my-button
+										@trigger="clickColumnFilter(i)"
+										:image="columnFilterValueByBatchIndex.length !== 0 || columnFilterValueByBatchIndex[i] !== '' ? 'filter.png' : 'filterTransp.png'"
+										:naked="true"
+										:tight="true"
+									/>
+									
+									<div class="input-dropdown-wrap" v-if="columnFilterShowBatchIndex === i">
+										<div class="input-dropdown default-inputs columnFilter">
+											<div class="row gap">
+												<input
+													v-model="columnFilterValueByBatchIndex[i]"
+													:placeholder="capApp.columnFilter.contains"
+													@keyup.enter="columnFilterSet(i)"
+												/>
+												<my-button image="ok.png"
+													@trigger="columnFilterSet(i)"
+													:active="columnFilterValueByBatchIndex[i] !== ''"
+												/>
+											</div>
+											<div class="row space-between">
+												<!-- select all -->
+												<my-button
+													@trigger="columnFilterAddAll(i)"
+													:caption="'['+capGen.button.selectAll+']'"
+													:image="columnFilterValueByBatchIndex[i].length === columnFilterValuesByBatchIndex[i].length ? 'checkbox1.png' : 'checkbox0.png'"
+													:naked="true"
+												/>
+												<!-- select all w/wo empty -->
+												<my-button
+													@trigger="columnFilterEmptyByBatchIndex[i] = !columnFilterEmptyByBatchIndex[i]; columnFilterSet(i)"
+													v-if="columnFilterValueByBatchIndex[i].length === columnFilterValuesByBatchIndex[i].length"
+													:caption="'['+capGen.button.empty+']'"
+													:image="columnFilterEmptyByBatchIndex[i] ? 'checkbox1.png' : 'checkbox0.png'"
+													:naked="true"
+												/>
+											</div>
+											<div class="columnFilterValues">
+												<my-button
+													v-for="v of columnFilterValuesByBatchIndex[i]"
+													@trigger="columnFilterAdd(i,v)"
+													:caption="v"
+													:image="columnFilterValueByBatchIndex[i].includes(v) ? 'checkbox1.png' : 'checkbox0.png'"
+													:naked="true"
+												/>
+											</div>
+											
+											<div class="row space-between">
+												<my-button image="remove.png"
+													@trigger="columnFilterValueByBatchIndex[i] = ''; columnFilterSet(i)"
+													:active="columnFilterValueByBatchIndex[i] !== ''"
+													:cancel="true"
+													:caption="capGen.button.clear"
+												/>
+												<my-button image="cancel.png"
+													@trigger="columnFilterShowBatchIndex = -1"
+													:cancel="true"
+													:captionTitle="capGen.button.close"
+												/>
+											</div>
+										</div>
+									</div>
+								</div>
 							</th>
 						</tr>
 					</thead>
@@ -633,6 +695,10 @@ let MyList = {
 			autoRenewInputLast:null, // last set auto renew input value (to compare against)
 			autoRenewTimer:null,     // interval timer for auto renew
 			choiceId:null,           // currently active choice
+			columnFilterShowBatchIndex:-1,
+			columnFilterEmptyByBatchIndex:[],  // show empty values by column batch index
+			columnFilterValueByBatchIndex:[],  // active filter values by column batch index
+			columnFilterValuesByBatchIndex:[], // available filter values by column batch index
 			focused:false,
 			inputAutoSelectDone:false,
 			inputDropdownUpwards:false, // show dropdown above input
@@ -654,7 +720,7 @@ let MyList = {
 			offset:0,        // current result offset
 			orders:[],       // column orderings, copied on mount, changable by user
 			rows:[],         // current result set
-			filtersUser:[],  // current user filters, based on complex conditions
+			filtersUser:[],  // current user filters
 			quickFilter:'',  // current quick text filter
 			
 			// list constants
@@ -669,8 +735,7 @@ let MyList = {
 		// columns can be batched by using the same batch number
 		// first column in batch is used for header caption and ordering
 		columnBatches:function() {
-			let out  = [];
-			
+			let out = [];
 			let addColumn = (column,index) => {
 				const hidden = column.display === 'hidden' || (this.isMobile && !column.onMobile);
 				const atr    = this.attributeIdMap[column.attributeId];
@@ -1217,6 +1282,41 @@ let MyList = {
 			}
 			this.reloadInside('order');
 		},
+		clickColumnFilter:function(ind) {
+			// fill inputs with empty values if not used before
+			if(this.columnFilterValueByBatchIndex.length === 0) {
+				for(let i = 0, j = this.columnBatches.length; i < j; i++) {
+					this.columnFilterEmptyByBatchIndex.push(true);
+					this.columnFilterValueByBatchIndex.push('');
+					this.columnFilterValuesByBatchIndex.push([]);
+				}
+			}
+			
+			// get available values for selection
+			if(this.columnFilterValuesByBatchIndex[ind].length === 0) {
+				let c = this.getColumnFirstNoFiles(this.columnBatches[ind]);
+				if(c === null) return;
+				
+				let a = this.attributeIdMap[c.attributeId];
+				let r = this.relationIdMap[a.relationId];
+				ws.send('data','get',{
+					relationId:a.relationId,
+					expressions:[{attributeId:a.id,index:0,aggregator:'first',distincted:true}],
+					orders:[{ascending:true,expressionPos:0}],
+					limit:100
+				},false).then(
+					res => {
+						for(let row of res.payload.rows) {
+							this.columnFilterValuesByBatchIndex[ind].push(row.values[0]);
+						}
+					},
+					this.$root.genericError
+				);
+			}
+			
+			this.columnFilterShowBatchIndex = this.columnFilterShowBatchIndex === ind
+				? -1 : ind;
+		},
 		clickColumnRight:function(columnBatch) {
 			const orderPos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
 			if(orderPos !== -1) {
@@ -1245,6 +1345,89 @@ let MyList = {
 			for(let i = 0, j = this.rows.length; i < j; i++) {
 				this.clickRow(this.rows[i],false);
 			}
+		},
+		columnFilterAdd:function(columnBatchIndex,v) {
+			let values = this.columnFilterValueByBatchIndex[columnBatchIndex];
+			if(typeof values !== 'object')
+				values = [];
+			
+			let p = values.indexOf(v);
+			if(p !== -1) values.splice(p,1);
+			else         values.push(v);
+			
+			if(values.length === 0)
+				values = '';
+			
+			this.columnFilterValueByBatchIndex[columnBatchIndex] = values;
+			this.columnFilterSet(columnBatchIndex);
+		},
+		columnFilterAddAll:function(columnBatchIndex) {
+			let valuesAvailable = this.columnFilterValuesByBatchIndex[columnBatchIndex];
+			let valuesSelected  = this.columnFilterValueByBatchIndex[columnBatchIndex];
+			
+			if(typeof valuesSelected === 'string')
+				valuesSelected = [];
+			
+			if(valuesAvailable.length === valuesSelected.length)
+				valuesSelected = [];
+			else
+				valuesSelected = JSON.parse(JSON.stringify(valuesAvailable));
+			
+			this.columnFilterValueByBatchIndex[columnBatchIndex] = valuesSelected;
+			this.columnFilterSet(columnBatchIndex);
+		},
+		columnFilterSet:function(columnBatchIndex) {
+			// get first usable column in batch
+			let batch  = this.columnBatches[columnBatchIndex];
+			let column = this.getColumnFirstNoFiles(batch);
+			if(column === null)
+				return;
+			
+			// remove existing filter
+			for(let i = 0, j = this.filtersUser.length; i < j; i++) {
+				let f = this.filtersUser[i];
+				if(f.side0.attributeId === column.attributeId && f.side0.attributeIndex === column.index) {
+					this.filtersUser.splice(i,1);
+					i--; j--;
+				}
+			}
+			
+			let empty  = this.columnFilterEmptyByBatchIndex[columnBatchIndex];
+			let filter = this.columnFilterValueByBatchIndex[columnBatchIndex];
+			if((typeof filter === 'string' && filter !== '') ||
+				(typeof filter === 'object' && filter.length !== 0)
+			) {
+				this.filtersUser.push({
+					connector:'AND',
+					operator:typeof filter === 'string' ? 'ILIKE' : '= ANY',
+					side0:{
+						attributeId:column.attributeId,
+						attributeIndex:column.index,
+						brackets:1
+					},
+					side1:{
+						brackets:empty ? 0 : 1,
+						content:'value',
+						value:filter
+					}
+				});
+				
+				if(empty) {
+					this.filtersUser.push({
+						connector:'OR',
+						operator:'IS NULL',
+						side0:{
+							attributeId:column.attributeId,
+							attributeIndex:column.index,
+							brackets:0
+						},
+						side1:{
+							brackets:1
+						}
+					});
+				}
+			}
+			this.get();
 		},
 		
 		// user actions, card layout
@@ -1332,6 +1515,16 @@ let MyList = {
 		},
 		
 		// helpers
+		getColumnFirstNoFiles:function(columnBatch) {
+			for(let ind of columnBatch.columnIndexes) {
+				let c = this.columns[ind];
+				let a = this.attributeIdMap[c.attributeId];
+				
+				if(!this.isAttributeFiles(a.content))
+					return c;
+			}
+			return null;
+		},
 		getColumnPosInOrder:function(columnIndex) {
 			if(columnIndex === -1)
 				return -1;
@@ -1451,7 +1644,6 @@ let MyList = {
 				this.$root.genericError
 			);
 		},
-		
 		getInput:function() {
 			// nothing to get if form is currently loading
 			if(this.formLoading)

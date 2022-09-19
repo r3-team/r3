@@ -246,12 +246,18 @@ h3{
 .column.gap{
 	gap:10px;
 }
+.column.space-between{
+	justify-content:space-between;
+}
 .row{
 	display:flex;
 	flex-direction:row;
 }
 .row.centered{
 	align-items:center;
+}
+.row.space-between{
+	justify-content:space-between;
 }
 .row.gap{
 	gap:10px;
