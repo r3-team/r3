@@ -3,6 +3,7 @@ import MyBuilderPreset    from './builderPreset.js';
 import MyBuilderPgTrigger from './builderPgTrigger.js';
 import MyBuilderPgIndex   from './builderPgIndex.js';
 import {
+	isAttributeFiles,
 	isAttributeRelationship,
 	isAttributeRelationship11
 } from '../shared/attribute.js';
@@ -266,7 +267,7 @@ let MyBuilderRelation = {
 					<table>
 						<thead>
 							<tr>
-								<th v-for="a in relation.attributes">{{ a.name }}</th>
+								<th v-for="a in attributesNotFiles">{{ a.name }}</th>
 							</tr>
 						</thead>
 						<tbody>
@@ -306,6 +307,10 @@ let MyBuilderRelation = {
 		};
 	},
 	computed:{
+		attributesNotFiles:function() {
+			if(this.relation === false) return [];
+			return this.relation.attributes.filter(v => !this.isAttributeFiles(v.content));
+		},
 		relation:function() {
 			return typeof this.relationIdMap[this.id] === 'undefined'
 				? false : this.relationIdMap[this.id];
@@ -424,6 +429,7 @@ let MyBuilderRelation = {
 	},
 	methods:{
 		// externals
+		isAttributeFiles,
 		isAttributeRelationship,
 		isAttributeRelationship11,
 		
