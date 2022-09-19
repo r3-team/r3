@@ -102,6 +102,7 @@
 		"order":"Ordine",
 		"password":"Password",
 		"preview":"Anteprima",
+		"readonly":"Readonly",
 		"record":"Record",
 		"results":"{CNT} risultati",
 		"resultsNone":"- nessun risultato -",
@@ -376,7 +377,7 @@
 				"deleteApps":"<br /><br />Le seguenti applicazioni dipendono da questa e verranno anch'esse eliminate:<ul>{LIST}</ul>",
 				"deleteMulti":"Questa azione eliminerà <b>in modo definitivo</b> <b>{COUNT} applicazione(i)</b> e i dati corrispondenti.<br /><br />Vuoi davvero continuare?",
 				"deleteTitle":"Cancellazione definitivo dell'applicazione '{APP}'",
-				"owner":"Con questa opzione abilitata, le modifiche a questa applicazione possono essere esportate come una nuova versione. Se non sei l'autore originale, tutte le modifiche andranno PERSE quando verrà installata una nuova versione dell'autore. Ciò può anche comportare la PERDITA DI DATI.<br /><br />Se intendi modificare/estendere le applicazioni di altri autori, puoi farlo in sicurezza \"costruendo su di esse\" - fai riferimento alla documentazione del Builder per maggiori dettagli.",
+				"owner":"Se non sei l'autore originale, tutte le modifiche andranno PERSE quando verrà installata una nuova versione dell'autore. Ciò può anche comportare la PERDITA DI DATI.<br /><br />Se intendi modificare/estendere le applicazioni di altri autori, puoi farlo in sicurezza \"costruendo su di esse\" - fai riferimento alla documentazione del Builder per maggiori dettagli.",
 				"ownerTitle":"Avvertimento - leggi attentamente!"
 			},
 			"error":{
@@ -387,7 +388,6 @@
 			"hidden":"Nascosto",
 			"import":"Aggiungi dal file",
 			"nothingInstalled":"Nessuna applicazione è installata.",
-			"owner":"Readonly",
 			"position":"Ordine nel menu",
 			"productionMode":"Le applicazioni possono essere modificate solo quando è attiva la modalità di manutenzione.",
 			"releaseDate":"Data rilascio",

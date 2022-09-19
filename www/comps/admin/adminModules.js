@@ -397,7 +397,7 @@ let MyAdminModules = {
 						<th class="noWrap" v-if="builderEnabled">
 							<div class="mixed-header">
 								<img src="images/warning.png" />
-								<span>{{ capApp.owner }}</span>
+								<span>{{ capGen.readonly }}</span>
 							</div>
 						</th>
 						<th class="noWrap">

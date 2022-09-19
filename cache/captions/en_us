@@ -102,6 +102,7 @@
 		"order":"Order",
 		"password":"Password",
 		"preview":"Preview",
+		"readonly":"Readonly",
 		"record":"Record",
 		"results":"{CNT} results",
 		"resultsNone":"- no results -",
@@ -376,7 +377,7 @@
 				"deleteApps":"<br /><br />The following applications are dependent on this one and will also be deleted:<ul>{LIST}</ul>",
 				"deleteMulti":"This action will <b>permanently</b> delete <b>{COUNT} application(s)</b> and corresponding data.<br /><br />Do you really want to continue?",
 				"deleteTitle":"Permanent deletion of application '{APP}'",
-				"owner":"With this option enabled, changes to this application can be exported as a new version. If you are not the original author, all changes will be LOST when a new version from the author is installed. This can also result in DATA LOSS.<br /><br />If you intend to change/extent applications from other authors, you can safely do so by 'building on them' - please refer to the Builder documentation for more details.",
+				"owner":"If you are not the original author, all changes will be LOST when a new version from the author is installed. This can also result in DATA LOSS.<br /><br />If you intend to change/extent applications from other authors, you can safely do so by 'building on them' - please refer to the Builder documentation for more details.",
 				"ownerTitle":"Warning - please read carefully!"
 			},
 			"error":{
@@ -387,7 +388,6 @@
 			"hidden":"Hidden",
 			"import":"Add from file",
 			"nothingInstalled":"No applications are installed.",
-			"owner":"Readonly",
 			"position":"Order in menu",
 			"productionMode":"Applications can only be changed when the maintenance mode is active.",
 			"releaseDate":"Release date",

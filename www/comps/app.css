@@ -646,11 +646,6 @@ table td.maximum{
 	box-shadow:none;
 	transition:none;
 }
-.default-inputs input:disabled,
-.default-inputs select:disabled,
-.default-inputs textarea:disabled{
-	color:var(--color-font-alt);
-}
 .default-inputs option{
 	padding:0px;
 	background-color:var(--color-bg);

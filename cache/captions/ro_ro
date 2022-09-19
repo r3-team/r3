@@ -102,6 +102,7 @@
 		"order":"Comandă",
 		"password":"Parolă",
 		"preview":"Previzualizare",
+		"readonly":"Readonly",
 		"record":"Record",
 		"results":"{CNT} rezultate",
 		"resultsNone":"- fără rezultate -",
@@ -376,7 +377,7 @@
 				"deleteApps":"<br /><br />Următoarele aplicații depind de aceasta și vor fi, de asemenea, șterse:<ul>{LIST}</ul>",
 				"deleteMulti":"Această acțiune va șterge <b>permanent</b> <b>{COUNT} aplicații</b> și datele corespunzătoare.<br /><br />Chiar doriți să continuați?",
 				"deleteTitle":"Ștergerea permanentă a aplicației '{APP}'",
-				"owner":"Cu această opțiune activată, modificările aduse acestei aplicații pot fi exportate ca versiune nouă. Dacă nu sunteți autorul original, toate modificările vor fi PIERUTE atunci când este instalată o nouă versiune de la autor. Acest lucru poate duce, de asemenea, la PIERDERE DE DATE.<br /><br />Dacă intenționați să modificați/extindeți aplicațiile de la alți autori, puteți face acest lucru în siguranță, „construind pe ele” - vă rugăm să consultați documentația Builder pentru mai multe detalii.",
+				"owner":"Dacă nu sunteți autorul original, toate modificările vor fi PIERUTE atunci când este instalată o nouă versiune de la autor. Acest lucru poate duce, de asemenea, la PIERDERE DE DATE.<br /><br />Dacă intenționați să modificați/extindeți aplicațiile de la alți autori, puteți face acest lucru în siguranță, „construind pe ele” - vă rugăm să consultați documentația Builder pentru mai multe detalii.",
 				"ownerTitle":"Atențiune - vă rugăm să citiți cu atenție!"
 			},
 			"error":{
@@ -387,7 +388,6 @@
 			"hidden":"Ascuns",
 			"import":"Adăugați din fișier",
 			"nothingInstalled":"Nu sunt instalate aplicații.",
-			"owner":"Readonly",
 			"position":"Ordinea în meniu",
 			"productionMode":"Aplicațiile pot fi modificate numai atunci când modul de întreținere este activ.",
 			"releaseDate":"Data lansării",

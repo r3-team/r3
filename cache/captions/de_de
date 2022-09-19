@@ -102,6 +102,7 @@
 		"order":"Reihenf.",
 		"password":"Passwort",
 		"preview":"Vorschau",
+		"readonly":"Schreibschutz",
 		"record":"Datensatz",
 		"results":"{CNT} Ergebnisse",
 		"resultsNone":"- keine Ergebnisse -",
@@ -376,7 +377,7 @@
 				"deleteApps":"<br /><br />Folgende Anwendungen sind von dieser abhängig und werden ebenfalls gelöscht:<ul>{LIST}</ul>",
 				"deleteMulti":"Diese Aktion wird <b>{COUNT} Anwendung(en)</b> mit dazugehörigen Daten <b>permanent</b> löschen.<br /><br />Möchtest du wirklich fortfahren?",
 				"deleteTitle":"Permanente Löschung der Anwendung \"{APP}\"",
-				"owner":"Wenn diese Option aktiviert ist, können Änderungen an dieser Anwendung als neue Version exportiert werden. Falls du nicht der originale Autor bist, werden alle Änderungen VERLOREN GEHEN, wenn eine neue Version vom Autoren installiert wird. Dies kann auch zu DATENVERLUST führen.<br /><br />Falls du vorhast, Anwendungen anderer Autoren zu verändern/erweitern, kannst du gefahrlos auf \"diesen aufbauen\" - bitte referenziere die Builder-Dokumentation für mehr Details.",
+				"owner":"Falls du nicht der originale Autor bist, werden alle Änderungen VERLOREN GEHEN, wenn eine neue Version vom Autoren installiert wird. Dies kann auch zu DATENVERLUST führen.<br /><br />Falls du vorhast, Anwendungen anderer Autoren zu verändern/erweitern, kannst du gefahrlos auf \"diesen aufbauen\" - bitte referenziere die Builder-Dokumentation für mehr Details.",
 				"ownerTitle":"Warnung - bitte vorsichtig lesen!"
 			},
 			"error":{
@@ -387,7 +388,6 @@
 			"hidden":"Versteckt",
 			"import":"Von Datei hinzufügen",
 			"nothingInstalled":"Es sind keine Anwendungen installiert.",
-			"owner":"Schreibschutz",
 			"position":"Reihenfolge im Menü",
 			"productionMode":"Anwendungen können nur im Wartungsmodus verändert werden.",
 			"releaseDate":"Veröff.-Datum",
