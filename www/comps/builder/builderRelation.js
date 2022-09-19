@@ -272,7 +272,9 @@ let MyBuilderRelation = {
 						</thead>
 						<tbody>
 							<tr v-for="r in previewRows">
-								<td v-for="v in r">{{ v }}</td>
+								<td v-for="v in r" :title="v">
+									{{ displayDataValue(v) }}
+								</td>
 							</tr>
 						</tbody>
 					</table>
@@ -297,6 +299,7 @@ let MyBuilderRelation = {
 			previewOffset:0,
 			previewRows:[],
 			previewRowCount:0,
+			previewValueLength:50,
 			showAttributes:true,
 			showExternal:false,
 			showGraph:false,
@@ -436,6 +439,13 @@ let MyBuilderRelation = {
 		// presentation
 		displayArrow:function(state) {
 			return state ? 'images/triangleDown.png' : 'images/triangleRight.png';
+		},
+		displayDataValue:function(v) {
+			if(typeof v !== 'string')
+				return v;
+			
+			return v.length < this.previewValueLength
+				? v : v.substring(0, this.previewValueLength-3) + '...';
 		},
 		
 		// actions
