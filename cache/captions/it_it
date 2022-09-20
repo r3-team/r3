@@ -1316,6 +1316,7 @@
 		"csvTimezone":"Fuso orario",
 		"csvTotalLimit":"Conteggio righe (0 = tutte)",
 		"fetching":"Data is being retrieved...",
+		"filtersExpert":"Expert filters",
 		"inputHintCreate":"Crea nuovo record",
 		"inputHintOpen":"Apri record",
 		"inputHintRemove":"Rimuovi record",

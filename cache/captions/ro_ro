@@ -1316,6 +1316,7 @@
 		"csvTimezone":"Zona de timp",
 		"csvTotalLimit":"Număr de rânduri (0 = toate)",
 		"fetching":"Data is being retrieved...",
+		"filtersExpert":"Expert filters",
 		"inputHintCreate":"Creați o înregistrare nouă",
 		"inputHintOpen":"Deschideți înregistrarea",
 		"inputHintRemove":"Ștergeți înregistrarea",

@@ -83,14 +83,22 @@
 	display:flex;
 	flex-flow:row nowrap;
 	justify-content:space-between;
-	align-items:center;
+	align-items:stretch;
 }
-.list .layoutTable th .columnBatch span{
+.list .layoutTable th .columBatchCaption{
 	flex:1 1 auto;
+	display:flex;
+	flex-flow:column nowrap;
+	justify-content:center;
+}
+.list .layoutTable th .columnFilterWrap{
+	width:100%;
+	min-width:220px;
+	max-width:360px;
+	right:4px;
+	left:unset;
 }
 .list .layoutTable th .columnFilter{
-	max-width:400px;
-	min-width:220px;
 	padding:6px;
 	box-sizing:border-box;
 	display:flex;
@@ -100,7 +108,7 @@
 .list .layoutTable th .columnFilterValues{
 	display:flex;
 	flex-flow:column nowrap;
-	max-height:300px;
+	max-height:250px;
 	border-top:1px solid var(--color-border);
 	border-bottom:1px solid var(--color-border);
 	overflow-y:scroll;
@@ -314,6 +322,7 @@
 	flex-flow:row nowrap;
 	align-items:center;
 	margin:6px 0px;
+	gap:6px;
 }
 .list-auto-renew-line>*{
 	margin:0px 9px 0px 0px;

@@ -1316,6 +1316,7 @@
 		"csvTimezone":"Zeitzone",
 		"csvTotalLimit":"Zeilenanzahl (0 = alle)",
 		"fetching":"Daten werden geladen...",
+		"filtersExpert":"Expertenfilter",
 		"inputHintCreate":"Neuen Datensatz anlegen",
 		"inputHintOpen":"Datensatz öffnen",
 		"inputHintRemove":"Datensatz entfernen",
