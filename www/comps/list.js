@@ -639,22 +639,22 @@ let MyList = {
 	data:function() {
 		return {
 			// list state
-			autoRenewInput:null,     // current auto renew input value
-			autoRenewInputLast:null, // last set auto renew input value (to compare against)
-			autoRenewTimer:null,     // interval timer for auto renew
-			choiceId:null,           // currently active choice
+			autoRenewInput:null,        // current auto renew input value
+			autoRenewInputLast:null,    // last set auto renew input value (to compare against)
+			autoRenewTimer:null,        // interval timer for auto renew
+			choiceId:null,              // currently active choice
 			columnBatchIndexFilter:-1,  // show filter for column batch by index
 			focused:false,
 			inputAutoSelectDone:false,
 			inputDropdownUpwards:false, // show dropdown above input
-			orderOverwritten:false,
-			rowsFetching:false,      // row values are being fetched
-			selectedRows:[],         // bulk selected rows by row index
-			showAutoRenew:false,     // show UI for auto list renew
-			showCsv:false,           // show UI for CSV import/export
-			showFilters:false,       // show UI for user filters
-			showFiltersAction:false, // show UI for expert filters
-			showTable:false,         // show regular list table as view or input dropdown
+			orderOverwritten:false,     // sort options were changed by user
+			rowsFetching:false,         // row values are being fetched
+			selectedRows:[],            // bulk selected rows by row index
+			showAutoRenew:false,        // show UI for auto list renew
+			showCsv:false,              // show UI for CSV import/export
+			showFilters:false,          // show UI for user filters
+			showFiltersAction:false,    // show UI for expert filters
+			showTable:false,            // show regular list table as view or input dropdown
 			
 			// list card layout state
 			orderByColumnBatchIndex:-1,
@@ -921,6 +921,7 @@ let MyList = {
 				if(this.routeChangeFieldReload(newVals,oldVals)) {
 					this.paramsUpdated();
 					this.reloadOutside();
+					this.orderOverwritten = true;
 				}
 			});
 		}
@@ -977,11 +978,13 @@ let MyList = {
 			return state ? 'radio1.png' : 'radio0.png';
 		},
 		displaySortDir:function(columnBatch) {
-			const orderPos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
+			if(!this.orderOverwritten)
+				return '';
 			
-			if(orderPos !== -1) {
-				let postfix = this.orders.length === 1 ? '' : (orderPos+1);
-				return (this.orders[orderPos].ascending ? ' \u25B2' : ' \u25BC') + postfix;
+			const pos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
+			if(pos !== -1) {
+				let postfix = this.orders.length === 1 ? '' : (pos+1);
+				return (this.orders[pos].ascending ? ' \u25B2' : ' \u25BC') + postfix;
 			}
 			return '';
 		},
@@ -1204,8 +1207,12 @@ let MyList = {
 			if(columnBatch.columnIndexSortBy === -1)
 				return;
 			
-			const orderPos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
-			if(orderPos === -1) {
+			// remove initial sorting when user chooses an option
+			if(!this.orderOverwritten)
+				this.orders = [];
+			
+			const pos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
+			if(pos === -1) {
 				const col = this.columns[columnBatch.columnIndexSortBy];
 				
 				// not ordered by this column -> add as ascending order
@@ -1223,21 +1230,21 @@ let MyList = {
 					});
 				}
 			}
-			else if(this.orders[orderPos].ascending) {
+			else if(this.orders[pos].ascending) {
 				
 				// ordered ascending by this column -> change to descending
-				this.orders[orderPos].ascending = false;
+				this.orders[pos].ascending = false;
 			}
 			else {
 				// ordered descending by this column -> remove
-				this.orders.splice(orderPos,1);
+				this.orders.splice(pos,1);
 			}
 			this.reloadInside('order');
 		},
 		clickColumnRight:function(columnBatch) {
-			const orderPos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
-			if(orderPos !== -1) {
-				this.orders.splice(orderPos,1);
+			const pos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
+			if(pos !== -1) {
+				this.orders.splice(pos,1);
 				this.reloadInside('order');
 			}
 		},
