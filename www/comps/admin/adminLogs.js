@@ -84,9 +84,9 @@ let MyAdminLogs = {
 							</option>
 						</select>
 						<select v-model="configInput[levelContext]">
-							<option value="1">(1) {{ capApp.logLevel1 }}</option>
-							<option value="2">(2) {{ capApp.logLevel2 }}</option>
-							<option value="3">(3) {{ capApp.logLevel3 }}</option>
+							<option value="1">{{ capApp.logLevel1 }}</option>
+							<option value="2">{{ capApp.logLevel2 }}</option>
+							<option value="3">{{ capApp.logLevel3 }}</option>
 						</select>
 						<my-button image="save.png"
 							@trigger="setConfig"
@@ -123,7 +123,14 @@ let MyAdminLogs = {
 								/>
 							</td>
 							<td class="minimum">{{ displayDate(l.date) }}</td>
-							<td class="minimum">{{ displayLevel(l.level) }}</td>
+							<td class="minimum">
+								<div class="row centered">
+									<div class="level-indicator"
+										:style="'background-color:'+displayIndicator(l.level)"
+									></div>
+									<span>{{ displayLevel(l.level) }}</span>
+								</div>
+							</td>
 							<td class="minimum">{{ l.nodeName }}</td>
 							<td class="minimum">{{ l.moduleName }}</td>
 							<td class="minimum">{{ capApp.contextLabel[l.context] }}</td>
@@ -189,8 +196,15 @@ let MyAdminLogs = {
 			let format = [this.settings.dateFormat,'H:i:S'];
 			return this.getUnixFormat(date,format.join(' '));
 		},
+		displayIndicator:function(level) {
+			switch(level) {
+				case 1: return '#ca2a2a'; break;
+				case 2: return '#caac2a'; break;
+			}
+			return '#b0b0b0';
+		},
 		displayLevel:function(level) {
-			return `(${level}) ` + this.capApp['level'+level];
+			return this.capApp['level'+level];
 		},
 		displayMessage:function(msg) {
 			if(msg.length > this.messageLengthShow)
