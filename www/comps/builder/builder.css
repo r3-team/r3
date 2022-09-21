@@ -580,6 +580,7 @@
 .builder-icon-input .iconLine{
 	width:40px;
 	height:30px;
+	min-width:unset;
 	margin-right:4px;
 	display:flex;
 	flex-direction:row;

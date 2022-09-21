@@ -34,7 +34,7 @@ let MyInputDateEntryInput = {
 	emits:['update:modelValue'],
 	computed:{
 		styles:function() {
-			return `width:${this.size}em;`;
+			return `width:${this.size}rem;`;
 		},
 		value:{
 			get:function() { return this.modelValue; },

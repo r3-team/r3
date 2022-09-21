@@ -1,6 +1,6 @@
 .filters{
 	width:100%;
-	max-width:700px;
+	max-width:850px;
 	min-width:500px;
 	display:flex;
 	flex-flow:column nowrap;
@@ -59,7 +59,8 @@
 	flex-flow:row nowrap;
 }
 .filter-side-inputs>input,
-.filter-side-inputs>select{
+.filter-side-inputs>select,
+.filter-side-inputs>.input-custom{
 	min-width:unset !important;
 	max-width:unset !important;
 	margin-right:3px !important;

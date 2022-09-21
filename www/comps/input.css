@@ -96,6 +96,8 @@
 /* collection input */
 .input-collection{
 	width:unset !important;
+	min-width:unset !important;
+	max-width:unset !important;
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
@@ -277,6 +279,8 @@
 	margin:0px 8px 0px 0px;
 }
 .input-date .date-inputs input{
+	min-width:unset;
+	max-width:unset;
 	line-height:28px;
 	font-size:inherit;
 	text-align:center;
