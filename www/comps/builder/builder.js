@@ -331,7 +331,10 @@ let MyBuilder = {
 			if(evt.ctrlKey && evt.key === 'q')
 				this.nextLanguage();
 			
-			// registered child hotkeys
+			// registered child hotkeys (only if module can be changed)
+			if(!this.moduleOwner)
+				return;
+			
 			for(let k of this.hotkeysChild) {
 				if(k.keyCtrl && !evt.ctrlKey)
 					continue;
@@ -339,7 +342,6 @@ let MyBuilder = {
 				if(k.key === evt.key) {
 					evt.preventDefault();
 					k.fnc();
-					console.log(456);
 				}
 			}
 		},
