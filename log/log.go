@@ -13,9 +13,11 @@ import (
 
 var (
 	access_mx = sync.Mutex{}
+	nodeId    = pgtype.UUID{
+		Status: pgtype.Null,
+	} // ID of the current node
 
-	nodeId    uuid.UUID // ID of the current node
-	outputCli bool      // write logs also to command line
+	outputCli bool // write logs also to command line
 
 	// log levels
 	contextLevel = map[string]int{
@@ -137,7 +139,8 @@ func SetNodeId(id uuid.UUID) {
 	access_mx.Lock()
 	defer access_mx.Unlock()
 
-	nodeId = id
+	nodeId.Bytes = id
+	nodeId.Status = pgtype.Present
 }
 
 func Info(context string, message string) {
