@@ -29,7 +29,7 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 	dstRelVersion := schema.GetFilesTableNameVersions(dstAttributeId)
 
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
-		SELECT v.file_id, r.name, v.hash, v.size_kb, v.date_change
+		SELECT v.file_id, r.name, v.version, v.hash, v.size_kb, v.date_change
 		FROM instance_file."%s" AS v
 		JOIN instance_file."%s" AS r
 			ON  r.file_id   = v.file_id
@@ -47,7 +47,7 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 
 	for rows.Next() {
 		var f types.DataGetValueFile
-		if err := rows.Scan(&f.Id, &f.Name, &f.Hash, &f.Size, &f.Changed); err != nil {
+		if err := rows.Scan(&f.Id, &f.Name, &f.Version, &f.Hash, &f.Size, &f.Changed); err != nil {
 			return files, err
 		}
 		files = append(files, f)
