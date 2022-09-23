@@ -32,6 +32,7 @@ type ClusterEventFilesCopied struct {
 	LoginId     int64       `json:"loginId"`
 	AttributeId uuid.UUID   `json:"attributeId"`
 	FileIds     []uuid.UUID `json:"fileIds"`
+	RecordId    int64       `json:"recordId"`
 }
 type ClusterEventFileRequested struct {
 	LoginId     int64     `json:"loginId"`
@@ -76,4 +77,5 @@ type ClusterWebsocketClientEvent struct {
 	// file copy request
 	FilesCopiedAttributeId uuid.UUID
 	FilesCopiedFileIds     []uuid.UUID
+	FilesCopiedRecordId    int64
 }

@@ -145,15 +145,15 @@ func do(m types.Mail) error {
 		}
 
 		rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
-			SELECT id, name, (
-				SELECT MAX(version)
-				FROM  instance_file."%s"
-				WHERE file_id = f.id
+			SELECT r.file_id, r.name, (
+				SELECT MAX(v.version)
+				FROM  instance_file."%s" AS v
+				WHERE v.file_id = r.file_Id
 			)
-			FROM instance_file."%s" AS f
-			WHERE record_id = $1
+			FROM instance_file."%s" AS r
+			WHERE r.record_id = $1
 		`, schema.GetFilesTableNameVersions(atr.Id),
-			schema.GetFilesTableName(atr.Id)),
+			schema.GetFilesTableNameRecords(atr.Id)),
 			m.RecordId.Int)
 
 		if err != nil {

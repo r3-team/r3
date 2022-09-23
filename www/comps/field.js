@@ -212,6 +212,7 @@ let MyField = {
 						:fieldId="field.id"
 						:formLoading="formLoading"
 						:readonly="isReadonly"
+						:recordId="joinsIndexMap[field.index].recordId"
 						:showGallery="field.display === 'gallery'"
 					>
 						<template #input-icon>

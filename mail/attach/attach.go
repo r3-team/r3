@@ -25,7 +25,7 @@ func DoAll() error {
 		FROM instance.mail_spool
 		WHERE outgoing = FALSE
 		AND record_id_wofk IS NOT NULL
-		AND attribute_id IS NOT NULL
+		AND attribute_id   IS NOT NULL
 	`)
 	if err != nil {
 		return err
@@ -146,7 +146,7 @@ func do(mail types.Mail) error {
 	rel, _ := cache.RelationIdMap[atr.RelationId]
 	for _, f := range filesMail {
 		if err := data.FileApplyVersion_tx(db.Ctx, tx, true, atr.Id, rel.Id,
-			f.Id, f.Hash, f.Name, f.Size, 0, mail.RecordId, -1); err != nil {
+			f.Id, f.Hash, f.Name, f.Size, 0, []int64{mail.RecordId.Int}, -1); err != nil {
 
 			return err
 		}

@@ -27,6 +27,8 @@ import (
 )
 
 var (
+	newFileUnnamed = "[UNNAMED]"
+
 	// finds: '17' from file names such as 'my_file_(17).jpg'
 	regexRenameSchema = regexp.MustCompile(`_\((\d+)\)`)
 )
@@ -76,20 +78,23 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 		return errors.New(handler.ErrUnauthorized)
 	}
 
-	// if existing file: check latest version and currently assigned record
-	var recordId pgtype.Int8
+	// if existing file: check latest version and currently assigned records
+	var recordIds []int64
 	var version int64 = 0
 	if !isNewFile {
 		if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
-			SELECT v.version+1, f.record_id
+			SELECT v.version+1, (
+				SELECT ARRAY_AGG(r.record_id)
+				FROM instance_file."%s" AS r
+				WHERE r.file_id = v.file_id
+			)
 			FROM instance_file."%s" AS v
-			JOIN instance_file."%s" AS f ON f.id = v.file_id
 			WHERE v.file_id = $1
 			ORDER BY v.version DESC
 			LIMIT 1
-		`, schema.GetFilesTableNameVersions(attributeId),
-			schema.GetFilesTableName(attributeId)),
-			fileId).Scan(&version, &recordId); err != nil {
+		`, schema.GetFilesTableNameRecords(attributeId),
+			schema.GetFilesTableNameVersions(attributeId)),
+			fileId).Scan(&version, &recordIds); err != nil {
 
 			return err
 		}
@@ -150,7 +155,7 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 
 	if err := FileApplyVersion_tx(db.Ctx, tx, isNewFile, attributeId,
 		attribute.RelationId, fileId, hash, part.FileName(),
-		fileSizeKb, version, recordId, loginId); err != nil {
+		fileSizeKb, version, recordIds, loginId); err != nil {
 
 		tx.Rollback(db.Ctx)
 		return err
@@ -161,15 +166,14 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 // stores database changes for uploaded/updated files
 func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool,
 	attributeId uuid.UUID, relationId uuid.UUID, fileId uuid.UUID, fileHash string,
-	fileName string, fileSizeKb int64, fileVersion int64, recordId pgtype.Int8,
+	fileName string, fileSizeKb int64, fileVersion int64, recordIds []int64,
 	loginId int64) error {
 
 	if isNewFile {
 		// store file reference
 		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-			INSERT INTO instance_file."%s" (id,name)
-			VALUES ($1,$2)
-		`, schema.GetFilesTableName(attributeId)), fileId, fileName); err != nil {
+			INSERT INTO instance_file."%s" (id) VALUES ($1)
+		`, schema.GetFilesTableName(attributeId)), fileId); err != nil {
 			return err
 		}
 	}
@@ -194,9 +198,9 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool,
 		return err
 	}
 
-	// skip change log if new file or file is not attached to a record
+	// skip change log if new file or file is not attached to any record
 	// new file change logs are stored when record is saved
-	if isNewFile || recordId.Status != pgtype.Present {
+	if isNewFile || len(recordIds) == 0 {
 		return nil
 	}
 
@@ -232,8 +236,15 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool,
 	logAttributeFileIndexes := []int{0}
 	logValuesOld := []interface{}{nil}
 
-	return setLog_tx(db.Ctx, tx, relationId, logAttributes,
-		logAttributeFileIndexes, false, logValuesOld, recordId.Int, loginId)
+	for _, recordId := range recordIds {
+		if err := setLog_tx(db.Ctx, tx, relationId, logAttributes,
+			logAttributeFileIndexes, false, logValuesOld, recordId,
+			loginId); err != nil {
+
+			return err
+		}
+	}
+	return nil
 }
 
 // updates file record assignment or deletion state based on file attribute changes
@@ -243,7 +254,7 @@ func filesApplyAttributChanges_tx(ctx context.Context, tx pgx.Tx,
 	if filesValue == nil {
 		return nil
 	}
-	tName := schema.GetFilesTableName(attributeId)
+	tNameR := schema.GetFilesTableNameRecords(attributeId)
 
 	vJson, err := json.Marshal(filesValue)
 	if err != nil {
@@ -286,7 +297,7 @@ func filesApplyAttributChanges_tx(ctx context.Context, tx pgx.Tx,
 			// trim spaces
 			change.Name = strings.TrimSpace(change.Name)
 
-			// check whether name is free to use within context of record
+			// check whether name is free to use within context of all assigned records
 			nameCandidate := change.Name
 			nameExt := filepath.Ext(nameCandidate)
 			nameExists := false
@@ -294,14 +305,14 @@ func filesApplyAttributChanges_tx(ctx context.Context, tx pgx.Tx,
 			for attempts := 0; attempts < 20; attempts++ {
 				if err := tx.QueryRow(ctx, fmt.Sprintf(`
 					SELECT EXISTS(
-						SELECT id
+						SELECT file_id
 						FROM instance_file."%s"
 						WHERE record_id   =  $1
-						AND   name        =  $2
-						AND   id          <> $3
+						AND   file_id     <> $2
+						AND   name        =  $3
 						AND   date_delete IS NULL
 					)
-				`, tName), recordId, nameCandidate, fileId).Scan(&nameExists); err != nil {
+				`, tNameR), recordId, fileId, nameCandidate).Scan(&nameExists); err != nil {
 					return err
 				}
 
@@ -338,9 +349,9 @@ func filesApplyAttributChanges_tx(ctx context.Context, tx pgx.Tx,
 			if _, err := tx.Exec(ctx, fmt.Sprintf(`
 				UPDATE instance_file."%s"
 				SET   name      = $1
-				WHERE id        = $2
+				WHERE file_id   = $2
 				AND   record_id = $3
-			`, tName), nameCandidate, fileId, recordId); err != nil {
+			`, tNameR), nameCandidate, fileId, recordId); err != nil {
 				return err
 			}
 		}
@@ -351,12 +362,17 @@ func filesApplyAttributChanges_tx(ctx context.Context, tx pgx.Tx,
 func FilesAssignToRecord_tx(ctx context.Context, tx pgx.Tx,
 	attributeId uuid.UUID, fileIds []uuid.UUID, recordId int64) error {
 
-	_, err := tx.Exec(ctx, fmt.Sprintf(`
-		UPDATE instance_file."%s"
-		SET record_id = $1
-		WHERE id = ANY($2)
-	`, schema.GetFilesTableName(attributeId)), recordId, fileIds)
-	return err
+	for _, fileId := range fileIds {
+		if _, err := tx.Exec(ctx, fmt.Sprintf(`
+			INSERT INTO instance_file."%s" (file_id, record_id, name)
+			VALUES ($1,$2,$3)
+		`, schema.GetFilesTableNameRecords(attributeId)), fileId,
+			recordId, newFileUnnamed); err != nil {
+
+			return err
+		}
+	}
+	return nil
 }
 
 func FilesSetDeletedForRecord_tx(ctx context.Context, tx pgx.Tx,
@@ -366,8 +382,8 @@ func FilesSetDeletedForRecord_tx(ctx context.Context, tx pgx.Tx,
 		UPDATE instance_file."%s"
 		SET date_delete = $1
 		WHERE record_id = $2
-		AND   id        = ANY($3)
-	`, schema.GetFilesTableName(attributeId)), tools.GetTimeUnix(), recordId, fileIds)
+		AND   file_id   = ANY($3)
+	`, schema.GetFilesTableNameRecords(attributeId)), tools.GetTimeUnix(), recordId, fileIds)
 	return err
 }
 

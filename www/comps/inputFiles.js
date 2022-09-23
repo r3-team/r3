@@ -29,13 +29,11 @@ let MyInputFilesName = {
 	props:{
 		change:  { required:true },               // known file change (not affected by sort)
 		name:    { type:String,  required:true }, // file name
-		readonly:{ type:Boolean, required:true }
+		readonly:{ type:Boolean, required:true },
+		unsaved: { type:Boolean, required:true }
 	},
 	emits:['update:name'],
 	computed:{
-		unsaved:(s) => {
-			return typeof s.change !== 'undefined' && s.change.action === 'create';
-		},
 		value:(s) => {
 			return typeof s.change !== 'undefined' && s.change.name !== ''
 				? s.change.name : s.name;
@@ -46,9 +44,30 @@ let MyInputFilesName = {
 	}
 };
 
+let MyInputFilesRequest = {
+	name:'my-input-files-request',
+	template:`<my-button image="screenFile.png"
+		@trigger="$emit('open',false)"
+		@trigger-shift="$emit('open',true)"
+		:captionTitle="capApp.button.fileRequestHint"
+		:active="hasClient"
+		:naked="true"
+		:tight="true"
+	/>`,
+	emits:['open'],
+	computed:{
+		// store
+		hasClient:(s) => s.$store.getters.loginHasClient,
+		capApp:   (s) => s.$store.getters.captions.input.files
+	}
+};
+
 let MyInputFiles = {
 	name:'my-input-files',
-	components:{MyInputFilesName},
+	components:{
+		MyInputFilesName,
+		MyInputFilesRequest
+	},
 	template:`<div class="input-files" ref="main"
 			v-on:dragleave.stop.prevent="dragLeave"
 			v-on:dragenter.stop.prevent="dragEnter"
@@ -60,7 +79,7 @@ let MyInputFiles = {
 			<div class="row">
 				<slot name="input-icon" />
 				<my-button image="files.png"
-					v-if="fileIdsSelected.length !== 0"
+					v-if="!unsavedSelected && fileIdsSelected.length !== 0"
 					@trigger="copyFilesSelected"
 					:caption="!noSpace ? capGen.button.copy : ''"
 					:captionTitle="capApp.button.copyHint"
@@ -204,6 +223,7 @@ let MyInputFiles = {
 								:change="fileIdMapChange[f.id]"
 								:name="f.name"
 								:readonly="readonly"
+								:unsaved="fileIdsUnsaved.includes(f.id)"
 							/>
 						</td>
 						<td>{{ getSizeReadable(f.size) }}</td>
@@ -219,14 +239,9 @@ let MyInputFiles = {
 										:tight="true"
 									/>
 								</a>
-								<my-button image="screenFile.png"
-									v-if="!readonly"
-									@trigger="fileRequest(f.id,false)"
-									@trigger-shift="fileRequest(f.id,true)"
-									:captionTitle="capApp.button.fileRequestHint"
-									:active="hasClient"
-									:naked="true"
-									:tight="true"
+								<my-input-files-request
+									v-if="!readonly && !fileIdsUnsaved.includes(f.id)"
+									@open="fileRequest(f.id,$event)"
 								/>
 							</div>
 						</td>
@@ -249,6 +264,7 @@ let MyInputFiles = {
 							:change="fileIdMapChange[f.id]"
 							:name="f.name"
 							:readonly="readonly"
+							:unsaved="fileIdsUnsaved.includes(f.id)"
 						/>
 						<div class="item-meta">
 							<span>{{ displayDate(f.changed) }}</span>
@@ -262,13 +278,9 @@ let MyInputFiles = {
 							:naked="true"
 							:tight="true"
 						/>
-						<my-button image="screenFile.png"
-							@trigger="fileRequest(f.id,false)"
-							@trigger-shift="fileRequest(f.id,true)"
-							:active="hasClient"
-							:captionTitle="capApp.button.fileRequestHint"
-							:naked="true"
-							:tight="true"
+						<my-input-files-request
+							v-if="!readonly && !fileIdsUnsaved.includes(f.id)"
+							@open="fileRequest(f.id,$event)"
 						/>
 					</div>
 				</div>
@@ -289,6 +301,7 @@ let MyInputFiles = {
 							:change="fileIdMapChange[f.id]"
 							:name="f.name"
 							:readonly="readonly"
+							:unsaved="fileIdsUnsaved.includes(f.id)"
 						/>
 						<span>{{ displayDate(f.changed) }}</span>
 						<span>{{ getSizeReadable(f.size) }}</span>
@@ -300,13 +313,9 @@ let MyInputFiles = {
 							:naked="true"
 							:tight="true"
 						/>
-						<my-button image="screenFile.png"
-							@trigger="fileRequest(f.id,false)"
-							@trigger-shift="fileRequest(f.id,true)"
-							:captionTitle="capApp.button.fileRequestHint"
-							:active="hasClient"
-							:naked="true"
-							:tight="true"
+						<my-input-files-request
+							v-if="!readonly && !fileIdsUnsaved.includes(f.id)"
+							@open="fileRequest(f.id,$event)"
 						/>
 					</div>
 				</div>
@@ -320,6 +329,7 @@ let MyInputFiles = {
 		formLoading: { type:Boolean, required:true }, // to react to form load events
 		modelValue:  { required:true },
 		readonly:    { type:Boolean, required:false, default:false },
+		recordId:    { type:Number,  required:true },
 		showGallery: { type:Boolean, required:false, default:false }
 	},
 	emits:['update:modelValue'],
@@ -401,6 +411,14 @@ let MyInputFiles = {
 			if(!s.noSpace)           out += ` ${s.capGen.files}`;
 			return out;
 		},
+		fileIdsUnsaved:(s) => {
+			let out = [];
+			for(let fileId in s.fileIdMapChange) {
+				if(s.fileIdMapChange[fileId].action === 'create')
+					out.push(fileId);
+			}
+			return out;
+		},
 		
 		// simple
 		allSelected:    (s) => s.filesProcessed.length === s.fileIdsSelected.length,
@@ -411,6 +429,7 @@ let MyInputFiles = {
 		sortByChanged:  (s) => s.sortMode === 'changed',
 		sortByName:     (s) => s.sortMode === 'name',
 		sortBySize:     (s) => s.sortMode === 'size',
+		unsavedSelected:(s) => s.fileIdsSelected.some(v => s.fileIdsUnsaved.includes(v)),
 		viewListComfort:(s) => s.viewMode === 'listComfort',
 		viewListCompact:(s) => s.viewMode === 'listCompact',
 		viewGallery:    (s) => s.viewMode === 'gallery',
@@ -420,7 +439,6 @@ let MyInputFiles = {
 		capApp:        (s) => s.$store.getters.captions.input.files,
 		capGen:        (s) => s.$store.getters.captions.generic,
 		filesCopy:     (s) => s.$store.getters.filesCopy,
-		hasClient:     (s) => s.$store.getters.loginHasClient,
 		settings:      (s) => s.$store.getters.settings,
 		token:         (s) => s.$store.getters['local/token']
 	},
@@ -486,13 +504,15 @@ let MyInputFiles = {
 			ws.send('file','request',{
 				attributeId:this.attributeId,
 				fileId:fileId,
+				recordId:this.recordId,
 				chooseApp:chooseApp
 			},false);
 		},
 		copyFilesSelected() {
 			let v = {
 				attributeId:this.attributeId,
-				fileIds:this.fileIdsSelected
+				fileIds:this.fileIdsSelected,
+				recordId:this.recordId
 			};
 			ws.send('file','copy',v,true);
 			this.$store.commit('filesCopy',v);
@@ -502,6 +522,7 @@ let MyInputFiles = {
 			ws.send('file','paste',{
 				srcAttributeId:this.filesCopy.attributeId,
 				srcFileIds:this.filesCopy.fileIds,
+				srcRecordId:this.filesCopy.recordId,
 				dstAttributeId:this.attributeId
 			},true).then(
 				res => {

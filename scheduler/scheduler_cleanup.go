@@ -77,37 +77,37 @@ func cleanUpFiles() error {
 	}
 
 	for _, atrId := range attributeIdsFile {
-		relFile := schema.GetFilesTableName(atrId)
-		relVersion := schema.GetFilesTableNameVersions(atrId)
+		tNameF := schema.GetFilesTableName(atrId)
+		tNameR := schema.GetFilesTableNameRecords(atrId)
+		tNameV := schema.GetFilesTableNameVersions(atrId)
 
 		fileIds := make([]uuid.UUID, 0)
 		limit := 100 // at most 100 entries at a time
 		now := tools.GetTimeUnix()
-		unixKeepDeleted := now - (oneDayInSeconds * int64(config.GetUint64("filesKeepDaysDeleted")))
-		unixKeepUnassigned := now - (oneDayInSeconds * int64(config.GetUint64("filesKeepDaysUnassigned")))
 
-		// find files either deleted or unassigned and that are outside their keep limits
+		// delete assignments if deleted too far in the past
+		_, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
+			DELETE FROM instance_file."%s"
+			WHERE date_delete IS NOT NULL
+			AND   date_delete < $1
+		`, tNameR), now-(oneDayInSeconds*int64(config.GetUint64("filesKeepDaysDeleted"))))
+		if err != nil {
+			return err
+		}
+
+		// find files that have no more record assignments
 		// execute in steps to reduce memory load
 		for {
 			if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
 				SELECT ARRAY_AGG(f.id)
 				FROM instance_file."%s" AS f
-				WHERE ( -- assigned but deleted to far in the past
-					f.record_id IS NOT NULL
-					AND f.date_delete < $1
+				WHERE 0 = (
+					SELECT COUNT(*)
+					FROM instance_file."%s" AS r
+					WHERE r.file_id = f.id
 				)
-				OR ( -- unassigned and last file version is too old
-					f.record_id IS NULL
-					AND (
-						SELECT MAX(date_change)
-						FROM instance_file."%s"
-						WHERE file_id = f.id
-					) < $2
-				)
-				LIMIT $3
-			`, relFile, relVersion), unixKeepDeleted, unixKeepUnassigned,
-				limit).Scan(&fileIds); err != nil {
-
+				LIMIT $1
+			`, tNameF, tNameR), limit).Scan(&fileIds); err != nil {
 				return err
 			}
 
@@ -122,7 +122,7 @@ func cleanUpFiles() error {
 					SELECT ARRAY_AGG(version)
 					FROM instance_file."%s"
 					WHERE file_id = $1
-				`, relVersion), fileId).Scan(&versions); err != nil {
+				`, tNameV), fileId).Scan(&versions); err != nil {
 					return err
 				}
 
@@ -151,7 +151,7 @@ func cleanUpFiles() error {
 							DELETE FROM instance_file."%s"
 							WHERE file_id = $1
 							AND   version = $2
-						`, relVersion), fileId, version); err != nil {
+						`, tNameV), fileId, version); err != nil {
 						return err
 					}
 				}
@@ -169,12 +169,12 @@ func cleanUpFiles() error {
 			// delete file records with no versions left
 			tag, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
 				DELETE FROM instance_file."%s" AS f
-				WHERE (
+				WHERE 0 = (
 					SELECT COUNT(*)
 					FROM instance_file."%s"
 					WHERE file_id = f.id
-				) = 0
-			`, relFile, relVersion))
+				)
+			`, tNameF, tNameV))
 			if err != nil {
 				return err
 			}
@@ -183,7 +183,8 @@ func cleanUpFiles() error {
 			if tag.RowsAffected() == 0 {
 				break
 			}
-			log.Info("server", fmt.Sprintf("successfully cleaned up %d files (deleted/unassigned)", tag.RowsAffected()))
+			log.Info("server", fmt.Sprintf("successfully cleaned up %d files (deleted/unassigned)",
+				tag.RowsAffected()))
 
 			// limit not reached this loop, we are done
 			if len(fileIds) < limit {
@@ -248,8 +249,7 @@ func cleanUpFiles() error {
 				
 				ORDER BY file_id ASC, version DESC
 				LIMIT $3
-			`, relVersion, relVersion, relVersion),
-				keepVersionsCnt, keepVersionsAfter, limit)
+			`, tNameV, tNameV, tNameV), keepVersionsCnt, keepVersionsAfter, limit)
 
 			if err != nil {
 				return err
@@ -281,7 +281,7 @@ func cleanUpFiles() error {
 						DELETE FROM instance_file."%s"
 						WHERE file_id = $1
 						AND   version = $2
-					`, relVersion), fv.fileId, fv.version); err != nil {
+					`, tNameV), fv.fileId, fv.version); err != nil {
 					return err
 				}
 				removeCnt++

@@ -11,7 +11,7 @@ import (
 )
 
 func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
-	dstAttributeId uuid.UUID) ([]types.DataGetValueFile, error) {
+	srcRecordId int64, dstAttributeId uuid.UUID) ([]types.DataGetValueFile, error) {
 
 	files := make([]types.DataGetValueFile, 0)
 
@@ -23,23 +23,24 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 		return files, err
 	}
 
-	srcRelFile := schema.GetFilesTableName(srcAttributeId)
+	srcRelRecord := schema.GetFilesTableNameRecords(srcAttributeId)
 	srcRelVersion := schema.GetFilesTableNameVersions(srcAttributeId)
 	dstRelFile := schema.GetFilesTableName(dstAttributeId)
 	dstRelVersion := schema.GetFilesTableNameVersions(dstAttributeId)
 
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
-		SELECT f.id, f.name, v.hash, v.size_kb, v.date_change
-		FROM instance_file."%s" AS f
-		JOIN instance_file."%s" AS v
-			ON  v.file_id = f.id
-			AND v.version = (
-				SELECT MAX(version)
-				FROM instance_file."%s" AS v
-				WHERE file_id = f.id
-			)
-		WHERE f.id = ANY($1)
-	`, srcRelFile, srcRelVersion, srcRelVersion), srcFileIds)
+		SELECT v.file_id, r.name, v.hash, v.size_kb, v.date_change
+		FROM instance_file."%s" AS v
+		JOIN instance_file."%s" AS r
+			ON  r.file_id   = v.file_id
+			AND r.record_id = $1
+		WHERE v.file_id = ANY($2)
+		AND   v.version = (
+			SELECT MAX(s.version)
+			FROM instance_file."%s" AS s
+			WHERE s.file_id = v.file_id
+		)
+	`, srcRelVersion, srcRelRecord, srcRelVersion), srcRecordId, srcFileIds)
 	if err != nil {
 		return files, err
 	}
@@ -63,6 +64,7 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 			return files, fmt.Errorf("file requested to be copied ('%s') cannot be found", f.Id)
 		}
 	}
+
 	for i, f := range files {
 
 		// create new file ID
@@ -86,9 +88,8 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 		}
 
 		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-			INSERT INTO instance_file."%s" (id, name)
-			VALUES ($1,$2)
-		`, dstRelFile), idNew, f.Name); err != nil {
+			INSERT INTO instance_file."%s" (id) VALUES ($1)
+		`, dstRelFile), idNew); err != nil {
 			tx.Rollback(db.Ctx)
 			return files, err
 		}

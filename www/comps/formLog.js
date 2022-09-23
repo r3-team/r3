@@ -104,7 +104,7 @@ let MyFormLog = {
 													:href="getAttributeFileVersionHref(indexAttributeIdMapField[ia].attributeId,fileId,c.name,token,c.version)"
 												>
 													<my-button image="download.png"
-														:caption="c.name"
+														:caption="c.name + ' (v' + c.version + ')'"
 														:naked="true"
 													/>
 												</a>

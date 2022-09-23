@@ -224,11 +224,8 @@
 		"files":{
 			"deleteDate":"File deleted",
 			"filesKeepDaysDeleted":"Keep deleted files for X days",
-			"filesKeepDaysUnassigned":"Keep unassigned files if last version is younger than X days",
-			"hintUnassigned":"Files that were assigned to records that have been deleted.",
 			"titleConfig":"Global configuration",
-			"titleDeleted":"Deleted files",
-			"titleUnassigned":"Unassigned files"
+			"titleDeleted":"Deleted files"
 		},
 		"ldaps":{
 			"button":{

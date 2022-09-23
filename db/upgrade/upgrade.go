@@ -134,7 +134,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					IF level_show < level THEN
 						RETURN;
 					END IF;
-				
+					
 					-- resolve module ID if possible
 					-- if not possible: log with module_id = NULL (better than not to log)
 					IF app_name IS NOT NULL THEN
@@ -142,7 +142,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 						FROM app.module
 						WHERE name = app_name;
 					END IF;
-				
+					
 					INSERT INTO instance.log (level,context,module_id,message,date_milli)
 					VALUES (level,'module',module_id,message,(EXTRACT(EPOCH FROM CLOCK_TIMESTAMP()) * 1000)::BIGINT);
 				END;	
@@ -153,18 +153,17 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			-- new config options
 			INSERT INTO instance.config (name,value) VALUES ('filesKeepDaysDeleted','90');
-			INSERT INTO instance.config (name,value) VALUES ('filesKeepDaysUnassigned','90');
 			INSERT INTO instance.config (name,value) VALUES ('imagerThumbWidth','300');
 			INSERT INTO instance.config (name,value) VALUES ('logImager',2);
 			INSERT INTO instance.config (name,value) VALUES ('logWebsocket',2);
-
+			
 			-- changes to fixed tokens
 			ALTER TYPE instance.token_fixed_context ADD VALUE 'client';
 			ALTER TABLE instance.login_token_fixed ADD COLUMN name CHARACTER VARYING(64);
-
+			
 			-- new cluster events
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'fileRequested';
-
+			
 			-- new schema
 			CREATE SCHEMA instance_file;
 		`); err != nil {
@@ -204,22 +203,41 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 		for _, fa := range fileAtrs {
 			// create instance_file tables for each files attribute
-			tName := fmt.Sprintf("%s_file", fa.attributeId)
+			tNameF := fmt.Sprintf("%s_file", fa.attributeId)
+			tNameR := fmt.Sprintf("%s_record", fa.attributeId)
 			tNameV := fmt.Sprintf("%s_version", fa.attributeId)
 
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				-- files
 				CREATE TABLE instance_file."%s" (
 					id uuid NOT NULL,
-					record_id bigint,
+				    CONSTRAINT "%s_pkey" PRIMARY KEY (id)
+				);
+				
+				-- file record assignments
+				CREATE TABLE instance_file."%s" (
+					file_id uuid NOT NULL,
+					record_id bigint NOT NULL,
 					name text NOT NULL,
 					date_delete bigint,
-				    CONSTRAINT "%s_pkey" PRIMARY KEY (id),
+				    CONSTRAINT "%s_pkey" PRIMARY KEY (file_id,record_id),
+				    CONSTRAINT "%s_file_id_fkey" FOREIGN KEY (file_id)
+				        REFERENCES instance_file."%s" (id) MATCH SIMPLE
+				        ON UPDATE CASCADE
+				        ON DELETE CASCADE
+				        DEFERRABLE INITIALLY DEFERRED,
 				    CONSTRAINT "%s_record_id_fkey" FOREIGN KEY (record_id)
 				        REFERENCES "%s"."%s" ("%s") MATCH SIMPLE
-				        ON UPDATE SET NULL
-				        ON DELETE SET NULL
+				        ON UPDATE CASCADE
+				        ON DELETE CASCADE
 				        DEFERRABLE INITIALLY DEFERRED
 				);
+				
+				CREATE INDEX "ind_%s_date_delete"
+					ON instance_file."%s" USING btree (date_delete ASC NULLS LAST);
+				
+				CREATE INDEX "fki_%s_file_id_fkey"
+					ON instance_file."%s" USING btree (file_id ASC NULLS LAST);
 				
 				CREATE INDEX "fki_%s_record_id_fkey"
 					ON instance_file."%s" USING btree (record_id ASC NULLS LAST);
@@ -245,46 +263,62 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				        DEFERRABLE INITIALLY DEFERRED
 				);
 				
-				CREATE INDEX "fki_%s_file_id_fkey"
-					ON instance_file."%s" USING btree (file_id ASC NULLS LAST);
-				
 				CREATE INDEX "fki_%s_login_id_fkey"
 					ON instance_file."%s" USING btree (login_id ASC NULLS LAST);
 				
 				CREATE INDEX "ind_%s_version"
 					ON instance_file."%s" USING btree (version ASC NULLS LAST);
-			`, tName, tName, tName, fa.moduleName, fa.relationName, schema.PkName,
-				tName, tName, tNameV, tNameV, tNameV, tName, tNameV, tNameV,
+				
+				CREATE INDEX "fki_%s_file_id_fkey"
+					ON instance_file."%s" USING btree (file_id ASC NULLS LAST);
+			`,
+				// files
+				tNameF, tNameF,
+				// file records
+				tNameR, tNameR, tNameR, tNameF, tNameR, fa.moduleName, fa.relationName,
+				schema.PkName, tNameR, tNameR, tNameR, tNameR, tNameR, tNameR,
+				// file versions
+				tNameV, tNameV, tNameV, tNameF, tNameV, tNameV,
 				tNameV, tNameV, tNameV, tNameV, tNameV)); err != nil {
 
 				return "", err
 			}
 
-			// insert JSON files references
+			// insert files from JSON attribute values
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-				INSERT INTO instance_file."%s" (record_id, id, name)
-				SELECT r.id, j.id, j.name
-				FROM %s.%s AS r
-				CROSS JOIN LATERAL JSON_TO_RECORDSET((r.%s->>'files')::JSON)
+				INSERT INTO instance_file."%s" (id)
+				SELECT j.id
+				FROM "%s"."%s" AS r
+				CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
 					AS j(id UUID, name TEXT, size INT)
-				WHERE r.%s IS NOT NULL
-			`, tName, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
+				WHERE r."%s" IS NOT NULL
+			`, tNameF, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
+				return "", err
+			}
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				INSERT INTO instance_file."%s" (record_id, file_id, name)
+				SELECT r.id, j.id, j.name
+				FROM "%s"."%s" AS r
+				CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
+					AS j(id UUID, name TEXT, size INT)
+				WHERE r."%s" IS NOT NULL
+			`, tNameR, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
 				return "", err
 			}
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 				INSERT INTO instance_file."%s" (file_id, version, size_kb, date_change)
 				SELECT j.id, 0, j.size, EXTRACT(EPOCH FROM NOW())
-				FROM %s.%s AS r
-				CROSS JOIN LATERAL JSON_TO_RECORDSET((r.%s->>'files')::JSON)
+				FROM "%s"."%s" AS r
+				CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
 					AS j(id UUID, name TEXT, size INT)
-				WHERE r.%s IS NOT NULL
+				WHERE r."%s" IS NOT NULL
 			`, tNameV, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
 				return "", err
 			}
 
 			// delete original files attribute columns
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-				ALTER TABLE %s.%s DROP COLUMN %s
+				ALTER TABLE "%s"."%s" DROP COLUMN "%s"
 			`, fa.moduleName, fa.relationName, fa.attributeName)); err != nil {
 				return "", err
 			}
@@ -294,7 +328,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			if err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
 				SELECT ARRAY_AGG(id)
 				FROM instance_file."%s"
-			`, tName)).Scan(&fileIds); err != nil {
+			`, tNameF)).Scan(&fileIds); err != nil {
 				return "", err
 			}
 
@@ -330,7 +364,6 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		`); err != nil {
 			return "", err
 		}
-
 		return "3.1", err
 	},
 	"2.7": func(tx pgx.Tx) (string, error) {

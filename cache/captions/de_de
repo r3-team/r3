@@ -224,11 +224,8 @@
 		"files":{
 			"deleteDate":"Datei gelöscht",
 			"filesKeepDaysDeleted":"Gelöschte Dateien für X Tage aufheben",
-			"filesKeepDaysUnassigned":"Nicht-zugewiesene Dateien aufheben, solange aktuellste Version jünger ist als X Tage",
-			"hintUnassigned":"Dateien, die Datensätzen zugewiesen waren, die gelöscht worden sind.",
 			"titleConfig":"Globale Konfiguration",
-			"titleDeleted":"Gelöschte Dateien",
-			"titleUnassigned":"Nicht-zugewiesene Dateien"
+			"titleDeleted":"Gelöschte Dateien"
 		},
 		"ldaps":{
 			"button":{

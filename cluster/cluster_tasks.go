@@ -99,13 +99,15 @@ func ConfigChanged(updateNodes bool, loadConfigFromDb bool, switchToMaintenance 
 	config.SetLogLevels()
 	return nil
 }
-func FilesCopied(updateNodes bool, loginId int64, attributeId uuid.UUID, fileIds []uuid.UUID) error {
+func FilesCopied(updateNodes bool, loginId int64, attributeId uuid.UUID,
+	fileIds []uuid.UUID, recordId int64) error {
 
 	if updateNodes {
 		if err := createEventsForOtherNodes("filesCopied", types.ClusterEventFilesCopied{
 			LoginId:     loginId,
 			AttributeId: attributeId,
 			FileIds:     fileIds,
+			RecordId:    recordId,
 		}); err != nil {
 			return err
 		}
@@ -114,6 +116,7 @@ func FilesCopied(updateNodes bool, loginId int64, attributeId uuid.UUID, fileIds
 		LoginId:                loginId,
 		FilesCopiedAttributeId: attributeId,
 		FilesCopiedFileIds:     fileIds,
+		FilesCopiedRecordId:    recordId,
 	}
 	return nil
 }

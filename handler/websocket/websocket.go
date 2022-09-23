@@ -145,6 +145,7 @@ func (hub *hubType) start() {
 					jsonMsg, err = prepareUnrequested("files_copied", types.ClusterEventFilesCopied{
 						AttributeId: event.FilesCopiedAttributeId,
 						FileIds:     event.FilesCopiedFileIds,
+						RecordId:    event.FilesCopiedRecordId,
 					})
 				}
 				if event.FileRequestedAttributeId != uuid.Nil {
