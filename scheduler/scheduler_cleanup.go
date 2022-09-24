@@ -125,7 +125,7 @@ func cleanUpFiles() error {
 				}
 
 				for _, version := range versions {
-					filePath := data.GetFilePathVersion(atrId, fileId, version)
+					filePath := data.GetFilePathVersion(fileId, version)
 
 					exists, err := tools.Exists(filePath)
 					if err != nil {
@@ -155,7 +155,7 @@ func cleanUpFiles() error {
 				}
 
 				// clean up thumbnail, if there
-				filePathThumb := data.GetFilePathThumb(atrId, fileId)
+				filePathThumb := data.GetFilePathThumb(fileId)
 				if exists, _ := tools.Exists(filePathThumb); exists {
 					if err := os.Remove(filePathThumb); err != nil {
 						log.Warning("server", "failed to remove old file thumbnail", err)
@@ -262,7 +262,7 @@ func cleanUpFiles() error {
 			rows.Close()
 
 			for _, fv := range fileVersions {
-				filePath := data.GetFilePathVersion(atrId, fv.fileId, fv.version)
+				filePath := data.GetFilePathVersion(fv.fileId, fv.version)
 
 				// if file version exists, attempt to delete it
 				// if not, skip deletion and remove reference

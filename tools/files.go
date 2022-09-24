@@ -4,6 +4,7 @@ import (
 	"crypto/sha256"
 	"fmt"
 	"io"
+	"io/fs"
 	"io/ioutil"
 	"math/rand"
 	"os"
@@ -162,6 +163,17 @@ func Exists(path string) (bool, error) {
 		return false, nil
 	}
 	return false, err
+}
+
+func PathCreateIfNotExists(path string, perm fs.FileMode) error {
+	_, err := os.Stat(path)
+	if err == nil {
+		return nil
+	}
+	if !os.IsNotExist(err) {
+		return err
+	}
+	return os.Mkdir(path, perm)
 }
 
 func IsEmpty(path string) (bool, error) {

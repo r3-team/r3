@@ -49,13 +49,16 @@ func MayAccessFile(loginId int64, attributeId uuid.UUID) error {
 	return nil
 }
 
-// returns path to downloadable file, a specific version or its thumbnail
-func GetFilePathThumb(attributeId uuid.UUID, fileId uuid.UUID) string {
-	return filepath.Join(config.File.Paths.Files, attributeId.String(),
+// returns path to downloadable file, a specific version, its directory or thumbnail
+func GetFilePathDir(fileId uuid.UUID) string {
+	return filepath.Join(config.File.Paths.Files, fileId.String()[:3])
+}
+func GetFilePathThumb(fileId uuid.UUID) string {
+	return filepath.Join(config.File.Paths.Files, fileId.String()[:3],
 		fmt.Sprintf("%s.webp", fileId.String()))
 }
-func GetFilePathVersion(attributeId uuid.UUID, fileId uuid.UUID, version int64) string {
-	return filepath.Join(config.File.Paths.Files, attributeId.String(),
+func GetFilePathVersion(fileId uuid.UUID, version int64) string {
+	return filepath.Join(config.File.Paths.Files, fileId.String()[:3],
 		fmt.Sprintf("%s_%d", fileId.String(), version))
 }
 
@@ -98,20 +101,13 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 			return err
 		}
 	}
-	filePathDir := filepath.Join(config.File.Paths.Files, attributeId.String())
 
-	exists, err = tools.Exists(filePathDir)
-	if err != nil {
+	if err := tools.PathCreateIfNotExists(GetFilePathDir(fileId), 0600); err != nil {
 		return err
-	}
-	if !exists {
-		if err := os.Mkdir(filePathDir, 0600); err != nil {
-			return err
-		}
 	}
 
 	// write file
-	filePath := GetFilePathVersion(attributeId, fileId, version)
+	filePath := GetFilePathVersion(fileId, version)
 	dest, err := os.Create(filePath)
 	if err != nil {
 		return err
@@ -144,7 +140,7 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 
 	// create/update thumbnail - failure should not block progress
 	image.CreateThumbnail(fileId, filepath.Ext(part.FileName()), filePath,
-		GetFilePathThumb(attributeId, fileId), false)
+		GetFilePathThumb(fileId), false)
 
 	// store file meta data in database
 	tx, err := db.Pool.Begin(db.Ctx)
@@ -383,7 +379,7 @@ func FilesSetDeletedForRecord_tx(ctx context.Context, tx pgx.Tx,
 	return err
 }
 
-func FileGetLatestVersion(attributeId uuid.UUID, fileId uuid.UUID) (int64, error) {
+func FileGetLatestVersion(fileId uuid.UUID) (int64, error) {
 	var version int64
 	err := db.Pool.QueryRow(db.Ctx, `
 		SELECT MAX(version)

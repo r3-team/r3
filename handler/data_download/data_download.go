@@ -60,11 +60,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if version == -1 {
-		version, err = data.FileGetLatestVersion(attributeId, fileId)
+		version, err = data.FileGetLatestVersion(fileId)
 		if err != nil {
 			handler.AbortRequest(w, context, err, handler.ErrGeneral)
 			return
 		}
 	}
-	http.ServeFile(w, r, data.GetFilePathVersion(attributeId, fileId, version))
+	http.ServeFile(w, r, data.GetFilePathVersion(fileId, version))
 }

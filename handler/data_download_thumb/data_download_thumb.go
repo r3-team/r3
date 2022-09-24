@@ -65,7 +65,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check whether thumbnail file exists
-	filePath := data.GetFilePathThumb(attributeId, fileId)
+	filePath := data.GetFilePathThumb(fileId)
 
 	_, err = os.Stat(filePath)
 	if err != nil && !os.IsNotExist(err) {
@@ -78,12 +78,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		urlElms := strings.Split(r.URL.Path, "/")
 		fileExt := filepath.Ext(urlElms[len(urlElms)-1])
 
-		version, err := data.FileGetLatestVersion(attributeId, fileId)
+		version, err := data.FileGetLatestVersion(fileId)
 		if err != nil {
 			handler.AbortRequest(w, context, err, handler.ErrGeneral)
 			return
 		}
-		filePathSrc := data.GetFilePathVersion(attributeId, fileId, version)
+		filePathSrc := data.GetFilePathVersion(fileId, version)
 
 		if err := image.CreateThumbnail(fileId, fileExt, filePathSrc, filePath, true); err != nil {
 			w.Write(handler.NoImage)

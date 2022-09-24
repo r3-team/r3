@@ -5,9 +5,7 @@ import (
 	"fmt"
 	"io"
 	"os"
-	"path/filepath"
 	"r3/cache"
-	"r3/config"
 	"r3/data"
 	"r3/db"
 	"r3/schema"
@@ -103,22 +101,13 @@ func do(mail types.Mail) error {
 		return err
 	}
 
-	// create base path if not there
-	basePath := filepath.Join(config.File.Paths.Files, atr.Id.String())
-
-	exists, err = tools.Exists(basePath)
-	if err != nil {
-		return err
-	}
-	if !exists {
-		if err := os.Mkdir(basePath, 0600); err != nil {
-			return err
-		}
-	}
-
 	// copy files
 	for i, f := range filesMail {
-		filePath := data.GetFilePathVersion(atr.Id, f.Id, 0)
+		if err := tools.PathCreateIfNotExists(data.GetFilePathDir(f.Id), 0600); err != nil {
+			return err
+		}
+
+		filePath := data.GetFilePathVersion(f.Id, 0)
 		file, err := os.Create(filePath)
 		if err != nil {
 			return err

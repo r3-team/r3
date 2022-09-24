@@ -51,7 +51,7 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 
 	// check if all requested files exist before starting
 	for _, f := range files {
-		exists, err := tools.Exists(GetFilePathVersion(srcAttributeId, f.Id, f.Version))
+		exists, err := tools.Exists(GetFilePathVersion(f.Id, f.Version))
 		if err != nil {
 			return files, err
 		}
@@ -68,8 +68,13 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 			return files, err
 		}
 
-		srcPath := GetFilePathVersion(srcAttributeId, f.Id, f.Version)
-		dstPath := GetFilePathVersion(dstAttributeId, idNew, 0)
+		// create new file path
+		if err := tools.PathCreateIfNotExists(GetFilePathDir(idNew), 0600); err != nil {
+			return files, err
+		}
+
+		srcPath := GetFilePathVersion(f.Id, f.Version)
+		dstPath := GetFilePathVersion(idNew, 0)
 
 		if err := tools.FileCopy(srcPath, dstPath, false); err != nil {
 			return files, err

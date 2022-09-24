@@ -41,7 +41,7 @@ func FileGet() (interface{}, error) {
 		rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
 			SELECT file_id, name, date_delete, record_id, (
 				SELECT v.size_kb
-				FROM instance.file_version" AS v
+				FROM instance.file_version AS v
 				WHERE v.file_id = r.file_id
 				ORDER BY v.version DESC
 				LIMIT 1

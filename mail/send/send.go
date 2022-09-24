@@ -170,7 +170,7 @@ func do(m types.Mail) error {
 		rows.Close()
 
 		for _, f := range files {
-			filePath := data.GetFilePathVersion(m.AttributeId.Bytes, f.Id, f.Version)
+			filePath := data.GetFilePathVersion(f.Id, f.Version)
 
 			exists, err = tools.Exists(filePath)
 			if err != nil {

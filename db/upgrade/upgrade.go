@@ -281,7 +281,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
 						AS j(id UUID, name TEXT, size INT)
 					WHERE r."%s" IS NOT NULL
-				ON CONFLICT id DO NOTHING
+				ON CONFLICT (id) DO NOTHING
 			`, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
 				return "", err
 			}
@@ -292,6 +292,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
 						AS j(id UUID, name TEXT, size INT)
 					WHERE r."%s" IS NOT NULL
+				ON CONFLICT ON CONSTRAINT "file_version_pkey" DO NOTHING
 			`, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
 				return "", err
 			}
@@ -323,13 +324,21 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			}
 
 			for _, fileId := range fileIds {
+				// create new file directory if not there
+				if err := tools.PathCreateIfNotExists(
+					filepath.Join(config.File.Paths.Files, fileId.String()[:3]), 0600); err != nil {
+
+					return "", err
+				}
+
+				// move file to new directory with new file name schema (file_id + version)
 				if err := os.Rename(
 					filepath.Join(config.File.Paths.Files,
 						fa.attributeId.String(), fileId.String()),
 					filepath.Join(config.File.Paths.Files,
-						fa.attributeId.String(), fmt.Sprintf("%s_0", fileId))); err != nil {
+						fileId.String()[:3], fmt.Sprintf("%s_0", fileId))); err != nil {
 
-					log.Warning("server", fmt.Sprintf("failed to rename file '%s/%s' during platform upgrade",
+					log.Warning("server", fmt.Sprintf("failed to move file '%s/%s' during platform upgrade",
 						fa.attributeId, fileId), err)
 				}
 			}
