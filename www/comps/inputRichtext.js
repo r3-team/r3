@@ -111,12 +111,12 @@ let MyInputRichtext = {
 			}
 		},
 		imageList:function() {
-			if(this.valueFiles === null || this.valueFiles.files === null)
+			if(this.valueFiles === null)
 				return [];
 			
 			let out = [];
-			for(let i = 0, j = this.valueFiles.files.length; i < j; i++) {
-				let file = this.valueFiles.files[i];
+			for(let i = 0, j = this.valueFiles.length; i < j; i++) {
+				let file = this.valueFiles[i];
 				
 				// file is not yet available to be downloaded
 				// new state is removed, once record is saved
