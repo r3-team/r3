@@ -524,25 +524,22 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 
 	if schema.IsContentFiles(atr.Content) {
 		// attribute is files attribute
-		tNameR := schema.GetFilesTableNameRecords(atr.Id)
-		tNameV := schema.GetFilesTableNameVersions(atr.Id)
-
 		*inSelect = append(*inSelect, fmt.Sprintf(`(
 			SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(t)))
 			FROM (
 				SELECT r.file_id AS id, r.name, COALESCE(v.hash,'') AS hash,
 					v.size_kb AS size, v.version, v.date_change AS changed
-				FROM instance_file."%s" AS r
-				JOIN instance_file."%s" AS v
+				FROM instance_file."%s"    AS r
+				JOIN instance.file_version AS v
 					ON  v.file_id = r.file_id
 					AND v.version = (
 					    SELECT MAX(s.version)
-					    FROM instance_file."%s" AS s
+					    FROM instance.file_version AS s
 					    WHERE s.file_id = r.file_id
 					)
 				WHERE r.record_id = "%s"."%s"
 				AND   r.date_delete IS NULL
-			) AS t)`, tNameR, tNameV, tNameV, relCode, schema.PkName))
+			) AS t)`, schema.GetFilesTableName(atr.Id), relCode, schema.PkName))
 		return nil
 	}
 

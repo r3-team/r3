@@ -58,15 +58,14 @@ func FileRequest(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 	var name string
 	if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
 		SELECT v.hash, r.name
-		FROM instance_file."%s" AS v
-		JOIN instance_file."%s" AS r
+		FROM instance.file_version AS v
+		JOIN instance_file."%s"    AS r
 			ON  r.file_id   = v.file_id
 			AND r.record_id = $1
 		WHERE v.file_id = $2
 		ORDER BY v.version DESC 
 		LIMIT 1
-	`, schema.GetFilesTableNameVersions(req.AttributeId),
-		schema.GetFilesTableNameRecords(req.AttributeId)),
+	`, schema.GetFilesTableName(req.AttributeId)),
 		req.RecordId, req.FileId).Scan(&hash, &name); err != nil {
 		return nil, err
 	}

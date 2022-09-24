@@ -88,12 +88,11 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 				FROM instance_file."%s" AS r
 				WHERE r.file_id = v.file_id
 			)
-			FROM instance_file."%s" AS v
+			FROM instance.file_version AS v
 			WHERE v.file_id = $1
 			ORDER BY v.version DESC
 			LIMIT 1
-		`, schema.GetFilesTableNameRecords(attributeId),
-			schema.GetFilesTableNameVersions(attributeId)),
+		`, schema.GetFilesTableName(attributeId)),
 			fileId).Scan(&version, &recordIds); err != nil {
 
 			return err
@@ -171,9 +170,9 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool,
 
 	if isNewFile {
 		// store file reference
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-			INSERT INTO instance_file."%s" (id) VALUES ($1)
-		`, schema.GetFilesTableName(attributeId)), fileId); err != nil {
+		if _, err := tx.Exec(db.Ctx, `
+			INSERT INTO instance.file (id) VALUES ($1)
+		`, fileId); err != nil {
 			return err
 		}
 	}
@@ -187,14 +186,11 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool,
 		loginNull.Status = pgtype.Null
 	}
 
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-		INSERT INTO instance_file."%s" (
-			file_id,version,login_id,hash,size_kb,date_change
-		)
+	if _, err := tx.Exec(db.Ctx, `
+		INSERT INTO instance.file_version (
+			file_id,version,login_id,hash,size_kb,date_change)
 		VALUES ($1,$2,$3,$4,$5,$6)
-	`, schema.GetFilesTableNameVersions(attributeId)), fileId, fileVersion,
-		loginId, fileHash, fileSizeKb, tools.GetTimeUnix()); err != nil {
-
+	`, fileId, fileVersion, loginId, fileHash, fileSizeKb, tools.GetTimeUnix()); err != nil {
 		return err
 	}
 
@@ -254,7 +250,7 @@ func filesApplyAttributChanges_tx(ctx context.Context, tx pgx.Tx,
 	if filesValue == nil {
 		return nil
 	}
-	tNameR := schema.GetFilesTableNameRecords(attributeId)
+	tNameR := schema.GetFilesTableName(attributeId)
 
 	vJson, err := json.Marshal(filesValue)
 	if err != nil {
@@ -366,7 +362,7 @@ func FilesAssignToRecord_tx(ctx context.Context, tx pgx.Tx,
 		if _, err := tx.Exec(ctx, fmt.Sprintf(`
 			INSERT INTO instance_file."%s" (file_id, record_id, name)
 			VALUES ($1,$2,$3)
-		`, schema.GetFilesTableNameRecords(attributeId)), fileId,
+		`, schema.GetFilesTableName(attributeId)), fileId,
 			recordId, newFileUnnamed); err != nil {
 
 			return err
@@ -383,18 +379,16 @@ func FilesSetDeletedForRecord_tx(ctx context.Context, tx pgx.Tx,
 		SET date_delete = $1
 		WHERE record_id = $2
 		AND   file_id   = ANY($3)
-	`, schema.GetFilesTableNameRecords(attributeId)), tools.GetTimeUnix(), recordId, fileIds)
+	`, schema.GetFilesTableName(attributeId)), tools.GetTimeUnix(), recordId, fileIds)
 	return err
 }
 
 func FileGetLatestVersion(attributeId uuid.UUID, fileId uuid.UUID) (int64, error) {
 	var version int64
-	err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
-		SELECT version
-		FROM instance_file."%s"
+	err := db.Pool.QueryRow(db.Ctx, `
+		SELECT MAX(version)
+		FROM instance.file_version
 		WHERE file_id = $1
-		ORDER BY version DESC
-		LIMIT 1
-	`, schema.GetFilesTableNameVersions(attributeId)), fileId).Scan(&version)
+	`, fileId).Scan(&version)
 	return version, err
 }

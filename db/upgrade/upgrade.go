@@ -164,6 +164,41 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- new cluster events
 			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'fileRequested';
 			
+			-- new file relations
+			CREATE TABLE instance.file (
+				id uuid NOT NULL,
+			    CONSTRAINT "file_pkey" PRIMARY KEY (id)
+			);
+				
+			CREATE TABLE instance.file_version (
+				file_id uuid NOT NULL,
+				version int NOT NULL,
+				login_id integer,
+				hash char(64),
+				size_kb int NOT NULL,
+				date_change bigint NOT NULL,
+			    CONSTRAINT "file_version_pkey" PRIMARY KEY (file_id, version),
+			    CONSTRAINT "file_version_file_id_fkey" FOREIGN KEY (file_id)
+			        REFERENCES instance.file (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT "file_version_login_id_fkey" FOREIGN KEY (login_id)
+			        REFERENCES instance.login (id) MATCH SIMPLE
+			        ON UPDATE SET NULL
+			        ON DELETE SET NULL
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX "fki_file_version_login_id_fkey"
+				ON instance.file_version USING btree (login_id ASC NULLS LAST);
+			
+			CREATE INDEX "ind_file_version_version"
+				ON instance.file_version USING btree (version ASC NULLS LAST);
+			
+			CREATE INDEX "fki_file_version_file_id_fkey"
+				ON instance.file_version USING btree (file_id ASC NULLS LAST);
+			
 			-- new schema
 			CREATE SCHEMA instance_file;
 		`); err != nil {
@@ -201,20 +236,11 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		}
 		rows.Close()
 
+		// create instance_file table for each files attribute and move files to new schema
 		for _, fa := range fileAtrs {
-			// create instance_file tables for each files attribute
-			tNameF := fmt.Sprintf("%s_file", fa.attributeId)
 			tNameR := fmt.Sprintf("%s_record", fa.attributeId)
-			tNameV := fmt.Sprintf("%s_version", fa.attributeId)
 
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-				-- files
-				CREATE TABLE instance_file."%s" (
-					id uuid NOT NULL,
-				    CONSTRAINT "%s_pkey" PRIMARY KEY (id)
-				);
-				
-				-- file record assignments
 				CREATE TABLE instance_file."%s" (
 					file_id uuid NOT NULL,
 					record_id bigint NOT NULL,
@@ -222,7 +248,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					date_delete bigint,
 				    CONSTRAINT "%s_pkey" PRIMARY KEY (file_id,record_id),
 				    CONSTRAINT "%s_file_id_fkey" FOREIGN KEY (file_id)
-				        REFERENCES instance_file."%s" (id) MATCH SIMPLE
+				        REFERENCES instance.file (id) MATCH SIMPLE
 				        ON UPDATE CASCADE
 				        ON DELETE CASCADE
 				        DEFERRABLE INITIALLY DEFERRED,
@@ -241,78 +267,42 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				
 				CREATE INDEX "fki_%s_record_id_fkey"
 					ON instance_file."%s" USING btree (record_id ASC NULLS LAST);
-				
-				-- file versions
-				CREATE TABLE instance_file."%s" (
-					file_id uuid NOT NULL,
-					version int NOT NULL,
-					login_id integer,
-					hash char(64),
-					size_kb int NOT NULL,
-					date_change bigint NOT NULL,
-				    CONSTRAINT "%s_pkey" PRIMARY KEY (file_id, version),
-				    CONSTRAINT "%s_file_id_fkey" FOREIGN KEY (file_id)
-				        REFERENCES instance_file."%s" (id) MATCH SIMPLE
-				        ON UPDATE CASCADE
-				        ON DELETE CASCADE
-				        DEFERRABLE INITIALLY DEFERRED,
-				    CONSTRAINT "%s_login_id_fkey" FOREIGN KEY (login_id)
-				        REFERENCES instance.login (id) MATCH SIMPLE
-				        ON UPDATE SET NULL
-				        ON DELETE SET NULL
-				        DEFERRABLE INITIALLY DEFERRED
-				);
-				
-				CREATE INDEX "fki_%s_login_id_fkey"
-					ON instance_file."%s" USING btree (login_id ASC NULLS LAST);
-				
-				CREATE INDEX "ind_%s_version"
-					ON instance_file."%s" USING btree (version ASC NULLS LAST);
-				
-				CREATE INDEX "fki_%s_file_id_fkey"
-					ON instance_file."%s" USING btree (file_id ASC NULLS LAST);
-			`,
-				// files
-				tNameF, tNameF,
-				// file records
-				tNameR, tNameR, tNameR, tNameF, tNameR, fa.moduleName, fa.relationName,
-				schema.PkName, tNameR, tNameR, tNameR, tNameR, tNameR, tNameR,
-				// file versions
-				tNameV, tNameV, tNameV, tNameF, tNameV, tNameV,
-				tNameV, tNameV, tNameV, tNameV, tNameV)); err != nil {
+			`, tNameR, tNameR, tNameR, tNameR, fa.moduleName, fa.relationName,
+				schema.PkName, tNameR, tNameR, tNameR, tNameR, tNameR, tNameR)); err != nil {
 
 				return "", err
 			}
 
 			// insert files from JSON attribute values
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-				INSERT INTO instance_file."%s" (id)
-				SELECT j.id
-				FROM "%s"."%s" AS r
-				CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
-					AS j(id UUID, name TEXT, size INT)
-				WHERE r."%s" IS NOT NULL
-			`, tNameF, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
+				INSERT INTO instance.file (id)
+					SELECT j.id
+					FROM "%s"."%s" AS r
+					CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
+						AS j(id UUID, name TEXT, size INT)
+					WHERE r."%s" IS NOT NULL
+				ON CONFLICT id DO NOTHING
+			`, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
+				return "", err
+			}
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				INSERT INTO instance.file_version (file_id, version, size_kb, date_change)
+					SELECT j.id, 0, j.size, EXTRACT(EPOCH FROM NOW())
+					FROM "%s"."%s" AS r
+					CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
+						AS j(id UUID, name TEXT, size INT)
+					WHERE r."%s" IS NOT NULL
+			`, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
 				return "", err
 			}
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 				INSERT INTO instance_file."%s" (record_id, file_id, name)
-				SELECT r.id, j.id, j.name
-				FROM "%s"."%s" AS r
-				CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
-					AS j(id UUID, name TEXT, size INT)
-				WHERE r."%s" IS NOT NULL
+					SELECT r.id, j.id, j.name
+					FROM "%s"."%s" AS r
+					CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
+						AS j(id UUID, name TEXT, size INT)
+					WHERE r."%s" IS NOT NULL
 			`, tNameR, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
-				return "", err
-			}
-			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-				INSERT INTO instance_file."%s" (file_id, version, size_kb, date_change)
-				SELECT j.id, 0, j.size, EXTRACT(EPOCH FROM NOW())
-				FROM "%s"."%s" AS r
-				CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
-					AS j(id UUID, name TEXT, size INT)
-				WHERE r."%s" IS NOT NULL
-			`, tNameV, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
 				return "", err
 			}
 
@@ -326,16 +316,18 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			// rename files on disk to new versioning
 			fileIds := make([]uuid.UUID, 0)
 			if err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
-				SELECT ARRAY_AGG(id)
+				SELECT ARRAY_AGG(file_id)
 				FROM instance_file."%s"
-			`, tNameF)).Scan(&fileIds); err != nil {
+			`, tNameR)).Scan(&fileIds); err != nil {
 				return "", err
 			}
 
 			for _, fileId := range fileIds {
 				if err := os.Rename(
-					filepath.Join(config.File.Paths.Files, fa.attributeId.String(), fileId.String()),
-					filepath.Join(config.File.Paths.Files, fa.attributeId.String(), fmt.Sprintf("%s_0", fileId))); err != nil {
+					filepath.Join(config.File.Paths.Files,
+						fa.attributeId.String(), fileId.String()),
+					filepath.Join(config.File.Paths.Files,
+						fa.attributeId.String(), fmt.Sprintf("%s_0", fileId))); err != nil {
 
 					log.Warning("server", fmt.Sprintf("failed to rename file '%s/%s' during platform upgrade",
 						fa.attributeId, fileId), err)

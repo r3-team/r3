@@ -147,13 +147,12 @@ func do(m types.Mail) error {
 		rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
 			SELECT r.file_id, r.name, (
 				SELECT MAX(v.version)
-				FROM  instance_file."%s" AS v
+				FROM  instance.file_version AS v
 				WHERE v.file_id = r.file_Id
 			)
 			FROM instance_file."%s" AS r
 			WHERE r.record_id = $1
-		`, schema.GetFilesTableNameVersions(atr.Id),
-			schema.GetFilesTableNameRecords(atr.Id)),
+		`, schema.GetFilesTableName(atr.Id)),
 			m.RecordId.Int)
 
 		if err != nil {

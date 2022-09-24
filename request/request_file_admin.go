@@ -41,7 +41,7 @@ func FileGet() (interface{}, error) {
 		rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
 			SELECT file_id, name, date_delete, record_id, (
 				SELECT v.size_kb
-				FROM instance_file."%s" AS v
+				FROM instance.file_version" AS v
 				WHERE v.file_id = r.file_id
 				ORDER BY v.version DESC
 				LIMIT 1
@@ -49,7 +49,7 @@ func FileGet() (interface{}, error) {
 			FROM instance_file."%s" AS r
 			WHERE date_delete IS NOT NULL
 			ORDER BY date_delete ASC NULLS LAST, name ASC
-		`, schema.GetFilesTableNameVersions(atrId), schema.GetFilesTableNameRecords(atrId)))
+		`, schema.GetFilesTableName(atrId)))
 		if err != nil {
 			return nil, err
 		}
@@ -86,6 +86,6 @@ func FileRestore(reqJson json.RawMessage) (interface{}, error) {
 		SET date_delete = NULL
 		WHERE file_id   = $1
 		AND   record_id = $2
-	`, schema.GetFilesTableNameRecords(req.AttributeId)), req.FileId, req.RecordId)
+	`, schema.GetFilesTableName(req.AttributeId)), req.FileId, req.RecordId)
 	return nil, err
 }

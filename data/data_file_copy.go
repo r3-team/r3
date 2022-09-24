@@ -23,24 +23,19 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 		return files, err
 	}
 
-	srcRelRecord := schema.GetFilesTableNameRecords(srcAttributeId)
-	srcRelVersion := schema.GetFilesTableNameVersions(srcAttributeId)
-	dstRelFile := schema.GetFilesTableName(dstAttributeId)
-	dstRelVersion := schema.GetFilesTableNameVersions(dstAttributeId)
-
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
 		SELECT v.file_id, r.name, v.version, v.hash, v.size_kb, v.date_change
-		FROM instance_file."%s" AS v
-		JOIN instance_file."%s" AS r
+		FROM instance.file_version AS v
+		JOIN instance_file."%s"    AS r
 			ON  r.file_id   = v.file_id
 			AND r.record_id = $1
 		WHERE v.file_id = ANY($2)
 		AND   v.version = (
 			SELECT MAX(s.version)
-			FROM instance_file."%s" AS s
+			FROM instance.file_version AS s
 			WHERE s.file_id = v.file_id
 		)
-	`, srcRelVersion, srcRelRecord, srcRelVersion), srcRecordId, srcFileIds)
+	`, schema.GetFilesTableName(srcAttributeId)), srcRecordId, srcFileIds)
 	if err != nil {
 		return files, err
 	}
@@ -87,17 +82,17 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 			return files, err
 		}
 
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-			INSERT INTO instance_file."%s" (id) VALUES ($1)
-		`, dstRelFile), idNew); err != nil {
+		if _, err := tx.Exec(db.Ctx, `
+			INSERT INTO instance.file (id) VALUES ($1)
+		`, idNew); err != nil {
 			tx.Rollback(db.Ctx)
 			return files, err
 		}
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-			INSERT INTO instance_file."%s" (
+		if _, err := tx.Exec(db.Ctx, `
+			INSERT INTO instance.file_version (
 				file_id, version, login_id, hash, size_kb, date_change)
 			VALUES ($1,$2,$3,$4,$5,$6)
-		`, dstRelVersion), idNew, 0, loginId, f.Hash, f.Size, f.Changed); err != nil {
+		`, idNew, 0, loginId, f.Hash, f.Size, f.Changed); err != nil {
 			tx.Rollback(db.Ctx)
 			return files, err
 		}

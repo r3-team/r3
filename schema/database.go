@@ -26,11 +26,5 @@ func GetEncKeyTableName(relationId uuid.UUID) string {
 	return fmt.Sprintf("keys_%s", relationId.String())
 }
 func GetFilesTableName(attributeId uuid.UUID) string {
-	return fmt.Sprintf("%s_file", attributeId.String())
-}
-func GetFilesTableNameRecords(attributeId uuid.UUID) string {
 	return fmt.Sprintf("%s_record", attributeId.String())
-}
-func GetFilesTableNameVersions(attributeId uuid.UUID) string {
-	return fmt.Sprintf("%s_version", attributeId.String())
 }

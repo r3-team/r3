@@ -12,22 +12,9 @@ import (
 func fileRelationsCreate_tx(tx pgx.Tx, attributeId uuid.UUID,
 	moduleName string, relationName string) error {
 
-	tNameF := schema.GetFilesTableName(attributeId)
-	tNameR := schema.GetFilesTableNameRecords(attributeId)
-	tNameV := schema.GetFilesTableNameVersions(attributeId)
+	tNameR := schema.GetFilesTableName(attributeId)
 
-	// files
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-		CREATE TABLE instance_file."%s" (
-			id uuid NOT NULL,
-		    CONSTRAINT "%s_pkey" PRIMARY KEY (id)
-		);
-	`, tNameF, tNameF)); err != nil {
-		return err
-	}
-
-	// file record assignments
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		CREATE TABLE instance_file."%s" (
 			file_id uuid NOT NULL,
 			record_id bigint NOT NULL,
@@ -35,7 +22,7 @@ func fileRelationsCreate_tx(tx pgx.Tx, attributeId uuid.UUID,
 			date_delete bigint,
 		    CONSTRAINT "%s_pkey" PRIMARY KEY (file_id,record_id),
 		    CONSTRAINT "%s_file_id_fkey" FOREIGN KEY (file_id)
-		        REFERENCES instance_file."%s" (id) MATCH SIMPLE
+		        REFERENCES instance.file (id) MATCH SIMPLE
 		        ON UPDATE CASCADE
 		        ON DELETE CASCADE
 		        DEFERRABLE INITIALLY DEFERRED,
@@ -54,56 +41,15 @@ func fileRelationsCreate_tx(tx pgx.Tx, attributeId uuid.UUID,
 		
 		CREATE INDEX "ind_%s_date_delete"
 			ON instance_file."%s" USING btree (date_delete ASC NULLS LAST);
-	`, tNameR, tNameR, tNameR, tNameF, tNameR, moduleName, relationName,
-		schema.PkName, tNameR, tNameR, tNameR, tNameR, tNameR, tNameR)); err != nil {
-
-		return err
-	}
-
-	// file versions
-	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-		CREATE TABLE instance_file."%s" (
-			file_id uuid NOT NULL,
-			version int NOT NULL,
-			login_id integer,
-			hash char(64),
-			size_kb int NOT NULL,
-			date_change bigint NOT NULL,
-		    CONSTRAINT "%s_pkey" PRIMARY KEY (file_id, version),
-		    CONSTRAINT "%s_file_id_fkey" FOREIGN KEY (file_id)
-		        REFERENCES instance_file."%s" (id) MATCH SIMPLE
-		        ON UPDATE CASCADE
-		        ON DELETE CASCADE
-		        DEFERRABLE INITIALLY DEFERRED,
-		    CONSTRAINT "%s_login_id_fkey" FOREIGN KEY (login_id)
-		        REFERENCES instance.login (id) MATCH SIMPLE
-		        ON UPDATE SET NULL
-		        ON DELETE SET NULL
-		        DEFERRABLE INITIALLY DEFERRED
-		);
-		
-		CREATE INDEX "fki_%s_file_id_fkey"
-			ON instance_file."%s" USING btree (file_id ASC NULLS LAST);
-		
-		CREATE INDEX "fki_%s_login_id_fkey"
-			ON instance_file."%s" USING btree (login_id ASC NULLS LAST);
-		
-		CREATE INDEX "ind_%s_version"
-			ON instance_file."%s" USING btree (version ASC NULLS LAST);
-	`, tNameV, tNameV, tNameV, tNameF, tNameV,
-		tNameV, tNameV, tNameV, tNameV, tNameV, tNameV))
+	`, tNameR, tNameR, tNameR, tNameR, moduleName, relationName, schema.PkName,
+		tNameR, tNameR, tNameR, tNameR, tNameR, tNameR))
 
 	return err
 }
 
 func FileRelationsDelete_tx(tx pgx.Tx, attributeId uuid.UUID) error {
 	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-		DROP TABLE instance_file."%s";
-		DROP TABLE instance_file."%s";
-		DROP TABLE instance_file."%s";
-	`, schema.GetFilesTableNameVersions(attributeId),
-		schema.GetFilesTableNameRecords(attributeId),
-		schema.GetFilesTableName(attributeId)))
-
+		DROP TABLE instance_file."%s"
+	`, schema.GetFilesTableName(attributeId)))
 	return err
 }
