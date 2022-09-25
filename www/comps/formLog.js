@@ -101,7 +101,7 @@ let MyFormLog = {
 												<!-- specific file version -->
 												<a target="_blank"
 													v-else
-													:href="getAttributeFileVersionHref(indexAttributeIdMapField[ia].attributeId,fileId,c.name,token,c.version)"
+													:href="getAttributeFileVersionHref(indexAttributeIdMapField[ia].attributeId,fileId,c.name,c.version,token)"
 												>
 													<my-button image="download.png"
 														:caption="c.name + ' (v' + c.version + ')'"

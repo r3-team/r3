@@ -52,7 +52,7 @@ let MyValueRich = {
 		<a target="_blank"
 			v-if="isFiles && !isGallery"
 			v-for="f in files"
-			:href="getAttributeFileVersionHref(attributeId,f.id,f.name,token,f.version)"
+			:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
 			:key="f.id"
 		>
 			<my-button image="download.png"
@@ -66,7 +66,7 @@ let MyValueRich = {
 		<template v-if="isGallery">
 			<img class="gallery-item"
 				v-for="f in files"
-				:src="getAttributeFileThumbHref(attributeId,f.id,f.name,token)"
+				:src="getAttributeFileThumbHref(attributeId,f.id,f.name,f.version,token)"
 				:style="styleGallery"
 			/>
 			

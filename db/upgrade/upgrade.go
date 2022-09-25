@@ -199,8 +199,72 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX "fki_file_version_file_id_fkey"
 				ON instance.file_version USING btree (file_id ASC NULLS LAST);
 			
-			-- new schema
+			-- new schema, type and functions
 			CREATE SCHEMA instance_file;
+			
+			CREATE TYPE instance.file_meta AS (
+				id UUID,
+				login_id_creator INTEGER,
+				hash TEXT,
+				name TEXT,
+				size_kb INTEGER,
+				version INTEGER,
+				date_change BIGINT,
+				date_delete BIGINT
+			);
+			
+			CREATE FUNCTION instance.files_get(attribute_id UUID,record_id BIGINT,include_deleted BOOLEAN DEFAULT false)
+				RETURNS instance.file_meta[]
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+					file  instance.file_meta;
+					files instance.file_meta[];
+					rec   RECORD;
+				BEGIN
+					FOR rec IN
+						EXECUTE FORMAT('
+							SELECT r.file_id, r.name, v.login_id, v.hash, v.version, v.size_kb, v.date_change, r.date_delete
+							FROM instance_file.%I AS r
+							JOIN instance.file_version AS v
+								ON  v.file_id = r.file_id
+								AND v.version = (
+									SELECT MAX(s.version)
+									FROM instance.file_version AS s
+									WHERE s.file_id = r.file_id
+								)
+							WHERE r.record_id = $1
+							AND ($2 OR r.date_delete IS NULL)
+						', CONCAT(attribute_id::TEXT,'_record')) USING record_id, include_deleted
+					LOOP
+						file.id               := rec.file_id;
+						file.login_id_creator := rec.login_id;
+						file.hash             := rec.hash;
+						file.name             := rec.name;
+						file.size_kb          := rec.size_kb;
+						file.version          := rec.version;
+						file.date_change      := rec.date_change;
+						file.date_delete      := rec.date_delete;
+						
+						files := ARRAY_APPEND(files,file);
+					END LOOP;
+					
+					RETURN files;
+				END;
+			$BODY$;
+			
+			CREATE FUNCTION instance.file_link(file_id UUID,file_name TEXT,attribute_id UUID,record_id BIGINT)
+				RETURNS VOID
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					EXECUTE FORMAT(
+						'INSERT INTO instance_file.%I (record_id, file_id, name) VALUES ($1, $2, $3)',
+						CONCAT(attribute_id::TEXT, '_record')
+					) USING record_id, file_id, file_name;
+				END;
+			$BODY$;
 		`); err != nil {
 			return "", err
 		}
@@ -317,7 +381,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			// rename files on disk to new versioning
 			fileIds := make([]uuid.UUID, 0)
 			if err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
-				SELECT ARRAY_AGG(file_id)
+				SELECT ARRAY_AGG(DISTINCT file_id)
 				FROM instance_file."%s"
 			`, tNameR)).Scan(&fileIds); err != nil {
 				return "", err

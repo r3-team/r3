@@ -231,7 +231,7 @@ let MyInputFiles = {
 						<td>
 							<div class="row">
 								<a target="_blank"
-									:href="getAttributeFileVersionHref(attributeId,f.id,f.name,token,f.version)"
+									:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
 								>
 									<my-button image="download.png"
 										:captionTitle="capApp.button.downloadHint"
@@ -253,10 +253,10 @@ let MyInputFiles = {
 			<div class="listComfort" v-if="viewListComfort">
 				<div class="item" v-for="f in filesProcessed">
 					<a target="_blank"
-						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,token,f.version)"
+						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
 						:title="capApp.button.downloadHint"
 					>
-						<img class="prev" :src="imagePreview(f.id,f.name)" />
+						<img class="prev" :src="imagePreview(f.id,f.name,f.version)" />
 					</a>
 					<div class="item-content">
 						<my-input-files-name
@@ -290,10 +290,10 @@ let MyInputFiles = {
 			<div class="gallery" v-if="viewGallery" >
 				<div class="item" v-for="f in filesProcessed">
 					<a target="_blank"
-						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,token,f.version)"
+						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
 						:title="capApp.button.downloadHint"
 					>
-						<img class="prev" :src="imagePreview(f.id,f.name)">
+						<img class="prev" :src="imagePreview(f.id,f.name,f.version)">
 					</a>
 					<div class="item-meta">
 						<my-input-files-name
@@ -468,11 +468,11 @@ let MyInputFiles = {
 			
 			return this.sortDirAsc ? ' \u25B2' : ' \u25BC';
 		},
-		imagePreview(fileId,fileName) {
-			if(!this.extPreview.includes(this.extRegex.exec(fileName)[1]))
+		imagePreview(fileId,name,version) {
+			if(!this.extPreview.includes(this.extRegex.exec(name)[1]))
 				return 'images/noPic.png';
 			
-			return this.getAttributeFileThumbHref(this.attributeId,fileId,fileName,this.token);
+			return this.getAttributeFileThumbHref(this.attributeId,fileId,name,version,this.token);
 		},
 		setNoSpaceMode() {
 			this.noSpace = this.$refs.main.clientWidth <= 700;
