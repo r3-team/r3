@@ -1,5 +1,4 @@
 .filters{
-	width:100%;
 	max-width:850px;
 	min-width:500px;
 	display:flex;
@@ -11,8 +10,7 @@
 	justify-content:space-between;
 }
 .filter-actions.end{
-	justify-content:flex-end;
-	margin-top:9px;
+	margin-top:6px;
 }
 .filter{
 	display:flex;

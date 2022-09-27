@@ -64,6 +64,14 @@
 	box-shadow:inset 0 -2px 0 0 var(--color-accent3-alt);
 	transition:box-shadow 0.5s;
 }
+.list .layoutTable tfoot tr{
+	background-color:var(--color-bg);
+}
+.list .layoutTable tfoot tr.aggregation td{
+	font-weight:bold;
+	border-top:2px solid var(--color-border);
+	border-bottom:2px solid var(--color-border);
+}
 .list .layoutTable th{
 	padding:6px 2px 6px 10px;
 	margin-bottom:-1px;
@@ -97,6 +105,9 @@
 	max-width:360px;
 	right:4px;
 	left:unset;
+}
+.list .layoutTable th .columnFilterWrap.firstInRow{
+	left:0px;
 }
 .list .layoutTable th .columnFilter{
 	padding:6px;
@@ -288,14 +299,17 @@
 }
 
 
-/* list header functions (CSV, filters) */
+/* list header functions (CSV, filters, aggregations) */
+.list-headers{
+	display:flex;
+	flex-flow:column nowrap;
+	background-color:var(--color-bg);
+}
 .list-header{
 	display:flex;
 	flex-flow:column nowrap;
-	align-items:flex-start;
 	padding:12px 16px 20px 16px;
 	border-bottom:1px solid #d2d2d2;
-	background-color:var(--color-bg);
 }
 .list-header span.message{
 	margin:0px 0px 12px 0px;
@@ -307,6 +321,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
+	margin-bottom:12px;
 }
 .list-header-title span{
 	font-size:120%;
@@ -327,6 +342,11 @@
 .list-auto-renew-line>*{
 	margin:0px 9px 0px 0px;
 }
+
+/* CSV */
+.list-csv{
+	align-items:flex-start;
+}
 .list-csv-line{
 	min-width:400px;
 	display:flex;
@@ -341,6 +361,24 @@
 .list-csv-line input,
 .list-csv-line select{
 	min-width:250px !important;
+}
+
+/* aggregators */
+.list-aggregator{
+	max-width:850px;
+	min-width:500px;
+	gap:6px;
+}
+.list-aggregator-item{
+	display:flex;
+	flex-flow:row nowrap;
+	gap:6px;
+}
+.list-aggregator-actions{
+	display:flex;
+	flex-flow:row nowrap;
+	margin-top:6px;
+	justify-content:space-between;
 }
 
 

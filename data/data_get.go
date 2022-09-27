@@ -409,7 +409,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 
 	// add expressions for relation tupel IDs after attributes (on main query)
 	if nestingLevel == 0 {
-		for index, relId := range indexRelationIds {
+		for index, _ := range indexRelationIds {
 
 			// if an aggregation function is used on any index, we cannot deliver record IDs
 			// unless a record aggregation functions is used on this specific relation index
@@ -418,9 +418,6 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 				continue
 			}
 
-			if _, exists := cache.RelationIdMap[relId]; !exists {
-				return "", "", errors.New("relation does not exist")
-			}
 			inSelect = append(inSelect, fmt.Sprintf(`"%s"."%s" AS %s`,
 				getRelationCode(index, nestingLevel),
 				schema.PkName,

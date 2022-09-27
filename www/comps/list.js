@@ -6,10 +6,13 @@ import MyListColumnBatch  from './listColumnBatch.js';
 import MyListCsv          from './listCsv.js';
 import MyValueRich        from './valueRich.js';
 import {consoleError}     from './shared/error.js';
-import {getColumnTitle}   from './shared/column.js';
 import {srcBase64}        from './shared/image.js';
 import {getCaption}       from './shared/language.js';
 import {isAttributeFiles} from './shared/attribute.js';
+import {
+	getColumnTitle,
+	getFirstColumnUsableAsAggregator
+} from './shared/column.js';
 import {
 	fieldOptionGet,
 	fieldOptionSet
@@ -18,6 +21,10 @@ import {
 	getChoiceFilters,
 	getRowsDecrypted
 } from './shared/form.js';
+import {
+	MyListAggregateInput,
+	MyListAggregateOutput
+} from './listAggregate.js';
 import {
 	fillRelationRecordIds,
 	getFiltersEncapsulated,
@@ -37,6 +44,8 @@ let MyList = {
 		MyFilters,
 		MyInputCollection,
 		MyInputOffset,
+		MyListAggregateInput,
+		MyListAggregateOutput,
 		MyListColumnBatch,
 		MyListCsv,
 		MyValueRich
@@ -255,6 +264,15 @@ let MyList = {
 						:tight="true"
 					/>
 					
+					<my-button image="sum.png"
+						v-if="hasAggregatorColumns"
+						@trigger="showAggregators = !showAggregators"
+						:caption="aggregators.length === 0 ? '' : String(aggregators.length)"
+						:captionTitle="capApp.button.aggregatorsHint"
+						:naked="true"
+						:tight="true"
+					/>
+					
 					<my-button image="filterCog.png"
 						v-if="showFiltersAction"
 						@trigger="toggleUserFilters"
@@ -301,7 +319,7 @@ let MyList = {
 				</div>
 			</div>
 			
-			<div v-if="showCsv || showFilters || showAutoRenew">
+			<div class="list-headers" v-if="showAggregators || showCsv || showFilters || showAutoRenew">
 				<!-- list header functions -->
 				
 				<!-- auto renew -->
@@ -324,17 +342,18 @@ let MyList = {
 					</div>
 				</div>
 				
+				<!-- filters -->
 				<div class="list-header" v-if="showFilters">
 					<my-filters class="default-inputs"
 						v-model="filtersUser"
 						@apply="reloadInside('filtersUser')"
+						@close="showFilters = false"
 						@reset="reloadInside('filtersUser')"
-						:addOnStart="true"
 						:columns="columns"
 						:disableContent="['fieldChanged','subQuery']"
 						:joins="joins"
-						:showApply="true"
 						:showReset="true"
+						:userFilter="true"
 					>
 						<template #title>
 							<div class="list-header-title">
@@ -345,19 +364,30 @@ let MyList = {
 					</my-filters>
 				</div>
 				
-				<div class="list-header" v-if="showCsv">
-					<my-list-csv
-						@reload="get"
-						:columns="columns"
-						:expressions="expressions"
-						:filters="filters.concat(filtersParsedQuick).concat(filtersParsedUser)"
-						:isExport="csvExport"
-						:isImport="csvImport"
-						:joins="getRelationsJoined(joins)"
-						:orders="orders"
-						:query="query"
-					/>
-				</div>
+				<!-- aggregators -->
+				<my-list-aggregate-input
+					v-if="showAggregators"
+					@close="showAggregators = false"
+					@set="setAggregators($event)"
+					:aggregators="aggregators"
+					:columnBatches="columnBatches"
+					:columns="columns"
+					:value="aggregators"
+				/>
+				
+				<!-- CSV -->
+				<my-list-csv
+					v-if="showCsv"
+					@reload="get"
+					:columns="columns"
+					:expressions="expressions"
+					:filters="filters.concat(filtersParsedQuick).concat(filtersParsedUser)"
+					:isExport="csvExport"
+					:isImport="csvImport"
+					:joins="relationsJoined"
+					:orders="orders"
+					:query="query"
+				/>
 			</div>
 			
 			<!-- list results as table -->
@@ -388,7 +418,8 @@ let MyList = {
 									:columns="columns"
 									:filters="filters"
 									:filtersColumn="filtersColumn"
-									:joins="joins"
+									:firstInRow="i === 0"
+									:joins="relationsJoined"
 									:relationId="query.relationId"
 									:show="columnBatchIndexFilter === i"
 									:rowCount="count"
@@ -492,6 +523,18 @@ let MyList = {
 							</td>
 						</tr>
 					</tbody>
+					<tfoot>
+						<!-- result aggregations -->
+						<my-list-aggregate-output ref="aggregations"
+							:aggregators="aggregators"
+							:columnBatches="columnBatches"
+							:columns="columns"
+							:filters="filtersCombined"
+							:leaveOneEmpty="hasBulkActions"
+							:joins="relationsJoined"
+							:relationId="query.relationId"
+						/>
+					</tfoot>
 				</table>
 			</div>
 			
@@ -650,6 +693,7 @@ let MyList = {
 			orderOverwritten:false,     // sort options were changed by user
 			rowsFetching:false,         // row values are being fetched
 			selectedRows:[],            // bulk selected rows by row index
+			showAggregators:false,      // show UI for aggregators
 			showAutoRenew:false,        // show UI for auto list renew
 			showCsv:false,              // show UI for CSV import/export
 			showFilters:false,          // show UI for user filters
@@ -660,6 +704,7 @@ let MyList = {
 			orderByColumnBatchIndex:-1,
 			
 			// list data
+			aggregators:[],   // current user aggregators
 			count:0,          // total result set count
 			limit:0,          // current result limit
 			offset:0,         // current result offset
@@ -746,6 +791,27 @@ let MyList = {
 				this.choices.length === 0 ? null : this.choices[0].id
 			);
 		},
+		filtersCombined:function() {
+			let filters = this.filters
+				.concat(this.filtersParsedColumn)
+				.concat(this.filtersParsedQuick)
+				.concat(this.filtersParsedUser)
+				.concat(this.choiceFilters);
+			
+			if(this.anyInputRows)
+				filters.push(this.getQueryAttributesPkFilter(
+					this.query.relationId,this.inputRecordIds,0,true
+				));
+			
+			return filters;
+		},
+		hasAggregatorColumns:function() {
+			for(let i = 0, j = this.columnBatches.length; i < j; i++) {
+				if(this.getFirstColumnUsableAsAggregator(this.columnBatches[i],this.columns) !== null)
+					return true;
+			}
+			return false;
+		},
 		hasBulkActions:function() {
 			if(this.isInput || this.rows.length === 0)
 				return false;
@@ -759,6 +825,10 @@ let MyList = {
 		hasChoices:function() {
 			return this.query.choices.length > 1;
 		},
+		hasCreate:function() {
+			if(this.joins.length === 0) return false;
+			return this.joins[0].applyCreate && this.rowSelect;
+		},
 		hasGalleryIcon:function() {
 			return this.columns.length !== 0 &&
 				this.columns[0].display === 'gallery' &&
@@ -766,10 +836,6 @@ let MyList = {
 				(!this.isInput || this.rowsInput.length !== 0) &&
 				this.attributeIdMap[this.columns[0].attributeId].content === 'files'
 			;
-		},
-		hasCreate:function() {
-			if(this.joins.length === 0) return false;
-			return this.joins[0].applyCreate && this.rowSelect;
 		},
 		hasUpdate:function() {
 			if(this.joins.length === 0) return false;
@@ -866,11 +932,12 @@ let MyList = {
 		},
 		
 		// simple
-		anyInputRows: function() { return this.inputRecordIds.length !== 0; },
-		autoSelect:   function() { return this.inputIsNew && this.inputAutoSelect !== 0 && !this.inputAutoSelectDone; },
-		choiceFilters:function() { return this.getChoiceFilters(this.choices,this.choiceId); },
-		expressions:  function() { return this.getQueryExpressions(this.columns); },
-		joins:        function() { return this.fillRelationRecordIds(this.query.joins); },
+		anyInputRows:   function() { return this.inputRecordIds.length !== 0; },
+		autoSelect:     function() { return this.inputIsNew && this.inputAutoSelect !== 0 && !this.inputAutoSelectDone; },
+		choiceFilters:  function() { return this.getChoiceFilters(this.choices,this.choiceId); },
+		expressions:    function() { return this.getQueryExpressions(this.columns); },
+		joins:          function() { return this.fillRelationRecordIds(this.query.joins); },
+		relationsJoined:function() { return this.getRelationsJoined(this.joins); },
 		
 		// stores
 		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
@@ -942,6 +1009,9 @@ let MyList = {
 			this.autoRenewInput = this.fieldOptionGet(this.fieldId,'autoRenew',this.autoRenew);
 			this.setAutoRenewTimer(false);
 		}
+		
+		// set initial aggregators
+		this.aggregators = this.fieldOptionGet(this.fieldId,'aggregators',[]);
 	},
 	beforeUnmount:function() {
 		this.setAutoRenewTimer(true);
@@ -960,6 +1030,7 @@ let MyList = {
 		getChoiceFilters,
 		getColumnTitle,
 		getFiltersEncapsulated,
+		getFirstColumnUsableAsAggregator,
 		getQueryAttributesPkFilter,
 		getQueryExpressions,
 		getRelationsJoined,
@@ -1160,11 +1231,6 @@ let MyList = {
 		},
 		toggleUserFilters:function() {
 			this.showFilters = !this.showFilters;
-			
-			if(!this.showFilters) {
-				this.filtersUser = [];
-				this.reloadInside('filtersUser');
-			}
 		},
 		toggleRecordId:function(id,middleClick) {
 			if(this.inputRecordIds.includes(id))
@@ -1312,6 +1378,11 @@ let MyList = {
 			// store timer option for field
 			this.fieldOptionSet(this.fieldId,'autoRenew',this.autoRenewInput);
 		},
+		setAggregators:function(v) {
+			this.aggregators = v;
+			this.fieldOptionSet(this.fieldId,'aggregators',v);
+			this.$refs.aggregations.get();
+		},
 		toggleOrderBy:function() {
 			this.orders[0].ascending = !this.orders[0].ascending;
 			this.reloadInside('order');
@@ -1434,23 +1505,11 @@ let MyList = {
 			if(this.offset !== 0 && this.offset % this.limit !== 0)
 				this.offset -= this.offset % this.limit;
 			
-			// build live filters from user inputs + input records (if set)
-			let filters = this.filters
-				.concat(this.filtersParsedColumn)
-				.concat(this.filtersParsedQuick)
-				.concat(this.filtersParsedUser)
-				.concat(this.choiceFilters);
-			
-			if(this.anyInputRows)
-				filters.push(this.getQueryAttributesPkFilter(
-					this.query.relationId,this.inputRecordIds,0,true
-				));
-			
 			ws.send('data','get',{
 				relationId:this.query.relationId,
-				joins:this.getRelationsJoined(this.joins),
+				joins:this.relationsJoined,
 				expressions:this.expressions,
-				filters:filters,
+				filters:this.filtersCombined,
 				orders:this.orders,
 				limit:this.limit,
 				offset:this.offset
@@ -1465,6 +1524,9 @@ let MyList = {
 							this.rows         = rows;
 							this.rowsFetching = false;
 							this.selectReset();
+							
+							// update aggregations as well
+							this.$refs.aggregations.get();
 							
 							if(this.isInput)
 								this.$nextTick(this.updateDropdownDirection);
@@ -1502,7 +1564,7 @@ let MyList = {
 			
 			ws.send('data','get',{
 				relationId:this.query.relationId,
-				joins:this.getRelationsJoined(this.joins),
+				joins:this.relationsJoined,
 				expressions:this.expressions,
 				filters:filters,
 				orders:this.orders

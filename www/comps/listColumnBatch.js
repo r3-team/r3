@@ -1,5 +1,4 @@
-import {isAttributeFiles}   from './shared/attribute.js';
-import {getRelationsJoined} from './shared/query.js';
+import {isAttributeFiles} from './shared/attribute.js';
 import {
 	getUnixFormat,
 	getUtcTimeStringFromUnix
@@ -16,7 +15,7 @@ let MyListColumnBatch = {
 		><span>{{ caption }}</span></div>
 		
 		<my-button
-			v-if="isValidFilter && (rowCount > 5 || active)"
+			v-if="isValidFilter && (rowCount > 5 || active || filtersColumn.length !== 0)"
 			@trigger="$emit(show ? 'close' : 'open')"
 			:blockBubble="true"
 			:caption="active && isArrayInput ? String(input.length) : ''"
@@ -26,7 +25,11 @@ let MyListColumnBatch = {
 		/>
 		
 		<!-- column filter dropdown -->
-		<div class="input-dropdown-wrap columnFilterWrap" v-if="show" v-click-outside="escaped">
+		<div class="input-dropdown-wrap columnFilterWrap"
+			v-if="show"
+			v-click-outside="escaped"
+			:class="{ firstInRow:firstInRow }"
+		>
 			<div class="input-dropdown default-inputs columnFilter">
 				
 				<!-- text filter -->
@@ -88,6 +91,7 @@ let MyListColumnBatch = {
 		columns:      { type:Array,   required:true }, // list columns
 		filters:      { type:Array,   required:true }, // list filters
 		filtersColumn:{ type:Array,   required:true }, // list filters from column filters
+		firstInRow:   { type:Boolean, required:true },
 		joins:        { type:Array,   required:true }, // list joins
 		relationId:   { type:String,  required:true }, // list query base relation ID
 		rowCount:     { type:Number,  required:true }, // list row count
@@ -135,7 +139,6 @@ let MyListColumnBatch = {
 	},
 	methods:{
 		// externals
-		getRelationsJoined,
 		getUnixFormat,
 		getUtcTimeStringFromUnix,
 		isAttributeFiles,
@@ -189,7 +192,7 @@ let MyListColumnBatch = {
 			
 			ws.send('data','get',{
 				relationId:this.relationId,
-				joins:this.getRelationsJoined(this.joins),
+				joins:this.joins,
 				expressions:[{
 					attributeId:this.columnUsed.attributeId,
 					index:this.columnUsed.index,

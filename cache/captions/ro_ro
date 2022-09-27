@@ -1277,6 +1277,7 @@
 	},
 	"list":{
 		"button":{
+			"aggregatorsHint":"Aggregate results",
 			"all":"Toate",
 			"allHint":"Selectați toate rezultatele",
 			"autoRenew":"{VALUE}s",
@@ -1299,6 +1300,7 @@
 			"csvExport":"export",
 			"csvImport":"import"
 		},
+		"aggregators":"Aggregate results",
 		"autoRenew":"Înnoire automată",
 		"autoRenewInput":"Actualizează datele la fiecare X secunde",
 		"autoRenewInputHint":"min. 10s",

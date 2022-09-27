@@ -794,7 +794,7 @@ let MyFilters = {
 					:naked="true"
 				/>
 				<my-button image="add.png"
-					v-if="showAdd"
+					v-if="showAdd && !userFilter"
 					@trigger="add"
 					:caption="capApp.add"
 					:naked="true"
@@ -831,16 +831,36 @@ let MyFilters = {
 			:side1="f.side1"
 		/>
 		
-		<div class="filter-actions end" v-if="showApply && anyFilters && nestedIndexAttributeIds.length !== 0">
-			<my-button image="ok.png"
-				@trigger="apply"
-				:active="anyFilters && bracketsEqual"
-				:caption="capGen.button.apply"
-			/>
+		<div class="filter-actions end" v-if="userFilter && nestedIndexAttributeIds.length !== 0">
+			<div class="row">
+				<my-button image="ok.png"
+					@trigger="apply"
+					:active="anyFilters && bracketsEqual"
+					:caption="capGen.button.apply"
+				/>
+				<my-button image="add.png"
+					v-if="showAdd"
+					@trigger="add"
+					:caption="capApp.add"
+					:naked="false"
+				/>
+			</div>
+			<div class="row">
+				<my-button image="delete.png"
+					@trigger="filters = []"
+					:active="anyFilters"
+					:cancel="true"
+					:captionTitle="capGen.button.reset"
+				/>
+				<my-button image="cancel.png"
+					@trigger="$emit('close')"
+					:cancel="true"
+					:caption="capGen.button.close"
+				/>
+			</div>
 		</div>
 	</div>`,
 	props:{
-		addOnStart:    { type:Boolean, required:false, default:false },
 		builderMode:   { type:Boolean, required:false, default:false },
 		columns:       { type:Array,   required:false, default:() => [] },
 		disableContent:{ type:Array,   required:false, default:() => [] }, // content to disable (attribute, record, field, true, ...)
@@ -853,11 +873,11 @@ let MyFilters = {
 		modelValue:    { type:Array,   required:true },
 		moduleId:      { type:String,  required:false, default:'' },
 		showAdd:       { type:Boolean, required:false, default:true },
-		showApply:     { type:Boolean, required:false, default:false },
 		showMove:      { type:Boolean, required:false, default:false },
-		showReset:     { type:Boolean, required:false, default:false }
+		showReset:     { type:Boolean, required:false, default:false },
+		userFilter:    { type:Boolean, required:false, default:false }     // filter is for end users
 	},
-	emits:['apply','reset','update:modelValue'],
+	emits:['apply','close','reset','update:modelValue'],
 	watch:{
 		// ugly hack to trigger inside this component
 		filterAddCnt() {
@@ -868,10 +888,6 @@ let MyFilters = {
 		return {
 			expertMode:this.builderMode
 		};
-	},
-	mounted() {
-		if(this.addOnStart)
-			this.add();
 	},
 	computed:{
 		// inputs

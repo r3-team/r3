@@ -1277,6 +1277,7 @@
 	},
 	"list":{
 		"button":{
+			"aggregatorsHint":"Ergebnisse aggregieren",
 			"all":"Alle",
 			"allHint":"Alle Ergebnisse auswählen",
 			"autoRenew":"{VALUE}s",
@@ -1299,6 +1300,7 @@
 			"csvExport":"exportieren",
 			"csvImport":"importieren"
 		},
+		"aggregators":"Ergebnisse aggregieren",
 		"autoRenew":"Automatische Aktualisierung",
 		"autoRenewInput":"Alle X Sekunden Daten erneuern",
 		"autoRenewInputHint":"min. 10s",
