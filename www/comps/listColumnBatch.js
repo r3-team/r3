@@ -1,4 +1,5 @@
-import {isAttributeFiles} from './shared/attribute.js';
+import {isAttributeFiles}                 from './shared/attribute.js';
+import {getFirstColumnUsableAsAggregator} from './shared/column.js';
 import {
 	getUnixFormat,
 	getUtcTimeStringFromUnix
@@ -8,32 +9,80 @@ export {MyListColumnBatch as default};
 let MyListColumnBatch = {
 	name:'my-list-column-batch',
 	template:`<div class="columnBatch">
-		<div class="columBatchCaption"
-			@click.left="$emit('click-left')"
-			@click.right.prevent="$emit('click-right')"
-			:class="{ clickable:columnBatch.columnIndexSortBy !== -1 }"
-		><span>{{ caption }}</span></div>
+		<div class="columBatchCaption" @click.stop="click" :class="{ clickable:canOpen }">
+			<span v-if="show"><b>{{ caption }}</b></span>
+			<span v-else>{{ caption }}</span>
+		</div>
 		
 		<my-button
-			v-if="isValidFilter && (rowCount > 5 || active || filtersColumn.length !== 0)"
-			@trigger="$emit(show ? 'close' : 'open')"
+			v-if="isValidFilter && filterActive"
+			@trigger="click"
 			:blockBubble="true"
-			:caption="active && isArrayInput ? String(input.length) : ''"
-			:image="active ? 'filterFull.png' : 'filterTransp.png'"
+			:caption="filterActive && isArrayInput ? String(input.length) : ''"
+			:image="filterActive ? 'filter.png' : ''"
 			:naked="true"
 			:tight="true"
 		/>
 		
-		<!-- column filter dropdown -->
-		<div class="input-dropdown-wrap columnFilterWrap"
+		<!-- column options dropdown -->
+		<div class="input-dropdown-wrap columnOptionWrap"
 			v-if="show"
 			v-click-outside="escaped"
-			:class="{ firstInRow:firstInRow }"
+			:class="{ lastInRow:lastInRow }"
 		>
-			<div class="input-dropdown default-inputs columnFilter">
+			<div class="input-dropdown default-inputs columnOption">
 				
-				<!-- text filter -->
-				<div class="row gap" v-if="values.length >= 5 && !isDateOrTime">
+				<!-- sorting -->
+				<div class="columnOptionItem" v-if="columnBatch.columnIndexSortBy !== -1">
+					<my-button image="sort.png"
+						@trigger="$emit('del-order')"
+						:active="isOrdered"
+						:captionTitle="capApp.orderBy"
+						:naked="true"
+						:tight="true"
+					/>
+					<my-button caption="\u25B2"
+						@trigger="$emit('set-order',true)"
+						:image="isOrderedAsc ? 'radio1.png' : 'radio0.png'"
+						:naked="true"
+						:tight="true"
+					/>
+					<my-button caption="\u25BC"
+						@trigger="$emit('set-order',false)"
+						:image="isOrderedDesc ? 'radio1.png' : 'radio0.png'"
+						:naked="true"
+						:tight="true"
+					/>
+				</div>
+				
+				<!-- aggregation -->
+				<div class="columnOptionItem" v-if="canAggregate">
+					<my-button image="sum.png"
+						@trigger="aggregatorProcessed = ''"
+						:active="aggregatorProcessed !== ''"
+						:captionTitle="capApp.button.aggregatorsHint"
+						:naked="true"
+						:tight="true"
+					/>
+					<select v-model="aggregatorProcessed">
+						<option value="">-</option>
+						<option value="avg">{{ capGen.option.aggAvg }}</option>
+						<option value="count">{{ capGen.option.aggCount }}</option>
+						<option value="max">{{ capGen.option.aggMax }}</option>
+						<option value="min">{{ capGen.option.aggMin }}</option>
+						<option value="sum">{{ capGen.option.aggSum }}</option>
+					</select>
+				</div>
+				
+				<!-- filter by text -->
+				<div class="columnOptionItem" v-if="showFilterText">
+					<my-button image="filter.png"
+						@trigger="input = ''; set()"
+						:active="filterActive"
+						:captionTitle="capGen.button.filter"
+						:naked="true"
+						:tight="true"
+					/>
 					<input
 						v-model="input"
 						:disabled="isArrayInput"
@@ -43,34 +92,35 @@ let MyListColumnBatch = {
 					<my-button image="ok.png"
 						@trigger="set"
 						:active="!isArrayInput && input !== ''"
+						:naked="true"
 					/>
 				</div>
 				
-				<!-- select all -->
-				<my-button
-					v-if="values.length >= 3"
-					@trigger="valueToggleAll"
-					:caption="'['+capGen.button.selectAll+']'"
-					:image="input.length === values.length ? 'checkbox1.png' : 'checkbox0.png'"
-					:naked="true"
-					:tight="true"
-				/>
-				
-				<!-- select values -->
-				<div class="columnFilterValues">
+				<!-- filter by items -->
+				<template v-if="showFilterItems">
 					<my-button
-						v-for="v of values"
-						@trigger="valueToggle(v)"
-						:caption="displayValue(v)"
-						:image="input.includes(v) ? 'checkbox1.png' : 'checkbox0.png'"
+						@trigger="valueToggleAll"
+						:caption="'['+capGen.button.selectAll+']'"
+						:image="input.length === values.length ? 'checkbox1.png' : 'checkbox0.png'"
 						:naked="true"
 						:tight="true"
 					/>
-				</div>
+					<div class="columnFilterValues">
+						<my-button
+							v-for="v of values"
+							@trigger="valueToggle(v)"
+							:caption="displayValue(v)"
+							:image="input.includes(v) ? 'checkbox1.png' : 'checkbox0.png'"
+							:naked="true"
+							:tight="true"
+						/>
+					</div>
+				</template>
 				
-				<!-- actions -->
+				<!-- filter actions -->
 				<div class="row space-between">
 					<my-button image="remove.png"
+						v-if="showFilterAny"
 						@trigger="input = ''; set()"
 						:active="input !== ''"
 						:cancel="true"
@@ -86,24 +136,29 @@ let MyListColumnBatch = {
 		</div>
 	</div>`,
 	props:{
-		caption:      { type:String,  required:true }, // column caption
-		columnBatch:  { type:Object,  required:true }, // column batch to show filters for
+		aggregator:   { required:true },
+		columnBatch:  { type:Object,  required:true }, // column batch to show options for
 		columns:      { type:Array,   required:true }, // list columns
+		columnSortPos:{ type:Number,  required:true }, // list sort for this column (number indicates sort position)
 		filters:      { type:Array,   required:true }, // list filters
 		filtersColumn:{ type:Array,   required:true }, // list filters from column filters
-		firstInRow:   { type:Boolean, required:true },
+		lastInRow:    { type:Boolean, required:true },
 		joins:        { type:Array,   required:true }, // list joins
+		orders:       { type:Array,   required:true }, // list orders
 		relationId:   { type:String,  required:true }, // list query base relation ID
-		rowCount:     { type:Number,  required:true }, // list row count
+		rowCount:     { type:Number,  required:true }, // list total row count
 		show:         { type:Boolean, required:true }
 	},
-	emits:['click-left','click-right','close','open','set-filters'],
+	emits:[
+		'close','del-aggregator','del-order','set-aggregator',
+		'set-filters','set-order','toggle'
+	],
 	data:function() {
 		return {
-			active:false,      // filter active from this column
-			input:'',          // value input (either string if text, or array if selected from values)
-			values:[],         // values available to filter with (all values a list could have for column)
-			valuesLoaded:false // values loaded once
+			filterActive:false, // filter active from this column
+			input:'',           // value input (either string if text, or array if selected from values)
+			values:[],          // values available to filter with (all values a list could have for column)
+			valuesLoaded:false  // values loaded once
 		};
 	},
 	mounted:function() {
@@ -111,7 +166,11 @@ let MyListColumnBatch = {
 			this.$watch('show',v => this.loadValues());
 	},
 	computed:{
-		columnUsed:(s) => {
+		aggregatorProcessed:{
+			get()  { return typeof this.aggregator !== 'undefined' ? this.aggregator : ''; },
+			set(v) { this.$emit(v === '' ? 'del-aggregator' : 'set-aggregator', v); }
+		},
+		columnUsedFilter:(s) => {
 			for(let ind of s.columnBatch.columnIndexes) {
 				let c = s.columns[ind];
 				let a = s.attributeIdMap[c.attributeId];
@@ -125,11 +184,24 @@ let MyListColumnBatch = {
 			}
 			return null;
 		},
+		caption:(s) => {
+			return !s.isOrdered
+				? s.columnBatch.caption
+				: `${s.columnBatch.caption} ${s.isOrderedAsc ? ' \u25B2' : ' \u25BC'} ${s.orders.length === 1 ? '' : (s.columnSortPos+1)}`;
+		},
 		
 		// simple
-		isArrayInput:  (s) => typeof s.input === 'object',
-		isDateOrTime:  (s) => s.isValidFilter && ['datetime','date','time'].includes(s.columnUsed.display),
-		isValidFilter: (s) => s.columnUsed !== null,
+		canAggregate:   (s) => s.getFirstColumnUsableAsAggregator(s.columnBatch,s.columns) !== null,
+		canOpen:        (s) => s.rowCount > 1 || s.filterActive,
+		showFilterAny:  (s) => s.showFilterItems || s.showFilterText,
+		showFilterItems:(s) => s.values.length >= 3 || s.rowCount > 5,
+		showFilterText: (s) => s.values.length >= 5 && !s.isDateOrTime,
+		isArrayInput:   (s) => typeof s.input === 'object',
+		isDateOrTime:   (s) => s.isValidFilter && ['datetime','date','time'].includes(s.columnUsedFilter.display),
+		isOrdered:      (s) => s.columnSortPos !== -1,
+		isOrderedAsc:   (s) => s.isOrdered && s.orders[s.columnSortPos].ascending,
+		isOrderedDesc:  (s) => s.isOrdered && !s.orders[s.columnSortPos].ascending,
+		isValidFilter:  (s) => s.columnUsedFilter !== null,
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -139,6 +211,7 @@ let MyListColumnBatch = {
 	},
 	methods:{
 		// externals
+		getFirstColumnUsableAsAggregator,
 		getUnixFormat,
 		getUtcTimeStringFromUnix,
 		isAttributeFiles,
@@ -148,15 +221,19 @@ let MyListColumnBatch = {
 			if(v === null)
 				return '[' + this.capGen.button.empty + ']';
 			
-			switch(this.columnUsed.display) {
-				case 'datetime': return this.getUnixFormat(v,this.dateFormat + ' H:i'); break;
-				case 'date':     return this.getUnixFormat(v,this.dateFormat);          break;
-				case 'time':     return this.getUtcTimeStringFromUnix(v);               break;
+			switch(this.columnUsedFilter.display) {
+				case 'datetime': return this.getUnixFormat(v,this.dateFormat + ' H:i:S'); break;
+				case 'date':     return this.getUnixFormat(v,this.dateFormat);            break;
+				case 'time':     return this.getUtcTimeStringFromUnix(v);                 break;
 				default: return String(v); break;
 			}
 		},
 		
 		// actions
+		click() {
+			if(this.canOpen)
+				this.$emit('toggle');
+		},
 		escaped() {
 			this.$emit('close');
 		},
@@ -194,8 +271,8 @@ let MyListColumnBatch = {
 				relationId:this.relationId,
 				joins:this.joins,
 				expressions:[{
-					attributeId:this.columnUsed.attributeId,
-					index:this.columnUsed.index,
+					attributeId:this.columnUsedFilter.attributeId,
+					index:this.columnUsedFilter.index,
 					aggregator:'first',
 					distincted:true
 				}],
@@ -218,8 +295,8 @@ let MyListColumnBatch = {
 			if(!this.isValidFilter)
 				return;
 			
-			let atrId    = this.columnUsed.attributeId;
-			let atrIndex = this.columnUsed.index;
+			let atrId    = this.columnUsedFilter.attributeId;
+			let atrIndex = this.columnUsedFilter.index;
 			let filters  = JSON.parse(JSON.stringify(this.filtersColumn));
 			
 			// remove existing filter
@@ -231,12 +308,12 @@ let MyListColumnBatch = {
 				}
 			}
 			
-			this.active = (
+			this.filterActive = (
 				!this.isArrayInput && this.input !== '' ||
 				this.isArrayInput  && this.input.length !== 0
 			);
 			
-			if(this.active) {
+			if(this.filterActive) {
 				let hasNull = this.isArrayInput && this.input.includes(null);
 				filters.push({
 					connector:'AND',

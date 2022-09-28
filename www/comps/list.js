@@ -2,6 +2,7 @@ import isDropdownUpwards  from './shared/layout.js';
 import MyFilters          from './filters.js';
 import MyInputCollection  from './inputCollection.js';
 import MyInputOffset      from './inputOffset.js';
+import MyListAggregate    from './listAggregate.js';
 import MyListColumnBatch  from './listColumnBatch.js';
 import MyListCsv          from './listCsv.js';
 import MyValueRich        from './valueRich.js';
@@ -9,10 +10,7 @@ import {consoleError}     from './shared/error.js';
 import {srcBase64}        from './shared/image.js';
 import {getCaption}       from './shared/language.js';
 import {isAttributeFiles} from './shared/attribute.js';
-import {
-	getColumnTitle,
-	getFirstColumnUsableAsAggregator
-} from './shared/column.js';
+import {getColumnTitle}   from './shared/column.js';
 import {
 	fieldOptionGet,
 	fieldOptionSet
@@ -21,10 +19,6 @@ import {
 	getChoiceFilters,
 	getRowsDecrypted
 } from './shared/form.js';
-import {
-	MyListAggregateInput,
-	MyListAggregateOutput
-} from './listAggregate.js';
 import {
 	fillRelationRecordIds,
 	getFiltersEncapsulated,
@@ -44,8 +38,7 @@ let MyList = {
 		MyFilters,
 		MyInputCollection,
 		MyInputOffset,
-		MyListAggregateInput,
-		MyListAggregateOutput,
+		MyListAggregate,
 		MyListColumnBatch,
 		MyListCsv,
 		MyValueRich
@@ -264,15 +257,6 @@ let MyList = {
 						:tight="true"
 					/>
 					
-					<my-button image="sum.png"
-						v-if="hasAggregatorColumns"
-						@trigger="showAggregators = !showAggregators"
-						:caption="aggregators.length === 0 ? '' : String(aggregators.length)"
-						:captionTitle="capApp.button.aggregatorsHint"
-						:naked="true"
-						:tight="true"
-					/>
-					
 					<my-button image="filterCog.png"
 						v-if="showFiltersAction"
 						@trigger="toggleUserFilters"
@@ -364,17 +348,6 @@ let MyList = {
 					</my-filters>
 				</div>
 				
-				<!-- aggregators -->
-				<my-list-aggregate-input
-					v-if="showAggregators"
-					@close="showAggregators = false"
-					@set="setAggregators($event)"
-					:aggregators="aggregators"
-					:columnBatches="columnBatches"
-					:columns="columns"
-					:value="aggregators"
-				/>
-				
 				<!-- CSV -->
 				<my-list-csv
 					v-if="showCsv"
@@ -406,23 +379,27 @@ let MyList = {
 									:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
 								/>
 							</th>
-							<th v-for="(b,i) in columnBatches" :style="b.style">
+							<th v-for="(b,i) in columnBatches" :style="b.style" class="no-padding">
 								<my-list-column-batch
-									@click-left="clickColumn(b)"
-									@click-right="clickColumnRight(b)"
-									@close="columnBatchIndexFilter = -1"
-									@open="columnBatchIndexFilter = i"
+									@close="columnBatchIndexOption = -1"
+									@del-aggregator="setAggregators(i,null)"
+									@del-order="setOrder(b,null)"
+									@set-aggregator="setAggregators(i,$event)"
 									@set-filters="filtersColumn = $event;reloadInside('filtersColumn')"
-									:caption="b.caption+displaySortDir(b)"
+									@set-order="setOrder(b,$event)"
+									@toggle="clickColumn(i)"
+									:aggregator="columnBatchIndexMapAggr[i]"
 									:columnBatch="b"
 									:columns="columns"
+									:columnSortPos="getColumnBatchSortPos(b)"
 									:filters="filters"
 									:filtersColumn="filtersColumn"
-									:firstInRow="i === 0"
+									:lastInRow="i === columnBatches.length - 1"
 									:joins="relationsJoined"
+									:orders="orders"
 									:relationId="query.relationId"
-									:show="columnBatchIndexFilter === i"
 									:rowCount="count"
+									:show="columnBatchIndexOption === i"
 								/>
 							</th>
 						</tr>
@@ -525,9 +502,9 @@ let MyList = {
 					</tbody>
 					<tfoot>
 						<!-- result aggregations -->
-						<my-list-aggregate-output ref="aggregations"
-							:aggregators="aggregators"
+						<my-list-aggregate ref="aggregations"
 							:columnBatches="columnBatches"
+							:columnBatchIndexMapAggr="columnBatchIndexMapAggr"
 							:columns="columns"
 							:filters="filtersCombined"
 							:leaveOneEmpty="hasBulkActions"
@@ -686,7 +663,7 @@ let MyList = {
 			autoRenewInputLast:null,    // last set auto renew input value (to compare against)
 			autoRenewTimer:null,        // interval timer for auto renew
 			choiceId:null,              // currently active choice
-			columnBatchIndexFilter:-1,  // show filter for column batch by index
+			columnBatchIndexOption:-1,  // show options for column batch by index
 			focused:false,
 			inputAutoSelectDone:false,
 			inputDropdownUpwards:false, // show dropdown above input
@@ -704,7 +681,7 @@ let MyList = {
 			orderByColumnBatchIndex:-1,
 			
 			// list data
-			aggregators:[],   // current user aggregators
+			columnBatchIndexMapAggr:{}, // map of aggregators, key: column batch index
 			count:0,          // total result set count
 			limit:0,          // current result limit
 			offset:0,         // current result offset
@@ -804,13 +781,6 @@ let MyList = {
 				));
 			
 			return filters;
-		},
-		hasAggregatorColumns:function() {
-			for(let i = 0, j = this.columnBatches.length; i < j; i++) {
-				if(this.getFirstColumnUsableAsAggregator(this.columnBatches[i],this.columns) !== null)
-					return true;
-			}
-			return false;
 		},
 		hasBulkActions:function() {
 			if(this.isInput || this.rows.length === 0)
@@ -1011,7 +981,7 @@ let MyList = {
 		}
 		
 		// set initial aggregators
-		this.aggregators = this.fieldOptionGet(this.fieldId,'aggregators',[]);
+		this.columnBatchIndexMapAggr = this.fieldOptionGet(this.fieldId,'columnBatchIndexMapAggr',{});
 	},
 	beforeUnmount:function() {
 		this.setAutoRenewTimer(true);
@@ -1030,7 +1000,6 @@ let MyList = {
 		getChoiceFilters,
 		getColumnTitle,
 		getFiltersEncapsulated,
-		getFirstColumnUsableAsAggregator,
 		getQueryAttributesPkFilter,
 		getQueryExpressions,
 		getRelationsJoined,
@@ -1047,17 +1016,6 @@ let MyList = {
 				return state ? 'checkbox1.png' : 'checkbox0.png';
 			
 			return state ? 'radio1.png' : 'radio0.png';
-		},
-		displaySortDir:function(columnBatch) {
-			if(!this.orderOverwritten)
-				return '';
-			
-			const pos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
-			if(pos !== -1) {
-				let postfix = this.orders.length === 1 ? '' : (pos+1);
-				return (this.orders[pos].ascending ? ' \u25B2' : ' \u25BC') + postfix;
-			}
-			return '';
 		},
 		resize:function() {
 			this.showFiltersAction = this.$refs.content.offsetWidth > 700;
@@ -1269,50 +1227,9 @@ let MyList = {
 		},
 		
 		// user actions, table layout
-		clickColumn:function(columnBatch) {
-			if(columnBatch.columnIndexSortBy === -1)
-				return;
-			
-			// remove initial sorting when user chooses an option
-			if(!this.orderOverwritten)
-				this.orders = [];
-			
-			const pos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
-			if(pos === -1) {
-				const col = this.columns[columnBatch.columnIndexSortBy];
-				
-				// not ordered by this column -> add as ascending order
-				if(col.subQuery) {
-					this.orders.push({
-						expressionPos:columnBatch.columnIndexSortBy, // equal to expression index
-						ascending:true
-					});
-				}
-				else {
-					this.orders.push({
-						attributeId:col.attributeId,
-						index:col.index,
-						ascending:true
-					});
-				}
-			}
-			else if(this.orders[pos].ascending) {
-				
-				// ordered ascending by this column -> change to descending
-				this.orders[pos].ascending = false;
-			}
-			else {
-				// ordered descending by this column -> remove
-				this.orders.splice(pos,1);
-			}
-			this.reloadInside('order');
-		},
-		clickColumnRight:function(columnBatch) {
-			const pos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
-			if(pos !== -1) {
-				this.orders.splice(pos,1);
-				this.reloadInside('order');
-			}
+		clickColumn:function(columnBatchIndex) {
+			this.columnBatchIndexOption = this.columnBatchIndexOption === columnBatchIndex
+				? -1 : columnBatchIndex;
 		},
 		clickRow:function(row,middleClick) {
 			const recordId = row.indexRecordIds['0'];
@@ -1360,6 +1277,15 @@ let MyList = {
 			}
 			this.reloadInside('order');
 		},
+		setAggregators:function(columnBatchIndex,aggregator) {
+			if(aggregator !== null)
+				this.columnBatchIndexMapAggr[columnBatchIndex] = aggregator;
+			else
+				delete(this.columnBatchIndexMapAggr[columnBatchIndex]);
+			
+			this.fieldOptionSet(this.fieldId,'columnBatchIndexMapAggr',this.columnBatchIndexMapAggr);
+			this.$refs.aggregations.get();
+		},
 		setAutoRenewTimer:function(justClear) {
 			// clear last timer
 			if(this.autoRenewTimer !== null)
@@ -1378,10 +1304,44 @@ let MyList = {
 			// store timer option for field
 			this.fieldOptionSet(this.fieldId,'autoRenew',this.autoRenewInput);
 		},
-		setAggregators:function(v) {
-			this.aggregators = v;
-			this.fieldOptionSet(this.fieldId,'aggregators',v);
-			this.$refs.aggregations.get();
+		setOrder:function(columnBatch,directionAsc) {
+			if(directionAsc === null) {
+				const pos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
+				if(pos !== -1) {
+					this.orders.splice(pos,1);
+					this.reloadInside('order');
+				}
+				return;
+			}
+			
+			// remove initial sorting when user chooses an option
+			if(!this.orderOverwritten)
+				this.orders = [];
+			
+			const pos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
+			if(pos === -1) {
+				const col = this.columns[columnBatch.columnIndexSortBy];
+				if(col.subQuery) {
+					this.orders.push({
+						expressionPos:columnBatch.columnIndexSortBy, // equal to expression index
+						ascending:directionAsc
+					});
+				}
+				else {
+					this.orders.push({
+						attributeId:col.attributeId,
+						index:col.index,
+						ascending:directionAsc
+					});
+				}
+			}
+			else {
+				if(this.orders[pos].ascending === directionAsc)
+					this.orders.splice(pos,1);
+				else
+					this.orders[pos].ascending = directionAsc;
+			}
+			this.reloadInside('order');
 		},
 		toggleOrderBy:function() {
 			this.orders[0].ascending = !this.orders[0].ascending;
@@ -1427,6 +1387,10 @@ let MyList = {
 		},
 		
 		// helpers
+		getColumnBatchSortPos:function(columnBatch) {
+			return !this.orderOverwritten
+				? -1 : this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
+		},
 		getColumnPosInOrder:function(columnIndex) {
 			if(columnIndex === -1)
 				return -1;
@@ -1526,7 +1490,8 @@ let MyList = {
 							this.selectReset();
 							
 							// update aggregations as well
-							this.$refs.aggregations.get();
+							if(typeof this.$refs.aggregations !== 'undefined')
+								this.$refs.aggregations.get();
 							
 							if(this.isInput)
 								this.$nextTick(this.updateDropdownDirection);

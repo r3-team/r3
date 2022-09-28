@@ -1,11 +1,13 @@
 .list{
 	flex:1 1 auto;
+	min-height:240px;
 	border-radius:3px;
 	display:flex;
 	flex-flow:column nowrap;
 	overflow:auto;
 }
 .list.asInput{
+	min-height:unset;
 	align-self:stretch;
 	justify-content:space-between;
 }
@@ -82,6 +84,9 @@
 	border-collapse:separate;
 	z-index:var(--z-index-list-header);
 }
+.list .layoutTable th.no-padding{
+	padding:0px;
+}
 .list .layoutTable th,
 .list .layoutTable td{
 	height:var(--row-height);
@@ -98,23 +103,31 @@
 	display:flex;
 	flex-flow:column nowrap;
 	justify-content:center;
+	padding:6px 2px 6px 10px;
 }
-.list .layoutTable th .columnFilterWrap{
+.list .layoutTable th .columnOptionWrap{
 	width:100%;
-	min-width:220px;
+	min-width:240px;
 	max-width:360px;
-	right:4px;
+	right:unset;
+	left:-1px;
+	bottom:-2px;
+}
+.list .layoutTable th .columnOptionWrap.lastInRow{
+	right:0px;
 	left:unset;
 }
-.list .layoutTable th .columnFilterWrap.firstInRow{
-	left:0px;
-}
-.list .layoutTable th .columnFilter{
+.list .layoutTable th .columnOption{
 	padding:6px;
 	box-sizing:border-box;
 	display:flex;
 	flex-flow:column nowrap;
 	gap:6px;
+}
+.list .layoutTable th .columnOptionItem{
+	display:flex;
+	flex-flow:row nowrap;
+	padding:1px 0px 5px;
 }
 .list .layoutTable th .columnFilterValues{
 	display:flex;
