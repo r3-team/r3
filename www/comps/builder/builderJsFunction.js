@@ -26,6 +26,7 @@ let MyBuilderJsFunction = {
 						:language="builderLanguage"
 						:longInput="true"
 					/>
+					<my-button :active="false" :caption="jsFunction.name" :naked="true "/>
 				</div>
 				<div class="area">
 					<my-button

@@ -23,6 +23,7 @@ let MyBuilderPgFunction = {
 						:language="builderLanguage"
 						:longInput="true"
 					/>
+					<my-button :active="false" :caption="pgFunction.name" :naked="true "/>
 				</div>
 				<div class="area">
 					<my-button

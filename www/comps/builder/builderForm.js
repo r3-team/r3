@@ -52,6 +52,7 @@ let MyBuilderForm = {
 							:longInput="true"
 							:readonly="readonly"
 						/>
+						<my-button :active="false" :caption="form.name" :naked="true "/>
 					</div>
 					
 					<div class="area">
