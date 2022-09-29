@@ -1282,6 +1282,8 @@
 			"allHint":"Seleziona tutti i risultati",
 			"autoRenew":"{VALUE}s",
 			"autoRenewHint":"Aggiorna i dati ogni {VALUE} secondi",
+			"columnFiltersRemove":"Remove column filters",
+			"columnOrderFlip":"Reverse order (right-click to remove)",
 			"csv":"CSV",
 			"csvHint":"Importa/esporta record tramite file di valori separati da virgole"
 		},

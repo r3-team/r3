@@ -132,6 +132,7 @@ body                                         { --depth:6; }
 .field                                       { --depth:0; }
 .field .disabled                             { --depth:6; }
 .list .layoutTable th                        { --depth:0; }
+.list .layoutTable .columBatchCaption.clickable:hover{ --depth:3; }
 .list .layoutTable tbody tr                  { --depth:1; }
 .list .layoutTable tbody tr:nth-child(odd)   { --depth:0; }
 .list .layoutCards .card                     { --depth:7; }

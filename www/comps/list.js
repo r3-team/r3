@@ -1305,41 +1305,38 @@ let MyList = {
 			this.fieldOptionSet(this.fieldId,'autoRenew',this.autoRenewInput);
 		},
 		setOrder:function(columnBatch,directionAsc) {
-			if(directionAsc === null) {
-				const pos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
-				if(pos !== -1) {
-					this.orders.splice(pos,1);
-					this.reloadInside('order');
-				}
-				return;
-			}
-			
-			// remove initial sorting when user chooses an option
+			// remove initial sorting when changing anything
 			if(!this.orderOverwritten)
 				this.orders = [];
 			
 			const pos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
-			if(pos === -1) {
-				const col = this.columns[columnBatch.columnIndexSortBy];
-				if(col.subQuery) {
-					this.orders.push({
-						expressionPos:columnBatch.columnIndexSortBy, // equal to expression index
-						ascending:directionAsc
-					});
-				}
-				else {
-					this.orders.push({
-						attributeId:col.attributeId,
-						index:col.index,
-						ascending:directionAsc
-					});
-				}
+			
+			// remove sort if direction null or same sort option was chosen
+			if(pos !== -1 && (directionAsc === null || this.orders[pos].ascending === directionAsc)) {
+				this.orders.splice(pos,1);
 			}
 			else {
-				if(this.orders[pos].ascending === directionAsc)
-					this.orders.splice(pos,1);
-				else
+				if(pos === -1) {
+					// add new sort
+					const col = this.columns[columnBatch.columnIndexSortBy];
+					if(col.subQuery) {
+						this.orders.push({
+							expressionPos:columnBatch.columnIndexSortBy, // equal to expression index
+							ascending:directionAsc
+						});
+					}
+					else {
+						this.orders.push({
+							attributeId:col.attributeId,
+							index:col.index,
+							ascending:directionAsc
+						});
+					}
+				}
+				else if(this.orders[pos].ascending !== directionAsc) {
+					// overwrite sort direction
 					this.orders[pos].ascending = directionAsc;
+				}
 			}
 			this.reloadInside('order');
 		},

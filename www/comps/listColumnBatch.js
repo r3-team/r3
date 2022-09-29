@@ -10,16 +10,30 @@ let MyListColumnBatch = {
 	name:'my-list-column-batch',
 	template:`<div class="columnBatch">
 		<div class="columBatchCaption" @click.stop="click" :class="{ clickable:canOpen }">
-			<span v-if="show"><b>{{ caption }}</b></span>
-			<span v-else>{{ caption }}</span>
+			<span v-if="show"><b>{{ columnBatch.caption }}</b></span>
+			<span v-else>{{ columnBatch.caption }}</span>
 		</div>
 		
 		<my-button
 			v-if="isValidFilter && filterActive"
-			@trigger="click"
+			@trigger="input = ''; set()"
+			@trigger-right="input = ''; set()"
 			:blockBubble="true"
 			:caption="filterActive && isArrayInput ? String(input.length) : ''"
+			:captionTitle="capApp.button.columnFiltersRemove"
 			:image="filterActive ? 'filter.png' : ''"
+			:naked="true"
+			:tight="true"
+		/>
+		
+		<my-button
+			v-if="isOrdered"
+			@trigger="$emit('set-order',!isOrderedAsc)"
+			@trigger-right="$emit('set-order',null)"
+			:blockBubble="true"
+			:caption="orders.length === 1 ? '' : String(columnSortPos+1)"
+			:captionTitle="capApp.button.columnOrderFlip"
+			:image="isOrderedAsc ? 'triangleUp.png' : 'triangleDown.png'"
 			:naked="true"
 			:tight="true"
 		/>
@@ -183,11 +197,6 @@ let MyListColumnBatch = {
 				}
 			}
 			return null;
-		},
-		caption:(s) => {
-			return !s.isOrdered
-				? s.columnBatch.caption
-				: `${s.columnBatch.caption} ${s.isOrderedAsc ? ' \u25B2' : ' \u25BC'} ${s.orders.length === 1 ? '' : (s.columnSortPos+1)}`;
 		},
 		
 		// simple

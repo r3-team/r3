@@ -1282,6 +1282,8 @@
 			"allHint":"Alle Ergebnisse auswählen",
 			"autoRenew":"{VALUE}s",
 			"autoRenewHint":"Alle {VALUE} Sekunden Daten erneuern",
+			"columnFiltersRemove":"Spaltenfilter entfernen",
+			"columnOrderFlip":"Reihenfolge umdrehen (Rechtsklick zum Entfernen)",
 			"csv":"CSV",
 			"csvHint":"Datensätze über kommaseparierte Werte-Datei importieren/exportieren"
 		},

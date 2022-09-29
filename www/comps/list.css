@@ -104,6 +104,9 @@
 	flex-flow:column nowrap;
 	justify-content:center;
 	padding:6px 2px 6px 10px;
+	border-radius:2px;
+	background-color:var(--color-bg);
+	transition:background-color 0.3s;
 }
 .list .layoutTable th .columnOptionWrap{
 	width:100%;
