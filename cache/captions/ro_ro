@@ -1004,7 +1004,7 @@
 			"newRole":"Rol nou",
 			"relation":"Relație",
 			"title":"Roluri",
-			"titleOne":"Rol '{NAME}'"
+			"titleOne":"Role title"
 		},
 		"backHint":"Reveniți la prezentarea generală a aplicației",
 		"language":"Traduceri",

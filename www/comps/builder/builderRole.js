@@ -1,3 +1,4 @@
+import MyBuilderCaption from './builderCaption.js';
 export {MyBuilderRole as default};
 
 let MyBuilderRoleAccessCollection = {
@@ -213,6 +214,7 @@ let MyBuilderRoleAccessRelation = {
 let MyBuilderRole = {
 	name:'my-builder-role',
 	components:{
+		MyBuilderCaption,
 		MyBuilderRoleAccessCollection,
 		MyBuilderRoleAccessMenu,
 		MyBuilderRoleAccessRelation
@@ -222,9 +224,14 @@ let MyBuilderRole = {
 		<div class="top">
 			<div class="area nowrap">
 				<div class="separator"></div>
-				<h1 class="title">
-					{{ capApp.titleOne.replace('{NAME}',role.name) }}
-				</h1>
+				<my-builder-caption
+					v-model="captions.roleTitle"
+					:contentName="capApp.titleOne"
+					:language="builderLanguage"
+					:longInput="true"
+					:readonly="isEveryone"
+				/>
+				<my-button :active="false" :caption="role.name" :naked="true "/>
 			</div>
 		</div>
 		<div class="top lower">
@@ -346,6 +353,7 @@ let MyBuilderRole = {
 			accessCollections:{},
 			accessMenus:{},
 			accessRelations:{},
+			captions:{},
 			ready:false,
 			relationIdsShown:[]
 		};
@@ -367,8 +375,9 @@ let MyBuilderRole = {
 				|| JSON.stringify(s.accessCollections) !== JSON.stringify(s.role.accessCollections)
 				|| JSON.stringify(s.accessMenus)       !== JSON.stringify(s.role.accessMenus)
 				|| JSON.stringify(s.accessRelations)   !== JSON.stringify(s.role.accessRelations)
-			;
+				|| JSON.stringify(s.captions)          !== JSON.stringify(s.role.captions);
 		},
+		isEveryone:(s) => s.role.name === 'everyone',
 		
 		// stores
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
@@ -391,6 +400,7 @@ let MyBuilderRole = {
 			this.accessCollections = JSON.parse(JSON.stringify(this.role.accessCollections));
 			this.accessMenus       = JSON.parse(JSON.stringify(this.role.accessMenus));
 			this.accessRelations   = JSON.parse(JSON.stringify(this.role.accessRelations));
+			this.captions          = JSON.parse(JSON.stringify(this.role.captions));
 			this.ready = true;
 		},
 		toggleRelationShow(id) {
@@ -408,13 +418,13 @@ let MyBuilderRole = {
 				content:this.role.content,
 				assignable:this.role.assignable,
 				childrenIds:this.role.childrenIds,
-				captions:this.role.captions,
 				
 				// changable values in this UI
 				accessAttributes:this.accessAttributes,
 				accessCollections:this.accessCollections,
 				accessMenus:this.accessMenus,
-				accessRelations:this.accessRelations
+				accessRelations:this.accessRelations,
+				captions:this.captions
 			},true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError

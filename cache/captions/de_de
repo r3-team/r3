@@ -1004,7 +1004,7 @@
 			"newRole":"Neue Rolle",
 			"relation":"Relation",
 			"title":"Rollen",
-			"titleOne":"Rolle \"{NAME}\""
+			"titleOne":"Rollentitel"
 		},
 		"backHint":"Zurück zur Anwendungsübersicht",
 		"language":"Übersetzung",

@@ -1004,7 +1004,7 @@
 			"newRole":"Nuovo ruolo",
 			"relation":"Relazione",
 			"title":"Ruoli",
-			"titleOne":"Ruolo '{NAME}'"
+			"titleOne":"Role title"
 		},
 		"backHint":"Torna alla panoramica dell'applicazione",
 		"language":"Traduzione",

@@ -168,8 +168,7 @@ let MyBuilderRolesItem = {
 				|| this.content    !== this.role.content
 				|| this.assignable !== this.role.assignable
 				|| JSON.stringify(this.childrenIds) !== JSON.stringify(this.role.childrenIds)
-				|| JSON.stringify(this.captions)    !== JSON.stringify(this.role.captions)
-			;
+				|| JSON.stringify(this.captions)    !== JSON.stringify(this.role.captions);
 		},
 		
 		// simple states

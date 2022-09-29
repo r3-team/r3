@@ -1004,7 +1004,7 @@
 			"newRole":"New role",
 			"relation":"Relation",
 			"title":"Roles",
-			"titleOne":"Role '{NAME}'"
+			"titleOne":"Role title"
 		},
 		"backHint":"Go back to application overview",
 		"language":"Translation",
