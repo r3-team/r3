@@ -336,6 +336,9 @@
 			"node":"Cluster node"
 		},
 		"mails":{
+			"dialog":{
+				"imapWarn":"Please note that the IMAP connector loads and then deletes messages from the chosen mailbox. It should only be used with a dedicated mailbox and not to access personal mail accounts."
+			},
 			"account":"Cont de email",
 			"accounts":"Conturi de email",
 			"accountHost":"Nume gazdă",
