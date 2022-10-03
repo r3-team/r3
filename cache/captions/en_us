@@ -1285,7 +1285,7 @@
 			"allHint":"Select all results",
 			"autoRenew":"{VALUE}s",
 			"autoRenewHint":"Refresh data every {VALUE} seconds",
-			"columnFiltersRemove":"Remove column filters",
+			"columnFilters":"Show column filters (right-click to remove)",
 			"columnOrderFlip":"Reverse order (right-click to remove)",
 			"csv":"CSV",
 			"csvHint":"Import/export records via comma separated values file"

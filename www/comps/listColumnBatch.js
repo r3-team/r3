@@ -16,11 +16,11 @@ let MyListColumnBatch = {
 		
 		<my-button
 			v-if="isValidFilter && filterActive"
-			@trigger="input = ''; set()"
+			@trigger="click"
 			@trigger-right="input = ''; set()"
 			:blockBubble="true"
 			:caption="filterActive && isArrayInput ? String(input.length) : ''"
-			:captionTitle="capApp.button.columnFiltersRemove"
+			:captionTitle="capApp.button.columnFilters"
 			:image="filterActive ? 'filter.png' : ''"
 			:naked="true"
 			:tight="true"
