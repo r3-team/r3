@@ -1267,7 +1267,7 @@
 			"button":{
 				"copyHint":"Ausgewählte Dateien kopieren, um sie in ein anderen Dateiinput einzufügen.",
 				"downloadHint":"Datei herunterladen",
-				"fileRequestHint":"Datei lokal auf dem Computer bearbeiten. Erfordert die R3-Client-Anwendung - installierbar über die Benutzereinstellungen.",
+				"fileRequestHint":"Datei lokal auf dem Computer bearbeiten. Erfordert die R3-Client-Anwendung (installierbar über die Benutzereinstellungen). Funktioniert nicht, wenn das System im Wartungsmodus ist.",
 				"pasteHint":"Kopierte Dateien in diesen Dateiinput einfügen."
 			},
 			"dropTarget":"Dateien hier ablegen, um sie hochzuladen",

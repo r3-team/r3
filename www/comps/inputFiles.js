@@ -50,15 +50,16 @@ let MyInputFilesRequest = {
 		@trigger="$emit('open',false)"
 		@trigger-shift="$emit('open',true)"
 		:captionTitle="capApp.button.fileRequestHint"
-		:active="hasClient"
+		:active="hasClient && productionMode"
 		:naked="true"
 		:tight="true"
 	/>`,
 	emits:['open'],
 	computed:{
 		// store
-		hasClient:(s) => s.$store.getters.loginHasClient,
-		capApp:   (s) => s.$store.getters.captions.input.files
+		capApp:        (s) => s.$store.getters.captions.input.files,
+		hasClient:     (s) => s.$store.getters.loginHasClient,
+		productionMode:(s) => s.$store.getters.productionMode
 	}
 };
 

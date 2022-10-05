@@ -1267,7 +1267,7 @@
 			"button":{
 				"copyHint":"Copy selected files to paste them into another file input.",
 				"downloadHint":"Download file",
-				"fileRequestHint":"Edit file locally on your computer. Requires the R3 client application - installable from the user settings.",
+				"fileRequestHint":"Edit file locally on your computer. Requires the R3 client application (installable from the user settings). Does not work if the system is in maintenance mode.",
 				"pasteHint":"Paste copied files into this file input."
 			},
 			"dropTarget":"Drop files here for upload",
