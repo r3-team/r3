@@ -427,6 +427,12 @@ let MyApp = {
 		initPublic:function() {
 			ws.send('public','get',{},false).then(
 				res => {
+					// reload page if known application version changed
+					if(this.appVersion !== '' && this.appVersion !== res.payload.appVersion) {
+						this.$store.commit('local/appVersion',res.payload.appVersion);
+						return location.reload();
+					}
+					
 					this.$store.commit('local/activated',res.payload.activated);
 					this.$store.commit('local/appName',res.payload.appName);
 					this.$store.commit('local/appNameShort',res.payload.appNameShort);

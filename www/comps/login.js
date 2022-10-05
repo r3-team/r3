@@ -382,7 +382,7 @@ let MyLogin = {
 			);
 		},
 		
-		// authentication successful, prepare appliation load
+		// authentication successful, prepare application load
 		appEnable(loginId,loginName) {
 			let token = JSON.parse(atob(this.token.split('.')[1]));
 			this.$store.commit('isAdmin',token.admin);
