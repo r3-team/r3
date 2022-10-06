@@ -2,6 +2,7 @@ package data
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"fmt"
 	"r3/cache"
@@ -355,10 +356,20 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 
 	// apply changes to file attributes
 	for _, i := range attributeFilesIndexes {
-		if err := filesApplyAttributChanges_tx(ctx, tx, indexRecordIds[index],
-			dataSet.Attributes[i].AttributeId, dataSet.Attributes[i].Value); err != nil {
+		if dataSet.Attributes[i].Value != nil {
+			vJson, err := json.Marshal(dataSet.Attributes[i].Value)
+			if err != nil {
+				return err
+			}
+			var v types.DataSetFileChanges
+			if err := json.Unmarshal(vJson, &v); err != nil {
+				return err
+			}
+			if err := FilesApplyAttributChanges_tx(ctx, tx, indexRecordIds[index],
+				dataSet.Attributes[i].AttributeId, v.FileIdMapChange); err != nil {
 
-			return err
+				return err
+			}
 		}
 	}
 

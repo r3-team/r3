@@ -2,7 +2,6 @@ package data
 
 import (
 	"context"
-	"encoding/json"
 	"errors"
 	"fmt"
 	"io"
@@ -186,7 +185,7 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool,
 		INSERT INTO instance.file_version (
 			file_id,version,login_id,hash,size_kb,date_change)
 		VALUES ($1,$2,$3,$4,$5,$6)
-	`, fileId, fileVersion, loginId, fileHash, fileSizeKb, tools.GetTimeUnix()); err != nil {
+	`, fileId, fileVersion, loginNull, fileHash, fileSizeKb, tools.GetTimeUnix()); err != nil {
 		return err
 	}
 
@@ -240,28 +239,17 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool,
 }
 
 // updates file record assignment or deletion state based on file attribute changes
-func filesApplyAttributChanges_tx(ctx context.Context, tx pgx.Tx,
-	recordId int64, attributeId uuid.UUID, filesValue interface{}) error {
+func FilesApplyAttributChanges_tx(ctx context.Context,
+	tx pgx.Tx, recordId int64, attributeId uuid.UUID,
+	fileIdMapChange map[uuid.UUID]types.DataSetFileChange) error {
 
-	if filesValue == nil {
-		return nil
-	}
 	tNameR := schema.GetFilesTableName(attributeId)
-
-	vJson, err := json.Marshal(filesValue)
-	if err != nil {
-		return err
-	}
-	var v types.DataSetFileChanges
-	if err := json.Unmarshal(vJson, &v); err != nil {
-		return err
-	}
 
 	// apply created & deleted files
 	fileIdsCreated := make([]uuid.UUID, 0)
 	fileIdsDeleted := make([]uuid.UUID, 0)
 
-	for fileId, change := range v.FileIdMapChange {
+	for fileId, change := range fileIdMapChange {
 		switch change.Action {
 		case "create":
 			fileIdsCreated = append(fileIdsCreated, fileId)
@@ -283,7 +271,7 @@ func filesApplyAttributChanges_tx(ctx context.Context, tx pgx.Tx,
 
 	// execute file rename actions after files were assigned to records (created files)
 	// rename is dependent on other files assigned to the same record
-	for fileId, change := range v.FileIdMapChange {
+	for fileId, change := range fileIdMapChange {
 		if (change.Action == "create" || change.Action == "rename") && change.Name != "" {
 
 			// trim spaces

@@ -132,6 +132,7 @@ func do(mail types.Mail) error {
 	}
 	defer tx.Rollback(db.Ctx)
 
+	fileIdMapChange := make(map[uuid.UUID]types.DataSetFileChange)
 	rel, _ := cache.RelationIdMap[atr.RelationId]
 	for _, f := range filesMail {
 		if err := data.FileApplyVersion_tx(db.Ctx, tx, true, atr.Id, rel.Id,
@@ -139,12 +140,15 @@ func do(mail types.Mail) error {
 
 			return err
 		}
+
+		fileIdMapChange[f.Id] = types.DataSetFileChange{
+			Action:  "create",
+			Name:    f.Name,
+			Version: -1,
+		}
 	}
-
-	// assign files to record
-	if err := data.FilesAssignToRecord_tx(db.Ctx, tx, atr.Id,
-		fileIds, mail.RecordId.Int); err != nil {
-
+	if err := data.FilesApplyAttributChanges_tx(db.Ctx, tx, mail.RecordId.Int,
+		atr.Id, fileIdMapChange); err != nil {
 		return err
 	}
 
