@@ -12,6 +12,7 @@ import (
 	"r3/db"
 	"r3/handler"
 	"r3/login/login_auth"
+	"r3/schema"
 	"r3/tools"
 	"r3/types"
 	"reflect"
@@ -35,6 +36,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handler.AbortRequestNoLog(w, handler.ErrBruteforceBlock)
 		return
 	}
+
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
 
 	// parse getters
 	fieldId, err := handler.ReadUuidGetterFromUrl(r, "field_id")
@@ -169,6 +173,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// add event summary expressions
 	for _, column := range f.Columns {
+
+		atr, exists := cache.AttributeIdMap[column.AttributeId]
+		if !exists {
+			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+			return
+		}
+
+		if schema.IsContentFiles(atr.Content) {
+			continue
+		}
 
 		atrId := pgtype.UUID{
 			Bytes:  column.AttributeId,
