@@ -148,7 +148,7 @@
 				"removeLogo":"Îndepărtează logo"
 			},
 			"dialog":{
-				"builderMode":"Builder este folosit pentru a crea sau modifica aplicații.<br /><br />Schimbarea aplicațiilor poate duce la pierderea de date și ar trebui ca <b>NICIODATĂ</b> acestea să fie realizate în medii de producție.<br /><br />Pentru a putea să utilizați în siguranță Builder, vă rugăm să utilizați o instanță dedicată a REI3; aplicațiile gata și testate pot fi apoi transferate într-un sistem de producție.<br /><br />Vă rugăm să consultați <a href=\"https://rei3.de/builderdocu-en_us/\" target=\"_blank \">Documentația Builder</a> pentru a afla mai multe.",
+				"builderMode":"Builder este folosit pentru a crea sau modifica aplicații.<br /><br />Schimbarea aplicațiilor poate duce la pierderea de date și ar trebui ca <b>NICIODATĂ</b> acestea să fie realizate în medii de producție.<br /><br />Pentru a putea să utilizați în siguranță Builder, vă rugăm să utilizați o instanță dedicată a REI3; aplicațiile gata și testate pot fi apoi transferate într-un sistem de producție.<br /><br />Vă rugăm să consultați <a href=\"https://rei3.de/en/docs/builder/\" target=\"_blank \">Documentația Builder</a> pentru a afla mai multe.",
 				"productionMode":"Modul de întreținere este folosit pentru a actualiza, instala sau elimina aplicații din sistem.<br /><br />Comutarea la modul întreținere <b>va deconecta toți utilizatorii fără permisiuni de administrator</b>.",
 				"pleaseRead":"Vă rugăm să citiți înainte de a salva"
 			},
@@ -1238,7 +1238,7 @@
 			"installBundle":"Core Company",
 			"installBundleDesc":"Instalați un set de aplicații de bază, utile pentru orice organizație. Setul „Core Company” include:<ul><li>Gestionarea absențelor</li><li>Urmărirea timpului</li><li>Gestionarea sarcinilor</li><li>A password safe</li><li>IT asset management</li></ul>După instalare, vă rugăm să aruncați o privire la paginile individuale de ajutor ale aplicației pentru a afla mai multe despre configurarea inițială pentru fiecare.",
 			"installFile":"Din fișierul",
-			"installFileDesc":"Instalați aplicații din fișierele locale REI3. Pentru sisteme offline sau aplicații create de sine stătător.<br /><br />Fișierele pentru aplicațiile REI3 oferite public pot fi descărcate de la <a href=\"https://rei3.de/download_en\" target=\" oficial _blank\">repository</a>.",
+			"installFileDesc":"Instalați aplicații din fișierele locale REI3. Pentru sisteme offline sau aplicații create de sine stătător.<br /><br />Fișierele pentru aplicațiile REI3 oferite public pot fi descărcate de la <a href=\"https://rei3.de/en/downloads\" target=\" oficial _blank\">repository</a>.",
 			"installRepo":"Din depozitul",
 			"installRepoDesc":"<b>Este necesar acces la internet</b><br /><br />Instalați aplicații din depozitul oficial REI3. Depozitul conține versiuni actuale ale aplicațiilor REI3 oferite public.<br /><br />Toate aplicațiile sunt revizuite și semnate digital.",
 			"intro":"Bun venit la REI3<br /><br />În prezent, nu există aplicații instalate. Pentru a începe să utilizați REI3, vă rugăm să alegeți una dintre opțiunile de instalare de mai jos.",
@@ -1397,10 +1397,11 @@
 				"step6":"It is now installed and will appear in your system tray.",
 				"title":"Install client application"
 			},
+			"nameHint":"'My Work PC'",
 			"titleAdd":"Install client application",
 			"titleContext":"Use",
 			"titleDateCreate":"Created",
-			"titleName":"'My Work PC'"
+			"titleName":"Device name"
 		},
 		"bordersAll":"Adăugați chenaruri",
 		"bordersCorners":"Colțuri la margine",

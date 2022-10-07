@@ -626,7 +626,7 @@ let MySettingsFixedTokens = {
 								<div class="column gap default-inputs">
 									<span>{{ capApp.install.step1 }}</span>
 									<div class="row gap">
-										<input v-model="deviceName" :placeholder="capApp.titleName" />
+										<input v-model="deviceName" :placeholder="capApp.nameHint" />
 										<my-button @trigger="set" :active="tokenFixed === ''" image="save.png" />
 									</div>
 									<br />

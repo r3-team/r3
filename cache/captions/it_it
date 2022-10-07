@@ -148,7 +148,7 @@
 				"removeLogo":"Rimuovi logo"
 			},
 			"dialog":{
-				"builderMode":"Il Builder viene utilizzato per creare o modificare le applicazioni.<br /><br />La modifica delle applicazioni può causare la perdita di dati e non dovrebbe <b>MAI</b> essere eseguita in ambienti di produzione.<br /><br />Per utilizzare in sicurezza il Builder, utilizzare un'istanza dedicata di REI3; le applicazioni pronte e testate possono quindi essere trasferite a un sistema di produzione.<br /><br />Fare riferimento a <a href=\"https://rei3.de/builderdocu-en_us/\" target=\"_blank \">Documentazione del Builder</a> per saperne di più.",
+				"builderMode":"Il Builder viene utilizzato per creare o modificare le applicazioni.<br /><br />La modifica delle applicazioni può causare la perdita di dati e non dovrebbe <b>MAI</b> essere eseguita in ambienti di produzione.<br /><br />Per utilizzare in sicurezza il Builder, utilizzare un'istanza dedicata di REI3; le applicazioni pronte e testate possono quindi essere trasferite a un sistema di produzione.<br /><br />Fare riferimento a <a href=\"https://rei3.de/en/docs/builder/\" target=\"_blank \">Documentazione del Builder</a> per saperne di più.",
 				"productionMode":"La modalità di manutenzione viene utilizzata per aggiornare, installare o rimuovere applicazioni dal sistema.<br /><br />Il passaggio alla modalità di manutenzione <b>disconnetterà tutti gli utenti senza autorizzazioni di amministratore</b>.",
 				"pleaseRead":"Si prega di leggere prima di salvare"
 			},
@@ -1238,7 +1238,7 @@
 			"installBundle":"Core Company",
 			"installBundleDesc":"Installa un set preconfezionato di applicazioni principali, utile per qualsiasi organizzazione. L'insieme \"Core Company\" include:<ul><li>Gestione delle assenze</li><li>Monitoraggio del tempo</li><li>Gestione delle attività</li><li>A password safe</li><li>IT asset management</li></ul>Dopo l'installazione, dai un'occhiata alle pagine di aiuto delle singole applicazioni per saperne di più sulla configurazione iniziale di ciascuna.",
 			"installFile":"Da file",
-			"installFileDesc":"Installa applicazioni da file REI3 locali. Per sistemi offline o applicazioni fai da te.<br /><br />I file per le applicazioni REI3 offerte pubblicamente possono essere scaricati dal sito ufficiale <a href=\"https://rei3.de/download_en\" target=\" _blank\">repository</a>.",
+			"installFileDesc":"Installa applicazioni da file REI3 locali. Per sistemi offline o applicazioni fai da te.<br /><br />I file per le applicazioni REI3 offerte pubblicamente possono essere scaricati dal sito ufficiale <a href=\"https://rei3.de/en/downloads\" target=\" _blank\">repository</a>.",
 			"installRepo":"Da archivio",
 			"installRepoDesc":"<b>Accesso a Internet richiesto</b><br /><br />Installa applicazioni dal repository REI3 ufficiale. Il repository contiene le versioni correnti delle applicazioni REI3 offerte pubblicamente.<br /><br />Tutte le applicazioni sono riviste e firmate digitalmente.",
 			"intro":"Benvenuto in REI3<br /><br />Al momento non ci sono applicazioni installate. Per iniziare a utilizzare REI3, scegli una delle opzioni di installazione di seguito.",
@@ -1397,10 +1397,11 @@
 				"step6":"It is now installed and will appear in your system tray.",
 				"title":"Install client application"
 			},
+			"nameHint":"'My Work PC'",
 			"titleAdd":"Install client application",
 			"titleContext":"Use",
 			"titleDateCreate":"Created",
-			"titleName":"'My Work PC'"
+			"titleName":"Device name"
 		},
 		"bordersAll":"Aggiungi bordi",
 		"bordersCorners":"Angoli del bordo",

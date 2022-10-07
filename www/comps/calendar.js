@@ -229,7 +229,6 @@ let MyCalendarMonth = {
 				</div>
 			</div>
 		</div>
-		
 	</div>`,
 	props:{
 		choiceId:   { required:false, default:null },
@@ -461,7 +460,8 @@ let MyCalendarMonth = {
 			}
 			
 			// if already on current month, select 'today'
-			this.$emit('day-selected',this.getDateAtUtcZero(now),false,false);
+			if(this.rowSelect)
+				this.$emit('day-selected',this.getDateAtUtcZero(now),false,false);
 		},
 		icsCopyToClipboard:function() {
 			navigator.clipboard.writeText(this.icsUrl);

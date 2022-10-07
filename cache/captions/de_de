@@ -148,7 +148,7 @@
 				"removeLogo":"Logo entfernen"
 			},
 			"dialog":{
-				"builderMode":"Der Builder dient zum Erstellen oder Verändern von Anwendungen.<br /><br />Das Ändern von Anwendungen kann zum Datenverlust führen und sollte <b>NIEMALS</b> in produktiven Umgebungen getan werden.<br /><br />Um den Builder sicher zu nutzen, bitte eine dedizierte Instanz von REI3 verwenden; fertige und getestete Anwendungen können dann in ein Produktivsystem transferiert werden.<br /><br />Um mehr zu lernen, steht die <a href=\"https://rei3.de/builderdocu-en_us/\" target=\"_blank\">Builder-Dokumentation</a> zur Verfügung.",
+				"builderMode":"Der Builder dient zum Erstellen oder Verändern von Anwendungen.<br /><br />Das Ändern von Anwendungen kann zum Datenverlust führen und sollte <b>NIEMALS</b> in produktiven Umgebungen getan werden.<br /><br />Um den Builder sicher zu nutzen, bitte eine dedizierte Instanz von REI3 verwenden; fertige und getestete Anwendungen können dann in ein Produktivsystem transferiert werden.<br /><br />Um mehr zu lernen, steht die <a href=\"https://rei3.de/en/docs/builder/\" target=\"_blank\">Builder-Dokumentation</a> zur Verfügung.",
 				"productionMode":"Der Wartungsmodus wird genutzt, um Anwendungen zu aktualisieren, installieren oder zu entfernen.<br /><br />Beim Aktivieren des Wartungsmodus werden <b>alle Benutzer ohne Adminrechte abgemeldet</b>.",
 				"pleaseRead":"Bitte vor dem Speichern lesen"
 			},
@@ -1238,7 +1238,7 @@
 			"installBundle":"Core Company",
 			"installBundleDesc":"Installiere eine vorselektierte Sammlung an Kernanwendungen für Organisationen. Die Sammlung \"Core Company\" inkludiert:<ul><li>Abwesenheitsverwaltung</li><li>Zeiterfassung</li><li>Projekt- & Aufgabenverwaltung</li><li>Anfragenverwaltung</li><li>Ein Passwort-Safe</li><li>IT-Anlagenverwaltung</li></ul>Nach der Installation unterstützen die Hilfeseiten der jeweiligen Anwendungen bei der Ersteinrichtung.",
 			"installFile":"Von Datei",
-			"installFileDesc":"Installiere Anwendungen von lokalen REI3-Dateien. Für Offline-Systeme oder selbsterstellte Anwendungen.<br /><br />Dateien für öffentliche REI3-Anwendungen können vom offiziellen <a href=\"https://rei3.de/download\" target=\"_blank\">Repository</a> heruntergeladen werden.",
+			"installFileDesc":"Installiere Anwendungen von lokalen REI3-Dateien. Für Offline-Systeme oder selbsterstellte Anwendungen.<br /><br />Dateien für öffentliche REI3-Anwendungen können vom offiziellen <a href=\"https://rei3.de/en/downloads\" target=\"_blank\">Repository</a> heruntergeladen werden.",
 			"installRepo":"Vom Repository",
 			"installRepoDesc":"<b>Internetzugriff erforderlich</b><br /><br />Installiere Anwendungen vom offiziellen REI3-Repository. Das Repository bietet aktuelle Versionen öffentlich angebotener REI3-Anwendungen.<br /><br />Alle Anwendungen sind geprüft und digital signiert.",
 			"intro":"Willkommen in REI3<br /><br />Aktuell sind keine Anwendungen installiert. Um REI3 zu benutzen, wähle bitte eine der unteren Installationsoptionen.",
@@ -1397,10 +1397,11 @@
 				"step6":"Sie ist jetzt installiert und erscheint im Systemtray.",
 				"title":"Client-Anwendung installieren"
 			},
+			"nameHint":"'Mein Arbeits-PC'",
 			"titleAdd":"Client-Anwendung installieren",
 			"titleContext":"Verwendung",
 			"titleDateCreate":"Erstellt",
-			"titleName":"'Mein Arbeits-PC'"
+			"titleName":"Gerätename"
 		},
 		"bordersAll":"Rahmen hinzufügen",
 		"bordersCorners":"Rahmenecken",

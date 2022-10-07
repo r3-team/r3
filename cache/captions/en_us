@@ -148,7 +148,7 @@
 				"removeLogo":"Remove logo"
 			},
 			"dialog":{
-				"builderMode":"The Builder is used to create or change applications.<br /><br />Changing applications can result in data loss and should <b>NEVER</b> be done in production environments.<br /><br />To safely use the Builder, please use a dedicated instance of REI3; ready and tested applications can then be transferred to a production system.<br /><br />Please refer to the <a href=\"https://rei3.de/builderdocu-en_us/\" target=\"_blank\">Builder documentation</a> to learn more.",
+				"builderMode":"The Builder is used to create or change applications.<br /><br />Changing applications can result in data loss and should <b>NEVER</b> be done in production environments.<br /><br />To safely use the Builder, please use a dedicated instance of REI3; ready and tested applications can then be transferred to a production system.<br /><br />Please refer to the <a href=\"https://rei3.de/en/docs/builder/\" target=\"_blank\">Builder documentation</a> to learn more.",
 				"productionMode":"The maintenance mode is used to update, install or remove applications from the system.<br /><br />Switching to maintenance mode will <b>logout all users without admin permissions</b>.",
 				"pleaseRead":"Please read before saving"
 			},
@@ -1238,7 +1238,7 @@
 			"installBundle":"Core Company",
 			"installBundleDesc":"Install a pre-packaged set of core applications, useful for any organization. The set 'Core Company' includes:<ul><li>Absence management</li><li>Time tracking</li><li>Project & task management</li><li>Request handling</li><li>A password safe</li><li>IT asset management</li></ul>After installation, please have a look at the individual application help pages to learn more about the initial setup for each.",
 			"installFile":"From file",
-			"installFileDesc":"Install applications from local REI3 files. For offline systems or self-made applications.<br /><br />Files for publicly offered REI3 applications can be downloaded from the official <a href=\"https://rei3.de/download_en\" target=\"_blank\">repository</a>.",
+			"installFileDesc":"Install applications from local REI3 files. For offline systems or self-made applications.<br /><br />Files for publicly offered REI3 applications can be downloaded from the official <a href=\"https://rei3.de/en/downloads\" target=\"_blank\">repository</a>.",
 			"installRepo":"From repository",
 			"installRepoDesc":"<b>Internet access required</b><br /><br />Install applications from the official REI3 repository. The repository contains current versions of publicly offered REI3 applications.<br /><br />All applications are reviewed and digitally signed.",
 			"intro":"Welcome to REI3<br /><br />There are currently no applications installed. To start using REI3, please choose one of the installation options below.",
@@ -1397,10 +1397,11 @@
 				"step6":"It is now installed and will appear in your system tray.",
 				"title":"Install client application"
 			},
+			"nameHint":"'My Work PC'",
 			"titleAdd":"Install client application",
 			"titleContext":"Use",
 			"titleDateCreate":"Created",
-			"titleName":"'My Work PC'"
+			"titleName":"Device name"
 		},
 		"bordersAll":"Add borders",
 		"bordersCorners":"Border corners",
