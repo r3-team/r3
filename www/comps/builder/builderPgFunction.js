@@ -23,6 +23,7 @@ let MyBuilderPgFunction = {
 						:language="builderLanguage"
 						:longInput="true"
 					/>
+					<my-button :active="false" :caption="pgFunction.name" :naked="true "/>
 				</div>
 				<div class="area">
 					<my-button
@@ -35,7 +36,7 @@ let MyBuilderPgFunction = {
 				<div class="area nowrap">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="hasChanges"
+						:active="hasChanges && !readonly"
 						:caption="capGen.button.save"
 					/>
 					<my-button image="refresh.png"
@@ -61,15 +62,15 @@ let MyBuilderPgFunction = {
 					<table>
 						<tr>
 							<td>{{ capApp.codeArgs }}</td>
-							<td><input class="long" v-model="codeArgs" :disabled="isTrigger" placeholder="-" /></td>
+							<td><input class="long" v-model="codeArgs" :disabled="isTrigger || readonly" placeholder="-" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.codeReturns }}</td>
-							<td><input v-model="codeReturns" :disabled="isTrigger" placeholder="-" /></td>
+							<td><input v-model="codeReturns" :disabled="isTrigger || readonly" placeholder="-" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.isFrontendExec }}</td>
-							<td><my-bool v-model="isFrontendExec" :readonly="isTrigger" /></td>
+							<td><my-bool v-model="isFrontendExec" :readonly="isTrigger || readonly" /></td>
 						</tr>
 						<tr>
 							<td>{{ capGen.title }}</td>
@@ -77,6 +78,7 @@ let MyBuilderPgFunction = {
 								<my-builder-caption
 									v-model="captions.pgFunctionTitle"
 									:language="builderLanguage"
+									:readonly="readonly"
 								/>
 							</td>
 						</tr>
@@ -87,6 +89,7 @@ let MyBuilderPgFunction = {
 									v-model="captions.pgFunctionDesc"
 									:language="builderLanguage"
 									:multiLine="true"
+									:readonly="readonly"
 								/>
 							</td>
 						</tr>
@@ -99,6 +102,7 @@ let MyBuilderPgFunction = {
 					v-model="codeFunction"
 					@click="insertEntitySelected"
 					@keydown.tab.prevent="addTab"
+					:disabled="readonly"
 					:placeholder="capApp.code"
 				></textarea>
 				
@@ -122,17 +126,20 @@ let MyBuilderPgFunction = {
 					<my-button
 						v-if="isTrigger"
 						@trigger="addNew = !addNew"
+						:active="!readonly"
 						:caption="capApp.button.addNew"
 						:image="addNew ? 'checkbox1.png' : 'checkbox0.png'"
 					/>
 					<my-button
 						v-if="isTrigger"
 						@trigger="addOld = !addOld"
+						:active="!readonly"
 						:caption="capApp.button.addOld"
 						:image="addOld ? 'checkbox1.png' : 'checkbox0.png'"
 					/>
 					<my-button image="refresh.png"
 						@trigger="codeFunction = getPgFunctionTemplate()"
+						:active="!readonly"
 						:caption="capApp.button.template"
 					/>
 				</div>
@@ -211,15 +218,23 @@ let MyBuilderPgFunction = {
 			</div>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	watch:{
 		pgFunction:{
 			handler:function() { this.reset(); },
 			immediate:true
 		}
+	},
+	mounted:function() {
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted:function() {
+		this.$emit('hotkeysRegister',[]);
 	},
 	data:function() {
 		return {
@@ -232,11 +247,12 @@ let MyBuilderPgFunction = {
 			isTrigger:false,
 			
 			instanceFunctionIds:[
-				'abort_show_message','clean_up_e2ee_keys','get_name','get_login_id',
-				'get_login_language_code','get_public_hostname','get_role_ids',
-				'has_role','has_role_any','log_error','log_info','log_warning',
-				'mail_delete','mail_delete_after_attach','mail_get_next',
-				'mail_send','update_collection'
+				'abort_show_message','clean_up_e2ee_keys','file_link',
+				'files_get','get_name','get_login_id','get_login_language_code',
+				'get_public_hostname','get_role_ids','has_role','has_role_any',
+				'log_error','log_info','log_warning','mail_delete',
+				'mail_delete_after_attach','mail_get_next','mail_send',
+				'update_collection'
 			],
 			
 			// states

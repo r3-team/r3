@@ -88,6 +88,13 @@ let MyLogin = {
 				</div>
 			</div>
 			
+			<!-- busy overlay -->
+			<div class="input-block-overlay-bg" :class="{show:loading}">
+				<div class="input-block-overlay">
+					<img class="busy" src="images/load.gif" />
+				</div>
+			</div>
+			
 			<!-- login dialog -->
 			<div class="contentBox">
 				<div class="top lower" :style="customBgLogin">
@@ -98,10 +105,6 @@ let MyLogin = {
 				</div>
 				
 				<div class="content" :class="{ badAuth:badAuth }">
-					
-					<div class="input-block-overlay" v-if="loading">
-						<img src="images/load.gif" />
-					</div>
 					
 					<input class="default" type="text"
 						@keyup="badAuth = false"
@@ -124,10 +127,11 @@ let MyLogin = {
 							:naked="true"
 						/>
 						
-						<my-button image="ok.png"
+						<my-button
 							@trigger="authenticate"
 							:active="isValid"
 							:caption="message.login[language]"
+							:image="loading ? 'load.gif' : 'ok.png'"
 							:right="true"
 						/>
 					</div>
@@ -378,7 +382,7 @@ let MyLogin = {
 			);
 		},
 		
-		// authentication successful, prepare appliation load
+		// authentication successful, prepare application load
 		appEnable(loginId,loginName) {
 			let token = JSON.parse(atob(this.token.split('.')[1]));
 			this.$store.commit('isAdmin',token.admin);

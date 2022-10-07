@@ -3,6 +3,7 @@ import MyBuilderPreset    from './builderPreset.js';
 import MyBuilderPgTrigger from './builderPgTrigger.js';
 import MyBuilderPgIndex   from './builderPgIndex.js';
 import {
+	isAttributeFiles,
 	isAttributeRelationship,
 	isAttributeRelationship11
 } from '../shared/attribute.js';
@@ -37,6 +38,7 @@ let MyBuilderRelation = {
 				<table class="default-inputs" v-if="showAttributes">
 					<thead>
 						<tr>
+							<th>{{ capGen.actions }}</th>
 							<th>{{ capGen.icon }}</th>
 							<th>{{ capGen.name }}</th>
 							<th>{{ capGen.id }}</th>
@@ -49,7 +51,6 @@ let MyBuilderRelation = {
 							<th>{{ capApp.def }}</th>
 							<th>{{ capApp.onUpdate }}</th>
 							<th>{{ capApp.onDelete }}</th>
-							<th></th>
 						</tr>
 					</thead>
 					<tbody>
@@ -57,6 +58,7 @@ let MyBuilderRelation = {
 						<my-builder-attribute
 							:builder-language="builderLanguage"
 							:foreign="false"
+							:readonly="readonly"
 							:relation="relation"
 						/>
 						
@@ -67,6 +69,7 @@ let MyBuilderRelation = {
 							:builder-language="builderLanguage"
 							:foreign="false"
 							:key="atr.id"
+							:readonly="readonly"
 							:relation="relation"
 						/>
 						
@@ -87,6 +90,7 @@ let MyBuilderRelation = {
 								:builder-language="builderLanguage"
 								:foreign="true"
 								:key="atr.id+'_outsideIn'"
+								:readonly="true"
 								:relation="relationIdMap[atr.relationId]"
 							/>
 						</template>
@@ -104,15 +108,16 @@ let MyBuilderRelation = {
 				<table class="indexes default-inputs" v-if="showIndexes">
 					<thead>
 						<tr>
+							<th>{{ capGen.actions }}</th>
 							<th>{{ capApp.indexAttributes }}</th>
 							<th>{{ capApp.indexAutoFki }}</th>
 							<th>{{ capApp.indexUnique }}</th>
-							<th></th>
 						</tr>
 					</thead>
 					<tbody>
 						<!-- new index -->
 						<my-builder-pg-index
+							:readonly="readonly"
 							:relation="relation"
 						/>
 						
@@ -121,6 +126,7 @@ let MyBuilderRelation = {
 							v-for="ind in relation.indexes"
 							:key="ind.id"
 							:index="ind"
+							:readonly="readonly"
 							:relation="relation"
 						/>
 					</tbody>
@@ -137,6 +143,7 @@ let MyBuilderRelation = {
 				<table class="default-inputs" v-if="showTriggers">
 					<thead>
 						<tr>
+							<th>{{ capGen.actions }}</th>
 							<th>{{ capApp.fires }}</th>
 							<th>{{ capGen.id }}</th>
 							<th>{{ capApp.onInsert }}</th>
@@ -146,15 +153,13 @@ let MyBuilderRelation = {
 							<th>{{ capApp.isConstraint }}</th>
 							<th>{{ capApp.isDeferrable }}</th>
 							<th>{{ capApp.isDeferred }}</th>
-							<th>{{ capApp.codeCondition }}</th>
-							<th>{{ capGen.button.open }}</th>
-							<th>{{ capApp.execute }}</th>
-							<th></th>
+							<th colspan="2">{{ capApp.execute }}</th>
 						</tr>
 					</thead>
 					<tbody>
 						<!-- new record -->
 						<my-builder-pg-trigger
+							:readonly="readonly"
 							:relation="relation"
 						/>
 						
@@ -162,6 +167,7 @@ let MyBuilderRelation = {
 						<my-builder-pg-trigger
 							v-for="trg in relation.triggers"
 							:key="trg.id"
+							:readonly="readonly"
 							:relation="relation"
 							:pg-trigger="trg"
 						/>
@@ -179,17 +185,18 @@ let MyBuilderRelation = {
 				<table class="preset-records default-inputs" v-if="showPresets">
 					<thead>
 						<tr>
+							<th>{{ capGen.actions }}</th>
 							<th>{{ capGen.name }}</th>
 							<th>{{ capApp.presetProtected }}</th>
 							<th>{{ capApp.presetValues }}</th>
 							<th>{{ capApp.presetValuesPreview }}</th>
-							<th></th>
 						</tr>
 					</thead>
 					
 					<!-- new record -->
 					<my-builder-preset
 						:builder-language="builderLanguage"
+						:readonly="readonly"
 						:relation="relation"
 					/>
 					
@@ -199,6 +206,7 @@ let MyBuilderRelation = {
 						:builder-language="builderLanguage"
 						:key="p.id"
 						:preset="p"
+						:readonly="readonly"
 						:relation="relation"
 					/>
 				</table>
@@ -259,12 +267,14 @@ let MyBuilderRelation = {
 					<table>
 						<thead>
 							<tr>
-								<th v-for="a in relation.attributes">{{ a.name }}</th>
+								<th v-for="a in attributesNotFiles">{{ a.name }}</th>
 							</tr>
 						</thead>
 						<tbody>
 							<tr v-for="r in previewRows">
-								<td v-for="v in r">{{ v }}</td>
+								<td v-for="v in r" :title="v">
+									{{ displayDataValue(v) }}
+								</td>
 							</tr>
 						</tbody>
 					</table>
@@ -279,8 +289,9 @@ let MyBuilderRelation = {
 		}
 	},
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	data:function() {
 		return {
@@ -288,6 +299,7 @@ let MyBuilderRelation = {
 			previewOffset:0,
 			previewRows:[],
 			previewRowCount:0,
+			previewValueLength:50,
 			showAttributes:true,
 			showExternal:false,
 			showGraph:false,
@@ -298,6 +310,10 @@ let MyBuilderRelation = {
 		};
 	},
 	computed:{
+		attributesNotFiles:function() {
+			if(this.relation === false) return [];
+			return this.relation.attributes.filter(v => !this.isAttributeFiles(v.content));
+		},
 		relation:function() {
 			return typeof this.relationIdMap[this.id] === 'undefined'
 				? false : this.relationIdMap[this.id];
@@ -416,12 +432,20 @@ let MyBuilderRelation = {
 	},
 	methods:{
 		// externals
+		isAttributeFiles,
 		isAttributeRelationship,
 		isAttributeRelationship11,
 		
 		// presentation
 		displayArrow:function(state) {
 			return state ? 'images/triangleDown.png' : 'images/triangleRight.png';
+		},
+		displayDataValue:function(v) {
+			if(typeof v !== 'string')
+				return v;
+			
+			return v.length < this.previewValueLength
+				? v : v.substring(0, this.previewValueLength-3) + '...';
 		},
 		
 		// actions

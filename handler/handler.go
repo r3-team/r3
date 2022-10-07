@@ -11,6 +11,10 @@ import (
 	"github.com/gofrs/uuid"
 )
 
+var (
+	NoImage []byte
+)
+
 func GetStringFromPart(part *multipart.Part) string {
 	buf := new(bytes.Buffer)
 	buf.ReadFrom(part)
@@ -43,6 +47,9 @@ func ReadGetterFromUrl(r *http.Request, name string) (string, error) {
 		return "", fmt.Errorf("missing getter: %s", name)
 	}
 	return keys[0], nil
+}
+func SetNoImage(v []byte) {
+	NoImage = v
 }
 
 func AbortRequest(w http.ResponseWriter, context string, err error, errMessageUser string) {

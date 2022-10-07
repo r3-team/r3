@@ -1,3 +1,21 @@
+import MyStore from '../../stores/store.js';
+
+export function copyValueDialog(captionTop,captionBody,copyClipboardValue) {
+	let copy = function() {
+		navigator.clipboard.writeText(copyClipboardValue);
+	};
+	
+	MyStore.commit('dialog',{
+		captionBody:captionBody,
+		captionTop:captionTop,
+		buttons:[{
+			caption:MyStore.getters.captions.generic.button.copyClipboard,
+			exec:copy,
+			image:'copyClipboard.png'
+		}]
+	});
+};
+
 export function getBuildFromVersion(fullVersion) {
 	let m = fullVersion.match(/\d+\.\d+\.\d+\.(\d+)/);
 	

@@ -304,9 +304,14 @@ func dataToCsv(writer *csv.Writer, get types.DataGet, locUser *time.Location,
 				}
 			case string:
 				stringValues[pos] = v
+			case int32:
+				if columns[pos].Display == "time" {
+					stringValues[pos] = time.Unix(int64(v), 0).UTC().Format("15:04:05")
+				} else {
+					stringValues[pos] = fmt.Sprintf("%v", value)
+				}
 			case int64:
 				column := columns[pos]
-
 				switch column.Display {
 				case "datetime":
 					fallthrough
@@ -335,8 +340,6 @@ func dataToCsv(writer *csv.Writer, get types.DataGet, locUser *time.Location,
 					}
 
 					stringValues[pos] = time.Unix(v, 0).In(loc).Format(format)
-				case "time":
-					stringValues[pos] = time.Unix(v, 0).UTC().Format("15:04:05")
 				default:
 					stringValues[pos] = fmt.Sprintf("%v", value)
 				}

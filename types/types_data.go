@@ -90,6 +90,14 @@ type DataGetResult struct {
 	IndexesPermNoSet   []int               `json:"indexesPermNoSet"`   // if getPerm, relation indexes of which records may not be updated
 	Values             []interface{}       `json:"values"`             // expression values, same order as requested expressions
 }
+type DataGetValueFile struct {
+	Id      uuid.UUID `json:"id"`
+	Name    string    `json:"name"`
+	Hash    string    `json:"hash"`
+	Size    int64     `json:"size"`
+	Version int64     `json:"version"`
+	Changed int64     `json:"changed"`
+}
 
 // data SET request
 type DataSetAttribute struct {
@@ -98,6 +106,18 @@ type DataSetAttribute struct {
 	OutsideIn     bool        `json:"outsideIn"`     // not from this index, comes from other relation via relationship attribute
 	Value         interface{} `json:"value"`
 }
+type DataSetEncKeys struct {
+	LoginId int64  `json:"loginId"`
+	KeyEnc  string `json:"keyEnc"` // encrypted data key, stored as base64
+}
+type DataSetFileChange struct {
+	Action  string `json:"action"`  // create, delete, rename, update
+	Name    string `json:"name"`    // file name for reference in change logs (new name if rename action)
+	Version int64  `json:"version"` // file version (specific version if update action, -1 otherwise)
+}
+type DataSetFileChanges struct {
+	FileIdMapChange map[uuid.UUID]DataSetFileChange `json:"fileIdMapChange"`
+}
 type DataSet struct {
 	RelationId  uuid.UUID          `json:"relationId"`  // relation ID to update
 	AttributeId uuid.UUID          `json:"attributeId"` // attribute ID of relationship to join with
@@ -105,19 +125,6 @@ type DataSet struct {
 	RecordId    int64              `json:"recordId"`    // record ID to update (0 if new)
 	Attributes  []DataSetAttribute `json:"attributes"`  // attribute values to set
 	EncKeysSet  []DataSetEncKeys   `json:"encKeysSet"`  // data encryption keys to store, encrypted with login´s public key
-}
-type DataSetEncKeys struct {
-	LoginId int64  `json:"loginId"`
-	KeyEnc  string `json:"keyEnc"` // encrypted data key, stored as base64
-}
-type DataSetFile struct {
-	Id   uuid.UUID `json:"id"`
-	Name string    `json:"name"`
-	New  bool      `json:"new"`
-	Size int64     `json:"size"`
-}
-type DataSetFiles struct {
-	Files []DataSetFile `json:"files"`
 }
 type DataSetResult struct {
 	IndexRecordIds map[int]int64 `json:"indexRecordIds"` // IDs of relation records, key: relation index

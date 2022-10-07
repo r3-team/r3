@@ -1,5 +1,6 @@
 import MyBuilderIconInput from './builderIconInput.js';
 import {getQueryTemplate} from '../shared/query.js';
+import {copyValueDialog}  from '../shared/generic.js';
 export {MyBuilderCollections as default};
 
 let MyBuilderCollectionsItem = {
@@ -8,42 +9,47 @@ let MyBuilderCollectionsItem = {
 	template:`<tbody>
 		<tr>
 			<td>
-				<my-button image="open.png"
-					v-if="!isNew"
-					@trigger="open"
-				/>
+				<div class="row">
+					<my-button image="save.png"
+						@trigger="set"
+						:active="hasChanges && !readonly"
+						:caption="isNew ? capGen.button.create : ''"
+						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+					/>
+					<my-button image="open.png"
+						v-if="!isNew"
+						@trigger="open"
+						:captionTitle="capGen.button.open"
+					/>
+					<my-button image="delete.png"
+						v-if="!isNew"
+						@trigger="delAsk"
+						:active="!readonly"
+						:cancel="true"
+						:captionTitle="capGen.button.delete"
+					/>
+				</div>
 			</td>
 			<td>
 				<my-builder-icon-input
 					@input="iconId = $event"
 					:iconIdSelected="iconId"
 					:module="module"
+					:readonly="readonly"
 				/>
 			</td>
 			<td>
 				<input class="long"
 					v-model="name"
+					:disabled="readonly"
 					:placeholder="isNew ? capApp.new : ''"
 				/>
 			</td>
 			<td>
 				<my-button image="visible1.png"
-					@trigger="showInfo"
+					@trigger="copyValueDialog(collection.name,collection.id,collection.id)"
 					:active="!isNew"
 				/>
-			</td>
-			<td>
-				<div class="row">
-					<my-button image="save.png"
-						@trigger="set"
-						:active="hasChanges"
-					/>
-					<my-button image="delete.png"
-						v-if="!isNew"
-						@trigger="delAsk"
-						:cancel="true"
-					/>
-				</div>
 			</td>
 		</tr>
 	</tbody>`,
@@ -59,7 +65,8 @@ let MyBuilderCollectionsItem = {
 				query:null,
 				inHeader:[]
 			}}
-		}
+		},
+		readonly:{ type:Boolean, required:true }
 	},
 	data:function() {
 		return {
@@ -82,21 +89,12 @@ let MyBuilderCollectionsItem = {
 	},
 	methods:{
 		// externals
+		copyValueDialog,
 		getQueryTemplate,
 		
 		// actions
 		open:function() {
 			this.$router.push('/builder/collection/'+this.collection.id);
-		},
-		showInfo:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.collection.id,
-				captionTop:this.collection.name,
-				buttons:[{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
 		},
 		
 		// backend calls
@@ -163,17 +161,17 @@ let MyBuilderCollections = {
 			<table>
 				<thead>
 					<tr>
-						<th>{{ capGen.button.open }}</th>
+						<th>{{ capGen.actions }}</th>
 						<th>{{ capGen.icon }}</th>
 						<th>{{ capGen.name }}</th>
 						<th>{{ capGen.id }}</th>
-						<th></th>
 					</tr>
 				</thead>
 				
 				<!-- new collection -->
 				<my-builder-collections-item
 					:module="module"
+					:readonly="readonly"
 				/>
 				
 				<!-- existing collections -->
@@ -182,12 +180,14 @@ let MyBuilderCollections = {
 					:collection="c"
 					:key="c.id"
 					:module="module"
+					:readonly="readonly"
 				/>
 			</table>
 		</div>
 	</div>`,
 	props:{
-		id:{ type:String, required:true }
+		id:      { type:String,  required:true },
+		readonly:{ type:Boolean, required:true }
 	},
 	computed:{
 		module:function() {

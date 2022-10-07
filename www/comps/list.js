@@ -2,13 +2,15 @@ import isDropdownUpwards  from './shared/layout.js';
 import MyFilters          from './filters.js';
 import MyInputCollection  from './inputCollection.js';
 import MyInputOffset      from './inputOffset.js';
+import MyListAggregate    from './listAggregate.js';
+import MyListColumnBatch  from './listColumnBatch.js';
 import MyListCsv          from './listCsv.js';
 import MyValueRich        from './valueRich.js';
 import {consoleError}     from './shared/error.js';
-import {getColumnTitle}   from './shared/column.js';
 import {srcBase64}        from './shared/image.js';
 import {getCaption}       from './shared/language.js';
 import {isAttributeFiles} from './shared/attribute.js';
+import {getColumnTitle}   from './shared/column.js';
 import {
 	fieldOptionGet,
 	fieldOptionSet
@@ -36,10 +38,12 @@ let MyList = {
 		MyFilters,
 		MyInputCollection,
 		MyInputOffset,
+		MyListAggregate,
+		MyListColumnBatch,
 		MyListCsv,
 		MyValueRich
 	},
-	template:`<div class="list"
+	template:`<div class="list" ref="content"
 		@keydown="keyDown"
 		v-click-outside="escape"
 		:class="{shade:!isInput, singleField:isSingleField, asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly }"
@@ -253,8 +257,8 @@ let MyList = {
 						:tight="true"
 					/>
 					
-					<my-button image="filter.png"
-						v-if="isSingleField"
+					<my-button image="filterCog.png"
+						v-if="showFiltersAction"
 						@trigger="toggleUserFilters"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
@@ -299,7 +303,7 @@ let MyList = {
 				</div>
 			</div>
 			
-			<div v-if="showCsv || showFilters || showAutoRenew">
+			<div class="list-headers" v-if="showAggregators || showCsv || showFilters || showAutoRenew">
 				<!-- list header functions -->
 				
 				<!-- auto renew -->
@@ -322,67 +326,81 @@ let MyList = {
 					</div>
 				</div>
 				
+				<!-- filters -->
 				<div class="list-header" v-if="showFilters">
 					<my-filters class="default-inputs"
 						v-model="filtersUser"
 						@apply="reloadInside('filtersUser')"
+						@close="showFilters = false"
 						@reset="reloadInside('filtersUser')"
-						:addOnStart="true"
 						:columns="columns"
 						:disableContent="['fieldChanged','subQuery']"
 						:joins="joins"
-						:showApply="true"
 						:showReset="true"
+						:userFilter="true"
 					>
 						<template #title>
 							<div class="list-header-title">
-								<img src="images/filter.png" />
-								<span>{{ capGen.filters }}</span>
+								<img src="images/filterCog.png" />
+								<span>{{ capApp.filtersExpert }}</span>
 							</div>
 						</template>
 					</my-filters>
 				</div>
 				
-				<div class="list-header" v-if="showCsv">
-					<my-list-csv
-						@reload="get"
-						:columns="columns"
-						:expressions="expressions"
-						:filters="filters.concat(filtersParsedQuick).concat(filtersParsedUser)"
-						:isExport="csvExport"
-						:isImport="csvImport"
-						:joins="getRelationsJoined(joins)"
-						:orders="orders"
-						:query="query"
-					/>
-				</div>
+				<!-- CSV -->
+				<my-list-csv
+					v-if="showCsv"
+					@reload="get"
+					:columns="columns"
+					:expressions="expressions"
+					:filters="filters.concat(filtersParsedQuick).concat(filtersParsedUser)"
+					:isExport="csvExport"
+					:isImport="csvImport"
+					:joins="relationsJoined"
+					:orders="orders"
+					:query="query"
+				/>
 			</div>
 			
+			<!-- list results as table -->
 			<div class="layoutTable"
 				v-if="layout === 'table'"
-				:class="{ 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
+				:class="{ scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
 				:id="usesPageHistory ? scrollFormId : null"
 			>
-				<!-- list results as HTML table -->
 				<table :class="{ 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
 					<thead v-if="header">
-						<!-- attribute headers -->
 						<tr>
 							<th v-if="hasBulkActions" class="minimum checkbox">
 								<img class="clickable" tabindex="0"
 									@click="selectRowsAllToggle"
 									@keyup.enter.space.stop="selectRowsAllToggle"
-									:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkbox1.png' : 'images/checkbox0.png'"
+									:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
 								/>
 							</th>
-							<th
-								v-for="b in columnBatches"
-								@click.left="clickColumn(b)"
-								@click.right.prevent="clickColumnRight(b)"
-								:class="{ clickable:b.columnIndexSortBy !== -1 }"
-								:style="b.style"
-							>
-								{{ b.caption+displaySortDir(b) }}
+							<th v-for="(b,i) in columnBatches" :style="b.style" class="no-padding">
+								<my-list-column-batch
+									@close="columnBatchIndexOption = -1"
+									@del-aggregator="setAggregators(i,null)"
+									@del-order="setOrder(b,null)"
+									@set-aggregator="setAggregators(i,$event)"
+									@set-filters="filtersColumn = $event;reloadInside('filtersColumn')"
+									@set-order="setOrder(b,$event)"
+									@toggle="clickColumn(i)"
+									:aggregator="columnBatchIndexMapAggr[i]"
+									:columnBatch="b"
+									:columns="columns"
+									:columnSortPos="getColumnBatchSortPos(b)"
+									:filters="filters"
+									:filtersColumn="filtersColumn"
+									:lastInRow="i === columnBatches.length - 1"
+									:joins="relationsJoined"
+									:orders="orders"
+									:relationId="query.relationId"
+									:rowCount="count"
+									:show="columnBatchIndexOption === i"
+								/>
 							</th>
 						</tr>
 					</thead>
@@ -443,7 +461,7 @@ let MyList = {
 								<img class="clickable" tabindex="0"
 									@click="selectRow(ri)"
 									@keyup.enter.space.stop="selectRow(ri)"
-									:src="selectedRows.includes(ri) ? 'images/checkbox1.png' : 'images/checkbox0.png'"
+									:src="selectedRows.includes(ri) ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
 								/>
 							</td>
 							
@@ -482,6 +500,18 @@ let MyList = {
 							</td>
 						</tr>
 					</tbody>
+					<tfoot>
+						<!-- result aggregations -->
+						<my-list-aggregate ref="aggregations"
+							:columnBatches="columnBatches"
+							:columnBatchIndexMapAggr="columnBatchIndexMapAggr"
+							:columns="columns"
+							:filters="filtersCombined"
+							:leaveOneEmpty="hasBulkActions"
+							:joins="relationsJoined"
+							:relationId="query.relationId"
+						/>
+					</tfoot>
 				</table>
 			</div>
 			
@@ -629,32 +659,37 @@ let MyList = {
 	data:function() {
 		return {
 			// list state
-			autoRenewInput:null,     // current auto renew input value
-			autoRenewInputLast:null, // last set auto renew input value (to compare against)
-			autoRenewTimer:null,     // interval timer for auto renew
-			choiceId:null,           // currently active choice
+			autoRenewInput:null,        // current auto renew input value
+			autoRenewInputLast:null,    // last set auto renew input value (to compare against)
+			autoRenewTimer:null,        // interval timer for auto renew
+			choiceId:null,              // currently active choice
+			columnBatchIndexOption:-1,  // show options for column batch by index
 			focused:false,
 			inputAutoSelectDone:false,
 			inputDropdownUpwards:false, // show dropdown above input
-			orderOverwritten:false,
-			rowsFetching:false,  // row values are being fetched
-			selectedRows:[],     // bulk selected rows by row index
-			showAutoRenew:false, // show UI for auto list renew
-			showCsv:false,       // show UI for CSV import/export
-			showFilters:false,   // show UI for user filters
-			showTable:false,     // show regular list table as view or input dropdown
+			orderOverwritten:false,     // sort options were changed by user
+			rowsFetching:false,         // row values are being fetched
+			selectedRows:[],            // bulk selected rows by row index
+			showAggregators:false,      // show UI for aggregators
+			showAutoRenew:false,        // show UI for auto list renew
+			showCsv:false,              // show UI for CSV import/export
+			showFilters:false,          // show UI for user filters
+			showFiltersAction:false,    // show UI for expert filters
+			showTable:false,            // show regular list table as view or input dropdown
 			
 			// list card layout state
 			orderByColumnBatchIndex:-1,
 			
 			// list data
-			count:0,         // total result set count
-			limit:0,         // current result limit
-			offset:0,        // current result offset
-			orders:[],       // column orderings, copied on mount, changable by user
-			rows:[],         // current result set
-			filtersUser:[],  // current user filters, based on complex conditions
-			quickFilter:'',  // current quick text filter
+			columnBatchIndexMapAggr:{}, // map of aggregators, key: column batch index
+			count:0,          // total result set count
+			limit:0,          // current result limit
+			offset:0,         // current result offset
+			orders:[],        // column orderings, copied on mount, changable by user
+			rows:[],          // current result set
+			filtersColumn:[], // current column filters
+			filtersUser:[],   // current user filters
+			quickFilter:'',   // current quick text filter
 			
 			// list constants
 			refTabindex:'input_row_', // prefix for vue references to tabindex elements
@@ -668,8 +703,7 @@ let MyList = {
 		// columns can be batched by using the same batch number
 		// first column in batch is used for header caption and ordering
 		columnBatches:function() {
-			let out  = [];
-			
+			let out = [];
 			let addColumn = (column,index) => {
 				const hidden = column.display === 'hidden' || (this.isMobile && !column.onMobile);
 				const atr    = this.attributeIdMap[column.attributeId];
@@ -734,6 +768,20 @@ let MyList = {
 				this.choices.length === 0 ? null : this.choices[0].id
 			);
 		},
+		filtersCombined:function() {
+			let filters = this.filters
+				.concat(this.filtersParsedColumn)
+				.concat(this.filtersParsedQuick)
+				.concat(this.filtersParsedUser)
+				.concat(this.choiceFilters);
+			
+			if(this.anyInputRows)
+				filters.push(this.getQueryAttributesPkFilter(
+					this.query.relationId,this.inputRecordIds,0,true
+				));
+			
+			return filters;
+		},
 		hasBulkActions:function() {
 			if(this.isInput || this.rows.length === 0)
 				return false;
@@ -747,6 +795,10 @@ let MyList = {
 		hasChoices:function() {
 			return this.query.choices.length > 1;
 		},
+		hasCreate:function() {
+			if(this.joins.length === 0) return false;
+			return this.joins[0].applyCreate && this.rowSelect;
+		},
 		hasGalleryIcon:function() {
 			return this.columns.length !== 0 &&
 				this.columns[0].display === 'gallery' &&
@@ -754,10 +806,6 @@ let MyList = {
 				(!this.isInput || this.rowsInput.length !== 0) &&
 				this.attributeIdMap[this.columns[0].attributeId].content === 'files'
 			;
-		},
-		hasCreate:function() {
-			if(this.joins.length === 0) return false;
-			return this.joins[0].applyCreate && this.rowSelect;
 		},
 		hasUpdate:function() {
 			if(this.joins.length === 0) return false;
@@ -811,6 +859,11 @@ let MyList = {
 		},
 		
 		// filters
+		filtersParsedColumn:function() {
+			return this.getFiltersEncapsulated(
+				JSON.parse(JSON.stringify(this.filtersColumn))
+			);
+		},
 		filtersParsedUser:function() {
 			return this.getFiltersEncapsulated(
 				JSON.parse(JSON.stringify(this.filtersUser))
@@ -823,12 +876,16 @@ let MyList = {
 			let out = [];
 			for(let i = 0, j = this.columns.length; i < j; i++) {
 				let c = this.columns[i];
+				let a = this.attributeIdMap[c.attributeId];
 				
-				if(c.aggregator !== null && c.aggregator !== 'record')
+				if(c.subQuery || this.isAttributeFiles(a.content) ||
+					(c.aggregator !== null && c.aggregator !== 'record')) {
+					
 					continue;
+				}
 				
 				out.push({
-					connector:i === 0 ? 'AND' : 'OR',
+					connector:out.length === 0 ? 'AND' : 'OR',
 					operator:'ILIKE',
 					side0:{
 						attributeId:c.attributeId,
@@ -845,11 +902,12 @@ let MyList = {
 		},
 		
 		// simple
-		anyInputRows: function() { return this.inputRecordIds.length !== 0; },
-		autoSelect:   function() { return this.inputIsNew && this.inputAutoSelect !== 0 && !this.inputAutoSelectDone; },
-		choiceFilters:function() { return this.getChoiceFilters(this.choices,this.choiceId); },
-		expressions:  function() { return this.getQueryExpressions(this.columns); },
-		joins:        function() { return this.fillRelationRecordIds(this.query.joins); },
+		anyInputRows:   function() { return this.inputRecordIds.length !== 0; },
+		autoSelect:     function() { return this.inputIsNew && this.inputAutoSelect !== 0 && !this.inputAutoSelectDone; },
+		choiceFilters:  function() { return this.getChoiceFilters(this.choices,this.choiceId); },
+		expressions:    function() { return this.getQueryExpressions(this.columns); },
+		joins:          function() { return this.fillRelationRecordIds(this.query.joins); },
+		relationsJoined:function() { return this.getRelationsJoined(this.joins); },
 		
 		// stores
 		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
@@ -863,6 +921,12 @@ let MyList = {
 	},
 	mounted:function() {
 		this.showTable = !this.isInput;
+		
+		// react to field resize
+		if(!this.Input) {
+			window.addEventListener('resize',this.resize);
+			this.resize();
+		}
 		
 		// setup watchers
 		this.$watch('formLoading',(val) => {
@@ -894,6 +958,7 @@ let MyList = {
 				if(this.routeChangeFieldReload(newVals,oldVals)) {
 					this.paramsUpdated();
 					this.reloadOutside();
+					this.orderOverwritten = true;
 				}
 			});
 		}
@@ -914,9 +979,16 @@ let MyList = {
 			this.autoRenewInput = this.fieldOptionGet(this.fieldId,'autoRenew',this.autoRenew);
 			this.setAutoRenewTimer(false);
 		}
+		
+		// set initial aggregators
+		this.columnBatchIndexMapAggr = this.fieldOptionGet(this.fieldId,'columnBatchIndexMapAggr',{});
 	},
 	beforeUnmount:function() {
 		this.setAutoRenewTimer(true);
+	},
+	unmounted:function() {
+		if(!this.Input)
+			window.removeEventListener('resize',this.resize);
 	},
 	methods:{
 		// externals
@@ -945,14 +1017,8 @@ let MyList = {
 			
 			return state ? 'radio1.png' : 'radio0.png';
 		},
-		displaySortDir:function(columnBatch) {
-			const orderPos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
-			
-			if(orderPos !== -1) {
-				let postfix = this.orders.length === 1 ? '' : (orderPos+1);
-				return (this.orders[orderPos].ascending ? ' \u25B2' : ' \u25BC') + postfix;
-			}
-			return '';
+		resize:function() {
+			this.showFiltersAction = this.$refs.content.offsetWidth > 700;
 		},
 		updateDropdownDirection:function() {
 			let headersPx  = 200; // rough height in px of all headers (menu/form) combined
@@ -974,8 +1040,9 @@ let MyList = {
 		reloadInside:function(entity) {
 			// inside state has changed, reload list (not relevant for list input)
 			switch(entity) {
-				case 'dropdown':    // fallthrough
-				case 'filterQuick': // fallthrough
+				case 'dropdown':      // fallthrough
+				case 'filterQuick':   // fallthrough
+				case 'filtersColumn': // fallthrough
 				case 'filtersUser': this.offset = 0; break;
 				case 'choice':
 					this.offset = 0;
@@ -991,8 +1058,8 @@ let MyList = {
 			
 			// update route parameters, reloads list via watcher
 			// enables browser history for fullpage list navigation
-			//  special cases: user filters & manuel reloads (no page param change)
-			if(this.usesPageHistory && entity !== 'filtersUser' && entity !== 'manual')
+			//  special cases: column/user filters & manuel reloads (no page param change)
+			if(this.usesPageHistory && !['filtersColumn','filtersUser','manual'].includes(entity))
 				return this.paramsUpdate(true);
 			
 			this.get();
@@ -1122,11 +1189,6 @@ let MyList = {
 		},
 		toggleUserFilters:function() {
 			this.showFilters = !this.showFilters;
-			
-			if(!this.showFilters) {
-				this.filtersUser = [];
-				this.reloadInside('filtersUser');
-			}
 		},
 		toggleRecordId:function(id,middleClick) {
 			if(this.inputRecordIds.includes(id))
@@ -1165,46 +1227,9 @@ let MyList = {
 		},
 		
 		// user actions, table layout
-		clickColumn:function(columnBatch) {
-			if(columnBatch.columnIndexSortBy === -1)
-				return;
-			
-			const orderPos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
-			if(orderPos === -1) {
-				const col = this.columns[columnBatch.columnIndexSortBy];
-				
-				// not ordered by this column -> add as ascending order
-				if(col.subQuery) {
-					this.orders.push({
-						expressionPos:columnBatch.columnIndexSortBy, // equal to expression index
-						ascending:true
-					});
-				}
-				else {
-					this.orders.push({
-						attributeId:col.attributeId,
-						index:col.index,
-						ascending:true
-					});
-				}
-			}
-			else if(this.orders[orderPos].ascending) {
-				
-				// ordered ascending by this column -> change to descending
-				this.orders[orderPos].ascending = false;
-			}
-			else {
-				// ordered descending by this column -> remove
-				this.orders.splice(orderPos,1);
-			}
-			this.reloadInside('order');
-		},
-		clickColumnRight:function(columnBatch) {
-			const orderPos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
-			if(orderPos !== -1) {
-				this.orders.splice(orderPos,1);
-				this.reloadInside('order');
-			}
+		clickColumn:function(columnBatchIndex) {
+			this.columnBatchIndexOption = this.columnBatchIndexOption === columnBatchIndex
+				? -1 : columnBatchIndex;
 		},
 		clickRow:function(row,middleClick) {
 			const recordId = row.indexRecordIds['0'];
@@ -1252,6 +1277,15 @@ let MyList = {
 			}
 			this.reloadInside('order');
 		},
+		setAggregators:function(columnBatchIndex,aggregator) {
+			if(aggregator !== null)
+				this.columnBatchIndexMapAggr[columnBatchIndex] = aggregator;
+			else
+				delete(this.columnBatchIndexMapAggr[columnBatchIndex]);
+			
+			this.fieldOptionSet(this.fieldId,'columnBatchIndexMapAggr',this.columnBatchIndexMapAggr);
+			this.$refs.aggregations.get();
+		},
 		setAutoRenewTimer:function(justClear) {
 			// clear last timer
 			if(this.autoRenewTimer !== null)
@@ -1269,6 +1303,42 @@ let MyList = {
 			
 			// store timer option for field
 			this.fieldOptionSet(this.fieldId,'autoRenew',this.autoRenewInput);
+		},
+		setOrder:function(columnBatch,directionAsc) {
+			// remove initial sorting when changing anything
+			if(!this.orderOverwritten)
+				this.orders = [];
+			
+			const pos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
+			
+			// remove sort if direction null or same sort option was chosen
+			if(pos !== -1 && (directionAsc === null || this.orders[pos].ascending === directionAsc)) {
+				this.orders.splice(pos,1);
+			}
+			else {
+				if(pos === -1) {
+					// add new sort
+					const col = this.columns[columnBatch.columnIndexSortBy];
+					if(col.subQuery) {
+						this.orders.push({
+							expressionPos:columnBatch.columnIndexSortBy, // equal to expression index
+							ascending:directionAsc
+						});
+					}
+					else {
+						this.orders.push({
+							attributeId:col.attributeId,
+							index:col.index,
+							ascending:directionAsc
+						});
+					}
+				}
+				else if(this.orders[pos].ascending !== directionAsc) {
+					// overwrite sort direction
+					this.orders[pos].ascending = directionAsc;
+				}
+			}
+			this.reloadInside('order');
 		},
 		toggleOrderBy:function() {
 			this.orders[0].ascending = !this.orders[0].ascending;
@@ -1314,6 +1384,10 @@ let MyList = {
 		},
 		
 		// helpers
+		getColumnBatchSortPos:function(columnBatch) {
+			return !this.orderOverwritten
+				? -1 : this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
+		},
 		getColumnPosInOrder:function(columnIndex) {
 			if(columnIndex === -1)
 				return -1;
@@ -1392,22 +1466,11 @@ let MyList = {
 			if(this.offset !== 0 && this.offset % this.limit !== 0)
 				this.offset -= this.offset % this.limit;
 			
-			// build live filters from user inputs + input records (if set)
-			let filters = this.filters
-				.concat(this.filtersParsedQuick)
-				.concat(this.filtersParsedUser)
-				.concat(this.choiceFilters);
-			
-			if(this.anyInputRows)
-				filters.push(this.getQueryAttributesPkFilter(
-					this.query.relationId,this.inputRecordIds,0,true
-				));
-			
 			ws.send('data','get',{
 				relationId:this.query.relationId,
-				joins:this.getRelationsJoined(this.joins),
+				joins:this.relationsJoined,
 				expressions:this.expressions,
-				filters:filters,
+				filters:this.filtersCombined,
 				orders:this.orders,
 				limit:this.limit,
 				offset:this.offset
@@ -1423,6 +1486,10 @@ let MyList = {
 							this.rowsFetching = false;
 							this.selectReset();
 							
+							// update aggregations as well
+							if(typeof this.$refs.aggregations !== 'undefined')
+								this.$refs.aggregations.get();
+							
 							if(this.isInput)
 								this.$nextTick(this.updateDropdownDirection);
 						},
@@ -1433,7 +1500,6 @@ let MyList = {
 				this.$root.genericError
 			);
 		},
-		
 		getInput:function() {
 			// nothing to get if form is currently loading
 			if(this.formLoading)
@@ -1460,7 +1526,7 @@ let MyList = {
 			
 			ws.send('data','get',{
 				relationId:this.query.relationId,
-				joins:this.getRelationsJoined(this.joins),
+				joins:this.relationsJoined,
 				expressions:this.expressions,
 				filters:filters,
 				orders:this.orders

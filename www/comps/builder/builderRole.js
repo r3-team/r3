@@ -1,3 +1,4 @@
+import MyBuilderCaption from './builderCaption.js';
 export {MyBuilderRole as default};
 
 let MyBuilderRoleAccessCollection = {
@@ -9,14 +10,16 @@ let MyBuilderRoleAccessCollection = {
 				<my-bool
 					@update:modelValue="$emit('apply',collection.id,access === 1 ? -1 : 1)"
 					:modelValue="access === 1 ? true : false"
+					:readonly="readonly"
 				/>
 			</td>
 		</tr>
 	</tbody>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		collection:     { type:Object, required:true },
-		idMapAccess:    { type:Object, required:true }
+		builderLanguage:{ type:String,  required:true },
+		collection:     { type:Object,  required:true },
+		idMapAccess:    { type:Object,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	emits:['apply'],
 	computed:{
@@ -46,6 +49,7 @@ let MyBuilderRoleAccessMenu = {
 				<my-bool
 					@update:modelValue="$emit('apply',menu.id,access === 1 ? -1 : 1)"
 					:modelValue="access === 1 ? true : false"
+					:readonly="readonly"
 				/>
 			</td>
 		</tr>
@@ -61,6 +65,7 @@ let MyBuilderRoleAccessMenu = {
 						:id-map-access="idMapAccess"
 						:key="men.id"
 						:menu="men"
+						:readonly="readonly"
 						:role="role"
 					/>
 				</table>
@@ -68,10 +73,11 @@ let MyBuilderRoleAccessMenu = {
 		</tr>
 	</tbody>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		idMapAccess:    { type:Object, required:true },
-		menu:           { type:Object, required:true },
-		role:           { type:Object, required:true }
+		builderLanguage:{ type:String,  required:true },
+		idMapAccess:    { type:Object,  required:true },
+		menu:           { type:Object,  required:true },
+		readonly:       { type:Boolean, required:true },
+		role:           { type:Object,  required:true }
 	},
 	emits:['apply'],
 	data:function() {
@@ -128,6 +134,7 @@ let MyBuilderRoleAccessRelation = {
 			<td>
 				<select
 					@input="$emit('apply-relation',relation.id,parseInt($event.target.value))"
+					:disabled="readonly"
 					:value="access"
 				>
 					<!-- null state (-1) for relation means: no access -->
@@ -147,8 +154,9 @@ let MyBuilderRoleAccessRelation = {
 			<td>{{ attributeIdMap[atr.id].name }}</td>
 			<td>
 				<select
-					:value="attributeIdMapAccessParsed[atr.id]"
 					@input="$emit('apply-attribute',atr.id,parseInt($event.target.value))"
+					:disabled="readonly"
+					:value="attributeIdMapAccessParsed[atr.id]"
 				>
 					<!-- null state (-1) for attribute means: follow relation -->
 					<option value="-1">{{ capApp.option.accessInherit }}</option>
@@ -160,6 +168,7 @@ let MyBuilderRoleAccessRelation = {
 		</tr>
 	</tbody>`,
 	props:{
+		readonly:            { type:Boolean, required:true },
 		relation:            { type:Object,  required:true },
 		role:                { type:Object,  required:true },
 		showEntries:         { type:Boolean, required:true },
@@ -205,6 +214,7 @@ let MyBuilderRoleAccessRelation = {
 let MyBuilderRole = {
 	name:'my-builder-role',
 	components:{
+		MyBuilderCaption,
 		MyBuilderRoleAccessCollection,
 		MyBuilderRoleAccessMenu,
 		MyBuilderRoleAccessRelation
@@ -214,16 +224,21 @@ let MyBuilderRole = {
 		<div class="top">
 			<div class="area nowrap">
 				<div class="separator"></div>
-				<h1 class="title">
-					{{ capApp.titleOne.replace('{NAME}',role.name) }}
-				</h1>
+				<my-builder-caption
+					v-model="captions.roleTitle"
+					:contentName="capApp.titleOne"
+					:language="builderLanguage"
+					:longInput="true"
+					:readonly="isEveryone"
+				/>
+				<my-button :active="false" :caption="role.name" :naked="true "/>
 			</div>
 		</div>
 		<div class="top lower">
 			<div class="area">
 				<my-button image="save.png"
 					@trigger="set"
-					:active="hasChanges"
+					:active="hasChanges && !readonly"
 					:caption="capGen.button.save"
 				/>
 				<my-button image="refresh.png"
@@ -257,6 +272,7 @@ let MyBuilderRole = {
 						:key="role.id + '_' + rel.id"
 						:relation="rel"
 						:role="role"
+						:readonly="readonly"
 						:relation-id-map-access="accessRelations"
 						:show-entries="relationIdsShown.includes(rel.id)"
 					/>
@@ -284,6 +300,7 @@ let MyBuilderRole = {
 						:key="role.id + '_' + men.id"
 						:menu="men"
 						:role="role"
+						:readonly="readonly"
 					/>
 				</table>
 			</div>
@@ -306,22 +323,29 @@ let MyBuilderRole = {
 						:collection="c"
 						:id-map-access="accessCollections"
 						:key="role.id + '_' + c.id"
+						:readonly="readonly"
 					/>
 				</table>
 			</div>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	watch:{
 		role:{
-			handler:function(v) {
-				if(v !== false) this.reset();
-			},
+			handler:function(v) { if(v !== false) this.reset(); },
 			immediate:true
 		}
+	},
+	mounted:function() {
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted:function() {
+		this.$emit('hotkeysRegister',[]);
 	},
 	data:function() {
 		return {
@@ -329,39 +353,41 @@ let MyBuilderRole = {
 			accessCollections:{},
 			accessMenus:{},
 			accessRelations:{},
+			captions:{},
 			ready:false,
 			relationIdsShown:[]
 		};
 	},
 	computed:{
 		// entities
-		module:function() {
-			return this.role === false
-				? false : this.moduleIdMap[this.role.moduleId];
+		module:(s) => {
+			return s.role === false
+				? false : s.moduleIdMap[s.role.moduleId];
 		},
-		role:function() {
-			return typeof this.roleIdMap[this.id] === 'undefined'
-				? false : this.roleIdMap[this.id];
+		role:(s) => {
+			return typeof s.roleIdMap[s.id] === 'undefined'
+				? false : s.roleIdMap[s.id];
 		},
 		
 		// states
-		hasChanges:function() {
-			return JSON.stringify(this.accessAttributes)  !== JSON.stringify(this.role.accessAttributes)
-				|| JSON.stringify(this.accessCollections) !== JSON.stringify(this.role.accessCollections)
-				|| JSON.stringify(this.accessMenus)       !== JSON.stringify(this.role.accessMenus)
-				|| JSON.stringify(this.accessRelations)   !== JSON.stringify(this.role.accessRelations)
-			;
+		hasChanges:(s) => {
+			return JSON.stringify(s.accessAttributes)  !== JSON.stringify(s.role.accessAttributes)
+				|| JSON.stringify(s.accessCollections) !== JSON.stringify(s.role.accessCollections)
+				|| JSON.stringify(s.accessMenus)       !== JSON.stringify(s.role.accessMenus)
+				|| JSON.stringify(s.accessRelations)   !== JSON.stringify(s.role.accessRelations)
+				|| JSON.stringify(s.captions)          !== JSON.stringify(s.role.captions);
 		},
+		isEveryone:(s) => s.role.name === 'everyone',
 		
 		// stores
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		roleIdMap:  function() { return this.$store.getters['schema/roleIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.builder.role; },
-		capGen:     function() { return this.$store.getters.captions.generic; }
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		roleIdMap:  (s) => s.$store.getters['schema/roleIdMap'],
+		capApp:     (s) => s.$store.getters.captions.builder.role,
+		capGen:     (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// actions
-		apply:function(type,id,access) {
+		apply(type,id,access) {
 			switch(type) {
 				case 'attribute':  this.accessAttributes[id]  = access; break;
 				case 'collection': this.accessCollections[id] = access; break;
@@ -369,14 +395,15 @@ let MyBuilderRole = {
 				case 'relation':   this.accessRelations[id]   = access; break;
 			}
 		},
-		reset:function() {
+		reset() {
 			this.accessAttributes  = JSON.parse(JSON.stringify(this.role.accessAttributes));
 			this.accessCollections = JSON.parse(JSON.stringify(this.role.accessCollections));
 			this.accessMenus       = JSON.parse(JSON.stringify(this.role.accessMenus));
 			this.accessRelations   = JSON.parse(JSON.stringify(this.role.accessRelations));
+			this.captions          = JSON.parse(JSON.stringify(this.role.captions));
 			this.ready = true;
 		},
-		toggleRelationShow:function(id) {
+		toggleRelationShow(id) {
 			let pos = this.relationIdsShown.indexOf(id);
 			
 			if(pos === -1) this.relationIdsShown.push(id);
@@ -384,20 +411,20 @@ let MyBuilderRole = {
 		},
 		
 		// backend calls
-		set:function() {
+		set() {
 			ws.send('role','set',{
 				id:this.role.id,
 				name:this.role.name,
 				content:this.role.content,
 				assignable:this.role.assignable,
 				childrenIds:this.role.childrenIds,
-				captions:this.role.captions,
 				
 				// changable values in this UI
 				accessAttributes:this.accessAttributes,
 				accessCollections:this.accessCollections,
 				accessMenus:this.accessMenus,
-				accessRelations:this.accessRelations
+				accessRelations:this.accessRelations,
+				captions:this.captions
 			},true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError

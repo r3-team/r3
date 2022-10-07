@@ -2,10 +2,29 @@
 package compatible
 
 import (
+	"encoding/json"
 	"r3/types"
 
 	"github.com/jackc/pgtype"
 )
+
+// < 3.1
+// fix legacy file attribute format
+func FixLegacyFileAttributeValue(jsonValue []byte) []types.DataGetValueFile {
+
+	// legacy format
+	var files struct {
+		Files []types.DataGetValueFile `json:"files"`
+	}
+	if err := json.Unmarshal(jsonValue, &files); err == nil && len(files.Files) != 0 {
+		return files.Files
+	}
+
+	// current format
+	var filesNew []types.DataGetValueFile
+	json.Unmarshal(jsonValue, &filesNew)
+	return filesNew
+}
 
 // < 2.6
 // fix empty 'open form' entity for fields

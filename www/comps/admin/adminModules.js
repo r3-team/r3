@@ -6,6 +6,20 @@ export {MyAdminModules as default};
 let MyAdminModulesItem = {
 	name:'my-admin-modules-item',
 	template:`<tr :class="{ grouping:module.parentId === null }">
+		<td>
+			<div class="row">
+				<my-button image="save.png"
+					@trigger="set"
+					:active="hasChanges && !productionMode"
+					:captionTitle="capGen.button.save"
+				/>
+				<my-button image="delete.png"
+					@trigger="delAsk"
+					:active="!productionMode"
+					:cancel="true"
+				/>
+			</div>
+		</td>
 		<td class="noWrap">
 			<div class="row centered">
 				<my-button image="dash.png"
@@ -19,6 +33,7 @@ let MyAdminModulesItem = {
 				</span>
 			</div>
 		</td>
+		<td class="minimum">v{{ module.releaseBuild }}</td>
 		<td class="noWrap">
 			{{ module.releaseDate === 0 ? '-' : getUnixFormat(module.releaseDate,'Y-m-d') }}
 		</td>
@@ -44,11 +59,11 @@ let MyAdminModulesItem = {
 			/>
 		</td>
 		<td class="noWrap">
-			<my-button image="question.png"
+			<my-button image="time.png"
+				v-if="changeLog !== '' && changeLog !== null"
 				@trigger="changeLogShow"
-				:active="changeLog !== '' && changeLog !== null"
-				:caption="module.name+' v'+module.releaseBuild"
-				:naked="true"
+				:caption="capApp.changeLog"
+				:tight="true"
 			/>
 		</td>
 		<td class="noWrap" v-if="builderEnabled">
@@ -56,6 +71,7 @@ let MyAdminModulesItem = {
 				@update:modelValue="ownerWarning"
 				:modelValue="owner"
 				:readonly="productionMode"
+				:reversed="true"
 			/>
 		</td>
 		<td class="noWrap">
@@ -66,20 +82,6 @@ let MyAdminModulesItem = {
 		</td>
 		<td class="default-inputs">
 			<input class="short" v-model.number="position" :disabled="productionMode" />
-		</td>
-		<td>
-			<div class="row">
-				<my-button image="save.png"
-					@trigger="set"
-					:active="hasChanges && !productionMode"
-					:captionTitle="capGen.button.save"
-				/>
-				<my-button image="delete.png"
-					@trigger="delAsk"
-					:active="!productionMode"
-					:cancel="true"
-				/>
-			</div>
 		</td>
 		<td></td>
 	</tr>`,
@@ -362,7 +364,13 @@ let MyAdminModules = {
 			<table class="table-default" v-if="modules.length !== 0">
 				<thead>
 					<tr>
-						<th class="noWrap">
+						<th>
+							<div class="mixed-header">
+								<img src="images/ok.png" />
+								<span>{{ capGen.actions }}</span>
+							</div>
+						</th>
+						<th class="noWrap" colspan="2">
 							<div class="mixed-header">
 								<img src="images/module.png" />
 								<span>{{ capGen.application }}</span>
@@ -376,7 +384,7 @@ let MyAdminModules = {
 						</th>
 						<th class="noWrap">
 							<div class="mixed-header">
-								<img src="images/ok.png" />
+								<img src="images/download.png" />
 								<span>{{ capApp.update }}</span>
 							</div>
 						</th>
@@ -389,7 +397,7 @@ let MyAdminModules = {
 						<th class="noWrap" v-if="builderEnabled">
 							<div class="mixed-header">
 								<img src="images/warning.png" />
-								<span>{{ capApp.owner }}</span>
+								<span>{{ capGen.readonly }}</span>
 							</div>
 						</th>
 						<th class="noWrap">
@@ -404,7 +412,6 @@ let MyAdminModules = {
 								<span>{{ capApp.position }}</span>
 							</div>
 						</th>
-						<th></th>
 						<th class="maximum"></th>
 					</tr>
 				</thead>

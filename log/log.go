@@ -13,22 +13,26 @@ import (
 
 var (
 	access_mx = sync.Mutex{}
+	nodeId    = pgtype.UUID{
+		Status: pgtype.Null,
+	} // ID of the current node
 
-	nodeId    uuid.UUID // ID of the current node
-	outputCli bool      // write logs also to command line
+	outputCli bool // write logs also to command line
 
 	// log levels
 	contextLevel = map[string]int{
-		"application": 1,
-		"backup":      1,
-		"cache":       1,
-		"cluster":     1,
-		"csv":         1,
-		"mail":        1,
-		"ldap":        1,
-		"scheduler":   1,
-		"server":      1,
-		"transfer":    1,
+		"backup":    1,
+		"cache":     1,
+		"cluster":   1,
+		"csv":       1,
+		"imager":    1,
+		"mail":      1,
+		"module":    1,
+		"ldap":      1,
+		"scheduler": 1,
+		"server":    1,
+		"transfer":  1,
+		"websocket": 1,
 	}
 )
 
@@ -40,7 +44,7 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
-	qb.AddList("SELECT", []string{"l.level", "l.context", "l.message", "l.date_milli", "m.name", "n.name"})
+	qb.AddList("SELECT", []string{"l.level", "l.context", "l.message", "l.date_milli", "COALESCE(m.name,'-')", "n.name"})
 	qb.Set("FROM", "instance.log AS l")
 	qb.Add("JOIN", "LEFT JOIN app.module AS m ON m.id = l.module_id")
 	qb.Add("JOIN", "LEFT JOIN instance_cluster.node AS n ON n.id = l.node_id")
@@ -91,6 +95,7 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 
 			return nil, 0, err
 		}
+
 		l.Date = int64(dateMilli / 1000)
 		logs = append(logs, l)
 	}
@@ -134,7 +139,8 @@ func SetNodeId(id uuid.UUID) {
 	access_mx.Lock()
 	defer access_mx.Unlock()
 
-	nodeId = id
+	nodeId.Bytes = id
+	nodeId.Status = pgtype.Present
 }
 
 func Info(context string, message string) {

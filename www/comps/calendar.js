@@ -124,17 +124,25 @@ let MyCalendarMonth = {
 		
 		<!-- optional headers -->
 		<div class="header-optional ics default-inputs" v-if="showIcs">
-		
+			
+			<div v-if="icsToken === ''" class="row gap">
+				<input v-model="icsTokenName" :placeholder="capApp.icsTokenNameHint" />
+				<my-button image="ok.png"
+					@trigger="setIcsTokenFixed"
+					:caption="capApp.button.icsPublish"
+				/>
+			</div>
+			
 			<template v-if="icsToken !== ''">
-				<input :value="icsUrl" />
+				<div class="row gap">
+					<input :value="icsUrl" readonly />
+					<my-button image="copyClipboard.png"
+						@trigger="icsCopyToClipboard"
+						:captionTitle="capGen.button.copyClipboard"
+					/>
+				</div>
 				<p>{{ capApp.icsDesc }}</p>
 			</template>
-			
-			<my-button image="ok.png"
-				@trigger="setIcsTokenFixed"
-				:active="icsToken === ''"
-				:caption="capApp.button.icsPublish"
-			/>
 		</div>
 		
 		<!-- week day header -->
@@ -221,7 +229,6 @@ let MyCalendarMonth = {
 				</div>
 			</div>
 		</div>
-		
 	</div>`,
 	props:{
 		choiceId:   { required:false, default:null },
@@ -252,6 +259,7 @@ let MyCalendarMonth = {
 	data:function() {
 		return {
 			icsToken:'',
+			icsTokenName:'',
 			showIcs:false
 		};
 	},
@@ -452,7 +460,11 @@ let MyCalendarMonth = {
 			}
 			
 			// if already on current month, select 'today'
-			this.$emit('day-selected',this.getDateAtUtcZero(now),false,false);
+			if(this.rowSelect)
+				this.$emit('day-selected',this.getDateAtUtcZero(now),false,false);
+		},
+		icsCopyToClipboard:function() {
+			navigator.clipboard.writeText(this.icsUrl);
 		},
 		
 		// presentation
@@ -546,7 +558,10 @@ let MyCalendarMonth = {
 		
 		// backend calls
 		setIcsTokenFixed:function() {
-			ws.send('login','setTokenFixed',{context:'ics'},true).then(
+			ws.send('login','setTokenFixed',{
+				name:this.icsTokenName,
+				context:'ics'
+			},true).then(
 				res => this.icsToken = res.payload.tokenFixed,
 				this.$root.genericError
 			);

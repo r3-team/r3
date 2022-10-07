@@ -34,7 +34,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// parse getters
+	// parse other getters
 	attributeId, err := handler.ReadUuidGetterFromUrl(r, "attribute_id")
 	if err != nil {
 		handler.AbortRequest(w, context, err, handler.ErrGeneral)
@@ -46,11 +46,25 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get and serve file
-	filePath, err := data.GetFilePath(loginId, attributeId, fileId)
+	// version is only required, if a specific file version is requested
+	// if not set, open the latest one
+	version, err := handler.ReadInt64GetterFromUrl(r, "version")
 	if err != nil {
-		handler.AbortRequest(w, context, err, handler.ErrGeneral)
+		version = -1
+	}
+
+	// check file access privilege
+	if err := data.MayAccessFile(loginId, attributeId); err != nil {
+		handler.AbortRequest(w, context, err, handler.ErrUnauthorized)
 		return
 	}
-	http.ServeFile(w, r, filePath)
+
+	if version == -1 {
+		version, err = data.FileGetLatestVersion(fileId)
+		if err != nil {
+			handler.AbortRequest(w, context, err, handler.ErrGeneral)
+			return
+		}
+	}
+	http.ServeFile(w, r, data.GetFilePathVersion(fileId, version))
 }

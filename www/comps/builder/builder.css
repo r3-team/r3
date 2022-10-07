@@ -29,6 +29,16 @@
 .builder .moduleSelect span{
 	margin:0px 9px 0px 6px;
 }
+.builder .moduleNoOwner{
+	margin:0px 12px 9px 12px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+}
+.builder .moduleNoOwner span{
+	flex:1 1 auto;
+	color:var(--color-error);
+}
 .builder .navigation select{
 	flex:1 1 auto;
 	margin-right:9px;
@@ -515,6 +525,7 @@
 }
 .builder-relation .preview td{
 	padding:1px 4px;
+	border-bottom:1px solid var(--color-border);
 }
 
 /* preset */
@@ -569,6 +580,7 @@
 .builder-icon-input .iconLine{
 	width:40px;
 	height:30px;
+	min-width:unset;
 	margin-right:4px;
 	display:flex;
 	flex-direction:row;
@@ -702,7 +714,7 @@
 	background-color:transparent;
 }
 .builder-function .input:disabled{
-	border:3px solid var(--color-cancel-border) !important;
+	border:3px solid var(--color-border) !important;
 }
 .builder-function .message{
 	margin:0px 0px 18px;

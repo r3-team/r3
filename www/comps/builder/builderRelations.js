@@ -1,4 +1,5 @@
 import {getDependentModules} from '../shared/builder.js';
+import {copyValueDialog}     from '../shared/generic.js';
 export {MyBuilderRelations as default};
 
 let MyBuilderRelationsItemPolicy = {
@@ -6,7 +7,7 @@ let MyBuilderRelationsItemPolicy = {
 	template:`<tr>
 		<td>#{{ position+1 }}</td>
 		<td>
-			<select v-model="roleId">
+			<select v-model="roleId" :disabled="readonly">
 				<optgroup
 					v-for="mod in getDependentModules(module,modules)"
 					:label="mod.name"
@@ -17,11 +18,11 @@ let MyBuilderRelationsItemPolicy = {
 				</optgroup>
 			</select>
 		</td>
-		<td><my-bool v-model="actionSelect" /></td>
-		<td><my-bool v-model="actionUpdate" /></td>
-		<td><my-bool v-model="actionDelete" /></td>
+		<td><my-bool v-model="actionSelect" :readonly="readonly" /></td>
+		<td><my-bool v-model="actionUpdate" :readonly="readonly" /></td>
+		<td><my-bool v-model="actionDelete" :readonly="readonly" /></td>
 		<td>
-			<select v-model="pgFunctionIdExcl">
+			<select v-model="pgFunctionIdExcl" :disabled="readonly">
 				<option :value="null">[{{ capApp.policyNotSet }}]</option>
 				<option v-for="f in filterFunctions" :value="f.id">
 					{{ f.name }}
@@ -29,7 +30,7 @@ let MyBuilderRelationsItemPolicy = {
 			</select>
 		</td>
 		<td>
-			<select v-model="pgFunctionIdIncl">
+			<select v-model="pgFunctionIdIncl" :disabled="readonly">
 				<option :value="null">[{{ capApp.policyNotSet }}]</option>
 				<option v-for="f in filterFunctions" :value="f.id">
 					{{ f.name }}
@@ -41,19 +42,25 @@ let MyBuilderRelationsItemPolicy = {
 				<my-button image="arrowDown.png"
 					v-if="!isLast"
 					@trigger="$emit('moveDown')"
+					:active="!readonly"
 					:naked="true"
+					:tight="true"
 				/>
 				<my-button image="arrowUp.png"
 					v-if="position !== 0"
 					@trigger="$emit('moveUp')"
+					:active="!readonly"
 					:naked="true"
+					:tight="true"
 				/>
 			</div>
 		</td>
 		<td>
 			<my-button image="cancel.png"
 				@trigger="$emit('remove')"
+				:active="!readonly"
 				:naked="true"
+				:tight="true"
 			/>
 		</td>
 	</tr>`,
@@ -61,7 +68,8 @@ let MyBuilderRelationsItemPolicy = {
 		isLast:    { type:Boolean, required:true },
 		modelValue:{ type:Object,  required:true },
 		moduleId:  { type:String,  required:true },
-		position:  { type:Number,  required:true }
+		position:  { type:Number,  required:true },
+		readonly:  { type:Boolean, required:true }
 	},
 	emits:['moveDown','moveUp','remove','update:modelValue'],
 	computed:{
@@ -130,22 +138,36 @@ let MyBuilderRelationsItem = {
 	template:`<tbody>
 		<tr>
 			<td>
-				<my-button image="open.png"
-					v-if="!isNew"
-					@trigger="open"
-				/>
+				<div class="row">
+					<my-button image="save.png"
+						@trigger="set"
+						:active="!readonly && hasChanges"
+						:caption="isNew ? capGen.button.create : ''"
+						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+					/>
+					<my-button image="open.png"
+						v-if="!isNew"
+						@trigger="open"
+						:captionTitle="capGen.button.open"
+					/>
+					<my-button image="delete.png"
+						v-if="!isNew"
+						@trigger="delAsk"
+						:active="!readonly"
+						:cancel="true"
+						:captionTitle="capGen.button.delete"
+					/>
+				</div>
 			</td>
-			<td>
-				<input class="long" v-model="name" :placeholder="isNew ? capApp.newRelation : ''" />
-			</td>
+			<td><input class="long" v-model="name" :disabled="readonly" :placeholder="isNew ? capApp.newRelation : ''" /></td>
 			<td>
 				<my-button image="visible1.png"
-					@trigger="showInfo"
+					@trigger="copyValueDialog(relation.name,relation.id,relation.id)"
 					:active="!isNew"
 				/>
 			</td>
 			<td>
-				<my-bool v-model="encryption" :readonly="!isNew" />
+				<my-bool v-model="encryption" :readonly="!isNew || readonly" />
 			</td>
 			<td>
 				<my-button
@@ -154,25 +176,8 @@ let MyBuilderRelationsItem = {
 					:image="showPolicies ? 'triangleDown.png' : 'triangleRight.png'"
 				/>
 			</td>
-			<td>
-				<input v-model.number="retentionCountInput" :placeholder="capApp.retentionCount" />
-			</td>
-			<td>
-				<input v-model.number="retentionDaysInput" :placeholder="capApp.retentionDays" />
-			</td>
-			<td>
-				<div class="row">
-					<my-button image="save.png"
-						@trigger="set"
-						:active="hasChanges"
-					/>
-					<my-button image="delete.png"
-						v-if="!isNew"
-						@trigger="delAsk"
-						:cancel="true"
-					/>
-				</div>
-			</td>
+			<td><input v-model.number="retentionCountInput" :disabled="readonly" :placeholder="capApp.retentionCount" /></td>
+			<td><input v-model.number="retentionDaysInput"  :disabled="readonly" :placeholder="capApp.retentionDays" /></td>
 		</tr>
 		<tr v-if="showPolicies">
 			<td colspan="999">
@@ -208,15 +213,17 @@ let MyBuilderRelationsItem = {
 								:modelValue="p"
 								:moduleId="moduleId"
 								:position="i"
+								:readonly="readonly"
 							/>
 						</tbody>
 					</table>
-					<p v-if="policies.length !== 0">
+					<p style="width:900px;" v-if="policies.length !== 0">
 						{{ capApp.policyExplanation }}
 					</p>
 					
 					<my-button image="add.png"
 						@trigger="addPolicy"
+						:active="!readonly"
 						:caption="capGen.button.add"
 					/>
 				</div>
@@ -224,8 +231,9 @@ let MyBuilderRelationsItem = {
 		</tr>
 	</tbody>`,
 	props:{
-		moduleId:{ type:String, required:true },
-		relation:{ type:Object, required:false,
+		moduleId:{ type:String,  required:true },
+		readonly:{ type:Boolean, required:true },
+		relation:{ type:Object,  required:false,
 			default:function() { return{
 				id:null,
 				name:'',
@@ -274,6 +282,10 @@ let MyBuilderRelationsItem = {
 		capGen:function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
+		// externals
+		copyValueDialog,
+		
+		// actions
 		addPolicy:function() {
 			this.policies.push({
 				roleId:null,
@@ -286,16 +298,6 @@ let MyBuilderRelationsItem = {
 		},
 		open:function() {
 			this.$router.push('/builder/relation/'+this.relation.id);
-		},
-		showInfo:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.relation.id,
-				captionTop:this.relation.name,
-				buttons:[{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
 		},
 		
 		// backend calls
@@ -357,19 +359,19 @@ let MyBuilderRelations = {
 			<table>
 				<thead>
 					<tr>
-						<th>{{ capGen.button.open }}</th>
+						<th>{{ capGen.actions }}</th>
 						<th>{{ capGen.name }}</th>
 						<th>{{ capGen.id }}</th>
 						<th>{{ capApp.encryption }}</th>
 						<th>{{ capApp.policies }}</th>
 						<th colspan="2">{{ capApp.retention }}</th>
-						<th></th>
 					</tr>
 				</thead>
 				
 				<!-- new record -->
 				<my-builder-relations-item
 					:moduleId="module.id"
+					:readonly="readonly"
 				/>
 				
 				<!-- existing records -->
@@ -377,13 +379,15 @@ let MyBuilderRelations = {
 					v-for="rel in module.relations"
 					:key="rel.id"
 					:moduleId="module.id"
+					:readonly="readonly"
 					:relation="rel"
 				/>
 			</table>
 		</div>
 	</div>`,
 	props:{
-		id:{ type:String, required:true }
+		id:      { type:String,  required:true },
+		readonly:{ type:Boolean, required:true }
 	},
 	computed:{
 		module:function() {

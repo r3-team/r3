@@ -95,6 +95,9 @@
 
 /* collection input */
 .input-collection{
+	width:unset !important;
+	min-width:unset !important;
+	max-width:unset !important;
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
@@ -216,82 +219,6 @@
 }
 
 
-/* files input */
-.input-files{
-	height:100%;
-	display:flex;
-	flex-flow:column nowrap;
-	overflow-y:auto;
-	flex:1 1 auto;
-}
-.input-files .item{
-	display:flex;
-	flex-direction:row;
-	justify-content:space-between;
-	align-items:center;
-	margin:2px 0px;
-}
-.input-files .item div.size{
-	text-align:right;
-	white-space:nowrap;
-	margin:0px 12px 0px 0px;
-	flex:0 1 80px;
-}
-.input-files .item input{
-	padding:4px 6px;
-	margin:0px 12px 0px 0px;
-	color:var(--color-font);
-	background-color:var(--color-bg);
-	flex:1 2 auto;
-}
-.input-files .upload{
-	display:flex;
-	flex-direction:row;
-}
-.input-files .upload input{
-	margin:6px 0px;
-}
-.input-files .upload .counter{
-	margin:6px 12px;
-}
-.input-files .gallery{
-	flex:1 1 auto;
-	height:100%; /* chrome fix */
-	min-height:120px;
-	overflow:hidden;
-	margin:0px 8px 0px 0px;
-	display:flex;
-	flex-flow:column nowrap;
-	position:relative;
-	border-radius:5px;
-}
-.input-files .gallery a.slide{
-	flex:1 1 auto;
-	height:100%; /* chrome fix */
-	background-position:center;
-	background-repeat:no-repeat;
-	background-size:contain;
-}
-.input-files .gallery .placeholder{
-	margin:12px;
-	font-style:italic;
-}
-.input-files .gallery-navigation{
-	display:flex;
-	flex-flow:row nowrap;
-	justify-content:center;
-	position:absolute;
-	bottom:8px;
-	left:0px;
-	right:0px;
-}
-.input-files .gallery .img-remove{
-	position:absolute;
-	top:8px;
-	right:8px;
-}
-
-
 /* input date */
 .input-date{
 	display:flex;
@@ -352,6 +279,8 @@
 	margin:0px 8px 0px 0px;
 }
 .input-date .date-inputs input{
+	min-width:unset;
+	max-width:unset;
 	line-height:28px;
 	font-size:inherit;
 	text-align:center;

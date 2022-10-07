@@ -1,3 +1,8 @@
+import {
+	isAttributeBoolean,
+	isAttributeFiles,
+	isAttributeString
+} from './attribute.js';
 import MyStore from '../../stores/store.js';
 
 export function getColumnTitle(c) {
@@ -15,4 +20,23 @@ export function getColumnTitle(c) {
 	
 	// if nothing else is available: attribute name
 	return a.name;
+};
+
+export function getFirstColumnUsableAsAggregator(batch,columns) {
+	for(let ind of batch.columnIndexes) {
+		let c = columns[ind];
+		let a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+		
+		// anything that can be counted can serve as aggregation
+		// sub queries and already aggregated colums are not supported
+		if(!c.subQuery
+			&& c.aggregator === null
+			&& c.display !== 'color'
+			&& !a.encrypted
+			&& !isAttributeFiles(a.content)
+			&& !isAttributeBoolean(a.content)
+			&& !isAttributeString(a.content)
+		) return c;
+	}
+	return null;
 };

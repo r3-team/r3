@@ -3,7 +3,7 @@ export {MyListCsv as default};
 
 let MyListCsv = {
 	name:'my-list-csv',
-	template:`<div class="default-inputs">
+	template:`<div class="list-header list-csv default-inputs">
 	
 		<div class="list-csv-line">
 			<p v-if="action === 'export'">{{ capApp.message.csvExport }}</p>

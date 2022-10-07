@@ -1,4 +1,7 @@
-import {getAttributeFileHref} from './shared/attribute.js';
+import {
+	getAttributeFileThumbHref,
+	getAttributeFileVersionHref
+} from './shared/attribute.js';
 import {
 	getUnixFormat,
 	getUtcTimeStringFromUnix
@@ -49,7 +52,7 @@ let MyValueRich = {
 		<a target="_blank"
 			v-if="isFiles && !isGallery"
 			v-for="f in files"
-			:href="getAttributeFileHref(attributeId,f.id,f.name,token)"
+			:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
 			:key="f.id"
 		>
 			<my-button image="download.png"
@@ -63,7 +66,7 @@ let MyValueRich = {
 		<template v-if="isGallery">
 			<img class="gallery-item"
 				v-for="f in files"
-				:src="getAttributeFileHref(attributeId,f.id,f.name,token)"
+				:src="getAttributeFileThumbHref(attributeId,f.id,f.name,f.version,token)"
 				:style="styleGallery"
 			/>
 			
@@ -104,7 +107,7 @@ let MyValueRich = {
 	computed:{
 		files:function() {
 			return !this.isFiles || this.value === null
-				? [] : this.value.files;
+				? [] : this.value;
 		},
 		link:function() {
 			return !this.isLink || this.value === null
@@ -128,7 +131,8 @@ let MyValueRich = {
 	},
 	methods:{
 		// externals
-		getAttributeFileHref,
+		getAttributeFileThumbHref,
+		getAttributeFileVersionHref,
 		getHtmlStripped,
 		getLinkMeta,
 		getUnixFormat,

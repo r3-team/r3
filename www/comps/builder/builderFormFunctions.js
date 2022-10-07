@@ -37,17 +37,20 @@ let MyBuilderFormFunction = {
 			 	v-if="!isLast"
 				@trigger="$emit('moveDown')"
 				:naked="true"
+				:tight="true"
 			/>
 			<my-button image="arrowUp.png"
 			 	v-if="!isFirst"
 				@trigger="$emit('moveUp')"
 				:naked="true"
+				:tight="true"
 			/>
 		</td>
 		<td>
 			<my-button image="cancel.png"
 				@trigger="$emit('remove')"
 				:naked="true"
+				:tight="true"
 			/>
 		</td>
 	</tr>`,

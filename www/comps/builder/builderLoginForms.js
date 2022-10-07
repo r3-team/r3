@@ -10,16 +10,38 @@ let MyBuilderLoginFormsItem = {
 	components:{ MyBuilderCaption },
 	template:`<tr>
 		<td>
-			<input class="long" v-model="name" :placeholder="isNew ? capApp.newLoginForm : ''" />
+			<div class="row">
+				<my-button image="save.png"
+					@trigger="set"
+					:active="hasChanges && formId !== null && attributeIdLogin !== null && attributeIdLookup !== null && name !== '' && !readonly"
+					:caption="isNew ? capGen.button.create : ''"
+					:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+				/>
+				<my-button image="delete.png"
+					v-if="!isNew"
+					@trigger="del"
+					:active="!readonly"
+					:cancel="true"
+					:captionTitle="capGen.button.delete"
+				/>
+			</div>
+		</td>
+		<td>
+			<input class="long"
+				v-model="name"
+				:disabled="readonly"
+				:placeholder="isNew ? capApp.newLoginForm : ''"
+			/>
 		</td>
 		<td>
 			<my-builder-caption
 				v-model="captions.loginFormTitle"
 				:language="builderLanguage"
+				:readonly="readonly"
 			/>
 		</td>
 		<td>
-			<select v-model="attributeIdLogin" @change="attributeIdLookup = null">
+			<select v-model="attributeIdLogin" @change="attributeIdLookup = null" :disabled="readonly">
 				<option :value="null">-</option>
 				<option v-for="a in loginAttributeCandidates" :value="a.id">
 					{{ relationIdMap[a.relationId].name + ': ' + a.name }}
@@ -27,7 +49,7 @@ let MyBuilderLoginFormsItem = {
 			</select>
 		</td>
 		<td>
-			<select v-model="attributeIdLookup">
+			<select v-model="attributeIdLookup" :disabled="readonly">
 				<option :value="null">-</option>
 				<option v-for="a in lookupAttributeCandidates" :value="a.id">
 					{{ relationIdMap[a.relationId].name + ': ' + a.name }}
@@ -35,25 +57,12 @@ let MyBuilderLoginFormsItem = {
 			</select>
 		</td>
 		<td>
-			<select v-model="formId">
+			<select v-model="formId" :disabled="readonly">
 				<option :value="null">-</option>
 				<option v-for="f in module.forms" :value="f.id">
 					{{ f.name }}
 				</option>
 			</select>
-		</td>
-		<td>
-			<div class="row">
-				<my-button image="save.png"
-					@trigger="set"
-					:active="hasChanges && formId !== null && attributeIdLogin !== null && attributeIdLookup !== null && name !== ''"
-				/>
-				<my-button image="delete.png"
-					v-if="!isNew"
-					@trigger="del"
-					:cancel="true"
-				/>
-			</div>
 		</td>
 	</tr>`,
 	props:{
@@ -70,7 +79,8 @@ let MyBuilderLoginFormsItem = {
 					loginFormTitle:{}
 				}
 			}}
-		}
+		},
+		readonly:{ type:Boolean, required:true }
 	},
 	data:function() {
 		return {
@@ -128,7 +138,8 @@ let MyBuilderLoginFormsItem = {
 		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
 		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
 		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.loginForm; }
+		capApp:        function() { return this.$store.getters.captions.builder.loginForm; },
+		capGen:        function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
 		// externals
@@ -182,12 +193,12 @@ let MyBuilderLoginForms = {
 			<table>
 				<thead>
 					<tr>
+						<th>{{ capGen.actions }}</th>
 						<th>{{ capGen.name }}</th>
 						<th>{{ capGen.title }}</th>
 						<th>{{ capApp.attributeLogin }}</th>
 						<th>{{ capApp.attributeLookup }}</th>
 						<th>{{ capApp.formOpen }}</th>
-						<th></th>
 					</tr>
 				</thead>
 				<tbody>
@@ -195,6 +206,7 @@ let MyBuilderLoginForms = {
 					<my-builder-login-forms-item
 						:builderLanguage="builderLanguage"
 						:module="module"
+						:readonly="readonly"
 					/>
 					
 					<!-- existing records -->
@@ -204,14 +216,16 @@ let MyBuilderLoginForms = {
 						:loginForm="l"
 						:key="l.id"
 						:module="module"
+						:readonly="readonly"
 					/>
 				</tbody>
 			</table>
 		</div>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	computed:{
 		module:function() {

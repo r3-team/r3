@@ -20,14 +20,15 @@ import (
 
 // a websocket client
 type clientType struct {
-	address   string             // IP address, no port
-	admin     bool               // belongs to admin login?
-	ctx       context.Context    // global context for client requests
-	ctxCancel context.CancelFunc // to abort requests in case of disconnect
-	loginId   int64              // client login ID, 0 = not logged in yet
-	noAuth    bool               // logged in without authentication (username only)
-	write_mx  sync.Mutex
-	ws        *websocket.Conn // websocket connection
+	address    string             // IP address, no port
+	admin      bool               // belongs to admin login?
+	ctx        context.Context    // global context for client requests
+	ctxCancel  context.CancelFunc // to abort requests in case of disconnect
+	fixedToken bool               // logged in with fixed token (limited access, only auth and server messages)
+	loginId    int64              // client login ID, 0 = not logged in yet
+	noAuth     bool               // logged in without authentication (public auth, username only)
+	write_mx   sync.Mutex         // to force sequential writes
+	ws         *websocket.Conn    // websocket connection
 }
 
 // a hub for all active websocket clients
@@ -80,20 +81,21 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	log.Info("server", fmt.Sprintf("new client connecting from %s", host))
+	log.Info(handlerContext, fmt.Sprintf("new client connecting from %s", host))
 
 	// create global request context with abort function
 	ctx, ctxCancel := context.WithCancel(context.Background())
 
 	client := &clientType{
-		address:   host,
-		admin:     false,
-		ctx:       ctx,
-		ctxCancel: ctxCancel,
-		loginId:   0,
-		noAuth:    false,
-		write_mx:  sync.Mutex{},
-		ws:        ws,
+		address:    host,
+		admin:      false,
+		ctx:        ctx,
+		ctxCancel:  ctxCancel,
+		fixedToken: false,
+		loginId:    0,
+		noAuth:     false,
+		write_mx:   sync.Mutex{},
+		ws:         ws,
 	}
 
 	hub.clientAdd <- client
@@ -105,7 +107,7 @@ func (hub *hubType) start() {
 
 	var removeClient = func(client *clientType) {
 		if _, exists := hub.clients[client]; exists {
-			log.Info("server", fmt.Sprintf("disconnecting client at %s", client.address))
+			log.Info(handlerContext, fmt.Sprintf("disconnecting client at %s", client.address))
 			client.ws.WriteMessage(websocket.CloseMessage, []byte{}) // optional
 			client.ws.Close()
 			client.ctxCancel()
@@ -139,6 +141,22 @@ func (hub *hubType) start() {
 				if event.ConfigChanged {
 					jsonMsg, err = prepareUnrequested("config_changed", nil)
 				}
+				if event.FilesCopiedAttributeId != uuid.Nil {
+					jsonMsg, err = prepareUnrequested("files_copied", types.ClusterEventFilesCopied{
+						AttributeId: event.FilesCopiedAttributeId,
+						FileIds:     event.FilesCopiedFileIds,
+						RecordId:    event.FilesCopiedRecordId,
+					})
+				}
+				if event.FileRequestedAttributeId != uuid.Nil {
+					jsonMsg, err = prepareUnrequested("fileRequested", types.ClusterEventFileRequested{
+						AttributeId: event.FileRequestedAttributeId,
+						ChooseApp:   event.FileRequestedChooseApp,
+						FileId:      event.FileRequestedFileId,
+						FileHash:    event.FileRequestedFileHash,
+						FileName:    event.FileRequestedFileName,
+					})
+				}
 				if event.Renew {
 					jsonMsg, err = prepareUnrequested("reauthorized", nil)
 				}
@@ -149,7 +167,7 @@ func (hub *hubType) start() {
 					jsonMsg, err = prepareUnrequested("schema_loaded", event.SchemaTimestamp)
 				}
 				if err != nil {
-					log.Error("server", "could not prepare unrequested transaction", err)
+					log.Error(handlerContext, "could not prepare unrequested transaction", err)
 					continue
 				}
 			}
@@ -168,7 +186,7 @@ func (hub *hubType) start() {
 
 				// kick client, if requested
 				if event.Kick || (event.KickNonAdmin && !client.admin) {
-					log.Info("server", fmt.Sprintf("kicking client (login ID %d)",
+					log.Info(handlerContext, fmt.Sprintf("kicking client (login ID %d)",
 						client.loginId))
 
 					removeClient(client)
@@ -212,20 +230,27 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 
 	// umarshal user input, this can always fail (never trust user input)
 	if err := json.Unmarshal(reqTransJson, &reqTrans); err != nil {
-		log.Error("server", "failed to unmarshal transaction", err)
+		log.Error(handlerContext, "failed to unmarshal transaction", err)
 		return []byte("{}")
 	}
 
-	log.Info("server", fmt.Sprintf("TRANSACTION %d, started by login ID %d (%s)",
+	log.Info(handlerContext, fmt.Sprintf("TRANSACTION %d, started by login ID %d (%s)",
 		reqTrans.TransactionNr, client.loginId, client.address))
 
 	// take over transaction number for response so client can match it locally
 	resTrans.TransactionNr = reqTrans.TransactionNr
 
-	// user can either authenticate or execute requests
+	// client can either authenticate or execute requests
 	authRequest := len(reqTrans.Requests) == 1 && reqTrans.Requests[0].Ressource == "auth"
 
 	if !authRequest {
+		if client.fixedToken {
+			log.Warning(handlerContext, "blocked client request",
+				fmt.Errorf("only authentication allowed for fixed token clients"))
+
+			return []byte("{}")
+		}
+
 		// execute non-authentication transaction
 		resTrans = request.ExecTransaction(client.ctx, client.loginId,
 			client.admin, client.noAuth, reqTrans, resTrans)
@@ -244,17 +269,23 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 		var resPayload interface{}
 
 		switch req.Action {
-		case "token": // authentication via token
-			resPayload, err = request.AuthToken(req.Payload, &client.loginId,
+		case "token": // authentication via JSON web token
+			resPayload, err = request.LoginAuthToken(req.Payload, &client.loginId,
 				&client.admin, &client.noAuth)
 
+		case "tokenFixed": // authentication via fixed token
+			resPayload, err = request.LoginAuthTokenFixed(req.Payload, &client.loginId)
+			if err == nil {
+				client.fixedToken = true
+			}
+
 		case "user": // authentication via credentials
-			resPayload, err = request.AuthUser(req.Payload, &client.loginId,
+			resPayload, err = request.LoginAuthUser(req.Payload, &client.loginId,
 				&client.admin, &client.noAuth)
 		}
 
 		if err != nil {
-			log.Warning("server", "failed to authenticate user", err)
+			log.Warning(handlerContext, "failed to authenticate user", err)
 			bruteforce.BadAttemptByHost(client.address)
 			resTrans.Error = "AUTH_ERROR"
 		} else {
@@ -268,7 +299,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 		}
 
 		if resTrans.Error == "" {
-			log.Info("server", fmt.Sprintf("authenticated client (login ID %d, admin: %v)",
+			log.Info(handlerContext, fmt.Sprintf("authenticated client (login ID %d, admin: %v)",
 				client.loginId, client.admin))
 		}
 	}
@@ -276,7 +307,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 	// marshal response transaction
 	resTransJson, err := json.Marshal(resTrans)
 	if err != nil {
-		log.Error("server", "cannot marshal responses", err)
+		log.Error(handlerContext, "cannot marshal responses", err)
 		return []byte("{}")
 	}
 	return resTransJson

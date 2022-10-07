@@ -63,8 +63,15 @@ export function getDetailsFromIndexAttributeId(indexAttributeId) {
 	};
 };
 
-export function getAttributeFileHref(attributeId,fileId,fileName,token) {
-	return `/data/download/${fileName}?attribute_id=${attributeId}&file_id=${fileId}&token=${token}`;
+export function getAttributeFileHref(attributeId,id,name,token) {
+	return `/data/download/${name}?attribute_id=${attributeId}&file_id=${id}&token=${token}`;
+};
+export function getAttributeFileThumbHref(attributeId,id,name,version,token) {
+	// thumbnails are only available for the latest version, version getter only serves as cache denial
+	return `/data/download/thumb/${name}?attribute_id=${attributeId}&file_id=${id}&version=${version}&token=${token}`;
+};
+export function getAttributeFileVersionHref(attributeId,id,name,version,token) {
+	return `/data/download/${name}?attribute_id=${attributeId}&file_id=${id}&version=${version}&token=${token}`;
 };
 
 export function getValueFromQuery(content,queryValue) {

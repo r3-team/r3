@@ -43,13 +43,16 @@ let MyBuilderForm = {
 							:icon-id-selected="iconId"
 							:module="module"
 							:title="capApp.icon"
+							:readonly="readonly"
 						/>
 						<my-builder-caption class="title"
 							v-model="captions.formTitle"
 							:contentName="capApp.formTitle"
 							:language="builderLanguage"
 							:longInput="true"
+							:readonly="readonly"
 						/>
+						<my-button :active="false" :caption="form.name" :naked="true "/>
 					</div>
 					
 					<div class="area">
@@ -63,7 +66,7 @@ let MyBuilderForm = {
 					<div class="area nowrap">
 						<my-button image="save.png"
 							@trigger="set"
-							:active="hasChanges"
+							:active="hasChanges && !readonly"
 							:caption="capGen.button.save"
 						/>
 						<my-button image="refresh.png"
@@ -129,6 +132,7 @@ let MyBuilderForm = {
 					v-model="captions.formHelp"
 					:contentName="capApp.formHelp"
 					:language="builderLanguage"
+					:readonly="readonly"
 					:richtext="true"
 				/>
 			</div>
@@ -294,9 +298,17 @@ let MyBuilderForm = {
 			</div>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:false, default:'' }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:false, default:'' },
+		readonly:       { type:Boolean, required:true }
+	},
+	mounted:function() {
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted:function() {
+		this.$emit('hotkeysRegister',[]);
 	},
 	data:function() {
 		return {

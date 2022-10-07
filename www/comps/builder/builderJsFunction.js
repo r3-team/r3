@@ -26,6 +26,7 @@ let MyBuilderJsFunction = {
 						:language="builderLanguage"
 						:longInput="true"
 					/>
+					<my-button :active="false" :caption="jsFunction.name" :naked="true "/>
 				</div>
 				<div class="area">
 					<my-button
@@ -38,7 +39,7 @@ let MyBuilderJsFunction = {
 				<div class="area nowrap">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="hasChanges"
+						:active="hasChanges && !readonly"
 						:caption="capGen.button.save"
 					/>
 					<my-button image="refresh.png"
@@ -67,6 +68,7 @@ let MyBuilderJsFunction = {
 							<td>
 								<input
 									v-model="codeArgs"
+									:disabled="readonly"
 									:placeholder="capApp.codeArgsHintJs"
 								/>
 							</td>
@@ -76,6 +78,7 @@ let MyBuilderJsFunction = {
 							<td>
 								<input
 									v-model="codeReturns"
+									:disabled="readonly"
 									:placeholder="capApp.codeReturnsHintJs"
 								/>
 							</td>
@@ -86,6 +89,7 @@ let MyBuilderJsFunction = {
 								<my-builder-caption
 									v-model="captions.jsFunctionTitle"
 									:language="builderLanguage"
+									:readonly="readonly"
 								/>
 							</td>
 						</tr>
@@ -96,6 +100,7 @@ let MyBuilderJsFunction = {
 									v-model="captions.jsFunctionDesc"
 									:language="builderLanguage"
 									:multiLine="true"
+									:readonly="readonly"
 								/>
 							</td>
 						</tr>
@@ -108,6 +113,7 @@ let MyBuilderJsFunction = {
 					v-model="codeFunction"
 					@click="insertEntitySelected"
 					@keydown.tab.prevent="addTab"
+					:disabled="readonly"
 					:placeholder="capApp.code"
 				></textarea>
 				
@@ -276,15 +282,23 @@ let MyBuilderJsFunction = {
 			</div>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
-		builderLanguage:{ type:String, required:true },
-		id:             { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		id:             { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	watch:{
 		jsFunction:{
 			handler:function() { this.reset(); },
 			immediate:true
 		}
+	},
+	mounted:function() {
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted:function() {
+		this.$emit('hotkeysRegister',[]);
 	},
 	data:function() {
 		return {

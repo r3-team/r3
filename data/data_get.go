@@ -288,7 +288,9 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 
 	// check for authorized access, READ(1) for GET
 	for _, expr := range data.Expressions {
-		if expr.AttributeId.Status == pgtype.Present && !authorizedAttribute(loginId, expr.AttributeId.Bytes, 1) {
+		if expr.AttributeId.Status == pgtype.Present &&
+			!authorizedAttribute(loginId, expr.AttributeId.Bytes, 1) {
+
 			return "", "", errors.New(handler.ErrUnauthorized)
 		}
 	}
@@ -407,7 +409,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 
 	// add expressions for relation tupel IDs after attributes (on main query)
 	if nestingLevel == 0 {
-		for index, relId := range indexRelationIds {
+		for index, _ := range indexRelationIds {
 
 			// if an aggregation function is used on any index, we cannot deliver record IDs
 			// unless a record aggregation functions is used on this specific relation index
@@ -416,9 +418,6 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 				continue
 			}
 
-			if _, exists := cache.RelationIdMap[relId]; !exists {
-				return "", "", errors.New("relation does not exist")
-			}
 			inSelect = append(inSelect, fmt.Sprintf(`"%s"."%s" AS %s`,
 				getRelationCode(index, nestingLevel),
 				schema.PkName,
@@ -519,6 +518,27 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 	}
 
 	alias := data_sql.GetExpressionAlias(exprPos)
+
+	if schema.IsContentFiles(atr.Content) {
+		// attribute is files attribute
+		*inSelect = append(*inSelect, fmt.Sprintf(`(
+			SELECT ARRAY_TO_JSON(ARRAY_AGG(ROW_TO_JSON(t)))
+			FROM (
+				SELECT r.file_id AS id, r.name, COALESCE(v.hash,'') AS hash,
+					v.size_kb AS size, v.version, v.date_change AS changed
+				FROM instance_file."%s"    AS r
+				JOIN instance.file_version AS v
+					ON  v.file_id = r.file_id
+					AND v.version = (
+					    SELECT MAX(s.version)
+					    FROM instance.file_version AS s
+					    WHERE s.file_id = r.file_id
+					)
+				WHERE r.record_id = "%s"."%s"
+				AND   r.date_delete IS NULL
+			) AS t)`, schema.GetFilesTableName(atr.Id), relCode, schema.PkName))
+		return nil
+	}
 
 	if !expr.OutsideIn {
 		// attribute is from index relation

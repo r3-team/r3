@@ -99,6 +99,52 @@ func ConfigChanged(updateNodes bool, loadConfigFromDb bool, switchToMaintenance 
 	config.SetLogLevels()
 	return nil
 }
+func FilesCopied(updateNodes bool, loginId int64, attributeId uuid.UUID,
+	fileIds []uuid.UUID, recordId int64) error {
+
+	if updateNodes {
+		if err := createEventsForOtherNodes("filesCopied", types.ClusterEventFilesCopied{
+			LoginId:     loginId,
+			AttributeId: attributeId,
+			FileIds:     fileIds,
+			RecordId:    recordId,
+		}); err != nil {
+			return err
+		}
+	}
+	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{
+		LoginId:                loginId,
+		FilesCopiedAttributeId: attributeId,
+		FilesCopiedFileIds:     fileIds,
+		FilesCopiedRecordId:    recordId,
+	}
+	return nil
+}
+func FileRequested(updateNodes bool, loginId int64, attributeId uuid.UUID,
+	fileId uuid.UUID, fileHash string, fileName string, chooseApp bool) error {
+
+	if updateNodes {
+		if err := createEventsForOtherNodes("fileRequested", types.ClusterEventFileRequested{
+			LoginId:     loginId,
+			AttributeId: attributeId,
+			ChooseApp:   chooseApp,
+			FileId:      fileId,
+			FileHash:    fileHash,
+			FileName:    fileName,
+		}); err != nil {
+			return err
+		}
+	}
+	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{
+		LoginId:                  loginId,
+		FileRequestedAttributeId: attributeId,
+		FileRequestedChooseApp:   chooseApp,
+		FileRequestedFileId:      fileId,
+		FileRequestedFileHash:    fileHash,
+		FileRequestedFileName:    fileName,
+	}
+	return nil
+}
 func LoginDisabled(updateNodes bool, loginId int64) error {
 	if updateNodes {
 		if err := createEventsForOtherNodes("loginDisabled", types.ClusterEventLogin{

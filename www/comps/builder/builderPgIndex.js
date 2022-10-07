@@ -4,9 +4,24 @@ let MyBuilderPgIndex = {
 	name:'my-builder-pg-index',
 	template:`<tr>
 		<td>
+			<my-button image="save.png"
+				@trigger="set"
+				:active="isNew && attributes.length !== 0 && !readonly"
+				:caption="isNew ? capGen.button.create : ''"
+				:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+			/>
+			<my-button image="delete.png"
+				v-if="!isNew"
+				@trigger="del"
+				:active="!autoFki && !readonly"
+				:cancel="true"
+				:captionTitle="capGen.button.delete"
+			/>
+		</td>
+		<td>
 			<span>{{ pgIndexAttributesCaption }}</span>
 			
-			<select v-model="attributeInput" v-if="isNew" @change="addAttribute">
+			<select v-model="attributeInput" v-if="isNew" @change="addAttribute" :disabled="readonly">
 				<option value="">{{ capApp.indexCreate }}</option>
 				
 				<template
@@ -22,19 +37,7 @@ let MyBuilderPgIndex = {
 			</select>
 		</td>
 		<td><my-bool v-model="autoFki" :readonly="true" /></td>
-		<td><my-bool v-model="noDuplicates" :readonly="!isNew" /></td>
-		<td>
-			<my-button image="save.png"
-				v-if="isNew"
-				@trigger="set"
-				:active="attributes.length !== 0"
-			/>
-			<my-button image="delete.png"
-				v-if="!isNew && !autoFki"
-				@trigger="del"
-				:cancel="true"
-			/>
-		</td>
+		<td><my-bool v-model="noDuplicates" :readonly="!isNew || readonly" /></td>
 	</tr>`,
 	props:{
 		index:{ type:Object, required:false,
@@ -45,7 +48,8 @@ let MyBuilderPgIndex = {
 				attributes:[]
 			}}
 		},
-		relation:{ type:Object, required:true }
+		readonly:{ type:Boolean, required:true },
+		relation:{ type:Object,  required:true }
 	},
 	data:function() {
 		return {

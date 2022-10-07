@@ -14,7 +14,7 @@ let MyBuilderCollectionInput = {
 			<!-- collection input -->
 			<td>{{ capApp.collection }}</td>
 			<td>
-				<select v-model="collectionIdInput" :disabled="fixedCollection">
+				<select v-model="collectionIdInput" :disabled="fixedCollection || readonly">
 					<option :value="null">-</option>
 					<optgroup
 						v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
@@ -31,7 +31,7 @@ let MyBuilderCollectionInput = {
 			<!-- collection column input -->
 			<td>{{ capApp.column }}</td>
 			<td>
-				<select v-model="columnIdInput">
+				<select v-model="columnIdInput" :disabled="readonly">
 					<option :value="null" disabled="disabled">-</option>
 					<option v-if="collectionIdInput !== null" v-for="c in collectionIdMap[collectionIdInput].columns" :value="c.id">
 						{{ getItemTitleColumn(c) }}
@@ -47,29 +47,31 @@ let MyBuilderCollectionInput = {
 					@update:openForm="openFormInput = $event"
 					:module="module"
 					:openForm="openFormInput"
+					:readonly="readonly"
 				/>
 			</td>
 		</tr>
 		<tr v-if="collectionSet && showMultiValue">
 			<!-- allow multi-value input -->
 			<td>{{ capApp.multiValue }}</td>
-			<td><my-bool v-model="multiValueInput" /></td>
+			<td><my-bool v-model="multiValueInput" :readonly="readonly" /></td>
 		</tr>
 		<tr v-if="collectionSet && showNoDisplayEmpty">
 			<!-- do not display if value is empty input -->
 			<td>{{ capApp.noDisplayEmpty }}</td>
-			<td><my-bool v-model="noDisplayEmptyInput" /></td>
+			<td><my-bool v-model="noDisplayEmptyInput" :readonly="readonly" /></td>
 		</tr>
 		<tr v-if="collectionSet && showOnMobile">
 			<!-- show on mobile input -->
 			<td>{{ capApp.onMobile }}</td>
-			<td><my-bool v-model="onMobileInput" /></td>
+			<td><my-bool v-model="onMobileInput" :readonly="readonly" /></td>
 		</tr>
 		<tr>
 			<td>
 				<my-button image="cancel.png"
 					v-if="allowRemove"
 					@trigger="$emit('remove')"
+					:active="!readonly"
 					:caption="capGen.button.delete"
 					:naked="true"
 				/>
@@ -82,6 +84,7 @@ let MyBuilderCollectionInput = {
 		consumer:          { required:true },
 		fixedCollection:   { type:Boolean, required:true },
 		module:            { type:Object,  required:true },
+		readonly:          { type:Boolean, required:true },
 		showMultiValue:    { type:Boolean, required:true },
 		showNoDisplayEmpty:{ type:Boolean, required:true },
 		showOnMobile:      { type:Boolean, required:true }

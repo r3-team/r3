@@ -4,9 +4,8 @@ import (
 	"crypto/tls"
 	"fmt"
 	"net/smtp"
-	"path/filepath"
 	"r3/cache"
-	"r3/config"
+	"r3/data"
 	"r3/db"
 	"r3/log"
 	"r3/schema"
@@ -15,7 +14,6 @@ import (
 	"strings"
 
 	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
 	"github.com/jordan-wright/email"
 )
 
@@ -40,7 +38,7 @@ func DoAll() error {
 		FROM instance.mail_spool
 		WHERE outgoing
 		AND attempt_count < $1
-		AND attempt_date < $2
+		AND attempt_date  < $2
 	`, sendAttempts, now-int64(sendAttemptEvery))
 	if err != nil {
 		return err
@@ -146,39 +144,33 @@ func do(m types.Mail) error {
 				m.AttributeId.Bytes)
 		}
 
-		rel, _ := cache.RelationIdMap[atr.RelationId]
-		mod, _ := cache.ModuleIdMap[rel.ModuleId]
-		var value interface{}
+		rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+			SELECT r.file_id, r.name, (
+				SELECT MAX(v.version)
+				FROM  instance.file_version AS v
+				WHERE v.file_id = r.file_Id
+			)
+			FROM instance_file."%s" AS r
+			WHERE r.record_id = $1
+		`, schema.GetFilesTableName(atr.Id)),
+			m.RecordId.Int)
 
-		err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
-			SELECT "%s"
-			FROM "%s"."%s"
-			WHERE "%s" = $1
-		`, atr.Name, mod.Name, rel.Name, schema.PkName),
-			m.RecordId.Int).Scan(&value)
-
-		if err != pgx.ErrNoRows && err != nil {
-			return err
-		}
-
-		if err == pgx.ErrNoRows {
-			return fmt.Errorf("cannot attach file(s) from non-existing record (ID: %d)",
-				m.RecordId.Int)
-		}
-
-		// attachments are set
-		files, err := schema.GetAttributeFilesFromInterface(value)
 		if err != nil {
 			return err
 		}
+		files := make([]types.DataGetValueFile, 0)
 
-		for _, file := range files.Files {
-			if file.New {
-				continue
+		for rows.Next() {
+			var f types.DataGetValueFile
+			if err := rows.Scan(&f.Id, &f.Name, &f.Version); err != nil {
+				return err
 			}
+			files = append(files, f)
+		}
+		rows.Close()
 
-			filePath := filepath.Join(config.File.Paths.Files,
-				atr.Id.String(), file.Id.String())
+		for _, f := range files {
+			filePath := data.GetFilePathVersion(f.Id, f.Version)
 
 			exists, err = tools.Exists(filePath)
 			if err != nil {
@@ -195,7 +187,7 @@ func do(m types.Mail) error {
 			if err != nil {
 				return err
 			}
-			att.Filename = file.Name
+			att.Filename = f.Name
 		}
 	}
 

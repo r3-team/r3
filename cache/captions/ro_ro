@@ -6,12 +6,15 @@
 			"cancel":"Anulează",
 			"clear":"Clear",
 			"close":"Închide",
+			"copy":"Copy",
 			"copyClipboard":"Copy to clipboard",
 			"create":"Crează",
 			"delete":"Șterge",
 			"deleteHint":"Șterge definitiv înregistrarea selectată",
 			"deleteSelected":"Șterge selecția",
+			"download":"Download",
 			"edit":"Editare",
+			"empty":"Empty",
 			"expert":"Avansat",
 			"export":"Exportă",
 			"filter":"Filtru",
@@ -21,13 +24,18 @@
 			"new":"Nou",
 			"newHint":"Crează o nouă înregistrare",
 			"open":"Deschide",
+			"ok":"Ok",
+			"paste":"Paste",
 			"refresh":"Reîncarcă",
 			"refreshHint":"Reîncarcă înregistrarea",
 			"reset":"Resetează",
+			"restore":"Restore",
 			"save":"Salvare",
 			"saveHint":"Salvează modificările",
 			"saveNew":"Salvează+Nou",
 			"saveNewHint":"Salvează modificările și deschide o nouă înregistrare",
+			"selectAll":"Select all",
+			"selectAllShort":"All",
 			"send":"Trimite",
 			"show":"Arată",
 			"unlock":"Unlock"
@@ -56,6 +64,7 @@
 			"sortDesc":"descendent",
 			"yes":"da"
 		},
+		"actions":"Actions",
 		"active":"Activ",
 		"application":"Aplicație",
 		"applications":"Aplicații",
@@ -63,9 +72,11 @@
 		"appWebsite":"https://rei3.de",
 		"available":"Available",
 		"busy":"Lucrează - Apasă aici pentru anulare",
+		"category":"Category",
 		"date":"Data",
 		"description":"Descriere",
 		"errorTitle":"Eroare",
+		"files":"Files",
 		"filters":"Filtre",
 		"home":"Acasă",
 		"icon":"Icoană",
@@ -92,14 +103,18 @@
 		"order":"Comandă",
 		"password":"Parolă",
 		"preview":"Previzualizare",
+		"readonly":"Readonly",
+		"record":"Record",
 		"results":"{CNT} rezultate",
 		"resultsNone":"- fără rezultate -",
 		"resultsOf":"/ {CNT}",
 		"role":"Rol",
 		"selected":"Selected",
+		"size":"Size",
 		"status":"Status",
 		"threeDots":"...",
 		"title":"Titlu",
+		"token":"Token",
 		"username":"Nume utilizator",
 		"version":"Versiune"
 	},
@@ -133,7 +148,7 @@
 				"removeLogo":"Îndepărtează logo"
 			},
 			"dialog":{
-				"builderMode":"Builder este folosit pentru a crea sau modifica aplicații.<br /><br />Schimbarea aplicațiilor poate duce la pierderea de date și ar trebui ca <b>NICIODATĂ</b> acestea să fie realizate în medii de producție.<br /><br />Pentru a putea să utilizați în siguranță Builder, vă rugăm să utilizați o instanță dedicată a REI3; aplicațiile gata și testate pot fi apoi transferate într-un sistem de producție.<br /><br />Vă rugăm să consultați <a href=\"https://rei3.de/builderdocu-en_us/\" target=\"_blank \">Documentația Builder</a> pentru a afla mai multe.",
+				"builderMode":"Builder este folosit pentru a crea sau modifica aplicații.<br /><br />Schimbarea aplicațiilor poate duce la pierderea de date și ar trebui ca <b>NICIODATĂ</b> acestea să fie realizate în medii de producție.<br /><br />Pentru a putea să utilizați în siguranță Builder, vă rugăm să utilizați o instanță dedicată a REI3; aplicațiile gata și testate pot fi apoi transferate într-un sistem de producție.<br /><br />Vă rugăm să consultați <a href=\"https://rei3.de/en/docs/builder/\" target=\"_blank \">Documentația Builder</a> pentru a afla mai multe.",
 				"productionMode":"Modul de întreținere este folosit pentru a actualiza, instala sau elimina aplicații din sistem.<br /><br />Comutarea la modul întreținere <b>va deconecta toți utilizatorii fără permisiuni de administrator</b>.",
 				"pleaseRead":"Vă rugăm să citiți înainte de a salva"
 			},
@@ -174,20 +189,6 @@
 			"licenseState":"Statul licenței",
 			"licenseStateNok":"Nici o licență activă",
 			"licenseStateOk":"Valabil pentru încă {COUNT} zi(le)",
-			"logLevel1":"Numai erori",
-			"logLevel2":"Erori & atenționări",
-			"logLevel3":"Toate",
-			"logLevelApplication":"Aplicații",
-			"logLevelBackup":"Backup",
-			"logLevelCache":"Tampon",
-			"logLevelCluster":"Cluster",
-			"logLevelCsv":"CSV import/export",
-			"logLevelLdap":"LDAP",
-			"logLevelMail":"Mail",
-			"logLevelScheduler":"Programare",
-			"logLevelServer":"Server",
-			"logLevelTransfer":"Transfer",
-			"logsKeepDays":"Păstrează logurile (în zile)",
 			"productionMode":"Modul întreținere",
 			"publicHostName":"Numele public al gazdei",
 			"pwForceDigit":"Necesită cifre",
@@ -209,7 +210,6 @@
 			"titleCustom":"Personalizare",
 			"titleGeneral":"General",
 			"titleIcs":"Abonamente la calendar",
-			"titleLogging":"Niveluri de jurnal",
 			"titleLogins":"Autentificări",
 			"titleMail":"Trimite mailuri",
 			"titlePerformance":"Performanță",
@@ -220,6 +220,12 @@
 			"updateCheckNewer":"De ultimă oră",
 			"updateCheckOlder":"Actualizare disponibilă",
 			"updateCheckUnknown":"Necunoscut"
+		},
+		"files":{
+			"deleteDate":"File deleted",
+			"filesKeepDaysDeleted":"Keep deleted files for X days",
+			"titleConfig":"Global configuration",
+			"titleDeleted":"Deleted files"
 		},
 		"ldaps":{
 			"button":{
@@ -299,18 +305,40 @@
 			"roleContentUser":"User"
 		},
 		"logs":{
+			"contextLabel":{
+				"backup":"Backup",
+				"cache":"Tampon",
+				"cluster":"Cluster",
+				"csv":"CSV import/export",
+				"imager":"Image processing",
+				"ldap":"LDAP",
+				"mail":"Mail",
+				"module":"Aplicații",
+				"scheduler":"Programare",
+				"server":"Server",
+				"transfer":"Transfer",
+				"websocket":"Websocket clients"
+			},
 			"byString":"Text search",
 			"context":"Context",
 			"date":"Timestamp",
+			"keepDays":"Păstrează logurile (în zile)",
 			"level":"Level",
 			"level1":"Error",
 			"level2":"Warning",
 			"level3":"Info",
+			"logLevel":"Log level",
+			"logLevel1":"Numai erori",
+			"logLevel2":"Erori & atenționări",
+			"logLevel3":"Toate",
 			"message":"Message",
 			"module":"Application",
 			"node":"Cluster node"
 		},
 		"mails":{
+			"dialog":{
+				"imapWarn":"Please note that the IMAP connector loads and then deletes messages from the chosen mailbox. It should only be used with a dedicated mailbox and not to access personal mail accounts."
+			},
 			"account":"Cont de email",
 			"accounts":"Conturi de email",
 			"accountHost":"Nume gazdă",
@@ -350,7 +378,7 @@
 				"deleteApps":"<br /><br />Următoarele aplicații depind de aceasta și vor fi, de asemenea, șterse:<ul>{LIST}</ul>",
 				"deleteMulti":"Această acțiune va șterge <b>permanent</b> <b>{COUNT} aplicații</b> și datele corespunzătoare.<br /><br />Chiar doriți să continuați?",
 				"deleteTitle":"Ștergerea permanentă a aplicației '{APP}'",
-				"owner":"Cu această opțiune activată, modificările aduse acestei aplicații pot fi exportate ca versiune nouă. Dacă nu sunteți autorul original, toate modificările vor fi PIERUTE atunci când este instalată o nouă versiune de la autor. Acest lucru poate duce, de asemenea, la PIERDERE DE DATE.<br /><br />Dacă intenționați să modificați/extindeți aplicațiile de la alți autori, puteți face acest lucru în siguranță, „construind pe ele” - vă rugăm să consultați documentația Builder pentru mai multe detalii.",
+				"owner":"Dacă nu sunteți autorul original, toate modificările vor fi PIERUTE atunci când este instalată o nouă versiune de la autor. Acest lucru poate duce, de asemenea, la PIERDERE DE DATE.<br /><br />Dacă intenționați să modificați/extindeți aplicațiile de la alți autori, puteți face acest lucru în siguranță, „construind pe ele” - vă rugăm să consultați documentația Builder pentru mai multe detalii.",
 				"ownerTitle":"Atențiune - vă rugăm să citiți cu atenție!"
 			},
 			"error":{
@@ -361,7 +389,6 @@
 			"hidden":"Ascuns",
 			"import":"Adăugați din fișier",
 			"nothingInstalled":"Nu sunt instalate aplicații.",
-			"owner":"Exportă modificările",
 			"position":"Ordinea în meniu",
 			"productionMode":"Aplicațiile pot fi modificate numai atunci când modul de întreținere este activ.",
 			"releaseDate":"Data lansării",
@@ -395,7 +422,8 @@
 		},
 		"scheduler":{
 			"button":{
-				"runNow":"Rulează acum"
+				"runNow":"Schedule immediate execution",
+				"runNowHint":"Task will be executed as soon as possible."
 			},
 			"names":{
 				"cleanupBruteforce":"Curățați memoria cache de brutforce",
@@ -436,6 +464,7 @@
 		},
 		"navigationCluster":"Cluster",
 		"navigationConfig":"Sistem",
+		"navigationFiles":"Files",
 		"navigationLdaps":"Autentificări-LDAP",
 		"navigationLicense":"Licență",
 		"navigationLogins":"Autentificări",
@@ -712,6 +741,8 @@
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Anulează operația și trimite un mesaj utilizatorului care rulează acum și care este afișat pe ecranul utilizatorului.",
 				"clean_up_e2ee_keys":"instance.clean_up_e2ee_keys(<blockquote>login_id INTEGER,<br />relation_id UUID,<br />record_ids_access INTEGER[]</blockquote>) => VOID<br /><br />Deletes end-to-end encryption data keys for records that a login has no longer access to. This makes decryption impossible for the login.",
+				"file_link":"instance.file_link(<blockquote>file_id UUID,<br/>file_name TEXT,<br/>attribute_id UUID,<br/>record_id BIGINT</blockquote>) => VOID<br /><br />Links an existing file to another record (added to the chosen file attribute). This link is a hardlink, meaning that the same file is being accessed.<br /><br />When renaming or deleting the file, the change only affects the file link. Regardless of deletion, the actual file is kept as long as one file link exists.",
+				"files_get":"instance.files_get(<blockquote>attribute_id UUID,<br />record_id BIGINT,<br />include_deleted BOOLEAN DEFAULT FALSE</blockquote>) => instance.file_meta[]<br /><br />Returns meta data for files from the chosen file attribute and record (can optionally include deleted files).<br /><br />The returned type 'instance.file_meta' consists of:<blockquote>id UUID,<br />login_id_creator INTEGER,<br />hash TEXT,<br />name TEXT,<br />size_kb INTEGER,<br />version INTEGER,<br />date_change BIGINT,<br />date_delete BIGINT</blockquote>",
 				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Returnează ID-ul login-ului, care execută operațiunea.",
 				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Returnează codul de limbă din 5 caractere ('en_us', ...) al login-ului, care este utilizat pentru a accesa backend-ul de date.",
 				"get_name":"instance.get_name() => TEXT<br /><br />Returnează numele instanței, definit în fereastra de personalizare a panoului de administrare.",
@@ -748,7 +779,7 @@
 			"codeArgsHintPg":"opțional, 'var1 integer, var2 bool, ...'",
 			"codeReturns":"Se intoarce",
 			"codeReturnsHintJs":"opțional, 'number', 'array',...",
-			"codeReturnsHintPg":"opțional, 'text', 'integer',...",
+			"codeReturnsHintPg":"'text', 'integer',...",
 			"collectionId":"[Select collection]",
 			"entityInput":"Selectați înlocuitor și faceți clic pe corpul funcției pentru a utiliza sintaxa <b>upgrade-safe</b>.",
 			"fieldId":"[Select field]",
@@ -976,11 +1007,12 @@
 			"newRole":"Rol nou",
 			"relation":"Relație",
 			"title":"Roluri",
-			"titleOne":"Rol '{NAME}'"
+			"titleOne":"Role title"
 		},
 		"backHint":"Reveniți la prezentarea generală a aplicației",
 		"language":"Traduceri",
 		"languageNextHint":"Comutați la următoarea limbă (tasta rapidă: CTRL + q)",
+		"noOwner":"Application is in read-only mode",
 		"navigationCollections":"Colecții",
 		"navigationCollectionsSub":"Detaliile colecției",
 		"navigationFilterHint":"Filtrează după text",
@@ -1012,6 +1044,7 @@
 			"zoomResetHint":"Resetați nivelul de zoom"
 		},
 		"icsDesc":"Utilizați această adresă URL pentru a vă abona la calendar (iCalendar, ICS).",
+		"icsTokenNameHint":"Device name (optional)",
 		"month0":"Ianuarie",
 		"month1":"Februarie",
 		"month2":"Martie",
@@ -1159,8 +1192,7 @@
 			"help":"Ajutor",
 			"helpHint":"Afișați paginile de ajutor",
 			"log":"Jurnale",
-			"logHint":"Deschideți jurnalele de modificări",
-			"logShowAll":"Show all ({CNT})"
+			"logHint":"Deschideți jurnalele de modificări"
 		},
 		"dialog":{
 			"close":"Există modificări nesalvate.<br /><br />Doriți în continuare să închideți acest formular?",
@@ -1178,13 +1210,22 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"înregistrarea a fost actualizată"
 		},
-		"dataLog":"Schimbă jurnalele",
-		"deletedUser":"utilizator șters",
 		"help":"Pagini de ajutor",
 		"helpContextTitle":"Context",
 		"helpModuleTitle":"Aplicație",
 		"invalidInputs":"Verificați intrările!",
 		"noAccess":"Fără acces"
+	},
+	"formLog":{
+		"button":{
+			"showAll":"Show all ({CNT})"
+		},
+		"deletedUser":"utilizator șters",
+		"fileCreated":"File added",
+		"fileDeleted":"File deleted",
+		"fileRenamed":"File renamed",
+		"fileUpdated":"File updated",
+		"title":"Schimbă jurnalele"
 	},
 	"home":{
 		"button":{
@@ -1197,7 +1238,7 @@
 			"installBundle":"Core Company",
 			"installBundleDesc":"Instalați un set de aplicații de bază, utile pentru orice organizație. Setul „Core Company” include:<ul><li>Gestionarea absențelor</li><li>Urmărirea timpului</li><li>Gestionarea sarcinilor</li><li>A password safe</li><li>IT asset management</li></ul>După instalare, vă rugăm să aruncați o privire la paginile individuale de ajutor ale aplicației pentru a afla mai multe despre configurarea inițială pentru fiecare.",
 			"installFile":"Din fișierul",
-			"installFileDesc":"Instalați aplicații din fișierele locale REI3. Pentru sisteme offline sau aplicații create de sine stătător.<br /><br />Fișierele pentru aplicațiile REI3 oferite public pot fi descărcate de la <a href=\"https://rei3.de/download_en\" target=\" oficial _blank\">repository</a>.",
+			"installFileDesc":"Instalați aplicații din fișierele locale REI3. Pentru sisteme offline sau aplicații create de sine stătător.<br /><br />Fișierele pentru aplicațiile REI3 oferite public pot fi descărcate de la <a href=\"https://rei3.de/en/downloads\" target=\" oficial _blank\">repository</a>.",
 			"installRepo":"Din depozitul",
 			"installRepoDesc":"<b>Este necesar acces la internet</b><br /><br />Instalați aplicații din depozitul oficial REI3. Depozitul conține versiuni actuale ale aplicațiilor REI3 oferite public.<br /><br />Toate aplicațiile sunt revizuite și semnate digital.",
 			"intro":"Bun venit la REI3<br /><br />În prezent, nu există aplicații instalate. Pentru a începe să utilizați REI3, vă rugăm să alegeți una dintre opțiunile de instalare de mai jos.",
@@ -1222,17 +1263,35 @@
 			"inputSecond":"--",
 			"inputYear":"aaaa"
 		},
-		"fileNotUploaded":"Fișierul încă nu este salvat",
-		"fileTooLarge":"Nu se poate încărca fișierul'{NAME}', mărimea maxim permisă este {SIZE}."
+		"files":{
+			"button":{
+				"copyHint":"Copy selected files to paste them into another file input.",
+				"downloadHint":"Download file",
+				"fileRequestHint":"Edit file locally on your computer. Requires the R3 client application (installable from the user settings). Does not work if the system is in maintenance mode.",
+				"pasteHint":"Paste copied files into this file input."
+			},
+			"dropTarget":"Drop files here for upload",
+			"fileChanged":"Changed",
+			"fileName":"File name",
+			"fileSize":"File size",
+			"tooLarge":"Nu se poate încărca fișierul'{NAME}', mărimea maxim permisă este {SIZE}.",
+			"unsaved":"(unsaved)"
+		}
 	},
 	"list":{
 		"button":{
+			"aggregatorsHint":"Aggregate results",
 			"all":"Toate",
 			"allHint":"Selectați toate rezultatele",
 			"autoRenew":"{VALUE}s",
 			"autoRenewHint":"Actualizează datele la fiecare {VALUE} secunde",
+			"columnFilters":"Show column filters (right-click to remove)",
+			"columnOrderFlip":"Reverse order (right-click to remove)",
 			"csv":"CSV",
 			"csvHint":"Importați/exportați înregistrări prin fișier cu valori separate prin virgulă"
+		},
+		"columnFilter":{
+			"contains":"Contains"
 		},
 		"dialog":{
 			"delete":"Sunteți sigur că doriți să ștergeți <b>permanent</b> înregistrările selectate?"
@@ -1246,6 +1305,7 @@
 			"csvExport":"export",
 			"csvImport":"import"
 		},
+		"aggregators":"Aggregate results",
 		"autoRenew":"Înnoire automată",
 		"autoRenewInput":"Actualizează datele la fiecare X secunde",
 		"autoRenewInputHint":"min. 10s",
@@ -1262,6 +1322,7 @@
 		"csvTimezone":"Zona de timp",
 		"csvTotalLimit":"Număr de rânduri (0 = toate)",
 		"fetching":"Data is being retrieved...",
+		"filtersExpert":"Expert filters",
 		"inputHintCreate":"Creați o înregistrare nouă",
 		"inputHintOpen":"Deschideți înregistrarea",
 		"inputHintRemove":"Ștergeți înregistrarea",
@@ -1319,6 +1380,29 @@
 			"cornerRounded":"rotunjit",
 			"cornerSquared":"colțuros"
 		},
+		"tokensFixed":{
+			"button":{
+				"loadApp":"Application",
+				"loadCnf":"Config file",
+				"install":"Install client application"
+			},
+			"install":{
+				"intro":"With the client application you can directly open and edit files from within REI3.",
+				"steps":"Installation steps",
+				"step1":"Choose a device name:",
+				"step2":"Select your operating system:",
+				"step3":"Download the application:",
+				"step4":"Download the application config file to the same folder:",
+				"step5":"Start the application.",
+				"step6":"It is now installed and will appear in your system tray.",
+				"title":"Install client application"
+			},
+			"nameHint":"'My Work PC'",
+			"titleAdd":"Install client application",
+			"titleContext":"Use",
+			"titleDateCreate":"Created",
+			"titleName":"Device name"
+		},
 		"bordersAll":"Adăugați chenaruri",
 		"bordersCorners":"Colțuri la margine",
 		"compact":"Aspect compact",
@@ -1343,6 +1427,7 @@
 		"titleAccount":"Account",
 		"titleDisplay":"Afișare",
 		"titleEncryption":"End-to-end encryption",
+		"titleFixedTokens":"Device access",
 		"titleTheme":"Temă",
 		"warnUnsaved":"Avertismente pentru modificări nesalvate"
 	}

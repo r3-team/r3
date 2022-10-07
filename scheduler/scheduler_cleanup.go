@@ -1,19 +1,20 @@
 package scheduler
 
 import (
-	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 	"r3/cache"
 	"r3/config"
+	"r3/data"
 	"r3/db"
+	"r3/handler"
 	"r3/log"
+	"r3/schema"
 	"r3/tools"
-	"time"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgtype"
 )
 
 var oneDayInSeconds int64 = 60 * 60 * 24
@@ -63,115 +64,239 @@ func cleanupLogs() error {
 	return nil
 }
 
-// deletes files that have no reference anymore
-// files are stored in subfolders, one for each attribute ID
+// removes files that were deleted from their attribute or that are not assigned to a record
 func cleanUpFiles() error {
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
 
-	srcPath := config.File.Paths.Files
-
-	// scan all attribute directories, there should be a limited amount of them
-	dirs, err := os.ReadDir(srcPath)
-	if err != nil {
+	attributeIdsFile := make([]uuid.UUID, 0)
+	if err := db.Pool.QueryRow(db.Ctx, `
+		SELECT ARRAY_AGG(id)
+		FROM app.attribute
+		WHERE content = 'files'
+	`).Scan(&attributeIdsFile); err != nil {
 		return err
 	}
 
-	for _, dir := range dirs {
+	for _, atrId := range attributeIdsFile {
+		tNameR := schema.GetFilesTableName(atrId)
 
-		attributeId, err := uuid.FromString(dir.Name())
-		if err != nil {
-			log.Warning("server", fmt.Sprintf("found invalid subdirectory '%s' in files directory '%s'",
-				dir.Name(), srcPath), errors.New("it will be ignored"))
+		fileIds := make([]uuid.UUID, 0)
+		limit := 100 // at most 100 entries at a time
+		now := tools.GetTimeUnix()
 
-			continue
-		}
-
-		attribute, exists := cache.AttributeIdMap[attributeId]
-		if !exists {
-			log.Warning("server", fmt.Sprintf("found subdirectory '%s' for non-existing attribute in files directory '%s', it should be deleted",
-				dir.Name(), srcPath), errors.New("manual intervention required"))
-
-			continue
-		}
-
-		relation, exists := cache.RelationIdMap[attribute.RelationId]
-		if !exists {
-			return errors.New("relation does not exist")
-		}
-
-		module, exists := cache.ModuleIdMap[relation.ModuleId]
-		if !exists {
-			return errors.New("module does not exist")
-		}
-		atrPath := filepath.Join(srcPath, dir.Name())
-
-		// scan all files in attribute directory
-		f, err := os.Open(atrPath)
+		// delete assignments if deleted too far in the past
+		_, err := db.Pool.Exec(db.Ctx, fmt.Sprintf(`
+			DELETE FROM instance_file."%s"
+			WHERE date_delete IS NOT NULL
+			AND   date_delete < $1
+		`, tNameR), now-(oneDayInSeconds*int64(config.GetUint64("filesKeepDaysDeleted"))))
 		if err != nil {
 			return err
 		}
-		defer f.Close()
 
-		// read 100 files at a time
+		// find files that have no more record assignments
+		// execute in steps to reduce load
 		for {
-			files, err := f.Readdir(100)
-
-			if len(files) == 0 && err == io.EOF {
-				// scan finished, break
-				break
-			}
-
-			if err != nil {
+			if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+				SELECT ARRAY_AGG(f.id)
+				FROM instance.file AS f
+				WHERE 0 = (
+					SELECT COUNT(*)
+					FROM instance_file."%s" AS r
+					WHERE r.file_id = f.id
+				)
+				LIMIT $1
+			`, tNameR), limit).Scan(&fileIds); err != nil {
 				return err
 			}
 
-			for _, file := range files {
+			if len(fileIds) == 0 {
+				break
+			}
 
-				if file.IsDir() {
-					log.Warning("server", fmt.Sprintf("found invalid subdirectory '%s' in files directory '%s'",
-						filepath.Join(dir.Name(), file.Name()), srcPath), errors.New("it will be ignored"))
+			for _, fileId := range fileIds {
 
-					continue
-				}
-
-				fileId, err := uuid.FromString(file.Name())
-				if err != nil {
-					log.Warning("server", fmt.Sprintf("found invalid file '%s' in files directory '%s'",
-						file.Name(), atrPath), errors.New("it will be ignored"))
-
-					continue
-				}
-
-				// check if file is still being referenced by files attribute value
-				// if this is slow, a GIN index is recommended
-				var referenceOk bool
-				if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
-					SELECT EXISTS(
-						SELECT id
-						FROM "%s"."%s"
-						WHERE "%s" @> '{"files":[{"id":"%s"}]}'
-					)
-				`, module.Name, relation.Name, attribute.Name,
-					fileId.String())).Scan(&referenceOk); err != nil {
-
+				versions := make([]int64, 0)
+				if err := db.Pool.QueryRow(db.Ctx, `
+					SELECT ARRAY_AGG(version)
+					FROM instance.file_version
+					WHERE file_id = $1
+				`, fileId).Scan(&versions); err != nil {
 					return err
 				}
 
-				if !referenceOk {
-					filePath := filepath.Join(atrPath, file.Name())
+				for _, version := range versions {
+					filePath := data.GetFilePathVersion(fileId, version)
 
-					log.Info("server", fmt.Sprintf("found not-referenced file '%s', it will be deleted",
-						file.Name()))
-
-					if err := os.Remove(filePath); err != nil {
+					exists, err := tools.Exists(filePath)
+					if err != nil {
 						return err
+					}
+					if !exists {
+						// file not available, skip and continue
+						continue
+					}
+
+					// referenced file version exists, attempt to delete it
+					// if deletion fails, abort and keep its reference as file might be in access
+					if err := os.Remove(filePath); err != nil {
+						log.Warning("server", "failed to remove old file version", err)
+						continue
+					}
+
+					// either file version existed on disk and could be deleted or it didn´t exist
+					// either case we delete the file reference
+					if _, err := db.Pool.Exec(db.Ctx, `
+							DELETE FROM instance.file_version
+							WHERE file_id = $1
+							AND   version = $2
+						`, fileId, version); err != nil {
+						return err
+					}
+				}
+
+				// clean up thumbnail, if there
+				filePathThumb := data.GetFilePathThumb(fileId)
+				if exists, _ := tools.Exists(filePathThumb); exists {
+					if err := os.Remove(filePathThumb); err != nil {
+						log.Warning("server", "failed to remove old file thumbnail", err)
+						continue
 					}
 				}
 			}
 
-			// add some sleep to give system breathing space
-			time.Sleep(time.Millisecond * 10)
+			// delete file records with no versions left
+			tag, err := db.Pool.Exec(db.Ctx, `
+				DELETE FROM instance.file AS f
+				WHERE 0 = (
+					SELECT COUNT(*)
+					FROM instance.file_version
+					WHERE file_id = f.id
+				)
+			`)
+			if err != nil {
+				return err
+			}
+
+			// if not a single file was deleted this loop, nothing more we can do
+			if tag.RowsAffected() == 0 {
+				break
+			}
+			log.Info("server", fmt.Sprintf("successfully cleaned up %d files (deleted/unassigned)",
+				tag.RowsAffected()))
+
+			// limit not reached this loop, we are done
+			if len(fileIds) < limit {
+				break
+			}
+		}
+
+		// find file versions that do not fulfill the relation retention settings
+		cache.Schema_mx.RLock()
+		atr, exists := cache.AttributeIdMap[atrId]
+		if !exists {
+			cache.Schema_mx.RUnlock()
+			return handler.ErrSchemaUnknownAttribute(atrId)
+		}
+		rel, exists := cache.RelationIdMap[atr.RelationId]
+		if !exists {
+			cache.Schema_mx.RUnlock()
+			return handler.ErrSchemaUnknownRelation(atr.RelationId)
+		}
+		cache.Schema_mx.RUnlock()
+
+		type fileVersion struct {
+			fileId  uuid.UUID
+			version int64
+		}
+
+		for {
+			removeCnt := 0
+			fileVersions := make([]fileVersion, 0)
+
+			var keepVersionsCnt int32 = 0
+			if rel.RetentionCount.Status == pgtype.Present {
+				keepVersionsCnt = rel.RetentionCount.Int
+			}
+
+			var keepVersionsAfter int64 = now
+			if rel.RetentionDays.Status == pgtype.Present {
+				keepVersionsAfter = now - (int64(rel.RetentionDays.Int) * 86400)
+			}
+
+			rows, err := db.Pool.Query(db.Ctx, `
+				SELECT v.file_id, v.version
+				FROM instance.file_version AS v
+				
+				-- never touch the latest version
+				WHERE v.version <> (
+					SELECT MAX(s.version)
+					FROM instance.file_version AS s
+					WHERE s.file_id = v.file_id
+				)
+				
+				-- retention count not fulfilled
+				AND (
+					SELECT COUNT(*) AS newer_version_cnt
+					FROM instance.file_version AS c
+					WHERE c.file_id = v.file_id
+					AND   c.version > v.version
+				) > $1
+				
+				-- retention days not fulfilled
+				AND v.date_change < $2
+				
+				ORDER BY file_id ASC, version DESC
+				LIMIT $3
+			`, keepVersionsCnt, keepVersionsAfter, limit)
+
+			if err != nil {
+				return err
+			}
+			for rows.Next() {
+				var fv fileVersion
+				if err := rows.Scan(&fv.fileId, &fv.version); err != nil {
+					return err
+				}
+				fileVersions = append(fileVersions, fv)
+			}
+			rows.Close()
+
+			for _, fv := range fileVersions {
+				filePath := data.GetFilePathVersion(fv.fileId, fv.version)
+
+				// if file version exists, attempt to delete it
+				// if not, skip deletion and remove reference
+				if exists, _ := tools.Exists(filePath); exists {
+
+					// if deletion fails, abort and keep its reference as file might be in access
+					if err := os.Remove(filePath); err != nil {
+						log.Warning("server", "failed to remove old file version", err)
+						continue
+					}
+				}
+
+				if _, err := db.Pool.Exec(db.Ctx, `
+						DELETE FROM instance.file_version
+						WHERE file_id = $1
+						AND   version = $2
+					`, fv.fileId, fv.version); err != nil {
+					return err
+				}
+				removeCnt++
+			}
+
+			// if not a single file version was deleted this loop, nothing more we can do
+			if removeCnt == 0 {
+				break
+			}
+
+			log.Info("server", fmt.Sprintf("successfully cleaned up %d file versions (no retention)",
+				removeCnt))
+
+			// limit not reached this loop, we are done
+			if len(fileVersions) < limit {
+				break
+			}
 		}
 	}
 	return nil

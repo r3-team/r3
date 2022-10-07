@@ -78,6 +78,9 @@
 	max-width:500px;
 	margin:var(--spacing-child);
 }
+.form-log table.file-changes{
+	width:100%;
+}
 
 /* context help */
 .form-help{

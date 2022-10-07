@@ -2,6 +2,7 @@ import MyBuilderCaption      from './builderCaption.js';
 import MyBuilderIconInput    from './builderIconInput.js';
 import {MyModuleSelect}      from '../input.js';
 import {getDependentModules} from '../shared/builder.js';
+import {copyValueDialog}     from '../shared/generic.js';
 import {getUnixFormat}       from '../shared/time.js';
 export {MyBuilderModules as default};
 
@@ -14,14 +15,14 @@ let MyBuilderModulesItemStartForm = {
 	template:`<tr>
 		<td>#{{ position+1 }}</td>
 		<td>
-			<select v-model="roleId">
+			<select v-model="roleId" :disabled="readonly">
 				<option v-for="r in module.roles" :value="r.id">
 					{{ r.name }}
 				</option>
 			</select>
 		</td>
 		<td>
-			<select v-model="formId">
+			<select v-model="formId" :disabled="readonly">
 				<option :value="null">-</option>
 				<option v-for="f in module.forms" :value="f.id">
 					{{ f.name }}
@@ -33,11 +34,13 @@ let MyBuilderModulesItemStartForm = {
 				<my-button image="arrowDown.png"
 					v-if="!isLast"
 					@trigger="$emit('moveDown')"
+					:active="!readonly"
 					:naked="true"
 				/>
 				<my-button image="arrowUp.png"
 					v-if="position !== 0"
 					@trigger="$emit('moveUp')"
+					:active="!readonly"
 					:naked="true"
 				/>
 			</div>
@@ -45,6 +48,7 @@ let MyBuilderModulesItemStartForm = {
 		<td>
 			<my-button image="cancel.png"
 				@trigger="$emit('remove')"
+				:active="!readonly"
 				:naked="true"
 			/>
 		</td>
@@ -53,26 +57,27 @@ let MyBuilderModulesItemStartForm = {
 		isLast:    { type:Boolean, required:true },
 		modelValue:{ type:Object,  required:true },
 		module:    { type:Object,  required:true },
-		position:  { type:Number,  required:true }
+		position:  { type:Number,  required:true },
+		readonly:  { type:Boolean, required:true }
 	},
 	emits:['moveDown','moveUp','remove','update:modelValue'],
 	computed:{
 		// inputs
 		formId:{
-			get:function()  { return this.modelValue.formId; },
-			set:function(v) { this.update('formId',v); }
+			get()  { return this.modelValue.formId; },
+			set(v) { this.update('formId',v); }
 		},
 		roleId:{
-			get:function()  { return this.modelValue.roleId; },
-			set:function(v) { this.update('roleId',v); }
+			get()  { return this.modelValue.roleId; },
+			set(v) { this.update('roleId',v); }
 		},
 		
 		// stores
-		capApp:function() { return this.$store.getters.captions.builder.relation; },
-		capGen:function() { return this.$store.getters.captions.generic; }
+		capApp:(s) => s.$store.getters.captions.builder.relation,
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
-		update:function(name,value) {
+		update(name,value) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = value;
 			
@@ -92,9 +97,16 @@ let MyBuilderModulesItem = {
 	template:`<tbody>
 		<tr>
 			<td>
+				<my-button image="save.png"
+					@trigger="set"
+					:active="hasChanges && !readonly"
+					:caption="isNew ? capGen.button.create : ''"
+					:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+				/>
 				<my-button image="open.png"
 					v-if="!isNew"
 					@trigger="open"
+					:captionTitle="capGen.button.open"
 				/>
 			</td>
 			<td>
@@ -102,21 +114,31 @@ let MyBuilderModulesItem = {
 					@input="iconId = $event"
 					:icon-id-selected="iconId"
 					:module="module"
-					:readonly="isNew"
+					:readonly="isNew || readonly"
 				/>
 			</td>
 			<td>
-				<input v-model="name" :placeholder="isNew ? capApp.new : ''" />
+				<input v-model="name" :disabled="readonly" :placeholder="isNew ? capApp.new : ''" />
 			</td>
 			<td>
 				<my-button image="visible1.png"
-					@trigger="showInfo"
+					@trigger="copyValueDialog(module.name,module.id,module.id)"
 					:active="!isNew"
 				/>
 			</td>
 			<td>
+				<div class="row">
+					<my-button image="settings.png"
+						@trigger="$router.push('/admin/modules')"
+						:active="!isNew"
+						:caption="readonly ? capGen.option.yes : capGen.option.no"
+					/>
+				</div>
+			</td>
+			<td>
 				<input class="short"
 					v-model="color1"
+					:disabled="readonly"
 				/>
 			</td>
 			<td v-click-outside="hideColorPicker">
@@ -144,7 +166,7 @@ let MyBuilderModulesItem = {
 				/>
 			</td>
 			<td>
-				<select v-model="parentId">
+				<select v-model="parentId" :disabled="readonly">
 					<option :value="null">-</option>
 					<option
 						v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.parentId === null)"
@@ -155,7 +177,7 @@ let MyBuilderModulesItem = {
 				</select>
 			</td>
 			<td>
-				<input class="short" v-model.number="position" />
+				<input class="short" v-model.number="position" :disabled="readonly" />
 			</td>
 			<td>
 				<my-button
@@ -181,12 +203,6 @@ let MyBuilderModulesItem = {
 			<td>
 				<input class="short" v-model="releaseBuildApp" disabled="disabled" />
 			</td>
-			<td>
-				<my-button image="save.png"
-					@trigger="set"
-					:active="hasChanges"
-				/>
-			</td>
 		</tr>
 		
 		<tr v-if="showStartForms">
@@ -196,7 +212,7 @@ let MyBuilderModulesItem = {
 					<!-- default start form -->
 					<div class="item-list">
 						<span>{{ capApp.startFormDefault }}</span>
-						<select v-model="formId">
+						<select v-model="formId" :disabled="readonly">
 							<option :value="null">-</option>
 							<option v-for="f in module.forms" :value="f.id">
 								{{ f.name }}
@@ -229,6 +245,7 @@ let MyBuilderModulesItem = {
 									:modelValue="sf"
 									:module="module"
 									:position="i"
+									:readonly="readonly"
 								/>
 							</tbody>
 						</table>
@@ -239,6 +256,7 @@ let MyBuilderModulesItem = {
 						
 					<my-button image="add.png"
 						@trigger="addStartForm"
+						:active="!readonly"
 						:caption="capGen.button.add"
 					/>
 				</div>
@@ -256,6 +274,7 @@ let MyBuilderModulesItem = {
 							<my-bool
 								@update:modelValue="toggleDependsOn(m.id,$event)"
 								:modelValue="dependsOn.includes(m.id)"
+								:readonly="readonly"
 							/>
 							<span class="depends-on">{{ m.name }}</span>
 						</div>
@@ -271,7 +290,7 @@ let MyBuilderModulesItem = {
 					<!-- main language selection -->
 					<div class="item-list">
 						<span>{{ capApp.languageMain }}</span>
-						<select v-model="languageMain">
+						<select v-model="languageMain" :disabled="readonly">
 							<option
 								v-for="l in languages"
 								:value="l"
@@ -298,6 +317,7 @@ let MyBuilderModulesItem = {
 									<td>
 										<input type="text"
 											v-model="languages[i]"
+											:disabled="readonly"
 											:placeholder="capApp.languageCodeHint"
 										/>
 									</td>
@@ -305,11 +325,13 @@ let MyBuilderModulesItem = {
 										<my-builder-caption
 											v-model="captions.moduleTitle"
 											:language="l"
+											:readonly="readonly"
 										/>
 									</td>
 									<td>
 										<my-button image="cancel.png"
 											@trigger="languages.splice(i,1)"
+											:active="!readonly"
 											:naked="true"
 										/>
 									</td>
@@ -320,6 +342,7 @@ let MyBuilderModulesItem = {
 					
 					<my-button image="add.png"
 						@trigger="languages.push('')"
+						:active="!readonly"
 						:caption="capGen.button.add"
 					/>
 				</div>
@@ -380,42 +403,39 @@ let MyBuilderModulesItem = {
 		};
 	},
 	computed:{
-		hasChanges:function() {
-			return this.parentId     !== this.module.parentId
-				|| this.formId       !== this.module.formId
-				|| this.iconId       !== this.module.iconId
-				|| this.name         !== this.module.name
-				|| this.color1       !== this.module.color1
-				|| this.position     !== this.module.position
-				|| this.languageMain !== this.module.languageMain
-				|| JSON.stringify(this.dependsOn)  !== JSON.stringify(this.module.dependsOn)
-				|| JSON.stringify(this.startForms) !== JSON.stringify(this.module.startForms)
-				|| JSON.stringify(this.languages)  !== JSON.stringify(this.module.languages)
-				|| JSON.stringify(this.captions)   !== JSON.stringify(this.module.captions)
+		hasChanges:(s) => {
+			return s.parentId     !== s.module.parentId
+				|| s.formId       !== s.module.formId
+				|| s.iconId       !== s.module.iconId
+				|| s.name         !== s.module.name
+				|| s.color1       !== s.module.color1
+				|| s.position     !== s.module.position
+				|| s.languageMain !== s.module.languageMain
+				|| JSON.stringify(s.dependsOn)  !== JSON.stringify(s.module.dependsOn)
+				|| JSON.stringify(s.startForms) !== JSON.stringify(s.module.startForms)
+				|| JSON.stringify(s.languages)  !== JSON.stringify(s.module.languages)
+				|| JSON.stringify(s.captions)   !== JSON.stringify(s.module.captions)
 			;
 		},
-		displayReleaseDate:function() {
-			if(this.releaseDate === 0) return '-';
-			
-			return this.getUnixFormat(this.releaseDate,'Y-m-d H:i');
-		},
-		styleColorPreview:function() {
-			return `background-color:#${this.color1};`;
-		},
 		
-		// simple states
-		isNew:function() { return this.id === null; },
+		// simple
+		displayReleaseDate:(s) => s.releaseDate === 0 ? '-' : s.getUnixFormat(s.releaseDate,'Y-m-d H:i'),
+		isNew:             (s) => s.id === null,
+		readonly:          (s) => s.id !== null && !s.moduleIdMapOptions[s.id].owner,
+		styleColorPreview: (s) => `background-color:#${s.color1};`,
 		
 		// stores
-		modules:       function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.module; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		modules:           (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleIdMapOptions:(s) => s.$store.getters['schema/moduleIdMapOptions'],
+		relationIdMap:     (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:    (s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:            (s) => s.$store.getters.captions.builder.module,
+		capGen:            (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
+		copyValueDialog,
 		getDependentModules,
 		getUnixFormat,
 		
@@ -435,16 +455,6 @@ let MyBuilderModulesItem = {
 		},
 		setColor:function(newVal) {
 			this.color1 = newVal.hex.substr(1);
-		},
-		showInfo:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.module.id,
-				captionTop:this.module.name,
-				buttons:[{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
 		},
 		toggleDependsOn:function(moduleId,state) {
 			let pos = this.dependsOn.indexOf(moduleId);
@@ -565,8 +575,8 @@ let MyBuilderModulesKeyCreate = {
 	</div>`,
 	computed:{
 		// stores
-		capApp:function() { return this.$store.getters.captions.builder.module; },
-		capGen:function() { return this.$store.getters.captions.generic; }
+		capApp:(s) => s.$store.getters.captions.builder.module,
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	data:function() {
 		return {
@@ -579,7 +589,7 @@ let MyBuilderModulesKeyCreate = {
 	},
 	methods:{
 		displayArrow,
-		createKey:function() {
+		createKey() {
 			ws.send('key','create',{keyLength:parseInt(this.keyLength)},true).then(
 				res => {
 					this.keyPrivate = res.payload.private;
@@ -615,12 +625,12 @@ let MyBuilderModulesGraph = {
 		</div>
 	</div>`,
 	computed:{
-		graphOption:function() {
+		graphOption:(s) => {
 			let edges = [];
 			let nodes = [];
 			
-			for(let i = 0, j = this.modules.length; i < j; i++) {
-				let m = this.modules[i];
+			for(let i = 0, j = s.modules.length; i < j; i++) {
+				let m = s.modules[i];
 				
 				nodes.push({
 					id:m.id,
@@ -629,7 +639,7 @@ let MyBuilderModulesGraph = {
 						show:true
 					},
 					symbolSize:30,
-					value:this.capApp.graphDependsOn.replace('{COUNT}',m.dependsOn.length)
+					value:s.capApp.graphDependsOn.replace('{COUNT}',m.dependsOn.length)
 				});
 				
 				for(let x = 0, y = m.dependsOn.length; x < y; x++) {
@@ -667,9 +677,9 @@ let MyBuilderModulesGraph = {
 		},
 		
 		// stores
-		modules: function() { return this.$store.getters['schema/modules']; },
-		capApp:  function() { return this.$store.getters.captions.builder.module; },
-		settings:function() { return this.$store.getters.settings; }
+		modules: (s) => s.$store.getters['schema/modules'],
+		capApp:  (s) => s.$store.getters.captions.builder.module,
+		settings:(s) => s.$store.getters.settings
 	},
 	data:function() {
 		return {
@@ -783,34 +793,34 @@ let MyBuilderModulesExport = {
 		</div>
 	</div>`,
 	computed:{
-		exportFileName:function() {
-			let m = this.moduleIdMap[this.id];
+		exportFileName:(s) => {
+			let m = s.moduleIdMap[s.id];
 			return `${m.name}_${m.releaseBuild}.rei3`;
 		},
-		exportHref:function() {
-			return `/export/${this.exportFileName}?module_id=${this.id}&token=${this.token}`;
+		exportHref:(s) => {
+			return `/export/${s.exportFileName}?module_id=${s.id}&token=${s.token}`;
 		},
-		exportValid:function() {
-			if(this.moduleIdMapChanged === null)
+		exportValid:(s) => {
+			if(s.moduleIdMapChanged === null)
 				return false;
 			
-			for(let k in this.moduleIdMapChanged) {
-				let m = this.moduleIdMapChanged[k];
+			for(let k in s.moduleIdMapChanged) {
+				let m = s.moduleIdMapChanged[k];
 				
 				// block if a dependency has changes
-				if(m.id !== this.id && this.moduleIdMapOptions[k].owner && this.moduleIdMapChanged[k])
+				if(m.id !== s.id && s.moduleIdMapOptions[k].owner && s.moduleIdMapChanged[k])
 					return false;
 			}
 			return true;
 		},
 		
 		// stores
-		token:      function() { return this.$store.getters['local/token']; },
-		modules:    function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		moduleIdMapOptions:function() { return this.$store.getters['schema/moduleIdMapOptions']; },
-		capApp:     function() { return this.$store.getters.captions.builder.module; },
-		capGen:     function() { return this.$store.getters.captions.generic; }
+		token:      (s) => s.$store.getters['local/token'],
+		modules:    (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		moduleIdMapOptions:(s) => s.$store.getters['schema/moduleIdMapOptions'],
+		capApp:     (s) => s.$store.getters.captions.builder.module,
+		capGen:     (s) => s.$store.getters.captions.generic
 	},
 	data:function() {
 		return {
@@ -823,7 +833,7 @@ let MyBuilderModulesExport = {
 	},
 	methods:{
 		displayArrow,
-		addVersion:function(moduleId) {
+		addVersion(moduleId) {
 			ws.send('transfer','addVersion',{moduleId:moduleId},true).then(
 				() => {
 					this.moduleIdMapChanged = null;
@@ -832,13 +842,13 @@ let MyBuilderModulesExport = {
 				this.$root.genericError
 			);
 		},
-		check:function() {
+		check() {
 			ws.send('module','checkChange',{id:this.id},true).then(
 				res => this.moduleIdMapChanged = res.payload.moduleIdMapChanged,
 				this.$root.genericError
 			);
 		},
-		setKey:function() {
+		setKey() {
 			// check validity
 			if(!this.exportPrivateKey.includes('-----BEGIN RSA PRIVATE KEY-----'))
 				return this.$store.commit('dialog',{
@@ -887,10 +897,11 @@ let MyBuilderModules = {
 				<table class="marginBottom">
 					<thead>
 						<tr>
-							<th>{{ capGen.button.open }}</th>
+							<th>{{ capGen.actions }}</th>
 							<th>{{ capGen.icon }}</th>
 							<th>{{ capGen.name }}</th>
 							<th>{{ capGen.id }}</th>
+							<th>{{ capGen.readonly }}</th>
 							<th colspan="2">{{ capApp.color }}</th>
 							<th>{{ capApp.dependsOn }}</th>
 							<th>{{ capApp.parent }}</th>
@@ -900,7 +911,6 @@ let MyBuilderModules = {
 							<th>{{ capApp.releaseDate }}</th>
 							<th>{{ capApp.releaseBuild }}</th>
 							<th>{{ capApp.releaseBuildApp }}</th>
-							<th></th>
 						</tr>
 					</thead>
 					
@@ -920,7 +930,7 @@ let MyBuilderModules = {
 			</div>
 		</div>
 		
-		<my-builder-modules-graph v-if="modules.length !== 0" />
+		<my-builder-modules-graph  v-if="modules.length !== 0" />
 		<my-builder-modules-export v-if="modules.length !== 0" />
 		<my-builder-modules-key-create />
 	</div>`,
@@ -940,9 +950,9 @@ let MyBuilderModules = {
 		}
 	},
 	computed:{
-		modules:function() { return this.$store.getters['schema/modules']; },
-		capApp: function() { return this.$store.getters.captions.builder.module; },
-		capGen: function() { return this.$store.getters.captions.generic; }
+		modules:(s) => s.$store.getters['schema/modules'],
+		capApp: (s) => s.$store.getters.captions.builder.module,
+		capGen: (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		displayArrow

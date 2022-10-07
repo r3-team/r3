@@ -63,6 +63,20 @@ func clusterProcessEvents() error {
 				return err
 			}
 			err = cluster.ConfigChanged(false, true, p.SwitchToMaintenance)
+		case "filesCopied":
+			var p types.ClusterEventFilesCopied
+			if err := json.Unmarshal(e.Payload, &p); err != nil {
+				return err
+			}
+			err = cluster.FilesCopied(false, p.LoginId,
+				p.AttributeId, p.FileIds, p.RecordId)
+		case "fileRequested":
+			var p types.ClusterEventFileRequested
+			if err := json.Unmarshal(e.Payload, &p); err != nil {
+				return err
+			}
+			err = cluster.FileRequested(false, p.LoginId, p.AttributeId,
+				p.FileId, p.FileHash, p.FileName, p.ChooseApp)
 		case "loginDisabled":
 			var p types.ClusterEventLogin
 			if err := json.Unmarshal(e.Payload, &p); err != nil {

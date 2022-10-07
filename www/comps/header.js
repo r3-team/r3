@@ -105,14 +105,10 @@ let MyHeader = {
 				
 				<!-- busy indicator -->
     				<transition name="fade_out">
-					<div class="entry no-wrap clickable" tabindex="0"
+					<div class="entry no-wrap"
 						v-if="busyCounter > 0"
-						@click="cancelRequest"
-						@keyup.enter="cancelRequest"
 						:title="capGen.busy"
-					>
-						<img src="images/load.gif" />
-					</div>
+					><img src="images/load.gif" /></div>
 				</transition>
 				
 				<!-- collection entries -->
@@ -312,7 +308,6 @@ let MyHeader = {
 		},
 		
 		// actions
-		cancelRequest:function() { this.$root.wsCancel(); },
 		openFeedback: function() { this.$store.commit('isAtFeedback',true); },
 		pagePrev:     function() { window.history.back(); },
 		pageNext:     function() { window.history.forward(); },

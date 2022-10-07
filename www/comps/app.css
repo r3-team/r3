@@ -112,7 +112,10 @@ body                                         { --depth:6; }
 .contentBox .top                             { --depth:4; }
 .contentBox .top .selector                   { --depth:0; }
 .contentBox .contentPart                     { --depth:5; }
-.default-inputs                              { --depth:0; }
+.default-inputs input,
+.default-inputs select,
+.default-inputs textarea,
+.default-inputs .input-custom                { --depth:0; }
 .default-inputs *:disabled                   { --depth:6; }
 .home .modules-title                         { --depth:0; }
 .home .module                                { --depth:4; }
@@ -129,13 +132,14 @@ body                                         { --depth:6; }
 .field                                       { --depth:0; }
 .field .disabled                             { --depth:6; }
 .list .layoutTable th                        { --depth:0; }
+.list .layoutTable .columBatchCaption.clickable:hover{ --depth:3; }
 .list .layoutTable tbody tr                  { --depth:1; }
 .list .layoutTable tbody tr:nth-child(odd)   { --depth:0; }
 .list .layoutCards .card                     { --depth:7; }
 .list .layoutCards .card.rowSelect:hover     { --depth:2; }
 .list .layoutCards .card .actions            { --depth:7; }
 .list .layoutCards .card .header             { --depth:7; }
-.list-header                                 { --depth:3; }
+.list-headers                                { --depth:3; }
 .calendar .month .days                       { --depth:6; }
 .calendar .month .day                        { --depth:0; }
 .calendar .month .day.outside                { --depth:3; }
@@ -154,9 +158,14 @@ body                                         { --depth:6; }
 .input-dropdown                              { --depth:1; }
 .input-dropdown .entry:focus                 { --depth:0; }
 .input-dropdown .entry:hover                 { --depth:0; }
+.input-files-header                          { --depth:2; }
+.input-files-header input                    { --depth:0; }
+.input-files .item                           { --depth:2; }
+.input-files .item img.prev                  { --depth:5; }
 .admin .logs .actions                        { --depth:7; }
-.admin .table-default th                     { --depth:6; }
-.admin .table-default tr.grouping td         { --depth:3; }
+.admin .table-default th                     { --depth:4; }
+.admin .table-default td                     { --depth:1; }
+.admin .table-default tr.grouping td         { --depth:4; }
 .admin-cluster-node                          { --depth:2; }
 .admin-cluster-node img                      { --depth:5; }
 .admin-license .file                         { --depth:1; }
@@ -235,12 +244,24 @@ h3{
 .column.centered{
 	align-items:center;
 }
+.column.gap{
+	gap:10px;
+}
+.column.space-between{
+	justify-content:space-between;
+}
 .row{
 	display:flex;
 	flex-direction:row;
 }
 .row.centered{
 	align-items:center;
+}
+.row.space-between{
+	justify-content:space-between;
+}
+.row.gap{
+	gap:10px;
 }
 .shade{
 	box-shadow:1px 1px 4px var(--color-shade);
@@ -316,22 +337,47 @@ h3{
 }
 
 /* input block overlay */
-.input-block-overlay{
+.input-block-overlay-bg{
 	position:absolute;
 	left:0px;
 	right:0px;
 	top:0px;
 	bottom:0px;
+	visibility:hidden;
+	opacity:0;
 	z-index:var(--z-index-block-full-page);
 	background-color:#000;
-	opacity:0.2;
+	transition:opacity 0.2s, visibility 0.2s;
 }
-.input-block-overlay img{
-	width:40px;
-	margin:-20px 0px 0px -20px;
+.input-block-overlay-bg.show{
+	visibility:visible;
+	opacity:0.35;
+	transition:opacity 2s 0.3s;
+}
+.input-block-overlay{
+	width:320px;
+	height:200px;
+	margin:-100px 0px 0px -160px;
 	left:50%;
 	top:50%;
 	position:absolute;
+	display:flex;
+	flex-flow:column nowrap;
+	justify-content:center;
+	align-items:center;
+}
+.input-block-overlay img.busy{
+	width:64px;
+	margin:0px 0px 20px 0px;
+}
+.input-block-overlay .cancel-action{
+	visibility:hidden;
+	opacity:0;
+}
+.input-block-overlay-bg.show .cancel-action{
+	visibility:visible;
+	opacity:1;
+	transition:opacity 1s 4s;
 }
 
 /* generic boxes */
@@ -527,10 +573,10 @@ table{
 table th{
 	font-weight:normal;
 	text-align:left;
-	padding:0px 8px;
+	padding:2px 4px;
 }
 table td{
-	padding:2px;
+	padding:2px 4px;
 }
 table th.no-padding,
 table td.no-padding{
@@ -579,19 +625,22 @@ table td.maximum{
 }
 .default-inputs input,
 .default-inputs select,
-.default-inputs textarea{
+.default-inputs textarea,
+.default-inputs .input-custom{
 	min-width:150px;
 	max-width:300px;
 }
 .default-inputs input.short,
 .default-inputs select.short,
-.default-inputs textarea.short{
+.default-inputs textarea.short,
+.default-inputs .input-custom.short{
 	min-width:50px;
 	max-width:100px;
 }
 .default-inputs input.long,
 .default-inputs select.long,
-.default-inputs textarea.long{
+.default-inputs textarea.long,
+.default-inputs .input-custom.long{
 	min-width:300px;
 	max-width:600px;
 }
@@ -606,11 +655,6 @@ table td.maximum{
 .default-inputs input[type=range]:focus{
 	box-shadow:none;
 	transition:none;
-}
-.default-inputs input:disabled,
-.default-inputs select:disabled,
-.default-inputs textarea:disabled{
-	color:var(--color-font-alt);
 }
 .default-inputs option{
 	padding:0px;

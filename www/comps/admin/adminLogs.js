@@ -30,7 +30,7 @@ let MyAdminLogs = {
 					:unixTo="unixTo"
 				/>
 				
-				<div class="right-bar default-inputs">
+				<div class="action-bar">
 					<my-input-offset
 						@input="offset = $event;get()"
 						:caption="true"
@@ -38,43 +38,70 @@ let MyAdminLogs = {
 						:offset="offset"
 						:total="total"
 					/>
-					<select class="entry" v-model="context" @change="offset = 0;get()">
-						<option value="">[{{ capApp.context }}]</option>
-						<option value="application">Applications</option>
-						<option value="backup">Backup</option>
-						<option value="cache">Cache</option>
-						<option value="cluster">Cluster</option>
-						<option value="csv">CSV</option>
-						<option value="ldap">LDAP</option>
-						<option value="mail">Mail</option>
-						<option value="scheduler">Scheduler</option>
-						<option value="server">Server</option>
-						<option value="transfer">Transfer</option>
-					</select>
-					<input class="entry"
-						v-model="byString"
-						@keyup.enter="offset = 0;get()"
-						:placeholder="capApp.byString"
-					/>
-					<span>{{ capGen.limit }}</span>
-					<select class="entry short" v-model.number="limit" @change="offset = 0;get()">
-						<option value="100">100</option>
-						<option value="250">250</option>
-						<option value="500">500</option>
-						<option value="1000">1000</option>
-					</select>
-					<my-button image="refresh.png"
-						@trigger="get"
-						:caption="capGen.button.refresh"
-					/>
+				</div>
+				
+				<div class="right-bar default-inputs">
+					<div class="action-bar">
+						<!-- log filters -->
+						<span>{{ capGen.filters }}</span>
+						<select class="entry" v-model="context" @change="offset = 0;get()">
+							<option value="">[{{ capApp.context }}]</option>
+							<option v-for="c in contextsValid" :value="c">
+								{{ capApp.contextLabel[c] }}
+							</option>
+						</select>
+						<input class="entry"
+							v-model="byString"
+							@keyup.enter="offset = 0;get()"
+							:placeholder="capApp.byString"
+						/>
+						<span>{{ capGen.limit }}</span>
+						<select class="entry short" v-model.number="limit" @change="offset = 0;get()">
+							<option value="100">100</option>
+							<option value="250">250</option>
+							<option value="500">500</option>
+							<option value="1000">1000</option>
+						</select>
+						<my-button image="refresh.png"
+							@trigger="get"
+							:caption="capGen.button.refresh"
+						/>
+					</div>
+				
+					<div class="action-bar default-inputs">
+						<!-- log configs -->
+						<span>{{ capApp.keepDays }}</span>
+						<input class="short" v-model="configInput.logsKeepDays" />
+						<my-button image="save.png"
+							@trigger="setConfig"
+							:active="config.logsKeepDays !== configInput.logsKeepDays"
+						/>
+						
+						<span>{{ capApp.logLevel }}</span>
+						<select class="short" v-model="levelContext">
+							<option v-for="c in contextsValid" :value="getConfigLogContextName(c)">
+								{{ capApp.contextLabel[c] }}
+							</option>
+						</select>
+						<select v-model="configInput[levelContext]">
+							<option value="1">{{ capApp.logLevel1 }}</option>
+							<option value="2">{{ capApp.logLevel2 }}</option>
+							<option value="3">{{ capApp.logLevel3 }}</option>
+						</select>
+						<my-button image="save.png"
+							@trigger="setConfig"
+							:active="config[levelContext] !== configInput[levelContext]"
+						/>
+					</div>
 				</div>
 			</div>
-		
+			
+			<!-- logs -->
 			<div class="table-default-wrap shade">
 				<table class="table-default">
 					<thead>
 						<tr class="title">
-							<th></th>
+							<th class="minimum">{{ capGen.button.show }}</th>
 							<th class="minimum">{{ capApp.date }}</th>
 							<th class="minimum">{{ capApp.level }}</th>
 							<th class="minimum">{{ capApp.node }}</th>
@@ -96,10 +123,17 @@ let MyAdminLogs = {
 								/>
 							</td>
 							<td class="minimum">{{ displayDate(l.date) }}</td>
-							<td class="minimum">{{ displayLevel(l.level) }}</td>
+							<td class="minimum">
+								<div class="row centered">
+									<div class="level-indicator"
+										:style="'background-color:'+displayIndicator(l.level)"
+									></div>
+									<span>{{ displayLevel(l.level) }}</span>
+								</div>
+							</td>
 							<td class="minimum">{{ l.nodeName }}</td>
 							<td class="minimum">{{ l.moduleName }}</td>
-							<td class="minimum">{{ l.context }}</td>
+							<td class="minimum">{{ capApp.contextLabel[l.context] }}</td>
 							<td>{{ displayMessage(l.message) }}</td>
 						</tr>
 					</tbody>
@@ -112,11 +146,16 @@ let MyAdminLogs = {
 	},
 	data:function() {
 		return {
+			contextsValid:[
+				'module','backup','cache','cluster','csv','imager','ldap',
+				'mail','scheduler','server','transfer','websocket'
+			],
 			messageLengthShow:200,
 			
 			// inputs
 			byString:'',
 			context:'',
+			levelContext:'logModule',
 			limit:100,
 			offset:0,
 			total:0,
@@ -124,11 +163,13 @@ let MyAdminLogs = {
 			unixTo:null,
 			
 			// data
+			configInput:{},
 			logs:[]
 		};
 	},
 	mounted:function() {
 		this.$store.commit('pageTitle',this.menuTitle);
+		this.configInput = JSON.parse(JSON.stringify(this.config));
 		
 		// set date range for log retrieval (7 days ago to now)
 		let d = new Date();
@@ -140,25 +181,30 @@ let MyAdminLogs = {
 		// stores
 		settings:function() { return this.$store.getters.settings; },
 		capApp:  function() { return this.$store.getters.captions.admin.logs; },
-		capGen:  function() { return this.$store.getters.captions.generic; }
+		capGen:  function() { return this.$store.getters.captions.generic; },
+		config:  function() { return this.$store.getters.config; }
 	},
 	methods:{
 		// externals
 		getLineBreaksParsedToHtml,
 		getUnixFormat,
 		
-		// presentation
+		getConfigLogContextName:function(context) {
+			return `log${context[0].toUpperCase() + context.slice(1)}`;
+		},
 		displayDate:function(date) {
 			let format = [this.settings.dateFormat,'H:i:S'];
 			return this.getUnixFormat(date,format.join(' '));
 		},
-		displayLevel:function(level) {
+		displayIndicator:function(level) {
 			switch(level) {
-				case 1: return this.capApp.level1; break;
-				case 2: return this.capApp.level2; break;
-				case 3: return this.capApp.level3; break;
-				default: '';
+				case 1: return '#ca2a2a'; break;
+				case 2: return '#caac2a'; break;
 			}
+			return '#b0b0b0';
+		},
+		displayLevel:function(level) {
+			return this.capApp['level'+level];
 		},
 		displayMessage:function(msg) {
 			if(msg.length > this.messageLengthShow)
@@ -207,6 +253,12 @@ let MyAdminLogs = {
 					this.logs  = res.payload.logs;
 					this.total = res.payload.total;
 				},
+				this.$root.genericError
+			);
+		},
+		setConfig:function() {
+			ws.send('config','set',this.configInput,true).then(
+				() => {},
 				this.$root.genericError
 			);
 		}

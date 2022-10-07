@@ -96,7 +96,6 @@ func addModules_tx(tx pgx.Tx, repoModuleMap map[uuid.UUID]types.RepoModule) erro
 
 		// add module and release data
 		var exists bool
-
 		if err := tx.QueryRow(db.Ctx, `
 			SELECT EXISTS (
 				SELECT module_id_wofk

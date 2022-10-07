@@ -38,18 +38,25 @@
 	display:flex;
 	flex-flow:row nowrap;
 	flex:1 1 auto;
-	align-items:center;
+	align-items:stretch;
 	overflow:auto;
+}
+.field .input-box .input-line>.button,
+.field .input-box .input-line>.bool{
+	align-self:center;
 }
 .field .field-icon{
 	height:22px;
 	margin:4px 9px 4px 0px;
+	align-self:center;
 	display:flex;
 	filter:var(--image-filter);
 }
 .field.top-aligned .input-line{
-	align-items:stretch;
 	padding:5px 0px 3px;
+}
+.field.top-aligned .field-icon{
+	align-self:flex-start;
 }
 .field .caption{
 	margin:6px 0px 0px 0px;

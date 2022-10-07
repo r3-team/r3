@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"r3/cluster"
 	"r3/login"
-	"r3/login/login_auth"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
@@ -12,6 +11,54 @@ import (
 	"github.com/jackc/pgx/v4"
 )
 
+// user requests
+func LoginGetNames(reqJson json.RawMessage) (interface{}, error) {
+
+	var req struct {
+		ByString     string  `json:"byString"`
+		Id           int64   `json:"id"`
+		IdsExclude   []int64 `json:"idsExclude"`
+		NoLdapAssign bool    `json:"noLdapAssign"`
+	}
+
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+	return login.GetNames(req.Id, req.IdsExclude, req.ByString, req.NoLdapAssign)
+}
+func LoginDelTokenFixed(reqJson json.RawMessage, loginId int64) (interface{}, error) {
+	var req struct {
+		Token string `json:"token"`
+	}
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+	return nil, login.DelTokenFixed(loginId, req.Token)
+}
+func LoginGetTokensFixed(loginId int64) (interface{}, error) {
+	return login.GetTokensFixed(loginId)
+}
+func LoginSetTokenFixed_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
+
+	var (
+		err error
+		req struct {
+			Context string `json:"context"`
+			Name    string `json:"name"`
+		}
+		res struct {
+			TokenFixed string `json:"tokenFixed"`
+		}
+	)
+
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+	res.TokenFixed, err = login.SetTokenFixed_tx(tx, loginId, req.Name, req.Context)
+	return res, err
+}
+
+// admin requests
 func LoginDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
@@ -27,7 +74,6 @@ func LoginDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	}
 	return nil, nil
 }
-
 func LoginGet(reqJson json.RawMessage) (interface{}, error) {
 
 	var (
@@ -56,7 +102,6 @@ func LoginGet(reqJson json.RawMessage) (interface{}, error) {
 	}
 	return res, nil
 }
-
 func LoginGetMembers(reqJson json.RawMessage) (interface{}, error) {
 
 	var (
@@ -79,22 +124,6 @@ func LoginGetMembers(reqJson json.RawMessage) (interface{}, error) {
 	}
 	return res, nil
 }
-
-func LoginGetNames(reqJson json.RawMessage) (interface{}, error) {
-
-	var req struct {
-		ByString     string  `json:"byString"`
-		Id           int64   `json:"id"`
-		IdsExclude   []int64 `json:"idsExclude"`
-		NoLdapAssign bool    `json:"noLdapAssign"`
-	}
-
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-	return login.GetNames(req.Id, req.IdsExclude, req.ByString, req.NoLdapAssign)
-}
-
 func LoginGetRecords(reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
@@ -108,7 +137,6 @@ func LoginGetRecords(reqJson json.RawMessage) (interface{}, error) {
 	}
 	return login.GetRecords(req.AttributeIdLookup, req.IdsExclude, req.ByString)
 }
-
 func LoginSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
@@ -130,7 +158,6 @@ func LoginSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	return nil, login.Set_tx(tx, req.Id, req.LdapId, req.LdapKey, req.LanguageCode,
 		req.Name, req.Pass, req.Admin, req.NoAuth, req.Active, req.RoleIds)
 }
-
 func LoginSetMembers_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
@@ -143,7 +170,6 @@ func LoginSetMembers_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error)
 	}
 	return nil, login.SetRoleLoginIds_tx(tx, req.RoleId, req.LoginIds)
 }
-
 func LoginSetRecord_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
@@ -157,27 +183,6 @@ func LoginSetRecord_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) 
 	}
 	return nil, login.SetRecord_tx(tx, req.AttributeIdLogin, req.LoginId, req.RecordId)
 }
-
-func LoginSetTokenFixed_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {
-
-	var (
-		err error
-		req struct {
-			Context string `json:"context"`
-		}
-		res struct {
-			TokenFixed string `json:"tokenFixed"`
-		}
-	)
-
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-
-	res.TokenFixed, err = login.SetTokenFixed_tx(tx, loginId, req.Context)
-	return res, err
-}
-
 func LoginKick(reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
@@ -189,7 +194,6 @@ func LoginKick(reqJson json.RawMessage) (interface{}, error) {
 	}
 	return nil, cluster.LoginDisabled(true, req.Id)
 }
-
 func LoginReauth(reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
@@ -201,68 +205,6 @@ func LoginReauth(reqJson json.RawMessage) (interface{}, error) {
 	}
 	return nil, cluster.LoginReauthorized(true, req.Id)
 }
-
 func LoginReauthAll() (interface{}, error) {
 	return nil, cluster.LoginReauthorizedAll(true)
-}
-
-// attempt login via user credentials
-// applies login ID, admin and no auth state to provided parameters if successful
-// returns token and success state
-func AuthUser(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth *bool) (interface{}, error) {
-
-	var (
-		err error
-		req struct {
-			Username string `json:"username"`
-			Password string `json:"password"`
-		}
-		res struct {
-			LoginId   int64  `json:"loginId"`
-			LoginName string `json:"loginName"`
-			SaltKdf   string `json:"saltKdf"`
-			Token     string `json:"token"`
-		}
-	)
-
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-
-	res.Token, res.SaltKdf, err = login_auth.User(req.Username, req.Password, loginId, admin, noAuth)
-	if err != nil {
-		return nil, err
-	}
-
-	res.LoginId = *loginId
-	res.LoginName = req.Username
-	return res, nil
-}
-
-// attempt login via JWT
-// applies login ID, admin and no auth state to provided parameters if successful
-func AuthToken(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth *bool) (interface{}, error) {
-
-	var (
-		err error
-		req struct {
-			Token string `json:"token"`
-		}
-		res struct {
-			LoginId   int64  `json:"loginId"`
-			LoginName string `json:"loginName"`
-		}
-	)
-
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-
-	res.LoginName, err = login_auth.Token(req.Token, loginId, admin, noAuth)
-	if err != nil {
-		return nil, err
-	}
-
-	res.LoginId = *loginId
-	return res, nil
 }

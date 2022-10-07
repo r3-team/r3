@@ -10,7 +10,6 @@ const MyStore = Vuex.createStore({
 	state:{
 		access:{},                     // access permissions for each entity (attribute, collection, menu, relation), key: entity ID
 		builderMode:false,             // builder mode active
-		busyBlockInput:false,          // while active, input is blocked when busy
 		busyCounter:0,                 // counter of calls making the app busy (WS requests, uploads, etc.)
 		captions:{},                   // all application captions in the user interface language
 		clusterNodeName:'',            // name of the cluster node that session is connected to
@@ -28,6 +27,10 @@ const MyStore = Vuex.createStore({
 		dialogStyles:'',
 		dialogTextDisplay:'', // display option (html, textarea, richtext)
 		feedback:false,       // feedback function is enabled
+		filesCopy:{           // meta data for file copy (filled on copy, emptied on paste)
+			attributeId:null,
+			fileIds:[]
+		},
 		formHasChanges:false, // a data form has unsaved changes
 		isAdmin:false,        // user is admin
 		isAtDialog:false,     // app shows generic dialog
@@ -38,6 +41,7 @@ const MyStore = Vuex.createStore({
 		license:{},           // license info (admin only)
 		licenseValid:false,   // license is valid (set and within validity period)
 		loginEncryption:false,// user login E2E encryption is used
+		loginHasClient:false, // login has an associated client (to allow for local file handling)
 		loginId:-1,           // user login ID
 		loginName:'',         // user login name
 		loginPrivateKey:null, // user login private key for decryption (non-exportable key)
@@ -83,6 +87,12 @@ const MyStore = Vuex.createStore({
 			state.dialogButtons = payload.buttons;
 			state.isAtDialog    = true;
 		},
+		filesCopyReset:(state,payload) => {
+			state.filesCopy = {
+				attributeId:null,
+				fileIds:[]
+			};
+		},
 		license:(state,payload) => {
 			state.license = payload;
 			
@@ -124,10 +134,10 @@ const MyStore = Vuex.createStore({
 		
 		// simple
 		access:         (state,payload) => state.access          = payload,
-		busyBlockInput: (state,payload) => state.busyBlockInput  = payload,
 		captions:       (state,payload) => state.captions        = payload,
 		clusterNodeName:(state,payload) => state.clusterNodeName = payload,
 		feedback:       (state,payload) => state.feedback        = payload,
+		filesCopy:      (state,payload) => state.filesCopy       = payload,
 		formHasChanges: (state,payload) => state.formHasChanges  = payload,
 		isAdmin:        (state,payload) => state.isAdmin         = payload,
 		isAtDialog:     (state,payload) => state.isAtDialog      = payload,
@@ -136,6 +146,7 @@ const MyStore = Vuex.createStore({
 		isNoAuth:       (state,payload) => state.isNoAuth        = payload,
 		isMobile:       (state,payload) => state.isMobile        = payload,
 		loginEncryption:(state,payload) => state.loginEncryption = payload,
+		loginHasClient: (state,payload) => state.loginHasClient  = payload,
 		loginId:        (state,payload) => state.loginId         = payload,
 		loginName:      (state,payload) => state.loginName       = payload,
 		loginPrivateKey:(state,payload) => state.loginPrivateKey = payload,
@@ -166,9 +177,8 @@ const MyStore = Vuex.createStore({
 		
 		// simple
 		access:           (state) => state.access,
-		blockInput:       (state) => state.busyBlockInput && state.busyCounter > 0,
+		blockInput:       (state) => state.busyCounter > 0,
 		builderEnabled:   (state) => state.builderMode && !state.productionMode,
-		busyBlockInput:   (state) => state.busyBlockInput,
 		busyCounter:      (state) => state.busyCounter,
 		captions:         (state) => state.captions,
 		clusterNodeName:  (state) => state.clusterNodeName,
@@ -182,6 +192,7 @@ const MyStore = Vuex.createStore({
 		dialogStyles:     (state) => state.dialogStyles,
 		dialogTextDisplay:(state) => state.dialogTextDisplay,
 		feedback:         (state) => state.feedback,
+		filesCopy:        (state) => state.filesCopy,
 		formHasChanges:   (state) => state.formHasChanges,
 		isAdmin:          (state) => state.isAdmin,
 		isAtDialog:       (state) => state.isAtDialog,
@@ -192,6 +203,7 @@ const MyStore = Vuex.createStore({
 		license:          (state) => state.license,
 		licenseValid:     (state) => state.licenseValid,
 		loginEncryption:  (state) => state.loginEncryption,
+		loginHasClient:   (state) => state.loginHasClient,
 		loginId:          (state) => state.loginId,
 		loginName:        (state) => state.loginName,
 		loginPrivateKey:  (state) => state.loginPrivateKey,

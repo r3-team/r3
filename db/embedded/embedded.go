@@ -97,7 +97,7 @@ func Backup(path string) error {
 		"-f", path,
 	}
 	cmd := exec.Command(filepath.Join(dbBin, "pg_dump"), args...)
-	addSysProgAttrs(cmd)
+	tools.CmdAddSysProgAttrs(cmd)
 	cmd.Env = append(cmd.Env, fmt.Sprintf("LC_MESSAGES=%s", locale))
 	cmd.Env = append(cmd.Env, fmt.Sprintf("PGPASSWORD=%s", config.File.Db.Pass))
 	return cmd.Run()
@@ -125,7 +125,7 @@ func execWaitFor(call string, args []string, waitFor []string, waitTime int) (st
 	ctx, _ := context.WithTimeout(context.Background(), time.Duration(waitTime)*time.Second)
 
 	cmd := exec.CommandContext(ctx, call, args...)
-	addSysProgAttrs(cmd)
+	tools.CmdAddSysProgAttrs(cmd)
 	cmd.Env = append(os.Environ(), fmt.Sprintf("LC_MESSAGES=%s", locale))
 
 	stdout, err := cmd.StdoutPipe()

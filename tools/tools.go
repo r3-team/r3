@@ -2,12 +2,9 @@ package tools
 
 import (
 	"bytes"
-	"fmt"
 	"io/ioutil"
 	"math/rand"
 	"os"
-	"os/exec"
-	"runtime"
 	"strconv"
 	"strings"
 	"time"
@@ -168,27 +165,4 @@ func RandStringRunes(n int) string {
 		b[i] = letterRunes[rand.Intn(len(letterRunes))]
 	}
 	return string(b)
-}
-
-func OpenRessource(path string, openWith bool) error {
-	var cmd *exec.Cmd
-
-	// open file depending on runtime environment
-	switch runtime.GOOS {
-	case "linux":
-		cmd = exec.Command("xdg-open", path)
-	case "freebsd":
-		cmd = exec.Command("xdg-open", path)
-        case "darwin":
-                cmd = exec.Command("xdg-open", path)
-	case "windows":
-		if openWith {
-			cmd = exec.Command("openWith", path)
-		} else {
-			cmd = exec.Command("rundll32", "url.dll,FileProtocolHandler", path)
-		}
-	default:
-		return fmt.Errorf("unsupported runtime environment '%v' for object open", runtime.GOOS)
-	}
-	return cmd.Run()
 }

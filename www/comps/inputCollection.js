@@ -51,6 +51,7 @@ let MyInputCollection = {
 			v-if="!readonly"
 			@trigger="toggle"
 			:naked="true"
+			:tight="true"
 		/>
 		
 		<!-- context menu dropdown -->

@@ -85,8 +85,7 @@ let MyAdminScheduler = {
 				<table class="table-default default-inputs shade">
 					<thead>
 						<tr>
-							<th></th>
-							<th>{{ capGen.name }}</th>
+							<th colspan="2">{{ capGen.name }}</th>
 							<th>{{ capApp.intervalSeconds }}</th>
 							<th>{{ capApp.dateAttempt }}</th>
 							<th>{{ capApp.dateSuccess }}</th>
@@ -102,6 +101,7 @@ let MyAdminScheduler = {
 											@trigger="expandScheduler(i)"
 											:image="schedulersExpanded.includes(i) ? 'triangleDown.png' : 'triangleRight.png'"
 											:naked="true"
+											:tight="true"
 										/>
 									</td>
 									<td>{{ displayName(s.taskName) }}</td>
@@ -119,6 +119,7 @@ let MyAdminScheduler = {
 											@trigger="runSystemTask(s.taskName)"
 											:active="schedulers[i].active"
 											:caption="capApp.button.runNow"
+											:captionTitle="capApp.button.runNowHint"
 										/>
 									</td>
 								</tr>

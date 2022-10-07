@@ -25,3 +25,6 @@ func GetPgIndexName(pgIndexId uuid.UUID) string {
 func GetEncKeyTableName(relationId uuid.UUID) string {
 	return fmt.Sprintf("keys_%s", relationId.String())
 }
+func GetFilesTableName(attributeId uuid.UUID) string {
+	return fmt.Sprintf("%s_record", attributeId.String())
+}

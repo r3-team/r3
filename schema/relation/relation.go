@@ -21,17 +21,34 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 		return err
 	}
 
-	// delete encryption table
+	// drop e2e encryption relation if its there
 	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		DROP TABLE IF EXISTS instance_e2ee."%s"
 	`, schema.GetEncKeyTableName(id))); err != nil {
 		return err
 	}
 
-	// delete relation
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-		DROP TABLE "%s"."%s"
-	`, modName, relName)); err != nil {
+	// delete file relations for file attributes
+	atrIdsFile := make([]uuid.UUID, 0)
+	if err := db.Pool.QueryRow(db.Ctx, `
+		SELECT ARRAY_AGG(id)
+		FROM app.attribute
+		WHERE relation_id = $1
+		AND   content     = 'files'
+	`, id).Scan(&atrIdsFile); err != nil {
+		return err
+	}
+
+	for _, atrId := range atrIdsFile {
+		if err := attribute.FileRelationsDelete_tx(tx, atrId); err != nil {
+			return err
+		}
+	}
+
+	// drop relation
+	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`DROP TABLE "%s"."%s"`,
+		modName, relName)); err != nil {
+
 		return err
 	}
 
@@ -42,12 +59,8 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 	}
 
 	// delete relation reference
-	if _, err := tx.Exec(db.Ctx, `
-		DELETE FROM app.relation WHERE id = $1
-	`, id); err != nil {
-		return err
-	}
-	return nil
+	_, err = tx.Exec(db.Ctx, `DELETE FROM app.relation WHERE id = $1`, id)
+	return err
 }
 func delPkSeq_tx(tx pgx.Tx, modName string, id uuid.UUID) error {
 	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`

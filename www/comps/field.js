@@ -59,7 +59,7 @@ let MyField = {
 				:id="getInputFieldName(field.id)"
 			>
 				<div class="caption"
-					v-if="focused || value !== null || isBoolean || isDateInput || isSlider || isRichtext || isCategory || isRelationship"
+					v-if="focused || value !== null || isBoolean || isDateInput || isSlider || isRichtext || isCategory || isRelationship || isFiles"
 					:class="{ invalid:showInvalid }"
 				>{{ caption }}</div>
 				
@@ -208,21 +208,17 @@ let MyField = {
 						v-if="isFiles"
 						v-model="value"
 						:attributeId="field.attributeId"
+						:countAllowed="field.max !== null ? field.max : 0"
+						:fieldId="field.id"
+						:formLoading="formLoading"
 						:readonly="isReadonly"
+						:recordId="joinsIndexMap[field.index].recordId"
 						:showGallery="field.display === 'gallery'"
-						:showNew="logViewer"
 					>
 						<template #input-icon>
 							<img class="field-icon"
 								v-if="iconId"
 								:src="srcBase64(iconIdMap[iconId].file)"
-							/>
-						</template>
-						
-						<template #input-empty>
-							<input class="input" type="text"
-								:disabled="true"
-								:placeholder="caption"
 							/>
 						</template>
 					</my-input-files>
@@ -535,7 +531,7 @@ let MyField = {
 			if(this.isReadonly)
 				out.push('readonly');
 			
-			if(this.isTextarea || this.isRichtext)
+			if(this.isTextarea || this.isRichtext || this.isFiles)
 				out.push('top-aligned');
 			
 			if(this.isRichtext)
@@ -823,8 +819,11 @@ let MyField = {
 			if(this.isString && this.value.length < this.field.min)
 				return false;
 			
+			if(this.isFiles && typeof this.value.fileCount !== 'undefined')
+				return this.value.fileCount >= this.field.min;
+			
 			if(this.isFiles)
-				return this.value.files.length >= this.field.min;
+				return this.value.length >= this.field.min;
 			
 			return true;
 		},
@@ -838,8 +837,11 @@ let MyField = {
 			if(this.isString && this.value.length > this.field.max)
 				return false;
 			
+			if(this.isFiles && typeof this.value.fileCount !== 'undefined')
+				return this.value.fileCount <= this.field.max;
+			
 			if(this.isFiles)
-				return this.value.files.length <= this.field.max;
+				return this.value.length <= this.field.max;
 			
 			return true;
 		},
@@ -898,7 +900,7 @@ let MyField = {
 		capApp:        function() { return this.$store.getters.captions.form; },
 		capGen:        function() { return this.$store.getters.captions.generic; },
 		isMobile:      function() { return this.$store.getters.isMobile; },
-		moduleLanguage:function() { return this.$store.getters.moduleLanguage; },
+		moduleLanguage:function() { return this.$store.getters.moduleLanguage; }
 	},
 	methods:{
 		// externals

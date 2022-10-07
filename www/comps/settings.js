@@ -1,4 +1,5 @@
 import {set as setSetting} from './shared/settings.js';
+import {getUnixFormat}     from './shared/time.js';
 import {
 	aesGcmDecryptBase64,
 	aesGcmDecryptBase64WithPhrase,
@@ -560,11 +561,212 @@ let MySettingsAccount = {
 	}
 };
 
+let MySettingsFixedTokens = {
+	name:'my-settings-fixed-tokens',
+	template:`<div>
+		<template v-if="tokensFixed.length !== 0">
+			<table class="default-inputs">
+				<thead>
+					<tr>
+						<th>{{ capApp.titleName }}</th>
+						<th>{{ capApp.titleContext }}</th>
+						<th colspan="2">{{ capApp.titleDateCreate }}</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-for="t in tokensFixed">
+						<td>{{ t.name }}</td>
+						<td>{{ t.context }}</td>
+						<td><span :title="getUnixFormat(t.dateCreate,'Y-m-d H:i:S')">{{ getUnixFormat(t.dateCreate,'Y-m-d') }}</span></td>
+						<td>
+							<div class="row">
+								<my-button image="delete.png"
+									@trigger="del(t.token)"
+									:cancel="true"
+								/>
+							</div>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			<br />
+			<br />
+		</template>
+		
+		<my-button image="add.png"
+			@trigger="showInstall = true"
+			:caption="capApp.button.install"
+		/>
+		
+		<!-- device install sub window -->
+		<div class="app-sub-window" v-if="showInstall">
+			<div class="contentBox pop-up">
+				<div class="top lower">
+					<div class="area">
+						<img class="icon" src="images/screen.png" />
+						<div class="caption">{{ capApp.install.title }}</div>
+					</div>
+					<div class="area">
+						<my-button
+							@trigger="showInstall = false" image="cancel.png"
+							:cancel="true"
+							:tight="true"
+						/>
+					</div>
+				</div>
+				
+				<div class="content">
+					<div class="column">
+						<span>{{ capApp.install.intro }}</span>
+						<br /><br />
+						
+						<h2>{{ capApp.install.steps }}</h2>
+						<ol>
+							<li>
+								<div class="column gap default-inputs">
+									<span>{{ capApp.install.step1 }}</span>
+									<div class="row gap">
+										<input v-model="deviceName" :placeholder="capApp.nameHint" />
+										<my-button @trigger="set" :active="tokenFixed === ''" image="save.png" />
+									</div>
+									<br />
+								</div>
+							</li>
+							<li>
+								<div class="column gap default-inputs">
+									<span>{{ capApp.install.step2 }}</span>
+									<select v-model="deviceOs">
+										<option value="amd64_windows">Windows (x64)</option>
+										<option value="amd64_linux">Linux (x64)</option>
+										<option value="arm64_linux">Linux (ARM64)</option>
+										<option value="amd64_mac">MacOS (x64)</option>
+									</select>
+									<br />
+								</div>
+							</li>
+							<li>
+								<div class="column gap">
+									<span>{{ capApp.install.step3 }}</span>
+									<span>
+										<my-button image="download.png"
+											@trigger="loadApp"
+											:active="tokenFixed !== ''"
+											:caption="capApp.button.loadApp"
+										/>
+									</span>
+									<br />
+								</div>
+							</li>
+							<li>
+								<div class="column gap">
+									<span>{{ capApp.install.step4 }}</span>
+									<span>
+										<my-button image="download.png"
+											@trigger="loadCnf"
+											:active="tokenFixed !== ''"
+											:caption="capApp.button.loadCnf"
+										/>
+									</span>
+									<br />
+								</div>
+							</li>
+							<li>{{ capApp.install.step5 }}</li>
+						</ol>
+						<br />
+						<span>{{ capApp.install.step6 }}</span>
+						<img src="images/install_tray.png" class="settings-install" />
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>`,
+	data:function() {
+		return {
+			tokensFixed:[],
+			showInstall:false,
+			
+			// inputs
+			deviceName:'',
+			deviceOs:'amd64_windows',
+			tokenFixed:''
+		};
+	},
+	computed:{
+		// stores
+		languageCode:(s) => s.$store.getters.settings.languageCode,
+		token:       (s) => s.$store.getters['local/token'],
+		capApp:      (s) => s.$store.getters.captions.settings.tokensFixed,
+		capGen:      (s) => s.$store.getters.captions.generic
+	},
+	mounted:function() {
+		this.get();
+		
+		// set default client
+		if     (navigator.userAgent.includes('Win64'))        this.deviceOs = 'amd64_windows';
+		else if(navigator.userAgent.includes('WOW64'))        this.deviceOs = 'amd64_windows';
+		else if(navigator.userAgent.includes('Mac OS'))       this.deviceOs = 'amd64_mac';
+		else if(navigator.userAgent.includes('Linux x86_64')) this.deviceOs = 'amd64_linux';
+		else if(navigator.userAgent.includes('ARM64'))        this.deviceOs = 'arm64_linux';
+	},
+	methods:{
+		// externals
+		getUnixFormat,
+		
+		// actions
+		loadApp:function() {
+			let call = [`os=${this.deviceOs}`,`token=${this.token}`];
+			window.open(`/client/download/?${call.join('&')}`);
+		},
+		loadCnf:function() {
+			let langCode = ['en_us','de_de'].includes(this.languageCode)
+				? this.languageCode : 'en_us';
+			
+			let call = [
+				`deviceName=${this.deviceName}`,
+				`hostName=${location.hostname}`,
+				`hostPort=${location.port}`,
+				`languageCode=${langCode}`,
+				`tokenFixed=${this.tokenFixed}`,
+				`token=${this.token}`,
+				`ssl=${location.protocol.includes('https') ? 1 : 0}`
+			];
+			window.open(`/client/download/config/?${call.join('&')}`);
+		},
+		
+		// backend calls
+		del:function(token) {
+			ws.send('login','delTokenFixed',{token:token},true).then(
+				this.get,
+				this.$root.genericError
+			);
+		},
+		get:function() {
+			ws.send('login','getTokensFixed',{},true).then(
+				res => this.tokensFixed = res.payload,
+				this.$root.genericError
+			);
+		},
+		set:function() {
+			ws.send('login','setTokenFixed',{
+				context:'client',
+				name:this.deviceName
+			},true).then(
+				res => {
+					this.tokenFixed = res.payload.tokenFixed;
+					this.get();
+				},
+				this.$root.genericError
+			);
+		}
+	}
+};
+
 let MySettings = {
 	name:'my-settings',
 	components:{
 		MySettingsAccount,
-		MySettingsEncryption
+		MySettingsEncryption,
+		MySettingsFixedTokens,
 	},
 	template:`<div class="settings">
 		
@@ -753,6 +955,15 @@ let MySettings = {
 						<h1>{{ capApp.titleAccount }}</h1>
 					</div>
 					<my-settings-account />
+				</div>
+				
+				<!-- Fixed tokens (device access) -->
+				<div class="contentPart short">
+					<div class="contentPartHeader">
+						<img class="icon" src="images/screen.png" />
+						<h1>{{ capApp.titleFixedTokens }}</h1>
+					</div>
+					<my-settings-fixed-tokens />
 				</div>
 				
 				<!-- encryption -->

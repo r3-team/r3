@@ -40,6 +40,22 @@ let MyAdminLoginsItem = {
 	template:`<tbody>
 		<tr class="default-inputs">
 			<td>
+				<div class="row">
+					<my-button image="save.png"
+						@trigger="set"
+						:active="hasChanges && name !== ''"
+						:caption="isNew ? capGen.button.create : ''"
+						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+					/>
+					<my-button image="delete.png"
+						v-if="!isNew"
+						@trigger="delAsk"
+						:cancel="true"
+						:captionTitle="capGen.button.delete"
+					/>
+				</div>
+			</td>
+			<td>
 				<input class="long"
 					v-model="name"
 					:disabled="ldapId !== null"
@@ -64,6 +80,8 @@ let MyAdminLoginsItem = {
 					:placeholder="!noAuth ? capApp.passwordHint : capApp.passwordHintNoAuth"
 				/>
 			</td>
+			<td><my-bool v-model="admin" /></td>
+			<td><my-bool v-model="active" /></td>
 			<td>
 				<my-button
 					@trigger="showRoles = !showRoles"
@@ -81,24 +99,7 @@ let MyAdminLoginsItem = {
 					>{{ l }}</option>
 				</select>
 			</td>
-			<td><my-bool v-model="admin" /></td>
-			<td><my-bool v-model="active" /></td>
 			<td><input class="short" disabled="disabled" :value="id" /></td>
-			<td>
-				<div class="row">
-					<my-button image="save.png"
-						@trigger="set"
-						:active="hasChanges"
-						:captionTitle="capGen.button.save"
-					/>
-					<my-button image="delete.png"
-						v-if="!isNew"
-						@trigger="delAsk"
-						:cancel="true"
-						:captionTitle="capGen.button.delete"
-					/>
-				</div>
-			</td>
 			<td></td>
 			<td class="left-border" v-for="(lf,lfi) in loginForms">
 				<div class="login-record" v-if="!isNew && !loginFormsHidden.includes(lfi)">
@@ -498,13 +499,19 @@ let MyAdminLogins = {
 			<table class="table-default">
 				<thead>
 					<tr>
+						<th class="minimum">
+							<div class="mixed-header">
+								<img src="images/ok.png" />
+								<span>{{ capGen.actions }}</span>
+							</div>
+						</th>
 						<th>
 							<div class="mixed-header">
 								<img src="images/person.png" />
 								<span>{{ capGen.username }}</span>
 							</div>
 						</th>
-						<th :title="capApp.noAuthHint">
+						<th class="minimum" :title="capApp.noAuthHint">
 							<div class="mixed-header">
 								<img src="images/warning.png" />
 								<span>{{ capApp.noAuth }}</span>
@@ -516,7 +523,19 @@ let MyAdminLogins = {
 								<span>{{ capApp.authentication }}</span>
 							</div>
 						</th>
-						<th>
+						<th class="minimum" :title="capApp.adminHint">
+							<div class="mixed-header">
+								<img src="images/settings.png" />
+								<span>{{ capApp.admin }}</span>
+							</div>
+						</th>
+						<th class="minimum">
+							<div class="mixed-header">
+								<img src="images/remove.png" />
+								<span>{{ capGen.active }}</span>
+							</div>
+						</th>
+						<th class="minimum">
 							<div class="mixed-header">
 								<img src="images/admin.png" />
 								<span>{{ capApp.roles }}</span>
@@ -528,25 +547,12 @@ let MyAdminLogins = {
 								<span>{{ capApp.language }}</span>
 							</div>
 						</th>
-						<th :title="capApp.adminHint">
-							<div class="mixed-header">
-								<img src="images/settings.png" />
-								<span>{{ capApp.admin }}</span>
-							</div>
-						</th>
-						<th>
-							<div class="mixed-header">
-								<img src="images/remove.png" />
-								<span>{{ capGen.active }}</span>
-							</div>
-						</th>
 						<th>
 							<div class="mixed-header">
 								<img src="images/form.png" />
 								<span>{{ capGen.id }}</span>
 							</div>
 						</th>
-						<th></th>
 						<th class="gab"></th>
 						<th class="left-border" v-for="(lf,lfi) in loginForms">
 							<div class="mixed-header">

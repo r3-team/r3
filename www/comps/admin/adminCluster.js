@@ -169,10 +169,12 @@ let MyAdminCluster = {
 			</div>
 		</div>
 		<div class="top lower">
-			<my-button image="refresh.png"
-				@trigger="get"
-				:caption="capGen.button.refresh"
-			/>
+			<div class="area">
+				<my-button image="refresh.png"
+					@trigger="get"
+					:caption="capGen.button.refresh"
+				/>
+			</div>
 		</div>
 		
 		<div class="content">
@@ -276,6 +278,7 @@ let MyAdminCluster = {
 	mounted:function() {
 		this.configInput = JSON.parse(JSON.stringify(this.config));
 		this.get();
+		this.$store.commit('pageTitle',this.menuTitle);
 	},
 	methods:{
 		// backend calls,

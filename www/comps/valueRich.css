@@ -24,7 +24,7 @@
 	box-sizing:border-box;
 	border:1px solid var(--color-border);
 	border-radius:5px;
-	margin:0px 4px 2px 0px;
+	margin:0px 6px 2px 0px;
 }
 .value-rich .gallery-item.placeholder{
 	opacity:0.6;

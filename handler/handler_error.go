@@ -51,6 +51,7 @@ const (
 )
 
 var (
+	// errors
 	errContexts     = []string{"APP", "CSV", "DBS", "SEC"}
 	errCodeRx       = regexp.MustCompile(`^{ERR_([A-Z]{3})_(\d{3})}`)
 	errExpectedList = []errExpected{

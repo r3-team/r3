@@ -7,6 +7,7 @@ import (
 	"r3/config"
 	"r3/db"
 	"r3/log"
+	"r3/schema"
 	"r3/schema/pgIndex"
 	"r3/tools"
 	"r3/types"
@@ -97,16 +98,339 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 // mapped by current database version string, returns new database version string
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
-	// clean up on next release
-	// ALTER TABLE app.role ALTER COLUMN content
-	//		TYPE app.role_content USING content::text::app.role_content;
-	// ALTER TABLE app.collection_consumer ALTER COLUMN content
-	//		TYPE app.collection_consumer_content USING content::text::app.collection_consumer_content;
-	// ALTER TABLE instance.login_setting ALTER COLUMN font_family
-	//		TYPE instance.login_setting_font_family USING font_family::text::instance.login_setting_font_family;
-	// ALTER TABLE instance.login_setting ALTER COLUMN pattern
-	//      TYPE instance.login_setting_pattern USING pattern::text::instance.login_setting_pattern;
+	"3.0": func(tx pgx.Tx) (string, error) {
+		if _, err := tx.Exec(db.Ctx, `
+			-- clean up from last upgrade
+			ALTER TABLE app.role ALTER COLUMN content
+				TYPE app.role_content USING content::text::app.role_content;
+			ALTER TABLE app.collection_consumer ALTER COLUMN content
+				TYPE app.collection_consumer_content USING content::text::app.collection_consumer_content;
+			ALTER TABLE instance.login_setting ALTER COLUMN font_family
+				TYPE instance.login_setting_font_family USING font_family::text::instance.login_setting_font_family;
+			ALTER TABLE instance.login_setting ALTER COLUMN pattern
+				TYPE instance.login_setting_pattern USING pattern::text::instance.login_setting_pattern;
+			
+			-- new log contexts
+			ALTER TYPE instance.log_context ADD VALUE 'imager';
+			ALTER TYPE instance.log_context ADD VALUE 'websocket';
+			
+			-- fix bad config name
+			UPDATE instance.config SET name = 'logModule' WHERE name = 'logApplication';
+			
+			-- fix logging function
+			CREATE OR REPLACE FUNCTION instance.log(level integer,message text,app_name text DEFAULT NULL::text)
+			    RETURNS void
+			    LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+					module_id UUID;
+					level_show INT;
+				BEGIN
+					-- check log level
+					SELECT value::INT INTO level_show
+					FROM instance.config
+					WHERE name = 'logModule';
+					
+					IF level_show < level THEN
+						RETURN;
+					END IF;
+					
+					-- resolve module ID if possible
+					-- if not possible: log with module_id = NULL (better than not to log)
+					IF app_name IS NOT NULL THEN
+						SELECT id INTO module_id
+						FROM app.module
+						WHERE name = app_name;
+					END IF;
+					
+					INSERT INTO instance.log (level,context,module_id,message,date_milli)
+					VALUES (level,'module',module_id,message,(EXTRACT(EPOCH FROM CLOCK_TIMESTAMP()) * 1000)::BIGINT);
+				END;	
+			$BODY$;
+			
+			-- new cluster event
+			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'filesCopied';
+			
+			-- new config options
+			INSERT INTO instance.config (name,value) VALUES ('filesKeepDaysDeleted','90');
+			INSERT INTO instance.config (name,value) VALUES ('imagerThumbWidth','300');
+			INSERT INTO instance.config (name,value) VALUES ('logImager',2);
+			INSERT INTO instance.config (name,value) VALUES ('logWebsocket',2);
+			
+			-- changes to fixed tokens
+			ALTER TYPE instance.token_fixed_context ADD VALUE 'client';
+			ALTER TABLE instance.login_token_fixed ADD COLUMN name CHARACTER VARYING(64);
+			
+			-- new cluster events
+			ALTER TYPE instance_cluster.node_event_content ADD VALUE 'fileRequested';
+			
+			-- new file relations
+			CREATE TABLE instance.file (
+				id uuid NOT NULL,
+			    CONSTRAINT "file_pkey" PRIMARY KEY (id)
+			);
+				
+			CREATE TABLE instance.file_version (
+				file_id uuid NOT NULL,
+				version int NOT NULL,
+				login_id integer,
+				hash char(64),
+				size_kb int NOT NULL,
+				date_change bigint NOT NULL,
+			    CONSTRAINT "file_version_pkey" PRIMARY KEY (file_id, version),
+			    CONSTRAINT "file_version_file_id_fkey" FOREIGN KEY (file_id)
+			        REFERENCES instance.file (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT "file_version_login_id_fkey" FOREIGN KEY (login_id)
+			        REFERENCES instance.login (id) MATCH SIMPLE
+			        ON UPDATE SET NULL
+			        ON DELETE SET NULL
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX "fki_file_version_login_id_fkey"
+				ON instance.file_version USING btree (login_id ASC NULLS LAST);
+			
+			CREATE INDEX "ind_file_version_version"
+				ON instance.file_version USING btree (version ASC NULLS LAST);
+			
+			CREATE INDEX "fki_file_version_file_id_fkey"
+				ON instance.file_version USING btree (file_id ASC NULLS LAST);
+			
+			-- new schema, type and functions
+			CREATE SCHEMA instance_file;
+			
+			CREATE TYPE instance.file_meta AS (
+				id UUID,
+				login_id_creator INTEGER,
+				hash TEXT,
+				name TEXT,
+				size_kb INTEGER,
+				version INTEGER,
+				date_change BIGINT,
+				date_delete BIGINT
+			);
+			
+			CREATE FUNCTION instance.files_get(attribute_id UUID,record_id BIGINT,include_deleted BOOLEAN DEFAULT false)
+				RETURNS instance.file_meta[]
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+					file  instance.file_meta;
+					files instance.file_meta[];
+					rec   RECORD;
+				BEGIN
+					FOR rec IN
+						EXECUTE FORMAT('
+							SELECT r.file_id, r.name, v.login_id, v.hash, v.version, v.size_kb, v.date_change, r.date_delete
+							FROM instance_file.%I AS r
+							JOIN instance.file_version AS v
+								ON  v.file_id = r.file_id
+								AND v.version = (
+									SELECT MAX(s.version)
+									FROM instance.file_version AS s
+									WHERE s.file_id = r.file_id
+								)
+							WHERE r.record_id = $1
+							AND ($2 OR r.date_delete IS NULL)
+						', CONCAT(attribute_id::TEXT,'_record')) USING record_id, include_deleted
+					LOOP
+						file.id               := rec.file_id;
+						file.login_id_creator := rec.login_id;
+						file.hash             := rec.hash;
+						file.name             := rec.name;
+						file.size_kb          := rec.size_kb;
+						file.version          := rec.version;
+						file.date_change      := rec.date_change;
+						file.date_delete      := rec.date_delete;
+						
+						files := ARRAY_APPEND(files,file);
+					END LOOP;
+					
+					RETURN files;
+				END;
+			$BODY$;
+			
+			CREATE FUNCTION instance.file_link(file_id UUID,file_name TEXT,attribute_id UUID,record_id BIGINT)
+				RETURNS VOID
+				LANGUAGE 'plpgsql'
+			AS $BODY$
+				DECLARE
+				BEGIN
+					EXECUTE FORMAT(
+						'INSERT INTO instance_file.%I (record_id, file_id, name) VALUES ($1, $2, $3)',
+						CONCAT(attribute_id::TEXT, '_record')
+					) USING record_id, file_id, file_name;
+				END;
+			$BODY$;
+		`); err != nil {
+			return "", err
+		}
 
+		type fileAtr struct {
+			moduleName    string
+			relationName  string
+			attributeName string
+			attributeId   uuid.UUID
+		}
+		fileAtrs := make([]fileAtr, 0)
+
+		rows, err := tx.Query(db.Ctx, `
+			SELECT a.id, a.name, r.name, m.name
+			FROM app.attribute AS a
+			JOIN app.relation  AS r ON r.id = a.relation_id
+			JOIN app.module    AS m ON m.id = r.module_id
+			WHERE a.content = 'files'
+		`)
+		if err != nil {
+			return "", err
+		}
+
+		for rows.Next() {
+			var fa fileAtr
+			if err := rows.Scan(&fa.attributeId, &fa.attributeName,
+				&fa.relationName, &fa.moduleName); err != nil {
+
+				rows.Close()
+				return "", err
+			}
+			fileAtrs = append(fileAtrs, fa)
+		}
+		rows.Close()
+
+		// create instance_file table for each files attribute and move files to new schema
+		for _, fa := range fileAtrs {
+			tNameR := fmt.Sprintf("%s_record", fa.attributeId)
+
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				CREATE TABLE instance_file."%s" (
+					file_id uuid NOT NULL,
+					record_id bigint NOT NULL,
+					name text NOT NULL,
+					date_delete bigint,
+				    CONSTRAINT "%s_pkey" PRIMARY KEY (file_id,record_id),
+				    CONSTRAINT "%s_file_id_fkey" FOREIGN KEY (file_id)
+				        REFERENCES instance.file (id) MATCH SIMPLE
+				        ON UPDATE CASCADE
+				        ON DELETE CASCADE
+				        DEFERRABLE INITIALLY DEFERRED,
+				    CONSTRAINT "%s_record_id_fkey" FOREIGN KEY (record_id)
+				        REFERENCES "%s"."%s" ("%s") MATCH SIMPLE
+				        ON UPDATE CASCADE
+				        ON DELETE CASCADE
+				        DEFERRABLE INITIALLY DEFERRED
+				);
+				
+				CREATE INDEX "ind_%s_date_delete"
+					ON instance_file."%s" USING btree (date_delete ASC NULLS LAST);
+				
+				CREATE INDEX "fki_%s_file_id_fkey"
+					ON instance_file."%s" USING btree (file_id ASC NULLS LAST);
+				
+				CREATE INDEX "fki_%s_record_id_fkey"
+					ON instance_file."%s" USING btree (record_id ASC NULLS LAST);
+			`, tNameR, tNameR, tNameR, tNameR, fa.moduleName, fa.relationName,
+				schema.PkName, tNameR, tNameR, tNameR, tNameR, tNameR, tNameR)); err != nil {
+
+				return "", err
+			}
+
+			// insert files from JSON attribute values
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				INSERT INTO instance.file (id)
+					SELECT j.id
+					FROM "%s"."%s" AS r
+					CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
+						AS j(id UUID, name TEXT, size INT)
+					WHERE r."%s" IS NOT NULL
+				ON CONFLICT (id) DO NOTHING
+			`, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
+				return "", err
+			}
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				INSERT INTO instance.file_version (file_id, version, size_kb, date_change)
+					SELECT j.id, 0, j.size, EXTRACT(EPOCH FROM NOW())
+					FROM "%s"."%s" AS r
+					CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
+						AS j(id UUID, name TEXT, size INT)
+					WHERE r."%s" IS NOT NULL
+				ON CONFLICT ON CONSTRAINT "file_version_pkey" DO NOTHING
+			`, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
+				return "", err
+			}
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				INSERT INTO instance_file."%s" (record_id, file_id, name)
+					SELECT r.id, j.id, j.name
+					FROM "%s"."%s" AS r
+					CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
+						AS j(id UUID, name TEXT, size INT)
+					WHERE r."%s" IS NOT NULL
+			`, tNameR, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
+				return "", err
+			}
+
+			// delete original files attribute columns
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				ALTER TABLE "%s"."%s" DROP COLUMN "%s"
+			`, fa.moduleName, fa.relationName, fa.attributeName)); err != nil {
+				return "", err
+			}
+
+			// rename files on disk to new versioning
+			fileIds := make([]uuid.UUID, 0)
+			if err := tx.QueryRow(db.Ctx, fmt.Sprintf(`
+				SELECT ARRAY_AGG(DISTINCT file_id)
+				FROM instance_file."%s"
+			`, tNameR)).Scan(&fileIds); err != nil {
+				return "", err
+			}
+
+			for _, fileId := range fileIds {
+				// create new file directory if not there
+				if err := tools.PathCreateIfNotExists(
+					filepath.Join(config.File.Paths.Files, fileId.String()[:3]), 0600); err != nil {
+
+					return "", err
+				}
+
+				// move file to new directory with new file name schema (file_id + version)
+				if err := os.Rename(
+					filepath.Join(config.File.Paths.Files,
+						fa.attributeId.String(), fileId.String()),
+					filepath.Join(config.File.Paths.Files,
+						fileId.String()[:3], fmt.Sprintf("%s_0", fileId))); err != nil {
+
+					log.Warning("server", fmt.Sprintf("failed to move file '%s/%s' during platform upgrade",
+						fa.attributeId, fileId), err)
+				}
+			}
+		}
+
+		// delete original files attribute change logs (+ logs that would be empty afterwards)
+		if _, err := tx.Exec(db.Ctx, `
+			DELETE FROM instance.data_log_value
+			WHERE attribute_id IN (
+			    SELECT id
+			    FROM app.attribute
+			    WHERE content = 'files'
+			)
+		`); err != nil {
+			return "", err
+		}
+		if _, err := tx.Exec(db.Ctx, `
+			DELETE FROM instance.data_log AS l
+			WHERE (
+			    SELECT COUNT(*)
+			    FROM instance.data_log_value
+			    WHERE data_log_id = l.id
+			) = 0
+		`); err != nil {
+			return "", err
+		}
+		return "3.1", err
+	},
 	"2.7": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
 			-- cleanup from last release

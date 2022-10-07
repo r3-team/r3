@@ -1,0 +1,55 @@
+package attribute
+
+import (
+	"fmt"
+	"r3/db"
+	"r3/schema"
+
+	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v4"
+)
+
+func fileRelationsCreate_tx(tx pgx.Tx, attributeId uuid.UUID,
+	moduleName string, relationName string) error {
+
+	tNameR := schema.GetFilesTableName(attributeId)
+
+	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		CREATE TABLE instance_file."%s" (
+			file_id uuid NOT NULL,
+			record_id bigint NOT NULL,
+			name text NOT NULL,
+			date_delete bigint,
+		    CONSTRAINT "%s_pkey" PRIMARY KEY (file_id,record_id),
+		    CONSTRAINT "%s_file_id_fkey" FOREIGN KEY (file_id)
+		        REFERENCES instance.file (id) MATCH SIMPLE
+		        ON UPDATE CASCADE
+		        ON DELETE CASCADE
+		        DEFERRABLE INITIALLY DEFERRED,
+		    CONSTRAINT "%s_record_id_fkey" FOREIGN KEY (record_id)
+		        REFERENCES "%s"."%s" ("%s") MATCH SIMPLE
+		        ON UPDATE CASCADE
+		        ON DELETE CASCADE
+		        DEFERRABLE INITIALLY DEFERRED
+		);
+		
+		CREATE INDEX "fki_%s_file_id_fkey"
+			ON instance_file."%s" USING btree (file_id ASC NULLS LAST);
+		
+		CREATE INDEX "fki_%s_record_id_fkey"
+			ON instance_file."%s" USING btree (record_id ASC NULLS LAST);
+		
+		CREATE INDEX "ind_%s_date_delete"
+			ON instance_file."%s" USING btree (date_delete ASC NULLS LAST);
+	`, tNameR, tNameR, tNameR, tNameR, moduleName, relationName, schema.PkName,
+		tNameR, tNameR, tNameR, tNameR, tNameR, tNameR))
+
+	return err
+}
+
+func FileRelationsDelete_tx(tx pgx.Tx, attributeId uuid.UUID) error {
+	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+		DROP TABLE instance_file."%s"
+	`, schema.GetFilesTableName(attributeId)))
+	return err
+}

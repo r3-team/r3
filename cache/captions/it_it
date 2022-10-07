@@ -6,12 +6,15 @@
 			"cancel":"Annulla",
 			"clear":"Clear",
 			"close":"Chiudi",
+			"copy":"Copy",
 			"copyClipboard":"Copy to clipboard",
 			"create":"Crea",
 			"delete":"Cancella",
 			"deleteHint":"Cancella il record definitivamente",
 			"deleteSelected":"Cancella selezionati",
+			"download":"Download",
 			"edit":"Modifica",
+			"empty":"Empty",
 			"expert":"Avanzato",
 			"export":"Esporta",
 			"filter":"Filtra",
@@ -21,13 +24,18 @@
 			"new":"Nuovo",
 			"newHint":"Crea un nuovo record",
 			"open":"Apri",
+			"ok":"Ok",
+			"paste":"Paste",
 			"refresh":"Ricarica",
 			"refreshHint":"Ricarica il record",
 			"reset":"Resetta",
+			"restore":"Restore",
 			"save":"Salva",
 			"saveHint":"Salva i cambiamenti",
 			"saveNew":"Salva+Nuovo",
 			"saveNewHint":"Salva il record e ne crea uno nuovo",
+			"selectAll":"Select all",
+			"selectAllShort":"All",
 			"send":"Invia",
 			"show":"Mostra",
 			"unlock":"Unlock"
@@ -56,6 +64,7 @@
 			"sortDesc":"discendente",
 			"yes":"sì"
 		},
+		"actions":"Actions",
 		"active":"Attivo",
 		"application":"Applicazione",
 		"applications":"Applicazioni",
@@ -63,9 +72,11 @@
 		"appWebsite":"https://rei3.de",
 		"available":"Available",
 		"busy":"Elaborazione - Clicca qui per annullare",
+		"category":"Category",
 		"date":"Data",
 		"description":"Descrizione",
 		"errorTitle":"Errore",
+		"files":"Files",
 		"filters":"Filtri",
 		"home":"Home",
 		"icon":"Icona",
@@ -92,14 +103,18 @@
 		"order":"Ordine",
 		"password":"Password",
 		"preview":"Anteprima",
+		"readonly":"Readonly",
+		"record":"Record",
 		"results":"{CNT} risultati",
 		"resultsNone":"- nessun risultato -",
 		"resultsOf":"/ {CNT}",
 		"role":"Ruolo",
 		"selected":"Selected",
+		"size":"Size",
 		"status":"Status",
 		"threeDots":"...",
 		"title":"Titolo",
+		"token":"Token",
 		"username":"Username",
 		"version":"Versione"
 	},
@@ -133,7 +148,7 @@
 				"removeLogo":"Rimuovi logo"
 			},
 			"dialog":{
-				"builderMode":"Il Builder viene utilizzato per creare o modificare le applicazioni.<br /><br />La modifica delle applicazioni può causare la perdita di dati e non dovrebbe <b>MAI</b> essere eseguita in ambienti di produzione.<br /><br />Per utilizzare in sicurezza il Builder, utilizzare un'istanza dedicata di REI3; le applicazioni pronte e testate possono quindi essere trasferite a un sistema di produzione.<br /><br />Fare riferimento a <a href=\"https://rei3.de/builderdocu-en_us/\" target=\"_blank \">Documentazione del Builder</a> per saperne di più.",
+				"builderMode":"Il Builder viene utilizzato per creare o modificare le applicazioni.<br /><br />La modifica delle applicazioni può causare la perdita di dati e non dovrebbe <b>MAI</b> essere eseguita in ambienti di produzione.<br /><br />Per utilizzare in sicurezza il Builder, utilizzare un'istanza dedicata di REI3; le applicazioni pronte e testate possono quindi essere trasferite a un sistema di produzione.<br /><br />Fare riferimento a <a href=\"https://rei3.de/en/docs/builder/\" target=\"_blank \">Documentazione del Builder</a> per saperne di più.",
 				"productionMode":"La modalità di manutenzione viene utilizzata per aggiornare, installare o rimuovere applicazioni dal sistema.<br /><br />Il passaggio alla modalità di manutenzione <b>disconnetterà tutti gli utenti senza autorizzazioni di amministratore</b>.",
 				"pleaseRead":"Si prega di leggere prima di salvare"
 			},
@@ -174,20 +189,6 @@
 			"licenseState":"Stato licenza",
 			"licenseStateNok":"Nessuna licenza attiva",
 			"licenseStateOk":"Valido per {COUNT} giorni in più",
-			"logLevel1":"Solo errori",
-			"logLevel2":"Errori e avvertimenti",
-			"logLevel3":"Tutto",
-			"logLevelApplication":"Applicazioni",
-			"logLevelBackup":"Backup",
-			"logLevelCache":"Cache",
-			"logLevelCluster":"Cluster",
-			"logLevelCsv":"Importa/esporta CSV",
-			"logLevelLdap":"LDAP",
-			"logLevelMail":"Posta",
-			"logLevelScheduler":"Pianificatore",
-			"logLevelServer":"Server",
-			"logLevelTransfer":"Trasferimento",
-			"logsKeepDays":"Mantieni log (in giorni)",
 			"productionMode":"Modalità manutenzione",
 			"publicHostName":"Nome host pubblico",
 			"pwForceDigit":"Richiesti numeri",
@@ -209,7 +210,6 @@
 			"titleCustom":"Personalizzazione",
 			"titleGeneral":"Generale",
 			"titleIcs":"Iscrizioni al calendario",
-			"titleLogging":"Livelli log",
 			"titleLogins":"Accessi",
 			"titleMail":"Invia posta",
 			"titlePerformance":"Performance",
@@ -220,6 +220,12 @@
 			"updateCheckNewer":"Cutting edge",
 			"updateCheckOlder":"Aggiornamento disponibile",
 			"updateCheckUnknown":"Sconosciuto"
+		},
+		"files":{
+			"deleteDate":"File deleted",
+			"filesKeepDaysDeleted":"Keep deleted files for X days",
+			"titleConfig":"Global configuration",
+			"titleDeleted":"Deleted files"
 		},
 		"ldaps":{
 			"button":{
@@ -299,18 +305,40 @@
 			"roleContentUser":"User"
 		},
 		"logs":{
+			"contextLabel":{
+				"backup":"Backup",
+				"cache":"Cache",
+				"cluster":"Cluster",
+				"csv":"Importa/esporta CSV",
+				"imager":"Image processing",
+				"ldap":"LDAP",
+				"mail":"Posta",
+				"module":"Applicazioni",
+				"scheduler":"Pianificatore",
+				"server":"Server",
+				"transfer":"Trasferimento",
+				"websocket":"Websocket clients"
+			},
 			"byString":"Cerca testo",
 			"context":"Contesto",
 			"date":"Timestamp",
+			"keepDays":"Mantieni log (in giorni)",
 			"level":"Livello",
 			"level1":"Errore",
 			"level2":"Avvertimento",
 			"level3":"Informazione",
+			"logLevel":"Log level",
+			"logLevel1":"Solo errori",
+			"logLevel2":"Errori e avvertimenti",
+			"logLevel3":"Tutto",
 			"message":"Messaggio",
 			"module":"Applicazione",
 			"node":"Cluster node"
 		},
 		"mails":{
+			"dialog":{
+				"imapWarn":"Please note that the IMAP connector loads and then deletes messages from the chosen mailbox. It should only be used with a dedicated mailbox and not to access personal mail accounts."
+			},
 			"account":"Account email",
 			"accounts":"Account email",
 			"accountHost":"Hostname",
@@ -350,7 +378,7 @@
 				"deleteApps":"<br /><br />Le seguenti applicazioni dipendono da questa e verranno anch'esse eliminate:<ul>{LIST}</ul>",
 				"deleteMulti":"Questa azione eliminerà <b>in modo definitivo</b> <b>{COUNT} applicazione(i)</b> e i dati corrispondenti.<br /><br />Vuoi davvero continuare?",
 				"deleteTitle":"Cancellazione definitivo dell'applicazione '{APP}'",
-				"owner":"Con questa opzione abilitata, le modifiche a questa applicazione possono essere esportate come una nuova versione. Se non sei l'autore originale, tutte le modifiche andranno PERSE quando verrà installata una nuova versione dell'autore. Ciò può anche comportare la PERDITA DI DATI.<br /><br />Se intendi modificare/estendere le applicazioni di altri autori, puoi farlo in sicurezza \"costruendo su di esse\" - fai riferimento alla documentazione del Builder per maggiori dettagli.",
+				"owner":"Se non sei l'autore originale, tutte le modifiche andranno PERSE quando verrà installata una nuova versione dell'autore. Ciò può anche comportare la PERDITA DI DATI.<br /><br />Se intendi modificare/estendere le applicazioni di altri autori, puoi farlo in sicurezza \"costruendo su di esse\" - fai riferimento alla documentazione del Builder per maggiori dettagli.",
 				"ownerTitle":"Avvertimento - leggi attentamente!"
 			},
 			"error":{
@@ -361,7 +389,6 @@
 			"hidden":"Nascosto",
 			"import":"Aggiungi dal file",
 			"nothingInstalled":"Nessuna applicazione è installata.",
-			"owner":"Esporta i cambiamenti",
 			"position":"Ordine nel menu",
 			"productionMode":"Le applicazioni possono essere modificate solo quando è attiva la modalità di manutenzione.",
 			"releaseDate":"Data rilascio",
@@ -395,7 +422,8 @@
 		},
 		"scheduler":{
 			"button":{
-				"runNow":"Esegui ora"
+				"runNow":"Schedule immediate execution",
+				"runNowHint":"Task will be executed as soon as possible."
 			},
 			"names":{
 				"cleanupBruteforce":"Pulisci casche forza bruta",
@@ -436,6 +464,7 @@
 		},
 		"navigationCluster":"Cluster",
 		"navigationConfig":"Sistema",
+		"navigationFiles":"Files",
 		"navigationLdaps":"LDAP-Logins",
 		"navigationLicense":"Licenza",
 		"navigationLogins":"Logins",
@@ -712,6 +741,8 @@
 			"helpPg":{
 				"abort_show_message":"instance.abort_show_message(message TEXT) => VOID<br /><br />Interrompe l'operazione e invia un messaggio all'utente che lo esegue, che viene visualizzato nell'interfaccia utente.",
 				"clean_up_e2ee_keys":"instance.clean_up_e2ee_keys(<blockquote>login_id INTEGER,<br />relation_id UUID,<br />record_ids_access INTEGER[]</blockquote>) => VOID<br /><br />Deletes end-to-end encryption data keys for records that a login has no longer access to. This makes decryption impossible for the login.",
+				"file_link":"instance.file_link(<blockquote>file_id UUID,<br/>file_name TEXT,<br/>attribute_id UUID,<br/>record_id BIGINT</blockquote>) => VOID<br /><br />Links an existing file to another record (added to the chosen file attribute). This link is a hardlink, meaning that the same file is being accessed.<br /><br />When renaming or deleting the file, the change only affects the file link. Regardless of deletion, the actual file is kept as long as one file link exists.",
+				"files_get":"instance.files_get(<blockquote>attribute_id UUID,<br />record_id BIGINT,<br />include_deleted BOOLEAN DEFAULT FALSE</blockquote>) => instance.file_meta[]<br /><br />Returns meta data for files from the chosen file attribute and record (can optionally include deleted files).<br /><br />The returned type 'instance.file_meta' consists of:<blockquote>id UUID,<br />login_id_creator INTEGER,<br />hash TEXT,<br />name TEXT,<br />size_kb INTEGER,<br />version INTEGER,<br />date_change BIGINT,<br />date_delete BIGINT</blockquote>",
 				"get_login_id":"instance.get_login_id() => INTEGER<br /><br />Restituisce l'ID del login che sta eseguendo l'operazione.",
 				"get_login_language_code":"instance.get_login_language_code() => TEXT<br /><br />Restituisce il codice della lingua di 5 lettere ('en_us', ...) del login, utilizzato per accedere al backend dei dati.",
 				"get_name":"instance.get_name() => TEXT<br /><br />Restituisce il nome dell'istanza, definito nella finestra di personalizzazione del pannello di amministrazione.",
@@ -748,7 +779,7 @@
 			"codeArgsHintPg":"opzionale, 'var1 integer, var2 bool, ...'",
 			"codeReturns":"Risposta",
 			"codeReturnsHintJs":"opzionale, 'number', 'array',...",
-			"codeReturnsHintPg":"opzionale, 'text', 'integer',...",
+			"codeReturnsHintPg":"'text', 'integer',...",
 			"collectionId":"[Select collection]",
 			"entityInput":"Seleziona il segnaposto e fai clic sul corpo della funzione per utilizzare la sintassi <b>upgrade-safe</b>.",
 			"fieldId":"[Select field]",
@@ -976,11 +1007,12 @@
 			"newRole":"Nuovo ruolo",
 			"relation":"Relazione",
 			"title":"Ruoli",
-			"titleOne":"Ruolo '{NAME}'"
+			"titleOne":"Role title"
 		},
 		"backHint":"Torna alla panoramica dell'applicazione",
 		"language":"Traduzione",
 		"languageNextHint":"Passa alla lingua successiva (tasto di scelta rapida: CTRL + q)",
+		"noOwner":"Application is in read-only mode",
 		"navigationCollections":"Collezioni",
 		"navigationCollectionsSub":"Dettagli collezione",
 		"navigationFilterHint":"Filtra per testo",
@@ -1012,6 +1044,7 @@
 			"zoomResetHint":"Ripristina livello di zoom"
 		},
 		"icsDesc":"Usa questo URL per iscriverti a questo calendario (iCalendar, ICS).",
+		"icsTokenNameHint":"Device name (optional)",
 		"month0":"Gennaio",
 		"month1":"Febbraio",
 		"month2":"Marzo",
@@ -1159,8 +1192,7 @@
 			"help":"Aiuto",
 			"helpHint":"Mostra pagine aiuto",
 			"log":"Log",
-			"logHint":"Apri log modifiche",
-			"logShowAll":"Show all ({CNT})"
+			"logHint":"Apri log modifiche"
 		},
 		"dialog":{
 			"close":"Ci sono modifiche non salvate.<br /><br />Chiudere comunque questo modulo?",
@@ -1178,13 +1210,22 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"Il record è stato aggiornato"
 		},
-		"dataLog":"Registri delle modifiche",
-		"deletedUser":"Utenti cancellati",
 		"help":"Pagine aiuto",
 		"helpContextTitle":"Contesto",
 		"helpModuleTitle":"Applicazione",
 		"invalidInputs":"Controlla input!",
 		"noAccess":"Nessun accesso"
+	},
+	"formLog":{
+		"button":{
+			"showAll":"Show all ({CNT})"
+		},
+		"deletedUser":"Utenti cancellati",
+		"fileCreated":"File added",
+		"fileDeleted":"File deleted",
+		"fileRenamed":"File renamed",
+		"fileUpdated":"File updated",
+		"title":"Registri delle modifiche"
 	},
 	"home":{
 		"button":{
@@ -1197,7 +1238,7 @@
 			"installBundle":"Core Company",
 			"installBundleDesc":"Installa un set preconfezionato di applicazioni principali, utile per qualsiasi organizzazione. L'insieme \"Core Company\" include:<ul><li>Gestione delle assenze</li><li>Monitoraggio del tempo</li><li>Gestione delle attività</li><li>A password safe</li><li>IT asset management</li></ul>Dopo l'installazione, dai un'occhiata alle pagine di aiuto delle singole applicazioni per saperne di più sulla configurazione iniziale di ciascuna.",
 			"installFile":"Da file",
-			"installFileDesc":"Installa applicazioni da file REI3 locali. Per sistemi offline o applicazioni fai da te.<br /><br />I file per le applicazioni REI3 offerte pubblicamente possono essere scaricati dal sito ufficiale <a href=\"https://rei3.de/download_en\" target=\" _blank\">repository</a>.",
+			"installFileDesc":"Installa applicazioni da file REI3 locali. Per sistemi offline o applicazioni fai da te.<br /><br />I file per le applicazioni REI3 offerte pubblicamente possono essere scaricati dal sito ufficiale <a href=\"https://rei3.de/en/downloads\" target=\" _blank\">repository</a>.",
 			"installRepo":"Da archivio",
 			"installRepoDesc":"<b>Accesso a Internet richiesto</b><br /><br />Installa applicazioni dal repository REI3 ufficiale. Il repository contiene le versioni correnti delle applicazioni REI3 offerte pubblicamente.<br /><br />Tutte le applicazioni sono riviste e firmate digitalmente.",
 			"intro":"Benvenuto in REI3<br /><br />Al momento non ci sono applicazioni installate. Per iniziare a utilizzare REI3, scegli una delle opzioni di installazione di seguito.",
@@ -1222,17 +1263,35 @@
 			"inputSecond":"--",
 			"inputYear":"yyyy"
 		},
-		"fileNotUploaded":"File non ancora salvato.",
-		"fileTooLarge":"Impossibile caricare il file '{NAME}', la dimensione massima consentita è {SIZE}."
+		"files":{
+			"button":{
+				"copyHint":"Copy selected files to paste them into another file input.",
+				"downloadHint":"Download file",
+				"fileRequestHint":"Edit file locally on your computer. Requires the R3 client application (installable from the user settings). Does not work if the system is in maintenance mode.",
+				"pasteHint":"Paste copied files into this file input."
+			},
+			"dropTarget":"Drop files here for upload",
+			"fileChanged":"Changed",
+			"fileName":"File name",
+			"fileSize":"File size",
+			"tooLarge":"Impossibile caricare il file '{NAME}', la dimensione massima consentita è {SIZE}.",
+			"unsaved":"(unsaved)"
+		}
 	},
 	"list":{
 		"button":{
+			"aggregatorsHint":"Aggregate results",
 			"all":"Tutto",
 			"allHint":"Seleziona tutti i risultati",
 			"autoRenew":"{VALUE}s",
 			"autoRenewHint":"Aggiorna i dati ogni {VALUE} secondi",
+			"columnFilters":"Show column filters (right-click to remove)",
+			"columnOrderFlip":"Reverse order (right-click to remove)",
 			"csv":"CSV",
 			"csvHint":"Importa/esporta record tramite file di valori separati da virgole"
+		},
+		"columnFilter":{
+			"contains":"Contains"
 		},
 		"dialog":{
 			"delete":"Sei sicuro di voler eliminare <b>in modo permanente</b> i record selezionati?"
@@ -1246,6 +1305,7 @@
 			"csvExport":"esporta",
 			"csvImport":"importa"
 		},
+		"aggregators":"Aggregate results",
 		"autoRenew":"Rinnovo automatico",
 		"autoRenewInput":"Aggiorna i dati ogni X secondi",
 		"autoRenewInputHint":"min. 10s",
@@ -1262,6 +1322,7 @@
 		"csvTimezone":"Fuso orario",
 		"csvTotalLimit":"Conteggio righe (0 = tutte)",
 		"fetching":"Data is being retrieved...",
+		"filtersExpert":"Expert filters",
 		"inputHintCreate":"Crea nuovo record",
 		"inputHintOpen":"Apri record",
 		"inputHintRemove":"Rimuovi record",
@@ -1319,6 +1380,29 @@
 			"cornerRounded":"arrotondato",
 			"cornerSquared":"squadrato"
 		},
+		"tokensFixed":{
+			"button":{
+				"loadApp":"Application",
+				"loadCnf":"Config file",
+				"install":"Install client application"
+			},
+			"install":{
+				"intro":"With the client application you can directly open and edit files from within REI3.",
+				"steps":"Installation steps",
+				"step1":"Choose a device name:",
+				"step2":"Select your operating system:",
+				"step3":"Download the application:",
+				"step4":"Download the application config file to the same folder:",
+				"step5":"Start the application.",
+				"step6":"It is now installed and will appear in your system tray.",
+				"title":"Install client application"
+			},
+			"nameHint":"'My Work PC'",
+			"titleAdd":"Install client application",
+			"titleContext":"Use",
+			"titleDateCreate":"Created",
+			"titleName":"Device name"
+		},
 		"bordersAll":"Aggiungi bordi",
 		"bordersCorners":"Angoli del bordo",
 		"compact":"Layout compatto",
@@ -1343,6 +1427,7 @@
 		"titleAccount":"Account",
 		"titleDisplay":"Visualizza",
 		"titleEncryption":"End-to-end encryption",
+		"titleFixedTokens":"Device access",
 		"titleTheme":"Tema",
 		"warnUnsaved":"Avviso per cambiamenti non salvati"
 	}

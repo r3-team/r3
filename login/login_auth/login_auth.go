@@ -31,6 +31,26 @@ func authCheckSystemMode(admin bool) error {
 	return nil
 }
 
+func createToken(loginId int64, username string, admin bool, noAuth bool) (string, error) {
+
+	// token is valid for multiple days, if user decides to stay logged in
+	now := time.Now()
+	expiryHoursTime := time.Duration(int64(config.GetUint64("tokenExpiryHours")))
+
+	token, err := jwt.Sign(tokenPayload{
+		Payload: jwt.Payload{
+			Issuer:         "r3 application",
+			Subject:        username,
+			ExpirationTime: jwt.NumericDate(now.Add(expiryHoursTime * time.Hour)),
+			IssuedAt:       jwt.NumericDate(now),
+		},
+		LoginId: loginId,
+		Admin:   admin,
+		NoAuth:  noAuth,
+	}, config.GetTokenSecret())
+	return string(token), err
+}
+
 // performs authentication attempt for user by using username and password
 // returns JWT, KDF salt
 func User(username string, password string, grantLoginId *int64,
@@ -86,28 +106,13 @@ func User(username string, password string, grantLoginId *int64,
 		}
 	}
 
-	// login ok, create token
-	// token is valid for multiple days, if user wants to stay logged in
-	now := time.Now()
-	expiryHoursTime := time.Duration(int64(config.GetUint64("tokenExpiryHours")))
-
-	token, err := jwt.Sign(tokenPayload{
-		Payload: jwt.Payload{
-			Issuer:         "r3 application",
-			Subject:        username,
-			ExpirationTime: jwt.NumericDate(now.Add(expiryHoursTime * time.Hour)),
-			IssuedAt:       jwt.NumericDate(now),
-		},
-		LoginId: loginId,
-		Admin:   admin,
-		NoAuth:  noAuth,
-	}, config.GetTokenSecret())
-
-	if err != nil {
+	if err := authCheckSystemMode(admin); err != nil {
 		return "", "", err
 	}
 
-	if err := authCheckSystemMode(admin); err != nil {
+	// login ok, create token
+	token, err := createToken(loginId, username, admin, noAuth)
+	if err != nil {
 		return "", "", err
 	}
 
@@ -115,7 +120,7 @@ func User(username string, password string, grantLoginId *int64,
 	*grantLoginId = loginId
 	*grantAdmin = admin
 	*grantNoAuth = noAuth
-	return string(token), saltKdf, nil
+	return token, saltKdf, nil
 }
 
 // performs authentication attempt for user by using existing JWT token, signed by server
@@ -162,33 +167,36 @@ func Token(token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *boo
 }
 
 // performs authentication for user by using fixed (permanent) token
-// used for less sensitive, permanent access (like ICS download)
+// used for application access (like ICS download or fat-client access)
 // cannot grant admin access
-func TokenFixed(loginId int64, tokenFixed string, grantLanguageCode *string) error {
+func TokenFixed(loginId int64, tokenFixed string, grantLanguageCode *string, grantToken *string) error {
 
 	if tokenFixed == "" {
 		return errors.New("empty token")
 	}
 
-	// check for existing token and active login
-	active := false
+	// check for existing token
 	languageCode := ""
-
-	if err := db.Pool.QueryRow(db.Ctx, `
-		SELECT s.language_code, l.active
+	username := ""
+	err := db.Pool.QueryRow(db.Ctx, `
+		SELECT s.language_code, l.name
 		FROM instance.login_token_fixed AS t
 		INNER JOIN instance.login_setting AS s ON s.login_id = t.login_id
 		INNER JOIN instance.login         AS l ON l.id       = t.login_id
 		WHERE t.login_id = $1
-		AND   t.token = $2
-	`, loginId, tokenFixed).Scan(&languageCode, &active); err != nil {
-		return err
-	}
-	if !active {
+		AND   t.token    = $2
+		AND   l.active
+	`, loginId, tokenFixed).Scan(&languageCode, &username)
+
+	if err == pgx.ErrNoRows {
 		return errors.New("login inactive")
+	}
+	if err != nil {
+		return err
 	}
 
 	// everything in order, auth successful
 	*grantLanguageCode = languageCode
-	return nil
+	*grantToken, err = createToken(loginId, username, false, false)
+	return err
 }

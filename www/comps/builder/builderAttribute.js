@@ -1,6 +1,7 @@
 import MyBuilderCaption      from './builderCaption.js';
 import MyBuilderIconInput    from './builderIconInput.js';
 import {getDependentModules} from '../shared/builder.js';
+import {copyValueDialog}     from '../shared/generic.js';
 import {
 	isAttributeBoolean,
 	isAttributeFiles,
@@ -20,23 +21,40 @@ let MyBuilderAttribute = {
 	},
 	template:`<tr>
 		<td>
+			<div class="row">
+				<my-button image="save.png"
+					@trigger="set"
+					:active="hasChanges && !readonly"
+					:caption="isNew ? capGen.button.create : ''"
+					:captionTitle="isNew ? capGen.button.create : capGen.button.save"
+				/>
+				<my-button image="delete.png"
+					v-if="!isNew"
+					@trigger="delAsk"
+					:active="!isId && !readonly"
+					:cancel="true"
+					:captionTitle="capGen.button.delete"
+				/>
+			</div>
+		</td>
+		<td>
 			<my-builder-icon-input
 				@input="iconId = $event"
 				:icon-id-selected="iconId"
 				:module="module"
-				:readonly="foreign"
+				:readonly="readonly"
 			/>
 		</td>
 		<td>
 			<input
 				v-model="name"
 				:placeholder="isNew ? capApp.new : ''"
-				:disabled="foreign || isId"
+				:disabled="readonly || isId"
 			/>
 		</td>
 		<td class="minimum">
 			<my-button image="visible1.png"
-				@trigger="showInfo"
+				@trigger="copyValueDialog(attribute.name,attribute.id,attribute.id)"
 				:active="!isNew"
 			/>
 		</td>
@@ -44,11 +62,11 @@ let MyBuilderAttribute = {
 			<my-builder-caption
 				v-model="captions.attributeTitle"
 				:language="builderLanguage"
-				:readonly="foreign"
+				:readonly="readonly"
 			/>
 		</td>
 		<td>
-			<select v-model="content" :disabled="foreign">
+			<select v-model="content" :disabled="readonly">
 				<option v-if="isNew || isAttributeInteger(content)" value="integer">integer</option>
 				<option v-if="isNew || isAttributeInteger(content)" value="bigint">bigint</option>
 				<option v-if="isNew || isAttributeNumeric(content)" value="numeric">numeric</option>
@@ -67,7 +85,7 @@ let MyBuilderAttribute = {
 		<td>
 			<select
 				v-model="relationshipId"
-				:disabled="!isNew || foreign || !isRelationship || isId"
+				:disabled="!isNew || readonly || !isRelationship || isId"
 			>
 				<option :value="null">-</option>
 				<option v-for="rel in module.relations" :value="rel.id">
@@ -88,31 +106,31 @@ let MyBuilderAttribute = {
 		<td>
 			<input class="short"
 				v-model.number="length"
-				:disabled="foreign || isId || !hasLength"
+				:disabled="readonly || isId || !hasLength"
 			/>
 		</td>
 		<td>
 			<my-bool
 				v-model="nullable"
-				:readonly="foreign || isId"
+				:readonly="readonly || isId"
 			/>
 		</td>
 		<td v-if="relation.encryption">
 			<my-bool
 				v-model="encrypted"
-				:readonly="foreign || !isNew || !canEncrypt"
+				:readonly="readonly || !isNew || !canEncrypt"
 			/>
 		</td>
 		<td>
 			<input placeholder="NO DEFAULT"
 				v-if="!isId"
 				v-model="def"
-				:disabled="foreign || isId"
+				:disabled="readonly || isId || isFiles"
 			/>
 			<input v-if="isId" placeholder="SYSTEM" disabled="disabled" />
 		</td>
 		<td>
-			<select v-model="onUpdate" :disabled="foreign || !isRelationship || isId">
+			<select v-model="onUpdate" :disabled="readonly || !isRelationship || isId">
 				<option v-if="!isRelationship" value="">-</option>
 				<template v-if="isRelationship">
 					<option value="NO ACTION">NO ACTION</option>
@@ -124,7 +142,7 @@ let MyBuilderAttribute = {
 			</select>
 		</td>
 		<td>
-			<select v-model="onDelete" :disabled="foreign || !isRelationship || isId">
+			<select v-model="onDelete" :disabled="readonly || !isRelationship || isId">
 				<option v-if="!isRelationship" value="">-</option>
 				<template v-if="isRelationship">
 					<option value="NO ACTION">NO ACTION</option>
@@ -134,20 +152,6 @@ let MyBuilderAttribute = {
 					<option value="SET DEFAULT">SET DEFAULT</option>
 				</template>
 			</select>
-		</td>
-		<td>
-			<div class="row">
-				<my-button image="save.png"
-					@trigger="set"
-					:active="hasChanges && !foreign"
-				/>
-				<my-button image="delete.png"
-					v-if="!isNew"
-					@trigger="delAsk"
-					:active="!isId"
-					:cancel="true"
-				/>
-			</div>
 		</td>
 	</tr>`,
 	props:{
@@ -172,8 +176,9 @@ let MyBuilderAttribute = {
 			}}
 		},
 		builderLanguage:{ type:String,  required:true },
+		foreign:        { type:Boolean, required:true },
 		relation:       { type:Object,  required:true },
-		foreign:        { type:Boolean, required:true }
+		readonly:       { type:Boolean, required:true }
 	},
 	data:function() {
 		return {
@@ -209,6 +214,7 @@ let MyBuilderAttribute = {
 		// simple states
 		canEncrypt:    function() { return this.content === 'text'; },
 		hasLength:     function() { return ['varchar','text','files'].includes(this.content); },
+		isFiles:       function() { return this.isAttributeFiles(this.content); },
 		isId:          function() { return !this.isNew && this.attribute.name === 'id'; },
 		isNew:         function() { return this.attribute.id === null; },
 		isRelationship:function() { return this.isAttributeRelationship(this.content); },
@@ -223,6 +229,7 @@ let MyBuilderAttribute = {
 	},
 	methods:{
 		// externals
+		copyValueDialog,
 		isAttributeBoolean,
 		isAttributeFiles,
 		isAttributeFloat,
@@ -231,18 +238,6 @@ let MyBuilderAttribute = {
 		isAttributeRelationship,
 		isAttributeString,
 		getDependentModules,
-		
-		// actions
-		showInfo:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.attribute.id,
-				captionTop:this.attribute.name,
-				buttons:[{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
 		
 		// backend calls
 		delAsk:function() {

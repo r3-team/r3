@@ -29,7 +29,8 @@ func GetPreview(id uuid.UUID, limit int, offset int) (interface{}, error) {
 		SELECT r.name, m.name, ARRAY(
 			SELECT name
 			FROM app.attribute
-			WHERE relation_id = r.id
+			WHERE relation_id =  r.id
+			AND   content     <> 'files'
 			ORDER BY CASE WHEN name = 'id' THEN 0 END, name ASC
 		) AS atrs
 		FROM app.relation AS r

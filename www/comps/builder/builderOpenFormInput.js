@@ -13,6 +13,7 @@ let MyBuilderOpenFormInput = {
 			<td>
 				<select
 					@input="set('formIdOpen',$event.target.value)"
+					:disabled="readonly"
 					:value="openForm !== null ? openForm.formIdOpen : null"
 				>
 					<option value="">-</option>
@@ -36,6 +37,7 @@ let MyBuilderOpenFormInput = {
 					<my-bool
 						@update:modelValue="set('popUp',$event)"
 						:modelValue="openForm.popUp"
+						:readonly="readonly"
 					/>
 				</td>
 			</tr>
@@ -44,6 +46,7 @@ let MyBuilderOpenFormInput = {
 				<td>
 					<input
 						@input="set('maxHeight',$event.target.value)"
+						:disabled="readonly"
 						:value="openForm.maxHeight"
 					/>
 				</td>
@@ -53,6 +56,7 @@ let MyBuilderOpenFormInput = {
 				<td>
 					<input
 						@input="set('maxWidth',$event.target.value)"
+						:disabled="readonly"
 						:value="openForm.maxWidth"
 					/>
 				</td>
@@ -66,6 +70,7 @@ let MyBuilderOpenFormInput = {
 					<td>
 						<select
 							@input="set('relationIndex',$event.target.value)"
+							:disabled="readonly"
 							:value="openForm.relationIndex"
 						>
 							<option :value="-1">-</option>
@@ -81,6 +86,7 @@ let MyBuilderOpenFormInput = {
 					<td>
 						<select
 							@input="set('attributeIdApply',$event.target.value)"
+							:disabled="readonly"
 							:value="openForm.attributeIdApply !== null ? openForm.attributeIdApply : ''"
 						>
 							<option value="">-</option>
@@ -102,6 +108,7 @@ let MyBuilderOpenFormInput = {
 		joinsIndexMap:   { type:Object,  required:false, default:function() { return {}; } },
 		module:          { type:Object,  required:true },
 		openForm:        { required:true },
+		readonly:        { type:Boolean, required:false, default:false },
 		relationIdSource:{ type:String,  required:false, default:null }
 	},
 	emits:['update:openForm'],

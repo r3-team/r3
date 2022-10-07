@@ -10,7 +10,7 @@ let MyAdminMailAccount = {
 			/>
 		</td>
 		<td>	
-			<select class="short" v-model="mode">
+			<select class="short" v-model="mode" @change="warning($event.target.value)">
 				<option value="smtp">SMTP</option>
 				<option value="imap">IMAP</option>
 			</select>
@@ -70,13 +70,13 @@ let MyAdminMailAccount = {
 	},
 	computed:{
 		hasChanges:function() {
-			return this.account.id !== this.id
-				|| this.account.name !== this.name
-				|| this.account.mode !== this.mode
+			return this.account.id       !== this.id
+				|| this.account.name     !== this.name
+				|| this.account.mode     !== this.mode
 				|| this.account.username !== this.username
 				|| this.account.password !== this.password
 				|| this.account.startTls !== this.startTls
-				|| this.account.sendAs !== this.sendAs
+				|| this.account.sendAs   !== this.sendAs
 				|| this.account.hostName !== this.hostName
 				|| this.account.hostPort !== this.hostPort
 			;
@@ -90,6 +90,21 @@ let MyAdminMailAccount = {
 		capGen:function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
+		warning:function(v) {
+			if(v !== 'imap')
+				return;
+			
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.imapWarn,
+				image:'warning.png',
+				buttons:[{
+					caption:this.capGen.button.ok,
+					keyEscape:true,
+					image:'ok.png'
+				}]
+			});
+		},
+		
 		// backend calls
 		del:function() {
 			ws.send('mailAccount','del',{id:this.id},true).then(
