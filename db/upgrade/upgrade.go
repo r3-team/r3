@@ -365,7 +365,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					SELECT r.id, j.id, j.name
 					FROM "%s"."%s" AS r
 					CROSS JOIN LATERAL JSON_TO_RECORDSET((r."%s"->>'files')::JSON)
-						AS j(id UUID, name TEXT, size INT)
+						AS j(id UUID, name TEXT)
 					WHERE r."%s" IS NOT NULL
 			`, tNameR, fa.moduleName, fa.relationName, fa.attributeName, fa.attributeName)); err != nil {
 				return "", err

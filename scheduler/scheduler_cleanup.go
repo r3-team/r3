@@ -97,14 +97,13 @@ func cleanUpFiles() error {
 		// execute in steps to reduce load
 		for {
 			if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
-				SELECT ARRAY_AGG(f.id)
-				FROM instance.file AS f
-				WHERE 0 = (
-					SELECT COUNT(*)
-					FROM instance_file."%s" AS r
-					WHERE r.file_id = f.id
+				SELECT ARRAY(
+				    SELECT file_id
+				    FROM instance_file."%s"
+				    GROUP BY file_id
+				    HAVING COUNT(*) = 0
+					LIMIT $1
 				)
-				LIMIT $1
 			`, tNameR), limit).Scan(&fileIds); err != nil {
 				return err
 			}
@@ -164,7 +163,7 @@ func cleanUpFiles() error {
 				}
 			}
 
-			// delete file records with no versions left
+			// delete references of files that have no versions left
 			tag, err := db.Pool.Exec(db.Ctx, `
 				DELETE FROM instance.file AS f
 				WHERE 0 = (
