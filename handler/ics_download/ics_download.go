@@ -20,6 +20,7 @@ import (
 	"time"
 
 	ics "github.com/arran4/golang-ical"
+	"github.com/gofrs/uuid"
 	"github.com/jackc/pgtype"
 )
 
@@ -226,6 +227,38 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// prepare URL
+	formUrl := ""
+	if f.OpenForm.FormIdOpen != uuid.Nil {
+		var modName string
+		var modNameParent string
+
+		if err := db.Pool.QueryRow(db.Ctx, `
+			SELECT name, COALESCE((
+				SELECT name
+				FROM app.module
+				WHERE id = m.parent_id
+			),'')
+			FROM app.module AS m
+			WHERE id = (
+				SELECT module_id
+				FROM app.form
+				WHERE id = $1
+			)
+		`, f.OpenForm.FormIdOpen).Scan(&modName, &modNameParent); err != nil {
+			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+			return
+		}
+
+		if modNameParent != "" {
+			modName = fmt.Sprintf("%s/%s", modNameParent, modName)
+		}
+
+		formUrl = fmt.Sprintf("https://%s/#/app/%s/form/%s",
+			config.GetString("publicHostName"), modName,
+			f.OpenForm.FormIdOpen.String())
+	}
+
 	// create iCAL as .ics download from data GET results
 	cal := ics.NewCalendar()
 	cal.SetMethod(ics.MethodPublish)
@@ -234,6 +267,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// build unique identifier for calendar events (for updates/deletions)
 	// record ID + field ID + instance ID
 	instance := fmt.Sprintf("%s@%s", f.Id, config.GetString("instanceId"))
+
+	// library adds Z (UTC indicator) to full day events, which is only valid on events with time
+	// we need to overwrite the chosen date format
+	dateFormatFullDay := "20060102"
 
 	for _, result := range results {
 
@@ -245,6 +282,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 		event := cal.AddEvent(fmt.Sprintf("%d_%s", recordId, instance))
+		event.SetDtStampTime(time.Now())
+
+		// set form URL
+		if formUrl != "" {
+			event.SetURL(fmt.Sprintf("%s/%d", formUrl, recordId))
+		}
 
 		// check for valid date values (start/end)
 		if len(result.Values) < 2 ||
@@ -267,8 +310,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			// apply ICS fix, add 1 day to end date
 			// 3 day event 09.02.2021 including 11.02.2021 is defined as
 			//  DTSTART 20210209 / DTEND 20210212 (until beginning of next day)
-			event.SetAllDayStartAt(time.Unix(dateStart, 0))
-			event.SetAllDayEndAt(time.Unix(dateEnd+86400, 0))
+			dateEnd = dateEnd + 86400
+
+			event.SetProperty(ics.ComponentPropertyDtStart,
+				time.Unix(dateStart, 0).Format(dateFormatFullDay))
+
+			event.SetProperty(ics.ComponentPropertyDtEnd,
+				time.Unix(dateEnd, 0).Format(dateFormatFullDay))
+
 		} else {
 			event.SetStartAt(time.Unix(dateStart, 0))
 			event.SetEndAt(time.Unix(dateEnd, 0))
