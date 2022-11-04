@@ -96,8 +96,7 @@ func renewDbUserPw_tx(tx pgx.Tx) error {
 	return nil
 }
 
-// instance initalized to 2.0
-//  cleanup: 'exportPrivateKey' (removed 2.1)
+// instance initalized to 3.0
 func initInstanceValues_tx(tx pgx.Tx) error {
 
 	appName, appNameShort := config.GetAppName()
@@ -130,7 +129,6 @@ func initInstanceValues_tx(tx pgx.Tx) error {
 			('dbTimeoutIcs','30'),
 			('dbVersionCut','3.0'),
 			('defaultLanguageCode','en_us'),
-			('exportPrivateKey',''),
 			('icsDaysPost','365'),
 			('icsDaysPre','365'),
 			('icsDownload','1'),

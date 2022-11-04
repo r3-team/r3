@@ -159,7 +159,6 @@
 			"backupDaily":"Zilnic",
 			"backupDir":"Directorul țintă*",
 			"backupDirNote":"*Asigurați-vă că această cale indică o locație separată din rețea sau că conținutul acesteia este copiat în mod regulat pe un al doilea sistem. Acest lucru este necesar pentru recuperare în cazul unei defecțiuni complete a sistemului.",
-			"backupEmbeddedNote":"Backup-urile integrate și complete sunt disponibile numai dacă este utilizat modelul de implementare autonom.<br /><br />Documentația sistemului conține capitole referitoare la măsurile de backup recomandate pentru instanțe dedicate.",
 			"backupMonthly":"Lunar",
 			"backupWeekly":"Săptămânal",
 			"bruteforceAttempts":"Nr. de încercări după care gazdele vor fi blocate",
@@ -426,6 +425,7 @@
 				"runNowHint":"Task will be executed as soon as possible."
 			},
 			"names":{
+				"backupRun":"Gestionați copiile de siguranță integrate",
 				"cleanupBruteforce":"Curățați memoria cache de brutforce",
 				"cleanupDataLogs":"Curățare jurnalele de modificări expirate",
 				"cleanupFiles":"Curățați fișierele încărcate expirate",
@@ -433,7 +433,6 @@
 				"cleanupTempDir":"Curățați directorul temporar",
 				"clusterCheckIn":"Cluster check-in",
 				"clusterProcessEvents":"Cluster event processing",
-				"embeddedBackup":"Gestionați copiile de siguranță integrate",
 				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Importați autentificări și roluri prin LDAP",
 				"mailAttach":"Transfer de atașamente prin e-mail",

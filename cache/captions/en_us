@@ -159,7 +159,6 @@
 			"backupDaily":"Daily",
 			"backupDir":"Target directory*",
 			"backupDirNote":"*Make sure this path points to a separate network location or its contents is copied to a second system regularly. This is necessary for recovery in case of complete system failure.",
-			"backupEmbeddedNote":"Integrated full backups are only available if the standalone deployment model is being used.<br /><br />The system documentation contains chapters regarding recommended backup measures for dedicated instances.",
 			"backupMonthly":"Monthly",
 			"backupWeekly":"Weekly",
 			"bruteforceAttempts":"Block hosts after attempts",
@@ -426,6 +425,7 @@
 				"runNowHint":"Task will be executed as soon as possible."
 			},
 			"names":{
+				"backupRun":"Manage integrated backups",
 				"cleanupBruteforce":"Cleanup bruteforce cache",
 				"cleanupDataLogs":"Cleanup expired change logs",
 				"cleanupFiles":"Cleanup expired file uploads",
@@ -433,7 +433,6 @@
 				"cleanupTempDir":"Cleanup temporary directory",
 				"clusterCheckIn":"Cluster check-in",
 				"clusterProcessEvents":"Cluster event processing",
-				"embeddedBackup":"Manage integrated backups",
 				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Import logins and roles via LDAP",
 				"mailAttach":"Email attachment transfer",

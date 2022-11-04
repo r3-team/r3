@@ -330,6 +330,9 @@ func load() error {
 		t.runNextUnix = getNextRunFromSchedule(s)
 
 		switch t.name {
+		case "backupRun":
+			t.nameLog = "Integrated full backups"
+			t.fn = backup.Run
 		case "cleanupBruteforce":
 			t.nameLog = "Cleanup of bruteforce cache"
 			t.fn = bruteforce.ClearHostMap
@@ -351,9 +354,6 @@ func load() error {
 		case "clusterProcessEvents":
 			t.nameLog = "Cluster event processing"
 			t.fn = clusterProcessEvents
-		case "embeddedBackup":
-			t.nameLog = "Integrated full backups"
-			t.fn = backup.Run
 		case "httpCertRenew":
 			t.nameLog = "Reload of updated HTTP certificate"
 			t.fn = cache.CheckRenewCert

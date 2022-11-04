@@ -372,68 +372,61 @@ let MyAdminConfig = {
 					<h1>{{ capApp.titleBackup }}</h1>
 				</div>
 				
-				<h3 class="backup-note"
-					v-if="!system.embeddedDb"
-					v-html="capApp.backupEmbeddedNote"
-				/>
-				
-				<template v-if="system.embeddedDb">
-					<table class="default-inputs">
-						<tr class="backup-dir">
-							<td>{{ capApp.backupDir }}</td>
-							<td colspan="3">
-								<input v-model="configInput.backupDir" />
-							</td>
-						</tr>
-						
-						<!-- daily -->
-						<tr>
-							<td>{{ capApp.backupDaily }}</td>
-							<td>
-								<my-bool-string-number
-									v-model="configInput.backupDaily"
-								/>
-							</td>
-							
-							<template v-if="configInput.backupDaily === '1'">
-								<td class="versions">{{ capApp.backupCount }}</td>
-								<td><input v-model="configInput.backupCountDaily" /></td>
-							</template>
-						</tr>
-						
-						<!-- weekly -->
-						<tr>
-							<td>{{ capApp.backupWeekly }}</td>
-							<td>
-								<my-bool-string-number
-									v-model="configInput.backupWeekly"
-								/>
-							</td>
-							
-							<template v-if="configInput.backupWeekly === '1'">
-								<td class="versions">{{ capApp.backupCount }}</td>
-								<td><input v-model="configInput.backupCountWeekly" /></td>
-							</template>
-						</tr>
-						
-						<!-- monthly -->
-						<tr>
-							<td>{{ capApp.backupMonthly }}</td>
-							<td>
-								<my-bool-string-number
-									v-model="configInput.backupMonthly"
-								/>
-							</td>
-							
-							<template v-if="configInput.backupMonthly === '1'">
-								<td class="versions">{{ capApp.backupCount }}</td>
-								<td><input v-model="configInput.backupCountMonthly" /></td>
-							</template>
-						</tr>
-					</table>
+				<table class="default-inputs">
+					<tr class="backup-dir">
+						<td>{{ capApp.backupDir }}</td>
+						<td colspan="3">
+							<input v-model="configInput.backupDir" />
+						</td>
+					</tr>
 					
-					<div class="note">{{ capApp.backupDirNote }}</div>
-				</template>
+					<!-- daily -->
+					<tr>
+						<td>{{ capApp.backupDaily }}</td>
+						<td>
+							<my-bool-string-number
+								v-model="configInput.backupDaily"
+							/>
+						</td>
+						
+						<template v-if="configInput.backupDaily === '1'">
+							<td class="versions">{{ capApp.backupCount }}</td>
+							<td><input v-model="configInput.backupCountDaily" /></td>
+						</template>
+					</tr>
+					
+					<!-- weekly -->
+					<tr>
+						<td>{{ capApp.backupWeekly }}</td>
+						<td>
+							<my-bool-string-number
+								v-model="configInput.backupWeekly"
+							/>
+						</td>
+						
+						<template v-if="configInput.backupWeekly === '1'">
+							<td class="versions">{{ capApp.backupCount }}</td>
+							<td><input v-model="configInput.backupCountWeekly" /></td>
+						</template>
+					</tr>
+					
+					<!-- monthly -->
+					<tr>
+						<td>{{ capApp.backupMonthly }}</td>
+						<td>
+							<my-bool-string-number
+								v-model="configInput.backupMonthly"
+							/>
+						</td>
+						
+						<template v-if="configInput.backupMonthly === '1'">
+							<td class="versions">{{ capApp.backupCount }}</td>
+							<td><input v-model="configInput.backupCountMonthly" /></td>
+						</template>
+					</tr>
+				</table>
+				
+				<div class="note">{{ capApp.backupDirNote }}</div>
 			</div>
 			
 			<!-- repository -->
@@ -573,8 +566,7 @@ let MyAdminConfig = {
 		licenseDays:  function() { return this.$store.getters.licenseDays; },
 		licenseValid: function() { return this.$store.getters.licenseValid; },
 		capApp:       function() { return this.$store.getters.captions.admin.config; },
-		capGen:       function() { return this.$store.getters.captions.generic; },
-		system:       function() { return this.$store.getters.system; }
+		capGen:       function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{
 		// externals

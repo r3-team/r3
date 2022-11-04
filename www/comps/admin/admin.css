@@ -186,10 +186,6 @@
 .admin-config .backup-dir input{
 	max-width:unset;
 }
-.admin-config .backup-note{
-	margin:40px 30px;
-	text-align:center;
-}
 .admin-config .versions{
 	padding-left:30px;
 }

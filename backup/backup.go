@@ -5,10 +5,10 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"r3/compress"
 	"r3/config"
-	"r3/db/embedded"
 	"r3/log"
 	"r3/tools"
 	"strconv"
@@ -87,7 +87,6 @@ func Run() error {
 	jobRan := false // limit to one job per run
 
 	var runOne = func(jobName string, keepVersions uint64, interval int64) error {
-
 		log.Info("backup", fmt.Sprintf("is considering job '%s' for execution", jobName))
 
 		if getLatestTimestamp(jobName) > (now - interval) {
@@ -99,7 +98,7 @@ func Run() error {
 			log.Error("backup", fmt.Sprintf("could not delete old versions of job '%s'", jobName), err)
 			return err
 		}
-		if err := exec(jobName); err != nil {
+		if err := runJob(jobName); err != nil {
 			log.Error("backup", fmt.Sprintf("could not execute job '%s'", jobName), err)
 			return err
 		}
@@ -112,13 +111,11 @@ func Run() error {
 			return err
 		}
 	}
-
 	if !jobRan && config.GetUint64("backupWeekly") == 1 {
 		if err := runOne("weekly", config.GetUint64("backupCountWeekly"), 604800); err != nil {
 			return err
 		}
 	}
-
 	if !jobRan && config.GetUint64("backupDaily") == 1 {
 		if err := runOne("daily", config.GetUint64("backupCountDaily"), 86400); err != nil {
 			return err
@@ -177,7 +174,7 @@ func cleanup(jobName string, countKeep uint64) error {
 	return nil
 }
 
-func exec(jobName string) error {
+func runJob(jobName string) error {
 
 	log.Info("backup", fmt.Sprintf("started for job '%s'", jobName))
 
@@ -193,8 +190,7 @@ func exec(jobName string) error {
 	if err := os.MkdirAll(dbPath, 0600); err != nil {
 		return err
 	}
-
-	if err := embedded.Backup(dbPath); err != nil {
+	if err := dumpDb(dbPath); err != nil {
 		return err
 	}
 
@@ -233,6 +229,22 @@ func exec(jobName string) error {
 	}
 	log.Info("backup", fmt.Sprintf("successfully completed job '%s'", jobName))
 	return nil
+}
+
+func dumpDb(path string) error {
+	args := []string{
+		"-h", config.File.Db.Host,
+		"-p", fmt.Sprintf("%d", config.File.Db.Port),
+		"-U", config.File.Db.User,
+		"-j", "4", // number of parallel jobs
+		"-Fd", // custom format, to file directory
+		"-f", path,
+	}
+	cmd := exec.Command(getPgDumpPath(), args...)
+	tools.CmdAddSysProgAttrs(cmd)
+	cmd.Env = append(cmd.Env, fmt.Sprintf("LC_MESSAGES=%s", "en_US"))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("PGPASSWORD=%s", config.File.Db.Pass))
+	return cmd.Run()
 }
 
 func tocFileRead() error {

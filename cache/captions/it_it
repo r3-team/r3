@@ -159,7 +159,6 @@
 			"backupDaily":"Giornaliero",
 			"backupDir":"Cartella destinazione*",
 			"backupDirNote":"*Assicurati che questo percorso punti a un percorso di rete separato o che il suo contenuto venga copiato regolarmente su un secondo sistema. Ciò è necessario per il ripristino in caso di guasto completo del sistema.",
-			"backupEmbeddedNote":"I backup completi integrati sono disponibili solo se viene utilizzato il modello di distribuzione autonomo.<br /><br />La documentazione del sistema contiene capitoli relativi alle misure di backup consigliate per istanze dedicate.",
 			"backupMonthly":"Mensile",
 			"backupWeekly":"Settimanale",
 			"bruteforceAttempts":"Blocca gli host dopo i tentativi",
@@ -426,6 +425,7 @@
 				"runNowHint":"Task will be executed as soon as possible."
 			},
 			"names":{
+				"backupRun":"Gestisci backup integrati",
 				"cleanupBruteforce":"Pulisci casche forza bruta",
 				"cleanupDataLogs":"Pulisci i log delle modifiche scadute",
 				"cleanupFiles":"Elimina i caricamenti di file scaduti",
@@ -433,7 +433,6 @@
 				"cleanupTempDir":"Pulisci cartella temporanea",
 				"clusterCheckIn":"Cluster check-in",
 				"clusterProcessEvents":"Cluster event processing",
-				"embeddedBackup":"Gestisci backup integrati",
 				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Importa login e ruoli tramite LDAP",
 				"mailAttach":"Trasferimento allegati e-mail",

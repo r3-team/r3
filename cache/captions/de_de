@@ -159,7 +159,6 @@
 			"backupDaily":"Täglich",
 			"backupDir":"Zielverzeichnis*",
 			"backupDirNote":"*Stelle sicher, dass dieser Pfad auf einen separaten Netzwerkspeicherort zeigt oder der Verzeichnisinhalt regelmäßig auf ein Zweitsystem kopiert wird. Dies ist für eine Wiederherstellung notwendig, falls das System komplett ausfällt.",
-			"backupEmbeddedNote":"Die integrierte Vollsicherung ist nur verfügbar, wenn das eigenständige Betriebsmodell genutzt wird.<br /><br />Die Systemdokumentation enthält Kapitel zu empfohlenen Sicherungsmaßnahmen für dedizierte Instanzen.",
 			"backupMonthly":"Monatlich",
 			"backupWeekly":"Wöchentlich",
 			"bruteforceAttempts":"Host blocken nach Versuchen",
@@ -426,6 +425,7 @@
 				"runNowHint":"Aufgabe wird so bald wie möglich ausgeführt."
 			},
 			"names":{
+				"backupRun":"Integrierte Backups steuern",
 				"cleanupBruteforce":"Bereinigung des Bruteforce-Cache",
 				"cleanupDataLogs":"Bereinigung abgelaufener Änderungshistorie",
 				"cleanupFiles":"Bereinigung abgelaufener Datei-Uploads",
@@ -433,7 +433,6 @@
 				"cleanupTempDir":"Bereinigung des temporären Verzeichnisses",
 				"clusterCheckIn":"Cluster-Knoten einchecken",
 				"clusterProcessEvents":"Cluster-Ereignisse verarbeiten",
-				"embeddedBackup":"Integrierte Backups steuern",
 				"httpCertRenew":"Neuladen des SSL-Zertifikates falls es erneuert wurde",
 				"importLdapLogins":"Import von Anmeldungen und Rollen über LDAP",
 				"mailAttach":"E-Mail-Anhänge transferieren",

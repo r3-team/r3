@@ -98,6 +98,22 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 // mapped by current database version string, returns new database version string
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
+	"3.1": func(tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(db.Ctx, `
+			-- enable backup tasks for non-embedded systems
+			UPDATE instance.task
+			SET embedded_only = false, name = 'backupRun'
+			WHERE name = 'embeddedBackup';
+			
+			UPDATE instance.schedule
+			SET task_name = 'backupRun'
+			WHERE task_name = 'embeddedBackup';
+			
+			-- outdated config key that was in 3.0 init script until 3.2
+			DELETE FROM instance.config WHERE name = 'exportPrivateKey';
+		`)
+		return "3.2", err
+	},
 	"3.0": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
 			-- clean up from last upgrade
