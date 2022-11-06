@@ -288,11 +288,42 @@ func dataToCsv(writer *csv.Writer, get types.DataGet, locUser *time.Location,
 		return 0, err
 	}
 
+	parseIntegerValues := func(display string, value int64) string {
+		switch display {
+		case "time":
+			return time.Unix(value, 0).UTC().Format("15:04:05")
+		case "date", "datetime":
+			// date values are always stored as UTC at midnight
+			loc := time.UTC
+			format := "2006-01-02"
+
+			switch dateFormat {
+			case "Y-m-d":
+				format = "2006-01-02"
+			case "Y/m/d":
+				format = "2006/01/02"
+			case "d.m.Y":
+				format = "02.01.2006"
+			case "d/m/Y":
+				format = "02/01/2006"
+			case "m/d/Y":
+				format = "01/02/2006"
+			}
+
+			// datetime values are in context of user timezone
+			if display == "datetime" {
+				loc = locUser
+				format = fmt.Sprintf("%s 15:04:05", format)
+			}
+			return time.Unix(value, 0).In(loc).Format(format)
+		}
+		return fmt.Sprintf("%v", value)
+	}
+
 	for i, j := 0, len(rows); i < j; i++ {
 
 		stringValues := make([]string, len(rows[i].Values))
 		for pos, value := range rows[i].Values {
-
 			switch v := value.(type) {
 			case nil:
 				stringValues[pos] = ""
@@ -305,44 +336,9 @@ func dataToCsv(writer *csv.Writer, get types.DataGet, locUser *time.Location,
 			case string:
 				stringValues[pos] = v
 			case int32:
-				if columns[pos].Display == "time" {
-					stringValues[pos] = time.Unix(int64(v), 0).UTC().Format("15:04:05")
-				} else {
-					stringValues[pos] = fmt.Sprintf("%v", value)
-				}
+				stringValues[pos] = parseIntegerValues(columns[pos].Display, int64(v))
 			case int64:
-				column := columns[pos]
-				switch column.Display {
-				case "datetime":
-					fallthrough
-				case "date":
-					// date values are always stored as UTC at midnight
-					loc := time.UTC
-					format := "2006-01-02"
-
-					switch dateFormat {
-					case "Y-m-d":
-						format = "2006-01-02"
-					case "Y/m/d":
-						format = "2006/01/02"
-					case "d.m.Y":
-						format = "02.01.2006"
-					case "d/m/Y":
-						format = "02/01/2006"
-					case "m/d/Y":
-						format = "01/02/2006"
-					}
-
-					// datetime values are in context of user timezone
-					if column.Display == "datetime" {
-						loc = locUser
-						format = fmt.Sprintf("%s 15:04:05", format)
-					}
-
-					stringValues[pos] = time.Unix(v, 0).In(loc).Format(format)
-				default:
-					stringValues[pos] = fmt.Sprintf("%v", value)
-				}
+				stringValues[pos] = parseIntegerValues(columns[pos].Display, v)
 			default:
 				stringValues[pos] = fmt.Sprintf("%v", value)
 			}
