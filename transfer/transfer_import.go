@@ -436,17 +436,19 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 			log.Info("transfer", fmt.Sprintf("set preset %s", e.Id))
 
 			// special case
-			// presets can fail import because referenced, unprotected presets were deleted
+			// presets can fail import because referenced, unprotected presets were deleted or unique constraints are broken
 			// if preset itself is unprotected, we try until the last loop and then give up
-			presetErr := preset.Set_tx(tx, e.RelationId, e.Id, e.Name, e.Protected, e.Values)
-
-			if presetErr != nil && lastRun && !e.Protected {
+			if lastRun && !e.Protected {
 				log.Info("transfer", "import failed to resolve unprotected preset until last loop, it will be ignored")
-				presetErr = nil
+				if err := importCheckResultAndApply(tx, nil, e.Id, idMapSkipped); err != nil {
+					return err
+				}
+				continue
 			}
 
-			if err := importCheckResultAndApply(tx, presetErr, e.Id,
-				idMapSkipped); err != nil {
+			if err := importCheckResultAndApply(tx, preset.Set_tx(tx,
+				e.RelationId, e.Id, e.Name, e.Protected, e.Values),
+				e.Id, idMapSkipped); err != nil {
 
 				return err
 			}
