@@ -1082,7 +1082,7 @@
 			"003":"Acțiunea a fost întreruptă. Vă rugăm să încercați din nou.",
 			"004":"Această înregistrare este protejată și nu poate fi ștearsă.",
 			"005":"Nu s-a putut crea entitatea deoarece nu a fost dat niciun nume. Vă rugăm să specificați un nume.",
-			"006":"Numele ales este nevalid. Vă rugăm să vă asigurați că numele...<ul><li>... începe cu o literă <b>(a-z)</b>.</li><li>... este de cel mult <b>31</b> caractere ca lungime.</li><li>... conține doar litere mici <b>(a-z)</b>, linie jos <b>(_)</b> sau numere <b>(0-9)</b>.</li></ul>Exemple: storage_inventory_post21, facility_address, contact_book",
+			"006":"Numele ales este nevalid. Vă rugăm să vă asigurați că numele...<ul><li>... începe cu o literă <b>(a-z)</b>.</li><li>... este de cel mult <b>60</b> caractere ca lungime.</li><li>... conține doar litere mici <b>(a-z)</b>, linie jos <b>(_)</b> sau numere <b>(0-9)</b>.</li></ul>Exemple: storage_inventory_post21, facility_address, contact_book",
 			"007":"Modulul la care se face referire nu este cunoscut.",
 			"008":"Relația la care se face referire nu este cunoscută.",
 			"009":"Atributul la care se face referire nu este cunoscut."

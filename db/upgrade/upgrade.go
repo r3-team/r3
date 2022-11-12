@@ -100,6 +100,12 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	"3.1": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
+			-- increase SQL entity name length to 60
+			ALTER TABLE app.module      ALTER COLUMN name TYPE CHARACTER VARYING(60);
+			ALTER TABLE app.attribute   ALTER COLUMN name TYPE CHARACTER VARYING(60);
+			ALTER TABLE app.pg_function ALTER COLUMN name TYPE CHARACTER VARYING(60);
+			ALTER TABLE app.relation    ALTER COLUMN name TYPE CHARACTER VARYING(60);
+			
 			-- enable backup tasks for non-embedded systems
 			UPDATE instance.task
 			SET embedded_only = false, name = 'backupRun'

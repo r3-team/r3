@@ -1082,7 +1082,7 @@
 			"003":"Aktion wurde abgebrochen. Bitte erneut versuchen.",
 			"004":"Dieser Datensatz ist geschützt und kann nicht gelöscht werden.",
 			"005":"Entität konnte nicht erstellt werden, da kein Name eingegeben worden ist. Bitte einen Namen eingeben.",
-			"006":"Der gewählte Name ist ungültig. Bitte stelle sicher, dass...<ul><li>... er mit einen Buchstaben beginnt <b>(a-z)</b>.</li><li>... maximal <b>31</b> Zeichen lang ist.</li><li>... nur kleingeschriebene Buchstaben <b>(a-z)</b>, Unterstriche <b>(_)</b> oder Nummern <b>(0-9)</b> beinhaltet.</li></ul>Beispiele: storage_inventory_post21, facility_address, contact_book",
+			"006":"Der gewählte Name ist ungültig. Bitte stelle sicher, dass...<ul><li>... er mit einen Buchstaben beginnt <b>(a-z)</b>.</li><li>... maximal <b>60</b> Zeichen lang ist.</li><li>... nur kleingeschriebene Buchstaben <b>(a-z)</b>, Unterstriche <b>(_)</b> oder Nummern <b>(0-9)</b> beinhaltet.</li></ul>Beispiele: storage_inventory_post21, facility_address, contact_book",
 			"007":"Ein referenziertes Modul ist unbekannt.",
 			"008":"Eine referenzierte Relation ist unbekannt.",
 			"009":"Ein referenziertes Attribut ist unbekannt."

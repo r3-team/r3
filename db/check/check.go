@@ -14,9 +14,9 @@ func DbIdentifier(input string) error {
 		return handler.CreateErrCode("APP", handler.ErrCodeAppNameEmpty)
 	}
 
-	// must start with [a-z], followed by [a-z0-9\_], max. 31 chars (max. identifier size in pgsql: 63)
-	// [_] as first character is allowed but reserved for system use
-	rex, err := regexp.Compile(`^[a-z][a-z0-9\_]{1,30}$`)
+	// must start with [a-z], followed by [a-z0-9\_], max. 60 chars (max. identifier size in PostgreSQL: 63)
+	// [_] as first character is allowed by PostgreSQL but reserved for system uses
+	rex, err := regexp.Compile(`^[a-z][a-z0-9\_]{1,59}$`)
 	if err != nil {
 		return err
 	}

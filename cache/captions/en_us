@@ -1082,7 +1082,7 @@
 			"003":"Action was aborted. Please try again.",
 			"004":"The record you attempted to delete is protected - it cannot be deleted.",
 			"005":"Failed to create entity because there was no name given. Please specify a name.",
-			"006":"The chosen name is invalid. Please make sure that the name...<ul><li>... starts with a letter <b>(a-z)</b>.</li><li>... is at most <b>31</b> characters long.</li><li>... contains only lower case letters <b>(a-z)</b>, underscores <b>(_)</b> or numbers <b>(0-9)</b>.</li></ul>Examples: storage_inventory_post21, facility_address, contact_book",
+			"006":"The chosen name is invalid. Please make sure that the name...<ul><li>... starts with a letter <b>(a-z)</b>.</li><li>... is at most <b>60</b> characters long.</li><li>... contains only lower case letters <b>(a-z)</b>, underscores <b>(_)</b> or numbers <b>(0-9)</b>.</li></ul>Examples: storage_inventory_post21, facility_address, contact_book",
 			"007":"A referenced module is not known.",
 			"008":"A referenced relation is not known.",
 			"009":"A referenced attribute is not known."

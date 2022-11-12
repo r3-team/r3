@@ -1082,7 +1082,7 @@
 			"003":"Azione abortita. Si prega di riprovare.",
 			"004":"Questo record è protetto e non può essere cancellato.",
 			"005":"Creazione entità fallita perchè non è stato indicato un nome. Si prega di specificare un nome.",
-			"006":"Il nome scelto non è valido. Assicurarsi che il nome ...<ul><li>... inizi con una lettera <b>(a-z)</b>.</li><li>... non sia più lungo di <b>31</b> caratteri.</li><li>... contenga solo lettere minuscole <b>(a-z)</b>, sottolineato <b>(_)</b> o numeri <b>(0-9)</b>.</li></ul>Esempio: storage_inventory_post21, facility_address, contact_book",
+			"006":"Il nome scelto non è valido. Assicurarsi che il nome ...<ul><li>... inizi con una lettera <b>(a-z)</b>.</li><li>... non sia più lungo di <b>60</b> caratteri.</li><li>... contenga solo lettere minuscole <b>(a-z)</b>, sottolineato <b>(_)</b> o numeri <b>(0-9)</b>.</li></ul>Esempio: storage_inventory_post21, facility_address, contact_book",
 			"007":"Il modulo referenziato non esiste.",
 			"008":"La relazione referenziata non esiste.",
 			"009":"L'attributo referenziato non esiste."
