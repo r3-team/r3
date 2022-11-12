@@ -100,6 +100,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	"3.1": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
+			-- icon names
+			ALTER TABLE app.icon ADD COLUMN name CHARACTER VARYING(64) NOT NULL DEFAULT '';
+			ALTER TABLE app.icon ALTER COLUMN name DROP DEFAULT;
+			
 			-- increase preset name length to 64
 			ALTER TABLE app.preset ALTER COLUMN name TYPE CHARACTER VARYING(64);
 			

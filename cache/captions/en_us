@@ -818,6 +818,7 @@
 		"icon":{
 			"add":"Add/edit icon file",
 			"addHelp":"Only PNG files with max. 64kb are supported. Icons should always be squared.",
+			"nameHint":"Optional icon name",
 			"title":"Icons"
 		},
 		"loginForm":{

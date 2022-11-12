@@ -120,6 +120,7 @@ type OpenForm struct {
 type Icon struct {
 	Id       uuid.UUID `json:"id"`
 	ModuleId uuid.UUID `json:"moduleId"`
+	Name     string    `json:"name"`
 	File     []byte    `json:"file"`
 }
 type Form struct {

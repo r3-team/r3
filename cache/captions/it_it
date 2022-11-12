@@ -818,6 +818,7 @@
 		"icon":{
 			"add":"Aggiungi/modifica file icona",
 			"addHelp":"Sono supportati solo file PNG con max. 64 kb. Le icone dovrebbero essere sempre quadrate.",
+			"nameHint":"Optional icon name",
 			"title":"Icone"
 		},
 		"loginForm":{

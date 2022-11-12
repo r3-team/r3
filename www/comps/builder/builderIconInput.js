@@ -47,7 +47,9 @@ let MyBuilderIconInput = {
 							<img class="builder-icon clickable"
 								v-for="icon in mod.icons"
 								@click="select(icon.id)"
+								:class="{ active:iconIdSelected === icon.id }"
 								:src="srcBase64(icon.file)"
+								:title="icon.name"
 							/>
 						</div>
 						<div class="actions">
@@ -79,15 +81,12 @@ let MyBuilderIconInput = {
 		};
 	},
 	computed:{
-		iconSelected:function() {
-			return this.iconIdSelected === null
-				? false : this.iconIdMap[this.iconIdSelected];
-		},
+		iconSelected:(s) => s.iconIdSelected === null ? false : s.iconIdMap[s.iconIdSelected],
 		
 		// stores
-		modules:  function() { return this.$store.getters['schema/modules']; },
-		iconIdMap:function() { return this.$store.getters['schema/iconIdMap']; },
-		capGen:   function() { return this.$store.getters.captions.generic; }
+		modules:  (s) => s.$store.getters['schema/modules'],
+		iconIdMap:(s) => s.$store.getters['schema/iconIdMap'],
+		capGen:   (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -95,14 +94,14 @@ let MyBuilderIconInput = {
 		srcBase64,
 		
 		// actions
-		click:function() {
+		click() {
 			if(!this.readonly)
 				this.showInput = !this.showInput;
 		},
-		close:function() {
+		close() {
 			this.showInput = false;
 		},
-		select:function(iconId) {
+		select(iconId) {
 			this.$emit('input',iconId);
 		}
 	}

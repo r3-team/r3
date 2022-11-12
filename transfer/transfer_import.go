@@ -198,7 +198,7 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		log.Info("transfer", fmt.Sprintf("set icon %s", e.Id))
 
 		if err := importCheckResultAndApply(tx, icon.Set_tx(tx, e.ModuleId,
-			e.Id, e.File), e.Id, idMapSkipped); err != nil {
+			e.Id, e.Name, e.File, true), e.Id, idMapSkipped); err != nil {
 
 			return err
 		}

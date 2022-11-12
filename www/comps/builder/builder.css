@@ -549,7 +549,7 @@
 /* icons */
 .builder-icons{
 	display:flex;
-	flex-flow:column wrap;
+	flex-flow:column nowrap;
 	align-items:flex-start;
 }
 .builder-icons .icons{
@@ -561,7 +561,11 @@
 	margin:20px 0px 40px 0px;
 }
 .builder-icons .icons .icon{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
 	margin:0px 24px 6px 0px;
+	gap:6px;
 }
 .builder-icons .icons .icon img.preview{
 	width:32px;
@@ -598,8 +602,15 @@
 .builder-icon-input .builder-icon{
 	width:22px;
 	height:22px;
-	margin:3px;
+	margin:1px;
+	padding:3px;
 	filter:var(--image-filter);
+}
+.builder-icon-input .builder-icon.active{
+	border-radius:5px;
+	background-color:var(--color-action);
+	filter:var(--image-filter-bg);
+	box-shadow:1px 1px 4px var(--color-shade);
 }
 .builder-icon-input .builder-icon.not-set{
 	--image-filter-contrast:50%;
@@ -607,7 +618,8 @@
 .builder-icon-input .builder-icon:hover{
 	width:26px;
 	height:26px;
-	margin:1px;
+	margin:0px;
+	padding:2px;
 }
 .build-icon-input-window {
 	max-width:500px;
