@@ -140,10 +140,7 @@ func LoadFile() error {
 	configJson = tools.RemoveUtf8Bom(configJson)
 
 	// unmarshal configuration JSON file
-	if err := json.Unmarshal(configJson, &File); err != nil {
-		return err
-	}
-	return nil
+	return json.Unmarshal(configJson, &File)
 }
 func WriteFile() error {
 	access_mx.Lock()
@@ -156,10 +153,7 @@ func WriteFile() error {
 	}
 
 	// write configuration to JSON file
-	if err := os.WriteFile(filePath, json, 0644); err != nil {
-		return err
-	}
-	return nil
+	return os.WriteFile(filePath, json, 0644)
 }
 
 // token

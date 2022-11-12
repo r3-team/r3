@@ -18,6 +18,7 @@
 		"temp": "data/temp/",
 		"transfer": "data/transfer"
 	},
+	"portable": false,
 	"web": {
 		"cert": "cert.crt",
 		"key": "cert.key",
