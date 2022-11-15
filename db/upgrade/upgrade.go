@@ -112,15 +112,6 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX ind_caption_content ON app.caption
 				USING btree (content ASC NULLS LAST);
 			
-			ALTER TABLE app.caption ADD COLUMN article_id UUID;
-			ALTER TABLE app.caption ADD CONSTRAINT caption_article_id_fkey FOREIGN KEY (article_id)
-				REFERENCES app.article (id) MATCH SIMPLE
-				ON UPDATE CASCADE
-				ON DELETE CASCADE
-				DEFERRABLE INITIALLY DEFERRED;
-			CREATE INDEX fki_caption_article_id_fkey
-			    ON app.caption USING btree (article_id ASC NULLS LAST);
-			
 			DROP TYPE app.caption_content;
 			CREATE TYPE app.caption_content AS ENUM (
 				'articleBody', 'articleTitle', 'attributeTitle', 'columnTitle',
@@ -186,6 +177,16 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ON app.article_help USING btree (article_id ASC NULLS LAST);
 			CREATE INDEX fki_article_help_module_id_fkey
 				ON app.article_help USING btree (module_id ASC NULLS LAST);
+			
+			-- new caption reference: articles
+			ALTER TABLE app.caption ADD COLUMN article_id UUID;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_article_id_fkey FOREIGN KEY (article_id)
+				REFERENCES app.article (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			CREATE INDEX fki_caption_article_id_fkey
+			    ON app.caption USING btree (article_id ASC NULLS LAST);
 			
 			-- migrate module help to articles
 			INSERT INTO app.article (id, module_id, name)
