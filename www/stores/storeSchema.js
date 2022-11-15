@@ -13,6 +13,7 @@ const MyStoreSchema = {
 		presetIdMapRecordId:{}, // record IDs by preset, key: preset ID
 		
 		// references to specific entities
+		articleIdMap:{},
 		attributeIdMap:{},
 		collectionIdMap:{},
 		formIdMap:{},
@@ -52,6 +53,7 @@ const MyStoreSchema = {
 			
 			// reset state
 			state.modules         = payload.modules;
+			state.articleIdMap    = {};
 			state.attributeIdMap  = {};
 			state.collectionIdMap = {};
 			state.moduleIdMap     = {};
@@ -84,6 +86,11 @@ const MyStoreSchema = {
 					
 					if(state.languageCodes.indexOf(lang) === -1)
 						state.languageCodes.push(lang);
+				}
+				
+				// process articles
+				for(const art of mod.articles) {
+					state.articleIdMap[art.id] = art;
 				}
 				
 				// process relations
@@ -143,6 +150,7 @@ const MyStoreSchema = {
 		timestamp    (state,payload) { state.timestamp     = payload; }
 	},
 	getters:{
+		articleIdMap:       (state) => state.articleIdMap,
 		attributeIdMap:     (state) => state.attributeIdMap,
 		collectionIdMap:    (state) => state.collectionIdMap,
 		formIdMap:          (state) => state.formIdMap,

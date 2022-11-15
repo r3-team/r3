@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"r3/db"
 	"r3/log"
+	"r3/schema/article"
 	"r3/schema/attribute"
 	"r3/schema/collection"
 	"r3/schema/column"
@@ -410,6 +411,26 @@ func importDeleteNotExisting_tx(tx pgx.Tx, module types.Module) error {
 		}
 	}
 
+	// articles
+	idsKeep = make([]uuid.UUID, 0)
+	idsDelete = make([]uuid.UUID, 0)
+
+	for _, entity := range module.Articles {
+		idsKeep = append(idsKeep, entity.Id)
+	}
+
+	idsDelete, err = importGetIdsToDeleteFromModule_tx(tx, "article", module.Id, idsKeep)
+	if err != nil {
+		return err
+	}
+
+	for _, id := range idsDelete {
+		log.Info("transfer", fmt.Sprintf("del article %s", id.String()))
+		if err := article.Del_tx(tx, id); err != nil {
+			return err
+		}
+	}
+
 	// JS functions
 	idsKeep = make([]uuid.UUID, 0)
 	idsDelete = make([]uuid.UUID, 0)
@@ -459,10 +480,11 @@ func importGetIdsToDeleteFromModule_tx(tx pgx.Tx, entity string,
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !tools.StringInSlice(entity, []string{"collection", "form", "icon",
-		"js_function", "login_form", "menu", "pg_function", "relation", "role"}) {
+	if !tools.StringInSlice(entity, []string{"article", "collection", "form",
+		"icon", "js_function", "login_form", "menu", "pg_function", "relation",
+		"role"}) {
 
-		return idsDelete, errors.New("unsupport type for delete check")
+		return idsDelete, errors.New("unsupported type for delete check")
 	}
 
 	err := tx.QueryRow(db.Ctx, fmt.Sprintf(`

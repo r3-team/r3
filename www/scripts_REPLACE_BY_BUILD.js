@@ -38,7 +38,6 @@ import MyBuilderIcons       from './comps/builder/builderIcons.js';
 import MyBuilderMenu        from './comps/builder/builderMenu.js';
 import MyBuilderForms       from './comps/builder/builderForms.js';
 import MyBuilderForm        from './comps/builder/builderForm.js';
-import MyBuilderHelp        from './comps/builder/builderHelp.js';
 import MyBuilderRoles       from './comps/builder/builderRoles.js';
 import MyBuilderRole        from './comps/builder/builderRole.js';
 import MyBuilderCollections from './comps/builder/builderCollections.js';
@@ -47,6 +46,7 @@ import MyBuilderLoginForms  from './comps/builder/builderLoginForms.js';
 import MyBuilderFunctions   from './comps/builder/builderFunctions.js';
 import MyBuilderPgFunction  from './comps/builder/builderPgFunction.js';
 import MyBuilderJsFunction  from './comps/builder/builderJsFunction.js';
+import MyBuilderArticles    from './comps/builder/builderArticles.js';
 
 // router
 const MyRouterPositions = Object.create(null);
@@ -166,9 +166,9 @@ const MyRouter = VueRouter.createRouter({
 				component:MyBuilderJsFunction,
 				props:true
 			},{
-				path:'help/:id',
-				meta:{ nav:'help', target:'module' },
-				component:MyBuilderHelp,
+				path:'articles/:id',
+				meta:{ nav:'articles', target:'module' },
+				component:MyBuilderArticles,
 				props:true
 			}
 		]

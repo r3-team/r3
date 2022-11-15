@@ -105,8 +105,8 @@ let MyBuilder = {
 							>{{ capApp.navigationLoginForms }}</router-link>
 							
 							<router-link class="entry center clickable"
-								:to="'/builder/help/'+module.id" 
-							>{{ capApp.navigationHelp }}</router-link>
+								:to="'/builder/articles/'+module.id" 
+							>{{ capApp.navigationArticles }}</router-link>
 							
 							<!-- so router link is not last child (CSS) -->
 							<div />
@@ -273,13 +273,11 @@ let MyBuilder = {
 		}
 	},
 	computed:{
-		subMenu:(s) => {
-			return s.navigation === 'relations' && s.module.relations.length !== 0
-			|| s.navigation === 'forms'         && s.module.forms.length !== 0
-			|| s.navigation === 'roles'         && s.module.roles.length !== 0
-			|| s.navigation === 'collections'   && s.module.collections.length !== 0
-			|| s.navigation === 'functions'     && (s.module.pgFunctions.length !== 0 || s.module.jsFunctions.length !== 0)
-		},
+		subMenu:(s) => s.navigation === 'relations' && s.module.relations.length !== 0
+			|| s.navigation === 'forms'       && s.module.forms.length !== 0
+			|| s.navigation === 'roles'       && s.module.roles.length !== 0
+			|| s.navigation === 'collections' && s.module.collections.length !== 0
+			|| s.navigation === 'functions'   && (s.module.pgFunctions.length !== 0 || s.module.jsFunctions.length !== 0),
 		moduleCaption:(s) => {
 			// 1st preference: dedicated module title
 			if(typeof s.module.captions.moduleTitle[s.builderLanguage] !== 'undefined')

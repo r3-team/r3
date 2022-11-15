@@ -136,7 +136,7 @@ let MyHome = {
 						</router-link>
 						
 						<my-button class="right" image="question.png"
-							v-if="typeof moduleIdMap[me.id].captions.moduleHelp[settings.languageCode] !== 'undefined'"
+							v-if="typeof moduleIdMap[me.id].articleIdsHelp.length !== 0"
 							@trigger="showHelp(me.caption,moduleIdMap[me.id].captions.moduleHelp[settings.languageCode])"
 							:blockBubble="true"
 							:naked="true"
@@ -154,7 +154,7 @@ let MyHome = {
 								
 							</router-link>
 							<my-button class="right" image="question.png"
-								v-if="typeof moduleIdMap[mec.id].captions.moduleHelp[settings.languageCode] !== 'undefined'"
+								v-if="typeof moduleIdMap[mec.id].articleIdsHelp.length !== 0"
 								@trigger="showHelp(mec.caption,moduleIdMap[mec.id].captions.moduleHelp[settings.languageCode])"
 								:blockBubble="true"
 								:naked="true"

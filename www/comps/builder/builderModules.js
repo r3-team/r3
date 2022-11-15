@@ -372,6 +372,7 @@ let MyBuilderModulesItem = {
 					languages:['en_us'],
 					forms:[],
 					relations:[],
+					articleIdsHelp:[],
 					captions:{
 						moduleTitle:{}
 					}
@@ -502,6 +503,7 @@ let MyBuilderModulesItem = {
 					dependsOn:this.dependsOn,
 					startForms:this.startForms,
 					languages:this.languages,
+					articleIdsHelp:this.module.articleIdsHelp,
 					captions:this.captions
 				})
 			];

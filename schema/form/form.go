@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"r3/compatible"
 	"r3/db"
 	"r3/schema"
+	"r3/schema/article"
 	"r3/schema/caption"
 	"r3/schema/field"
 	"r3/schema/query"
@@ -105,7 +107,7 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 	}
 	return Set_tx(tx, moduleId, form.Id, form.PresetIdOpen, form.IconId, newName,
 		form.NoDataActions, form.Query, form.Fields, form.Functions, form.States,
-		form.Captions)
+		form.ArticleIdsHelp, form.Captions)
 }
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
@@ -132,8 +134,13 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 	}
 
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
-		SELECT id, preset_id_open, icon_id, name, no_data_actions
-		FROM app.form
+		SELECT id, preset_id_open, icon_id, name, no_data_actions, ARRAY(
+			SELECT article_id
+			FROM app.article_form
+			WHERE form_id = f.id
+			ORDER BY position ASC
+		) AS "articleIdsHelp"
+		FROM app.form AS f
 		WHERE true
 		%s
 		ORDER BY name ASC
@@ -145,7 +152,9 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 	for rows.Next() {
 		var f types.Form
 
-		if err := rows.Scan(&f.Id, &f.PresetIdOpen, &f.IconId, &f.Name, &f.NoDataActions); err != nil {
+		if err := rows.Scan(&f.Id, &f.PresetIdOpen, &f.IconId, &f.Name,
+			&f.NoDataActions, &f.ArticleIdsHelp); err != nil {
+
 			return forms, err
 		}
 		f.ModuleId = moduleId
@@ -171,7 +180,7 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 		if err != nil {
 			return forms, err
 		}
-		form.Captions, err = caption.Get("form", form.Id, []string{"formTitle", "formHelp"})
+		form.Captions, err = caption.Get("form", form.Id, []string{"formTitle"})
 		if err != nil {
 			return forms, err
 		}
@@ -183,7 +192,7 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUID,
 	iconId pgtype.UUID, name string, noDataActions bool, queryIn types.Query,
 	fields []interface{}, functions []types.FormFunction, states []types.FormState,
-	captions types.CaptionMap) error {
+	articleIdsHelp []uuid.UUID, captions types.CaptionMap) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &id, "form", "id")
 	if err != nil {
@@ -238,11 +247,18 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUI
 		return err
 	}
 
-	// set form captions
-	if err := caption.Set_tx(tx, id, captions); err != nil {
+	// set help articles
+	if err := article.Assign_tx(tx, "form", id, articleIdsHelp); err != nil {
 		return err
 	}
-	return nil
+
+	// set form captions
+	// fix imports < 3.2: Migration from help captions to help articles
+	captions, err = compatible.FixCaptions_tx(tx, "form", id, captions)
+	if err != nil {
+		return err
+	}
+	return caption.Set_tx(tx, id, captions)
 }
 
 // replace field IDs (form duplication)

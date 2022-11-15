@@ -79,25 +79,22 @@ func getEntityName(content string) (string, error) {
 
 	switch content {
 
+	case "articleTitle", "articleBody":
+		return "article_id", nil
+
 	case "attributeTitle":
 		return "attribute_id", nil
 
 	case "columnTitle":
 		return "column_id", nil
 
-	case "fieldTitle":
-		fallthrough
-	case "fieldHelp":
+	case "fieldTitle", "fieldHelp":
 		return "field_id", nil
 
-	case "formTitle":
-		fallthrough
-	case "formHelp":
+	case "formTitle", "formHelp":
 		return "form_id", nil
 
-	case "jsFunctionTitle":
-		fallthrough
-	case "jsFunctionDesc":
+	case "jsFunctionTitle", "jsFunctionDesc":
 		return "js_function_id", nil
 
 	case "loginFormTitle":
@@ -107,21 +104,15 @@ func getEntityName(content string) (string, error) {
 		return "menu_id", nil
 
 	case "moduleTitle":
-		fallthrough
-	case "moduleHelp":
 		return "module_id", nil
 
-	case "pgFunctionTitle":
-		fallthrough
-	case "pgFunctionDesc":
+	case "pgFunctionTitle", "pgFunctionDesc":
 		return "pg_function_id", nil
 
 	case "queryChoiceTitle":
 		return "query_choice_id", nil
 
-	case "roleTitle":
-		fallthrough
-	case "roleDesc":
+	case "roleTitle", "roleDesc":
 		return "role_id", nil
 	}
 	return "", errors.New("bad caption content name")

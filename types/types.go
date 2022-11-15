@@ -1,15 +1,9 @@
 package types
 
-import (
-	"encoding/json"
-
-	"github.com/gofrs/uuid"
-)
-
 type Void struct{}
 
 // captions
-type Captions struct {
+/*type Captions struct {
 	Application    json.RawMessage      `json:"application"`
 	AttributeTitle map[uuid.UUID]string `json:"attributeTitle"`
 	ColumnTitle    map[uuid.UUID]string `json:"columnTitle"`
@@ -17,8 +11,7 @@ type Captions struct {
 	FieldTitle     map[uuid.UUID]string `json:"fieldTitle"`
 	FormHelp       map[uuid.UUID]string `json:"formHelp"`
 	FormTitle      map[uuid.UUID]string `json:"formTitle"`
-	ModuleHelp     map[uuid.UUID]string `json:"moduleHelp"`
 	ModuleTitle    map[uuid.UUID]string `json:"moduleTitle"`
 	RoleDesc       map[uuid.UUID]string `json:"roleDesc"`
 	RoleTitle      map[uuid.UUID]string `json:"roleTitle"`
-}
+}*/

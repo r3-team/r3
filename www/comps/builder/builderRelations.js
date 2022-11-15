@@ -159,7 +159,7 @@ let MyBuilderRelationsItem = {
 					/>
 				</div>
 			</td>
-			<td><input class="long" v-model="name" :disabled="readonly" :placeholder="isNew ? capApp.newRelation : ''" /></td>
+			<td><input class="long" v-model="name" :disabled="readonly" :placeholder="isNew ? capApp.new : ''" /></td>
 			<td>
 				<my-button image="visible1.png"
 					@trigger="copyValueDialog(relation.name,relation.id,relation.id)"
@@ -303,7 +303,7 @@ let MyBuilderRelationsItem = {
 		// backend calls
 		delAsk:function() {
 			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.deleteRelation,
+				captionBody:this.capApp.dialog.delete,
 				buttons:[{
 					cancel:true,
 					caption:this.capGen.button.delete,

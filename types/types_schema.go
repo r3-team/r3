@@ -27,16 +27,24 @@ type Module struct {
 	Menus           []Menu            `json:"menus"`
 	Icons           []Icon            `json:"icons"`
 	Roles           []Role            `json:"roles"`
+	Articles        []Article         `json:"articles"`
 	LoginForms      []LoginForm       `json:"loginForms"`
 	PgFunctions     []PgFunction      `json:"pgFunctions"`
 	JsFunctions     []JsFunction      `json:"jsFunctions"`
 	Collections     []Collection      `json:"collections"`
+	ArticleIdsHelp  []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
 	Captions        CaptionMap        `json:"captions"`
 }
 type ModuleStartForm struct {
 	Position int       `json:"position"`
 	RoleId   uuid.UUID `json:"roleId"`
 	FormId   uuid.UUID `json:"formId"`
+}
+type Article struct {
+	Id       uuid.UUID  `json:"id"`
+	ModuleId uuid.UUID  `json:"moduleId"`
+	Name     string     `json:"name"`
+	Captions CaptionMap `json:"captions"`
 }
 type Relation struct {
 	Id             uuid.UUID        `json:"id"`
@@ -124,17 +132,18 @@ type Icon struct {
 	File     []byte    `json:"file"`
 }
 type Form struct {
-	Id            uuid.UUID      `json:"id"`
-	ModuleId      uuid.UUID      `json:"moduleId"`
-	PresetIdOpen  pgtype.UUID    `json:"presetIdOpen"`
-	IconId        pgtype.UUID    `json:"iconId"`
-	Name          string         `json:"name"`
-	NoDataActions bool           `json:"noDataActions"` // disables record manipulation actions (new/save/delete)
-	Query         Query          `json:"query"`
-	Fields        []interface{}  `json:"fields"`
-	Functions     []FormFunction `json:"functions"`
-	States        []FormState    `json:"states"`
-	Captions      CaptionMap     `json:"captions"`
+	Id             uuid.UUID      `json:"id"`
+	ModuleId       uuid.UUID      `json:"moduleId"`
+	PresetIdOpen   pgtype.UUID    `json:"presetIdOpen"`
+	IconId         pgtype.UUID    `json:"iconId"`
+	Name           string         `json:"name"`
+	NoDataActions  bool           `json:"noDataActions"` // disables record manipulation actions (new/save/delete)
+	Query          Query          `json:"query"`
+	Fields         []interface{}  `json:"fields"`
+	Functions      []FormFunction `json:"functions"`
+	States         []FormState    `json:"states"`
+	ArticleIdsHelp []uuid.UUID    `json:"articleIdsHelp"` // IDs of articles for form context help, in order
+	Captions       CaptionMap     `json:"captions"`
 }
 type FormFunction struct {
 	Position     int       `json:"position"`

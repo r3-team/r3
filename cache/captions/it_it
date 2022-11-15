@@ -78,6 +78,7 @@
 		"errorTitle":"Errore",
 		"files":"Files",
 		"filters":"Filtri",
+		"form":"Form",
 		"home":"Home",
 		"icon":"Icona",
 		"id":"ID",
@@ -478,6 +479,22 @@
 		"titleDocs":"Documentazione amministrazione"
 	},
 	"builder":{
+		"articles":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this article?"
+			},
+			"option":{
+				"assignForm":"Form context help",
+				"assignModule":"Application help page"
+			},
+			"addArticle":"Add article",
+			"assignTo":"Assign to",
+			"body":"Content",
+			"new":"New article",
+			"title":"Help articles",
+			"titleAssign":"Assign articles",
+			"titleAssigned":"Assigned"
+		},
 		"attribute":{
 			"dialog":{
 				"delete":"Sei sicuro di voler eliminare questo attributo? Questo eliminerà anche tutti i dati inclusi dal tuo sistema.<br /><br /><b>Questa azione è irreversibile senza backup correnti.</b>"
@@ -812,9 +829,6 @@
 			"titleOne":"titolo funzione",
 			"value":"VALUE"
 		},
-		"help":{
-			"title":"Aiuto Applicazione"
-		},
 		"icon":{
 			"add":"Aggiungi/modifica file icona",
 			"addHelp":"Sono supportati solo file PNG con max. 64 kb. Le icone dovrebbero essere sempre quadrate.",
@@ -924,7 +938,7 @@
 		},
 		"relation":{
 			"dialog":{
-				"deleteRelation":"Sei sicuro di voler eliminare questa relazione? Questo eliminerà anche tutti i dati inclusi dal tuo sistema.<br /><br /><b>Questa azione è irreversibile senza backup correnti.</b>"
+				"delete":"Sei sicuro di voler eliminare questa relazione? Questo eliminerà anche tutti i dati inclusi dal tuo sistema.<br /><br /><b>Questa azione è irreversibile senza backup correnti.</b>"
 			},
 			"attributes":"Attributi ({CNT})",
 			"codeCondition":"Condizione",
@@ -946,7 +960,7 @@
 			"isDeferrable":"DEFERRABLE",
 			"isDeferred":"INIT. DEFERRED",
 			"length":"Lunghezza",
-			"newRelation":"Nuova relazione",
+			"new":"Nuova relazione",
 			"nullable":"Vuoto",
 			"onDelete":"DELETE",
 			"onInsert":"INSERT",
@@ -1013,6 +1027,7 @@
 		"language":"Traduzione",
 		"languageNextHint":"Passa alla lingua successiva (tasto di scelta rapida: CTRL + q)",
 		"noOwner":"Application is in read-only mode",
+		"navigationArticles":"Help articles",
 		"navigationCollections":"Collezioni",
 		"navigationCollectionsSub":"Dettagli collezione",
 		"navigationFilterHint":"Filtra per testo",
@@ -1022,7 +1037,6 @@
 		"navigationFunctionsSub":"dettagli funzione",
 		"navigationFunctionsSubBackend":"Backend",
 		"navigationFunctionsSubFrontend":"Frontend",
-		"navigationHelp":"Aiuto",
 		"navigationIcons":"Icone",
 		"navigationLoginForms":"Modulo login",
 		"navigationMenu":"Menu",
@@ -1211,10 +1225,11 @@
 			"recordUpdated":"Il record è stato aggiornato"
 		},
 		"help":"Pagine aiuto",
-		"helpContextTitle":"Contesto",
-		"helpModuleTitle":"Applicazione",
+		"helpForm":"Form help",
+		"helpModule":"Application help",
 		"invalidInputs":"Controlla input!",
-		"noAccess":"Nessun accesso"
+		"noAccess":"Nessun accesso",
+		"tableOfContents":"Table of contents"
 	},
 	"formLog":{
 		"button":{

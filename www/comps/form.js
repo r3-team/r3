@@ -361,8 +361,8 @@ let MyForm = {
 			return false;
 		},
 		helpAvailable:function() {
-			return typeof this.form.captions.formHelp[this.moduleLanguage] !== 'undefined'
-				|| typeof this.moduleIdMap[this.moduleId].captions.moduleHelp[this.moduleLanguage] !== 'undefined';
+			return this.form.articleIdsHelp.length !== 0
+				|| this.moduleIdMap[this.moduleId].articleIdsHelp.length !== 0;
 		},
 		isSingleField:function() {
 			return this.fields.length === 1 && ['calendar','chart','list'].includes(this.fields[0].content);

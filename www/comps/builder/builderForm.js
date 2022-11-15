@@ -938,6 +938,7 @@ let MyBuilderForm = {
 				fields:fieldsCleaned,
 				functions:this.functions,
 				states:this.states,
+				articleIdsHelp:this.form.articleIdsHelp,
 				captions:this.captions
 			}));
 			requests.push(ws.prepare('schema','check',{

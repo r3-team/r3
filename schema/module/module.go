@@ -3,10 +3,12 @@ package module
 import (
 	"errors"
 	"fmt"
+	"r3/compatible"
 	"r3/db"
 	"r3/db/check"
 	"r3/module_option"
 	"r3/schema"
+	"r3/schema/article"
 	"r3/schema/attribute"
 	"r3/schema/caption"
 	"r3/schema/pgFunction"
@@ -100,6 +102,12 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 				ORDER BY module_id_on ASC
 			) AS "dependsOn",
 			ARRAY(
+				SELECT article_id
+				FROM app.article_help
+				WHERE module_id = m.id
+				ORDER BY position ASC
+			) AS "articleIdsHelp",
+			ARRAY(
 				SELECT language_code
 				FROM app.module_language
 				WHERE module_id = m.id
@@ -125,7 +133,8 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 		var m types.Module
 		if err := rows.Scan(&m.Id, &m.ParentId, &m.FormId, &m.IconId, &m.Name,
 			&m.Color1, &m.Position, &m.LanguageMain, &m.ReleaseBuild,
-			&m.ReleaseBuildApp, &m.ReleaseDate, &m.DependsOn, &m.Languages); err != nil {
+			&m.ReleaseBuildApp, &m.ReleaseDate, &m.DependsOn, &m.ArticleIdsHelp,
+			&m.Languages); err != nil {
 
 			rows.Close()
 			return modules, err
@@ -142,7 +151,7 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 			return modules, err
 		}
 
-		mod.Captions, err = caption.Get("module", mod.Id, []string{"moduleTitle", "moduleHelp"})
+		mod.Captions, err = caption.Get("module", mod.Id, []string{"moduleTitle"})
 		if err != nil {
 			return modules, err
 		}
@@ -155,7 +164,7 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 	formId pgtype.UUID, iconId pgtype.UUID, name string, color1 string,
 	position int, languageMain string, releaseBuild int, releaseBuildApp int,
 	releaseDate int64, dependsOn []uuid.UUID, startForms []types.ModuleStartForm,
-	languages []string, captions types.CaptionMap) error {
+	languages []string, articleIdsHelp []uuid.UUID, captions types.CaptionMap) error {
 
 	if err := check.DbIdentifier(name); err != nil {
 		return err
@@ -323,11 +332,18 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 		}
 	}
 
-	// set captions
-	if err := caption.Set_tx(tx, id, captions); err != nil {
+	// set help articles
+	if err := article.Assign_tx(tx, "module", id, articleIdsHelp); err != nil {
 		return err
 	}
-	return nil
+
+	// set captions
+	// fix imports < 3.2: Migration from help captions to help articles
+	captions, err = compatible.FixCaptions_tx(tx, "module", id, captions)
+	if err != nil {
+		return err
+	}
+	return caption.Set_tx(tx, id, captions)
 }
 
 func getStartForms(id uuid.UUID) ([]types.ModuleStartForm, error) {
@@ -377,107 +393,4 @@ func getDependsOn_tx(tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {
 
 	}
 	return moduleIdsDependsOn, nil
-}
-
-func getRelationIds_tx(tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {
-
-	relationIds := make([]uuid.UUID, 0)
-	rows, err := tx.Query(db.Ctx, `
-		SELECT id
-		FROM app.relation
-		WHERE module_id = $1
-	`, id)
-	if err != nil {
-		return relationIds, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var relationId uuid.UUID
-		if err := rows.Scan(&relationId); err != nil {
-			return relationIds, err
-		}
-		relationIds = append(relationIds, relationId)
-
-	}
-	return relationIds, nil
-}
-
-func getPgTriggerIds_tx(tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {
-
-	pgTriggerIds := make([]uuid.UUID, 0)
-	rows, err := tx.Query(db.Ctx, `
-		SELECT id
-		FROM app.pg_trigger
-		WHERE relation_id IN (
-			SELECT id
-			FROM app.relation
-			WHERE module_id = $1
-		)
-		OR pg_function_id IN (
-			SELECT id
-			FROM app.pg_function
-			WHERE module_id = $1
-		)
-	`, id)
-	if err != nil {
-		return pgTriggerIds, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var trgId uuid.UUID
-		if err := rows.Scan(&trgId); err != nil {
-			return pgTriggerIds, err
-		}
-		pgTriggerIds = append(pgTriggerIds, trgId)
-	}
-	return pgTriggerIds, nil
-}
-
-func getPgFunctionIds_tx(tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {
-
-	pgFunctionIds := make([]uuid.UUID, 0)
-	rows, err := tx.Query(db.Ctx, `
-		SELECT id
-		FROM app.pg_function
-		WHERE module_id = $1
-	`, id)
-	if err != nil {
-		return pgFunctionIds, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var fncId uuid.UUID
-		if err := rows.Scan(&fncId); err != nil {
-			return pgFunctionIds, err
-		}
-		pgFunctionIds = append(pgFunctionIds, fncId)
-
-	}
-	return pgFunctionIds, nil
-}
-
-func getFormIds_tx(tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {
-
-	formIds := make([]uuid.UUID, 0)
-	rows, err := tx.Query(db.Ctx, `
-		SELECT id
-		FROM app.form
-		WHERE module_id = $1
-	`, id)
-	if err != nil {
-		return formIds, err
-	}
-	defer rows.Close()
-
-	for rows.Next() {
-		var formId uuid.UUID
-		if err := rows.Scan(&formId); err != nil {
-			return formIds, err
-		}
-		formIds = append(formIds, formId)
-	}
-	return formIds, nil
 }

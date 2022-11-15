@@ -14,6 +14,7 @@ import (
 	"r3/log"
 	"r3/module_option"
 	"r3/schema"
+	"r3/schema/article"
 	"r3/schema/attribute"
 	"r3/schema/collection"
 	"r3/schema/form"
@@ -180,7 +181,25 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 			mod.ParentId, mod.FormId, mod.IconId, mod.Name, mod.Color1,
 			mod.Position, mod.LanguageMain, mod.ReleaseBuild,
 			mod.ReleaseBuildApp, mod.ReleaseDate, mod.DependsOn, mod.StartForms,
-			mod.Languages, mod.Captions), mod.Id, idMapSkipped); err != nil {
+			mod.Languages, mod.ArticleIdsHelp, mod.Captions), mod.Id, idMapSkipped); err != nil {
+
+			return err
+		}
+	}
+
+	// articles
+	for _, e := range mod.Articles {
+		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info("transfer", fmt.Sprintf("set article %s", e.Id))
+
+		if err := importCheckResultAndApply(tx, article.Set_tx(tx, e.ModuleId,
+			e.Id, e.Name, e.Captions), e.Id, idMapSkipped); err != nil {
 
 			return err
 		}
@@ -346,8 +365,8 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 		if err := importCheckResultAndApply(tx, form.Set_tx(tx,
 			e.ModuleId, e.Id, e.PresetIdOpen, e.IconId, e.Name, e.NoDataActions,
-			e.Query, e.Fields, e.Functions, e.States, e.Captions), e.Id,
-			idMapSkipped); err != nil {
+			e.Query, e.Fields, e.Functions, e.States, e.ArticleIdsHelp,
+			e.Captions), e.Id, idMapSkipped); err != nil {
 
 			return err
 		}

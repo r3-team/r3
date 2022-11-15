@@ -99,6 +99,7 @@ let MyBuilderFormsItem = {
 				fields:[],
 				functions:[],
 				states:[],
+				articleIdsHelp:[],
 				captions:{
 					formTitle:{}
 				}

@@ -78,6 +78,7 @@
 		"errorTitle":"Fehler",
 		"files":"Dateien",
 		"filters":"Filter",
+		"form":"Formular",
 		"home":"Start",
 		"icon":"Icon",
 		"id":"ID",
@@ -478,6 +479,22 @@
 		"titleDocs":"Admin-Dokumentation"
 	},
 	"builder":{
+		"articles":{
+			"dialog":{
+				"delete":"Bist du sicher, dass du diesen Artikel löschen möchtest?"
+			},
+			"option":{
+				"assignForm":"Formkontexthilfe",
+				"assignModule":"Anwendungshilfe"
+			},
+			"addArticle":"Artikel hinzufügen",
+			"assignTo":"Zuweisen an",
+			"body":"Inhalt",
+			"new":"Neuer Artikel",
+			"title":"Hilfe-Artikel",
+			"titleAssign":"Artikel zuweisen",
+			"titleAssigned":"Zugewiesen"
+		},
 		"attribute":{
 			"dialog":{
 				"delete":"Bist du sicher, dass du dieses Attribut löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelles Backup nicht rückgängig zu machen.</b>"
@@ -812,9 +829,6 @@
 			"titleOne":"Funktionstitel",
 			"value":"VALUE"
 		},
-		"help":{
-			"title":"Anwendungshilfe"
-		},
 		"icon":{
 			"add":"Icon-Datei hinzufügen/bearbeiten",
 			"addHelp":"Es werden nur PNG-Dateien mit bis zu 64kb unterstützt. Icons sollten immer quadratisch sein.",
@@ -924,7 +938,7 @@
 		},
 		"relation":{
 			"dialog":{
-				"deleteRelation":"Bist du sicher, dass du diese Relation löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelles Backup nicht rückgängig zu machen.</b>"
+				"delete":"Bist du sicher, dass du diese Relation löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelles Backup nicht rückgängig zu machen.</b>"
 			},
 			"attributes":"Attribute ({CNT})",
 			"codeCondition":"Kondition",
@@ -946,7 +960,7 @@
 			"isDeferrable":"DEFERRABLE",
 			"isDeferred":"INIT. DEFERRED",
 			"length":"Länge",
-			"newRelation":"Neue Relation",
+			"new":"Neue Relation",
 			"nullable":"Nullable",
 			"onDelete":"DELETE",
 			"onInsert":"INSERT",
@@ -1013,6 +1027,7 @@
 		"language":"Übersetzung",
 		"languageNextHint":"Zur nächsten Übersetzung wechseln (Hotkey: STRG + q)",
 		"noOwner":"Anwendung ist schreibgeschützt",
+		"navigationArticles":"Hilfe-Artikel",
 		"navigationCollections":"Sammlungen",
 		"navigationCollectionsSub":"Sammlungsdetails",
 		"navigationFilterHint":"Nach Text filtern",
@@ -1022,7 +1037,6 @@
 		"navigationFunctionsSub":"Funktionsdetails",
 		"navigationFunctionsSubBackend":"Backend",
 		"navigationFunctionsSubFrontend":"Frontend",
-		"navigationHelp":"Hilfe",
 		"navigationIcons":"Icons",
 		"navigationLoginForms":"Anmeldeformulare",
 		"navigationMenu":"Menüs",
@@ -1211,10 +1225,11 @@
 			"recordUpdated":"Datensatz aktualisiert"
 		},
 		"help":"Hilfeseiten",
-		"helpContextTitle":"Kontext",
-		"helpModuleTitle":"Anwendung",
+		"helpForm":"Formularhilfe",
+		"helpModule":"Anwendungshilfe",
 		"invalidInputs":"Eingaben prüfen!",
-		"noAccess":"Kein Zugriff"
+		"noAccess":"Kein Zugriff",
+		"tableOfContents":"Inhaltsverzeichnis"
 	},
 	"formLog":{
 		"button":{
