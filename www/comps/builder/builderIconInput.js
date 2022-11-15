@@ -31,6 +31,9 @@ let MyBuilderIconInput = {
 								v-if="!iconSelected"
 							/>
 						</div>
+						<div class="area default-inputs">
+							<input v-model="filter" :placeholder="capGen.button.filter" />
+						</div>
 						<div class="area">
 							<my-button image="cancel.png"
 								@trigger="close"
@@ -45,7 +48,7 @@ let MyBuilderIconInput = {
 							<span>{{ mod.name }}</span>
 							
 							<img class="builder-icon clickable"
-								v-for="icon in mod.icons"
+								v-for="icon in mod.icons.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
 								@click="select(icon.id)"
 								:class="{ active:iconIdSelected === icon.id }"
 								:src="srcBase64(icon.file)"
@@ -77,6 +80,7 @@ let MyBuilderIconInput = {
 	emits:['input'],
 	data:function() {
 		return {
+			filter:'',
 			showInput:false
 		};
 	},
