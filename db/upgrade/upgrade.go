@@ -191,7 +191,12 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- migrate module help to articles
 			INSERT INTO app.article (id, module_id, name)
 				SELECT gen_random_uuid(), id, 'Migrated from application help'
-				FROM app.module;
+				FROM app.module
+				WHERE id IN (
+					SELECT module_id
+					FROM app.caption
+					WHERE content = 'moduleHelp'
+				);
 			
 			INSERT INTO app.caption (article_id, content, language_code, value)
 				SELECT a.id, 'articleBody', c.language_code, c.value
