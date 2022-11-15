@@ -80,6 +80,7 @@
 		"filters":"Filter",
 		"form":"Formular",
 		"home":"Start",
+		"help":"Hilfe",
 		"icon":"Icon",
 		"id":"ID",
 		"inputDecimal":"Wert muss dezimal sein",
@@ -1047,6 +1048,15 @@
 		"pageTitle":"Builder",
 		"pageTitleDocs":"Builder-Dokumentation"
 	},
+	"articles":{
+		"button":{
+			"pdf":"PDF"
+		},
+		"form":"Formularhilfe",
+		"module":"Anwendungshilfe",
+		"title":"Hilfeseiten",
+		"toc":"Inhaltsverzeichnis"
+	},
 	"calendar":{
 		"button":{
 			"ics":"Zugriff",
@@ -1205,7 +1215,6 @@
 			"fullscreenHint":"Vollbildmodus wechseln",
 			"help":"Hilfe",
 			"helpHint":"Hilfeseiten anzeigen",
-			"helpPdf":"PDF",
 			"log":"Historie",
 			"logHint":"Änderungshistorie anzeigen"
 		},
@@ -1225,12 +1234,8 @@
 			"recordValueCopied":"In die Zwischenablage kopiert",
 			"recordUpdated":"Datensatz aktualisiert"
 		},
-		"help":"Hilfeseiten",
-		"helpForm":"Formularhilfe",
-		"helpModule":"Anwendungshilfe",
 		"invalidInputs":"Eingaben prüfen!",
-		"noAccess":"Kein Zugriff",
-		"tableOfContents":"Inhaltsverzeichnis"
+		"noAccess":"Kein Zugriff"
 	},
 	"formLog":{
 		"button":{

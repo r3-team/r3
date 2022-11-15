@@ -1,5 +1,5 @@
+import MyArticles            from './articles.js';
 import MyField               from './field.js';
-import MyFormHelp            from './formHelp.js';
 import MyFormLog             from './formLog.js';
 import {hasAccessToRelation} from './shared/access.js';
 import {consoleError}        from './shared/error.js';
@@ -54,8 +54,8 @@ export {MyForm as default};
 let MyForm = {
 	name:'my-form',
 	components:{
+		MyArticles,
 		MyField,
-		MyFormHelp,
 		MyFormLog
 	},
 	template:`<div class="form-wrap" :class="{ 'pop-up':isPopUp, 'fullscreen':popUpFullscreen }" :key="form.id">
@@ -236,7 +236,7 @@ let MyForm = {
 			</div>
 		</div>
 		
-		<!-- form data change log -->
+		<!-- form change logs -->
 		<my-form-log
 			v-if="showLog"
 			@close-log="showLog = false"
@@ -250,8 +250,8 @@ let MyForm = {
 			:values="values"
 		/>
 		
-		<!-- form context help -->
-		<my-form-help
+		<!-- form help articles -->
+		<my-articles class="form-help"
 			v-if="showHelp && helpAvailable"
 			@close="showHelp = false"
 			:form="form"

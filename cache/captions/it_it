@@ -79,6 +79,7 @@
 		"files":"Files",
 		"filters":"Filtri",
 		"form":"Form",
+		"help":"Help",
 		"home":"Home",
 		"icon":"Icona",
 		"id":"ID",
@@ -1047,6 +1048,15 @@
 		"pageTitle":"Builder",
 		"pageTitleDocs":"Documentazione Builder"
 	},
+	"articles":{
+		"button":{
+			"pdf":"PDF"
+		},
+		"form":"Form help",
+		"module":"Application help",
+		"title":"Help pages",
+		"toc":"Table of contents"
+	},
 	"calendar":{
 		"button":{
 			"ics":"Accesso",
@@ -1205,7 +1215,6 @@
 			"fullscreenHint":"Toggle fullscreen mode",
 			"help":"Aiuto",
 			"helpHint":"Mostra pagine aiuto",
-			"helpPdf":"PDF",
 			"log":"Log",
 			"logHint":"Apri log modifiche"
 		},
@@ -1225,12 +1234,8 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"Il record è stato aggiornato"
 		},
-		"help":"Pagine aiuto",
-		"helpForm":"Form help",
-		"helpModule":"Application help",
 		"invalidInputs":"Controlla input!",
-		"noAccess":"Nessun accesso",
-		"tableOfContents":"Table of contents"
+		"noAccess":"Nessun accesso"
 	},
 	"formLog":{
 		"button":{

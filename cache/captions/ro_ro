@@ -80,6 +80,7 @@
 		"filters":"Filtre",
 		"form":"Form",
 		"home":"Acasă",
+		"help":"Help",
 		"icon":"Icoană",
 		"id":"ID",
 		"inputDecimal":"Trebuie să fie zecimal",
@@ -1047,6 +1048,15 @@
 		"pageTitle":"Builder",
 		"pageTitleDocs":"Documentația lui Builder"
 	},
+	"articles":{
+		"button":{
+			"pdf":"PDF"
+		},
+		"form":"Form help",
+		"module":"Application help",
+		"title":"Help pages",
+		"toc":"Table of contents"
+	},
 	"calendar":{
 		"button":{
 			"ics":"Acces",
@@ -1205,7 +1215,6 @@
 			"fullscreenHint":"Toggle fullscreen mode",
 			"help":"Ajutor",
 			"helpHint":"Afișați paginile de ajutor",
-			"helpPdf":"PDF",
 			"log":"Jurnale",
 			"logHint":"Deschideți jurnalele de modificări"
 		},
@@ -1225,12 +1234,8 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"înregistrarea a fost actualizată"
 		},
-		"help":"Pagini de ajutor",
-		"helpForm":"Form help",
-		"helpModule":"Application help",
 		"invalidInputs":"Verificați intrările!",
-		"noAccess":"Fără acces",
-		"tableOfContents":"Table of contents"
+		"noAccess":"Fără acces"
 	},
 	"formLog":{
 		"button":{

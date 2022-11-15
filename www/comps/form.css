@@ -91,6 +91,9 @@
 	flex-direction:column;
 	overflow:auto;
 }
+.form-help.large{
+	max-width:800px;
+}
 
 /* messages */
 .form-message{

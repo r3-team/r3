@@ -1,3 +1,4 @@
+import MyArticles            from '../articles.js';
 import srcBase64Icon         from '../shared/image.js';
 import {getCaptionForModule} from '../shared/language.js';
 import {getUnixFormat}       from '../shared/time.js';
@@ -59,10 +60,18 @@ let MyAdminModulesItem = {
 			/>
 		</td>
 		<td class="noWrap">
+			<my-button image="question.png"
+				@trigger="$emit('showHelp',module.id)"
+				:active="module.articleIdsHelp.length !== 0"
+				:captionTitle="capGen.help"
+				:tight="true"
+			/>
+		</td>
+		<td class="noWrap">
 			<my-button image="time.png"
 				v-if="changeLog !== '' && changeLog !== null"
 				@trigger="changeLogShow"
-				:caption="capApp.changeLog"
+				:captionTitle="capApp.changeLog"
 				:tight="true"
 			/>
 		</td>
@@ -91,7 +100,7 @@ let MyAdminModulesItem = {
 		options:       { type:Object,  required:true },
 		repoModules:   { type:Array,   required:true }
 	},
-	emits:['install'],
+	emits:['showHelp','install'],
 	data:function() {
 		return {
 			id:this.module.id,
@@ -312,7 +321,10 @@ let MyAdminModulesItem = {
 
 let MyAdminModules = {
 	name:'my-admin-modules',
-	components:{MyAdminModulesItem},
+	components:{
+		MyAdminModulesItem,
+		MyArticles
+	},
 	template:`<div class="contentBox admin-modules limited1500 grow">
 		<div class="top">
 			<div class="area">
@@ -347,6 +359,15 @@ let MyAdminModules = {
 					:image="fileUploading ? 'load.gif' : 'ok.png'"
 				/>
 			</div>
+		</div>
+		
+		<!-- application help window -->
+		<div class="app-sub-window under-header" v-if="moduleIdShowHelp !== null">
+			<my-articles class="admin-modules-help shade"
+				@close="moduleIdShowHelp = null"
+				:moduleId="moduleIdShowHelp"
+				:isPopUp="false"
+			/>
 		</div>
 		
 		<div class="content no-padding">
@@ -390,6 +411,12 @@ let MyAdminModules = {
 						</th>
 						<th class="noWrap">
 							<div class="mixed-header">
+								<img src="images/question.png" />
+								<span>{{ capGen.help }}</span>
+							</div>
+						</th>
+						<th class="noWrap">
+							<div class="mixed-header">
 								<img src="images/time.png" />
 								<span>{{ capApp.changeLog }}</span>
 							</div>
@@ -418,6 +445,7 @@ let MyAdminModules = {
 				<tbody>
 					<my-admin-modules-item
 						v-for="(m,i) in modules"
+						@showHelp="moduleIdShowHelp = $event"
 						@install="install"
 						:installStarted="installStarted"
 						:key="m.id"
@@ -437,6 +465,7 @@ let MyAdminModules = {
 			fileToUpload:null,
 			fileUploading:false,
 			installStarted:false,
+			moduleIdShowHelp:null,
 			repoModules:[]
 		};
 	},

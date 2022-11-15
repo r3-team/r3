@@ -268,6 +268,19 @@
 .admin-modules-file h1{
 	margin:0px 9px 0px 0px !important;
 }
+.admin-modules-help{
+	max-width:1100px;
+	min-width:400px;
+	max-height:90vh;
+	border:1px solid var(--color-border);
+	border-radius:8px;
+}
+.admin-modules-help.large{
+	max-width:1600px;
+	max-height:90vh;
+	border:1px solid var(--color-border);
+	border-radius:8px;
+}
 
 
 /* LDAP */

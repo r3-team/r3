@@ -1,23 +1,26 @@
-import MyInputRichtext    from './inputRichtext.js';
 import {getModuleCaption} from './shared/generic.js';
 import {generatePdf}      from './shared/pdf.js';
 import {getDateFormat}    from './shared/time.js';
-export {MyFormHelp as default};
+export {MyArticles as default};
 
-let MyFormHelp = {
-	name:'my-form-help',
-	components:{MyInputRichtext},
-	template:`<div class="form-help contentBox" :class="{ 'pop-up':isPopUp }">
+let MyArticles = {
+	name:'my-articles',
+	template:`<div class="articles-wrap contentBox" :class="{ large:showLarge || isMobile, 'pop-up':isPopUp }">
 		<div class="top lower">
 			<div class="area">
 				<img class="icon" src="images/question.png" />
-				<h1>{{ capApp.help }}</h1>
+				<h1>{{ capApp.title }}</h1>
 			</div>
 			
 			<div class="area">
+				<my-button
+					v-if="!isMobile"
+					@trigger="showLarge = !showLarge"
+					:image="showLarge ? 'shrink.png' : 'expand.png'"
+				/>
 				<my-button image="download.png"
 					@trigger="pdfDownload"
-					:caption="capApp.button.helpPdf"
+					:caption="capApp.button.pdf"
 				/>
 				<my-button image="cancel.png"
 					@trigger="$emit('close')"
@@ -27,13 +30,13 @@ let MyFormHelp = {
 			</div>
 		</div>
 		
-		<div class="articles-tabs" v-if="form.articleIdsHelp.length !== 0">
+		<div class="articles-tabs" v-if="hasFormHelp">
 			<div class="entry" tabindex="0"
 				v-for="t in tabs"
 				@click="showFrom = t"
 				@key.enter="showFrom = t"
 				:class="{ active:t === showFrom }"
-			>{{ t === 'form' ? capApp.helpForm : capApp.helpModule }}
+			>{{ t === 'form' ? capApp.form : capApp.module }}
 			</div>
 		</div>
 		
@@ -41,7 +44,7 @@ let MyFormHelp = {
 		<div class="articles" ref="articles">
 			<!-- index -->
 			<div class="articles-toc" v-if="hasArticleIndex">
-				<h1>{{ capApp.tableOfContents }}</h1>
+				<h1>{{ capApp.toc }}</h1>
 				<ol>
 					<li v-for="a in articlesShown" @click="articleScrollTo(a.id)">
 						{{ getArticleTitle(a) }}
@@ -67,7 +70,7 @@ let MyFormHelp = {
 		</div>
 	</div>`,
 	props:{
-		form:    { type:Object,  required:true },
+		form:    { type:Object,  required:false, default:null },
 		isPopUp: { type:Boolean, required:true },
 		moduleId:{ type:String,  required:true }
 	},
@@ -76,7 +79,8 @@ let MyFormHelp = {
 		return {
 			articleIdsClosed:[],
 			articleTitleEmpty:'-',
-			showFrom:this.form.articleIdsHelp.length !== 0 ? 'form' : 'module',
+			showFrom:this.form !== null && this.form.articleIdsHelp.length !== 0 ? 'form' : 'module',
+			showLarge:false,
 			tabs:['form','module']
 		};
 	},
@@ -94,12 +98,14 @@ let MyFormHelp = {
 			return out;
 		},
 		hasArticleIndex:(s) => s.articlesShown.length > 1,
+		hasFormHelp:    (s) => s.form !== null && s.form.articleIdsHelp.length !== 0,
 		
 		// stores
 		module:        (s) => s.moduleIdMap[s.moduleId],
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		articleIdMap:  (s) => s.$store.getters['schema/articleIdMap'],
-		capApp:        (s) => s.$store.getters.captions.form,
+		capApp:        (s) => s.$store.getters.captions.articles,
+		isMobile:      (s) => s.$store.getters.isMobile,
 		moduleLanguage:(s) => s.$store.getters.moduleLanguage
 	},
 	methods:{
@@ -125,7 +131,7 @@ let MyFormHelp = {
 			this.$refs['article_'+id][0].scrollIntoView();
 		},
 		pdfDownload() {
-			let titleHelp   = this.showFrom === 'form' ? this.capApp.helpForm : this.capApp.helpModule;
+			let titleHelp   = this.showFrom === 'form' ? this.capApp.form : this.capApp.module;
 			let titleModule = this.getModuleCaption(this.module,this.moduleLanguage);
 			let titleDate   = this.getDateFormat(new Date(),'Y-m-d');
 			
