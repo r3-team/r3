@@ -3,6 +3,7 @@ import {srcBase64}          from './shared/image.js';
 import {hasAccessToAnyMenu} from './shared/access.js';
 import {getColumnTitle}     from './shared/column.js';
 import {getFormRoute}       from './shared/form.js';
+import {getModuleCaption}   from './shared/generic.js';
 import {
 	getCollectionColumn,
 	getCollectionValues
@@ -172,7 +173,7 @@ let MyMenu = {
 						v-if="module.iconId !== null"
 						:src="srcBase64(iconIdMap[module.iconId].file)"
 					/>
-					<h1>{{ moduleCaption }}</h1>
+					<h1>{{ getModuleCaption(module,moduleLanguage) }}</h1>
 				</div>
 				
 				<div class="area">
@@ -207,15 +208,6 @@ let MyMenu = {
 		module:        { type:Object,  required:true }
 	},
 	computed:{
-		moduleCaption:function() {
-			// 1st preference: dedicated module title
-			if(typeof this.module.captions.moduleTitle[this.moduleLanguage] !== 'undefined')
-				return this.module.captions.moduleTitle[this.moduleLanguage];
-			
-			// if nothing else is available: module name
-			return this.moduleIdMap[this.module.id].name;
-		},
-		
 		// stores
 		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
 		iconIdMap:     function() { return this.$store.getters['schema/iconIdMap']; },
@@ -228,6 +220,7 @@ let MyMenu = {
 	},
 	methods:{
 		// externals
+		getModuleCaption,
 		hasAccessToAnyMenu,
 		srcBase64,
 		

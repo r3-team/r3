@@ -1,4 +1,7 @@
-import MyInputRichtext from './inputRichtext.js';
+import MyInputRichtext    from './inputRichtext.js';
+import {getModuleCaption} from './shared/generic.js';
+import {generatePdf}      from './shared/pdf.js';
+import {getDateFormat}    from './shared/time.js';
 export {MyFormHelp as default};
 
 let MyFormHelp = {
@@ -12,6 +15,10 @@ let MyFormHelp = {
 			</div>
 			
 			<div class="area">
+				<my-button image="download.png"
+					@trigger="pdfDownload"
+					:caption="capApp.button.helpPdf"
+				/>
 				<my-button image="cancel.png"
 					@trigger="$emit('close')"
 					:cancel="true"
@@ -31,7 +38,7 @@ let MyFormHelp = {
 		</div>
 		
 		<!-- articles -->
-		<div class="articles">
+		<div class="articles" ref="articles">
 			<!-- index -->
 			<div class="articles-toc" v-if="hasArticleIndex">
 				<h1>{{ capApp.tableOfContents }}</h1>
@@ -43,8 +50,8 @@ let MyFormHelp = {
 			</div>
 		
 			<div class="article" v-for="(a,i) in articlesShown">
-				<div class="article-title" :ref="'article_'+a.id" v-if="hasArticleIndex || getArticleTitle(a) !== articleTitleEmpty">
-					<my-button
+				<div class="article-title pdf-title" :ref="'article_'+a.id" v-if="hasArticleIndex || getArticleTitle(a) !== articleTitleEmpty">
+					<my-button class="pdf-hide"
 						@trigger="articleToggle(a.id)"
 						:image="!articleIdsClosed.includes(a.id) ? 'triangleDown.png' : 'triangleRight.png'"
 						:naked="true"
@@ -96,6 +103,12 @@ let MyFormHelp = {
 		moduleLanguage:(s) => s.$store.getters.moduleLanguage
 	},
 	methods:{
+		// externals
+		generatePdf,
+		getDateFormat,
+		getModuleCaption,
+		
+		// presentation
 		getArticleTitle(article) {
 			return typeof article.captions.articleTitle[this.moduleLanguage] !== 'undefined'
 				? article.captions.articleTitle[this.moduleLanguage] : this.articleTitleEmpty;
@@ -110,6 +123,43 @@ let MyFormHelp = {
 		},
 		articleScrollTo(id) {
 			this.$refs['article_'+id][0].scrollIntoView();
+		},
+		pdfDownload() {
+			let titleHelp   = this.showFrom === 'form' ? this.capApp.helpForm : this.capApp.helpModule;
+			let titleModule = this.getModuleCaption(this.module,this.moduleLanguage);
+			let titleDate   = this.getDateFormat(new Date(),'Y-m-d');
+			
+			this.generatePdf(
+				`${titleModule}_${titleHelp}_${titleDate}.pdf`
+				,'a4','p',60,90,`
+					<div class="pdf-header">
+						<span>${titleModule}</span>
+						<span>${titleHelp}</span>
+						<span>${titleDate}</span>
+					</div>
+				`,this.$refs['articles'].innerHTML,'',`
+					code{
+						font-family:inherit;
+						font-weight:bold;
+					}
+					.pdf-title{
+						font-size:120%;
+						font-weight:bold;
+					}
+					.pdf-header{
+						display:flex;
+						flex-flow:row nowrap;
+						justify-content:space-between;
+					}
+					.pdf-header span{
+						font-style:italic;
+						font-size:90%;
+					}
+					.pdf-hide{
+						display:none;
+					}
+				`
+			);
 		}
 	}
 };

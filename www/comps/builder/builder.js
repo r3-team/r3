@@ -1,6 +1,7 @@
-import MyBuilderDocs    from './builderDocs.js';
-import {srcBase64}      from '../shared/image.js';
-import {MyModuleSelect} from '../input.js';
+import MyBuilderDocs      from './builderDocs.js';
+import {srcBase64}        from '../shared/image.js';
+import {getModuleCaption} from '../shared/generic.js';
+import {MyModuleSelect}   from '../input.js';
 export {MyBuilder as default};
 
 let MyBuilder = {
@@ -19,7 +20,7 @@ let MyBuilder = {
 							v-if="module.iconId !== null"
 							:src="srcBase64(iconIdMap[module.iconId].file)"
 						/>
-						<h1>{{ moduleCaption }}</h1>
+						<h1>{{ getModuleCaption(module,builderLanguage) }}</h1>
 					</div>
 					<div class="area">
 						<my-button image="question.png"
@@ -278,14 +279,6 @@ let MyBuilder = {
 			|| s.navigation === 'roles'       && s.module.roles.length !== 0
 			|| s.navigation === 'collections' && s.module.collections.length !== 0
 			|| s.navigation === 'functions'   && (s.module.pgFunctions.length !== 0 || s.module.jsFunctions.length !== 0),
-		moduleCaption:(s) => {
-			// 1st preference: dedicated module title
-			if(typeof s.module.captions.moduleTitle[s.builderLanguage] !== 'undefined')
-				return s.module.captions.moduleTitle[s.builderLanguage];
-			
-			// if nothing else is available: module name
-			return s.moduleIdMap[s.module.id].name;
-		},
 		moduleIdInput:{
 			get() {
 				if(!this.module) return '';
@@ -322,6 +315,7 @@ let MyBuilder = {
 	},
 	methods:{
 		// externals
+		getModuleCaption,
 		srcBase64,
 		
 		handleHotkeys(evt) {

@@ -1205,6 +1205,7 @@
 			"fullscreenHint":"Toggle fullscreen mode",
 			"help":"Ajutor",
 			"helpHint":"Afișați paginile de ajutor",
+			"helpPdf":"PDF",
 			"log":"Jurnale",
 			"logHint":"Deschideți jurnalele de modificări"
 		},

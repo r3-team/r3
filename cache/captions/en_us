@@ -1205,6 +1205,7 @@
 			"fullscreenHint":"Toggle fullscreen mode",
 			"help":"Help",
 			"helpHint":"Show help pages",
+			"helpPdf":"PDF",
 			"log":"Logs",
 			"logHint":"Open change logs"
 		},

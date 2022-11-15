@@ -43,3 +43,7 @@
 .article-body{
 	font-size:110%;
 }
+.article-body img{
+	width:100%;
+	height:unset;
+}

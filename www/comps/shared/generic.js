@@ -16,6 +16,15 @@ export function copyValueDialog(captionTop,captionBody,copyClipboardValue) {
 	});
 };
 
+export function getModuleCaption(module,moduleLanguage) {
+	// 1st preference: dedicated module title
+	if(typeof module.captions.moduleTitle[moduleLanguage] !== 'undefined')
+		return module.captions.moduleTitle[moduleLanguage];
+	
+	// if nothing else is available: module name
+	return MyStore.getters['schema/moduleIdMap'][module.id].name;
+};
+
 export function getBuildFromVersion(fullVersion) {
 	let m = fullVersion.match(/\d+\.\d+\.\d+\.(\d+)/);
 	
