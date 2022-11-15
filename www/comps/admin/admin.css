@@ -274,12 +274,10 @@
 	max-height:90vh;
 	border:1px solid var(--color-border);
 	border-radius:8px;
+	overflow:hidden;
 }
 .admin-modules-help.large{
 	max-width:1600px;
-	max-height:90vh;
-	border:1px solid var(--color-border);
-	border-radius:8px;
 }
 
 

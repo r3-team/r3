@@ -5,7 +5,7 @@ export {MyArticles as default};
 
 let MyArticles = {
 	name:'my-articles',
-	template:`<div class="articles-wrap contentBox" :class="{ large:showLarge || isMobile, 'pop-up':isPopUp }">
+	template:`<div class="contentBox" :class="{ large:showLarge || isMobile, 'pop-up':isPopUp }">
 		<div class="top lower">
 			<div class="area">
 				<img class="icon" src="images/question.png" />

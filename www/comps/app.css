@@ -184,8 +184,8 @@ body                                         { --depth:6; }
 .builder-field                               { --depth:5; }
 .builder-field .column                       { --depth:4; }
 .builder-menu                                { --depth:4; }
-.builder-articles .sub-component             { --depth:0; }
 .builder-articles-assign                     { --depth:2; }
+.builder-articles-body-richtext              { --depth:0; }
 
 
 html,body{
@@ -482,6 +482,9 @@ h3{
 	flex-flow:row wrap;
 	align-items:center;
 	padding:4px 0px;
+}
+.contentBox .top .area.gap{
+	gap:9px;
 }
 .contentBox .top .area.nowrap{
 	flex-wrap:nowrap;

@@ -362,8 +362,8 @@ let MyAdminModules = {
 		</div>
 		
 		<!-- application help window -->
-		<div class="app-sub-window under-header" v-if="moduleIdShowHelp !== null">
-			<my-articles class="admin-modules-help shade"
+		<div class="app-sub-window under-header" v-if="moduleIdShowHelp !== null" @mousedown.self="moduleIdShowHelp = null">
+			<my-articles class="admin-modules-help shade pop-up"
 				@close="moduleIdShowHelp = null"
 				:moduleId="moduleIdShowHelp"
 				:isPopUp="false"

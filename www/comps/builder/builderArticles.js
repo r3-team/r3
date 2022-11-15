@@ -1,4 +1,5 @@
 import MyBuilderCaption      from './builderCaption.js';
+import MyArticles            from '../articles.js';
 import {getDependentModules} from '../shared/builder.js';
 import {copyValueDialog}     from '../shared/generic.js';
 export {MyBuilderArticles as default};
@@ -39,24 +40,54 @@ let MyBuilderArticlesItem = {
 					:readonly="readonly"
 				/>
 			</td>
-			<td class="maximum">
-				<my-button
+			<td>
+				<my-button image="edit.png"
 					@trigger="showContent = !showContent"
-					:caption="capGen.button.show"
-					:image="showContent ? 'triangleDown.png' : 'triangleRight.png'"
+					:caption="capGen.button.edit"
 				/>
 			</td>
-		</tr>
-		<tr v-if="showContent">
-			<td colspan="999">
-				<div class="sub-component shade">
-					<my-builder-caption
-						v-model="captions.articleBody"
-						:contentName="''"
-						:language="builderLanguage"
-						:readonly="readonly"
-						:richtext="true"
-					/>
+			<td>
+				<!-- article body pop up window -->
+				<div class="app-sub-window under-header" v-if="showContent" @mousedown.self="showContent = false">
+					<div class="contentBox builder-articles-body shade pop-up">
+						<div class="top lower">
+							<div class="area">
+								<img class="icon" src="images/question.png" />
+								<h1>{{ article.name }}</h1>
+							</div>
+							
+							<div class="area gap">
+								<span>{{ capGen.title }}</span>
+								<my-builder-caption
+									v-model="captions.articleTitle"
+									:language="builderLanguage"
+									:readonly="readonly"
+								/>
+							</div>
+							
+							<div class="area">
+								<my-button image="save.png"
+									@trigger="set"
+									:active="hasChanges"
+									:caption="capGen.button.save"
+								/>
+								<my-button image="cancel.png"
+									@trigger="showContent = false"
+									:cancel="true"
+									:tight="true"
+								/>
+							</div>
+						</div>
+						<div class="content grow no-padding builder-articles-body-richtext">
+							<my-builder-caption
+								v-model="captions.articleBody"
+								:contentName="''"
+								:language="builderLanguage"
+								:readonly="readonly"
+								:richtext="true"
+							/>
+						</div>
+					</div>
 				</div>
 			</td>
 		</tr>
@@ -146,7 +177,10 @@ let MyBuilderArticlesItem = {
 
 let MyBuilderArticles = {
 	name:'my-builder-articles',
-	components:{MyBuilderArticlesItem},
+	components:{
+		MyArticles,
+		MyBuilderArticlesItem
+	},
 	template:`<div class="builder-articles contentBox grow">
 		<div class="top lower">
 			<div class="area nowrap">
@@ -163,7 +197,7 @@ let MyBuilderArticles = {
 							<th>{{ capGen.name }}</th>
 							<th>{{ capGen.id }}</th>
 							<th>{{ capGen.title }}</th>
-							<th>{{ capApp.body }}</th>
+							<th colspan="2">{{ capApp.body }}</th>
 						</tr>
 					</thead>
 					
@@ -236,6 +270,10 @@ let MyBuilderArticles = {
 						:active="hasChanges"
 						:caption="capGen.button.save"
 					/>
+					<my-button image="open.png"
+						@trigger="showPreview = true"
+						:caption="capGen.preview"
+					/>
 				</div>
 				
 				<!-- assigned articles list -->
@@ -259,6 +297,16 @@ let MyBuilderArticles = {
 					</template>
 				</draggable>
 			</div>
+			
+			<!-- articles preview -->
+			<div class="app-sub-window under-header" v-if="showPreview" @mousedown.self="showPreview = false">
+				<my-articles class="builder-articles-preview shade pop-up"
+					@close="showPreview = false"
+					:form="formIdAssignTo !== null ? formIdMap[formIdAssignTo] : null"
+					:moduleId="module.id"
+					:isPopUp="false"
+				/>
+			</div>
 		</div>
 	</div>`,
 	props:{
@@ -275,7 +323,8 @@ let MyBuilderArticles = {
 			
 			// states
 			articleIdsAssigned:[],
-			articleIdsAssignedOrg:[] // to compare for changes
+			articleIdsAssignedOrg:[], // to compare for changes
+			showPreview:false
 		};
 	},
 	computed:{
