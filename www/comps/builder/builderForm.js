@@ -93,17 +93,11 @@ let MyBuilderForm = {
 							:caption="capApp.showStates"
 							:image="showStates ? 'visible1.png' : 'visible0.png'"
 						/>
-						<my-button
-							@trigger="showHelp = !showHelp"
-							:caption="capApp.showHelp"
-							:image="showHelp ? 'visible1.png' : 'visible0.png'"
-						/>
 					</div>
 				</div>
 				
 				<!-- form builder fields -->
 				<my-builder-fields class="builder-form-fields default-inputs" flexDirParent="column"
-					v-if="!showHelp"
 					@fields-set="fields = $event"
 					@field-column-query-set="(...args) => setFieldColumnQuery(args[0],args[1])"
 					@field-counter-set="fieldCounter = $event"
@@ -124,16 +118,6 @@ let MyBuilderForm = {
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="form.moduleId"
 					:showCaptions="showCaptions"
-				/>
-				
-				<!-- form context help -->
-				<my-builder-caption
-					v-if="showHelp"
-					v-model="captions.formHelp"
-					:contentName="capApp.formHelp"
-					:language="builderLanguage"
-					:readonly="readonly"
-					:richtext="true"
 				/>
 			</div>
 			
@@ -334,7 +318,6 @@ let MyBuilderForm = {
 			fieldMoveIndex:0,    // index of field which to move (move by click)
 			showCaptions:true,   // show caption inputs on non-container fields
 			showFunctions:false, // show form functions
-			showHelp:false,      // show form context help
 			showSidebar:true,    // show form Builder sidebar
 			showStates:false,    // show form states
 			showStatesFull:false,// sub content (states/functions) are full screen

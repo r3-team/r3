@@ -691,7 +691,6 @@
 			"readonly":"Read only",
 			"required":"Required",
 			"showFunctions":"Functions",
-			"showHelp":"Help",
 			"showStates":"States",
 			"sql":"SQL preview",
 			"state":"State",

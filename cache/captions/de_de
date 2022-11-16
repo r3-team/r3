@@ -691,7 +691,6 @@
 			"readonly":"Lesend",
 			"required":"Benötigt",
 			"showFunctions":"Funktionen",
-			"showHelp":"Hilfe",
 			"showStates":"Zustände",
 			"sql":"SQL-Vorschau",
 			"state":"Status",

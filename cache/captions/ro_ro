@@ -691,7 +691,6 @@
 			"readonly":"Numai citire",
 			"required":"Necesar",
 			"showFunctions":"Funcțiile",
-			"showHelp":"Ajutor",
 			"showStates":"Statuturi",
 			"sql":"Previzualizare SQL",
 			"state":"Statut",

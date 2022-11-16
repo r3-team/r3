@@ -691,7 +691,6 @@
 			"readonly":"Solo lettura",
 			"required":"Obbligatorio",
 			"showFunctions":"Funzioni",
-			"showHelp":"Aiuto",
 			"showStates":"Condizioni",
 			"sql":"Anteprima SQL",
 			"state":"Condizione",
