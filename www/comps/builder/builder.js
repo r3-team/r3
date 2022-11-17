@@ -11,7 +11,6 @@ let MyBuilder = {
 		MyModuleSelect
 	},
 	template:`<div class="builder equal-width">
-		
 		<div class="navigationWrap" v-if="module">
 			<div class="navigation contentBox">
 				<div class="top lower nowrap">
@@ -73,40 +72,44 @@ let MyBuilder = {
 					<div class="navigation-two-columns">
 						<div class="navigation-column">
 							<router-link class="entry center clickable"
-								:to="'/builder/relations/'+module.id" 
+								:to="'/builder/module/'+module.id"
+							>{{ capApp.navigationModule }}</router-link>
+							
+							<router-link class="entry center clickable"
+								:to="'/builder/relations/'+module.id"
 							>{{ capApp.navigationRelations }}</router-link>
 							
 							<router-link class="entry center clickable"
-								:to="'/builder/roles/'+module.id" 
+								:to="'/builder/roles/'+module.id"
 							>{{ capApp.navigationRoles }}</router-link>
 							
 							<router-link class="entry center clickable"
-								:to="'/builder/forms/'+module.id" 
+								:to="'/builder/forms/'+module.id"
 							>{{ capApp.navigationForms }}</router-link>
 							
 							<router-link class="entry center clickable"
-								:to="'/builder/menu/'+module.id" 
+								:to="'/builder/menu/'+module.id"
 							>{{ capApp.navigationMenu }}</router-link>
-							
-							<router-link class="entry center clickable"
-								:to="'/builder/icons/'+module.id" 
-							>{{ capApp.navigationIcons }}</router-link>
 						</div>
 						<div class="navigation-column">
 							<router-link class="entry center clickable"
-								:to="'/builder/functions/'+module.id" 
+								:to="'/builder/icons/'+module.id"
+							>{{ capApp.navigationIcons }}</router-link>
+							
+							<router-link class="entry center clickable"
+								:to="'/builder/functions/'+module.id"
 							>{{ capApp.navigationFunctions }}</router-link>
 							
 							<router-link class="entry center clickable"
-								:to="'/builder/collections/'+module.id" 
+								:to="'/builder/collections/'+module.id"
 							>{{ capApp.navigationCollections }}</router-link>
 							
 							<router-link class="entry center clickable"
-								:to="'/builder/login-forms/'+module.id" 
+								:to="'/builder/login-forms/'+module.id"
 							>{{ capApp.navigationLoginForms }}</router-link>
 							
 							<router-link class="entry center clickable"
-								:to="'/builder/articles/'+module.id" 
+								:to="'/builder/articles/'+module.id"
 							>{{ capApp.navigationArticles }}</router-link>
 							
 							<!-- so router link is not last child (CSS) -->
@@ -222,7 +225,7 @@ let MyBuilder = {
 			filter:'',          // simple text filter for menu
 			hotkeysChild:[],    // hotkeys from child components
 			moduleId:'',        // selected module ID
-			navigation:'relations',
+			navigation:'module',
 			ready:false,
 			showDocs:false
 		};
@@ -263,12 +266,14 @@ let MyBuilder = {
 				this.moduleId = id;
 				
 				// set module translation language
-				let mod = this.moduleIdMap[id];
-				
-				if(mod.languages.indexOf(this.settings.languageCode) !== -1)
-					this.builderLanguage = this.settings.languageCode;
-				else if(mod.languages.length !== 0)
-					this.builderLanguage = mod.languages[0];
+				if(id !== '') {
+					let mod = this.moduleIdMap[id];
+					
+					if(mod.languages.indexOf(this.settings.languageCode) !== -1)
+						this.builderLanguage = this.settings.languageCode;
+					else if(mod.languages.length !== 0)
+						this.builderLanguage = mod.languages[0];
+				}
 			},
 			immediate:true
 		}

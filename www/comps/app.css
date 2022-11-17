@@ -183,9 +183,11 @@ body                                         { --depth:6; }
 .builder-icon-input .iconLine.disabled       { --depth:5; }
 .builder-field                               { --depth:5; }
 .builder-field .column                       { --depth:4; }
+.builder-modules .item-wrap                  { --depth:5; }
 .builder-menu                                { --depth:4; }
 .builder-articles-assign                     { --depth:2; }
 .builder-articles-body-richtext              { --depth:0; }
+table.builder-vertical td                    { --depth:5; }
 
 
 html,body{

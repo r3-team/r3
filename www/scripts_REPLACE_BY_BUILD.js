@@ -31,6 +31,7 @@ import MyAdminScheduler    from './comps/admin/adminScheduler.js';
 
 // builder
 import MyBuilder            from './comps/builder/builder.js';
+import MyBuilderModule      from './comps/builder/builderModule.js';
 import MyBuilderModules     from './comps/builder/builderModules.js';
 import MyBuilderRelations   from './comps/builder/builderRelations.js';
 import MyBuilderRelation    from './comps/builder/builderRelation.js';
@@ -95,6 +96,11 @@ const MyRouter = VueRouter.createRouter({
 			{
 				path:'modules',
 				component:MyBuilderModules
+			},{
+				path:'module/:id?',
+				meta:{ nav:'module', target:'module' },
+				component:MyBuilderModule,
+				props:true
 			},{
 				path:'relations/:id',
 				meta:{ nav:'relations', target:'module' },

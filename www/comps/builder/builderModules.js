@@ -1,6 +1,7 @@
 import MyBuilderCaption      from './builderCaption.js';
 import MyBuilderIconInput    from './builderIconInput.js';
 import {MyModuleSelect}      from '../input.js';
+import srcBase64Icon         from '../shared/image.js';
 import {getDependentModules} from '../shared/builder.js';
 import {copyValueDialog}     from '../shared/generic.js';
 import {getUnixFormat}       from '../shared/time.js';
@@ -8,531 +9,6 @@ export {MyBuilderModules as default};
 
 let displayArrow = function(state) {
 	return state ? 'images/triangleDown.png' : 'images/triangleRight.png';
-};
-
-let MyBuilderModulesItemStartForm = {
-	name:'my-builder-modules-item-start-form',
-	template:`<tr>
-		<td>#{{ position+1 }}</td>
-		<td>
-			<select v-model="roleId" :disabled="readonly">
-				<option v-for="r in module.roles" :value="r.id">
-					{{ r.name }}
-				</option>
-			</select>
-		</td>
-		<td>
-			<select v-model="formId" :disabled="readonly">
-				<option :value="null">-</option>
-				<option v-for="f in module.forms" :value="f.id">
-					{{ f.name }}
-				</option>
-			</select>
-		</td>
-		<td>
-			<div class="row centered">
-				<my-button image="arrowDown.png"
-					v-if="!isLast"
-					@trigger="$emit('moveDown')"
-					:active="!readonly"
-					:naked="true"
-				/>
-				<my-button image="arrowUp.png"
-					v-if="position !== 0"
-					@trigger="$emit('moveUp')"
-					:active="!readonly"
-					:naked="true"
-				/>
-			</div>
-		</td>
-		<td>
-			<my-button image="cancel.png"
-				@trigger="$emit('remove')"
-				:active="!readonly"
-				:naked="true"
-			/>
-		</td>
-	</tr>`,
-	props:{
-		isLast:    { type:Boolean, required:true },
-		modelValue:{ type:Object,  required:true },
-		module:    { type:Object,  required:true },
-		position:  { type:Number,  required:true },
-		readonly:  { type:Boolean, required:true }
-	},
-	emits:['moveDown','moveUp','remove','update:modelValue'],
-	computed:{
-		// inputs
-		formId:{
-			get()  { return this.modelValue.formId; },
-			set(v) { this.update('formId',v); }
-		},
-		roleId:{
-			get()  { return this.modelValue.roleId; },
-			set(v) { this.update('roleId',v); }
-		},
-		
-		// stores
-		capApp:(s) => s.$store.getters.captions.builder.relation,
-		capGen:(s) => s.$store.getters.captions.generic
-	},
-	methods:{
-		update(name,value) {
-			let v = JSON.parse(JSON.stringify(this.modelValue));
-			v[name] = value;
-			
-			this.$emit('update:modelValue',v);
-		}
-	}
-};
-
-let MyBuilderModulesItem = {
-	name:'my-builder-modules-item',
-	components:{
-		'chrome-picker':VueColor.Chrome,
-		MyBuilderCaption,
-		MyBuilderIconInput,
-		MyBuilderModulesItemStartForm
-	},
-	template:`<tbody>
-		<tr>
-			<td>
-				<my-button image="save.png"
-					@trigger="set"
-					:active="hasChanges && !readonly"
-					:caption="isNew ? capGen.button.create : ''"
-					:captionTitle="isNew ? capGen.button.create : capGen.button.save"
-				/>
-				<my-button image="open.png"
-					v-if="!isNew"
-					@trigger="open"
-					:captionTitle="capGen.button.open"
-				/>
-			</td>
-			<td>
-				<my-builder-icon-input
-					@input="iconId = $event"
-					:icon-id-selected="iconId"
-					:module="module"
-					:readonly="isNew || readonly"
-				/>
-			</td>
-			<td>
-				<input v-model="name" :disabled="readonly" :placeholder="isNew ? capApp.new : ''" />
-			</td>
-			<td>
-				<my-button image="visible1.png"
-					@trigger="copyValueDialog(module.name,module.id,module.id)"
-					:active="!isNew"
-				/>
-			</td>
-			<td>
-				<div class="row">
-					<my-button image="settings.png"
-						@trigger="$router.push('/admin/modules')"
-						:active="!isNew"
-						:caption="readonly ? capGen.option.yes : capGen.option.no"
-					/>
-				</div>
-			</td>
-			<td>
-				<input class="short"
-					v-model="color1"
-					:disabled="readonly"
-				/>
-			</td>
-			<td v-click-outside="hideColorPicker">
-				<div class="builder-color clickable"
-					@click="showColorPicker = !showColorPicker"
-					:style="styleColorPreview"
-				></div>
-				
-				<div class="colorPickerWrap">
-					<chrome-picker class="colorPickerFloating"
-						v-if="showColorPicker"
-						@update:modelValue="setColor"
-						:disable-alpha="true"
-						:disable-fields="true"
-						:modelValue="color1"
-					/>
-				</div>
-			</td>
-			<td>
-				<my-button
-					@trigger="toggleSubComponent('dependsOn')"
-					:active="modules.filter(m => m.id !== module.id).length > 0"
-					:caption="String(dependsOn.length)"
-					:image="showDependencies ? 'triangleDown.png' : 'triangleRight.png'"
-				/>
-			</td>
-			<td>
-				<select v-model="parentId" :disabled="readonly">
-					<option :value="null">-</option>
-					<option
-						v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.parentId === null)"
-						:value="mod.id"
-					>
-						{{ mod.name }}
-					</option>
-				</select>
-			</td>
-			<td>
-				<input class="short" v-model.number="position" :disabled="readonly" />
-			</td>
-			<td>
-				<my-button
-					@trigger="toggleSubComponent('startForms')"
-					:active="module.forms.length !== 0"
-					:caption="String(startForms.length)"
-					:image="showStartForms ? 'triangleDown.png' : 'triangleRight.png'"
-				/>
-			</td>
-			<td>
-				<my-button
-					@trigger="toggleSubComponent('languages')"
-					:caption="String(languages.length)"
-					:image="showLanguages ? 'triangleDown.png' : 'triangleRight.png'"
-				/>
-			</td>
-			<td>
-				<input :value="displayReleaseDate" disabled="disabled" />
-			</td>
-			<td>
-				<input class="short" v-model="releaseBuild" disabled="disabled" />
-			</td>
-			<td>
-				<input class="short" v-model="releaseBuildApp" disabled="disabled" />
-			</td>
-		</tr>
-		
-		<tr v-if="showStartForms">
-			<td colspan="999">
-				<div class="sub-component">
-					
-					<!-- default start form -->
-					<div class="item-list">
-						<span>{{ capApp.startFormDefault }}</span>
-						<select v-model="formId" :disabled="readonly">
-							<option :value="null">-</option>
-							<option v-for="f in module.forms" :value="f.id">
-								{{ f.name }}
-							</option>
-						</select>
-					</div>
-					<div class="item-list">
-						<span>{{ capApp.startFormDefaultHint }}</span>
-					</div>
-					<br />
-					
-					<div class="item-list">
-						<table v-if="startForms.length !== 0">
-							<thead>
-								<tr>
-									<td>{{ capGen.order }}</td>
-									<td>{{ capGen.role }}</td>
-									<td>{{ capApp.startForm }}</td>
-									<td colspan="2"></td>
-								</tr>
-							</thead>
-							<tbody>
-								<my-builder-modules-item-start-form
-									v-for="(sf,i) in startForms"
-									@moveDown="startForms.splice(i+1,0,startForms.splice(i,1)[0])"
-									@moveUp="startForms.splice(i-1,0,startForms.splice(i,1)[0])"
-									@remove="startForms.splice(i,1)"
-									@update:modelValue="startForms[i] = $event"
-									:isLast="i === startForms.length-1"
-									:modelValue="sf"
-									:module="module"
-									:position="i"
-									:readonly="readonly"
-								/>
-							</tbody>
-						</table>
-						<p v-if="startForms.length !== 0">
-							{{ capApp.startFormsExplanation }}
-						</p>
-					</div>
-						
-					<my-button image="add.png"
-						@trigger="addStartForm"
-						:active="!readonly"
-						:caption="capGen.button.add"
-					/>
-				</div>
-			</td>
-		</tr>
-		
-		<tr v-if="showDependencies">
-			<td colspan="999">
-				<div class="sub-component">
-					<div class="item-list">
-						<div class="item" 
-							v-for="m in modules.filter(m => m.id !== module.id)"
-							:key="m.id"
-						>
-							<my-bool
-								@update:modelValue="toggleDependsOn(m.id,$event)"
-								:modelValue="dependsOn.includes(m.id)"
-								:readonly="readonly"
-							/>
-							<span class="depends-on">{{ m.name }}</span>
-						</div>
-					</div>
-				</div>
-			</td>
-		</tr>
-		
-		<tr v-if="showLanguages">
-			<td colspan="999">
-				<div class="sub-component">
-				
-					<!-- main language selection -->
-					<div class="item-list">
-						<span>{{ capApp.languageMain }}</span>
-						<select v-model="languageMain" :disabled="readonly">
-							<option
-								v-for="l in languages"
-								:value="l"
-							>{{ l }}</option>
-						</select>
-					</div>
-					<div class="item-list">
-						<span>{{ capApp.languageMainHint }}</span>
-					</div>
-					<br />
-					
-					<!-- language entry and header title -->
-					<div class="item-list">
-						<table>
-							<thead>
-								<tr>
-									<td>{{ capApp.languageCode }}</td>
-									<td>{{ capApp.languageTitle }}</td>
-									<td></td>
-								</tr>
-							</thead>
-							<tbody>
-								<tr v-for="(l,i) in languages">
-									<td>
-										<input type="text"
-											v-model="languages[i]"
-											:disabled="readonly"
-											:placeholder="capApp.languageCodeHint"
-										/>
-									</td>
-									<td>
-										<my-builder-caption
-											v-model="captions.moduleTitle"
-											:language="l"
-											:readonly="readonly"
-										/>
-									</td>
-									<td>
-										<my-button image="cancel.png"
-											@trigger="languages.splice(i,1)"
-											:active="!readonly"
-											:naked="true"
-										/>
-									</td>
-								</tr>
-							</tbody>
-						</table>
-					</div>
-					
-					<my-button image="add.png"
-						@trigger="languages.push('')"
-						:active="!readonly"
-						:caption="capGen.button.add"
-					/>
-				</div>
-			</td>
-		</tr>
-	</tbody>`,
-	props:{
-		builderLanguage:{ type:String, required:true },
-		module:{
-			type:Object,
-			required:false,
-			default:function() {
-				return{
-					id:null,
-					parentId:null,
-					formId:null,
-					iconId:null,
-					name:'',
-					color1:'217A4D',
-					position:0,
-					languageMain:'en_us',
-					releaseBuild:0,
-					releaseBuildApp:0,
-					releaseDate:0,
-					dependsOn:[],
-					startForms:[],
-					languages:['en_us'],
-					forms:[],
-					relations:[],
-					articleIdsHelp:[],
-					captions:{
-						moduleTitle:{}
-					}
-				};
-			}
-		}
-	},
-	data:function() {
-		return {
-			id:this.module.id,
-			parentId:this.module.parentId,
-			formId:this.module.formId,
-			iconId:this.module.iconId,
-			name:this.module.name,
-			color1:this.module.color1,
-			position:this.module.position,
-			languageMain:this.module.languageMain,
-			releaseBuild:this.module.releaseBuild,
-			releaseBuildApp:this.module.releaseBuildApp,
-			releaseDate:this.module.releaseDate,
-			dependsOn:JSON.parse(JSON.stringify(this.module.dependsOn)),
-			startForms:JSON.parse(JSON.stringify(this.module.startForms)),
-			languages:JSON.parse(JSON.stringify(this.module.languages)),
-			captions:JSON.parse(JSON.stringify(this.module.captions)),
-			showColorPicker:false,
-			showDependencies:false,
-			showLanguages:false,
-			showStartForms:false
-		};
-	},
-	computed:{
-		hasChanges:(s) => {
-			return s.parentId     !== s.module.parentId
-				|| s.formId       !== s.module.formId
-				|| s.iconId       !== s.module.iconId
-				|| s.name         !== s.module.name
-				|| s.color1       !== s.module.color1
-				|| s.position     !== s.module.position
-				|| s.languageMain !== s.module.languageMain
-				|| JSON.stringify(s.dependsOn)  !== JSON.stringify(s.module.dependsOn)
-				|| JSON.stringify(s.startForms) !== JSON.stringify(s.module.startForms)
-				|| JSON.stringify(s.languages)  !== JSON.stringify(s.module.languages)
-				|| JSON.stringify(s.captions)   !== JSON.stringify(s.module.captions)
-			;
-		},
-		
-		// simple
-		displayReleaseDate:(s) => s.releaseDate === 0 ? '-' : s.getUnixFormat(s.releaseDate,'Y-m-d H:i'),
-		isNew:             (s) => s.id === null,
-		readonly:          (s) => s.id !== null && !s.moduleIdMapOptions[s.id].owner,
-		styleColorPreview: (s) => `background-color:#${s.color1};`,
-		
-		// stores
-		modules:           (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
-		moduleIdMapOptions:(s) => s.$store.getters['schema/moduleIdMapOptions'],
-		relationIdMap:     (s) => s.$store.getters['schema/relationIdMap'],
-		attributeIdMap:    (s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:            (s) => s.$store.getters.captions.builder.module,
-		capGen:            (s) => s.$store.getters.captions.generic
-	},
-	methods:{
-		// externals
-		copyValueDialog,
-		getDependentModules,
-		getUnixFormat,
-		
-		// actions
-		addStartForm:function() {
-			this.startForms.push({
-				position:this.startForms.length,
-				formId:null,
-				roleId:null
-			});
-		},
-		hideColorPicker:function() {
-			this.showColorPicker = false;
-		},
-		open:function() {
-			this.$router.push('/builder/relations/'+this.module.id);
-		},
-		setColor:function(newVal) {
-			this.color1 = newVal.hex.substr(1);
-		},
-		toggleDependsOn:function(moduleId,state) {
-			let pos = this.dependsOn.indexOf(moduleId);
-			
-			if(pos === -1 && state)
-				this.dependsOn.push(moduleId);
-			else if(pos !== -1 && !state)
-				this.dependsOn.splice(pos,1);
-		},
-		toggleSubComponent:function(name) {
-			if(name === 'dependsOn') {
-				this.showLanguages  = false;
-				this.showStartForms = false;
-				this.showDependencies = !this.showDependencies;
-			}
-			if(name === 'languages') {
-				this.showDependencies = false;
-				this.showStartForms   = false;
-				this.showLanguages = !this.showLanguages;
-			}
-			if(name === 'startForms') {
-				this.showDependencies = false;
-				this.showLanguages    = false;
-				this.showStartForms = !this.showStartForms;
-			}
-		},
-		
-		// backend calls
-		set:function() {
-			this.languages.sort(); // for change comparissons
-			
-			let requests = [
-				ws.prepare('module','set',{
-					id:this.id,
-					parentId:this.parentId,
-					formId:this.formId,
-					iconId:this.iconId,
-					name:this.name,
-					color1:this.color1,
-					position:this.position,
-					languageMain:this.languageMain,
-					releaseBuild:this.releaseBuild,
-					releaseBuildApp:this.releaseBuildApp,
-					releaseDate:this.releaseDate,
-					dependsOn:this.dependsOn,
-					startForms:this.startForms,
-					languages:this.languages,
-					articleIdsHelp:this.module.articleIdsHelp,
-					captions:this.captions
-				})
-			];
-			
-			if(!this.isNew)
-				requests.push(ws.prepare('schema','check',{moduleId:this.id}));
-			
-			ws.sendMultiple(requests,true).then(
-				() => {
-					if(this.isNew) {
-						this.name      = '';
-						this.captions  = { moduleTitle:{} };
-						this.dependsOn = [];
-					}
-					
-					// reload entire schema if new module or its parent has changed
-					if(this.isNew || this.parentId !== this.module.parentId)
-						this.$root.schemaReload();
-					else
-						this.$root.schemaReload(this.id);
-					
-					// sort array for change comparissons
-					this.dependsOn.sort();
-					this.languages.sort();
-				},
-				this.$root.genericError
-			);
-		}
-	}
 };
 
 let MyBuilderModulesKeyCreate = {
@@ -876,7 +352,6 @@ let MyBuilderModules = {
 	components:{
 		MyBuilderModulesExport,
 		MyBuilderModulesGraph,
-		MyBuilderModulesItem,
 		MyBuilderModulesKeyCreate
 	},
 	template:`<div class="builder-modules">
@@ -885,7 +360,7 @@ let MyBuilderModules = {
 			<div class="top clickable" @click="show = !show">
 				<div class="area nowrap">
 					<img class="icon" :src="displayArrow(show)" />
-					<h1 class="title">{{ capApp.title }}</h1>
+					<h1 class="title">{{ capApp.titleAll }}</h1>
 				</div>
 				
 				<div class="area">
@@ -895,40 +370,36 @@ let MyBuilderModules = {
 				</div>
 			</div>
 			
-			<div class="content min-height default-inputs" v-if="show">
-				<table class="marginBottom">
-					<thead>
-						<tr>
-							<th>{{ capGen.actions }}</th>
-							<th>{{ capGen.icon }}</th>
-							<th>{{ capGen.name }}</th>
-							<th>{{ capGen.id }}</th>
-							<th>{{ capGen.readonly }}</th>
-							<th colspan="2">{{ capApp.color }}</th>
-							<th>{{ capApp.dependsOn }}</th>
-							<th>{{ capApp.parent }}</th>
-							<th>{{ capApp.position }}</th>
-							<th>{{ capApp.startForm }}</th>
-							<th>{{ capApp.languages }}</th>
-							<th>{{ capApp.releaseDate }}</th>
-							<th>{{ capApp.releaseBuild }}</th>
-							<th>{{ capApp.releaseBuildApp }}</th>
-						</tr>
-					</thead>
+			<div class="content min-height" v-if="show">
+				<div class="item-list">
+					<div class="item-wrap new shade">
+						<router-link class="item" :to="'/builder/module'">
+							<img :src="srcBase64Icon(null,'images/module.png')" />
+							<span>{{ capApp.titleNew }}</span>
+						</router-link>
+					</div>
 					
-					<!-- new record -->
-					<my-builder-modules-item
-						:builder-language="builderLanguage"
-					/>
-					
-					<!-- existing records -->
-					<my-builder-modules-item
-						v-for="mod in modules"
-						:builder-language="builderLanguage"
-						:key="mod.id+'_'+mod.releaseBuild"
-						:module="mod"
-					/>
-				</table>
+					<div class="item-wrap shade" v-for="m in modules.filter(v => v.parentId === null)">
+						<router-link class="item"
+							:class="{ parent:modules.filter(v => v.parentId === m.id).length !== 0 }"
+							:to="'/builder/module/'+m.id"
+						>
+							<div class="color" :style="'background-color:#'+m.color1"></div>
+							<img :src="srcBase64Icon(m.iconId,'images/module.png')" />
+							<span>{{ m.name }}</span>
+						</router-link>
+						<div class="item-children">
+							<router-link class="item"
+								v-for="mc in modules.filter(v => v.parentId === m.id)"
+								:to="'/builder/module/'+mc.id"
+							>
+								<div class="color" :style="'background-color:#'+mc.color1"></div>
+								<img :src="srcBase64Icon(mc.iconId,'images/module.png')" />
+								<span>{{ mc.name }}</span>
+							</router-link>
+						</div>
+					</div>
+				</div>
 			</div>
 		</div>
 		
@@ -957,6 +428,7 @@ let MyBuilderModules = {
 		capGen: (s) => s.$store.getters.captions.generic
 	},
 	methods:{
-		displayArrow
+		displayArrow,
+		srcBase64Icon
 	}
 };
