@@ -19,7 +19,7 @@ let MyBuilderIconInput = {
 		</div>
 		
 		<div class="app-sub-window" v-if="showInput && iconIdMap !== null" @click.self="close">
-			<div class="build-icon-input-window shade">
+			<div class="build-icon-input-window">
 				<div class="contentBox">
 					<div class="top lower">
 						<div class="area">

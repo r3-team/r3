@@ -138,7 +138,7 @@ table.builder-vertical>tr>td:last-child{
 	gap:10px;
 }
 .builder-modules .item-wrap{
-	flex:0 0 440px;
+	flex:0 0 360px;
 	padding:6px 12px;
 	display:flex;
 	flex-flow:column nowrap;
@@ -155,7 +155,7 @@ table.builder-vertical>tr>td:last-child{
 	align-items:center;
 	gap:9px;
 	margin:2px 0px;
-	padding:2px;
+	padding:3px;
 	font-size:110%;
 	text-decoration:none;
 	color:inherit;
@@ -165,7 +165,7 @@ table.builder-vertical>tr>td:last-child{
 }
 .builder-modules .item.parent{
 	border-bottom:2px solid var(--color-border);
-	font-size:130%;
+	font-size:120%;
 }
 .builder-modules .item .color{
 	width:12px;

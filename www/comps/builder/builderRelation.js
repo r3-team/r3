@@ -22,6 +22,7 @@ let MyBuilderRelation = {
 	template:`<div class="contentBox builder-relation" v-if="relation">
 		<div class="top lower nowrap">
 			<div class="area">
+				<img class="icon" src="images/database.png" />
 				<h1 class="title">{{ capApp.titleOne.replace('{NAME}',relation.name) }}</h1>
 			</div>
 		</div>

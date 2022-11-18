@@ -20,6 +20,7 @@ let MyBuilderJsFunction = {
 		<div class="contentBox" v-if="jsFunction">
 			<div class="top">
 				<div class="area nowrap">
+					<img class="icon" src="images/code.png" />
 					<my-builder-caption
 						v-model="captions.jsFunctionTitle"
 						:contentName="capApp.titleOne"

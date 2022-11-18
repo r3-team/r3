@@ -1,5 +1,5 @@
 import MyBuilderDocs      from './builderDocs.js';
-import {srcBase64}        from '../shared/image.js';
+import srcBase64Icon      from '../shared/image.js';
 import {getModuleCaption} from '../shared/generic.js';
 import {MyModuleSelect}   from '../input.js';
 export {MyBuilder as default};
@@ -16,8 +16,7 @@ let MyBuilder = {
 				<div class="top lower nowrap">
 					<div class="area">
 						<img class="icon"
-							v-if="module.iconId !== null"
-							:src="srcBase64(iconIdMap[module.iconId].file)"
+							:src="srcBase64Icon(module.iconId,'images/module.png')"
 						/>
 						<h1>{{ getModuleCaption(module,builderLanguage) }}</h1>
 					</div>
@@ -61,7 +60,10 @@ let MyBuilder = {
 					</div>
 					
 					<!-- module read only -->
-					<div class="moduleNoOwner" v-if="!moduleOwner" :title="capApp.noOwnerHint">
+					<div class="moduleNoOwner"
+						v-if="!moduleOwner"
+						:title="capApp.noOwnerHint"
+					>
 						<span>{{ capApp.noOwner }}</span>
 						<my-button image="settings.png"
 							@trigger="$router.push('/admin/modules')"
@@ -69,48 +71,78 @@ let MyBuilder = {
 					</div>
 					
 					<!-- module component navigation -->
-					<div class="navigation-two-columns">
+					<div class="navigation-two-columns" v-if="module">
 						<div class="navigation-column">
-							<router-link class="entry center clickable"
+							<router-link class="entry clickable"
 								:to="'/builder/module/'+module.id"
-							>{{ capApp.navigationModule }}</router-link>
+							>
+								<img src="images/module.png" />
+								<span>{{ capApp.navigationModule }}</span>
+							</router-link>
 							
-							<router-link class="entry center clickable"
+							<router-link class="entry clickable"
 								:to="'/builder/relations/'+module.id"
-							>{{ capApp.navigationRelations }}</router-link>
+							>
+								<img src="images/database.png" />
+								<span>{{ capApp.navigationRelations }}</span>
+							</router-link>
 							
-							<router-link class="entry center clickable"
+							<router-link class="entry clickable"
 								:to="'/builder/roles/'+module.id"
-							>{{ capApp.navigationRoles }}</router-link>
+							>
+								<img src="images/personMultiple.png" />
+								<span>{{ capApp.navigationRoles }}</span>
+							</router-link>
 							
-							<router-link class="entry center clickable"
+							<router-link class="entry clickable"
 								:to="'/builder/forms/'+module.id"
-							>{{ capApp.navigationForms }}</router-link>
+							>
+								<img src="images/form.png" />
+								<span>{{ capApp.navigationForms }}</span>
+							</router-link>
 							
-							<router-link class="entry center clickable"
+							<router-link class="entry clickable"
 								:to="'/builder/menu/'+module.id"
-							>{{ capApp.navigationMenu }}</router-link>
+							>
+								<img src="images/flexRow.png" />
+								<span>{{ capApp.navigationMenu }}</span>
+							</router-link>
 						</div>
 						<div class="navigation-column">
-							<router-link class="entry center clickable"
+							<router-link class="entry clickable"
 								:to="'/builder/icons/'+module.id"
-							>{{ capApp.navigationIcons }}</router-link>
+							>
+								<img src="images/icon.png" />
+								<span>{{ capApp.navigationIcons }}</span>
+							</router-link>
 							
-							<router-link class="entry center clickable"
+							<router-link class="entry clickable"
 								:to="'/builder/functions/'+module.id"
-							>{{ capApp.navigationFunctions }}</router-link>
+							>
+								<img src="images/code.png" />
+								<span>{{ capApp.navigationFunctions }}</span>
+							</router-link>
 							
-							<router-link class="entry center clickable"
+							<router-link class="entry clickable"
 								:to="'/builder/collections/'+module.id"
-							>{{ capApp.navigationCollections }}</router-link>
+							>
+								<img src="images/tray.png" />
+								<span>{{ capApp.navigationCollections }}</span>
+							</router-link>
 							
-							<router-link class="entry center clickable"
+							<router-link class="entry clickable"
 								:to="'/builder/login-forms/'+module.id"
-							>{{ capApp.navigationLoginForms }}</router-link>
+							>
+								<img src="images/personCog.png" />
+								<span>{{ capApp.navigationLoginForms }}</span>
+							</router-link>
 							
-							<router-link class="entry center clickable"
+							<router-link class="entry clickable"
 								:to="'/builder/articles/'+module.id"
-							>{{ capApp.navigationArticles }}</router-link>
+							>
+								<img src="images/question.png" />
+								<span>{{ capApp.navigationArticles }}</span>
+							</router-link>
 							
 							<!-- so router link is not last child (CSS) -->
 							<div />
@@ -118,11 +150,11 @@ let MyBuilder = {
 					</div>
 					
 					<div class="navigation-entities-header" v-if="subMenu">
-						<h1 v-if="navigation === 'forms'">{{ capApp.navigationFormsSub }}</h1>
-						<h1 v-if="navigation === 'functions'">{{ capApp.navigationFunctionsSub }}</h1>
-						<h1 v-if="navigation === 'roles'">{{ capApp.navigationRolesSub }}</h1>
-						<h1 v-if="navigation === 'relations'">{{ capApp.navigationRelationsSub }}</h1>
-						<h1 v-if="navigation === 'collections'">{{ capApp.navigationCollectionsSub }}</h1>
+						<h1 v-if="navigation === 'forms'">{{ capApp.navigationForms }}</h1>
+						<h1 v-if="navigation === 'functions'">{{ capApp.navigationFunctions }}</h1>
+						<h1 v-if="navigation === 'roles'">{{ capApp.navigationRoles }}</h1>
+						<h1 v-if="navigation === 'relations'">{{ capApp.navigationRelations }}</h1>
+						<h1 v-if="navigation === 'collections'">{{ capApp.navigationCollections }}</h1>
 						<input class="lookup" placeholder="..."
 							v-model="filter"
 							:title="capApp.navigationFilterHint"
@@ -273,6 +305,8 @@ let MyBuilder = {
 						this.builderLanguage = this.settings.languageCode;
 					else if(mod.languages.length !== 0)
 						this.builderLanguage = mod.languages[0];
+				} else {
+					this.builderLanguage = 'en_us';
 				}
 			},
 			immediate:true
@@ -298,8 +332,9 @@ let MyBuilder = {
 		},
 		
 		// simple
-		module:     (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
-		moduleOwner:(s) => s.moduleId === '' ? false : s.moduleIdMapOptions[s.moduleId].owner,
+		isNew:      (s) => s.moduleId === '',
+		module:     (s) => s.isNew ? false : s.moduleIdMap[s.moduleId],
+		moduleOwner:(s) => s.isNew ? true  : s.moduleIdMapOptions[s.moduleId].owner,
 		
 		// stores
 		modules:           (s) => s.$store.getters['schema/modules'],
@@ -321,7 +356,7 @@ let MyBuilder = {
 	methods:{
 		// externals
 		getModuleCaption,
-		srcBase64,
+		srcBase64Icon,
 		
 		handleHotkeys(evt) {
 			// language switch

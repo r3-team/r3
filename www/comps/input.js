@@ -69,13 +69,14 @@ let MyModuleSelect = {
 		:value="modelValue"
 	>
 		<option
-			v-for="m in modules"
+			v-for="m in modules.filter(v => !moduleIdsFilter.includes(v.id))"
 			:disabled="enableAssignable && displayInvalid(m)"
 			:value="m.id"
 		>{{ displayModuleName(m) }}</option>
 	</select>`,
 	props:{
 		enableAssignable:{ type:Boolean, required:false, default:false },
+		moduleIdsFilter: { type:Array,   required:false, default:() => [] },
 		modelValue:      { required:true } // module ID
 	},
 	emits:['update:modelValue'],

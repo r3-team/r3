@@ -38,6 +38,7 @@ let MyBuilderForm = {
 			<div class="builder-form-content" v-show="!showStatesFull || !showStates">
 				<div class="top">
 					<div class="area nowrap">
+						<img class="icon" src="images/form.png" />
 						<my-builder-icon-input
 							@input="iconId = $event"
 							:icon-id-selected="iconId"

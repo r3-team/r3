@@ -380,22 +380,24 @@ let MyBuilderModules = {
 					</div>
 					
 					<div class="item-wrap shade" v-for="m in modules.filter(v => v.parentId === null)">
-						<router-link class="item"
-							:class="{ parent:modules.filter(v => v.parentId === m.id).length !== 0 }"
+						<router-link class="item parent"
+							:title="capApp.position+': '+m.position"
 							:to="'/builder/module/'+m.id"
 						>
 							<div class="color" :style="'background-color:#'+m.color1"></div>
 							<img :src="srcBase64Icon(m.iconId,'images/module.png')" />
-							<span>{{ m.name }}</span>
+							<span>{{ m.name + ' - v' + m.releaseBuild }}</span>
 						</router-link>
+						
 						<div class="item-children">
 							<router-link class="item"
 								v-for="mc in modules.filter(v => v.parentId === m.id)"
+								:title="capApp.position+': '+m.position" 
 								:to="'/builder/module/'+mc.id"
 							>
 								<div class="color" :style="'background-color:#'+mc.color1"></div>
 								<img :src="srcBase64Icon(mc.iconId,'images/module.png')" />
-								<span>{{ mc.name }}</span>
+								<span>{{ mc.name + ' - v' + mc.releaseBuild }}</span>
 							</router-link>
 						</div>
 					</div>

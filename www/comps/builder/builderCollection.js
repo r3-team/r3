@@ -22,7 +22,7 @@ let MyBuilderCollection = {
 		<div class="contentBox grow">
 			<div class="top">
 				<div class="area nowrap">
-					<div class="separator"></div>
+					<img class="icon" src="images/tray.png" />
 					<h1 class="title">
 						{{ capApp.titleOne.replace('{NAME}',collection.name) }}
 					</h1>

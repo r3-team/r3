@@ -160,6 +160,7 @@ let MyBuilderMenu = {
 		
 		<div class="top">
 			<div class="area nowrap">
+				<img class="icon" src="images/menu.png" />
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
 		</div>

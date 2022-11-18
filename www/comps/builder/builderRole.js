@@ -223,7 +223,7 @@ let MyBuilderRole = {
 			
 		<div class="top">
 			<div class="area nowrap">
-				<div class="separator"></div>
+				<img class="icon" src="images/personMultiple.png" />
 				<my-builder-caption
 					v-model="captions.roleTitle"
 					:contentName="capApp.titleOne"

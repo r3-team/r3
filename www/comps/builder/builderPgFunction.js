@@ -17,6 +17,7 @@ let MyBuilderPgFunction = {
 		<div class="contentBox" v-if="pgFunction">
 			<div class="top">
 				<div class="area nowrap">
+					<img class="icon" src="images/code.png" />
 					<my-builder-caption
 						v-model="captions.pgFunctionTitle"
 						:contentName="capApp.titleOne"

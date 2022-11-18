@@ -1,8 +1,13 @@
 import MyBuilderCaption      from './builderCaption.js';
 import MyBuilderIconInput    from './builderIconInput.js';
+import srcBase64Icon         from '../shared/image.js';
 import {getDependentModules} from '../shared/builder.js';
-import {copyValueDialog}     from '../shared/generic.js';
 import {getUnixFormat}       from '../shared/time.js';
+import {MyModuleSelect}      from '../input.js';
+import {
+	copyValueDialog,
+	getNilUuid
+} from '../shared/generic.js';
 export {MyBuilderModule as default};
 
 let MyBuilderModuleStartForm = {
@@ -65,11 +70,13 @@ let MyBuilderModule = {
 		'chrome-picker':VueColor.Chrome,
 		MyBuilderCaption,
 		MyBuilderIconInput,
-		MyBuilderModuleStartForm
+		MyBuilderModuleStartForm,
+		MyModuleSelect
 	},
 	template:`<div class="builder-module contentBox grow">
 		<div class="top">
 			<div class="area nowrap">
+				<img class="icon" src="images/module.png" />
 				<h1 class="title">{{ isNew ? capApp.titleNew : capApp.title.replace('{NAME}',this.name) }}</h1>
 			</div>
 		</div>
@@ -81,14 +88,22 @@ let MyBuilderModule = {
 					:caption="isNew ? capGen.button.create : capGen.button.save"
 				/>
 				<my-button image="refresh.png"
+					v-if="!isNew"
 					@trigger="reset"
 					:active="hasChanges"
 					:caption="capGen.button.refresh"
 				/>
 				<my-button image="visible1.png"
+					v-if="!isNew"
 					@trigger="copyValueDialog(module.name,module.id,module.id)"
 					:active="!isNew"
 					:caption="capGen.id"
+				/>
+				<my-button image="upward.png"
+					v-if="isNew"
+					@trigger="goBack()"
+					:caption="capGen.button.goBack"
+					:cancel="true"
 				/>
 			</div>
 		</div>
@@ -100,57 +115,17 @@ let MyBuilderModule = {
 					<td><input v-model="name" :disabled="readonly" /></td>
 					<td>{{ capApp.nameHint }}</td>
 				</tr>
-				<tr>
+				<tr v-if="!isNew">
 					<td>{{ capGen.title }}</td>
 					<td>
 						<my-builder-caption class="title"
 							v-model="captions.moduleTitle"
 							:contentName="''"
 							:language="builderLanguage"
-							:readonly="isNew || readonly"
+							:readonly="readonly"
 						/>
 					</td>
 					<td>{{ capApp.titleHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capGen.icon }}</td>
-					<td>
-						<my-builder-icon-input
-							@input="iconId = $event"
-							:icon-id-selected="iconId"
-							:module="module"
-							:readonly="isNew || readonly"
-						/>
-					</td>
-					<td>{{ capApp.iconHint }}</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.color }}</td>
-					<td>
-						<div class="row gap">
-							<input class="short"
-								v-model="color1"
-								:disabled="readonly"
-							/>
-							<div v-click-outside="hideColorPicker">
-								<div class="builder-color clickable shade"
-									@click="showColorPicker = !showColorPicker"
-									:style="styleColorPreview"
-								></div>
-								
-								<div class="colorPickerWrap">
-									<chrome-picker class="colorPickerFloating"
-										v-if="showColorPicker"
-										@update:modelValue="setColor"
-										:disable-alpha="true"
-										:disable-fields="true"
-										:modelValue="color1"
-									/>
-								</div>
-							</div>
-						</div>
-					</td>
-					<td>{{ capApp.colorHint }}</td>
 				</tr>
 				<tr>
 					<td>{{ capApp.dependsOn }}</td>
@@ -164,19 +139,57 @@ let MyBuilderModule = {
 								:naked="true"
 							/>
 						</div>
-						<select @change="toggleDependsOn($event.target.value,true)" :disabled="readonly">
-							<option :value="null"><i>[{{ capApp.dependsOnAdd }}]</i></option>
-							<option
-								v-for="m in modules.filter(v => v.id !== module.id && !dependsOn.includes(v.id))"
-								:value="m.id"
-							>
-								{{ m.name }}
-							</option>
-						</select>
+						<my-module-select
+							v-if="!readonly"
+							@update:modelValue="toggleDependsOn($event,true)"
+							:moduleIdsFilter="dependsOn.concat([id])"
+							:modelValue="moduleIdDependsOnInput"
+						/>
 					</td>
 					<td>{{ capApp.dependsOnHint }}</td>
 				</tr>
+				<tr v-if="!isNew">
+					<td>{{ capGen.icon }}</td>
+					<td>
+						<my-builder-icon-input
+							@input="iconId = $event"
+							:icon-id-selected="iconId"
+							:module="module"
+							:readonly="readonly"
+						/>
+					</td>
+					<td>{{ capApp.iconHint }}</td>
+				</tr>
 				<tr>
+					<td>{{ capApp.color }}</td>
+					<td>
+						<div class="row gap">
+							<input class="short"
+								v-model="color1"
+								:disabled="readonly"
+							/>
+							<div v-click-outside="hideColorPicker">
+								<div class="builder-color shade"
+									@click="showColorPicker = !showColorPicker"
+									:class="{ clickable:!readonly }"
+									:style="styleColorPreview"
+								></div>
+								
+								<div class="colorPickerWrap" v-if="!readonly">
+									<chrome-picker class="colorPickerFloating"
+										v-if="showColorPicker"
+										@update:modelValue="setColor"
+										:disable-alpha="true"
+										:disable-fields="true"
+										:modelValue="color1"
+									/>
+								</div>
+							</div>
+						</div>
+					</td>
+					<td>{{ capApp.colorHint }}</td>
+				</tr>
+				<tr v-if="!isNew">
 					<td>{{ capApp.parent }}</td>
 					<td>
 						<select v-model="parentId" :disabled="readonly">
@@ -196,7 +209,7 @@ let MyBuilderModule = {
 					<td><input class="short" v-model.number="position" :disabled="readonly" /></td>
 					<td>{{ capApp.positionHint }}</td>
 				</tr>
-				<tr>
+				<tr v-if="!isNew">
 					<td>{{ capApp.startFormDefault }}</td>
 					<td>
 						<select v-model="formId" :disabled="readonly">
@@ -208,7 +221,7 @@ let MyBuilderModule = {
 					</td>
 					<td>{{ capApp.startFormDefaultHint }}</td>
 				</tr>
-				<tr>
+				<tr v-if="!isNew">
 					<td>{{ capApp.startFormByRole }}</td>
 					<td>
 						<div class="item-list">
@@ -275,25 +288,32 @@ let MyBuilderModule = {
 					</td>
 					<td>{{ capApp.languageMainHint }}</td>
 				</tr>
-				<tr>
+				<tr v-if="!isNew">
 					<td>{{ capApp.releaseDate }}</td>
 					<td colspan="2"><input :value="displayReleaseDate" disabled="disabled" /></td>
 				</tr>
-				<tr>
+				<tr v-if="!isNew">
 					<td>{{ capApp.releaseBuild }}</td>
 					<td colspan="2"><input class="short" v-model="releaseBuild" disabled="disabled" /></td>
 				</tr>
-				<tr>
+				<tr v-if="!isNew">
 					<td>{{ capApp.releaseBuildApp }}</td>
 					<td colspan="2"><input class="short" v-model="releaseBuildApp" disabled="disabled" /></td>
 				</tr>
 			</table>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		id:             { type:String,  required:false, default:'' },
 		readonly:       { type:Boolean, required:true }
+	},
+	mounted:function() {
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted:function() {
+		this.$emit('hotkeysRegister',[]);
 	},
 	data:function() {
 		return {
@@ -317,6 +337,7 @@ let MyBuilderModule = {
 			},
 			
 			// states
+			moduleIdDependsOnInput:null,
 			showColorPicker:false,
 			showDependencies:false,
 			showLanguages:false,
@@ -361,7 +382,9 @@ let MyBuilderModule = {
 		// externals
 		copyValueDialog,
 		getDependentModules,
+		getNilUuid,
 		getUnixFormat,
+		srcBase64Icon,
 		
 		reset() {
 			if(!this.module) return;
@@ -394,6 +417,9 @@ let MyBuilderModule = {
 				roleId:null
 			});
 		},
+		goBack() {
+			window.history.back();
+		},
 		hideColorPicker() {
 			this.showColorPicker = false;
 		},
@@ -415,7 +441,7 @@ let MyBuilderModule = {
 			
 			let requests = [
 				ws.prepare('module','set',{
-					id:this.id,
+					id:this.isNew ? this.getNilUuid() : this.id,
 					parentId:this.parentId,
 					formId:this.formId,
 					iconId:this.iconId,
@@ -439,21 +465,14 @@ let MyBuilderModule = {
 			
 			ws.sendMultiple(requests,true).then(
 				() => {
-					if(this.isNew) {
-						this.name      = '';
-						this.captions  = { moduleTitle:{} };
-						this.dependsOn = [];
-					}
-					
 					// reload entire schema if new module or its parent has changed
 					if(this.isNew || this.parentId !== this.module.parentId)
 						this.$root.schemaReload();
 					else
 						this.$root.schemaReload(this.id);
 					
-					// sort array for change comparissons
-					this.dependsOn.sort();
-					this.languages.sort();
+					if(this.isNew)
+						setTimeout(() => this.$router.push('/builder/modules'),1000);
 				},
 				this.$root.genericError
 			);
