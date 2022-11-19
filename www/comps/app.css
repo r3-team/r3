@@ -187,7 +187,10 @@ body                                         { --depth:6; }
 .builder-menu                                { --depth:4; }
 .builder-articles-assign                     { --depth:2; }
 .builder-articles-body-richtext              { --depth:0; }
-table.builder-vertical td                    { --depth:5; }
+.builder-entry-list .entry                   { --depth:5; }
+.builder-entry-list .entry:focus             { --depth:2; }
+.builder-entry-list .entry:hover             { --depth:2; }
+.builder-table-vertical td                   { --depth:5; }
 
 
 html,body{
@@ -566,11 +569,6 @@ h3{
 }
 .content-row span{
 	margin:0px 12px 0px 0px;
-}
-
-/* generic margins */
-.marginBottom{
-	margin:0px 0px 20px !important;
 }
 
 /* generic styles */

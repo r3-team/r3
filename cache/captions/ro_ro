@@ -859,13 +859,15 @@
 				"exportKeySet":"Păstrați cheia în memorie",
 				"graph":"Graficul dependențelor",
 				"keyCreate":"Generează",
+				"manageApps":"Manage applications",
+				"repo":"Install from repository",
 				"versionCreate":"Creați o nouă versiune"
 			},
 			"color":"Culoarea",
 			"colorHint":"Primary application color - shown in the header and menu if not overwritten by customizing and/or user settings. The system styles are optimized for washed out, darkish colors (dark pastel).",
 			"dependsOn":"Builds on",
 			"dependsOnAdd":"Add application",
-			"dependsOnHint":"Use other applications as foundation for your own. This enables reuse or extension of existing relations, forms and so on. Especially useful for extending data sets for niche requirements.",
+			"dependsOnHint":"Use other applications as foundation for your own. This enables reuse or extension of existing relations, forms and so on.",
 			"export":"Transfer - Exportați aplicația într-un fișier",
 			"exportKeyBad":"Signing key seems invalid. Make sure to use the private key for exporting applications.",
 			"exportKeyEmpty":"Pentru export este necesară cheia pentru semnătură",
@@ -886,8 +888,8 @@
 			"languageMainHint":"Is used if the chosen user language is not offered by your application.",
 			"languages":"Application languages",
 			"languagesHint":"Languages that the application is available in.",
-			"nameHint":"A unique reference name for your application. Only lower case letters, numbers, dashes and underscores are allowed (example: 'inventory_manager'). Consider using a prefix to keep the name unique, such as 'mcl' for 'My Company Limited' (full name: 'mcl_inventory_manager').",
-			"new":"Aplicație nouă",
+			"nameHint":"Reference name for this application. The name must be unique within a REI3 system, so consider using a prefix based on your organization name.",
+			"nameHolder":"work_scheduler, inventory_planner, ...",
 			"parent":"Atribuit către",
 			"parentHint":"When assigned to another application, it will be displayed as its child in menus and overviews - there is no other functional change. Applications can only be assigned to applications that they build on.",
 			"position":"Poziția implicită",
@@ -901,8 +903,15 @@
 			"startFormDefaultHint":"Form that is shown, when user opens the application.",
 			"title":"Application '{NAME}'",
 			"titleAll":"Aplicații",
-			"titleHint":"The application title, visible to users when working with your application.",
-			"titleNew":"New application"
+			"titleHint":"The application title, visible to users when working with your application."
+		},
+		"new":{
+			"message":{
+				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Some examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
+				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p>"
+			},
+			"module":"Aplicație nouă",
+			"relation":"Relație nouă"
 		},
 		"openFormInput":{
 			"attributeApply":"...pentru a seta valoare formularului",
@@ -969,13 +978,12 @@
 			"isDeferrable":"AMÂNATĂ",
 			"isDeferred":"INIT. AMÂNAT",
 			"length":"Lungime",
-			"new":"Relație nouă",
 			"nullable":"Poate fi nulă",
 			"onDelete":"DELETE",
 			"onInsert":"INSERT",
 			"onUpdate":"UPDATE",
 			"perRow":"EACH ROW",
-			"policies":"Politici",
+			"policies":"Politici ({CNT})",
 			"policyActions":"Acțiune",
 			"policyActionDelete":"Ștergeți",
 			"policyActionSelect":"Afișează",
@@ -993,12 +1001,13 @@
 			"previewLimit":"Înregistrări/pagină",
 			"previewPage":"Pagină",
 			"previewRowCount":"Număr de înregistrări",
+			"properties":"Properties",
 			"relationship":"Relație",
 			"retention":"Jurnalul de modificări",
 			"retentionCount":"Păstrați X modificări",
 			"retentionDays":"Păstrați timp de X zile",
 			"title":"Relații",
-			"titleOne":"Detalii despre relația '{NAME}'",
+			"titleOne":"Relația '{NAME}'",
 			"triggers":"Declanșatoare ({CNT})"
 		},
 		"role":{

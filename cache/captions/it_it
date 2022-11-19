@@ -859,13 +859,15 @@
 				"exportKeySet":"Memorizza la chiave in memoria",
 				"graph":"Grafico delle dipendenze",
 				"keyCreate":"Genera",
+				"manageApps":"Manage applications",
+				"repo":"Install from repository",
 				"versionCreate":"Crea nuova versione"
 			},
 			"color":"Colore",
 			"colorHint":"Primary application color - shown in the header and menu if not overwritten by customizing and/or user settings. The system styles are optimized for washed out, darkish colors (dark pastel).",
 			"dependsOn":"Builds on",
 			"dependsOnAdd":"Add application",
-			"dependsOnHint":"Use other applications as foundation for your own. This enables reuse or extension of existing relations, forms and so on. Especially useful for extending data sets for niche requirements.",
+			"dependsOnHint":"Use other applications as foundation for your own. This enables reuse or extension of existing relations, forms and so on.",
 			"export":"Trasferisci - Esporta l'applicazione in un file",
 			"exportKeyBad":"Signing key seems invalid. Make sure to use the private key for exporting applications.",
 			"exportKeyEmpty":"La chiave di firma è necessaria per l'esportazione",
@@ -886,8 +888,8 @@
 			"languageMainHint":"Is used if the chosen user language is not offered by your application.",
 			"languages":"Application languages",
 			"languagesHint":"Languages that the application is available in.",
-			"nameHint":"A unique reference name for your application. Only lower case letters, numbers, dashes and underscores are allowed (example: 'inventory_manager'). Consider using a prefix to keep the name unique, such as 'mcl' for 'My Company Limited' (full name: 'mcl_inventory_manager').",
-			"new":"Nuova applicazione",
+			"nameHint":"Reference name for this application. The name must be unique within a REI3 system, so consider using a prefix based on your organization name.",
+			"nameHolder":"work_scheduler, inventory_planner, ...",
 			"parent":"Assegnato a",
 			"parentHint":"When assigned to another application, it will be displayed as its child in menus and overviews - there is no other functional change. Applications can only be assigned to applications that they build on.",
 			"position":"Posizione predefinita",
@@ -901,8 +903,15 @@
 			"startFormDefaultHint":"Form that is shown, when user opens the application.",
 			"title":"Application '{NAME}'",
 			"titleAll":"Applicazioni",
-			"titleHint":"The application title, visible to users when working with your application.",
-			"titleNew":"New application"
+			"titleHint":"The application title, visible to users when working with your application."
+		},
+		"new":{
+			"message":{
+				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Some examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
+				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p>"
+			},
+			"module":"Nuova applicazione",
+			"relation":"Nuova relazione"
 		},
 		"openFormInput":{
 			"attributeApply":"...per impopstare il valore sul modulo",
@@ -969,13 +978,12 @@
 			"isDeferrable":"DEFERRABLE",
 			"isDeferred":"INIT. DEFERRED",
 			"length":"Lunghezza",
-			"new":"Nuova relazione",
 			"nullable":"Vuoto",
 			"onDelete":"DELETE",
 			"onInsert":"INSERT",
 			"onUpdate":"UPDATE",
 			"perRow":"EACH ROW",
-			"policies":"Politica",
+			"policies":"Politica ({CNT})",
 			"policyActions":"Azione",
 			"policyActionDelete":"Dancella",
 			"policyActionSelect":"Visualizza",
@@ -993,12 +1001,13 @@
 			"previewLimit":"Record/pagina",
 			"previewPage":"Pagina",
 			"previewRowCount":"Numero record",
+			"properties":"Properties",
 			"relationship":"Relazioni",
 			"retention":"Log cambiamenti",
 			"retentionCount":"Mantieni X modifiche",
 			"retentionDays":"Mantieni X giorni",
 			"title":"Relazioni",
-			"titleOne":"Dettagli relazione '{NAME}'",
+			"titleOne":"Relazione '{NAME}'",
 			"triggers":"Triggers ({CNT})"
 		},
 		"role":{

@@ -97,7 +97,7 @@ const MyRouter = VueRouter.createRouter({
 				path:'modules',
 				component:MyBuilderModules
 			},{
-				path:'module/:id?',
+				path:'module/:id',
 				meta:{ nav:'module', target:'module' },
 				component:MyBuilderModule,
 				props:true

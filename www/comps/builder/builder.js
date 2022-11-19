@@ -1,4 +1,5 @@
 import MyBuilderDocs      from './builderDocs.js';
+import MyBuilderNew       from './builderNew.js';
 import srcBase64Icon      from '../shared/image.js';
 import {getModuleCaption} from '../shared/generic.js';
 import {MyModuleSelect}   from '../input.js';
@@ -8,6 +9,7 @@ let MyBuilder = {
 	name:'my-builder',
 	components:{
 		MyBuilderDocs,
+		MyBuilderNew,
 		MyModuleSelect
 	},
 	template:`<div class="builder equal-width">
@@ -23,6 +25,7 @@ let MyBuilder = {
 					<div class="area">
 						<my-button image="question.png"
 							@trigger="showDocs = !showDocs"
+							:captionTitle="capGen.help"
 							:tight="true"
 						/>
 					</div>
@@ -155,10 +158,16 @@ let MyBuilder = {
 						<h1 v-if="navigation === 'roles'">{{ capApp.navigationRoles }}</h1>
 						<h1 v-if="navigation === 'relations'">{{ capApp.navigationRelations }}</h1>
 						<h1 v-if="navigation === 'collections'">{{ capApp.navigationCollections }}</h1>
-						<input class="lookup" placeholder="..."
-							v-model="filter"
-							:title="capApp.navigationFilterHint"
-						/>
+						<div class="row gap centered default-inputs">
+							<input class="short" placeholder="..."
+								v-model="filter"
+								:title="capApp.navigationFilterHint"
+							/>
+							<my-button image="add.png"
+								v-if="navigation.includes('relations')"
+								@trigger="add"
+							/>
+						</div>
 					</div>
 					
 					<!-- module sub component navigation -->
@@ -233,6 +242,7 @@ let MyBuilder = {
 		<router-view
 			v-if="ready"
 			v-show="!showDocs"
+			@createNew="createNew = $event"
 			@hotkey="handleHotkeys"
 			@hotkeysRegister="hotkeysChild = $event"
 			@toggleDocs="showDocs = !showDocs"
@@ -244,6 +254,14 @@ let MyBuilder = {
 			v-if="showDocs"
 			@close="showDocs = false"
 		/>
+		
+		<!-- new entity dialog -->
+		<my-builder-new
+			v-if="createNew !== null"
+			@close="createNew = null"
+			:entity="createNew"
+			:moduleId="moduleId"
+		/>
 	</div>`,
 	created:function() {
 		window.addEventListener('keydown',this.handleHotkeys);
@@ -254,6 +272,7 @@ let MyBuilder = {
 	data:function() {
 		return {
 			builderLanguage:'', // selected language for translations
+			createNew:null,     // entity to create (module, relation, ...)
 			filter:'',          // simple text filter for menu
 			hotkeysChild:[],    // hotkeys from child components
 			moduleId:'',        // selected module ID
@@ -323,11 +342,9 @@ let MyBuilder = {
 				if(!this.module) return '';
 				return this.module.id;
 			},
-			set(value) {
-				if(value === '')
-					this.$router.push(`/builder/modules`);
-				else
-					this.$router.push(`/builder/${this.navigation}/${value}`);
+			set(v) {
+				if(v === '') this.$router.push(`/builder/modules`);
+				else         this.$router.push(`/builder/${this.navigation}/${v}`);
 			}
 		},
 		
@@ -358,6 +375,7 @@ let MyBuilder = {
 		getModuleCaption,
 		srcBase64Icon,
 		
+		// handlers
 		handleHotkeys(evt) {
 			// language switch
 			if(evt.ctrlKey && evt.key === 'q')
@@ -375,6 +393,13 @@ let MyBuilder = {
 					evt.preventDefault();
 					k.fnc();
 				}
+			}
+		},
+		
+		// actions
+		add() {
+			switch(this.navigation) {
+				case 'relations': this.createNew = 'relation'; break;
 			}
 		},
 		nextLanguage() {

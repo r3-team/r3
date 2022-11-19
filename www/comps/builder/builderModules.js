@@ -364,21 +364,33 @@ let MyBuilderModules = {
 				</div>
 				
 				<div class="area">
+					<my-button image="box.png"
+						@trigger="$router.push('/admin/repo')"
+						:caption="capApp.button.repo"
+					/>
+					<my-button image="builder.png"
+						@trigger="$router.push('/admin/modules')"
+						:caption="capApp.button.manageApps"
+					/>
 					<my-button image="question.png"
-						@trigger="$emit('toggle-docs')"
+						@trigger="$emit('toggleDocs')"
+						:caption="capGen.help"
 					/>
 				</div>
 			</div>
 			
 			<div class="content min-height" v-if="show">
 				<div class="item-list">
+				
+					<!-- new module -->
 					<div class="item-wrap new shade">
-						<router-link class="item" :to="'/builder/module'">
+						<div class="item" @click="$emit('createNew','module')">
 							<img :src="srcBase64Icon(null,'images/module.png')" />
-							<span>{{ capApp.titleNew }}</span>
-						</router-link>
+							<span>{{ capGen.button.add }}</span>
+						</div>
 					</div>
 					
+					<!-- existing modules -->
 					<div class="item-wrap shade" v-for="m in modules.filter(v => v.parentId === null)">
 						<router-link class="item parent"
 							:title="capApp.position+': '+m.position"
@@ -412,17 +424,11 @@ let MyBuilderModules = {
 	props:{
 		builderLanguage:{ type:String, required:true }
 	},
-	emits:['set-module-id','toggle-docs'],
+	emits:['createNew','toggleDocs'],
 	data:function() {
 		return {
 			show:true
 		};
-	},
-	watch:{
-		$route:{
-			handler:function() { this.$emit('set-module-id',''); },
-			immediate:true
-		}
 	},
 	computed:{
 		modules:(s) => s.$store.getters['schema/modules'],

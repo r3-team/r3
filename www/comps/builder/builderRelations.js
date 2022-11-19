@@ -1,389 +1,30 @@
-import {getDependentModules} from '../shared/builder.js';
-import {copyValueDialog}     from '../shared/generic.js';
 export {MyBuilderRelations as default};
-
-let MyBuilderRelationsItemPolicy = {
-	name:'my-builder-relations-item-policy',
-	template:`<tr>
-		<td>#{{ position+1 }}</td>
-		<td>
-			<select v-model="roleId" :disabled="readonly">
-				<optgroup
-					v-for="mod in getDependentModules(module,modules)"
-					:label="mod.name"
-				>
-					<option v-for="r in mod.roles" :value="r.id">
-						{{ r.name }}
-					</option>
-				</optgroup>
-			</select>
-		</td>
-		<td><my-bool v-model="actionSelect" :readonly="readonly" /></td>
-		<td><my-bool v-model="actionUpdate" :readonly="readonly" /></td>
-		<td><my-bool v-model="actionDelete" :readonly="readonly" /></td>
-		<td>
-			<select v-model="pgFunctionIdExcl" :disabled="readonly">
-				<option :value="null">[{{ capApp.policyNotSet }}]</option>
-				<option v-for="f in filterFunctions" :value="f.id">
-					{{ f.name }}
-				</option>
-			</select>
-		</td>
-		<td>
-			<select v-model="pgFunctionIdIncl" :disabled="readonly">
-				<option :value="null">[{{ capApp.policyNotSet }}]</option>
-				<option v-for="f in filterFunctions" :value="f.id">
-					{{ f.name }}
-				</option>
-			</select>
-		</td>
-		<td>
-			<div class="row centered">
-				<my-button image="arrowDown.png"
-					v-if="!isLast"
-					@trigger="$emit('moveDown')"
-					:active="!readonly"
-					:naked="true"
-					:tight="true"
-				/>
-				<my-button image="arrowUp.png"
-					v-if="position !== 0"
-					@trigger="$emit('moveUp')"
-					:active="!readonly"
-					:naked="true"
-					:tight="true"
-				/>
-			</div>
-		</td>
-		<td>
-			<my-button image="cancel.png"
-				@trigger="$emit('remove')"
-				:active="!readonly"
-				:naked="true"
-				:tight="true"
-			/>
-		</td>
-	</tr>`,
-	props:{
-		isLast:    { type:Boolean, required:true },
-		modelValue:{ type:Object,  required:true },
-		moduleId:  { type:String,  required:true },
-		position:  { type:Number,  required:true },
-		readonly:  { type:Boolean, required:true }
-	},
-	emits:['moveDown','moveUp','remove','update:modelValue'],
-	computed:{
-		filterFunctions:function() {
-			// limit to integer array returns, as in: INTEGER[], bigint[], INT [] or integer ARRAY
-			let pat = /^(integer|bigint|int)(\s?\[\]|\sarray)$/i;
-			let out = [];
-			for(let i = 0, j = this.module.pgFunctions.length; i < j; i++) {
-				let f = this.module.pgFunctions[i];
-				
-				if(pat.test(f.codeReturns))
-					out.push(f);
-			}
-			return out;
-		},
-		
-		// inputs
-		actionDelete:{
-			get:function()  { return this.modelValue.actionDelete; },
-			set:function(v) { this.update('actionDelete',v); }
-		},
-		actionSelect:{
-			get:function()  { return this.modelValue.actionSelect; },
-			set:function(v) { this.update('actionSelect',v); }
-		},
-		actionUpdate:{
-			get:function()  { return this.modelValue.actionUpdate; },
-			set:function(v) { this.update('actionUpdate',v); }
-		},
-		pgFunctionIdExcl:{
-			get:function()  { return this.modelValue.pgFunctionIdExcl; },
-			set:function(v) { this.update('pgFunctionIdExcl',v); }
-		},
-		pgFunctionIdIncl:{
-			get:function()  { return this.modelValue.pgFunctionIdIncl; },
-			set:function(v) { this.update('pgFunctionIdIncl',v); }
-		},
-		roleId:{
-			get:function()  { return this.modelValue.roleId; },
-			set:function(v) { this.update('roleId',v); }
-		},
-		
-		// stores
-		module: function() { return this.$store.getters['schema/moduleIdMap'][this.moduleId]; },
-		modules:function() { return this.$store.getters['schema/modules']; },
-		capApp: function() { return this.$store.getters.captions.builder.relation; }
-	},
-	methods:{
-		// external
-		getDependentModules,
-		
-		update:function(name,value) {
-			let v = JSON.parse(JSON.stringify(this.modelValue));
-			v[name] = value;
-			
-			this.$emit('update:modelValue',v);
-		}
-	}
-};
-
-let MyBuilderRelationsItem = {
-	name:'my-builder-relations-item',
-	components:{
-		MyBuilderRelationsItemPolicy
-	},
-	template:`<tbody>
-		<tr>
-			<td>
-				<div class="row">
-					<my-button image="save.png"
-						@trigger="set"
-						:active="!readonly && hasChanges"
-						:caption="isNew ? capGen.button.create : ''"
-						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
-					/>
-					<my-button image="open.png"
-						v-if="!isNew"
-						@trigger="open"
-						:captionTitle="capGen.button.open"
-					/>
-					<my-button image="delete.png"
-						v-if="!isNew"
-						@trigger="delAsk"
-						:active="!readonly"
-						:cancel="true"
-						:captionTitle="capGen.button.delete"
-					/>
-				</div>
-			</td>
-			<td><input class="long" v-model="name" :disabled="readonly" :placeholder="isNew ? capApp.new : ''" /></td>
-			<td>
-				<my-button image="visible1.png"
-					@trigger="copyValueDialog(relation.name,relation.id,relation.id)"
-					:active="!isNew"
-				/>
-			</td>
-			<td>
-				<my-bool v-model="encryption" :readonly="!isNew || readonly" />
-			</td>
-			<td>
-				<my-button
-					@trigger="showPolicies = !showPolicies"
-					:caption="String(policies.length)"
-					:image="showPolicies ? 'triangleDown.png' : 'triangleRight.png'"
-				/>
-			</td>
-			<td><input v-model.number="retentionCountInput" :disabled="readonly" :placeholder="capApp.retentionCount" /></td>
-			<td><input v-model.number="retentionDaysInput"  :disabled="readonly" :placeholder="capApp.retentionDays" /></td>
-		</tr>
-		<tr v-if="showPolicies">
-			<td colspan="999">
-				<div class="sub-component">
-					<table v-if="policies.length !== 0">
-						<thead>
-							<tr>
-								<td></td>
-								<td></td>
-								<td colspan="3">{{ capApp.policyActions }}</td>
-								<td colspan="2">{{ capApp.policyFunctions }}</td>
-								<td colspan="2"></td>
-							</tr>
-							<tr>
-								<td>{{ capGen.order }}</td>
-								<td>{{ capGen.role }}</td>
-								<td>{{ capApp.policyActionSelect }}</td>
-								<td>{{ capApp.policyActionUpdate }}</td>
-								<td>{{ capApp.policyActionDelete }}</td>
-								<td>{{ capApp.policyFunctionExcl }}</td>
-								<td>{{ capApp.policyFunctionIncl }}</td>
-								<td colspan="2"></td>
-							</tr>
-						</thead>
-						<tbody>
-							<my-builder-relations-item-policy
-								v-for="(p,i) in policies"
-								@moveDown="policies.splice(i+1,0,policies.splice(i,1)[0])"
-								@moveUp="policies.splice(i-1,0,policies.splice(i,1)[0])"
-								@remove="policies.splice(i,1)"
-								@update:modelValue="policies[i] = $event"
-								:isLast="i === policies.length-1"
-								:modelValue="p"
-								:moduleId="moduleId"
-								:position="i"
-								:readonly="readonly"
-							/>
-						</tbody>
-					</table>
-					<p style="width:900px;" v-if="policies.length !== 0">
-						{{ capApp.policyExplanation }}
-					</p>
-					
-					<my-button image="add.png"
-						@trigger="addPolicy"
-						:active="!readonly"
-						:caption="capGen.button.add"
-					/>
-				</div>
-			</td>
-		</tr>
-	</tbody>`,
-	props:{
-		moduleId:{ type:String,  required:true },
-		readonly:{ type:Boolean, required:true },
-		relation:{ type:Object,  required:false,
-			default:function() { return{
-				id:null,
-				name:'',
-				encryption:false,
-				retentionCount:null,
-				retentionDays:null,
-				policies:[]
-			}}
-		}
-	},
-	data:function() {
-		return {
-			name:this.relation.name,
-			encryption:this.relation.encryption,
-			retentionCount:this.relation.retentionCount,
-			retentionDays:this.relation.retentionDays,
-			policies:JSON.parse(JSON.stringify(this.relation.policies)),
-			
-			// states
-			showPolicies:false
-		};
-	},
-	computed:{
-		hasChanges:function() {
-			return this.name                     !== this.relation.name
-				|| this.encryption               !== this.relation.encryption
-				|| this.retentionCount           !== this.relation.retentionCount
-				|| this.retentionDays            !== this.relation.retentionDays
-				|| JSON.stringify(this.policies) !== JSON.stringify(this.relation.policies)
-			;
-		},
-		retentionCountInput:{
-			get:function()  { return this.retentionCount; },
-			set:function(v) { this.retentionCount = v === '' ? null : v; },
-		},
-		retentionDaysInput:{
-			get:function()  { return this.retentionDays; },
-			set:function(v) { this.retentionDays = v === '' ? null : v; },
-		},
-		
-		// simple states
-		isNew:function() { return this.relation.id === null; },
-		
-		// stores
-		capApp:function() { return this.$store.getters.captions.builder.relation; },
-		capGen:function() { return this.$store.getters.captions.generic; }
-	},
-	methods:{
-		// externals
-		copyValueDialog,
-		
-		// actions
-		addPolicy:function() {
-			this.policies.push({
-				roleId:null,
-				pgFunctionIdExcl:null,
-				pgFunctionIdIncl:null,
-				actionDelete:false,
-				actionSelect:false,
-				actionUpdate:false
-			});
-		},
-		open:function() {
-			this.$router.push('/builder/relation/'+this.relation.id);
-		},
-		
-		// backend calls
-		delAsk:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
-		del:function() {
-			ws.send('relation','del',{id:this.relation.id},true).then(
-				() => this.$root.schemaReload(this.moduleId),
-				this.$root.genericError
-			);
-		},
-		set:function() {
-			ws.send('relation','set',{
-				id:this.relation.id,
-				moduleId:this.moduleId,
-				name:this.name,
-				encryption:this.encryption,
-				retentionCount:this.retentionCount,
-				retentionDays:this.retentionDays,
-				policies:this.policies
-			},true).then(
-				() => {
-					if(this.isNew) {
-						this.name     = '';
-						this.policies = [];
-					}
-					this.$root.schemaReload(this.moduleId);
-				},
-				this.$root.genericError
-			);
-		}
-	}
-};
 
 let MyBuilderRelations = {
 	name:'my-builder-relations',
-	components:{MyBuilderRelationsItem},
 	template:`<div class="contentBox grow builder-relations">
-		
 		<div class="top lower">
 			<div class="area nowrap">
 				<img class="icon" src="images/database.png" />
-				<h1 class="title">{{ capApp.title }}</h1>
+				
+				<div class="row gap">
+					<h1 class="title">{{ capApp.title }}</h1>
+					<my-button image="add.png"
+						@trigger="$emit('createNew','relation')"
+						:caption="capGen.button.add"
+					/>
+				</div>
 			</div>
 		</div>
 		
 		<div class="content default-inputs" v-if="module">
-			<table>
-				<thead>
-					<tr>
-						<th>{{ capGen.actions }}</th>
-						<th>{{ capGen.name }}</th>
-						<th>{{ capGen.id }}</th>
-						<th>{{ capApp.encryption }}</th>
-						<th>{{ capApp.policies }}</th>
-						<th colspan="2">{{ capApp.retention }}</th>
-					</tr>
-				</thead>
-				
-				<!-- new record -->
-				<my-builder-relations-item
-					:moduleId="module.id"
-					:readonly="readonly"
-				/>
-				
-				<!-- existing records -->
-				<my-builder-relations-item
-					v-for="rel in module.relations"
-					:key="rel.id"
-					:moduleId="module.id"
-					:readonly="readonly"
-					:relation="rel"
-				/>
-			</table>
+			<div class="builder-entry-list">
+				<router-link class="entry clickable"
+					v-for="r in module.relations"
+					:key="r.id"
+					:to="'/builder/relation/'+r.id" 
+				>{{ r.name }}</router-link>
+			</div>
 		</div>
 	</div>`,
 	props:{
@@ -391,14 +32,11 @@ let MyBuilderRelations = {
 		readonly:{ type:Boolean, required:true }
 	},
 	computed:{
-		module:function() {
-			return typeof this.moduleIdMap[this.id] === 'undefined'
-				? false : this.moduleIdMap[this.id];
-		},
+		module:(s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
 		
 		// stores
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.builder.relation; },
-		capGen:     function() { return this.$store.getters.captions.generic; }
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:     (s) => s.$store.getters.captions.builder.relation,
+		capGen:     (s) => s.$store.getters.captions.generic
 	}
 };
