@@ -172,7 +172,7 @@ let MyBuilderRelation = {
 						</tr>
 						<tr>
 							<td>{{ capApp.encryption }}</td>
-							<td><my-bool v-model="encryption" :readonly="readonly" /></td>
+							<td><my-bool v-model="encryption" :readonly="true" /></td>
 							<td>{{ capApp.encryptionHint }}</td>
 						</tr>
 						<tr>
@@ -746,7 +746,10 @@ let MyBuilderRelation = {
 		},
 		del() {
 			ws.send('relation','del',{id:this.relation.id},true).then(
-				() => this.$root.schemaReload(this.moduleId),
+				() => {
+					this.$root.schemaReload(this.relation.moduleId);
+					this.$router.push('/builder/relations/'+this.relation.moduleId);
+				},
 				this.$root.genericError
 			);
 		},
@@ -768,7 +771,7 @@ let MyBuilderRelation = {
 				id:this.id,
 				moduleId:this.relation.moduleId,
 				name:this.name,
-				encryption:this.encryption,
+				encryption:this.relation.encryption,
 				retentionCount:this.retentionCount,
 				retentionDays:this.retentionDays,
 				policies:this.policies

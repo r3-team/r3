@@ -27,6 +27,21 @@ let MyBuilderNew = {
 				
 				<div v-html="capApp.message[entity]"></div>
 				
+				<!-- additional options -->
+				<template v-if="showOptions">
+					<br />
+					<h2>{{ capApp.options }}</h2>
+					
+					<!-- relation: E2EE encryption -->
+					<template v-if="entity === 'relation'">
+						<div class="row centered">
+							<span>{{ capApp.relationEncryption }}</span>
+							<my-bool v-model="encryption" />
+						</div>
+						<p v-html="capApp.relationEncryptionHint">
+					</template>
+				</template>
+				
 				<div class="actions">
 					<my-button image="save.png"
 						@trigger="set"
@@ -44,7 +59,11 @@ let MyBuilderNew = {
 	emits:['close'],
 	data:function() {
 		return {
-			name:''
+			// all entities
+			name:'',
+			
+			// relation
+			encryption:false
 		};
 	},
 	computed:{
@@ -66,6 +85,7 @@ let MyBuilderNew = {
 			}
 			return '';
 		},
+		showOptions:(s) => ['relation'].includes(s.entity),
 		
 		// stores
 		capApp:(s) => s.$store.getters.captions.builder.new,
@@ -106,7 +126,7 @@ let MyBuilderNew = {
 						id:this.getNilUuid(),
 						moduleId:this.moduleId,
 						name:this.name,
-						encryption:false,
+						encryption:this.encryption,
 						retentionCount:null,
 						retentionDays:null,
 						policies:[]

@@ -907,11 +907,14 @@
 		},
 		"new":{
 			"message":{
-				"module":"<p>Bitte wählen Sie einen Namen für Ihre Anwendung. Dieser Name dient zur eindeutigen Identifizierung Ihrer Anwendung in einem REI3-System. Er ist nicht für Benutzer sichtbar.</p><h3>Beispiele:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Da der Anwendungsname eindeutig sein muss, kann ein nach Ihrer Organisation benannter Präfix sinnvoll sein. Falls Ihre Organisation bspw. \"Modern Fashion GmbH\" heißt, könnten Sie \"mfg\" als Präfix nutzen (also 'mfg_shift_planner').</p>",
+				"module":"<p>Bitte wählen Sie einen Namen für Ihre Anwendung. Dieser Name dient zur eindeutigen Identifizierung Ihrer Anwendung in einem REI3-System. Er ist nicht für Benutzer sichtbar.</p><h3>Beispiele:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Da der Anwendungsname eindeutig sein muss, kann ein nach Ihrer Organisation benannter Präfix sinnvoll sein. Falls Ihre Organisation bspw. \"Modern Fashion GmbH\" heißt, könnten Sie \"mfg\" als Präfix nutzen (also \"mfg_shift_planner\").</p>",
 				"relation":"<p>Ein Relationsname sollte darstellen, was in dieser gespeichert wird. Er muss in einer Anwendung einzigartig sein.</p><h3>Beispiele:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
 			},
 			"module":"Neue Anwendung",
-			"relation":"Neue Relation"
+			"options":"Weitere Optionen",
+			"relation":"Neue Relation",
+			"relationEncryption":"Ende-zu-Ende-Verschlüsselung",
+			"relationEncryptionHint":"Erlaubt Ende-zu-Ende-Verschlüsselung (E2EE) für Attribute auf dieser Relation. E2EE hat Vor- und Nachteile - die Builder-Dokumentation sollte hierzu gelesen werden. Diese Einstellung kann nachträglich nicht geändert werden."
 		},
 		"openFormInput":{
 			"attributeApply":"...um Wert auf Formular zu setzen",
@@ -1119,10 +1122,10 @@
 	"error":{
 		"APP":{
 			"001":"Ein unerwarteter Fehler ist aufgetreten. Bitte erneut versuchen.",
-			"002":"Aktion konnte nicht innerhalb des erlaubten Zeitraums abgeschlossen werden. Wenn dies häufiger vorkommt, bitte den Systemadministrator informieren.",
-			"003":"Aktion wurde abgebrochen. Bitte erneut versuchen.",
+			"002":"Der Vorgang konnte nicht innerhalb des erlaubten Zeitraums abgeschlossen werden. Wenn dies häufiger vorkommt, bitte den Systemadministrator informieren.",
+			"003":"Der Vorgang wurde abgebrochen. Bitte erneut versuchen.",
 			"004":"Dieser Datensatz ist geschützt und kann nicht gelöscht werden.",
-			"005":"Entität konnte nicht erstellt werden, da kein Name eingegeben worden ist. Bitte einen Namen eingeben.",
+			"005":"Die Entität konnte nicht erstellt werden, da kein Name eingegeben worden ist. Bitte einen Namen eingeben.",
 			"006":"Der gewählte Name ist ungültig. Bitte stelle sicher, dass...<ul><li>... er mit einen Buchstaben beginnt <b>(a-z)</b>.</li><li>... maximal <b>60</b> Zeichen lang ist.</li><li>... nur kleingeschriebene Buchstaben <b>(a-z)</b>, Unterstriche <b>(_)</b> oder Nummern <b>(0-9)</b> beinhaltet.</li></ul>Beispiele: storage_inventory_post21, facility_address, contact_book",
 			"007":"Ein referenziertes Modul ist unbekannt.",
 			"008":"Eine referenzierte Relation ist unbekannt.",

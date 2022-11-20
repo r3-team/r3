@@ -911,7 +911,10 @@
 				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
 			},
 			"module":"New application",
-			"relation":"New relation"
+			"options":"Additional options",
+			"relation":"New relation",
+			"relationEncryption":"End-to-end Encryption",
+			"relationEncryptionHint":"Enables end-to-end encryption (E2EE) for attributes on this relation. E2EE has benefits and drawbacks - please carefully read the Builder documentation before using it. This setting cannot be changed later."
 		},
 		"openFormInput":{
 			"attributeApply":"...to set value on form",
