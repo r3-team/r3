@@ -168,10 +168,12 @@ let MyBuilderRelation = {
 						<tr>
 							<td>{{ capGen.name }}</td>
 							<td><input class="long" v-model="name" :disabled="readonly" /></td>
+							<td>{{ capApp.nameHint }}</td>
 						</tr>
 						<tr>
 							<td>{{ capApp.encryption }}</td>
 							<td><my-bool v-model="encryption" :readonly="readonly" /></td>
+							<td>{{ capApp.encryptionHint }}</td>
 						</tr>
 						<tr>
 							<td>{{ capApp.retention }}</td>
@@ -187,6 +189,7 @@ let MyBuilderRelation = {
 									</tr>
 								</table>
 							</td>
+							<td>{{ capApp.retentionHint }}</td>
 						</tr>
 					</table>
 					

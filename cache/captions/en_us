@@ -907,8 +907,8 @@
 		},
 		"new":{
 			"message":{
-				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Some examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
-				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p>"
+				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
+				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
 			},
 			"module":"New application",
 			"relation":"New relation"
@@ -964,6 +964,7 @@
 			"def":"DEFAULT",
 			"encrypted":"E2E encrypted",
 			"encryption":"E2E encryption",
+			"encryptionHint":"Relation supports end-to-end encrypted attribute values.",
 			"execute":"Execute",
 			"external":"Refering relationships ({CNT})",
 			"fires":"Fires",
@@ -978,6 +979,7 @@
 			"isDeferrable":"DEFERRABLE",
 			"isDeferred":"INIT. DEFERRED",
 			"length":"Length",
+			"nameHint":"Reference name for this relation. Must be unique within this application.",
 			"nullable":"Nullable",
 			"onDelete":"DELETE",
 			"onInsert":"INSERT",
@@ -1006,6 +1008,7 @@
 			"retention":"Change log",
 			"retentionCount":"Keep X changes",
 			"retentionDays":"Keep for X days",
+			"retentionHint":"How many (count) or how long (in days) change logs are retained for.",
 			"title":"Relations",
 			"titleOne":"Relation '{NAME}'",
 			"triggers":"Triggers ({CNT})"

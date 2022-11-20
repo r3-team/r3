@@ -6,24 +6,55 @@ let MyBuilderRelations = {
 		<div class="top lower">
 			<div class="area nowrap">
 				<img class="icon" src="images/database.png" />
-				
-				<div class="row gap">
-					<h1 class="title">{{ capApp.title }}</h1>
-					<my-button image="add.png"
-						@trigger="$emit('createNew','relation')"
-						:caption="capGen.button.add"
-					/>
-				</div>
+				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
 		</div>
 		
 		<div class="content default-inputs" v-if="module">
 			<div class="builder-entry-list">
+			
+				<div class="entry clickable" @click="$emit('createNew','relation')">
+					<my-button image="add.png"
+						@trigger="$emit('createNew','relation')"
+						:caption="capGen.button.new"
+						:naked="true"
+						:tight="true"
+					/>
+				</div>
+				
 				<router-link class="entry clickable"
 					v-for="r in module.relations"
 					:key="r.id"
 					:to="'/builder/relation/'+r.id" 
-				>{{ r.name }}</router-link>
+				>
+					<span>{{ r.name }}</span>
+					<div class="row">
+						
+						<my-button image="lock.png"
+							v-if="r.encryption"
+							:active="false"
+							:captionTitle="capApp.encryptionHint"
+							:naked="true"
+							:tight="true"
+						/>
+						<my-button image="time.png"
+							v-if="r.retentionCount !== null || r.retentionDays !== null"
+							:active="false"
+							:caption="displayRetention(r)"
+							:captionTitle="capApp.retentionHint"
+							:naked="true"
+							:tight="true"
+						/>
+						<my-button image="files_list2.png"
+							v-if="r.attributes.length !== 0"
+							:active="false"
+							:caption="String(r.attributes.length)"
+							:captionTitle="capApp.attributes.replace('{CNT}',r.attributes.length)"
+							:naked="true"
+							:tight="true"
+						/>
+					</div>
+				</router-link>
 			</div>
 		</div>
 	</div>`,
@@ -38,5 +69,13 @@ let MyBuilderRelations = {
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		capApp:     (s) => s.$store.getters.captions.builder.relation,
 		capGen:     (s) => s.$store.getters.captions.generic
+	},
+	methods:{
+		// presentation
+		displayRetention(rel) {
+			let count = rel.retentionCount !== null ? rel.retentionCount : 0;
+			let days  = rel.retentionDays  !== null ? rel.retentionDays  : 0;
+			return `${count} / ${days}`;
+		}
 	}
 };

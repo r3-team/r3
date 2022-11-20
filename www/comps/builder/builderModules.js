@@ -384,9 +384,13 @@ let MyBuilderModules = {
 				
 					<!-- new module -->
 					<div class="item-wrap new shade">
-						<div class="item" @click="$emit('createNew','module')">
-							<img :src="srcBase64Icon(null,'images/module.png')" />
-							<span>{{ capGen.button.add }}</span>
+						<div class="item">
+							<my-button image="module.png"
+								@trigger="$emit('createNew','module')"
+								:caption="capGen.button.new"
+								:naked="true"
+								:tight="true"
+							/>
 						</div>
 					</div>
 					

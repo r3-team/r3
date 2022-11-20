@@ -7,7 +7,7 @@
 /* generics */
 .builder-table-vertical{
 	border-collapse:separate;
-	border-spacing:0px 10px;
+	border-spacing:0px 6px;
 }
 .builder-table-vertical>tr>td{
 	max-width:420px;
@@ -149,9 +149,14 @@
 	align-content:flex-start;
 }
 .builder-entry-list .entry{
-	width:280px;
-	padding:8px 12px;
+	width:420px;
+	height:40px;
+	padding:1px 12px;
 	margin:1px 2px 2px 2px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	justify-content:space-between;
 	font-size:110%;
 	color:inherit;
 	border-radius:6px;
@@ -162,7 +167,7 @@
 }
 .builder-entry-list .entry:hover{
 	text-decoration:underline;
-	padding:7px 11px;
+	padding:0px 11px;
 	border:1px solid var(--color-border);
 }
 
