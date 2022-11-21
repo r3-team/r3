@@ -137,7 +137,7 @@ let MyBuilderRelation = {
 		<div class="top lower nowrap">
 			<div class="area">
 				<img class="icon" src="images/database.png" />
-				<h1 class="title">{{ capApp.titleOne.replace('{NAME}',relation.name) }}</h1>
+				<h1 class="title">{{ capApp.titleOne.replace('{NAME}',name) }}</h1>
 			</div>
 			<div class="area">
 				<my-button image="visible1.png"
@@ -196,7 +196,7 @@ let MyBuilderRelation = {
 					<div class="row">
 						<my-button image="save.png"
 							@trigger="set"
-							:active="!readonly && hasChanges"
+							:active="canSave"
 							:caption="capGen.button.save"
 							:captionTitle="capGen.button.save"
 						/>
@@ -661,6 +661,7 @@ let MyBuilderRelation = {
 		
 		// simple
 		attributesNotFiles:(s) => s.relation === false ? [] : s.relation.attributes.filter(v => !s.isAttributeFiles(v.content)),
+		canSave:           (s) => s.name !== '' && !s.readonly && s.hasChanges,
 		relation:          (s) => typeof s.relationIdMap[s.id] === 'undefined' ? false : s.relationIdMap[s.id],
 		
 		// stores

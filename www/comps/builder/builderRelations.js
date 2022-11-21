@@ -8,22 +8,26 @@ let MyBuilderRelations = {
 				<img class="icon" src="images/database.png" />
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
+			<div class="area default-inputs">
+				<input v-model="filter" placeholder="..." />
+			</div>
 		</div>
 		
 		<div class="content default-inputs" v-if="module">
 			<div class="builder-entry-list">
 			
-				<div class="entry clickable" @click="$emit('createNew','relation')">
-					<my-button image="add.png"
-						@trigger="$emit('createNew','relation')"
-						:caption="capGen.button.new"
-						:naked="true"
-						:tight="true"
-					/>
+				<div class="entry"
+					@click="$emit('createNew',readonly ? null : 'relation')"
+					:class="{ clickable:!readonly, off:readonly }"
+				>
+					<div class="row gap centered">
+						<img class="icon" src="images/add.png" />
+						<span>{{ capGen.button.new }}</span>
+					</div>
 				</div>
 				
 				<router-link class="entry clickable"
-					v-for="r in module.relations"
+					v-for="r in module.relations.filter(v => filter === '' || v.name.includes(filter))"
 					:key="r.id"
 					:to="'/builder/relation/'+r.id" 
 				>
@@ -58,6 +62,11 @@ let MyBuilderRelations = {
 			</div>
 		</div>
 	</div>`,
+	data:function() {
+		return {
+			filter:'',
+		};
+	},
 	props:{
 		id:      { type:String,  required:true },
 		readonly:{ type:Boolean, required:true }

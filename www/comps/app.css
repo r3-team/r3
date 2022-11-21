@@ -187,9 +187,9 @@ body                                         { --depth:6; }
 .builder-menu                                { --depth:4; }
 .builder-articles-assign                     { --depth:2; }
 .builder-articles-body-richtext              { --depth:0; }
-.builder-entry-list .entry                   { --depth:5; }
-.builder-entry-list .entry:focus             { --depth:2; }
-.builder-entry-list .entry:hover             { --depth:2; }
+.builder-entry-list .entry                   { --depth:0; }
+.builder-entry-list .entry:not(.off):focus   { --depth:3; }
+.builder-entry-list .entry:not(.off):hover   { --depth:3; }
 .builder-table-vertical td                   { --depth:5; }
 
 

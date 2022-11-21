@@ -164,8 +164,10 @@ let MyBuilder = {
 								:title="capApp.navigationFilterHint"
 							/>
 							<my-button image="add.png"
-								v-if="moduleOwner && navigation.includes('relations')"
+								v-if="navigation.includes('relations')"
 								@trigger="add"
+								:active="moduleOwner"
+								:captionTitle="capGen.button.add"
 							/>
 						</div>
 					</div>
