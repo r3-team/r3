@@ -558,8 +558,7 @@
 				},
 				"event":"Event",
 				"eventBefore":"Before event",
-				"jsFunctionId":"Execute frontend function",
-				"title":"Form functions"
+				"jsFunctionId":"Execute frontend function"
 			},
 			"option":{
 				"displayColor":"color",
@@ -582,17 +581,15 @@
 			},
 			"states":{
 				"button":{
-					"addCondition":"Add condition",
-					"addEffect":"Add effect",
-					"showAll":"Show all"
+					"addCondition":"Condition",
+					"addEffect":"Effect"
 				},
 				"option":{
 					"filterFieldIdHint":"By field"
 				},
 				"conditions":"Conditions",
 				"descriptionHint":"Description",
-				"effects":"Effects",
-				"title":"Form states"
+				"effects":"Effects"
 			},
 			"aggregator":"Aggregate",
 			"autoRenew":"Auto refresh",
@@ -691,6 +688,7 @@
 			"presetOpen":"Open preset",
 			"readonly":"Read only",
 			"required":"Required",
+			"showContent":"Content",
 			"showFunctions":"Functions",
 			"showStates":"States",
 			"sql":"SQL preview",
@@ -1185,20 +1183,36 @@
 				"OR":"OR"
 			},
 			"content":{
-				"attribute":"attribute value",
-				"collection":"collection value(s)",
+				"attribute":"attribute",
+				"collection":"collection",
 				"field":"field value",
-				"fieldChanged":"field has changed (TRUE/FALSE)",
-				"javascript":"JavaScript expression",
-				"languageCode":"login language code (en_us, ...)",
-				"login":"login ID (integer)",
-				"preset":"preset record ID (Integer)",
-				"record":"record ID (integer, form relation 0)",
-				"recordNew":"record is new (TRUE/FALSE, form)",
-				"role":"login has role (TRUE/FALSE)",
+				"fieldChanged":"field changed",
+				"javascript":"JavaScript",
+				"languageCode":"login language",
+				"login":"login ID",
+				"preset":"preset record",
+				"record":"record ID",
+				"recordNew":"record is new",
+				"role":"login has role",
 				"subQuery":"sub query",
-				"true":"true value (TRUE)",
+				"true":"true value",
 				"value":"fixed value"
+			},
+			"contentHint":{
+				"attribute":"Attribute value from the current query.",
+				"collection":"One or many values from the chosen collection column. Use '@>', '<@' or '&&' operators when comparing multiple values.",
+				"field":"Current field value.",
+				"fieldChanged":"TRUE/FALSE, depending on whether field value has changed.",
+				"javascript":"Return value of the given Javascript expression.",
+				"languageCode":"The chosen user language code (en_us, de_de, ...) of the current login.",
+				"login":"ID of the current login (integer).",
+				"preset":"ID of the given preset record (integer).",
+				"record":"ID of the current record on this form (integer, relation 0).",
+				"recordNew":"TRUE/FALSE, depending on whether the current record is new on this form.",
+				"role":"TRUE/FALSE, depending on the whether the current login has the given role assigned.",
+				"subQuery":"Return value of the given sub query.",
+				"true":"TRUE value to compare other TRUE values against.",
+				"value":"A static value to compare against."
 			},
 			"operator":{
 				"eq":"equal",

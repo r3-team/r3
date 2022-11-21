@@ -164,24 +164,23 @@
 
 /* form functions */
 .builder-form-functions{
+	display:flex;
+	flex-flow:column nowrap;
 	min-height:360px;
 	margin:0px;
+}
+.builder-form-functions table{
+	margin-top:20px;
 }
 .builder-form-functions table td{
 	padding:2px 8px;
 }
-.builder-form-function{}
 
 
 /* form states */
 .builder-form-states{
-	max-height:360px;
 	margin:0px;
 	flex:1 1 auto;
-}
-.builder-form-states.fullscreen{
-	max-height:none;
-	overflow:auto;
 }
 .builder-form-states input,
 .builder-form-states select{
@@ -189,11 +188,16 @@
 	min-width:unset;
 	margin-right:6px;
 }
+.builder-form-states .actions{
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:space-between;
+	margin-bottom:20px;
+}
 .builder-form-state{
 	display:flex;
 	flex-flow:column nowrap;
 	align-items:flex-start;
-	margin:0px 9px;
 }
 .builder-form-state.show-details{
 	margin:0px 0px 3px 0px;
@@ -206,6 +210,7 @@
 	margin-right:6px;
 }
 .builder-form-state .details{
+	width:100%;
 	display:flex;
 	flex-flow:row nowrap;
 	margin:0px 0px 8px 0px;
@@ -213,15 +218,21 @@
 .builder-form-state span.title{
 	margin:8px 0px 4px 0px;
 }
-.builder-form-state-condition,
+.builder-form-state .effects{
+	display:flex;
+	flex-flow:row wrap;
+	max-width:700px;
+}
+.builder-form-state-condition{
+	display:flex;
+	flex-flow:row nowrap;
+}
 .builder-form-state-effect{
 	display:flex;
 	flex-flow:row nowrap;
-	align-items:center;
-	margin:0px 0px 4px 0px;
-	padding:0px 0px 0px 8px;
-}
-.builder-form-state-condition>*,
-.builder-form-state-effect>*{
-	margin-right:8px !important;
+	margin:0px 4px 2px 0px;
+	padding:2px 3px;
+	border:1px solid var(--color-border);
+	border-radius:5px;
+	background-color:var(--color-bg);
 }

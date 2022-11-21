@@ -4,6 +4,7 @@ import MyBuilderFormFunctions from './builderFormFunctions.js';
 import MyBuilderFormStates    from './builderFormStates.js';
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderFields        from './builderFields.js';
+import MyTabs                 from '../tabs.js';
 import {getNilUuid}           from '../shared/generic.js';
 import {
 	getIndexAttributeId,
@@ -28,14 +29,15 @@ let MyBuilderForm = {
 		MyBuilderFormFunctions,
 		MyBuilderFormStates,
 		MyBuilderIconInput,
-		MyBuilderQuery
+		MyBuilderQuery,
+		MyTabs
 	},
 	template:`<div class="builder-form" v-if="form">
 	
 		<!-- form builder main area -->
 		<div class="contentBox builder-form-main">
 			
-			<div class="builder-form-content" v-show="!showStatesFull || !showStates">
+			<div class="builder-form-content">
 				<div class="top">
 					<div class="area nowrap">
 						<img class="icon" src="images/form.png" />
@@ -84,16 +86,6 @@ let MyBuilderForm = {
 							:caption="capApp.captions"
 							:image="showCaptions ? 'visible1.png' : 'visible0.png'"
 						/>
-						<my-button
-							@trigger="showFunctions = !showFunctions"
-							:caption="capApp.showFunctions"
-							:image="showFunctions ? 'visible1.png' : 'visible0.png'"
-						/>
-						<my-button
-							@trigger="showStates = !showStates"
-							:caption="capApp.showStates"
-							:image="showStates ? 'visible1.png' : 'visible0.png'"
-						/>
 					</div>
 				</div>
 				
@@ -121,25 +113,6 @@ let MyBuilderForm = {
 					:showCaptions="showCaptions"
 				/>
 			</div>
-			
-			<!-- form functions -->
-			<my-builder-form-functions
-				v-if="showFunctions"
-				v-model="functions"
-				@close="showFunctions = false"
-				:formId="form.id"
-			/>
-			
-			<!-- form states -->
-			<my-builder-form-states
-				v-if="showStates"
-				v-model="states"
-				@close="showStates = false"
-				@set-fullscreen="showStatesFull = !showStatesFull"
-				:fieldIdMapRef="fieldIdMapRef"
-				:form="form"
-				:fullscreen="showStatesFull"
-			/>
 		</div>
 		
 		<div class="contentBox sidebar scroll" v-if="showSidebar">
@@ -159,6 +132,13 @@ let MyBuilderForm = {
 					/>
 				</div>
 			</div>
+			
+			<my-tabs
+				v-if="!showFieldQuery"
+				v-model="tabTarget"
+				:entries="['content','states','functions']"
+				:entriesText="[capApp.showContent,capApp.showStates,capApp.showFunctions]"
+			/>
 			
 			<div class="content grow" v-if="showFieldQuery">
 				
@@ -228,8 +208,24 @@ let MyBuilderForm = {
 			
 			<div class="content grow" v-if="!showFieldQuery">
 				
+				<!-- form states -->
+				<my-builder-form-states
+					v-if="tabTarget === 'states'"
+					v-model="states"
+					:fieldIdMapRef="fieldIdMapRef"
+					:form="form"
+				/>
+			
+				<!-- form functions -->
+				<my-builder-form-functions
+					v-if="tabTarget === 'functions'"
+					v-model="functions"
+					:formId="form.id"
+				/>
+				
 				<!-- form record query -->
 				<my-builder-query
+					v-if="tabTarget === 'content'"
 					@index-removed="removeDataFields(fields,$event)"
 					@set-filters="filters = $event"
 					@set-joins="joins = $event"
@@ -245,7 +241,7 @@ let MyBuilderForm = {
 				/>
 				
 				<!-- template fields -->
-				<div class="templates-wrap">
+				<div class="templates-wrap" v-if="tabTarget === 'content'">
 					<div class="content-row default-inputs">
 						<h2>{{ capApp.fields }}</h2>
 						
@@ -321,10 +317,10 @@ let MyBuilderForm = {
 			showFunctions:false, // show form functions
 			showSidebar:true,    // show form Builder sidebar
 			showStates:false,    // show form states
-			showStatesFull:false,// sub content (states/functions) are full screen
 			showTemplate1n:false,// show templates for 1:n relationship input fields
 			showTemplateN1:true, // show templates for n:1 relationship input fields
 			showTemplateNm:false,// show templates for n:m relationship input fields
+			tabTarget:'content', // sidebar tab target (content, states, functions)
 			templateIndex:'-1'
 		};
 	},

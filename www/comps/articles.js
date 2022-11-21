@@ -1,3 +1,4 @@
+import MyTabs             from './tabs.js';
 import {getModuleCaption} from './shared/generic.js';
 import {generatePdf}      from './shared/pdf.js';
 import {getDateFormat}    from './shared/time.js';
@@ -5,6 +6,7 @@ export {MyArticles as default};
 
 let MyArticles = {
 	name:'my-articles',
+	components:{ MyTabs },
 	template:`<div class="contentBox" :class="{ large:showLarge || isMobile, 'pop-up':isPopUp }">
 		<div class="top lower">
 			<div class="area">
@@ -30,15 +32,12 @@ let MyArticles = {
 			</div>
 		</div>
 		
-		<div class="articles-tabs" v-if="hasFormHelp">
-			<div class="entry" tabindex="0"
-				v-for="t in tabs"
-				@click="showFrom = t"
-				@key.enter="showFrom = t"
-				:class="{ active:t === showFrom }"
-			>{{ t === 'form' ? capApp.form : capApp.module }}
-			</div>
-		</div>
+		<my-tabs
+			v-if="hasFormHelp"
+			v-model="tabTarget"
+			:entries="['form','module']"
+			:entriesText="[capApp.form,capApp.module]"
+		/>
 		
 		<!-- articles -->
 		<div class="articles" ref="articles">
@@ -79,14 +78,13 @@ let MyArticles = {
 		return {
 			articleIdsClosed:[],
 			articleTitleEmpty:'-',
-			showFrom:this.form !== null && this.form.articleIdsHelp.length !== 0 ? 'form' : 'module',
-			showLarge:false,
-			tabs:['form','module']
+			tabTarget:this.form !== null && this.form.articleIdsHelp.length !== 0 ? 'form' : 'module',
+			showLarge:false
 		};
 	},
 	computed:{
 		articlesShown:(s) => {
-			let articleIds = s.showFrom === 'module'
+			let articleIds = s.tabTarget === 'module'
 				? s.module.articleIdsHelp : s.form.articleIdsHelp;
 			
 			let out = [];
@@ -131,7 +129,7 @@ let MyArticles = {
 			this.$refs['article_'+id][0].scrollIntoView();
 		},
 		pdfDownload() {
-			let titleHelp   = this.showFrom === 'form' ? this.capApp.form : this.capApp.module;
+			let titleHelp   = this.tabTarget === 'form' ? this.capApp.form : this.capApp.module;
 			let titleModule = this.getModuleCaption(this.module,this.moduleLanguage);
 			let titleDate   = this.getDateFormat(new Date(),'Y-m-d');
 			

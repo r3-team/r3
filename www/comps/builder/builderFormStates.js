@@ -22,14 +22,15 @@ let MyBuilderFormStateEffect = {
 		<select @input="update('newState',$event.target.value)" :value="effect.newState">
 			<option value="hidden">{{ capApp.stateHidden }}</option>
 			<option value="default">{{ capApp.stateDefault }}</option>
-			<option v-if="isData" value="optional">{{ capApp.stateOptional }}</option>
-			<option v-if="isData" value="required">{{ capApp.stateRequired }}</option>
-			<option v-if="isData || isButton" value="readonly">{{ capApp.stateReadonly }}</option>
+			<option value="optional" :disabled="!isData">{{ capApp.stateOptional }}</option>
+			<option value="required" :disabled="!isData">{{ capApp.stateRequired }}</option>
+			<option value="readonly" :disabled="!isData && !isButton">{{ capApp.stateReadonly }}</option>
 		</select>
 		
 		<my-button image="cancel.png"
 			@trigger="$emit('remove')"
 			:naked="true"
+			:tight="true"
 		/>
 	</div>`,
 	props:{
@@ -59,21 +60,22 @@ let MyBuilderFormStateEffect = {
 let MyBuilderFormState = {
 	name:'my-builder-form-state',
 	components:{MyBuilderFormStateEffect},
-	template:`<div class="builder-form-state" :class="{ 'show-details':detailsShow || showAlways }">
+	template:`<div class="builder-form-state" :class="{ 'show-details':detailsShow }">
 		<div class="details">
 			<my-button
 				@trigger="detailsShow = !detailsShow"
-				:image="detailsShow || showAlways ? 'triangleDown.png' : 'triangleRight.png'"
+				:image="detailsShow ? 'triangleDown.png' : 'triangleRight.png'"
 				:naked="true"
+				:tight="true"
 			/>
 			
-			<input class="long description"
+			<input class="description"
 				@input="update('description',-1,$event.target.value)"
 				:placeholder="capApp.descriptionHint"
 				:value="state.description"
 			/>
 			
-			<template v-if="detailsShow || showAlways">
+			<template v-if="detailsShow">
 				<my-button image="add.png"
 					@trigger="addCondition()"
 					:caption="capApp.button.addCondition"
@@ -87,10 +89,11 @@ let MyBuilderFormState = {
 			<my-button image="cancel.png"
 				@trigger="$emit('remove')"
 				:naked="true"
+				:tight="true"
 			/>
 		</div>
 		
-		<template v-if="detailsShow || showAlways">
+		<template v-if="detailsShow">
 			<span class="title" v-if="state.conditions.length !== 0">
 				{{ capApp.conditions }}
 			</span>
@@ -109,15 +112,17 @@ let MyBuilderFormState = {
 			<span class="title" v-if="state.effects.length !== 0">
 				{{ capApp.effects }}
 			</span>
-			<my-builder-form-state-effect
-				v-for="(e,i) in state.effects"
-				@update:modelValue="update('effects',i,$event)"
-				@remove="remove('effects',i)"
-				:fieldIdMap="fieldIdMap"
-				:fieldIdMapRef="fieldIdMapRef"
-				:key="'effect'+i"
-				:modelValue="state.effects[i]"
-			/>
+			<div class="effects">
+				<my-builder-form-state-effect
+					v-for="(e,i) in state.effects"
+					@update:modelValue="update('effects',i,$event)"
+					@remove="remove('effects',i)"
+					:fieldIdMap="fieldIdMap"
+					:fieldIdMapRef="fieldIdMapRef"
+					:key="'effect'+i"
+					:modelValue="state.effects[i]"
+				/>
+			</div>
 		</template>
 	</div>`,
 	props:{
@@ -125,8 +130,7 @@ let MyBuilderFormState = {
 		fieldIdMap:    { type:Object,  required:true }, // all fields by ID
 		fieldIdMapRef: { type:Object,  required:true }, // field references by ID
 		form:          { type:Object,  required:true },
-		modelValue:    { type:Object,  required:true },
-		showAlways:    { type:Boolean, required:true }
+		modelValue:    { type:Object,  required:true }
 	},
 	emits:['remove','update:modelValue'],
 	data() {
@@ -209,32 +213,19 @@ let MyBuilderFormState = {
 let MyBuilderFormStates = {
 	name:'my-builder-form-states',
 	components:{ MyBuilderFormState },
-	template:`<div class="builder-form-states contentBox" :class="{fullscreen:fullscreen}">
+	template:`<div class="builder-form-states">
 		
-		<div class="top lower">
-			<div class="area">
-				<my-button
-					:active="true"
-					:caption="capApp.title"
-					:naked="true"
-				/>
-				<my-button image="add.png"
-					@trigger="add"
-					:caption="capGen.button.add"
-				/>
-				<my-button
-					@trigger="showAll = !showAll"
-					:caption="capApp.button.showAll"
-					:image="showAll ? 'triangleDown.png' : 'triangleRight.png'"
-				/>
-			</div>
-			<div class="area default-inputs">
-				
-				<input
+		<div class="actions">
+			<my-button image="add.png"
+				@trigger="add"
+				:caption="capGen.button.add"
+			/>
+			
+			<div class="row centered default-inputs">
+				<input class="short"
 					v-model="filter"
 					:placeholder="capGen.button.filter"
 				/>
-				
 				<select v-model="filterFieldId">
 					<option value="">{{ capApp.option.filterFieldIdHint }}</option>
 					<template v-for="(ref,fieldId) in fieldIdMapRef">
@@ -244,19 +235,10 @@ let MyBuilderFormStates = {
 						>F{{ ref }}</option>
 					</template>
 				</select>
-				
-				<my-button
-					@trigger="$emit('set-fullscreen')"
-					:image="fullscreen ? 'shrink.png' : 'expand.png'"
-				/>
-				<my-button image="cancel.png"
-					@trigger="$emit('close')"
-					:cancel="true"
-				/>
 			</div>
 		</div>
 		
-		<div class="content default-inputs">
+		<div class="content no-padding default-inputs">
 			<my-builder-form-state
 				v-for="(s,i) in states"
 				v-show="stateShowIndex.includes(i)"
@@ -268,22 +250,19 @@ let MyBuilderFormStates = {
 				:form="form"
 				:key="s.id"
 				:modelValue="states[i]"
-				:showAlways="showAll"
 			/>
 		</div>
 	</div>`,
 	props:{
 		fieldIdMapRef:{ type:Object, required:false, default:() => {return {}} }, // field reference map (unique field counter for each ID)
 		form:         { type:Object, required:true },
-		fullscreen:   { type:Boolean,required:true },
 		modelValue:   { type:Array,  required:true }
 	},
-	emits:['close','set-fullscreen','update:modelValue'],
+	emits:['update:modelValue'],
 	data:function() {
 		return {
 			filter:'',
-			filterFieldId:'',
-			showAll:false
+			filterFieldId:''
 		};
 	},
 	computed:{
@@ -316,7 +295,7 @@ let MyBuilderFormStates = {
 				let s = this.states[i];
 				
 				// check text filter
-				if(this.filter !== '' && !s.description.includes(this.filter))
+				if(this.filter !== '' && !s.description.toLowerCase().includes(this.filter.toLowerCase()))
 					continue;
 				
 				// check field filter

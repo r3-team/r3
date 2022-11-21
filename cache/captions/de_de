@@ -558,8 +558,7 @@
 				},
 				"event":"Ereignis",
 				"eventBefore":"Vor Ereignis",
-				"jsFunctionId":"Frontend-Funktion ausführen",
-				"title":"Formularfunktionen"
+				"jsFunctionId":"Frontend-Funktion ausführen"
 			},
 			"option":{
 				"displayColor":"Farbe",
@@ -582,17 +581,15 @@
 			},
 			"states":{
 				"button":{
-					"addCondition":"Kondition hinzufügen",
-					"addEffect":"Effekt hinzufügen",
-					"showAll":"Alle zeigen"
+					"addCondition":"Kondition",
+					"addEffect":"Effekt"
 				},
 				"option":{
 					"filterFieldIdHint":"Nach Feld"
 				},
 				"conditions":"Konditionen",
 				"descriptionHint":"Beschreibung",
-				"effects":"Effekte",
-				"title":"Formularzustände"
+				"effects":"Effekte"
 			},
 			"aggregator":"Aggregieren",
 			"autoRenew":"Auto-Aktualisierung",
@@ -691,6 +688,7 @@
 			"presetOpen":"Vord. Datensatz öffnen",
 			"readonly":"Lesend",
 			"required":"Benötigt",
+			"showContent":"Inhalt",
 			"showFunctions":"Funktionen",
 			"showStates":"Zustände",
 			"sql":"SQL-Vorschau",
@@ -1185,20 +1183,36 @@
 				"OR":"ODER"
 			},
 			"content":{
-				"attribute":"Attributwert",
-				"collection":"Sammlungswert(e)",
+				"attribute":"Attribut",
+				"collection":"Sammlung",
 				"field":"Feldwert",
-				"fieldChanged":"Feldwert geändert (TRUE/FALSE)",
-				"javascript":"JavaScript-Ausdruck",
-				"languageCode":"Login-Sprach-Code (en_us, ...)",
-				"login":"Login-ID (Integer)",
-				"preset":"ID von vordefinierten Datensatz (Integer)",
-				"record":"Datensatz-ID (Integer, Formular Relation 0)",
-				"recordNew":"Datensatz ist neu (TRUE/FALSE, Formular)",
-				"role":"Login hat Rolle (TRUE/FALSE)",
+				"fieldChanged":"Feld geändert",
+				"javascript":"JavaScript",
+				"languageCode":"Login-Sprache",
+				"login":"Login-ID",
+				"preset":"Vordef. Datensatz",
+				"record":"Datensatz-ID",
+				"recordNew":"Datensatz ist neu",
+				"role":"Login hat Rolle",
 				"subQuery":"Sub-Query",
-				"true":"Wahrheitswert (TRUE)",
+				"true":"Wahrheitswert",
 				"value":"Fester Wert"
+			},
+			"contentHint":{
+				"attribute":"Attributwert der aktuellen Query.",
+				"collection":"Wert(e) der gewählten Sammlungsspalte. '@>', '<@' oder '&&'-Operatoren können für den Vergleich mit mehreren Werten verwendet werden.",
+				"field":"Aktueller Feldwert.",
+				"fieldChanged":"WAHR/FALSCH, abhängig davon, ob sich ein Feldwert geändert hat.",
+				"javascript":"Rückgabewert des gewählten Javascript-Ausdrucks.",
+				"languageCode":"Der gewählte Sprach-Code von der aktuellen Anmeldung (en_us, de_de, ...).",
+				"login":"ID der aktuellen Anmeldung (Integer).",
+				"preset":"ID des gewählten, vordefinierten Datensatzes (Integer).",
+				"record":"ID des aktuellen Datensatzes auf dem Formular (Integer, Relation 0).",
+				"recordNew":"WAHR/FALSCH, abhängig davon, ob der aktuelle Datensatz auf dem Formular neu ist.",
+				"role":"WAHR/FALSCH, abhängig davon, ob der aktuellen Anmeldung die gewählte Rolle zugewiesen ist.",
+				"subQuery":"Rückgabewert der gewählten Sub-Query.",
+				"true":"WAHR-Wert zum Vergleich mit anderen WAHR-Werten.",
+				"value":"Ein statischer Wert zum Vergleich."
 			},
 			"operator":{
 				"eq":"gleich",

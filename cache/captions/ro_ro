@@ -558,8 +558,7 @@
 				},
 				"event":"Eveniment",
 				"eventBefore":"Inaintea evenimentului",
-				"jsFunctionId":"Executați funcția de interfață",
-				"title":"Funcțiile formularului"
+				"jsFunctionId":"Executați funcția de interfață"
 			},
 			"option":{
 				"displayColor":"culoare",
@@ -582,17 +581,15 @@
 			},
 			"states":{
 				"button":{
-					"addCondition":"Adaugați o condiție",
-					"addEffect":"Adaugați o consecință",
-					"showAll":"Arată tot"
+					"addCondition":"Condiție",
+					"addEffect":"Consecință"
 				},
 				"option":{
 					"filterFieldIdHint":"După câmp"
 				},
 				"conditions":"Condiții",
 				"descriptionHint":"Descriere",
-				"effects":"Consecințe",
-				"title":"Stările formularului"
+				"effects":"Consecințe"
 			},
 			"aggregator":"Agrega",
 			"autoRenew":"Reîmprospătare automată",
@@ -691,6 +688,7 @@
 			"presetOpen":"Deschide presetarea",
 			"readonly":"Numai citire",
 			"required":"Necesar",
+			"showContent":"Content",
 			"showFunctions":"Funcțiile",
 			"showStates":"Statuturi",
 			"sql":"Previzualizare SQL",
@@ -1185,20 +1183,36 @@
 				"OR":"SAU"
 			},
 			"content":{
-				"attribute":"valoarea atributului",
-				"collection":"collection value(s)",
-				"field":"valoarea câmpului",
-				"fieldChanged":"field has changed (TRUE/FALSE)",
-				"javascript":"Expresie JavaScript",
-				"languageCode":"codul limbii de conectare (en_us, ...)",
-				"login":"ID-ul autentificării (întreg)",
-				"preset":"ID-ul înregistrare prestabilită (întreg)",
-				"record":"ID înregistrare (întreg, relație de formă 0)",
-				"recordNew":"înregistrarea este nouă (adevărat/fals, formular)",
-				"role":"autentificarea are rol (ADEVĂRAT/FALS)",
-				"subQuery":"subînterogare",
-				"true":"valoare adevărată (TRUE)",
-				"value":"valoare fixă"
+				"attribute":"attribute",
+				"collection":"collection",
+				"field":"field value",
+				"fieldChanged":"field changed",
+				"javascript":"JavaScript",
+				"languageCode":"login language",
+				"login":"login ID",
+				"preset":"preset record",
+				"record":"record ID",
+				"recordNew":"record is new",
+				"role":"login has role",
+				"subQuery":"sub query",
+				"true":"true value",
+				"value":"fixed value"
+			},
+			"contentHint":{
+				"attribute":"Attribute value from the current query.",
+				"collection":"One or many values from the chosen collection column. Use '@>', '<@' or '&&' operators when comparing multiple values.",
+				"field":"Current field value.",
+				"fieldChanged":"TRUE/FALSE, depending on whether field value has changed.",
+				"javascript":"Return value of the given Javascript expression.",
+				"languageCode":"The chosen user language code (en_us, de_de, ...) of the current login.",
+				"login":"ID of the current login (integer).",
+				"preset":"ID of the given preset record (integer).",
+				"record":"ID of the current record on this form (integer, relation 0).",
+				"recordNew":"TRUE/FALSE, depending on whether the current record is new on this form.",
+				"role":"TRUE/FALSE, depending on the whether the current login has the given role assigned.",
+				"subQuery":"Return value of the given sub query.",
+				"true":"TRUE value to compare other TRUE values against.",
+				"value":"A static value to compare against."
 			},
 			"operator":{
 				"eq":"egal",

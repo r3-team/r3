@@ -558,8 +558,7 @@
 				},
 				"event":"Evento",
 				"eventBefore":"Prima dell'evento",
-				"jsFunctionId":"Esegue la funzione nell'interfaccia",
-				"title":"Funzioni modulo"
+				"jsFunctionId":"Esegue la funzione nell'interfaccia"
 			},
 			"option":{
 				"displayColor":"colore",
@@ -582,17 +581,15 @@
 			},
 			"states":{
 				"button":{
-					"addCondition":"Aggiungi condizione",
-					"addEffect":"Aggiungi effetto",
-					"showAll":"Mostra tutto"
+					"addCondition":"Condizione",
+					"addEffect":"Effetto"
 				},
 				"option":{
 					"filterFieldIdHint":"Per campo"
 				},
 				"conditions":"Condizioni",
 				"descriptionHint":"Descrizione",
-				"effects":"Effetti",
-				"title":"Stati modulo"
+				"effects":"Effetti"
 			},
 			"aggregator":"Aggregato",
 			"autoRenew":"Ricarica in automatico",
@@ -691,6 +688,7 @@
 			"presetOpen":"Preimpostazione apertura",
 			"readonly":"Solo lettura",
 			"required":"Obbligatorio",
+			"showContent":"Content",
 			"showFunctions":"Funzioni",
 			"showStates":"Condizioni",
 			"sql":"Anteprima SQL",
@@ -1185,20 +1183,36 @@
 				"OR":"OR"
 			},
 			"content":{
-				"attribute":"valore attributo",
-				"collection":"valore(i) collezione",
-				"field":"valore campo",
-				"fieldChanged":"field has changed (TRUE/FALSE)",
-				"javascript":"Espressione JavaScript",
-				"languageCode":"codice lingua login (en_us, ...)",
-				"login":"ID login (integer)",
-				"preset":"ID preimpostato (integer)",
-				"record":"ID record (integer, relazione modulo 0)",
-				"recordNew":"il record è nuovo (TRUE/FALSE, modulo)",
-				"role":"il login ha ruolo (TRUE/FALSE)",
+				"attribute":"attribute",
+				"collection":"collection",
+				"field":"field value",
+				"fieldChanged":"field changed",
+				"javascript":"JavaScript",
+				"languageCode":"login language",
+				"login":"login ID",
+				"preset":"preset record",
+				"record":"record ID",
+				"recordNew":"record is new",
+				"role":"login has role",
 				"subQuery":"sub query",
-				"true":"valore vero (TRUE)",
-				"value":"valore fisso"
+				"true":"true value",
+				"value":"fixed value"
+			},
+			"contentHint":{
+				"attribute":"Attribute value from the current query.",
+				"collection":"One or many values from the chosen collection column. Use '@>', '<@' or '&&' operators when comparing multiple values.",
+				"field":"Current field value.",
+				"fieldChanged":"TRUE/FALSE, depending on whether field value has changed.",
+				"javascript":"Return value of the given Javascript expression.",
+				"languageCode":"The chosen user language code (en_us, de_de, ...) of the current login.",
+				"login":"ID of the current login (integer).",
+				"preset":"ID of the given preset record (integer).",
+				"record":"ID of the current record on this form (integer, relation 0).",
+				"recordNew":"TRUE/FALSE, depending on whether the current record is new on this form.",
+				"role":"TRUE/FALSE, depending on the whether the current login has the given role assigned.",
+				"subQuery":"Return value of the given sub query.",
+				"true":"TRUE value to compare other TRUE values against.",
+				"value":"A static value to compare against."
 			},
 			"operator":{
 				"eq":"uguale",

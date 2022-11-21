@@ -32,8 +32,8 @@ let MyFilterBrackets = {
 	emits:['update:modelValue'],
 	computed:{
 		value:{
-			get:function()  { return this.modelValue; },
-			set:function(v) { this.$emit('update:modelValue',v); }
+			get()  { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue',v); }
 		}
 	},
 	methods:{
@@ -69,9 +69,7 @@ let MyFilterOperatorOption = {
 		value:      { type:String,  required:true }
 	},
 	computed:{
-		displayCaption:function() {
-			return !this.builderMode ? this.caption : this.value;
-		}
+		displayCaption:(s) => !s.builderMode ? s.caption : s.value
 	}
 };
 
@@ -128,10 +126,10 @@ let MyFilterOperator = {
 	emits:['update:modelValue'],
 	computed:{
 		value:{
-			get:function()  { return this.modelValue; },
-			set:function(v) { this.$emit('update:modelValue',v); }
+			get()  { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue',v); }
 		},
-		capApp:function() { return this.$store.getters.captions.filter; }
+		capApp:(s) => s.$store.getters.captions.filter
 	}
 };
 
@@ -148,10 +146,10 @@ let MyFilterConnector = {
 	emits:['update:modelValue'],
 	computed:{
 		value:{
-			get:function()  { return this.modelValue; },
-			set:function(v) { this.$emit('update:modelValue',v); }
+			get()  { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue',v); }
 		},
-		capApp:function() { return this.$store.getters.captions.filter; }
+		capApp:(s) => s.$store.getters.captions.filter
 	}
 };
 
@@ -186,22 +184,22 @@ let MyFilterAttribute = {
 	emits:['update:modelValue'],
 	computed:{
 		value:{
-			get:function()  { return this.modelValue; },
-			set:function(v) { this.$emit('update:modelValue',v); }
+			get()  { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue',v); }
 		},
 		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.filter; },
-		moduleLanguage:function() { return this.$store.getters.moduleLanguage; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.filter,
+		moduleLanguage:(s) => s.$store.getters.moduleLanguage
 	},
 	methods:{
 		// externals
 		getItemTitleNoRelationship,
 		
 		// presentation
-		getAttributeCaption:function(nestedIndexAttributeId) {
+		getAttributeCaption(nestedIndexAttributeId) {
 			let v   = nestedIndexAttributeId.split('_');
 			let atr = this.attributeIdMap[v[2]];
 			
@@ -217,7 +215,7 @@ let MyFilterAttribute = {
 			let rel = this.relationIdMap[atr.relationId];
 			return this.getItemTitleNoRelationship(rel,atr,v[1]);
 		},
-		getQueryLabel:function(nestingLevel) {
+		getQueryLabel(nestingLevel) {
 			if(nestingLevel === 0)
 				return this.capApp.nestingMain;
 			
@@ -246,6 +244,7 @@ let MyFilterSide = {
 					<option
 						v-for="c in contentEnabled"
 						:disabled="contentUnusable.includes(c)"
+						:title="capApp.option.contentHint[c]"
 						:value="c"
 					>
 						{{ capApp.option.content[c] }}
@@ -428,62 +427,58 @@ let MyFilterSide = {
 	},
 	computed:{
 		// entities
-		contentEnabled:function() {
+		contentEnabled:(s) => {
 			return [
 				'attribute','field','fieldChanged','value','record',
 				'recordNew','login','preset','role','languageCode',
 				'javascript','true','collection','subQuery'
-			].filter(v => !this.disableContent.includes(v));
+			].filter(v => !s.disableContent.includes(v));
 		},
-		contentUnusable:function() {
+		contentUnusable:(s) => {
 			let out = [];
-			if(Object.keys(this.fieldIdMap).length === 0) {
+			if(Object.keys(s.fieldIdMap).length === 0) {
 				out.push('field');
 				out.push('fieldChanged');
 			}
 			return out;
 		},
-		module:function() {
-			return this.moduleId === ''
-				? false : this.moduleIdMap[this.moduleId];
-		},
-		nestedIndexAttributeIdsSubQuery:function() {
-			if(!this.isSubQuery) return [];
+		nestedIndexAttributeIdsSubQuery:(s) => {
+			if(!s.isSubQuery) return [];
 			
-			return this.getNestedIndexAttributeIdsByJoins(
-				this.query.joins,
-				this.joinsParents.length,
+			return s.getNestedIndexAttributeIdsByJoins(
+				s.query.joins,
+				s.joinsParents.length,
 				false
 			);
 		},
 		
 		// inputs
 		brackets:{
-			get:function()  { return this.modelValue.brackets; },
-			set:function(v) { this.set('brackets',v); }
+			get()  { return this.modelValue.brackets; },
+			set(v) { this.set('brackets',v); }
 		},
 		content:{ // getter only
-			get:function() { return this.modelValue.content; }
+			get() { return this.modelValue.content; }
 		},
 		collectionId:{
-			get:function()  { return this.modelValue.collectionId; },
-			set:function(v) { this.set('collectionId',v); }
+			get()  { return this.modelValue.collectionId; },
+			set(v) { this.set('collectionId',v); }
 		},
 		columnId:{
-			get:function()  { return this.modelValue.columnId; },
-			set:function(v) { this.set('columnId',v); }
+			get()  { return this.modelValue.columnId; },
+			set(v) { this.set('columnId',v); }
 		},
 		fieldId:{
-			get:function()  { return this.modelValue.fieldId; },
-			set:function(v) { this.set('fieldId',v); }
+			get()  { return this.modelValue.fieldId; },
+			set(v) { this.set('fieldId',v); }
 		},
 		nestedIndexAttribute:{
-			get:function()  {
+			get()  {
 				return `${this.modelValue.attributeNested}`+
 					`_${this.modelValue.attributeIndex}`+
 					`_${this.modelValue.attributeId}`;
 			},
-			set:function(v) {
+			set(v) {
 				if(typeof v === 'undefined')
 					return;
 				
@@ -492,52 +487,53 @@ let MyFilterSide = {
 			}
 		},
 		presetId:{
-			get:function()  { return this.modelValue.presetId; },
-			set:function(v) { this.set('presetId',v); }
+			get()  { return this.modelValue.presetId; },
+			set(v) { this.set('presetId',v); }
 		},
 		query:{
-			get:function()  { return this.modelValue.query; },
-			set:function(v) { this.set('query',v); }
+			get()  { return this.modelValue.query; },
+			set(v) { this.set('query',v); }
 		},
 		queryAggregator:{
-			get:function()  { let v = this.modelValue.queryAggregator; return v !== null ? v : ''; },
-			set:function(v) { this.set('queryAggregator',v === '' ? null : v); }
+			get()  { let v = this.modelValue.queryAggregator; return v !== null ? v : ''; },
+			set(v) { this.set('queryAggregator',v === '' ? null : v); }
 		},
 		roleId:{
-			get:function()  { return this.modelValue.roleId; },
-			set:function(v) { this.set('roleId',v); }
+			get()  { return this.modelValue.roleId; },
+			set(v) { this.set('roleId',v); }
 		},
 		valueFixText:{
-			get:function()  { return this.modelValue.value; },
-			set:function(v) { this.set('value',v); }
+			get()  { return this.modelValue.value; },
+			set(v) { this.set('value',v); }
 		},
 		valueFixTextDate:{
-			get:function()  {
-				return this.valueFixText === '' ? null : this.valueFixText;
-			},
-			set:function(v) {
+			get()  { return this.valueFixText === '' ? null : this.valueFixText; },
+			set(v) {
 				if(v === null) v = '';
 				this.valueFixText = String(v);
 			}
 		},
 		
+		// simple
+		module:(s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
+		
 		// states
-		isAttribute:  function() { return this.content === 'attribute'; },
-		isCollection: function() { return this.content === 'collection'; },
-		isField:      function() { return this.content === 'field' || this.content === 'fieldChanged'; },
-		isJavascript: function() { return this.content === 'javascript'; },
-		isPreset:     function() { return this.content === 'preset'; },
-		isRole:       function() { return this.content === 'role'; },
-		isSubQuery:   function() { return this.content === 'subQuery'; },
-		isValue:      function() { return this.content === 'value'; },
-		isNullPartner:function() { return !this.leftSide && this.isNullOperator; },
+		isAttribute:  (s) => s.content === 'attribute',
+		isCollection: (s) => s.content === 'collection',
+		isField:      (s) => s.content === 'field' || s.content === 'fieldChanged',
+		isJavascript: (s) => s.content === 'javascript',
+		isPreset:     (s) => s.content === 'preset',
+		isRole:       (s) => s.content === 'role',
+		isSubQuery:   (s) => s.content === 'subQuery',
+		isValue:      (s) => s.content === 'value',
+		isNullPartner:(s) => !s.leftSide && s.isNullOperator,
 		
 		// stores
-		modules:        function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
-		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
-		capApp:         function() { return this.$store.getters.captions.filter; },
-		capGen:         function() { return this.$store.getters.captions.generic; }
+		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
+		capApp:         (s) => s.$store.getters.captions.filter,
+		capGen:         (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -547,19 +543,19 @@ let MyFilterSide = {
 		getQueryTemplate,
 		
 		// actions
-		set:function(name,newValue) {
+		set(name,newValue) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = newValue;
 			this.$emit('update:modelValue',v);
 		},
-		setAttribute:function(attributeId,index,nested) {
+		setAttribute(attributeId,index,nested) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v.attributeId     = attributeId;
 			v.attributeIndex  = index;
 			v.attributeNested = nested;
 			this.$emit('update:modelValue',v);
 		},
-		setContent:function(evt) {
+		setContent(evt) {
 			let v     = JSON.parse(JSON.stringify(this.modelValue));
 			v.content = evt.target.value;
 			
@@ -592,7 +588,7 @@ let MyFilterSide = {
 			}
 			this.$emit('update:modelValue',v);
 		},
-		setQuery:function(name,newValue) {
+		setQuery(name,newValue) {
 			let v = JSON.parse(JSON.stringify(this.modelValue.query));
 			v[name] = newValue;
 			this.set('query',v);
@@ -705,75 +701,76 @@ let MyFilter = {
 	computed:{
 		// inputs
 		brackets0Input:{
-			get:function() { return this.side0.brackets; },
-			set:function(vNew) {
+			get() { return this.side0.brackets; },
+			set(vNew) {
 				let v = JSON.parse(JSON.stringify(this.side0));
 				v.brackets = vNew;
 				this.side0Input = v;
 			}
 		},
 		brackets1Input:{
-			get:function() { return this.side1.brackets; },
-			set:function(vNew) {
+			get() { return this.side1.brackets; },
+			set(vNew) {
 				let v = JSON.parse(JSON.stringify(this.side1));
 				v.brackets = vNew;
 				this.side1Input = v;
 			}
 		},
 		connectorInput:{
-			get:function()  { return this.connector; },
-			set:function(v) { this.$emit('update',this.position,'connector',v); }
+			get()  { return this.connector; },
+			set(v) { this.$emit('update',this.position,'connector',v); }
 		},
 		operatorInput:{
-			get:function()  { return this.operator; },
-			set:function(v) { this.$emit('update',this.position,'operator',v); }
+			get()  { return this.operator; },
+			set(v) { this.$emit('update',this.position,'operator',v); }
 		},
 		side0Input:{
-			get:function()  { return this.side0; },
-			set:function(v) { this.$emit('update',this.position,'side0',v); }
+			get()  { return this.side0; },
+			set(v) { this.$emit('update',this.position,'side0',v); }
 		},
 		side1Input:{
-			get:function()  { return this.side1; },
-			set:function(v) { this.$emit('update',this.position,'side1',v); }
+			get()  { return this.side1; },
+			set(v) { this.$emit('update',this.position,'side1',v); }
 		},
 		
 		// states
-		side0Column:function() {
-			for(let i = 0, j = this.columns.length; i < j; i++) {
-				let c = this.columns[i];
+		side0Column:(s) => {
+			for(let i = 0, j = s.columns.length; i < j; i++) {
+				let c = s.columns[i];
 				
-				if(c.index !== this.side0.attributeIndex || c.attributeId !== this.side0.attributeId)
+				if(c.index !== s.side0.attributeIndex || c.attributeId !== s.side0.attributeId)
 					continue;
 				
 				return c;
 			}
 			return false;
 		},
-		side0ColumDate:function() {
-			return ['date','datetime'].includes(this.side0Column.display);
+		side0ColumDate:(s) => {
+			return ['date','datetime'].includes(s.side0Column.display);
 		},
-		side0ColumTime:function() {
-			return ['datetime','time'].includes(this.side0Column.display);
+		side0ColumTime:(s) => {
+			return ['datetime','time'].includes(s.side0Column.display);
 		},
-		isNullOperator:function() {
-			return ['IS NULL','IS NOT NULL'].includes(this.operator);
+		isNullOperator:(s) => {
+			return ['IS NULL','IS NOT NULL'].includes(s.operator);
 		},
-		isStringInput:function() {
+		isStringInput:(s) => {
 			return (
-				typeof this.side0.attributeId !== 'undefined' &&
-				this.side0.attributeId !== null &&
-				this.isAttributeString(this.attributeIdMap[this.side0.attributeId].content)
+				typeof s.side0.attributeId !== 'undefined' &&
+				s.side0.attributeId !== null &&
+				s.isAttributeString(s.attributeIdMap[s.side0.attributeId].content)
 			) || (
-				typeof this.side1.attributeId !== 'undefined' &&
-				this.side1.attributeId !== null &&
-				this.isAttributeString(this.attributeIdMap[this.side1.attributeId].content)
+				typeof s.side1.attributeId !== 'undefined' &&
+				s.side1.attributeId !== null &&
+				s.isAttributeString(s.attributeIdMap[s.side1.attributeId].content)
 			);
 		},
 		
 		// stores
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; }
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap']
 	},
 	methods:{
+		// externals
 		isAttributeString
 	}
 };

@@ -162,7 +162,7 @@ body                                         { --depth:6; }
 .input-files-header input                    { --depth:0; }
 .input-files .item                           { --depth:2; }
 .input-files .item img.prev                  { --depth:5; }
-.articles-tabs .entry:not(.active)           { --depth:1; }
+.tabs .tab-entry:not(.active)                { --depth:1; }
 .admin .logs .actions                        { --depth:7; }
 .admin .table-default th                     { --depth:4; }
 .admin .table-default td                     { --depth:1; }
@@ -181,6 +181,7 @@ body                                         { --depth:6; }
 .builder .lookup                             { --depth:1; }
 .builder-icon-input .iconLine                { --depth:0; }
 .builder-icon-input .iconLine.disabled       { --depth:5; }
+.builder-form-state-effect                   { --depth:5; }
 .builder-field                               { --depth:5; }
 .builder-field .column                       { --depth:4; }
 .builder-modules .item-wrap                  { --depth:5; }
@@ -265,11 +266,11 @@ h3{
 .row.centered{
 	align-items:center;
 }
-.row.space-between{
-	justify-content:space-between;
-}
 .row.gap{
 	gap:10px;
+}
+.row.space-between{
+	justify-content:space-between;
 }
 .shade{
 	box-shadow:1px 1px 4px var(--color-shade);
