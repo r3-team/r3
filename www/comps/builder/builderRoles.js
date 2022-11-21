@@ -33,6 +33,25 @@ let MyBuilderRoles = {
 					:to="'/builder/role/'+r.id" 
 				>
 					<span>{{ r.name }}</span>
+					<div class="row">
+						
+						<my-button image="personArrow.png"
+							v-if="r.assignable && r.name !== 'everyone'"
+							:active="false"
+							:captionTitle="capApp.assignable"
+							:naked="true"
+							:tight="true"
+						/>
+						
+						<my-button image="department.png"
+							v-if="r.childrenIds.length !== 0"
+							:active="false"
+							:caption="String(r.childrenIds.length)"
+							:captionTitle="capApp.children"
+							:naked="true"
+							:tight="true"
+						/>
+					</div>
 				</router-link>
 			</div>
 		</div>

@@ -97,13 +97,20 @@
 	border-bottom:1px solid var(--color-border);
 	background-color:var(--color-bg);
 }
-.builder .navigation-entities-header h1{
+.builder .navigation-entities-header .line{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:8px;
+}
+.builder .navigation-entities-header .line h1{
 	margin:0px;
 	font-size:110%;
 }
-.builder .navigation-entities-header img{
+.builder .navigation-entities-header .line img{
 	width:18px;
 	height:18px;
+	filter:var(--image-filter);
 }
 .builder .navigation-entities-header-sub{
 	margin:7px 9px 2px;
@@ -170,16 +177,19 @@
 	background-color:var(--color-bg);
 	box-shadow:1px 1px 3px var(--color-shade);
 	box-sizing:border-box;
-	transition:background-color 0.2s;
+	transition:background-color 0.2s, border-bottom 0.2s, box-shadow 0.2s;
 }
 .builder-entry-list .entry.off{
 	color:var(--color-font-alt);
 }
 .builder-entry-list .entry:not(.off):hover{
-	text-decoration:underline;
 	padding:0px 12px 0px;
-	border-bottom:3px solid var(--color-border-bg);
+	border-bottom:3px solid var(--color-accent1);
 	box-shadow:1px 1px 5px var(--color-shade);
+}
+.builder-entry-list .entry:not(.off):focus{
+	border-bottom:2px solid var(--color-accent1);
+	box-shadow:1px 1px 7px var(--color-shade);
 }
 .builder-entry-list .entry img.icon{
 	width:24px;

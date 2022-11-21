@@ -154,23 +154,23 @@ let MyBuilder = {
 					
 					<!-- module sub component navigation header -->
 					<div class="navigation-entities-header" v-if="subMenu">
-						<div class="row gap centered" v-if="navigation === 'forms'">
+						<div class="line" v-if="navigation === 'forms'">
 							<img src="images/form.png" />
 							<h1>{{ capApp.navigationForms }}</h1>
 						</div>
-						<div class="row gap centered" v-if="navigation === 'functions'">
+						<div class="line" v-if="navigation === 'functions'">
 							<img src="images/code.png" />
 							<h1>{{ capApp.navigationFunctions }}</h1>
 						</div>
-						<div class="row gap centered" v-if="navigation === 'roles'">
+						<div class="line" v-if="navigation === 'roles'">
 							<img src="images/personMultiple.png" />
 							<h1>{{ capApp.navigationRoles }}</h1>
 						</div>
-						<div class="row gap centered" v-if="navigation === 'relations'">
+						<div class="line" v-if="navigation === 'relations'">
 							<img src="images/database.png" />
 							<h1>{{ capApp.navigationRelations }}</h1>
 						</div>
-						<div class="row gap centered" v-if="navigation === 'collections'">
+						<div class="line" v-if="navigation === 'collections'">
 							<img src="images/tray.png" />
 							<h1>{{ capApp.navigationCollections }}</h1>
 						</div>
