@@ -228,19 +228,6 @@ let MyBuilderRole = {
 				<img class="icon" src="images/personMultiple.png" />
 				<h1 class="title">{{ capApp.titleOne.replace('{NAME}',name) }}</h1>
 			</div>
-			
-			<div class="area">
-				<my-button image="visible1.png"
-					@trigger="copyValueDialog(role.name,role.id,role.id)"
-				/>
-				<my-button image="delete.png"
-					@trigger="delAsk"
-					:active="!readonly"
-					:cancel="true"
-					:caption="capGen.button.delete"
-					:captionTitle="capGen.button.delete"
-				/>
-			</div>
 		</div>
 		<div class="top lower">
 			<div class="area">
@@ -253,6 +240,17 @@ let MyBuilderRole = {
 					@trigger="reset"
 					:active="hasChanges"
 					:caption="capGen.button.refresh"
+				/>
+				<my-button image="visible1.png"
+					@trigger="copyValueDialog(role.name,role.id,role.id)"
+					:caption="capGen.id"
+				/>
+				<my-button image="delete.png"
+					@trigger="delAsk"
+					:active="!readonly && !isEveryone"
+					:cancel="true"
+					:caption="capGen.button.delete"
+					:captionTitle="capGen.button.delete"
 				/>
 			</div>
 		</div>

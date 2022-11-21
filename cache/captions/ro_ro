@@ -617,7 +617,7 @@
 			"columnTitle":"Titlu",
 			"columnWrap":"Text continuu",
 			"containerContentLayout":"Aspect conținut",
-			"content":"Interogarea datelor din formular",
+			"content":"Form",
 			"contentColumn":"Subinterogare pentru date coloane",
 			"contentField":"Interogare câmpurilor de date",
 			"copy":"Copie formular",
@@ -688,9 +688,6 @@
 			"presetOpen":"Deschide presetarea",
 			"readonly":"Numai citire",
 			"required":"Necesar",
-			"showContent":"Content",
-			"showFunctions":"Funcțiile",
-			"showStates":"Statuturi",
 			"sql":"Previzualizare SQL",
 			"state":"Statut",
 			"stateDefault":"implicit",
@@ -700,7 +697,11 @@
 			"stateRequired":"necesar",
 			"subQuery":"Sub interogare",
 			"subQueryAttribute":"Atribut",
-			"title":"Formulare"
+			"tabContent":"Content",
+			"tabFunctions":"Funcțiile ({CNT})",
+			"tabStates":"Statuturi ({CNT})",
+			"title":"Formulare",
+			"titleOne":"Form '{NAME}'"
 		},
 		"function":{
 			"button":{
@@ -909,6 +910,7 @@
 				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
 				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
 			},
+			"form":"New form",
 			"module":"Aplicație nouă",
 			"options":"Additional options",
 			"relation":"Relație nouă",

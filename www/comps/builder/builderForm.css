@@ -6,7 +6,7 @@
 
 /* form builder sidebar area */
 .builder-form .sidebar{
-	min-width:400px;
+	min-width:420px;
 	flex:0 0 auto;
 	overflow:auto;
 }
@@ -28,7 +28,6 @@
 /* form builder main area */
 .builder-form-main{
 	flex:2 1 auto;
-	z-index:var(--z-index-form);
 	overflow:auto;
 }
 

@@ -194,7 +194,7 @@ let MyBuilder = {
 						<!-- relations -->
 						<template v-if="navigation === 'relations'">
 							<router-link class="entry clickable"
-								v-for="rel in module.relations.filter(v => v.name.includes(filter))"
+								v-for="rel in module.relations.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 								:key="rel.id"
 								:to="'/builder/relation/'+rel.id" 
 							>{{ rel.name }}</router-link>
@@ -203,7 +203,7 @@ let MyBuilder = {
 						<!-- forms -->
 						<template v-if="navigation === 'forms'">
 							<router-link class="entry clickable"
-								v-for="frm in module.forms.filter(v => v.name.includes(filter))"
+								v-for="frm in module.forms.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 								:key="frm.id"
 								:to="'/builder/form/'+frm.id" 
 							>{{ frm.name }}</router-link>
@@ -212,7 +212,7 @@ let MyBuilder = {
 						<!-- roles -->
 						<template v-if="navigation === 'roles'">
 							<router-link class="entry clickable"
-								v-for="rol in module.roles.filter(v => v.name.includes(filter))"
+								v-for="rol in module.roles.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 								:key="rol.id"
 								:to="'/builder/role/'+rol.id" 
 							>{{ rol.name }}</router-link>
@@ -221,7 +221,7 @@ let MyBuilder = {
 						<!-- collections -->
 						<template v-if="navigation === 'collections'">
 							<router-link class="entry clickable"
-								v-for="c in module.collections.filter(v => v.name.includes(filter))"
+								v-for="c in module.collections.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 								:key="c.id"
 								:to="'/builder/collection/'+c.id" 
 							>{{ c.name }}</router-link>
@@ -232,22 +232,22 @@ let MyBuilder = {
 							
 							<!-- PG functions -->
 							<div class="navigation-entities-header-sub"
-								v-if="module.pgFunctions.filter(v => v.name.includes(filter)).length > 0"
+								v-if="module.pgFunctions.filter(v => v.name.toLowerCase().includes(filter.toLowerCase())).length > 0"
 							>{{ capApp.navigationFunctionsSubBackend }}</div>
 							
 							<router-link class="entry clickable"
-								v-for="fnc in module.pgFunctions.filter(v => v.name.includes(filter))"
+								v-for="fnc in module.pgFunctions.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 								:key="fnc.id"
 								:to="'/builder/pg-function/'+fnc.id" 
 							>{{ fnc.name }}</router-link>
 							
 							<!-- JS functions -->
 							<div class="navigation-entities-header-sub"
-								v-if="module.jsFunctions.filter(v => v.name.includes(filter)).length > 0"
+								v-if="module.jsFunctions.filter(v => v.name.toLowerCase().includes(filter.toLowerCase())).length > 0"
 							>{{ capApp.navigationFunctionsSubFrontend }}</div>
 							
 							<router-link class="entry clickable"
-								v-for="fnc in module.jsFunctions.filter(v => v.name.includes(filter))"
+								v-for="fnc in module.jsFunctions.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 								:key="fnc.id"
 								:to="'/builder/js-function/'+fnc.id" 
 							>{{ fnc.name }}</router-link>

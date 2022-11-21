@@ -1,4 +1,5 @@
-import {getNilUuid} from '../shared/generic.js';
+import {getQueryTemplate} from '../shared/query.js';
+import {getNilUuid}       from '../shared/generic.js';
 export {MyBuilderNew as default};
 
 let MyBuilderNew = {
@@ -73,6 +74,7 @@ let MyBuilderNew = {
 		// presentation
 		title:(s) => {
 			switch(s.entity) {
+				case 'form':     return s.capApp.form;     break;
 				case 'module':   return s.capApp.module;   break;
 				case 'relation': return s.capApp.relation; break;
 				case 'role':     return s.capApp.role;     break;
@@ -81,6 +83,7 @@ let MyBuilderNew = {
 		},
 		titleImgSrc:(s) => {
 			switch(s.entity) {
+				case 'form':     return 'images/form.png';           break;
 				case 'module':   return 'images/module.png';         break;
 				case 'relation': return 'images/database.png';       break;
 				case 'role':     return 'images/personMultiple.png'; break;
@@ -96,11 +99,30 @@ let MyBuilderNew = {
 	methods:{
 		// externals
 		getNilUuid,
+		getQueryTemplate,
 		
 		// backend calls
 		set() {
 			let request;
 			switch(this.entity) {
+				case 'form':
+					request = {
+						id:this.getNilUuid(),
+						moduleId:this.moduleId,
+						presetIdOpen:null,
+						iconId:null,
+						name:this.name,
+						noDataActions:false,
+						query:this.getQueryTemplate(),
+						fields:[],
+						functions:[],
+						states:[],
+						articleIdsHelp:[],
+						captions:{
+							formTitle:{}
+						}
+					};
+				break;
 				case 'module':
 					request = {
 						id:this.getNilUuid(),

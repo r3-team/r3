@@ -617,7 +617,7 @@
 			"columnTitle":"Title",
 			"columnWrap":"Text wrap",
 			"containerContentLayout":"Content layout",
-			"content":"Form data query",
+			"content":"Form",
 			"contentColumn":"Column data sub query",
 			"contentField":"Field data query",
 			"copy":"Duplicate form",
@@ -688,9 +688,6 @@
 			"presetOpen":"Open preset",
 			"readonly":"Read only",
 			"required":"Required",
-			"showContent":"Content",
-			"showFunctions":"Functions",
-			"showStates":"States",
 			"sql":"SQL preview",
 			"state":"State",
 			"stateDefault":"default",
@@ -700,7 +697,11 @@
 			"stateRequired":"required",
 			"subQuery":"Sub query",
 			"subQueryAttribute":"Attribute",
-			"title":"Forms"
+			"tabContent":"Content",
+			"tabFunctions":"Functions ({CNT})",
+			"tabStates":"States ({CNT})",
+			"title":"Forms",
+			"titleOne":"Form '{NAME}'"
 		},
 		"function":{
 			"button":{
@@ -909,6 +910,7 @@
 				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
 				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
 			},
+			"form":"New form",
 			"module":"New application",
 			"options":"Additional options",
 			"relation":"New relation",

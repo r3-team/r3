@@ -7,7 +7,7 @@ let MyTabs = {
 			v-for="(e,i) in entries"
 			@click="$emit('update:modelValue',e)"
 			@key.enter="$emit('update:modelValue',e)"
-			:class="{ active:e === modelValue }"
+			:class="{ active:e === modelValue, clickable:e !== modelValue }"
 		>{{ entriesText[i] }}</div>
 	</div>`,
 	props:{
