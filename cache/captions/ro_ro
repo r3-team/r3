@@ -846,7 +846,7 @@
 			"button":{
 				"add":"Adaugă înregistrare"
 			},
-			"collections":"Collections",
+			"collections":"Show collection values in menu",
 			"copy":"Copiați toate elementele de meniu din",
 			"formId":"- Selectați formularul -",
 			"showChildrenHint":"Afișați implicit subintrările",

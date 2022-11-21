@@ -15,11 +15,11 @@ let MyBuilderMenuItems = {
 	},
 	template:`<draggable handle=".dragAnchor" group="menu" itemKey="id" animation="100"
 		:fallbackOnBody="true"
-		:list="menus"
+		:list="list"
 	>
 		<template #item="{element,index}">
 	    		<div class="builder-menu shade">
-				<img v-if="!readonly" class="action dragAnchor" src="images/drag.png" />
+				<img v-if="!readonly" class="dragAnchor" src="images/drag.png" />
 				
 				<div class="inputs">
 					<div class="line">
@@ -28,20 +28,6 @@ let MyBuilderMenuItems = {
 							:active="!readonly"
 							:captionTitle="capApp.showChildrenHint"
 							:image="element.showChildren ? 'visible1.png' : 'visible0.png'"
-							:naked="true"
-						/>
-						
-						<!-- show collections -->
-						<my-button image="triangleDown.png"
-							v-if="showCollectionsIndex === index"
-							@trigger="showCollectionsIndex = -1"
-							:caption="capApp.collections + ' (' + element.collections.length + ')'"
-							:naked="true"
-						/>
-						<my-button image="triangleRight.png"
-							v-if="showCollectionsIndex !== index"
-							@trigger="showCollectionsIndex = index"
-							:caption="capApp.collections + ' (' + element.collections.length + ')'"
 							:naked="true"
 						/>
 						
@@ -73,30 +59,56 @@ let MyBuilderMenuItems = {
 								</option>
 							</optgroup>
 						</select>
+						
+						<!-- show collections -->
+						<my-button image="tray.png"
+							@trigger="showCollectionsIndex = index"
+							:caption="String(element.collections.length)"
+							:captionTitle="capApp.collections + ' (' + element.collections.length + ')'"
+						/>
 					</div>
-					
-					<!-- collections -->
-					<div class="line column" v-if="showCollectionsIndex === index">
-						<my-button image="add.png"
-							@trigger="element.collections.push(getCollectionConsumerTemplate())"
-							:active="!readonly"
-							:caption="capGen.button.add"
-							:naked="true"
-						/>
-						<my-builder-collection-input
-							v-for="(c,i) in element.collections"
-							@remove="element.collections.splice(i,1)"
-							@update:consumer="element.collections[i] = $event"
-							:allowFormOpen="false"
-							:allowRemove="true"
-							:consumer="c"
-							:fixedCollection="false"
-							:module="module"
-							:readonly="readonly"
-							:showMultiValue="false"
-							:showNoDisplayEmpty="true"
-							:showOnMobile="true"
-						/>
+				</div>
+				
+				<!-- collections -->
+				<div class="app-sub-window under-header"
+					v-if="showCollectionsIndex === index"
+					@mousedown.self="showCollectionsIndex = -1"
+				>
+					<div class="contentBox builder-new">
+						<div class="top lower">
+							<div class="area nowrap">
+								<h1 class="title">{{ capApp.collections }}</h1>
+							</div>
+							<div class="area">
+								<my-button image="cancel.png"
+									@trigger="showCollectionsIndex = -1"
+									:cancel="true"
+								/>
+							</div>
+						</div>
+						
+						<div class="content default-inputs">
+							<my-button image="add.png"
+								@trigger="element.collections.push(getCollectionConsumerTemplate())"
+								:active="!readonly"
+								:caption="capGen.button.add"
+								:naked="true"
+							/>
+							<my-builder-collection-input
+								v-for="(c,i) in element.collections"
+								@remove="element.collections.splice(i,1)"
+								@update:consumer="element.collections[i] = $event"
+								:allowFormOpen="false"
+								:allowRemove="true"
+								:consumer="c"
+								:fixedCollection="false"
+								:module="module"
+								:readonly="readonly"
+								:showMultiValue="false"
+								:showNoDisplayEmpty="true"
+								:showOnMobile="true"
+							/>
+						</div>
 					</div>
 				</div>
 				
@@ -104,7 +116,7 @@ let MyBuilderMenuItems = {
 				<my-builder-menu-items class="nested"
 					@remove="$emit('remove',$event)"
 					:builderLanguage="builderLanguage"
-					:menus="element.menus"
+					:list="element.menus"
 					:module="module"
 					:readonly="readonly"
 				/>
@@ -117,13 +129,13 @@ let MyBuilderMenuItems = {
 			</div>
 		</template>
 	</draggable>`,
+	emits:['remove'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		module:         { type:Object,  required:true },
-		menus:          { type:Array,   required:true },
+		list:           { type:Array,   required:true },
 		readonly:       { type:Boolean, required:true }
 	},
-	emits:['remove'],
 	data:function() {
 		return {
 			showCollectionsIndex:-1
@@ -131,21 +143,21 @@ let MyBuilderMenuItems = {
 	},
 	computed:{
 		// stores
-		modules:       function() { return this.$store.getters['schema/modules']; },
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.menu; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		settings:      function() { return this.$store.getters.settings; }
+		modules:    (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:     (s) => s.$store.getters.captions.builder.menu,
+		capGen:     (s) => s.$store.getters.captions.generic,
+		settings:   (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
 		getCollectionConsumerTemplate,
 		getDependentModules,
+		getNilUuid,
 		
 		// actions
-		remove:function(id,i) {
-			this.menus.splice(i,1);
+		remove(id,i) {
+			this.list.splice(i,1);
 			
 			// ID must be handled separately as it must be deleted in backend
 			this.$emit('remove',id);
@@ -155,7 +167,7 @@ let MyBuilderMenuItems = {
 
 let MyBuilderMenu = {
 	name:'my-builder-menu',
-	components:{MyBuilderMenuItems},
+	components:{ MyBuilderMenuItems },
 	template:`<div v-if="module" class="builder-menus contentBox grow">
 		
 		<div class="top">
@@ -185,11 +197,12 @@ let MyBuilderMenu = {
 		</div>
 		
 		<div class="content default-inputs">
+		
 			<my-builder-menu-items
 				@remove="removeById"
-				:builder-language="builderLanguage"
-				:menus="menus"
+				:builderLanguage="builderLanguage"
 				:module="module"
+				:list="menus"
 				:readonly="readonly"
 			/>
 			
@@ -223,7 +236,8 @@ let MyBuilderMenu = {
 			newCnt:0, // temporary menu IDs, replaced with NULL UUIDs on SET
 			menus:[],
 			menuIdCopy:null,
-			menuIdsRemove:[]
+			menuIdsRemove:[],
+			showCollections:false
 		};
 	},
 	mounted:function() {
@@ -239,24 +253,15 @@ let MyBuilderMenu = {
 		}
 	},
 	computed:{
-		hasChanges:function() {
-			return this.menuIdsRemove.length !== 0
-				|| JSON.stringify(this.menus) !== JSON.stringify(this.module.menus)
-			;
-		},
-		module:function() {
-			if(typeof this.moduleIdMap[this.id] === 'undefined')
-				return false;
-			
-			return this.moduleIdMap[this.id];
-		},
+		hasChanges:(s) => s.menuIdsRemove.length !== 0 || JSON.stringify(s.menus) !== JSON.stringify(s.module.menus),
+		module:    (s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
 		
 		// stores
-		modules:    function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.builder.menu; },
-		capGen:     function() { return this.$store.getters.captions.generic; },
-		settings:   function() { return this.$store.getters.settings; }
+		modules:    (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:     (s) => s.$store.getters.captions.builder.menu,
+		capGen:     (s) => s.$store.getters.captions.generic,
+		settings:   (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
@@ -264,7 +269,7 @@ let MyBuilderMenu = {
 		getNilUuid,
 		
 		// actions
-		add:function() {
+		add() {
 			this.menus.unshift({
 				id:this.newCnt++,
 				moduleId:this.id,
@@ -278,17 +283,17 @@ let MyBuilderMenu = {
 				}
 			});
 		},
-		removeById:function(menuId) {
+		removeById(menuId) {
 			if(!Number.isInteger(menuId))
 				this.menuIdsRemove.push(menuId);
 		},
-		reset:function() {
+		reset() {
 			if(this.module)
 				this.menus = JSON.parse(JSON.stringify(this.module.menus));
 		},
 		
 		// backend functions
-		copy:function() {
+		copy() {
 			ws.send('menu','copy',{
 				moduleId:this.menuIdCopy,
 				moduleIdNew:this.module.id
@@ -300,7 +305,7 @@ let MyBuilderMenu = {
 				this.$root.genericError
 			);
 		},
-		set:function() {
+		set() {
 			let that     = this;
 			let requests = [];
 			

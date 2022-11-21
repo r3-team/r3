@@ -987,18 +987,12 @@
 	border:1px dotted var(--color-border);
 	border-radius:3px;
 }
-.builder-menu .action{
+.builder-menu img.dragAnchor{
 	width:30px;
 	height:30px;
 	text-align:center;
 	margin:0px 3px 0px 0px;
-	cursor:pointer;
 	filter:var(--image-filter);
-}
-.builder-menu .action.end{
-	margin:0px 0px 0px auto;
-}
-.builder-menu .action.dragAnchor{
 	cursor:move;
 }
 .builder-menu .inputs{
@@ -1011,9 +1005,6 @@
 	align-content:flex-start;
 	align-items:flex-start;
 	flex:0 1 auto;
-}
-.builder-menu .inputs .line.column{
-	flex-direction:column;
 }
 .builder-menu input,
 .builder-menu select{

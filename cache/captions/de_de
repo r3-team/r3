@@ -846,7 +846,7 @@
 			"button":{
 				"add":"Eintrag hinzufügen"
 			},
-			"collections":"Sammlungen",
+			"collections":"Sammlungswerte im Menü anzeigen",
 			"copy":"Alle Menüeintrage kopieren von",
 			"formId":"- Formular auswählen -",
 			"showChildrenHint":"Standardmäßig Untereinträge anzeigen",

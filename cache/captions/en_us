@@ -846,7 +846,7 @@
 			"button":{
 				"add":"Add entry"
 			},
-			"collections":"Collections",
+			"collections":"Show collection values in menu",
 			"copy":"Copy all menu items from",
 			"formId":"- Select form -",
 			"showChildrenHint":"Show sub entries by default",
