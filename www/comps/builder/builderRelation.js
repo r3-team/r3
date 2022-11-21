@@ -160,7 +160,7 @@ let MyBuilderRelation = {
 			<div class="contentPart full">
 				<div class="contentPartHeader clickable" @click="showRelation = !showRelation">
 					<img class="icon" :src="displayArrow(showRelation)" />
-					<h1>{{ capApp.properties }}</h1>
+					<h1>{{ capGen.properties }}</h1>
 				</div>
 				
 				<template v-if="showRelation">

@@ -1,265 +1,7 @@
-import MyBuilderCaption      from './builderCaption.js';
-import {getDependentModules} from '../shared/builder.js';
-import {copyValueDialog}     from '../shared/generic.js';
 export {MyBuilderRoles as default};
-
-let MyBuilderRolesItem = {
-	name:'my-builder-roles-item',
-	components:{MyBuilderCaption},
-	template:`<tbody>
-		<tr>
-			<td>
-				<div class="row">
-					<my-button image="save.png"
-						@trigger="set"
-						:active="hasChanges && !readonly"
-						:caption="isNew ? capGen.button.create : ''"
-						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
-					/>
-					<my-button image="open.png"
-						v-if="!isNew"
-						@trigger="open"
-						:captionTitle="capGen.button.open"
-					/>
-					<my-button image="delete.png"
-						v-if="!isNew"
-						@trigger="delAsk"
-						:active="!isEveryone && !readonly"
-						:cancel="true"
-						:captionTitle="capGen.button.delete"
-					/>
-				</div>
-			</td>
-			<td>
-				<input class="long"
-					v-model="name"
-					:disabled="isEveryone || readonly"
-					:placeholder="isNew ? capApp.newRole : ''"
-				/>
-			</td>
-			<td>
-				<my-button image="visible1.png"
-					@trigger="copyValueDialog(role.name,role.id,role.id)"
-					:active="!isNew && !readonly"
-				/>
-			</td>
-			<td>
-				<my-builder-caption
-					v-model="captions.roleTitle"
-					:language="builderLanguage"
-					:readonly="isEveryone || readonly"
-				/>
-			</td>
-			<td>
-				<my-builder-caption
-					v-model="captions.roleDesc"
-					:language="builderLanguage"
-					:readonly="isEveryone || readonly"
-				/>
-			</td>
-			<td>
-				<select v-model="content" :disabled="isEveryone || readonly">
-					<option value="admin">{{ capApp.option.contentAdmin }}</option>
-					<option value="user">{{ capApp.option.contentUser }}</option>
-					<option value="other">{{ capApp.option.contentOther }}</option>
-					<option v-if="isEveryone" value="everyone">
-						{{ capApp.option.contentEveryone }}
-					</option>
-				</select>
-			</td>
-			<td>
-				<my-bool
-					v-model="assignable"
-					:readonly="isEveryone || readonly"
-				/>
-			</td>
-			<td>
-				<my-button
-					v-if="!isEveryone"
-					@trigger="showChildren = !showChildren"
-					:caption="String(childrenIds.length)"
-					:image="showChildren ? 'triangleDown.png' : 'triangleRight.png'"
-				/>
-				<my-button caption="0" image="triangleRight.png"
-					v-if="isEveryone"
-					:active="false"
-				/>
-			</td>
-		</tr>
-		
-		<tr v-if="showChildren">
-			<td colspan="999">
-				<div class="role-children">
-					
-					<div class="role-child-add">
-						<span>{{ capGen.button.add }}</span>
-						<select
-							@change="addChild($event.target.value)"
-							:disabled="readonly"
-							:value="null"
-						>
-							<option :value="null">-</option>
-							<optgroup
-								v-for="mod in getDependentModules(module,modules)"
-								:label="mod.name"
-							>
-								<option
-									v-for="r in mod.roles.filter(v => v.id !== role.id && !childrenIds.includes(v.id) && v.name !== 'everyone')"
-									:value="r.id"
-								>
-									{{ r.name }}
-								</option>
-							</optgroup>
-						</select>
-					</div>
-					
-					<div class="role-child" v-for="c in childrenIds">
-						<my-button image="cancel.png"
-							@trigger="removeChild(c)"
-							:active="!readonly"
-							:naked="true"
-						/>
-						<my-button
-							:caption="moduleIdMap[roleIdMap[c].moduleId].name + '->' + roleIdMap[c].name"
-							:naked="true"
-						/>
-					</div>
-				</div>
-			</td>
-		</tr>
-	</tbody>`,
-	props:{
-		builderLanguage:{ type:String,  required:true },
-		moduleId:       { type:String,  required:true },
-		readonly:       { type:Boolean, required:true },
-		role:           { type:Object,  required:false,
-			default:function() { return{
-				id:null,
-				name:'',
-				content:'user',
-				assignable:true,
-				childrenIds:[],
-				captions:{
-					roleTitle:{},
-					roleDesc:{}
-				},
-				accessAttributes:{},
-				accessCollections:{},
-				accessMenus:{},
-				accessRelations:{}
-			}}
-		}
-	},
-	data:function() {
-		return {
-			name:this.role.name,
-			content:this.role.content,
-			assignable:this.role.assignable,
-			childrenIds:JSON.parse(JSON.stringify(this.role.childrenIds)),
-			captions:JSON.parse(JSON.stringify(this.role.captions)),
-			
-			// states
-			showChildren:false
-		};
-	},
-	computed:{
-		hasChanges:function() {
-			return this.name       !== this.role.name
-				|| this.content    !== this.role.content
-				|| this.assignable !== this.role.assignable
-				|| JSON.stringify(this.childrenIds) !== JSON.stringify(this.role.childrenIds)
-				|| JSON.stringify(this.captions)    !== JSON.stringify(this.role.captions);
-		},
-		
-		// simple states
-		isEveryone:  function() { return this.role.name === 'everyone' },
-		isNew:       function() { return this.role.id === null; },
-		captionDesc: function() { return this.capRolDesc[this.role.id]; },
-		captionTitle:function() { return this.capRolTitle[this.role.id]; },
-		
-		// stores
-		module:     function() { return this.moduleIdMap[this.moduleId]; },
-		modules:    function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		roleIdMap:  function() { return this.$store.getters['schema/roleIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.builder.role; },
-		capGen:     function() { return this.$store.getters.captions.generic; },
-		settings:   function() { return this.$store.getters.settings; }
-	},
-	methods:{
-		// externals
-		copyValueDialog,
-		getDependentModules,
-		
-		// actions
-		open:function() {
-			this.$router.push('/builder/role/'+this.role.id);
-		},
-		addChild:function(id) {
-			this.childrenIds.push(id);
-		},
-		removeChild:function(id) {
-			let pos = this.childrenIds.indexOf(id);
-			if(pos !== -1)
-				this.childrenIds.splice(pos,1);
-		},
-		
-		// backend calls
-		delAsk:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
-		del:function() {
-			ws.send('role','del',{id:this.role.id},true).then(
-				() => {
-					this.$root.schemaReload(this.moduleId);
-					this.$root.loginReauthAll(false);
-				},
-				this.$root.genericError
-			);
-		},
-		set:function() {
-			ws.send('role','set',{
-				id:this.role.id,
-				moduleId:this.moduleId,
-				childrenIds:this.childrenIds,
-				name:this.name,
-				content:this.content,
-				assignable:this.assignable,
-				captions:this.captions,
-				
-				// not changable values on this interface
-				accessAttributes:this.role.accessAttributes,
-				accessCollections:this.role.accessCollections,
-				accessMenus:this.role.accessMenus,
-				accessRelations:this.role.accessRelations
-			},true).then(
-				() => {
-					if(this.isNew)
-						this.name = '';
-					
-					this.$root.schemaReload(this.moduleId);
-					this.$root.loginReauthAll(false);
-				},
-				this.$root.genericError
-			);
-		}
-	}
-};
 
 let MyBuilderRoles = {
 	name:'my-builder-roles',
-	components:{MyBuilderRolesItem},
 	template:`<div class="builder-roles contentBox grow">
 		
 		<div class="top lower">
@@ -267,40 +9,32 @@ let MyBuilderRoles = {
 				<img class="icon" src="images/personMultiple.png" />
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
+			<div class="area default-inputs">
+				<input v-model="filter" placeholder="..." />
+			</div>
 		</div>
 		
 		<div class="content default-inputs" v-if="module">
-			<table>
-				<thead>
-					<tr>
-						<th>{{ capGen.actions }}</th>
-						<th>{{ capGen.name }}</th>
-						<th>{{ capGen.id }}</th>
-						<th>{{ capGen.title }}</th>
-						<th>{{ capGen.description }}</th>
-						<th>{{ capGen.category }}</th>
-						<th>{{ capApp.assignable }}</th>
-						<th>{{ capApp.children }}</th>
-					</tr>
-				</thead>
+			<div class="builder-entry-list">
+			
+				<div class="entry"
+					@click="$emit('createNew',readonly ? null : 'role')"
+					:class="{ clickable:!readonly, off:readonly }"
+				>
+					<div class="row gap centered">
+						<img class="icon" src="images/add.png" />
+						<span>{{ capGen.button.new }}</span>
+					</div>
+				</div>
 				
-				<!-- new role -->
-				<my-builder-roles-item
-					:builderLanguage="builderLanguage"
-					:moduleId="module.id"
-					:readonly="readonly"
-				/>
-				
-				<!-- existing roles -->
-				<my-builder-roles-item
-					v-for="rol in module.roles"
-					:builderLanguage="builderLanguage"
-					:key="rol.id"
-					:moduleId="module.id"
-					:readonly="readonly"
-					:role="rol"
-				/>
-			</table>
+				<router-link class="entry clickable"
+					v-for="r in module.roles.filter(v => filter === '' || v.name.includes(filter))"
+					:key="r.id"
+					:to="'/builder/role/'+r.id" 
+				>
+					<span>{{ r.name }}</span>
+				</router-link>
+			</div>
 		</div>
 	</div>`,
 	props:{
@@ -308,15 +42,17 @@ let MyBuilderRoles = {
 		id:             { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
+	data:function() {
+		return {
+			filter:'',
+		};
+	},
 	computed:{
-		module:function() {
-			return typeof this.moduleIdMap[this.id] === 'undefined'
-				? false : this.moduleIdMap[this.id];
-		},
+		module:(s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
 		
 		// stores
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.builder.role; },
-		capGen:     function() { return this.$store.getters.captions.generic; }
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:     (s) => s.$store.getters.captions.builder.role,
+		capGen:     (s) => s.$store.getters.captions.generic
 	}
 };

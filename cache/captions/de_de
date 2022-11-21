@@ -105,6 +105,7 @@
 		"order":"Reihenf.",
 		"password":"Passwort",
 		"preview":"Vorschau",
+		"properties":"Eigenschaften",
 		"readonly":"Schreibschutz",
 		"record":"Datensatz",
 		"results":"{CNT} Ergebnisse",
@@ -914,7 +915,8 @@
 			"options":"Weitere Optionen",
 			"relation":"Neue Relation",
 			"relationEncryption":"Ende-zu-Ende-Verschlüsselung",
-			"relationEncryptionHint":"Erlaubt Ende-zu-Ende-Verschlüsselung (E2EE) für Attribute auf dieser Relation. E2EE hat Vor- und Nachteile - die Builder-Dokumentation sollte hierzu gelesen werden. Diese Einstellung kann nachträglich nicht geändert werden."
+			"relationEncryptionHint":"Erlaubt Ende-zu-Ende-Verschlüsselung (E2EE) für Attribute auf dieser Relation. E2EE hat Vor- und Nachteile - die Builder-Dokumentation sollte hierzu gelesen werden. Diese Einstellung kann nachträglich nicht geändert werden.",
+			"role":"Neue Rolle"
 		},
 		"openFormInput":{
 			"attributeApply":"...um Wert auf Formular zu setzen",
@@ -1006,7 +1008,6 @@
 			"previewLimit":"Datensätze/Seite",
 			"previewPage":"Seite",
 			"previewRowCount":"Datensatzanzahl",
-			"properties":"Eigenschaften",
 			"relationship":"Beziehung",
 			"retention":"Änderungshistorie",
 			"retentionCount":"X Änderungen behalten",
@@ -1045,7 +1046,7 @@
 			"newRole":"Neue Rolle",
 			"relation":"Relation",
 			"title":"Rollen",
-			"titleOne":"Rollentitel"
+			"titleOne":"Role \"{NAME}\""
 		},
 		"backHint":"Zurück zur Anwendungsübersicht",
 		"language":"Übersetzung",

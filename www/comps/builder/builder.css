@@ -15,6 +15,7 @@
 	vertical-align:top;
 	background-color:var(--color-bg);
 	box-shadow:1px 1px 2px var(--color-shade);
+	border-bottom:1px solid var(--color-border);
 }
 .builder-table-vertical>tr>td:first-child{
 	font-size:110%;
@@ -99,6 +100,10 @@
 .builder .navigation-entities-header h1{
 	margin:0px;
 	font-size:110%;
+}
+.builder .navigation-entities-header img{
+	width:18px;
+	height:18px;
 }
 .builder .navigation-entities-header-sub{
 	margin:7px 9px 2px;
@@ -825,36 +830,25 @@
 }
 
 /* role */
-.builder-roles .role-children{
-	min-width:300px;
-	padding:10px 15px;
-	margin:0px 15px 10px;
-	border:1px solid var(--color-border);
-	border-top:none;
-	border-radius:0px 0px 5px 5px;
-	display:flex;
-	flex-direction:column;
-}
-.builder-roles .role-child-add{
-	max-width:320px;
-	margin:10px 0px;
-	display:flex;
-	flex-direction:row;
-	align-items:center;
-}
-.builder-roles .role-child-add span{
-	margin:0px 12px 0px 0px;
-}
-.builder-roles .role-child{
-	margin:0px 0px 0px 0px;
-}
-.builder-role{}
-.builder-role.contentBox .content{
-	display:flex;
-	flex-flow:row nowrap;
-}
+.builder-roles{}
 .builder-role table{
 	width:100%;
+}
+.builder-role .access-header{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:10px;
+	margin:var(--spacing);
+}
+.builder-role .access-header h1{
+	margin:0px;
+	padding:0px;
+}
+.builder-role .access-header img{
+	width:24px;
+	height:24px;
+	filter:var(--image-filter);
 }
 
 /* functions */

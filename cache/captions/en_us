@@ -105,6 +105,7 @@
 		"order":"Order",
 		"password":"Password",
 		"preview":"Preview",
+		"properties":"Properties",
 		"readonly":"Readonly",
 		"record":"Record",
 		"results":"{CNT} results",
@@ -914,7 +915,8 @@
 			"options":"Additional options",
 			"relation":"New relation",
 			"relationEncryption":"End-to-end Encryption",
-			"relationEncryptionHint":"Enables end-to-end encryption (E2EE) for attributes on this relation. E2EE has benefits and drawbacks - please carefully read the Builder documentation before using it. This setting cannot be changed later."
+			"relationEncryptionHint":"Enables end-to-end encryption (E2EE) for attributes on this relation. E2EE has benefits and drawbacks - please carefully read the Builder documentation before using it. This setting cannot be changed later.",
+			"role":"New role"
 		},
 		"openFormInput":{
 			"attributeApply":"...to set value on form",
@@ -1006,7 +1008,6 @@
 			"previewLimit":"Records/page",
 			"previewPage":"Page",
 			"previewRowCount":"Record count",
-			"properties":"Properties",
 			"relationship":"Relationship",
 			"retention":"Change log",
 			"retentionCount":"Keep X changes",
@@ -1045,7 +1046,7 @@
 			"newRole":"New role",
 			"relation":"Relation",
 			"title":"Roles",
-			"titleOne":"Role title"
+			"titleOne":"Role '{NAME}'"
 		},
 		"backHint":"Go back to application overview",
 		"language":"Translation",

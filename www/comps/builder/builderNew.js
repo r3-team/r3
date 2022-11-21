@@ -38,7 +38,7 @@ let MyBuilderNew = {
 							<span>{{ capApp.relationEncryption }}</span>
 							<my-bool v-model="encryption" />
 						</div>
-						<p v-html="capApp.relationEncryptionHint">
+						<p v-html="capApp.relationEncryptionHint"></p>
 					</template>
 				</template>
 				
@@ -75,13 +75,15 @@ let MyBuilderNew = {
 			switch(s.entity) {
 				case 'module':   return s.capApp.module;   break;
 				case 'relation': return s.capApp.relation; break;
+				case 'role':     return s.capApp.role;     break;
 			}
 			return '';
 		},
 		titleImgSrc:(s) => {
 			switch(s.entity) {
-				case 'module':   return 'images/module.png';   break;
-				case 'relation': return 'images/database.png'; break;
+				case 'module':   return 'images/module.png';         break;
+				case 'relation': return 'images/database.png';       break;
+				case 'role':     return 'images/personMultiple.png'; break;
 			}
 			return '';
 		},
@@ -130,6 +132,21 @@ let MyBuilderNew = {
 						retentionCount:null,
 						retentionDays:null,
 						policies:[]
+					};
+				break;
+				case 'role':
+					request = {
+						id:this.getNilUuid(),
+						moduleId:this.moduleId,
+						content:'user',
+						name:this.name,
+						assignable:true,
+						captions:{},
+						childrenIds:[],
+						accessAttributes:{},
+						accessCollections:{},
+						accessMenus:{},
+						accessRelations:{}
 					};
 				break;
 				default: return; break;

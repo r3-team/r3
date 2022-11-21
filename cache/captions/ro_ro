@@ -105,6 +105,7 @@
 		"order":"Comandă",
 		"password":"Parolă",
 		"preview":"Previzualizare",
+		"properties":"Properties",
 		"readonly":"Readonly",
 		"record":"Record",
 		"results":"{CNT} rezultate",
@@ -914,7 +915,8 @@
 			"options":"Additional options",
 			"relation":"Relație nouă",
 			"relationEncryption":"End-to-end Encryption",
-			"relationEncryptionHint":"Enables end-to-end encryption (E2EE) for attributes on this relation. E2EE has benefits and drawbacks - please carefully read the Builder documentation before using it. This setting cannot be changed later."
+			"relationEncryptionHint":"Enables end-to-end encryption (E2EE) for attributes on this relation. E2EE has benefits and drawbacks - please carefully read the Builder documentation before using it. This setting cannot be changed later.",
+			"role":"New role"
 		},
 		"openFormInput":{
 			"attributeApply":"...pentru a seta valoare formularului",
@@ -1006,7 +1008,6 @@
 			"previewLimit":"Înregistrări/pagină",
 			"previewPage":"Pagină",
 			"previewRowCount":"Număr de înregistrări",
-			"properties":"Properties",
 			"relationship":"Relație",
 			"retention":"Jurnalul de modificări",
 			"retentionCount":"Păstrați X modificări",
@@ -1045,7 +1046,7 @@
 			"newRole":"Rol nou",
 			"relation":"Relație",
 			"title":"Roluri",
-			"titleOne":"Role title"
+			"titleOne":"Role '{NAME}'"
 		},
 		"backHint":"Reveniți la prezentarea generală a aplicației",
 		"language":"Traduceri",

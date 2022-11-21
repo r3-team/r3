@@ -689,7 +689,7 @@ table td.maximum{
 	color:var(--color-font);
 }
 .navigation .entry{
-	padding:10px var(--spacing);
+	padding:8px var(--spacing);
 	margin:0px;
 	display:flex;
 	color:inherit;

@@ -113,17 +113,17 @@ let MyBuilder = {
 						</div>
 						<div class="navigation-column">
 							<router-link class="entry clickable"
-								:to="'/builder/icons/'+module.id"
-							>
-								<img src="images/icon.png" />
-								<span>{{ capApp.navigationIcons }}</span>
-							</router-link>
-							
-							<router-link class="entry clickable"
 								:to="'/builder/functions/'+module.id"
 							>
 								<img src="images/code.png" />
 								<span>{{ capApp.navigationFunctions }}</span>
+							</router-link>
+							
+							<router-link class="entry clickable"
+								:to="'/builder/icons/'+module.id"
+							>
+								<img src="images/icon.png" />
+								<span>{{ capApp.navigationIcons }}</span>
 							</router-link>
 							
 							<router-link class="entry clickable"
@@ -152,19 +152,35 @@ let MyBuilder = {
 						</div>
 					</div>
 					
+					<!-- module sub component navigation header -->
 					<div class="navigation-entities-header" v-if="subMenu">
-						<h1 v-if="navigation === 'forms'">{{ capApp.navigationForms }}</h1>
-						<h1 v-if="navigation === 'functions'">{{ capApp.navigationFunctions }}</h1>
-						<h1 v-if="navigation === 'roles'">{{ capApp.navigationRoles }}</h1>
-						<h1 v-if="navigation === 'relations'">{{ capApp.navigationRelations }}</h1>
-						<h1 v-if="navigation === 'collections'">{{ capApp.navigationCollections }}</h1>
+						<div class="row gap centered" v-if="navigation === 'forms'">
+							<img src="images/form.png" />
+							<h1>{{ capApp.navigationForms }}</h1>
+						</div>
+						<div class="row gap centered" v-if="navigation === 'functions'">
+							<img src="images/code.png" />
+							<h1>{{ capApp.navigationFunctions }}</h1>
+						</div>
+						<div class="row gap centered" v-if="navigation === 'roles'">
+							<img src="images/personMultiple.png" />
+							<h1>{{ capApp.navigationRoles }}</h1>
+						</div>
+						<div class="row gap centered" v-if="navigation === 'relations'">
+							<img src="images/database.png" />
+							<h1>{{ capApp.navigationRelations }}</h1>
+						</div>
+						<div class="row gap centered" v-if="navigation === 'collections'">
+							<img src="images/tray.png" />
+							<h1>{{ capApp.navigationCollections }}</h1>
+						</div>
 						<div class="row gap centered default-inputs">
 							<input class="short" placeholder="..."
 								v-model="filter"
 								:title="capApp.navigationFilterHint"
 							/>
 							<my-button image="add.png"
-								v-if="navigation.includes('relations')"
+								v-if="['relations','roles'].includes(navigation)"
 								@trigger="add"
 								:active="moduleOwner"
 								:captionTitle="capGen.button.add"
@@ -402,6 +418,7 @@ let MyBuilder = {
 		add() {
 			switch(this.navigation) {
 				case 'relations': this.createNew = 'relation'; break;
+				case 'roles':     this.createNew = 'role';     break;
 			}
 		},
 		nextLanguage() {
