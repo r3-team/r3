@@ -12,9 +12,8 @@ let MyBuilderForms = {
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
 			<div class="area default-inputs">
-				<span>{{ capApp.copy }}</span>
 				<select v-model="copyFormId" @change="copySelected" :disabled="readonly">
-					<option :value="null">{{ capApp.copyForm }}</option>
+					<option :value="null">{{ capApp.copy }}</option>
 					<optgroup
 						v-for="mod in getDependentModules(module,modules)"
 						:label="mod.name"
@@ -36,7 +35,7 @@ let MyBuilderForms = {
 			</div>
 			
 			<div class="area default-inputs">
-				<input v-model="filter" placeholder="..." />
+				<input placeholder="..." v-model="filter" />
 			</div>
 		</div>
 		
@@ -58,16 +57,19 @@ let MyBuilderForms = {
 					:key="f.id"
 					:to="'/builder/form/'+f.id" 
 				>
-					<span>{{ f.name }}</span>
-					<div class="row">
-						<my-button
-							v-if="f.iconId !== null"
-							:active="false"
-							:imageBase64="srcBase64(iconIdMap[f.iconId].file)"
-							:naked="true"
-							:tight="true"
-						/>
+					<div class="lines">
+						<span>{{ f.name }}</span>
+						<span class="subtitle" v-if="typeof f.captions.formTitle[builderLanguage] !== 'undefined'">
+							[{{ f.captions.formTitle[builderLanguage] }}]
+						</span>
 					</div>
+					<my-button
+						v-if="f.iconId !== null"
+						:active="false"
+						:imageBase64="srcBase64(iconIdMap[f.iconId].file)"
+						:naked="true"
+						:tight="true"
+					/>
 				</router-link>
 			</div>
 		</div>

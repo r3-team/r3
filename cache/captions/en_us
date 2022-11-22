@@ -617,7 +617,6 @@
 			"contentColumn":"Column data sub query",
 			"contentField":"Field data query",
 			"copy":"Duplicate form",
-			"copyForm":"Select form",
 			"copyNewName":"New form name",
 			"csvExport":"CSV export",
 			"csvImport":"CSV import",

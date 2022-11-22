@@ -180,7 +180,7 @@ let MyBuilder = {
 								:title="capApp.navigationFilterHint"
 							/>
 							<my-button image="add.png"
-								v-if="['relations','roles'].includes(navigation)"
+								v-if="['forms','relations','roles'].includes(navigation)"
 								@trigger="add"
 								:active="moduleOwner"
 								:captionTitle="capGen.button.add"
@@ -417,6 +417,7 @@ let MyBuilder = {
 		// actions
 		add() {
 			switch(this.navigation) {
+				case 'forms':     this.createNew = 'form';     break;
 				case 'relations': this.createNew = 'relation'; break;
 				case 'roles':     this.createNew = 'role';     break;
 			}

@@ -32,7 +32,12 @@ let MyBuilderRoles = {
 					:key="r.id"
 					:to="'/builder/role/'+r.id" 
 				>
-					<span>{{ r.name }}</span>
+					<div class="lines">
+						<span>{{ r.name }}</span>
+						<span class="subtitle" v-if="typeof r.captions.roleTitle[builderLanguage] !== 'undefined'">
+							[{{ r.captions.roleTitle[builderLanguage] }}]
+						</span>
+					</div>
 					<div class="row">
 						
 						<my-button image="personArrow.png"
