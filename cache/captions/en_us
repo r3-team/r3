@@ -580,10 +580,6 @@
 				"ganttStepsHours":"hours"
 			},
 			"states":{
-				"button":{
-					"addCondition":"Condition",
-					"addEffect":"Effect"
-				},
 				"option":{
 					"filterFieldIdHint":"By field"
 				},

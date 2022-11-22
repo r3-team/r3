@@ -60,13 +60,12 @@ let MyBuilderFormStateEffect = {
 let MyBuilderFormState = {
 	name:'my-builder-form-state',
 	components:{MyBuilderFormStateEffect},
-	template:`<div class="builder-form-state" :class="{ 'show-details':detailsShow }">
-		<div class="details">
+	template:`<div class="builder-form-state">
+		<div class="title">
 			<my-button
 				@trigger="detailsShow = !detailsShow"
+				:captionTitle="capGen.button.show"
 				:image="detailsShow ? 'triangleDown.png' : 'triangleRight.png'"
-				:naked="true"
-				:tight="true"
 			/>
 			
 			<input class="description"
@@ -75,28 +74,20 @@ let MyBuilderFormState = {
 				:value="state.description"
 			/>
 			
-			<template v-if="detailsShow">
-				<my-button image="add.png"
-					@trigger="addCondition()"
-					:caption="capApp.button.addCondition"
-				/>
-				<my-button image="add.png"
-					@trigger="addEffect()"
-					:caption="capApp.button.addEffect"
-				/>
-			</template>
-			
 			<my-button image="cancel.png"
 				@trigger="$emit('remove')"
-				:naked="true"
+				:cancel="true"
+				:captionTitle="capGen.button.delete"
 				:tight="true"
 			/>
 		</div>
 		
-		<template v-if="detailsShow">
-			<span class="title" v-if="state.conditions.length !== 0">
-				{{ capApp.conditions }}
-			</span>
+		<div class="details" v-if="detailsShow">
+			<my-button image="add.png"
+				@trigger="addCondition"
+				:caption="capApp.conditions"
+				:naked="true"
+			/>
 			<my-filters
 				v-model="conditions"
 				:builderMode="true"
@@ -109,9 +100,11 @@ let MyBuilderFormState = {
 				:showMove="true"
 			/>
 			
-			<span class="title" v-if="state.effects.length !== 0">
-				{{ capApp.effects }}
-			</span>
+			<my-button image="add.png"
+				@trigger="addEffect"
+				:caption="capApp.effects"
+				:naked="true"
+			/>
 			<div class="effects">
 				<my-builder-form-state-effect
 					v-for="(e,i) in state.effects"
@@ -123,7 +116,7 @@ let MyBuilderFormState = {
 					:modelValue="state.effects[i]"
 				/>
 			</div>
-		</template>
+		</div>
 	</div>`,
 	props:{
 		dataFields:    { type:Array,   required:true }, // all data fields

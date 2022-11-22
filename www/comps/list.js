@@ -332,7 +332,6 @@ let MyList = {
 						v-model="filtersUser"
 						@apply="reloadInside('filtersUser')"
 						@close="showFilters = false"
-						@reset="reloadInside('filtersUser')"
 						:columns="columns"
 						:disableContent="['fieldChanged','subQuery']"
 						:joins="joins"

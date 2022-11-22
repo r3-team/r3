@@ -197,22 +197,25 @@
 	display:flex;
 	flex-flow:column nowrap;
 	align-items:flex-start;
-}
-.builder-form-state.show-details{
-	margin:0px 0px 3px 0px;
-	padding:9px;
-	border:1px solid #444;
+	margin:2px 2px 4px 2px;
+	padding:2px 4px;
+	box-shadow:1px 1px 4px var(--color-shade);
+	border-bottom:1px solid var(--color-border);
 	border-radius:5px;
 }
 .builder-form-state .description{
 	width:400px;
 	margin-right:6px;
 }
-.builder-form-state .details{
+.builder-form-state .title{
 	width:100%;
 	display:flex;
 	flex-flow:row nowrap;
-	margin:0px 0px 8px 0px;
+}
+.builder-form-state .details{
+	display:flex;
+	flex-flow:column nowrap;
+	margin-top:8px;
 }
 .builder-form-state span.title{
 	margin:8px 0px 4px 0px;

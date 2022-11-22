@@ -38,7 +38,8 @@ let MyBuilderFormFunction = {
 		<td>
 			<my-button image="cancel.png"
 				@trigger="$emit('remove')"
-				:naked="true"
+				:cancel="true"
+				:captionTitle="capGen.button.delete"
 				:tight="true"
 			/>
 		</td>

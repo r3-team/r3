@@ -580,10 +580,6 @@
 				"ganttStepsHours":"ore"
 			},
 			"states":{
-				"button":{
-					"addCondition":"Condiție",
-					"addEffect":"Consecință"
-				},
 				"option":{
 					"filterFieldIdHint":"După câmp"
 				},

@@ -181,7 +181,8 @@ body                                         { --depth:6; }
 .builder .lookup                             { --depth:1; }
 .builder-icon-input .iconLine                { --depth:0; }
 .builder-icon-input .iconLine.disabled       { --depth:5; }
-.builder-form-state-effect                   { --depth:5; }
+.builder-form-state                          { --depth:5; }
+.builder-form-state-effect                   { --depth:7; }
 .builder-field                               { --depth:5; }
 .builder-field .column                       { --depth:4; }
 .builder-modules .item-wrap                  { --depth:5; }

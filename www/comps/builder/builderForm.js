@@ -154,7 +154,7 @@ let MyBuilderForm = {
 				v-if="!showFieldQuery"
 				v-model="tabTarget"
 				:entries="['content','states','functions','properties']"
-				:entriesText="[capApp.tabContent,capApp.tabStates.replace('{CNT}',form.states.length),capApp.tabFunctions.replace('{CNT}',form.functions.length),capGen.properties]"
+				:entriesText="[capApp.tabContent,capApp.tabStates.replace('{CNT}',states.length),capApp.tabFunctions.replace('{CNT}',functions.length),capGen.properties]"
 			/>
 			
 			<!-- form content -->

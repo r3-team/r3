@@ -605,6 +605,7 @@ let MyFilter = {
 		MyFilterSide
 	},
 	template:`<div class="filter">
+		<img v-if="expertMode" class="dragAnchor" src="images/drag.png" />
 		<my-filter-connector class="connector"
 			v-model="connectorInput"
 			:readonly="position === 0"
@@ -659,19 +660,10 @@ let MyFilter = {
 			v-model="brackets1Input"
 			:left="false"
 		/>
-		<my-button image="arrowDown.png"
-			v-if="moveDown"
-			@trigger="$emit('move-down')"
-			:naked="true"
-		/>
-		<my-button image="arrowUp.png"
-			v-if="moveUp"
-			@trigger="$emit('move-up')"
-			:naked="true"
-		/>
 		<my-button image="cancel.png"
 			@trigger="$emit('remove',position)"
-			:naked="true"
+			:cancel="true"
+			:tight="true"
 		/>
 	</div>`,
 	props:{
@@ -685,8 +677,6 @@ let MyFilter = {
 		joins:         { type:Array,   required:true },
 		joinsParents:  { type:Array,   required:true },
 		moduleId:      { type:String,  required:true },
-		moveDown:      { type:Boolean, required:true },
-		moveUp:        { type:Boolean, required:true },
 		nestedIndexAttributeIds:{ type:Array, required:true },
 		nestingLevels: { type:Number,  required:true },
 		
@@ -697,7 +687,7 @@ let MyFilter = {
 		side0:    { type:Object, required:true },
 		side1:    { type:Object, required:true }
 	},
-	emits:['apply-value','move-down','move-up','remove','update'],
+	emits:['apply-value','remove','update'],
 	computed:{
 		// inputs
 		brackets0Input:{
@@ -799,34 +789,37 @@ let MyFilters = {
 			</div>
 		</div>
 		
-		<my-filter
-			v-for="(f,i) in filters"
-			@apply-value="apply"
-			@move-down="move(i,true)"
-			@move-up="move(i,false)"
-			@remove="remove"
-			@update="update"
-			:builderMode="builderMode"
-			:columns="columns"
-			:columnsMode="columnsMode"
-			:connector="f.connector"
-			:disableContent="disableContent"
-			:expertMode="expertMode"
-			:fieldIdMap="fieldIdMap"
-			:fieldIdMapRef="fieldIdMapRef"
-			:joins="joins"
-			:joinsParents="joinsParents"
-			:key="i"
-			:moduleId="moduleId"
-			:moveDown="showMove && i < filters.length - 1"
-			:moveUp="showMove && i === filters.length -1"
-			:nestedIndexAttributeIds="nestedIndexAttributeIds"
-			:nestingLevels="joinsParents.length+1"
-			:operator="f.operator"
-			:position="i"
-			:side0="f.side0"
-			:side1="f.side1"
-		/>
+		<draggable handle=".dragAnchor" group="filters" itemKey="id" animation="100"
+			@change="set"
+			:fallbackOnBody="true"
+			:list="filters"
+		>
+			<template #item="{element,index}">
+				<my-filter
+					@apply-value="apply"
+					@remove="remove"
+					@update="setValue"
+					:builderMode="builderMode"
+					:columns="columns"
+					:columnsMode="columnsMode"
+					:connector="element.connector"
+					:disableContent="disableContent"
+					:expertMode="expertMode"
+					:fieldIdMap="fieldIdMap"
+					:fieldIdMapRef="fieldIdMapRef"
+					:joins="joins"
+					:joinsParents="joinsParents"
+					:key="index"
+					:moduleId="moduleId"
+					:nestedIndexAttributeIds="nestedIndexAttributeIds"
+					:nestingLevels="joinsParents.length+1"
+					:operator="element.operator"
+					:position="index"
+					:side0="element.side0"
+					:side1="element.side1"
+				/>
+			</template>
+		</draggable>
 		
 		<div class="filter-actions end" v-if="userFilter && nestedIndexAttributeIds.length !== 0">
 			<div class="row">
@@ -844,7 +837,7 @@ let MyFilters = {
 			</div>
 			<div class="row">
 				<my-button image="delete.png"
-					@trigger="filters = []"
+					@trigger="removeAll"
 					:active="anyFilters"
 					:cancel="true"
 					:captionTitle="capGen.button.reset"
@@ -874,25 +867,21 @@ let MyFilters = {
 		showReset:     { type:Boolean, required:false, default:false },
 		userFilter:    { type:Boolean, required:false, default:false }     // filter is for end users
 	},
-	emits:['apply','close','reset','update:modelValue'],
+	emits:['apply','close','update:modelValue'],
 	watch:{
-		// ugly hack to trigger inside this component
-		filterAddCnt() {
-			this.add();
+		filterAddCnt() { this.add(); }, // ugly hack to trigger inside this component
+		modelValue:{
+			handler:function() { this.reset(); },
+			immediate:true
 		}
 	},
 	data() {
 		return {
-			expertMode:this.builderMode
+			expertMode:this.builderMode,
+			filters:[]
 		};
 	},
 	computed:{
-		// inputs
-		filters:{
-			get()  { return JSON.parse(JSON.stringify(this.modelValue)); },
-			set(v) { this.$emit('update:modelValue',v); }
-		},
-		
 		// states
 		bracketsEqual:(s) => {
 			let cnt0 = 0;
@@ -953,19 +942,11 @@ let MyFilters = {
 		getNestedIndexAttributeIdsByJoins,
 		isAttributeFiles,
 		
-		forceFirstAnd() {
-			// overwrite first filter with only valid connector
-			if(this.filters.length > 0)
-				this.filters[0].connector = 'AND';
+		reset() {
+			this.filters = JSON.parse(JSON.stringify(this.modelValue));
 		},
 		
 		// actions
-		apply() {
-			if(!this.bracketsEqual)
-				return;
-			
-			this.$emit('apply');
-		},
 		add() {
 			let v = {
 				connector:'AND',
@@ -1007,29 +988,36 @@ let MyFilters = {
 				v.side1.query           = null;
 				v.side1.queryAggregator = null;
 			}
-			let f = JSON.parse(JSON.stringify(this.filters));
-			f.push(v);
-			this.filters = f;
+			this.filters.push(v);
+			this.set();
 		},
-		move(i,down) {
-			let f = this.filters[i];
-			this.filters.splice(i,1);
-			this.filters.splice((down ? i + 1 : i - 1),0,f);
-			this.filters = this.filters;
-			this.forceFirstAnd();
+		apply() {
+			if(this.bracketsEqual)
+				this.$emit('apply');
 		},
 		remove(position) {
 			this.filters.splice(position,1);
-			this.filters = this.filters;
-			this.forceFirstAnd();
+			this.set();
 			
 			// inform parent when filter has been reset
 			if(this.filters.length === 0)
-				this.$emit('reset');
+				this.$emit('apply');
 		},
-		update(position,name,value) {
+		removeAll() {
+			this.filters = [];
+			this.set();
+			this.$emit('apply');
+		},
+		set() {
+			// overwrite first filter with only valid connector
+			if(this.filters.length > 0)
+				this.filters[0].connector = 'AND';
+			
+			this.$emit('update:modelValue',JSON.parse(JSON.stringify(this.filters)));
+		},
+		setValue(position,name,value) {
 			this.filters[position][name] = value;
-			this.filters = this.filters;
+			this.set();
 		}
 	}
 };

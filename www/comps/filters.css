@@ -13,11 +13,18 @@
 	margin-top:6px;
 }
 .filter{
+	flex:1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
-	flex:1 1 auto;
+	align-items:center;
 	margin:0px 0px 6px 0px;
 	position:relative;
+}
+.filter img.dragAnchor{
+	height:24px;
+	margin-right:3px;
+	filter:var(--image-filter);
+	cursor:move;
 }
 .filter .subQuery{
 	padding:6px;
