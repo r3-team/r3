@@ -84,7 +84,7 @@ let MyBuilderRelations = {
 		displayRetention(rel) {
 			let count = rel.retentionCount !== null ? rel.retentionCount : 0;
 			let days  = rel.retentionDays  !== null ? rel.retentionDays  : 0;
-			return `${count} / ${days}`;
+			return `${count}/${days}`;
 		}
 	}
 };

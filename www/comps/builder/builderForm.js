@@ -1,10 +1,12 @@
 import MyBuilderCaption       from './builderCaption.js';
 import MyBuilderIconInput     from './builderIconInput.js';
+import MyBuilderFieldOptions  from './builderFieldOptions.js';
 import MyBuilderFormFunctions from './builderFormFunctions.js';
 import MyBuilderFormStates    from './builderFormStates.js';
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderFields        from './builderFields.js';
 import MyTabs                 from '../tabs.js';
+import {getFieldHasQuery}     from '../shared/builder.js';
 import {
 	copyValueDialog,
 	getNilUuid
@@ -29,6 +31,7 @@ let MyBuilderForm = {
 	components:{
 		MyBuilderCaption,
 		MyBuilderFields,
+		MyBuilderFieldOptions,
 		MyBuilderFormFunctions,
 		MyBuilderFormStates,
 		MyBuilderIconInput,
@@ -109,9 +112,9 @@ let MyBuilderForm = {
 				<!-- form builder fields -->
 				<my-builder-fields class="builder-form-fields default-inputs" flexDirParent="column"
 					@fields-set="fields = $event"
-					@field-column-query-set="(...args) => setFieldColumnQuery(args[0],args[1])"
+					@field-column-query-set="(...args) => setFieldShow(args[0],args[1],'content')"
 					@field-counter-set="fieldCounter = $event"
-					@field-id-query-set="setFieldColumnQuery($event,null)"
+					@field-id-show="(...args) => setFieldShow(args[0],null,args[1])"
 					@field-move-store="fieldMoveStore"
 					@field-remove="removeById($event,'field')"
 					:builderLanguage="builderLanguage"
@@ -119,7 +122,7 @@ let MyBuilderForm = {
 					:dataFields="dataFields"
 					:fieldCounter="fieldCounter"
 					:fieldIdMapRef="fieldIdMapRef"
-					:fieldIdQuery="fieldIdQuery"
+					:fieldIdShow="fieldIdShow"
 					:fieldMoveList="fieldMoveList"
 					:fieldMoveIndex="fieldMoveIndex"
 					:fields="fields"
@@ -137,217 +140,240 @@ let MyBuilderForm = {
 			<!-- form builder sidebar -->
 			<div class="top lower">
 				<div class="area">
-					<img class="icon" src="images/form.png" />
-					<h1 v-if="showFieldQuery">{{ capApp.contentField }}</h1>
-					<h1 v-if="!showFieldQuery">{{ capApp.content }}</h1>
+					<img v-if="!fieldShow" class="icon" src="images/form.png" />
+					<h1 v-if="!fieldShow">{{ capApp.sidebarForm }}</h1>
+					<h1 v-if="fieldShow">{{ capApp.sidebarField.replace('{NAME}','F'+fieldIdMapRef[fieldIdShow]) }}</h1>
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
-						v-if="showFieldQuery"
-						@trigger="fieldIdQuery = null"
+						v-if="fieldShow"
+						@trigger="fieldIdShow = null"
 						:cancel="true"
 					/>
 				</div>
 			</div>
 			
-			<my-tabs
-				v-if="!showFieldQuery"
-				v-model="tabTarget"
-				:entries="['content','states','functions','properties']"
-				:entriesText="[capApp.tabContent,capApp.tabStates.replace('{CNT}',states.length),capApp.tabFunctions.replace('{CNT}',functions.length),capGen.properties]"
-			/>
-			
-			<!-- form content -->
-			<div class="content grow" v-if="!showFieldQuery">
-				
-				<!-- form record query -->
-				<my-builder-query
-					v-if="tabTarget === 'content'"
-					@index-removed="removeDataFields(fields,$event)"
-					@set-filters="filters = $event"
-					@set-joins="joins = $event"
-					@set-relation-id="relationId = $event"
-					:allowChoices="false"
-					:allowFixedLimit="false"
-					:builderLanguage="builderLanguage"
-					:filters="filters"
-					:fixedLimit="0"
-					:joins="joins"
-					:moduleId="form.moduleId"
-					:relationId="relationId"
+			<template v-if="!fieldShow">
+				<my-tabs
+					v-model="tabTarget"
+					:entries="['content','states','functions','properties']"
+					:entriesText="[capApp.tabContent,capApp.tabStates.replace('{CNT}',states.length),capApp.tabFunctions.replace('{CNT}',functions.length),capGen.properties]"
 				/>
 				
-				<!-- template fields -->
-				<div class="templates-wrap" v-if="tabTarget === 'content'">
-					<div class="content-row default-inputs">
-						<h2>{{ capApp.fields }}</h2>
+				<!-- form content -->
+				<div class="content grow">
+					
+					<!-- form record query -->
+					<my-builder-query
+						v-if="tabTarget === 'content'"
+						@index-removed="removeDataFields(fields,$event)"
+						@set-filters="filters = $event"
+						@set-joins="joins = $event"
+						@set-relation-id="relationId = $event"
+						:allowChoices="false"
+						:allowFixedLimit="false"
+						:builderLanguage="builderLanguage"
+						:filters="filters"
+						:fixedLimit="0"
+						:joins="joins"
+						:moduleId="form.moduleId"
+						:relationId="relationId"
+					/>
+					
+					<!-- template fields -->
+					<div class="templates-wrap" v-if="tabTarget === 'content'">
+						<div class="content-row default-inputs">
+							<h2>{{ capApp.fields }}</h2>
+							
+							<div class="templates-filter">
+								<my-bool caption0="n:1" caption1="n:1" v-model="showTemplateN1" />
+								<my-bool caption0="1:n" caption1="1:n" v-model="showTemplate1n" />
+								<my-bool caption0="n:m" caption1="n:m" v-model="showTemplateNm" />
+								<select v-model="templateIndex" class="short">
+									<option value="-1">{{ capGen.option.all }}</option>
+									<option v-for="j in joinsIndexMap" :value="j.index">
+										{{ j.index }})
+									</option>
+								</select>
+							</div>
+						</div>
 						
-						<div class="templates-filter">
-							<my-bool caption0="n:1" caption1="n:1" v-model="showTemplateN1" />
-							<my-bool caption0="1:n" caption1="1:n" v-model="showTemplate1n" />
-							<my-bool caption0="n:m" caption1="n:m" v-model="showTemplateNm" />
-							<select v-model="templateIndex" class="short">
-								<option value="-1">{{ capGen.option.all }}</option>
-								<option v-for="j in joinsIndexMap" :value="j.index">
-									{{ j.index }})
-								</option>
-							</select>
+						<div class="templates">
+							<my-builder-fields flexDirParent="column"
+								@field-counter-set="fieldCounter = $event"
+								@field-move-store="fieldMoveStore"
+								:builderLanguage="builderLanguage"
+								:fields="fieldsTemplate"
+								:fieldMoveList="fieldMoveList"
+								:fieldMoveIndex="fieldMoveIndex"
+								:fieldCounter="fieldCounter"
+								:formId="id"
+								:isTemplate="true"
+								:template1n="showTemplate1n"
+								:templateIndex="parseInt(templateIndex)"
+								:templateN1="showTemplateN1"
+								:templateNm="showTemplateNm"
+							/>
 						</div>
 					</div>
 					
-					<div class="templates">
-						<my-builder-fields flexDirParent="column"
-							@field-counter-set="fieldCounter = $event"
-							@field-move-store="fieldMoveStore"
-							:builderLanguage="builderLanguage"
-							:fields="fieldsTemplate"
-							:fieldMoveList="fieldMoveList"
-							:fieldMoveIndex="fieldMoveIndex"
-							:fieldCounter="fieldCounter"
-							:formId="id"
-							:isTemplate="true"
-							:template1n="showTemplate1n"
-							:templateIndex="parseInt(templateIndex)"
-							:templateN1="showTemplateN1"
-							:templateNm="showTemplateNm"
-						/>
-					</div>
+					<!-- form properties -->
+					<table class="default-inputs" v-if="tabTarget === 'properties'">
+						<tr>
+							<td>{{ capGen.name }}</td>
+							<td><input class="long" v-model="name" :disabled="readonly" /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.title }}</td>
+							<td>
+								<my-builder-caption
+									v-model="captions.formTitle"
+									:contentName="capApp.formTitle"
+									:language="builderLanguage"
+									:longInput="true"
+									:readonly="readonly"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.icon }}</td>
+							<td>
+								<my-builder-icon-input
+									@input="iconId = $event"
+									:icon-id-selected="iconId"
+									:module="module"
+									:title="capApp.icon"
+									:readonly="readonly"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.noDataActions }}</td>
+							<td><my-bool v-model="noDataActions" :disabled="readonly" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.presetOpen }}</td>
+							<td>
+								<select v-model="presetIdOpen" :disabled="readonly">
+									<option :value="null" v-if="presetCandidates.length === 0">
+										{{ capGen.nothingThere }}
+									</option>
+									<option :value="null" v-if="presetCandidates.length !== 0">
+										{{ capGen.nothingSelected }}
+									</option>
+									<option v-for="p in presetCandidates" :key="p.id" :value="p.id">
+										{{ p.name }}
+									</option>
+								</select>
+							</td>
+						</tr>
+					</table>
+					
+					<!-- form states -->
+					<my-builder-form-states
+						v-if="tabTarget === 'states'"
+						v-model="states"
+						:fieldIdMapRef="fieldIdMapRef"
+						:form="form"
+					/>
+					
+					<!-- form functions -->
+					<my-builder-form-functions
+						v-if="tabTarget === 'functions'"
+						v-model="functions"
+						:formId="form.id"
+					/>
 				</div>
-				
-				<!-- form properties -->
-				<table class="builder-table-vertical default-inputs" v-if="tabTarget === 'properties'">
-					<tr>
-						<td>{{ capGen.name }}</td>
-						<td><input class="long" v-model="name" :disabled="readonly" /></td>
-					</tr>
-					<tr>
-						<td>{{ capGen.title }}</td>
-						<td>
-							<my-builder-caption
-								v-model="captions.formTitle"
-								:contentName="capApp.formTitle"
-								:language="builderLanguage"
-								:longInput="true"
-								:readonly="readonly"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capGen.icon }}</td>
-						<td>
-							<my-builder-icon-input
-								@input="iconId = $event"
-								:icon-id-selected="iconId"
-								:module="module"
-								:title="capApp.icon"
-								:readonly="readonly"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.noDataActions }}</td>
-						<td><my-bool v-model="noDataActions" :disabled="readonly" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.presetOpen }}</td>
-						<td>
-							<select v-model="presetIdOpen" :disabled="readonly">
-								<option :value="null" v-if="presetCandidates.length === 0">
-									{{ capGen.nothingThere }}
-								</option>
-								<option :value="null" v-if="presetCandidates.length !== 0">
-									{{ capGen.nothingSelected }}
-								</option>
-								<option v-for="p in presetCandidates" :key="p.id" :value="p.id">
-									{{ p.name }}
-								</option>
-							</select>
-						</td>
-					</tr>
-				</table>
-				
-				<!-- form states -->
-				<my-builder-form-states
-					v-if="tabTarget === 'states'"
-					v-model="states"
-					:fieldIdMapRef="fieldIdMapRef"
-					:form="form"
-				/>
-				
-				<!-- form functions -->
-				<my-builder-form-functions
-					v-if="tabTarget === 'functions'"
-					v-model="functions"
-					:formId="form.id"
-				/>
-			</div>
+			</template>
 			
 			<!-- field content -->
-			<div class="content grow" v-if="showFieldQuery">
-				
-				<!-- field query (lists, relationship inputs, calendars, charts, ...) -->
-				<my-builder-query
-					@index-removed="fieldQueryRemoveIndex($event)"
-					@set-choices="fieldQuerySet('choices',$event)"
-					@set-filters="fieldQuerySet('filters',$event)"
-					@set-fixed-limit="fieldQuerySet('fixedLimit',$event)"
-					@set-joins="fieldQuerySet('joins',$event)"
-					@set-lookups="fieldQuerySet('lookups',$event)"
-					@set-orders="fieldQuerySet('orders',$event)"
-					@set-relation-id="fieldQuerySet('relationId',$event)"
-					:allowLookups="fieldQueryEdit.content === 'list' && fieldQueryEdit.csvImport"
-					:allowOrders="true"
-					:builderLanguage="builderLanguage"
-					:choices="fieldQueryEdit.query.choices"
-					:fieldIdMap="fieldIdMap"
-					:fieldIdMapRef="fieldIdMapRef"
-					:filters="fieldQueryEdit.query.filters"
-					:fixedLimit="fieldQueryEdit.query.fixedLimit"
-					:joins="fieldQueryEdit.query.joins"
-					:moduleId="module.id"
-					:orders="fieldQueryEdit.query.orders"
-					:lookups="fieldQueryEdit.query.lookups"
-					:relationId="fieldQueryEdit.query.relationId"
-					:relationIdStart="fieldQueryRelationIdStart"
+			<template v-if="fieldShow">
+				<my-tabs
+					v-if="fieldShowHasQuery"
+					v-model="tabTargetField"
+					:entries="['content','properties']"
+					:entriesText="[capApp.tabContent,capGen.properties]"
 				/>
-				
-				<template v-if="showColumnQuery">
-					<!-- field column sub query -->
-					<br /><br />
-					<div class="row">
-						<my-button image="database.png"
-							:active="false"
-							:caption="capApp.contentColumn"
-							:large="true"
-							:naked="true"
-						/>
-					</div>
+				<div class="content grow">
 					
-					<my-builder-query
-						@set-choices="fieldColumnQuerySet('choices',$event)"
-						@set-filters="fieldColumnQuerySet('filters',$event)"
-						@set-fixed-limit="fieldColumnQuerySet('fixedLimit',$event)"
-						@set-joins="fieldColumnQuerySet('joins',$event)"
-						@set-lookups="fieldColumnQuerySet('lookups',$event)"
-						@set-orders="fieldColumnQuerySet('orders',$event)"
-						@set-relation-id="fieldColumnQuerySet('relationId',$event)"
-						:allowChoices="false"
-						:allowOrders="true"
+					<!-- field options -->
+					<my-builder-field-options
+						v-if="tabTargetField === 'properties'"
+						@set="(...args) => fieldPropertySet(args[0],args[1])"
 						:builderLanguage="builderLanguage"
-						:choices="columnQueryEdit.query.choices"
-						:fieldIdMap="fieldIdMap"
-						:fieldIdMapRef="fieldIdMapRef"
-						:filters="columnQueryEdit.query.filters"
-						:fixedLimit="columnQueryEdit.query.fixedLimit"
-						:joins="columnQueryEdit.query.joins"
-						:joinsParents="[fieldQueryEdit.query.joins]"
-						:orders="columnQueryEdit.query.orders"
-						:lookups="columnQueryEdit.query.lookups"
+						:dataFields="dataFields"
+						:field="fieldShow"
+						:formId="id"
+						:joinsIndexMap="joinsIndexMap"
 						:moduleId="module.id"
-						:relationId="columnQueryEdit.query.relationId"
 					/>
-				</template>
-			</div>
+					
+					<!-- field query (relationship inputs, lists, calendars, charts, ...) -->
+					<template v-if="fieldShowHasQuery&& tabTargetField === 'content'">
+						<my-builder-query
+							@index-removed="fieldQueryRemoveIndex($event)"
+							@set-choices="fieldQuerySet('choices',$event)"
+							@set-filters="fieldQuerySet('filters',$event)"
+							@set-fixed-limit="fieldQuerySet('fixedLimit',$event)"
+							@set-joins="fieldQuerySet('joins',$event)"
+							@set-lookups="fieldQuerySet('lookups',$event)"
+							@set-orders="fieldQuerySet('orders',$event)"
+							@set-relation-id="fieldQuerySet('relationId',$event)"
+							:allowLookups="fieldShow.content === 'list' && fieldShow.csvImport"
+							:allowOrders="true"
+							:builderLanguage="builderLanguage"
+							:choices="fieldShow.query.choices"
+							:fieldIdMap="fieldIdMap"
+							:fieldIdMapRef="fieldIdMapRef"
+							:filters="fieldShow.query.filters"
+							:fixedLimit="fieldShow.query.fixedLimit"
+							:joins="fieldShow.query.joins"
+							:moduleId="module.id"
+							:orders="fieldShow.query.orders"
+							:lookups="fieldShow.query.lookups"
+							:relationId="fieldShow.query.relationId"
+							:relationIdStart="fieldQueryRelationIdStart"
+						/>
+						
+						<template v-if="showColumnQuery">
+							<!-- field column sub query -->
+							<br /><br />
+							<div class="row">
+								<my-button image="database.png"
+									:active="false"
+									:caption="capApp.sidebarFieldColumnData"
+									:large="true"
+									:naked="true"
+								/>
+							</div>
+							
+							<my-builder-query
+								@set-choices="fieldColumnQuerySet('choices',$event)"
+								@set-filters="fieldColumnQuerySet('filters',$event)"
+								@set-fixed-limit="fieldColumnQuerySet('fixedLimit',$event)"
+								@set-joins="fieldColumnQuerySet('joins',$event)"
+								@set-lookups="fieldColumnQuerySet('lookups',$event)"
+								@set-orders="fieldColumnQuerySet('orders',$event)"
+								@set-relation-id="fieldColumnQuerySet('relationId',$event)"
+								:allowChoices="false"
+								:allowOrders="true"
+								:builderLanguage="builderLanguage"
+								:choices="columnQueryEdit.query.choices"
+								:fieldIdMap="fieldIdMap"
+								:fieldIdMapRef="fieldIdMapRef"
+								:filters="columnQueryEdit.query.filters"
+								:fixedLimit="columnQueryEdit.query.fixedLimit"
+								:joins="columnQueryEdit.query.joins"
+								:joinsParents="[fieldShow.query.joins]"
+								:orders="columnQueryEdit.query.orders"
+								:lookups="columnQueryEdit.query.lookups"
+								:moduleId="module.id"
+								:relationId="columnQueryEdit.query.relationId"
+							/>
+						</template>
+					</template>
+				</div>
+			</template>
 		</div>
 	</div>`,
 	emits:['hotkeysRegister'],
@@ -384,7 +410,7 @@ let MyBuilderForm = {
 			columnIdQuery:null,
 			fieldCounter:0,      // counter to generate unique IDs for all fields
 			                     // used to populate new fields and for template fields
-			fieldIdQuery:null,   // field ID of which query is currently being edited
+			fieldIdShow:null,    // field ID which is shown in sidebar to be edited
 			fieldMoveList:null,  // fields list from which to move field (move by click)
 			fieldMoveIndex:0,    // index of field which to move (move by click)
 			showCaptions:true,   // show caption inputs on non-container fields
@@ -394,7 +420,8 @@ let MyBuilderForm = {
 			showTemplate1n:false,// show templates for 1:n relationship input fields
 			showTemplateN1:true, // show templates for n:1 relationship input fields
 			showTemplateNm:false,// show templates for n:m relationship input fields
-			tabTarget:'content', // sidebar tab target (content, states, functions)
+			tabTarget:'content', // sidebar tab target (content, states, functions, properties)
+			tabTargetField:'content', // sidebar tab target for field (content, properties)
 			templateIndex:'-1'
 		};
 	},
@@ -520,30 +547,32 @@ let MyBuilderForm = {
 			return getIndexIds(s.fields);
 		},
 		fieldQueryRelationIdStart:(s) => {
-			if(s.fieldQueryEdit.content !== 'data')
+			if(s.fieldShow === false || s.fieldShow.content !== 'data')
 				return null;
 			
-			let atr = s.attributeIdMap[s.fieldQueryEdit.attributeId];
+			let atr = s.attributeIdMap[s.fieldShow.attributeId];
+			if(!s.isAttributeRelationship(atr.content))
+				return null;
 			
-			if(s.fieldQueryEdit.attributeIdNm !== null)
-				return s.attributeIdMap[s.fieldQueryEdit.attributeIdNm].relationshipId;
+			if(s.fieldShow.attributeIdNm !== null)
+				return s.attributeIdMap[s.fieldShow.attributeIdNm].relationshipId;
 			
-			if(s.joinsIndexMap[s.fieldQueryEdit.index].relationId === atr.relationId)
+			if(s.joinsIndexMap[s.fieldShow.index].relationId === atr.relationId)
 				return atr.relationshipId;
 			
 			return s.relationId;
 		},
 		
 		// simple
-		columnQueryEdit: (s) => s.columnIdQuery === null ? false : s.columnIdMap[s.columnIdQuery],
-		dataFields:      (s) => s.getDataFields(s.fields),
-		fieldQueryEdit:  (s) => s.fieldIdQuery === null ? false : s.fieldIdMap[s.fieldIdQuery],
-		form:            (s) => typeof s.formIdMap[s.id] === 'undefined' ? false : s.formIdMap[s.id],
-		joinsIndexMap:   (s) => s.getJoinsIndexMap(s.joins),
-		presetCandidates:(s) => s.relation === false ? [] : s.relationIdMap[s.form.query.relationId].presets,
-		relation:        (s) => typeof s.relationIdMap[s.relationId] === 'undefined' ? false : s.relationIdMap[s.relationId],
-		showColumnQuery: (s) => s.columnQueryEdit !== false,
-		showFieldQuery:  (s) => s.fieldQueryEdit !== false,
+		columnQueryEdit:  (s) => s.columnIdQuery === null ? false : s.columnIdMap[s.columnIdQuery],
+		dataFields:       (s) => s.getDataFields(s.fields),
+		fieldShow:        (s) => s.fieldIdShow === null ? false : s.fieldIdMap[s.fieldIdShow],
+		fieldShowHasQuery:(s) => s.getFieldHasQuery(s.fieldShow),
+		form:             (s) => typeof s.formIdMap[s.id] === 'undefined' ? false : s.formIdMap[s.id],
+		joinsIndexMap:    (s) => s.getJoinsIndexMap(s.joins),
+		presetCandidates: (s) => s.relation === false ? [] : s.relationIdMap[s.form.query.relationId].presets,
+		relation:         (s) => typeof s.relationIdMap[s.relationId] === 'undefined' ? false : s.relationIdMap[s.relationId],
+		showColumnQuery:  (s) => s.columnQueryEdit !== false,
 		
 		// stores
 		module:        (s) => s.moduleIdMap[s.form.moduleId],
@@ -566,6 +595,7 @@ let MyBuilderForm = {
 		// externals
 		copyValueDialog,
 		getDataFields,
+		getFieldHasQuery,
 		getFormRoute,
 		getIndexAttributeId,
 		getJoinsIndexMap,
@@ -606,9 +636,9 @@ let MyBuilderForm = {
 			this.relationId     = this.form.query.relationId;
 			this.joins          = JSON.parse(JSON.stringify(this.form.query.joins));
 			this.filters        = JSON.parse(JSON.stringify(this.form.query.filters));
+			this.fieldIdShow    = null;
 			this.fieldIdsRemove = [];
 			this.columnIdQuery  = null;
-			this.fieldIdQuery   = null;
 		},
 		
 		createFieldButton() {
@@ -880,8 +910,8 @@ let MyBuilderForm = {
 				case 'field': this.fieldIdsRemove.push(id); break;
 			}
 			
-			if(this.fieldIdQuery === id)
-				this.fieldIdQuery = null;
+			if(this.fieldIdShow === id)
+				this.fieldIdShow = null;
 		},
 		replaceBuilderId(fields) {
 			for(let i = 0, j = fields.length; i < j; i++) {
@@ -906,8 +936,11 @@ let MyBuilderForm = {
 		},
 		
 		// field manipulation
+		fieldPropertySet(name,value) {
+			this.fieldShow[name] = value;
+		},
 		fieldQueryRemoveIndex(index) {
-			let colsCloned = JSON.parse(JSON.stringify(this.fieldQueryEdit.columns));
+			let colsCloned = JSON.parse(JSON.stringify(this.fieldShow.columns));
 			
 			for(let i = 0, j = colsCloned.length; i < j; i++) {
 				if(colsCloned[i].index === index) {
@@ -915,21 +948,22 @@ let MyBuilderForm = {
 					i--; j--;
 				}
 			}
-			this.fieldQueryEdit.columns = colsCloned;
+			this.fieldShow.columns = colsCloned;
 		},
 		fieldQuerySet(name,value) {
-			let v = JSON.parse(JSON.stringify(this.fieldQueryEdit.query));
+			let v = JSON.parse(JSON.stringify(this.fieldShow.query));
 			v[name] = value;
-			this.fieldQueryEdit.query = v;
+			this.fieldShow.query = v;
 		},
 		fieldColumnQuerySet(name,value) {
 			let v = JSON.parse(JSON.stringify(this.columnQueryEdit.query));
 			v[name] = value;
 			this.columnQueryEdit.query = v;
 		},
-		setFieldColumnQuery(fieldId,columnId) {
-			this.fieldIdQuery  = fieldId;
-			this.columnIdQuery = columnId;
+		setFieldShow(fieldId,columnId,tab) {
+			this.tabTargetField = tab;
+			this.fieldIdShow    = fieldId;
+			this.columnIdQuery  = columnId;
 		},
 		
 		// backend calls

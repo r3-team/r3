@@ -1,9 +1,11 @@
 import MyBuilderCaption          from './builderCaption.js';
 import MyBuilderIconInput        from './builderIconInput.js';
-import MyBuilderFieldOptions     from './builderFieldOptions.js';
-import {getItemTitle}            from '../shared/builder.js';
 import {getFlexBasis}            from '../shared/form.js';
 import {isAttributeRelationship} from '../shared/attribute.js';
+import {
+	getFieldHasQuery,
+	getItemTitle
+} from '../shared/builder.js';
 import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
@@ -23,7 +25,6 @@ let MyBuilderFields = {
 		MyBuilderCaption,
 		MyBuilderColumns,
 		MyBuilderColumnTemplates,
-		MyBuilderFieldOptions,
 		MyBuilderIconInput
 	},
 	template:`<draggable handle=".dragAnchor" animation="100" itemKey="id"
@@ -70,9 +71,17 @@ let MyBuilderFields = {
 					<!-- action: edit field options -->
 					<img class="action edit clickable" src="images/edit.png"
 						v-if="!isTemplate && !moveActive"
-						@click="fieldIdEditSet(element.id)"
-						:class="{ selected:fieldIdEdit === element.id }"
+						@click="fieldIdShowSet(element.id,false)"
+						:class="{ selected:fieldIdShow === element.id }"
 						:title="capApp.fieldOptions"
+					/>
+					
+					<!-- action: edit field query -->
+					<img class="action edit clickable" src="images/database.png"
+						v-if="!isTemplate && !moveActive && getFieldHasQuery(element)"
+						@click="fieldIdShowSet(element.id,true)"
+						:class="{ selected:fieldIdShow === element.id }"
+						:title="capApp.contentField"
 					/>
 					
 					<!-- toggle: show on mobile -->
@@ -88,14 +97,6 @@ let MyBuilderFields = {
 						v-if="!isTemplate && !moveActive && element.state === 'hidden'"
 						@click="fieldPropertySet(index,'state','default')"
 						:title="capApp.hidden"
-					/>
-					
-					<!-- action: edit field query (in parent form) -->
-					<img class="action edit clickable" src="images/database.png"
-						v-if="!isTemplate && !moveActive && hasFieldColumns(element)"
-						@click="fieldIdQuerySet(element.id)"
-						:class="{ selected:fieldIdQuery === element.id }"
-						:title="capApp.contentField"
 					/>
 					
 					<!-- action: list data SQL preview -->
@@ -187,21 +188,9 @@ let MyBuilderFields = {
 					/>
 				</div>
 				
-				<!-- field options -->
-				<my-builder-field-options
-					v-if="!isTemplate && fieldIdEdit === element.id"
-					@set="(...args) => fieldPropertySet(index,args[0],args[1])"
-					:builderLanguage="builderLanguage"
-					:dataFields="dataFields"
-					:field="element"
-					:formId="formId"
-					:joinsIndexMap="joinsIndexMap"
-					:moduleId="moduleId"
-				/>
-				
 				<!-- columns for list/calendar/chart fields -->
 				<div class="columnsTarget"
-					v-if="!isTemplate && hasFieldColumns(element)"
+					v-if="!isTemplate && getFieldHasQuery(element)"
 				>
 					<div v-if="element.columns.length === 0">
 						{{ capApp.columnsTarget }}
@@ -209,7 +198,7 @@ let MyBuilderFields = {
 					
 					<my-builder-columns class="inList"
 						@columns-set="fieldPropertySet(index,'columns',$event)"
-						@column-id-query-set="$emit('field-column-query-set',element.id,$event)"
+						@column-id-query-set="$emit('field-column-query-set',element.id,$event,'content')"
 						:builderLanguage="builderLanguage"
 						:columnIdQuery="columnIdQuery"
 						:columns="element.columns"
@@ -223,10 +212,10 @@ let MyBuilderFields = {
 					/>
 				</div>
 				
-				<!-- column templates for list/calendar/chart fields -->
+				<!-- column templates for fields with columns -->
 				<div class="columnsTemplates">
 					<my-builder-column-templates
-						v-if="fieldIdQuery === element.id"
+						v-if="fieldIdShow === element.id && getFieldHasQuery(element)"
 						:builderLanguage="builderLanguage"
 						:columns="element.columns"
 						:groupName="element.id+'_columns'"
@@ -240,7 +229,7 @@ let MyBuilderFields = {
 					v-if="!isTemplate && element.content === 'container'"
 					@field-column-query-set="(...args) => $emit('field-column-query-set',...args)"
 					@field-counter-set="$emit('field-counter-set',$event)"
-					@field-id-query-set="$emit('field-id-query-set',$event)"
+					@field-id-show="(...args) => $emit('field-id-show',...args)"
 					@field-remove="$emit('field-remove',$event)"
 					@field-move-store="$emit('field-move-store',$event)"
 					:builderLanguage="builderLanguage"
@@ -249,7 +238,7 @@ let MyBuilderFields = {
 					:dataFields="dataFields"
 					:fieldCounter="fieldCounter"
 					:fieldIdMapRef="fieldIdMapRef"
-					:fieldIdQuery="fieldIdQuery"
+					:fieldIdShow="fieldIdShow"
 					:fieldMoveList="fieldMoveList"
 					:fieldMoveIndex="fieldMoveIndex"
 					:fields="element.fields"
@@ -266,11 +255,11 @@ let MyBuilderFields = {
 	</draggable>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },
-		columnIdQuery:  { required:false,default:null },
+		columnIdQuery:  { required:false, default:null },
 		dataFields:     { type:Array,   required:false, default:() => [] },          // all data fields from form
 		fields:         { type:Array,   required:true },                             // fields to handle
 		fieldIdMapRef:  { type:Object,  required:false, default:() => {return {}} }, // field reference map (unique field counter for each ID)
-		fieldIdQuery:   { required:false, default:null },
+		fieldIdShow:    { required:false, default:null },
 		fieldMoveList:  { required:true },
 		fieldMoveIndex: { type:Number,  required:true },
 		fieldCounter:   { type:Number,  required:true },
@@ -286,13 +275,12 @@ let MyBuilderFields = {
 		templateNm:     { type:Boolean, required:false, default:false }
 	},
 	emits:[
-		'field-column-query-set','field-counter-set','field-id-query-set',
+		'field-column-query-set','field-counter-set','field-id-show',
 		'field-remove','field-move-store'
 	],
 	data:function() {
 		return {
-			clone:false,
-			fieldIdEdit:'' // field ID in edit mode
+			clone:false
 		};
 	},
 	computed:{
@@ -311,6 +299,7 @@ let MyBuilderFields = {
 	},
 	methods:{
 		// externals
+		getFieldHasQuery,
 		getFlexBasis,
 		getItemTitle,
 		getJoinsIndexMap,
@@ -339,17 +328,11 @@ let MyBuilderFields = {
 		},
 		
 		// actions
-		fieldIdEditSet:function(fieldId) {
-			if(this.fieldIdEdit === fieldId)
-				return this.fieldIdEdit = '';
-			
-			this.fieldIdEdit = fieldId;
-		},
-		fieldIdQuerySet:function(fieldId) {
-			if(this.fieldIdQuery === fieldId)
-				return this.$emit('field-id-query-set',null);
-			
-			this.$emit('field-id-query-set',fieldId);
+		fieldIdShowSet:function(id,isData) {
+			this.$emit('field-id-show',
+				this.fieldIdShow === id ? null : id,
+				isData ? 'content' : 'properties'
+			);
 		},
 		fieldPropertySet:function(fieldIndex,name,value) {
 			this.fields[fieldIndex][name] = value;
@@ -412,8 +395,8 @@ let MyBuilderFields = {
 			this.$emit('field-move-store',{fieldList:null,fieldIndex:0});
 		},
 		remove:function(id,i) {
-			if(this.fieldIdQuery === id)
-				this.$emit('field-id-query-set',null);
+			if(this.fieldIdShow === id)
+				this.$emit('field-id-show',null,'content');
 			
 			this.fields.splice(i,1);
 			
@@ -444,12 +427,6 @@ let MyBuilderFields = {
 				pos--;
 				return pos >= 0 ? values[pos] : values[values.length-1];
 			}
-		},
-		hasFieldColumns:function(field) {
-			if(['calendar','chart','list'].includes(field.content))
-				return true;
-			
-			return this.isRelationship(field);
 		},
 		isRelationship:function(field) {
 			if(field.content !== 'data') return false;
@@ -514,10 +491,6 @@ let MyBuilderFields = {
 			return out.join(';');
 		},
 		getStyleParent:function(f) {
-			// overwrite if edit panel is open
-			if(this.fieldIdEdit === f.id)
-				return 'flex:0 0 auto;';
-			
 			let out = [`flex:${f.grow} ${f.shrink} ${this.getFlexBasis(f.basis)}`];
 			
 			if(f.basis !== 0) {

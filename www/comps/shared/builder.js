@@ -4,6 +4,13 @@ import {
 } from './attribute.js';
 import MyStore from '../../stores/store.js';
 
+export function getFieldHasQuery(field) {
+	return ['calendar','chart','list'].includes(field.content)
+		? true : field.content === 'data' && isAttributeRelationship(
+			MyStore.getters['schema/attributeIdMap'][field.attributeId].content
+		);
+};
+
 export function getDependentModules(moduleSource,modulesAll) {
 	let out = [];
 	for(let i = 0, j = modulesAll.length; i < j; i++) {

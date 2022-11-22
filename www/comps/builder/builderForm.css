@@ -123,10 +123,7 @@
 }
 
 /* options */
-.builder-field-options{
-	max-width:500px;
-	padding:8px 12px;
-}
+.builder-field-options{}
 .builder-field-options .chart-option{
 	width:100%;
 	min-width:300px;
