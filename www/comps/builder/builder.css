@@ -17,6 +17,9 @@
 	box-shadow:1px 1px 2px var(--color-shade);
 	border-bottom:1px solid var(--color-border);
 }
+.builder-table-vertical.tight>tr>td{
+	padding:4px 6px 4px 15px;
+}
 .builder-table-vertical>tr>td:first-child{
 	font-size:110%;
 	line-height:150%;
@@ -511,7 +514,7 @@
 	width:24px;
 }
 .builder-drag-item .action.edit.selected{
-	border:2px solid var(--color-border);
+	outline:2px solid var(--color-border);
 }
 .builder-drag-item .title{
 	padding:0px 3px;
@@ -635,36 +638,28 @@
 	max-width:1600px;
 }
 
-/* open form input */
-.builder-open-form-input{
-	padding:5px;
-	margin-bottom:5px;
-	border:1px solid var(--color-border);
-	border-radius:4px;
-	box-shadow:1px 1px 4px var(--color-shade);
-}
-.builder-open-form-input td{
-	padding:3px 5px;
-}
-
 /* columns */
 .builder-columns{
-	flex:1 1 auto;
-	padding:5px 0px 0px 5px;
+	overflow:auto;
+	padding:3px 0px 0px 3px;
+	margin-bottom:12px;
 	display:flex;
 	flex-flow:row wrap;
+	align-items:flex-start;
 }
-.builder-columns.templates{
-	padding:5px;
-}
-.builder-columns.templates .template-title{
-	margin:3px 12px;
+.builder-columns.sidebar{
+	flex:1 1 auto;
+	max-width:500px;
+	min-height:80px;
+	max-height:280px;
+	box-shadow:1px 1px 4px var(--color-shade);
+	border-bottom:2px solid var(--color-border);
+	border-radius:5px;
 }
 .builder-columns .column-wrap{
 	white-space:nowrap;
+	margin:0px 3px 3px 0px;
 	border:1px solid var(--color-border);
-	border-radius:3px;
-	margin:0px 5px 5px 0px;
 }
 .builder-column-options{
 	max-width:500px;

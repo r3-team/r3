@@ -1,4 +1,5 @@
 import MyBuilderCaption       from './builderCaption.js';
+import MyBuilderColumnOptions from './builderColumnOptions.js';
 import MyBuilderIconInput     from './builderIconInput.js';
 import MyBuilderFieldOptions  from './builderFieldOptions.js';
 import MyBuilderFormFunctions from './builderFormFunctions.js';
@@ -7,6 +8,10 @@ import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderFields        from './builderFields.js';
 import MyTabs                 from '../tabs.js';
 import {getFieldHasQuery}     from '../shared/builder.js';
+import {
+	MyBuilderColumns,
+	MyBuilderColumnTemplates
+} from './builderColumns.js';
 import {
 	copyValueDialog,
 	getNilUuid
@@ -30,6 +35,9 @@ let MyBuilderForm = {
 	name:'my-builder-form',
 	components:{
 		MyBuilderCaption,
+		MyBuilderColumns,
+		MyBuilderColumnOptions,
+		MyBuilderColumnTemplates,
 		MyBuilderFields,
 		MyBuilderFieldOptions,
 		MyBuilderFormFunctions,
@@ -111,18 +119,19 @@ let MyBuilderForm = {
 				
 				<!-- form builder fields -->
 				<my-builder-fields class="builder-form-fields default-inputs" flexDirParent="column"
+					@column-id-show="(...args) => setFieldShow(args[0],args[1],'content')"
 					@fields-set="fields = $event"
-					@field-column-query-set="(...args) => setFieldShow(args[0],args[1],'content')"
 					@field-counter-set="fieldCounter = $event"
 					@field-id-show="(...args) => setFieldShow(args[0],null,args[1])"
 					@field-move-store="fieldMoveStore"
 					@field-remove="removeById($event,'field')"
 					:builderLanguage="builderLanguage"
-					:columnIdQuery="columnIdQuery"
+					:columnIdShow="columnIdShow"
 					:dataFields="dataFields"
 					:fieldCounter="fieldCounter"
 					:fieldIdMapRef="fieldIdMapRef"
 					:fieldIdShow="fieldIdShow"
+					:fieldIdShowTab="tabTargetField"
 					:fieldMoveList="fieldMoveList"
 					:fieldMoveIndex="fieldMoveIndex"
 					:fields="fields"
@@ -218,7 +227,7 @@ let MyBuilderForm = {
 					</div>
 					
 					<!-- form properties -->
-					<table class="default-inputs" v-if="tabTarget === 'properties'">
+					<table class="builder-table-vertical tight fullWidth default-inputs" v-if="tabTarget === 'properties'">
 						<tr>
 							<td>{{ capGen.name }}</td>
 							<td><input class="long" v-model="name" :disabled="readonly" /></td>
@@ -292,6 +301,7 @@ let MyBuilderForm = {
 					v-if="fieldShowHasQuery"
 					v-model="tabTargetField"
 					:entries="['content','properties']"
+					:entriesIcon="['images/database.png','images/edit.png']"
 					:entriesText="[capApp.tabContent,capGen.properties]"
 				/>
 				<div class="content grow">
@@ -309,7 +319,7 @@ let MyBuilderForm = {
 					/>
 					
 					<!-- field query (relationship inputs, lists, calendars, charts, ...) -->
-					<template v-if="fieldShowHasQuery&& tabTargetField === 'content'">
+					<template v-if="fieldShowHasQuery && tabTargetField === 'content'">
 						<my-builder-query
 							@index-removed="fieldQueryRemoveIndex($event)"
 							@set-choices="fieldQuerySet('choices',$event)"
@@ -335,19 +345,41 @@ let MyBuilderForm = {
 							:relationIdStart="fieldQueryRelationIdStart"
 						/>
 						
-						<template v-if="showColumnQuery">
-							<!-- field column sub query -->
-							<br /><br />
-							<div class="row">
-								<my-button image="database.png"
-									:active="false"
-									:caption="capApp.sidebarFieldColumnData"
-									:large="true"
-									:naked="true"
-								/>
-							</div>
+						<!-- column templates query fields -->
+						<br />
+						<h2>{{ capApp.sidebarFieldColumns }}</h2>
+						<h3>{{ capGen.available }}</h3>
+						<my-builder-column-templates class="sidebar"
+							:builderLanguage="builderLanguage"
+							:columns="fieldShow.columns"
+							:groupName="fieldIdShow+'_columns'"
+							:joins="fieldShow.query.joins"
+							:moduleId="module.id"
+						/>
+						
+						<!-- columns for query fields -->
+						<h3>{{ capGen.active }}</h3>
+						<my-builder-columns class="sidebar"
+							@columns-set="fieldPropertySet('columns',$event)"
+							@column-id-show="setFieldShow(fieldIdShow,$event,'content')"
+							:builderLanguage="builderLanguage"
+							:columnIdShow="columnIdShow"
+							:columns="fieldShow.columns"
+							:displayOptions="true"
+							:groupName="fieldIdShow+'_columns'"
+							:hasCaptions="fieldShow.content === 'list'"
+							:joins="fieldShow.query.joins"
+							:isTemplate="false"
+							:moduleId="module.id"
+							:showCaptions="showCaptions"
+						/>
+						
+						<!-- column settings -->
+						<div class="column-options" v-if="columnShow">
+							<h3>{{ capApp.sidebarFieldColumnSettings }}</h3>
 							
 							<my-builder-query
+								v-if="columnShow.subQuery"
 								@set-choices="fieldColumnQuerySet('choices',$event)"
 								@set-filters="fieldColumnQuerySet('filters',$event)"
 								@set-fixed-limit="fieldColumnQuerySet('fixedLimit',$event)"
@@ -358,19 +390,28 @@ let MyBuilderForm = {
 								:allowChoices="false"
 								:allowOrders="true"
 								:builderLanguage="builderLanguage"
-								:choices="columnQueryEdit.query.choices"
+								:choices="columnShow.query.choices"
 								:fieldIdMap="fieldIdMap"
 								:fieldIdMapRef="fieldIdMapRef"
-								:filters="columnQueryEdit.query.filters"
-								:fixedLimit="columnQueryEdit.query.fixedLimit"
-								:joins="columnQueryEdit.query.joins"
+								:filters="columnShow.query.filters"
+								:fixedLimit="columnShow.query.fixedLimit"
+								:joins="columnShow.query.joins"
 								:joinsParents="[fieldShow.query.joins]"
-								:orders="columnQueryEdit.query.orders"
-								:lookups="columnQueryEdit.query.lookups"
+								:orders="columnShow.query.orders"
+								:lookups="columnShow.query.lookups"
 								:moduleId="module.id"
-								:relationId="columnQueryEdit.query.relationId"
+								:relationId="columnShow.query.relationId"
 							/>
-						</template>
+							
+							<my-builder-column-options
+								@set="(...args) => fieldColumnPropertySet(args[0],args[1])"
+								:builderLanguage="builderLanguage"
+								:column="columnShow"
+								:displayOptions="true"
+								:joins="fieldShow.query.joins"
+								:moduleId="module.id"
+							/>
+						</div>
 					</template>
 				</div>
 			</template>
@@ -407,13 +448,13 @@ let MyBuilderForm = {
 			filters:[],
 			
 			// state
-			columnIdQuery:null,
+			columnIdShow:null,
 			fieldCounter:0,      // counter to generate unique IDs for all fields
 			                     // used to populate new fields and for template fields
 			fieldIdShow:null,    // field ID which is shown in sidebar to be edited
 			fieldMoveList:null,  // fields list from which to move field (move by click)
 			fieldMoveIndex:0,    // index of field which to move (move by click)
-			showCaptions:true,   // show caption inputs on non-container fields
+			showCaptions:false,  // show caption inputs on non-container fields
 			showFunctions:false, // show form functions
 			showSidebar:true,    // show form Builder sidebar
 			showStates:false,    // show form states
@@ -564,7 +605,7 @@ let MyBuilderForm = {
 		},
 		
 		// simple
-		columnQueryEdit:  (s) => s.columnIdQuery === null ? false : s.columnIdMap[s.columnIdQuery],
+		columnShow:       (s) => s.columnIdShow === null ? false : s.columnIdMap[s.columnIdShow],
 		dataFields:       (s) => s.getDataFields(s.fields),
 		fieldShow:        (s) => s.fieldIdShow === null ? false : s.fieldIdMap[s.fieldIdShow],
 		fieldShowHasQuery:(s) => s.getFieldHasQuery(s.fieldShow),
@@ -572,7 +613,6 @@ let MyBuilderForm = {
 		joinsIndexMap:    (s) => s.getJoinsIndexMap(s.joins),
 		presetCandidates: (s) => s.relation === false ? [] : s.relationIdMap[s.form.query.relationId].presets,
 		relation:         (s) => typeof s.relationIdMap[s.relationId] === 'undefined' ? false : s.relationIdMap[s.relationId],
-		showColumnQuery:  (s) => s.columnQueryEdit !== false,
 		
 		// stores
 		module:        (s) => s.moduleIdMap[s.form.moduleId],
@@ -638,7 +678,7 @@ let MyBuilderForm = {
 			this.filters        = JSON.parse(JSON.stringify(this.form.query.filters));
 			this.fieldIdShow    = null;
 			this.fieldIdsRemove = [];
-			this.columnIdQuery  = null;
+			this.columnIdShow  = null;
 		},
 		
 		createFieldButton() {
@@ -936,6 +976,9 @@ let MyBuilderForm = {
 		},
 		
 		// field manipulation
+		fieldColumnPropertySet(name,value) {
+			this.columnShow[name] = value;
+		},
 		fieldPropertySet(name,value) {
 			this.fieldShow[name] = value;
 		},
@@ -956,14 +999,22 @@ let MyBuilderForm = {
 			this.fieldShow.query = v;
 		},
 		fieldColumnQuerySet(name,value) {
-			let v = JSON.parse(JSON.stringify(this.columnQueryEdit.query));
+			let v = JSON.parse(JSON.stringify(this.columnShow.query));
 			v[name] = value;
-			this.columnQueryEdit.query = v;
+			this.columnShow.query = v;
 		},
 		setFieldShow(fieldId,columnId,tab) {
+			if(columnId !== null && columnId === this.columnIdShow)
+				return this.columnIdShow = null;
+			
+			if(fieldId === this.fieldIdShow && columnId === this.columnIdShow && tab === this.tabTargetField) {
+				this.fieldIdShow  = null;
+				this.columnIdShow = null;
+				return;
+			}
 			this.tabTargetField = tab;
 			this.fieldIdShow    = fieldId;
-			this.columnIdQuery  = columnId;
+			this.columnIdShow   = columnId;
 		},
 		
 		// backend calls

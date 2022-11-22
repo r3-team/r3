@@ -270,7 +270,7 @@ let MyBuilderFieldOptions = {
 		MyBuilderOpenFormInput
 	},
 	template:`<div class="builder-field-options">
-		<table class="fullWidth default-inputs"><tbody>
+		<table class="builder-table-vertical tight fullWidth default-inputs">
 			<tr>
 				<td>{{ capApp.onMobile }}</td>
 				<td>
@@ -879,12 +879,15 @@ let MyBuilderFieldOptions = {
 			<template v-if="isList || isCalendar">
 				<tr>
 					<td>
-						<my-button image="add.png"
-							@trigger="collectionAdd"
-							:caption="capApp.collectionTitle"
-							:naked="true"
-							:tight="true"
-						/>
+						<div class="column">
+							<span>{{ capApp.collectionTitle }}</span>
+							<my-button image="add.png"
+								@trigger="collectionAdd"
+								:caption="capGen.button.add"
+								:naked="true"
+								:tight="true"
+							/>
+						</div>
 					</td>
 					<td>
 						<div class="builder-field-options-collection-label">
@@ -907,7 +910,7 @@ let MyBuilderFieldOptions = {
 					</td>
 				</tr>
 			</template>
-		</tbody></table>
+		</table>
 	</div>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },

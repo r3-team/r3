@@ -24,6 +24,15 @@
 	flex-flow:row nowrap;
 	margin-bottom:10px;
 }
+.builder-form .sidebar .column-options{
+	padding:5px;
+	box-shadow:1px 1px 4px var(--color-shade);
+	border-bottom:2px solid var(--color-border);
+	border-radius:5px;
+}
+.builder-form .sidebar .column-options h3{
+	margin:3px 6px;
+}
 
 /* form builder main area */
 .builder-form-main{
@@ -75,6 +84,7 @@
 	min-width:200px !important;
 }
 
+
 /* fields */
 .builder-field{
 	flex:1 1 auto;
@@ -110,17 +120,7 @@
 	background-color:var(--color-bg);
 	border-radius:0px;
 }
-.builder-field .columnsTarget{
-	line-height:30px;
-	padding:5px;
-	background-color:rgba(0,0,0,0.03);
-	border-bottom:1px dotted var(--color-border);
-}
-.builder-field .columnsTemplates{
-	flex:0 0 auto;
-	display:flex;
-	flex-flow:column nowrap;
-}
+
 
 /* options */
 .builder-field-options{}

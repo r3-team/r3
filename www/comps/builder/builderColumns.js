@@ -1,251 +1,19 @@
-import MyBuilderCaption from './builderCaption.js';
-import MyBuilderQuery   from './builderQuery.js';
-import {getFlexBasis}   from '../shared/form.js';
-import {getRandomInt}   from '../shared/generic.js';
+import MyBuilderCaption   from './builderCaption.js';
+import {getFlexBasis}     from '../shared/form.js';
+import {getRandomInt}     from '../shared/generic.js';
+import {getQueryTemplate} from '../shared/query.js';
 import {
 	getIndexAttributeId,
-	getIndexAttributeIdsByJoins,
-	isAttributeFiles,
-	isAttributeInteger,
-	isAttributeRelationship,
-	isAttributeString
+	isAttributeRelationship
 } from '../shared/attribute.js';
 import {
 	getItemTitle,
 	getItemTitleColumn
 } from '../shared/builder.js';
-import {
-	getCaptionByIndexAttributeId,
-	getQueryTemplate
-} from '../shared/query.js';
-
-let MyBuilderColumnOptions = {
-	name:'my-builder-column-options',
-	components:{MyBuilderQuery},
-	template:`<div class="builder-column-options">
-		<table class="fullWidth default-inputs"><tbody>
-			<tr v-if="displayOptions">
-				<td>{{ capApp.onMobile }}</td>
-				<td>
-					<my-bool
-						@update:modelValue="set('onMobile',$event)"
-						:modelValue="column.onMobile"
-					/>
-				</td>
-			</tr>
-			<tr v-if="displayOptions">
-				<td>{{ capApp.columnSize }}</td>
-				<td>
-					<input
-						v-if="column.basis !== 0"
-						@change="setInt('basis',$event.target.value,false)"
-						:value="column.basis"
-					/>
-					<my-button
-						v-else
-						@trigger="setInt('basis',25,false)"
-						:caption="capApp.columnSize0"
-						:naked="true"
-					/>
-				</td>
-			</tr>
-			<tr v-if="displayOptions">
-				<td>{{ capApp.columnLength }}</td>
-				<td>
-					<input
-						v-if="column.length !== 0"
-						@change="setInt('length',$event.target.value,false)"
-						:value="column.length"
-					/>
-					<my-button
-						v-else
-						@trigger="setInt('length',50,false)"
-						:caption="capApp.columnLength0"
-						:naked="true"
-					/>
-				</td>
-			</tr>
-			<tr v-if="displayOptions">
-				<td>{{ capApp.columnWrap }}</td>
-				<td>
-					<my-bool
-						@update:modelValue="set('wrap',$event)"
-						:modelValue="column.wrap"
-					/>
-				</td>
-			</tr>
-			<tr v-if="displayOptions">
-				<td>{{ capApp.columnClipboard }}</td>
-				<td>
-					<my-bool
-						@update:modelValue="set('clipboard',$event)"
-						:modelValue="column.clipboard"
-					/>
-				</td>
-			</tr>
-			<tr v-if="displayOptions">
-				<td>{{ capApp.columnBatch }}</td>
-				<td>
-					<input
-						v-if="column.batch !== null"
-						@change="setInt('batch',$event.target.value,true)"
-						:value="column.batch"
-					/>
-					<my-button
-						v-else
-						@trigger="setInt('batch',1,true)"
-						:caption="capApp.columnBatchNot"
-						:naked="true"
-					/>
-				</td>
-			</tr>
-			<tr v-if="displayOptions">
-				<td>{{ capApp.display }}</td>
-				<td>
-					<select
-						@input="set('display',$event.target.value)"
-						:value="column.display"
-					>
-						<option value="default">{{ capApp.option.displayDefault }}</option>
-						<option v-if="isInteger" value="datetime">{{ capApp.option.displayDatetime }}</option>
-						<option v-if="isInteger" value="date"    >{{ capApp.option.displayDate }}</option>
-						<option v-if="isInteger" value="time"    >{{ capApp.option.displayTime }}</option>
-						<option v-if="isString"  value="color"   >{{ capApp.option.displayColor }}</option>
-						<option v-if="isString"  value="email"   >{{ capApp.option.displayEmail }}</option>
-						<option v-if="isString"  value="password">{{ capApp.option.displayPassword }}</option>
-						<option v-if="isString"  value="phone"   >{{ capApp.option.displayPhone }}</option>
-						<option v-if="isString"  value="richtext">{{ capApp.option.displayRichtext }}</option>
-						<option v-if="isString"  value="url"     >{{ capApp.option.displayUrl }}</option>
-						<option v-if="isFiles"   value="gallery" >{{ capApp.option.displayGallery }}</option>
-						<option value="hidden">{{ capApp.option.displayHidden }}</option>
-					</select>
-				</td>
-			</tr>
-			<tr>
-				<td colspan="999"><b>{{ capApp.columnHeaderData }}</b></td>
-			</tr>
-			<tr>
-				<td>{{ capApp.distincted }}</td>
-				<td>
-					<my-bool
-						@update:modelValue="set('distincted',$event)"
-						:modelValue="column.distincted"
-					/>
-				</td>
-			</tr>
-			<tr>
-				<td>{{ capApp.groupBy }}</td>
-				<td>
-					<my-bool
-						@update:modelValue="set('groupBy',$event)"
-						:modelValue="column.groupBy"
-					/>
-				</td>
-			</tr>
-			<tr>
-				<td>{{ capApp.aggregator }}</td>
-				<td>
-					<select
-						@input="set('aggregator',$event.target.value)"
-						:value="column.aggregator"
-					>
-						<option value="">-</option>
-						<option value="record">{{ capGen.option.aggRecord }}</option>
-						<option value="avg">{{ capGen.option.aggAvg }}</option>
-						<option value="count">{{ capGen.option.aggCount }}</option>
-						<option value="list">{{ capGen.option.aggList }}</option>
-						<option value="max">{{ capGen.option.aggMax }}</option>
-						<option value="min">{{ capGen.option.aggMin }}</option>
-						<option value="sum">{{ capGen.option.aggSum }}</option>
-						<option value="array">{{ capGen.option.aggArray }}</option>
-					</select>
-				</td>
-			</tr>
-			<tr v-if="isSubQuery">
-				<td>{{ capApp.subQueryAttribute }}</td>
-				<td>
-					<select
-						@change="setIndexAttribute($event.target.value)"
-						:value="column.index+'_'+column.attributeId"
-					>
-						<option value="0_null">-</option>
-						<option v-for="ia in indexAttributeIds" :value="ia">
-							{{ getCaptionByIndexAttributeId(ia) }}
-						</option>
-					</select>
-				</td>
-			</tr>
-		</tbody></table>
-	</div>`,
-	props:{
-		builderLanguage:{ type:String, required:true },
-		column:         { type:Object, required:true },
-		displayOptions: { type:Boolean,required:true },
-		joins:          { type:Array,  required:false, default:() => [] },
-		moduleId:       { type:String, required:true }
-	},
-	emits:['set'],
-	computed:{
-		attribute:function() {
-			return typeof this.attributeIdMap[this.column.attributeId] === 'undefined'
-				? false : this.attributeIdMap[this.column.attributeId];
-		},
-		indexAttributeIds:function() {
-			return !this.isSubQuery
-				? [] : this.getIndexAttributeIdsByJoins(this.column.query.joins);
-		},
-		
-		// simple states
-		isFiles:   function() { return this.isAttributeFiles(this.attribute.content); },
-		isInteger: function() { return this.isAttributeInteger(this.attribute.content); },
-		isString:  function() { return this.isAttributeString(this.attribute.content); },
-		isSubQuery:function() { return this.column.subQuery; },
-		
-		// stores
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.form; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
-	},
-	methods:{
-		// externals
-		getCaptionByIndexAttributeId,
-		getIndexAttributeIdsByJoins,
-		isAttributeFiles,
-		isAttributeInteger,
-		isAttributeString,
-		
-		// actions
-		set:function(name,val) {
-			if(val === '') val = null;
-			this.$emit('set',name,val);
-		},
-		setInt:function(name,val,allowNull) {
-			if(val !== '')
-				return this.$emit('set',name,parseInt(val));
-			
-			if(allowNull) return this.$emit('set',name,null);
-			else          return this.$emit('set',name,0);
-		},
-		setIndexAttribute:function(indexAttributeId) {
-			let v = indexAttributeId.split('_');
-			
-			if(v[1] === 'null') {
-				this.set('index',0);
-				this.set('attributeId',null);
-				return;
-			}
-			this.set('index',parseInt(v[0]));
-			this.set('attributeId',v[1]);
-		}
-	}
-};
 
 export let MyBuilderColumns = {
 	name:'my-builder-columns',
-	components:{
-		MyBuilderCaption,
-		MyBuilderColumnOptions
-	},
+	components:{MyBuilderCaption},
 	template:`<draggable class="builder-columns" handle=".dragAnchor" animation="100" itemKey="id"
 		v-model="columnsInput"
 		:group="group"
@@ -257,8 +25,8 @@ export let MyBuilderColumns = {
 					
 					<img class="action edit clickable" src="images/edit.png"
 						v-if="!isTemplate"
-						@click="idEditSet(element.id)"
-						:class="{ selected:idEdit === element.id }"
+						@click="$emit('column-id-show',element.id)"
+						:class="{ selected:columnIdShow === element.id }"
 					/>
 					
 					<!-- toggle: show on mobile -->
@@ -267,13 +35,6 @@ export let MyBuilderColumns = {
 						@click="propertySet(index,'onMobile',!element.onMobile)"
 						:src="element.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
 						:title="capApp.onMobile"
-					/>
-					
-					<!-- action: edit column query (if sub query) -->
-					<img class="action edit clickable" src="images/database.png"
-						v-if="!isTemplate && element.subQuery"
-						@click="columnIdQuerySet(element.id)"
-						:class="{ selected:columnIdQuery === element.id }"
 					/>
 					
 					<div class="title">{{ getTitle(element) }}</div>
@@ -311,24 +72,13 @@ export let MyBuilderColumns = {
 						:modelValue="element.captions.columnTitle"
 					/>
 				</div>
-				
-				<!-- column options -->
-				<my-builder-column-options
-					v-if="idEdit === element.id"
-					@set="(...args) => propertySet(index,args[0],args[1])"
-					:builderLanguage="builderLanguage"
-					:column="element"
-					:displayOptions="displayOptions"
-					:joins="joins"
-					:moduleId="moduleId"
-				/>
 			</div>
 		</template>
 	</draggable>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		columns:        { type:Array,   required:true },
-		columnIdQuery:  { required:false,default:null },
+		columnIdShow:   { required:false,default:null },
 		displayOptions: { type:Boolean, required:true },
 		groupName:      { type:String,  required:true },
 		hasCaptions:    { type:Boolean, required:true },
@@ -337,12 +87,7 @@ export let MyBuilderColumns = {
 		moduleId:       { type:String,  required:true },
 		showCaptions:   { type:Boolean, required:false, default:false }
 	},
-	emits:['column-id-query-set','columns-set'],
-	data:function() {
-		return {
-			idEdit:'' // column ID in edit mode
-		};
-	},
+	emits:['column-id-show','columns-set'],
 	computed:{
 		columnsInput:{
 			get:function()  { return JSON.parse(JSON.stringify(this.columns)); },
@@ -375,13 +120,6 @@ export let MyBuilderColumns = {
 		},
 		
 		// actions
-		columnIdQuerySet:function(columnId) {
-			this.$emit('column-id-query-set',
-				this.columnIdQuery === columnId ? null : columnId);
-		},
-		idEditSet:function(columnId) {
-			this.idEdit = this.idEdit === columnId ? '' : columnId;
-		},
 		propertySet:function(columnIndex,name,value) {
 			this.columnsInput[columnIndex][name] = value;
 			this.refreshColumnsInput();
@@ -415,22 +153,15 @@ export let MyBuilderColumns = {
 export let MyBuilderColumnTemplates = {
 	name:'my-builder-column-templates',
 	components:{MyBuilderColumns},
-	template:`<div class="builder-columns templates">
-		<span class="template-title">
-			{{ columnsTemplate.length !== 0 ? capApp.columnsTemplates : capGen.nothingThere }}
-		</span>
-		
-		<!-- template columns -->
-		<my-builder-columns
-			:builderLanguage="builderLanguage"
-			:columns="columnsTemplate"
-			:displayOptions="false"
-			:groupName="groupName"
-			:hasCaptions="false"
-			:isTemplate="true"
-			:moduleId="moduleId"
-		/>
-	</div>`,
+	template:`<my-builder-columns
+		:builderLanguage="builderLanguage"
+		:columns="columnsTemplate"
+		:displayOptions="false"
+		:groupName="groupName"
+		:hasCaptions="false"
+		:isTemplate="true"
+		:moduleId="moduleId"
+	/>`,
 	props:{
 		builderLanguage:{ type:String, required:true },
 		columns:        { type:Array,  required:true },
@@ -477,7 +208,6 @@ export let MyBuilderColumnTemplates = {
 		// stores
 		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
 		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.form; },
 		capGen:        function() { return this.$store.getters.captions.generic; }
 	},
 	methods:{

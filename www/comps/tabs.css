@@ -5,6 +5,11 @@
 .tabs .tab-entry{
 	flex:1 1 auto;
 	padding:10px 0px;
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:center;
+	align-items:center;
+	gap:6px;
 	text-align:center;
 	border-bottom:1px solid var(--color-border);
 	border-right:1px solid var(--color-border);
@@ -19,4 +24,13 @@
 }
 .tabs .tab-entry:not(.active):hover{
 	background-color:var(--color-accent3);
+}
+.tabs .tab-entry img{
+	width:18px;
+	height:18px;
+	filter:var(--image-filter);
+}
+.tabs .tab-entry.active img{
+	width:22px;
+	height:22px;
 }

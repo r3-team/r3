@@ -1,0 +1,228 @@
+import MyBuilderQuery from './builderQuery.js';
+import {
+	getIndexAttributeIdsByJoins,
+	isAttributeFiles,
+	isAttributeInteger,
+	isAttributeString
+} from '../shared/attribute.js';
+import {
+	getCaptionByIndexAttributeId
+} from '../shared/query.js';
+export {MyBuilderColumnOptions as default};
+
+let MyBuilderColumnOptions = {
+	name:'my-builder-column-options',
+	components:{MyBuilderQuery},
+	template:`<div class="builder-column-options">
+		<table class="fullWidth default-inputs"><tbody>
+			<tr v-if="displayOptions">
+				<td>{{ capApp.onMobile }}</td>
+				<td>
+					<my-bool
+						@update:modelValue="set('onMobile',$event)"
+						:modelValue="column.onMobile"
+					/>
+				</td>
+			</tr>
+			<tr v-if="displayOptions">
+				<td>{{ capApp.columnSize }}</td>
+				<td>
+					<input
+						v-if="column.basis !== 0"
+						@change="setInt('basis',$event.target.value,false)"
+						:value="column.basis"
+					/>
+					<my-button
+						v-else
+						@trigger="setInt('basis',25,false)"
+						:caption="capApp.columnSize0"
+						:naked="true"
+					/>
+				</td>
+			</tr>
+			<tr v-if="displayOptions">
+				<td>{{ capApp.columnLength }}</td>
+				<td>
+					<input
+						v-if="column.length !== 0"
+						@change="setInt('length',$event.target.value,false)"
+						:value="column.length"
+					/>
+					<my-button
+						v-else
+						@trigger="setInt('length',50,false)"
+						:caption="capApp.columnLength0"
+						:naked="true"
+					/>
+				</td>
+			</tr>
+			<tr v-if="displayOptions">
+				<td>{{ capApp.columnWrap }}</td>
+				<td>
+					<my-bool
+						@update:modelValue="set('wrap',$event)"
+						:modelValue="column.wrap"
+					/>
+				</td>
+			</tr>
+			<tr v-if="displayOptions">
+				<td>{{ capApp.columnClipboard }}</td>
+				<td>
+					<my-bool
+						@update:modelValue="set('clipboard',$event)"
+						:modelValue="column.clipboard"
+					/>
+				</td>
+			</tr>
+			<tr v-if="displayOptions">
+				<td>{{ capApp.columnBatch }}</td>
+				<td>
+					<input
+						v-if="column.batch !== null"
+						@change="setInt('batch',$event.target.value,true)"
+						:value="column.batch"
+					/>
+					<my-button
+						v-else
+						@trigger="setInt('batch',1,true)"
+						:caption="capApp.columnBatchNot"
+						:naked="true"
+					/>
+				</td>
+			</tr>
+			<tr v-if="displayOptions">
+				<td>{{ capApp.display }}</td>
+				<td>
+					<select
+						@input="set('display',$event.target.value)"
+						:value="column.display"
+					>
+						<option value="default">{{ capApp.option.displayDefault }}</option>
+						<option v-if="isInteger" value="datetime">{{ capApp.option.displayDatetime }}</option>
+						<option v-if="isInteger" value="date"    >{{ capApp.option.displayDate }}</option>
+						<option v-if="isInteger" value="time"    >{{ capApp.option.displayTime }}</option>
+						<option v-if="isString"  value="color"   >{{ capApp.option.displayColor }}</option>
+						<option v-if="isString"  value="email"   >{{ capApp.option.displayEmail }}</option>
+						<option v-if="isString"  value="password">{{ capApp.option.displayPassword }}</option>
+						<option v-if="isString"  value="phone"   >{{ capApp.option.displayPhone }}</option>
+						<option v-if="isString"  value="richtext">{{ capApp.option.displayRichtext }}</option>
+						<option v-if="isString"  value="url"     >{{ capApp.option.displayUrl }}</option>
+						<option v-if="isFiles"   value="gallery" >{{ capApp.option.displayGallery }}</option>
+						<option value="hidden">{{ capApp.option.displayHidden }}</option>
+					</select>
+				</td>
+			</tr>
+			<tr>
+				<td colspan="999"><b>{{ capApp.columnHeaderData }}</b></td>
+			</tr>
+			<tr>
+				<td>{{ capApp.distincted }}</td>
+				<td>
+					<my-bool
+						@update:modelValue="set('distincted',$event)"
+						:modelValue="column.distincted"
+					/>
+				</td>
+			</tr>
+			<tr>
+				<td>{{ capApp.groupBy }}</td>
+				<td>
+					<my-bool
+						@update:modelValue="set('groupBy',$event)"
+						:modelValue="column.groupBy"
+					/>
+				</td>
+			</tr>
+			<tr>
+				<td>{{ capApp.aggregator }}</td>
+				<td>
+					<select
+						@input="set('aggregator',$event.target.value)"
+						:value="column.aggregator"
+					>
+						<option value="">-</option>
+						<option value="record">{{ capGen.option.aggRecord }}</option>
+						<option value="avg">{{ capGen.option.aggAvg }}</option>
+						<option value="count">{{ capGen.option.aggCount }}</option>
+						<option value="list">{{ capGen.option.aggList }}</option>
+						<option value="max">{{ capGen.option.aggMax }}</option>
+						<option value="min">{{ capGen.option.aggMin }}</option>
+						<option value="sum">{{ capGen.option.aggSum }}</option>
+						<option value="array">{{ capGen.option.aggArray }}</option>
+					</select>
+				</td>
+			</tr>
+			<tr v-if="isSubQuery">
+				<td>{{ capApp.subQueryAttribute }}</td>
+				<td>
+					<select
+						@change="setIndexAttribute($event.target.value)"
+						:value="column.index+'_'+column.attributeId"
+					>
+						<option value="0_null">-</option>
+						<option v-for="ia in indexAttributeIds" :value="ia">
+							{{ getCaptionByIndexAttributeId(ia) }}
+						</option>
+					</select>
+				</td>
+			</tr>
+		</tbody></table>
+	</div>`,
+	props:{
+		builderLanguage:{ type:String, required:true },
+		column:         { type:Object, required:true },
+		displayOptions: { type:Boolean,required:true },
+		joins:          { type:Array,  required:false, default:() => [] },
+		moduleId:       { type:String, required:true }
+	},
+	emits:['set'],
+	computed:{
+		attribute:(s) => typeof s.attributeIdMap[s.column.attributeId] === 'undefined'
+			? false : s.attributeIdMap[s.column.attributeId],
+		indexAttributeIds:(s) => !s.isSubQuery
+			? [] : s.getIndexAttributeIdsByJoins(s.column.query.joins),
+		
+		// simple states
+		isFiles:   (s) => s.isAttributeFiles(s.attribute.content),
+		isInteger: (s) => s.isAttributeInteger(s.attribute.content),
+		isString:  (s) => s.isAttributeString(s.attribute.content),
+		isSubQuery:(s) => s.column.subQuery,
+		
+		// stores
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.form,
+		capGen:        (s) => s.$store.getters.captions.generic
+	},
+	methods:{
+		// externals
+		getCaptionByIndexAttributeId,
+		getIndexAttributeIdsByJoins,
+		isAttributeFiles,
+		isAttributeInteger,
+		isAttributeString,
+		
+		// actions
+		set(name,val) {
+			if(val === '') val = null;
+			this.$emit('set',name,val);
+		},
+		setInt(name,val,allowNull) {
+			if(val !== '')
+				return this.$emit('set',name,parseInt(val));
+			
+			if(allowNull) return this.$emit('set',name,null);
+			else          return this.$emit('set',name,0);
+		},
+		setIndexAttribute(indexAttributeId) {
+			let v = indexAttributeId.split('_');
+			
+			if(v[1] === 'null') {
+				this.set('index',0);
+				this.set('attributeId',null);
+				return;
+			}
+			this.set('index',parseInt(v[0]));
+			this.set('attributeId',v[1]);
+		}
+	}
+};
