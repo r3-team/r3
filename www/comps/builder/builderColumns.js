@@ -19,10 +19,8 @@ export let MyBuilderColumns = {
 		:group="group"
 	>
 		<template #item="{element,index}">
-	   	 	<div class="column-wrap">
+	   	 	<div class="column-wrap dragAnchor">
 				<div class="builder-drag-item column">
-					<img class="action dragAnchor" src="images/drag.png" />
-					
 					<img class="action edit clickable" src="images/edit.png"
 						v-if="!isTemplate"
 						@click="$emit('column-id-show',element.id)"
@@ -64,7 +62,7 @@ export let MyBuilderColumns = {
 				</div>
 				
 				<!-- caption inputs -->
-				<div v-if="hasCaptions && showCaptions" class="captionInputs">
+				<div v-if="hasCaptions && showShortcuts" class="captionInputs">
 				
 					<my-builder-caption
 						@update:modelValue="propertySet(index,'captions',{columnTitle:$event})"
@@ -85,7 +83,7 @@ export let MyBuilderColumns = {
 		isTemplate:     { type:Boolean, required:true },
 		joins:          { type:Array,   required:false, default:() => [] },
 		moduleId:       { type:String,  required:true },
-		showCaptions:   { type:Boolean, required:false, default:false }
+		showShortcuts:  { type:Boolean, required:false, default:false }
 	},
 	emits:['column-id-show','columns-set'],
 	computed:{

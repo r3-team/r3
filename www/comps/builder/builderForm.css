@@ -15,9 +15,9 @@
 }
 .builder-form .sidebar .templates{
 	margin-bottom:16px;
-	border:1px solid var(--color-border);
-	border-radius:5px;
 	overflow:auto;
+	border-radius:5px;
+	overflow:hidden;
 }
 .builder-form .sidebar .templates-filter{
 	display:flex;
@@ -53,35 +53,31 @@
 	flex-flow:column nowrap;
 	padding:5px 0px 0px 5px;
 	overflow:auto;
-}
-.builder-form-content div.container:hover{
-	background-color:rgba(80,56,120,0.05);
+	background-color:var(--color-bg);
+	background-size:15px 15px;
+	background-image:radial-gradient(var(--color-form-builder-actions-bg) 1px, var(--color-bg) 1px);
 }
 
-.builder-form-content div.container-nested{
+.builder-form-content .container-nested{
 	/* nesting target inside container */
-	padding:5px 0px 20px 5px;
+	min-height:20px;
+	margin:4px;
+	margin-top:0px;
+	padding:5px 0px 0px 5px;
 	display:flex;
 	flex:1 1 auto;
 	flex-wrap:wrap;
 	overflow:auto;
+	border-radius:2px;
+	background-color:var(--color-bg);
+	background-size:15px 15px;
+	background-image:radial-gradient(var(--color-form-builder-actions-bg) 1px, var(--color-bg) 1px);
 }
-.builder-form-content div.container-nested.row{
+.builder-form-content .container-nested.row{
 	flex-direction:row;
 }
-.builder-form-content div.container-nested.column{
+.builder-form-content .container-nested.column{
 	flex-direction:column;
-}
-.builder-field.container{
-	/* nestable container field */
-	width:auto;
-	margin:0px 5px 5px 0px;
-	box-sizing:border-box;
-	border:1px solid var(--color-border);
-	flex:0 1 auto;
-	
-	/* to overwrite bad size inputs */
-	min-width:200px !important;
 }
 
 
@@ -93,21 +89,37 @@
 	background-color:var(--color-bg);
 	display:flex;
 	flex-direction:column;
-	border:1px solid var(--color-border);
 	border-radius:3px;
+	background-color:var(--color-form-builder-actions);
 }
-.builder-field.container:hover{
-	border-top-width:2px !important;
-	border-color:var(--color-accent1) !important;
+.builder-field.dragAnchor{
+	cursor:move;
+}
+.builder-field.container{
+	/* nestable container field */
+	width:auto;
+	margin:0px 5px 5px 0px;
+	box-sizing:border-box;
+	flex:0 1 auto;
+	background-color:var(--color-form-builder-container);
+	
+	/* to overwrite bad size inputs */
+	min-width:200px !important;
+}
+.builder-field:hover{
+	/*outline:1px solid var(--color-accent1);*/
 }
 .builder-field.isTemplate{
-	border:none;
 	margin:0px;
+	border-radius:0px;
 }
 .builder-field .captionInputs{
 	display:flex;
 	flex-direction:row;
 	margin:0px 2px;
+}
+.builder-field .captionInputs *{
+	flex-grow:0;
 }
 .builder-field .captionInputs input{
 	min-width:50px;

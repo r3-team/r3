@@ -40,13 +40,13 @@ let MyBuilderCaption = {
 	emits:['hotkey','update:modelValue'],
 	computed:{
 		valueInput:{
-			get:function() {
+			get() {
 				if(typeof this.modelValue[this.language] !== 'undefined')
 					return this.modelValue[this.language];
 				else
 					return '';
 			},
-			set:function(v) {
+			set(v) {
 				let value = JSON.parse(JSON.stringify(this.modelValue));
 				
 				if(v === '')
@@ -60,11 +60,9 @@ let MyBuilderCaption = {
 					JSON.parse(JSON.stringify(value,Object.keys(value).sort())));
 			}
 		},
-		placeholder:function() {
-			if(this.contentName === '')
-				return this.language;
-			
-			return `${this.contentName} (${this.language})`;
+		placeholder() {
+			return this.contentName === ''
+				? this.language : `${this.contentName} (${this.language})`;
 		}
 	}
 };

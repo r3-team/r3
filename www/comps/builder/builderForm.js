@@ -99,9 +99,9 @@ let MyBuilderForm = {
 							:caption="capGen.button.open"
 						/>
 						<my-button
-							@trigger="showCaptions = !showCaptions"
-							:caption="capApp.captions"
-							:image="showCaptions ? 'visible1.png' : 'visible0.png'"
+							@trigger="showShortcuts = !showShortcuts"
+							:caption="capApp.shortcuts"
+							:image="showShortcuts ? 'checkbox1.png' : 'checkbox0.png'"
 						/>
 						<my-button image="visible1.png"
 							@trigger="copyValueDialog(form.name,form.id,form.id)"
@@ -113,6 +113,20 @@ let MyBuilderForm = {
 							:cancel="true"
 							:caption="capGen.button.delete"
 							:captionTitle="capGen.button.delete"
+						/>
+					</div>
+					<div class="area nowrap">
+						<my-button image="search.png"
+							@trigger="uiScale = uiScaleOrg"
+							:active="uiScale !== uiScaleOrg"
+							:captionTitle="capApp.scale"
+							:naked="true"
+						/>
+						<input type="range"
+							v-model.number="uiScale"
+							:min="uiScaleMin"
+							:max="uiScaleMax"
+							:title="uiScale + '%'"
 						/>
 					</div>
 				</div>
@@ -139,7 +153,8 @@ let MyBuilderForm = {
 					:isTemplate="false"
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="form.moduleId"
-					:showCaptions="showCaptions"
+					:showShortcuts="showShortcuts"
+					:uiScale="uiScale"
 				/>
 			</div>
 		</div>
@@ -151,7 +166,7 @@ let MyBuilderForm = {
 				<div class="area">
 					<img v-if="!fieldShow" class="icon" src="images/form.png" />
 					<h1 v-if="!fieldShow">{{ capApp.sidebarForm }}</h1>
-					<h1 v-if="fieldShow">{{ capApp.sidebarField.replace('{NAME}','F'+fieldIdMapRef[fieldIdShow]) }}</h1>
+					<h1 v-if="fieldShow" class="selected">{{ capApp.sidebarField.replace('{NAME}','F'+fieldIdMapRef[fieldIdShow]) }}</h1>
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
@@ -371,7 +386,7 @@ let MyBuilderForm = {
 							:joins="fieldShow.query.joins"
 							:isTemplate="false"
 							:moduleId="module.id"
-							:showCaptions="showCaptions"
+							:showShortcuts="showShortcuts"
 						/>
 						
 						<!-- column settings -->
@@ -454,7 +469,7 @@ let MyBuilderForm = {
 			fieldIdShow:null,    // field ID which is shown in sidebar to be edited
 			fieldMoveList:null,  // fields list from which to move field (move by click)
 			fieldMoveIndex:0,    // index of field which to move (move by click)
-			showCaptions:false,  // show caption inputs on non-container fields
+			showShortcuts:false,  // show caption inputs on non-container fields
 			showFunctions:false, // show form functions
 			showSidebar:true,    // show form Builder sidebar
 			showStates:false,    // show form states
@@ -463,7 +478,11 @@ let MyBuilderForm = {
 			showTemplateNm:false,// show templates for n:m relationship input fields
 			tabTarget:'content', // sidebar tab target (content, states, functions, properties)
 			tabTargetField:'content', // sidebar tab target for field (content, properties)
-			templateIndex:'-1'
+			templateIndex:'-1',
+			uiScale:90,
+			uiScaleMax:160,
+			uiScaleMin:30,
+			uiScaleOrg:90
 		};
 	},
 	computed:{

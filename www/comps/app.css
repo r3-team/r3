@@ -60,9 +60,11 @@
 	--color-menu-border:hsl(0,0%,96%,1.00);
 	--color-navigation-default:#444;
 	
-	--color-form-builder-actions:hsl(195,36%,87%,1.00);
-	--color-form-builder-columns:hsl(247,36%,56%,0.42);
-	--color-form-builder-container:hsl(99,30%,83%,1.00);
+	--color-form-builder-actions:hsl(200,24%,56%);
+	--color-form-builder-actions-bg:hsl(200,37%,90%);
+	--color-form-builder-columns:hsl(353,15%,50%);
+	--color-form-builder-container:hsl(113,25%,60%);
+	--color-form-builder-selected:hsl(235,100%,50%);
 	
 	/**/
 	/* images */
@@ -181,6 +183,7 @@ body                                         { --depth:6; }
 .builder .lookup                             { --depth:1; }
 .builder-icon-input .iconLine                { --depth:0; }
 .builder-icon-input .iconLine.disabled       { --depth:5; }
+.builder-form-content .container-nested      { --depth:1; }
 .builder-form-state                          { --depth:5; }
 .builder-form-state-effect                   { --depth:7; }
 .builder-field                               { --depth:5; }
@@ -1008,7 +1011,8 @@ table td.maximum{
 	
 	--color-hover-underlay:rgba(0,0,0,0.50);
 	--color-form-builder-actions:hsl(195,17%,29%,1.00);
-	--color-form-builder-columns:hsl(247,17%,46%,0.42);
+	--color-form-builder-actions-bg:hsl(195,3%,20%);
+	--color-form-builder-columns:hsl(247,17%,41%,0.85);
 	--color-form-builder-container:hsl(99,18%,26%,1.00);
 	
 	--image-list-cards: url('../images/texture_paper02.webp');

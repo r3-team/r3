@@ -1,3 +1,4 @@
+import MyBuilderCaption                from './builderCaption.js';
 import MyBuilderCollectionInput        from './builderCollectionInput.js';
 import MyBuilderOpenFormInput          from './builderOpenFormInput.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
@@ -265,18 +266,31 @@ let MyBuilderFieldOptionsChart = {
 let MyBuilderFieldOptions = {
 	name:'my-builder-field-options',
 	components:{
+		MyBuilderCaption,
 		MyBuilderCollectionInput,
 		MyBuilderFieldOptionsChart,
 		MyBuilderOpenFormInput
 	},
 	template:`<div class="builder-field-options">
 		<table class="builder-table-vertical tight fullWidth default-inputs">
-			<tr>
-				<td>{{ capApp.onMobile }}</td>
+			<tr v-if="field.content === 'button' || field.content === 'data' || field.content === 'header'">
+				<td>{{ capGen.title }}</td>
 				<td>
-					<my-bool
-						@update:modelValue="set('onMobile',$event)"
-						:modelValue="field.onMobile"
+					<my-builder-caption
+						@update:modelValue="field.captions.fieldTitle = $event;set('captions',field.captions)"
+						:language="builderLanguage"
+						:modelValue="field.captions.fieldTitle"
+					/>
+				</td>
+			</tr>
+			<tr v-if="field.content === 'data'">
+				<td>{{ capApp.fieldHelp }}</td>
+				<td>
+					<my-builder-caption
+						@update:modelValue="field.captions.fieldHelp = $event;set('captions',field.captions)"
+						:language="builderLanguage"
+						:modelValue="field.captions.fieldHelp"
+						:multiLine="true"
 					/>
 				</td>
 			</tr>
@@ -293,6 +307,15 @@ let MyBuilderFieldOptions = {
 						<option v-if="isData" value="required">{{ capApp.stateRequired }}</option>
 						<option v-if="isData || isButton" value="readonly">{{ capApp.stateReadonly }}</option>
 					</select>
+				</td>
+			</tr>
+			<tr>
+				<td>{{ capApp.onMobile }}</td>
+				<td>
+					<my-bool
+						@update:modelValue="set('onMobile',$event)"
+						:modelValue="field.onMobile"
+					/>
 				</td>
 			</tr>
 			
@@ -632,61 +655,6 @@ let MyBuilderFieldOptions = {
 			
 			<template v-if="isContainer">
 				<tr>
-					<td>{{ capApp.fieldSize }}</td>
-					<td>
-						<input
-							v-if="field.basis !== 0"
-							@input="setInt('basis',$event.target.value,false)"
-							:value="field.basis"
-						/>
-						<my-button
-							v-else
-							@trigger="setInt('basis',300,false)"
-							:caption="capApp.fieldSize0"
-							:naked="true"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.flexSizeGrow }}</td>
-					<td>
-						<input
-							@input="setInt('grow',$event.target.value,false)"
-							:value="field.grow"
-						/>
-					</td>
-				</tr>
-				<tr v-if="field.basis !== 0">
-					<td>{{ capApp.flexSizeMax }}</td>
-					<td>
-						<input
-							@input="setInt('perMax',$event.target.value,false)"
-							:value="field.perMax"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.flexSizeShrink }}</td>
-					<td>
-						<input
-							@input="setInt('shrink',$event.target.value,false)"
-							:value="field.shrink"
-						/>
-					</td>
-				</tr>
-				<tr v-if="field.basis !== 0">
-					<td>{{ capApp.flexSizeMin }}</td>
-					<td>
-						<input
-							@input="setInt('perMin',$event.target.value,false)"
-							:value="field.perMin"
-						/>
-					</td>
-				</tr>
-				<tr>
-					<td colspan="999"><b>{{ capApp.containerContentLayout }}</b></td>
-				</tr>
-				<tr>
 					<td>{{ capApp.fieldDirection }}</td>
 					<td>
 						<select
@@ -704,6 +672,90 @@ let MyBuilderFieldOptions = {
 						<my-bool
 							@update:modelValue="set('wrap',$event)"
 							:modelValue="field.wrap"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.fieldSize }}</td>
+					<td>
+						<div class="row gap" v-if="field.basis !== 0">
+							<input class="short"
+								@input="setInt('basis',$event.target.value,false)"
+								:value="field.basis"
+							/>
+							<my-button image="add.png"
+								@trigger="setInt('basis',field.basis+50,false)"
+								:tight="true"
+							/>
+							<my-button image="remove.png"
+								@trigger="setInt('basis',field.basis-50,false)"
+								:active="field.basis >= 50"
+								:tight="true"
+							/>
+						</div>
+						<my-button
+							v-if="field.basis === 0"
+							@trigger="setInt('basis',300,false)"
+							:caption="capApp.fieldSize0"
+							:naked="true"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.flexSizeGrow }}</td>
+					<td>
+						<div class="row gap">
+							<input class="short"
+								@input="setInt('grow',$event.target.value,false)"
+								:value="field.grow"
+							/>
+							<my-button image="add.png"
+								@trigger="setInt('grow',field.grow+1,false)"
+								:tight="true"
+							/>
+							<my-button image="remove.png"
+								@trigger="setInt('grow',field.grow-1,false)"
+								:active="field.grow > 0"
+								:tight="true"
+							/>
+						</div>
+					</td>
+				</tr>
+				<tr v-if="field.basis !== 0">
+					<td>{{ capApp.flexSizeMax }}</td>
+					<td>
+						<input
+							@input="setInt('perMax',$event.target.value,false)"
+							:value="field.perMax"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.flexSizeShrink }}</td>
+					<td>
+						<div class="row gap">
+							<input class="short"
+								@input="setInt('shrink',$event.target.value,false)"
+								:value="field.shrink"
+							/>
+							<my-button image="add.png"
+								@trigger="setInt('shrink',field.shrink+1,false)"
+								:tight="true"
+							/>
+							<my-button image="remove.png"
+								@trigger="setInt('shrink',field.shrink-1,false)"
+								:active="field.shrink > 0"
+								:tight="true"
+							/>
+						</div>
+					</td>
+				</tr>
+				<tr v-if="field.basis !== 0">
+					<td>{{ capApp.flexSizeMin }}</td>
+					<td>
+						<input
+							@input="setInt('perMin',$event.target.value,false)"
+							:value="field.perMin"
 						/>
 					</td>
 				</tr>
