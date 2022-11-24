@@ -36,23 +36,14 @@ let MyBuilderFields = {
 				:key="element.id"
 				:style="getStyleParent(element)"
 			>
-				<div class="builder-drag-item" :class="{ container:element.content === 'container' }">
+				<div class="builder-field-header" :class="{ dragAnchor:!moveActive, container:element.content === 'container' }">
 					<!-- form state field reference -->
-					<span class="reference" v-if="!isTemplate">
+					<span v-if="!isTemplate">
 						F{{ typeof fieldIdMapRef[element.id] !== 'undefined' ? fieldIdMapRef[element.id] : '' }}
 					</span>
 					
-					<!-- action: move this field -->
-					<img class="action edit clickable"
-						v-if="!moveActive || fieldMoveList[fieldMoveIndex].id === element.id || !isTemplate"
-						@click="moveByClick(fields,index,false)"
-						:class="{ selected:moveActive && fieldMoveList[fieldMoveIndex].id === element.id }"
-						:src="!moveActive ? 'images/arrowRight.png' : 'images/arrowDown.png'"
-						:title="!moveActive ? capApp.fieldMoveSource : capApp.fieldMoveTarget"
-					/>
-					
 					<!-- action: edit field options -->
-					<img class="action edit clickable" src="images/edit.png"
+					<img class="clickable" src="images/edit.png"
 						v-if="!isTemplate && !moveActive"
 						@click="$emit('field-id-show',element.id,'properties')"
 						:class="{ selected:fieldIdShow === element.id && fieldIdShowTab === 'properties' }"
@@ -60,7 +51,7 @@ let MyBuilderFields = {
 					/>
 					
 					<!-- action: edit field content -->
-					<img class="action edit clickable" src="images/database.png"
+					<img class="clickable" src="images/database.png"
 						v-if="!isTemplate && !moveActive && getFieldHasQuery(element)"
 						@click="$emit('field-id-show',element.id,'content')"
 						:class="{ selected:fieldIdShow === element.id && fieldIdShowTab === 'content' }"
@@ -68,77 +59,14 @@ let MyBuilderFields = {
 					/>
 					
 					<!-- display: field is hidden -->
-					<img class="action edit clickable" src="images/visible0.png"
+					<img class="clickable" src="images/visible0.png"
 						v-if="!isTemplate && !moveActive && element.state === 'hidden'"
 						@click="fieldPropertySet(index,'state','default')"
 						:title="capApp.hidden"
 					/>
 					
-					<!-- action: list data SQL preview -->
-					<img class="action edit clickable" src="images/code.png"
-						v-if="!isTemplate && ['calendar','chart','list'].includes(element.content)"
-						@click="getSqlPreview(element)"
-						:title="capApp.sql"
-					/>
-					
-					<!-- action: move target inside container -->
-					<img class="action edit clickable" src="images/arrowInside.png"
-						v-if="!isTemplate && element.content === 'container' && moveActive && fieldMoveList[fieldMoveIndex].id !== element.id"
-						@click="moveByClick(element.fields,0,true)"
-						:title="capApp.fieldMoveInside"
-					/>
-					
-					<!-- toggle: show on mobile -->
-					<img class="action edit clickable"
-						v-if="!isTemplate && !moveActive && showShortcuts"
-						@click="fieldPropertySet(index,'onMobile',toggleBool(element.onMobile))"
-						:src="element.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
-						:title="capApp.onMobile+': '+element.onMobile"
-					/>
-					
-					<!-- field icon -->
-					<my-builder-icon-input
-						v-if="!isTemplate && showShortcuts && element.content !== 'container'"
-						@input="element.iconId = $event"
-						:icon-id-selected="element.iconId"
-						:module="moduleIdMap[moduleId]"
-						:title="capApp.fieldIcon"
-					/>
-					
-					<!-- field title -->
-					<div v-if="isTemplate || element.content !== 'container'" class="title">
-						{{ getTitle(element) }}
-					</div>
-					
 					<!-- container actions -->
 					<template v-if="!isTemplate && !moveActive && element.content === 'container'">
-						
-						<div class="part clickable"
-							v-if="showShortcuts"
-							@click="fieldPropertySet(index,'basis',toggleSize(element.basis,50,300))"
-							@click.prevent.right="fieldPropertySet(index,'basis',toggleSize(element.basis,-50))"
-							:title="capApp.flexSize"
-						>
-							<span>{{ getFlexBasis(element.basis) }}</span>
-						</div>
-						
-						<div class="part clickable"
-							v-if="showShortcuts"
-							@click="fieldPropertySet(index,'grow',toggleSize(element.grow,1,1))"
-							@click.prevent.right="fieldPropertySet(index,'grow',toggleSize(element.grow,-1))"
-							:title="capApp.flexSizeGrow"
-						>
-							<span>G{{ element.grow }}</span>
-						</div>
-						
-						<div class="part clickable"
-							v-if="showShortcuts"
-							@click="fieldPropertySet(index,'shrink',toggleSize(element.shrink,1,1))"
-							@click.prevent.right="fieldPropertySet(index,'shrink',toggleSize(element.shrink,-1))"
-							:title="capApp.flexSizeShrink"
-						>
-							<span>S{{ element.shrink }}</span>
-						</div>
 						
 						<img class="clickable"
 							@click="fieldPropertySet(index,'direction',toggleDir(element.direction))"
@@ -153,31 +81,91 @@ let MyBuilderFields = {
 							:src="element.wrap ? 'images/wrap1.png' : 'images/wrap0.png'"
 							:title="capApp.flexWrap+': '+element.wrap"
 						/>
+						
+						<div class="clickable on-hover"
+							@click="fieldPropertySet(index,'basis',toggleSize(element.basis,50,300))"
+							@click.prevent.right="fieldPropertySet(index,'basis',toggleSize(element.basis,-50))"
+							:title="capApp.flexSize"
+						>
+							<span>{{ getFlexBasis(element.basis) }}</span>
+						</div>
+						
+						<div class="clickable on-hover"
+							@click="fieldPropertySet(index,'grow',toggleSize(element.grow,1,1))"
+							@click.prevent.right="fieldPropertySet(index,'grow',toggleSize(element.grow,-1))"
+							:title="capApp.flexSizeGrow"
+						>
+							<span>G{{ element.grow }}</span>
+						</div>
+						
+						<div class="clickable on-hover"
+							@click="fieldPropertySet(index,'shrink',toggleSize(element.shrink,1,1))"
+							@click.prevent.right="fieldPropertySet(index,'shrink',toggleSize(element.shrink,-1))"
+							:title="capApp.flexSizeShrink"
+						>
+							<span>S{{ element.shrink }}</span>
+						</div>
 					</template>
 					
-					<!-- action: remove field -->
-					<img class="action end clickable" src="images/cancel.png"
-						v-if="!isTemplate"
-						@click="remove(element.id,index)"
-					/>
-				</div>
-				
-				<!-- caption inputs -->
-				<div class="captionInputs"
-					v-if="!isTemplate && showShortcuts && element.content !== 'container'"
-				>
-					<my-builder-caption
-						v-if="element.content === 'button' || element.content === 'data' || element.content === 'header'"
-						v-model="element.captions.fieldTitle"
-						:contentName="capApp.fieldTitle"
-						:language="builderLanguage"
+					<!-- action: move this field -->
+					<img class="mover"
+						v-if="!moveActive || fieldMoveList[fieldMoveIndex].id === element.id || !isTemplate"
+						@click="moveByClick(fields,index,false)"
+						:class="{ 'on-hover':!moveActive, selected:moveActive && fieldMoveList[fieldMoveIndex].id === element.id }"
+						:src="!moveActive ? 'images/arrowRight.png' : 'images/arrowDown.png'"
+						:title="!moveActive ? capApp.fieldMoveSource : capApp.fieldMoveTarget"
 					/>
 					
-					<my-builder-caption
-						v-if="element.content === 'data'"
-						v-model="element.captions.fieldHelp"
-						:contentName="capApp.fieldHelp"
+					<!-- action: list data SQL preview -->
+					<img class="clickable on-hover" src="images/code.png"
+						v-if="!isTemplate && ['calendar','chart','list'].includes(element.content)"
+						@click="getSqlPreview(element)"
+						:title="capApp.sql"
+					/>
+					
+					<!-- action: move target inside container -->
+					<img class="clickable" src="images/arrowInside.png"
+						v-if="!isTemplate && element.content === 'container' && moveActive && fieldMoveList[fieldMoveIndex].id !== element.id"
+						@click="moveByClick(element.fields,0,true)"
+						:title="capApp.fieldMoveInside"
+					/>
+					
+					<!-- toggle: show on mobile -->
+					<img class="clickable on-hover"
+						v-if="!isTemplate && !moveActive"
+						@click="fieldPropertySet(index,'onMobile',toggleBool(element.onMobile))"
+						:src="element.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
+						:title="capApp.onMobile+': '+element.onMobile"
+					/>
+					
+					<!-- field icon -->
+					<my-builder-icon-input class="on-hover"
+						v-if="!isTemplate && element.content !== 'container'"
+						@input="element.iconId = $event"
+						:icon-id-selected="element.iconId"
+						:module="moduleIdMap[moduleId]"
+						:title="capApp.fieldIcon"
+					/>
+					
+					<!-- field title -->
+					<my-builder-caption class="on-hover"
+						v-if="!isTemplate && (element.content === 'button' || element.content === 'data' || element.content === 'header')"
+						v-model="element.captions.fieldTitle"
+						:contentName="getTitle(element)"
+						:dynamicSize="true"
 						:language="builderLanguage"
+					/>
+					<span class="title"
+						v-if="isTemplate || element.content !== 'container'" :title="getTitle(element)"
+						:class="{ 'no-hover':!isTemplate }"
+					>
+						{{ getTitle(element) }}
+					</span>
+					
+					<!-- action: remove field -->
+					<img class="on-hover end clickable" src="images/cancel.png"
+						v-if="!isTemplate"
+						@click="remove(element.id,index)"
 					/>
 				</div>
 				
@@ -189,13 +177,12 @@ let MyBuilderFields = {
 					:builderLanguage="builderLanguage"
 					:columns="element.columns"
 					:columnIdShow="columnIdShow"
-					:displayOptions="false"
+					:displayOptions="true"
 					:groupName="element.id+'_columns'"
 					:hasCaptions="element.content === 'list'"
 					:joins="element.query.joins"
 					:isTemplate="false"
 					:moduleId="moduleId"
-					:showShortcuts="showShortcuts"
 				/>
 				
 				<!-- nested fields in container -->
@@ -222,7 +209,6 @@ let MyBuilderFields = {
 					:isTemplate="isTemplate"
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="moduleId"
-					:showShortcuts="showShortcuts"
 					:style="getStyleChildren(element)"
 					:uiScale="uiScale"
 				/>
@@ -245,7 +231,6 @@ let MyBuilderFields = {
 		isTemplate:     { type:Boolean, required:true },                             // is template for fields
 		joinsIndexMap:  { type:Object,  required:false, default:() => {return {}} },
 		moduleId:       { type:String,  required:false, default:'' },
-		showShortcuts:  { type:Boolean, required:false, default:false },
 		template1n:     { type:Boolean, required:false, default:false },
 		templateIndex:  { type:Number,  required:false, default:-1 },
 		templateN1:     { type:Boolean, required:false, default:false },
@@ -412,9 +397,6 @@ let MyBuilderFields = {
 			
 			if(field.content === 'container')
 				out['container'] = 'container';
-			
-			if(!this.moveActive)
-				out['dragAnchor'] = 'dragAnchor';
 			
 			return out;
 		},

@@ -676,7 +676,6 @@
 			"readonly":"Lesend",
 			"required":"Benötigt",
 			"scale":"UI-Skalierung",
-			"shortcuts":"Shortcuts",
 			"sidebarField":"{NAME}: Feldeinstellungen",
 			"sidebarFieldColumns":"Spalten",
 			"sidebarFieldColumnSettings":"Spalteneinstellungen",

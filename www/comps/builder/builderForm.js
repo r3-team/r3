@@ -98,11 +98,6 @@ let MyBuilderForm = {
 							@trigger="open"
 							:caption="capGen.button.open"
 						/>
-						<my-button
-							@trigger="showShortcuts = !showShortcuts"
-							:caption="capApp.shortcuts"
-							:image="showShortcuts ? 'checkbox1.png' : 'checkbox0.png'"
-						/>
 						<my-button image="visible1.png"
 							@trigger="copyValueDialog(form.name,form.id,form.id)"
 							:caption="capGen.id"
@@ -153,7 +148,6 @@ let MyBuilderForm = {
 					:isTemplate="false"
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="form.moduleId"
-					:showShortcuts="showShortcuts"
 					:uiScale="uiScale"
 				/>
 			</div>
@@ -386,7 +380,6 @@ let MyBuilderForm = {
 							:joins="fieldShow.query.joins"
 							:isTemplate="false"
 							:moduleId="module.id"
-							:showShortcuts="showShortcuts"
 						/>
 						
 						<!-- column settings -->
@@ -422,7 +415,7 @@ let MyBuilderForm = {
 								@set="(...args) => fieldColumnPropertySet(args[0],args[1])"
 								:builderLanguage="builderLanguage"
 								:column="columnShow"
-								:displayOptions="true"
+								:hasCaptions="fieldShow.content === 'list'"
 								:joins="fieldShow.query.joins"
 								:moduleId="module.id"
 							/>
@@ -469,7 +462,6 @@ let MyBuilderForm = {
 			fieldIdShow:null,    // field ID which is shown in sidebar to be edited
 			fieldMoveList:null,  // fields list from which to move field (move by click)
 			fieldMoveIndex:0,    // index of field which to move (move by click)
-			showShortcuts:false,  // show caption inputs on non-container fields
 			showFunctions:false, // show form functions
 			showSidebar:true,    // show form Builder sidebar
 			showStates:false,    // show form states

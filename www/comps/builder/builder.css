@@ -472,7 +472,7 @@
 	padding:2px 2px 2px 6px;
 	line-height:24px;
 	display:flex;
-	flex-flow:row wrap;
+	flex-flow:row nowrap;
 	align-items:center;
 	overflow:visible;
 	color:var(--color-bg-font);
@@ -513,9 +513,17 @@
 	outline:3px solid var(--color-form-builder-selected);
 }
 .builder-drag-item .title{
+	flex:1 0 auto;
 	padding:0px 3px;
-	word-wrap:anywhere;
+	/*word-wrap:anywhere;*/
 	font-size:95%;
+	
+	/* auto cutting text */
+	width:100px;
+	min-width:0px;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	overflow:hidden;
 }
 .builder-drag-item .reference{
 	margin-right:6px;

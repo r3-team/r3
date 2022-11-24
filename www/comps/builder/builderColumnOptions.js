@@ -1,4 +1,5 @@
-import MyBuilderQuery from './builderQuery.js';
+import MyBuilderCaption from './builderCaption.js';
+import MyBuilderQuery   from './builderQuery.js';
 import {
 	getIndexAttributeIdsByJoins,
 	isAttributeFiles,
@@ -12,10 +13,13 @@ export {MyBuilderColumnOptions as default};
 
 let MyBuilderColumnOptions = {
 	name:'my-builder-column-options',
-	components:{MyBuilderQuery},
+	components:{
+		MyBuilderCaption,
+		MyBuilderQuery
+	},
 	template:`<div class="builder-column-options">
 		<table class="fullWidth default-inputs"><tbody>
-			<tr v-if="displayOptions">
+			<tr>
 				<td>{{ capApp.onMobile }}</td>
 				<td>
 					<my-bool
@@ -24,7 +28,17 @@ let MyBuilderColumnOptions = {
 					/>
 				</td>
 			</tr>
-			<tr v-if="displayOptions">
+			<tr v-if="hasCaptions">
+				<td>{{ capGen.title }}</td>
+				<td>
+					<my-builder-caption
+						@update:modelValue="set('captions',{columnTitle:$event})"
+						:language="builderLanguage"
+						:modelValue="column.captions.columnTitle"
+					/>
+				</td>
+			</tr>
+			<tr>
 				<td>{{ capApp.columnSize }}</td>
 				<td>
 					<input
@@ -40,7 +54,7 @@ let MyBuilderColumnOptions = {
 					/>
 				</td>
 			</tr>
-			<tr v-if="displayOptions">
+			<tr>
 				<td>{{ capApp.columnLength }}</td>
 				<td>
 					<input
@@ -56,7 +70,7 @@ let MyBuilderColumnOptions = {
 					/>
 				</td>
 			</tr>
-			<tr v-if="displayOptions">
+			<tr>
 				<td>{{ capApp.columnWrap }}</td>
 				<td>
 					<my-bool
@@ -65,7 +79,7 @@ let MyBuilderColumnOptions = {
 					/>
 				</td>
 			</tr>
-			<tr v-if="displayOptions">
+			<tr>
 				<td>{{ capApp.columnClipboard }}</td>
 				<td>
 					<my-bool
@@ -74,7 +88,7 @@ let MyBuilderColumnOptions = {
 					/>
 				</td>
 			</tr>
-			<tr v-if="displayOptions">
+			<tr>
 				<td>{{ capApp.columnBatch }}</td>
 				<td>
 					<input
@@ -90,7 +104,7 @@ let MyBuilderColumnOptions = {
 					/>
 				</td>
 			</tr>
-			<tr v-if="displayOptions">
+			<tr>
 				<td>{{ capApp.display }}</td>
 				<td>
 					<select
@@ -169,11 +183,11 @@ let MyBuilderColumnOptions = {
 		</tbody></table>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String, required:true },
-		column:         { type:Object, required:true },
-		displayOptions: { type:Boolean,required:true },
-		joins:          { type:Array,  required:false, default:() => [] },
-		moduleId:       { type:String, required:true }
+		builderLanguage:{ type:String,  required:true },
+		column:         { type:Object,  required:true },
+		hasCaptions:    { type:Boolean, required:true },
+		joins:          { type:Array,   required:false, default:() => [] },
+		moduleId:       { type:String,  required:true }
 	},
 	emits:['set'],
 	computed:{

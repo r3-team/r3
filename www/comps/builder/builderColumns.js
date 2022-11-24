@@ -19,25 +19,35 @@ export let MyBuilderColumns = {
 		:group="group"
 	>
 		<template #item="{element,index}">
-	   	 	<div class="column-wrap dragAnchor">
-				<div class="builder-drag-item column">
-					<img class="action edit clickable" src="images/edit.png"
+	   	 	<div class="builder-field column column-wrap dragAnchor">
+				<div class="builder-field-header">
+					<img class="clickable" src="images/edit.png"
 						v-if="!isTemplate"
 						@click="$emit('column-id-show',element.id)"
 						:class="{ selected:columnIdShow === element.id }"
 					/>
 					
+					<!-- column title -->
+					<div class="title" :class="{ 'no-hover':hasCaptions }">
+						{{ getTitle(element) }}
+					</div>
+					<my-builder-caption class="on-hover"
+						v-if="hasCaptions"
+						@update:modelValue="propertySet(index,'captions',{columnTitle:$event})"
+						:contentName="getTitle(element)"
+						:language="builderLanguage"
+						:modelValue="element.captions.columnTitle"
+					/>
+					
 					<!-- toggle: show on mobile -->
-					<img class="action edit clickable"
+					<img class="clickable on-hover"
 						v-if="!isTemplate && displayOptions"
 						@click="propertySet(index,'onMobile',!element.onMobile)"
 						:src="element.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
 						:title="capApp.onMobile"
 					/>
 					
-					<div class="title">{{ getTitle(element) }}</div>
-					
-					<div class="part clickable"
+					<div class="clickable on-hover"
 						v-if="!isTemplate && displayOptions"
 						@click="propertySet(index,'basis',toggleSize(element.basis,25))"
 						@click.prevent.right="propertySet(index,'basis',toggleSize(element.basis,-25))"
@@ -46,7 +56,7 @@ export let MyBuilderColumns = {
 						<span>{{ getFlexBasis(element.basis) }}</span>
 					</div>
 					
-					<div class="title clickable"
+					<div class="on-hover clickable"
 						v-if="!isTemplate && displayOptions"
 						@click="batchSet(index,1)"
 						@click.right.prevent="batchSet(index,-1)"
@@ -55,19 +65,9 @@ export let MyBuilderColumns = {
 						{{ element.batch === null ? 'B-' : 'B'+element.batch }}
 					</div>
 					
-					<img class="action end clickable" src="images/cancel.png"
+					<img class="end on-hover clickable" src="images/cancel.png"
 						v-if="!isTemplate"
 						@click="remove(index)"
-					/>
-				</div>
-				
-				<!-- caption inputs -->
-				<div v-if="hasCaptions && showShortcuts" class="captionInputs">
-				
-					<my-builder-caption
-						@update:modelValue="propertySet(index,'captions',{columnTitle:$event})"
-						:language="builderLanguage"
-						:modelValue="element.captions.columnTitle"
 					/>
 				</div>
 			</div>
@@ -82,8 +82,7 @@ export let MyBuilderColumns = {
 		hasCaptions:    { type:Boolean, required:true },
 		isTemplate:     { type:Boolean, required:true },
 		joins:          { type:Array,   required:false, default:() => [] },
-		moduleId:       { type:String,  required:true },
-		showShortcuts:  { type:Boolean, required:false, default:false }
+		moduleId:       { type:String,  required:true }
 	},
 	emits:['column-id-show','columns-set'],
 	computed:{
