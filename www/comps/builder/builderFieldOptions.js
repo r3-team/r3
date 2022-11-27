@@ -1,5 +1,6 @@
 import MyBuilderCaption                from './builderCaption.js';
 import MyBuilderCollectionInput        from './builderCollectionInput.js';
+import MyBuilderIconInput              from './builderIconInput.js';
 import MyBuilderOpenFormInput          from './builderOpenFormInput.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
 import {
@@ -269,11 +270,12 @@ let MyBuilderFieldOptions = {
 		MyBuilderCaption,
 		MyBuilderCollectionInput,
 		MyBuilderFieldOptionsChart,
+		MyBuilderIconInput,
 		MyBuilderOpenFormInput
 	},
 	template:`<div class="builder-field-options">
 		<table class="builder-table-vertical tight fullWidth default-inputs">
-			<tr v-if="field.content === 'button' || field.content === 'data' || field.content === 'header'">
+			<tr v-if="isButton || isData || isHeader">
 				<td>{{ capGen.title }}</td>
 				<td>
 					<my-builder-caption
@@ -283,7 +285,7 @@ let MyBuilderFieldOptions = {
 					/>
 				</td>
 			</tr>
-			<tr v-if="field.content === 'data'">
+			<tr v-if="isData">
 				<td>{{ capApp.fieldHelp }}</td>
 				<td>
 					<my-builder-caption
@@ -291,6 +293,17 @@ let MyBuilderFieldOptions = {
 						:language="builderLanguage"
 						:modelValue="field.captions.fieldHelp"
 						:multiLine="true"
+					/>
+				</td>
+			</tr>
+			<tr v-if="!isContainer">
+				<td>{{ capGen.icon }}</td>
+				<td>
+					<my-builder-icon-input
+						@input="set('iconId',$event)"
+						:icon-id-selected="field.iconId"
+						:module="module"
+						:title="capGen.icon"
 					/>
 				</td>
 			</tr>

@@ -83,11 +83,8 @@
 .builder-field.column{
 	background-color:var(--color-form-builder-columns);
 }
-.builder-field:hover{
-	/*outline:1px solid var(--color-accent1);*/
-}
 .builder-field.isTemplate{
-	margin:0px;
+	margin:0px 2px 2px 0px;
 	border-radius:0px;
 }
 .builder-field-header{
@@ -103,14 +100,18 @@
 .builder-field-header.dragAnchor{
 	cursor:move;
 }
-.builder-field-header .on-hover{
+.builder-field-header .on-hover,
+.builder-field-header .on-selected{
 	visibility:hidden;
 	display:none;
 }
+.builder-field-header .selected.on-selected,
+.builder-field-header:focus-within .on-hover,
 .builder-field-header:hover .on-hover{
 	visibility:visible;
 	display:block;
 }
+.builder-field-header:focus-within .no-hover,
 .builder-field-header:hover .no-hover{
 	visibility:hidden;
 	display:none;
@@ -148,22 +149,46 @@
 	/* nesting target inside container */
 	min-height:20px;
 	margin:0px 5px 0px 0px;
-	margin-top:0px;
 	padding:5px 0px 0px 2px;
 	display:flex;
 	flex:1 1 auto;
-	flex-wrap:wrap;
+	flex-flow:row nowrap;
 	overflow:auto;
-	border-radius:0px 2px 2px 0px;
+	border-radius:5px 2px 2px 0px;
 	background-color:var(--color-bg);
 	background-size:15px 15px;
 	background-image:radial-gradient(var(--color-form-builder-actions-bg) 1px, var(--color-bg) 1px);
 }
-.builder-field .container-nested.row{
-	flex-direction:row;
-}
 .builder-field .container-nested.column{
 	flex-direction:column;
+}
+.builder-field .container-nested.wrap{
+	flex-wrap:wrap;
+}
+.builder-field .container-nested.empty{
+	background-size:22px 100%;
+	background-image:linear-gradient(
+		90deg,
+		var(--color-bg) 20px,
+		var(--color-bg),
+		var(--color-form-builder-actions-bg),
+		var(--color-form-builder-actions-bg) 20px
+	);
+}
+.builder-field .container-nested.empty.column{
+	background-position:5px;
+	background-size:100% 22px;
+	background-image:linear-gradient(
+		0deg,
+		var(--color-bg) 20px,
+		var(--color-bg),
+		var(--color-form-builder-actions-bg),
+		var(--color-form-builder-actions-bg) 20px
+	);
+}
+.builder-field.column .batch-set{
+	font-weight:bold;
+	font-family:Consolas,Courier,monospace,cursive;
 }
 
 

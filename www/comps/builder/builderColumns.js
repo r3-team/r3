@@ -21,22 +21,20 @@ export let MyBuilderColumns = {
 		<template #item="{element,index}">
 	   	 	<div class="builder-field column column-wrap dragAnchor">
 				<div class="builder-field-header">
-					<img class="clickable" src="images/edit.png"
+					
+					<div class="batch-set clickable"
+						v-if="!isTemplate && displayOptions"
+						@click="batchSet(index,1)"
+						@click.right.prevent="batchSet(index,-1)"
+						:title="element.batch === null ? capApp.columnBatchHintNot : capApp.columnBatchHint.replace('{CNT}',element.batch)"
+					>
+						[{{ element.batch === null ? 'B-' : 'B'+element.batch }}]
+					</div>
+					
+					<img class="on-hover on-selected clickable" src="images/edit.png"
 						v-if="!isTemplate"
 						@click="$emit('column-id-show',element.id)"
 						:class="{ selected:columnIdShow === element.id }"
-					/>
-					
-					<!-- column title -->
-					<div class="title" :class="{ 'no-hover':hasCaptions }">
-						{{ getTitle(element) }}
-					</div>
-					<my-builder-caption class="on-hover"
-						v-if="hasCaptions"
-						@update:modelValue="propertySet(index,'captions',{columnTitle:$event})"
-						:contentName="getTitle(element)"
-						:language="builderLanguage"
-						:modelValue="element.captions.columnTitle"
 					/>
 					
 					<!-- toggle: show on mobile -->
@@ -56,14 +54,17 @@ export let MyBuilderColumns = {
 						<span>{{ getFlexBasis(element.basis) }}</span>
 					</div>
 					
-					<div class="on-hover clickable"
-						v-if="!isTemplate && displayOptions"
-						@click="batchSet(index,1)"
-						@click.right.prevent="batchSet(index,-1)"
-						:title="element.batch === null ? capApp.columnBatchHintNot : capApp.columnBatchHint.replace('{CNT}',element.batch)"
-					>
-						{{ element.batch === null ? 'B-' : 'B'+element.batch }}
+					<!-- column title -->
+					<div class="title" :class="{ 'no-hover':hasCaptions }">
+						{{ getTitle(element) }}
 					</div>
+					<my-builder-caption class="on-hover"
+						v-if="hasCaptions"
+						@update:modelValue="propertySet(index,'captions',{columnTitle:$event})"
+						:contentName="getTitle(element)"
+						:language="builderLanguage"
+						:modelValue="element.captions.columnTitle"
+					/>
 					
 					<img class="end on-hover clickable" src="images/cancel.png"
 						v-if="!isTemplate"

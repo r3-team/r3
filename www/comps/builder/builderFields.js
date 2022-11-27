@@ -42,32 +42,8 @@ let MyBuilderFields = {
 						F{{ typeof fieldIdMapRef[element.id] !== 'undefined' ? fieldIdMapRef[element.id] : '' }}
 					</span>
 					
-					<!-- action: edit field options -->
-					<img class="clickable" src="images/edit.png"
-						v-if="!isTemplate && !moveActive"
-						@click="$emit('field-id-show',element.id,'properties')"
-						:class="{ selected:fieldIdShow === element.id && fieldIdShowTab === 'properties' }"
-						:title="capApp.fieldOptions"
-					/>
-					
-					<!-- action: edit field content -->
-					<img class="clickable" src="images/database.png"
-						v-if="!isTemplate && !moveActive && getFieldHasQuery(element)"
-						@click="$emit('field-id-show',element.id,'content')"
-						:class="{ selected:fieldIdShow === element.id && fieldIdShowTab === 'content' }"
-						:title="capApp.contentField"
-					/>
-					
-					<!-- display: field is hidden -->
-					<img class="clickable" src="images/visible0.png"
-						v-if="!isTemplate && !moveActive && element.state === 'hidden'"
-						@click="fieldPropertySet(index,'state','default')"
-						:title="capApp.hidden"
-					/>
-					
-					<!-- container actions -->
+					<!-- container actions 1 -->
 					<template v-if="!isTemplate && !moveActive && element.content === 'container'">
-						
 						<img class="clickable"
 							@click="fieldPropertySet(index,'direction',toggleDir(element.direction))"
 							@click.prevent.right="fieldPropertySet(index,'direction',toggleDir(element.direction))"
@@ -81,7 +57,42 @@ let MyBuilderFields = {
 							:src="element.wrap ? 'images/wrap1.png' : 'images/wrap0.png'"
 							:title="capApp.flexWrap+': '+element.wrap"
 						/>
-						
+					</template>
+					
+					<!-- display: field is hidden -->
+					<img class="clickable" src="images/visible0.png"
+						v-if="!isTemplate && !moveActive && element.state === 'hidden'"
+						@click="fieldPropertySet(index,'state','default')"
+						:title="capApp.hidden"
+					/>
+					
+					<!-- action: edit field options -->
+					<img class="on-hover on-selected clickable" src="images/edit.png"
+						v-if="!isTemplate && !moveActive"
+						@click="$emit('field-id-show',element.id,'properties')"
+						:class="{ selected:fieldIdShow === element.id && fieldIdShowTab === 'properties' }"
+						:title="capApp.fieldOptions"
+					/>
+					
+					<!-- action: edit field content -->
+					<img class="on-hover on-selected clickable" src="images/database.png"
+						v-if="!isTemplate && !moveActive && getFieldHasQuery(element)"
+						@click="$emit('field-id-show',element.id,'content')"
+						:class="{ selected:fieldIdShow === element.id && fieldIdShowTab === 'content' }"
+						:title="capApp.contentField"
+					/>
+					
+					<!-- action: move this field -->
+					<img class="mover"
+						v-if="!moveActive || fieldMoveList[fieldMoveIndex].id === element.id || !isTemplate"
+						@click="moveByClick(fields,index,false)"
+						:class="{ 'on-hover':!moveActive, selected:moveActive && fieldMoveList[fieldMoveIndex].id === element.id }"
+						:src="!moveActive ? 'images/arrowRight.png' : 'images/arrowDown.png'"
+						:title="!moveActive ? capApp.fieldMoveSource : capApp.fieldMoveTarget"
+					/>
+					
+					<!-- container actions 2 -->
+					<template v-if="!isTemplate && !moveActive && element.content === 'container'">
 						<div class="clickable on-hover"
 							@click="fieldPropertySet(index,'basis',toggleSize(element.basis,50,300))"
 							@click.prevent.right="fieldPropertySet(index,'basis',toggleSize(element.basis,-50))"
@@ -106,15 +117,6 @@ let MyBuilderFields = {
 							<span>S{{ element.shrink }}</span>
 						</div>
 					</template>
-					
-					<!-- action: move this field -->
-					<img class="mover"
-						v-if="!moveActive || fieldMoveList[fieldMoveIndex].id === element.id || !isTemplate"
-						@click="moveByClick(fields,index,false)"
-						:class="{ 'on-hover':!moveActive, selected:moveActive && fieldMoveList[fieldMoveIndex].id === element.id }"
-						:src="!moveActive ? 'images/arrowRight.png' : 'images/arrowDown.png'"
-						:title="!moveActive ? capApp.fieldMoveSource : capApp.fieldMoveTarget"
-					/>
 					
 					<!-- action: list data SQL preview -->
 					<img class="clickable on-hover" src="images/code.png"
@@ -194,7 +196,7 @@ let MyBuilderFields = {
 					@field-remove="$emit('field-remove',$event)"
 					@field-move-store="$emit('field-move-store',$event)"
 					:builderLanguage="builderLanguage"
-					:class="element.direction"
+					:class="{ column:element.direction === 'column', wrap:element.wrap, empty:element.fields.length === 0 }"
 					:columnIdShow="columnIdShow"
 					:dataFields="dataFields"
 					:fieldCounter="fieldCounter"

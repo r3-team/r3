@@ -75,6 +75,7 @@
 		"category":"Kategorie",
 		"date":"Datum",
 		"description":"Beschreibung",
+		"displayed":"Angezeigt",
 		"errorTitle":"Fehler",
 		"files":"Dateien",
 		"filters":"Filter",

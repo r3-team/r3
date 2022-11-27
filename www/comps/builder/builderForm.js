@@ -367,7 +367,8 @@ let MyBuilderForm = {
 						/>
 						
 						<!-- columns for query fields -->
-						<h3>{{ capGen.active }}</h3>
+						<br />
+						<h3>{{ capGen.displayed }}</h3>
 						<my-builder-columns class="sidebar"
 							@columns-set="fieldPropertySet('columns',$event)"
 							@column-id-show="setFieldShow(fieldIdShow,$event,'content')"
