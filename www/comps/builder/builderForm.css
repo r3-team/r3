@@ -78,7 +78,7 @@
 	background-color:var(--color-form-builder-container);
 	
 	/* to overwrite bad size inputs */
-	min-width:200px !important;
+	min-width:50px !important;
 }
 .builder-field.column{
 	background-color:var(--color-form-builder-columns);
@@ -100,6 +100,30 @@
 .builder-field-header.dragAnchor{
 	cursor:move;
 }
+.builder-field-header .break-out-wrap{
+	flex:1 1 auto;
+	height:100%;
+	position:relative;
+	z-index:var(--z-index-builder-break-out);
+}
+.builder-field-header .break-out{
+	height:100%;
+	min-width:100%;
+	position:absolute;
+	padding:1px 1px 1px 5px;
+	top:-2px;
+	left:-2px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:4px;
+	border:1px solid var(--color-border);
+	border-radius:5px;
+	background-color:var(--color-form-builder-actions);
+}
+.builder-field-header.container .break-out{
+	background-color:var(--color-form-builder-container);
+}
 .builder-field-header .on-hover,
 .builder-field-header .on-selected{
 	visibility:hidden;
@@ -116,22 +140,22 @@
 	visibility:hidden;
 	display:none;
 }
-.builder-field-header img{
+.builder-field-header img.action{
 	width:24px;
 	padding:1px;
 	filter:var(--image-filter);
 }
-.builder-field-header img:hover{
+.builder-field-header img.action:hover{
 	width:26px;
 	padding:0px;
 }
-.builder-field-header img.mover{
+.builder-field-header img.action.mover{
 	cursor:pointer;
 }
-.builder-field-header img.selected{
+.builder-field-header img.action.selected{
 	outline:3px solid var(--color-form-builder-selected);
 }
-.builder-field-header img.end{
+.builder-field-header img.action.end{
 	margin:0px 0px 0px auto;
 }
 .builder-field-header .title{
@@ -139,7 +163,7 @@
 	padding:0px 3px;
 	
 	/* auto cutting text */
-	width:100px;
+	width:10px;
 	min-width:0px;
 	text-overflow:ellipsis;
 	white-space:nowrap;
@@ -153,7 +177,6 @@
 	display:flex;
 	flex:1 1 auto;
 	flex-flow:row nowrap;
-	overflow:auto;
 	border-radius:5px 2px 2px 0px;
 	background-color:var(--color-bg);
 	background-size:15px 15px;
@@ -185,6 +208,10 @@
 		var(--color-form-builder-actions-bg),
 		var(--color-form-builder-actions-bg) 20px
 	);
+}
+.builder-field .field-ref{
+	font-weight:bold;
+	font-family:Consolas,Courier,monospace,cursive;
 }
 .builder-field.column .batch-set{
 	font-weight:bold;

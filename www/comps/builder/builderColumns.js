@@ -31,14 +31,14 @@ export let MyBuilderColumns = {
 						[{{ element.batch === null ? 'B-' : 'B'+element.batch }}]
 					</div>
 					
-					<img class="on-hover on-selected clickable" src="images/edit.png"
+					<img class="on-hover on-selected action clickable" src="images/edit.png"
 						v-if="!isTemplate"
 						@click="$emit('column-id-show',element.id)"
 						:class="{ selected:columnIdShow === element.id }"
 					/>
 					
 					<!-- toggle: show on mobile -->
-					<img class="clickable on-hover"
+					<img class="action clickable on-hover"
 						v-if="!isTemplate && displayOptions"
 						@click="propertySet(index,'onMobile',!element.onMobile)"
 						:src="element.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
@@ -66,7 +66,7 @@ export let MyBuilderColumns = {
 						:modelValue="element.captions.columnTitle"
 					/>
 					
-					<img class="end on-hover clickable" src="images/cancel.png"
+					<img class="action end on-hover clickable" src="images/cancel.png"
 						v-if="!isTemplate"
 						@click="remove(index)"
 					/>

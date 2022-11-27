@@ -23,13 +23,7 @@ let MyBuilderIconInput = {
 				<div class="contentBox">
 					<div class="top lower">
 						<div class="area">
-							<img class="icon"
-								v-if="iconSelected"
-								:src="srcBase64(iconSelected.file)"
-							/>
-							<img class="icon" src="images/noPic.png"
-								v-if="!iconSelected"
-							/>
+							<h1 class="title">{{ capGen.icon }}</h1>
 						</div>
 						<div class="area default-inputs">
 							<input v-model="filter" :placeholder="capGen.button.filter" />
