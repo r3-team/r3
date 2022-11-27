@@ -661,15 +661,6 @@
 	background-image:linear-gradient(var(--color-form-builder-actions-bg) 1px, transparent 1px),
 		linear-gradient(to right, var(--color-form-builder-actions-bg) 1px, var(--color-bg) 1px);
 }
-.builder-columns.sidebar{
-	flex:1 1 auto;
-	max-width:500px;
-	min-height:60px;
-	max-height:280px;
-	box-shadow:1px 1px 4px var(--color-shade);
-	border-bottom:2px solid var(--color-border);
-	border-radius:5px;
-}
 .builder-columns .column-wrap{
 	width:100%;
 	white-space:nowrap;

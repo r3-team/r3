@@ -19,7 +19,7 @@ export let MyBuilderColumns = {
 		:group="group"
 	>
 		<template #item="{element,index}">
-	   	 	<div class="builder-field column column-wrap dragAnchor">
+	   	 	<div class="builder-field column column-wrap dragAnchor" :class="{ selected:columnIdShow === element.id }">
 				<div class="builder-field-header">
 					
 					<div class="batch-set clickable"
@@ -55,11 +55,11 @@ export let MyBuilderColumns = {
 					</div>
 					
 					<!-- column title -->
-					<div class="title" :class="{ 'no-hover':hasCaptions }">
+					<div class="title" :class="{ 'no-hover':hasCaptions && displayOptions }" :title="getTitle(element)">
 						{{ getTitle(element) }}
 					</div>
 					<my-builder-caption class="on-hover"
-						v-if="hasCaptions"
+						v-if="hasCaptions && displayOptions"
 						@update:modelValue="propertySet(index,'captions',{columnTitle:$event})"
 						:contentName="getTitle(element)"
 						:language="builderLanguage"

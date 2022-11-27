@@ -160,7 +160,9 @@ let MyBuilderForm = {
 				<div class="area">
 					<img v-if="!fieldShow" class="icon" src="images/form.png" />
 					<h1 v-if="!fieldShow">{{ capApp.sidebarForm }}</h1>
-					<h1 v-if="fieldShow" class="selected">{{ capApp.sidebarField.replace('{NAME}','F'+fieldIdMapRef[fieldIdShow]) }}</h1>
+					<h1 v-if="fieldShow" class="selected-ref">
+						{{ capApp.sidebarField.replace('{NAME}','F'+fieldIdMapRef[fieldIdShow]) }}
+					</h1>
 				</div>
 				<div class="area">
 					<my-button image="cancel.png"
@@ -357,35 +359,41 @@ let MyBuilderForm = {
 						<!-- column templates query fields -->
 						<br />
 						<h2>{{ capApp.sidebarFieldColumns }}</h2>
-						<h3>{{ capGen.available }}</h3>
-						<my-builder-column-templates class="sidebar"
-							:builderLanguage="builderLanguage"
-							:columns="fieldShow.columns"
-							:groupName="fieldIdShow+'_columns'"
-							:joins="fieldShow.query.joins"
-							:moduleId="module.id"
-						/>
 						
-						<!-- columns for query fields -->
-						<br />
-						<h3>{{ capGen.displayed }}</h3>
-						<my-builder-columns class="sidebar"
-							@columns-set="fieldPropertySet('columns',$event)"
-							@column-id-show="setFieldShow(fieldIdShow,$event,'content')"
-							:builderLanguage="builderLanguage"
-							:columnIdShow="columnIdShow"
-							:columns="fieldShow.columns"
-							:displayOptions="true"
-							:groupName="fieldIdShow+'_columns'"
-							:hasCaptions="fieldShow.content === 'list'"
-							:joins="fieldShow.query.joins"
-							:isTemplate="false"
-							:moduleId="module.id"
-						/>
+						<div class="columns">
+							<div class="side">
+								<h3>{{ capGen.available }}</h3>
+								<my-builder-column-templates class="shade"
+									:builderLanguage="builderLanguage"
+									:columns="fieldShow.columns"
+									:groupName="fieldIdShow+'_columns'"
+									:joins="fieldShow.query.joins"
+									:moduleId="module.id"
+								/>
+							</div>
+							
+							<div class="side">
+								<!-- columns for query fields -->
+								<h3>{{ capGen.displayed }}</h3>
+								<my-builder-columns class="shade"
+									@columns-set="fieldPropertySet('columns',$event)"
+									@column-id-show="setFieldShow(fieldIdShow,$event,'content')"
+									:builderLanguage="builderLanguage"
+									:columnIdShow="columnIdShow"
+									:columns="fieldShow.columns"
+									:displayOptions="false"
+									:groupName="fieldIdShow+'_columns'"
+									:hasCaptions="fieldShow.content === 'list'"
+									:joins="fieldShow.query.joins"
+									:isTemplate="false"
+									:moduleId="module.id"
+								/>
+							</div>
+						</div>
 						
 						<!-- column settings -->
-						<div class="column-options" v-if="columnShow">
-							<h3>{{ capApp.sidebarFieldColumnSettings }}</h3>
+						<div class="column-options" ref="columnOptions" v-if="columnShow">
+							<h3 class="selected-ref">{{ capApp.sidebarFieldColumnSettings }}</h3>
 							
 							<my-builder-query
 								v-if="columnShow.subQuery"
@@ -1027,6 +1035,9 @@ let MyBuilderForm = {
 			this.tabTargetField = tab;
 			this.fieldIdShow    = fieldId;
 			this.columnIdShow   = columnId;
+			
+			if(columnId !== null)
+				this.$nextTick(() => this.$refs.columnOptions.scrollIntoView());
 		},
 		
 		// backend calls

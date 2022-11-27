@@ -214,7 +214,7 @@ let MyBuilderFormStates = {
 				:caption="capGen.button.add"
 			/>
 			
-			<div class="row centered default-inputs">
+			<div class="row centered default-inputs" v-if="states.length !== 0">
 				<input class="short"
 					v-model="filter"
 					:placeholder="capGen.button.filter"

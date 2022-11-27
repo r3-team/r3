@@ -18,7 +18,7 @@ let MyBuilderColumnOptions = {
 		MyBuilderQuery
 	},
 	template:`<div class="builder-column-options">
-		<table class="fullWidth default-inputs"><tbody>
+		<table class="builder-table-vertical tight fullWidth default-inputs">
 			<tr>
 				<td>{{ capApp.onMobile }}</td>
 				<td>
@@ -180,7 +180,7 @@ let MyBuilderColumnOptions = {
 					</select>
 				</td>
 			</tr>
-		</tbody></table>
+		</table>
 	</div>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },

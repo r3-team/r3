@@ -68,6 +68,13 @@ let MyBuilderFields = {
 						:title="capApp.fieldIcon"
 					/>
 					
+					<!-- display: field is hidden -->
+					<img class="action clickable" src="images/visible0.png"
+						v-if="!isTemplate && !moveActive && element.state === 'hidden'"
+						@click="fieldPropertySet(index,'state','default')"
+						:title="capApp.hidden"
+					/>
+					
 					<!-- action: edit field options -->
 					<img class="action clickable on-hover on-selected" src="images/edit.png"
 						v-if="!isTemplate && !moveActive"
@@ -93,25 +100,15 @@ let MyBuilderFields = {
 						:title="!moveActive ? capApp.fieldMoveSource : capApp.fieldMoveTarget"
 					/>
 					
-					<template v-if="!isTemplate">
-					
-						<!-- display: field is hidden -->
-						<img class="action clickable" src="images/visible0.png"
-							v-if="!moveActive && element.state === 'hidden'"
-							@click="fieldPropertySet(index,'state','default')"
-							:title="capApp.hidden"
-						/>
-						
-						<!-- action: move target inside container -->
-						<img class="action clickable" src="images/arrowInside.png"
-							v-if="element.content === 'container' && moveActive && fieldMoveList[fieldMoveIndex].id !== element.id"
-							@click="moveByClick(element.fields,0,true)"
-							:title="capApp.fieldMoveInside"
-						/>
-					</template>
+					<!-- action: move target inside container -->
+					<img class="action clickable" src="images/arrowInside.png"
+						v-if="!isTemplate && element.content === 'container' && moveActive && fieldMoveList[fieldMoveIndex].id !== element.id"
+						@click="moveByClick(element.fields,0,true)"
+						:title="capApp.fieldMoveInside"
+					/>
 					
 					<!-- mouse over break out actions -->
-					<div v-if="!isTemplate && !moveActive" class="break-out-wrap on-hover on-selected">
+					<div v-if="!isTemplate && !moveActive" class="break-out-wrap on-hover">
 						<div class="break-out shade">
 							
 							<!-- toggle: show on mobile -->
@@ -406,6 +403,9 @@ let MyBuilderFields = {
 			
 			if(field.content === 'container')
 				out['container'] = 'container';
+			
+			if(field.id === this.fieldIdShow)
+				out['selected'] = 'selected';
 			
 			return out;
 		},
