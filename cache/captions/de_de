@@ -73,6 +73,7 @@
 		"available":"Verfügbar",
 		"busy":"Arbeitet - Zum Abbrechen hier klicken",
 		"category":"Kategorie",
+		"content":"Inhalt",
 		"date":"Datum",
 		"description":"Beschreibung",
 		"displayed":"Angezeigt",
@@ -114,6 +115,7 @@
 		"resultsOf":"/ {CNT}",
 		"role":"Rolle",
 		"selected":"Ausgewählt",
+		"settings":"Einstellungen",
 		"size":"Größe",
 		"status":"Status",
 		"title":"Titel",
@@ -690,7 +692,6 @@
 			"stateRequired":"benötigt",
 			"subQuery":"Sub-Query",
 			"subQueryAttribute":"Attribut",
-			"tabContent":"Inhalt",
 			"tabFunctions":"Funktionen ({CNT})",
 			"tabStates":"Zustände ({CNT})",
 			"title":"Formulare",
@@ -700,7 +701,6 @@
 			"button":{
 				"addNew":"NEW-Präfix",
 				"addOld":"OLD-Präfix",
-				"addSchedule":"Zeitplan hinzufügen",
 				"details":"Details",
 				"template":"Vorlage"
 			},
@@ -818,8 +818,9 @@
 			"schedulesItem":"{CNT} Zeitpläne",
 			"title":"Funktionen",
 			"titleJs":"Frontend-Funktionen ({CNT})",
+			"titleJsOne":"Frontend-Funktionen \"{NAME}\"",
 			"titlePg":"Backend-Funktionen ({CNT})",
-			"titleOne":"Funktionstitel",
+			"titlePgOne":"Backend-Funktionen \"{NAME}\"",
 			"value":"VALUE"
 		},
 		"icon":{
@@ -906,6 +907,9 @@
 			"form":"Neues Formular",
 			"module":"Neue Anwendung",
 			"options":"Weitere Optionen",
+			"pgFunction":"Neue Backend-Funktion",
+			"pgFunctionTrigger":"Trigger",
+			"pgFunctionTriggerHint":"Macht aus dieser Backend-Funktion einen Trigger. Ein Trigger kann in einer Relation referenziert werden, um auf Datenbank-Ereignisse zu reagieren, wie z. B. wenn Datensätze erstellt, aktualisiert oder gelöscht werden. Diese Einstellung kann nachträglich nicht geändert werden.",
 			"relation":"Neue Relation",
 			"relationEncryption":"Ende-zu-Ende-Verschlüsselung",
 			"relationEncryptionHint":"Erlaubt Ende-zu-Ende-Verschlüsselung (E2EE) für Attribute auf dieser Relation. E2EE hat Vor- und Nachteile - die Builder-Dokumentation sollte hierzu gelesen werden. Diese Einstellung kann nachträglich nicht geändert werden.",

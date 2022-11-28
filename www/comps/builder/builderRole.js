@@ -228,6 +228,16 @@ let MyBuilderRole = {
 				<img class="icon" src="images/personMultiple.png" />
 				<h1 class="title">{{ capApp.titleOne.replace('{NAME}',name) }}</h1>
 			</div>
+			<div class="area nowrap">
+				<my-builder-caption class="title"
+					v-model="captions.roleTitle"
+					:contentName="capGen.title"
+					:language="builderLanguage"
+					:longInput="true"
+					:readonly="readonly"
+				/>
+			</div>
+			<div class="area nowrap"></div>
 		</div>
 		<div class="top lower">
 			<div class="area">
@@ -242,7 +252,7 @@ let MyBuilderRole = {
 					:caption="capGen.button.refresh"
 				/>
 				<my-button image="visible1.png"
-					@trigger="copyValueDialog(role.name,role.id,role.id)"
+					@trigger="copyValueDialog(name,id,id)"
 					:caption="capGen.id"
 				/>
 				<my-button image="delete.png"

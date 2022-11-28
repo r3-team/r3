@@ -1,30 +1,136 @@
 import MyBuilderCaption               from './builderCaption.js';
 import {MyBuilderFunctionPlaceholder} from './builderFunctions.js';
+import MyTabs                         from '../tabs.js';
+import {
+	copyValueDialog,
+	getNilUuid
+} from '../shared/generic.js';
 import {
 	getDependentModules,
 	getPgFunctionTemplate
 } from '../shared/builder.js';
 export {MyBuilderPgFunction as default};
 
+let MyBuilderPgFunctionItemSchedule = {
+	name:'my-builder-pg-function-item-schedule',
+	template:`<div class="schedule-line">
+		
+		<my-button image="cancel.png"
+			@trigger="$emit('remove')"
+			:active="!readonly"
+			:naked="true"
+		/>
+		
+		<!-- interval at which to run -->
+		<span>{{ capApp.runOnce }}</span>
+		<div><my-bool v-model="runOnce" :readonly="readonly" /></div>
+		
+		<template v-if="intervalType !== 'once'">
+			<span>{{ capApp.intervalEvery }}</span>
+			<input class="short" v-model.number="intervalValue" :disabled="readonly" />
+			
+			<select class="short" v-model="intervalType" :disabled="readonly">
+				<option value="seconds">{{ capApp.option.intervalSeconds }}</option>
+				<option value="minutes">{{ capApp.option.intervalMinutes }}</option>
+				<option value="hours"  >{{ capApp.option.intervalHours   }}</option>
+				<option value="days"   >{{ capApp.option.intervalDays    }}</option>
+				<option value="weeks"  >{{ capApp.option.intervalWeeks   }}</option>
+				<option value="months" >{{ capApp.option.intervalMonths  }}</option>
+				<option value="years"  >{{ capApp.option.intervalYears   }}</option>
+			</select>
+		</template>
+		
+		<!-- for weeks/months/years scheduler - on which day to run -->
+		<template v-if="['weeks','months','years'].includes(intervalType)">
+			<span v-if="intervalType === 'weeks'" >{{ capApp.intervalAtDayForWeeks  }}</span>
+			<span v-if="intervalType === 'months'">{{ capApp.intervalAtDayForMonths }}</span>
+			<span v-if="intervalType === 'years'" >{{ capApp.intervalAtDayForYears }}</span>
+			<input class="short" v-model.number="atDay" :disabled="readonly" placeholder="DD" />
+		</template>
+		
+		<!-- target time, at which hour:minute:second to run -->
+		<template v-if="['days','weeks','months','years'].includes(intervalType)">
+			<span>{{ capApp.intervalAtTime }}</span>
+			<input class="short" placeholder="HH" :disabled="readonly" v-model.number="atHour" />
+			<div>:</div>
+			<input class="short" placeholder="MM" :disabled="readonly" v-model.number="atMinute" />
+			<div>:</div>
+			<input class="short" placeholder="SS" :disabled="readonly" v-model.number="atSecond" />
+		</template>
+	</div>`,
+	props:{
+		modelValue:{ type:Object,  required:true },
+		readonly:  { type:Boolean, required:true }
+	},
+	emits:['remove','update:modelValue'],
+	computed:{
+		// inputs
+		atDay:{
+			get()  { return this.modelValue.atDay; },
+			set(v) { this.update('atDay',v); }
+		},
+		atHour:{
+			get()  { return this.modelValue.atHour; },
+			set(v) { this.update('atHour',v); }
+		},
+		atMinute:{
+			get()  { return this.modelValue.atMinute; },
+			set(v) { this.update('atMinute',v); }
+		},
+		atSecond:{
+			get()  { return this.modelValue.atSecond; },
+			set(v) { this.update('atSecond',v); }
+		},
+		intervalType:{
+			get()  { return this.modelValue.intervalType; },
+			set(v) { this.update('intervalType',v); }
+		},
+		intervalValue:{
+			get()  { return this.modelValue.intervalValue; },
+			set(v) { this.update('intervalValue',v); }
+		},
+		runOnce:{
+			get()  { return this.intervalType === 'once'; },
+			set(v) {
+				if(v) this.update('intervalType','once');
+				else  this.update('intervalType','days');
+			}
+		},
+		
+		// stores
+		capApp:(s) => s.$store.getters.captions.builder.function
+	},
+	methods:{
+		update(name,value) {
+			let v = JSON.parse(JSON.stringify(this.modelValue));
+			v[name] = value;
+			this.$emit('update:modelValue',v);
+		}
+	}
+};
+
 let MyBuilderPgFunction = {
 	name:'my-builder-pg-function',
 	components:{
 		MyBuilderCaption,
-		MyBuilderFunctionPlaceholder
+		MyBuilderFunctionPlaceholder,
+		MyBuilderPgFunctionItemSchedule,
+		MyTabs
 	},
 	template:`<div class="builder-function">
-		
 		<div class="contentBox" v-if="pgFunction">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/code.png" />
+					<h1 class="title">{{ capApp.titlePgOne.replace('{NAME}',name) }}</h1>
+				</div>
+				<div class="area">
 					<my-builder-caption
 						v-model="captions.pgFunctionTitle"
-						:contentName="capApp.titleOne"
+						:contentName="capGen.title"
 						:language="builderLanguage"
 						:longInput="true"
 					/>
-					<my-button :active="false" :caption="pgFunction.name" :naked="true "/>
 				</div>
 				<div class="area">
 					<my-button
@@ -45,33 +151,162 @@ let MyBuilderPgFunction = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
-					<my-button
-						@trigger="showHeader = !showHeader"
-						:caption="capApp.button.details"
-						:image="showHeader ? 'visible1.png' : 'visible0.png'"
+					<my-button image="visible1.png"
+						@trigger="copyValueDialog(name,id,id)"
+						:caption="capGen.id"
 					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
 						:caption="capGen.preview"
-						:image="showPreview ? 'visible1.png' : 'visible0.png'"
+						:image="showPreview ? 'checkbox1.png' : 'checkbox0.png'"
+					/>
+					<my-button image="delete.png"
+						@trigger="delAsk"
+						:active="!readonly"
+						:cancel="true"
+						:caption="capGen.button.delete"
+						:captionTitle="capGen.button.delete"
 					/>
 				</div>
 			</div>
 			
 			<div class="content no-padding function-details default-inputs">
-				<div class="header" v-if="showHeader">
-					<table>
+				
+				<!-- function body input -->
+				<textarea class="input"
+					v-if="!showPreview"
+					v-model="codeFunction"
+					@click="insertEntitySelected"
+					@keydown.tab.prevent="addTab"
+					:disabled="readonly"
+					:placeholder="capApp.code"
+				></textarea>
+				
+				<!-- function body preview -->
+				<textarea class="input" disabled="disabled"
+					v-if="showPreview"
+					v-model="preview"
+				></textarea>
+			</div>
+		</div>
+		
+		<!-- sidebar -->
+		<div class="contentBox right" v-if="pgFunction && showSidebar">
+			<div class="top lower">
+				<div class="area nowrap">
+					<h1 class="title">{{ capGen.settings }}</h1>
+				</div>
+			</div>
+			
+			<my-tabs
+				v-model="tabTarget"
+				:entries="['content','properties']"
+				:entriesIcon="['images/database.png','images/edit.png']"
+				:entriesText="[capApp.placeholders,capGen.properties]"
+			/>
+			
+			<div class="content padding default-inputs">
+				
+				<template v-if="tabTarget === 'content'">
+					<div class="row">
+						<my-button
+							v-if="isTrigger"
+							@trigger="addNew = !addNew"
+							:active="!readonly"
+							:caption="capApp.button.addNew"
+							:image="addNew ? 'checkbox1.png' : 'checkbox0.png'"
+						/>
+						<my-button
+							v-if="isTrigger"
+							@trigger="addOld = !addOld"
+							:active="!readonly"
+							:caption="capApp.button.addOld"
+							:image="addOld ? 'checkbox1.png' : 'checkbox0.png'"
+						/>
+						<my-button image="refresh.png"
+							@trigger="codeFunction = getPgFunctionTemplate()"
+							:active="!readonly"
+							:caption="capApp.button.template"
+						/>
+					</div>
+					<br />
+					
+					<div class="message" v-html="capApp.entityInput"></div>
+					
+					<h2>{{ capApp.placeholdersModules }}</h2>
+					<div class="placeholders modules"
+						v-for="mod in getDependentModules(module,modules).filter(v => v.relations.length !== 0 || v.pgFunctions.length !== 0)"
+						:key="mod.id"
+					>
+						<my-button
+							@trigger="toggleModule(mod.id)"
+							:caption="mod.name"
+							:image="moduleIdsOpen.includes(mod.id) ? 'triangleDown.png' : 'triangleRight.png'"
+							:naked="true"
+						/>
+						
+						<template v-if="moduleIdsOpen.includes(mod.id)">
+							
+							<!-- relations & attributes -->
+							<div class="placeholders relations" v-for="rel in mod.relations" :key="rel.id">
+								
+								<my-builder-function-placeholder
+									@toggle="toggleEntity('relation',rel.id)"
+									:builderLanguage="builderLanguage"
+									:name="rel.name"
+									:selected="entitySelected === 'relation' && entitySelectedId === rel.id"
+								/>
+								
+								<my-builder-function-placeholder
+									v-for="atr in rel.attributes"
+									@toggle="toggleEntity('attribute',atr.id)"
+									:builderLanguage="builderLanguage"
+									:key="atr.id"
+									:naked="true"
+									:name="atr.name"
+									:selected="entitySelected === 'attribute' && entitySelectedId === atr.id"
+								/>
+							</div>
+							
+							<!-- PG functions -->
+							<div class="placeholders functions">
+								<my-builder-function-placeholder
+									v-for="f in mod.pgFunctions.filter(v => !v.isTrigger)"
+									@show-help="showHelp(f.name+'()',$event)"
+									@toggle="toggleEntity('pgFunction',f.id)"
+									:builderLanguage="builderLanguage"
+									:functionObj="f"
+									:functionType="'pg'"
+									:key="f.id"
+									:name="f.name"
+									:selected="entitySelected === 'pgFunction' && entitySelectedId === f.id"
+								/>
+							</div>
+						</template>
+					</div>
+					
+					<!-- instance functions -->
+					<h2>{{ capApp.placeholdersInstance }}</h2>
+					
+					<div class="placeholders functions">
+						<my-builder-function-placeholder
+							v-for="f in instanceFunctionIds"
+							@show-help="showHelp(f+'()',$event)"
+							@toggle="toggleEntity('instanceFunction',f)"
+							:builderLanguage="builderLanguage"
+							:functionHelp="capApp.helpPg[f]"
+							:key="f"
+							:name="f"
+							:selected="entitySelected === 'instanceFunction' && entitySelectedId === f"
+						/>
+					</div>
+				</template>
+				
+				<template v-if="tabTarget === 'properties'">
+					<table class="builder-table-vertical tight fullWidth">
 						<tr>
-							<td>{{ capApp.codeArgs }}</td>
-							<td><input class="long" v-model="codeArgs" :disabled="isTrigger || readonly" placeholder="-" /></td>
-						</tr>
-						<tr>
-							<td>{{ capApp.codeReturns }}</td>
-							<td><input v-model="codeReturns" :disabled="isTrigger || readonly" placeholder="-" /></td>
-						</tr>
-						<tr>
-							<td>{{ capApp.isFrontendExec }}</td>
-							<td><my-bool v-model="isFrontendExec" :readonly="isTrigger || readonly" /></td>
+							<td>{{ capGen.name }}</td>
+							<td><input v-model="name" :disabled="readonly" /></td>
 						</tr>
 						<tr>
 							<td>{{ capGen.title }}</td>
@@ -94,128 +329,42 @@ let MyBuilderPgFunction = {
 								/>
 							</td>
 						</tr>
+						<tr>
+							<td>{{ capApp.codeArgs }}</td>
+							<td><textarea v-model="codeArgs" :disabled="isTrigger || readonly" placeholder="-"></textarea></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.codeReturns }}</td>
+							<td><input v-model="codeReturns" :disabled="isTrigger || readonly" placeholder="-" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.isFrontendExec }}</td>
+							<td><my-bool v-model="isFrontendExec" :readonly="isTrigger || readonly" /></td>
+						</tr>
+						<tr>
+							<td>
+								<div class="column">
+									<span>{{ capApp.schedules }}</span>
+									<my-button image="add.png"
+										@trigger="addSchedule"
+										:active="!readonly"
+										:caption="capGen.button.add"
+										:naked="true"
+									/>
+								</div>
+							</td>
+							<td>
+								<my-builder-pg-function-item-schedule
+									v-for="(s,i) in schedules"
+									v-model="schedules[i]"
+									@remove="schedules.splice(i,1)"
+									:key="i"
+									:readonly="readonly"
+								/>
+							</td>
+						</tr>
 					</table>
-				</div>
-				
-				<!-- function body input -->
-				<textarea class="input"
-					v-if="!showPreview"
-					v-model="codeFunction"
-					@click="insertEntitySelected"
-					@keydown.tab.prevent="addTab"
-					:disabled="readonly"
-					:placeholder="capApp.code"
-				></textarea>
-				
-				<!-- function body preview -->
-				<textarea class="input" disabled="disabled"
-					v-if="showPreview"
-					v-model="preview"
-				></textarea>
-			</div>
-		</div>
-		
-		<div class="contentBox right" v-if="pgFunction && showSidebar">
-			<div class="top">
-				<div class="area nowrap">
-					<img class="icon" src="images/database.png" />
-					<h1 class="title">{{ capApp.placeholders }}</h1>
-				</div>
-			</div>
-			<div class="top lower">
-				<div class="area nowrap">
-					<my-button
-						v-if="isTrigger"
-						@trigger="addNew = !addNew"
-						:active="!readonly"
-						:caption="capApp.button.addNew"
-						:image="addNew ? 'checkbox1.png' : 'checkbox0.png'"
-					/>
-					<my-button
-						v-if="isTrigger"
-						@trigger="addOld = !addOld"
-						:active="!readonly"
-						:caption="capApp.button.addOld"
-						:image="addOld ? 'checkbox1.png' : 'checkbox0.png'"
-					/>
-					<my-button image="refresh.png"
-						@trigger="codeFunction = getPgFunctionTemplate()"
-						:active="!readonly"
-						:caption="capApp.button.template"
-					/>
-				</div>
-			</div>
-			<div class="content padding default-inputs">
-				
-				<div class="message" v-html="capApp.entityInput"></div>
-				
-				<h2>{{ capApp.placeholdersModules }}</h2>
-				<div class="placeholders modules"
-					v-for="mod in getDependentModules(module,modules).filter(v => v.relations.length !== 0 || v.pgFunctions.length !== 0)"
-					:key="mod.id"
-				>
-					<my-button
-						@trigger="toggleModule(mod.id)"
-						:caption="mod.name"
-						:image="moduleIdsOpen.includes(mod.id) ? 'triangleDown.png' : 'triangleRight.png'"
-						:naked="true"
-					/>
-					
-					<template v-if="moduleIdsOpen.includes(mod.id)">
-						
-						<!-- relations & attributes -->
-						<div class="placeholders relations" v-for="rel in mod.relations" :key="rel.id">
-							
-							<my-builder-function-placeholder
-								@toggle="toggleEntity('relation',rel.id)"
-								:builderLanguage="builderLanguage"
-								:name="rel.name"
-								:selected="entitySelected === 'relation' && entitySelectedId === rel.id"
-							/>
-							
-							<my-builder-function-placeholder
-								v-for="atr in rel.attributes"
-								@toggle="toggleEntity('attribute',atr.id)"
-								:builderLanguage="builderLanguage"
-								:key="atr.id"
-								:naked="true"
-								:name="atr.name"
-								:selected="entitySelected === 'attribute' && entitySelectedId === atr.id"
-							/>
-						</div>
-						
-						<!-- PG functions -->
-						<div class="placeholders functions">
-							<my-builder-function-placeholder
-								v-for="f in mod.pgFunctions.filter(v => !v.isTrigger)"
-								@show-help="showHelp(f.name+'()',$event)"
-								@toggle="toggleEntity('pgFunction',f.id)"
-								:builderLanguage="builderLanguage"
-								:functionObj="f"
-								:functionType="'pg'"
-								:key="f.id"
-								:name="f.name"
-								:selected="entitySelected === 'pgFunction' && entitySelectedId === f.id"
-							/>
-						</div>
-					</template>
-				</div>
-				
-				<!-- instance functions -->
-				<h2>{{ capApp.placeholdersInstance }}</h2>
-				
-				<div class="placeholders functions">
-					<my-builder-function-placeholder
-						v-for="f in instanceFunctionIds"
-						@show-help="showHelp(f+'()',$event)"
-						@toggle="toggleEntity('instanceFunction',f)"
-						:builderLanguage="builderLanguage"
-						:functionHelp="capApp.helpPg[f]"
-						:key="f"
-						:name="f"
-						:selected="entitySelected === 'instanceFunction' && entitySelectedId === f"
-					/>
-				</div>
+				</template>
 			</div>
 		</div>
 	</div>`,
@@ -231,10 +380,10 @@ let MyBuilderPgFunction = {
 			immediate:true
 		}
 	},
-	mounted:function() {
+	mounted() {
 		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
 	},
-	unmounted:function() {
+	unmounted() {
 		this.$emit('hotkeysRegister',[]);
 	},
 	data:function() {
@@ -246,6 +395,7 @@ let MyBuilderPgFunction = {
 			codeReturns:'',
 			isFrontendExec:false,
 			isTrigger:false,
+			schedules:[],
 			
 			instanceFunctionIds:[
 				'abort_show_message','clean_up_e2ee_keys','file_link',
@@ -262,48 +412,55 @@ let MyBuilderPgFunction = {
 			entitySelected:'',
 			entitySelectedId:null,
 			moduleIdsOpen:[],
-			showHeader:false,
 			showPreview:false,
-			showSidebar:true
+			showSidebar:true,
+			tabTarget:'content'
 		};
 	},
 	computed:{
-		hasChanges:function() {
-			return this.codeArgs       !== this.pgFunction.codeArgs
-				|| this.codeFunction   !== this.placeholdersSet(this.pgFunction.codeFunction)
-				|| this.codeReturns    !== this.pgFunction.codeReturns
-				|| this.isFrontendExec !== this.pgFunction.isFrontendExec
-				|| JSON.stringify(this.captions) !== JSON.stringify(this.pgFunction.captions);
-		},
-		module:function() {
-			return this.pgFunction === false
-				? false : this.moduleIdMap[this.pgFunction.moduleId];
-		},
-		pgFunction:function() {
-			return typeof this.pgFunctionIdMap[this.id] === 'undefined'
-				? false : this.pgFunctionIdMap[this.id];
-		},
+		hasChanges:(s) => s.name !== s.pgFunction.name
+			|| s.codeArgs        !== s.pgFunction.codeArgs
+			|| s.codeFunction    !== s.placeholdersSet(s.pgFunction.codeFunction)
+			|| s.codeReturns     !== s.pgFunction.codeReturns
+			|| s.isFrontendExec  !== s.pgFunction.isFrontendExec
+			|| JSON.stringify(s.schedules) !== JSON.stringify(s.pgFunction.schedules)
+			|| JSON.stringify(s.captions)  !== JSON.stringify(s.pgFunction.captions),
 		
 		// simple
-		preview:function() { return !this.showPreview ? '' : this.placeholdersUnset(true); },
+		module:    (s) => s.pgFunction === false ? false : s.moduleIdMap[s.pgFunction.moduleId],
+		pgFunction:(s) => typeof s.pgFunctionIdMap[s.id] === 'undefined' ? false : s.pgFunctionIdMap[s.id],
+		preview:   (s) => !s.showPreview ? '' : s.placeholdersUnset(true),
 		
 		// stores
-		modules:        function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
-		moduleNameMap:  function() { return this.$store.getters['schema/moduleNameMap']; },
-		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
-		pgFunctionIdMap:function() { return this.$store.getters['schema/pgFunctionIdMap']; },
-		capApp:         function() { return this.$store.getters.captions.builder.function; },
-		capGen:         function() { return this.$store.getters.captions.generic; }
+		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleNameMap:  (s) => s.$store.getters['schema/moduleNameMap'],
+		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
+		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
+		capApp:         (s) => s.$store.getters.captions.builder.function,
+		capGen:         (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
+		copyValueDialog,
 		getDependentModules,
+		getNilUuid,
 		getPgFunctionTemplate,
 		
 		// actions
-		addTab:function(evt) {
+		addSchedule() {
+			this.schedules.push({
+				id:this.getNilUuid(),
+				atSecond:0,
+				atMinute:0,
+				atHour:12,
+				atDay:1,
+				intervalType:'days',
+				intervalValue:3
+			});
+		},
+		addTab(evt) {
 			let field    = evt.target;
 			let startPos = field.selectionStart;
 			let endPos   = field.selectionEnd;
@@ -315,7 +472,7 @@ let MyBuilderPgFunction = {
 			field.selectionEnd   = startPos + 1;
 			this.codeFunction    = field.value;
 		},
-		reset:function() {
+		reset() {
 			this.name           = this.pgFunction.name;
 			this.captions       = JSON.parse(JSON.stringify(this.pgFunction.captions));
 			this.codeArgs       = this.pgFunction.codeArgs;
@@ -323,10 +480,11 @@ let MyBuilderPgFunction = {
 			this.codeReturns    = this.pgFunction.codeReturns;
 			this.isFrontendExec = this.pgFunction.isFrontendExec;
 			this.isTrigger      = this.pgFunction.isTrigger;
+			this.schedules      = this.pgFunction.schedules;
 			this.addNew         = false;
 			this.addOld         = false;
 		},
-		insertEntitySelected:function(evt) {
+		insertEntitySelected(evt) {
 			if(this.entitySelectedId === null)
 				return;
 			
@@ -381,7 +539,7 @@ let MyBuilderPgFunction = {
 			this.codeFunction = field.value;
 			this.entitySelectedId = null;
 		},
-		toggleEntity:function(entityName,id) {
+		toggleEntity(entityName,id) {
 			if(this.entitySelected === entityName && this.entitySelectedId === id) {
 				this.entitySelected   = '';
 				this.entitySelectedId = null;
@@ -390,7 +548,7 @@ let MyBuilderPgFunction = {
 			this.entitySelected   = entityName;
 			this.entitySelectedId = id;
 		},
-		toggleModule:function(id) {
+		toggleModule(id) {
 			let pos = this.moduleIdsOpen.indexOf(id);
 			
 			if(pos === -1)
@@ -398,7 +556,7 @@ let MyBuilderPgFunction = {
 			
 			this.moduleIdsOpen.splice(pos,1);
 		},
-		showHelp:function(top,text) {
+		showHelp(top,text) {
 			this.$store.commit('dialog',{
 				captionTop:top,
 				captionBody:text,
@@ -414,7 +572,7 @@ let MyBuilderPgFunction = {
 		// attribute reference: (module.relation.attribute) <-> (ATR_ID)
 		// relation  reference: {module}[relation]          <-> {MOD_ID}[REL_ID]
 		// function  reference: {module}[function](...      <-> {MOD_ID}[FNC_IC](...
-		placeholdersSet:function(body) {
+		placeholdersSet(body) {
 			let that = this;
 			
 			// replace attributes with placeholders
@@ -445,7 +603,7 @@ let MyBuilderPgFunction = {
 			});
 			return body;
 		},
-		placeholdersUnset:function(previewMode) {
+		placeholdersUnset(previewMode) {
 			let that = this;
 			let body = this.codeFunction;
 			
@@ -558,13 +716,35 @@ let MyBuilderPgFunction = {
 		},
 		
 		// backend calls
-		set:function() {
+		delAsk() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.delete,
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.delete,
+					exec:this.del,
+					image:'delete.png'
+				},{
+					caption:this.capGen.button.cancel,
+					image:'cancel.png'
+				}]
+			});
+		},
+		del() {
+			ws.send('pgFunction','del',{id:this.pgFunction.id},true).then(
+				() => {
+					this.$root.schemaReload(this.pgFunction.moduleId);
+					this.$router.push('/builder/functions/'+this.pgFunction.moduleId);
+				},
+				this.$root.genericError
+			);
+		},
+		set() {
 			ws.sendMultiple([
 				ws.prepare('pgFunction','set',{
 					id:this.pgFunction.id,
 					moduleId:this.pgFunction.moduleId,
 					isTrigger:this.pgFunction.isTrigger,
-					schedules:this.pgFunction.schedules,
 					
 					// changable
 					name:this.name,
@@ -572,6 +752,7 @@ let MyBuilderPgFunction = {
 					codeFunction:this.placeholdersUnset(false),
 					codeReturns:this.codeReturns,
 					isFrontendExec:this.isFrontendExec,
+					schedules:this.schedules,
 					captions:this.captions
 				}),
 				ws.prepare('schema','check',{moduleId:this.module.id})

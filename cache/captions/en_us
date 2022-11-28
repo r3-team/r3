@@ -73,6 +73,7 @@
 		"available":"Available",
 		"busy":"Working - Click here to abort",
 		"category":"Category",
+		"content":"Content",
 		"date":"Date",
 		"description":"Description",
 		"displayed":"Displayed",
@@ -114,6 +115,7 @@
 		"resultsOf":"/ {CNT}",
 		"role":"Role",
 		"selected":"Selected",
+		"settings":"Settings",
 		"size":"Size",
 		"status":"Status",
 		"threeDots":"...",
@@ -690,7 +692,6 @@
 			"stateRequired":"required",
 			"subQuery":"Sub query",
 			"subQueryAttribute":"Attribute",
-			"tabContent":"Content",
 			"tabFunctions":"Functions ({CNT})",
 			"tabStates":"States ({CNT})",
 			"title":"Forms",
@@ -700,7 +701,6 @@
 			"button":{
 				"addNew":"NEW prefix",
 				"addOld":"OLD prefix",
-				"addSchedule":"Add new schedule",
 				"details":"Details",
 				"template":"Template"
 			},
@@ -818,8 +818,9 @@
 			"schedulesItem":"{CNT} schedules",
 			"title":"Functions",
 			"titleJs":"Frontend functions ({CNT})",
+			"titleJsOne":"Frontend function '{NAME}'",
 			"titlePg":"Backend functions ({CNT})",
-			"titleOne":"Function title",
+			"titlePgOne":"Backend function '{NAME}'",
 			"value":"VALUE"
 		},
 		"icon":{
@@ -906,6 +907,9 @@
 			"form":"New form",
 			"module":"New application",
 			"options":"Additional options",
+			"pgFunction":"New backend function",
+			"pgFunctionTrigger":"Trigger",
+			"pgFunctionTriggerHint":"Makes this backend function a trigger. A trigger can be referenced inside a relation to react to events in the database, like when records are created, updated or deleted. This setting cannot be changed later.",
 			"relation":"New relation",
 			"relationEncryption":"End-to-end Encryption",
 			"relationEncryptionHint":"Enables end-to-end encryption (E2EE) for attributes on this relation. E2EE has benefits and drawbacks - please carefully read the Builder documentation before using it. This setting cannot be changed later.",

@@ -177,7 +177,7 @@ let MyBuilderForm = {
 				<my-tabs
 					v-model="tabTarget"
 					:entries="['content','states','functions','properties']"
-					:entriesText="[capApp.tabContent,capApp.tabStates.replace('{CNT}',states.length),capApp.tabFunctions.replace('{CNT}',functions.length),capGen.properties]"
+					:entriesText="[capGen.content,capApp.tabStates.replace('{CNT}',states.length),capApp.tabFunctions.replace('{CNT}',functions.length),capGen.properties]"
 				/>
 				
 				<!-- form content -->
@@ -313,7 +313,7 @@ let MyBuilderForm = {
 					v-model="tabTargetField"
 					:entries="['content','properties']"
 					:entriesIcon="['images/database.png','images/edit.png']"
-					:entriesText="[capApp.tabContent,capGen.properties]"
+					:entriesText="[capGen.content,capGen.properties]"
 				/>
 				<div class="content grow">
 					

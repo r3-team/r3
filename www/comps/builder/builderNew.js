@@ -1,5 +1,6 @@
-import {getQueryTemplate} from '../shared/query.js';
-import {getNilUuid}       from '../shared/generic.js';
+import {getQueryTemplate}      from '../shared/query.js';
+import {getNilUuid}            from '../shared/generic.js';
+import {getPgFunctionTemplate} from '../shared/builder.js';
 export {MyBuilderNew as default};
 
 let MyBuilderNew = {
@@ -33,6 +34,15 @@ let MyBuilderNew = {
 					<br />
 					<h2>{{ capApp.options }}</h2>
 					
+					<!-- PG function: is trigger -->
+					<template v-if="entity === 'pgFunction'">
+						<div class="row centered">
+							<span>{{ capApp.pgFunctionTrigger }}</span>
+							<my-bool v-model="isTrigger" />
+						</div>
+						<p v-html="capApp.pgFunctionTriggerHint"></p>
+					</template>
+					
 					<!-- relation: E2EE encryption -->
 					<template v-if="entity === 'relation'">
 						<div class="row centered">
@@ -63,6 +73,9 @@ let MyBuilderNew = {
 			// all entities
 			name:'',
 			
+			// PG function
+			isTrigger:false,
+			
 			// relation
 			encryption:false
 		};
@@ -74,23 +87,25 @@ let MyBuilderNew = {
 		// presentation
 		title:(s) => {
 			switch(s.entity) {
-				case 'form':     return s.capApp.form;     break;
-				case 'module':   return s.capApp.module;   break;
-				case 'relation': return s.capApp.relation; break;
-				case 'role':     return s.capApp.role;     break;
+				case 'form':       return s.capApp.form;       break;
+				case 'module':     return s.capApp.module;     break;
+				case 'pgFunction': return s.capApp.pgFunction; break;
+				case 'relation':   return s.capApp.relation;   break;
+				case 'role':       return s.capApp.role;       break;
 			}
 			return '';
 		},
 		titleImgSrc:(s) => {
 			switch(s.entity) {
-				case 'form':     return 'images/form.png';           break;
-				case 'module':   return 'images/module.png';         break;
-				case 'relation': return 'images/database.png';       break;
-				case 'role':     return 'images/personMultiple.png'; break;
+				case 'form':       return 'images/form.png';           break;
+				case 'module':     return 'images/module.png';         break;
+				case 'pgFunction': return 'images/code.png';           break;
+				case 'relation':   return 'images/database.png';       break;
+				case 'role':       return 'images/personMultiple.png'; break;
 			}
 			return '';
 		},
-		showOptions:(s) => ['relation'].includes(s.entity),
+		showOptions:(s) => ['pgFunction','relation'].includes(s.entity),
 		
 		// stores
 		capApp:(s) => s.$store.getters.captions.builder.new,
@@ -100,6 +115,7 @@ let MyBuilderNew = {
 		// externals
 		getNilUuid,
 		getQueryTemplate,
+		getPgFunctionTemplate,
 		
 		// backend calls
 		set() {
@@ -142,6 +158,23 @@ let MyBuilderNew = {
 						articleIdsHelp:[],
 						captions:{
 							moduleTitle:{}
+						}
+					};
+				break;
+				case 'pgFunction':
+					request = {
+						id:this.getNilUuid(),
+						moduleId:this.moduleId,
+						name:this.name,
+						codeArgs:'',
+						codeFunction:this.getPgFunctionTemplate(),
+						codeReturns:this.isTrigger ? 'TRIGGER' : 'INTEGER',
+						isFrontendExec:false,
+						isTrigger:this.isTrigger,
+						schedules:[],
+						captions:{
+							pgFunctionTitle:{},
+							pgFunctionDesc:{}
 						}
 					};
 				break;

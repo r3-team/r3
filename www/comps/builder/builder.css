@@ -901,15 +901,8 @@
 	display:flex;
 	flex-flow:column nowrap;
 }
-.builder-function .function-details .header{
-	width:100%;
-	padding:6px 8px;
-	border-bottom:2px solid var(--color-border);
-}
-.builder-function .function-details .header table td{
-	padding:2px 12px;
-}
 .builder-function .input{
+	flex:1 1 auto;
 	max-width:none;
 	font-family:'Lucida Console',Courier,monospace;
 	border:none !important;

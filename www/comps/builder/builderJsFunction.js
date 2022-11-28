@@ -23,7 +23,7 @@ let MyBuilderJsFunction = {
 					<img class="icon" src="images/code.png" />
 					<my-builder-caption
 						v-model="captions.jsFunctionTitle"
-						:contentName="capApp.titleOne"
+						:contentName="capGen.title"
 						:language="builderLanguage"
 						:longInput="true"
 					/>

@@ -27,7 +27,7 @@ let MyBuilderRelations = {
 				</div>
 				
 				<router-link class="entry clickable"
-					v-for="r in module.relations.filter(v => filter === '' || v.name.includes(filter))"
+					v-for="r in module.relations.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
 					:key="r.id"
 					:to="'/builder/relation/'+r.id" 
 				>

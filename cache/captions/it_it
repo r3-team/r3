@@ -73,6 +73,7 @@
 		"available":"Available",
 		"busy":"Elaborazione - Clicca qui per annullare",
 		"category":"Category",
+		"content":"Content",
 		"date":"Data",
 		"description":"Descrizione",
 		"displayed":"Displayed",
@@ -114,6 +115,7 @@
 		"resultsOf":"/ {CNT}",
 		"role":"Ruolo",
 		"selected":"Selected",
+		"settings":"Settings",
 		"size":"Size",
 		"status":"Status",
 		"threeDots":"...",
@@ -690,7 +692,6 @@
 			"stateRequired":"obbligatorio",
 			"subQuery":"Sub query",
 			"subQueryAttribute":"Attributo",
-			"tabContent":"Content",
 			"tabFunctions":"Funzioni ({CNT})",
 			"tabStates":"Condizioni ({CNT})",
 			"title":"Moduli",
@@ -700,7 +701,6 @@
 			"button":{
 				"addNew":"NUOVO prefisso",
 				"addOld":"VECCHIO prefisso",
-				"addSchedule":"Aggiungi nuova pianificazione",
 				"details":"Dettagli",
 				"template":"Template"
 			},
@@ -818,8 +818,9 @@
 			"schedulesItem":"{CNT} pianificazioni",
 			"title":"Funzioni",
 			"titleJs":"Funzioni frontend ({CNT})",
+			"titleJsOne":"Funzioni frontend '{NAME}'",
 			"titlePg":"Funzioni backend ({CNT})",
-			"titleOne":"titolo funzione",
+			"titlePgOne":"Funzioni backend '{NAME}'",
 			"value":"VALUE"
 		},
 		"icon":{
@@ -906,6 +907,9 @@
 			"form":"New form",
 			"module":"Nuova applicazione",
 			"options":"Additional options",
+			"pgFunction":"New backend function",
+			"pgFunctionTrigger":"Trigger",
+			"pgFunctionTriggerHint":"Makes this backend function a trigger. A trigger can be referenced inside a relation to react to events in the database, like when records are created, updated or deleted. This setting cannot be changed later.",
 			"relation":"Nuova relazione",
 			"relationEncryption":"End-to-end Encryption",
 			"relationEncryptionHint":"Enables end-to-end encryption (E2EE) for attributes on this relation. E2EE has benefits and drawbacks - please carefully read the Builder documentation before using it. This setting cannot be changed later.",

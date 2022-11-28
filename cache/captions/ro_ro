@@ -73,6 +73,7 @@
 		"available":"Available",
 		"busy":"Lucrează - Apasă aici pentru anulare",
 		"category":"Category",
+		"content":"Content",
 		"date":"Data",
 		"description":"Descriere",
 		"displayed":"Displayed",
@@ -114,6 +115,7 @@
 		"resultsOf":"/ {CNT}",
 		"role":"Rol",
 		"selected":"Selected",
+		"settings":"Settings",
 		"size":"Size",
 		"status":"Status",
 		"threeDots":"...",
@@ -690,7 +692,6 @@
 			"stateRequired":"necesar",
 			"subQuery":"Sub interogare",
 			"subQueryAttribute":"Atribut",
-			"tabContent":"Content",
 			"tabFunctions":"Funcțiile ({CNT})",
 			"tabStates":"Statuturi ({CNT})",
 			"title":"Formulare",
@@ -700,7 +701,6 @@
 			"button":{
 				"addNew":"Prefix NOU",
 				"addOld":"Prefix VECHI",
-				"addSchedule":"Adăugați o programare nouă",
 				"details":"Detalii",
 				"template":"Șablon"
 			},
@@ -818,8 +818,9 @@
 			"schedulesItem":"{CNT} programări",
 			"title":"Funcții",
 			"titleJs":"Funcții front-end ({CNT})",
+			"titleJsOne":"Funcții front-end '{NAME}'",
 			"titlePg":"Funcții back-end ({CNT})",
-			"titleOne":"Titlu funcției",
+			"titlePgOne":"Funcții back-end '{NAME}'",
 			"value":"VALUE"
 		},
 		"icon":{
@@ -906,6 +907,9 @@
 			"form":"New form",
 			"module":"Aplicație nouă",
 			"options":"Additional options",
+			"pgFunction":"New backend function",
+			"pgFunctionTrigger":"Trigger",
+			"pgFunctionTriggerHint":"Makes this backend function a trigger. A trigger can be referenced inside a relation to react to events in the database, like when records are created, updated or deleted. This setting cannot be changed later.",
 			"relation":"Relație nouă",
 			"relationEncryption":"End-to-end Encryption",
 			"relationEncryptionHint":"Enables end-to-end encryption (E2EE) for attributes on this relation. E2EE has benefits and drawbacks - please carefully read the Builder documentation before using it. This setting cannot be changed later.",

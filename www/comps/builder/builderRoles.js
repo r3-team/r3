@@ -16,7 +16,7 @@ let MyBuilderRoles = {
 		
 		<div class="content default-inputs" v-if="module">
 			<div class="builder-entry-list">
-			
+				
 				<div class="entry"
 					@click="$emit('createNew',readonly ? null : 'role')"
 					:class="{ clickable:!readonly, off:readonly }"
@@ -28,7 +28,7 @@ let MyBuilderRoles = {
 				</div>
 				
 				<router-link class="entry clickable"
-					v-for="r in module.roles.filter(v => filter === '' || v.name.includes(filter))"
+					v-for="r in module.roles.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
 					:key="r.id"
 					:to="'/builder/role/'+r.id" 
 				>
