@@ -257,6 +257,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.pg_function ALTER COLUMN name TYPE CHARACTER VARYING(60);
 			ALTER TABLE app.relation    ALTER COLUMN name TYPE CHARACTER VARYING(60);
 			
+			-- added missing flex property value
+			ALTER TYPE app.field_container_align_content ADD VALUE 'space-evenly';
+			
 			-- enable backup tasks for non-embedded systems
 			UPDATE instance.task
 			SET embedded_only = false, name = 'backupRun'

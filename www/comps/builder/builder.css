@@ -814,6 +814,10 @@
 	filter:var(--image-filter-bg);
 	box-shadow:1px 1px 4px var(--color-shade);
 }
+.builder-icon-input .builder-icon.naked{
+	border:1px solid var(--color-border);
+	border-radius:5px;
+}
 .builder-icon-input .builder-icon.not-set{
 	--image-filter-contrast:50%;
 }

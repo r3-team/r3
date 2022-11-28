@@ -815,6 +815,7 @@ let MyBuilderFieldOptions = {
 							<option value="center">center</option>
 							<option value="space-between">space-between</option>
 							<option value="space-around">space-around</option>
+							<option value="space-evenly">space-evenly</option>
 							<option value="stretch">stretch</option>
 						</select>
 					</td>

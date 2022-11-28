@@ -63,8 +63,9 @@ let MyBuilderFields = {
 					<my-builder-icon-input
 						v-if="!isTemplate && !moveActive && element.content !== 'container'"
 						@input="element.iconId = $event"
-						:icon-id-selected="element.iconId"
+						:iconIdSelected="element.iconId"
 						:module="moduleIdMap[moduleId]"
+						:naked="true"
 						:title="capApp.fieldIcon"
 					/>
 					
@@ -202,7 +203,7 @@ let MyBuilderFields = {
 					@field-remove="$emit('field-remove',$event)"
 					@field-move-store="$emit('field-move-store',$event)"
 					:builderLanguage="builderLanguage"
-					:class="{ column:element.direction === 'column', wrap:element.wrap, empty:element.fields.length === 0 }"
+					:class="getClassChildren(element)"
 					:columnIdShow="columnIdShow"
 					:dataFields="dataFields"
 					:fieldCounter="fieldCounter"
@@ -217,7 +218,6 @@ let MyBuilderFields = {
 					:isTemplate="isTemplate"
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="moduleId"
-					:style="getStyleChildren(element)"
 					:uiScale="uiScale"
 				/>
 			</div>
@@ -448,14 +448,20 @@ let MyBuilderFields = {
 			}
 			return group;
 		},
-		getStyleChildren(f) {
-			let out = [
-				`flex-wrap:${f.wrap ? 'wrap' : 'nowrap'}`,
-				`justify-content:${f.justifyContent}`,
-				`align-items:${f.alignItems}`,
-				`align-content:${f.alignContent}`
-			];
-			return out.join(';');
+		getClassChildren(f) {
+			// default classed
+			let out = [];
+			if(f.fields.length === 0) out.push('empty');
+			
+			// draggable does not support styling the main element
+			// use custom classes as fallback
+			if(f.direction === 'column') out.push('column');
+			if(f.wrap)                   out.push('wrap');
+			
+			out.push(`style-justify-content-${f.justifyContent}`);
+			out.push(`style-justify-content-${f.alignContent}`);
+			out.push(`style-align-items-${f.alignItems}`);
+			return out;
 		},
 		getStyleParent(f) {
 			if(typeof f.basis === 'undefined')

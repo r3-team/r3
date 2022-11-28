@@ -64,8 +64,8 @@
 	--color-navigation-default:#444;
 	
 	--color-form-builder-actions:hsl(196deg 45% 86%);
-	--color-form-builder-actions-bg:hsl(200deg,37%,90%);
-	--color-form-builder-columns:hsl(247deg 32% 84%);
+	--color-form-builder-actions-bg:hsl(200deg 30% 94%);
+	--color-form-builder-columns:hsl(226deg 25% 77%);
 	--color-form-builder-container:hsl(99deg 47% 83%);
 	--color-form-builder-selected:hsl(59deg 100% 50%);
 	
@@ -1021,9 +1021,9 @@ table td.maximum{
 	
 	--color-hover-underlay:rgba(0,0,0,0.50);
 	--color-form-builder-actions:hsl(195,17%,29%,1.00);
-	--color-form-builder-actions-bg:hsl(195,3%,20%);
-	--color-form-builder-columns:hsl(247,17%,41%,0.85);
-	--color-form-builder-container:hsl(99,18%,26%,1.00);
+	--color-form-builder-actions-bg:hsl(195deg 3% 25%);
+	--color-form-builder-columns:hsl(176deg 9% 32%);
+	--color-form-builder-container:hsl(125deg 17% 31%);
 	--color-form-builder-selected:hsl(59deg 72% 44%);
 	
 	--image-list-cards: url('../images/texture_paper02.webp');
