@@ -12,7 +12,6 @@ let MyBuilderNew = {
 					<img class="icon" :src="titleImgSrc" />
 					<h1 class="title">{{ title }}</h1>
 				</div>
-				
 				<div class="area">
 					<my-button image="cancel.png"
 						@trigger="$emit('close')"
@@ -33,6 +32,20 @@ let MyBuilderNew = {
 				<template v-if="showOptions">
 					<br />
 					<h2>{{ capApp.options }}</h2>
+					
+					<!-- JS function: assigned form -->
+					<template v-if="entity === 'jsFunction'">
+						<div class="row centered gap">
+							<span>{{ capApp.jsFunctionFormId }}</span>
+							<select v-model="formId">
+								<option :value="null">-</option>
+								<option v-for="f in moduleIdMap[moduleId].forms" :value="f.id">
+									{{ f.name }}
+								</option>
+							</select>
+						</div>
+						<p v-html="capApp.jsFunctionFormIdHint"></p>
+					</template>
 					
 					<!-- PG function: is trigger -->
 					<template v-if="entity === 'pgFunction'">
@@ -73,6 +86,9 @@ let MyBuilderNew = {
 			// all entities
 			name:'',
 			
+			// JS function
+			formId:null,
+			
 			// PG function
 			isTrigger:false,
 			
@@ -88,6 +104,7 @@ let MyBuilderNew = {
 		title:(s) => {
 			switch(s.entity) {
 				case 'form':       return s.capApp.form;       break;
+				case 'jsFunction': return s.capApp.jsFunction; break;
 				case 'module':     return s.capApp.module;     break;
 				case 'pgFunction': return s.capApp.pgFunction; break;
 				case 'relation':   return s.capApp.relation;   break;
@@ -98,18 +115,20 @@ let MyBuilderNew = {
 		titleImgSrc:(s) => {
 			switch(s.entity) {
 				case 'form':       return 'images/form.png';           break;
+				case 'jsFunction': return 'images/codeScreen.png';     break;
 				case 'module':     return 'images/module.png';         break;
-				case 'pgFunction': return 'images/code.png';           break;
+				case 'pgFunction': return 'images/codeDatabase.png';   break;
 				case 'relation':   return 'images/database.png';       break;
 				case 'role':       return 'images/personMultiple.png'; break;
 			}
 			return '';
 		},
-		showOptions:(s) => ['pgFunction','relation'].includes(s.entity),
+		showOptions:(s) => ['jsFunction','pgFunction','relation'].includes(s.entity),
 		
 		// stores
-		capApp:(s) => s.$store.getters.captions.builder.new,
-		capGen:(s) => s.$store.getters.captions.generic
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:     (s) => s.$store.getters.captions.builder.new,
+		capGen:     (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -136,6 +155,21 @@ let MyBuilderNew = {
 						articleIdsHelp:[],
 						captions:{
 							formTitle:{}
+						}
+					};
+				break;
+				case 'jsFunction':
+					request = {
+						id:this.getNilUuid(),
+						moduleId:this.moduleId,
+						formId:this.formId,
+						name:this.name,
+						codeArgs:'',
+						codeFunction:'',
+						codeReturns:'',
+						captions:{
+							jsFunctionTitle:{},
+							jsFunctionDesc:{}
 						}
 					};
 				break;

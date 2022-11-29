@@ -1,12 +1,12 @@
-import MyBuilderCaption               from './builderCaption.js';
-import {MyBuilderFunctionPlaceholder} from './builderFunctions.js';
-import MyTabs                         from '../tabs.js';
+import MyBuilderCaption from './builderCaption.js';
+import MyTabs           from '../tabs.js';
 import {
 	copyValueDialog,
 	getNilUuid
 } from '../shared/generic.js';
 import {
 	getDependentModules,
+	getFunctionHelp,
 	getPgFunctionTemplate
 } from '../shared/builder.js';
 export {MyBuilderPgFunction as default};
@@ -121,7 +121,6 @@ let MyBuilderPgFunction = {
 	name:'my-builder-pg-function',
 	components:{
 		MyBuilderCaption,
-		MyBuilderFunctionPlaceholder,
 		MyBuilderPgFunctionItemSchedule,
 		MyTabs
 	},
@@ -129,7 +128,7 @@ let MyBuilderPgFunction = {
 		<div class="contentBox" v-if="pgFunction">
 			<div class="top">
 				<div class="area nowrap">
-					<img class="icon" src="images/code.png" />
+					<img class="icon" src="images/codeDatabase.png" />
 					<h1 class="title">{{ capApp.titlePgOne.replace('{NAME}',name) }}</h1>
 				</div>
 				<div class="area">
@@ -184,7 +183,7 @@ let MyBuilderPgFunction = {
 				<textarea class="input"
 					v-if="!showPreview"
 					v-model="codeFunction"
-					@click="insertEntitySelected"
+					@click="insertEntity"
 					@keydown.tab.prevent="addTab"
 					:disabled="readonly"
 					:placeholder="capApp.code"
@@ -242,11 +241,14 @@ let MyBuilderPgFunction = {
 					<div class="message" v-html="capApp.entityInput"></div>
 					
 					<div class="placeholders">
-						<h2>{{ capApp.placeholdersModules }}</h2>
+						<div class="title">
+							<img src="images/builder.png" />
+							<span>{{ capGen.applications }}</span>
+						</div>
 						<table>
 							<tr>
 								<td>
-									<select v-model="entityModuleId" @change="entitySelectedId = null; entitySelected = 'relation'">
+									<select v-model="entityModuleId" @change="entityId = null; entity = 'relation'">
 										<option :value="null">-</option>
 										<option
 											v-for="mod in getDependentModules(module,modules).filter(v => v.relations.length !== 0 || v.pgFunctions.length !== 0)"
@@ -255,21 +257,21 @@ let MyBuilderPgFunction = {
 									</select>
 								</td>
 								<td v-if="entityModuleId !== null">
-									<select class="dynamic" v-model="entitySelected" @change="entitySelectedId = null">
+									<select class="dynamic" v-model="entity" @change="entityId = null">
 										<option value="relation">{{ capApp.placeholderRelation }}</option>
 										<option value="attribute">{{ capApp.placeholderAttribute }}</option>
 										<option value="pgFunction">{{ capApp.placeholderFunction }}</option>
 									</select>
 								</td>
 								<td>
-									<select v-model="entitySelectedId" v-if="entityModuleId !== null && entitySelected === 'relation'">
+									<select v-model="entityId" v-if="entityModuleId !== null && entity === 'relation'">
 										<option :value="null">-</option>
 										<option
 											v-for="r in moduleIdMap[entityModuleId].relations"
 											:value="r.id"
 										>{{ r.name }}</option>
 									</select>
-									<select v-model="entitySelectedId" v-if="entityModuleId !== null && entitySelected === 'attribute'">
+									<select v-model="entityId" v-if="entityModuleId !== null && entity === 'attribute'">
 										<option :value="null">-</option>
 										<optgroup v-for="r in moduleIdMap[entityModuleId].relations" :label="r.name">
 											<option
@@ -278,7 +280,7 @@ let MyBuilderPgFunction = {
 											>{{ a.name }}</option>
 										</optgroup>
 									</select>
-									<select v-model="entitySelectedId" v-if="entityModuleId !== null && entitySelected === 'pgFunction'">
+									<select v-model="entityId" v-if="entityModuleId !== null && entity === 'pgFunction'">
 										<option :value="null">-</option>
 										<option
 											v-for="f in moduleIdMap[entityModuleId].pgFunctions"
@@ -286,20 +288,29 @@ let MyBuilderPgFunction = {
 										>{{ f.name }}</option>
 									</select>
 								</td>
+								<td v-if="entity === 'pgFunction'">
+									<my-button image="question.png"
+										@trigger="showHelp(pgFunctionIdMap[entityId].name+'()',functionHelp)"
+										:active="functionHelp !== ''"
+									/>
+								</td>
 							</tr>
 						</table>
-						<span v-if="['relation','attribute','pgFunction'].includes(entitySelected) && entitySelectedId !== null">
+						<span class="insert-ref" v-if="['relation','attribute','pgFunction'].includes(entity) && entityId !== null">
 							{{ capApp.placeholderInsert }}
 						</span>
 					</div>
 					
 					<!-- instance functions -->
 					<div class="placeholders">
-						<h2>{{ capApp.placeholdersInstance }}</h2>
+						<div class="title">
+							<img src="images/server.png" />
+							<span>{{ capApp.placeholdersInstance }}</span>
+						</div>
 						<table>
 							<tr>
 								<td>
-									<select v-model="entitySelectedId" @change="entitySelected = 'instanceFunction'; entityModuleId = null">
+									<select v-model="entityId" @change="entity = 'instanceFunction'; entityModuleId = null">
 										<option :value="null">-</option>
 										<option
 											v-for="f in instanceFunctionIds"
@@ -309,14 +320,14 @@ let MyBuilderPgFunction = {
 								</td>
 								<td>
 									<my-button image="question.png"
-										@trigger="showHelp(entitySelectedId+'()',capApp.helpPg[entitySelectedId])"
-										:active="entitySelected === 'instanceFunction' && entitySelectedId !== null"
+										@trigger="showHelp(entityId+'()',capApp.helpPg[entityId])"
+										:active="entity === 'instanceFunction' && entityId !== null"
 										:captionTitle="capGen.button.help"
 									/>
 								</td>
 							</tr>
 						</table>
-						<span v-if="entitySelected === 'instanceFunction' && entitySelectedId !== null">
+						<span class="insert-ref" v-if="entity === 'instanceFunction' && entityId !== null">
 							{{ capApp.placeholderInsert }}
 						</span>
 					</div>
@@ -408,6 +419,7 @@ let MyBuilderPgFunction = {
 	},
 	data:function() {
 		return {
+			// inputs
 			name:'',
 			captions:{},
 			codeArgs:'',
@@ -417,6 +429,12 @@ let MyBuilderPgFunction = {
 			isTrigger:false,
 			schedules:[],
 			
+			// states
+			addNew:false,
+			addOld:false,
+			entity:'relation', // selected placeholder entity (relation, attribute, pgFunction, instanceFunction)
+			entityId:null,
+			entityModuleId:null,
 			instanceFunctionIds:[
 				'abort_show_message','clean_up_e2ee_keys','file_link',
 				'files_get','get_name','get_login_id','get_login_language_code',
@@ -425,13 +443,6 @@ let MyBuilderPgFunction = {
 				'mail_delete_after_attach','mail_get_next','mail_send',
 				'update_collection'
 			],
-			
-			// states
-			addNew:false,
-			addOld:false,
-			entityModuleId:null,
-			entitySelected:'relation',
-			entitySelectedId:null,
 			showPreview:false,
 			showSidebar:true,
 			tabTarget:'content'
@@ -445,6 +456,9 @@ let MyBuilderPgFunction = {
 			|| s.isFrontendExec  !== s.pgFunction.isFrontendExec
 			|| JSON.stringify(s.schedules) !== JSON.stringify(s.pgFunction.schedules)
 			|| JSON.stringify(s.captions)  !== JSON.stringify(s.pgFunction.captions),
+		
+		functionHelp:(s) => s.entity === 'pgFunction' && s.entityId !== null
+			? s.getFunctionHelp('pg',s.pgFunctionIdMap[s.entityId],s.builderLanguage) : '',
 		
 		// simple
 		module:    (s) => s.pgFunction === false ? false : s.moduleIdMap[s.pgFunction.moduleId],
@@ -465,6 +479,7 @@ let MyBuilderPgFunction = {
 		// externals
 		copyValueDialog,
 		getDependentModules,
+		getFunctionHelp,
 		getNilUuid,
 		getPgFunctionTemplate,
 		
@@ -504,8 +519,8 @@ let MyBuilderPgFunction = {
 			this.addNew         = false;
 			this.addOld         = false;
 		},
-		insertEntitySelected(evt) {
-			if(this.entitySelectedId === null)
+		insertEntity(evt) {
+			if(this.entityId === null)
 				return;
 			
 			let field = evt.target;
@@ -516,19 +531,19 @@ let MyBuilderPgFunction = {
 			// relation:    {module_name}.[relation_name]
 			// pg function: {module_name}.[function_name]()
 			// attribute:   (module_name.relation_name.attribute_name)
-			switch(this.entitySelected) {
+			switch(this.entity) {
 				case 'relation':
-					rel  = this.relationIdMap[this.entitySelectedId];
+					rel  = this.relationIdMap[this.entityId];
 					mod  = this.moduleIdMap[rel.moduleId];
 					text = `{${mod.name}}.[${rel.name}]`;
 				break;
 				case 'pgFunction':
-					fnc  = this.pgFunctionIdMap[this.entitySelectedId];
+					fnc  = this.pgFunctionIdMap[this.entityId];
 					mod  = this.moduleIdMap[fnc.moduleId];
 					text = `{${mod.name}}.[${fnc.name}]()`;
 				break;
 				case 'attribute':
-					atr  = this.attributeIdMap[this.entitySelectedId];
+					atr  = this.attributeIdMap[this.entityId];
 					rel  = this.relationIdMap[atr.relationId];
 					mod  = this.moduleIdMap[rel.moduleId];
 					text = `(${mod.name}.${rel.name}.${atr.name})`;
@@ -537,7 +552,7 @@ let MyBuilderPgFunction = {
 					if(this.addOld) text = 'OLD.'+text;
 				break;
 				case 'instanceFunction':
-					text = `instance.${this.entitySelectedId}()`;
+					text = `instance.${this.entityId}()`;
 				break;
 			}
 			
@@ -557,7 +572,7 @@ let MyBuilderPgFunction = {
 				field.value += text;
 			}
 			this.codeFunction = field.value;
-			this.entitySelectedId = null;
+			this.entityId = null;
 		},
 		showHelp(top,text) {
 			this.$store.commit('dialog',{
@@ -737,7 +752,7 @@ let MyBuilderPgFunction = {
 			ws.send('pgFunction','del',{id:this.pgFunction.id},true).then(
 				() => {
 					this.$root.schemaReload(this.pgFunction.moduleId);
-					this.$router.push('/builder/functions/'+this.pgFunction.moduleId);
+					this.$router.push('/builder/pg-functions/'+this.pgFunction.moduleId);
 				},
 				this.$root.genericError
 			);

@@ -44,8 +44,9 @@ import MyBuilderRole        from './comps/builder/builderRole.js';
 import MyBuilderCollections from './comps/builder/builderCollections.js';
 import MyBuilderCollection  from './comps/builder/builderCollection.js';
 import MyBuilderLoginForms  from './comps/builder/builderLoginForms.js';
-import MyBuilderFunctions   from './comps/builder/builderFunctions.js';
+import MyBuilderPgFunctions from './comps/builder/builderPgFunctions.js';
 import MyBuilderPgFunction  from './comps/builder/builderPgFunction.js';
+import MyBuilderJsFunctions from './comps/builder/builderJsFunctions.js';
 import MyBuilderJsFunction  from './comps/builder/builderJsFunction.js';
 import MyBuilderArticles    from './comps/builder/builderArticles.js';
 
@@ -132,9 +133,14 @@ const MyRouter = VueRouter.createRouter({
 				component:MyBuilderForm,
 				props:true
 			},{
-				path:'functions/:id',
-				meta:{ nav:'functions', target:'module' },
-				component:MyBuilderFunctions,
+				path:'pg-functions/:id',
+				meta:{ nav:'pg-functions', target:'module' },
+				component:MyBuilderPgFunctions,
+				props:true
+			},{
+				path:'js-functions/:id',
+				meta:{ nav:'js-functions', target:'module' },
+				component:MyBuilderJsFunctions,
 				props:true
 			},{
 				path:'roles/:id',
@@ -163,12 +169,12 @@ const MyRouter = VueRouter.createRouter({
 				props:true
 			},{
 				path:'pg-function/:id',
-				meta:{ nav:'functions', target:'pg-function' },
+				meta:{ nav:'pg-functions', target:'pg-function' },
 				component:MyBuilderPgFunction,
 				props:true
 			},{
 				path:'js-function/:id',
-				meta:{ nav:'functions', target:'js-function' },
+				meta:{ nav:'js-functions', target:'js-function' },
 				component:MyBuilderJsFunction,
 				props:true
 			},{

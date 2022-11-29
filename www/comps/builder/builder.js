@@ -110,20 +110,27 @@ let MyBuilder = {
 								<img src="images/menu.png" />
 								<span>{{ capApp.navigationMenu }}</span>
 							</router-link>
-						</div>
-						<div class="navigation-column">
-							<router-link class="entry clickable"
-								:to="'/builder/functions/'+module.id"
-							>
-								<img src="images/code.png" />
-								<span>{{ capApp.navigationFunctions }}</span>
-							</router-link>
 							
 							<router-link class="entry clickable"
 								:to="'/builder/icons/'+module.id"
 							>
 								<img src="images/icon.png" />
 								<span>{{ capApp.navigationIcons }}</span>
+							</router-link>
+						</div>
+						<div class="navigation-column">
+							<router-link class="entry clickable"
+								:to="'/builder/pg-functions/'+module.id"
+							>
+								<img src="images/codeDatabase.png" />
+								<span>{{ capApp.navigationPgFunctions }}</span>
+							</router-link>
+							
+							<router-link class="entry clickable"
+								:to="'/builder/js-functions/'+module.id"
+							>
+								<img src="images/codeScreen.png" />
+								<span>{{ capApp.navigationJsFunctions }}</span>
 							</router-link>
 							
 							<router-link class="entry clickable"
@@ -174,13 +181,21 @@ let MyBuilder = {
 							<img src="images/tray.png" />
 							<h1>{{ capApp.navigationCollections }}</h1>
 						</div>
+						<div class="line" v-if="navigation === 'pg-functions'">
+							<img src="images/codeDatabase.png" />
+							<h1>{{ capApp.navigationPgFunctions }}</h1>
+						</div>
+						<div class="line" v-if="navigation === 'js-functions'">
+							<img src="images/codeScreen.png" />
+							<h1>{{ capApp.navigationJsFunctions }}</h1>
+						</div>
 						<div class="row gap centered default-inputs">
 							<input class="short" placeholder="..."
 								v-model="filter"
 								:title="capApp.navigationFilterHint"
 							/>
 							<my-button image="add.png"
-								v-if="['forms','relations','roles'].includes(navigation)"
+								v-if="['forms','js-functions','pg-functions','relations','roles'].includes(navigation)"
 								@trigger="add"
 								:active="moduleOwner"
 								:captionTitle="capGen.button.add"
@@ -227,25 +242,17 @@ let MyBuilder = {
 							>{{ c.name }}</router-link>
 						</template>
 						
-						<!-- functions -->
-						<template v-if="navigation === 'functions'">
-							
-							<!-- PG functions -->
-							<div class="navigation-entities-header-sub"
-								v-if="module.pgFunctions.filter(v => v.name.toLowerCase().includes(filter.toLowerCase())).length > 0"
-							>{{ capApp.navigationFunctionsSubBackend }}</div>
-							
+						<!-- PG functions -->
+						<template v-if="navigation === 'pg-functions'">
 							<router-link class="entry clickable"
 								v-for="fnc in module.pgFunctions.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 								:key="fnc.id"
 								:to="'/builder/pg-function/'+fnc.id" 
 							>{{ fnc.name }}</router-link>
-							
-							<!-- JS functions -->
-							<div class="navigation-entities-header-sub"
-								v-if="module.jsFunctions.filter(v => v.name.toLowerCase().includes(filter.toLowerCase())).length > 0"
-							>{{ capApp.navigationFunctionsSubFrontend }}</div>
-							
+						</template>
+						
+						<!-- JS functions -->
+						<template v-if="navigation === 'js-functions'">
 							<router-link class="entry clickable"
 								v-for="fnc in module.jsFunctions.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 								:key="fnc.id"
@@ -351,10 +358,11 @@ let MyBuilder = {
 	},
 	computed:{
 		subMenu:(s) => s.navigation === 'relations' && s.module.relations.length !== 0
-			|| s.navigation === 'forms'       && s.module.forms.length !== 0
-			|| s.navigation === 'roles'       && s.module.roles.length !== 0
-			|| s.navigation === 'collections' && s.module.collections.length !== 0
-			|| s.navigation === 'functions'   && (s.module.pgFunctions.length !== 0 || s.module.jsFunctions.length !== 0),
+			|| s.navigation === 'forms'        && s.module.forms.length !== 0
+			|| s.navigation === 'roles'        && s.module.roles.length !== 0
+			|| s.navigation === 'collections'  && s.module.collections.length !== 0
+			|| s.navigation === 'js-functions' && s.module.jsFunctions.length !== 0
+			|| s.navigation === 'pg-functions' && s.module.pgFunctions.length !== 0,
 		moduleIdInput:{
 			get() {
 				if(!this.module) return '';
@@ -399,7 +407,7 @@ let MyBuilder = {
 			if(evt.ctrlKey && evt.key === 'q')
 				this.nextLanguage();
 			
-			// registered child hotkeys (only if module can be changed)
+			// registered child hotkeys (if module is writable)
 			if(!this.moduleOwner)
 				return;
 			
@@ -417,9 +425,11 @@ let MyBuilder = {
 		// actions
 		add() {
 			switch(this.navigation) {
-				case 'forms':     this.createNew = 'form';     break;
-				case 'relations': this.createNew = 'relation'; break;
-				case 'roles':     this.createNew = 'role';     break;
+				case 'forms':        this.createNew = 'form';       break;
+				case 'js-functions': this.createNew = 'jsFunction'; break;
+				case 'pg-functions': this.createNew = 'pgFunction'; break;
+				case 'relations':    this.createNew = 'relation';   break;
+				case 'roles':        this.createNew = 'role';       break;
 			}
 		},
 		nextLanguage() {

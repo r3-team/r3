@@ -24,6 +24,28 @@ export function getDependentModules(moduleSource,modulesAll) {
 	return out;
 };
 
+export function getFunctionHelp(functionPrefix,functionObj,builderLanguage) {
+	let help = `${functionObj.name}(${functionObj.codeArgs}) => ${functionObj.codeReturns}`;
+	
+	// add translated title/description, if available
+	let cap = `${functionPrefix}FunctionTitle`;
+	if(typeof functionObj.captions[cap] !== 'undefined'
+		&& typeof functionObj.captions[cap][builderLanguage] !== 'undefined'
+		&& functionObj.captions[cap][builderLanguage] !== '') {
+		
+		help += `<br /><br />${functionObj.captions[cap][builderLanguage]}`;
+	}
+	
+	cap = `${functionPrefix}FunctionDesc`;
+	if(typeof functionObj.captions[cap] !== 'undefined'
+		&& typeof functionObj.captions[cap][builderLanguage] !== 'undefined'
+		&& functionObj.captions[cap][builderLanguage] !== '') {
+		
+		help += `<br /><br />${functionObj.captions[cap][builderLanguage]}`;
+	}
+	return help;
+};
+
 export function getValueFromJson(inputJson,nameChain,valueFallback) {
 	let o = JSON.parse(inputJson);
 	for(let i = 0, j = nameChain.length; i < j; i++) {
