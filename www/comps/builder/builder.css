@@ -852,6 +852,18 @@
 .builder-role table{
 	width:100%;
 }
+.builder-role.contentBox>.content{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
+}
+.builder-role .contentBox.access{
+	flex-flow:row nowrap;
+}
+.builder-role .contentBox.sidebar{
+	flex:1 1 300px;
+	max-width:500px;
+}
 .builder-role .access-header{
 	display:flex;
 	flex-flow:row nowrap;

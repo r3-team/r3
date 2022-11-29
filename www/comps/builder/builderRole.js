@@ -42,9 +42,10 @@ let MyBuilderRoleAccessMenu = {
 					@trigger="showSubs = !showSubs"
 					:image="showSubs ? 'triangleDown.png' : 'triangleRight.png'"
 					:naked="true"
+					:tight="true"
 				/>
 			</td>
-			<td class="maximum clickable" @click="showSubs = !showSubs">
+			<td class="clickable" @click="showSubs = !showSubs">
 				{{ title }}
 			</td>
 			<td>
@@ -120,18 +121,14 @@ let MyBuilderRoleAccessRelation = {
 	name:'my-builder-role-access-relation',
 	template:`<tbody>
 		<tr>
-			<td class="minimum">
+			<td colspan="2">
 				<my-button
-					v-if="relation.attributes.length !== 0"
 					@trigger="$emit('relation-selected',relation.id)"
+					:caption="relation.name + (brokenInheritance ? '*' : '')"
 					:image="showEntries ? 'triangleDown.png' : 'triangleRight.png'"
 					:naked="true"
+					:tight="true"
 				/>
-			</td>
-			<td colspan="2" class="clickable maximum"
-				@click="$emit('relation-selected',relation.id)"
-			>
-				{{ relation.name + (brokenInheritance ? '*' : '') }}
 			</td>
 			<td>
 				<select
@@ -152,7 +149,7 @@ let MyBuilderRoleAccessRelation = {
 			v-for="atr in relation.attributes"
 			:key="atr.id"
 		>
-			<td colspan="2"></td>
+			<td></td>
 			<td>{{ attributeIdMap[atr.id].name }}</td>
 			<td>
 				<select
@@ -255,6 +252,12 @@ let MyBuilderRole = {
 					@trigger="copyValueDialog(name,id,id)"
 					:caption="capGen.id"
 				/>
+				<my-button
+					@trigger="showProperties = !showProperties"
+					:active="!isEveryone"
+					:caption="capGen.properties"
+					:image="showProperties ? 'checkbox1.png' : 'checkbox0.png'"
+				/>
 				<my-button image="delete.png"
 					@trigger="delAsk"
 					:active="!readonly && !isEveryone"
@@ -266,15 +269,91 @@ let MyBuilderRole = {
 		</div>
 		
 		<div class="content no-padding">
-		
-			<!-- properties -->
-			<div class="contentPart" v-if="!isEveryone">
-				<div class="contentPartHeader clickable" @click="showProperties = !showProperties">
-					<img class="icon" :src="displayArrow(showProperties)" />
-					<h1>{{ capGen.properties }}</h1>
+			<div class="contentBox grow access">
+				<div class="contentPart">
+					<div class="contentPartHeader">
+						<h1>{{ capApp.data }}</h1>
+					</div>
+					
+					<table class="default-inputs">
+						<thead>
+							<th>{{ capApp.relation }}</th>
+							<th>{{ capApp.attribute }}</th>
+							<th>{{ capApp.access }}*</th>
+						</thead>
+						
+						<my-builder-role-access-relation
+							v-for="rel in module.relations"
+							@apply-attribute="(...args) => apply('attribute',args[0],args[1])"
+							@apply-relation="(...args) => apply('relation',args[0],args[1])"
+							@relation-selected="toggleRelationShow"
+							:attribute-id-map-access="accessAttributes"
+							:key="role.id + '_' + rel.id"
+							:relation="rel"
+							:role="role"
+							:readonly="readonly"
+							:relation-id-map-access="accessRelations"
+							:show-entries="relationIdsShown.includes(rel.id)"
+						/>
+					</table>
+					
+					<p>{{ capApp.legend }}</p>
 				</div>
-				
-				<template v-if="showProperties">
+				<div class="contentPart">
+					<div class="contentPartHeader">
+						<h1>{{ capApp.menus }}</h1>
+					</div>
+					
+					<table class="default-inputs">
+						<thead>
+							<th colspan="2">{{ capApp.menu }}</th>
+							<th>{{ capApp.access }}</th>
+						</thead>
+						
+						<my-builder-role-access-menu
+							v-for="men in module.menus"
+							@apply="(...args) => apply('menu',args[0],args[1])"
+							:builder-language="builderLanguage"
+							:id-map-access="accessMenus"
+							:key="role.id + '_' + men.id"
+							:menu="men"
+							:role="role"
+							:readonly="readonly"
+						/>
+					</table>
+				</div>
+				<div class="contentPart">
+					<div class="contentPartHeader">
+						<h1>{{ capApp.collections }}</h1>
+					</div>
+					
+					<table class="default-inputs">
+						<thead>
+							<th>{{ capApp.collection }}</th>
+							<th>{{ capApp.access }}</th>
+						</thead>
+						
+						<my-builder-role-access-collection
+							v-for="c in module.collections"
+							@apply="(...args) => apply('collection',args[0],args[1])"
+							:builder-language="builderLanguage"
+							:collection="c"
+							:id-map-access="accessCollections"
+							:key="role.id + '_' + c.id"
+							:readonly="readonly"
+						/>
+					</table>
+				</div>
+			</div>
+			
+			<!-- sidebar -->
+			<div class="contentBox sidebar" v-if="!isEveryone && showProperties">
+				<div class="top lower">
+					<div class="area nowrap">
+						<h1 class="title">{{ capGen.properties }}</h1>
+					</div>
+				</div>
+				<div class="content padding default-inputs">
 					<table class="builder-table-vertical default-inputs">
 						<tr>
 							<td>{{ capGen.name }}</td>
@@ -352,93 +431,6 @@ let MyBuilderRole = {
 							</td>
 						</tr>
 					</table>
-				</template>
-			</div>
-			
-			<!-- permissions -->
-			<br />
-			<div class="access-header">
-				<img class="icon" src="images/lock.png" />
-				<h1>{{ capApp.access }}</h1>
-			</div>
-			
-			<div class="row">
-				<div class="contentPart">
-					<div class="contentPartHeader">
-						<h1>{{ capApp.data }}</h1>
-					</div>
-					
-					<table class="default-inputs">
-						<thead>
-							<th></th>
-							<th>{{ capApp.relation }}</th>
-							<th>{{ capApp.attribute }}</th>
-							<th>{{ capApp.access }}*</th>
-						</thead>
-						
-						<my-builder-role-access-relation
-							v-for="rel in module.relations"
-							@apply-attribute="(...args) => apply('attribute',args[0],args[1])"
-							@apply-relation="(...args) => apply('relation',args[0],args[1])"
-							@relation-selected="toggleRelationShow"
-							:attribute-id-map-access="accessAttributes"
-							:key="role.id + '_' + rel.id"
-							:relation="rel"
-							:role="role"
-							:readonly="readonly"
-							:relation-id-map-access="accessRelations"
-							:show-entries="relationIdsShown.includes(rel.id)"
-						/>
-					</table>
-					
-					<p>{{ capApp.legend }}</p>
-				</div>
-				
-				<div class="contentPart">
-					<div class="contentPartHeader">
-						<h1>{{ capApp.menus }}</h1>
-					</div>
-					
-					<table class="default-inputs">
-						<thead>
-							<th colspan="2">{{ capApp.menu }}</th>
-							<th>{{ capApp.access }}</th>
-						</thead>
-						
-						<my-builder-role-access-menu
-							v-for="men in module.menus"
-							@apply="(...args) => apply('menu',args[0],args[1])"
-							:builder-language="builderLanguage"
-							:id-map-access="accessMenus"
-							:key="role.id + '_' + men.id"
-							:menu="men"
-							:role="role"
-							:readonly="readonly"
-						/>
-					</table>
-				</div>
-				
-				<div class="contentPart">
-					<div class="contentPartHeader">
-						<h1>{{ capApp.collections }}</h1>
-					</div>
-					
-					<table class="default-inputs">
-						<thead>
-							<th>{{ capApp.collection }}</th>
-							<th>{{ capApp.access }}</th>
-						</thead>
-						
-						<my-builder-role-access-collection
-							v-for="c in module.collections"
-							@apply="(...args) => apply('collection',args[0],args[1])"
-							:builder-language="builderLanguage"
-							:collection="c"
-							:id-map-access="accessCollections"
-							:key="role.id + '_' + c.id"
-							:readonly="readonly"
-						/>
-					</table>
 				</div>
 			</div>
 		</div>
@@ -508,11 +500,6 @@ let MyBuilderRole = {
 		// externals
 		copyValueDialog,
 		getDependentModules,
-		
-		// presentation
-		displayArrow(state) {
-			return state ? 'images/triangleDown.png' : 'images/triangleRight.png';
-		},
 		
 		// actions
 		apply(type,id,access) {
