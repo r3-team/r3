@@ -107,7 +107,7 @@ let MyBuilder = {
 							<router-link class="entry clickable"
 								:to="'/builder/menu/'+module.id"
 							>
-								<img src="images/flexRow.png" />
+								<img src="images/menu.png" />
 								<span>{{ capApp.navigationMenu }}</span>
 							</router-link>
 						</div>

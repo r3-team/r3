@@ -870,31 +870,20 @@
 }
 
 /* functions */
-.builder-functions .schedule-line{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	margin:0px 0px 6px 0px;
-}
-.builder-functions .schedule-line span{
-	margin:0px 6px 0px 12px;
-}
-.builder-functions .schedule-line input{
-	max-width:32px !important;
-}
 .builder-function{
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
 }
 .builder-function .contentBox{
-	flex:3 0.5 600px;
+	flex:1 1 900px;
 	display:flex;
 	flex-direction:column;
 	overflow:auto;
 }
 .builder-function .contentBox.right{
-	flex:0.5 1 350px;
+	flex:1 1 300px;
+	max-width:600px;
 }
 .builder-function .function-details{
 	flex:1 1 auto;
@@ -923,24 +912,12 @@
 	display:flex;
 	flex-flow:column nowrap;
 }
-.builder-function .placeholders.modules{
-	margin:0px 0px 8px 0px;
-}
-.builder-function .placeholders.collections-title,
-.builder-function .placeholders.form-query-title,
-.builder-function .placeholders.fields-title,
-.builder-function .placeholders.fields{
+.builder-function .placeholders{
 	margin:0px 0px 16px 0px;
 }
-.builder-function .placeholders.collections-title span,
-.builder-function .placeholders.fields-title span{
+.builder-function .placeholders span{
 	font-style:italic;
 	margin:12px 0px 0px 0px;
-}
-.builder-function .placeholders.fields,
-.builder-function .placeholders.relations,
-.builder-function .placeholders.functions{
-	flex-flow:row wrap;
 }
 .builder-function .placeholders .functions-title{
 	color:var(--color-font-alt);
@@ -959,6 +936,29 @@
 	background-color:transparent;
 	border:none;
 	box-shadow:none;
+}
+.builder-function .schedule{
+	display:flex;
+	flex-flow:row wrap;
+	align-items:center;
+	padding:0px 0px 6px 0px;
+	margin:0px 0px 6px 0px;
+	border-bottom:1px solid var(--color-border);
+	border-radius:4px;
+	gap:4px;
+}
+.builder-function .schedule .line{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:5px;
+}
+.builder-function .schedule span{
+	font-size:80%;
+	line-height:90%;
+}
+.builder-function .schedule input{
+	max-width:32px !important;
 }
 
 

@@ -199,6 +199,7 @@ body                                         { --depth:6; }
 .builder-entry-list .entry:not(.off):hover   { --depth:3; }
 .builder-entry-list .entry:not(.off):focus   { --depth:5; }
 .builder-table-vertical td                   { --depth:5; }
+.builder-function .placeholders              { --depth:2; }
 
 
 html,body{

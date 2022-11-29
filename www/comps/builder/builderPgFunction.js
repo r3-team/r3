@@ -13,50 +13,58 @@ export {MyBuilderPgFunction as default};
 
 let MyBuilderPgFunctionItemSchedule = {
 	name:'my-builder-pg-function-item-schedule',
-	template:`<div class="schedule-line">
+	template:`<div class="schedule">
 		
-		<my-button image="cancel.png"
-			@trigger="$emit('remove')"
-			:active="!readonly"
-			:naked="true"
-		/>
-		
-		<!-- interval at which to run -->
-		<span>{{ capApp.runOnce }}</span>
-		<div><my-bool v-model="runOnce" :readonly="readonly" /></div>
-		
-		<template v-if="intervalType !== 'once'">
-			<span>{{ capApp.intervalEvery }}</span>
-			<input class="short" v-model.number="intervalValue" :disabled="readonly" />
-			
-			<select class="short" v-model="intervalType" :disabled="readonly">
-				<option value="seconds">{{ capApp.option.intervalSeconds }}</option>
-				<option value="minutes">{{ capApp.option.intervalMinutes }}</option>
-				<option value="hours"  >{{ capApp.option.intervalHours   }}</option>
-				<option value="days"   >{{ capApp.option.intervalDays    }}</option>
-				<option value="weeks"  >{{ capApp.option.intervalWeeks   }}</option>
-				<option value="months" >{{ capApp.option.intervalMonths  }}</option>
-				<option value="years"  >{{ capApp.option.intervalYears   }}</option>
+		<div class="line">
+			<!-- interval at which to run -->
+			<select class="dynamic" v-model="runOnce" :disabled="readonly">
+				<optgroup :label="capApp.runType">
+					<option :value="true">{{ capApp.runOnce }}</option>
+					<option :value="false">{{ capApp.runRegular }}</option>
+				</optgroup>
 			</select>
-		</template>
+			
+			<template v-if="intervalType !== 'once'">
+				<span>{{ capApp.intervalEvery }}</span>
+				<input class="dynamic" v-model.number="intervalValue" :disabled="readonly" />
+				
+				<select class="dynamic" v-model="intervalType" :disabled="readonly">
+					<option value="seconds">{{ capApp.option.intervalSeconds }}</option>
+					<option value="minutes">{{ capApp.option.intervalMinutes }}</option>
+					<option value="hours"  >{{ capApp.option.intervalHours   }}</option>
+					<option value="days"   >{{ capApp.option.intervalDays    }}</option>
+					<option value="weeks"  >{{ capApp.option.intervalWeeks   }}</option>
+					<option value="months" >{{ capApp.option.intervalMonths  }}</option>
+					<option value="years"  >{{ capApp.option.intervalYears   }}</option>
+				</select>
+			</template>
+		</div>
 		
-		<!-- for weeks/months/years scheduler - on which day to run -->
-		<template v-if="['weeks','months','years'].includes(intervalType)">
-			<span v-if="intervalType === 'weeks'" >{{ capApp.intervalAtDayForWeeks  }}</span>
-			<span v-if="intervalType === 'months'">{{ capApp.intervalAtDayForMonths }}</span>
-			<span v-if="intervalType === 'years'" >{{ capApp.intervalAtDayForYears }}</span>
-			<input class="short" v-model.number="atDay" :disabled="readonly" placeholder="DD" />
-		</template>
-		
-		<!-- target time, at which hour:minute:second to run -->
-		<template v-if="['days','weeks','months','years'].includes(intervalType)">
-			<span>{{ capApp.intervalAtTime }}</span>
-			<input class="short" placeholder="HH" :disabled="readonly" v-model.number="atHour" />
-			<div>:</div>
-			<input class="short" placeholder="MM" :disabled="readonly" v-model.number="atMinute" />
-			<div>:</div>
-			<input class="short" placeholder="SS" :disabled="readonly" v-model.number="atSecond" />
-		</template>
+		<div class="line">
+			<!-- for weeks/months/years scheduler - on which day to run -->
+			<template v-if="['weeks','months','years'].includes(intervalType)">
+				<span v-if="intervalType === 'weeks'" >{{ capApp.intervalAtDayForWeeks  }}</span>
+				<span v-if="intervalType === 'months'">{{ capApp.intervalAtDayForMonths }}</span>
+				<span v-if="intervalType === 'years'" >{{ capApp.intervalAtDayForYears }}</span>
+				<input class="short" v-model.number="atDay" :disabled="readonly" placeholder="DD" />
+			</template>
+			
+			<!-- target time, at which hour:minute:second to run -->
+			<template v-if="['days','weeks','months','years'].includes(intervalType)">
+				<span>{{ capApp.intervalAtTime }}</span>
+				<input class="dynamic" placeholder="HH" :disabled="readonly" v-model.number="atHour" />
+				<div>:</div>
+				<input class="dynamic" placeholder="MM" :disabled="readonly" v-model.number="atMinute" />
+				<div>:</div>
+				<input class="dynamic" placeholder="SS" :disabled="readonly" v-model.number="atSecond" />
+			</template>
+			
+			<my-button image="cancel.png"
+				@trigger="$emit('remove')"
+				:active="!readonly"
+				:naked="true"
+			/>
+		</div>
 	</div>`,
 	props:{
 		modelValue:{ type:Object,  required:true },
@@ -233,72 +241,84 @@ let MyBuilderPgFunction = {
 					
 					<div class="message" v-html="capApp.entityInput"></div>
 					
-					<h2>{{ capApp.placeholdersModules }}</h2>
-					<div class="placeholders modules"
-						v-for="mod in getDependentModules(module,modules).filter(v => v.relations.length !== 0 || v.pgFunctions.length !== 0)"
-						:key="mod.id"
-					>
-						<my-button
-							@trigger="toggleModule(mod.id)"
-							:caption="mod.name"
-							:image="moduleIdsOpen.includes(mod.id) ? 'triangleDown.png' : 'triangleRight.png'"
-							:naked="true"
-						/>
-						
-						<template v-if="moduleIdsOpen.includes(mod.id)">
-							
-							<!-- relations & attributes -->
-							<div class="placeholders relations" v-for="rel in mod.relations" :key="rel.id">
-								
-								<my-builder-function-placeholder
-									@toggle="toggleEntity('relation',rel.id)"
-									:builderLanguage="builderLanguage"
-									:name="rel.name"
-									:selected="entitySelected === 'relation' && entitySelectedId === rel.id"
-								/>
-								
-								<my-builder-function-placeholder
-									v-for="atr in rel.attributes"
-									@toggle="toggleEntity('attribute',atr.id)"
-									:builderLanguage="builderLanguage"
-									:key="atr.id"
-									:naked="true"
-									:name="atr.name"
-									:selected="entitySelected === 'attribute' && entitySelectedId === atr.id"
-								/>
-							</div>
-							
-							<!-- PG functions -->
-							<div class="placeholders functions">
-								<my-builder-function-placeholder
-									v-for="f in mod.pgFunctions.filter(v => !v.isTrigger)"
-									@show-help="showHelp(f.name+'()',$event)"
-									@toggle="toggleEntity('pgFunction',f.id)"
-									:builderLanguage="builderLanguage"
-									:functionObj="f"
-									:functionType="'pg'"
-									:key="f.id"
-									:name="f.name"
-									:selected="entitySelected === 'pgFunction' && entitySelectedId === f.id"
-								/>
-							</div>
-						</template>
+					<div class="placeholders">
+						<h2>{{ capApp.placeholdersModules }}</h2>
+						<table>
+							<tr>
+								<td>
+									<select v-model="entityModuleId" @change="entitySelectedId = null; entitySelected = 'relation'">
+										<option :value="null">-</option>
+										<option
+											v-for="mod in getDependentModules(module,modules).filter(v => v.relations.length !== 0 || v.pgFunctions.length !== 0)"
+											:value="mod.id"
+										>{{ mod.name }}</option>
+									</select>
+								</td>
+								<td v-if="entityModuleId !== null">
+									<select class="dynamic" v-model="entitySelected" @change="entitySelectedId = null">
+										<option value="relation">{{ capApp.placeholderRelation }}</option>
+										<option value="attribute">{{ capApp.placeholderAttribute }}</option>
+										<option value="pgFunction">{{ capApp.placeholderFunction }}</option>
+									</select>
+								</td>
+								<td>
+									<select v-model="entitySelectedId" v-if="entityModuleId !== null && entitySelected === 'relation'">
+										<option :value="null">-</option>
+										<option
+											v-for="r in moduleIdMap[entityModuleId].relations"
+											:value="r.id"
+										>{{ r.name }}</option>
+									</select>
+									<select v-model="entitySelectedId" v-if="entityModuleId !== null && entitySelected === 'attribute'">
+										<option :value="null">-</option>
+										<optgroup v-for="r in moduleIdMap[entityModuleId].relations" :label="r.name">
+											<option
+												v-for="a in relationIdMap[r.id].attributes"
+												:value="a.id"
+											>{{ a.name }}</option>
+										</optgroup>
+									</select>
+									<select v-model="entitySelectedId" v-if="entityModuleId !== null && entitySelected === 'pgFunction'">
+										<option :value="null">-</option>
+										<option
+											v-for="f in moduleIdMap[entityModuleId].pgFunctions"
+											:value="f.id"
+										>{{ f.name }}</option>
+									</select>
+								</td>
+							</tr>
+						</table>
+						<span v-if="['relation','attribute','pgFunction'].includes(entitySelected) && entitySelectedId !== null">
+							{{ capApp.placeholderInsert }}
+						</span>
 					</div>
 					
 					<!-- instance functions -->
-					<h2>{{ capApp.placeholdersInstance }}</h2>
-					
-					<div class="placeholders functions">
-						<my-builder-function-placeholder
-							v-for="f in instanceFunctionIds"
-							@show-help="showHelp(f+'()',$event)"
-							@toggle="toggleEntity('instanceFunction',f)"
-							:builderLanguage="builderLanguage"
-							:functionHelp="capApp.helpPg[f]"
-							:key="f"
-							:name="f"
-							:selected="entitySelected === 'instanceFunction' && entitySelectedId === f"
-						/>
+					<div class="placeholders">
+						<h2>{{ capApp.placeholdersInstance }}</h2>
+						<table>
+							<tr>
+								<td>
+									<select v-model="entitySelectedId" @change="entitySelected = 'instanceFunction'; entityModuleId = null">
+										<option :value="null">-</option>
+										<option
+											v-for="f in instanceFunctionIds"
+											:value="f"
+										>{{ f }}</option>
+									</select>
+								</td>
+								<td>
+									<my-button image="question.png"
+										@trigger="showHelp(entitySelectedId+'()',capApp.helpPg[entitySelectedId])"
+										:active="entitySelected === 'instanceFunction' && entitySelectedId !== null"
+										:captionTitle="capGen.button.help"
+									/>
+								</td>
+							</tr>
+						</table>
+						<span v-if="entitySelected === 'instanceFunction' && entitySelectedId !== null">
+							{{ capApp.placeholderInsert }}
+						</span>
 					</div>
 				</template>
 				
@@ -329,7 +349,7 @@ let MyBuilderPgFunction = {
 								/>
 							</td>
 						</tr>
-						<tr>
+						<tr v-if="!isTrigger">
 							<td>{{ capApp.codeArgs }}</td>
 							<td><textarea v-model="codeArgs" :disabled="isTrigger || readonly" placeholder="-"></textarea></td>
 						</tr>
@@ -337,11 +357,11 @@ let MyBuilderPgFunction = {
 							<td>{{ capApp.codeReturns }}</td>
 							<td><input v-model="codeReturns" :disabled="isTrigger || readonly" placeholder="-" /></td>
 						</tr>
-						<tr>
+						<tr v-if="!isTrigger">
 							<td>{{ capApp.isFrontendExec }}</td>
 							<td><my-bool v-model="isFrontendExec" :readonly="isTrigger || readonly" /></td>
 						</tr>
-						<tr>
+						<tr v-if="!isTrigger">
 							<td>
 								<div class="column">
 									<span>{{ capApp.schedules }}</span>
@@ -409,9 +429,9 @@ let MyBuilderPgFunction = {
 			// states
 			addNew:false,
 			addOld:false,
-			entitySelected:'',
+			entityModuleId:null,
+			entitySelected:'relation',
 			entitySelectedId:null,
-			moduleIdsOpen:[],
 			showPreview:false,
 			showSidebar:true,
 			tabTarget:'content'
@@ -480,7 +500,7 @@ let MyBuilderPgFunction = {
 			this.codeReturns    = this.pgFunction.codeReturns;
 			this.isFrontendExec = this.pgFunction.isFrontendExec;
 			this.isTrigger      = this.pgFunction.isTrigger;
-			this.schedules      = this.pgFunction.schedules;
+			this.schedules      = JSON.parse(JSON.stringify(this.pgFunction.schedules));
 			this.addNew         = false;
 			this.addOld         = false;
 		},
@@ -538,23 +558,6 @@ let MyBuilderPgFunction = {
 			}
 			this.codeFunction = field.value;
 			this.entitySelectedId = null;
-		},
-		toggleEntity(entityName,id) {
-			if(this.entitySelected === entityName && this.entitySelectedId === id) {
-				this.entitySelected   = '';
-				this.entitySelectedId = null;
-				return;
-			}
-			this.entitySelected   = entityName;
-			this.entitySelectedId = id;
-		},
-		toggleModule(id) {
-			let pos = this.moduleIdsOpen.indexOf(id);
-			
-			if(pos === -1)
-				return this.moduleIdsOpen.push(id);
-			
-			this.moduleIdsOpen.splice(pos,1);
 		},
 		showHelp(top,text) {
 			this.$store.commit('dialog',{
