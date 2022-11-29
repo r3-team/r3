@@ -1,12 +1,17 @@
 import MyBuilderQuery                  from './builderQuery.js';
 import MyBuilderCollectionInput        from './builderCollectionInput.js';
+import MyBuilderIconInput              from './builderIconInput.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
-import {getNilUuid}                    from '../shared/generic.js';
 import {getQueryTemplate}              from '../shared/query.js';
+import MyTabs                          from '../tabs.js';
 import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
 } from './builderColumns.js';
+import {
+	copyValueDialog,
+	getNilUuid
+} from '../shared/generic.js';
 export {MyBuilderCollection as default};
 
 let MyBuilderCollection = {
@@ -15,7 +20,9 @@ let MyBuilderCollection = {
 		MyBuilderCollectionInput,
 		MyBuilderColumns,
 		MyBuilderColumnTemplates,
-		MyBuilderQuery
+		MyBuilderIconInput,
+		MyBuilderQuery,
+		MyTabs
 	},
 	template:`<div class="builder-collection" v-if="collection">
 	
@@ -24,7 +31,7 @@ let MyBuilderCollection = {
 				<div class="area nowrap">
 					<img class="icon" src="images/tray.png" />
 					<h1 class="title">
-						{{ capApp.titleOne.replace('{NAME}',collection.name) }}
+						{{ capApp.titleOne.replace('{NAME}',name) }}
 					</h1>
 				</div>
 				<div class="area">
@@ -48,13 +55,24 @@ let MyBuilderCollection = {
 					/>
 					<my-button
 						@trigger="showInHeader = !showInHeader"
-						:caption="capApp.button.inHeader"
+						:caption="capApp.inHeader"
 						:image="showInHeader ? 'visible1.png' : 'visible0.png'"
+					/>
+					<my-button image="visible1.png"
+						@trigger="copyValueDialog(name,id,id)"
+						:caption="capGen.id"
 					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
 						:caption="capGen.preview"
-						:image="showPreview ? 'visible1.png' : 'visible0.png'"
+						:image="showPreview ? 'checkbox1.png' : 'checkbox0.png'"
+					/>
+					<my-button image="delete.png"
+						@trigger="delAsk"
+						:active="!readonly"
+						:cancel="true"
+						:caption="capGen.button.delete"
+						:captionTitle="capGen.button.delete"
 					/>
 				</div>
 			</div>
@@ -146,15 +164,20 @@ let MyBuilderCollection = {
 		</div>
 		
 		<div class="contentBox sidebar scroll" v-if="showSidebar">
-			<div class="top">
+			<div class="top lower">
 				<div class="area">
-					<img class="icon" src="images/database.png" />
-					<h1>{{ capApp.query }}</h1>
+					<h1>{{ capGen.settings }}</h1>
 				</div>
 			</div>
-			<div class="top lower" v-if="settings.compact" />
 			
-			<div class="content">
+			<my-tabs
+				v-model="tabTarget"
+				:entries="['content','properties']"
+				:entriesIcon="['images/database.png','images/edit.png']"
+				:entriesText="[capGen.content,capGen.properties]"
+			/>
+			
+			<div class="content" v-if="tabTarget === 'content'">
 				<my-builder-query
 					@index-removed="removeIndex($event)"
 					@set-filters="filters = $event"
@@ -211,6 +234,27 @@ let MyBuilderCollection = {
 					/>
 				</template>
 			</div>
+			
+			<div class="content" v-if="tabTarget === 'properties'">
+				<table class="builder-table-vertical tight fullWidth default-inputs">
+					<tr>
+						<td>{{ capGen.name }}</td>
+						<td><input v-model="name" :disabled="readonly" /></td>
+					</tr>
+					<tr>
+						<td>{{ capGen.icon }}</td>
+						<td>
+							<my-builder-icon-input
+								@input="iconId = $event"
+								:iconIdSelected="iconId"
+								:module="module"
+								:title="capGen.icon"
+								:readonly="readonly"
+							/>
+						</td>
+					</tr>
+				</table>
+			</div>
 		</div>
 	</div>`,
 	emits:['hotkeysRegister'],
@@ -237,51 +281,20 @@ let MyBuilderCollection = {
 			// inputs
 			columns:[],
 			columnIdQuery:null,
+			iconId:null,
 			inHeader:[],
+			name:'',
 			
 			// state
 			showInHeader:false,
 			showPreview:false,
-			showSidebar:true
+			showSidebar:true,
+			tabTarget:'content'
 		};
 	},
 	computed:{
-		// entities
-		collection:function() {
-			return typeof this.collectionIdMap[this.id] === 'undefined'
-				? false : this.collectionIdMap[this.id];
-		},
-		columnQueryEdit:function() {
-			if(this.columnIdQuery === null) return false;
-			
-			for(let i = 0, j = this.columns.length; i < j; i++) {
-				if(this.columns[i].id === this.columnIdQuery)
-					return this.columns[i];
-			}
-			return false;
-		},
-		
-		// states
-		hasChanges:function() {
-			return this.relationId               !== this.collection.query.relationId
-				|| this.fixedLimit               !== this.collection.query.fixedLimit
-				|| JSON.stringify(this.joins)    !== JSON.stringify(this.collection.query.joins)
-				|| JSON.stringify(this.filters)  !== JSON.stringify(this.collection.query.filters)
-				|| JSON.stringify(this.orders)   !== JSON.stringify(this.collection.query.orders)
-				|| JSON.stringify(this.columns)  !== JSON.stringify(this.collection.columns)
-				|| JSON.stringify(this.inHeader) !== JSON.stringify(this.collection.inHeader)
-			;
-		},
-		showColumnQuery:function() {
-			return this.columnQueryEdit !== false;
-		},
-		
-		// entities
-		module:function() {
-			return this.moduleIdMap[this.collection.moduleId];
-		},
-		collectionRows:function() {
-			const col = this.$store.getters.collectionIdMap[this.collection.id];
+		collectionRows:(s) => {
+			const col = s.$store.getters.collectionIdMap[s.collection.id];
 			if(typeof col === 'undefined')
 				return [];
 			
@@ -291,14 +304,37 @@ let MyBuilderCollection = {
 			}
 			return out;
 		},
+		columnQueryEdit:(s) => {
+			if(s.columnIdQuery === null) return false;
+			
+			for(let i = 0, j = s.columns.length; i < j; i++) {
+				if(s.columns[i].id === s.columnIdQuery)
+					return s.columns[i];
+			}
+			return false;
+		},
+		hasChanges:(s) => s.name          !== s.collection.name
+			|| s.iconId                   !== s.collection.iconId
+			|| s.relationId               !== s.collection.query.relationId
+			|| s.fixedLimit               !== s.collection.query.fixedLimit
+			|| JSON.stringify(s.joins)    !== JSON.stringify(s.collection.query.joins)
+			|| JSON.stringify(s.filters)  !== JSON.stringify(s.collection.query.filters)
+			|| JSON.stringify(s.orders)   !== JSON.stringify(s.collection.query.orders)
+			|| JSON.stringify(s.columns)  !== JSON.stringify(s.collection.columns)
+			|| JSON.stringify(s.inHeader) !== JSON.stringify(s.collection.inHeader),
+		
+		// simple
+		collection:     (s) => typeof s.collectionIdMap[s.id] === 'undefined' ? false : s.collectionIdMap[s.id],
+		module:         (s) => s.moduleIdMap[s.collection.moduleId],
+		showColumnQuery:(s) => s.columnQueryEdit !== false,
 		
 		// stores
-		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
-		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
-		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
-		settings:       function() { return this.$store.getters.settings; },
-		capApp:         function() { return this.$store.getters.captions.builder.collection; },
-		capGen:         function() { return this.$store.getters.captions.generic; }
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
+		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
+		settings:       (s) => s.$store.getters.settings,
+		capApp:         (s) => s.$store.getters.captions.builder.collection,
+		capGen:         (s) => s.$store.getters.captions.generic
 	},
 	watch:{
 		collection:{
@@ -308,29 +344,30 @@ let MyBuilderCollection = {
 	},
 	methods:{
 		// externals
+		copyValueDialog,
 		getCollectionConsumerTemplate,
 		getNilUuid,
 		
 		// actions
-		collectionAdd:function() {
+		collectionAdd() {
 			let v = JSON.parse(JSON.stringify(this.inHeader));
 			let c = this.getCollectionConsumerTemplate();
 			c.collectionId = this.collection.id;
 			v.push(c);
 			this.inHeader = v;
 		},
-		collectionRemove:function(i) {
+		collectionRemove(i) {
 			this.inHeader.splice(i,1);
 		},
-		collectionSet:function(i,value) {
+		collectionSet(i,value) {
 			this.inHeader[i] = value;
 		},
-		columnQuerySet:function(name,value) {
+		columnQuerySet(name,value) {
 			let v = JSON.parse(JSON.stringify(this.columnQueryEdit.query));
 			v[name] = value;
 			this.columnQueryEdit.query = v;
 		},
-		removeIndex:function(index) {
+		removeIndex(index) {
 			for(let i = 0, j = this.columns.length; i < j; i++) {
 				let c = this.columns[i];
 				
@@ -340,9 +377,11 @@ let MyBuilderCollection = {
 				}
 			}
 		},
-		reset:function() {
+		reset() {
 			if(!this.collection) return;
 			
+			this.name       = this.collection.name;
+			this.iconId     = this.collection.iconId;
 			this.relationId = this.collection.query.relationId;
 			this.fixedLimit = this.collection.query.fixedLimit;
 			this.joins      = JSON.parse(JSON.stringify(this.collection.query.joins));
@@ -353,7 +392,7 @@ let MyBuilderCollection = {
 		},
 		
 		// helpers
-		replaceBuilderId:function(columns) {
+		replaceBuilderId(columns) {
 			for(let i = 0, j = columns.length; i < j; i++) {
 				
 				if(columns[i].id.startsWith('new_'))
@@ -363,13 +402,36 @@ let MyBuilderCollection = {
 		},
 		
 		// backend calls
-		set:function() {
+		delAsk() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.delete,
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.delete,
+					exec:this.del,
+					image:'delete.png'
+				},{
+					caption:this.capGen.button.cancel,
+					image:'cancel.png'
+				}]
+			});
+		},
+		del() {
+			ws.send('collection','del',{id:this.collection.id},true).then(
+				() => {
+					this.$root.schemaReload(this.module.id);
+					this.$router.push('/builder/collections/'+this.collection.moduleId);
+				},
+				this.$root.genericError
+			);
+		},
+		set() {
 			ws.sendMultiple([
 				ws.prepare('collection','set',{
 					id:this.collection.id,
-					iconId:this.collection.iconId,
 					moduleId:this.collection.moduleId,
-					name:this.collection.name,
+					iconId:this.iconId,
+					name:this.name,
 					columns:this.replaceBuilderId(
 						JSON.parse(JSON.stringify(this.columns))
 					),

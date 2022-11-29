@@ -260,7 +260,7 @@ let MyBuilderForm = {
 							<td>
 								<my-builder-icon-input
 									@input="iconId = $event"
-									:icon-id-selected="iconId"
+									:iconIdSelected="iconId"
 									:module="module"
 									:title="capApp.icon"
 									:readonly="readonly"

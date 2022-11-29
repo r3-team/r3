@@ -25,10 +25,8 @@ let MyBuilderRoleAccessCollection = {
 	},
 	emits:['apply'],
 	computed:{
-		access:function() {
-			return typeof this.idMapAccess[this.collection.id] === 'undefined'
-				? -1 : this.idMapAccess[this.collection.id];
-		}
+		access:(s) => typeof s.idMapAccess[s.collection.id] === 'undefined'
+			? -1 : s.idMapAccess[s.collection.id]
 	}
 };
 
@@ -87,33 +85,26 @@ let MyBuilderRoleAccessMenu = {
 		return { showSubs:true };
 	},
 	computed:{
-		access:function() {
-			if(typeof this.idMapAccess[this.menu.id] === 'undefined')
-				return -1;
-			
-			return this.idMapAccess[this.menu.id];
-		},
-		subsExist:function() {
-			return this.menu.menus.length !== 0;
-		},
-		title:function() {
+		access:   (s) => typeof s.idMapAccess[s.menu.id] === 'undefined' ? -1 : s.idMapAccess[s.menu.id],
+		subsExist:(s) => s.menu.menus.length !== 0,
+		title:    (s) => {
 			// 1st preference: proper menu title
-			if(typeof this.menu.captions.menuTitle[this.builderLanguage] !== 'undefined')
-				return this.menu.captions.menuTitle[this.builderLanguage];
+			if(typeof s.menu.captions.menuTitle[s.builderLanguage] !== 'undefined')
+				return s.menu.captions.menuTitle[s.builderLanguage];
 			
 			// 2nd preference (if form is referenced): form title
-			if(this.menu.formId !== null) {
-				let form = this.formIdMap[this.menu.formId];
+			if(s.menu.formId !== null) {
+				let form = s.formIdMap[s.menu.formId];
 				
-				if(typeof form.captions.formTitle[this.builderLanguage] !== 'undefined')
-					return form.captions.formTitle[this.builderLanguage];
+				if(typeof form.captions.formTitle[s.builderLanguage] !== 'undefined')
+					return form.captions.formTitle[s.builderLanguage];
 			}
-			return this.capGen.missingCaption;
+			return s.capGen.missingCaption;
 		},
 		
 		// stores
-		formIdMap:function() { return this.$store.getters['schema/formIdMap']; },
-		capGen:   function() { return this.$store.getters.captions.generic; }
+		formIdMap:(s) => s.$store.getters['schema/formIdMap'],
+		capGen:   (s) => s.$store.getters.captions.generic
 	}
 };
 
@@ -176,37 +167,33 @@ let MyBuilderRoleAccessRelation = {
 	},
 	emits:['apply-attribute','apply-relation','relation-selected'],
 	computed:{
-		access:function() {
-			if(typeof this.relationIdMapAccess[this.relation.id] === 'undefined')
-				return -1;
-			
-			return this.relationIdMapAccess[this.relation.id];
-		},
-		attributeIdMapAccessParsed:function() {
+		access:(s) => typeof s.relationIdMapAccess[s.relation.id] === 'undefined'
+			? -1 : s.relationIdMapAccess[s.relation.id],
+		attributeIdMapAccessParsed:(s) => {
 			let out = {};
-			for(let i = 0, j = this.relation.attributes.length; i < j; i++) {
-				let a = this.relation.attributes[i];
+			for(let i = 0, j = s.relation.attributes.length; i < j; i++) {
+				let a = s.relation.attributes[i];
 				
-				if(typeof this.attributeIdMapAccess[a.id] === 'undefined') {
+				if(typeof s.attributeIdMapAccess[a.id] === 'undefined') {
 					out[a.id] = -1;
 					continue;
 				}
-				out[a.id] = this.attributeIdMapAccess[a.id];
+				out[a.id] = s.attributeIdMapAccess[a.id];
 			}
 			return out;
 		},
-		brokenInheritance:function() {
-			for(let key in this.attributeIdMapAccessParsed) {
-				if(this.attributeIdMapAccessParsed[key] !== -1)
+		brokenInheritance:(s) => {
+			for(let key in s.attributeIdMapAccessParsed) {
+				if(s.attributeIdMapAccessParsed[key] !== -1)
 					return true;
 			}
 			return false;
 		},
 		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.role; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.role
 	}
 };
 

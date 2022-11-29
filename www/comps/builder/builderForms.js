@@ -66,6 +66,7 @@ let MyBuilderForms = {
 					<my-button
 						v-if="f.iconId !== null"
 						:active="false"
+						:captionTitle="capGen.icon"
 						:imageBase64="srcBase64(iconIdMap[f.iconId].file)"
 						:naked="true"
 						:tight="true"

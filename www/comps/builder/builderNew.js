@@ -103,6 +103,7 @@ let MyBuilderNew = {
 		// presentation
 		title:(s) => {
 			switch(s.entity) {
+				case 'collection': return s.capApp.collection; break;
 				case 'form':       return s.capApp.form;       break;
 				case 'jsFunction': return s.capApp.jsFunction; break;
 				case 'module':     return s.capApp.module;     break;
@@ -114,6 +115,7 @@ let MyBuilderNew = {
 		},
 		titleImgSrc:(s) => {
 			switch(s.entity) {
+				case 'collection': return 'images/tray.png';           break;
 				case 'form':       return 'images/form.png';           break;
 				case 'jsFunction': return 'images/codeScreen.png';     break;
 				case 'module':     return 'images/module.png';         break;
@@ -140,6 +142,17 @@ let MyBuilderNew = {
 		set() {
 			let request;
 			switch(this.entity) {
+				case 'collection':
+					request = {
+						id:this.getNilUuid(),
+						moduleId:this.moduleId,
+						iconId:null,
+						name:this.name,
+						columns:[],
+						query:this.getQueryTemplate(),
+						inHeader:[]
+					};
+				break;
 				case 'form':
 					request = {
 						id:this.getNilUuid(),

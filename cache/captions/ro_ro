@@ -507,14 +507,12 @@
 			"new":"Atribut nou"
 		},
 		"collection":{
-			"button":{
-				"inHeader":"Show in header"
-			},
 			"dialog":{
 				"delete":"Are you sure you want to delete this collection?"
 			},
 			"columnsTarget":"Place columns here",
 			"contentColumn":"Column data sub query",
+			"inHeader":"Show in header",
 			"new":"New collection",
 			"previewHint":"Collection values for the logged in user. Collections are retrieved on page load (F5 to reload) if they are enabled within assigned roles.",
 			"query":"Query",
@@ -907,6 +905,7 @@
 				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
 				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
 			},
+			"collection":"New collection",
 			"form":"New form",
 			"jsFunction":"New Frontend function",
 			"jsFunctionFormId":"Assigned to form",

@@ -195,7 +195,7 @@ let MyBuilder = {
 								:title="capApp.navigationFilterHint"
 							/>
 							<my-button image="add.png"
-								v-if="['forms','js-functions','pg-functions','relations','roles'].includes(navigation)"
+								v-if="['collections','forms','js-functions','pg-functions','relations','roles'].includes(navigation)"
 								@trigger="add"
 								:active="moduleOwner"
 								:captionTitle="capGen.button.add"
@@ -364,10 +364,7 @@ let MyBuilder = {
 			|| s.navigation === 'js-functions' && s.module.jsFunctions.length !== 0
 			|| s.navigation === 'pg-functions' && s.module.pgFunctions.length !== 0,
 		moduleIdInput:{
-			get() {
-				if(!this.module) return '';
-				return this.module.id;
-			},
+			get()  { return !this.module ? '' : this.module.id; },
 			set(v) {
 				if(v === '') this.$router.push(`/builder/modules`);
 				else         this.$router.push(`/builder/${this.navigation}/${v}`);
@@ -425,6 +422,7 @@ let MyBuilder = {
 		// actions
 		add() {
 			switch(this.navigation) {
+				case 'collections':  this.createNew = 'collection'; break;
 				case 'forms':        this.createNew = 'form';       break;
 				case 'js-functions': this.createNew = 'jsFunction'; break;
 				case 'pg-functions': this.createNew = 'pgFunction'; break;
