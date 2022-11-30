@@ -381,12 +381,12 @@ let MyBuilderForm = {
 									:builderLanguage="builderLanguage"
 									:columnIdShow="columnIdShow"
 									:columns="fieldShow.columns"
-									:displayOptions="false"
 									:groupName="fieldIdShow+'_columns'"
 									:hasCaptions="fieldShow.content === 'list'"
 									:joins="fieldShow.query.joins"
 									:isTemplate="false"
 									:moduleId="module.id"
+									:showOptions="false"
 								/>
 							</div>
 						</div>

@@ -550,19 +550,6 @@
 .builder-collection .preview table td{
 	padding:4px 8px;
 }
-.builder-collection .columnsTarget{
-	display:flex;
-	flex-flow:column nowrap;
-	min-height:70px;
-	margin:5px;
-	padding:5px;
-	border:3px dotted var(--color-border);
-	border-radius:5px;
-}
-.builder-collection .columnsTemplates{
-	display:flex;
-	flex-flow:column nowrap;
-}
 .builder-collection .sidebar{
 	min-width:400px;
 	flex:0 0 auto;
@@ -571,6 +558,24 @@
 .builder-collection .inHeader{
 	padding:6px 8px;
 	border-bottom:2px solid var(--color-border);
+}
+.builder-collection-columns{
+	display:flex;
+	flex-flow:column nowrap;
+	max-height:100%;
+}
+.builder-collection-column-used{
+	flex:2 1 auto;
+	display:flex;
+	flex-flow:column nowrap;
+	max-height:400px;
+	padding:5px;
+	border:3px dotted var(--color-border);
+	border-radius:0px 0px 5px 5px;
+}
+.builder-collection-column-templates{
+	flex:1 3 auto;
+	overflow:auto;
 }
 
 /* collection input */

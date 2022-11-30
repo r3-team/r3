@@ -53,11 +53,6 @@ let MyBuilderCollection = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
-					<my-button
-						@trigger="showInHeader = !showInHeader"
-						:caption="capApp.inHeader"
-						:image="showInHeader ? 'visible1.png' : 'visible0.png'"
-					/>
 					<my-button image="visible1.png"
 						@trigger="copyValueDialog(name,id,id)"
 						:caption="capGen.id"
@@ -78,7 +73,7 @@ let MyBuilderCollection = {
 			</div>
 			
 			<div class="content no-padding">
-			
+				
 				<!-- collection value preview -->
 				<div class="preview" v-if="showPreview">
 					<table>
@@ -98,68 +93,36 @@ let MyBuilderCollection = {
 					<p>{{ capApp.previewHint }}</p>
 				</div>
 				
-				<!-- collection to be shown in application header -->
-				<div class="inHeader default-inputs" v-if="showInHeader">
-					<table>
-						<tr>
-							<td>
-								<my-button image="add.png"
-									@trigger="collectionAdd"
-									:active="!readonly"
-									:caption="capGen.button.add"
-									:naked="true"
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>
-								<my-builder-collection-input
-									v-for="(c,i) in inHeader"
-									@remove="collectionRemove(i)"
-									@update:consumer="collectionSet(i,$event)"
-									:allowFormOpen="true"
-									:allowRemove="true"
-									:consumer="c"
-									:fixedCollection="true"
-									:module="module"
-									:readonly="readonly"
-									:showMultiValue="false"
-									:showNoDisplayEmpty="true"
-									:showOnMobile="true"
-								/>
-							</td>
-						</tr>
-					</table>
-				</div>
+				<div class="builder-collection-columns">
 				
-				<!-- collection query columns -->
-				<div class="columnsTarget">
-					<div v-if="columns.length === 0">{{ capApp.columnsTarget }}</div>
-					<my-builder-columns groupName="columns"
-						@columns-set="columns = $event"
-						@column-id-query-set="columnIdQuery = $event"
-						@column-remove=""
-						:builderLanguage="builderLanguage"
-						:columnIdQuery="columnIdQuery"
-						:columns="columns"
-						:displayOptions="false"
-						:hasCaptions="true"
-						:joins="joins"
-						:isTemplate="false"
-						:moduleId="module.id"
-						:showCaptions="true"
-					/>
+					<!-- collection query columns -->
+					<div class="builder-collection-column-used">
+						<h2>{{ capApp.columnsTarget }}</h2>
+						<my-builder-columns groupName="columns"
+							@columns-set="columns = $event"
+							@column-id-show="toggleColumnOptions($event)"
+							@column-remove=""
+							:builderLanguage="builderLanguage"
+							:columnIdShow="columnIdQuery"
+							:columns="columns"
+							:hasCaptions="true"
+							:joins="joins"
+							:isTemplate="false"
+							:moduleId="module.id"
+							:showOptions="false"
+						/>
+					</div>
+					
+					<div class="builder-collection-column-templates">
+						<my-builder-column-templates groupName="columns"
+							:builderLanguage="builderLanguage"
+							:columns="columns"
+							:hasCaptions="true"
+							:joins="joins"
+							:moduleId="module.id"
+						/>
+					</div>
 				</div>
-			</div>
-			
-			<div class="columnsTemplates">
-				<my-builder-column-templates groupName="columns"
-					:builderLanguage="builderLanguage"
-					:columns="columns"
-					:hasCaptions="true"
-					:joins="joins"
-					:moduleId="module.id"
-				/>
 			</div>
 		</div>
 		
@@ -199,7 +162,7 @@ let MyBuilderCollection = {
 					:relationId="relationId"
 				/>
 				
-				<template v-if="showColumnQuery">
+				<template v-if="showColumnQuery && columnQueryEdit.subQuery">
 					<!-- column sub query -->
 					<br /><br />
 					<div class="row">
@@ -253,6 +216,35 @@ let MyBuilderCollection = {
 							/>
 						</td>
 					</tr>
+					<tr>
+						<td>
+							<div class="column gap">
+								<span>{{ capApp.inHeader }}</span>
+								<my-button image="add.png"
+									@trigger="collectionAdd"
+									:active="!readonly"
+									:caption="capGen.button.add"
+									:naked="true"
+								/>
+							</div>
+						</td>
+						<td>
+							<my-builder-collection-input
+								v-for="(c,i) in inHeader"
+								@remove="collectionRemove(i)"
+								@update:consumer="collectionSet(i,$event)"
+								:allowFormOpen="true"
+								:allowRemove="true"
+								:consumer="c"
+								:fixedCollection="true"
+								:module="module"
+								:readonly="readonly"
+								:showMultiValue="false"
+								:showNoDisplayEmpty="true"
+								:showOnMobile="true"
+							/>
+						</td>
+					</tr>
 				</table>
 			</div>
 		</div>
@@ -286,7 +278,6 @@ let MyBuilderCollection = {
 			name:'',
 			
 			// state
-			showInHeader:false,
 			showPreview:false,
 			showSidebar:true,
 			tabTarget:'content'
@@ -389,6 +380,10 @@ let MyBuilderCollection = {
 			this.orders     = JSON.parse(JSON.stringify(this.collection.query.orders));
 			this.columns    = JSON.parse(JSON.stringify(this.collection.columns));
 			this.inHeader   = JSON.parse(JSON.stringify(this.collection.inHeader));
+			this.columnIdQuery = null;
+		},
+		toggleColumnOptions(id) {
+			this.columnIdQuery = this.columnIdQuery === id ? null : id;
 		},
 		
 		// helpers

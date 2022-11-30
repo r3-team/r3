@@ -186,12 +186,12 @@ let MyBuilderFields = {
 					:builderLanguage="builderLanguage"
 					:columns="element.columns"
 					:columnIdShow="columnIdShow"
-					:displayOptions="true"
 					:groupName="element.id+'_columns'"
 					:hasCaptions="element.content === 'list'"
 					:joins="element.query.joins"
 					:isTemplate="false"
 					:moduleId="moduleId"
+					:showOptions="true"
 				/>
 				
 				<!-- nested fields in container -->

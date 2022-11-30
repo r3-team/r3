@@ -23,7 +23,7 @@ export let MyBuilderColumns = {
 				<div class="builder-field-header">
 					
 					<div class="batch-set clickable"
-						v-if="!isTemplate && displayOptions"
+						v-if="!isTemplate && showOptions"
 						@click="batchSet(index,1)"
 						@click.right.prevent="batchSet(index,-1)"
 						:title="element.batch === null ? capApp.columnBatchHintNot : capApp.columnBatchHint.replace('{CNT}',element.batch)"
@@ -39,14 +39,14 @@ export let MyBuilderColumns = {
 					
 					<!-- toggle: show on mobile -->
 					<img class="action clickable on-hover"
-						v-if="!isTemplate && displayOptions"
+						v-if="!isTemplate && showOptions"
 						@click="propertySet(index,'onMobile',!element.onMobile)"
 						:src="element.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
 						:title="capApp.onMobile"
 					/>
 					
 					<div class="clickable on-hover"
-						v-if="!isTemplate && displayOptions"
+						v-if="!isTemplate && showOptions"
 						@click="propertySet(index,'basis',toggleSize(element.basis,25))"
 						@click.prevent.right="propertySet(index,'basis',toggleSize(element.basis,-25))"
 						:title="capApp.columnSize"
@@ -55,11 +55,11 @@ export let MyBuilderColumns = {
 					</div>
 					
 					<!-- column title -->
-					<div class="title" :class="{ 'no-hover':hasCaptions && displayOptions }" :title="getTitle(element)">
+					<div class="title" :class="{ 'no-hover':hasCaptions && showOptions }" :title="getTitle(element)">
 						{{ getTitle(element) }}
 					</div>
 					<my-builder-caption class="on-hover"
-						v-if="hasCaptions && displayOptions"
+						v-if="hasCaptions && showOptions"
 						@update:modelValue="propertySet(index,'captions',{columnTitle:$event})"
 						:contentName="getTitle(element)"
 						:language="builderLanguage"
@@ -78,32 +78,33 @@ export let MyBuilderColumns = {
 		builderLanguage:{ type:String,  required:true },
 		columns:        { type:Array,   required:true },
 		columnIdShow:   { required:false,default:null },
-		displayOptions: { type:Boolean, required:true },
 		groupName:      { type:String,  required:true },
 		hasCaptions:    { type:Boolean, required:true },
 		isTemplate:     { type:Boolean, required:true },
 		joins:          { type:Array,   required:false, default:() => [] },
-		moduleId:       { type:String,  required:true }
+		moduleId:       { type:String,  required:true },
+		showOptions:    { type:Boolean, required:true }
 	},
 	emits:['column-id-show','columns-set'],
 	computed:{
 		columnsInput:{
-			get:function()  { return JSON.parse(JSON.stringify(this.columns)); },
-			set:function(v) { if(!this.isTemplate) this.$emit('columns-set',v); }
+			get()  { return JSON.parse(JSON.stringify(this.columns)); },
+			set(v) { if(!this.isTemplate) this.$emit('columns-set',v); }
 		},
-		group:function() {
-			// must be unique or else columns could be moved between separate entities
+		
+		// must be unique or else columns could be moved between separate entities
+		group:(s) => {
 			return {
-				name:this.groupName,
-				pull:[this.groupName],
-				put:this.isTemplate ? false : [this.groupName]
+				name:s.groupName,
+				pull:[s.groupName],
+				put:s.isTemplate ? false : [s.groupName]
 			};
 		},
 		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.form; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.form
 	},
 	methods:{
 		// externals
@@ -112,22 +113,22 @@ export let MyBuilderColumns = {
 		getItemTitleColumn,
 		
 		// presentation
-		getTitle:function(column) {
+		getTitle(column) {
 			return column.subQuery
 				? this.capApp.subQuery : this.getItemTitleColumn(column);
 		},
 		
 		// actions
-		propertySet:function(columnIndex,name,value) {
+		propertySet(columnIndex,name,value) {
 			this.columnsInput[columnIndex][name] = value;
 			this.refreshColumnsInput();
 		},
-		toggleSize:function(oldVal,change) {
+		toggleSize(oldVal,change) {
 			if(oldVal+change < 0) return 0;
 			
 			return oldVal+change;
 		},
-		batchSet:function(columnIndex,valChange) {
+		batchSet(columnIndex,valChange) {
 			let c = this.columnsInput[columnIndex];
 			
 			if(c.batch === null)
@@ -136,12 +137,12 @@ export let MyBuilderColumns = {
 			let newVal = c.batch + valChange <= 0 ? null : c.batch + valChange;
 			this.propertySet(columnIndex,'batch',newVal);
 		},
-		refreshColumnsInput:function() {
+		refreshColumnsInput() {
 			// computed setter is not triggered unless object is set anew
 			// this forces setter to trigger
 			this.columnsInput = this.columnsInput;
 		},
-		remove:function(i) {
+		remove(i) {
 			this.columnsInput.splice(i,1);
 			this.refreshColumnsInput();
 		}
@@ -154,7 +155,7 @@ export let MyBuilderColumnTemplates = {
 	template:`<my-builder-columns
 		:builderLanguage="builderLanguage"
 		:columns="columnsTemplate"
-		:displayOptions="false"
+		:showOptions="false"
 		:groupName="groupName"
 		:hasCaptions="false"
 		:isTemplate="true"
@@ -169,13 +170,12 @@ export let MyBuilderColumnTemplates = {
 	},
 	computed:{
 		columnsTemplate:{
-			get:function() {
+			get() {
 				if(this.joins.length === 0)
 					return [];
 				
-				let columns = [];
-				
 				// add attribute columns
+				let columns = [];
 				for(let i = 0, j = this.joins.length; i < j; i++) {
 					let join = this.joins[i];
 					
@@ -188,25 +188,21 @@ export let MyBuilderColumnTemplates = {
 				
 				return columns;
 			},
-			set:function() {}
+			set() {}
 		},
-		indexAttributeIdsUsed:function() {
-			let indexIds = [];
-			
-			for(let i = 0, j = this.columns.length; i < j; i++) {
-				let col = this.columns[i];
-				
-				indexIds.push(this.getIndexAttributeId(
-					col.index,col.attributeId,false,null
-				));
+		indexAttributeIdsUsed:(s) => {
+			let ids = [];
+			for(let i = 0, j = s.columns.length; i < j; i++) {
+				let c = s.columns[i];
+				ids.push(s.getIndexAttributeId(c.index,c.attributeId,false,null));
 			}
-			return indexIds;
+			return ids;
 		},
 		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -215,7 +211,7 @@ export let MyBuilderColumnTemplates = {
 		getRandomInt,
 		isAttributeRelationship,
 		
-		createColumn:function(index,attributeId,subQuery) {
+		createColumn(index,attributeId,subQuery) {
 			let id = !subQuery
 				? 'new_'+this.getIndexAttributeId(index,attributeId,false,null)
 				: 'new_sub_query' + this.getRandomInt(1,99999)
@@ -241,7 +237,7 @@ export let MyBuilderColumnTemplates = {
 				}
 			};
 		},
-		createColumnsForRelation:function(relation,index) {
+		createColumnsForRelation(relation,index) {
 			let columns = [];
 			for(let i = 0, j = relation.attributes.length; i < j; i++) {
 				let atr = relation.attributes[i];
