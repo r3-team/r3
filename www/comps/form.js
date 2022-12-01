@@ -131,7 +131,7 @@ let MyForm = {
 						:captionTitle="capApp.button.helpHint"
 					/>
 					<my-button
-						v-if="isPopUp"
+						v-if="isPopUp && !isMobile"
 						@trigger="popUpFullscreen = !popUpFullscreen"
 						:captionTitle="capApp.button.fullscreenHint"
 						:image="popUpFullscreen ? 'shrink.png' : 'expand.png'"
