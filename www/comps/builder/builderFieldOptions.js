@@ -3,6 +3,7 @@ import MyBuilderCollectionInput        from './builderCollectionInput.js';
 import MyBuilderIconInput              from './builderIconInput.js';
 import MyBuilderOpenFormInput          from './builderOpenFormInput.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
+import {getNilUuid}                    from '../shared/generic.js';
 import {
 	getDependentModules,
 	getItemTitle,
@@ -65,30 +66,30 @@ let MyBuilderFieldOptionsChartSerie = {
 	emits:['remove','update:modelValue'],
 	computed:{
 		columnX:{
-			get:function()  { return this.get(['encode',this.type === 'pie' ? 'itemName' : 'x'],0); },
-			set:function(v) { this.set(['encode',this.type === 'pie' ? 'itemName' : 'x'],v); }
+			get()  { return this.get(['encode',this.type === 'pie' ? 'itemName' : 'x'],0); },
+			set(v) { this.set(['encode',this.type === 'pie' ? 'itemName' : 'x'],v); }
 		},
 		columnY:{
-			get:function()  { return this.get(['encode',this.type === 'pie' ? 'value' : 'y'],0); },
-			set:function(v) { this.set(['encode',this.type === 'pie' ? 'value' : 'y'],v); }
+			get()  { return this.get(['encode',this.type === 'pie' ? 'value' : 'y'],0); },
+			set(v) { this.set(['encode',this.type === 'pie' ? 'value' : 'y'],v); }
 		},
 		serie:{
-			get:function()  { return this.modelValue; },
-			set:function(v) { this.$emit('update:modelValue',v); }
+			get()  { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue',v); }
 		},
 		tooltip:{
-			get:function()  { return this.get(['encode','tooltip'],0); },
-			set:function(v) { this.set(['encode','tooltip'],v); }
+			get()  { return this.get(['encode','tooltip'],0); },
+			set(v) { this.set(['encode','tooltip'],v); }
 		},
 		type:{
-			get:function()  { return this.get(['type'],'bar'); },
-			set:function(v) { this.set(['type'],v); }
+			get()  { return this.get(['type'],'bar'); },
+			set(v) { this.set(['type'],v); }
 		},
 		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.form.chart; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.form.chart
 	},
 	methods:{
 		// externals
@@ -96,12 +97,12 @@ let MyBuilderFieldOptionsChartSerie = {
 		getValueFromJson,
 		setValueInJson,
 		
-		get:function(nameChain,valueFallback) {
+		get(nameChain,valueFallback) {
 			return this.getValueFromJson(
 				JSON.stringify(this.serie),nameChain,valueFallback
 			);
 		},
-		set:function(nameChain,value) {
+		set(nameChain,value) {
 			let s = JSON.parse(JSON.stringify(this.serie));
 			
 			// apply encoding fix (differences between serie types)
@@ -191,25 +192,25 @@ let MyBuilderFieldOptionsChart = {
 	},
 	computed:{
 		axisTypeX:{
-			get:function()  { return this.getValueFromJson(this.option,['xAxis','type'],'category'); },
-			set:function(v) { this.option = this.setValueInJson(this.option,['xAxis','type'],v); }
+			get()  { return this.getValueFromJson(this.option,['xAxis','type'],'category'); },
+			set(v) { this.option = this.setValueInJson(this.option,['xAxis','type'],v); }
 		},
 		axisTypeY:{
-			get:function()  { return this.getValueFromJson(this.option,['yAxis','type'],'value'); },
-			set:function(v) { this.option = this.setValueInJson(this.option,['yAxis','type'],v); }
+			get()  { return this.getValueFromJson(this.option,['yAxis','type'],'value'); },
+			set(v) { this.option = this.setValueInJson(this.option,['yAxis','type'],v); }
 		},
 		series:{
-			get:function()  { return this.getValueFromJson(this.option,['series'],[]); },
-			set:function(v) {}
+			get()  { return this.getValueFromJson(this.option,['series'],[]); },
+			set(v) {}
 		},
 		option:{
-			get:function()  { return this.modelValue; },
-			set:function(v) { this.$emit('update:modelValue',v); }
+			get()  { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue',v); }
 		},
 		
 		// stores
-		capApp:function() { return this.$store.getters.captions.builder.form.chart; },
-		capGen:function() { return this.$store.getters.captions.generic; }
+		capApp:(s) => s.$store.getters.captions.builder.form.chart,
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	watch:{
 		option:{
@@ -230,7 +231,7 @@ let MyBuilderFieldOptionsChart = {
 		setValueInJson,
 		
 		// actions
-		optionInput:function(v) {
+		optionInput(v) {
 			try{
 				let o = JSON.parse(v);
 				
@@ -241,7 +242,7 @@ let MyBuilderFieldOptionsChart = {
 				this.jsonBad = true;
 			}
 		},
-		serieAdd:function() {
+		serieAdd() {
 			let series = this.getValueFromJson(this.option,['series'],[]);
 			series.push({
 				type:'bar',
@@ -253,7 +254,7 @@ let MyBuilderFieldOptionsChart = {
 			});
 			this.option = this.setValueInJson(this.option,['series'],series);
 		},
-		serieSet:function(i,value) {
+		serieSet(i,value) {
 			let series = this.getValueFromJson(this.option,['series'],[]);
 			
 			if(value === null) series.splice(i,1);
@@ -822,6 +823,37 @@ let MyBuilderFieldOptions = {
 				</tr>
 			</template>
 			
+			<template v-if="isTabs">
+				<tr>
+					<td>
+						<div class="column">
+							<span>{{ capApp.tabs }}</span>
+							<my-button image="add.png"
+								@trigger="tabAdd(i)"
+								:caption="capGen.button.add"
+								:naked="true"
+							/>
+						</div>
+					</td>
+					<td>
+						<div class="column">
+							<div class="row centered gap" v-for="(t,i) in field.tabs">
+								<span>T{{ i }}</span>
+								<my-builder-caption
+									@update:modelValue="t.captions.tabTitle = $event;set('tabs',field.tabs)"
+									:language="builderLanguage"
+									:modelValue="t.captions.tabTitle"
+								/>
+								<my-button image="cancel.png"
+									@trigger="field.tabs.splice(i,1);set('tabs',field.tabs)"
+									:naked="true"
+								/>
+							</div>
+						</div>
+					</td>
+				</tr>
+			</template>
+			
 			<template v-if="isList">
 				<tr>
 					<td>{{ capApp.display }}</td>
@@ -988,20 +1020,18 @@ let MyBuilderFieldOptions = {
 	},
 	emits:['set'],
 	computed:{
-		attribute:function() {
-			return !this.isData || typeof this.attributeIdMap[this.field.attributeId] === 'undefined'
-				? false : this.attributeIdMap[this.field.attributeId];
-		},
-		presetIdMap:function() {
-			if(!this.isRelationship)
+		attribute:(s) => !s.isData || typeof s.attributeIdMap[s.field.attributeId] === 'undefined'
+			? false : s.attributeIdMap[s.field.attributeId],
+		presetIdMap:(s) => {
+			if(!s.isRelationship)
 				return {};
 			
-			let nm = this.field.attributeIdNm !== null;
-			let trgAtrId = nm ? this.field.attributeIdNm : this.field.attributeId;
+			let nm = s.field.attributeIdNm !== null;
+			let trgAtrId = nm ? s.field.attributeIdNm : s.field.attributeId;
 			
-			let presets = !this.field.outsideIn || nm
-				? this.relationIdMap[this.attributeIdMap[trgAtrId].relationshipId].presets
-				: this.relationIdMap[this.attributeIdMap[trgAtrId].relationId].presets
+			let presets = !s.field.outsideIn || nm
+				? s.relationIdMap[s.attributeIdMap[trgAtrId].relationshipId].presets
+				: s.relationIdMap[s.attributeIdMap[trgAtrId].relationId].presets
 			;
 			
 			let map = {};
@@ -1012,32 +1042,33 @@ let MyBuilderFieldOptions = {
 		},
 		
 		// simple states
-		hasCaption:    function() { return this.isData || this.isHeader; },
-		isButton:      function() { return this.field.content === 'button'; },
-		isCalendar:    function() { return this.field.content === 'calendar'; },
-		isChart:       function() { return this.field.content === 'chart'; },
-		isContainer:   function() { return this.field.content === 'container'; },
-		isData:        function() { return this.field.content === 'data'; },
-		isDate:        function() { return this.isData && this.field.display === 'date'; },
-		isDatetime:    function() { return this.isData && this.field.display === 'datetime'; },
-		isHeader:      function() { return this.field.content === 'header'; },
-		isList:        function() { return this.field.content === 'list'; },
-		isOpenForm:    function() { return typeof this.field.openForm !== 'undefined' && this.field.openForm !== null; },
-		isQuery:       function() { return this.isCalendar || this.isChart || this.isList || this.isRelationship },
-		isFiles:       function() { return this.isData && this.isAttributeFiles(this.attribute.content); },
-		isInteger:     function() { return this.isData && this.isAttributeInteger(this.attribute.content); },
-		isRelationship:function() { return this.isData && this.isAttributeRelationship(this.attribute.content); },
-		isString:      function() { return this.isData && this.isAttributeString(this.attribute.content); },
+		hasCaption:    (s) => s.isData || s.isHeader,
+		isButton:      (s) => s.field.content === 'button',
+		isCalendar:    (s) => s.field.content === 'calendar',
+		isChart:       (s) => s.field.content === 'chart',
+		isContainer:   (s) => s.field.content === 'container',
+		isData:        (s) => s.field.content === 'data',
+		isDate:        (s) => s.isData && s.field.display === 'date',
+		isDatetime:    (s) => s.isData && s.field.display === 'datetime',
+		isHeader:      (s) => s.field.content === 'header',
+		isList:        (s) => s.field.content === 'list',
+		isOpenForm:    (s) => typeof s.field.openForm !== 'undefined' && s.field.openForm !== null,
+		isQuery:       (s) => s.isCalendar || s.isChart || s.isList || s.isRelationship,
+		isTabs:        (s) => s.field.content === 'tabs',
+		isFiles:       (s) => s.isData && s.isAttributeFiles(s.attribute.content),
+		isInteger:     (s) => s.isData && s.isAttributeInteger(s.attribute.content),
+		isRelationship:(s) => s.isData && s.isAttributeRelationship(s.attribute.content),
+		isString:      (s) => s.isData && s.isAttributeString(s.attribute.content),
 		
 		// stores
-		module:        function() { return this.moduleIdMap[this.moduleId]; },
-		modules:       function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		formIdMap:     function() { return this.$store.getters['schema/formIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.form; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		module:        (s) => s.moduleIdMap[s.moduleId],
+		modules:       (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		formIdMap:     (s) => s.$store.getters['schema/formIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.form,
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -1046,23 +1077,35 @@ let MyBuilderFieldOptions = {
 		getDetailsFromIndexAttributeId,
 		getIndexAttributeId,
 		getItemTitleRelation,
+		getNilUuid,
 		isAttributeFiles,
 		isAttributeInteger,
 		isAttributeRelationship,
 		isAttributeString,
 		
 		// actions
-		collectionAdd:function() {
+		tabAdd(i) {
+			let v = JSON.parse(JSON.stringify(this.field.tabs));
+			v.push({
+				id:this.getNilUuid(),
+				fields:[],
+				captions:{
+					tabTitle:{}
+				}
+			});
+			this.set('tabs',v);
+		},
+		collectionAdd() {
 			let v = JSON.parse(JSON.stringify(this.field.collections));
 			v.push(this.getCollectionConsumerTemplate());
 			this.set('collections',v);
 		},
-		collectionRemove:function(i) {
+		collectionRemove(i) {
 			let v = JSON.parse(JSON.stringify(this.field.collections));
 			v.splice(i,1);
 			this.set('collections',v);
 		},
-		presetIdAdd:function(value) {
+		presetIdAdd(value) {
 			let ids = JSON.parse(JSON.stringify(this.field.defPresetIds));
 			
 			if(ids.includes(value))
@@ -1071,7 +1114,7 @@ let MyBuilderFieldOptions = {
 			ids.push(value);
 			this.set('defPresetIds',ids);
 		},
-		presetIdRemove:function(value) {
+		presetIdRemove(value) {
 			let ids = JSON.parse(JSON.stringify(this.field.defPresetIds));
 			
 			let pos = ids.indexOf(value);
@@ -1081,7 +1124,7 @@ let MyBuilderFieldOptions = {
 			ids.splice(pos,1);
 			this.set('defPresetIds',ids);
 		},
-		set:function(name,val) {
+		set(name,val) {
 			if(name === 'csvImport' && !val) {
 				// no CSV import, clear query lookups
 				let q = JSON.parse(JSON.stringify(this.field.query));
@@ -1095,12 +1138,12 @@ let MyBuilderFieldOptions = {
 			}
 			this.$emit('set',name,val);
 		},
-		setCollection:function(i,value) {
+		setCollection(i,value) {
 			let v = JSON.parse(JSON.stringify(this.field.collections));
 			v[i] = value;
 			this.set('collections',v);
 		},
-		setIndexAttribute:function(name,indexAttributeId) {
+		setIndexAttribute(name,indexAttributeId) {
 			let values = this.getDetailsFromIndexAttributeId(indexAttributeId);
 			
 			switch(name) {
@@ -1121,14 +1164,14 @@ let MyBuilderFieldOptions = {
 				break;
 			}
 		},
-		setInt:function(name,val,allowNull) {
+		setInt(name,val,allowNull) {
 			if(val !== '')
 				return this.set(name,parseInt(val));
 			
 			if(allowNull) return this.set(name,null);
 			else          return this.set(name,0);
 		},
-		setNull:function(name,val) {
+		setNull(name,val) {
 			this.set(name,val === '' ? null : val);
 		}
 	}

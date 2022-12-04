@@ -435,13 +435,8 @@ func importDeleteNotExistingFields_tx(tx pgx.Tx, moduleId uuid.UUID, form types.
 				if err := json.Unmarshal(fieldJson, &fieldTabs); err != nil {
 					return err
 				}
-
 				for _, tab := range fieldTabs.Tabs {
-					if tab.Field == nil {
-						continue
-					}
-
-					if err := fieldsNestedParse([]interface{}{tab.Field}); err != nil {
+					if err := fieldsNestedParse(tab.Fields); err != nil {
 						return err
 					}
 				}

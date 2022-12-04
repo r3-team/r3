@@ -690,6 +690,7 @@
 			"stateRequired":"benötigt",
 			"subQuery":"Sub-Query",
 			"subQueryAttribute":"Attribut",
+			"tabs":"Tabs",
 			"tabFunctions":"Funktionen ({CNT})",
 			"tabStates":"Zustände ({CNT})",
 			"title":"Formulare",

@@ -690,6 +690,7 @@
 			"stateRequired":"necesar",
 			"subQuery":"Sub interogare",
 			"subQueryAttribute":"Atribut",
+			"tabs":"Tabs",
 			"tabFunctions":"Funcțiile ({CNT})",
 			"tabStates":"Statuturi ({CNT})",
 			"title":"Formulare",

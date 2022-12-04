@@ -506,9 +506,14 @@ let MyBuilderForm = {
 				for(let i = 0, j = fields.length; i < j; i++) {
 					
 					let f = fields[i];
-					
 					if(f.content === 'container') {
 						collect(f.fields);
+						continue;
+					}
+					if(f.content === 'tabs') {
+						for(let x = 0, y = f.tabs.length; x < y; x++) {
+							collect(f.tabs[x].fields);
+						}
 						continue;
 					}
 					
@@ -533,8 +538,14 @@ let MyBuilderForm = {
 					let f = fields[i];
 					refs[f.id] = refCounter++;
 					
-					if(f.content === 'container')
-						collect(f.fields);
+					switch(f.content) {
+						case 'container': collect(f.fields); break;
+						case 'tabs':
+							for(let x = 0, y = f.tabs.length; x < y; x++) {
+								collect(f.tabs[x].fields);
+							}
+						break;
+					}
 				}
 			};
 			collect(s.fields);
@@ -548,15 +559,21 @@ let MyBuilderForm = {
 					let f = fields[i];
 					map[f.id] = f;
 					
-					if(f.content === 'container')
-						collect(f.fields);
+					switch(f.content) {
+						case 'container': collect(f.fields); break;
+						case 'tabs':
+							for(let x = 0, y = f.tabs.length; x < y; x++) {
+								collect(f.tabs[x].fields);
+							}
+						break;
+					}
 				}
 			};
 			collect(s.fields);
 			return map;
 		},
 		fieldsTemplate:{
-			get:function() {
+			get() {
 				if(!this.form)
 					return [];
 				
@@ -564,6 +581,7 @@ let MyBuilderForm = {
 				
 				// relation-independent fields
 				fields.push(this.createFieldContainer()); // container
+				fields.push(this.createFieldTabs());      // tabs
 				fields.push(this.createFieldList());      // list
 				fields.push(this.createFieldCalendar());  // calendar
 				fields.push(this.createFieldChart());     // chart
@@ -581,7 +599,7 @@ let MyBuilderForm = {
 				}
 				return fields;
 			},
-			set:function() {} // cannot be set
+			set() {} // cannot be set
 		},
 		indexAttributeIdsUsed:(s) => {
 			let getIndexIds = function(fields) {
@@ -600,6 +618,11 @@ let MyBuilderForm = {
 						break;
 						case 'container':
 							indexIds = indexIds.concat(getIndexIds(f.fields));
+						break;
+						case 'tabs':
+							for(let x = 0, y = f.tabs.length; x < y; x++) {
+								indexIds = indexIds.concat(getIndexIds(f.tabs[x].fields));
+							}
 						break;
 					}
 				}
@@ -868,6 +891,22 @@ let MyBuilderForm = {
 				resultLimit:50
 			};
 		},
+		createFieldTabs() {
+			return {
+				id:'template_tabs',
+				iconId:null,
+				content:'tabs',
+				state:'default',
+				onMobile:true,
+				tabs:[{
+					id:this.getNilUuid(),
+					fields:[],
+					captions:{
+						tabTitle:{}
+					}
+				}]
+			};
+		},
 		createFieldsForRelation(relation,index) {
 			let fields = [];
 			// create data fields from all attributes from this relation
@@ -959,8 +998,14 @@ let MyBuilderForm = {
 					continue;
 				}
 				
-				if(field.content === 'container')
-					this.removeDataFields(field.fields,index);
+				switch(field.content) {
+					case 'container': this.removeDataFields(field.fields,index); break;
+					case 'tabs':
+						for(let x = 0, y = field.tabs.length; x < y; x++) {
+							this.removeDataFields(field.tabs[x].fields,index);
+						}
+					break;
+				}
 			}
 		},
 		removeById(id,type) {
@@ -977,12 +1022,18 @@ let MyBuilderForm = {
 			for(let i = 0, j = fields.length; i < j; i++) {
 				let f = fields[i];
 				
-				if(f.content === 'container')
-					this.replaceBuilderId(f.fields);
+				switch(f.content) {
+					case 'container': this.replaceBuilderId(f.fields); break;
+					case 'tabs':
+						for(let x = 0, y = f.tabs.length; x < y; x++) {
+							this.replaceBuilderId(f.tabs[x].fields);
+						}
+					break;
+				}
 				
 				if(f.id.startsWith('new_'))
 					f.id = this.getNilUuid();
-					
+				
 				if(typeof f.columns !== 'undefined') {
 					
 					for(let x = 0, y = f.columns.length; x < y; x++) {

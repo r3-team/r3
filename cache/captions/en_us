@@ -690,6 +690,7 @@
 			"stateRequired":"required",
 			"subQuery":"Sub query",
 			"subQueryAttribute":"Attribute",
+			"tabs":"Tabs",
 			"tabFunctions":"Functions ({CNT})",
 			"tabStates":"States ({CNT})",
 			"title":"Forms",

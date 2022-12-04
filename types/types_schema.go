@@ -481,10 +481,10 @@ type JsFunction struct {
 	Captions     CaptionMap  `json:"captions"`
 }
 type Tab struct {
-	Id       uuid.UUID   `json:"id"`
-	Position int         `json:"position"`
-	Field    interface{} `json:"field"` // field assigned to tab (use container field for multiple)
-	Captions CaptionMap  `json:"captions"`
+	Id       uuid.UUID     `json:"id"`
+	Position int           `json:"position"`
+	Fields   []interface{} `json:"fields"` // fields assigned to tab
+	Captions CaptionMap    `json:"captions"`
 }
 type Deletion struct {
 	Id     uuid.UUID `json:"id"`

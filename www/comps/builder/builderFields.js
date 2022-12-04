@@ -36,7 +36,7 @@ let MyBuilderFields = {
 				:key="element.id"
 				:style="getStyleParent(element)"
 			>
-				<div class="builder-field-header" :class="{ dragAnchor:!moveActive, container:element.content === 'container' }">
+				<div class="builder-field-header" :class="{ dragAnchor:!moveActive }">
 					<!-- form state field reference -->
 					<span class="field-ref" v-if="!isTemplate">
 						F{{ typeof fieldIdMapRef[element.id] !== 'undefined' ? fieldIdMapRef[element.id] : '' }}
@@ -178,6 +178,43 @@ let MyBuilderFields = {
 					</span>
 				</div>
 				
+				<!-- tabs -->
+				<div class="builder-tabs" v-if="!isTemplate && element.content === 'tabs'">
+					<div class="entries">
+						<div class="entry"
+							v-for="(t,i) in element.tabs"
+							@click="fieldTabSet(element.id,i)"
+							:class="{ active:showTab(element,i) }"
+						>
+							T{{ i }}
+						</div>
+					</div>
+					<my-builder-fields class="fields-nested column"
+						v-for="(t,i) in element.tabs.filter((v,i) => showTab(element,i))"
+						@column-id-show="(...args) => $emit('column-id-show',...args)"
+						@field-counter-set="$emit('field-counter-set',$event)"
+						@field-id-show="(...args) => $emit('field-id-show',...args)"
+						@field-remove="$emit('field-remove',$event)"
+						@field-move-store="$emit('field-move-store',$event)"
+						:builderLanguage="builderLanguage"
+						:columnIdShow="columnIdShow"
+						:dataFields="dataFields"
+						:fieldCounter="fieldCounter"
+						:fieldIdMapRef="fieldIdMapRef"
+						:fieldIdShow="fieldIdShow"
+						:fieldIdShowTab="fieldIdShowTab"
+						:fieldMoveList="fieldMoveList"
+						:fieldMoveIndex="fieldMoveIndex"
+						:fields="t.fields"
+						:flexDirParent="'column'"
+						:formId="formId"
+						:isTemplate="false"
+						:joinsIndexMap="joinsIndexMap"
+						:moduleId="moduleId"
+						:uiScale="uiScale"
+					/>
+				</div>
+				
 				<!-- columns -->
 				<my-builder-columns
 					v-if="!isTemplate && getFieldHasQuery(element)"
@@ -195,7 +232,7 @@ let MyBuilderFields = {
 				/>
 				
 				<!-- nested fields in container -->
-				<my-builder-fields class="container-nested"
+				<my-builder-fields class="fields-nested"
 					v-if="!isTemplate && element.content === 'container'"
 					@column-id-show="(...args) => $emit('column-id-show',...args)"
 					@field-counter-set="$emit('field-counter-set',$event)"
@@ -248,7 +285,8 @@ let MyBuilderFields = {
 	emits:['column-id-show','field-counter-set','field-id-show','field-remove','field-move-store'],
 	data:function() {
 		return {
-			clone:false
+			clone:false,
+			fieldIdMapTabIndex:{}
 		};
 	},
 	computed:{
@@ -294,10 +332,22 @@ let MyBuilderFields = {
 			if(this.templateNm && field.attributeIdNm !== null) return true;
 			return false;
 		},
+		showTab(field,tabIndex) {
+			if(typeof this.fieldIdMapTabIndex[field.id] === 'undefined')
+				return tabIndex === 0;
+			
+			if(this.fieldIdMapTabIndex[field.id] >= field.tabs.length)
+				return tabIndex === 0;
+			
+			return this.fieldIdMapTabIndex[field.id] === tabIndex;
+		},
 		
 		// actions
 		fieldPropertySet(fieldIndex,name,value) {
 			this.fields[fieldIndex][name] = value;
+		},
+		fieldTabSet(fieldId,tabIndex) {
+			this.fieldIdMapTabIndex[fieldId] = tabIndex;
 		},
 		
 		cloneField(field) {
@@ -399,15 +449,12 @@ let MyBuilderFields = {
 		
 		// getters
 		getClass(field) {
-			let out = { isTemplate:this.isTemplate };
-			
-			if(field.content === 'container')
-				out['container'] = 'container';
-			
-			if(field.id === this.fieldIdShow)
-				out['selected'] = 'selected';
-			
-			return out;
+			return {
+				container:field.content === 'container',
+				isTemplate:this.isTemplate,
+				selected:field.id === this.fieldIdShow,
+				tabs:field.content === 'tabs'
+			};
 		},
 		getTitle(field) {
 			switch(field.content) {
@@ -416,6 +463,7 @@ let MyBuilderFields = {
 				case 'chart':     return 'Chart';     break;
 				case 'container': return 'Container'; break;
 				case 'header':    return 'Header';    break;
+				case 'tabs':      return 'Tabs'; break;
 				case 'data':
 					let atr = this.attributeIdMap[field.attributeId];
 					let rel = this.relationIdMap[atr.relationId];

@@ -396,6 +396,41 @@ let MyField = {
 			:query="field.query"
 		/>
 		
+		<!-- tabs -->
+		<div class="tabs" v-if="isTabs">
+			<div class="tabs-entries">
+				<div class="tabs-entry" v-for="(t,i) in field.tabs" @click="tabIndexShow = i">
+					{{ t.captions.tabTitle[this.moduleLanguage] }}
+				</div>
+			</div>
+			<template v-for="(t,i) in field.tabs.filter((v,i) => i === tabIndexShow)">
+				<my-field
+					v-for="f in t.fields"
+					@clipboard="$emit('clipboard')"
+					@execute-function="$emit('execute-function',$event)"
+					@hotkey="$emit('hotkey',$event)"
+					@open-form="(...args) => $emit('open-form',...args)"
+					@set-form-args="(...args) => $emit('set-form-args',...args)"
+					@set-valid="(...args) => $emit('set-valid',...args)"
+					@set-value="(...args) => $emit('set-value',...args)"
+					@set-value-init="(...args) => $emit('set-value-init',...args)"
+					:dataFieldMap="dataFieldMap"
+					:field="f"
+					:fieldIdMapCaption="fieldIdMapCaption"
+					:fieldIdMapState="fieldIdMapState"
+					:formBadSave="formBadSave"
+					:formIsPopUp="formIsPopUp"
+					:formIsSingleField="formIsSingleField"
+					:formLoading="formLoading"
+					:formReadonly="formReadonly"
+					:flexDirParent="'column'"
+					:joinsIndexMap="joinsIndexMap"
+					:key="f.id"
+					:values="values"
+				/>
+			</template>
+		</div>
+		
 		<!-- container children -->
 		<my-field
 			v-if="isContainer"
@@ -448,7 +483,8 @@ let MyField = {
 			focused:false,
 			notTouched:true,            // data field was not touched by user
 			showColorPickerInput:false, // for color picker fields
-			showPassword:false          // for password fields
+			showPassword:false,         // for password fields
+			tabIndexShow:0
 		};
 	},
 	watch:{
@@ -856,6 +892,7 @@ let MyField = {
 		isContainer:function() { return this.field.content === 'container'; },
 		isData:     function() { return this.field.content === 'data'; },
 		isList:     function() { return this.field.content === 'list'; },
+		isTabs:     function() { return this.field.content === 'tabs'; },
 		
 		// display
 		isHidden:  function() { return this.stateFinal === 'hidden'; },

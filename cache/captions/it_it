@@ -690,6 +690,7 @@
 			"stateRequired":"obbligatorio",
 			"subQuery":"Sub query",
 			"subQueryAttribute":"Attributo",
+			"tabs":"Tabs",
 			"tabFunctions":"Funzioni ({CNT})",
 			"tabStates":"Condizioni ({CNT})",
 			"title":"Moduli",

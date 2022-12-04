@@ -68,6 +68,8 @@
 	--color-form-builder-columns:hsl(226deg 25% 77%);
 	--color-form-builder-container:hsl(99deg 47% 83%);
 	--color-form-builder-selected:hsl(59deg 100% 50%);
+	--color-form-builder-tabs:hsl(135deg 45% 78%);
+	--color-form-builder-tabs-active:hsl(135deg 54% 87%);
 	
 	/**/
 	/* images */
@@ -190,7 +192,7 @@ body                                         { --depth:6; }
 .builder-form-state-effect                   { --depth:7; }
 .builder-field                               { --depth:9; }
 .builder-field .builder-columns              { --depth:1; }
-.builder-field .container-nested             { --depth:1; }
+.builder-field .fields-nested                { --depth:1; }
 .builder-modules .item-wrap                  { --depth:5; }
 .builder-menu                                { --depth:4; }
 .builder-articles-assign                     { --depth:2; }
@@ -1025,6 +1027,8 @@ table td.maximum{
 	--color-form-builder-columns:hsl(176deg 9% 32%);
 	--color-form-builder-container:hsl(125deg 17% 31%);
 	--color-form-builder-selected:hsl(59deg 72% 44%);
+	--color-form-builder-tabs:hsl(104deg 15% 32%);
+	--color-form-builder-tabs-active:hsl(104deg 12% 39%);
 	
 	--image-list-cards: url('../images/texture_paper02.webp');
 	

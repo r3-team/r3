@@ -506,13 +506,11 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			if tools.IntInSlice(pos, posTabsLookup) {
 				field := fields[pos].(types.FieldTabs)
 
-				for _, tab := range field.Tabs {
-					// a tab can at most ever have 1 field assigned
-					c := getChildren(parentId, tab.Id)
-					if len(c) == 1 {
-						tab.Field = c[0]
-					}
+				for i, tab := range field.Tabs {
+					field.Tabs[i].Fields = getChildren(field.Id, tab.Id)
 				}
+
+				children = append(children, field)
 				continue
 			}
 
@@ -723,14 +721,10 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 					return err
 				}
 
-				if t.Field == nil {
-					continue
-				}
-
 				if err := Set_tx(tx, formId,
 					pgtype.UUID{Bytes: fieldId, Status: pgtype.Present},
 					pgtype.UUID{Bytes: t.Id, Status: pgtype.Present},
-					[]interface{}{t.Field}, fieldIdMapQuery); err != nil {
+					t.Fields, fieldIdMapQuery); err != nil {
 
 					return err
 				}

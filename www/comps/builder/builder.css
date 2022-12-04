@@ -677,6 +677,31 @@
 	padding:8px 12px;
 }
 
+/* tabs */
+.builder-tabs{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:column nowrap;
+}
+.builder-tabs .entries{
+	margin-right:5px;
+	flex:0 0 40px;
+	display:flex;
+	flex-flow:row nowrap;
+	background-color:var(--color-form-builder-tabs-active);
+}
+.builder-tabs .entries .entry{
+	line-height:40px;
+	padding:0px 9px;
+	vertical-align:middle;
+	cursor:pointer;
+}
+.builder-tabs .entries .entry.active{
+	font-weight:bold;
+	text-decoration:underline;
+	background-color:var(--color-form-builder-tabs);
+}
+
 /* relation */
 .builder-relations .sub-component{
 	display:flex;

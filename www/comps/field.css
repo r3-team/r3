@@ -218,6 +218,24 @@
 	flex:0 0 auto;
 }
 
+/* tabs field */
+.field .tabs{
+	display:flex;
+	flex-flow:column nowrap;
+}
+.field .tabs-entries{
+	display:flex;
+	flex-flow:row wrap;
+	border-bottom:1px solid var(--color-border);
+}
+.field .tabs-entry{
+	padding:5px 9px;
+	border-right:1px solid var(--color-border);
+}
+.field .tabs-entry.active{
+	font-weight:bold;
+}
+
 /* user overwrites */
 .user-bordersAll .field .input-box{
 	border-width:1px;
