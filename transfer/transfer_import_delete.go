@@ -22,6 +22,7 @@ import (
 	"r3/schema/preset"
 	"r3/schema/relation"
 	"r3/schema/role"
+	"r3/schema/tab"
 	"r3/tools"
 	"r3/types"
 
@@ -253,140 +254,9 @@ func importDeleteNotExisting_tx(tx pgx.Tx, module types.Module) error {
 		}
 	}
 
-	// fields, cascades columns
-	idsKeep = make([]uuid.UUID, 0)
-	idsDelete = make([]uuid.UUID, 0)
-
-	var fieldsNestedParse func(fields []interface{}) error
-	fieldsNestedParse = func(fields []interface{}) error {
-		for _, fieldIf := range fields {
-
-			fieldJson, err := json.Marshal(fieldIf)
-			if err != nil {
-				return err
-			}
-
-			var field types.Field
-			if err := json.Unmarshal(fieldJson, &field); err != nil {
-				return err
-			}
-
-			idsKeep = append(idsKeep, field.Id)
-
-			if field.Content == "container" {
-
-				var fieldContainer types.FieldContainer
-				if err := json.Unmarshal(fieldJson, &fieldContainer); err != nil {
-					return err
-				}
-				if err := fieldsNestedParse(fieldContainer.Fields); err != nil {
-					return err
-				}
-			}
-		}
-		return nil
-	}
-
-	for _, form := range module.Forms {
-		if err := fieldsNestedParse(form.Fields); err != nil {
-			return err
-		}
-	}
-
-	idsDelete, err = importGetIdsToDeleteFromForm_tx(tx, "field", module.Id, idsKeep)
-	if err != nil {
-		return err
-	}
-
-	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del field %s", id.String()))
-		if err := field.Del_tx(tx, id); err != nil {
-			return err
-		}
-	}
-
-	// columns
-	idsKeep = make([]uuid.UUID, 0)
-	idsDelete = make([]uuid.UUID, 0)
-
-	var fieldColumnsNestedParse func(fields []interface{}) error
-	fieldColumnsNestedParse = func(fields []interface{}) error {
-		for _, fieldIf := range fields {
-
-			fieldJson, err := json.Marshal(fieldIf)
-			if err != nil {
-				return err
-			}
-
-			var field types.Field
-			if err := json.Unmarshal(fieldJson, &field); err != nil {
-				return err
-			}
-
-			switch field.Content {
-			case "calendar":
-				var fieldCalendar types.FieldCalendar
-				if err := json.Unmarshal(fieldJson, &fieldCalendar); err != nil {
-					return err
-				}
-				for _, column := range fieldCalendar.Columns {
-					idsKeep = append(idsKeep, column.Id)
-				}
-
-			case "chart":
-				var fieldChart types.FieldChart
-				if err := json.Unmarshal(fieldJson, &fieldChart); err != nil {
-					return err
-				}
-				for _, column := range fieldChart.Columns {
-					idsKeep = append(idsKeep, column.Id)
-				}
-
-			case "data":
-				var fieldDataRel types.FieldDataRelationship
-				if err := json.Unmarshal(fieldJson, &fieldDataRel); err != nil {
-					return err
-				}
-				for _, column := range fieldDataRel.Columns {
-					idsKeep = append(idsKeep, column.Id)
-				}
-
-			case "list":
-				var fieldList types.FieldList
-				if err := json.Unmarshal(fieldJson, &fieldList); err != nil {
-					return err
-				}
-				for _, column := range fieldList.Columns {
-					idsKeep = append(idsKeep, column.Id)
-				}
-
-			case "container":
-				var fieldContainer types.FieldContainer
-				if err := json.Unmarshal(fieldJson, &fieldContainer); err != nil {
-					return err
-				}
-				if err := fieldColumnsNestedParse(fieldContainer.Fields); err != nil {
-					return err
-				}
-			}
-		}
-		return nil
-	}
-
-	for _, form := range module.Forms {
-		if err := fieldColumnsNestedParse(form.Fields); err != nil {
-			return err
-		}
-	}
-
-	idsDelete, err = importGetIdsToDeleteFromField_tx(tx, "column", module.Id, idsKeep)
-	if err != nil {
-		return err
-	}
-
-	for _, id := range idsDelete {
-		log.Info("transfer", fmt.Sprintf("del column %s", id.String()))
-		if err := column.Del_tx(tx, id); err != nil {
+	// fields, includes/cascades columns & tabs
+	for _, entity := range module.Forms {
+		if err := importDeleteNotExistingFields_tx(tx, module.Id, entity); err != nil {
 			return err
 		}
 	}
@@ -469,6 +339,156 @@ func importDeleteNotExisting_tx(tx pgx.Tx, module types.Module) error {
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del preset %s", id.String()))
 		if err := preset.Del_tx(tx, id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func importDeleteNotExistingFields_tx(tx pgx.Tx, moduleId uuid.UUID, form types.Form) error {
+
+	var err error
+	idsKeepFields := make([]uuid.UUID, 0)
+	idsKeepColumns := make([]uuid.UUID, 0)
+	idsKeepTabs := make([]uuid.UUID, 0)
+	idsDelete := make([]uuid.UUID, 0)
+
+	var fieldsNestedParse func(fields []interface{}) error
+	fieldsNestedParse = func(fields []interface{}) error {
+		for _, fieldIf := range fields {
+
+			fieldJson, err := json.Marshal(fieldIf)
+			if err != nil {
+				return err
+			}
+
+			var field types.Field
+			if err := json.Unmarshal(fieldJson, &field); err != nil {
+				return err
+			}
+
+			// field
+			idsKeepFields = append(idsKeepFields, field.Id)
+
+			// field tabs
+			if field.Content == "tabs" {
+				var fieldTabs types.FieldTabs
+				if err := json.Unmarshal(fieldJson, &fieldTabs); err != nil {
+					return err
+				}
+				for _, tab := range fieldTabs.Tabs {
+					idsKeepTabs = append(idsKeepTabs, tab.Id)
+				}
+			}
+
+			// field columns
+			switch field.Content {
+			case "calendar":
+				var fieldCalendar types.FieldCalendar
+				if err := json.Unmarshal(fieldJson, &fieldCalendar); err != nil {
+					return err
+				}
+				for _, column := range fieldCalendar.Columns {
+					idsKeepColumns = append(idsKeepColumns, column.Id)
+				}
+
+			case "chart":
+				var fieldChart types.FieldChart
+				if err := json.Unmarshal(fieldJson, &fieldChart); err != nil {
+					return err
+				}
+				for _, column := range fieldChart.Columns {
+					idsKeepColumns = append(idsKeepColumns, column.Id)
+				}
+
+			case "data":
+				var fieldDataRel types.FieldDataRelationship
+				if err := json.Unmarshal(fieldJson, &fieldDataRel); err != nil {
+					return err
+				}
+				for _, column := range fieldDataRel.Columns {
+					idsKeepColumns = append(idsKeepColumns, column.Id)
+				}
+
+			case "list":
+				var fieldList types.FieldList
+				if err := json.Unmarshal(fieldJson, &fieldList); err != nil {
+					return err
+				}
+				for _, column := range fieldList.Columns {
+					idsKeepColumns = append(idsKeepColumns, column.Id)
+				}
+			}
+
+			// if field includes other fields, parse them as well
+			switch field.Content {
+			case "container":
+				var fieldContainer types.FieldContainer
+				if err := json.Unmarshal(fieldJson, &fieldContainer); err != nil {
+					return err
+				}
+				if err := fieldsNestedParse(fieldContainer.Fields); err != nil {
+					return err
+				}
+			case "tabs":
+				var fieldTabs types.FieldTabs
+				if err := json.Unmarshal(fieldJson, &fieldTabs); err != nil {
+					return err
+				}
+
+				for _, tab := range fieldTabs.Tabs {
+					if tab.Field == nil {
+						continue
+					}
+
+					if err := fieldsNestedParse([]interface{}{tab.Field}); err != nil {
+						return err
+					}
+				}
+			}
+		}
+		return nil
+	}
+
+	if err := fieldsNestedParse(form.Fields); err != nil {
+		return err
+	}
+
+	// delete fields
+	idsDelete, err = importGetIdsToDeleteFromForm_tx(tx, "field", moduleId, idsKeepFields)
+	if err != nil {
+		return err
+	}
+
+	for _, id := range idsDelete {
+		log.Info("transfer", fmt.Sprintf("del field %s", id.String()))
+		if err := field.Del_tx(tx, id); err != nil {
+			return err
+		}
+	}
+
+	// delete tabs
+	idsDelete, err = importGetIdsToDeleteFromField_tx(tx, "tab", moduleId, idsKeepTabs)
+	if err != nil {
+		return err
+	}
+
+	for _, id := range idsDelete {
+		log.Info("transfer", fmt.Sprintf("del tab %s", id.String()))
+		if err := tab.Del_tx(tx, id); err != nil {
+			return err
+		}
+	}
+
+	// delete columns
+	idsDelete, err = importGetIdsToDeleteFromField_tx(tx, "column", moduleId, idsKeepColumns)
+	if err != nil {
+		return err
+	}
+
+	for _, id := range idsDelete {
+		log.Info("transfer", fmt.Sprintf("del column %s", id.String()))
+		if err := column.Del_tx(tx, id); err != nil {
 			return err
 		}
 	}
@@ -558,7 +578,7 @@ func importGetIdsToDeleteFromField_tx(tx pgx.Tx, entity string, moduleId uuid.UU
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !tools.StringInSlice(entity, []string{"column"}) {
+	if !tools.StringInSlice(entity, []string{"column", "tab"}) {
 		return idsDelete, errors.New("unsupport type for delete check")
 	}
 

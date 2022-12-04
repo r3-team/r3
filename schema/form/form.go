@@ -225,7 +225,11 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUI
 
 	// set fields (recursive)
 	fieldIdMapQuery := make(map[uuid.UUID]types.Query)
-	if err := field.Set_tx(tx, id, pgtype.UUID{Status: pgtype.Null}, fields, fieldIdMapQuery); err != nil {
+	if err := field.Set_tx(tx, id,
+		pgtype.UUID{Status: pgtype.Null},
+		pgtype.UUID{Status: pgtype.Null},
+		fields, fieldIdMapQuery); err != nil {
+
 		return err
 	}
 

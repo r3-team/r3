@@ -269,6 +269,47 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			SET task_name = 'backupRun'
 			WHERE task_name = 'embeddedBackup';
 			
+			-- new tabs field
+			ALTER TYPE app.caption_content ADD VALUE 'tabTitle';
+			ALTER TYPE app.field_content ADD VALUE 'tabs';
+			
+			CREATE TABLE app.tab (
+				id uuid NOT NULL,
+				field_id uuid NOT NULL,
+				"position" smallint NOT NULL,
+			    CONSTRAINT tab_pkey PRIMARY KEY (id),
+				CONSTRAINT tab_field_id_position_key UNIQUE (field_id, "position")
+					DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT tab_field_id_fkey FOREIGN KEY (field_id)
+					REFERENCES app.field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_tab_field_id_fkey
+				ON app.tab USING btree (field_id ASC NULLS LAST);
+			
+			ALTER TABLE app.field ADD COLUMN tab_id uuid;
+			ALTER TABLE app.field ADD CONSTRAINT tab_id_fkey FOREIGN KEY (tab_id)
+				REFERENCES app.tab (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_tab_id_fkey
+				ON app.field USING btree (tab_id ASC NULLS LAST);
+				
+			ALTER TABLE app.caption ADD COLUMN tab_id uuid;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_tab_id_fkey FOREIGN KEY (tab_id)
+				REFERENCES app.tab (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_tab_id_fkey
+				ON app.caption USING btree (tab_id ASC NULLS LAST);
+			
 			-- outdated config key that was in 3.0 init script until 3.2
 			DELETE FROM instance.config WHERE name = 'exportPrivateKey';
 		`); err != nil {
@@ -347,7 +388,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				id uuid NOT NULL,
 			    CONSTRAINT "file_pkey" PRIMARY KEY (id)
 			);
-				
+			
 			CREATE TABLE instance.file_version (
 				file_id uuid NOT NULL,
 				version int NOT NULL,

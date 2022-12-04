@@ -192,13 +192,15 @@ type FormStateEffect struct {
 }
 type Field struct {
 	Id       uuid.UUID   `json:"id"`
+	TabId    pgtype.UUID `json:"tabId"`
 	IconId   pgtype.UUID `json:"iconId"`
-	Content  string      `json:"content"`  // field content (button, header, data, list, ...)
-	State    string      `json:"state"`    // field state (hidden, readonly, default, required)
+	Content  string      `json:"content"`  // field content (button, header, data, list, calendar, chart, tabs)
+	State    string      `json:"state"`    // field default state (hidden, readonly, default, required)
 	OnMobile bool        `json:"onMobile"` // display this field on mobile?
 }
 type FieldButton struct {
 	Id           uuid.UUID   `json:"id"`
+	TabId        pgtype.UUID `json:"tabId"`
 	IconId       pgtype.UUID `json:"iconId"`
 	Content      string      `json:"content"`
 	State        string      `json:"state"`
@@ -213,6 +215,7 @@ type FieldButton struct {
 }
 type FieldCalendar struct {
 	Id               uuid.UUID            `json:"id"`
+	TabId            pgtype.UUID          `json:"tabId"`
 	IconId           pgtype.UUID          `json:"iconId"`
 	Content          string               `json:"content"`
 	State            string               `json:"state"`
@@ -240,6 +243,7 @@ type FieldCalendar struct {
 }
 type FieldChart struct {
 	Id          uuid.UUID   `json:"id"`
+	TabId       pgtype.UUID `json:"tabId"`
 	IconId      pgtype.UUID `json:"iconId"`
 	Content     string      `json:"content"`
 	State       string      `json:"state"`
@@ -250,6 +254,7 @@ type FieldChart struct {
 }
 type FieldContainer struct {
 	Id             uuid.UUID     `json:"id"`
+	TabId          pgtype.UUID   `json:"tabId"`
 	IconId         pgtype.UUID   `json:"iconId"`
 	Content        string        `json:"content"`
 	State          string        `json:"state"`
@@ -268,6 +273,7 @@ type FieldContainer struct {
 }
 type FieldData struct {
 	Id             uuid.UUID          `json:"id"`
+	TabId          pgtype.UUID        `json:"tabId"`
 	IconId         pgtype.UUID        `json:"iconId"`
 	Content        string             `json:"content"`
 	State          string             `json:"state"`
@@ -291,6 +297,7 @@ type FieldData struct {
 }
 type FieldDataRelationship struct {
 	Id             uuid.UUID   `json:"id"`
+	TabId          pgtype.UUID `json:"tabId"`
 	IconId         pgtype.UUID `json:"iconId"`
 	Content        string      `json:"content"`
 	State          string      `json:"state"`
@@ -327,6 +334,7 @@ type FieldDataRelationship struct {
 }
 type FieldHeader struct {
 	Id       uuid.UUID   `json:"id"`
+	TabId    pgtype.UUID `json:"tabId"`
 	IconId   pgtype.UUID `json:"iconId"`
 	Content  string      `json:"content"`
 	State    string      `json:"state"`
@@ -336,6 +344,7 @@ type FieldHeader struct {
 }
 type FieldList struct {
 	Id          uuid.UUID            `json:"id"`
+	TabId       pgtype.UUID          `json:"tabId"`
 	IconId      pgtype.UUID          `json:"iconId"`
 	Content     string               `json:"content"`
 	State       string               `json:"state"`
@@ -354,6 +363,15 @@ type FieldList struct {
 	// legacy
 	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
 	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
+}
+type FieldTabs struct {
+	Id       uuid.UUID   `json:"id"`
+	TabId    pgtype.UUID `json:"tabId"`
+	IconId   pgtype.UUID `json:"iconId"`
+	Content  string      `json:"content"`
+	State    string      `json:"state"`
+	OnMobile bool        `json:"onMobile"`
+	Tabs     []Tab       `json:"tabs"`
 }
 type Collection struct {
 	Id       uuid.UUID            `json:"id"`
@@ -461,6 +479,12 @@ type JsFunction struct {
 	CodeFunction string      `json:"codeFunction"`
 	CodeReturns  string      `json:"codeReturns"`
 	Captions     CaptionMap  `json:"captions"`
+}
+type Tab struct {
+	Id       uuid.UUID   `json:"id"`
+	Position int         `json:"position"`
+	Field    interface{} `json:"field"` // field assigned to tab (use container field for multiple)
+	Captions CaptionMap  `json:"captions"`
 }
 type Deletion struct {
 	Id     uuid.UUID `json:"id"`

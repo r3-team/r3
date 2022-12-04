@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"r3/compatible"
 	"r3/db"
 	"r3/schema"
@@ -12,6 +13,7 @@ import (
 	"r3/schema/column"
 	"r3/schema/openForm"
 	"r3/schema/query"
+	"r3/schema/tab"
 	"r3/tools"
 	"r3/types"
 	"sort"
@@ -31,8 +33,8 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	fields := make([]interface{}, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT f.id, f.parent_id, f.icon_id, f.content, f.state, f.on_mobile,
-		a.content,
+		SELECT f.id, f.parent_id, f.tab_id, f.icon_id, f.content, f.state,
+		f.on_mobile, a.content,
 		
 		-- button field
 		fb.js_function_id,
@@ -91,12 +93,14 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	posButtonLookup := make([]int, 0)
 	posCalendarLookup := make([]int, 0)
 	posChartLookup := make([]int, 0)
-	posContainerLookup := make([]int, 0)
 	posDataLookup := make([]int, 0)
 	posDataRelLookup := make([]int, 0)
 	posHeaderLookup := make([]int, 0)
 	posListLookup := make([]int, 0)
+	posParentLookup := make([]int, 0)
+	posTabsLookup := make([]int, 0)
 	posMapParentId := make(map[int]uuid.UUID)
+	posMapTabId := make(map[int]uuid.UUID)
 
 	for rows.Next() {
 		var fieldId uuid.UUID
@@ -112,14 +116,14 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		var autoRenew, dateRange0, dateRange1, indexColor, min, max pgtype.Int4
 		var attributeId, attributeIdAlt, attributeIdNm, attributeIdDate0,
 			attributeIdDate1, attributeIdColor, fieldParentId, iconId,
-			jsFunctionIdButton, jsFunctionIdData pgtype.UUID
+			jsFunctionIdButton, jsFunctionIdData, tabId pgtype.UUID
 		var category, clipboard, csvExport, csvImport, filterQuick,
 			filterQuickList, gantt, ganttStepsToggle, ics, outsideIn,
 			wrap pgtype.Bool
 		var defPresetIds []uuid.UUID
 
-		if err := rows.Scan(&fieldId, &fieldParentId, &iconId, &content, &state,
-			&onMobile, &atrContent, &jsFunctionIdButton, &attributeIdDate0,
+		if err := rows.Scan(&fieldId, &fieldParentId, &tabId, &iconId, &content,
+			&state, &onMobile, &atrContent, &jsFunctionIdButton, &attributeIdDate0,
 			&attributeIdDate1, &attributeIdColor, &indexDate0, &indexDate1,
 			&indexColor, &ics, &gantt, &ganttSteps, &ganttStepsToggle,
 			&dateRange0, &dateRange1, &chartOption, &direction, &justifyContent,
@@ -135,14 +139,14 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		}
 
 		// store parent if there
-		if fieldParentId.Status == pgtype.Present {
-			posMapParentId[pos] = fieldParentId.Bytes
-		}
+		posMapParentId[pos] = fieldParentId.Bytes
+		posMapTabId[pos] = tabId.Bytes
 
 		switch content {
 		case "button":
 			fields = append(fields, types.FieldButton{
 				Id:           fieldId,
+				TabId:        tabId,
 				IconId:       iconId,
 				Content:      content,
 				State:        state,
@@ -158,6 +162,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		case "calendar":
 			fields = append(fields, types.FieldCalendar{
 				Id:               fieldId,
+				TabId:            tabId,
 				IconId:           iconId,
 				Content:          content,
 				State:            state,
@@ -186,6 +191,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		case "chart":
 			fields = append(fields, types.FieldChart{
 				Id:          fieldId,
+				TabId:       tabId,
 				IconId:      iconId,
 				Content:     content,
 				State:       state,
@@ -198,6 +204,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		case "container":
 			fields = append(fields, types.FieldContainer{
 				Id:             fieldId,
+				TabId:          tabId,
 				IconId:         iconId,
 				Content:        content,
 				State:          state,
@@ -214,12 +221,13 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				PerMax:         int(perMax.Int),
 				Fields:         []interface{}{},
 			})
-			posContainerLookup = append(posContainerLookup, pos)
+			posParentLookup = append(posParentLookup, pos)
 
 		case "data":
 			if schema.IsContentRelationship(atrContent.String) {
 				fields = append(fields, types.FieldDataRelationship{
 					Id:             fieldId,
+					TabId:          tabId,
 					IconId:         iconId,
 					Content:        content,
 					State:          state,
@@ -255,6 +263,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			} else {
 				fields = append(fields, types.FieldData{
 					Id:             fieldId,
+					TabId:          tabId,
 					IconId:         iconId,
 					Content:        content,
 					State:          state,
@@ -281,6 +290,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		case "header":
 			fields = append(fields, types.FieldHeader{
 				Id:       fieldId,
+				TabId:    tabId,
 				IconId:   iconId,
 				Content:  content,
 				State:    state,
@@ -293,6 +303,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		case "list":
 			fields = append(fields, types.FieldList{
 				Id:          fieldId,
+				TabId:       tabId,
 				IconId:      iconId,
 				Content:     content,
 				State:       state,
@@ -312,6 +323,18 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				AttributeIdRecord: compatible.GetNullUuid(),
 			})
 			posListLookup = append(posListLookup, pos)
+		case "tabs":
+			fields = append(fields, types.FieldTabs{
+				Id:       fieldId,
+				TabId:    tabId,
+				IconId:   iconId,
+				Content:  content,
+				State:    state,
+				OnMobile: onMobile,
+				Tabs:     []types.Tab{},
+			})
+			posTabsLookup = append(posTabsLookup, pos)
+			posParentLookup = append(posParentLookup, pos)
 		}
 		pos++
 	}
@@ -446,9 +469,15 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		fields[pos] = field
 	}
 
-	// lookup container fields: children
-	// initialize function here for recursive execution
-	var getContainerChildren func(id uuid.UUID) []interface{}
+	// lookup tabs fields: get tabs
+	for _, pos := range posTabsLookup {
+		var field = fields[pos].(types.FieldTabs)
+		field.Tabs, err = tab.Get("field", field.Id)
+		if err != nil {
+			return fields, err
+		}
+		fields[pos] = field
+	}
 
 	// get sorted keys for field positions with parent Id
 	orderedPos := make([]int, 0, len(posMapParentId))
@@ -457,52 +486,46 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	}
 	sort.Ints(orderedPos)
 
-	getContainerChildren = func(id uuid.UUID) []interface{} {
-
+	// initialize function for recursive execution
+	var getChildren func(parentId uuid.UUID, tabId uuid.UUID) []interface{}
+	getChildren = func(parentId uuid.UUID, tabId uuid.UUID) []interface{} {
 		children := make([]interface{}, 0)
 
 		for _, pos := range orderedPos {
-
-			if id != posMapParentId[pos] {
+			if posMapParentId[pos] != parentId || posMapTabId[pos] != tabId {
 				continue
 			}
 
-			if !tools.IntInSlice(pos, posContainerLookup) {
-
-				// child is not container, add directly
+			// no parent field
+			if !tools.IntInSlice(pos, posParentLookup) {
 				children = append(children, fields[pos])
 				continue
 			}
 
-			// child is also container, lookup its children
+			// tabs field
+			if tools.IntInSlice(pos, posTabsLookup) {
+				field := fields[pos].(types.FieldTabs)
+
+				for _, tab := range field.Tabs {
+					// a tab can at most ever have 1 field assigned
+					c := getChildren(parentId, tab.Id)
+					if len(c) == 1 {
+						tab.Field = c[0]
+					}
+				}
+				continue
+			}
+
+			// container field
 			field := fields[pos].(types.FieldContainer)
-			field.Fields = getContainerChildren(field.Id)
+			field.Fields = getChildren(field.Id, uuid.Nil)
 			children = append(children, field)
 		}
 		return children
 	}
 
-	for _, pos := range posContainerLookup {
-
-		// only process top level containers
-		// children are assigned recursively
-		if _, exists := posMapParentId[pos]; exists {
-			continue
-		}
-		field := fields[pos].(types.FieldContainer)
-		field.Fields = getContainerChildren(field.Id)
-		fields[pos] = field
-	}
-
-	// only keep top level fields
-	fieldsNested := make([]interface{}, 0)
-	for pos, _ := range fields {
-		if _, exists := posMapParentId[pos]; exists {
-			continue
-		}
-		fieldsNested = append(fieldsNested, fields[pos])
-	}
-	return fieldsNested, nil
+	// recursively resolve all fields with their children
+	return getChildren(uuid.Nil, uuid.Nil), nil
 }
 func GetCalendar(fieldId uuid.UUID) (types.FieldCalendar, error) {
 
@@ -542,7 +565,7 @@ func GetCalendar(fieldId uuid.UUID) (types.FieldCalendar, error) {
 	return f, nil
 }
 
-func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
+func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID,
 	fields []interface{}, fieldIdMapQuery map[uuid.UUID]types.Query) error {
 
 	for pos, fieldIf := range fields {
@@ -556,8 +579,8 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 		if err := json.Unmarshal(fieldJson, &f); err != nil {
 			return err
 		}
-		fieldId, err := setGeneric_tx(tx, formId, f.Id, parentId, f.IconId,
-			f.Content, f.State, f.OnMobile, pos)
+		fieldId, err := setGeneric_tx(tx, formId, f.Id, parentId, tabId,
+			f.IconId, f.Content, f.State, f.OnMobile, pos)
 
 		if err != nil {
 			return err
@@ -615,9 +638,11 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 			}
 
 			// update container children
-			containerParentId := pgtype.UUID{Bytes: fieldId, Status: pgtype.Present}
+			if err := Set_tx(tx, formId,
+				pgtype.UUID{Bytes: fieldId, Status: pgtype.Present},
+				pgtype.UUID{Status: pgtype.Null},
+				f.Fields, fieldIdMapQuery); err != nil {
 
-			if err := Set_tx(tx, formId, containerParentId, f.Fields, fieldIdMapQuery); err != nil {
 				return err
 			}
 
@@ -682,6 +707,35 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 			}
 			fieldIdMapQuery[fieldId] = f.Query
 
+		case "tabs":
+			var f types.FieldTabs
+			if err := json.Unmarshal(fieldJson, &f); err != nil {
+				return err
+			}
+			if len(f.Tabs) == 0 {
+				return fmt.Errorf("tabs field '%s' has 0 tabs", fieldId)
+			}
+
+			// update tabs
+			for i, t := range f.Tabs {
+				t.Id, err = tab.Set_tx(tx, "field", fieldId, i, t)
+				if err != nil {
+					return err
+				}
+
+				if t.Field == nil {
+					continue
+				}
+
+				if err := Set_tx(tx, formId,
+					pgtype.UUID{Bytes: fieldId, Status: pgtype.Present},
+					pgtype.UUID{Bytes: t.Id, Status: pgtype.Present},
+					[]interface{}{t.Field}, fieldIdMapQuery); err != nil {
+
+					return err
+				}
+			}
+
 		default:
 			return errors.New("unknown field content")
 		}
@@ -690,8 +744,8 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID,
 }
 
 func setGeneric_tx(tx pgx.Tx, formId uuid.UUID, id uuid.UUID,
-	parentId pgtype.UUID, iconId pgtype.UUID, content string, state string,
-	onMobile bool, position int) (uuid.UUID, error) {
+	parentId pgtype.UUID, tabId pgtype.UUID, iconId pgtype.UUID, content string,
+	state string, onMobile bool, position int) (uuid.UUID, error) {
 
 	known, err := schema.CheckCreateId_tx(tx, &id, "field", "id")
 	if err != nil {
@@ -701,18 +755,18 @@ func setGeneric_tx(tx pgx.Tx, formId uuid.UUID, id uuid.UUID,
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.field
-			SET parent_id = $1, icon_id = $2, state = $3, on_mobile = $4,
-				position = $5
-			WHERE id = $6
-		`, parentId, iconId, state, onMobile, position, id); err != nil {
+			SET parent_id = $1, tab_id = $2, icon_id = $3, state = $4,
+				on_mobile = $5, position = $6
+			WHERE id = $7
+		`, parentId, tabId, iconId, state, onMobile, position, id); err != nil {
 			return id, err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.field (id, form_id, parent_id, icon_id,
-				content, state, on_mobile, position)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-		`, id, formId, parentId, iconId, content, state, onMobile, position); err != nil {
+			INSERT INTO app.field (id, form_id, parent_id, tab_id,
+				icon_id, content, state, on_mobile, position)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+		`, id, formId, parentId, tabId, iconId, content, state, onMobile, position); err != nil {
 			return id, err
 		}
 	}

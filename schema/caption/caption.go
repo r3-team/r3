@@ -114,6 +114,9 @@ func getEntityName(content string) (string, error) {
 
 	case "roleTitle", "roleDesc":
 		return "role_id", nil
+
+	case "tabTitle":
+		return "tab_id", nil
 	}
 	return "", errors.New("bad caption content name")
 }
