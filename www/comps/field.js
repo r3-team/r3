@@ -14,6 +14,10 @@ import {
 	openLink
 } from './shared/generic.js';
 import {
+	fieldOptionGet,
+	fieldOptionSet
+} from './shared/field.js';
+import {
 	getFlexStyle,
 	getInputFieldName,
 	setGetterArgs
@@ -404,7 +408,7 @@ let MyField = {
 				</div>
 				<div class="tabs-entry clickable"
 					v-for="(t,i) in field.tabs"
-					@click="tabIndexShow = i"
+					@click="setTab(i)"
 					:class="getTabClasses(i)"
 				>
 					{{ t.captions.tabTitle[this.moduleLanguage] }}
@@ -495,8 +499,12 @@ let MyField = {
 			notTouched:true,            // data field was not touched by user
 			showColorPickerInput:false, // for color picker fields
 			showPassword:false,         // for password fields
-			tabIndexShow:0
+			tabIndexShow:0              // tabs only: which tab is shown
 		};
+	},
+	mounted:function() {
+		if(this.isTabs)
+			this.tabIndexShow = this.fieldOptionGet(this.field.id,'tabIndex',0);
 	},
 	watch:{
 		formLoading:function(val) {
@@ -952,6 +960,8 @@ let MyField = {
 	},
 	methods:{
 		// externals
+		fieldOptionGet,
+		fieldOptionSet,
 		getFlexStyle,
 		getIndexAttributeId,
 		getInputFieldName,
@@ -1054,6 +1064,10 @@ let MyField = {
 		setCollectionIndexes:function(collectionId,indexes) {
 			if(indexes.length === 0) delete(this.collectionIdMapIndexes[collectionId]);
 			else                     this.collectionIdMapIndexes[collectionId] = indexes;
+		},
+		setTab:function(tabIndex) {
+			this.tabIndexShow = tabIndex;
+			this.fieldOptionSet(this.field.id,'tabIndex',tabIndex);
 		},
 		setValue:function(val,valOld,indexAttributeId) {
 			if(val === '')
