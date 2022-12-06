@@ -714,7 +714,8 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 				return fmt.Errorf("tabs field '%s' has 0 tabs", fieldId)
 			}
 
-			// update tabs
+			// insert/update/delete tabs
+			idsKeep := make([]uuid.UUID, 0)
 			for i, t := range f.Tabs {
 				t.Id, err = tab.Set_tx(tx, "field", fieldId, i, t)
 				if err != nil {
@@ -728,6 +729,14 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 
 					return err
 				}
+				idsKeep = append(idsKeep, t.Id)
+			}
+			if _, err := tx.Exec(db.Ctx, `
+				DELETE FROM app.tab
+				WHERE field_id = $1
+				AND id <> ALL($2)
+			`, f.Id, idsKeep); err != nil {
+				return err
 			}
 
 		default:
