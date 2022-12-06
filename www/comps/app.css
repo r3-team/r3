@@ -138,8 +138,10 @@ body                                         { --depth:6; }
 .settings .backup-code                       { --depth:0; }
 .field                                       { --depth:0; }
 .field .disabled                             { --depth:6; }
-.field .tabs-entries                         { --depth:5; }
+.field .tabs-entries                         { --depth:6; }
 .field .tabs-entry.active                    { --depth:2; }
+.field .tabs-entry.active.showsCal           { --depth:4; }
+.field .tabs-entry.active.showsChart         { --depth:4; }
 .field .tabs-entry.active.showsData          { --depth:0; }
 .field .tabs-entry.active.showsList          { --depth:4; }
 .field .tabs-entry.active.showsTabs          { --depth:5; }
@@ -443,7 +445,7 @@ h3{
 	position:relative;
 }
 .contentBox .top{
-	padding:8px var(--spacing) 8px var(--spacing);
+	padding:0px var(--spacing);
 	line-height:30px;
 	background-color:var(--color-bg);
 	flex:0 0 auto;
@@ -503,7 +505,7 @@ h3{
 	display:flex;
 	flex-flow:row wrap;
 	align-items:center;
-	padding:4px 0px;
+	padding:12px 0px;
 }
 .contentBox .top .area.gap{
 	gap:9px;

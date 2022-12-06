@@ -217,6 +217,21 @@
 .field .chart .actions{
 	flex:0 0 auto;
 }
+.field .chart-header{
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:flex-end;
+}
+.field .chart-header select{
+	height:30px;
+	font-size:inherit;
+	margin:10px;
+	padding:0px 5px;
+	box-sizing:border-box;
+	border-radius:4px;
+	color:var(--color-font);
+	background-color:var(--color-bg);
+}
 
 /* tabs field */
 .field .tabs{

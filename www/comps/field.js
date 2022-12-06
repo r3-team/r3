@@ -394,8 +394,8 @@ let MyField = {
 			:columns="columnsProcessed"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
-			:isSingleField="isAloneInForm"
 			:limit="field.query.fixedLimit"
+			:needsHeader="isAloneInForm || isAloneInTab"
 			:optionJson="field.chartOption"
 			:query="field.query"
 		/>
@@ -434,7 +434,7 @@ let MyField = {
 					:fieldIdMapState="fieldIdMapState"
 					:formBadSave="formBadSave"
 					:formIsPopUp="formIsPopUp"
-					:formLoading="formLoading"
+					:formLoading="tabLoading"
 					:formReadonly="formReadonly"
 					:isAloneInTab="t.fields.length === 1"
 					:isAloneInForm="false"
@@ -499,7 +499,8 @@ let MyField = {
 			notTouched:true,            // data field was not touched by user
 			showColorPickerInput:false, // for color picker fields
 			showPassword:false,         // for password fields
-			tabIndexShow:0              // tabs only: which tab is shown
+			tabIndexShow:0,             // tabs only: which tab is shown
+			tabLoading:true             // tabs only: replaces formLoading for tab fields
 		};
 	},
 	mounted:function() {
@@ -509,6 +510,8 @@ let MyField = {
 	watch:{
 		formLoading:function(val) {
 			if(!val) this.notTouched = true;
+			
+			this.tabLoading = val;
 		},
 		isValid:{ // inform parent form about field validity
 			handler:function(v) { this.$emit('set-valid',v,this.field.id); },
@@ -990,9 +993,11 @@ let MyField = {
 			return {
 				active:tabIndex === this.tabIndexShow,
 				first:tabIndex === 0,
-				showsData:active && oneField && fields[0].content === 'data',
-				showsList:active && oneField && fields[0].content === 'list',
-				showsTabs:active && oneField && fields[0].content === 'tabs'
+				showsCal:  active && oneField && fields[0].content === 'calendar',
+				showsChart:active && oneField && fields[0].content === 'chart',
+				showsData: active && oneField && fields[0].content === 'data',
+				showsList: active && oneField && fields[0].content === 'list',
+				showsTabs: active && oneField && fields[0].content === 'tabs'
 			};
 		},
 		
@@ -1066,8 +1071,12 @@ let MyField = {
 			else                     this.collectionIdMapIndexes[collectionId] = indexes;
 		},
 		setTab:function(tabIndex) {
-			this.tabIndexShow = tabIndex;
 			this.fieldOptionSet(this.field.id,'tabIndex',tabIndex);
+			this.tabIndexShow = tabIndex;
+			
+			// inform tab fields about change
+			this.tabLoading = true;
+			this.$nextTick(() => this.tabLoading = false);
 		},
 		setValue:function(val,valOld,indexAttributeId) {
 			if(val === '')

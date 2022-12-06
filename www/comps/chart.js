@@ -17,19 +17,20 @@ let MyChart = {
 		echarts:VueECharts
 	},
 	template:`<div class="chart shade">
-		<div class="top lower" v-if="showTopBar">
-			<div class="area" />
-			<div class="area">
-				<select class="selector"
-					v-if="hasChoices"
-					v-model="choiceId"
-					@change="choiceIdSet($event.target.value)"
-				>
-					<option v-for="c in choices" :value="c.id">
-						{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
-					</option>
-				</select>
-			</div>
+		<div class="top lower" v-if="needsHeader || hasChoices">
+			<template v-if="hasChoices">
+				<div class="area" />
+				<div class="area">
+					<select class="selector"
+						v-model="choiceId"
+						@change="choiceIdSet($event.target.value)"
+					>
+						<option v-for="c in choices" :value="c.id">
+							{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
+						</option>
+					</select>
+				</div>
+			</template>
 		</div>
 		<echarts ref="chart"
 			v-if="ready"
@@ -42,8 +43,8 @@ let MyChart = {
 		columns:      { type:Array,   required:true },
 		filters:      { type:Array,   required:true },
 		formLoading:  { type:Boolean, required:true },
-		isSingleField:{ type:Boolean, required:true },
 		limit:        { type:Number,  required:true },
+		needsHeader:  { type:Boolean, required:true },
 		optionJson:   { type:String,  required:true },
 		query:        { type:Object,  required:true }
 	},
@@ -67,7 +68,6 @@ let MyChart = {
 		// simple
 		choiceFilters:function() { return this.getChoiceFilters(this.choices,this.choiceId); },
 		hasChoices:   function() { return this.choices.length > 1; },
-		showTopBar:   function() { return this.hasChoices || this.isSingleField; },
 		
 		// stores
 		settings:function() { return this.$store.getters.settings; }
