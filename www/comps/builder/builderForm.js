@@ -835,16 +835,19 @@ let MyBuilderForm = {
 				presentation:'',
 				display:'default',
 				def:'',
+				defCollection:null,
 				min:null,
 				max:null,
 				regexCheck:null,
 				jsFunctionId:null,
-				collectionIdDef:null,
-				columnIdDef:null,
 				captions:{
 					fieldTitle:{},
 					fieldHelp:{}
-				}
+				},
+				
+				// legacy
+				collectionIdDef:null,
+				columnIdDef:null
 			};
 			if(this.isAttributeRelationship(attribute.content)) {
 				field.attributeIdNm = attributeIdNm;
