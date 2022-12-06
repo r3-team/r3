@@ -46,7 +46,7 @@ let MyList = {
 	template:`<div class="list" ref="content"
 		@keydown="keyDown"
 		v-click-outside="escape"
-		:class="{shade:!isInput, singleField:isSingleField, asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly }"
+		:class="{shade:!isInput, asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly }"
 	>
 		<!-- list as input field (showing record(s) from active field value) -->
 		<template v-if="isInput">
@@ -258,7 +258,7 @@ let MyList = {
 					/>
 					
 					<my-button image="filterCog.png"
-						v-if="showFiltersAction"
+						v-if="!smallSize"
 						@trigger="toggleUserFilters"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
@@ -294,7 +294,7 @@ let MyList = {
 					</select>
 					
 					<select class="selector"
-						v-if="isSingleField && allowPaging && !isMobile"
+						v-if="allowPaging && !smallSize && !isMobile"
 						v-model.number="limit"
 						@change="reloadInside()"
 					>
@@ -365,7 +365,7 @@ let MyList = {
 			<!-- list results as table -->
 			<div class="layoutTable"
 				v-if="layout === 'table'"
-				:class="{ scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
+				:class="{ scrolls:scrolls, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
 				:id="usesPageHistory ? scrollFormId : null"
 			>
 				<table :class="{ 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
@@ -636,8 +636,8 @@ let MyList = {
 		formLoading:    { type:Boolean, required:false, default:false }, // trigger and control list reloads
 		header:         { type:Boolean, required:false, default:true  }, // show list header
 		isInput:        { type:Boolean, required:false, default:false }, // use list as input
-		isSingleField:  { type:Boolean, required:false, default:false }, // list fills entire form
 		rowSelect:      { type:Boolean, required:false, default:false }, // list rows can be selected (to open record in form)
+		scrolls:        { type:Boolean, required:false, default:false }, // list should scroll its contents (instead of growing)
 		usesPageHistory:{ type:Boolean, required:false, default:false }, // list uses page getters for filtering/sorting/etc.
 		
 		// list as input field
@@ -673,8 +673,8 @@ let MyList = {
 			showAutoRenew:false,        // show UI for auto list renew
 			showCsv:false,              // show UI for CSV import/export
 			showFilters:false,          // show UI for user filters
-			showFiltersAction:false,    // show UI for expert filters
 			showTable:false,            // show regular list table as view or input dropdown
+			smallSize:false,            // limit UI options as list is small
 			
 			// list card layout state
 			orderByColumnBatchIndex:-1,
@@ -1017,7 +1017,7 @@ let MyList = {
 			return state ? 'radio1.png' : 'radio0.png';
 		},
 		resize:function() {
-			this.showFiltersAction = this.$refs.content.offsetWidth > 700;
+			this.smallSize = this.$refs.content.offsetWidth < 700;
 		},
 		updateDropdownDirection:function() {
 			let headersPx  = 200; // rough height in px of all headers (menu/form) combined

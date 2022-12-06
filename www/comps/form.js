@@ -111,7 +111,7 @@ let MyForm = {
 				</div>
 				
 				<div class="area">
-					<template v-if="isData && !isSingleField">
+					<template v-if="isData">
 						<my-button image="refresh.png"
 							@trigger="get"
 							@trigger-middle="openForm(recordId,null,null,true)"
@@ -151,65 +151,66 @@ let MyForm = {
 			</div>
 			
 			<!-- title bar lower -->
-			<div class="top lower" v-if="!isSingleField">
-				<template v-if="isData">
-					<div class="area">
-						<my-button image="new.png"
-							v-if="allowNew && !noDataActions"
-							@trigger="openNewAsk(false)"
-							@trigger-middle="openNewAsk(true)"
-							:active="(!isNew || hasChanges) && canCreate"
-							:caption="capGen.button.new"
-							:captionTitle="capGen.button.newHint"
-						/>
-						<my-button image="save.png"
-							v-if="!noDataActions"
-							@trigger="set(false)"
-							:active="canUpdate"
-							:caption="capGen.button.save"
-							:captionTitle="capGen.button.saveHint"
-						/>
-						<my-button image="save_new.png"
-							v-if="!isPopUp && !isMobile && allowNew && !noDataActions"
-							@trigger="set(true)"
-							:active="canUpdate && canCreate"
-							:caption="capGen.button.saveNew"
-							:captionTitle="capGen.button.saveNewHint"
-						/>
-						<my-button image="upward.png"
-							v-if="!isMobile && !isPopUp"
-							@trigger="openPrevAsk"
-							:active="!updatingRecord"
-							:cancel="true"
-							:caption="capGen.button.goBack"
-						/>
-						<my-button image="shred.png"
-							v-if="allowDel && !noDataActions"
-							@trigger="delAsk"
-							:active="canDelete"
-							:cancel="true"
-							:caption="capGen.button.delete"
-							:captionTitle="capGen.button.deleteHint"
-						/>
-					</div>
-					<div class="area">
-						<my-button image="warning.png"
-							v-if="badLoad"
-							:caption="capApp.noAccess"
-							:cancel="true"
-						/>
-						<my-button image="warning.png"
-							v-if="badSave && fieldIdsInvalid.length !== 0"
-							@trigger="scrollToInvalidField"
-							:caption="capApp.invalidInputs"
-							:cancel="true"
-						/>
-					</div>
-				</template>
+			<div class="top lower" v-if="isData || form.fields.length === 0">
+				<div class="area">
+					<my-button image="new.png"
+						v-if="allowNew && !noDataActions"
+						@trigger="openNewAsk(false)"
+						@trigger-middle="openNewAsk(true)"
+						:active="(!isNew || hasChanges) && canCreate"
+						:caption="capGen.button.new"
+						:captionTitle="capGen.button.newHint"
+					/>
+					<my-button image="save.png"
+						v-if="!noDataActions"
+						@trigger="set(false)"
+						:active="canUpdate"
+						:caption="capGen.button.save"
+						:captionTitle="capGen.button.saveHint"
+					/>
+					<my-button image="save_new.png"
+						v-if="!isPopUp && !isMobile && allowNew && !noDataActions"
+						@trigger="set(true)"
+						:active="canUpdate && canCreate"
+						:caption="capGen.button.saveNew"
+						:captionTitle="capGen.button.saveNewHint"
+					/>
+					<my-button image="upward.png"
+						v-if="!isMobile && !isPopUp"
+						@trigger="openPrevAsk"
+						:active="!updatingRecord"
+						:cancel="true"
+						:caption="capGen.button.goBack"
+					/>
+					<my-button image="shred.png"
+						v-if="allowDel && !noDataActions"
+						@trigger="delAsk"
+						:active="canDelete"
+						:cancel="true"
+						:caption="capGen.button.delete"
+						:captionTitle="capGen.button.deleteHint"
+					/>
+				</div>
+				<div class="area">
+					<my-button image="warning.png"
+						v-if="badLoad"
+						:caption="capApp.noAccess"
+						:cancel="true"
+					/>
+					<my-button image="warning.png"
+						v-if="badSave && fieldIdsInvalid.length !== 0"
+						@trigger="scrollToInvalidField"
+						:caption="capApp.invalidInputs"
+						:cancel="true"
+					/>
+				</div>
 			</div>
 			
 			<!-- form fields -->
-			<div class="content grow fields" :class="{ singleField:isSingleField }" :style="patternStyle">
+			<div class="content grow fields"
+				:class="{ onlyOne:isSingleField }"
+				:style="patternStyle"
+			>
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
 					@clipboard="messageSet('[CLIPBOARD]')"
@@ -226,9 +227,9 @@ let MyForm = {
 					:fieldIdMapState="fieldIdMapState"
 					:formBadSave="badSave"
 					:formIsPopUp="isPopUp"
-					:formIsSingleField="isSingleField"
 					:formLoading="loading"
 					:formReadonly="badLoad || blockInputs"
+					:isAloneInForm="isSingleField"
 					:joinsIndexMap="joinsIndexMap"
 					:key="f.id"
 					:values="values"
@@ -365,7 +366,7 @@ let MyForm = {
 				|| this.moduleIdMap[this.moduleId].articleIdsHelp.length !== 0;
 		},
 		isSingleField:function() {
-			return this.fields.length === 1 && ['calendar','chart','list'].includes(this.fields[0].content);
+			return this.fields.length === 1 && ['calendar','chart','list','tabs'].includes(this.fields[0].content);
 		},
 		menuActive:function() {
 			return typeof this.formIdMapMenu[this.form.id] === 'undefined'

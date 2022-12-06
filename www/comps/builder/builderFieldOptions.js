@@ -846,6 +846,7 @@ let MyBuilderFieldOptions = {
 								/>
 								<my-button image="cancel.png"
 									@trigger="field.tabs.splice(i,1);set('tabs',field.tabs)"
+									:active="field.tabs.length > 1"
 									:naked="true"
 								/>
 							</div>

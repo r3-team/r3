@@ -399,9 +399,6 @@
 
 
 /* user overwrites */
-.user-bordersAll .list:not(.singleField):not(.asInput){
-	border:1px solid var(--color-border);
-}
 .user-bordersRounded .list-input-row-empty{
 	border-radius:0px 0px 3px 3px;
 }

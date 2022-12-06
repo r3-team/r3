@@ -138,6 +138,12 @@ body                                         { --depth:6; }
 .settings .backup-code                       { --depth:0; }
 .field                                       { --depth:0; }
 .field .disabled                             { --depth:6; }
+.field .tabs-entries                         { --depth:5; }
+.field .tabs-entry.active                    { --depth:2; }
+.field .tabs-entry.active.showsData          { --depth:0; }
+.field .tabs-entry.active.showsList          { --depth:4; }
+.field .tabs-entry.active.showsTabs          { --depth:5; }
+.field .tabs>.fields                         { --depth:2; }
 .list .layoutTable th                        { --depth:0; }
 .list .layoutTable .columBatchCaption.clickable:hover{ --depth:3; }
 .list .layoutTable tbody tr                  { --depth:1; }

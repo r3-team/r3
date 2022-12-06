@@ -412,7 +412,8 @@ let MyBuilderFields = {
 			
 			this.fields.splice(i,1);
 			
-			// ID must be handled separately as it must be deleted in backend
+			// container/tab fields are removed automatically (cascaded)
+			// direct form children (top level) must be removed manually
 			this.$emit('field-remove',id);
 		},
 		toggleBool(oldBool) {

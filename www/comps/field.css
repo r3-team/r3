@@ -220,34 +220,68 @@
 
 /* tabs field */
 .field .tabs{
+	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
+	border-radius:3px;
+	overflow:auto;
 }
 .field .tabs-entries{
 	display:flex;
 	flex-flow:row wrap;
+	padding:7px 0px 0px 0px;
+	background-color:var(--color-bg);
 	border-bottom:1px solid var(--color-border);
 }
+.field .tabs-icon{
+	padding:0px 2px 0px 7px;
+	display:flex;
+}
+.field .tabs-icon img{
+	height:22px;
+	align-self:center;
+	display:flex;
+	filter:var(--image-filter);
+}
 .field .tabs-entry{
-	padding:5px 9px;
+	line-height:40px;
+	margin-top:-1px; /* in case of row wrap */
+	margin-bottom:-1px;
+	padding:0px 9px;
+	border-top:1px solid var(--color-border);
 	border-right:1px solid var(--color-border);
+	border-bottom:1px solid var(--color-border);
+	border-radius:5px 5px 0px 0px;
+	box-sizing:border-box;
+	background-color:var(--color-bg);
+	font-size:85%;
 }
 .field .tabs-entry.active{
-	font-weight:bold;
+	margin-top:-3px;
+	margin-bottom:-2px;
+	border-top:2px solid var(--color-border);
+	font-size:100%;
+}
+.field .tabs-entry.first{
+	margin-left:5px;
+	border-left:1px solid var(--color-border);
+}
+.field .tabs>.fields{
+	flex:1 1 auto;
+	background-color:var(--color-bg);
 }
 
 /* user overwrites */
-.user-bordersAll .field .input-box{
-	border-width:1px;
-	border-style:solid;
-}
 .user-bordersSquared .field .color-input .preview,
 .user-bordersSquared .field .chart,
 .user-bordersSquared .field .input-box,
 .user-bordersSquared .field .slider input,
-.user-bordersSquared .field .slider .slider-value{
+.user-bordersSquared .field .slider .slider-value,
+.user-bordersSquared .field .tabs,
+.user-bordersSquared .field .tabs-entry{
 	border-radius:0px;
 }
+
 .user-bordersRounded .field .input-box{
 	border-radius:3px;
 }

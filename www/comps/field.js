@@ -320,12 +320,12 @@ let MyField = {
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
 			:iconId="iconId ? iconId : null"
-			:isSingleField="formIsSingleField"
 			:layout="field.layout"
 			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
-			:usesPageHistory="formIsSingleField && !formIsPopUp"
+			:scrolls="isAloneInForm || isAloneInTab"
+			:usesPageHistory="isAloneInForm && !formIsPopUp"
 		/>
 		
 		<!-- calendar -->
@@ -351,7 +351,7 @@ let MyField = {
 			:indexDate1="field.indexDate1"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
-			:usesPageHistory="formIsSingleField && !formIsPopUp"
+			:usesPageHistory="isAloneInForm && !formIsPopUp"
 		/>
 		
 		<!-- gantt -->
@@ -380,7 +380,7 @@ let MyField = {
 			:stepTypeDefault="field.ganttSteps"
 			:stepTypeToggle="field.ganttStepsToggle"
 			:query="field.query"
-			:usesPageHistory="formIsSingleField && !formIsPopUp"
+			:usesPageHistory="isAloneInForm && !formIsPopUp"
 		/>
 		
 		<!-- chart -->
@@ -390,21 +390,31 @@ let MyField = {
 			:columns="columnsProcessed"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
-			:isSingleField="formIsSingleField"
+			:isSingleField="isAloneInForm"
 			:limit="field.query.fixedLimit"
 			:optionJson="field.chartOption"
 			:query="field.query"
 		/>
 		
 		<!-- tabs -->
-		<div class="tabs" v-if="isTabs">
+		<div class="tabs shade" v-if="isTabs">
 			<div class="tabs-entries">
-				<div class="tabs-entry" v-for="(t,i) in field.tabs" @click="tabIndexShow = i">
+				<div class="tabs-icon" v-if="iconId">
+					<img :src="srcBase64(iconIdMap[iconId].file)" />
+				</div>
+				<div class="tabs-entry clickable"
+					v-for="(t,i) in field.tabs"
+					@click="tabIndexShow = i"
+					:class="getTabClasses(i)"
+				>
 					{{ t.captions.tabTitle[this.moduleLanguage] }}
 				</div>
 			</div>
-			<template v-for="(t,i) in field.tabs.filter((v,i) => i === tabIndexShow)">
-				<my-field
+			<div class="fields"
+				v-for="(t,i) in field.tabs.filter((v,i) => i === tabIndexShow)"
+				:class="{ onlyOne:t.fields.length === 1 && t.fields[0].content !== 'container' }"
+			>
+				<my-field flexDirParent="column"
 					v-for="f in t.fields"
 					@clipboard="$emit('clipboard')"
 					@execute-function="$emit('execute-function',$event)"
@@ -420,15 +430,15 @@ let MyField = {
 					:fieldIdMapState="fieldIdMapState"
 					:formBadSave="formBadSave"
 					:formIsPopUp="formIsPopUp"
-					:formIsSingleField="formIsSingleField"
 					:formLoading="formLoading"
 					:formReadonly="formReadonly"
-					:flexDirParent="'column'"
+					:isAloneInTab="t.fields.length === 1"
+					:isAloneInForm="false"
 					:joinsIndexMap="joinsIndexMap"
 					:key="f.id"
 					:values="values"
 				/>
-			</template>
+			</div>
 		</div>
 		
 		<!-- container children -->
@@ -449,10 +459,10 @@ let MyField = {
 			:fieldIdMapState="fieldIdMapState"
 			:formBadSave="formBadSave"
 			:formIsPopUp="formIsPopUp"
-			:formIsSingleField="formIsSingleField"
 			:formLoading="formLoading"
 			:formReadonly="formReadonly"
 			:flexDirParent="field.direction"
+			:isAloneInForm="isAloneInForm"
 			:joinsIndexMap="joinsIndexMap"
 			:key="f.id"
 			:values="values"
@@ -465,11 +475,12 @@ let MyField = {
 		fieldIdMapState:  { type:Object,  required:false, default:() => {return {}} }, // overwritten states
 		formBadSave:      { type:Boolean, required:true }, // attempted save with invalid inputs
 		formIsPopUp:      { type:Boolean, required:true }, // parent form is a pop-up form
-		formIsSingleField:{ type:Boolean, required:true }, // parent form contains a single field
 		formLoading:      { type:Boolean, required:true },
 		formReadonly:     { type:Boolean, required:true }, // form is read only, disable all inputs
 		flexDirParent:    { type:String,  required:true }, // flex direction (row/column) of parent
 		joinsIndexMap:    { type:Object,  required:true },
+		isAloneInForm:    { type:Boolean, required:true }, // parent form contains only this field
+		isAloneInTab:     { type:Boolean, required:false, default:false }, // only field in a tab
 		logViewer:        { type:Boolean, required:false, default:false }, // is part of log viewer
 		values:           { type:Object,  required:true }
 	},
@@ -958,6 +969,22 @@ let MyField = {
 		openLink,
 		setGetterArgs,
 		srcBase64,
+		
+		// presentation
+		getTabClasses:function(tabIndex) {
+			if(!this.isTabs) return {};
+			let active   = tabIndex === this.tabIndexShow;
+			let fields   = this.field.tabs[tabIndex].fields;
+			let oneField = fields.length === 1;
+			
+			return {
+				active:tabIndex === this.tabIndexShow,
+				first:tabIndex === 0,
+				showsData:active && oneField && fields[0].content === 'data',
+				showsList:active && oneField && fields[0].content === 'list',
+				showsTabs:active && oneField && fields[0].content === 'tabs'
+			};
+		},
 		
 		// actions
 		blur:function() {
