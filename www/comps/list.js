@@ -636,6 +636,7 @@ let MyList = {
 		formLoading:    { type:Boolean, required:false, default:false }, // trigger and control list reloads
 		header:         { type:Boolean, required:false, default:true  }, // show list header
 		isInput:        { type:Boolean, required:false, default:false }, // use list as input
+		isHiddenInTab:  { type:Boolean, required:false, default:false }, // list is in a non-visible tab-field
 		rowSelect:      { type:Boolean, required:false, default:false }, // list rows can be selected (to open record in form)
 		scrolls:        { type:Boolean, required:false, default:false }, // list should scroll its contents (instead of growing)
 		usesPageHistory:{ type:Boolean, required:false, default:false }, // list uses page getters for filtering/sorting/etc.
@@ -932,6 +933,9 @@ let MyList = {
 			if(val) return;
 			this.inputAutoSelectDone = false;
 			this.reloadOutside();
+		});
+		this.$watch('isHiddenInTab',(val) => {
+			if(!val) this.reloadOutside();
 		});
 		this.$watch(() => [this.choices,this.columns,this.filters],(newVals,oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
@@ -1457,8 +1461,8 @@ let MyList = {
 		},
 		
 		get:function() {
-			// nothing to get if nothing is shown or form is currently loading
-			if(!this.showTable || this.formLoading)
+			// do nothing if nothing is shown, form is loading or list is in a non-visible tab
+			if(!this.showTable || this.formLoading || this.isHiddenInTab)
 				return;
 			
 			// fix invalid offset (can occur when limit is changed)

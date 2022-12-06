@@ -277,6 +277,9 @@
 	border-top:2px solid var(--color-border);
 	font-size:100%;
 }
+.field .tabs-entry.error{
+	color:var(--color-error);
+}
 .field .tabs-entry.first{
 	margin-left:5px;
 	border-left:1px solid var(--color-border);

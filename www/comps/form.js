@@ -223,6 +223,7 @@ let MyForm = {
 					@set-value-init="valueSet"
 					:dataFieldMap="fieldIdMapData"
 					:field="f"
+					:fieldIdsInvalid="fieldIdsInvalid"
 					:fieldIdMapCaption="fieldIdMapCaption"
 					:fieldIdMapState="fieldIdMapState"
 					:formBadSave="badSave"
@@ -774,6 +775,12 @@ let MyForm = {
 					for(const f of fields) {
 						if(f.content === 'container') {
 							fillFieldValueTemplates(f.fields);
+							continue;
+						}
+						if(f.content === 'tabs') {
+							for(let t of f.tabs) {
+								fillFieldValueTemplates(t.fields);
+							}
 							continue;
 						}
 						

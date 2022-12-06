@@ -326,6 +326,7 @@ let MyField = {
 			:iconId="iconId ? iconId : null"
 			:layout="field.layout"
 			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
+			:isHiddenInTab="isHiddenInTab"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
 			:scrolls="isAloneInForm || isAloneInTab"
@@ -415,7 +416,8 @@ let MyField = {
 				</div>
 			</div>
 			<div class="fields"
-				v-for="(t,i) in field.tabs.filter((v,i) => i === tabIndexShow)"
+				v-for="(t,i) in field.tabs"
+				v-show="i === tabIndexShow"
 				:class="{ onlyOne:t.fields.length === 1 && t.fields[0].content !== 'container' }"
 			>
 				<my-field flexDirParent="column"
@@ -430,14 +432,16 @@ let MyField = {
 					@set-value-init="(...args) => $emit('set-value-init',...args)"
 					:dataFieldMap="dataFieldMap"
 					:field="f"
+					:fieldIdsInvalid="fieldIdsInvalid"
 					:fieldIdMapCaption="fieldIdMapCaption"
 					:fieldIdMapState="fieldIdMapState"
 					:formBadSave="formBadSave"
 					:formIsPopUp="formIsPopUp"
-					:formLoading="tabLoading"
+					:formLoading="formLoading"
 					:formReadonly="formReadonly"
 					:isAloneInTab="t.fields.length === 1"
 					:isAloneInForm="false"
+					:isHiddenInTab="isHiddenInTab || i !== tabIndexShow"
 					:joinsIndexMap="joinsIndexMap"
 					:key="f.id"
 					:values="values"
@@ -459,6 +463,7 @@ let MyField = {
 			@set-value-init="(...args) => $emit('set-value-init',...args)"
 			:dataFieldMap="dataFieldMap"
 			:field="f"
+			:fieldIdsInvalid="fieldIdsInvalid"
 			:fieldIdMapCaption="fieldIdMapCaption"
 			:fieldIdMapState="fieldIdMapState"
 			:formBadSave="formBadSave"
@@ -467,6 +472,7 @@ let MyField = {
 			:formReadonly="formReadonly"
 			:flexDirParent="field.direction"
 			:isAloneInForm="isAloneInForm"
+			:isHiddenInTab="isHiddenInTab"
 			:joinsIndexMap="joinsIndexMap"
 			:key="f.id"
 			:values="values"
@@ -475,6 +481,7 @@ let MyField = {
 	props:{
 		dataFieldMap:     { type:Object,  required:true },
 		field:            { type:Object,  required:true },
+		fieldIdsInvalid:  { type:Array,   required:false, default:() => {return []} },
 		fieldIdMapCaption:{ type:Object,  required:false, default:() => {return {}} }, // overwritten captions
 		fieldIdMapState:  { type:Object,  required:false, default:() => {return {}} }, // overwritten states
 		formBadSave:      { type:Boolean, required:true }, // attempted save with invalid inputs
@@ -485,6 +492,7 @@ let MyField = {
 		joinsIndexMap:    { type:Object,  required:true },
 		isAloneInForm:    { type:Boolean, required:true }, // parent form contains only this field
 		isAloneInTab:     { type:Boolean, required:false, default:false }, // only field in a tab
+		isHiddenInTab:    { type:Boolean, required:false, default:false }, // field is in a non-visible tab
 		logViewer:        { type:Boolean, required:false, default:false }, // is part of log viewer
 		values:           { type:Object,  required:true }
 	},
@@ -499,8 +507,7 @@ let MyField = {
 			notTouched:true,            // data field was not touched by user
 			showColorPickerInput:false, // for color picker fields
 			showPassword:false,         // for password fields
-			tabIndexShow:0,             // tabs only: which tab is shown
-			tabLoading:true             // tabs only: replaces formLoading for tab fields
+			tabIndexShow:0              // tabs only: which tab is shown
 		};
 	},
 	mounted:function() {
@@ -510,8 +517,6 @@ let MyField = {
 	watch:{
 		formLoading:function(val) {
 			if(!val) this.notTouched = true;
-			
-			this.tabLoading = val;
 		},
 		isValid:{ // inform parent form about field validity
 			handler:function(v) { this.$emit('set-valid',v,this.field.id); },
@@ -530,7 +535,7 @@ let MyField = {
 				// 1st preference: field caption overwrite
 				out = this.fieldIdMapCaption[this.field.id];
 			}
-			else if(typeof this.field.captions.fieldTitle[this.moduleLanguage] !== 'undefined') {
+			else if(typeof this.field.captions !== 'undefined' && typeof this.field.captions.fieldTitle[this.moduleLanguage] !== 'undefined') {
 				// 2nd preference: field caption
 				out = this.field.captions.fieldTitle[this.moduleLanguage];
 			}
@@ -572,7 +577,8 @@ let MyField = {
 			return '';
 		},
 		captionHelp:function() {
-			return typeof this.field.captions.fieldHelp[this.moduleLanguage] !== 'undefined'
+			return typeof this.field.captions !== 'undefined'
+				&& typeof this.field.captions.fieldHelp[this.moduleLanguage] !== 'undefined'
 				? this.field.captions.fieldHelp[this.moduleLanguage] : '';
 		},
 		domClass:function() {
@@ -730,6 +736,34 @@ let MyField = {
 				state = 'readonly';
 			
 			return state;
+		},
+		tabIndexesInvalidFields:function() {
+			if(!this.isTabs) return [];
+			let hasAnyInvalid = (fields) => {
+				for(let f of fields) {
+					switch(f.content) {
+						case 'data':
+							if(this.fieldIdsInvalid.includes(f.id)) return true;
+						break;
+						case 'container':
+							if(hasAnyInvalid(f.fields)) return true;
+						break;
+						case 'tabs':
+							for(let t of f.tabs) {
+								if(hasAnyInvalid(t.fields)) return true;
+							}
+						break;
+					}
+				}
+				return false;
+			};
+			
+			let out = [];
+			for(let i = 0, j = this.field.tabs.length; i < j; i++) {
+				if(hasAnyInvalid(this.field.tabs[i].fields))
+					out.push(i);
+			}
+			return out;
 		},
 		
 		// field value for data attribute
@@ -992,6 +1026,7 @@ let MyField = {
 			
 			return {
 				active:tabIndex === this.tabIndexShow,
+				error:this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
 				first:tabIndex === 0,
 				showsCal:  active && oneField && fields[0].content === 'calendar',
 				showsChart:active && oneField && fields[0].content === 'chart',
@@ -1073,10 +1108,6 @@ let MyField = {
 		setTab:function(tabIndex) {
 			this.fieldOptionSet(this.field.id,'tabIndex',tabIndex);
 			this.tabIndexShow = tabIndex;
-			
-			// inform tab fields about change
-			this.tabLoading = true;
-			this.$nextTick(() => this.tabLoading = false);
 		},
 		setValue:function(val,valOld,indexAttributeId) {
 			if(val === '')
