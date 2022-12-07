@@ -312,6 +312,18 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX fki_caption_tab_id_fkey
 				ON app.caption USING btree (tab_id ASC NULLS LAST);
 			
+			ALTER TABLE app.form_state_effect ADD COLUMN tab_id uuid;
+			ALTER TABLE app.form_state_effect ADD CONSTRAINT form_state_effect_tab_id_fkey FOREIGN KEY (tab_id)
+				REFERENCES app.tab (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_form_state_effect_tab_id_fkey
+				ON app.form_state_effect USING btree (tab_id ASC NULLS LAST);
+			
+			ALTER TABLE app.form_state_effect ALTER COLUMN field_id DROP NOT NULL;
+			
 			-- outdated config key that was in 3.0 init script until 3.2
 			DELETE FROM instance.config WHERE name = 'exportPrivateKey';
 		`); err != nil {

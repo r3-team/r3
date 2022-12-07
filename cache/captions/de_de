@@ -577,6 +577,8 @@
 				"displayRichtext":"Rich-Text",
 				"displaySlider":"Werteschieber",
 				"displayUrl":"URL",
+				"effectField":"Feld",
+				"effectTab":"Tab",
 				"ganttStepsDays":"Tage",
 				"ganttStepsHours":"Stunden"
 			},

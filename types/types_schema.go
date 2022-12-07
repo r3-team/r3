@@ -187,8 +187,9 @@ type FormStateConditionSide struct {
 	Value        pgtype.Varchar `json:"value"`        // fixed value, can be anything including NULL
 }
 type FormStateEffect struct {
-	FieldId  uuid.UUID `json:"fieldId"`  // affected field
-	NewState string    `json:"newState"` // effect state (hidden, readonly, default, required)
+	FieldId  pgtype.UUID `json:"fieldId"`  // affected field
+	TabId    pgtype.UUID `json:"tabId"`    // affected tab
+	NewState string      `json:"newState"` // effect state (hidden, readonly, default, required)
 }
 type Field struct {
 	Id       uuid.UUID   `json:"id"`

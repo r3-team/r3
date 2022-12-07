@@ -577,6 +577,8 @@
 				"displayRichtext":"richtext",
 				"displaySlider":"valoarea cursorului",
 				"displayUrl":"URL",
+				"effectField":"Field",
+				"effectTab":"Tab",
 				"ganttStepsDays":"zile",
 				"ganttStepsHours":"ore"
 			},

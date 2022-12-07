@@ -100,8 +100,10 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 		}
 
 		for j, e := range state.Effects {
-			if _, exists := idMapReplaced[e.FieldId]; exists {
-				form.States[i].Effects[j].FieldId = idMapReplaced[e.FieldId]
+			if e.FieldId.Status == pgtype.Present {
+				if _, exists := idMapReplaced[e.FieldId.Bytes]; exists {
+					form.States[i].Effects[j].FieldId.Bytes = idMapReplaced[e.FieldId.Bytes]
+				}
 			}
 		}
 	}

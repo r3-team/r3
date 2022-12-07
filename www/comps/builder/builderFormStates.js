@@ -9,13 +9,28 @@ let MyBuilderFormStateEffect = {
 	name:'my-builder-form-state-effect',
 	template:`<div class="builder-form-state-effect">
 		
+		<!-- target -->
+		<select v-model="target" @input="changeTarget($event.target.value)">
+			<option value="field">{{ capApp.option.effectField }}</option>
+			<option value="tab">{{ capApp.option.effectTab }}</option>
+		</select>
+		
 		<!-- affected field -->
-		<select @input="update('fieldId',$event.target.value)" :value="effect.fieldId">
-			<option value="">-</option>
+		<select v-if="target === 'field'" @input="update('fieldId',$event.target.value)" :value="effect.fieldId">
+			<option :value="null">-</option>
 			<option
 				v-for="(ref,fieldId) in entityIdMapRef.field"
 				:value="fieldId"
 			>F{{ ref }}</option>
+		</select>
+		
+		<!-- affected tab -->
+		<select v-if="target === 'tab'" @input="update('tabId',$event.target.value)" :value="effect.tabId">
+			<option :value="null">-</option>
+			<option
+				v-for="(ref,id) in entityIdMapRef.tab"
+				:value="id"
+			>T{{ ref }}</option>
 		</select>
 		
 		<!-- new state -->
@@ -39,6 +54,11 @@ let MyBuilderFormStateEffect = {
 		modelValue:    { type:Object, required:true }
 	},
 	emits:['remove','update:modelValue'],
+	data() {
+		return {
+			target:this.modelValue.tabId === null ? 'field' : 'tab'
+		};
+	},
 	computed:{
 		effect:  (s) => JSON.parse(JSON.stringify(s.modelValue)),
 		fieldSet:(s) => s.effect.fieldId !== null,
@@ -49,6 +69,10 @@ let MyBuilderFormStateEffect = {
 		capApp:(s) => s.$store.getters.captions.builder.form
 	},
 	methods:{
+		changeTarget(target) {
+			if(target === 'field') this.update('tabId',null);
+			else                   this.update('fieldId',null);
+		},
 		update(name,value) {
 			let v = JSON.parse(JSON.stringify(this.effect));
 			v[name] = value;
@@ -183,6 +207,7 @@ let MyBuilderFormState = {
 			let v = JSON.parse(JSON.stringify(this.state));
 			v.effects.push({
 				fieldId:null,
+				tabId:null,
 				newState:'default'
 			});
 			this.$emit('update:modelValue',v);

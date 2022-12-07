@@ -121,7 +121,7 @@ func getStateEffects(formStateId uuid.UUID) ([]types.FormStateEffect, error) {
 	effects := make([]types.FormStateEffect, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT field_id, new_state
+		SELECT field_id, tab_id, new_state
 		FROM app.form_state_effect
 		WHERE form_state_id = $1
 	`, formStateId)
@@ -132,8 +132,7 @@ func getStateEffects(formStateId uuid.UUID) ([]types.FormStateEffect, error) {
 
 	for rows.Next() {
 		var e types.FormStateEffect
-
-		if err := rows.Scan(&e.FieldId, &e.NewState); err != nil {
+		if err := rows.Scan(&e.FieldId, &e.TabId, &e.NewState); err != nil {
 			return effects, err
 		}
 		effects = append(effects, e)
@@ -231,10 +230,10 @@ func setState_tx(tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID,
 	for _, e := range state.Effects {
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.form_state_effect (
-				form_state_id, field_id, new_state
+				form_state_id, field_id, tab_id, new_state
 			)
-			VALUES ($1,$2,$3)
-		`, state.Id, e.FieldId, e.NewState); err != nil {
+			VALUES ($1,$2,$3,$4)
+		`, state.Id, e.FieldId, e.TabId, e.NewState); err != nil {
 			return state.Id, err
 		}
 	}
