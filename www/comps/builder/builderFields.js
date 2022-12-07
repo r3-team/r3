@@ -103,8 +103,8 @@ let MyBuilderFields = {
 					
 					<!-- action: move target inside container -->
 					<img class="action clickable" src="images/arrowInside.png"
-						v-if="!isTemplate && element.content === 'container' && moveActive && fieldMoveList[fieldMoveIndex].id !== element.id"
-						@click="moveByClick(element.fields,0,true)"
+						v-if="!isTemplate && ['container','tabs'].includes(element.content) && moveActive && fieldMoveList[fieldMoveIndex].id !== element.id"
+						@click="moveByClick(getParentChildren(element),0,true)"
 						:title="capApp.fieldMoveInside"
 					/>
 					
@@ -343,18 +343,17 @@ let MyBuilderFields = {
 		},
 		
 		// actions
-		fieldPropertySet(fieldIndex,name,value) {
-			this.fields[fieldIndex][name] = value;
-		},
-		fieldTabSet(fieldId,tabIndex) {
-			this.fieldIdMapTabIndex[fieldId] = tabIndex;
-		},
-		
 		cloneField(field) {
 			// generate copy of field with unique ID
 			let fieldNew = JSON.parse(JSON.stringify(field));
 			fieldNew.id = 'new_'+this.fieldCounterInput++;
 			return fieldNew;
+		},
+		fieldPropertySet(fieldIndex,name,value) {
+			this.fields[fieldIndex][name] = value;
+		},
+		fieldTabSet(fieldId,tabIndex) {
+			this.fieldIdMapTabIndex[fieldId] = tabIndex;
 		},
 		
 		// clone is in context of the source draggable element
@@ -371,7 +370,7 @@ let MyBuilderFields = {
 		// move field by clicking on it in original fields list (source)
 		//  and then clicking on a field in another fields list (target)
 		// actual move happens in step 2 and is in context of target list
-		moveByClick(fieldList,fieldIndex,moveToContainer) {
+		moveByClick(fieldList,fieldIndex,moveToParent) {
 			
 			// if nothing is stored yet, store this field list and index
 			if(!this.moveActive)
@@ -381,7 +380,7 @@ let MyBuilderFields = {
 			
 			let fieldStored = this.fieldMoveList[this.fieldMoveIndex];
 			
-			if(!moveToContainer) {
+			if(!moveToParent) {
 				let fieldNow = fieldList[fieldIndex];
 				
 				// deselect if the same field is set twice
@@ -391,7 +390,7 @@ let MyBuilderFields = {
 					});
 			}
 			
-			// move field from old (stored) list to clicked on list
+			// move field from old (stored) element to clicked on element
 			let isFromTemplate = fieldStored.id.startsWith('template_');
 			
 			if(isFromTemplate)
@@ -399,7 +398,7 @@ let MyBuilderFields = {
 			else
 				this.fieldMoveList.splice(this.fieldMoveIndex,1);
 			
-			if(moveToContainer)
+			if(moveToParent)
 				fieldList.splice(fieldIndex,0,fieldStored);
 			else
 				fieldList.splice(fieldIndex+1,0,fieldStored);
@@ -456,6 +455,15 @@ let MyBuilderFields = {
 				selected:field.id === this.fieldIdShow,
 				tabs:field.content === 'tabs'
 			};
+		},
+		getParentChildren(parentField) {
+			if(parentField.content === 'container')
+				return parentField.fields;
+			
+			let tabIndex = typeof this.fieldIdMapTabIndex[parentField.id] !== 'undefined'
+				? this.fieldIdMapTabIndex[parentField.id] : 0;
+			
+			return parentField.tabs[tabIndex].fields;
 		},
 		getTitle(field) {
 			switch(field.content) {
