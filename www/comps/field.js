@@ -408,7 +408,7 @@ let MyField = {
 					<img :src="srcBase64(iconIdMap[iconId].file)" />
 				</div>
 				<div class="tabs-entry clickable"
-					v-for="(t,i) in field.tabs"
+					v-for="(t,i) in field.tabs.filter(v => v.state !== 'hidden')"
 					@click="setTab(i)"
 					:class="getTabClasses(i)"
 				>

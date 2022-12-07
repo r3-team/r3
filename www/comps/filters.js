@@ -292,7 +292,7 @@ let MyFilterSide = {
 				
 				<!-- field input -->
 				<select v-model="fieldId" v-if="!columnsMode && isField">
-					<template v-for="(ref,fieldId) in fieldIdMapRef">
+					<template v-for="(ref,fieldId) in entityIdMapRef.field">
 						<option
 							v-if="fieldIdMap[fieldId].content === 'data'"
 							:value="fieldId"
@@ -389,8 +389,8 @@ let MyFilterSide = {
 				:allowChoices="false"
 				:allowOrders="true"
 				:choices="query.choices"
+				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
-				:fieldIdMapRef="fieldIdMapRef"
 				:filters="query.filters"
 				:fixedLimit="query.fixedLimit"
 				:joins="query.joins"
@@ -408,8 +408,8 @@ let MyFilterSide = {
 		columnTime:    { type:Boolean, required:false, default:false },
 		columnsMode:   { type:Boolean, required:true },
 		disableContent:{ type:Array,   required:true },
+		entityIdMapRef:{ type:Object,  required:true },
 		fieldIdMap:    { type:Object,  required:true },
-		fieldIdMapRef: { type:Object,  required:true },
 		isNullOperator:{ type:Boolean, required:true },
 		joins:         { type:Array,   required:true },
 		joinsParents:  { type:Array,   required:true },
@@ -621,8 +621,8 @@ let MyFilter = {
 			:builderMode="builderMode"
 			:columnsMode="columnsMode"
 			:disableContent="disableContent"
+			:entityIdMapRef="entityIdMapRef"
 			:fieldIdMap="fieldIdMap"
-			:fieldIdMapRef="fieldIdMapRef"
 			:isNullOperator="isNullOperator"
 			:joins="joins"
 			:joinsParents="joinsParents"
@@ -645,8 +645,8 @@ let MyFilter = {
 			:columnTime="side0ColumTime"
 			:columnsMode="columnsMode"
 			:disableContent="disableContent"
+			:entityIdMapRef="entityIdMapRef"
 			:fieldIdMap="fieldIdMap"
-			:fieldIdMapRef="fieldIdMapRef"
 			:isNullOperator="isNullOperator"
 			:joins="joins"
 			:joinsParents="joinsParents"
@@ -671,9 +671,9 @@ let MyFilter = {
 		columns:       { type:Array,   required:false, default:() => [] },
 		columnsMode:   { type:Boolean, required:true },
 		disableContent:{ type:Array,   required:true },
+		entityIdMapRef:{ type:Object,  required:true },
 		expertMode:    { type:Boolean, required:true },
 		fieldIdMap:    { type:Object,  required:true },
-		fieldIdMapRef: { type:Object,  required:true },
 		joins:         { type:Array,   required:true },
 		joinsParents:  { type:Array,   required:true },
 		moduleId:      { type:String,  required:true },
@@ -804,9 +804,9 @@ let MyFilters = {
 					:columnsMode="columnsMode"
 					:connector="element.connector"
 					:disableContent="disableContent"
+					:entityIdMapRef="entityIdMapRef"
 					:expertMode="expertMode"
 					:fieldIdMap="fieldIdMap"
-					:fieldIdMapRef="fieldIdMapRef"
 					:joins="joins"
 					:joinsParents="joinsParents"
 					:key="index"
@@ -854,8 +854,8 @@ let MyFilters = {
 		builderMode:   { type:Boolean, required:false, default:false },
 		columns:       { type:Array,   required:false, default:() => [] },
 		disableContent:{ type:Array,   required:false, default:() => [] }, // content to disable (attribute, record, field, true, ...)
+		entityIdMapRef:{ type:Object,  required:false, default:() => {return {}} },
 		fieldIdMap:    { type:Object,  required:false, default:() => {return {}} },
-		fieldIdMapRef: { type:Object,  required:false, default:() => {return {}} },
 		filterAddCnt:  { type:Number,  required:false, default:0 },
 		frontendOnly:  { type:Boolean, required:false, default:false },    // filter criteria must not contain backend types (attributes/queries)
 		joins:         { type:Array,   required:false, default:() => [] },

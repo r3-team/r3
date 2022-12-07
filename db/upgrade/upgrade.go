@@ -270,6 +270,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			WHERE task_name = 'embeddedBackup';
 			
 			-- new tabs field
+			ALTER TYPE app.field_state RENAME TO state_effect;
 			ALTER TYPE app.caption_content ADD VALUE 'tabTitle';
 			ALTER TYPE app.field_content ADD VALUE 'tabs';
 			
@@ -277,6 +278,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				id uuid NOT NULL,
 				field_id uuid NOT NULL,
 				"position" smallint NOT NULL,
+				"state" state_effect NOT NULL,
 			    CONSTRAINT tab_pkey PRIMARY KEY (id),
 				CONSTRAINT tab_field_id_position_key UNIQUE (field_id, "position")
 					DEFERRABLE INITIALLY DEFERRED,

@@ -137,8 +137,8 @@ let MyBuilderForm = {
 					:builderLanguage="builderLanguage"
 					:columnIdShow="columnIdShow"
 					:dataFields="dataFields"
+					:entityIdMapRef="entityIdMapRef"
 					:fieldCounter="fieldCounter"
-					:fieldIdMapRef="fieldIdMapRef"
 					:fieldIdShow="fieldIdShow"
 					:fieldIdShowTab="tabTargetField"
 					:fieldMoveList="fieldMoveList"
@@ -161,7 +161,7 @@ let MyBuilderForm = {
 					<img v-if="!fieldShow" class="icon" src="images/form.png" />
 					<h1 v-if="!fieldShow">{{ capApp.sidebarForm }}</h1>
 					<h1 v-if="fieldShow" class="selected-ref">
-						{{ capApp.sidebarField.replace('{NAME}','F'+fieldIdMapRef[fieldIdShow]) }}
+						{{ capApp.sidebarField.replace('{NAME}','F'+entityIdMapRef[fieldIdShow]) }}
 					</h1>
 				</div>
 				<div class="area">
@@ -293,7 +293,7 @@ let MyBuilderForm = {
 					<my-builder-form-states
 						v-if="tabTarget === 'states'"
 						v-model="states"
-						:fieldIdMapRef="fieldIdMapRef"
+						:entityIdMapRef="entityIdMapRef"
 						:form="form"
 					/>
 					
@@ -323,6 +323,7 @@ let MyBuilderForm = {
 						@set="(...args) => fieldPropertySet(args[0],args[1])"
 						:builderLanguage="builderLanguage"
 						:dataFields="dataFields"
+						:entityIdMapRef="entityIdMapRef"
 						:field="fieldShow"
 						:formId="id"
 						:joinsIndexMap="joinsIndexMap"
@@ -344,8 +345,8 @@ let MyBuilderForm = {
 							:allowOrders="true"
 							:builderLanguage="builderLanguage"
 							:choices="fieldShow.query.choices"
+							:entityIdMapRef="entityIdMapRef"
 							:fieldIdMap="fieldIdMap"
-							:fieldIdMapRef="fieldIdMapRef"
 							:filters="fieldShow.query.filters"
 							:fixedLimit="fieldShow.query.fixedLimit"
 							:joins="fieldShow.query.joins"
@@ -408,8 +409,8 @@ let MyBuilderForm = {
 								:allowOrders="true"
 								:builderLanguage="builderLanguage"
 								:choices="columnShow.query.choices"
+								:entityIdMapRef="entityIdMapRef"
 								:fieldIdMap="fieldIdMap"
-								:fieldIdMapRef="fieldIdMapRef"
 								:filters="columnShow.query.filters"
 								:fixedLimit="columnShow.query.fixedLimit"
 								:joins="columnShow.query.joins"
@@ -527,22 +528,20 @@ let MyBuilderForm = {
 			collect(s.fields);
 			return map;
 		},
-		fieldIdMapRef:(s) => {
-			// unique field reference counter for all fields (mapped by field ID)
-			let refs = {};
-			let refCounter = 0;
+		entityIdMapRef:(s) => {
+			let refs      = { field:{}, tab:{} }; // ID maps for fields/tabs
+			let ctrFields = 0; // unique reference number for each field
+			let ctrTabs   = 0; // unique reference number for each tab
 			
 			let collect = function(fields) {
-				for(let i = 0, j = fields.length; i < j; i++) {
-					
-					let f = fields[i];
-					refs[f.id] = refCounter++;
-					
+				for(let f of fields) {
+					refs.field[f.id] = ctrFields++;
 					switch(f.content) {
 						case 'container': collect(f.fields); break;
 						case 'tabs':
-							for(let x = 0, y = f.tabs.length; x < y; x++) {
-								collect(f.tabs[x].fields);
+							for(let t of f.tabs) {
+								refs.tab[t.id] = ctrTabs++;
+								collect(t.fields);
 							}
 						break;
 					}
@@ -903,6 +902,7 @@ let MyBuilderForm = {
 				onMobile:true,
 				tabs:[{
 					id:this.getNilUuid(),
+					state:'default',
 					fields:[],
 					captions:{
 						tabTitle:{}

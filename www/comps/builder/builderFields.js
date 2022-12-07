@@ -39,7 +39,7 @@ let MyBuilderFields = {
 				<div class="builder-field-header" :class="{ dragAnchor:!moveActive }">
 					<!-- form state field reference -->
 					<span class="field-ref" v-if="!isTemplate">
-						F{{ typeof fieldIdMapRef[element.id] !== 'undefined' ? fieldIdMapRef[element.id] : '' }}
+						F{{ typeof entityIdMapRef.field[element.id] !== 'undefined' ? entityIdMapRef.field[element.id] : '' }}
 					</span>
 					
 					<!-- container actions 1 -->
@@ -186,7 +186,7 @@ let MyBuilderFields = {
 							@click="fieldTabSet(element.id,i)"
 							:class="{ active:showTab(element,i) }"
 						>
-							T{{ i }}
+							T{{ typeof entityIdMapRef.tab[t.id] !== 'undefined' ? entityIdMapRef.tab[t.id] : '' }}
 						</div>
 					</div>
 					<my-builder-fields class="fields-nested column"
@@ -199,8 +199,8 @@ let MyBuilderFields = {
 						:builderLanguage="builderLanguage"
 						:columnIdShow="columnIdShow"
 						:dataFields="dataFields"
+						:entityIdMapRef="entityIdMapRef"
 						:fieldCounter="fieldCounter"
-						:fieldIdMapRef="fieldIdMapRef"
 						:fieldIdShow="fieldIdShow"
 						:fieldIdShowTab="fieldIdShowTab"
 						:fieldMoveList="fieldMoveList"
@@ -243,8 +243,8 @@ let MyBuilderFields = {
 					:class="getClassChildren(element)"
 					:columnIdShow="columnIdShow"
 					:dataFields="dataFields"
+					:entityIdMapRef="entityIdMapRef"
 					:fieldCounter="fieldCounter"
-					:fieldIdMapRef="fieldIdMapRef"
 					:fieldIdShow="fieldIdShow"
 					:fieldIdShowTab="fieldIdShowTab"
 					:fieldMoveList="fieldMoveList"
@@ -263,17 +263,17 @@ let MyBuilderFields = {
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		columnIdShow:   { type:String,  required:false, default:null },
-		dataFields:     { type:Array,   required:false, default:() => [] },          // all data fields from form
-		fields:         { type:Array,   required:true },                             // fields to handle
-		fieldIdMapRef:  { type:Object,  required:false, default:() => {return {}} }, // field reference map (unique field counter for each ID)
+		dataFields:     { type:Array,   required:false, default:() => [] },
+		entityIdMapRef: { type:Object,  required:false, default:() => {return {}} },
+		fields:         { type:Array,   required:true },
 		fieldIdShow:    { required:false, default:null },
 		fieldIdShowTab: { type:String,  required:false, default:'' },
 		fieldMoveList:  { required:true },
 		fieldMoveIndex: { type:Number,  required:true },
 		fieldCounter:   { type:Number,  required:true },
-		flexDirParent:  { type:String,  required:true },                             // flex direction of parent (row|column)
+		flexDirParent:  { type:String,  required:true }, // flex direction of parent (row|column)
 		formId:         { type:String,  required:true },
-		isTemplate:     { type:Boolean, required:true },                             // is template for fields
+		isTemplate:     { type:Boolean, required:true }, // is template for fields
 		joinsIndexMap:  { type:Object,  required:false, default:() => {return {}} },
 		moduleId:       { type:String,  required:false, default:'' },
 		template1n:     { type:Boolean, required:false, default:false },

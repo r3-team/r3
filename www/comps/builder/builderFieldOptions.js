@@ -837,19 +837,39 @@ let MyBuilderFieldOptions = {
 					</td>
 					<td>
 						<div class="column">
-							<div class="row centered gap" v-for="(t,i) in field.tabs">
-								<span>T{{ i }}</span>
-								<my-builder-caption
-									@update:modelValue="t.captions.tabTitle = $event;set('tabs',field.tabs)"
-									:language="builderLanguage"
-									:modelValue="t.captions.tabTitle"
-								/>
-								<my-button image="cancel.png"
-									@trigger="field.tabs.splice(i,1);set('tabs',field.tabs)"
-									:active="field.tabs.length > 1"
-									:naked="true"
-								/>
-							</div>
+							<table>
+								<tr>
+									<th></th>
+									<th>{{ capGen.title }}</th>
+									<th colspan="2">{{ capGen.status }}</th>
+								</tr>
+								<tr v-for="(t,i) in field.tabs">
+									<td>T{{ typeof entityIdMapRef.tab[t.id] !== 'undefined' ? entityIdMapRef.tab[t.id] : '' }}</td>
+									<td>
+										<my-builder-caption
+											@update:modelValue="t.captions.tabTitle = $event;set('tabs',field.tabs)"
+											:language="builderLanguage"
+											:modelValue="t.captions.tabTitle"
+										/>
+									</td>
+									<td>
+										<select
+											@input="t.state = $event.target.value;set('tabs',field.tabs)"
+											:value="t.state"
+										>
+											<option value="hidden">{{ capApp.stateHidden }}</option>
+											<option value="default">{{ capApp.stateDefault }}</option>
+										</select>
+									</td>
+									<td>
+										<my-button image="cancel.png"
+											@trigger="field.tabs.splice(i,1);set('tabs',field.tabs)"
+											:active="field.tabs.length > 1"
+											:naked="true"
+										/>
+									</td>
+								</tr>
+							</table>
 						</div>
 					</td>
 				</tr>
@@ -1012,12 +1032,13 @@ let MyBuilderFieldOptions = {
 		</table>
 	</div>`,
 	props:{
-		builderLanguage:{ type:String,  required:true },
-		dataFields:     { type:Array,   required:true },
-		field:          { type:Object,  required:true },
-		formId:         { type:String,  required:true },
-		joinsIndexMap:  { type:Object,  required:true },
-		moduleId:       { type:String,  required:true }
+		builderLanguage:{ type:String, required:true },
+		dataFields:     { type:Array,  required:true },
+		entityIdMapRef: { type:Object, required:true },
+		field:          { type:Object, required:true },
+		formId:         { type:String, required:true },
+		joinsIndexMap:  { type:Object, required:true },
+		moduleId:       { type:String, required:true }
 	},
 	emits:['set'],
 	computed:{
@@ -1089,6 +1110,7 @@ let MyBuilderFieldOptions = {
 			let v = JSON.parse(JSON.stringify(this.field.tabs));
 			v.push({
 				id:this.getNilUuid(),
+				state:'default',
 				fields:[],
 				captions:{
 					tabTitle:{}

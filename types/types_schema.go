@@ -483,6 +483,7 @@ type JsFunction struct {
 type Tab struct {
 	Id       uuid.UUID     `json:"id"`
 	Position int           `json:"position"`
+	State    string        `json:"state"`  // tab default state (default, hidden)
 	Fields   []interface{} `json:"fields"` // fields assigned to tab
 	Captions CaptionMap    `json:"captions"`
 }

@@ -13,7 +13,7 @@ let MyBuilderFormStateEffect = {
 		<select @input="update('fieldId',$event.target.value)" :value="effect.fieldId">
 			<option value="">-</option>
 			<option
-				v-for="(ref,fieldId) in fieldIdMapRef"
+				v-for="(ref,fieldId) in entityIdMapRef.field"
 				:value="fieldId"
 			>F{{ ref }}</option>
 		</select>
@@ -34,22 +34,22 @@ let MyBuilderFormStateEffect = {
 		/>
 	</div>`,
 	props:{
-		fieldIdMap:   { type:Object, required:true },
-		fieldIdMapRef:{ type:Object, required:true },
-		modelValue:   { type:Object, required:true }
+		entityIdMapRef:{ type:Object, required:true },
+		fieldIdMap:    { type:Object, required:true },
+		modelValue:    { type:Object, required:true }
 	},
 	emits:['remove','update:modelValue'],
 	computed:{
-		effect:  function() { return JSON.parse(JSON.stringify(this.modelValue)); },
-		fieldSet:function() { return this.effect.fieldId !== null; },
-		isButton:function() { return this.fieldSet && this.fieldIdMap[this.effect.fieldId].content === 'button'; },
-		isData:  function() { return this.fieldSet && this.fieldIdMap[this.effect.fieldId].content === 'data'; },
+		effect:  (s) => JSON.parse(JSON.stringify(s.modelValue)),
+		fieldSet:(s) => s.effect.fieldId !== null,
+		isButton:(s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'button',
+		isData:  (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'data',
 		
 		// store
-		capApp:function() { return this.$store.getters.captions.builder.form; }
+		capApp:(s) => s.$store.getters.captions.builder.form
 	},
 	methods:{
-		update:function(name,value) {
+		update(name,value) {
 			let v = JSON.parse(JSON.stringify(this.effect));
 			v[name] = value;
 			this.$emit('update:modelValue',v);
@@ -92,8 +92,8 @@ let MyBuilderFormState = {
 				v-model="conditions"
 				:builderMode="true"
 				:disableContent="['attribute','javascript','subQuery']"
+				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
-				:fieldIdMapRef="fieldIdMapRef"
 				:filterAddCnt="filterAddCnt"
 				:moduleId="form.moduleId"
 				:showAdd="true"
@@ -110,8 +110,8 @@ let MyBuilderFormState = {
 					v-for="(e,i) in state.effects"
 					@update:modelValue="update('effects',i,$event)"
 					@remove="remove('effects',i)"
+					:entityIdMapRef="entityIdMapRef"
 					:fieldIdMap="fieldIdMap"
-					:fieldIdMapRef="fieldIdMapRef"
 					:key="'effect'+i"
 					:modelValue="state.effects[i]"
 				/>
@@ -120,8 +120,8 @@ let MyBuilderFormState = {
 	</div>`,
 	props:{
 		dataFields:    { type:Array,   required:true }, // all data fields
+		entityIdMapRef:{ type:Object,  required:true },
 		fieldIdMap:    { type:Object,  required:true }, // all fields by ID
-		fieldIdMapRef: { type:Object,  required:true }, // field references by ID
 		form:          { type:Object,  required:true },
 		modelValue:    { type:Object,  required:true }
 	},
@@ -221,7 +221,7 @@ let MyBuilderFormStates = {
 				/>
 				<select v-model="filterFieldId">
 					<option value="">{{ capApp.option.filterFieldIdHint }}</option>
-					<template v-for="(ref,fieldId) in fieldIdMapRef">
+					<template v-for="(ref,fieldId) in entityIdMapRef.field">
 						<option
 							v-if="fieldIdsUsed.includes(fieldId)"
 							:value="fieldId"
@@ -238,8 +238,8 @@ let MyBuilderFormStates = {
 				@remove="remove(i)"
 				@update:modelValue="update(i,$event)"
 				:dataFields="dataFields"
+				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
-				:fieldIdMapRef="fieldIdMapRef"
 				:form="form"
 				:key="s.id"
 				:modelValue="states[i]"
@@ -247,9 +247,9 @@ let MyBuilderFormStates = {
 		</div>
 	</div>`,
 	props:{
-		fieldIdMapRef:{ type:Object, required:false, default:() => {return {}} }, // field reference map (unique field counter for each ID)
-		form:         { type:Object, required:true },
-		modelValue:   { type:Array,  required:true }
+		entityIdMapRef:{ type:Object, required:false, default:() => {return {}} },
+		form:          { type:Object, required:true },
+		modelValue:    { type:Array,  required:true }
 	},
 	emits:['update:modelValue'],
 	data:function() {
