@@ -367,21 +367,10 @@ func importDeleteNotExistingFields_tx(tx pgx.Tx, moduleId uuid.UUID, form types.
 				return err
 			}
 
-			// field
+			// keep this field
 			idsKeepFields = append(idsKeepFields, field.Id)
 
-			// field tabs
-			if field.Content == "tabs" {
-				var fieldTabs types.FieldTabs
-				if err := json.Unmarshal(fieldJson, &fieldTabs); err != nil {
-					return err
-				}
-				for _, tab := range fieldTabs.Tabs {
-					idsKeepTabs = append(idsKeepTabs, tab.Id)
-				}
-			}
-
-			// field columns
+			// field containing other elements (columns, tabs, other fields)
 			switch field.Content {
 			case "calendar":
 				var fieldCalendar types.FieldCalendar
@@ -401,6 +390,15 @@ func importDeleteNotExistingFields_tx(tx pgx.Tx, moduleId uuid.UUID, form types.
 					idsKeepColumns = append(idsKeepColumns, column.Id)
 				}
 
+			case "container":
+				var fieldContainer types.FieldContainer
+				if err := json.Unmarshal(fieldJson, &fieldContainer); err != nil {
+					return err
+				}
+				if err := fieldsNestedParse(fieldContainer.Fields); err != nil {
+					return err
+				}
+
 			case "data":
 				var fieldDataRel types.FieldDataRelationship
 				if err := json.Unmarshal(fieldJson, &fieldDataRel); err != nil {
@@ -418,24 +416,15 @@ func importDeleteNotExistingFields_tx(tx pgx.Tx, moduleId uuid.UUID, form types.
 				for _, column := range fieldList.Columns {
 					idsKeepColumns = append(idsKeepColumns, column.Id)
 				}
-			}
 
-			// if field includes other fields, parse them as well
-			switch field.Content {
-			case "container":
-				var fieldContainer types.FieldContainer
-				if err := json.Unmarshal(fieldJson, &fieldContainer); err != nil {
-					return err
-				}
-				if err := fieldsNestedParse(fieldContainer.Fields); err != nil {
-					return err
-				}
 			case "tabs":
 				var fieldTabs types.FieldTabs
 				if err := json.Unmarshal(fieldJson, &fieldTabs); err != nil {
 					return err
 				}
 				for _, tab := range fieldTabs.Tabs {
+					idsKeepTabs = append(idsKeepTabs, tab.Id)
+
 					if err := fieldsNestedParse(tab.Fields); err != nil {
 						return err
 					}
@@ -445,12 +434,13 @@ func importDeleteNotExistingFields_tx(tx pgx.Tx, moduleId uuid.UUID, form types.
 		return nil
 	}
 
+	// parse all form fields recursively
 	if err := fieldsNestedParse(form.Fields); err != nil {
 		return err
 	}
 
 	// delete fields
-	idsDelete, err = importGetIdsToDeleteFromForm_tx(tx, "field", moduleId, idsKeepFields)
+	idsDelete, err = importGetIdsToDeleteFromForm_tx(tx, "field", form.Id, idsKeepFields)
 	if err != nil {
 		return err
 	}
@@ -463,7 +453,7 @@ func importDeleteNotExistingFields_tx(tx pgx.Tx, moduleId uuid.UUID, form types.
 	}
 
 	// delete tabs
-	idsDelete, err = importGetIdsToDeleteFromField_tx(tx, "tab", moduleId, idsKeepTabs)
+	idsDelete, err = importGetIdsToDeleteFromField_tx(tx, "tab", form.Id, idsKeepTabs)
 	if err != nil {
 		return err
 	}
@@ -476,7 +466,7 @@ func importDeleteNotExistingFields_tx(tx pgx.Tx, moduleId uuid.UUID, form types.
 	}
 
 	// delete columns
-	idsDelete, err = importGetIdsToDeleteFromField_tx(tx, "column", moduleId, idsKeepColumns)
+	idsDelete, err = importGetIdsToDeleteFromField_tx(tx, "column", form.Id, idsKeepColumns)
 	if err != nil {
 		return err
 	}
@@ -495,9 +485,8 @@ func importGetIdsToDeleteFromModule_tx(tx pgx.Tx, entity string,
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !tools.StringInSlice(entity, []string{"article", "collection", "form",
-		"icon", "js_function", "login_form", "menu", "pg_function", "relation",
-		"role"}) {
+	if !tools.StringInSlice(entity, []string{"article", "collection", "form", "icon",
+		"js_function", "login_form", "menu", "pg_function", "relation", "role"}) {
 
 		return idsDelete, errors.New("unsupported type for delete check")
 	}
@@ -521,7 +510,6 @@ func importGetIdsToDeleteFromRelation_tx(tx pgx.Tx, entity string, moduleId uuid
 	idsDelete := make([]uuid.UUID, 0)
 
 	if !tools.StringInSlice(entity, []string{"attribute", "pg_index", "pg_trigger", "preset"}) {
-
 		return idsDelete, errors.New("unsupport type for delete check")
 	}
 
@@ -542,7 +530,7 @@ func importGetIdsToDeleteFromRelation_tx(tx pgx.Tx, entity string, moduleId uuid
 	return idsDelete, nil
 }
 
-func importGetIdsToDeleteFromForm_tx(tx pgx.Tx, entity string, moduleId uuid.UUID,
+func importGetIdsToDeleteFromForm_tx(tx pgx.Tx, entity string, formId uuid.UUID,
 	idsKeep []uuid.UUID) ([]uuid.UUID, error) {
 
 	idsDelete := make([]uuid.UUID, 0)
@@ -555,12 +543,8 @@ func importGetIdsToDeleteFromForm_tx(tx pgx.Tx, entity string, moduleId uuid.UUI
 		SELECT ARRAY_AGG(id)
 		FROM app.%s
 		WHERE id <> ALL($1)
-		AND form_id IN (
-			SELECT id
-			FROM app.form
-			WHERE module_id = $2
-		)
-	`, entity), idsKeep, moduleId).Scan(&idsDelete)
+		AND form_id = $2
+	`, entity), idsKeep, formId).Scan(&idsDelete)
 
 	if err != nil && err != pgx.ErrNoRows {
 		return idsDelete, err
@@ -568,7 +552,7 @@ func importGetIdsToDeleteFromForm_tx(tx pgx.Tx, entity string, moduleId uuid.UUI
 	return idsDelete, nil
 }
 
-func importGetIdsToDeleteFromField_tx(tx pgx.Tx, entity string, moduleId uuid.UUID,
+func importGetIdsToDeleteFromField_tx(tx pgx.Tx, entity string, formId uuid.UUID,
 	idsKeep []uuid.UUID) ([]uuid.UUID, error) {
 
 	idsDelete := make([]uuid.UUID, 0)
@@ -584,13 +568,9 @@ func importGetIdsToDeleteFromField_tx(tx pgx.Tx, entity string, moduleId uuid.UU
 		AND field_id IN (
 			SELECT id
 			FROM app.field
-			WHERE form_id IN (
-				SELECT id
-				FROM app.form
-				WHERE module_id = $2
-			)
+			WHERE form_id = $2
 		)
-	`, entity), idsKeep, moduleId).Scan(&idsDelete)
+	`, entity), idsKeep, formId).Scan(&idsDelete)
 
 	if err != nil && err != pgx.ErrNoRows {
 		return idsDelete, err
