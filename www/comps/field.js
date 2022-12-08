@@ -404,11 +404,12 @@ let MyField = {
 		<!-- tabs -->
 		<div class="tabs shade" v-if="isTabs">
 			<div class="tabs-entries">
-				<div class="tabs-icon" v-if="iconId">
-					<img :src="srcBase64(iconIdMap[iconId].file)" />
+				<div class="tabs-icon">
+					<img v-if="iconId" :src="srcBase64(iconIdMap[iconId].file)" />
 				</div>
 				<div class="tabs-entry clickable"
-					v-for="(t,i) in field.tabs.filter(v => v.state !== 'hidden')"
+					v-for="(t,i) in field.tabs"
+					v-show="!tabIndexesHidden.includes(i)"
 					@click="setTab(i)"
 					:class="getTabClasses(i)"
 				>
@@ -431,10 +432,10 @@ let MyField = {
 					@set-value="(...args) => $emit('set-value',...args)"
 					@set-value-init="(...args) => $emit('set-value-init',...args)"
 					:dataFieldMap="dataFieldMap"
+					:entityIdMapState="entityIdMapState"
 					:field="f"
 					:fieldIdsInvalid="fieldIdsInvalid"
 					:fieldIdMapCaption="fieldIdMapCaption"
-					:fieldIdMapState="fieldIdMapState"
 					:formBadSave="formBadSave"
 					:formIsPopUp="formIsPopUp"
 					:formLoading="formLoading"
@@ -462,10 +463,10 @@ let MyField = {
 			@set-value="(...args) => $emit('set-value',...args)"
 			@set-value-init="(...args) => $emit('set-value-init',...args)"
 			:dataFieldMap="dataFieldMap"
+			:entityIdMapState="entityIdMapState"
 			:field="f"
 			:fieldIdsInvalid="fieldIdsInvalid"
 			:fieldIdMapCaption="fieldIdMapCaption"
-			:fieldIdMapState="fieldIdMapState"
 			:formBadSave="formBadSave"
 			:formIsPopUp="formIsPopUp"
 			:formLoading="formLoading"
@@ -480,10 +481,10 @@ let MyField = {
 	</div>`,
 	props:{
 		dataFieldMap:     { type:Object,  required:true },
+		entityIdMapState: { type:Object,  required:false, default:() => {return {}} }, // overwritten states
 		field:            { type:Object,  required:true },
 		fieldIdsInvalid:  { type:Array,   required:false, default:() => {return []} },
 		fieldIdMapCaption:{ type:Object,  required:false, default:() => {return {}} }, // overwritten captions
-		fieldIdMapState:  { type:Object,  required:false, default:() => {return {}} }, // overwritten states
 		formBadSave:      { type:Boolean, required:true }, // attempted save with invalid inputs
 		formIsPopUp:      { type:Boolean, required:true }, // parent form is a pop-up form
 		formLoading:      { type:Boolean, required:true },
@@ -511,8 +512,19 @@ let MyField = {
 		};
 	},
 	mounted:function() {
-		if(this.isTabs)
-			this.tabIndexShow = this.fieldOptionGet(this.field.id,'tabIndex',0);
+		if(this.isTabs) {
+			let tabIndex = this.fieldOptionGet(this.field.id,'tabIndex',0);
+			
+			// use stored tab index if valid
+			if(this.field.tabs.length > tabIndex && !this.tabIndexesHidden.includes(tabIndex))
+				return this.tabIndexShow = this.fieldOptionGet(this.field.id,'tabIndex',0);
+			
+			// use first available tab index
+			for(let i = 0, j = this.field.tabs.length; i < j; i++) {
+				if(!this.tabIndexesHidden.includes(i))
+					return this.tabIndexShow = i;
+			}
+		}
 	},
 	watch:{
 		formLoading:function(val) {
@@ -718,8 +730,8 @@ let MyField = {
 			let state = this.field.state;
 			
 			// apply form state if available
-			if(typeof this.fieldIdMapState[this.field.id] !== 'undefined')
-				state = this.fieldIdMapState[this.field.id];
+			if(typeof this.entityIdMapState.field[this.field.id] !== 'undefined')
+				state = this.entityIdMapState.field[this.field.id];
 			
 			// overwrites for 'default' state for data fields
 			if(this.isData && state === 'default') {
@@ -736,6 +748,19 @@ let MyField = {
 				state = 'readonly';
 			
 			return state;
+		},
+		tabIndexesHidden:function() {
+			if(!this.isTabs) return [];
+			let out = [];
+			for(let i = 0, j = this.field.tabs.length; i < j; i++) {
+				let t     = this.field.tabs[i];
+				let state = typeof this.entityIdMapState.tab[t.id] !== 'undefined'
+					? this.entityIdMapState.tab[t.id] : t.state;
+				
+				if(state === 'hidden')
+					out.push(i);
+			}
+			return out;
 		},
 		tabIndexesInvalidFields:function() {
 			if(!this.isTabs) return [];
@@ -1027,7 +1052,6 @@ let MyField = {
 			return {
 				active:tabIndex === this.tabIndexShow,
 				error:this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
-				first:tabIndex === 0,
 				showsCal:  active && oneField && fields[0].content === 'calendar',
 				showsChart:active && oneField && fields[0].content === 'chart',
 				showsData: active && oneField && fields[0].content === 'data',

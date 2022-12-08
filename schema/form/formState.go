@@ -124,6 +124,7 @@ func getStateEffects(formStateId uuid.UUID) ([]types.FormStateEffect, error) {
 		SELECT field_id, tab_id, new_state
 		FROM app.form_state_effect
 		WHERE form_state_id = $1
+		ORDER BY field_id ASC, tab_id ASC
 	`, formStateId)
 	if err != nil {
 		return effects, err

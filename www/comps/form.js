@@ -222,10 +222,10 @@ let MyForm = {
 					@set-value="valueSetByField"
 					@set-value-init="valueSet"
 					:dataFieldMap="fieldIdMapData"
+					:entityIdMapState="entityIdMapState"
 					:field="f"
 					:fieldIdsInvalid="fieldIdsInvalid"
 					:fieldIdMapCaption="fieldIdMapCaption"
-					:fieldIdMapState="fieldIdMapState"
 					:formBadSave="badSave"
 					:formIsPopUp="isPopUp"
 					:formLoading="loading"
@@ -243,7 +243,7 @@ let MyForm = {
 			v-if="showLog"
 			@close-log="showLog = false"
 			:dataFieldMap="fieldIdMapData"
-			:fieldIdMapState="fieldIdMapState"
+			:entityIdMapState="entityIdMapState"
 			:form="form"
 			:formLoading="loading"
 			:isPopUp="isPopUp"
@@ -555,8 +555,8 @@ let MyForm = {
 			};
 		},
 		
-		// field state overwrite
-		fieldIdMapState:function() {
+		// state overwrite for different entities (fields, tabs)
+		entityIdMapState:function() {
 			const valueChangeComp = (value) => {
 				if(!Array.isArray(value))
 					return value;
@@ -608,14 +608,13 @@ let MyForm = {
 				return false;
 			};
 			
-			let out = {};
+			let out = { field:{}, tab:{} };
 			for(const s of this.form.states) {
 				if(s.conditions.length === 0 || s.effects.length === 0)
 					continue;
 				
-				let line = 'return ';
-				
 				// parse condition expressions
+				let line = 'return ';
 				for(let i = 0, j = s.conditions.length; i < j; i++) {
 					let c = s.conditions[i];
 					
@@ -638,7 +637,8 @@ let MyForm = {
 				// apply effects if conditions are met
 				if(Function(line)()) {
 					for(const e of s.effects) {
-						out[e.fieldId] = e.newState;
+						if(e.fieldId !== null) out.field[e.fieldId] = e.newState;
+						if(e.tabId   !== null) out.tab[e.tabId]     = e.newState;
 					}
 				}
 			}
