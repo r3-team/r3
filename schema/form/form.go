@@ -54,7 +54,7 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 
 			// replace IDs inside fields
 			// first run: field IDs
-			// second run: IDs for (sub)queries, columns
+			// second run: IDs for (sub)queries, columns, tabs
 			fieldIf, err = replaceFieldIds(fieldIf, idMapReplaced, runs == 0)
 			if err != nil {
 				return err
@@ -103,6 +103,11 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 			if e.FieldId.Status == pgtype.Present {
 				if _, exists := idMapReplaced[e.FieldId.Bytes]; exists {
 					form.States[i].Effects[j].FieldId.Bytes = idMapReplaced[e.FieldId.Bytes]
+				}
+			}
+			if e.TabId.Status == pgtype.Present {
+				if _, exists := idMapReplaced[e.TabId.Bytes]; exists {
+					form.States[i].Effects[j].TabId.Bytes = idMapReplaced[e.TabId.Bytes]
 				}
 			}
 		}
@@ -499,6 +504,32 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 			for i, _ := range field.Collections {
 				field.Collections[i] = replaceCollectionConsumer(field.Collections[i])
 			}
+		}
+		fieldIf = field
+
+	case types.FieldTabs:
+		if setFieldIds {
+			field.Id, err = schema.ReplaceUuid(field.Id, idMapReplaced)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			for i, tab := range field.Tabs {
+				tab.Id, err = schema.ReplaceUuid(tab.Id, idMapReplaced)
+				if err != nil {
+					return nil, err
+				}
+				field.Tabs[i] = tab
+			}
+		}
+		for i, tab := range field.Tabs {
+			for fi, _ := range tab.Fields {
+				tab.Fields[fi], err = replaceFieldIds(tab.Fields[fi], idMapReplaced, setFieldIds)
+				if err != nil {
+					return nil, err
+				}
+			}
+			field.Tabs[i] = tab
 		}
 		fieldIf = field
 
