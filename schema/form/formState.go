@@ -229,6 +229,10 @@ func setState_tx(tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID,
 	}
 
 	for _, e := range state.Effects {
+
+		// fix imports < 3.2: New state effect: Tab ID
+		e.TabId = compatible.FixPgxNull(e.TabId).(pgtype.UUID)
+
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.form_state_effect (
 				form_state_id, field_id, tab_id, new_state
