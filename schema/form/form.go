@@ -45,6 +45,9 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 		return err
 	}
 
+	// remove form functions (cannot be copied without recreating all functions)
+	form.Functions = make([]types.FormFunction, 0)
+
 	// replace IDs from fields as well as their (sub)queries, columns, etc.
 	// run twice: once for all field IDs and again to update dependent field sub entities
 	//  example: filters from columns (sub queries) or other fields (list queries) can reference field IDs
