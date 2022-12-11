@@ -86,15 +86,14 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 		}
 
 		for j, c := range state.Conditions {
-
-			if c.FieldId0.Status == pgtype.Present {
-				if _, exists := idMapReplaced[c.FieldId0.Bytes]; exists {
-					form.States[i].Conditions[j].FieldId0.Bytes = idMapReplaced[c.FieldId0.Bytes]
+			if c.Side0.FieldId.Status == pgtype.Present {
+				if _, exists := idMapReplaced[c.Side0.FieldId.Bytes]; exists {
+					form.States[i].Conditions[j].Side0.FieldId.Bytes = idMapReplaced[c.Side0.FieldId.Bytes]
 				}
 			}
-			if c.FieldId1.Status == pgtype.Present {
-				if _, exists := idMapReplaced[c.FieldId1.Bytes]; exists {
-					form.States[i].Conditions[j].FieldId1.Bytes = idMapReplaced[c.FieldId1.Bytes]
+			if c.Side1.FieldId.Status == pgtype.Present {
+				if _, exists := idMapReplaced[c.Side1.FieldId.Bytes]; exists {
+					form.States[i].Conditions[j].Side1.FieldId.Bytes = idMapReplaced[c.Side1.FieldId.Bytes]
 				}
 			}
 		}
