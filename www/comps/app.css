@@ -131,6 +131,7 @@ body                                         { --depth:6; }
 .home-wizard .tabBar .entry:hover            { --depth:1; }
 .home-wizardAction                           { --depth:3; }
 .login input                                 { --depth:0; }
+.login select                                { --depth:0; }
 .menu .items-bg                              { --depth:5; }
 .menu .item .line:focus,
 .menu .item .line:hover                      { --depth:7; }

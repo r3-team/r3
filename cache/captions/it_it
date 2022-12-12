@@ -1461,6 +1461,9 @@
 				"step4":"Start the application.",
 				"step5":"It is now installed and will appear in your system tray."
 			},
+			"message":{
+				"delete":"Are you sure you want to delete this entry? This cannot be undone."
+			},
 			"mfa":{
 				"apps":[
 					"Google Authenticator",
@@ -1469,7 +1472,7 @@
 					"...or any application that supports TOTP"
 				],
 				"appsExample":"Some examples:",
-				"intro":"You can increase your account security by enabling multi-factor authentication (MFA). To enable MFA, please install an authenticator app on a separate device (like a smartphone).",
+				"intro":"You can increase your account security by enabling multi-factor authentication (MFA). To enable MFA, please use an authenticator app on a separate device (like a smartphone).",
 				"name":"Choose a name for your device",
 				"nameHint":"'My smartphone'",
 				"outro":"Use the QR code to add this account to your authenticator app. When you are done, close this window. You can repeat this process to enable MFA with multiple devices."
@@ -1504,7 +1507,7 @@
 		"titleAccount":"Account",
 		"titleDisplay":"Visualizza",
 		"titleEncryption":"End-to-end encryption",
-		"titleFixedTokens":"Device access",
+		"titleFixedTokens":"Devices",
 		"titleTheme":"Tema",
 		"warnUnsaved":"Avviso per cambiamenti non salvati"
 	}

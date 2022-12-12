@@ -19,7 +19,8 @@
 	padding:16px;
 	position:relative;
 }
-.login input{
+.login input,
+.login select{
 	width:100%;
 	padding:8px 0px;
 	margin:6px 0px 12px 0px;
@@ -30,8 +31,10 @@
 	background-color:var(--color-bg);
 	outline:none;
 	box-shadow:1px 1px 3px var(--color-shade);
+	box-sizing:border-box;
 }
-.login input:focus{
+.login input:focus,
+.login select:focus{
 	outline:1px solid var(--color-accent1);
 	box-shadow:1px 1px 5px var(--color-shade);
 	transition:outline 0.3s, box-shadow 0.3;

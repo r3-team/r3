@@ -1461,6 +1461,9 @@
 				"step4":"Die Anwendung starten",
 				"step5":"Sie ist jetzt installiert und erscheint im Systemtray."
 			},
+			"message":{
+				"delete":"Sind Sie sicher, dass Sie diesen Eintrag löschen wollen? Dies kann nicht rückgängig gemacht werden."
+			},
 			"mfa":{
 				"apps":[
 					"Google Authenticator",
@@ -1469,7 +1472,7 @@
 					"...oder eine beliebige Anwendung, die TOTP unterstützt"
 				],
 				"appsExample":"Ein paar Beispiele:",
-				"intro":"Sie können die Sicherheit Ihres Kontos erhöhen, indem Sie Multi-Faktor-Authentifizierung (MFA) verwenden. Um MFA zu aktivieren, installieren Sie bitte eine Authentifizierungs-App auf einem separaten Gerät (z. B. einem Smartphone).",
+				"intro":"Sie können die Sicherheit Ihres Kontos erhöhen, indem Sie Multi-Faktor-Authentifizierung (MFA) verwenden. Um MFA zu aktivieren, nutzen Sie bitte eine Authentifizierungs-App auf einem separaten Gerät (z. B. einem Smartphone).",
 				"name":"Wählen Sie einen Namen für Ihr Gerät",
 				"nameHint":"'Mein Smartphone'",
 				"outro":"Verwenden Sie den QR-Code, um dieses Konto zu Ihrer Authenticator-App hinzuzufügen. Wenn Sie fertig sind, schließen Sie dieses Fenster. Sie können diesen Vorgang wiederholen, um MFA für mehrere Geräte zu aktivieren."
@@ -1504,7 +1507,7 @@
 		"titleAccount":"Konto",
 		"titleDisplay":"Anzeige",
 		"titleEncryption":"Ende-zu-Ende-Verschlüsselung",
-		"titleFixedTokens":"Gerätezugriff",
+		"titleFixedTokens":"Geräte",
 		"titleTheme":"Darstellung",
 		"warnUnsaved":"Warnung bei ungespeicherten Änderungen"
 	}

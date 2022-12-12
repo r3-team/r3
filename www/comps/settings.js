@@ -580,7 +580,7 @@ let MySettingsFixedTokens = {
 						<td>
 							<div class="row">
 								<my-button image="delete.png"
-									@trigger="del(t.id)"
+									@trigger="delAsk(t.id)"
 									:cancel="true"
 								/>
 							</div>
@@ -752,6 +752,9 @@ let MySettingsFixedTokens = {
 			showMfa:false,
 			showMfaText:false,
 			
+			// temporary
+			tokenIdDel:null, // ID of token to delete (dialog)
+			
 			// inputs
 			deviceOs:'amd64_windows',
 			tokenFixed:'',
@@ -760,12 +763,18 @@ let MySettingsFixedTokens = {
 		};
 	},
 	computed:{
-		// simpole
-		qrCodeUri:(s) => !s.tokenSet ? '' : `otpauth://totp/r3:my_user?issuer=r3&secret=${s.tokenFixedB32}`,
-		tokenSet: (s) => s.tokenFixed !== '',
+		qrCodeUri:(s) => {
+			let app = encodeURIComponent(s.appNameShort+' - '+s.tokenName);
+			let usr = encodeURIComponent(s.loginName);
+			let uri = `otpauth://totp/${app}:${usr}?issuer=${app}&secret=${s.tokenFixedB32}`;
+			return !s.tokenSet ? '' : uri;
+		},
+		tokenSet:(s) => s.tokenFixed !== '',
 		
 		// stores
+		appNameShort:(s) => s.$store.getters['local/appNameShort'],
 		languageCode:(s) => s.$store.getters.settings.languageCode,
+		loginName:   (s) => s.$store.getters.loginName,
 		token:       (s) => s.$store.getters['local/token'],
 		capApp:      (s) => s.$store.getters.captions.settings.tokensFixed,
 		capGen:      (s) => s.$store.getters.captions.generic
@@ -835,8 +844,26 @@ let MySettingsFixedTokens = {
 		},
 		
 		// backend calls
-		del(id) {
-			ws.send('login','delTokenFixed',{id:id},true).then(
+		delAsk(id) {
+			this.tokenIdDel = id;
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.message.delete,
+				image:'warning.png',
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.delete,
+					exec:this.del,
+					keyEnter:true,
+					image:'delete.png'
+				},{
+					caption:this.capGen.button.cancel,
+					keyEscape:true,
+					image:'cancel.png'
+				}]
+			});
+		},
+		del() {
+			ws.send('login','delTokenFixed',{id:this.tokenIdDel},true).then(
 				this.get,
 				this.$root.genericError
 			);

@@ -125,16 +125,18 @@ let MyLogin = {
 					
 					<!-- MFA input -->
 					<template v-if="showMfa">
+						<span>{{ message.mfa[language] }}</span>
 						<select v-model.number="mfaTokenId">
 							<option v-for="t in mfaTokens" :value="t.id">
 								{{ t.name }}
 							</option>
 						</select>
-						<input class="default" type="text"
+						<input class="default" type="text" maxlength="6"
 							@keyup="badAuth = false"
 							@keyup.enter="authenticate"
 							v-model="mfaTokenPin"
 							v-focus
+							:placeholder="message.mfaHint[language]"
 						/>
 					</template>
 					
@@ -222,6 +224,14 @@ let MyLogin = {
 				maintenanceMode:{
 					de:'Wartungsmodus ist aktiv',
 					en_US:'Maintenance mode is active'
+				},
+				mfa:{
+					de:'Multi-Faktor-Authentifizierung',
+					en_US:'Multi-factor authentication'
+				},
+				mfaHint:{
+					de:'6-stelliger Validierungs-Code',
+					en_US:'6 digit validation code'
 				},
 				stayLoggedIn:{
 					de:'Angemeldet bleiben',
@@ -355,6 +365,7 @@ let MyLogin = {
 						this.mfaTokens   = res.payload.mfaTokens;
 						this.mfaTokenId  = res.payload.mfaTokens[0].id;
 						this.mfaTokenPin = '';
+						this.loading     = false;
 						return;
 					}
 					
