@@ -29,3 +29,7 @@ type LoginTokenFixed struct {
 	Token      string `json:"token"`
 	DateCreate int64  `json:"dateCreate"`
 }
+type LoginMfaToken struct {
+	Id   int64  `json:"id"`
+	Name string `json:"name"`
+}

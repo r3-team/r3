@@ -106,19 +106,38 @@ let MyLogin = {
 				
 				<div class="content" :class="{ badAuth:badAuth }">
 					
-					<input class="default" type="text"
-						@keyup="badAuth = false"
-						@keyup.enter="authenticate"
-						v-model="username"
-						v-focus
-						placeholder="username"
-					/>
-					<input class="default" type="password"
-						@keyup="badAuth = false"
-						@keyup.enter="authenticate"
-						v-model="password"
-						placeholder="password"
-					/>
+					<!-- credentials input -->
+					<template v-if="!showMfa">
+						<input class="default" type="text"
+							@keyup="badAuth = false"
+							@keyup.enter="authenticate"
+							v-model="username"
+							v-focus
+							placeholder="username"
+						/>
+						<input class="default" type="password"
+							@keyup="badAuth = false"
+							@keyup.enter="authenticate"
+							v-model="password"
+							placeholder="password"
+						/>
+					</template>
+					
+					<!-- MFA input -->
+					<template v-if="showMfa">
+						<select v-model.number="mfaTokenId">
+							<option v-for="t in mfaTokens" :value="t.id">
+								{{ t.name }}
+							</option>
+						</select>
+						<input class="default" type="text"
+							@keyup="badAuth = false"
+							@keyup.enter="authenticate"
+							v-model="mfaTokenPin"
+							v-focus
+						/>
+					</template>
+					
 					<div class="actions">
 						<my-button
 							@trigger="tokenKeepInput = !tokenKeepInput"
@@ -126,7 +145,6 @@ let MyLogin = {
 							:image="tokenKeep ? 'checkbox1.png' : 'checkbox0.png'"
 							:naked="true"
 						/>
-						
 						<my-button
 							@trigger="authenticate"
 							:active="isValid"
@@ -165,6 +183,9 @@ let MyLogin = {
 	data:function() {
 		return {
 			// inputs
+			mfaTokens:[],     // list of TOTP tokens to choose from, [{id:12,name:'My Phone'},{...}]
+			mfaTokenId:null,  // selected TOTP token
+			mfaTokenPin:null, // entered TOTP PIN (6 digit code)
 			password:'',
 			username:'',
 			
@@ -221,8 +242,14 @@ let MyLogin = {
 		},
 		
 		// states
-		isValid:   (s) => !s.badAuth && s.username !== '' && s.password !== '',
+		isValid:(s) => {
+			if(!s.showMfa)
+				return !s.badAuth && s.username !== '' && s.password !== '';
+			
+			return !s.badAuth && s.mfaTokenId !== null && s.mfaTokenPin !== null;
+		},
 		showCustom:(s) => s.activated && (s.companyName !== '' || s.companyWelcome !== ''),
+		showMfa:   (s) => s.mfaTokens.length !== 0,
 		
 		// stores
 		activated:        (s) => s.$store.getters['local/activated'],
@@ -318,14 +345,26 @@ let MyLogin = {
 			
 			ws.send('auth','user',{
 				username:this.username,
-				password:this.password
+				password:this.password,
+				mfaTokenId:this.mfaTokenId,
+				mfaTokenPin:this.mfaTokenPin
 			},true).then(
-				res => this.authenticatedByUser(
-					res.payload.loginId,
-					res.payload.loginName,
-					res.payload.token,
-					res.payload.saltKdf
-				),
+				res => {
+					// MFA token list returned, MFA is required
+					if(res.payload.mfaTokens.length !== 0) {
+						this.mfaTokens   = res.payload.mfaTokens;
+						this.mfaTokenId  = res.payload.mfaTokens[0].id;
+						this.mfaTokenPin = '';
+						return;
+					}
+					
+					this.authenticatedByUser(
+						res.payload.loginId,
+						res.payload.loginName,
+						res.payload.token,
+						res.payload.saltKdf
+					);
+				},
 				() => this.handleError('authUser')
 			);
 			this.loading = true;

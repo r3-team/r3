@@ -35,5 +35,6 @@ require (
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
 	github.com/jackc/puddle v1.3.0 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
+	github.com/xlzd/gotp v0.1.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 )
