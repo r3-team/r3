@@ -338,6 +338,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return LoginReauth(reqJson)
 		case "reauthAll":
 			return LoginReauthAll()
+		case "resetTotp":
+			return LoginResetTotp_tx(tx, reqJson)
 		case "set":
 			return LoginSet_tx(tx, reqJson)
 		case "setMembers":

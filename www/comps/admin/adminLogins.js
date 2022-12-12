@@ -100,6 +100,14 @@ let MyAdminLoginsItem = {
 				</select>
 			</td>
 			<td><input class="short" disabled="disabled" :value="id" /></td>
+			<td>
+				<my-button image="warning.png"
+					@trigger="resetTotpAsk"
+					:active="!isNew && !noAuth"
+					:cancel="true"
+					:caption="capGen.button.reset"
+				/>
+			</td>
 			<td></td>
 			<td class="left-border" v-for="(lf,lfi) in loginForms">
 				<div class="login-record" v-if="!isNew && !loginFormsHidden.includes(lfi)">
@@ -221,17 +229,17 @@ let MyAdminLoginsItem = {
 	},
 	watch:{
 		login:{
-			handler:function(){
-				this.id      = this.login.id;
-				this.ldapId  = this.login.ldapId;
-				this.ldapKey = this.login.ldapKey;
-				this.name    = this.login.name;
-				this.languageCode = this.login.languageCode;
-				this.active  = this.login.active;
-				this.admin   = this.login.admin;
-				this.noAuth  = this.login.noAuth;
-				this.roleIds = JSON.parse(JSON.stringify(this.login.roleIds));
-				this.pass    = '';
+			handler(v){
+				this.id           = v.id;
+				this.ldapId       = v.ldapId;
+				this.ldapKey      = v.ldapKey;
+				this.name         = v.name;
+				this.languageCode = v.languageCode;
+				this.active       = v.active;
+				this.admin        = v.admin;
+				this.noAuth       = v.noAuth;
+				this.roleIds      = JSON.parse(JSON.stringify(v.roleIds));
+				this.pass         = '';
 			},
 			immediate:true
 		}
@@ -257,59 +265,59 @@ let MyAdminLoginsItem = {
 			showRoles:false
 		};
 	},
-	mounted:function() {
-		if(this.languageCode === '')
-			this.languageCode = this.config.defaultLanguageCode;
-	},
 	computed:{
-		anyRoles:function() {
-			for(let i = 0, j = this.modules.length; i < j; i++) {
-				if(this.modules[i].roles.length !== 1)
+		anyRoles:(s) => {
+			for(let m of s.modules) {
+				if(m.roles.length !== 1)
 					return true;
 			}
 			return false;
 		},
-		isLdapAssignedRoles:function() {
-			if(this.ldapId === null)
+		isLdapAssignedRoles:(s) => {
+			if(s.ldapId === null)
 				return false;
 			
-			for(let i = 0, j = this.ldaps.length; i < j; i++) {
-				if(this.ldaps[i].id === this.ldapId)
-					return this.ldaps[i].assignRoles;
+			for(let l of s.ldaps) {
+				if(l.id === s.ldapId)
+					return l.assignRoles;
 			}
 			return false;
 		},
-		hasChanges:function() {
-			return this.name !== this.login.name
-				|| (!this.isNew && this.languageCode !== this.login.languageCode)
-				|| this.active !== this.login.active
-				|| this.admin !== this.login.admin
-				|| this.noAuth !== this.login.noAuth
-				|| this.pass !== ''
-				|| JSON.stringify([...this.roleIds].sort()) !== JSON.stringify([...this.login.roleIds].sort())
+		hasChanges:(s) => {
+			return s.name !== s.login.name
+				|| (!s.isNew && s.languageCode !== s.login.languageCode)
+				|| s.active !== s.login.active
+				|| s.admin !== s.login.admin
+				|| s.noAuth !== s.login.noAuth
+				|| s.pass !== ''
+				|| JSON.stringify([...s.roleIds].sort()) !== JSON.stringify([...s.login.roleIds].sort())
 			;
 		},
-		roleTotalNonHidden:function() {
+		roleTotalNonHidden:(s) => {
 			let cnt = 0;
-			for(let i = 0, j = this.roleIds.length; i < j; i++) {
-				if(!this.moduleIdMap[this.roleIdMap[this.roleIds[i]].moduleId].hidden)
+			for(let roleId of s.roleIds) {
+				if(!s.moduleIdMap[s.roleIdMap[roleId].moduleId].hidden)
 					cnt++
 			}
 			return cnt;
 		},
 		
 		// simple states
-		isNew:function() { return this.login.id === 0; },
+		isNew:(s) => s.login.id === 0,
 		
 		// stores
-		languageCodes:function() { return this.$store.getters['schema/languageCodes']; },
-		modules:      function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:  function() { return this.$store.getters['schema/moduleIdMap']; },
-		formIdMap:    function() { return this.$store.getters['schema/formIdMap']; },
-		roleIdMap:    function() { return this.$store.getters['schema/roleIdMap']; },
-		capApp:       function() { return this.$store.getters.captions.admin.login; },
-		capGen:       function() { return this.$store.getters.captions.generic; },
-		config:       function() { return this.$store.getters.config; }
+		languageCodes:(s) => s.$store.getters['schema/languageCodes'],
+		modules:      (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:  (s) => s.$store.getters['schema/moduleIdMap'],
+		formIdMap:    (s) => s.$store.getters['schema/formIdMap'],
+		roleIdMap:    (s) => s.$store.getters['schema/roleIdMap'],
+		capApp:       (s) => s.$store.getters.captions.admin.login,
+		capGen:       (s) => s.$store.getters.captions.generic,
+		config:       (s) => s.$store.getters.config
+	},
+	mounted() {
+		if(this.languageCode === '')
+			this.languageCode = this.config.defaultLanguageCode;
 	},
 	methods:{
 		// externals
@@ -318,20 +326,20 @@ let MyAdminLoginsItem = {
 		srcBase64Icon,
 		
 		// actions
-		openLoginForm:function(index) {
+		openLoginForm(index) {
 			let frm = this.formIdMap[this.loginForms[index].formId];
 			let mod = this.moduleIdMap[frm.moduleId];
 			
 			this.$store.commit('moduleLanguage',this.getValidLanguageCode(mod));
 			this.$emit('open-login-form',index,this.id,this.login.records[index].id);
 		},
-		toggleRoleId:function(roleId) {
+		toggleRoleId(roleId) {
 			let pos = this.roleIds.indexOf(roleId);
 			
 			if(pos === -1)      this.roleIds.push(roleId);
 			else if(pos !== -1) this.roleIds.splice(pos,1);
 		},
-		toggleRolesByContent:function(content) {
+		toggleRolesByContent(content) {
 			let roleIdsByContent = [];
 			for(let i = 0, j = this.modules.length; i < j; i++) {
 				for(let x = 0, y = this.modules[i].roles.length; x < y; x++) {
@@ -358,7 +366,7 @@ let MyAdminLoginsItem = {
 		},
 		
 		// backend calls
-		delAsk:function() {
+		delAsk() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.delete,
 				buttons:[{
@@ -372,7 +380,7 @@ let MyAdminLoginsItem = {
 				}]
 			});
 		},
-		del:function() {
+		del() {
 			ws.send('login','del',{id:this.login.id},true).then(
 				() => {
 					this.$emit('updated');
@@ -384,7 +392,7 @@ let MyAdminLoginsItem = {
 				this.$root.genericError
 			);
 		},
-		set:function() {
+		set() {
 			ws.send('login','set',{
 				id:this.login.id,
 				ldapId:this.login.ldapId,
@@ -419,8 +427,32 @@ let MyAdminLoginsItem = {
 			);
 		},
 		
+		// MFA calls
+		resetTotpAsk() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.resetTotp,
+				image:'warning.png',
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.reset,
+					exec:this.resetTotp,
+					keyEnter:true,
+					image:'refresh.png'
+				},{
+					caption:this.capGen.button.cancel,
+					keyEscape:true,
+					image:'cancel.png'
+				}]
+			});
+		},
+		resetTotp(loginId) {
+			ws.send('login','resetTotp',{id:this.id},true).then(
+				res => {},this.$root.genericError
+			);
+		},
+		
 		// record calls
-		getRecords:function(loginFormIndex) {
+		getRecords(loginFormIndex) {
 			let loginForm  = this.loginForms[loginFormIndex];
 			let excludeIds = [];
 			
@@ -553,6 +585,12 @@ let MyAdminLogins = {
 								<span>{{ capGen.id }}</span>
 							</div>
 						</th>
+						<th class="minimum" :title="capApp.mfaHint">
+							<div class="mixed-header">
+								<img src="images/smartphone.png" />
+								<span>{{ capApp.mfa }}</span>
+							</div>
+						</th>
 						<th class="gab"></th>
 						<th class="left-border" v-for="(lf,lfi) in loginForms">
 							<div class="mixed-header">
@@ -633,53 +671,53 @@ let MyAdminLogins = {
 			loginFormsHidden:[]
 		};
 	},
-	mounted:function() {
-		this.get();
-		this.getLdaps();
-		this.$store.commit('pageTitle',this.menuTitle);
-	},
 	computed:{
-		loginForms:function() {
+		loginForms:(s) => {
 			let out = [];
-			for(let i = 0, j = this.modules.length; i < j; i++) {
-				for(let x = 0, y = this.modules[i].loginForms.length; x < y; x++) {
-					out.push(this.modules[i].loginForms[x]);
+			for(let i = 0, j = s.modules.length; i < j; i++) {
+				for(let x = 0, y = s.modules[i].loginForms.length; x < y; x++) {
+					out.push(s.modules[i].loginForms[x]);
 				}
 			}
 			return out;
 		},
 		
 		// stores
-		modules:    function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		formIdMap:  function() { return this.$store.getters['schema/formIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.admin.login; },
-		capGen:     function() { return this.$store.getters.captions.generic; }
+		modules:    (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		formIdMap:  (s) => s.$store.getters['schema/formIdMap'],
+		capApp:     (s) => s.$store.getters.captions.admin.login,
+		capGen:     (s) => s.$store.getters.captions.generic
+	},
+	mounted() {
+		this.get();
+		this.getLdaps();
+		this.$store.commit('pageTitle',this.menuTitle);
 	},
 	methods:{
 		// externals
 		getCaptionForModule,
 		srcBase64Icon,
 		
-		byStringSet:function() {
+		byStringSet() {
 			this.offset = 0;
 			this.get();
 		},
-		limitSet:function(newLimit) {
+		limitSet(newLimit) {
 			this.limit  = parseInt(newLimit);
 			this.offset = 0;
 			this.get();
 		},
-		offsetSet:function(newOffset) {
+		offsetSet(newOffset) {
 			this.offset = newOffset;
 			this.get();
 		},
-		openLoginForm:function(index,loginId,recordId) {
+		openLoginForm(index,loginId,recordId) {
 			this.loginFormIndexOpen = index;
 			this.loginFormLogin     = loginId;
 			this.loginFormRecord    = recordId !== null ? recordId : 0;
 		},
-		toggleLoginForms:function(index) {
+		toggleLoginForms(index) {
 			let pos = this.loginFormsHidden.indexOf(index);
 			
 			if(pos === -1)
@@ -689,7 +727,7 @@ let MyAdminLogins = {
 		},
 		
 		// backend calls
-		get:function() {
+		get() {
 			let forms = [];
 			for(let i = 0, j = this.loginForms.length; i < j; i++) {
 				forms.push({
@@ -711,13 +749,13 @@ let MyAdminLogins = {
 				this.$root.genericError
 			);
 		},
-		getLdaps:function() {
+		getLdaps() {
 			ws.send('ldap','get',{},true).then(
 				res => this.ldaps = res.payload.ldaps,
 				this.$root.genericError
 			);
 		},
-		setRecord:function(index,loginId,recordId) {
+		setRecord(index,loginId,recordId) {
 			ws.send('login','setRecord',{
 				attributeIdLogin:this.loginForms[index].attributeIdLogin,
 				loginId:loginId,

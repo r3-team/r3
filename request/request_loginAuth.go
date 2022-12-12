@@ -19,7 +19,7 @@ func LoginAuthUser(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth 
 			Username string `json:"username"`
 			Password string `json:"password"`
 
-			// MFA details, sent with regular credentials on the second attempt
+			// MFA details, sent together with credentials (usually on second auth attempt)
 			MfaTokenId  pgtype.Int4    `json:"mfaTokenId"`
 			MfaTokenPin pgtype.Varchar `json:"mfaTokenPin"`
 		}
@@ -29,7 +29,7 @@ func LoginAuthUser(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth 
 			SaltKdf   string `json:"saltKdf"`
 			Token     string `json:"token"`
 
-			// MFA details, returned if login successful but MFA not satisfied yet
+			// MFA token details, filled if login was successful but MFA not satisfied yet
 			MfaTokens []types.LoginMfaToken `json:"mfaTokens"`
 		}
 	)

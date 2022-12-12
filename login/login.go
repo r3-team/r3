@@ -396,6 +396,16 @@ func CreateAdmin(username string, password string) error {
 	return tx.Commit(db.Ctx)
 }
 
+// reset all TOTP keys
+func ResetTotp_tx(tx pgx.Tx, loginId int64) error {
+	_, err := db.Pool.Exec(db.Ctx, `
+		DELETE FROM instance.login_token_fixed
+		WHERE login_id = $1
+		AND   context  = 'totp'
+	`, loginId)
+	return err
+}
+
 // updates internal login backend with logins from LDAP
 // uses unique key value to update login record
 // can optionally update login roles

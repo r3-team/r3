@@ -288,7 +288,8 @@
 		},
 		"login":{
 			"dialog":{
-				"delete":"Are you sure you want to delete this login?<br /><br />This action is irreversible.</b>"
+				"delete":"Are you sure you want to delete this login?<br /><br />This action is irreversible.</b>",
+				"resetTotp":"This will reset all multi-factor authentication methods for this login. System access is then possible with only username & password.<br /><br />Do you want to continue?"
 			},
 			"error":{
 				"uniqueConstraint":"Username must be unique"
@@ -298,6 +299,8 @@
 			"authentication":"Authentication",
 			"language":"Language",
 			"ldapAssignActive":"Roles are assigned via LDAP group memberships",
+			"mfa":"MFA",
+			"mfaHint":"Multi-factor authentication",
 			"newLogin":"New login",
 			"noAuth":"Public",
 			"noAuthHint":"Can login without authentication",

@@ -288,7 +288,8 @@
 		},
 		"login":{
 			"dialog":{
-				"delete":"Sigur doriți să ștergeți această autentificare?<br/><br/>Această acțiune este ireversibilă.</b>"
+				"delete":"Sigur doriți să ștergeți această autentificare?<br/><br/>Această acțiune este ireversibilă.</b>",
+				"resetTotp":"This will reset all multi-factor authentication methods for this login. System access is then possible with only username & password.<br /><br />Do you want to continue?"
 			},
 			"error":{
 				"uniqueConstraint":"Numele utilizatorului trebuie sa fie unic"
@@ -298,6 +299,8 @@
 			"authentication":"Autentificare",
 			"language":"Limba",
 			"ldapAssignActive":"Rolurile sunt atribuite prin apartenența la grupul LDAP",
+			"mfa":"MFA",
+			"mfaHint":"Multi-factor authentication",
 			"newLogin":"Autentificare nouă",
 			"noAuth":"Public",
 			"noAuthHint":"Poate intra fără autentificare",

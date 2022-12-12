@@ -212,3 +212,12 @@ func LoginReauth(reqJson json.RawMessage) (interface{}, error) {
 func LoginReauthAll() (interface{}, error) {
 	return nil, cluster.LoginReauthorizedAll(true)
 }
+func LoginResetTotp_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+	var req struct {
+		Id int64 `json:"id"`
+	}
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+	return nil, login.ResetTotp_tx(tx, req.Id)
+}

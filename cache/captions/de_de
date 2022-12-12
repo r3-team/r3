@@ -288,7 +288,8 @@
 		},
 		"login":{
 			"dialog":{
-				"delete":"Bist du sicher, dass du diesen Login löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>"
+				"delete":"Bist du sicher, dass du diesen Login löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>",
+				"resetTotp":"Hiermit werden alle Multi-Faktor-Authentifizierungsmethoden für diese Anmeldung zurückgesetzt. Systemzugriff ist dann mit nur Benutzername & Passwort möglich.<br /><br />Möchten Sie fortfahren?"
 			},
 			"error":{
 				"uniqueConstraint":"Benutzername muss einzigartig sein"
@@ -298,6 +299,8 @@
 			"authentication":"Authentifizierung",
 			"language":"Sprache",
 			"ldapAssignActive":"Rollen werden anhand LDAP-Gruppenmitgliedschaften zugewiesen",
+			"mfa":"MFA",
+			"mfaHint":"Multi-Faktor-Authentifizierung",
 			"newLogin":"Neue Anmeldung",
 			"noAuth":"Öffentlich",
 			"noAuthHint":"Kann sich ohne Authentifizierung einloggen",
