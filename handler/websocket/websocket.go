@@ -284,7 +284,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 			resPayload, err = request.LoginAuthToken(req.Payload, &client.loginId,
 				&client.admin, &client.noAuth)
 
-		case "tokenFixed": // authentication via fixed token
+		case "tokenFixed": // authentication via fixed token (fat-client)
 			resPayload, err = request.LoginAuthTokenFixed(req.Payload, &client.loginId)
 			if err == nil {
 				client.fixedToken = true

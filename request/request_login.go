@@ -1,6 +1,7 @@
 package request
 
 import (
+	"encoding/base32"
 	"encoding/json"
 	"r3/cluster"
 	"r3/login"
@@ -28,12 +29,12 @@ func LoginGetNames(reqJson json.RawMessage) (interface{}, error) {
 }
 func LoginDelTokenFixed(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 	var req struct {
-		Token string `json:"token"`
+		Id int64 `json:"id"`
 	}
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login.DelTokenFixed(loginId, req.Token)
+	return nil, login.DelTokenFixed(loginId, req.Id)
 }
 func LoginGetTokensFixed(loginId int64) (interface{}, error) {
 	return login.GetTokensFixed(loginId)
@@ -47,7 +48,8 @@ func LoginSetTokenFixed_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (i
 			Name    string `json:"name"`
 		}
 		res struct {
-			TokenFixed string `json:"tokenFixed"`
+			TokenFixed    string `json:"tokenFixed"`
+			TokenFixedB32 string `json:"tokenFixedB32"`
 		}
 	)
 
@@ -55,6 +57,8 @@ func LoginSetTokenFixed_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (i
 		return nil, err
 	}
 	res.TokenFixed, err = login.SetTokenFixed_tx(tx, loginId, req.Name, req.Context)
+	res.TokenFixedB32 = base32.StdEncoding.WithPadding(base32.NoPadding).EncodeToString([]byte(res.TokenFixed))
+
 	return res, err
 }
 

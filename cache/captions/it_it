@@ -1444,24 +1444,40 @@
 		"tokensFixed":{
 			"button":{
 				"loadApp":"Application",
-				"loadCnf":"Config file",
-				"install":"Install client application"
+				"loadCnf":"Config file"
+			},
+			"context":{
+				"client":"REI3 client",
+				"ics":"Calendar app",
+				"totp":"Multi-factor"
 			},
 			"install":{
 				"intro":"With the client application you can directly open and edit files from within REI3.",
+				"nameHint":"'My Work PC'",
 				"steps":"Installation steps",
 				"step1":"Choose a device name:",
 				"step2":"Select your operating system:",
-				"step3":"Download the application:",
-				"step4":"Download the application config file to the same folder:",
-				"step5":"Start the application.",
-				"step6":"It is now installed and will appear in your system tray.",
-				"title":"Install client application"
+				"step3":"Download the application & config file to the same folder:",
+				"step4":"Start the application.",
+				"step5":"It is now installed and will appear in your system tray."
 			},
-			"nameHint":"'My Work PC'",
+			"mfa":{
+				"apps":[
+					"Google Authenticator",
+					"Microsoft Authenticator",
+					"Aegis Authenticator",
+					"...or any application that supports TOTP"
+				],
+				"appsExample":"Some examples:",
+				"intro":"You can increase your account security by enabling multi-factor authentication (MFA). To enable MFA, please install an authenticator app on a separate device (like a smartphone).",
+				"name":"Choose a name for your device",
+				"nameHint":"'My smartphone'",
+				"outro":"Use the QR code to add this account to your authenticator app. When you are done, close this window. You can repeat this process to enable MFA with multiple devices."
+			},
 			"titleAdd":"Install client application",
 			"titleContext":"Use",
 			"titleDateCreate":"Created",
+			"titleMfa":"Setup multi-factor authentication",
 			"titleName":"Device name"
 		},
 		"bordersAll":"Aggiungi bordi",

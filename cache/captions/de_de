@@ -1444,24 +1444,40 @@
 		"tokensFixed":{
 			"button":{
 				"loadApp":"Anwendung",
-				"loadCnf":"Konfigdatei",
-				"install":"Client-Anwendung installieren"
+				"loadCnf":"Konfigdatei"
+			},
+			"context":{
+				"client":"REI3-Client",
+				"ics":"Kalender-App",
+				"totp":"Multi-Faktor"
 			},
 			"install":{
 				"intro":"Mit der Client-Anwendung können Dateien direkt aus REI3 geöffnet und bearbeitet werden.",
+				"nameHint":"'Mein Arbeits-PC'",
 				"steps":"Installationsschritte",
 				"step1":"Gerätename auswählen:",
 				"step2":"Betriebssystem auswählen:",
-				"step3":"Anwendung herunterladen:",
-				"step4":"Konfigdatei in den gleichen Ordner herunterladen:",
-				"step5":"Die Anwendung starten",
-				"step6":"Sie ist jetzt installiert und erscheint im Systemtray.",
-				"title":"Client-Anwendung installieren"
+				"step3":"Anwendung & Konfigdatei in den gleichen Ordner herunterladen:",
+				"step4":"Die Anwendung starten",
+				"step5":"Sie ist jetzt installiert und erscheint im Systemtray."
 			},
-			"nameHint":"'Mein Arbeits-PC'",
+			"mfa":{
+				"apps":[
+					"Google Authenticator",
+					"Microsoft Authenticator",
+					"Aegis Authenticator",
+					"...oder eine beliebige Anwendung, die TOTP unterstützt"
+				],
+				"appsExample":"Ein paar Beispiele:",
+				"intro":"Sie können die Sicherheit Ihres Kontos erhöhen, indem Sie Multi-Faktor-Authentifizierung (MFA) verwenden. Um MFA zu aktivieren, installieren Sie bitte eine Authentifizierungs-App auf einem separaten Gerät (z. B. einem Smartphone).",
+				"name":"Wählen Sie einen Namen für Ihr Gerät",
+				"nameHint":"'Mein Smartphone'",
+				"outro":"Verwenden Sie den QR-Code, um dieses Konto zu Ihrer Authenticator-App hinzuzufügen. Wenn Sie fertig sind, schließen Sie dieses Fenster. Sie können diesen Vorgang wiederholen, um MFA für mehrere Geräte zu aktivieren."
+			},
 			"titleAdd":"Client-Anwendung installieren",
 			"titleContext":"Verwendung",
 			"titleDateCreate":"Erstellt",
+			"titleMfa":"Multifaktor-Authentifizierung hinzufügen",
 			"titleName":"Gerätename"
 		},
 		"bordersAll":"Rahmen hinzufügen",

@@ -3,6 +3,7 @@ package login_auth
 import (
 	"database/sql"
 	"errors"
+	"fmt"
 	"r3/config"
 	"r3/db"
 	"r3/handler"
@@ -169,10 +170,15 @@ func Token(token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *boo
 // performs authentication for user by using fixed (permanent) token
 // used for application access (like ICS download or fat-client access)
 // cannot grant admin access
-func TokenFixed(loginId int64, tokenFixed string, grantLanguageCode *string, grantToken *string) error {
+func TokenFixed(loginId int64, context string, tokenFixed string, grantLanguageCode *string, grantToken *string) error {
 
 	if tokenFixed == "" {
 		return errors.New("empty token")
+	}
+
+	// only specific contexts may be used for token authentication
+	if !tools.StringInSlice(context, []string{"client", "ics"}) {
+		return fmt.Errorf("invalid token authentication context '%s'", context)
 	}
 
 	// check for existing token
@@ -184,9 +190,10 @@ func TokenFixed(loginId int64, tokenFixed string, grantLanguageCode *string, gra
 		INNER JOIN instance.login_setting AS s ON s.login_id = t.login_id
 		INNER JOIN instance.login         AS l ON l.id       = t.login_id
 		WHERE t.login_id = $1
-		AND   t.token    = $2
+		AND   t.context  = $2
+		AND   t.token    = $3
 		AND   l.active
-	`, loginId, tokenFixed).Scan(&languageCode, &username)
+	`, loginId, context, tokenFixed).Scan(&languageCode, &username)
 
 	if err == pgx.ErrNoRows {
 		return errors.New("login inactive")

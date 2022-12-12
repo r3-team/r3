@@ -23,8 +23,9 @@ type LoginRecord struct {
 	Name string `json:"name"` // name for relation record (based on lookup attribute)
 }
 type LoginTokenFixed struct {
+	Id         int64  `json:"id"`
 	Name       string `json:"name"`    // to identify token user/device
-	Context    string `json:"context"` // what is being used for
+	Context    string `json:"context"` // what is being used for (client, ics, totp)
 	Token      string `json:"token"`
 	DateCreate int64  `json:"dateCreate"`
 }

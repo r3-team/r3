@@ -324,6 +324,12 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			ALTER TABLE app.form_state_effect ALTER COLUMN field_id DROP NOT NULL;
 			
+			-- MFA
+			ALTER TABLE instance.login_token_fixed DROP CONSTRAINT login_token_fixed_pkey;
+			ALTER TABLE instance.login_token_fixed ADD COLUMN id SERIAL PRIMARY KEY;
+			
+			ALTER TYPE instance.token_fixed_context ADD VALUE 'totp';
+			
 			-- outdated config key that was in 3.0 init script until 3.2
 			DELETE FROM instance.config WHERE name = 'exportPrivateKey';
 		`); err != nil {

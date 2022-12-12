@@ -19,7 +19,6 @@ let MySettingsEncryption = {
 	template:`<div class="encryption">
 	
 		<p>{{ capApp.description }}</p>
-		
 		<table>
 			<tr>
 				<td class="minimum">{{ capGen.status }}:</td>
@@ -146,10 +145,10 @@ let MySettingsEncryption = {
 	},
 	computed:{
 		// indexes of module entries with any relation with enabled encryption
-		moduleEntriesIndexesEnc:function() {
+		moduleEntriesIndexesEnc:(s) => {
 			let out = [];
-			for(let i = 0, j = this.moduleEntries.length; i < j; i++) {
-				for(const r of this.moduleIdMap[this.moduleEntries[i].id].relations) {
+			for(let i = 0, j = s.moduleEntries.length; i < j; i++) {
+				for(const r of s.moduleIdMap[s.moduleEntries[i].id].relations) {
 					if(r.encryption) {
 						out.push(i);
 						break;
@@ -160,31 +159,31 @@ let MySettingsEncryption = {
 		},
 		
 		// e2e encryption status
-		statusCaption:function() {
-			if(!this.active) return this.capApp.status.inactive;
-			if(this.locked)  return this.capApp.status.locked;
-			return this.capApp.status.unlocked;
+		statusCaption:(s) => {
+			if(!s.active) return s.capApp.status.inactive;
+			if(s.locked)  return s.capApp.status.locked;
+			return s.capApp.status.unlocked;
 		},
 		
 		// states
-		active: function() { return this.loginEncryption; },
-		anyEnc: function() { return this.moduleEntriesIndexesEnc.length !== 0; },
-		locked: function() { return this.active && this.loginPrivateKey === null; },
-		newKeys:function() { return this.newKeyPrivateEnc !== null; },
+		active: (s) => s.loginEncryption,
+		anyEnc: (s) => s.moduleEntriesIndexesEnc.length !== 0,
+		locked: (s) => s.active && s.loginPrivateKey === null,
+		newKeys:(s) => s.newKeyPrivateEnc !== null,
 		
 		// stores
-		moduleIdMap:       function() { return this.$store.getters['schema/moduleIdMap']; },
-		loginKeyAes:       function() { return this.$store.getters['local/loginKeyAes']; },
-		loginKeySalt:      function() { return this.$store.getters['local/loginKeySalt']; },
-		loginEncryption:   function() { return this.$store.getters.loginEncryption; },
-		loginPrivateKey:   function() { return this.$store.getters.loginPrivateKey; },
-		loginPrivateKeyEnc:function() { return this.$store.getters.loginPrivateKeyEnc; },
-		loginPrivateKeyEncBackup:function() { return this.$store.getters.loginPrivateKeyEncBackup; },
-		loginPublicKey:    function() { return this.$store.getters.loginPublicKey; },
-		kdfIterations:     function() { return this.$store.getters.constants.kdfIterations; },
-		capApp:            function() { return this.$store.getters.captions.settings.encryption; },
-		capErr:            function() { return this.$store.getters.captions.error; },
-		capGen:            function() { return this.$store.getters.captions.generic; }
+		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
+		loginKeyAes:       (s) => s.$store.getters['local/loginKeyAes'],
+		loginKeySalt:      (s) => s.$store.getters['local/loginKeySalt'],
+		loginEncryption:   (s) => s.$store.getters.loginEncryption,
+		loginPrivateKey:   (s) => s.$store.getters.loginPrivateKey,
+		loginPrivateKeyEnc:(s) => s.$store.getters.loginPrivateKeyEnc,
+		loginPrivateKeyEncBackup:(s) => s.$store.getters.loginPrivateKeyEncBackup,
+		loginPublicKey:    (s) => s.$store.getters.loginPublicKey,
+		kdfIterations:     (s) => s.$store.getters.constants.kdfIterations,
+		capApp:            (s) => s.$store.getters.captions.settings.encryption,
+		capErr:            (s) => s.$store.getters.captions.error,
+		capGen:            (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -198,7 +197,7 @@ let MySettingsEncryption = {
 		pemImport,
 		rsaGenerateKeys,
 		
-		generateBackupCode:function() {
+		generateBackupCode() {
 			let chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 			let len   = 128;
 			let arr   = new Uint32Array(len);
@@ -209,7 +208,7 @@ let MySettingsEncryption = {
 			}
 			return out;
 		},
-		createKeys:function() {
+		createKeys() {
 			this.running = true;
 			const backupCode     = this.generateBackupCode();
 			const backupCodeShow = backupCode.replace(/.{4}/g, '$& '); // add spaces every 4 chars
@@ -253,7 +252,7 @@ let MySettingsEncryption = {
 				this.$root.genericError
 			);
 		},
-		resetAsk:function() {
+		resetAsk() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.resetAccessHint,
 				image:'refresh.png',
@@ -269,7 +268,7 @@ let MySettingsEncryption = {
 				}]
 			});
 		},
-		unlockError:function() {
+		unlockError() {
 			this.$store.commit('dialog',{
 				captionBody:this.capErr.SEC['002'],
 				image:'key.png',
@@ -281,7 +280,7 @@ let MySettingsEncryption = {
 				}]
 			});
 		},
-		unlockWithBackupCode:function() {
+		unlockWithBackupCode() {
 			// remove spaces from backup code input
 			const backupCode = this.regainBackupCode.replace(/\s/g,'');
 			
@@ -291,7 +290,7 @@ let MySettingsEncryption = {
 				()  => this.unlockError()
 			);
 		},
-		unlockWithPassphrase:function() {
+		unlockWithPassphrase() {
 			this.pbkdf2PassToAesGcmKey(this.regainPassword,this.loginKeySalt,this.kdfIterations,true).then(
 				loginKeyOld => {
 					// attempt to decrypt private key with login key based on previous password
@@ -305,7 +304,7 @@ let MySettingsEncryption = {
 		},
 		
 		// backend calls
-		reencrypt:function(privateKeyPem) {
+		reencrypt(privateKeyPem) {
 			Promise.all([
 				this.pemImport(privateKeyPem,'RSA',false), // import private key PEM
 				this.aesGcmImportBase64(this.loginKeyAes)  // import current login key
@@ -330,7 +329,7 @@ let MySettingsEncryption = {
 				this.$root.genericError
 			);
 		},
-		reset:function() {
+		reset() {
 			ws.send('loginKeys','reset',{},true).then(
 				res => {
 					this.$store.commit('loginEncryption',false);
@@ -341,7 +340,7 @@ let MySettingsEncryption = {
 				}
 			);
 		},
-		set:function() {
+		set() {
 			this.pemExport(this.newKeyPair.publicKey).then(
 				publicKeyPem => {
 					ws.send('loginKeys','store',{
@@ -576,12 +575,12 @@ let MySettingsFixedTokens = {
 				<tbody>
 					<tr v-for="t in tokensFixed">
 						<td>{{ t.name }}</td>
-						<td>{{ t.context }}</td>
+						<td>{{ displayContext(t.context) }}</td>
 						<td><span :title="getUnixFormat(t.dateCreate,'Y-m-d H:i:S')">{{ getUnixFormat(t.dateCreate,'Y-m-d') }}</span></td>
 						<td>
 							<div class="row">
 								<my-button image="delete.png"
-									@trigger="del(t.token)"
+									@trigger="del(t.id)"
 									:cancel="true"
 								/>
 							</div>
@@ -593,10 +592,81 @@ let MySettingsFixedTokens = {
 			<br />
 		</template>
 		
-		<my-button image="add.png"
-			@trigger="showInstall = true"
-			:caption="capApp.button.install"
-		/>
+		<div class="settings-token-actions">
+			<my-button image="screen.png"
+				@trigger="showSubWindow('install')"
+				:caption="capApp.titleAdd"
+			/>
+			<my-button image="smartphone.png"
+				@trigger="showSubWindow('mfa')"
+				:caption="capApp.titleMfa"
+			/>
+		</div>
+		
+		<!-- MFA sub window -->
+		<div class="app-sub-window" v-if="showMfa">
+			<div class="contentBox pop-up settings-mfa">
+				<div class="top lower">
+					<div class="area">
+						<img class="icon" src="images/smartphone.png" />
+						<div class="caption">{{ capApp.titleMfa }}</div>
+					</div>
+					<div class="area">
+						<my-button
+							@trigger="showMfa = false" image="cancel.png"
+							:cancel="true"
+							:tight="true"
+						/>
+					</div>
+				</div>
+				
+				<div class="content">
+					<div class="column">
+						<span>{{ capApp.mfa.intro }}</span>
+						<br />
+						
+						<span>{{ capApp.mfa.appsExample }}</span>
+						<ul>
+							<li v-for="l in capApp.mfa.apps">{{ l }}</li>
+						</ul>
+						
+						<div class="row gap centered default-inputs">
+							<span>{{ capApp.mfa.name }}</span>
+							<div class="settings-mfa-input">
+								<input class="dynamic"
+									v-model="tokenName"
+									:disabled="tokenSet"
+									:placeholder="capApp.mfa.nameHint"
+								/>
+							</div>
+						</div>
+						
+						<br />
+						<div>
+							<my-button image="ok.png"
+								v-if="!tokenSet"
+								@trigger="set('totp')"
+								:active="tokenName !== ''"
+								:caption="capGen.button.ok"
+							/>
+						</div>
+						
+						<!-- scannable code -->
+						<div class="settings-mfa-qrcode shade clickable" ref="qrcode"
+							v-show="tokenSet"
+							@click="showMfaText = !showMfaText"
+						></div>
+						
+						<template v-if="showMfaText">
+							<span class="settings-mfa-uri">{{ qrCodeUri }}</span>
+							<br />
+						</template>
+						
+						<span v-if="tokenSet">{{ capApp.mfa.outro }}</span>
+					</div>
+				</div>
+			</div>
+		</div>
 		
 		<!-- device install sub window -->
 		<div class="app-sub-window" v-if="showInstall">
@@ -604,7 +674,7 @@ let MySettingsFixedTokens = {
 				<div class="top lower">
 					<div class="area">
 						<img class="icon" src="images/screen.png" />
-						<div class="caption">{{ capApp.install.title }}</div>
+						<div class="caption">{{ capApp.titleAdd }}</div>
 					</div>
 					<div class="area">
 						<my-button
@@ -626,8 +696,11 @@ let MySettingsFixedTokens = {
 								<div class="column gap default-inputs">
 									<span>{{ capApp.install.step1 }}</span>
 									<div class="row gap">
-										<input v-model="deviceName" :placeholder="capApp.nameHint" />
-										<my-button @trigger="set" :active="tokenFixed === ''" image="save.png" />
+										<input v-model="tokenName" :placeholder="capApp.install.nameHint" />
+										<my-button image="save.png"
+											@trigger="set('client')"
+											:active="tokenName !== '' && !tokenSet"
+										/>
 									</div>
 									<br />
 								</div>
@@ -647,33 +720,25 @@ let MySettingsFixedTokens = {
 							<li>
 								<div class="column gap">
 									<span>{{ capApp.install.step3 }}</span>
-									<span>
+									<div class="row gap">
 										<my-button image="download.png"
 											@trigger="loadApp"
-											:active="tokenFixed !== ''"
+											:active="tokenSet"
 											:caption="capApp.button.loadApp"
 										/>
-									</span>
-									<br />
-								</div>
-							</li>
-							<li>
-								<div class="column gap">
-									<span>{{ capApp.install.step4 }}</span>
-									<span>
 										<my-button image="download.png"
 											@trigger="loadCnf"
-											:active="tokenFixed !== ''"
+											:active="tokenSet"
 											:caption="capApp.button.loadCnf"
 										/>
-									</span>
+									</div>
 									<br />
 								</div>
 							</li>
-							<li>{{ capApp.install.step5 }}</li>
+							<li>{{ capApp.install.step4 }}</li>
 						</ol>
 						<br />
-						<span>{{ capApp.install.step6 }}</span>
+						<span>{{ capApp.install.step5 }}</span>
 						<img src="images/install_tray.png" class="settings-install" />
 					</div>
 				</div>
@@ -684,19 +749,36 @@ let MySettingsFixedTokens = {
 		return {
 			tokensFixed:[],
 			showInstall:false,
+			showMfa:false,
+			showMfaText:false,
 			
 			// inputs
-			deviceName:'',
 			deviceOs:'amd64_windows',
-			tokenFixed:''
+			tokenFixed:'',
+			tokenFixedB32:'',
+			tokenName:''
 		};
 	},
 	computed:{
+		// simpole
+		qrCodeUri:(s) => !s.tokenSet ? '' : `otpauth://totp/r3:my_user?issuer=r3&secret=${s.tokenFixedB32}`,
+		tokenSet: (s) => s.tokenFixed !== '',
+		
 		// stores
 		languageCode:(s) => s.$store.getters.settings.languageCode,
 		token:       (s) => s.$store.getters['local/token'],
 		capApp:      (s) => s.$store.getters.captions.settings.tokensFixed,
 		capGen:      (s) => s.$store.getters.captions.generic
+	},
+	watch:{
+		qrCodeUri(v) {
+			if(typeof this.$refs.qrcode !== 'undefined' && this.$refs.qrcode !== null) {
+				let qr = qrcode(0,'M');
+				qr.addData(v);
+				qr.make();
+				this.$refs.qrcode.innerHTML = qr.createImgTag(5,20);
+			}
+		}
 	},
 	mounted:function() {
 		this.get();
@@ -713,16 +795,16 @@ let MySettingsFixedTokens = {
 		getUnixFormat,
 		
 		// actions
-		loadApp:function() {
+		loadApp() {
 			let call = [`os=${this.deviceOs}`,`token=${this.token}`];
 			window.open(`/client/download/?${call.join('&')}`);
 		},
-		loadCnf:function() {
+		loadCnf() {
 			let langCode = ['en_us','de_de'].includes(this.languageCode)
 				? this.languageCode : 'en_us';
 			
 			let call = [
-				`deviceName=${this.deviceName}`,
+				`deviceName=${this.tokenName}`,
 				`hostName=${location.hostname}`,
 				`hostPort=${location.port}`,
 				`languageCode=${langCode}`,
@@ -732,27 +814,47 @@ let MySettingsFixedTokens = {
 			];
 			window.open(`/client/download/config/?${call.join('&')}`);
 		},
+		showSubWindow(target) {
+			this.tokenFixed    = '';
+			this.tokenFixedB32 = '';
+			this.tokenName     = '';
+			switch(target) {
+				case 'install': this.showInstall = true; break;
+				case 'mfa':     this.showMfa     = true; break;
+			}
+		},
+		
+		// presentation
+		displayContext(v) {
+			switch(v) {
+				case 'client': return this.capApp.context.client; break;
+				case 'ics':    return this.capApp.context.ics;    break;
+				case 'totp':   return this.capApp.context.totp;   break;
+			}
+			return '-';
+		},
 		
 		// backend calls
-		del:function(token) {
-			ws.send('login','delTokenFixed',{token:token},true).then(
+		del(id) {
+			ws.send('login','delTokenFixed',{id:id},true).then(
 				this.get,
 				this.$root.genericError
 			);
 		},
-		get:function() {
+		get() {
 			ws.send('login','getTokensFixed',{},true).then(
 				res => this.tokensFixed = res.payload,
 				this.$root.genericError
 			);
 		},
-		set:function() {
+		set(context) {
 			ws.send('login','setTokenFixed',{
-				context:'client',
-				name:this.deviceName
+				context:context,
+				name:this.tokenName
 			},true).then(
 				res => {
-					this.tokenFixed = res.payload.tokenFixed;
+					this.tokenFixed    = res.payload.tokenFixed;
+					this.tokenFixedB32 = res.payload.tokenFixedB32;
 					this.get();
 				},
 				this.$root.genericError
