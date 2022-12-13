@@ -107,62 +107,61 @@ let MyApp = {
 	},
 	computed:{
 		// presentation
-		bgStyle:function() {
+		bgStyle:(s) => {
 			// custom color before specific module color
-			if(this.customBgHeader !== '')
-				return this.customBgHeader;
+			if(s.customBgHeader !== '')
+				return s.customBgHeader;
 			
-			if(this.moduleColor1 !== '')
-				return `background-color:#${this.moduleColor1};`;
+			if(s.moduleColor1 !== '')
+				return `background-color:#${s.moduleColor1};`;
 			
 			return '';
 		},
-		classes:function() {
-			if(!this.appReady)
+		classes:(s) => {
+			if(!s.appReady)
 				return 'is-not-ready';
 			
 			let classes = [
-				'user-spacing',`spacing-value${this.settings.spacing}`,
-				'user-font',this.settings.fontFamily
+				'user-spacing',`spacing-value${s.settings.spacing}`,
+				'user-font',s.settings.fontFamily
 			];
 			
-			if(this.settings.bordersAll)       classes.push('user-bordersAll');
-			if(this.settings.compact)          classes.push('user-compact');
-			if(this.settings.dark)             classes.push('user-dark');
-			if(this.settings.mobileScrollForm) classes.push('user-mobile-scroll-form');
-			if(this.isMobile)                  classes.push('is-mobile');
+			if(s.settings.bordersAll)       classes.push('user-bordersAll');
+			if(s.settings.compact)          classes.push('user-compact');
+			if(s.settings.dark)             classes.push('user-dark');
+			if(s.settings.mobileScrollForm) classes.push('user-mobile-scroll-form');
+			if(s.isMobile)                  classes.push('is-mobile');
 			
-			switch(this.settings.bordersCorner) {
+			switch(s.settings.bordersCorner) {
 				case 'rounded': classes.push('user-bordersRounded'); break;
 				case 'squared': classes.push('user-bordersSquared'); break;
 			}
 			return classes.join(' ');
 		},
-		styles:function() {
-			if(!this.appReady) return '';
+		styles:(s) => {
+			if(!s.appReady) return '';
 			
-			let styles = [`font-size:${this.settings.fontSize}%`];
+			let styles = [`font-size:${s.settings.fontSize}%`];
 			
-			if(this.patternStyle !== '')
-				styles.push(this.patternStyle);
+			if(s.patternStyle !== '')
+				styles.push(s.patternStyle);
 			
 			return styles.join(';');
 		},
-		stylesContent:function() {
-			if(!this.appReady || this.settings.compact)
+		stylesContent:(s) => {
+			if(!s.appReady || s.settings.compact)
 				return '';
 			
-			return [`max-width:${this.settings.pageLimit}px`].join(';');
+			return [`max-width:${s.settings.pageLimit}px`].join(';');
 		},
 		
 		// navigation
-		moduleEntries:function() {
+		moduleEntries:(s) => {
 			let idMapChildren = {};
 			let entries       = [];
-			let that          = this;
 			
 			// collect assigned modules
-			for(const mod of this.modules) {
+			for(const mod of s.modules) {
 				if(mod.parentId === null)
 					continue;
 				
@@ -180,11 +179,11 @@ let MyApp = {
 					return false;
 				
 				// module is accessible if start form is set and user has access to any menu
-				let formIdStart = getStartFormId(module,that.access);
+				let formIdStart = getStartFormId(module,s.access);
 				let accessible  = formIdStart !== null;
 				
 				// ignore hidden modules
-				if(that.moduleIdMapOpts[module.id].hidden)
+				if(s.moduleIdMapOpts[module.id].hidden)
 					return false;
 				
 				// ignore inaccessible and childless modules
@@ -193,7 +192,7 @@ let MyApp = {
 				}
 				
 				// module caption
-				let caption = that.getCaptionForModule(
+				let caption = s.getCaptionForModule(
 					module.captions.moduleTitle,module.name,module
 				);
 				
@@ -220,12 +219,12 @@ let MyApp = {
 					iconId:module.iconId,
 					id:module.id,
 					name:module.name,
-					position:that.moduleIdMapOpts[module.id].position
+					position:s.moduleIdMapOpts[module.id].position
 				};
 			};
 			
 			// parse module entries
-			for(const mod of this.modules) {
+			for(const mod of s.modules) {
 				let m = parseModule(mod,true);
 				
 				if(m !== false)
@@ -247,44 +246,45 @@ let MyApp = {
 		},
 		
 		// simple
-		httpMode:function() { return location.protocol === 'http:'; },
+		httpMode:(s) => location.protocol === 'http:',
 		
 		// stores
-		activated:      function() { return this.$store.getters['local/activated']; },
-		appVersion:     function() { return this.$store.getters['local/appVersion']; },
-		customBgHeader: function() { return this.$store.getters['local/customBgHeader']; },
-		customLogo:     function() { return this.$store.getters['local/customLogo']; },
-		customLogoUrl:  function() { return this.$store.getters['local/customLogoUrl']; },
-		loginKeyAes:    function() { return this.$store.getters['local/loginKeyAes']; },
-		schemaTimestamp:function() { return this.$store.getters['schema/timestamp']; },
-		modules:        function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
-		moduleIdMapOpts:function() { return this.$store.getters['schema/moduleIdMapOptions']; },
-		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
-		access:         function() { return this.$store.getters.access; },
-		blockInput:     function() { return this.$store.getters.blockInput; },
-		capErr:         function() { return this.$store.getters.captions.error; },
-		capGen:         function() { return this.$store.getters.captions.generic; },
-		isAdmin:        function() { return this.$store.getters.isAdmin; },
-		isAtDialog:     function() { return this.$store.getters.isAtDialog; },
-		isAtFeedback:   function() { return this.$store.getters.isAtFeedback; },
-		isMobile:       function() { return this.$store.getters.isMobile; },
-		loginEncryption:function() { return this.$store.getters.loginEncryption; },
-		loginPrivateKey:function() { return this.$store.getters.loginPrivateKey; },
-		moduleColor1:   function() { return this.$store.getters.moduleColor1; },
-		patternStyle:   function() { return this.$store.getters.patternStyle; },
-		popUpFormGlobal:function() { return this.$store.getters.popUpFormGlobal; },
-		settings:       function() { return this.$store.getters.settings; }
+		activated:          (s) => s.$store.getters['local/activated'],
+		appVersion:         (s) => s.$store.getters['local/appVersion'],
+		customBgHeader:     (s) => s.$store.getters['local/customBgHeader'],
+		customLogo:         (s) => s.$store.getters['local/customLogo'],
+		customLogoUrl:      (s) => s.$store.getters['local/customLogoUrl'],
+		loginKeyAes:        (s) => s.$store.getters['local/loginKeyAes'],
+		schemaTimestamp:    (s) => s.$store.getters['schema/timestamp'],
+		schemaTimestampLast:(s) => s.$store.getters['local/schemaTimestampLast'],
+		modules:            (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleIdMapOpts:    (s) => s.$store.getters['schema/moduleIdMapOptions'],
+		formIdMap:          (s) => s.$store.getters['schema/formIdMap'],
+		access:             (s) => s.$store.getters.access,
+		blockInput:         (s) => s.$store.getters.blockInput,
+		capErr:             (s) => s.$store.getters.captions.error,
+		capGen:             (s) => s.$store.getters.captions.generic,
+		isAdmin:            (s) => s.$store.getters.isAdmin,
+		isAtDialog:         (s) => s.$store.getters.isAtDialog,
+		isAtFeedback:       (s) => s.$store.getters.isAtFeedback,
+		isMobile:           (s) => s.$store.getters.isMobile,
+		loginEncryption:    (s) => s.$store.getters.loginEncryption,
+		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
+		moduleColor1:       (s) => s.$store.getters.moduleColor1,
+		patternStyle:       (s) => s.$store.getters.patternStyle,
+		popUpFormGlobal:    (s) => s.$store.getters.popUpFormGlobal,
+		settings:           (s) => s.$store.getters.settings
 	},
-	created:function() {
+	created() {
 		window.addEventListener('resize',this.setMobileView);
 	},
-	mounted:function() {
+	mounted() {
 		setInterval(this.wsReconnect,2000); // websocket reconnect loop
 		this.wsConnect();                   // connect to backend via websocket
 		this.setMobileView();               // initial state, mobile view: yes/no
 	},
-	unmounted:function() {
+	unmounted() {
 		window.removeEventListener('resize',this.setMobileView);
 	},
 	methods:{
@@ -301,7 +301,7 @@ let MyApp = {
 		updateCollections,
 		
 		// general app states
-		stateChange:function() {
+		stateChange() {
 			// create app states required for basic function
 			// order is required, earlier ones must be satisfied first
 			if(!this.wsConnected)  return this.wsConnect();  // backend connection
@@ -309,18 +309,18 @@ let MyApp = {
 			if(!this.schemaLoaded) return this.initSchema(); // schema data
 			if(!this.loginReady)   return this.loginReady = true;
 		},
-		setInitErr:function(err) {
+		setInitErr(err) {
 			// generic error handler is not available yet
 			// log to console and release login routine
 			this.consoleError(err);
 			this.$refs.login.parentError();
 		},
-		setMobileView:function() {
+		setMobileView() {
 			this.$store.commit('isMobile',window.innerWidth <= 800 || window.innerHeight <= 400);
 		},
 		
 		// web socket control
-		wsConnect:function() {
+		wsConnect() {
 			let protocol = this.httpMode ? 'ws:' : 'wss:';
 			ws.open(
 				`${protocol}//${window.location.host}/websocket`,
@@ -331,11 +331,11 @@ let MyApp = {
 			);
 			window.addEventListener('onunload',() => ws.close());
 		},
-		wsConnectOk:function() {
+		wsConnectOk() {
 			this.wsConnected = true;
 			this.stateChange();
 		},
-		wsBackendRequest:function(res) {
+		wsBackendRequest(res) {
 			switch(res.ressource) {
 				// affects admins only
 				case 'schema_loading':
@@ -385,20 +385,20 @@ let MyApp = {
 				break;
 			}
 		},
-		wsBlocking:function(state) {
+		wsBlocking(state) {
 			this.$store.commit(state ? 'busyAdd' : 'busyRemove');
 		},
-		wsCancel:function() {
+		wsCancel() {
 			ws.clear();
 		},
-		wsBroken:function() {
+		wsBroken() {
 			this.$store.commit('busyReset');
 			this.appReady     = false;
 			this.loginReady   = false;
 			this.publicLoaded = false;
 			this.wsConnected  = false;
 		},
-		wsReconnect:function(killConnection) {
+		wsReconnect(killConnection) {
 			if(!this.wsConnected || killConnection === true) {
 				ws.close();
 				this.$store.commit('busyReset');
@@ -407,7 +407,7 @@ let MyApp = {
 		},
 		
 		// session control
-		sessionInvalid:function() {
+		sessionInvalid() {
 			this.$store.commit('local/loginKeyAes',null);
 			this.$store.commit('local/token','');
 			this.$store.commit('local/tokenKeep',false);
@@ -424,7 +424,7 @@ let MyApp = {
 		},
 		
 		// public info retrieval
-		initPublic:function() {
+		initPublic() {
 			ws.send('public','get',{},false).then(
 				res => {
 					// reload page if known application version changed
@@ -456,7 +456,7 @@ let MyApp = {
 		},
 		
 		// schema retrieval
-		initSchema:function() {
+		initSchema() {
 			fetch(`./cache/download/schema_${this.schemaTimestamp}.json`).then(
 				res => {
 					if(res.status !== 200)
@@ -464,6 +464,7 @@ let MyApp = {
 					
 					res.json().then((data) => {
 						this.$store.commit('schema/set',data);
+						this.$store.commit('local/schemaTimestampLast',this.schemaTimestamp);
 						this.schemaLoaded = true;
 						this.stateChange();
 					});
@@ -474,7 +475,7 @@ let MyApp = {
 		},
 		
 		// final app meta retrieval, after authentication
-		initApp:function() {
+		initApp() {
 			let requests = [
 				ws.prepare('setting','get',{}),
 				ws.prepare('lookup','get',{name:'access'}),
@@ -533,7 +534,7 @@ let MyApp = {
 		},
 		
 		// crypto
-		pemImportPrivateEnc:function(privateKeyPemEnc) {
+		pemImportPrivateEnc(privateKeyPemEnc) {
 			// attempt to decrypt private key with personal login key
 			// prepare login AES key
 			return this.aesGcmImportBase64(this.loginKeyAes).then(
@@ -556,13 +557,13 @@ let MyApp = {
 		},
 		
 		// backend reloads
-		loginReauthAll:function(blocking) {
+		loginReauthAll(blocking) {
 			ws.send('login','reauthAll',{},blocking).then(
 				() => {},
 				this.genericError
 			);
 		},
-		schemaReload:function(moduleId) {
+		schemaReload(moduleId) {
 			
 			// all or specific module
 			let payload = typeof moduleId === 'undefined'
