@@ -249,32 +249,31 @@ let MyApp = {
 		httpMode:(s) => location.protocol === 'http:',
 		
 		// stores
-		activated:          (s) => s.$store.getters['local/activated'],
-		appVersion:         (s) => s.$store.getters['local/appVersion'],
-		customBgHeader:     (s) => s.$store.getters['local/customBgHeader'],
-		customLogo:         (s) => s.$store.getters['local/customLogo'],
-		customLogoUrl:      (s) => s.$store.getters['local/customLogoUrl'],
-		loginKeyAes:        (s) => s.$store.getters['local/loginKeyAes'],
-		schemaTimestamp:    (s) => s.$store.getters['schema/timestamp'],
-		schemaTimestampLast:(s) => s.$store.getters['local/schemaTimestampLast'],
-		modules:            (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
-		moduleIdMapOpts:    (s) => s.$store.getters['schema/moduleIdMapOptions'],
-		formIdMap:          (s) => s.$store.getters['schema/formIdMap'],
-		access:             (s) => s.$store.getters.access,
-		blockInput:         (s) => s.$store.getters.blockInput,
-		capErr:             (s) => s.$store.getters.captions.error,
-		capGen:             (s) => s.$store.getters.captions.generic,
-		isAdmin:            (s) => s.$store.getters.isAdmin,
-		isAtDialog:         (s) => s.$store.getters.isAtDialog,
-		isAtFeedback:       (s) => s.$store.getters.isAtFeedback,
-		isMobile:           (s) => s.$store.getters.isMobile,
-		loginEncryption:    (s) => s.$store.getters.loginEncryption,
-		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
-		moduleColor1:       (s) => s.$store.getters.moduleColor1,
-		patternStyle:       (s) => s.$store.getters.patternStyle,
-		popUpFormGlobal:    (s) => s.$store.getters.popUpFormGlobal,
-		settings:           (s) => s.$store.getters.settings
+		activated:      (s) => s.$store.getters['local/activated'],
+		appVersion:     (s) => s.$store.getters['local/appVersion'],
+		customBgHeader: (s) => s.$store.getters['local/customBgHeader'],
+		customLogo:     (s) => s.$store.getters['local/customLogo'],
+		customLogoUrl:  (s) => s.$store.getters['local/customLogoUrl'],
+		loginKeyAes:    (s) => s.$store.getters['local/loginKeyAes'],
+		schemaTimestamp:(s) => s.$store.getters['local/schemaTimestamp'],
+		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleIdMapOpts:(s) => s.$store.getters['schema/moduleIdMapOptions'],
+		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
+		access:         (s) => s.$store.getters.access,
+		blockInput:     (s) => s.$store.getters.blockInput,
+		capErr:         (s) => s.$store.getters.captions.error,
+		capGen:         (s) => s.$store.getters.captions.generic,
+		isAdmin:        (s) => s.$store.getters.isAdmin,
+		isAtDialog:     (s) => s.$store.getters.isAtDialog,
+		isAtFeedback:   (s) => s.$store.getters.isAtFeedback,
+		isMobile:       (s) => s.$store.getters.isMobile,
+		loginEncryption:(s) => s.$store.getters.loginEncryption,
+		loginPrivateKey:(s) => s.$store.getters.loginPrivateKey,
+		moduleColor1:   (s) => s.$store.getters.moduleColor1,
+		patternStyle:   (s) => s.$store.getters.patternStyle,
+		popUpFormGlobal:(s) => s.$store.getters.popUpFormGlobal,
+		settings:       (s) => s.$store.getters.settings
 	},
 	created() {
 		window.addEventListener('resize',this.setMobileView);
@@ -345,7 +344,7 @@ let MyApp = {
 					this.$store.commit('busyRemove');
 					
 					// reload new schema
-					this.$store.commit('schema/timestamp',res.payload);
+					this.$store.commit('local/schemaTimestamp',res.payload);
 					this.initSchema();
 				break;
 				
@@ -443,11 +442,11 @@ let MyApp = {
 					this.$store.commit('local/companyLogoUrl',res.payload.companyLogoUrl);
 					this.$store.commit('local/companyName',res.payload.companyName);
 					this.$store.commit('local/companyWelcome',res.payload.companyWelcome);
+					this.$store.commit('local/schemaTimestamp',res.payload.schemaTimestamp);
 					this.$store.commit('clusterNodeName',res.payload.clusterNodeName);
 					this.$store.commit('productionMode',res.payload.productionMode === 1);
 					this.$store.commit('pageTitleRefresh'); // update page title with new app name
 					this.$store.commit('schema/languageCodes',res.payload.languageCodes);
-					this.$store.commit('schema/timestamp',res.payload.schemaTimestamp);
 					this.publicLoaded = true;
 					this.stateChange();
 				},
@@ -464,7 +463,6 @@ let MyApp = {
 					
 					res.json().then((data) => {
 						this.$store.commit('schema/set',data);
-						this.$store.commit('local/schemaTimestampLast',this.schemaTimestamp);
 						this.schemaLoaded = true;
 						this.stateChange();
 					});

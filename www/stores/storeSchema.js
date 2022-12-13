@@ -4,9 +4,6 @@ export {MyStoreSchema as default};
 const MyStoreSchema = {
 	namespaced:true,
 	state:{
-		// unix timestamp of loaded schema
-		timestamp:-1,
-		
 		// cache content
 		modules:[],             // all modules with everything beneath them
 		moduleIdMapOptions:{},  // instance options for all modules, key: module ID
@@ -146,8 +143,7 @@ const MyStoreSchema = {
 				}
 			}
 		},
-		languageCodes(state,payload) { state.languageCodes = payload; },
-		timestamp    (state,payload) { state.timestamp     = payload; }
+		languageCodes(state,payload) { state.languageCodes = payload; }
 	},
 	getters:{
 		articleIdMap:       (state) => state.articleIdMap,
@@ -166,7 +162,6 @@ const MyStoreSchema = {
 		pgFunctionIdMap:    (state) => state.pgFunctionIdMap,
 		presetIdMapRecordId:(state) => state.presetIdMapRecordId,
 		relationIdMap:      (state) => state.relationIdMap,
-		roleIdMap:          (state) => state.roleIdMap,
-		timestamp:          (state) => state.timestamp
+		roleIdMap:          (state) => state.roleIdMap
 	}
 };

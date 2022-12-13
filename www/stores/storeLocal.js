@@ -3,23 +3,23 @@ export {MyStoreLocal as default};
 const MyStoreLocal = {
 	namespaced:true,
 	state:{
-		activated:false,        // application is activated via valid license file
+		activated:false,      // application is activated via valid license file
 		appName:'App Name',
 		appNameShort:'App',
-		appVersion:'',          // full application version (as in 1.2.0.3422)
-		companyColorHeader:'',  // custom color on header
-		companyColorLogin:'',   // custom color on login screen
-		companyLogo:'',         // custom company logo
-		companyLogoUrl:'',      // custom company logo, href URL when clicked on
-		companyName:'',         // custom company name on login screen
-		companyWelcome:'',      // custom welcome message on login screen
-		fieldIdMapOption:{},    // map of field IDs with field options (reset on schema change)
-		loginKeyAes:null,       // en-/decryption key for login private key
-		loginKeySalt:null,      // salt for login key KDF
-		menuIdMapOpen:{},       // map of menu IDs with open state (true/false)
-		schemaTimestampLast:-1, // last known schema timestamp, to reset dependent data if schema changed
-		token:'',               // JWT token
-		tokenKeep:false         // keep JWT token between sessions
+		appVersion:'',        // full application version (as in 1.2.0.3422)
+		companyColorHeader:'',// custom color on header
+		companyColorLogin:'', // custom color on login screen
+		companyLogo:'',       // custom company logo
+		companyLogoUrl:'',    // custom company logo, href URL when clicked on
+		companyName:'',       // custom company name on login screen
+		companyWelcome:'',    // custom welcome message on login screen
+		fieldIdMapOption:{},  // map of field IDs with field options (reset on schema change)
+		loginKeyAes:null,     // en-/decryption key for login private key
+		loginKeySalt:null,    // salt for login key KDF
+		menuIdMapOpen:{},     // map of menu IDs with open state (true/false)
+		schemaTimestamp:-1,   // last known schema timestamp
+		token:'',             // JWT token
+		tokenKeep:false       // keep JWT token between sessions
 	},
 	mutations:{
 		activated:function(state,payload) {
@@ -98,14 +98,14 @@ const MyStoreLocal = {
 			state.tokenKeep = payload;
 			set('tokenKeep',payload);
 		},
-		schemaTimestampLast:function(state,payload) {
+		schemaTimestamp:function(state,payload) {
 			// if schema timestamp changed from last known one, reset dependent data
-			if(state.schemaTimestampLast !== payload) {
+			if(state.schemaTimestamp !== payload) {
 				state.fieldIdMapOption = {};
 				set('fieldIdMapOption',{});
 			}
-			state.schemaTimestampLast = payload;
-			set('schemaTimestampLast',payload);
+			state.schemaTimestamp = payload;
+			set('schemaTimestamp',payload);
 		}
 	},
 	getters:{
@@ -127,23 +127,23 @@ const MyStoreLocal = {
 		},
 		
 		// simple getters
-		activated:          (state) => state.activated,
-		appName:            (state) => state.appName,
-		appNameShort:       (state) => state.appNameShort,
-		appVersion:         (state) => state.appVersion,
-		companyColorHeader: (state) => state.companyColorHeader,
-		companyColorLogin:  (state) => state.companyColorLogin,
-		companyLogo:        (state) => state.companyLogo,
-		companyLogoUrl:     (state) => state.companyLogoUrl,
-		companyName:        (state) => state.companyName,
-		companyWelcome:     (state) => state.companyWelcome,
-		fieldIdMapOption:   (state) => state.fieldIdMapOption,
-		loginKeyAes:        (state) => state.loginKeyAes,
-		loginKeySalt:       (state) => state.loginKeySalt,
-		menuIdMapOpen:      (state) => state.menuIdMapOpen,
-		schemaTimestampLast:(state) => state.schemaTimestampLast,
-		token:              (state) => state.token,
-		tokenKeep:          (state) => state.tokenKeep
+		activated:         (state) => state.activated,
+		appName:           (state) => state.appName,
+		appNameShort:      (state) => state.appNameShort,
+		appVersion:        (state) => state.appVersion,
+		companyColorHeader:(state) => state.companyColorHeader,
+		companyColorLogin: (state) => state.companyColorLogin,
+		companyLogo:       (state) => state.companyLogo,
+		companyLogoUrl:    (state) => state.companyLogoUrl,
+		companyName:       (state) => state.companyName,
+		companyWelcome:    (state) => state.companyWelcome,
+		fieldIdMapOption:  (state) => state.fieldIdMapOption,
+		loginKeyAes:       (state) => state.loginKeyAes,
+		loginKeySalt:      (state) => state.loginKeySalt,
+		menuIdMapOpen:     (state) => state.menuIdMapOpen,
+		schemaTimestamp:   (state) => state.schemaTimestamp,
+		token:             (state) => state.token,
+		tokenKeep:         (state) => state.tokenKeep
 	}
 };
 
