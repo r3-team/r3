@@ -14,98 +14,90 @@ let MyAdminFiles = {
 		</div>
 		<div class="top lower">
 			<div class="area">
+				<my-button image="save.png"
+					@trigger="setConfig"
+					:active="hasChanged"
+					:caption="capGen.button.save"
+				/>
 				<my-button image="refresh.png"
-					@trigger="get"
+					@trigger="reset"
 					:caption="capGen.button.refresh"
 				/>
 			</div>
 		</div>
 		
-		<div class="content no-padding">
-			<div class="contentPart config">
-				<div class="contentPartHeader">
-					<img class="icon" src="images/settings.png" />
-					<h1>{{ capApp.titleConfig }}</h1>
-				</div>
-				<table class="default-inputs">
-					<tr>
-						<td>{{ capApp.filesKeepDaysDeleted }}</td>
-						<td><input v-model="configInput.filesKeepDaysDeleted" /></td>
-					</tr>
-				</table>
-				
-				<div>
-					<my-button image="save.png"
-						@trigger="setConfig"
-						:active="hasChanged"
-						:caption="capGen.button.save"
-					/>
-				</div>
+		<div class="content">
+			<div class="contentPartHeader">
+				<img class="icon" src="images/settings.png" />
+				<h1>{{ capApp.titleConfig }}</h1>
 			</div>
+			<table class="default-inputs">
+				<tr>
+					<td>{{ capApp.filesKeepDaysDeleted }}</td>
+					<td><input v-model="configInput.filesKeepDaysDeleted" /></td>
+				</tr>
+			</table>
 			
-			<hr />
 			<br />
 			
 			<!-- deleted files -->
-			<div class="contentPart full">
-				<div class="contentPartHeader">
-					<img class="icon" src="images/delete.png" />
-					<h1>{{ capApp.titleDeleted }}</h1>
-				</div>
-				
-				<table class="table-default default-inputs shade">
-					<thead>
-						<tr>
-							<th>{{ capGen.actions }}</th>
-							<th>{{ capGen.name }}</th>
-							<th>{{ capGen.size }}</th>
-							<th>{{ capApp.deleteDate }}</th>
-							<th>{{ capGen.record }}</th>
-							<th>{{ capGen.id }}</th>
-						</tr>
-					</thead>
-					<tbody>
-						<tr v-if="Object.keys(attributeIdMapDeleted).length === 0">
-							<td colspan="999">{{ capGen.nothingThere }}</td>
-						</tr>
-						<template v-for="(files,atrId) in attributeIdMapDeleted">
-							<tr class="attribute-title">
-								<td class="minimum" colspan="999">
-									<my-button
-										@trigger="toggleShow(atrId)"
-										:caption="displayAttribute(atrId,files.length)"
-										:image="attributeIdsShowDeleted.includes(atrId) ? 'triangleDown.png' : 'triangleRight.png'"
-										:naked="true"
-										:tight="true"
-									/>
-								</td>
-							</tr>
-							<tr v-if="attributeIdsShowDeleted.includes(atrId)" v-for="f in files">
-								<td>
-									<div class="row">
-										<my-button image="time.png"
-											@trigger="restore(atrId,f.id,f.recordId)"
-											:caption="capGen.button.restore"
-										/>
-										<a target="_blank"
-											:href="getAttributeFileHref(atrId,f.id,f.name,token)"
-										>
-											<my-button image="download.png"
-												:caption="capGen.button.download"
-											/>
-										</a>
-									</div>
-								</td>
-								<td class="file-name">{{ f.name }}</td>
-								<td>{{ getSizeReadable(f.size) }}</td>
-								<td>{{ displayTime(f.deleted) }}</td>
-								<td>{{ f.recordId }}</td>
-								<td>{{ f.id }}</td>
-							</tr>
-						</template>
-					</tbody>
-				</table>
+			<div class="contentPartHeader">
+				<img class="icon" src="images/delete.png" />
+				<h1>{{ capApp.titleDeleted }}</h1>
 			</div>
+			
+			<table class="table-default default-inputs shade">
+				<thead>
+					<tr>
+						<th>{{ capGen.actions }}</th>
+						<th>{{ capGen.name }}</th>
+						<th>{{ capGen.size }}</th>
+						<th>{{ capApp.deleteDate }}</th>
+						<th>{{ capGen.record }}</th>
+						<th>{{ capGen.id }}</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr v-if="Object.keys(attributeIdMapDeleted).length === 0">
+						<td colspan="999">{{ capGen.nothingThere }}</td>
+					</tr>
+					<template v-for="(files,atrId) in attributeIdMapDeleted">
+						<tr class="attribute-title">
+							<td class="minimum" colspan="999">
+								<my-button
+									@trigger="toggleShow(atrId)"
+									:caption="displayAttribute(atrId,files.length)"
+									:image="attributeIdsShowDeleted.includes(atrId) ? 'triangleDown.png' : 'triangleRight.png'"
+									:naked="true"
+									:tight="true"
+								/>
+							</td>
+						</tr>
+						<tr v-if="attributeIdsShowDeleted.includes(atrId)" v-for="f in files">
+							<td class="minimum">
+								<div class="row">
+									<my-button image="time.png"
+										@trigger="restore(atrId,f.id,f.recordId)"
+										:caption="capGen.button.restore"
+									/>
+									<a target="_blank"
+										:href="getAttributeFileHref(atrId,f.id,f.name,token)"
+									>
+										<my-button image="download.png"
+											:caption="capGen.button.download"
+										/>
+									</a>
+								</div>
+							</td>
+							<td class="file-name">{{ f.name }}</td>
+							<td>{{ getSizeReadable(f.size) }}</td>
+							<td>{{ displayTime(f.deleted) }}</td>
+							<td>{{ f.recordId }}</td>
+							<td>{{ f.id }}</td>
+						</tr>
+					</template>
+				</tbody>
+			</table>
 		</div>
 	</div>`,
 	props:{
@@ -119,8 +111,7 @@ let MyAdminFiles = {
 		};
 	},
 	mounted:function() {
-		this.configInput = JSON.parse(JSON.stringify(this.config));
-		this.get();
+		this.reset();
 		this.$store.commit('pageTitle',this.menuTitle);
 	},
 	computed:{
@@ -154,6 +145,10 @@ let MyAdminFiles = {
 		},
 		
 		// actions
+		reset() {
+			this.configInput = JSON.parse(JSON.stringify(this.config));
+			this.get();
+		},
 		toggleShow(atrId) {
 			let v = this.attributeIdsShowDeleted;
 			let pos = v.indexOf(atrId);
