@@ -218,6 +218,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "set":
 			return AttributeSet_tx(tx, reqJson)
 		}
+	case "backup":
+		switch action {
+		case "get":
+			return BackupGet()
+		}
 	case "bruteforce":
 		switch action {
 		case "get":

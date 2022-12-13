@@ -95,6 +95,7 @@
 		"inputSmall":"Valore troppo piccolo (min. {MIN})",
 		"inputTooFewFiles":"Troppo pochi file",
 		"inputTooManyFiles":"Troppi file",
+		"interval":"Interval",
 		"licenseRequired":"Richiede licenza",
 		"limit":"Limite",
 		"menu":"Menu",
@@ -121,10 +122,22 @@
 		"threeDots":"...",
 		"title":"Titolo",
 		"token":"Token",
+		"type":"Type",
 		"username":"Username",
 		"version":"Versione"
 	},
 	"admin":{
+		"backups":{
+			"count":"Mantieni le versioni",
+			"daily":"Giornaliero",
+			"dir":"Cartella destinazione*",
+			"dirNote":"*Assicurati che questo percorso punti a un percorso di rete separato o che il suo contenuto venga copiato regolarmente su un secondo sistema. Ciò è necessario per il ripristino in caso di guasto completo del sistema.",
+			"full":"Full backup",
+			"list":"Backup sets",
+			"monthly":"Mensile",
+			"title":"Backup completi integrati",
+			"weekly":"Settimanale"
+		},
 		"cluster":{
 			"button":{
 				"shutdown":"Shutdown"
@@ -161,12 +174,6 @@
 			"appName":"Nome Istanza",
 			"appNameShort":"Titolo pagina",
 			"appVersion":"Versione piattaforma",
-			"backupCount":"Mantieni le versioni",
-			"backupDaily":"Giornaliero",
-			"backupDir":"Cartella destinazione*",
-			"backupDirNote":"*Assicurati che questo percorso punti a un percorso di rete separato o che il suo contenuto venga copiato regolarmente su un secondo sistema. Ciò è necessario per il ripristino in caso di guasto completo del sistema.",
-			"backupMonthly":"Mensile",
-			"backupWeekly":"Settimanale",
 			"bruteforceAttempts":"Blocca gli host dopo i tentativi",
 			"bruteforceCountBlocked":"Host Bloccati",
 			"bruteforceCountTracked":"Host Tracciati",
@@ -211,7 +218,6 @@
 			"repoSkipVerify":"Consenti certificati non attendibili",
 			"repoUrl":"URL dell'archivio",
 			"title":"Configurazione di sistema",
-			"titleBackup":"Backup completi integrati",
 			"titleCustom":"Personalizzazione",
 			"titleGeneral":"Generale",
 			"titleIcs":"Iscrizioni al calendario",
@@ -470,6 +476,7 @@
 			"systemTasks":"System tasks (global)",
 			"systemTasksNode":"System tasks (cluster nodes)"
 		},
+		"navigationBackups":"Backups",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"Sistema",
 		"navigationFiles":"Files",

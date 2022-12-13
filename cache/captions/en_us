@@ -95,6 +95,7 @@
 		"inputSmall":"Value is too small (min. {MIN})",
 		"inputTooFewFiles":"Too few files",
 		"inputTooManyFiles":"Too many files",
+		"interval":"Interval",
 		"licenseRequired":"Requires license",
 		"limit":"Limit",
 		"menu":"Menu",
@@ -121,10 +122,22 @@
 		"threeDots":"...",
 		"title":"Title",
 		"token":"Token",
+		"type":"Type",
 		"username":"Username",
 		"version":"Version"
 	},
 	"admin":{
+		"backups":{
+			"count":"Keep versions",
+			"daily":"Daily",
+			"dir":"Target directory*",
+			"dirNote":"*Make sure this path points to a separate network location or its contents is copied to a second system regularly. This is necessary for recovery in case of complete system failure.",
+			"full":"Full backup",
+			"list":"Backup sets",
+			"monthly":"Monthly",
+			"title":"Integrated full backups",
+			"weekly":"Weekly"
+		},
 		"cluster":{
 			"button":{
 				"shutdown":"Shutdown"
@@ -161,12 +174,6 @@
 			"appName":"Instance name",
 			"appNameShort":"Page title",
 			"appVersion":"Platform version",
-			"backupCount":"Keep versions",
-			"backupDaily":"Daily",
-			"backupDir":"Target directory*",
-			"backupDirNote":"*Make sure this path points to a separate network location or its contents is copied to a second system regularly. This is necessary for recovery in case of complete system failure.",
-			"backupMonthly":"Monthly",
-			"backupWeekly":"Weekly",
 			"bruteforceAttempts":"Block hosts after attempts",
 			"bruteforceCountBlocked":"Blocked hosts",
 			"bruteforceCountTracked":"Tracked hosts",
@@ -211,7 +218,6 @@
 			"repoSkipVerify":"Allow untrusted certificates",
 			"repoUrl":"Repository URL",
 			"title":"System configuration",
-			"titleBackup":"Integrated full backups",
 			"titleCustom":"Customizing",
 			"titleGeneral":"General",
 			"titleIcs":"Calendar subscriptions",
@@ -470,6 +476,7 @@
 			"systemTasks":"System tasks (global)",
 			"systemTasksNode":"System tasks (cluster nodes)"
 		},
+		"navigationBackups":"Backups",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"System",
 		"navigationFiles":"Files",

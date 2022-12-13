@@ -95,6 +95,7 @@
 		"inputSmall":"Valoarea este prea mică (min. {MIN})",
 		"inputTooFewFiles":"Prea puține fișiere",
 		"inputTooManyFiles":"Prea mult fișiere",
+		"interval":"Interval",
 		"licenseRequired":"Implică o licență",
 		"limit":"Limita",
 		"menu":"Menu",
@@ -121,10 +122,22 @@
 		"threeDots":"...",
 		"title":"Titlu",
 		"token":"Token",
+		"type":"Type",
 		"username":"Nume utilizator",
 		"version":"Versiune"
 	},
 	"admin":{
+		"backups":{
+			"count":"Păstrați versiunile",
+			"daily":"Zilnic",
+			"dir":"Directorul țintă*",
+			"dirNote":"*Asigurați-vă că această cale indică o locație separată din rețea sau că conținutul acesteia este copiat în mod regulat pe un al doilea sistem. Acest lucru este necesar pentru recuperare în cazul unei defecțiuni complete a sistemului.",
+			"full":"Full backup",
+			"list":"Backup sets",
+			"monthly":"Lunar",
+			"title":"Backup-uri complete integrate",
+			"weekly":"Săptămânal"
+		},
 		"cluster":{
 			"button":{
 				"shutdown":"Shutdown"
@@ -161,12 +174,6 @@
 			"appName":"Nume instanță",
 			"appNameShort":"Titlul paginii",
 			"appVersion":"Versiunea platformei",
-			"backupCount":"Păstrați versiunile",
-			"backupDaily":"Zilnic",
-			"backupDir":"Directorul țintă*",
-			"backupDirNote":"*Asigurați-vă că această cale indică o locație separată din rețea sau că conținutul acesteia este copiat în mod regulat pe un al doilea sistem. Acest lucru este necesar pentru recuperare în cazul unei defecțiuni complete a sistemului.",
-			"backupMonthly":"Lunar",
-			"backupWeekly":"Săptămânal",
 			"bruteforceAttempts":"Nr. de încercări după care gazdele vor fi blocate",
 			"bruteforceCountBlocked":"Gazde blocate",
 			"bruteforceCountTracked":"Gazde urmărite",
@@ -211,7 +218,6 @@
 			"repoSkipVerify":"Permite certificate care nu sunt de încredere",
 			"repoUrl":"Adresa depozitului (URL)",
 			"title":"Configuratia sistemului",
-			"titleBackup":"Backup-uri complete integrate",
 			"titleCustom":"Personalizare",
 			"titleGeneral":"General",
 			"titleIcs":"Abonamente la calendar",
@@ -470,6 +476,7 @@
 			"systemTasks":"System tasks (global)",
 			"systemTasksNode":"System tasks (cluster nodes)"
 		},
+		"navigationBackups":"Backups",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"Sistem",
 		"navigationFiles":"Files",

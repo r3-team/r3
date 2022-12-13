@@ -5,6 +5,15 @@ import (
 	"github.com/jackc/pgtype"
 )
 
+type BackupDef struct {
+	AppBuild  int    `json:"appBuild"`
+	JobName   string `json:"jobName"`
+	Timestamp int64  `json:"timestamp"`
+}
+type BackupTocFile struct {
+	Backups []BackupDef `json:"backups"`
+}
+
 type Log struct {
 	Level      int            `json:"level"`
 	Context    string         `json:"context"`

@@ -95,6 +95,7 @@
 		"inputSmall":"Wert ist zu klein (min. {MIN})",
 		"inputTooFewFiles":"Zu wenige Dateien",
 		"inputTooManyFiles":"Zu viele Dateien",
+		"interval":"Intervall",
 		"licenseRequired":"Lizenz erforderlich",
 		"limit":"Anzahl",
 		"menu":"Menü",
@@ -118,13 +119,25 @@
 		"settings":"Einstellungen",
 		"size":"Größe",
 		"status":"Status",
+		"threeDots":"...",
 		"title":"Titel",
 		"token":"Token",
-		"threeDots":"...",
+		"type":"Typ",
 		"username":"Benutzername",
 		"version":"Version"
 	},
 	"admin":{
+		"backups":{
+			"count":"Versionen behalten",
+			"daily":"Täglich",
+			"dir":"Zielverzeichnis*",
+			"dirNote":"*Stelle sicher, dass dieser Pfad auf einen separaten Netzwerkspeicherort zeigt oder der Verzeichnisinhalt regelmäßig auf ein Zweitsystem kopiert wird. Dies ist für eine Wiederherstellung notwendig, falls das System komplett ausfällt.",
+			"full":"Vollsicherung",
+			"list":"Sicherungssätze",
+			"monthly":"Monatlich",
+			"title":"Integrierte Vollsicherungen",
+			"weekly":"Wöchentlich"
+		},
 		"cluster":{
 			"button":{
 				"shutdown":"Herunterfahren"
@@ -161,12 +174,6 @@
 			"appName":"Instanzname",
 			"appNameShort":"Seitentitel",
 			"appVersion":"Plattform-Version",
-			"backupCount":"Versionen behalten",
-			"backupDaily":"Täglich",
-			"backupDir":"Zielverzeichnis*",
-			"backupDirNote":"*Stelle sicher, dass dieser Pfad auf einen separaten Netzwerkspeicherort zeigt oder der Verzeichnisinhalt regelmäßig auf ein Zweitsystem kopiert wird. Dies ist für eine Wiederherstellung notwendig, falls das System komplett ausfällt.",
-			"backupMonthly":"Monatlich",
-			"backupWeekly":"Wöchentlich",
 			"bruteforceAttempts":"Host blocken nach Versuchen",
 			"bruteforceCountBlocked":"Blockierte Hosts",
 			"bruteforceCountTracked":"Verfolgte Hosts",
@@ -211,7 +218,6 @@
 			"repoSkipVerify":"Nicht vertrauenswürdige Zertifikate zulassen",
 			"repoUrl":"Repository-URL",
 			"title":"Systemkonfiguration",
-			"titleBackup":"Integrierte Vollsicherungen",
 			"titleCustom":"Anpassungen",
 			"titleGeneral":"Allgemein",
 			"titleIcs":"Kalender-Abonnements",
@@ -470,6 +476,7 @@
 			"systemTasks":"Systemaufgaben (global)",
 			"systemTasksNode":"Systemaufgaben (Clusterknoten)"
 		},
+		"navigationBackups":"Sicherungen",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"System",
 		"navigationFiles":"Dateien",

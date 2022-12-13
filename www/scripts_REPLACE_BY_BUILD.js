@@ -15,6 +15,7 @@ import {
 
 // admin
 import MyAdmin             from './comps/admin/admin.js';
+import MyAdminBackups      from './comps/admin/adminBackups.js';
 import MyAdminCluster      from './comps/admin/adminCluster.js';
 import MyAdminConfig       from './comps/admin/adminConfig.js';
 import MyAdminFiles        from './comps/admin/adminFiles.js';
@@ -75,6 +76,7 @@ const MyRouter = VueRouter.createRouter({
 		redirect:'/admin/config',
 		component:MyAdmin,
 		children:[
+			{ path:'backups',     component:MyAdminBackups },
 			{ path:'cluster',     component:MyAdminCluster },
 			{ path:'config',      component:MyAdminConfig },
 			{ path:'files',       component:MyAdminFiles },
