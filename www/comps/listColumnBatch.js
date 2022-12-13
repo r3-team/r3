@@ -14,14 +14,13 @@ let MyListColumnBatch = {
 			<span v-else>{{ columnBatch.caption }}</span>
 		</div>
 		
-		<my-button
-			v-if="isValidFilter && filterActive"
+		<my-button image="filter.png"
+			v-if="isValidFilter && isFiltered"
 			@trigger="click"
 			@trigger-right="input = ''; set()"
 			:blockBubble="true"
-			:caption="filterActive && isArrayInput ? String(input.length) : ''"
+			:caption="isArrayInput ? String(input.length) : ''"
 			:captionTitle="capApp.button.columnFilters"
-			:image="filterActive ? 'filter.png' : ''"
 			:naked="true"
 			:tight="true"
 		/>
@@ -92,7 +91,7 @@ let MyListColumnBatch = {
 				<div class="columnOptionItem" v-if="showFilterText">
 					<my-button image="filter.png"
 						@trigger="input = ''; set()"
-						:active="filterActive"
+						:active="isFiltered"
 						:captionTitle="capGen.button.filter"
 						:naked="true"
 						:tight="true"
@@ -154,8 +153,8 @@ let MyListColumnBatch = {
 		columnBatch:  { type:Object,  required:true }, // column batch to show options for
 		columns:      { type:Array,   required:true }, // list columns
 		columnSortPos:{ type:Number,  required:true }, // list sort for this column (number indicates sort position)
-		filters:      { type:Array,   required:true }, // list filters
-		filtersColumn:{ type:Array,   required:true }, // list filters from column filters
+		filters:      { type:Array,   required:true }, // list filters (predefined)
+		filtersColumn:{ type:Array,   required:true }, // list filters from users column selection
 		lastInRow:    { type:Boolean, required:true },
 		joins:        { type:Array,   required:true }, // list joins
 		orders:       { type:Array,   required:true }, // list orders
@@ -169,21 +168,29 @@ let MyListColumnBatch = {
 	],
 	data:function() {
 		return {
-			filterActive:false, // filter active from this column
-			input:'',           // value input (either string if text, or array if selected from values)
-			values:[],          // values available to filter with (all values a list could have for column)
-			valuesLoaded:false  // values loaded once
+			input:'',          // value input (either string if text, or array if selected from values)
+			values:[],         // values available to filter with (all values a list could have for column)
+			valuesLoaded:false // values loaded once
 		};
 	},
 	mounted:function() {
 		if(this.isValidFilter)
 			this.$watch('show',v => this.loadValues());
+		
+		// apply input values from column filter (must be first index)
+		if(this.columnFilterIndexes.length !== 0) {
+			let f = this.filtersColumn[this.columnFilterIndexes[0]];
+			if(f.side1.content === 'value')
+				this.input = f.side1.value;
+		}
 	},
 	computed:{
 		aggregatorProcessed:{
 			get()  { return typeof this.aggregator !== 'undefined' ? this.aggregator : ''; },
 			set(v) { this.$emit(v === '' ? 'del-aggregator' : 'set-aggregator', v); }
 		},
+		
+		// returns column of the column batch that is used for filtering (null if none is available)
 		columnUsedFilter:(s) => {
 			for(let ind of s.columnBatch.columnIndexes) {
 				let c = s.columns[ind];
@@ -199,14 +206,32 @@ let MyListColumnBatch = {
 			return null;
 		},
 		
+		// returns indexes of column user filters that this column is responsible for
+		columnFilterIndexes:(s) => {
+			if(!s.isValidFilter)
+				return [];
+			
+			let atrId    = s.columnUsedFilter.attributeId;
+			let atrIndex = s.columnUsedFilter.index;
+			let out      = [];
+			
+			for(let i = 0, j = s.filtersColumn.length; i < j; i++) {
+				let f = s.filtersColumn[i];
+				if(f.side0.attributeId === atrId && f.side0.attributeIndex === atrIndex)
+					out.push(i);
+			}
+			return out;
+		},
+		
 		// simple
 		canAggregate:   (s) => s.getFirstColumnUsableAsAggregator(s.columnBatch,s.columns) !== null,
-		canOpen:        (s) => s.rowCount > 1 || s.filterActive,
+		canOpen:        (s) => s.rowCount > 1 || s.isFiltered,
 		showFilterAny:  (s) => s.showFilterItems || s.showFilterText,
 		showFilterItems:(s) => s.values.length >= 3 || s.rowCount > 5,
 		showFilterText: (s) => s.values.length >= 5 && !s.isDateOrTime,
 		isArrayInput:   (s) => typeof s.input === 'object',
 		isDateOrTime:   (s) => s.isValidFilter && ['datetime','date','time'].includes(s.columnUsedFilter.display),
+		isFiltered:     (s) => s.columnFilterIndexes.length !== 0,
 		isOrdered:      (s) => s.columnSortPos !== -1,
 		isOrderedAsc:   (s) => s.isOrdered && s.orders[s.columnSortPos].ascending,
 		isOrderedDesc:  (s) => s.isOrdered && !s.orders[s.columnSortPos].ascending,
@@ -304,25 +329,19 @@ let MyListColumnBatch = {
 			if(!this.isValidFilter)
 				return;
 			
-			let atrId    = this.columnUsedFilter.attributeId;
-			let atrIndex = this.columnUsedFilter.index;
-			let filters  = JSON.parse(JSON.stringify(this.filtersColumn));
-			
-			// remove existing filter
-			for(let i = 0, j = filters.length; i < j; i++) {
-				let f = filters[i];
-				if(f.side0.attributeId === atrId && f.side0.attributeIndex === atrIndex) {
-					filters.splice(i,1);
-					i--; j--;
-				}
-			}
-			
-			this.filterActive = (
+			let atrId      = this.columnUsedFilter.attributeId;
+			let atrIndex   = this.columnUsedFilter.index;
+			let filters    = JSON.parse(JSON.stringify(this.filtersColumn));
+			let filterUsed = (
 				!this.isArrayInput && this.input !== '' ||
 				this.isArrayInput  && this.input.length !== 0
 			);
 			
-			if(this.filterActive) {
+			// remove existing filters for this column
+			filters = filters.filter((v,i) => !this.columnFilterIndexes.includes(i));
+			
+			// add new filters for this column, if active
+			if(filterUsed) {
 				let hasNull = this.isArrayInput && this.input.includes(null);
 				filters.push({
 					connector:'AND',
