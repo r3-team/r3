@@ -178,9 +178,9 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 					const atrIdNm = typeof fld.attributeIdNm !== 'undefined'
 						? fld.attributeIdNm : null;
 					
-					s.value = values[getIndexAttributeId(
+					s.value = JSON.parse(JSON.stringify(values[getIndexAttributeId(
 						fld.index,fld.attributeId,fld.outsideIn === true,atrIdNm
-					)];
+					)]));
 				}
 			break;
 			case 'javascript':
