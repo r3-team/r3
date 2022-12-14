@@ -343,8 +343,8 @@ let MyForm = {
 			// check for protected preset record
 			let rel = this.relationIdMap[this.joins[0].relationId];
 			
-			for(let i = 0, j = rel.presets.length; i < j; i++) {
-				if(rel.presets[i].protected && this.presetIdMapRecordId[rel.presets[i].id] === this.recordId)
+			for(let p of rel.presets) {
+				if(p.protected && this.presetIdMapRecordId[p.id] === this.recordId)
 					return false;
 			}
 			return true;
@@ -873,6 +873,7 @@ let MyForm = {
 		
 		// field value control
 		valueSet:function(indexAttributeId,value,isOriginal,updateJoins) {
+			let changed = this.values[indexAttributeId] !== value;
 			this.values[indexAttributeId] = value;
 			
 			// set original value for change comparisson against current value
@@ -880,7 +881,7 @@ let MyForm = {
 				this.valuesOrg[indexAttributeId] = JSON.parse(JSON.stringify(value));
 			
 			// update sub joins if value has changed from input
-			if(updateJoins) {
+			if(updateJoins && changed) {
 				let ia = this.getDetailsFromIndexAttributeId(indexAttributeId);
 				if(ia.outsideIn)
 					return;
@@ -1365,16 +1366,16 @@ let MyForm = {
 			while(joinAdded) {
 				joinAdded = false;
 				
-				for(let i = 0, j = this.relationsJoined.length; i < j; i++) {
+				for(let r of this.relationsJoined) {
 					
-					if(!joinIndexes.includes(this.relationsJoined[i].indexFrom))
+					if(!joinIndexes.includes(r.indexFrom))
 						continue; // not dependent on existing joins
 					
-					if(joinIndexes.includes(this.relationsJoined[i].index))
+					if(joinIndexes.includes(r.index))
 						continue; // already added
-						
-					joins.push(this.relationsJoined[i]);
-					joinIndexes.push(this.relationsJoined[i].index);
+					
+					joins.push(r);
+					joinIndexes.push(r.index);
 					
 					// repeat if join was added (to collect dependend joins)
 					joinAdded = true;
