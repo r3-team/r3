@@ -408,6 +408,7 @@ let MyField = {
 					<img v-if="iconId" :src="srcBase64(iconIdMap[iconId].file)" />
 				</div>
 				<div class="tabs-entry clickable"
+					v-if="!isMobile"
 					v-for="(t,i) in field.tabs"
 					v-show="!tabIndexesHidden.includes(i)"
 					@click="setTab(i)"
@@ -415,6 +416,11 @@ let MyField = {
 				>
 					{{ t.captions.tabTitle[this.moduleLanguage] }}
 				</div>
+				<select v-if="isMobile" @change="setTab(parseInt($event.target.value))" :value="tabIndexShow">
+					<option v-for="(t,i) in field.tabs" :value="i">
+						{{ t.captions.tabTitle[this.moduleLanguage] }}
+					</option>
+				</select>
 			</div>
 			<div class="fields"
 				v-for="(t,i) in field.tabs"
