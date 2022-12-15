@@ -5,6 +5,8 @@ import MyHeader              from './header.js';
 import MyLogin               from './login.js';
 import {getStartFormId}      from './shared/access.js';
 import {updateCollections}   from './shared/collection.js';
+import {formOpen}            from './shared/form.js';
+import srcBase64Icon         from './shared/image.js';
 import {getCaptionForModule} from './shared/language.js';
 import {openLink}            from './shared/generic.js';
 import {
@@ -40,6 +42,7 @@ let MyApp = {
 		<template v-if="appReady">
 			<my-header
 				@logout="sessionInvalid"
+				@show-collection-input="collectionEntries = $event"
 				:bgStyle="bgStyle"
 				:keysLocked="loginEncryption && loginPrivateKey === null"
 				:moduleEntries="moduleEntries"
@@ -73,6 +76,25 @@ let MyApp = {
 				/>
 			</div>
 			
+			<!-- mobile collection selection input -->
+			<div class="app-sub-window at-top no-scroll"
+				v-if="collectionEntries.length !== 0"
+				@mousedown.self="collectionEntries = []"
+			>
+				<div class="fullscreen-collection-input shade">
+					<div class="entry clickable" tabindex="0"
+						v-for="e in collectionEntries"
+						@click="formOpen(e.openForm);collectionEntries = []"
+					>
+						<div class="row centered gap">
+							<img v-if="e.iconId !== null" :src="srcBase64Icon(e.iconId,'')" />
+							<span>{{ e.value + ' ' + e.title }}</span>
+						</div>
+						<img src="images/open.png" />
+					</div>
+				</div>
+			</div>
+			
 			<!-- dialog window -->
 			<transition name="fade">
 				<my-dialog v-if="isAtDialog" />
@@ -98,11 +120,12 @@ let MyApp = {
 	</div>`,
 	data:function() {
 		return {
-			appReady:false,     // app is loaded and user authenticated
-			loginReady:false,   // app is ready for authentication
-			publicLoaded:false, // public data has been loaded
-			schemaLoaded:false, // app schema has been loaded
-			wsConnected:false   // connection to backend has been established (websocket)
+			appReady:false,       // app is loaded and user authenticated
+			loginReady:false,     // app is ready for authentication
+			publicLoaded:false,   // public data has been loaded
+			schemaLoaded:false,   // app schema has been loaded
+			collectionEntries:[], // show collection entries in pop-up window (for mobile use)
+			wsConnected:false     // connection to backend has been established (websocket)
 		};
 	},
 	computed:{
@@ -291,12 +314,14 @@ let MyApp = {
 		aesGcmDecryptBase64,
 		aesGcmImportBase64,
 		consoleError,
+		formOpen,
 		genericError,
 		genericErrorWithFallback,
 		getCaptionForModule,
 		getStartFormId,
 		openLink,
 		pemImport,
+		srcBase64Icon,
 		updateCollections,
 		
 		// general app states

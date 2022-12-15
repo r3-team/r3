@@ -266,3 +266,26 @@ export function setGetterArgs(argsArray,name,value) {
 	}
 	return argsArray;
 };
+
+export function formOpen(options) {
+	if(options === null)
+		return;
+	
+	// pop-up form
+	if(options.popUp) {
+		let popUpConfig = getFormPopUpTemplate();
+		popUpConfig.formId   = options.formIdOpen;
+		popUpConfig.moduleId = MyStore.getters['schema/formIdMap'][options.formIdOpen].moduleId;
+		
+		let styles = [];
+		if(options.maxWidth  !== 0) styles.push(`max-width:${options.maxWidth}px`);
+		if(options.maxHeight !== 0) styles.push(`max-height:${options.maxHeight}px`);
+		popUpConfig.style = styles.join(';');
+		
+		MyStore.commit('popUpFormGlobal',popUpConfig);
+		return;
+	}
+	
+	// regular form navigation
+	this.$router.push(getFormRoute(options.formIdOpen,0,false));
+};
