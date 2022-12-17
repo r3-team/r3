@@ -12,9 +12,9 @@ type RepoModule struct {
 	ChangeLog        pgtype.Varchar            `json:"changeLog"`
 	Author           string                    `json:"author"`
 	InStore          bool                      `json:"inStore"`
-	ReleaseBuild     int                       `json:"releaseBuild"`
-	ReleaseBuildApp  int                       `json:"releaseBuildApp"`
-	ReleaseDate      int                       `json:"releaseDate"`
+	ReleaseBuild     int                       `json:"releaseBuild"`    // module version
+	ReleaseBuildApp  int                       `json:"releaseBuildApp"` // platform version
+	ReleaseDate      int                       `json:"releaseDate"`     // module release date
 	LanguageCodeMeta map[string]RepoModuleMeta `json:"languageCodeMeta"`
 }
 
