@@ -1186,7 +1186,6 @@
 		"moduleRelated":"Questo feedback è per l'applicazione aperta? ({NOME})",
 		"sendNok":"Non è stato possibile inviare il feedback. Per favore riprova più tardi.",
 		"sendOk":"Il feedback è stato inviato con successo. Grazie!",
-		"submit":"Fare clic sull'icona appropriata per inviare un feedback:",
 		"textHint":"Inserisci qui il feedback (facoltativo)",
 		"title":"Invia feedback anonimo",
 		"whatIsSent":"Oltre ai campi visibili (testo del feedback, smiley scelto, ecc.) vengono inviati i seguenti dati:<br /><ul><li>Quale applicazione e modulo sono aperti</li><li>Versioni dell'applicazione e il sistema</li><li>Se l'utente che fornisce feedback è un amministratore</li><li>Un identificatore casuale per raggruppare feedback dallo stesso sistema</li></ul>",

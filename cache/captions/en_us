@@ -1186,7 +1186,6 @@
 		"moduleRelated":"Is this feedback for the open application? ({NAME})",
 		"sendNok":"Feedback could not be send. Please try again later.",
 		"sendOk":"Feedback was send successfully. Thank you!",
-		"submit":"Click on the appropriate icon to send feedback:",
 		"textHint":"Enter feedback here (optional)",
 		"title":"Send anonymous feedback",
 		"whatIsSent":"In addition to the visible fields (feedback text, chosen smiley, etc.) the following data is being sent:<br /><ul><li>Which application and form are open</li><li>Versions of the application and the system</li><li>Whether the user giving feedback is an administrator</li><li>A random identifier to bundle feedback from the same system</li></ul>",

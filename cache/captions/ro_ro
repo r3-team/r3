@@ -1186,7 +1186,6 @@
 		"moduleRelated":"Acest feedback este pentru aplicația deschisă? ({NUME})",
 		"sendNok":"Feedback-ul nu a putut fi trimis. Vă rugăm să încercați din nou mai târziu.",
 		"sendOk":"Feedback-ul a fost trimis cu succes. Mulțumesc!",
-		"submit":"Faceți clic pe pictograma corespunzătoare pentru a trimite feedback:",
 		"textHint":"Introdu feedback-ul aici (opțional)",
 		"title":"Trimite feedback anonim",
 		"whatIsSent":"Pe lângă câmpurile vizibile (textul din feedback, zâmbetul ales etc.) sunt trimise următoarele date:<br /><ul><li>Ce aplicație și formular sunt deschise</li><li>Versiuni ale aplicației și sistemul</li><li>Dacă utilizatorul care oferă feedback este un administrator</li><li>Un identificator aleatoriu pentru a grupa feedback de la același sistem</li></ul>",

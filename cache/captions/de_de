@@ -1186,7 +1186,6 @@
 		"moduleRelated":"Ist dies Feedback für die offene Anwendung? ({NAME})",
 		"sendNok":"Feedback konnte nicht gesendet werden. Bitte versuche es später noch einmal.",
 		"sendOk":"Feedback wurde erfolgreich gesendet. Vielen Dank!",
-		"submit":"Auf das passende Icon klicken, um Feedback zu senden:",
 		"textHint":"Feedback hier eingeben (optional)",
 		"title":"Anonymes Feedback senden",
 		"whatIsSent":"Zusätzlich zu den sichtbaren Feldern (Feedback-Text, gewählter Smiley, usw.) werden folgende Daten gesendet:<br /><ul><li>Welche Anwendung und welches Formular offen sind</li><li>Die Versionen der offenen Anwendung und des Systems</li><li>Ob der Feedback-Geber ein Administrator ist</li><li>Eine zufällige Kennung, um Feedback aus dem gleichen System bündeln zu können</li></ul>",

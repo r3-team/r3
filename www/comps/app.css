@@ -793,7 +793,7 @@ table td.maximum{
 	display:flex;
 	flex-flow:row nowrap;
 	justify-content:center;
-	margin:16px 0px;
+	margin:0px 0px 24px;
 }
 .feedback .submit-text.error{
 	color:var(--color-error);
@@ -802,20 +802,25 @@ table td.maximum{
 	display:flex;
 	flex-flow:row nowrap;
 	justify-content:center;
-	margin:0px 0px 36px 0px;
+	margin:0px 0px 24px 0px;
 }
 .feedback .submit-box img{
 	height:48px;
-	margin:3px 5px;
+	margin:8px;
 	cursor:pointer;
 	border-radius:50px;
+	box-sizing:border-box;
 	box-shadow:1px 1px 4px var(--color-shade);
 }
 .feedback .submit-box img:focus,
 .feedback .submit-box img:hover{
-	height:54px;
-	margin:0px 2px;
-	transition:height 0.5s, margin 0.5s;
+	height:56px;
+	margin:4px
+}
+.feedback .submit-box img.active{
+	height:60px;
+	margin:2px;
+	border:2px solid var(--color-accent3-alt);
 }
 .feedback .whatIsSent{
 	margin:6px 0px;
