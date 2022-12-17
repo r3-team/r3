@@ -520,8 +520,9 @@
 			"dialog":{
 				"delete":"Are you sure you want to delete this collection?"
 			},
-			"columnsTarget":"Place columns here",
-			"contentColumn":"Column data sub query",
+			"columnSettings":"Column settings",
+			"columnsAvailable":"Available columns",
+			"columnsTarget":"Active columns",
 			"inHeader":"Show in header",
 			"new":"New collection",
 			"previewHint":"Collection values for the logged in user. Collections are retrieved on page load (F5 to reload) if they are enabled within assigned roles.",

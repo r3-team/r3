@@ -1,5 +1,6 @@
 import MyBuilderQuery                  from './builderQuery.js';
 import MyBuilderCollectionInput        from './builderCollectionInput.js';
+import MyBuilderColumnOptions          from './builderColumnOptions.js';
 import MyBuilderIconInput              from './builderIconInput.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
 import {getQueryTemplate}              from '../shared/query.js';
@@ -17,6 +18,7 @@ export {MyBuilderCollection as default};
 let MyBuilderCollection = {
 	name:'my-builder-collection',
 	components:{
+		MyBuilderColumnOptions,
 		MyBuilderCollectionInput,
 		MyBuilderColumns,
 		MyBuilderColumnTemplates,
@@ -25,7 +27,6 @@ let MyBuilderCollection = {
 		MyTabs
 	},
 	template:`<div class="builder-collection" v-if="collection">
-	
 		<div class="contentBox grow">
 			<div class="top">
 				<div class="area nowrap">
@@ -96,14 +97,14 @@ let MyBuilderCollection = {
 				<div class="builder-collection-columns">
 				
 					<!-- collection query columns -->
-					<div class="builder-collection-column-used">
+					<div class="builder-collection-columns-active">
 						<h2>{{ capApp.columnsTarget }}</h2>
 						<my-builder-columns groupName="columns"
 							@columns-set="columns = $event"
 							@column-id-show="toggleColumnOptions($event)"
 							@column-remove=""
 							:builderLanguage="builderLanguage"
-							:columnIdShow="columnIdQuery"
+							:columnIdShow="columnIdShow"
 							:columns="columns"
 							:hasCaptions="true"
 							:joins="joins"
@@ -113,14 +114,17 @@ let MyBuilderCollection = {
 						/>
 					</div>
 					
-					<div class="builder-collection-column-templates">
-						<my-builder-column-templates groupName="columns"
-							:builderLanguage="builderLanguage"
-							:columns="columns"
-							:hasCaptions="true"
-							:joins="joins"
-							:moduleId="module.id"
-						/>
+					<div class="builder-collection-columns-available">
+						<h2>{{ capApp.columnsAvailable }}</h2>
+						<div class="builder-collection-column-templates">
+							<my-builder-column-templates groupName="columns"
+								:builderLanguage="builderLanguage"
+								:columns="columns"
+								:hasCaptions="true"
+								:joins="joins"
+								:moduleId="module.id"
+							/>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -140,6 +144,7 @@ let MyBuilderCollection = {
 				:entriesText="[capGen.content,capGen.properties]"
 			/>
 			
+			<!-- collection content -->
 			<div class="content" v-if="tabTarget === 'content'">
 				<my-builder-query
 					@index-removed="removeIndex($event)"
@@ -162,42 +167,45 @@ let MyBuilderCollection = {
 					:relationId="relationId"
 				/>
 				
-				<template v-if="showColumnQuery && columnQueryEdit.subQuery">
-					<!-- column sub query -->
-					<br /><br />
-					<div class="row">
-						<my-button image="database.png"
-							:active="false"
-							:caption="capApp.contentColumn"
-							:large="true"
-							:naked="true"
-						/>
-					</div>
+				<!-- column settings -->
+				<template v-if="columnShow !== false">
+					<br />
+					<h3 class="selected-ref">{{ capApp.columnSettings }}</h3>
 					
 					<my-builder-query
-						@set-choices="columnQuerySet('choices',$event)"
-						@set-filters="columnQuerySet('filters',$event)"
-						@set-fixed-limit="columnQuerySet('fixedLimit',$event)"
-						@set-joins="columnQuerySet('joins',$event)"
-						@set-lookups="columnQuerySet('lookups',$event)"
-						@set-orders="columnQuerySet('orders',$event)"
-						@set-relation-id="columnQuerySet('relationId',$event)"
+						v-if="columnShow.subQuery"
+						@set-choices="columnSetQuery('choices',$event)"
+						@set-filters="columnSetQuery('filters',$event)"
+						@set-fixed-limit="columnSetQuery('fixedLimit',$event)"
+						@set-joins="columnSetQuery('joins',$event)"
+						@set-lookups="columnSetQuery('lookups',$event)"
+						@set-orders="columnSetQuery('orders',$event)"
+						@set-relation-id="columnSetQuery('relationId',$event)"
 						:allowChoices="false"
 						:allowOrders="true"
 						:builderLanguage="builderLanguage"
-						:choices="columnQueryEdit.query.choices"
-						:filters="columnQueryEdit.query.filters"
-						:fixedLimit="columnQueryEdit.query.fixedLimit"
-						:joins="columnQueryEdit.query.joins"
+						:choices="columnShow.query.choices"
+						:filters="columnShow.query.filters"
+						:fixedLimit="columnShow.query.fixedLimit"
+						:joins="columnShow.query.joins"
 						:joinsParents="[joins]"
-						:orders="columnQueryEdit.query.orders"
-						:lookups="columnQueryEdit.query.lookups"
+						:orders="columnShow.query.orders"
+						:lookups="columnShow.query.lookups"
 						:moduleId="module.id"
-						:relationId="columnQueryEdit.query.relationId"
+						:relationId="columnShow.query.relationId"
+					/>
+					<my-builder-column-options
+						@set="(...args) => columnSet(args[0],args[1])"
+						:builderLanguage="builderLanguage"
+						:column="columnShow"
+						:hasCaptions="true"
+						:moduleId="module.id"
+						:onlyData="true"
 					/>
 				</template>
 			</div>
 			
+			<!-- collection properties -->
 			<div class="content" v-if="tabTarget === 'properties'">
 				<table class="builder-table-vertical tight fullWidth default-inputs">
 					<tr>
@@ -255,13 +263,13 @@ let MyBuilderCollection = {
 		id:             { type:String,  required:false, default:'' },
 		readonly:       { type:Boolean, required:true }
 	},
-	mounted:function() {
+	mounted() {
 		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
 	},
-	unmounted:function() {
+	unmounted() {
 		this.$emit('hotkeysRegister',[]);
 	},
-	data:function() {
+	data() {
 		return {
 			// query
 			relationId:'',
@@ -272,7 +280,7 @@ let MyBuilderCollection = {
 			
 			// inputs
 			columns:[],
-			columnIdQuery:null,
+			columnIdShow:null,
 			iconId:null,
 			inHeader:[],
 			name:'',
@@ -295,11 +303,11 @@ let MyBuilderCollection = {
 			}
 			return out;
 		},
-		columnQueryEdit:(s) => {
-			if(s.columnIdQuery === null) return false;
+		columnShow:(s) => {
+			if(s.columnIdShow === null) return false;
 			
 			for(let i = 0, j = s.columns.length; i < j; i++) {
-				if(s.columns[i].id === s.columnIdQuery)
+				if(s.columns[i].id === s.columnIdShow)
 					return s.columns[i];
 			}
 			return false;
@@ -317,7 +325,6 @@ let MyBuilderCollection = {
 		// simple
 		collection:     (s) => typeof s.collectionIdMap[s.id] === 'undefined' ? false : s.collectionIdMap[s.id],
 		module:         (s) => s.moduleIdMap[s.collection.moduleId],
-		showColumnQuery:(s) => s.columnQueryEdit !== false,
 		
 		// stores
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
@@ -353,10 +360,13 @@ let MyBuilderCollection = {
 		collectionSet(i,value) {
 			this.inHeader[i] = value;
 		},
-		columnQuerySet(name,value) {
-			let v = JSON.parse(JSON.stringify(this.columnQueryEdit.query));
+		columnSet(name,value) {
+			this.columnShow[name] = value;
+		},
+		columnSetQuery(name,value) {
+			let v = JSON.parse(JSON.stringify(this.columnShow.query));
 			v[name] = value;
-			this.columnQueryEdit.query = v;
+			this.columnShow.query = v;
 		},
 		removeIndex(index) {
 			for(let i = 0, j = this.columns.length; i < j; i++) {
@@ -380,10 +390,13 @@ let MyBuilderCollection = {
 			this.orders     = JSON.parse(JSON.stringify(this.collection.query.orders));
 			this.columns    = JSON.parse(JSON.stringify(this.collection.columns));
 			this.inHeader   = JSON.parse(JSON.stringify(this.collection.inHeader));
-			this.columnIdQuery = null;
+			this.columnIdShow = null;
 		},
 		toggleColumnOptions(id) {
-			this.columnIdQuery = this.columnIdQuery === id ? null : id;
+			this.columnIdShow = this.columnIdShow === id ? null : id;
+			
+			if(this.columnIdShow !== null)
+				this.tabTarget = 'content';
 		},
 		
 		// helpers

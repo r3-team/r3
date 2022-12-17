@@ -19,15 +19,6 @@ let MyBuilderColumnOptions = {
 	},
 	template:`<div class="builder-column-options">
 		<table class="builder-table-vertical tight fullWidth default-inputs">
-			<tr>
-				<td>{{ capApp.onMobile }}</td>
-				<td>
-					<my-bool
-						@update:modelValue="set('onMobile',$event)"
-						:modelValue="column.onMobile"
-					/>
-				</td>
-			</tr>
 			<tr v-if="hasCaptions">
 				<td>{{ capGen.title }}</td>
 				<td>
@@ -38,94 +29,105 @@ let MyBuilderColumnOptions = {
 					/>
 				</td>
 			</tr>
-			<tr>
-				<td>{{ capApp.columnSize }}</td>
-				<td>
-					<input
-						v-if="column.basis !== 0"
-						@change="setInt('basis',$event.target.value,false)"
-						:value="column.basis"
-					/>
-					<my-button
-						v-else
-						@trigger="setInt('basis',25,false)"
-						:caption="capApp.columnSize0"
-						:naked="true"
-					/>
-				</td>
-			</tr>
-			<tr>
-				<td>{{ capApp.columnLength }}</td>
-				<td>
-					<input
-						v-if="column.length !== 0"
-						@change="setInt('length',$event.target.value,false)"
-						:value="column.length"
-					/>
-					<my-button
-						v-else
-						@trigger="setInt('length',50,false)"
-						:caption="capApp.columnLength0"
-						:naked="true"
-					/>
-				</td>
-			</tr>
-			<tr>
-				<td>{{ capApp.columnWrap }}</td>
-				<td>
-					<my-bool
-						@update:modelValue="set('wrap',$event)"
-						:modelValue="column.wrap"
-					/>
-				</td>
-			</tr>
-			<tr>
-				<td>{{ capApp.columnClipboard }}</td>
-				<td>
-					<my-bool
-						@update:modelValue="set('clipboard',$event)"
-						:modelValue="column.clipboard"
-					/>
-				</td>
-			</tr>
-			<tr>
-				<td>{{ capApp.columnBatch }}</td>
-				<td>
-					<input
-						v-if="column.batch !== null"
-						@change="setInt('batch',$event.target.value,true)"
-						:value="column.batch"
-					/>
-					<my-button
-						v-else
-						@trigger="setInt('batch',1,true)"
-						:caption="capApp.columnBatchNot"
-						:naked="true"
-					/>
-				</td>
-			</tr>
-			<tr>
-				<td>{{ capApp.display }}</td>
-				<td>
-					<select
-						@input="set('display',$event.target.value)"
-						:value="column.display"
-					>
-						<option value="default">{{ capApp.option.displayDefault }}</option>
-						<option v-if="isInteger" value="datetime">{{ capApp.option.displayDatetime }}</option>
-						<option v-if="isInteger" value="date"    >{{ capApp.option.displayDate }}</option>
-						<option v-if="isInteger" value="time"    >{{ capApp.option.displayTime }}</option>
-						<option v-if="isString"  value="color"   >{{ capApp.option.displayColor }}</option>
-						<option v-if="isString"  value="email"   >{{ capApp.option.displayEmail }}</option>
-						<option v-if="isString"  value="password">{{ capApp.option.displayPassword }}</option>
-						<option v-if="isString"  value="phone"   >{{ capApp.option.displayPhone }}</option>
-						<option v-if="isString"  value="richtext">{{ capApp.option.displayRichtext }}</option>
-						<option v-if="isString"  value="url"     >{{ capApp.option.displayUrl }}</option>
-						<option v-if="isFiles"   value="gallery" >{{ capApp.option.displayGallery }}</option>
-						<option value="hidden">{{ capApp.option.displayHidden }}</option>
-					</select>
-				</td>
-			</tr>
+			<template v-if="!onlyData">
+				<tr>
+					<td>{{ capApp.onMobile }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="set('onMobile',$event)"
+							:modelValue="column.onMobile"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.columnSize }}</td>
+					<td>
+						<input
+							v-if="column.basis !== 0"
+							@change="setInt('basis',$event.target.value,false)"
+							:value="column.basis"
+						/>
+						<my-button
+							v-else
+							@trigger="setInt('basis',25,false)"
+							:caption="capApp.columnSize0"
+							:naked="true"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.columnLength }}</td>
+					<td>
+						<input
+							v-if="column.length !== 0"
+							@change="setInt('length',$event.target.value,false)"
+							:value="column.length"
+						/>
+						<my-button
+							v-else
+							@trigger="setInt('length',50,false)"
+							:caption="capApp.columnLength0"
+							:naked="true"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.columnWrap }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="set('wrap',$event)"
+							:modelValue="column.wrap"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.columnClipboard }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="set('clipboard',$event)"
+							:modelValue="column.clipboard"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.columnBatch }}</td>
+					<td>
+						<input
+							v-if="column.batch !== null"
+							@change="setInt('batch',$event.target.value,true)"
+							:value="column.batch"
+						/>
+						<my-button
+							v-else
+							@trigger="setInt('batch',1,true)"
+							:caption="capApp.columnBatchNot"
+							:naked="true"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.display }}</td>
+					<td>
+						<select
+							@input="set('display',$event.target.value)"
+							:value="column.display"
+						>
+							<option value="default">{{ capApp.option.displayDefault }}</option>
+							<option v-if="isInteger" value="datetime">{{ capApp.option.displayDatetime }}</option>
+							<option v-if="isInteger" value="date"    >{{ capApp.option.displayDate }}</option>
+							<option v-if="isInteger" value="time"    >{{ capApp.option.displayTime }}</option>
+							<option v-if="isString"  value="color"   >{{ capApp.option.displayColor }}</option>
+							<option v-if="isString"  value="email"   >{{ capApp.option.displayEmail }}</option>
+							<option v-if="isString"  value="password">{{ capApp.option.displayPassword }}</option>
+							<option v-if="isString"  value="phone"   >{{ capApp.option.displayPhone }}</option>
+							<option v-if="isString"  value="richtext">{{ capApp.option.displayRichtext }}</option>
+							<option v-if="isString"  value="url"     >{{ capApp.option.displayUrl }}</option>
+							<option v-if="isFiles"   value="gallery" >{{ capApp.option.displayGallery }}</option>
+							<option value="hidden">{{ capApp.option.displayHidden }}</option>
+						</select>
+					</td>
+				</tr>
+			</template>
 			<tr>
 				<td colspan="999"><b>{{ capApp.columnHeaderData }}</b></td>
 			</tr>
@@ -186,8 +188,8 @@ let MyBuilderColumnOptions = {
 		builderLanguage:{ type:String,  required:true },
 		column:         { type:Object,  required:true },
 		hasCaptions:    { type:Boolean, required:true },
-		joins:          { type:Array,   required:false, default:() => [] },
-		moduleId:       { type:String,  required:true }
+		moduleId:       { type:String,  required:true },
+		onlyData:       { type:Boolean, required:true }  // no display/formatting options
 	},
 	emits:['set'],
 	computed:{
@@ -196,7 +198,7 @@ let MyBuilderColumnOptions = {
 		indexAttributeIds:(s) => !s.isSubQuery
 			? [] : s.getIndexAttributeIdsByJoins(s.column.query.joins),
 		
-		// simple states
+		// simple
 		isFiles:   (s) => s.isAttributeFiles(s.attribute.content),
 		isInteger: (s) => s.isAttributeInteger(s.attribute.content),
 		isString:  (s) => s.isAttributeString(s.attribute.content),

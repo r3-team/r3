@@ -426,8 +426,8 @@ let MyBuilderForm = {
 								:builderLanguage="builderLanguage"
 								:column="columnShow"
 								:hasCaptions="fieldShow.content === 'list'"
-								:joins="fieldShow.query.joins"
 								:moduleId="module.id"
+								:onlyData="false"
 							/>
 						</div>
 					</template>

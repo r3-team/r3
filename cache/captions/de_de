@@ -520,8 +520,9 @@
 			"dialog":{
 				"delete":"Bist du sicher, dass du diese Sammlung löschen möchtest?"
 			},
-			"columnsTarget":"Spalten hier ablegen",
-			"contentColumn":"Spalten-Datenabfrage",
+			"columnSettings":"Spalteneinstellungen",
+			"columnsAvailable":"Verfügbare Spalten",
+			"columnsTarget":"Aktive Spalten",
 			"inHeader":"In Titelzeile anzeigen",
 			"new":"Neue Sammlung",
 			"previewHint":"Sammlungswerte für den eingeloggten Benutzer. Sammlungen werden beim Seitenaufruf geladen (F5 zum neu laden) wenn sie in zugewiesenen Rollen aktiviert sind.",

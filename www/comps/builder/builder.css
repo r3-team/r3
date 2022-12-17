@@ -559,18 +559,31 @@
 	padding:6px 8px;
 	border-bottom:2px solid var(--color-border);
 }
+.builder-collection .selected-ref{
+	text-decoration:underline;
+	text-decoration-color:var(--color-form-builder-selected);
+	text-decoration-thickness:4px;
+}
 .builder-collection-columns{
 	display:flex;
 	flex-flow:column nowrap;
 	max-height:100%;
 }
-.builder-collection-column-used{
+.builder-collection-columns-active{
 	flex:2 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
 	max-height:400px;
 	padding:5px;
 	border:3px dotted var(--color-border);
+	border-radius:0px 0px 5px 5px;
+}
+.builder-collection-columns-available{
+	display:flex;
+	flex-flow:column nowrap;
+	padding:5px;
+	border:3px dotted var(--color-border);
+	border-top:none;
 	border-radius:0px 0px 5px 5px;
 }
 .builder-collection-column-templates{

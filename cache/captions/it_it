@@ -520,8 +520,9 @@
 			"dialog":{
 				"delete":"Sicuro di voler cancellare questa collezione?"
 			},
-			"columnsTarget":"Posiziona le colonne qui",
-			"contentColumn":"Sub query dati in colonna",
+			"columnSettings":"Column settings",
+			"columnsAvailable":"Available columns",
+			"columnsTarget":"Active columns",
 			"inHeader":"Show in header",
 			"new":"Nuova collezione",
 			"previewHint":"Collection values for the logged in user. Collections are retrieved on page load (F5 to reload) if they are enabled within assigned roles.",
