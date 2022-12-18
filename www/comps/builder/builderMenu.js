@@ -18,19 +18,11 @@ let MyBuilderMenuItems = {
 		:list="list"
 	>
 		<template #item="{element,index}">
-	    		<div class="builder-menu shade">
+	    		<div class="builder-menu">
 				<img v-if="!readonly" class="dragAnchor" src="images/drag.png" />
 				
 				<div class="inputs">
 					<div class="line">
-						<my-button
-							@trigger="element.showChildren = !element.showChildren"
-							:active="!readonly"
-							:captionTitle="capApp.showChildrenHint"
-							:image="element.showChildren ? 'visible1.png' : 'visible0.png'"
-							:naked="true"
-						/>
-						
 						<!-- icon input -->
 						<my-builder-icon-input
 							@input="element.iconId = $event"
@@ -60,6 +52,13 @@ let MyBuilderMenuItems = {
 							</optgroup>
 						</select>
 						
+						<my-button
+							@trigger="element.showChildren = !element.showChildren"
+							:active="!readonly"
+							:captionTitle="capApp.showChildrenHint"
+							:image="element.showChildren ? 'visible1.png' : 'visible0.png'"
+						/>
+						
 						<!-- show collections -->
 						<my-button image="tray.png"
 							@trigger="showCollectionsIndex = index"
@@ -74,7 +73,7 @@ let MyBuilderMenuItems = {
 					v-if="showCollectionsIndex === index"
 					@mousedown.self="showCollectionsIndex = -1"
 				>
-					<div class="contentBox builder-new">
+					<div class="contentBox builder-new pop-up">
 						<div class="top lower">
 							<div class="area nowrap">
 								<h1 class="title">{{ capApp.collections }}</h1>
@@ -231,7 +230,7 @@ let MyBuilderMenu = {
 		id:             { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			newCnt:0, // temporary menu IDs, replaced with NULL UUIDs on SET
 			menus:[],
@@ -240,10 +239,10 @@ let MyBuilderMenu = {
 			showCollections:false
 		};
 	},
-	mounted:function() {
+	mounted() {
 		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
 	},
-	unmounted:function() {
+	unmounted() {
 		this.$emit('hotkeysRegister',[]);
 	},
 	watch:{

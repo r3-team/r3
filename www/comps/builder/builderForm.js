@@ -269,7 +269,7 @@ let MyBuilderForm = {
 						</tr>
 						<tr>
 							<td>{{ capApp.noDataActions }}</td>
-							<td><my-bool v-model="noDataActions" :disabled="readonly" /></td>
+							<td><my-bool v-model="noDataActions" :readonly="readonly" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.presetOpen }}</td>

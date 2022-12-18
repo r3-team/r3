@@ -203,7 +203,7 @@ body                                         { --depth:6; }
 .builder-field .builder-columns              { --depth:1; }
 .builder-field .fields-nested                { --depth:1; }
 .builder-modules .item-wrap                  { --depth:5; }
-.builder-menu                                { --depth:4; }
+.builder-menu .nested                        { --depth:6; }
 .builder-articles-assign                     { --depth:2; }
 .builder-articles-body-richtext              { --depth:0; }
 .builder-entry-list .entry                   { --depth:0; }

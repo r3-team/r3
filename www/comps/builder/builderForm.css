@@ -314,7 +314,6 @@
 }
 .builder-form-states input,
 .builder-form-states select{
-	width:auto;
 	min-width:unset;
 	margin-right:6px;
 }

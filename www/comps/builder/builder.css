@@ -1036,13 +1036,10 @@
 .builder-menu{
 	min-height:30px;
 	margin:0px 5px 5px 0px;
-	padding:0px 0px 0px 3px;
 	line-height:30px;
-	background-color:rgba(0,0,0,0.1);
 	display:flex;
 	flex-direction:row;
 	justify-content:flex-start;
-	border:1px dotted var(--color-border);
 	border-radius:3px;
 }
 .builder-menu img.dragAnchor{
@@ -1073,11 +1070,11 @@
 	flex:0 1 220px;
 }
 .builder-menu .nested{
-	margin:2px 5px 2px 0px;
 	padding:5px 0px 0px 5px;
 	flex:8 1 500px;
-	border:1px dotted var(--color-border);
-	border-radius:3px;
+	background-color:var(--color-bg);
+	border:2px dotted var(--color-border);
+	border-radius:6px;
 }
 
 

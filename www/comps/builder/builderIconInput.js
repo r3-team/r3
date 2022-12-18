@@ -34,7 +34,7 @@ let MyBuilderIconInput = {
 		
 		<div class="app-sub-window" v-if="showInput && iconIdMap !== null" @click.self="close">
 			<div class="build-icon-input-window">
-				<div class="contentBox">
+				<div class="contentBox pop-up">
 					<div class="top lower">
 						<div class="area">
 							<h1 class="title">{{ capGen.icon }}</h1>
