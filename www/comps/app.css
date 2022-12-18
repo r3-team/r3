@@ -783,7 +783,7 @@ table td.maximum{
 .feedback .submit-choice{
 	display:flex;
 	flex-flow:column nowrap;
-	margin:12px 0px;
+	margin:12px 0px 24px;
 }
 .feedback .submit-choice span{
 	margin:0px 0px 9px;

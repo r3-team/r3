@@ -268,6 +268,88 @@ let MyAdminConfig = {
 				</table>
 			</div>
 			
+			<!-- repository -->
+			<div class="contentPart">
+				<div class="contentPartHeader">
+					<img class="icon" src="images/box.png" />
+					<h1>{{ capApp.titleRepo }}</h1>
+				</div>
+				
+				<table class="default-inputs">
+					<tr>
+						<td>{{ capApp.repoUrl }}</td>
+						<td><input v-model="configInput.repoUrl" /></td>
+					</tr>
+					<tr>
+						<td>{{ capGen.username }}</td>
+						<td><input v-model="configInput.repoUser" /></td>
+					</tr>
+					<tr>
+						<td>{{ capGen.password }}</td>
+						<td><input type="password" v-model="configInput.repoPass" /></td>
+					</tr>
+					<tr>
+						<td>{{ capApp.repoSkipVerify }}</td>
+						<td>
+							<my-bool-string-number
+								v-model="configInput.repoSkipVerify"
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.repoFeedback }}</td>
+						<td>
+							<my-bool-string-number
+								v-model="configInput.repoFeedback"
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td colspan="2"><br /><h3>{{ capApp.repoKeyManagement }}</h3></td>
+					</tr>
+					<tr>
+						<td>{{ capApp.repoPublicKeys }}</td>
+						<td>
+							<div class="repo-key" v-for="(key,name) in publicKeys">
+								<my-button
+									:active="false"
+									:caption="name"
+									:naked="true"
+								/>
+								<div>
+									<my-button image="search.png"
+										@trigger="publicKeyShow(name,key)"
+									/>
+									<my-button image="cancel.png"
+										@trigger="publicKeyRemove(name)"
+										:cancel="true"
+									/>
+								</div>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.repoPublicKeyAdd }}</td>
+						<td>
+							<div class="repo-key-input">
+								<input v-model="publicKeyInputName"
+									:placeholder="capApp.repoPublicKeyInputNameHint"
+								/>
+								<textarea v-model="publicKeyInputValue"
+									:placeholder="capApp.repoPublicKeyInputValueHint"
+								></textarea>
+								
+								<my-button image="add.png"
+									@trigger="publicKeyAdd"
+									:active="publicKeyInputName !== '' && publicKeyInputValue !== ''"
+									:caption="capGen.button.add"
+								/>
+							</div>
+						</td>
+					</tr>
+				</table>
+			</div>
+			
 			<!-- performance -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
@@ -361,80 +443,6 @@ let MyAdminConfig = {
 					<tr>
 						<td>{{ capApp.bruteforceCountBlocked }}</td>
 						<td>{{ bruteforceCountBlocked }}</td>
-					</tr>
-				</table>
-			</div>
-			
-			<!-- repository -->
-			<div class="contentPart">
-				<div class="contentPartHeader">
-					<img class="icon" src="images/box.png" />
-					<h1>{{ capApp.titleRepo }}</h1>
-				</div>
-				
-				<table class="default-inputs">
-					<tr>
-						<td>{{ capApp.repoUrl }}</td>
-						<td><input v-model="configInput.repoUrl" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.repoSkipVerify }}</td>
-						<td>
-							<my-bool-string-number
-								v-model="configInput.repoSkipVerify"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.repoFeedback }}</td>
-						<td>
-							<my-bool-string-number
-								v-model="configInput.repoFeedback"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td colspan="2"><br /><h3>{{ capApp.repoKeyManagement }}</h3></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.repoPublicKeys }}</td>
-						<td>
-							<div class="repo-key" v-for="(key,name) in publicKeys">
-								<my-button
-									:active="false"
-									:caption="name"
-									:naked="true"
-								/>
-								<div>
-									<my-button image="search.png"
-										@trigger="publicKeyShow(name,key)"
-									/>
-									<my-button image="cancel.png"
-										@trigger="publicKeyRemove(name)"
-										:cancel="true"
-									/>
-								</div>
-							</div>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.repoPublicKeyAdd }}</td>
-						<td>
-							<div class="repo-key-input">
-								<input v-model="publicKeyInputName"
-									:placeholder="capApp.repoPublicKeyInputNameHint"
-								/>
-								<textarea v-model="publicKeyInputValue"
-									:placeholder="capApp.repoPublicKeyInputValueHint"
-								></textarea>
-								
-								<my-button image="add.png"
-									@trigger="publicKeyAdd"
-									:active="publicKeyInputName !== '' && publicKeyInputValue !== ''"
-									:caption="capGen.button.add"
-								/>
-							</div>
-						</td>
 					</tr>
 				</table>
 			</div>

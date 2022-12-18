@@ -37,7 +37,11 @@ let MyFeedback = {
 							module.name,module))
 						}}
 					</span>
-					<my-bool v-model="moduleRelated" />
+					<my-bool
+						v-model="moduleRelated"
+						:caption0="capGen.option.no"
+						:caption1="capGen.option.yes"
+					/>
 				</div>
 				
 				<div class="submit-box">
@@ -107,7 +111,7 @@ let MyFeedback = {
 	computed:{
 		form:(s) => typeof s.$route.params.formId === 'undefined'
 			? false : s.formIdMap[s.$route.params.formId],
-		module:(s) => !s.form ? false : s.moduleIdMap[this.form.moduleId],
+		module:(s) => !s.form ? false : s.moduleIdMap[s.form.moduleId],
 		
 		// stores
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
