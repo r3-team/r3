@@ -33,6 +33,14 @@ let MyAdminFiles = {
 			</div>
 			<table class="default-inputs">
 				<tr>
+					<td>{{ capApp.fileVersionsKeepCount }}</td>
+					<td><input v-model="configInput.fileVersionsKeepCount" /></td>
+				</tr>
+				<tr>
+					<td>{{ capApp.fileVersionsKeepDays }}</td>
+					<td><input v-model="configInput.fileVersionsKeepDays" /></td>
+				</tr>
+				<tr>
 					<td>{{ capApp.filesKeepDaysDeleted }}</td>
 					<td><input v-model="configInput.filesKeepDaysDeleted" /></td>
 				</tr>

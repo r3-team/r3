@@ -104,22 +104,59 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	"3.1": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
-			-- update caption (missing index, new content, new reference)
-			CREATE INDEX fki_caption_js_function_id_fkey
-				ON app.caption USING btree (js_function_id ASC NULLS LAST);
+			-- new tabs field
+			ALTER TYPE app.field_state RENAME TO state_effect;
+			ALTER TYPE app.field_content ADD VALUE 'tabs';
 			
-			ALTER TABLE app.caption ALTER COLUMN content TYPE TEXT;
-			CREATE INDEX ind_caption_content ON app.caption
-				USING btree (content ASC NULLS LAST);
-			
-			DROP TYPE app.caption_content;
-			CREATE TYPE app.caption_content AS ENUM (
-				'articleBody', 'articleTitle', 'attributeTitle', 'columnTitle',
-				'fieldHelp', 'fieldTitle', 'formTitle', 'menuTitle',
-				'moduleTitle', 'queryChoiceTitle', 'roleDesc', 'roleTitle',
-				'pgFunctionTitle', 'pgFunctionDesc', 'loginFormTitle',
-				'jsFunctionTitle', 'jsFunctionDesc'
+			CREATE TABLE app.tab (
+				id uuid NOT NULL,
+				field_id uuid NOT NULL,
+				"position" smallint NOT NULL,
+				"state" state_effect NOT NULL,
+			    CONSTRAINT tab_pkey PRIMARY KEY (id),
+				CONSTRAINT tab_field_id_position_key UNIQUE (field_id, "position")
+					DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT tab_field_id_fkey FOREIGN KEY (field_id)
+					REFERENCES app.field (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
 			);
+			
+			CREATE INDEX IF NOT EXISTS fki_tab_field_id_fkey
+				ON app.tab USING btree (field_id ASC NULLS LAST);
+			
+			ALTER TABLE app.field ADD COLUMN tab_id uuid;
+			ALTER TABLE app.field ADD CONSTRAINT tab_id_fkey FOREIGN KEY (tab_id)
+				REFERENCES app.tab (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_tab_id_fkey
+				ON app.field USING btree (tab_id ASC NULLS LAST);
+				
+			ALTER TABLE app.caption ADD COLUMN tab_id uuid;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_tab_id_fkey FOREIGN KEY (tab_id)
+				REFERENCES app.tab (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_tab_id_fkey
+				ON app.caption USING btree (tab_id ASC NULLS LAST);
+			
+			ALTER TABLE app.form_state_effect ADD COLUMN tab_id uuid;
+			ALTER TABLE app.form_state_effect ADD CONSTRAINT form_state_effect_tab_id_fkey FOREIGN KEY (tab_id)
+				REFERENCES app.tab (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_form_state_effect_tab_id_fkey
+				ON app.form_state_effect USING btree (tab_id ASC NULLS LAST);
+			
+			ALTER TABLE app.form_state_effect ALTER COLUMN field_id DROP NOT NULL;
 			
 			-- new entity: articles
 			CREATE TABLE app.article (
@@ -187,6 +224,23 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				DEFERRABLE INITIALLY DEFERRED;
 			CREATE INDEX fki_caption_article_id_fkey
 			    ON app.caption USING btree (article_id ASC NULLS LAST);
+		
+			-- update caption (missing index, new content, new reference)
+			CREATE INDEX fki_caption_js_function_id_fkey
+				ON app.caption USING btree (js_function_id ASC NULLS LAST);
+			
+			ALTER TABLE app.caption ALTER COLUMN content TYPE TEXT;
+			CREATE INDEX ind_caption_content ON app.caption
+				USING btree (content ASC NULLS LAST);
+			
+			DROP TYPE app.caption_content;
+			CREATE TYPE app.caption_content AS ENUM (
+				'articleBody', 'articleTitle', 'attributeTitle', 'columnTitle',
+				'fieldHelp', 'fieldTitle', 'formTitle', 'menuTitle',
+				'moduleTitle', 'queryChoiceTitle', 'roleDesc', 'roleTitle',
+				'pgFunctionTitle', 'pgFunctionDesc', 'loginFormTitle',
+				'jsFunctionTitle', 'jsFunctionDesc', 'tabTitle'
+			);
 			
 			-- migrate module help to articles
 			INSERT INTO app.article (id, module_id, name)
@@ -269,71 +323,105 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			SET task_name = 'backupRun'
 			WHERE task_name = 'embeddedBackup';
 			
-			-- new tabs field
-			ALTER TYPE app.field_state RENAME TO state_effect;
-			ALTER TYPE app.caption_content ADD VALUE 'tabTitle';
-			ALTER TYPE app.field_content ADD VALUE 'tabs';
-			
-			CREATE TABLE app.tab (
-				id uuid NOT NULL,
-				field_id uuid NOT NULL,
-				"position" smallint NOT NULL,
-				"state" state_effect NOT NULL,
-			    CONSTRAINT tab_pkey PRIMARY KEY (id),
-				CONSTRAINT tab_field_id_position_key UNIQUE (field_id, "position")
-					DEFERRABLE INITIALLY DEFERRED,
-			    CONSTRAINT tab_field_id_fkey FOREIGN KEY (field_id)
-					REFERENCES app.field (id) MATCH SIMPLE
-					ON UPDATE CASCADE
-					ON DELETE CASCADE
-					DEFERRABLE INITIALLY DEFERRED
-			);
-			
-			CREATE INDEX IF NOT EXISTS fki_tab_field_id_fkey
-				ON app.tab USING btree (field_id ASC NULLS LAST);
-			
-			ALTER TABLE app.field ADD COLUMN tab_id uuid;
-			ALTER TABLE app.field ADD CONSTRAINT tab_id_fkey FOREIGN KEY (tab_id)
-				REFERENCES app.tab (id) MATCH SIMPLE
-					ON UPDATE CASCADE
-					ON DELETE CASCADE
-					DEFERRABLE INITIALLY DEFERRED;
-			
-			CREATE INDEX IF NOT EXISTS fki_tab_id_fkey
-				ON app.field USING btree (tab_id ASC NULLS LAST);
-				
-			ALTER TABLE app.caption ADD COLUMN tab_id uuid;
-			ALTER TABLE app.caption ADD CONSTRAINT caption_tab_id_fkey FOREIGN KEY (tab_id)
-				REFERENCES app.tab (id) MATCH SIMPLE
-				ON UPDATE CASCADE
-				ON DELETE CASCADE
-				DEFERRABLE INITIALLY DEFERRED;
-			
-			CREATE INDEX fki_caption_tab_id_fkey
-				ON app.caption USING btree (tab_id ASC NULLS LAST);
-			
-			ALTER TABLE app.form_state_effect ADD COLUMN tab_id uuid;
-			ALTER TABLE app.form_state_effect ADD CONSTRAINT form_state_effect_tab_id_fkey FOREIGN KEY (tab_id)
-				REFERENCES app.tab (id) MATCH SIMPLE
-				ON UPDATE CASCADE
-				ON DELETE CASCADE
-				DEFERRABLE INITIALLY DEFERRED;
-			
-			CREATE INDEX IF NOT EXISTS fki_form_state_effect_tab_id_fkey
-				ON app.form_state_effect USING btree (tab_id ASC NULLS LAST);
-			
-			ALTER TABLE app.form_state_effect ALTER COLUMN field_id DROP NOT NULL;
-			
 			-- MFA
 			ALTER TABLE instance.login_token_fixed DROP CONSTRAINT login_token_fixed_pkey;
 			ALTER TABLE instance.login_token_fixed ADD COLUMN id SERIAL PRIMARY KEY;
 			
 			ALTER TYPE instance.token_fixed_context ADD VALUE 'totp';
 			
+			-- file reference counter & retention settings
+			ALTER TABLE instance.file ADD COLUMN ref_counter INTEGER NOT NULL DEFAULT 0;
+			ALTER TABLE instance.file ALTER COLUMN ref_counter DROP DEFAULT;
+			
+			CREATE INDEX IF NOT EXISTS ind_file_ref_counter
+				ON instance.file USING btree (ref_counter ASC NULLS LAST);
+			
+			CREATE OR REPLACE FUNCTION instance.trg_file_ref_counter_update()
+			    RETURNS trigger
+			    LANGUAGE 'plpgsql'
+			AS $BODY$
+			DECLARE
+			BEGIN
+				IF TG_OP = 'INSERT' THEN
+					UPDATE instance.file
+					SET ref_counter = ref_counter + 1
+					WHERE id = NEW.file_id;
+					RETURN NEW;
+				END IF;
+				
+				UPDATE instance.file
+				SET ref_counter = ref_counter - 1
+				WHERE id = OLD.file_id;
+				RETURN OLD;
+			END;
+			$BODY$;
+			
+			INSERT INTO instance.config (name,value) VALUES ('fileVersionsKeepCount','30');
+			INSERT INTO instance.config (name,value) VALUES ('fileVersionsKeepDays','90');
+			
 			-- outdated config key that was in 3.0 init script until 3.2
 			DELETE FROM instance.config WHERE name = 'exportPrivateKey';
 		`); err != nil {
 			return "", err
+		}
+
+		// add triggers to file record relations (file reference counter update)
+		attributeIds := make([]uuid.UUID, 0)
+		refLookups := make([]string, 0)
+		if err := tx.QueryRow(db.Ctx, `
+			SELECT ARRAY_AGG(id)
+			FROM app.attribute
+			WHERE content = 'files'
+		`).Scan(&attributeIds); err != nil {
+			return "", err
+		}
+
+		for _, attributeId := range attributeIds {
+			tName := schema.GetFilesTableName(attributeId)
+
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				CREATE TRIGGER "%s" BEFORE INSERT OR DELETE ON instance_file."%s"
+					FOR EACH ROW EXECUTE FUNCTION instance.trg_file_ref_counter_update();
+			`, schema.GetFilesTriggerName(attributeId), tName)); err != nil {
+				return "", err
+			}
+			refLookups = append(refLookups, fmt.Sprintf(`SELECT COUNT(*) AS s FROM instance_file."%s" WHERE file_id = f.id`, tName))
+		}
+
+		// update file reference counter once with the current state
+		if len(refLookups) != 0 {
+			type refCnt struct {
+				Id  uuid.UUID
+				Cnt int64
+			}
+			refCnts := make([]refCnt, 0)
+
+			rows, err := tx.Query(db.Ctx, fmt.Sprintf(`
+				SELECT f.id, ( SELECT SUM(s) FROM (%s) AS ref_counts ) AS cnt
+				FROM instance.file AS f
+			`, strings.Join(refLookups, " UNION ALL ")))
+			if err != nil {
+				return "", err
+			}
+
+			for rows.Next() {
+				var r refCnt
+				if err := rows.Scan(&r.Id, &r.Cnt); err != nil {
+					return "", err
+				}
+				refCnts = append(refCnts, r)
+			}
+			rows.Close()
+
+			for _, r := range refCnts {
+				if _, err := tx.Exec(db.Ctx, `
+					UPDATE instance.file
+					SET ref_counter = $1
+					WHERE id = $2
+				`, r.Cnt, r.Id); err != nil {
+					return "", err
+				}
+			}
 		}
 		return "3.2", nil
 	},

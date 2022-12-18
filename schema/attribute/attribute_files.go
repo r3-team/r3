@@ -41,8 +41,12 @@ func fileRelationsCreate_tx(tx pgx.Tx, attributeId uuid.UUID,
 		
 		CREATE INDEX "ind_%s_date_delete"
 			ON instance_file."%s" USING btree (date_delete ASC NULLS LAST);
+		
+		CREATE TRIGGER "%s" BEFORE INSERT OR DELETE ON instance_file."%s"
+			FOR EACH ROW EXECUTE FUNCTION instance.trg_file_ref_counter_update();
 	`, tNameR, tNameR, tNameR, tNameR, moduleName, relationName, schema.PkName,
-		tNameR, tNameR, tNameR, tNameR, tNameR, tNameR))
+		tNameR, tNameR, tNameR, tNameR, tNameR, tNameR,
+		schema.GetFilesTriggerName(attributeId), tNameR))
 
 	return err
 }

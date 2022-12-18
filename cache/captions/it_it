@@ -235,6 +235,8 @@
 		"files":{
 			"deleteDate":"File deleted",
 			"filesKeepDaysDeleted":"Keep deleted files for X days",
+			"fileVersionsKeepCount":"Keep at least X file versions",
+			"fileVersionsKeepDays":"Keep file versions for at least X days",
 			"titleConfig":"Global configuration",
 			"titleDeleted":"Deleted files"
 		},

@@ -235,6 +235,8 @@
 		"files":{
 			"deleteDate":"Datei gelöscht",
 			"filesKeepDaysDeleted":"Gelöschte Dateien für X Tage aufheben",
+			"fileVersionsKeepCount":"Mindestens X Dateiversionen aufheben",
+			"fileVersionsKeepDays":"Dateiversionen für mindestens X Tage aufheben",
 			"titleConfig":"Globale Konfiguration",
 			"titleDeleted":"Gelöschte Dateien"
 		},
