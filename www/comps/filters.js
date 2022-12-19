@@ -295,8 +295,9 @@ let MyFilterSide = {
 					<template v-for="(ref,fieldId) in entityIdMapRef.field">
 						<option
 							v-if="fieldIdMap[fieldId].content === 'data'"
+							:disabled="fieldId.startsWith('new')"
 							:value="fieldId"
-						>F{{ ref }}</option>
+						>F{{ fieldId.startsWith('new') ? ref + ' (' + capGen.notSaved + ')' : ref }}</option>
 					</template>
 				</select>
 				

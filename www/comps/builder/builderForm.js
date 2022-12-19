@@ -293,7 +293,9 @@ let MyBuilderForm = {
 					<my-builder-form-states
 						v-if="tabTarget === 'states'"
 						v-model="states"
+						:dataFields="dataFields"
 						:entityIdMapRef="entityIdMapRef"
+						:fieldIdMap="fieldIdMap"
 						:form="form"
 					/>
 					
@@ -553,16 +555,14 @@ let MyBuilderForm = {
 		fieldIdMap:(s) => {
 			let map = {};
 			let collect = function(fields) {
-				for(let i = 0, j = fields.length; i < j; i++) {
-					
-					let f = fields[i];
+				for(let f of fields) {
 					map[f.id] = f;
 					
 					switch(f.content) {
 						case 'container': collect(f.fields); break;
 						case 'tabs':
-							for(let x = 0, y = f.tabs.length; x < y; x++) {
-								collect(f.tabs[x].fields);
+							for(let t of f.tabs) {
+								collect(t.fields);
 							}
 						break;
 					}
@@ -1131,7 +1131,7 @@ let MyBuilderForm = {
 				for(let x = 0, y = s.conditions.length; x < y; x++) {
 					let c = s.conditions[x];
 					
-					if(this.fieldIdsRemove.includes(c.fieldId0) || this.fieldIdsRemove.includes(c.fieldId1))
+					if(this.fieldIdsRemove.includes(c.side0.fieldId) || this.fieldIdsRemove.includes(c.side1.fieldId))
 						return this.showMessage(this.capApp.error.formStateFieldRemovedCondition.replace('{NAME}',s.description));
 				}
 				

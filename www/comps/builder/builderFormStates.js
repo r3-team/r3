@@ -1,8 +1,4 @@
 import {getNilUuid} from '../shared/generic.js';
-import {
-	getDataFields,
-	getFieldMap
-} from '../shared/form.js';
 export {MyBuilderFormStates as default};
 
 let MyBuilderFormStateEffect = {
@@ -20,8 +16,9 @@ let MyBuilderFormStateEffect = {
 			<option :value="null">-</option>
 			<option
 				v-for="(ref,fieldId) in entityIdMapRef.field"
+				:disabled="fieldId.startsWith('new')"
 				:value="fieldId"
-			>F{{ ref }}</option>
+			>F{{ fieldId.startsWith('new') ? ref + ' (' + capGen.notSaved + ')' : ref }}</option>
 		</select>
 		
 		<!-- affected tab -->
@@ -61,12 +58,13 @@ let MyBuilderFormStateEffect = {
 	},
 	computed:{
 		effect:  (s) => JSON.parse(JSON.stringify(s.modelValue)),
-		fieldSet:(s) => s.effect.fieldId !== null,
+		fieldSet:(s) => s.effect.fieldId !== null && typeof s.fieldIdMap[s.effect.fieldId] !== 'undefined',
 		isButton:(s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'button',
 		isData:  (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'data',
 		
 		// store
-		capApp:(s) => s.$store.getters.captions.builder.form
+		capApp:(s) => s.$store.getters.captions.builder.form,
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		changeTarget(target) {
@@ -272,7 +270,9 @@ let MyBuilderFormStates = {
 		</div>
 	</div>`,
 	props:{
+		dataFields:    { type:Array,  required:true },
 		entityIdMapRef:{ type:Object, required:false, default:() => {return {}} },
+		fieldIdMap:    { type:Object, required:true },
 		form:          { type:Object, required:true },
 		modelValue:    { type:Array,  required:true }
 	},
@@ -286,17 +286,16 @@ let MyBuilderFormStates = {
 	computed:{
 		fieldIdsUsed() {
 			let out = [];
-			
 			for(let i = 0, j = this.states.length; i < j; i++) {
 				let s = this.states[i];
 				
 				for(let x = 0, y = s.conditions.length; x < y; x++) {
 					
-					if(s.conditions[x].fieldId0 !== null && !out.includes(s.conditions[x].fieldId0))
-						out.push(s.conditions[x].fieldId0);
+					if(s.conditions[x].side0.fieldId !== null && !out.includes(s.conditions[x].side0.fieldId))
+						out.push(s.conditions[x].side0.fieldId);
 					
-					if(s.conditions[x].fieldId1 !== null && !out.includes(s.conditions[x].fieldId1))
-						out.push(s.conditions[x].fieldId1);
+					if(s.conditions[x].side1.fieldId !== null && !out.includes(s.conditions[x].side1.fieldId))
+						out.push(s.conditions[x].side1.fieldId);
 				}
 				
 				for(let x = 0, y = s.effects.length; x < y; x++) {
@@ -323,8 +322,8 @@ let MyBuilderFormStates = {
 					// check conditions for field ID
 					for(let i = 0, j = s.conditions.length; i < j; i++) {
 						
-						if(s.conditions[i].fieldId0 === this.filterFieldId
-							|| s.conditions[i].fieldId1 === this.filterFieldId) {
+						if(s.conditions[i].side0.fieldId === this.filterFieldId
+							|| s.conditions[i].side1.fieldId === this.filterFieldId) {
 							
 							show = true;
 							break;
@@ -348,9 +347,7 @@ let MyBuilderFormStates = {
 		},
 		
 		// simple
-		dataFields:(s) => s.getDataFields(s.form.fields),
-		fieldIdMap:(s) => s.getFieldMap(s.form.fields),
-		states:    (s) => JSON.parse(JSON.stringify(s.modelValue)),
+		states:(s) => JSON.parse(JSON.stringify(s.modelValue)),
 		
 		// stores
 		capApp:(s) => s.$store.getters.captions.builder.form.states,
@@ -358,8 +355,6 @@ let MyBuilderFormStates = {
 	},
 	methods:{
 		// externals
-		getDataFields,
-		getFieldMap,
 		getNilUuid,
 		
 		// actions
