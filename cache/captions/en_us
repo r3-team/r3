@@ -76,6 +76,7 @@
 		"content":"Content",
 		"date":"Date",
 		"description":"Description",
+		"details":"Details",
 		"displayed":"Displayed",
 		"errorTitle":"Error",
 		"files":"Files",
