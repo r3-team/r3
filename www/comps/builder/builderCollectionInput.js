@@ -34,7 +34,7 @@ let MyBuilderCollectionInput = {
 				<select v-model="columnIdInput" :disabled="readonly">
 					<option :value="null" disabled="disabled">-</option>
 					<option v-if="collectionIdInput !== null" v-for="c in collectionIdMap[collectionIdInput].columns" :value="c.id">
-						{{ getItemTitleColumn(c) }}
+						{{ getItemTitleColumn(c,true) }}
 					</option>
 				</select>
 			</td>
@@ -98,7 +98,6 @@ let MyBuilderCollectionInput = {
 					: this.getCollectionConsumerTemplate();
 			}
 		},
-		
 		collectionIdInput:{
 			get()  { return this.consumerInput.collectionId },
 			set(v) { this.set('collectionId',v) }

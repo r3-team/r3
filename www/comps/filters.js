@@ -286,7 +286,7 @@ let MyFilterSide = {
 				<select v-model="columnId" v-if="!columnsMode && isCollection && collectionId !== null">
 					<option :value="null">-</option>
 					<option v-for="c in collectionIdMap[collectionId].columns" :value="c.id">
-						{{ getItemTitleColumn(c) }}
+						{{ getItemTitleColumn(c,true) }}
 					</option>
 				</select>
 				

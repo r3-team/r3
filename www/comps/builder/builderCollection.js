@@ -2,6 +2,7 @@ import MyBuilderQuery                  from './builderQuery.js';
 import MyBuilderCollectionInput        from './builderCollectionInput.js';
 import MyBuilderColumnOptions          from './builderColumnOptions.js';
 import MyBuilderIconInput              from './builderIconInput.js';
+import {getItemTitleColumn}            from '../shared/builder.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
 import {getQueryTemplate}              from '../shared/query.js';
 import MyTabs                          from '../tabs.js';
@@ -81,7 +82,7 @@ let MyBuilderCollection = {
 						<thead>
 							<tr>
 								<th v-for="c in collection.columns">
-									{{ attributeIdMap[c.attributeId].name }}
+									{{ getItemTitleColumn(c,true) }}
 								</th>
 							</tr>
 						</thead>
@@ -344,6 +345,7 @@ let MyBuilderCollection = {
 		// externals
 		copyValueDialog,
 		getCollectionConsumerTemplate,
+		getItemTitleColumn,
 		getNilUuid,
 		
 		// actions

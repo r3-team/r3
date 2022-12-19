@@ -55,13 +55,13 @@ export let MyBuilderColumns = {
 					</div>
 					
 					<!-- column title -->
-					<div class="title" :class="{ 'no-hover':hasCaptions && showOptions }" :title="getTitle(element)">
-						{{ getTitle(element) }}
+					<div class="title" :class="{ 'no-hover':hasCaptions && showOptions }">
+						{{ getItemTitleColumn(element,false) }}
 					</div>
 					<my-builder-caption class="on-hover"
 						v-if="hasCaptions && showOptions"
 						@update:modelValue="propertySet(index,'captions',{columnTitle:$event})"
-						:contentName="getTitle(element)"
+						:contentName="getItemTitleColumn(element,false)"
 						:language="builderLanguage"
 						:modelValue="element.captions.columnTitle"
 					/>
@@ -111,12 +111,6 @@ export let MyBuilderColumns = {
 		getFlexBasis,
 		getItemTitle,
 		getItemTitleColumn,
-		
-		// presentation
-		getTitle(column) {
-			return column.subQuery
-				? this.capApp.subQuery : this.getItemTitleColumn(column);
-		},
 		
 		// actions
 		propertySet(columnIndex,name,value) {

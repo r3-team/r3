@@ -97,10 +97,21 @@ export function getItemTitleNoRelationship(relation,attribute,index) {
 	return `${index}) ${relation.name}.${attribute.name}`;
 };
 
-export function getItemTitleColumn(column) {
-	let a = MyStore.getters['schema/attributeIdMap'][column.attributeId];
-	let r = MyStore.getters['schema/relationIdMap'][a.relationId];
-	return getItemTitle(r,a,column.index,false,false);
+export function getItemTitleColumn(column,withTitle) {
+	let name;
+	if(column.subQuery) {
+		name = `SubQuery`;
+	}
+	else {
+		let a = MyStore.getters['schema/attributeIdMap'][column.attributeId];
+		let r = MyStore.getters['schema/relationIdMap'][a.relationId];
+		name = getItemTitle(r,a,column.index,false,false);
+	}
+	
+	if(withTitle && typeof column.captions.columnTitle[MyStore.getters.settings.languageCode] !== 'undefined')
+		name = `${name} (${column.captions.columnTitle[MyStore.getters.settings.languageCode]})`;
+	
+	return name;
 };
 
 export function getItemTitleRelation(relationId,index) {
