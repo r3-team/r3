@@ -30,6 +30,7 @@ import (
 	"r3/schema/relation"
 	"r3/schema/role"
 	"r3/tools"
+	"r3/transfer/transfer_delete"
 	"r3/types"
 	"strings"
 
@@ -104,12 +105,26 @@ func ImportFromFiles(filePathsImport []string) error {
 		for _, m := range modules {
 			log.Info("transfer", fmt.Sprintf("import START, module '%s', %s", m.Name, m.Id))
 
+			/* execution order
+			1. delete to be removed triggers (only need to run once), known issues:
+				DB error if preset changes fire triggers that are deleted later
+				DB error if PG functions are deleted before referring triggers
+			2. set new/existing entities (module, relations, attributes, presets, ...)
+			3. delete all other entities after import is done
+				if other entities rely on deleted states (presets), they are applied on next loop
+			*/
+			if firstRun && !moduleIdMapMeta[m.Id].isNew {
+				if err := transfer_delete.NotExistingPgTriggers_tx(tx, m.Id, m.Relations); err != nil {
+					return err
+				}
+			}
+
 			if err := import_tx(tx, m, firstRun, lastRun, idMapSkipped); err != nil {
 				return err
 			}
 
 			if _, exists := idMapSkipped[m.Id]; !exists && !moduleIdMapMeta[m.Id].isNew {
-				if err := importDeleteNotExisting_tx(tx, m); err != nil {
+				if err := transfer_delete.NotExisting_tx(tx, m); err != nil {
 					return err
 				}
 			}
@@ -155,18 +170,11 @@ func ImportFromFiles(filePathsImport []string) error {
 func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 	idMapSkipped map[uuid.UUID]types.Void) error {
 
-	// # Execution order
-	// 1) set new/existing entities (module, relations, attributes, presets, ...)
-	// 2) execute data migration scripts (old and new data structures exist) (NOT IMPLEMENTED YET)
-	// 3) delete entities after import is done
-	//    if other entities rely on deleted states (presets), they are applied on next loop
-
-	// we use a sensible import order to avoid conflicts but some cannot be avoided
-	// # known cases
+	// we use a sensible import order to avoid conflicts but some cannot be avoided:
 	// * pg functions referencing each other
 	// * preset values referencing other presets
 	// * presets being dependent on deleted attributes (less NOT NULL constraints)
-	// import loop allows for repeated attempts
+	// use import loops to allow for repeated attempts
 
 	// module
 	run, err := importCheckRunAndSave(tx, firstRun, mod.Id, idMapSkipped)
