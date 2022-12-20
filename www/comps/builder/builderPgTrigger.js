@@ -37,9 +37,13 @@ let MyBuilderPgTrigger = {
 		<td><my-bool v-model="onUpdate" :readonly="readonly" /></td>
 		<td><my-bool v-model="onDelete" :readonly="readonly" /></td>
 		<td><my-bool v-model="perRow"   :readonly="readonly" /></td>
-		<td><my-bool v-model="isConstraint" :readonly="!constraintOk || readonly" /></td>
-		<td><my-bool v-model="isDeferrable" :readonly="!constraintOk || !isConstraint || readonly" /></td>
-		<td><my-bool v-model="isDeferred"   :readonly="!constraintOk || !isConstraint || !isDeferrable || readonly" /></td>
+		<td>
+			<my-bool
+				@update:modelValue="setDeferred($event)"
+				:readonly="!constraintOk || readonly"
+				:modelValue="isDeferred"
+			/>
+		</td>
 		<td>
 			<div class="row">
 				<my-button image="open.png"
@@ -79,7 +83,7 @@ let MyBuilderPgTrigger = {
 		readonly:{ type:Boolean, required:true },
 		relation:{ type:Object,  required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			pgFunctionId:this.pgTrigger.pgFunctionId,
 			fires:this.pgTrigger.fires,
@@ -94,42 +98,47 @@ let MyBuilderPgTrigger = {
 		};
 	},
 	computed:{
-		hasChanges:function() {
-			return this.pgFunctionId !== this.pgTrigger.pgFunctionId
-				|| this.fires !== this.pgTrigger.fires
-				|| this.onDelete !== this.pgTrigger.onDelete
-				|| this.onInsert !== this.pgTrigger.onInsert
-				|| this.onUpdate !== this.pgTrigger.onUpdate
-				|| this.isConstraint !== this.pgTrigger.isConstraint
-				|| this.isDeferrable !== this.pgTrigger.isDeferrable
-				|| this.isDeferred !== this.pgTrigger.isDeferred
-				|| this.perRow !== this.pgTrigger.perRow
-				|| this.codeCondition !== this.pgTrigger.codeCondition
-			;
-		},
+		hasChanges:(s) =>
+			s.pgFunctionId     !== s.pgTrigger.pgFunctionId
+			|| s.fires         !== s.pgTrigger.fires
+			|| s.onDelete      !== s.pgTrigger.onDelete
+			|| s.onInsert      !== s.pgTrigger.onInsert
+			|| s.onUpdate      !== s.pgTrigger.onUpdate
+			|| s.isConstraint  !== s.pgTrigger.isConstraint
+			|| s.isDeferrable  !== s.pgTrigger.isDeferrable
+			|| s.isDeferred    !== s.pgTrigger.isDeferred
+			|| s.perRow        !== s.pgTrigger.perRow
+			|| s.codeCondition !== s.pgTrigger.codeCondition,
 		
-		// simple states
-		constraintOk:function() { return this.fires === 'AFTER' && this.perRow; },
-		isNew:       function() { return this.pgTrigger.id === null; },
+		// simple
+		constraintOk:(s) => s.fires === 'AFTER' && s.perRow,
+		isNew:       (s) => s.pgTrigger.id === null,
 		
 		// stores
-		module:     function() { return this.moduleIdMap[this.relation.moduleId]; },
-		modules:    function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.builder.pgTrigger; },
-		capGen:     function() { return this.$store.getters.captions.generic; }
+		module:     (s) => s.moduleIdMap[s.relation.moduleId],
+		modules:    (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:     (s) => s.$store.getters.captions.builder.pgTrigger,
+		capGen:     (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
 		copyValueDialog,
 		
 		// actions
-		open:function() {
+		open() {
 			this.$router.push('/builder/pg-function/'+this.pgFunctionId);
+		},
+		setDeferred(state) {
+			// abstract unuseful states into two options
+			// either trigger is 'constraint+deferrable+initially' deferred or not all
+			this.isConstraint = state;
+			this.isDeferrable = state;
+			this.isDeferred   = state;
 		},
 		
 		// backend calls
-		delAsk:function() {
+		delAsk() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.delete,
 				buttons:[{
@@ -143,13 +152,13 @@ let MyBuilderPgTrigger = {
 				}]
 			});
 		},
-		del:function() {
+		del() {
 			ws.send('pgTrigger','del',{id:this.pgTrigger.id},true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);
 		},
-		set:function(atr) {
+		set(atr) {
 			// fix invalid options
 			if(!this.perRow || this.fires !== 'AFTER') {
 				this.isConstraint = false;

@@ -150,6 +150,10 @@
 	display:flex;
 	flex-flow:column nowrap;
 }
+.builder-new .options{
+	flex:1 1 auto;
+	margin-top:20px;
+}
 .builder-new .actions{
 	flex:1 1 auto;
 	margin-top:20px;

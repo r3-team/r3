@@ -26,11 +26,13 @@ let MyBuilderNew = {
 					<input v-model="name" />
 				</div>
 				
-				<div v-html="capApp.message[entity]"></div>
+				<div
+					v-if="typeof capApp.message[entity] !== 'undefined'"
+					v-html="capApp.message[entity]"
+				></div>
 				
 				<!-- additional options -->
-				<template v-if="showOptions">
-					<br />
+				<div class="options" v-if="showOptions">
 					<h2>{{ capApp.options }}</h2>
 					
 					<!-- JS function: assigned form -->
@@ -64,7 +66,7 @@ let MyBuilderNew = {
 						</div>
 						<p v-html="capApp.relationEncryptionHint"></p>
 					</template>
-				</template>
+				</div>
 				
 				<div class="actions">
 					<my-button image="save.png"

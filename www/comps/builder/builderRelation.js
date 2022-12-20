@@ -326,8 +326,6 @@ let MyBuilderRelation = {
 							<th>{{ capApp.onUpdate }}</th>
 							<th>{{ capApp.onDelete }}</th>
 							<th>{{ capApp.perRow }}</th>
-							<th>{{ capApp.isConstraint }}</th>
-							<th>{{ capApp.isDeferrable }}</th>
 							<th>{{ capApp.isDeferred }}</th>
 							<th colspan="2">{{ capApp.execute }}</th>
 						</tr>
