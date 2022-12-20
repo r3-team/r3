@@ -304,18 +304,26 @@ let MyBuilderArticles = {
 				<my-articles class="builder-articles-preview shade pop-up"
 					@close="showPreview = false"
 					:form="formIdAssignTo !== null ? formIdMap[formIdAssignTo] : null"
+					:languageSet="builderLanguage"
 					:moduleId="module.id"
 					:isPopUp="false"
 				/>
 			</div>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		id:             { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
-	data:function() {
+	mounted() {
+		this.$emit('hotkeysRegister',[{fnc:this.assign,key:'s',keyCtrl:true}]);
+	},
+	unmounted() {
+		this.$emit('hotkeysRegister',[]);
+	},
+	data() {
 		return {
 			// inputs
 			articleIdAdd:null,     // article to add

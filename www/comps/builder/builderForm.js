@@ -443,13 +443,13 @@ let MyBuilderForm = {
 		id:             { type:String,  required:false, default:'' },
 		readonly:       { type:Boolean, required:true }
 	},
-	mounted:function() {
+	mounted() {
 		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
 	},
-	unmounted:function() {
+	unmounted() {
 		this.$emit('hotkeysRegister',[]);
 	},
-	data:function() {
+	data() {
 		return {
 			// form data
 			iconId:null,         // form icon

@@ -63,15 +63,16 @@ let MyArticles = {
 				</div>
 				<div class="article-body"
 					v-if="!articleIdsClosed.includes(a.id)"
-					v-html="a.captions.articleBody[moduleLanguage]"
+					v-html="a.captions.articleBody[language]"
 				/>
 			</div>
 		</div>
 	</div>`,
 	props:{
-		form:    { type:Object,  required:false, default:null },
-		isPopUp: { type:Boolean, required:true },
-		moduleId:{ type:String,  required:true }
+		form:       { type:Object,  required:false, default:null },
+		isPopUp:    { type:Boolean, required:true },
+		languageSet:{ type:String,  required:false, default:null }, // overwrite shown language
+		moduleId:   { type:String,  required:true }
 	},
 	emits:['close'],
 	data:function() {
@@ -90,13 +91,16 @@ let MyArticles = {
 			let out = [];
 			for(let articleId of articleIds) {
 				let a = s.articleIdMap[articleId];
-				if(typeof a.captions.articleBody[s.moduleLanguage] !== 'undefined')
+				if(typeof a.captions.articleBody[s.language] !== 'undefined')
 					out.push(a);
 			}
 			return out;
 		},
+		
+		// simple
 		hasArticleIndex:(s) => s.articlesShown.length > 1,
 		hasFormHelp:    (s) => s.form !== null && s.form.articleIdsHelp.length !== 0,
+		language:       (s) => s.languageSet !== null ? s.languageSet : s.moduleLanguage,
 		
 		// stores
 		module:        (s) => s.moduleIdMap[s.moduleId],
@@ -114,8 +118,8 @@ let MyArticles = {
 		
 		// presentation
 		getArticleTitle(article) {
-			return typeof article.captions.articleTitle[this.moduleLanguage] !== 'undefined'
-				? article.captions.articleTitle[this.moduleLanguage] : this.articleTitleEmpty;
+			return typeof article.captions.articleTitle[this.language] !== 'undefined'
+				? article.captions.articleTitle[this.language] : this.articleTitleEmpty;
 		},
 		
 		// actions
@@ -130,7 +134,7 @@ let MyArticles = {
 		},
 		pdfDownload() {
 			let titleHelp   = this.tabTarget === 'form' ? this.capApp.form : this.capApp.module;
-			let titleModule = this.getModuleCaption(this.module,this.moduleLanguage);
+			let titleModule = this.getModuleCaption(this.module,this.language);
 			let titleDate   = this.getDateFormat(new Date(),'Y-m-d');
 			
 			this.generatePdf(
