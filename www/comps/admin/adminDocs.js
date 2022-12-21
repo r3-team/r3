@@ -3,7 +3,6 @@ export {MyAdminDocs as default};
 let MyAdminDocs = {
 	name:'my-admin-docs',
 	template:`<div class="contentBox grow">
-		
 		<div class="top lower">
 			<div class="area">
 				<img class="icon" src="images/question.png" />
@@ -22,29 +21,27 @@ let MyAdminDocs = {
 		<div class="content html-docs" v-html="docsFinal"></div>
 	</div>`,
 	emits:['close'],
-	data:function() {
+	data() {
 		return {
 			docs:'',
 			idPlaceholder:'admin-docs_'
 		};
 	},
 	computed:{
-		docsFinal:function() {
-			return this.docs
-				.replace(/href="#(.*?)"/g,'href="'+window.location+'#'+this.idPlaceholder+`$1`+'"')
-				.replace(/id="(.*?)"/g,'id="'+this.idPlaceholder+`$1`+'"')
-			;
-		},
+		docsFinal:(s) => s.docs
+			.replace(/href="#(.*?)"/g,'href="'+window.location+'#'+s.idPlaceholder+`$1`+'"')
+			.replace(/id="(.*?)"/g,'id="'+s.idPlaceholder+`$1`+'"')
+			.replace(/src="(.*?)"/g,'src="docs/'+`$1`+'"'),
 		
 		// stores
-		capApp:  function() { return this.$store.getters.captions.admin; },
-		settings:function() { return this.$store.getters.settings; }
+		capApp:  (s) => s.$store.getters.captions.admin,
+		settings:(s) => s.$store.getters.settings
 	},
-	mounted:function() {
-		 this.get();
+	mounted() {
+		this.get();
 	},
 	methods:{
-		get:function() {
+		get() {
 			let that = this;
 			let req  = new XMLHttpRequest();
 			

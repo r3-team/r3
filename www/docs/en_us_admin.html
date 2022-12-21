@@ -1,4 +1,4 @@
-<p><em>Updated 2022-12-13</em></p>
+<p><em>Updated 2022-12-21</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -140,11 +140,15 @@
 <p>After configuration, basically all administrative tasks are executed via the admin user interface inside the main REI3 web application. Any user defined as 'admin' has full access to these features.</p>
 <h2 id="maintenance-mode">Maintenance mode</h2>
 <p>To execute deep system changes safely, a separate operation mode is available, called 'maintenance mode'. When enabled, all non-admin users are automatically logged off from the system; new logins are also rejected from non-admin users.</p>
+<p><img src="en_us_admin_pics/maintenance_mode.webp" alt="Maintenance mode" /></p>
 <p>In maintenance mode, applications may be installed, configured and deleted. Please be aware that deleting applications will permanently delete all corresponding data from the system. This is irreversable without current, functional backups.</p>
 <h2 id="builder-mode">Builder mode</h2>
-<p>When the maintenance mode is active, Builder mode can also be enabled. This gives admin users access to the integrated, graphical application builder utility, called 'Builder' for short. The Builder is a powerful tool. All REI3 applications are exclusively created and changed via the Builder. Please be aware that changing applications has permanent consequences up to and including data loss. Do not attempt to use the Builder in any productive instance. For testing or developing applications, a separated instance should be used. The portable version makes this easy on Windows clients. On Linux a separated application service, accessing a separate database, serves the same purpose.</p>
+<p>When the maintenance mode is active, Builder mode can also be enabled. This gives admin users access to the integrated, graphical application builder utility, called 'Builder' for short. The Builder is a powerful tool. All REI3 applications are exclusively created and changed via the Builder.</p>
+<p><img src="en_us_admin_pics/builder_mode.webp" alt="Builder mode" /></p>
+<p>Please be aware that changing applications has permanent consequences up to and including data loss. Do not attempt to use the Builder in any productive instance. For testing or developing applications, a separated instance should be used. The portable version makes this easy on Windows clients. On Linux a separated application service, accessing a separate database, serves the same purpose.</p>
 <h2 id="authentication-and-authorization">Authentication and authorization</h2>
 <p>To let users access the system, individual logins must be created by an REI3 administrator or imported from a <a href="#authentication-and-authorization-via-ldap">directory service</a>. Login names can be anything from names to employee IDs to email addresses - they only need to be unique within a REI3 instance.</p>
+<p><img src="en_us_admin_pics/authentication.webp" alt="Logins" /></p>
 <p>To access any application or data, roles have to be assigned to logins. This can be done by an REI3 administrator manually, or they can be assigned automatically according to group memberships within a <a href="#authentication-and-authorization-via-ldap">directory service</a>. Role permissions are cumulative - the more roles a user has, the larger the access.</p>
 <p>To increase account security, REI3 administrators can choose password complexity options in the admin interface. Additionaly, MFA (multi-factor authentication) in the form of TOTP (time-based one-time-passwords) is available to users and can be reset by administrators. MFA can be setup on multiple devices and is supported by most authenticator apps (anything that supports TOTP).</p>
 <h2 id="authentication-and-authorization-via-ldap">Authentication and authorization via LDAP</h2>
@@ -162,13 +166,17 @@
 </ul>
 <h2 id="connecting-logins-to-data-sets">Connecting logins to data sets</h2>
 <p>To facilitate workflows and other features with relation to the current user, logins can be connected to data sets. One example is the application 'Organizations', which connects logins to company contacts. With this connection, applications can use organization details of the corresponding company contact to retrieve contact information, assign work, track time, manage projects and so on.</p>
+<p><img src="en_us_admin_pics/login_form.webp" alt="Connect logins to data sets" /></p>
 <p>There is no limit in the number of applications or data sets that can be connected to a login. Logins can also be connected to other entities like customers, requestors and so on.</p>
 <p>If at least one app that offers connecting data sets to logins is installed, REI3 administrators can create new or assign existing data sets in the admin interface for logins.</p>
 <h1 id="manage-applications">Manage applications</h1>
 <p>To get use out of REI3, applications need to be installed. To manage applications, the maintenance mode must be enabled first.</p>
 <p>Applications are installed via the admin user interface. They can be retrieved from multiple sources:</p>
 <ul>
-<li>Official repository: Pre-installed repository for official REI3 applications. Internet access is required to access this online service.</li>
+<li>Official repository: Pre-installed repository for official REI3 applications. Internet access is required to access this online service.
+<ul>
+<li><img src="en_us_admin_pics/repo.webp" alt="Official repository" /></li>
+</ul></li>
 <li>Local repository: For organizations running multiple REI3 instances and/or needing full control over all releases. A repository can be installed on any REI3 instance as it is a REI3 application as well.</li>
 <li>Manual import of applications: All applications can be imported manually. This is useful for development releases, testing and for applications not released in any repository.</li>
 </ul>
@@ -186,6 +194,7 @@
 </ul></li>
 </ul>
 <p>The integrated backup feature automatically backs up all necessary data, if its enabled in the admin panel and dependencies are <a href="#installation">installed</a>.</p>
+<p><img src="en_us_admin_pics/backup.webp" alt="Backups!" /></p>
 <p>With larger systems, the integrated backup might not be good enough; it can only create full backups, which are very safe but take more time and disk space than other backup methods. With growing data sets, you might need to consider also using incremental/differential backups; these require more effort and possibly infrastructure and are not part of this documentation.</p>
 <h2 id="database">Database</h2>
 <p>In any deployment model, a PostgreSQL database is used for REI3. To access the stand-alone, integrated database, use the connection details from the REI3 configuration file (<code>config.json</code>) while the REI3 service is running. The database is called 'app' by default.</p>

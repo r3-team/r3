@@ -1,4 +1,4 @@
-<p><em>Aktualisiert 2022-12-13</em></p>
+<p><em>Aktualisiert 2022-12-21</em></p>
 <h1 id="inhaltsverzeichnis">Inhaltsverzeichnis</h1>
 <ol type="1">
 <li><a href="#einführung">Einführung</a></li>
@@ -140,11 +140,15 @@
 <p>Nach der Konfiguration werden grundsätzlich alle administrativen Aufgaben über die Adminoberfläche in der REI3-Hauptwebanwendung ausgeführt. Jeder Benutzer, der als "Administrator" definiert ist, hat vollen Zugriff auf diese Funktionen.</p>
 <h2 id="wartungsmodus">Wartungsmodus</h2>
 <p>Um tiefgreifende Systemänderungen sicher auszuführen, steht ein separater Betriebsmodus zur Verfügung, der als "Wartungsmodus" bezeichnet wird. Wenn dieser aktiviert ist, werden alle Benutzer, die keine Administratoren sind, vom System abgemeldet. Neue Anmeldungen von Nicht-Administratoren werden abgelehnt.</p>
+<p><img src="de_de_admin_pics/maintenance_mode.webp" alt="Wartungsmodus" /></p>
 <p>Im Wartungsmodus können Anwendungen installiert, konfiguriert und gelöscht werden. Bitte beachten Sie, dass durch das Löschen von Anwendungen alle entsprechenden Daten dauerhaft aus dem System gelöscht werden. Dies ist ohne aktuelle, funktionale Backups nicht rückgängig zu machen.</p>
 <h2 id="builder-modus">Builder-Modus</h2>
-<p>Wenn das System im Wartungsmodus ist, kann zusätzlich der Builder-Modus aktiviert werden. Dies ermöglicht Adminbenutzern Zugriff auf das integrierte, grafische Anwendungsentwicklungswerkzeug, kurz 'Builder' genannt. Der Builder ist ein umfangreiches Werkzeug. Alle REI3-Anwendungen werden ausschließlich über den Builder erstellt und geändert. Bitte beachten Sie, dass das Ändern von Anwendungen dauerhafte Konsequenzen bis hin zum Datenverlust hat. Versuchen Sie nicht, den Builder in einer produktiven Instanz zu verwenden. Zum Testen oder Entwickeln von Anwendungen sollte eine separate Instanz verwendet werden. Die portable Version macht dies für Windows-Endgeräte einfach. Unter Linux dient ein separater Anwendungsdienst, der auf eine separate Datenbank zugreift, demselben Zweck.</p>
+<p>Wenn das System im Wartungsmodus ist, kann zusätzlich der Builder-Modus aktiviert werden. Dies ermöglicht Adminbenutzern Zugriff auf das integrierte, grafische Anwendungsentwicklungswerkzeug, kurz 'Builder' genannt.</p>
+<p><img src="de_de_admin_pics/builder_mode.webp" alt="Builder-Modus" /></p>
+<p>Der Builder ist ein umfangreiches Werkzeug. Alle REI3-Anwendungen werden ausschließlich über den Builder erstellt und geändert. Bitte beachten Sie, dass das Ändern von Anwendungen dauerhafte Konsequenzen bis hin zum Datenverlust hat. Versuchen Sie nicht, den Builder in einer produktiven Instanz zu verwenden. Zum Testen oder Entwickeln von Anwendungen sollte eine separate Instanz verwendet werden. Die portable Version macht dies für Windows-Endgeräte einfach. Unter Linux dient ein separater Anwendungsdienst, der auf eine separate Datenbank zugreift, demselben Zweck.</p>
 <h2 id="authentifizierung-und-autorisierung">Authentifizierung und Autorisierung</h2>
 <p>Um Benutzern den Zugang zum System zu ermöglichen, müssen individuelle Anmeldungen von einem REI3-Administrator erstellt oder von einem <a href="#authentifizierung-und-autorisierung-über-ldap">Verzeichnisdienst</a> importiert werden. Anmeldenamen können alles sein, von Namen über Mitarbeiter-IDs bis hin zu E-Mail-Adressen - sie müssen nur innerhalb einer REI3-Instanz eindeutig sein.</p>
+<p><img src="de_de_admin_pics/authentication.webp" alt="Anmeldungen" /></p>
 <p>Um auf eine Anwendung oder Daten zugreifen zu können, müssen den Anmeldungen Rollen zugewiesen werden. Dies kann durch einen REI3-Administrator manuell geschehen oder sie können automatisch anhand von Gruppenmitgliedschaften innerhalb eines <a href="#authentifizierung-und-autorisierung-über-ldap">Verzeichnisdienstes</a> zugewiesen werden. Rollenberechtigungen sind kumulativ - je mehr Rollen ein Benutzer hat, desto umfangreicher ist der Zugriff.</p>
 <p>Um die Kontosicherheit zu erhöhen, können REI3-Administratoren in der Admin-Oberfläche Optionen für die Passwortkomplexität auswählen. Darüber hinaus steht den Benutzern MFA (Multi-Faktor-Authentifizierung) in Form von TOTP (zeitbasierte Einmal-Passwörter) zur Verfügung, die von den Administratoren zurückgesetzt werden können. MFA kann auf mehreren Geräten eingerichtet werden und wird von den meisten Authenticator-Apps unterstützt (alles, was TOTP unterstützt).</p>
 <h2 id="authentifizierung-und-autorisierung-über-ldap">Authentifizierung und Autorisierung über LDAP</h2>
@@ -162,13 +166,17 @@
 </ul>
 <h2 id="anmeldungen-mit-datensätzen-verbinden">Anmeldungen mit Datensätzen verbinden</h2>
 <p>Um Workflows und andere Funktionen mit Bezug zum aktuellen Benutzer zu ermöglichen, können Anmeldungen mit Datensätzen verbunden werden. Ein Beispiel ist die Anwendung "Organisationen", die Anmeldungen mit Unternehmenskontakten verbindet. Mit dieser Verbindung können Anwendungen die Organisationsdetails des entsprechenden Firmenkontakts nutzen, um Kontaktinformationen abzurufen, Arbeit zuzuweisen, Zeit zu erfassen, Projekte zu verwalten usw.</p>
+<p><img src="de_de_admin_pics/login_form.webp" alt="Anmeldungen mit Datensätzen verbinden" /></p>
 <p>Die Anzahl der Anwendungen oder Datensätze, die mit einer Anmeldung verbunden werden können, ist nicht begrenzt. Anmeldungen können auch mit anderen Entitäten wie Kunden, Anfragern usw. verbunden werden.</p>
 <p>Wenn mindestens eine Anwendung installiert ist, welche eine Verknüpfung von Datensätzen mit Anmeldungen ermöglicht, können REI3-Administratoren in der Verwaltungsoberfläche für Anmeldungen neue Datensätze erstellen oder bestehende zuweisen.</p>
 <h1 id="anwendungen-verwalten">Anwendungen verwalten</h1>
 <p>Um REI3 nutzen zu können, müssen Anwendungen installiert werden. Um Anwendungen zu verwalten, muss zuerst der Wartungsmodus aktiviert werden.</p>
 <p>Anwendungen werden über die Adminoberfläche installiert. Sie können aus mehreren Quellen abgerufen werden:</p>
 <ul>
-<li>Offizielles Repository: Vorinstalliertes Repository für offizielle REI3-Anwendungen. Für den Zugriff auf diesen Onlinedienst ist ein Internetzugang erforderlich.</li>
+<li>Offizielles Repository: Vorinstalliertes Repository für offizielle REI3-Anwendungen. Für den Zugriff auf diesen Onlinedienst ist ein Internetzugang erforderlich.
+<ul>
+<li><img src="de_de_admin_pics/repo.webp" alt="Offizielles Repository" /></li>
+</ul></li>
 <li>Lokales Repository: Für Organisationen, die mehrere REI3-Instanzen ausführen und/oder die vollständige Kontrolle über alle Veröffentlichungen benötigen. Ein Repository kann auf jeder REI3-Instanz installiert werden, da es sich auch um eine REI3-Anwendung handelt.</li>
 <li>Manueller Import von Anwendungen: Alle Anwendungen können manuell importiert werden. Dies ist nützlich für Entwicklungsversionen, Tests und für Anwendungen, die in keinem Repository veröffentlicht wurden.</li>
 </ul>
@@ -186,6 +194,7 @@
 </ul></li>
 </ul>
 <p>Die integrierte Backup-Funktion sichert automatisch alle erforderlichen Daten, wenn sie in der Admin-Oberfläche aktiviert ist und Abhängigkeiten <a href="#installation">installiert</a> sind.</p>
+<p><img src="de_de_admin_pics/backup.webp" alt="Backups!" /></p>
 <p>Bei größeren Systemen reicht die integrierte Backup-Funktion möglicherweise nicht aus; sie kann nur Vollsicherungen erstellen, die zwar sehr sicher sind, aber mehr Zeit und Speicherplatz benötigen als andere Sicherungsmethoden. Bei wachsenden Datenbeständen sollten Sie auch inkrementelle/differenzielle Sicherungen in Betracht ziehen; diese erfordern mehr Aufwand und möglicherweise Infrastruktur und sind nicht Teil dieser Dokumentation.</p>
 <h2 id="datenbank">Datenbank</h2>
 <p>In jedem Bereitstellungsmodell wird eine PostgreSQL-Datenbank für REI3 verwendet. Um auf die eigenständige, integrierte Datenbank zuzugreifen, verwenden Sie die Verbindungsdetails aus der REI3-Konfigurationsdatei (<code>config.json</code>), während der REI3-Dienst ausgeführt wird. Die Datenbank heißt standardmäßig "app".</p>
