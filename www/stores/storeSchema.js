@@ -37,13 +37,17 @@ const MyStoreSchema = {
 			};
 			let processFields = function(fields) {
 				for(let i = 0, j = fields.length; i < j; i++) {
-					let f = fields[i];
+					if(typeof fields[i].query !== 'undefined')
+						fields[i].query = getQueryTemplateIfNull(fields[i].query);
 					
-					if(typeof f.query !== 'undefined')
-						fields[i].query = getQueryTemplateIfNull(f.query);
-					
-					if(f.content === 'container')
-						fields[i].fields = processFields(f.fields);
+					switch(fields[i].content) {
+						case 'container': fields[i].fields = processFields(fields[i].fields); break;
+						case 'tabs':
+							for(let x = 0, y = fields[i].tabs.length; x < y; x++) {
+								fields[i].tabs[x].fields = processFields(fields[i].tabs[x].fields);
+							}
+						break;
+					}
 				}
 				return fields;
 			};

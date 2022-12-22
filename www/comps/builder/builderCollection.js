@@ -4,7 +4,6 @@ import MyBuilderColumnOptions          from './builderColumnOptions.js';
 import MyBuilderIconInput              from './builderIconInput.js';
 import {getItemTitleColumn}            from '../shared/builder.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
-import {getQueryTemplate}              from '../shared/query.js';
 import MyTabs                          from '../tabs.js';
 import {
 	MyBuilderColumns,

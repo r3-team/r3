@@ -1,5 +1,4 @@
 import MyBuilderIconInput from './builderIconInput.js';
-import {getQueryTemplate} from '../shared/query.js';
 import {copyValueDialog}  from '../shared/generic.js';
 import {srcBase64}        from '../shared/image.js';
 export {MyBuilderCollections as default};
