@@ -1030,6 +1030,9 @@ let MyBuilderForm = {
 					case 'tabs':
 						for(let x = 0, y = f.tabs.length; x < y; x++) {
 							this.replaceBuilderId(f.tabs[x].fields);
+							
+							if(f.tabs[x].id.startsWith('new_'))
+								f.tabs[x].id = this.getNilUuid();
 						}
 					break;
 				}

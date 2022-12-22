@@ -3,7 +3,10 @@ import MyBuilderCollectionInput        from './builderCollectionInput.js';
 import MyBuilderIconInput              from './builderIconInput.js';
 import MyBuilderOpenFormInput          from './builderOpenFormInput.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
-import {getNilUuid}                    from '../shared/generic.js';
+import {
+	getNilUuid,
+	getRandomInt
+} from '../shared/generic.js';
 import {
 	getDependentModules,
 	getItemTitle,
@@ -1100,6 +1103,7 @@ let MyBuilderFieldOptions = {
 		getIndexAttributeId,
 		getItemTitleRelation,
 		getNilUuid,
+		getRandomInt,
 		isAttributeFiles,
 		isAttributeInteger,
 		isAttributeRelationship,
@@ -1109,7 +1113,7 @@ let MyBuilderFieldOptions = {
 		tabAdd(i) {
 			let v = JSON.parse(JSON.stringify(this.field.tabs));
 			v.push({
-				id:this.getNilUuid(),
+				id:'new_tab' + this.getRandomInt(1,99999),
 				state:'default',
 				fields:[],
 				captions:{
