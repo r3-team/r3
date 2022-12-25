@@ -33,7 +33,7 @@ let MyBuilderCollectionInput = {
 			<td>
 				<select v-model="columnIdInput" :disabled="readonly">
 					<option :value="null" disabled="disabled">-</option>
-					<option v-if="collectionIdInput !== null" v-for="c in collectionIdMap[collectionIdInput].columns" :value="c.id">
+					<option v-if="collectionIdInput !== null" v-for="c in collection.columns" :value="c.id">
 						{{ getItemTitleColumn(c,true) }}
 					</option>
 				</select>
@@ -45,6 +45,7 @@ let MyBuilderCollectionInput = {
 			<td>
 				<my-builder-open-form-input
 					@update:openForm="openFormInput = $event"
+					:allowAllForms="true"
 					:module="module"
 					:openForm="openFormInput"
 					:readonly="readonly"
@@ -124,6 +125,7 @@ let MyBuilderCollectionInput = {
 		},
 		
 		// simple
+		collection:   (s) => !s.collectionSet ? false : s.collectionIdMap[s.collectionIdInput],
 		collectionSet:(s) => s.collectionIdInput !== null,
 		
 		// stores

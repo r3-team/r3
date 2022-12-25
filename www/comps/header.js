@@ -109,11 +109,12 @@ let MyHeader = {
 				</transition>
 				
 				<!-- collection entries -->
-				<div class="entry no-wrap clickable" tabindex="0"
+				<div class="entry no-wrap" tabindex="0"
 					v-if="collectionCounter === 0"
 					v-for="e in collectionEntries"
 					@click="formOpen(e.openForm)"
 					@keyup.enter="formOpen(e.openForm)"
+					:class="{ clickable:e.openForm !== null, readonly:e.openForm === null }"
 					:title="e.title"
 				>
 					<img v-if="e.iconId !== null" :src="srcBase64Icon(e.iconId,'')" />
