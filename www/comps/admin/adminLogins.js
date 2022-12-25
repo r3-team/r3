@@ -283,16 +283,13 @@ let MyAdminLoginsItem = {
 			}
 			return false;
 		},
-		hasChanges:(s) => {
-			return s.name !== s.login.name
-				|| (!s.isNew && s.languageCode !== s.login.languageCode)
-				|| s.active !== s.login.active
-				|| s.admin !== s.login.admin
-				|| s.noAuth !== s.login.noAuth
-				|| s.pass !== ''
-				|| JSON.stringify([...s.roleIds].sort()) !== JSON.stringify([...s.login.roleIds].sort())
-			;
-		},
+		hasChanges:(s) => s.name !== s.login.name
+			|| (!s.isNew && s.languageCode !== s.login.languageCode)
+			|| s.active !== s.login.active
+			|| s.admin !== s.login.admin
+			|| s.noAuth !== s.login.noAuth
+			|| s.pass !== ''
+			|| JSON.stringify([...s.roleIds].sort()) !== JSON.stringify([...s.login.roleIds].sort()),
 		roleTotalNonHidden:(s) => {
 			let cnt = 0;
 			for(let roleId of s.roleIds) {
@@ -761,7 +758,14 @@ let MyAdminLogins = {
 				loginId:loginId,
 				recordId:recordId
 			},true).then(
-				() => this.get(),
+				() => {
+					this.get();
+					
+					// reauth login to update collections (can be dependent on assigned record)
+					ws.send('login','reauth',{id:loginId},false).then(
+						() => {}, this.$root.genericError
+					);
+				},
 				this.$root.genericError
 			);
 		}

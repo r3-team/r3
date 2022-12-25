@@ -145,7 +145,7 @@ let MyBuilderCollection = {
 			/>
 			
 			<!-- collection content -->
-			<div class="content" v-if="tabTarget === 'content'">
+			<div class="content grow" v-if="tabTarget === 'content'">
 				<my-builder-query
 					@index-removed="removeIndex($event)"
 					@set-filters="filters = $event"
