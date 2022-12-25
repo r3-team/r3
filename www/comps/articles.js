@@ -133,12 +133,12 @@ let MyArticles = {
 			this.$refs['article_'+id][0].scrollIntoView();
 		},
 		pdfDownload() {
-			let titleHelp   = this.tabTarget === 'form' ? this.capApp.form : this.capApp.module;
-			let titleModule = this.getModuleCaption(this.module,this.language);
 			let titleDate   = this.getDateFormat(new Date(),'Y-m-d');
+			let titleHelp   = this.tabTarget === 'form' ? this.capApp.form : this.capApp.module;
+			let titleModule = `${this.getModuleCaption(this.module,this.language)} v${this.module.releaseBuild}`;
 			
 			this.generatePdf(
-				`${titleModule}_${titleHelp}_${titleDate}.pdf`
+				`${titleModule} - ${titleHelp}.pdf`
 				,'a4','p',60,90,`
 					<div class="pdf-header">
 						<span>${titleModule}</span>
