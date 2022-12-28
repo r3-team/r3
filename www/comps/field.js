@@ -517,27 +517,28 @@ let MyField = {
 			tabIndexShow:0              // tabs only: which tab is shown
 		};
 	},
-	mounted:function() {
-		if(this.isTabs) {
-			let tabIndex = this.fieldOptionGet(this.field.id,'tabIndex',0);
-			
-			// use stored tab index if valid
-			if(this.field.tabs.length > tabIndex && !this.tabIndexesHidden.includes(tabIndex))
-				return this.tabIndexShow = this.fieldOptionGet(this.field.id,'tabIndex',0);
-			
-			// use first available tab index
-			for(let i = 0, j = this.field.tabs.length; i < j; i++) {
-				if(!this.tabIndexesHidden.includes(i))
-					return this.tabIndexShow = i;
-			}
-		}
-	},
 	watch:{
 		formLoading:function(val) {
 			if(!val) this.notTouched = true;
 		},
 		isValid:{ // inform parent form about field validity
 			handler:function(v) { this.$emit('set-valid',v,this.field.id); },
+			immediate:true
+		},
+		tabIndexesHidden:{
+			handler:function(v) {
+				if(!this.isTabs) return;
+				
+				// use stored tab index if valid, otherwise use first valid one
+				let tabIndex = this.fieldOptionGet(this.field.id,'tabIndex',0);
+				if(this.field.tabs.length > tabIndex && !v.includes(tabIndex))
+					return this.tabIndexShow = tabIndex;
+				
+				for(let i = 0, j = this.field.tabs.length; i < j; i++) {
+					if(!v.includes(i))
+						return this.tabIndexShow = i;
+				}
+			},
 			immediate:true
 		}
 	},
