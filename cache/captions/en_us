@@ -24,6 +24,7 @@
 			"new":"New",
 			"newHint":"Create new record",
 			"open":"Open",
+			"openBuilder":"Open Builder",
 			"ok":"Ok",
 			"paste":"Paste",
 			"refresh":"Reload",

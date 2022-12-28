@@ -611,6 +611,7 @@
 .builder-articles-wrap{
 	display:flex;
 	flex-flow:row wrap;
+	overflow:auto;
 }
 .builder-articles-edit{
 	flex:1 1 auto;

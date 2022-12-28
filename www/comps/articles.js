@@ -69,13 +69,13 @@ let MyArticles = {
 		</div>
 	</div>`,
 	props:{
-		form:       { type:Object,  required:false, default:null },
-		isPopUp:    { type:Boolean, required:true },
-		languageSet:{ type:String,  required:false, default:null }, // overwrite shown language
-		moduleId:   { type:String,  required:true }
+		form:    { type:Object,  required:false, default:null },
+		isPopUp: { type:Boolean, required:true },
+		language:{ type:String,  required:false, default:null },
+		moduleId:{ type:String,  required:true }
 	},
 	emits:['close'],
-	data:function() {
+	data() {
 		return {
 			articleIdsClosed:[],
 			articleTitleEmpty:'-',
@@ -100,15 +100,13 @@ let MyArticles = {
 		// simple
 		hasArticleIndex:(s) => s.articlesShown.length > 1,
 		hasFormHelp:    (s) => s.form !== null && s.form.articleIdsHelp.length !== 0,
-		language:       (s) => s.languageSet !== null ? s.languageSet : s.moduleLanguage,
 		
 		// stores
-		module:        (s) => s.moduleIdMap[s.moduleId],
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		articleIdMap:  (s) => s.$store.getters['schema/articleIdMap'],
-		capApp:        (s) => s.$store.getters.captions.articles,
-		isMobile:      (s) => s.$store.getters.isMobile,
-		moduleLanguage:(s) => s.$store.getters.moduleLanguage
+		module:      (s) => s.moduleIdMap[s.moduleId],
+		moduleIdMap: (s) => s.$store.getters['schema/moduleIdMap'],
+		articleIdMap:(s) => s.$store.getters['schema/articleIdMap'],
+		capApp:      (s) => s.$store.getters.captions.articles,
+		isMobile:    (s) => s.$store.getters.isMobile
 	},
 	methods:{
 		// externals

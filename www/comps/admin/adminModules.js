@@ -14,10 +14,17 @@ let MyAdminModulesItem = {
 					:active="hasChanges && !productionMode"
 					:captionTitle="capGen.button.save"
 				/>
+				<my-button image="builder.png"
+					:active="builderEnabled"
+					@trigger="openBuilder(false)"
+					@trigger-middle="openBuilder(true)"
+					:captionTitle="capGen.button.openBuilder"
+				/>
 				<my-button image="delete.png"
 					@trigger="delAsk"
 					:active="!productionMode"
 					:cancel="true"
+					:captionTitle="capGen.button.delete"
 				/>
 			</div>
 		</td>
@@ -101,7 +108,7 @@ let MyAdminModulesItem = {
 		repoModules:   { type:Array,   required:true }
 	},
 	emits:['showHelp','install'],
-	data:function() {
+	data() {
 		return {
 			id:this.module.id,
 			hidden:this.options.hidden,
@@ -196,6 +203,10 @@ let MyAdminModulesItem = {
 					image:'cancel.png'
 				}]
 			});
+		},
+		openBuilder(middle) {
+			if(!middle) this.$router.push('/builder/module/'+this.module.id);
+			else        window.open('#/builder/module/'+this.module.id,'_blank');
 		},
 		ownerEnable() {
 			this.owner = true;
@@ -345,6 +356,7 @@ let MyAdminModules = {
 				@close="moduleIdShowHelp = null"
 				:moduleId="moduleIdShowHelp"
 				:isPopUp="false"
+				:language="moduleLanguage"
 			/>
 		</div>
 		
@@ -476,6 +488,7 @@ let MyAdminModules = {
 		builderEnabled:    (s) => s.$store.getters.builderEnabled,
 		capApp:            (s) => s.$store.getters.captions.admin.modules,
 		capGen:            (s) => s.$store.getters.captions.generic,
+		moduleLanguage:    (s) => s.$store.getters.moduleLanguage,
 		productionMode:    (s) => s.$store.getters.productionMode,
 		system:            (s) => s.$store.getters.system
 	},

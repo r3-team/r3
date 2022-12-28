@@ -140,6 +140,7 @@ let MyForm = {
 						v-if="isAdmin && builderEnabled && !isMobile"
 						@trigger="openBuilder(false)"
 						@trigger-middle="openBuilder(true)"
+						:captionTitle="capGen.button.openBuilder"
 					/>
 					<my-button image="cancel.png"
 						v-if="isPopUp"
@@ -258,6 +259,7 @@ let MyForm = {
 			@close="showHelp = false"
 			:form="form"
 			:isPopUp="isPopUp"
+			:language="moduleLanguage"
 			:moduleId="moduleId"
 		/>
 	</div>`,

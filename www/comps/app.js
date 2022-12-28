@@ -118,7 +118,7 @@ let MyApp = {
 			</div>
 		</template>
 	</div>`,
-	data:function() {
+	data() {
 		return {
 			appReady:false,       // app is loaded and user authenticated
 			loginReady:false,     // app is ready for authentication

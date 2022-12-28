@@ -304,9 +304,9 @@ let MyBuilderArticles = {
 				<my-articles class="builder-articles-preview shade pop-up"
 					@close="showPreview = false"
 					:form="formIdAssignTo !== null ? formIdMap[formIdAssignTo] : null"
-					:languageSet="builderLanguage"
-					:moduleId="module.id"
 					:isPopUp="false"
+					:language="builderLanguage"
+					:moduleId="module.id"
 				/>
 			</div>
 		</div>

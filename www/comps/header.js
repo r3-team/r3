@@ -20,6 +20,7 @@ let MyHeader = {
 					
 					<router-link class="entry no-wrap clickable" to="/builder"
 						v-if="builderEnabled"
+						:title="capGen.button.openBuilder"
 					>
 						<img src="images/builder.png" />
 					</router-link>
