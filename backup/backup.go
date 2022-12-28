@@ -108,6 +108,26 @@ func Run() error {
 	}
 	return nil
 }
+func TocFileReadCreate() (types.BackupTocFile, error) {
+	var tocFile = types.BackupTocFile{}
+	var path = getTocFilePath()
+
+	exists, err := tools.Exists(path)
+	if err != nil {
+		log.Error("backup", "could not check existence of TOC file", err)
+		return tocFile, err
+	}
+	if !exists {
+		tocFile.Backups = make([]types.BackupDef, 0)
+		return tocFile, tocFileWrite(tocFile)
+	}
+
+	jsonFile, err := os.ReadFile(path)
+	if err != nil {
+		return tocFile, err
+	}
+	return tocFile, json.Unmarshal(tools.RemoveUtf8Bom(jsonFile), &tocFile)
+}
 
 func jobCleanup(jobName string, countKeep uint64) error {
 
@@ -221,25 +241,6 @@ func dumpDb(path string) error {
 	return cmd.Run()
 }
 
-func TocFileReadCreate() (types.BackupTocFile, error) {
-	var tocFile = types.BackupTocFile{}
-	var path = getTocFilePath()
-
-	exists, err := tools.Exists(path)
-	if err != nil {
-		log.Error("backup", "could not check existence of TOC file", err)
-		return tocFile, err
-	}
-	if !exists {
-		return tocFile, tocFileWrite(tocFile)
-	}
-
-	jsonFile, err := os.ReadFile(path)
-	if err != nil {
-		return tocFile, err
-	}
-	return tocFile, json.Unmarshal(tools.RemoveUtf8Bom(jsonFile), &tocFile)
-}
 func tocFileWrite(tocFile types.BackupTocFile) error {
 	jsonFile, err := json.MarshalIndent(tocFile, "", "\t")
 	if err != nil {

@@ -325,7 +325,7 @@
 		},
 		"logs":{
 			"contextLabel":{
-				"backup":"Backup",
+				"backup":"Sicherung",
 				"cache":"Cache",
 				"cluster":"Cluster",
 				"csv":"CSV-Import/Export",
@@ -393,7 +393,7 @@
 				"updateAll":"Alle aktualisieren ({COUNT})"
 			},
 			"dialog":{
-				"delete":"Bist du sicher, dass du diese Anwendung löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelles Backup nicht rückgängig zu machen.</b>{APPS}",
+				"delete":"Bist du sicher, dass du diese Anwendung löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelle Sicherung nicht rückgängig zu machen.</b>{APPS}",
 				"deleteApps":"<br /><br />Folgende Anwendungen sind von dieser abhängig und werden ebenfalls gelöscht:<ul>{LIST}</ul>",
 				"deleteMulti":"Diese Aktion wird <b>{COUNT} Anwendung(en)</b> mit dazugehörigen Daten <b>permanent</b> löschen.<br /><br />Möchtest du wirklich fortfahren?",
 				"deleteTitle":"Permanente Löschung der Anwendung \"{APP}\"",
@@ -445,7 +445,7 @@
 				"runNowHint":"Aufgabe wird so bald wie möglich ausgeführt."
 			},
 			"names":{
-				"backupRun":"Integrierte Backups steuern",
+				"backupRun":"Integrierte Sicherungen steuern",
 				"cleanupBruteforce":"Bereinigung des Bruteforce-Cache",
 				"cleanupDataLogs":"Bereinigung abgelaufener Änderungshistorie",
 				"cleanupFiles":"Bereinigung abgelaufener Datei-Uploads",
@@ -517,7 +517,7 @@
 		},
 		"attribute":{
 			"dialog":{
-				"delete":"Bist du sicher, dass du dieses Attribut löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelles Backup nicht rückgängig zu machen.</b>"
+				"delete":"Bist du sicher, dass du dieses Attribut löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelle Sicherung nicht rückgängig zu machen.</b>"
 			},
 			"new":"Neues Attribut"
 		},
@@ -982,7 +982,7 @@
 		},
 		"relation":{
 			"dialog":{
-				"delete":"Bist du sicher, dass du diese Relation löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelles Backup nicht rückgängig zu machen.</b>"
+				"delete":"Bist du sicher, dass du diese Relation löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelle Sicherung nicht rückgängig zu machen.</b>"
 			},
 			"attributes":"Attribute ({CNT})",
 			"codeCondition":"Kondition",
