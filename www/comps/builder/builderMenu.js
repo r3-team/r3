@@ -111,6 +111,13 @@ let MyBuilderMenuItems = {
 					</div>
 				</div>
 				
+				<my-button image="delete.png"
+					@trigger="remove(element.id,index)"
+					:active="!readonly"
+					:cancel="true"
+					:captionTitle="capGen.button.delete"
+				/>
+				
 				<!-- nested menus -->
 				<my-builder-menu-items class="nested"
 					@remove="$emit('remove',$event)"
@@ -118,12 +125,6 @@ let MyBuilderMenuItems = {
 					:list="element.menus"
 					:module="module"
 					:readonly="readonly"
-				/>
-				
-				<my-button image="cancel.png"
-					@trigger="remove(element.id,index)"
-					:active="!readonly"
-					:naked="true"
 				/>
 			</div>
 		</template>

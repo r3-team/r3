@@ -66,7 +66,7 @@ export let MyBuilderColumns = {
 						:modelValue="element.captions.columnTitle"
 					/>
 					
-					<img class="action end on-hover clickable" src="images/cancel.png"
+					<img class="action end on-hover clickable" src="images/delete.png"
 						v-if="!isTemplate"
 						@click="remove(index)"
 					/>

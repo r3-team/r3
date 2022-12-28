@@ -39,9 +39,9 @@ let MyBuilderFormStateEffect = {
 			<option value="readonly" :disabled="!isData && !isButton">{{ capApp.stateReadonly }}</option>
 		</select>
 		
-		<my-button image="cancel.png"
+		<my-button image="delete.png"
 			@trigger="$emit('remove')"
-			:naked="true"
+			:cancel="true"
 			:tight="true"
 		/>
 	</div>`,
@@ -96,7 +96,7 @@ let MyBuilderFormState = {
 				:value="state.description"
 			/>
 			
-			<my-button image="cancel.png"
+			<my-button image="delete.png"
 				@trigger="$emit('remove')"
 				:cancel="true"
 				:captionTitle="capGen.button.delete"

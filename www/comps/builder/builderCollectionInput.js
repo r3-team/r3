@@ -69,7 +69,7 @@ let MyBuilderCollectionInput = {
 		</tr>
 		<tr>
 			<td>
-				<my-button image="cancel.png"
+				<my-button image="delete.png"
 					v-if="allowRemove"
 					@trigger="$emit('remove')"
 					:active="!readonly"

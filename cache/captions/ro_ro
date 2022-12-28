@@ -2,6 +2,7 @@
 	"generic":{
 		"button":{
 			"add":"Adaugă",
+			"all":"All",
 			"apply":"Aplică",
 			"cancel":"Anulează",
 			"clear":"Clear",
@@ -1319,7 +1320,7 @@
 			"title":"Setare"
 		},
 		"newVersion":"Notificare de actualizare",
-		"newVersionText":"Este disponibilă o nouă versiune de REI3.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">Descărcați REI3 v{VERSION}</a >",
+		"newVersionText":"Este disponibilă o nouă versiune de REI3.<br /><br /><a href=\"https://rei3.de/en/downloads\" target=\"_blank\">Descărcați REI3 v{VERSION}</a >",
 		"noAccess":"Nu a fost acordat încă acces.<br />Vă rugăm să contactați administratorul de sistem.",
 		"noAccessAdmin":"Pentru a obține acces, atribuiți roluri utliztorului dvs.",
 		"noAccessTitle":"Fără acces la aplicații",

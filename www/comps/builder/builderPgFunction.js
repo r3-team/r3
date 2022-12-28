@@ -59,7 +59,7 @@ let MyBuilderPgFunctionItemSchedule = {
 				<input class="dynamic" placeholder="SS" :disabled="readonly" v-model.number="atSecond" />
 			</template>
 			
-			<my-button image="cancel.png"
+			<my-button image="delete.png"
 				@trigger="$emit('remove')"
 				:active="!readonly"
 				:naked="true"

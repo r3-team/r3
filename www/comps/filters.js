@@ -661,7 +661,7 @@ let MyFilter = {
 			v-model="brackets1Input"
 			:left="false"
 		/>
-		<my-button image="cancel.png"
+		<my-button image="delete.png"
 			@trigger="$emit('remove',position)"
 			:cancel="true"
 			:tight="true"
@@ -841,6 +841,7 @@ let MyFilters = {
 					@trigger="removeAll"
 					:active="anyFilters"
 					:cancel="true"
+					:caption="capGen.button.all"
 					:captionTitle="capGen.button.reset"
 				/>
 				<my-button image="cancel.png"

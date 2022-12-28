@@ -2,6 +2,7 @@
 	"generic":{
 		"button":{
 			"add":"Add",
+			"all":"All",
 			"apply":"Apply",
 			"cancel":"Cancel",
 			"clear":"Clear",
@@ -1319,7 +1320,7 @@
 			"title":"Setup"
 		},
 		"newVersion":"Update notification",
-		"newVersionText":"A new version of REI3 is available.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">Download REI3 v{VERSION}</a>",
+		"newVersionText":"A new version of REI3 is available.<br /><br /><a href=\"https://rei3.de/en/downloads\" target=\"_blank\">Download REI3 v{VERSION}</a>",
 		"noAccess":"No access has been granted yet.<br />Please contact your system administrator.",
 		"noAccessAdmin":"To get access, assign roles to your login.",
 		"noAccessTitle":"No access to applications",

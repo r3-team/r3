@@ -169,6 +169,7 @@ let MyBuilderForm = {
 						v-if="fieldShow"
 						@trigger="fieldIdShow = null"
 						:cancel="true"
+						:captionTitle="capGen.button.close"
 					/>
 				</div>
 			</div>

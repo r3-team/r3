@@ -74,6 +74,7 @@ let MyBuilderArticlesItem = {
 								<my-button image="cancel.png"
 									@trigger="showContent = false"
 									:cancel="true"
+									:captionTitle="capGen.button.close"
 									:tight="true"
 								/>
 							</div>

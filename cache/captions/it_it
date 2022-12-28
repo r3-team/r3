@@ -2,6 +2,7 @@
 	"generic":{
 		"button":{
 			"add":"Aggiungi",
+			"all":"All",
 			"apply":"Applica",
 			"cancel":"Annulla",
 			"clear":"Clear",
@@ -1319,7 +1320,7 @@
 			"title":"Setup"
 		},
 		"newVersion":"Notifica aggiornamento",
-		"newVersionText":"È disponibile una nuova versione di REI3.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">Scarica REI3 v{VERSION}</a >",
+		"newVersionText":"È disponibile una nuova versione di REI3.<br /><br /><a href=\"https://rei3.de/en/downloads\" target=\"_blank\">Scarica REI3 v{VERSION}</a >",
 		"noAccess":"Non è stato ancora concesso l'accesso.<br />Contatta il tuo amministratore di sistema.",
 		"noAccessAdmin":"Per ottenere l'accesso, assegna i ruoli al tuo login.",
 		"noAccessTitle":"Nessun accesso alle applicazioni",

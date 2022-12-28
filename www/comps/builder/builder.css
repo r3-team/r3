@@ -1076,6 +1076,7 @@
 }
 .builder-menu .nested{
 	padding:5px 0px 0px 5px;
+	margin-right:5px;
 	flex:8 1 500px;
 	background-color:var(--color-bg);
 	border:2px dotted var(--color-border);

@@ -2,6 +2,7 @@
 	"generic":{
 		"button":{
 			"add":"Hinzufügen",
+			"all":"Alle",
 			"apply":"Ausführen",
 			"cancel":"Abbrechen",
 			"clear":"Entfernen",
@@ -1319,7 +1320,7 @@
 			"title":"Einrichtung"
 		},
 		"newVersion":"Update-Notifikation",
-		"newVersionText":"Eine neue Version von REI3 ist verfügbar.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">REI3 v{VERSION} herunterladen</a>",
+		"newVersionText":"Eine neue Version von REI3 ist verfügbar.<br /><br /><a href=\"https://rei3.de/de/downloads\" target=\"_blank\">REI3 v{VERSION} herunterladen</a>",
 		"noAccess":"Es ist noch kein Zugriff eingerichtet.<br />Bitte kontaktiere deinen Systemadministrator.",
 		"noAccessAdmin":"Um Zugriff zu erhalten, weise deiner Anmeldung Rollen zu.",
 		"noAccessTitle":"Kein Zugriff auf Anwendungen",

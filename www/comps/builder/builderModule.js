@@ -26,10 +26,10 @@ let MyBuilderModuleStartForm = {
 				{{ f.name }}
 			</option>
 		</select>
-		<my-button image="cancel.png"
+		<my-button image="delete.png"
 			@trigger="$emit('remove')"
 			:active="!readonly"
-			:naked="true"
+			:cancel="true"
 			:tight="true"
 		/>
 	</div>`,
@@ -122,7 +122,7 @@ let MyBuilderModule = {
 					<td>{{ capApp.dependsOn }}</td>
 					<td>
 						<div class="item-list">
-							<my-button image="cancel.png"
+							<my-button image="delete.png"
 								v-for="m in modules.filter(v => v.id !== module.id && dependsOn.includes(v.id))"
 								@trigger="toggleDependsOn(m.id,false)"
 								:active="!readonly"
@@ -252,10 +252,10 @@ let MyBuilderModule = {
 									:disabled="readonly"
 									:placeholder="capApp.languageCodeHint"
 								/>
-								<my-button image="cancel.png"
+								<my-button image="delete.png"
 									@trigger="languages.splice(i,1)"
 									:active="!readonly"
-									:naked="true"
+									:cancel="true"
 								/>
 							</div>
 						</div>

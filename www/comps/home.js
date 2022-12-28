@@ -165,46 +165,36 @@ let MyHome = {
 	props:{
 		moduleEntries:{ type:Array, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			installStarted:false,
 			wizardTarget:'bundle'
 		};
 	},
 	computed:{
-		showUpdate:function() {
-			if(!this.isAdmin || this.versionBuildNew <= this.settings.hintUpdateVersion)
-				return false;
-			
-			return this.versionBuildNew > this.getBuildFromVersion(this.appVersion);
-		},
-		versionBuildNew:function() {
-			if(!this.isAdmin || this.config.updateCheckVersion === '')
-				return 0;
-			
-			return this.getBuildFromVersion(this.config.updateCheckVersion);
-		},
-		
-		// simple
-		noAccess:    function() { return this.noNavigation && !this.noModules; },
-		noModules:   function() { return this.modules.length === 0; },
-		noNavigation:function() { return this.moduleEntries.length === 0; },
+		noAccess:       (s) => s.noNavigation && !s.noModules,
+		noModules:      (s) => s.modules.length === 0,
+		noNavigation:   (s) => s.moduleEntries.length === 0,
+		showUpdate:     (s) => !s.isAdmin || s.versionBuildNew <= s.settings.hintUpdateVersion
+			? false : s.versionBuildNew > s.getBuildFromVersion(s.appVersion),
+		versionBuildNew:(s) => !s.isAdmin || s.config.updateCheckVersion === ''
+			? 0 : s.getBuildFromVersion(s.config.updateCheckVersion),		
 		
 		// stores
-		appName:       function() { return this.$store.getters['local/appName']; },
-		appVersion:    function() { return this.$store.getters['local/appVersion']; },
-		customBgHeader:function() { return this.$store.getters['local/customBgHeader']; },
-		modules:       function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		iconIdMap:     function() { return this.$store.getters['schema/iconIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.home; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		config:        function() { return this.$store.getters.config; },
-		isAdmin:       function() { return this.$store.getters.isAdmin; },
-		isMobile:      function() { return this.$store.getters.isMobile; },
-		settings:      function() { return this.$store.getters.settings; }
+		appName:       (s) => s.$store.getters['local/appName'],
+		appVersion:    (s) => s.$store.getters['local/appVersion'],
+		customBgHeader:(s) => s.$store.getters['local/customBgHeader'],
+		modules:       (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
+		capApp:        (s) => s.$store.getters.captions.home,
+		capGen:        (s) => s.$store.getters.captions.generic,
+		config:        (s) => s.$store.getters.config,
+		isAdmin:       (s) => s.$store.getters.isAdmin,
+		isMobile:      (s) => s.$store.getters.isMobile,
+		settings:      (s) => s.$store.getters.settings
 	},
-	mounted:function() {
+	mounted() {
 		this.$store.commit('moduleColor1','');
 		this.$store.commit('pageTitle',this.capApp.title);
 	},
@@ -215,22 +205,20 @@ let MyHome = {
 		setSettingSingle,
 		
 		// presentation
-		bgStyle:function(moduleId) {
-			if(this.customBgHeader !== '')
-				return this.customBgHeader;
-			
-			return `background-color:#${this.moduleIdMap[moduleId].color1};`;
+		bgStyle(moduleId) {
+			return this.customBgHeader !== '' ? this.customBgHeader
+				: `background-color:#${this.moduleIdMap[moduleId].color1};`;
 		},
 		
 		// actions
-		installPackage:function() {
+		installPackage() {
 			ws.send('package','install',{},true).then(
 				() => {},
 				this.$root.genericError
 			);
 			this.installStarted = true;
 		},
-		showHelp:function(top,body) {
+		showHelp(top,body) {
 			this.$store.commit('dialog',{
 				captionBody:body,
 				captionTop:top,
@@ -245,8 +233,8 @@ let MyHome = {
 		},
 		
 		// routing
-		goToApps:  function() { this.$router.push('/admin/modules'); },
-		goToLogins:function() { this.$router.push('/admin/logins'); },
-		goToRepo:  function() { this.$router.push('/admin/repo'); }
+		goToApps()   { this.$router.push('/admin/modules'); },
+		goToLogins() { this.$router.push('/admin/logins'); },
+		goToRepo()   { this.$router.push('/admin/repo'); }
 	}
 };

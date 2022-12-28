@@ -389,7 +389,7 @@ let MyBuilderRole = {
 						<tr>
 							<td>{{ capApp.children }}</td>
 							<td>
-								<my-button image="cancel.png"
+								<my-button image="delete.png"
 									v-for="c in childrenIds"
 									@trigger="childRemove(c)"
 									:active="!readonly"
