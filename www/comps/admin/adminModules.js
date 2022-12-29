@@ -1,7 +1,10 @@
 import MyArticles            from '../articles.js';
 import srcBase64Icon         from '../shared/image.js';
-import {getCaptionForModule} from '../shared/language.js';
 import {getUnixFormat}       from '../shared/time.js';
+import {
+	getCaptionForModule,
+	getValidLanguageCode
+} from '../shared/language.js';
 export {MyAdminModules as default};
 
 let MyAdminModulesItem = {
@@ -435,7 +438,7 @@ let MyAdminModules = {
 				<tbody>
 					<my-admin-modules-item
 						v-for="(m,i) in modules"
-						@showHelp="moduleIdShowHelp = $event"
+						@showHelp="showHelp($event)"
 						@install="install"
 						:installStarted="installStarted"
 						:key="m.id"
@@ -493,12 +496,21 @@ let MyAdminModules = {
 		system:            (s) => s.$store.getters.system
 	},
 	methods:{
+		// externals
+		getValidLanguageCode,
+		
 		// error handling
 		installError(message) {
 			message = this.capApp.error.installFailed.replace('{ERROR}',message);
 			
 			this.$root.genericError(message);
 			this.installStarted = false;
+		},
+		showHelp(moduleId) {
+			this.$store.commit('moduleLanguage',this.getValidLanguageCode(
+				this.moduleIdMap[moduleId]));
+			
+			this.moduleIdShowHelp = moduleId;
 		},
 		
 		// actions

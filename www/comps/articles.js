@@ -69,10 +69,10 @@ let MyArticles = {
 		</div>
 	</div>`,
 	props:{
-		form:    { type:Object,  required:false, default:null },
+		form:    { type:Object,  required:false, default:null }, // show context help of which form
 		isPopUp: { type:Boolean, required:true },
-		language:{ type:String,  required:false, default:null },
-		moduleId:{ type:String,  required:true }
+		language:{ type:String,  required:false, default:null }, // language to use (5-letter code)
+		moduleId:{ type:String,  required:true }                 // show help of which module
 	},
 	emits:['close'],
 	data() {
