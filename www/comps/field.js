@@ -1087,7 +1087,6 @@ let MyField = {
 				this.showColorPickerInput = false;
 		},
 		openForm:function(recordId,getters,middleClick) {
-			
 			// set defaults
 			if(typeof recordId    === 'undefined') recordId    = 0;
 			if(typeof getters     === 'undefined') getters     = [];

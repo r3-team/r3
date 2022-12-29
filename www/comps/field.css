@@ -277,9 +277,9 @@
 }
 .field .tabs-entry{
 	line-height:40px;
-	margin:-1px 0px -1px 0px; /* -1px in case of row wrap */
 	padding:0px 9px;
 	border:1px solid var(--color-border);
+	border-bottom:none;
 	border-radius:5px 5px 0px 0px;
 	box-sizing:border-box;
 	background-color:var(--color-bg);

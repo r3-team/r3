@@ -83,7 +83,7 @@ let MyBuilderNew = {
 		moduleId:{ type:String, required:true },
 	},
 	emits:['close'],
-	data:function() {
+	data() {
 		return {
 			// all entities
 			name:'',
