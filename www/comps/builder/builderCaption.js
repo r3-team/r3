@@ -4,7 +4,7 @@ export {MyBuilderCaption as default};
 let MyBuilderCaption = {
 	name:'my-builder-caption',
 	components:{MyInputRichtext},
-	template:`<div class="builder-caption default-inputs">
+	template:`<div class="builder-caption default-inputs" :title="placeholder">
 		
 		<template v-if="!richtext">
 			<input v-model="valueInput"

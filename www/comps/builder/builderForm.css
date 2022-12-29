@@ -109,13 +109,13 @@
 .builder-field.selected{
 	outline:4px solid var(--color-form-builder-selected);
 }
-.builder-field>.builder-field-header>.break-out{
+.builder-field>.builder-field-header>.break-out-wrap>.break-out{
 	background-color:var(--color-form-builder-actions);
 }
-.builder-field.container>.builder-field-header>.break-out{
+.builder-field.container>.builder-field-header>.break-out-wrap>.break-out{
 	background-color:var(--color-form-builder-container);
 }
-.builder-field.tabs>.builder-field-header>.break-out{
+.builder-field.tabs>.builder-field-header>.break-out-wrap>.break-out{
 	background-color:var(--color-form-builder-tabs);
 }
 .builder-field-header{
