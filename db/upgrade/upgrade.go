@@ -112,7 +112,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				id uuid NOT NULL,
 				field_id uuid NOT NULL,
 				"position" smallint NOT NULL,
-				"state" state_effect NOT NULL,
+				"state" app.state_effect NOT NULL,
 			    CONSTRAINT tab_pkey PRIMARY KEY (id),
 				CONSTRAINT tab_field_id_position_key UNIQUE (field_id, "position")
 					DEFERRABLE INITIALLY DEFERRED,
