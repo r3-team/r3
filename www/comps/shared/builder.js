@@ -4,6 +4,13 @@ import {
 } from './attribute.js';
 import MyStore from '../../stores/store.js';
 
+export function getFieldHasQuery(field) {
+	return ['calendar','chart','list'].includes(field.content)
+		? true : field.content === 'data' && isAttributeRelationship(
+			MyStore.getters['schema/attributeIdMap'][field.attributeId].content
+		);
+};
+
 export function getDependentModules(moduleSource,modulesAll) {
 	let out = [];
 	for(let i = 0, j = modulesAll.length; i < j; i++) {
@@ -15,6 +22,28 @@ export function getDependentModules(moduleSource,modulesAll) {
 		out.push(m);
 	}
 	return out;
+};
+
+export function getFunctionHelp(functionPrefix,functionObj,builderLanguage) {
+	let help = `${functionObj.name}(${functionObj.codeArgs}) => ${functionObj.codeReturns}`;
+	
+	// add translated title/description, if available
+	let cap = `${functionPrefix}FunctionTitle`;
+	if(typeof functionObj.captions[cap] !== 'undefined'
+		&& typeof functionObj.captions[cap][builderLanguage] !== 'undefined'
+		&& functionObj.captions[cap][builderLanguage] !== '') {
+		
+		help += `<br /><br />${functionObj.captions[cap][builderLanguage]}`;
+	}
+	
+	cap = `${functionPrefix}FunctionDesc`;
+	if(typeof functionObj.captions[cap] !== 'undefined'
+		&& typeof functionObj.captions[cap][builderLanguage] !== 'undefined'
+		&& functionObj.captions[cap][builderLanguage] !== '') {
+		
+		help += `<br /><br />${functionObj.captions[cap][builderLanguage]}`;
+	}
+	return help;
 };
 
 export function getValueFromJson(inputJson,nameChain,valueFallback) {
@@ -68,10 +97,21 @@ export function getItemTitleNoRelationship(relation,attribute,index) {
 	return `${index}) ${relation.name}.${attribute.name}`;
 };
 
-export function getItemTitleColumn(column) {
-	let a = MyStore.getters['schema/attributeIdMap'][column.attributeId];
-	let r = MyStore.getters['schema/relationIdMap'][a.relationId];
-	return getItemTitle(r,a,column.index,false,false);
+export function getItemTitleColumn(column,withTitle) {
+	let name;
+	if(column.subQuery) {
+		name = `SubQuery`;
+	}
+	else {
+		let a = MyStore.getters['schema/attributeIdMap'][column.attributeId];
+		let r = MyStore.getters['schema/relationIdMap'][a.relationId];
+		name = getItemTitle(r,a,column.index,false,false);
+	}
+	
+	if(withTitle && typeof column.captions.columnTitle[MyStore.getters.settings.languageCode] !== 'undefined')
+		name = `${name} (${column.captions.columnTitle[MyStore.getters.settings.languageCode]})`;
+	
+	return name;
 };
 
 export function getItemTitleRelation(relationId,index) {

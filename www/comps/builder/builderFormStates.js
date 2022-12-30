@@ -1,54 +1,77 @@
 import {getNilUuid} from '../shared/generic.js';
-import {
-	getDataFields,
-	getFieldMap
-} from '../shared/form.js';
 export {MyBuilderFormStates as default};
 
 let MyBuilderFormStateEffect = {
 	name:'my-builder-form-state-effect',
 	template:`<div class="builder-form-state-effect">
 		
+		<!-- target -->
+		<select v-model="target" @input="changeTarget($event.target.value)">
+			<option value="field">{{ capApp.option.effectField }}</option>
+			<option value="tab">{{ capApp.option.effectTab }}</option>
+		</select>
+		
 		<!-- affected field -->
-		<select @input="update('fieldId',$event.target.value)" :value="effect.fieldId">
-			<option value="">-</option>
+		<select v-if="target === 'field'" @input="update('fieldId',$event.target.value)" :value="effect.fieldId">
+			<option :value="null">-</option>
 			<option
-				v-for="(ref,fieldId) in fieldIdMapRef"
+				v-for="(ref,fieldId) in entityIdMapRef.field"
+				:disabled="fieldId.startsWith('new')"
 				:value="fieldId"
-			>F{{ ref }}</option>
+			>F{{ fieldId.startsWith('new') ? ref + ' (' + capGen.notSaved + ')' : ref }}</option>
+		</select>
+		
+		<!-- affected tab -->
+		<select v-if="target === 'tab'" @input="update('tabId',$event.target.value)" :value="effect.tabId">
+			<option :value="null">-</option>
+			<option
+				v-for="(ref,id) in entityIdMapRef.tab"
+				:value="id"
+			>T{{ ref }}</option>
 		</select>
 		
 		<!-- new state -->
 		<select @input="update('newState',$event.target.value)" :value="effect.newState">
 			<option value="hidden">{{ capApp.stateHidden }}</option>
 			<option value="default">{{ capApp.stateDefault }}</option>
-			<option v-if="isData" value="optional">{{ capApp.stateOptional }}</option>
-			<option v-if="isData" value="required">{{ capApp.stateRequired }}</option>
-			<option v-if="isData || isButton" value="readonly">{{ capApp.stateReadonly }}</option>
+			<option value="optional" :disabled="!isData">{{ capApp.stateOptional }}</option>
+			<option value="required" :disabled="!isData">{{ capApp.stateRequired }}</option>
+			<option value="readonly" :disabled="!isData && !isButton">{{ capApp.stateReadonly }}</option>
 		</select>
 		
-		<my-button image="cancel.png"
+		<my-button image="delete.png"
 			@trigger="$emit('remove')"
-			:naked="true"
+			:cancel="true"
+			:tight="true"
 		/>
 	</div>`,
 	props:{
-		fieldIdMap:   { type:Object, required:true },
-		fieldIdMapRef:{ type:Object, required:true },
-		modelValue:   { type:Object, required:true }
+		entityIdMapRef:{ type:Object, required:true },
+		fieldIdMap:    { type:Object, required:true },
+		modelValue:    { type:Object, required:true }
 	},
 	emits:['remove','update:modelValue'],
+	data() {
+		return {
+			target:this.modelValue.tabId === null ? 'field' : 'tab'
+		};
+	},
 	computed:{
-		effect:  function() { return JSON.parse(JSON.stringify(this.modelValue)); },
-		fieldSet:function() { return this.effect.fieldId !== null; },
-		isButton:function() { return this.fieldSet && this.fieldIdMap[this.effect.fieldId].content === 'button'; },
-		isData:  function() { return this.fieldSet && this.fieldIdMap[this.effect.fieldId].content === 'data'; },
+		effect:  (s) => JSON.parse(JSON.stringify(s.modelValue)),
+		fieldSet:(s) => s.effect.fieldId !== null && typeof s.fieldIdMap[s.effect.fieldId] !== 'undefined',
+		isButton:(s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'button',
+		isData:  (s) => s.fieldSet && s.fieldIdMap[s.effect.fieldId].content === 'data',
 		
 		// store
-		capApp:function() { return this.$store.getters.captions.builder.form; }
+		capApp:(s) => s.$store.getters.captions.builder.form,
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
-		update:function(name,value) {
+		changeTarget(target) {
+			if(target === 'field') this.update('tabId',null);
+			else                   this.update('fieldId',null);
+		},
+		update(name,value) {
 			let v = JSON.parse(JSON.stringify(this.effect));
 			v[name] = value;
 			this.$emit('update:modelValue',v);
@@ -59,74 +82,70 @@ let MyBuilderFormStateEffect = {
 let MyBuilderFormState = {
 	name:'my-builder-form-state',
 	components:{MyBuilderFormStateEffect},
-	template:`<div class="builder-form-state" :class="{ 'show-details':detailsShow || showAlways }">
-		<div class="details">
+	template:`<div class="builder-form-state">
+		<div class="title">
 			<my-button
 				@trigger="detailsShow = !detailsShow"
-				:image="detailsShow || showAlways ? 'triangleDown.png' : 'triangleRight.png'"
-				:naked="true"
+				:captionTitle="capGen.button.show"
+				:image="detailsShow ? 'triangleDown.png' : 'triangleRight.png'"
 			/>
 			
-			<input class="long description"
+			<input class="description"
 				@input="update('description',-1,$event.target.value)"
 				:placeholder="capApp.descriptionHint"
 				:value="state.description"
 			/>
 			
-			<template v-if="detailsShow || showAlways">
-				<my-button image="add.png"
-					@trigger="addCondition()"
-					:caption="capApp.button.addCondition"
-				/>
-				<my-button image="add.png"
-					@trigger="addEffect()"
-					:caption="capApp.button.addEffect"
-				/>
-			</template>
-			
-			<my-button image="cancel.png"
+			<my-button image="delete.png"
 				@trigger="$emit('remove')"
-				:naked="true"
+				:cancel="true"
+				:captionTitle="capGen.button.delete"
+				:tight="true"
 			/>
 		</div>
 		
-		<template v-if="detailsShow || showAlways">
-			<span class="title" v-if="state.conditions.length !== 0">
-				{{ capApp.conditions }}
-			</span>
+		<div class="details" v-if="detailsShow">
+			<my-button image="add.png"
+				@trigger="addCondition"
+				:caption="capApp.conditions"
+				:naked="true"
+			/>
 			<my-filters
 				v-model="conditions"
 				:builderMode="true"
 				:disableContent="['attribute','javascript','subQuery']"
+				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
-				:fieldIdMapRef="fieldIdMapRef"
 				:filterAddCnt="filterAddCnt"
 				:moduleId="form.moduleId"
 				:showAdd="true"
 				:showMove="true"
 			/>
 			
-			<span class="title" v-if="state.effects.length !== 0">
-				{{ capApp.effects }}
-			</span>
-			<my-builder-form-state-effect
-				v-for="(e,i) in state.effects"
-				@update:modelValue="update('effects',i,$event)"
-				@remove="remove('effects',i)"
-				:fieldIdMap="fieldIdMap"
-				:fieldIdMapRef="fieldIdMapRef"
-				:key="'effect'+i"
-				:modelValue="state.effects[i]"
+			<my-button image="add.png"
+				@trigger="addEffect"
+				:caption="capApp.effects"
+				:naked="true"
 			/>
-		</template>
+			<div class="effects">
+				<my-builder-form-state-effect
+					v-for="(e,i) in state.effects"
+					@update:modelValue="update('effects',i,$event)"
+					@remove="remove('effects',i)"
+					:entityIdMapRef="entityIdMapRef"
+					:fieldIdMap="fieldIdMap"
+					:key="'effect'+i"
+					:modelValue="state.effects[i]"
+				/>
+			</div>
+		</div>
 	</div>`,
 	props:{
 		dataFields:    { type:Array,   required:true }, // all data fields
+		entityIdMapRef:{ type:Object,  required:true },
 		fieldIdMap:    { type:Object,  required:true }, // all fields by ID
-		fieldIdMapRef: { type:Object,  required:true }, // field references by ID
 		form:          { type:Object,  required:true },
-		modelValue:    { type:Object,  required:true },
-		showAlways:    { type:Boolean, required:true }
+		modelValue:    { type:Object,  required:true }
 	},
 	emits:['remove','update:modelValue'],
 	data() {
@@ -186,6 +205,7 @@ let MyBuilderFormState = {
 			let v = JSON.parse(JSON.stringify(this.state));
 			v.effects.push({
 				fieldId:null,
+				tabId:null,
 				newState:'default'
 			});
 			this.$emit('update:modelValue',v);
@@ -209,97 +229,73 @@ let MyBuilderFormState = {
 let MyBuilderFormStates = {
 	name:'my-builder-form-states',
 	components:{ MyBuilderFormState },
-	template:`<div class="builder-form-states contentBox" :class="{fullscreen:fullscreen}">
+	template:`<div class="builder-form-states">
 		
-		<div class="top lower">
-			<div class="area">
-				<my-button
-					:active="true"
-					:caption="capApp.title"
-					:naked="true"
-				/>
-				<my-button image="add.png"
-					@trigger="add"
-					:caption="capGen.button.add"
-				/>
-				<my-button
-					@trigger="showAll = !showAll"
-					:caption="capApp.button.showAll"
-					:image="showAll ? 'triangleDown.png' : 'triangleRight.png'"
-				/>
-			</div>
-			<div class="area default-inputs">
-				
-				<input
+		<div class="actions">
+			<my-button image="add.png"
+				@trigger="add"
+				:caption="capGen.button.add"
+			/>
+			
+			<div class="row centered default-inputs" v-if="states.length !== 0">
+				<input class="short"
 					v-model="filter"
 					:placeholder="capGen.button.filter"
 				/>
-				
 				<select v-model="filterFieldId">
 					<option value="">{{ capApp.option.filterFieldIdHint }}</option>
-					<template v-for="(ref,fieldId) in fieldIdMapRef">
+					<template v-for="(ref,fieldId) in entityIdMapRef.field">
 						<option
 							v-if="fieldIdsUsed.includes(fieldId)"
 							:value="fieldId"
 						>F{{ ref }}</option>
 					</template>
 				</select>
-				
-				<my-button
-					@trigger="$emit('set-fullscreen')"
-					:image="fullscreen ? 'shrink.png' : 'expand.png'"
-				/>
-				<my-button image="cancel.png"
-					@trigger="$emit('close')"
-					:cancel="true"
-				/>
 			</div>
 		</div>
 		
-		<div class="content default-inputs">
+		<div class="content no-padding default-inputs">
 			<my-builder-form-state
 				v-for="(s,i) in states"
 				v-show="stateShowIndex.includes(i)"
 				@remove="remove(i)"
 				@update:modelValue="update(i,$event)"
 				:dataFields="dataFields"
+				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
-				:fieldIdMapRef="fieldIdMapRef"
 				:form="form"
 				:key="s.id"
 				:modelValue="states[i]"
-				:showAlways="showAll"
 			/>
 		</div>
 	</div>`,
 	props:{
-		fieldIdMapRef:{ type:Object, required:false, default:() => {return {}} }, // field reference map (unique field counter for each ID)
-		form:         { type:Object, required:true },
-		fullscreen:   { type:Boolean,required:true },
-		modelValue:   { type:Array,  required:true }
+		dataFields:    { type:Array,  required:true },
+		entityIdMapRef:{ type:Object, required:false, default:() => {return {}} },
+		fieldIdMap:    { type:Object, required:true },
+		form:          { type:Object, required:true },
+		modelValue:    { type:Array,  required:true }
 	},
-	emits:['close','set-fullscreen','update:modelValue'],
+	emits:['update:modelValue'],
 	data:function() {
 		return {
 			filter:'',
-			filterFieldId:'',
-			showAll:false
+			filterFieldId:''
 		};
 	},
 	computed:{
 		fieldIdsUsed() {
 			let out = [];
-			
 			for(let i = 0, j = this.states.length; i < j; i++) {
 				let s = this.states[i];
 				
 				for(let x = 0, y = s.conditions.length; x < y; x++) {
 					
-					if(s.conditions[x].fieldId0 !== null && !out.includes(s.conditions[x].fieldId0))
-						out.push(s.conditions[x].fieldId0);
+					if(s.conditions[x].side0.fieldId !== null && !out.includes(s.conditions[x].side0.fieldId))
+						out.push(s.conditions[x].side0.fieldId);
 					
-					if(s.conditions[x].fieldId1 !== null && !out.includes(s.conditions[x].fieldId1))
-						out.push(s.conditions[x].fieldId1);
+					if(s.conditions[x].side1.fieldId !== null && !out.includes(s.conditions[x].side1.fieldId))
+						out.push(s.conditions[x].side1.fieldId);
 				}
 				
 				for(let x = 0, y = s.effects.length; x < y; x++) {
@@ -316,7 +312,7 @@ let MyBuilderFormStates = {
 				let s = this.states[i];
 				
 				// check text filter
-				if(this.filter !== '' && !s.description.includes(this.filter))
+				if(this.filter !== '' && !s.description.toLowerCase().includes(this.filter.toLowerCase()))
 					continue;
 				
 				// check field filter
@@ -326,8 +322,8 @@ let MyBuilderFormStates = {
 					// check conditions for field ID
 					for(let i = 0, j = s.conditions.length; i < j; i++) {
 						
-						if(s.conditions[i].fieldId0 === this.filterFieldId
-							|| s.conditions[i].fieldId1 === this.filterFieldId) {
+						if(s.conditions[i].side0.fieldId === this.filterFieldId
+							|| s.conditions[i].side1.fieldId === this.filterFieldId) {
 							
 							show = true;
 							break;
@@ -351,9 +347,7 @@ let MyBuilderFormStates = {
 		},
 		
 		// simple
-		dataFields:(s) => s.getDataFields(s.form.fields),
-		fieldIdMap:(s) => s.getFieldMap(s.form.fields),
-		states:    (s) => JSON.parse(JSON.stringify(s.modelValue)),
+		states:(s) => JSON.parse(JSON.stringify(s.modelValue)),
 		
 		// stores
 		capApp:(s) => s.$store.getters.captions.builder.form.states,
@@ -361,8 +355,6 @@ let MyBuilderFormStates = {
 	},
 	methods:{
 		// externals
-		getDataFields,
-		getFieldMap,
 		getNilUuid,
 		
 		// actions

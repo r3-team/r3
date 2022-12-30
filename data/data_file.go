@@ -166,7 +166,7 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool,
 	if isNewFile {
 		// store file reference
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO instance.file (id) VALUES ($1)
+			INSERT INTO instance.file (id, ref_counter) VALUES ($1,0)
 		`, fileId); err != nil {
 			return err
 		}

@@ -32,8 +32,8 @@ let MyFilterBrackets = {
 	emits:['update:modelValue'],
 	computed:{
 		value:{
-			get:function()  { return this.modelValue; },
-			set:function(v) { this.$emit('update:modelValue',v); }
+			get()  { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue',v); }
 		}
 	},
 	methods:{
@@ -69,9 +69,7 @@ let MyFilterOperatorOption = {
 		value:      { type:String,  required:true }
 	},
 	computed:{
-		displayCaption:function() {
-			return !this.builderMode ? this.caption : this.value;
-		}
+		displayCaption:(s) => !s.builderMode ? s.caption : s.value
 	}
 };
 
@@ -128,10 +126,10 @@ let MyFilterOperator = {
 	emits:['update:modelValue'],
 	computed:{
 		value:{
-			get:function()  { return this.modelValue; },
-			set:function(v) { this.$emit('update:modelValue',v); }
+			get()  { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue',v); }
 		},
-		capApp:function() { return this.$store.getters.captions.filter; }
+		capApp:(s) => s.$store.getters.captions.filter
 	}
 };
 
@@ -148,10 +146,10 @@ let MyFilterConnector = {
 	emits:['update:modelValue'],
 	computed:{
 		value:{
-			get:function()  { return this.modelValue; },
-			set:function(v) { this.$emit('update:modelValue',v); }
+			get()  { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue',v); }
 		},
-		capApp:function() { return this.$store.getters.captions.filter; }
+		capApp:(s) => s.$store.getters.captions.filter
 	}
 };
 
@@ -186,22 +184,22 @@ let MyFilterAttribute = {
 	emits:['update:modelValue'],
 	computed:{
 		value:{
-			get:function()  { return this.modelValue; },
-			set:function(v) { this.$emit('update:modelValue',v); }
+			get()  { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue',v); }
 		},
 		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.filter; },
-		moduleLanguage:function() { return this.$store.getters.moduleLanguage; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.filter,
+		moduleLanguage:(s) => s.$store.getters.moduleLanguage
 	},
 	methods:{
 		// externals
 		getItemTitleNoRelationship,
 		
 		// presentation
-		getAttributeCaption:function(nestedIndexAttributeId) {
+		getAttributeCaption(nestedIndexAttributeId) {
 			let v   = nestedIndexAttributeId.split('_');
 			let atr = this.attributeIdMap[v[2]];
 			
@@ -217,7 +215,7 @@ let MyFilterAttribute = {
 			let rel = this.relationIdMap[atr.relationId];
 			return this.getItemTitleNoRelationship(rel,atr,v[1]);
 		},
-		getQueryLabel:function(nestingLevel) {
+		getQueryLabel(nestingLevel) {
 			if(nestingLevel === 0)
 				return this.capApp.nestingMain;
 			
@@ -246,6 +244,7 @@ let MyFilterSide = {
 					<option
 						v-for="c in contentEnabled"
 						:disabled="contentUnusable.includes(c)"
+						:title="capApp.option.contentHint[c]"
 						:value="c"
 					>
 						{{ capApp.option.content[c] }}
@@ -287,17 +286,18 @@ let MyFilterSide = {
 				<select v-model="columnId" v-if="!columnsMode && isCollection && collectionId !== null">
 					<option :value="null">-</option>
 					<option v-for="c in collectionIdMap[collectionId].columns" :value="c.id">
-						{{ getItemTitleColumn(c) }}
+						{{ getItemTitleColumn(c,true) }}
 					</option>
 				</select>
 				
 				<!-- field input -->
 				<select v-model="fieldId" v-if="!columnsMode && isField">
-					<template v-for="(ref,fieldId) in fieldIdMapRef">
+					<template v-for="(ref,fieldId) in entityIdMapRef.field">
 						<option
 							v-if="fieldIdMap[fieldId].content === 'data'"
+							:disabled="fieldId.startsWith('new')"
 							:value="fieldId"
-						>F{{ ref }}</option>
+						>F{{ fieldId.startsWith('new') ? ref + ' (' + capGen.notSaved + ')' : ref }}</option>
 					</template>
 				</select>
 				
@@ -390,8 +390,8 @@ let MyFilterSide = {
 				:allowChoices="false"
 				:allowOrders="true"
 				:choices="query.choices"
+				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
-				:fieldIdMapRef="fieldIdMapRef"
 				:filters="query.filters"
 				:fixedLimit="query.fixedLimit"
 				:joins="query.joins"
@@ -409,8 +409,8 @@ let MyFilterSide = {
 		columnTime:    { type:Boolean, required:false, default:false },
 		columnsMode:   { type:Boolean, required:true },
 		disableContent:{ type:Array,   required:true },
+		entityIdMapRef:{ type:Object,  required:true },
 		fieldIdMap:    { type:Object,  required:true },
-		fieldIdMapRef: { type:Object,  required:true },
 		isNullOperator:{ type:Boolean, required:true },
 		joins:         { type:Array,   required:true },
 		joinsParents:  { type:Array,   required:true },
@@ -428,62 +428,58 @@ let MyFilterSide = {
 	},
 	computed:{
 		// entities
-		contentEnabled:function() {
+		contentEnabled:(s) => {
 			return [
 				'attribute','field','fieldChanged','value','record',
 				'recordNew','login','preset','role','languageCode',
 				'javascript','true','collection','subQuery'
-			].filter(v => !this.disableContent.includes(v));
+			].filter(v => !s.disableContent.includes(v));
 		},
-		contentUnusable:function() {
+		contentUnusable:(s) => {
 			let out = [];
-			if(Object.keys(this.fieldIdMap).length === 0) {
+			if(Object.keys(s.fieldIdMap).length === 0) {
 				out.push('field');
 				out.push('fieldChanged');
 			}
 			return out;
 		},
-		module:function() {
-			return this.moduleId === ''
-				? false : this.moduleIdMap[this.moduleId];
-		},
-		nestedIndexAttributeIdsSubQuery:function() {
-			if(!this.isSubQuery) return [];
+		nestedIndexAttributeIdsSubQuery:(s) => {
+			if(!s.isSubQuery) return [];
 			
-			return this.getNestedIndexAttributeIdsByJoins(
-				this.query.joins,
-				this.joinsParents.length,
+			return s.getNestedIndexAttributeIdsByJoins(
+				s.query.joins,
+				s.joinsParents.length,
 				false
 			);
 		},
 		
 		// inputs
 		brackets:{
-			get:function()  { return this.modelValue.brackets; },
-			set:function(v) { this.set('brackets',v); }
+			get()  { return this.modelValue.brackets; },
+			set(v) { this.set('brackets',v); }
 		},
 		content:{ // getter only
-			get:function() { return this.modelValue.content; }
+			get() { return this.modelValue.content; }
 		},
 		collectionId:{
-			get:function()  { return this.modelValue.collectionId; },
-			set:function(v) { this.set('collectionId',v); }
+			get()  { return this.modelValue.collectionId; },
+			set(v) { this.set('collectionId',v); }
 		},
 		columnId:{
-			get:function()  { return this.modelValue.columnId; },
-			set:function(v) { this.set('columnId',v); }
+			get()  { return this.modelValue.columnId; },
+			set(v) { this.set('columnId',v); }
 		},
 		fieldId:{
-			get:function()  { return this.modelValue.fieldId; },
-			set:function(v) { this.set('fieldId',v); }
+			get()  { return this.modelValue.fieldId; },
+			set(v) { this.set('fieldId',v); }
 		},
 		nestedIndexAttribute:{
-			get:function()  {
+			get()  {
 				return `${this.modelValue.attributeNested}`+
 					`_${this.modelValue.attributeIndex}`+
 					`_${this.modelValue.attributeId}`;
 			},
-			set:function(v) {
+			set(v) {
 				if(typeof v === 'undefined')
 					return;
 				
@@ -492,52 +488,53 @@ let MyFilterSide = {
 			}
 		},
 		presetId:{
-			get:function()  { return this.modelValue.presetId; },
-			set:function(v) { this.set('presetId',v); }
+			get()  { return this.modelValue.presetId; },
+			set(v) { this.set('presetId',v); }
 		},
 		query:{
-			get:function()  { return this.modelValue.query; },
-			set:function(v) { this.set('query',v); }
+			get()  { return this.modelValue.query; },
+			set(v) { this.set('query',v); }
 		},
 		queryAggregator:{
-			get:function()  { let v = this.modelValue.queryAggregator; return v !== null ? v : ''; },
-			set:function(v) { this.set('queryAggregator',v === '' ? null : v); }
+			get()  { let v = this.modelValue.queryAggregator; return v !== null ? v : ''; },
+			set(v) { this.set('queryAggregator',v === '' ? null : v); }
 		},
 		roleId:{
-			get:function()  { return this.modelValue.roleId; },
-			set:function(v) { this.set('roleId',v); }
+			get()  { return this.modelValue.roleId; },
+			set(v) { this.set('roleId',v); }
 		},
 		valueFixText:{
-			get:function()  { return this.modelValue.value; },
-			set:function(v) { this.set('value',v); }
+			get()  { return this.modelValue.value; },
+			set(v) { this.set('value',v); }
 		},
 		valueFixTextDate:{
-			get:function()  {
-				return this.valueFixText === '' ? null : this.valueFixText;
-			},
-			set:function(v) {
+			get()  { return this.valueFixText === '' ? null : this.valueFixText; },
+			set(v) {
 				if(v === null) v = '';
 				this.valueFixText = String(v);
 			}
 		},
 		
+		// simple
+		module:(s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
+		
 		// states
-		isAttribute:  function() { return this.content === 'attribute'; },
-		isCollection: function() { return this.content === 'collection'; },
-		isField:      function() { return this.content === 'field' || this.content === 'fieldChanged'; },
-		isJavascript: function() { return this.content === 'javascript'; },
-		isPreset:     function() { return this.content === 'preset'; },
-		isRole:       function() { return this.content === 'role'; },
-		isSubQuery:   function() { return this.content === 'subQuery'; },
-		isValue:      function() { return this.content === 'value'; },
-		isNullPartner:function() { return !this.leftSide && this.isNullOperator; },
+		isAttribute:  (s) => s.content === 'attribute',
+		isCollection: (s) => s.content === 'collection',
+		isField:      (s) => s.content === 'field' || s.content === 'fieldChanged',
+		isJavascript: (s) => s.content === 'javascript',
+		isPreset:     (s) => s.content === 'preset',
+		isRole:       (s) => s.content === 'role',
+		isSubQuery:   (s) => s.content === 'subQuery',
+		isValue:      (s) => s.content === 'value',
+		isNullPartner:(s) => !s.leftSide && s.isNullOperator,
 		
 		// stores
-		modules:        function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
-		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
-		capApp:         function() { return this.$store.getters.captions.filter; },
-		capGen:         function() { return this.$store.getters.captions.generic; }
+		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
+		capApp:         (s) => s.$store.getters.captions.filter,
+		capGen:         (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -547,19 +544,19 @@ let MyFilterSide = {
 		getQueryTemplate,
 		
 		// actions
-		set:function(name,newValue) {
+		set(name,newValue) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = newValue;
 			this.$emit('update:modelValue',v);
 		},
-		setAttribute:function(attributeId,index,nested) {
+		setAttribute(attributeId,index,nested) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v.attributeId     = attributeId;
 			v.attributeIndex  = index;
 			v.attributeNested = nested;
 			this.$emit('update:modelValue',v);
 		},
-		setContent:function(evt) {
+		setContent(evt) {
 			let v     = JSON.parse(JSON.stringify(this.modelValue));
 			v.content = evt.target.value;
 			
@@ -592,7 +589,7 @@ let MyFilterSide = {
 			}
 			this.$emit('update:modelValue',v);
 		},
-		setQuery:function(name,newValue) {
+		setQuery(name,newValue) {
 			let v = JSON.parse(JSON.stringify(this.modelValue.query));
 			v[name] = newValue;
 			this.set('query',v);
@@ -609,6 +606,7 @@ let MyFilter = {
 		MyFilterSide
 	},
 	template:`<div class="filter">
+		<img v-if="expertMode" class="dragAnchor" src="images/drag.png" />
 		<my-filter-connector class="connector"
 			v-model="connectorInput"
 			:readonly="position === 0"
@@ -624,8 +622,8 @@ let MyFilter = {
 			:builderMode="builderMode"
 			:columnsMode="columnsMode"
 			:disableContent="disableContent"
+			:entityIdMapRef="entityIdMapRef"
 			:fieldIdMap="fieldIdMap"
-			:fieldIdMapRef="fieldIdMapRef"
 			:isNullOperator="isNullOperator"
 			:joins="joins"
 			:joinsParents="joinsParents"
@@ -648,8 +646,8 @@ let MyFilter = {
 			:columnTime="side0ColumTime"
 			:columnsMode="columnsMode"
 			:disableContent="disableContent"
+			:entityIdMapRef="entityIdMapRef"
 			:fieldIdMap="fieldIdMap"
-			:fieldIdMapRef="fieldIdMapRef"
 			:isNullOperator="isNullOperator"
 			:joins="joins"
 			:joinsParents="joinsParents"
@@ -663,19 +661,10 @@ let MyFilter = {
 			v-model="brackets1Input"
 			:left="false"
 		/>
-		<my-button image="arrowDown.png"
-			v-if="moveDown"
-			@trigger="$emit('move-down')"
-			:naked="true"
-		/>
-		<my-button image="arrowUp.png"
-			v-if="moveUp"
-			@trigger="$emit('move-up')"
-			:naked="true"
-		/>
-		<my-button image="cancel.png"
+		<my-button image="delete.png"
 			@trigger="$emit('remove',position)"
-			:naked="true"
+			:cancel="true"
+			:tight="true"
 		/>
 	</div>`,
 	props:{
@@ -683,14 +672,12 @@ let MyFilter = {
 		columns:       { type:Array,   required:false, default:() => [] },
 		columnsMode:   { type:Boolean, required:true },
 		disableContent:{ type:Array,   required:true },
+		entityIdMapRef:{ type:Object,  required:true },
 		expertMode:    { type:Boolean, required:true },
 		fieldIdMap:    { type:Object,  required:true },
-		fieldIdMapRef: { type:Object,  required:true },
 		joins:         { type:Array,   required:true },
 		joinsParents:  { type:Array,   required:true },
 		moduleId:      { type:String,  required:true },
-		moveDown:      { type:Boolean, required:true },
-		moveUp:        { type:Boolean, required:true },
 		nestedIndexAttributeIds:{ type:Array, required:true },
 		nestingLevels: { type:Number,  required:true },
 		
@@ -701,79 +688,80 @@ let MyFilter = {
 		side0:    { type:Object, required:true },
 		side1:    { type:Object, required:true }
 	},
-	emits:['apply-value','move-down','move-up','remove','update'],
+	emits:['apply-value','remove','update'],
 	computed:{
 		// inputs
 		brackets0Input:{
-			get:function() { return this.side0.brackets; },
-			set:function(vNew) {
+			get() { return this.side0.brackets; },
+			set(vNew) {
 				let v = JSON.parse(JSON.stringify(this.side0));
 				v.brackets = vNew;
 				this.side0Input = v;
 			}
 		},
 		brackets1Input:{
-			get:function() { return this.side1.brackets; },
-			set:function(vNew) {
+			get() { return this.side1.brackets; },
+			set(vNew) {
 				let v = JSON.parse(JSON.stringify(this.side1));
 				v.brackets = vNew;
 				this.side1Input = v;
 			}
 		},
 		connectorInput:{
-			get:function()  { return this.connector; },
-			set:function(v) { this.$emit('update',this.position,'connector',v); }
+			get()  { return this.connector; },
+			set(v) { this.$emit('update',this.position,'connector',v); }
 		},
 		operatorInput:{
-			get:function()  { return this.operator; },
-			set:function(v) { this.$emit('update',this.position,'operator',v); }
+			get()  { return this.operator; },
+			set(v) { this.$emit('update',this.position,'operator',v); }
 		},
 		side0Input:{
-			get:function()  { return this.side0; },
-			set:function(v) { this.$emit('update',this.position,'side0',v); }
+			get()  { return this.side0; },
+			set(v) { this.$emit('update',this.position,'side0',v); }
 		},
 		side1Input:{
-			get:function()  { return this.side1; },
-			set:function(v) { this.$emit('update',this.position,'side1',v); }
+			get()  { return this.side1; },
+			set(v) { this.$emit('update',this.position,'side1',v); }
 		},
 		
 		// states
-		side0Column:function() {
-			for(let i = 0, j = this.columns.length; i < j; i++) {
-				let c = this.columns[i];
+		side0Column:(s) => {
+			for(let i = 0, j = s.columns.length; i < j; i++) {
+				let c = s.columns[i];
 				
-				if(c.index !== this.side0.attributeIndex || c.attributeId !== this.side0.attributeId)
+				if(c.index !== s.side0.attributeIndex || c.attributeId !== s.side0.attributeId)
 					continue;
 				
 				return c;
 			}
 			return false;
 		},
-		side0ColumDate:function() {
-			return ['date','datetime'].includes(this.side0Column.display);
+		side0ColumDate:(s) => {
+			return ['date','datetime'].includes(s.side0Column.display);
 		},
-		side0ColumTime:function() {
-			return ['datetime','time'].includes(this.side0Column.display);
+		side0ColumTime:(s) => {
+			return ['datetime','time'].includes(s.side0Column.display);
 		},
-		isNullOperator:function() {
-			return ['IS NULL','IS NOT NULL'].includes(this.operator);
+		isNullOperator:(s) => {
+			return ['IS NULL','IS NOT NULL'].includes(s.operator);
 		},
-		isStringInput:function() {
+		isStringInput:(s) => {
 			return (
-				typeof this.side0.attributeId !== 'undefined' &&
-				this.side0.attributeId !== null &&
-				this.isAttributeString(this.attributeIdMap[this.side0.attributeId].content)
+				typeof s.side0.attributeId !== 'undefined' &&
+				s.side0.attributeId !== null &&
+				s.isAttributeString(s.attributeIdMap[s.side0.attributeId].content)
 			) || (
-				typeof this.side1.attributeId !== 'undefined' &&
-				this.side1.attributeId !== null &&
-				this.isAttributeString(this.attributeIdMap[this.side1.attributeId].content)
+				typeof s.side1.attributeId !== 'undefined' &&
+				s.side1.attributeId !== null &&
+				s.isAttributeString(s.attributeIdMap[s.side1.attributeId].content)
 			);
 		},
 		
 		// stores
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; }
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap']
 	},
 	methods:{
+		// externals
 		isAttributeString
 	}
 };
@@ -802,34 +790,37 @@ let MyFilters = {
 			</div>
 		</div>
 		
-		<my-filter
-			v-for="(f,i) in filters"
-			@apply-value="apply"
-			@move-down="move(i,true)"
-			@move-up="move(i,false)"
-			@remove="remove"
-			@update="update"
-			:builderMode="builderMode"
-			:columns="columns"
-			:columnsMode="columnsMode"
-			:connector="f.connector"
-			:disableContent="disableContent"
-			:expertMode="expertMode"
-			:fieldIdMap="fieldIdMap"
-			:fieldIdMapRef="fieldIdMapRef"
-			:joins="joins"
-			:joinsParents="joinsParents"
-			:key="i"
-			:moduleId="moduleId"
-			:moveDown="showMove && i < filters.length - 1"
-			:moveUp="showMove && i === filters.length -1"
-			:nestedIndexAttributeIds="nestedIndexAttributeIds"
-			:nestingLevels="joinsParents.length+1"
-			:operator="f.operator"
-			:position="i"
-			:side0="f.side0"
-			:side1="f.side1"
-		/>
+		<draggable handle=".dragAnchor" group="filters" itemKey="id" animation="100"
+			@change="set"
+			:fallbackOnBody="true"
+			:list="filters"
+		>
+			<template #item="{element,index}">
+				<my-filter
+					@apply-value="apply"
+					@remove="remove"
+					@update="setValue"
+					:builderMode="builderMode"
+					:columns="columns"
+					:columnsMode="columnsMode"
+					:connector="element.connector"
+					:disableContent="disableContent"
+					:entityIdMapRef="entityIdMapRef"
+					:expertMode="expertMode"
+					:fieldIdMap="fieldIdMap"
+					:joins="joins"
+					:joinsParents="joinsParents"
+					:key="index"
+					:moduleId="moduleId"
+					:nestedIndexAttributeIds="nestedIndexAttributeIds"
+					:nestingLevels="joinsParents.length+1"
+					:operator="element.operator"
+					:position="index"
+					:side0="element.side0"
+					:side1="element.side1"
+				/>
+			</template>
+		</draggable>
 		
 		<div class="filter-actions end" v-if="userFilter && nestedIndexAttributeIds.length !== 0">
 			<div class="row">
@@ -847,9 +838,10 @@ let MyFilters = {
 			</div>
 			<div class="row">
 				<my-button image="delete.png"
-					@trigger="filters = []"
+					@trigger="removeAll"
 					:active="anyFilters"
 					:cancel="true"
+					:caption="capGen.button.all"
 					:captionTitle="capGen.button.reset"
 				/>
 				<my-button image="cancel.png"
@@ -864,8 +856,8 @@ let MyFilters = {
 		builderMode:   { type:Boolean, required:false, default:false },
 		columns:       { type:Array,   required:false, default:() => [] },
 		disableContent:{ type:Array,   required:false, default:() => [] }, // content to disable (attribute, record, field, true, ...)
+		entityIdMapRef:{ type:Object,  required:false, default:() => {return {}} },
 		fieldIdMap:    { type:Object,  required:false, default:() => {return {}} },
-		fieldIdMapRef: { type:Object,  required:false, default:() => {return {}} },
 		filterAddCnt:  { type:Number,  required:false, default:0 },
 		frontendOnly:  { type:Boolean, required:false, default:false },    // filter criteria must not contain backend types (attributes/queries)
 		joins:         { type:Array,   required:false, default:() => [] },
@@ -877,25 +869,21 @@ let MyFilters = {
 		showReset:     { type:Boolean, required:false, default:false },
 		userFilter:    { type:Boolean, required:false, default:false }     // filter is for end users
 	},
-	emits:['apply','close','reset','update:modelValue'],
+	emits:['apply','close','update:modelValue'],
 	watch:{
-		// ugly hack to trigger inside this component
-		filterAddCnt() {
-			this.add();
+		filterAddCnt() { this.add(); }, // ugly hack to trigger inside this component
+		modelValue:{
+			handler:function() { this.reset(); },
+			immediate:true
 		}
 	},
 	data() {
 		return {
-			expertMode:this.builderMode
+			expertMode:this.builderMode,
+			filters:[]
 		};
 	},
 	computed:{
-		// inputs
-		filters:{
-			get()  { return JSON.parse(JSON.stringify(this.modelValue)); },
-			set(v) { this.$emit('update:modelValue',v); }
-		},
-		
 		// states
 		bracketsEqual:(s) => {
 			let cnt0 = 0;
@@ -956,19 +944,11 @@ let MyFilters = {
 		getNestedIndexAttributeIdsByJoins,
 		isAttributeFiles,
 		
-		forceFirstAnd() {
-			// overwrite first filter with only valid connector
-			if(this.filters.length > 0)
-				this.filters[0].connector = 'AND';
+		reset() {
+			this.filters = JSON.parse(JSON.stringify(this.modelValue));
 		},
 		
 		// actions
-		apply() {
-			if(!this.bracketsEqual)
-				return;
-			
-			this.$emit('apply');
-		},
 		add() {
 			let v = {
 				connector:'AND',
@@ -1010,29 +990,36 @@ let MyFilters = {
 				v.side1.query           = null;
 				v.side1.queryAggregator = null;
 			}
-			let f = JSON.parse(JSON.stringify(this.filters));
-			f.push(v);
-			this.filters = f;
+			this.filters.push(v);
+			this.set();
 		},
-		move(i,down) {
-			let f = this.filters[i];
-			this.filters.splice(i,1);
-			this.filters.splice((down ? i + 1 : i - 1),0,f);
-			this.filters = this.filters;
-			this.forceFirstAnd();
+		apply() {
+			if(this.bracketsEqual)
+				this.$emit('apply');
 		},
 		remove(position) {
 			this.filters.splice(position,1);
-			this.filters = this.filters;
-			this.forceFirstAnd();
+			this.set();
 			
 			// inform parent when filter has been reset
 			if(this.filters.length === 0)
-				this.$emit('reset');
+				this.$emit('apply');
 		},
-		update(position,name,value) {
+		removeAll() {
+			this.filters = [];
+			this.set();
+			this.$emit('apply');
+		},
+		set() {
+			// overwrite first filter with only valid connector
+			if(this.filters.length > 0)
+				this.filters[0].connector = 'AND';
+			
+			this.$emit('update:modelValue',JSON.parse(JSON.stringify(this.filters)));
+		},
+		setValue(position,name,value) {
 			this.filters[position][name] = value;
-			this.filters = this.filters;
+			this.set();
 		}
 	}
 };

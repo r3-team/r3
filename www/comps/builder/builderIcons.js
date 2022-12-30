@@ -2,12 +2,68 @@ import {getNilUuid} from '../shared/generic.js';
 import {srcBase64}  from '../shared/image.js';
 export {MyBuilderIcons as default};
 
+let MyBuilderIcon = {
+	name:'my-builder-icon',
+	template:`<div class="icon">
+		<my-button
+			v-if="!readonly"
+			@trigger="$emit('toggle')"
+			:active="!readonly"
+			:image="selected ? 'checkbox1.png' : 'checkbox0.png'"
+			:tight="true"
+		/>
+		<img class="preview" :src="srcBase64(icon.file)" />
+		<span class="default-inputs">
+			<input v-model="name" :disabled="readonly" :placeholder="capApp.nameHint" />
+		</span>
+		<my-button image="save.png"
+			v-if="!readonly"
+			@trigger="set"
+			:active="hasChanges"
+		/>
+	</div>`,
+	props:{
+		icon:    { type:Object,  required:true },
+		readonly:{ type:Boolean, required:true },
+		selected:{ type:Boolean, required:true }
+	},
+	emits:['toggle'],
+	data:function() {
+		return {
+			name:this.icon.name
+		};
+	},
+	computed:{
+		hasChanges:(s) => s.icon.name !== s.name,
+		
+		// stores
+		capApp:(s) => s.$store.getters.captions.builder.icon
+	},
+	methods:{
+		// external
+		srcBase64,
+		
+		set() {
+			ws.send('icon','setName',{
+				id:this.icon.id,
+				moduleId:this.icon.moduleId,
+				name:this.name
+			},true).then(
+				this.$root.schemaReload(this.icon.moduleId),
+				this.$root.genericError
+			);
+		}
+	}
+};
+
 let MyBuilderIcons = {
 	name:'my-builder-icons',
+	components:{ MyBuilderIcon },
 	template:`<div class="contentBox grow">
 		
 		<div class="top">
 			<div class="area nowrap">
+				<img class="icon" src="images/icon.png" />
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
 		</div>
@@ -24,19 +80,17 @@ let MyBuilderIcons = {
 		</div>
 		
 		<div class="content builder-icons" v-if="module">
-		
 			<div class="icons">
-				<div class="icon" v-for="icon in module.icons">
-					<my-button
-						@trigger="toggleSelect(icon.id)"
-						:active="!readonly"
-						:image="iconIdsSelected.includes(icon.id) ? 'checkbox1.png' : 'checkbox0.png'"
-					/>
-					<img class="preview" :src="srcBase64(icon.file)" />
-				</div>
+				<my-builder-icon v-for="icon in module.icons"
+					@toggle="toggleSelect(icon.id)"
+					:key="icon.id"
+					:icon="icon"
+					:readonly="readonly"
+					:selected="iconIdsSelected.includes(icon.id)"
+				/>
 			</div>
 			
-			<div v-if="iconIdsSelected.length < 2" class="builder-icons-add">
+			<div v-if="iconIdsSelected.length < 2 && !readonly" class="builder-icons-add">
 				<h2>{{ capApp.add }}</h2>
 				
 				<div>
@@ -58,30 +112,22 @@ let MyBuilderIcons = {
 		};
 	},
 	computed:{
-		iconIdUpdate:function() {
-			// if single icon is selected, it can be updated
-			return this.iconIdsSelected.length !== 1 ? -1 : this.iconIdsSelected[0];
-		},
-		module:function() {
-			if(typeof this.moduleIdMap[this.id] === 'undefined')
-				return false;
-			
-			return this.moduleIdMap[this.id];
-		},
+		// if single icon is selected, it can be updated
+		iconIdUpdate:(s) => s.iconIdsSelected.length !== 1 ? -1 : s.iconIdsSelected[0],
+		module:      (s) => s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
 		
 		// stores
-		token:      function() { return this.$store.getters['local/token']; },
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.builder.icon; },
-		capGen:     function() { return this.$store.getters.captions.generic; }
+		token:      (s) => s.$store.getters['local/token'],
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:     (s) => s.$store.getters.captions.builder.icon,
+		capGen:     (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
 		getNilUuid,
-		srcBase64,
 		
 		// actions
-		toggleSelect:function(id) {
+		toggleSelect(id) {
 			let pos = this.iconIdsSelected.indexOf(id);
 			
 			if(pos === -1) this.iconIdsSelected.push(id);
@@ -89,7 +135,7 @@ let MyBuilderIcons = {
 		},
 		
 		// backend calls
-		del:function() {
+		del() {
 			let requests = [];
 			for(let i = 0, j = this.iconIdsSelected.length; i < j; i++) {
 				requests.push(ws.prepare('icon','del',{id:this.iconIdsSelected[i]}));
@@ -103,7 +149,7 @@ let MyBuilderIcons = {
 				err => this.$root.genericError(err)
 			);
 		},
-		add:function(evt) {
+		add(evt) {
 			let that        = this;
 			let formData    = new FormData();
 			let httpRequest = new XMLHttpRequest();

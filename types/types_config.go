@@ -16,6 +16,8 @@ type FileType struct {
 		Transfer       string `json:"transfer"`
 	} `json:"paths"`
 
+	Portable bool `json:"portable"`
+
 	Web struct {
 		Cert   string `json:"cert"`
 		Key    string `json:"key"`

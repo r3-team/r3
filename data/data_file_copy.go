@@ -88,7 +88,7 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 		}
 
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO instance.file (id) VALUES ($1)
+			INSERT INTO instance.file (id, ref_counter) VALUES ($1,0)
 		`, idNew); err != nil {
 			tx.Rollback(db.Ctx)
 			return files, err

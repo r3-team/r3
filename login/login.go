@@ -332,19 +332,19 @@ func GetNames(id int64, idsExclude []int64, byString string, noLdapAssign bool) 
 }
 
 // user creatable fixed (permanent) tokens for less sensitive access permissions
-func DelTokenFixed(loginId int64, token string) error {
+func DelTokenFixed(loginId int64, id int64) error {
 	_, err := db.Pool.Exec(db.Ctx, `
 		DELETE FROM instance.login_token_fixed
 		WHERE login_id = $1
-		AND   token    = $2
-	`, loginId, token)
+		AND   id       = $2
+	`, loginId, id)
 	return err
 }
 func GetTokensFixed(loginId int64) ([]types.LoginTokenFixed, error) {
 	tokens := make([]types.LoginTokenFixed, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT name, context, token, date_create
+		SELECT id, name, context, token, date_create
 		FROM instance.login_token_fixed
 		WHERE login_id = $1
 		ORDER BY date_create ASC
@@ -357,7 +357,7 @@ func GetTokensFixed(loginId int64) ([]types.LoginTokenFixed, error) {
 	for rows.Next() {
 		var t types.LoginTokenFixed
 		var n pgtype.Varchar
-		if err := rows.Scan(&n, &t.Context, &t.Token, &t.DateCreate); err != nil {
+		if err := rows.Scan(&t.Id, &n, &t.Context, &t.Token, &t.DateCreate); err != nil {
 			return tokens, err
 		}
 		t.Name = n.String
@@ -366,11 +366,6 @@ func GetTokensFixed(loginId int64) ([]types.LoginTokenFixed, error) {
 	return tokens, nil
 }
 func SetTokenFixed_tx(tx pgx.Tx, loginId int64, name string, context string) (string, error) {
-
-	if !tools.StringInSlice(context, []string{"client", "ics"}) {
-		return "", errors.New("unknown fixed token context")
-	}
-
 	min, max := 32, 48
 	tokenFixed := tools.RandStringRunes(rand.Intn(max-min+1) + min)
 
@@ -399,6 +394,16 @@ func CreateAdmin(username string, password string) error {
 		return err
 	}
 	return tx.Commit(db.Ctx)
+}
+
+// reset all TOTP keys
+func ResetTotp_tx(tx pgx.Tx, loginId int64) error {
+	_, err := db.Pool.Exec(db.Ctx, `
+		DELETE FROM instance.login_token_fixed
+		WHERE login_id = $1
+		AND   context  = 'totp'
+	`, loginId)
+	return err
 }
 
 // updates internal login backend with logins from LDAP

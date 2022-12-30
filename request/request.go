@@ -200,6 +200,15 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 	}
 
 	switch ressource {
+	case "article":
+		switch action {
+		case "assign":
+			return ArticleAssign_tx(tx, reqJson)
+		case "del":
+			return ArticleDel_tx(tx, reqJson)
+		case "set":
+			return ArticleSet_tx(tx, reqJson)
+		}
 	case "attribute":
 		switch action {
 		case "del":
@@ -208,6 +217,11 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return AttributeGet(reqJson)
 		case "set":
 			return AttributeSet_tx(tx, reqJson)
+		}
+	case "backup":
+		switch action {
+		case "get":
+			return BackupGet()
 		}
 	case "bruteforce":
 		switch action {
@@ -271,6 +285,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		switch action {
 		case "del":
 			return IconDel_tx(tx, reqJson)
+		case "setName":
+			return IconSetName_tx(tx, reqJson)
 		}
 	case "jsFunction":
 		switch action {
@@ -327,6 +343,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return LoginReauth(reqJson)
 		case "reauthAll":
 			return LoginReauthAll()
+		case "resetTotp":
+			return LoginResetTotp_tx(tx, reqJson)
 		case "set":
 			return LoginSet_tx(tx, reqJson)
 		case "setMembers":

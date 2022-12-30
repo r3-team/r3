@@ -28,23 +28,24 @@
 .form .fields{
 	overflow:auto;
 	display:flex;
-	flex-direction:column;
+	flex-flow:column nowrap;
 	padding:var(--spacing-parent);
 }
 .form .fields .field{
 	margin:var(--spacing-child);
 }
-.form .fields.singleField{
+.form .fields.onlyOne{
 	padding:0px;
 }
-.form .fields.singleField .field{
+.form .fields.onlyOne>.field{
 	margin:0px;
 	overflow:auto;
 }
-.form .fields.singleField .calendar .month,
-.form .fields.singleField .chart,
-.form .fields.singleField .list,
-.form .fields.singleField .gantt{
+.form .fields.onlyOne>.field>.calendar .month,
+.form .fields.onlyOne>.field>.chart,
+.form .fields.onlyOne>.field>.list,
+.form .fields.onlyOne>.field>.gantt,
+.form .fields.onlyOne>.field>.tabs{
 	border-radius:0px;
 }
 
@@ -91,9 +92,8 @@
 	flex-direction:column;
 	overflow:auto;
 }
-.form-help .help-content{
-	flex:1 1 auto;
-	display:flex;
+.form-help.large{
+	max-width:800px;
 }
 
 /* messages */
@@ -103,8 +103,18 @@
 }
 
 /* user overwrites */
-.user-bordersAll .form .fields:not(.singleField) .calendar .month,
-.user-bordersAll .form .fields:not(.singleField) .gantt{
+.user-bordersAll .form .container>.field>.calendar .month,
+.user-bordersAll .form .container>.field>.chart,
+.user-bordersAll .form .container>.field>.gantt,
+.user-bordersAll .form .container>.field>.input-box,
+.user-bordersAll .form .container>.field>.list,
+.user-bordersAll .form .container>.field>.tabs,
+.user-bordersAll .form .fields:not(.onlyOne)>.field>.calendar .month,
+.user-bordersAll .form .fields:not(.onlyOne)>.field>.chart,
+.user-bordersAll .form .fields:not(.onlyOne)>.field>.gantt,
+.user-bordersAll .form .fields:not(.onlyOne)>.field>.input-box,
+.user-bordersAll .form .fields:not(.onlyOne)>.field>.list,
+.user-bordersAll .form .fields:not(.onlyOne)>.field>.tabs{
 	border:1px solid var(--color-border);
 }
 .user-bordersSquared .form .top .state,

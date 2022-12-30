@@ -5,7 +5,7 @@ export {MyBuilderIconInput as default};
 let MyBuilderIconInput = {
 	name:'my-builder-icon-input',
 	template:`<div class="builder-icon-input">
-		<div class="iconLine input-custom" :tabindex="readonly ? -1 : 0"
+		<div class="iconLine input-custom" v-if="!naked" :tabindex="readonly ? -1 : 0"
 			@click="click"
 			:class="{ clickable:!readonly, disabled:readonly }"
 		>
@@ -18,18 +18,29 @@ let MyBuilderIconInput = {
 			/>
 		</div>
 		
+		<template v-if="naked">
+			<img class="builder-icon naked"
+				v-if="iconSelected"
+				@click="click"
+				:class="{ clickable:!readonly }"
+				:src="srcBase64(iconSelected.file)"
+			/>
+			<img class="builder-icon naked" src="images/noPic.png"
+				v-if="!iconSelected"
+				@click="click"
+				:class="{ clickable:!readonly }"
+			/>
+		</template>
+		
 		<div class="app-sub-window" v-if="showInput && iconIdMap !== null" @click.self="close">
-			<div class="build-icon-input-window shade">
-				<div class="contentBox">
+			<div class="build-icon-input-window">
+				<div class="contentBox pop-up">
 					<div class="top lower">
 						<div class="area">
-							<img class="icon"
-								v-if="iconSelected"
-								:src="srcBase64(iconSelected.file)"
-							/>
-							<img class="icon" src="images/noPic.png"
-								v-if="!iconSelected"
-							/>
+							<h1 class="title">{{ capGen.icon }}</h1>
+						</div>
+						<div class="area default-inputs">
+							<input v-model="filter" :placeholder="capGen.button.filter" />
 						</div>
 						<div class="area">
 							<my-button image="cancel.png"
@@ -45,9 +56,11 @@ let MyBuilderIconInput = {
 							<span>{{ mod.name }}</span>
 							
 							<img class="builder-icon clickable"
-								v-for="icon in mod.icons"
+								v-for="icon in mod.icons.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
 								@click="select(icon.id)"
+								:class="{ active:iconIdSelected === icon.id }"
 								:src="srcBase64(icon.file)"
+								:title="icon.name"
 							/>
 						</div>
 						<div class="actions">
@@ -68,26 +81,25 @@ let MyBuilderIconInput = {
 		</div>
 	</div>`,
 	props:{
-		module:        { type:Object,  required:true},
 		iconIdSelected:{ required:true },
+		module:        { type:Object,  required:true},
+		naked:         { type:Boolean, required:false, default:false },
 		readonly:      { type:Boolean, required:false, default:false }
 	},
 	emits:['input'],
 	data:function() {
 		return {
+			filter:'',
 			showInput:false
 		};
 	},
 	computed:{
-		iconSelected:function() {
-			return this.iconIdSelected === null
-				? false : this.iconIdMap[this.iconIdSelected];
-		},
+		iconSelected:(s) => s.iconIdSelected === null ? false : s.iconIdMap[s.iconIdSelected],
 		
 		// stores
-		modules:  function() { return this.$store.getters['schema/modules']; },
-		iconIdMap:function() { return this.$store.getters['schema/iconIdMap']; },
-		capGen:   function() { return this.$store.getters.captions.generic; }
+		modules:  (s) => s.$store.getters['schema/modules'],
+		iconIdMap:(s) => s.$store.getters['schema/iconIdMap'],
+		capGen:   (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -95,14 +107,14 @@ let MyBuilderIconInput = {
 		srcBase64,
 		
 		// actions
-		click:function() {
+		click() {
 			if(!this.readonly)
 				this.showInput = !this.showInput;
 		},
-		close:function() {
+		close() {
 			this.showInput = false;
 		},
-		select:function(iconId) {
+		select(iconId) {
 			this.$emit('input',iconId);
 		}
 	}

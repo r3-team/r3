@@ -109,12 +109,12 @@ let MyInputFiles = {
 			
 			<!-- file name filter -->
 			<div class="right-side">
-				<div class="view-toggle">
-					<img src="images/files_list1.png" :class="{ active:viewListCompact }" @click="setViewMode('listCompact')" />
-					<img src="images/files_list2.png" :class="{ active:viewListComfort }" @click="setViewMode('listComfort')" />
-					<img src="images/files_list3.png" :class="{ active:viewGallery }"     @click="setViewMode('gallery')" />
+				<div class="view-toggle" v-if="!noFiles">
+					<img draggable="false" src="images/files_list1.png" :class="{ active:viewListCompact }" @click="setViewMode('listCompact')" />
+					<img draggable="false" src="images/files_list2.png" :class="{ active:viewListComfort }" @click="setViewMode('listComfort')" />
+					<img draggable="false" src="images/files_list3.png" :class="{ active:viewGallery }"     @click="setViewMode('gallery')" />
 				</div>
-				<input v-if="!noSpace" v-model="filterName" class="short" placeholder="..." />
+				<input v-if="!noSpace && !noFiles" v-model="filterName" class="short" placeholder="..." />
 			</div>
 		</div>
 		
@@ -127,9 +127,8 @@ let MyInputFiles = {
 			<div class="input-files-actions">
 				
 				<!-- file upload -->
-				<div class="input-files-upload">
+				<div class="input-files-upload" v-if="!readonly && !maxFiles">
 					<input type="file" multiple="multiple"
-						v-if="!readonly && !maxFiles"
 						@change="upload($event.target.files)"
 					/>
 					
@@ -141,14 +140,26 @@ let MyInputFiles = {
 				</div>
 				
 				<!-- toggle all -->
-				<my-button
-					v-if="!viewListCompact && !noFiles && !oneFile && !readonly"
-					@trigger="toggleAll"
-					:caption="!noSpace ? capGen.button.selectAll : capGen.button.selectAllShort"
-					:image="displayChecked(allSelected)"
-					:naked="true"
-					:tight="true"
-				/>
+				<div class="row centered gap">
+					<my-button
+						v-if="!viewListCompact && !noFiles && !oneFile && !readonly"
+						@trigger="toggleAll"
+						:caption="!noSpace ? capGen.button.selectAll : capGen.button.selectAllShort"
+						:image="displayChecked(allSelected)"
+						:naked="true"
+						:tight="true"
+					/>
+					
+					<!-- gallery option: show meta -->
+					<my-button
+						v-if="viewGallery && !noFiles && !oneFile"
+						@trigger="galleryMeta = !galleryMeta"
+						:caption="capGen.details"
+						:image="displayChecked(galleryMeta)"
+						:naked="true"
+						:tight="true"
+					/>
+				</div>
 				
 				<!-- sort mode -->
 				<div class="row default-inputs" v-if="!viewListCompact && !fewFiles && !noSpace">
@@ -253,23 +264,25 @@ let MyInputFiles = {
 			<!-- list comfortable -->
 			<div class="listComfort" v-if="viewListComfort">
 				<div class="item" v-for="f in filesProcessed">
-					<a target="_blank"
+					<a draggable="false" target="_blank"
 						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
 						:title="capApp.button.downloadHint"
 					>
-						<img class="prev" :src="imagePreview(f.id,f.name,f.version)" />
+						<img draggable="false" class="prev" :src="imagePreview(f.id,f.name,f.version)" />
 					</a>
 					<div class="item-content">
-						<my-input-files-name
-							@update:name="updateName(f.id,$event)"
-							:change="fileIdMapChange[f.id]"
-							:name="f.name"
-							:readonly="readonly"
-							:unsaved="fileIdsUnsaved.includes(f.id)"
-						/>
 						<div class="item-meta">
-							<span>{{ displayDate(f.changed) }}</span>
-							<span>{{ getSizeReadable(f.size) }}</span>
+							<my-input-files-name
+								@update:name="updateName(f.id,$event)"
+								:change="fileIdMapChange[f.id]"
+								:name="f.name"
+								:readonly="readonly"
+								:unsaved="fileIdsUnsaved.includes(f.id)"
+							/>
+							<div class="row centered gap">
+								<span>{{ getSizeReadable(f.size) }}</span>
+								<span>{{ displayDate(f.changed) }}</span>
+							</div>
 						</div>
 					</div>
 					<div v-if="!readonly" class="item-actions shade">
@@ -290,13 +303,13 @@ let MyInputFiles = {
 			<!-- gallery -->
 			<div class="gallery" v-if="viewGallery" >
 				<div class="item" v-for="f in filesProcessed">
-					<a target="_blank"
+					<a draggable="false" target="_blank"
 						:href="getAttributeFileVersionHref(attributeId,f.id,f.name,f.version,token)"
 						:title="capApp.button.downloadHint"
 					>
-						<img class="prev" :src="imagePreview(f.id,f.name,f.version)">
+						<img draggable="false" class="prev" :src="imagePreview(f.id,f.name,f.version)">
 					</a>
-					<div class="item-meta">
+					<div class="item-meta" v-if="galleryMeta">
 						<my-input-files-name
 							@update:name="updateName(f.id,$event)"
 							:change="fileIdMapChange[f.id]"
@@ -304,8 +317,10 @@ let MyInputFiles = {
 							:readonly="readonly"
 							:unsaved="fileIdsUnsaved.includes(f.id)"
 						/>
-						<span>{{ displayDate(f.changed) }}</span>
-						<span>{{ getSizeReadable(f.size) }}</span>
+						<div class="row centered gap">
+							<span>{{ getSizeReadable(f.size) }}</span>
+							<span>{{ displayDate(f.changed) }}</span>
+						</div>
 					</div>
 					<div v-if="!readonly" class="item-actions shade">
 						<my-button
@@ -334,7 +349,7 @@ let MyInputFiles = {
 		showGallery: { type:Boolean, required:false, default:false }
 	},
 	emits:['update:modelValue'],
-	data:function() {
+	data() {
 		return {
 			extPreview:[
 				'bmp','gif','jpg','jpeg','pdf','png','psd','svg','xcf','webp',
@@ -347,22 +362,23 @@ let MyInputFiles = {
 			progress:100,
 			viewModes:['listCompact','listComfort','gallery'],
 			
-			// inputs
+			// states
 			dragActive:false,
 			dragTarget:{},
 			files:[],              // files from value
 			fileIdMapChange:{},    // map of file changes done inside this component, key: file ID
 			fileIdsSelected:[],    // file IDs selected by checkbox
 			filterName:'',         // filter files by name
+			galleryMeta:false,     // show file meta data in gallery view
 			sortDirAsc:true,
 			sortMode:'name',       // name, size, changed
 			viewMode:'listCompact' // active view mode
 		};
 	},
-	created:function() {
+	created() {
 		window.addEventListener('resize',this.setNoSpaceMode);
 	},
-	mounted:function() {
+	mounted() {
 		// setup watchers
 		this.$watch('formLoading',(val) => {
 			if(val) return;
@@ -382,7 +398,7 @@ let MyInputFiles = {
 		// apply last chosen view mode
 		this.setViewMode(this.fieldOptionGet(this.fieldId,'fileViewMode',this.viewMode));
 	},
-	unmounted:function() {
+	unmounted() {
 		window.removeEventListener('resize',this.setNoSpaceMode);
 	},
 	computed:{

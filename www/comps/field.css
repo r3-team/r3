@@ -217,19 +217,100 @@
 .field .chart .actions{
 	flex:0 0 auto;
 }
+.field .chart-header{
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:flex-end;
+}
+.field .chart-header select{
+	height:30px;
+	font-size:inherit;
+	margin:10px;
+	padding:0px 5px;
+	box-sizing:border-box;
+	border-radius:4px;
+	color:var(--color-font);
+	background-color:var(--color-bg);
+}
+
+/* tabs field */
+.field .tabs{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:column nowrap;
+	border-radius:3px;
+	overflow:auto;
+}
+.field .tabs-entries{
+	display:flex;
+	flex-flow:row wrap;
+	padding:7px 0px 0px 0px;
+	background-color:var(--color-bg);
+	border-bottom:1px solid var(--color-border);
+}
+.field .tabs-entries select{
+	flex:1 1 auto;
+	padding:8px;
+	font-size:110%;
+	color:var(--color-font);
+	background-color:transparent;
+	border:1px solid var(--color-border);
+	border-right:none;
+	border-bottom:none;
+	border-radius:5px 0px 0px 0px;
+	outline:none;
+}
+.field .tabs-entries option{
+	color:var(--color-font);
+	background-color:var(--color-bg);
+}
+.field .tabs-icon{
+	margin-right:5px;
+	display:flex;
+}
+.field .tabs-icon img{
+	height:22px;
+	margin:0px 2px 0px 7px;
+	align-self:center;
+	display:flex;
+	filter:var(--image-filter);
+}
+.field .tabs-entry{
+	line-height:40px;
+	padding:0px 9px;
+	border:1px solid var(--color-border);
+	border-bottom:none;
+	border-radius:5px 5px 0px 0px;
+	box-sizing:border-box;
+	background-color:var(--color-bg);
+	font-size:85%;
+}
+.field .tabs-entry.active{
+	margin-top:-3px;
+	margin-bottom:-2px;
+	border-top:2px solid var(--color-border);
+	font-size:100%;
+}
+.field .tabs-entry.error{
+	color:var(--color-error);
+}
+.field .tabs>.fields{
+	flex:1 1 auto;
+	background-color:var(--color-bg);
+}
 
 /* user overwrites */
-.user-bordersAll .field .input-box{
-	border-width:1px;
-	border-style:solid;
-}
 .user-bordersSquared .field .color-input .preview,
 .user-bordersSquared .field .chart,
 .user-bordersSquared .field .input-box,
 .user-bordersSquared .field .slider input,
-.user-bordersSquared .field .slider .slider-value{
+.user-bordersSquared .field .slider .slider-value,
+.user-bordersSquared .field .tabs,
+.user-bordersSquared .field .tabs-entries select,
+.user-bordersSquared .field .tabs-entry{
 	border-radius:0px;
 }
+
 .user-bordersRounded .field .input-box{
 	border-radius:3px;
 }

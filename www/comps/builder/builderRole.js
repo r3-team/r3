@@ -1,4 +1,6 @@
-import MyBuilderCaption from './builderCaption.js';
+import MyBuilderCaption      from './builderCaption.js';
+import {getDependentModules} from '../shared/builder.js';
+import {copyValueDialog}     from '../shared/generic.js';
 export {MyBuilderRole as default};
 
 let MyBuilderRoleAccessCollection = {
@@ -23,10 +25,8 @@ let MyBuilderRoleAccessCollection = {
 	},
 	emits:['apply'],
 	computed:{
-		access:function() {
-			return typeof this.idMapAccess[this.collection.id] === 'undefined'
-				? -1 : this.idMapAccess[this.collection.id];
-		}
+		access:(s) => typeof s.idMapAccess[s.collection.id] === 'undefined'
+			? -1 : s.idMapAccess[s.collection.id]
 	}
 };
 
@@ -40,9 +40,10 @@ let MyBuilderRoleAccessMenu = {
 					@trigger="showSubs = !showSubs"
 					:image="showSubs ? 'triangleDown.png' : 'triangleRight.png'"
 					:naked="true"
+					:tight="true"
 				/>
 			</td>
-			<td class="maximum clickable" @click="showSubs = !showSubs">
+			<td class="clickable" @click="showSubs = !showSubs">
 				{{ title }}
 			</td>
 			<td>
@@ -84,33 +85,26 @@ let MyBuilderRoleAccessMenu = {
 		return { showSubs:true };
 	},
 	computed:{
-		access:function() {
-			if(typeof this.idMapAccess[this.menu.id] === 'undefined')
-				return -1;
-			
-			return this.idMapAccess[this.menu.id];
-		},
-		subsExist:function() {
-			return this.menu.menus.length !== 0;
-		},
-		title:function() {
+		access:   (s) => typeof s.idMapAccess[s.menu.id] === 'undefined' ? -1 : s.idMapAccess[s.menu.id],
+		subsExist:(s) => s.menu.menus.length !== 0,
+		title:    (s) => {
 			// 1st preference: proper menu title
-			if(typeof this.menu.captions.menuTitle[this.builderLanguage] !== 'undefined')
-				return this.menu.captions.menuTitle[this.builderLanguage];
+			if(typeof s.menu.captions.menuTitle[s.builderLanguage] !== 'undefined')
+				return s.menu.captions.menuTitle[s.builderLanguage];
 			
 			// 2nd preference (if form is referenced): form title
-			if(this.menu.formId !== null) {
-				let form = this.formIdMap[this.menu.formId];
+			if(s.menu.formId !== null) {
+				let form = s.formIdMap[s.menu.formId];
 				
-				if(typeof form.captions.formTitle[this.builderLanguage] !== 'undefined')
-					return form.captions.formTitle[this.builderLanguage];
+				if(typeof form.captions.formTitle[s.builderLanguage] !== 'undefined')
+					return form.captions.formTitle[s.builderLanguage];
 			}
-			return this.capGen.missingCaption;
+			return s.capGen.missingCaption;
 		},
 		
 		// stores
-		formIdMap:function() { return this.$store.getters['schema/formIdMap']; },
-		capGen:   function() { return this.$store.getters.captions.generic; }
+		formIdMap:(s) => s.$store.getters['schema/formIdMap'],
+		capGen:   (s) => s.$store.getters.captions.generic
 	}
 };
 
@@ -118,18 +112,14 @@ let MyBuilderRoleAccessRelation = {
 	name:'my-builder-role-access-relation',
 	template:`<tbody>
 		<tr>
-			<td class="minimum">
+			<td colspan="2">
 				<my-button
-					v-if="relation.attributes.length !== 0"
 					@trigger="$emit('relation-selected',relation.id)"
+					:caption="relation.name + (brokenInheritance ? '*' : '')"
 					:image="showEntries ? 'triangleDown.png' : 'triangleRight.png'"
 					:naked="true"
+					:tight="true"
 				/>
-			</td>
-			<td colspan="2" class="clickable maximum"
-				@click="$emit('relation-selected',relation.id)"
-			>
-				{{ relation.name + (brokenInheritance ? '*' : '') }}
 			</td>
 			<td>
 				<select
@@ -150,7 +140,7 @@ let MyBuilderRoleAccessRelation = {
 			v-for="atr in relation.attributes"
 			:key="atr.id"
 		>
-			<td colspan="2"></td>
+			<td></td>
 			<td>{{ attributeIdMap[atr.id].name }}</td>
 			<td>
 				<select
@@ -177,37 +167,33 @@ let MyBuilderRoleAccessRelation = {
 	},
 	emits:['apply-attribute','apply-relation','relation-selected'],
 	computed:{
-		access:function() {
-			if(typeof this.relationIdMapAccess[this.relation.id] === 'undefined')
-				return -1;
-			
-			return this.relationIdMapAccess[this.relation.id];
-		},
-		attributeIdMapAccessParsed:function() {
+		access:(s) => typeof s.relationIdMapAccess[s.relation.id] === 'undefined'
+			? -1 : s.relationIdMapAccess[s.relation.id],
+		attributeIdMapAccessParsed:(s) => {
 			let out = {};
-			for(let i = 0, j = this.relation.attributes.length; i < j; i++) {
-				let a = this.relation.attributes[i];
+			for(let i = 0, j = s.relation.attributes.length; i < j; i++) {
+				let a = s.relation.attributes[i];
 				
-				if(typeof this.attributeIdMapAccess[a.id] === 'undefined') {
+				if(typeof s.attributeIdMapAccess[a.id] === 'undefined') {
 					out[a.id] = -1;
 					continue;
 				}
-				out[a.id] = this.attributeIdMapAccess[a.id];
+				out[a.id] = s.attributeIdMapAccess[a.id];
 			}
 			return out;
 		},
-		brokenInheritance:function() {
-			for(let key in this.attributeIdMapAccessParsed) {
-				if(this.attributeIdMapAccessParsed[key] !== -1)
+		brokenInheritance:(s) => {
+			for(let key in s.attributeIdMapAccessParsed) {
+				if(s.attributeIdMapAccessParsed[key] !== -1)
 					return true;
 			}
 			return false;
 		},
 		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.role; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.role
 	}
 };
 
@@ -223,16 +209,19 @@ let MyBuilderRole = {
 			
 		<div class="top">
 			<div class="area nowrap">
-				<div class="separator"></div>
-				<my-builder-caption
+				<img class="icon" src="images/personMultiple.png" />
+				<h1 class="title">{{ capApp.titleOne.replace('{NAME}',name) }}</h1>
+			</div>
+			<div class="area nowrap">
+				<my-builder-caption class="title"
 					v-model="captions.roleTitle"
-					:contentName="capApp.titleOne"
+					:contentName="capGen.title"
 					:language="builderLanguage"
 					:longInput="true"
-					:readonly="isEveryone"
+					:readonly="readonly"
 				/>
-				<my-button :active="false" :caption="role.name" :naked="true "/>
 			</div>
+			<div class="area nowrap"></div>
 		</div>
 		<div class="top lower">
 			<div class="area">
@@ -246,86 +235,190 @@ let MyBuilderRole = {
 					:active="hasChanges"
 					:caption="capGen.button.refresh"
 				/>
+				<my-button image="visible1.png"
+					@trigger="copyValueDialog(name,id,id)"
+					:caption="capGen.id"
+				/>
+				<my-button
+					@trigger="showProperties = !showProperties"
+					:active="!isEveryone"
+					:caption="capGen.properties"
+					:image="showProperties ? 'checkbox1.png' : 'checkbox0.png'"
+				/>
+				<my-button image="delete.png"
+					@trigger="delAsk"
+					:active="!readonly && !isEveryone"
+					:cancel="true"
+					:caption="capGen.button.delete"
+					:captionTitle="capGen.button.delete"
+				/>
 			</div>
 		</div>
 		
 		<div class="content no-padding">
-			<div class="contentPart">
-				<div class="contentPartHeader">
-					<h1>{{ capApp.data }}</h1>
-				</div>
-				
-				<table class="default-inputs">
-					<thead>
-						<th></th>
-						<th>{{ capApp.relation }}</th>
-						<th>{{ capApp.attribute }}</th>
-						<th>{{ capApp.access }}*</th>
-					</thead>
+			<div class="contentBox grow access">
+				<div class="contentPart">
+					<div class="contentPartHeader">
+						<h1>{{ capApp.data }}</h1>
+					</div>
 					
-					<my-builder-role-access-relation
-						v-for="rel in module.relations"
-						@apply-attribute="(...args) => apply('attribute',args[0],args[1])"
-						@apply-relation="(...args) => apply('relation',args[0],args[1])"
-						@relation-selected="toggleRelationShow"
-						:attribute-id-map-access="accessAttributes"
-						:key="role.id + '_' + rel.id"
-						:relation="rel"
-						:role="role"
-						:readonly="readonly"
-						:relation-id-map-access="accessRelations"
-						:show-entries="relationIdsShown.includes(rel.id)"
-					/>
-				</table>
-				
-				<p>{{ capApp.legend }}</p>
+					<table class="default-inputs">
+						<thead>
+							<th>{{ capApp.relation }}</th>
+							<th>{{ capApp.attribute }}</th>
+							<th>{{ capApp.access }}*</th>
+						</thead>
+						
+						<my-builder-role-access-relation
+							v-for="rel in module.relations"
+							@apply-attribute="(...args) => apply('attribute',args[0],args[1])"
+							@apply-relation="(...args) => apply('relation',args[0],args[1])"
+							@relation-selected="toggleRelationShow"
+							:attribute-id-map-access="accessAttributes"
+							:key="role.id + '_' + rel.id"
+							:relation="rel"
+							:role="role"
+							:readonly="readonly"
+							:relation-id-map-access="accessRelations"
+							:show-entries="relationIdsShown.includes(rel.id)"
+						/>
+					</table>
+					
+					<p>{{ capApp.legend }}</p>
+				</div>
+				<div class="contentPart">
+					<div class="contentPartHeader">
+						<h1>{{ capApp.menus }}</h1>
+					</div>
+					
+					<table class="default-inputs">
+						<thead>
+							<th colspan="2">{{ capApp.menu }}</th>
+							<th>{{ capApp.access }}</th>
+						</thead>
+						
+						<my-builder-role-access-menu
+							v-for="men in module.menus"
+							@apply="(...args) => apply('menu',args[0],args[1])"
+							:builder-language="builderLanguage"
+							:id-map-access="accessMenus"
+							:key="role.id + '_' + men.id"
+							:menu="men"
+							:role="role"
+							:readonly="readonly"
+						/>
+					</table>
+				</div>
+				<div class="contentPart">
+					<div class="contentPartHeader">
+						<h1>{{ capApp.collections }}</h1>
+					</div>
+					
+					<table class="default-inputs">
+						<thead>
+							<th>{{ capApp.collection }}</th>
+							<th>{{ capApp.access }}</th>
+						</thead>
+						
+						<my-builder-role-access-collection
+							v-for="c in module.collections"
+							@apply="(...args) => apply('collection',args[0],args[1])"
+							:builder-language="builderLanguage"
+							:collection="c"
+							:id-map-access="accessCollections"
+							:key="role.id + '_' + c.id"
+							:readonly="readonly"
+						/>
+					</table>
+				</div>
 			</div>
 			
-			<div class="contentPart">
-				<div class="contentPartHeader">
-					<h1>{{ capApp.menus }}</h1>
+			<!-- sidebar -->
+			<div class="contentBox sidebar" v-if="!isEveryone && showProperties">
+				<div class="top lower">
+					<div class="area nowrap">
+						<h1 class="title">{{ capGen.properties }}</h1>
+					</div>
 				</div>
-				
-				<table class="default-inputs">
-					<thead>
-						<th colspan="2">{{ capApp.menu }}</th>
-						<th>{{ capApp.access }}</th>
-					</thead>
-					
-					<my-builder-role-access-menu
-						v-for="men in module.menus"
-						@apply="(...args) => apply('menu',args[0],args[1])"
-						:builder-language="builderLanguage"
-						:id-map-access="accessMenus"
-						:key="role.id + '_' + men.id"
-						:menu="men"
-						:role="role"
-						:readonly="readonly"
-					/>
-				</table>
-			</div>
-			
-			<div class="contentPart">
-				<div class="contentPartHeader">
-					<h1>{{ capApp.collections }}</h1>
+				<div class="content padding default-inputs">
+					<table class="builder-table-vertical default-inputs">
+						<tr>
+							<td>{{ capGen.name }}</td>
+							<td><input v-model="name" :disabled="isEveryone || readonly" /></td>
+						</tr>
+						<tr>
+							<td>{{ capGen.title }}</td>
+							<td>
+								<my-builder-caption
+									v-model="captions.roleTitle"
+									:contentName="capGen.title"
+									:language="builderLanguage"
+									:readonly="readonly"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.description }}</td>
+							<td>
+								<my-builder-caption
+									v-model="captions.roleDesc"
+									:contentName="capGen.description"
+									:language="builderLanguage"
+									:multiLine="true"
+									:readonly="readonly"
+								/>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.category }}</td>
+							<td>
+								<select v-model="content" :disabled="readonly">
+									<option value="admin">{{ capApp.option.contentAdmin }}</option>
+									<option value="user">{{ capApp.option.contentUser }}</option>
+									<option value="other">{{ capApp.option.contentOther }}</option>
+									<option v-if="isEveryone" value="everyone">
+										{{ capApp.option.contentEveryone }}
+									</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.assignable }}</td>
+							<td><my-bool v-model="assignable" :readonly="readonly" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.children }}</td>
+							<td>
+								<my-button image="delete.png"
+									v-for="c in childrenIds"
+									@trigger="childRemove(c)"
+									:active="!readonly"
+									:caption="moduleIdMap[roleIdMap[c].moduleId].name + '->' + roleIdMap[c].name"
+									:naked="true"
+								/>
+								
+								<select
+									@change="childAdd($event.target.value)"
+									:disabled="readonly"
+									:value="null"
+								>
+									<option disabled :value="null">[{{ capGen.button.add }}]</option>
+									<optgroup
+										v-for="mod in getDependentModules(module,modules)"
+										:label="mod.name"
+									>
+										<option
+											v-for="r in mod.roles.filter(v => v.id !== role.id && !childrenIds.includes(v.id) && v.name !== 'everyone')"
+											:value="r.id"
+										>
+											{{ r.name }}
+										</option>
+									</optgroup>
+								</select>
+							</td>
+						</tr>
+					</table>
 				</div>
-				
-				<table class="default-inputs">
-					<thead>
-						<th>{{ capApp.collection }}</th>
-						<th>{{ capApp.access }}</th>
-					</thead>
-					
-					<my-builder-role-access-collection
-						v-for="c in module.collections"
-						@apply="(...args) => apply('collection',args[0],args[1])"
-						:builder-language="builderLanguage"
-						:collection="c"
-						:id-map-access="accessCollections"
-						:key="role.id + '_' + c.id"
-						:readonly="readonly"
-					/>
-				</table>
 			</div>
 		</div>
 	</div>`,
@@ -349,43 +442,52 @@ let MyBuilderRole = {
 	},
 	data:function() {
 		return {
+			// inputs
 			accessAttributes:{},
 			accessCollections:{},
 			accessMenus:{},
 			accessRelations:{},
+			assignable:true,
 			captions:{},
+			childrenIds:[],
+			content:'user',
+			name:'',
+			
+			// states
 			ready:false,
-			relationIdsShown:[]
+			relationIdsShown:[],
+			showProperties:false
 		};
 	},
 	computed:{
-		// entities
-		module:(s) => {
-			return s.role === false
-				? false : s.moduleIdMap[s.role.moduleId];
-		},
-		role:(s) => {
-			return typeof s.roleIdMap[s.id] === 'undefined'
-				? false : s.roleIdMap[s.id];
-		},
+		hasChanges:(s) =>
+			s.name          !== s.role.name
+			|| s.content    !== s.role.content
+			|| s.assignable !== s.role.assignable
+			|| JSON.stringify(s.childrenIds)       !== JSON.stringify(s.role.childrenIds)
+			|| JSON.stringify(s.accessAttributes)  !== JSON.stringify(s.role.accessAttributes)
+			|| JSON.stringify(s.accessCollections) !== JSON.stringify(s.role.accessCollections)
+			|| JSON.stringify(s.accessMenus)       !== JSON.stringify(s.role.accessMenus)
+			|| JSON.stringify(s.accessRelations)   !== JSON.stringify(s.role.accessRelations)
+			|| JSON.stringify(s.captions)          !== JSON.stringify(s.role.captions),
 		
-		// states
-		hasChanges:(s) => {
-			return JSON.stringify(s.accessAttributes)  !== JSON.stringify(s.role.accessAttributes)
-				|| JSON.stringify(s.accessCollections) !== JSON.stringify(s.role.accessCollections)
-				|| JSON.stringify(s.accessMenus)       !== JSON.stringify(s.role.accessMenus)
-				|| JSON.stringify(s.accessRelations)   !== JSON.stringify(s.role.accessRelations)
-				|| JSON.stringify(s.captions)          !== JSON.stringify(s.role.captions);
-		},
+		// simple
 		isEveryone:(s) => s.role.name === 'everyone',
+		module:    (s) => s.role === false ? false : s.moduleIdMap[s.role.moduleId],
+		role:      (s) => typeof s.roleIdMap[s.id] === 'undefined' ? false : s.roleIdMap[s.id],
 		
 		// stores
+		modules:    (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		roleIdMap:  (s) => s.$store.getters['schema/roleIdMap'],
 		capApp:     (s) => s.$store.getters.captions.builder.role,
 		capGen:     (s) => s.$store.getters.captions.generic
 	},
 	methods:{
+		// externals
+		copyValueDialog,
+		getDependentModules,
+		
 		// actions
 		apply(type,id,access) {
 			switch(type) {
@@ -395,7 +497,19 @@ let MyBuilderRole = {
 				case 'relation':   this.accessRelations[id]   = access; break;
 			}
 		},
+		childAdd(id) {
+			this.childrenIds.push(id);
+		},
+		childRemove(id) {
+			let pos = this.childrenIds.indexOf(id);
+			if(pos !== -1)
+				this.childrenIds.splice(pos,1);
+		},
 		reset() {
+			this.name              = this.role.name;
+			this.content           = this.role.content;
+			this.assignable        = this.role.assignable;
+			this.childrenIds       = JSON.parse(JSON.stringify(this.role.childrenIds)),
 			this.accessAttributes  = JSON.parse(JSON.stringify(this.role.accessAttributes));
 			this.accessCollections = JSON.parse(JSON.stringify(this.role.accessCollections));
 			this.accessMenus       = JSON.parse(JSON.stringify(this.role.accessMenus));
@@ -411,22 +525,47 @@ let MyBuilderRole = {
 		},
 		
 		// backend calls
+		delAsk() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.delete,
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.delete,
+					exec:this.del,
+					image:'delete.png'
+				},{
+					caption:this.capGen.button.cancel,
+					image:'cancel.png'
+				}]
+			});
+		},
+		del() {
+			ws.send('role','del',{id:this.role.id},true).then(
+				() => {
+					this.$root.schemaReload(this.role.moduleId);
+					this.$root.loginReauthAll(false);
+					this.$router.push('/builder/roles/'+this.role.moduleId);
+				},
+				this.$root.genericError
+			);
+		},
 		set() {
 			ws.send('role','set',{
 				id:this.role.id,
-				name:this.role.name,
-				content:this.role.content,
-				assignable:this.role.assignable,
-				childrenIds:this.role.childrenIds,
-				
-				// changable values in this UI
+				name:this.name,
+				content:this.content,
+				assignable:this.assignable,
+				childrenIds:this.childrenIds,
 				accessAttributes:this.accessAttributes,
 				accessCollections:this.accessCollections,
 				accessMenus:this.accessMenus,
 				accessRelations:this.accessRelations,
 				captions:this.captions
 			},true).then(
-				() => this.$root.schemaReload(this.module.id),
+				() => {
+					this.$root.schemaReload(this.role.moduleId);
+					this.$root.loginReauthAll(false);
+				},
 				this.$root.genericError
 			);
 		}

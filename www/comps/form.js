@@ -1,5 +1,5 @@
+import MyArticles            from './articles.js';
 import MyField               from './field.js';
-import MyFormHelp            from './formHelp.js';
 import MyFormLog             from './formLog.js';
 import {hasAccessToRelation} from './shared/access.js';
 import {consoleError}        from './shared/error.js';
@@ -54,8 +54,8 @@ export {MyForm as default};
 let MyForm = {
 	name:'my-form',
 	components:{
+		MyArticles,
 		MyField,
-		MyFormHelp,
 		MyFormLog
 	},
 	template:`<div class="form-wrap" :class="{ 'pop-up':isPopUp, 'fullscreen':popUpFullscreen }" :key="form.id">
@@ -111,7 +111,7 @@ let MyForm = {
 				</div>
 				
 				<div class="area">
-					<template v-if="isData && !isSingleField">
+					<template v-if="isData">
 						<my-button image="refresh.png"
 							@trigger="get"
 							@trigger-middle="openForm(recordId,null,null,true)"
@@ -131,7 +131,7 @@ let MyForm = {
 						:captionTitle="capApp.button.helpHint"
 					/>
 					<my-button
-						v-if="isPopUp"
+						v-if="isPopUp && !isMobile"
 						@trigger="popUpFullscreen = !popUpFullscreen"
 						:captionTitle="capApp.button.fullscreenHint"
 						:image="popUpFullscreen ? 'shrink.png' : 'expand.png'"
@@ -140,6 +140,7 @@ let MyForm = {
 						v-if="isAdmin && builderEnabled && !isMobile"
 						@trigger="openBuilder(false)"
 						@trigger-middle="openBuilder(true)"
+						:captionTitle="capGen.button.openBuilder"
 					/>
 					<my-button image="cancel.png"
 						v-if="isPopUp"
@@ -151,65 +152,66 @@ let MyForm = {
 			</div>
 			
 			<!-- title bar lower -->
-			<div class="top lower" v-if="!isSingleField">
-				<template v-if="isData">
-					<div class="area">
-						<my-button image="new.png"
-							v-if="allowNew && !noDataActions"
-							@trigger="openNewAsk(false)"
-							@trigger-middle="openNewAsk(true)"
-							:active="(!isNew || hasChanges) && canCreate"
-							:caption="capGen.button.new"
-							:captionTitle="capGen.button.newHint"
-						/>
-						<my-button image="save.png"
-							v-if="!noDataActions"
-							@trigger="set(false)"
-							:active="canUpdate"
-							:caption="capGen.button.save"
-							:captionTitle="capGen.button.saveHint"
-						/>
-						<my-button image="save_new.png"
-							v-if="!isPopUp && !isMobile && allowNew && !noDataActions"
-							@trigger="set(true)"
-							:active="canUpdate && canCreate"
-							:caption="capGen.button.saveNew"
-							:captionTitle="capGen.button.saveNewHint"
-						/>
-						<my-button image="upward.png"
-							v-if="!isMobile && !isPopUp"
-							@trigger="openPrevAsk"
-							:active="!updatingRecord"
-							:cancel="true"
-							:caption="capGen.button.goBack"
-						/>
-						<my-button image="shred.png"
-							v-if="allowDel && !noDataActions"
-							@trigger="delAsk"
-							:active="canDelete"
-							:cancel="true"
-							:caption="capGen.button.delete"
-							:captionTitle="capGen.button.deleteHint"
-						/>
-					</div>
-					<div class="area">
-						<my-button image="warning.png"
-							v-if="badLoad"
-							:caption="capApp.noAccess"
-							:cancel="true"
-						/>
-						<my-button image="warning.png"
-							v-if="badSave && fieldIdsInvalid.length !== 0"
-							@trigger="scrollToInvalidField"
-							:caption="capApp.invalidInputs"
-							:cancel="true"
-						/>
-					</div>
-				</template>
+			<div class="top lower" v-if="isData || form.fields.length === 0">
+				<div class="area">
+					<my-button image="new.png"
+						v-if="allowNew && !noDataActions"
+						@trigger="openNewAsk(false)"
+						@trigger-middle="openNewAsk(true)"
+						:active="(!isNew || hasChanges) && canCreate"
+						:caption="capGen.button.new"
+						:captionTitle="capGen.button.newHint"
+					/>
+					<my-button image="save.png"
+						v-if="!noDataActions"
+						@trigger="set(false)"
+						:active="canUpdate"
+						:caption="capGen.button.save"
+						:captionTitle="capGen.button.saveHint"
+					/>
+					<my-button image="save_new.png"
+						v-if="!isPopUp && !isMobile && allowNew && !noDataActions"
+						@trigger="set(true)"
+						:active="canUpdate && canCreate"
+						:caption="capGen.button.saveNew"
+						:captionTitle="capGen.button.saveNewHint"
+					/>
+					<my-button image="upward.png"
+						v-if="!isMobile && !isPopUp"
+						@trigger="openPrevAsk"
+						:active="!updatingRecord"
+						:cancel="true"
+						:caption="capGen.button.goBack"
+					/>
+					<my-button image="shred.png"
+						v-if="allowDel && !noDataActions"
+						@trigger="delAsk"
+						:active="canDelete"
+						:cancel="true"
+						:caption="capGen.button.delete"
+						:captionTitle="capGen.button.deleteHint"
+					/>
+				</div>
+				<div class="area">
+					<my-button image="warning.png"
+						v-if="badLoad"
+						:caption="capApp.noAccess"
+						:cancel="true"
+					/>
+					<my-button image="warning.png"
+						v-if="badSave && fieldIdsInvalid.length !== 0"
+						@trigger="scrollToInvalidField"
+						:caption="capApp.invalidInputs"
+						:cancel="true"
+					/>
+				</div>
 			</div>
 			
 			<!-- form fields -->
-			<div class="content grow fields" :class="{ singleField:isSingleField }" :style="patternStyle">
+			<div class="content grow fields"
+				:class="{ onlyOne:isSingleField }"
+				:style="patternStyle"
+			>
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
 					@clipboard="messageSet('[CLIPBOARD]')"
@@ -221,14 +223,15 @@ let MyForm = {
 					@set-value="valueSetByField"
 					@set-value-init="valueSet"
 					:dataFieldMap="fieldIdMapData"
+					:entityIdMapState="entityIdMapState"
 					:field="f"
+					:fieldIdsInvalid="fieldIdsInvalid"
 					:fieldIdMapCaption="fieldIdMapCaption"
-					:fieldIdMapState="fieldIdMapState"
 					:formBadSave="badSave"
 					:formIsPopUp="isPopUp"
-					:formIsSingleField="isSingleField"
 					:formLoading="loading"
 					:formReadonly="badLoad || blockInputs"
+					:isAloneInForm="isSingleField"
 					:joinsIndexMap="joinsIndexMap"
 					:key="f.id"
 					:values="values"
@@ -236,12 +239,12 @@ let MyForm = {
 			</div>
 		</div>
 		
-		<!-- form data change log -->
+		<!-- form change logs -->
 		<my-form-log
 			v-if="showLog"
 			@close-log="showLog = false"
 			:dataFieldMap="fieldIdMapData"
-			:fieldIdMapState="fieldIdMapState"
+			:entityIdMapState="entityIdMapState"
 			:form="form"
 			:formLoading="loading"
 			:isPopUp="isPopUp"
@@ -250,12 +253,13 @@ let MyForm = {
 			:values="values"
 		/>
 		
-		<!-- form context help -->
-		<my-form-help
+		<!-- form help articles -->
+		<my-articles class="form-help"
 			v-if="showHelp && helpAvailable"
 			@close="showHelp = false"
 			:form="form"
 			:isPopUp="isPopUp"
+			:language="moduleLanguage"
 			:moduleId="moduleId"
 		/>
 	</div>`,
@@ -341,8 +345,8 @@ let MyForm = {
 			// check for protected preset record
 			let rel = this.relationIdMap[this.joins[0].relationId];
 			
-			for(let i = 0, j = rel.presets.length; i < j; i++) {
-				if(rel.presets[i].protected && this.presetIdMapRecordId[rel.presets[i].id] === this.recordId)
+			for(let p of rel.presets) {
+				if(p.protected && this.presetIdMapRecordId[p.id] === this.recordId)
 					return false;
 			}
 			return true;
@@ -361,11 +365,11 @@ let MyForm = {
 			return false;
 		},
 		helpAvailable:function() {
-			return typeof this.form.captions.formHelp[this.moduleLanguage] !== 'undefined'
-				|| typeof this.moduleIdMap[this.moduleId].captions.moduleHelp[this.moduleLanguage] !== 'undefined';
+			return this.form.articleIdsHelp.length !== 0
+				|| this.moduleIdMap[this.moduleId].articleIdsHelp.length !== 0;
 		},
 		isSingleField:function() {
-			return this.fields.length === 1 && ['calendar','chart','list'].includes(this.fields[0].content);
+			return this.fields.length === 1 && ['calendar','chart','list','tabs'].includes(this.fields[0].content);
 		},
 		menuActive:function() {
 			return typeof this.formIdMapMenu[this.form.id] === 'undefined'
@@ -553,8 +557,8 @@ let MyForm = {
 			};
 		},
 		
-		// field state overwrite
-		fieldIdMapState:function() {
+		// state overwrite for different entities (fields, tabs)
+		entityIdMapState:function() {
 			const valueChangeComp = (value) => {
 				if(!Array.isArray(value))
 					return value;
@@ -606,14 +610,13 @@ let MyForm = {
 				return false;
 			};
 			
-			let out = {};
+			let out = { field:{}, tab:{} };
 			for(const s of this.form.states) {
 				if(s.conditions.length === 0 || s.effects.length === 0)
 					continue;
 				
-				let line = 'return ';
-				
 				// parse condition expressions
+				let line = 'return ';
 				for(let i = 0, j = s.conditions.length; i < j; i++) {
 					let c = s.conditions[i];
 					
@@ -636,7 +639,8 @@ let MyForm = {
 				// apply effects if conditions are met
 				if(Function(line)()) {
 					for(const e of s.effects) {
-						out[e.fieldId] = e.newState;
+						if(e.fieldId !== null) out.field[e.fieldId] = e.newState;
+						if(e.tabId   !== null) out.tab[e.tabId]     = e.newState;
 					}
 				}
 			}
@@ -775,6 +779,12 @@ let MyForm = {
 							fillFieldValueTemplates(f.fields);
 							continue;
 						}
+						if(f.content === 'tabs') {
+							for(let t of f.tabs) {
+								fillFieldValueTemplates(t.fields);
+							}
+							continue;
+						}
 						
 						if(f.content !== 'data')
 							continue;
@@ -865,6 +875,7 @@ let MyForm = {
 		
 		// field value control
 		valueSet:function(indexAttributeId,value,isOriginal,updateJoins) {
+			let changed = this.values[indexAttributeId] !== value;
 			this.values[indexAttributeId] = value;
 			
 			// set original value for change comparisson against current value
@@ -872,7 +883,7 @@ let MyForm = {
 				this.valuesOrg[indexAttributeId] = JSON.parse(JSON.stringify(value));
 			
 			// update sub joins if value has changed from input
-			if(updateJoins) {
+			if(updateJoins && changed) {
 				let ia = this.getDetailsFromIndexAttributeId(indexAttributeId);
 				if(ia.outsideIn)
 					return;
@@ -1357,16 +1368,16 @@ let MyForm = {
 			while(joinAdded) {
 				joinAdded = false;
 				
-				for(let i = 0, j = this.relationsJoined.length; i < j; i++) {
+				for(let r of this.relationsJoined) {
 					
-					if(!joinIndexes.includes(this.relationsJoined[i].indexFrom))
+					if(!joinIndexes.includes(r.indexFrom))
 						continue; // not dependent on existing joins
 					
-					if(joinIndexes.includes(this.relationsJoined[i].index))
+					if(joinIndexes.includes(r.index))
 						continue; // already added
-						
-					joins.push(this.relationsJoined[i]);
-					joinIndexes.push(this.relationsJoined[i].index);
+					
+					joins.push(r);
+					joinIndexes.push(r.index);
 					
 					// repeat if join was added (to collect dependend joins)
 					joinAdded = true;

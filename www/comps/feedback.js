@@ -10,6 +10,12 @@ let MyFeedback = {
 					<img class="icon" src="images/feedback.png" />
 					<div class="caption">{{ capApp.title }}</div>
 				</div>
+				<div class="area">
+					<my-button image="cancel.png"
+						@trigger="close"
+						:cancel="true"
+					/>
+				</div>
 			</div>
 			
 			<div class="content default-inputs">
@@ -20,6 +26,7 @@ let MyFeedback = {
 					<option value="4">{{ capApp.option.codePraise }}</option>
 				</select>
 				<textarea
+					v-focus
 					v-model="text"
 					:placeholder="capApp.textHint"
 				/>
@@ -30,35 +37,45 @@ let MyFeedback = {
 							module.name,module))
 						}}
 					</span>
-					<my-bool v-model="moduleRelated" />
+					<my-bool
+						v-model="moduleRelated"
+						:caption0="capGen.option.no"
+						:caption1="capGen.option.yes"
+					/>
 				</div>
 				
-				<div class="submit-text" :class="{ error:messageError }">
-					<span v-if="message === ''">{{ capApp.submit }}</span>
-					<span v-if="message !== ''">{{ message }}</span>
-				</div>
-				<div class="submit-box" v-if="message === ''">
+				<div class="submit-box">
 					<img src="images/smiley5.png" tabindex="0"
-						@click="send(5)"
-						@keyup.enter="send(5)"
+						@click="mood = 5"
+						@keyup.enter="mood = 5"
+						:class="{ active:mood === 5 }"
 					/>
 					<img src="images/smiley4.png" tabindex="0"
-						@click="send(4)"
-						@keyup.enter="send(4)"
+						@click="mood = 4"
+						@keyup.enter="mood = 4"
+						:class="{ active:mood === 4 }"
 					/>
 					<img src="images/smiley3.png" tabindex="0"
-						@click="send(3)"
-						@keyup.enter="send(3)"
+						@click="mood = 3"
+						@keyup.enter="mood = 3"
+						:class="{ active:mood === 3 }"
 					/>
 					<img src="images/smiley2.png" tabindex="0"
-						@click="send(2)"
-						@keyup.enter="send(2)"
+						@click="mood = 2"
+						@keyup.enter="mood = 2"
+						:class="{ active:mood === 2 }"
 					/>
 					<img src="images/smiley1.png" tabindex="0"
-						@click="send(1)"
-						@keyup.enter="send(1)"
+						@click="mood = 1"
+						@keyup.enter="mood = 1"
+						:class="{ active:mood === 1 }"
 					/>
 				</div>
+				
+				<div class="submit-text"
+					v-if="message !== ''"
+					:class="{ error:messageError }"
+				><span>{{ message }}</span></div>
 				
 				<div>
 					<my-button
@@ -66,10 +83,10 @@ let MyFeedback = {
 						:caption="capApp.button.whatIsSent"
 						:naked="true"
 					/>
-					<my-button class="right" image="cancel.png"
-						@trigger="close"
-						:cancel="true"
-						:caption="capGen.button.close"
+					<my-button class="right" image="ok.png"
+						@trigger="send"
+						:active="message === ''"
+						:caption="capGen.button.send"
 					/>
 				</div>
 				
@@ -80,55 +97,47 @@ let MyFeedback = {
 			</div>
 		</div>
 	</div>`,
-	data:function() {
+	data() {
 		return {
 			code:1,
 			message:'',
 			messageError:false,
 			moduleRelated:true,
+			mood:3,
 			showWhatIsSent:false,
 			text:''
 		};
 	},
 	computed:{
-		form:function() {
-			if(typeof this.$route.params.formId === 'undefined')
-				return false;
-			
-			return this.formIdMap[this.$route.params.formId];
-		},
-		module:function() {
-			if(!this.form)
-				return false;
-			
-			return this.moduleIdMap[this.form.moduleId];
-		},
+		form:(s) => typeof s.$route.params.formId === 'undefined'
+			? false : s.formIdMap[s.$route.params.formId],
+		module:(s) => !s.form ? false : s.moduleIdMap[s.form.moduleId],
 		
 		// stores
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		formIdMap:  function() { return this.$store.getters['schema/formIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.feedback; },
-		capGen:     function() { return this.$store.getters.captions.generic; },
-		isAdmin:    function() { return this.$store.getters.isAdmin; }
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		formIdMap:  (s) => s.$store.getters['schema/formIdMap'],
+		capApp:     (s) => s.$store.getters.captions.feedback,
+		capGen:     (s) => s.$store.getters.captions.generic,
+		isAdmin:    (s) => s.$store.getters.isAdmin
 	},
 	methods:{
 		// externals
 		getCaptionForModule,
 		
 		// actions
-		close:function() {
+		close() {
 			this.$store.commit('isAtFeedback',false);
 		},
 		
 		// backend calls
-		send:function(mood) {
+		send() {
 			ws.send('feedback','send',{
 				code:this.code,
 				formId:!this.form ? null : this.form.id,
 				isAdmin:this.isAdmin,
 				moduleId:!this.module ? null : this.module.id,
 				moduleRelated:!this.module ? false : this.moduleRelated,
-				mood:mood,
+				mood:this.mood,
 				text:this.text
 			},true).then(
 				() => this.message = this.capApp.sendOk,

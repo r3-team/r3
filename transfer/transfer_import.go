@@ -14,6 +14,7 @@ import (
 	"r3/log"
 	"r3/module_option"
 	"r3/schema"
+	"r3/schema/article"
 	"r3/schema/attribute"
 	"r3/schema/collection"
 	"r3/schema/form"
@@ -29,6 +30,7 @@ import (
 	"r3/schema/relation"
 	"r3/schema/role"
 	"r3/tools"
+	"r3/transfer/transfer_delete"
 	"r3/types"
 	"strings"
 
@@ -103,12 +105,26 @@ func ImportFromFiles(filePathsImport []string) error {
 		for _, m := range modules {
 			log.Info("transfer", fmt.Sprintf("import START, module '%s', %s", m.Name, m.Id))
 
+			/* execution order
+			1. delete to be removed triggers (only need to run once), known issues:
+				DB error if preset changes fire triggers that are deleted later
+				DB error if PG functions are deleted before referring triggers
+			2. set new/existing entities (module, relations, attributes, presets, ...)
+			3. delete all other entities after import is done
+				if other entities rely on deleted states (presets), they are applied on next loop
+			*/
+			if firstRun && !moduleIdMapMeta[m.Id].isNew {
+				if err := transfer_delete.NotExistingPgTriggers_tx(tx, m.Id, m.Relations); err != nil {
+					return err
+				}
+			}
+
 			if err := import_tx(tx, m, firstRun, lastRun, idMapSkipped); err != nil {
 				return err
 			}
 
 			if _, exists := idMapSkipped[m.Id]; !exists && !moduleIdMapMeta[m.Id].isNew {
-				if err := importDeleteNotExisting_tx(tx, m); err != nil {
+				if err := transfer_delete.NotExisting_tx(tx, m); err != nil {
 					return err
 				}
 			}
@@ -154,18 +170,11 @@ func ImportFromFiles(filePathsImport []string) error {
 func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 	idMapSkipped map[uuid.UUID]types.Void) error {
 
-	// # Execution order
-	// 1) set new/existing entities (module, relations, attributes, presets, ...)
-	// 2) execute data migration scripts (old and new data structures exist) (NOT IMPLEMENTED YET)
-	// 3) delete entities after import is done
-	//    if other entities rely on deleted states (presets), they are applied on next loop
-
-	// we use a sensible import order to avoid conflicts but some cannot be avoided
-	// # known cases
+	// we use a sensible import order to avoid conflicts but some cannot be avoided:
 	// * pg functions referencing each other
 	// * preset values referencing other presets
 	// * presets being dependent on deleted attributes (less NOT NULL constraints)
-	// import loop allows for repeated attempts
+	// use import loops to allow for repeated attempts
 
 	// module
 	run, err := importCheckRunAndSave(tx, firstRun, mod.Id, idMapSkipped)
@@ -180,7 +189,25 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 			mod.ParentId, mod.FormId, mod.IconId, mod.Name, mod.Color1,
 			mod.Position, mod.LanguageMain, mod.ReleaseBuild,
 			mod.ReleaseBuildApp, mod.ReleaseDate, mod.DependsOn, mod.StartForms,
-			mod.Languages, mod.Captions), mod.Id, idMapSkipped); err != nil {
+			mod.Languages, mod.ArticleIdsHelp, mod.Captions), mod.Id, idMapSkipped); err != nil {
+
+			return err
+		}
+	}
+
+	// articles
+	for _, e := range mod.Articles {
+		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info("transfer", fmt.Sprintf("set article %s", e.Id))
+
+		if err := importCheckResultAndApply(tx, article.Set_tx(tx, e.ModuleId,
+			e.Id, e.Name, e.Captions), e.Id, idMapSkipped); err != nil {
 
 			return err
 		}
@@ -198,7 +225,7 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		log.Info("transfer", fmt.Sprintf("set icon %s", e.Id))
 
 		if err := importCheckResultAndApply(tx, icon.Set_tx(tx, e.ModuleId,
-			e.Id, e.File), e.Id, idMapSkipped); err != nil {
+			e.Id, e.Name, e.File, true), e.Id, idMapSkipped); err != nil {
 
 			return err
 		}
@@ -346,8 +373,8 @@ func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 		if err := importCheckResultAndApply(tx, form.Set_tx(tx,
 			e.ModuleId, e.Id, e.PresetIdOpen, e.IconId, e.Name, e.NoDataActions,
-			e.Query, e.Fields, e.Functions, e.States, e.Captions), e.Id,
-			idMapSkipped); err != nil {
+			e.Query, e.Fields, e.Functions, e.States, e.ArticleIdsHelp,
+			e.Captions), e.Id, idMapSkipped); err != nil {
 
 			return err
 		}

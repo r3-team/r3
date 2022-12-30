@@ -1,4 +1,4 @@
-<p><em>Updated 2022-09-16</em></p>
+<p><em>Updated 2022-12-21</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -28,13 +28,12 @@
 <li><a href="#maintenance-mode">Maintenance mode</a></li>
 <li><a href="#builder-mode">Builder mode</a></li>
 <li><a href="#authentication-and-authorization">Authentication and authorization</a></li>
-<li><a href="#connecting-logins-to-data-sets">Connecting logins to data sets</a></li>
 <li><a href="#authentication-and-authorization-via-ldap">Authentication and authorization via LDAP</a></li>
+<li><a href="#connecting-logins-to-data-sets">Connecting logins to data sets</a></li>
 </ol></li>
 <li><a href="#manage-applications">Manage applications</a></li>
 <li><a href="#backup-and-recovery">Backup and recovery</a>
 <ol type="1">
-<li><a href="#files">Files</a></li>
 <li><a href="#database">Database</a></li>
 </ol></li>
 <li><a href="#updates">Updates</a>
@@ -45,15 +44,13 @@
 <li><a href="#cloud-operations">Cloud operations</a></li>
 </ol>
 <h1 id="introduction">Introduction</h1>
-<p>This is the documentation for deploying and operating the REI3 application platform. It assumes system administration knowledge for the target infrastructure (Windows Server or Linux). Once running, administrators can deploy REI3 applications from online or local repositories in infrastructures with or without internet access.</p>
+<p>This is the documentation for deploying and operating the REI3 application platform. It assumes some knowledge for the target infrastructure (Windows Server or Linux). Once running, administrators can deploy REI3 applications from online or local repositories in infrastructures with or without internet access.</p>
 <h1 id="deployment-models">Deployment models</h1>
-<p>To work within various customer environments, multiple deployment models are available for the REI3 platform; these are listed below in detail. Installation and configuration instructions follow afterwards.</p>
+<p>Depending on the environment, different deployment models are available.</p>
 <h2 id="stand-alone">Stand-alone</h2>
-<p>This model was created for small and medium size installations (~250 users) and is available for Windows Server. The stand-alone deployment has almost no external dependencies. It is the recommended model for organizations with smaller IT teams as it requires little management.</p>
-<p>When running stand-alone, REI3 manages an internal database and can also execute full backups.</p>
+<p>This model was created for small and medium size installations (~250 users) and is available for Windows Server. The stand-alone deployment has almost no external dependencies and includes an integrated database. It is the recommended model for organizations with smaller IT teams.</p>
 <h2 id="dedicated">Dedicated</h2>
 <p>In this model REI3 runs as an application separate from its database system. This is recommended for large instances or when an organization has a database team onhand. This version can be deployed on Linux and Windows servers.</p>
-<p>Running this model, REI3 will require a separate PostgreSQL database system and will not manage any database backups.</p>
 <h2 id="portable">Portable</h2>
 <p>An option for development, demo and test instances. With the portable version, REI3 can be started on Windows servers or clients directly without any setup. Like the stand-alone model, the portable version includes its own database. It is not recommended to run anything productive from a portable instance.</p>
 <h1 id="technical-requirements">Technical requirements</h1>
@@ -87,7 +84,9 @@
 <ul>
 <li>Linux server
 <ul>
-<li>Optional: ImageMagick &amp; Ghostscript (for thumbnails)</li>
+<li>Optional: ImageMagick (for thumbnails)</li>
+<li>Optional: Ghostscript (for PDF thumbnails)</li>
+<li>Optional: PostgreSQL client tools (for integrated backups)</li>
 </ul></li>
 <li>Windows Server
 <ul>
@@ -107,18 +106,20 @@
 <p>REI3 comes with a graphical installer for Windows Server. The installer supports both <a href="#stand-alone">stand-alone</a> and <a href="#dedicated">dedicated</a> deployment models.</p>
 <ul>
 <li><a href="#stand-alone">Stand-alone</a>: After following the installer, REI3 can be started immediately.</li>
-<li><a href="#dedicated">Dedicated</a>: After the installation, database connection details for an empty PostgreSQL database must be entered into the configuration file <code>config.json</code>. The file <code>config.json</code> is located inside the chosen application directory. The database user must have full permissions for the chosen database.</li>
+<li><a href="#dedicated">Dedicated</a>: After the installation, database connection details for an empty, UTF8 encoded PostgreSQL database must be entered into the configuration file <code>config.json</code>. The file <code>config.json</code> is located inside the chosen application directory. The database user must have full permissions for the chosen database.</li>
 </ul>
 <p>Independent of deployment model, REI3 is handled as a Windows service and can be started with the service manager (command: <code>service.msc</code>). REI3 will write to the Windows application log, should the service not start correctly.</p>
+<p>Because of licensing terms, we cannot distribute Ghostscript with REI3. If you want to create PDF thumbnails, you have to download and install a current version of Ghostscript on the REI3 server.</p>
 <h2 id="on-a-linux-server">On a Linux server</h2>
-<p>For Linux servers, REI3 is available as a compressed archive with pre-compiled binary. The installation steps are:</p>
+<p>For Linux servers, REI3 is available as a compressed archive with pre-compiled binaries. The installation steps are:</p>
 <ol type="1">
 <li>Extract the REI3 archive file to a location of your choice (<code>/opt/rei3/</code> for example).</li>
 <li>Make the file <code>r3</code> executable (<code>chmod u+x r3</code>).</li>
 <li>Copy the file <code>config_template.json</code> to <code>config.json</code> - keep it in the same directory as the <code>r3</code> executable.</li>
 <li>Add connection details to an empty, UTF8 encoded PostgreSQL database to <code>config.json</code>. The database user must have full permissions for the chosen database.</li>
 <li>Optional: Install ImageMagick and Ghostscript if you want to have thumbnails (<code>sudo apt install imagemagick ghostscript</code>).</li>
-<li>Register REI3 with your service manager (<code>sudo r3 -install</code>).</li>
+<li>Optional: Install PostgreSQL client tools if you want to use the integrated backup feature (<code>sudo apt install postgresql-client</code>).</li>
+<li>Register REI3 with your service manager (<code>sudo ./r3 -install</code>).</li>
 <li>Start the REI3 service (<code>systemctl start rei3</code> for example).</li>
 </ol>
 <p>If the service does not start, REI3 writes to <code>syslog</code>.</p>
@@ -129,18 +130,27 @@
 <p>REI3s core configuration can be changed within its configuration file (<code>config.json</code>), which is located in the chosen REI3 installation directory. Setting file paths, web server port and database connection details is straightforward. Changes are applied when the application service restarts. Special configuration options and certification management is explained separately.</p>
 <h2 id="ssl-certificates">SSL certificates</h2>
 <p>During installation, REI3 creates a self-signed certificate to allow encrypted access to the application. It is not recommended to keep this certificate. If at all possible, a properly signed certificate should be provided for REI3 to ensure secure communication with trust between clients and server.</p>
-<p>We can offer support for setting up necessary infrastructure; it is however dependent on your organization to manage certificates. Cloud based offerings for REI3 can include certification services.</p>
+<p>Some common considerations / pitfalls:</p>
+<ul>
+<li>REI3 can work with different certificates. If REI3 cannot load a certificate, it will fail to start and log to the operating system (<code>syslog</code> for Linux, Windows application log otherwise).</li>
+<li>Make sure that the hostname that the certificate is set to, is the same as clients use to connect to the REI3 server. The port is irrelevant.</li>
+<li>When running REI3 internally (not reachable from the cloud), clients still need to be able to verify the certificate. Make sure that your certificate file (*.crt) includes all certificates up the chain until the one that is known to the clients - this is usually a trusted root certificate or intermediary.</li>
+</ul>
 <h1 id="general-administration">General administration</h1>
 <p>After configuration, basically all administrative tasks are executed via the admin user interface inside the main REI3 web application. Any user defined as 'admin' has full access to these features.</p>
 <h2 id="maintenance-mode">Maintenance mode</h2>
 <p>To execute deep system changes safely, a separate operation mode is available, called 'maintenance mode'. When enabled, all non-admin users are automatically logged off from the system; new logins are also rejected from non-admin users.</p>
+<p><img src="en_us_admin_pics/maintenance_mode.webp" alt="Maintenance mode" /></p>
 <p>In maintenance mode, applications may be installed, configured and deleted. Please be aware that deleting applications will permanently delete all corresponding data from the system. This is irreversable without current, functional backups.</p>
 <h2 id="builder-mode">Builder mode</h2>
-<p>When the maintenance mode is active, Builder mode can also be enabled. This gives admin users access to the integrated, graphical application builder utility, called 'Builder' for short. The Builder is a powerful tool. All REI3 applications are exclusively created and changed via the Builder. Please be aware that changing applications has permanent consequences up to and including data loss. Do not attempt to use the Builder in any productive instance. For testing or developing applications, a separated instance should be used. The portable version makes this easy on Windows clients. On Linux a separated application service, accessing a separate database, serves the same purpose.</p>
+<p>When the maintenance mode is active, Builder mode can also be enabled. This gives admin users access to the integrated, graphical application builder utility, called 'Builder' for short. The Builder is a powerful tool. All REI3 applications are exclusively created and changed via the Builder.</p>
+<p><img src="en_us_admin_pics/builder_mode.webp" alt="Builder mode" /></p>
+<p>Please be aware that changing applications has permanent consequences up to and including data loss. Do not attempt to use the Builder in any productive instance. For testing or developing applications, a separated instance should be used. The portable version makes this easy on Windows clients. On Linux a separated application service, accessing a separate database, serves the same purpose.</p>
 <h2 id="authentication-and-authorization">Authentication and authorization</h2>
-<p>Users are authenticated in REI3 via defined login names and passwords. New logins can be created at will; there are no limits except that login names need to be unique. To grant access, application roles need to be assigned to logins. Roles work cumulatively; the more roles a login is assigned to, the more permissions are granted. Options for password complexity are available in the admin user interface.</p>
-<h2 id="connecting-logins-to-data-sets">Connecting logins to data sets</h2>
-<p>Some applications relate data sets to logged in users to facilitate workflows. One example is the application 'Organizations', which connects logins to employees. This connection can then be used by all applications building on 'Organizations'. Other entities can be connected to logins as well, like connecting logins to customer accounts. Please refer to the corresponding application help pages to learn more.</p>
+<p>To let users access the system, individual logins must be created by an REI3 administrator or imported from a <a href="#authentication-and-authorization-via-ldap">directory service</a>. Login names can be anything from names to employee IDs to email addresses - they only need to be unique within a REI3 instance.</p>
+<p><img src="en_us_admin_pics/authentication.webp" alt="Logins" /></p>
+<p>To access any application or data, roles have to be assigned to logins. This can be done by an REI3 administrator manually, or they can be assigned automatically according to group memberships within a <a href="#authentication-and-authorization-via-ldap">directory service</a>. Role permissions are cumulative - the more roles a user has, the larger the access.</p>
+<p>To increase account security, REI3 administrators can choose password complexity options in the admin interface. Additionaly, MFA (multi-factor authentication) in the form of TOTP (time-based one-time-passwords) is available to users and can be reset by administrators. MFA can be setup on multiple devices and is supported by most authenticator apps (anything that supports TOTP).</p>
 <h2 id="authentication-and-authorization-via-ldap">Authentication and authorization via LDAP</h2>
 <p>REI3 hosts its own, internal authentication backend. To integrate into existing infrastructures, REI3 can utilize LDAP services to offer:</p>
 <ul>
@@ -154,11 +164,19 @@
 <li>Microsoft AD only: Nested group memberships are automatically resolved.</li>
 </ul></li>
 </ul>
+<h2 id="connecting-logins-to-data-sets">Connecting logins to data sets</h2>
+<p>To facilitate workflows and other features with relation to the current user, logins can be connected to data sets. One example is the application 'Organizations', which connects logins to company contacts. With this connection, applications can use organization details of the corresponding company contact to retrieve contact information, assign work, track time, manage projects and so on.</p>
+<p><img src="en_us_admin_pics/login_form.webp" alt="Connect logins to data sets" /></p>
+<p>There is no limit in the number of applications or data sets that can be connected to a login. Logins can also be connected to other entities like customers, requestors and so on.</p>
+<p>If at least one app that offers connecting data sets to logins is installed, REI3 administrators can create new or assign existing data sets in the admin interface for logins.</p>
 <h1 id="manage-applications">Manage applications</h1>
 <p>To get use out of REI3, applications need to be installed. To manage applications, the maintenance mode must be enabled first.</p>
 <p>Applications are installed via the admin user interface. They can be retrieved from multiple sources:</p>
 <ul>
-<li>Official repository: Pre-installed repository for official REI3 applications. Internet access is required to access this online service.</li>
+<li>Official repository: Pre-installed repository for official REI3 applications. Internet access is required to access this online service.
+<ul>
+<li><img src="en_us_admin_pics/repo.webp" alt="Official repository" /></li>
+</ul></li>
 <li>Local repository: For organizations running multiple REI3 instances and/or needing full control over all releases. A repository can be installed on any REI3 instance as it is a REI3 application as well.</li>
 <li>Manual import of applications: All applications can be imported manually. This is useful for development releases, testing and for applications not released in any repository.</li>
 </ul>
@@ -167,15 +185,17 @@
 <p>To fully recover a REI3 instance, these components must be backed up:</p>
 <ul>
 <li>The REI3 database</li>
-<li>The REI3 configuration file <code>config.json</code></li>
-<li>The 'uploaded files' directory</li>
-<li>The used SSL certificates</li>
+<li>The REI3 configuration file (<code>config.json</code>)</li>
+<li>Directories (can be renamed in <code>config.json</code>)
+<ul>
+<li><code>certificates</code> (used SSL certificates)</li>
+<li><code>files</code> (uploaded files)</li>
+<li><code>transfer</code> (installed applications)</li>
+</ul></li>
 </ul>
-<p>When running stand-alone, the integrated backup addresses all of the above and allows for full recovery as long as the target backup directory is separate from the application server. If not running in stand-alone or more control is required, more details are given below.</p>
-<h2 id="files">Files</h2>
-<p>The configuration file <code>config.json</code> is located in the chosen application directory for REI3. Certificates and file paths are referenced within the configuration file itself. For full recovery, copies of these are required.</p>
-<p>Other directories besides the stated ones, do not need to be backed up but are not very large and can be included to keep backup jobs simple.</p>
-<p>The configuration file can be reconstructed if lost and certificates newly created. This though would require effort and impede a quick recovery.</p>
+<p>The integrated backup feature automatically backs up all necessary data, if its enabled in the admin panel and dependencies are <a href="#installation">installed</a>.</p>
+<p><img src="en_us_admin_pics/backup.webp" alt="Backups!" /></p>
+<p>With larger systems, the integrated backup might not be good enough; it can only create full backups, which are very safe but take more time and disk space than other backup methods. With growing data sets, you might need to consider also using incremental/differential backups; these require more effort and possibly infrastructure and are not part of this documentation.</p>
 <h2 id="database">Database</h2>
 <p>In any deployment model, a PostgreSQL database is used for REI3. To access the stand-alone, integrated database, use the connection details from the REI3 configuration file (<code>config.json</code>) while the REI3 service is running. The database is called 'app' by default.</p>
 <p>For full backups, we recommend using internal PostgreSQL tools, like <code>pg_dump</code> to backup and <code>pg_restore</code> to recover the database. Examples:</p>
@@ -188,7 +208,6 @@
 <li>Always backup to a separate network location, in case the system fails completely.</li>
 <li>Recoveries of full backups should always run against an empty / new database to make sure that all data can safely be recovered to the backed up state. The recovered database can then be renamed or the REI3 configuration file updated to access the recovered database.</li>
 </ul>
-<p>Incremental backups are useful for larger instances but are not covered by this documentation. Organizations large enough to require these, should either use their existing backup solutions or follow documented PostgreSQL practices for executing incremental backups.</p>
 <h1 id="updates">Updates</h1>
 <p>There are 2 kinds of updates to be handled - application updates and platform updates. Application updates are more common and serve to expand functionality for REI3 applications. These updates can be installed directly from the admin user interface, when the maintenance mode is active. If the updates are received via repository, its a single-click operation. Manual updates must be provided via packaged application files. It is good practice to install updates in testing environments first as looks and behaviour can change between application releases.</p>
 <p>Platform updates address the underlying platform software and might be necessary for application updates as well, if these require newer platform features. Because security and stability issues are fixed with platform updates, it is always good to update the platform itself.</p>

@@ -1,4 +1,4 @@
-<p><em>Updated 2022-07-20</em></p>
+<p><em>Updated 2022-12-21</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -25,7 +25,7 @@
 <li><a href="#forms">Forms</a>
 <ol type="1">
 <li><a href="#form-layouts">Form layouts</a></li>
-<li><a href="#field-options">Field options</a></li>
+<li><a href="#field-settings">Field settings</a></li>
 <li><a href="#list-fields">List fields</a></li>
 <li><a href="#calendar-fields">Calendar fields</a></li>
 <li><a href="#chart-fields">Chart fields</a></li>
@@ -36,7 +36,7 @@
 <li><a href="#query-filters">Query filters</a></li>
 </ol></li>
 <li><a href="#columns">Columns</a></li>
-<li><a href="#help-pages">Help pages</a></li>
+<li><a href="#help-articles">Help articles</a></li>
 <li><a href="#translations">Translations</a></li>
 <li><a href="#icons">Icons</a></li>
 <li><a href="#menus">Menus</a></li>
@@ -81,70 +81,70 @@
 <li><a href="#troubleshooting">Troubleshooting</a></li>
 </ol>
 <h1 id="introduction">Introduction</h1>
-<p>This is the documentation for building REI3 applications. REI3 is a free, open-source business application platform, which can run on-premise or from the cloud, on Windows and Linux. To learn how to setup and administrate REI3, please refer to the <a href="https://rei3.de/en/docs/admin">admin documentation</a>.</p>
-<p>REI3´s primary purpose is to fulfill business software requirements. Simple applications, like a system that manages company event attendance, can be built within a single hour. More complex applications, like absence management or a system to execute mail campaigns, require more time but are also easily buildable with REI3. Organizations using REI3 can save time and money by reducing dependency on costly software solutions for simple requirements, while cheaply addressing complex, niche requirements that no fitting solution is available for.</p>
-<p>Most people with IT administration skills can utilize REI3 to address software requirements; it is however very useful to know and understand relational databases to make use of all features. REI3 provides access to low-level entities, such as database indexes, triggers, sub queries, functions and so on. With some background knowledge, complex relationships, business logic, access control as well as performance tuning can be implemented to build powerful, fast and scalable applications.</p>
+<p>This is the documentation for building REI3 applications. REI3 is a free to use, open-source business application platform, which can run on-premise or from the cloud, on Windows and Linux. To learn how to setup and administrate REI3, please refer to the <a href="https://rei3.de/en/docs/admin">admin documentation</a>.</p>
+<p>REI3´s primary purpose is to fulfill business software requirements. Simple applications, like a system that manages company event attendance, can be built within an hour. More complex requirements, like tracking and managing employee absence or executing mail campaigns, can also be fulfilled. Organizations using REI3 can save time and money by reducing their dependency on costly software solutions for simple tasks, while cheaply addressing complex, niche requirements that no fitting solution is available for.</p>
+<p>Most people with IT administration skills can use REI3 to address their software needs; it is however very useful to know relational databases to make use of all features. REI3 provides access to low-level entities, such as database indexes, triggers, sub queries, functions and so on. With some background knowledge, complex relationships, business logic, access control as well as performance tuning can be implemented to build powerful, fast and scalable applications.</p>
 <h1 id="the-builder">The Builder</h1>
-<p>Building REI3 applications is done exclusively with an integrated, graphical utility, simply called 'the Builder'. The Builder is included in all REI3 releases.</p>
-<p>Using the Builder, individuals and organizations can create or change applications. Finished applications can then be exported as file and re-imported into other REI3 instances. Applications can therefore be built on one system and <a href="#application-transfers">transferred</a> to another. It is also possible to share applications with others by exchanging REI3 files or using online repositories.</p>
-<p>Changing an application with the Builder can result in changes to the underlying data structure, potentially deleting data in the instance but also in other instances when transferring an application. Precautions must be taken accordingly:</p>
+<p>REI3 applications are created and updated with a graphical utility, called 'Builder'. The Builder is included in all releases of REI3 and can be enabled by an admin user.</p>
+<p>Finished applications can be <a href="#application-transfers">exported and then imported</a> into other REI3 instances, to deploy changes to production systems or to share applications with others. There is a dedicated REI3 application available (REI3 Repository) to host and distribute other REI3 applications publicly or inside internal networks.</p>
+<p>Be aware: Changing an application with the Builder can result in changes to the underlying data structure, potentially deleting data in the instance but also in other instances when <a href="#application-transfers">transferring</a> an application. Precautions must be taken accordingly:</p>
 <ul>
 <li>NEVER use the Builder in productive instances. To build, use the portable version of REI3 or run a separate REI3 instance. For critical instances, it is smart to run a copy of a productive system to confirm application changes before deploying to the final, productive instance.</li>
-<li>DO NOT make changes to applications from other authors - these are deleted when the application is updated. You can expand existing applications safely by adding custom data &amp; UI on top of them inside your own applications. Please refer to <a href="#building-on-applications">Building on applications</a> to learn more.</li>
+<li>DO NOT make changes to applications from other authors - these are deleted when the application is updated. You can expand existing applications safely by adding custom data &amp; user interfaces on top of them inside your own applications. Please refer to <a href="#building-on-applications">Building on applications</a> to learn more.</li>
 <li>ALWAYS consider carefully when deciding to <a href="#deletions">delete data structures</a> (relations/attributes). This will affect target instances and, if other applications build on yours, affect other applications as well. Renaming data structures is safe however.</li>
 </ul>
-<p>To enable the Builder, you need to login into a running REI3 instance with an admin user. After enabling the maintenance mode, which will kick all non-admin users from the system, the Builder can be switched on. Once activated, the Builder can be accessed from its icon on the top-left corner of the main menu.</p>
-<p><img src="en_us_builder_pics/admin_config.png" alt="Activating the Builder" /></p>
+<p>To enable the Builder, you need to log into a running REI3 instance with an admin user. After enabling the maintenance mode, which will kick all non-admin users from the system, the Builder can be switched on. Once activated, the Builder can be accessed from its icon on the top-left corner of the main menu.</p>
+<p><img src="en_us_builder_pics/admin_config.webp" alt="Activating the Builder" /></p>
 <h1 id="getting-started">Getting started</h1>
-<p>Going into the Builder UI you will be presented with a list of installed applications. To create a new application, you only need to decide on a name and click on the save icon. The name can become important later as application names need to stay unique within a given REI3 instance. It is however no problem the change the name later.</p>
-<p><img src="en_us_builder_pics/start.png" alt="Builder start page" /></p>
+<p>To start, you can either directly <a href="#creating-your-own-applications">create your own application</a>, or <a href="#installing-applications-as-reference">install existing ones</a> from the public repository.</p>
+<p><img src="en_us_builder_pics/start.webp" alt="Installed applications" /></p>
+<p>To get a feel of how the <a href="#the-builder">Builder</a> is used, we recommend looking at finished applications first.</p>
 <h2 id="installing-applications-as-reference">Installing applications as reference</h2>
-<p>To play around and see working examples, you can install applications from the REI3 repository from the admin UI. In a non-productive instance you can install, change, delete and re-install applications at any time. Installing finished applications can help with understanding how these are built and how specific options are used.</p>
-<p><img src="en_us_builder_pics/repo_install.png" alt="Install apps from repo" /></p>
+<p>To play around and see working examples, you can install applications from the public repository inside the admin interface. In a non-productive instance you can install, change, delete and re-install applications at any time. Installing finished applications can help with understanding how these are built and how specific options are used.</p>
+<p><img src="en_us_builder_pics/repo_install.webp" alt="Install apps from repo" /></p>
 <h2 id="creating-your-own-applications">Creating your own applications</h2>
-<p>Creating a new application is straightforward. After opening the <a href="#the-builder">Builder</a>, a list of installed applications is presented to you. The first line is reserved for creating new applications. By entering a unique name for the application and clicking the save icon, a new application is generated. You can then open the application to add things like <a href="#data-storage">data storage</a>, <a href="#menus">menus</a>, <a href="#forms">forms</a> and so on.</p>
+<p>Creating a new application is straightforward. After opening the <a href="#the-builder">Builder</a>, a list of installed applications is presented to you. After clicking on 'new', enter a unique name for your application and save - a new application is generated. You can then open the application to work on it.</p>
+<p><img src="en_us_builder_pics/module_create.webp" alt="Create new application" /></p>
 <p>There a few options when creating or updating the application itself:</p>
 <ul>
 <li>Name: A unique name, representing your application. Only important for transferring your application to other instances - users see a <a href="#translations">translated</a> application title instead (see below).</li>
-<li>Depends on (optional): Dependencies to other applications. More details in <a href="#building-on-applications">Building on applications</a>.</li>
-<li>Assigned to (optional): Application which serves as a parent to the selected application. Must be activated in 'depends on' first. This option effectively creates a hierarchy in the start and header menus. Currently the hierarchy is limited to 2 levels (1 parent, multiple children) - these might be expanded in the future.</li>
+<li>Builds on (optional): When other applications are installed in the same REI3 instance, they can be selected here. Each selected application can then be referenced inside the Builder to reuse data, user interfaces, icons and so on. More details in <a href="#building-on-applications">Building on applications</a>.</li>
+<li>Assigned to (optional): Application which serves as a parent to your application. Must be selected in 'builds on' first. This option effectively creates a hierarchy in the start and header menus. Currently the hierarchy is limited to 2 levels (1 parent, multiple children).</li>
 <li>Icon (optional): An <a href="#icons">icon</a> representing the application. Must be added to the application first.</li>
 <li>Color (optional): Freely selectable color. Is shown on the start page and on the header when the application is active. Can be overwritten in instances with customizing. Should be a color with low-brightness to contrast bright header fonts.</li>
-<li>Default position: Order in which application should appear in menus (smaller first). Can be overwritten in instances by admins. When 'assigned to' a parent application, positions affect the order underneath the parent application.</li>
+<li>Default position: Order in which the application should appear in menus (smaller first). Can be overwritten in instances by admins. When 'assigned to' a parent application, positions affect the order underneath the parent application.</li>
 <li>Start form (optional): Depending on assigned <a href="#roles-and-access-management">roles</a>, a different <a href="#forms">form</a> can be shown when opening the application. Multiple rules for matching role membership with start form can be set; if no rule matches, the default start form is shown. A valid start form is required for the application to show up in the user´s menu.
 <ul>
-<li><img src="en_us_builder_pics/start_form.png" alt="Role dependent start form" /></li>
+<li><img src="en_us_builder_pics/start_form.webp" alt="Role dependent start form" /></li>
 </ul></li>
-<li>Languages (1 is required): Languages, the application is available in. A language is defined by its 5-letter language code (en_us, de_de, ch_cn, and so on). Be aware: You must provide translations for all languages that you define here - not doing this results in error strings being shown to users. Besides the application title, other entities (menus, forms, help pages, ...) require translations when creating them. You can also define a fallback language, which is used if a user selects a language that your application does not offer. To start, you should keep to a single translation and expand when needed.
-<ul>
-<li><img src="en_us_builder_pics/start_language.png" alt="Application languages" /></li>
-</ul></li>
+<li>Languages (1 is required): Languages, the application is available in. A language is defined by its 5-letter language code (en_us, de_de, ch_cn, and so on). Be aware: You must provide translations for all languages that you define here - not doing this results in error strings being shown to users. Besides the application title, other entities (menus, forms, help pages, ...) require translations when creating them. You can also define a fallback language, which is used if a user selects a language that your application does not offer. To start, you should keep to a single translation and expand when needed.</li>
 </ul>
 <p>Some options depend on other entities being created first (other applications to build on, forms to select as start form, icons to show). When creating an application these can be skipped and updated later.</p>
-<p>In addition, a couple of non-editable fields are shown. These are set when an updated application is exported. Please refer to <a href="#application-transfers">Application transfers</a> for more details.</p>
+<p>In addition, a couple of non-editable fields are shown. These are set when an application is exported. Please refer to <a href="#application-transfers">Application transfers</a> for more details.</p>
 <ul>
 <li>Release date: Current date when exported.</li>
 <li>Application version: Incremented by 1 when exported.</li>
-<li>Platform version: Version of the platform when exported.</li>
+<li>Platform version: Version of the REI3 instance when exported.</li>
 </ul>
 <h1 id="data-storage">Data storage</h1>
 <p>Applications that work with data usually need some sort of long-term data storage. REI3 is built on the well-established, relational database management system <a href="https://www.postgresql.org/">postgreSQL</a>.</p>
-<p>To store data in a relational database system, 'relations' are created in the form of database tables. Relations contain records for specific entities (for example students and classes of a school) and can be used to implement relationships between them (which students attend which classes). These concepts are widely taught but are not explained in detail in this documentation - it is important to understand however, that REI3 follows them closely. <a href="#relations">Relations</a>, their <a href="#attributes">attributes</a> and, by extension, <a href="#relationships">relationships</a> work the same way in REI3 as they would when building an application with any common relational database system.</p>
+<p>To store data in a relational database system, 'relations' are created in the form of database tables. Relations contain records for named entities (for example students and classes of a school) and can be used to implement relationships between them (which students attend which classes). <a href="#relations">Relations</a>, their <a href="#attributes">attributes</a> and, by extension, <a href="#relationships">relationships</a> work the same way in REI3 as they would when building an application with any common relational database system.</p>
 <p>Relations and attributes are referenced in <a href="#forms">forms</a> to display, create or update data in lists, fields, calendars and so on. They are also accessible in <a href="#backend-functions">backend functions</a> for complex data manipulation, calculations or other data related actions.</p>
 <h2 id="relations">Relations</h2>
 <p>Relations are used to store data in the form of records. Records can be anything, from company contacts, students, vehicles, locations - to invoices and workflows. By creating multiple relations, you can store any data your application needs.</p>
+<p><img src="en_us_builder_pics/relations.webp" alt="Relations" /></p>
 <p>The following options are available for relations:</p>
 <ul>
 <li>Name: The internal name of the relation; it should reflect the contents of the relation and must be unique within the application.</li>
-<li>E2E encryption: This enables <a href="#end-to-end-encryption">end-to-end encryption</a> for this relation. Please read the corresponding <a href="#end-to-end-encryption">chapter</a> before enabling it.</li>
+<li>E2E encryption: This enables <a href="#end-to-end-encryption">end-to-end encryption</a> or E2EE for this relation. E2EE has benefits and drawbacks and should only be enabled were needed. This settings cannot be changed later for this relation. Please read the corresponding <a href="#end-to-end-encryption">chapter</a> before enabling it.</li>
 <li>Policies: Are used to control, which records of a relation are accessible to which user based on filtering done on the backend - <a href="#policies">more details</a>.</li>
 <li>Change log: <a href="#change-logs">Data retention settings</a> for the relation.</li>
 </ul>
-<p><img src="en_us_builder_pics/relations.png" alt="Relations" /></p>
+<p><img src="en_us_builder_pics/relation.webp" alt="Relation settings" /></p>
 <p>Relations are central to managing data in REI3. They contain all records, their values (following their <a href="#attributes">attributes</a>), <a href="#indexing">indexes</a> (mostly for performance tuning), <a href="#presets">presets</a> (predefined records) and <a href="#triggers">triggers</a> (automatically executed backend functions).</p>
 <h2 id="attributes">Attributes</h2>
 <p>Once a relation has been created, you can create attributes for it. An attribute is a data field, which is available to every record in a relation. A relation called 'contacts' might have attributes such as 'email', 'phone_number' and 'works_at_company'.</p>
-<p><img src="en_us_builder_pics/attributes.png" alt="Attributes" /></p>
+<p><img src="en_us_builder_pics/attributes.webp" alt="Attributes" /></p>
 <p>The following options are available for attributes:</p>
 <ul>
 <li>Icon: Default <a href="#icons">icon</a> for this attribute. Used by input fields on <a href="#forms">data forms</a> if no other icon is defined.</li>
@@ -152,7 +152,7 @@
 <li>Title: A <a href="#translations">translated</a> title - displayed in input fields and <a href="#columns">columns</a> if not overwritten.</li>
 <li>Content: The content of the attribute - multiple content types exist.
 <ul>
-<li>Integers: Numbers without decimal points (integer/bigint)</li>
+<li>Integers: Whole numbers, no decimal points (integer/bigint)</li>
 <li>Floats: Numbers with decimal points (real/double precision), inexact but enables fast calculations</li>
 <li>Numeric: Numbers with decimal points (numeric), exact but slow for calculations</li>
 <li>Text: Characters, stored as UTF8 (varchar, text)</li>
@@ -160,43 +160,58 @@
 <li>Special types, which contents are managed by REI3:
 <ul>
 <li>Relationship: Integer number (1:1, N:1), referring to primary key of another relation</li>
-<li>Files: JSON blob for meta data of uploaded files (files)</li>
+<li>Files: References to uploaded files and file versions</li>
 </ul></li>
 </ul></li>
 <li>Relationship: Target relation for relationship. Only available, if attribute content 1:1 or N:1 was selected.</li>
 <li>Length: Length of attribute value. Relevant for text (max. amount of characters) and files types (max. file size in KB).</li>
-<li>Nullable: Attribute values can be 'NULL' (empty/non-existing).</li>
-<li>E2E encrypted: Enables <a href="#end-to-end-encryption">end-to-end encryption</a> for this attribute. Only available for relations with E2E encryption enabled and when creating new attributes.</li>
+<li>Nullable: Attribute values can be 'NULL' (empty). If disabled, there must always be value present.</li>
+<li>E2E encrypted: Enables <a href="#end-to-end-encryption">end-to-end encryption</a> for this attribute. Only available for <a href="#relations">relations</a> with E2E encryption enabled and when creating new attributes.</li>
 <li>Default: If no attribute value is given, this default value is applied.</li>
-<li>ON UPDATE/DELETE: These define how records, connected via a relationship react when their partner is updated or deleted (refer to 'Relationships' for more details).</li>
+<li>ON UPDATE/DELETE: These define how records, connected via a relationship react when their partner is updated or deleted (refer to <a href="#relationships">relationships</a> for more details).</li>
 </ul>
-<p>By default, an attribute with the name 'id' exists for each relation. This attribute serves as primary key for the record and cannot be removed. A primary key like this is often used when designing basic relationships - when needed, composite and unique keys <a href="#indexing">can be created</a> to serve specific needs.</p>
+<p>By default, an attribute with the name 'id' exists for each relation, which is its primary key. A primary key serves to reference each specific record by a unique value - in this case, its a unique, automatically assigned number (auto-incremented integer).</p>
+<p>Other types of keys <a href="#indexing">can be created</a> when needed - like keys with unique constraints, based on one or many attribute values.</p>
 <h2 id="relationships">Relationships</h2>
-<p>Two relations can be placed in a relationship by creating a 'relationship attribute' on either one of them, referring to the other relation. You can choose a 1:1 (one-to-one) or N:1 (many-to-one) relationship. Foreign keys and indexes are created automatically when using relationship attributes (unique index for 1:1 attributes, non-unique index for N:1).</p>
+<p>Two relations can be in a relationship by creating a 'relationship attribute' on either one of them, which refers to the other. You can choose a 1:1 (one-to-one) or N:1 (many-to-one) relationship. Some examples:</p>
+<ul>
+<li>1:1 - one-to-one
+<ul>
+<li>Relation 1: asset (contains asset details like a unique asset number)</li>
+<li>Relation 2: asset_purchase (contains purchasing details for one asset like its invoice number and paid price)</li>
+<li>-&gt; The relationship attribute can be on either relation 1 or 2. Only one asset can have the specific asset purchasing details (1 'asset' record is connected to 1 'asset_purchase' record - 1:1).</li>
+</ul></li>
+<li>N:1 - many-to-one
+<ul>
+<li>Relation 1: asset (contains asset details like a unique asset number)</li>
+<li>Relation 2: product (contains product details, like model name, manufacturer)</li>
+<li>-&gt; The relationship attribute (as in N:1 'asset_product') must be on relation 1. Multiple assets can be the same product (many asset records are connected to 1 product record - N:1).</li>
+</ul></li>
+</ul>
 <p>A N:M (many-to-many) relationship can be created between two relations by creating a third relation with two N:1 attributes. This third relation can then hold other attributes as well, adding details to the N:M relationship. Example:</p>
 <ul>
-<li>Relation 1: student (details of student records)</li>
-<li>Relation 2: class (details of class records)</li>
+<li>Relation 1: student (contains student details, like name, date of birth, ...)</li>
+<li>Relation 2: class (contains class details, like a description, assigned teacher, ...)</li>
 <li>Relation 3: student_class (N:1 attribute to 'student', N:1 attribute to 'class', integer attribute 'started in year' to describe first year of student attendance)</li>
 </ul>
-<p><img src="en_us_builder_pics/nm_relationship.png" alt="N:M Relationship" /></p>
+<p><img src="en_us_builder_pics/nm_relationship.webp" alt="N:M Relationship" /></p>
 <p>Relationship attributes use foreign keys to enforce the existence of referenced records. When a record that serves as relationship target is deleted, the foreign key becomes invalid. This also occurs, although more rarely, when the referenced key of such a record is changed. To deal with these cases, you can specify a desired behavior for 'ON DELETE' (referenced record is deleted) and 'ON UPDATE' (key of referenced record is changed):</p>
 <ul>
 <li>NO ACTION: Block the deletion of the original record.</li>
-<li>RESTRICT: Similar to NO ACTION, but does not allow deferring in a running transaction. This option is not important in most cases but is available when needed.</li>
+<li>RESTRICT: Similar to NO ACTION, but does not allow deferring in a running transaction. This option is only relevant for experts.</li>
 <li>CASCADE: Delete the record which is referencing the invalid relationship target. Often used in parent-to-child relationships - when parent is deleted, delete all children automatically.</li>
 <li>SET NULL: Replace the invalid value with NULL. Only works if the relationship <a href="#attributes">attribute</a> is nullable.</li>
 <li>SET DEFAULT: Replace the invalid value with defined default value. Only works if a <a href="#attributes">default value</a> is set.</li>
 </ul>
 <h2 id="presets">Presets</h2>
 <p>Presets are predefined records that are shipped with your application. A preset consists of a name as well as attribute values. The preset name only serves as reference inside the Builder - it is not visible to any end user. When your application is transferred to a target instance, one record for each preset is created in the corresponding relation. All defined attribute values are applied to this record.</p>
-<p><img src="en_us_builder_pics/presets.png" alt="Presets" /></p>
-<p>When you define your preset, you can choose to protect it and/or its attribute values. Protecting the preset itself, blocks deletion of its associated record, while protecting attribute values blocks updating these values. The protection settings can be mixed to serve different purposes:</p>
+<p><img src="en_us_builder_pics/presets.webp" alt="Presets" /></p>
+<p>When you define a preset, you can choose to protect it and/or its attribute values. Protecting the preset itself, blocks deletion of its associated record, while protecting attribute values blocks updating these values. The protection settings can be mixed to serve different purposes:</p>
 <ul>
-<li>Protected record, protected values. For records that must stay a certain way for your application to work properly; this can be useful for workflow states.</li>
-<li>Protected record, unprotected values. Useful for central configuration records with customizable options.</li>
-<li>Unprotected record, protected values. Useful for cases in which a record is optional, but its values need to stay a certain way to be sensible.</li>
-<li>Unprotected record, unprotected values. Useful for sample data - can be overwritten, changed or deleted at will.</li>
+<li>Protected record &amp; protected values. For records that must stay a certain way for your application to work properly; this can be useful for workflow states.</li>
+<li>Protected record &amp; unprotected values. Useful for central configuration records with customizable options.</li>
+<li>Unprotected record &amp; protected values. Useful for cases in which a record is optional, but its values need to stay a certain way to be sensible.</li>
+<li>Unprotected record &amp; unprotected values. Useful for sample data - can be overwritten, changed or deleted at will.</li>
 </ul>
 <p>Important! When a record or its values are unprotected, they can be deleted/changed in the target instance. When updating your application in the instance, already deleted/changed preset records are not recreated or updated. REI3 follows this definition: An unprotected preset/value is optional and if a user in the target instance decides to delete/change it, it will stay that way.</p>
 <p>Protected presets/preset values on the other hand are always updated. Since deletion/change is blocked, updates only occur if presets have changed themselves. When switching an unprotected preset/preset value to 'protected', deleted/changed presets/preset values are recreated/updated.</p>
@@ -209,28 +224,39 @@
 <p>Lastly, deleting presets will delete associated records as well. Independently of the protection setting, records of deleted presets will be deleted in the target instance during transfer.</p>
 <h2 id="indexing">Indexing</h2>
 <p>Indexes are defined on <a href="#relations">relations</a>. They serve to improve the speed, in which data can be looked up from the database, which leads to a better user experience. They are optional for smaller relations but become very relevant, when records inside a relation keep growing in number.</p>
-<p>Standard principles of indexing, which is part of any relational database management system, can directly be applied. Here are some basics - for more details, please lookup any online resource on database indexing:</p>
+<p>Standard principles of indexing, which is part of any relational database management system, can directly be applied. Here are some basics - for more details, please lookup other resources on database indexing:</p>
 <ul>
-<li>Indexes help the database system find specific records without having to scan entire relations.</li>
-<li>In general, indexes have a big impact on performance - especially on larger relations. A good index can speed up data retrieval a thousand-fold.</li>
+<li>Indexes help the database system find specific records without having to scan all records in a relation.</li>
+<li>Indexes can have a big impact on performance - especially on larger relations. A good index can speed up data retrieval a thousand-fold.</li>
 <li>As indexes serve to find records by certain criteria, attributes that are used in <a href="#query-filters">filters</a> benefit from indexing a lot.</li>
 <li>Having indexes for specific attributes is important for good database performance; creating indexes for all attributes is a bad idea however. The more indexes exist, the slower changes to records become as indexes must be updated as well. In addition, each index has storage overhead, adding to the database size.</li>
 <li>Unique indexes can be used to enforce unique values in all kinds of attributes (unique names/numbers/dates/...). This is one use-case for indexing besides performance.</li>
 <li>Indexes can be used to enforce unique, composite keys by using multiple attributes to form a unique index.</li>
 </ul>
 <h2 id="triggers">Triggers</h2>
-<p>Triggers in REI3 are PostgreSQL database triggers. Database triggers react to events in the database and serve to apply logic, check inputs or block certain actions. When inserting, updating or deleting records in a relation, a trigger executes a defined <a href="#backend-functions">backend function</a>.</p>
+<p>Triggers are an advanced feature, executing predefined functions when records inside your <a href="#relations">relations</a> are changed (created, updated or deleted). They are usually used for complex or event driven business logic and are not required in most use cases.</p>
+<p>To setup a trigger, a trigger function must be created first. A trigger function is a regular <a href="#backend-functions">backend function</a> of the type 'Trigger' - read its <a href="#backend-functions">documentation</a> for more details.</p>
+<p><img src="en_us_builder_pics/triggers.webp" alt="New trigger" /></p>
 <p>Multiple options exist for triggers:</p>
 <ul>
 <li>ON INSERT/UPDATE/DELETE: Event on the relation that the trigger reacts to.</li>
-<li>EACH ROW: Trigger executes function for each affected row or once for the statement. If set per row, NEW/OLD can be used to reference the record state as it was (OLD) and what it would be changed to (NEW).</li>
-<li>BEFORE/AFTER: Trigger executes function before or after the specified event has occured. BEFORE can be used to overwrite missing NULL values, while AFTER can be useful to work with changes over multiple relations ('see DEFERRABLE').</li>
-<li>CONSTRAINT: Similar to a regular trigger, but its timing can be changed (see 'DEFERRABLE').</li>
-<li>DEFERRABLE: If set, trigger may be executed at the end of a database transaction instead of immediately. As REI3 offers updates of joined relations in forms, a deferred trigger waits until all affected relations are updated and then executes its function.</li>
-<li>INITIALLY DEFERRED: Trigger will be deferred by default.</li>
+<li>EACH ROW: Trigger executes function for each affected record or once after all records from a relation are processed. If set for EACH ROW, NEW/OLD can be used inside the trigger function to reference or update the record values, depending on the event.
+<ul>
+<li>INSERT: When a new record is created, NEW will contain all values of the new record. You can access it by using regular function placeholders for attributes, as in: <code>NEW.(lsw_organizations.contact.display_name)</code>. You can then work with these values or overwrite them, as in: <code>NEW.(lsw_organizations.contact.display_name) := 'My_value';</code> - these changes will directly be reflected in your records. Make sure to end your function with <code>RETURN NEW;</code>.</li>
+<li>UPDATE: When a record is updated, NEW will contain all values after the update, while OLD contains all values before the update. Just like with INSERT, make sure to end your function with <code>RETURN NEW;</code>.</li>
+<li>DELETE: When a record is deleted, OLD will contain all values before the deletion. Make sure to end your function with <code>RETURN OLD;</code>.</li>
+</ul></li>
+<li>BEFORE/AFTER: Trigger executes function before or after the specified event has occured. BEFORE can be used to simply overwrite record values or log changes elsewhere, while AFTER can be useful to work with changes over multiple relations ('see DEFERRED').</li>
+<li>DEFERRED: If enabled, triggers are executed after changes to all relations are done. This means that when multiple relations are updated (like on joined relations on a data form), you can work with the final values of all records inside a <a href="#relationships">relationship</a>. Since each trigger only reacts to events for its own relation, NEW/OLD cannot contain values of connected records; in this case you need to use SELECT/UPDATE/DELETE to lookup or affect other record values.</li>
 <li>Condition: A SQL condition, must return true for the trigger to execute the function.</li>
 <li>Execute: The function to execute. Must be a function that returns 'trigger'.</li>
 </ul>
+<p>You can also execute a single trigger function for multiple events. With the variale <code>TG_OP</code> you can check, which event occurred, such as:</p>
+<pre><code>IF TG_OP = &#39;INSERT&#39;
+    THEN my_var := 123;
+    ELSE my_var := 456;
+END IF;</code></pre>
+<p>For more details about triggers, you can lookup the <a href="https://www.postgresql.org/docs/15/trigger-definition.html">PostgreSQL trigger documentation</a>.</p>
 <h2 id="policies">Policies</h2>
 <p>A relation policy can limit what specific records are accessible to a logged in user via their <a href="#roles-and-access-management">role memberships</a>. This is done by using <a href="#backend-functions">backend functions</a> that serve as filter for specific actions. While forms, lists and other frontend elements can also <a href="#query-filters">filter records</a>, relation policies are applied globally and cannot be circumvented by changing the frontend.</p>
 <p>A policy can be set for different actions, these are:</p>
@@ -239,8 +265,8 @@
 <li>Update: Users can only change values of records based on the results of the policy.</li>
 <li>Delete: Users can only delete records based on the results of the policy.</li>
 </ul>
-<p>Depending on the action, the frontend will either not show records (no select), disable inputs (select but no update) or block record deletion (no delete). Regardless of the frontend, relation policies will also be enforced on the backend when users attempt to select, update or delete records.</p>
-<p><img src="en_us_builder_pics/policies.png" alt="Policies" /></p>
+<p>Depending on the action, the frontend will either not show records (no select), disable inputs (select but no update) or block record deletion (no delete). Regardless of the frontend, relation policies will always be enforced on the backend.</p>
+<p><img src="en_us_builder_pics/policies.webp" alt="Policies" /></p>
 <p>To create a policy, a role must be connected to at least one action. An 'allow' (whitelist) or 'block' (blacklist) filter function is used to define which records should be accessible. A filter function is a <a href="#backend-functions">backend function</a> that returns an array of record IDs (as in 'INTEGER[]' or 'bigint ARRAY'); the record IDs must match the relation for which the policy is defined. With the help of instance functions, such as 'has_role()' or 'get_login_id()', filter functions limit what records are accessible based on the currently logged in user.</p>
 <p>Polices have a defined order. The first policy matching the attempted action of the logged in user with the selected role, is applied. If the user has multiple roles, only the first matching policy is applied. If full access is desired, a role can be assigned all actions and both filter functions kept empty (e. g. 'unfiltered'). If no policy is matched, full access is also granted.</p>
 <h2 id="change-logs">Change logs</h2>
@@ -251,26 +277,26 @@
 </ol>
 <p>A system task regularly deletes older changes, when the retention settings are satisfied. If both settings are used (number and days of changes), the more conservative setting wins. Example: 30 changes should be kept for 90 days. If there are more than 30 changes, they are all still being kept if they occurred within the last 90 days. If there are changes after 90 days, but still less than 30, they are also being kept.</p>
 <p>Changes are visible to users in forms that access corresponding relations via the change log window. This will show all changes corresponding to joined relations (see <a href="#queries">Queries</a>), but only for attributes that are accessible to the user via data input fields. If a user has access to a data field, and changes are available, they will be visible without further permissions being required.</p>
-<p>The change retention cleanup job can be configured to run more or less often in the admin UI.</p>
 <h1 id="roles-and-access-management">Roles and access management</h1>
 <p>Roles are used to control what a user can see and do in an application. Roles control:</p>
 <ul>
-<li>Data entity access: Access control for data structures, e. g. <a href="#relations">relations</a> and <a href="#attributes">attributes</a>.</li>
-<li>Applied policies: Access control for specific records, which is defined via <a href="#policies">relation policies</a>.</li>
-<li>Start form: Which form is shown when a user opens an application. Defined for the <a href="#creating-your-own-applications">application</a>.</li>
+<li>Data access: Access control for data structures, e. g. <a href="#relations">relations</a> and <a href="#attributes">attributes</a>.</li>
 <li>Visible menus: Which menus are shown for a role member.</li>
 <li>Available collections: Which <a href="#collections">collections</a> are retrieved for a role member.</li>
+<li>Applied policies: Access control for specific records, which is defined via <a href="#policies">relation policies</a>.</li>
+<li>Start form: Which form is shown when a user opens an application. Defined for the <a href="#creating-your-own-applications">application</a>.</li>
 </ul>
+<p><img src="en_us_builder_pics/role.webp" alt="Role settings" /></p>
 <p>Roles in REI3 are cumulative; the more roles a user has, the more access is available. There is no 'deny' option; when you need to deny a group of users access, you remove the corresponding access from the role and create a second one, granting this specific access.</p>
 <p>When creating a role, you need to choose a unique role name within your application. Titles, descriptions and role types serve to explain the role to administrators of REI3 instances as they will be shown in the admin UI. The role type is purely descriptive and only serves to make role assignment quicker.</p>
 <p>Roles can be members of other roles. This enables access inheritance with no fixed limit on how many levels of inheritance are allowed. A user logging in receives access following assigned roles and the memberships of these roles (and the memberships of those roles, and so on).</p>
-<p>When applications build on other applications (see <a href="#building-on-applications">Building on applications</a>) usually some access to the other application´s data is necessary. This is solved by making your roles members of roles from other applications. In many cases data access is desired but users from one application should not see user interfaces from the other; this is addressed by creating 'data only' roles with no assigned menu entries.</p>
+<p>When applications <a href="#building-on-applications">build on other applications</a> usually some access to the other application´s data is necessary. This is solved by making your roles members of roles from other applications. In many cases data access is desired but users from one application should not see user interfaces from the other; this is addressed by creating 'data only' roles with no assigned menu entries.</p>
 <p>Lastly, the option 'assignable' controls whether a role is directly assignable to a user. If set to 'false' the specific role is hidden in the admin UI and can only be assigned indirectly via membership of other roles. This can be useful for 'data only' roles or for complex role hierarchies.</p>
 <h1 id="presentation-and-user-interfaces">Presentation and user interfaces</h1>
 <p>Besides managing data, most systems require some kind of frontend. For this purpose, REI3 includes <a href="#forms">forms</a> to display and manipulate data and <a href="#menus">menus</a> to navigate your application.</p>
 <h2 id="forms">Forms</h2>
 <p>Forms serve to display and manipulate data. They can also be used to execute actions or react to user inputs via <a href="#frontend-functions">frontend functions</a>.</p>
-<p><img src="en_us_builder_pics/forms.png" alt="Forms" /></p>
+<p><img src="en_us_builder_pics/forms.webp" alt="Forms" /></p>
 <p>When creating a form, you can specify the following:</p>
 <ul>
 <li>Icon: An <a href="#icons">icon</a> representing the form. Shown in the form header, if not overwritten by a menu entry.</li>
@@ -281,7 +307,7 @@
 </ul>
 <p>Once created, you can start designing your form. Generally, forms can be separated in two types:</p>
 <ul>
-<li>Data: You define a <a href="#queries">query</a> to create or update <a href="#relations">relation</a> records. This will give you access to attribute input fields from the selected and <a href="#queries">joined</a> relations.</li>
+<li>Data: You define a <a href="#queries">query</a> to create, update or delete <a href="#relations">relation</a> records. This will give you access to attribute input fields from the selected and <a href="#queries">joined</a> relations.</li>
 <li>Non-data: You do not define a <a href="#queries">query</a>. This type of forms usually serve purposes other than record manipulation. Some examples:
 <ul>
 <li>Showing a full page <a href="#list-fields">list</a> to view and navigate to relation records.</li>
@@ -289,11 +315,12 @@
 <li>Showing a dashboard of multiple lists and buttons to reach different parts of your application.</li>
 </ul></li>
 </ul>
-<p><img src="en_us_builder_pics/form.png" alt="Form" /></p>
-<p>Forms are designed by adding fields. Fields serve to create layouts, manipulate data, execute actions and more. Available fields are shown in the sidebar of the form UI inside the Builder, depending on what the form has access to. These types of fields exist:</p>
+<p><img src="en_us_builder_pics/form.webp" alt="Form" /></p>
+<p>Forms are designed by working with fields. Fields serve to create layouts, manipulate data, execute actions and more. Available fields are shown in the sidebar, depending on what the form has access to. These types of fields exist:</p>
 <ul>
 <li>Container: These construct the layout of your form. Containers 'contain' other fields, including other containers to create simple or complex <a href="#form-layouts">layouts</a>.</li>
-<li>List/calendar: A <a href="#list-fields">list</a> or <a href="#calendar-fields">calendar</a> representation of relation records. By default, independent of the current data form record but can use <a href="#query-filters">filters</a> to access attribute input field values or the currently open record. Common use-cases:
+<li>Tabs: A field consisting of one or more tabs, which then contain other fields. Useful to separate UI elements, hide seldom used fields or improve usability of very large forms. To add layouts inside tab fields, you can use container fields.</li>
+<li>List/calendar: A <a href="#list-fields">list</a> or <a href="#calendar-fields">calendar</a> representation of relation records. By default, independent of the current data form record but can use <a href="#query-filters">filters</a> to access field values or the currently open record. Common use-cases:
 <ul>
 <li>Single page: A calendar or list filling the entire form. Gives overview and access to specific records.</li>
 <li>Dashboard page: Part of a dashboard, showing unrelated relation records.</li>
@@ -301,38 +328,39 @@
 </ul></li>
 <li>Chart: A <a href="#chart-fields">chart</a>, using data based on, and filtered by, a defined <a href="#queries">query</a>.</li>
 <li>Header: Simply text with an optional preceding icon. Used for titles or small explanations.</li>
-<li>Button: Actions that a user can execute (see <a href="#field-options">Button fields</a>).</li>
-<li>Data: Data forms only. Dependent on the defined <a href="#queries">query</a>, attribute input fields are available for record view and manipulation. They are labeled by a relation index number, the relation and the attribute name, as in '0) employee.forename'.
+<li>Button: Actions that a user can execute (see <a href="#field-settings">Button fields</a>).</li>
+<li>Data: Data forms only. Dependent on the defined <a href="#queries">query</a>, attribute input fields are available to view and manipulate record values. They are labeled by a relation index number, the relation and the attribute name, as in '0) employee.forename'.
 <ul>
-<li>Depending on the attribute type, fields will behave differently and offer different <a href="#field-options">options</a>. For example: Text attributes can be presented as a line input, a URL or with a richtext editor, while integer attributes can be presented as number or date inputs.</li>
+<li>Depending on the attribute type, fields will behave differently and offer different <a href="#field-settings">settings</a>. For example: Text attributes can be presented as a line input, a URL or with a richtext editor, while integer attributes can be presented as number or date inputs.</li>
 </ul></li>
-<li>Data by referring relationship: Like data fields but for N:1 &amp; N:M relationships. With these fields users can see and manipulate multiple relationship references at once. Depending on the field options, they can be displayed as multi-input dropdowns or checkboxes.</li>
+<li>Data by referring relationship: Like data fields but for N:1 &amp; N:M relationships. With these fields users can see and manipulate multiple relationship references at once. Depending on the field settings, they can be displayed as multi-input dropdowns or checkboxes.</li>
 </ul>
-<p>To summarize: A form can handle a relation record by defining a <a href="#queries">query</a> (data) or not (non-data). It consists entirely of fields, with container fields being used to create a <a href="#form-layouts">layout</a>. To create/manipulate a record, attribute input fields are available for selected relations (see <a href="#queries">Queries</a>), while many options exist to customize these (see <a href="#field-options">Field options</a>).</p>
+<p>To summarize: A form can handle a relation record by defining a <a href="#queries">query</a> (data) or not (non-data). It consists entirely of fields, with container fields being used to create a <a href="#form-layouts">layout</a>. To view/manipulate records, attribute input fields are available for selected relations (see <a href="#queries">Queries</a>), while many settings exist to customize these (see <a href="#field-settings">Field settings</a>).</p>
 <h3 id="form-layouts">Form layouts</h3>
 <p>REI3´s form layouts are primarily based on the CSS standard 'Flexbox'. Every container field in REI3 is a flexbox container, which configures its own size as well as layout characteristics for its children.</p>
-<p><img src="en_us_builder_pics/form_layout.png" alt="Form layout" /></p>
-<p>The most important concept is the flex flow. Every container decides, whether its contained fields (children) will 'flow' in a row (from left to right) or in a column (from top to bottom). In addition to the flow direction, the container decides whether its children will 'wrap', meaning they will move into a new row or column if the available space is insufficient. Disabling wrapping will result in the fields needing to shrink their sizes or expand their parents size resulting in compact fields or scrolling, depending on the parents configuration and available space.</p>
+<p><img src="en_us_builder_pics/form_layout.webp" alt="Form layout" /></p>
+<p>The most important concept is the flex flow. Every container decides, whether its contained fields (children) will 'flow' in a row (from left to right) or in a column (from top to bottom). In addition to the flow direction, the container decides whether its children will 'wrap', meaning they will move into a new row or column if the available space is insufficient. Disabling wrapping will result in fields needing to shrink their sizes or expand their parents size resulting in compact fields or scrolling, depending on the parents configuration.</p>
 <p>To create specific layouts, row and column containers are usually mixed. An example: To create a form with 3 columns next to each other, with multiple fields in each column, the following containers can be used:</p>
 <ul>
 <li>1 parent Container with a 'row' layout, containing 3 child containers, 1 for each column. Wrapping is enabled so that if the form is too small, the 3 column containers move underneath each other to properly display their content without horizontal scrolling.</li>
 <li>3 child containers each having a 'column' layout, meaning that their children fields are displayed underneath each other. Wrapping is disabled, as forms are usually designed to be scrolled vertically.</li>
 </ul>
+<p><img src="en_us_builder_pics/form_layout_ex.webp" alt="Form layout" /></p>
 <p>If you are inexperienced with Flexbox, it is best to play around with containers in the form builder. Basically any layout can be created by mixing container configurations. Important to note: Non-container fields do not have layout configuration. If you need to specifically change the layout of a single non-container field (its size for example), you place your single field inside a new container field and change the container layout. This is done to keep layout options and complexity to container fields only.</p>
 <p>When editing a container field, the following options are available:</p>
 <ul>
 <li>Show in mobile view: If disabled, this field (and its children) are not visible when accessing REI3 via a mobile device.</li>
 <li>Base size: Initial size of the container (width if inside row layout, height if inside column layout) in pixels. Is affected by its grow/shrink factors (see below).</li>
 <li>Grow/shrink factor: A number compared between all children inside the same container. A field with a factor of 3 will grow/shrink 3 times more than a field with a factor of 1. Growing and shrinking occur when more/less space is available than the field requires.</li>
-<li>Grows/shrinks to: Percentage value of the maximum/minimum size (from the base size) a container will grow/shrink to.</li>
+<li>Grows/shrinks to: Percentage value of the maximum/minimum size (from the base size) a container will grow/shrink to. Ignored if the base size is set to 'auto'.</li>
 <li>Wrap content: Move children fields to a new line (row/column) if space is insufficient. If disabled, fields are shrunk, parents expanded or scrolling used, depending on the configuration of the parent and its available space.</li>
 <li>Direction: Place children in a row (left-to-right) or column (top-to-bottom) layout.</li>
 <li>Justify content: Defines the alignment of children on the main axis (row: x, column: y).</li>
 <li>Align items: Defines the alignment of children on the cross axis (row: y, column: x).</li>
 <li>Align content: Only relevant if a row or column has more than one line (wrapping enabled). Defines the alignment of children with the lines.</li>
 </ul>
-<h3 id="field-options">Field options</h3>
-<p><img src="en_us_builder_pics/field_options.png" alt="Field options" /></p>
+<h3 id="field-settings">Field settings</h3>
+<p><img src="en_us_builder_pics/field_settings.webp" alt="Field settings" /></p>
 <p>Depending on the field content, different options are available:</p>
 <ul>
 <li>State: Available to all fields, default state of field.
@@ -341,7 +369,7 @@
 <li>Default: Field is shown. Data fields are automatically set to 'readonly' if the user is missing permissions and to 'required' if the data field <a href="#attributes">attribute</a> is not nullable.</li>
 <li>Optional: Data field only. Input is always optional.</li>
 <li>Readonly: Data field only. Input is always readonly.</li>
-<li>Required: Data field only. Input is always required. Form will disallow saving while this field´s input is empty/invalid.</li>
+<li>Required: Data field only. Input is always required. Form will disallow saving while this field´s input is empty.</li>
 </ul></li>
 <li>Data fields: Non-relationships
 <ul>
@@ -454,15 +482,15 @@
 </ul>
 <h3 id="form-states">Form states</h3>
 <p>Form states serve to change the behavior of fields; this is done by applying effects on fields based on form state conditions. Multiple form states can be used and will work in parallel.</p>
-<p>Similar to <a href="#query-filters">query filters</a> having one or many filter lines, form states have conditions. Each condition contains a connector (AND/OR), comparison criteria (field value, user role, etc.), an operator (equals, greater than, etc.) as well as brackets to facility more complex comparisons.</p>
-<p><img src="en_us_builder_pics/form_states.png" alt="Form states" /></p>
+<p>Similar to <a href="#query-filters">query filters</a> having one or many filter lines, form states have conditions. Each condition contains a connector (AND/OR), comparison criteria (field value, user role, etc.), an operator (equals, greater than, etc.) as well as brackets to facility grouped comparisons.</p>
+<p><img src="en_us_builder_pics/form_states.webp" alt="Form states" /></p>
 <p>Many condition criteria are available:</p>
 <ul>
 <li>Field value: Data field value on the current form.</li>
-<li>Field has changed: TRUE/FALSE depending on whether the field value has changed from its previous state. When the current record is new, the previous state is either empty (NULL) or the defined <a href="#field-options">default value</a> for the field. If the record is not new, the previous state is the field value that the record was saved with last.</li>
+<li>Field has changed: TRUE/FALSE depending on whether the current field value is different to its original value. When the current record is new, the previous state is either empty (NULL) or the defined <a href="#field-settings">default value</a> for the field. If the record is not new, the previous state is the field value that the record was saved with last.</li>
 <li>Fixed value: A fixed text or number value to compare against.</li>
-<li>Login ID: Integer ID of the logged in user. Can be combined with the field display option <a href="#field-options">Login</a> or <a href="#login-forms">Login forms</a> to connect relation records to REI3 users and then filter relations based on the logged in user. Useful for employee, customer, agent or other person-based records.</li>
-<li>Login language code: The selected 5-letter language-code ('de_de', 'en_us', etc.) of the logged in user. Can be used to join relations for translating user definable records and then filter these according to the active user interface language.</li>
+<li>Login ID: Integer ID of the logged in user. Can be combined with the field display option <a href="#field-settings">Login</a> or <a href="#login-forms">Login forms</a> to connect relation records to REI3 users and then filter relations based on the logged in user. Useful for employee, customer, agent or other person-based records.</li>
+<li>Login language code: The selected 5-letter language-code ('de_de', 'en_us', etc.) of the logged in user. Can be used to join relations for translating user definable records and then filter these according to the active user language.</li>
 <li>Login has role: TRUE if the currently logged in user has the selected role (directly assigned or inherited).</li>
 <li>Preset record ID: Integer ID of the record that has been created from a <a href="#presets">preset</a>. Only protected presets can be selected, as unprotected presets can be deleted.</li>
 <li>Record is new: TRUE if record being handled by the current data form is new.</li>
@@ -472,23 +500,22 @@
 </ul>
 <p>When conditions of a form state are met, its effects are applied to specified fields. Currently available effects are:</p>
 <ul>
-<li>Hidden: Available for all field types. If set, field is not shown. If field is a container, all its children are hidden as well.</li>
+<li>Hidden: Available for all field types. If set, field is not shown. If field is a container or tab, all its children are hidden as well.</li>
 <li>Default: Field is managed automatically. If it is an attribute input field and not set to 'nullable', it is shown as 'required'. If the user is missing write permissions to the underlying attribute or record (see <a href="#policies">relation policies</a>), it is shown as 'readonly'.</li>
 <li>Optional: Only attribute input fields. Field is optional.</li>
 <li>Readonly: Only attribute input fields. Field is readonly.</li>
 <li>Required: Only attribute input fields. Field is writable and required.</li>
 </ul>
 <p>If multiple states would apply to the same field the last one is used. Form states are executed in order of their description, so numbered prefixes can be used to achieve a desired state execution order.</p>
-<p>When editing form states in the Builder UI, fields are referenced by a unique field ID (F12 for example). Make sure to save the form after adding new fields before adding form states, otherwise fields cannot be referenced properly.</p>
 <h2 id="queries">Queries</h2>
-<p>To show or manipulate data, frontend components (like <a href="#forms">forms</a> or <a href="#field-options">fields</a>) need to know how to access the REI3 data storage. This is done by defining data access queries or 'queries' for short. When a form defines a query, it becomes a <a href="#forms">data form</a>; list or calendar fields also require queries to access data. In short, queries control how data is retrieved and (if desired) updated or deleted. Because data is stored in relations, queries access relations to handle attribute values from data records.</p>
+<p>To show or manipulate data, frontend components (like <a href="#forms">forms</a> or <a href="#field-settings">fields</a>) need to know how to access the REI3 data storage. This is done by defining data access queries or 'queries' for short. When a form defines a query, it becomes a <a href="#forms">data form</a>; list or calendar fields also require queries to access data. In short, queries control how data is retrieved and (if desired) updated or deleted. Because data is stored in relations, queries access relations to handle attribute values from data records.</p>
 <p>To define a query, you start by selecting a <a href="#relations">relation</a> - this is the 'base relation' or relation index 0. A relation index is a simple number, that uniquely identifies a specific relation within a query. Indexes are needed, because we can connect or 'join' relations if they are linked with <a href="#relationships">relationship attributes</a>; these index numbers define, which relation is referenced when we later create input fields or filters. Each joined relation gets its own, unique index number.</p>
-<p><img src="en_us_builder_pics/query.png" alt="List field query" /></p>
+<p><img src="en_us_builder_pics/query.webp" alt="List field query" /></p>
 <p>Because relations can also be in relationships with themselves (self-reference), we cannot use the relation name to uniquely identify a relation. Example: Relation 'employee' has a relationship attribute 'superior' ('an employee has a superior') to connect to itself (the superior is also an employee). In this example, relation index 0 would be 'employee', which is joined to relation 'employee' with relation index 1. When adding input fields, we can then choose to access the employee (relation 0) or its superior (relation 1) and create attribute input fields on our form accordingly.</p>
 <p>When joining relations with each other, there a couple of options to consider.</p>
 <ul>
-<li>Join type: Only relevant on joined relations (not base relation). Values: (F)ull, (I)nner, (L)eft, (R)ight. These values define, how the join handles its relationship. An inner join, for example, only receives records for a relation, if the relationship partner is valid, while a left join still shows the relation record even with no valid relationship partner. These values directly follow common relational database systems; for more information please lookup 'SQL joins' from external resources.</li>
-<li>Record handling: The following options define how records of specific relations are handled. Relation 0 is the most import one as its record is the base that is opened on forms or accessed on list fields. Joined records from other relations are available as well and are created/updated or deleted based on the defined options below.
+<li>Join type (F)ull, (I)nner, (L)eft or (R)ight. These values define, how the join handles its relationship. An inner join, for example, only receives records for a relation, if the relationship partner is valid, while a left join still shows the relation record even with no valid relationship partner. These values directly follow common relational database systems; for more information please lookup 'SQL joins' from external resources.</li>
+<li>Record handling: The following options define how records of specific relations are handled. Relation 0 is the most important one as its record is the base that is opened on forms or accessed on list fields. Joined records from other relations are available as well and are created/updated or deleted based on the defined options below.
 <ul>
 <li>(C)reate: If set, a record can be created by a form or, if set for list fields, an option to open a pre-defined form is offered (see <a href="#list-fields">List fields</a>).</li>
 <li>(U)pdate: It set, a record can be changed by a form. List fields cannot yet do record updates - this will likely come in a future release.</li>
@@ -509,9 +536,9 @@
 <p>Query filters can be defined in two ways:</p>
 <ul>
 <li>(Regular) filters: Automatically applied on any data access. Depending on filter conditions, different data can be shown in different contexts (logged in user, role membership, active interface <a href="#translations">language</a>, and so on).</li>
-<li>Filter sets: A named set of filter conditions, from which a user can choose from to customize the output of the query. Multiple filter sets can be defined for a query. Filter sets can serve different purposes:
+<li>Filter sets: A named set of filter conditions, from which a user can choose from to customize the output. Multiple filter sets can be defined for a query. Filter sets can serve different purposes:
 <ul>
-<li>Sub selections: Wherever filter sets can be used (lists, calendars, Gantt, ...), if at least 2 sets are defined, users can choose between them. This enables result subsets in lists (like only 'active' or 'closed' records) and in input dropdowns ('show only colleagues in my department' or 'in entire company'). The first filter set is activated immediately until its changed by a user. If multiple sets are desired but everything should be shown by default, create the first filter set without any filter lines.</li>
+<li>Sub selections: Wherever filter sets can be used (lists, calendars, Gantt, ...), if at least 2 sets are defined, users can choose between them. This enables result subsets in lists (like only 'active', 'closed' or 'records in recycle bin') and in input dropdowns ('show only colleagues in my department' or 'in entire company'). The first filter set is active by default. If multiple sets are desired but everything should be shown by default, create the first filter set without any filter lines.</li>
 <li>Input only filters: Relationship inputs can be filtered with user context dependent conditions (login/roles). Using regular filters will affect the current field value without user action (if login condition results in different/less data). Using a filter set, enables filtering to be limited to the value input (dropdowns usually) and will not affect existing field values. If a single filter set is defined, the user will not be presented with a choice between filter sets.</li>
 </ul></li>
 </ul>
@@ -520,7 +547,7 @@
 <li>Attribute value: Current record value for the specified attribute. Not affected by changes on a form until they were saved.</li>
 <li>Field value: Data field value on the current form. When the chosen field value changes, the filter is updated and the connected query filter automatically reloads.</li>
 <li>Fixed value: A fixed text or number value to compare against.</li>
-<li>Login ID: Integer ID of the logged in user. Can be combined with the field display option <a href="#field-options">Login</a> or <a href="#login-forms">Login forms</a> to connect relation records to REI3 users and then filter relations based on the logged in user. Useful for employee, customer, agent or other person-based records.</li>
+<li>Login ID: Integer ID of the logged in user. Can be combined with the field display option <a href="#field-settings">Login</a> or <a href="#login-forms">Login forms</a> to connect relation records to REI3 users and then filter relations based on the logged in user. Useful for employee, customer, agent or other person-based records.</li>
 <li>Login language code: The selected 5-letter language-code ('de_de', 'en_us', etc.) of the logged in user. Can be used to join relations for translating user definable records and then filter these according to the active user interface language.</li>
 <li>Login has role: TRUE if the currently logged in user has the selected role (directly assigned or inherited).</li>
 <li>Preset record ID: Integer ID of the record that has been created from a <a href="#presets">preset</a>. Only protected presets can be selected, as unprotected presets can be deleted.</li>
@@ -536,10 +563,10 @@
 <p>Columns are used to choose data to be retrieved from a <a href="#queries">query</a> when working with things like <a href="#list-fields">lists</a> or <a href="#collections">collections</a>.</p>
 <p>There are two types of columns:</p>
 <ul>
-<li>Attribute columns: These are available automatically, based on the selected relations from the query. They display the value for the selected attribute for each record.</li>
+<li>Attribute columns: These are available automatically, based on the selected relations from the <a href="#queries">query</a>. They display the value for the selected attribute for each record.</li>
 <li>Sub query columns: These can show data outside the main query. Sub queries can show data from any accessible relation, but are usually filtered by attribute values from the main query. By creating corresponding filters on the sub query, aggregation functions can do things like 'show totals' or 'display averages' for sub entities of the current record. Sub queries can use other sub queries to filter themselves and also be used as filters inside the query itself.</li>
 </ul>
-<p><img src="en_us_builder_pics/list.png" alt="List" /></p>
+<p><img src="en_us_builder_pics/list.webp" alt="List" /></p>
 <p>Columns each have a <a href="#translations">translated</a> title to communicate their content to users. If no title is given, attribute columns can fallback to the attribute title. Besides titles, columns have multiple options:</p>
 <ul>
 <li>Size (pixel): A size in pixel (usually width) that a column attempts to populate. Can be used to limit the size or reserve space for important columns. If text wrapping is disabled, text values are cut off with '...' when they reach the target size or the available space is insufficient (up to a point).</li>
@@ -547,7 +574,7 @@
 <li>Text wrap: Text values wrap to a new line when space is insufficient. Can be combined with column size and length settings to control how text is displayed.</li>
 <li>Column batch: In some cases, it is desired to merge two or more columns. Example: A single column showing both fore- &amp; surname for employees. By adding two attribute columns (forename &amp; surname in this example) and using a column batch, a single batch column is created. Column batches use a number to decide which columns are merged. Columns with the same batch number, when placed next to each other, result in a merged batch column. Only the title of the first column in a batch (first column from the left) is used as title for the entire column batch. The same is true for sorting: Only the first column in a batch is sorted by.</li>
 <li>Clipboard: Shows a copy-to-clipboard action inside the column.</li>
-<li>Display: Similar to <a href="#field-options">field display options</a>. Depending on the attribute type of a column, different display options are available. These serve to specify how to present attribute values. Some examples: Displaying time values as <a href="#date-and-time-management">formatted dates</a>, showing color values as labels and hiding some columns completely.</li>
+<li>Display: Similar to <a href="#field-settings">field display options</a>. Depending on the attribute type of a column, different display options are available. These serve to specify how to present attribute values. Some examples: Displaying time values as <a href="#date-and-time-management">formatted dates</a>, showing color values as labels and hiding some columns completely.</li>
 <li>Data retrieval: Multiple options exist to configure, how column values are being retrieved.
 <ul>
 <li>Distinct: Useful when joining N:1 or N:M relationships or when using sub queries. Filters out duplicate values for the given column attribute.</li>
@@ -555,30 +582,31 @@
 <li>Aggregate: Use aggregation functions on the given column attribute. Like with 'Group by' this requires other attribute columns to either be grouped or aggregated as well. Aggregate functions follow well-known SQL standards (sums, counts, etc.) - there is one special case however for REI3: 'single record'. This is basically a 'FIRST' aggregation, taking the first available result from the group or aggregation set. 'Single record' exists to allow REI3 to still make a specific record selectable on the current list even with grouping and aggregations combining and merging results; this can be useful when working with complicated joins, but often can be avoided by using sub queries.</li>
 </ul></li>
 </ul>
-<h2 id="help-pages">Help pages</h2>
-<p>REI3 offers two methods for applications to provide documentation to users:</p>
+<h2 id="help-articles">Help articles</h2>
+<p>Sometimes it becomes necessary to explain concepts, data structures or workflows to application users. Besides titles and small help texts next to input fields, application authors can create help articles that go into more detail. A help article is a piece of richtext that can include descriptions, tables, bullet-point lists, images, external links and so on.</p>
+<p>After creating a help article, you can assign it to different places:</p>
 <ol type="1">
-<li>The global application help. This help page is accessible on every form by clicking on the question mark.</li>
-<li>Form context help. This help page gives details about dealing with a form. It is accessible on the specific form for which it is set by clicking on the question mark.</li>
+<li>Application help page - a globally accessible documentation for your application.</li>
+<li>Form context help - accessible when a user is on a specific form.</li>
 </ol>
-<p>Both help pages are <a href="#translations">translatable</a> and accessible via the question mark button that is shown on every form. If the form context help or application help page is not set, the corresponding entry is grayed out. If neither is set, the question mark is grayed out.</p>
+<p>A table of content is automatically generated for the assigned articles in your chosen order. Help articles are <a href="#translations">translatable</a> and are accessed via the question mark button on all application forms. PDF export is also available for easier viewing or for distributing your application documentation.</p>
 <h2 id="translations">Translations</h2>
-<p>REI3 is a multi language system. By adding translations to your application, you expand the number of available languages that your application can support. However, adding a language requires you to provide translations for many entities. For some entities, REI3 can use fallbacks - it is however important to test your application thoroughly when adding a new translation.</p>
+<p>REI3 is a multi language system. By adding translations, you expand the number of available languages that your application can support. However, adding a language requires you to provide translations for affected entities. For some entities, REI3 can use fallbacks - it is however important to test your application thoroughly when adding a new translation.</p>
 <p>The following entities are translatable:</p>
 <ul>
-<li>Application title: Shown in the main header and start page of REI3. Configured in the application overview (Builder start page).</li>
+<li>Application title: Shown in the main header and start page of REI3. Configured in the application settings.</li>
 <li>Attribute title: Shown as filter criteria in lists and as fallback for data field &amp; column titles if these are not set.</li>
 <li>Role title &amp; description: Shown in admin UI. Serves to explain role usage to administrators.</li>
 <li>Form title: Shown in form header. Can fallback to menu title if not set and if form is opened via a menu entry.</li>
-<li>Form help page: Shown in the help page if the specific form is open. Serves as contextual help for a form.</li>
+<li>Form context help: Shown in the help page if the specific form is open. Serves as contextual help for a form.</li>
 <li>Field title: Shown in form over a field. If it is a data field and has no title, it uses the attribute title as fallback.</li>
 <li>Field help text: Shown in form under a field. Additional context help for how to use a data field.</li>
 <li>Column title: Shown in lists. Describes the content of a column. Can fallback to attribute title if not set. If column batches are used (see <a href="#list-fields">List fields</a>), only the title of the first column is used.</li>
 <li>Menu title: Shown in application menu. Can be used as fallback for form titles if these are not set.</li>
-<li>Application help page: Shown in the help page, independent of which form is open. This is the global application help page that is always available.</li>
+<li>Application help page: Shown in the help page, independent of which form is open.</li>
 </ul>
 <p>Every translation is referenced by a five-letter language code, such as 'de_de', 'en_us', and so on. A user can choose one language code as their interface language out of a pool of codes from all installed applications. If your application does not support the user-chosen translation, your defined fallback translation will be shown instead (configurable in the application overview).</p>
-<p>You can also use translations for presets or live data. By using the filter criteria 'language code' you can join (see <a href="#queries">Queries</a>) and filter relations based on the currently active user translation. As an example: You can define preset states for a workflow ('new', 'approved', ...) and create a second relation that serves to translate these states. By using one attribute for the language code and the other for a N:1 relationship to your workflow state, you can add multiple translations for each workflow state. Then you only need to filter to the currently active language code. Many REI3 applications use this method for customizable and translatable state records - you can look at the application 'Absence' as reference.</p>
+<p>You can also use translations for presets or live data. By using the filter criteria 'language code' you can join (see <a href="#queries">Queries</a>) and filter relations based on the currently active user translation. As an example: You can define preset states for a workflow ('new', 'approved', ...) and create a second relation that serves to translate these states. By using one attribute for the language code and the other for a N:1 relationship to your workflow state, you can add multiple translations for each workflow state. Then you only need to filter to the currently active language code. Many REI3 applications use this method for customizable and translatable state records.</p>
 <h2 id="icons">Icons</h2>
 <p>Icons serve to help users recognize entities or navigate the application in different user interfaces:</p>
 <ul>
@@ -596,11 +624,11 @@
 <li>Main menu: Shown at the top of the page and on the start page for each user. Automatically created by resolving accessible applications for the current login. The header menu shows the top level of applications as well as a second level of <a href="#creating-your-own-applications">assigned to</a> applications (child applications). Currently only 2 levels of hierarchy are supported. The display order can be defined in the application overview (Builder start page) with the <a href="#creating-your-own-applications">default position</a>; this option can be overwritten in a target instance inside the admin panel. An application is only shown in the main menu, when a start form has been defined and a user has access to it; this includes admin users.</li>
 <li>Application menu: This can directly be defined in the Builder with unlimited levels of hierarchy; we recommend to keep the menu hierarchy to at most 3 levels for usability reasons. Each menu entry can optionally open a form and/or contain sub menu entries. When sub entries are defined, you can choose whether these entries are shown by default or must be toggled first by opening the parent menu entry. The translatable menu title as well as menu icon are applied to an opened form if the form does not define its own title/icon.</li>
 </ul>
-<p><img src="en_us_builder_pics/menus.png" alt="Menus" /></p>
+<p><img src="en_us_builder_pics/menus.webp" alt="Menus" /></p>
 <p>When <a href="#building-on-applications">Building on applications</a>, you can choose to copy the entire menu structure from another application. This is can be useful when you intent to extend another application; you copy the original menu structure, change target forms and add your own, custom menu entries.</p>
 <h2 id="login-forms">Login forms</h2>
 <p>Sometimes it is useful to connect the currently logged in user to a record from within your application. To assign a personal, employee or a customer contact record for example.</p>
-<p><img src="en_us_builder_pics/login_form.png" alt="Login form" /></p>
+<p><img src="en_us_builder_pics/login_form.webp" alt="Login form" /></p>
 <p>To enable this, an integer attribute can be placed on any of your relations. This attribute will then contain the login ID (which also is an integer). Once the login attribute exists, you have two options to update it:</p>
 <ol type="1">
 <li>Define a login form: By defining a login form, an instance administrator can create/select a record for each login within the admin interface. Available options:
@@ -609,7 +637,7 @@
 <li>Lookup attribute: The text attribute that will be shown (and can be searched by) inside the admin interface.</li>
 <li>Form to open: The form that opens, when creating/updating a login record inside the admin interface. This form must use the login attribute´s relation as <a href="#queries">base relation</a> (index 0).</li>
 </ul></li>
-<li>Place an input field on any form with the display type <a href="#field-options">login</a>: This way non-admins can update the login attribute on any defined form if they have write permissions. Please be aware, that this exposes all usernames of the instance as they need to be selectable inside the field input.</li>
+<li>Place an input field on any form with the display type <a href="#field-settings">login</a>: This way non-admins can update the login attribute on any defined form if they have write permissions. Please be aware, that this exposes all usernames of the instance as they need to be selectable inside the field input.</li>
 </ol>
 <h1 id="functions">Functions</h1>
 <p>With functions, authors can greatly expand the capabilities of their applications. Basically, functions are executing pre-defined code that the application author prepared. Depending on the type and trigger of the function, they can do different things. In general, REI3 supports 2 function types:</p>
@@ -618,32 +646,32 @@
 <li>Backend functions: Functions that are executed on the 'backend', e. g. where REI3 is hosted. This is the server that REI3´s database is run from. Backend functions are used to update data, block invalid inputs, enforce standards and so on.</li>
 </ul>
 <h2 id="frontend-functions">Frontend functions</h2>
-<p>Frontend functions execute JavaScript within the user´s browser. How JavaScript works and how it is written is not part of this documentation - please refer to documentation for this language. For examples of how these frontend functions are written, you can install other REI3 applications as reference.</p>
+<p>Frontend functions execute JavaScript within the user´s browser. How JavaScript works and how it is written is not part of this documentation - please refer to documentation for this language. For examples of how these frontend functions are written, you can <a href="#installing-applications-as-reference">install other REI3 applications as reference</a>.</p>
 <p>By using frontend functions, applications can execute logic based on frontend events. Some examples:</p>
 <ul>
 <li>User opens a form.</li>
 <li>User saves changes to a record.</li>
 <li>User changes the value of a field.</li>
 </ul>
+<p><img src="en_us_builder_pics/function_frontend.webp" alt="Frontend function" /></p>
 <p>Frontend functions can be used in a 'global context', which means that they can be used und reused throughout the application. This is useful for general helper functions, like validating inputs, logging access or converting values (like time conversions or Markdown to HTML).</p>
-<p>You can however bind a frontend function to a <a href="#forms">form</a>. This means that it can only be used in the context of the form, but can therefore access form entities like input fields. These functions are usually used for data manipulation/validation purposes.</p>
-<p><img src="en_us_builder_pics/function_frontend.png" alt="Frontend function" /></p>
+<p>You can however also bind a frontend function to a <a href="#forms">form</a>. This means that it can only be used in the context of the form, but can therefore access form entities like input fields. These functions are usually used for data manipulation/validation purposes.</p>
 <p>Within the function code, dynamic placeholders are used to reference other entities like other functions, input fields and so on. Placeholders are important as they protect your function when you make changes to referenced entities.</p>
-<p>Frontend functions can also call 'instance functions'; these are exposed functions that can be accessed to interact with the REI3 system directly. Instance function can check a user´s role membership, navigate the user to different places, copy values to the users clipboard, execute <a href="#backend-functions">backend functions</a>, and more. To learn more about specific instance functions, you can read the contextual help that each function provides.</p>
+<p>Frontend functions can also call 'instance functions'; these are functions that can be accessed to interact with the REI3 system directly. Instance function can check a user´s role membership, navigate the user to different places, copy values to the users clipboard, execute <a href="#backend-functions">backend functions</a>, and more. To learn more about specific instance functions, you can read the contextual help that each function provides.</p>
 <h2 id="backend-functions">Backend functions</h2>
-<p>Backend functions in REI3 are PL/pgSQL functions. PL/pgSQL (Procedural Language/PostgreSQL) is a programming language of the underlying database system that REI3 is running on (PostgreSQL). To learn more about writing PL/pgSQL, please refer to documentation for this language. To start with, you can install other REI3 applications as reference.</p>
+<p>Backend functions in REI3 are PL/pgSQL functions. PL/pgSQL (Procedural Language/PostgreSQL) is a programming language of the underlying database system that REI3 is running on (PostgreSQL). To learn more about writing PL/pgSQL, please refer to <a href="https://www.postgresql.org/docs/current/plpgsql.html">documentation for this language</a>. To start with, you can install other REI3 applications as reference.</p>
 <p>By using backend functions, complex data manipulation tasks can be achieved, invalid inputs blocked and standards enforced. Backend functions can be triggered by <a href="#triggers">relation triggers</a> and called from other backend or frontend functions. They can also be regularly executed via schedules.</p>
-<p><img src="en_us_builder_pics/function_backend.png" alt="Backend function" /></p>
-<p>Within the function code, dynamic placeholders are used to reference application entities (relations, attributes and other backend functions). This ensures that changes are upgrade safe: Referenced entities can be renamed safely, while deletion is blocked. Using these placeholders, your functions are protected against breaking changes, while you work on your application.</p>
-<p>Backend functions also have access to 'instance functions'. These expose data or features from the REI3 instance. They can be used to read configuration settings (like the public hostname), get context information (like the login ID used to access the database) or execute tasks (like <a href="#sending-an-email">sending emails</a>). To learn more about specific instance functions, you can read the contextual help that each function provides.</p>
+<p><img src="en_us_builder_pics/function_backend.webp" alt="Backend function" /></p>
+<p>Within the function code, placeholders are used to reference application entities (relations, attributes and other backend functions). This ensures that changes are upgrade safe: Referenced entities can be renamed safely, while deletion is blocked. Using these placeholders, your functions are protected against breaking changes, while you work on your application.</p>
+<p>Backend functions also have access to 'instance functions'. These expose data or features from the REI3 system. They can be used to read configuration settings (like the public hostname), get context information (like the login ID used to access the database) or execute tasks (like <a href="#sending-an-email">sending emails</a>). To learn more about specific instance functions, you can read the contextual help that each function provides.</p>
 <h1 id="collections">Collections</h1>
-<p>A collection is a data store that is available on the frontend, which can be accessed by other frontend elements (like <a href="#field-options">form fields</a> or <a href="#frontend-functions">frontend-functions</a>). It contains data based on a defined <a href="#queries">query</a>. Depending on the selected <a href="#columns">columns</a> and <a href="#query-filters">filters</a>, a collection will retrieve records and their values.</p>
+<p>A collection is a data store that is available on the frontend, which can be accessed by other frontend elements (like <a href="#field-settings">form fields</a> or <a href="#frontend-functions">frontend-functions</a>). It contains data based on a defined <a href="#queries">query</a>. Depending on the selected <a href="#columns">columns</a> and <a href="#query-filters">filters</a>, a collection will retrieve records and their values.</p>
 <p>Collections are retrieved when a user logs into the system and updated when user permissions change; collections can also be updated directly by executing a <a href="#functions">function</a>. When updating a collection via a frontend function, only the current user will be affected - updating from a backend function can however affect one, many or all users.</p>
 <p>Some use cases for collections are:</p>
 <ul>
 <li>As filter criteria in field <a href="#query-filters">query filters</a>: When complex or expensive filter criteria are needed in a list view (for example, using multiple conditions and sub queries) it can be very useful to use a collection instead. Collections are retrieved once, expensive lookups are therefore not repeated on every list view. It also removes the need to repeat complex filters on other but similar views; the same collection can be referenced multiple times.</li>
 <li>As user filter for data fields (<a href="#list-fields">lists</a>, <a href="#calendar-fields">calendars</a>, etc.): Once a collection is defined within a <a href="#query-filters">query filter</a> for a data field, they can be used to offer additional user filter inputs, in which a user can select from existing collection values to filter the current view.</li>
-<li>As default value for <a href="#field-options">fields</a>: Collections can also be used as default values for input fields, like adding values to a relationship input field based on the logged in user´s team memberships. They can also be used to support user configuration options for default inputs.</li>
+<li>As default value for <a href="#field-settings">fields</a>: Collections can also be used as default values for input fields, like adding values to a relationship input field based on the logged in user´s team memberships. They can also be used to support user configuration options for default inputs.</li>
 <li>As input to a condition of a <a href="#form-states">form state</a>: Form states control how form fields behave - with collections, application authors can use configurations independent of the current record to show/hide/force field inputs depending on global or user-based settings.</li>
 <li>As a data field, shown in the header menu (top header bar): Any collection value can also be shown in the header menu to serve as a notification for example. Showing values like the number of open requests to be approved, it can also be used to navigate to another form showing data connected to the notification.</li>
 <li>As a data field, shown within a menu entry: Menu entries can reference collection values to show context-relevant data, like counters reflecting the total number of items on a list that the menu entry would show.</li>
@@ -657,9 +685,8 @@
 <h2 id="how-to-use">How to use</h2>
 <p>Application authors can enable E2EE for a new <a href="#relations">relation</a> within the Builder. With encryption enabled, new <a href="#attributes">attributes</a> of a relation can be set to be encrypted. After that, data will be automatically encrypted for the current login when saved on <a href="#forms">data forms</a> and decrypted when accessed by things like <a href="#list-fields">lists</a>.</p>
 <p>For E2EE to work, users that work with encrypted data need to setup their personal encryption once for their login inside the user settings interface. If they attempt to work with encrypted data without that setup, an error message will be shown.</p>
-<p><img src="en_us_builder_pics/settings_e2ee.png" alt="E2EE user settings" /></p>
+<p><img src="en_us_builder_pics/settings_e2ee.webp" alt="E2EE user settings" /></p>
 <p>When a user attempts to read encrypted data that was not encrypted for it, an error message is shown. It is up to the application author to filter records, based on things like record ownership or group membership, to make data accessible to only privileged users.</p>
-<p><img src="en_us_builder_pics/e2ee_error.png" alt="E2EE error" /></p>
 <h2 id="encrypt-for-multiple-users">Encrypt for multiple users</h2>
 <p>By default, REI3 encrypts for the current user´s login only. Often sensitive data needs to be shared between individuals or groups however. For this, REI3 can receive a list of user logins to encrypt data for. This is done by calling a specific <a href="#frontend-functions">frontend-function</a> when a list of privileged users is set or updated.</p>
 <p>Example: A record is by default accessible to its creator and should be encrypted as such; this works automatically once the relation and specific attributes are set to be encrypted. The creator can however share access with others by selecting a list of contacts from its organization within a relationship input field. When this field is updated, the frontend function 'app.set_e2ee_by_login_ids(loginIds)' is called with an array of login IDs from the selected contacts. As not every contact is necessarily connected to a login (see <a href="#login-forms">login forms</a>), the relationship input should be filtered to contacts with logins. With login IDs set by the frontend function, REI3 will automatically encrypt the data for all affected logins. If any selected logins do not have encryption enabled, an error message will be shown.</p>
@@ -671,7 +698,7 @@
 <li>Assign members to a group that already has access to specific records. In this case, we would update encryption for one or many records on a different relation. For this the <a href="#frontend-functions">frontend function</a> 'app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids)' exists. You would still set the login IDs (all current group members + all other logins that already have access), the relation ID (the relation of the encrypted record) and the record IDs (IDs of records that the group has access to).</li>
 </ul>
 <p>The REI3 'Password Safe' application includes implementations of all of the above cases and can be used as a reference.</p>
-<p><img src="en_us_builder_pics/e2ee_function.png" alt="E2EE function" /></p>
+<p><img src="en_us_builder_pics/e2ee_function.webp" alt="E2EE function" /></p>
 <h2 id="limitations">Limitations</h2>
 <p>Because E2EE only allows specific individuals to access encrypted data, the REI3 system itself cannot use it for things like filtering or sorting. Full-text search over encrypted data is possible with the use of both <a href="#backend-functions">backend functions</a> to retrieve and <a href="#frontend-functions">frontend functions</a> to decrypt and then search through plain data. It is however necessary that the user executing those functions is privileged to access that data; without it being encrypted for this particular user, the data cannot be decrypted and therefore not processed.</p>
 <p>Additionally, E2EE in REI3 requires additional overhead in the form of computation time for the en-/decryption itself, as well as space to store individual user´s decryption keys.</p>
@@ -684,7 +711,7 @@
 <p>Once your application has a parent, you can access the following components:</p>
 <ul>
 <li>Data (<a href="#relations">relations</a> &amp; <a href="#attributes">attributes</a>): Access to parent relations in relationships within the child application; effectively extending these directly (with 1:1 relationships) or creating new data structures attached to the parent relations. Parent relations &amp; attributes can also be accessed in <a href="#queries">queries</a>, enabling access to these as if they were part of the child application.</li>
-<li><a href="#forms">Forms</a>: Access to forms from the parent application as targets in <a href="#list-fields">lists</a>, <a href="#field-options">buttons</a> or within <a href="#menus">menus</a>. This allows for re-use of existing user interfaces.</li>
+<li><a href="#forms">Forms</a>: Access to forms from the parent application as targets in <a href="#list-fields">lists</a>, <a href="#field-settings">buttons</a> or within <a href="#menus">menus</a>. This allows for re-use of existing user interfaces.</li>
 <li><a href="#menus">Menus</a>: Access to menus from the parent application. It is also possible to copy an entire menu structure of an application to quickly recreate the parent, while making desired changes to specific menu entries.</li>
 <li><a href="#functions">Functions</a>: Parent functions (backend &amp; frontend) can be accessed directly, while access to entities from within functions in the child application is also enabled. To keep applications upgrade safe, always use the provided placeholders when referencing entities in functions. This will not protect against deletions (see below) but will keep your application running when entities are renamed.</li>
 </ul>
@@ -753,7 +780,7 @@
 <ul>
 <li>All date/time values are stored as unix timestamps. An unix timestamp stores time as an offset in seconds to a fixed point in time (which is '1970-01-01 00:00:00 at UTC').</li>
 <li>To store date/time values integer or bigint <a href="#attributes">attributes</a> are used. Unix timestamps require bigint when storing dates/datetimes bigger than '2038-01-19 03:14:08 UTC' as this is the maximum timestamp representable by a 32 bit signed integer.</li>
-<li>Date/time values are always stored as integers, but can be differently presented depending on the display option in the corresponding <a href="#field-options">field</a> or <a href="#list-fields">column</a>:
+<li>Date/time values are always stored as integers, but can be differently presented depending on the display option in the corresponding <a href="#field-settings">field</a> or <a href="#list-fields">column</a>:
 <ul>
 <li>Dates: When displaying integer values as 'date' they represent a 'fixed day in a year' and are formatted as such. When entering a date, it is stored as midnight at UTC of the corresponding day. So choosing the 2nd August 2017 will be stored as unix timestamp '1501632000' or '2017-08-02 00:00:00 UTC'. Because all date values are stored as midnight, they can directly be compared. Timezone information is not stored or used at all in this context.</li>
 <li>Time: When displaying an integer as 'time' they represent a 'fixed point of time on a clock' and are formatted as such. When entering a time, it is stored as the offset to unix zero ('1970-01-01 00:00:00'). Because there is no date component, the highest possible value is the count of seconds until '23:59:59' (or 86399 as unix timestamp). This implementation allows comparison between time values. Similar to dates, timezones are not used in this context.</li>

@@ -1,6 +1,10 @@
+import MyArticles            from '../articles.js';
 import srcBase64Icon         from '../shared/image.js';
-import {getCaptionForModule} from '../shared/language.js';
 import {getUnixFormat}       from '../shared/time.js';
+import {
+	getCaptionForModule,
+	getValidLanguageCode
+} from '../shared/language.js';
 export {MyAdminModules as default};
 
 let MyAdminModulesItem = {
@@ -13,10 +17,17 @@ let MyAdminModulesItem = {
 					:active="hasChanges && !productionMode"
 					:captionTitle="capGen.button.save"
 				/>
+				<my-button image="builder.png"
+					:active="builderEnabled"
+					@trigger="openBuilder(false)"
+					@trigger-middle="openBuilder(true)"
+					:captionTitle="capGen.button.openBuilder"
+				/>
 				<my-button image="delete.png"
 					@trigger="delAsk"
 					:active="!productionMode"
 					:cancel="true"
+					:captionTitle="capGen.button.delete"
 				/>
 			</div>
 		</td>
@@ -59,10 +70,18 @@ let MyAdminModulesItem = {
 			/>
 		</td>
 		<td class="noWrap">
+			<my-button image="question.png"
+				@trigger="$emit('showHelp',module.id)"
+				:active="hasHelp"
+				:captionTitle="capGen.help"
+				:tight="true"
+			/>
+		</td>
+		<td class="noWrap">
 			<my-button image="time.png"
-				v-if="changeLog !== '' && changeLog !== null"
 				@trigger="changeLogShow"
-				:caption="capApp.changeLog"
+				:active="changeLog !== '' && changeLog !== null"
+				:captionTitle="capApp.changeLog"
 				:tight="true"
 			/>
 		</td>
@@ -91,8 +110,8 @@ let MyAdminModulesItem = {
 		options:       { type:Object,  required:true },
 		repoModules:   { type:Array,   required:true }
 	},
-	emits:['install'],
-	data:function() {
+	emits:['showHelp','install'],
+	data() {
 		return {
 			id:this.module.id,
 			hidden:this.options.hidden,
@@ -101,95 +120,72 @@ let MyAdminModulesItem = {
 		};
 	},
 	computed:{
-		hasChanges:function() {
-			return this.position !== this.options.position
-				|| this.hidden   !== this.options.hidden
-				|| this.owner    !== this.options.owner;
-		},
-		moduleNamesDependendOnUs:function() {
+		hasChanges:(s) => s.position !== s.options.position
+			|| s.hidden !== s.options.hidden
+			|| s.owner  !== s.options.owner,
+		hasHelp:(s) => s.module.articleIdsHelp.length !== 0
+			&& typeof s.articleIdMap[s.module.articleIdsHelp[0]].captions.articleBody[s.settings.languageCode] !== 'undefined',
+		moduleNamesDependendOnUs:(s) => {
 			let out = [];
-			
-			for(let i = 0, j = this.moduleIdsDependendOnUs.length; i < j; i++) {
-				let m = this.moduleIdMap[this.moduleIdsDependendOnUs[i]];
+			for(let i = 0, j = s.moduleIdsDependendOnUs.length; i < j; i++) {
+				let m = s.moduleIdMap[s.moduleIdsDependendOnUs[i]];
 				out.push(m.name);
 			}
 			return out;
 		},
-		moduleIdsDependendOnUs:function() {
-			let out  = [];
-			let that = this;
-			
-			let addDependendIds = function(m) {
-				
+		moduleIdsDependendOnUs:(s) => {
+			let out = [];
+			let addDependendIds = function(moduleParent) {
 				// check all other modules for dependency to parent module
-				for(let i = 0, j = that.modules.length; i < j; i++) {
-					
-					let childId = that.modules[i].id;
-					
+				for(let moduleChild of s.modules) {
 					// root, parent module or was already added
-					if(childId === that.module.id || childId === m.id || out.includes(childId))
+					if(moduleChild.id === s.module.id || moduleChild.id === moduleParent.id || out.includes(moduleChild.id))
 						continue;
 					
-					for(let x = 0, y = that.modules[i].dependsOn.length; x < y; x++) {
-						
-						if(that.modules[i].dependsOn[x] !== m.id)
-							continue;
-						
-						out.push(childId);
-						
-						// add dependencies from child as well
-						addDependendIds(that.modules[i]);
-						break;
+					for(let moduleIdChildDependsOn of moduleChild.dependsOn) {
+						if(moduleIdChildDependsOn === moduleParent.id) {
+							out.push(moduleChild.id);
+							
+							// add dependencies from child as well
+							addDependendIds(moduleChild);
+							break;
+						}
 					}
 				}
 			};
 			
-			// get dependencies if this module (root)
-			addDependendIds(this.module);
-			
+			// get dependencies of this module (root)
+			addDependendIds(s.module);
 			return out;
 		},
 		
 		// repository
-		isInRepo:function() {
-			return this.repoModule !== false;
-		},
-		isOutdatedApp:function() {
-			return this.isInRepo && this.repoModule.releaseBuildApp > this.system.appBuild;
-		},
-		isOutdated:function() {
-			return this.isInRepo && this.repoModule.releaseBuild > this.module.releaseBuild;
-		},
-		isReadyForUpdate:function() {
-			return this.isInRepo && this.isOutdated && !this.isOutdatedApp;
-		},
-		isUpToDate:function() {
-			return this.isInRepo && !this.isOutdated;
-		},
-		repoModule:function() {
-			for(let i = 0, j = this.repoModules.length; i < j; i++) {
-				if(this.repoModules[i].moduleId === this.id)
-					return this.repoModules[i];
+		repoModule:(s) => {
+			for(let i = 0, j = s.repoModules.length; i < j; i++) {
+				if(s.repoModules[i].moduleId === s.id)
+					return s.repoModules[i];
 			}
 			return false;
 		},
 		
 		// simple
-		changeLog:function() {
-			if(this.repoModule === false) return '';
-			
-			return this.repoModule.changeLog;
-		},
+		changeLog:       (s) => s.repoModule === false ? '' : s.repoModule.changeLog,
+		isInRepo:        (s) => s.repoModule !== false,
+		isOutdated:      (s) => s.isInRepo && s.repoModule.releaseBuild > s.module.releaseBuild,
+		isOutdatedApp:   (s) => s.isInRepo && s.repoModule.releaseBuildApp > s.system.appBuild,
+		isReadyForUpdate:(s) => s.isInRepo && s.isOutdated && !s.isOutdatedApp,
+		isUpToDate:      (s) => s.isInRepo && !s.isOutdated,
 		
 		// stores
-		modules:       function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		builderEnabled:function() { return this.$store.getters.builderEnabled; },
-		capApp:        function() { return this.$store.getters.captions.admin.modules; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		productionMode:function() { return this.$store.getters.productionMode; },
-		settings:      function() { return this.$store.getters.settings; },
-		system:        function() { return this.$store.getters.system; }
+		modules:       (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		articleIdMap:  (s) => s.$store.getters['schema/articleIdMap'],
+		builderEnabled:(s) => s.$store.getters.builderEnabled,
+		capApp:        (s) => s.$store.getters.captions.admin.modules,
+		capGen:        (s) => s.$store.getters.captions.generic,
+		productionMode:(s) => s.$store.getters.productionMode,
+		settings:      (s) => s.$store.getters.settings,
+		system:        (s) => s.$store.getters.system
 	},
 	methods:{
 		// externals
@@ -197,7 +193,8 @@ let MyAdminModulesItem = {
 		getUnixFormat,
 		srcBase64Icon,
 		
-		changeLogShow:function() {
+		// actions
+		changeLogShow() {
 			this.$store.commit('dialog',{
 				captionTop:this.capApp.changeLog,
 				captionBody:this.changeLog,
@@ -210,10 +207,14 @@ let MyAdminModulesItem = {
 				}]
 			});
 		},
-		ownerEnable:function() {
+		openBuilder(middle) {
+			if(!middle) this.$router.push('/builder/module/'+this.module.id);
+			else        window.open('#/builder/module/'+this.module.id,'_blank');
+		},
+		ownerEnable() {
 			this.owner = true;
 		},
-		ownerWarning:function(state) {
+		ownerWarning(state) {
 			if(!state) {
 				this.owner = false;
 				return;
@@ -238,7 +239,7 @@ let MyAdminModulesItem = {
 		},
 		
 		// backend calls
-		delAsk:function() {
+		delAsk() {
 			let appNames = '';
 			
 			if(this.moduleNamesDependendOnUs.length !== 0)
@@ -263,7 +264,7 @@ let MyAdminModulesItem = {
 				}]
 			});
 		},
-		delAsk2:function() {
+		delAsk2() {
 			this.$nextTick(function() {
 				this.$store.commit('dialog',{
 					captionBody:this.capApp.dialog.deleteMulti.replace('{COUNT}',this.moduleNamesDependendOnUs.length + 1),
@@ -283,7 +284,7 @@ let MyAdminModulesItem = {
 				});
 			});
 		},
-		del:function() {
+		del() {
 			let requests = [ws.prepare('module','del',{id:this.id})];
 			
 			// add dependencies to delete
@@ -296,7 +297,7 @@ let MyAdminModulesItem = {
 				this.$root.genericError
 			);
 		},
-		set:function() {
+		set() {
 			ws.send('moduleOption','set',{
 				id:this.id,
 				hidden:this.hidden,
@@ -312,7 +313,10 @@ let MyAdminModulesItem = {
 
 let MyAdminModules = {
 	name:'my-admin-modules',
-	components:{MyAdminModulesItem},
+	components:{
+		MyAdminModulesItem,
+		MyArticles
+	},
 	template:`<div class="contentBox admin-modules limited1500 grow">
 		<div class="top">
 			<div class="area">
@@ -347,6 +351,16 @@ let MyAdminModules = {
 					:image="fileUploading ? 'load.gif' : 'ok.png'"
 				/>
 			</div>
+		</div>
+		
+		<!-- application help window -->
+		<div class="app-sub-window under-header" v-if="moduleIdShowHelp !== null" @mousedown.self="moduleIdShowHelp = null">
+			<my-articles class="admin-modules-help shade pop-up"
+				@close="moduleIdShowHelp = null"
+				:moduleId="moduleIdShowHelp"
+				:isPopUp="false"
+				:language="moduleLanguage"
+			/>
 		</div>
 		
 		<div class="content no-padding">
@@ -390,6 +404,12 @@ let MyAdminModules = {
 						</th>
 						<th class="noWrap">
 							<div class="mixed-header">
+								<img src="images/question.png" />
+								<span>{{ capGen.help }}</span>
+							</div>
+						</th>
+						<th class="noWrap">
+							<div class="mixed-header">
 								<img src="images/time.png" />
 								<span>{{ capApp.changeLog }}</span>
 							</div>
@@ -418,6 +438,7 @@ let MyAdminModules = {
 				<tbody>
 					<my-admin-modules-item
 						v-for="(m,i) in modules"
+						@showHelp="showHelp($event)"
 						@install="install"
 						:installStarted="installStarted"
 						:key="m.id"
@@ -432,67 +453,71 @@ let MyAdminModules = {
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			fileToUpload:null,
 			fileUploading:false,
 			installStarted:false,
+			moduleIdShowHelp:null,
 			repoModules:[]
 		};
 	},
-	mounted:function() {
+	mounted() {
 		this.$store.commit('pageTitle',this.menuTitle);
 		this.getRepo();
 	},
 	computed:{
-		canUploadFile:function() {
-			return !this.installStarted && !this.fileUploading && !this.productionMode;
-		},
-		moduleIdsUpdate:function() {
+		moduleIdsUpdate:(s) => {
 			let out = [];
-			for(let i = 0, j = this.repoModules.length; i < j; i++) {
-				let rm = this.repoModules[i];
-				
-				if(rm.releaseBuildApp >= this.system.appBuild)
-					continue;
-				
-				if(typeof this.moduleIdMap[rm.moduleId] === 'undefined')
-					continue;
-				
-				let m = this.moduleIdMap[rm.moduleId];
-				if(rm.releaseBuild <= m.releaseBuild)
-					continue;
-				
-				out.push(m.id);
+			for(let rm of s.repoModules) {
+				if(rm.releaseBuildApp <= s.system.appBuild
+					&& typeof s.moduleIdMap[rm.moduleId] !== 'undefined'
+					&& rm.releaseBuild > s.moduleIdMap[rm.moduleId].releaseBuild
+				) {
+					out.push(rm.moduleId);
+				}
 			}
 			return out;
 		},
 		
+		// simple
+		canUploadFile:(s) => !s.installStarted && !s.fileUploading && !s.productionMode,
+		
 		// stores
-		token:             function() { return this.$store.getters['local/token']; },
-		modules:           function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:       function() { return this.$store.getters['schema/moduleIdMap']; },
-		moduleIdMapOptions:function() { return this.$store.getters['schema/moduleIdMapOptions']; },
-		builderEnabled:    function() { return this.$store.getters.builderEnabled; },
-		capApp:            function() { return this.$store.getters.captions.admin.modules; },
-		capGen:            function() { return this.$store.getters.captions.generic; },
-		productionMode:    function() { return this.$store.getters.productionMode; },
-		system:            function() { return this.$store.getters.system; }
+		token:             (s) => s.$store.getters['local/token'],
+		modules:           (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleIdMapOptions:(s) => s.$store.getters['schema/moduleIdMapOptions'],
+		builderEnabled:    (s) => s.$store.getters.builderEnabled,
+		capApp:            (s) => s.$store.getters.captions.admin.modules,
+		capGen:            (s) => s.$store.getters.captions.generic,
+		moduleLanguage:    (s) => s.$store.getters.moduleLanguage,
+		productionMode:    (s) => s.$store.getters.productionMode,
+		system:            (s) => s.$store.getters.system
 	},
 	methods:{
+		// externals
+		getValidLanguageCode,
+		
 		// error handling
-		installError:function(message) {
+		installError(message) {
 			message = this.capApp.error.installFailed.replace('{ERROR}',message);
 			
 			this.$root.genericError(message);
 			this.installStarted = false;
 		},
+		showHelp(moduleId) {
+			this.$store.commit('moduleLanguage',this.getValidLanguageCode(
+				this.moduleIdMap[moduleId]));
+			
+			this.moduleIdShowHelp = moduleId;
+		},
 		
 		// actions
-		goToRepo:function() {
+		goToRepo() {
 			return this.$router.push('/admin/repo');
 		},
-		importModule:function() {
+		importModule() {
 			this.fileUploading = true;
 			let formData       = new FormData();
 			let httpRequest    = new XMLHttpRequest();
@@ -519,27 +544,27 @@ let MyAdminModules = {
 		},
 		
 		// backend calls
-		getRepo:function() {
+		getRepo() {
 			ws.send('repoModule','get',{getInstalled:true,getNew:false},true).then(
 				res => this.repoModules = res.payload.repoModules,
 				this.$root.genericError
 			);
 		},
-		install:function(fileId) {
+		install(fileId) {
 			ws.send('repoModule','install',{fileId:fileId},true).then(
 				() => this.installOk(),
 				this.installError
 			);
 			this.installStarted = true;
 		},
-		installAll:function() {
+		installAll() {
 			ws.send('repoModule','installAll',{},true).then(
 				() => this.installOk(),
 				this.installError
 			);
 			this.installStarted = true;
 		},
-		installOk:function() {
+		installOk() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.updateDone,
 				buttons:[{

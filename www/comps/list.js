@@ -46,7 +46,7 @@ let MyList = {
 	template:`<div class="list" ref="content"
 		@keydown="keyDown"
 		v-click-outside="escape"
-		:class="{shade:!isInput, singleField:isSingleField, asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly }"
+		:class="{shade:!isInput, asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly }"
 	>
 		<!-- list as input field (showing record(s) from active field value) -->
 		<template v-if="isInput">
@@ -155,7 +155,7 @@ let MyList = {
 										@click="focus"
 										@focus="focus"
 										@keyup="updatedTextInput"
-										v-model="quickFilter"
+										v-model="filtersQuick"
 										:class="{ invalid:!inputValid }"
 										:disabled="inputIsReadonly"
 										:placeholder="inputLinePlaceholder"
@@ -258,7 +258,7 @@ let MyList = {
 					/>
 					
 					<my-button image="filterCog.png"
-						v-if="showFiltersAction"
+						v-if="!smallSize"
 						@trigger="toggleUserFilters"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
@@ -269,7 +269,7 @@ let MyList = {
 					<input class="selector lookup" type="text"
 						v-if="filterQuick"
 						@keyup.enter="updatedFilterQuick"
-						v-model="quickFilter"
+						v-model="filtersQuick"
 						:title="capApp.quick"
 						placeholder="..."
 					/>
@@ -294,7 +294,7 @@ let MyList = {
 					</select>
 					
 					<select class="selector"
-						v-if="isSingleField && allowPaging && !isMobile"
+						v-if="allowPaging && !smallSize && !isMobile"
 						v-model.number="limit"
 						@change="reloadInside()"
 					>
@@ -332,7 +332,6 @@ let MyList = {
 						v-model="filtersUser"
 						@apply="reloadInside('filtersUser')"
 						@close="showFilters = false"
-						@reset="reloadInside('filtersUser')"
 						:columns="columns"
 						:disableContent="['fieldChanged','subQuery']"
 						:joins="joins"
@@ -354,7 +353,7 @@ let MyList = {
 					@reload="get"
 					:columns="columns"
 					:expressions="expressions"
-					:filters="filters.concat(filtersParsedQuick).concat(filtersParsedUser)"
+					:filters="filtersCombined"
 					:isExport="csvExport"
 					:isImport="csvImport"
 					:joins="relationsJoined"
@@ -366,7 +365,7 @@ let MyList = {
 			<!-- list results as table -->
 			<div class="layoutTable"
 				v-if="layout === 'table'"
-				:class="{ scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
+				:class="{ scrolls:scrolls, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
 				:id="usesPageHistory ? scrollFormId : null"
 			>
 				<table :class="{ 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
@@ -430,7 +429,7 @@ let MyList = {
 									<input class="selector lookup small" type="text" placeholder="..."
 										v-if="filterQuick"
 										@keyup.enter="updatedFilterQuick"
-										v-model="quickFilter"
+										v-model="filtersQuick"
 										:title="capApp.quick"
 									/>
 									
@@ -637,8 +636,9 @@ let MyList = {
 		formLoading:    { type:Boolean, required:false, default:false }, // trigger and control list reloads
 		header:         { type:Boolean, required:false, default:true  }, // show list header
 		isInput:        { type:Boolean, required:false, default:false }, // use list as input
-		isSingleField:  { type:Boolean, required:false, default:false }, // list fills entire form
+		isHiddenInTab:  { type:Boolean, required:false, default:false }, // list is in a non-visible tab-field
 		rowSelect:      { type:Boolean, required:false, default:false }, // list rows can be selected (to open record in form)
+		scrolls:        { type:Boolean, required:false, default:false }, // list should scroll its contents (instead of growing)
 		usesPageHistory:{ type:Boolean, required:false, default:false }, // list uses page getters for filtering/sorting/etc.
 		
 		// list as input field
@@ -674,8 +674,8 @@ let MyList = {
 			showAutoRenew:false,        // show UI for auto list renew
 			showCsv:false,              // show UI for CSV import/export
 			showFilters:false,          // show UI for user filters
-			showFiltersAction:false,    // show UI for expert filters
 			showTable:false,            // show regular list table as view or input dropdown
+			smallSize:false,            // limit UI options as list is small
 			
 			// list card layout state
 			orderByColumnBatchIndex:-1,
@@ -687,9 +687,9 @@ let MyList = {
 			offset:0,         // current result offset
 			orders:[],        // column orderings, copied on mount, changable by user
 			rows:[],          // current result set
-			filtersColumn:[], // current column filters
+			filtersColumn:[], // current user column filters
+			filtersQuick:'',  // current user quick text filter
 			filtersUser:[],   // current user filters
-			quickFilter:'',   // current quick text filter
 			
 			// list constants
 			refTabindex:'input_row_', // prefix for vue references to tabindex elements
@@ -870,7 +870,7 @@ let MyList = {
 			);
 		},
 		filtersParsedQuick:function() {
-			if(this.quickFilter === '')
+			if(this.filtersQuick === '')
 				return [];
 			
 			let out = [];
@@ -894,7 +894,7 @@ let MyList = {
 					},
 					side1:{
 						brackets:0,
-						value:this.quickFilter
+						value:this.filtersQuick
 					}
 				});
 			}
@@ -933,6 +933,9 @@ let MyList = {
 			if(val) return;
 			this.inputAutoSelectDone = false;
 			this.reloadOutside();
+		});
+		this.$watch('isHiddenInTab',(val) => {
+			if(!val) this.reloadOutside();
 		});
 		this.$watch(() => [this.choices,this.columns,this.filters],(newVals,oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
@@ -980,7 +983,10 @@ let MyList = {
 			this.setAutoRenewTimer(false);
 		}
 		
-		// set initial aggregators
+		// load cached list options
+		this.filtersColumn = this.fieldOptionGet(this.fieldId,'filtersColumn',[]);
+		this.filtersQuick  = this.fieldOptionGet(this.fieldId,'filtersQuick','');
+		this.filtersUser   = this.fieldOptionGet(this.fieldId,'filtersUser',[]);
 		this.columnBatchIndexMapAggr = this.fieldOptionGet(this.fieldId,'columnBatchIndexMapAggr',{});
 	},
 	beforeUnmount:function() {
@@ -1018,7 +1024,7 @@ let MyList = {
 			return state ? 'radio1.png' : 'radio0.png';
 		},
 		resize:function() {
-			this.showFiltersAction = this.$refs.content.offsetWidth > 700;
+			this.smallSize = this.$refs.content.offsetWidth < 700;
 		},
 		updateDropdownDirection:function() {
 			let headersPx  = 200; // rough height in px of all headers (menu/form) combined
@@ -1058,8 +1064,8 @@ let MyList = {
 			
 			// update route parameters, reloads list via watcher
 			// enables browser history for fullpage list navigation
-			//  special cases: column/user filters & manuel reloads (no page param change)
-			if(this.usesPageHistory && !['filtersColumn','filtersUser','manual'].includes(entity))
+			//  special cases: column/quick/user filters & manuel reloads (no page param change)
+			if(this.usesPageHistory && !['filtersColumn','filtersQuick','filtersUser','manual'].includes(entity))
 				return this.paramsUpdate(true);
 			
 			this.get();
@@ -1086,7 +1092,6 @@ let MyList = {
 			if(this.limit       !== 0)    args.push(`limit=${this.limit}`);
 			if(this.offset      !== 0)    args.push(`offset=${this.offset}`);
 			if(orders.length    !== 0)    args.push(`orderby=${orders.join(',')}`);
-			if(this.quickFilter !== '')   args.push(`quickfilter=${this.quickFilter}`);
 			
 			this.$emit('set-args',args,pushHistory);
 		},
@@ -1099,18 +1104,16 @@ let MyList = {
 				choice:     { parse:'string',   value:this.choiceIdDefault },
 				limit:      { parse:'int',      value:this.limitDefault },
 				offset:     { parse:'int',      value:0 },
-				orderby:    { parse:'listOrder',value:!this.orderOverwritten ? JSON.stringify(this.query.orders) : '[]' },
-				quickfilter:{ parse:'string',   value:'' }
+				orderby:    { parse:'listOrder',value:!this.orderOverwritten ? JSON.stringify(this.query.orders) : '[]' }
 			};
 			this.routeParseParams(params);
 			
 			if(this.choiceId !== params['choice'].value)
 				this.choiceId = params['choice'].value;
 			
-			this.limit       = params['limit'].value;
-			this.offset      = params['offset'].value;
-			this.orders      = JSON.parse(params['orderby'].value);
-			this.quickFilter = params['quickfilter'].value;
+			this.limit  = params['limit'].value;
+			this.offset = params['offset'].value;
+			this.orders = JSON.parse(params['orderby'].value);
 			
 			// apply first order for card layout selector
 			this.orderByColumnBatchIndex = -1;
@@ -1136,8 +1139,8 @@ let MyList = {
 		},
 		focus:function() {
 			if(!this.inputIsReadonly && this.isInput && !this.inputAsCategory && !this.showTable) {
-				this.focused     = true;
-				this.quickFilter = '';
+				this.focused      = true;
+				this.filtersQuick = '';
 				this.$emit('focused');
 			}
 		},
@@ -1183,7 +1186,7 @@ let MyList = {
 			this.showTable = !this.showTable;
 			
 			if(this.showTable) {
-				this.quickFilter = '';
+				this.filtersQuick = '';
 				this.reloadInside('dropdown');
 			}
 		},
@@ -1223,7 +1226,7 @@ let MyList = {
 			if(this.isInput && !this.showTable)
 				this.showTable = true;
 			
-			this.reloadInside('filterQuick');
+			this.reloadInside('filtersQuick');
 		},
 		
 		// user actions, table layout
@@ -1241,8 +1244,8 @@ let MyList = {
 					else                this.rowsInput = [row];
 				}
 				
-				this.showTable   = false;
-				this.quickFilter = '';
+				this.showTable    = false;
+				this.filtersQuick = '';
 			}
 			
 			if(this.rowSelect)
@@ -1361,11 +1364,8 @@ let MyList = {
 		// bulk selection
 		selectRow:function(rowIndex) {
 			let pos = this.selectedRows.indexOf(rowIndex);
-			
-			if(pos === -1)
-				this.selectedRows.push(rowIndex);
-			else
-				this.selectedRows.splice(pos,1);
+			if(pos === -1) this.selectedRows.push(rowIndex);
+			else           this.selectedRows.splice(pos,1);
 		},
 		selectReset:function() {
 			this.selectedRows = [];
@@ -1377,7 +1377,6 @@ let MyList = {
 			}
 			
 			this.selectedRows = [];
-			
 			for(let i = 0, j = this.rows.length; i < j; i++) {
 				this.selectedRows.push(i);
 			}
@@ -1412,7 +1411,7 @@ let MyList = {
 		},
 		
 		// backend calls
-		delAsk:function(idsToDelete) {
+		delAsk:function(rowIndexes) {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.delete,
 				buttons:[{
@@ -1420,26 +1419,22 @@ let MyList = {
 					caption:this.capGen.button.delete,
 					exec:this.del,
 					image:'delete.png',
-					params:[idsToDelete]
+					params:[rowIndexes]
 				},{
 					caption:this.capGen.button.cancel,
 					image:'cancel.png'
 				}]
 			});
 		},
-		del:function(idsToDelete) {
+		del:function(rowIndexes) {
 			let requests = [];
-			
-			for(let i = 0, j = this.joins.length; i < j; i++) {
-				let j = this.joins[i];
-				
+			for(let j of this.joins) {
 				if(!j.applyDelete)
 					continue;
 				
 				// specific rows selected
-				for(let x = 0, y = idsToDelete.length; x < y; x++) {
-					
-					let r = this.rows[idsToDelete[x]];
+				for(let rowIndex of rowIndexes) {
+					let r = this.rows[rowIndex];
 					
 					if(r.indexRecordIds[j.index] === 0)
 						continue;
@@ -1450,16 +1445,14 @@ let MyList = {
 					}));
 				}
 			}
-			
 			ws.sendMultiple(requests,true).then(
 				this.get,
 				this.$root.genericError
 			);
 		},
-		
 		get:function() {
-			// nothing to get if nothing is shown or form is currently loading
-			if(!this.showTable || this.formLoading)
+			// do nothing if nothing is shown, form is loading or list is in a non-visible tab
+			if(!this.showTable || this.formLoading || this.isHiddenInTab)
 				return;
 			
 			// fix invalid offset (can occur when limit is changed)
@@ -1490,8 +1483,13 @@ let MyList = {
 							if(typeof this.$refs.aggregations !== 'undefined')
 								this.$refs.aggregations.get();
 							
-							if(this.isInput)
+							if(this.isInput) {
 								this.$nextTick(this.updateDropdownDirection);
+							} else {
+								this.fieldOptionSet(this.fieldId,'filtersColumn',this.filtersColumn);
+								this.fieldOptionSet(this.fieldId,'filtersQuick',this.filtersQuick);
+								this.fieldOptionSet(this.fieldId,'filtersUser',this.filtersUser);
+							}
 						},
 						this.consoleError
 					);
@@ -1561,7 +1559,6 @@ let MyList = {
 						let ids = [];
 						if(this.inputAutoSelect > 0) {
 							for(let i = 0; i < this.inputAutoSelect; i++) {
-								
 								if(res.payload.rows.length - 1 < i)
 									break;
 								
@@ -1570,7 +1567,6 @@ let MyList = {
 						}
 						else {
 							for(let i = 0; i > this.inputAutoSelect; i--) {
-								
 								if(res.payload.rows.length - 1 + i < 0)
 									break;
 								

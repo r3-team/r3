@@ -56,6 +56,24 @@ var (
 	appNameShort string = "R3"
 	appVersion   string = "0.1.2.3"
 
+	// start parameters
+	cli struct {
+		adminCreate      string
+		configFile       string
+		dynamicPort      bool
+		imageMagick      string
+		http             bool
+		open             bool
+		run              bool
+		serviceName      string
+		serviceStart     bool
+		serviceStop      bool
+		serviceInstall   bool
+		serviceUninstall bool
+		setData          string
+		wwwPath          string
+	}
+
 	// embed static web files
 	//go:embed www/*
 	fsStatic embed.FS
@@ -64,25 +82,8 @@ var (
 	fsStaticNoPic []byte
 )
 
-type cliInput struct {
-	adminCreate      string
-	configFile       string
-	dynamicPort      bool
-	imageMagick      string
-	http             bool
-	open             bool
-	run              bool
-	serviceName      string
-	serviceStart     bool
-	serviceStop      bool
-	serviceInstall   bool
-	serviceUninstall bool
-	setData          string
-	wwwPath          string
-}
 type program struct {
-	cli             cliInput
-	embeddedDbOwned bool           // this instance has started the embedded database
+	embeddedDbOwned bool           // whether this instance has started the embedded database
 	logger          service.Logger // logs to the operating system if called as service, otherwise to stdOut
 	stopping        bool
 	webServer       *http.Server
@@ -95,7 +96,6 @@ func main() {
 	config.SetAppName(appName, appNameShort)
 
 	// process configuration overwrites from command line
-	var cli cliInput
 	flag.StringVar(&cli.adminCreate, "newadmin", "", "Create new admin user (username:password), password must not contain spaces or colons")
 	flag.StringVar(&cli.configFile, "config", "config.json", "Location of configuration file (combined with -run)")
 	flag.BoolVar(&cli.dynamicPort, "dynamicport", false, "Start with a port provided by the operating system (combined with -run)")
@@ -117,7 +117,6 @@ func main() {
 	if cli.serviceName != appName {
 		svcDisplay = fmt.Sprintf("%s platform (%s)", appName, cli.serviceName)
 	}
-
 	svcConfig := &service.Config{
 		Name:        strings.ToLower(cli.serviceName),
 		DisplayName: svcDisplay,
@@ -127,7 +126,6 @@ func main() {
 	// initialize service
 	var err error
 	prg := &program{}
-	prg.cli = cli
 	prg.stopping = false
 
 	svc, err := service.New(prg, svcConfig)
@@ -135,7 +133,6 @@ func main() {
 		fmt.Printf("service could not be created, error: %v\n", err)
 		return
 	}
-
 	prg.logger, err = svc.Logger(nil)
 	if err != nil {
 		fmt.Printf("service logger could not be created, error: %v\n", err)
@@ -155,21 +152,35 @@ func main() {
 		signal.Notify(scheduler.OsExit, syscall.SIGTERM)
 	}
 
-	// get path for executable
+	// get path for executable & change working dir to it
 	app, err := os.Executable()
 	if err != nil {
 		prg.logger.Error(err)
 		return
 	}
-
-	// change working directory to executable path
 	if err := os.Chdir(filepath.Dir(app)); err != nil {
 		prg.logger.Error(err)
 		return
 	}
 
+	// load configuration from file
+	config.SetConfigFilePath(cli.configFile)
+
+	if err := config.LoadFile(); err != nil {
+		prg.logger.Errorf("failed to read configuration file, %v", err)
+		return
+	}
+
+	// apply portable mode settings if enabled
+	if config.File.Portable {
+		cli.dynamicPort = true
+		cli.http = true
+		cli.run = true
+		cli.open = true
+	}
+
 	// print usage info if interactive and no arguments were added
-	if service.Interactive() && len(os.Args) == 1 {
+	if !config.File.Portable && service.Interactive() && len(os.Args) == 1 {
 		fmt.Printf("Available parameters:\n")
 		flag.PrintDefaults()
 
@@ -187,14 +198,6 @@ func main() {
 
 		reader := bufio.NewReader(os.Stdin)
 		reader.ReadString('\n')
-		return
-	}
-
-	// load configuration from file
-	config.SetConfigFilePath(cli.configFile)
-
-	if err := config.LoadFile(); err != nil {
-		prg.logger.Errorf("failed to read configuration file, %v", err)
 		return
 	}
 
@@ -326,8 +329,8 @@ func (prg *program) execute(svc service.Service) {
 	}
 
 	// process cli commands
-	if prg.cli.adminCreate != "" {
-		adminInputs := strings.Split(prg.cli.adminCreate, ":")
+	if cli.adminCreate != "" {
+		adminInputs := strings.Split(cli.adminCreate, ":")
 
 		if len(adminInputs) != 2 {
 			prg.executeAborted(svc, fmt.Errorf("invalid syntax for admin creation, required is username:password"))
@@ -385,7 +388,7 @@ func (prg *program) execute(svc service.Service) {
 	}
 
 	// prepare image processing
-	image.PrepareProcessing(prg.cli.imageMagick)
+	image.PrepareProcessing(cli.imageMagick)
 
 	log.Info("server", fmt.Sprintf("is ready to start application (%s)", appVersion))
 
@@ -394,7 +397,7 @@ func (prg *program) execute(svc service.Service) {
 
 	mux := http.NewServeMux()
 
-	if prg.cli.wwwPath == "" {
+	if cli.wwwPath == "" {
 		fsStaticWww, err := fs.Sub(fs.FS(fsStatic), "www")
 		if err != nil {
 			prg.executeAborted(svc, fmt.Errorf("failed to access embedded web file directory, %v", err))
@@ -402,7 +405,7 @@ func (prg *program) execute(svc service.Service) {
 		}
 		mux.Handle("/", http.FileServer(http.FS(fsStaticWww)))
 	} else {
-		mux.Handle("/", http.FileServer(http.Dir(prg.cli.wwwPath)))
+		mux.Handle("/", http.FileServer(http.Dir(cli.wwwPath)))
 	}
 	handler.SetNoImage(fsStaticNoPic)
 
@@ -440,9 +443,9 @@ func (prg *program) execute(svc service.Service) {
 	log.Info("server", fmt.Sprintf("starting web handlers for '%s'", webServerString))
 
 	// if dynamic port is used we can only now open the app in default browser (port is now known)
-	if prg.cli.open && prg.cli.dynamicPort {
+	if cli.open && cli.dynamicPort {
 		protocol := "https"
-		if prg.cli.http {
+		if cli.http {
 			protocol = "http"
 		}
 		tools.OpenRessource(fmt.Sprintf("%s://localhost:%d", protocol, config.File.Web.Port))
@@ -454,7 +457,7 @@ func (prg *program) execute(svc service.Service) {
 	}
 
 	// start web server and block routine
-	if prg.cli.http {
+	if cli.http {
 		if err := prg.webServer.Serve(webListener); err != nil && err != http.ErrServerClosed {
 			prg.executeAborted(svc, err)
 		}

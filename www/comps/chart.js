@@ -17,19 +17,20 @@ let MyChart = {
 		echarts:VueECharts
 	},
 	template:`<div class="chart shade">
-		<div class="top lower" v-if="showTopBar">
-			<div class="area" />
-			<div class="area">
-				<select class="selector"
-					v-if="hasChoices"
-					v-model="choiceId"
-					@change="choiceIdSet($event.target.value)"
-				>
-					<option v-for="c in choices" :value="c.id">
-						{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
-					</option>
-				</select>
-			</div>
+		<div class="top lower" v-if="needsHeader || hasChoices">
+			<template v-if="hasChoices">
+				<div class="area" />
+				<div class="area">
+					<select class="selector"
+						v-model="choiceId"
+						@change="choiceIdSet($event.target.value)"
+					>
+						<option v-for="c in choices" :value="c.id">
+							{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
+						</option>
+					</select>
+				</div>
+			</template>
 		</div>
 		<echarts ref="chart"
 			v-if="ready"
@@ -38,16 +39,16 @@ let MyChart = {
 		/>
 	</div>`,
 	props:{
-		choices:      { type:Array,   required:false, default:() => [] },
-		columns:      { type:Array,   required:true },
-		filters:      { type:Array,   required:true },
-		formLoading:  { type:Boolean, required:true },
-		isSingleField:{ type:Boolean, required:true },
-		limit:        { type:Number,  required:true },
-		optionJson:   { type:String,  required:true },
-		query:        { type:Object,  required:true }
+		choices:    { type:Array,   required:false, default:() => [] },
+		columns:    { type:Array,   required:true },
+		filters:    { type:Array,   required:true },
+		formLoading:{ type:Boolean, required:true },
+		limit:      { type:Number,  required:true },
+		needsHeader:{ type:Boolean, required:true },
+		optionJson: { type:String,  required:true },
+		query:      { type:Object,  required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			choiceId:null,
 			option:{},
@@ -55,27 +56,26 @@ let MyChart = {
 		};
 	},
 	computed:{
-		dateTimeColumnIndexes:function() {
+		dateTimeColumnIndexes:(s) => {
 			let out = [];
-			for(let i = 0, j = this.columns.length; i < j; i++) {
-				if(['datetime','date','time'].includes(this.columns[i].display))
+			for(let i = 0, j = s.columns.length; i < j; i++) {
+				if(['datetime','date','time'].includes(s.columns[i].display))
 					out.push(i);
 			}
 			return out;
 		},
 		
 		// simple
-		choiceFilters:function() { return this.getChoiceFilters(this.choices,this.choiceId); },
-		hasChoices:   function() { return this.choices.length > 1; },
-		showTopBar:   function() { return this.hasChoices || this.isSingleField; },
+		choiceFilters:(s) => s.getChoiceFilters(s.choices,s.choiceId),
+		hasChoices:   (s) => s.choices.length > 1,
 		
 		// stores
-		settings:function() { return this.$store.getters.settings; }
+		settings:(s) => s.$store.getters.settings
 	},
-	created:function() {
+	created() {
 		window.addEventListener('resize',this.resize);
 	},
-	mounted:function() {
+	mounted() {
 		// setup watchers
 		this.$watch('formLoading',(val) => {
 			if(!val) this.get();
@@ -90,7 +90,7 @@ let MyChart = {
 		// set default choice
 		this.choiceId = this.choices.length > 0 ? this.choices[0].id : null;
 	},
-	unmounted:function() {
+	unmounted() {
 		window.removeEventListener('resize',this.resize);
 	},
 	methods:{
@@ -103,15 +103,15 @@ let MyChart = {
 		getUtcTimeStringFromUnix,
 		
 		// actions
-		choiceIdSet:function() {
+		choiceIdSet() {
 			this.get();
 		},
-		resize:function() {
+		resize() {
 			this.$refs.chart.resize();
 		},
 		
 		// backend calls
-		get:function() {
+		get() {
 			ws.send('data','get',{
 				relationId:this.query.relationId,
 				joins:this.getRelationsJoined(this.query.joins),

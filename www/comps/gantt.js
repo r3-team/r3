@@ -358,6 +358,7 @@ let MyGantt = {
 		indexColor:      { required:true },
 		indexDate0:      { type:Number,  required:true },
 		indexDate1:      { type:Number,  required:true },
+		isHiddenInTab:   { type:Boolean, required:false, default:false }, // Gantt is in a non-visible tab-field
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:true },
 		stepTypeDefault: { type:String,  required:true },
@@ -365,7 +366,7 @@ let MyGantt = {
 		usesPageHistory: { type:Boolean, required:true }
 	},
 	emits:['open-form','record-selected','set-args','set-collection-indexes'],
-	data:function() {
+	data() {
 		return {
 			choiceId:null,
 			dateStart:null,
@@ -388,124 +389,113 @@ let MyGantt = {
 		};
 	},
 	computed:{
-		choiceIdDefault:function() {
-			// default is user field option, fallback is first choice in list
-			return this.fieldOptionGet(
-				this.fieldId,'choiceId',
-				this.choices.length === 0 ? null : this.choices[0].id
-			);
-		},
-		hasCreate:function() {
-			if(this.query.joins.length === 0) return false;
-			return this.query.joins[0].applyCreate && this.rowSelect;
-		},
+		// default is user field option, fallback is first choice in list
+		choiceIdDefault:(s) => s.fieldOptionGet(
+			s.fieldId,'choiceId',
+			s.choices.length === 0 ? null : s.choices[0].id
+		),
 		
 		// unix date range points, 0=gantt start, 1=gantt end
-		date0:function() {
-			let d = new Date(this.dateStart.getTime());
-			
-			switch(this.stepType) {
-				case 'days': // start 3 days before current day
-					d.setDate(d.getDate() - 3 + (this.page*this.steps));
-				break;
-				case 'hours':
-					d.setDate(d.getDate() + this.page);
-				break;
+		date0:(s) => {
+			let d = new Date(s.dateStart.getTime());
+			switch(s.stepType) {
+				// start 3 days before current day
+				case 'days':  d.setDate(d.getDate() - 3 + (s.page*s.steps)); break;
+				// start today
+				case 'hours': d.setDate(d.getDate() + s.page); break;
 			}
 			return d;
 		},
-		date1:function() {
-			let d = new Date(this.dateStart.getTime());
-			
-			switch(this.stepType) {
-				case 'days':
-					d.setDate(d.getDate() + this.steps - 3 + (this.page*(this.steps)));
-				break;
+		date1:(s) => {
+			let d = new Date(s.dateStart.getTime());
+			switch(s.stepType) {
+				case 'days': d.setDate(d.getDate() + s.steps - 3 + (s.page*s.steps)); break;
 				case 'hours':
-					let days = Math.floor(this.steps / 24);
+					let days = Math.floor(s.steps / 24);
 					
-					if(days === 0 || this.steps % 24 !== 0)
+					if(days === 0 || s.steps % 24 !== 0)
 						days += 1;
 					
-					d.setDate(d.getDate() + days + this.page);
+					d.setDate(d.getDate() + days + s.page);
 				break;
 			}
 			return d;
 		},
 		
-		dateRangeLabel:function() {
-			let d0 = new Date(this.date0.getTime());
-			let d1 = new Date(this.date1.getTime());
+		dateRangeLabel:(s) => {
+			let d0 = new Date(s.date0.getTime());
+			let d1 = new Date(s.date1.getTime());
 			d1.setDate(d1.getDate()-1);
 			
-			if(this.isMobile)
-				return this.getDateFormat(d0,this.settings.dateFormat);
+			if(s.isMobile)
+				return s.getDateFormat(d0,s.settings.dateFormat);
 			
-			return this.getDateFormat(d0,this.settings.dateFormat)
-				+ ' - ' +this.getDateFormat(d1,this.settings.dateFormat);
+			return s.getDateFormat(d0,s.settings.dateFormat)
+				+ ' - ' +s.getDateFormat(d1,s.settings.dateFormat);
 		},
 		
 		// records in gantt are always grouped (basically 1 calendar line per group)
 		//  currently only 1 group level exists (group 0), more could be added to allow nesting
 		//  group 0 label expression indexes define, which expression index(es) hold grouping label value(s)
-		group0LabelExpressionIndexes:function() {
+		group0LabelExpressionIndexes:(s) => {
 			let out = [];
 			
 			// get columns with batch 1 (fixed definition)
-			for(let i = 0, j = this.columns.length; i < j; i++) {
-				if(this.columns[i].batch === 1)
+			for(let i = 0, j = s.columns.length; i < j; i++) {
+				if(s.columns[i].batch === 1)
 					out.push(i);
 			}
 			return out;
 		},
 		
 		// presentation
-		columnIndexesHidden:function() {
-			return this.getColumnIndexesHidden(this.columns);
-		},
-		pxPerSec:function() {
-			if     (this.isHours) return this.stepPixels / 3600;
-			else if(this.isDays)  return this.stepPixels / 86400;
+		pxPerSec:(s) => {
+			if     (s.isHours) return s.stepPixels / 3600;
+			else if(s.isDays)  return s.stepPixels / 86400;
 			return 0.0;
 		},
-		styleHeaderItem:function() {
-			return `width:${this.stepPixels}px;`;
-		},
-		styleLine:function() {
+		styleLine:(s) => {
 			return [
-				`max-width:${this.stepPixels * this.steps}px`,
-				`background-size:${this.stepPixels}px ${this.linePixels}px`
+				`max-width:${s.stepPixels * s.steps}px`,
+				`background-size:${s.stepPixels}px ${s.linePixels}px`
 			].join(';');
 		},
 		
 		// simple
-		choiceFilters:function() { return this.getChoiceFilters(this.choices,this.choiceId); },
-		expressions:  function() { return this.getQueryExpressions(this.columns); },
-		hasChoices:   function() { return this.choices.length > 1; },
-		hasColor:     function() { return this.attributeIdColor !== null; },
-		isDays:       function() { return this.stepType === 'days' },
-		isEmpty:      function() { return this.groups.length === 0 },
-		isHours:      function() { return this.stepType === 'hours' },
-		joins:        function() { return this.fillRelationRecordIds(this.query.joins); },
-		stepPixels:   function() { return this.stepBase * this.stepZoom; },
+		choiceFilters:      (s) => s.getChoiceFilters(s.choices,s.choiceId),
+		columnIndexesHidden:(s) => s.getColumnIndexesHidden(s.columns),
+		expressions:        (s) => s.getQueryExpressions(s.columns),
+		hasChoices:         (s) => s.choices.length > 1,
+		hasColor:           (s) => s.attributeIdColor !== null,
+		hasCreate:          (s) => s.query.joins.length === 0 ? false : s.query.joins[0].applyCreate && s.rowSelect,
+		isDays:             (s) => s.stepType === 'days',
+		isEmpty:            (s) => s.groups.length === 0,
+		isHours:            (s) => s.stepType === 'hours',
+		joins:              (s) => s.fillRelationRecordIds(s.query.joins),
+		stepPixels:         (s) => s.stepBase * s.stepZoom,
+		styleHeaderItem:    (s) => `width:${s.stepPixels}px;`,
 		
 		// stores
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		iconIdMap:     function() { return this.$store.getters['schema/iconIdMap']; },
-		isMobile:      function() { return this.$store.getters.isMobile; },
-		capApp:        function() { return this.$store.getters.captions.calendar; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		settings:      function() { return this.$store.getters.settings; }
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
+		isMobile:      (s) => s.$store.getters.isMobile,
+		capApp:        (s) => s.$store.getters.captions.calendar,
+		capGen:        (s) => s.$store.getters.captions.generic,
+		settings:      (s) => s.$store.getters.settings
 	},
-	created:function() {
+	created() {
 		window.addEventListener('resize',this.resize);
 	},
-	mounted:function() {
+	mounted() {
 		this.dateStart = this.getDateNowRounded();
 		
 		// setup watchers
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
+		});
+		this.$watch('isHiddenInTab',(val) => {
+			// if field is hidden, steps cannot be calculated
+			if(!val) this.$nextTick(() => this.setSteps(true));
 		});
 		this.$watch(() => [this.choices,this.columns,this.filters],(newVals, oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
@@ -526,7 +516,7 @@ let MyGantt = {
 		this.$watch(() => [this.showGroupLabels,this.stepZoom],() => {
 			this.fieldOptionSet(this.fieldId,'ganttShowGroupLabels',this.showGroupLabels);
 			this.fieldOptionSet(this.fieldId,'ganttStepZoom',this.stepZoom);
-			this.$nextTick(this.setSteps);
+			this.$nextTick(() => this.setSteps(false));
 		});
 		
 		if(this.usesPageHistory) {
@@ -542,11 +532,9 @@ let MyGantt = {
 		this.stepZoom        = this.fieldOptionGet(this.fieldId,'ganttStepZoom',this.stepZoom);
 		
 		this.ready = true;
-		this.$nextTick(function() {
-			this.setSteps();
-		});
+		this.$nextTick(() => this.setSteps(false));
 	},
-	unmounted:function() {
+	unmounted() {
 		window.removeEventListener('resize',this.resize);
 	},
 	methods:{
@@ -569,7 +557,7 @@ let MyGantt = {
 		routeParseParams,
 		srcBase64Icon,
 		
-		createHeaderItems:function() {
+		createHeaderItems() {
 			let that = this;
 			this.headerItems     = [];
 			this.headerItemsMeta = [];
@@ -636,12 +624,12 @@ let MyGantt = {
 		},
 		
 		// actions
-		choiceIdSet:function(choiceId) {
+		choiceIdSet(choiceId) {
 			this.fieldOptionSet(this.fieldId,'choiceId',choiceId);
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},
-		clickHeaderItem:function(unixTime,shift,middleClick) {
+		clickHeaderItem(unixTime,shift,middleClick) {
 			if(!this.hasCreate) return;
 			
 			if(this.isDays)
@@ -659,15 +647,15 @@ let MyGantt = {
 			];
 			this.$emit('open-form',0,[`attributes=${attributes.join(',')}`],middleClick);
 		},
-		pageChange:function(factor) {
+		pageChange(factor) {
 			this.page += factor;
 			this.reloadInside();
 		},
-		resize:function() {
+		resize() {
 			clearTimeout(this.resizeTimer);
-			this.resizeTimer = setTimeout(() => this.setSteps(),150);
+			this.resizeTimer = setTimeout(() => this.setSteps(false),150);
 		},
-		scrollToNow:function() {
+		scrollToNow() {
 			if(this.page !== 0)
 				return this.pageChange(this.page-(this.page*2));
 			
@@ -680,7 +668,7 @@ let MyGantt = {
 			
 			this.$refs.content.scrollLeft = this.pxPerSec * secFromStart;
 		},
-		toggleStepType:function() {
+		toggleStepType() {
 			switch(this.stepType) {
 				case 'hours': this.stepType = 'days';  break;
 				case 'days':  this.stepType = 'hours'; break;
@@ -689,11 +677,11 @@ let MyGantt = {
 		},
 		
 		// reloads
-		reloadOutside:function() {
+		reloadOutside() {
 			this.createHeaderItems();
 			this.get();
 		},
-		reloadInside:function() {
+		reloadInside() {
 			// reload full page gantt by updating route parameters
 			// enables browser history for fullpage list navigation
 			if(this.usesPageHistory)
@@ -704,7 +692,7 @@ let MyGantt = {
 		},
 		
 		// page routing
-		paramsUpdate:function(pushHistory) {
+		paramsUpdate(pushHistory) {
 			let args = [
 				`page=${this.page}`,
 				`type=${this.stepType}`
@@ -715,7 +703,7 @@ let MyGantt = {
 			
 			this.$emit('set-args',args,pushHistory);
 		},
-		paramsUpdated:function() {
+		paramsUpdated() {
 			let params = {
 				choice:{ parse:'string', value:this.choiceIdDefault },
 				page:  { parse:'int',    value:0 },
@@ -731,35 +719,32 @@ let MyGantt = {
 		},
 		
 		// presentation
-		displayHeaderMetaItem:function(value) {
+		displayHeaderMetaItem(value) {
 			if(this.isHours) // add days as: 12., 13., ...
 				return `${value}.`;
 			
 			if(this.isDays) // add month as: January, ...
 				return this.capApp['month'+value];
 		},
-		setSteps:function() {
+		setSteps(forceReload) {
 			// get count of steps that fit within Gantt content
 			let stepsNew = Math.floor(
 				this.$refs.content.offsetWidth /
 				(this.stepBase * this.stepZoom)
 			);
 			
-			if(stepsNew === this.steps)
+			if(stepsNew === this.steps && !forceReload)
 				return;
 			
-			this.steps = Math.floor(
-				this.$refs.content.offsetWidth /
-				(this.stepBase * this.stepZoom)
-			);
+			this.steps = stepsNew;
 			this.reloadOutside();
 		},
-		styleLabel:function(group) {
+		styleLabel(group) {
 			return `height:${group.lines.length*this.linePixels}px;`;
 		},
 		
 		// helpers
-		getDateNowRounded:function() {
+		getDateNowRounded() {
 			let d = new Date();
 			
 			// round point in times depending on the gantt step type
@@ -774,7 +759,7 @@ let MyGantt = {
 			
 			return d;
 		},
-		getFreeLineIndex:function(lines,date0,date1) {
+		getFreeLineIndex(lines,date0,date1) {
 			let index;
 			
 			for(let i = 0, j = lines.length; i < j; i++) {
@@ -797,8 +782,8 @@ let MyGantt = {
 		},
 		
 		// backend calls
-		get:function() {
-			if(this.formLoading)
+		get() {
+			if(this.formLoading || this.isHiddenInTab)
 				return;
 			
 			ws.send('data','get',{

@@ -256,7 +256,7 @@ let MyCalendarMonth = {
 		'day-selected','open-form','record-selected','set-choice-id',
 		'set-collection-indexes','set-date'
 	],
-	data:function() {
+	data() {
 		return {
 			icsToken:'',
 			icsTokenName:'',
@@ -266,12 +266,12 @@ let MyCalendarMonth = {
 	computed:{
 		// inputs
 		choiceIdInput:{
-			get:function()  { return this.choiceId; },
-			set:function(v) { this.$emit('set-choice-id',v); }
+			get()  { return this.choiceId; },
+			set(v) { this.$emit('set-choice-id',v); }
 		},
 		monthInput:{
-			get:function() { return this.date.getMonth(); },
-			set:function(v) {
+			get() { return this.date.getMonth(); },
+			set(v) {
 				let d = new Date(this.date.valueOf());
 				d.setDate(1); // set to 1st to add month correctly
 				d.setMonth(v);
@@ -279,8 +279,8 @@ let MyCalendarMonth = {
 			}
 		},
 		yearInput:{
-			get:function() { return this.date.getFullYear(); },
-			set:function(v) {
+			get() { return this.date.getFullYear(); },
+			set(v) {
 				if(v.length !== 4) return;
 				
 				let d = new Date(this.date.valueOf());
@@ -291,7 +291,7 @@ let MyCalendarMonth = {
 		
 		// event values arrive sorted by start date
 		// they are processed for display on each day of the calendar
-		eventsByDay:function() {
+		eventsByDay:(s) => {
 			let days = [];
 			
 			for(let i = 0; i < 42; i++) {
@@ -299,34 +299,33 @@ let MyCalendarMonth = {
 			}
 			
 			// each row is one event (partial day, full day or spanning multiple days)
-			for(let i = 0, j = this.rows.length; i < j; i++) {
+			for(let i = 0, j = s.rows.length; i < j; i++) {
 				
 				let ev = {
-					color:this.hasColor ? this.rows[i].values[2] : null,
-					date0:this.rows[i].values[0],
-					date1:this.rows[i].values[1],
+					color:s.hasColor ? s.rows[i].values[2] : null,
+					date0:s.rows[i].values[0],
+					date1:s.rows[i].values[1],
 					entryFirst:true,
 					entryLast:false,
 					fullDay:false,
 					fullDaysLeft:0,
-					indexRecordIds:this.rows[i].indexRecordIds,
+					indexRecordIds:s.rows[i].indexRecordIds,
 					placeholder:false,
-					recordId:this.rows[i].indexRecordIds['0'],
+					recordId:s.rows[i].indexRecordIds['0'],
 					values:[]
 				};
 				
 				// add non-hidden values
-				let values = this.hasColor ? this.rows[i].values.slice(3) : this.rows[i].values.slice(2);
-				for(let i = 0, j = values.length; i < j; i++) {
-					
-					if(!this.columnIndexesHidden.includes(i))
-						ev.values.push(values[i]);
+				let values = s.hasColor ? s.rows[i].values.slice(3) : s.rows[i].values.slice(2);
+				for(let x = 0, y = values.length; x < y; x++) {
+					if(!s.columnIndexesHidden.includes(x))
+						ev.values.push(values[x]);
 				}
 				
 				// check for full day event (stored as UTC zero)
 				// add timezone offset to display correctly on calendar
 				// because DST can be different for each date, we must use their individual offsets
-				if(this.isUnixUtcZero(ev.date0) && this.isUnixUtcZero(ev.date1)) {
+				if(s.isUnixUtcZero(ev.date0) && s.isUnixUtcZero(ev.date1)) {
 					ev.date0 += new Date(ev.date0 * 1000).getTimezoneOffset() * 60;
 					ev.date1 += new Date(ev.date1 * 1000).getTimezoneOffset() * 60;
 					ev.fullDay = true;
@@ -338,13 +337,13 @@ let MyCalendarMonth = {
 				dEvent.setHours(0,0,0); // use midnight
 				
 				let fullDaysLeft  = ev.fullDaysLeft;
-				let daysFromStart = this.getDaysBetween(this.date0,dEvent)+1;
+				let daysFromStart = s.getDaysBetween(s.date0,dEvent)+1;
 				
 				// show first event only if within calendar bounds
 				// store position in case we have a multi day event
 				let eventPosition;
 				
-				if(this.dayOffsetWithinBounds(daysFromStart)) {
+				if(s.dayOffsetWithinBounds(daysFromStart)) {
 					eventPosition = days[daysFromStart].events.length;
 					days[daysFromStart].events.push(ev);
 				}
@@ -370,7 +369,7 @@ let MyCalendarMonth = {
 					fullDaysLeft--;
 					
 					// event is outside of bounds, skip
-					if(!this.dayOffsetWithinBounds(daysFromStart))
+					if(!s.dayOffsetWithinBounds(daysFromStart))
 						continue;
 					
 					// reset event position if it reaches into next week
@@ -391,39 +390,35 @@ let MyCalendarMonth = {
 				}
 				
 				// retroactively mark last day
-				if(this.dayOffsetWithinBounds(daysFromStart))
+				if(s.dayOffsetWithinBounds(daysFromStart))
 					days[daysFromStart].events[days[daysFromStart].events.length-1].entryLast = true;
 			}
 			return days;
 		},
 		
 		// helpers
-		columnIndexesHidden:function() {
-			return this.getColumnIndexesHidden(this.columns);
-		},
-		daysBefore:function() {
-			let d = new Date(this.date.valueOf());
+		daysBefore:(s) => {
+			let d = new Date(s.date.valueOf());
 			d.setDate(1);
-			return this.getDaysBetween(this.date0,d);
+			return s.getDaysBetween(s.date0,d);
 		},
-		icsUrl:function() {
-			return `${location.protocol}//${location.host}/ics/download/cal.ics`
-				+ `?field_id=${this.fieldId}&login_id=${this.loginId}&token_fixed=${this.icsToken}`;
-		},
+		icsUrl:(s) => `${location.protocol}//${location.host}/ics/download/cal.ics`
+			+ `?field_id=${s.fieldId}&login_id=${s.loginId}&token_fixed=${s.icsToken}`,
 		
 		// simple
-		daysAfter: function() { return this.date1.getDate(); },
-		month:     function() { return this.date.getMonth(); }, // active month (0-11)
-		hasChoices:function() { return this.choices.length > 1; },
+		columnIndexesHidden:(s) => s.getColumnIndexesHidden(s.columns),
+		daysAfter:          (s) => s.date1.getDate(),
+		month:              (s) => s.date.getMonth(), // active month (0-11)
+		hasChoices:         (s) => s.choices.length > 1,
 		
 		// stores
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		iconIdMap:     function() { return this.$store.getters['schema/iconIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.calendar; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		isMobile:      function() { return this.$store.getters.isMobile; },
-		loginId:       function() { return this.$store.getters.loginId; },
-		settings:      function() { return this.$store.getters.settings; }
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
+		capApp:        (s) => s.$store.getters.captions.calendar,
+		capGen:        (s) => s.$store.getters.captions.generic,
+		isMobile:      (s) => s.$store.getters.isMobile,
+		loginId:       (s) => s.$store.getters.loginId,
+		settings:      (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
@@ -437,7 +432,7 @@ let MyCalendarMonth = {
 		srcBase64,
 		
 		// actions
-		clickDay:function(dayOffset,shift,middleClick) {
+		clickDay(dayOffset,shift,middleClick) {
 			if(!this.rowSelect) return;
 			
 			let d = new Date(this.date0.valueOf());
@@ -446,11 +441,11 @@ let MyCalendarMonth = {
 			// dates are stored as UTC zero
 			this.$emit('day-selected',this.getDateAtUtcZero(d),shift,middleClick);
 		},
-		clickRecord:function(recordId,middleClick) {
+		clickRecord(recordId,middleClick) {
 			if(this.rowSelect)
-				this.$emit('record-selected',recordId,null,middleClick);
+				this.$emit('record-selected',recordId,[],middleClick);
 		},
-		goToToday:function() {
+		goToToday() {
 			// switch to current month if not there (to show 'today')
 			let now = new Date();
 			if(now.getMonth() !== this.date.getMonth()
@@ -463,26 +458,26 @@ let MyCalendarMonth = {
 			if(this.rowSelect)
 				this.$emit('day-selected',this.getDateAtUtcZero(now),false,false);
 		},
-		icsCopyToClipboard:function() {
+		icsCopyToClipboard() {
 			navigator.clipboard.writeText(this.icsUrl);
 		},
 		
 		// presentation
-		dayOffsetWithinBounds:function(day) {
+		dayOffsetWithinBounds(day) {
 			// currently, calendar is always 42 days
 			return day >= 0 && day <= 41;
 		},
-		getPartCaption:function(date0) {
+		getPartCaption(date0) {
 			let d = new Date(date0 * 1000);
 			let h = this.getStringFilled(d.getHours(),2,"0");
 			let m = this.getStringFilled(d.getMinutes(),2,"0");
 			return `${h}:${m}`;
 		},
-		getColor:function(styleName,color) {
+		getColor(styleName,color) {
 			if(color !== null) return `${styleName}:#${color};`;
 			return '';
 		},
-		getDayClasses:function(dayOffset,day) {
+		getDayClasses(dayOffset,day) {
 			let cls = {};
 			
 			if(this.rowSelect)
@@ -521,7 +516,7 @@ let MyCalendarMonth = {
 			}
 			return cls;
 		},
-		getFullDayTextStyles:function(dayInWeek,event) {
+		getFullDayTextStyles(dayInWeek,event) {
 			// get maximum length of full day text
 			// can span multiple days, if event has multiple days
 			let days = event.fullDaysLeft;
@@ -536,12 +531,12 @@ let MyCalendarMonth = {
 			// remove 10% for right padding
 			return `max-width:${(days*100)-10}%;`;
 		},
-		getDayNumber:function(dayOffset) {
+		getDayNumber(dayOffset) {
 			let d = new Date(this.date0.valueOf());
 			d.setDate(d.getDate()+(dayOffset));
 			return d.getDate();
 		},
-		getWeekDayCaption:function(dayOffset) {
+		getWeekDayCaption(dayOffset) {
 			
 			if(!this.settings.sundayFirstDow) {
 				dayOffset++;
@@ -557,7 +552,7 @@ let MyCalendarMonth = {
 		},
 		
 		// backend calls
-		setIcsTokenFixed:function() {
+		setIcsTokenFixed() {
 			ws.send('login','setTokenFixed',{
 				name:this.icsTokenName,
 				context:'ics'
@@ -616,12 +611,13 @@ let MyCalendar = {
 		indexColor:      { required:true },
 		indexDate0:      { type:Number,  required:true },
 		indexDate1:      { type:Number,  required:true },
+		isHiddenInTab:   { type:Boolean, required:false, default:false }, // calendar is in a non-visible tab-field
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:false, default:false },
 		usesPageHistory: { type:Boolean, required:true }
 	},
 	emits:['open-form','record-selected','set-args','set-collection-indexes'],
-	data:function() {
+	data() {
 		return {
 			// calendar state
 			choiceId:null,
@@ -636,45 +632,39 @@ let MyCalendar = {
 		};
 	},
 	computed:{
-		choiceIdDefault:function() {
-			// default is user field option, fallback is first choice in list
-			return this.fieldOptionGet(
-				this.fieldId,'choiceId',
-				this.choices.length === 0 ? null : this.choices[0].id
-			);
-		},
-		expressions:function() {
-			// special date range expressions + regular column expressions
-			return this.getQueryExpressionsDateRange(
-				this.attributeIdDate0,this.indexDate0,
-				this.attributeIdDate1,this.indexDate1,
-				this.attributeIdColor,this.indexColor
-			).concat(this.getQueryExpressions(this.columns));
-		},
-		hasCreate:function() {
-			if(this.query.joins.length === 0) return false;
-			return this.query.joins[0].applyCreate && this.rowSelect;
-		},
+		// special date range expressions + regular column expressions
+		expressions:(s) => s.getQueryExpressionsDateRange(
+			s.attributeIdDate0,s.indexDate0,
+			s.attributeIdDate1,s.indexDate1,
+			s.attributeIdColor,s.indexColor
+		).concat(s.getQueryExpressions(s.columns)),
+		
+		// default is user field option, fallback is first choice in list
+		choiceIdDefault:(s) => s.fieldOptionGet(s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
 		
 		// simple
-		choiceFilters:function() { return this.getChoiceFilters(this.choices,this.choiceId); },
+		choiceFilters:(s) => s.getChoiceFilters(s.choices,s.choiceId),
+		hasCreate:    (s) => s.query.joins.length === 0 ? false : s.query.joins[0].applyCreate && s.rowSelect,
 		
 		// start/end date of calendar
-		date0:function() { return this.getCalendarCutOff0(this.view,new Date(this.date.valueOf())) },
-		date1:function() { return this.getCalendarCutOff1(this.view,new Date(this.date.valueOf()),this.date0) },
+		date0:(s) => s.getCalendarCutOff0(s.view,new Date(s.date.valueOf())),
+		date1:(s) => s.getCalendarCutOff1(s.view,new Date(s.date.valueOf()),s.date0),
 		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.calendar; },
-		settings:      function() { return this.$store.getters.settings; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.calendar,
+		settings:      (s) => s.$store.getters.settings
 	},
-	mounted:function() {
+	mounted() {
 		this.date = new Date();
 		this.date.setHours(0,0,0);
 		
 		// setup watchers
 		this.$watch('formLoading',(val) => {
+			if(!val) this.reloadOutside();
+		});
+		this.$watch('isHiddenInTab',(val) => {
 			if(!val) this.reloadOutside();
 		});
 		this.$watch(() => [this.choices,this.columns,this.filters],(newVals, oldVals) => {
@@ -719,21 +709,21 @@ let MyCalendar = {
 		routeParseParams,
 		
 		// actions
-		choiceIdSet:function(choiceId) {
+		choiceIdSet(choiceId) {
 			if(choiceId === this.choiceId) return;
 			
 			this.fieldOptionSet(this.fieldId,'choiceId',choiceId);
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},
-		dateSet:function(d) {
+		dateSet(d) {
 			if(d !== this.date) {
 				d.setHours(0,0,0);
 				this.date = d;
 				this.reloadInside();
 			}
 		},
-		daySelected:function(d,shift,middleClick) {
+		daySelected(d,shift,middleClick) {
 			if(!shift) {
 				this.dateSelect0 = d;
 				this.dateSelect1 = d;
@@ -754,10 +744,10 @@ let MyCalendar = {
 		},
 		
 		// reloads
-		reloadOutside:function() {
+		reloadOutside() {
 			this.get();
 		},
-		reloadInside:function() {
+		reloadInside() {
 			// reload full page calendar by updating route parameters
 			// enables browser history for fullpage navigation
 			if(this.usesPageHistory)
@@ -767,7 +757,7 @@ let MyCalendar = {
 		},
 		
 		// page routing
-		paramsUpdate:function(pushHistory) {
+		paramsUpdate(pushHistory) {
 			let args = [
 				`month=${this.date.getMonth()}`,
 				`year=${this.date.getFullYear()}`
@@ -778,7 +768,7 @@ let MyCalendar = {
 			
 			this.$emit('set-args',args,pushHistory);
 		},
-		paramsUpdated:function() {
+		paramsUpdated() {
 			let params = {
 				choice:{ parse:'string', value:this.choiceIdDefault },
 				month: { parse:'int',    value:this.date.getMonth() },
@@ -801,8 +791,8 @@ let MyCalendar = {
 		},
 		
 		// backend calls
-		get:function() {
-			if(this.query.relationId === null)
+		get() {
+			if(this.query.relationId === null || this.isHiddenInTab)
 				return;
 			
 			let dateStart = this.getUnixFromDate(this.date0);

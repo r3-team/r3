@@ -2,6 +2,7 @@
 	"generic":{
 		"button":{
 			"add":"Add",
+			"all":"All",
 			"apply":"Apply",
 			"cancel":"Cancel",
 			"clear":"Clear",
@@ -24,6 +25,7 @@
 			"new":"New",
 			"newHint":"Create new record",
 			"open":"Open",
+			"openBuilder":"Open Builder",
 			"ok":"Ok",
 			"paste":"Paste",
 			"refresh":"Reload",
@@ -73,11 +75,16 @@
 		"available":"Available",
 		"busy":"Working - Click here to abort",
 		"category":"Category",
+		"content":"Content",
 		"date":"Date",
 		"description":"Description",
+		"details":"Details",
+		"displayed":"Displayed",
 		"errorTitle":"Error",
 		"files":"Files",
 		"filters":"Filters",
+		"form":"Form",
+		"help":"Help",
 		"home":"Home",
 		"icon":"Icon",
 		"id":"ID",
@@ -91,6 +98,7 @@
 		"inputSmall":"Value is too small (min. {MIN})",
 		"inputTooFewFiles":"Too few files",
 		"inputTooManyFiles":"Too many files",
+		"interval":"Interval",
 		"licenseRequired":"Requires license",
 		"limit":"Limit",
 		"menu":"Menu",
@@ -100,9 +108,11 @@
 		"nothingSelected":"Nothing selected",
 		"nothingThere":"No results available",
 		"notice":"Notice",
+		"notSaved":"Not saved",
 		"order":"Order",
 		"password":"Password",
 		"preview":"Preview",
+		"properties":"Properties",
 		"readonly":"Readonly",
 		"record":"Record",
 		"results":"{CNT} results",
@@ -110,15 +120,28 @@
 		"resultsOf":"/ {CNT}",
 		"role":"Role",
 		"selected":"Selected",
+		"settings":"Settings",
 		"size":"Size",
 		"status":"Status",
 		"threeDots":"...",
 		"title":"Title",
 		"token":"Token",
+		"type":"Type",
 		"username":"Username",
 		"version":"Version"
 	},
 	"admin":{
+		"backups":{
+			"count":"Keep versions",
+			"daily":"Daily",
+			"dir":"Target directory*",
+			"dirNote":"*Make sure this path points to a separate network location or its contents is copied to a second system regularly. This is necessary for recovery in case of complete system failure.",
+			"full":"Full backup",
+			"list":"Backup sets",
+			"monthly":"Monthly",
+			"title":"Integrated full backups",
+			"weekly":"Weekly"
+		},
 		"cluster":{
 			"button":{
 				"shutdown":"Shutdown"
@@ -155,13 +178,6 @@
 			"appName":"Instance name",
 			"appNameShort":"Page title",
 			"appVersion":"Platform version",
-			"backupCount":"Keep versions",
-			"backupDaily":"Daily",
-			"backupDir":"Target directory*",
-			"backupDirNote":"*Make sure this path points to a separate network location or its contents is copied to a second system regularly. This is necessary for recovery in case of complete system failure.",
-			"backupEmbeddedNote":"Integrated full backups are only available if the standalone deployment model is being used.<br /><br />The system documentation contains chapters regarding recommended backup measures for dedicated instances.",
-			"backupMonthly":"Monthly",
-			"backupWeekly":"Weekly",
 			"bruteforceAttempts":"Block hosts after attempts",
 			"bruteforceCountBlocked":"Blocked hosts",
 			"bruteforceCountTracked":"Tracked hosts",
@@ -206,7 +222,6 @@
 			"repoSkipVerify":"Allow untrusted certificates",
 			"repoUrl":"Repository URL",
 			"title":"System configuration",
-			"titleBackup":"Integrated full backups",
 			"titleCustom":"Customizing",
 			"titleGeneral":"General",
 			"titleIcs":"Calendar subscriptions",
@@ -224,6 +239,8 @@
 		"files":{
 			"deleteDate":"File deleted",
 			"filesKeepDaysDeleted":"Keep deleted files for X days",
+			"fileVersionsKeepCount":"Keep at least X file versions",
+			"fileVersionsKeepDays":"Keep file versions for at least X days",
 			"titleConfig":"Global configuration",
 			"titleDeleted":"Deleted files"
 		},
@@ -283,7 +300,8 @@
 		},
 		"login":{
 			"dialog":{
-				"delete":"Are you sure you want to delete this login?<br /><br />This action is irreversible.</b>"
+				"delete":"Are you sure you want to delete this login?<br /><br />This action is irreversible.</b>",
+				"resetTotp":"This will reset all multi-factor authentication methods for this login. System access is then possible with only username & password.<br /><br />Do you want to continue?"
 			},
 			"error":{
 				"uniqueConstraint":"Username must be unique"
@@ -293,6 +311,8 @@
 			"authentication":"Authentication",
 			"language":"Language",
 			"ldapAssignActive":"Roles are assigned via LDAP group memberships",
+			"mfa":"MFA",
+			"mfaHint":"Multi-factor authentication",
 			"newLogin":"New login",
 			"noAuth":"Public",
 			"noAuthHint":"Can login without authentication",
@@ -426,6 +446,7 @@
 				"runNowHint":"Task will be executed as soon as possible."
 			},
 			"names":{
+				"backupRun":"Manage integrated backups",
 				"cleanupBruteforce":"Cleanup bruteforce cache",
 				"cleanupDataLogs":"Cleanup expired change logs",
 				"cleanupFiles":"Cleanup expired file uploads",
@@ -433,7 +454,6 @@
 				"cleanupTempDir":"Cleanup temporary directory",
 				"clusterCheckIn":"Cluster check-in",
 				"clusterProcessEvents":"Cluster event processing",
-				"embeddedBackup":"Manage integrated backups",
 				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Import logins and roles via LDAP",
 				"mailAttach":"Email attachment transfer",
@@ -462,6 +482,7 @@
 			"systemTasks":"System tasks (global)",
 			"systemTasksNode":"System tasks (cluster nodes)"
 		},
+		"navigationBackups":"Backups",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"System",
 		"navigationFiles":"Files",
@@ -479,6 +500,22 @@
 		"titleDocs":"Admin documentation"
 	},
 	"builder":{
+		"articles":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this article?"
+			},
+			"option":{
+				"assignForm":"Form context help",
+				"assignModule":"Application help page"
+			},
+			"addArticle":"Add article",
+			"assignTo":"Assign to",
+			"body":"Content",
+			"new":"New article",
+			"title":"Help articles",
+			"titleAssign":"Assign articles",
+			"titleAssigned":"Assigned"
+		},
 		"attribute":{
 			"dialog":{
 				"delete":"Are you sure you want to delete this attribute? This will also delete all included data from your system.<br /><br /><b>This action is irreversible without current backups.</b>"
@@ -486,14 +523,13 @@
 			"new":"New attribute"
 		},
 		"collection":{
-			"button":{
-				"inHeader":"Show in header"
-			},
 			"dialog":{
 				"delete":"Are you sure you want to delete this collection?"
 			},
-			"columnsTarget":"Place columns here",
-			"contentColumn":"Column data sub query",
+			"columnSettings":"Column settings",
+			"columnsAvailable":"Available columns",
+			"columnsTarget":"Active columns",
+			"inHeader":"Show in header",
 			"new":"New collection",
 			"previewHint":"Collection values for the logged in user. Collections are retrieved on page load (F5 to reload) if they are enabled within assigned roles.",
 			"query":"Query",
@@ -540,8 +576,7 @@
 				},
 				"event":"Event",
 				"eventBefore":"Before event",
-				"jsFunctionId":"Execute frontend function",
-				"title":"Form functions"
+				"jsFunctionId":"Execute frontend function"
 			},
 			"option":{
 				"displayColor":"color",
@@ -559,22 +594,18 @@
 				"displayRichtext":"richtext",
 				"displaySlider":"value slider",
 				"displayUrl":"URL",
+				"effectField":"Field",
+				"effectTab":"Tab",
 				"ganttStepsDays":"days",
 				"ganttStepsHours":"hours"
 			},
 			"states":{
-				"button":{
-					"addCondition":"Add condition",
-					"addEffect":"Add effect",
-					"showAll":"Show all"
-				},
 				"option":{
 					"filterFieldIdHint":"By field"
 				},
 				"conditions":"Conditions",
 				"descriptionHint":"Description",
-				"effects":"Effects",
-				"title":"Form states"
+				"effects":"Effects"
 			},
 			"aggregator":"Aggregate",
 			"autoRenew":"Auto refresh",
@@ -582,13 +613,10 @@
 			"autoRenewHint":"in seconds",
 			"autoSelect":"Auto select records",
 			"autoSelectHint":"0=off, 2=first two, -3=last three",
-			"captions":"Captions",
 			"category":"Category selector",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*Collection is only affected if selected as filter criteria in data query.",
-			"collectionTitle":"Filter collection by input",
-			"columnsTarget":"Place columns here",
-			"columnsTemplates":"Available columns",
+			"collectionTitle":"Filter collection",
 			"columnBatch":"Column batch",
 			"columnBatchNot":"not batched",
 			"columnBatchHint":"Column is part of batch {CNT}",
@@ -601,12 +629,7 @@
 			"columnSize0":"automatic",
 			"columnTitle":"Title",
 			"columnWrap":"Text wrap",
-			"containerContentLayout":"Content layout",
-			"content":"Form data query",
-			"contentColumn":"Column data sub query",
-			"contentField":"Field data query",
 			"copy":"Duplicate form",
-			"copyForm":"Select form",
 			"copyNewName":"New form name",
 			"csvExport":"CSV export",
 			"csvImport":"CSV import",
@@ -637,7 +660,6 @@
 			"fieldRegexCheck":"Validate with RegEx",
 			"fieldSize":"Base size (pixel)",
 			"fieldSize0":"automatic",
-			"fieldTitle":"Title",
 			"fileExt":"File extension",
 			"fileName":"File name",
 			"fileSize":"File size",
@@ -673,9 +695,11 @@
 			"presetOpen":"Open preset",
 			"readonly":"Read only",
 			"required":"Required",
-			"showFunctions":"Functions",
-			"showHelp":"Help",
-			"showStates":"States",
+			"scale":"UI scale",
+			"sidebarField":"{NAME}: Field settings",
+			"sidebarFieldColumns":"Columns",
+			"sidebarFieldColumnSettings":"Column settings",
+			"sidebarForm":"Form settings",
 			"sql":"SQL preview",
 			"state":"State",
 			"stateDefault":"default",
@@ -685,13 +709,16 @@
 			"stateRequired":"required",
 			"subQuery":"Sub query",
 			"subQueryAttribute":"Attribute",
-			"title":"Forms"
+			"tabs":"Tabs",
+			"tabFunctions":"Functions ({CNT})",
+			"tabStates":"States ({CNT})",
+			"title":"Forms",
+			"titleOne":"Form '{NAME}'"
 		},
 		"function":{
 			"button":{
 				"addNew":"NEW prefix",
 				"addOld":"OLD prefix",
-				"addSchedule":"Add new schedule",
 				"details":"Details",
 				"template":"Template"
 			},
@@ -783,42 +810,44 @@
 			"collectionId":"[Select collection]",
 			"entityInput":"Select placeholder and click on function body to use <b>upgrade-safe</b> syntax.",
 			"fieldId":"[Select field]",
-			"form":"Bind to form",
+			"form":"Assigned to form",
 			"functionsBackend":"Backend functions",
 			"functionsFrontend":"Frontend functions",
-			"intervalAtDayForMonths":"at day of month",
-			"intervalAtDayForWeeks":"at day of week (0=su, 1=mo, ...)",
-			"intervalAtDayForYears":"at day of year",
+			"intervalAtDayForMonths":"at day",
+			"intervalAtDayForWeeks":"at weekday",
+			"intervalAtDayForYears":"at day",
 			"intervalAtTime":"at time",
-			"intervalEvery":"Run: Every",
+			"intervalEvery":"Every",
 			"isFrontendExec":"Frontend call",
 			"isTrigger":"Trigger",
 			"language":"Language",
 			"languageJs":"JavaScript",
 			"languagePg":"PL/pgSQL",
 			"new":"New function",
-			"placeholderInsert":"Click on the function body to insert reference",
+			"placeholderAttribute":"Attribute",
+			"placeholderInsert":"Click on the function body to insert placeholder",
+			"placeholderFunction":"Function",
+			"placeholderRelation":"Relation",
 			"placeholders":"Placeholders",
 			"placeholdersCollections":"Collections",
 			"placeholdersFormFields":"Form data fields",
 			"placeholdersFormQuery":"Form data query",
 			"placeholdersInstance":"Instance functions",
-			"placeholdersModules":"Applications",
-			"runOnce":"Run once",
-			"schedules":"Recurrence",
-			"schedulesItem":"{CNT} schedules",
+			"runOnce":"Once",
+			"runRegular":"Regularly",
+			"runType":"Execution",
+			"schedules":"Schedules",
 			"title":"Functions",
-			"titleJs":"Frontend functions ({CNT})",
-			"titlePg":"Backend functions ({CNT})",
-			"titleOne":"Function title",
+			"titleJs":"Frontend functions",
+			"titleJsOne":"Frontend function '{NAME}'",
+			"titlePg":"Backend functions",
+			"titlePgOne":"Backend function '{NAME}'",
 			"value":"VALUE"
-		},
-		"help":{
-			"title":"Application help"
 		},
 		"icon":{
 			"add":"Add/edit icon file",
 			"addHelp":"Only PNG files with max. 64kb are supported. Icons should always be squared.",
+			"nameHint":"Optional icon name",
 			"title":"Icons"
 		},
 		"loginForm":{
@@ -832,7 +861,7 @@
 			"button":{
 				"add":"Add entry"
 			},
-			"collections":"Collections",
+			"collections":"Show collection values in menu",
 			"copy":"Copy all menu items from",
 			"formId":"- Select form -",
 			"showChildrenHint":"Show sub entries by default",
@@ -845,10 +874,15 @@
 				"exportKeySet":"Store key in memory",
 				"graph":"Dependency graph",
 				"keyCreate":"Generate",
+				"manageApps":"Manage applications",
+				"repo":"Install from repository",
 				"versionCreate":"Create new version"
 			},
 			"color":"Color",
-			"dependsOn":"Dependent",
+			"colorHint":"Primary application color - shown in the header and menu if not overwritten by customizing and/or user settings. The system styles are optimized for washed out, darkish colors (dark pastel).",
+			"dependsOn":"Builds on",
+			"dependsOnAdd":"Add application",
+			"dependsOnHint":"Use other applications as foundation for your own. This enables reuse or extension of existing relations, forms and so on.",
 			"export":"Transfer - Export application to file",
 			"exportKeyBad":"Signing key seems invalid. Make sure to use the private key for exporting applications.",
 			"exportKeyEmpty":"Signing key is required for export",
@@ -859,27 +893,52 @@
 			"exportStateNok":"Changes to current version",
 			"exportStateOk":"Ready",
 			"graphDependsOn":"Dependent on: {COUNT}",
+			"iconHint":"Icons are available, once they have been added to this application. Icons from applications that are being built on, can also be used.",
 			"keyCreate":"Transfer - Generate new signing key pair",
 			"keyCreateInfo":"Make sure to keep the private key safe at all times. The public key must be imported in target REI3 instances to accept your applications.",
 			"keyCreateLength":"Select key length",
 			"languageCode":"Language code",
 			"languageCodeHint":"en_us, zh_cn, de_de, ...",
-			"languageMain":"Primary language*",
-			"languageMainHint":"*is used if chosen user language is not available.",
-			"languageTitle":"Application title",
-			"languages":"Languages",
-			"new":"New application",
+			"languageMain":"Fallback language",
+			"languageMainHint":"Is used if the chosen user language is not offered by your application.",
+			"languages":"Application languages",
+			"languagesHint":"Languages that the application is available in.",
+			"nameHint":"Reference name for this application. The name must be unique within a REI3 system, so consider using a prefix based on your organization name.",
+			"nameHolder":"work_scheduler, inventory_planner, ...",
 			"parent":"Assigned to",
+			"parentHint":"When assigned to another application, it will be displayed as its child in menus and overviews - there is no other functional change. Applications can only be assigned to applications that they build on.",
 			"position":"Default position",
-			"releaseBuild":"Appl. version",
+			"positionHint":"Position of the application in the header (smaller ones first). Can be overwritten by system administrators.",
+			"releaseBuild":"Application version",
 			"releaseBuildApp":"Platform version",
 			"releaseDate":"Release date",
-			"startForm":"Start form",
-			"startFormDefault":"Default start form*",
-			"startFormDefaultHint":"*is used if no other form can be assigned via role.",
-			"startForms":"Start forms",
-			"startFormsExplanation":"The first start form is used that matches a role of the current login.",
-			"title":"Applications"
+			"startFormByRole":"Start form by role",
+			"startFormByRoleHint":"The first start form is used that matches a role of the current login. Overwrites the default start form.",
+			"startFormDefault":"Start form",
+			"startFormDefaultHint":"Form that is shown, when user opens the application.",
+			"title":"Application '{NAME}'",
+			"titleAll":"Applications",
+			"titleHint":"The application title, visible to users when working with your application."
+		},
+		"new":{
+			"message":{
+				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
+				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
+			},
+			"collection":"New collection",
+			"form":"New form",
+			"jsFunction":"New Frontend function",
+			"jsFunctionFormId":"Assigned to form",
+			"jsFunctionFormIdHint":"Assigned functions can interact with a form to do things like read or write to form fields. If assigned, the function can only be used on the chosen form and cannot be reused in other frontend functions. This setting cannot be changed later.",
+			"module":"New application",
+			"options":"Additional options",
+			"pgFunction":"New backend function",
+			"pgFunctionTrigger":"Trigger",
+			"pgFunctionTriggerHint":"Makes this backend function a trigger. A trigger can be referenced inside a relation to react to events in the database, like when records are created, updated or deleted. This setting cannot be changed later.",
+			"relation":"New relation",
+			"relationEncryption":"End-to-end Encryption",
+			"relationEncryptionHint":"Enables end-to-end encryption (E2EE) for attributes on this relation. E2EE has benefits and drawbacks - please carefully read the Builder documentation before using it. This setting cannot be changed later.",
+			"role":"New role"
 		},
 		"openFormInput":{
 			"attributeApply":"...to set value on form",
@@ -924,7 +983,7 @@
 		},
 		"relation":{
 			"dialog":{
-				"deleteRelation":"Are you sure you want to delete this relation? This will also delete all included data from your system.<br /><br /><b>This action is irreversible without current backups.</b>"
+				"delete":"Are you sure you want to delete this relation? This will also delete all included data from your system.<br /><br /><b>This action is irreversible without current backups.</b>"
 			},
 			"attributes":"Attributes ({CNT})",
 			"codeCondition":"Condition",
@@ -932,6 +991,7 @@
 			"def":"DEFAULT",
 			"encrypted":"E2E encrypted",
 			"encryption":"E2E encryption",
+			"encryptionHint":"Relation supports end-to-end encrypted attribute values.",
 			"execute":"Execute",
 			"external":"Refering relationships ({CNT})",
 			"fires":"Fires",
@@ -942,17 +1002,15 @@
 			"indexAutoFki":"System",
 			"indexCreate":"Add attribute to new index",
 			"indexUnique":"Unique",
-			"isConstraint":"CONSTRAINT",
-			"isDeferrable":"DEFERRABLE",
-			"isDeferred":"INIT. DEFERRED",
+			"isDeferred":"DEFERRED",
 			"length":"Length",
-			"newRelation":"New relation",
+			"nameHint":"Reference name for this relation. Must be unique within this application.",
 			"nullable":"Nullable",
 			"onDelete":"DELETE",
 			"onInsert":"INSERT",
 			"onUpdate":"UPDATE",
 			"perRow":"EACH ROW",
-			"policies":"Policies",
+			"policies":"Policies ({CNT})",
 			"policyActions":"Action",
 			"policyActionDelete":"Delete",
 			"policyActionSelect":"Select",
@@ -974,8 +1032,9 @@
 			"retention":"Change log",
 			"retentionCount":"Keep X changes",
 			"retentionDays":"Keep for X days",
+			"retentionHint":"How many (count) or how long (in days) change logs are retained for.",
 			"title":"Relations",
-			"titleOne":"Relation details '{NAME}'",
+			"titleOne":"Relation '{NAME}'",
 			"triggers":"Triggers ({CNT})"
 		},
 		"role":{
@@ -1007,31 +1066,35 @@
 			"newRole":"New role",
 			"relation":"Relation",
 			"title":"Roles",
-			"titleOne":"Role title"
+			"titleOne":"Role '{NAME}'"
 		},
 		"backHint":"Go back to application overview",
 		"language":"Translation",
 		"languageNextHint":"Switch to next language (hotkey: CTRL + q)",
 		"noOwner":"Application is in read-only mode",
+		"navigationArticles":"Help articles",
 		"navigationCollections":"Collections",
-		"navigationCollectionsSub":"Collection details",
 		"navigationFilterHint":"Filter by text",
 		"navigationForms":"Forms",
-		"navigationFormsSub":"Form design",
-		"navigationFunctions":"Functions",
-		"navigationFunctionsSub":"Function details",
-		"navigationFunctionsSubBackend":"Backend",
-		"navigationFunctionsSubFrontend":"Frontend",
-		"navigationHelp":"Help",
+		"navigationJsFunctions":"Functions (front)",
+		"navigationPgFunctions":"Functions (back)",
 		"navigationIcons":"Icons",
 		"navigationLoginForms":"Login forms",
 		"navigationMenu":"Menus",
+		"navigationModule":"Application",
 		"navigationRelations":"Relations",
-		"navigationRelationsSub":"Relation details",
 		"navigationRoles":"Roles",
-		"navigationRolesSub":"Role access",
 		"pageTitle":"Builder",
 		"pageTitleDocs":"Builder documentation"
+	},
+	"articles":{
+		"button":{
+			"pdf":"PDF"
+		},
+		"form":"Form help",
+		"module":"Application help",
+		"title":"Help pages",
+		"toc":"Table of contents"
 	},
 	"calendar":{
 		"button":{
@@ -1083,7 +1146,7 @@
 			"003":"Action was aborted. Please try again.",
 			"004":"The record you attempted to delete is protected - it cannot be deleted.",
 			"005":"Failed to create entity because there was no name given. Please specify a name.",
-			"006":"The chosen name is invalid. Please make sure that the name...<ul><li>... starts with a letter <b>(a-z)</b>.</li><li>... is at most <b>31</b> characters long.</li><li>... contains only lower case letters <b>(a-z)</b>, underscores <b>(_)</b> or numbers <b>(0-9)</b>.</li></ul>Examples: storage_inventory_post21, facility_address, contact_book",
+			"006":"The chosen name is invalid. Please make sure that the name...<ul><li>... starts with a letter <b>(a-z)</b>.</li><li>... is at most <b>60</b> characters long.</li><li>... contains only lower case letters <b>(a-z)</b>, underscores <b>(_)</b> or numbers <b>(0-9)</b>.</li></ul>Examples: storage_inventory_post21, facility_address, contact_book",
 			"007":"A referenced module is not known.",
 			"008":"A referenced relation is not known.",
 			"009":"A referenced attribute is not known."
@@ -1128,7 +1191,6 @@
 		"moduleRelated":"Is this feedback for the open application? ({NAME})",
 		"sendNok":"Feedback could not be send. Please try again later.",
 		"sendOk":"Feedback was send successfully. Thank you!",
-		"submit":"Click on the appropriate icon to send feedback:",
 		"textHint":"Enter feedback here (optional)",
 		"title":"Send anonymous feedback",
 		"whatIsSent":"In addition to the visible fields (feedback text, chosen smiley, etc.) the following data is being sent:<br /><ul><li>Which application and form are open</li><li>Versions of the application and the system</li><li>Whether the user giving feedback is an administrator</li><li>A random identifier to bundle feedback from the same system</li></ul>",
@@ -1141,20 +1203,36 @@
 				"OR":"OR"
 			},
 			"content":{
-				"attribute":"attribute value",
-				"collection":"collection value(s)",
+				"attribute":"attribute",
+				"collection":"collection",
 				"field":"field value",
-				"fieldChanged":"field has changed (TRUE/FALSE)",
-				"javascript":"JavaScript expression",
-				"languageCode":"login language code (en_us, ...)",
-				"login":"login ID (integer)",
-				"preset":"preset record ID (Integer)",
-				"record":"record ID (integer, form relation 0)",
-				"recordNew":"record is new (TRUE/FALSE, form)",
-				"role":"login has role (TRUE/FALSE)",
+				"fieldChanged":"field changed",
+				"javascript":"JavaScript",
+				"languageCode":"login language",
+				"login":"login ID",
+				"preset":"preset record",
+				"record":"record ID",
+				"recordNew":"record is new",
+				"role":"login has role",
 				"subQuery":"sub query",
-				"true":"true value (TRUE)",
+				"true":"true value",
 				"value":"fixed value"
+			},
+			"contentHint":{
+				"attribute":"Attribute value from the current query.",
+				"collection":"One or many values from the chosen collection column. Use '@>', '<@' or '&&' operators when comparing multiple values.",
+				"field":"Current field value.",
+				"fieldChanged":"TRUE/FALSE, depending on whether field value has changed.",
+				"javascript":"Return value of the given Javascript expression.",
+				"languageCode":"The chosen user language code (en_us, de_de, ...) of the current login.",
+				"login":"ID of the current login (integer).",
+				"preset":"ID of the given preset record (integer).",
+				"record":"ID of the current record on this form (integer, relation 0).",
+				"recordNew":"TRUE/FALSE, depending on whether the current record is new on this form.",
+				"role":"TRUE/FALSE, depending on the whether the current login has the given role assigned.",
+				"subQuery":"Return value of the given sub query.",
+				"true":"TRUE value to compare other TRUE values against.",
+				"value":"A static value to compare against."
 			},
 			"operator":{
 				"eq":"equal",
@@ -1210,9 +1288,6 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"Record updated"
 		},
-		"help":"Help pages",
-		"helpContextTitle":"Context",
-		"helpModuleTitle":"Application",
 		"invalidInputs":"Check inputs!",
 		"noAccess":"No access"
 	},
@@ -1245,7 +1320,7 @@
 			"title":"Setup"
 		},
 		"newVersion":"Update notification",
-		"newVersionText":"A new version of REI3 is available.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">Download REI3 v{VERSION}</a>",
+		"newVersionText":"A new version of REI3 is available.<br /><br /><a href=\"https://rei3.de/en/downloads\" target=\"_blank\">Download REI3 v{VERSION}</a>",
 		"noAccess":"No access has been granted yet.<br />Please contact your system administrator.",
 		"noAccessAdmin":"To get access, assign roles to your login.",
 		"noAccessTitle":"No access to applications",
@@ -1383,24 +1458,43 @@
 		"tokensFixed":{
 			"button":{
 				"loadApp":"Application",
-				"loadCnf":"Config file",
-				"install":"Install client application"
+				"loadCnf":"Config file"
+			},
+			"context":{
+				"client":"REI3 client",
+				"ics":"Calendar app",
+				"totp":"Multi-factor"
 			},
 			"install":{
 				"intro":"With the client application you can directly open and edit files from within REI3.",
+				"nameHint":"'My Work PC'",
 				"steps":"Installation steps",
 				"step1":"Choose a device name:",
 				"step2":"Select your operating system:",
-				"step3":"Download the application:",
-				"step4":"Download the application config file to the same folder:",
-				"step5":"Start the application.",
-				"step6":"It is now installed and will appear in your system tray.",
-				"title":"Install client application"
+				"step3":"Download the application & config file to the same folder:",
+				"step4":"Start the application.",
+				"step5":"It is now installed and will appear in your system tray."
 			},
-			"nameHint":"'My Work PC'",
+			"message":{
+				"delete":"Are you sure you want to delete this entry? This cannot be undone."
+			},
+			"mfa":{
+				"apps":[
+					"Google Authenticator",
+					"Microsoft Authenticator",
+					"Aegis Authenticator",
+					"...or any application that supports TOTP"
+				],
+				"appsExample":"Some examples:",
+				"intro":"You can increase your account security by enabling multi-factor authentication (MFA). To enable MFA, please use an authenticator app on a separate device (like a smartphone).",
+				"name":"Choose a name for your device",
+				"nameHint":"'My smartphone'",
+				"outro":"Use the QR code to add this account to your authenticator app. When you are done, close this window. You can repeat this process to enable MFA with multiple devices."
+			},
 			"titleAdd":"Install client application",
 			"titleContext":"Use",
 			"titleDateCreate":"Created",
+			"titleMfa":"Setup multi-factor authentication",
 			"titleName":"Device name"
 		},
 		"bordersAll":"Add borders",
@@ -1427,7 +1521,7 @@
 		"titleAccount":"Account",
 		"titleDisplay":"Display",
 		"titleEncryption":"End-to-end encryption",
-		"titleFixedTokens":"Device access",
+		"titleFixedTokens":"Devices",
 		"titleTheme":"Theme",
 		"warnUnsaved":"Warnings for unsaved changes"
 	}

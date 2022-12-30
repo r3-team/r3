@@ -7,7 +7,7 @@ export {MyBuilderOpenFormInput as default};
 
 let MyBuilderOpenFormInput = {
 	name:'my-builder-open-form-input',
-	template:`<table class="builder-open-form-input">
+	template:`<table>
 		<tr>
 			<td>{{ capApp.formIdOpen }}</td>
 			<td>

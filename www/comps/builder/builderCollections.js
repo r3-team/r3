@@ -1,203 +1,83 @@
 import MyBuilderIconInput from './builderIconInput.js';
-import {getQueryTemplate} from '../shared/query.js';
 import {copyValueDialog}  from '../shared/generic.js';
+import {srcBase64}        from '../shared/image.js';
 export {MyBuilderCollections as default};
-
-let MyBuilderCollectionsItem = {
-	name:'my-builder-collections-item',
-	components:{MyBuilderIconInput},
-	template:`<tbody>
-		<tr>
-			<td>
-				<div class="row">
-					<my-button image="save.png"
-						@trigger="set"
-						:active="hasChanges && !readonly"
-						:caption="isNew ? capGen.button.create : ''"
-						:captionTitle="isNew ? capGen.button.create : capGen.button.save"
-					/>
-					<my-button image="open.png"
-						v-if="!isNew"
-						@trigger="open"
-						:captionTitle="capGen.button.open"
-					/>
-					<my-button image="delete.png"
-						v-if="!isNew"
-						@trigger="delAsk"
-						:active="!readonly"
-						:cancel="true"
-						:captionTitle="capGen.button.delete"
-					/>
-				</div>
-			</td>
-			<td>
-				<my-builder-icon-input
-					@input="iconId = $event"
-					:iconIdSelected="iconId"
-					:module="module"
-					:readonly="readonly"
-				/>
-			</td>
-			<td>
-				<input class="long"
-					v-model="name"
-					:disabled="readonly"
-					:placeholder="isNew ? capApp.new : ''"
-				/>
-			</td>
-			<td>
-				<my-button image="visible1.png"
-					@trigger="copyValueDialog(collection.name,collection.id,collection.id)"
-					:active="!isNew"
-				/>
-			</td>
-		</tr>
-	</tbody>`,
-	props:{
-		module:    { type:Object, required:true },
-		collection:{ type:Object, required:false,
-			default:function() { return{
-				id:null,
-				iconId:null,
-				moduleId:null,
-				name:'',
-				columns:[],
-				query:null,
-				inHeader:[]
-			}}
-		},
-		readonly:{ type:Boolean, required:true }
-	},
-	data:function() {
-		return {
-			iconId:this.collection.iconId,
-			name:this.collection.name
-		};
-	},
-	computed:{
-		hasChanges:function() {
-			return this.iconId !== this.collection.iconId
-				|| this.name   !== this.collection.name;
-		},
-		
-		// simple states
-		isNew:function() { return this.collection.id === null; },
-		
-		// stores
-		capApp:function() { return this.$store.getters.captions.builder.collection; },
-		capGen:function() { return this.$store.getters.captions.generic; }
-	},
-	methods:{
-		// externals
-		copyValueDialog,
-		getQueryTemplate,
-		
-		// actions
-		open:function() {
-			this.$router.push('/builder/collection/'+this.collection.id);
-		},
-		
-		// backend calls
-		delAsk:function() {
-			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.delete,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.delete,
-					exec:this.del,
-					image:'delete.png'
-				},{
-					caption:this.capGen.button.cancel,
-					image:'cancel.png'
-				}]
-			});
-		},
-		del:function() {
-			ws.send('collection','del',{id:this.collection.id},true).then(
-				() => this.$root.schemaReload(this.module.id),
-				this.$root.genericError
-			);
-		},
-		set:function() {
-			let query = JSON.parse(JSON.stringify(this.collection.query));
-			if(query === null)
-				query = this.getQueryTemplate();
-			
-			ws.send('collection','set',{
-				id:this.collection.id,
-				moduleId:this.module.id,
-				iconId:this.iconId,
-				name:this.name,
-				
-				// not changable values on this interface
-				columns:this.collection.columns,
-				query:query,
-				inHeader:this.collection.inHeader
-			},true).then(
-				() => {
-					if(this.isNew)
-						this.name = '';
-					
-					this.$root.schemaReload(this.module.id);
-				},
-				this.$root.genericError
-			);
-		}
-	}
-};
 
 let MyBuilderCollections = {
 	name:'my-builder-collections',
-	components:{MyBuilderCollectionsItem},
 	template:`<div class="builder-collections contentBox grow">
-		
 		<div class="top lower">
 			<div class="area nowrap">
+				<img class="icon" src="images/tray.png" />
 				<h1 class="title">{{ capApp.title }}</h1>
+			</div>
+			<div class="area default-inputs">
+				<input v-model="filter" placeholder="..." />
 			</div>
 		</div>
 		
 		<div class="content default-inputs" v-if="module">
-			<table>
-				<thead>
-					<tr>
-						<th>{{ capGen.actions }}</th>
-						<th>{{ capGen.icon }}</th>
-						<th>{{ capGen.name }}</th>
-						<th>{{ capGen.id }}</th>
-					</tr>
-				</thead>
+			<div class="builder-entry-list">
 				
-				<!-- new collection -->
-				<my-builder-collections-item
-					:module="module"
-					:readonly="readonly"
-				/>
+				<div class="entry"
+					@click="$emit('createNew',readonly ? null : 'collection')"
+					:class="{ clickable:!readonly, off:readonly }"
+				>
+					<div class="row gap centered">
+						<img class="icon" src="images/add.png" />
+						<span>{{ capGen.button.new }}</span>
+					</div>
+				</div>
 				
-				<!-- existing collections -->
-				<my-builder-collections-item
-					v-for="c in module.collections"
-					:collection="c"
+				<router-link class="entry clickable"
+					v-for="c in module.collections.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
 					:key="c.id"
-					:module="module"
-					:readonly="readonly"
-				/>
-			</table>
+					:to="'/builder/collection/'+c.id" 
+				>
+					<div class="lines">
+						<span>{{ c.name }}</span>
+					</div>
+					<div class="row">
+						<my-button image="menu.png"
+							v-if="c.inHeader.length !== 0"
+							:active="false"
+							:captionTitle="capApp.inHeader"
+							:naked="true"
+							:tight="true"
+						/>
+						<my-button
+							v-if="c.iconId !== null"
+							:active="false"
+							:captionTitle="capGen.icon"
+							:imageBase64="srcBase64(iconIdMap[c.iconId].file)"
+							:naked="true"
+							:tight="true"
+						/>
+					</div>
+				</router-link>
+			</div>
 		</div>
 	</div>`,
 	props:{
 		id:      { type:String,  required:true },
 		readonly:{ type:Boolean, required:true }
 	},
+	data:function() {
+		return {
+			filter:'',
+		};
+	},
 	computed:{
-		module:function() {
-			return typeof this.moduleIdMap[this.id] === 'undefined'
-				? false : this.moduleIdMap[this.id];
-		},
+		module:(s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
 		
 		// stores
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.builder.collection; },
-		capGen:     function() { return this.$store.getters.captions.generic; }
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		iconIdMap:  (s) => s.$store.getters['schema/iconIdMap'],
+		capApp:     (s) => s.$store.getters.captions.builder.collection,
+		capGen:     (s) => s.$store.getters.captions.generic
+	},
+	methods:{
+		// externals
+		srcBase64
 	}
 };

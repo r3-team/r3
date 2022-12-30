@@ -1,0 +1,28 @@
+{
+	"cluster": {
+		"nodeId": ""
+	},
+	"db": {
+		"embedded": true,
+		"host": "localhost",
+		"port": 5432,
+		"name": "app",
+		"user": "app",
+		"pass": "app"
+	},
+	"paths": {
+		"certificates": "data/certificates/",
+		"embeddedDbBin": "pgsql/bin/",
+		"embeddedDbData": "data/database/",
+		"files": "data/files/",
+		"temp": "data/temp/",
+		"transfer": "data/transfer"
+	},
+	"portable": true,
+	"web": {
+		"cert": "cert.crt",
+		"key": "cert.key",
+		"listen": "0.0.0.0",
+		"port": 443
+	}
+}

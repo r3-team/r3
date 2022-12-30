@@ -13,10 +13,11 @@ const MyStoreLocal = {
 		companyLogoUrl:'',    // custom company logo, href URL when clicked on
 		companyName:'',       // custom company name on login screen
 		companyWelcome:'',    // custom welcome message on login screen
-		fieldIdMapOption:{},  // map of field IDs with field options
+		fieldIdMapOption:{},  // map of field IDs with field options (reset on schema change)
 		loginKeyAes:null,     // en-/decryption key for login private key
 		loginKeySalt:null,    // salt for login key KDF
 		menuIdMapOpen:{},     // map of menu IDs with open state (true/false)
+		schemaTimestamp:-1,   // last known schema timestamp
 		token:'',             // JWT token
 		tokenKeep:false       // keep JWT token between sessions
 	},
@@ -96,32 +97,33 @@ const MyStoreLocal = {
 		tokenKeep:function(state,payload) {
 			state.tokenKeep = payload;
 			set('tokenKeep',payload);
+		},
+		schemaTimestamp:function(state,payload) {
+			// if schema timestamp changed from last known one, reset dependent data
+			if(state.schemaTimestamp !== payload) {
+				state.fieldIdMapOption = {};
+				set('fieldIdMapOption',{});
+			}
+			state.schemaTimestamp = payload;
+			set('schemaTimestamp',payload);
 		}
 	},
 	getters:{
 		customBgLogin:function(state) {
-			if(!state.activated || state.companyColorLogin === '')
-				return '';
-			
-			return `background-color:#${state.companyColorLogin};`;
+			return !state.activated || state.companyColorLogin === ''
+				? '' : `background-color:#${state.companyColorLogin};`;
 		},
 		customBgHeader:function(state) {
-			if(!state.activated || state.companyColorHeader === '')
-				return '';
-			
-			return `background-color:#${state.companyColorHeader};`;
+			return !state.activated || state.companyColorHeader === ''
+				? '' : `background-color:#${state.companyColorHeader};`;
 		},
 		customLogo:function(state) {
-			if(!state.activated || state.companyLogo === '')
-				return 'images/logo.png';
-			
-			return `data:image/png;base64,${state.companyLogo}`;
+			return !state.activated || state.companyLogo === ''
+				? 'images/logo.png' : `data:image/png;base64,${state.companyLogo}`;
 		},
 		customLogoUrl:function(state) {
-			if(!state.activated || state.companyLogoUrl === '')
-				return 'https://rei3.de/';
-			
-			return state.companyLogoUrl;
+			return !state.activated || state.companyLogoUrl === ''
+				? 'https://rei3.de/' : state.companyLogoUrl;
 		},
 		
 		// simple getters
@@ -139,6 +141,7 @@ const MyStoreLocal = {
 		loginKeyAes:       (state) => state.loginKeyAes,
 		loginKeySalt:      (state) => state.loginKeySalt,
 		menuIdMapOpen:     (state) => state.menuIdMapOpen,
+		schemaTimestamp:   (state) => state.schemaTimestamp,
 		token:             (state) => state.token,
 		tokenKeep:         (state) => state.tokenKeep
 	}

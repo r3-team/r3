@@ -7,9 +7,8 @@
 
 .input-files-header{
 	display:flex;
-	height:42px;
-	margin:10px 0px 3px 0px;
-	padding:3px 9px;
+	height:36px;
+	padding:0px 9px;
 	border-top:1px solid var(--color-border);
 	border-bottom:1px solid var(--color-border);
 	border-left:1px solid var(--color-border);
@@ -19,6 +18,7 @@
 	justify-content:space-between;
 	background-color:var(--color-bg);
 	box-shadow:1px 1px 3px var(--color-shade);
+	z-index:var(--z-index-field-file-header);
 }
 .input-files-header input{
 	width:100%;
@@ -67,7 +67,6 @@
 }
 .input-files-content{
 	flex:1 1 auto;
-	margin-bottom:3px;
 	position:relative;
 	overflow:auto;
 }
@@ -87,18 +86,20 @@
 	align-items:center;
 }
 .input-files-name input{
-	padding:4px 3px;
-	margin:2px;
+	padding:4px 0px;
+	margin:5px 0px 2px;
+	font-family:inherit;
 	color:var(--color-font);
+	background-color:transparent;
 	border:none;
 	outline:none;
-	background-color:var(--color-bg);
 	flex:1 1 auto;
 }
 .input-files-name input:focus,
 .input-files-name input:hover{
-	margin:0px;
-	border:2px solid var(--color-border);
+	padding:4px 6px;
+	background-color:var(--color-bg);
+	box-shadow:1px 1px 2px var(--color-shade);
 	border-radius:3px;
 }
 .input-files-name .error{
@@ -118,6 +119,7 @@
 	background-color:var(--color-bg);
 	z-index:var(--z-index-list-header);
 	border-bottom:2px solid var(--color-border);
+	z-index:var(--z-index-field-file-list);
 }
 .input-files table.listCompact th,
 .input-files table.listCompact td{
@@ -140,12 +142,6 @@
 	background-color:var(--color-bg);
 	flex:1 2 auto;
 }
-.input-files table.listCompact input:focus,
-.input-files table.listCompact input:hover{
-	margin:0px;
-	border:2px solid var(--color-border);
-	border-radius:3px;
-}
 
 
 /* list comfortable */
@@ -153,6 +149,7 @@
 	display:flex;
 	position:absolute;
 	flex-flow:row wrap;
+	margin:0px 3px;
 	padding:3px 0px 5px;
 	gap:6px;
 }
@@ -160,7 +157,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 	position:relative;
-	padding:5px;
+	padding:3px 5px 0px 5px;
 	background-color:var(--color-bg);
 	border:1px solid var(--color-border);
 	border-radius:5px;
@@ -177,12 +174,12 @@
 	margin-left:24px;
 }
 .input-files .listComfort .item img.prev{
-	width:70px;
-	height:70px;
+	width:80px;
+	height:80px;
 	object-fit:contain;
 	margin-right:6px;
 	background-color:var(--color-bg);
-	border:1px solid var(--color-border);
+	box-shadow:1px 1px 2px var(--color-shade);
 	border-radius:3px;
 }
 .input-files .listComfort .item-content{
@@ -194,10 +191,9 @@
 .input-files .listComfort .item-meta{
 	flex:1 1 auto;
 	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	padding:0px 6px;
-	gap:10px;
+	flex-flow:column nowrap;
+	padding:0px 4px;
+	gap:5px;
 }
 .input-files .listComfort .item-actions{
 	display:flex;
@@ -217,25 +213,29 @@
 	display:flex;
 	position:absolute;
 	flex-flow:row wrap;
+	margin:0px 3px;
 	padding:3px 0px 5px;
-	gap:10px;
 }
 .input-files .gallery .item{
-	padding:0px 7px;
+	margin-right:1px;
 	position:relative;
 	display:flex;
 	flex-flow:column nowrap;
 	align-items:center;
 	border-radius:5px;
 	background-color:var(--color-bg);
-	border:1px solid var(--color-border);
-	box-shadow:1px 1px 3px var(--color-shade);
+	box-shadow:1px 1px 2px var(--color-shade);
+	overflow:hidden;
+}
+.input-files .gallery .item>a{
+	font-size:0; /* fix img padding when inside a */
 }
 .input-files .gallery .item:focus,
 .input-files .gallery .item:hover{
-	margin-top:-3px;
-	margin-bottom:3px;
-	box-shadow:1px 1px 6px var(--color-shade);
+	margin-top:-6px;
+	margin-bottom:6px;
+	outline:1px solid var(--color-border);
+	box-shadow:1px 1px 4px var(--color-shade);
 	transition:box-shadow 0.3s, margin 0.3s;
 }
 .input-files .gallery .item img.prev{
@@ -244,17 +244,14 @@
 	height:240px;
 	object-fit:contain;
 	background-color:var(--color-bg);
-	border:1px solid var(--color-border);
-	border-top:none;
-	border-radius:0px 0px 4px 4px;
 	box-sizing:border-box;
+	box-shadow:1px 1px 3px var(--color-shade);
 }
 .input-files .gallery .item-meta{
-	margin:0px 5px 5px;
+	margin:0px 8px 12px;
 	display:flex;
 	flex-flow:column nowrap;
 	align-self:stretch;
-	gap:5px;
 }
 .input-files .gallery .item-actions{
 	display:flex;

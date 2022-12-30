@@ -1,9 +1,11 @@
-import MyBuilderCaption               from './builderCaption.js';
-import MyBuilderQuery                 from './builderQuery.js';
-import {MyBuilderFunctionPlaceholder} from './builderFunctions.js';
-import {getDataFieldMap}              from '../shared/form.js';
+import MyBuilderCaption  from './builderCaption.js';
+import MyBuilderQuery    from './builderQuery.js';
+import {getDataFieldMap} from '../shared/form.js';
+import {copyValueDialog} from '../shared/generic.js';
+import MyTabs            from '../tabs.js';
 import {
 	getDependentModules,
+	getFunctionHelp,
 	getItemTitle
 } from '../shared/builder.js';
 export {MyBuilderJsFunction as default};
@@ -12,21 +14,24 @@ let MyBuilderJsFunction = {
 	name:'my-builder-js-function',
 	components:{
 		MyBuilderCaption,
-		MyBuilderFunctionPlaceholder,
-		MyBuilderQuery
+		MyBuilderQuery,
+		MyTabs
 	},
 	template:`<div class="builder-function">
 		
 		<div class="contentBox" v-if="jsFunction">
 			<div class="top">
 				<div class="area nowrap">
+					<img class="icon" src="images/codeScreen.png" />
+					<h1 class="title">{{ capApp.titleJsOne.replace('{NAME}',name) }}</h1>
+				</div>
+				<div class="area">
 					<my-builder-caption
 						v-model="captions.jsFunctionTitle"
-						:contentName="capApp.titleOne"
+						:contentName="capGen.title"
 						:language="builderLanguage"
 						:longInput="true"
 					/>
-					<my-button :active="false" :caption="jsFunction.name" :naked="true "/>
 				</div>
 				<div class="area">
 					<my-button
@@ -47,41 +52,271 @@ let MyBuilderJsFunction = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
-					<my-button
-						@trigger="showHeader = !showHeader"
-						:caption="capApp.button.details"
-						:image="showHeader ? 'visible1.png' : 'visible0.png'"
+					<my-button image="visible1.png"
+						@trigger="copyValueDialog(name,id,id)"
+						:caption="capGen.id"
 					/>
 					<my-button
 						@trigger="showPreview = !showPreview"
 						:caption="capGen.preview"
-						:image="showPreview ? 'visible1.png' : 'visible0.png'"
+						:image="showPreview ? 'checkbox1.png' : 'checkbox0.png'"
+					/>
+					<my-button image="delete.png"
+						@trigger="delAsk"
+						:active="!readonly"
+						:cancel="true"
+						:caption="capGen.button.delete"
+						:captionTitle="capGen.button.delete"
 					/>
 				</div>
 			</div>
 			
 			<div class="content no-padding function-details default-inputs">
-				<div class="header" v-if="showHeader">
-					<table>
+				
+				<!-- function body input -->
+				<textarea class="input"
+					v-if="!showPreview"
+					v-model="codeFunction"
+					@click="insertEntity"
+					@keydown.tab.prevent="addTab"
+					:disabled="readonly"
+					:placeholder="capApp.code"
+				></textarea>
+				
+				<!-- function body preview -->
+				<textarea class="input" disabled="disabled"
+					v-if="showPreview"
+					v-model="preview"
+				></textarea>
+			</div>
+		</div>
+		
+		<div class="contentBox right" v-if="jsFunction && showSidebar">
+			<div class="top lower">
+				<div class="area nowrap">
+					<h1 class="title">{{ capGen.settings }}</h1>
+				</div>
+			</div>
+			
+			<my-tabs
+				v-model="tabTarget"
+				:entries="['content','properties']"
+				:entriesIcon="['images/database.png','images/edit.png']"
+				:entriesText="[capApp.placeholders,capGen.properties]"
+			/>
+			
+			<div class="content padding default-inputs">
+				
+				<template v-if="tabTarget === 'content'">
+					<div class="message" v-html="capApp.entityInput"></div>
+					
+					<template v-if="form !== false && form.query.joins.length !== 0">
+						<div class="placeholders">
+							
+							<!-- read only form query view -->
+							<h2>{{ capApp.placeholdersFormQuery }}</h2>
+							
+							<my-builder-query
+								:allowChoices="false"
+								:allowFixedLimit="false"
+								:allowFilters="false"
+								:allowJoinEdit="false"
+								:builderLanguage="builderLanguage"
+								:choices="form.query.choices"
+								:filters="form.query.filters"
+								:fixedLimit="0"
+								:joins="form.query.joins"
+								:lookups="form.query.lookups"
+								:moduleId="form.moduleId"
+								:orders="form.query.orders"
+								:relationId="form.query.relationId"
+							/>
+						</div>
+						
+						<!-- current form data field input -->
+						<div class="placeholders">
+							<div class="title">
+								<img src="images/form.png" />
+								<span>{{ capApp.placeholdersFormFields }}</span>
+							</div>
+							
+							<div class="row gap">
+								<select v-model="fieldMode">
+									<option value="get_field_value"  >{{ capApp.option.fieldGetValue   }}</option>
+									<option value="set_field_value"  >{{ capApp.option.fieldSetValue   }}</option>
+									<option value="set_field_caption">{{ capApp.option.fieldSetCaption }}</option>
+								</select>
+								<select
+									@change="toggleEntity('field',$event.target.value)"
+									:value="entity === 'field' ? entityId : ''"
+								>
+									<option value="" disabled>{{ capApp.fieldId }}</option>
+									<option v-for="fieldId in dataFieldIdsSorted" :value="fieldId">
+										{{ displayFieldName(fieldId) }}
+									</option>
+								</select>
+							</div>
+							<span class="insert-ref" v-if="entity === 'field' && entityId !== null">
+								{{ capApp.placeholderInsert }}
+							</span>
+						</div>
+					</template>
+					
+					<!-- collection input -->
+					<div class="placeholders">
+						<div class="title">
+							<img src="images/tray.png" />
+							<span>{{ capApp.placeholdersCollections }}</span>
+						</div>
+						
+						<div class="row gap">
+							<select v-model="collectionMode">
+								<option value="read"  >{{ capApp.option.collectionRead   }}</option>
+								<option value="update">{{ capApp.option.collectionUpdate }}</option>
+							</select>
+							<select
+								@change="toggleEntity('collection',$event.target.value)"
+								:value="entity === 'collection' ? entityId : ''"
+							>
+								<option value="" disabled>{{ capApp.collectionId }}</option>
+								<optgroup
+									v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
+									:label="m.name"
+								>
+									<option v-for="c in m.collections" :value="c.id">
+										{{ c.name }}
+									</option>
+								</optgroup>
+							</select>
+						</div>
+						<span class="insert-ref" v-if="entity === 'collection' && entityId !== null">
+							{{ capApp.placeholderInsert }}
+						</span>
+					</div>
+					
+					<!-- frontend functions input -->
+					<div class="placeholders">
+						<div class="title">
+							<img src="images/codeScreen.png" />
+							<span>{{ capApp.titleJs }}</span>
+						</div>
+						<table>
+							<tr>
+								<td>
+									<select v-model="entityJsModuleId">
+										<option :value="null">-</option>
+										<option
+											v-for="mod in getDependentModules(module,modules).filter(v => v.jsFunctions.length !== 0)"
+											:value="mod.id"
+										>{{ mod.name }}</option>
+									</select>
+								</td>
+								<td>
+									<select
+										v-if="entityJsModuleId !== null"
+										@change="toggleEntity('jsFunction',$event.target.value)"
+										:value="entity === 'jsFunction' ? entityId : ''"
+									>
+										<option value="">-</option>
+										<option
+											v-for="f in moduleIdMap[entityJsModuleId].jsFunctions.filter(v => v.formId === null || v.formId === formId)"
+											:value="f.id"
+										>{{ f.name }}</option>
+									</select>
+								</td>
+								<td>
+									<my-button image="question.png"
+										@trigger="showHelp(jsFunctionIdMap[entityId].name+'()',functionHelpJs)"
+										:active="functionHelpJs !== ''"
+									/>
+								</td>
+							</tr>
+						</table>
+						<span class="insert-ref" v-if="entity === 'jsFunction' && entityId !== null">
+							{{ capApp.placeholderInsert }}
+						</span>
+					</div>
+					
+					<!-- backend functions input -->
+					<div class="placeholders">
+						<div class="title">
+							<img src="images/codeDatabase.png" />
+							<span>{{ capApp.titlePg }}</span>
+						</div>
+						<table>
+							<tr>
+								<td>
+									<select v-model="entityPgModuleId">
+										<option :value="null">-</option>
+										<option
+											v-for="mod in getDependentModules(module,modules).filter(v => v.pgFunctions.filter(f => f.isFrontendExec).length !== 0)"
+											:value="mod.id"
+										>{{ mod.name }}</option>
+									</select>
+								</td>
+								<td>
+									<select
+										v-if="entityPgModuleId !== null"
+										@change="toggleEntity('pgFunction',$event.target.value)"
+										:value="entity === 'pgFunction' ? entityId : ''"
+									>
+										<option value="">-</option>
+										<option
+											v-for="f in moduleIdMap[entityPgModuleId].pgFunctions.filter(v => v.isFrontendExec)"
+											:value="f.id"
+										>{{ f.name }}</option>
+									</select>
+								</td>
+								<td>
+									<my-button image="question.png"
+										@trigger="showHelp(pgFunctionIdMap[entityId].name+'()',functionHelpPg)"
+										:active="functionHelpPg !== ''"
+									/>
+								</td>
+							</tr>
+						</table>
+						<span class="insert-ref" v-if="entity === 'pgFunction' && entityId !== null">
+							{{ capApp.placeholderInsert }}
+						</span>
+					</div>
+					
+					<!-- instance functions -->
+					<div class="placeholders">
+						<div class="title">
+							<img src="images/server.png" />
+							<span>{{ capApp.placeholdersInstance }}</span>
+						</div>
+						<table>
+							<tr>
+								<td>
+									<select v-model="entityId" @change="entity = 'appFunction'">
+										<option :value="null">-</option>
+										<option
+											v-for="f in appFunctions"
+											:value="f"
+										>{{ f }}</option>
+									</select>
+								</td>
+								<td>
+									<my-button image="question.png"
+										@trigger="showHelp(entityId+'()',capApp.helpJs[entityId])"
+										:active="entity === 'appFunction' && entityId !== null"
+										:captionTitle="capGen.button.help"
+									/>
+								</td>
+							</tr>
+						</table>
+						<span class="insert-ref" v-if="entity === 'appFunction' && entityId !== null">
+							{{ capApp.placeholderInsert }}
+						</span>
+					</div>
+				</template>
+				
+				<template v-if="tabTarget === 'properties'">
+					<table class="builder-table-vertical tight fullWidth">
 						<tr>
-							<td>{{ capApp.codeArgs }}</td>
-							<td>
-								<input
-									v-model="codeArgs"
-									:disabled="readonly"
-									:placeholder="capApp.codeArgsHintJs"
-								/>
-							</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.codeReturns }}</td>
-							<td>
-								<input
-									v-model="codeReturns"
-									:disabled="readonly"
-									:placeholder="capApp.codeReturnsHintJs"
-								/>
-							</td>
+							<td>{{ capGen.name }}</td>
+							<td><input v-model="name" :disabled="readonly" /></td>
 						</tr>
 						<tr>
 							<td>{{ capGen.title }}</td>
@@ -104,181 +339,45 @@ let MyBuilderJsFunction = {
 								/>
 							</td>
 						</tr>
+						<tr>
+							<td>{{ capApp.form }}</td>
+							<td>
+								<div class="row centered">
+									<select v-model="formId" disabled>
+										<option :value="null">-</option>
+										<option v-for="f in moduleIdMap[jsFunction.moduleId].forms" :value="f.id">
+											{{ f.name }}
+										</option>
+									</select>
+									<my-button image="open.png"
+										@trigger="openForm"
+										:active="formId !== null"
+									/>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.codeArgs }}</td>
+							<td>
+								<textarea
+									v-model="codeArgs"
+									:disabled="readonly"
+									:placeholder="capApp.codeArgsHintJs"
+								></textarea>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.codeReturns }}</td>
+							<td>
+								<input
+									v-model="codeReturns"
+									:disabled="readonly"
+									:placeholder="capApp.codeReturnsHintJs"
+								/>
+							</td>
+						</tr>
 					</table>
-				</div>
-				
-				<!-- function body input -->
-				<textarea class="input"
-					v-if="!showPreview"
-					v-model="codeFunction"
-					@click="insertEntitySelected"
-					@keydown.tab.prevent="addTab"
-					:disabled="readonly"
-					:placeholder="capApp.code"
-				></textarea>
-				
-				<!-- function body preview -->
-				<textarea class="input" disabled="disabled"
-					v-if="showPreview"
-					v-model="preview"
-				></textarea>
-			</div>
-		</div>
-		
-		<div class="contentBox right" v-if="jsFunction && showSidebar">
-			<div class="top lower">
-				<div class="area nowrap">
-					<img class="icon" src="images/database.png" />
-					<h1 class="title">{{ capApp.placeholders }}</h1>
-				</div>
-			</div>
-			<div class="content padding default-inputs">
-				
-				<div class="message" v-html="capApp.entityInput"></div>
-				
-				<template v-if="form !== false && form.query.joins.length !== 0">
-					<div class="placeholders form-query-title">
-						
-						<!-- read only form query view -->
-						<h2>{{ capApp.placeholdersFormQuery }}</h2>
-						
-						<my-builder-query
-							:allowChoices="false"
-							:allowFixedLimit="false"
-							:allowFilters="false"
-							:allowJoinEdit="false"
-							:builderLanguage="builderLanguage"
-							:choices="form.query.choices"
-							:filters="form.query.filters"
-							:fixedLimit="0"
-							:joins="form.query.joins"
-							:lookups="form.query.lookups"
-							:moduleId="form.moduleId"
-							:orders="form.query.orders"
-							:relationId="form.query.relationId"
-						/>
-					</div>
-					
-					<!-- current form data field input -->
-					<div class="placeholders fields-title">
-						<h2>{{ capApp.placeholdersFormFields }}</h2>
-						
-						<div class="row">
-							<select v-model="fieldMode">
-								<option value="get_field_value"  >{{ capApp.option.fieldGetValue   }}</option>
-								<option value="set_field_value"  >{{ capApp.option.fieldSetValue   }}</option>
-								<option value="set_field_caption">{{ capApp.option.fieldSetCaption }}</option>
-							</select>
-							<select
-								@change="toggleEntity('field',$event.target.value)"
-								:value="entitySelected === 'field' ? entitySelectedId : ''"
-							>
-								<option value="" disabled>{{ capApp.fieldId }}</option>
-								<option v-for="fieldId in dataFieldIdsSorted" :value="fieldId">
-									{{ displayFieldName(fieldId) }}
-								</option>
-							</select>
-						</div>
-						<span v-if="entitySelected === 'field' && entitySelectedId !== null">
-							{{ capApp.placeholderInsert }}
-						</span>
-					</div>
 				</template>
-				
-				<!-- collection input -->
-				<div class="placeholders collections-title">
-					<h2>{{ capApp.placeholdersCollections }}</h2>
-					<div class="row">
-						<select v-model="collectionMode">
-							<option value="read"  >{{ capApp.option.collectionRead   }}</option>
-							<option value="update">{{ capApp.option.collectionUpdate }}</option>
-						</select>
-						<select
-							@change="toggleEntity('collection',$event.target.value)"
-							:value="entitySelected === 'collection' ? entitySelectedId : ''"
-						>
-							<option value="" disabled>{{ capApp.collectionId }}</option>
-							<optgroup
-								v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
-								:label="m.name"
-							>
-								<option v-for="c in m.collections" :value="c.id">
-									{{ c.name }}
-								</option>
-							</optgroup>
-						</select>
-					</div>
-					<span v-if="entitySelected === 'collection' && entitySelectedId !== null">
-						{{ capApp.placeholderInsert }}
-					</span>
-				</div>
-				
-				<!-- other module functions input -->
-				<h2>{{ capApp.placeholdersModules }}</h2>
-				<div class="placeholders modules"
-					v-for="mod in getDependentModules(module,modules).filter(v => v.pgFunctions.length !== 0 || v.jsFunctions.length !== 0)"
-					:key="mod.id"
-				>
-					<my-button
-						@trigger="toggleModule(mod.id)"
-						:caption="mod.name"
-						:image="moduleIdsOpen.includes(mod.id) ? 'triangleDown.png' : 'triangleRight.png'"
-						:naked="true"
-					/>
-					
-					<template v-if="moduleIdsOpen.includes(mod.id)">
-						
-						<!-- JS functions -->
-						<div class="functions-title" v-if="mod.jsFunctions.filter(v => v.formId === null || v.formId === formId).length !== 0">
-							{{ capApp.functionsFrontend }}
-						</div>
-						<div class="placeholders functions">
-							<my-builder-function-placeholder
-								v-for="f in mod.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
-								@show-help="showHelp(f.name+'()',$event)"
-								@toggle="toggleEntity('jsFunction',f.id)"
-								:builderLanguage="builderLanguage"
-								:functionObj="f"
-								:functionType="'js'"
-								:key="f.id"
-								:name="f.name"
-								:selected="entitySelected === 'jsFunction' && entitySelectedId === f.id"
-							/>
-						</div>
-						
-						<!-- PG functions -->
-						<div class="functions-title" v-if="mod.pgFunctions.filter(v => v.isFrontendExec).length !== 0">
-							{{ capApp.functionsBackend }}
-						</div>
-						<div class="placeholders functions">
-							<my-builder-function-placeholder
-								v-for="f in mod.pgFunctions.filter(v => v.isFrontendExec)"
-								@show-help="showHelp(f.name+'()',$event)"
-								@toggle="toggleEntity('pgFunction',f.id)"
-								:builderLanguage="builderLanguage"
-								:functionObj="f"
-								:functionType="'pg'"
-								:key="f.id"
-								:name="f.name"
-								:selected="entitySelected === 'pgFunction' && entitySelectedId === f.id"
-							/>
-						</div>
-					</template>
-				</div>
-				
-				<h2>{{ capApp.placeholdersInstance }}</h2>
-				<div class="placeholders functions">
-					<my-builder-function-placeholder
-						v-for="f in appFunctions"
-						@show-help="showHelp(f+'()',$event)"
-						@toggle="toggleEntity('appFunction',f)"
-						:builderLanguage="builderLanguage"
-						:functionHelp="capApp.helpJs[f]"
-						:key="f"
-						:name="f"
-						:selected="entitySelected === 'appFunction' && entitySelectedId === f"
-					/>
-				</div>
 			</div>
 		</div>
 	</div>`,
@@ -294,10 +393,10 @@ let MyBuilderJsFunction = {
 			immediate:true
 		}
 	},
-	mounted:function() {
+	mounted() {
 		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
 	},
-	unmounted:function() {
+	unmounted() {
 		this.$emit('hotkeysRegister',[]);
 	},
 	data:function() {
@@ -324,24 +423,21 @@ let MyBuilderJsFunction = {
 			// states
 			collectionMode:'read',
 			fieldMode:'get_field_value',
-			entitySelected:'',
-			entitySelectedId:null,
-			moduleIdsOpen:[],
-			showHeader:false,
+			entity:'', // selected placeholder entity
+			entityId:null,
+			entityJsModuleId:null,
+			entityPgModuleId:null,
 			showPreview:false,
-			showSidebar:true
+			showSidebar:true,
+			tabTarget:'content'
 		};
 	},
 	computed:{
-		dataFieldMap:function() {
-			return this.formId === null
-				? {} : this.getDataFieldMap(this.formIdMap[this.formId].fields);
-		},
-		dataFieldIdsSorted:function() {
+		dataFieldIdsSorted:(s) => {
 			let map = {};
-			for(let k in this.dataFieldMap) {
-				let f = this.dataFieldMap[k];
-				map[`${f.index}_${this.attributeIdMap[f.attributeId].name}`] = f.id;
+			for(let k in s.dataFieldMap) {
+				let f = s.dataFieldMap[k];
+				map[`${f.index}_${s.attributeIdMap[f.attributeId].name}`] = f.id;
 			}
 			let keysSorted = Object.keys(map).sort();
 			
@@ -351,48 +447,48 @@ let MyBuilderJsFunction = {
 			}			
 			return out;
 		},
-		form:function() {
-			return this.formId === null ? false : this.formIdMap[this.formId];
-		},
-		module:function() {
-			return this.jsFunction === false
-				? false : this.moduleIdMap[this.jsFunction.moduleId];
-		},
-		jsFunction:function() {
-			return typeof this.jsFunctionIdMap[this.id] === 'undefined'
-				? false : this.jsFunctionIdMap[this.id];
-		},
-		hasChanges:function() {
-			return this.codeArgs     !== this.jsFunction.codeArgs
-				|| this.codeFunction !== this.placeholdersSet(this.jsFunction.codeFunction)
-				|| this.codeReturns  !== this.jsFunction.codeReturns
-				|| JSON.stringify(this.captions) !== JSON.stringify(this.jsFunction.captions);
-		},
-		preview:function() {
-			return !this.showPreview ? '' : this.placeholdersUnset();
-		},
+		hasChanges:(s) => s.name     !== s.jsFunction.name
+			|| s.codeArgs            !== s.jsFunction.codeArgs
+			|| s.codeFunction        !== s.placeholdersSet(s.jsFunction.codeFunction)
+			|| s.codeReturns         !== s.jsFunction.codeReturns
+			|| JSON.stringify(s.captions) !== JSON.stringify(s.jsFunction.captions),
+		
+		functionHelpJs:(s) => s.entity === 'jsFunction' && s.entityId !== null
+			? s.getFunctionHelp('js',s.jsFunctionIdMap[s.entityId],s.builderLanguage) : '',
+		
+		functionHelpPg:(s) => s.entity === 'pgFunction' && s.entityId !== null
+			? s.getFunctionHelp('pg',s.pgFunctionIdMap[s.entityId],s.builderLanguage) : '',
+		
+		// simple
+		dataFieldMap:(s) => s.formId === null ? {} : s.getDataFieldMap(s.formIdMap[s.formId].fields),
+		form:        (s) => s.formId === null ? false : s.formIdMap[s.formId],
+		jsFunction:  (s) => typeof s.jsFunctionIdMap[s.id] === 'undefined' ? false : s.jsFunctionIdMap[s.id],
+		module:      (s) => s.jsFunction === false ? false : s.moduleIdMap[s.jsFunction.moduleId],
+		preview:     (s) => !s.showPreview ? '' : s.placeholdersUnset(),
 		
 		// stores
-		modules:        function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
-		moduleNameMap:  function() { return this.$store.getters['schema/moduleNameMap']; },
-		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
-		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
-		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
-		jsFunctionIdMap:function() { return this.$store.getters['schema/jsFunctionIdMap']; },
-		pgFunctionIdMap:function() { return this.$store.getters['schema/pgFunctionIdMap']; },
-		capApp:         function() { return this.$store.getters.captions.builder.function; },
-		capGen:         function() { return this.$store.getters.captions.generic; }
+		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleNameMap:  (s) => s.$store.getters['schema/moduleNameMap'],
+		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
+		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
+		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
+		jsFunctionIdMap:(s) => s.$store.getters['schema/jsFunctionIdMap'],
+		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
+		capApp:         (s) => s.$store.getters.captions.builder.function,
+		capGen:         (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
+		copyValueDialog,
 		getDataFieldMap,
 		getDependentModules,
+		getFunctionHelp,
 		getItemTitle,
 		
 		// presentation
-		displayFieldName:function(fieldId) {
+		displayFieldName(fieldId) {
 			let f = this.dataFieldMap[fieldId];
 			let a = this.attributeIdMap[f.attributeId];
 			let r = this.relationIdMap[a.relationId];
@@ -400,7 +496,7 @@ let MyBuilderJsFunction = {
 		},
 		
 		// actions
-		addTab:function(evt) {
+		addTab(evt) {
 			let field    = evt.target;
 			let startPos = field.selectionStart;
 			let endPos   = field.selectionEnd;
@@ -412,7 +508,10 @@ let MyBuilderJsFunction = {
 			field.selectionEnd   = startPos + 1;
 			this.codeFunction    = field.value;
 		},
-		reset:function() {
+		openForm() {
+			this.$router.push('/builder/form/'+this.formId);
+		},
+		reset() {
 			this.name         = this.jsFunction.name;
 			this.formId       = this.jsFunction.formId;
 			this.codeArgs     = this.jsFunction.codeArgs;
@@ -420,8 +519,8 @@ let MyBuilderJsFunction = {
 			this.codeReturns  = this.jsFunction.codeReturns;
 			this.captions     = JSON.parse(JSON.stringify(this.jsFunction.captions));
 		},
-		insertEntitySelected:function(evt) {
-			if(this.entitySelectedId === null)
+		insertEntity(evt) {
+			if(this.entityId === null)
 				return;
 			
 			let field   = evt.target;
@@ -435,21 +534,21 @@ let MyBuilderJsFunction = {
 			let mod, rel, atr, col, fnc, frm, fld, opt, args;
 			
 			// build unique placeholder name
-			switch(this.entitySelected) {
+			switch(this.entity) {
 				case 'appFunction':
 					opt     = '';
 					postfix = '';
 					
-					if(typeof this.capApp.helpJsHint[this.entitySelectedId] !== 'undefined')
-						opt = this.capApp.helpJsHint[this.entitySelectedId];
+					if(typeof this.capApp.helpJsHint[this.entityId] !== 'undefined')
+						opt = this.capApp.helpJsHint[this.entityId];
 					
-					if(this.appFunctionsAsync.includes(this.entitySelectedId))
+					if(this.appFunctionsAsync.includes(this.entityId))
 						postfix = postfixAsync;
 					
-					text = `${prefix}.${this.entitySelectedId}(${opt})${postfix}`;
+					text = `${prefix}.${this.entityId}(${opt})${postfix}`;
 				break;
 				case 'collection':
-					col = this.collectionIdMap[this.entitySelectedId];
+					col = this.collectionIdMap[this.entityId];
 					mod = this.moduleIdMap[col.moduleId];
 					let columns = [];
 					for(let i = 0, j = col.columns.length; i < j; i++) {
@@ -461,25 +560,25 @@ let MyBuilderJsFunction = {
 					}
 				break;
 				case 'field':
-					fld  = this.dataFieldMap[this.entitySelectedId];
+					fld  = this.dataFieldMap[this.entityId];
 					atr  = this.attributeIdMap[fld.attributeId];
 					rel  = this.relationIdMap[atr.relationId];
 					opt  = this.fieldMode.includes('set') ? ', '+this.capApp.value : '';
 					text = `${prefix}.${this.fieldMode}({${fld.index}:${rel.name}.${atr.name}}${opt})`;
 				break;
 				case 'form':
-					frm  = this.formIdMap[this.entitySelectedId];
+					frm  = this.formIdMap[this.entityId];
 					mod  = this.moduleIdMap[frm.moduleId];
 					text = `${prefix}.open_form({${mod.name}.${frm.name}},0,false)`;
 				break;
 				case 'jsFunction':
-					fnc  = this.jsFunctionIdMap[this.entitySelectedId];
+					fnc  = this.jsFunctionIdMap[this.entityId];
 					mod  = this.moduleIdMap[fnc.moduleId];
 					args = fnc.codeArgs === '' ? '' : ', '+fnc.codeArgs.toUpperCase();
 					text = `${prefix}.call_frontend({${mod.name}.${fnc.name}}${args})`;
 				break;
 				case 'pgFunction':
-					fnc  = this.pgFunctionIdMap[this.entitySelectedId];
+					fnc  = this.pgFunctionIdMap[this.entityId];
 					mod  = this.moduleIdMap[fnc.moduleId];
 					
 					// add argument names to show function interface
@@ -511,24 +610,18 @@ let MyBuilderJsFunction = {
 				field.value += text;
 			}
 			this.codeFunction = field.value;
-			this.entitySelectedId = null;
+			this.entityId = null;
 		},
-		toggleEntity:function(entityName,id) {
-			if(this.entitySelected === entityName && this.entitySelectedId === id) {
-				this.entitySelected   = '';
-				this.entitySelectedId = null;
+		toggleEntity(entityName,id) {
+			if(this.entity === entityName && this.entityId === id) {
+				this.entity   = '';
+				this.entityId = null;
 				return;
 			}
-			this.entitySelected   = entityName;
-			this.entitySelectedId = id;
+			this.entity   = entityName;
+			this.entityId = id;
 		},
-		toggleModule:function(id) {
-			const pos = this.moduleIdsOpen.indexOf(id);
-			
-			return pos === -1 ? this.moduleIdsOpen.push(id)
-				: this.moduleIdsOpen.splice(pos,1);
-		},
-		showHelp:function(top,text) {
+		showHelp(top,text) {
 			this.$store.commit('dialog',{
 				captionTop:top,
 				captionBody:text,
@@ -541,7 +634,7 @@ let MyBuilderJsFunction = {
 		},
 		
 		// placeholders are used for storing entities via ID instead of name (which can change)
-		placeholdersSet:function(body) {
+		placeholdersSet(body) {
 			let that   = this;
 			let fields = this.dataFieldMap;
 			let uuid   = '[a-z0-9\-]{36}';
@@ -610,7 +703,7 @@ let MyBuilderJsFunction = {
 			
 			return body;
 		},
-		placeholdersUnset:function() {
+		placeholdersUnset() {
 			let that   = this;
 			let body   = this.codeFunction;
 			let fields = this.dataFieldMap;
@@ -749,13 +842,36 @@ let MyBuilderJsFunction = {
 		},
 		
 		// backend calls
-		set:function() {
+		delAsk() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.delete,
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.delete,
+					exec:this.del,
+					image:'delete.png'
+				},{
+					caption:this.capGen.button.cancel,
+					image:'cancel.png'
+				}]
+			});
+		},
+		del() {
+			ws.send('jsFunction','del',{id:this.jsFunction.id},true).then(
+				() => {
+					this.$root.schemaReload(this.jsFunction.moduleId);
+					this.$router.push('/builder/js-functions/'+this.jsFunction.moduleId);
+				},
+				this.$root.genericError
+			);
+		},
+		set() {
 			ws.sendMultiple([
 				ws.prepare('jsFunction','set',{
 					id:this.jsFunction.id,
 					moduleId:this.jsFunction.moduleId,
 					formId:this.jsFunction.formId,
-					name:this.jsFunction.name,
+					name:this.name,
 					codeArgs:this.codeArgs,
 					codeFunction:this.placeholdersUnset(),
 					codeReturns:this.codeReturns,

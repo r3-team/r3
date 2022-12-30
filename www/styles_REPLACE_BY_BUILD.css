@@ -1,4 +1,5 @@
 @import url("comps/app.css");
+@import url("comps/articles.css");
 @import url("comps/button.css");
 @import url("comps/calendar.css");
 @import url("comps/field.css");
@@ -13,6 +14,7 @@
 @import url("comps/login.css");
 @import url("comps/menu.css");
 @import url("comps/settings.css");
+@import url("comps/tabs.css");
 @import url("comps/valueRich.css");
 @import url("comps/admin/admin.css");
 @import url("comps/builder/builder.css");

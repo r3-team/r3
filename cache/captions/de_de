@@ -2,6 +2,7 @@
 	"generic":{
 		"button":{
 			"add":"Hinzufügen",
+			"all":"Alle",
 			"apply":"Ausführen",
 			"cancel":"Abbrechen",
 			"clear":"Entfernen",
@@ -24,6 +25,7 @@
 			"new":"Neu",
 			"newHint":"Neuen Datensatz erstellen",
 			"open":"Öffnen",
+			"openBuilder":"Builder öffnen",
 			"ok":"Ok",
 			"paste":"Einfügen",
 			"refresh":"Neu laden",
@@ -73,12 +75,17 @@
 		"available":"Verfügbar",
 		"busy":"Arbeitet - Zum Abbrechen hier klicken",
 		"category":"Kategorie",
+		"content":"Inhalt",
 		"date":"Datum",
 		"description":"Beschreibung",
+		"details":"Details",
+		"displayed":"Angezeigt",
 		"errorTitle":"Fehler",
 		"files":"Dateien",
 		"filters":"Filter",
+		"form":"Formular",
 		"home":"Start",
+		"help":"Hilfe",
 		"icon":"Icon",
 		"id":"ID",
 		"inputDecimal":"Wert muss dezimal sein",
@@ -91,6 +98,7 @@
 		"inputSmall":"Wert ist zu klein (min. {MIN})",
 		"inputTooFewFiles":"Zu wenige Dateien",
 		"inputTooManyFiles":"Zu viele Dateien",
+		"interval":"Intervall",
 		"licenseRequired":"Lizenz erforderlich",
 		"limit":"Anzahl",
 		"menu":"Menü",
@@ -100,9 +108,11 @@
 		"nothingSelected":"Keine Auswahl getroffen",
 		"nothingThere":"Keine Ergebnisse verfügbar",
 		"notice":"Hinweis",
+		"notSaved":"Ungespeichert",
 		"order":"Reihenf.",
 		"password":"Passwort",
 		"preview":"Vorschau",
+		"properties":"Eigenschaften",
 		"readonly":"Schreibschutz",
 		"record":"Datensatz",
 		"results":"{CNT} Ergebnisse",
@@ -110,15 +120,28 @@
 		"resultsOf":"/ {CNT}",
 		"role":"Rolle",
 		"selected":"Ausgewählt",
+		"settings":"Einstellungen",
 		"size":"Größe",
 		"status":"Status",
+		"threeDots":"...",
 		"title":"Titel",
 		"token":"Token",
-		"threeDots":"...",
+		"type":"Typ",
 		"username":"Benutzername",
 		"version":"Version"
 	},
 	"admin":{
+		"backups":{
+			"count":"Versionen behalten",
+			"daily":"Täglich",
+			"dir":"Zielverzeichnis*",
+			"dirNote":"*Stelle sicher, dass dieser Pfad auf einen separaten Netzwerkspeicherort zeigt oder der Verzeichnisinhalt regelmäßig auf ein Zweitsystem kopiert wird. Dies ist für eine Wiederherstellung notwendig, falls das System komplett ausfällt.",
+			"full":"Vollsicherung",
+			"list":"Sicherungssätze",
+			"monthly":"Monatlich",
+			"title":"Integrierte Vollsicherungen",
+			"weekly":"Wöchentlich"
+		},
 		"cluster":{
 			"button":{
 				"shutdown":"Herunterfahren"
@@ -155,13 +178,6 @@
 			"appName":"Instanzname",
 			"appNameShort":"Seitentitel",
 			"appVersion":"Plattform-Version",
-			"backupCount":"Versionen behalten",
-			"backupDaily":"Täglich",
-			"backupDir":"Zielverzeichnis*",
-			"backupDirNote":"*Stelle sicher, dass dieser Pfad auf einen separaten Netzwerkspeicherort zeigt oder der Verzeichnisinhalt regelmäßig auf ein Zweitsystem kopiert wird. Dies ist für eine Wiederherstellung notwendig, falls das System komplett ausfällt.",
-			"backupEmbeddedNote":"Die integrierte Vollsicherung ist nur verfügbar, wenn das eigenständige Betriebsmodell genutzt wird.<br /><br />Die Systemdokumentation enthält Kapitel zu empfohlenen Sicherungsmaßnahmen für dedizierte Instanzen.",
-			"backupMonthly":"Monatlich",
-			"backupWeekly":"Wöchentlich",
 			"bruteforceAttempts":"Host blocken nach Versuchen",
 			"bruteforceCountBlocked":"Blockierte Hosts",
 			"bruteforceCountTracked":"Verfolgte Hosts",
@@ -206,7 +222,6 @@
 			"repoSkipVerify":"Nicht vertrauenswürdige Zertifikate zulassen",
 			"repoUrl":"Repository-URL",
 			"title":"Systemkonfiguration",
-			"titleBackup":"Integrierte Vollsicherungen",
 			"titleCustom":"Anpassungen",
 			"titleGeneral":"Allgemein",
 			"titleIcs":"Kalender-Abonnements",
@@ -224,6 +239,8 @@
 		"files":{
 			"deleteDate":"Datei gelöscht",
 			"filesKeepDaysDeleted":"Gelöschte Dateien für X Tage aufheben",
+			"fileVersionsKeepCount":"Mindestens X Dateiversionen aufheben",
+			"fileVersionsKeepDays":"Dateiversionen für mindestens X Tage aufheben",
 			"titleConfig":"Globale Konfiguration",
 			"titleDeleted":"Gelöschte Dateien"
 		},
@@ -283,7 +300,8 @@
 		},
 		"login":{
 			"dialog":{
-				"delete":"Bist du sicher, dass du diesen Login löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>"
+				"delete":"Bist du sicher, dass du diesen Login löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>",
+				"resetTotp":"Hiermit werden alle Multi-Faktor-Authentifizierungsmethoden für diese Anmeldung zurückgesetzt. Systemzugriff ist dann mit nur Benutzername & Passwort möglich.<br /><br />Möchten Sie fortfahren?"
 			},
 			"error":{
 				"uniqueConstraint":"Benutzername muss einzigartig sein"
@@ -293,6 +311,8 @@
 			"authentication":"Authentifizierung",
 			"language":"Sprache",
 			"ldapAssignActive":"Rollen werden anhand LDAP-Gruppenmitgliedschaften zugewiesen",
+			"mfa":"MFA",
+			"mfaHint":"Multi-Faktor-Authentifizierung",
 			"newLogin":"Neue Anmeldung",
 			"noAuth":"Öffentlich",
 			"noAuthHint":"Kann sich ohne Authentifizierung einloggen",
@@ -306,7 +326,7 @@
 		},
 		"logs":{
 			"contextLabel":{
-				"backup":"Backup",
+				"backup":"Sicherung",
 				"cache":"Cache",
 				"cluster":"Cluster",
 				"csv":"CSV-Import/Export",
@@ -374,7 +394,7 @@
 				"updateAll":"Alle aktualisieren ({COUNT})"
 			},
 			"dialog":{
-				"delete":"Bist du sicher, dass du diese Anwendung löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelles Backup nicht rückgängig zu machen.</b>{APPS}",
+				"delete":"Bist du sicher, dass du diese Anwendung löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelle Sicherung nicht rückgängig zu machen.</b>{APPS}",
 				"deleteApps":"<br /><br />Folgende Anwendungen sind von dieser abhängig und werden ebenfalls gelöscht:<ul>{LIST}</ul>",
 				"deleteMulti":"Diese Aktion wird <b>{COUNT} Anwendung(en)</b> mit dazugehörigen Daten <b>permanent</b> löschen.<br /><br />Möchtest du wirklich fortfahren?",
 				"deleteTitle":"Permanente Löschung der Anwendung \"{APP}\"",
@@ -385,7 +405,7 @@
 				"installFailed":"Aktualisierung der Anwendung ist fehlgeschlagen. Bei Aktualisierung einer einzelnen Anwendung können fehlende Abhängigkeiten zu Problemen führen - bitte versuchen, alle Anwendungen gemeinsam zu aktualisieren, um diese zu lösen.<br /><br />Fehlermeldung: {ERROR}",
 				"uploadFailed":"Anwendung konnte nicht von der hochgeladenen Datei installiert werden. Bitte das Loglevel für Transfere auf \"Alles\" erhöhen und erneut versuchen - Details werden dann im Systemlog aufgeführt."
 			},
-			"changeLog":"Änderungshistorie",
+			"changeLog":"Änderungen",
 			"hidden":"Versteckt",
 			"import":"Von Datei hinzufügen",
 			"nothingInstalled":"Es sind keine Anwendungen installiert.",
@@ -426,6 +446,7 @@
 				"runNowHint":"Aufgabe wird so bald wie möglich ausgeführt."
 			},
 			"names":{
+				"backupRun":"Integrierte Sicherungen steuern",
 				"cleanupBruteforce":"Bereinigung des Bruteforce-Cache",
 				"cleanupDataLogs":"Bereinigung abgelaufener Änderungshistorie",
 				"cleanupFiles":"Bereinigung abgelaufener Datei-Uploads",
@@ -433,7 +454,6 @@
 				"cleanupTempDir":"Bereinigung des temporären Verzeichnisses",
 				"clusterCheckIn":"Cluster-Knoten einchecken",
 				"clusterProcessEvents":"Cluster-Ereignisse verarbeiten",
-				"embeddedBackup":"Integrierte Backups steuern",
 				"httpCertRenew":"Neuladen des SSL-Zertifikates falls es erneuert wurde",
 				"importLdapLogins":"Import von Anmeldungen und Rollen über LDAP",
 				"mailAttach":"E-Mail-Anhänge transferieren",
@@ -462,6 +482,7 @@
 			"systemTasks":"Systemaufgaben (global)",
 			"systemTasksNode":"Systemaufgaben (Clusterknoten)"
 		},
+		"navigationBackups":"Sicherungen",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"System",
 		"navigationFiles":"Dateien",
@@ -479,21 +500,36 @@
 		"titleDocs":"Admin-Dokumentation"
 	},
 	"builder":{
+		"articles":{
+			"dialog":{
+				"delete":"Bist du sicher, dass du diesen Artikel löschen möchtest?"
+			},
+			"option":{
+				"assignForm":"Formkontexthilfe",
+				"assignModule":"Anwendungshilfe"
+			},
+			"addArticle":"Artikel hinzufügen",
+			"assignTo":"Zuweisen an",
+			"body":"Inhalt",
+			"new":"Neuer Artikel",
+			"title":"Hilfe-Artikel",
+			"titleAssign":"Artikel zuweisen",
+			"titleAssigned":"Zugewiesen"
+		},
 		"attribute":{
 			"dialog":{
-				"delete":"Bist du sicher, dass du dieses Attribut löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelles Backup nicht rückgängig zu machen.</b>"
+				"delete":"Bist du sicher, dass du dieses Attribut löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelle Sicherung nicht rückgängig zu machen.</b>"
 			},
 			"new":"Neues Attribut"
 		},
 		"collection":{
-			"button":{
-				"inHeader":"In Titelzeile anzeigen"
-			},
 			"dialog":{
 				"delete":"Bist du sicher, dass du diese Sammlung löschen möchtest?"
 			},
-			"columnsTarget":"Spalten hier ablegen",
-			"contentColumn":"Spalten-Datenabfrage",
+			"columnSettings":"Spalteneinstellungen",
+			"columnsAvailable":"Verfügbare Spalten",
+			"columnsTarget":"Aktive Spalten",
+			"inHeader":"In Titelzeile anzeigen",
 			"new":"Neue Sammlung",
 			"previewHint":"Sammlungswerte für den eingeloggten Benutzer. Sammlungen werden beim Seitenaufruf geladen (F5 zum neu laden) wenn sie in zugewiesenen Rollen aktiviert sind.",
 			"query":"Query",
@@ -540,8 +576,7 @@
 				},
 				"event":"Ereignis",
 				"eventBefore":"Vor Ereignis",
-				"jsFunctionId":"Frontend-Funktion ausführen",
-				"title":"Formularfunktionen"
+				"jsFunctionId":"Frontend-Funktion ausführen"
 			},
 			"option":{
 				"displayColor":"Farbe",
@@ -559,22 +594,18 @@
 				"displayRichtext":"Rich-Text",
 				"displaySlider":"Werteschieber",
 				"displayUrl":"URL",
+				"effectField":"Feld",
+				"effectTab":"Tab",
 				"ganttStepsDays":"Tage",
 				"ganttStepsHours":"Stunden"
 			},
 			"states":{
-				"button":{
-					"addCondition":"Kondition hinzufügen",
-					"addEffect":"Effekt hinzufügen",
-					"showAll":"Alle zeigen"
-				},
 				"option":{
 					"filterFieldIdHint":"Nach Feld"
 				},
 				"conditions":"Konditionen",
 				"descriptionHint":"Beschreibung",
-				"effects":"Effekte",
-				"title":"Formularzustände"
+				"effects":"Effekte"
 			},
 			"aggregator":"Aggregieren",
 			"autoRenew":"Auto-Aktualisierung",
@@ -582,13 +613,10 @@
 			"autoRenewHint":"in Sekunden",
 			"autoSelect":"Datensätze autom. wählen",
 			"autoSelectHint":"0=aus, 2=erste zwei, -3=letzten drei",
-			"captions":"Beschriftungen",
 			"category":"Kategorieauswahl",
 			"collectionIdDef":"Standardwert(e) aus Sammlung",
 			"collectionHint":"*Sammlung wird nur beeinflusst, wenn sie als Filterkriterium in der Datenabfrage genutzt wird.",
-			"collectionTitle":"Sammlung durch Eingabe filtern",
-			"columnsTarget":"Spalten hier ablegen",
-			"columnsTemplates":"Verfügbare Spalten",
+			"collectionTitle":"Sammlung filtern",
 			"columnBatch":"Spaltenstapel",
 			"columnBatchNot":"nicht gestapelt",
 			"columnBatchHint":"Spalte ist Teil von Stapel {CNT}",
@@ -601,12 +629,7 @@
 			"columnSize0":"automatisch",
 			"columnTitle":"Title",
 			"columnWrap":"Textumbruch",
-			"containerContentLayout":"Inhalts-Layout",
-			"content":"Formular-Datenabfrage",
-			"contentColumn":"Spalten-Datenabfrage",
-			"contentField":"Feld-Datenabfrage",
 			"copy":"Formular duplizieren",
-			"copyForm":"Formular auswählen",
 			"copyNewName":"Neuer Formularname",
 			"csvExport":"CSV-Export",
 			"csvImport":"CSV-Import",
@@ -637,7 +660,6 @@
 			"fieldRegexCheck":"Validieren mit RegEx",
 			"fieldSize":"Startgröße (Pixel)",
 			"fieldSize0":"automatisch",
-			"fieldTitle":"Titel",
 			"fileExt":"Dateiendung",
 			"fileName":"Dateiname",
 			"fileSize":"Dateigröße",
@@ -673,9 +695,11 @@
 			"presetOpen":"Vord. Datensatz öffnen",
 			"readonly":"Lesend",
 			"required":"Benötigt",
-			"showFunctions":"Funktionen",
-			"showHelp":"Hilfe",
-			"showStates":"Zustände",
+			"scale":"UI-Skalierung",
+			"sidebarField":"{NAME}: Feldeinstellungen",
+			"sidebarFieldColumns":"Spalten",
+			"sidebarFieldColumnSettings":"Spalteneinstellungen",
+			"sidebarForm":"Formulareinstellungen",
 			"sql":"SQL-Vorschau",
 			"state":"Status",
 			"stateDefault":"standard",
@@ -685,13 +709,16 @@
 			"stateRequired":"benötigt",
 			"subQuery":"Sub-Query",
 			"subQueryAttribute":"Attribut",
-			"title":"Formulare"
+			"tabs":"Tabs",
+			"tabFunctions":"Funktionen ({CNT})",
+			"tabStates":"Zustände ({CNT})",
+			"title":"Formulare",
+			"titleOne":"Formular \"{NAME}\""
 		},
 		"function":{
 			"button":{
 				"addNew":"NEW-Präfix",
 				"addOld":"OLD-Präfix",
-				"addSchedule":"Zeitplan hinzufügen",
 				"details":"Details",
 				"template":"Vorlage"
 			},
@@ -783,42 +810,44 @@
 			"collectionId":"[Sammlung auswählen]",
 			"entityInput":"Platzhalter selektieren und in den Funktions-Code klicken, um <b>upgrade-sicheren</b> Syntax zu verwenden.",
 			"fieldId":"[Feld auswählen]",
-			"form":"An Formular knüpfen",
+			"form":"An Formular zugewiesen",
 			"functionsBackend":"Backend-Funktionen",
 			"functionsFrontend":"Frontend-Funktionen",
-			"intervalAtDayForMonths":"am Tag im Monat",
-			"intervalAtDayForWeeks":"am Wochentag (0=So, 1=Mo, ...)",
-			"intervalAtDayForYears":"am Tag im Jahr",
+			"intervalAtDayForMonths":"am Tag",
+			"intervalAtDayForWeeks":"am Wochentag",
+			"intervalAtDayForYears":"am Tag",
 			"intervalAtTime":"um Uhrzeit",
-			"intervalEvery":"Ausführen: Alle",
+			"intervalEvery":"Alle",
 			"isFrontendExec":"Frontend-Aufruf",
 			"isTrigger":"Trigger",
 			"language":"Language",
 			"languageJs":"JavaScript",
 			"languagePg":"PL/pgSQL",
 			"new":"Neue Funktion",
-			"placeholderInsert":"Auf Funktionskörper klicken, um Referenz einzufügen",
+			"placeholderAttribute":"Attribut",
+			"placeholderInsert":"Auf Funktionskörper klicken, um Platzhalter einzufügen",
+			"placeholderFunction":"Funktion",
+			"placeholderRelation":"Relation",
 			"placeholders":"Platzhalter",
 			"placeholdersCollections":"Sammlungen",
 			"placeholdersFormFields":"Formular-Datenfelder",
 			"placeholdersFormQuery":"Formular-Datenabfrage",
 			"placeholdersInstance":"Instanzfunktionen",
-			"placeholdersModules":"Anwendungen",
-			"runOnce":"Einmal ausführen",
-			"schedules":"Wiederholung",
-			"schedulesItem":"{CNT} Zeitpläne",
+			"runOnce":"Einmalig",
+			"runRegular":"Regelmäßig",
+			"runType":"Ausführung",
+			"schedules":"Zeitpläne",
 			"title":"Funktionen",
-			"titleJs":"Frontend-Funktionen ({CNT})",
-			"titlePg":"Backend-Funktionen ({CNT})",
-			"titleOne":"Funktionstitel",
+			"titleJs":"Frontend-Funktionen",
+			"titleJsOne":"Frontend-Funktionen \"{NAME}\"",
+			"titlePg":"Backend-Funktionen",
+			"titlePgOne":"Backend-Funktionen \"{NAME}\"",
 			"value":"VALUE"
-		},
-		"help":{
-			"title":"Anwendungshilfe"
 		},
 		"icon":{
 			"add":"Icon-Datei hinzufügen/bearbeiten",
 			"addHelp":"Es werden nur PNG-Dateien mit bis zu 64kb unterstützt. Icons sollten immer quadratisch sein.",
+			"nameHint":"Optionaler Icon-Name",
 			"title":"Icons"
 		},
 		"loginForm":{
@@ -832,7 +861,7 @@
 			"button":{
 				"add":"Eintrag hinzufügen"
 			},
-			"collections":"Sammlungen",
+			"collections":"Sammlungswerte im Menü anzeigen",
 			"copy":"Alle Menüeintrage kopieren von",
 			"formId":"- Formular auswählen -",
 			"showChildrenHint":"Standardmäßig Untereinträge anzeigen",
@@ -845,10 +874,15 @@
 				"exportKeySet":"Schlüssel zwischenspeichern",
 				"graph":"Abhängigkeitsdiagramm",
 				"keyCreate":"Erzeugen",
+				"manageApps":"Anwendungen verwalten",
+				"repo":"Vom Repository installieren",
 				"versionCreate":"Neue Version erzeugen"
 			},
 			"color":"Farbe",
-			"dependsOn":"Abhängig",
+			"colorHint":"Primäre Anwendungsfarbe - sichtbar in der obersten Leiste und Menü, wenn nicht durch Customizing und/oder Benutzereinstellung überschrieben. Die Systemdarstellung ist optimiert für ausgewaschene, dunklere Farben (dunkles Pastell).",
+			"dependsOn":"Baut auf",
+			"dependsOnAdd":"Anwendung hinzufügen",
+			"dependsOnHint":"Verwenden Sie andere Anwendungen als Grundlage für Ihre eigenen. Dies ermöglicht die Wiederverwendung oder Erweiterung bestehender Relationen, Formulare und so weiter.",
 			"export":"Transfer - Anwendung in Datei exportieren",
 			"exportKeyBad":"Signierschlüssel scheint ungültig zu sein. Stelle sicher, dass du den privaten Schlüssel für den Export verwendest.",
 			"exportKeyEmpty":"Export erfordert einen Signierschlüssel",
@@ -859,27 +893,52 @@
 			"exportStateNok":"Änderungen an akt. Version",
 			"exportStateOk":"Bereit",
 			"graphDependsOn":"Abhängig von: {COUNT}",
+			"iconHint":"Icons sind verfügbar, sobald sie dieser Anwendung hinzugefügt worden sind. Icons von Anwendungen, auf denen aufgebaut wird, können ebenfalls genutzt werden.",
 			"keyCreate":"Transfer - Neues Signierschlüsselpaar erzeugen",
-			"keyCreateInfo":"Stelle sicher, dass der private Schlüssel zur jeder Zeit sicher verwahrt wird. Der öffentliche Schlüssel muss in Zielinstanzen von REI3 importiert werden, bevor Anwendungen installiert werden können.",
+			"keyCreateInfo":"Stelle sicher, dass der private Schlüssel zu jeder Zeit sicher verwahrt wird. Der öffentliche Schlüssel muss in Zielinstanzen von REI3 importiert werden, bevor Anwendungen installiert werden können.",
 			"keyCreateLength":"Schlüssellänge auswählen",
 			"languageCode":"Sprach-Code",
 			"languageCodeHint":"en_us, zh_cn, de_de, ...",
-			"languageMain":"Primäre Sprache*",
-			"languageMainHint":"*wird verwendet wenn die gewählte Benutzersprache nicht verfügbar ist.",
-			"languageTitle":"Anwendungstitel",
-			"languages":"Sprachen",
-			"new":"Neue Anwendung",
+			"languageMain":"Rückfallsprache",
+			"languageMainHint":"Wird verwendet, wenn die gewählte Benutzersprache von dieser Anwendung nicht angeboten wird.",
+			"languages":"Anwendungssprachen",
+			"languagesHint":"Sprachen, in der diese Anwendung verfügbar ist.",
+			"nameHint":"Referenzname für diese Anwendung. Dieser Name muss in einem REI3-System einzigartig sein, deswegen kann ein Präfix basierend auf dem Organisationsnamen sinnvoll sein.",
+			"nameHolder":"work_scheduler, inventory_planner, ...",
 			"parent":"Zugeordnet zu",
+			"parentHint":"Wenn eine Anwendung einer anderen Anwendung zugewiesen wird, wird sie in Menüs und Übersichten als deren Kind angezeigt - es gibt keine weitere funktionale Änderung. Anwendungen können nur anderen Anwendungen zugewiesen werden, auf denen sie aufbauen.",
 			"position":"Standardposition",
-			"releaseBuild":"Anw.-Version",
-			"releaseBuildApp":"Plattform-Version",
-			"releaseDate":"Veröff.-Datum",
-			"startForm":"Startformular",
-			"startFormDefault":"Standard-Startformular*",
-			"startFormDefaultHint":"*wird verwendet wenn kein anderes Formular per Rolle zugewiesen werden kann.",
-			"startForms":"Startformulare",
-			"startFormsExplanation":"Das erste Startformular wird verwendet, das einer Rolle der aktuellen Anmeldung entspricht.",
-			"title":"Anwendungen"
+			"positionHint":"Position der Anwendung in der Kopfzeile (kleinere zuerst). Kann von Systemadministratoren überschrieben werden.",
+			"releaseBuild":"Anwendungsversion",
+			"releaseBuildApp":"Plattformversion",
+			"releaseDate":"Veröffentlichungsdatum",
+			"startFormByRole":"Startformular nach Rolle",
+			"startFormByRoleHint":"Das erste Startformular wird verwendet, das einer Rolle der aktuellen Anmeldung entspricht. Überschreibt das reguläre Startformular.",
+			"startFormDefault":"Startformular",
+			"startFormDefaultHint":"Formular, das gezeigt wird, wenn Benutzer die Anwendung öffnet.",
+			"title":"Anwendung \"{NAME}\"",
+			"titleAll":"Anwendungen",
+			"titleHint":"Der Anwendungstitel, sichtbar für Benutzer, wenn sie mit der Anwendung arbeiten."
+		},
+		"new":{
+			"message":{
+				"module":"<p>Bitte wählen Sie einen Namen für Ihre Anwendung. Dieser Name dient zur eindeutigen Identifizierung Ihrer Anwendung in einem REI3-System. Er ist nicht für Benutzer sichtbar.</p><h3>Beispiele:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Da der Anwendungsname eindeutig sein muss, kann ein nach Ihrer Organisation benannter Präfix sinnvoll sein. Falls Ihre Organisation bspw. \"Modern Fashion GmbH\" heißt, könnten Sie \"mfg\" als Präfix nutzen (also \"mfg_shift_planner\").</p>",
+				"relation":"<p>Ein Relationsname sollte darstellen, was in dieser gespeichert wird. Er muss in einer Anwendung einzigartig sein.</p><h3>Beispiele:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
+			},
+			"collection":"Neue Sammlung",
+			"form":"Neues Formular",
+			"jsFunction":"Neue Frontend-Funktion",
+			"jsFunctionFormId":"An Formular zugewiesen",
+			"jsFunctionFormIdHint":"Zugewiesene Funktionen können mit einem Formular interagieren, um bspw. Formularfelder zu lesen oder zu beschreiben. Wenn zugewiesen, können Funktionen nur in dem gewählten Formular ausgewählt und auch nicht in anderen Frontend-Funktionen aufgerufen werden. Diese Einstellung kann nachträglich nicht geändert werden.",
+			"module":"Neue Anwendung",
+			"options":"Weitere Optionen",
+			"pgFunction":"Neue Backend-Funktion",
+			"pgFunctionTrigger":"Trigger",
+			"pgFunctionTriggerHint":"Macht aus dieser Backend-Funktion einen Trigger. Ein Trigger kann in einer Relation referenziert werden, um auf Datenbank-Ereignisse zu reagieren, wie z. B. wenn Datensätze erstellt, aktualisiert oder gelöscht werden. Diese Einstellung kann nachträglich nicht geändert werden.",
+			"relation":"Neue Relation",
+			"relationEncryption":"Ende-zu-Ende-Verschlüsselung",
+			"relationEncryptionHint":"Erlaubt Ende-zu-Ende-Verschlüsselung (E2EE) für Attribute auf dieser Relation. E2EE hat Vor- und Nachteile - die Builder-Dokumentation sollte hierzu gelesen werden. Diese Einstellung kann nachträglich nicht geändert werden.",
+			"role":"Neue Rolle"
 		},
 		"openFormInput":{
 			"attributeApply":"...um Wert auf Formular zu setzen",
@@ -924,7 +983,7 @@
 		},
 		"relation":{
 			"dialog":{
-				"deleteRelation":"Bist du sicher, dass du diese Relation löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelles Backup nicht rückgängig zu machen.</b>"
+				"delete":"Bist du sicher, dass du diese Relation löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelle Sicherung nicht rückgängig zu machen.</b>"
 			},
 			"attributes":"Attribute ({CNT})",
 			"codeCondition":"Kondition",
@@ -932,6 +991,7 @@
 			"def":"DEFAULT",
 			"encrypted":"E2E-Verschlüsselt",
 			"encryption":"E2E-Verschlüsselung",
+			"encryptionHint":"Relation unterstützt Ende-zu-Ende verschlüsselte Attributwerte.",
 			"execute":"Ausführen",
 			"external":"Referenzierende Beziehungen ({CNT})",
 			"fires":"Started",
@@ -942,17 +1002,15 @@
 			"indexAutoFki":"System",
 			"indexCreate":"Attribut neuen Index hinzufügen",
 			"indexUnique":"Einzigartig",
-			"isConstraint":"CONSTRAINT",
-			"isDeferrable":"DEFERRABLE",
-			"isDeferred":"INIT. DEFERRED",
+			"isDeferred":"DEFERRED",
 			"length":"Länge",
-			"newRelation":"Neue Relation",
+			"nameHint":"Referenzname für diese Relation. Muss einzigartig in dieser Anwendung sein.",
 			"nullable":"Nullable",
 			"onDelete":"DELETE",
 			"onInsert":"INSERT",
 			"onUpdate":"UPDATE",
 			"perRow":"EACH ROW",
-			"policies":"Richtlinien",
+			"policies":"Richtlinien ({CNT})",
 			"policyActions":"Handlung",
 			"policyActionDelete":"Löschen",
 			"policyActionSelect":"Auswählen",
@@ -974,8 +1032,9 @@
 			"retention":"Änderungshistorie",
 			"retentionCount":"X Änderungen behalten",
 			"retentionDays":"Für X Tage behalten",
+			"retentionHint":"Wie viele (Anzahl) oder wie lange (in Tagen) Änderungslogs vorbehalten werden.",
 			"title":"Relationen",
-			"titleOne":"Relationsdetails \"{NAME}\"",
+			"titleOne":"Relation \"{NAME}\"",
 			"triggers":"Trigger ({CNT})"
 		},
 		"role":{
@@ -1007,31 +1066,35 @@
 			"newRole":"Neue Rolle",
 			"relation":"Relation",
 			"title":"Rollen",
-			"titleOne":"Rollentitel"
+			"titleOne":"Role \"{NAME}\""
 		},
 		"backHint":"Zurück zur Anwendungsübersicht",
 		"language":"Übersetzung",
 		"languageNextHint":"Zur nächsten Übersetzung wechseln (Hotkey: STRG + q)",
 		"noOwner":"Anwendung ist schreibgeschützt",
+		"navigationArticles":"Hilfe-Artikel",
 		"navigationCollections":"Sammlungen",
-		"navigationCollectionsSub":"Sammlungsdetails",
 		"navigationFilterHint":"Nach Text filtern",
 		"navigationForms":"Formulare",
-		"navigationFormsSub":"Formular-Design",
-		"navigationFunctions":"Funktionen",
-		"navigationFunctionsSub":"Funktionsdetails",
-		"navigationFunctionsSubBackend":"Backend",
-		"navigationFunctionsSubFrontend":"Frontend",
-		"navigationHelp":"Hilfe",
+		"navigationJsFunctions":"Funktionen (front)",
+		"navigationPgFunctions":"Funktionen (back)",
 		"navigationIcons":"Icons",
 		"navigationLoginForms":"Anmeldeformulare",
 		"navigationMenu":"Menüs",
+		"navigationModule":"Anwendung",
 		"navigationRelations":"Relationen",
-		"navigationRelationsSub":"Relationsdetails",
 		"navigationRoles":"Rollen",
-		"navigationRolesSub":"Rollenzugriff",
 		"pageTitle":"Builder",
 		"pageTitleDocs":"Builder-Dokumentation"
+	},
+	"articles":{
+		"button":{
+			"pdf":"PDF"
+		},
+		"form":"Formularhilfe",
+		"module":"Anwendungshilfe",
+		"title":"Hilfeseiten",
+		"toc":"Inhaltsverzeichnis"
 	},
 	"calendar":{
 		"button":{
@@ -1079,11 +1142,11 @@
 	"error":{
 		"APP":{
 			"001":"Ein unerwarteter Fehler ist aufgetreten. Bitte erneut versuchen.",
-			"002":"Aktion konnte nicht innerhalb des erlaubten Zeitraums abgeschlossen werden. Wenn dies häufiger vorkommt, bitte den Systemadministrator informieren.",
-			"003":"Aktion wurde abgebrochen. Bitte erneut versuchen.",
+			"002":"Der Vorgang konnte nicht innerhalb des erlaubten Zeitraums abgeschlossen werden. Wenn dies häufiger vorkommt, bitte den Systemadministrator informieren.",
+			"003":"Der Vorgang wurde abgebrochen. Bitte erneut versuchen.",
 			"004":"Dieser Datensatz ist geschützt und kann nicht gelöscht werden.",
-			"005":"Entität konnte nicht erstellt werden, da kein Name eingegeben worden ist. Bitte einen Namen eingeben.",
-			"006":"Der gewählte Name ist ungültig. Bitte stelle sicher, dass...<ul><li>... er mit einen Buchstaben beginnt <b>(a-z)</b>.</li><li>... maximal <b>31</b> Zeichen lang ist.</li><li>... nur kleingeschriebene Buchstaben <b>(a-z)</b>, Unterstriche <b>(_)</b> oder Nummern <b>(0-9)</b> beinhaltet.</li></ul>Beispiele: storage_inventory_post21, facility_address, contact_book",
+			"005":"Die Entität konnte nicht erstellt werden, da kein Name eingegeben worden ist. Bitte einen Namen eingeben.",
+			"006":"Der gewählte Name ist ungültig. Bitte stelle sicher, dass...<ul><li>... er mit einen Buchstaben beginnt <b>(a-z)</b>.</li><li>... maximal <b>60</b> Zeichen lang ist.</li><li>... nur kleingeschriebene Buchstaben <b>(a-z)</b>, Unterstriche <b>(_)</b> oder Nummern <b>(0-9)</b> beinhaltet.</li></ul>Beispiele: storage_inventory_post21, facility_address, contact_book",
 			"007":"Ein referenziertes Modul ist unbekannt.",
 			"008":"Eine referenzierte Relation ist unbekannt.",
 			"009":"Ein referenziertes Attribut ist unbekannt."
@@ -1128,7 +1191,6 @@
 		"moduleRelated":"Ist dies Feedback für die offene Anwendung? ({NAME})",
 		"sendNok":"Feedback konnte nicht gesendet werden. Bitte versuche es später noch einmal.",
 		"sendOk":"Feedback wurde erfolgreich gesendet. Vielen Dank!",
-		"submit":"Auf das passende Icon klicken, um Feedback zu senden:",
 		"textHint":"Feedback hier eingeben (optional)",
 		"title":"Anonymes Feedback senden",
 		"whatIsSent":"Zusätzlich zu den sichtbaren Feldern (Feedback-Text, gewählter Smiley, usw.) werden folgende Daten gesendet:<br /><ul><li>Welche Anwendung und welches Formular offen sind</li><li>Die Versionen der offenen Anwendung und des Systems</li><li>Ob der Feedback-Geber ein Administrator ist</li><li>Eine zufällige Kennung, um Feedback aus dem gleichen System bündeln zu können</li></ul>",
@@ -1141,20 +1203,36 @@
 				"OR":"ODER"
 			},
 			"content":{
-				"attribute":"Attributwert",
-				"collection":"Sammlungswert(e)",
+				"attribute":"Attribut",
+				"collection":"Sammlung",
 				"field":"Feldwert",
-				"fieldChanged":"Feldwert geändert (TRUE/FALSE)",
-				"javascript":"JavaScript-Ausdruck",
-				"languageCode":"Login-Sprach-Code (en_us, ...)",
-				"login":"Login-ID (Integer)",
-				"preset":"ID von vordefinierten Datensatz (Integer)",
-				"record":"Datensatz-ID (Integer, Formular Relation 0)",
-				"recordNew":"Datensatz ist neu (TRUE/FALSE, Formular)",
-				"role":"Login hat Rolle (TRUE/FALSE)",
+				"fieldChanged":"Feld geändert",
+				"javascript":"JavaScript",
+				"languageCode":"Login-Sprache",
+				"login":"Login-ID",
+				"preset":"Vordef. Datensatz",
+				"record":"Datensatz-ID",
+				"recordNew":"Datensatz ist neu",
+				"role":"Login hat Rolle",
 				"subQuery":"Sub-Query",
-				"true":"Wahrheitswert (TRUE)",
+				"true":"Wahrheitswert",
 				"value":"Fester Wert"
+			},
+			"contentHint":{
+				"attribute":"Attributwert der aktuellen Query.",
+				"collection":"Wert(e) der gewählten Sammlungsspalte. '@>', '<@' oder '&&'-Operatoren können für den Vergleich mit mehreren Werten verwendet werden.",
+				"field":"Aktueller Feldwert.",
+				"fieldChanged":"WAHR/FALSCH, abhängig davon, ob sich ein Feldwert geändert hat.",
+				"javascript":"Rückgabewert des gewählten Javascript-Ausdrucks.",
+				"languageCode":"Der gewählte Sprach-Code von der aktuellen Anmeldung (en_us, de_de, ...).",
+				"login":"ID der aktuellen Anmeldung (Integer).",
+				"preset":"ID des gewählten, vordefinierten Datensatzes (Integer).",
+				"record":"ID des aktuellen Datensatzes auf dem Formular (Integer, Relation 0).",
+				"recordNew":"WAHR/FALSCH, abhängig davon, ob der aktuelle Datensatz auf dem Formular neu ist.",
+				"role":"WAHR/FALSCH, abhängig davon, ob der aktuellen Anmeldung die gewählte Rolle zugewiesen ist.",
+				"subQuery":"Rückgabewert der gewählten Sub-Query.",
+				"true":"WAHR-Wert zum Vergleich mit anderen WAHR-Werten.",
+				"value":"Ein statischer Wert zum Vergleich."
 			},
 			"operator":{
 				"eq":"gleich",
@@ -1210,9 +1288,6 @@
 			"recordValueCopied":"In die Zwischenablage kopiert",
 			"recordUpdated":"Datensatz aktualisiert"
 		},
-		"help":"Hilfeseiten",
-		"helpContextTitle":"Kontext",
-		"helpModuleTitle":"Anwendung",
 		"invalidInputs":"Eingaben prüfen!",
 		"noAccess":"Kein Zugriff"
 	},
@@ -1245,7 +1320,7 @@
 			"title":"Einrichtung"
 		},
 		"newVersion":"Update-Notifikation",
-		"newVersionText":"Eine neue Version von REI3 ist verfügbar.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">REI3 v{VERSION} herunterladen</a>",
+		"newVersionText":"Eine neue Version von REI3 ist verfügbar.<br /><br /><a href=\"https://rei3.de/de/downloads\" target=\"_blank\">REI3 v{VERSION} herunterladen</a>",
 		"noAccess":"Es ist noch kein Zugriff eingerichtet.<br />Bitte kontaktiere deinen Systemadministrator.",
 		"noAccessAdmin":"Um Zugriff zu erhalten, weise deiner Anmeldung Rollen zu.",
 		"noAccessTitle":"Kein Zugriff auf Anwendungen",
@@ -1383,24 +1458,43 @@
 		"tokensFixed":{
 			"button":{
 				"loadApp":"Anwendung",
-				"loadCnf":"Konfigdatei",
-				"install":"Client-Anwendung installieren"
+				"loadCnf":"Konfigdatei"
+			},
+			"context":{
+				"client":"REI3-Client",
+				"ics":"Kalender-App",
+				"totp":"Multi-Faktor"
 			},
 			"install":{
 				"intro":"Mit der Client-Anwendung können Dateien direkt aus REI3 geöffnet und bearbeitet werden.",
+				"nameHint":"'Mein Arbeits-PC'",
 				"steps":"Installationsschritte",
 				"step1":"Gerätename auswählen:",
 				"step2":"Betriebssystem auswählen:",
-				"step3":"Anwendung herunterladen:",
-				"step4":"Konfigdatei in den gleichen Ordner herunterladen:",
-				"step5":"Die Anwendung starten",
-				"step6":"Sie ist jetzt installiert und erscheint im Systemtray.",
-				"title":"Client-Anwendung installieren"
+				"step3":"Anwendung & Konfigdatei in den gleichen Ordner herunterladen:",
+				"step4":"Die Anwendung starten",
+				"step5":"Sie ist jetzt installiert und erscheint im Systemtray."
 			},
-			"nameHint":"'Mein Arbeits-PC'",
+			"message":{
+				"delete":"Sind Sie sicher, dass Sie diesen Eintrag löschen wollen? Dies kann nicht rückgängig gemacht werden."
+			},
+			"mfa":{
+				"apps":[
+					"Google Authenticator",
+					"Microsoft Authenticator",
+					"Aegis Authenticator",
+					"...oder eine beliebige Anwendung, die TOTP unterstützt"
+				],
+				"appsExample":"Ein paar Beispiele:",
+				"intro":"Sie können die Sicherheit Ihres Kontos erhöhen, indem Sie Multi-Faktor-Authentifizierung (MFA) verwenden. Um MFA zu aktivieren, nutzen Sie bitte eine Authentifizierungs-App auf einem separaten Gerät (z. B. einem Smartphone).",
+				"name":"Wählen Sie einen Namen für Ihr Gerät",
+				"nameHint":"'Mein Smartphone'",
+				"outro":"Verwenden Sie den QR-Code, um dieses Konto zu Ihrer Authenticator-App hinzuzufügen. Wenn Sie fertig sind, schließen Sie dieses Fenster. Sie können diesen Vorgang wiederholen, um MFA für mehrere Geräte zu aktivieren."
+			},
 			"titleAdd":"Client-Anwendung installieren",
 			"titleContext":"Verwendung",
 			"titleDateCreate":"Erstellt",
+			"titleMfa":"Multifaktor-Authentifizierung hinzufügen",
 			"titleName":"Gerätename"
 		},
 		"bordersAll":"Rahmen hinzufügen",
@@ -1427,7 +1521,7 @@
 		"titleAccount":"Konto",
 		"titleDisplay":"Anzeige",
 		"titleEncryption":"Ende-zu-Ende-Verschlüsselung",
-		"titleFixedTokens":"Gerätezugriff",
+		"titleFixedTokens":"Geräte",
 		"titleTheme":"Darstellung",
 		"warnUnsaved":"Warnung bei ungespeicherten Änderungen"
 	}

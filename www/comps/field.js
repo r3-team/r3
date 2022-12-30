@@ -14,6 +14,10 @@ import {
 	openLink
 } from './shared/generic.js';
 import {
+	fieldOptionGet,
+	fieldOptionSet
+} from './shared/field.js';
+import {
 	getFlexStyle,
 	getInputFieldName,
 	setGetterArgs
@@ -320,12 +324,13 @@ let MyField = {
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
 			:iconId="iconId ? iconId : null"
-			:isSingleField="formIsSingleField"
 			:layout="field.layout"
 			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
+			:isHiddenInTab="isHiddenInTab"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
-			:usesPageHistory="formIsSingleField && !formIsPopUp"
+			:scrolls="isAloneInForm || isAloneInTab"
+			:usesPageHistory="isAloneInForm && !formIsPopUp"
 		/>
 		
 		<!-- calendar -->
@@ -349,9 +354,10 @@ let MyField = {
 			:indexColor="field.indexColor"
 			:indexDate0="field.indexDate0"
 			:indexDate1="field.indexDate1"
+			:isHiddenInTab="isHiddenInTab"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
-			:usesPageHistory="formIsSingleField && !formIsPopUp"
+			:usesPageHistory="isAloneInForm && !formIsPopUp"
 		/>
 		
 		<!-- gantt -->
@@ -376,11 +382,12 @@ let MyField = {
 			:indexColor="field.indexColor"
 			:indexDate0="field.indexDate0"
 			:indexDate1="field.indexDate1"
+			:isHiddenInTab="isHiddenInTab"
 			:rowSelect="field.openForm !== null"
 			:stepTypeDefault="field.ganttSteps"
 			:stepTypeToggle="field.ganttStepsToggle"
 			:query="field.query"
-			:usesPageHistory="formIsSingleField && !formIsPopUp"
+			:usesPageHistory="isAloneInForm && !formIsPopUp"
 		/>
 		
 		<!-- chart -->
@@ -390,11 +397,66 @@ let MyField = {
 			:columns="columnsProcessed"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
-			:isSingleField="formIsSingleField"
 			:limit="field.query.fixedLimit"
+			:needsHeader="isAloneInForm || isAloneInTab"
 			:optionJson="field.chartOption"
 			:query="field.query"
 		/>
+		
+		<!-- tabs -->
+		<div class="tabs shade" v-if="isTabs">
+			<div class="tabs-entries">
+				<div class="tabs-icon">
+					<img v-if="iconId" :src="srcBase64(iconIdMap[iconId].file)" />
+				</div>
+				<div class="tabs-entry clickable"
+					v-if="!isMobile"
+					v-for="(t,i) in field.tabs"
+					v-show="!tabIndexesHidden.includes(i)"
+					@click="setTab(i)"
+					:class="getTabClasses(i)"
+				>
+					{{ t.captions.tabTitle[this.moduleLanguage] }}
+				</div>
+				<select v-if="isMobile" @change="setTab(parseInt($event.target.value))" :value="tabIndexShow">
+					<option v-for="(t,i) in field.tabs" :value="i">
+						{{ t.captions.tabTitle[this.moduleLanguage] }}
+					</option>
+				</select>
+			</div>
+			<div class="fields"
+				v-for="(t,i) in field.tabs"
+				v-show="i === tabIndexShow"
+				:class="{ onlyOne:t.fields.length === 1 && t.fields[0].content !== 'container' }"
+			>
+				<my-field flexDirParent="column"
+					v-for="f in t.fields"
+					@clipboard="$emit('clipboard')"
+					@execute-function="$emit('execute-function',$event)"
+					@hotkey="$emit('hotkey',$event)"
+					@open-form="(...args) => $emit('open-form',...args)"
+					@set-form-args="(...args) => $emit('set-form-args',...args)"
+					@set-valid="(...args) => $emit('set-valid',...args)"
+					@set-value="(...args) => $emit('set-value',...args)"
+					@set-value-init="(...args) => $emit('set-value-init',...args)"
+					:dataFieldMap="dataFieldMap"
+					:entityIdMapState="entityIdMapState"
+					:field="f"
+					:fieldIdsInvalid="fieldIdsInvalid"
+					:fieldIdMapCaption="fieldIdMapCaption"
+					:formBadSave="formBadSave"
+					:formIsPopUp="formIsPopUp"
+					:formLoading="formLoading"
+					:formReadonly="formReadonly"
+					:isAloneInTab="t.fields.length === 1"
+					:isAloneInForm="false"
+					:isHiddenInTab="isHiddenInTab || i !== tabIndexShow"
+					:joinsIndexMap="joinsIndexMap"
+					:key="f.id"
+					:values="values"
+				/>
+			</div>
+		</div>
 		
 		<!-- container children -->
 		<my-field
@@ -409,15 +471,17 @@ let MyField = {
 			@set-value="(...args) => $emit('set-value',...args)"
 			@set-value-init="(...args) => $emit('set-value-init',...args)"
 			:dataFieldMap="dataFieldMap"
+			:entityIdMapState="entityIdMapState"
 			:field="f"
+			:fieldIdsInvalid="fieldIdsInvalid"
 			:fieldIdMapCaption="fieldIdMapCaption"
-			:fieldIdMapState="fieldIdMapState"
 			:formBadSave="formBadSave"
 			:formIsPopUp="formIsPopUp"
-			:formIsSingleField="formIsSingleField"
 			:formLoading="formLoading"
 			:formReadonly="formReadonly"
 			:flexDirParent="field.direction"
+			:isAloneInForm="isAloneInForm"
+			:isHiddenInTab="isHiddenInTab"
 			:joinsIndexMap="joinsIndexMap"
 			:key="f.id"
 			:values="values"
@@ -425,16 +489,19 @@ let MyField = {
 	</div>`,
 	props:{
 		dataFieldMap:     { type:Object,  required:true },
+		entityIdMapState: { type:Object,  required:false, default:() => {return {}} }, // overwritten states
 		field:            { type:Object,  required:true },
+		fieldIdsInvalid:  { type:Array,   required:false, default:() => {return []} },
 		fieldIdMapCaption:{ type:Object,  required:false, default:() => {return {}} }, // overwritten captions
-		fieldIdMapState:  { type:Object,  required:false, default:() => {return {}} }, // overwritten states
 		formBadSave:      { type:Boolean, required:true }, // attempted save with invalid inputs
 		formIsPopUp:      { type:Boolean, required:true }, // parent form is a pop-up form
-		formIsSingleField:{ type:Boolean, required:true }, // parent form contains a single field
 		formLoading:      { type:Boolean, required:true },
 		formReadonly:     { type:Boolean, required:true }, // form is read only, disable all inputs
 		flexDirParent:    { type:String,  required:true }, // flex direction (row/column) of parent
 		joinsIndexMap:    { type:Object,  required:true },
+		isAloneInForm:    { type:Boolean, required:true }, // parent form contains only this field
+		isAloneInTab:     { type:Boolean, required:false, default:false }, // only field in a tab
+		isHiddenInTab:    { type:Boolean, required:false, default:false }, // field is in a non-visible tab
 		logViewer:        { type:Boolean, required:false, default:false }, // is part of log viewer
 		values:           { type:Object,  required:true }
 	},
@@ -448,7 +515,8 @@ let MyField = {
 			focused:false,
 			notTouched:true,            // data field was not touched by user
 			showColorPickerInput:false, // for color picker fields
-			showPassword:false          // for password fields
+			showPassword:false,         // for password fields
+			tabIndexShow:0              // tabs only: which tab is shown
 		};
 	},
 	watch:{
@@ -457,6 +525,22 @@ let MyField = {
 		},
 		isValid:{ // inform parent form about field validity
 			handler:function(v) { this.$emit('set-valid',v,this.field.id); },
+			immediate:true
+		},
+		tabIndexesHidden:{
+			handler:function(v) {
+				if(!this.isTabs) return;
+				
+				// use stored tab index if valid, otherwise use first valid one
+				let tabIndex = this.fieldOptionGet(this.field.id,'tabIndex',0);
+				if(this.field.tabs.length > tabIndex && !v.includes(tabIndex))
+					return this.tabIndexShow = tabIndex;
+				
+				for(let i = 0, j = this.field.tabs.length; i < j; i++) {
+					if(!v.includes(i))
+						return this.tabIndexShow = i;
+				}
+			},
 			immediate:true
 		}
 	},
@@ -472,7 +556,7 @@ let MyField = {
 				// 1st preference: field caption overwrite
 				out = this.fieldIdMapCaption[this.field.id];
 			}
-			else if(typeof this.field.captions.fieldTitle[this.moduleLanguage] !== 'undefined') {
+			else if(typeof this.field.captions !== 'undefined' && typeof this.field.captions.fieldTitle[this.moduleLanguage] !== 'undefined') {
 				// 2nd preference: field caption
 				out = this.field.captions.fieldTitle[this.moduleLanguage];
 			}
@@ -514,7 +598,8 @@ let MyField = {
 			return '';
 		},
 		captionHelp:function() {
-			return typeof this.field.captions.fieldHelp[this.moduleLanguage] !== 'undefined'
+			return typeof this.field.captions !== 'undefined'
+				&& typeof this.field.captions.fieldHelp[this.moduleLanguage] !== 'undefined'
 				? this.field.captions.fieldHelp[this.moduleLanguage] : '';
 		},
 		domClass:function() {
@@ -654,8 +739,8 @@ let MyField = {
 			let state = this.field.state;
 			
 			// apply form state if available
-			if(typeof this.fieldIdMapState[this.field.id] !== 'undefined')
-				state = this.fieldIdMapState[this.field.id];
+			if(typeof this.entityIdMapState.field[this.field.id] !== 'undefined')
+				state = this.entityIdMapState.field[this.field.id];
 			
 			// overwrites for 'default' state for data fields
 			if(this.isData && state === 'default') {
@@ -672,6 +757,47 @@ let MyField = {
 				state = 'readonly';
 			
 			return state;
+		},
+		tabIndexesHidden:function() {
+			if(!this.isTabs) return [];
+			let out = [];
+			for(let i = 0, j = this.field.tabs.length; i < j; i++) {
+				let t     = this.field.tabs[i];
+				let state = typeof this.entityIdMapState.tab[t.id] !== 'undefined'
+					? this.entityIdMapState.tab[t.id] : t.state;
+				
+				if(state === 'hidden')
+					out.push(i);
+			}
+			return out;
+		},
+		tabIndexesInvalidFields:function() {
+			if(!this.isTabs) return [];
+			let hasAnyInvalid = (fields) => {
+				for(let f of fields) {
+					switch(f.content) {
+						case 'data':
+							if(this.fieldIdsInvalid.includes(f.id)) return true;
+						break;
+						case 'container':
+							if(hasAnyInvalid(f.fields)) return true;
+						break;
+						case 'tabs':
+							for(let t of f.tabs) {
+								if(hasAnyInvalid(t.fields)) return true;
+							}
+						break;
+					}
+				}
+				return false;
+			};
+			
+			let out = [];
+			for(let i = 0, j = this.field.tabs.length; i < j; i++) {
+				if(hasAnyInvalid(this.field.tabs[i].fields))
+					out.push(i);
+			}
+			return out;
 		},
 		
 		// field value for data attribute
@@ -856,6 +982,7 @@ let MyField = {
 		isContainer:function() { return this.field.content === 'container'; },
 		isData:     function() { return this.field.content === 'data'; },
 		isList:     function() { return this.field.content === 'list'; },
+		isTabs:     function() { return this.field.content === 'tabs'; },
 		
 		// display
 		isHidden:  function() { return this.stateFinal === 'hidden'; },
@@ -904,6 +1031,8 @@ let MyField = {
 	},
 	methods:{
 		// externals
+		fieldOptionGet,
+		fieldOptionSet,
 		getFlexStyle,
 		getIndexAttributeId,
 		getInputFieldName,
@@ -921,6 +1050,24 @@ let MyField = {
 		openLink,
 		setGetterArgs,
 		srcBase64,
+		
+		// presentation
+		getTabClasses:function(tabIndex) {
+			if(!this.isTabs) return {};
+			let active   = tabIndex === this.tabIndexShow;
+			let fields   = this.field.tabs[tabIndex].fields;
+			let oneField = fields.length === 1;
+			
+			return {
+				active:tabIndex === this.tabIndexShow,
+				error:this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
+				showsCal:  active && oneField && fields[0].content === 'calendar',
+				showsChart:active && oneField && fields[0].content === 'chart',
+				showsData: active && oneField && fields[0].content === 'data',
+				showsList: active && oneField && fields[0].content === 'list',
+				showsTabs: active && oneField && fields[0].content === 'tabs'
+			};
+		},
 		
 		// actions
 		blur:function() {
@@ -942,7 +1089,6 @@ let MyField = {
 				this.showColorPickerInput = false;
 		},
 		openForm:function(recordId,getters,middleClick) {
-			
 			// set defaults
 			if(typeof recordId    === 'undefined') recordId    = 0;
 			if(typeof getters     === 'undefined') getters     = [];
@@ -990,6 +1136,10 @@ let MyField = {
 		setCollectionIndexes:function(collectionId,indexes) {
 			if(indexes.length === 0) delete(this.collectionIdMapIndexes[collectionId]);
 			else                     this.collectionIdMapIndexes[collectionId] = indexes;
+		},
+		setTab:function(tabIndex) {
+			this.fieldOptionSet(this.field.id,'tabIndex',tabIndex);
+			this.tabIndexShow = tabIndex;
 		},
 		setValue:function(val,valOld,indexAttributeId) {
 			if(val === '')

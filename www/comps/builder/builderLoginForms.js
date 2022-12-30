@@ -185,6 +185,7 @@ let MyBuilderLoginForms = {
 		
 		<div class="top lower">
 			<div class="area nowrap">
+				<img class="icon" src="images/personCog.png" />
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
 		</div>

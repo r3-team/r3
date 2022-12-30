@@ -52,6 +52,13 @@ var (
 		clientAdd: make(chan *clientType),
 		clientDel: make(chan *clientType),
 	}
+
+	// limit concurrent requests to 10, regardless of client count
+	// known issue: if 10+ requests occur during schema reload, server hangs
+	// we traced the issue to the DB requests but there are no visible issues in Postgres or pgx
+	// 10 concurrently handled requests are more than reasonable - a workaround is fine for now
+	// we plan to upgrade to pgx v5 soon and will revisit the issue then
+	hubRequestLimit = make(chan bool, 10)
 )
 
 func StartBackgroundTasks() {
@@ -222,6 +229,10 @@ func (client *clientType) write(message []byte) {
 }
 
 func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.RawMessage {
+	hubRequestLimit <- true
+	defer func() {
+		<-hubRequestLimit
+	}()
 
 	var (
 		reqTrans types.RequestTransaction
@@ -273,7 +284,7 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 			resPayload, err = request.LoginAuthToken(req.Payload, &client.loginId,
 				&client.admin, &client.noAuth)
 
-		case "tokenFixed": // authentication via fixed token
+		case "tokenFixed": // authentication via fixed token (fat-client)
 			resPayload, err = request.LoginAuthTokenFixed(req.Payload, &client.loginId)
 			if err == nil {
 				client.fixedToken = true

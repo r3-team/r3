@@ -10,6 +10,7 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/module_option"
+	"r3/schema/article"
 	"r3/schema/attribute"
 	"r3/schema/collection"
 	"r3/schema/form"
@@ -156,10 +157,19 @@ func updateSchemaCache(moduleIdsUpdateOnly []uuid.UUID) error {
 		mod.Menus = make([]types.Menu, 0)
 		mod.Icons = make([]types.Icon, 0)
 		mod.Roles = make([]types.Role, 0)
+		mod.Articles = make([]types.Article, 0)
 		mod.LoginForms = make([]types.LoginForm, 0)
 		mod.PgFunctions = make([]types.PgFunction, 0)
 		mod.JsFunctions = make([]types.JsFunction, 0)
 		mod.Collections = make([]types.Collection, 0)
+
+		// get articles
+		log.Info("cache", "load articles")
+
+		mod.Articles, err = article.Get(mod.Id)
+		if err != nil {
+			return err
+		}
 
 		// get relations
 		log.Info("cache", "load relations")

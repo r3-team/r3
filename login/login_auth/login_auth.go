@@ -2,18 +2,22 @@ package login_auth
 
 import (
 	"database/sql"
+	"encoding/base32"
 	"errors"
+	"fmt"
 	"r3/config"
 	"r3/db"
 	"r3/handler"
 	"r3/ldap/ldap_auth"
 	"r3/tools"
+	"r3/types"
 	"strings"
 	"time"
 
 	"github.com/gbrlsnchs/jwt/v3"
 	"github.com/jackc/pgtype"
 	"github.com/jackc/pgx/v4"
+	"github.com/xlzd/gotp"
 )
 
 type tokenPayload struct {
@@ -52,12 +56,14 @@ func createToken(loginId int64, username string, admin bool, noAuth bool) (strin
 }
 
 // performs authentication attempt for user by using username and password
-// returns JWT, KDF salt
-func User(username string, password string, grantLoginId *int64,
-	grantAdmin *bool, grantNoAuth *bool) (string, string, error) {
+// returns JWT, KDF salt, MFA token list (if MFA is required)
+func User(username string, password string, mfaTokenId pgtype.Int4,
+	mfaTokenPin pgtype.Varchar, grantLoginId *int64, grantAdmin *bool,
+	grantNoAuth *bool) (string, string, []types.LoginMfaToken, error) {
 
+	mfaTokens := make([]types.LoginMfaToken, 0)
 	if username == "" {
-		return "", "", errors.New("username not given")
+		return "", "", mfaTokens, errors.New("username not given")
 	}
 
 	// usernames are case insensitive
@@ -79,48 +85,97 @@ func User(username string, password string, grantLoginId *int64,
 	`, username).Scan(&loginId, &ldapId, &salt, &hash, &saltKdf, &admin, &noAuth)
 
 	if err != nil && err != pgx.ErrNoRows {
-		return "", "", err
+		return "", "", mfaTokens, err
 	}
 
-	// username not found must result in same response as authentication failed
+	// username not found / user inactive must result in same response as authentication failed
 	// otherwise we can probe the system for valid user names
 	if err == pgx.ErrNoRows {
-		return "", "", errors.New(handler.ErrAuthFailed)
+		return "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
 	}
 
 	if !noAuth && password == "" {
-		return "", "", errors.New("password not given")
+		return "", "", mfaTokens, errors.New("password not given")
 	}
 
 	if !noAuth {
 		if ldapId.Status == pgtype.Present {
 			// authentication against LDAP
 			if err := ldap_auth.Check(ldapId.Int, username, password); err != nil {
-				return "", "", errors.New(handler.ErrAuthFailed)
+				return "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
 			}
 		} else {
 			// authentication against stored hash
 			if !hash.Valid || !salt.Valid || hash.String != tools.Hash(salt.String+password) {
-				return "", "", errors.New(handler.ErrAuthFailed)
+				return "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
 			}
 		}
 	}
 
 	if err := authCheckSystemMode(admin); err != nil {
-		return "", "", err
+		return "", "", mfaTokens, err
 	}
 
-	// login ok, create token
+	// login ok
+
+	if mfaTokenId.Status == pgtype.Present && mfaTokenPin.Status == pgtype.Present {
+
+		// validate provided MFA token
+		var mfaToken []byte
+		if err := db.Pool.QueryRow(db.Ctx, `
+			SELECT token
+			FROM instance.login_token_fixed
+			WHERE login_id = $1
+			AND   id       = $2
+			AND   context  = 'totp'
+		`, loginId, mfaTokenId.Int).Scan(&mfaToken); err != nil {
+			return "", "", mfaTokens, err
+		}
+
+		if mfaTokenPin.String != gotp.NewDefaultTOTP(base32.StdEncoding.WithPadding(
+			base32.NoPadding).EncodeToString(mfaToken)).Now() {
+
+			return "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
+		}
+
+	} else {
+		// get available MFA tokens
+		rows, err := db.Pool.Query(db.Ctx, `
+			SELECT id, name
+			FROM instance.login_token_fixed
+			WHERE login_id = $1
+			AND   context  = 'totp'
+		`, loginId)
+		if err != nil {
+			return "", "", mfaTokens, err
+		}
+
+		for rows.Next() {
+			var m types.LoginMfaToken
+			if err := rows.Scan(&m.Id, &m.Name); err != nil {
+				return "", "", mfaTokens, err
+			}
+			mfaTokens = append(mfaTokens, m)
+		}
+		rows.Close()
+
+		// MFA tokens available, return with list
+		if len(mfaTokens) != 0 {
+			return "", "", mfaTokens, nil
+		}
+	}
+
+	// create session token
 	token, err := createToken(loginId, username, admin, noAuth)
 	if err != nil {
-		return "", "", err
+		return "", "", mfaTokens, err
 	}
 
 	// everything in order, auth successful
 	*grantLoginId = loginId
 	*grantAdmin = admin
 	*grantNoAuth = noAuth
-	return token, saltKdf, nil
+	return token, saltKdf, mfaTokens, nil
 }
 
 // performs authentication attempt for user by using existing JWT token, signed by server
@@ -169,10 +224,15 @@ func Token(token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *boo
 // performs authentication for user by using fixed (permanent) token
 // used for application access (like ICS download or fat-client access)
 // cannot grant admin access
-func TokenFixed(loginId int64, tokenFixed string, grantLanguageCode *string, grantToken *string) error {
+func TokenFixed(loginId int64, context string, tokenFixed string, grantLanguageCode *string, grantToken *string) error {
 
 	if tokenFixed == "" {
 		return errors.New("empty token")
+	}
+
+	// only specific contexts may be used for token authentication
+	if !tools.StringInSlice(context, []string{"client", "ics"}) {
+		return fmt.Errorf("invalid token authentication context '%s'", context)
 	}
 
 	// check for existing token
@@ -184,9 +244,10 @@ func TokenFixed(loginId int64, tokenFixed string, grantLanguageCode *string, gra
 		INNER JOIN instance.login_setting AS s ON s.login_id = t.login_id
 		INNER JOIN instance.login         AS l ON l.id       = t.login_id
 		WHERE t.login_id = $1
-		AND   t.token    = $2
+		AND   t.context  = $2
+		AND   t.token    = $3
 		AND   l.active
-	`, loginId, tokenFixed).Scan(&languageCode, &username)
+	`, loginId, context, tokenFixed).Scan(&languageCode, &username)
 
 	if err == pgx.ErrNoRows {
 		return errors.New("login inactive")

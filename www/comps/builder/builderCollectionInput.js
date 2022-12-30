@@ -33,8 +33,8 @@ let MyBuilderCollectionInput = {
 			<td>
 				<select v-model="columnIdInput" :disabled="readonly">
 					<option :value="null" disabled="disabled">-</option>
-					<option v-if="collectionIdInput !== null" v-for="c in collectionIdMap[collectionIdInput].columns" :value="c.id">
-						{{ getItemTitleColumn(c) }}
+					<option v-if="collectionIdInput !== null" v-for="c in collection.columns" :value="c.id">
+						{{ getItemTitleColumn(c,true) }}
 					</option>
 				</select>
 			</td>
@@ -45,6 +45,7 @@ let MyBuilderCollectionInput = {
 			<td>
 				<my-builder-open-form-input
 					@update:openForm="openFormInput = $event"
+					:allowAllForms="true"
 					:module="module"
 					:openForm="openFormInput"
 					:readonly="readonly"
@@ -68,7 +69,7 @@ let MyBuilderCollectionInput = {
 		</tr>
 		<tr>
 			<td>
-				<my-button image="cancel.png"
+				<my-button image="delete.png"
 					v-if="allowRemove"
 					@trigger="$emit('remove')"
 					:active="!readonly"
@@ -98,7 +99,6 @@ let MyBuilderCollectionInput = {
 					: this.getCollectionConsumerTemplate();
 			}
 		},
-		
 		collectionIdInput:{
 			get()  { return this.consumerInput.collectionId },
 			set(v) { this.set('collectionId',v) }
@@ -125,6 +125,7 @@ let MyBuilderCollectionInput = {
 		},
 		
 		// simple
+		collection:   (s) => !s.collectionSet ? false : s.collectionIdMap[s.collectionIdInput],
 		collectionSet:(s) => s.collectionIdInput !== null,
 		
 		// stores

@@ -15,6 +15,7 @@ import {
 
 // admin
 import MyAdmin             from './comps/admin/admin.js';
+import MyAdminBackups      from './comps/admin/adminBackups.js';
 import MyAdminCluster      from './comps/admin/adminCluster.js';
 import MyAdminConfig       from './comps/admin/adminConfig.js';
 import MyAdminFiles        from './comps/admin/adminFiles.js';
@@ -31,6 +32,7 @@ import MyAdminScheduler    from './comps/admin/adminScheduler.js';
 
 // builder
 import MyBuilder            from './comps/builder/builder.js';
+import MyBuilderModule      from './comps/builder/builderModule.js';
 import MyBuilderModules     from './comps/builder/builderModules.js';
 import MyBuilderRelations   from './comps/builder/builderRelations.js';
 import MyBuilderRelation    from './comps/builder/builderRelation.js';
@@ -38,15 +40,16 @@ import MyBuilderIcons       from './comps/builder/builderIcons.js';
 import MyBuilderMenu        from './comps/builder/builderMenu.js';
 import MyBuilderForms       from './comps/builder/builderForms.js';
 import MyBuilderForm        from './comps/builder/builderForm.js';
-import MyBuilderHelp        from './comps/builder/builderHelp.js';
 import MyBuilderRoles       from './comps/builder/builderRoles.js';
 import MyBuilderRole        from './comps/builder/builderRole.js';
 import MyBuilderCollections from './comps/builder/builderCollections.js';
 import MyBuilderCollection  from './comps/builder/builderCollection.js';
 import MyBuilderLoginForms  from './comps/builder/builderLoginForms.js';
-import MyBuilderFunctions   from './comps/builder/builderFunctions.js';
+import MyBuilderPgFunctions from './comps/builder/builderPgFunctions.js';
 import MyBuilderPgFunction  from './comps/builder/builderPgFunction.js';
+import MyBuilderJsFunctions from './comps/builder/builderJsFunctions.js';
 import MyBuilderJsFunction  from './comps/builder/builderJsFunction.js';
+import MyBuilderArticles    from './comps/builder/builderArticles.js';
 
 // router
 const MyRouterPositions = Object.create(null);
@@ -73,6 +76,7 @@ const MyRouter = VueRouter.createRouter({
 		redirect:'/admin/config',
 		component:MyAdmin,
 		children:[
+			{ path:'backups',     component:MyAdminBackups },
 			{ path:'cluster',     component:MyAdminCluster },
 			{ path:'config',      component:MyAdminConfig },
 			{ path:'files',       component:MyAdminFiles },
@@ -95,6 +99,11 @@ const MyRouter = VueRouter.createRouter({
 			{
 				path:'modules',
 				component:MyBuilderModules
+			},{
+				path:'module/:id',
+				meta:{ nav:'module', target:'module' },
+				component:MyBuilderModule,
+				props:true
 			},{
 				path:'relations/:id',
 				meta:{ nav:'relations', target:'module' },
@@ -126,9 +135,14 @@ const MyRouter = VueRouter.createRouter({
 				component:MyBuilderForm,
 				props:true
 			},{
-				path:'functions/:id',
-				meta:{ nav:'functions', target:'module' },
-				component:MyBuilderFunctions,
+				path:'pg-functions/:id',
+				meta:{ nav:'pg-functions', target:'module' },
+				component:MyBuilderPgFunctions,
+				props:true
+			},{
+				path:'js-functions/:id',
+				meta:{ nav:'js-functions', target:'module' },
+				component:MyBuilderJsFunctions,
 				props:true
 			},{
 				path:'roles/:id',
@@ -157,18 +171,18 @@ const MyRouter = VueRouter.createRouter({
 				props:true
 			},{
 				path:'pg-function/:id',
-				meta:{ nav:'functions', target:'pg-function' },
+				meta:{ nav:'pg-functions', target:'pg-function' },
 				component:MyBuilderPgFunction,
 				props:true
 			},{
 				path:'js-function/:id',
-				meta:{ nav:'functions', target:'js-function' },
+				meta:{ nav:'js-functions', target:'js-function' },
 				component:MyBuilderJsFunction,
 				props:true
 			},{
-				path:'help/:id',
-				meta:{ nav:'help', target:'module' },
-				component:MyBuilderHelp,
+				path:'articles/:id',
+				meta:{ nav:'articles', target:'module' },
+				component:MyBuilderArticles,
 				props:true
 			}
 		]

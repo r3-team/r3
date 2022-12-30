@@ -34,13 +34,16 @@
 	box-shadow:1px 2px 6px var(--color-shade);
 	border-bottom:2px solid var(--color-border-bg);
 }
-.button:active:hover:not(.naked):not(.noMargin):not(.inactive){
+.button:active:hover:not(.naked):not(.inactive){
 	height:28px;
 	margin:1px calc(var(--spacing-button-horz-outside) + 2px) 1px 2px;
 	padding-left:calc(var(--spacing-button-horz-inside) - 2px);
 	padding-right:calc(var(--spacing-button-horz-inside) - 2px);
 	box-shadow:1px 1px 3px var(--color-shade);
 	filter:brightness(90%);
+}
+.button.noMargin:active:hover:not(.naked):not(.inactive){
+	margin:1px 2px;
 }
 .button.large:active:hover:not(.naked):not(.noMargin):not(.inactive){
 	height:38px;

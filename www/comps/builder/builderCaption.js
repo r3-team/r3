@@ -4,18 +4,18 @@ export {MyBuilderCaption as default};
 let MyBuilderCaption = {
 	name:'my-builder-caption',
 	components:{MyInputRichtext},
-	template:`<div class="builder-caption default-inputs">
+	template:`<div class="builder-caption default-inputs" :title="placeholder">
 		
 		<template v-if="!richtext">
 			<input v-model="valueInput"
 				v-if="!multiLine"
-				:class="{ long:longInput }"
+				:class="{ dynamic:dynamicSize, long:longInput }"
 				:disabled="readonly"
 				:placeholder="placeholder"
 			/>
 			<textarea v-model="valueInput"
 				v-else
-				:class="{ long:longInput }"
+				:class="{ dynamic:dynamicSize, long:longInput }"
 				:disabled="readonly"
 				:placeholder="placeholder"
 			></textarea>
@@ -30,6 +30,7 @@ let MyBuilderCaption = {
 	</div>`,
 	props:{
 		contentName:{ type:String,  required:false, default:'' },
+		dynamicSize:{ type:Boolean, required:false, default:false },
 		language:   { type:String,  required:true },
 		longInput:  { type:Boolean, required:false, default:false },
 		modelValue: { type:Object,  required:true },
@@ -40,13 +41,13 @@ let MyBuilderCaption = {
 	emits:['hotkey','update:modelValue'],
 	computed:{
 		valueInput:{
-			get:function() {
+			get() {
 				if(typeof this.modelValue[this.language] !== 'undefined')
 					return this.modelValue[this.language];
 				else
 					return '';
 			},
-			set:function(v) {
+			set(v) {
 				let value = JSON.parse(JSON.stringify(this.modelValue));
 				
 				if(v === '')
@@ -60,11 +61,9 @@ let MyBuilderCaption = {
 					JSON.parse(JSON.stringify(value,Object.keys(value).sort())));
 			}
 		},
-		placeholder:function() {
-			if(this.contentName === '')
-				return this.language;
-			
-			return `${this.contentName} (${this.language})`;
+		placeholder() {
+			return this.contentName === ''
+				? this.language : `${this.contentName} (${this.language})`;
 		}
 	}
 };

@@ -2,6 +2,7 @@
 	"generic":{
 		"button":{
 			"add":"Aggiungi",
+			"all":"All",
 			"apply":"Applica",
 			"cancel":"Annulla",
 			"clear":"Clear",
@@ -24,6 +25,7 @@
 			"new":"Nuovo",
 			"newHint":"Crea un nuovo record",
 			"open":"Apri",
+			"openBuilder":"Open Builder",
 			"ok":"Ok",
 			"paste":"Paste",
 			"refresh":"Ricarica",
@@ -73,11 +75,16 @@
 		"available":"Available",
 		"busy":"Elaborazione - Clicca qui per annullare",
 		"category":"Category",
+		"content":"Content",
 		"date":"Data",
 		"description":"Descrizione",
+		"details":"Details",
+		"displayed":"Displayed",
 		"errorTitle":"Errore",
 		"files":"Files",
 		"filters":"Filtri",
+		"form":"Form",
+		"help":"Help",
 		"home":"Home",
 		"icon":"Icona",
 		"id":"ID",
@@ -91,6 +98,7 @@
 		"inputSmall":"Valore troppo piccolo (min. {MIN})",
 		"inputTooFewFiles":"Troppo pochi file",
 		"inputTooManyFiles":"Troppi file",
+		"interval":"Interval",
 		"licenseRequired":"Richiede licenza",
 		"limit":"Limite",
 		"menu":"Menu",
@@ -100,9 +108,11 @@
 		"nothingSelected":"Niente selezionato",
 		"nothingThere":"Nessun risultato disponibile",
 		"notice":"Avviso",
+		"notSaved":"Not saved",
 		"order":"Ordine",
 		"password":"Password",
 		"preview":"Anteprima",
+		"properties":"Properties",
 		"readonly":"Readonly",
 		"record":"Record",
 		"results":"{CNT} risultati",
@@ -110,15 +120,28 @@
 		"resultsOf":"/ {CNT}",
 		"role":"Ruolo",
 		"selected":"Selected",
+		"settings":"Settings",
 		"size":"Size",
 		"status":"Status",
 		"threeDots":"...",
 		"title":"Titolo",
 		"token":"Token",
+		"type":"Type",
 		"username":"Username",
 		"version":"Versione"
 	},
 	"admin":{
+		"backups":{
+			"count":"Mantieni le versioni",
+			"daily":"Giornaliero",
+			"dir":"Cartella destinazione*",
+			"dirNote":"*Assicurati che questo percorso punti a un percorso di rete separato o che il suo contenuto venga copiato regolarmente su un secondo sistema. Ciò è necessario per il ripristino in caso di guasto completo del sistema.",
+			"full":"Full backup",
+			"list":"Backup sets",
+			"monthly":"Mensile",
+			"title":"Backup completi integrati",
+			"weekly":"Settimanale"
+		},
 		"cluster":{
 			"button":{
 				"shutdown":"Shutdown"
@@ -155,13 +178,6 @@
 			"appName":"Nome Istanza",
 			"appNameShort":"Titolo pagina",
 			"appVersion":"Versione piattaforma",
-			"backupCount":"Mantieni le versioni",
-			"backupDaily":"Giornaliero",
-			"backupDir":"Cartella destinazione*",
-			"backupDirNote":"*Assicurati che questo percorso punti a un percorso di rete separato o che il suo contenuto venga copiato regolarmente su un secondo sistema. Ciò è necessario per il ripristino in caso di guasto completo del sistema.",
-			"backupEmbeddedNote":"I backup completi integrati sono disponibili solo se viene utilizzato il modello di distribuzione autonomo.<br /><br />La documentazione del sistema contiene capitoli relativi alle misure di backup consigliate per istanze dedicate.",
-			"backupMonthly":"Mensile",
-			"backupWeekly":"Settimanale",
 			"bruteforceAttempts":"Blocca gli host dopo i tentativi",
 			"bruteforceCountBlocked":"Host Bloccati",
 			"bruteforceCountTracked":"Host Tracciati",
@@ -206,7 +222,6 @@
 			"repoSkipVerify":"Consenti certificati non attendibili",
 			"repoUrl":"URL dell'archivio",
 			"title":"Configurazione di sistema",
-			"titleBackup":"Backup completi integrati",
 			"titleCustom":"Personalizzazione",
 			"titleGeneral":"Generale",
 			"titleIcs":"Iscrizioni al calendario",
@@ -224,6 +239,8 @@
 		"files":{
 			"deleteDate":"File deleted",
 			"filesKeepDaysDeleted":"Keep deleted files for X days",
+			"fileVersionsKeepCount":"Keep at least X file versions",
+			"fileVersionsKeepDays":"Keep file versions for at least X days",
 			"titleConfig":"Global configuration",
 			"titleDeleted":"Deleted files"
 		},
@@ -283,7 +300,8 @@
 		},
 		"login":{
 			"dialog":{
-				"delete":"Sei sicuro di voler eliminare questo login?<br /><br />Questa azione è irreversibile.</b>"
+				"delete":"Sei sicuro di voler eliminare questo login?<br /><br />Questa azione è irreversibile.</b>",
+				"resetTotp":"This will reset all multi-factor authentication methods for this login. System access is then possible with only username & password.<br /><br />Do you want to continue?"
 			},
 			"error":{
 				"uniqueConstraint":"Lo username deve essere univoco"
@@ -293,6 +311,8 @@
 			"authentication":"Autenticazione",
 			"language":"Lingua",
 			"ldapAssignActive":"I ruoli vengono assegnati tramite l'appartenenza ai gruppi LDAP",
+			"mfa":"MFA",
+			"mfaHint":"Multi-factor authentication",
 			"newLogin":"Nuovo login",
 			"noAuth":"Pubblico",
 			"noAuthHint":"Può accedere senza autenticazione",
@@ -426,6 +446,7 @@
 				"runNowHint":"Task will be executed as soon as possible."
 			},
 			"names":{
+				"backupRun":"Gestisci backup integrati",
 				"cleanupBruteforce":"Pulisci casche forza bruta",
 				"cleanupDataLogs":"Pulisci i log delle modifiche scadute",
 				"cleanupFiles":"Elimina i caricamenti di file scaduti",
@@ -433,7 +454,6 @@
 				"cleanupTempDir":"Pulisci cartella temporanea",
 				"clusterCheckIn":"Cluster check-in",
 				"clusterProcessEvents":"Cluster event processing",
-				"embeddedBackup":"Gestisci backup integrati",
 				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Importa login e ruoli tramite LDAP",
 				"mailAttach":"Trasferimento allegati e-mail",
@@ -462,6 +482,7 @@
 			"systemTasks":"System tasks (global)",
 			"systemTasksNode":"System tasks (cluster nodes)"
 		},
+		"navigationBackups":"Backups",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"Sistema",
 		"navigationFiles":"Files",
@@ -479,6 +500,22 @@
 		"titleDocs":"Documentazione amministrazione"
 	},
 	"builder":{
+		"articles":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this article?"
+			},
+			"option":{
+				"assignForm":"Form context help",
+				"assignModule":"Application help page"
+			},
+			"addArticle":"Add article",
+			"assignTo":"Assign to",
+			"body":"Content",
+			"new":"New article",
+			"title":"Help articles",
+			"titleAssign":"Assign articles",
+			"titleAssigned":"Assigned"
+		},
 		"attribute":{
 			"dialog":{
 				"delete":"Sei sicuro di voler eliminare questo attributo? Questo eliminerà anche tutti i dati inclusi dal tuo sistema.<br /><br /><b>Questa azione è irreversibile senza backup correnti.</b>"
@@ -486,14 +523,13 @@
 			"new":"Nuovo attributo"
 		},
 		"collection":{
-			"button":{
-				"inHeader":"Show in header"
-			},
 			"dialog":{
 				"delete":"Sicuro di voler cancellare questa collezione?"
 			},
-			"columnsTarget":"Posiziona le colonne qui",
-			"contentColumn":"Sub query dati in colonna",
+			"columnSettings":"Column settings",
+			"columnsAvailable":"Available columns",
+			"columnsTarget":"Active columns",
+			"inHeader":"Show in header",
 			"new":"Nuova collezione",
 			"previewHint":"Collection values for the logged in user. Collections are retrieved on page load (F5 to reload) if they are enabled within assigned roles.",
 			"query":"Query",
@@ -540,8 +576,7 @@
 				},
 				"event":"Evento",
 				"eventBefore":"Prima dell'evento",
-				"jsFunctionId":"Esegue la funzione nell'interfaccia",
-				"title":"Funzioni modulo"
+				"jsFunctionId":"Esegue la funzione nell'interfaccia"
 			},
 			"option":{
 				"displayColor":"colore",
@@ -559,22 +594,18 @@
 				"displayRichtext":"testo formattato",
 				"displaySlider":"valore a cursore",
 				"displayUrl":"URL",
+				"effectField":"Field",
+				"effectTab":"Tab",
 				"ganttStepsDays":"giorni",
 				"ganttStepsHours":"ore"
 			},
 			"states":{
-				"button":{
-					"addCondition":"Aggiungi condizione",
-					"addEffect":"Aggiungi effetto",
-					"showAll":"Mostra tutto"
-				},
 				"option":{
 					"filterFieldIdHint":"Per campo"
 				},
 				"conditions":"Condizioni",
 				"descriptionHint":"Descrizione",
-				"effects":"Effetti",
-				"title":"Stati modulo"
+				"effects":"Effetti"
 			},
 			"aggregator":"Aggregato",
 			"autoRenew":"Ricarica in automatico",
@@ -582,13 +613,10 @@
 			"autoRenewHint":"in secondi",
 			"autoSelect":"Selezione automatica dei record",
 			"autoSelectHint":"0=off, 2=primi due, -3=ultimi tre",
-			"captions":"Titoli",
 			"category":"Selettore categoria",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*La collezione è influenzata solo se è selezionata come criterio filtrante nella query dei dati.",
-			"collectionTitle":"Filtrare la collezione dall'input",
-			"columnsTarget":"Posiziona le colonne qui",
-			"columnsTemplates":"Colonne disponibili",
+			"collectionTitle":"Filter collection",
 			"columnBatch":"Raggruppamento di colonne",
 			"columnBatchNot":"non raggruppata",
 			"columnBatchHint":"La colonna fa parte del gruppo {CNT}",
@@ -601,12 +629,7 @@
 			"columnSize0":"automatico",
 			"columnTitle":"Titolo",
 			"columnWrap":"A capo automatico",
-			"containerContentLayout":"Disposizione dei contenuti",
-			"content":"Query dati del modulo",
-			"contentColumn":"Query dati della colonna",
-			"contentField":"Query dati del campo",
 			"copy":"Duplica modulo",
-			"copyForm":"Seleziona modulo",
 			"copyNewName":"Nuovo nome del modulo",
 			"csvExport":"Esporta CSV",
 			"csvImport":"Importa CSV",
@@ -637,7 +660,6 @@
 			"fieldRegexCheck":"Convalida con RegEx",
 			"fieldSize":"Dimensione base (pixel)",
 			"fieldSize0":"automatico",
-			"fieldTitle":"Titolo",
 			"fileExt":"Estensione file",
 			"fileName":"nome file",
 			"fileSize":"Dimensione file",
@@ -673,9 +695,11 @@
 			"presetOpen":"Preimpostazione apertura",
 			"readonly":"Solo lettura",
 			"required":"Obbligatorio",
-			"showFunctions":"Funzioni",
-			"showHelp":"Aiuto",
-			"showStates":"Condizioni",
+			"scale":"UI scale",
+			"sidebarField":"{NAME}: Field settings",
+			"sidebarFieldColumns":"Columns",
+			"sidebarFieldColumnSettings":"Column settings",
+			"sidebarForm":"Form settings",
 			"sql":"Anteprima SQL",
 			"state":"Condizione",
 			"stateDefault":"predefinito",
@@ -685,13 +709,16 @@
 			"stateRequired":"obbligatorio",
 			"subQuery":"Sub query",
 			"subQueryAttribute":"Attributo",
-			"title":"Moduli"
+			"tabs":"Tabs",
+			"tabFunctions":"Funzioni ({CNT})",
+			"tabStates":"Condizioni ({CNT})",
+			"title":"Moduli",
+			"titleOne":"Form '{NAME}'"
 		},
 		"function":{
 			"button":{
 				"addNew":"NUOVO prefisso",
 				"addOld":"VECCHIO prefisso",
-				"addSchedule":"Aggiungi nuova pianificazione",
 				"details":"Dettagli",
 				"template":"Template"
 			},
@@ -783,42 +810,44 @@
 			"collectionId":"[Select collection]",
 			"entityInput":"Seleziona il segnaposto e fai clic sul corpo della funzione per utilizzare la sintassi <b>upgrade-safe</b>.",
 			"fieldId":"[Select field]",
-			"form":"Lega al modulo",
+			"form":"Assigned to form",
 			"functionsBackend":"Funzioni backend",
 			"functionsFrontend":"Funzioni frontend",
-			"intervalAtDayForMonths":"al giorno del mese",
-			"intervalAtDayForWeeks":"al giorno della settimana (0=do, 1=lu, ...)",
-			"intervalAtDayForYears":"al giorno dell'anno",
+			"intervalAtDayForMonths":"at day",
+			"intervalAtDayForWeeks":"at weekday",
+			"intervalAtDayForYears":"at day",
 			"intervalAtTime":"alle ore",
-			"intervalEvery":"Esegui: Sempre",
+			"intervalEvery":"Every",
 			"isFrontendExec":"Chiamata frontend",
 			"isTrigger":"Trigger",
 			"language":"linguaggio",
 			"languageJs":"JavaScript",
 			"languagePg":"PL/pgSQL",
 			"new":"Nuova funzione",
-			"placeholderInsert":"Click on the function body to insert reference",
+			"placeholderAttribute":"Attribute",
+			"placeholderInsert":"Click on the function body to insert placeholder",
+			"placeholderFunction":"Function",
+			"placeholderRelation":"Relation",
 			"placeholders":"Segnaposti",
 			"placeholdersCollections":"Collections",
 			"placeholdersFormFields":"Form data fields",
 			"placeholdersFormQuery":"Query dati modulo",
 			"placeholdersInstance":"Funzioni instanza",
-			"placeholdersModules":"Applicazioni",
-			"runOnce":"esegui una volta",
-			"schedules":"Ricorrente",
-			"schedulesItem":"{CNT} pianificazioni",
+			"runOnce":"Once",
+			"runRegular":"Regularly",
+			"runType":"Execution",
+			"schedules":"Schedules",
 			"title":"Funzioni",
-			"titleJs":"Funzioni frontend ({CNT})",
-			"titlePg":"Funzioni backend ({CNT})",
-			"titleOne":"titolo funzione",
+			"titleJs":"Funzioni frontend",
+			"titleJsOne":"Funzioni frontend '{NAME}'",
+			"titlePg":"Funzioni backend",
+			"titlePgOne":"Funzioni backend '{NAME}'",
 			"value":"VALUE"
-		},
-		"help":{
-			"title":"Aiuto Applicazione"
 		},
 		"icon":{
 			"add":"Aggiungi/modifica file icona",
 			"addHelp":"Sono supportati solo file PNG con max. 64 kb. Le icone dovrebbero essere sempre quadrate.",
+			"nameHint":"Optional icon name",
 			"title":"Icone"
 		},
 		"loginForm":{
@@ -832,7 +861,7 @@
 			"button":{
 				"add":"Aggiungi voce"
 			},
-			"collections":"Collections",
+			"collections":"Show collection values in menu",
 			"copy":"Copia tutte le voci di menu da",
 			"formId":"- Seleziona modulo -",
 			"showChildrenHint":"Mostra le voci secondarie per impostazione predefinita",
@@ -845,10 +874,15 @@
 				"exportKeySet":"Memorizza la chiave in memoria",
 				"graph":"Grafico delle dipendenze",
 				"keyCreate":"Genera",
+				"manageApps":"Manage applications",
+				"repo":"Install from repository",
 				"versionCreate":"Crea nuova versione"
 			},
 			"color":"Colore",
-			"dependsOn":"Depende da",
+			"colorHint":"Primary application color - shown in the header and menu if not overwritten by customizing and/or user settings. The system styles are optimized for washed out, darkish colors (dark pastel).",
+			"dependsOn":"Builds on",
+			"dependsOnAdd":"Add application",
+			"dependsOnHint":"Use other applications as foundation for your own. This enables reuse or extension of existing relations, forms and so on.",
 			"export":"Trasferisci - Esporta l'applicazione in un file",
 			"exportKeyBad":"Signing key seems invalid. Make sure to use the private key for exporting applications.",
 			"exportKeyEmpty":"La chiave di firma è necessaria per l'esportazione",
@@ -859,27 +893,52 @@
 			"exportStateNok":"Modifiche alla versione attuale",
 			"exportStateOk":"Pronto",
 			"graphDependsOn":"Dipende da: {COUNT}",
+			"iconHint":"Icons are available, once they have been added to this application. Icons from applications that are being built on, can also be used.",
 			"keyCreate":"Trasferimento - Genera nuova coppia chiavi per firma",
 			"keyCreateInfo":"Assicurati di tenere sempre al sicuro la chiave privata. La chiave pubblica deve essere importata nelle istanze REI3 di destinazione per accettare le tue applicazioni.",
 			"keyCreateLength":"Seleziona la lunghezza della chiave",
 			"languageCode":"Codice lingua",
 			"languageCodeHint":"en_us, zh_cn, de_de, ...",
-			"languageMain":"Lingua principale*",
-			"languageMainHint":"*viene utilizzata se la lingua utente scelta non è disponibile.",
-			"languageTitle":"Titolo applicazione",
-			"languages":"Lingue",
-			"new":"Nuova applicazione",
+			"languageMain":"Fallback language",
+			"languageMainHint":"Is used if the chosen user language is not offered by your application.",
+			"languages":"Application languages",
+			"languagesHint":"Languages that the application is available in.",
+			"nameHint":"Reference name for this application. The name must be unique within a REI3 system, so consider using a prefix based on your organization name.",
+			"nameHolder":"work_scheduler, inventory_planner, ...",
 			"parent":"Assegnato a",
+			"parentHint":"When assigned to another application, it will be displayed as its child in menus and overviews - there is no other functional change. Applications can only be assigned to applications that they build on.",
 			"position":"Posizione predefinita",
-			"releaseBuild":"Versione appl.",
+			"positionHint":"Position of the application in the header (smaller ones first). Can be overwritten by system administrators.",
+			"releaseBuild":"Versione applicazione",
 			"releaseBuildApp":"Versione Piattaforma",
 			"releaseDate":"Data rilascio",
-			"startForm":"Modulo iniziale",
-			"startFormDefault":"Modulo iniziale predefinito*",
-			"startFormDefaultHint":"*è utilizzato se nessun altro modulo può essere assegnato in base al ruolo.",
-			"startForms":"Moduli iniziali",
-			"startFormsExplanation":"Viene utilizzato il primo modulo iniziale che corrisponde a un ruolo del login corrente.",
-			"title":"Applicazioni"
+			"startFormByRole":"Start form by role",
+			"startFormByRoleHint":"The first start form is used that matches a role of the current login. Overwrites the default start form.",
+			"startFormDefault":"Start form",
+			"startFormDefaultHint":"Form that is shown, when user opens the application.",
+			"title":"Application '{NAME}'",
+			"titleAll":"Applicazioni",
+			"titleHint":"The application title, visible to users when working with your application."
+		},
+		"new":{
+			"message":{
+				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
+				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
+			},
+			"collection":"New collection",
+			"form":"New form",
+			"jsFunction":"New Frontend function",
+			"jsFunctionFormId":"Assigned to form",
+			"jsFunctionFormIdHint":"Assigned functions can interact with a form to do things like read or write to form fields. If assigned, the function can only be used on the chosen form and cannot be reused in other frontend functions. This setting cannot be changed later.",
+			"module":"Nuova applicazione",
+			"options":"Additional options",
+			"pgFunction":"New backend function",
+			"pgFunctionTrigger":"Trigger",
+			"pgFunctionTriggerHint":"Makes this backend function a trigger. A trigger can be referenced inside a relation to react to events in the database, like when records are created, updated or deleted. This setting cannot be changed later.",
+			"relation":"Nuova relazione",
+			"relationEncryption":"End-to-end Encryption",
+			"relationEncryptionHint":"Enables end-to-end encryption (E2EE) for attributes on this relation. E2EE has benefits and drawbacks - please carefully read the Builder documentation before using it. This setting cannot be changed later.",
+			"role":"New role"
 		},
 		"openFormInput":{
 			"attributeApply":"...per impopstare il valore sul modulo",
@@ -924,7 +983,7 @@
 		},
 		"relation":{
 			"dialog":{
-				"deleteRelation":"Sei sicuro di voler eliminare questa relazione? Questo eliminerà anche tutti i dati inclusi dal tuo sistema.<br /><br /><b>Questa azione è irreversibile senza backup correnti.</b>"
+				"delete":"Sei sicuro di voler eliminare questa relazione? Questo eliminerà anche tutti i dati inclusi dal tuo sistema.<br /><br /><b>Questa azione è irreversibile senza backup correnti.</b>"
 			},
 			"attributes":"Attributi ({CNT})",
 			"codeCondition":"Condizione",
@@ -932,6 +991,7 @@
 			"def":"PREDDEFINITO",
 			"encrypted":"E2E encrypted",
 			"encryption":"E2E encryption",
+			"encryptionHint":"Relation supports end-to-end encrypted attribute values.",
 			"execute":"Eseguire",
 			"external":"Relazioni di riferimento ({CNT})",
 			"fires":"Accensioni",
@@ -942,17 +1002,15 @@
 			"indexAutoFki":"Sistema",
 			"indexCreate":"Aggiungi attributo al nuovo indice",
 			"indexUnique":"Univoco",
-			"isConstraint":"CONSTRAINT",
-			"isDeferrable":"DEFERRABLE",
-			"isDeferred":"INIT. DEFERRED",
+			"isDeferred":"DEFERRED",
 			"length":"Lunghezza",
-			"newRelation":"Nuova relazione",
+			"nameHint":"Reference name for this relation. Must be unique within this application.",
 			"nullable":"Vuoto",
 			"onDelete":"DELETE",
 			"onInsert":"INSERT",
 			"onUpdate":"UPDATE",
 			"perRow":"EACH ROW",
-			"policies":"Politica",
+			"policies":"Politica ({CNT})",
 			"policyActions":"Azione",
 			"policyActionDelete":"Dancella",
 			"policyActionSelect":"Visualizza",
@@ -974,8 +1032,9 @@
 			"retention":"Log cambiamenti",
 			"retentionCount":"Mantieni X modifiche",
 			"retentionDays":"Mantieni X giorni",
+			"retentionHint":"How many (count) or how long (in days) change logs are retained for.",
 			"title":"Relazioni",
-			"titleOne":"Dettagli relazione '{NAME}'",
+			"titleOne":"Relazione '{NAME}'",
 			"triggers":"Triggers ({CNT})"
 		},
 		"role":{
@@ -1007,31 +1066,35 @@
 			"newRole":"Nuovo ruolo",
 			"relation":"Relazione",
 			"title":"Ruoli",
-			"titleOne":"Role title"
+			"titleOne":"Role '{NAME}'"
 		},
 		"backHint":"Torna alla panoramica dell'applicazione",
 		"language":"Traduzione",
 		"languageNextHint":"Passa alla lingua successiva (tasto di scelta rapida: CTRL + q)",
 		"noOwner":"Application is in read-only mode",
+		"navigationArticles":"Help articles",
 		"navigationCollections":"Collezioni",
-		"navigationCollectionsSub":"Dettagli collezione",
 		"navigationFilterHint":"Filtra per testo",
 		"navigationForms":"Moduli",
-		"navigationFormsSub":"Disegna modulo",
-		"navigationFunctions":"Funzioni",
-		"navigationFunctionsSub":"dettagli funzione",
-		"navigationFunctionsSubBackend":"Backend",
-		"navigationFunctionsSubFrontend":"Frontend",
-		"navigationHelp":"Aiuto",
+		"navigationJsFunctions":"Funzioni (front)",
+		"navigationPgFunctions":"Funzioni (back)",
 		"navigationIcons":"Icone",
 		"navigationLoginForms":"Modulo login",
 		"navigationMenu":"Menu",
+		"navigationModule":"Application",
 		"navigationRelations":"Relazioni",
-		"navigationRelationsSub":"Dettagli Relazione",
 		"navigationRoles":"Ruoli",
-		"navigationRolesSub":"Ruolo accesso",
 		"pageTitle":"Builder",
 		"pageTitleDocs":"Documentazione Builder"
+	},
+	"articles":{
+		"button":{
+			"pdf":"PDF"
+		},
+		"form":"Form help",
+		"module":"Application help",
+		"title":"Help pages",
+		"toc":"Table of contents"
 	},
 	"calendar":{
 		"button":{
@@ -1083,7 +1146,7 @@
 			"003":"Azione abortita. Si prega di riprovare.",
 			"004":"Questo record è protetto e non può essere cancellato.",
 			"005":"Creazione entità fallita perchè non è stato indicato un nome. Si prega di specificare un nome.",
-			"006":"Il nome scelto non è valido. Assicurarsi che il nome ...<ul><li>... inizi con una lettera <b>(a-z)</b>.</li><li>... non sia più lungo di <b>31</b> caratteri.</li><li>... contenga solo lettere minuscole <b>(a-z)</b>, sottolineato <b>(_)</b> o numeri <b>(0-9)</b>.</li></ul>Esempio: storage_inventory_post21, facility_address, contact_book",
+			"006":"Il nome scelto non è valido. Assicurarsi che il nome ...<ul><li>... inizi con una lettera <b>(a-z)</b>.</li><li>... non sia più lungo di <b>60</b> caratteri.</li><li>... contenga solo lettere minuscole <b>(a-z)</b>, sottolineato <b>(_)</b> o numeri <b>(0-9)</b>.</li></ul>Esempio: storage_inventory_post21, facility_address, contact_book",
 			"007":"Il modulo referenziato non esiste.",
 			"008":"La relazione referenziata non esiste.",
 			"009":"L'attributo referenziato non esiste."
@@ -1128,7 +1191,6 @@
 		"moduleRelated":"Questo feedback è per l'applicazione aperta? ({NOME})",
 		"sendNok":"Non è stato possibile inviare il feedback. Per favore riprova più tardi.",
 		"sendOk":"Il feedback è stato inviato con successo. Grazie!",
-		"submit":"Fare clic sull'icona appropriata per inviare un feedback:",
 		"textHint":"Inserisci qui il feedback (facoltativo)",
 		"title":"Invia feedback anonimo",
 		"whatIsSent":"Oltre ai campi visibili (testo del feedback, smiley scelto, ecc.) vengono inviati i seguenti dati:<br /><ul><li>Quale applicazione e modulo sono aperti</li><li>Versioni dell'applicazione e il sistema</li><li>Se l'utente che fornisce feedback è un amministratore</li><li>Un identificatore casuale per raggruppare feedback dallo stesso sistema</li></ul>",
@@ -1141,20 +1203,36 @@
 				"OR":"OR"
 			},
 			"content":{
-				"attribute":"valore attributo",
-				"collection":"valore(i) collezione",
-				"field":"valore campo",
-				"fieldChanged":"field has changed (TRUE/FALSE)",
-				"javascript":"Espressione JavaScript",
-				"languageCode":"codice lingua login (en_us, ...)",
-				"login":"ID login (integer)",
-				"preset":"ID preimpostato (integer)",
-				"record":"ID record (integer, relazione modulo 0)",
-				"recordNew":"il record è nuovo (TRUE/FALSE, modulo)",
-				"role":"il login ha ruolo (TRUE/FALSE)",
+				"attribute":"attribute",
+				"collection":"collection",
+				"field":"field value",
+				"fieldChanged":"field changed",
+				"javascript":"JavaScript",
+				"languageCode":"login language",
+				"login":"login ID",
+				"preset":"preset record",
+				"record":"record ID",
+				"recordNew":"record is new",
+				"role":"login has role",
 				"subQuery":"sub query",
-				"true":"valore vero (TRUE)",
-				"value":"valore fisso"
+				"true":"true value",
+				"value":"fixed value"
+			},
+			"contentHint":{
+				"attribute":"Attribute value from the current query.",
+				"collection":"One or many values from the chosen collection column. Use '@>', '<@' or '&&' operators when comparing multiple values.",
+				"field":"Current field value.",
+				"fieldChanged":"TRUE/FALSE, depending on whether field value has changed.",
+				"javascript":"Return value of the given Javascript expression.",
+				"languageCode":"The chosen user language code (en_us, de_de, ...) of the current login.",
+				"login":"ID of the current login (integer).",
+				"preset":"ID of the given preset record (integer).",
+				"record":"ID of the current record on this form (integer, relation 0).",
+				"recordNew":"TRUE/FALSE, depending on whether the current record is new on this form.",
+				"role":"TRUE/FALSE, depending on the whether the current login has the given role assigned.",
+				"subQuery":"Return value of the given sub query.",
+				"true":"TRUE value to compare other TRUE values against.",
+				"value":"A static value to compare against."
 			},
 			"operator":{
 				"eq":"uguale",
@@ -1210,9 +1288,6 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"Il record è stato aggiornato"
 		},
-		"help":"Pagine aiuto",
-		"helpContextTitle":"Contesto",
-		"helpModuleTitle":"Applicazione",
 		"invalidInputs":"Controlla input!",
 		"noAccess":"Nessun accesso"
 	},
@@ -1245,7 +1320,7 @@
 			"title":"Setup"
 		},
 		"newVersion":"Notifica aggiornamento",
-		"newVersionText":"È disponibile una nuova versione di REI3.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">Scarica REI3 v{VERSION}</a >",
+		"newVersionText":"È disponibile una nuova versione di REI3.<br /><br /><a href=\"https://rei3.de/en/downloads\" target=\"_blank\">Scarica REI3 v{VERSION}</a >",
 		"noAccess":"Non è stato ancora concesso l'accesso.<br />Contatta il tuo amministratore di sistema.",
 		"noAccessAdmin":"Per ottenere l'accesso, assegna i ruoli al tuo login.",
 		"noAccessTitle":"Nessun accesso alle applicazioni",
@@ -1383,24 +1458,43 @@
 		"tokensFixed":{
 			"button":{
 				"loadApp":"Application",
-				"loadCnf":"Config file",
-				"install":"Install client application"
+				"loadCnf":"Config file"
+			},
+			"context":{
+				"client":"REI3 client",
+				"ics":"Calendar app",
+				"totp":"Multi-factor"
 			},
 			"install":{
 				"intro":"With the client application you can directly open and edit files from within REI3.",
+				"nameHint":"'My Work PC'",
 				"steps":"Installation steps",
 				"step1":"Choose a device name:",
 				"step2":"Select your operating system:",
-				"step3":"Download the application:",
-				"step4":"Download the application config file to the same folder:",
-				"step5":"Start the application.",
-				"step6":"It is now installed and will appear in your system tray.",
-				"title":"Install client application"
+				"step3":"Download the application & config file to the same folder:",
+				"step4":"Start the application.",
+				"step5":"It is now installed and will appear in your system tray."
 			},
-			"nameHint":"'My Work PC'",
+			"message":{
+				"delete":"Are you sure you want to delete this entry? This cannot be undone."
+			},
+			"mfa":{
+				"apps":[
+					"Google Authenticator",
+					"Microsoft Authenticator",
+					"Aegis Authenticator",
+					"...or any application that supports TOTP"
+				],
+				"appsExample":"Some examples:",
+				"intro":"You can increase your account security by enabling multi-factor authentication (MFA). To enable MFA, please use an authenticator app on a separate device (like a smartphone).",
+				"name":"Choose a name for your device",
+				"nameHint":"'My smartphone'",
+				"outro":"Use the QR code to add this account to your authenticator app. When you are done, close this window. You can repeat this process to enable MFA with multiple devices."
+			},
 			"titleAdd":"Install client application",
 			"titleContext":"Use",
 			"titleDateCreate":"Created",
+			"titleMfa":"Setup multi-factor authentication",
 			"titleName":"Device name"
 		},
 		"bordersAll":"Aggiungi bordi",
@@ -1427,7 +1521,7 @@
 		"titleAccount":"Account",
 		"titleDisplay":"Visualizza",
 		"titleEncryption":"End-to-end encryption",
-		"titleFixedTokens":"Device access",
+		"titleFixedTokens":"Devices",
 		"titleTheme":"Tema",
 		"warnUnsaved":"Avviso per cambiamenti non salvati"
 	}

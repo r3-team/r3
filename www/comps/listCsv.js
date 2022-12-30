@@ -104,7 +104,7 @@ let MyListCsv = {
 		query:      { type:Object, required:true }
 	},
 	emits:['reload'],
-	data:function() {
+	data() {
 		return {
 			action:'',       // CSV action (export/import)
 			boolNative:true, // use native bool strings (true/false) or translations (yes/no, ...)
@@ -120,7 +120,7 @@ let MyListCsv = {
 			totalLimit:500
 		};
 	},
-	mounted:function() {
+	mounted() {
 		this.action = this.isExport ? 'export' : 'import';
 		
 		for(let i = 0, j = this.columns.length; i < j; i++) {
@@ -140,45 +140,43 @@ let MyListCsv = {
 		}
 	},
 	computed:{
-		exportHref:function() {
+		exportHref:(s) => {
 			let getters = [
-				`token=${this.token}`,
-				`bool_false=${this.boolNative ? 'false' : this.capGen.option.no}`,
-				`bool_true=${this.boolNative ? 'true' : this.capGen.option.yes}`,
-				`comma_char=${encodeURIComponent(this.commaChar)}`,
-				`date_format=${encodeURIComponent(this.settings.dateFormat)}`,
-				`timezone=${encodeURIComponent(this.timezone)}`,
-				`ignore_header=${this.hasHeader ? 'false' : 'true'}`,
-				`relation_id=${this.query.relationId}`,
-				`columns=${JSON.stringify(this.columns)}`,
-				`joins=${JSON.stringify(this.joins)}`,
-				`expressions=${JSON.stringify(this.expressions)}`,
-				`filters=${JSON.stringify(this.filters)}`,
-				`orders=${JSON.stringify(this.orders)}`,
-				`total_limit=${this.totalLimit}`
+				`token=${s.token}`,
+				`bool_false=${s.boolNative ? 'false' : s.capGen.option.no}`,
+				`bool_true=${s.boolNative ? 'true' : s.capGen.option.yes}`,
+				`comma_char=${encodeURIComponent(s.commaChar)}`,
+				`date_format=${encodeURIComponent(s.settings.dateFormat)}`,
+				`timezone=${encodeURIComponent(s.timezone)}`,
+				`ignore_header=${s.hasHeader ? 'false' : 'true'}`,
+				`relation_id=${s.query.relationId}`,
+				`columns=${JSON.stringify(s.columns)}`,
+				`joins=${JSON.stringify(s.joins)}`,
+				`expressions=${JSON.stringify(s.expressions)}`,
+				`filters=${JSON.stringify(s.filters)}`,
+				`orders=${JSON.stringify(s.orders)}`,
+				`total_limit=${s.totalLimit}`
 			];
 			return `/csv/download/export.csv?${getters.join('&')}`;
 		},
-		timezone:function() {
-			return Intl.DateTimeFormat().resolvedOptions().timeZone;
-		},
+		timezone:(s) => Intl.DateTimeFormat().resolvedOptions().timeZone,
 		
 		// stores
-		token:         function() { return this.$store.getters['local/token']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.list; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		settings:      function() { return this.$store.getters.settings; }
+		token:         (s) => s.$store.getters['local/token'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.list,
+		capGen:        (s) => s.$store.getters.captions.generic,
+		settings:      (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
 		resolveErrCode,
 		
 		// actions
-		setFile:function(evt) {
+		setFile(evt) {
 			this.file = evt.target.files[0];
 		},
-		send:function() {
+		send() {
 			let that = this;
 			let formData    = new FormData();
 			let httpRequest = new XMLHttpRequest();

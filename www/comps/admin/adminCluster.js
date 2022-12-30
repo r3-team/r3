@@ -170,8 +170,13 @@ let MyAdminCluster = {
 		</div>
 		<div class="top lower">
 			<div class="area">
+				<my-button image="save.png"
+					@trigger="setConfig"
+					:active="config.clusterNodeMissingAfter !== configInput.clusterNodeMissingAfter"
+					:caption="capGen.button.save"
+				/>
 				<my-button image="refresh.png"
-					@trigger="get"
+					@trigger="reset"
 					:caption="capGen.button.refresh"
 				/>
 			</div>
@@ -182,33 +187,22 @@ let MyAdminCluster = {
 				{{ capGen.licenseRequired }}
 			</div>
 			
-			<div class="contentPart config">
-				<div class="contentPartHeader">
-					<img class="icon" src="images/settings.png" />
-					<h1>{{ capApp.title.config }}</h1>
-				</div>
-				<table>
-					<tr class="default-inputs">
-						<td>{{ capApp.configNodeMissing }}</td>
-						<td>
-							<input
-								v-model="configInput.clusterNodeMissingAfter"
-								:disabled="!licenseValid"
-							/>
-						</td>
-					</tr>
-				</table>
-				
-				<div>
-					<my-button image="save.png"
-						@trigger="setConfig"
-						:active="config.clusterNodeMissingAfter !== configInput.clusterNodeMissingAfter"
-						:caption="capGen.button.save"
-					/>
-				</div>
+			<div class="contentPartHeader">
+				<img class="icon" src="images/settings.png" />
+				<h1>{{ capApp.title.config }}</h1>
 			</div>
+			<table>
+				<tr class="default-inputs">
+					<td>{{ capApp.configNodeMissing }}</td>
+					<td>
+						<input
+							v-model="configInput.clusterNodeMissingAfter"
+							:disabled="!licenseValid"
+						/>
+					</td>
+				</tr>
+			</table>
 			
-			<hr />
 			<br />
 			
 			<!-- cluster master -->
@@ -276,11 +270,16 @@ let MyAdminCluster = {
 		};
 	},
 	mounted:function() {
-		this.configInput = JSON.parse(JSON.stringify(this.config));
-		this.get();
+		this.reset();
 		this.$store.commit('pageTitle',this.menuTitle);
 	},
 	methods:{
+		// actions
+		reset() {
+			this.configInput = JSON.parse(JSON.stringify(this.config));
+			this.get();
+		},
+		
 		// backend calls,
 		del:function(id) {
 			ws.send('cluster','delNode',{id:id},true).then(

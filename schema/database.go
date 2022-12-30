@@ -28,3 +28,6 @@ func GetEncKeyTableName(relationId uuid.UUID) string {
 func GetFilesTableName(attributeId uuid.UUID) string {
 	return fmt.Sprintf("%s_record", attributeId.String())
 }
+func GetFilesTriggerName(attributeId uuid.UUID) string {
+	return fmt.Sprintf("trg_%s_record", attributeId.String())
+}

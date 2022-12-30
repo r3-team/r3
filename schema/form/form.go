@@ -4,8 +4,10 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
+	"r3/compatible"
 	"r3/db"
 	"r3/schema"
+	"r3/schema/article"
 	"r3/schema/caption"
 	"r3/schema/field"
 	"r3/schema/query"
@@ -43,6 +45,9 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 		return err
 	}
 
+	// remove form functions (cannot be copied without recreating all functions)
+	form.Functions = make([]types.FormFunction, 0)
+
 	// replace IDs from fields as well as their (sub)queries, columns, etc.
 	// run twice: once for all field IDs and again to update dependent field sub entities
 	//  example: filters from columns (sub queries) or other fields (list queries) can reference field IDs
@@ -52,7 +57,7 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 
 			// replace IDs inside fields
 			// first run: field IDs
-			// second run: IDs for (sub)queries, columns
+			// second run: IDs for (sub)queries, columns, tabs
 			fieldIf, err = replaceFieldIds(fieldIf, idMapReplaced, runs == 0)
 			if err != nil {
 				return err
@@ -84,28 +89,34 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 		}
 
 		for j, c := range state.Conditions {
-
-			if c.FieldId0.Status == pgtype.Present {
-				if _, exists := idMapReplaced[c.FieldId0.Bytes]; exists {
-					form.States[i].Conditions[j].FieldId0.Bytes = idMapReplaced[c.FieldId0.Bytes]
+			if c.Side0.FieldId.Status == pgtype.Present {
+				if _, exists := idMapReplaced[c.Side0.FieldId.Bytes]; exists {
+					form.States[i].Conditions[j].Side0.FieldId.Bytes = idMapReplaced[c.Side0.FieldId.Bytes]
 				}
 			}
-			if c.FieldId1.Status == pgtype.Present {
-				if _, exists := idMapReplaced[c.FieldId1.Bytes]; exists {
-					form.States[i].Conditions[j].FieldId1.Bytes = idMapReplaced[c.FieldId1.Bytes]
+			if c.Side1.FieldId.Status == pgtype.Present {
+				if _, exists := idMapReplaced[c.Side1.FieldId.Bytes]; exists {
+					form.States[i].Conditions[j].Side1.FieldId.Bytes = idMapReplaced[c.Side1.FieldId.Bytes]
 				}
 			}
 		}
 
 		for j, e := range state.Effects {
-			if _, exists := idMapReplaced[e.FieldId]; exists {
-				form.States[i].Effects[j].FieldId = idMapReplaced[e.FieldId]
+			if e.FieldId.Status == pgtype.Present {
+				if _, exists := idMapReplaced[e.FieldId.Bytes]; exists {
+					form.States[i].Effects[j].FieldId.Bytes = idMapReplaced[e.FieldId.Bytes]
+				}
+			}
+			if e.TabId.Status == pgtype.Present {
+				if _, exists := idMapReplaced[e.TabId.Bytes]; exists {
+					form.States[i].Effects[j].TabId.Bytes = idMapReplaced[e.TabId.Bytes]
+				}
 			}
 		}
 	}
 	return Set_tx(tx, moduleId, form.Id, form.PresetIdOpen, form.IconId, newName,
 		form.NoDataActions, form.Query, form.Fields, form.Functions, form.States,
-		form.Captions)
+		form.ArticleIdsHelp, form.Captions)
 }
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
@@ -132,8 +143,13 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 	}
 
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
-		SELECT id, preset_id_open, icon_id, name, no_data_actions
-		FROM app.form
+		SELECT id, preset_id_open, icon_id, name, no_data_actions, ARRAY(
+			SELECT article_id
+			FROM app.article_form
+			WHERE form_id = f.id
+			ORDER BY position ASC
+		) AS "articleIdsHelp"
+		FROM app.form AS f
 		WHERE true
 		%s
 		ORDER BY name ASC
@@ -145,7 +161,9 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 	for rows.Next() {
 		var f types.Form
 
-		if err := rows.Scan(&f.Id, &f.PresetIdOpen, &f.IconId, &f.Name, &f.NoDataActions); err != nil {
+		if err := rows.Scan(&f.Id, &f.PresetIdOpen, &f.IconId, &f.Name,
+			&f.NoDataActions, &f.ArticleIdsHelp); err != nil {
+
 			return forms, err
 		}
 		f.ModuleId = moduleId
@@ -171,7 +189,7 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 		if err != nil {
 			return forms, err
 		}
-		form.Captions, err = caption.Get("form", form.Id, []string{"formTitle", "formHelp"})
+		form.Captions, err = caption.Get("form", form.Id, []string{"formTitle"})
 		if err != nil {
 			return forms, err
 		}
@@ -183,7 +201,7 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUID,
 	iconId pgtype.UUID, name string, noDataActions bool, queryIn types.Query,
 	fields []interface{}, functions []types.FormFunction, states []types.FormState,
-	captions types.CaptionMap) error {
+	articleIdsHelp []uuid.UUID, captions types.CaptionMap) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &id, "form", "id")
 	if err != nil {
@@ -216,7 +234,11 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUI
 
 	// set fields (recursive)
 	fieldIdMapQuery := make(map[uuid.UUID]types.Query)
-	if err := field.Set_tx(tx, id, pgtype.UUID{Status: pgtype.Null}, fields, fieldIdMapQuery); err != nil {
+	if err := field.Set_tx(tx, id,
+		pgtype.UUID{Status: pgtype.Null},
+		pgtype.UUID{Status: pgtype.Null},
+		fields, fieldIdMapQuery); err != nil {
+
 		return err
 	}
 
@@ -238,11 +260,18 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUI
 		return err
 	}
 
-	// set form captions
-	if err := caption.Set_tx(tx, id, captions); err != nil {
+	// set help articles
+	if err := article.Assign_tx(tx, "form", id, articleIdsHelp); err != nil {
 		return err
 	}
-	return nil
+
+	// set form captions
+	// fix imports < 3.2: Migration from help captions to help articles
+	captions, err = compatible.FixCaptions_tx(tx, "form", id, captions)
+	if err != nil {
+		return err
+	}
+	return caption.Set_tx(tx, id, captions)
 }
 
 // replace field IDs (form duplication)
@@ -477,6 +506,32 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 			for i, _ := range field.Collections {
 				field.Collections[i] = replaceCollectionConsumer(field.Collections[i])
 			}
+		}
+		fieldIf = field
+
+	case types.FieldTabs:
+		if setFieldIds {
+			field.Id, err = schema.ReplaceUuid(field.Id, idMapReplaced)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			for i, tab := range field.Tabs {
+				tab.Id, err = schema.ReplaceUuid(tab.Id, idMapReplaced)
+				if err != nil {
+					return nil, err
+				}
+				field.Tabs[i] = tab
+			}
+		}
+		for i, tab := range field.Tabs {
+			for fi, _ := range tab.Fields {
+				tab.Fields[fi], err = replaceFieldIds(tab.Fields[fi], idMapReplaced, setFieldIds)
+				if err != nil {
+					return nil, err
+				}
+			}
+			field.Tabs[i] = tab
 		}
 		fieldIf = field
 

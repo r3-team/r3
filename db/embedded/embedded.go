@@ -32,6 +32,9 @@ var (
 	msgState1  = "server is running"
 )
 
+func GetDbBinPath() string {
+	return dbBin
+}
 func SetPaths() {
 	dbBin = config.File.Paths.EmbeddedDbBin
 	dbBinCtl = filepath.Join(dbBin, "pg_ctl")
@@ -84,23 +87,6 @@ func Stop() error {
 
 	_, err = execWaitFor(dbBinCtl, []string{"stop", "-D", dbData}, []string{msgStopped}, 10)
 	return err
-}
-
-func Backup(path string) error {
-
-	args := []string{
-		"-h", config.File.Db.Host,
-		"-p", fmt.Sprintf("%d", config.File.Db.Port),
-		"-U", config.File.Db.User,
-		"-j", "4", // number of parallel jobs
-		"-Fd", // custom format, to file directory
-		"-f", path,
-	}
-	cmd := exec.Command(filepath.Join(dbBin, "pg_dump"), args...)
-	tools.CmdAddSysProgAttrs(cmd)
-	cmd.Env = append(cmd.Env, fmt.Sprintf("LC_MESSAGES=%s", locale))
-	cmd.Env = append(cmd.Env, fmt.Sprintf("PGPASSWORD=%s", config.File.Db.Pass))
-	return cmd.Run()
 }
 
 func status() (bool, error) {

@@ -1,13 +1,12 @@
 import MyBuilderCaption          from './builderCaption.js';
+import {MyBuilderColumns}        from './builderColumns.js';
 import MyBuilderIconInput        from './builderIconInput.js';
-import MyBuilderFieldOptions     from './builderFieldOptions.js';
-import {getItemTitle}            from '../shared/builder.js';
 import {getFlexBasis}            from '../shared/form.js';
 import {isAttributeRelationship} from '../shared/attribute.js';
 import {
-	MyBuilderColumns,
-	MyBuilderColumnTemplates
-} from './builderColumns.js';
+	getFieldHasQuery,
+	getItemTitle
+} from '../shared/builder.js';
 import {
 	getJoinsIndexMap,
 	getQueryExpressions,
@@ -22,8 +21,6 @@ let MyBuilderFields = {
 	components:{
 		MyBuilderCaption,
 		MyBuilderColumns,
-		MyBuilderColumnTemplates,
-		MyBuilderFieldOptions,
 		MyBuilderIconInput
 	},
 	template:`<draggable handle=".dragAnchor" animation="100" itemKey="id"
@@ -39,121 +36,22 @@ let MyBuilderFields = {
 				:key="element.id"
 				:style="getStyleParent(element)"
 			>
-				<div class="builder-drag-item" :class="{ container:element.content === 'container' }">
+				<div class="builder-field-header" :class="{ dragAnchor:!moveActive }">
 					<!-- form state field reference -->
-					<span class="reference" v-if="!isTemplate">
-						F{{ typeof fieldIdMapRef[element.id] !== 'undefined' ? fieldIdMapRef[element.id] : '' }}
+					<span class="field-ref" v-if="!isTemplate">
+						F{{ typeof entityIdMapRef.field[element.id] !== 'undefined' ? entityIdMapRef.field[element.id] : '' }}
 					</span>
 					
-					<!-- action: move this field -->
-					<img class="action edit clickable"
-						v-if="!moveActive || fieldMoveList[fieldMoveIndex].id === element.id || !isTemplate"
-						@click="moveByClick(fields,index,false)"
-						:class="{ selected:moveActive && fieldMoveList[fieldMoveIndex].id === element.id }"
-						:src="!moveActive ? 'images/arrowRight.png' : 'images/arrowDown.png'"
-						:title="!moveActive ? capApp.fieldMoveSource : capApp.fieldMoveTarget"
-					/>
-					
-					<!-- action: move target inside container -->
-					<img class="action edit clickable" src="images/arrowInside.png"
-						v-if="!isTemplate && element.content === 'container' && moveActive && fieldMoveList[fieldMoveIndex].id !== element.id"
-						@click="moveByClick(element.fields,0,true)"
-						:title="capApp.fieldMoveInside"
-					/>
-					
-					<!-- action: move via drag&drop -->
-					<img class="action dragAnchor" src="images/drag.png"
-						v-if="!moveActive"
-						:title="capApp.fieldMoveSource"
-					/>
-					
-					<!-- action: edit field options -->
-					<img class="action edit clickable" src="images/edit.png"
-						v-if="!isTemplate && !moveActive"
-						@click="fieldIdEditSet(element.id)"
-						:class="{ selected:fieldIdEdit === element.id }"
-						:title="capApp.fieldOptions"
-					/>
-					
-					<!-- toggle: show on mobile -->
-					<img class="action edit clickable"
-						v-if="!isTemplate && !moveActive"
-						@click="fieldPropertySet(index,'onMobile',toggleBool(element.onMobile))"
-						:src="element.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
-						:title="capApp.onMobile+': '+element.onMobile"
-					/>
-					
-					<!-- display: field is hidden -->
-					<img class="action edit clickable" src="images/visible0.png"
-						v-if="!isTemplate && !moveActive && element.state === 'hidden'"
-						@click="fieldPropertySet(index,'state','default')"
-						:title="capApp.hidden"
-					/>
-					
-					<!-- action: edit field query (in parent form) -->
-					<img class="action edit clickable" src="images/database.png"
-						v-if="!isTemplate && !moveActive && hasFieldColumns(element)"
-						@click="fieldIdQuerySet(element.id)"
-						:class="{ selected:fieldIdQuery === element.id }"
-						:title="capApp.contentField"
-					/>
-					
-					<!-- action: list data SQL preview -->
-					<img class="action edit clickable" src="images/code.png"
-						v-if="!isTemplate && ['calendar','chart','list'].includes(element.content)"
-						@click="getSqlPreview(element)"
-						:title="capApp.sql"
-					/>
-					
-					<!-- field icon -->
-					<my-builder-icon-input
-						v-if="!isTemplate && element.content !== 'container'"
-						@input="element.iconId = $event"
-						:icon-id-selected="element.iconId"
-						:module="moduleIdMap[moduleId]"
-						:title="capApp.fieldIcon"
-					/>
-					
-					<!-- field title -->
-					<div v-if="isTemplate || element.content !== 'container'" class="title">
-						{{ getTitle(element) }}
-					</div>
-					
-					<!-- container actions -->
+					<!-- container actions 1 -->
 					<template v-if="!isTemplate && !moveActive && element.content === 'container'">
-						
-						<div class="part clickable"
-							@click="fieldPropertySet(index,'basis',toggleSize(element.basis,50,300))"
-							@click.prevent.right="fieldPropertySet(index,'basis',toggleSize(element.basis,-50))"
-							:title="capApp.flexSize"
-						>
-							<span>{{ getFlexBasis(element.basis) }}</span>
-						</div>
-						
-						<div class="part clickable"
-							@click="fieldPropertySet(index,'grow',toggleSize(element.grow,1,1))"
-							@click.prevent.right="fieldPropertySet(index,'grow',toggleSize(element.grow,-1))"
-							:title="capApp.flexSizeGrow"
-						>
-							<span>G{{ element.grow }}</span>
-						</div>
-						
-						<div class="part clickable"
-							@click="fieldPropertySet(index,'shrink',toggleSize(element.shrink,1,1))"
-							@click.prevent.right="fieldPropertySet(index,'shrink',toggleSize(element.shrink,-1))"
-							:title="capApp.flexSizeShrink"
-						>
-							<span>S{{ element.shrink }}</span>
-						</div>
-						
-						<img class="clickable"
+						<img class="action clickable"
 							@click="fieldPropertySet(index,'direction',toggleDir(element.direction))"
 							@click.prevent.right="fieldPropertySet(index,'direction',toggleDir(element.direction))"
 							:src="element.direction === 'row' ? 'images/flexRow.png' : 'images/flexColumn.png'"
 							:title="capApp.fieldDirection+': '+element.direction"
 						/>
 						
-						<img class="clickable"
+						<img class="action clickable"
 							@click="fieldPropertySet(index,'wrap',toggleBool(element.wrap))"
 							@click.prevent.right="fieldPropertySet(index,'wrap',toggleBool(element.wrap))"
 							:src="element.wrap ? 'images/wrap1.png' : 'images/wrap0.png'"
@@ -161,95 +59,194 @@ let MyBuilderFields = {
 						/>
 					</template>
 					
-					<!-- action: remove field -->
-					<img class="action end clickable" src="images/cancel.png"
-						v-if="!isTemplate"
-						@click="remove(element.id,index)"
-					/>
-				</div>
-				
-				<!-- caption inputs -->
-				<div class="captionInputs"
-					v-if="!isTemplate && showCaptions && element.content !== 'container'"
-				>
-					<my-builder-caption
-						v-if="element.content === 'button' || element.content === 'data' || element.content === 'header'"
-						v-model="element.captions.fieldTitle"
-						:contentName="capApp.fieldTitle"
-						:language="builderLanguage"
+					<!-- field icon -->
+					<my-builder-icon-input
+						v-if="!isTemplate && !moveActive && element.content !== 'container'"
+						@input="element.iconId = $event"
+						:iconIdSelected="element.iconId"
+						:module="moduleIdMap[moduleId]"
+						:naked="true"
+						:title="capApp.fieldIcon"
 					/>
 					
-					<my-builder-caption
-						v-if="element.content === 'data'"
-						v-model="element.captions.fieldHelp"
-						:contentName="capApp.fieldHelp"
-						:language="builderLanguage"
+					<!-- display: field is hidden -->
+					<img class="action clickable" src="images/visible0.png"
+						v-if="!isTemplate && !moveActive && element.state === 'hidden'"
+						@click="fieldPropertySet(index,'state','default')"
+						:title="capApp.hidden"
 					/>
-				</div>
-				
-				<!-- field options -->
-				<my-builder-field-options
-					v-if="!isTemplate && fieldIdEdit === element.id"
-					@set="(...args) => fieldPropertySet(index,args[0],args[1])"
-					:builderLanguage="builderLanguage"
-					:dataFields="dataFields"
-					:field="element"
-					:formId="formId"
-					:joinsIndexMap="joinsIndexMap"
-					:moduleId="moduleId"
-				/>
-				
-				<!-- columns for list/calendar/chart fields -->
-				<div class="columnsTarget"
-					v-if="!isTemplate && hasFieldColumns(element)"
-				>
-					<div v-if="element.columns.length === 0">
-						{{ capApp.columnsTarget }}
+					
+					<!-- action: edit field options -->
+					<img class="action clickable on-hover on-selected" src="images/edit.png"
+						v-if="!isTemplate && !moveActive"
+						@click="$emit('field-id-show',element.id,'properties')"
+						:class="{ selected:fieldIdShow === element.id && fieldIdShowTab === 'properties' }"
+						:title="capApp.fieldOptions"
+					/>
+					
+					<!-- action: edit field content -->
+					<img class="action clickable on-hover on-selected" src="images/database.png"
+						v-if="!isTemplate && !moveActive && getFieldHasQuery(element)"
+						@click="$emit('field-id-show',element.id,'content')"
+						:class="{ selected:fieldIdShow === element.id && fieldIdShowTab === 'content' }"
+						:title="capApp.contentField"
+					/>
+					
+					<!-- action: move this field -->
+					<img class="action mover"
+						v-if="!moveActive || fieldMoveList[fieldMoveIndex].id === element.id || !isTemplate"
+						@click="moveByClick(fields,index,false)"
+						:class="{ 'on-hover':!moveActive, selected:moveActive && fieldMoveList[fieldMoveIndex].id === element.id }"
+						:src="!moveActive ? 'images/arrowRight.png' : 'images/arrowDown.png'"
+						:title="!moveActive ? capApp.fieldMoveSource : capApp.fieldMoveTarget"
+					/>
+					
+					<!-- action: move target inside container -->
+					<img class="action clickable" src="images/arrowInside.png"
+						v-if="!isTemplate && ['container','tabs'].includes(element.content) && moveActive && fieldMoveList[fieldMoveIndex].id !== element.id"
+						@click="moveByClick(getParentChildren(element),0,true)"
+						:title="capApp.fieldMoveInside"
+					/>
+					
+					<!-- mouse over break out actions -->
+					<div v-if="!isTemplate && !moveActive" class="break-out-wrap on-hover">
+						<div class="break-out shade">
+							
+							<!-- toggle: show on mobile -->
+							<img class="action clickable"
+								v-if="!moveActive"
+								@click="fieldPropertySet(index,'onMobile',toggleBool(element.onMobile))"
+								:src="element.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
+								:title="capApp.onMobile+': '+element.onMobile"
+							/>
+							
+							<!-- container actions 2 -->
+							<template v-if="!moveActive && element.content === 'container'">
+								<div class="clickable"
+									@click="fieldPropertySet(index,'basis',toggleSize(element.basis,50,300))"
+									@click.prevent.right="fieldPropertySet(index,'basis',toggleSize(element.basis,-50))"
+									:title="capApp.flexSize"
+								>
+									<span>{{ getFlexBasis(element.basis) }}</span>
+								</div>
+								
+								<div class="clickable"
+									@click="fieldPropertySet(index,'grow',toggleSize(element.grow,1,1))"
+									@click.prevent.right="fieldPropertySet(index,'grow',toggleSize(element.grow,-1))"
+									:title="capApp.flexSizeGrow"
+								>
+									<span>G{{ element.grow }}</span>
+								</div>
+								
+								<div class="clickable"
+									@click="fieldPropertySet(index,'shrink',toggleSize(element.shrink,1,1))"
+									@click.prevent.right="fieldPropertySet(index,'shrink',toggleSize(element.shrink,-1))"
+									:title="capApp.flexSizeShrink"
+								>
+									<span>S{{ element.shrink }}</span>
+								</div>
+							</template>
+							
+							<!-- action: list data SQL preview -->
+							<img class="action clickable" src="images/code.png"
+								v-if="['calendar','chart','list'].includes(element.content)"
+								@click="getSqlPreview(element)"
+								:title="capApp.sql"
+							/>
+							
+							<!-- field title -->
+							<my-builder-caption
+								v-if="element.content === 'button' || element.content === 'data' || element.content === 'header'"
+								v-model="element.captions.fieldTitle"
+								:contentName="getTitle(element)"
+								:dynamicSize="true"
+								:language="builderLanguage"
+							/>
+							
+							<!-- action: remove field -->
+							<img class="action on-hover end clickable" src="images/cancel.png"
+								@click="remove(element.id,index)"
+							/>
+						</div>
 					</div>
 					
-					<my-builder-columns class="inList"
-						@columns-set="fieldPropertySet(index,'columns',$event)"
-						@column-id-query-set="$emit('field-column-query-set',element.id,$event)"
+					<span class="title"
+						v-if="isTemplate || element.content !== 'container'" :title="getTitle(element)"
+						:class="{ 'no-hover':!isTemplate }"
+					>
+						{{ getTitle(element) }}
+					</span>
+				</div>
+				
+				<!-- tabs -->
+				<div class="builder-tabs" v-if="!isTemplate && element.content === 'tabs'">
+					<div class="entries">
+						<div class="entry"
+							v-for="(t,i) in element.tabs"
+							@click="fieldTabSet(element.id,i)"
+							:class="{ active:showTab(element,i) }"
+						>
+							T{{ typeof entityIdMapRef.tab[t.id] !== 'undefined' ? entityIdMapRef.tab[t.id] : '' }}
+						</div>
+					</div>
+					<my-builder-fields class="fields-nested column"
+						v-for="(t,i) in element.tabs.filter((v,i) => showTab(element,i))"
+						@column-id-show="(...args) => $emit('column-id-show',...args)"
+						@field-counter-set="$emit('field-counter-set',$event)"
+						@field-id-show="(...args) => $emit('field-id-show',...args)"
+						@field-remove="$emit('field-remove',$event)"
+						@field-move-store="$emit('field-move-store',$event)"
 						:builderLanguage="builderLanguage"
-						:columnIdQuery="columnIdQuery"
-						:columns="element.columns"
-						:displayOptions="true"
-						:groupName="element.id+'_columns'"
-						:hasCaptions="element.content === 'list'"
-						:joins="element.query.joins"
+						:columnIdShow="columnIdShow"
+						:dataFields="dataFields"
+						:entityIdMapRef="entityIdMapRef"
+						:fieldCounter="fieldCounter"
+						:fieldIdShow="fieldIdShow"
+						:fieldIdShowTab="fieldIdShowTab"
+						:fieldMoveList="fieldMoveList"
+						:fieldMoveIndex="fieldMoveIndex"
+						:fields="t.fields"
+						:flexDirParent="'column'"
+						:formId="formId"
 						:isTemplate="false"
+						:joinsIndexMap="joinsIndexMap"
 						:moduleId="moduleId"
-						:showCaptions="showCaptions"
+						:uiScale="uiScale"
 					/>
 				</div>
 				
-				<!-- column templates for list/calendar/chart fields -->
-				<div class="columnsTemplates">
-					<my-builder-column-templates
-						v-if="fieldIdQuery === element.id"
-						:builderLanguage="builderLanguage"
-						:columns="element.columns"
-						:groupName="element.id+'_columns'"
-						:joins="element.query.joins"
-						:moduleId="moduleId"
-					/>
-				</div>
+				<!-- columns -->
+				<my-builder-columns
+					v-if="!isTemplate && getFieldHasQuery(element)"
+					@column-id-show="$emit('column-id-show',element.id,$event)"
+					@columns-set="fieldPropertySet(index,'columns',$event)"
+					:builderLanguage="builderLanguage"
+					:columns="element.columns"
+					:columnIdShow="columnIdShow"
+					:groupName="element.id+'_columns'"
+					:hasCaptions="element.content === 'list'"
+					:joins="element.query.joins"
+					:isTemplate="false"
+					:moduleId="moduleId"
+					:showOptions="true"
+				/>
 				
 				<!-- nested fields in container -->
-				<my-builder-fields class="container-nested"
+				<my-builder-fields class="fields-nested"
 					v-if="!isTemplate && element.content === 'container'"
-					@field-column-query-set="(...args) => $emit('field-column-query-set',...args)"
+					@column-id-show="(...args) => $emit('column-id-show',...args)"
 					@field-counter-set="$emit('field-counter-set',$event)"
-					@field-id-query-set="$emit('field-id-query-set',$event)"
+					@field-id-show="(...args) => $emit('field-id-show',...args)"
 					@field-remove="$emit('field-remove',$event)"
 					@field-move-store="$emit('field-move-store',$event)"
 					:builderLanguage="builderLanguage"
-					:class="element.direction"
-					:columnIdQuery="columnIdQuery"
+					:class="getClassChildren(element)"
+					:columnIdShow="columnIdShow"
 					:dataFields="dataFields"
+					:entityIdMapRef="entityIdMapRef"
 					:fieldCounter="fieldCounter"
-					:fieldIdMapRef="fieldIdMapRef"
-					:fieldIdQuery="fieldIdQuery"
+					:fieldIdShow="fieldIdShow"
+					:fieldIdShowTab="fieldIdShowTab"
 					:fieldMoveList="fieldMoveList"
 					:fieldMoveIndex="fieldMoveIndex"
 					:fields="element.fields"
@@ -258,59 +255,57 @@ let MyBuilderFields = {
 					:isTemplate="isTemplate"
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="moduleId"
-					:showCaptions="showCaptions"
-					:style="getStyleChildren(element)"
+					:uiScale="uiScale"
 				/>
 			</div>
 		</template>
 	</draggable>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },
-		columnIdQuery:  { required:false,default:null },
-		dataFields:     { type:Array,   required:false, default:() => [] },          // all data fields from form
-		fields:         { type:Array,   required:true },                             // fields to handle
-		fieldIdMapRef:  { type:Object,  required:false, default:() => {return {}} }, // field reference map (unique field counter for each ID)
-		fieldIdQuery:   { required:false, default:null },
+		columnIdShow:   { type:String,  required:false, default:null },
+		dataFields:     { type:Array,   required:false, default:() => [] },
+		entityIdMapRef: { type:Object,  required:false, default:() => {return {}} },
+		fields:         { type:Array,   required:true },
+		fieldIdShow:    { required:false, default:null },
+		fieldIdShowTab: { type:String,  required:false, default:'' },
 		fieldMoveList:  { required:true },
 		fieldMoveIndex: { type:Number,  required:true },
 		fieldCounter:   { type:Number,  required:true },
-		flexDirParent:  { type:String,  required:true },                             // flex direction of parent (row|column)
+		flexDirParent:  { type:String,  required:true }, // flex direction of parent (row|column)
 		formId:         { type:String,  required:true },
-		isTemplate:     { type:Boolean, required:true },                             // is template for fields
+		isTemplate:     { type:Boolean, required:true }, // is template for fields
 		joinsIndexMap:  { type:Object,  required:false, default:() => {return {}} },
 		moduleId:       { type:String,  required:false, default:'' },
-		showCaptions:   { type:Boolean, required:false, default:false },
 		template1n:     { type:Boolean, required:false, default:false },
 		templateIndex:  { type:Number,  required:false, default:-1 },
 		templateN1:     { type:Boolean, required:false, default:false },
-		templateNm:     { type:Boolean, required:false, default:false }
+		templateNm:     { type:Boolean, required:false, default:false },
+		uiScale:        { type:Number,  required:false, default:100 }
 	},
-	emits:[
-		'field-column-query-set','field-counter-set','field-id-query-set',
-		'field-remove','field-move-store'
-	],
+	emits:['column-id-show','field-counter-set','field-id-show','field-remove','field-move-store'],
 	data:function() {
 		return {
 			clone:false,
-			fieldIdEdit:'' // field ID in edit mode
+			fieldIdMapTabIndex:{}
 		};
 	},
 	computed:{
 		fieldCounterInput:{
-			get:function()  { return this.fieldCounter; },
-			set:function(v) { this.$emit('field-counter-set',v); }
+			get()  { return this.fieldCounter; },
+			set(v) { this.$emit('field-counter-set',v); }
 		},
-		moveActive:function() { return this.fieldMoveList !== null; },
+		moveActive() { return this.fieldMoveList !== null; },
 		
 		// stores
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.form; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.form,
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
+		getFieldHasQuery,
 		getFlexBasis,
 		getItemTitle,
 		getJoinsIndexMap,
@@ -321,7 +316,7 @@ let MyBuilderFields = {
 		isAttributeRelationship,
 		
 		// presentation
-		show:function(field) {
+		show(field) {
 			// filter only templates and only data fields
 			if(!this.isTemplate || field.content !== 'data') 
 				return true;
@@ -337,35 +332,34 @@ let MyBuilderFields = {
 			if(this.templateNm && field.attributeIdNm !== null) return true;
 			return false;
 		},
+		showTab(field,tabIndex) {
+			if(typeof this.fieldIdMapTabIndex[field.id] === 'undefined')
+				return tabIndex === 0;
+			
+			if(this.fieldIdMapTabIndex[field.id] >= field.tabs.length)
+				return tabIndex === 0;
+			
+			return this.fieldIdMapTabIndex[field.id] === tabIndex;
+		},
 		
 		// actions
-		fieldIdEditSet:function(fieldId) {
-			if(this.fieldIdEdit === fieldId)
-				return this.fieldIdEdit = '';
-			
-			this.fieldIdEdit = fieldId;
-		},
-		fieldIdQuerySet:function(fieldId) {
-			if(this.fieldIdQuery === fieldId)
-				return this.$emit('field-id-query-set',null);
-			
-			this.$emit('field-id-query-set',fieldId);
-		},
-		fieldPropertySet:function(fieldIndex,name,value) {
-			this.fields[fieldIndex][name] = value;
-		},
-		
-		cloneField:function(field) {
+		cloneField(field) {
 			// generate copy of field with unique ID
 			let fieldNew = JSON.parse(JSON.stringify(field));
 			fieldNew.id = 'new_'+this.fieldCounterInput++;
 			return fieldNew;
 		},
+		fieldPropertySet(fieldIndex,name,value) {
+			this.fields[fieldIndex][name] = value;
+		},
+		fieldTabSet(fieldId,tabIndex) {
+			this.fieldIdMapTabIndex[fieldId] = tabIndex;
+		},
 		
 		// clone is in context of the source draggable element
 		// after element has been cloned (but before it has been dropped),
 		//  it is moved (pull->put) between nested draggable elements
-		moveByDragClone:function(field) {
+		moveByDragClone(field) {
 			// as clone is triggered in source & target, stop if this draggable is not supposed to clone
 			if(!this.clone)
 				return field;
@@ -376,7 +370,7 @@ let MyBuilderFields = {
 		// move field by clicking on it in original fields list (source)
 		//  and then clicking on a field in another fields list (target)
 		// actual move happens in step 2 and is in context of target list
-		moveByClick:function(fieldList,fieldIndex,moveToContainer) {
+		moveByClick(fieldList,fieldIndex,moveToParent) {
 			
 			// if nothing is stored yet, store this field list and index
 			if(!this.moveActive)
@@ -386,7 +380,7 @@ let MyBuilderFields = {
 			
 			let fieldStored = this.fieldMoveList[this.fieldMoveIndex];
 			
-			if(!moveToContainer) {
+			if(!moveToParent) {
 				let fieldNow = fieldList[fieldIndex];
 				
 				// deselect if the same field is set twice
@@ -396,7 +390,7 @@ let MyBuilderFields = {
 					});
 			}
 			
-			// move field from old (stored) list to clicked on list
+			// move field from old (stored) element to clicked on element
 			let isFromTemplate = fieldStored.id.startsWith('template_');
 			
 			if(isFromTemplate)
@@ -404,35 +398,36 @@ let MyBuilderFields = {
 			else
 				this.fieldMoveList.splice(this.fieldMoveIndex,1);
 			
-			if(moveToContainer)
+			if(moveToParent)
 				fieldList.splice(fieldIndex,0,fieldStored);
 			else
 				fieldList.splice(fieldIndex+1,0,fieldStored);
 			
 			this.$emit('field-move-store',{fieldList:null,fieldIndex:0});
 		},
-		remove:function(id,i) {
-			if(this.fieldIdQuery === id)
-				this.$emit('field-id-query-set',null);
+		remove(id,i) {
+			if(this.fieldIdShow === id)
+				this.$emit('field-id-show',null,'content');
 			
 			this.fields.splice(i,1);
 			
-			// ID must be handled separately as it must be deleted in backend
+			// container/tab fields are removed automatically (cascaded)
+			// direct form children (top level) must be removed manually
 			this.$emit('field-remove',id);
 		},
-		toggleBool:function(oldBool) {
+		toggleBool(oldBool) {
 			return !oldBool;
 		},
-		toggleDir:function(oldDir) {
+		toggleDir(oldDir) {
 			return oldDir === 'row' ? 'column' : 'row';
 		},
-		toggleSize:function(oldVal,change,startSize) {
+		toggleSize(oldVal,change,startSize) {
 			if(oldVal+change < 0) return 0;
 			if(oldVal === 0)      return startSize;
 			
 			return oldVal+change;
 		},
-		toggleValues:function(oldValue,values,toggleNext) {
+		toggleValues(oldValue,values,toggleNext) {
 			let pos = values.indexOf(oldValue);
 			
 			if(pos === -1) return values[0];
@@ -445,13 +440,7 @@ let MyBuilderFields = {
 				return pos >= 0 ? values[pos] : values[values.length-1];
 			}
 		},
-		hasFieldColumns:function(field) {
-			if(['calendar','chart','list'].includes(field.content))
-				return true;
-			
-			return this.isRelationship(field);
-		},
-		isRelationship:function(field) {
+		isRelationship(field) {
 			if(field.content !== 'data') return false;
 			
 			return this.isAttributeRelationship(
@@ -459,25 +448,31 @@ let MyBuilderFields = {
 		},
 		
 		// getters
-		getClass:function(field) {
-			let out = {
-				isTemplate:this.isTemplate
+		getClass(field) {
+			return {
+				container:field.content === 'container',
+				isTemplate:this.isTemplate,
+				selected:field.id === this.fieldIdShow,
+				tabs:field.content === 'tabs'
 			};
-			
-			if(field.content === 'container')
-				out['container'] = 'container';
-			
-			return out;
 		},
-		getTitle:function(field) {
-			let cap = '';
+		getParentChildren(parentField) {
+			if(parentField.content === 'container')
+				return parentField.fields;
+			
+			let tabIndex = typeof this.fieldIdMapTabIndex[parentField.id] !== 'undefined'
+				? this.fieldIdMapTabIndex[parentField.id] : 0;
+			
+			return parentField.tabs[tabIndex].fields;
+		},
+		getTitle(field) {
 			switch(field.content) {
-				case 'button':    cap = 'Button';    break;
-				case 'calendar':  cap = 'Calendar';  break;
-				case 'chart':     cap = 'Chart';     break;
-				case 'container': cap = 'Container'; break;
-				case 'list':      cap = 'List';      break;
-				case 'header':    cap = 'Header';    break;
+				case 'button':    return 'Button';    break;
+				case 'calendar':  return 'Calendar';  break;
+				case 'chart':     return 'Chart';     break;
+				case 'container': return 'Container'; break;
+				case 'header':    return 'Header';    break;
+				case 'tabs':      return 'Tabs'; break;
 				case 'data':
 					let atr = this.attributeIdMap[field.attributeId];
 					let rel = this.relationIdMap[atr.relationId];
@@ -486,12 +481,18 @@ let MyBuilderFields = {
 					if(typeof field.attributeIdNm !== 'undefined' && field.attributeIdNm !== null)
 						atrNm = this.attributeIdMap[field.attributeIdNm];
 					
-					cap = this.getItemTitle(rel,atr,field.index,field.outsideIn,atrNm);
+					return this.getItemTitle(rel,atr,field.index,field.outsideIn,atrNm);
+				break;
+				case 'list':
+					if(field.query.relationId === null)
+						return 'List';
+					
+					return `List: ${this.relationIdMap[field.query.relationId].name}`;
 				break;
 			}
-			return cap;
+			return '';
 		},
-		getGroup:function() {
+		getGroup() {
 			let group = {
 				name:'fields',
 				pull:['fields'],
@@ -504,33 +505,41 @@ let MyBuilderFields = {
 			}
 			return group;
 		},
-		getStyleChildren:function(f) {
-			let out = [
-				`flex-wrap:${f.wrap ? 'wrap' : 'nowrap'}`,
-				`justify-content:${f.justifyContent}`,
-				`align-items:${f.alignItems}`,
-				`align-content:${f.alignContent}`
-			];
-			return out.join(';');
+		getClassChildren(f) {
+			// default classed
+			let out = [];
+			if(f.fields.length === 0) out.push('empty');
+			
+			// draggable does not support styling the main element
+			// use custom classes as fallback
+			if(f.direction === 'column') out.push('column');
+			if(f.wrap)                   out.push('wrap');
+			
+			out.push(`style-justify-content-${f.justifyContent}`);
+			out.push(`style-justify-content-${f.alignContent}`);
+			out.push(`style-align-items-${f.alignItems}`);
+			return out;
 		},
-		getStyleParent:function(f) {
-			// overwrite if edit panel is open
-			if(this.fieldIdEdit === f.id)
-				return 'flex:0 0 auto;';
+		getStyleParent(f) {
+			if(typeof f.basis === 'undefined')
+				return;
 			
-			let out = [`flex:${f.grow} ${f.shrink} ${this.getFlexBasis(f.basis)}`];
+			let basis = f.basis;
+			if(basis !== 0)
+				basis = Math.floor(basis * this.uiScale / 100);
 			
-			if(f.basis !== 0) {
+			let out = [`flex:${f.grow} ${f.shrink} ${this.getFlexBasis(basis)}`];
+			if(basis !== 0) {
 				let dirMax = this.flexDirParent === 'row' ? 'max-width' : 'max-height';
 				let dirMin = this.flexDirParent === 'row' ? 'min-width' : 'min-height';
-				out.push(`${dirMax}:${f.basis*f.perMax/100}px`);
-				out.push(`${dirMin}:${f.basis*f.perMin/100}px`);
+				out.push(`${dirMax}:${basis*f.perMax/100}px`);
+				out.push(`${dirMin}:${basis*f.perMin/100}px`);
 			}
 			return out.join(';');
 		},
 		
 		// backend calls
-		getSqlPreview:function(field) {
+		getSqlPreview(field) {
 			ws.send('dataSql','get',{
 				relationId:field.query.relationId,
 				joins:this.getRelationsJoined(field.query.joins),

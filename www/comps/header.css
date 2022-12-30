@@ -61,6 +61,9 @@
 	outline:none;
 	z-index:var(--z-index-header-entry);
 }
+.app-header .entry.readonly{
+	cursor:default;
+}
 .app-header .entry.no-wrap{
 	margin:0px 3px 0px 0px;
 }
@@ -75,8 +78,8 @@
 .app-header .entry span:first-child{
 	margin:0px;
 }
-.app-header .entry:focus,
-.app-header .entry:hover,
+.app-header .entry:focus:not(.readonly),
+.app-header .entry:hover:not(.readonly),
 .app-header .entry-wrap:focus .entry,
 .app-header .entry-wrap:hover .entry{
 	border:2px solid var(--color-header-border);

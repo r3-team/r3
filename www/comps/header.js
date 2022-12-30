@@ -1,9 +1,6 @@
 import srcBase64Icon    from './shared/image.js';
 import {getColumnTitle} from './shared/column.js';
-import {
-	getFormPopUpTemplate,
-	getFormRoute
-} from './shared/form.js';
+import {formOpen}       from './shared/form.js';
 import {
 	getCollectionColumn,
 	getCollectionValues
@@ -23,6 +20,7 @@ let MyHeader = {
 					
 					<router-link class="entry no-wrap clickable" to="/builder"
 						v-if="builderEnabled"
+						:title="capGen.button.openBuilder"
 					>
 						<img src="images/builder.png" />
 					</router-link>
@@ -112,14 +110,24 @@ let MyHeader = {
 				</transition>
 				
 				<!-- collection entries -->
-				<div class="entry no-wrap clickable" tabindex="0"
+				<div class="entry no-wrap" tabindex="0"
+					v-if="collectionCounter === 0"
 					v-for="e in collectionEntries"
-					@click="openForm(e.openForm)"
-					@keyup.enter="openForm(e.openForm)"
+					@click="formOpen(e.openForm)"
+					@keyup.enter="formOpen(e.openForm)"
+					:class="{ clickable:e.openForm !== null, readonly:e.openForm === null }"
 					:title="e.title"
 				>
 					<img v-if="e.iconId !== null" :src="srcBase64Icon(e.iconId,'')" />
 					<span>{{ e.value }}</span>
+				</div>
+				<div class="entry clickable" tabindex="0"
+					v-if="collectionCounter !== 0"
+					@click="$emit('show-collection-input',collectionEntries)"
+					@keyup.enter="$emit('show-collection-input',collectionEntries)"
+				>
+					<img src="images/bell.png" />
+					<span>{{ collectionCounter }}</span>
 				</div>
 				
 				<!-- navigation -->
@@ -178,8 +186,8 @@ let MyHeader = {
 		keysLocked:   { type:Boolean, required:true },
 		moduleEntries:{ type:Array,   required:true }
 	},
-	emits:['logout'],
-	data:function() {
+	emits:['logout','show-collection-input'],
+	data() {
 		return {
 			contentSizePx:0,        // width in pixel required by all application entries
 			contentSizePxBuffer:50, // keep this space free (currently only for busy indicator)
@@ -188,17 +196,27 @@ let MyHeader = {
 		};
 	},
 	computed:{
-		collectionEntries:function() {
+		collectionCounter:(s) => {
+			if(!s.isMobile) return 0;
+			
+			let cnt = 0;
+			for(let c of s.collectionEntries) {
+				if(Number.isInteger(c.value))
+					cnt += c.value;
+			}
+			return cnt;
+		},
+		collectionEntries:(s) => {
 			let out = [];
-			for(let k in this.collectionIdMap) {
-				for(let i = 0, j = this.collectionIdMap[k].inHeader.length; i < j; i++) {
-					let collection = this.collectionIdMap[k];
+			for(let k in s.collectionIdMap) {
+				for(let i = 0, j = s.collectionIdMap[k].inHeader.length; i < j; i++) {
+					let collection = s.collectionIdMap[k];
 					let consumer   = collection.inHeader[i];
 					
-					if(!consumer.onMobile && this.isMobile)
+					if(!consumer.onMobile && s.isMobile)
 						continue;
 					
-					let value = this.getCollectionValues(
+					let value = s.getCollectionValues(
 						collection.id,
 						consumer.columnIdDisplay,
 						true
@@ -209,7 +227,7 @@ let MyHeader = {
 					out.push({
 						iconId:collection.iconId,
 						openForm:consumer.openForm,
-						title:this.getColumnTitle(this.getCollectionColumn(
+						title:s.getColumnTitle(s.getCollectionColumn(
 							collection.id,
 							consumer.columnIdDisplay
 						)),
@@ -219,61 +237,55 @@ let MyHeader = {
 			}
 			return out;
 		},
-		menuAvailable:function() {
-			return typeof this.$route.meta.menu !== 'undefined';
-		},
-		moduleActive:function() {
-			if(this.$route.params.moduleName === '')
+		moduleActive:(s) => {
+			if(s.$route.params.moduleName === '')
 				return false;
 			
-			if(this.$route.params.moduleNameChild !== '')
-				return this.moduleNameMap[this.$route.params.moduleNameChild];
+			if(s.$route.params.moduleNameChild !== '')
+				return s.moduleNameMap[s.$route.params.moduleNameChild];
 			
-			return this.moduleNameMap[this.$route.params.moduleName];
-		},
-		styles:function() {
-			if(this.settings.compact)
-				return '';
-			
-			return `max-width:${this.settings.pageLimit}px;`;
+			return s.moduleNameMap[s.$route.params.moduleName];
 		},
 		
+		// simple
+		menuAvailable:(s) => typeof s.$route.meta.menu !== 'undefined',
+		styles:       (s) => s.settings.compact ? '' : `max-width:${s.settings.pageLimit}px;`,
+		
 		// stores
-		modules:        function() { return this.$store.getters['schema/modules']; },
-		moduleNameMap:  function() { return this.$store.getters['schema/moduleNameMap']; },
-		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
-		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
-		builderEnabled: function() { return this.$store.getters.builderEnabled; },
-		busyCounter:    function() { return this.$store.getters.busyCounter; },
-		capErr:         function() { return this.$store.getters.captions.error; },
-		capGen:         function() { return this.$store.getters.captions.generic; },
-		feedback:       function() { return this.$store.getters.feedback; },
-		isAdmin:        function() { return this.$store.getters.isAdmin; },
-		isAtMenu:       function() { return this.$store.getters.isAtMenu; },
-		isMobile:       function() { return this.$store.getters.isMobile; },
-		isNoAuth:       function() { return this.$store.getters.isNoAuth; },
-		settings:       function() { return this.$store.getters.settings; }
+		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleNameMap:  (s) => s.$store.getters['schema/moduleNameMap'],
+		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
+		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
+		builderEnabled: (s) => s.$store.getters.builderEnabled,
+		busyCounter:    (s) => s.$store.getters.busyCounter,
+		capErr:         (s) => s.$store.getters.captions.error,
+		capGen:         (s) => s.$store.getters.captions.generic,
+		feedback:       (s) => s.$store.getters.feedback,
+		isAdmin:        (s) => s.$store.getters.isAdmin,
+		isAtMenu:       (s) => s.$store.getters.isAtMenu,
+		isMobile:       (s) => s.$store.getters.isMobile,
+		isNoAuth:       (s) => s.$store.getters.isNoAuth,
+		settings:       (s) => s.$store.getters.settings
 	},
-	created:function() {
+	created() {
 		window.addEventListener('resize',this.windowResized);
 	},
-	mounted:function() {
+	mounted() {
 		this.windowResized();
 	},
-	unmounted:function() {
+	unmounted() {
 		window.removeEventListener('resize',this.windowResized);
 	},
 	methods:{
 		// externals
+		formOpen,
 		getCollectionColumn,
 		getCollectionValues,
 		getColumnTitle,
-		getFormPopUpTemplate,
-		getFormRoute,
 		srcBase64Icon,
 		
 		// display
-		keysLockedMsg:function() {
+		keysLockedMsg() {
 			this.$store.commit('dialog',{
 				captionBody:this.capErr.SEC['002'],
 				image:'key_locked.png',
@@ -285,7 +297,7 @@ let MyHeader = {
 				}]
 			});
 		},
-		windowResized:function() {
+		windowResized() {
 			if(this.sizeCheckTimedOut)
 				return;
 			
@@ -308,30 +320,8 @@ let MyHeader = {
 		},
 		
 		// actions
-		openFeedback: function() { this.$store.commit('isAtFeedback',true); },
-		pagePrev:     function() { window.history.back(); },
-		pageNext:     function() { window.history.forward(); },
-		openForm:function(options) {
-			if(options === null)
-				return;
-			
-			// pop-up form
-			if(options.popUp) {
-				let popUpConfig = this.getFormPopUpTemplate();
-				popUpConfig.formId   = options.formIdOpen;
-				popUpConfig.moduleId = this.formIdMap[options.formIdOpen].moduleId;
-				
-				let styles = [];
-				if(options.maxWidth  !== 0) styles.push(`max-width:${options.maxWidth}px`);
-				if(options.maxHeight !== 0) styles.push(`max-height:${options.maxHeight}px`);
-				popUpConfig.style = styles.join(';');
-				
-				this.$store.commit('popUpFormGlobal',popUpConfig);
-				return;
-			}
-			
-			// regular form navigation
-			this.$router.push(this.getFormRoute(options.formIdOpen,0,false));
-		}
+		openFeedback() { this.$store.commit('isAtFeedback',true); },
+		pagePrev() { window.history.back(); },
+		pageNext() { window.history.forward(); }
 	}
 };

@@ -2,6 +2,7 @@
 	"generic":{
 		"button":{
 			"add":"Adaugă",
+			"all":"All",
 			"apply":"Aplică",
 			"cancel":"Anulează",
 			"clear":"Clear",
@@ -24,6 +25,7 @@
 			"new":"Nou",
 			"newHint":"Crează o nouă înregistrare",
 			"open":"Deschide",
+			"openBuilder":"Open Builder",
 			"ok":"Ok",
 			"paste":"Paste",
 			"refresh":"Reîncarcă",
@@ -73,12 +75,17 @@
 		"available":"Available",
 		"busy":"Lucrează - Apasă aici pentru anulare",
 		"category":"Category",
+		"content":"Content",
 		"date":"Data",
 		"description":"Descriere",
+		"details":"Details",
+		"displayed":"Displayed",
 		"errorTitle":"Eroare",
 		"files":"Files",
 		"filters":"Filtre",
+		"form":"Form",
 		"home":"Acasă",
+		"help":"Help",
 		"icon":"Icoană",
 		"id":"ID",
 		"inputDecimal":"Trebuie să fie zecimal",
@@ -91,6 +98,7 @@
 		"inputSmall":"Valoarea este prea mică (min. {MIN})",
 		"inputTooFewFiles":"Prea puține fișiere",
 		"inputTooManyFiles":"Prea mult fișiere",
+		"interval":"Interval",
 		"licenseRequired":"Implică o licență",
 		"limit":"Limita",
 		"menu":"Menu",
@@ -100,9 +108,11 @@
 		"nothingSelected":"Nimic selectat",
 		"nothingThere":"Rezultate lipsă",
 		"notice":"Notă",
+		"notSaved":"Not saved",
 		"order":"Comandă",
 		"password":"Parolă",
 		"preview":"Previzualizare",
+		"properties":"Properties",
 		"readonly":"Readonly",
 		"record":"Record",
 		"results":"{CNT} rezultate",
@@ -110,15 +120,28 @@
 		"resultsOf":"/ {CNT}",
 		"role":"Rol",
 		"selected":"Selected",
+		"settings":"Settings",
 		"size":"Size",
 		"status":"Status",
 		"threeDots":"...",
 		"title":"Titlu",
 		"token":"Token",
+		"type":"Type",
 		"username":"Nume utilizator",
 		"version":"Versiune"
 	},
 	"admin":{
+		"backups":{
+			"count":"Păstrați versiunile",
+			"daily":"Zilnic",
+			"dir":"Directorul țintă*",
+			"dirNote":"*Asigurați-vă că această cale indică o locație separată din rețea sau că conținutul acesteia este copiat în mod regulat pe un al doilea sistem. Acest lucru este necesar pentru recuperare în cazul unei defecțiuni complete a sistemului.",
+			"full":"Full backup",
+			"list":"Backup sets",
+			"monthly":"Lunar",
+			"title":"Backup-uri complete integrate",
+			"weekly":"Săptămânal"
+		},
 		"cluster":{
 			"button":{
 				"shutdown":"Shutdown"
@@ -155,13 +178,6 @@
 			"appName":"Nume instanță",
 			"appNameShort":"Titlul paginii",
 			"appVersion":"Versiunea platformei",
-			"backupCount":"Păstrați versiunile",
-			"backupDaily":"Zilnic",
-			"backupDir":"Directorul țintă*",
-			"backupDirNote":"*Asigurați-vă că această cale indică o locație separată din rețea sau că conținutul acesteia este copiat în mod regulat pe un al doilea sistem. Acest lucru este necesar pentru recuperare în cazul unei defecțiuni complete a sistemului.",
-			"backupEmbeddedNote":"Backup-urile integrate și complete sunt disponibile numai dacă este utilizat modelul de implementare autonom.<br /><br />Documentația sistemului conține capitole referitoare la măsurile de backup recomandate pentru instanțe dedicate.",
-			"backupMonthly":"Lunar",
-			"backupWeekly":"Săptămânal",
 			"bruteforceAttempts":"Nr. de încercări după care gazdele vor fi blocate",
 			"bruteforceCountBlocked":"Gazde blocate",
 			"bruteforceCountTracked":"Gazde urmărite",
@@ -206,7 +222,6 @@
 			"repoSkipVerify":"Permite certificate care nu sunt de încredere",
 			"repoUrl":"Adresa depozitului (URL)",
 			"title":"Configuratia sistemului",
-			"titleBackup":"Backup-uri complete integrate",
 			"titleCustom":"Personalizare",
 			"titleGeneral":"General",
 			"titleIcs":"Abonamente la calendar",
@@ -224,6 +239,8 @@
 		"files":{
 			"deleteDate":"File deleted",
 			"filesKeepDaysDeleted":"Keep deleted files for X days",
+			"fileVersionsKeepCount":"Keep at least X file versions",
+			"fileVersionsKeepDays":"Keep file versions for at least X days",
 			"titleConfig":"Global configuration",
 			"titleDeleted":"Deleted files"
 		},
@@ -283,7 +300,8 @@
 		},
 		"login":{
 			"dialog":{
-				"delete":"Sigur doriți să ștergeți această autentificare?<br/><br/>Această acțiune este ireversibilă.</b>"
+				"delete":"Sigur doriți să ștergeți această autentificare?<br/><br/>Această acțiune este ireversibilă.</b>",
+				"resetTotp":"This will reset all multi-factor authentication methods for this login. System access is then possible with only username & password.<br /><br />Do you want to continue?"
 			},
 			"error":{
 				"uniqueConstraint":"Numele utilizatorului trebuie sa fie unic"
@@ -293,6 +311,8 @@
 			"authentication":"Autentificare",
 			"language":"Limba",
 			"ldapAssignActive":"Rolurile sunt atribuite prin apartenența la grupul LDAP",
+			"mfa":"MFA",
+			"mfaHint":"Multi-factor authentication",
 			"newLogin":"Autentificare nouă",
 			"noAuth":"Public",
 			"noAuthHint":"Poate intra fără autentificare",
@@ -426,6 +446,7 @@
 				"runNowHint":"Task will be executed as soon as possible."
 			},
 			"names":{
+				"backupRun":"Gestionați copiile de siguranță integrate",
 				"cleanupBruteforce":"Curățați memoria cache de brutforce",
 				"cleanupDataLogs":"Curățare jurnalele de modificări expirate",
 				"cleanupFiles":"Curățați fișierele încărcate expirate",
@@ -433,7 +454,6 @@
 				"cleanupTempDir":"Curățați directorul temporar",
 				"clusterCheckIn":"Cluster check-in",
 				"clusterProcessEvents":"Cluster event processing",
-				"embeddedBackup":"Gestionați copiile de siguranță integrate",
 				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Importați autentificări și roluri prin LDAP",
 				"mailAttach":"Transfer de atașamente prin e-mail",
@@ -462,6 +482,7 @@
 			"systemTasks":"System tasks (global)",
 			"systemTasksNode":"System tasks (cluster nodes)"
 		},
+		"navigationBackups":"Backups",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"Sistem",
 		"navigationFiles":"Files",
@@ -479,6 +500,22 @@
 		"titleDocs":"Documentația admin"
 	},
 	"builder":{
+		"articles":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this article?"
+			},
+			"option":{
+				"assignForm":"Form context help",
+				"assignModule":"Application help page"
+			},
+			"addArticle":"Add article",
+			"assignTo":"Assign to",
+			"body":"Content",
+			"new":"New article",
+			"title":"Help articles",
+			"titleAssign":"Assign articles",
+			"titleAssigned":"Assigned"
+		},
 		"attribute":{
 			"dialog":{
 				"delete":"Sigur doriți să ștergeți acest atribut? De asemenea, aceasta va șterge toate datele incluse, din sistemul dvs.<br /><br /><b>Această acțiune este ireversibilă fără backup-uri curente.</b>"
@@ -486,14 +523,13 @@
 			"new":"Atribut nou"
 		},
 		"collection":{
-			"button":{
-				"inHeader":"Show in header"
-			},
 			"dialog":{
 				"delete":"Are you sure you want to delete this collection?"
 			},
-			"columnsTarget":"Place columns here",
-			"contentColumn":"Column data sub query",
+			"columnSettings":"Column settings",
+			"columnsAvailable":"Available columns",
+			"columnsTarget":"Active columns",
+			"inHeader":"Show in header",
 			"new":"New collection",
 			"previewHint":"Collection values for the logged in user. Collections are retrieved on page load (F5 to reload) if they are enabled within assigned roles.",
 			"query":"Query",
@@ -540,8 +576,7 @@
 				},
 				"event":"Eveniment",
 				"eventBefore":"Inaintea evenimentului",
-				"jsFunctionId":"Executați funcția de interfață",
-				"title":"Funcțiile formularului"
+				"jsFunctionId":"Executați funcția de interfață"
 			},
 			"option":{
 				"displayColor":"culoare",
@@ -559,22 +594,18 @@
 				"displayRichtext":"richtext",
 				"displaySlider":"valoarea cursorului",
 				"displayUrl":"URL",
+				"effectField":"Field",
+				"effectTab":"Tab",
 				"ganttStepsDays":"zile",
 				"ganttStepsHours":"ore"
 			},
 			"states":{
-				"button":{
-					"addCondition":"Adaugați o condiție",
-					"addEffect":"Adaugați o consecință",
-					"showAll":"Arată tot"
-				},
 				"option":{
 					"filterFieldIdHint":"După câmp"
 				},
 				"conditions":"Condiții",
 				"descriptionHint":"Descriere",
-				"effects":"Consecințe",
-				"title":"Stările formularului"
+				"effects":"Consecințe"
 			},
 			"aggregator":"Agrega",
 			"autoRenew":"Reîmprospătare automată",
@@ -582,13 +613,10 @@
 			"autoRenewHint":"în secunde",
 			"autoSelect":"Auto select records",
 			"autoSelectHint":"0=închis, 2=primele două, -3=ultimele trei",
-			"captions":"Titlu",
 			"category":"Selector de categorie",
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*Collection is only affected if selected as filter criteria in data query.",
-			"collectionTitle":"Filter collection by input",
-			"columnsTarget":"Așezați coloane aici",
-			"columnsTemplates":"Coloane disponibile",
+			"collectionTitle":"Filter collection",
 			"columnBatch":"Grup de coloane",
 			"columnBatchNot":"negrupate",
 			"columnBatchHint":"Coloana este parte a lotului {CNT}",
@@ -601,12 +629,7 @@
 			"columnSize0":"automatic",
 			"columnTitle":"Titlu",
 			"columnWrap":"Text continuu",
-			"containerContentLayout":"Aspect conținut",
-			"content":"Interogarea datelor din formular",
-			"contentColumn":"Subinterogare pentru date coloane",
-			"contentField":"Interogare câmpurilor de date",
 			"copy":"Copie formular",
-			"copyForm":"Selectați formularul",
 			"copyNewName":"Numele formularului nou",
 			"csvExport":"Export CSV",
 			"csvImport":"Import CSV",
@@ -637,7 +660,6 @@
 			"fieldRegexCheck":"Validați cu RegEx",
 			"fieldSize":"Dimensiunea de bază (pixeli)",
 			"fieldSize0":"automatic",
-			"fieldTitle":"Titlu",
 			"fileExt":"Extensia fișierului",
 			"fileName":"Numele fișierului",
 			"fileSize":"Mărimea fișierului",
@@ -673,9 +695,11 @@
 			"presetOpen":"Deschide presetarea",
 			"readonly":"Numai citire",
 			"required":"Necesar",
-			"showFunctions":"Funcțiile",
-			"showHelp":"Ajutor",
-			"showStates":"Statuturi",
+			"scale":"UI scale",
+			"sidebarField":"{NAME}: Field settings",
+			"sidebarFieldColumns":"Columns",
+			"sidebarFieldColumnSettings":"Column settings",
+			"sidebarForm":"Form settings",
 			"sql":"Previzualizare SQL",
 			"state":"Statut",
 			"stateDefault":"implicit",
@@ -685,13 +709,16 @@
 			"stateRequired":"necesar",
 			"subQuery":"Sub interogare",
 			"subQueryAttribute":"Atribut",
-			"title":"Formulare"
+			"tabs":"Tabs",
+			"tabFunctions":"Funcțiile ({CNT})",
+			"tabStates":"Statuturi ({CNT})",
+			"title":"Formulare",
+			"titleOne":"Form '{NAME}'"
 		},
 		"function":{
 			"button":{
 				"addNew":"Prefix NOU",
 				"addOld":"Prefix VECHI",
-				"addSchedule":"Adăugați o programare nouă",
 				"details":"Detalii",
 				"template":"Șablon"
 			},
@@ -783,42 +810,44 @@
 			"collectionId":"[Select collection]",
 			"entityInput":"Selectați înlocuitor și faceți clic pe corpul funcției pentru a utiliza sintaxa <b>upgrade-safe</b>.",
 			"fieldId":"[Select field]",
-			"form":"Leagă la formular",
+			"form":"Assigned to form",
 			"functionsBackend":"Funcții back-end",
 			"functionsFrontend":"Funcții front-end",
-			"intervalAtDayForMonths":"în ziua lunii",
-			"intervalAtDayForWeeks":"în ziua săptămânii (0=du, 1=lu, ...)",
-			"intervalAtDayForYears":"in ziua anului",
+			"intervalAtDayForMonths":"at day",
+			"intervalAtDayForWeeks":"at weekday",
+			"intervalAtDayForYears":"at day",
 			"intervalAtTime":"la ora",
-			"intervalEvery":"Rulează: La fiecare",
+			"intervalEvery":"Every",
 			"isFrontendExec":"Apelare Front-end",
 			"isTrigger":"Declanșator",
 			"language":"Limbajul",
 			"languageJs":"JavaScript",
 			"languagePg":"PL/pgSQL",
 			"new":"Funcție nouă",
-			"placeholderInsert":"Click on the function body to insert reference",
+			"placeholderAttribute":"Attribute",
+			"placeholderInsert":"Click on the function body to insert placeholder",
+			"placeholderFunction":"Function",
+			"placeholderRelation":"Relation",
 			"placeholders":"Înlocuitori",
 			"placeholdersCollections":"Collections",
 			"placeholdersFormFields":"Form data fields",
 			"placeholdersFormQuery":"Câmpurile de date din înterogare",
 			"placeholdersInstance":"Funcții instanță",
-			"placeholdersModules":"Aplicații",
-			"runOnce":"Rulează o dată",
-			"schedules":"Repetare",
-			"schedulesItem":"{CNT} programări",
+			"runOnce":"Once",
+			"runRegular":"Regularly",
+			"runType":"Execution",
+			"schedules":"Schedules",
 			"title":"Funcții",
-			"titleJs":"Funcții front-end ({CNT})",
-			"titlePg":"Funcții back-end ({CNT})",
-			"titleOne":"Titlu funcției",
+			"titleJs":"Funcții front-end",
+			"titleJsOne":"Funcții front-end '{NAME}'",
+			"titlePg":"Funcții back-end",
+			"titlePgOne":"Funcții back-end '{NAME}'",
 			"value":"VALUE"
-		},
-		"help":{
-			"title":"Ajutorul aplicației"
 		},
 		"icon":{
 			"add":"Adăugați/editați fișierul pictogramă",
 			"addHelp":"Doar fișiere PNG cu dimensiunea maximă de 64 kb sunt acceptate. Pictogramele ar trebui să fie întotdeauna pătrate.",
+			"nameHint":"Optional icon name",
 			"title":"Pictograme"
 		},
 		"loginForm":{
@@ -832,7 +861,7 @@
 			"button":{
 				"add":"Adaugă înregistrare"
 			},
-			"collections":"Collections",
+			"collections":"Show collection values in menu",
 			"copy":"Copiați toate elementele de meniu din",
 			"formId":"- Selectați formularul -",
 			"showChildrenHint":"Afișați implicit subintrările",
@@ -845,10 +874,15 @@
 				"exportKeySet":"Păstrați cheia în memorie",
 				"graph":"Graficul dependențelor",
 				"keyCreate":"Generează",
+				"manageApps":"Manage applications",
+				"repo":"Install from repository",
 				"versionCreate":"Creați o nouă versiune"
 			},
 			"color":"Culoarea",
-			"dependsOn":"Depinde",
+			"colorHint":"Primary application color - shown in the header and menu if not overwritten by customizing and/or user settings. The system styles are optimized for washed out, darkish colors (dark pastel).",
+			"dependsOn":"Builds on",
+			"dependsOnAdd":"Add application",
+			"dependsOnHint":"Use other applications as foundation for your own. This enables reuse or extension of existing relations, forms and so on.",
 			"export":"Transfer - Exportați aplicația într-un fișier",
 			"exportKeyBad":"Signing key seems invalid. Make sure to use the private key for exporting applications.",
 			"exportKeyEmpty":"Pentru export este necesară cheia pentru semnătură",
@@ -859,27 +893,52 @@
 			"exportStateNok":"Modificări la versiunea curentă",
 			"exportStateOk":"Gata",
 			"graphDependsOn":"Depinde de: {COUNT}",
+			"iconHint":"Icons are available, once they have been added to this application. Icons from applications that are being built on, can also be used.",
 			"keyCreate":"Transfer - Generați o nouă pereche de chei pentru semnătură",
 			"keyCreateInfo":"Asigurați-vă că păstrați cheia privată, în orice moment, în siguranță. Cheia publică trebuie importată în instanțele REI3 țintă pentru a vă accepta aplicațiile.",
 			"keyCreateLength":"Selectați lungimea cheii",
 			"languageCode":"Codul limbii",
 			"languageCodeHint":"en_us, zh_cn, de_de, ...",
-			"languageMain":"Limba principală*",
-			"languageMainHint":"*este utilizată în cazul în care limba aleasă de utilizator nu este disponibilă.",
-			"languageTitle":"Titlul aplicației",
-			"languages":"Limbi",
-			"new":"Aplicație nouă",
+			"languageMain":"Fallback language",
+			"languageMainHint":"Is used if the chosen user language is not offered by your application.",
+			"languages":"Application languages",
+			"languagesHint":"Languages that the application is available in.",
+			"nameHint":"Reference name for this application. The name must be unique within a REI3 system, so consider using a prefix based on your organization name.",
+			"nameHolder":"work_scheduler, inventory_planner, ...",
 			"parent":"Atribuit către",
+			"parentHint":"When assigned to another application, it will be displayed as its child in menus and overviews - there is no other functional change. Applications can only be assigned to applications that they build on.",
 			"position":"Poziția implicită",
-			"releaseBuild":"Ver. aplicației",
-			"releaseBuildApp":"Ver. platformei",
+			"positionHint":"Position of the application in the header (smaller ones first). Can be overwritten by system administrators.",
+			"releaseBuild":"Versiune aplicației",
+			"releaseBuildApp":"Versiune platformei",
 			"releaseDate":"Data lansării",
-			"startForm":"Formular de start",
-			"startFormDefault":"Formular de pornire implicit*",
-			"startFormDefaultHint":"*este folosit dacă nici un alt formular nu poate fi atribuită prin rol.",
-			"startForms":"Formulare de început",
-			"startFormsExplanation":"Se utilizează primul formular de pornire care se potrivește cu un rol al autentificarii curente.",
-			"title":"Aplicații"
+			"startFormByRole":"Start form by role",
+			"startFormByRoleHint":"The first start form is used that matches a role of the current login. Overwrites the default start form.",
+			"startFormDefault":"Start form",
+			"startFormDefaultHint":"Form that is shown, when user opens the application.",
+			"title":"Application '{NAME}'",
+			"titleAll":"Aplicații",
+			"titleHint":"The application title, visible to users when working with your application."
+		},
+		"new":{
+			"message":{
+				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
+				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
+			},
+			"collection":"New collection",
+			"form":"New form",
+			"jsFunction":"New Frontend function",
+			"jsFunctionFormId":"Assigned to form",
+			"jsFunctionFormIdHint":"Assigned functions can interact with a form to do things like read or write to form fields. If assigned, the function can only be used on the chosen form and cannot be reused in other frontend functions. This setting cannot be changed later.",
+			"module":"Aplicație nouă",
+			"options":"Additional options",
+			"pgFunction":"New backend function",
+			"pgFunctionTrigger":"Trigger",
+			"pgFunctionTriggerHint":"Makes this backend function a trigger. A trigger can be referenced inside a relation to react to events in the database, like when records are created, updated or deleted. This setting cannot be changed later.",
+			"relation":"Relație nouă",
+			"relationEncryption":"End-to-end Encryption",
+			"relationEncryptionHint":"Enables end-to-end encryption (E2EE) for attributes on this relation. E2EE has benefits and drawbacks - please carefully read the Builder documentation before using it. This setting cannot be changed later.",
+			"role":"New role"
 		},
 		"openFormInput":{
 			"attributeApply":"...pentru a seta valoare formularului",
@@ -924,7 +983,7 @@
 		},
 		"relation":{
 			"dialog":{
-				"deleteRelation":"Sigur doriți să ștergeți această relație? Acest lucru va șterge și toate datele incluse din sistemul dvs.<br /><br /><b>Această acțiune este ireversibilă fără backup-uri curente.</b>"
+				"delete":"Sigur doriți să ștergeți această relație? Acest lucru va șterge și toate datele incluse din sistemul dvs.<br /><br /><b>Această acțiune este ireversibilă fără backup-uri curente.</b>"
 			},
 			"attributes":"Atribute ({CNT})",
 			"codeCondition":"Condiție",
@@ -932,6 +991,7 @@
 			"def":"IMPLICIT",
 			"encrypted":"E2E encrypted",
 			"encryption":"E2E encryption",
+			"encryptionHint":"Relation supports end-to-end encrypted attribute values.",
 			"execute":"Execută",
 			"external":"Relații de referință ({CNT})",
 			"fires":"Fires",
@@ -942,17 +1002,15 @@
 			"indexAutoFki":"Sistem",
 			"indexCreate":"Adăugați un atribut la noul index",
 			"indexUnique":"Unic",
-			"isConstraint":"CONSTRÂNGERE",
-			"isDeferrable":"AMÂNATĂ",
-			"isDeferred":"INIT. AMÂNAT",
+			"isDeferred":"AMÂNAT",
 			"length":"Lungime",
-			"newRelation":"Relație nouă",
+			"nameHint":"Reference name for this relation. Must be unique within this application.",
 			"nullable":"Poate fi nulă",
 			"onDelete":"DELETE",
 			"onInsert":"INSERT",
 			"onUpdate":"UPDATE",
 			"perRow":"EACH ROW",
-			"policies":"Politici",
+			"policies":"Politici ({CNT})",
 			"policyActions":"Acțiune",
 			"policyActionDelete":"Ștergeți",
 			"policyActionSelect":"Afișează",
@@ -974,8 +1032,9 @@
 			"retention":"Jurnalul de modificări",
 			"retentionCount":"Păstrați X modificări",
 			"retentionDays":"Păstrați timp de X zile",
+			"retentionHint":"How many (count) or how long (in days) change logs are retained for.",
 			"title":"Relații",
-			"titleOne":"Detalii despre relația '{NAME}'",
+			"titleOne":"Relația '{NAME}'",
 			"triggers":"Declanșatoare ({CNT})"
 		},
 		"role":{
@@ -1007,31 +1066,35 @@
 			"newRole":"Rol nou",
 			"relation":"Relație",
 			"title":"Roluri",
-			"titleOne":"Role title"
+			"titleOne":"Role '{NAME}'"
 		},
 		"backHint":"Reveniți la prezentarea generală a aplicației",
 		"language":"Traduceri",
 		"languageNextHint":"Comutați la următoarea limbă (tasta rapidă: CTRL + q)",
 		"noOwner":"Application is in read-only mode",
+		"navigationArticles":"Help articles",
 		"navigationCollections":"Colecții",
-		"navigationCollectionsSub":"Detaliile colecției",
 		"navigationFilterHint":"Filtrează după text",
 		"navigationForms":"Formulare",
-		"navigationFormsSub":"Formular de proiectare",
-		"navigationFunctions":"Funcții",
-		"navigationFunctionsSub":"Detaliile funcțiilor",
-		"navigationFunctionsSubBackend":"Back-end",
-		"navigationFunctionsSubFrontend":"Front-end",
-		"navigationHelp":"Ajutor",
+		"navigationJsFunctions":"Funcții (front)",
+		"navigationPgFunctions":"Funcții (back)",
 		"navigationIcons":"Pictograme",
 		"navigationLoginForms":"Formular conectare",
 		"navigationMenu":"Meniuri",
+		"navigationModule":"Application",
 		"navigationRelations":"Relații",
-		"navigationRelationsSub":"Detalii despre relație",
 		"navigationRoles":"Roluri",
-		"navigationRolesSub":"Accesul la rol",
 		"pageTitle":"Builder",
 		"pageTitleDocs":"Documentația lui Builder"
+	},
+	"articles":{
+		"button":{
+			"pdf":"PDF"
+		},
+		"form":"Form help",
+		"module":"Application help",
+		"title":"Help pages",
+		"toc":"Table of contents"
 	},
 	"calendar":{
 		"button":{
@@ -1083,7 +1146,7 @@
 			"003":"Acțiunea a fost întreruptă. Vă rugăm să încercați din nou.",
 			"004":"Această înregistrare este protejată și nu poate fi ștearsă.",
 			"005":"Nu s-a putut crea entitatea deoarece nu a fost dat niciun nume. Vă rugăm să specificați un nume.",
-			"006":"Numele ales este nevalid. Vă rugăm să vă asigurați că numele...<ul><li>... începe cu o literă <b>(a-z)</b>.</li><li>... este de cel mult <b>31</b> caractere ca lungime.</li><li>... conține doar litere mici <b>(a-z)</b>, linie jos <b>(_)</b> sau numere <b>(0-9)</b>.</li></ul>Exemple: storage_inventory_post21, facility_address, contact_book",
+			"006":"Numele ales este nevalid. Vă rugăm să vă asigurați că numele...<ul><li>... începe cu o literă <b>(a-z)</b>.</li><li>... este de cel mult <b>60</b> caractere ca lungime.</li><li>... conține doar litere mici <b>(a-z)</b>, linie jos <b>(_)</b> sau numere <b>(0-9)</b>.</li></ul>Exemple: storage_inventory_post21, facility_address, contact_book",
 			"007":"Modulul la care se face referire nu este cunoscut.",
 			"008":"Relația la care se face referire nu este cunoscută.",
 			"009":"Atributul la care se face referire nu este cunoscut."
@@ -1128,7 +1191,6 @@
 		"moduleRelated":"Acest feedback este pentru aplicația deschisă? ({NUME})",
 		"sendNok":"Feedback-ul nu a putut fi trimis. Vă rugăm să încercați din nou mai târziu.",
 		"sendOk":"Feedback-ul a fost trimis cu succes. Mulțumesc!",
-		"submit":"Faceți clic pe pictograma corespunzătoare pentru a trimite feedback:",
 		"textHint":"Introdu feedback-ul aici (opțional)",
 		"title":"Trimite feedback anonim",
 		"whatIsSent":"Pe lângă câmpurile vizibile (textul din feedback, zâmbetul ales etc.) sunt trimise următoarele date:<br /><ul><li>Ce aplicație și formular sunt deschise</li><li>Versiuni ale aplicației și sistemul</li><li>Dacă utilizatorul care oferă feedback este un administrator</li><li>Un identificator aleatoriu pentru a grupa feedback de la același sistem</li></ul>",
@@ -1141,20 +1203,36 @@
 				"OR":"SAU"
 			},
 			"content":{
-				"attribute":"valoarea atributului",
-				"collection":"collection value(s)",
-				"field":"valoarea câmpului",
-				"fieldChanged":"field has changed (TRUE/FALSE)",
-				"javascript":"Expresie JavaScript",
-				"languageCode":"codul limbii de conectare (en_us, ...)",
-				"login":"ID-ul autentificării (întreg)",
-				"preset":"ID-ul înregistrare prestabilită (întreg)",
-				"record":"ID înregistrare (întreg, relație de formă 0)",
-				"recordNew":"înregistrarea este nouă (adevărat/fals, formular)",
-				"role":"autentificarea are rol (ADEVĂRAT/FALS)",
-				"subQuery":"subînterogare",
-				"true":"valoare adevărată (TRUE)",
-				"value":"valoare fixă"
+				"attribute":"attribute",
+				"collection":"collection",
+				"field":"field value",
+				"fieldChanged":"field changed",
+				"javascript":"JavaScript",
+				"languageCode":"login language",
+				"login":"login ID",
+				"preset":"preset record",
+				"record":"record ID",
+				"recordNew":"record is new",
+				"role":"login has role",
+				"subQuery":"sub query",
+				"true":"true value",
+				"value":"fixed value"
+			},
+			"contentHint":{
+				"attribute":"Attribute value from the current query.",
+				"collection":"One or many values from the chosen collection column. Use '@>', '<@' or '&&' operators when comparing multiple values.",
+				"field":"Current field value.",
+				"fieldChanged":"TRUE/FALSE, depending on whether field value has changed.",
+				"javascript":"Return value of the given Javascript expression.",
+				"languageCode":"The chosen user language code (en_us, de_de, ...) of the current login.",
+				"login":"ID of the current login (integer).",
+				"preset":"ID of the given preset record (integer).",
+				"record":"ID of the current record on this form (integer, relation 0).",
+				"recordNew":"TRUE/FALSE, depending on whether the current record is new on this form.",
+				"role":"TRUE/FALSE, depending on the whether the current login has the given role assigned.",
+				"subQuery":"Return value of the given sub query.",
+				"true":"TRUE value to compare other TRUE values against.",
+				"value":"A static value to compare against."
 			},
 			"operator":{
 				"eq":"egal",
@@ -1210,9 +1288,6 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"înregistrarea a fost actualizată"
 		},
-		"help":"Pagini de ajutor",
-		"helpContextTitle":"Context",
-		"helpModuleTitle":"Aplicație",
 		"invalidInputs":"Verificați intrările!",
 		"noAccess":"Fără acces"
 	},
@@ -1245,7 +1320,7 @@
 			"title":"Setare"
 		},
 		"newVersion":"Notificare de actualizare",
-		"newVersionText":"Este disponibilă o nouă versiune de REI3.<br /><br /><a href=\"https://rei3.de/download\" target=\"_blank\">Descărcați REI3 v{VERSION}</a >",
+		"newVersionText":"Este disponibilă o nouă versiune de REI3.<br /><br /><a href=\"https://rei3.de/en/downloads\" target=\"_blank\">Descărcați REI3 v{VERSION}</a >",
 		"noAccess":"Nu a fost acordat încă acces.<br />Vă rugăm să contactați administratorul de sistem.",
 		"noAccessAdmin":"Pentru a obține acces, atribuiți roluri utliztorului dvs.",
 		"noAccessTitle":"Fără acces la aplicații",
@@ -1383,24 +1458,43 @@
 		"tokensFixed":{
 			"button":{
 				"loadApp":"Application",
-				"loadCnf":"Config file",
-				"install":"Install client application"
+				"loadCnf":"Config file"
+			},
+			"context":{
+				"client":"REI3 client",
+				"ics":"Calendar app",
+				"totp":"Multi-factor"
 			},
 			"install":{
 				"intro":"With the client application you can directly open and edit files from within REI3.",
+				"nameHint":"'My Work PC'",
 				"steps":"Installation steps",
 				"step1":"Choose a device name:",
 				"step2":"Select your operating system:",
-				"step3":"Download the application:",
-				"step4":"Download the application config file to the same folder:",
-				"step5":"Start the application.",
-				"step6":"It is now installed and will appear in your system tray.",
-				"title":"Install client application"
+				"step3":"Download the application & config file to the same folder:",
+				"step4":"Start the application.",
+				"step5":"It is now installed and will appear in your system tray."
 			},
-			"nameHint":"'My Work PC'",
+			"message":{
+				"delete":"Are you sure you want to delete this entry? This cannot be undone."
+			},
+			"mfa":{
+				"apps":[
+					"Google Authenticator",
+					"Microsoft Authenticator",
+					"Aegis Authenticator",
+					"...or any application that supports TOTP"
+				],
+				"appsExample":"Some examples:",
+				"intro":"You can increase your account security by enabling multi-factor authentication (MFA). To enable MFA, please use an authenticator app on a separate device (like a smartphone).",
+				"name":"Choose a name for your device",
+				"nameHint":"'My smartphone'",
+				"outro":"Use the QR code to add this account to your authenticator app. When you are done, close this window. You can repeat this process to enable MFA with multiple devices."
+			},
 			"titleAdd":"Install client application",
 			"titleContext":"Use",
 			"titleDateCreate":"Created",
+			"titleMfa":"Setup multi-factor authentication",
 			"titleName":"Device name"
 		},
 		"bordersAll":"Adăugați chenaruri",
@@ -1427,7 +1521,7 @@
 		"titleAccount":"Account",
 		"titleDisplay":"Afișare",
 		"titleEncryption":"End-to-end encryption",
-		"titleFixedTokens":"Device access",
+		"titleFixedTokens":"Devices",
 		"titleTheme":"Temă",
 		"warnUnsaved":"Avertismente pentru modificări nesalvate"
 	}

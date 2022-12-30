@@ -97,16 +97,18 @@ export function getChoiceFilters(choices,choiceIdActive) {
 
 export function getDataFields(fields) {
 	let out = [];
-	
-	for(let i = 0, j = fields.length; i < j; i++) {
-		let f = fields[i];
-		
+	for(let f of fields) {
 		switch(f.content) {
 			case 'container':
 				out = out.concat(getDataFields(f.fields));
 			break;
 			case 'data':
 				out.push(f);
+			break;
+			case 'tabs':
+				for(let t of f.tabs) {
+					out = Object.assign(out,getDataFields(t.fields))
+				}
 			break;
 		}
 	}
@@ -115,16 +117,18 @@ export function getDataFields(fields) {
 
 export function getDataFieldMap(fields) {
 	let out = {};
-	
-	for(let i = 0, j = fields.length; i < j; i++) {
-		let f = fields[i];
-		
+	for(let f of fields) {
 		switch(f.content) {
 			case 'container':
 				out = Object.assign(out,getDataFieldMap(f.fields));
 			break;
 			case 'data':
 				out[f.id] = f;
+			break;
+			case 'tabs':
+				for(let t of f.tabs) {
+					out = Object.assign(out,getDataFieldMap(t.fields))
+				}
 			break;
 		}
 	}
@@ -133,13 +137,18 @@ export function getDataFieldMap(fields) {
 
 export function getFieldMap(fields) {
 	let out = {};
-	
-	for(let i = 0, j = fields.length; i < j; i++) {
-		let f = fields[i];
+	for(let f of fields) {
 		out[f.id] = f;
-		
-		if(f.content === 'container')
-			out = Object.assign(out,getFieldMap(f.fields));
+		switch(f.content) {
+			case 'container':
+				out = Object.assign(out,getFieldMap(f.fields));
+			break;
+			case 'tabs':
+				for(let t of f.tabs) {
+					out = Object.assign(out,getFieldMap(t.fields))
+				}
+			break;
+		}
 	}
 	return out;
 };
@@ -256,4 +265,27 @@ export function setGetterArgs(argsArray,name,value) {
 		}
 	}
 	return argsArray;
+};
+
+export function formOpen(options) {
+	if(options === null)
+		return;
+	
+	// pop-up form
+	if(options.popUp) {
+		let popUpConfig = getFormPopUpTemplate();
+		popUpConfig.formId   = options.formIdOpen;
+		popUpConfig.moduleId = MyStore.getters['schema/formIdMap'][options.formIdOpen].moduleId;
+		
+		let styles = [];
+		if(options.maxWidth  !== 0) styles.push(`max-width:${options.maxWidth}px`);
+		if(options.maxHeight !== 0) styles.push(`max-height:${options.maxHeight}px`);
+		popUpConfig.style = styles.join(';');
+		
+		MyStore.commit('popUpFormGlobal',popUpConfig);
+		return;
+	}
+	
+	// regular form navigation
+	this.$router.push(getFormRoute(options.formIdOpen,0,false));
 };

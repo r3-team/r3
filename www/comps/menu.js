@@ -3,6 +3,7 @@ import {srcBase64}          from './shared/image.js';
 import {hasAccessToAnyMenu} from './shared/access.js';
 import {getColumnTitle}     from './shared/column.js';
 import {getFormRoute}       from './shared/form.js';
+import {getModuleCaption}   from './shared/generic.js';
 import {
 	getCollectionColumn,
 	getCollectionValues
@@ -59,34 +60,28 @@ let MyMenuItem = {
 		menu:        { type:Object, required:true },
 		module:      { type:Object, required:true }
 	},
-	mounted:function() {
+	mounted() {
 		// show children if no preference is recorded and default is true
 		if(typeof this.menuIdMapOpen[this.menu.id] === 'undefined' && this.menu.showChildren)
 			this.clickSubMenus();
 	},
 	computed:{
-		active:     function() { return this.menuAccess[this.menu.id] === 1; },
-		hasChildren:function() { return this.menu.menus.length !== 0; },
-		selected:   function() { return this.menu.formId === this.formIdActive; },
-		subIcon:    function() { return this.showChildren ? 'images/triangleDown.png' : 'images/triangleLeft.png'; },
-		
-		anyAccessibleChildren:function() {
-			for(let i = 0, j = this.menu.menus.length; i < j; i++) {
-				if(this.menuAccess[this.menu.menus[i].id] === 1)
+		anyAccessibleChildren:(s) => {
+			for(let i = 0, j = s.menu.menus.length; i < j; i++) {
+				if(s.menuAccess[s.menu.menus[i].id] === 1)
 					return true;
 			}
 			return false;
 		},
-		collectionEntries:function() {
+		collectionEntries:(s) => {
 			let out = [];
-			for(let i = 0, j = this.menu.collections.length; i < j; i++) {
-				let consumer   = this.menu.collections[i];
-				let collection = this.collectionIdMap[consumer.collectionId];
+			for(let consumer of s.menu.collections) {
+				let collection = s.collectionIdMap[consumer.collectionId];
 				
-				if(!consumer.onMobile && this.isMobile)
+				if(!consumer.onMobile && s.isMobile)
 					continue;
 				
-				let value = this.getCollectionValues(
+				let value = s.getCollectionValues(
 					collection.id,
 					consumer.columnIdDisplay,
 					true
@@ -96,7 +91,7 @@ let MyMenuItem = {
 				
 				out.push({
 					iconId:collection.iconId,
-					title:this.getColumnTitle(this.getCollectionColumn(
+					title:s.getColumnTitle(s.getCollectionColumn(
 						collection.id,
 						consumer.columnIdDisplay
 					)),
@@ -105,24 +100,24 @@ let MyMenuItem = {
 			}
 			return out;
 		},
-		showChildren:function() {
-			return this.hasChildren && this.menuIdMapOpen[this.menu.id];
-		},
-		title:function() {
-			if(typeof this.menu.captions.menuTitle[this.moduleLanguage] !== 'undefined')
-				return this.menu.captions.menuTitle[this.moduleLanguage];
-			
-			return this.capGen.missingCaption;
-		},
+		
+		// simple
+		active:      (s) => s.menuAccess[s.menu.id] === 1,
+		hasChildren: (s) => s.menu.menus.length !== 0,
+		selected:    (s) => s.menu.formId === s.formIdActive,
+		showChildren:(s) => s.hasChildren && s.menuIdMapOpen[s.menu.id],
+		subIcon:     (s) => s.showChildren ? 'images/triangleDown.png' : 'images/triangleLeft.png',
+		title:       (s) => typeof s.menu.captions.menuTitle[s.moduleLanguage] !== 'undefined'
+			? s.menu.captions.menuTitle[s.moduleLanguage] : s.capGen.missingCaption,
 		
 		// stores
-		menuIdMapOpen:  function() { return this.$store.getters['local/menuIdMapOpen']; },
-		collectionIdMap:function() { return this.$store.getters['schema/collectionIdMap']; },
-		iconIdMap:      function() { return this.$store.getters['schema/iconIdMap']; },
-		capGen:         function() { return this.$store.getters.captions.generic; },
-		isMobile:       function() { return this.$store.getters.isMobile; },
-		menuAccess:     function() { return this.$store.getters.access.menu; },
-		moduleLanguage: function() { return this.$store.getters.moduleLanguage; }
+		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
+		iconIdMap:      (s) => s.$store.getters['schema/iconIdMap'],
+		menuIdMapOpen:  (s) => s.$store.getters['local/menuIdMapOpen'],
+		capGen:         (s) => s.$store.getters.captions.generic,
+		isMobile:       (s) => s.$store.getters.isMobile,
+		menuAccess:     (s) => s.$store.getters.access.menu,
+		moduleLanguage: (s) => s.$store.getters.moduleLanguage
 	},
 	methods:{
 		// externals
@@ -134,7 +129,7 @@ let MyMenuItem = {
 		srcBase64Icon,
 		
 		// actions
-		click:function() {
+		click() {
 			// no form is set, we can only toggle sub menus (if there)
 			if(this.menu.formId === null)
 				return this.clickSubMenus();
@@ -143,15 +138,13 @@ let MyMenuItem = {
 				return this.$router.push(this.getFormRoute(this.menu.formId,0,true));
 			
 			// form is set and we are already there
-			if(!this.isMobile)
-				return this.clickSubMenus();
-			else
-				return this.$store.commit('isAtMenu',false);
+			if(!this.isMobile) return this.clickSubMenus();
+			else               return this.$store.commit('isAtMenu',false);
 		},
-		clickMiddle:function() {
+		clickMiddle() {
  			window.open('#'+this.getFormRoute(this.menu.formId,0,true),'_blank');
 		},
-		clickSubMenus:function() {
+		clickSubMenus() {
 			if(this.hasChildren)
 				this.$store.commit('local/menuIdMapOpenToggle',this.menu.id);
 		}
@@ -172,7 +165,7 @@ let MyMenu = {
 						v-if="module.iconId !== null"
 						:src="srcBase64(iconIdMap[module.iconId].file)"
 					/>
-					<h1>{{ moduleCaption }}</h1>
+					<h1>{{ getModuleCaption(module,moduleLanguage) }}</h1>
 				</div>
 				
 				<div class="area">
@@ -180,7 +173,7 @@ let MyMenu = {
 						v-if="isAdmin && builderEnabled && !isMobile"
 						@trigger="openBuilder(false)"
 						@trigger-middle="openBuilder(true)"
-						:naked="true"
+						:captionTitle="capGen.button.openBuilder"
 						:tight="true"
 					/>
 				</div>
@@ -207,32 +200,25 @@ let MyMenu = {
 		module:        { type:Object,  required:true }
 	},
 	computed:{
-		moduleCaption:function() {
-			// 1st preference: dedicated module title
-			if(typeof this.module.captions.moduleTitle[this.moduleLanguage] !== 'undefined')
-				return this.module.captions.moduleTitle[this.moduleLanguage];
-			
-			// if nothing else is available: module name
-			return this.moduleIdMap[this.module.id].name;
-		},
-		
 		// stores
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		iconIdMap:     function() { return this.$store.getters['schema/iconIdMap']; },
-		builderEnabled:function() { return this.$store.getters.builderEnabled; },
-		isAdmin:       function() { return this.$store.getters.isAdmin; },
-		isMobile:      function() { return this.$store.getters.isMobile; },
-		menuAccess:    function() { return this.$store.getters.access.menu; },
-		moduleLanguage:function() { return this.$store.getters.moduleLanguage; },
-		settings:      function() { return this.$store.getters.settings; }
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
+		builderEnabled:(s) => s.$store.getters.builderEnabled,
+		capGen:        (s) => s.$store.getters.captions.generic,
+		isAdmin:       (s) => s.$store.getters.isAdmin,
+		isMobile:      (s) => s.$store.getters.isMobile,
+		menuAccess:    (s) => s.$store.getters.access.menu,
+		moduleLanguage:(s) => s.$store.getters.moduleLanguage,
+		settings:      (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
+		getModuleCaption,
 		hasAccessToAnyMenu,
 		srcBase64,
 		
 		// actions
-		openBuilder:function(middle) {
+		openBuilder(middle) {
 			if(!middle) this.$router.push('/builder/menu/'+this.module.id);
 			else        window.open('#/builder/menu/'+this.module.id,'_blank');
 		}

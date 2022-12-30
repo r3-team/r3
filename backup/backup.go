@@ -5,32 +5,19 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"path/filepath"
 	"r3/compress"
 	"r3/config"
-	"r3/db/embedded"
 	"r3/log"
 	"r3/tools"
+	"r3/types"
 	"strconv"
 	"sync"
 )
 
-type backupDef struct {
-	AppBuild  int    `json:"appBuild"`
-	JobName   string `json:"jobName"`
-	Timestamp int64  `json:"timestamp"`
-}
-type tocFileType struct {
-	Backups []backupDef `json:"backups"`
-}
-
 var (
-	access_mx sync.Mutex
-
-	backupDir   string      // working directory for backups
-	tocFilePath string      // path to table of content file for backups
-	tocFile     tocFileType // in-memory table of content file
-
+	access_mx       sync.Mutex
 	subPathConfig   = "config.json"      // path within backup dir for config file
 	subPathDb       = "database"         // path within backup dir for database dump
 	subPathCerts    = "certificates.zip" // path within backup dir for certificate files
@@ -52,55 +39,52 @@ func Run() error {
 	}
 
 	// initialize state
-	backupDir = config.GetString("backupDir")
-	tocFilePath = filepath.Join(backupDir, "backups_toc.json")
-
-	if backupDir == "" {
+	if config.GetString("backupDir") == "" {
 		err := errors.New("backup directory not defined")
-		log.Error("backup", "could start", err)
+		log.Error("backup", "could not start", err)
 		return err
 	}
 
-	// check for table of contents backup file
-	exists, err := tools.Exists(tocFilePath)
+	// read table of contents backup file
+	tocFile, err := TocFileReadCreate()
 	if err != nil {
-		log.Error("backup", "could not check existence of TOC file", err)
 		return err
-	}
-
-	if !exists {
-		// create new TOC file
-		if err := tocFileWrite(); err != nil {
-			log.Error("backup", "could not write TOC file", err)
-			return err
-		}
-	} else {
-		// read existing
-		if err := tocFileRead(); err != nil {
-			log.Error("backup", "could not read TOC file", err)
-			return err
-		}
 	}
 
 	// clean up old backups then create new backups
 	now := tools.GetTimeUnix()
 	jobRan := false // limit to one job per run
 
-	var runOne = func(jobName string, keepVersions uint64, interval int64) error {
+	_, _, appBuild, _ := config.GetAppVersions()
+	appBuildInt, err := strconv.Atoi(appBuild)
+	if err != nil {
+		return err
+	}
 
+	var runOne = func(jobName string, keepVersions uint64, interval int64) error {
 		log.Info("backup", fmt.Sprintf("is considering job '%s' for execution", jobName))
 
-		if getLatestTimestamp(jobName) > (now - interval) {
+		if getLatestTimestamp(tocFile, jobName) > (now - interval) {
 			log.Info("backup", fmt.Sprintf("does not need to execute '%s', latest backup is still valid", jobName))
 			return nil
 		}
 
-		if err := cleanup(jobName, keepVersions); err != nil {
+		if err := jobCleanup(jobName, keepVersions); err != nil {
 			log.Error("backup", fmt.Sprintf("could not delete old versions of job '%s'", jobName), err)
 			return err
 		}
-		if err := exec(jobName); err != nil {
+		if err := jobExec(jobName); err != nil {
 			log.Error("backup", fmt.Sprintf("could not execute job '%s'", jobName), err)
+			return err
+		}
+
+		// update TOC file
+		tocFile.Backups = append(tocFile.Backups, types.BackupDef{
+			AppBuild:  appBuildInt,
+			JobName:   jobName,
+			Timestamp: tools.GetTimeUnix(),
+		})
+		if err := tocFileWrite(tocFile); err != nil {
 			return err
 		}
 		jobRan = true
@@ -112,13 +96,11 @@ func Run() error {
 			return err
 		}
 	}
-
 	if !jobRan && config.GetUint64("backupWeekly") == 1 {
 		if err := runOne("weekly", config.GetUint64("backupCountWeekly"), 604800); err != nil {
 			return err
 		}
 	}
-
 	if !jobRan && config.GetUint64("backupDaily") == 1 {
 		if err := runOne("daily", config.GetUint64("backupCountDaily"), 86400); err != nil {
 			return err
@@ -126,13 +108,38 @@ func Run() error {
 	}
 	return nil
 }
+func TocFileReadCreate() (types.BackupTocFile, error) {
+	var tocFile = types.BackupTocFile{}
+	var path = getTocFilePath()
 
-func cleanup(jobName string, countKeep uint64) error {
+	exists, err := tools.Exists(path)
+	if err != nil {
+		log.Error("backup", "could not check existence of TOC file", err)
+		return tocFile, err
+	}
+	if !exists {
+		tocFile.Backups = make([]types.BackupDef, 0)
+		return tocFile, tocFileWrite(tocFile)
+	}
+
+	jsonFile, err := os.ReadFile(path)
+	if err != nil {
+		return tocFile, err
+	}
+	return tocFile, json.Unmarshal(tools.RemoveUtf8Bom(jsonFile), &tocFile)
+}
+
+func jobCleanup(jobName string, countKeep uint64) error {
 
 	log.Info("backup", fmt.Sprintf("starting cleanup for job '%s', keep %d versions",
 		jobName, countKeep))
 
 	defer log.Info("backup", fmt.Sprintf("finished cleanup for job '%s'", jobName))
+
+	tocFile, err := TocFileReadCreate()
+	if err != nil {
+		return err
+	}
 
 	// get current count
 	var countCurrent int
@@ -148,7 +155,7 @@ func cleanup(jobName string, countKeep uint64) error {
 	// if 3 are to be kept, delete all but 2 (to make room for next backup)
 	for countDelete := countCurrent - int(countKeep) + 1; countDelete > 0; countDelete-- {
 
-		timestampToDelete, timestampIndex := getOldestTimestamp(jobName)
+		timestampToDelete, timestampIndex := getOldestTimestamp(tocFile, jobName)
 
 		pathToDelete := getBackupJobDir(timestampToDelete, jobName)
 
@@ -169,93 +176,85 @@ func cleanup(jobName string, countKeep uint64) error {
 		tocFile.Backups[timestampIndex] = tocFile.Backups[len(tocFile.Backups)-1]
 		tocFile.Backups = tocFile.Backups[:len(tocFile.Backups)-1]
 
-		if err := tocFileWrite(); err != nil {
+		if err := tocFileWrite(tocFile); err != nil {
 			return err
 		}
 		log.Info("backup", fmt.Sprintf("has successfully deleted '%s'", pathToDelete))
 	}
 	return nil
 }
-
-func exec(jobName string) error {
-
+func jobExec(jobName string) error {
 	log.Info("backup", fmt.Sprintf("started for job '%s'", jobName))
 
 	newTimestamp := tools.GetTimeUnix()
-	_, _, appBuild, _ := config.GetAppVersions()
-	appBuildInt, err := strconv.Atoi(appBuild)
-	if err != nil {
-		return err
-	}
+	jobDir := getBackupJobDir(newTimestamp, jobName)
 
 	// create database backup
-	dbPath := filepath.Join(getBackupJobDir(newTimestamp, jobName), subPathDb)
+	dbPath := filepath.Join(jobDir, subPathDb)
 	if err := os.MkdirAll(dbPath, 0600); err != nil {
 		return err
 	}
-
-	if err := embedded.Backup(dbPath); err != nil {
+	if err := dumpDb(dbPath); err != nil {
 		return err
 	}
 
 	// create certificates backup
-	target := filepath.Join(getBackupJobDir(newTimestamp, jobName), subPathCerts)
+	target := filepath.Join(jobDir, subPathCerts)
 	if err := compress.Path(target, config.File.Paths.Certificates); err != nil {
 		return err
 	}
 
 	// create config backup
-	target = filepath.Join(getBackupJobDir(newTimestamp, jobName), subPathConfig)
+	target = filepath.Join(jobDir, subPathConfig)
 	if err := tools.FileCopy(config.GetConfigFilepath(), target, false); err != nil {
 		return err
 	}
 
 	// create files backup
-	target = filepath.Join(getBackupJobDir(newTimestamp, jobName), subPathFiles)
+	target = filepath.Join(jobDir, subPathFiles)
 	if err := compress.Path(target, config.File.Paths.Files); err != nil {
 		return err
 	}
 
 	// create transfer backup
-	target = filepath.Join(getBackupJobDir(newTimestamp, jobName), subPathTransfer)
+	target = filepath.Join(jobDir, subPathTransfer)
 	if err := compress.Path(target, config.File.Paths.Transfer); err != nil {
-		return err
-	}
-
-	// update TOC file
-	tocFile.Backups = append(tocFile.Backups, backupDef{
-		AppBuild:  appBuildInt,
-		JobName:   jobName,
-		Timestamp: newTimestamp,
-	})
-	if err := tocFileWrite(); err != nil {
 		return err
 	}
 	log.Info("backup", fmt.Sprintf("successfully completed job '%s'", jobName))
 	return nil
 }
 
-func tocFileRead() error {
-	jsonFile, err := os.ReadFile(tocFilePath)
-	if err != nil {
-		return err
+func dumpDb(path string) error {
+	args := []string{
+		"-h", config.File.Db.Host,
+		"-p", fmt.Sprintf("%d", config.File.Db.Port),
+		"-U", config.File.Db.User,
+		"-j", "4", // number of parallel jobs
+		"-Fd", // custom format, to file directory
+		"-f", path,
 	}
-	jsonFile = tools.RemoveUtf8Bom(jsonFile)
-
-	return json.Unmarshal(jsonFile, &tocFile)
+	cmd := exec.Command(getPgDumpPath(), args...)
+	tools.CmdAddSysProgAttrs(cmd)
+	cmd.Env = append(cmd.Env, fmt.Sprintf("LC_MESSAGES=%s", "en_US"))
+	cmd.Env = append(cmd.Env, fmt.Sprintf("PGPASSWORD=%s", config.File.Db.Pass))
+	return cmd.Run()
 }
-func tocFileWrite() error {
+
+func tocFileWrite(tocFile types.BackupTocFile) error {
 	jsonFile, err := json.MarshalIndent(tocFile, "", "\t")
 	if err != nil {
 		return err
 	}
-	return os.WriteFile(tocFilePath, jsonFile, 0644)
+	return os.WriteFile(getTocFilePath(), jsonFile, 0644)
 }
 
-func getLatestTimestamp(jobName string) int64 {
+func getTocFilePath() string {
+	return filepath.Join(config.GetString("backupDir"), "backups_toc.json")
+}
 
+func getLatestTimestamp(tocFile types.BackupTocFile, jobName string) int64 {
 	var timestamp int64
-
 	for _, backup := range tocFile.Backups {
 		if backup.JobName == jobName && backup.Timestamp > timestamp {
 			timestamp = backup.Timestamp
@@ -264,8 +263,7 @@ func getLatestTimestamp(jobName string) int64 {
 	return timestamp
 }
 
-func getOldestTimestamp(jobName string) (int64, int) {
-
+func getOldestTimestamp(tocFile types.BackupTocFile, jobName string) (int64, int) {
 	var timestamp int64
 	var timestampIndex int
 
@@ -279,5 +277,5 @@ func getOldestTimestamp(jobName string) (int64, int) {
 }
 
 func getBackupJobDir(timestamp int64, jobName string) string {
-	return filepath.Join(backupDir, fmt.Sprintf("%d_%s", timestamp, jobName))
+	return filepath.Join(config.GetString("backupDir"), fmt.Sprintf("%d_%s", timestamp, jobName))
 }

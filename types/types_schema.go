@@ -27,16 +27,24 @@ type Module struct {
 	Menus           []Menu            `json:"menus"`
 	Icons           []Icon            `json:"icons"`
 	Roles           []Role            `json:"roles"`
+	Articles        []Article         `json:"articles"`
 	LoginForms      []LoginForm       `json:"loginForms"`
 	PgFunctions     []PgFunction      `json:"pgFunctions"`
 	JsFunctions     []JsFunction      `json:"jsFunctions"`
 	Collections     []Collection      `json:"collections"`
+	ArticleIdsHelp  []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
 	Captions        CaptionMap        `json:"captions"`
 }
 type ModuleStartForm struct {
 	Position int       `json:"position"`
 	RoleId   uuid.UUID `json:"roleId"`
 	FormId   uuid.UUID `json:"formId"`
+}
+type Article struct {
+	Id       uuid.UUID  `json:"id"`
+	ModuleId uuid.UUID  `json:"moduleId"`
+	Name     string     `json:"name"`
+	Captions CaptionMap `json:"captions"`
 }
 type Relation struct {
 	Id             uuid.UUID        `json:"id"`
@@ -120,20 +128,22 @@ type OpenForm struct {
 type Icon struct {
 	Id       uuid.UUID `json:"id"`
 	ModuleId uuid.UUID `json:"moduleId"`
+	Name     string    `json:"name"`
 	File     []byte    `json:"file"`
 }
 type Form struct {
-	Id            uuid.UUID      `json:"id"`
-	ModuleId      uuid.UUID      `json:"moduleId"`
-	PresetIdOpen  pgtype.UUID    `json:"presetIdOpen"`
-	IconId        pgtype.UUID    `json:"iconId"`
-	Name          string         `json:"name"`
-	NoDataActions bool           `json:"noDataActions"` // disables record manipulation actions (new/save/delete)
-	Query         Query          `json:"query"`
-	Fields        []interface{}  `json:"fields"`
-	Functions     []FormFunction `json:"functions"`
-	States        []FormState    `json:"states"`
-	Captions      CaptionMap     `json:"captions"`
+	Id             uuid.UUID      `json:"id"`
+	ModuleId       uuid.UUID      `json:"moduleId"`
+	PresetIdOpen   pgtype.UUID    `json:"presetIdOpen"`
+	IconId         pgtype.UUID    `json:"iconId"`
+	Name           string         `json:"name"`
+	NoDataActions  bool           `json:"noDataActions"` // disables record manipulation actions (new/save/delete)
+	Query          Query          `json:"query"`
+	Fields         []interface{}  `json:"fields"`
+	Functions      []FormFunction `json:"functions"`
+	States         []FormState    `json:"states"`
+	ArticleIdsHelp []uuid.UUID    `json:"articleIdsHelp"` // IDs of articles for form context help, in order
+	Captions       CaptionMap     `json:"captions"`
 }
 type FormFunction struct {
 	Position     int       `json:"position"`
@@ -177,18 +187,21 @@ type FormStateConditionSide struct {
 	Value        pgtype.Varchar `json:"value"`        // fixed value, can be anything including NULL
 }
 type FormStateEffect struct {
-	FieldId  uuid.UUID `json:"fieldId"`  // affected field
-	NewState string    `json:"newState"` // effect state (hidden, readonly, default, required)
+	FieldId  pgtype.UUID `json:"fieldId"`  // affected field
+	TabId    pgtype.UUID `json:"tabId"`    // affected tab
+	NewState string      `json:"newState"` // effect state (hidden, readonly, default, required)
 }
 type Field struct {
 	Id       uuid.UUID   `json:"id"`
+	TabId    pgtype.UUID `json:"tabId"`
 	IconId   pgtype.UUID `json:"iconId"`
-	Content  string      `json:"content"`  // field content (button, header, data, list, ...)
-	State    string      `json:"state"`    // field state (hidden, readonly, default, required)
+	Content  string      `json:"content"`  // field content (button, header, data, list, calendar, chart, tabs)
+	State    string      `json:"state"`    // field default state (hidden, readonly, default, required)
 	OnMobile bool        `json:"onMobile"` // display this field on mobile?
 }
 type FieldButton struct {
 	Id           uuid.UUID   `json:"id"`
+	TabId        pgtype.UUID `json:"tabId"`
 	IconId       pgtype.UUID `json:"iconId"`
 	Content      string      `json:"content"`
 	State        string      `json:"state"`
@@ -203,6 +216,7 @@ type FieldButton struct {
 }
 type FieldCalendar struct {
 	Id               uuid.UUID            `json:"id"`
+	TabId            pgtype.UUID          `json:"tabId"`
 	IconId           pgtype.UUID          `json:"iconId"`
 	Content          string               `json:"content"`
 	State            string               `json:"state"`
@@ -230,6 +244,7 @@ type FieldCalendar struct {
 }
 type FieldChart struct {
 	Id          uuid.UUID   `json:"id"`
+	TabId       pgtype.UUID `json:"tabId"`
 	IconId      pgtype.UUID `json:"iconId"`
 	Content     string      `json:"content"`
 	State       string      `json:"state"`
@@ -240,6 +255,7 @@ type FieldChart struct {
 }
 type FieldContainer struct {
 	Id             uuid.UUID     `json:"id"`
+	TabId          pgtype.UUID   `json:"tabId"`
 	IconId         pgtype.UUID   `json:"iconId"`
 	Content        string        `json:"content"`
 	State          string        `json:"state"`
@@ -258,6 +274,7 @@ type FieldContainer struct {
 }
 type FieldData struct {
 	Id             uuid.UUID          `json:"id"`
+	TabId          pgtype.UUID        `json:"tabId"`
 	IconId         pgtype.UUID        `json:"iconId"`
 	Content        string             `json:"content"`
 	State          string             `json:"state"`
@@ -281,6 +298,7 @@ type FieldData struct {
 }
 type FieldDataRelationship struct {
 	Id             uuid.UUID   `json:"id"`
+	TabId          pgtype.UUID `json:"tabId"`
 	IconId         pgtype.UUID `json:"iconId"`
 	Content        string      `json:"content"`
 	State          string      `json:"state"`
@@ -317,6 +335,7 @@ type FieldDataRelationship struct {
 }
 type FieldHeader struct {
 	Id       uuid.UUID   `json:"id"`
+	TabId    pgtype.UUID `json:"tabId"`
 	IconId   pgtype.UUID `json:"iconId"`
 	Content  string      `json:"content"`
 	State    string      `json:"state"`
@@ -326,6 +345,7 @@ type FieldHeader struct {
 }
 type FieldList struct {
 	Id          uuid.UUID            `json:"id"`
+	TabId       pgtype.UUID          `json:"tabId"`
 	IconId      pgtype.UUID          `json:"iconId"`
 	Content     string               `json:"content"`
 	State       string               `json:"state"`
@@ -344,6 +364,15 @@ type FieldList struct {
 	// legacy
 	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
 	FormIdOpen        pgtype.UUID `json:"formIdOpen"`
+}
+type FieldTabs struct {
+	Id       uuid.UUID   `json:"id"`
+	TabId    pgtype.UUID `json:"tabId"`
+	IconId   pgtype.UUID `json:"iconId"`
+	Content  string      `json:"content"`
+	State    string      `json:"state"`
+	OnMobile bool        `json:"onMobile"`
+	Tabs     []Tab       `json:"tabs"`
 }
 type Collection struct {
 	Id       uuid.UUID            `json:"id"`
@@ -451,6 +480,13 @@ type JsFunction struct {
 	CodeFunction string      `json:"codeFunction"`
 	CodeReturns  string      `json:"codeReturns"`
 	Captions     CaptionMap  `json:"captions"`
+}
+type Tab struct {
+	Id       uuid.UUID     `json:"id"`
+	Position int           `json:"position"`
+	State    string        `json:"state"`  // tab default state (default, hidden)
+	Fields   []interface{} `json:"fields"` // fields assigned to tab
+	Captions CaptionMap    `json:"captions"`
 }
 type Deletion struct {
 	Id     uuid.UUID `json:"id"`

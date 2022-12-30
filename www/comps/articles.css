@@ -1,0 +1,30 @@
+.articles{
+	padding:var(--spacing-parent);
+	overflow:auto;
+}
+.articles-toc{
+	margin-bottom:40px;
+}
+.articles-toc li{
+	font-size:110%;
+	padding:2px 0px;
+	cursor:pointer;
+	text-decoration:underline;
+}
+.article{
+	padding:var(--spacing-child);
+}
+.article-title{
+	display:flex;
+	align-items:center;
+	font-size:130%;
+	margin:0px 0px 12px 0px;
+	border-bottom:1px solid var(--color-border);
+}
+.article-body{
+	font-size:110%;
+}
+.article-body img{
+	width:100%;
+	height:unset;
+}

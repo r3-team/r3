@@ -50,8 +50,8 @@ let MyBuilderQueryChoice = {
 			v-model="filtersInput"
 			:builderMode="true"
 			:disableContent="['fieldChanged']"
+			:entityIdMapRef="entityIdMapRef"
 			:fieldIdMap="fieldIdMap"
-			:fieldIdMapRef="fieldIdMapRef"
 			:joins="joins"
 			:joinsParents="joinsParents"
 			:moduleId="moduleId"
@@ -67,8 +67,8 @@ let MyBuilderQueryChoice = {
 	props:{
 		builderLanguage:{ type:String, required:true },
 		choice:         { type:Object, required:true },
+		entityIdMapRef: { type:Object, required:true },
 		fieldIdMap:     { type:Object, required:true },
-		fieldIdMapRef:  { type:Object, required:true },
 		joins:          { type:Array,  required:true },
 		joinsParents:   { type:Array,  required:true },
 		moduleId:       { type:String, required:true },
@@ -639,8 +639,8 @@ let MyBuilderQuery = {
 				v-show="showFilters"
 				:builderMode="true"
 				:disableContent="['fieldChanged']"
+				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
-				:fieldIdMapRef="fieldIdMapRef"
 				:filterAddCnt="filterAddCnt"
 				:joins="joins"
 				:joinsParents="joinsParents"
@@ -682,8 +682,8 @@ let MyBuilderQuery = {
 				@update="choiceApply(i,$event)"
 				:builderLanguage="builderLanguage"
 				:choice="choicesInput[i]"
+				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
-				:fieldIdMapRef="fieldIdMapRef"
 				:joins="joins"
 				:joinsParents="joinsParents"
 				:key="i+'_'+c.id"
@@ -742,8 +742,8 @@ let MyBuilderQuery = {
 		allowOrders:    { type:Boolean, required:false, default:false },
 		builderLanguage:{ type:String,  required:false, default:'' },
 		choices:        { type:Array,   required:false, default:() => [] },          // choices for optional query filters (selectable by users)
+		entityIdMapRef: { type:Object,  required:false, default:() => {return {}} },
 		fieldIdMap:     { type:Object,  required:false, default:() => {return {}} }, // form field map, key: field ID
-		fieldIdMapRef:  { type:Object,  required:false, default:() => {return {}} }, // form field reference number map, key: field ID
 		filters:        { type:Array,   required:true },
 		fixedLimit:     { type:Number,  required:true },
 		lookups:        { type:Array,   required:false, default:() => [] },

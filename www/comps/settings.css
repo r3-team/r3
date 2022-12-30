@@ -49,3 +49,27 @@
 	box-shadow:1px 1px 3px #000;
 	border-radius:6px;
 }
+.settings-token-actions{
+	display:flex;
+	flex-flow:row wrap;
+	align-items:center;
+	gap:9px;
+}
+
+/* multi factor authentication */
+.settings-mfa{
+	max-width:500px;
+}
+.settings-mfa-qrcode{
+	margin:10px auto 20px;
+	border:1px solid var(--color-border);
+	border-radius:5px;
+	overflow:hidden;
+}
+.settings-mfa-input{
+	max-width:200px;
+}
+.settings-mfa-uri{
+	font-style:italic;
+	word-break:break-all;
+}

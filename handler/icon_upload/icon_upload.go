@@ -32,7 +32,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// loop form reader until empty
-	// fixed order: token, module ID, file
+	// fixed order: token, module ID, icon ID, file
 	var token string
 	var moduleIdString string
 	var iconIdString string
@@ -89,7 +89,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		// insert icon
+		// insert/update icon
 		tx, err := db.Pool.Begin(db.Ctx)
 		if err != nil {
 			handler.AbortRequest(w, context, err, handler.ErrGeneral)
@@ -109,7 +109,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if err := icon.Set_tx(tx, moduleId, iconId, buf.Bytes()); err != nil {
+		if err := icon.Set_tx(tx, moduleId, iconId, "", buf.Bytes(), false); err != nil {
 			handler.AbortRequest(w, context, err, handler.ErrGeneral)
 			return
 		}
