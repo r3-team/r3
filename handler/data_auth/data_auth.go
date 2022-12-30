@@ -44,8 +44,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var loginId int64
 	var isAdmin bool
 	var noAuth bool
-	var mfaTokenId = pgtype.Int4{Status: pgtype.Present}
-	var mfaTokenPin = pgtype.Varchar{Status: pgtype.Present}
+	var mfaTokenId = pgtype.Int4{Status: pgtype.Null}
+	var mfaTokenPin = pgtype.Varchar{Status: pgtype.Null}
 
 	token, _, _, err := login_auth.User(req.Username, req.Password,
 		mfaTokenId, mfaTokenPin, &loginId, &isAdmin, &noAuth)
