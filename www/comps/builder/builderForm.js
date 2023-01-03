@@ -644,7 +644,7 @@ let MyBuilderForm = {
 			if(s.joinsIndexMap[s.fieldShow.index].relationId === atr.relationId)
 				return atr.relationshipId;
 			
-			return s.relationId;
+			return atr.relationId;
 		},
 		
 		// simple
@@ -915,9 +915,7 @@ let MyBuilderForm = {
 			let fields = [];
 			// create data fields from all attributes from this relation
 			// non-relationship attributes
-			for(let i = 0, j = relation.attributes.length; i < j; i++) {
-				let atr = relation.attributes[i];
-				
+			for(let atr of relation.attributes) {
 				if(!this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,false,null))
 					&& relation.attributeIdPk !== atr.id
 					&& !this.isAttributeRelationship(atr.content)
@@ -927,9 +925,7 @@ let MyBuilderForm = {
 			}
 			
 			// relationship attributes
-			for(let i = 0, j = relation.attributes.length; i < j; i++) {
-				let atr = relation.attributes[i];
-				
+			for(let atr of relation.attributes) {
 				if(!this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,false,null))
 					&& this.isAttributeRelationship(atr.content)
 				) {
@@ -946,9 +942,7 @@ let MyBuilderForm = {
 					continue;
 				
 				// relationship attributes referencing this relation (can be self reference)
-				for(let i = 0, j = rel.attributes.length; i < j; i++) {
-					let atr = rel.attributes[i];
-					
+				for(let atr of rel.attributes) {
 					if(atr.relationshipId !== relation.id)
 						continue;
 					
@@ -963,29 +957,26 @@ let MyBuilderForm = {
 				
 				// relationship attributes that can be used to build n:m relationships
 				let atrsN1 = [];
-				for(let i = 0, j = rel.attributes.length; i < j; i++) {
-					if(this.isAttributeRelationshipN1(rel.attributes[i].content))
-						atrsN1.push(rel.attributes[i]);
+				for(let atr of rel.attributes) {
+					if(this.isAttributeRelationshipN1(atr.content))
+						atrsN1.push(atr);
 				}
 				
-				for(let i = 0, j = atrsN1.length; i < j; i++) {
+				for(let atrN1 of atrsN1) {
 					
 					// find attributes in relationship with us
-					let atr = atrsN1[i];
-					if(atr.relationshipId !== relation.id)
+					if(atrN1.relationshipId !== relation.id)
 						continue;
 					
-					for(let x = 0, y = atrsN1.length; x < y; x++) {
-						let atrNm = atrsN1[x];
-						
-						// offer n:m together with every other n:1 attribute
-						if(atrNm.id === atr.id)
+					// offer n:m together with every other n:1 attribute
+					for(let atrNm of atrsN1) {
+						if(atrNm.id === atrN1.id)
 							continue;
 						
-						if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atr.id,true,atrNm.id)))
+						if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(index,atrN1.id,true,atrNm.id)))
 							continue;
 						
-						fields.push(this.createFieldData(index,atr,true,atrNm.id));
+						fields.push(this.createFieldData(index,atrN1,true,atrNm.id));
 					}
 				}
 			}
