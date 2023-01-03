@@ -1,7 +1,7 @@
 ## REI3
-REI3 is a business application platform that anyone can use. It provides access to a growing range of free [business applications](https://rei3.de/en/applications), which are built with the integrated, graphical application [Builder](https://rei3.de/en/docs).
+REI3 is an open low code application platform. It runs on almost any system, on-premise or in the cloud and is free to use for individuals and organizations.
 
-Individuals and organizations can freely build on or create completely new applications. Once created, applications can be exported and shared with others via files or public repositories.
+Applications are built with the integrated, graphical [Builder](https://rei3.de/en/docs) utility, after which they can be signed, exported, shared and/or sold. A growing range of free, production ready [business applications](https://rei3.de/en/applications) are publicly available.
 
 ### ⭐ Features
 * Easy to install on Windows and Linux systems with very few dependencies.
@@ -14,9 +14,10 @@ Individuals and organizations can freely build on or create completely new appli
   * Mobile views, with options to optimize frontend components for easier use on small screens.
   * Sending and receiving mails with attachments.
   * Multi-language support.
-  * API for read and write access.
+  * Multi factor authentication.
 * For enterprise environments:
   * LDAP import for user logins and access permissions.
+  * Cluster management
   * Customization of application colors, names, welcome messages and so on.
 
 ## 📀 How to install
@@ -31,38 +32,13 @@ A portable version is also available for Windows clients for testing and develop
 
 ### Linux
 1. Prepare a PostgreSQL server with a new, empty database.
-1. [Download](https://rei3.de/en/downloads) and extract the precompiled Linux package.
-1. Make the file `r3` executable.
-1. Rename the file `config_template.json` to `config.json` and enter connection details to the chosen database.
-1. Install REI3 as a service with `r3 -install`.
-1. Start REI3 with your service manager, as in `systemctl start rei3`.
+1. [Download](https://rei3.de/en/downloads) and extract the precompiled Linux package (in `/opt/rei3` for example).
+1. Make the file `r3` executable (`chmod u+x r3`).
+1. Rename the file `config_template.json` to `config.json` and enter connection details to the chosen database (PostgreSQL, UTF8 encoded).
+1. Install REI3 as a service (`./r3 -install`).
+1. Start REI3 with your service manager (as in `systemctl start rei3`).
 1. That´s it.
 
-#### Example `config.json` file with connection details
-```...json
-{
-        "db": {
-                "embedded": false,
-                "host": "10.0.150.1",
-                "port": 5432,
-                "name": "r3_database",
-                "user": "r3",
-                "pass": "A_STRONG_PASSWORD_PLZ"
-        },
-        "paths": {
-                "certificates": "data/certificates/",
-                "files": "data/files/",
-                "temp": "data/temp/",
-                "transfer": "data/transfer"
-        },
-        "web": {
-                "cert": "cert.crt",
-                "key": "cert.key",
-                "listen": "0.0.0.0",
-                "port": 5443
-        }
-}
-```
 For the full [admin documentation](https://rei3.de/en/docs/admin), please visit the website.
 
 ## 💡 How to build applications
@@ -70,7 +46,7 @@ All versions of REI3 include the graphical Builder utility, which can create new
 
 For information about how to use the Builder, please visit the [Builder documentation](https://rei3.de/en/docs/builder).
 
-## 📑 How to build your own version of REI3
+## 📑 How to create your own version of REI3
 1. Install the latest version of [Golang](https://golang.org/dl/).
 1. Download & extract the source code of the version you want to build (as in `2.4.3.2799`).
 1. Go into the source code directory (where `r3.go` is located) and execute: `go build -ldflags "-X main.appVersion={YOUR_APP_VERSION}"`.
@@ -89,6 +65,6 @@ REI3 heavily relies on [PostgreSQL](https://www.postgresql.org/) for data manage
 ## 👏 How to contribute
 Contributions are always welcome - feel free to fork and submit pull requests.
 
-REI3 follows a four-digit versioning syntax, such as 2.4.2.2788 (MAJOR.MINOR.PATCH.BUILD). Major releases serve to introduce major changes to the application. Minor releases may bring new features, database changes and fixes. Patch releases should primarily focus on fixes, but may include small features as long as the database is not changed.
+REI3 follows a four-digit versioning syntax, such as 3.2.0.4246 (MAJOR.MINOR.PATCH.BUILD). The major release will stay at 3 indefinitely, while we introduce new features and database changes with each minor release. Patch releases primarily focus on fixes, but may include small features as long as the database is not changed.
 
 The branch `main` will contain the currently released minor version of REI3; patches for this version can directly be submitted for the main branch. Each new minor release will use a separate branch, which will merge with `main` once the latest minor version is released.
