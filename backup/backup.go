@@ -191,7 +191,7 @@ func jobExec(jobName string) error {
 
 	// create database backup
 	dbPath := filepath.Join(jobDir, subPathDb)
-	if err := os.MkdirAll(dbPath, 0600); err != nil {
+	if err := os.MkdirAll(dbPath, 0700); err != nil {
 		return err
 	}
 	if err := dumpDb(dbPath); err != nil {

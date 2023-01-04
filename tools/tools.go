@@ -44,7 +44,7 @@ func CheckCreateDir(dir string) error {
 	}
 
 	if !exists {
-		if err := os.MkdirAll(dir, os.FileMode(0660)); err != nil {
+		if err := os.MkdirAll(dir, os.FileMode(0770)); err != nil {
 			return err
 		}
 	}

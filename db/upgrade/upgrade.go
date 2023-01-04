@@ -2520,7 +2520,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		config.File.Paths.Transfer = strings.Replace(config.File.Paths.Files,
 			filepath.Base(config.File.Paths.Files), "transfer", 1)
 
-		if err := os.MkdirAll(config.File.Paths.Transfer, 0600); err != nil {
+		if err := os.MkdirAll(config.File.Paths.Transfer, 0700); err != nil {
 			return "", err
 		}
 		if err := config.WriteFile(); err != nil {
