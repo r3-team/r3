@@ -419,9 +419,11 @@ let MyField = {
 					{{ t.captions.tabTitle[this.moduleLanguage] }}
 				</div>
 				<select v-if="isMobile" @change="setTab(parseInt($event.target.value))" :value="tabIndexShow">
-					<option v-for="(t,i) in field.tabs" :value="i">
-						{{ t.captions.tabTitle[this.moduleLanguage] }}
-					</option>
+					<template v-for="(t,i) in field.tabs">
+						<option v-if="!tabIndexesHidden.includes(i)" :value="i">
+							{{ t.captions.tabTitle[this.moduleLanguage] }}
+						</option>
+					</template>
 				</select>
 			</div>
 			<div class="fields"
