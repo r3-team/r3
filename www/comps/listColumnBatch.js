@@ -227,7 +227,7 @@ let MyListColumnBatch = {
 		canAggregate:   (s) => s.getFirstColumnUsableAsAggregator(s.columnBatch,s.columns) !== null,
 		canOpen:        (s) => s.rowCount > 1 || s.isFiltered,
 		showFilterAny:  (s) => s.showFilterItems || s.showFilterText,
-		showFilterItems:(s) => s.values.length >= 3 || s.rowCount > 5,
+		showFilterItems:(s) => s.values.length != 0,
 		showFilterText: (s) => s.values.length >= 5 && !s.isDateOrTime,
 		isArrayInput:   (s) => typeof s.input === 'object',
 		isDateOrTime:   (s) => s.isValidFilter && ['datetime','date','time'].includes(s.columnUsedFilter.display),
