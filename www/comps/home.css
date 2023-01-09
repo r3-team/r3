@@ -155,10 +155,9 @@
 	flex:0 1 auto;
 	margin:20px 0px;
 	text-align:center;
-	font-size:280%;
-	letter-spacing:5px;
+	font-size:300%;
+	letter-spacing:3px;
 	color:var(--color-font);
-	text-shadow:2px 2px 5px var(--color-shade);
 	filter:contrast(60%);
 }
 
