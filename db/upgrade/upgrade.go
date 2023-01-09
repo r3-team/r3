@@ -717,7 +717,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			for _, fileId := range fileIds {
 				// create new file directory if not there
 				if err := tools.PathCreateIfNotExists(
-					filepath.Join(config.File.Paths.Files, fileId.String()[:3]), 0600); err != nil {
+					filepath.Join(config.File.Paths.Files, fileId.String()[:3]), 0700); err != nil {
 
 					return "", err
 				}

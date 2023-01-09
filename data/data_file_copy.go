@@ -69,7 +69,7 @@ func CopyFiles(loginId int64, srcAttributeId uuid.UUID, srcFileIds []uuid.UUID,
 		}
 
 		// create new file path
-		if err := tools.PathCreateIfNotExists(GetFilePathDir(idNew), 0600); err != nil {
+		if err := tools.PathCreateIfNotExists(GetFilePathDir(idNew), 0700); err != nil {
 			return files, err
 		}
 

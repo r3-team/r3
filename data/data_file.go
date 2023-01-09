@@ -101,7 +101,7 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 		}
 	}
 
-	if err := tools.PathCreateIfNotExists(GetFilePathDir(fileId), 0600); err != nil {
+	if err := tools.PathCreateIfNotExists(GetFilePathDir(fileId), 0700); err != nil {
 		return err
 	}
 

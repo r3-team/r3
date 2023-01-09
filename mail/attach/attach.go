@@ -103,7 +103,7 @@ func do(mail types.Mail) error {
 
 	// copy files
 	for i, f := range filesMail {
-		if err := tools.PathCreateIfNotExists(data.GetFilePathDir(f.Id), 0600); err != nil {
+		if err := tools.PathCreateIfNotExists(data.GetFilePathDir(f.Id), 0700); err != nil {
 			return err
 		}
 
