@@ -85,7 +85,7 @@ let MyForm = {
 			:class="{ 'pop-up':isPopUp }"
 		>
 			<!-- title bar upper -->
-			<div class="top">
+			<div class="top" :class="{ lower:!hasBarLower && !isSingleField }">
 				<div class="area">
 					<img class="icon"
 						v-if="iconId !== null"
@@ -152,7 +152,7 @@ let MyForm = {
 			</div>
 			
 			<!-- title bar lower -->
-			<div class="top lower" v-if="isData || form.fields.length === 0">
+			<div class="top lower" v-if="hasBarLower">
 				<div class="area">
 					<my-button image="new.png"
 						v-if="allowNew && !noDataActions"
@@ -377,6 +377,7 @@ let MyForm = {
 		},
 		
 		// states, simple
+		hasBarLower:  function() { return this.isData || this.form.fields.length === 0; },
 		isData:       function() { return this.relationId !== null; },
 		isNew:        function() { return this.recordId === 0; },
 		noDataActions:function() { return this.form.noDataActions || this.blockInputs; },
