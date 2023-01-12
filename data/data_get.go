@@ -370,6 +370,14 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 	mapIndex_aggRecords := make(map[int]bool) // map of indexes with record aggregation
 	for pos, expr := range data.Expressions {
 
+		// option: return NULL
+		if expr.ReturnNull {
+			inSelect = append(inSelect, data_sql.GetExpression(
+				expr, "null", data_sql.GetExpressionAlias(pos)))
+
+			continue
+		}
+
 		// non-attribute expression
 		if expr.AttributeId.Status != pgtype.Present {
 

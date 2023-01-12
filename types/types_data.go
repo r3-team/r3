@@ -58,6 +58,7 @@ type DataGetExpression struct {
 	Aggregator pgtype.Varchar `json:"aggregator"` // set AGGREGATE function (min, max, avg, count, ...)
 	Distincted bool           `json:"distincted"` // set DISTINCT
 	GroupBy    bool           `json:"groupBy"`    // set GROUP BY
+	ReturnNull bool           `json:"returnNull"` // return NULL (ignores everything else)
 }
 
 type DataGetOrder struct {

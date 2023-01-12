@@ -149,7 +149,7 @@ func getLogValues_tx(ctx context.Context, tx pgx.Tx, logId uuid.UUID,
 
 // set data change log for specific record that was either created or updated
 func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
-	attributes []types.DataSetAttribute, fileAttributesIndexes []int,
+	attributes []types.DataSetAttribute, fileAttributeIndexes []int,
 	wasCreated bool, valuesOld []interface{}, recordId int64,
 	loginId int64) error {
 
@@ -173,11 +173,27 @@ func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 
 	// existing record, apply log if any attribute values changed
 	// compare old to new attribute values
-	attributesChangedIndexes := make([]int, 0)
+	attributeChangedIndexes := make([]int, 0)
 	for i, atr := range attributes {
 
-		// skip value comparisson for file attributes (old value is not retrieved)
-		if tools.IntInSlice(i, fileAttributesIndexes) {
+		// special case: file attributes
+		// new value is always delta (file uploaded/removed/etc.), old value is not needed
+		if tools.IntInSlice(i, fileAttributeIndexes) {
+			if atr.Value == nil {
+				continue
+			}
+
+			var v types.DataSetFileChanges
+			vJson, err := json.Marshal(atr.Value)
+			if err != nil {
+				return err
+			}
+			if err := json.Unmarshal(vJson, &v); err != nil {
+				return err
+			}
+			if len(v.FileIdMapChange) != 0 {
+				attributeChangedIndexes = append(attributeChangedIndexes, i)
+			}
 			continue
 		}
 
@@ -188,7 +204,7 @@ func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 
 		// only one value is nil, definite change
 		if valuesOld[i] == nil || atr.Value == nil {
-			attributesChangedIndexes = append(attributesChangedIndexes, i)
+			attributeChangedIndexes = append(attributeChangedIndexes, i)
 			continue
 		}
 
@@ -202,31 +218,11 @@ func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 			return err
 		}
 		if string(jsonOld) != string(jsonNew) {
-			attributesChangedIndexes = append(attributesChangedIndexes, i)
+			attributeChangedIndexes = append(attributeChangedIndexes, i)
 		}
 	}
 
-	// check for changes in file attributes
-	for _, atrIndex := range fileAttributesIndexes {
-		if attributes[atrIndex].Value == nil {
-			continue
-		}
-
-		var v types.DataSetFileChanges
-		vJson, err := json.Marshal(attributes[atrIndex].Value)
-		if err != nil {
-			return err
-		}
-		if err := json.Unmarshal(vJson, &v); err != nil {
-			return err
-		}
-
-		if len(v.FileIdMapChange) != 0 {
-			attributesChangedIndexes = append(attributesChangedIndexes, atrIndex)
-		}
-	}
-
-	if len(attributesChangedIndexes) == 0 {
+	if len(attributeChangedIndexes) == 0 {
 		// return if no attribute values changed for existing record
 		return nil
 	}
@@ -237,7 +233,7 @@ func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 	}
 
 	// log value even if null, as a change to null is still a change
-	for _, i := range attributesChangedIndexes {
+	for _, i := range attributeChangedIndexes {
 		if err := setLogValue_tx(ctx, tx, logId, attributes[i]); err != nil {
 			return err
 		}

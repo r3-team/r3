@@ -91,28 +91,28 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 		// set data for record of given relation index
 
 		// log data changes if retention is enabled
-		// if existing record, get current values for log comparison after change
-		useLog := relationUsesLogging(rel.RetentionCount, rel.RetentionDays)
-		logAttributes := make([]types.DataSetAttribute, 0)
-		logFileAttributeIndexes := make([]int, 0)
+		fileAttributeIndexes := make([]int, 0)
 		logRecordOld := types.DataGetResult{}
+		useLog := relationUsesLogging(rel.RetentionCount, rel.RetentionDays)
 
-		for i, a := range dataSet.Attributes {
-			atr, exists := cache.AttributeIdMap[a.AttributeId]
-			if !exists {
-				return indexRecordIds, handler.ErrSchemaUnknownAttribute(a.AttributeId)
-			}
+		if useLog {
+			for i, a := range dataSet.Attributes {
+				atr, exists := cache.AttributeIdMap[a.AttributeId]
+				if !exists {
+					return indexRecordIds, handler.ErrSchemaUnknownAttribute(a.AttributeId)
+				}
 
-			// store index of files attributes, they require special treatment
-			if schema.IsContentFiles(atr.Content) {
-				logFileAttributeIndexes = append(logFileAttributeIndexes, i)
+				// store index of files attributes, they require special treatment
+				if schema.IsContentFiles(atr.Content) {
+					fileAttributeIndexes = append(fileAttributeIndexes, i)
+				}
 			}
-			logAttributes = append(logAttributes, a)
 		}
 
+		// if existing record, get current values for log comparison after change
 		if useLog && !isNewRecord {
 			logRecordOld, err = collectCurrentValuesForLog_tx(ctx, tx,
-				dataSet.RelationId, logAttributes, logFileAttributeIndexes,
+				dataSet.RelationId, dataSet.Attributes, fileAttributeIndexes,
 				dataSet.RecordId, loginId)
 
 			if err != nil {
@@ -138,8 +138,8 @@ func Set_tx(ctx context.Context, tx pgx.Tx, dataSetsByIndex map[int]types.DataSe
 
 		// set data log
 		if useLog {
-			if err := setLog_tx(ctx, tx, dataSet.RelationId, logAttributes,
-				logFileAttributeIndexes, isNewRecord, logRecordOld.Values,
+			if err := setLog_tx(ctx, tx, dataSet.RelationId, dataSet.Attributes,
+				fileAttributeIndexes, isNewRecord, logRecordOld.Values,
 				indexRecordIds[index], loginId); err != nil {
 
 				return indexRecordIds, fmt.Errorf("failed to set data log, %v", err)
@@ -496,7 +496,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 
 func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx,
 	relationId uuid.UUID, attributes []types.DataSetAttribute,
-	fileAttributesIndexes []int, recordId int64, loginId int64) (types.DataGetResult, error) {
+	fileAttributeIndexes []int, recordId int64, loginId int64) (types.DataGetResult, error) {
 
 	var result types.DataGetResult
 	rel, exists := cache.RelationIdMap[relationId]
@@ -527,12 +527,6 @@ func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx,
 	}
 
 	for i, attribute := range attributes {
-
-		// ignore file attributes on value lookup
-		if tools.IntInSlice(i, fileAttributesIndexes) {
-			continue
-		}
-
 		dataGet.Expressions = append(dataGet.Expressions, types.DataGetExpression{
 			AttributeId: pgtype.UUID{
 				Bytes:  attribute.AttributeId,
@@ -541,6 +535,10 @@ func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx,
 			AttributeIdNm: attribute.AttributeIdNm,
 			Index:         0,
 			OutsideIn:     attribute.OutsideIn,
+
+			// special case: file attribute
+			// no need to lookup current values as file attribute values already only include changes
+			ReturnNull: tools.IntInSlice(i, fileAttributeIndexes),
 		})
 	}
 
