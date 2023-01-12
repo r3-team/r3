@@ -380,13 +380,8 @@ let MyInputFiles = {
 	},
 	mounted() {
 		// setup watchers
-		this.$watch('formLoading',(val) => {
-			if(val) return;
-			
-			let v = JSON.parse(JSON.stringify(this.modelValue));
-			this.files = v !== null ? v : [];
-			this.fileIdMapChange = {};
-		});
+		this.$watch('formLoading',v => { if(!v) this.reset(); });
+		this.$watch('modelValue', v => this.reset());
 		
 		// apply initial view size
 		this.setNoSpaceMode();
@@ -469,6 +464,18 @@ let MyInputFiles = {
 		getNilUuid,
 		getSizeReadable,
 		getUnixFormat,
+		
+		reset() {
+			// model value is either:
+			// * null, empty input/no files -> reset input
+			// * array of files, initial attribute value -> initialize input
+			// * object with file changes (removed, renamed, ...) -> ignore, input already has this state
+			if(this.modelValue === null || Array.isArray(this.modelValue)) {
+				let v = JSON.parse(JSON.stringify(this.modelValue));
+				this.files = v !== null ? v : [];
+				this.fileIdMapChange = {};
+			}
+		},
 		
 		// presentation
 		displayChecked(state) {
