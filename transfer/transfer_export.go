@@ -55,11 +55,7 @@ func ExportToFile(moduleId uuid.UUID, zipFilePath string) error {
 	if err := writeFilesToZip(zipFilePath, moduleJsonPaths); err != nil {
 		return err
 	}
-
-	if err := tx.Commit(db.Ctx); err != nil {
-		return err
-	}
-	return nil
+	return tx.Commit(db.Ctx)
 }
 
 func export_tx(tx pgx.Tx, moduleId uuid.UUID, original bool, filePaths *[]string,

@@ -1,7 +1,10 @@
 package data_download
 
 import (
+	"mime"
 	"net/http"
+	"path"
+	"path/filepath"
 	"r3/bruteforce"
 	"r3/data"
 	"r3/handler"
@@ -46,25 +49,31 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// version is only required, if a specific file version is requested
-	// if not set, open the latest one
-	version, err := handler.ReadInt64GetterFromUrl(r, "version")
-	if err != nil {
-		version = -1
-	}
-
 	// check file access privilege
 	if err := data.MayAccessFile(loginId, attributeId); err != nil {
 		handler.AbortRequest(w, context, err, handler.ErrUnauthorized)
 		return
 	}
 
+	// version is only required, if a specific file version is requested
+	// if not set, open the latest one
+	version, err := handler.ReadInt64GetterFromUrl(r, "version")
+	if err != nil {
+		version = -1
+	}
 	if version == -1 {
 		version, err = data.FileGetLatestVersion(fileId)
 		if err != nil {
 			handler.AbortRequest(w, context, err, handler.ErrGeneral)
 			return
 		}
+	}
+
+	// get content type by extension if possible
+	// if content type is not set, http.ServeFile will guess one
+	ctype := mime.TypeByExtension(filepath.Ext(path.Base(r.URL.Path)))
+	if ctype != "" {
+		w.Header().Set("Content-Type", ctype)
 	}
 	http.ServeFile(w, r, data.GetFilePathVersion(fileId, version))
 }
