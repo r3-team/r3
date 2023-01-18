@@ -515,11 +515,6 @@ func (prg *program) Stop(svc service.Service) error {
 	}
 	prg.stopping = true
 
-	// stop cluster node
-	if err := cluster.StopNode(); err != nil {
-		prg.logger.Error(err)
-	}
-
 	// stop scheduler
 	scheduler.Stop()
 
@@ -535,8 +530,12 @@ func (prg *program) Stop(svc service.Service) error {
 		log.Info("server", "stopped web handlers")
 	}
 
-	// close database connection if open
+	// close database connection and deregister cluster node if DB is open
 	if db.Pool != nil {
+		if err := cluster.StopNode(); err != nil {
+			prg.logger.Error(err)
+		}
+
 		db.Close()
 		log.Info("server", "stopped database handler")
 	}
