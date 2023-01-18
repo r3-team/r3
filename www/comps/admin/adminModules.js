@@ -288,8 +288,8 @@ let MyAdminModulesItem = {
 			let requests = [ws.prepare('module','del',{id:this.id})];
 			
 			// add dependencies to delete
-			for(let i = 0, j = this.moduleIdsDependendOnUs.length; i < j; i++) {
-				requests.push(ws.prepare('module','del',{id:this.moduleIdsDependendOnUs[i]}));
+			for(let id of this.moduleIdsDependendOnUs) {
+				requests.push(ws.prepare('module','del',{id:id}));
 			}
 			
 			ws.sendMultiple(requests,true).then(

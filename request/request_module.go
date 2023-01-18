@@ -38,14 +38,10 @@ func ModuleDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		Id uuid.UUID `json:"id"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := module.Del_tx(tx, req.Id); err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return nil, module.Del_tx(tx, req.Id)
 }
 
 func ModuleGet() (interface{}, error) {
@@ -67,16 +63,11 @@ func ModuleGet() (interface{}, error) {
 func ModuleSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req types.Module
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	if err := module.Set_tx(tx, req.Id, req.ParentId, req.FormId, req.IconId,
+	return nil, module.Set_tx(tx, req.Id, req.ParentId, req.FormId, req.IconId,
 		req.Name, req.Color1, req.Position, req.LanguageMain, req.ReleaseBuild,
 		req.ReleaseBuildApp, req.ReleaseDate, req.DependsOn, req.StartForms,
-		req.Languages, req.ArticleIdsHelp, req.Captions); err != nil {
-
-		return nil, err
-	}
-	return nil, nil
+		req.Languages, req.ArticleIdsHelp, req.Captions)
 }

@@ -481,6 +481,7 @@ let MyApp = {
 		
 		// schema retrieval
 		initSchema() {
+			this.$store.commit('busyAdd');
 			fetch(`./cache/download/schema_${this.schemaTimestamp}.json`).then(
 				res => {
 					if(res.status !== 200)
@@ -491,10 +492,9 @@ let MyApp = {
 						this.schemaLoaded = true;
 						this.stateChange();
 					});
-				}
-			).catch(err => {
-				this.setInitErr('Failed to load schema cache: '+err);
-			});
+				})
+				.catch(err => { this.setInitErr('Failed to load schema cache: '+err); } )
+				.finally(() => this.$store.commit('busyRemove'));
 		},
 		
 		// final app meta retrieval, after authentication
