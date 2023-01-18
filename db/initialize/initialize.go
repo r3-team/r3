@@ -125,7 +125,7 @@ func initInstanceValues_tx(tx pgx.Tx) error {
 			('companyWelcome',''),
 			('dbTimeoutCsv','120'),
 			('dbTimeoutDataRest','60'),
-			('dbTimeoutDataWs','60'),
+			('dbTimeoutDataWs','300'),
 			('dbTimeoutIcs','30'),
 			('dbVersionCut','3.0'),
 			('defaultLanguageCode','en_us'),
