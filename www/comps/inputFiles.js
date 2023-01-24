@@ -398,7 +398,7 @@ let MyInputFiles = {
 	},
 	computed:{
 		filesProcessed:{
-			get:	function() {
+			get() {
 				let v = JSON.parse(JSON.stringify(this.files));
 				
 				if(this.filterName !== '')
