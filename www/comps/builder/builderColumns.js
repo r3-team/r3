@@ -55,7 +55,10 @@ export let MyBuilderColumns = {
 					</div>
 					
 					<!-- column title -->
-					<div class="title" :class="{ 'no-hover':hasCaptions && showOptions }">
+					<div class="title word-break"
+						:class="{ 'no-hover':hasCaptions && showOptions }"
+						:title="getItemTitleColumn(element,false)"
+					>
 						{{ getItemTitleColumn(element,false) }}
 					</div>
 					<my-builder-caption class="on-hover"
