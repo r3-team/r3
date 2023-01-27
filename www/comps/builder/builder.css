@@ -954,6 +954,7 @@
 	flex:1 1 auto;
 	max-width:none;
 	font-family:'Lucida Console',Courier,monospace;
+	tab-size:4;
 	border:none !important;
 	border-radius:0px !important;
 	background-color:transparent;
