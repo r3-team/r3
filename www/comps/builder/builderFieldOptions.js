@@ -841,37 +841,47 @@ let MyBuilderFieldOptions = {
 					<td>
 						<div class="column">
 							<table>
+								<thead>
 								<tr>
-									<th></th>
+									<th colspan="2"></th>
 									<th>{{ capGen.title }}</th>
 									<th colspan="2">{{ capGen.status }}</th>
 								</tr>
-								<tr v-for="(t,i) in field.tabs">
-									<td>T{{ typeof entityIdMapRef.tab[t.id] !== 'undefined' ? entityIdMapRef.tab[t.id] : '' }}</td>
-									<td>
-										<my-builder-caption
-											@update:modelValue="t.captions.tabTitle = $event;set('tabs',field.tabs)"
-											:language="builderLanguage"
-											:modelValue="t.captions.tabTitle"
-										/>
-									</td>
-									<td>
-										<select
-											@input="t.state = $event.target.value;set('tabs',field.tabs)"
-											:value="t.state"
-										>
-											<option value="hidden">{{ capApp.stateHidden }}</option>
-											<option value="default">{{ capApp.stateDefault }}</option>
-										</select>
-									</td>
-									<td>
-										<my-button image="cancel.png"
-											@trigger="field.tabs.splice(i,1);set('tabs',field.tabs)"
-											:active="field.tabs.length > 1"
-											:naked="true"
-										/>
-									</td>
-								</tr>
+								</thead>
+								<draggable handle=".dragAnchor" group="tabs" itemKey="id" animation="100" tag="tbody"
+									:fallbackOnBody="true"
+									:list="field.tabs"
+								>
+									<template #item="{element,index}">
+										<tr>
+											<td><img class="action dragAnchor" src="images/drag.png" /></td>
+											<td>T{{ typeof entityIdMapRef.tab[element.id] !== 'undefined' ? entityIdMapRef.tab[element.id] : '' }}</td>
+											<td>
+												<my-builder-caption
+													@update:modelValue="element.captions.tabTitle = $event;set('tabs',field.tabs)"
+													:language="builderLanguage"
+													:modelValue="element.captions.tabTitle"
+												/>
+											</td>
+											<td>
+												<select
+													@input="element.state = $event.target.value;set('tabs',field.tabs)"
+													:value="element.state"
+												>
+													<option value="hidden">{{ capApp.stateHidden }}</option>
+													<option value="default">{{ capApp.stateDefault }}</option>
+												</select>
+											</td>
+											<td>
+												<my-button image="cancel.png"
+													@trigger="field.tabs.splice(index,1);set('tabs',field.tabs)"
+													:active="field.tabs.length > 1"
+													:naked="true"
+												/>
+											</td>
+										</tr>
+									</template>
+								</draggable>
 							</table>
 						</div>
 					</td>
