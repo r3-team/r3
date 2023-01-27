@@ -431,7 +431,7 @@ let MyField = {
 				v-show="i === tabIndexShow"
 				:class="{ onlyOne:t.fields.length === 1 && t.fields[0].content !== 'container' }"
 			>
-				<my-field flexDirParent="column"
+				<my-field flexDirParent="column" :ref="'tabField_'+f.id"
 					v-for="f in t.fields"
 					@clipboard="$emit('clipboard')"
 					@execute-function="$emit('execute-function',$event)"
@@ -1059,10 +1059,15 @@ let MyField = {
 			let active   = tabIndex === this.tabIndexShow;
 			let fields   = this.field.tabs[tabIndex].fields;
 			let oneField = fields.length === 1;
+			let readonly = false;
+			
+			if(oneField && typeof this.$refs['tabField_'+fields[0].id] !== 'undefined')
+				readonly = this.$refs['tabField_'+fields[0].id]['0'].isReadonly;
 			
 			return {
 				active:tabIndex === this.tabIndexShow,
 				error:this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
+				readonly:  active && oneField && readonly,
 				showsCal:  active && oneField && fields[0].content === 'calendar',
 				showsChart:active && oneField && fields[0].content === 'chart',
 				showsData: active && oneField && fields[0].content === 'data',

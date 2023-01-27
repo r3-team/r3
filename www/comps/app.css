@@ -148,6 +148,7 @@ body                                         { --depth:6; }
 .field .tabs-entry.active.showsData          { --depth:0; }
 .field .tabs-entry.active.showsList          { --depth:4; }
 .field .tabs-entry.active.showsTabs          { --depth:6; }
+.field .tabs-entry.active.readonly           { --depth:6; }
 .field .tabs>.fields                         { --depth:2; }
 .list .layoutTable th                        { --depth:0; }
 .list .layoutTable .columBatchCaption.clickable:hover{ --depth:3; }
