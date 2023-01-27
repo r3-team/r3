@@ -545,6 +545,9 @@
 			"onMobile":"Show on mobile"
 		},
 		"form":{
+			"button":{
+				"layoutColumns":"{CNT} columns"
+			},
 			"chart":{
 				"axisType":"Axis type",
 				"axisTypeCategory":"Category",
@@ -641,6 +644,7 @@
 			"dateRangeHint":"relative to current date",
 			"display":"Display",
 			"distincted":"Distinct",
+			"dragDrop":"Place fields here via drag & drop from the selection on the right to add them to the form.",
 			"fields":"Fields",
 			"fieldAttributeIdAltDateTo":"Date to (period)",
 			"fieldAttributeIdAltRichtextFiles":"Richtext file access",
@@ -687,6 +691,7 @@
 			"jsFunctionButton":"Function on click",
 			"jsFunctionData":"Function on value change",
 			"layout":"List layout",
+			"layoutCreate":"Create simple layout:",
 			"limit":"Result count",
 			"new":"New form",
 			"noDataActions":"No data actions",

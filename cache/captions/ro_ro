@@ -545,6 +545,9 @@
 			"onMobile":"Show on mobile"
 		},
 		"form":{
+			"button":{
+				"layoutColumns":"{CNT} columns"
+			},
 			"chart":{
 				"axisType":"Tipul de axă",
 				"axisTypeCategory":"Categorie",
@@ -641,6 +644,7 @@
 			"dateRangeHint":"raportat la data curentă",
 			"display":"Afișare",
 			"distincted":"Distinct",
+			"dragDrop":"Place fields here via drag & drop from the selection on the right to add them to the form.",
 			"fields":"Câmpuri",
 			"fieldAttributeIdAltDateTo":"Data până la (perioada)",
 			"fieldAttributeIdAltRichtextFiles":"Acces la fișierul Richtext",
@@ -687,6 +691,7 @@
 			"jsFunctionButton":"Function on click",
 			"jsFunctionData":"Function on value change",
 			"layout":"Aspectul listei",
+			"layoutCreate":"Create simple layout:",
 			"limit":"Numărul rezultatelor",
 			"new":"Formular nou",
 			"noDataActions":"No data actions",

@@ -61,6 +61,12 @@
 	overflow:auto;
 	display:flex;
 	flex-flow:column nowrap;
+	background-color:var(--color-bg);
+	background-size:15px 15px;
+	background-image:radial-gradient(var(--color-form-builder-actions-bg) 1px, var(--color-bg) 1px);
+}
+.builder-form-assistant{
+	margin:10px 10px 5px 10px;
 }
 .builder-form-fields{
 	/* all active fields in builder */
@@ -69,9 +75,6 @@
 	flex-flow:column nowrap;
 	padding:5px 0px 0px 5px;
 	overflow:auto;
-	background-color:var(--color-bg);
-	background-size:15px 15px;
-	background-image:radial-gradient(var(--color-form-builder-actions-bg) 1px, var(--color-bg) 1px);
 }
 
 

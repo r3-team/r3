@@ -545,6 +545,9 @@
 			"onMobile":"In mobiler Ansicht"
 		},
 		"form":{
+			"button":{
+				"layoutColumns":"{CNT} Spalten"
+			},
 			"chart":{
 				"axisType":"Achsentyp",
 				"axisTypeCategory":"Kategorie",
@@ -641,6 +644,7 @@
 			"dateRangeHint":"relativ zum akt. Datum",
 			"display":"Darstellung",
 			"distincted":"Unterscheiden",
+			"dragDrop":"Felder von der Auswahl rechts per Drag&Drop hier ablegen, um sie zum Formular hinzuzufügen.",
 			"fields":"Felder",
 			"fieldAttributeIdAltDateTo":"Datum bis (Zeitraum)",
 			"fieldAttributeIdAltRichtextFiles":"Rich-Text Dateizugriff",
@@ -687,6 +691,7 @@
 			"jsFunctionButton":"Funktion nack Klick",
 			"jsFunctionData":"Funktion nach Wertänderung",
 			"layout":"Listen-Layout",
+			"layoutCreate":"Einfaches layout erstellen:",
 			"limit":"Ergebnisanzahl",
 			"new":"Neues Formular",
 			"noDataActions":"Keine Datenaktionen",

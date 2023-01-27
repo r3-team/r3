@@ -126,6 +126,19 @@ let MyBuilderForm = {
 					</div>
 				</div>
 				
+				<!-- empty form assistent -->
+				<div class="builder-form-assistant" v-if="fields.length === 0">
+					<h2>{{ capApp.dragDrop }}</h2>
+					<div class="row gap centered">
+						<span>{{ capApp.layoutCreate }}</span>
+						<my-button
+							v-for="c in 3"
+							@trigger="addLayoutColumns(c+1)"
+							:caption="capApp.button.layoutColumns.replace('{CNT}',String(c+1))"
+						/>
+					</div>
+				</div>
+				
 				<!-- form builder fields -->
 				<my-builder-fields class="builder-form-fields default-inputs" flexDirParent="column"
 					@column-id-show="(...args) => setFieldShow(args[0],args[1],'content')"
@@ -688,6 +701,20 @@ let MyBuilderForm = {
 		isAttributeRelationshipN1,
 		
 		// actions
+		addLayoutColumns(count) {
+			let parent = this.createFieldContainer();
+			parent.id        = 'new_'+this.fieldCounter++;
+			parent.direction = 'row';
+			parent.wrap      = true;
+			
+			for(; count > 0; count--) {
+				let child = this.createFieldContainer();
+				child.id    = 'new_'+this.fieldCounter++;
+				child.basis = 300;
+				parent.fields.push(child);
+			}
+			this.fields.push(parent);
+		},
 		open() {
 			this.$router.push(this.getFormRoute(this.form.id,0,false));
 		},

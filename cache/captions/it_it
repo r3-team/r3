@@ -545,6 +545,9 @@
 			"onMobile":"Show on mobile"
 		},
 		"form":{
+			"button":{
+				"layoutColumns":"{CNT} columns"
+			},
 			"chart":{
 				"axisType":"Tipo assi",
 				"axisTypeCategory":"Categoria",
@@ -641,6 +644,7 @@
 			"dateRangeHint":"rispetto alla data attuale",
 			"display":"Visualizza",
 			"distincted":"Distinto",
+			"dragDrop":"Place fields here via drag & drop from the selection on the right to add them to the form.",
 			"fields":"Campi",
 			"fieldAttributeIdAltDateTo":"Data a (periodo)",
 			"fieldAttributeIdAltRichtextFiles":"Accesso file Richtext",
@@ -687,6 +691,7 @@
 			"jsFunctionButton":"Funzione on click",
 			"jsFunctionData":"Funzione on value change",
 			"layout":"Disposizione elenco",
+			"layoutCreate":"Create simple layout:",
 			"limit":"Limite risultato",
 			"new":"Nuovo modulo",
 			"noDataActions":"No data actions",
