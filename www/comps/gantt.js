@@ -231,6 +231,7 @@ let MyGantt = {
 					:captionTitle="capApp.button.ganttToggleHint"
 					:image="isDays ? 'clock.png' : 'clock24.png'"
 					:naked="true"
+					:tight="true"
 				/>
 				
 				<my-button image="search.png"
@@ -238,6 +239,7 @@ let MyGantt = {
 					@trigger="stepZoom = stepZoomDefault"
 					:captionTitle="capApp.button.zoomResetHint"
 					:naked="true"
+					:tight="true"
 				/>
 				
 				<input class="zoom-factor clickable" type="range" min="3" max="12"
@@ -265,6 +267,7 @@ let MyGantt = {
 				</select>
 				
 				<my-button image="calendar.png"
+					v-if="!isMobile"
 					@trigger="scrollToNow"
 					:caption="!isMobile ? capApp.now : ''"
 					:captionTitle="capApp.nowHint"
@@ -355,9 +358,9 @@ let MyGantt = {
 		filters:         { type:Array,   required:true }, // processed query filters
 		formLoading:     { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
 		iconId:          { required:true },
-		indexColor:      { required:true },
-		indexDate0:      { type:Number,  required:true },
-		indexDate1:      { type:Number,  required:true },
+		indexColor:      { required:true },               // index of attribute that provides record color
+		indexDate0:      { type:Number,  required:true }, // index of attribute that provides record date from
+		indexDate1:      { type:Number,  required:true }, // index of attribute that provides record date to
 		isHiddenInTab:   { type:Boolean, required:false, default:false }, // Gantt is in a non-visible tab-field
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:true },
@@ -383,8 +386,8 @@ let MyGantt = {
 			stepBase:8,       // base size of step width in pixels, used to multiply with zoom factor
 			stepType:'days',  // gantt step type (hours, days)
 			stepZoom:7,       // zoom factor for step, 7 is default (7*8=56)
-			stepZoomDefault:7,
-			steps:0,
+			stepZoomDefault:7,// zoom reset to
+			steps:0,          // available steps, calculated based on field size and zoom factor
 			unixTimeRangeStart:null // for time range input
 		};
 	},
@@ -398,26 +401,18 @@ let MyGantt = {
 		// unix date range points, 0=gantt start, 1=gantt end
 		date0:(s) => {
 			let d = new Date(s.dateStart.getTime());
+			// start 3 steps before page start point
 			switch(s.stepType) {
-				// start 3 days before current day
-				case 'days':  d.setDate(d.getDate() - 3 + (s.page*s.steps)); break;
-				// start today
-				case 'hours': d.setDate(d.getDate() + s.page); break;
+				case 'days':  d.setDate(d.getDate()   - 3 + (s.page*s.steps)); break;
+				case 'hours': d.setHours(d.getHours() - 3 + (s.page*s.steps)); break;
 			}
 			return d;
 		},
 		date1:(s) => {
 			let d = new Date(s.dateStart.getTime());
 			switch(s.stepType) {
-				case 'days': d.setDate(d.getDate() + s.steps - 3 + (s.page*s.steps)); break;
-				case 'hours':
-					let days = Math.floor(s.steps / 24);
-					
-					if(days === 0 || s.steps % 24 !== 0)
-						days += 1;
-					
-					d.setDate(d.getDate() + days + s.page);
-				break;
+				case 'days':  d.setDate(d.getDate()   + s.steps - 3 + (s.page*s.steps)); break;
+				case 'hours': d.setHours(d.getHours() + s.steps - 3 + (s.page*s.steps)); break;
 			}
 			return d;
 		},
@@ -425,13 +420,22 @@ let MyGantt = {
 		dateRangeLabel:(s) => {
 			let d0 = new Date(s.date0.getTime());
 			let d1 = new Date(s.date1.getTime());
-			d1.setDate(d1.getDate()-1);
-			
-			if(s.isMobile)
-				return s.getDateFormat(d0,s.settings.dateFormat);
-			
-			return s.getDateFormat(d0,s.settings.dateFormat)
-				+ ' - ' +s.getDateFormat(d1,s.settings.dateFormat);
+			let format = s.isDays ? s.settings.dateFormat : s.settings.dateFormat+' H:i';
+			if(s.isDays) {
+				d1.setDate(d1.getDate()-1);
+				return s.isMobile ? s.getDateFormat(d0,format)
+					: s.getDateFormat(d0,format) + ' - ' +s.getDateFormat(d1,format);
+			}
+			if(s.isHours) {
+				if(s.isMobile)
+					return s.getDateFormat(d0,format);
+				
+				if(d0.getDate() === d1.getDate())
+					return s.getDateFormat(d0,format) + '-' +s.getDateFormat(d1,'H:i');
+				
+				return s.getDateFormat(d0,format) + ' - ' +s.getDateFormat(d1,format);
+			}
+			return '';
 		},
 		
 		// records in gantt are always grouped (basically 1 calendar line per group)
@@ -487,6 +491,7 @@ let MyGantt = {
 		window.addEventListener('resize',this.resize);
 	},
 	mounted() {
+		this.stepType  = this.stepTypeDefault;
 		this.dateStart = this.getDateNowRounded();
 		
 		// setup watchers
