@@ -729,10 +729,9 @@ let MyCalendar = {
 				this.dateSelect1 = d;
 			}
 			else {
-				if(this.dateSelect0 === null) {
-					this.dateSelect0 = d;
-					return;
-				}
+				if(this.dateSelect0 === null)
+					return this.dateSelect0 = d;
+				
 				this.dateSelect1 = d;
 			}
 			
@@ -741,6 +740,8 @@ let MyCalendar = {
 				`${this.attributeIdDate1}_${this.getUnixFromDate(this.dateSelect1)}`
 			];
 			this.$emit('open-form',0,[`attributes=${attributes.join(',')}`],middleClick);
+			this.dateSelect0 = null;
+			this.dateSelect1 = null;
 		},
 		
 		// reloads

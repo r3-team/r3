@@ -646,6 +646,7 @@ let MyGantt = {
 				`${this.attributeIdDate1}_${unixTime}`
 			];
 			this.$emit('open-form',0,[`attributes=${attributes.join(',')}`],middleClick);
+			this.unixTimeRangeStart = null;
 		},
 		pageChange(factor) {
 			this.page += factor;
