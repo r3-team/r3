@@ -60,12 +60,6 @@ let MyAdmin = {
 						<span>{{ capApp.navigationRepo }}</span>
 					</router-link>
 					
-					<!-- scheduler -->
-					<router-link class="entry clickable" tag="div" to="/admin/scheduler">
-						<img src="images/tasks.png" />
-						<span>{{ capApp.navigationScheduler }}</span>
-					</router-link>
-					
 					<!-- mail accounts -->
 					<router-link class="entry clickable" tag="div" to="/admin/mailaccounts">
 						<img src="images/mail2.png" />
@@ -100,6 +94,12 @@ let MyAdmin = {
 					<router-link class="entry clickable" tag="div" to="/admin/logs">
 						<img src="images/log.png" />
 						<span>{{ capApp.navigationLogs }}</span>
+					</router-link>
+					
+					<!-- scheduler -->
+					<router-link class="entry clickable" tag="div" to="/admin/scheduler">
+						<img src="images/clock.png" />
+						<span>{{ capApp.navigationScheduler }}</span>
 					</router-link>
 					
 					<!-- license -->

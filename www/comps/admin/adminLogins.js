@@ -479,7 +479,7 @@ let MyAdminLogins = {
 		
 		<div class="top">
 			<div class="area">
-				<img class="icon" src="images/admin.png" />
+				<img class="icon" src="images/person.png" />
 				<h1>{{ menuTitle }}</h1>
 			</div>
 		</div>
