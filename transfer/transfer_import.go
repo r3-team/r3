@@ -161,10 +161,7 @@ func ImportFromFiles(filePathsImport []string) error {
 	}
 	log.Info("transfer", "changes were commited successfully")
 
-	if err := cluster.SchemaChangedAll(true, true); err != nil {
-		return err
-	}
-	return nil
+	return cluster.SchemaChangedAll(true, true)
 }
 
 func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
