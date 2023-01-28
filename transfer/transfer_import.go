@@ -48,6 +48,8 @@ type importMeta struct {
 
 // imports extracted modules from given file paths
 func ImportFromFiles(filePathsImport []string) error {
+	Import_mx.Lock()
+	defer Import_mx.Unlock()
 
 	log.Info("transfer", fmt.Sprintf("start import for modules from file(s): '%s'",
 		strings.Join(filePathsImport, "', '")))
@@ -119,7 +121,7 @@ func ImportFromFiles(filePathsImport []string) error {
 				}
 			}
 
-			if err := import_tx(tx, m, firstRun, lastRun, idMapSkipped); err != nil {
+			if err := importModule_tx(tx, m, firstRun, lastRun, idMapSkipped); err != nil {
 				return err
 			}
 
@@ -136,6 +138,7 @@ func ImportFromFiles(filePathsImport []string) error {
 	for _, m := range modules {
 
 		// validate dependency between modules
+		log.Info("transfer", fmt.Sprintf("validity check for module '%s', %s", m.Name, m.Id))
 		if err := schema.ValidateDependency_tx(tx, m.Id); err != nil {
 			return err
 		}
@@ -164,7 +167,7 @@ func ImportFromFiles(filePathsImport []string) error {
 	return cluster.SchemaChangedAll(true, true)
 }
 
-func import_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
+func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 	idMapSkipped map[uuid.UUID]types.Void) error {
 
 	// we use a sensible import order to avoid conflicts but some cannot be avoided:

@@ -14,10 +14,6 @@ import (
 // collect cluster events from shared database for node to react to
 func clusterProcessEvents() error {
 
-	// block cluster event processing while schema is being updated
-	cache.Schema_mx.RLock()
-	defer cache.Schema_mx.RUnlock()
-
 	rows, err := db.Pool.Query(db.Ctx, `
 		SELECT content, payload
 		FROM instance_cluster.node_event
@@ -114,7 +110,7 @@ func clusterProcessEvents() error {
 			if err := json.Unmarshal(e.Payload, &p); err != nil {
 				return err
 			}
-			runTask(p.TaskName, p.PgFunctionId, p.PgFunctionScheduleId)
+			runTaskDirectly(p.TaskName, p.PgFunctionId, p.PgFunctionScheduleId)
 		case "shutdownTriggered":
 			OsExit <- syscall.SIGTERM
 		}

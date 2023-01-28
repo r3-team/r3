@@ -24,13 +24,16 @@ import (
 	"r3/tools"
 	"r3/types"
 	"strconv"
+	"sync"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v4"
 )
 
-// in memory storage for export key
-var exportKey string
+var (
+	exportKey string       // in memory storage for export key
+	Import_mx sync.RWMutex // transfer import mutex
+)
 
 func StoreExportKey(key string) {
 	exportKey = key

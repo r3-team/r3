@@ -19,6 +19,7 @@ import (
 	"r3/repo"
 	"r3/schema"
 	"r3/tools"
+	"r3/transfer"
 	"sync"
 	"time"
 
@@ -60,11 +61,12 @@ type taskSchedule struct {
 }
 
 var (
-	change_mx                  = &sync.Mutex{}
-	loadTasks                  = false // load tasks from database
-	loadCounter int            = 0     // counter of times tasks were initialized
-	tasks       []task                 // all tasks
-	OsExit      chan os.Signal = make(chan os.Signal)
+	change_mx                        = &sync.Mutex{}
+	loadTasks                        = false // if true, tasks are reloaded from the database on next run
+	loadCounter       int            = 0     // number of times tasks were loaded - used to check whether tasks were reloaded during execution
+	nextExecutionUnix int64          = 0     // unix time of next (earliest) task to run
+	tasks             []task                 // all tasks
+	OsExit            chan os.Signal = make(chan os.Signal)
 
 	// main loop
 	loopInterval          = time.Second * time.Duration(1)  // loop interval
@@ -102,79 +104,86 @@ func init() {
 		time.Sleep(loopIntervalStartWait)
 		log.Info("scheduler", "started")
 
-		var nextExecutionUnix int64 = 0 // unix time of next (earliest) task to run
-
 		for {
 			time.Sleep(loopInterval)
 			if loopStopping {
 				log.Info("scheduler", "stopped")
 				return
 			}
-
-			if loadTasks {
-				if err := load(); err != nil {
-					log.Error("scheduler", "failed to load config", err)
-					continue
-				}
-
-				// tasks reloaded, reset next execution time
-				nextExecutionUnix = 0
+			if err := runTasksBySchedule(); err != nil {
+				log.Error("scheduler", "failed to start tasks", err)
 			}
-
-			// stop if nothing to do
-			change_mx.Lock()
-			if len(tasks) == 0 {
-				change_mx.Unlock()
-				continue
-			}
-
-			// get earliest unix time for any task to run
-			if nextExecutionUnix == 0 {
-
-				var taskNameNext string
-				for _, t := range tasks {
-
-					// task is already running or should not run anymore (-1)
-					if t.running || t.runNextUnix == -1 {
-						continue
-					}
-
-					if nextExecutionUnix == 0 || t.runNextUnix < nextExecutionUnix {
-						nextExecutionUnix = t.runNextUnix
-						taskNameNext = t.nameLog
-					}
-				}
-				log.Info("scheduler", fmt.Sprintf("will start next task at %s ('%s')",
-					time.Unix(nextExecutionUnix, 0), taskNameNext))
-			}
-
-			// execute tasks if earliest next task date is reached
-			now := tools.GetTimeUnix()
-			if nextExecutionUnix != 0 && now >= nextExecutionUnix {
-
-				// tasks are being executed, reset for next run
-				nextExecutionUnix = 0
-
-				// trigger all tasks that are scheduled and not already running
-				// if multiple schedules trigger for a PG function only execute one
-				for i, t := range tasks {
-					if now >= t.runNextUnix && t.runNextUnix != -1 {
-						go runTaskByIndex(i)
-					}
-				}
-			}
-			change_mx.Unlock()
 		}
 	}()
 }
 
-// trigger task directly from outside
-// either by name of system task or by choosing a PG function schedule
-func runTask(systemTaskName string, pgFunctionId uuid.UUID, pgFunctionScheduleId uuid.UUID) {
-	taskIndexToRun := -1
-
-	// identify task index to run
+// start tasks which schedules are due
+func runTasksBySchedule() error {
 	change_mx.Lock()
+	defer change_mx.Unlock()
+
+	// obtain read locks for import transfers & schema updates
+	// tasks should not be started while either is running
+	transfer.Import_mx.RLock()
+	defer transfer.Import_mx.RUnlock()
+
+	cache.Schema_mx.RLock()
+	defer cache.Schema_mx.RUnlock()
+
+	if loadTasks {
+		if err := load(); err != nil {
+			return err
+		}
+		nextExecutionUnix = 0
+	}
+
+	if len(tasks) == 0 {
+		return nil
+	}
+
+	// get earliest unix time for any task to run
+	if nextExecutionUnix == 0 {
+
+		var taskNameNext string
+		for _, t := range tasks {
+
+			// task is already running or should not run anymore (-1)
+			if t.running || t.runNextUnix == -1 {
+				continue
+			}
+
+			if nextExecutionUnix == 0 || t.runNextUnix < nextExecutionUnix {
+				nextExecutionUnix = t.runNextUnix
+				taskNameNext = t.nameLog
+			}
+		}
+		log.Info("scheduler", fmt.Sprintf("will start next task at %s ('%s')",
+			time.Unix(nextExecutionUnix, 0), taskNameNext))
+	}
+
+	// execute tasks if earliest next task date is reached
+	now := tools.GetTimeUnix()
+	if nextExecutionUnix != 0 && now >= nextExecutionUnix {
+
+		// tasks are being executed, reset for next run
+		nextExecutionUnix = 0
+
+		// trigger all tasks that are scheduled
+		// if multiple schedules trigger for a PG function only execute one
+		for i, t := range tasks {
+			if now >= t.runNextUnix && t.runNextUnix != -1 {
+				go runTaskByIndex(i)
+			}
+		}
+	}
+	return nil
+}
+
+// start task directly (by name if system task or by a PG function schedule)
+func runTaskDirectly(systemTaskName string, pgFunctionId uuid.UUID, pgFunctionScheduleId uuid.UUID) {
+
+	change_mx.Lock()
+	taskIndexToRun := -1
 	if systemTaskName != "" {
 		for i, t := range tasks {
 			if t.isSystemTask && t.name == systemTaskName {
@@ -203,12 +212,14 @@ func runTask(systemTaskName string, pgFunctionId uuid.UUID, pgFunctionScheduleId
 	}
 }
 
+// start task by its index in scheduler task list
 func runTaskByIndex(taskIndex int) {
 
-	// store counter value before task, to check whether all tasks were reloaded during
+	// store counter value before task, to check whether tasks were reloaded during
 	change_mx.Lock()
 	loadCounterPre := loadCounter
 
+	// skip, if task is already running
 	if tasks[taskIndex].running {
 		change_mx.Unlock()
 		return
@@ -266,9 +277,6 @@ func runTaskByIndex(taskIndex int) {
 }
 
 func load() error {
-	change_mx.Lock()
-	defer change_mx.Unlock()
-
 	log.Info("scheduler", "is updating its configuration")
 	tasks = nil
 
@@ -437,6 +445,7 @@ func load() error {
 	return nil
 }
 
+// helpers
 func runPgFunction(pgFunctionId uuid.UUID) error {
 
 	tx, err := db.Pool.Begin(db.Ctx)
