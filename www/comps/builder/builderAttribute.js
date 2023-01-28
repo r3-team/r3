@@ -180,7 +180,7 @@ let MyBuilderAttribute = {
 		relation:       { type:Object,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			relationshipId:!this.foreign ? this.attribute.relationshipId : this.attribute.relationId,
 			iconId:this.attribute.iconId,
@@ -196,36 +196,33 @@ let MyBuilderAttribute = {
 		};
 	},
 	computed:{
-		hasChanges:function() {
-			return this.iconId         !== this.attribute.iconId
-				|| this.relationshipId !== this.attribute.relationshipId
-				|| this.content        !== this.attribute.content
-				|| this.length         !== this.attribute.length
-				|| this.name           !== this.attribute.name
-				|| this.nullable       !== this.attribute.nullable
-				|| this.encrypted      !== this.attribute.encrypted
-				|| this.def            !== this.attribute.def
-				|| this.onUpdate       !== this.attribute.onUpdate
-				|| this.onDelete       !== this.attribute.onDelete
-				|| JSON.stringify(this.captions) !== JSON.stringify(this.attribute.captions)
-			;
-		},
+		hasChanges:(s) => s.iconId !== s.attribute.iconId
+			|| s.relationshipId !== s.attribute.relationshipId
+			|| s.content        !== s.attribute.content
+			|| s.length         !== s.attribute.length
+			|| s.name           !== s.attribute.name
+			|| s.nullable       !== s.attribute.nullable
+			|| s.encrypted      !== s.attribute.encrypted
+			|| s.def            !== s.attribute.def
+			|| s.onUpdate       !== s.attribute.onUpdate
+			|| s.onDelete       !== s.attribute.onDelete
+			|| JSON.stringify(s.captions) !== JSON.stringify(s.attribute.captions),
 		
 		// simple states
-		canEncrypt:    function() { return this.content === 'text'; },
-		hasLength:     function() { return ['varchar','text','files'].includes(this.content); },
-		isFiles:       function() { return this.isAttributeFiles(this.content); },
-		isId:          function() { return !this.isNew && this.attribute.name === 'id'; },
-		isNew:         function() { return this.attribute.id === null; },
-		isRelationship:function() { return this.isAttributeRelationship(this.content); },
+		canEncrypt:    (s) => s.content === 'text',
+		hasLength:     (s) => ['varchar','files'].includes(s.content),
+		isFiles:       (s) => s.isAttributeFiles(s.content),
+		isId:          (s) => !s.isNew && s.attribute.name === 'id',
+		isNew:         (s) => s.attribute.id === null,
+		isRelationship:(s) => s.isAttributeRelationship(s.content),
 		
 		// stores
-		module:       function() { return this.moduleIdMap[this.relation.moduleId]; },
-		modules:      function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:  function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap:function() { return this.$store.getters['schema/relationIdMap']; },
-		capApp:       function() { return this.$store.getters.captions.builder.attribute; },
-		capGen:       function() { return this.$store.getters.captions.generic; }
+		module:       (s) => s.moduleIdMap[s.relation.moduleId],
+		modules:      (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:  (s) => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap:(s) => s.$store.getters['schema/relationIdMap'],
+		capApp:       (s) => s.$store.getters.captions.builder.attribute,
+		capGen:       (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -240,7 +237,7 @@ let MyBuilderAttribute = {
 		getDependentModules,
 		
 		// backend calls
-		delAsk:function() {
+		delAsk() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.delete,
 				buttons:[{
@@ -254,13 +251,13 @@ let MyBuilderAttribute = {
 				}]
 			});
 		},
-		del:function(rel) {
+		del(rel) {
 			ws.send('attribute','del',{id:this.attribute.id},true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);
 		},
-		set:function() {
+		set() {
 			if(this.encrypted && !this.canEncrypt)
 				this.encrypted = false;
 			
