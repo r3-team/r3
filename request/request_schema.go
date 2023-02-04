@@ -6,8 +6,8 @@ import (
 	"r3/schema"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func SchemaCheck_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
@@ -33,7 +33,7 @@ func SchemaReload(reqJson json.RawMessage) (interface{}, error) {
 	}
 
 	modIds := make([]uuid.UUID, 0)
-	if req.ModuleId.Status == pgtype.Present {
+	if req.ModuleId.Valid {
 		modIds = append(modIds, req.ModuleId.Bytes)
 	}
 	return nil, cluster.SchemaChanged(true, true, modIds)

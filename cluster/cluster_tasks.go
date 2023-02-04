@@ -13,7 +13,7 @@ import (
 	"runtime"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 // check in cluster node to shared database

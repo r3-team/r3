@@ -9,7 +9,7 @@ import (
 	"r3/schema"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,

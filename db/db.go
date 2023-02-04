@@ -9,8 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4/pgxpool"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5/pgxpool"
 )
 
 var Ctx = context.TODO()
@@ -46,7 +46,7 @@ func Open(config types.FileTypeDb) error {
 		return err
 	}
 
-	Pool, err = pgxpool.ConnectConfig(context.Background(), poolConfig)
+	Pool, err = pgxpool.NewWithConfig(context.Background(), poolConfig)
 	if err != nil {
 		return err
 	}

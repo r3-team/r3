@@ -35,8 +35,8 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type importMeta struct {
@@ -401,7 +401,7 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 	// menus, refer to forms/icons
 	log.Info("transfer", "set menus")
-	if err := menu.Set_tx(tx, pgtype.UUID{Status: pgtype.Null}, mod.Menus); err != nil {
+	if err := menu.Set_tx(tx, pgtype.UUID{}, mod.Menus); err != nil {
 		return err
 	}
 

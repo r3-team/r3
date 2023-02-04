@@ -5,7 +5,7 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func delPolicies_tx(tx pgx.Tx, relationId uuid.UUID) error {

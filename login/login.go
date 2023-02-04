@@ -15,8 +15,8 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // delete one login
@@ -100,7 +100,7 @@ func Get(byString string, limit int, offset int, recordRequests []types.LoginAdm
 		l.Records = make([]types.LoginAdminRecord, 0)
 		for _, r := range records {
 			if r == "" {
-				l.Records = append(l.Records, types.LoginAdminRecord{Id: pgtype.Int8{Status: pgtype.Null}, Label: ""})
+				l.Records = append(l.Records, types.LoginAdminRecord{Id: pgtype.Int8{}, Label: ""})
 				continue
 			}
 
@@ -114,10 +114,7 @@ func Get(byString string, limit int, offset int, recordRequests []types.LoginAdm
 				return logins, 0, err
 			}
 			l.Records = append(l.Records, types.LoginAdminRecord{
-				Id: pgtype.Int8{
-					Int:    id,
-					Status: pgtype.Present,
-				},
+				Id:    pgtype.Int8{Int64: id, Valid: true},
 				Label: parts[1],
 			})
 		}
@@ -157,7 +154,7 @@ func Get(byString string, limit int, offset int, recordRequests []types.LoginAdm
 }
 
 // set login with meta data
-func Set_tx(tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Varchar,
+func Set_tx(tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Text,
 	languageCode string, name string, pass string, admin bool, noAuth bool,
 	active bool, roleIds []uuid.UUID) error {
 
@@ -185,17 +182,16 @@ func Set_tx(tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Varchar,
 	}
 
 	// generate password hash, if password was provided
-	var salt, hash = pgtype.Varchar{Status: pgtype.Null},
-		pgtype.Varchar{Status: pgtype.Null}
+	var salt, hash = pgtype.Text{}, pgtype.Text{}
 
 	var saltKdf = tools.RandStringRunes(16)
 
 	if pass != "" {
 		salt.String = tools.RandStringRunes(32)
-		salt.Status = pgtype.Present
+		salt.Valid = true
 
 		hash.String = tools.Hash(salt.String + pass)
-		hash.Status = pgtype.Present
+		hash.Valid = true
 	}
 
 	if !exists {
@@ -356,7 +352,7 @@ func GetTokensFixed(loginId int64) ([]types.LoginTokenFixed, error) {
 
 	for rows.Next() {
 		var t types.LoginTokenFixed
-		var n pgtype.Varchar
+		var n pgtype.Text
 		if err := rows.Scan(&t.Id, &n, &t.Context, &t.Token, &t.DateCreate); err != nil {
 			return tokens, err
 		}
@@ -387,9 +383,8 @@ func CreateAdmin(username string, password string) error {
 	}
 	defer tx.Rollback(db.Ctx)
 
-	if err := Set_tx(tx, 0, pgtype.Int4{Status: pgtype.Null},
-		pgtype.Varchar{Status: pgtype.Null}, "", username, password,
-		true, false, true, []uuid.UUID{}); err != nil {
+	if err := Set_tx(tx, 0, pgtype.Int4{}, pgtype.Text{}, "", username,
+		password, true, false, true, []uuid.UUID{}); err != nil {
 
 		return err
 	}
@@ -456,14 +451,8 @@ func SetLdapLogin_tx(tx pgx.Tx, ldapId int32, ldapKey string, ldapName string,
 
 	if newLogin || nameEx != ldapName || active != ldapActive || rolesNeedUpdate {
 
-		ldapIdSql := pgtype.Int4{
-			Int:    ldapId,
-			Status: pgtype.Present,
-		}
-		ldapKeySql := pgtype.Varchar{
-			String: ldapKey,
-			Status: pgtype.Present,
-		}
+		ldapIdSql := pgtype.Int4{Int32: ldapId, Valid: true}
+		ldapKeySql := pgtype.Text{String: ldapKey, Valid: true}
 
 		if rolesNeedUpdate {
 			roleIds = ldapRoleIds

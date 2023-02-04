@@ -8,14 +8,12 @@ import (
 	"sync"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var (
 	access_mx = sync.Mutex{}
-	nodeId    = pgtype.UUID{
-		Status: pgtype.Null,
-	} // ID of the current node
+	nodeId    = pgtype.UUID{} // ID of the current node
 
 	outputCli bool // write logs also to command line
 
@@ -62,14 +60,14 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 		qb.AddPara("{NAME}", fmt.Sprintf("%%%s%%", byString))
 	}
 
-	if dateFrom.Status == pgtype.Present {
+	if dateFrom.Valid {
 		qb.Add("WHERE", "l.date_milli >= {DATEFROM}")
-		qb.AddPara("{DATEFROM}", dateFrom.Int*1000)
+		qb.AddPara("{DATEFROM}", dateFrom.Int64*1000)
 	}
 
-	if dateTo.Status == pgtype.Present {
+	if dateTo.Valid {
 		qb.Add("WHERE", "l.date_milli <= {DATETO}")
-		qb.AddPara("{DATETO}", dateTo.Int*1000)
+		qb.AddPara("{DATETO}", dateTo.Int64*1000)
 	}
 
 	qb.Add("ORDER", "l.date_milli DESC")
@@ -140,7 +138,7 @@ func SetNodeId(id uuid.UUID) {
 	defer access_mx.Unlock()
 
 	nodeId.Bytes = id
-	nodeId.Status = pgtype.Present
+	nodeId.Valid = true
 }
 
 func Info(context string, message string) {

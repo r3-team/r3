@@ -26,8 +26,8 @@ import (
 	"unicode/utf8"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var (
@@ -426,7 +426,7 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 		dataSet := dataSetsByIndex[column.Index]
 		dataSet.Attributes = append(dataSet.Attributes, types.DataSetAttribute{
 			AttributeId:   column.AttributeId,
-			AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+			AttributeIdNm: pgtype.UUID{},
 			OutsideIn:     false,
 			Value:         value,
 		})
@@ -608,7 +608,7 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 			// join is from this relation (self reference), update attribute for this record
 			dataSet.Attributes = append(dataSet.Attributes, types.DataSetAttribute{
 				AttributeId:   joinAtr.Id,
-				AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+				AttributeIdNm: pgtype.UUID{},
 				OutsideIn:     false,
 				Value:         dataSet.RecordId,
 			})
@@ -636,7 +636,7 @@ func importLine_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 
 				otherDataSet.Attributes = append(otherDataSet.Attributes, types.DataSetAttribute{
 					AttributeId:   joinAtr.Id,
-					AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+					AttributeIdNm: pgtype.UUID{},
 					OutsideIn:     false,
 					Value:         dataSet.RecordId,
 				})

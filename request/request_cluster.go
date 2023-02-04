@@ -5,7 +5,7 @@ import (
 	"r3/cluster"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func ClusterNodeDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {

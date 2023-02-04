@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func GetPreview(id uuid.UUID, limit int, offset int) (interface{}, error) {

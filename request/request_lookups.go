@@ -7,7 +7,7 @@ import (
 	"r3/config"
 	"r3/db"
 
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func LookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
@@ -63,9 +63,9 @@ func LookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 
 	case "loginKeys":
 		var res struct {
-			PrivateEnc       pgtype.Varchar `json:"privateEnc"`
-			PrivateEncBackup pgtype.Varchar `json:"privateEncBackup"`
-			Public           pgtype.Varchar `json:"public"`
+			PrivateEnc       pgtype.Text `json:"privateEnc"`
+			PrivateEncBackup pgtype.Text `json:"privateEncBackup"`
+			Public           pgtype.Text `json:"public"`
 		}
 
 		err := db.Pool.QueryRow(db.Ctx, `

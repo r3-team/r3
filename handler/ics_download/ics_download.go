@@ -21,7 +21,7 @@ import (
 
 	ics "github.com/arran4/golang-ical"
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var handlerContext = "ics_download"
@@ -119,15 +119,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			Operator:  ">=",
 			Side0: types.DataGetFilterSide{
 				AttributeId: pgtype.UUID{
-					Bytes:  f.AttributeIdDate0,
-					Status: pgtype.Present,
+					Bytes: f.AttributeIdDate0,
+					Valid: true,
 				},
 				AttributeIndex:  f.IndexDate0,
-				QueryAggregator: pgtype.Varchar{Status: pgtype.Null},
+				QueryAggregator: pgtype.Text{},
 			},
 			Side1: types.DataGetFilterSide{
-				AttributeId:     pgtype.UUID{Status: pgtype.Null},
-				QueryAggregator: pgtype.Varchar{Status: pgtype.Null},
+				AttributeId:     pgtype.UUID{},
+				QueryAggregator: pgtype.Text{},
 				Value:           tools.GetTimeUnix() - dateRange0,
 			},
 		})
@@ -138,15 +138,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			Operator:  "<=",
 			Side0: types.DataGetFilterSide{
 				AttributeId: pgtype.UUID{
-					Bytes:  f.AttributeIdDate1,
-					Status: pgtype.Present,
+					Bytes: f.AttributeIdDate1,
+					Valid: true,
 				},
 				AttributeIndex:  f.IndexDate1,
-				QueryAggregator: pgtype.Varchar{Status: pgtype.Null},
+				QueryAggregator: pgtype.Text{},
 			},
 			Side1: types.DataGetFilterSide{
-				AttributeId:     pgtype.UUID{Status: pgtype.Null},
-				QueryAggregator: pgtype.Varchar{Status: pgtype.Null},
+				AttributeId:     pgtype.UUID{},
+				QueryAggregator: pgtype.Text{},
 				Value:           tools.GetTimeUnix() + dateRange1,
 			},
 		})
@@ -155,20 +155,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// add date value expressions
 	dataGet.Expressions = append(dataGet.Expressions, types.DataGetExpression{
 		AttributeId: pgtype.UUID{
-			Bytes:  f.AttributeIdDate0,
-			Status: pgtype.Present,
+			Bytes: f.AttributeIdDate0,
+			Valid: true,
 		},
-		AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-		Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+		AttributeIdNm: pgtype.UUID{},
+		Aggregator:    pgtype.Text{},
 		Index:         f.IndexDate0,
 	})
 	dataGet.Expressions = append(dataGet.Expressions, types.DataGetExpression{
 		AttributeId: pgtype.UUID{
-			Bytes:  f.AttributeIdDate1,
-			Status: pgtype.Present,
+			Bytes: f.AttributeIdDate1,
+			Valid: true,
 		},
-		AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-		Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+		AttributeIdNm: pgtype.UUID{},
+		Aggregator:    pgtype.Text{},
 		Index:         f.IndexDate1,
 	})
 
@@ -186,14 +186,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 
 		atrId := pgtype.UUID{
-			Bytes:  column.AttributeId,
-			Status: pgtype.Present,
+			Bytes: column.AttributeId,
+			Valid: true,
 		}
 
 		expr := types.DataGetExpression{
 			AttributeId:   atrId,
-			AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-			Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+			AttributeIdNm: pgtype.UUID{},
+			Aggregator:    pgtype.Text{},
 			Index:         column.Index,
 		}
 		if column.SubQuery {
@@ -347,7 +347,7 @@ func isUtcZero(unix int64) bool {
 	return unix%86400 == 0
 }
 
-func convertSubQueryToDataGet(query types.Query, queryAggregator pgtype.Varchar,
+func convertSubQueryToDataGet(query types.Query, queryAggregator pgtype.Text,
 	attributeId pgtype.UUID, attributeIndex int, loginId int64, languageCode string) types.DataGet {
 
 	var dataGet types.DataGet
@@ -367,12 +367,12 @@ func convertSubQueryToDataGet(query types.Query, queryAggregator pgtype.Varchar,
 		orders = append(orders, types.DataGetOrder{
 			Ascending: o.Ascending,
 			AttributeId: pgtype.UUID{
-				Bytes:  o.AttributeId,
-				Status: pgtype.Present,
+				Bytes: o.AttributeId,
+				Valid: true,
 			},
 			Index: pgtype.Int4{
-				Int:    int32(o.Index),
-				Status: pgtype.Present,
+				Int32: int32(o.Index),
+				Valid: true,
 			},
 		})
 	}
@@ -385,7 +385,7 @@ func convertSubQueryToDataGet(query types.Query, queryAggregator pgtype.Varchar,
 		types.DataGetExpression{
 			Aggregator:    queryAggregator,
 			AttributeId:   attributeId,
-			AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+			AttributeIdNm: pgtype.UUID{},
 			Index:         attributeIndex,
 		},
 	}

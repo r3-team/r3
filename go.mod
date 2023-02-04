@@ -12,8 +12,6 @@ require (
 	github.com/gofrs/uuid v4.3.1+incompatible
 	github.com/gorilla/websocket v1.5.0
 	github.com/h2non/filetype v1.1.3
-	github.com/jackc/pgtype v1.13.0
-	github.com/jackc/pgx/v4 v4.17.2
 	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/kardianos/service v1.2.2
 	github.com/magefile/mage v1.14.0 // indirect
@@ -22,20 +20,20 @@ require (
 	golang.org/x/text v0.5.0 // indirect
 )
 
-require github.com/xlzd/gotp v0.1.0
+require (
+	github.com/jackc/pgx/v5 v5.2.0
+	github.com/xlzd/gotp v0.1.0
+)
 
 require (
 	github.com/Azure/go-ntlmssp v0.0.0-20221128193559-754e69321358 // indirect
 	github.com/emersion/go-sasl v0.0.0-20220912192320-0145f2c60ead // indirect
 	github.com/emersion/go-textwrapper v0.0.0-20200911093747-65d896831594 // indirect
 	github.com/google/go-cmp v0.5.4 // indirect
-	github.com/jackc/chunkreader/v2 v2.0.1 // indirect
-	github.com/jackc/pgconn v1.13.0 // indirect
-	github.com/jackc/pgio v1.0.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
-	github.com/jackc/pgproto3/v2 v2.3.1 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20200714003250-2b9c44734f2b // indirect
-	github.com/jackc/puddle v1.3.0 // indirect
-	github.com/pkg/errors v0.9.1 // indirect
+	github.com/jackc/puddle/v2 v2.1.2 // indirect
+	go.uber.org/atomic v1.10.0 // indirect
+	golang.org/x/sync v0.0.0-20220923202941-7f9b1623fab7 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 )

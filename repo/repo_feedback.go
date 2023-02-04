@@ -8,7 +8,7 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func SendFeedback(isAdmin bool, moduleRelated bool, moduleId pgtype.UUID,
@@ -27,7 +27,7 @@ func SendFeedback(isAdmin bool, moduleRelated bool, moduleId pgtype.UUID,
 	releaseBuild := 0
 	_, _, releaseBuildApp, _ := config.GetAppVersions()
 
-	if moduleId.Status == pgtype.Present {
+	if moduleId.Valid {
 		module, exists := cache.ModuleIdMap[moduleId.Bytes]
 		if !exists {
 			return errors.New("unknown module")
@@ -59,52 +59,52 @@ func SendFeedback(isAdmin bool, moduleRelated bool, moduleId pgtype.UUID,
 			Attributes: []types.DataSetAttribute{
 				types.DataSetAttribute{
 					AttributeId:   uuid.FromStringOrNil("8a4a37e3-9952-4cbc-8c90-2aea780bb977"), // is_admin
-					AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+					AttributeIdNm: pgtype.UUID{},
 					Value:         isAdmin,
 				},
 				types.DataSetAttribute{
 					AttributeId:   uuid.FromStringOrNil("256b6705-33c4-43b7-92cf-12f55190d2e2"), // module_related
-					AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+					AttributeIdNm: pgtype.UUID{},
 					Value:         moduleRelated,
 				},
 				types.DataSetAttribute{
 					AttributeId:   uuid.FromStringOrNil("a668177b-81f1-4cad-bdc8-8ec97b8d5004"), // module_uuid
-					AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+					AttributeIdNm: pgtype.UUID{},
 					Value:         moduleId,
 				},
 				types.DataSetAttribute{
 					AttributeId:   uuid.FromStringOrNil("88c6ceac-cdc7-4a7d-aed7-6e8ca7568b43"), // form_uuid
-					AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+					AttributeIdNm: pgtype.UUID{},
 					Value:         formId,
 				},
 				types.DataSetAttribute{
 					AttributeId:   uuid.FromStringOrNil("7d8fa36e-c4d7-4b79-96d6-8271e17be586"), // mood
-					AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+					AttributeIdNm: pgtype.UUID{},
 					Value:         mood,
 				},
 				types.DataSetAttribute{
 					AttributeId:   uuid.FromStringOrNil("e8a6badc-a423-433e-980f-991c2a4d9399"), // code
-					AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+					AttributeIdNm: pgtype.UUID{},
 					Value:         code,
 				},
 				types.DataSetAttribute{
 					AttributeId:   uuid.FromStringOrNil("01490477-18c1-4aa2-85f1-ef90f173d22f"), // release_build
-					AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+					AttributeIdNm: pgtype.UUID{},
 					Value:         releaseBuild,
 				},
 				types.DataSetAttribute{
 					AttributeId:   uuid.FromStringOrNil("e5e0fe54-38c7-4c00-8c48-2bdca0febc2b"), // release_build_app
-					AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+					AttributeIdNm: pgtype.UUID{},
 					Value:         releaseBuildApp,
 				},
 				types.DataSetAttribute{
 					AttributeId:   uuid.FromStringOrNil("22e93eba-bbc1-4a63-9f36-deca6b74e78d"), // text
-					AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+					AttributeIdNm: pgtype.UUID{},
 					Value:         text,
 				},
 				types.DataSetAttribute{
 					AttributeId:   uuid.FromStringOrNil("4639719a-52dc-4809-97dd-9b5c142f7203"), // instance_uuid
-					AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
+					AttributeIdNm: pgtype.UUID{},
 					Value:         config.GetString("instanceId"),
 				},
 			},

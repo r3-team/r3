@@ -10,8 +10,8 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
@@ -174,10 +174,8 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 		// create primary key attribute if relation is new (e. g. not imported or updated)
 		if isNew {
 			if err := attribute.Set_tx(tx, id, uuid.Nil,
-				pgtype.UUID{Status: pgtype.Null},
-				pgtype.UUID{Status: pgtype.Null},
-				schema.PkName, "integer", 0, false, false, "", "", "",
-				types.CaptionMap{}); err != nil {
+				pgtype.UUID{}, pgtype.UUID{}, schema.PkName, "integer", 0,
+				false, false, "", "", "", types.CaptionMap{}); err != nil {
 
 				return err
 			}

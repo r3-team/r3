@@ -13,8 +13,8 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var contentTypes = []string{"integer", "bigint", "numeric", "real",
@@ -59,8 +59,8 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
 func Get(relationId uuid.UUID) ([]types.Attribute, error) {
 
-	var onUpdateNull pgtype.Varchar
-	var onDeleteNull pgtype.Varchar
+	var onUpdateNull pgtype.Text
+	var onDeleteNull pgtype.Text
 
 	attributes := make([]types.Attribute, 0)
 	rows, err := db.Pool.Query(db.Ctx, `
@@ -133,14 +133,14 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 	}
 
 	// prepare onUpdate / onDelete values
-	var onUpdateNull = pgtype.Varchar{Status: pgtype.Null}
-	var onDeleteNull = pgtype.Varchar{Status: pgtype.Null}
+	var onUpdateNull = pgtype.Text{}
+	var onDeleteNull = pgtype.Text{}
 
 	if isRel {
 		onUpdateNull.String = onUpdate
-		onUpdateNull.Status = pgtype.Present
+		onUpdateNull.Valid = true
 		onDeleteNull.String = onDelete
-		onDeleteNull.Status = pgtype.Present
+		onDeleteNull.Valid = true
 	} else {
 		onUpdate = ""
 		onDelete = ""
@@ -153,8 +153,8 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		var lengthEx int
 		var nullableEx bool
 		var defEx string
-		var onUpdateEx pgtype.Varchar
-		var onDeleteEx pgtype.Varchar
+		var onUpdateEx pgtype.Text
+		var onDeleteEx pgtype.Text
 		var relationshipIdEx pgtype.UUID
 		if err := tx.QueryRow(db.Ctx, `
 			SELECT name, content, length, nullable, def, on_update, on_delete,
@@ -216,7 +216,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		// do not allow relationship target change
 		// if data exists, IDs will not match new target relation
 		// if data does not exist, attribute can be recreated with new target relation instead
-		if relationshipIdEx.Status == pgtype.Present && relationshipIdEx.Bytes != relationshipId.Bytes {
+		if relationshipIdEx.Valid && relationshipIdEx.Bytes != relationshipId.Bytes {
 			return fmt.Errorf("cannot change relationship target for existing attribute")
 		}
 
@@ -335,7 +335,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 			// check relationship target if relationship attribute
 			var contentRel string
 			if isRel {
-				if relationshipId.Status != pgtype.Present {
+				if !relationshipId.Valid {
 					return fmt.Errorf("relationship requires valid target")
 				}
 
@@ -344,7 +344,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 					return err
 				}
 
-			} else if relationshipId.Status == pgtype.Present {
+			} else if relationshipId.Valid {
 				return errors.New("cannot define non-relationship with relationship target")
 			}
 

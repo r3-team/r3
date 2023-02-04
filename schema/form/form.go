@@ -15,8 +15,8 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error {
@@ -89,12 +89,12 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 		}
 
 		for j, c := range state.Conditions {
-			if c.Side0.FieldId.Status == pgtype.Present {
+			if c.Side0.FieldId.Valid {
 				if _, exists := idMapReplaced[c.Side0.FieldId.Bytes]; exists {
 					form.States[i].Conditions[j].Side0.FieldId.Bytes = idMapReplaced[c.Side0.FieldId.Bytes]
 				}
 			}
-			if c.Side1.FieldId.Status == pgtype.Present {
+			if c.Side1.FieldId.Valid {
 				if _, exists := idMapReplaced[c.Side1.FieldId.Bytes]; exists {
 					form.States[i].Conditions[j].Side1.FieldId.Bytes = idMapReplaced[c.Side1.FieldId.Bytes]
 				}
@@ -102,12 +102,12 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 		}
 
 		for j, e := range state.Effects {
-			if e.FieldId.Status == pgtype.Present {
+			if e.FieldId.Valid {
 				if _, exists := idMapReplaced[e.FieldId.Bytes]; exists {
 					form.States[i].Effects[j].FieldId.Bytes = idMapReplaced[e.FieldId.Bytes]
 				}
 			}
-			if e.TabId.Status == pgtype.Present {
+			if e.TabId.Valid {
 				if _, exists := idMapReplaced[e.TabId.Bytes]; exists {
 					form.States[i].Effects[j].TabId.Bytes = idMapReplaced[e.TabId.Bytes]
 				}
@@ -234,9 +234,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUI
 
 	// set fields (recursive)
 	fieldIdMapQuery := make(map[uuid.UUID]types.Query)
-	if err := field.Set_tx(tx, id,
-		pgtype.UUID{Status: pgtype.Null},
-		pgtype.UUID{Status: pgtype.Null},
+	if err := field.Set_tx(tx, id, pgtype.UUID{}, pgtype.UUID{},
 		fields, fieldIdMapQuery); err != nil {
 
 		return err
@@ -293,13 +291,13 @@ func replaceQueryFilterIds(filterIn types.QueryFilter, idMapReplaced map[uuid.UU
 	}
 
 	// assign newly created field IDs to existing field filters
-	if filterIn.Side0.FieldId.Status == pgtype.Present {
+	if filterIn.Side0.FieldId.Valid {
 		if _, exists := idMapReplaced[filterIn.Side0.FieldId.Bytes]; !exists {
 			return filterIn, errors.New("unknown field filter ID")
 		}
 		filterIn.Side0.FieldId.Bytes = idMapReplaced[filterIn.Side0.FieldId.Bytes]
 	}
-	if filterIn.Side1.FieldId.Status == pgtype.Present {
+	if filterIn.Side1.FieldId.Valid {
 		if _, exists := idMapReplaced[filterIn.Side1.FieldId.Bytes]; !exists {
 			return filterIn, errors.New("unknown field filter ID")
 		}

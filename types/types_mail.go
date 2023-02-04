@@ -2,7 +2,7 @@ package types
 
 import (
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Mail struct {

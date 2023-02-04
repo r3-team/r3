@@ -9,8 +9,7 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
@@ -264,7 +263,7 @@ func setRecord_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, recordId 
 		}
 
 		// check for fixed value
-		if value.PresetIdRefer.Status != pgtype.Present {
+		if !value.PresetIdRefer.Valid {
 
 			if value.Value == "" {
 				// no value set, ignore

@@ -8,7 +8,7 @@ import (
 	"r3/login"
 	"r3/tools"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func PrepareDbIfNew() error {

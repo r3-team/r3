@@ -7,7 +7,7 @@ import (
 	"r3/ldap/ldap_import"
 	"r3/types"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func LdapDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {

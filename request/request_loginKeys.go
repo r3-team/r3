@@ -6,7 +6,7 @@ import (
 	"r3/login/login_keys"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func LoginKeysGetPublic(ctx context.Context, reqJson json.RawMessage) (interface{}, error) {

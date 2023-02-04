@@ -8,7 +8,7 @@ import (
 	"r3/tools"
 	"strconv"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func ConfigGet() (interface{}, error) {

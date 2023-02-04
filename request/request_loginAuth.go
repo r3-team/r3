@@ -5,7 +5,7 @@ import (
 	"r3/login/login_auth"
 	"r3/types"
 
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // attempt login via user credentials
@@ -21,7 +21,7 @@ func LoginAuthUser(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth 
 
 			// MFA details, sent together with credentials (usually on second auth attempt)
 			MfaTokenId  pgtype.Int4    `json:"mfaTokenId"`
-			MfaTokenPin pgtype.Varchar `json:"mfaTokenPin"`
+			MfaTokenPin pgtype.Text `json:"mfaTokenPin"`
 		}
 		res struct {
 			LoginId   int64  `json:"loginId"`

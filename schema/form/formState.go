@@ -7,8 +7,7 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func getStates(formId uuid.UUID) ([]types.FormState, error) {
@@ -75,17 +74,6 @@ func getStateConditions(formStateId uuid.UUID) ([]types.FormStateCondition, erro
 	rows.Close()
 
 	for i, c := range conditions {
-
-		// fix old state conditions < 2.7: Pre-migration values, replaced by left/right sides
-		c.FieldId0 = compatible.FixPgxNull(c.FieldId0).(pgtype.UUID)
-		c.FieldId1 = compatible.FixPgxNull(c.FieldId1).(pgtype.UUID)
-		c.FieldChanged = compatible.FixPgxNull(c.FieldChanged).(pgtype.Bool)
-		c.PresetId1 = compatible.FixPgxNull(c.PresetId1).(pgtype.UUID)
-		c.RoleId = compatible.FixPgxNull(c.RoleId).(pgtype.UUID)
-		c.Login1 = compatible.FixPgxNull(c.Login1).(pgtype.Bool)
-		c.NewRecord = compatible.FixPgxNull(c.NewRecord).(pgtype.Bool)
-		c.Value1 = compatible.FixPgxNull(c.Value1).(pgtype.Varchar)
-
 		c.Side0, err = getStateConditionSide(formStateId, c.Position, 0)
 		if err != nil {
 			return conditions, err
@@ -229,10 +217,6 @@ func setState_tx(tx pgx.Tx, formId uuid.UUID, state types.FormState) (uuid.UUID,
 	}
 
 	for _, e := range state.Effects {
-
-		// fix imports < 3.2: New state effect: Tab ID
-		e.TabId = compatible.FixPgxNull(e.TabId).(pgtype.UUID)
-
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.form_state_effect (
 				form_state_id, field_id, tab_id, new_state

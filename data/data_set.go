@@ -15,8 +15,8 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // sets data
@@ -392,7 +392,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 		if len(shipValues.values) == 0 {
 
 			// remove all references
-			if shipValues.attributeIdNm.Status != pgtype.Present {
+			if !shipValues.attributeIdNm.Valid {
 
 				if _, err := tx.Exec(ctx, fmt.Sprintf(`
 					UPDATE "%s"."%s" SET "%s" = NULL
@@ -415,7 +415,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 			continue
 		}
 
-		if shipValues.attributeIdNm.Status != pgtype.Present {
+		if !shipValues.attributeIdNm.Valid {
 
 			// remove old references to this tupel
 			if _, err := tx.Exec(ctx, fmt.Sprintf(`
@@ -515,8 +515,8 @@ func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx,
 				Operator:  "=",
 				Side0: types.DataGetFilterSide{
 					AttributeId: pgtype.UUID{
-						Bytes:  rel.AttributeIdPk,
-						Status: pgtype.Present,
+						Bytes: rel.AttributeIdPk,
+						Valid: true,
 					},
 				},
 				Side1: types.DataGetFilterSide{
@@ -529,8 +529,8 @@ func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx,
 	for i, attribute := range attributes {
 		dataGet.Expressions = append(dataGet.Expressions, types.DataGetExpression{
 			AttributeId: pgtype.UUID{
-				Bytes:  attribute.AttributeId,
-				Status: pgtype.Present,
+				Bytes: attribute.AttributeId,
+				Valid: true,
 			},
 			AttributeIdNm: attribute.AttributeIdNm,
 			Index:         0,

@@ -21,8 +21,8 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var (
@@ -174,13 +174,9 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool,
 
 	// store file version reference
 	loginNull := pgtype.Int4{
-		Int:    int32(loginId),
-		Status: pgtype.Present,
+		Int32: int32(loginId),
+		Valid: loginId != -1,
 	}
-	if loginId == -1 {
-		loginNull.Status = pgtype.Null
-	}
-
 	if _, err := tx.Exec(db.Ctx, `
 		INSERT INTO instance.file_version (
 			file_id,version,login_id,hash,size_kb,date_change)
@@ -209,10 +205,8 @@ func FileApplyVersion_tx(ctx context.Context, tx pgx.Tx, isNewFile bool,
 
 	logAttributes := []types.DataSetAttribute{
 		types.DataSetAttribute{
-			AttributeId: attributeId,
-			AttributeIdNm: pgtype.UUID{
-				Status: pgtype.Null,
-			},
+			AttributeId:   attributeId,
+			AttributeIdNm: pgtype.UUID{},
 			Value: types.DataSetFileChanges{
 				FileIdMapChange: map[uuid.UUID]types.DataSetFileChange{
 					fileId: types.DataSetFileChange{

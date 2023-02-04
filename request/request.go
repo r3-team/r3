@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func ExecTransaction(ctxClient context.Context, loginId int64, isAdmin bool,

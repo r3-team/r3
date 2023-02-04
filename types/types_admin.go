@@ -2,7 +2,7 @@ package types
 
 import (
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type BackupDef struct {
@@ -15,18 +15,18 @@ type BackupTocFile struct {
 }
 
 type Log struct {
-	Level      int            `json:"level"`
-	Context    string         `json:"context"`
-	Message    string         `json:"message"`
-	ModuleName pgtype.Varchar `json:"moduleName"`
-	NodeName   pgtype.Varchar `json:"nodeName"`
-	Date       int64          `json:"date"`
+	Level      int         `json:"level"`
+	Context    string      `json:"context"`
+	Message    string      `json:"message"`
+	ModuleName pgtype.Text `json:"moduleName"`
+	NodeName   pgtype.Text `json:"nodeName"`
+	Date       int64       `json:"date"`
 }
 
 type LoginAdmin struct {
 	Id           int64              `json:"id"`
 	LdapId       pgtype.Int4        `json:"ldapId"`
-	LdapKey      pgtype.Varchar     `json:"ldapKey"`
+	LdapKey      pgtype.Text        `json:"ldapKey"`
 	Name         string             `json:"name"`
 	Active       bool               `json:"active"`
 	Admin        bool               `json:"admin"`

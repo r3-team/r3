@@ -5,7 +5,7 @@ import (
 	"r3/setting"
 	"r3/types"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func SettingsGet(loginId int64) (interface{}, error) {

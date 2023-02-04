@@ -3,8 +3,6 @@ package data_sql
 import (
 	"fmt"
 	"r3/types"
-
-	"github.com/jackc/pgtype"
 )
 
 // alias for SELECT expression
@@ -18,8 +16,8 @@ func GetExpression(expr types.DataGetExpression, code string, alias string) stri
 	if expr.Distincted {
 		distinct = "DISTINCT "
 	}
-	aggregated := expr.Aggregator.Status == pgtype.Present
-	subQuery := expr.AttributeId.Status != pgtype.Present
+	aggregated := expr.Aggregator.Valid
+	subQuery := !expr.AttributeId.Valid
 
 	if aggregated {
 		// build aggregation syntax

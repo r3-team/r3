@@ -3,7 +3,6 @@ package query
 import (
 	"errors"
 	"fmt"
-	"r3/compatible"
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
@@ -11,8 +10,8 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var allowedEntities = []string{"form", "field", "collection", "column", "query_filter_query"}
@@ -82,7 +81,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	rows.Close()
 
 	// retrieve filters
-	q.Filters, err = getFilters(q.Id, pgtype.UUID{Status: pgtype.Null})
+	q.Filters, err = getFilters(q.Id, pgtype.UUID{})
 	if err != nil {
 		return q, err
 	}
@@ -154,10 +153,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	rows.Close()
 
 	for i, c := range q.Choices {
-		c.Filters, err = getFilters(q.Id, pgtype.UUID{
-			Bytes:  c.Id,
-			Status: pgtype.Present,
-		})
+		c.Filters, err = getFilters(q.Id, pgtype.UUID{Bytes: c.Id, Valid: true})
 		if err != nil {
 			rows.Close()
 			return q, err
@@ -205,7 +201,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 	}
 
 	// query without a base relation is not used and therefore not needed
-	if query.RelationId.Status != pgtype.Present {
+	if !query.RelationId.Valid {
 		if known {
 			if _, err := tx.Exec(db.Ctx, `
 				DELETE FROM app.query
@@ -289,7 +285,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 	`, query.Id); err != nil {
 		return err
 	}
-	if err := setFilters_tx(tx, query.Id, pgtype.UUID{Status: pgtype.Null}, query.Filters, 0); err != nil {
+	if err := setFilters_tx(tx, query.Id, pgtype.UUID{}, query.Filters, 0); err != nil {
 		return err
 	}
 
@@ -360,10 +356,9 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 		//  (necessary as query ID + position is used as PK
 		positionOffset := (position + 1) * 100
 
-		if err := setFilters_tx(tx, query.Id, pgtype.UUID{
-			Bytes:  c.Id,
-			Status: pgtype.Present,
-		}, c.Filters, positionOffset); err != nil {
+		if err := setFilters_tx(tx, query.Id, pgtype.UUID{Bytes: c.Id, Valid: true},
+			c.Filters, positionOffset); err != nil {
+
 			return err
 		}
 		if err := caption.Set_tx(tx, c.Id, c.Captions); err != nil {
@@ -380,7 +375,7 @@ func getFilters(queryId uuid.UUID, queryChoiceId pgtype.UUID) ([]types.QueryFilt
 	params = append(params, queryId)
 
 	nullCheck := "AND query_choice_id IS NULL"
-	if queryChoiceId.Status == pgtype.Present {
+	if queryChoiceId.Valid {
 		nullCheck = "AND query_choice_id = $2"
 		params = append(params, queryChoiceId.Bytes)
 	}
@@ -453,7 +448,7 @@ func getFilterSide(queryId uuid.UUID, filterPosition int, side int) (types.Query
 			return s, err
 		}
 	} else {
-		s.Query.RelationId = pgtype.UUID{Status: pgtype.Null}
+		s.Query.RelationId = pgtype.UUID{}
 	}
 	return s, nil
 }
@@ -492,13 +487,6 @@ func setFilters_tx(tx pgx.Tx, queryId uuid.UUID, queryChoiceId pgtype.UUID,
 }
 func SetFilterSide_tx(tx pgx.Tx, queryId uuid.UUID, filterPosition int,
 	side int, s types.QueryFilterSide) error {
-
-	// fix imports < 2.5: New filter side option: Preset
-	s.PresetId = compatible.FixPgxNull(s.PresetId).(pgtype.UUID)
-
-	// fix imports < 2.6: New collection/column references
-	s.CollectionId = compatible.FixPgxNull(s.CollectionId).(pgtype.UUID)
-	s.ColumnId = compatible.FixPgxNull(s.ColumnId).(pgtype.UUID)
 
 	if _, err := tx.Exec(db.Ctx, `
 		INSERT INTO app.query_filter_side (

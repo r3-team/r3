@@ -5,7 +5,7 @@ import (
 	"r3/log"
 	"r3/types"
 
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func LogGet(reqJson json.RawMessage) (interface{}, error) {
@@ -32,8 +32,5 @@ func LogGet(reqJson json.RawMessage) (interface{}, error) {
 	res.Logs, res.Total, err = log.Get(req.DateFrom, req.DateTo,
 		req.Limit, req.Offset, req.Context, req.ByString)
 
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+	return res, err
 }

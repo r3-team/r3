@@ -4,7 +4,7 @@ import (
 	"r3/db"
 	"r3/types"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 // mail spooler

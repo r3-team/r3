@@ -11,8 +11,8 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var allowedEntities = []string{"collection", "field"}
@@ -59,7 +59,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 				return columns, err
 			}
 		} else {
-			c.Query.RelationId = pgtype.UUID{Status: pgtype.Null}
+			c.Query.RelationId = pgtype.UUID{}
 		}
 
 		// get captions

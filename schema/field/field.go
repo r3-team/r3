@@ -19,8 +19,8 @@ import (
 	"sort"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
@@ -110,7 +110,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		var atrContent sql.NullString
 
 		var alignItems, alignContent, chartOption, def, direction, display,
-			ganttSteps, justifyContent, layout, regexCheck pgtype.Varchar
+			ganttSteps, justifyContent, layout, regexCheck pgtype.Text
 		var autoSelect, grow, shrink, basis, perMin, perMax, index, indexDate0,
 			indexDate1, size, resultLimit pgtype.Int2
 		var autoRenew, dateRange0, dateRange1, indexColor, min, max pgtype.Int4
@@ -155,8 +155,8 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				OpenForm:     types.OpenForm{},
 
 				// legacy
-				FormIdOpen:        compatible.GetNullUuid(),
-				AttributeIdRecord: compatible.GetNullUuid(),
+				FormIdOpen:        pgtype.UUID{},
+				AttributeIdRecord: pgtype.UUID{},
 			})
 			posButtonLookup = append(posButtonLookup, pos)
 		case "calendar":
@@ -170,22 +170,22 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				AttributeIdDate0: attributeIdDate0.Bytes,
 				AttributeIdDate1: attributeIdDate1.Bytes,
 				AttributeIdColor: attributeIdColor,
-				IndexDate0:       int(indexDate0.Int),
-				IndexDate1:       int(indexDate1.Int),
+				IndexDate0:       int(indexDate0.Int16),
+				IndexDate1:       int(indexDate1.Int16),
 				IndexColor:       indexColor,
 				Ics:              ics.Bool,
 				Gantt:            gantt.Bool,
 				GanttSteps:       ganttSteps,
 				GanttStepsToggle: ganttStepsToggle.Bool,
-				DateRange0:       int64(dateRange0.Int),
-				DateRange1:       int64(dateRange1.Int),
+				DateRange0:       int64(dateRange0.Int32),
+				DateRange1:       int64(dateRange1.Int32),
 				Columns:          []types.Column{},
 				Query:            types.Query{},
 				OpenForm:         types.OpenForm{},
 
 				// legacy
-				FormIdOpen:        compatible.GetNullUuid(),
-				AttributeIdRecord: compatible.GetNullUuid(),
+				FormIdOpen:        pgtype.UUID{},
+				AttributeIdRecord: pgtype.UUID{},
 			})
 			posCalendarLookup = append(posCalendarLookup, pos)
 		case "chart":
@@ -214,11 +214,11 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				AlignItems:     alignItems.String,
 				AlignContent:   alignContent.String,
 				Wrap:           wrap.Bool,
-				Grow:           int(grow.Int),
-				Shrink:         int(shrink.Int),
-				Basis:          int(basis.Int),
-				PerMin:         int(perMin.Int),
-				PerMax:         int(perMax.Int),
+				Grow:           int(grow.Int16),
+				Shrink:         int(shrink.Int16),
+				Basis:          int(basis.Int16),
+				PerMin:         int(perMin.Int16),
+				PerMax:         int(perMax.Int16),
 				Fields:         []interface{}{},
 			})
 			posParentLookup = append(posParentLookup, pos)
@@ -236,9 +236,9 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 					AttributeId:    attributeId.Bytes,
 					AttributeIdAlt: attributeIdAlt,
 					AttributeIdNm:  attributeIdNm,
-					Index:          int(index.Int),
+					Index:          int(index.Int16),
 					Display:        display.String,
-					AutoSelect:     int(autoSelect.Int),
+					AutoSelect:     int(autoSelect.Int16),
 					Min:            min,
 					Max:            max,
 					RegexCheck:     regexCheck,
@@ -254,10 +254,10 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 					Captions:       types.CaptionMap{},
 
 					// legacy
-					FormIdOpen:        compatible.GetNullUuid(),
-					AttributeIdRecord: compatible.GetNullUuid(),
-					CollectionIdDef:   compatible.GetNullUuid(),
-					ColumnIdDef:       compatible.GetNullUuid(),
+					FormIdOpen:        pgtype.UUID{},
+					AttributeIdRecord: pgtype.UUID{},
+					CollectionIdDef:   pgtype.UUID{},
+					ColumnIdDef:       pgtype.UUID{},
 				})
 				posDataRelLookup = append(posDataRelLookup, pos)
 			} else {
@@ -271,7 +271,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 					Clipboard:      clipboard.Bool,
 					AttributeId:    attributeId.Bytes,
 					AttributeIdAlt: attributeIdAlt,
-					Index:          int(index.Int),
+					Index:          int(index.Int16),
 					Display:        display.String,
 					Def:            def.String,
 					Min:            min,
@@ -281,8 +281,8 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 					Captions:       types.CaptionMap{},
 
 					// legacy
-					CollectionIdDef: compatible.GetNullUuid(),
-					ColumnIdDef:     compatible.GetNullUuid(),
+					CollectionIdDef: pgtype.UUID{},
+					ColumnIdDef:     pgtype.UUID{},
 				})
 				posDataLookup = append(posDataLookup, pos)
 			}
@@ -295,7 +295,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				Content:  content,
 				State:    state,
 				OnMobile: onMobile,
-				Size:     int(size.Int),
+				Size:     int(size.Int16),
 				Captions: types.CaptionMap{},
 			})
 			posHeaderLookup = append(posHeaderLookup, pos)
@@ -316,11 +316,11 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				FilterQuick: filterQuickList.Bool,
 				Query:       types.Query{},
 				OpenForm:    types.OpenForm{},
-				ResultLimit: int(resultLimit.Int),
+				ResultLimit: int(resultLimit.Int16),
 
 				// legacy
-				FormIdOpen:        compatible.GetNullUuid(),
-				AttributeIdRecord: compatible.GetNullUuid(),
+				FormIdOpen:        pgtype.UUID{},
+				AttributeIdRecord: pgtype.UUID{},
 			})
 			posListLookup = append(posListLookup, pos)
 		case "tabs":
@@ -636,10 +636,8 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			}
 
 			// update container children
-			if err := Set_tx(tx, formId,
-				pgtype.UUID{Bytes: fieldId, Status: pgtype.Present},
-				pgtype.UUID{Status: pgtype.Null},
-				f.Fields, fieldIdMapQuery); err != nil {
+			if err := Set_tx(tx, formId, pgtype.UUID{Bytes: fieldId, Valid: true},
+				pgtype.UUID{}, f.Fields, fieldIdMapQuery); err != nil {
 
 				return err
 			}
@@ -723,8 +721,8 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 				}
 
 				if err := Set_tx(tx, formId,
-					pgtype.UUID{Bytes: fieldId, Status: pgtype.Present},
-					pgtype.UUID{Bytes: t.Id, Status: pgtype.Present},
+					pgtype.UUID{Bytes: fieldId, Valid: true},
+					pgtype.UUID{Bytes: t.Id, Valid: true},
 					t.Fields, fieldIdMapQuery); err != nil {
 
 					return err
@@ -783,9 +781,8 @@ func setButton_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 		return err
 	}
 
-	// fix imports < 2.6: New open form entity, new JS function reference
+	// fix imports < 2.6: New open form entity
 	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
-	jsFunctionId = compatible.FixPgxNull(jsFunctionId).(pgtype.UUID)
 
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
@@ -810,7 +807,7 @@ func setButton_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	attributeIdDate0 uuid.UUID, attributeIdDate1 uuid.UUID,
 	attributeIdColor pgtype.UUID, attributeIdRecord pgtype.UUID, indexDate0 int,
-	indexDate1 int, indexColor pgtype.Int4, gantt bool, ganttSteps pgtype.Varchar,
+	indexDate1 int, indexColor pgtype.Int4, gantt bool, ganttSteps pgtype.Text,
 	ganttStepsToggle bool, ics bool, dateRange0 int64, dateRange1 int64,
 	columns []types.Column, collections []types.CollectionConsumer,
 	oForm types.OpenForm) error {
@@ -819,9 +816,6 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	if err != nil {
 		return err
 	}
-
-	// fix imports < 2.5: New optional record attribute
-	attributeIdRecord = compatible.FixPgxNull(attributeIdRecord).(pgtype.UUID)
 
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
@@ -933,7 +927,7 @@ func setContainer_tx(tx pgx.Tx, fieldId uuid.UUID, direction string,
 }
 func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 	attributeIdAlt pgtype.UUID, index int, def string, display string,
-	min pgtype.Int4, max pgtype.Int4, regexCheck pgtype.Varchar,
+	min pgtype.Int4, max pgtype.Int4, regexCheck pgtype.Text,
 	jsFunctionId pgtype.UUID, clipboard bool, defCollection types.CollectionConsumer,
 	collectionIdDef pgtype.UUID, columnIdDef pgtype.UUID) error {
 
@@ -942,13 +936,8 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 		return err
 	}
 
-	// fix imports < 2.6: New JS function/collection+column default value reference
-	jsFunctionId = compatible.FixPgxNull(jsFunctionId).(pgtype.UUID)
-	collectionIdDef = compatible.FixPgxNull(collectionIdDef).(pgtype.UUID)
-	columnIdDef = compatible.FixPgxNull(columnIdDef).(pgtype.UUID)
-
 	// fix imports < 3.0: Migrate legacy definitions
-	if collectionIdDef.Status != pgtype.Null {
+	if collectionIdDef.Valid {
 		defCollection.CollectionId = collectionIdDef.Bytes
 		defCollection.ColumnIdDisplay = columnIdDef
 		defCollection.MultiValue = false

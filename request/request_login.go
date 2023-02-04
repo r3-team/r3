@@ -8,8 +8,8 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5"
 )
 
 // user requests
@@ -146,7 +146,7 @@ func LoginSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		Id           int64          `json:"id"`
 		LdapId       pgtype.Int4    `json:"ldapId"`
-		LdapKey      pgtype.Varchar `json:"ldapKey"`
+		LdapKey      pgtype.Text `json:"ldapKey"`
 		Name         string         `json:"name"`
 		Pass         string         `json:"pass"`
 		LanguageCode string         `json:"languageCode"`

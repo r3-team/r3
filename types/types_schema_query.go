@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var (
@@ -58,15 +58,15 @@ type QueryFilter struct {
 	Side1     QueryFilterSide `json:"side1"`     // comparison: right side
 }
 type QueryFilterSide struct {
-	Brackets int            `json:"brackets"` // opening/closing brackets (side 0/1)
-	Value    pgtype.Varchar `json:"value"`    // fixed value, can be anything including NULL
+	Brackets int         `json:"brackets"` // opening/closing brackets (side 0/1)
+	Value    pgtype.Text `json:"value"`    // fixed value, can be anything including NULL
 
 	// for backend processing
-	AttributeId     pgtype.UUID    `json:"attributeId"`     // attribute (database value)
-	AttributeIndex  int            `json:"attributeIndex"`  // relation index of attribute
-	AttributeNested int            `json:"attributeNested"` // nesting level of attribute  (0=main query, 1=1st sub query)
-	Query           Query          `json:"query"`           // sub query
-	QueryAggregator pgtype.Varchar `json:"queryAggregator"` // sub query aggregator (COUNT, AGG, etc.)
+	AttributeId     pgtype.UUID `json:"attributeId"`     // attribute (database value)
+	AttributeIndex  int         `json:"attributeIndex"`  // relation index of attribute
+	AttributeNested int         `json:"attributeNested"` // nesting level of attribute  (0=main query, 1=1st sub query)
+	Query           Query       `json:"query"`           // sub query
+	QueryAggregator pgtype.Text `json:"queryAggregator"` // sub query aggregator (COUNT, AGG, etc.)
 
 	// for frontend processing
 	Content      string      `json:"content"`      // attribute, collection, field, language code, login, preset, record, record new, role, sub query, true, value
@@ -100,7 +100,7 @@ type QueryChoice struct {
 func (src Query) MarshalJSON() ([]byte, error) {
 
 	// if relation is not set, query is empty
-	if src.RelationId.Status != pgtype.Present {
+	if !src.RelationId.Valid {
 		return []byte("null"), nil
 	}
 	type alias Query

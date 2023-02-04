@@ -7,7 +7,7 @@ import (
 	"r3/schema"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // returns deleted or unassigned files

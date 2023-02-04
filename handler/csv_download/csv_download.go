@@ -23,7 +23,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
 )
 
 var (
@@ -195,7 +194,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		for i, expr := range get.Expressions {
 
 			// handle non-attribute expression
-			if expr.AttributeId.Status != pgtype.Present {
+			if !expr.AttributeId.Valid {
 				columnNames[i] = "[ --- ]"
 				continue
 			}

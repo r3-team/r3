@@ -4,8 +4,8 @@ import (
 	"r3/db"
 	"r3/types"
 
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5"
 )
 
 func Get(loginId int64) (types.Settings, error) {
@@ -31,7 +31,7 @@ func Set_tx(tx pgx.Tx, loginId int64, languageCode string, dateFormat string,
 	sundayFirstDow bool, fontSize int, bordersAll bool, bordersCorner string,
 	pageLimit int, headerCaptions bool, spacing int, dark bool, compact bool,
 	hintUpdateVersion int, mobileScrollForm bool, warnUnsaved bool,
-	menuColored bool, pattern pgtype.Varchar, fontFamily string) error {
+	menuColored bool, pattern pgtype.Text, fontFamily string) error {
 
 	_, err := tx.Exec(db.Ctx, `
 		UPDATE instance.login_setting

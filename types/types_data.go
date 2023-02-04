@@ -2,7 +2,7 @@ package types
 
 import (
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // data GET request, translates to SELECT statements
@@ -23,13 +23,13 @@ type DataGetFilter struct {
 	Side1     DataGetFilterSide `json:"side1"`     // comparison: right side
 }
 type DataGetFilterSide struct {
-	AttributeId     pgtype.UUID    `json:"attributeId"`     // attribute ID, optional
-	AttributeIndex  int            `json:"attributeIndex"`  // attribute relation index
-	AttributeNested int            `json:"attributeNested"` // attribute nesting level (0 = main query, 1 = 1st sub query)
-	Brackets        int            `json:"brackets"`        // brackets before (side0) or after (side1)
-	Query           DataGet        `json:"query"`           // sub query, optional
-	QueryAggregator pgtype.Varchar `json:"queryAggregator"` // sub query aggregator, optional
-	Value           interface{}    `json:"value"`           // fixed value, optional, filled by frontend with value of field/login ID/record/...
+	AttributeId     pgtype.UUID `json:"attributeId"`     // attribute ID, optional
+	AttributeIndex  int         `json:"attributeIndex"`  // attribute relation index
+	AttributeNested int         `json:"attributeNested"` // attribute nesting level (0 = main query, 1 = 1st sub query)
+	Brackets        int         `json:"brackets"`        // brackets before (side0) or after (side1)
+	Query           DataGet     `json:"query"`           // sub query, optional
+	QueryAggregator pgtype.Text `json:"queryAggregator"` // sub query aggregator, optional
+	Value           interface{} `json:"value"`           // fixed value, optional, filled by frontend with value of field/login ID/record/...
 }
 
 // a JOIN connects multiple relations via a relationship attribute
@@ -55,10 +55,10 @@ type DataGetExpression struct {
 	Query DataGet `json:"query"` // a regular data GET request
 
 	// expression options
-	Aggregator pgtype.Varchar `json:"aggregator"` // set AGGREGATE function (min, max, avg, count, ...)
-	Distincted bool           `json:"distincted"` // set DISTINCT
-	GroupBy    bool           `json:"groupBy"`    // set GROUP BY
-	ReturnNull bool           `json:"returnNull"` // return NULL (ignores everything else)
+	Aggregator pgtype.Text `json:"aggregator"` // set AGGREGATE function (min, max, avg, count, ...)
+	Distincted bool        `json:"distincted"` // set DISTINCT
+	GroupBy    bool        `json:"groupBy"`    // set GROUP BY
+	ReturnNull bool        `json:"returnNull"` // return NULL (ignores everything else)
 }
 
 type DataGetOrder struct {

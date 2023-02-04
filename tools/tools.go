@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func init() {
@@ -147,14 +147,10 @@ func UuidInSlice(needle uuid.UUID, haystack []uuid.UUID) bool {
 
 func UuidStringToNullUuid(input string) pgtype.UUID {
 	id, err := uuid.FromString(input)
-	out := pgtype.UUID{
-		Bytes:  id,
-		Status: pgtype.Present,
+	return pgtype.UUID{
+		Bytes: id,
+		Valid: err == nil,
 	}
-	if err != nil {
-		out.Status = pgtype.Null
-	}
-	return out
 }
 
 func RandStringRunes(n int) string {

@@ -15,8 +15,8 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // run upgrade if DB version is different to application version
@@ -1276,7 +1276,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			FieldChanged pgtype.Bool
 			NewRecord    pgtype.Bool
 			Login1       pgtype.Bool
-			Value1       pgtype.Varchar
+			Value1       pgtype.Text
 		}
 		rows, err := tx.Query(db.Ctx, `
 			SELECT form_state_id, position, field_id0, field_id1, preset_id1, role_id,
@@ -1304,7 +1304,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		rows.Close()
 
 		var insertSide = func(formStateId uuid.UUID, position int, side int,
-			brackets int, content string, value pgtype.Varchar,
+			brackets int, content string, value pgtype.Text,
 			fieldId pgtype.UUID, presetId pgtype.UUID, roleId pgtype.UUID) error {
 
 			_, err := tx.Exec(db.Ctx, `
@@ -1323,23 +1323,16 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			content0 := ""
 			content1 := ""
 			operatorOverwrite := ""
-			value0 := pgtype.Varchar{}
-			value0.Status = pgtype.Null
-			value1 := pgtype.Varchar{}
-			value1.Status = pgtype.Null
+			value0 := pgtype.Text{}
+			value1 := pgtype.Text{}
 			emptyId := pgtype.UUID{}
-			emptyId.Status = pgtype.Null
 			field0 := pgtype.UUID{}
-			field0.Status = pgtype.Null
 			field1 := pgtype.UUID{}
-			field1.Status = pgtype.Null
 			preset1 := pgtype.UUID{}
-			preset1.Status = pgtype.Null
 			role := pgtype.UUID{}
-			role.Status = pgtype.Null
 
 			// field, value
-			if c.FieldChanged.Status == pgtype.Present {
+			if c.FieldChanged.Valid {
 				content0 = "fieldChanged"
 				content1 = "true"
 				field0 = c.FieldId0
@@ -1347,19 +1340,19 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				if !c.FieldChanged.Bool {
 					operatorOverwrite = "<>"
 				}
-			} else if c.NewRecord.Status == pgtype.Present {
+			} else if c.NewRecord.Valid {
 				content0 = "recordNew"
 				content1 = "true"
 				operatorOverwrite = "="
 				if !c.NewRecord.Bool {
 					operatorOverwrite = "<>"
 				}
-			} else if c.RoleId.Status == pgtype.Present {
+			} else if c.RoleId.Valid {
 				content0 = "role"
 				content1 = "true"
 				role = c.RoleId
 			} else {
-				if c.FieldId0.Status == pgtype.Present {
+				if c.FieldId0.Valid {
 					content0 = "field"
 					field0 = c.FieldId0
 
@@ -1367,18 +1360,18 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 						content1 = "value"
 					}
 				}
-				if c.FieldId1.Status == pgtype.Present {
+				if c.FieldId1.Valid {
 					content1 = "field"
 					field1 = c.FieldId1
 				}
-				if c.Login1.Status == pgtype.Present {
+				if c.Login1.Valid {
 					content1 = "login"
 				}
-				if c.PresetId1.Status == pgtype.Present {
+				if c.PresetId1.Valid {
 					content1 = "preset"
 					preset1 = c.PresetId1
 				}
-				if c.Value1.Status == pgtype.Present && c.Value1.String != "" {
+				if c.Value1.Valid && c.Value1.String != "" {
 					content1 = "value"
 					value1 = c.Value1
 				}

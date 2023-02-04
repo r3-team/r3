@@ -7,7 +7,7 @@ import (
 	"r3/mail"
 	"r3/types"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 // mails from spooler

@@ -6,7 +6,7 @@ import (
 	"r3/schema"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func fileRelationsCreate_tx(tx pgx.Tx, attributeId uuid.UUID,

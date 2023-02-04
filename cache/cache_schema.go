@@ -1,5 +1,5 @@
 // Application cache
-// Used during regular operation for fast lookups during regular operation.
+// Used during regular operation for fast lookups.
 // Is NOT used while manipulating the schema.
 package cache
 
@@ -30,7 +30,7 @@ import (
 	"sync"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type schemaCacheType struct {
@@ -227,7 +227,7 @@ func updateSchemaCache(moduleIdsUpdateOnly []uuid.UUID) error {
 		// get menus
 		log.Info("cache", "load menus")
 
-		mod.Menus, err = menu.Get(mod.Id, pgtype.UUID{Status: pgtype.Null})
+		mod.Menus, err = menu.Get(mod.Id, pgtype.UUID{})
 		if err != nil {
 			return err
 		}
