@@ -7,7 +7,6 @@ import (
 	"r3/cache"
 	"r3/data/data_enc"
 	"r3/data/data_sql"
-	"r3/db"
 	"r3/handler"
 	"r3/schema"
 	"r3/tools"
@@ -18,7 +17,6 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
-	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var regexRelId = regexp.MustCompile(`^\_r(\d+)id`) // finds: _r3id
@@ -55,15 +53,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 	columns := rows.FieldDescriptions()
 
 	for rows.Next() {
-
-		// put unknown data types into interfaces
-		valuePointers := make([]interface{}, len(columns))
-		valuesAll := make([]interface{}, len(columns))
-		for i, _ := range columns {
-			valuePointers[i] = &valuesAll[i]
-		}
-
-		if err := rows.Scan(valuePointers...); err != nil {
+		valuesAll, err := rows.Values()
+		if err != nil {
 			return results, 0, err
 		}
 
@@ -73,9 +64,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 
 		// collect values for expressions
 		for i := 0; i < len(data.Expressions); i++ {
-			if fmt.Sprintf("%T", valuesAll[i]) == "pgtype.Numeric" {
-				valuesAll[i] = db.PgxNumericToString(valuesAll[i].(pgtype.Numeric))
-			}
 			values = append(values, valuesAll[i])
 		}
 
@@ -512,8 +500,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 }
 
 // add SELECT for attribute in given relation index
-// if attribute is from another relation than the given index (relationship),
-//  attribute value = tupel IDs in relation with given index via given attribute
+// if attribute is from another relation than given index (relationship), attribute value = tupel IDs in relation with given index via given attribute
 // 'outside in' is important in cases of self reference, where direction cannot be ascertained by attribute
 func addSelect(exprPos int, expr types.DataGetExpression,
 	indexRelationIds map[int]uuid.UUID, inSelect *[]string, nestingLevel int) error {
