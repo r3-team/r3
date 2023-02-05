@@ -21,7 +21,7 @@ import (
 
 // run upgrade if DB version is different to application version
 // DB version is related to major+minor application version (e. g. app: 1.3.2.1999 -> 1.3)
-//  -> DB changes are therefore exclusive to major or minor releases
+// -> DB changes are therefore exclusive to major or minor releases
 func RunIfRequired() error {
 	_, appVersionCut, _, dbVersionCut := config.GetAppVersions()
 	if appVersionCut == dbVersionCut {
@@ -102,6 +102,11 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 	// ALTER TABLE app.caption ALTER COLUMN content
 	//  TYPE app.caption_content USING content::text::app.caption_content;
 
+	"3.2": func(tx pgx.Tx) (string, error) {
+		//_, err := tx.Exec(db.Ctx, ``)
+		//return "3.3", err
+		return "3.3", nil
+	},
 	"3.1": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
 			-- new tabs field

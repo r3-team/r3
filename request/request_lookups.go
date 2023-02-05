@@ -23,18 +23,6 @@ func LookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 	case "access":
 		return cache.GetAccessById(loginId)
 
-	case "caption":
-		var languageCode string
-
-		if err := db.Pool.QueryRow(db.Ctx, `
-			SELECT language_code
-			FROM instance.login_setting
-			WHERE login_id = $1
-		`, loginId).Scan(&languageCode); err != nil {
-			return nil, err
-		}
-		return cache.GetCaptions(languageCode), nil
-
 	case "customizing":
 		var res struct {
 			CompanyName    string `json:"companyName"`

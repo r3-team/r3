@@ -124,7 +124,7 @@ let MySettingsEncryption = {
 	props:{
 		moduleEntries:{ type:Array, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			running:false,
 			
@@ -745,7 +745,7 @@ let MySettingsFixedTokens = {
 			</div>
 		</div>
 	</div>`,
-	data:function() {
+	data() {
 		return {
 			tokensFixed:[],
 			showInstall:false,
@@ -789,7 +789,7 @@ let MySettingsFixedTokens = {
 			}
 		}
 	},
-	mounted:function() {
+	mounted() {
 		this.get();
 		
 		// set default client
@@ -1120,7 +1120,7 @@ let MySettings = {
 	},
 	watch:{
 		settingsInput:{
-			handler:function() {
+			handler() {
 				if(this.settingsLoaded)
 					this.setSetting(this.settingsInput);
 			},

@@ -4,10 +4,11 @@ import {genericError} from './error.js';
 export function set(settings) {
 	ws.send('setting','set',settings,true).then(
 		() => {
-			if(MyStore.getters.settings.languageCode !== settings.languageCode)
-				return location.reload();
-			
+			let langOld = MyStore.getters.settings.languageCode;
 			MyStore.commit('settings',JSON.parse(JSON.stringify(settings)));
+			
+			if(langOld !== settings.languageCode)
+				this.$root.captionsReload();
 		},
 		genericError
 	);
