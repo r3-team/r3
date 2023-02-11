@@ -131,16 +131,16 @@ var (
 			},
 			matchRx: regexp.MustCompile(`^ERROR\: null value in column \".+\" violates not-null constraint \(SQLSTATE 23502\)`),
 		},
-		errExpected{ // NOT NULL constraint violation
+		errExpected{ // invalid syntax for type
 			convertFn: func(err error) error {
-				matches := regexp.MustCompile(`^ERROR\: invalid input syntax for type \w+\: \"(.+)\"/`).FindStringSubmatch(err.Error())
+				matches := regexp.MustCompile(`^ERROR\: invalid input syntax for type \w+\: \"(.+)\"`).FindStringSubmatch(err.Error())
 				if len(matches) != 2 {
 					return CreateErrCode("DBS", ErrCodeDbsInvalidTypeSyntax)
 				}
 				return CreateErrCodeWithArgs("DBS", ErrCodeDbsInvalidTypeSyntax,
 					map[string]string{"VALUE": matches[1]})
 			},
-			matchRx: regexp.MustCompile(`^ERROR\: invalid input syntax for type \w+\: \".+\"/`),
+			matchRx: regexp.MustCompile(`^ERROR\: invalid input syntax for type \w+\: \".+\"`),
 		},
 		errExpected{ // failed to create unique index due to existing non-unique values
 			convertFn: func(err error) error { return CreateErrCode("DBS", ErrCodeDbsIndexFailUnique) },

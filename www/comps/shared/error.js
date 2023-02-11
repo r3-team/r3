@@ -148,6 +148,13 @@ export function resolveErrCode(message) {
 				
 				return cap.replace('{NAME}',matches[1]);
 			break;
+			case '007': // invalid syntax for type
+				matches = message.match(/\[VALUE\:([^\]]*)\]/);
+				if(matches === null || matches.length !== 2)
+					return message;
+				
+				return cap.replace('{VALUE}',matches[1]);
+			break;
 		}
 	}
 	if(errContext === 'SEC') {

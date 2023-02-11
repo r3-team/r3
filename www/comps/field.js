@@ -5,6 +5,7 @@ import MyInputDate            from './inputDate.js';
 import MyInputFiles           from './inputFiles.js';
 import MyInputLogin           from './inputLogin.js';
 import MyInputRichtext        from './inputRichtext.js';
+import MyInputUuid            from './inputUuid.js';
 import MyList                 from './list.js';
 import {hasAccessToAttribute} from './shared/access.js';
 import {srcBase64}            from './shared/image.js';
@@ -33,7 +34,8 @@ import {
 	isAttributeFiles,
 	isAttributeInteger,
 	isAttributeRelationship,
-	isAttributeString
+	isAttributeString,
+	isAttributeUuid
 } from './shared/attribute.js';
 export {MyField as default};
 
@@ -48,6 +50,7 @@ let MyField = {
 		MyInputFiles,
 		MyInputLogin,
 		MyInputRichtext,
+		MyInputUuid,
 		MyList
 	},
 	template:`<div class="field"
@@ -63,7 +66,7 @@ let MyField = {
 				:id="getInputFieldName(field.id)"
 			>
 				<div class="caption"
-					v-if="focused || value !== null || isBoolean || isDateInput || isSlider || isRichtext || isCategory || isRelationship || isFiles"
+					v-if="focused || value !== null || isBoolean || isDateInput || isSlider || isRichtext || isCategory || isRelationship || isFiles || isUuid"
 					:class="{ invalid:showInvalid }"
 				>{{ caption }}</div>
 				
@@ -92,6 +95,13 @@ let MyField = {
 						:disabled="isReadonly"
 						:placeholder="!focused ? caption : ''"
 						:type="!isPassword || showPassword ? 'text' : 'password'"
+					/>
+					
+					<!-- UUID input -->
+					<my-input-uuid
+						v-if="isUuid"
+						v-model="value"
+						:readonly="isReadonly"
 					/>
 					
 					<!-- password show action -->
@@ -909,7 +919,7 @@ let MyField = {
 				&& !this.isTextarea
 				&& !this.isRichtext
 				&& !this.isColor
-			;
+				&& !this.isUuid;
 		},
 		isValid:function() {
 			if(!this.isData || this.isReadonly)
@@ -933,6 +943,9 @@ let MyField = {
 				return false;
 			
 			if(this.isInteger && !/^-?\d+$/.test(this.value))
+				return false;
+			
+			if(this.isUuid && !/^[0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12}$/i.test(this.value))
 				return false;
 			
 			return this.isValidMin && this.isValidMax;
@@ -1016,6 +1029,7 @@ let MyField = {
 		isInteger:  function() { return this.isData && this.isAttributeInteger(this.attribute.content); },
 		isQuery:    function() { return this.isCalendar || this.isChart || this.isList || this.isRelationship },
 		isString:   function() { return this.isData && this.isAttributeString(this.attribute.content); },
+		isUuid:     function() { return this.isData && this.isAttributeUuid(this.attribute.content); },
 		isRelationship:  function() { return this.isData && this.isAttributeRelationship(this.attribute.content); },
 		isRelationship1N:function() { return this.isRelationship && this.field.outsideIn === true && this.attribute.content === 'n:1'; },
 		
@@ -1049,6 +1063,7 @@ let MyField = {
 		isAttributeInteger,
 		isAttributeRelationship,
 		isAttributeString,
+		isAttributeUuid,
 		openLink,
 		setGetterArgs,
 		srcBase64,

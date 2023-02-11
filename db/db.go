@@ -6,10 +6,10 @@ import (
 	"net/url"
 	"r3/tools"
 	"r3/types"
-	"strings"
 	"time"
 
-	"github.com/jackc/pgx/v5/pgtype"
+	pgxuuid "github.com/jackc/pgx-gofrs-uuid"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
 )
 
@@ -46,6 +46,11 @@ func Open(config types.FileTypeDb) error {
 		return err
 	}
 
+	poolConfig.AfterConnect = func(ctx context.Context, con *pgx.Conn) error {
+		pgxuuid.Register(con.TypeMap())
+		return err
+	}
+
 	Pool, err = pgxpool.NewWithConfig(context.Background(), poolConfig)
 	if err != nil {
 		return err
@@ -60,34 +65,4 @@ func Open(config types.FileTypeDb) error {
 func Close() {
 	Pool.Close()
 	Pool = nil
-}
-
-func PgxNumericToString(value pgtype.Numeric) string {
-	s := value.Int.String()
-	l := len(s)
-	e := int(value.Exp)
-
-	// zero exponent, as in 12 (int=12, len=2, exp=0)
-	if e == 0 {
-		return s
-	}
-
-	// positive exponent, as in 2500 (int=25, len=2, exp=2)
-	if e > 0 {
-		return fmt.Sprintf("%s%s", s, strings.Repeat("0", e))
-	}
-
-	// negative exponents
-	// equals out length, as in 0.12 (int=12, len=2, exp=-2)
-	if l+e == 0 {
-		return fmt.Sprintf("0.%s", s)
-	}
-
-	// below zero, as in 0.012 (int=12, len=2, exp=-3)
-	if l+e < 0 {
-		return fmt.Sprintf("0.%s%s", strings.Repeat("0", (l+e)-((l+e)*2)), s)
-	}
-
-	// above zero, as in 11.1 (int=111, len=3, exp=-1)
-	return fmt.Sprintf("%s.%s", s[0:l+e], s[l+e:])
 }

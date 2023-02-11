@@ -18,7 +18,7 @@ import (
 )
 
 var contentTypes = []string{"integer", "bigint", "numeric", "real",
-	"double precision", "varchar", "text", "boolean", "1:1", "n:1", "files"}
+	"double precision", "varchar", "text", "boolean", "uuid", "1:1", "n:1", "files"}
 
 var fkBreakActions = []string{"NO ACTION", "RESTRICT", "CASCADE", "SET NULL",
 	"SET DEFAULT"}
@@ -199,6 +199,9 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 
 		case "boolean": // keep boolean
 			contentUpdateOk = content == "boolean"
+
+		case "uuid": // keep UUID
+			contentUpdateOk = content == "uuid"
 
 		case "1:1": // keep 1:1 or switch to n:1
 			fallthrough
@@ -450,10 +453,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 	}
 
 	// set captions
-	if err := caption.Set_tx(tx, id, captions); err != nil {
-		return err
-	}
-	return nil
+	return caption.Set_tx(tx, id, captions)
 }
 
 func SetName_tx(tx pgx.Tx, id uuid.UUID, name string, ignoreNameCheck bool) error {

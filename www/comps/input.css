@@ -331,6 +331,27 @@
 	color:var(--color-font) !important;
 }
 
+/* UUID input */
+.input-uuid{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row wrap;
+	padding:3px 0px;
+	gap:2px;
+	align-items:center;
+}
+.input-uuid input{
+	font-size:105%;
+	padding:4px 5px 1px;
+	color:inherit;
+	border:none;
+	border-bottom:2px solid var(--color-border);
+	border-radius:3px;
+	outline:none;
+	background-color:transparent;
+	font-family:'Lucida Console',Courier,monospace;
+}
+
 
 /* richtext input */
 .input-richtext{
@@ -364,7 +385,6 @@
 .tox-edit-area__iframe{
 	background:transparent !important;
 }
-
 
 /* user overwrites */
 .user-bordersSquared .bool>div,

@@ -9,7 +9,8 @@ import {
 	isAttributeInteger,
 	isAttributeNumeric,
 	isAttributeRelationship,
-	isAttributeString
+	isAttributeString,
+	isAttributeUuid
 } from '../shared/attribute.js';
 export {MyBuilderAttribute as default};
 
@@ -75,6 +76,7 @@ let MyBuilderAttribute = {
 				<option v-if="isNew || isAttributeString(content)"  value="varchar">varchar</option>
 				<option v-if="isNew || isAttributeString(content)"  value="text">text</option>
 				<option v-if="isNew || isAttributeBoolean(content)" value="boolean">boolean</option>
+				<option v-if="isNew || isAttributeUuid(content)"    value="uuid">UUID</option>
 				<option v-if="isNew || isAttributeFiles(content)"   value="files">files</option>
 				<option v-if="isNew || isAttributeRelationship(content)" value="1:1">1:1</option>
 				<option v-if="isNew || isAttributeRelationship(content)" value="n:1">
@@ -234,6 +236,7 @@ let MyBuilderAttribute = {
 		isAttributeNumeric,
 		isAttributeRelationship,
 		isAttributeString,
+		isAttributeUuid,
 		getDependentModules,
 		
 		// backend calls

@@ -32,6 +32,7 @@ require (
 	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
+	github.com/jackc/pgx-gofrs-uuid v0.0.0-20220402203838-5fdaf7ddb8a2 // indirect
 	github.com/jackc/puddle/v2 v2.1.3-0.20230114152537-cc12efc05a26 // indirect
 	golang.org/x/sync v0.0.0-20220923202941-7f9b1623fab7 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect

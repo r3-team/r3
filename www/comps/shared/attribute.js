@@ -132,6 +132,7 @@ export function isAttributeFloat(content)   { return attributeContentNames.float
 export function isAttributeInteger(content) { return attributeContentNames.integer.includes(content); };
 export function isAttributeNumeric(content) { return content === 'numeric'; };
 export function isAttributeString(content)  { return attributeContentNames.text.includes(content); };
+export function isAttributeUuid(content)    { return content === 'uuid'; };
 export function isAttributeRelationship(content)   { return attributeContentNames.relationship.includes(content); };
 export function isAttributeRelationship11(content) { return content === '1:1'; };
 export function isAttributeRelationshipN1(content) { return content === 'n:1'; };

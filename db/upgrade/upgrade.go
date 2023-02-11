@@ -103,9 +103,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 	//  TYPE app.caption_content USING content::text::app.caption_content;
 
 	"3.2": func(tx pgx.Tx) (string, error) {
-		//_, err := tx.Exec(db.Ctx, ``)
-		//return "3.3", err
-		return "3.3", nil
+		_, err := tx.Exec(db.Ctx, `
+			ALTER TYPE app.attribute_content ADD VALUE 'uuid';
+		`)
+		return "3.3", err
 	},
 	"3.1": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
