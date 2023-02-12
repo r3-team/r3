@@ -490,9 +490,7 @@ let MyBuilderJsFunction = {
 		// presentation
 		displayFieldName(fieldId) {
 			let f = this.dataFieldMap[fieldId];
-			let a = this.attributeIdMap[f.attributeId];
-			let r = this.relationIdMap[a.relationId];
-			return this.getItemTitle(r,a,f.index,false,false);
+			return this.getItemTitle(f.attributeId,f.index,false,null);
 		},
 		
 		// actions

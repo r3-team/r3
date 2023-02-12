@@ -14,7 +14,7 @@
 	margin-top:20px;
 }
 .builder-form .sidebar .templates{
-	margin-bottom:16px;
+	margin:10px 0px 16px;
 	overflow:auto;
 	border-radius:5px;
 	overflow:hidden;
@@ -22,7 +22,6 @@
 .builder-form .sidebar .templates-filter{
 	display:flex;
 	flex-flow:row nowrap;
-	margin-bottom:10px;
 }
 .builder-form .sidebar .columns{
 	display:flex;

@@ -121,9 +121,7 @@ export function getNestedIndexAttributeIdsByJoins(joins,nestingLevel,inclEncrypt
 
 export function getCaptionByIndexAttributeId(indexAttributeId) {
 	let v = indexAttributeId.split('_');
-	let a = MyStore.getters['schema/attributeIdMap'][v[1]];
-	let r = MyStore.getters['schema/relationIdMap'][a.relationId];
-	return getItemTitle(r,a,v[0],false,false);
+	return getItemTitle(v[1],v[0],false,null);
 };
 
 export function getSubQueryFilterExpressions(subQuery) {

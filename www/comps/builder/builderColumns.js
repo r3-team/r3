@@ -1,15 +1,12 @@
-import MyBuilderCaption   from './builderCaption.js';
-import {getFlexBasis}     from '../shared/form.js';
-import {getRandomInt}     from '../shared/generic.js';
-import {getQueryTemplate} from '../shared/query.js';
+import MyBuilderCaption     from './builderCaption.js';
+import {getItemTitleColumn} from '../shared/builder.js';
+import {getFlexBasis}       from '../shared/form.js';
+import {getRandomInt}       from '../shared/generic.js';
+import {getQueryTemplate}   from '../shared/query.js';
 import {
 	getIndexAttributeId,
 	isAttributeRelationship
 } from '../shared/attribute.js';
-import {
-	getItemTitle,
-	getItemTitleColumn
-} from '../shared/builder.js';
 
 export let MyBuilderColumns = {
 	name:'my-builder-columns',
@@ -112,7 +109,6 @@ export let MyBuilderColumns = {
 	methods:{
 		// externals
 		getFlexBasis,
-		getItemTitle,
 		getItemTitleColumn,
 		
 		// actions

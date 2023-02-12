@@ -19,6 +19,7 @@
 	background-color:var(--color-cancel);
 }
 .button.naked{
+	padding:4px;
 	color:inherit;
 	background-color:transparent;
 	box-shadow:unset;

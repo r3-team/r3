@@ -36,7 +36,7 @@ let MyBuilderFields = {
 				:key="element.id"
 				:style="getStyleParent(element)"
 			>
-				<div class="builder-field-header" :class="{ dragAnchor:!moveActive }">
+				<div class="builder-field-header" :class="{ dragAnchor:!moveActive && !noMovement }">
 					<!-- form state field reference -->
 					<span class="field-ref" v-if="!isTemplate">
 						F{{ typeof entityIdMapRef.field[element.id] !== 'undefined' ? entityIdMapRef.field[element.id] : '' }}
@@ -94,7 +94,7 @@ let MyBuilderFields = {
 					
 					<!-- action: move this field -->
 					<img class="action mover"
-						v-if="!moveActive || fieldMoveList[fieldMoveIndex].id === element.id || !isTemplate"
+						v-if="!noMovement && (!moveActive || fieldMoveList[fieldMoveIndex].id === element.id || !isTemplate)"
 						@click="moveByClick(fields,index,false)"
 						:class="{ 'on-hover':!moveActive, selected:moveActive && fieldMoveList[fieldMoveIndex].id === element.id }"
 						:src="!moveActive ? 'images/arrowRight.png' : 'images/arrowDown.png'"
@@ -164,8 +164,8 @@ let MyBuilderFields = {
 							/>
 							
 							<!-- action: remove field -->
-							<img class="action on-hover end clickable" src="images/cancel.png"
-								@click="remove(element.id,index)"
+							<img class="action on-hover end clickable" src="images/delete.png"
+								@click="$emit('field-remove',element.id)"
 							/>
 						</div>
 					</div>
@@ -271,19 +271,21 @@ let MyBuilderFields = {
 		fieldMoveList:  { required:true },
 		fieldMoveIndex: { type:Number,  required:true },
 		fieldCounter:   { type:Number,  required:true },
+		filterData:     { type:Boolean, required:false, default:false },
+		filterData1n:   { type:Boolean, required:false, default:false },
+		filterDataIndex:{ type:Number,  required:false, default:-1 },
+		filterDataN1:   { type:Boolean, required:false, default:false },
+		filterDataNm:   { type:Boolean, required:false, default:false },
 		flexDirParent:  { type:String,  required:true }, // flex direction of parent (row|column)
 		formId:         { type:String,  required:true },
 		isTemplate:     { type:Boolean, required:true }, // is template for fields
 		joinsIndexMap:  { type:Object,  required:false, default:() => {return {}} },
 		moduleId:       { type:String,  required:false, default:'' },
-		template1n:     { type:Boolean, required:false, default:false },
-		templateIndex:  { type:Number,  required:false, default:-1 },
-		templateN1:     { type:Boolean, required:false, default:false },
-		templateNm:     { type:Boolean, required:false, default:false },
+		noMovement:     { type:Boolean, required:false, default:false },
 		uiScale:        { type:Number,  required:false, default:100 }
 	},
 	emits:['column-id-show','field-counter-set','field-id-show','field-remove','field-move-store'],
-	data:function() {
+	data() {
 		return {
 			clone:false,
 			fieldIdMapTabIndex:{}
@@ -294,7 +296,7 @@ let MyBuilderFields = {
 			get()  { return this.fieldCounter; },
 			set(v) { this.$emit('field-counter-set',v); }
 		},
-		moveActive() { return this.fieldMoveList !== null; },
+		moveActive:(s) => s.fieldMoveList !== null,
 		
 		// stores
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
@@ -317,19 +319,19 @@ let MyBuilderFields = {
 		
 		// presentation
 		show(field) {
-			// filter only templates and only data fields
-			if(!this.isTemplate || field.content !== 'data') 
+			// filter only data fields
+			if(!this.filterData || field.content !== 'data') 
 				return true;
 			
 			// filter by selected index (if set)
-			if(this.templateIndex !== -1 && field.index !== this.templateIndex)
+			if(this.filterDataIndex !== -1 && field.index !== this.filterDataIndex)
 				return false;
 			
-			// filter relationship fields
+			// filter by relationship type (show non-rel fields)
 			if(!this.isRelationship(field)) return true;
-			if(!field.outsideIn)            return this.templateN1; 
-			if(this.template1n && field.attributeIdNm === null) return true;
-			if(this.templateNm && field.attributeIdNm !== null) return true;
+			if(!field.outsideIn)            return this.filterDataN1; 
+			if(this.filterData1n && field.attributeIdNm === null) return true;
+			if(this.filterDataNm && field.attributeIdNm !== null) return true;
 			return false;
 		},
 		showTab(field,tabIndex) {
@@ -405,16 +407,6 @@ let MyBuilderFields = {
 			
 			this.$emit('field-move-store',{fieldList:null,fieldIndex:0});
 		},
-		remove(id,i) {
-			if(this.fieldIdShow === id)
-				this.$emit('field-id-show',null,'content');
-			
-			this.fields.splice(i,1);
-			
-			// container/tab fields are removed automatically (cascaded)
-			// direct form children (top level) must be removed manually
-			this.$emit('field-remove',id);
-		},
 		toggleBool(oldBool) {
 			return !oldBool;
 		},
@@ -472,17 +464,8 @@ let MyBuilderFields = {
 				case 'chart':     return 'Chart';     break;
 				case 'container': return 'Container'; break;
 				case 'header':    return 'Header';    break;
-				case 'tabs':      return 'Tabs'; break;
-				case 'data':
-					let atr = this.attributeIdMap[field.attributeId];
-					let rel = this.relationIdMap[atr.relationId];
-					
-					let atrNm = false;
-					if(typeof field.attributeIdNm !== 'undefined' && field.attributeIdNm !== null)
-						atrNm = this.attributeIdMap[field.attributeIdNm];
-					
-					return this.getItemTitle(rel,atr,field.index,field.outsideIn,atrNm);
-				break;
+				case 'tabs':      return 'Tabs';      break;
+				case 'data':      return this.getItemTitle(field.attributeId,field.index,field.outsideIn,field.attributeIdNm); break;
 				case 'list':
 					if(field.query.relationId === null)
 						return 'List';

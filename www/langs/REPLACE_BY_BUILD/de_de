@@ -646,6 +646,7 @@
 			"distincted":"Unterscheiden",
 			"dragDrop":"Felder von der Auswahl rechts per Drag&Drop hier ablegen, um sie zum Formular hinzuzufügen.",
 			"fields":"Felder",
+			"fieldsEditInputs":"Eingaben bearbeiten",
 			"fieldAttributeIdAltDateTo":"Datum bis (Zeitraum)",
 			"fieldAttributeIdAltRichtextFiles":"Rich-Text Dateizugriff",
 			"fieldClipboard":"Zwischenablage",

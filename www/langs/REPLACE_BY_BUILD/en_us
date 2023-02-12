@@ -646,6 +646,7 @@
 			"distincted":"Distinct",
 			"dragDrop":"Place fields here via drag & drop from the selection on the right to add them to the form.",
 			"fields":"Fields",
+			"fieldsEditInputs":"Edit inputs",
 			"fieldAttributeIdAltDateTo":"Date to (period)",
 			"fieldAttributeIdAltRichtextFiles":"Richtext file access",
 			"fieldClipboard":"Clipboard",

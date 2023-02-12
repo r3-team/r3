@@ -646,6 +646,7 @@
 			"distincted":"Distinct",
 			"dragDrop":"Place fields here via drag & drop from the selection on the right to add them to the form.",
 			"fields":"Câmpuri",
+			"fieldsEditInputs":"Edit inputs",
 			"fieldAttributeIdAltDateTo":"Data până la (perioada)",
 			"fieldAttributeIdAltRichtextFiles":"Acces la fișierul Richtext",
 			"fieldClipboard":"Clipboard",

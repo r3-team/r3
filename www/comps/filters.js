@@ -211,9 +211,7 @@ let MyFilterAttribute = {
 				// if nothing else is available: attribute name
 				return atr.name;
 			}
-			
-			let rel = this.relationIdMap[atr.relationId];
-			return this.getItemTitleNoRelationship(rel,atr,v[1]);
+			return this.getItemTitleNoRelationship(atr.id,v[1]);
 		},
 		getQueryLabel(nestingLevel) {
 			if(nestingLevel === 0)

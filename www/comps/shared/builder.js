@@ -78,35 +78,34 @@ export function setValueInJson(inputJson,nameChain,value) {
 	return JSON.stringify(o,null,2);
 };
 
-export function getItemTitle(relation,attribute,index,outsideIn,attributeNm) {
-	let isRel = isAttributeRelationship(attribute.content);
+export function getItemTitle(attributeId,index,outsideIn,attributeIdNm) {
+	let atr = MyStore.getters['schema/attributeIdMap'][attributeId];
+	let rel = MyStore.getters['schema/relationIdMap'][atr.relationId];
 	
-	if(!isRel)     return `${index}) ${relation.name}.${attribute.name}`;
-	if(!outsideIn) return `${index}) [${attribute.content}] ${relation.name}.${attribute.name}`;
+	let isRel = isAttributeRelationship(atr.content);
 	
-	if(attributeNm !== false)
-		return `${index}) [n:m] ${relation.name}.${attribute.name} -> ${attributeNm.name}`;
+	if(!isRel)     return `${index}) ${rel.name}.${atr.name}`;
+	if(!outsideIn) return `${index}) [${atr.content}] ${rel.name}.${atr.name}`;
 	
-	let relCap = isAttributeRelationship11(attribute.content) ? '1:1' : '1:n';
+	if(typeof attributeIdNm !== 'undefined' && attributeIdNm !== null) {
+		let atrNm = MyStore.getters['schema/attributeIdMap'][attributeIdNm];
+		return `${index}) [n:m] ${rel.name}.${atr.name} -> ${atrNm.name}`;
+	}
 	
-	return `${index}) [${relCap}] ${relation.name}.${attribute.name}`;
-	
+	let relCap = isAttributeRelationship11(atr.content) ? '1:1' : '1:n';
+	return `${index}) [${relCap}] ${rel.name}.${atr.name}`;
 };
 
-export function getItemTitleNoRelationship(relation,attribute,index) {
-	return `${index}) ${relation.name}.${attribute.name}`;
+export function getItemTitleNoRelationship(attributeId,index) {
+	let atr = MyStore.getters['schema/attributeIdMap'][attributeId];
+	let rel = MyStore.getters['schema/relationIdMap'][atr.relationId];
+	return `${index}) ${rel.name}.${atr.name}`;
 };
 
 export function getItemTitleColumn(column,withTitle) {
 	let name;
-	if(column.subQuery) {
-		name = `SubQuery`;
-	}
-	else {
-		let a = MyStore.getters['schema/attributeIdMap'][column.attributeId];
-		let r = MyStore.getters['schema/relationIdMap'][a.relationId];
-		name = getItemTitle(r,a,column.index,false,false);
-	}
+	if(column.subQuery) name = `SubQuery`;
+	else                name = getItemTitle(column.attributeId,column.index,false,null);
 	
 	if(withTitle && typeof column.captions.columnTitle[MyStore.getters.settings.languageCode] !== 'undefined')
 		name = `${name} (${column.captions.columnTitle[MyStore.getters.settings.languageCode]})`;

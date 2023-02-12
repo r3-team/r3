@@ -39,19 +39,19 @@ let MyBuilderFieldOptionsChartSerie = {
 				<select v-model="columnX">
 					<option disabled :value="-1">{{ capApp.serieColumnX }}</option>
 					<option v-for="(c,i) in columns" :value="i" >
-						{{ getItemTitle(relationIdMap[attributeIdMap[c.attributeId].relationId],attributeIdMap[c.attributeId],c.index,false,false) }}
+						{{ getItemTitle(c.attributeId,c.index,false,null) }}
 					</option>
 				</select>
 				<select v-model="columnY">
 					<option disabled :value="-1">{{ capApp.serieColumnY }}</option>
 					<option v-for="(c,i) in columns" :value="i" >
-						{{ getItemTitle(relationIdMap[attributeIdMap[c.attributeId].relationId],attributeIdMap[c.attributeId],c.index,false,false) }}
+						{{ getItemTitle(c.attributeId,c.index,false,null) }}
 					</option>
 				</select>
 				<select v-model="tooltip">
 					<option disabled :value="-1">{{ capApp.serieColumnTooltip }}</option>
 					<option v-for="(c,i) in columns" :value="i" >
-						{{ getItemTitle(relationIdMap[attributeIdMap[c.attributeId].relationId],attributeIdMap[c.attributeId],c.index,false,false) }}
+						{{ getItemTitle(c.attributeId,c.index,false,null) }}
 					</option>
 				</select>
 				<my-button image="cancel.png"
