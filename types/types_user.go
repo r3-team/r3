@@ -19,5 +19,6 @@ type Settings struct {
 	Pattern           pgtype.Text `json:"pattern"`
 	Spacing           int         `json:"spacing"`
 	SundayFirstDow    bool        `json:"sundayFirstDow"`
+	TabRemember       bool        `json:"tabRemember"`
 	WarnUnsaved       bool        `json:"warnUnsaved"`
 }

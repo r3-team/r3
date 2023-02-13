@@ -1524,6 +1524,7 @@
 		"pattern":"Background pattern",
 		"spacing":"Spaziatura",
 		"sundayFirstDow":"Domenica è il primo giorno della settimana",
+		"tabRemember":"Open last used tab",
 		"titleAccount":"Account",
 		"titleDisplay":"Visualizza",
 		"titleEncryption":"End-to-end encryption",

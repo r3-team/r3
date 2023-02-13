@@ -105,6 +105,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 	"3.2": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
 			ALTER TYPE app.attribute_content ADD VALUE 'uuid';
+			ALTER TABLE instance.login_setting ADD COLUMN tab_remember BOOLEAN NOT NULL DEFAULT TRUE;
 		`)
 		return "3.3", err
 	},

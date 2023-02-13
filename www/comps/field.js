@@ -543,11 +543,13 @@ let MyField = {
 			handler:function(v) {
 				if(!this.isTabs) return;
 				
-				// use stored tab index if valid, otherwise use first valid one
-				let tabIndex = this.fieldOptionGet(this.field.id,'tabIndex',0);
-				if(this.field.tabs.length > tabIndex && !v.includes(tabIndex))
-					return this.tabIndexShow = tabIndex;
-				
+				// use remembered tab if enabled and available
+				if(this.settings.tabRemember) {
+					let tabIndex = this.fieldOptionGet(this.field.id,'tabIndex',0);
+					if(this.field.tabs.length > tabIndex && !v.includes(tabIndex))
+						return this.tabIndexShow = tabIndex;
+				}
+				// use first valid tab
 				for(let i = 0, j = this.field.tabs.length; i < j; i++) {
 					if(!v.includes(i))
 						return this.tabIndexShow = i;
@@ -1043,7 +1045,8 @@ let MyField = {
 		capApp:        function() { return this.$store.getters.captions.form; },
 		capGen:        function() { return this.$store.getters.captions.generic; },
 		isMobile:      function() { return this.$store.getters.isMobile; },
-		moduleLanguage:function() { return this.$store.getters.moduleLanguage; }
+		moduleLanguage:function() { return this.$store.getters.moduleLanguage; },
+		settings:      function() { return this.$store.getters.settings; }
 	},
 	methods:{
 		// externals
