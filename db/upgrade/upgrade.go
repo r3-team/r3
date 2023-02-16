@@ -99,13 +99,139 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	// clean up on next release
-	// ALTER TABLE app.caption ALTER COLUMN content
-	//  TYPE app.caption_content USING content::text::app.caption_content;
+	// ALTER TABLE app.attribute ALTER COLUMN content_use
+	//  TYPE app.attribute_content_use USING content_use::text::app.attribute_content_use;
 
 	"3.2": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
-			ALTER TYPE app.attribute_content ADD VALUE 'uuid';
+			-- clean up from last release
+			ALTER TABLE app.caption ALTER COLUMN content
+				TYPE app.caption_content USING content::text::app.caption_content;
+			
+			-- new user setting
 			ALTER TABLE instance.login_setting ADD COLUMN tab_remember BOOLEAN NOT NULL DEFAULT TRUE;
+			
+			-- new attribute content
+			ALTER TYPE app.attribute_content ADD VALUE 'uuid';
+			
+			-- attribute content used as option
+			CREATE TYPE app.attribute_content_use AS ENUM ('default', 'textarea', 'richtext', 'date', 'datetime', 'time', 'color');
+			ALTER TABLE app.attribute ADD COLUMN content_use VARCHAR(8) NOT NULL DEFAULT 'default';
+			
+			-- migrate integer/bigint attributes
+			UPDATE app.attribute AS a
+			SET content_use = (
+				SELECT CASE
+					WHEN (
+						SELECT (
+							SELECT COUNT(*)
+							FROM app.field_data AS d
+							WHERE (
+								d.attribute_id = a.id
+								OR d.attribute_id_alt = a.id
+							)
+							AND d.display = 'datetime'
+						) + (
+							SELECT COUNT(*)
+							FROM app.column AS c
+							WHERE c.attribute_id = a.id
+							AND c.display = 'datetime'
+						)
+					) <> 0 THEN 'datetime'
+					WHEN (
+						SELECT (
+							SELECT COUNT(*)
+							FROM app.field_data AS d
+							WHERE (
+								d.attribute_id = a.id
+								OR d.attribute_id_alt = a.id
+							)
+							AND d.display = 'date'
+						) + (
+							SELECT COUNT(*)
+							FROM app.column AS c
+							WHERE c.attribute_id = a.id
+							AND c.display = 'date'
+						)
+					) <> 0 THEN 'date'
+					WHEN (
+						SELECT (
+							SELECT COUNT(*)
+							FROM app.field_data AS d
+							WHERE d.attribute_id = a.id
+							AND d.display = 'time'
+						) + (
+							SELECT COUNT(*)
+							FROM app.column AS c
+							WHERE c.attribute_id = a.id
+							AND c.display = 'time'
+						)
+					) <> 0 THEN 'time'
+					ELSE 'default'
+				END
+			)
+			WHERE content IN ('integer','bigint');
+			
+			-- migrate text/varchar attributes
+			UPDATE app.attribute AS a
+			SET content_use = (
+				SELECT CASE
+					WHEN (
+						SELECT (
+							SELECT COUNT(*)
+							FROM app.field_data AS d
+							WHERE d.attribute_id = a.id
+							AND d.display = 'richtext'
+						) + (
+							SELECT COUNT(*)
+							FROM app.column AS c
+							WHERE c.attribute_id = a.id
+							AND c.display = 'richtext'
+						)
+					) <> 0 THEN 'richtext'
+					WHEN (
+						SELECT (
+							SELECT COUNT(*)
+							FROM app.field_data AS d
+							WHERE d.attribute_id = a.id
+							AND d.display = 'textarea'
+						) + (
+							SELECT COUNT(*)
+							FROM app.column AS c
+							WHERE c.attribute_id = a.id
+							AND c.display = 'textarea'
+						)
+					) <> 0 THEN 'textarea'
+					WHEN (
+						SELECT (
+							SELECT COUNT(*)
+							FROM app.field_data AS d
+							WHERE d.attribute_id = a.id
+							AND d.display = 'color'
+						) + (
+							SELECT COUNT(*)
+							FROM app.column AS c
+							WHERE c.attribute_id = a.id
+							AND c.display = 'color'
+						)
+					) <> 0 THEN 'color'
+					ELSE 'default'
+				END
+			)
+			WHERE content IN ('text','varchar');
+			
+			UPDATE app.field_data SET display = 'default'
+			WHERE display IN ('datetime','date','time','richtext','textarea','color');
+			
+			UPDATE app.column SET display = 'default'
+			WHERE display IN ('datetime','date','time','richtext','textarea','color');
+			
+			-- remove invalid data display options
+			ALTER TYPE app.data_display RENAME TO app.data_display_old;
+			CREATE TYPE app.data_display AS ENUM ('default', 'email', 'gallery', 'hidden', 'login', 'password', 'phone', 'slider', 'url');
+			ALTER TABLE app.field_data ALTER COLUMN display TYPE app.data_display USING display::text::app.data_display;
+			ALTER TABLE app.column ALTER COLUMN display TYPE app.data_display USING display::text::app.data_display;
+			DROP TYPE app.data_display_old;
 		`)
 		return "3.3", err
 	},

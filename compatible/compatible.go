@@ -5,12 +5,37 @@ import (
 	"encoding/json"
 	"fmt"
 	"r3/db"
+	"r3/tools"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgtype"
 )
+
+// < 3.3
+// migrate attribute content use
+func FixAttributeContentUse(contentUse string) string {
+	if contentUse == "" {
+		return "default"
+	}
+	return contentUse
+}
+func MigrateDisplayToContentUse_tx(tx pgx.Tx, attributeId uuid.UUID, display string) (string, error) {
+
+	if tools.StringInSlice(display, []string{"textarea",
+		"richtext", "date", "datetime", "time", "color"}) {
+
+		_, err := tx.Exec(db.Ctx, `
+			UPDATE app.attribute
+			SET content_use = $1
+			WHERE id = $2
+		`, display, attributeId)
+
+		return "default", err
+	}
+	return display, nil
+}
 
 // < 3.2
 // migrate old module/form help pages to help articles

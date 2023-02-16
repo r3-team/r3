@@ -270,6 +270,7 @@ let MyBuilder = {
 			@createNew="createNew = $event"
 			@hotkey="handleHotkeys"
 			@hotkeysRegister="hotkeysChild = $event"
+			@nextLanguage="nextLanguage"
 			@toggleDocs="showDocs = !showDocs"
 			:builderLanguage="builderLanguage"
 			:readonly="!moduleOwner"
@@ -288,13 +289,13 @@ let MyBuilder = {
 			:moduleId="moduleId"
 		/>
 	</div>`,
-	created:function() {
+	created() {
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
-	unmounted:function() {
+	unmounted() {
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
-	data:function() {
+	data() {
 		return {
 			builderLanguage:'', // selected language for translations
 			createNew:null,     // entity to create (module, relation, ...)
@@ -306,7 +307,7 @@ let MyBuilder = {
 			showDocs:false
 		};
 	},
-	mounted:function() {
+	mounted() {
 		this.$store.commit('moduleColor1','');
 		this.$store.commit('pageTitle',this.capApp.pageTitle);
 		
@@ -317,7 +318,7 @@ let MyBuilder = {
 	},
 	watch:{
 		$route:{
-			handler:function(val) {
+			handler(val) {
 				if(val.hash === '')
 					this.showDocs = false;
 				

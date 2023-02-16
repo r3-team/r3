@@ -59,7 +59,8 @@ let MyChart = {
 		dateTimeColumnIndexes:(s) => {
 			let out = [];
 			for(let i = 0, j = s.columns.length; i < j; i++) {
-				if(['datetime','date','time'].includes(s.columns[i].display))
+				let atr = s.attributeIdMap[s.columns[i].attributeId];
+				if(['datetime','date','time'].includes(atr.contentUse))
 					out.push(i);
 			}
 			return out;
@@ -70,7 +71,8 @@ let MyChart = {
 		hasChoices:   (s) => s.choices.length > 1,
 		
 		// stores
-		settings:(s) => s.$store.getters.settings
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		settings:      (s) => s.$store.getters.settings
 	},
 	created() {
 		window.addEventListener('resize',this.resize);
@@ -149,12 +151,11 @@ let MyChart = {
 						
 						// apply date|time column display options
 						if(this.dateTimeColumnIndexes.length !== 0) {
-							for(let x = 0, y = this.dateTimeColumnIndexes.length; x < y; x++) {
-								let columnIndex = this.dateTimeColumnIndexes[x];
-								let column      = this.columns[columnIndex];
-								let value       = res.payload.rows[i].values[columnIndex];
+							for(let columnIndex of this.dateTimeColumnIndexes) {
+								let atr   = this.attributeIdMap[this.columns[columnIndex].attributeId];
+								let value = res.payload.rows[i].values[columnIndex];
 								
-								switch(column.display) {
+								switch(atr.contentUse) {
 									case 'date':     value = this.getUnixFormat(value,'Y-m-d');     break;
 									case 'datetime': value = this.getUnixFormat(value,'Y-m-d H:i'); break;
 									case 'time':     value = this.getUtcTimeStringFromUnix(value);  break;

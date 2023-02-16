@@ -3,6 +3,7 @@ package column
 import (
 	"errors"
 	"fmt"
+	"r3/compatible"
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
@@ -96,6 +97,12 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column
 	for position, c := range columns {
 
 		known, err := schema.CheckCreateId_tx(tx, &c.Id, "column", "id")
+		if err != nil {
+			return err
+		}
+
+		// fix imports < 3.3: Migrate display option to attribute content use
+		c.Display, err = compatible.MigrateDisplayToContentUse_tx(tx, c.AttributeId, c.Display)
 		if err != nil {
 			return err
 		}

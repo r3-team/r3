@@ -4,6 +4,7 @@ import {getFlexBasis}       from '../shared/form.js';
 import {getRandomInt}       from '../shared/generic.js';
 import {getQueryTemplate}   from '../shared/query.js';
 import {
+	getAttributeIcon,
 	getIndexAttributeId,
 	isAttributeRelationship
 } from '../shared/attribute.js';
@@ -19,19 +20,12 @@ export let MyBuilderColumns = {
 	   	 	<div class="builder-field column column-wrap dragAnchor" :class="{ selected:columnIdShow === element.id }">
 				<div class="builder-field-header">
 					
-					<div class="batch-set clickable"
-						v-if="!isTemplate && showOptions"
-						@click="batchSet(index,1)"
-						@click.right.prevent="batchSet(index,-1)"
-						:title="element.batch === null ? capApp.columnBatchHintNot : capApp.columnBatchHint.replace('{CNT}',element.batch)"
-					>
-						[{{ element.batch === null ? 'B-' : 'B'+element.batch }}]
-					</div>
-					
-					<img class="on-hover on-selected action clickable" src="images/edit.png"
-						v-if="!isTemplate"
-						@click="$emit('column-id-show',element.id)"
-						:class="{ selected:columnIdShow === element.id }"
+					<my-button
+						@trigger="$emit('column-id-show',element.id)"
+						:active="!isTemplate"
+						:image="!element.subQuery ? getAttributeIcon(attributeIdMap[element.attributeId]) : 'database.png'"
+						:naked="true"
+						:tight="true"
 					/>
 					
 					<!-- toggle: show on mobile -->
@@ -41,6 +35,15 @@ export let MyBuilderColumns = {
 						:src="element.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
 						:title="capApp.onMobile"
 					/>
+					
+					<div class="batch-set clickable on-hover"
+						v-if="!isTemplate && showOptions"
+						@click="batchSet(index,1)"
+						@click.right.prevent="batchSet(index,-1)"
+						:title="element.batch === null ? capApp.columnBatchHintNot : capApp.columnBatchHint.replace('{CNT}',element.batch)"
+					>
+						[{{ element.batch === null ? 'B-' : 'B'+element.batch }}]
+					</div>
 					
 					<div class="clickable on-hover"
 						v-if="!isTemplate && showOptions"
@@ -108,6 +111,7 @@ export let MyBuilderColumns = {
 	},
 	methods:{
 		// externals
+		getAttributeIcon,
 		getFlexBasis,
 		getItemTitleColumn,
 		

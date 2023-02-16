@@ -124,19 +124,11 @@ let MyListCsv = {
 		this.action = this.isExport ? 'export' : 'import';
 		
 		for(let i = 0, j = this.columns.length; i < j; i++) {
-			
 			let atr = this.attributeIdMap[this.columns[i].attributeId];
-			if(atr.content === 'boolean')
-				this.hasBool = true;
-			
-			if(this.columns[i].display === 'date')
-				this.hasDate =  true;
-			
-			if(this.columns[i].display === 'datetime')
-				this.hasDatetime =  true;
-			
-			if(this.columns[i].display === 'time')
-				this.hasTime =  true;
+			if(atr.content    === 'boolean')  this.hasBool     = true;
+			if(atr.contentUse === 'date')     this.hasDate     = true; 
+			if(atr.contentUse === 'datetime') this.hasDatetime = true;
+			if(atr.contentUse === 'time')     this.hasTime     = true;
 		}
 	},
 	computed:{

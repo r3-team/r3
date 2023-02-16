@@ -20,8 +20,9 @@ let MyBuilderCollections = {
 			<div class="builder-entry-list">
 				
 				<div class="entry"
-					@click="$emit('createNew',readonly ? null : 'collection')"
-					:class="{ clickable:!readonly, off:readonly }"
+					v-if="!readonly"
+					@click="$emit('createNew','collection')"
+					:class="{ clickable:!readonly }"
 				>
 					<div class="row gap centered">
 						<img class="icon" src="images/add.png" />

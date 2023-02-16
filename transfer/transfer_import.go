@@ -265,8 +265,8 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 			if err := importCheckResultAndApply(tx, attribute.Set_tx(tx,
 				e.RelationId, e.Id, e.RelationshipId, e.IconId, e.Name,
-				e.Content, e.Length, e.Nullable, e.Encrypted, e.Def, e.OnUpdate, e.OnDelete,
-				e.Captions), e.Id, idMapSkipped); err != nil {
+				e.Content, e.ContentUse, e.Length, e.Nullable, e.Encrypted,
+				e.Def, e.OnUpdate, e.OnDelete, e.Captions), e.Id, idMapSkipped); err != nil {
 
 				return err
 			}

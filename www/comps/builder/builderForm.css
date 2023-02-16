@@ -6,7 +6,7 @@
 
 /* form builder sidebar area */
 .builder-form .sidebar{
-	min-width:420px;
+	min-width:500px;
 	flex:0 0 auto;
 	overflow:auto;
 }
@@ -255,10 +255,6 @@
 .builder-field .fields-nested.style-align-items-center           { align-items:center; }
 .builder-field .fields-nested.style-align-items-baseline         { align-items:baseline; }
 
-.builder-field .field-ref{
-	font-weight:bold;
-	font-family:Consolas,Courier,monospace,cursive;
-}
 .builder-field.column .batch-set{
 	font-weight:bold;
 	font-family:Consolas,Courier,monospace,cursive;

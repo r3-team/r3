@@ -724,36 +724,24 @@ let MyFilter = {
 		
 		// states
 		side0Column:(s) => {
-			for(let i = 0, j = s.columns.length; i < j; i++) {
-				let c = s.columns[i];
-				
-				if(c.index !== s.side0.attributeIndex || c.attributeId !== s.side0.attributeId)
-					continue;
-				
-				return c;
+			for(let c of s.columns) {
+				if(c.index === s.side0.attributeIndex && c.attributeId === s.side0.attributeId)
+					return c;
 			}
 			return false;
 		},
-		side0ColumDate:(s) => {
-			return ['date','datetime'].includes(s.side0Column.display);
-		},
-		side0ColumTime:(s) => {
-			return ['datetime','time'].includes(s.side0Column.display);
-		},
-		isNullOperator:(s) => {
-			return ['IS NULL','IS NOT NULL'].includes(s.operator);
-		},
-		isStringInput:(s) => {
-			return (
-				typeof s.side0.attributeId !== 'undefined' &&
-				s.side0.attributeId !== null &&
-				s.isAttributeString(s.attributeIdMap[s.side0.attributeId].content)
-			) || (
-				typeof s.side1.attributeId !== 'undefined' &&
-				s.side1.attributeId !== null &&
-				s.isAttributeString(s.attributeIdMap[s.side1.attributeId].content)
-			);
-		},
+		side0ColumDate:(s) => ['date','datetime'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
+		side0ColumTime:(s) => ['datetime','time'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
+		isNullOperator:(s) => ['IS NULL','IS NOT NULL'].includes(s.operator),
+		isStringInput: (s) => (
+			typeof s.side0.attributeId !== 'undefined' &&
+			s.side0.attributeId !== null &&
+			s.isAttributeString(s.attributeIdMap[s.side0.attributeId].content)
+		) || (
+			typeof s.side1.attributeId !== 'undefined' &&
+			s.side1.attributeId !== null &&
+			s.isAttributeString(s.attributeIdMap[s.side1.attributeId].content)
+		),
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap']

@@ -31,8 +31,8 @@ export function getFirstColumnUsableAsAggregator(batch,columns) {
 		// sub queries and already aggregated colums are not supported
 		if(!c.subQuery
 			&& c.aggregator === null
-			&& c.display !== 'color'
 			&& !a.encrypted
+			&& a.contentUse !== 'color'
 			&& !isAttributeFiles(a.content)
 			&& !isAttributeBoolean(a.content)
 			&& !isAttributeString(a.content)

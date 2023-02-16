@@ -177,7 +177,7 @@ let MyBuilderForm = {
 					<img v-if="!fieldShow" class="icon" src="images/form.png" />
 					<h1 v-if="!fieldShow">{{ capApp.sidebarForm }}</h1>
 					<h1 v-if="fieldShow" class="selected-ref">
-						{{ capApp.sidebarField.replace('{NAME}','F'+entityIdMapRef.field[fieldIdShow]) }}
+						{{ capApp.sidebarField.replace('{NAME}','F'+entityIdMapRef.field[fieldShow.id]) }}
 					</h1>
 				</div>
 				<div class="area">

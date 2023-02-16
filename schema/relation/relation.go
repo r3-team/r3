@@ -174,8 +174,8 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 		// create primary key attribute if relation is new (e. g. not imported or updated)
 		if isNew {
 			if err := attribute.Set_tx(tx, id, uuid.Nil,
-				pgtype.UUID{}, pgtype.UUID{}, schema.PkName, "integer", 0,
-				false, false, "", "", "", types.CaptionMap{}); err != nil {
+				pgtype.UUID{}, pgtype.UUID{}, schema.PkName, "integer", "default",
+				0, false, false, "", "", "", types.CaptionMap{}); err != nil {
 
 				return err
 			}

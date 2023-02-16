@@ -197,7 +197,7 @@ let MyListColumnBatch = {
 				let a = s.attributeIdMap[c.attributeId];
 				
 				// ignore color display, sub query, aggregator, encrypted and file attribute columns
-				if(c.display !== 'color' && c.query === null && c.aggregator === null &&
+				if(a.contentUse !== 'color' && c.query === null && c.aggregator === null &&
 					!a.encrypted && !s.isAttributeFiles(a.content)) {
 					
 					return c;
@@ -230,7 +230,7 @@ let MyListColumnBatch = {
 		showFilterItems:(s) => s.values.length != 0,
 		showFilterText: (s) => s.values.length >= 5 && !s.isDateOrTime,
 		isArrayInput:   (s) => typeof s.input === 'object',
-		isDateOrTime:   (s) => s.isValidFilter && ['datetime','date','time'].includes(s.columnUsedFilter.display),
+		isDateOrTime:   (s) => s.isValidFilter && ['datetime','date','time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
 		isFiltered:     (s) => s.columnFilterIndexes.length !== 0,
 		isOrdered:      (s) => s.columnSortPos !== -1,
 		isOrderedAsc:   (s) => s.isOrdered && s.orders[s.columnSortPos].ascending,
@@ -255,7 +255,8 @@ let MyListColumnBatch = {
 			if(v === null)
 				return '[' + this.capGen.button.empty + ']';
 			
-			switch(this.columnUsedFilter.display) {
+			let atr = this.attributeIdMap[this.columnUsedFilter.attributeId];
+			switch(atr.contentUse) {
 				case 'datetime': return this.getUnixFormat(v,this.dateFormat + ' H:i:S'); break;
 				case 'date':     return this.getUnixFormat(v,this.dateFormat);            break;
 				case 'time':     return this.getUtcTimeStringFromUnix(v);                 break;

@@ -21,8 +21,8 @@ export function getIndexAttributeId(index,attributeId,outsideIn,attributeIdNm) {
 		index,
 		attributeId,
 		outsideIn ? 'rel' : 'org',
-		attributeIdNm].join('_')
-	;
+		attributeIdNm
+	].join('_');
 };
 
 export function getIndexAttributeIdByField(f,altAttribute) {
@@ -123,6 +123,33 @@ export function getAttributeValuesFromGetter(getter) {
 				MyStore.getters['schema/attributeIdMap'][atrId].content,value);
 	}
 	return map;
+};
+
+export function getAttributeIcon(attribute) {
+	if(isAttributeString(attribute.content)) {
+		switch(attribute.contentUse) {
+			case 'default':  return 'text.png';       break;
+			case 'richtext': return 'text_rich.png';  break;
+			case 'textarea': return 'text_lines.png'; break;
+			case 'color':    return 'colors.png';     break;
+		}
+	}
+	if(isAttributeInteger(attribute.content)) {
+		switch(attribute.contentUse) {
+			case 'datetime': return 'calendar_time.png'; break;
+			case 'date':     return 'calendar.png';      break;
+			case 'time':     return 'clock.png';         break;
+			default:         return 'numbers.png';       break;
+		}
+	}
+	if(isAttributeBoolean(attribute.content))        return 'bool.png';
+	if(isAttributeUuid(attribute.content))           return 'uuid.png';
+	if(isAttributeFloat(attribute.content))          return 'numbers_float.png';
+	if(isAttributeNumeric(attribute.content))        return 'numbers_decimal.png';
+	if(isAttributeFiles(attribute.content))          return 'files.png';
+	if(isAttributeRelationship11(attribute.content)) return 'link1.png';
+	if(isAttributeRelationshipN1(attribute.content)) return 'link2.png';
+	return 'noPic.png';
 };
 
 export function isAttributeBoolean(content) { return content === 'boolean'; };

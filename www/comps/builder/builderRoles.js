@@ -18,8 +18,9 @@ let MyBuilderRoles = {
 			<div class="builder-entry-list">
 				
 				<div class="entry"
-					@click="$emit('createNew',readonly ? null : 'role')"
-					:class="{ clickable:!readonly, off:readonly }"
+					v-if="!readonly"
+					@click="$emit('createNew','role')"
+					:class="{ clickable:!readonly }"
 				>
 					<div class="row gap centered">
 						<img class="icon" src="images/add.png" />

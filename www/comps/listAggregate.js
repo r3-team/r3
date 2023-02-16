@@ -23,14 +23,17 @@ let MyListAggregate = {
 		joins:                  { type:Array,   required:true }, // list joins
 		relationId:             { type:String,  required:true }  // list base relation
 	},
-	data:function() {
+	data() {
 		return {
 			columnBatchIndexMapValue:{}
 		};
 	},
 	computed:{
 		anyValues: (s) => Object.keys(s.columnBatchIndexMapValue).length !== 0,
-		dateFormat:(s) => s.$store.getters.settings.dateFormat
+		dateFormat:(s) => s.$store.getters.settings.dateFormat,
+		
+		// stores
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap']
 	},
 	methods:{
 		// external
@@ -93,7 +96,7 @@ let MyListAggregate = {
 							continue;
 						}
 						
-						switch(columns[valueIndex].display) {
+						switch(this.attributeIdMap[columns[valueIndex].attributeId].contentUse) {
 							case 'date':     v = this.getUnixFormat(v,this.dateFormat); break;
 							case 'datetime': v = this.getUnixFormat(v,this.dateFormat + ' H:i'); break;
 							case 'time':     v = this.getUtcTimeStringFromUnix(v); break;

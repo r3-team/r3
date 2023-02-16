@@ -1001,21 +1001,15 @@ let MyField = {
 		isList:     function() { return this.field.content === 'list'; },
 		isTabs:     function() { return this.field.content === 'tabs'; },
 		
-		// display
+		// states
 		isHidden:  function() { return this.stateFinal === 'hidden'; },
 		isReadonly:function() { return this.stateFinal === 'readonly'; },
 		isRequired:function() { return this.stateFinal === 'required'; },
 		
 		// display options
-		isColor:   function() { return this.isData && this.field.display === 'color'; },
-		isDate:    function() { return this.isData && this.field.display === 'date'; },
-		isDatetime:function() { return this.isData && this.field.display === 'datetime'; },
 		isLogin:   function() { return this.isData && this.field.display === 'login'; },
 		isPassword:function() { return this.isData && this.field.display === 'password'; },
 		isSlider:  function() { return this.isData && this.field.display === 'slider'; },
-		isTime:    function() { return this.isData && this.field.display === 'time'; },
-		isTextarea:function() { return this.isData && this.field.display === 'textarea'; },
-		isRichtext:function() { return this.isData && this.field.display === 'richtext'; },
 		
 		// composite
 		isActive:   function() { return !this.isMobile || this.field.onMobile; },
@@ -1024,13 +1018,19 @@ let MyField = {
 		isBoolean:  function() { return this.isData && this.isAttributeBoolean(this.attribute.content); },
 		isCategory: function() { return this.isData && this.isRelationship && this.field.category; },
 		isClipboard:function() { return this.isData && this.field.clipboard && !this.isFiles && !this.isRelationship; },
+		isColor:    function() { return this.isData && this.attribute.contentUse === 'color'; },
+		isDate:     function() { return this.isData && this.attribute.contentUse === 'date'; },
+		isDatetime: function() { return this.isData && this.attribute.contentUse === 'datetime'; },
 		isDateInput:function() { return this.isData && this.isDatetime || this.isDate || this.isTime; },
 		isDateRange:function() { return this.isDateInput && this.field.attributeIdAlt !== null; },
 		isDecimal:  function() { return this.isData && this.isAttributeDecimal(this.attribute.content); },
 		isFiles:    function() { return this.isData && this.isAttributeFiles(this.attribute.content); },
 		isInteger:  function() { return this.isData && this.isAttributeInteger(this.attribute.content); },
 		isQuery:    function() { return this.isCalendar || this.isChart || this.isList || this.isRelationship },
+		isRichtext: function() { return this.isData && this.attribute.contentUse === 'richtext'; },
 		isString:   function() { return this.isData && this.isAttributeString(this.attribute.content); },
+		isTextarea: function() { return this.isData && this.attribute.contentUse === 'textarea'; },
+		isTime:     function() { return this.isData && this.attribute.contentUse === 'time'; },
 		isUuid:     function() { return this.isData && this.isAttributeUuid(this.attribute.content); },
 		isRelationship:  function() { return this.isData && this.isAttributeRelationship(this.attribute.content); },
 		isRelationship1N:function() { return this.isRelationship && this.field.outsideIn === true && this.attribute.content === 'n:1'; },
@@ -1106,7 +1106,7 @@ let MyField = {
 			this.focused = true;
 		},
 		click:function() {
-			if(this.field.display === 'color' && !this.isReadonly)
+			if(this.isColor && !this.isReadonly)
 				this.showColorPickerInput = !this.showColorPickerInput;
 		},
 		clickOutside:function() {

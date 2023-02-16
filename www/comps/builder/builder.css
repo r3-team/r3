@@ -167,6 +167,9 @@
 	max-height:100%;
 	align-content:flex-start;
 }
+.builder-entry-list.height-limit{
+	max-height:700px;
+}
 .builder-entry-list .entry{
 	width:380px;
 	height:46px;
@@ -367,6 +370,11 @@
     filter:var(--image-filter);
 }
 
+/* attributes */
+.builder-attribute{
+	overflow:auto;
+}
+
 /* caption */
 .builder-caption{
 	flex:1 1 auto;
@@ -382,7 +390,7 @@
 	align-items:center;
 }
 .builder-query .nested-join{
-	max-width:400px;
+	max-width:500px;
 	margin:0px 0px 0px 8px;
 }
 .builder-query .nested-join.nested{

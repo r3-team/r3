@@ -943,6 +943,18 @@ func setData_tx(tx pgx.Tx, fieldId uuid.UUID, attributeId uuid.UUID,
 		defCollection.MultiValue = false
 	}
 
+	// fix imports < 3.3: Migrate display option to attribute content use
+	display, err = compatible.MigrateDisplayToContentUse_tx(tx, attributeId, display)
+	if err != nil {
+		return err
+	}
+	if attributeIdAlt.Valid {
+		_, err = compatible.MigrateDisplayToContentUse_tx(tx, attributeIdAlt.Bytes, display)
+		if err != nil {
+			return err
+		}
+	}
+
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.field_data

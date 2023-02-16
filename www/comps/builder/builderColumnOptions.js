@@ -3,7 +3,6 @@ import MyBuilderQuery   from './builderQuery.js';
 import {
 	getIndexAttributeIdsByJoins,
 	isAttributeFiles,
-	isAttributeInteger,
 	isAttributeString
 } from '../shared/attribute.js';
 import {
@@ -113,14 +112,9 @@ let MyBuilderColumnOptions = {
 							:value="column.display"
 						>
 							<option value="default">{{ capApp.option.displayDefault }}</option>
-							<option v-if="isInteger" value="datetime">{{ capApp.option.displayDatetime }}</option>
-							<option v-if="isInteger" value="date"    >{{ capApp.option.displayDate }}</option>
-							<option v-if="isInteger" value="time"    >{{ capApp.option.displayTime }}</option>
-							<option v-if="isString"  value="color"   >{{ capApp.option.displayColor }}</option>
 							<option v-if="isString"  value="email"   >{{ capApp.option.displayEmail }}</option>
 							<option v-if="isString"  value="password">{{ capApp.option.displayPassword }}</option>
 							<option v-if="isString"  value="phone"   >{{ capApp.option.displayPhone }}</option>
-							<option v-if="isString"  value="richtext">{{ capApp.option.displayRichtext }}</option>
 							<option v-if="isString"  value="url"     >{{ capApp.option.displayUrl }}</option>
 							<option v-if="isFiles"   value="gallery" >{{ capApp.option.displayGallery }}</option>
 							<option value="hidden">{{ capApp.option.displayHidden }}</option>
@@ -200,7 +194,6 @@ let MyBuilderColumnOptions = {
 		
 		// simple
 		isFiles:   (s) => s.isAttributeFiles(s.attribute.content),
-		isInteger: (s) => s.isAttributeInteger(s.attribute.content),
 		isString:  (s) => s.isAttributeString(s.attribute.content),
 		isSubQuery:(s) => s.column.subQuery,
 		
@@ -214,7 +207,6 @@ let MyBuilderColumnOptions = {
 		getCaptionByIndexAttributeId,
 		getIndexAttributeIdsByJoins,
 		isAttributeFiles,
-		isAttributeInteger,
 		isAttributeString,
 		
 		// actions

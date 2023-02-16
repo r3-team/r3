@@ -17,8 +17,9 @@ let MyBuilderRelations = {
 			<div class="builder-entry-list">
 			
 				<div class="entry"
-					@click="$emit('createNew',readonly ? null : 'relation')"
-					:class="{ clickable:!readonly, off:readonly }"
+					v-if="!readonly"
+					@click="$emit('createNew','relation')"
+					:class="{ clickable:!readonly }"
 				>
 					<div class="row gap centered">
 						<img class="icon" src="images/add.png" />
@@ -62,14 +63,14 @@ let MyBuilderRelations = {
 			</div>
 		</div>
 	</div>`,
-	data:function() {
-		return {
-			filter:'',
-		};
-	},
 	props:{
 		id:      { type:String,  required:true },
 		readonly:{ type:Boolean, required:true }
+	},
+	data() {
+		return {
+			filter:'',
+		};
 	},
 	computed:{
 		module:(s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],

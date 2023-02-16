@@ -87,15 +87,16 @@ type Attribute struct {
 	Id             uuid.UUID   `json:"id"`
 	RelationId     uuid.UUID   `json:"relationId"`     // attribute belongs to this relation
 	RelationshipId pgtype.UUID `json:"relationshipId"` // ID of target relation
-	IconId         pgtype.UUID `json:"iconId"`         // default icon for attribute
-	Name           string      `json:"name"`           // name of attributes, used as table column
-	Content        string      `json:"content"`        // attribute content (integer, text, ...)
+	IconId         pgtype.UUID `json:"iconId"`         // default icon
+	Name           string      `json:"name"`           // name, used as table column
+	Content        string      `json:"content"`        // content (integer, varchar, text, real, uuid, files, n:1, ...)
+	ContentUse     string      `json:"contentUse"`     // content use (default, richtext, color, datetime, ...)
 	Length         int         `json:"length"`         // varchar length or max file size in KB (files attribute)
-	Nullable       bool        `json:"nullable"`
-	Encrypted      bool        `json:"encrypted"` // content is encrypted (end-to-end for logins)
-	Def            string      `json:"def"`
-	OnUpdate       string      `json:"onUpdate"`
-	OnDelete       string      `json:"onDelete"`
+	Nullable       bool        `json:"nullable"`       // value is nullable
+	Encrypted      bool        `json:"encrypted"`      // value is encrypted (end-to-end for logins)
+	Def            string      `json:"def"`            // default value
+	OnUpdate       string      `json:"onUpdate"`       // relationship attribute, action on 'UPDATE'
+	OnDelete       string      `json:"onDelete"`       // relationship attribute, action on 'DELETE'
 	Captions       CaptionMap  `json:"captions"`
 }
 type Menu struct {

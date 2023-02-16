@@ -43,8 +43,9 @@ let MyBuilderForms = {
 			
 			<div class="builder-entry-list">
 				<div class="entry"
-					@click="$emit('createNew',readonly ? null : 'form')"
-					:class="{ clickable:!readonly, off:readonly }"
+					v-if="!readonly"
+					@click="$emit('createNew','form')"
+					:class="{ clickable:!readonly }"
 				>
 					<div class="row gap centered">
 						<img class="icon" src="images/add.png" />
@@ -80,7 +81,7 @@ let MyBuilderForms = {
 		id:             { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			copyFormId:null,
 			copyNewName:'',

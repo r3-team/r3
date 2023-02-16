@@ -80,7 +80,7 @@ let MyValueRich = {
 		attributeId:{ type:String,  required:true },
 		basis:      { type:Number,  required:false, default:0 },         // size basis (usually column width)
 		clipboard:  { type:Boolean, required:false, default:false },     // copy-to-clipboard action
-		display:    { type:String,  required:false, default:'default' }, // variant (color, url, gallery, ...)
+		display:    { type:String,  required:false, default:'default' }, // variant (url, gallery, password ...)
 		length:     { type:Number,  required:false, default:0 },         // string length limit
 		value:      { required:true },
 		wrap:       { type:Boolean, required:false, default:false }      // wrap string value
@@ -88,11 +88,11 @@ let MyValueRich = {
 	emits:['clipboard','focus','trigger'],
 	watch:{
 		value:{
-			handler:function() { this.setValue(); },
+			handler() { this.setValue(); },
 			immediate:true
 		}
 	},
-	data:function() {
+	data() {
 		return {
 			isColor:false,
 			isFiles:false,
@@ -105,29 +105,18 @@ let MyValueRich = {
 		};
 	},
 	computed:{
-		files:function() {
-			return !this.isFiles || this.value === null
-				? [] : this.value;
-		},
-		link:function() {
-			return !this.isLink || this.value === null
-				? false : this.getLinkMeta(this.display,this.value);
-		},
+		files:(s) => !s.isFiles || s.value === null ? [] : s.value,
+		link: (s) => !s.isLink || s.value === null ? false : s.getLinkMeta(s.display,s.value),
 		
 		// styles
-		style:function() {
-			return !this.isColor ? '' : 'background-color:#'+this.value;
-		},
-		styleGallery:function() {
-			return !this.isGallery || this.basis === 0 ? '' :
-				`width:${this.basis}px;height:${this.basis}px;`;
-		},
+		style:       (s) => !s.isColor ? '' : 'background-color:#'+s.value,
+		styleGallery:(s) => !s.isGallery || s.basis === 0 ? '' : `width:${s.basis}px;height:${s.basis}px;`,
 		
 		// store
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		token:         function() { return this.$store.getters['local/token']; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		dateFormat:    function() { return this.$store.getters.settings.dateFormat; }
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		token:         (s) => s.$store.getters['local/token'],
+		capGen:        (s) => s.$store.getters.captions.generic,
+		dateFormat:    (s) => s.$store.getters.settings.dateFormat
 	},
 	methods:{
 		// externals
@@ -139,78 +128,72 @@ let MyValueRich = {
 		getUtcTimeStringFromUnix,
 		openLink,
 		
-		copyToClipboard:function() {
+		copyToClipboard() {
 			navigator.clipboard.writeText(
 				!this.isPassword ? this.stringValueFull : this.value
 			);
 			this.$emit('clipboard');
 		},
-		setValue:function() {
-			// special values based on attribute content
-			switch(this.attributeIdMap[this.attributeId].content) {
+		setValue() {
+			let directValue = false;
+			let atr = this.attributeIdMap[this.attributeId];
+			switch(atr.content) {
 				case 'boolean':
 					this.stringValue = this.value ? this.capGen.option.yes : this.capGen.option.no;
-					this.isString = true;
-					return;
+					return this.isString = true;
 				break;
 				case 'files':
-					this.isFiles = true;
-					
-					if(this.display === 'gallery')
-						this.isGallery = true;
-					
-					return;
+					this.isGallery = this.display === 'gallery';
+					return this.isFiles = true;
 				break;
+				
+				// text
+				case 'text': // fallthrough
+				case 'varchar':
+					
+					// handle different uses and display options
+					switch(atr.contentUse) {
+						case 'color': return this.isColor = true; break;
+						case 'richtext':
+							if(this.value !== null)
+								this.stringValueFull = this.getHtmlStripped(this.value);
+						break;
+						default: directValue = true; break;
+					}
+					switch(this.display) {
+						case 'password':
+							this.isPassword      = true;
+							this.stringValueFull = '**********';
+							directValue = false;
+						break;
+						case 'email': // fallthrough
+						case 'phone': // fallthrough
+						case 'url':
+							this.isLink = true;
+						break;
+					}
+				break;
+				
+				// integers
+				case 'integer': // fallthrough
+				case 'bigint':
+					switch(atr.contentUse) {
+						case 'date':     this.stringValueFull = this.getUnixFormat(this.value,this.dateFormat);          break;
+						case 'datetime': this.stringValueFull = this.getUnixFormat(this.value,this.dateFormat + ' H:i'); break;
+						case 'time':     this.stringValueFull = this.getUtcTimeStringFromUnix(this.value);               break;
+						default:         directValue = true; break;
+					}
+				break;
+				
+				// others (numbers, UUID)
+				default: directValue = true; break;
 			}
 			
-			// text values, apply display variant
-			switch(this.display) {
-				
-				// show value as color
-				case 'color':
-					this.isColor = true;
-					return;
-				break;
-				
-				// show value as string
-				case 'email': // fallthrough, all links, all default strings
-				case 'phone': // fallthrough, all links, all default strings
-				case 'url':   // fallthrough, all links, all default strings
-					this.isLink = true;
-				case 'default':
-					this.isString = true;
-					
-					if(this.value !== null)
-						this.stringValueFull = this.value;
-				break;
-				
-				case 'password':
-					this.isString        = true;
-					this.isPassword      = true;
-					this.stringValueFull = '**********';
-				break;
-				
-				case 'richtext':
-					this.isString = true;
-					
-					if(this.value !== null)
-						this.stringValueFull = this.getHtmlStripped(this.value);
-				break;
-				
-				// date / time
-				case 'date':
-					this.isString = true;
-					this.stringValueFull = this.getUnixFormat(this.value,this.dateFormat);
-				break;
-				case 'datetime':
-					this.isString = true;
-					this.stringValueFull = this.getUnixFormat(this.value,this.dateFormat + ' H:i');
-				break;
-				case 'time':
-					this.isString = true;
-					this.stringValueFull = this.getUtcTimeStringFromUnix(this.value);
-				break;
-			}
+			// only string values left
+			this.isString = true;
+			
+			if(directValue && this.value !== null)
+				this.stringValueFull = this.value;
 			
 			// set final string value with applied text length limit
 			if(this.length !== 0 && this.stringValueFull.length > this.length)
