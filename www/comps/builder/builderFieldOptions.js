@@ -187,7 +187,7 @@ let MyBuilderFieldOptionsChart = {
 		modelValue:{ type:String, required:true }
 	},
 	emits:['update:modelValue'],
-	data:function() {
+	data() {
 		return {
 			jsonBad:false,      // JSON validity check failed
 			jsonFirstLoad:true, // prettify JSON input on first load
@@ -218,7 +218,7 @@ let MyBuilderFieldOptionsChart = {
 	},
 	watch:{
 		option:{
-			handler:function(v) {
+			handler(v) {
 				if(this.jsonFirstLoad) {
 					this.jsonInput     = JSON.stringify(JSON.parse(v),null,2);
 					this.jsonFirstLoad = false;
@@ -392,21 +392,14 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<tr v-if="!isRelationship">
+				<tr v-if="!isRelationship && displayOptions.length > 1">
 					<td>{{ capApp.display }}</td>
 					<td>
 						<select
 							@input="set('display',$event.target.value)"
 							:value="field.display"
 						>
-							<option value="default">{{ capApp.option.displayDefault }}</option>
-							<option v-if="isInteger" value="slider"  >{{ capApp.option.displaySlider }}</option>
-							<option v-if="isInteger" value="login"   >{{ capApp.option.displayLogin }}</option>
-							<option v-if="isString"  value="password">{{ capApp.option.displayPassword }}</option>
-							<option v-if="isString"  value="email"   >{{ capApp.option.displayEmail }}</option>
-							<option v-if="isString"  value="phone"   >{{ capApp.option.displayPhone }}</option>
-							<option v-if="isString"  value="url"     >{{ capApp.option.displayUrl }}</option>
-							<option v-if="isFiles"   value="gallery" >{{ capApp.option.displayGallery }}</option>
+							<option v-for="o in displayOptions" :value="o">{{ capApp.option.display[o] }}</option>
 						</select>
 					</td>
 				</tr>
@@ -1074,6 +1067,13 @@ let MyBuilderFieldOptions = {
 	computed:{
 		attribute:(s) => !s.isData || typeof s.attributeIdMap[s.field.attributeId] === 'undefined'
 			? false : s.attributeIdMap[s.field.attributeId],
+		displayOptions:(s) => {
+			let out = ['default'];
+			if(s.isInteger && s.isDisplayDefault) out.push('slider','login');
+			if(s.isString  && s.isDisplayDefault) out.push('password','email','phone','url');
+			if(s.isFiles)                         out.push('gallery');
+			return out;
+		},
 		presetIdMap:(s) => {
 			if(!s.isRelationship)
 				return {};
@@ -1094,23 +1094,24 @@ let MyBuilderFieldOptions = {
 		},
 		
 		// simple states
-		hasCaption:    (s) => s.isData || s.isHeader,
-		isButton:      (s) => s.field.content === 'button',
-		isCalendar:    (s) => s.field.content === 'calendar',
-		isChart:       (s) => s.field.content === 'chart',
-		isContainer:   (s) => s.field.content === 'container',
-		isData:        (s) => s.field.content === 'data',
-		isDate:        (s) => s.isData && s.attribute.contentUse === 'date',
-		isDatetime:    (s) => s.isData && s.attribute.contentUse === 'datetime',
-		isHeader:      (s) => s.field.content === 'header',
-		isList:        (s) => s.field.content === 'list',
-		isOpenForm:    (s) => typeof s.field.openForm !== 'undefined' && s.field.openForm !== null,
-		isQuery:       (s) => s.isCalendar || s.isChart || s.isList || s.isRelationship,
-		isTabs:        (s) => s.field.content === 'tabs',
-		isFiles:       (s) => s.isData && s.isAttributeFiles(s.attribute.content),
-		isInteger:     (s) => s.isData && s.isAttributeInteger(s.attribute.content),
-		isRelationship:(s) => s.isData && s.isAttributeRelationship(s.attribute.content),
-		isString:      (s) => s.isData && s.isAttributeString(s.attribute.content),
+		hasCaption:      (s) => s.isData || s.isHeader,
+		isButton:        (s) => s.field.content === 'button',
+		isCalendar:      (s) => s.field.content === 'calendar',
+		isChart:         (s) => s.field.content === 'chart',
+		isContainer:     (s) => s.field.content === 'container',
+		isData:          (s) => s.field.content === 'data',
+		isDate:          (s) => s.isData && s.attribute.contentUse === 'date',
+		isDatetime:      (s) => s.isData && s.attribute.contentUse === 'datetime',
+		isDisplayDefault:(s) => s.isData && s.attribute.contentUse === 'default',
+		isHeader:        (s) => s.field.content === 'header',
+		isList:          (s) => s.field.content === 'list',
+		isOpenForm:      (s) => typeof s.field.openForm !== 'undefined' && s.field.openForm !== null,
+		isQuery:         (s) => s.isCalendar || s.isChart || s.isList || s.isRelationship,
+		isTabs:          (s) => s.field.content === 'tabs',
+		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
+		isInteger:       (s) => s.isData && s.isAttributeInteger(s.attribute.content),
+		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.attribute.content),
+		isString:        (s) => s.isData && s.isAttributeString(s.attribute.content),
 		
 		// stores
 		module:        (s) => s.moduleIdMap[s.moduleId],

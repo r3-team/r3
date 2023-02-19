@@ -227,7 +227,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			WHERE display IN ('datetime','date','time','richtext','textarea','color');
 			
 			-- remove invalid data display options
-			ALTER TYPE app.data_display RENAME TO app.data_display_old;
+			ALTER TYPE app.data_display RENAME TO data_display_old;
 			CREATE TYPE app.data_display AS ENUM ('default', 'email', 'gallery', 'hidden', 'login', 'password', 'phone', 'slider', 'url');
 			ALTER TABLE app.field_data ALTER COLUMN display TYPE app.data_display USING display::text::app.data_display;
 			ALTER TABLE app.column ALTER COLUMN display TYPE app.data_display USING display::text::app.data_display;

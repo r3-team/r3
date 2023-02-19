@@ -204,6 +204,25 @@
 	white-space:break-spaces;
 	word-break:break-all;
 }
+.builder-field-button{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:5px;
+	padding:2px 4px;
+	margin:0px 3px 0px 0px;
+	font-weight:bold;
+}
+.builder-field-button:hover{
+	border-bottom:2px solid var(--color-form-builder-selected);
+}
+.builder-field-button.selected{
+	border-bottom:3px solid var(--color-form-builder-selected);
+}
+.builder-field-button img{
+	height:24px;
+	filter:var(--image-filter);
+}
 
 .builder-field .fields-nested{
 	/* nesting target inside container */

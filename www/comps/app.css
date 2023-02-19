@@ -203,9 +203,10 @@ body                                         { --depth:6; }
 .builder-icon-input .iconLine.disabled       { --depth:5; }
 .builder-form-state                          { --depth:5; }
 .builder-form-state-effect                   { --depth:7; }
-.builder-field                               { --depth:9; }
+.builder-field                               { --depth:7; }
 .builder-field .builder-columns              { --depth:1; }
 .builder-field .fields-nested                { --depth:1; }
+.builder-field-button                        { --depth:7; }
 .builder-modules .item-wrap                  { --depth:5; }
 .builder-menu .nested                        { --depth:6; }
 .builder-articles-assign                     { --depth:2; }

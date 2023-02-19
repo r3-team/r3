@@ -32,15 +32,14 @@ let MyBuilderField = {
 	>
 		<div class="builder-field-header" :class="{ dragAnchor:!moveActive && !noMovement }">
 			<!-- field icon -->
-			<my-button
-				@trigger="$emit('field-id-show',field.id,'properties')"
-				:active="!isTemplate && !moveActive"
-				:caption="reference"
-				:captionTitle="capApp.fieldOptions"
-				:image="icon"
-				:naked="true"
-				:tight="true"
-			/>
+			<div class="builder-field-button"
+				@click="openSettings"
+				:class="{ clickable:!isTemplate && !moveActive, selected:isSelected }"
+				:title="capApp.fieldOptions"
+			>
+				<img :src="'images/' + icon" />
+				<span>{{ reference }}</span>
+			</div>
 			
 			<!-- container actions 1 -->
 			<template v-if="!isTemplate && !moveActive && isContainer">
@@ -399,6 +398,9 @@ let MyBuilderField = {
 		isAttributeRelationship,
 		
 		// actions
+		openSettings() {
+			this.$emit('field-id-show',this.field.id,'properties');
+		},
 		toggleBool(oldBool) {
 			return !oldBool;
 		},

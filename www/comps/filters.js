@@ -730,8 +730,8 @@ let MyFilter = {
 			}
 			return false;
 		},
-		side0ColumDate:(s) => ['date','datetime'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
-		side0ColumTime:(s) => ['datetime','time'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
+		side0ColumDate:(s) => s.side0Column && ['date','datetime'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
+		side0ColumTime:(s) => s.side0Column && ['datetime','time'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
 		isNullOperator:(s) => ['IS NULL','IS NOT NULL'].includes(s.operator),
 		isStringInput: (s) => (
 			typeof s.side0.attributeId !== 'undefined' &&

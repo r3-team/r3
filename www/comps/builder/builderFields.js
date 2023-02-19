@@ -101,8 +101,6 @@ let MyBuilderFields = {
 		//  and then clicking on a field in another fields list (target)
 		// actual move happens in step 2 and is in context of target list
 		moveByClick(fieldList,fieldIndex,moveToParent) {
-			console.log(arguments);
-			
 			if(fieldList === null)
 				fieldList = this.fields;
 			
