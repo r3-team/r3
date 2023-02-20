@@ -1,8 +1,9 @@
-import MyBuilderCaption  from './builderCaption.js';
-import MyBuilderQuery    from './builderQuery.js';
-import {getDataFieldMap} from '../shared/form.js';
-import {copyValueDialog} from '../shared/generic.js';
-import MyTabs            from '../tabs.js';
+import MyBuilderCaption   from './builderCaption.js';
+import MyBuilderQuery     from './builderQuery.js';
+import {getDataFieldMap}  from '../shared/form.js';
+import {copyValueDialog}  from '../shared/generic.js';
+import {getJoinsIndexMap} from '../shared/query.js';
+import MyTabs             from '../tabs.js';
 import {
 	getDependentModules,
 	getFunctionHelp,
@@ -389,7 +390,7 @@ let MyBuilderJsFunction = {
 	},
 	watch:{
 		jsFunction:{
-			handler:function() { this.reset(); },
+			handler() { this.reset(); },
 			immediate:true
 		}
 	},
@@ -399,7 +400,7 @@ let MyBuilderJsFunction = {
 	unmounted() {
 		this.$emit('hotkeysRegister',[]);
 	},
-	data:function() {
+	data() {
 		return {
 			name:'',
 			formId:null,
@@ -460,11 +461,12 @@ let MyBuilderJsFunction = {
 			? s.getFunctionHelp('pg',s.pgFunctionIdMap[s.entityId],s.builderLanguage) : '',
 		
 		// simple
-		dataFieldMap:(s) => s.formId === null ? {} : s.getDataFieldMap(s.formIdMap[s.formId].fields),
-		form:        (s) => s.formId === null ? false : s.formIdMap[s.formId],
-		jsFunction:  (s) => typeof s.jsFunctionIdMap[s.id] === 'undefined' ? false : s.jsFunctionIdMap[s.id],
-		module:      (s) => s.jsFunction === false ? false : s.moduleIdMap[s.jsFunction.moduleId],
-		preview:     (s) => !s.showPreview ? '' : s.placeholdersUnset(),
+		dataFieldMap: (s) => s.formId === null ? {} : s.getDataFieldMap(s.formIdMap[s.formId].fields),
+		form:         (s) => s.formId === null ? false : s.formIdMap[s.formId],
+		joinsIndexMap:(s) => s.form !== false ? s.getJoinsIndexMap(s.form.query.joins) : {},
+		jsFunction:   (s) => typeof s.jsFunctionIdMap[s.id] === 'undefined' ? false : s.jsFunctionIdMap[s.id],
+		module:       (s) => s.jsFunction === false ? false : s.moduleIdMap[s.jsFunction.moduleId],
+		preview:      (s) => !s.showPreview ? '' : s.placeholdersUnset(),
 		
 		// stores
 		modules:        (s) => s.$store.getters['schema/modules'],
@@ -486,6 +488,7 @@ let MyBuilderJsFunction = {
 		getDependentModules,
 		getFunctionHelp,
 		getItemTitle,
+		getJoinsIndexMap,
 		
 		// presentation
 		displayFieldName(fieldId) {
@@ -748,17 +751,11 @@ let MyBuilderJsFunction = {
 			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption)\\(\{(\\d+)\:(${dbName})\.(${dbName})\}`,'g');
 			body = body.replace(pat,function(match,mode,part,index,relName,atrName) {
 				
-				// resolve relation by name
-				let rel = false;
-				for(let i = 0, j = that.module.relations.length; i < j; i++) {
-					if(that.module.relations[i].name !== relName)
-						continue;
-					
-					rel = that.module.relations[i];
-					break;
-				}
-				if(rel === false)
+				// resolve relation by join index of form query
+				if(typeof that.joinsIndexMap[index] === 'undefined')
 					return match;
+				
+				let rel = that.relationIdMap[that.joinsIndexMap[index].relationId];
 				
 				// resolve attribute by name
 				let atr = false;
