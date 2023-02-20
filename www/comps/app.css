@@ -280,6 +280,9 @@ h3{
 .column.gap{
 	gap:10px;
 }
+.column.grow{
+	flex:1 1 auto;
+}
 .column.space-between{
 	justify-content:space-between;
 }
@@ -292,6 +295,9 @@ h3{
 }
 .row.gap{
 	gap:10px;
+}
+.row.grow{
+	flex:1 1 auto;
 }
 .row.space-between{
 	justify-content:space-between;

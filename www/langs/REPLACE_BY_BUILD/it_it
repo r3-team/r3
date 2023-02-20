@@ -562,7 +562,7 @@
 				"text":"Single line of text. Can be used for names, email addresses, phone numbers, addresses and so on.",
 				"textarea":"Multiple lines of text. For larger amounts of text. Useful for descriptions or notes.",
 				"time":"A time value. Used when only hours/minutes/seconds are needed, independent of date.",
-				"uuid":"Universally unique identifier value (UUIDv4). When generated correctly, UUIDs are statistically extremely unlikely to ever exist twice, independent in what system they originated. Most often used to uniquely identify or reference records in disconnected systems."
+				"uuid":"Universally unique identifier value (UUIDv4). UUIDs are statistically extremely unlikely to ever exist twice, independent in what system they originated. Most often used to uniquely identify or reference records in disconnected systems."
 			},
 			"bigint":"Large values",
 			"bigintDates":"Support dates after 2038",
@@ -1060,6 +1060,8 @@
 			},
 			"attributes":"Attributi ({CNT})",
 			"attributeContent":"Value type",
+			"attributeLength":"Max. length/size",
+			"attributeNoIcon":"No icon defined",
 			"attributeNotNullable":"Must have value",
 			"codeCondition":"Condizione",
 			"encryption":"E2E encryption",

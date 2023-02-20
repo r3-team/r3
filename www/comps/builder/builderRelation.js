@@ -162,7 +162,12 @@ let MyBuilderRelation = {
 			<div class="contentPart full">
 				<div class="contentPartHeader clickable" @click="showAttributes = !showAttributes">
 					<img class="icon" :src="displayArrow(showAttributes)" />
-					<h1>{{ capApp.attributes.replace('{CNT}',relation.attributes.length) }}</h1>
+					<div class="row centered grow space-between gap">
+						<h1>{{ capApp.attributes.replace('{CNT}',relation.attributes.length) }}</h1>
+						<div class="default-inputs" v-if="showAttributes">
+							<input @click.stop="" v-model="attributeFilter" :placeholder="capGen.threeDots" />
+						</div>
+					</div>
 				</div>
 				
 				<div class="builder-entry-list height-limit" v-if="showAttributes">
@@ -179,7 +184,7 @@ let MyBuilderRelation = {
 					
 					<div class="entry clickable"
 						@click="attributeIdEdit = atr.id"
-						v-for="atr in relation.attributes"
+						v-for="atr in relation.attributes.filter(v => attributeFilter === '' || v.name.includes(attributeFilter.toLowerCase()))"
 					>
 						<div class="row centered gap">
 							<my-button
@@ -197,6 +202,14 @@ let MyBuilderRelation = {
 							</div>
 						</div>
 						<div class="row centered">
+							<my-button
+								v-if="atr.length !== 0"
+								:active="false"
+								:caption="'['+String(atr.length)+']'"
+								:captionTitle="capApp.attributeLength"
+								:naked="true"
+								:tight="true"
+							/>
 							<my-button image="asterisk.png"
 								v-if="!atr.nullable"
 								:active="false"
@@ -206,8 +219,8 @@ let MyBuilderRelation = {
 							/>
 							<my-button
 								:active="false"
-								:captionTitle="capGen.icon"
-								:image="atr.iconId === null ? 'noPic.png' : ''"
+								:captionTitle="atr.iconId === null ? capApp.attributeNoIcon : capGen.icon"
+								:image="atr.iconId === null ? 'icon_missing.png' : ''"
 								:imageBase64="atr.iconId !== null ? srcBase64(iconIdMap[atr.iconId].file) : ''"
 								:naked="true"
 								:tight="true"
@@ -571,6 +584,7 @@ let MyBuilderRelation = {
 			policies:[],
 			
 			// states
+			attributeFilter:'',
 			previewLimit:10,
 			previewOffset:0,
 			previewRows:[],

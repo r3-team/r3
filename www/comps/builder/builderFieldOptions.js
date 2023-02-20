@@ -355,7 +355,7 @@ let MyBuilderFieldOptions = {
 				<tr>
 					<td>{{ capGen.attribute }}</td>
 					<td>
-						<div class="row centered">
+						<div class="row centered gap">
 							<my-button
 								:active="false"
 								:image="getAttributeIcon(attribute)"
@@ -363,6 +363,7 @@ let MyBuilderFieldOptions = {
 								:tight="true"
 							/>
 							<input disabled="disabled"
+								:title="getItemTitle(field.attributeId,field.index,field.outsideIn,field.attributeIdNm)"
 								:value="getItemTitle(field.attributeId,field.index,field.outsideIn,field.attributeIdNm)"
 							/>
 							<my-button image="open.png"

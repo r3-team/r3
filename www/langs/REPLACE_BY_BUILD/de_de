@@ -562,7 +562,7 @@
 				"text":"Einzelne Textzeile. Kann für Namen, E-Mail-Adressen, Telefonnummern, Adressen usw. verwendet werden.",
 				"textarea":"Mehrere Textzeilen. Für größere Textmengen. Nützlich für Beschreibungen oder Notizen.",
 				"time":"Ein Zeitwert. Wird verwendet, wenn nur Stunden/Minuten/Sekunden benötigt werden, unabhängig vom Datum.",
-				"uuid":"Universally Unique Identifier (UUIDv4). Wenn sie korrekt generiert werden, ist es statistisch äußerst unwahrscheinlich, dass UUIDs jemals zweimal existieren - unabhängig davon, aus welchem System sie stammen. Werden meist zur eindeutigen Identifizierung oder Referenzierung von Datensätzen in nicht-verbundenen Systemen verwendet."
+				"uuid":"Universally Unique Identifier (UUIDv4). UUIDs sind statistisch extrem unwahrscheinlich zweimal zu existieren - unabhängig davon, aus welchem System sie stammen. Werden meist zur eindeutigen Identifizierung oder Referenzierung von Datensätzen in nicht-verbundenen Systemen verwendet."
 			},
 			"bigint":"Große Werte",
 			"bigintDates":"Datumswerte nach 2038",
@@ -1060,6 +1060,8 @@
 			},
 			"attributes":"Attribute ({CNT})",
 			"attributeContent":"Wertetyp",
+			"attributeLength":"Max. Länge/Größe",
+			"attributeNoIcon":"Kein Icon festgelegt",
 			"attributeNotNullable":"Muss Wert haben",
 			"codeCondition":"Kondition",
 			"encryption":"E2E-Verschlüsselung",

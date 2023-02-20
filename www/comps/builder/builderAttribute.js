@@ -48,6 +48,7 @@ let MyBuilderAttribute = {
 								<my-button image="visible1.png"
 									@trigger="copyValueDialog(values.name,attributeId,attributeId)"
 									:active="!isNew"
+									:caption="capGen.id"
 								/>
 							</div>
 						</td>
