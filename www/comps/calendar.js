@@ -611,7 +611,7 @@ let MyCalendar = {
 		indexColor:      { required:true },
 		indexDate0:      { type:Number,  required:true },
 		indexDate1:      { type:Number,  required:true },
-		isHiddenInTab:   { type:Boolean, required:false, default:false }, // calendar is in a non-visible tab-field
+		isHidden:        { type:Boolean, required:false, default:false },
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:false, default:false },
 		usesPageHistory: { type:Boolean, required:true }
@@ -664,7 +664,7 @@ let MyCalendar = {
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
 		});
-		this.$watch('isHiddenInTab',(val) => {
+		this.$watch('isHidden',(val) => {
 			if(!val) this.reloadOutside();
 		});
 		this.$watch(() => [this.choices,this.columns,this.filters],(newVals, oldVals) => {
@@ -793,7 +793,7 @@ let MyCalendar = {
 		
 		// backend calls
 		get() {
-			if(this.query.relationId === null || this.isHiddenInTab)
+			if(this.query.relationId === null || this.isHidden)
 				return;
 			
 			let dateStart = this.getUnixFromDate(this.date0);

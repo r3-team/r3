@@ -361,7 +361,7 @@ let MyGantt = {
 		indexColor:      { required:true },               // index of attribute that provides record color
 		indexDate0:      { type:Number,  required:true }, // index of attribute that provides record date from
 		indexDate1:      { type:Number,  required:true }, // index of attribute that provides record date to
-		isHiddenInTab:   { type:Boolean, required:false, default:false }, // Gantt is in a non-visible tab-field
+		isHidden:        { type:Boolean, required:false, default:false },
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:true },
 		stepTypeDefault: { type:String,  required:true },
@@ -498,7 +498,7 @@ let MyGantt = {
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
 		});
-		this.$watch('isHiddenInTab',(val) => {
+		this.$watch('isHidden',(val) => {
 			// if field is hidden, steps cannot be calculated
 			if(!val) this.$nextTick(() => this.setSteps(true));
 		});
@@ -789,7 +789,7 @@ let MyGantt = {
 		
 		// backend calls
 		get() {
-			if(this.formLoading || this.isHiddenInTab)
+			if(this.formLoading || this.isHidden)
 				return;
 			
 			ws.send('data','get',{
