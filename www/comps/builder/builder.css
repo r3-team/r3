@@ -354,6 +354,15 @@
 	width:24px;
 	height:24px;
 }
+.builder-start-box{
+	flex-flow:column nowrap;
+	display:flex;
+	color:inherit;
+	border:1px solid var(--color-border);
+	border-radius:12px;
+	box-shadow:1px 2px 2px var(--color-shade);
+	background-color:var(--color-bg);
+}
 .builder-start .builder-start-entities{
 	display:flex;
 	flex-flow:row wrap;
@@ -361,18 +370,11 @@
 	gap:12px;
 }
 .builder-start .builder-start-entity{
-	display:flex;
 	width:260px;
-	flex-flow:column nowrap;
 	align-items:center;
 	text-align:center;
 	padding:15px 14px;
 	text-decoration:none;
-	color:inherit;
-	border:1px solid var(--color-border);
-	border-radius:12px;
-	box-shadow:1px 2px 2px var(--color-shade);
-	background-color:var(--color-bg);
 }
 .builder-start .builder-start-entity:hover{
 	padding-top:18px;
@@ -399,10 +401,6 @@
 .builder-start .builder-start-visibility{
 	max-width:700px;
 	padding:10px;
-	border:1px solid var(--color-border);
-	border-radius:12px;
-	box-shadow:1px 2px 2px var(--color-shade);
-	background-color:var(--color-bg);
 }
 .builder-start .builder-start-visibility-header{
 	display:flex;
@@ -419,6 +417,12 @@
 }
 .builder-start .builder-start-visibility td:first-child{
 	padding-left:15px;
+}
+.builder-start .builder-start-resources{
+	max-width:700px;
+	flex-flow:row nowrap;
+	gap:5px;
+	padding:10px;
 }
 
 /* module */

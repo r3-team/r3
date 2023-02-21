@@ -28,7 +28,7 @@ let MyBuilderStart = {
 			<!-- major entities -->
 			<div class="builder-start-entities">
 				
-				<router-link class="builder-start-entity clickable"
+				<router-link class="builder-start-box builder-start-entity clickable"
 					:to="'/builder/relations/'+id" 
 				>
 					<div class="builder-start-entity-header">
@@ -39,7 +39,7 @@ let MyBuilderStart = {
 					<span>{{ capApp.titleRelationsHint }}</span>
 				</router-link>
 				
-				<router-link class="builder-start-entity clickable"
+				<router-link class="builder-start-box builder-start-entity clickable"
 					:to="'/builder/forms/'+id" 
 				>
 					<div class="builder-start-entity-header">
@@ -50,7 +50,7 @@ let MyBuilderStart = {
 					<span>{{ capApp.titleFormsHint }}</span>
 				</router-link>
 				
-				<router-link class="builder-start-entity clickable"
+				<router-link class="builder-start-box builder-start-entity clickable"
 					:to="'/builder/menu/'+id" 
 				>
 					<div class="builder-start-entity-header">
@@ -61,7 +61,7 @@ let MyBuilderStart = {
 					<span>{{ capApp.titleMenuHint }}</span>
 				</router-link>
 				
-				<router-link class="builder-start-entity clickable"
+				<router-link class="builder-start-box builder-start-entity clickable"
 					:to="'/builder/roles/'+id" 
 				>
 					<div class="builder-start-entity-header">
@@ -77,7 +77,7 @@ let MyBuilderStart = {
 			<br /><br />
 			<h1>{{ capApp.checks }}</h1>
 			
-			<div class="builder-start-visibility">
+			<div class="builder-start-box builder-start-visibility">
 				<div class="builder-start-visibility-header">
 					<my-builder-start-icon :bad="readonly" />
 					<h1>{{ !readonly ? capApp.checkNotReadonly : capApp.checkNotReadonlyOff }}</h1>
@@ -128,6 +128,22 @@ let MyBuilderStart = {
 					</tr>
 				</table>
 			</div>
+			
+			<!-- external resources -->
+			<br /><br />
+			<h1>{{ capApp.needHelp }}</h1>
+			<div class="builder-start-box builder-start-resources">
+				<my-button image="globe.png"
+					@trigger="open('https://community.rei3.de/')"
+					:caption="capApp.extCommunity"
+					:large="true"
+				/>
+				<my-button image="globe.png"
+					@trigger="open('https://rei3.de/en/docs')"
+					:caption="capApp.extDocs"
+					:large="true"
+				/>
+			</div>
 		</div>
 	</div>`,
 	emits:['hotkeysRegister'],
@@ -158,5 +174,10 @@ let MyBuilderStart = {
 		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
 		moduleIdMapOptions:(s) => s.$store.getters['schema/moduleIdMapOptions'],
 		capApp:            (s) => s.$store.getters.captions.builder.start
+	},
+	methods:{
+		open(url) {
+			window.open(url);
+		}
 	}
 };

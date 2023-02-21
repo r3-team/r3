@@ -1156,6 +1156,9 @@
 			"checkMenuInRoleOff":"Keine Rolle hat Zugriff auf einen Menüeintrag",
 			"checkStartForm":"Startformular ist festgelegt",
 			"checkStartFormOff":"Startformular ist nicht festgelegt",
+			"extCommunity":"REI3-Forum",
+			"extDocs":"REI3-Dokumentation",
+			"needHelp":"Fragen?",
 			"title":"Erste Schritte",
 			"titleForms":"Formulare erstellen",
 			"titleFormsHint":"Benutzeroberflächen bauen zum Arbeiten mit Datensätzen.",
@@ -1164,7 +1167,7 @@
 			"titleRoles":"Rollen vorbereiten",
 			"titleRolesHint":"Festlegen, was man sehen und tun darf.",
 			"titleRelations":"Relationen definieren",
-			"titleRelationsHint":"Datensätze speichern und Daten zuweisen."
+			"titleRelationsHint":"Um Datensätze zu speichern und Daten zuweisen."
 		},
 		"backHint":"Zurück zur Anwendungsübersicht",
 		"language":"Übersetzung",

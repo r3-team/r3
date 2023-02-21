@@ -1156,6 +1156,9 @@
 			"checkMenuInRoleOff":"No menu access is assigned to a role",
 			"checkStartForm":"Start form is defined",
 			"checkStartFormOff":"Start form is not defined",
+			"extCommunity":"REI3 forum",
+			"extDocs":"REI3 documentation",
+			"needHelp":"Need help?",
 			"title":"First steps",
 			"titleForms":"Create forms",
 			"titleFormsHint":"Build user interfaces to work with records.",
@@ -1164,7 +1167,7 @@
 			"titleRoles":"Prepare roles",
 			"titleRolesHint":"Define what everyone can do or see.",
 			"titleRelations":"Define relations",
-			"titleRelationsHint":"Store and add data to records."
+			"titleRelationsHint":"To store and add data to records."
 		},
 		"backHint":"Reveniți la prezentarea generală a aplicației",
 		"language":"Traduceri",

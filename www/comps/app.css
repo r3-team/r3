@@ -218,9 +218,8 @@ body                                         { --depth:6; }
 .builder-entry-list .entry:not(.off):focus   { --depth:5; }
 .builder-table-vertical td                   { --depth:5; }
 .builder-function .placeholders              { --depth:2; }
-.builder-start .builder-start-entity         { --depth:6; }
+.builder-start .builder-start-box            { --depth:6; }
 .builder-start .builder-start-entity:hover   { --depth:1; }
-.builder-start .builder-start-visibility     { --depth:6; }
 
 
 html,body{
