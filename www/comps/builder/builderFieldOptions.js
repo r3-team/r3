@@ -10,7 +10,7 @@ import {
 import {
 	getDependentModules,
 	getItemTitle,
-	getItemTitleRelation,
+	getItemTitlePath,
 	getValueFromJson,
 	setValueInJson
 } from '../shared/builder.js';
@@ -363,7 +363,7 @@ let MyBuilderFieldOptions = {
 								:tight="true"
 							/>
 							<input disabled="disabled"
-								:title="getItemTitle(field.attributeId,field.index,field.outsideIn,field.attributeIdNm)"
+								:title="getItemTitlePath(field.attributeId)"
 								:value="getItemTitle(field.attributeId,field.index,field.outsideIn,field.attributeIdNm)"
 							/>
 							<my-button image="open.png"
@@ -1132,7 +1132,7 @@ let MyBuilderFieldOptions = {
 		getDetailsFromIndexAttributeId,
 		getIndexAttributeId,
 		getItemTitle,
-		getItemTitleRelation,
+		getItemTitlePath,
 		getNilUuid,
 		getRandomInt,
 		isAttributeFiles,

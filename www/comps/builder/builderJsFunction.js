@@ -7,7 +7,8 @@ import MyTabs             from '../tabs.js';
 import {
 	getDependentModules,
 	getFunctionHelp,
-	getItemTitle
+	getItemTitle,
+	getItemTitlePath
 } from '../shared/builder.js';
 export {MyBuilderJsFunction as default};
 
@@ -152,7 +153,11 @@ let MyBuilderJsFunction = {
 									:value="entity === 'field' ? entityId : ''"
 								>
 									<option value="" disabled>{{ capApp.fieldId }}</option>
-									<option v-for="fieldId in dataFieldIdsSorted" :value="fieldId">
+									<option
+										v-for="fieldId in dataFieldIdsSorted"
+										:title="getItemTitlePath(dataFieldMap[fieldId].attributeId)"
+										:value="fieldId"
+									>
 										{{ displayFieldName(fieldId) }}
 									</option>
 								</select>
@@ -438,14 +443,16 @@ let MyBuilderJsFunction = {
 			let map = {};
 			for(let k in s.dataFieldMap) {
 				let f = s.dataFieldMap[k];
-				map[`${f.index}_${s.attributeIdMap[f.attributeId].name}`] = f.id;
+				let a = s.attributeIdMap[f.attributeId];
+				let r = s.relationIdMap[a.relationId];
+				let m = s.moduleIdMap[r.moduleId];
+				map[`${f.index}_${m.name}.${r.name}.${a.name}`] = f.id;
 			}
 			let keysSorted = Object.keys(map).sort();
-			
 			let out = [];
-			for(let i = 0, j = keysSorted.length; i < j; i++) {
-				out.push(map[keysSorted[i]]);
-			}			
+			for(let k of keysSorted) {
+				out.push(map[k]);
+			}
 			return out;
 		},
 		hasChanges:(s) => s.name     !== s.jsFunction.name
@@ -488,6 +495,7 @@ let MyBuilderJsFunction = {
 		getDependentModules,
 		getFunctionHelp,
 		getItemTitle,
+		getItemTitlePath,
 		getJoinsIndexMap,
 		
 		// presentation
@@ -564,8 +572,9 @@ let MyBuilderJsFunction = {
 					fld  = this.dataFieldMap[this.entityId];
 					atr  = this.attributeIdMap[fld.attributeId];
 					rel  = this.relationIdMap[atr.relationId];
+					mod  = this.moduleIdMap[rel.moduleId];
 					opt  = this.fieldMode.includes('set') ? ', '+this.capApp.value : '';
-					text = `${prefix}.${this.fieldMode}({${fld.index}:${rel.name}.${atr.name}}${opt})`;
+					text = `${prefix}.${this.fieldMode}({${fld.index}:${mod.name}.${rel.name}.${atr.name}}${opt})`;
 				break;
 				case 'form':
 					frm  = this.formIdMap[this.entityId];
@@ -681,7 +690,8 @@ let MyBuilderJsFunction = {
 				
 				let atr = that.attributeIdMap[fld.attributeId];
 				let rel = that.relationIdMap[atr.relationId];
-				return `${prefix}.${mode}_field_${part}({${fld.index}:${rel.name}.${atr.name}}`;
+				let mod = that.moduleIdMap[rel.moduleId];
+				return `${prefix}.${mode}_field_${part}({${fld.index}:${mod.name}.${rel.name}.${atr.name}}`;
 			});
 			
 			// replace function IDs with placeholders
@@ -748,14 +758,20 @@ let MyBuilderJsFunction = {
 			
 			// replace field value/caption get/set placeholders
 			// stored as: app.get_field_value({0:contact.is_active}...
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption)\\(\{(\\d+)\:(${dbName})\.(${dbName})\}`,'g');
-			body = body.replace(pat,function(match,mode,part,index,relName,atrName) {
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption)\\(\{(\\d+)\:(${dbName})\.(${dbName})\.(${dbName})\}`,'g');
+			body = body.replace(pat,function(match,mode,part,index,modName,relName,atrName) {
 				
-				// resolve relation by join index of form query
-				if(typeof that.joinsIndexMap[index] === 'undefined')
+				// resolve relation inside given module
+				let mod = that.moduleNameMap[modName];
+				let rel = false;
+				for(let r of mod.relations) {
+					if(r.name === relName) {
+						rel = r;
+						break;
+					}
+				}
+				if(rel === false)
 					return match;
-				
-				let rel = that.relationIdMap[that.joinsIndexMap[index].relationId];
 				
 				// resolve attribute by name
 				let atr = false;

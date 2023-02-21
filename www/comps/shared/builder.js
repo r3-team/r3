@@ -96,6 +96,13 @@ export function getItemTitle(attributeId,index,outsideIn,attributeIdNm) {
 	return `${index}) [${relCap}] ${rel.name}.${atr.name}`;
 };
 
+export function getItemTitlePath(attributeId) {
+	let atr = MyStore.getters['schema/attributeIdMap'][attributeId];
+	let rel = MyStore.getters['schema/relationIdMap'][atr.relationId];
+	let mod = MyStore.getters['schema/moduleIdMap'][rel.moduleId];
+	return `${mod.name}.${rel.name}.${atr.name}`;
+};
+
 export function getItemTitleNoRelationship(attributeId,index) {
 	let atr = MyStore.getters['schema/attributeIdMap'][attributeId];
 	let rel = MyStore.getters['schema/relationIdMap'][atr.relationId];
