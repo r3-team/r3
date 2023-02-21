@@ -11,7 +11,7 @@ let MyAdminLogs = {
 		
 		<div class="top lower">
 			<div class="area">
-				<img class="icon" src="images/log.png" />
+				<img class="icon" src="images/fileText.png" />
 				<h1>{{ menuTitle }}</h1>
 			</div>
 		</div>

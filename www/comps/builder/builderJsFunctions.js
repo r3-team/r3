@@ -39,7 +39,7 @@ let MyBuilderJsFunctions = {
 						</span>
 					</div>
 					<div class="row">
-						<my-button image="form.png"
+						<my-button image="fileText.png"
 							v-if="f.formId !== null"
 							:active="false"
 							:captionTitle="capApp.form"

@@ -100,7 +100,7 @@ let MyBuilder = {
 							<router-link class="entry clickable"
 								:to="'/builder/forms/'+module.id"
 							>
-								<img src="images/form.png" />
+								<img src="images/fileText.png" />
 								<span>{{ capApp.navigationForms }}</span>
 							</router-link>
 							
@@ -121,7 +121,7 @@ let MyBuilder = {
 							<router-link class="entry clickable"
 								:to="'/builder/icons/'+module.id"
 							>
-								<img src="images/icon.png" />
+								<img src="images/fileImage.png" />
 								<span>{{ capApp.navigationIcons }}</span>
 							</router-link>
 						</div>
@@ -169,7 +169,7 @@ let MyBuilder = {
 					<!-- module sub component navigation header -->
 					<div class="navigation-entities-header" v-if="subMenu">
 						<div class="line" v-if="navigation === 'forms'">
-							<img src="images/form.png" />
+							<img src="images/fileText.png" />
 							<h1>{{ capApp.navigationForms }}</h1>
 						</div>
 						<div class="line" v-if="navigation === 'functions'">

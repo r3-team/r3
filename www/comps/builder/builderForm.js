@@ -57,7 +57,7 @@ let MyBuilderForm = {
 			<div class="builder-form-content">
 				<div class="top">
 					<div class="area nowrap">
-						<img class="icon" src="images/form.png" />
+						<img class="icon" src="images/fileText.png" />
 						<h1 class="title">{{ capApp.titleOne.replace('{NAME}',name) }}</h1>
 					</div>
 					
@@ -174,7 +174,7 @@ let MyBuilderForm = {
 			<!-- form builder sidebar -->
 			<div class="top lower">
 				<div class="area">
-					<img v-if="!fieldShow" class="icon" src="images/form.png" />
+					<img v-if="!fieldShow" class="icon" src="images/fileText.png" />
 					<h1 v-if="!fieldShow">{{ capApp.sidebarForm }}</h1>
 					<h1 v-if="fieldShow" class="selected-ref">
 						{{ capApp.sidebarField.replace('{NAME}','F'+entityIdMapRef.field[fieldShow.id]) }}

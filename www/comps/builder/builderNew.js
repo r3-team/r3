@@ -118,7 +118,7 @@ let MyBuilderNew = {
 		titleImgSrc:(s) => {
 			switch(s.entity) {
 				case 'collection': return 'images/tray.png';           break;
-				case 'form':       return 'images/form.png';           break;
+				case 'form':       return 'images/fileText.png';       break;
 				case 'jsFunction': return 'images/codeScreen.png';     break;
 				case 'module':     return 'images/module.png';         break;
 				case 'pgFunction': return 'images/codeDatabase.png';   break;

@@ -578,7 +578,7 @@ let MyAdminLogins = {
 						</th>
 						<th>
 							<div class="mixed-header">
-								<img src="images/form.png" />
+								<img src="images/fileText.png" />
 								<span>{{ capGen.id }}</span>
 							</div>
 						</th>

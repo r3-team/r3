@@ -8,7 +8,7 @@ let MyBuilderForms = {
 		
 		<div class="top lower">
 			<div class="area nowrap">
-				<img class="icon" src="images/form.png" />
+				<img class="icon" src="images/fileText.png" />
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
 			<div class="area default-inputs">

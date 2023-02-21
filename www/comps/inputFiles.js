@@ -354,7 +354,7 @@ let MyInputFiles = {
 			extPreview:[
 				'bmp','gif','jpg','jpeg','pdf','png','psd','svg','xcf','webp',
 				'cfg','conf','css','csv','go','html','ini','java','js','json',
-				'log','md','php','sql','txt','xml'
+				'log','md','php','pl','ps1','py','sql','txt','xml'
 			],
 			
 			extRegex:/(?:\.([^.]+))?$/,
@@ -493,10 +493,29 @@ let MyInputFiles = {
 			return this.sortDirAsc ? ' \u25B2' : ' \u25BC';
 		},
 		imagePreview(fileId,name,version) {
-			if(!this.extPreview.includes(this.extRegex.exec(name)[1]))
-				return 'images/noPic.png';
+			let ext = this.extRegex.exec(name)[1].toLowerCase();
+			if(this.extPreview.includes(ext))
+				return this.getAttributeFileThumbHref(this.attributeId,fileId,name,version,this.token);
 			
-			return this.getAttributeFileThumbHref(this.attributeId,fileId,name,version,this.token);
+			if(['doc','docx','odt'].includes(ext))
+				return 'images/fileRichtext.png';
+			
+			if(['xls','xlsx','ods'].includes(ext))
+				return 'images/fileSheet.png';
+			
+			if(['7z','gz','iso','rar','zip'].includes(ext))
+				return 'images/fileZip.png';
+			
+			if(['asc','der','key','p12','pem','pfx','ppk','pub'].includes(ext))
+				return 'images/fileKey.png';
+			
+			if(['aac','flac','m4a','mp3','mp4','ogg','wav','wma'].includes(ext))
+				return 'images/fileAudio.png';
+			
+			if(['avi','flv','m4v','mp4','mov','mpg','mpeg','mkv','ogv','webm','wmv'].includes(ext))
+				return 'images/fileVideo.png';
+			
+			return 'images/noPic.png';
 		},
 		setNoSpaceMode() {
 			this.noSpace = this.$refs.main.clientWidth <= 700;

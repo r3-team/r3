@@ -92,7 +92,7 @@ let MyAdmin = {
 					
 					<!-- logs -->
 					<router-link class="entry clickable" tag="div" to="/admin/logs">
-						<img src="images/log.png" />
+						<img src="images/fileText.png" />
 						<span>{{ capApp.navigationLogs }}</span>
 					</router-link>
 					

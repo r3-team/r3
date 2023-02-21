@@ -138,7 +138,7 @@ let MyBuilderJsFunction = {
 						<!-- current form data field input -->
 						<div class="placeholders">
 							<div class="title">
-								<img src="images/form.png" />
+								<img src="images/fileText.png" />
 								<span>{{ capApp.placeholdersFormFields }}</span>
 							</div>
 							

@@ -91,7 +91,7 @@ let MyForm = {
 						v-if="iconId !== null"
 						:src="srcBase64(iconIdMap[iconId].file)"
 					/>
-					<img class="icon" src="images/form.png"
+					<img class="icon" src="images/fileText.png"
 						v-if="iconId === null"
 					/>
 					

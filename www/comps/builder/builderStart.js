@@ -46,7 +46,7 @@ let MyBuilderStart = {
 						<my-builder-start-icon :bad="!hasForms" />
 						<h1>{{ capApp.titleForms }}</h1>
 					</div>
-					<img class="poster" src="images/formHighRes.png" />
+					<img class="poster" src="images/fileText.png" />
 					<span>{{ capApp.titleFormsHint }}</span>
 				</router-link>
 				

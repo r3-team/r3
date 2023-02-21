@@ -204,7 +204,7 @@ let MyList = {
 						:caption="!isMobile ? capGen.button.new : ''"
 						:captionTitle="capGen.button.newHint"
 					/>
-					<my-button image="sheet.png"
+					<my-button image="fileSheet.png"
 						v-if="csvImport || csvExport"
 						@trigger="showCsv = !showCsv"
 						:caption="!isMobile ? capApp.button.csv : ''"

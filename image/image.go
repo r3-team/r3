@@ -149,7 +149,7 @@ func processFile(fileId uuid.UUID, ext string, src string, dst string) {
 
 	// text based, drawn thumbnails
 	case "cfg", "conf", "css", "csv", "go", "html", "ini", "java", "js",
-		"json", "log", "md", "php", "sql", "txt", "xml":
+		"json", "log", "md", "php", "pl", "ps1", "py", "sql", "txt", "xml":
 
 		textThumb := ""
 		textLines := 30
