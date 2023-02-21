@@ -251,7 +251,7 @@ let MyBuilderAttribute = {
 				<div class="row">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="!readonly && hasChanges"
+						:active="canSave"
 						:caption="isNew ? capGen.button.create : capGen.button.save"
 					/>
 					<my-button image="refresh.png"
@@ -395,6 +395,7 @@ let MyBuilderAttribute = {
 		
 		// simple
 		canEncrypt:    (s) => s.relation.encryption && s.values.content === 'text',
+		canSave:       (s) => !s.readonly && s.hasChanges,
 		hasChanges:    (s) => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
 		hasLength:     (s) => ['files','richtext','text','textarea'].includes(s.usedFor),
 		isId:          (s) => !s.isNew && s.values.name === 'id',
@@ -433,6 +434,10 @@ let MyBuilderAttribute = {
 	},
 	mounted() {
 		this.reset();
+		window.addEventListener('keydown',this.handleHotkeys);
+	},
+	unmounted() {
+		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
 		// external
@@ -451,6 +456,16 @@ let MyBuilderAttribute = {
 		isAttributeUuid,
 		
 		// actions
+		handleHotkeys(e) {
+			if(e.ctrlKey && e.key === 's' && this.canSave) {
+				this.set();
+				e.preventDefault();
+			}
+			if(e.key === 'Escape') {
+				this.$emit('close');
+				e.preventDefault();
+			}
+		},
 		reset() {
 			this.values = this.attributeId !== null
 				? JSON.parse(JSON.stringify(this.attributeIdMap[this.attributeId]))

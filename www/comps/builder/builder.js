@@ -290,7 +290,7 @@ let MyBuilder = {
 		
 		<!-- new entity dialog -->
 		<my-builder-new
-			v-if="createNew !== null"
+			v-if="createNewOpen"
 			@close="createNew = null"
 			:entity="createNew"
 			:moduleId="moduleId"
@@ -381,9 +381,10 @@ let MyBuilder = {
 		},
 		
 		// simple
-		isNew:      (s) => s.moduleId === '',
-		module:     (s) => s.isNew ? false : s.moduleIdMap[s.moduleId],
-		moduleOwner:(s) => s.isNew ? true  : s.moduleIdMapOptions[s.moduleId].owner,
+		createNewOpen:(s) => s.createNew !== null,
+		isNew:        (s) => s.moduleId === '',
+		module:       (s) => s.isNew ? false : s.moduleIdMap[s.moduleId],
+		moduleOwner:  (s) => s.isNew ? true  : s.moduleIdMapOptions[s.moduleId].owner,
 		
 		// stores
 		modules:           (s) => s.$store.getters['schema/modules'],
@@ -409,6 +410,9 @@ let MyBuilder = {
 		
 		// handlers
 		handleHotkeys(evt) {
+			if(this.createNewOpen)
+				return;
+			
 			// language switch
 			if(evt.ctrlKey && evt.key === 'q')
 				this.nextLanguage();

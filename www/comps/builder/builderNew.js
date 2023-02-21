@@ -71,7 +71,7 @@ let MyBuilderNew = {
 				<div class="actions">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="nameValid"
+						:active="canSave"
 						:caption="capGen.button.create"
 					/>
 				</div>
@@ -100,7 +100,7 @@ let MyBuilderNew = {
 	},
 	computed:{
 		// inputs
-		nameValid:(s) => s.name !== '',
+		canSave:(s) => s.name !== '',
 		
 		// presentation
 		title:(s) => {
@@ -134,11 +134,29 @@ let MyBuilderNew = {
 		capApp:     (s) => s.$store.getters.captions.builder.new,
 		capGen:     (s) => s.$store.getters.captions.generic
 	},
+	mounted() {
+		window.addEventListener('keydown',this.handleHotkeys);
+	},
+	unmounted() {
+		window.removeEventListener('keydown',this.handleHotkeys);
+	},
 	methods:{
 		// externals
 		getNilUuid,
 		getQueryTemplate,
 		getPgFunctionTemplate,
+		
+		// actions
+		handleHotkeys(e) {
+			if(e.ctrlKey && e.key === 's' && this.canSave) {
+				this.set();
+				e.preventDefault();
+			}
+			if(e.key === 'Escape') {
+				this.$emit('close');
+				e.preventDefault();
+			}
+		},
 		
 		// backend calls
 		set() {
