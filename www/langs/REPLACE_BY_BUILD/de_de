@@ -1139,6 +1139,33 @@
 			"title":"Rollen",
 			"titleOne":"Role \"{NAME}\""
 		},
+		"start":{
+			"button":{
+				"fix":"Fixen"
+			},
+			"appVisible":"Anwendung ist sichtbar für Benutzer mit zugewiesenen Rollen",
+			"appVisibleOff":"Anwendung ist nicht sichtbar für Benutzer",
+			"checks":"System-Checks",
+			"checkNotHidden":"Anwendung wurde nicht versteckt",
+			"checkNotHiddenOff":"Anwendung wurde von einem Admin versteckt",
+			"checkNotReadonly":"Anwendung kann verändert werden",
+			"checkNotReadonlyOff":"Anwendung hat einen Schreibschutz",
+			"checkMenu":"Mindestens ein Menüeintrag existiert",
+			"checkMenuInRole":"Zugriff auf mindestens einen Menüeintrag ist definiert",
+			"checkMenuOff":"Es existiert kein Menüeintrag",
+			"checkMenuInRoleOff":"Keine Rolle hat Zugriff auf einen Menüeintrag",
+			"checkStartForm":"Startformular ist festgelegt",
+			"checkStartFormOff":"Startformular ist nicht festgelegt",
+			"title":"Erste Schritte",
+			"titleForms":"Formulare erstellen",
+			"titleFormsHint":"Benutzeroberflächen bauen zum Arbeiten mit Datensätzen.",
+			"titleMenu":"Menü einrichten",
+			"titleMenuHint":"Benutzer durch die Anwendung führen.",
+			"titleRoles":"Rollen vorbereiten",
+			"titleRolesHint":"Festlegen, was man sehen und tun darf.",
+			"titleRelations":"Relationen definieren",
+			"titleRelationsHint":"Datensätze speichern und Daten zuweisen."
+		},
 		"backHint":"Zurück zur Anwendungsübersicht",
 		"language":"Übersetzung",
 		"languageNextHint":"Zur nächsten Übersetzung wechseln (Hotkey: STRG + q)",
@@ -1155,6 +1182,7 @@
 		"navigationModule":"Anwendung",
 		"navigationRelations":"Relationen",
 		"navigationRoles":"Rollen",
+		"navigationStart":"Erste Schritte",
 		"pageTitle":"Builder",
 		"pageTitleDocs":"Builder-Dokumentation"
 	},

@@ -1139,6 +1139,33 @@
 			"title":"Roluri",
 			"titleOne":"Role '{NAME}'"
 		},
+		"start":{
+			"button":{
+				"fix":"Fix"
+			},
+			"appVisible":"Application is visible to users with assigned roles",
+			"appVisibleOff":"Application is not visible to users",
+			"checks":"System checks",
+			"checkNotHidden":"Application has not been hidden",
+			"checkNotHiddenOff":"Application has been hidden by an admin",
+			"checkNotReadonly":"Application is writable",
+			"checkNotReadonlyOff":"Application is readonly",
+			"checkMenu":"At least one menu entry exists",
+			"checkMenuInRole":"At least one menu access is assigned to a role",
+			"checkMenuOff":"No menu entry exists",
+			"checkMenuInRoleOff":"No menu access is assigned to a role",
+			"checkStartForm":"Start form is defined",
+			"checkStartFormOff":"Start form is not defined",
+			"title":"First steps",
+			"titleForms":"Create forms",
+			"titleFormsHint":"Build user interfaces to work with records.",
+			"titleMenu":"Setup a menu",
+			"titleMenuHint":"Guide users through your application.",
+			"titleRoles":"Prepare roles",
+			"titleRolesHint":"Define what everyone can do or see.",
+			"titleRelations":"Define relations",
+			"titleRelationsHint":"Store and add data to records."
+		},
 		"backHint":"Reveniți la prezentarea generală a aplicației",
 		"language":"Traduceri",
 		"languageNextHint":"Comutați la următoarea limbă (tasta rapidă: CTRL + q)",
@@ -1155,6 +1182,7 @@
 		"navigationModule":"Application",
 		"navigationRelations":"Relații",
 		"navigationRoles":"Roluri",
+		"navigationStart":"First steps",
 		"pageTitle":"Builder",
 		"pageTitleDocs":"Documentația lui Builder"
 	},

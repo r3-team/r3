@@ -101,7 +101,7 @@
 	--color-accent3-alt:   hsl(199,11%,calc(93% - var(--light-depth))); /* menu/list/calendar entry active */
 	--color-accent4:       hsl(339, 4%,calc(61% - var(--light-depth))); /* gantt entry */
 	--color-error:         hsl(0,  84%,calc(61% - var(--light-depth)));
-	--color-success:       hsl(113,44%,calc(44% - var(--light-depth)));
+	--color-success:       hsl(113,84%,calc(44% - var(--light-depth)));
 	--color-action:        hsl(196,27%,calc(47% - var(--light-depth)));
 	--color-action-bright: hsl(196,22%,calc(72% - var(--light-depth)));
 	--color-action-disable:hsl(0,   0%,calc(77% - var(--light-depth)));
@@ -110,6 +110,8 @@
 	
 	/* depth based image filters */
 	--image-filter:        invert(1) contrast(var(--image-filter-contrast)) brightness(var(--light-read));
+	--image-filter-error:  invert(13%) sepia(92%) saturate(6289%) hue-rotate(359deg) brightness(97%) contrast(88%);
+	--image-filter-success:invert(36%) sepia(95%) saturate(788%) hue-rotate(76deg) brightness(98%) contrast(93%);
 	--image-filter-alt:    invert(1) contrast(var(--image-filter-contrast)) brightness(var(--light-read-less));
 	--image-filter-bg:     invert(1) contrast(var(--image-filter-contrast)) brightness(var(--light-contrast));
 }
@@ -216,6 +218,9 @@ body                                         { --depth:6; }
 .builder-entry-list .entry:not(.off):focus   { --depth:5; }
 .builder-table-vertical td                   { --depth:5; }
 .builder-function .placeholders              { --depth:2; }
+.builder-start .builder-start-entity         { --depth:6; }
+.builder-start .builder-start-entity:hover   { --depth:1; }
+.builder-start .builder-start-visibility     { --depth:6; }
 
 
 html,body{
@@ -1098,6 +1103,8 @@ table td.maximum{
 	--color-accent3:       hsl(199,11%,calc(35% - (1.50% * var(--depth)) ));
 	--color-accent3-alt:   hsl(199,11%,calc(45% - (1.50% * var(--depth)) ));
 	--color-accent4:       hsl(339, 4%,calc(61% - (1.50% * var(--depth)) ));
+	--color-error:         hsl(0,  64%,calc(61% - var(--light-depth)));
+	--color-success:       hsl(113,54%,calc(44% - var(--light-depth)));
 	--color-action:        hsl(196,27%,calc(37% - var(--light-depth)) );
 	--color-action-disable:hsl(0,   0%,calc(40% - var(--light-depth)) );
 	
@@ -1119,6 +1126,8 @@ table td.maximum{
 	--color-header-border:         hsl(0,0%,55%,1.00);
 	--color-cancel-border:         var(--color-cancel);
 	--image-filter-bg:             var(--image-filter);
+	--image-filter-error:          invert(13%) sepia(92%) saturate(4889%) hue-rotate(359deg) brightness(97%) contrast(calc(50% + (var(--light-depth)*2)));
+	--image-filter-success:        invert(36%) sepia(75%) saturate(1288%) hue-rotate(76deg) brightness(92%) contrast(calc(30% + (var(--light-depth)*2)));
 }
 .user-dark *::-webkit-scrollbar {
 	width:15px;

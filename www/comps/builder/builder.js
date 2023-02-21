@@ -77,6 +77,13 @@ let MyBuilder = {
 					<div class="navigation-two-columns" v-if="module">
 						<div class="navigation-column">
 							<router-link class="entry clickable"
+								:to="'/builder/start/'+module.id"
+							>
+								<img src="images/flag.png" />
+								<span>{{ capApp.navigationStart }}</span>
+							</router-link>
+							
+							<router-link class="entry clickable"
 								:to="'/builder/module/'+module.id"
 							>
 								<img src="images/module.png" />
@@ -91,13 +98,6 @@ let MyBuilder = {
 							</router-link>
 							
 							<router-link class="entry clickable"
-								:to="'/builder/roles/'+module.id"
-							>
-								<img src="images/personMultiple.png" />
-								<span>{{ capApp.navigationRoles }}</span>
-							</router-link>
-							
-							<router-link class="entry clickable"
 								:to="'/builder/forms/'+module.id"
 							>
 								<img src="images/form.png" />
@@ -109,6 +109,13 @@ let MyBuilder = {
 							>
 								<img src="images/menu.png" />
 								<span>{{ capApp.navigationMenu }}</span>
+							</router-link>
+							
+							<router-link class="entry clickable"
+								:to="'/builder/roles/'+module.id"
+							>
+								<img src="images/personMultiple.png" />
+								<span>{{ capApp.navigationRoles }}</span>
 							</router-link>
 							
 							<router-link class="entry clickable"
@@ -332,6 +339,7 @@ let MyBuilder = {
 				let id;
 				switch(val.meta.target) {
 					case 'module':      id = val.params.id;                                break;
+					case 'start':       id = val.params.id;                                break;
 					case 'docs':        id = val.params.id;                                break;
 					case 'relation':    id = this.relationIdMap[val.params.id].moduleId;   break;
 					case 'form':        id = this.formIdMap[val.params.id].moduleId;       break;
