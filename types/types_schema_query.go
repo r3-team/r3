@@ -69,12 +69,14 @@ type QueryFilterSide struct {
 	QueryAggregator pgtype.Text `json:"queryAggregator"` // sub query aggregator (COUNT, AGG, etc.)
 
 	// for frontend processing
-	Content      string      `json:"content"`      // attribute, collection, field, language code, login, preset, record, record new, role, sub query, true, value
+	Content      string      `json:"content"`      // attribute, collection, field, language code, login, nowDate, nowDatetime, nowTime, preset, record, record new, role, sub query, true, value
 	CollectionId pgtype.UUID `json:"collectionId"` // collection ID of which column value to compare
 	ColumnId     pgtype.UUID `json:"columnId"`     // column ID from collection of which value to compare
 	FieldId      pgtype.UUID `json:"fieldId"`      // frontend field value
 	PresetId     pgtype.UUID `json:"presetId"`     // preset ID of record to be compared
 	RoleId       pgtype.UUID `json:"roleId"`       // role ID assigned to user
+
+	NowOffset pgtype.Int4 `json:"nowOffset"` // offset in seconds (+/-) for now* content (e. g. nowDatetime - 86400 -> last day)
 }
 
 type QueryOrder struct {

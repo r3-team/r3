@@ -232,6 +232,13 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.field_data ALTER COLUMN display TYPE app.data_display USING display::text::app.data_display;
 			ALTER TABLE app.column ALTER COLUMN display TYPE app.data_display USING display::text::app.data_display;
 			DROP TYPE app.data_display_old;
+			
+			-- new filter options
+			ALTER TYPE app.filter_side_content ADD VALUE 'nowDate';
+			ALTER TYPE app.filter_side_content ADD VALUE 'nowDatetime';
+			ALTER TYPE app.filter_side_content ADD VALUE 'nowTime';
+			
+			ALTER TABLE app.query_filter_side ADD COLUMN now_offset INTEGER;
 		`)
 		return "3.3", err
 	},

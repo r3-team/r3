@@ -1312,6 +1312,9 @@
 				"javascript":"JavaScript",
 				"languageCode":"Login-Sprache",
 				"login":"Login-ID",
+				"nowDate":"Datum",
+				"nowDatetime":"Datum + Zeit",
+				"nowTime":"Zeit",
 				"preset":"Vordef. Datensatz",
 				"record":"Datensatz-ID",
 				"recordNew":"Datensatz ist neu",
@@ -1328,6 +1331,9 @@
 				"javascript":"Rückgabewert des gewählten Javascript-Ausdrucks.",
 				"languageCode":"Der gewählte Sprach-Code von der aktuellen Anmeldung (en_us, de_de, ...).",
 				"login":"ID der aktuellen Anmeldung (Integer).",
+				"nowDate":"Das aktuelle Datum (heute), zum Vergleich mit Datumswerten.",
+				"nowDatetime":"Das aktuelle Datum + Zeit (heute zu dieser Zeit), zum Vergleich mit Datum + Zeitwerten.",
+				"nowTime":"Die aktuelle Zeit (diese Stunde/Minute/Sekunde), zum Vergleich mit Zeitwerten.",
 				"preset":"ID des gewählten, vordefinierten Datensatzes (Integer).",
 				"record":"ID des aktuellen Datensatzes auf dem Formular (Integer, Relation 0).",
 				"recordNew":"WAHR/FALSCH, abhängig davon, ob der aktuelle Datensatz auf dem Formular neu ist.",
@@ -1335,6 +1341,12 @@
 				"subQuery":"Rückgabewert der gewählten Sub-Query.",
 				"true":"WAHR-Wert zum Vergleich mit anderen WAHR-Werten.",
 				"value":"Ein statischer Wert zum Vergleich."
+			},
+			"nowMode":{
+				"days":"Tage",
+				"hours":"Std.",
+				"minutes":"Min.",
+				"seconds":"Sek."
 			},
 			"operator":{
 				"eq":"gleich",
@@ -1352,9 +1364,15 @@
 			}
 		},
 		"add":"Hinzufügen",
+		"contentData":"Daten",
+		"contentDate":"Aktuelles Datum/Zeit",
+		"contentForm":"Aktuelles Formular",
+		"contentLogin":"Angemeldeter Benutzer",
 		"javascriptHint":"Bsp.: return new Date().getFullYear();",
 		"nestingMain":"Main-Query",
 		"nestingSub":"Sub-Query",
+		"nowOffsetHint":"+/- X {MODE}",
+		"nowOffsetTitle":"Addiere (positive Nummer) or subtrahiere (negative Nummer) X Tage/Stunden/Minuten/Sekunden von jetzt.",
 		"operatorsArray":"Array",
 		"operatorsNull":"Leerer Wert",
 		"operatorsSets":"Subset",

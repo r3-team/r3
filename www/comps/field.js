@@ -668,9 +668,7 @@ let MyField = {
 			return out;
 		},
 		domStyle:(s) => {
-			if(!s.isContainer) return '';
-			
-			return s.getFlexStyle(s.flexDirParent,
+			return !s.isContainer ? '' : s.getFlexStyle(s.flexDirParent,
 				s.field.justifyContent,s.field.alignItems,
 				s.field.alignContent,s.field.wrap,s.field.grow,
 				s.field.shrink,s.field.basis,s.field.perMax,
@@ -686,15 +684,11 @@ let MyField = {
 				s.field.attributeId,s.field.outsideIn === true,atrIdNm);
 		},
 		fieldAttributeIdAlt:(s) => {
-			if(!s.isData || s.field.attributeIdAlt === null)
-				return false;
-			
-			return s.getIndexAttributeId(s.field.index,s.field.attributeIdAlt,false,null);
+			return !s.isData || s.field.attributeIdAlt === null ? false
+				: s.getIndexAttributeId(s.field.index,s.field.attributeIdAlt,false,null);
 		},
 		columnsProcessed:(s) => {
-			if(!s.isQuery) return [];
-			
-			return s.getQueryColumnsProcessed(s.field.columns,
+			return !s.isQuery ? [] : s.getQueryColumnsProcessed(s.field.columns,
 				s.dataFieldMap,s.joinsIndexMap,s.values);
 		},
 		choicesProcessed:(s) => {
@@ -710,9 +704,7 @@ let MyField = {
 			return choices;
 		},
 		filtersProcessed:(s) => {
-			if(!s.isQuery) return [];
-			
-			return s.getQueryFiltersProcessed(
+			return !s.isQuery ? [] : s.getQueryFiltersProcessed(
 				s.field.query.filters,s.dataFieldMap,s.joinsIndexMap,
 				s.values,[],s.collectionIdMapIndexes
 			);

@@ -407,19 +407,31 @@ func convertQueryToDataFilter(filters []types.QueryFilter, loginId int64, langua
 			QueryAggregator: side.QueryAggregator,
 			Value:           side.Value,
 		}
-
-		if side.Content == "languageCode" {
-			sideOut.Value = languageCode
-		}
-		if side.Content == "login" {
-			sideOut.Value = loginId
-		}
-		if side.Content == "subQuery" {
+		switch side.Content {
+		// data
+		case "subQuery":
 			sideOut.Query = convertSubQueryToDataGet(side.Query, side.QueryAggregator,
 				side.AttributeId, side.AttributeIndex, loginId, languageCode)
-		}
-		if side.Content == "true" {
+		case "true":
 			sideOut.Value = true
+
+		// date/time
+		case "nowDate":
+			t := time.Now().UTC()
+			sideOut.Value = time.Date(t.Year(), t.Month(), t.Day(), 0, 0, 0, 0,
+				t.Location()).UTC().Unix() + int64(side.NowOffset.Int32)
+		case "nowDatetime":
+			sideOut.Value = time.Now().UTC().Unix() + int64(side.NowOffset.Int32)
+		case "nowTime":
+			t := time.Now().UTC()
+			sideOut.Value = time.Date(1970, 1, 1, t.Hour(), t.Minute(), t.Second(), 0,
+				t.Location()).UTC().Unix() + int64(side.NowOffset.Int32)
+
+		// user
+		case "languageCode":
+			sideOut.Value = languageCode
+		case "login":
+			sideOut.Value = loginId
 		}
 		return sideOut
 	}

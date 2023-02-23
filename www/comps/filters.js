@@ -37,7 +37,7 @@ let MyFilterBrackets = {
 		}
 	},
 	methods:{
-		add:function(increase) {
+		add(increase) {
 			let v = this.value;
 			
 			if(increase) v++;
@@ -48,7 +48,7 @@ let MyFilterBrackets = {
 			
 			this.value = v;
 		},
-		display:function() {
+		display() {
 			let out = '';
 			let brk = this.left ? '(' : ')';
 			
@@ -239,14 +239,38 @@ let MyFilterSide = {
 					@input="setContent"
 					:value="content"
 				>
-					<option
-						v-for="c in contentEnabled"
-						:disabled="contentUnusable.includes(c)"
-						:title="capApp.option.contentHint[c]"
-						:value="c"
-					>
-						{{ capApp.option.content[c] }}
-					</option>
+					<optgroup :disabled="contentData.length === 0" :label="capApp.contentData">
+						<option
+							v-for="c in contentData"
+							:disabled="contentUnusable.includes(c)"
+							:title="capApp.option.contentHint[c]"
+							:value="c"
+						>{{ capApp.option.content[c] }}</option>
+					</optgroup>
+					<optgroup :disabled="contentForm.length === 0" :label="capApp.contentForm">
+						<option
+							v-for="c in contentForm"
+							:disabled="contentUnusable.includes(c)"
+							:title="capApp.option.contentHint[c]"
+							:value="c"
+						>{{ capApp.option.content[c] }}</option>
+					</optgroup>
+					<optgroup :disabled="contentDate.length === 0" :label="capApp.contentDate">
+						<option
+							v-for="c in contentDate"
+							:disabled="contentUnusable.includes(c)"
+							:title="capApp.option.contentHint[c]"
+							:value="c"
+						>{{ capApp.option.content[c] }}</option>
+					</optgroup>
+					<optgroup :disabled="contentLogin.length === 0" :label="capApp.contentLogin">
+						<option
+							v-for="c in contentLogin"
+							:disabled="contentUnusable.includes(c)"
+							:title="capApp.option.contentHint[c]"
+							:value="c"
+						>{{ capApp.option.content[c] }}</option>
+					</optgroup>
 				</select>
 				
 				<!-- sub query show toggle -->
@@ -319,6 +343,21 @@ let MyFilterSide = {
 						{{ r.name }}
 					</option>
 				</select>
+				
+				<!-- date offset input -->
+				<template v-if="!columnsMode && isAnyDate">
+					<input
+						v-model.number="nowOffset"
+						:placeholder="capApp.nowOffsetHint.replace('{MODE}',capApp.option.nowMode[nowOffsetMode])"
+						:title="capApp.nowOffsetTitle"
+					/>
+					<select v-model="nowOffsetMode" @change="changeOffsetMode">
+						<option value="seconds">{{ capApp.option.nowMode.seconds }}</option>
+						<option value="minutes">{{ capApp.option.nowMode.minutes }}</option>
+						<option value="hours">{{ capApp.option.nowMode.hours }}</option>
+						<option value="days">{{ capApp.option.nowMode.days }}</option>
+					</select>
+				</template>
 				
 				<!-- fixed value input -->
 				<template v-if="isValue || isJavascript">
@@ -419,20 +458,14 @@ let MyFilterSide = {
 		nestingLevels: { type:Number,  required:true }
 	},
 	emits:['apply-value','update:modelValue'],
-	data:function() {
+	data() {
 		return {
-			showQuery:false // show existing sub query
+			nowOffsetMode:'seconds', // mode for date/time offset (days, hours, minutes, seconds)
+			showQuery:false          // show existing sub query
 		};
 	},
 	computed:{
 		// entities
-		contentEnabled:(s) => {
-			return [
-				'attribute','field','fieldChanged','value','record',
-				'recordNew','login','preset','role','languageCode',
-				'javascript','true','collection','subQuery'
-			].filter(v => !s.disableContent.includes(v));
-		},
 		contentUnusable:(s) => {
 			let out = [];
 			if(Object.keys(s.fieldIdMap).length === 0) {
@@ -485,6 +518,35 @@ let MyFilterSide = {
 				this.setAttribute(vs[2],parseInt(vs[1]),parseInt(vs[0]));
 			}
 		},
+		nowOffset:{
+			get()  {
+				if(this.modelValue.nowOffset !== null) {
+					if(this.modelValue.nowOffset % 86400 === 0) {
+						this.nowOffsetMode = 'days';
+						return this.modelValue.nowOffset / 86400;
+					}
+					if(this.modelValue.nowOffset % 3600 === 0) {
+						this.nowOffsetMode = 'hours';
+						return this.modelValue.nowOffset / 3600;
+					}
+					if(this.modelValue.nowOffset % 60 === 0) {
+						this.nowOffsetMode = 'minutes';
+						return this.modelValue.nowOffset / 60;
+					}
+				}
+				return this.modelValue.nowOffset;
+			},
+			set(v) {
+				if(v !== '') {
+					switch(this.nowOffsetMode) {
+						case 'days': v = v * 86400; break;
+						case 'hours': v = v * 3600; break;
+						case 'minutes': v = v * 60; break;
+					}
+				}
+				this.set('nowOffset',v === '' ? null : v);
+			}
+		},
 		presetId:{
 			get()  { return this.modelValue.presetId; },
 			set(v) { this.set('presetId',v); }
@@ -514,9 +576,14 @@ let MyFilterSide = {
 		},
 		
 		// simple
-		module:(s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
+		contentData: (s) => ['attribute','collection','preset','subQuery','value','true'].filter(v => !s.disableContent.includes(v)),
+		contentDate: (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
+		contentForm: (s) => ['field','fieldChanged','javascript','record','recordNew'].filter(v => !s.disableContent.includes(v)),
+		contentLogin:(s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
+		module:      (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
 		
 		// states
+		isAnyDate:    (s) => ['nowDate','nowDatetime','nowTime'].includes(s.content),
 		isAttribute:  (s) => s.content === 'attribute',
 		isCollection: (s) => s.content === 'collection',
 		isField:      (s) => s.content === 'field' || s.content === 'fieldChanged',
@@ -565,6 +632,10 @@ let MyFilterSide = {
 				v.attributeNested = 0;
 			}
 			
+			// remove unneeded date offset
+			if(!['nowDate','nowDatetime','nowTime'].includes(v.content))
+				v.nowOffset = null;
+			
 			// remove invalid references
 			if(v.content !== 'collection') {
 				v.collectionId = null;
@@ -591,6 +662,10 @@ let MyFilterSide = {
 			let v = JSON.parse(JSON.stringify(this.modelValue.query));
 			v[name] = newValue;
 			this.set('query',v);
+		},
+		changeOffsetMode() {
+			if(this.nowOffset !== 0 && this.nowOffset !== null)
+				this.nowOffset = this.nowOffset;
 		}
 	}
 };

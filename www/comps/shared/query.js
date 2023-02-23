@@ -3,6 +3,11 @@ import {getItemTitle}                from './builder.js';
 import {getCollectionValues}         from './collection.js';
 import {filterOperatorIsSingleValue} from './generic.js';
 import MyStore                       from '../../stores/store.js';
+import {
+	getUnixNowDate,
+	getUnixNowDatetime,
+	getUnixNowTime
+} from './time.js';
 
 let getQueryExpressionAttribute = function(column) {
 	return {
@@ -163,32 +168,13 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 	
 	let getFilterSideProcessed = function(s,operator) {
 		switch(s.content) {
+			// data
 			case 'collection':
 				s.value = getCollectionValues(
 					s.collectionId,
 					s.columnId,
 					filterOperatorIsSingleValue(operator),
 					collectionIdMapIndexFilter[s.collectionId]);
-			break;
-			case 'field':
-				const fld = dataFieldIdMap[s.fieldId];
-				if(typeof fld !== 'undefined') {
-					const atrIdNm = typeof fld.attributeIdNm !== 'undefined'
-						? fld.attributeIdNm : null;
-					
-					s.value = JSON.parse(JSON.stringify(values[getIndexAttributeId(
-						fld.index,fld.attributeId,fld.outsideIn === true,atrIdNm
-					)]));
-				}
-			break;
-			case 'javascript':
-				s.value = Function(s.value)();
-			break;
-			case 'languageCode':
-				s.value = MyStore.getters.moduleLanguage;
-			break;
-			case 'login':
-				s.value = MyStore.getters.loginId;
 			break;
 			case 'preset':
 				// unprotected presets can be deleted, 0 as fallback
@@ -197,17 +183,6 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 				const presetIdMap = MyStore.getters['schema/presetIdMapRecordId'];
 				if(typeof presetIdMap[s.presetId] !== 'undefined')
 					s.value = presetIdMap[s.presetId];
-			break;
-			case 'record':
-				if(typeof joinsIndexMap['0'] !== 'undefined')
-					s.value = joinsIndexMap['0'].recordId;
-			break;
-			case 'recordNew':
-				if(typeof joinsIndexMap['0'] !== 'undefined')
-					s.value = joinsIndexMap['0'].recordId === 0;
-			break;
-			case 'role':
-				s.value = MyStore.getters.access.roleIds.includes(s.roleId);
 			break;
 			case 'subQuery':
 				s.query.expressions = getSubQueryFilterExpressions(s);
@@ -224,6 +199,46 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 			case 'true':
 				s.value = true;
 			break;
+			
+			// form
+			case 'field':
+				const fld = dataFieldIdMap[s.fieldId];
+				if(typeof fld !== 'undefined') {
+					const atrIdNm = typeof fld.attributeIdNm !== 'undefined'
+						? fld.attributeIdNm : null;
+					
+					s.value = JSON.parse(JSON.stringify(values[getIndexAttributeId(
+						fld.index,fld.attributeId,fld.outsideIn === true,atrIdNm
+					)]));
+				}
+			break;
+			case 'javascript':
+				s.value = Function(s.value)();
+			break;
+			case 'record':
+				if(typeof joinsIndexMap['0'] !== 'undefined')
+					s.value = joinsIndexMap['0'].recordId;
+			break;
+			case 'recordNew':
+				if(typeof joinsIndexMap['0'] !== 'undefined')
+					s.value = joinsIndexMap['0'].recordId === 0;
+			break;
+			
+			// login
+			case 'languageCode':
+				s.value = MyStore.getters.moduleLanguage;
+			break;
+			case 'login':
+				s.value = MyStore.getters.loginId;
+			break;
+			case 'role':
+				s.value = MyStore.getters.access.roleIds.includes(s.roleId);
+			break;
+			
+			// date & time
+			case 'nowDate':     s.value = getUnixNowDate()     + s.nowOffset; break;
+			case 'nowDatetime': s.value = getUnixNowDatetime() + s.nowOffset; break;
+			case 'nowTime':     s.value = getUnixNowTime()     + s.nowOffset; break;
 		}
 		
 		// remove unnecessary data

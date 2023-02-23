@@ -1312,6 +1312,9 @@
 				"javascript":"JavaScript",
 				"languageCode":"login language",
 				"login":"login ID",
+				"nowDate":"date",
+				"nowDatetime":"date + time",
+				"nowTime":"time",
 				"preset":"preset record",
 				"record":"record ID",
 				"recordNew":"record is new",
@@ -1328,6 +1331,9 @@
 				"javascript":"Return value of the given Javascript expression.",
 				"languageCode":"The chosen user language code (en_us, de_de, ...) of the current login.",
 				"login":"ID of the current login (integer).",
+				"nowDate":"The current date (today), to compare against date values.",
+				"nowDatetime":"The current date + time (today at this second), to compare against date + time values.",
+				"nowTime":"The current time (this hour/minute/second), to compare against time values.",
 				"preset":"ID of the given preset record (integer).",
 				"record":"ID of the current record on this form (integer, relation 0).",
 				"recordNew":"TRUE/FALSE, depending on whether the current record is new on this form.",
@@ -1335,6 +1341,12 @@
 				"subQuery":"Return value of the given sub query.",
 				"true":"TRUE value to compare other TRUE values against.",
 				"value":"A static value to compare against."
+			},
+			"nowMode":{
+				"days":"days",
+				"hours":"hours",
+				"minutes":"min.",
+				"seconds":"sec."
 			},
 			"operator":{
 				"eq":"equal",
@@ -1352,9 +1364,15 @@
 			}
 		},
 		"add":"Add",
+		"contentData":"Data",
+		"contentDate":"Current date/time",
+		"contentForm":"Current form",
+		"contentLogin":"Logged in user",
 		"javascriptHint":"Ex.: return new Date().getFullYear();",
 		"nestingMain":"Main query",
 		"nestingSub":"Sub query",
+		"nowOffsetHint":"+/- X {MODE}",
+		"nowOffsetTitle":"Add (positive number) or remove (negative number) X days/hours/minutes/seconds from now.",
 		"operatorsArray":"Array",
 		"operatorsNull":"Empty value",
 		"operatorsSets":"Subset",

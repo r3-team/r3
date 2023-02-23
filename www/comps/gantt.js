@@ -82,11 +82,11 @@ let MyGanttLineRecord = {
 	},
 	emits:['record-selected'],
 	computed:{
-		isFullDay:function() {
+		isFullDay() {
 			return this.isUnixUtcZero(this.getUnixFromDate(this.date0))
 				&& this.isUnixUtcZero(this.getUnixFromDate(this.date1));
 		},
-		style:function() {
+		style() {
 			let d0 = new Date(this.date0.getTime());
 			let d1 = new Date(this.date1.getTime());
 			
@@ -121,7 +121,7 @@ let MyGanttLineRecord = {
 			// max-width is overwritten by CSS if hovered over (show full entry)
 			return [`min-width:${width}px`,`max-width:${width}px`,`left:${offset}px`].join(';');
 		},
-		styleBg:function(r) {
+		styleBg(r) {
 			return this.color === null
 				? '' : `background-color:#${this.color};`;
 		}
@@ -133,7 +133,7 @@ let MyGanttLineRecord = {
 		isUnixUtcZero,
 		
 		// actions
-		clickRecord:function(middleClick) {
+		clickRecord(middleClick) {
 			if(this.rowSelect)
 				this.$emit('record-selected',this.recordId,[],middleClick);
 		}
@@ -865,7 +865,6 @@ let MyGantt = {
 						
 						// check in which line record fits (no overlapping)
 						let lineIndex = this.getFreeLineIndex(groupMap[groupName].lines,date0,date1);
-						
 						if(lineIndex === -1) {
 							lineIndex = groupMap[groupName].lines.length;
 							groupMap[groupName].lines.push([]);
