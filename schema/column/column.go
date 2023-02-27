@@ -16,7 +16,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var allowedEntities = []string{"collection", "field"}
+var allowedEntities = []string{"api", "collection", "field"}
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 	_, err := tx.Exec(db.Ctx, `DELETE FROM app.column WHERE id = $1`, id)

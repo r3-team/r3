@@ -21,6 +21,8 @@ import (
 	"r3/db/initialize"
 	"r3/db/upgrade"
 	"r3/handler"
+	"r3/handler/api"
+	"r3/handler/api_auth"
 	"r3/handler/cache_download"
 	"r3/handler/client_download"
 	"r3/handler/csv_download"
@@ -409,13 +411,13 @@ func (prg *program) execute(svc service.Service) {
 	}
 	handler.SetNoImage(fsStaticNoPic)
 
+	mux.HandleFunc("/api/", api.Handler)
+	mux.HandleFunc("/api/auth", api_auth.Handler)
 	mux.HandleFunc("/cache/download/", cache_download.Handler)
 	mux.HandleFunc("/csv/download/", csv_download.Handler)
 	mux.HandleFunc("/csv/upload", csv_upload.Handler)
 	mux.HandleFunc("/client/download/", client_download.Handler)
 	mux.HandleFunc("/client/download/config/", client_download.HandlerConfig)
-	mux.HandleFunc("/data/access", data_access.Handler)
-	mux.HandleFunc("/data/auth", data_auth.Handler)
 	mux.HandleFunc("/data/download/", data_download.Handler)
 	mux.HandleFunc("/data/download/thumb/", data_download_thumb.Handler)
 	mux.HandleFunc("/data/upload", data_upload.Handler)
@@ -425,6 +427,10 @@ func (prg *program) execute(svc service.Service) {
 	mux.HandleFunc("/websocket", websocket.Handler)
 	mux.HandleFunc("/export/", transfer_export.Handler)
 	mux.HandleFunc("/import", transfer_import.Handler)
+
+	// legacy
+	mux.HandleFunc("/data/access", data_access.Handler)
+	mux.HandleFunc("/data/auth", data_auth.Handler)
 
 	webServerString := fmt.Sprintf("%s:%d", config.File.Web.Listen, config.File.Web.Port)
 	webListener, err := net.Listen("tcp", webServerString)

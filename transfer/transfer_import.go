@@ -14,6 +14,7 @@ import (
 	"r3/log"
 	"r3/module_option"
 	"r3/schema"
+	"r3/schema/api"
 	"r3/schema/article"
 	"r3/schema/attribute"
 	"r3/schema/collection"
@@ -289,6 +290,23 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 			e.ModuleId, e.Id, e.IconId, e.Name, e.Columns, e.Query, e.InHeader),
 			e.Id, idMapSkipped); err != nil {
 
+			return err
+		}
+	}
+
+	// APIs
+	for _, e := range mod.Apis {
+
+		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info("transfer", fmt.Sprintf("set API %s", e.Id))
+
+		if err := importCheckResultAndApply(tx, api.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}

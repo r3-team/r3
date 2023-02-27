@@ -52,11 +52,17 @@ func SetNoImage(v []byte) {
 	NoImage = v
 }
 
-func AbortRequest(w http.ResponseWriter, context string, err error, errMessageUser string) {
-	log.Error("server", fmt.Sprintf("aborted %s request", context), err)
+func AbortRequest(w http.ResponseWriter, context string, errToLog error, errMessageUser string) {
+	AbortRequestWithCode(w, context, http.StatusBadRequest, errToLog, errMessageUser)
+}
+
+func AbortRequestWithCode(w http.ResponseWriter, context string,
+	httpCode int, errToLog error, errMessageUser string) {
+
+	log.Error("server", fmt.Sprintf("aborted %s request", context), errToLog)
 
 	w.Header().Set("Content-Type", "application/json")
-	w.WriteHeader(http.StatusBadRequest)
+	w.WriteHeader(httpCode)
 	w.Write([]byte(fmt.Sprintf(`{"error": "%s"}`, errMessageUser)))
 }
 

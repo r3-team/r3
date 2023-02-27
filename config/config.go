@@ -79,6 +79,7 @@ func SetConfigFilePath(path string) {
 	filePath = path
 }
 func SetLogLevels() {
+	log.SetLogLevel("api", int(GetUint64("logApi")))
 	log.SetLogLevel("backup", int(GetUint64("logBackup")))
 	log.SetLogLevel("cache", int(GetUint64("logCache")))
 	log.SetLogLevel("cluster", int(GetUint64("logCluster")))

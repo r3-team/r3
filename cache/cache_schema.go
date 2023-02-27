@@ -10,6 +10,7 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/module_option"
+	"r3/schema/api"
 	"r3/schema/article"
 	"r3/schema/attribute"
 	"r3/schema/collection"
@@ -44,11 +45,13 @@ var (
 	Schema_mx sync.RWMutex
 
 	// cached entities for regular use during normal operation
-	ModuleIdMap     map[uuid.UUID]types.Module     // all modules by ID
-	RelationIdMap   map[uuid.UUID]types.Relation   // all relations by ID
-	AttributeIdMap  map[uuid.UUID]types.Attribute  // all attributes by ID
-	RoleIdMap       map[uuid.UUID]types.Role       // all roles by ID
-	PgFunctionIdMap map[uuid.UUID]types.PgFunction // all PG functions by ID
+	ModuleIdMap        map[uuid.UUID]types.Module      // all modules by ID
+	ModuleApiNameMapId map[string]map[string]uuid.UUID // all API IDs by module+API name
+	RelationIdMap      map[uuid.UUID]types.Relation    // all relations by ID
+	AttributeIdMap     map[uuid.UUID]types.Attribute   // all attributes by ID
+	RoleIdMap          map[uuid.UUID]types.Role        // all roles by ID
+	PgFunctionIdMap    map[uuid.UUID]types.PgFunction  // all PG functions by ID
+	ApiIdMap           map[uuid.UUID]types.Api         // all APIs by ID
 
 	// schema cache
 	moduleIdsOrdered []uuid.UUID     // all module IDs in desired order
@@ -132,10 +135,12 @@ func updateSchemaCache(moduleIdsUpdateOnly []uuid.UUID) error {
 		log.Info("cache", "starting schema processing for all modules")
 		moduleIdsOrdered = make([]uuid.UUID, 0)
 		ModuleIdMap = make(map[uuid.UUID]types.Module)
+		ModuleApiNameMapId = make(map[string]map[string]uuid.UUID)
 		RelationIdMap = make(map[uuid.UUID]types.Relation)
 		AttributeIdMap = make(map[uuid.UUID]types.Attribute)
 		RoleIdMap = make(map[uuid.UUID]types.Role)
 		PgFunctionIdMap = make(map[uuid.UUID]types.PgFunction)
+		ApiIdMap = make(map[uuid.UUID]types.Api)
 	} else {
 		log.Info("cache", "starting schema processing for one module")
 	}
@@ -162,6 +167,8 @@ func updateSchemaCache(moduleIdsUpdateOnly []uuid.UUID) error {
 		mod.PgFunctions = make([]types.PgFunction, 0)
 		mod.JsFunctions = make([]types.JsFunction, 0)
 		mod.Collections = make([]types.Collection, 0)
+		mod.Apis = make([]types.Api, 0)
+		ModuleApiNameMapId[mod.Name] = make(map[string]uuid.UUID)
 
 		// get articles
 		log.Info("cache", "load articles")
@@ -286,6 +293,18 @@ func updateSchemaCache(moduleIdsUpdateOnly []uuid.UUID) error {
 		mod.Collections, err = collection.Get(mod.Id)
 		if err != nil {
 			return err
+		}
+
+		// get APIs
+		log.Info("cache", "load APIs")
+
+		mod.Apis, err = api.Get(mod.Id)
+		if err != nil {
+			return err
+		}
+		for _, a := range mod.Apis {
+			ApiIdMap[a.Id] = a
+			ModuleApiNameMapId[mod.Name][a.Name] = a.Id
 		}
 
 		// update cache map with parsed module

@@ -200,6 +200,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 	}
 
 	switch ressource {
+	case "api":
+		switch action {
+		case "del":
+			return ApiDel_tx(tx, reqJson)
+		case "set":
+			return ApiSet_tx(tx, reqJson)
+		}
 	case "article":
 		switch action {
 		case "assign":

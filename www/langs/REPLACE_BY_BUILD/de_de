@@ -330,6 +330,7 @@
 		},
 		"logs":{
 			"contextLabel":{
+				"api":"API",
 				"backup":"Sicherung",
 				"cache":"Cache",
 				"cluster":"Cluster",

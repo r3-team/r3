@@ -19,6 +19,7 @@ var (
 
 	// log levels
 	contextLevel = map[string]int{
+		"api":       1,
 		"backup":    1,
 		"cache":     1,
 		"cluster":   1,

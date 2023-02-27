@@ -32,6 +32,7 @@ type Module struct {
 	PgFunctions     []PgFunction      `json:"pgFunctions"`
 	JsFunctions     []JsFunction      `json:"jsFunctions"`
 	Collections     []Collection      `json:"collections"`
+	Apis            []Api             `json:"apis"`
 	ArticleIdsHelp  []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
 	Captions        CaptionMap        `json:"captions"`
 }
@@ -39,6 +40,21 @@ type ModuleStartForm struct {
 	Position int       `json:"position"`
 	RoleId   uuid.UUID `json:"roleId"`
 	FormId   uuid.UUID `json:"formId"`
+}
+type Api struct {
+	Id         uuid.UUID `json:"id"`
+	ModuleId   uuid.UUID `json:"moduleId"`
+	Name       string    `json:"name"`
+	Query      Query     `json:"query"`
+	Columns    []Column  `json:"columns"`
+	HasDelete  bool      `json:"hasDelete"`
+	HasGet     bool      `json:"hasGet`
+	HasPatch   bool      `json:"hasPatch`
+	HasPost    bool      `json:"hasPost"`
+	HasPut     bool      `json:"hasPut"`
+	LimitDef   int       `json:"limitDef"`   // default limit, if nothing else is specified
+	LimitMax   int       `json:"limitMax"`   // maximum limit that can be requested
+	VerboseGet bool      `json:"verboseGet"` // default output option for GET, add attribute names as keys
 }
 type Article struct {
 	Id       uuid.UUID  `json:"id"`

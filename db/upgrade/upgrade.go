@@ -239,6 +239,70 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TYPE app.filter_side_content ADD VALUE 'nowTime';
 			
 			ALTER TABLE app.query_filter_side ADD COLUMN now_offset INTEGER;
+			
+			-- new API entity
+			ALTER TYPE instance.log_context ADD VALUE 'api';
+			INSERT INTO instance.config (name,value) VALUES ('logApi','2');
+			
+			CREATE TABLE app.api (
+				id uuid NOT NULL,
+				module_id uuid NOT NULL,
+				name varchar(64) NOT NULL,
+				has_delete bool NOT NULL,
+				has_get bool NOT NULL,
+				has_patch bool NOT NULL,
+				has_post bool NOT NULL,
+				has_put bool NOT NULL,
+				limit_def int NOT NULL,
+				limit_max int NOT NULL,
+				verbose_get bool NOT NULL,
+			    CONSTRAINT api_pkey PRIMARY KEY (id),
+			    CONSTRAINT api_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID
+			);
+			
+			ALTER TABLE app.query ADD COLUMN api_id uuid;
+			ALTER TABLE app.query ADD CONSTRAINT query_api_id_fkey FOREIGN KEY (api_id)
+				REFERENCES app.api (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_query_api_id_fkey
+				ON app.query USING btree (api_id ASC NULLS LAST);
+			
+			ALTER TABLE app.query DROP CONSTRAINT query_single_parent;
+			ALTER TABLE app.query ADD  CONSTRAINT query_single_parent CHECK (1 = (
+				CASE WHEN api_id        IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN collection_id IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN column_id     IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN field_id      IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN form_id       IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN query_filter_query_id IS NULL THEN 0 ELSE 1
+				END
+			));
+			
+			ALTER TABLE app.column ADD COLUMN api_id uuid;
+			ALTER TABLE app.column ADD CONSTRAINT column_api_id_fkey FOREIGN KEY (api_id)
+				REFERENCES app.api (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_column_api_id_fkey
+			    ON app."column" USING btree (api_id ASC NULLS LAST);
+			
+			ALTER TABLE app.column DROP CONSTRAINT column_single_parent;
+			ALTER TABLE app.column ADD  CONSTRAINT column_single_parent CHECK (1 = (
+				CASE WHEN api_id        IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN collection_id IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN field_id      IS NULL THEN 0 ELSE 1
+				END
+			));
 		`)
 		return "3.3", err
 	},
