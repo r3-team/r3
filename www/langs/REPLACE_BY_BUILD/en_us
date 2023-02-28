@@ -505,6 +505,28 @@
 		"titleDocs":"Admin documentation"
 	},
 	"builder":{
+		"api":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this API?"
+			},
+			"columnsAvailable":"Available columns",
+			"columnsTarget":"Active columns",
+			"columnSettings":"Column settings",
+			"content":"API type",
+			"contentValue":"REST",
+			"hasDeleteHint":"Deletes an existing record - plus connected records if other relations are joined. Relations need the 'DELETE' option enabled to be affected.",
+			"hasGetHint":"Returns values from an existing (if record ID is given) or from all available records from one or multiple, joined relations.",
+			"hasPatchHint":"Changes specific values for an existing record - plus of connected records if other relations are joined. Relations need the 'UPDATE' option enabled to be affected.",
+			"hasPostHint":"Creates a new record - plus connected records if other relations are joined. Relations need the 'CREATE' option enabled to be affected.",
+			"httpMethods":"HTTP methods",
+			"limitDef":"GET result count",
+			"limitDefHint":"Default result count if not overwritten with the 'limit' getter (such as 'limit=1000').",
+			"limitMax":"GET maximum results",
+			"limitMaxHint":"Highest result count that is returned with one GET call.",
+			"nameHint":"The API name is used in the REST call itself. The call must be updated if changed.",
+			"title":"APIs",
+			"titleOne":"API '{NAME}'"
+		},
 		"articles":{
 			"dialog":{
 				"delete":"Are you sure you want to delete this article?"
@@ -999,6 +1021,7 @@
 				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
 				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
 			},
+			"api":"New API",
 			"collection":"New collection",
 			"form":"New form",
 			"jsFunction":"New Frontend function",
@@ -1174,6 +1197,7 @@
 		"language":"Translation",
 		"languageNextHint":"Switch to next language (hotkey: CTRL + q)",
 		"noOwner":"Application is in read-only mode",
+		"navigationApis":"APIs",
 		"navigationArticles":"Help articles",
 		"navigationCollections":"Collections",
 		"navigationFilterHint":"Filter by text",

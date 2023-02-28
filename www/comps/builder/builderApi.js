@@ -1,10 +1,7 @@
-import MyBuilderQuery                  from './builderQuery.js';
-import MyBuilderCollectionInput        from './builderCollectionInput.js';
-import MyBuilderColumnOptions          from './builderColumnOptions.js';
-import MyBuilderIconInput              from './builderIconInput.js';
-import {getItemTitleColumn}            from '../shared/builder.js';
-import {getCollectionConsumerTemplate} from '../shared/collection.js';
-import MyTabs                          from '../tabs.js';
+import MyBuilderQuery         from './builderQuery.js';
+import MyBuilderColumnOptions from './builderColumnOptions.js';
+import {getItemTitleColumn}   from '../shared/builder.js';
+import MyTabs                 from '../tabs.js';
 import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
@@ -13,20 +10,18 @@ import {
 	copyValueDialog,
 	getNilUuid
 } from '../shared/generic.js';
-export {MyBuilderCollection as default};
+export {MyBuilderApi as default};
 
-let MyBuilderCollection = {
-	name:'my-builder-collection',
+let MyBuilderApi = {
+	name:'my-builder-api',
 	components:{
 		MyBuilderColumnOptions,
-		MyBuilderCollectionInput,
 		MyBuilderColumns,
 		MyBuilderColumnTemplates,
-		MyBuilderIconInput,
 		MyBuilderQuery,
 		MyTabs
 	},
-	template:`<div class="builder-collection" v-if="collection">
+	template:`<div class="builder-api" v-if="api">
 		<div class="contentBox grow">
 			<div class="top">
 				<div class="area nowrap">
@@ -58,11 +53,6 @@ let MyBuilderCollection = {
 						@trigger="copyValueDialog(name,id,id)"
 						:caption="capGen.id"
 					/>
-					<my-button
-						@trigger="showPreview = !showPreview"
-						:caption="capGen.preview"
-						:image="showPreview ? 'checkbox1.png' : 'checkbox0.png'"
-					/>
 					<my-button image="delete.png"
 						@trigger="delAsk"
 						:active="!readonly"
@@ -75,29 +65,10 @@ let MyBuilderCollection = {
 			
 			<div class="content no-padding">
 				
-				<!-- collection value preview -->
-				<div class="preview" v-if="showPreview">
-					<table>
-						<thead>
-							<tr>
-								<th v-for="c in collection.columns">
-									{{ getItemTitleColumn(c,true) }}
-								</th>
-							</tr>
-						</thead>
-						<tbody>
-							<tr v-for="r in collectionRows">
-								<td v-for="v in r">{{ v }}</td>
-							</tr>
-						</tbody>
-					</table>
-					<p>{{ capApp.previewHint }}</p>
-				</div>
+				<div class="builder-api-columns">
 				
-				<div class="builder-collection-columns">
-				
-					<!-- collection query columns -->
-					<div class="builder-collection-columns-active">
+					<!-- query columns -->
+					<div class="builder-api-columns-active">
 						<h2>{{ capApp.columnsTarget }}</h2>
 						<my-builder-columns groupName="columns"
 							@columns-set="columns = $event"
@@ -114,9 +85,9 @@ let MyBuilderCollection = {
 						/>
 					</div>
 					
-					<div class="builder-collection-columns-available">
+					<div class="builder-api-columns-available">
 						<h2>{{ capApp.columnsAvailable }}</h2>
-						<div class="builder-collection-column-templates">
+						<div class="builder-api-column-templates">
 							<my-builder-column-templates groupName="columns"
 								:builderLanguage="builderLanguage"
 								:columns="columns"
@@ -144,7 +115,7 @@ let MyBuilderCollection = {
 				:entriesText="[capGen.content,capGen.properties]"
 			/>
 			
-			<!-- collection content -->
+			<!-- API content -->
 			<div class="content grow" v-if="tabTarget === 'content'">
 				<my-builder-query
 					@index-removed="removeIndex($event)"
@@ -203,53 +174,57 @@ let MyBuilderCollection = {
 				</template>
 			</div>
 			
-			<!-- collection properties -->
+			<!-- properties -->
 			<div class="content" v-if="tabTarget === 'properties'">
 				<table class="builder-table-vertical tight fullWidth default-inputs">
 					<tr>
 						<td>{{ capGen.name }}</td>
 						<td><input v-model="name" :disabled="readonly" /></td>
+						<td>{{ capApp.nameHint }}</td>
 					</tr>
 					<tr>
-						<td>{{ capGen.icon }}</td>
-						<td>
-							<my-builder-icon-input
-								@input="iconId = $event"
-								:iconIdSelected="iconId"
-								:module="module"
-								:title="capGen.icon"
-								:readonly="readonly"
-							/>
-						</td>
+						<td>{{ capApp.content }}</td>
+						<td><input disabled="disabled" :value="capApp.contentValue" /></td>
+						<td></td>
 					</tr>
 					<tr>
-						<td>
-							<div class="column gap">
-								<span>{{ capApp.inHeader }}</span>
-								<my-button image="add.png"
-									@trigger="collectionAdd"
-									:active="!readonly"
-									:caption="capGen.button.add"
-									:naked="true"
-								/>
+						<td>{{ capApp.httpMethods }}</td>
+						<td colspan="2">
+							<div class="column">
+								<table>
+									<tr>
+										<td>GET</td>
+										<td><my-bool v-model="hasGet" /></td>
+										<td>{{ capApp.hasGetHint }}</td>
+									</tr>
+									<tr>
+										<td>POST</td>
+										<td><my-bool v-model="hasPost" /></td>
+										<td>{{ capApp.hasPostHint }}</td>
+									</tr>
+									<tr>
+										<td>PATCH</td>
+										<td><my-bool v-model="hasPatch" /></td>
+										<td>{{ capApp.hasPatchHint }}</td>
+									</tr>
+									<tr>
+										<td>DELETE</td>
+										<td><my-bool v-model="hasDelete" /></td>
+										<td>{{ capApp.hasDeleteHint }}</td>
+									</tr>
+								</table>
 							</div>
 						</td>
-						<td>
-							<my-builder-collection-input
-								v-for="(c,i) in inHeader"
-								@remove="collectionRemove(i)"
-								@update:consumer="collectionSet(i,$event)"
-								:allowFormOpen="true"
-								:allowRemove="true"
-								:consumer="c"
-								:fixedCollection="true"
-								:module="module"
-								:readonly="readonly"
-								:showMultiValue="false"
-								:showNoDisplayEmpty="true"
-								:showOnMobile="true"
-							/>
-						</td>
+					</tr>
+					<tr v-if="hasGet">
+						<td>{{ capApp.limitDef }}</td>
+						<td><input v-model.number="limitDef" :disabled="readonly" /></td>
+						<td>{{ capApp.limitDefHint }}</td>
+					</tr>
+					<tr v-if="hasGet">
+						<td>{{ capApp.limitMax }}</td>
+						<td><input v-model.number="limitMax" :disabled="readonly" /></td>
+						<td>{{ capApp.limitMaxHint }}</td>
 					</tr>
 				</table>
 			</div>
@@ -278,29 +253,23 @@ let MyBuilderCollection = {
 			
 			// inputs
 			columns:[],
-			iconId:null,
-			inHeader:[],
+			hasDelete:false,
+			hasGet:false,
+			hasPatch:false,
+			hasPost:false,
+			limitDef:100,
+			limitMax:1000,
 			name:'',
+			verboseGet:false,
 			
 			// state
 			columnIdShow:null,
 			showPreview:false,
 			showSidebar:true,
-			tabTarget:'content'
+			tabTarget:'properties'
 		};
 	},
 	computed:{
-		collectionRows:(s) => {
-			const col = s.$store.getters.collectionIdMap[s.collection.id];
-			if(typeof col === 'undefined')
-				return [];
-			
-			let out = [];
-			for(const r of col) {
-				out.push(r.values);
-			}
-			return out;
-		},
 		columnShow:(s) => {
 			if(s.columnIdShow === null) return false;
 			
@@ -310,30 +279,35 @@ let MyBuilderCollection = {
 			}
 			return false;
 		},
-		hasChanges:(s) => s.name          !== s.collection.name
-			|| s.iconId                   !== s.collection.iconId
-			|| s.relationId               !== s.collection.query.relationId
-			|| s.fixedLimit               !== s.collection.query.fixedLimit
-			|| JSON.stringify(s.joins)    !== JSON.stringify(s.collection.query.joins)
-			|| JSON.stringify(s.filters)  !== JSON.stringify(s.collection.query.filters)
-			|| JSON.stringify(s.orders)   !== JSON.stringify(s.collection.query.orders)
-			|| JSON.stringify(s.columns)  !== JSON.stringify(s.collection.columns)
-			|| JSON.stringify(s.inHeader) !== JSON.stringify(s.collection.inHeader),
+		hasChanges:(s) => s.name         !== s.api.name
+			|| s.hasDelete               !== s.api.hasDelete
+			|| s.hasGet                  !== s.api.hasGet
+			|| s.hasPatch                !== s.api.hasPatch
+			|| s.hasPost                 !== s.api.hasPost
+			|| s.limitDef                !== s.api.limitDef
+			|| s.limitMax                !== s.api.limitMax
+			|| s.verboseGet              !== s.api.verboseGet
+			|| s.relationId              !== s.api.query.relationId
+			|| s.fixedLimit              !== s.api.query.fixedLimit
+			|| JSON.stringify(s.joins)   !== JSON.stringify(s.api.query.joins)
+			|| JSON.stringify(s.filters) !== JSON.stringify(s.api.query.filters)
+			|| JSON.stringify(s.orders)  !== JSON.stringify(s.api.query.orders)
+			|| JSON.stringify(s.columns) !== JSON.stringify(s.api.columns),
 		
 		// simple
-		collection:(s) => typeof s.collectionIdMap[s.id] === 'undefined' ? false : s.collectionIdMap[s.id],
-		module:    (s) => s.moduleIdMap[s.collection.moduleId],
+		api:   (s) => typeof s.apiIdMap[s.id] === 'undefined' ? false : s.apiIdMap[s.id],
+		module:(s) => s.moduleIdMap[s.api.moduleId],
 		
 		// stores
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
-		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
-		settings:       (s) => s.$store.getters.settings,
-		capApp:         (s) => s.$store.getters.captions.builder.collection,
-		capGen:         (s) => s.$store.getters.captions.generic
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		apiIdMap:      (s) => s.$store.getters['schema/apiIdMap'],
+		settings:      (s) => s.$store.getters.settings,
+		capApp:        (s) => s.$store.getters.captions.builder.api,
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	watch:{
-		collection:{
+		api:{
 			handler() { this.reset(); },
 			immediate:true
 		}
@@ -341,24 +315,10 @@ let MyBuilderCollection = {
 	methods:{
 		// externals
 		copyValueDialog,
-		getCollectionConsumerTemplate,
 		getItemTitleColumn,
 		getNilUuid,
 		
 		// actions
-		collectionAdd() {
-			let v = JSON.parse(JSON.stringify(this.inHeader));
-			let c = this.getCollectionConsumerTemplate();
-			c.collectionId = this.collection.id;
-			v.push(c);
-			this.inHeader = v;
-		},
-		collectionRemove(i) {
-			this.inHeader.splice(i,1);
-		},
-		collectionSet(i,value) {
-			this.inHeader[i] = value;
-		},
 		columnSet(name,value) {
 			this.columnShow[name] = value;
 		},
@@ -376,17 +336,22 @@ let MyBuilderCollection = {
 			}
 		},
 		reset() {
-			if(!this.collection) return;
+			if(!this.api) return;
 			
-			this.name       = this.collection.name;
-			this.iconId     = this.collection.iconId;
-			this.relationId = this.collection.query.relationId;
-			this.fixedLimit = this.collection.query.fixedLimit;
-			this.joins      = JSON.parse(JSON.stringify(this.collection.query.joins));
-			this.filters    = JSON.parse(JSON.stringify(this.collection.query.filters));
-			this.orders     = JSON.parse(JSON.stringify(this.collection.query.orders));
-			this.columns    = JSON.parse(JSON.stringify(this.collection.columns));
-			this.inHeader   = JSON.parse(JSON.stringify(this.collection.inHeader));
+			this.name       = this.api.name;
+			this.hasDelete  = this.api.hasDelete;
+			this.hasGet     = this.api.hasGet;
+			this.hasPatch   = this.api.hasPatch;
+			this.hasPost    = this.api.hasPost;
+			this.limitDef   = this.api.limitDef;
+			this.limitMax   = this.api.limitMax;
+			this.verboseGet = this.api.verboseGet;
+			this.relationId = this.api.query.relationId;
+			this.fixedLimit = this.api.query.fixedLimit;
+			this.joins      = JSON.parse(JSON.stringify(this.api.query.joins));
+			this.filters    = JSON.parse(JSON.stringify(this.api.query.filters));
+			this.orders     = JSON.parse(JSON.stringify(this.api.query.orders));
+			this.columns    = JSON.parse(JSON.stringify(this.api.columns));
 			this.columnIdShow = null;
 		},
 		toggleColumnOptions(id) {
@@ -399,7 +364,6 @@ let MyBuilderCollection = {
 		// helpers
 		replaceBuilderId(columns) {
 			for(let i = 0, j = columns.length; i < j; i++) {
-				
 				if(columns[i].id.startsWith('new_'))
 					columns[i].id = this.getNilUuid();
 			}
@@ -422,33 +386,38 @@ let MyBuilderCollection = {
 			});
 		},
 		del() {
-			ws.send('collection','del',{id:this.collection.id},true).then(
+			ws.send('api','del',{id:this.api.id},true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
-					this.$router.push('/builder/collections/'+this.collection.moduleId);
+					this.$router.push('/builder/apis/'+this.module.id);
 				},
 				this.$root.genericError
 			);
 		},
 		set() {
 			ws.sendMultiple([
-				ws.prepare('collection','set',{
-					id:this.collection.id,
-					moduleId:this.collection.moduleId,
-					iconId:this.iconId,
+				ws.prepare('api','set',{
+					id:this.api.id,
+					moduleId:this.api.moduleId,
 					name:this.name,
 					columns:this.replaceBuilderId(
 						JSON.parse(JSON.stringify(this.columns))
 					),
 					query:{
-						id:this.collection.query.id,
+						id:this.api.query.id,
 						relationId:this.relationId,
 						joins:this.joins,
 						filters:this.filters,
 						orders:this.orders,
 						fixedLimit:this.fixedLimit
 					},
-					inHeader:this.inHeader
+					hasDelete:this.hasDelete,
+					hasGet:this.hasGet,
+					hasPatch:this.hasPatch,
+					hasPost:this.hasPost,
+					limitDef:this.limitDef,
+					limitMax:this.limitMax,
+					verboseGet:this.verboseGet
 				}),
 				ws.prepare('schema','check',{moduleId:this.module.id})
 			],true).then(

@@ -161,6 +161,13 @@ let MyBuilder = {
 								<span>{{ capApp.navigationArticles }}</span>
 							</router-link>
 							
+							<router-link class="entry clickable"
+								:to="'/builder/apis/'+module.id"
+							>
+								<img src="images/tray.png" />
+								<span>{{ capApp.navigationApis }}</span>
+							</router-link>
+							
 							<!-- so router link is not last child (CSS) -->
 							<div />
 						</div>
@@ -188,6 +195,10 @@ let MyBuilder = {
 							<img src="images/tray.png" />
 							<h1>{{ capApp.navigationCollections }}</h1>
 						</div>
+						<div class="line" v-if="navigation === 'apis'">
+							<img src="images/tray.png" />
+							<h1>{{ capApp.navigationApis }}</h1>
+						</div>
 						<div class="line" v-if="navigation === 'pg-functions'">
 							<img src="images/codeDatabase.png" />
 							<h1>{{ capApp.navigationPgFunctions }}</h1>
@@ -202,7 +213,7 @@ let MyBuilder = {
 								:title="capApp.navigationFilterHint"
 							/>
 							<my-button image="add.png"
-								v-if="['collections','forms','js-functions','pg-functions','relations','roles'].includes(navigation)"
+								v-if="['apis','collections','forms','js-functions','pg-functions','relations','roles'].includes(navigation)"
 								@trigger="add"
 								:active="moduleOwner"
 								:captionTitle="capGen.button.add"
@@ -247,6 +258,15 @@ let MyBuilder = {
 								:key="c.id"
 								:to="'/builder/collection/'+c.id" 
 							>{{ c.name }}</router-link>
+						</template>
+						
+						<!-- APIs -->
+						<template v-if="navigation === 'apis'">
+							<router-link class="entry clickable"
+								v-for="a in module.apis.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
+								:key="a.id"
+								:to="'/builder/api/'+a.id" 
+							>{{ a.name }}</router-link>
 						</template>
 						
 						<!-- PG functions -->
@@ -338,15 +358,16 @@ let MyBuilder = {
 				// ascertain module ID to be loaded
 				let id;
 				switch(val.meta.target) {
+					case 'docs':        id = val.params.id;                                break;
 					case 'module':      id = val.params.id;                                break;
 					case 'start':       id = val.params.id;                                break;
-					case 'docs':        id = val.params.id;                                break;
-					case 'relation':    id = this.relationIdMap[val.params.id].moduleId;   break;
-					case 'form':        id = this.formIdMap[val.params.id].moduleId;       break;
-					case 'role':        id = this.roleIdMap[val.params.id].moduleId;       break;
+					case 'api':         id = this.apiIdMap[val.params.id].moduleId;        break;
 					case 'collection':  id = this.collectionIdMap[val.params.id].moduleId; break;
-					case 'pg-function': id = this.pgFunctionIdMap[val.params.id].moduleId; break;
+					case 'form':        id = this.formIdMap[val.params.id].moduleId;       break;
 					case 'js-function': id = this.jsFunctionIdMap[val.params.id].moduleId; break;
+					case 'relation':    id = this.relationIdMap[val.params.id].moduleId;   break;
+					case 'role':        id = this.roleIdMap[val.params.id].moduleId;       break;
+					case 'pg-function': id = this.pgFunctionIdMap[val.params.id].moduleId; break;
 				}
 				this.moduleId = id;
 				
@@ -370,6 +391,7 @@ let MyBuilder = {
 			|| s.navigation === 'forms'        && s.module.forms.length !== 0
 			|| s.navigation === 'roles'        && s.module.roles.length !== 0
 			|| s.navigation === 'collections'  && s.module.collections.length !== 0
+			|| s.navigation === 'apis'         && s.module.apis.length !== 0
 			|| s.navigation === 'js-functions' && s.module.jsFunctions.length !== 0
 			|| s.navigation === 'pg-functions' && s.module.pgFunctions.length !== 0,
 		moduleIdInput:{
@@ -398,6 +420,7 @@ let MyBuilder = {
 		pgFunctionIdMap:   (s) => s.$store.getters['schema/pgFunctionIdMap'],
 		roleIdMap:         (s) => s.$store.getters['schema/roleIdMap'],
 		collectionIdMap:   (s) => s.$store.getters['schema/collectionIdMap'],
+		apiIdMap:          (s) => s.$store.getters['schema/apiIdMap'],
 		builderEnabled:    (s) => s.$store.getters.builderEnabled,
 		capApp:            (s) => s.$store.getters.captions.builder,
 		capGen:            (s) => s.$store.getters.captions.generic,
@@ -435,6 +458,7 @@ let MyBuilder = {
 		// actions
 		add() {
 			switch(this.navigation) {
+				case 'apis':         this.createNew = 'api';        break;
 				case 'collections':  this.createNew = 'collection'; break;
 				case 'forms':        this.createNew = 'form';       break;
 				case 'js-functions': this.createNew = 'jsFunction'; break;

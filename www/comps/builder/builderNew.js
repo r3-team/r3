@@ -79,7 +79,7 @@ let MyBuilderNew = {
 		</div>
 	</div>`,
 	props:{
-		entity:  { type:String, required:true },  // module, relation, form, role
+		entity:  { type:String, required:true },
 		moduleId:{ type:String, required:true },
 	},
 	emits:['close'],
@@ -105,6 +105,7 @@ let MyBuilderNew = {
 		// presentation
 		title:(s) => {
 			switch(s.entity) {
+				case 'api':        return s.capApp.api;        break;
 				case 'collection': return s.capApp.collection; break;
 				case 'form':       return s.capApp.form;       break;
 				case 'jsFunction': return s.capApp.jsFunction; break;
@@ -117,6 +118,7 @@ let MyBuilderNew = {
 		},
 		titleImgSrc:(s) => {
 			switch(s.entity) {
+				case 'api':        return 'images/tray.png';           break;
 				case 'collection': return 'images/tray.png';           break;
 				case 'form':       return 'images/fileText.png';       break;
 				case 'jsFunction': return 'images/codeScreen.png';     break;
@@ -162,6 +164,22 @@ let MyBuilderNew = {
 		set() {
 			let request;
 			switch(this.entity) {
+				case 'api':
+					request = {
+						id:this.getNilUuid(),
+						moduleId:this.moduleId,
+						name:this.name,
+						columns:[],
+						query:this.getQueryTemplate(),
+						hasDelete:false,
+						hasGet:true,
+						hasPatch:false,
+						hasPost:false,
+						limitDef:100,
+						limitMax:1000,
+						verboseGet:true
+					};
+				break;
 				case 'collection':
 					request = {
 						id:this.getNilUuid(),

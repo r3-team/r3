@@ -505,6 +505,28 @@
 		"titleDocs":"Admin-Dokumentation"
 	},
 	"builder":{
+		"api":{
+			"dialog":{
+				"delete":"Bist du sicher, dass du diese API löschen möchtest?"
+			},
+			"columnsAvailable":"Verfügbare Spalten",
+			"columnsTarget":"Aktive Spalten",
+			"columnSettings":"Spalteneinstellungen",
+			"content":"API-Typ",
+			"contentValue":"REST",
+			"hasDeleteHint":"Löscht einen bestehenden Datensatz - plus zusammenhängende Datensätze, wenn andere Relationen verbunden sind. Relationen müssen die Option \"Löschen\" aktiv haben, um berücksichtigt zu werden.",
+			"hasGetHint":"Liefert Werte von einem bestehenden Datensatz (wenn Datensatz-ID definiert ist) oder von allen verfügbaren Datensätzen von einer oder mehreren, verbundenen Relationen.",
+			"hasPatchHint":"Aktualisiert Werte für einen bestehenden Datensatz - plus von zusammenhängenden Datensätzen, wenn andere Relationen verbunden sind. Relationen müssen die Option \"Aktualisieren\" aktiv haben, um berücksichtigt zu werden.",
+			"hasPostHint":"Erstellt einen neuen Datensatz - plus zusammenhängende Datensätze, wenn andere Relationen verbunden sind. Relationen müssen die Option \"Erstellen\" aktiv haben, um berücksichtigt zu werden.",
+			"httpMethods":"HTTP-Methoden",
+			"limitDef":"GET Ergebnisanzahl",
+			"limitDefHint":"Anzahl der Ergebnisse wenn nicht überschrieben mit dem Getter \"limit\" (bspw. \"limit=1000\").",
+			"limitMax":"GET maximale Ergebnisse",
+			"limitMaxHint":"Höchste Ergebnisanzahl, die mit einem GET-Aufruf geliefert wird.",
+			"nameHint":"Der API-Name wird im REST-Aufruf verwendet. The Aufruf muss verändert werden, wenn der API-Name sich ändert.",
+			"title":"APIs",
+			"titleOne":"API '{NAME}'"
+		},
 		"articles":{
 			"dialog":{
 				"delete":"Bist du sicher, dass du diesen Artikel löschen möchtest?"
@@ -999,6 +1021,7 @@
 				"module":"<p>Bitte wählen Sie einen Namen für Ihre Anwendung. Dieser Name dient zur eindeutigen Identifizierung Ihrer Anwendung in einem REI3-System. Er ist nicht für Benutzer sichtbar.</p><h3>Beispiele:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Da der Anwendungsname eindeutig sein muss, kann ein nach Ihrer Organisation benannter Präfix sinnvoll sein. Falls Ihre Organisation bspw. \"Modern Fashion GmbH\" heißt, könnten Sie \"mfg\" als Präfix nutzen (also \"mfg_shift_planner\").</p>",
 				"relation":"<p>Ein Relationsname sollte darstellen, was in dieser gespeichert wird. Er muss in einer Anwendung einzigartig sein.</p><h3>Beispiele:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
 			},
+			"api":"Neue API",
 			"collection":"Neue Sammlung",
 			"form":"Neues Formular",
 			"jsFunction":"Neue Frontend-Funktion",
@@ -1174,6 +1197,7 @@
 		"language":"Übersetzung",
 		"languageNextHint":"Zur nächsten Übersetzung wechseln (Hotkey: STRG + q)",
 		"noOwner":"Anwendung ist schreibgeschützt",
+		"navigationApis":"APIs",
 		"navigationArticles":"Hilfe-Artikel",
 		"navigationCollections":"Sammlungen",
 		"navigationFilterHint":"Nach Text filtern",

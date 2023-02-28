@@ -21,7 +21,7 @@ func Get(moduleId uuid.UUID) ([]types.Api, error) {
 
 	rows, err := db.Pool.Query(db.Ctx, `
 		SELECT id, name, has_delete, has_get, has_patch,
-			has_post, has_put, limit_def, limit_max, verbose_get
+			has_post, limit_def, limit_max, verbose_get
 		FROM app.api
 		WHERE module_id = $1
 		ORDER BY name ASC
@@ -34,9 +34,8 @@ func Get(moduleId uuid.UUID) ([]types.Api, error) {
 		var a types.Api
 		a.ModuleId = moduleId
 
-		if err := rows.Scan(&a.Id, &a.Name, &a.HasDelete, &a.HasGet,
-			&a.HasPatch, &a.HasPost, &a.HasPut, &a.LimitDef, &a.LimitMax,
-			&a.VerboseGet); err != nil {
+		if err := rows.Scan(&a.Id, &a.Name, &a.HasDelete, &a.HasGet, &a.HasPatch,
+			&a.HasPost, &a.LimitDef, &a.LimitMax, &a.VerboseGet); err != nil {
 
 			return apis, err
 		}
@@ -70,22 +69,20 @@ func Set_tx(tx pgx.Tx, api types.Api) error {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.api
 			SET name = $1, has_delete = $2, has_get = $3, has_patch = $4,
-				has_post = $5, has_put = $6, limit_def = $7, limit_max = $8,
-				verbose_get = $9
-			WHERE id = $10
-		`, api.Name, api.HasDelete, api.HasGet, api.HasPatch,
-			api.HasPost, api.HasPut, api.LimitDef, api.LimitMax,
-			api.VerboseGet, api.Id); err != nil {
+				has_post = $5, limit_def = $6, limit_max = $7, verbose_get = $8
+			WHERE id = $9
+		`, api.Name, api.HasDelete, api.HasGet, api.HasPatch, api.HasPost,
+			api.LimitDef, api.LimitMax, api.VerboseGet, api.Id); err != nil {
 
 			return err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.api (id, module_id, name, has_delete, has_get,
-				has_patch, has_post, has_put, limit_def, limit_max, verbose_get)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+				has_patch, has_post, limit_def, limit_max, verbose_get)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
 		`, api.Id, api.ModuleId, api.Name, api.HasDelete, api.HasGet,
-			api.HasPatch, api.HasPost, api.HasPut, api.LimitDef, api.LimitMax,
+			api.HasPatch, api.HasPost, api.LimitDef, api.LimitMax,
 			api.VerboseGet); err != nil {
 
 			return err

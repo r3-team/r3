@@ -1,9 +1,8 @@
-import {srcBase64} from '../shared/image.js';
-export {MyBuilderCollections as default};
+export {MyBuilderApis as default};
 
-let MyBuilderCollections = {
-	name:'my-builder-collections',
-	template:`<div class="builder-collections contentBox grow">
+let MyBuilderApis = {
+	name:'my-builder-apis',
+	template:`<div class="builder-apis contentBox grow">
 		<div class="top lower">
 			<div class="area nowrap">
 				<img class="icon" src="images/tray.png" />
@@ -19,7 +18,7 @@ let MyBuilderCollections = {
 				
 				<div class="entry"
 					v-if="!readonly"
-					@click="$emit('createNew','collection')"
+					@click="$emit('createNew','api')"
 					:class="{ clickable:!readonly }"
 				>
 					<div class="row gap centered">
@@ -29,29 +28,14 @@ let MyBuilderCollections = {
 				</div>
 				
 				<router-link class="entry clickable"
-					v-for="c in module.collections.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
-					:key="c.id"
-					:to="'/builder/collection/'+c.id" 
+					v-for="a in module.apis.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
+					:key="a.id"
+					:to="'/builder/api/'+a.id" 
 				>
 					<div class="lines">
-						<span>{{ c.name }}</span>
+						<span>{{ a.name }}</span>
 					</div>
 					<div class="row">
-						<my-button image="menu.png"
-							v-if="c.inHeader.length !== 0"
-							:active="false"
-							:captionTitle="capApp.inHeader"
-							:naked="true"
-							:tight="true"
-						/>
-						<my-button
-							v-if="c.iconId !== null"
-							:active="false"
-							:captionTitle="capGen.icon"
-							:imageBase64="srcBase64(iconIdMap[c.iconId].file)"
-							:naked="true"
-							:tight="true"
-						/>
 					</div>
 				</router-link>
 			</div>
@@ -71,12 +55,7 @@ let MyBuilderCollections = {
 		
 		// stores
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		iconIdMap:  (s) => s.$store.getters['schema/iconIdMap'],
-		capApp:     (s) => s.$store.getters.captions.builder.collection,
+		capApp:     (s) => s.$store.getters.captions.builder.api,
 		capGen:     (s) => s.$store.getters.captions.generic
-	},
-	methods:{
-		// externals
-		srcBase64
 	}
 };

@@ -10,6 +10,7 @@ const MyStoreSchema = {
 		presetIdMapRecordId:{}, // record IDs by preset, key: preset ID
 		
 		// references to specific entities
+		apiIdMap:{},
 		articleIdMap:{},
 		attributeIdMap:{},
 		collectionIdMap:{},
@@ -54,6 +55,7 @@ const MyStoreSchema = {
 			
 			// reset state
 			state.modules         = payload.modules;
+			state.apiIdMap        = {};
 			state.articleIdMap    = {};
 			state.attributeIdMap  = {};
 			state.collectionIdMap = {};
@@ -136,6 +138,13 @@ const MyStoreSchema = {
 					state.collectionIdMap[collection.id] = collection;
 				}
 				
+				// process APIs
+				for(let api of mod.apis) {
+					api.query = getQueryTemplateIfNull(api.query);
+					
+					state.apiIdMap[api.id] = api;
+				}
+				
 				// process PG functions
 				for(const pgFunc of mod.pgFunctions) {
 					state.pgFunctionIdMap[pgFunc.id] = pgFunc;
@@ -150,6 +159,7 @@ const MyStoreSchema = {
 		languageCodes(state,payload) { state.languageCodes = payload; }
 	},
 	getters:{
+		apiIdMap:           (state) => state.apiIdMap,
 		articleIdMap:       (state) => state.articleIdMap,
 		attributeIdMap:     (state) => state.attributeIdMap,
 		collectionIdMap:    (state) => state.collectionIdMap,

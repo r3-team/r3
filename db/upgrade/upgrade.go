@@ -252,7 +252,6 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				has_get bool NOT NULL,
 				has_patch bool NOT NULL,
 				has_post bool NOT NULL,
-				has_put bool NOT NULL,
 				limit_def int NOT NULL,
 				limit_max int NOT NULL,
 				verbose_get bool NOT NULL,

@@ -63,7 +63,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var isDelete, isGet, isPatch, isPost, isPut bool
+	var isDelete, isGet, isPatch, isPost bool
 	switch r.Method {
 	case "DELETE":
 		isDelete = true
@@ -73,8 +73,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		isPatch = true
 	case "POST":
 		isPost = true
-	case "PUT":
-		isPut = true
 	default:
 		handler.AbortRequestWithCode(w, handlerContext, http.StatusBadRequest,
 			errors.New("invalid HTTP method"), "invalid HTTP method")
@@ -156,8 +154,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if (isDelete && !api.HasDelete) ||
 		(isGet && !api.HasGet) ||
 		(isPatch && !api.HasPatch) ||
-		(isPost && !api.HasPost) ||
-		(isPut && !api.HasPut) {
+		(isPost && !api.HasPost) {
 		handler.AbortRequestWithCode(w, handlerContext, http.StatusBadRequest,
 			fmt.Errorf("unsupported HTTP method '%s'", r.Method),
 			fmt.Sprintf("HTTP method '%s' is not supported by this API", r.Method))
@@ -332,10 +329,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isPost {
-
-	}
-
-	if isPut {
 
 	}
 

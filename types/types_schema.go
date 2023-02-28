@@ -48,10 +48,9 @@ type Api struct {
 	Query      Query     `json:"query"`
 	Columns    []Column  `json:"columns"`
 	HasDelete  bool      `json:"hasDelete"`
-	HasGet     bool      `json:"hasGet`
-	HasPatch   bool      `json:"hasPatch`
+	HasGet     bool      `json:"hasGet"`
+	HasPatch   bool      `json:"hasPatch"`
 	HasPost    bool      `json:"hasPost"`
-	HasPut     bool      `json:"hasPut"`
 	LimitDef   int       `json:"limitDef"`   // default limit, if nothing else is specified
 	LimitMax   int       `json:"limitMax"`   // maximum limit that can be requested
 	VerboseGet bool      `json:"verboseGet"` // default output option for GET, add attribute names as keys
