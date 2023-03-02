@@ -183,8 +183,5 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	}
 
 	// set policies
-	if err := setPolicies_tx(tx, id, policies); err != nil {
-		return err
-	}
-	return nil
+	return setPolicies_tx(tx, id, policies)
 }

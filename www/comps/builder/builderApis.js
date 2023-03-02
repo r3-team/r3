@@ -5,7 +5,7 @@ let MyBuilderApis = {
 	template:`<div class="builder-apis contentBox grow">
 		<div class="top lower">
 			<div class="area nowrap">
-				<img class="icon" src="images/tray.png" />
+				<img class="icon" src="images/api.png" />
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
 			<div class="area default-inputs">

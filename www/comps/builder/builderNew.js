@@ -23,7 +23,7 @@ let MyBuilderNew = {
 			<div class="content default-inputs">
 				<div class="row gap centered">
 					<span>{{ capGen.name }}</span>
-					<input v-model="name" />
+					<input v-model="name" v-focus />
 				</div>
 				
 				<div
@@ -118,7 +118,7 @@ let MyBuilderNew = {
 		},
 		titleImgSrc:(s) => {
 			switch(s.entity) {
-				case 'api':        return 'images/tray.png';           break;
+				case 'api':        return 'images/api.png';            break;
 				case 'collection': return 'images/tray.png';           break;
 				case 'form':       return 'images/fileText.png';       break;
 				case 'jsFunction': return 'images/codeScreen.png';     break;
@@ -173,11 +173,10 @@ let MyBuilderNew = {
 						query:this.getQueryTemplate(),
 						hasDelete:false,
 						hasGet:true,
-						hasPatch:false,
 						hasPost:false,
 						limitDef:100,
 						limitMax:1000,
-						verboseGet:true
+						verboseDef:true
 					};
 				break;
 				case 'collection':

@@ -10,6 +10,7 @@ import (
 	"r3/cache"
 	"r3/config"
 	"r3/data"
+	"r3/data/data_import"
 	"r3/data/data_query"
 	"r3/db"
 	"r3/handler"
@@ -23,8 +24,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var handlerContext = "api"
-
 func Handler(w http.ResponseWriter, r *http.Request) {
 
 	if blocked := bruteforce.Check(r); blocked {
@@ -36,14 +35,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	token := strings.TrimPrefix(r.Header.Get("Authorization"), "Bearer ")
 
+	var abort = func(httpCode int, errToLog error, errMsgUser string) {
+		// if not other error is prepared for log, use user error
+		if errToLog == nil {
+			errToLog = errors.New(errMsgUser)
+		}
+		handler.AbortRequestWithCode(w, "api", httpCode, errToLog, errMsgUser)
+	}
+
 	// check token
 	var loginId int64
 	var admin bool
 	var noAuth bool
 	if _, err := login_auth.Token(token, &loginId, &admin, &noAuth); err != nil {
-		handler.AbortRequestWithCode(w, handlerContext, http.StatusUnauthorized,
-			err, handler.ErrUnauthorized)
-
+		abort(http.StatusUnauthorized, err, handler.ErrUnauthorized)
 		bruteforce.BadAttempt(r)
 		return
 	}
@@ -57,26 +62,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		FROM instance.login_setting
 		WHERE login_id = $1
 	`, loginId).Scan(&languageCode); err != nil {
-		handler.AbortRequestWithCode(w, handlerContext,
-			http.StatusServiceUnavailable, err, handler.ErrGeneral)
-
+		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
 		return
 	}
 
-	var isDelete, isGet, isPatch, isPost bool
+	var isDelete, isGet, isPost bool
 	switch r.Method {
 	case "DELETE":
 		isDelete = true
 	case "GET":
 		isGet = true
-	case "PATCH":
-		isPatch = true
 	case "POST":
 		isPost = true
 	default:
-		handler.AbortRequestWithCode(w, handlerContext, http.StatusBadRequest,
-			errors.New("invalid HTTP method"), "invalid HTTP method")
-
+		abort(http.StatusBadRequest, nil, "invalid HTTP method")
 		return
 	}
 
@@ -88,8 +87,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		Rules:
 		Path must contain 5-6 elements (see examples above, split by '/')
-		6th element is the record ID, required by all except GET/POST
-		GET/POST can also have record ID (GET: single record lookup, POST: create fixed ID record)
+		6th element is the record ID, required by all except GET
+		GET can also have record ID (single record lookup)
 	*/
 	elements := strings.Split(r.URL.Path, "/")
 	recordIdProvided := len(elements) == 6
@@ -100,11 +99,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		if isGet || isPost {
 			examplePostfix = " (record ID is optional)"
 		}
-
-		handler.AbortRequestWithCode(w, handlerContext, http.StatusBadRequest,
-			errors.New("invalid URL"),
-			fmt.Sprintf("invalid URL, expected: /api/{APP_NAME}/{API_NAME}/{VERSION}/{RECORD_ID}%s", examplePostfix))
-
+		abort(http.StatusBadRequest, nil, fmt.Sprintf("invalid URL, expected: /api/{APP_NAME}/{API_NAME}/{VERSION}/{RECORD_ID}%s", examplePostfix))
 		return
 	}
 
@@ -114,9 +109,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	apiName := elements[3]
 	version, err := strconv.ParseInt(elements[4][1:], 10, 64) // expected format: "v3"
 	if err != nil {
-		handler.AbortRequestWithCode(w, handlerContext, http.StatusBadRequest,
-			err, fmt.Sprintf("invalid API version format '%s', expected: 'v12'", elements[4]))
-
+		abort(http.StatusBadRequest, err, fmt.Sprintf("invalid API version format '%s', expected: 'v12'", elements[4]))
 		return
 	}
 
@@ -124,16 +117,14 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if len(elements) == 6 {
 		recordId, err = strconv.ParseInt(elements[5], 10, 64)
 		if err != nil {
-			handler.AbortRequestWithCode(w, handlerContext, http.StatusBadRequest,
-				err, fmt.Sprintf("invalid API record ID '%s', integer expected", elements[5]))
-
+			abort(http.StatusBadRequest, err, fmt.Sprintf("invalid API record ID '%s', integer expected", elements[5]))
 			return
 		}
 	}
 
 	// URL processing complete, actually use API
-	log.Info("api", fmt.Sprintf("%s.%s (v%d) is called (record ID: %d)",
-		modName, apiName, version, recordId))
+	log.Info("api", fmt.Sprintf("%s.%s (v%d) is called with %s (record ID: %d)",
+		modName, apiName, version, r.Method, recordId))
 
 	// resolve API by module+API names
 	cache.Schema_mx.RLock()
@@ -141,37 +132,67 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	apiId, exists := cache.ModuleApiNameMapId[modName][apiName]
 	if !exists {
-		handler.AbortRequestWithCode(w, handlerContext, http.StatusNotFound,
-			fmt.Errorf("API not found, '%s'.'%s'", modName, apiName),
-			fmt.Sprintf("API not found, '%s'.'%s'", modName, apiName))
-
+		abort(http.StatusNotFound, nil, fmt.Sprintf("API '%s.%s' not found", modName, apiName))
 		return
 	}
 	api := cache.ApiIdMap[apiId]
-	verboseGet := api.VerboseGet
 
 	// check supported API methods
 	if (isDelete && !api.HasDelete) ||
 		(isGet && !api.HasGet) ||
-		(isPatch && !api.HasPatch) ||
 		(isPost && !api.HasPost) {
-		handler.AbortRequestWithCode(w, handlerContext, http.StatusBadRequest,
-			fmt.Errorf("unsupported HTTP method '%s'", r.Method),
-			fmt.Sprintf("HTTP method '%s' is not supported by this API", r.Method))
-
+		abort(http.StatusBadRequest, nil, fmt.Sprintf("HTTP method '%s' is not supported by this API", r.Method))
 		return
 	}
 
 	if !api.Query.RelationId.Valid {
-		handler.AbortRequestWithCode(w, handlerContext, http.StatusServiceUnavailable,
-			fmt.Errorf("query has no base relation"), "query has no base relation")
-
+		abort(http.StatusServiceUnavailable, nil, "query has no base relation")
 		return
 	}
 
+	// TEMP
 	// check role access
 
+	// parse general getters
+	var getters struct {
+		limit   int
+		offset  int
+		verbose bool
+	}
+	getters.limit = api.LimitDef
+	getters.verbose = api.VerboseDef
+
+	for getter, value := range r.URL.Query() {
+		if len(value) == 1 && getter == "limit" || getter == "offset" || getter == "verbose" {
+			n, err := strconv.Atoi(value[0])
+			if err != nil {
+				abort(http.StatusBadRequest, err, fmt.Sprintf("invalid value '%s' for %s", value[0], getter))
+				return
+			}
+			switch getter {
+			case "limit":
+				getters.limit = n
+			case "offset":
+				getters.offset = n
+			case "verbose":
+				getters.verbose = n == 1
+			}
+		}
+	}
+
 	// execute request
+	ctx, ctxCancel := context.WithTimeout(context.Background(),
+		time.Duration(int64(config.GetUint64("dbTimeoutDataRest")))*time.Second)
+
+	defer ctxCancel()
+
+	tx, err := db.Pool.Begin(ctx)
+	if err != nil {
+		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
+		return
+	}
+	defer tx.Rollback(ctx)
+
 	if isDelete {
 
 	}
@@ -180,7 +201,17 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		dataGet := types.DataGet{
 			RelationId:  api.Query.RelationId.Bytes,
 			IndexSource: 0,
+			Limit:       getters.limit,
+			Offset:      getters.offset,
 		}
+
+		// abort if requested limit exceeds max limit
+		// better to abort as smaller than requested result count might suggest the absence of more data
+		if api.LimitMax < dataGet.Limit {
+			abort(http.StatusBadRequest, nil, fmt.Sprintf("max. result limit is: %d", api.LimitMax))
+			return
+		}
+
 		for _, join := range api.Query.Joins {
 			if join.Index == 0 {
 				continue
@@ -208,40 +239,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			dataGet.Expressions = append(dataGet.Expressions, expr)
 		}
 
-		// set API default limit
-		dataGet.Limit = api.LimitDef
-
-		// parse getters
-		for getter, value := range r.URL.Query() {
-			if len(value) != 1 {
-				continue
-			}
-
-			if getter == "limit" || getter == "offset" || getter == "verbose" {
-				n, err := strconv.ParseInt(value[0], 10, 64)
-				if err != nil {
-					handler.AbortRequestWithCode(w, handlerContext, http.StatusBadRequest,
-						err, fmt.Sprintf("invalid value '%s' for %s", value[0], getter))
-
-					return
-				}
-
-				switch getter {
-				case "limit":
-					dataGet.Limit = int(n)
-				case "offset":
-					dataGet.Offset = int(n)
-				case "verbose":
-					verboseGet = n == 1
-				}
-			}
-		}
-
-		// enforce API max limit
-		if api.LimitMax < dataGet.Limit {
-			dataGet.Limit = api.LimitMax
-		}
-
 		// apply query filters
 		dataGet.Filters = data_query.ConvertQueryToDataFilter(
 			api.Query.Filters, loginId, languageCode)
@@ -265,32 +262,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		dataGet.Orders = data_query.ConvertQueryToDataOrders(api.Query.Orders)
 
 		// get data
-		ctx, ctxCancel := context.WithTimeout(context.Background(),
-			time.Duration(int64(config.GetUint64("dbTimeoutDataRest")))*time.Second)
-
-		defer ctxCancel()
-
-		tx, err := db.Pool.Begin(ctx)
-		if err != nil {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
-			return
-		}
-		defer tx.Rollback(ctx)
-
 		var query string
 		results, _, err := data.Get_tx(ctx, tx, dataGet, loginId, &query)
 		if err != nil {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
-			return
-		}
-		if err := tx.Commit(ctx); err != nil {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+			if err.Error() == handler.ErrUnauthorized {
+				abort(http.StatusUnauthorized, err, handler.ErrUnauthorized)
+				return
+			}
+			abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
 			return
 		}
 
 		// parse output
 		rows := make([]interface{}, 0)
-		if !verboseGet {
+		if !getters.verbose {
 			for _, result := range results {
 				rows = append(rows, result.Values)
 			}
@@ -317,22 +302,70 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		payloadJson, err := json.Marshal(rows)
 		if err != nil {
-			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+			abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
 			return
 		}
 		w.Write(payloadJson)
-		return
-	}
-
-	if isPatch {
-
 	}
 
 	if isPost {
+		values := make([]interface{}, len(api.Columns))
 
+		if !getters.verbose {
+			// non-verbose mode: values are following columns (equal count and order)
+			// [123,"Fritz","Hans"]
+			if err := json.NewDecoder(r.Body).Decode(&values); err != nil {
+				abort(http.StatusBadRequest, err, "invalid JSON object")
+				return
+			}
+		} else {
+			// verbose mode: relation index -> attribute name -> value
+			// convert verbose to non-verbose input (to process both inputs the same way)
+			/*{
+				"0":{ "attribute0a":123, "attribute0b":"Fritz" },
+				"1":{ "attribute1a":"Hans" }
+			}*/
+			var jsonObj map[string]map[string]interface{}
+			if err := json.NewDecoder(r.Body).Decode(&jsonObj); err != nil {
+				abort(http.StatusBadRequest, err, "invalid JSON object")
+				return
+			}
+
+			// pre-populate values with nil, in case required attribute values are not given
+			for i, _ := range api.Columns {
+				values[i] = nil
+			}
+
+			for relIndexStr, attributeNameMapValues := range jsonObj {
+				relIndex, err := strconv.Atoi(relIndexStr)
+				if err != nil {
+					abort(http.StatusBadRequest, nil, fmt.Sprintf("invalid relation index '%s', integer expected", relIndexStr))
+					return
+				}
+				for i, column := range api.Columns {
+					if column.Index == relIndex {
+						atr := cache.AttributeIdMap[column.AttributeId]
+						if value, exists := attributeNameMapValues[atr.Name]; exists {
+							values[i] = value
+						}
+					}
+				}
+			}
+		}
+
+		if err := data_import.FromInterfaceValues_tx(ctx, tx, loginId, values,
+			api.Columns, api.Query.Joins, api.Query.Lookups); err != nil {
+
+			abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
+			return
+		}
+
+		w.WriteHeader(http.StatusOK)
 	}
 
-	// should never arrive here, one of the above methods must be valid
-	handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
-	return
+	// apply changes
+	if err := tx.Commit(ctx); err != nil {
+		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
+		return
+	}
 }

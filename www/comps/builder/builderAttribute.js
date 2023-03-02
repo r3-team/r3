@@ -44,7 +44,7 @@ let MyBuilderAttribute = {
 						<td>{{ capGen.name }}</td>
 						<td>
 							<div class="row gap centered">
-								<input v-model="values.name" :disabled="readonly || isId" />
+								<input v-focus v-model="values.name" :disabled="readonly || isId" />
 								<my-button image="visible1.png"
 									@trigger="copyValueDialog(values.name,attributeId,attributeId)"
 									:active="!isNew"

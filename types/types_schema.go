@@ -49,11 +49,10 @@ type Api struct {
 	Columns    []Column  `json:"columns"`
 	HasDelete  bool      `json:"hasDelete"`
 	HasGet     bool      `json:"hasGet"`
-	HasPatch   bool      `json:"hasPatch"`
 	HasPost    bool      `json:"hasPost"`
 	LimitDef   int       `json:"limitDef"`   // default limit, if nothing else is specified
 	LimitMax   int       `json:"limitMax"`   // maximum limit that can be requested
-	VerboseGet bool      `json:"verboseGet"` // default output option for GET, add attribute names as keys
+	VerboseDef bool      `json:"verboseDef"` // default input/output option, verbose shows relation indexes and attribute names
 }
 type Article struct {
 	Id       uuid.UUID  `json:"id"`
@@ -477,9 +476,10 @@ type PgTrigger struct {
 type PgIndex struct {
 	Id           uuid.UUID          `json:"id"`
 	RelationId   uuid.UUID          `json:"relationId"`
-	NoDuplicates bool               `json:"noDuplicates"`
-	AutoFki      bool               `json:"autoFki"`
-	Attributes   []PgIndexAttribute `json:"attributes"`
+	NoDuplicates bool               `json:"noDuplicates"` // index is unique
+	AutoFki      bool               `json:"autoFki"`      // index belongs to foreign key attribute (auto-generated)
+	PrimaryKey   bool               `json:"primaryKey"`   // index belongs to primary key attribute
+	Attributes   []PgIndexAttribute `json:"attributes"`   // attributes the index is made of
 }
 type PgIndexAttribute struct {
 	PgIndexId   uuid.UUID `json:"pgIndexId"`

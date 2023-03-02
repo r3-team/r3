@@ -78,25 +78,25 @@ let MyBuilderQueryChoice = {
 	emits:['move-down','move-up','remove','update'],
 	computed:{
 		filtersInput:{
-			get:function()  { return JSON.parse(JSON.stringify(this.choice.filters)); },
-			set:function(v) { this.update('filters',v); }
+			get()  { return JSON.parse(JSON.stringify(this.choice.filters)); },
+			set(v) { this.update('filters',v); }
 		},
 		nameInput:{
-			get:function()  { return this.choice.name; },
-			set:function(v) { this.update('name',v); }
+			get()  { return this.choice.name; },
+			set(v) { this.update('name',v); }
 		},
 		
 		// stores
-		capApp:function() { return this.$store.getters.captions.builder.query; },
-		capGen:function() { return this.$store.getters.captions.generic; }
+		capApp:(s) => s.$store.getters.captions.builder.query,
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
-		updateCaption:function(content,value) {
+		updateCaption(content,value) {
 			let captionsInput = JSON.parse(JSON.stringify(this.choice.captions));
 			captionsInput[content] = value;
 			this.update('captions',captionsInput);
 		},
-		update:function(content,value) {
+		update(content,value) {
 			let choice = JSON.parse(JSON.stringify(this.choice));
 			choice[content] = value;
 			this.$emit('update',choice);
@@ -122,16 +122,13 @@ let MyBuilderQueryLookupItem = {
 	emits:['update:modelValue'],
 	computed:{
 		value:{
-			get:function()  { return this.modelValue; },
-			set:function(v) { this.$emit('update:modelValue',v); }
+			get()  { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue',v); }
 		},
-		pgIndexCandidates:function() {
+		pgIndexCandidates:(s) => {
 			let out = [];
-			let rel = this.relationIdMap[this.join.relationId];
-			
-			for(let i = 0, j = rel.indexes.length; i < j; i++) {
-				let index = rel.indexes[i];
-				
+			let rel = s.relationIdMap[s.join.relationId];
+			for(let index of rel.indexes) {
 				if(index.noDuplicates)
 					out.push(index);
 			}
@@ -139,16 +136,14 @@ let MyBuilderQueryLookupItem = {
 		},
 		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap']
 	},
 	methods:{
-		displayPgIndexDesc:function(pgIndex) {
+		displayPgIndexDesc(pgIndex) {
 			let out = [];
-			
-			for(let i = 0, j = pgIndex.attributes.length; i < j; i++) {
-				
-				let atr = this.attributeIdMap[pgIndex.attributes[i].attributeId];
+			for(let a of pgIndex.attributes) {
+				let atr = this.attributeIdMap[a.attributeId];
 				out.push(`${atr.name} (${atr.content})`);
 			}
 			return out.join(' + ');
@@ -171,45 +166,37 @@ let MyBuilderQueryLookups = {
 	</div>`,
 	props:{
 		joins:  { type:Array, required:true },
-		lookups:{ type:Array, required:true }
+		lookups:{ type:Array, required:true } // [{pgIndexId:123,index:0},{...}]
 	},
 	emits:['update'],
 	computed:{
-		lookupsInput:{
-			get:function()  { return JSON.parse(JSON.stringify(this.lookups)); },
-			set:function(v) { this.$emit('update',v); }
-		},
-		
 		// stores
-		capApp:function() { return this.$store.getters.captions.builder.query; }
+		capApp:(s) => s.$store.getters.captions.builder.query
 	},
 	methods:{
-		getValueForJoin:function(join) {
-			for(let i = 0, j = this.lookupsInput.length; i < j; i++) {
-				if(this.lookupsInput[i].index === join.index)
-					return this.lookupsInput[i].pgIndexId;
+		getValueForJoin(join) {
+			for(let lookup of this.lookups) {
+				if(lookup.index === join.index)
+					return lookup.pgIndexId;
 			}
 			return null;
 		},
-		setValueForJoin:function(join,pgIndexId) {
-			let pos = -1;
-			for(let i = 0, j = this.lookupsInput.length; i < j; i++) {
-				if(this.lookupsInput[i].index === join.index) {
-					pos = i;
+		setValueForJoin(join,pgIndexId) {
+			let lookups = JSON.parse(JSON.stringify(this.lookups));
+			for(let i = 0, j = lookups.length; i < j; i++) {
+				if(lookups[i].index === join.index) {
+					lookups.splice(i,1);
 					break;
 				}
 			}
 			
-			if(pgIndexId === null && pos !== -1)
-				this.lookupsInput.splice(pos,1);
-			
-			if(pgIndexId !== null && pos === -1)
-				this.lookupsInput.push({
+			if(pgIndexId !== null)
+				lookups.push({
 					pgIndexId:pgIndexId,
 					index:join.index
 				});
 			
-			this.lookupsInput = this.lookupsInput;
+			this.$emit('update',lookups);
 		}
 	}
 };

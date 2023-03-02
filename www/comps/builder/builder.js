@@ -164,7 +164,7 @@ let MyBuilder = {
 							<router-link class="entry clickable"
 								:to="'/builder/apis/'+module.id"
 							>
-								<img src="images/tray.png" />
+								<img src="images/api.png" />
 								<span>{{ capApp.navigationApis }}</span>
 							</router-link>
 							
@@ -196,7 +196,7 @@ let MyBuilder = {
 							<h1>{{ capApp.navigationCollections }}</h1>
 						</div>
 						<div class="line" v-if="navigation === 'apis'">
-							<img src="images/tray.png" />
+							<img src="images/api.png" />
 							<h1>{{ capApp.navigationApis }}</h1>
 						</div>
 						<div class="line" v-if="navigation === 'pg-functions'">

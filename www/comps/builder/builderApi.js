@@ -25,7 +25,7 @@ let MyBuilderApi = {
 		<div class="contentBox grow">
 			<div class="top">
 				<div class="area nowrap">
-					<img class="icon" src="images/tray.png" />
+					<img class="icon" src="images/api.png" />
 					<h1 class="title">
 						{{ capApp.titleOne.replace('{NAME}',name) }}
 					</h1>
@@ -122,15 +122,17 @@ let MyBuilderApi = {
 					@set-filters="filters = $event"
 					@set-fixed-limit="fixedLimit = $event"
 					@set-joins="joins = $event"
+					@set-lookups="lookups = $event"
 					@set-orders="orders = $event"
 					@set-relation-id="relationId = $event"
 					:allowChoices="false"
-					:allowLookups="false"
+					:allowLookups="true"
 					:allowOrders="true"
 					:builderLanguage="builderLanguage"
 					:filters="filters"
 					:fixedLimit="fixedLimit"
 					:joins="joins"
+					:lookups="lookups"
 					:moduleId="module.id"
 					:orders="orders"
 					:relationId="relationId"
@@ -203,11 +205,6 @@ let MyBuilderApi = {
 										<td>{{ capApp.hasPostHint }}</td>
 									</tr>
 									<tr>
-										<td>PATCH</td>
-										<td><my-bool v-model="hasPatch" /></td>
-										<td>{{ capApp.hasPatchHint }}</td>
-									</tr>
-									<tr>
 										<td>DELETE</td>
 										<td><my-bool v-model="hasDelete" /></td>
 										<td>{{ capApp.hasDeleteHint }}</td>
@@ -249,18 +246,18 @@ let MyBuilderApi = {
 			joins:[],
 			filters:[],
 			orders:[],
+			lookups:[],
 			fixedLimit:0,
 			
 			// inputs
 			columns:[],
 			hasDelete:false,
 			hasGet:false,
-			hasPatch:false,
 			hasPost:false,
 			limitDef:100,
 			limitMax:1000,
 			name:'',
-			verboseGet:false,
+			verboseDef:false,
 			
 			// state
 			columnIdShow:null,
@@ -282,16 +279,16 @@ let MyBuilderApi = {
 		hasChanges:(s) => s.name         !== s.api.name
 			|| s.hasDelete               !== s.api.hasDelete
 			|| s.hasGet                  !== s.api.hasGet
-			|| s.hasPatch                !== s.api.hasPatch
 			|| s.hasPost                 !== s.api.hasPost
 			|| s.limitDef                !== s.api.limitDef
 			|| s.limitMax                !== s.api.limitMax
-			|| s.verboseGet              !== s.api.verboseGet
+			|| s.verboseDef              !== s.api.verboseDef
 			|| s.relationId              !== s.api.query.relationId
 			|| s.fixedLimit              !== s.api.query.fixedLimit
 			|| JSON.stringify(s.joins)   !== JSON.stringify(s.api.query.joins)
 			|| JSON.stringify(s.filters) !== JSON.stringify(s.api.query.filters)
 			|| JSON.stringify(s.orders)  !== JSON.stringify(s.api.query.orders)
+			|| JSON.stringify(s.lookups) !== JSON.stringify(s.api.query.lookups)
 			|| JSON.stringify(s.columns) !== JSON.stringify(s.api.columns),
 		
 		// simple
@@ -341,16 +338,16 @@ let MyBuilderApi = {
 			this.name       = this.api.name;
 			this.hasDelete  = this.api.hasDelete;
 			this.hasGet     = this.api.hasGet;
-			this.hasPatch   = this.api.hasPatch;
 			this.hasPost    = this.api.hasPost;
 			this.limitDef   = this.api.limitDef;
 			this.limitMax   = this.api.limitMax;
-			this.verboseGet = this.api.verboseGet;
+			this.verboseDef = this.api.verboseDef;
 			this.relationId = this.api.query.relationId;
 			this.fixedLimit = this.api.query.fixedLimit;
 			this.joins      = JSON.parse(JSON.stringify(this.api.query.joins));
 			this.filters    = JSON.parse(JSON.stringify(this.api.query.filters));
 			this.orders     = JSON.parse(JSON.stringify(this.api.query.orders));
+			this.lookups    = JSON.parse(JSON.stringify(this.api.query.lookups));
 			this.columns    = JSON.parse(JSON.stringify(this.api.columns));
 			this.columnIdShow = null;
 		},
@@ -409,15 +406,15 @@ let MyBuilderApi = {
 						joins:this.joins,
 						filters:this.filters,
 						orders:this.orders,
+						lookups:this.lookups,
 						fixedLimit:this.fixedLimit
 					},
 					hasDelete:this.hasDelete,
 					hasGet:this.hasGet,
-					hasPatch:this.hasPatch,
 					hasPost:this.hasPost,
 					limitDef:this.limitDef,
 					limitMax:this.limitMax,
-					verboseGet:this.verboseGet
+					verboseDef:this.verboseDef
 				}),
 				ws.prepare('schema','check',{moduleId:this.module.id})
 			],true).then(

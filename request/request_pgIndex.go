@@ -10,11 +10,9 @@ import (
 )
 
 func PgIndexDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
 	var req struct {
 		Id uuid.UUID `json:"id"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
@@ -22,11 +20,9 @@ func PgIndexDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 }
 
 func PgIndexGet(reqJson json.RawMessage) (interface{}, error) {
-
 	var req struct {
 		RelationId uuid.UUID `json:"relationId"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
@@ -34,12 +30,14 @@ func PgIndexGet(reqJson json.RawMessage) (interface{}, error) {
 }
 
 func PgIndexSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
 	var req types.PgIndex
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, pgIndex.Set_tx(tx, req.RelationId,
-		req.Id, req.NoDuplicates, false, req.Attributes)
+	// overwrite values that can only be set on the backend
+	req.AutoFki = false
+	req.PrimaryKey = false
+
+	return nil, pgIndex.Set_tx(tx, req)
 }

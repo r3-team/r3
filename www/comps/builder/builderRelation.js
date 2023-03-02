@@ -328,6 +328,7 @@ let MyBuilderRelation = {
 						<tr>
 							<th>{{ capGen.actions }}</th>
 							<th>{{ capApp.indexAttributes }}</th>
+							<th>{{ capApp.indexPrimaryKey }}</th>
 							<th>{{ capApp.indexAutoFki }}</th>
 							<th>{{ capApp.indexUnique }}</th>
 						</tr>

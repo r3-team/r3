@@ -108,6 +108,23 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.caption ALTER COLUMN content
 				TYPE app.caption_content USING content::text::app.caption_content;
 			
+			-- add references for PKs as PG indexes (used for API)
+			ALTER TABLE app.pg_index ADD COLUMN primary_key bool NOT NULL DEFAULT false;
+			ALTER TABLE app.pg_index ALTER COLUMN primary_key DROP DEFAULT;
+			
+			INSERT INTO app.pg_index (id, relation_id, auto_fki, no_duplicates, primary_key)
+				SELECT gen_random_uuid(), id, false, true, true FROM app.relation;
+			
+			INSERT INTO app.pg_index_attribute (pg_index_id, position, order_asc, attribute_id)
+				SELECT id, 0, true, (
+					SELECT id
+					FROM app.attribute
+					WHERE name = $1
+					AND relation_id = pgi.relation_id
+				)
+				FROM app.pg_index AS pgi
+				WHERE primary_key;
+			
 			-- new user setting
 			ALTER TABLE instance.login_setting ADD COLUMN tab_remember BOOLEAN NOT NULL DEFAULT TRUE;
 			
@@ -302,7 +319,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				CASE WHEN field_id      IS NULL THEN 0 ELSE 1
 				END
 			));
-		`)
+		`, schema.PkName)
 		return "3.3", err
 	},
 	"3.1": func(tx pgx.Tx) (string, error) {
@@ -3373,7 +3390,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			`, ar.moduleName, ar.attributeId.String())); err != nil {
 				return "", err
 			}
-			if err := pgIndex.SetAutoFkiForAttribute_tx(tx, ar.relationId, ar.attributeId, (ar.content == "1:1")); err != nil {
+			if err := pgIndex.SetAutoFkiForAttribute_tx(tx, ar.relationId,
+				ar.attributeId, (ar.content == "1:1")); err != nil {
+
 				return "", err
 			}
 		}

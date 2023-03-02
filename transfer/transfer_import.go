@@ -358,7 +358,6 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 	// PG indexes
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Indexes {
-
 			run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 			if err != nil {
 				return err
@@ -368,10 +367,7 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 			}
 			log.Info("transfer", fmt.Sprintf("set index %s", e.Id))
 
-			if err := importCheckResultAndApply(tx, pgIndex.Set_tx(tx,
-				e.RelationId, e.Id, e.NoDuplicates, e.AutoFki, e.Attributes),
-				e.Id, idMapSkipped); err != nil {
-
+			if err := importCheckResultAndApply(tx, pgIndex.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
 				return err
 			}
 		}
@@ -379,7 +375,6 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 	// forms, refer to relations/attributes/collections/JS functions
 	for _, e := range mod.Forms {
-
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
