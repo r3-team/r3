@@ -266,7 +266,7 @@ let MyBuilder = {
 								v-for="a in module.apis.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
 								:key="a.id"
 								:to="'/builder/api/'+a.id" 
-							>{{ a.name }}</router-link>
+							>{{ a.name + ' (v' + a.version + ')' }}</router-link>
 						</template>
 						
 						<!-- PG functions -->

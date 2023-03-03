@@ -110,9 +110,9 @@ let MyBuilderApi = {
 			
 			<my-tabs
 				v-model="tabTarget"
-				:entries="['content','properties']"
-				:entriesIcon="['images/database.png','images/edit.png']"
-				:entriesText="[capGen.content,capGen.properties]"
+				:entries="['content','calls','properties']"
+				:entriesIcon="['images/database.png','images/code.png','images/edit.png']"
+				:entriesText="[capGen.content,capApp.calls,capGen.properties]"
 			/>
 			
 			<!-- API content -->
@@ -176,6 +176,88 @@ let MyBuilderApi = {
 				</template>
 			</div>
 			
+			<!-- calls -->
+			<div class="content" v-if="tabTarget === 'calls'">
+				<table class="builder-table-vertical tight fullWidth default-inputs">
+					<tr>
+						<td>{{ capApp.call }}</td>
+						<td>
+							<select v-model="previewCall">
+								<option value="AUTH">AUTH</option>
+								<option value="GET"    :disabled="!hasGet">GET</option>
+								<option value="POST"   :disabled="!hasPost">POST</option>
+								<option value="DELETE" :disabled="!hasDelete">DELETE</option>
+							</select>
+						</td>
+						<td>{{ previewCall === 'AUTH' ? capApp.callHintAuth : '' }}</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.httpMethod }}</td>
+						<td colspan="2"><input disabled="disabled" :value="previewMethod" /></td>
+					</tr>
+					<tr>
+						<td>URL</td>
+						<td colspan="2">
+							<div class="row centered gap">
+								<input class="long" disabled="disabled" :value="previewUrl" />
+								<my-button image="copyClipboard.png"
+									@trigger="copyToClipboard(previewUrl)"
+									:captionTitle="capGen.button.copyClipboard"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr v-if="previewCall !== 'AUTH'">
+						<td>Headers</td>
+						<td colspan="2">
+							<table>
+								<thead>
+									<tr>
+										<th>Key</th><th>Value</th>
+									</tr>
+								</thead>
+								<tbody>
+									<tr>
+										<th>Authentication</th><th>Bearer {TOKEN_FROM_AUTH_CALL}</th>
+									</tr>
+								</tbody>
+							</table>
+						</td>
+					</tr>
+					<tr v-if="!['DELETE','AUTH'].includes(previewCall)">
+						<td>Params</td>
+						<td colspan="2">
+							<table>
+								<tr v-if="previewCall === 'GET'">
+									<td>Limit</td>
+									<td><input v-model.number="previewParams.limit" /></td>
+									<td>{{ capApp.limitHint }}</td>
+								</tr>
+								<tr v-if="previewCall === 'GET'">
+									<td>Offset</td>
+									<td><input v-model.number="previewParams.offset" /></td>
+									<td>{{ capApp.offsetHint }}</td>
+								</tr>
+								<tr v-if="['GET','POST'].includes(previewCall)">
+									<td>Verbose</td>
+									<td><my-bool v-model="previewParams.verbose" /></td>
+									<td>{{ capApp.verboseHint }}</td>
+								</tr>
+							</table>
+						</td>
+					</tr>
+					
+					<tr v-if="['AUTH','POST'].includes(previewCall)">
+						<td>Body</td>
+						<td colspan="2"><textarea class="long" disabled="disabled" :value="previewBody"></textarea></td>
+					</tr>
+					<tr v-if="['AUTH','GET','POST'].includes(previewCall)">
+						<td>Response</td>
+						<td colspan="2"><textarea class="long" disabled="disabled" :value="previewResponse"></textarea></td>
+					</tr>
+				</table>
+			</div>
+			
 			<!-- properties -->
 			<div class="content" v-if="tabTarget === 'properties'">
 				<table class="builder-table-vertical tight fullWidth default-inputs">
@@ -185,9 +267,19 @@ let MyBuilderApi = {
 						<td>{{ capApp.nameHint }}</td>
 					</tr>
 					<tr>
+						<td>{{ capGen.version }}</td>
+						<td><input v-model.number="version" :disabled="readonly" /></td>
+						<td>{{ capApp.versionHint }}</td>
+					</tr>
+					<tr>
 						<td>{{ capApp.content }}</td>
 						<td><input disabled="disabled" :value="capApp.contentValue" /></td>
 						<td></td>
+					</tr>
+					<tr>
+						<td>{{ capApp.verboseDef }}</td>
+						<td><my-bool v-model="verboseDef" /></td>
+						<td>{{ capApp.verboseDefHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.httpMethods }}</td>
@@ -249,7 +341,7 @@ let MyBuilderApi = {
 			lookups:[],
 			fixedLimit:0,
 			
-			// inputs
+			// API inputs
 			columns:[],
 			hasDelete:false,
 			hasGet:false,
@@ -258,6 +350,15 @@ let MyBuilderApi = {
 			limitMax:1000,
 			name:'',
 			verboseDef:false,
+			version:1,
+			
+			// API call preview
+			previewCall:'AUTH', // AUTH, GET, POST, DELETE
+			previewParams:{
+				limit:100,
+				offset:0,
+				verbose:false
+			},
 			
 			// state
 			columnIdShow:null,
@@ -267,6 +368,7 @@ let MyBuilderApi = {
 		};
 	},
 	computed:{
+		// states
 		columnShow:(s) => {
 			if(s.columnIdShow === null) return false;
 			
@@ -283,6 +385,7 @@ let MyBuilderApi = {
 			|| s.limitDef                !== s.api.limitDef
 			|| s.limitMax                !== s.api.limitMax
 			|| s.verboseDef              !== s.api.verboseDef
+			|| s.version                 !== s.api.version
 			|| s.relationId              !== s.api.query.relationId
 			|| s.fixedLimit              !== s.api.query.fixedLimit
 			|| JSON.stringify(s.joins)   !== JSON.stringify(s.api.query.joins)
@@ -290,6 +393,41 @@ let MyBuilderApi = {
 			|| JSON.stringify(s.orders)  !== JSON.stringify(s.api.query.orders)
 			|| JSON.stringify(s.lookups) !== JSON.stringify(s.api.query.lookups)
 			|| JSON.stringify(s.columns) !== JSON.stringify(s.api.columns),
+		
+		// preview values
+		previewBody:(s) => {
+			if(s.previewCall === 'AUTH')
+				return `{\n\t"username": "{API_LOGIN_NAME}",\n\t"password": "{API_LOGIN_PASSWORD}"\n}`;
+			
+			return '';
+		},
+		previewGetters:(s) => {
+			let out = [`verbose=${s.previewParams.verbose ? '1' : '0'}`];
+			
+			if(s.previewCall === 'GET') {
+				if(s.previewParams.limit  !== 0) out.push(`limit=${s.previewParams.limit}`);
+				if(s.previewParams.offset !== 0) out.push(`offset=${s.previewParams.offset}`);
+			}
+			return `?${out.join('&')}`;
+		},
+		
+		previewMethod:(s) => s.previewCall === 'AUTH' ? 'POST' : s.previewCall,
+		previewResponse:(s) => {
+			if(s.previewCall === 'AUTH')
+				return `{\n\t"token": "{ACCESS_TOKEN}"\n}`;
+			
+			return '';
+		},
+		previewUrl:(s) => {
+			let base = `https://${s.config.publicHostName}/api/`;
+			switch(s.previewCall) {
+				case 'AUTH':   base += 'auth'; break;
+				case 'GET':    base += `${s.module.name}/${s.name}/v${s.version}`; break;
+				case 'POST':   base += `${s.module.name}/${s.name}/v${s.version}`; break;
+				case 'DELETE': base += `${s.module.name}/${s.name}/v${s.version}/{RECORD_ID}`; break;
+			}
+			return base + s.previewGetters;
+		},
 		
 		// simple
 		api:   (s) => typeof s.apiIdMap[s.id] === 'undefined' ? false : s.apiIdMap[s.id],
@@ -299,6 +437,7 @@ let MyBuilderApi = {
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		apiIdMap:      (s) => s.$store.getters['schema/apiIdMap'],
+		config:        (s) => s.$store.getters.config,
 		settings:      (s) => s.$store.getters.settings,
 		capApp:        (s) => s.$store.getters.captions.builder.api,
 		capGen:        (s) => s.$store.getters.captions.generic
@@ -324,6 +463,9 @@ let MyBuilderApi = {
 			v[name] = value;
 			this.columnShow.query = v;
 		},
+		copyToClipboard(value) {
+			navigator.clipboard.writeText(value);
+		},
 		removeIndex(index) {
 			for(let i = 0, j = this.columns.length; i < j; i++) {
 				if(this.columns[i].index === index) {
@@ -342,6 +484,7 @@ let MyBuilderApi = {
 			this.limitDef   = this.api.limitDef;
 			this.limitMax   = this.api.limitMax;
 			this.verboseDef = this.api.verboseDef;
+			this.version    = this.api.version;
 			this.relationId = this.api.query.relationId;
 			this.fixedLimit = this.api.query.fixedLimit;
 			this.joins      = JSON.parse(JSON.stringify(this.api.query.joins));
@@ -414,7 +557,8 @@ let MyBuilderApi = {
 					hasPost:this.hasPost,
 					limitDef:this.limitDef,
 					limitMax:this.limitMax,
-					verboseDef:this.verboseDef
+					verboseDef:this.verboseDef,
+					version:this.version
 				}),
 				ws.prepare('schema','check',{moduleId:this.module.id})
 			],true).then(

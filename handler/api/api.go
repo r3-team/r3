@@ -17,6 +17,7 @@ import (
 	"r3/log"
 	"r3/login/login_auth"
 	"r3/types"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -280,21 +281,36 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				rows = append(rows, result.Values)
 			}
 		} else {
-			// resolve attribute names
-			atrNames := make([]string, len(api.Columns))
+			// prepare keys for row template object: { "0_person":{"firstname":"Hans", ...}, "1_department":{"name":"IT"}...}
+			atrNamesByColumn := make([]string, len(api.Columns))
+			relIndexMapNames := make(map[int]string)
 			for i, column := range api.Columns {
-				atrNames[i] = cache.AttributeIdMap[column.AttributeId].Name
+				atr := cache.AttributeIdMap[column.AttributeId]
+				rel := cache.RelationIdMap[atr.RelationId]
 
+				atrNamesByColumn[i] = atr.Name
 				if column.Aggregator.Valid {
-					atrNames[i] = fmt.Sprintf("%s (%s)",
-						strings.ToUpper(column.Aggregator.String), atrNames[i])
+					atrNamesByColumn[i] = fmt.Sprintf("%s (%s)",
+						strings.ToUpper(column.Aggregator.String), atrNamesByColumn[i])
+				}
+
+				if _, exists := relIndexMapNames[column.Index]; !exists {
+					relIndexMapNames[column.Index] = rel.Name
 				}
 			}
 
 			for _, result := range results {
-				row := make(map[string]interface{})
+				row := make(map[string]map[string]interface{})
 				for i, value := range result.Values {
-					row[atrNames[i]] = value
+
+					relIndex := api.Columns[i].Index
+					relRef := fmt.Sprintf("%d(%s)", relIndex, relIndexMapNames[relIndex])
+
+					if _, exists := row[relRef]; !exists {
+						row[relRef] = make(map[string]interface{})
+					}
+
+					row[relRef][atrNamesByColumn[i]] = value
 				}
 				rows = append(rows, row)
 			}
@@ -305,6 +321,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
 			return
 		}
+		w.WriteHeader(http.StatusOK)
 		w.Write(payloadJson)
 	}
 
@@ -319,12 +336,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				return
 			}
 		} else {
-			// verbose mode: relation index -> attribute name -> value
+			// verbose mode structure: relation index + relation name (only for readability, optional) -> attribute name -> value
 			// convert verbose to non-verbose input (to process both inputs the same way)
 			/*{
-				"0":{ "attribute0a":123, "attribute0b":"Fritz" },
-				"1":{ "attribute1a":"Hans" }
-			}*/
+				"0(employee)":{ "firstname":"Hans", "age":47 },
+				"1(department)":{ "name":"IT" }
+			]*/
 			var jsonObj map[string]map[string]interface{}
 			if err := json.NewDecoder(r.Body).Decode(&jsonObj); err != nil {
 				abort(http.StatusBadRequest, err, "invalid JSON object")
@@ -336,10 +353,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				values[i] = nil
 			}
 
-			for relIndexStr, attributeNameMapValues := range jsonObj {
-				relIndex, err := strconv.Atoi(relIndexStr)
+			for relStr, attributeNameMapValues := range jsonObj {
+
+				// remove optional relation name and whitespace
+				relStr = strings.TrimSpace(
+					regexp.MustCompile(`\(.+\)`).ReplaceAllString(relStr, ""))
+
+				// only the mandatory relation index number should be left
+				relIndex, err := strconv.Atoi(relStr)
 				if err != nil {
-					abort(http.StatusBadRequest, nil, fmt.Sprintf("invalid relation index '%s', integer expected", relIndexStr))
+					abort(http.StatusBadRequest, nil, fmt.Sprintf("invalid relation index '%s', integer expected", relStr))
 					return
 				}
 				for i, column := range api.Columns {
@@ -353,14 +376,22 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		if err := data_import.FromInterfaceValues_tx(ctx, tx, loginId, values,
-			api.Columns, api.Query.Joins, api.Query.Lookups); err != nil {
+		indexRecordIds, err := data_import.FromInterfaceValues_tx(ctx, tx, loginId, values,
+			api.Columns, api.Query.Joins, api.Query.Lookups)
 
+		if err != nil {
+			abort(http.StatusServiceUnavailable, nil, err.Error())
+			return
+		}
+
+		payloadJson, err := json.Marshal(indexRecordIds)
+		if err != nil {
 			abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
 			return
 		}
 
 		w.WriteHeader(http.StatusOK)
+		w.Write(payloadJson)
 	}
 
 	// apply changes

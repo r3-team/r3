@@ -359,9 +359,9 @@ let MyBuilderForm = {
 				<my-tabs
 					v-if="fieldShowHasQuery"
 					v-model="tabTargetField"
-					:entries="['properties','content']"
-					:entriesIcon="['images/edit.png','images/database.png',]"
-					:entriesText="[capGen.properties,capGen.content]"
+					:entries="['content','properties']"
+					:entriesIcon="['images/database.png','images/edit.png',]"
+					:entriesText="[capGen.content,capGen.properties]"
 				/>
 				<div class="content grow">
 					

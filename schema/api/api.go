@@ -21,7 +21,7 @@ func Get(moduleId uuid.UUID) ([]types.Api, error) {
 
 	rows, err := db.Pool.Query(db.Ctx, `
 		SELECT id, name, has_delete, has_get, has_post,
-			limit_def, limit_max, verbose_def
+			limit_def, limit_max, verbose_def, version
 		FROM app.api
 		WHERE module_id = $1
 		ORDER BY name ASC
@@ -34,8 +34,8 @@ func Get(moduleId uuid.UUID) ([]types.Api, error) {
 		var a types.Api
 		a.ModuleId = moduleId
 
-		if err := rows.Scan(&a.Id, &a.Name, &a.HasDelete, &a.HasGet,
-			&a.HasPost, &a.LimitDef, &a.LimitMax, &a.VerboseDef); err != nil {
+		if err := rows.Scan(&a.Id, &a.Name, &a.HasDelete, &a.HasGet, &a.HasPost,
+			&a.LimitDef, &a.LimitMax, &a.VerboseDef, &a.Version); err != nil {
 
 			return apis, err
 		}
@@ -69,20 +69,20 @@ func Set_tx(tx pgx.Tx, api types.Api) error {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.api
 			SET name = $1, has_delete = $2, has_get = $3, has_post = $4,
-				limit_def = $5, limit_max = $6, verbose_def = $7
-			WHERE id = $8
+				limit_def = $5, limit_max = $6, verbose_def = $7, version = $8
+			WHERE id = $9
 		`, api.Name, api.HasDelete, api.HasGet, api.HasPost, api.LimitDef,
-			api.LimitMax, api.VerboseDef, api.Id); err != nil {
+			api.LimitMax, api.VerboseDef, api.Version, api.Id); err != nil {
 
 			return err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.api (id, module_id, name, has_delete, has_get,
-				has_post, limit_def, limit_max, verbose_def)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-		`, api.Id, api.ModuleId, api.Name, api.HasDelete, api.HasGet,
-			api.HasPost, api.LimitDef, api.LimitMax, api.VerboseDef); err != nil {
+				has_post, limit_def, limit_max, verbose_def, version)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+		`, api.Id, api.ModuleId, api.Name, api.HasDelete, api.HasGet, api.HasPost,
+			api.LimitDef, api.LimitMax, api.VerboseDef, api.Version); err != nil {
 
 			return err
 		}

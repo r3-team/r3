@@ -46,12 +46,17 @@ func resolveQueryLookups(joins []types.QueryJoin, lookups []types.QueryLookup) m
 	return indexMapPgIndexAttributeIds
 }
 
+// executes a data SET call from a list of interface{} values
+// uses columns to recognize attribute (and their orders)
+// uses query joins/lookups to recognize relationships and resolve records via unique indexes
 func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 	valuesIn []interface{}, columns []types.Column, joins []types.QueryJoin,
-	lookups []types.QueryLookup) error {
+	lookups []types.QueryLookup) (map[int]int64, error) {
+
+	indexRecordIds := make(map[int]int64)
 
 	if len(valuesIn) != len(columns) {
-		return errors.New("column and value count do not match")
+		return indexRecordIds, errors.New("column and value count do not match")
 	}
 
 	// prepare data SET structure and build join index map for reference
@@ -73,10 +78,10 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 
 		atr, exists := cache.AttributeIdMap[column.AttributeId]
 		if !exists {
-			return handler.ErrSchemaUnknownAttribute(column.AttributeId)
+			return indexRecordIds, handler.ErrSchemaUnknownAttribute(column.AttributeId)
 		}
 		if atr.Encrypted {
-			return errors.New("cannot handle value for encrypted attribute")
+			return indexRecordIds, errors.New("cannot handle value for encrypted attribute")
 		}
 
 		dataSet := dataSetsByIndex[column.Index]
@@ -174,7 +179,7 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 			// execute lookup as values for all PG index attributes were found
 			rel, exists := cache.RelationIdMap[join.RelationId]
 			if !exists {
-				return handler.ErrSchemaUnknownAttribute(join.RelationId)
+				return indexRecordIds, handler.ErrSchemaUnknownAttribute(join.RelationId)
 			}
 			mod := cache.ModuleIdMap[rel.ModuleId]
 
@@ -195,7 +200,7 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 				continue
 			}
 			if err != nil {
-				return err
+				return indexRecordIds, err
 			}
 			dataSet.RecordId = recordId
 			dataSetsByIndex[join.Index] = dataSet
@@ -240,7 +245,7 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 
 		joinAtr, exists := cache.AttributeIdMap[dataSet.AttributeId]
 		if !exists {
-			return handler.ErrSchemaUnknownAttribute(dataSet.AttributeId)
+			return indexRecordIds, handler.ErrSchemaUnknownAttribute(dataSet.AttributeId)
 		}
 
 		if joinAtr.RelationId == dataSet.RelationId {
@@ -290,6 +295,5 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 			}
 		}
 	}
-	_, err := data.Set_tx(ctx, tx, dataSetsByIndex, loginId)
-	return err
+	return data.Set_tx(ctx, tx, dataSetsByIndex, loginId)
 }

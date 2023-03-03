@@ -36,6 +36,20 @@ let MyBuilderApis = {
 						<span>{{ a.name }}</span>
 					</div>
 					<div class="row">
+						<my-button
+							:active="false"
+							:caption="caption(a)"
+							:captionTitle="captionTitle(a)"
+							:naked="true"
+							:tight="true"
+						/>
+						<my-button
+							:active="false"
+							:caption="'v' + a.version"
+							:captionTitle="capGen.version"
+							:naked="true"
+							:tight="true"
+						/>
 					</div>
 				</router-link>
 			</div>
@@ -57,5 +71,21 @@ let MyBuilderApis = {
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		capApp:     (s) => s.$store.getters.captions.builder.api,
 		capGen:     (s) => s.$store.getters.captions.generic
+	},
+	methods:{
+		caption(api) {
+			let out = [];
+			if(api.hasGet)    out.push('G');
+			if(api.hasPost)   out.push('P');
+			if(api.hasDelete) out.push('D');
+			return out.join(' ');
+		},
+		captionTitle(api) {
+			let out = [];
+			if(api.hasGet)    out.push('GET');
+			if(api.hasPost)   out.push('POST');
+			if(api.hasDelete) out.push('DELETE');
+			return out.join(' ');
+		}
 	}
 };

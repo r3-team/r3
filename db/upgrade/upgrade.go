@@ -272,7 +272,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				limit_def int NOT NULL,
 				limit_max int NOT NULL,
 				verbose_get bool NOT NULL,
+				version int NOT NULL,
 			    CONSTRAINT api_pkey PRIMARY KEY (id),
+				CONSTRAINT api_name_version_key UNIQUE (name,version)
+					DEFERRABLE INITIALLY DEFERRED,
 			    CONSTRAINT api_module_id_fkey FOREIGN KEY (module_id)
 			        REFERENCES app.module (id) MATCH SIMPLE
 			        ON UPDATE CASCADE

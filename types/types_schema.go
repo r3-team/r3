@@ -53,6 +53,7 @@ type Api struct {
 	LimitDef   int       `json:"limitDef"`   // default limit, if nothing else is specified
 	LimitMax   int       `json:"limitMax"`   // maximum limit that can be requested
 	VerboseDef bool      `json:"verboseDef"` // default input/output option, verbose shows relation indexes and attribute names
+	Version    int       `json:"version"`
 }
 type Article struct {
 	Id       uuid.UUID  `json:"id"`

@@ -509,6 +509,9 @@
 			"dialog":{
 				"delete":"Are you sure you want to delete this API?"
 			},
+			"call":"Call",
+			"calls":"Calls",
+			"callHintAuth":"An authentication call is required to get a valid access token for further requests. The token is valid following the max. session time, set in the system configuration.",
 			"columnsAvailable":"Available columns",
 			"columnsTarget":"Active columns",
 			"columnSettings":"Column settings",
@@ -517,14 +520,21 @@
 			"hasDeleteHint":"Deletes an existing record - plus connected records if other relations are joined. Relations need the 'DELETE' option enabled to be affected.",
 			"hasGetHint":"Returns values from an existing (if record ID is given) or from all available records from one or multiple, joined relations.",
 			"hasPostHint":"Creates or updates a record - plus connected records if other relations are joined. Relations need the 'CREATE' option enabled to be affected.",
+			"httpMethod":"HTTP method",
 			"httpMethods":"HTTP methods",
-			"limitDef":"GET result count",
-			"limitDefHint":"Default result count if not overwritten with the 'limit' getter (such as 'limit=1000').",
-			"limitMax":"GET maximum results",
+			"limitDef":"GET default result count",
+			"limitDefHint":"Default result count if not overwritten with the 'limit' parameter (such as 'limit=1000').",
+			"limitHint":"Requested result count.",
+			"limitMax":"GET maximum result count",
 			"limitMaxHint":"Highest result count that is returned with one GET call.",
 			"nameHint":"The API name is used in the REST call itself. The call must be updated if changed.",
+			"offsetHint":"Result offset - shows results coming after the count specified.",
 			"title":"APIs",
-			"titleOne":"API '{NAME}'"
+			"titleOne":"API '{NAME}'",
+			"verboseDef":"Verbose mode",
+			"verboseDefHint":"Default setting for verbose mode, if not set as parameter.",
+			"verboseHint":"If enabled, API inputs (POST requests) and outputs (GET responses) are processed with their entity names instead of using simple value lists. Enable this option to see a preview below.",
+			"versionHint":"Version number for this API. Versions are often used to offer new features without breaking older calls. No two APIs with the same name & version number may exist."
 		},
 		"articles":{
 			"dialog":{
@@ -1071,8 +1081,8 @@
 			"joinApplyDeleteHint":"(D)șterge înregistrare la această relație",
 			"joinApplyUpdateHint":"(U)pdate înregistrare la această relație",
 			"joinConnectorHint":"(L)eft/(I)nner/(R)ight/(F)ull join",
-			"lookups":"Incarcă listă după index unic({COUNT})",
-			"lookupWarning":"Dacă atributele de relație (n:1, 1:1) sunt folosite în indecși unici,<br />relațiile menționate trebuie incluse în import.",
+			"lookups":"Record lookups ({COUNT})",
+			"lookupsHelp":"Lookups identify records during data imports (CSV/API POST).<ul><li>Any unique index can be used as lookup (often a unique name) - unique indexes are defined on the corresponding relation.</li><li>Lookups only work if their values are included in the imported data.</li><li>To create/update records during data import, 'CREATE'/'UPDATE' options must be enabled for the desired relations (tab 'content').</li><li>If relationship attributes (n:1/1:1) are used as lookups, their relations must be joined and lookups defined for their records.</li></ul>",
 			"orders":"Triere(i) ({COUNT})",
 			"relations":"Relații ({COUNT})",
 			"select":"Selectați relația pentru join"

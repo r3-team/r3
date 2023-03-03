@@ -162,7 +162,6 @@ let MyBuilderQueryLookups = {
 			:key="j.index"
 			:modelValue="getValueForJoin(j)"
 		/>
-		<span v-html="capApp.lookupWarning"></span>
 	</div>`,
 	props:{
 		joins:  { type:Array, required:true },
@@ -236,28 +235,27 @@ let MyBuilderQueryOrderItem = {
 	},
 	emits:['remove','set-ascending','set-attribute-id','set-index'],
 	computed:{
-		indexAttributeIds:function() {
-			return this.getIndexAttributeIdsByJoins(this.joins);
-		},
-		
 		// inputs
 		ascendingInput:{
-			get:function()  { return this.ascending; },
-			set:function(v) { this.$emit('set-ascending',v); }
+			get()  { return this.ascending; },
+			set(v) { this.$emit('set-ascending',v); }
 		},
 		attributeIdInput:{
-			get:function()  { return this.attributeId; },
-			set:function(v) { this.$emit('set-attribute-id',v); }
+			get()  { return this.attributeId; },
+			set(v) { this.$emit('set-attribute-id',v); }
 		},
 		indexInput:{
-			get:function()  { return this.index; },
-			set:function(v) { this.$emit('set-index',v); }
+			get()  { return this.index; },
+			set(v) { this.$emit('set-index',v); }
 		},
 		
+		// simple
+		indexAttributeIds:(s) => s.getIndexAttributeIdsByJoins(s.joins),
+		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -265,7 +263,7 @@ let MyBuilderQueryOrderItem = {
 		getIndexAttributeIdsByJoins,
 		
 		// actions
-		setIndexAttribute:function(indexAttributeId) {
+		setIndexAttribute(indexAttributeId) {
 			let v = indexAttributeId.split('_');
 			
 			if(v[1] === 'null') {
@@ -304,16 +302,16 @@ let MyBuilderQueryOrders = {
 	emits:['update'],
 	computed:{
 		ordersInput:{
-			get:function()  { return JSON.parse(JSON.stringify(this.orders)); },
-			set:function(v) { this.$emit('update',v); }
+			get()  { return JSON.parse(JSON.stringify(this.orders)); },
+			set(v) { this.$emit('update',v); }
 		}
 	},
 	methods:{
-		remove:function(i) {
+		remove(i) {
 			this.ordersInput.splice(i,1);
 			this.ordersInput = this.ordersInput;
 		},
-		update:function(i,name,value) {
+		update(i,name,value) {
 			this.ordersInput[i][name] = value;
 			this.ordersInput = this.ordersInput;
 		}
@@ -397,7 +395,7 @@ let MyBuilderQueryNestedJoin = {
 			/>
 		</div>
 	</div>`,
-	data:function() {
+	data() {
 		return {
 			relationAddId:null,
 			relationAddShow:false
@@ -421,31 +419,31 @@ let MyBuilderQueryNestedJoin = {
 		'relation-connector-set','relation-remove'
 	],
 	computed:{
-		attributesUnused:function() {
+		attributesUnused:(s) => {
 			let atrs = [];
 			
 			// get attributes of this relation and in relationship with this relation
-			for(let key in this.attributeIdMap) {
-				let atr = this.attributeIdMap[key];
+			for(let key in s.attributeIdMap) {
+				let atr = s.attributeIdMap[key];
 				
-				if(!this.isAttributeRelationship(atr.content))
+				if(!s.isAttributeRelationship(atr.content))
 					continue;
 				
 				// relationship attribute is from current relation, add
-				if(atr.relationId === this.joinRelationId) {
+				if(atr.relationId === s.joinRelationId) {
 					atrs.push(atr);
 					continue;
 				}
 				
 				// relationship attribute is not pointing to us, ignore
-				if(atr.relationshipId !== this.joinRelationId)
+				if(atr.relationshipId !== s.joinRelationId)
 					continue;
 				
 				// if attribute is from other relation, check module dependency first
-				let rel = this.relationIdMap[atr.relationId];
-				let mod = this.moduleIdMap[rel.moduleId];
+				let rel = s.relationIdMap[atr.relationId];
+				let mod = s.moduleIdMap[rel.moduleId];
 				
-				if(mod.id !== this.module.id && !this.module.dependsOn.includes(mod.id))
+				if(mod.id !== s.module.id && !s.module.dependsOn.includes(mod.id))
 					continue;
 				
 				atrs.push(atr);
@@ -454,25 +452,25 @@ let MyBuilderQueryNestedJoin = {
 		},
 		
 		// stores
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.query; }
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.query
 	},
 	methods:{
 		// externals
 		isAttributeRelationship,
 		
 		// actions
-		relationAdd:function(event) {
+		relationAdd(event) {
 			this.$emit('relation-add',this.index,this.joinRelationId,this.relationAddId,'LEFT');
 			this.relationAddId   = null;
 			this.relationAddShow = false;
 		},
-		toggleApply:function(content) {
+		toggleApply(content) {
 			this.$emit('relation-apply-toggle',this.index,content);
 		},
-		toggleConnector:function() {
+		toggleConnector() {
 			switch(this.connector) {
 				case 'INNER': this.$emit('relation-connector-set',this.index,'LEFT');  break;
 				case 'LEFT':  this.$emit('relation-connector-set',this.index,'RIGHT'); break;
@@ -482,7 +480,7 @@ let MyBuilderQueryNestedJoin = {
 		},
 		
 		// presentation
-		displayApply:function(content) {
+		displayApply(content) {
 			switch(content) {
 				case 'create': return this.applyCreate ? 'C' : 'c'; break;
 				case 'update': return this.applyUpdate ? 'U' : 'u'; break;
@@ -490,19 +488,19 @@ let MyBuilderQueryNestedJoin = {
 			}
 			return '?';
 		},
-		displayName:function() {
+		displayName() {
 			return `${this.index}) ${this.name}`;
 		},
-		displayJoin:function() {
+		displayJoin() {
 			return this.attributesUnused.length !== 0 ? 'A' : '-';
 		},
-		displayJoinOption:function(atr) {
+		displayJoinOption(atr) {
 			let relIdResolve = atr.relationId === this.joinRelationId ? atr.relationshipId : atr.relationId;
 			let atrRel       = this.relationIdMap[atr.relationId];
 			
 			return `+ ${this.relationIdMap[relIdResolve].name} via ${atrRel.name}.${atr.name}`;
 		},
-		displayConnector:function(index) {
+		displayConnector(index) {
 			if(index === 0) return '-';
 			
 			switch(this.connector) {
@@ -686,9 +684,14 @@ let MyBuilderQuery = {
 				<my-button
 					@trigger="showLookups = !showLookups"
 					:active="joins.length !== 0"
-					:caption="capApp.lookups.replace('{COUNT}',joins.length)"
+					:caption="capApp.lookups.replace('{COUNT}',lookups.length)"
 					:image="displayArrow(showLookups,joins.length)"
 					:large="true"
+					:naked="true"
+				/>
+				<my-button image="question.png"
+					@trigger="showLookupHelp"
+					:caption="capGen.help"
 					:naked="true"
 				/>
 			</div>
@@ -745,7 +748,7 @@ let MyBuilderQuery = {
 		'index-removed','set-choices','set-filters','set-fixed-limit',
 		'set-joins','set-lookups','set-orders','set-relation-id'
 	],
-	data:function() {
+	data() {
 		return {
 			filterAddCnt:0, // ugly hack to add filter
 			showChoices:false,
@@ -756,37 +759,72 @@ let MyBuilderQuery = {
 		};
 	},
 	computed:{
+		
+		// inputs
+		choicesInput:{
+			get()  { return this.choices; },
+			set(v) { this.$emit('set-choices',v); }
+		},
+		filtersInput:{
+			get()  { return this.filters; },
+			set(v) { this.$emit('set-filters',v); }
+		},
+		fixedLimitInput:{
+			get()  { return this.fixedLimit; },
+			set(v) { this.$emit('set-fixed-limit',v === '' ? 0 : v); }
+		},
+		joinsInput:{
+			get()  { return this.joins; },
+			set(v) { this.$emit('set-joins',v); }
+		},
+		lookupsInput:{
+			get()  { return this.lookups; },
+			set(v) { this.$emit('set-lookups',v); }
+		},
+		ordersInput:{
+			get()  { return this.orders; },
+			set(v) { this.$emit('set-orders',v); }
+		},
+		relationIdInput:{
+			get() {
+				let relId = this.relationId;
+				if(relId === null && this.relationIdStart !== null) {
+					
+					// if source relation not set, but default given: set
+					this.$emit('set-relation-id',this.relationIdStart);
+					return null;
+				}
+				
+				if(relId !== null && this.joins.length === 0) {
+					
+					// if source relation set, but not added as join yet: add
+					this.relationAdd(-1,relId,null,'INNER');
+				}
+				return relId;
+			},
+			set(v) { this.$emit('set-relation-id',v); }
+		},
+		
 		// entities
-		module:function() {
-			return typeof this.moduleIdMap[this.moduleId] === 'undefined'
-				? false : this.moduleIdMap[this.moduleId];
-		},
-		relation:function() {
-			return typeof this.relationIdMap[this.relationId] === 'undefined'
-				? false : this.relationIdMap[this.relationId];
-		},
-		relationNextIndex:function() {
+		relationNextIndex:(s) => {
 			let indexCandidate = 0;
-			for(let i = 0, j = this.joinsInput.length; i < j; i++) {
-				if(this.joinsInput[i].index >= indexCandidate)
-					indexCandidate = this.joinsInput[i].index + 1;
+			for(let join of s.joinsInput) {
+				if(join.index >= indexCandidate)
+					indexCandidate = join.index + 1;
 			}
 			return indexCandidate;
 		},
-		relationsNested:function() {
-			let that = this;
-			
+		relationsNested:(s) => {
 			let getChildRelationsByIndex = function(indexFrom) {
 				let rels = [];
-				
-				for(let i = 0, j = that.joinsInput.length; i < j; i++) {
-					if(that.joinsInput[i].indexFrom !== indexFrom)
+				for(let i = 0, j = s.joinsInput.length; i < j; i++) {
+					if(s.joinsInput[i].indexFrom !== indexFrom)
 						continue;
 					
-					let join   = JSON.parse(JSON.stringify(that.joinsInput[i]));
-					let atr    = that.attributeIdMap[join.attributeId];
-					let atrRel = that.relationIdMap[atr.relationId];
-					let rel    = that.relationIdMap[join.relationId];
+					let join   = JSON.parse(JSON.stringify(s.joinsInput[i]));
+					let atr    = s.attributeIdMap[join.attributeId];
+					let atrRel = s.relationIdMap[atr.relationId];
+					let rel    = s.relationIdMap[join.relationId];
 					
 					rels.push({
 						applyCreate:join.applyCreate,
@@ -803,79 +841,34 @@ let MyBuilderQuery = {
 				return rels;
 			};
 			
-			if(!this.module || !this.relation)
+			if(!s.module || !s.relation)
 				return false;
 			
 			// source relation with all relations deep-nested
 			return {
-				applyCreate:this.joinsInput[0].applyCreate,
-				applyUpdate:this.joinsInput[0].applyUpdate,
-				applyDelete:this.joinsInput[0].applyDelete,
+				applyCreate:s.joinsInput[0].applyCreate,
+				applyUpdate:s.joinsInput[0].applyUpdate,
+				applyDelete:s.joinsInput[0].applyDelete,
 				connector:'INNER',
 				index:0,
 				joins:getChildRelationsByIndex(0),
-				joinAttributeId:this.getNilUuid(),
-				joinRelationId:this.relation.id,
-				name:this.relation.name
+				joinAttributeId:s.getNilUuid(),
+				joinRelationId:s.relation.id,
+				name:s.relation.name
 			};
 		},
 		
-		// inputs
-		choicesInput:{
-			get:function()  { return this.choices; },
-			set:function(v) { this.$emit('set-choices',v); }
-		},
-		filtersInput:{
-			get:function()  { return this.filters; },
-			set:function(v) { this.$emit('set-filters',v); }
-		},
-		fixedLimitInput:{
-			get:function()  { return this.fixedLimit; },
-			set:function(v) { this.$emit('set-fixed-limit',v === '' ? 0 : v); }
-		},
-		joinsInput:{
-			get:function()  { return this.joins; },
-			set:function(v) { this.$emit('set-joins',v); }
-		},
-		lookupsInput:{
-			get:function()  { return this.lookups; },
-			set:function(v) { this.$emit('set-lookups',v); }
-		},
-		ordersInput:{
-			get:function()  { return this.orders; },
-			set:function(v) { this.$emit('set-orders',v); }
-		},
-		relationIdInput:{
-			get:function() {
-				let relId = this.relationId;
-				
-				if(relId === null && this.relationIdStart !== null) {
-					
-					// if source relation not set, but default given: set
-					this.$emit('set-relation-id',this.relationIdStart);
-					return null;
-				}
-				
-				if(relId !== null && this.joins.length === 0) {
-					
-					// if source relation set, but not added as join yet: add
-					this.relationAdd(-1,relId,null,'INNER');
-				}
-				return relId;
-			},
-			set:function(newVal) {
-				this.$emit('set-relation-id',newVal);
-			}
-		},
+		// entities, simple
+		module:  (s) => typeof s.moduleIdMap[s.moduleId]     === 'undefined' ? false : s.moduleIdMap[s.moduleId],
+		relation:(s) => typeof s.relationIdMap[s.relationId] === 'undefined' ? false : s.relationIdMap[s.relationId],
 		
 		// stores
-		module:        function() { return this.moduleIdMap[this.moduleId]; },
-		modules:       function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.query; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		modules:       (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.query,
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -883,18 +876,20 @@ let MyBuilderQuery = {
 		getNilUuid,
 		
 		// presentation
-		displayArrow:function(state,count) {
+		displayArrow(state,count) {
 			return state && count !== 0 ? 'triangleDown.png' : 'triangleRight.png';
 		},
 		
-		getRelationByIndex:function(index) {
+		getRelationByIndex(index) {
 			for(let i = 0, j = this.joinsInput.length; i < j; i++) {
 				if(this.joinsInput[i].index === index)
 					return this.joinsInput[i];
 			}
 			return false;
 		},
-		choiceAdd:function() {
+		
+		// actions
+		choiceAdd() {
 			this.choicesInput.push({
 				id:this.getNilUuid(),
 				name:'',
@@ -907,26 +902,26 @@ let MyBuilderQuery = {
 			if(!this.showChoices)
 				this.showChoices = true;
 		},
-		choiceApply:function(i,value) {
+		choiceApply(i,value) {
 			this.choicesInput[i] = value;
 			this.choicesInput = this.choicesInput;
 		},
-		choiceMove:function(i,down) {
+		choiceMove(i,down) {
 			let c = this.choicesInput[i];
 			this.choicesInput.splice(i,1);
 			this.choicesInput.splice((down ? i + 1 : i - 1),0,c);
 		},
-		choiceRemove:function(i) {
+		choiceRemove(i) {
 			this.choicesInput.splice(i,1);
 			this.choicesInput = this.choicesInput;
 		},
-		filterAdd:function() {
+		filterAdd() {
 			this.filterAddCnt++;
 			
 			if(!this.showFilters)
 				this.showFilters = true;
 		},
-		orderAdd:function() {
+		orderAdd() {
 			this.ordersInput.push({
 				ascending:true,
 				attributeId:null,
@@ -937,9 +932,21 @@ let MyBuilderQuery = {
 			if(!this.showOrders)
 				this.showOrders = true;
 		},
+		showLookupHelp() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.lookupsHelp,
+				captionTop:this.capGen.help,
+				image:'question.png',
+				buttons:[{
+					caption:this.capGen.button.close,
+					cancel:true,
+					image:'cancel.png'
+				}]
+			});
+		},
 		
 		// relation manipulation
-		relationAdd:function(indexFrom,relationIdFrom,attributeId,connector) {
+		relationAdd(indexFrom,relationIdFrom,attributeId,connector) {
 			let isSource = indexFrom === -1;
 			let relId    = '';
 			if(!isSource) {
@@ -961,7 +968,7 @@ let MyBuilderQuery = {
 			});
 			this.joinsInput = this.joinsInput;
 		},
-		relationRemove:function(index) {
+		relationRemove(index) {
 			for(let i = 0, j = this.joinsInput.length; i < j; i++) {
 				if(this.joinsInput[i].index !== index)
 					continue;
@@ -977,7 +984,7 @@ let MyBuilderQuery = {
 			}
 			this.$emit('index-removed',index);
 		},
-		relationApplyToggle:function(index,content) {
+		relationApplyToggle(index,content) {
 			let r = this.getRelationByIndex(index);
 			if(r === false) return;
 			
@@ -988,7 +995,7 @@ let MyBuilderQuery = {
 			}
 			this.joinsInput = this.joinsInput;
 		},
-		relationConnectorSet:function(index,connector) {
+		relationConnectorSet(index,connector) {
 			let r = this.getRelationByIndex(index);
 			if(r === false) return;
 			
