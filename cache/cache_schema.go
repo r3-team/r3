@@ -304,7 +304,7 @@ func updateSchemaCache(moduleIdsUpdateOnly []uuid.UUID) error {
 		}
 		for _, a := range mod.Apis {
 			ApiIdMap[a.Id] = a
-			ModuleApiNameMapId[mod.Name][a.Name] = a.Id
+			ModuleApiNameMapId[mod.Name][fmt.Sprintf("%s.v%d", a.Name, a.Version)] = a.Id
 		}
 
 		// update cache map with parsed module

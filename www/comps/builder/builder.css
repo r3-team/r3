@@ -715,6 +715,13 @@
 	text-decoration-color:var(--color-form-builder-selected);
 	text-decoration-thickness:4px;
 }
+.builder-api .code-preview{
+	font-family: Consolas, monaco, monospace;
+	tab-size:4;
+}
+.builder-api .code-preview.high{
+	height:500px;
+}
 .builder-api-columns{
 	display:flex;
 	flex-flow:column nowrap;

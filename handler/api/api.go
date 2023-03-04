@@ -88,7 +88,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 		Rules:
 		Path must contain 5-6 elements (see examples above, split by '/')
-		6th element is the record ID, required by all except GET
+		6th element is the record ID, required by DELETE
 		GET can also have record ID (single record lookup)
 	*/
 	elements := strings.Split(r.URL.Path, "/")
@@ -108,7 +108,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// 0 is empty, 1 = "api", 2 = MODULE_NAME, 3 = API_NAME, 4 = API_VERSION, 5 = RECORD_ID (some cases)
 	modName := elements[2]
 	apiName := elements[3]
-	version, err := strconv.ParseInt(elements[4][1:], 10, 64) // expected format: "v3"
+	version, err := strconv.Atoi(elements[4][1:]) // expected format: "v3"
 	if err != nil {
 		abort(http.StatusBadRequest, err, fmt.Sprintf("invalid API version format '%s', expected: 'v12'", elements[4]))
 		return
@@ -131,7 +131,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
-	apiId, exists := cache.ModuleApiNameMapId[modName][apiName]
+	apiId, exists := cache.ModuleApiNameMapId[modName][fmt.Sprintf("%s.v%d", apiName, version)]
 	if !exists {
 		abort(http.StatusNotFound, nil, fmt.Sprintf("API '%s.%s' not found", modName, apiName))
 		return
