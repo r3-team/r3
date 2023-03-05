@@ -1173,6 +1173,8 @@
 				"contentUser":"Regular user"
 			},
 			"access":"Access",
+			"api":"API",
+			"apis":"APIs",
 			"assignable":"Assignable",
 			"attribute":"Attribute",
 			"children":"Member of",

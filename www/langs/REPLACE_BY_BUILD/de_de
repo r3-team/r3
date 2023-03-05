@@ -1173,6 +1173,8 @@
 				"contentUser":"Regulärer Benutzer"
 			},
 			"access":"Zugriff",
+			"api":"API",
+			"apis":"APIs",
 			"assignable":"Zuweisbar",
 			"attribute":"Attribut",
 			"children":"Mitglied von",

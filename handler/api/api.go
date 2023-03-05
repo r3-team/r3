@@ -55,8 +55,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// check unreasonable URL length
-
 	// get language code
 	var languageCode string
 	if err := db.Pool.QueryRow(db.Ctx, `
@@ -152,8 +150,16 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// TEMP
 	// check role access
+	access, err := cache.GetAccessById(loginId)
+	if err != nil {
+		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
+		return
+	}
+	if _, exists := access.Api[api.Id]; !exists {
+		abort(http.StatusUnauthorized, nil, handler.ErrUnauthorized)
+		return
+	}
 
 	// parse general getters
 	var getters struct {

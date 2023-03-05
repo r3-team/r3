@@ -24,8 +24,7 @@ func GetAccessById(loginId int64) (types.LoginAccess, error) {
 	access_mx.Lock()
 	defer access_mx.Unlock()
 
-	_, exists := loginIdMapAccess[loginId]
-	if !exists {
+	if _, exists := loginIdMapAccess[loginId]; !exists {
 		if err := load(loginId); err != nil {
 			return types.LoginAccess{}, err
 		}
@@ -66,6 +65,7 @@ func load(loginId int64) error {
 
 	loginIdMapAccess[loginId] = types.LoginAccess{
 		RoleIds:    roleIds,
+		Api:        make(map[uuid.UUID]int),
 		Attribute:  make(map[uuid.UUID]int),
 		Collection: make(map[uuid.UUID]int),
 		Menu:       make(map[uuid.UUID]int),
@@ -73,10 +73,16 @@ func load(loginId int64) error {
 	}
 
 	for _, roleId := range roleIds {
-
 		role, _ := RoleIdMap[roleId]
 
 		// because access rights work cumulatively, apply highest right only
+		for id, access := range role.AccessApis {
+			if _, exists := loginIdMapAccess[loginId].Api[id]; !exists ||
+				loginIdMapAccess[loginId].Api[id] < access {
+
+				loginIdMapAccess[loginId].Api[id] = access
+			}
+		}
 		for id, access := range role.AccessAttributes {
 			if _, exists := loginIdMapAccess[loginId].Attribute[id]; !exists ||
 				loginIdMapAccess[loginId].Attribute[id] < access {

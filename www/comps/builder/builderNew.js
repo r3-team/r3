@@ -283,6 +283,7 @@ let MyBuilderNew = {
 						assignable:true,
 						captions:{},
 						childrenIds:[],
+						accessApis:{},
 						accessAttributes:{},
 						accessCollections:{},
 						accessMenus:{},

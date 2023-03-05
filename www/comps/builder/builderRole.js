@@ -3,6 +3,33 @@ import {getDependentModules} from '../shared/builder.js';
 import {copyValueDialog}     from '../shared/generic.js';
 export {MyBuilderRole as default};
 
+let MyBuilderRoleAccessApi = {
+	name:'my-builder-role-access-api',
+	template:`<tbody>
+		<tr class="entry">
+			<td class="maximum">{{ api.name }}</td>
+			<td>
+				<my-bool
+					@update:modelValue="$emit('apply',api.id,access === 1 ? -1 : 1)"
+					:modelValue="access === 1 ? true : false"
+					:readonly="readonly"
+				/>
+			</td>
+		</tr>
+	</tbody>`,
+	props:{
+		builderLanguage:{ type:String,  required:true },
+		api:            { type:Object,  required:true },
+		idMapAccess:    { type:Object,  required:true },
+		readonly:       { type:Boolean, required:true }
+	},
+	emits:['apply'],
+	computed:{
+		access:(s) => typeof s.idMapAccess[s.api.id] === 'undefined'
+			? -1 : s.idMapAccess[s.api.id]
+	}
+};
+
 let MyBuilderRoleAccessCollection = {
 	name:'my-builder-role-access-collection',
 	template:`<tbody>
@@ -62,8 +89,8 @@ let MyBuilderRoleAccessMenu = {
 					<my-builder-role-access-menu
 						v-for="men in menu.menus"
 						@apply="(...args) => $emit('apply',...args)"
-						:builder-language="builderLanguage"
-						:id-map-access="idMapAccess"
+						:builderLanguage="builderLanguage"
+						:idMapAccess="idMapAccess"
 						:key="men.id"
 						:menu="men"
 						:readonly="readonly"
@@ -81,7 +108,7 @@ let MyBuilderRoleAccessMenu = {
 		role:           { type:Object,  required:true }
 	},
 	emits:['apply'],
-	data:function() {
+	data() {
 		return { showSubs:true };
 	},
 	computed:{
@@ -171,9 +198,7 @@ let MyBuilderRoleAccessRelation = {
 			? -1 : s.relationIdMapAccess[s.relation.id],
 		attributeIdMapAccessParsed:(s) => {
 			let out = {};
-			for(let i = 0, j = s.relation.attributes.length; i < j; i++) {
-				let a = s.relation.attributes[i];
-				
+			for(let a of s.relation.attributes) {
 				if(typeof s.attributeIdMapAccess[a.id] === 'undefined') {
 					out[a.id] = -1;
 					continue;
@@ -201,6 +226,7 @@ let MyBuilderRole = {
 	name:'my-builder-role',
 	components:{
 		MyBuilderCaption,
+		MyBuilderRoleAccessApi,
 		MyBuilderRoleAccessCollection,
 		MyBuilderRoleAccessMenu,
 		MyBuilderRoleAccessRelation
@@ -274,12 +300,12 @@ let MyBuilderRole = {
 							@apply-attribute="(...args) => apply('attribute',args[0],args[1])"
 							@apply-relation="(...args) => apply('relation',args[0],args[1])"
 							@relation-selected="toggleRelationShow"
-							:attribute-id-map-access="accessAttributes"
+							:attributeIdMapAccess="accessAttributes"
 							:key="role.id + '_' + rel.id"
 							:relation="rel"
 							:role="role"
 							:readonly="readonly"
-							:relation-id-map-access="accessRelations"
+							:relationIdMapAccess="accessRelations"
 							:show-entries="relationIdsShown.includes(rel.id)"
 						/>
 					</table>
@@ -300,8 +326,8 @@ let MyBuilderRole = {
 						<my-builder-role-access-menu
 							v-for="men in module.menus"
 							@apply="(...args) => apply('menu',args[0],args[1])"
-							:builder-language="builderLanguage"
-							:id-map-access="accessMenus"
+							:builderLanguage="builderLanguage"
+							:idMapAccess="accessMenus"
 							:key="role.id + '_' + men.id"
 							:menu="men"
 							:role="role"
@@ -323,10 +349,32 @@ let MyBuilderRole = {
 						<my-builder-role-access-collection
 							v-for="c in module.collections"
 							@apply="(...args) => apply('collection',args[0],args[1])"
-							:builder-language="builderLanguage"
+							:builderLanguage="builderLanguage"
 							:collection="c"
-							:id-map-access="accessCollections"
+							:idMapAccess="accessCollections"
 							:key="role.id + '_' + c.id"
+							:readonly="readonly"
+						/>
+					</table>
+				</div>
+				<div class="contentPart">
+					<div class="contentPartHeader">
+						<h1>{{ capApp.apis }}</h1>
+					</div>
+					
+					<table class="default-inputs">
+						<thead>
+							<th>{{ capApp.api }}</th>
+							<th>{{ capApp.access }}</th>
+						</thead>
+						
+						<my-builder-role-access-api
+							v-for="a in module.apis"
+							@apply="(...args) => apply('api',args[0],args[1])"
+							:api="a"
+							:builderLanguage="builderLanguage"
+							:idMapAccess="accessApis"
+							:key="role.id + '_' + a.id"
 							:readonly="readonly"
 						/>
 					</table>
@@ -430,19 +478,20 @@ let MyBuilderRole = {
 	},
 	watch:{
 		role:{
-			handler:function(v) { if(v !== false) this.reset(); },
+			handler(v) { if(v !== false) this.reset(); },
 			immediate:true
 		}
 	},
-	mounted:function() {
+	mounted() {
 		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
 	},
-	unmounted:function() {
+	unmounted() {
 		this.$emit('hotkeysRegister',[]);
 	},
-	data:function() {
+	data() {
 		return {
 			// inputs
+			accessApis:{},
 			accessAttributes:{},
 			accessCollections:{},
 			accessMenus:{},
@@ -465,6 +514,7 @@ let MyBuilderRole = {
 			|| s.content    !== s.role.content
 			|| s.assignable !== s.role.assignable
 			|| JSON.stringify(s.childrenIds)       !== JSON.stringify(s.role.childrenIds)
+			|| JSON.stringify(s.accessApis)        !== JSON.stringify(s.role.accessApis)
 			|| JSON.stringify(s.accessAttributes)  !== JSON.stringify(s.role.accessAttributes)
 			|| JSON.stringify(s.accessCollections) !== JSON.stringify(s.role.accessCollections)
 			|| JSON.stringify(s.accessMenus)       !== JSON.stringify(s.role.accessMenus)
@@ -491,6 +541,7 @@ let MyBuilderRole = {
 		// actions
 		apply(type,id,access) {
 			switch(type) {
+				case 'api':        this.accessApis[id]        = access; break;
 				case 'attribute':  this.accessAttributes[id]  = access; break;
 				case 'collection': this.accessCollections[id] = access; break;
 				case 'menu':       this.accessMenus[id]       = access; break;
@@ -510,6 +561,7 @@ let MyBuilderRole = {
 			this.content           = this.role.content;
 			this.assignable        = this.role.assignable;
 			this.childrenIds       = JSON.parse(JSON.stringify(this.role.childrenIds)),
+			this.accessApis        = JSON.parse(JSON.stringify(this.role.accessApis));
 			this.accessAttributes  = JSON.parse(JSON.stringify(this.role.accessAttributes));
 			this.accessCollections = JSON.parse(JSON.stringify(this.role.accessCollections));
 			this.accessMenus       = JSON.parse(JSON.stringify(this.role.accessMenus));
@@ -556,6 +608,7 @@ let MyBuilderRole = {
 				content:this.content,
 				assignable:this.assignable,
 				childrenIds:this.childrenIds,
+				accessApis:this.accessApis,
 				accessAttributes:this.accessAttributes,
 				accessCollections:this.accessCollections,
 				accessMenus:this.accessMenus,

@@ -1173,6 +1173,8 @@
 				"contentUser":"Regular user"
 			},
 			"access":"Acces",
+			"api":"API",
+			"apis":"APIs",
 			"assignable":"Alocabil",
 			"attribute":"Atribut",
 			"children":"Membru al",

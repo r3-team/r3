@@ -322,6 +322,16 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				CASE WHEN field_id      IS NULL THEN 0 ELSE 1
 				END
 			));
+			
+			ALTER TABLE app.role_access ADD COLUMN api_id uuid;
+			ALTER TABLE app.role_access ADD CONSTRAINT role_access_api_id_fkey FOREIGN KEY (api_id)
+				REFERENCES app.api (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_role_access_api_id_fkey
+			    ON app.role_access USING btree (api_id ASC NULLS LAST);
 		`, schema.PkName)
 		return "3.3", err
 	},

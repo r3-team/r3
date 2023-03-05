@@ -433,6 +433,7 @@ type Role struct {
 	Name              string            `json:"name"`
 	Content           string            `json:"content"`
 	Assignable        bool              `json:"assignable"`
+	AccessApis        map[uuid.UUID]int `json:"accessApis"`
 	AccessAttributes  map[uuid.UUID]int `json:"accessAttributes"`
 	AccessCollections map[uuid.UUID]int `json:"accessCollections"`
 	AccessMenus       map[uuid.UUID]int `json:"accessMenus"`

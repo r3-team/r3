@@ -254,7 +254,6 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 	// attributes, refer to relations
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Attributes {
-
 			run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 			if err != nil {
 				return err
@@ -276,7 +275,6 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 	// collections
 	for _, e := range mod.Collections {
-
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
@@ -296,7 +294,6 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 	// APIs
 	for _, e := range mod.Apis {
-
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
@@ -313,7 +310,6 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 	// PG functions, refer to relations/attributes/pg_functions (self reference)
 	for _, e := range mod.PgFunctions {
-
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
@@ -335,7 +331,6 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 	// PG triggers, refer to PG functions
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Triggers {
-
 			run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 			if err != nil {
 				return err
@@ -420,7 +415,6 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 	// roles, refer to relations/attributes/menu
 	for _, e := range mod.Roles {
-
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
@@ -430,18 +424,13 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		}
 		log.Info("transfer", fmt.Sprintf("set role %s", e.Id))
 
-		if err := importCheckResultAndApply(tx, role.Set_tx(tx,
-			e.ModuleId, e.Id, e.Name, e.Content, e.Assignable, e.ChildrenIds,
-			e.AccessAttributes, e.AccessCollections, e.AccessMenus,
-			e.AccessRelations, e.Captions), e.Id, idMapSkipped); err != nil {
-
+		if err := importCheckResultAndApply(tx, role.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
 
 	// JS functions, refer to forms/fields/roles/pg_functions/js_functions (self reference)
 	for _, e := range mod.JsFunctions {
-
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
