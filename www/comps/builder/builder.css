@@ -722,6 +722,9 @@
 .builder-api .code-preview.high{
 	height:500px;
 }
+.builder-api .code-preview.low{
+	height:40px;
+}
 .builder-api-columns{
 	display:flex;
 	flex-flow:column nowrap;

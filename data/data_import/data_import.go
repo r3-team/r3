@@ -185,15 +185,16 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 
 			namesWhere := make([]string, 0)
 			for i, name := range names {
-				namesWhere = append(namesWhere, fmt.Sprintf("%s = $%d", name, (i+1)))
+				namesWhere = append(namesWhere, fmt.Sprintf(`"%s" = $%d`, name, (i+1)))
 			}
 
 			var recordId int64
 			err := tx.QueryRow(ctx, fmt.Sprintf(`
-				SELECT id
-				FROM %s.%s
+				SELECT %s
+				FROM "%s"."%s"
 				WHERE %s
-			`, mod.Name, rel.Name, strings.Join(namesWhere, "\nAND ")), paras...).Scan(&recordId)
+			`, schema.PkName, mod.Name, rel.Name,
+				strings.Join(namesWhere, "\nAND ")), paras...).Scan(&recordId)
 
 			if err == pgx.ErrNoRows {
 				indexesResolved = append(indexesResolved, join.Index)

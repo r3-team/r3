@@ -2,6 +2,7 @@ package handler
 
 import (
 	"bytes"
+	"encoding/json"
 	"fmt"
 	"mime/multipart"
 	"net/http"
@@ -63,11 +64,21 @@ func AbortRequestWithCode(w http.ResponseWriter, context string,
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(httpCode)
-	w.Write([]byte(fmt.Sprintf(`{"error": "%s"}`, errMessageUser)))
+
+	json, _ := json.Marshal(struct {
+		Error string `json:"error"`
+	}{Error: errMessageUser})
+
+	w.Write(json)
 }
 
 func AbortRequestNoLog(w http.ResponseWriter, errMessageUser string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusBadRequest)
-	w.Write([]byte(fmt.Sprintf(`{"error": "%s"}`, errMessageUser)))
+
+	json, _ := json.Marshal(struct {
+		Error string `json:"error"`
+	}{Error: errMessageUser})
+
+	w.Write(json)
 }

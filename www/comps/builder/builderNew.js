@@ -176,7 +176,8 @@ let MyBuilderNew = {
 						hasPost:false,
 						limitDef:100,
 						limitMax:1000,
-						verboseDef:true
+						verboseDef:true,
+						version:1
 					};
 				break;
 				case 'collection':

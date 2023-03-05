@@ -529,7 +529,7 @@
 				"request":"Request example (body)",
 				"requestHintPost":"If verbose mode is disabled, value order must be identical to active columns.",
 				"response":"Response example (body)",
-				"responseHintPost":"POST responses return the record IDs for each affected relation (by relation join index). The record ID will be an existing (if updated) or new one (if created).",
+				"responseHintPost":"POST responses return the record IDs for each affected relation (by relation join index). The record ID will be an existing (if updated) or new one (if created).<br /><br />Make sure to define record lookups (tab 'Content') if you want to update records.",
 				"verboseHint":"If enabled, POST requests and GET responses use entity names instead of ordered value lists. Enable this option to see a preview below."
 			},
 			"calls":"Calls",
@@ -1041,6 +1041,7 @@
 		},
 		"new":{
 			"message":{
+				"api":"<p>The API name will be used as part of the API call. It can be changed later.</p>",
 				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
 				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
 			},

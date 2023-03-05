@@ -16,6 +16,7 @@ import (
 	"r3/handler"
 	"r3/log"
 	"r3/login/login_auth"
+	"r3/schema"
 	"r3/types"
 	"regexp"
 	"strconv"
@@ -94,10 +95,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	elements := strings.Split(r.URL.Path, "/")
 	recordIdProvided := len(elements) == 6
 
-	if len(elements) < 5 || len(elements) > 6 || (!isGet && !isPost && !recordIdProvided) {
+	if len(elements) < 5 || len(elements) > 6 || (isDelete && !recordIdProvided) {
 
 		examplePostfix := ""
-		if isGet || isPost {
+		if isGet {
 			examplePostfix = " (record ID is optional)"
 		}
 		abort(http.StatusBadRequest, nil, fmt.Sprintf("invalid URL, expected: /api/{APP_NAME}/{API_NAME}/{VERSION}/{RECORD_ID}%s", examplePostfix))
@@ -124,7 +125,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// URL processing complete, actually use API
-	log.Info("api", fmt.Sprintf("%s.%s (v%d) is called with %s (record ID: %d)",
+	log.Info("api", fmt.Sprintf("'%s.%s' (v%d) is called with %s (record ID: %d)",
 		modName, apiName, version, r.Method, recordId))
 
 	// resolve API by module+API names
@@ -133,7 +134,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	apiId, exists := cache.ModuleApiNameMapId[modName][fmt.Sprintf("%s.v%d", apiName, version)]
 	if !exists {
-		abort(http.StatusNotFound, nil, fmt.Sprintf("API '%s.%s' not found", modName, apiName))
+		abort(http.StatusNotFound, nil, fmt.Sprintf("API '%s.%s' (v%d) does not exist", modName, apiName, version))
 		return
 	}
 	api := cache.ApiIdMap[apiId]
@@ -195,7 +196,82 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	defer tx.Rollback(ctx)
 
 	if isDelete {
+		if recordId < 1 {
+			abort(http.StatusBadRequest, nil, "record ID must be > 0")
+			return
+		}
 
+		// look up all records from joined relations
+		// continue even if some joins do not have DELETE enabled, as its necessary for later joins that might require a DELETE
+		// joins are ordered smaller indexes first, later joined relations always have higher indexes than their partners
+		relationIndexMapRecordIds := make(map[int][]int64)
+		for _, join := range api.Query.Joins {
+			if join.Index == 0 {
+				relationIndexMapRecordIds[0] = []int64{recordId}
+				continue
+			}
+
+			if _, exists := relationIndexMapRecordIds[join.IndexFrom]; !exists {
+				// no record on the partner relation, skip
+				continue
+			}
+
+			ids := make([]int64, 0)
+			joinAtr, exists := cache.AttributeIdMap[join.AttributeId.Bytes]
+			if !exists {
+				abort(http.StatusServiceUnavailable, nil,
+					handler.ErrSchemaUnknownAttribute(join.AttributeId.Bytes).Error())
+
+				return
+			}
+
+			var atrNameLookup, atrNameFilter string
+			var rel types.Relation
+
+			if joinAtr.RelationId == join.RelationId {
+				atrNameLookup = schema.PkName
+				atrNameFilter = joinAtr.Name
+				rel = cache.RelationIdMap[join.RelationId]
+			} else {
+				// join from other relation
+				atrNameLookup = joinAtr.Name
+				atrNameFilter = schema.PkName
+				rel = cache.RelationIdMap[joinAtr.RelationId]
+			}
+			mod := cache.ModuleIdMap[rel.ModuleId]
+
+			if err := tx.QueryRow(ctx, fmt.Sprintf(`
+				SELECT ARRAY(
+					SELECT "%s"
+					FROM "%s"."%s"
+					WHERE "%s" = ANY($1)
+				)
+			`, atrNameLookup, mod.Name, rel.Name, atrNameFilter),
+				relationIndexMapRecordIds[join.IndexFrom]).Scan(&ids); err != nil {
+
+				abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
+				return
+			}
+			relationIndexMapRecordIds[join.Index] = ids
+		}
+
+		// execute delete
+		for _, join := range api.Query.Joins {
+
+			if _, exists := relationIndexMapRecordIds[join.Index]; !exists {
+				continue
+			}
+			if !join.ApplyDelete || len(relationIndexMapRecordIds[join.Index]) == 0 {
+				continue
+			}
+
+			for _, id := range relationIndexMapRecordIds[join.Index] {
+				if err := data.Del_tx(ctx, tx, join.RelationId, id, loginId); err != nil {
+					abort(http.StatusConflict, nil, err.Error())
+					return
+				}
+			}
+		}
 	}
 
 	if isGet {
@@ -270,7 +346,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				abort(http.StatusUnauthorized, err, handler.ErrUnauthorized)
 				return
 			}
-			abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
+			abort(http.StatusServiceUnavailable, nil, err.Error())
 			return
 		}
 
@@ -380,7 +456,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			api.Columns, api.Query.Joins, api.Query.Lookups)
 
 		if err != nil {
-			abort(http.StatusServiceUnavailable, nil, err.Error())
+			abort(http.StatusConflict, nil, err.Error())
 			return
 		}
 

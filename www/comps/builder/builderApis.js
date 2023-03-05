@@ -78,14 +78,14 @@ let MyBuilderApis = {
 			if(api.hasGet)    out.push('G');
 			if(api.hasPost)   out.push('P');
 			if(api.hasDelete) out.push('D');
-			return out.join(' ');
+			return `[${out.join('')}]`;
 		},
 		captionTitle(api) {
 			let out = [];
 			if(api.hasGet)    out.push('GET');
 			if(api.hasPost)   out.push('POST');
 			if(api.hasDelete) out.push('DELETE');
-			return out.join(' ');
+			return out.join(', ');
 		}
 	}
 };

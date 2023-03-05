@@ -2,6 +2,7 @@ package api
 
 import (
 	"r3/db"
+	"r3/db/check"
 	"r3/schema"
 	"r3/schema/column"
 	"r3/schema/query"
@@ -59,6 +60,10 @@ func Get(moduleId uuid.UUID) ([]types.Api, error) {
 }
 
 func Set_tx(tx pgx.Tx, api types.Api) error {
+
+	if err := check.DbIdentifier(api.Name); err != nil {
+		return err
+	}
 
 	known, err := schema.CheckCreateId_tx(tx, &api.Id, "api", "id")
 	if err != nil {

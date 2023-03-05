@@ -114,22 +114,22 @@ let MyBuilderApiPreview = {
 			<td colspan="2">
 				<div class="column gap">
 					<textarea class="long code-preview" disabled="disabled"
-						:class="{ high:isPost }"
+						:class="{ high:isPost, low:isGet || isDelete }"
 						:value="request"
 					></textarea>
-					<span v-if="isPost && !params.verbose">{{ capApp.requestHintPost }}</span>
+					<span v-if="isPost && !params.verbose" v-html="capApp.requestHintPost"></span>
 				</div>
 			</td>
 		</tr>
-		<tr v-if="!isDelete">
+		<tr>
 			<td>{{ capApp.response }}</td>
 			<td colspan="2">
 				<div class="column gap">
 					<textarea class="long code-preview" disabled="disabled"
-						:class="{ high:isGet }"
+						:class="{ high:isGet, low:isDelete }"
 						:value="response"
 					></textarea>
-					<span v-if="isPost">{{ capApp.responseHintPost }}</span>
+					<span v-if="isPost" v-html="capApp.responseHintPost"></span>
 				</div>
 			</td>
 		</tr>
@@ -186,7 +186,7 @@ let MyBuilderApiPreview = {
 				}
 				return JSON.stringify(out,null,'\t');
 			}
-			return '';
+			return s.capApp.empty;
 		},
 		url:(s) => {
 			let base = `https://${s.config.publicHostName}/api/`;
