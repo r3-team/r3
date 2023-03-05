@@ -78,7 +78,7 @@ let MyBuilderApis = {
 			if(api.hasGet)    out.push('G');
 			if(api.hasPost)   out.push('P');
 			if(api.hasDelete) out.push('D');
-			return `[${out.join('')}]`;
+			return `[${out.join(',')}]`;
 		},
 		captionTitle(api) {
 			let out = [];

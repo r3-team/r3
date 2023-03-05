@@ -17,7 +17,9 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-func resolveQueryLookups(joins []types.QueryJoin, lookups []types.QueryLookup) map[int][]uuid.UUID {
+// build unique index lookup table per relation index
+// contains all attribute IDs to identify a record via its unique lookup index
+func ResolveQueryLookups(joins []types.QueryJoin, lookups []types.QueryLookup) map[int][]uuid.UUID {
 	indexMapPgIndexAttributeIds := make(map[int][]uuid.UUID)
 	for _, join := range joins {
 		for _, lookup := range lookups {
@@ -46,12 +48,12 @@ func resolveQueryLookups(joins []types.QueryJoin, lookups []types.QueryLookup) m
 	return indexMapPgIndexAttributeIds
 }
 
-// executes a data SET call from a list of interface{} values
+// executes a data SET call from a list of ordered interface{} values
 // uses columns to recognize attribute (and their orders)
 // uses query joins/lookups to recognize relationships and resolve records via unique indexes
 func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 	valuesIn []interface{}, columns []types.Column, joins []types.QueryJoin,
-	lookups []types.QueryLookup) (map[int]int64, error) {
+	lookups []types.QueryLookup, indexMapPgIndexAttributeIds map[int][]uuid.UUID) (map[int]int64, error) {
 
 	indexRecordIds := make(map[int]int64)
 
@@ -101,7 +103,6 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 	//  unless PG index includes a relationship attribute, then we can only hope that
 	//   the referenced record is also looked up successfully via a different, unique PG index
 	indexesResolved := make([]int, 0)
-	indexMapPgIndexAttributeIds := resolveQueryLookups(joins, lookups)
 
 	// multiple attempts can be necessary as PG indexes can use relationship attributes
 	//  these attribute values, if they are available at all, need to be resolved as well

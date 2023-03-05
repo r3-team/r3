@@ -111,13 +111,13 @@ let MyBuilderColumnOptions = {
 							@input="set('display',$event.target.value)"
 							:value="column.display"
 						>
-							<option value="default">{{ capApp.option.displayDefault }}</option>
-							<option v-if="isString"  value="email"   >{{ capApp.option.displayEmail }}</option>
-							<option v-if="isString"  value="password">{{ capApp.option.displayPassword }}</option>
-							<option v-if="isString"  value="phone"   >{{ capApp.option.displayPhone }}</option>
-							<option v-if="isString"  value="url"     >{{ capApp.option.displayUrl }}</option>
-							<option v-if="isFiles"   value="gallery" >{{ capApp.option.displayGallery }}</option>
-							<option value="hidden">{{ capApp.option.displayHidden }}</option>
+							<option value="default">{{ capApp.option.display.default }}</option>
+							<option v-if="isString"  value="email"   >{{ capApp.option.display.email }}</option>
+							<option v-if="isString"  value="password">{{ capApp.option.display.password }}</option>
+							<option v-if="isString"  value="phone"   >{{ capApp.option.display.phone }}</option>
+							<option v-if="isString"  value="url"     >{{ capApp.option.display.url }}</option>
+							<option v-if="isFiles"   value="gallery" >{{ capApp.option.display.gallery }}</option>
+							<option value="hidden">{{ capApp.option.display.hidden }}</option>
 						</select>
 					</td>
 				</tr>

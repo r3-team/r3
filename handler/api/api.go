@@ -452,8 +452,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			}
 		}
 
-		indexRecordIds, err := data_import.FromInterfaceValues_tx(ctx, tx, loginId, values,
-			api.Columns, api.Query.Joins, api.Query.Lookups)
+		indexRecordIds, err := data_import.FromInterfaceValues_tx(ctx, tx,
+			loginId, values, api.Columns, api.Query.Joins, api.Query.Lookups,
+			data_import.ResolveQueryLookups(api.Query.Joins, api.Query.Lookups))
 
 		if err != nil {
 			abort(http.StatusConflict, nil, err.Error())
