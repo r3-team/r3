@@ -76,8 +76,8 @@ func Get(moduleId uuid.UUID, id uuid.UUID) ([]types.Api, error) {
 	}
 
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
-		SELECT id, module_id, name, has_delete, has_get, has_post,
-			limit_def, limit_max, verbose_def, version
+		SELECT id, module_id, name, comment, has_delete, has_get,
+			has_post, limit_def, limit_max, verbose_def, version
 		FROM app.api
 		WHERE true
 		%s
@@ -89,8 +89,9 @@ func Get(moduleId uuid.UUID, id uuid.UUID) ([]types.Api, error) {
 
 	for rows.Next() {
 		var a types.Api
-		if err := rows.Scan(&a.Id, &a.ModuleId, &a.Name, &a.HasDelete, &a.HasGet,
-			&a.HasPost, &a.LimitDef, &a.LimitMax, &a.VerboseDef, &a.Version); err != nil {
+		if err := rows.Scan(&a.Id, &a.ModuleId, &a.Name, &a.Comment,
+			&a.HasDelete, &a.HasGet, &a.HasPost, &a.LimitDef, &a.LimitMax,
+			&a.VerboseDef, &a.Version); err != nil {
 
 			return apis, err
 		}
@@ -127,21 +128,22 @@ func Set_tx(tx pgx.Tx, api types.Api) error {
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.api
-			SET name = $1, has_delete = $2, has_get = $3, has_post = $4,
-				limit_def = $5, limit_max = $6, verbose_def = $7, version = $8
-			WHERE id = $9
-		`, api.Name, api.HasDelete, api.HasGet, api.HasPost, api.LimitDef,
-			api.LimitMax, api.VerboseDef, api.Version, api.Id); err != nil {
+			SET name = $1, comment = $2, has_delete = $3, has_get = $4,
+				has_post = $5, limit_def = $6, limit_max = $7, verbose_def = $8,
+				version = $9
+			WHERE id = $10
+		`, api.Name, api.Comment, api.HasDelete, api.HasGet, api.HasPost,
+			api.LimitDef, api.LimitMax, api.VerboseDef, api.Version, api.Id); err != nil {
 
 			return err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.api (id, module_id, name, has_delete, has_get,
-				has_post, limit_def, limit_max, verbose_def, version)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
-		`, api.Id, api.ModuleId, api.Name, api.HasDelete, api.HasGet, api.HasPost,
-			api.LimitDef, api.LimitMax, api.VerboseDef, api.Version); err != nil {
+			INSERT INTO app.api (id, module_id, name, comment, has_delete,
+				has_get, has_post, limit_def, limit_max, verbose_def, version)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
+		`, api.Id, api.ModuleId, api.Name, api.Comment, api.HasDelete, api.HasGet,
+			api.HasPost, api.LimitDef, api.LimitMax, api.VerboseDef, api.Version); err != nil {
 
 			return err
 		}

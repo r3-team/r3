@@ -7,6 +7,7 @@ import {
 	isAttributeDecimal,
 	isAttributeFiles,
 	isAttributeInteger,
+	isAttributeRelationship,
 	isAttributeString,
 	isAttributeUuid,
 } from '../shared/attribute.js';
@@ -93,7 +94,7 @@ let MyBuilderApiPreview = {
 				<table>
 					<tr v-if="isGet">
 						<td>Limit</td>
-						<td><input v-model.number="params.limit" /></td>
+						<td><input v-model.number="params.limit" @keyup="limitChanged = true" /></td>
 						<td>{{ capApp.limitHint }}</td>
 					</tr>
 					<tr v-if="isGet">
@@ -136,22 +137,25 @@ let MyBuilderApiPreview = {
 	</table>`,
 	emits:['hotkeysRegister'],
 	props:{
-		api:       { type:Object,  required:true },
-		columns:   { type:Array,   required:true },
-		hasDelete: { type:Boolean, required:true },
-		hasGet:    { type:Boolean, required:true },
-		hasPost:   { type:Boolean, required:true },
-		joins:     { type:Array,   required:true },
-		module:    { type:Object,  required:true },
-		name:      { type:String,  required:true },
-		verboseDef:{ type:Boolean, required:true },
-		version:   { type:Number,  required:true }
+		api:            { type:Object,  required:true },
+		builderLanguage:{ type:String,  required:true },
+		columns:        { type:Array,   required:true },
+		hasDelete:      { type:Boolean, required:true },
+		hasGet:         { type:Boolean, required:true },
+		hasPost:        { type:Boolean, required:true },
+		joins:          { type:Array,   required:true },
+		limitDef:       { type:Number,  required:true },
+		module:         { type:Object,  required:true },
+		name:           { type:String,  required:true },
+		verboseDef:     { type:Boolean, required:true },
+		version:        { type:Number,  required:true }
 	},
 	data() {
 		return {
 			// API call preview
 			call:'AUTH', // AUTH, GET, POST, DELETE
 			contentType:'application/json',
+			limitChanged:false,
 			params:{
 				limit:100,
 				offset:0,
@@ -171,7 +175,7 @@ let MyBuilderApiPreview = {
 			if(s.verboseChanged)       out.push(`verbose=${s.params.verbose ? '1' : '0'}`);
 			if(s.isGet && s.limitSet)  out.push(`limit=${s.params.limit}`);
 			if(s.isGet && s.offsetSet) out.push(`offset=${s.params.offset}`);
-			return `?${out.join('&')}`;
+			return out.length === 0 ? '' : `?${out.join('&')}`;
 		},
 		request:(s) => {
 			if(s.isAuth) return `{\n\t"username": "{API_LOGIN_USERNAME}",\n\t"password": "{API_LOGIN_PASSWORD}"\n}`;
@@ -208,7 +212,7 @@ let MyBuilderApiPreview = {
 		isDelete: (s) => s.call === 'DELETE',
 		isGet:    (s) => s.call === 'GET',
 		isPost:   (s) => s.call === 'POST',
-		limitSet: (s) => s.params.limit  !== '' && s.params.limit  !== 0,
+		limitSet: (s) => s.params.limit  !== '' && s.params.limit  !== 0 && s.limitChanged,
 		offsetSet:(s) => s.params.offset !== '' && s.params.offset !== 0,
 		recordSet:(s) => s.recordId      !== '' && s.recordId      !== 0,
 		
@@ -221,6 +225,8 @@ let MyBuilderApiPreview = {
 		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	mounted() {
+		// set defaults from API
+		this.params.limit   = this.limitDef;
 		this.params.verbose = this.verboseDef;
 	},
 	methods:{
@@ -229,16 +235,18 @@ let MyBuilderApiPreview = {
 		isAttributeDecimal,
 		isAttributeFiles,
 		isAttributeInteger,
+		isAttributeRelationship,
 		isAttributeString,
 		isAttributeUuid,
 		
 		// display
 		getAttributeExampleValue(content) {
-			if(this.isAttributeInteger(content)) return 123;
-			if(this.isAttributeDecimal(content)) return 123.45;
-			if(this.isAttributeString(content))  return 'ABC';
-			if(this.isAttributeUuid(content))    return '064fc31d-479d-450d-22cd-71f874df3a50';
-			if(this.isAttributeBoolean(content)) return true;
+			if(this.isAttributeInteger(content))      return 123;
+			if(this.isAttributeDecimal(content))      return 123.45;
+			if(this.isAttributeString(content))       return 'ABC';
+			if(this.isAttributeRelationship(content)) return 456;
+			if(this.isAttributeUuid(content))         return '064fc31d-479d-450d-22cd-71f874df3a50';
+			if(this.isAttributeBoolean(content))      return true;
 			if(this.isAttributeFiles(content))
 				return [{
 	                "changed":1677925664,
@@ -262,18 +270,35 @@ let MyBuilderApiPreview = {
 					}
 					rows.push(row);
 				} else {
-					let row = {};
+					let row         = {};
+					let subQueryCtr = 0;
 					for(let join of this.joins) {
-						let rel = this.relationIdMap[join.relationId];
-						let ref = `${join.index}(${rel.name})`;
-						row[ref] = {};
+						// relation reference (relation index + name): '0(person)' or '1(department)'
+						let relRef  = `${join.index}(${this.relationIdMap[join.relationId].name})`;
+						row[relRef] = {};
 						
 						for(let column of this.columns) {
 							if(column.index !== join.index)
 								continue;
 							
+							// new sub query columns do not have an attribute unless selected
+							if(column.attributeId === null) {
+								row[relRef][`[sub_query${subQueryCtr++}_no_attribute]`] = null;
+								continue;
+							}
+							
+							let colRef;
 							let atr = this.attributeIdMap[column.attributeId];
-							row[ref][atr.name] = this.getAttributeExampleValue(atr.content);
+							
+							if(typeof column.captions.columnTitle[this.builderLanguage] !== 'undefined') {
+								colRef = column.captions.columnTitle[this.builderLanguage];
+							} else {
+								colRef = !column.subQuery ? atr.name : `sub_query${subQueryCtr++}`;
+								
+								if(column.aggregator !== null)
+									colRef = `${column.aggregator.toUpperCase()} (${colRef})`;
+							}
+							row[relRef][colRef] = this.getAttributeExampleValue(atr.content);
 						}
 					}
 					rows.push(row);
@@ -462,11 +487,13 @@ let MyBuilderApi = {
 			<div class="content" v-if="tabTarget === 'calls'">
 				<my-builder-api-preview
 					:api="api"
+					:builderLanguage="builderLanguage"
 					:columns="columns"
 					:hasDelete="hasDelete"
 					:hasGet="hasGet"
 					:hasPost="hasPost"
 					:joins="joins"
+					:limitDef="limitDef"
 					:module="module"
 					:name="name"
 					:verboseDef="verboseDef"
@@ -486,6 +513,12 @@ let MyBuilderApi = {
 						<td>{{ capGen.version }}</td>
 						<td><input v-model.number="version" :disabled="readonly" /></td>
 						<td>{{ capApp.versionHint }}</td>
+					</tr>
+					<tr>
+						<td>{{ capGen.comments }}</td>
+						<td colspan="2">
+							<textarea class="long" v-model="comment" :disabled="readonly"></textarea>
+						</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.content }}</td>
@@ -559,6 +592,7 @@ let MyBuilderApi = {
 			
 			// API inputs
 			columns:[],
+			comment:'',
 			hasDelete:false,
 			hasGet:false,
 			hasPost:false,
@@ -587,6 +621,7 @@ let MyBuilderApi = {
 			return false;
 		},
 		hasChanges:(s) => s.name         !== s.api.name
+			|| s.comment                 !== s.api.comment
 			|| s.hasDelete               !== s.api.hasDelete
 			|| s.hasGet                  !== s.api.hasGet
 			|| s.hasPost                 !== s.api.hasPost
@@ -645,6 +680,7 @@ let MyBuilderApi = {
 			if(!this.api) return;
 			
 			this.name       = this.api.name;
+			this.comment    = this.api.comment;
 			this.hasDelete  = this.api.hasDelete;
 			this.hasGet     = this.api.hasGet;
 			this.hasPost    = this.api.hasPost;
@@ -716,6 +752,7 @@ let MyBuilderApi = {
 					id:this.api.id,
 					moduleId:this.api.moduleId,
 					name:this.name,
+					comment:this.comment === '' ? null : this.comment,
 					columns:this.replaceBuilderId(
 						JSON.parse(JSON.stringify(this.columns))
 					),

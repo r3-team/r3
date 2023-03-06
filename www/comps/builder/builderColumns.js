@@ -56,13 +56,13 @@ export let MyBuilderColumns = {
 					
 					<!-- column title -->
 					<div class="title word-break"
-						:class="{ 'no-hover':hasCaptions && showOptions }"
+						:class="{ 'no-hover':hasCaptions }"
 						:title="getItemTitleColumn(element,false)"
 					>
 						{{ getItemTitleColumn(element,false) }}
 					</div>
 					<my-builder-caption class="on-hover"
-						v-if="hasCaptions && showOptions"
+						v-if="hasCaptions"
 						@update:modelValue="propertySet(index,'captions',{columnTitle:$event})"
 						:contentName="getItemTitleColumn(element,false)"
 						:language="builderLanguage"

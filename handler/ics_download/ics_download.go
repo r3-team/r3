@@ -181,27 +181,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 			return
 		}
-
 		if schema.IsContentFiles(atr.Content) {
 			continue
 		}
 
-		atrId := pgtype.UUID{
-			Bytes: column.AttributeId,
-			Valid: true,
-		}
-
-		expr := types.DataGetExpression{
-			AttributeId:   atrId,
-			AttributeIdNm: pgtype.UUID{},
-			Aggregator:    pgtype.Text{},
-			Index:         column.Index,
-		}
-		if column.SubQuery {
-			expr.Query = data_query.ConvertSubQueryToDataGet(column.Query, column.Aggregator,
-				atrId, column.Index, loginId, languageCode)
-		}
-		dataGet.Expressions = append(dataGet.Expressions, expr)
+		dataGet.Expressions = append(dataGet.Expressions,
+			data_query.ConvertColumnToExpression(column, loginId, languageCode))
 	}
 
 	// get data

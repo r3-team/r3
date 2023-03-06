@@ -42,18 +42,19 @@ type ModuleStartForm struct {
 	FormId   uuid.UUID `json:"formId"`
 }
 type Api struct {
-	Id         uuid.UUID `json:"id"`
-	ModuleId   uuid.UUID `json:"moduleId"`
-	Name       string    `json:"name"`
-	Query      Query     `json:"query"`
-	Columns    []Column  `json:"columns"`
-	HasDelete  bool      `json:"hasDelete"`
-	HasGet     bool      `json:"hasGet"`
-	HasPost    bool      `json:"hasPost"`
-	LimitDef   int       `json:"limitDef"`   // default limit, if nothing else is specified
-	LimitMax   int       `json:"limitMax"`   // maximum limit that can be requested
-	VerboseDef bool      `json:"verboseDef"` // default input/output option, verbose shows relation indexes and attribute names
-	Version    int       `json:"version"`
+	Id         uuid.UUID   `json:"id"`
+	ModuleId   uuid.UUID   `json:"moduleId"`
+	Name       string      `json:"name"`
+	Comment    pgtype.Text `json:"comment"` // author comment
+	Query      Query       `json:"query"`
+	Columns    []Column    `json:"columns"`
+	HasDelete  bool        `json:"hasDelete"`
+	HasGet     bool        `json:"hasGet"`
+	HasPost    bool        `json:"hasPost"`
+	LimitDef   int         `json:"limitDef"`   // default limit, if nothing else is specified
+	LimitMax   int         `json:"limitMax"`   // maximum limit that can be requested
+	VerboseDef bool        `json:"verboseDef"` // default input/output option, verbose shows relation indexes and attribute names
+	Version    int         `json:"version"`
 }
 type Article struct {
 	Id       uuid.UUID  `json:"id"`

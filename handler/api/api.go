@@ -295,6 +295,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// resolve relation joins
 		for _, join := range api.Query.Joins {
 			if join.Index == 0 {
 				continue
@@ -306,20 +307,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				Connector:   join.Connector,
 			})
 		}
+
+		// build expressions from columns
 		for _, column := range api.Columns {
-			atrId := pgtype.UUID{
-				Bytes: column.AttributeId,
-				Valid: true,
-			}
-			expr := types.DataGetExpression{
-				AttributeId: atrId,
-				Index:       column.Index,
-			}
-			if column.SubQuery {
-				expr.Query = data_query.ConvertSubQueryToDataGet(column.Query,
-					column.Aggregator, atrId, column.Index, loginId, languageCode)
-			}
-			dataGet.Expressions = append(dataGet.Expressions, expr)
+			dataGet.Expressions = append(dataGet.Expressions,
+				data_query.ConvertColumnToExpression(column, loginId, languageCode))
 		}
 
 		// apply query filters
@@ -356,6 +348,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		fmt.Println(query)
+
 		// parse output
 		rows := make([]interface{}, 0)
 		if !getters.verbose {
@@ -363,18 +357,30 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				rows = append(rows, result.Values)
 			}
 		} else {
-			// prepare keys for row template object: { "0_person":{"firstname":"Hans", ...}, "1_department":{"name":"IT"}...}
-			atrNamesByColumn := make([]string, len(api.Columns))
+			// prepare keys for row template object: { "0(person)":{"firstname":"Hans", ...}, "1(department)":{"name":"IT"}...}
 			relIndexMapNames := make(map[int]string)
+			colRefByColumn := make([]string, len(api.Columns))
+			subQueryCtr := 0
 			for i, column := range api.Columns {
 				atr := cache.AttributeIdMap[column.AttributeId]
 				rel := cache.RelationIdMap[atr.RelationId]
+				colRef := ""
 
-				atrNamesByColumn[i] = atr.Name
-				if column.Aggregator.Valid {
-					atrNamesByColumn[i] = fmt.Sprintf("%s (%s)",
-						strings.ToUpper(column.Aggregator.String), atrNamesByColumn[i])
+				if ref, exists := column.Captions["columnTitle"][languageCode]; exists {
+					colRef = ref
+				} else {
+					if column.SubQuery {
+						colRef = fmt.Sprintf("sub_query%d", subQueryCtr)
+						subQueryCtr++
+					} else {
+						colRef = atr.Name
+					}
+
+					if column.Aggregator.Valid {
+						colRef = fmt.Sprintf("%s (%s)", strings.ToUpper(column.Aggregator.String), colRef)
+					}
 				}
+				colRefByColumn[i] = colRef
 
 				if _, exists := relIndexMapNames[column.Index]; !exists {
 					relIndexMapNames[column.Index] = rel.Name
@@ -392,7 +398,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 						row[relRef] = make(map[string]interface{})
 					}
 
-					row[relRef][atrNamesByColumn[i]] = value
+					row[relRef][colRefByColumn[i]] = value
 				}
 				rows = append(rows, row)
 			}
@@ -408,8 +414,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	if isPost {
-		values := make([]interface{}, len(api.Columns))
+		// check for invalid POST inputs
+		for _, column := range api.Columns {
+			if column.SubQuery {
+				abort(http.StatusBadRequest, nil, "POST does not support sub queries")
+				return
+			}
+		}
 
+		values := make([]interface{}, len(api.Columns))
 		if !getters.verbose {
 			// non-verbose mode: values are following columns (equal count and order)
 			// [123,"Fritz","Hans"]
@@ -435,7 +448,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				values[i] = nil
 			}
 
-			for relStr, attributeNameMapValues := range jsonObj {
+			for relStr, columnNameMapValues := range jsonObj {
 
 				// remove optional relation name and whitespace
 				relStr = strings.TrimSpace(
@@ -448,11 +461,19 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 					return
 				}
 				for i, column := range api.Columns {
-					if column.Index == relIndex {
-						atr := cache.AttributeIdMap[column.AttributeId]
-						if value, exists := attributeNameMapValues[atr.Name]; exists {
-							values[i] = value
-						}
+					if column.Index != relIndex {
+						continue
+					}
+
+					var colRef string
+					if ref, exists := column.Captions["columnTitle"][languageCode]; exists {
+						colRef = ref
+					} else {
+						colRef = cache.AttributeIdMap[column.AttributeId].Name
+					}
+
+					if value, exists := columnNameMapValues[colRef]; exists {
+						values[i] = value
 					}
 				}
 			}

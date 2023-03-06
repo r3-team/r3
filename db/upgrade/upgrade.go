@@ -265,6 +265,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				id uuid NOT NULL,
 				module_id uuid NOT NULL,
 				name varchar(64) NOT NULL,
+				comment text,
 				has_delete bool NOT NULL,
 				has_get bool NOT NULL,
 				has_patch bool NOT NULL,

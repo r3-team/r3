@@ -169,6 +169,7 @@ let MyBuilderNew = {
 						id:this.getNilUuid(),
 						moduleId:this.moduleId,
 						name:this.name,
+						comment:this.comment,
 						columns:[],
 						query:this.getQueryTemplate(),
 						hasDelete:false,
