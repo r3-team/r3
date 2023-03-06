@@ -240,15 +240,16 @@ let MyBuilderApiPreview = {
 		isAttributeUuid,
 		
 		// display
-		getAttributeExampleValue(content) {
-			if(this.isAttributeInteger(content))      return 123;
-			if(this.isAttributeDecimal(content))      return 123.45;
-			if(this.isAttributeString(content))       return 'ABC';
-			if(this.isAttributeRelationship(content)) return 456;
-			if(this.isAttributeUuid(content))         return '064fc31d-479d-450d-22cd-71f874df3a50';
-			if(this.isAttributeBoolean(content))      return true;
+		getAttributeExampleValue(content,aggregator) {
+			let value;
+			if(this.isAttributeInteger(content))      value = 123;
+			if(this.isAttributeDecimal(content))      value = 123.45;
+			if(this.isAttributeString(content))       value = 'ABC';
+			if(this.isAttributeRelationship(content)) value = 456;
+			if(this.isAttributeUuid(content))         value = '064fc31d-479d-450d-22cd-71f874df3a50';
+			if(this.isAttributeBoolean(content))      value = true;
 			if(this.isAttributeFiles(content))
-				return [{
+				value = [{
 	                "changed":1677925664,
 	                "hash":"FILE_HASH",
 	                "id":"FILE_UUID",
@@ -256,6 +257,14 @@ let MyBuilderApiPreview = {
 	                "size":240,
 	                "version":0
 	            }];
+			
+			if(aggregator !== null) {
+				switch(aggregator) {
+					case 'array': return [value,value];        break;
+					case 'list':  return `${value}, ${value}`; break;
+				}
+			}
+			return value;
 		},
 		getBodyPreview(singleRecord) {
 			let rows     = [];
@@ -266,7 +275,7 @@ let MyBuilderApiPreview = {
 					let row = [];
 					for(let column of this.columns) {
 						row.push(this.getAttributeExampleValue(
-							this.attributeIdMap[column.attributeId].content));
+							this.attributeIdMap[column.attributeId].content,column.aggregator));
 					}
 					rows.push(row);
 				} else {
@@ -298,7 +307,7 @@ let MyBuilderApiPreview = {
 								if(column.aggregator !== null)
 									colRef = `${column.aggregator.toUpperCase()} (${colRef})`;
 							}
-							row[relRef][colRef] = this.getAttributeExampleValue(atr.content);
+							row[relRef][colRef] = this.getAttributeExampleValue(atr.content,column.aggregator);
 						}
 					}
 					rows.push(row);
