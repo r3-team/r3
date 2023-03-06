@@ -202,6 +202,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 	switch ressource {
 	case "api":
 		switch action {
+		case "copy":
+			return ApiCopy_tx(tx, reqJson)
 		case "del":
 			return ApiDel_tx(tx, reqJson)
 		case "set":

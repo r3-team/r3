@@ -29,16 +29,6 @@ func CheckCreateId_tx(tx pgx.Tx, id *uuid.UUID, relName string, pkName string) (
 	return known, err
 }
 
-// replace given UUID with a new one while storing the state change in a given map (oldstate -> newstate)
-func ReplaceUuid(id uuid.UUID, idMapReplaced map[uuid.UUID]uuid.UUID) (uuid.UUID, error) {
-	newId, err := uuid.NewV4()
-	if err != nil {
-		return uuid.Nil, err
-	}
-	idMapReplaced[id] = newId
-	return newId, nil
-}
-
 // attribute checks
 func IsContentFiles(content string) bool {
 	return content == "files"

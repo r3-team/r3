@@ -103,7 +103,7 @@ let MyBuilderApiPreview = {
 					</tr>
 					<tr v-if="isGet || isPost">
 						<td>Verbose</td>
-						<td><my-bool v-model="params.verbose" /></td>
+						<td><my-bool v-model="params.verbose" @update:modelValue="verboseChanged = true" /></td>
 						<td>{{ capApp.verboseHint }}</td>
 					</tr>
 				</table>
@@ -136,15 +136,16 @@ let MyBuilderApiPreview = {
 	</table>`,
 	emits:['hotkeysRegister'],
 	props:{
-		api:      { type:Object,  required:true },
-		columns:  { type:Array,   required:true },
-		hasDelete:{ type:Boolean, required:true },
-		hasGet:   { type:Boolean, required:true },
-		hasPost:  { type:Boolean, required:true },
-		joins:    { type:Array,   required:true },
-		module:   { type:Object,  required:true },
-		name:     { type:String,  required:true },
-		version:  { type:Number,  required:true }
+		api:       { type:Object,  required:true },
+		columns:   { type:Array,   required:true },
+		hasDelete: { type:Boolean, required:true },
+		hasGet:    { type:Boolean, required:true },
+		hasPost:   { type:Boolean, required:true },
+		joins:     { type:Array,   required:true },
+		module:    { type:Object,  required:true },
+		name:      { type:String,  required:true },
+		verboseDef:{ type:Boolean, required:true },
+		version:   { type:Number,  required:true }
 	},
 	data() {
 		return {
@@ -156,18 +157,20 @@ let MyBuilderApiPreview = {
 				offset:0,
 				verbose:false
 			},
-			recordId:0
+			recordId:0,
+			verboseChanged:false
 		};
 	},
 	computed:{
 		// preview values
 		method:(s) => s.isAuth ? 'POST' : s.call,
 		paramsUrl:(s) => {
-			let out = [`verbose=${s.params.verbose ? '1' : '0'}`];
-			if(s.isGet) {
-				if(s.limitSet)  out.push(`limit=${s.params.limit}`);
-				if(s.offsetSet) out.push(`offset=${s.params.offset}`);
-			}
+			if(s.isAuth) return '';
+			
+			let out = [];
+			if(s.verboseChanged)       out.push(`verbose=${s.params.verbose ? '1' : '0'}`);
+			if(s.isGet && s.limitSet)  out.push(`limit=${s.params.limit}`);
+			if(s.isGet && s.offsetSet) out.push(`offset=${s.params.offset}`);
 			return `?${out.join('&')}`;
 		},
 		request:(s) => {
@@ -216,6 +219,9 @@ let MyBuilderApiPreview = {
 		capApp:        (s) => s.$store.getters.captions.builder.api.preview,
 		capAppApi:     (s) => s.$store.getters.captions.builder.api,
 		capGen:        (s) => s.$store.getters.captions.generic
+	},
+	mounted() {
+		this.params.verbose = this.verboseDef;
 	},
 	methods:{
 		// externals
@@ -321,6 +327,11 @@ let MyBuilderApi = {
 						:active="hasChanges"
 						:caption="capGen.button.refresh"
 					/>
+					<my-button image="files.png"
+						@trigger="copy"
+						:caption="capApp.button.versionNew"
+						:captionTitle="capApp.button.versionNewHint"
+					/>
 					<my-button image="visible1.png"
 						@trigger="copyValueDialog(name,id,id)"
 						:caption="capGen.id"
@@ -339,7 +350,7 @@ let MyBuilderApi = {
 				
 				<div class="builder-api-columns">
 				
-					<!-- query columns -->
+					<!-- columns -->
 					<div class="builder-api-columns-active">
 						<h2>{{ capApp.columnsTarget }}</h2>
 						<my-builder-columns groupName="columns"
@@ -363,7 +374,6 @@ let MyBuilderApi = {
 							<my-builder-column-templates groupName="columns"
 								:builderLanguage="builderLanguage"
 								:columns="columns"
-								:hasCaptions="true"
 								:joins="joins"
 								:moduleId="module.id"
 							/>
@@ -459,6 +469,7 @@ let MyBuilderApi = {
 					:joins="joins"
 					:module="module"
 					:name="name"
+					:verboseDef="verboseDef"
 					:version="version"
 				/>
 			</div>
@@ -667,6 +678,15 @@ let MyBuilderApi = {
 		},
 		
 		// backend calls
+		copy() {
+			ws.send('api','copy',{id:this.id},true).then(
+				() => {
+					this.$root.schemaReload(this.module.id);
+					this.$router.push('/builder/apis/'+this.module.id);
+				},
+				this.$root.genericError
+			);
+		},
 		delAsk() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.delete,

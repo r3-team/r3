@@ -298,7 +298,7 @@ func updateSchemaCache(moduleIdsUpdateOnly []uuid.UUID) error {
 		// get APIs
 		log.Info("cache", "load APIs")
 
-		mod.Apis, err = api.Get(mod.Id)
+		mod.Apis, err = api.Get(mod.Id, uuid.Nil)
 		if err != nil {
 			return err
 		}

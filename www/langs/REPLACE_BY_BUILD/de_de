@@ -506,6 +506,10 @@
 	},
 	"builder":{
 		"api":{
+			"button":{
+				"versionNew":"Neue Version",
+				"versionNewHint":"Dupliziert diese API mit einer neuen Versionsnummer."
+			},
 			"dialog":{
 				"delete":"Bist du sicher, dass du diese API löschen möchtest?"
 			},

@@ -7,7 +7,7 @@ let MyBuilderRoleAccessApi = {
 	name:'my-builder-role-access-api',
 	template:`<tbody>
 		<tr class="entry">
-			<td class="maximum">{{ api.name }}</td>
+			<td class="maximum">{{ api.name + ' (v' + api.version + ')' }}</td>
 			<td>
 				<my-bool
 					@update:modelValue="$emit('apply',api.id,access === 1 ? -1 : 1)"
@@ -285,6 +285,7 @@ let MyBuilderRole = {
 			<div class="contentBox grow access">
 				<div class="contentPart">
 					<div class="contentPartHeader">
+						<img class="icon" src="images/database.png" />
 						<h1>{{ capApp.data }}</h1>
 					</div>
 					
@@ -314,6 +315,7 @@ let MyBuilderRole = {
 				</div>
 				<div class="contentPart">
 					<div class="contentPartHeader">
+						<img class="icon" src="images/menu.png" />
 						<h1>{{ capApp.menus }}</h1>
 					</div>
 					
@@ -337,6 +339,7 @@ let MyBuilderRole = {
 				</div>
 				<div class="contentPart">
 					<div class="contentPartHeader">
+						<img class="icon" src="images/tray.png" />
 						<h1>{{ capApp.collections }}</h1>
 					</div>
 					
@@ -359,6 +362,7 @@ let MyBuilderRole = {
 				</div>
 				<div class="contentPart">
 					<div class="contentPartHeader">
+						<img class="icon" src="images/api.png" />
 						<h1>{{ capApp.apis }}</h1>
 					</div>
 					

@@ -120,7 +120,6 @@ let MyBuilderCollection = {
 							<my-builder-column-templates groupName="columns"
 								:builderLanguage="builderLanguage"
 								:columns="columns"
-								:hasCaptions="true"
 								:joins="joins"
 								:moduleId="module.id"
 							/>

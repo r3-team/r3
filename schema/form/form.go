@@ -40,7 +40,7 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 		return err
 	}
 
-	form.Query, err = replaceQueryIds(form.Query, idMapReplaced)
+	form.Query, err = schema.ReplaceQueryIds(form.Query, idMapReplaced)
 	if err != nil {
 		return err
 	}
@@ -272,73 +272,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUI
 	return caption.Set_tx(tx, id, captions)
 }
 
-// replace field IDs (form duplication)
-func replaceQueryFilterIds(filterIn types.QueryFilter, idMapReplaced map[uuid.UUID]uuid.UUID) (types.QueryFilter, error) {
-	var err error
-
-	// replace IDs in sub query
-	if filterIn.Side0.Content == "subQuery" {
-		filterIn.Side0.Query, err = replaceQueryIds(filterIn.Side0.Query, idMapReplaced)
-		if err != nil {
-			return filterIn, err
-		}
-	}
-	if filterIn.Side1.Content == "subQuery" {
-		filterIn.Side1.Query, err = replaceQueryIds(filterIn.Side1.Query, idMapReplaced)
-		if err != nil {
-			return filterIn, err
-		}
-	}
-
-	// assign newly created field IDs to existing field filters
-	if filterIn.Side0.FieldId.Valid {
-		if _, exists := idMapReplaced[filterIn.Side0.FieldId.Bytes]; !exists {
-			return filterIn, errors.New("unknown field filter ID")
-		}
-		filterIn.Side0.FieldId.Bytes = idMapReplaced[filterIn.Side0.FieldId.Bytes]
-	}
-	if filterIn.Side1.FieldId.Valid {
-		if _, exists := idMapReplaced[filterIn.Side1.FieldId.Bytes]; !exists {
-			return filterIn, errors.New("unknown field filter ID")
-		}
-		filterIn.Side1.FieldId.Bytes = idMapReplaced[filterIn.Side1.FieldId.Bytes]
-	}
-	return filterIn, nil
-}
-func replaceQueryIds(queryIn types.Query, idMapReplaced map[uuid.UUID]uuid.UUID) (types.Query, error) {
-	var err error
-
-	queryIn.Id, err = schema.ReplaceUuid(queryIn.Id, idMapReplaced)
-	if err != nil {
-		return queryIn, err
-	}
-
-	// replace IDs in filters
-	for i, _ := range queryIn.Filters {
-		queryIn.Filters[i], err = replaceQueryFilterIds(queryIn.Filters[i], idMapReplaced)
-		if err != nil {
-			return queryIn, err
-		}
-	}
-
-	// replace IDs in choices
-	for i, _ := range queryIn.Choices {
-		queryIn.Choices[i].Id, err = schema.ReplaceUuid(queryIn.Choices[i].Id, idMapReplaced)
-		if err != nil {
-			return queryIn, err
-		}
-
-		for x, _ := range queryIn.Choices[i].Filters {
-			queryIn.Choices[i].Filters[x], err = replaceQueryFilterIds(
-				queryIn.Choices[i].Filters[x], idMapReplaced)
-
-			if err != nil {
-				return queryIn, err
-			}
-		}
-	}
-	return queryIn, nil
-}
+// form duplication
 func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID, setFieldIds bool) (interface{}, error) {
 	var err error
 
@@ -358,23 +292,6 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 		consumer.Id = uuid.Nil
 		consumer.OpenForm = replaceOpenForm(consumer.OpenForm)
 		return consumer
-	}
-
-	replaceColumnIds := func(columns []types.Column) ([]types.Column, error) {
-		for i, _ := range columns {
-			columns[i].Id, err = schema.ReplaceUuid(columns[i].Id, idMapReplaced)
-			if err != nil {
-				return columns, err
-			}
-
-			if columns[i].SubQuery {
-				columns[i].Query, err = replaceQueryIds(columns[i].Query, idMapReplaced)
-				if err != nil {
-					return columns, err
-				}
-			}
-		}
-		return columns, nil
 	}
 
 	switch field := fieldIf.(type) {
@@ -398,11 +315,11 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 			}
 		} else {
 			field.OpenForm = replaceOpenForm(field.OpenForm)
-			field.Columns, err = replaceColumnIds(field.Columns)
+			field.Columns, err = schema.ReplaceColumnIds(field.Columns, idMapReplaced)
 			if err != nil {
 				return nil, err
 			}
-			field.Query, err = replaceQueryIds(field.Query, idMapReplaced)
+			field.Query, err = schema.ReplaceQueryIds(field.Query, idMapReplaced)
 			if err != nil {
 				return nil, err
 			}
@@ -419,11 +336,11 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 				return nil, err
 			}
 		} else {
-			field.Columns, err = replaceColumnIds(field.Columns)
+			field.Columns, err = schema.ReplaceColumnIds(field.Columns, idMapReplaced)
 			if err != nil {
 				return nil, err
 			}
-			field.Query, err = replaceQueryIds(field.Query, idMapReplaced)
+			field.Query, err = schema.ReplaceQueryIds(field.Query, idMapReplaced)
 			if err != nil {
 				return nil, err
 			}
@@ -464,11 +381,11 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 			}
 		} else {
 			field.OpenForm = replaceOpenForm(field.OpenForm)
-			field.Columns, err = replaceColumnIds(field.Columns)
+			field.Columns, err = schema.ReplaceColumnIds(field.Columns, idMapReplaced)
 			if err != nil {
 				return nil, err
 			}
-			field.Query, err = replaceQueryIds(field.Query, idMapReplaced)
+			field.Query, err = schema.ReplaceQueryIds(field.Query, idMapReplaced)
 			if err != nil {
 				return nil, err
 			}
@@ -493,11 +410,11 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 			}
 		} else {
 			field.OpenForm = replaceOpenForm(field.OpenForm)
-			field.Columns, err = replaceColumnIds(field.Columns)
+			field.Columns, err = schema.ReplaceColumnIds(field.Columns, idMapReplaced)
 			if err != nil {
 				return nil, err
 			}
-			field.Query, err = replaceQueryIds(field.Query, idMapReplaced)
+			field.Query, err = schema.ReplaceQueryIds(field.Query, idMapReplaced)
 			if err != nil {
 				return nil, err
 			}

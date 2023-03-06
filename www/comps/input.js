@@ -22,17 +22,15 @@ let MyBool = {
 	},
 	emits:['update:modelValue'],
 	computed:{
-		boolOn:      function() { return this.modelValue === (!this.reversed ? true : false); },
-		displayLeft: function() { return this.boolOn ? this.caption1 : ''; },
-		displayRight:function() {
-			if(this.modelValue === null)
-				return '-';
-			
-			return !this.boolOn ? this.caption0 : '';
+		boolOn:      (s) => s.modelValue === (!s.reversed ? true : false),
+		displayLeft: (s) => s.boolOn ? s.caption1 : '',
+		displayRight:(s) => {
+			if(s.modelValue === null) return '-';
+			return !s.boolOn ? s.caption0 : '';
 		},
 	},
 	methods:{
-		trigger:function() {
+		trigger() {
 			if(this.readonly) return;
 			return this.$emit('update:modelValue',this.modelValue === true ? false : true);
 		}
@@ -56,8 +54,8 @@ let MyBoolStringNumber = {
 	emits:['update:modelValue'],
 	computed:{
 		value:{
-			get:function()  { return this.modelValue === '1' ? true : false; },
-			set:function(v) { this.$emit('update:modelValue',v ? '1' : '0'); }
+			get()  { return this.modelValue === '1' ? true : false; },
+			set(v) { this.$emit('update:modelValue',v ? '1' : '0'); }
 		}
 	}
 };
@@ -81,7 +79,7 @@ let MyModuleSelect = {
 		modelValue:      { required:true } // module ID
 	},
 	emits:['update:modelValue'],
-	mounted:function() {
+	mounted() {
 		if(this.modelValue !== null)
 			return;
 		
@@ -96,7 +94,7 @@ let MyModuleSelect = {
 		}
 	},
 	computed:{
-		modules:function() { return this.$store.getters['schema/modules']; }
+		modules:(s) => s.$store.getters['schema/modules']
 	},
 	methods:{
 		// externals
@@ -104,10 +102,10 @@ let MyModuleSelect = {
 		hasAnyAssignableRole,
 		
 		// presentation
-		displayInvalid:function(module) {
+		displayInvalid(module) {
 			return module.hidden || !this.hasAnyAssignableRole(module.roles);
 		},
-		displayModuleName:function(module) {
+		displayModuleName(module) {
 			let name = this.getCaptionForModule(
 				module.captions['moduleTitle'],module.name,module);
 			

@@ -1,42 +1,96 @@
 package api
 
 import (
+	"errors"
+	"fmt"
 	"r3/db"
 	"r3/db/check"
 	"r3/schema"
 	"r3/schema/column"
 	"r3/schema/query"
 	"r3/types"
+	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 )
+
+func Copy_tx(tx pgx.Tx, id uuid.UUID) error {
+
+	apis, err := Get(uuid.Nil, id)
+	if err != nil {
+		return err
+	}
+
+	if len(apis) != 1 {
+		return errors.New("API copy target does not exist")
+	}
+	api := apis[0]
+
+	// get new version number (latest + 1)
+	if err := tx.QueryRow(db.Ctx, `
+		SELECT MAX(version) + 1
+		FROM app.api
+		WHERE module_id = $1
+		AND   name      = $2
+	`, api.ModuleId, api.Name).Scan(&api.Version); err != nil {
+		return err
+	}
+
+	// replace IDs with new ones
+	// keep association between old (replaced) and new ID
+	idMapReplaced := make(map[uuid.UUID]uuid.UUID)
+
+	api.Id, err = schema.ReplaceUuid(api.Id, idMapReplaced)
+	if err != nil {
+		return err
+	}
+	api.Query, err = schema.ReplaceQueryIds(api.Query, idMapReplaced)
+	if err != nil {
+		return err
+	}
+	api.Columns, err = schema.ReplaceColumnIds(api.Columns, idMapReplaced)
+	if err != nil {
+		return err
+	}
+	return Set_tx(tx, api)
+}
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 	_, err := tx.Exec(db.Ctx, `DELETE FROM app.api WHERE id = $1`, id)
 	return err
 }
 
-func Get(moduleId uuid.UUID) ([]types.Api, error) {
-	apis := make([]types.Api, 0)
+func Get(moduleId uuid.UUID, id uuid.UUID) ([]types.Api, error) {
 
-	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, name, has_delete, has_get, has_post,
+	apis := make([]types.Api, 0)
+	sqlWheres := []string{}
+	sqlValues := []interface{}{}
+	if moduleId != uuid.Nil {
+		sqlWheres = append(sqlWheres, fmt.Sprintf("AND module_id = $%d", len(sqlValues)+1))
+		sqlValues = append(sqlValues, moduleId)
+	}
+	if id != uuid.Nil {
+		sqlWheres = append(sqlWheres, fmt.Sprintf("AND id = $%d", len(sqlValues)+1))
+		sqlValues = append(sqlValues, id)
+	}
+
+	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+		SELECT id, module_id, name, has_delete, has_get, has_post,
 			limit_def, limit_max, verbose_def, version
 		FROM app.api
-		WHERE module_id = $1
-		ORDER BY name ASC
-	`, moduleId)
+		WHERE true
+		%s
+		ORDER BY name ASC, version ASC
+	`, strings.Join(sqlWheres, "\n")), sqlValues...)
 	if err != nil {
 		return apis, err
 	}
 
 	for rows.Next() {
 		var a types.Api
-		a.ModuleId = moduleId
-
-		if err := rows.Scan(&a.Id, &a.Name, &a.HasDelete, &a.HasGet, &a.HasPost,
-			&a.LimitDef, &a.LimitMax, &a.VerboseDef, &a.Version); err != nil {
+		if err := rows.Scan(&a.Id, &a.ModuleId, &a.Name, &a.HasDelete, &a.HasGet,
+			&a.HasPost, &a.LimitDef, &a.LimitMax, &a.VerboseDef, &a.Version); err != nil {
 
 			return apis, err
 		}

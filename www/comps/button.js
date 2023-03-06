@@ -45,7 +45,7 @@ let MyButton = {
 	},
 	emits:['trigger','trigger-middle','trigger-right','trigger-shift'],
 	computed:{
-		classes:function() {
+		classes() {
 			return {
 				cancel:this.cancel,
 				clickable:this.active,
@@ -59,7 +59,7 @@ let MyButton = {
 		}
 	},
 	methods:{
-		trigger:function(ev) {
+		trigger(ev) {
 			if(!this.active) return;
 			
 			if(this.blockBubble)
@@ -67,7 +67,7 @@ let MyButton = {
 			
 			this.$emit('trigger');
 		},
-		triggerMiddle:function(ev) {
+		triggerMiddle(ev) {
 			if(!this.active) return;
 			
 			if(this.blockBubble)
@@ -75,7 +75,7 @@ let MyButton = {
 			
 			this.$emit('trigger-middle');
 		},
-		triggerRight:function(ev) {
+		triggerRight(ev) {
 			if(!this.active) return;
 			
 			if(this.blockBubble)
@@ -83,7 +83,7 @@ let MyButton = {
 			
 			this.$emit('trigger-right');
 		},
-		triggerShift:function(ev) {
+		triggerShift(ev) {
 			if(!this.active) return;
 			
 			if(this.blockBubble)
