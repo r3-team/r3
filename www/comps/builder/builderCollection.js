@@ -157,6 +157,7 @@ let MyBuilderCollection = {
 					:allowOrders="true"
 					:builderLanguage="builderLanguage"
 					:filters="filters"
+					:filtersDisable="filtersDisable"
 					:fixedLimit="fixedLimit"
 					:joins="joins"
 					:moduleId="module.id"
@@ -183,6 +184,7 @@ let MyBuilderCollection = {
 						:builderLanguage="builderLanguage"
 						:choices="columnShow.query.choices"
 						:filters="columnShow.query.filters"
+						:filtersDisable="filtersDisable"
 						:fixedLimit="columnShow.query.fixedLimit"
 						:joins="columnShow.query.joins"
 						:joinsParents="[joins]"
@@ -283,6 +285,7 @@ let MyBuilderCollection = {
 			
 			// state
 			columnIdShow:null,
+			filtersDisable:['collection','field','fieldChanged','javascript','record','recordNew'],
 			showPreview:false,
 			showSidebar:true,
 			tabTarget:'content'

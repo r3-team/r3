@@ -623,7 +623,7 @@ let MyBuilderQuery = {
 				v-model="filtersInput"
 				v-show="showFilters"
 				:builderMode="true"
-				:disableContent="['fieldChanged']"
+				:disableContent="filtersDisable"
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
 				:filterAddCnt="filterAddCnt"
@@ -735,6 +735,7 @@ let MyBuilderQuery = {
 		entityIdMapRef: { type:Object,  required:false, default:() => {return {}} },
 		fieldIdMap:     { type:Object,  required:false, default:() => {return {}} }, // form field map, key: field ID
 		filters:        { type:Array,   required:true },
+		filtersDisable: { type:Array,   required:false, default:() => [] }, // filter content to disable (attribute, javascript, collection, preset, ...)
 		fixedLimit:     { type:Number,  required:true },
 		lookups:        { type:Array,   required:false, default:() => [] },
 		joins:          { type:Array,   required:true },                    // available relations, incl. source relation

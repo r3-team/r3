@@ -437,6 +437,7 @@ let MyBuilderApi = {
 					:allowOrders="true"
 					:builderLanguage="builderLanguage"
 					:filters="filters"
+					:filtersDisable="filtersDisable"
 					:fixedLimit="fixedLimit"
 					:joins="joins"
 					:lookups="lookups"
@@ -464,6 +465,7 @@ let MyBuilderApi = {
 						:builderLanguage="builderLanguage"
 						:choices="columnShow.query.choices"
 						:filters="columnShow.query.filters"
+						:filtersDisable="filtersDisable"
 						:fixedLimit="columnShow.query.fixedLimit"
 						:joins="columnShow.query.joins"
 						:joinsParents="[joins]"
@@ -604,6 +606,7 @@ let MyBuilderApi = {
 			
 			// state
 			columnIdShow:null,
+			filtersDisable:['collection','field','fieldChanged','javascript','record','recordNew'],
 			showPreview:false,
 			showSidebar:true,
 			tabTarget:'properties'

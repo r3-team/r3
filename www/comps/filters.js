@@ -239,7 +239,7 @@ let MyFilterSide = {
 					@input="setContent"
 					:value="content"
 				>
-					<optgroup :disabled="contentData.length === 0" :label="capApp.contentData">
+					<optgroup v-if="contentData.length !== 0" :label="capApp.contentData">
 						<option
 							v-for="c in contentData"
 							:disabled="contentUnusable.includes(c)"
@@ -247,7 +247,7 @@ let MyFilterSide = {
 							:value="c"
 						>{{ capApp.option.content[c] }}</option>
 					</optgroup>
-					<optgroup :disabled="contentForm.length === 0" :label="capApp.contentForm">
+					<optgroup v-if="contentForm.length !== 0" :label="capApp.contentForm">
 						<option
 							v-for="c in contentForm"
 							:disabled="contentUnusable.includes(c)"
@@ -255,7 +255,7 @@ let MyFilterSide = {
 							:value="c"
 						>{{ capApp.option.content[c] }}</option>
 					</optgroup>
-					<optgroup :disabled="contentDate.length === 0" :label="capApp.contentDate">
+					<optgroup v-if="contentDate.length !== 0" :label="capApp.contentDate">
 						<option
 							v-for="c in contentDate"
 							:disabled="contentUnusable.includes(c)"
@@ -263,7 +263,7 @@ let MyFilterSide = {
 							:value="c"
 						>{{ capApp.option.content[c] }}</option>
 					</optgroup>
-					<optgroup :disabled="contentLogin.length === 0" :label="capApp.contentLogin">
+					<optgroup v-if="contentLogin.length !== 0" :label="capApp.contentLogin">
 						<option
 							v-for="c in contentLogin"
 							:disabled="contentUnusable.includes(c)"
