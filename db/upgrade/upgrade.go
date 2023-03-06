@@ -103,27 +103,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 	//  TYPE app.attribute_content_use USING content_use::text::app.attribute_content_use;
 
 	"3.2": func(tx pgx.Tx) (string, error) {
-		_, err := tx.Exec(db.Ctx, `
+		if _, err := tx.Exec(db.Ctx, `
 			-- clean up from last release
 			ALTER TABLE app.caption ALTER COLUMN content
 				TYPE app.caption_content USING content::text::app.caption_content;
-			
-			-- add references for PKs as PG indexes (used for API)
-			ALTER TABLE app.pg_index ADD COLUMN primary_key bool NOT NULL DEFAULT false;
-			ALTER TABLE app.pg_index ALTER COLUMN primary_key DROP DEFAULT;
-			
-			INSERT INTO app.pg_index (id, relation_id, auto_fki, no_duplicates, primary_key)
-				SELECT gen_random_uuid(), id, false, true, true FROM app.relation;
-			
-			INSERT INTO app.pg_index_attribute (pg_index_id, position, order_asc, attribute_id)
-				SELECT id, 0, true, (
-					SELECT id
-					FROM app.attribute
-					WHERE name = $1
-					AND relation_id = pgi.relation_id
-				)
-				FROM app.pg_index AS pgi
-				WHERE primary_key;
 			
 			-- new user setting
 			ALTER TABLE instance.login_setting ADD COLUMN tab_remember BOOLEAN NOT NULL DEFAULT TRUE;
@@ -268,11 +251,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				comment text,
 				has_delete bool NOT NULL,
 				has_get bool NOT NULL,
-				has_patch bool NOT NULL,
 				has_post bool NOT NULL,
 				limit_def int NOT NULL,
 				limit_max int NOT NULL,
-				verbose_get bool NOT NULL,
+				verbose_def bool NOT NULL,
 				version int NOT NULL,
 			    CONSTRAINT api_pkey PRIMARY KEY (id),
 				CONSTRAINT api_name_version_key UNIQUE (name,version)
@@ -333,6 +315,27 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX IF NOT EXISTS fki_role_access_api_id_fkey
 			    ON app.role_access USING btree (api_id ASC NULLS LAST);
+			
+			-- add references for PKs as PG indexes (used for API)
+			ALTER TABLE app.pg_index ADD COLUMN primary_key bool NOT NULL DEFAULT false;
+			ALTER TABLE app.pg_index ALTER COLUMN primary_key DROP DEFAULT;
+			
+			INSERT INTO app.pg_index (id, relation_id, auto_fki, no_duplicates, primary_key)
+				SELECT gen_random_uuid(), id, false, true, true FROM app.relation;
+		`); err != nil {
+			return "", err
+		}
+
+		_, err := tx.Exec(db.Ctx, `
+			INSERT INTO app.pg_index_attribute (pg_index_id, position, order_asc, attribute_id)
+				SELECT id, 0, true, (
+					SELECT id
+					FROM app.attribute
+					WHERE name = $1
+					AND relation_id = pgi.relation_id
+				)
+				FROM app.pg_index AS pgi
+				WHERE primary_key;
 		`, schema.PkName)
 		return "3.3", err
 	},

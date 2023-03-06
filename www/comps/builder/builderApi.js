@@ -178,12 +178,12 @@ let MyBuilderApiPreview = {
 			return out.length === 0 ? '' : `?${out.join('&')}`;
 		},
 		request:(s) => {
-			if(s.isAuth) return `{\n\t"username": "{API_LOGIN_USERNAME}",\n\t"password": "{API_LOGIN_PASSWORD}"\n}`;
+			if(s.isAuth) return `{\n\t"username": "API_LOGIN_USERNAME",\n\t"password": "API_LOGIN_PASSWORD"\n}`;
 			if(s.isPost) return s.getBodyPreview(true);
 			return s.capApp.empty;
 		},
 		response:(s) => {
-			if(s.isAuth) return `{\n\t"token": "{ACCESS_TOKEN}"\n}`;
+			if(s.isAuth) return `{\n\t"token": "ACCESS_TOKEN"\n}`;
 			if(s.isGet)  return s.getBodyPreview(false);
 			
 			if(s.isPost) {
@@ -250,9 +250,9 @@ let MyBuilderApiPreview = {
 			if(this.isAttributeFiles(content))
 				return [{
 	                "changed":1677925664,
-	                "hash":"{FILE_HASH}",
-	                "id":"{FILE_UUID}",
-	                "name":"my_file.txt",
+	                "hash":"FILE_HASH",
+	                "id":"FILE_UUID",
+	                "name":"FILE_NAME",
 	                "size":240,
 	                "version":0
 	            }];

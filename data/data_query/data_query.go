@@ -1,6 +1,8 @@
 package data_query
 
 import (
+	"r3/cache"
+	"r3/tools"
 	"r3/types"
 	"time"
 
@@ -34,7 +36,8 @@ func ConvertColumnToExpression(column types.Column, loginId int64, languageCode 
 }
 
 func ConvertSubQueryToDataGet(query types.Query, queryAggregator pgtype.Text,
-	attributeId pgtype.UUID, attributeIndex int, loginId int64, languageCode string) types.DataGet {
+	attributeId pgtype.UUID, attributeIndex int, loginId int64,
+	languageCode string) types.DataGet {
 
 	return types.DataGet{
 		RelationId: query.RelationId.Bytes,
@@ -70,6 +73,8 @@ func ConvertQueryToDataFilter(filters []types.QueryFilter,
 		}
 		switch side.Content {
 		// data
+		case "preset":
+			sideOut.Value = cache.GetPresetRecordId(side.PresetId.Bytes)
 		case "subQuery":
 			sideOut.Query = ConvertSubQueryToDataGet(side.Query, side.QueryAggregator,
 				side.AttributeId, side.AttributeIndex, loginId, languageCode)
@@ -93,6 +98,13 @@ func ConvertQueryToDataFilter(filters []types.QueryFilter,
 			sideOut.Value = languageCode
 		case "login":
 			sideOut.Value = loginId
+		case "role":
+			access, err := cache.GetAccessById(loginId)
+			if err == nil {
+				sideOut.Value = tools.UuidInSlice(side.RoleId.Bytes, access.RoleIds)
+			} else {
+				sideOut.Value = false
+			}
 		}
 		return sideOut
 	}

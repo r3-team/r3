@@ -348,8 +348,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		fmt.Println(query)
-
 		// parse output
 		rows := make([]interface{}, 0)
 		if !getters.verbose {
