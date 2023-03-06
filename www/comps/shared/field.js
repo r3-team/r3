@@ -1,4 +1,19 @@
-import MyStore from '../../stores/store.js';
+import {getAttributeIcon} from './attribute.js';
+import MyStore            from '../../stores/store.js';
+
+export function getFieldIcon(field) {
+	switch(field.content) {
+		case 'button':    return 'circle_play.png'; break;
+		case 'calendar':  return 'calendar.png'; break;
+		case 'chart':     return 'chart.png'; break;
+		case 'container': return 'layout.png'; break;
+		case 'data':      return getAttributeIcon(MyStore.getters['schema/attributeIdMap'][field.attributeId]); break;
+		case 'header':    return 'header.png'; break;
+		case 'list':      return 'files_list2.png'; break;
+		case 'tabs':      return 'tabs.png'; break;
+	}
+	return 'noPic.png';
+};
 
 export function fieldOptionGet(fieldId,optionName,fallbackValue) {
 	let map = MyStore.getters['local/fieldIdMapOption'];

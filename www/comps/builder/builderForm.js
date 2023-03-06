@@ -7,6 +7,7 @@ import MyBuilderFormStates    from './builderFormStates.js';
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderFields        from './builderFields.js';
 import MyTabs                 from '../tabs.js';
+import {getFieldIcon}         from '../shared/field.js';
 import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
@@ -174,7 +175,7 @@ let MyBuilderForm = {
 			<!-- form builder sidebar -->
 			<div class="top lower">
 				<div class="area">
-					<img v-if="!fieldShow" class="icon" src="images/fileText.png" />
+					<img class="icon" :src="'images/' + (!fieldShow ? 'fileText.png' : getFieldIcon(fieldShow))" />
 					<h1 v-if="!fieldShow">{{ capApp.sidebarForm }}</h1>
 					<h1 v-if="fieldShow" class="selected-ref">
 						{{ capApp.sidebarField.replace('{NAME}','F'+entityIdMapRef.field[fieldShow.id]) }}
@@ -725,6 +726,7 @@ let MyBuilderForm = {
 		copyValueDialog,
 		getDataFields,
 		getFieldHasQuery,
+		getFieldIcon,
 		getFormRoute,
 		getIndexAttributeId,
 		getItemTitle,

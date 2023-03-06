@@ -1,11 +1,9 @@
-import MyBuilderCaption   from './builderCaption.js';
-import MyBuilderFields    from './builderFields.js';
-import {MyBuilderColumns} from './builderColumns.js';
-import {getFlexBasis}     from '../shared/form.js';
-import {
-	getAttributeIcon,
-	isAttributeRelationship
-} from '../shared/attribute.js';
+import MyBuilderCaption          from './builderCaption.js';
+import MyBuilderFields           from './builderFields.js';
+import {MyBuilderColumns}        from './builderColumns.js';
+import {isAttributeRelationship} from '../shared/attribute.js';
+import {getFieldIcon}            from '../shared/field.js';
+import {getFlexBasis}            from '../shared/form.js';
 import {
 	getFieldHasQuery,
 	getItemTitle
@@ -37,7 +35,7 @@ let MyBuilderField = {
 				:class="{ clickable:!isTemplate && !moveActive, selected:isSelected }"
 				:title="capApp.fieldOptions"
 			>
-				<img :src="'images/' + icon" />
+				<img :src="'images/' + getFieldIcon(field)" />
 				<span>{{ reference }}</span>
 			</div>
 			
@@ -311,17 +309,6 @@ let MyBuilderField = {
 			}
 			return out.join(';');
 		},
-		icon:(s) => {
-			if(s.isButton)    return 'circle_play.png';
-			if(s.isData)      return s.getAttributeIcon(s.attribute);
-			if(s.isCalendar)  return 'calendar.png';
-			if(s.isChart)     return 'chart.png';
-			if(s.isContainer) return 'layout.png';
-			if(s.isHeader)    return 'header.png';
-			if(s.isList)      return 'files_list2.png';
-			if(s.isTabs)      return 'tabs.png';
-			return 'noPic.png';
-		},
 		parentChildren:(s) => {
 			if(s.isContainer)
 				return s.field.fields;
@@ -387,8 +374,8 @@ let MyBuilderField = {
 	},
 	methods:{
 		// externals
-		getAttributeIcon,
 		getFieldHasQuery,
+		getFieldIcon,
 		getFlexBasis,
 		getItemTitle,
 		getJoinsIndexMap,
