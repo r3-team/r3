@@ -17,6 +17,7 @@ import (
 	"r3/log"
 	"r3/login/login_auth"
 	"r3/schema"
+	"r3/tools"
 	"r3/types"
 	"regexp"
 	"strconv"
@@ -55,17 +56,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// get language code
-	var languageCode string
-	if err := db.Pool.QueryRow(db.Ctx, `
-		SELECT language_code
-		FROM instance.login_setting
-		WHERE login_id = $1
-	`, loginId).Scan(&languageCode); err != nil {
-		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
-		return
-	}
-
 	var isDelete, isGet, isPost bool
 	switch r.Method {
 	case "DELETE":
@@ -96,10 +86,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	if len(elements) < 5 || len(elements) > 6 || (isDelete && !recordIdProvided) {
 
 		examplePostfix := ""
-		if isGet {
-			examplePostfix = " (record ID is optional)"
+		if isDelete {
+			examplePostfix = "/RECORD_ID"
 		}
-		abort(http.StatusBadRequest, nil, fmt.Sprintf("invalid URL, expected: /api/{APP_NAME}/{API_NAME}/{VERSION}/{RECORD_ID}%s", examplePostfix))
+		abort(http.StatusBadRequest, nil, fmt.Sprintf("invalid URL, expected: /api/APP_NAME/API_NAME/VERSION%s", examplePostfix))
 		return
 	}
 
@@ -157,7 +147,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if _, exists := access.Api[api.Id]; !exists {
-		abort(http.StatusUnauthorized, nil, handler.ErrUnauthorized)
+		abort(http.StatusForbidden, nil, handler.ErrUnauthorized)
 		return
 	}
 
@@ -186,6 +176,24 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				getters.verbose = n == 1
 			}
 		}
+	}
+
+	// get login language code (for filters)
+	var languageCode string
+	if err := db.Pool.QueryRow(db.Ctx, `
+		SELECT language_code
+		FROM instance.login_setting
+		WHERE login_id = $1
+	`, loginId).Scan(&languageCode); err != nil {
+		abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
+		return
+	}
+
+	// get valid module language code (for captions)
+	languageCodeModule := languageCode
+	mod := cache.ModuleIdMap[api.ModuleId]
+	if !tools.StringInSlice(languageCode, mod.Languages) {
+		languageCodeModule = mod.LanguageMain
 	}
 
 	// execute request
@@ -364,7 +372,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				rel := cache.RelationIdMap[atr.RelationId]
 				colRef := ""
 
-				if ref, exists := column.Captions["columnTitle"][languageCode]; exists {
+				if ref, exists := column.Captions["columnTitle"][languageCodeModule]; exists {
 					colRef = ref
 				} else {
 					if column.SubQuery {
@@ -464,7 +472,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 					}
 
 					var colRef string
-					if ref, exists := column.Captions["columnTitle"][languageCode]; exists {
+					if ref, exists := column.Captions["columnTitle"][languageCodeModule]; exists {
 						colRef = ref
 					} else {
 						colRef = cache.AttributeIdMap[column.AttributeId].Name

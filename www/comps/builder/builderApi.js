@@ -71,6 +71,14 @@ let MyBuilderApiPreview = {
 			<td><input v-model.number="recordId" /></td>
 			<td>{{ isGet ? capApp.recordIdHintGet : capApp.recordIdHintDelete }}</td>
 		</tr>
+		<tr v-if="warnings.length !== 0">
+			<td class="warnings">{{ capAppApi.warnings }}</td>
+			<td colspan="2">
+				<ul>
+					<li v-for="w in warnings">{{ w }}</li>
+				</ul>
+			</td>
+		</tr>
 		<tr v-if="!isAuth">
 			<td>{{ capApp.headers }}</td>
 			<td colspan="2">
@@ -148,7 +156,8 @@ let MyBuilderApiPreview = {
 		module:         { type:Object,  required:true },
 		name:           { type:String,  required:true },
 		verboseDef:     { type:Boolean, required:true },
-		version:        { type:Number,  required:true }
+		version:        { type:Number,  required:true },
+		warnings:       { type:Array,   required:true }
 	},
 	data() {
 		return {
@@ -196,7 +205,7 @@ let MyBuilderApiPreview = {
 			return s.capApp.empty;
 		},
 		url:(s) => {
-			let base = `https://${s.config.publicHostName}/api/`;
+			let base = `${location.protocol}//${location.host}/api/`;
 			switch(s.call) {
 				case 'AUTH': base += 'auth'; break;
 				default: base += `${s.module.name}/${s.name}/v${s.version}`; break;
@@ -219,7 +228,6 @@ let MyBuilderApiPreview = {
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		config:        (s) => s.$store.getters.config,
 		capApp:        (s) => s.$store.getters.captions.builder.api.preview,
 		capAppApi:     (s) => s.$store.getters.captions.builder.api,
 		capGen:        (s) => s.$store.getters.captions.generic
@@ -509,6 +517,7 @@ let MyBuilderApi = {
 					:name="name"
 					:verboseDef="verboseDef"
 					:version="version"
+					:warnings="warnings"
 				/>
 			</div>
 			
@@ -540,6 +549,14 @@ let MyBuilderApi = {
 						<td>{{ capApp.verboseDef }}</td>
 						<td><my-bool v-model="verboseDef" /></td>
 						<td>{{ capApp.verboseDefHint }}</td>
+					</tr>
+					<tr v-if="warnings.length !== 0">
+						<td class="warnings">{{ capApp.warnings }}</td>
+						<td colspan="2">
+							<ul>
+								<li v-for="w in warnings">{{ w }}</li>
+							</ul>
+						</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.httpMethods }}</td>
@@ -648,6 +665,33 @@ let MyBuilderApi = {
 			|| JSON.stringify(s.orders)  !== JSON.stringify(s.api.query.orders)
 			|| JSON.stringify(s.lookups) !== JSON.stringify(s.api.query.lookups)
 			|| JSON.stringify(s.columns) !== JSON.stringify(s.api.columns),
+		warnings:(s) => {
+			let out = [];
+			if(s.hasGet || s.hasPost) {
+				// check no base relation/no columns
+				if(s.relationId === '' || s.columns.length === 0)
+					out.push(s.capApp.warning.noData);
+			}
+			if(s.hasPost) {
+				// check sub queries in POST API
+				for(let c of s.columns) {
+					if(c.subQuery) {
+						out.push(s.capApp.warning.postSubQuery);
+						break;
+					}
+				}
+				// check missing record lookups
+				for(let j of s.joins) {
+					if(!j.applyUpdate) continue;
+					
+					if(s.lookups.filter(l => l.index === j.index).length === 0) {
+						out.push(s.capApp.warning.postNoUpdate);
+						break;
+					}
+				}
+			}
+			return out;
+		},
 		
 		// simple
 		api:   (s) => typeof s.apiIdMap[s.id] === 'undefined' ? false : s.apiIdMap[s.id],

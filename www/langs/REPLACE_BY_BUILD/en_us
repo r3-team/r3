@@ -537,6 +537,11 @@
 				"responseHintPost":"POST responses return the record IDs for each affected relation (by relation join index). The record ID will be an existing (if updated) or new one (if created).<br /><br />Make sure to define record lookups (tab 'Content') if you want to update records.",
 				"verboseHint":"If enabled, POST requests and GET responses use entity names instead of ordered value lists. Enable this option to see a preview below."
 			},
+			"warning":{
+				"noData":"For the API to work, at least 1 relation must be selected (tab 'Content') and at least 1 column must be active.",
+				"postNoUpdate":"POST calls fail to update records without record lookups (tab 'Content'). At least 1 relation is set to 'UPDATE' without a record lookup.",
+				"postSubQuery":"POST calls fail if sub queries are included. At least 1 column is a sub query."
+			},
 			"calls":"Calls",
 			"columnsAvailable":"Available columns",
 			"columnsTarget":"Active columns",
@@ -553,7 +558,8 @@
 			"titleOne":"API '{NAME}'",
 			"verboseDef":"Verbose mode",
 			"verboseDefHint":"Default setting for verbose mode, if not set as parameter.",
-			"versionHint":"Version number for this API. Versions are often used to offer new features without breaking older calls. No two APIs with the same name & version number may exist."
+			"versionHint":"Version number for this API. Versions are often used to offer new features without breaking older calls. No two APIs with the same name & version number may exist.",
+			"warnings":"Warnings"
 		},
 		"articles":{
 			"dialog":{

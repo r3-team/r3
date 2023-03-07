@@ -537,6 +537,11 @@
 				"responseHintPost":"POST-Antworten liefern die Datensatz-IDs der betroffenen Relationen (nach Relation-Join-Index). Die Datensatz-ID ist eine bestehende (falls aktualisiert) oder neue (falls erzeugt).<br /><br />Datensatzerkennung muss definiert sein (Tab \"Inhalt\"), damit Datensätze aktualisiert werden können.",
 				"verboseHint":"Wenn diese Option aktiviert ist, benutzen POST-Anfragen und GET-Ausgaben Entitätsnamen anstatt geordnete Wertelisten. Option aktivieren, um eine Vorschau weiter unten zu sehen."
 			},
+			"warning":{
+				"noData":"Damit die API arbeiten kann, muss mindestens 1 Relation ausgewählt (Tab \"Inhalt\") und 1 Spalte aktiv sein.",
+				"postNoUpdate":"POST-Aufrufe können ohne Datensatzerkennung keine Datensätze aktualisieren (Tab \"Inhalt\"). Mindestens 1 Relation hat die Option \"Aktualisieren\" ohne Datensatzerkennung.",
+				"postSubQuery":"POST-Aufrufe schlagen fehl wenn eine SubQuery genutzt wird. Mindestens 1 Spalte ist eine SubQuery."
+			},
 			"calls":"Aufrufe",
 			"columnsAvailable":"Verfügbare Spalten",
 			"columnsTarget":"Aktive Spalten",
@@ -553,7 +558,8 @@
 			"titleOne":"API '{NAME}'",
 			"verboseDef":"Verbose-Modus",
 			"verboseDefHint":"Standardeinstellung für den Verbose-Modus, wenn nicht als Parameter gesetzt.",
-			"versionHint":"Versionsnummer für diese API. Versionen werden häufig verwendet, um neue Funktionen anzubieten, ohne ältere Aufrufe zu stören. Es dürfen keine zwei APIs mit demselben Namen & Versionsnummer existieren."
+			"versionHint":"Versionsnummer für diese API. Versionen werden häufig verwendet, um neue Funktionen anzubieten, ohne ältere Aufrufe zu stören. Es dürfen keine zwei APIs mit demselben Namen & Versionsnummer existieren.",
+			"warnings":"Warnungen"
 		},
 		"articles":{
 			"dialog":{

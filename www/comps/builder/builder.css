@@ -725,6 +725,9 @@
 .builder-api .code-preview.low{
 	height:40px;
 }
+.builder-api .warnings{
+	color:var(--color-error);
+}
 .builder-api-columns{
 	display:flex;
 	flex-flow:column nowrap;

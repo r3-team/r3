@@ -1,7 +1,7 @@
 .button{
 	height:30px;
 	margin:0px var(--spacing-button-horz-outside) 0px 0px;
-	padding:4px var(--spacing-button-horz-inside) 4px var(--spacing-button-horz-inside);
+	padding:4px var(--spacing-button-horz-inside);
 	font-size:inherit;
 	color:var(--color-bg-font);
 	display:flex;
@@ -19,7 +19,7 @@
 	background-color:var(--color-cancel);
 }
 .button.naked{
-	padding:4px;
+	padding:4px 6px;
 	color:inherit;
 	background-color:transparent;
 	box-shadow:unset;
