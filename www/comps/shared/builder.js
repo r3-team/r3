@@ -84,16 +84,16 @@ export function getItemTitle(attributeId,index,outsideIn,attributeIdNm) {
 	
 	let isRel = isAttributeRelationship(atr.content);
 	
-	if(!isRel)     return `${index}) ${rel.name}.${atr.name}`;
-	if(!outsideIn) return `${index}) [${atr.content}] ${rel.name}.${atr.name}`;
+	if(!isRel)     return `${index} ${rel.name}.${atr.name}`;
+	if(!outsideIn) return `${index} [${atr.content}] ${rel.name}.${atr.name}`;
 	
 	if(typeof attributeIdNm !== 'undefined' && attributeIdNm !== null) {
 		let atrNm = MyStore.getters['schema/attributeIdMap'][attributeIdNm];
-		return `${index}) [n:m] ${rel.name}.${atr.name} -> ${atrNm.name}`;
+		return `${index} [n:m] ${rel.name}.${atr.name} -> ${atrNm.name}`;
 	}
 	
 	let relCap = isAttributeRelationship11(atr.content) ? '1:1' : '1:n';
-	return `${index}) [${relCap}] ${rel.name}.${atr.name}`;
+	return `${index} [${relCap}] ${rel.name}.${atr.name}`;
 };
 
 export function getItemTitlePath(attributeId) {
@@ -121,7 +121,7 @@ export function getItemTitleColumn(column,withTitle) {
 };
 
 export function getItemTitleRelation(relationId,index) {
-	return `${index}) ${MyStore.getters['schema/relationIdMap'][relationId].name}`;
+	return `${index} ${MyStore.getters['schema/relationIdMap'][relationId].name}`;
 };
 
 export function getPgFunctionTemplate() {

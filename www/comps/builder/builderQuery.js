@@ -4,7 +4,8 @@ import {getNilUuid}                   from '../shared/generic.js';
 import {getCaptionByIndexAttributeId} from '../shared/query.js';
 import {
 	getIndexAttributeIdsByJoins,
-	isAttributeRelationship
+	isAttributeRelationship,
+	isAttributeRelationship11
 } from '../shared/attribute.js';
 export {MyBuilderQuery as default};
 
@@ -324,39 +325,40 @@ let MyBuilderQueryNestedJoin = {
 	
 		<!-- descriptive summary line with relation options -->
 		<div class="summary">
+			<img class="relationship" :src="'images/'+iconRelationship" />
 			
-			<div v-html="displayName()" />
+			<span>{{ index }}</span>
+			<span>{{ joinRelation.name }}</span>
+			<span v-if="!isBaseRelation" :title="joinReferenceFull">({{ joinReference }})</span>
 		
 			<!-- relation options -->
 			<div class="options" v-if="!readonly">
-				<div class="option clickable"
+				<img v-if="index !== 0" class="option clickable" :src="iconJoin" :title="iconJoinTitle" @click="toggleConnector" />
+				
+				<img class="option clickable" src="images/database.png"
 					@click="relationAddShow = !relationAddShow"
 					:title="capApp.joinAddHint"
-				>{{ displayJoin() }}</div>
+				/>
 				
-				<div class="option clickable"
-					@click="toggleConnector"
-					:title="capApp.joinConnectorHint"
-				>{{ displayConnector(index) }}</div>
-				
-				<div class="option clickable"
+				<img class="option clickable toggle" src="images/recordCreate.png"
 					@click="toggleApply('create')"
+					:class="{ off:!applyCreate }"
 					:title="capApp.joinApplyCreateHint"
-				>{{ displayApply('create') }}</div>
-				
-				<div class="option clickable"
+				/>
+				<img class="option clickable toggle" src="images/recordUpdate.png"
 					@click="toggleApply('update')"
+					:class="{ off:!applyUpdate }"
 					:title="capApp.joinApplyUpdateHint"
-				>{{ displayApply('update') }}</div>
-				
-				<div class="option clickable"
+				/>
+				<img class="option clickable toggle" src="images/recordDelete.png"
 					@click="toggleApply('delete')"
+					:class="{ off:!applyDelete }"
 					:title="capApp.joinApplyDeleteHint"
-				>{{ displayApply('delete') }}</div>
+				/>
 				
 				<!-- delete only if last relation in chain -->
-				<div v-if="joins.length === 0" class="option clickable" @click="$emit('relation-remove',index)">X</div>
-				<div v-if="joins.length !== 0" class="option">-</div>
+				<img v-if="joins.length === 0" class="option clickable" src="images/cancel.png" @click="$emit('relation-remove',index)" />
+				<img v-else class="option" src="images/clear.png" />
 			</div>
 		</div>
 		
@@ -390,7 +392,6 @@ let MyBuilderQueryNestedJoin = {
 				:joinAttributeId="j.joinAttributeId"
 				:joinRelationId="j.joinRelationId"
 				:module="module"
-				:name="j.name"
 				:readonly="readonly"
 			/>
 		</div>
@@ -411,7 +412,6 @@ let MyBuilderQueryNestedJoin = {
 		joinAttributeId:{ type:String, required:true },
 		joinRelationId: { type:String, required:true },
 		module:         { type:Object, required:true },
-		name:           { type:String, required:true },
 		readonly:       { type:Boolean,required:true }
 	},
 	emits:[
@@ -451,6 +451,35 @@ let MyBuilderQueryNestedJoin = {
 			return atrs;
 		},
 		
+		// simple
+		hasNoJoinOptions:(s) => s.attributesUnused.length === 0,
+		iconJoin:        (s) => {
+			switch(s.connector) {
+				case 'INNER': return 'images/joinInner.png'; break;
+				case 'LEFT':  return 'images/joinLeft.png';  break;
+				case 'RIGHT': return 'images/joinRight.png'; break;
+				case 'FULL':  return 'images/joinOuter.png'; break;
+			}
+			return 'images/clear.png';
+		},
+		iconJoinTitle:   (s) => s.capApp.join.replace('{NAME}',s.connector),
+		iconRelationship:(s) => {
+			if(s.isBaseRelation) return 'link0.png';
+			if(s.isRelation11)   return 'link1.png';
+			if(s.isRelation1N)   return 'link2.png';
+			if(s.isRelationN1)   return 'link3.png';
+			return 'noPic.png';
+		},
+		isBaseRelation:   (s) => s.index === 0,
+		isOutsideIn:      (s) => s.joinAttribute.relationId !== s.joinRelationId,
+		isRelation11:     (s) => s.isAttributeRelationship11(s.joinAttribute.content),
+		isRelationN1:     (s) => !s.isRelation11 && s.isOutsideIn,
+		isRelation1N:     (s) => !s.isRelation11 && !s.isOutsideIn,
+		joinAttribute:    (s) => s.attributeIdMap[s.joinAttributeId],
+		joinReference:    (s) => !s.isOutsideIn ? s.joinAttribute.name : s.joinReferenceFull,
+		joinReferenceFull:(s) => `${s.relationIdMap[s.joinAttribute.relationId].name}.${s.joinAttribute.name}`,
+		joinRelation:     (s) => s.relationIdMap[s.joinRelationId],
+		
 		// stores
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
@@ -460,6 +489,7 @@ let MyBuilderQueryNestedJoin = {
 	methods:{
 		// externals
 		isAttributeRelationship,
+		isAttributeRelationship11,
 		
 		// actions
 		relationAdd(event) {
@@ -488,28 +518,14 @@ let MyBuilderQueryNestedJoin = {
 			}
 			return '?';
 		},
-		displayName() {
-			return `${this.index}) ${this.name}`;
-		},
-		displayJoin() {
-			return this.attributesUnused.length !== 0 ? 'A' : '-';
-		},
 		displayJoinOption(atr) {
 			let relIdResolve = atr.relationId === this.joinRelationId ? atr.relationshipId : atr.relationId;
 			let atrRel       = this.relationIdMap[atr.relationId];
 			
-			return `+ ${this.relationIdMap[relIdResolve].name} via ${atrRel.name}.${atr.name}`;
+			return `+ ${this.relationIdMap[relIdResolve].name} (${atrRel.name}.${atr.name})`;
 		},
-		displayConnector(index) {
-			if(index === 0) return '-';
-			
-			switch(this.connector) {
-				case 'INNER': return 'I'; break;
-				case 'LEFT':  return 'L'; break;
-				case 'RIGHT': return 'R'; break;
-				case 'FULL':  return 'F'; break;
-			}
-			return '?';
+		displayCheck(state) {
+			return `images/${state ? 'checkbox1' : 'checkbox0'}.png`;
 		}
 	}
 };
@@ -572,7 +588,6 @@ let MyBuilderQuery = {
 				:joinRelationId="relationsNested.joinRelationId"
 				:key="relationsNested.index"
 				:module="module"
-				:name="relationsNested.name"
 				:readonly="!allowJoinEdit"
 			/>
 		</div>
@@ -822,10 +837,9 @@ let MyBuilderQuery = {
 					if(s.joinsInput[i].indexFrom !== indexFrom)
 						continue;
 					
-					let join   = JSON.parse(JSON.stringify(s.joinsInput[i]));
-					let atr    = s.attributeIdMap[join.attributeId];
-					let atrRel = s.relationIdMap[atr.relationId];
-					let rel    = s.relationIdMap[join.relationId];
+					let join = JSON.parse(JSON.stringify(s.joinsInput[i]));
+					let atr  = s.attributeIdMap[join.attributeId];
+					let rel  = s.relationIdMap[join.relationId];
 					
 					rels.push({
 						applyCreate:join.applyCreate,
@@ -835,8 +849,7 @@ let MyBuilderQuery = {
 						index:join.index,
 						joins:getChildRelationsByIndex(join.index),
 						joinAttributeId:atr.id,
-						joinRelationId:rel.id,
-						name:`${rel.name} <b>via</b> ${atrRel.name}.${atr.name}`
+						joinRelationId:rel.id
 					});
 				}
 				return rels;

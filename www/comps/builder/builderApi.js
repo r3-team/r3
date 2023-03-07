@@ -84,14 +84,10 @@ let MyBuilderApiPreview = {
 			<td colspan="2">
 				<table>
 					<thead>
-						<tr>
-							<th>Key</th><th>Value</th>
-						</tr>
+						<tr><th>Key</th><th>Value</th></tr>
 					</thead>
 					<tbody>
-						<tr>
-							<th>Authentication</th><th>Bearer {TOKEN_FROM_AUTH_CALL}</th>
-						</tr>
+						<tr><th>Authentication</th><th>Bearer {TOKEN_FROM_AUTH_CALL}</th></tr>
 					</tbody>
 				</table>
 			</td>
@@ -371,6 +367,7 @@ let MyBuilderApi = {
 					/>
 					<my-button image="files.png"
 						@trigger="copy"
+						:active="!readonly"
 						:caption="capApp.button.versionNew"
 						:captionTitle="capApp.button.versionNewHint"
 					/>

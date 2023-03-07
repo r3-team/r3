@@ -110,7 +110,7 @@
 	
 	/* depth based image filters */
 	--image-filter:        invert(1) contrast(var(--image-filter-contrast)) brightness(var(--light-read));
-	--image-filter-error:  invert(13%) sepia(92%) saturate(6289%) hue-rotate(359deg) brightness(97%) contrast(88%);
+	--image-filter-error:  invert(13%) sepia(92%) saturate(4089%) hue-rotate(359deg) brightness(97%) contrast(88%);
 	--image-filter-success:invert(36%) sepia(95%) saturate(788%) hue-rotate(76deg) brightness(98%) contrast(93%);
 	--image-filter-alt:    invert(1) contrast(var(--image-filter-contrast)) brightness(var(--light-read-less));
 	--image-filter-bg:     invert(1) contrast(var(--image-filter-contrast)) brightness(var(--light-contrast));
