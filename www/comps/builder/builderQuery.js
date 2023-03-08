@@ -325,7 +325,7 @@ let MyBuilderQueryNestedJoin = {
 	
 		<!-- descriptive summary line with relation options -->
 		<div class="summary">
-			<img class="relationship" :src="'images/'+iconRelationship" />
+			<img class="relationship" :src="'images/'+iconRelationship" :title="iconRelationshipTitle" />
 			
 			<span>{{ index }}</span>
 			<span>{{ joinRelation.name }}</span>
@@ -335,7 +335,7 @@ let MyBuilderQueryNestedJoin = {
 			<div class="options" v-if="!readonly">
 				<img v-if="index !== 0" class="option clickable" :src="iconJoin" :title="iconJoinTitle" @click="toggleConnector" />
 				
-				<img class="option clickable" src="images/database.png"
+				<img class="option clickable" src="images/databaseAdd.png"
 					@click="relationAddShow = !relationAddShow"
 					:title="capApp.joinAddHint"
 				/>
@@ -470,12 +470,19 @@ let MyBuilderQueryNestedJoin = {
 			if(s.isRelationN1)   return 'link3.png';
 			return 'noPic.png';
 		},
+		iconRelationshipTitle:(s) => {
+			if(s.isBaseRelation) return '';
+			if(s.isRelation11)   return '1:1';
+			if(s.isRelation1N)   return '1:n';
+			if(s.isRelationN1)   return 'n:1';
+			return '';
+		},
 		isBaseRelation:   (s) => s.index === 0,
-		isOutsideIn:      (s) => s.joinAttribute.relationId !== s.joinRelationId,
-		isRelation11:     (s) => s.isAttributeRelationship11(s.joinAttribute.content),
-		isRelationN1:     (s) => !s.isRelation11 && s.isOutsideIn,
-		isRelation1N:     (s) => !s.isRelation11 && !s.isOutsideIn,
-		joinAttribute:    (s) => s.attributeIdMap[s.joinAttributeId],
+		isOutsideIn:      (s) => !s.isBaseRelation && s.joinAttribute.relationId !== s.joinRelationId,
+		isRelation11:     (s) => !s.isBaseRelation && s.isAttributeRelationship11(s.joinAttribute.content),
+		isRelationN1:     (s) => !s.isBaseRelation && !s.isRelation11 && s.isOutsideIn,
+		isRelation1N:     (s) => !s.isBaseRelation && !s.isRelation11 && !s.isOutsideIn,
+		joinAttribute:    (s) => !s.isBaseRelation ? s.attributeIdMap[s.joinAttributeId] : false,
 		joinReference:    (s) => !s.isOutsideIn ? s.joinAttribute.name : s.joinReferenceFull,
 		joinReferenceFull:(s) => `${s.relationIdMap[s.joinAttribute.relationId].name}.${s.joinAttribute.name}`,
 		joinRelation:     (s) => s.relationIdMap[s.joinRelationId],
@@ -519,10 +526,15 @@ let MyBuilderQueryNestedJoin = {
 			return '?';
 		},
 		displayJoinOption(atr) {
-			let relIdResolve = atr.relationId === this.joinRelationId ? atr.relationshipId : atr.relationId;
+			let outsideIn    = atr.relationId !== this.joinRelationId;
+			let relIdPartner = !outsideIn ? atr.relationshipId : atr.relationId;
 			let atrRel       = this.relationIdMap[atr.relationId];
+			let relType      = outsideIn ? '1:n' : 'n:1';
 			
-			return `+ ${this.relationIdMap[relIdResolve].name} (${atrRel.name}.${atr.name})`;
+			if(this.isAttributeRelationship11(atr.content))
+				relType = '1:1';
+			
+			return `[${relType}] ${this.relationIdMap[relIdPartner].name} (${atrRel.name}.${atr.name})`;
 		},
 		displayCheck(state) {
 			return `images/${state ? 'checkbox1' : 'checkbox0'}.png`;
