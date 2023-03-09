@@ -840,6 +840,8 @@
 			"subQuery":"Sub-Query",
 			"subQueryAttribute":"Attribut",
 			"tabs":"Tabs",
+			"tabContentCounter":"Zähler",
+			"tabContentCounterHint":"Zeigt zusammengezählte Feldwerte in Tabtitel (Listenzeilen, Dateien, usw.)",
 			"tabFunctions":"Funktionen ({CNT})",
 			"tabStates":"Zustände ({CNT})",
 			"title":"Formulare",

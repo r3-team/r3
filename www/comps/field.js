@@ -221,6 +221,7 @@ let MyField = {
 					<my-input-files
 						v-if="isFiles"
 						v-model="value"
+						@file-count-change="$emit('set-counter',field.id,$event)"
 						:attributeId="field.attributeId"
 						:countAllowed="field.max !== null ? field.max : 0"
 						:fieldId="field.id"
@@ -319,6 +320,7 @@ let MyField = {
 			v-if="isList"
 			@clipboard="$emit('clipboard')"
 			@open-form="(...args) => openForm(args[0],[],args[1])"
+			@record-count-change="$emit('set-counter',field.id,$event)"
 			@record-selected="(...args) => openForm(args[0],[],args[1])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
@@ -347,6 +349,7 @@ let MyField = {
 		<my-calendar
 			v-if="isCalendar && !field.gantt"
 			@open-form="(...args) => openForm(args[0],args[1],args[2])"
+			@record-count-change="$emit('set-counter',field.id,$event)"
 			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
@@ -374,6 +377,7 @@ let MyField = {
 		<my-gantt
 			v-if="isCalendar && field.gantt"
 			@open-form="(...args) => openForm(args[0],args[1],args[2])"
+			@record-count-change="$emit('set-counter',field.id,$event)"
 			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
@@ -426,7 +430,7 @@ let MyField = {
 					@click="setTab(i)"
 					:class="getTabClasses(i)"
 				>
-					{{ t.captions.tabTitle[this.moduleLanguage] }}
+					{{ tabIndexesTitle[i] }}
 				</div>
 				<select v-if="isMobile" @change="setTab(parseInt($event.target.value))" :value="tabIndexShow">
 					<template v-for="(t,i) in field.tabs">
@@ -448,6 +452,7 @@ let MyField = {
 					@execute-function="$emit('execute-function',$event)"
 					@hotkey="$emit('hotkey',$event)"
 					@open-form="(...args) => $emit('open-form',...args)"
+					@set-counter="(...args) => setTabCounter(i,args[0],args[1])"
 					@set-form-args="(...args) => $emit('set-form-args',...args)"
 					@set-valid="(...args) => $emit('set-valid',...args)"
 					@set-value="(...args) => $emit('set-value',...args)"
@@ -463,7 +468,7 @@ let MyField = {
 					:formReadonly="formReadonly"
 					:isAloneInTab="t.fields.length === 1"
 					:isAloneInForm="false"
-					:isHiddenInParent="isHidden || i !== tabIndexShow"
+					:isHiddenInParent="isHidden || (i !== tabIndexShow && !t.contentCounter)"
 					:joinsIndexMap="joinsIndexMap"
 					:key="f.id"
 					:values="values"
@@ -479,6 +484,7 @@ let MyField = {
 			@execute-function="$emit('execute-function',$event)"
 			@hotkey="$emit('hotkey',$event)"
 			@open-form="(...args) => $emit('open-form',...args)"
+			@set-counter="(...args) => $emit('set-counter',...args)"
 			@set-form-args="(...args) => $emit('set-form-args',...args)"
 			@set-valid="(...args) => $emit('set-valid',...args)"
 			@set-value="(...args) => $emit('set-value',...args)"
@@ -520,16 +526,17 @@ let MyField = {
 	},
 	emits:[
 		'clipboard','execute-function','hotkey','open-form','set-form-args',
-		'set-valid','set-value','set-value-init'
+		'set-counter','set-valid','set-value','set-value-init'
 	],
 	data() {
 		return {
-			collectionIdMapIndexes:{},  // active record indexes of collection, used to filter with
+			collectionIdMapIndexes:{},    // active record indexes of collection, used to filter with
 			focused:false,
-			notTouched:true,            // data field was not touched by user
-			showColorPickerInput:false, // for color picker fields
-			showPassword:false,         // for password fields
-			tabIndexShow:0              // tabs only: which tab is shown
+			notTouched:true,              // data field was not touched by user
+			showColorPickerInput:false,   // for color picker fields
+			showPassword:false,           // for password fields
+			tabIndexFieldIdMapCounter:{}, // tabs only: counter (by tab index + field ID) of child values (like combined list row counts)
+			tabIndexShow:0                // tabs only: which tab is shown
 		};
 	},
 	watch:{
@@ -815,6 +822,24 @@ let MyField = {
 			}
 			return out;
 		},
+		tabIndexesTitle:(s) => {
+			let out = [];
+			for(let i = 0, j = s.field.tabs.length; i < j; i++) {
+				let tab = s.field.tabs[i];
+				out.push(tab.captions.tabTitle[s.moduleLanguage]);
+				
+				if(typeof s.tabIndexFieldIdMapCounter[String(i)] === 'undefined')
+					continue;
+				
+				// aggregate tab counters
+				let ctr = 0;
+				for(let fieldId in s.tabIndexFieldIdMapCounter[String(i)]) {
+					ctr += s.tabIndexFieldIdMapCounter[String(i)][fieldId];
+				}
+				out[out.length-1] += ` (${ctr})`;
+			}
+			return out;
+		},
 		
 		// data input states
 		inputCanWrite:(s) => {
@@ -1096,6 +1121,15 @@ let MyField = {
 		setTab(tabIndex) {
 			this.fieldOptionSet(this.field.id,'tabIndex',tabIndex);
 			this.tabIndexShow = tabIndex;
+		},
+		setTabCounter(tabIndex,fieldId,value) {
+			if(!this.field.tabs[tabIndex].contentCounter)
+				return;
+			
+			if(typeof this.tabIndexFieldIdMapCounter[String(tabIndex)] === 'undefined')
+				this.tabIndexFieldIdMapCounter[String(tabIndex)] = {};
+			
+			this.tabIndexFieldIdMapCounter[String(tabIndex)][fieldId] = value;
 		},
 		setValue(val,valOld,indexAttributeId) {
 			if(val === '')

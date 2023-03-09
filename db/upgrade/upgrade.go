@@ -240,6 +240,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			ALTER TABLE app.query_filter_side ADD COLUMN now_offset INTEGER;
 			
+			-- new tab field option
+			ALTER TABLE app.tab ADD COLUMN content_counter bool NOT NULL DEFAULT false;
+			ALTER TABLE app.tab ALTER COLUMN content_counter DROP DEFAULT;
+			
 			-- new API entity
 			ALTER TYPE instance.log_context ADD VALUE 'api';
 			INSERT INTO instance.config (name,value) VALUES ('logApi','2');

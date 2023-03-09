@@ -616,7 +616,7 @@ let MyCalendar = {
 		rowSelect:       { type:Boolean, required:false, default:false },
 		usesPageHistory: { type:Boolean, required:true }
 	},
-	emits:['open-form','record-selected','set-args','set-collection-indexes'],
+	emits:['open-form','record-count-change','record-selected','set-args','set-collection-indexes'],
 	data() {
 		return {
 			// calendar state
@@ -833,7 +833,10 @@ let MyCalendar = {
 				)).concat(this.choiceFilters),
 				orders:orders
 			},true).then(
-				res => this.rows = res.payload.rows,
+				res => {
+					this.rows = res.payload.rows;
+					this.$emit('record-count-change',this.rows.length);
+				},
 				this.$root.genericError
 			);
 		}

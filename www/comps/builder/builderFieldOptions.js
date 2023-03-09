@@ -856,6 +856,7 @@ let MyBuilderFieldOptions = {
 								<tr>
 									<th colspan="2"></th>
 									<th>{{ capGen.title }}</th>
+									<th :title="capApp.tabContentCounterHint">{{ capApp.tabContentCounter }}</th>
 									<th colspan="2">{{ capGen.status }}</th>
 								</tr>
 								</thead>
@@ -875,7 +876,13 @@ let MyBuilderFieldOptions = {
 												/>
 											</td>
 											<td>
-												<select
+												<my-bool
+													@update:modelValue="element.contentCounter = $event;set('tabs',field.tabs)"
+													:modelValue="element.contentCounter"
+												/>
+											</td>
+											<td>
+												<select class="short"
 													@input="element.state = $event.target.value;set('tabs',field.tabs)"
 													:value="element.state"
 												>
@@ -1145,6 +1152,7 @@ let MyBuilderFieldOptions = {
 			let v = JSON.parse(JSON.stringify(this.field.tabs));
 			v.push({
 				id:'new_tab' + this.getRandomInt(1,99999),
+				contentCounter:false,
 				state:'default',
 				fields:[],
 				captions:{

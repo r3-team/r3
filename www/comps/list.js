@@ -499,7 +499,7 @@ let MyList = {
 								</div>
 							</td>
 							<td v-if="!rowsFetching" colspan="999">
-								{{ capGen.resultsNone }}
+								<div class="batch">{{ capGen.resultsNone }}</div>
 							</td>
 						</tr>
 					</tbody>
@@ -656,8 +656,8 @@ let MyList = {
 		inputValid:     { type:Boolean, required:false, default:true }
 	},
 	emits:[
-		'blurred','clipboard','focused','open-form','record-removed',
-		'record-selected','records-selected-init','set-args',
+		'blurred','clipboard','focused','open-form','record-count-change',
+		'record-removed','record-selected','records-selected-init','set-args',
 		'set-collection-indexes'
 	],
 	data() {
@@ -1463,6 +1463,8 @@ let MyList = {
 							this.rows         = rows;
 							this.rowsFetching = false;
 							this.selectReset();
+							
+							this.$emit('record-count-change',this.count);
 							
 							// update aggregations as well
 							if(typeof this.$refs.aggregations !== 'undefined')

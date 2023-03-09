@@ -348,7 +348,7 @@ let MyInputFiles = {
 		recordId:    { type:Number,  required:true },
 		showGallery: { type:Boolean, required:false, default:false }
 	},
-	emits:['update:modelValue'],
+	emits:['file-count-change','update:modelValue'],
 	data() {
 		return {
 			extPreview:[
@@ -474,6 +474,7 @@ let MyInputFiles = {
 				let v = JSON.parse(JSON.stringify(this.modelValue));
 				this.files = v !== null ? v : [];
 				this.fileIdMapChange = {};
+				this.$emit('file-count-change',this.files.length);
 			}
 		},
 		
@@ -666,6 +667,7 @@ let MyInputFiles = {
 				this.files.push(f);
 				this.update(f.id,'create',f.name);
 			}
+			this.$emit('file-count-change',this.files.length);
 		},
 		updateDelete(fileIds) {
 			for(let fileId of fileIds) {
@@ -677,6 +679,7 @@ let MyInputFiles = {
 					}
 				}
 			}
+			this.$emit('file-count-change',this.files.length);
 		},
 		updateName(fileId,name) {
 			// name is not immediately updated in files list to conserve sorting

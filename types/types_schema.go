@@ -501,11 +501,12 @@ type JsFunction struct {
 	Captions     CaptionMap  `json:"captions"`
 }
 type Tab struct {
-	Id       uuid.UUID     `json:"id"`
-	Position int           `json:"position"`
-	State    string        `json:"state"`  // tab default state (default, hidden)
-	Fields   []interface{} `json:"fields"` // fields assigned to tab
-	Captions CaptionMap    `json:"captions"`
+	Id             uuid.UUID     `json:"id"`
+	Position       int           `json:"position"`
+	ContentCounter bool          `json:"contentCounter"` // tab shows counter of its child field values (list rows, calendar entries, file counts)
+	State          string        `json:"state"`          // tab default state (default, hidden)
+	Fields         []interface{} `json:"fields"`         // fields assigned to tab
+	Captions       CaptionMap    `json:"captions"`
 }
 type Deletion struct {
 	Id     uuid.UUID `json:"id"`

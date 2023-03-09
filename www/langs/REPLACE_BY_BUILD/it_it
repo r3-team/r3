@@ -840,6 +840,8 @@
 			"subQuery":"Sub query",
 			"subQueryAttribute":"Attributo",
 			"tabs":"Tabs",
+			"tabContentCounter":"Counter",
+			"tabContentCounterHint":"Shows aggregated count of field values in tab title (list rows, file counts, etc.)",
 			"tabFunctions":"Funzioni ({CNT})",
 			"tabStates":"Condizioni ({CNT})",
 			"title":"Moduli",
