@@ -180,7 +180,7 @@ func processFile(fileId uuid.UUID, ext string, src string, dst string) {
 			"-annotate", "+10+40", fmt.Sprintf("%s", textThumb), dst}
 
 	default:
-		returnErr = fmt.Errorf("unsupported file extension '%s'", ext)
+		log.Info("imager", fmt.Sprintf("skipped unsupported file extension '%s'", ext))
 		return
 	}
 
