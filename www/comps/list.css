@@ -66,6 +66,11 @@
 	box-shadow:inset 0 -2px 0 0 var(--color-accent3-alt);
 	transition:box-shadow 0.5s;
 }
+.list .layoutTable tbody tr.rowSelect:hover td .batch.colored,
+.list .layoutTable tbody tr.rowSelect:focus td .batch.colored{
+	filter:brightness(88%);
+	transition:filter 0.5s;
+}
 .list .layoutTable tfoot tr{
 	background-color:var(--color-bg);
 }
@@ -75,7 +80,7 @@
 	border-bottom:2px solid var(--color-border);
 }
 .list .layoutTable th{
-	padding:6px 2px 6px 10px;
+	padding:0px;
 	margin-bottom:-1px;
 	position:sticky;
 	top:0px;
@@ -83,9 +88,6 @@
 	background-color:var(--color-bg);
 	border-collapse:separate;
 	z-index:var(--z-index-list-header);
-}
-.list .layoutTable th.no-padding{
-	padding:0px;
 }
 .list .layoutTable th,
 .list .layoutTable td{
@@ -152,7 +154,7 @@
 	filter:var(--image-filter);
 }
 .list .layoutTable td{
-	padding:4px 10px;
+	padding:0px;
 	border-bottom:1px solid var(--color-border);
 	border-right:1px solid var(--color-border);
 }
@@ -166,7 +168,14 @@
 	height:32px;
 	margin:0px;
 }
+.list .layoutTable th.checkbox img:active,
+.list .layoutTable td.checkbox img:active{
+	height:24px;
+	margin:4px;
+}
 .list .layoutTable td .batch{
+	height:100%;
+	padding:0px 10px;
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
@@ -259,6 +268,10 @@
 .list .layoutCards .card img.checkbox:hover{
 	height:32px;
 	margin:0px;
+}
+.list .layoutCards .card img.checkbox:active{
+	height:22px;
+	margin:5px;
 }
 .list .layoutCards .card table{
 	max-width:100%;

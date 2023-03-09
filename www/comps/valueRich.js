@@ -7,6 +7,7 @@ import {
 	getUtcTimeStringFromUnix
 } from './shared/time.js';
 import {
+	colorAdjustBg,
 	getHtmlStripped,
 	getLinkMeta,
 	openLink
@@ -109,17 +110,18 @@ let MyValueRich = {
 		link: (s) => !s.isLink || s.value === null ? false : s.getLinkMeta(s.display,s.value),
 		
 		// styles
-		style:       (s) => !s.isColor ? '' : 'background-color:#'+s.value,
+		style:       (s) => !s.isColor ? '' : `background-color:${s.colorAdjustBg(s.value,s.settings.dark)}`,
 		styleGallery:(s) => !s.isGallery || s.basis === 0 ? '' : `width:${s.basis}px;height:${s.basis}px;`,
 		
 		// store
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		token:         (s) => s.$store.getters['local/token'],
 		capGen:        (s) => s.$store.getters.captions.generic,
-		dateFormat:    (s) => s.$store.getters.settings.dateFormat
+		settings:      (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
+		colorAdjustBg,
 		getAttributeFileThumbHref,
 		getAttributeFileVersionHref,
 		getHtmlStripped,
@@ -178,9 +180,9 @@ let MyValueRich = {
 				case 'integer': // fallthrough
 				case 'bigint':
 					switch(atr.contentUse) {
-						case 'date':     this.stringValueFull = this.getUnixFormat(this.value,this.dateFormat);          break;
-						case 'datetime': this.stringValueFull = this.getUnixFormat(this.value,this.dateFormat + ' H:i'); break;
-						case 'time':     this.stringValueFull = this.getUtcTimeStringFromUnix(this.value);               break;
+						case 'date':     this.stringValueFull = this.getUnixFormat(this.value,this.settings.dateFormat);          break;
+						case 'datetime': this.stringValueFull = this.getUnixFormat(this.value,this.settings.dateFormat + ' H:i'); break;
+						case 'time':     this.stringValueFull = this.getUtcTimeStringFromUnix(this.value);                        break;
 						default:         directValue = true; break;
 					}
 				break;

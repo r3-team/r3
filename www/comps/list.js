@@ -20,6 +20,10 @@ import {
 	getRowsDecrypted
 } from './shared/form.js';
 import {
+	colorAdjustBg,
+	colorMakeContrastFont
+} from './shared/generic.js';
+import {
 	fillRelationRecordIds,
 	getFiltersEncapsulated,
 	getQueryAttributesPkFilter,
@@ -378,7 +382,7 @@ let MyList = {
 									:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
 								/>
 							</th>
-							<th v-for="(b,i) in columnBatches" :style="b.style" class="no-padding">
+							<th v-for="(b,i) in columnBatches" :style="b.style">
 								<my-list-column-batch
 									@close="columnBatchIndexOption = -1"
 									@del-aggregator="setAggregators(i,null)"
@@ -465,13 +469,13 @@ let MyList = {
 							</td>
 							
 							<!-- row values per column batch -->
-							<td
-								v-for="b in columnBatches"
-								:style="b.style"
-							>
-								<div class="batch">
+							<td v-for="b in columnBatches" :style="b.style">
+								<div class="batch"
+									:class="{ colored:b.columnIndexColor !== -1 }"
+									:style="b.columnIndexColor === -1 ? '' : displayColorColumn(r.values[b.columnIndexColor])"
+								>
 									<my-value-rich class="context-list-table"
-										v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
+										v-for="ind in b.columnIndexes.filter(v => v !== b.columnIndexColor && r.values[v] !== null)"
 										@clipboard="$emit('clipboard')"
 										:attributeId="columns[ind].attributeId"
 										:basis="b.columnIndexes.length === 1 ? columns[ind].basis : 0"
@@ -703,39 +707,43 @@ let MyList = {
 		// columns can be batched by using the same batch number
 		// first column in batch is used for header caption and ordering
 		columnBatches:(s) => {
-			let out = [];
+			let batches   = [];
 			let addColumn = (column,index) => {
 				const hidden = column.display === 'hidden' || (s.isMobile && !column.onMobile);
 				const atr    = s.attributeIdMap[column.attributeId];
 				
 				// first non-encrypted/non-file attribute in batch can be sorted by
-				const noSort = atr.encrypted || s.isAttributeFiles(atr.content);
+				const noSort  = atr.encrypted || s.isAttributeFiles(atr.content);
+				const isColor = atr.contentUse === 'color';
 				
 				if(column.batch !== null) {
-					for(let i = 0, j = out.length; i < j; i++) {
+					for(let i = 0, j = batches.length; i < j; i++) {
+						if(batches[i].batch !== column.batch)
+							continue;
 						
-						if(out[i].batch === column.batch) {
-							// batch already exists
-							
-							// do not add column if its hidden
-							if(hidden) return;
-							
-							// add its own column index + sort setting + width to batch
-							out[i].columnIndexes.push(index);
-							out[i].columnIndexSortBy = out[i].columnIndexSortBy !== -1 || noSort
-								? out[i].columnIndexSortBy : index;
-							out[i].width += column.basis;
-							return;
-						}
+						// do not add column if its hidden
+						if(hidden) return;
+						
+						// add its own column index + sort setting + width to batch
+						batches[i].columnIndexes.push(index);
+						batches[i].columnIndexSortBy = batches[i].columnIndexSortBy !== -1 || noSort
+							? batches[i].columnIndexSortBy : index;
+						batches[i].width += column.basis;
+						
+						if(isColor)
+							batches[i].columnIndexColor = index;
+						
+						return;
 					}
 				}
 				
 				// create new column batch with itself as first column
 				// create even if first column is hidden as other columns in same batch might not be
-				out.push({
+				batches.push({
 					batch:column.batch,
 					caption:s.getColumnTitle(column),
 					columnIndexes:!hidden ? [index] : [],
+					columnIndexColor:!isColor ? -1 : index,
 					columnIndexSortBy:noSort ? -1 : index,
 					style:'',
 					width:column.basis
@@ -746,20 +754,20 @@ let MyList = {
 			}
 			
 			// finalize batches
-			for(let i = 0, j = out.length; i < j; i++) {
+			for(let i = 0, j = batches.length; i < j; i++) {
 				
 				// remove batches that have no columns
-				if(out[i].columnIndexes.length === 0) {
-					out.splice(i,1);
+				if(batches[i].columnIndexes.length === 0) {
+					batches.splice(i,1);
 					i--; j--;
 					continue;
 				}
 				
 				// finalize style
-				if(out[i].width !== 0)
-					out[i].style = `max-width:${out[i].width}px;`;
+				if(batches[i].width !== 0)
+					batches[i].style = `max-width:${batches[i].width}px;`;
 			}
-			return out;
+			return batches;
 		},
 		filtersCombined:(s) => {
 			let filters = s.filters
@@ -886,7 +894,8 @@ let MyList = {
 		capGen:        (s) => s.$store.getters.captions.generic,
 		isMobile:      (s) => s.$store.getters.isMobile,
 		moduleLanguage:(s) => s.$store.getters.moduleLanguage,
-		scrollFormId:  (s) => s.$store.getters.constants.scrollFormId
+		scrollFormId:  (s) => s.$store.getters.constants.scrollFormId,
+		settings:      (s) => s.$store.getters.settings
 	},
 	mounted() {
 		this.showTable = !this.isInput;
@@ -967,6 +976,8 @@ let MyList = {
 	},
 	methods:{
 		// externals
+		colorAdjustBg,
+		colorMakeContrastFont,
 		consoleError,
 		fieldOptionGet,
 		fieldOptionSet,
@@ -991,6 +1002,11 @@ let MyList = {
 				return state ? 'checkbox1.png' : 'checkbox0.png';
 			
 			return state ? 'radio1.png' : 'radio0.png';
+		},
+		displayColorColumn(color) {
+			let bg   = this.colorAdjustBg(color,this.settings.dark);
+			let font = this.colorMakeContrastFont(bg);
+			return `background-color:${bg};color:${font};`;
 		},
 		resize() {
 			this.smallSize = this.$refs.content.offsetWidth < 700;
