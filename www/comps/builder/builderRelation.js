@@ -283,6 +283,10 @@ let MyBuilderRelation = {
 							<td>{{ capApp.nameHint }}</td>
 						</tr>
 						<tr>
+							<td>{{ capGen.comments }}</td>
+							<td colspan="2"><textarea class="dynamic" v-model="comment" :disabled="readonly"></textarea></td>
+						</tr>
+						<tr>
 							<td>{{ capApp.encryption }}</td>
 							<td><my-bool v-model="encryption" :readonly="true" /></td>
 							<td>{{ capApp.encryptionHint }}</td>
@@ -580,6 +584,7 @@ let MyBuilderRelation = {
 			attributeIdEdit:false,
 			encryption:false,
 			name:'',
+			comment:null,
 			retentionCount:null,
 			retentionDays:null,
 			policies:[],
@@ -688,6 +693,7 @@ let MyBuilderRelation = {
 			};
 		},
 		hasChanges:(s) => s.name          !== s.relation.name
+			|| s.comment                  !== s.relation.comment
 			|| s.encryption               !== s.relation.encryption
 			|| s.retentionCount           !== s.relation.retentionCount
 			|| s.retentionDays            !== s.relation.retentionDays
@@ -762,6 +768,7 @@ let MyBuilderRelation = {
 		},
 		reset() {
 			this.name           = this.relation.name;
+			this.comment        = this.relation.comment;
 			this.encryption     = this.relation.encryption;
 			this.retentionCount = this.relation.retentionCount;
 			this.retentionDays  = this.relation.retentionDays;
@@ -819,12 +826,13 @@ let MyBuilderRelation = {
 				id:this.id,
 				moduleId:this.relation.moduleId,
 				name:this.name,
+				comment:this.comment === '' ? null : this.comment,
 				encryption:this.relation.encryption,
-				retentionCount:this.retentionCount,
-				retentionDays:this.retentionDays,
+				retentionCount:this.retentionCount === '' ? null : this.retentionCount,
+				retentionDays:this.retentionDays === '' ? null : this.retentionDays,
 				policies:this.policies
 			},true).then(
-				() => this.$root.schemaReload(this.moduleId),
+				() => this.$root.schemaReload(this.relation.moduleId),
 				this.$root.genericError
 			);
 		}

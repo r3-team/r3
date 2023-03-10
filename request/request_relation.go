@@ -44,12 +44,10 @@ func RelationGet(reqJson json.RawMessage) (interface{}, error) {
 
 func RelationSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req types.Relation
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, relation.Set_tx(tx, req.ModuleId, req.Id, req.Name,
-		req.Encryption, req.RetentionCount, req.RetentionDays, req.Policies)
+	return nil, relation.Set_tx(tx, req)
 }
 
 func RelationPreview(reqJson json.RawMessage) (interface{}, error) {

@@ -320,6 +320,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX IF NOT EXISTS fki_role_access_api_id_fkey
 			    ON app.role_access USING btree (api_id ASC NULLS LAST);
 			
+			-- relation comments
+			ALTER TABLE app.relation ADD COLUMN comment text;
+			
 			-- add references for PKs as PG indexes (used for API)
 			ALTER TABLE app.pg_index ADD COLUMN primary_key bool NOT NULL DEFAULT false;
 			ALTER TABLE app.pg_index ALTER COLUMN primary_key DROP DEFAULT;

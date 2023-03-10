@@ -65,8 +65,9 @@ type Article struct {
 type Relation struct {
 	Id             uuid.UUID        `json:"id"`
 	ModuleId       uuid.UUID        `json:"moduleId"`
-	AttributeIdPk  uuid.UUID        `json:"attributeIdPk"` // read only, ID of PK attribute
-	Name           string           `json:"name"`
+	AttributeIdPk  uuid.UUID        `json:"attributeIdPk"`  // read only, ID of PK attribute
+	Name           string           `json:"name"`           // unique (within module) relation name
+	Comment        pgtype.Text      `json:"comment"`        // author comment
 	Encryption     bool             `json:"encryption"`     // relation supports encrypted attribute values
 	RetentionCount pgtype.Int4      `json:"retentionCount"` // minimum number of retained change events
 	RetentionDays  pgtype.Int4      `json:"retentionDays"`  // minimum age of retained change events
