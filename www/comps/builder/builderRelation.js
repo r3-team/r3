@@ -190,7 +190,7 @@ let MyBuilderRelation = {
 							<my-button
 								:active="false"
 								:captionTitle="capApp.attributeContent"
-								:image="getAttributeIcon(atr)"
+								:image="getAttributeIcon(atr,false)"
 								:naked="true"
 								:tight="true"
 							/>

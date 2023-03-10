@@ -125,7 +125,7 @@ export function getAttributeValuesFromGetter(getter) {
 	return map;
 };
 
-export function getAttributeIcon(attribute) {
+export function getAttributeIcon(attribute,outsideIn) {
 	if(isAttributeString(attribute.content)) {
 		switch(attribute.contentUse) {
 			case 'default':  return 'text.png';       break;
@@ -142,13 +142,17 @@ export function getAttributeIcon(attribute) {
 			default:         return 'numbers.png';       break;
 		}
 	}
-	if(isAttributeBoolean(attribute.content))        return 'bool.png';
-	if(isAttributeUuid(attribute.content))           return 'uuid.png';
-	if(isAttributeFloat(attribute.content))          return 'numbers_float.png';
-	if(isAttributeNumeric(attribute.content))        return 'numbers_decimal.png';
-	if(isAttributeFiles(attribute.content))          return 'files.png';
-	if(isAttributeRelationship11(attribute.content)) return 'link1.png';
-	if(isAttributeRelationshipN1(attribute.content)) return 'link2.png';
+	if(isAttributeBoolean(attribute.content)) return 'bool.png';
+	if(isAttributeUuid(attribute.content))    return 'uuid.png';
+	if(isAttributeFloat(attribute.content))   return 'numbers_float.png';
+	if(isAttributeNumeric(attribute.content)) return 'numbers_decimal.png';
+	if(isAttributeFiles(attribute.content))   return 'files.png';
+	
+	if(isAttributeRelationship11(attribute.content))
+		return 'link1.png';
+	if(isAttributeRelationshipN1(attribute.content))
+		return outsideIn ? 'link2.png' : 'link3.png';
+	
 	return 'noPic.png';
 };
 

@@ -23,7 +23,7 @@ export let MyBuilderColumns = {
 					<my-button
 						@trigger="$emit('column-id-show',element.id)"
 						:active="!isTemplate"
-						:image="!element.subQuery ? getAttributeIcon(attributeIdMap[element.attributeId]) : 'database.png'"
+						:image="!element.subQuery ? getAttributeIcon(attributeIdMap[element.attributeId],false) : 'database.png'"
 						:naked="true"
 						:tight="true"
 					/>

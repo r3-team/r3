@@ -3,11 +3,15 @@ import MyStore            from '../../stores/store.js';
 
 export function getFieldIcon(field) {
 	switch(field.content) {
+		case 'data':
+			return getAttributeIcon(
+				MyStore.getters['schema/attributeIdMap'][field.attributeId],
+				field.outsideIn);
+		break;
 		case 'button':    return 'circle_play.png'; break;
 		case 'calendar':  return 'calendar.png'; break;
 		case 'chart':     return 'chart.png'; break;
 		case 'container': return 'layout.png'; break;
-		case 'data':      return getAttributeIcon(MyStore.getters['schema/attributeIdMap'][field.attributeId]); break;
 		case 'header':    return 'header.png'; break;
 		case 'list':      return 'files_list2.png'; break;
 		case 'tabs':      return 'tabs.png'; break;
