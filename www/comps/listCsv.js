@@ -106,8 +106,10 @@ let MyListCsv = {
 	emits:['reload'],
 	data() {
 		return {
-			action:'',       // CSV action (export/import)
-			boolNative:true, // use native bool strings (true/false) or translations (yes/no, ...)
+			action:'',               // CSV action (export/import)
+			boolNative:true,         // use native bool strings (true/false) or translations (yes/no, ...)
+			cacheDenialTimeout:null, // timer do refresh cache denial timestamp
+			cacheDenialTimestamp:0,  // unix timestamp, used for CSV export cache denial
 			commaChar:',',
 			file:null,
 			hasBool:false,
@@ -130,6 +132,10 @@ let MyListCsv = {
 			if(atr.contentUse === 'datetime') this.hasDatetime = true;
 			if(atr.contentUse === 'time')     this.hasTime     = true;
 		}
+		this.cacheDenialTimeout = setInterval(this.setCacheDenialTimestamp,1000);
+	},
+	unmounted() {
+		clearInterval(this.cacheDenialTimeout);
 	},
 	computed:{
 		exportHref:(s) => {
@@ -147,7 +153,8 @@ let MyListCsv = {
 				`expressions=${JSON.stringify(s.expressions)}`,
 				`filters=${JSON.stringify(s.filters)}`,
 				`orders=${JSON.stringify(s.orders)}`,
-				`total_limit=${s.totalLimit}`
+				`total_limit=${s.totalLimit}`,
+				`timestamp=${s.cacheDenialTimestamp}`
 			];
 			return `/csv/download/export.csv?${getters.join('&')}`;
 		},
@@ -165,6 +172,9 @@ let MyListCsv = {
 		resolveErrCode,
 		
 		// actions
+		setCacheDenialTimestamp() {
+			this.cacheDenialTimestamp = Math.floor(new Date().getTime() / 1000);
+		},
 		setFile(evt) {
 			this.file = evt.target.files[0];
 		},
