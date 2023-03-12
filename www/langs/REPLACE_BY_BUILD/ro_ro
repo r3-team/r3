@@ -923,6 +923,7 @@
 				"collectionUpdate":"update values",
 				"fieldGetValue":"citește valoarea",
 				"fieldSetCaption":"write caption",
+				"fieldSetError":"write error message",
 				"fieldSetValue":"scrie valoarea",
 				"intervalDays":"Zile",
 				"intervalHours":"Ore",

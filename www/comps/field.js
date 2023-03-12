@@ -463,6 +463,7 @@ let MyField = {
 					:fieldIdsChanged="fieldIdsChanged"
 					:fieldIdsInvalid="fieldIdsInvalid"
 					:fieldIdMapCaption="fieldIdMapCaption"
+					:fieldIdMapError="fieldIdMapError"
 					:formBadSave="formBadSave"
 					:formIsPopUp="formIsPopUp"
 					:formLoading="formLoading"
@@ -496,6 +497,7 @@ let MyField = {
 			:fieldIdsChanged="fieldIdsChanged"
 			:fieldIdsInvalid="fieldIdsInvalid"
 			:fieldIdMapCaption="fieldIdMapCaption"
+			:fieldIdMapError="fieldIdMapError"
 			:formBadSave="formBadSave"
 			:formIsPopUp="formIsPopUp"
 			:formLoading="formLoading"
@@ -515,6 +517,7 @@ let MyField = {
 		fieldIdsChanged:  { type:Array,   required:false, default:() => {return []} },
 		fieldIdsInvalid:  { type:Array,   required:false, default:() => {return []} },
 		fieldIdMapCaption:{ type:Object,  required:false, default:() => {return {}} }, // overwritten captions
+		fieldIdMapError:  { type:Object,  required:false, default:() => {return {}} }, // overwritten error messages
 		formBadSave:      { type:Boolean, required:true }, // attempted save with invalid inputs
 		formIsPopUp:      { type:Boolean, required:true }, // parent form is a pop-up form
 		formLoading:      { type:Boolean, required:true },
@@ -632,7 +635,8 @@ let MyField = {
 			return out;
 		},
 		captionError:(s) => {
-			if(!s.showInvalid) return '';
+			if(s.customErr !== null) return s.customErr; // custom error is always shown
+			if(!s.showInvalid)       return '';
 			
 			if(!s.isValidMin) {
 				if(s.isString) return s.capGen.inputShort.replace('{MIN}',s.field.min);
@@ -901,6 +905,7 @@ let MyField = {
 		},
 		isValidValue:(s) => {
 			if(!s.isData)                                            return true;
+			if(s.customErr !== null)                                 return false;
 			if(s.inputRegex !== null && !s.inputRegex.test(s.value)) return false;
 			if(s.isDecimal && !/^-?\d+\.?\d*$/.test(s.value))        return false;
 			if(s.isInteger && !/^-?\d+$/.test(s.value))              return false;
@@ -932,8 +937,10 @@ let MyField = {
 		},
 		
 		// simple
-		attribute:(s) => !s.isData || typeof s.attributeIdMap[s.field.attributeId] === 'undefined'
+		attribute:  (s) => !s.isData || typeof s.attributeIdMap[s.field.attributeId] === 'undefined'
 			? false : s.attributeIdMap[s.field.attributeId],
+		customErr:  (s) => typeof s.fieldIdMapError[s.field.id] !== 'undefined'
+			&& s.fieldIdMapError[s.field.id] !== null ? s.fieldIdMapError[s.field.id] : null,
 		inputRegex: (s) => !s.isData || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
 		showInvalid:(s) => !s.isValid && (s.formBadSave || !s.notTouched),

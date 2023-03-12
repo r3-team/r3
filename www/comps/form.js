@@ -227,6 +227,7 @@ let MyForm = {
 					:fieldIdsChanged="fieldIdsChanged"
 					:fieldIdsInvalid="fieldIdsInvalid"
 					:fieldIdMapCaption="fieldIdMapCaption"
+					:fieldIdMapError="fieldIdMapError"
 					:formBadSave="badSave"
 					:formIsPopUp="isPopUp"
 					:formLoading="loading"
@@ -309,6 +310,7 @@ let MyForm = {
 			fields:[],            // all fields (nested within each other)
 			fieldIdsInvalid:[],   // field IDs with invalid values
 			fieldIdMapCaption:{}, // overwrites for field captions
+			fieldIdMapError:{},   // overwrites for field error messages (custom errors)
 			indexMapRecordId:{},  // record IDs for form, key: relation index
 			indexMapRecordKey:{}, // record en-/decryption keys, key: relation index
 			indexesNoDel:{},      // relation indexes with no DEL permission (via relation policy)
@@ -481,6 +483,9 @@ let MyForm = {
 					? undefined : s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[fieldId],false)],
 				set_field_caption:(fieldId,caption) => {
 					s.fieldIdMapCaption[fieldId] = caption;
+				},
+				set_field_error:(fieldId,errorMsg) => {
+					s.fieldIdMapError[fieldId] = errorMsg;
 				},
 				set_field_value:(fieldId,value) => {
 					// use common return codes: 0 = success, 1 = error
@@ -772,6 +777,7 @@ let MyForm = {
 			this.badLoad     = false;
 			this.blockInputs = false;
 			this.fieldIdMapCaption         = {};
+			this.fieldIdMapError           = {};
 			this.loginIdsEncryptFor        = [];
 			this.loginIdsEncryptForOutside = [];
 			this.indexesNoDel              = [];

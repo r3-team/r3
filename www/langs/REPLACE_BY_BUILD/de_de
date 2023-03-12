@@ -923,6 +923,7 @@
 				"collectionUpdate":"Werte aktualisieren",
 				"fieldGetValue":"Wert lesen",
 				"fieldSetCaption":"Titel setzen",
+				"fieldSetError":"Fehlermeldung setzen",
 				"fieldSetValue":"Wert setzen",
 				"intervalDays":"Tage",
 				"intervalHours":"Stunden",

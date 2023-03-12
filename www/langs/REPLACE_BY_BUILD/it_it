@@ -923,6 +923,7 @@
 				"collectionUpdate":"update values",
 				"fieldGetValue":"legge valore",
 				"fieldSetCaption":"write caption",
+				"fieldSetError":"write error message",
 				"fieldSetValue":"scrive valore",
 				"intervalDays":"Giorni",
 				"intervalHours":"Ore",
