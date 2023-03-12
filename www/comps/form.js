@@ -273,7 +273,7 @@ let MyForm = {
 		recordId:         { type:Number, required:true }
 	},
 	emits:['close','record-deleted','record-open','record-updated'],
-	mounted:function() {
+	mounted() {
 		// reset form if either content or record changes
 		this.$watch(() => [this.formId,this.recordId],() => { this.reset() },{
 			immediate:true
@@ -286,15 +286,15 @@ let MyForm = {
 		
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
-	unmounted:function() {
+	unmounted() {
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
-	data:function() {
+	data() {
 		return {
 			// states
 			badLoad:false,        // attempted record load with no return (can happen if access is lost during save)
 			badSave:false,        // attempted save (data SET) with invalid fields, also updates data fields
-			blockInputs:false,    // disable all user inputs, set by frontend functions
+			blockInputs:false,    // disable all user inputs (used by frontend functions)
 			lastFormId:'',        // when routing occurs: if ID is the same, no need to rebuild form
 			loading:false,        // form is currently loading, informs sub components when form is ready
 			message:null,         // form message
@@ -329,96 +329,62 @@ let MyForm = {
 	},
 	computed:{
 		// states
-		canCreate:function() {
-			return !this.updatingRecord
-				&& this.joins.length !== 0
-				&& this.joins[0].applyCreate
-				&& this.hasAccessToRelation(this.access,this.joins[0].relationId,2);
-		},
-		canDelete:function() {
-			if(this.updatingRecord
-				|| this.isNew
-				|| this.badLoad
-				|| this.joinsIndexesDel.length === 0
-			) return false;
+		canCreate:(s) =>!s.updatingRecord
+			&& s.joins.length !== 0
+			&& s.joins[0].applyCreate
+			&& s.hasAccessToRelation(s.access,s.joins[0].relationId,2),
+		canDelete:(s) => {
+			if(s.updatingRecord || s.isNew || s.badLoad || s.joinsIndexesDel.length === 0)
+				return false;
 			
 			// check for protected preset record
-			let rel = this.relationIdMap[this.joins[0].relationId];
-			
+			let rel = s.relationIdMap[s.joins[0].relationId];
 			for(let p of rel.presets) {
-				if(p.protected && this.presetIdMapRecordId[p.id] === this.recordId)
+				if(p.protected && s.presetIdMapRecordId[p.id] === s.recordId)
 					return false;
 			}
 			return true;
 		},
-		canUpdate:function() {
-			return this.hasChanges && !this.badLoad && !this.updatingRecord;
-		},
-		hasChanges:function() {
-			if(this.noDataActions)
-				return false;
+		canUpdate:    (s) => s.hasChanges && !s.badLoad && !s.updatingRecord,
+		hasBarLower:  (s) => s.isData || s.form.fields.length === 0,
+		hasChanges:   (s) => {
+			if(s.noDataActions) return false;
 			
-			for(let k in this.values) {
-				if(!this.isAttributeValueEqual(this.values[k],this.valuesOrg[k]))
+			for(let k in s.values) {
+				if(!s.isAttributeValueEqual(s.values[k],s.valuesOrg[k]))
 					return true;
 			}
 			return false;
 		},
-		helpAvailable:function() {
-			return this.form.articleIdsHelp.length !== 0
-				|| this.moduleIdMap[this.moduleId].articleIdsHelp.length !== 0;
-		},
-		isSingleField:function() {
-			return this.fields.length === 1 && ['calendar','chart','list','tabs'].includes(this.fields[0].content);
-		},
-		menuActive:function() {
-			return typeof this.formIdMapMenu[this.form.id] === 'undefined'
-				? null : this.formIdMapMenu[this.form.id];
-		},
-		
-		// states, simple
-		hasBarLower:  function() { return this.isData || this.form.fields.length === 0; },
-		isData:       function() { return this.relationId !== null; },
-		isNew:        function() { return this.recordId === 0; },
-		noDataActions:function() { return this.form.noDataActions || this.blockInputs; },
-		warnUnsaved:  function() { return this.hasChanges && this.settings.warnUnsaved; },
+		helpAvailable:(s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
+		isData:       (s) => s.relationId !== null,
+		isNew:        (s) => s.recordId === 0,
+		isSingleField:(s) => s.fields.length === 1 && ['calendar','chart','list','tabs'].includes(s.fields[0].content),
+		menuActive:   (s) => typeof s.formIdMapMenu[s.form.id] === 'undefined' ? null : s.formIdMapMenu[s.form.id],
+		noDataActions:(s) => s.form.noDataActions || s.blockInputs,
+		warnUnsaved:  (s) => s.hasChanges && s.settings.warnUnsaved,
 		
 		// entities
-		fieldIdMapData:function() {
-			return this.getDataFieldMap(this.fields);
-		},
-		form:function() {
-			return this.formIdMap[this.formId];
-		},
-		iconId:function() {
-			if(this.form.iconId !== null)
-				return this.form.iconId;
+		fieldIdMapData:(s) => s.getDataFieldMap(s.fields),
+		form:(s) => s.formIdMap[s.formId],
+		iconId:(s) => {
+			if(s.form.iconId !== null)
+				return s.form.iconId;
 			
-			if(this.menuActive !== null && this.menuActive.formId === this.form.id)
-				return this.menuActive.iconId;
+			if(s.menuActive !== null && s.menuActive.formId === s.form.id)
+				return s.menuActive.iconId;
 			
 			return null;
 		},
-		relationsJoined:function() {
-			return this.getRelationsJoined(this.joins);
-		},
-		joinsIndexMap:function() {
-			return this.getJoinIndexMapExpanded(
-				this.joins,
-				this.indexMapRecordId,
-				this.indexesNoDel,
-				this.indexesNoSet
-			);
-		},
-		joinsIndexesDel:function() {
+		relationsJoined:(s) => s.getRelationsJoined(s.joins),
+		joinsIndexMap:  (s) => s.getJoinIndexMapExpanded(s.joins,s.indexMapRecordId,s.indexesNoDel,s.indexesNoSet),
+		joinsIndexesDel:(s) => {
 			let out = [];
-			for(let k in this.joinsIndexMap) {
-				const join = this.joinsIndexMap[k];
+			for(let k in s.joinsIndexMap) {
+				const join = s.joinsIndexMap[k];
 				
-				if(join.applyDelete
-					&& !join.recordNoDel
-					&& join.recordId !== 0
-					&& this.hasAccessToRelation(this.access,join.relationId,3)) {
+				if(join.applyDelete && !join.recordNoDel && join.recordId !== 0
+					&& s.hasAccessToRelation(s.access,join.relationId,3)) {
 					
 					out.push(join);
 				}
@@ -427,46 +393,45 @@ let MyForm = {
 		},
 		
 		// presentation
-		title:function() {
+		title:(s) => {
 			// apply dedicated form title
-			if(typeof this.form.captions.formTitle[this.moduleLanguage] !== 'undefined')
-				return this.form.captions.formTitle[this.moduleLanguage];
+			if(typeof s.form.captions.formTitle[s.moduleLanguage] !== 'undefined')
+				return s.form.captions.formTitle[s.moduleLanguage];
 			
 			// no form title available, use menu title if corresponding menu is active
-			if(this.menuActive !== null && this.menuActive.formId === this.form.id &&
-				typeof this.menuActive.captions.menuTitle[this.moduleLanguage] !== 'undefined') {
+			if(s.menuActive !== null && s.menuActive.formId === s.form.id &&
+				typeof s.menuActive.captions.menuTitle[s.moduleLanguage] !== 'undefined') {
 				
-				return this.menuActive.captions.menuTitle[this.moduleLanguage];
+				return s.menuActive.captions.menuTitle[s.moduleLanguage];
 			}
 			return '';
 		},
 		
 		// helpers
-		exposedFunctions:function() {
+		exposedFunctions:(s) => {
 			return {
 				// simple functions
-				block_inputs:     (v) => this.blockInputs = v,
+				block_inputs:     (v) => s.blockInputs = v,
 				copy_to_clipboard:(v) => navigator.clipboard.writeText(v),
-				get_language_code:()  => this.settings.languageCode,
-				get_login_id:     ()  => this.loginId,
-				get_record_id:    (i) =>
-					typeof this.indexMapRecordId[i] !== 'undefined'
-						? this.indexMapRecordId[i] : -1,
-				get_role_ids:     ()  => this.access.roleIds,
+				get_language_code:()  => s.settings.languageCode,
+				get_login_id:     ()  => s.loginId,
+				get_record_id:    (i) => typeof s.indexMapRecordId[i] !== 'undefined'
+					? s.indexMapRecordId[i] : -1,
+				get_role_ids:     ()  => s.access.roleIds,
 				go_back:          ()  => window.history.back(),
-				has_role:         (v) => this.access.roleIds.includes(v),
+				has_role:         (v) => s.access.roleIds.includes(v),
 				open_form:        (formId,recordId,newTab,popUp,maxY,maxX) =>
-					this.openForm(recordId,{
+					s.openForm(recordId,{
 						formIdOpen:formId,
 						popUp:popUp,
 						maxHeight:maxY,
 						maxWidth:maxX
 					},[],newTab),
-				show_form_message:(v,i) => this.messageSet(v,i),
+				show_form_message:s.messageSet,
 				
 				// collection functions
-				collection_read:this.getCollectionMultiValues,
-				collection_update:(v) => this.updateCollections(false,undefined,v),
+				collection_read:s.getCollectionMultiValues,
+				collection_update:(v) => s.updateCollections(false,undefined,v),
 				
 				// call other functions
 				call_backend:(id,...args) => {
@@ -477,52 +442,42 @@ let MyForm = {
 						);
 					});
 				},
-				call_frontend:(id,...args) => this.executeFunction(id,args),
+				call_frontend:(id,...args) => s.executeFunction(id,args),
 				
 				// direct translations
-				record_delete:this.delAsk,
-				record_new:   this.openNewAsk,
-				record_reload:this.get,
-				record_save:  this.set,
+				record_delete:s.delAsk,
+				record_new:   s.openNewAsk,
+				record_reload:s.get,
+				record_save:  s.set,
 				
 				// PDF functions
-				pdf_create:this.generatePdf,
+				pdf_create:s.generatePdf,
 				
 				// timeout/interval function calls
-				timer_clear:this.timerClear,
+				timer_clear:s.timerClear,
 				timer_set:(name,isInterval,fnc,milliseconds) => {
-					this.timerClear(name);
-					this.timers[name] = {
-						id:isInterval
-							? setInterval(fnc,milliseconds)
-							: setTimeout(fnc,milliseconds),
+					s.timerClear(name);
+					s.timers[name] = {
+						id:isInterval ? setInterval(fnc,milliseconds) : setTimeout(fnc,milliseconds),
 						isInterval:isInterval
 					};
 				},
 				
 				// session value store
-				value_store_get:(k) => {
-					return typeof this.$store.getters.sessionValueStore[this.moduleId] !== 'undefined'
-						&& typeof this.$store.getters.sessionValueStore[this.moduleId][k] !== 'undefined'
-						? this.$store.getters.sessionValueStore[this.moduleId][k]
-						: undefined;
-				},
-				value_store_set:(k,v) => this.$store.commit('sessionValueStore',{
-					moduleId:this.moduleId,
-					key:k,
-					value:v
+				value_store_get:(k) => typeof s.$store.getters.sessionValueStore[s.moduleId] !== 'undefined'
+					&& typeof s.$store.getters.sessionValueStore[s.moduleId][k] !== 'undefined'
+						? s.$store.getters.sessionValueStore[s.moduleId][k]
+						: undefined,
+				value_store_set:(k,v) => s.$store.commit('sessionValueStore',{
+					moduleId:s.moduleId,key:k,value:v
 				}),
 				
 				// e2e encryption
-				get_e2ee_data_key:(dataKeyEnc) => {
-					return this.rsaDecrypt(this.loginPrivateKey,dataKeyEnc);
-				},
-				get_e2ee_data_value:(dataKey,value) => {
-					return this.aesGcmDecryptBase64WithPhrase(value,dataKey);
-				},
-				set_e2ee_by_login_ids:ids => this.loginIdsEncryptFor = ids,
+				get_e2ee_data_key:  (dataKeyEnc)    => s.rsaDecrypt(s.loginPrivateKey,dataKeyEnc),
+				get_e2ee_data_value:(dataKey,value) => s.aesGcmDecryptBase64WithPhrase(value,dataKey),
+				set_e2ee_by_login_ids:ids => s.loginIdsEncryptFor = ids,
 				set_e2ee_by_login_ids_and_relation:(loginIds,relationId,recordIds) => {
-					this.loginIdsEncryptForOutside.push({
+					s.loginIdsEncryptForOutside.push({
 						loginIds:loginIds,
 						relationId:relationId,
 						recordIds:recordIds
@@ -530,36 +485,29 @@ let MyForm = {
 				},
 				
 				// field manipulation
-				get_field_value:(fieldId) => {
-					// if field cannot be found, return undefined
-					// NULL is a valid field value
-					if(typeof this.fieldIdMapData[fieldId] === 'undefined')
-						return undefined;
-					
-					return this.values[this.getIndexAttributeIdByField(
-						this.fieldIdMapData[fieldId],false)];
-				},
+				get_field_value:(fieldId) => typeof s.fieldIdMapData[fieldId] === 'undefined'
+					? undefined : s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[fieldId],false)],
 				set_field_caption:(fieldId,caption) => {
-					this.fieldIdMapCaption[fieldId] = caption;
+					s.fieldIdMapCaption[fieldId] = caption;
 				},
 				set_field_value:(fieldId,value) => {
 					// use common return codes: 0 = success, 1 = error
-					if(typeof this.fieldIdMapData[fieldId] === 'undefined')
+					if(typeof s.fieldIdMapData[fieldId] === 'undefined')
 						return 1;
 					
-					this.valueSet(this.getIndexAttributeIdByField(
-						this.fieldIdMapData[fieldId],false),value,false,true);
+					s.valueSet(s.getIndexAttributeIdByField(
+						s.fieldIdMapData[fieldId],false),value,false,true);
 					
 					return 0;
 				},
 				
-				// legacy calls (pre 3.0)
-				update_collection:(v) => this.updateCollections(false,undefined,v)
+				// legacy calls (<3.0)
+				update_collection:(v) => s.updateCollections(false,undefined,v)
 			};
 		},
 		
 		// state overwrite for different entities (fields, tabs)
-		entityIdMapState:function() {
+		entityIdMapState:(s) => {
 			const valueChangeComp = (value) => {
 				if(!Array.isArray(value))
 					return value;
@@ -569,35 +517,35 @@ let MyForm = {
 			};
 			const getValueFromConditionSide = (side,operator) => {
 				switch(side.content) {
-					case 'languageCode':return this.settings.languageCode;                break;
-					case 'login':       return this.loginId;                              break;
-					case 'preset':      return this.presetIdMapRecordId[side.presetId];   break;
-					case 'recordNew':   return this.isNew;                                break;
-					case 'role':        return this.access.roleIds.includes(side.roleId); break;
-					case 'true':        return true;                                      break;
+					case 'languageCode':return s.settings.languageCode;                break;
+					case 'login':       return s.loginId;                              break;
+					case 'preset':      return s.presetIdMapRecordId[side.presetId];   break;
+					case 'recordNew':   return s.isNew;                                break;
+					case 'role':        return s.access.roleIds.includes(side.roleId); break;
+					case 'true':        return true;                                   break;
 					
 					case 'collection':
 						return getCollectionValues(
 							side.collectionId,
 							side.columnId,
-							this.filterOperatorIsSingleValue(operator));
+							s.filterOperatorIsSingleValue(operator));
 					break;
 					case 'field':
-						return this.values[this.getIndexAttributeIdByField(
-							this.fieldIdMapData[side.fieldId],false)];
+						return s.values[s.getIndexAttributeIdByField(
+							s.fieldIdMapData[side.fieldId],false)];
 					break;
 					case 'fieldChanged':
 						return valueChangeComp(
-								this.values[this.getIndexAttributeIdByField(
-								this.fieldIdMapData[side.fieldId],false)]
+								s.values[s.getIndexAttributeIdByField(
+								s.fieldIdMapData[side.fieldId],false)]
 							) != valueChangeComp(
-								this.valuesOrg[this.getIndexAttributeIdByField(
-								this.fieldIdMapData[side.fieldId],false)]
+								s.valuesOrg[s.getIndexAttributeIdByField(
+								s.fieldIdMapData[side.fieldId],false)]
 							);
 					break;
 					case 'record':
-						return typeof this.joinsIndexMap['0'] !== 'undefined'
-							? this.joinsIndexMap['0'].recordId : false;
+						return typeof s.joinsIndexMap['0'] !== 'undefined'
+							? s.joinsIndexMap['0'].recordId : false;
 					break;
 					case 'value':
 						// compatibility fix, true value should be used instead
@@ -612,14 +560,14 @@ let MyForm = {
 			};
 			
 			let out = { field:{}, tab:{} };
-			for(const s of this.form.states) {
-				if(s.conditions.length === 0 || s.effects.length === 0)
+			for(const state of s.form.states) {
+				if(state.conditions.length === 0 || state.effects.length === 0)
 					continue;
 				
 				// parse condition expressions
 				let line = 'return ';
-				for(let i = 0, j = s.conditions.length; i < j; i++) {
-					let c = s.conditions[i];
+				for(let i = 0, j = state.conditions.length; i < j; i++) {
+					let c = state.conditions[i];
 					
 					if(i !== 0)
 						line += c.connector === 'AND' ? '&&' : '||';
@@ -628,7 +576,7 @@ let MyForm = {
 					line += '('.repeat(c.side0.brackets);
 					
 					// get boolean expression by checking filter condition
-					line += this.filterIsCorrect(c.operator,
+					line += s.filterIsCorrect(c.operator,
 						getValueFromConditionSide(c.side0,c.operator),
 						getValueFromConditionSide(c.side1,c.operator)
 					) ? 'true' : 'false';
@@ -639,7 +587,7 @@ let MyForm = {
 				
 				// apply effects if conditions are met
 				if(Function(line)()) {
-					for(const e of s.effects) {
+					for(const e of state.effects) {
 						if(e.fieldId !== null) out.field[e.fieldId] = e.newState;
 						if(e.tabId   !== null) out.tab[e.tabId]     = e.newState;
 					}
@@ -649,29 +597,29 @@ let MyForm = {
 		},
 		
 		// stores
-		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap:  function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap: function() { return this.$store.getters['schema/attributeIdMap']; },
-		formIdMap:      function() { return this.$store.getters['schema/formIdMap']; },
-		formIdMapMenu:  function() { return this.$store.getters['schema/formIdMapMenu']; },
-		iconIdMap:      function() { return this.$store.getters['schema/iconIdMap']; },
-		jsFunctionIdMap:function() { return this.$store.getters['schema/jsFunctionIdMap']; },
-		presetIdMapRecordId:function() { return this.$store.getters['schema/presetIdMapRecordId']; },
-		access:         function() { return this.$store.getters.access; },
-		builderEnabled: function() { return this.$store.getters.builderEnabled; },
-		capApp:         function() { return this.$store.getters.captions.form; },
-		capErr:         function() { return this.$store.getters.captions.error; },
-		capGen:         function() { return this.$store.getters.captions.generic; },
-		isAdmin:        function() { return this.$store.getters.isAdmin; },
-		isMobile:       function() { return this.$store.getters.isMobile; },
-		keyLength:      function() { return this.$store.getters.constants.keyLength; },
-		loginEncryption:function() { return this.$store.getters.loginEncryption; },
-		loginId:        function() { return this.$store.getters.loginId; },
-		loginPublicKey: function() { return this.$store.getters.loginPublicKey; },
-		loginPrivateKey:function() { return this.$store.getters.loginPrivateKey; },
-		moduleLanguage: function() { return this.$store.getters.moduleLanguage; },
-		patternStyle:   function() { return this.$store.getters.patternStyle; },
-		settings:       function() { return this.$store.getters.settings; }
+		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap:      (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:     (s) => s.$store.getters['schema/attributeIdMap'],
+		formIdMap:          (s) => s.$store.getters['schema/formIdMap'],
+		formIdMapMenu:      (s) => s.$store.getters['schema/formIdMapMenu'],
+		iconIdMap:          (s) => s.$store.getters['schema/iconIdMap'],
+		jsFunctionIdMap:    (s) => s.$store.getters['schema/jsFunctionIdMap'],
+		presetIdMapRecordId:(s) => s.$store.getters['schema/presetIdMapRecordId'],
+		access:             (s) => s.$store.getters.access,
+		builderEnabled:     (s) => s.$store.getters.builderEnabled,
+		capApp:             (s) => s.$store.getters.captions.form,
+		capErr:             (s) => s.$store.getters.captions.error,
+		capGen:             (s) => s.$store.getters.captions.generic,
+		isAdmin:            (s) => s.$store.getters.isAdmin,
+		isMobile:           (s) => s.$store.getters.isMobile,
+		keyLength:          (s) => s.$store.getters.constants.keyLength,
+		loginEncryption:    (s) => s.$store.getters.loginEncryption,
+		loginId:            (s) => s.$store.getters.loginId,
+		loginPublicKey:     (s) => s.$store.getters.loginPublicKey,
+		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
+		moduleLanguage:     (s) => s.$store.getters.moduleLanguage,
+		patternStyle:       (s) => s.$store.getters.patternStyle,
+		settings:           (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
@@ -713,7 +661,7 @@ let MyForm = {
 		updateCollections,
 		
 		// form management
-		handleHotkeys:function(e) {
+		handleHotkeys(e) {
 			// not data or pop-up form open
 			if(!this.isData || this.popUp !== null) return;
 			
@@ -727,7 +675,7 @@ let MyForm = {
 					this.set(false);
 			}
 		},
-		messageSet:function(message,duration) {
+		messageSet(message,duration) {
 			// convert message codes
 			switch(message) {
 				case '[CREATED]':    this.message = this.capApp.message.recordCreated;     break;
@@ -743,7 +691,7 @@ let MyForm = {
 			this.messageTimeout = setTimeout(() => this.message = null,
 				typeof duration !== 'undefined' ? duration : 3000);
 		},
-		processFilters:function(joinIndexesRemove) {
+		processFilters(joinIndexesRemove) {
 			return this.getQueryFiltersProcessed(
 				this.form.query.filters,
 				this.fieldIdMapData,
@@ -752,7 +700,7 @@ let MyForm = {
 				joinIndexesRemove
 			);
 		},
-		reset:function() {
+		reset() {
 			// set form to loading as all data is being changed
 			// it will be released once form is ready
 			this.loading = true;
@@ -799,8 +747,9 @@ let MyForm = {
 						let isRelMulti       = isRelationship && f.attributeIdNm !== null || (f.outsideIn && isRelationshipN1);
 						
 						if(f.def !== '')
-							def = this.getAttributeValueFromString(attribute.content,
-								 this.getResolvedPlaceholders(f.def));
+							def = this.getAttributeValueFromString(
+								attribute.content,
+								this.getResolvedPlaceholders(f.def));
 						
 						if(f.defCollection !== null)
 							def = this.getCollectionValues(
@@ -869,13 +818,13 @@ let MyForm = {
 			this.popUp = null;
 			this.get();
 		},
-		releaseLoadingOnNextTick:function() {
+		releaseLoadingOnNextTick() {
 			// releases state on next tick for watching components to react to with updated data
 			this.$nextTick(() => this.loading = false);
 		},
 		
 		// field value control
-		valueSet:function(indexAttributeId,value,isOriginal,updateJoins) {
+		valueSet(indexAttributeId,value,isOriginal,updateJoins) {
 			let changed = this.values[indexAttributeId] !== value;
 			this.values[indexAttributeId] = value;
 			
@@ -896,7 +845,7 @@ let MyForm = {
 				}
 			}
 		},
-		valuesSetAllDefault:function() {
+		valuesSetAllDefault() {
 			for(let k in this.values) {
 				// overwrite default attribute default values
 				let ia = this.getDetailsFromIndexAttributeId(k);
@@ -910,7 +859,7 @@ let MyForm = {
 				this.valueSet(k,JSON.parse(JSON.stringify(this.valuesDef[k])),true,true);
 			}
 		},
-		valueSetByField:function(indexAttributeId,value) {
+		valueSetByField(indexAttributeId,value) {
 			// block updates during form load
 			//  some fields (richtext) updated their values after form was already unloaded
 			if(!this.loading)
@@ -971,14 +920,14 @@ let MyForm = {
 		},
 		
 		// field validity control
-		validSet:function(state,fieldId) {
+		validSet(state,fieldId) {
 			let pos = this.fieldIdsInvalid.indexOf(fieldId);
 			if(state  && pos !== -1) return this.fieldIdsInvalid.splice(pos,1); 
 			if(!state && pos === -1) return this.fieldIdsInvalid.push(fieldId);
 		},
 		
 		// actions
-		closeAsk:function() {
+		closeAsk() {
 			if(!this.warnUnsaved)
 				return this.close();
 			
@@ -997,10 +946,10 @@ let MyForm = {
 				}]
 			});
 		},
-		close:function() {
+		close() {
 			this.$emit('close');
 		},
-		executeFunction:function(jsFunctionId,args) {
+		executeFunction(jsFunctionId,args) {
 			if(typeof this.jsFunctionIdMap[jsFunctionId] === 'undefined')
 				return;
 			
@@ -1034,11 +983,11 @@ let MyForm = {
 			`;
 			return Function(argNames,code)(this.exposedFunctions,...args);
 		},
-		openBuilder:function(middle) {
+		openBuilder(middle) {
 			if(!middle) this.$router.push('/builder/form/'+this.form.id);
 			else        window.open('#/builder/form/'+this.form.id,'_blank');
 		},
-		openNewAsk:function(middleClick) {
+		openNewAsk(middleClick) {
 			// middle click does not kill form inputs, no confirmation required
 			if(middleClick || !this.warnUnsaved)
 				return this.openNew(middleClick);
@@ -1068,11 +1017,11 @@ let MyForm = {
 				}]
 			});
 		},
-		openNew:function(middleClick) {
+		openNew(middleClick) {
 			this.$store.commit('formHasChanges',false);
 			this.openForm(0,null,null,middleClick);
 		},
-		openPrevAsk:function() {
+		openPrevAsk() {
 			if(!this.warnUnsaved)
 				return this.openPrev();
 			
@@ -1091,11 +1040,11 @@ let MyForm = {
 				}]
 			});
 		},
-		openPrev:function() {
+		openPrev() {
 			this.$store.commit('formHasChanges',false);
 			window.history.back();
 		},
-		popUpRecordChanged:function(change,recordId) {
+		popUpRecordChanged(change,recordId) {
 			if(typeof this.fieldIdMapData[this.popUp.fieldId] !== 'undefined') {
 				// update data field value to reflect change of pop-up form record
 				let field = this.fieldIdMapData[this.popUp.fieldId];
@@ -1129,14 +1078,14 @@ let MyForm = {
 			this.loading = true;
 			this.releaseLoadingOnNextTick();
 		},
-		scrollToInvalidField:function() {
+		scrollToInvalidField() {
 			if(this.fieldIdsInvalid.length !== 0)
 				document.getElementById(this.getInputFieldName(
 					this.fieldIdsInvalid[0])).scrollIntoView();
 		},
 		
 		// timer
-		timerClear:function(name) {
+		timerClear(name) {
 			if(typeof this.timers[name] !== 'undefined') {
 				if(this.timers[name].isInterval)
 					clearInterval(this.timers[name].id);
@@ -1146,16 +1095,16 @@ let MyForm = {
 				delete(this.timers[name]);
 			}
 		},
-		timerClearAll:function() {
+		timerClearAll() {
 			for(let k in this.timers) {
 				this.timerClear(k);
 			}
 		},
 		
 		// form function triggers
-		triggerEventAfter: function(e) { this.triggerEvent(e,false); },
-		triggerEventBefore:function(e) { this.triggerEvent(e,true); },
-		triggerEvent:function(event,before) {
+		triggerEventAfter (e) { this.triggerEvent(e,false); },
+		triggerEventBefore(e) { this.triggerEvent(e,true); },
+		triggerEvent      (event,before) {
 			for(let i = 0, j = this.form.functions.length; i < j; i++) {
 				let f = this.form.functions[i];
 				
@@ -1167,7 +1116,7 @@ let MyForm = {
 		},
 		
 		// navigation
-		openForm:function(recordId,options,getterArgs,newTab) {
+		openForm(recordId,options,getterArgs,newTab) {
 			// set defaults if not given
 			if(typeof recordId === 'undefined' || recordId === null)
 				recordId = 0; // open empty record if none is given
@@ -1246,7 +1195,7 @@ let MyForm = {
 			
 			return this.$router.replace(path);
 		},
-		setFormArgs:function(args,push) {
+		setFormArgs(args,push) {
 			const path = this.getFormRoute(this.form.id,this.recordId,true,args);
 			
 			if(this.$route.fullPath === path || this.isPopUp)
@@ -1257,7 +1206,7 @@ let MyForm = {
 		},
 		
 		// backend calls
-		delAsk:function() {
+		delAsk() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.delete,
 				buttons:[{
@@ -1273,7 +1222,7 @@ let MyForm = {
 				}]
 			});
 		},
-		del:function() {
+		del() {
 			this.triggerEventBefore('delete');
 			
 			let requests = [];
@@ -1299,7 +1248,7 @@ let MyForm = {
 			);
 			this.updatingRecord = true;
 		},
-		get:function() {
+		get() {
 			this.triggerEventBefore('open');
 			
 			// no record defined, form is done loading
@@ -1360,7 +1309,7 @@ let MyForm = {
 				this.$root.genericError
 			);
 		},
-		getFromSubJoin:function(join,recordId) {
+		getFromSubJoin(join,recordId) {
 			let joinIndexes = [join.index]; // all join indexes to collect (start with initial join)
 			let joins       = [];           // all collected joins
 			let joinAdded   = true;
