@@ -543,6 +543,9 @@ let MyForm = {
 								s.fieldIdMapData[side.fieldId],false)]
 							);
 					break;
+					case 'fieldValid':
+						return !s.fieldIdsInvalid.includes(side.fieldId);
+					break;
 					case 'record':
 						return typeof s.joinsIndexMap['0'] !== 'undefined'
 							? s.joinsIndexMap['0'].recordId : false;

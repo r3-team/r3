@@ -323,6 +323,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- relation comments
 			ALTER TABLE app.relation ADD COLUMN comment text;
 			
+			-- new filter condition: field invalid
+			ALTER TYPE app.filter_side_content ADD VALUE 'fieldValid';
+			
 			-- add references for PKs as PG indexes (used for API)
 			ALTER TABLE app.pg_index ADD COLUMN primary_key bool NOT NULL DEFAULT false;
 			ALTER TABLE app.pg_index ALTER COLUMN primary_key DROP DEFAULT;

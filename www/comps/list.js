@@ -337,7 +337,7 @@ let MyList = {
 						@apply="reloadInside('filtersUser')"
 						@close="showFilters = false"
 						:columns="columns"
-						:disableContent="['fieldChanged','subQuery']"
+						:disableContent="['fieldChanged','fieldValid','subQuery']"
 						:joins="joins"
 						:showReset="true"
 						:userFilter="true"
