@@ -145,8 +145,8 @@ export function updateCollections(continueOnError,errFnc,collectionId) {
 				MyStore.getters['schema/moduleIdMap'][c.moduleId]));
 			
 			const joinIndexMap = getJoinIndexMap(q.joins);
-			const filters      = getQueryFiltersProcessed(q.filters,{},joinIndexMap);
-			const columns      = getQueryColumnsProcessed(c.columns,{},joinIndexMap);
+			const filters      = getQueryFiltersProcessed(q.filters,joinIndexMap);
+			const columns      = getQueryColumnsProcessed(c.columns,joinIndexMap);
 			
 			requestIds.push(c.id);
 			dataRequests.push(ws.prepare('data','get',{

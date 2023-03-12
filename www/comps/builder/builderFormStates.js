@@ -113,7 +113,7 @@ let MyBuilderFormState = {
 			<my-filters
 				v-model="conditions"
 				:builderMode="true"
-				:disableContent="['attribute','javascript','subQuery']"
+				:disableContent="['attribute','javascript','nowDate','nowDatetime','nowTime','subQuery']"
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
 				:filterAddCnt="filterAddCnt"

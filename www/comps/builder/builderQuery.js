@@ -50,7 +50,6 @@ let MyBuilderQueryChoice = {
 		<my-filters
 			v-model="filtersInput"
 			:builderMode="true"
-			:disableContent="['fieldChanged','fieldValid']"
 			:entityIdMapRef="entityIdMapRef"
 			:fieldIdMap="fieldIdMap"
 			:joins="joins"

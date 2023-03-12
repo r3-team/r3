@@ -460,6 +460,7 @@ let MyField = {
 					:dataFieldMap="dataFieldMap"
 					:entityIdMapState="entityIdMapState"
 					:field="f"
+					:fieldIdsChanged="fieldIdsChanged"
 					:fieldIdsInvalid="fieldIdsInvalid"
 					:fieldIdMapCaption="fieldIdMapCaption"
 					:formBadSave="formBadSave"
@@ -492,6 +493,7 @@ let MyField = {
 			:dataFieldMap="dataFieldMap"
 			:entityIdMapState="entityIdMapState"
 			:field="f"
+			:fieldIdsChanged="fieldIdsChanged"
 			:fieldIdsInvalid="fieldIdsInvalid"
 			:fieldIdMapCaption="fieldIdMapCaption"
 			:formBadSave="formBadSave"
@@ -510,6 +512,7 @@ let MyField = {
 		dataFieldMap:     { type:Object,  required:true },
 		entityIdMapState: { type:Object,  required:false, default:() => {return {}} }, // overwritten states
 		field:            { type:Object,  required:true },
+		fieldIdsChanged:  { type:Array,   required:false, default:() => {return []} },
 		fieldIdsInvalid:  { type:Array,   required:false, default:() => {return []} },
 		fieldIdMapCaption:{ type:Object,  required:false, default:() => {return {}} }, // overwritten captions
 		formBadSave:      { type:Boolean, required:true }, // attempted save with invalid inputs
@@ -647,11 +650,9 @@ let MyField = {
 			if(!s.isValidValue) return s.capGen.inputInvalid; // generic error
 			return '';
 		},
-		captionHelp:(s) => {
-			return typeof s.field.captions !== 'undefined'
-				&& typeof s.field.captions.fieldHelp[s.moduleLanguage] !== 'undefined'
-				? s.field.captions.fieldHelp[s.moduleLanguage] : '';
-		},
+		captionHelp:(s) => typeof s.field.captions !== 'undefined'
+			&& typeof s.field.captions.fieldHelp[s.moduleLanguage] !== 'undefined'
+			? s.field.captions.fieldHelp[s.moduleLanguage] : '',
 		domClass:(s) => {
 			let out = [];
 			
@@ -674,13 +675,10 @@ let MyField = {
 			
 			return out;
 		},
-		domStyle:(s) => {
-			return !s.isContainer ? '' : s.getFlexStyle(s.flexDirParent,
-				s.field.justifyContent,s.field.alignItems,
-				s.field.alignContent,s.field.wrap,s.field.grow,
-				s.field.shrink,s.field.basis,s.field.perMax,
-				s.field.perMin);
-		},
+		domStyle:(s) => !s.isContainer ? '' : s.getFlexStyle(
+			s.flexDirParent,s.field.justifyContent,s.field.alignItems,
+			s.field.alignContent,s.field.wrap,s.field.grow,s.field.shrink,
+			s.field.basis,s.field.perMax,s.field.perMin),
 		fieldAttributeId:(s) => {
 			if(!s.isData) return false;
 			
@@ -690,39 +688,31 @@ let MyField = {
 			return s.getIndexAttributeId(s.field.index,
 				s.field.attributeId,s.field.outsideIn === true,atrIdNm);
 		},
-		fieldAttributeIdAlt:(s) => {
-			return !s.isData || s.field.attributeIdAlt === null ? false
-				: s.getIndexAttributeId(s.field.index,s.field.attributeIdAlt,false,null);
-		},
-		columnsProcessed:(s) => {
-			return !s.isQuery ? [] : s.getQueryColumnsProcessed(s.field.columns,
-				s.dataFieldMap,s.joinsIndexMap,s.values);
-		},
+		fieldAttributeIdAlt:(s) => !s.isData || s.field.attributeIdAlt === null ? false
+			: s.getIndexAttributeId(s.field.index,s.field.attributeIdAlt,false,null),
+		columnsProcessed:(s) => !s.isQuery ? [] : s.getQueryColumnsProcessed(
+			s.field.columns,s.joinsIndexMap,s.dataFieldMap,
+			s.fieldIdsChanged,s.fieldIdsInvalid,s.values),
 		choicesProcessed:(s) => {
 			if(!s.isQuery) return [];
 			
 			let choices = JSON.parse(JSON.stringify(s.field.query.choices));
 			for(let i = 0, j = choices.length; i < j; i++) {
 				choices[i].filters = s.getQueryFiltersProcessed(
-					choices[i].filters,s.dataFieldMap,s.joinsIndexMap,
-					s.values,[],s.collectionIdMapIndexes
+					choices[i].filters,s.joinsIndexMap,s.dataFieldMap,
+					s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
+					s.collectionIdMapIndexes
 				);
 			}
 			return choices;
 		},
-		filtersProcessed:(s) => {
-			return !s.isQuery ? [] : s.getQueryFiltersProcessed(
-				s.field.query.filters,s.dataFieldMap,s.joinsIndexMap,
-				s.values,[],s.collectionIdMapIndexes
-			);
-		},
+		filtersProcessed:(s) => !s.isQuery ? [] : s.getQueryFiltersProcessed(
+			s.field.query.filters,s.joinsIndexMap,s.dataFieldMap,
+			s.fieldIdsChanged,s.fieldIdsInvalid,s.values,s.collectionIdMapIndexes
+		),
 		iconId:(s) => {
-			if(s.field.iconId !== null)
-				return s.field.iconId;
-			
-			if(s.isData && s.attribute.iconId !== null)
-				return s.attribute.iconId;
-			
+			if(s.field.iconId !== null)                 return s.field.iconId;
+			if(s.isData && s.attribute.iconId !== null) return s.attribute.iconId;
 			return false;
 		},
 		presetValue:(s) => {

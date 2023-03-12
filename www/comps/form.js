@@ -30,7 +30,6 @@ import {
 import {
 	isAttributeRelationship,
 	isAttributeRelationshipN1,
-	isAttributeValueEqual,
 	getAttributeValueFromString,
 	getAttributeValuesFromGetter,
 	getDetailsFromIndexAttributeId,
@@ -225,6 +224,7 @@ let MyForm = {
 					:dataFieldMap="fieldIdMapData"
 					:entityIdMapState="entityIdMapState"
 					:field="f"
+					:fieldIdsChanged="fieldIdsChanged"
 					:fieldIdsInvalid="fieldIdsInvalid"
 					:fieldIdMapCaption="fieldIdMapCaption"
 					:formBadSave="badSave"
@@ -347,15 +347,7 @@ let MyForm = {
 		},
 		canUpdate:    (s) => s.hasChanges && !s.badLoad && !s.updatingRecord,
 		hasBarLower:  (s) => s.isData || s.form.fields.length === 0,
-		hasChanges:   (s) => {
-			if(s.noDataActions) return false;
-			
-			for(let k in s.values) {
-				if(!s.isAttributeValueEqual(s.values[k],s.valuesOrg[k]))
-					return true;
-			}
-			return false;
-		},
+		hasChanges:   (s) => !s.noDataActions && s.fieldIdsChanged.length !== 0,
 		helpAvailable:(s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
 		isData:       (s) => s.relationId !== null,
 		isNew:        (s) => s.recordId === 0,
@@ -508,48 +500,19 @@ let MyForm = {
 		
 		// state overwrite for different entities (fields, tabs)
 		entityIdMapState:(s) => {
-			const valueChangeComp = (value) => {
-				if(!Array.isArray(value))
-					return value;
-				
-				value.sort();
-				return JSON.stringify(value);
-			};
 			const getValueFromConditionSide = (side,operator) => {
 				switch(side.content) {
-					case 'languageCode':return s.settings.languageCode;                break;
-					case 'login':       return s.loginId;                              break;
-					case 'preset':      return s.presetIdMapRecordId[side.presetId];   break;
-					case 'recordNew':   return s.isNew;                                break;
-					case 'role':        return s.access.roleIds.includes(side.roleId); break;
-					case 'true':        return true;                                   break;
-					
-					case 'collection':
-						return getCollectionValues(
-							side.collectionId,
-							side.columnId,
-							s.filterOperatorIsSingleValue(operator));
-					break;
-					case 'field':
-						return s.values[s.getIndexAttributeIdByField(
-							s.fieldIdMapData[side.fieldId],false)];
-					break;
-					case 'fieldChanged':
-						return valueChangeComp(
-								s.values[s.getIndexAttributeIdByField(
-								s.fieldIdMapData[side.fieldId],false)]
-							) != valueChangeComp(
-								s.valuesOrg[s.getIndexAttributeIdByField(
-								s.fieldIdMapData[side.fieldId],false)]
-							);
-					break;
-					case 'fieldValid':
-						return !s.fieldIdsInvalid.includes(side.fieldId);
-					break;
-					case 'record':
-						return typeof s.joinsIndexMap['0'] !== 'undefined'
-							? s.joinsIndexMap['0'].recordId : false;
-					break;
+					case 'collection':   return getCollectionValues(side.collectionId,side.columnId,s.filterOperatorIsSingleValue(operator)); break;
+					case 'field':        return s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[side.fieldId],false)]; break;
+					case 'fieldChanged': return s.fieldIdsChanged.includes(side.fieldId); break;
+					case 'fieldValid':   return !s.fieldIdsInvalid.includes(side.fieldId); break;
+					case 'languageCode': return s.settings.languageCode; break;
+					case 'login':        return s.loginId; break;
+					case 'preset':       return s.presetIdMapRecordId[side.presetId]; break;
+					case 'record':       return typeof s.joinsIndexMap['0'] !== 'undefined' ? s.joinsIndexMap['0'].recordId : false; break;
+					case 'recordNew':    return s.isNew; break;
+					case 'role':         return s.access.roleIds.includes(side.roleId); break;
+					case 'true':         return true; break;
 					case 'value':
 						// compatibility fix, true value should be used instead
 						if(typeof side.value === 'string') {
@@ -595,6 +558,15 @@ let MyForm = {
 						if(e.tabId   !== null) out.tab[e.tabId]     = e.newState;
 					}
 				}
+			}
+			return out;
+		},
+		fieldIdsChanged:(s) => {
+			let out = [];
+			for(let fieldId in s.fieldIdMapData) {
+				let ia = s.getIndexAttributeIdByField(s.fieldIdMapData[fieldId],false);
+				if(!s.valueIsEqual(s.values[ia],s.valuesOrg[ia]))
+					out.push(fieldId);
 			}
 			return out;
 		},
@@ -655,7 +627,6 @@ let MyForm = {
 		hasAccessToRelation,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
-		isAttributeValueEqual,
 		openLink,
 		pemImport,
 		rsaDecrypt,
@@ -693,15 +664,6 @@ let MyForm = {
 			clearTimeout(this.messageTimeout);
 			this.messageTimeout = setTimeout(() => this.message = null,
 				typeof duration !== 'undefined' ? duration : 3000);
-		},
-		processFilters(joinIndexesRemove) {
-			return this.getQueryFiltersProcessed(
-				this.form.query.filters,
-				this.fieldIdMapData,
-				this.joinsIndexMap,
-				this.values,
-				joinIndexesRemove
-			);
 		},
 		reset() {
 			// set form to loading as all data is being changed
@@ -827,6 +789,15 @@ let MyForm = {
 		},
 		
 		// field value control
+		valueIsEqual(v1,v2) {
+			const clean = v => {
+				if(!Array.isArray(v)) return v;
+				
+				v.sort();
+				return JSON.stringify(v);
+			};
+			return clean(v1) == clean(v2);
+		},
 		valueSet(indexAttributeId,value,isOriginal,updateJoins) {
 			let changed = this.values[indexAttributeId] !== value;
 			this.values[indexAttributeId] = value;
@@ -1275,16 +1246,17 @@ let MyForm = {
 				});
 			}
 			
+			let filters = this.getQueryFiltersProcessed(
+				this.form.query.filters,this.joinsIndexMap).concat([
+					this.getQueryAttributePkFilter(this.relationId,this.recordId,0,false)
+				]);
+			
 			ws.send('data','get',{
 				relationId:this.relationId,
 				indexSource:0,
 				joins:this.relationsJoined,
 				expressions:expressions,
-				filters:this.processFilters([]).concat([
-					this.getQueryAttributePkFilter(
-						this.relationId,this.recordId,0,false
-					)
-				]),
+				filters:filters,
 				getPerm:true
 			},true).then(
 				res => {
@@ -1351,13 +1323,19 @@ let MyForm = {
 					});
 			}
 			
-			// build list of indexes to remove from filters
-			let joinIndexesRemove = [];
-			for(let k in this.joinsIndexMap) {
-				let id = parseInt(k);
+			// process filters and remove ones for join indexes that are not available
+			let filters = this.getQueryFiltersProcessed(
+				this.form.query.filters,this.joinsIndexMap);
+			
+			for(let i = 0, j = filters.length; i < j; i++) {
+				let f = filters[i];
 				
-				if(!joinIndexes.includes(id))
-					joinIndexesRemove.push(id);
+				if((f.side0.attributeId !== null && !joinIndexes.includes(f.side0.attributeIndex))
+					|| (f.side1.attributeId !== null && !joinIndexes.includes(f.side1.attributeIndex))) {
+					
+					filters.splice(i,1);
+					i--; j--;
+				}
 			}
 			
 			if(recordId === null) {
@@ -1382,7 +1360,7 @@ let MyForm = {
 				indexSource:join.index,
 				joins:joins,
 				expressions:expressions,
-				filters:	this.processFilters(joinIndexesRemove).concat([
+				filters:	filters.concat([
 					this.getQueryAttributePkFilter(
 						this.relationId,recordId,join.index,false
 					)
@@ -1490,7 +1468,7 @@ let MyForm = {
 					continue;
 				
 				// ignore unchanged values for existing record
-				if(!isNew && this.isAttributeValueEqual(this.values[k],this.valuesOrg[k]))
+				if(!isNew && this.valueIsEqual(this.values[k],this.valuesOrg[k]))
 					continue;
 				
 				// ignore values if join settings disallow creation/update

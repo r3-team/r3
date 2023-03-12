@@ -212,6 +212,7 @@ let MyBuilderForm = {
 						:allowFixedLimit="false"
 						:builderLanguage="builderLanguage"
 						:filters="filters"
+						:filtersDisable="['field','fieldChanged','fieldValid']"
 						:fixedLimit="0"
 						:joins="joins"
 						:moduleId="form.moduleId"

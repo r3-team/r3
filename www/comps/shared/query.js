@@ -137,31 +137,29 @@ export function getSubQueryFilterExpressions(subQuery) {
 	}];
 };
 
-export function getQueryColumnsProcessed(columns,dataFieldIdMap,joinsIndexMap,values) {
+export function getQueryColumnsProcessed(columns,joinsIndexMap,
+	dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,values) {
+	
 	columns = JSON.parse(JSON.stringify(columns));
 	for(let i = 0, j = columns.length; i < j; i++) {
-		
 		if(!columns[i].subQuery)
 			continue;
 		
 		columns[i].query.filters = getQueryFiltersProcessed(
-			columns[i].query.filters,
-			dataFieldIdMap,
-			joinsIndexMap,
-			values
+			columns[i].query.filters,joinsIndexMap,
+			dataFieldIdMap,fieldIdsChanged,fieldIdsInvalid,values
 		);
 	}
 	return columns;
 };
 
-export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
-	values,joinIndexesRemove,collectionIdMapIndexFilter) {
+export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
+	fieldIdsChanged,fieldIdsInvalid,values,collectionIdMapIndexFilter) {
 	
-	if(typeof values === 'undefined')
-		values = {};
-	
-	if(typeof joinIndexesRemove === 'undefined')
-		joinIndexesRemove = [];
+	if(typeof dataFieldIdMap  === 'undefined') dataFieldIdMap  = {};
+	if(typeof fieldIdsChanged === 'undefined') fieldIdsChanged = [];
+	if(typeof fieldIdsInvalid === 'undefined') fieldIdsInvalid = [];
+	if(typeof values          === 'undefined') values          = {};
 	
 	if(typeof collectionIdMapIndexFilter === 'undefined')
 		collectionIdMapIndexFilter = {};
@@ -177,21 +175,13 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 					collectionIdMapIndexFilter[s.collectionId]);
 			break;
 			case 'preset':
-				// unprotected presets can be deleted, 0 as fallback
-				s.value = 0;
-				
-				const presetIdMap = MyStore.getters['schema/presetIdMapRecordId'];
-				if(typeof presetIdMap[s.presetId] !== 'undefined')
-					s.value = presetIdMap[s.presetId];
+				s.value = MyStore.getters['schema/presetIdMapRecordId'][s.presetId];
 			break;
 			case 'subQuery':
 				s.query.expressions = getSubQueryFilterExpressions(s);
 				s.query.filters     = getQueryFiltersProcessed(
-					s.query.filters,
-					dataFieldIdMap,
-					joinsIndexMap,
-					values,
-					joinIndexesRemove,
+					s.query.filters,joinsIndexMap,dataFieldIdMap,
+					fieldIdsChanged,fieldIdsInvalid,values,
 					collectionIdMapIndexFilter
 				);
 				s.query.limit = s.query.fixedLimit;
@@ -212,28 +202,16 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 					)]));
 				}
 			break;
-			case 'javascript':
-				s.value = Function(s.value)();
-			break;
-			case 'record':
-				if(typeof joinsIndexMap['0'] !== 'undefined')
-					s.value = joinsIndexMap['0'].recordId;
-			break;
-			case 'recordNew':
-				if(typeof joinsIndexMap['0'] !== 'undefined')
-					s.value = joinsIndexMap['0'].recordId === 0;
-			break;
+			case 'fieldChanged': s.value = fieldIdsChanged.includes(s.fieldId);  break;
+			case 'fieldValid':   s.value = !fieldIdsInvalid.includes(s.fieldId); break;
+			case 'javascript':   s.value = Function(s.value)();                  break;
+			case 'record':       if(typeof joinsIndexMap['0'] !== 'undefined') s.value = joinsIndexMap['0'].recordId;       break;
+			case 'recordNew':    if(typeof joinsIndexMap['0'] !== 'undefined') s.value = joinsIndexMap['0'].recordId === 0; break;
 			
 			// login
-			case 'languageCode':
-				s.value = MyStore.getters.moduleLanguage;
-			break;
-			case 'login':
-				s.value = MyStore.getters.loginId;
-			break;
-			case 'role':
-				s.value = MyStore.getters.access.roleIds.includes(s.roleId);
-			break;
+			case 'languageCode': s.value = MyStore.getters.moduleLanguage;                    break;
+			case 'login':        s.value = MyStore.getters.loginId;                           break;
+			case 'role':         s.value = MyStore.getters.access.roleIds.includes(s.roleId); break;
 			
 			// date & time
 			case 'nowDate':     s.value = getUnixNowDate()     + s.nowOffset; break;
@@ -263,12 +241,6 @@ export function getQueryFiltersProcessed(filters,dataFieldIdMap,joinsIndexMap,
 	let out = [];
 	filters = JSON.parse(JSON.stringify(filters));
 	for(let f of filters) {
-		if(f.side0.attributeId !== null && joinIndexesRemove.includes(f.side0.attributeIndex))
-			continue;
-		
-		if(f.side1.attributeId !== null && joinIndexesRemove.includes(f.side1.attributeIndex))
-			continue;
-		
 		f.side0 = getFilterSideProcessed(f.side0,f.operator);
 		f.side1 = getFilterSideProcessed(f.side1,f.operator);
 		out.push(f);

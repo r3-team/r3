@@ -85,21 +85,11 @@ export function getValueFromQuery(content,queryValue) {
 };
 
 export function getAttributeValueFromString(content,value) {
-	if(isAttributeBoolean(content))
-		return value === 'true' || value === 'TRUE';
-	
-	if(isAttributeInteger(content))
-		return parseInt(value);
-	
-	if(isAttributeDecimal(content))
-		return parseFloat(value);
-	
-	if(isAttributeRelationship11(content))
-		return parseInt(value);
-	
-	if(isAttributeRelationshipN1(content))
-		return JSON.parse(value);
-	
+	if(isAttributeBoolean(content))        return value === 'true' || value === 'TRUE';
+	if(isAttributeInteger(content))        return parseInt(value);
+	if(isAttributeDecimal(content))        return parseFloat(value);
+	if(isAttributeRelationship11(content)) return parseInt(value);
+	if(isAttributeRelationshipN1(content)) return JSON.parse(value);
 	return value;
 };
 
@@ -167,7 +157,3 @@ export function isAttributeUuid(content)    { return content === 'uuid'; };
 export function isAttributeRelationship(content)   { return attributeContentNames.relationship.includes(content); };
 export function isAttributeRelationship11(content) { return content === '1:1'; };
 export function isAttributeRelationshipN1(content) { return content === 'n:1'; };
-export function isAttributeValueEqual(v1,v2) {
-	// stringify values to (naively) compare arrays as well
-	return JSON.stringify(v1) === JSON.stringify(v2);
-};

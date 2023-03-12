@@ -829,31 +829,23 @@ let MyList = {
 		},
 		
 		// filters
-		filtersParsedColumn:(s) => {
-			return s.getFiltersEncapsulated(
-				JSON.parse(JSON.stringify(s.filtersColumn))
-			);
-		},
-		filtersParsedUser:(s) => {
-			return s.getFiltersEncapsulated(
-				JSON.parse(JSON.stringify(s.filtersUser))
-			);
-		},
+		filtersParsedColumn:(s) => s.getFiltersEncapsulated(
+			JSON.parse(JSON.stringify(s.filtersColumn))
+		),
+		filtersParsedUser:(s) => s.getFiltersEncapsulated(
+			JSON.parse(JSON.stringify(s.filtersUser))
+		),
 		filtersParsedQuick:(s) => {
-			if(s.filtersQuick === '')
-				return [];
+			if(s.filtersQuick === '') return [];
 			
 			let out = [];
-			for(let i = 0, j = s.columns.length; i < j; i++) {
-				let c = s.columns[i];
+			for(let c of s.columns) {
 				let a = s.attributeIdMap[c.attributeId];
-				
 				if(c.subQuery || s.isAttributeFiles(a.content) ||
 					(c.aggregator !== null && c.aggregator !== 'record')) {
 					
 					continue;
 				}
-				
 				out.push({
 					connector:out.length === 0 ? 'AND' : 'OR',
 					operator:'ILIKE',

@@ -408,7 +408,7 @@ let MyBuilderField = {
 				joins:this.getRelationsJoined(this.field.query.joins),
 				expressions:this.getQueryExpressions(this.field.columns),
 				filters:this.getQueryFiltersProcessed(this.field.query.filters,
-					{},this.getJoinsIndexMap(this.field.query.joins)),
+					this.getJoinsIndexMap(this.field.query.joins)),
 				orders:this.field.query.orders,
 				limit:this.field.query.fixedLimit !== 0 ? this.field.query.fixedLimit : 0
 			},true).then(

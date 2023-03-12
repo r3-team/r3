@@ -242,7 +242,6 @@ let MyFilterSide = {
 					<optgroup v-if="contentData.length !== 0" :label="capApp.contentData">
 						<option
 							v-for="c in contentData"
-							:disabled="contentUnusable.includes(c)"
 							:title="capApp.option.contentHint[c]"
 							:value="c"
 						>{{ capApp.option.content[c] }}</option>
@@ -250,7 +249,6 @@ let MyFilterSide = {
 					<optgroup v-if="contentForm.length !== 0" :label="capApp.contentForm">
 						<option
 							v-for="c in contentForm"
-							:disabled="contentUnusable.includes(c)"
 							:title="capApp.option.contentHint[c]"
 							:value="c"
 						>{{ capApp.option.content[c] }}</option>
@@ -258,7 +256,6 @@ let MyFilterSide = {
 					<optgroup v-if="contentDate.length !== 0" :label="capApp.contentDate">
 						<option
 							v-for="c in contentDate"
-							:disabled="contentUnusable.includes(c)"
 							:title="capApp.option.contentHint[c]"
 							:value="c"
 						>{{ capApp.option.content[c] }}</option>
@@ -266,7 +263,6 @@ let MyFilterSide = {
 					<optgroup v-if="contentLogin.length !== 0" :label="capApp.contentLogin">
 						<option
 							v-for="c in contentLogin"
-							:disabled="contentUnusable.includes(c)"
 							:title="capApp.option.contentHint[c]"
 							:value="c"
 						>{{ capApp.option.content[c] }}</option>
@@ -466,15 +462,6 @@ let MyFilterSide = {
 	},
 	computed:{
 		// entities
-		contentUnusable:(s) => {
-			let out = [];
-			if(Object.keys(s.fieldIdMap).length === 0) {
-				out.push('field');
-				out.push('fieldChanged');
-				out.push('fieldValid');
-			}
-			return out;
-		},
 		nestedIndexAttributeIdsSubQuery:(s) => {
 			if(!s.isSubQuery) return [];
 			
@@ -589,11 +576,11 @@ let MyFilterSide = {
 		isCollection: (s) => s.content === 'collection',
 		isField:      (s) => ['field','fieldChanged','fieldValid'].includes(s.content),
 		isJavascript: (s) => s.content === 'javascript',
+		isNullPartner:(s) => !s.leftSide && s.isNullOperator,
 		isPreset:     (s) => s.content === 'preset',
 		isRole:       (s) => s.content === 'role',
 		isSubQuery:   (s) => s.content === 'subQuery',
 		isValue:      (s) => s.content === 'value',
-		isNullPartner:(s) => !s.leftSide && s.isNullOperator,
 		
 		// stores
 		modules:        (s) => s.$store.getters['schema/modules'],
