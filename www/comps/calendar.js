@@ -91,10 +91,11 @@ let MyCalendarMonth = {
 			<div class="area nowrap default-inputs">
 				<my-input-collection class="selector"
 					v-for="c in collections"
-					@update:indexes="$emit('set-collection-indexes',c.collectionId,$event)"
+					@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event)"
 					:collectionId="c.collectionId"
 					:columnIdDisplay="c.columnIdDisplay"
 					:key="c.collectionId"
+					:modelValue="collectionIdMapIndexes[c.collectionId]"
 					:multiValue="c.multiValue"
 				/>
 				
@@ -235,6 +236,7 @@ let MyCalendarMonth = {
 		choices:    { type:Array,   required:false, default:() => [] },
 		columns:    { type:Array,   required:false, default:() => [] },
 		collections:{ type:Array,   required:false, default:() => [] },
+		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		date:       { type:Date,    required:true },                    // selected date to work around
 		date0:      { type:Date,    required:true },                    // start date of calendar
 		date1:      { type:Date,    required:true },                    // end date of calendar
@@ -580,6 +582,7 @@ let MyCalendar = {
 			:choices="choices"
 			:columns="columns"
 			:collections="collections"
+			:collectionIdMapIndexes="collectionIdMapIndexes"
 			:date="date"
 			:date0="date0"
 			:date1="date1"
@@ -603,6 +606,7 @@ let MyCalendar = {
 		choices:         { type:Array,   required:false, default:() => [] },
 		columns:         { type:Array,   required:true },
 		collections:     { type:Array,   required:true },
+		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		fieldId:         { type:String,  required:false, default:'' },
 		filters:         { type:Array,   required:true },
 		formLoading:     { type:Boolean, required:false, default:false },

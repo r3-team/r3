@@ -328,6 +328,7 @@ let MyField = {
 			:autoRenew="field.autoRenew"
 			:choices="choicesProcessed"
 			:collections="field.collections"
+			:collectionIdMapIndexes="collectionIdMapIndexes"
 			:columns="columnsProcessed"
 			:csvExport="field.csvExport"
 			:csvImport="field.csvImport"
@@ -359,6 +360,7 @@ let MyField = {
 			:choices="choicesProcessed"
 			:columns="columnsProcessed"
 			:collections="field.collections"
+			:collectionIdMapIndexes="collectionIdMapIndexes"
 			:fieldId="field.id"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
@@ -387,6 +389,7 @@ let MyField = {
 			:choices="choicesProcessed"
 			:columns="columnsProcessed"
 			:collections="field.collections"
+			:collectionIdMapIndexes="collectionIdMapIndexes"
 			:fieldId="field.id"
 			:days0="field.dateRange0 / 86400"
 			:days1="field.dateRange1 / 86400"
@@ -536,7 +539,7 @@ let MyField = {
 	],
 	data() {
 		return {
-			collectionIdMapIndexes:{},    // active record indexes of collection, used to filter with
+			collectionIdMapIndexes:{},    // selected record indexes of collection, used to filter with
 			focused:false,
 			notTouched:true,              // data field was not touched by user
 			showColorPickerInput:false,   // for color picker fields
@@ -1001,6 +1004,10 @@ let MyField = {
 		moduleLanguage:     (s) => s.$store.getters.moduleLanguage,
 		settings:           (s) => s.$store.getters.settings
 	},
+	mounted() {
+		// fill stored collection row indexes
+		this.collectionIdMapIndexes = this.fieldOptionGet(this.field.id,'collectionIdMapIndexes',{});
+	},
 	methods:{
 		// externals
 		fieldOptionGet,
@@ -1112,8 +1119,8 @@ let MyField = {
 			this.value = valueNew.length !== 0 ? valueNew : null;
 		},
 		setCollectionIndexes(collectionId,indexes) {
-			if(indexes.length === 0) delete(this.collectionIdMapIndexes[collectionId]);
-			else                     this.collectionIdMapIndexes[collectionId] = indexes;
+			this.collectionIdMapIndexes[collectionId] = indexes;
+			this.fieldOptionSet(this.field.id,'collectionIdMapIndexes',this.collectionIdMapIndexes);
 		},
 		setTab(tabIndex) {
 			this.fieldOptionSet(this.field.id,'tabIndex',tabIndex);

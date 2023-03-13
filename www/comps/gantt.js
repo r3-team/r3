@@ -249,10 +249,11 @@ let MyGantt = {
 				
 				<my-input-collection class="selector"
 					v-for="c in collections"
-					@update:indexes="$emit('set-collection-indexes',c.collectionId,$event)"
+					@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event)"
 					:collectionId="c.collectionId"
 					:columnIdDisplay="c.columnIdDisplay"
 					:key="c.collectionId"
+					:modelValue="collectionIdMapIndexes[c.collectionId]"
 					:multiValue="c.multiValue"
 				/>
 				
@@ -354,6 +355,7 @@ let MyGantt = {
 		choices:         { type:Array,   required:false, default:() => [] },
 		columns:         { type:Array,   required:true }, // processed list columns
 		collections:     { type:Array,   required:true },
+		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		fieldId:         { type:String,  required:true },
 		filters:         { type:Array,   required:true }, // processed query filters
 		formLoading:     { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)

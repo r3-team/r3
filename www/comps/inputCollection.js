@@ -106,20 +106,21 @@ let MyInputCollection = {
 	props:{
 		collectionId:   { type:String,  required:true },
 		columnIdDisplay:{ type:String,  required:true },
+		modelValue:     { required:true }, // indexes of selected rows in collection
 		multiValue:     { type:Boolean, required:false, default:false },
 		readonly:       { type:Boolean, required:false, default:false }
 	},
-	emits:['update:indexes'],
-	data:function() {
+	emits:['update:modelValue'],
+	data() {
 		return {
-			rowIndexesSelected:[], // selected record indexes
 			limitVisible:10,       // number of available entries shown in context menu
 			textInput:'',          // text line input
 			showDropdown:false
 		};
 	},
 	computed:{
-		rowIndexesVisible:(s) => {
+		rowIndexesSelected:(s) => typeof s.modelValue === 'undefined' ? [] : s.modelValue,
+		rowIndexesVisible: (s) => {
 			let out = [];
 			for(let i = 0, j = s.rows.length; i < j; i++) {
 				if(!s.rowIndexesSelected.includes(i)
@@ -166,16 +167,18 @@ let MyInputCollection = {
 			if(pos === -1)
 				return;
 			
-			this.rowIndexesSelected.splice(pos,1);
-			this.$emit('update:indexes',this.rowIndexesSelected);
+			let rowIndexes = JSON.parse(JSON.stringify(this.rowIndexesSelected));
+			rowIndexes.splice(pos,1);
+			this.$emit('update:modelValue',rowIndexes);
 		},
 		entrySelect(i) {
-			if(!this.multiValue)
-				this.rowIndexesSelected = [];
+			let rowIndexes = JSON.parse(JSON.stringify(this.rowIndexesSelected));
+			
+			if(!this.multiValue) rowIndexes = [];
 			
 			this.textInput = '';
-			this.rowIndexesSelected.push(i);
-			this.$emit('update:indexes',this.rowIndexesSelected);
+			rowIndexes.push(i);
+			this.$emit('update:modelValue',rowIndexes);
 		},
 		escape() { this.showDropdown = false; },
 		keyup () { this.showDropdown = true; },

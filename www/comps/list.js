@@ -280,10 +280,11 @@ let MyList = {
 					
 					<my-input-collection class="selector"
 						v-for="c in collections"
-						@update:indexes="$emit('set-collection-indexes',c.collectionId,$event)"
+						@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event)"
 						:collectionId="c.collectionId"
 						:columnIdDisplay="c.columnIdDisplay"
 						:key="c.collectionId"
+						:modelValue="collectionIdMapIndexes[c.collectionId]"
 						:multiValue="c.multiValue"
 					/>
 					
@@ -623,6 +624,7 @@ let MyList = {
 		autoRenew:   { required:false,default:null },                    // refresh list data every x seconds
 		choices:     { type:Array,   required:false, default:() => [] }, // processed query choices
 		collections: { type:Array,   required:false, default:() => [] }, // consumed collections to filter by user input
+		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		columns:     { type:Array,   required:true },                    // processed list columns
 		fieldId:     { type:String,  required:true },
 		filters:     { type:Array,   required:true },                    // processed query filters
@@ -1158,6 +1160,15 @@ let MyList = {
 				}
 			}
 		},
+		setAggregators(columnBatchIndex,aggregator) {
+			if(aggregator !== null)
+				this.columnBatchIndexMapAggr[columnBatchIndex] = aggregator;
+			else
+				delete(this.columnBatchIndexMapAggr[columnBatchIndex]);
+			
+			this.fieldOptionSet(this.fieldId,'columnBatchIndexMapAggr',this.columnBatchIndexMapAggr);
+			this.$refs.aggregations.get();
+		},
 		toggleDropdown() {
 			this.showTable = !this.showTable;
 			
@@ -1255,15 +1266,6 @@ let MyList = {
 				}
 			}
 			this.reloadInside('order');
-		},
-		setAggregators(columnBatchIndex,aggregator) {
-			if(aggregator !== null)
-				this.columnBatchIndexMapAggr[columnBatchIndex] = aggregator;
-			else
-				delete(this.columnBatchIndexMapAggr[columnBatchIndex]);
-			
-			this.fieldOptionSet(this.fieldId,'columnBatchIndexMapAggr',this.columnBatchIndexMapAggr);
-			this.$refs.aggregations.get();
 		},
 		setAutoRenewTimer(justClear) {
 			// clear last timer
