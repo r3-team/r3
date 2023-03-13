@@ -729,7 +729,8 @@
 			},
 			"states":{
 				"option":{
-					"filterFieldIdHint":"By field"
+					"filterFieldIdHint":"By field",
+					"filterTabIdHint":"By tab"
 				},
 				"conditions":"Conditions",
 				"descriptionHint":"Description",

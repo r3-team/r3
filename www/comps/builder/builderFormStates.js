@@ -251,13 +251,22 @@ let MyBuilderFormStates = {
 						>F{{ ref }}</option>
 					</template>
 				</select>
+				<select v-model="filterTabId">
+					<option value="">{{ capApp.option.filterTabIdHint }}</option>
+					<template v-for="(ref,tabId) in entityIdMapRef.tab">
+						<option
+							v-if="tabIdsUsed.includes(tabId)"
+							:value="tabId"
+						>T{{ ref }}</option>
+					</template>
+				</select>
 			</div>
 		</div>
 		
 		<div class="content no-padding default-inputs">
 			<my-builder-form-state
 				v-for="(s,i) in states"
-				v-show="stateShowIndex.includes(i)"
+				v-show="stateShowIndexex.includes(i)"
 				@remove="remove(i)"
 				@update:modelValue="update(i,$event)"
 				:dataFields="dataFields"
@@ -277,10 +286,11 @@ let MyBuilderFormStates = {
 		modelValue:    { type:Array,  required:true }
 	},
 	emits:['update:modelValue'],
-	data:function() {
+	data() {
 		return {
 			filter:'',
-			filterFieldId:''
+			filterFieldId:'',
+			filterTabId:''
 		};
 	},
 	computed:{
@@ -306,7 +316,17 @@ let MyBuilderFormStates = {
 			}
 			return out;
 		},
-		stateShowIndex() {
+		tabIdsUsed() {
+			let out = [];
+			for(let s of this.states) {
+				for(let e of s.effects) {
+					if(e.tabId !== null && !out.includes(e.tabId))
+						out.push(e.tabId);
+				}
+			}
+			return out;
+		},
+		stateShowIndexex() {
 			let out = [];
 			for(let i = 0, j = this.states.length; i < j; i++) {
 				let s = this.states[i];
@@ -318,22 +338,15 @@ let MyBuilderFormStates = {
 				// check field filter
 				if(this.filterFieldId !== '') {
 					let show = false;
-					
-					// check conditions for field ID
-					for(let i = 0, j = s.conditions.length; i < j; i++) {
-						
-						if(s.conditions[i].side0.fieldId === this.filterFieldId
-							|| s.conditions[i].side1.fieldId === this.filterFieldId) {
-							
+					for(let c of s.conditions) {
+						if(c.side0.fieldId === this.filterFieldId || c.side1.fieldId === this.filterFieldId) {
 							show = true;
 							break;
 						}
 					}
-					
-					// check actions for field ID
 					if(!show) {
-						for(let i = 0, j = s.effects.length; i < j; i++) {
-							if(s.effects[i].fieldId === this.filterFieldId) {
+						for(let e of s.effects) {
+							if(e.fieldId === this.filterFieldId) {
 								show = true;
 								break;
 							}
@@ -341,6 +354,19 @@ let MyBuilderFormStates = {
 					}
 					if(!show) continue;
 				}
+				
+				// check tab filter
+				if(this.filterTabId !== '') {
+					let show = false;
+					for(let e of s.effects) {
+						if(e.tabId === this.filterTabId) {
+							show = true;
+							break;
+						}
+					}
+					if(!show) continue;
+				}
+				
 				out.push(i);
 			}
 			return out;

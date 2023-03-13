@@ -729,7 +729,8 @@
 			},
 			"states":{
 				"option":{
-					"filterFieldIdHint":"Per campo"
+					"filterFieldIdHint":"Per campo",
+					"filterTabIdHint":"By tab"
 				},
 				"conditions":"Condizioni",
 				"descriptionHint":"Descrizione",

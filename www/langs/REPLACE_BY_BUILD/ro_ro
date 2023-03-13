@@ -729,7 +729,8 @@
 			},
 			"states":{
 				"option":{
-					"filterFieldIdHint":"După câmp"
+					"filterFieldIdHint":"După câmp",
+					"filterTabIdHint":"By tab"
 				},
 				"conditions":"Condiții",
 				"descriptionHint":"Descriere",
