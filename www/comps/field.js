@@ -438,7 +438,7 @@ let MyField = {
 				<select v-if="isMobile" @change="setTab(parseInt($event.target.value))" :value="tabIndexShow">
 					<template v-for="(t,i) in field.tabs">
 						<option v-if="!tabIndexesHidden.includes(i)" :value="i">
-							{{ t.captions.tabTitle[this.moduleLanguage] }}
+							{{ tabIndexesTitle[i] }}
 						</option>
 					</template>
 				</select>

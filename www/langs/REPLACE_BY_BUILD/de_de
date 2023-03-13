@@ -1383,7 +1383,7 @@
 				"collection":"Sammlung",
 				"field":"Feldwert",
 				"fieldChanged":"Feld geändert",
-				"fieldValid":"field gültig",
+				"fieldValid":"Feld gültig",
 				"javascript":"JavaScript",
 				"languageCode":"Login-Sprache",
 				"login":"Login-ID",
