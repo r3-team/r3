@@ -133,7 +133,8 @@
 		"token":"Token",
 		"type":"Typ",
 		"username":"Benutzername",
-		"version":"Version"
+		"version":"Version",
+		"warnings":"Warnungen"
 	},
 	"admin":{
 		"backups":{
@@ -733,6 +734,12 @@
 				"conditions":"Konditionen",
 				"descriptionHint":"Beschreibung",
 				"effects":"Effekte"
+			},
+			"warning":{
+				"calendarNoDateFromTo":"Kein Attribut ausgewählt für \"Datum von\" oder \"Datum zu\". Beide sind notwendig, damit ein Kalenderfeld arbeiten kann.",
+				"columnNoSubQueryAttribute":"Keine Relation & Attribut ausgewählt für eine Sub-Query-Spalte.",
+				"queryColumnsNotSet":"Keine angezeigten Spalten. Eine Spalte hinzufügen, um Daten anzuzeigen.",
+				"queryRelationNotSet":"Keine Relation ausgewählt. Feld hat keinen Zugriff auf Daten."
 			},
 			"aggregator":"Aggregieren",
 			"autoRenew":"Auto-Aktualisierung",

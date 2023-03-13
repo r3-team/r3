@@ -14,7 +14,8 @@ export function getIndexAttributeId(index,attributeId,outsideIn,attributeIdNm) {
 	// used to ascertain whether attribute has already been used
 	// usually, attributes can only be used once (on a form for example)
 	//  if relationship exists that is a self reference, attribute can exist twice
-	if(attributeId === null)   attributeId   = 'null';
+	if(index         === null) index         = 'null';
+	if(attributeId   === null) attributeId   = 'null';
 	if(attributeIdNm === null) attributeIdNm = 'null';
 	
 	return [

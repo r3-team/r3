@@ -175,6 +175,9 @@
 	padding:1px;
 	filter:var(--image-filter);
 }
+.builder-field-header img.action.warning{
+	filter:var(--image-filter-error);
+}
 .builder-field-header img.action.selected{
 	outline:2px solid var(--color-border);
 }

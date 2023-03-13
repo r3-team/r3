@@ -551,7 +551,7 @@ let MyBuilderFieldOptions = {
 							@input="setIndexAttribute('date0',$event.target.value)"
 							:value="getIndexAttributeId(field.indexDate0,field.attributeIdDate0,false,null)"
 						>
-							<option :value="null">-</option>
+							<option :value="getIndexAttributeId(null,null,false,null)">-</option>
 							<optgroup
 								v-for="j in field.query.joins"
 								:label="j.index+') '+relationIdMap[j.relationId].name"
@@ -573,7 +573,7 @@ let MyBuilderFieldOptions = {
 							@input="setIndexAttribute('date1',$event.target.value)"
 							:value="getIndexAttributeId(field.indexDate1,field.attributeIdDate1,false,null)"
 						>
-							<option :value="null">-</option>
+							<option :value="getIndexAttributeId(null,null,false,null)">-</option>
 							<optgroup
 								v-for="j in field.query.joins"
 								:label="j.index+') '+relationIdMap[j.relationId].name"
@@ -595,7 +595,7 @@ let MyBuilderFieldOptions = {
 							@input="setIndexAttribute('color',$event.target.value)"
 							:value="getIndexAttributeId(field.indexColor,field.attributeIdColor,false,null)"
 						>
-							<option :value="null">-</option>
+							<option :value="getIndexAttributeId(null,null,false,null)">-</option>
 							<optgroup
 								v-for="j in field.query.joins"
 								:label="j.index+') '+relationIdMap[j.relationId].name"

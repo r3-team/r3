@@ -39,6 +39,13 @@ let MyBuilderField = {
 				<span>{{ reference }}</span>
 			</div>
 			
+			<!-- warnings -->
+			<img class="action warning clickable" src="images/warning.png"
+				v-if="!isTemplate && !moveActive && warnings.length !== 0"
+				@click="showWarnings"
+				:title="capGen.warnings"
+			/>
+			
 			<!-- container actions 1 -->
 			<template v-if="!isTemplate && !moveActive && isContainer">
 				<img class="action clickable"
@@ -344,6 +351,25 @@ let MyBuilderField = {
 			}
 			return '';
 		},
+		warnings:(s) => {
+			let out = [];
+			if(s.hasQuery) {
+				if(s.field.query.relationId === null) out.push(s.capApp.warning.queryRelationNotSet);
+				if(s.field.columns.length   === 0)    out.push(s.capApp.warning.queryColumnsNotSet);
+				
+				for(let c of s.field.columns) {
+					if(c.subQuery && c.attributeId === null) {
+						out.push(s.capApp.warning.columnNoSubQueryAttribute);
+						break;
+					}
+				}
+			}
+			if(s.isCalendar) {
+				if(s.field.attributeIdDate0 === null || s.field.attributeIdDate1 === null)
+					out.push(s.capApp.warning.calendarNoDateFromTo);
+			}
+			return out;
+		},
 		
 		// simple
 		hasQuery:      (s) => s.getFieldHasQuery(s.field),
@@ -387,6 +413,18 @@ let MyBuilderField = {
 		// actions
 		openSettings() {
 			this.$emit('field-id-show',this.field.id,'properties');
+		},
+		showWarnings() {
+			this.$store.commit('dialog',{
+				captionBody:`<ul><li>${this.warnings.join('</li><li>')}</li></ul>`,
+				captionTop:this.capGen.warnings,
+				image:'warning.png',
+				buttons:[{
+					caption:this.capGen.button.close,
+					cancel:true,
+					image:'cancel.png'
+				}]
+			});
 		},
 		toggleBool(oldBool) {
 			return !oldBool;

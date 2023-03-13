@@ -133,7 +133,8 @@
 		"token":"Token",
 		"type":"Type",
 		"username":"Username",
-		"version":"Version"
+		"version":"Version",
+		"warnings":"Warnings"
 	},
 	"admin":{
 		"backups":{
@@ -733,6 +734,12 @@
 				"conditions":"Conditions",
 				"descriptionHint":"Description",
 				"effects":"Effects"
+			},
+			"warning":{
+				"calendarNoDateFromTo":"No attribute selected for 'date from' or 'date to'. Both are required for a calendar field to work.",
+				"columnNoSubQueryAttribute":"No relation & attribute chosen for a sub query column.",
+				"queryColumnsNotSet":"No displayed columns. Add any column to show data.",
+				"queryRelationNotSet":"No relation selected. Field has no access to data."
 			},
 			"aggregator":"Aggregate",
 			"autoRenew":"Auto refresh",
