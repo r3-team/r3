@@ -15,6 +15,9 @@
 	border-radius:4px;
 	transition:height 0.1s, margin 0.1s, padding 0.1s, box-shadow 0.1s, border-bottom 0.1s, filter 0.1s;
 }
+.button.adjusts{
+	flex:1 0 auto;
+}
 .button.cancel{
 	background-color:var(--color-cancel);
 }
@@ -66,6 +69,14 @@
 }
 .button span{
 	white-space:nowrap;
+}
+.button.adjusts span{
+	flex:1 0 auto;
+	width:10px;
+	min-width:0px;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	overflow:hidden;
 }
 .button img{
 	width:20px;

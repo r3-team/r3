@@ -1107,6 +1107,7 @@
 }
 .builder-function .contentBox.right{
 	flex:1 1 300px;
+	min-width:420px;
 	max-width:600px;
 }
 .builder-function .function-details{
@@ -1134,11 +1135,9 @@
 	margin:0px 0px 18px;
 }
 .builder-function .placeholders{
+	margin:6px 0px 22px 0px;
 	display:flex;
 	flex-flow:column nowrap;
-}
-.builder-function .placeholders{
-	margin:6px 0px 22px 0px;
 }
 .builder-function .placeholders .title{
 	display:flex;
@@ -1155,11 +1154,44 @@
 .builder-function .placeholders .title span{
 	font-size:120%;
 }
-.builder-function .placeholders span.insert-ref{
+.builder-function .insert-ref{
 	font-style:italic;
 	margin:12px 0px 0px 0px;
 	color:var(--color-error);
 }
+
+.builder-function .entities-title{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	justify-content:space-between;
+	gap:6px;
+	margin:3px 0px 6px 0px;
+}
+.builder-function .entities{
+	display:flex;
+	flex-flow:column nowrap;
+	gap:2px;
+}
+.builder-function .entity{
+	border:1px solid var(--color-border);
+	border-radius:4px;
+	background-color:var(--color-bg);
+}
+.builder-function .entity-title{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	justify-content:space-between;
+}
+.builder-function .entity-children{
+	padding:3px 0px 3px 5px;
+	border-top:1px solid var(--color-border);
+	display:flex;
+	flex-flow:row wrap;
+	gap:3px;
+}
+
 .builder-function .schedule{
 	display:flex;
 	flex-flow:row wrap;

@@ -239,33 +239,6 @@ let MyBuilderRelation = {
 						:relation="relation"
 					/>
 				</div>
-				
-				<!-- TEMP: To be replaced -->
-				<table class="default-inputs" v-if="false">
-					<tbody>
-						<!-- existing records by relationship (different key is important!) -->
-						<template v-if="relationshipAttributes.length !== 0">
-							<tr>
-								<td colspan="999" class="clickable" @click="showExternal = !showExternal">
-									<div class="references">
-										<img :src="displayArrow(showExternal)" />
-										<span>{{ capApp.external.replace('{CNT}',relationshipAttributes.length) }}</span>
-									</div>
-								</td>
-							</tr>
-							<my-builder-attribute
-								v-if="showExternal"
-								v-for="atr in relationshipAttributes"
-								:attribute="atr"
-								:builder-language="builderLanguage"
-								:foreign="true"
-								:key="atr.id+'_outsideIn'"
-								:readonly="true"
-								:relation="relationIdMap[atr.relationId]"
-							/>
-						</template>
-					</tbody>
-				</table>
 			</div>
 			
 			<!-- relation properties -->
@@ -597,7 +570,6 @@ let MyBuilderRelation = {
 			previewRowCount:0,
 			previewValueLength:50,
 			showAttributes:true,
-			showExternal:false,
 			showGraph:false,
 			showIndexes:false,
 			showPolicies:false,
@@ -698,16 +670,6 @@ let MyBuilderRelation = {
 			|| s.retentionCount           !== s.relation.retentionCount
 			|| s.retentionDays            !== s.relation.retentionDays
 			|| JSON.stringify(s.policies) !== JSON.stringify(s.relation.policies),
-		relationshipAttributes:(s) => {
-			let atrs = [];
-			for(let key in s.attributeIdMap) {
-				let atr = s.attributeIdMap[key];
-				
-				if(atr.relationId !== s.id && atr.relationshipId === s.id)
-					atrs.push(atr);
-			}
-			return atrs;
-		},
 		
 		// simple
 		attributesNotFiles:(s) => s.relation === false ? [] : s.relation.attributes.filter(v => !s.isAttributeFiles(v.content)),

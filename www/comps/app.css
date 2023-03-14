@@ -209,6 +209,7 @@ body                                         { --depth:6; }
 .builder-field .builder-columns              { --depth:1; }
 .builder-field .fields-nested                { --depth:1; }
 .builder-field-button                        { --depth:7; }
+.builder-function .entity                    { --depth:5; }
 .builder-modules .item-wrap                  { --depth:5; }
 .builder-menu .nested                        { --depth:6; }
 .builder-articles-assign                     { --depth:2; }
