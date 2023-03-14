@@ -859,6 +859,7 @@
 			"button":{
 				"addNew":"Prefix NOU",
 				"addOld":"Prefix VECHI",
+				"clear":"Clear selection",
 				"details":"Detalii",
 				"template":"Șablon"
 			},

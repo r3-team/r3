@@ -859,6 +859,7 @@
 			"button":{
 				"addNew":"NEW prefix",
 				"addOld":"OLD prefix",
+				"clear":"Clear selection",
 				"details":"Details",
 				"template":"Template"
 			},

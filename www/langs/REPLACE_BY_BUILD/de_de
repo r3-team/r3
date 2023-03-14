@@ -859,6 +859,7 @@
 			"button":{
 				"addNew":"NEW-Präfix",
 				"addOld":"OLD-Präfix",
+				"clear":"Selektion aufheben",
 				"details":"Details",
 				"template":"Vorlage"
 			},

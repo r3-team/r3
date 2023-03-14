@@ -859,6 +859,7 @@
 			"button":{
 				"addNew":"NUOVO prefisso",
 				"addOld":"VECCHIO prefisso",
+				"clear":"Clear selection",
 				"details":"Dettagli",
 				"template":"Template"
 			},

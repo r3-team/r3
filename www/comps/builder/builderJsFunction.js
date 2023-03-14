@@ -163,9 +163,6 @@ let MyBuilderJsFunction = {
 									</option>
 								</select>
 							</div>
-							<span class="insert-ref" v-if="entity === 'field' && entityId !== null">
-								{{ capApp.placeholderInsert }}
-							</span>
 						</div>
 					</template>
 					
@@ -196,9 +193,6 @@ let MyBuilderJsFunction = {
 								</optgroup>
 							</select>
 						</div>
-						<span class="insert-ref" v-if="entity === 'collection' && entityId !== null">
-							{{ capApp.placeholderInsert }}
-						</span>
 					</div>
 					
 					<!-- frontend functions input -->
@@ -239,9 +233,6 @@ let MyBuilderJsFunction = {
 								</td>
 							</tr>
 						</table>
-						<span class="insert-ref" v-if="entity === 'jsFunction' && entityId !== null">
-							{{ capApp.placeholderInsert }}
-						</span>
 					</div>
 					
 					<!-- backend functions input -->
@@ -282,9 +273,6 @@ let MyBuilderJsFunction = {
 								</td>
 							</tr>
 						</table>
-						<span class="insert-ref" v-if="entity === 'pgFunction' && entityId !== null">
-							{{ capApp.placeholderInsert }}
-						</span>
 					</div>
 					
 					<!-- instance functions -->
@@ -313,9 +301,19 @@ let MyBuilderJsFunction = {
 								</td>
 							</tr>
 						</table>
-						<span class="insert-ref" v-if="entity === 'appFunction' && entityId !== null">
+					</div>
+					
+					<div class="column gap" v-if="entityId !== null">
+						<span class="insert-ref">
 							{{ capApp.placeholderInsert }}
 						</span>
+						<div>
+							<my-button image="cancel.png"
+								@trigger="entity = ''; entityId = null"
+								:caption="capApp.button.clear"
+								:cancel="true"
+							/>
+						</div>
 					</div>
 				</template>
 				
