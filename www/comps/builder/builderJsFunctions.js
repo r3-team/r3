@@ -15,7 +15,7 @@ let MyBuilderJsFunctions = {
 		</div>
 		
 		<div class="content" v-if="module">
-			<div class="builder-entry-list">
+			<div class="generic-entry-list">
 				<div class="entry"
 					v-if="!readonly"
 					@click="$emit('createNew','jsFunction')"

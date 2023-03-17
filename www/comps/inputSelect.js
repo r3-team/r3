@@ -10,7 +10,7 @@ let MyInputSelect = {
 			<input class="input" type="text"
 				v-model="textInput"
 				@focus="$emit('focused')"
-				@keyup="getIfNotEmpty"
+				@keyup="inputChange"
 				@keyup.enter="enter"
 				@keyup.esc="escape"
 				:disabled="readonly"
@@ -70,21 +70,16 @@ let MyInputSelect = {
 		}
 	},
 	computed:{
-		selectedInput:{
-			get()  { return this.selected; },
-			set(v) { this.$emit('update:selected',v); }
-		},
-		
 		// stores
 		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		apply(i) {
-			this.selectedInput = this.options[i].id;
+			this.$emit('update:selected',this.options[i].id);
 			this.showDropdown  = false;
 		},
 		clear() {
-			this.selectedInput = null;
+			this.$emit('update:selected',null);
 		},
 		enter() {
 			if(!this.showDropdown)
@@ -98,14 +93,7 @@ let MyInputSelect = {
 			this.$emit('blurred');
 			this.showDropdown = false;
 		},
-		toggle() {
-			if(this.showDropdown) {
-				this.showDropdown = false;
-				return;
-			}
-			this.openDropdown();
-		},
-		getIfNotEmpty() {
+		inputChange() {
 			if(!this.showDropdown && this.textInput === '')
 				return;
 			
@@ -115,6 +103,13 @@ let MyInputSelect = {
 		openDropdown() {
 			this.showDropdown = true;
 			this.$emit('request-data');
+		},
+		toggle() {
+			if(this.showDropdown) {
+				this.showDropdown = false;
+				return;
+			}
+			this.openDropdown();
 		}
 	}
 };

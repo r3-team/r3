@@ -5,31 +5,6 @@
 }
 
 /* generics */
-.builder-table-vertical{
-	border-collapse:separate;
-	border-spacing:0px 6px;
-}
-.builder-table-vertical>tr>td{
-	max-width:420px;
-	padding:10px 15px;
-	vertical-align:top;
-	background-color:var(--color-bg);
-	box-shadow:1px 1px 2px var(--color-shade);
-	border-bottom:1px solid var(--color-border);
-}
-.builder-table-vertical.tight>tr>td{
-	padding:4px 6px 4px 15px;
-}
-.builder-table-vertical>tr>td:first-child{
-	font-size:110%;
-	line-height:150%;
-	border-radius:10px 0px 0px 10px;
-}
-.builder-table-vertical>tr>td:last-child{
-	font-size:110%;
-	line-height:150%;
-	border-radius:0px 10px 10px 0px;
-}
 .builder .builder-sub-container{
 	display:flex;
 	flex-flow:column nowrap;
@@ -39,9 +14,6 @@
 	border:1px solid var(--color-border);
 	border-top:none;
 	border-radius:0px 0px 5px 5px;
-}
-.builder-table-vertical.large>tr>td{
-	max-width:720px;
 }
 .builder img.dragAnchor{
 	height:24px;
@@ -157,66 +129,6 @@
 .builder-new .actions{
 	flex:1 1 auto;
 	margin-top:20px;
-}
-
-
-/* general entries */
-.builder-entry-list{
-	display:flex;
-	flex-flow:column wrap;
-	max-height:100%;
-	align-content:flex-start;
-}
-.builder-entry-list.height-limit{
-	max-height:700px;
-}
-.builder-entry-list .entry{
-	width:380px;
-	height:46px;
-	padding:0px 12px 2px;
-	margin:3px 8px 3px 0px;
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	justify-content:space-between;
-	font-size:100%;
-	color:inherit;
-	border-radius:6px;
-	border-bottom:3px solid var(--color-border);
-	text-decoration:none;
-	background-color:var(--color-bg);
-	box-shadow:1px 1px 3px var(--color-shade);
-	box-sizing:border-box;
-	transition:background-color 0.2s, border-bottom 0.2s, box-shadow 0.2s;
-}
-.builder-entry-list .entry.off{
-	color:var(--color-font-alt);
-}
-.builder-entry-list .entry:not(.off):hover{
-	padding:0px 12px 0px;
-	border-bottom:3px solid var(--color-accent1);
-	box-shadow:1px 1px 5px var(--color-shade);
-}
-.builder-entry-list .entry:not(.off):focus{
-	border-bottom:2px solid var(--color-accent1);
-	box-shadow:1px 1px 7px var(--color-shade);
-}
-.builder-entry-list .entry img.icon{
-	width:18px;
-	height:18px;
-	filter:var(--image-filter);
-}
-.builder-entry-list .entry.off img.icon{
-	filter:var(--image-filter-alt);
-}
-.builder-entry-list .lines{
-	display:flex;
-	flex-flow:column nowrap;
-	gap:5px;
-}
-.builder-entry-list .subtitle{
-	font-size:80%;
-	color:var(--color-font-alt);
 }
 
 

@@ -170,11 +170,11 @@ let MyBuilderRelation = {
 					</div>
 				</div>
 				
-				<div class="builder-entry-list height-limit" v-if="showAttributes">
+				<div class="generic-entry-list height-limit" v-if="showAttributes">
 					<div class="entry"
 						v-if="!readonly"
 						@click="attributeIdEdit = null"
-						:class="{ clickable:!readonly, off:readonly }"
+						:class="{ clickable:!readonly }"
 					>
 						<div class="row gap centered">
 							<img class="icon" src="images/add.png" />
@@ -249,7 +249,7 @@ let MyBuilderRelation = {
 				</div>
 				
 				<template v-if="showRelation">
-					<table class="builder-table-vertical default-inputs">
+					<table class="generic-table-vertical default-inputs">
 						<tr>
 							<td>{{ capGen.name }}</td>
 							<td><input class="long" v-model="name" :disabled="readonly" /></td>

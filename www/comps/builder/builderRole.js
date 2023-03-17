@@ -393,7 +393,7 @@ let MyBuilderRole = {
 					</div>
 				</div>
 				<div class="content padding default-inputs">
-					<table class="builder-table-vertical default-inputs">
+					<table class="generic-table-vertical default-inputs">
 						<tr>
 							<td>{{ capGen.name }}</td>
 							<td><input v-model="name" :disabled="isEveryone || readonly" /></td>

@@ -26,7 +26,7 @@ let MyInputLogin = {
 	emits:['blurred','focused','update:modelValue'],
 	watch:{
 		loginId:{
-			handler:function(valNew,valOld) {
+			handler(valNew,valOld) {
 				if(valNew === null)
 					return this.inputTextSet = '';
 				
@@ -36,7 +36,7 @@ let MyInputLogin = {
 			immediate:true
 		}
 	},
-	data:function() {
+	data() {
 		return {
 			inputText:'',
 			inputTextSet:'',
@@ -45,8 +45,8 @@ let MyInputLogin = {
 	},
 	computed:{
 		loginId:{
-			get:function()  { return this.modelValue; },
-			set:function(v) {
+			get()  { return this.modelValue; },
+			set(v) {
 				this.$emit('update:modelValue',v);
 				
 				if(this.clearInput)
@@ -55,7 +55,7 @@ let MyInputLogin = {
 		}
 	},
 	methods:{
-		get:function() {
+		get() {
 			// if login is set, exclude ID
 			let idsExclude = this.loginId !== null
 				? this.idsExclude.concat([this.loginId]) : this.idsExclude;
@@ -69,7 +69,7 @@ let MyInputLogin = {
 				this.$root.genericError
 			);
 		},
-		getName:function() {
+		getName() {
 			ws.send('login','getNames',{
 				id:this.loginId,
 				noLdapAssign:this.noLdapAssign

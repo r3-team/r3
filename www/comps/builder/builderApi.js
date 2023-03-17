@@ -23,7 +23,7 @@ export {MyBuilderApi as default};
 
 let MyBuilderApiPreview = {
 	name:'my-builder-api-preview',
-	template:`<table class="builder-table-vertical tight fullWidth default-inputs">
+	template:`<table class="generic-table-vertical tight fullWidth default-inputs">
 		<tr>
 			<td>{{ capApp.call }}</td>
 			<td>
@@ -520,7 +520,7 @@ let MyBuilderApi = {
 			
 			<!-- properties -->
 			<div class="content" v-if="tabTarget === 'properties'">
-				<table class="builder-table-vertical tight fullWidth default-inputs">
+				<table class="generic-table-vertical tight fullWidth default-inputs">
 					<tr>
 						<td>{{ capGen.name }}</td>
 						<td><input v-model="name" :disabled="readonly" /></td>

@@ -358,8 +358,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return LoginSet_tx(tx, reqJson)
 		case "setMembers":
 			return LoginSetMembers_tx(tx, reqJson)
-		case "setRecord":
-			return LoginSetRecord_tx(tx, reqJson)
 		}
 	case "loginForm":
 		switch action {

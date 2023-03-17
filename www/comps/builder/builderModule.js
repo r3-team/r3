@@ -100,7 +100,7 @@ let MyBuilderModule = {
 		</div>
 		
 		<div class="content default-inputs">
-			<table class="builder-table-vertical">
+			<table class="generic-table-vertical">
 				<tr>
 					<td>{{ capGen.name }}</td>
 					<td><input v-model="name" :disabled="readonly" :placeholder="capApp.nameHolder" /></td>

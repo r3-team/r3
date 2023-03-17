@@ -39,7 +39,7 @@ let MyBuilderAttribute = {
 			</div>
 			
 			<div class="content default-inputs">
-				<table class="builder-table-vertical">
+				<table class="generic-table-vertical">
 					<tr>
 						<td>{{ capGen.name }}</td>
 						<td>

@@ -305,30 +305,42 @@
 			"validUntil":"Gültig bis"
 		},
 		"login":{
+			"button":{
+				"resetMfa":"MFA zurücksetzen"
+			},
 			"dialog":{
 				"delete":"Bist du sicher, dass du diesen Login löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>",
-				"resetTotp":"Hiermit werden alle Multi-Faktor-Authentifizierungsmethoden für diese Anmeldung zurückgesetzt. Systemzugriff ist dann mit nur Benutzername & Passwort möglich.<br /><br />Möchten Sie fortfahren?"
+				"resetTotp":"Hiermit werden alle Multi-Faktor-Authentifizierungsmethoden (MFA) für diese Anmeldung zurückgesetzt. Systemzugriff ist dann mit nur Benutzername & Passwort möglich.<br /><br />Zurücksetzung der MFA hat keinen Einfluss auf die Ende-zu-Ende-Verschlüsselung.<br /><br />Möchten Sie fortfahren?"
 			},
 			"error":{
 				"uniqueConstraint":"Benutzername muss einzigartig sein"
 			},
+			"hint":{
+				"admin":"Adminberechtigungen erlauben die Verwaltung von Anwendungen und Anmeldungen. Admins können ebenfalls den Wartungs- und Builder-Modus aktivieren.",
+				"active":"Bei Deaktivierung werden aktive Sitzungen beendet.",
+				"isAdmin":"Anmeldung hat Adminberechtigungen.",
+				"isInactive":"Anmeldung ist deaktiviert.",
+				"isLdap":"Anmeldung ist einer LDAP-Verbindung zugewiesen.",
+				"isNoAuth":"Öffentliche Anmeldung ist aktiv.",
+				"languageCode":"Der aktuelle Sprache-Code für die Anmeldung.",
+				"name":"Benutzername für die Anmeldung - muss im System einzigartig sein.",
+				"noAuth":"Öffentliche Anmeldungen brauchen keine Authentifizierung. Systemzugriff ist nur mit einer URL möglich.",
+				"password":"Hiermit wird das aktuelle Password für die Anmeldung überschrieben. Multi-Faktor-Authentifizierung ist davon nicht betroffen. Ende-zu-Ende-Verschlüsselung (E2EE) wird erst wieder verfügbar sein, wenn der Benutzer seinen Backup-Code eingibt.",
+				"records":"Anmeldung sind {COUNT} Anwendungsdatensätze zugeordnet.",
+				"roles":"Anmeldung sind {COUNT} Rollen zugewiesen."
+			},
 			"admin":"Admin",
-			"adminHint":"Plattformadmin",
-			"authentication":"Authentifizierung",
-			"language":"Sprache",
+			"languageCode":"Sprache-Code",
+			"ldap":"LDAP zugewiesen",
 			"ldapAssignActive":"Rollen werden anhand LDAP-Gruppenmitgliedschaften zugewiesen",
-			"mfa":"MFA",
-			"mfaHint":"Multi-Faktor-Authentifizierung",
-			"newLogin":"Neue Anmeldung",
-			"noAuth":"Öffentlich",
-			"noAuthHint":"Kann sich ohne Authentifizierung einloggen",
-			"passwordHint":"Neues Passwort setzen",
-			"passwordHintNoAuth":"Keine Authentifizierung",
-			"recordSelectHint":"...",
+			"noAuth":"Öffentlicher Zugriff",
+			"password":"Neues Passwort setzen",
 			"roles":"Rollen",
 			"roleContentAdmin":"Admin",
 			"roleContentOther":"Besonders",
-			"roleContentUser":"Benutzer"
+			"roleContentUser":"Benutzer",
+			"title":"Anmeldung \"{NAME}\"",
+			"titleNew":"Neue Anmeldung"
 		},
 		"logs":{
 			"contextLabel":{

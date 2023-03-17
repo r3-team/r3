@@ -41,7 +41,7 @@ let MyBuilderForms = {
 		
 		<div class="content default-inputs" v-if="module">
 			
-			<div class="builder-entry-list">
+			<div class="generic-entry-list">
 				<div class="entry"
 					v-if="!readonly"
 					@click="$emit('createNew','form')"

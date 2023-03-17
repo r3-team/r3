@@ -305,30 +305,42 @@
 			"validUntil":"Valabilă până la"
 		},
 		"login":{
+			"button":{
+				"resetMfa":"Reset MFA"
+			},
 			"dialog":{
 				"delete":"Sigur doriți să ștergeți această autentificare?<br/><br/>Această acțiune este ireversibilă.</b>",
-				"resetTotp":"This will reset all multi-factor authentication methods for this login. System access is then possible with only username & password.<br /><br />Do you want to continue?"
+				"resetTotp":"This will reset all multi-factor authentication (MFA) methods for this login. System access is then possible with only username & password.<br /><br />Resetting MFA has no effect on end-to-end encryption.<br /><br />Do you want to continue?"
 			},
 			"error":{
 				"uniqueConstraint":"Numele utilizatorului trebuie sa fie unic"
 			},
+			"hint":{
+				"admin":"Admin privileges include management of applications and users. Admins can also enable maintenance and builder modes.",
+				"active":"When deactivated, active sessions will be terminated.",
+				"isAdmin":"Login has admin privileges.",
+				"isInactive":"Login is deactivated.",
+				"isLdap":"Login is assigned to a LDAP connection.",
+				"isNoAuth":"Public login is enabled.",
+				"languageCode":"Current user language code for this login.",
+				"name":"Login username - must be unique within the system.",
+				"noAuth":"Public logins do not require authentication. System access is possible with only a URL.",
+				"password":"This will overwrite the current password for this login. Multi-factor-authentication is not affected by this change. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
+				"records":"Login has {COUNT} application records assigned.",
+				"roles":"Login has {COUNT} roles assigned."
+			},
 			"admin":"Administrator",
-			"adminHint":"Administrator platformă",
-			"authentication":"Autentificare",
-			"language":"Limba",
+			"languageCode":"Language code",
+			"ldap":"LDAP assigned",
 			"ldapAssignActive":"Rolurile sunt atribuite prin apartenența la grupul LDAP",
-			"mfa":"MFA",
-			"mfaHint":"Multi-factor authentication",
-			"newLogin":"Autentificare nouă",
-			"noAuth":"Public",
-			"noAuthHint":"Poate intra fără autentificare",
-			"passwordHint":"Alege o parolă nouă",
-			"passwordHintNoAuth":"Fără autentificare",
-			"recordSelectHint":"...",
+			"noAuth":"Public access",
+			"password":"Alege o parolă nouă",
 			"roles":"Roluri",
 			"roleContentAdmin":"Admin",
 			"roleContentOther":"Special",
-			"roleContentUser":"User"
+			"roleContentUser":"User",
+			"title":"Login '{NAME}'",
+			"titleNew":"New login"
 		},
 		"logs":{
 			"contextLabel":{

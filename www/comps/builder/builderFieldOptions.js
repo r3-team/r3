@@ -279,7 +279,7 @@ let MyBuilderFieldOptions = {
 		MyBuilderOpenFormInput
 	},
 	template:`<div class="builder-field-options">
-		<table class="builder-table-vertical tight fullWidth default-inputs">
+		<table class="generic-table-vertical tight fullWidth default-inputs">
 			<tr v-if="isButton || isData || isHeader">
 				<td>{{ capGen.title }}</td>
 				<td>

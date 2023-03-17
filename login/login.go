@@ -7,6 +7,7 @@ import (
 	"r3/cache"
 	"r3/config"
 	"r3/db"
+	"r3/handler"
 	"r3/schema"
 	"r3/setting"
 	"r3/tools"
@@ -26,7 +27,9 @@ func Del_tx(tx pgx.Tx, id int64) error {
 }
 
 // get logins with meta data and total count
-func Get(byString string, limit int, offset int, recordRequests []types.LoginAdminRecordRequest) ([]types.LoginAdmin, int, error) {
+func Get(byId int64, byString string, limit int, offset int,
+	recordRequests []types.LoginAdminRecordGet) ([]types.LoginAdmin, int, error) {
+
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
@@ -70,6 +73,9 @@ func Get(byString string, limit int, offset int, recordRequests []types.LoginAdm
 	if byString != "" {
 		qb.Add("WHERE", `l.name ILIKE {NAME}`)
 		qb.AddPara("{NAME}", fmt.Sprintf("%%%s%%", byString))
+	} else if byId != 0 {
+		qb.Add("WHERE", `l.id = {ID}`)
+		qb.AddPara("{ID}", byId)
 	}
 
 	qb.Add("ORDER", "l.name ASC")
@@ -131,6 +137,10 @@ func Get(byString string, limit int, offset int, recordRequests []types.LoginAdm
 	}
 
 	// get total count
+	if byId != 0 {
+		return logins, 1, nil
+	}
+
 	var qb_cnt tools.QueryBuilder
 	qb_cnt.UseDollarSigns()
 	qb_cnt.AddList("SELECT", []string{"COUNT(*)"})
@@ -154,36 +164,36 @@ func Get(byString string, limit int, offset int, recordRequests []types.LoginAdm
 }
 
 // set login with meta data
+// returns created login ID if new login
 func Set_tx(tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Text,
 	languageCode string, name string, pass string, admin bool, noAuth bool,
-	active bool, roleIds []uuid.UUID) error {
+	active bool, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
 
 	if languageCode == "" {
 		languageCode = config.GetString("defaultLanguageCode")
 	}
 
 	if name == "" {
-		return errors.New("name must not be empty")
+		return 0, errors.New("name must not be empty")
 	}
 
-	// usernames are case insensitive
-	name = strings.ToLower(name)
+	name = strings.ToLower(name) // usernames are case insensitive
+	isNew := id == 0             // ID 0 is new login
 
-	// check for existing login
-	var exists bool
-	if err := tx.QueryRow(db.Ctx, `
-		SELECT EXISTS(
-			SELECT name
-			FROM instance.login
-			WHERE id = $1
-		)
-	`, id).Scan(&exists); err != nil {
-		return err
+	if !isNew {
+		// check for existing login
+		var temp string
+		err := tx.QueryRow(db.Ctx, `SELECT name FROM instance.login WHERE id = $1`, id).Scan(&temp)
+		if err == pgx.ErrNoRows {
+			return 0, fmt.Errorf("no login with ID %d", id)
+		}
+		if err != nil {
+			return 0, err
+		}
 	}
 
 	// generate password hash, if password was provided
 	var salt, hash = pgtype.Text{}, pgtype.Text{}
-
 	var saltKdf = tools.RandStringRunes(16)
 
 	if pass != "" {
@@ -194,7 +204,7 @@ func Set_tx(tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Text,
 		hash.Valid = true
 	}
 
-	if !exists {
+	if isNew {
 		if err := tx.QueryRow(db.Ctx, `
 			INSERT INTO instance.login (
 				ldap_id, ldap_key, name, salt, hash,
@@ -205,10 +215,10 @@ func Set_tx(tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Text,
 		`, ldapId, ldapKey, name, &salt, &hash, saltKdf,
 			admin, noAuth, active).Scan(&id); err != nil {
 
-			return err
+			return 0, err
 		}
 		if err := setting.SetDefaults_tx(tx, id, languageCode); err != nil {
-			return err
+			return 0, err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
@@ -217,10 +227,10 @@ func Set_tx(tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Text,
 				no_auth = $5, active = $6
 			WHERE id = $7
 		`, ldapId, ldapKey, name, admin, noAuth, active, id); err != nil {
-			return err
+			return 0, err
 		}
 		if err := setting.SetLanguageCode_tx(tx, id, languageCode); err != nil {
-			return err
+			return 0, err
 		}
 
 		if pass != "" {
@@ -229,11 +239,43 @@ func Set_tx(tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Text,
 				SET salt = $1, hash = $2
 				WHERE id = $3
 			`, &salt, &hash, id); err != nil {
-				return err
+				return 0, err
 			}
 		}
 	}
-	return setRoleIds_tx(tx, id, roleIds)
+
+	// set records
+	for _, record := range records {
+
+		atr, exists := cache.AttributeIdMap[record.AttributeId]
+		if !exists {
+			return 0, handler.ErrSchemaUnknownAttribute(record.AttributeId)
+		}
+		rel := cache.RelationIdMap[atr.RelationId]
+		mod := cache.ModuleIdMap[rel.ModuleId]
+		if !isNew {
+			// remove old record (first to free up unique index)
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				UPDATE "%s"."%s"
+				SET "%s" = null
+				WHERE "%s" = $1
+			`, mod.Name, rel.Name, atr.Name, atr.Name), id); err != nil {
+				return 0, err
+			}
+		}
+
+		// set new record
+		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			UPDATE "%s"."%s"
+			SET "%s" = $1
+			WHERE "%s" = $2
+		`, mod.Name, rel.Name, atr.Name, schema.PkName), id, record.RecordId); err != nil {
+			return 0, err
+		}
+	}
+
+	// set roles
+	return id, setRoleIds_tx(tx, id, roleIds)
 }
 
 // get login to role memberships
@@ -383,8 +425,8 @@ func CreateAdmin(username string, password string) error {
 	}
 	defer tx.Rollback(db.Ctx)
 
-	if err := Set_tx(tx, 0, pgtype.Int4{}, pgtype.Text{}, "", username,
-		password, true, false, true, []uuid.UUID{}); err != nil {
+	if _, err := Set_tx(tx, 0, pgtype.Int4{}, pgtype.Text{}, "", username, password,
+		true, false, true, []uuid.UUID{}, []types.LoginAdminRecordSet{}); err != nil {
 
 		return err
 	}
@@ -460,8 +502,11 @@ func SetLdapLogin_tx(tx pgx.Tx, ldapId int32, ldapKey string, ldapName string,
 		if newLogin {
 			active = true
 		}
-		return id, true, Set_tx(tx, id, ldapIdSql, ldapKeySql,
-			languageCode, ldapName, "", admin, false, ldapActive, roleIds)
+
+		_, err = Set_tx(tx, id, ldapIdSql, ldapKeySql, languageCode, ldapName, "",
+			admin, false, ldapActive, roleIds, []types.LoginAdminRecordSet{})
+
+		return id, true, err
 	}
 	return id, false, nil
 }

@@ -286,7 +286,7 @@ let MyBuilderForm = {
 					</div>
 					
 					<!-- form properties -->
-					<table class="builder-table-vertical tight fullWidth default-inputs" v-if="tabTarget === 'properties'">
+					<table class="generic-table-vertical tight fullWidth default-inputs" v-if="tabTarget === 'properties'">
 						<tr>
 							<td>{{ capGen.name }}</td>
 							<td><input class="long" v-model="name" :disabled="readonly" /></td>

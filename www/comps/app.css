@@ -128,6 +128,10 @@ body                                         { --depth:6; }
 .default-inputs textarea,
 .default-inputs .input-custom                { --depth:0; }
 .default-inputs *:disabled                   { --depth:6; }
+.generic-entry-list .entry                   { --depth:0; }
+.generic-entry-list .entry:not(.off):hover   { --depth:3; }
+.generic-entry-list .entry:not(.off):focus   { --depth:5; }
+.generic-table-vertical td                   { --depth:5; }
 .home .modules-title                         { --depth:0; }
 .home .module                                { --depth:4; }
 .home-wizard                                 { --depth:7; }
@@ -192,8 +196,8 @@ body                                         { --depth:6; }
 .admin-cluster-node                          { --depth:2; }
 .admin-cluster-node img                      { --depth:5; }
 .admin-license .file                         { --depth:1; }
-.admin-logins .role-select                   { --depth:4; }
-.admin-logins .role-select .app-filter       { --depth:0; }
+.admin-logins .role-select                   { --depth:3; }
+.admin-logins .role-select th                { --depth:3; }
 .admin-modules .message                      { --depth:7; }
 .admin-roles .admin-role-title               { --depth:7; }
 .admin-roles .admin-role-members             { --depth:1; }
@@ -214,10 +218,6 @@ body                                         { --depth:6; }
 .builder-menu .nested                        { --depth:6; }
 .builder-articles-assign                     { --depth:2; }
 .builder-articles-body-richtext              { --depth:0; }
-.builder-entry-list .entry                   { --depth:0; }
-.builder-entry-list .entry:not(.off):hover   { --depth:3; }
-.builder-entry-list .entry:not(.off):focus   { --depth:5; }
-.builder-table-vertical td                   { --depth:5; }
 .builder-function .placeholders              { --depth:2; }
 .builder-start .builder-start-box            { --depth:6; }
 .builder-start .builder-start-entity:hover   { --depth:1; }
@@ -386,7 +386,7 @@ h3{
 	overflow:hidden;
 }
 .app-sub-window.under-header{
-	padding-top:60px;
+	padding-top:70px;
 }
 
 /* input block overlay */
@@ -766,6 +766,96 @@ table td.maximum{
 .navigation .entry.router-link-active{
 	background-color:var(--color-accent3-alt);
 }
+
+/* generic record table */
+.generic-table-vertical{
+	border-collapse:separate;
+	border-spacing:0px 6px;
+}
+.generic-table-vertical>tr>td{
+	max-width:420px;
+	padding:10px 15px;
+	vertical-align:top;
+	background-color:var(--color-bg);
+	box-shadow:1px 1px 2px var(--color-shade);
+	border-bottom:1px solid var(--color-border);
+}
+.generic-table-vertical.tight>tr>td{
+	padding:4px 6px 4px 15px;
+}
+.generic-table-vertical>tr>td:first-child{
+	font-size:110%;
+	line-height:150%;
+	border-radius:10px 0px 0px 10px;
+}
+.generic-table-vertical>tr>td:last-child{
+	font-size:110%;
+	line-height:150%;
+	border-radius:0px 10px 10px 0px;
+}
+.generic-table-vertical.large>tr>td{
+	max-width:720px;
+}
+
+/* generic entry lists */
+.generic-entry-list{
+	display:flex;
+	flex-flow:column wrap;
+	max-height:100%;
+	align-content:flex-start;
+}
+.generic-entry-list.height-limit{
+	max-height:700px;
+}
+.generic-entry-list .entry{
+	width:380px;
+	height:46px;
+	padding:0px 12px 2px;
+	margin:3px 8px 3px 0px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	justify-content:space-between;
+	font-size:100%;
+	color:inherit;
+	border-radius:6px;
+	border-bottom:3px solid var(--color-border);
+	text-decoration:none;
+	background-color:var(--color-bg);
+	box-shadow:1px 1px 3px var(--color-shade);
+	box-sizing:border-box;
+	transition:background-color 0.2s, border-bottom 0.2s, box-shadow 0.2s;
+}
+.generic-entry-list.wide .entry{
+	width:500px;
+}
+.generic-entry-list .entry:hover{
+	padding:0px 12px 0px;
+	border-bottom:3px solid var(--color-accent1);
+	box-shadow:1px 1px 5px var(--color-shade);
+}
+.generic-entry-list .entry:focus{
+	border-bottom:2px solid var(--color-accent1);
+	box-shadow:1px 1px 7px var(--color-shade);
+}
+.generic-entry-list .entry img.icon{
+	width:18px;
+	height:18px;
+	filter:var(--image-filter);
+}
+.generic-entry-list .entry.off img.icon{
+	filter:var(--image-filter-alt);
+}
+.generic-entry-list .lines{
+	display:flex;
+	flex-flow:column nowrap;
+	gap:5px;
+}
+.generic-entry-list .subtitle{
+	font-size:80%;
+	color:var(--color-font-alt);
+}
+
 
 /* feedback */
 .feedback{

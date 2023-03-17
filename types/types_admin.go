@@ -36,12 +36,16 @@ type LoginAdmin struct {
 	RoleIds      []uuid.UUID        `json:"roleIds"`
 }
 type LoginAdminRecord struct {
-	Id    pgtype.Int8 `json:"id"`
-	Label string      `json:"label"`
+	Id    pgtype.Int8 `json:"id"`    // record ID
+	Label string      `json:"label"` // record label
 }
-type LoginAdminRecordRequest struct {
+type LoginAdminRecordGet struct {
 	AttributeIdLogin  uuid.UUID `json:"attributeIdLogin"`
 	AttributeIdLookup uuid.UUID `json:"attributeIdLookup"`
+}
+type LoginAdminRecordSet struct {
+	AttributeId uuid.UUID `json:"attributeId"` // login attribute
+	RecordId    int64     `json:"recordId"`
 }
 
 type Ldap struct {

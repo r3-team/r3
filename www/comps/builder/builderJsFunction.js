@@ -318,7 +318,7 @@ let MyBuilderJsFunction = {
 				</template>
 				
 				<template v-if="tabTarget === 'properties'">
-					<table class="builder-table-vertical tight fullWidth">
+					<table class="generic-table-vertical tight fullWidth">
 						<tr>
 							<td>{{ capGen.name }}</td>
 							<td><input v-model="name" :disabled="readonly" /></td>
