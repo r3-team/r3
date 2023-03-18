@@ -1,6 +1,7 @@
 .calendar{
 	display:flex;
 	flex:1 1 auto;
+	box-shadow:1px 1px 4px var(--color-shade);
 }
 
 /* month view */
@@ -166,4 +167,15 @@
 	border-radius:4px;
 	color:var(--color-bg-font);
 	background-color:var(--color-accent3-alt);
+}
+
+
+/* user overwrites */
+.user-clean .calendar:not(.isSingleField){
+	box-shadow:none;
+	border:1px solid var(--color-border);
+	border-radius:5px;
+}
+.user-bordersSquared .calendar{
+	border-radius:0px !important;
 }

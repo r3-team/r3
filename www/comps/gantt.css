@@ -3,6 +3,7 @@
 	display:flex;
 	flex-flow:column nowrap;
     border-radius:3px;
+	box-shadow:1px 1px 4px var(--color-shade);
     overflow:auto;
 }
 .gantt input.zoom-factor{
@@ -163,4 +164,15 @@
 	right:1px;
 	top:9px;
 	bottom:4px;
+}
+
+
+/* user overwrites */
+.user-clean .gantt:not(.isSingleField){
+	box-shadow:none;
+	border:1px solid var(--color-border);
+	border-radius:5px;
+}
+.user-bordersSquared .gantt{
+	border-radius:0px !important;
 }

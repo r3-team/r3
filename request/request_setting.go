@@ -17,9 +17,5 @@ func SettingsSet_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interfac
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, setting.Set_tx(tx, loginId, req.LanguageCode, req.DateFormat,
-		req.SundayFirstDow, req.FontSize, req.BordersAll, req.BordersCorner,
-		req.PageLimit, req.HeaderCaptions, req.Spacing, req.Dark, req.Compact,
-		req.HintUpdateVersion, req.MobileScrollForm, req.WarnUnsaved,
-		req.MenuColored, req.Pattern, req.FontFamily, req.TabRemember)
+	return nil, setting.Set_tx(tx, loginId, req)
 }

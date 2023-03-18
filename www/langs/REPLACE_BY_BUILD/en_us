@@ -1719,6 +1719,7 @@
 		"dateFormat3":"d/m/Y (30/12/2012)",
 		"dateFormat4":"m/d/Y (12/30/2012)",
 		"dark":"Dark mode",
+		"fieldClean":"Field backgrounds",
 		"fontFamily":"Font",
 		"fontSize":"Font size",
 		"headerCaptions":"Show main menu titles",

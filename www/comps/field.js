@@ -62,26 +62,23 @@ let MyField = {
 			
 			<div class="input-box"
 			 	v-click-outside="clickOutside"
-				:class="{ hasCaption:value !== null, disabled:isReadonly }"
+				:class="{ disabled:isReadonly }"
 				:id="getInputFieldName(field.id)"
 			>
 				<div class="caption"
-					v-if="focused || value !== null || isBoolean || isDateInput || isSlider || isRichtext || isCategory || isRelationship || isFiles || isUuid"
+					v-if="hasCaption"
 					:class="{ invalid:showInvalid }"
-				>{{ caption }}</div>
+				>
+					<img src="images/lock.png" v-if="isEncrypted" :title="capApp.dialog.encrypted" />
+					<span>{{ caption }}</span>
+				</div>
 				
-				<div class="input-line">
+				<div class="input-line" :class="{ isSingleField:isAloneInForm || isAloneInTab }">
 					
 					<!-- data field icon -->
 					<img class="field-icon"
-						v-if="iconId && !isRelationship && !isFiles"
+						v-if="iconId && !isRelationship && !isFiles && !isRichtext && !isTextarea"
 						:src="srcBase64(iconIdMap[iconId].file)"
-					/>
-					
-					<!-- encryption indicator -->
-					<img class="field-icon" src="images/lock.png"
-						v-if="isEncrypted"
-						:title="capApp.dialog.encrypted"
 					/>
 					
 					<!-- regular text line input (numeric, strings, etc.) -->
@@ -93,7 +90,7 @@ let MyField = {
 						@click="click"
 						:class="{ invalid:showInvalid }"
 						:disabled="isReadonly"
-						:placeholder="!focused ? caption : ''"
+						:placeholder="!focused && !isCleanUi ? caption : ''"
 						:type="!isPassword || showPassword ? 'text' : 'password'"
 					/>
 					
@@ -130,7 +127,7 @@ let MyField = {
 							v-model="value"
 							:class="{ invalid:showInvalid }"
 							:disabled="isReadonly"
-							:placeholder="!focused ? caption : ''"
+							:placeholder="!focused && !isCleanUi ? caption : ''"
 						/>
 						
 						<!-- preview -->
@@ -158,7 +155,7 @@ let MyField = {
 						@click="click"
 						:class="{ invalid:showInvalid }"
 						:disabled="isReadonly"
-						:placeholder="!focused ? caption : ''"
+						:placeholder="!focused && !isCleanUi ? caption : ''"
 					></textarea>
 					
 					<!-- richtext input -->
@@ -191,7 +188,7 @@ let MyField = {
 						v-model="value"
 						@blurred="blur"
 						@focused="focus"
-						:placeholder="!focused ? caption : ''"
+						:placeholder="!focused && !isCleanUi ? caption : ''"
 						:readonly="isReadonly"
 					/>
 					
@@ -267,7 +264,7 @@ let MyField = {
 						:rowSelect="true"
 					>
 						<template #input-icon>
-							<img class="field-icon"
+							<img class="field-icon inList"
 								v-if="iconId"
 								:src="srcBase64(iconIdMap[iconId].file)"
 							/>
@@ -340,9 +337,9 @@ let MyField = {
 			:layout="field.layout"
 			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 			:isHidden="isHidden"
+			:isSingleField="isAloneInForm || isAloneInTab"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
-			:scrolls="isAloneInForm || isAloneInTab"
 			:usesPageHistory="isAloneInForm && !formIsPopUp"
 		/>
 		
@@ -370,6 +367,7 @@ let MyField = {
 			:indexDate0="field.indexDate0"
 			:indexDate1="field.indexDate1"
 			:isHidden="isHidden"
+			:isSingleField="isAloneInForm || isAloneInTab"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
 			:usesPageHistory="isAloneInForm && !formIsPopUp"
@@ -400,6 +398,7 @@ let MyField = {
 			:indexDate0="field.indexDate0"
 			:indexDate1="field.indexDate1"
 			:isHidden="isHidden"
+			:isSingleField="isAloneInForm || isAloneInTab"
 			:rowSelect="field.openForm !== null"
 			:stepTypeDefault="field.ganttSteps"
 			:stepTypeToggle="field.ganttStepsToggle"
@@ -421,7 +420,7 @@ let MyField = {
 		/>
 		
 		<!-- tabs -->
-		<div class="tabs shade" v-if="isTabs">
+		<div class="tabs" v-if="isTabs">
 			<div class="tabs-entries">
 				<div class="tabs-icon">
 					<img v-if="iconId" :src="srcBase64(iconIdMap[iconId].file)" />
@@ -944,6 +943,9 @@ let MyField = {
 			? false : s.attributeIdMap[s.field.attributeId],
 		customErr:  (s) => typeof s.fieldIdMapError[s.field.id] !== 'undefined'
 			&& s.fieldIdMapError[s.field.id] !== null ? s.fieldIdMapError[s.field.id] : null,
+		hasCaption: (s) => !s.isAloneInTab && (s.focused || s.value !== null || s.isCleanUi || s.isBoolean
+			|| s.isDateInput || s.isSlider || s.isRichtext || s.isCategory || s.isRelationship || s.isFiles || s.isUuid),
+		isCleanUi:  (s) => s.settings.fieldClean,
 		inputRegex: (s) => !s.isData || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
 		showInvalid:(s) => !s.isValid && (s.formBadSave || !s.notTouched),

@@ -110,6 +110,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			-- new user setting
 			ALTER TABLE instance.login_setting ADD COLUMN tab_remember BOOLEAN NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.login_setting ALTER COLUMN tab_remember DROP DEFAULT;
+			ALTER TABLE instance.login_setting ADD COLUMN field_clean BOOLEAN NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.login_setting ALTER COLUMN field_clean DROP DEFAULT;
 			
 			-- new attribute content
 			ALTER TYPE app.attribute_content ADD VALUE 'uuid';

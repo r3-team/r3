@@ -4,12 +4,14 @@
 	border-radius:3px;
 	display:flex;
 	flex-flow:column nowrap;
+	box-shadow:1px 1px 4px var(--color-shade);
 	overflow:auto;
 }
 .list.asInput{
 	min-height:unset;
 	align-self:stretch;
 	justify-content:space-between;
+	box-shadow:none;
 }
 .list.asInput.inputAddShown{
 	margin-bottom:var(--row-height);
@@ -319,12 +321,9 @@
 }
 .list-input-row-empty{
 	position:absolute;
-	padding-left:8px;
 	bottom:2px; /* keep field underline visible */
-	left:0px;
-	right:0px;
-	background-color:var(--color-bg);
-	border-top:1px solid var(--color-border);
+	left:8px;
+	right:2px;
 }
 
 
@@ -412,6 +411,11 @@
 
 
 /* user overwrites */
+.user-clean .list:not(.asInput):not(.isSingleField){
+	box-shadow:none;
+	border:1px solid var(--color-border);
+	border-radius:5px;
+}
 .user-bordersRounded .list-input-row-empty{
 	border-radius:0px 0px 3px 3px;
 }

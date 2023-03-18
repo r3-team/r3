@@ -182,7 +182,7 @@ let MyGantt = {
 		MyInputCollection,
 		MyValueRich
 	},
-	template:`<div class="gantt shade" v-if="ready">
+	template:`<div class="gantt" :class="{ isSingleField:isSingleField }" v-if="ready">
 		
 		<!-- header -->
 		<div class="top lower">
@@ -364,6 +364,7 @@ let MyGantt = {
 		indexDate0:      { type:Number,  required:true }, // index of attribute that provides record date from
 		indexDate1:      { type:Number,  required:true }, // index of attribute that provides record date to
 		isHidden:        { type:Boolean, required:false, default:false },
+		isSingleField:   { type:Boolean, required:false, default:false },
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:true },
 		stepTypeDefault: { type:String,  required:true },

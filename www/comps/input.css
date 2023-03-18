@@ -160,7 +160,7 @@
 .input-dropdown-wrap{
 	height:0px;
 	position:absolute;
-	bottom:-1px;
+	bottom:0px;
 	left:1%;
 	right:1%;
 	overflow:visible !important;

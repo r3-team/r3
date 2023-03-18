@@ -8,6 +8,7 @@ type Settings struct {
 	Compact           bool        `json:"compact"`
 	DateFormat        string      `json:"dateFormat"`
 	Dark              bool        `json:"dark"`
+	FieldClean        bool        `json:"fieldClean"`
 	FontFamily        string      `json:"fontFamily"`
 	FontSize          int         `json:"fontSize"`
 	HeaderCaptions    bool        `json:"headerCaptions"`

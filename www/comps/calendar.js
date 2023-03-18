@@ -569,8 +569,8 @@ let MyCalendarMonth = {
 let MyCalendar = {
 	name:'my-calendar',
 	components:{MyCalendarMonth},
-	template:`<div class="calendar" v-if="ready">
-		<my-calendar-month class="shade"
+	template:`<div class="calendar" :class="{ isSingleField:isSingleField }" v-if="ready">
+		<my-calendar-month
 			v-if="view === 'month'"
 			@day-selected="daySelected"
 			@open-form="(...args) => $emit('open-form',...args)"
@@ -616,6 +616,7 @@ let MyCalendar = {
 		indexDate0:      { type:Number,  required:true },
 		indexDate1:      { type:Number,  required:true },
 		isHidden:        { type:Boolean, required:false, default:false },
+		isSingleField:   { type:Boolean, required:false, default:false },
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:false, default:false },
 		usesPageHistory: { type:Boolean, required:true }

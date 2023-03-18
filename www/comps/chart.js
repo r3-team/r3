@@ -16,7 +16,7 @@ let MyChart = {
 	components:{
 		echarts:VueECharts
 	},
-	template:`<div class="chart shade">
+	template:`<div class="chart">
 		<div class="top lower" v-if="needsHeader || hasChoices">
 			<template v-if="hasChoices">
 				<div class="area" />

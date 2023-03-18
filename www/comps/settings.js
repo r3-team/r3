@@ -1062,6 +1062,10 @@ let MySettings = {
 								<td>{{ capApp.compact }}</td>
 								<td><my-bool v-model="settingsInput.compact" /></td>
 							</tr>
+							<tr>
+								<td>{{ capApp.fieldClean }}</td>
+								<td><my-bool v-model="settingsInput.fieldClean" :reversed="true" /></td>
+							</tr>
 							<tr v-if="!settingsInput.compact">
 								<td>{{ capApp.pageLimit }}</td>
 								<td>

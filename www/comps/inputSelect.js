@@ -24,7 +24,7 @@ let MyInputSelect = {
 					@trigger="clear"
 					:naked="nakedIcons"
 				/>
-				<my-button image="arrowDown.png"
+				<my-button image="pageDown.png"
 					v-if="!readonly"
 					@trigger="toggle"
 					:naked="nakedIcons"

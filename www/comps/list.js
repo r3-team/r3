@@ -50,7 +50,7 @@ let MyList = {
 	template:`<div class="list" ref="content"
 		@keydown="keyDown"
 		v-click-outside="escape"
-		:class="{shade:!isInput, asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly }"
+		:class="{asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly, isSingleField:isSingleField }"
 	>
 		<!-- list as input field (showing record(s) from active field value) -->
 		<template v-if="isInput">
@@ -121,7 +121,6 @@ let MyList = {
 								@trigger="inputTriggerRowRemove(i)"
 								:captionTitle="capApp.inputHintRemove"
 								:naked="true"
-								:tight="true"
 							/>
 							<my-button image="open.png"
 								v-if="inputOpenForm && hasUpdate"
@@ -129,15 +128,13 @@ let MyList = {
 								@trigger-middle="$emit('open-form',r.indexRecordIds['0'],true)"
 								:captionTitle="capApp.inputHintOpen"
 								:naked="true"
-								:tight="true"
 							/>
 							
 							<!-- show dropdown toggle if single input -->
-							<my-button image="arrowDown.png"
+							<my-button image="pageDown.png"
 								v-if="!inputAsCategory && !showInputAddLine && !inputIsReadonly"
 								@trigger="toggleDropdown"
 								:naked="true"
-								:tight="true"
 							/>
 						</div>
 					</td>
@@ -175,14 +172,12 @@ let MyList = {
 										@trigger-middle="$emit('open-form',0,true)"
 										:captionTitle="capApp.inputHintCreate"
 										:naked="true"
-										:tight="true"
 									/>
-									<my-button image="arrowDown.png"
+									<my-button image="pageDown.png"
 										v-if="!inputIsReadonly"
 										@trigger="toggleDropdown"
 										:captionTitle="capApp.inputHintSelect"
 										:naked="true"
-										:tight="true"
 									/>
 								</div>
 							</td>
@@ -369,7 +364,7 @@ let MyList = {
 			<!-- list results as table -->
 			<div class="layoutTable"
 				v-if="layout === 'table'"
-				:class="{ scrolls:scrolls, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
+				:class="{ scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
 				:id="usesPageHistory ? scrollFormId : null"
 			>
 				<table :class="{ 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
@@ -642,8 +637,8 @@ let MyList = {
 		header:         { type:Boolean, required:false, default:true  }, // show list header
 		isInput:        { type:Boolean, required:false, default:false }, // use list as input
 		isHidden:       { type:Boolean, required:false, default:false }, // list is not visible and therefore not loaded/updated
+		isSingleField:  { type:Boolean, required:false, default:false }, // list is single field within a parent (form/tab - not container!)
 		rowSelect:      { type:Boolean, required:false, default:false }, // list rows can be selected (to open record in form)
-		scrolls:        { type:Boolean, required:false, default:false }, // list should scroll its contents (instead of growing)
 		usesPageHistory:{ type:Boolean, required:false, default:false }, // list uses page getters for filtering/sorting/etc.
 		
 		// list as input field
@@ -997,6 +992,8 @@ let MyList = {
 			return state ? 'radio1.png' : 'radio0.png';
 		},
 		displayColorColumn(color) {
+			if(color === null) return '';
+			
 			let bg   = this.colorAdjustBg(color,this.settings.dark);
 			let font = this.colorMakeContrastFont(bg);
 			return `background-color:${bg};color:${font};`;
