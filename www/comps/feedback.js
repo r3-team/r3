@@ -120,9 +120,23 @@ let MyFeedback = {
 		capGen:     (s) => s.$store.getters.captions.generic,
 		isAdmin:    (s) => s.$store.getters.isAdmin
 	},
+	mounted() {
+		window.addEventListener('keydown',this.handleHotkeys);
+	},
+	unmounted() {
+		window.removeEventListener('keydown',this.handleHotkeys);
+	},
 	methods:{
 		// externals
 		getCaptionForModule,
+		
+		// general
+		handleHotkeys(e) {
+			if(e.key === 'Escape') {
+				this.close();
+				e.preventDefault();
+			}
+		},
 		
 		// actions
 		close() {

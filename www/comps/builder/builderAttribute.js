@@ -25,7 +25,7 @@ let MyBuilderAttribute = {
 	},
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-attribute pop-up" v-if="values !== null">
-			<div class="top lower">
+			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" :src="'images/'+getAttributeIcon(values,false)" />
 					<h1 class="title">{{ title }}</h1>
@@ -34,6 +34,27 @@ let MyBuilderAttribute = {
 					<my-button image="cancel.png"
 						@trigger="$emit('close')"
 						:cancel="true"
+					/>
+				</div>
+			</div>
+			<div class="top lower">
+				<div class="area">
+					<my-button image="save.png"
+						@trigger="set"
+						:active="canSave"
+						:caption="isNew ? capGen.button.create : capGen.button.save"
+					/>
+					<my-button image="refresh.png"
+						@trigger="reset"
+						:active="hasChanges"
+						:caption="capGen.button.refresh"
+					/>
+					<my-button image="delete.png"
+						v-if="!isNew"
+						@trigger="delAsk"
+						:active="!readonly"
+						:cancel="true"
+						:caption="capGen.button.delete"
 					/>
 				</div>
 			</div>
@@ -246,27 +267,6 @@ let MyBuilderAttribute = {
 						<td>{{ capApp.contentHint }}</td>
 					</tr>
 				</table>
-				<br />
-				
-				<div class="row">
-					<my-button image="save.png"
-						@trigger="set"
-						:active="canSave"
-						:caption="isNew ? capGen.button.create : capGen.button.save"
-					/>
-					<my-button image="refresh.png"
-						@trigger="reset"
-						:active="hasChanges"
-						:caption="capGen.button.refresh"
-					/>
-					<my-button image="delete.png"
-						v-if="!isNew"
-						@trigger="delAsk"
-						:active="!readonly"
-						:cancel="true"
-						:caption="capGen.button.delete"
-					/>
-				</div>
 			</div>
 		</div>
 	</div>`,

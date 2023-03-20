@@ -292,7 +292,7 @@ let MyBuilder = {
 		</div>
 		
 		<router-view
-			v-if="ready"
+			v-if="isReady"
 			v-show="!showDocs"
 			@createNew="createNew = $event"
 			@hotkey="handleHotkeys"
@@ -328,9 +328,9 @@ let MyBuilder = {
 			createNew:null,     // entity to create (module, relation, ...)
 			filter:'',          // simple text filter for menu
 			hotkeysChild:[],    // hotkeys from child components
+			isReady:false,      // ready to show content
 			moduleId:'',        // selected module ID
 			navigation:'module',
-			ready:false,
 			showDocs:false
 		};
 	},
@@ -341,7 +341,7 @@ let MyBuilder = {
 		if(!this.builderEnabled)
 			return this.$router.push('/');
 		
-		this.ready = true;
+		this.isReady = true;
 	},
 	watch:{
 		$route:{
@@ -349,39 +349,50 @@ let MyBuilder = {
 				if(val.hash === '')
 					this.showDocs = false;
 				
-				if(typeof val.meta.nav === 'undefined')
-					return this.moduleId = '';
+				if(typeof val.meta.nav === 'undefined') {
+					this.moduleId = '';
+					this.isReady  = true;
+					return;
+				}
 				
 				// ascertain navigation
 				this.navigation = val.meta.nav;
 				
 				// ascertain module ID to be loaded
-				let id;
-				switch(val.meta.target) {
-					case 'docs':        id = val.params.id;                                break;
-					case 'module':      id = val.params.id;                                break;
-					case 'start':       id = val.params.id;                                break;
-					case 'api':         id = this.apiIdMap[val.params.id].moduleId;        break;
-					case 'collection':  id = this.collectionIdMap[val.params.id].moduleId; break;
-					case 'form':        id = this.formIdMap[val.params.id].moduleId;       break;
-					case 'js-function': id = this.jsFunctionIdMap[val.params.id].moduleId; break;
-					case 'relation':    id = this.relationIdMap[val.params.id].moduleId;   break;
-					case 'role':        id = this.roleIdMap[val.params.id].moduleId;       break;
-					case 'pg-function': id = this.pgFunctionIdMap[val.params.id].moduleId; break;
+				let isModule    = ['docs','module','start'].includes(val.meta.target);
+				let targetIdMap = this.moduleIdMap;
+				
+				if(!isModule) {
+					switch(val.meta.target) {
+						case 'api':         targetIdMap = this.apiIdMap;        break;
+						case 'collection':  targetIdMap = this.collectionIdMap; break;
+						case 'form':        targetIdMap = this.formIdMap;       break;
+						case 'js-function': targetIdMap = this.jsFunctionIdMap; break;
+						case 'relation':    targetIdMap = this.relationIdMap;   break;
+						case 'role':        targetIdMap = this.roleIdMap;       break;
+						case 'pg-function': targetIdMap = this.pgFunctionIdMap; break;
+					}
 				}
-				this.moduleId = id;
+				
+				// reroute if invalid target (usually navigating back to deleted entity)
+				if(typeof targetIdMap[val.params.id] === 'undefined') {
+					this.$router.replace('/builder/modules');
+					this.isReady = false;
+					return;
+				}
+				
+				// apply module ID from target
+				this.moduleId = isModule ? val.params.id : targetIdMap[val.params.id].moduleId;
 				
 				// set module translation language
-				if(id !== '') {
-					let mod = this.moduleIdMap[id];
-					
-					if(mod.languages.indexOf(this.settings.languageCode) !== -1)
-						this.builderLanguage = this.settings.languageCode;
-					else if(mod.languages.length !== 0)
-						this.builderLanguage = mod.languages[0];
-				} else {
-					this.builderLanguage = 'en_us';
-				}
+				let mod = this.moduleIdMap[this.moduleId];
+				
+				if(mod.languages.indexOf(this.settings.languageCode) !== -1)
+					this.builderLanguage = this.settings.languageCode;
+				else if(mod.languages.length !== 0)
+					this.builderLanguage = mod.languages[0];
+				
+				this.isReady = true;
 			},
 			immediate:true
 		}
