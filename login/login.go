@@ -165,9 +165,9 @@ func Get(byId int64, byString string, limit int, offset int,
 
 // set login with meta data
 // returns created login ID if new login
-func Set_tx(tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Text,
-	languageCode string, name string, pass string, admin bool, noAuth bool,
-	active bool, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
+func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4,
+	ldapKey pgtype.Text, languageCode string, name string, pass string, admin bool,
+	noAuth bool, active bool, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
 
 	if languageCode == "" {
 		languageCode = config.GetString("defaultLanguageCode")
@@ -217,7 +217,23 @@ func Set_tx(tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Text,
 
 			return 0, err
 		}
-		if err := setting.SetDefaults_tx(tx, id, languageCode); err != nil {
+
+		// apply default login settings from login template
+		if !loginTemplateId.Valid {
+			// get GLOBAL template
+			if err := tx.QueryRow(db.Ctx, `
+				SELECT id
+				FROM instance.login_template
+				WHERE name = 'GLOBAL'
+			`).Scan(&loginTemplateId); err != nil {
+				return 0, err
+			}
+		}
+		s, err := setting.Get(pgtype.Int8{}, loginTemplateId)
+		if err != nil {
+			return 0, err
+		}
+		if err := setting.Set_tx(tx, pgtype.Int8{Int64: id, Valid: true}, pgtype.Int8{}, s, true); err != nil {
 			return 0, err
 		}
 	} else {
@@ -227,9 +243,6 @@ func Set_tx(tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Text,
 				no_auth = $5, active = $6
 			WHERE id = $7
 		`, ldapId, ldapKey, name, admin, noAuth, active, id); err != nil {
-			return 0, err
-		}
-		if err := setting.SetLanguageCode_tx(tx, id, languageCode); err != nil {
 			return 0, err
 		}
 
@@ -242,6 +255,11 @@ func Set_tx(tx pgx.Tx, id int64, ldapId pgtype.Int4, ldapKey pgtype.Text,
 				return 0, err
 			}
 		}
+	}
+
+	// apply language code separately
+	if err := setting.SetLanguageCode_tx(tx, id, languageCode); err != nil {
+		return 0, err
 	}
 
 	// set records
@@ -425,8 +443,9 @@ func CreateAdmin(username string, password string) error {
 	}
 	defer tx.Rollback(db.Ctx)
 
-	if _, err := Set_tx(tx, 0, pgtype.Int4{}, pgtype.Text{}, "", username, password,
-		true, false, true, []uuid.UUID{}, []types.LoginAdminRecordSet{}); err != nil {
+	if _, err := Set_tx(tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{},
+		"", username, password, true, false, true, []uuid.UUID{},
+		[]types.LoginAdminRecordSet{}); err != nil {
 
 		return err
 	}
@@ -448,7 +467,8 @@ func ResetTotp_tx(tx pgx.Tx, loginId int64) error {
 // can optionally update login roles
 // returns login ID and whether login needed to be changed
 func SetLdapLogin_tx(tx pgx.Tx, ldapId int32, ldapKey string, ldapName string,
-	ldapActive bool, ldapRoleIds []uuid.UUID, updateRoles bool) (int64, bool, error) {
+	ldapActive bool, ldapRoleIds []uuid.UUID, loginTemplateId pgtype.Int8,
+	updateRoles bool) (int64, bool, error) {
 
 	// existing login details
 	var id int64
@@ -503,8 +523,9 @@ func SetLdapLogin_tx(tx pgx.Tx, ldapId int32, ldapKey string, ldapName string,
 			active = true
 		}
 
-		_, err = Set_tx(tx, id, ldapIdSql, ldapKeySql, languageCode, ldapName, "",
-			admin, false, ldapActive, roleIds, []types.LoginAdminRecordSet{})
+		_, err = Set_tx(tx, id, loginTemplateId, ldapIdSql, ldapKeySql,
+			languageCode, ldapName, "", admin, false, ldapActive, roleIds,
+			[]types.LoginAdminRecordSet{})
 
 		return id, true, err
 	}

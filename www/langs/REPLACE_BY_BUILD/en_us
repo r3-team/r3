@@ -288,6 +288,7 @@
 			"searchDn":"Search DN",
 			"searchDnHint":"Example: OU=User,DC=mycompany,DC=local",
 			"starttls":"Use StartTLS",
+			"template":"Login template",
 			"title":"Create/edit connection",
 			"titleRoles":"Roles per group membership",
 			"tls":"Use SSL/TLS",
@@ -327,7 +328,8 @@
 				"noAuth":"Public logins do not require authentication. System access is possible with only a URL.",
 				"password":"This will overwrite the current password for this login. Multi-factor-authentication is not affected by this change. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
 				"records":"Login has {COUNT} application records assigned.",
-				"roles":"Login has {COUNT} roles assigned."
+				"roles":"Login has {COUNT} roles assigned.",
+				"template":"Predefined settings (display and theme options) are applied from the chosen template."
 			},
 			"admin":"Admin",
 			"languageCode":"Language code",
@@ -339,8 +341,17 @@
 			"roleContentAdmin":"Admin",
 			"roleContentOther":"Special",
 			"roleContentUser":"User",
+			"template":"Login template",
 			"title":"Login '{NAME}'",
 			"titleNew":"New login"
+		},
+		"loginTemplate":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this login template?<br /><br />This action is irreversible.</b>"
+			},
+			"global":"Global login template. Settings from this template are applied to new logins if no other is chosen.",
+			"title":"Login template '{NAME}'",
+			"titleNew":"New login template"
 		},
 		"logs":{
 			"contextLabel":{
@@ -508,6 +519,7 @@
 		"navigationLdaps":"LDAP-Logins",
 		"navigationLicense":"License",
 		"navigationLogins":"Logins",
+		"navigationLoginTemplates":"Login templates",
 		"navigationLogs":"Logs",
 		"navigationMailAccounts":"Email accounts",
 		"navigationMails":"Email spooler",

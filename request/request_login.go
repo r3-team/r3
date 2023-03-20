@@ -148,13 +148,15 @@ func LoginSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 		NoAuth       bool                        `json:"noAuth"`
 		RoleIds      []uuid.UUID                 `json:"roleIds"`
 		Records      []types.LoginAdminRecordSet `json:"records"`
+		TemplateId   pgtype.Int8                 `json:"templateId"`
 	}
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return login.Set_tx(tx, req.Id, req.LdapId, req.LdapKey, req.LanguageCode,
-		req.Name, req.Pass, req.Admin, req.NoAuth, req.Active, req.RoleIds, req.Records)
+	return login.Set_tx(tx, req.Id, req.TemplateId, req.LdapId, req.LdapKey,
+		req.LanguageCode, req.Name, req.Pass, req.Admin, req.NoAuth,
+		req.Active, req.RoleIds, req.Records)
 }
 func LoginSetMembers_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 

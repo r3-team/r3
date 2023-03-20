@@ -163,6 +163,18 @@
 }
 
 
+/* login template */
+.admin-login-template{
+	min-width:800px;
+	overflow:auto;
+}
+.admin-login-template .header-icon{
+	width:16px;
+	height:16px;
+	filter:var(--image-filter);
+}
+
+
 /* backups */
 .admin-backups .note{
 	max-width:500px;

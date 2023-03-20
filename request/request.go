@@ -368,6 +368,15 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "set":
 			return LoginFormSet_tx(tx, reqJson)
 		}
+	case "loginTemplate":
+		switch action {
+		case "del":
+			return LoginTemplateDel_tx(tx, reqJson)
+		case "get":
+			return LoginTemplateGet(reqJson)
+		case "set":
+			return LoginTemplateSet_tx(tx, reqJson)
+		}
 	case "mail":
 		switch action {
 		case "del":

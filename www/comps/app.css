@@ -774,7 +774,7 @@ table td.maximum{
 	border-collapse:separate;
 	border-spacing:0px 6px;
 }
-.generic-table-vertical>tr>td{
+.generic-table-vertical>tr>td:not(.grouping){
 	max-width:420px;
 	padding:10px 15px;
 	vertical-align:top;
@@ -1186,7 +1186,7 @@ table td.maximum{
 	--light-read-less:  calc(78% - (var(--light-depth) * 2.5));
 	--light-contrast:   calc(23% - var(--light-depth));
 	
-	--color-border:     hsl(0,0%,calc(40% - (var(--light-depth) * 4)));
+	--color-border:     hsl(0,0%,calc(32% - (var(--light-depth) * 3.5)));
 	--color-border-bg:  hsl(0,0%,calc(70% - var(--light-depth)));
 	--color-shade:      #000;
 	

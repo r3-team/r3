@@ -14,21 +14,22 @@ import {
 } from './comps/input.js';
 
 // admin
-import MyAdmin             from './comps/admin/admin.js';
-import MyAdminBackups      from './comps/admin/adminBackups.js';
-import MyAdminCluster      from './comps/admin/adminCluster.js';
-import MyAdminConfig       from './comps/admin/adminConfig.js';
-import MyAdminFiles        from './comps/admin/adminFiles.js';
-import MyAdminLdaps        from './comps/admin/adminLdaps.js';
-import MyAdminLicense      from './comps/admin/adminLicense.js';
-import MyAdminLogins       from './comps/admin/adminLogins.js';
-import MyAdminLogs         from './comps/admin/adminLogs.js';
-import MyAdminMails        from './comps/admin/adminMails.js';
-import MyAdminMailAccounts from './comps/admin/adminMailAccounts.js';
-import MyAdminModules      from './comps/admin/adminModules.js';
-import MyAdminRepo         from './comps/admin/adminRepo.js';
-import MyAdminRoles        from './comps/admin/adminRoles.js';
-import MyAdminScheduler    from './comps/admin/adminScheduler.js';
+import MyAdmin               from './comps/admin/admin.js';
+import MyAdminBackups        from './comps/admin/adminBackups.js';
+import MyAdminCluster        from './comps/admin/adminCluster.js';
+import MyAdminConfig         from './comps/admin/adminConfig.js';
+import MyAdminFiles          from './comps/admin/adminFiles.js';
+import MyAdminLdaps          from './comps/admin/adminLdaps.js';
+import MyAdminLicense        from './comps/admin/adminLicense.js';
+import MyAdminLogins         from './comps/admin/adminLogins.js';
+import MyAdminLoginTemplates from './comps/admin/adminLoginTemplates.js';
+import MyAdminLogs           from './comps/admin/adminLogs.js';
+import MyAdminMails          from './comps/admin/adminMails.js';
+import MyAdminMailAccounts   from './comps/admin/adminMailAccounts.js';
+import MyAdminModules        from './comps/admin/adminModules.js';
+import MyAdminRepo           from './comps/admin/adminRepo.js';
+import MyAdminRoles          from './comps/admin/adminRoles.js';
+import MyAdminScheduler      from './comps/admin/adminScheduler.js';
 
 // builder
 import MyBuilder            from './comps/builder/builder.js';
@@ -79,20 +80,21 @@ const MyRouter = VueRouter.createRouter({
 		redirect:'/admin/config',
 		component:MyAdmin,
 		children:[
-			{ path:'backups',     component:MyAdminBackups },
-			{ path:'cluster',     component:MyAdminCluster },
-			{ path:'config',      component:MyAdminConfig },
-			{ path:'files',       component:MyAdminFiles },
-			{ path:'ldaps',       component:MyAdminLdaps },
-			{ path:'license',     component:MyAdminLicense },
-			{ path:'logins',      component:MyAdminLogins },
-			{ path:'logs',        component:MyAdminLogs },
-			{ path:'mails',       component:MyAdminMails },
-			{ path:'mailaccounts',component:MyAdminMailAccounts },
-			{ path:'modules',     component:MyAdminModules },
-			{ path:'repo',        component:MyAdminRepo },
-			{ path:'roles',       component:MyAdminRoles },
-			{ path:'scheduler',   component:MyAdminScheduler }
+			{ path:'backups',        component:MyAdminBackups },
+			{ path:'cluster',        component:MyAdminCluster },
+			{ path:'config',         component:MyAdminConfig },
+			{ path:'files',          component:MyAdminFiles },
+			{ path:'ldaps',          component:MyAdminLdaps },
+			{ path:'license',        component:MyAdminLicense },
+			{ path:'logins',         component:MyAdminLogins },
+			{ path:'logintemplates', component:MyAdminLoginTemplates },
+			{ path:'logs',           component:MyAdminLogs },
+			{ path:'mails',          component:MyAdminMails },
+			{ path:'mailaccounts',   component:MyAdminMailAccounts },
+			{ path:'modules',        component:MyAdminModules },
+			{ path:'repo',           component:MyAdminRepo },
+			{ path:'roles',          component:MyAdminRoles },
+			{ path:'scheduler',      component:MyAdminScheduler }
 		]
 	},{
 		path:'/builder',

@@ -215,7 +215,7 @@ let MyAdminLogins = {
 		},
 		getLdaps() {
 			ws.send('ldap','get',{},true).then(
-				res => this.ldaps = res.payload.ldaps,
+				res => this.ldaps = res.payload,
 				this.$root.genericError
 			);
 		}

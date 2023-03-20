@@ -326,6 +326,63 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- relation comments
 			ALTER TABLE app.relation ADD COLUMN comment text;
 			
+			-- login templates
+			CREATE TABLE instance.login_template (
+				id integer NOT NULL,
+				name character varying(64) NOT NULL,
+				comment text,
+			    CONSTRAINT login_template_pkey SERIAL PRIMARY KEY (id)
+			);
+			ALTER TABLE instance.login_template ADD CONSTRAINT login_template_name_unique
+				UNIQUE (name) DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE instance.login_setting ADD COLUMN login_template_id integer;
+			ALTER TABLE instance.login_setting ADD CONSTRAINT login_setting_login_template_id_fkey
+				FOREIGN KEY (login_template_id)
+				REFERENCES instance.login_template (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE instance.login_setting DROP CONSTRAINT login_setting_pkey;
+			ALTER TABLE instance.login_setting ALTER COLUMN login_id DROP NOT NULL;
+			ALTER TABLE instance.login_setting ADD CONSTRAINT login_setting_login_id_unique
+				UNIQUE (login_id) DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE instance.login_setting ADD CONSTRAINT login_setting_login_template_id_unique
+				UNIQUE (login_template_id) DEFERRABLE INITIALLY DEFERRED;
+			
+			ALTER TABLE instance.login_setting ADD CONSTRAINT login_setting_single_parent CHECK (1 = (
+				CASE WHEN login_id          IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN login_template_id IS NULL THEN 0 ELSE 1 END
+			));
+			
+			CREATE INDEX IF NOT EXISTS fki_login_setting_login_id_fkey
+			    ON instance.login_setting USING btree (login_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_login_setting_login_template_id_fkey
+			    ON instance.login_setting USING btree (login_template_id ASC NULLS LAST);
+			
+			ALTER TABLE instance.ldap ADD COLUMN login_template_id INTEGER;
+			ALTER TABLE instance.ldap ADD CONSTRAINT ldap_login_template_id_fkey
+				FOREIGN KEY (login_template_id)
+				REFERENCES instance.login_template (id) MATCH SIMPLE
+				ON UPDATE SET NULL
+				ON DELETE SET NULL
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_ldap_login_template_id_fkey
+			    ON instance.ldap USING btree (login_template_id ASC NULLS LAST);
+			
+			-- default login template
+			INSERT INTO instance.login_template (name) VALUES ('GLOBAL');
+			INSERT INTO instance.login_setting (login_template_id, language_code, date_format,
+				sunday_first_dow, font_size, borders_all, borders_corner, page_limit, 
+				header_captions, spacing, dark, compact, hint_update_version,
+				mobile_scroll_form, warn_unsaved, menu_colored, pattern, font_family,
+				tab_remember, field_clean)
+			SELECT id, 'en_us', 'Y-m-d', true, 100, false, 'keep', 2000, true, 3, false,
+				true, 0, true, true, false, 'bubbles', 'helvetica', true, true
+			FROM instance.login_template
+			WHERE name = 'GLOBAL';
+			
 			-- new filter condition: field invalid
 			ALTER TYPE app.filter_side_content ADD VALUE 'fieldValid';
 			

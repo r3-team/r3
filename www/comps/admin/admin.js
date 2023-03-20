@@ -30,16 +30,22 @@ let MyAdmin = {
 						<span>{{ capApp.navigationConfig }}</span>
 					</router-link>
 					
-					<!-- user management -->
+					<!-- logins -->
 					<router-link class="entry clickable" tag="div" to="/admin/logins">
 						<img src="images/person.png" />
 						<span>{{ capApp.navigationLogins }}</span>
 					</router-link>
 					
-					<!-- role management -->
+					<!-- roles -->
 					<router-link class="entry clickable" tag="div" to="/admin/roles">
 						<img src="images/admin.png" />
 						<span>{{ capApp.navigationRoles }}</span>
+					</router-link>
+					
+					<!-- login templates -->
+					<router-link class="entry clickable" tag="div" to="/admin/logintemplates">
+						<img src="images/personTemplate.png" />
+						<span>{{ capApp.navigationLoginTemplates }}</span>
 					</router-link>
 					
 					<!-- LDAP -->
@@ -123,7 +129,7 @@ let MyAdmin = {
 		/>
 	</div>`,
 	watch:{
-		$route:function(val) {
+		$route(val) {
 			if(val.hash === '')
 				this.showDocs = false;
 		}
@@ -143,21 +149,22 @@ let MyAdmin = {
 	},
 	computed:{
 		contentTitle:(s) => {
-			if(s.$route.path.includes('backups'))      return s.capApp.navigationBackups;
-			if(s.$route.path.includes('cluster'))      return s.capApp.navigationCluster;
-			if(s.$route.path.includes('config'))       return s.capApp.navigationConfig;
-			if(s.$route.path.includes('docs'))         return s.capApp.navigationDocs;
-			if(s.$route.path.includes('files'))        return s.capApp.navigationFiles;
-			if(s.$route.path.includes('license'))      return s.capApp.navigationLicense;
-			if(s.$route.path.includes('logins'))       return s.capApp.navigationLogins;
-			if(s.$route.path.includes('logs'))         return s.capApp.navigationLogs;
-			if(s.$route.path.includes('ldaps'))        return s.capApp.navigationLdaps;
-			if(s.$route.path.includes('mailaccounts')) return s.capApp.navigationMailAccounts;
-			if(s.$route.path.includes('mails'))        return s.capApp.navigationMails;
-			if(s.$route.path.includes('modules'))      return s.capApp.navigationModules;
-			if(s.$route.path.includes('repo'))         return s.capApp.navigationRepo;
-			if(s.$route.path.includes('roles'))        return s.capApp.navigationRoles;
-			if(s.$route.path.includes('scheduler'))    return s.capApp.navigationScheduler;
+			if(s.$route.path.includes('backups'))        return s.capApp.navigationBackups;
+			if(s.$route.path.includes('cluster'))        return s.capApp.navigationCluster;
+			if(s.$route.path.includes('config'))         return s.capApp.navigationConfig;
+			if(s.$route.path.includes('docs'))           return s.capApp.navigationDocs;
+			if(s.$route.path.includes('files'))          return s.capApp.navigationFiles;
+			if(s.$route.path.includes('license'))        return s.capApp.navigationLicense;
+			if(s.$route.path.includes('logins'))         return s.capApp.navigationLogins;
+			if(s.$route.path.includes('logintemplates')) return s.capApp.navigationLoginTemplates;
+			if(s.$route.path.includes('logs'))           return s.capApp.navigationLogs;
+			if(s.$route.path.includes('ldaps'))          return s.capApp.navigationLdaps;
+			if(s.$route.path.includes('mailaccounts'))   return s.capApp.navigationMailAccounts;
+			if(s.$route.path.includes('mails'))          return s.capApp.navigationMails;
+			if(s.$route.path.includes('modules'))        return s.capApp.navigationModules;
+			if(s.$route.path.includes('repo'))           return s.capApp.navigationRepo;
+			if(s.$route.path.includes('roles'))          return s.capApp.navigationRoles;
+			if(s.$route.path.includes('scheduler'))      return s.capApp.navigationScheduler;
 			return '';
 		},
 		

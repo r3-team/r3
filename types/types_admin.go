@@ -47,25 +47,32 @@ type LoginAdminRecordSet struct {
 	AttributeId uuid.UUID `json:"attributeId"` // login attribute
 	RecordId    int64     `json:"recordId"`
 }
+type LoginTemplateAdmin struct {
+	Id       int64       `json:"id"`
+	Name     string      `json:"name"`
+	Comment  pgtype.Text `json:"comment"`
+	Settings Settings    `json:"settings"`
+}
 
 type Ldap struct {
-	Id              int32      `json:"id"`
-	Name            string     `json:"name"`
-	Host            string     `json:"host"`
-	Port            int        `json:"port"`
-	BindUserDn      string     `json:"bindUserDn"`      // DN of bind user, example: 'CN=readonly,OU=User,DC=test,DC=local'
-	BindUserPw      string     `json:"bindUserPw"`      // password of bind user in clear text
-	SearchClass     string     `json:"searchClass"`     // object class to filter to, example: '(&(objectClass=user))'
-	SearchDn        string     `json:"searchDn"`        // root search DN, example: 'OU=User,DC=test,DC=local'
-	KeyAttribute    string     `json:"keyAttribute"`    // name of attribute used as key, example: 'objectGUID'
-	LoginAttribute  string     `json:"loginAttribute"`  // name of attribute used as login, example: 'sAMAccountName'
-	MemberAttribute string     `json:"memberAttribute"` // name of attribute used as membership, example: 'memberOf'
-	AssignRoles     bool       `json:"assignRoles"`     // assign roles from group membership (see member attribute)
-	MsAdExt         bool       `json:"msAdExt"`         // Microsoft AD extensions (nested group memberships, user account control)
-	Starttls        bool       `json:"starttls"`        // upgrade unencrypted LDAP connection with TLS (STARTTLS)
-	Tls             bool       `json:"tls"`             // connect to LDAP via SSL/TLS (LDAPS)
-	TlsVerify       bool       `json:"tlsVerify"`       // verify TLS connection, can be used to allow non-trusted certificates
-	Roles           []LdapRole `json:"roles"`
+	Id              int32       `json:"id"`
+	LoginTemplateId pgtype.Int8 `json:"loginTemplateId"` // template for new logins (applies login settings)
+	Name            string      `json:"name"`
+	Host            string      `json:"host"`
+	Port            int         `json:"port"`
+	BindUserDn      string      `json:"bindUserDn"`      // DN of bind user, example: 'CN=readonly,OU=User,DC=test,DC=local'
+	BindUserPw      string      `json:"bindUserPw"`      // password of bind user in clear text
+	SearchClass     string      `json:"searchClass"`     // object class to filter to, example: '(&(objectClass=user))'
+	SearchDn        string      `json:"searchDn"`        // root search DN, example: 'OU=User,DC=test,DC=local'
+	KeyAttribute    string      `json:"keyAttribute"`    // name of attribute used as key, example: 'objectGUID'
+	LoginAttribute  string      `json:"loginAttribute"`  // name of attribute used as login, example: 'sAMAccountName'
+	MemberAttribute string      `json:"memberAttribute"` // name of attribute used as membership, example: 'memberOf'
+	AssignRoles     bool        `json:"assignRoles"`     // assign roles from group membership (see member attribute)
+	MsAdExt         bool        `json:"msAdExt"`         // Microsoft AD extensions (nested group memberships, user account control)
+	Starttls        bool        `json:"starttls"`        // upgrade unencrypted LDAP connection with TLS (STARTTLS)
+	Tls             bool        `json:"tls"`             // connect to LDAP via SSL/TLS (LDAPS)
+	TlsVerify       bool        `json:"tlsVerify"`       // verify TLS connection, can be used to allow non-trusted certificates
+	Roles           []LdapRole  `json:"roles"`
 }
 type LdapRole struct {
 	LdapId  int32     `json:"ldapId"`

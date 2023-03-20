@@ -288,6 +288,7 @@
 			"searchDn":"Such-DN",
 			"searchDnHint":"Beispiel: OU=User,DC=mycompany,DC=local",
 			"starttls":"StartTLS verwenden",
+			"template":"Anmeldevorlage,
 			"title":"Verbindung erstellen/bearbeiten",
 			"titleRoles":"Rollen nach Gruppenmitgliedschaft",
 			"tls":"SSL/TLS verwenden",
@@ -309,7 +310,7 @@
 				"resetMfa":"MFA zurücksetzen"
 			},
 			"dialog":{
-				"delete":"Bist du sicher, dass du diesen Login löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>",
+				"delete":"Bist du sicher, dass du diese Anmeldung löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>",
 				"resetTotp":"Hiermit werden alle Multi-Faktor-Authentifizierungsmethoden (MFA) für diese Anmeldung zurückgesetzt. Systemzugriff ist dann mit nur Benutzername & Passwort möglich.<br /><br />Zurücksetzung der MFA hat keinen Einfluss auf die Ende-zu-Ende-Verschlüsselung.<br /><br />Möchten Sie fortfahren?"
 			},
 			"error":{
@@ -327,7 +328,8 @@
 				"noAuth":"Öffentliche Anmeldungen brauchen keine Authentifizierung. Systemzugriff ist nur mit einer URL möglich.",
 				"password":"Hiermit wird das aktuelle Password für die Anmeldung überschrieben. Multi-Faktor-Authentifizierung ist davon nicht betroffen. Ende-zu-Ende-Verschlüsselung (E2EE) wird erst wieder verfügbar sein, wenn der Benutzer seinen Backup-Code eingibt.",
 				"records":"Anmeldung sind {COUNT} Anwendungsdatensätze zugeordnet.",
-				"roles":"Anmeldung sind {COUNT} Rollen zugewiesen."
+				"roles":"Anmeldung sind {COUNT} Rollen zugewiesen.",
+				"template":"Vorausgewählte Einstellungen (Anzeige- & Darstellungsoptionen) der gewählten Vorlage werden angewendet."
 			},
 			"admin":"Admin",
 			"languageCode":"Sprache-Code",
@@ -339,8 +341,17 @@
 			"roleContentAdmin":"Admin",
 			"roleContentOther":"Besonders",
 			"roleContentUser":"Benutzer",
+			"template":"Anmeldevorlage",
 			"title":"Anmeldung \"{NAME}\"",
 			"titleNew":"Neue Anmeldung"
+		},
+		"loginTemplate":{
+			"dialog":{
+				"delete":"Bist du sicher, dass du diese Anmeldevorlage löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>"
+			},
+			"global":"Globale Anmeldevorlage. Einstellungen dieser Vorlage werden für neue Anmeldungen angewendet, wenn keine andere ausgewählt worden ist.",
+			"title":"Anmeldevorlage \"{NAME}\"",
+			"titleNew":"Neue Anmeldevorlage"
 		},
 		"logs":{
 			"contextLabel":{
@@ -508,6 +519,7 @@
 		"navigationLdaps":"LDAP-Anmeldungen",
 		"navigationLicense":"Lizenz",
 		"navigationLogins":"Anmeldungen",
+		"navigationLoginTemplates":"Anmeldevorlagen",
 		"navigationLogs":"Logs",
 		"navigationMailAccounts":"E-Mail-Accounts",
 		"navigationMails":"E-Mail-Warteschlange",

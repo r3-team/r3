@@ -61,7 +61,7 @@ let MyAdminLogin = {
 			/>
 		</div>
 		
-		<div class="contentBox admin-login pop-up" v-if="isReady">
+		<div class="contentBox admin-login pop-up" v-if="inputsReady">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/person.png" />
@@ -196,6 +196,22 @@ let MyAdminLogin = {
 						<td><my-bool v-model="noAuth" :readonly="isLdap" /></td>
 						<td>{{ capApp.hint.noAuth }}</td>
 					</tr>
+					<tr v-if="isNew">
+						<td>
+							<div class="title-cell">
+								<img src="images/personTemplate.png" />
+								<span>{{ capApp.template }}</span>
+							</div>
+						</td>
+						<td>
+							<select v-model="templateId">
+								<option v-for="t in templates" :title="t.comment" :value="t.id">
+									{{ t.name }}
+								</option>
+							</select>
+						</td>
+						<td>{{ capApp.hint.template }}</td>
+					</tr>
 					<tr>
 						<td>
 							<div class="title-cell">
@@ -205,10 +221,7 @@ let MyAdminLogin = {
 						</td>
 						<td>
 							<select v-model="languageCode">
-								<option
-									v-for="l in languageCodes"
-									:value="l"
-								>{{ l }}</option>
+								<option v-for="l in languageCodes" :value="l">{{ l }}</option>
 							</select>
 						</td>
 						<td>{{ capApp.hint.languageCode }}</td>
@@ -310,15 +323,17 @@ let MyAdminLogin = {
 			noAuth:false,
 			records:[],
 			roleIds:[],
+			templateId:null,
 			
 			// states
 			inputKeys:['name','languageCode','active','admin','pass','noAuth','records','roleIds'],
-			isReady:false,
-			recordInput:'', // record lookup input
-			recordList:[],  // record lookup dropdown values
-			roleFilter:'',  // filter for role selection
+			inputsOrg:{},      // map of original input values, key = input key
+			inputsReady:false, // inputs have been loaded
+			recordInput:'',    // record lookup input
+			recordList:[],     // record lookup dropdown values
+			roleFilter:'',     // filter for role selection
 			tabTarget:'properties',
-			valuesOrg:{}, // map of original input values, key = input name
+			templates:[],      // login templates
 			
 			// login form
 			loginFormIndexOpen:null,
@@ -327,11 +342,11 @@ let MyAdminLogin = {
 	},
 	computed:{
 		hasChanges:(s) => {
-			if(!s.isReady)
+			if(!s.inputsReady)
 				return false;
 			
 			for(let k of s.inputKeys) {
-				if(JSON.stringify(s.valuesOrg[k]) !== JSON.stringify(s[k]))
+				if(JSON.stringify(s.inputsOrg[k]) !== JSON.stringify(s[k]))
 					return true;
 			}
 			return false;
@@ -377,6 +392,7 @@ let MyAdminLogin = {
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);
 		this.id = this.loginId;
+		this.getTemplates();
 		
 		// existing login, get values
 		if(this.id !== 0)
@@ -387,7 +403,7 @@ let MyAdminLogin = {
 		for(let lf of this.loginForms) {
 			this.records.push({id:null,label:''});
 		}
-		this.valuesLoaded();
+		this.inputsLoaded();
 	},
 	unmounted() {
 		window.removeEventListener('keydown',this.handleHotkeys);
@@ -409,6 +425,12 @@ let MyAdminLogin = {
 				this.$emit('close');
 				e.preventDefault();
 			}
+		},
+		inputsLoaded() {
+			for(let k of this.inputKeys) {
+				this.inputsOrg[k] = JSON.parse(JSON.stringify(this[k]));
+			}
+			this.inputsReady = true;
 		},
 		
 		// actions
@@ -460,12 +482,6 @@ let MyAdminLogin = {
 			if(add)
 				this.getRecords(loginFormIndex);
 		},
-		valuesLoaded() {
-			for(let k of this.inputKeys) {
-				this.valuesOrg[k] = JSON.parse(JSON.stringify(this[k]));
-			}
-			this.isReady = true;
-		},
 		
 		// backend calls
 		delAsk() {
@@ -512,7 +528,7 @@ let MyAdminLogin = {
 					this.records      = login.records;
 					this.roleIds      = login.roleIds;
 					this.pass         = '';
-					this.valuesLoaded();
+					this.inputsLoaded();
 				},
 				this.$root.genericError
 			);
@@ -532,6 +548,18 @@ let MyAdminLogin = {
 					
 					if(res.payload.length === 1)
 						this.records[loginFormIndex].label = res.payload[0].name;
+				},
+				this.$root.genericError
+			);
+		},
+		getTemplates() {
+			ws.send('loginTemplate','get',{byId:0},true).then(
+				res => {
+					this.templates = res.payload;
+					
+					// apply global template if empty
+					if(this.templateId === null && this.templates.length > 0)
+						this.templateId = this.templates[0].id;
 				},
 				this.$root.genericError
 			);
@@ -556,7 +584,8 @@ let MyAdminLogin = {
 				admin:this.admin,
 				noAuth:this.noAuth,
 				roleIds:this.roleIds,
-				records:records
+				records:records,
+				templateId:this.templateId
 			},true).then(
 				res => {
 					// if login was changed, reauth. or kick client
