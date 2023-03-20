@@ -975,6 +975,8 @@
 			"codeReturnsHintPg":"'text', 'integer',...",
 			"collectionId":"[Select collection]",
 			"entityInput":"Seleziona il segnaposto e fai clic sul corpo della funzione per utilizzare la sintassi <b>upgrade-safe</b>.",
+			"exec":"Execute",
+			"execResponse":"Response",
 			"fieldId":"[Select field]",
 			"form":"Assigned to form",
 			"functionsBackend":"Funzioni backend",

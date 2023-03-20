@@ -975,6 +975,8 @@
 			"codeReturnsHintPg":"\"text\", \"integer\",...",
 			"collectionId":"[Sammlung auswählen]",
 			"entityInput":"Platzhalter selektieren und in den Funktions-Code klicken, um <b>upgrade-sicheren</b> Syntax zu verwenden.",
+			"exec":"Ausführen",
+			"execResponse":"Antwort",
 			"fieldId":"[Feld auswählen]",
 			"form":"An Formular zugewiesen",
 			"functionsBackend":"Backend-Funktionen",

@@ -1027,6 +1027,9 @@
 	display:flex;
 	flex-flow:column nowrap;
 }
+.builder-function .response{
+	min-height:600px;
+}
 .builder-function .input{
 	flex:1 1 auto;
 	max-width:none;

@@ -975,6 +975,8 @@
 			"codeReturnsHintPg":"'text', 'integer',...",
 			"collectionId":"[Select collection]",
 			"entityInput":"Selectați înlocuitor și faceți clic pe corpul funcției pentru a utiliza sintaxa <b>upgrade-safe</b>.",
+			"exec":"Execute",
+			"execResponse":"Response",
 			"fieldId":"[Select field]",
 			"form":"Assigned to form",
 			"functionsBackend":"Funcții back-end",

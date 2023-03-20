@@ -207,9 +207,9 @@ let MyBuilderPgFunction = {
 			
 			<my-tabs
 				v-model="tabTarget"
-				:entries="['content','properties']"
-				:entriesIcon="['images/database.png','images/edit.png']"
-				:entriesText="[capApp.placeholders,capGen.properties]"
+				:entries="tabs.keys"
+				:entriesIcon="tabs.icons"
+				:entriesText="tabs.labels"
 			/>
 			
 			<div class="content padding default-inputs">
@@ -391,6 +391,33 @@ let MyBuilderPgFunction = {
 					</div>
 				</template>
 				
+				<template v-if="tabTarget === 'exec'">
+					<table class="generic-table-vertical tight fullWidth">
+						<tr v-if="execArgInputs.length > 0">
+							<td>{{ capApp.codeArgs }}</td>
+							<td>
+								<div class="column gap">
+									<input class="long"
+										v-model="execArgs[i]"
+										v-for="(a,i) in execArgInputs"
+										:disabled="readonly"
+										:placeholder="a.trim()"
+									/>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.execResponse }}</td>
+							<td><textarea class="long response" v-model="execResponse" disabled></textarea></td>
+						</tr>
+					</table>
+					<my-button image="settingsPlay.png"
+						@trigger="exec"
+						:active="!readonly"
+						:caption="capApp.exec"
+					/>
+				</template>
+				
 				<template v-if="tabTarget === 'properties'">
 					<table class="generic-table-vertical tight fullWidth">
 						<tr>
@@ -420,7 +447,7 @@ let MyBuilderPgFunction = {
 						</tr>
 						<tr v-if="!isTrigger">
 							<td>{{ capApp.codeArgs }}</td>
-							<td><textarea v-model="codeArgs" :disabled="isTrigger || readonly" placeholder="-"></textarea></td>
+							<td><textarea v-model="codeArgs" @keyup="resetExec" :disabled="isTrigger || readonly" placeholder="-"></textarea></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.codeReturns }}</td>
@@ -491,6 +518,10 @@ let MyBuilderPgFunction = {
 			isTrigger:false,
 			schedules:[],
 			
+			// execution
+			execArgs:[],
+			execResponse:'',
+			
 			// states
 			addNew:false,
 			addOld:false,
@@ -518,6 +549,7 @@ let MyBuilderPgFunction = {
 		};
 	},
 	computed:{
+		execArgInputs:(s) => s.codeArgs.trim() === '' ? [] : s.codeArgs.split(','),
 		hasChanges:(s) => s.name !== s.pgFunction.name
 			|| s.codeArgs        !== s.pgFunction.codeArgs
 			|| s.codeFunction    !== s.placeholdersSet(s.pgFunction.codeFunction)
@@ -525,9 +557,21 @@ let MyBuilderPgFunction = {
 			|| s.isFrontendExec  !== s.pgFunction.isFrontendExec
 			|| JSON.stringify(s.schedules) !== JSON.stringify(s.pgFunction.schedules)
 			|| JSON.stringify(s.captions)  !== JSON.stringify(s.pgFunction.captions),
-		
 		modulesData:(s) => s.getDependentModules(s.module,s.modules).filter(v => v.relations.length   !== 0),
 		modulesFnc: (s) => s.getDependentModules(s.module,s.modules).filter(v => v.pgFunctions.length !== 0),
+		tabs:(s) => {
+			let out = {
+				icons:['images/database.png','images/edit.png'],
+				keys:['content','properties'],
+				labels:[s.capApp.placeholders,s.capGen.properties]
+			};
+			if(!s.isTrigger) {
+				out.icons.splice(1,0,'images/settingsPlay.png');
+				out.keys.splice(1,0,'exec');
+				out.labels.splice(1,0,s.capApp.exec);
+			}
+			return out;
+		},
 		
 		// simple
 		module:    (s) => s.pgFunction === false ? false : s.moduleIdMap[s.pgFunction.moduleId],
@@ -648,6 +692,19 @@ let MyBuilderPgFunction = {
 			this.schedules      = JSON.parse(JSON.stringify(this.pgFunction.schedules));
 			this.addNew         = false;
 			this.addOld         = false;
+			
+			if(this.isTrigger && this.tabTarget === 'exec')
+				this.tabTarget = 'content';
+			
+			this.resetExec();
+		},
+		resetExec() {
+			this.execArgs     = [];
+			this.execResponse = '';
+			
+			for(let a of this.execArgInputs) {
+				this.execArgs.push('');
+			}
 		},
 		selectEntity(entity,id) {
 			if(entity === this.entity && id === this.entityId)
@@ -838,6 +895,15 @@ let MyBuilderPgFunction = {
 					this.$root.schemaReload(this.pgFunction.moduleId);
 					this.$router.push('/builder/pg-functions/'+this.pgFunction.moduleId);
 				},
+				this.$root.genericError
+			);
+		},
+		exec() {
+			ws.send('pgFunction','execAny',{
+				id:this.pgFunction.id,
+				args:this.execArgs
+			},true).then(
+				res => this.execResponse = res.payload,
 				this.$root.genericError
 			);
 		},

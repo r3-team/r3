@@ -179,8 +179,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		}
 	case "pgFunction":
 		switch action {
-		case "exec":
-			return PgFunctionExec_tx(tx, reqJson)
+		case "exec": // user may exec non-trigger backend function, available to frontend
+			return PgFunctionExec_tx(tx, reqJson, true)
 		}
 	case "setting":
 		switch action {
@@ -435,6 +435,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		switch action {
 		case "del":
 			return PgFunctionDel_tx(tx, reqJson)
+		case "execAny": // admin may exec any non-trigger backend function
+			return PgFunctionExec_tx(tx, reqJson, false)
 		case "get":
 			return PgFunctionGet(reqJson)
 		case "set":
