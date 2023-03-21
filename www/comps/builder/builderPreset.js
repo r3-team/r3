@@ -1,5 +1,8 @@
 import {isAttributeRelationship} from '../shared/attribute.js';
-import {getNilUuid}              from '../shared/generic.js';
+import {
+	copyValueDialog,
+	getNilUuid
+} from '../shared/generic.js';
 export {MyBuilderPreset as default};
 
 let MyBuilderPresetValue = {
@@ -32,30 +35,25 @@ let MyBuilderPresetValue = {
 	},
 	emits:['set'],
 	computed:{
-		isRelationship:function() {
-			return this.isAttributeRelationship(this.attribute.content);
-		},
-		relationship:function() {
-			return !this.isRelationship
-				? false : this.relationIdMap[this.attribute.relationshipId];
-		},
+		isRelationship:(s) => s.isAttributeRelationship(s.attribute.content),
+		relationship:  (s) => !s.isRelationship ? false : s.relationIdMap[s.attribute.relationshipId],
 		
 		// inputs
 		presetIdReferInput:{
-			get:function()  { return this.presetIdRefer; },
-			set:function(v) { return this.$emit('set',v,this.protected,this.value); }
+			get()  { return this.presetIdRefer; },
+			set(v) { return this.$emit('set',v,this.protected,this.value); }
 		},
 		protectedInput:{
-			get:function()  { return this.protected; },
-			set:function(v) { return this.$emit('set',this.presetIdRefer,v,this.value); }
+			get()  { return this.protected; },
+			set(v) { return this.$emit('set',this.presetIdRefer,v,this.value); }
 		},
 		valueInput:{
-			get:function()  { return this.value; },
-			set:function(v) { return this.$emit('set',this.presetIdRefer,this.protected,v); }
+			get()  { return this.value; },
+			set(v) { return this.$emit('set',this.presetIdRefer,this.protected,v); }
 		},
 		
 		// stores
-		relationIdMap:function() { return this.$store.getters['schema/relationIdMap']; }
+		relationIdMap:(s) => s.$store.getters['schema/relationIdMap']
 	},
 	methods:{
 		isAttributeRelationship
@@ -86,6 +84,12 @@ let MyBuilderPreset = {
 			</td>
 			<td>
 				<input v-model="name" :disabled="readonly" :placeholder="isNew ? capApp.new : ''" />
+			</td>
+			<td>
+				<my-button image="visible1.png"
+					@trigger="copyValueDialog(name,preset.id,preset.id)"
+					:active="!isNew"
+				/>
 			</td>
 			<td><my-bool v-model="protected" :readonly="readonly" /></td>
 			<td class="minimum">
@@ -140,7 +144,7 @@ let MyBuilderPreset = {
 			}}
 		}
 	},
-	data:function() {
+	data() {
 		return {
 			showValues:false,
 			name:this.preset.name,
@@ -149,47 +153,46 @@ let MyBuilderPreset = {
 		};
 	},
 	computed:{
-		hasChanges:function() {
-			if(this.name === '')
+		hasChanges:(s) => {
+			if(s.name === '')
 				return false;
 			
-			return (this.isNew && this.values.length !== 0)
-				|| this.name !== this.preset.name
-				|| this.protected !== this.preset.protected
-				|| JSON.stringify(this.values) !== JSON.stringify(this.preset.values);
+			return (s.isNew && s.values.length !== 0)
+				|| s.name !== s.preset.name
+				|| s.protected !== s.preset.protected
+				|| JSON.stringify(s.values) !== JSON.stringify(s.preset.values);
 		},
-		previewLine:function() {
+		previewLine:(s) => {
 			let items = [];
-			for(let i = 0, j = this.values.length; i < j; i++) {
-				let v = this.values[i];
-				
+			for(let v of s.values) {
 				if(v.value !== '')
 					items.push(v.value);
 			}
 			return items.join(', ');
 		},
-		attributeIdMapValue:function() {
+		attributeIdMapValue:(s) => {
 			let map = {};
-			for(let i = 0, j = this.values.length; i < j; i++) {
-				map[this.values[i].attributeId] = this.values[i];
+			for(let v of s.values) {
+				map[v.attributeId] = v;
 			}
 			return map;
 		},
 		
 		// simple states
-		isNew:function() { return this.preset.id === null; },
+		isNew:(s) => s.preset.id === null,
 		
 		// stores
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.preset; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.preset,
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
+		copyValueDialog,
 		getNilUuid,
 		isAttributeRelationship,
 		
-		childGet:function(atrId,mode) {
+		childGet(atrId,mode) {
 			const exists = typeof this.attributeIdMapValue[atrId] !== 'undefined';
 			
 			switch(mode) {
@@ -205,7 +208,7 @@ let MyBuilderPreset = {
 			}
 			return false;
 		},
-		childSet:function(atrId,presetIdRefer,protec,value) {
+		childSet(atrId,presetIdRefer,protec,value) {
 			let atr = this.attributeIdMap[atrId];
 			
 			// no preset value yet for attribute, create one
@@ -241,7 +244,7 @@ let MyBuilderPreset = {
 		},
 		
 		// backend calls
-		delAsk:function() {
+		delAsk() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.delete,
 				buttons:[{
@@ -255,13 +258,13 @@ let MyBuilderPreset = {
 				}]
 			});
 		},
-		del:function(rel) {
+		del(rel) {
 			ws.send('preset','del',{id:this.preset.id},true).then(
 				() => this.$root.schemaReload(this.relation.moduleId),
 				this.$root.genericError
 			);
 		},
-		set:function() {
+		set() {
 			ws.send('preset','set',{
 				id:this.preset.id,
 				relationId:this.relation.id,

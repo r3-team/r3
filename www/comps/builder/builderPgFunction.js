@@ -535,10 +535,10 @@ let MyBuilderPgFunction = {
 			instanceFunctionIds:[
 				'abort_show_message','clean_up_e2ee_keys','file_link',
 				'files_get','get_name','get_login_id','get_login_language_code',
-				'get_public_hostname','get_role_ids','has_role','has_role_any',
-				'log_error','log_info','log_warning','mail_delete',
-				'mail_delete_after_attach','mail_get_next','mail_send',
-				'update_collection'
+				'get_preset_record_id','get_public_hostname','get_role_ids',
+				'has_role','has_role_any','log_error','log_info','log_warning',
+				'mail_delete','mail_delete_after_attach','mail_get_next',
+				'mail_send','update_collection'
 			],
 			showHolderFncInstance:false,
 			showHolderFncModule:false,

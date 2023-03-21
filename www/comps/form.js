@@ -405,16 +405,18 @@ let MyForm = {
 		exposedFunctions:(s) => {
 			return {
 				// simple functions
-				block_inputs:     (v) => s.blockInputs = v,
-				copy_to_clipboard:(v) => navigator.clipboard.writeText(v),
-				get_language_code:()  => s.settings.languageCode,
-				get_login_id:     ()  => s.loginId,
-				get_record_id:    (i) => typeof s.indexMapRecordId[i] !== 'undefined'
+				block_inputs:        (v) => s.blockInputs = v,
+				copy_to_clipboard:   (v) => navigator.clipboard.writeText(v),
+				get_language_code:   ()  => s.settings.languageCode,
+				get_login_id:        ()  => s.loginId,
+				get_preset_record_id:(v) => typeof s.presetIdMapRecordId[v] !== 'undefined'
+					? s.presetIdMapRecordId[v] : null,
+				get_record_id:       (i) => typeof s.indexMapRecordId[i] !== 'undefined'
 					? s.indexMapRecordId[i] : -1,
-				get_role_ids:     ()  => s.access.roleIds,
-				go_back:          ()  => window.history.back(),
-				has_role:         (v) => s.access.roleIds.includes(v),
-				open_form:        (formId,recordId,newTab,popUp,maxY,maxX) =>
+				get_role_ids:        ()  => s.access.roleIds,
+				go_back:             ()  => window.history.back(),
+				has_role:            (v) => s.access.roleIds.includes(v),
+				open_form:           (formId,recordId,newTab,popUp,maxY,maxX) =>
 					s.openForm(recordId,{
 						formIdOpen:formId,
 						popUp:popUp,

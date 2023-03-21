@@ -393,7 +393,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX IF NOT EXISTS fki_query_filter_side_content_fkey
 			    ON app.query_filter_side USING btree (content ASC NULLS LAST);
 			
-			-- add function to retrieve all nested presets inside queries
+			-- add function to retrieve all nested presets inside queries (for schema checks)
 			CREATE OR REPLACE FUNCTION app.get_preset_ids_inside_queries(query_ids_in uuid[])
 			    RETURNS uuid[]
 			    LANGUAGE 'plpgsql'
@@ -429,6 +429,23 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				
 				RETURN preset_ids;
 			END;
+			$BODY$;
+			
+			-- add new instance function: get record ID from preset
+			CREATE OR REPLACE FUNCTION instance.get_preset_record_id(preset_id_in UUID)
+			    RETURNS text
+			    LANGUAGE 'plpgsql'
+			    COST 100
+			    IMMUTABLE PARALLEL UNSAFE
+			AS $BODY$
+				DECLARE
+				BEGIN
+					RETURN (
+						SELECT record_id_wofk
+						FROM instance.preset_record
+						WHERE preset_id = preset_id_in
+					);
+				END;
 			$BODY$;
 			
 			-- add references for PKs as PG indexes (used for API)

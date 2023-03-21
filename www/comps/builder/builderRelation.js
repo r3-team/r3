@@ -444,6 +444,7 @@ let MyBuilderRelation = {
 						<tr>
 							<th>{{ capGen.actions }}</th>
 							<th>{{ capGen.name }}</th>
+							<th>{{ capGen.id }}</th>
 							<th>{{ capApp.presetProtected }}</th>
 							<th>{{ capApp.presetValues }}</th>
 							<th>{{ capApp.presetValuesPreview }}</th>
