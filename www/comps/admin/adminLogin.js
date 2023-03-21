@@ -51,7 +51,7 @@ let MyAdminLogin = {
 		>
 			<my-form ref="popUpForm"
 				@close="loginFormIndexOpen = null"
-				@record-updated="updateLoginRecord(loginFormIndexOpen,$event,true)"
+				@record-updated="updateLoginRecord(loginFormIndexOpen,$event,true);loginFormIndexOpen = null"
 				:allowDel="false"
 				:allowNew="false"
 				:formId="loginForms[loginFormIndexOpen].formId"
@@ -212,20 +212,6 @@ let MyAdminLogin = {
 						</td>
 						<td>{{ capApp.hint.template }}</td>
 					</tr>
-					<tr>
-						<td>
-							<div class="title-cell">
-								<img src="images/languages.png" />
-								<span>{{ capApp.languageCode }}</span>
-							</div>
-						</td>
-						<td>
-							<select v-model="languageCode">
-								<option v-for="l in languageCodes" :value="l">{{ l }}</option>
-							</select>
-						</td>
-						<td>{{ capApp.hint.languageCode }}</td>
-					</tr>
 					<tr v-if="!isLdap">
 						<td>
 							<div class="title-cell">
@@ -316,7 +302,6 @@ let MyAdminLogin = {
 			ldapId:null,
 			ldapKey:null,
 			name:'',
-			languageCode:'',
 			active:true,
 			admin:false,
 			pass:'',
@@ -326,7 +311,7 @@ let MyAdminLogin = {
 			templateId:null,
 			
 			// states
-			inputKeys:['name','languageCode','active','admin','pass','noAuth','records','roleIds'],
+			inputKeys:['name','active','admin','pass','noAuth','records','roleIds'],
 			inputsOrg:{},      // map of original input values, key = input key
 			inputsReady:false, // inputs have been loaded
 			recordInput:'',    // record lookup input
@@ -379,7 +364,6 @@ let MyAdminLogin = {
 		isNew:     (s) => s.id     === 0,
 		
 		// stores
-		languageCodes:     (s) => s.$store.getters['schema/languageCodes'],
 		modules:           (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
 		moduleIdMapOptions:(s) => s.$store.getters['schema/moduleIdMapOptions'],
@@ -399,7 +383,6 @@ let MyAdminLogin = {
 			return this.get();
 		
 		// new login, set defaults
-		this.languageCode = this.config.defaultLanguageCode;
 		for(let lf of this.loginForms) {
 			this.records.push({id:null,label:''});
 		}
@@ -518,16 +501,15 @@ let MyAdminLogin = {
 					if(res.payload.logins.length !== 1) return;
 					
 					let login = res.payload.logins[0];
-					this.ldapId       = login.ldapId;
-					this.ldapKey      = login.ldapKey;
-					this.name         = login.name;
-					this.active       = login.active;
-					this.admin        = login.admin;
-					this.noAuth       = login.noAuth;
-					this.languageCode = login.languageCode;
-					this.records      = login.records;
-					this.roleIds      = login.roleIds;
-					this.pass         = '';
+					this.ldapId  = login.ldapId;
+					this.ldapKey = login.ldapKey;
+					this.name    = login.name;
+					this.active  = login.active;
+					this.admin   = login.admin;
+					this.noAuth  = login.noAuth;
+					this.records = login.records;
+					this.roleIds = login.roleIds;
+					this.pass    = '';
 					this.inputsLoaded();
 				},
 				this.$root.genericError
@@ -579,7 +561,6 @@ let MyAdminLogin = {
 				ldapKey:this.ldapKey,
 				name:this.name,
 				pass:this.pass,
-				languageCode:this.languageCode,
 				active:this.active,
 				admin:this.admin,
 				noAuth:this.noAuth,

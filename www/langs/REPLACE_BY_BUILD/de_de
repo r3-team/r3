@@ -323,7 +323,6 @@
 				"isInactive":"Anmeldung ist deaktiviert.",
 				"isLdap":"Anmeldung ist einer LDAP-Verbindung zugewiesen.",
 				"isNoAuth":"Öffentliche Anmeldung ist aktiv.",
-				"languageCode":"Der aktuelle Sprache-Code für die Anmeldung.",
 				"name":"Benutzername für die Anmeldung - muss im System einzigartig sein.",
 				"noAuth":"Öffentliche Anmeldungen brauchen keine Authentifizierung. Systemzugriff ist nur mit einer URL möglich.",
 				"password":"Hiermit wird das aktuelle Password für die Anmeldung überschrieben. Multi-Faktor-Authentifizierung ist davon nicht betroffen. Ende-zu-Ende-Verschlüsselung (E2EE) wird erst wieder verfügbar sein, wenn der Benutzer seinen Backup-Code eingibt.",
@@ -332,7 +331,6 @@
 				"template":"Vorausgewählte Einstellungen (Anzeige- & Darstellungsoptionen) der gewählten Vorlage werden angewendet."
 			},
 			"admin":"Admin",
-			"languageCode":"Sprache-Code",
 			"ldap":"LDAP zugewiesen",
 			"ldapAssignActive":"Rollen werden anhand LDAP-Gruppenmitgliedschaften zugewiesen",
 			"noAuth":"Öffentlicher Zugriff",

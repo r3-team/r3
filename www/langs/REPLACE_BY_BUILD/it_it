@@ -323,7 +323,6 @@
 				"isInactive":"Login is deactivated.",
 				"isLdap":"Login is assigned to a LDAP connection.",
 				"isNoAuth":"Public login is enabled.",
-				"languageCode":"Current user language code for this login.",
 				"name":"Login username - must be unique within the system.",
 				"noAuth":"Public logins do not require authentication. System access is possible with only a URL.",
 				"password":"This will overwrite the current password for this login. Multi-factor-authentication is not affected by this change. End-to-end encryption (E2EE) will be unavailable until user provides the associated backup code.",
@@ -332,7 +331,6 @@
 				"template":"Predefined settings (display and theme options) are applied from the chosen template."
 			},
 			"admin":"Admin",
-			"languageCode":"Language code",
 			"ldap":"LDAP assigned",
 			"ldapAssignActive":"I ruoli vengono assegnati tramite l'appartenenza ai gruppi LDAP",
 			"noAuth":"Public access",

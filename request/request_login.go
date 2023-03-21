@@ -137,26 +137,25 @@ func LoginGetRecords(reqJson json.RawMessage) (interface{}, error) {
 func LoginSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
-		Id           int64                       `json:"id"`
-		LdapId       pgtype.Int4                 `json:"ldapId"`
-		LdapKey      pgtype.Text                 `json:"ldapKey"`
-		Name         string                      `json:"name"`
-		Pass         string                      `json:"pass"`
-		LanguageCode string                      `json:"languageCode"`
-		Active       bool                        `json:"active"`
-		Admin        bool                        `json:"admin"`
-		NoAuth       bool                        `json:"noAuth"`
-		RoleIds      []uuid.UUID                 `json:"roleIds"`
-		Records      []types.LoginAdminRecordSet `json:"records"`
-		TemplateId   pgtype.Int8                 `json:"templateId"`
+		Id         int64                       `json:"id"`
+		LdapId     pgtype.Int4                 `json:"ldapId"`
+		LdapKey    pgtype.Text                 `json:"ldapKey"`
+		Name       string                      `json:"name"`
+		Pass       string                      `json:"pass"`
+		Active     bool                        `json:"active"`
+		Admin      bool                        `json:"admin"`
+		NoAuth     bool                        `json:"noAuth"`
+		RoleIds    []uuid.UUID                 `json:"roleIds"`
+		Records    []types.LoginAdminRecordSet `json:"records"`
+		TemplateId pgtype.Int8                 `json:"templateId"`
 	}
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
 	return login.Set_tx(tx, req.Id, req.TemplateId, req.LdapId, req.LdapKey,
-		req.LanguageCode, req.Name, req.Pass, req.Admin, req.NoAuth,
-		req.Active, req.RoleIds, req.Records)
+		req.Name, req.Pass, req.Admin, req.NoAuth, req.Active, req.RoleIds,
+		req.Records)
 }
 func LoginSetMembers_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 

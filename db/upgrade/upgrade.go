@@ -328,10 +328,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			-- login templates
 			CREATE TABLE instance.login_template (
-				id integer NOT NULL,
+				id SERIAL NOT NULL,
 				name character varying(64) NOT NULL,
 				comment text,
-			    CONSTRAINT login_template_pkey SERIAL PRIMARY KEY (id)
+			    CONSTRAINT login_template_pkey PRIMARY KEY (id)
 			);
 			ALTER TABLE instance.login_template ADD CONSTRAINT login_template_name_unique
 				UNIQUE (name) DEFERRABLE INITIALLY DEFERRED;
@@ -424,7 +424,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				AND   s.content  = 'subQuery';
 			
 				IF array_length(query_ids_sub,1) <> 0 THEN
-					preset_ids := array_cat(preset_ids, presets.get_preset_ids_for_query(query_ids_sub));
+					preset_ids := array_cat(preset_ids, app.get_preset_ids_inside_queries(query_ids_sub));
 				END IF;
 				
 				RETURN preset_ids;

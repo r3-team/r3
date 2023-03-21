@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"math/rand"
 	"r3/cache"
-	"r3/config"
 	"r3/db"
 	"r3/handler"
 	"r3/schema"
@@ -37,11 +36,10 @@ func Get(byId int64, byString string, limit int, offset int,
 
 	var qb tools.QueryBuilder
 	qb.UseDollarSigns()
-	qb.AddList("SELECT", []string{"l.id", "l.ldap_id", "l.ldap_key", "l.name",
-		"l.admin", "l.no_auth", "l.active", "ls.language_code"})
+	qb.AddList("SELECT", []string{"l.id", "l.ldap_id", "l.ldap_key",
+		"l.name", "l.admin", "l.no_auth", "l.active"})
 
 	qb.Set("FROM", "instance.login AS l")
-	qb.Add("JOIN", "INNER JOIN instance.login_setting AS ls ON ls.login_id = l.id")
 
 	// resolve requests for login records (records connected to logins via login attribute)
 	parts := make([]string, 0)
@@ -58,8 +56,8 @@ func Get(byId int64, byString string, limit int, offset int,
 		}
 
 		// if attribute exists, everything else does too
-		rel, _ := cache.RelationIdMap[atrLogin.RelationId]
-		mod, _ := cache.ModuleIdMap[rel.ModuleId]
+		rel := cache.RelationIdMap[atrLogin.RelationId]
+		mod := cache.ModuleIdMap[rel.ModuleId]
 
 		parts = append(parts, fmt.Sprintf(`SELECT COALESCE((SELECT CONCAT("%s",'%s',"%s") FROM "%s"."%s" WHERE "%s" = l.id),'')`,
 			schema.PkName, separator, atrLookup.Name, mod.Name, rel.Name, atrLogin.Name))
@@ -96,8 +94,8 @@ func Get(byId int64, byString string, limit int, offset int,
 		var l types.LoginAdmin
 		var records []string
 
-		if err := rows.Scan(&l.Id, &l.LdapId, &l.LdapKey, &l.Name, &l.Admin,
-			&l.NoAuth, &l.Active, &l.LanguageCode, &records); err != nil {
+		if err := rows.Scan(&l.Id, &l.LdapId, &l.LdapKey, &l.Name,
+			&l.Admin, &l.NoAuth, &l.Active, &records); err != nil {
 
 			return logins, 0, err
 		}
@@ -166,12 +164,8 @@ func Get(byId int64, byString string, limit int, offset int,
 // set login with meta data
 // returns created login ID if new login
 func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4,
-	ldapKey pgtype.Text, languageCode string, name string, pass string, admin bool,
-	noAuth bool, active bool, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
-
-	if languageCode == "" {
-		languageCode = config.GetString("defaultLanguageCode")
-	}
+	ldapKey pgtype.Text, name string, pass string, admin bool, noAuth bool,
+	active bool, roleIds []uuid.UUID, records []types.LoginAdminRecordSet) (int64, error) {
 
 	if name == "" {
 		return 0, errors.New("name must not be empty")
@@ -255,11 +249,6 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 				return 0, err
 			}
 		}
-	}
-
-	// apply language code separately
-	if err := setting.SetLanguageCode_tx(tx, id, languageCode); err != nil {
-		return 0, err
 	}
 
 	// set records
@@ -444,7 +433,7 @@ func CreateAdmin(username string, password string) error {
 	defer tx.Rollback(db.Ctx)
 
 	if _, err := Set_tx(tx, 0, pgtype.Int8{}, pgtype.Int4{}, pgtype.Text{},
-		"", username, password, true, false, true, []uuid.UUID{},
+		username, password, true, false, true, []uuid.UUID{},
 		[]types.LoginAdminRecordSet{}); err != nil {
 
 		return err
@@ -472,7 +461,7 @@ func SetLdapLogin_tx(tx pgx.Tx, ldapId int32, ldapKey string, ldapName string,
 
 	// existing login details
 	var id int64
-	var nameEx, languageCode string
+	var nameEx string
 	var roleIds []uuid.UUID
 	var admin, active bool
 
@@ -480,7 +469,7 @@ func SetLdapLogin_tx(tx pgx.Tx, ldapId int32, ldapKey string, ldapName string,
 	var rolesEqual pgtype.Bool
 
 	err := tx.QueryRow(db.Ctx, `
-		SELECT r1.id, r1.name, s.language_code, r1.admin, r1.active, r1.roles,
+		SELECT r1.id, r1.name, r1.admin, r1.active, r1.roles,
 			(r1.roles <@ r2.roles AND r1.roles @> r2.roles) AS equal
 		FROM (
 			SELECT *, (
@@ -493,14 +482,11 @@ func SetLdapLogin_tx(tx pgx.Tx, ldapId int32, ldapKey string, ldapName string,
 			AND l.ldap_key = $2::text
 		) AS r1
 		
-		INNER JOIN instance.login_setting AS s
-			ON s.login_id = r1.id
-		
 		INNER JOIN (
 			SELECT $3::uuid[] AS roles
 		) AS r2 ON true
 	`, ldapId, ldapKey, ldapRoleIds).Scan(&id, &nameEx,
-		&languageCode, &admin, &active, &roleIds, &rolesEqual)
+		&admin, &active, &roleIds, &rolesEqual)
 
 	if err != nil && err != pgx.ErrNoRows {
 		return 0, false, err
@@ -524,7 +510,7 @@ func SetLdapLogin_tx(tx pgx.Tx, ldapId int32, ldapKey string, ldapName string,
 		}
 
 		_, err = Set_tx(tx, id, loginTemplateId, ldapIdSql, ldapKeySql,
-			languageCode, ldapName, "", admin, false, ldapActive, roleIds,
+			ldapName, "", admin, false, ldapActive, roleIds,
 			[]types.LoginAdminRecordSet{})
 
 		return id, true, err
