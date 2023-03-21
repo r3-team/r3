@@ -386,6 +386,51 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- new filter condition: field invalid
 			ALTER TYPE app.filter_side_content ADD VALUE 'fieldValid';
 			
+			-- missing index: query filter side preset & content
+			CREATE INDEX IF NOT EXISTS fki_query_filter_side_preset_id_fkey
+			    ON app.query_filter_side USING btree (preset_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_query_filter_side_content_fkey
+			    ON app.query_filter_side USING btree (content ASC NULLS LAST);
+			
+			-- add function to retrieve all nested presets inside queries
+			CREATE OR REPLACE FUNCTION app.get_preset_ids_inside_queries(query_ids_in uuid[])
+			    RETURNS uuid[]
+			    LANGUAGE 'plpgsql'
+				IMMUTABLE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+				preset_ids    UUID[];
+				query_ids_sub UUID[];
+			BEGIN
+				IF array_length(query_ids_in,1) = 0 THEN
+					RETURN preset_ids;
+				END IF;
+			
+				-- collect preset directly
+				SELECT ARRAY_AGG(preset_id) INTO preset_ids
+				FROM app.query_filter_side
+				WHERE query_id = ANY(query_ids_in)
+				AND   content  = 'preset';
+			
+				-- collect presets from filters inside sub queries
+				SELECT ARRAY_AGG(q.id) INTO query_ids_sub
+				FROM app.query_filter_side AS s
+				JOIN app.query AS q
+					ON  q.query_filter_query_id = s.query_id
+					AND q.query_filter_position = s.query_filter_position
+					AND q.query_filter_side     = s.side
+				WHERE s.query_id = ANY(query_ids_in)
+				AND   s.content  = 'subQuery';
+			
+				IF array_length(query_ids_sub,1) <> 0 THEN
+					preset_ids := array_cat(preset_ids, presets.get_preset_ids_for_query(query_ids_sub));
+				END IF;
+				
+				RETURN preset_ids;
+			END;
+			$BODY$;
+			
 			-- add references for PKs as PG indexes (used for API)
 			ALTER TABLE app.pg_index ADD COLUMN primary_key bool NOT NULL DEFAULT false;
 			ALTER TABLE app.pg_index ALTER COLUMN primary_key DROP DEFAULT;

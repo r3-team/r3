@@ -182,7 +182,7 @@ let MyLogin = {
 		loginReady:  { type:Boolean, required:true }  // can login
 	},
 	emits:['authenticated'],
-	data:function() {
+	data() {
 		return {
 			// inputs
 			mfaTokens:[],     // list of TOTP tokens to choose from, [{id:12,name:'My Phone'},{...}]
@@ -278,7 +278,7 @@ let MyLogin = {
 		productionMode:   (s) => s.$store.getters.productionMode
 	},
 	watch:{
-		loginReady:function(v) {
+		loginReady(v) {
 			if(!v) return;
 			
 			// authenticate via login getter, if set
@@ -312,7 +312,7 @@ let MyLogin = {
 				return this.authenticateByToken();
 		}
 	},
-	mounted:function() {
+	mounted() {
 		// overwrite language by browser setting
 		if(this.languages.includes(window.navigator.language))
 			this.language = window.navigator.language;

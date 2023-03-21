@@ -322,14 +322,16 @@ let MyFilterSide = {
 				<!-- preset input -->
 				<select v-model="presetId" v-if="!columnsMode && isPreset">
 					<option :value="null"></option>
-					<optgroup
-						v-for="r in module.relations.filter(v => v.presets.length !== 0)"
-						:label="r.name"
-					>
-						<option v-for="p in r.presets.filter(v => v.protected)" :value="p.id">
-							{{ p.name }}
-						</option>
-					</optgroup>
+					<template v-for="m in getDependentModules(module,modules)">
+						<optgroup
+							v-for="r in m.relations.filter(v => v.presets.filter(p => p.protected).length !== 0)"
+							:label="m.name + '.' + r.name"
+						>
+							<option v-for="p in r.presets.filter(v => v.protected)" :value="p.id">
+								{{ p.name }}
+							</option>
+						</optgroup>
+					</template>
 				</select>
 				
 				<!-- role input -->

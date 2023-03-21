@@ -1091,8 +1091,7 @@ let MyBuilderFieldOptions = {
 			
 			let presets = !s.field.outsideIn || nm
 				? s.relationIdMap[s.attributeIdMap[trgAtrId].relationshipId].presets
-				: s.relationIdMap[s.attributeIdMap[trgAtrId].relationId].presets
-			;
+				: s.relationIdMap[s.attributeIdMap[trgAtrId].relationId].presets;
 			
 			let map = {};
 			for(let i = 0, j = presets.length; i < j; i++) {
