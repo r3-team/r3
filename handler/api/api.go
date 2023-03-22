@@ -259,8 +259,9 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 					SELECT "%s"
 					FROM "%s"."%s"
 					WHERE "%s" = ANY($1)
+					AND   "%s" IS NOT NULL -- ignore empty references
 				)
-			`, atrNameLookup, mod.Name, rel.Name, atrNameFilter),
+			`, atrNameLookup, mod.Name, rel.Name, atrNameFilter, atrNameLookup),
 				relationIndexMapRecordIds[join.IndexFrom]).Scan(&ids); err != nil {
 
 				abort(http.StatusServiceUnavailable, err, handler.ErrGeneral)
