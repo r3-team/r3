@@ -1331,30 +1331,12 @@ let MyForm = {
 					});
 			}
 			
-			// process filters and remove ones for join indexes that are not available
-			let filters = this.getQueryFiltersProcessed(
-				this.form.query.filters,this.joinsIndexMap);
-			
-			for(let i = 0, j = filters.length; i < j; i++) {
-				let f = filters[i];
-				
-				if((f.side0.attributeId !== null && !joinIndexes.includes(f.side0.attributeIndex))
-					|| (f.side1.attributeId !== null && !joinIndexes.includes(f.side1.attributeIndex))) {
-					
-					filters.splice(i,1);
-					i--; j--;
-				}
-			}
-			
+			// record is empty, clear attribute values from all joined relations
 			if(recordId === null) {
-				// reset index attribute values
-				for(let i = 0, j = expressions.length; i < j; i++) {
-					let e = expressions[i];
-					
+				for(let e of expressions) {
 					this.valueSet(
 						this.getIndexAttributeId(
-							e.index,e.attributeId,
-							e.outsideIn,e.attributeIdNm
+							e.index,e.attributeId,e.outsideIn,e.attributeIdNm
 						),
 						null,true,false
 					);
@@ -1362,17 +1344,33 @@ let MyForm = {
 				return;
 			}
 			
+			// remove filters for non-available joins
+			// then process filters (to encapsule final filters correctly)
+			// lastly add filter for the record itself
+			let removeInvalid = function(filters) {
+				let out = [];
+				for(let f of filters) {
+					if((f.side0.attributeId !== null && !joinIndexes.includes(f.side0.attributeIndex))
+						|| (f.side1.attributeId !== null && !joinIndexes.includes(f.side1.attributeIndex))) {
+						continue;
+					}
+					out.push(f);
+				}
+				return out;
+			};
+			
+			let filters = this.getQueryFiltersProcessed(
+				removeInvalid(JSON.parse(JSON.stringify(this.form.query.filters))),this.joinsIndexMap);
+			
+			filters.push(this.getQueryAttributePkFilter(this.relationId,recordId,join.index,false));
+			
 			this.triggerEventBefore('open');
 			ws.send('data','get',{
 				relationId:join.relationId,
 				indexSource:join.index,
 				joins:joins,
 				expressions:expressions,
-				filters:	filters.concat([
-					this.getQueryAttributePkFilter(
-						this.relationId,recordId,join.index,false
-					)
-				]),
+				filters:filters,
 				getPerm:true
 			},true).then(
 				res => {
