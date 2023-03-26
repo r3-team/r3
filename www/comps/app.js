@@ -434,8 +434,10 @@ let MyApp = {
 		// session control
 		sessionInvalid() {
 			this.$store.commit('local/loginKeyAes',null);
+			this.$store.commit('local/loginKeySalt',null);
 			this.$store.commit('local/token','');
 			this.$store.commit('local/tokenKeep',false);
+			this.$store.commit('loginEncryption',false);
 			this.$store.commit('loginPrivateKey',null);
 			this.$store.commit('loginPrivateKeyEnc',null);
 			this.$store.commit('loginPrivateKeyEncBackup',null);

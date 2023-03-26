@@ -323,6 +323,7 @@ let MyLogin = {
 		// clear token & login key, if available but not to be kept
 		if(!this.tokenKeep && this.token !== '') {
 			this.$store.commit('local/loginKeyAes',null);
+			this.$store.commit('local/loginKeySalt',null);
 			this.$store.commit('local/token','');
 		}
 	},
