@@ -77,8 +77,13 @@ let MyInputFiles = {
 		>
 		<!-- header -->
 		<div v-if="!dragActive" class="input-files-header default-inputs">
-			<div class="row">
+			<div class="row centered">
 				<slot name="input-icon" />
+	   			<transition name="fade_out">
+					<div v-if="progress !== 100">
+						{{ progress + '%' }}
+					</div>
+				</transition>
 				<my-button image="files.png"
 					v-if="!unsavedSelected && fileIdsSelected.length !== 0"
 					@trigger="copyFilesSelected"
@@ -131,12 +136,6 @@ let MyInputFiles = {
 					<input type="file" multiple="multiple"
 						@change="upload($event.target.files)"
 					/>
-					
-		   			<transition name="fade_out">
-						<div v-if="progress !== 100" class="counter">
-							{{ progress + '%' }}
-						</div>
-					</transition>
 				</div>
 				
 				<!-- toggle all -->
@@ -690,17 +689,13 @@ let MyInputFiles = {
 			let maxSize = this.attributeIdMap[this.attributeId].length;
 			let updateTotal = () => {
 				let total = 0;
-				for(let i = 0, j = files.length; i < j; i++) {
-					total += files[i].hasProgress;
+				for(let f of files) {
+					total += f.hasProgress;
 				}
 				this.progress = Math.floor(total / files.length);
 			}
 			
-			for(let i = 0, j = files.length; i < j; i++) {
-				
-				// check file
-				let file = files[i];
-				
+			for(let file of files) {
 				if(maxSize !== 0 && Math.floor(file.size/1024) > maxSize) {
 					file.hasProgress = 100;
 					this.$root.genericError(this.capApp.tooLarge.replace(
@@ -710,10 +705,9 @@ let MyInputFiles = {
 				}
 				
 				// upload file
-				file.hasProgress = 0;
-				
 				let formData = new FormData();
 				let xhr      = new XMLHttpRequest();
+				file.hasProgress = 0;
 				
 				xhr.upload.onprogress = function(event) {
 					if(event.lengthComputable) {
