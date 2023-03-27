@@ -68,8 +68,12 @@ let MyBuilderFormStateEffect = {
 	},
 	methods:{
 		changeTarget(target) {
-			if(target === 'field') this.update('tabId',null);
-			else                   this.update('fieldId',null);
+			this.$emit('update:modelValue',{
+				fieldId:null,
+				newState:'default',
+				tabId:null
+			});
+			this.target = target;
 		},
 		update(name,value) {
 			let v = JSON.parse(JSON.stringify(this.effect));
@@ -134,7 +138,7 @@ let MyBuilderFormState = {
 					@remove="remove('effects',i)"
 					:entityIdMapRef="entityIdMapRef"
 					:fieldIdMap="fieldIdMap"
-					:key="'effect'+i"
+					:key="getEffectKey(i,state.effects[i])"
 					:modelValue="state.effects[i]"
 				/>
 			</div>
@@ -209,6 +213,9 @@ let MyBuilderFormState = {
 				newState:'default'
 			});
 			this.$emit('update:modelValue',v);
+		},
+		getEffectKey(i,e) {
+			return e.tabId !== null ? `effect_${i}_${e.tabId}` : `effect_${i}_${e.field_id}`;
 		},
 		remove(name,i) {
 			let v = JSON.parse(JSON.stringify(this.state));
