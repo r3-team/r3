@@ -569,13 +569,12 @@ let MyBuilderQuery = {
 				v-model="relationIdInput"
 			>
 				<option :value="null">-</option>
+				<option v-for="rel in module.relations" :value="rel.id">{{ rel.name }}</option>
 				<optgroup
-					v-for="mod in getDependentModules(module,modules)"
+					v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id)"
 					:label="mod.name"
 				>
-					<option v-for="rel in mod.relations"
-						:value="rel.id"
-					>
+					<option v-for="rel in mod.relations" :value="rel.id">
 						{{ rel.name }}
 					</option>
 				</optgroup>
