@@ -202,6 +202,13 @@ let MyBuilderRelation = {
 							</div>
 						</div>
 						<div class="row centered">
+							<my-button image="lock.png"
+								v-if="atr.encrypted"
+								:active="false"
+								:captionTitle="capApp.attributeEncrypted"
+								:naked="true"
+								:tight="true"
+							/>
 							<my-button
 								v-if="atr.length !== 0"
 								:active="false"

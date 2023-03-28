@@ -1161,6 +1161,7 @@
 			},
 			"attributes":"Attribute ({CNT})",
 			"attributeContent":"Wertetyp",
+			"attributeEncrypted":"Wert ist Ende-zu-Ende verschlüsselt",
 			"attributeLength":"Max. Länge/Größe",
 			"attributeNoIcon":"Kein Icon festgelegt",
 			"attributeNotNullable":"Muss Wert haben",
