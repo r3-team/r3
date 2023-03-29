@@ -13,6 +13,7 @@ import (
 
 var (
 	access_mx = sync.Mutex{}
+	debug     = false
 	nodeId    = pgtype.UUID{} // ID of the current node
 
 	outputCli bool // write logs also to command line
@@ -119,6 +120,12 @@ func Get(dateFrom pgtype.Int8, dateTo pgtype.Int8, limit int, offset int,
 	return logs, total, nil
 }
 
+func SetDebug(state bool) {
+	access_mx.Lock()
+	defer access_mx.Unlock()
+
+	debug = state
+}
 func SetOutputCli(state bool) {
 	access_mx.Lock()
 	defer access_mx.Unlock()
@@ -159,7 +166,7 @@ func write(level int, context string, message string, err error) {
 		return
 	}
 
-	if level > levelActive {
+	if !debug && level > levelActive {
 		return
 	}
 

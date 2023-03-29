@@ -62,6 +62,7 @@ var (
 	cli struct {
 		adminCreate      string
 		configFile       string
+		debug            bool
 		dynamicPort      bool
 		imageMagick      string
 		http             bool
@@ -105,6 +106,7 @@ func main() {
 	flag.BoolVar(&cli.http, "http", false, "Start with HTTP (not encrypted, for testing/development only, combined with -run)")
 	flag.BoolVar(&cli.open, "open", false, fmt.Sprintf("Open URL of %s in default browser (combined with -run)", appName))
 	flag.BoolVar(&cli.run, "run", false, fmt.Sprintf("Run %s from within this console (see 'config.json' for configuration)", appName))
+	flag.BoolVar(&cli.debug, "debug", false, "Logs all events regardless of configured log level (combined with -run)")
 	flag.BoolVar(&cli.serviceInstall, "install", false, fmt.Sprintf("Install %s service", appName))
 	flag.StringVar(&cli.serviceName, "servicename", appName, "Specify name of service to manage (to (un)install, start or stop service)")
 	flag.BoolVar(&cli.serviceStart, "start", false, fmt.Sprintf("Start %s service", appName))
@@ -113,6 +115,11 @@ func main() {
 	flag.StringVar(&cli.setData, "setdata", "", "Write to config file: Data directory (platform files and database if stand-alone)")
 	flag.StringVar(&cli.wwwPath, "wwwpath", "", "(Development) Use web files from given path instead of embedded ones")
 	flag.Parse()
+
+	// enable debug mode
+	if cli.debug {
+		log.SetDebug(true)
+	}
 
 	// define service and service logger
 	svcDisplay := fmt.Sprintf("%s platform", appName)
