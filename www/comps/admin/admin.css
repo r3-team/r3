@@ -118,21 +118,59 @@
 .admin-logins .login-record-input input{
 	margin-right:5px;
 }
-.admin-logins .role-select{
-	max-width:1100px;
-	min-width:300px;
-	margin:-4px 5px 12px;
-	border:1px solid var(--color-border);
-	border-radius:0px 0px 9px 9px;
-	background-color:var(--color-bg);
-	overflow:hidden;
-}
-.admin-logins .role-select .role-content{
-	border-left:1px solid var(--color-border);
-}
 .admin-logins .module-icon{
 	width:24px;
 	margin-right:9px;
+	filter:var(--image-filter);
+}
+.admin-login{
+	min-width:1000px;
+	max-width:1200px;
+	min-height:600px;
+	overflow:auto;
+}
+.admin-login .content{
+	display:flex;
+	flex-flow:column nowrap;
+}
+.admin-login .role-select{
+	margin-top:5px;
+	border-bottom:1px solid var(--color-border);
+}
+.admin-login .role-select td{
+	padding:0px 4px !important;
+}
+.admin-login .role-select td:first-child{
+	padding-left:12px !important;
+}
+.admin-login .role-select tr.grouping td:first-child{
+	padding:4px 4px 4px 12px !important;
+}
+.admin-login .role-select td.role-content{
+	border-left:1px solid var(--color-border);
+}
+.admin-login .title-cell{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:3px;
+}
+.admin-login .title-cell>img{
+	width:16px;
+	height:16px;
+	margin-right:6px;
+	filter:var(--image-filter);
+}
+
+
+/* login template */
+.admin-login-template{
+	min-width:800px;
+	overflow:auto;
+}
+.admin-login-template .header-icon{
+	width:16px;
+	height:16px;
 	filter:var(--image-filter);
 }
 

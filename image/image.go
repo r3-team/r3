@@ -149,7 +149,7 @@ func processFile(fileId uuid.UUID, ext string, src string, dst string) {
 
 	// text based, drawn thumbnails
 	case "cfg", "conf", "css", "csv", "go", "html", "ini", "java", "js",
-		"json", "log", "md", "php", "sql", "txt", "xml":
+		"json", "log", "md", "php", "pl", "ps1", "py", "sql", "txt", "xml":
 
 		textThumb := ""
 		textLines := 30
@@ -180,7 +180,7 @@ func processFile(fileId uuid.UUID, ext string, src string, dst string) {
 			"-annotate", "+10+40", fmt.Sprintf("%s", textThumb), dst}
 
 	default:
-		returnErr = fmt.Errorf("unsupported file extension '%s'", ext)
+		log.Info("imager", fmt.Sprintf("skipped unsupported file extension '%s'", ext))
 		return
 	}
 

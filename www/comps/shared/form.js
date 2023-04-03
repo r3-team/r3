@@ -5,9 +5,9 @@ import {
 	rsaDecrypt
 } from './crypto.js';
 import {
-	getDateAtUtcZero,
-	getDateShifted,
-	getUnixFromDate
+	getUnixNowDate,
+	getUnixNowDatetime,
+	getUnixNowTime
 } from './time.js';
 
 export async function getRowsDecrypted(rows,expressions) {
@@ -226,17 +226,12 @@ export function getInputFieldName(fieldId) {
 
 export function getResolvedPlaceholders(value) {
 	switch(value) {
-		case '{CURR_TIME}':
-			let now = new Date();
-			let d   = new Date(0);
-			d.setHours(now.getHours(),now.getMinutes(),now.getSeconds());
-			return getUnixFromDate(getDateShifted(d,false));
-		break;
-		case '{CURR_DATETIME}':  return getUnixFromDate(new Date()); break;
-		case '{CURR_DATE}':      return getUnixFromDate(getDateAtUtcZero(new Date())); break;
-		case '{CURR_DATE_YYYY}': return new Date().getFullYear(); break;
+		case '{CURR_TIME}':      return getUnixNowTime();          break;
+		case '{CURR_DATE}':      return getUnixNowDate();          break;
+		case '{CURR_DATETIME}':  return getUnixNowDatetime();      break;
+		case '{CURR_DATE_YYYY}': return new Date().getFullYear();  break;
 		case '{CURR_DATE_MM}':   return (new Date().getMonth())+1; break;
-		case '{CURR_DATE_DD}':   return new Date().getDate(); break;
+		case '{CURR_DATE_DD}':   return new Date().getDate();      break;
 	}
 	return value;
 };

@@ -8,7 +8,7 @@ import (
 	"r3/login"
 	"r3/tools"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func PrepareDbIfNew() error {
@@ -95,6 +95,23 @@ func renewDbUserPw_tx(tx pgx.Tx) error {
 	}
 	return nil
 }
+
+// for later inits
+/*
+	create default login template
+	INSERT INTO instance.login_template (name)
+	VALUES ('GLOBAL');
+
+	INSERT INTO instance.login_setting (login_template_id, language_code, date_format,
+		sunday_first_dow, font_size, borders_all, borders_corner, page_limit,
+		header_captions, spacing, dark, compact, hint_update_version,
+		mobile_scroll_form, warn_unsaved, menu_colored, pattern, font_family,
+		tab_remember, field_clean)
+	SELECT id, 'en_us', 'Y-m-d', true, 100, false, 'keep', 2000, true, 3, false,
+		true, 0, true, true, false, 'bubbles', 'helvetica', true, true
+	FROM instance.login_template
+	WHERE name = 'GLOBAL';
+*/
 
 // instance initalized to 3.0
 func initInstanceValues_tx(tx pgx.Tx) error {

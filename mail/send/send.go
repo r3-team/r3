@@ -13,7 +13,6 @@ import (
 	"r3/types"
 	"strings"
 
-	"github.com/jackc/pgtype"
 	"github.com/jordan-wright/email"
 )
 
@@ -98,8 +97,8 @@ func do(m types.Mail) error {
 	var err error
 	var ma types.MailAccount
 
-	if m.AccountId.Status == pgtype.Present {
-		ma, err = cache.GetMailAccount(m.AccountId.Int, accountMode)
+	if m.AccountId.Valid {
+		ma, err = cache.GetMailAccount(m.AccountId.Int32, accountMode)
 	} else {
 		ma, err = cache.GetMailAccountAny(accountMode)
 	}
@@ -131,7 +130,7 @@ func do(m types.Mail) error {
 	}
 
 	// parse attachments from file attribute, if set
-	if m.RecordId.Status == pgtype.Present && m.AttributeId.Status == pgtype.Present {
+	if m.RecordId.Valid && m.AttributeId.Valid {
 
 		atr, exists := cache.AttributeIdMap[m.AttributeId.Bytes]
 		if !exists {
@@ -152,8 +151,7 @@ func do(m types.Mail) error {
 			)
 			FROM instance_file."%s" AS r
 			WHERE r.record_id = $1
-		`, schema.GetFilesTableName(atr.Id)),
-			m.RecordId.Int)
+		`, schema.GetFilesTableName(atr.Id)), m.RecordId.Int64)
 
 		if err != nil {
 			return err

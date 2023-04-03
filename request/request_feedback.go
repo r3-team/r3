@@ -4,8 +4,8 @@ import (
 	"encoding/json"
 	"r3/repo"
 
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5/pgtype"
+	"github.com/jackc/pgx/v5"
 )
 
 func FeedbackSend_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {

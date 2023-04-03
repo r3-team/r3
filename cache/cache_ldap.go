@@ -13,7 +13,6 @@ var (
 )
 
 func GetLdapIdMap() map[int32]types.Ldap {
-
 	ldap_mx.Lock()
 	defer ldap_mx.Unlock()
 	return ldapIdMap

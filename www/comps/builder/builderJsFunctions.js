@@ -15,10 +15,11 @@ let MyBuilderJsFunctions = {
 		</div>
 		
 		<div class="content" v-if="module">
-			<div class="builder-entry-list">
+			<div class="generic-entry-list">
 				<div class="entry"
-					@click="$emit('createNew',readonly ? null : 'jsFunction')"
-					:class="{ clickable:!readonly, off:readonly }"
+					v-if="!readonly"
+					@click="$emit('createNew','jsFunction')"
+					:class="{ clickable:!readonly }"
 				>
 					<div class="row gap centered">
 						<img class="icon" src="images/add.png" />
@@ -38,7 +39,7 @@ let MyBuilderJsFunctions = {
 						</span>
 					</div>
 					<div class="row">
-						<my-button image="form.png"
+						<my-button image="fileText.png"
 							v-if="f.formId !== null"
 							:active="false"
 							:captionTitle="capApp.form"

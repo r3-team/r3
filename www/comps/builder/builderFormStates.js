@@ -68,8 +68,12 @@ let MyBuilderFormStateEffect = {
 	},
 	methods:{
 		changeTarget(target) {
-			if(target === 'field') this.update('tabId',null);
-			else                   this.update('fieldId',null);
+			this.$emit('update:modelValue',{
+				fieldId:null,
+				newState:'default',
+				tabId:null
+			});
+			this.target = target;
 		},
 		update(name,value) {
 			let v = JSON.parse(JSON.stringify(this.effect));
@@ -85,9 +89,9 @@ let MyBuilderFormState = {
 	template:`<div class="builder-form-state">
 		<div class="title">
 			<my-button
-				@trigger="detailsShow = !detailsShow"
+				@trigger="$emit('open')"
 				:captionTitle="capGen.button.show"
-				:image="detailsShow ? 'triangleDown.png' : 'triangleRight.png'"
+				:image="open ? 'triangleDown.png' : 'triangleRight.png'"
 			/>
 			
 			<input class="description"
@@ -104,7 +108,7 @@ let MyBuilderFormState = {
 			/>
 		</div>
 		
-		<div class="details" v-if="detailsShow">
+		<div class="details" v-if="open">
 			<my-button image="add.png"
 				@trigger="addCondition"
 				:caption="capApp.conditions"
@@ -113,7 +117,7 @@ let MyBuilderFormState = {
 			<my-filters
 				v-model="conditions"
 				:builderMode="true"
-				:disableContent="['attribute','javascript','subQuery']"
+				:disableContent="['attribute','javascript','nowDate','nowDatetime','nowTime','subQuery']"
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
 				:filterAddCnt="filterAddCnt"
@@ -134,7 +138,7 @@ let MyBuilderFormState = {
 					@remove="remove('effects',i)"
 					:entityIdMapRef="entityIdMapRef"
 					:fieldIdMap="fieldIdMap"
-					:key="'effect'+i"
+					:key="getEffectKey(i,state.effects[i])"
 					:modelValue="state.effects[i]"
 				/>
 			</div>
@@ -145,12 +149,12 @@ let MyBuilderFormState = {
 		entityIdMapRef:{ type:Object,  required:true },
 		fieldIdMap:    { type:Object,  required:true }, // all fields by ID
 		form:          { type:Object,  required:true },
-		modelValue:    { type:Object,  required:true }
+		modelValue:    { type:Object,  required:true },
+		open:          { type:Boolean, required:true }
 	},
-	emits:['remove','update:modelValue'],
+	emits:['open','remove','update:modelValue'],
 	data() {
 		return {
-			detailsShow:false,
 			filterAddCnt:0 // ugly hack to add filter
 		};
 	},
@@ -210,6 +214,9 @@ let MyBuilderFormState = {
 			});
 			this.$emit('update:modelValue',v);
 		},
+		getEffectKey(i,e) {
+			return e.tabId !== null ? `effect_${i}_${e.tabId}` : `effect_${i}_${e.field_id}`;
+		},
 		remove(name,i) {
 			let v = JSON.parse(JSON.stringify(this.state));
 			v[name].splice(i,1);
@@ -230,7 +237,6 @@ let MyBuilderFormStates = {
 	name:'my-builder-form-states',
 	components:{ MyBuilderFormState },
 	template:`<div class="builder-form-states">
-		
 		<div class="actions">
 			<my-button image="add.png"
 				@trigger="add"
@@ -251,13 +257,23 @@ let MyBuilderFormStates = {
 						>F{{ ref }}</option>
 					</template>
 				</select>
+				<select v-model="filterTabId">
+					<option value="">{{ capApp.option.filterTabIdHint }}</option>
+					<template v-for="(ref,tabId) in entityIdMapRef.tab">
+						<option
+							v-if="tabIdsUsed.includes(tabId)"
+							:value="tabId"
+						>T{{ ref }}</option>
+					</template>
+				</select>
 			</div>
 		</div>
 		
 		<div class="content no-padding default-inputs">
 			<my-builder-form-state
 				v-for="(s,i) in states"
-				v-show="stateShowIndex.includes(i)"
+				v-show="stateIndexesShow.includes(i)"
+				@open="open(i)"
 				@remove="remove(i)"
 				@update:modelValue="update(i,$event)"
 				:dataFields="dataFields"
@@ -266,6 +282,7 @@ let MyBuilderFormStates = {
 				:form="form"
 				:key="s.id"
 				:modelValue="states[i]"
+				:open="stateIndexesOpen.includes(i)"
 			/>
 		</div>
 	</div>`,
@@ -277,10 +294,12 @@ let MyBuilderFormStates = {
 		modelValue:    { type:Array,  required:true }
 	},
 	emits:['update:modelValue'],
-	data:function() {
+	data() {
 		return {
 			filter:'',
-			filterFieldId:''
+			filterFieldId:'',
+			filterTabId:'',
+			stateIndexesOpen:[]
 		};
 	},
 	computed:{
@@ -289,27 +308,41 @@ let MyBuilderFormStates = {
 			for(let i = 0, j = this.states.length; i < j; i++) {
 				let s = this.states[i];
 				
-				for(let x = 0, y = s.conditions.length; x < y; x++) {
+				for(let c of s.conditions) {
+					if(c.side0.fieldId !== null && !out.includes(c.side0.fieldId))
+						out.push(c.side0.fieldId);
 					
-					if(s.conditions[x].side0.fieldId !== null && !out.includes(s.conditions[x].side0.fieldId))
-						out.push(s.conditions[x].side0.fieldId);
-					
-					if(s.conditions[x].side1.fieldId !== null && !out.includes(s.conditions[x].side1.fieldId))
-						out.push(s.conditions[x].side1.fieldId);
+					if(c.side1.fieldId !== null && !out.includes(c.side1.fieldId))
+						out.push(c.side1.fieldId);
 				}
 				
-				for(let x = 0, y = s.effects.length; x < y; x++) {
-					
-					if(s.effects[x].fieldId !== null && !out.includes(s.effects[x].fieldId))
-						out.push(s.effects[x].fieldId);
+				for(let e of s.effects) {
+					if(e.fieldId !== null && !out.includes(e.fieldId))
+						out.push(e.fieldId);
 				}
 			}
 			return out;
 		},
-		stateShowIndex() {
+		tabIdsUsed() {
+			let out = [];
+			for(let s of this.states) {
+				for(let e of s.effects) {
+					if(e.tabId !== null && !out.includes(e.tabId))
+						out.push(e.tabId);
+				}
+			}
+			return out;
+		},
+		stateIndexesShow() {
 			let out = [];
 			for(let i = 0, j = this.states.length; i < j; i++) {
 				let s = this.states[i];
+				
+				// always keep open states visible
+				if(this.stateIndexesOpen.includes(i)) {
+					out.push(i);
+					continue;
+				}
 				
 				// check text filter
 				if(this.filter !== '' && !s.description.toLowerCase().includes(this.filter.toLowerCase()))
@@ -318,22 +351,15 @@ let MyBuilderFormStates = {
 				// check field filter
 				if(this.filterFieldId !== '') {
 					let show = false;
-					
-					// check conditions for field ID
-					for(let i = 0, j = s.conditions.length; i < j; i++) {
-						
-						if(s.conditions[i].side0.fieldId === this.filterFieldId
-							|| s.conditions[i].side1.fieldId === this.filterFieldId) {
-							
+					for(let c of s.conditions) {
+						if(c.side0.fieldId === this.filterFieldId || c.side1.fieldId === this.filterFieldId) {
 							show = true;
 							break;
 						}
 					}
-					
-					// check actions for field ID
 					if(!show) {
-						for(let i = 0, j = s.effects.length; i < j; i++) {
-							if(s.effects[i].fieldId === this.filterFieldId) {
+						for(let e of s.effects) {
+							if(e.fieldId === this.filterFieldId) {
 								show = true;
 								break;
 							}
@@ -341,6 +367,19 @@ let MyBuilderFormStates = {
 					}
 					if(!show) continue;
 				}
+				
+				// check tab filter
+				if(this.filterTabId !== '') {
+					let show = false;
+					for(let e of s.effects) {
+						if(e.tabId === this.filterTabId) {
+							show = true;
+							break;
+						}
+					}
+					if(!show) continue;
+				}
+				
 				out.push(i);
 			}
 			return out;
@@ -367,6 +406,11 @@ let MyBuilderFormStates = {
 				effects:[]
 			});
 			this.$emit('update:modelValue',v);
+		},
+		open(i) {
+			let pos = this.stateIndexesOpen.indexOf(i);
+			if(pos === -1) this.stateIndexesOpen.push(i);
+			else           this.stateIndexesOpen.splice(pos,1);
 		},
 		remove(i) {
 			let v = JSON.parse(JSON.stringify(this.states));

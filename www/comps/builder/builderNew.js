@@ -23,7 +23,7 @@ let MyBuilderNew = {
 			<div class="content default-inputs">
 				<div class="row gap centered">
 					<span>{{ capGen.name }}</span>
-					<input v-model="name" />
+					<input v-model="name" v-focus />
 				</div>
 				
 				<div
@@ -71,7 +71,7 @@ let MyBuilderNew = {
 				<div class="actions">
 					<my-button image="save.png"
 						@trigger="set"
-						:active="nameValid"
+						:active="canSave"
 						:caption="capGen.button.create"
 					/>
 				</div>
@@ -79,7 +79,7 @@ let MyBuilderNew = {
 		</div>
 	</div>`,
 	props:{
-		entity:  { type:String, required:true },  // module, relation, form, role
+		entity:  { type:String, required:true },
 		moduleId:{ type:String, required:true },
 	},
 	emits:['close'],
@@ -100,11 +100,12 @@ let MyBuilderNew = {
 	},
 	computed:{
 		// inputs
-		nameValid:(s) => s.name !== '',
+		canSave:(s) => s.name !== '',
 		
 		// presentation
 		title:(s) => {
 			switch(s.entity) {
+				case 'api':        return s.capApp.api;        break;
 				case 'collection': return s.capApp.collection; break;
 				case 'form':       return s.capApp.form;       break;
 				case 'jsFunction': return s.capApp.jsFunction; break;
@@ -117,8 +118,9 @@ let MyBuilderNew = {
 		},
 		titleImgSrc:(s) => {
 			switch(s.entity) {
+				case 'api':        return 'images/api.png';            break;
 				case 'collection': return 'images/tray.png';           break;
-				case 'form':       return 'images/form.png';           break;
+				case 'form':       return 'images/fileText.png';       break;
 				case 'jsFunction': return 'images/codeScreen.png';     break;
 				case 'module':     return 'images/module.png';         break;
 				case 'pgFunction': return 'images/codeDatabase.png';   break;
@@ -134,16 +136,51 @@ let MyBuilderNew = {
 		capApp:     (s) => s.$store.getters.captions.builder.new,
 		capGen:     (s) => s.$store.getters.captions.generic
 	},
+	mounted() {
+		window.addEventListener('keydown',this.handleHotkeys);
+	},
+	unmounted() {
+		window.removeEventListener('keydown',this.handleHotkeys);
+	},
 	methods:{
 		// externals
 		getNilUuid,
 		getQueryTemplate,
 		getPgFunctionTemplate,
 		
+		// actions
+		handleHotkeys(e) {
+			if(e.ctrlKey && e.key === 's' && this.canSave) {
+				this.set();
+				e.preventDefault();
+			}
+			if(e.key === 'Escape') {
+				this.$emit('close');
+				e.preventDefault();
+			}
+		},
+		
 		// backend calls
 		set() {
 			let request;
 			switch(this.entity) {
+				case 'api':
+					request = {
+						id:this.getNilUuid(),
+						moduleId:this.moduleId,
+						name:this.name,
+						comment:null,
+						columns:[],
+						query:this.getQueryTemplate(),
+						hasDelete:false,
+						hasGet:true,
+						hasPost:false,
+						limitDef:100,
+						limitMax:1000,
+						verboseDef:true,
+						version:1
+					};
+				break;
 				case 'collection':
 					request = {
 						id:this.getNilUuid(),
@@ -232,6 +269,7 @@ let MyBuilderNew = {
 						id:this.getNilUuid(),
 						moduleId:this.moduleId,
 						name:this.name,
+						comment:null,
 						encryption:this.encryption,
 						retentionCount:null,
 						retentionDays:null,
@@ -247,6 +285,7 @@ let MyBuilderNew = {
 						assignable:true,
 						captions:{},
 						childrenIds:[],
+						accessApis:{},
 						accessAttributes:{},
 						accessCollections:{},
 						accessMenus:{},

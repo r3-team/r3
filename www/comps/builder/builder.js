@@ -77,6 +77,13 @@ let MyBuilder = {
 					<div class="navigation-two-columns" v-if="module">
 						<div class="navigation-column">
 							<router-link class="entry clickable"
+								:to="'/builder/start/'+module.id"
+							>
+								<img src="images/flag.png" />
+								<span>{{ capApp.navigationStart }}</span>
+							</router-link>
+							
+							<router-link class="entry clickable"
 								:to="'/builder/module/'+module.id"
 							>
 								<img src="images/module.png" />
@@ -91,16 +98,9 @@ let MyBuilder = {
 							</router-link>
 							
 							<router-link class="entry clickable"
-								:to="'/builder/roles/'+module.id"
-							>
-								<img src="images/personMultiple.png" />
-								<span>{{ capApp.navigationRoles }}</span>
-							</router-link>
-							
-							<router-link class="entry clickable"
 								:to="'/builder/forms/'+module.id"
 							>
-								<img src="images/form.png" />
+								<img src="images/fileText.png" />
 								<span>{{ capApp.navigationForms }}</span>
 							</router-link>
 							
@@ -112,9 +112,16 @@ let MyBuilder = {
 							</router-link>
 							
 							<router-link class="entry clickable"
+								:to="'/builder/roles/'+module.id"
+							>
+								<img src="images/personMultiple.png" />
+								<span>{{ capApp.navigationRoles }}</span>
+							</router-link>
+							
+							<router-link class="entry clickable"
 								:to="'/builder/icons/'+module.id"
 							>
-								<img src="images/icon.png" />
+								<img src="images/fileImage.png" />
 								<span>{{ capApp.navigationIcons }}</span>
 							</router-link>
 						</div>
@@ -154,6 +161,13 @@ let MyBuilder = {
 								<span>{{ capApp.navigationArticles }}</span>
 							</router-link>
 							
+							<router-link class="entry clickable"
+								:to="'/builder/apis/'+module.id"
+							>
+								<img src="images/api.png" />
+								<span>{{ capApp.navigationApis }}</span>
+							</router-link>
+							
 							<!-- so router link is not last child (CSS) -->
 							<div />
 						</div>
@@ -162,7 +176,7 @@ let MyBuilder = {
 					<!-- module sub component navigation header -->
 					<div class="navigation-entities-header" v-if="subMenu">
 						<div class="line" v-if="navigation === 'forms'">
-							<img src="images/form.png" />
+							<img src="images/fileText.png" />
 							<h1>{{ capApp.navigationForms }}</h1>
 						</div>
 						<div class="line" v-if="navigation === 'functions'">
@@ -181,6 +195,10 @@ let MyBuilder = {
 							<img src="images/tray.png" />
 							<h1>{{ capApp.navigationCollections }}</h1>
 						</div>
+						<div class="line" v-if="navigation === 'apis'">
+							<img src="images/api.png" />
+							<h1>{{ capApp.navigationApis }}</h1>
+						</div>
 						<div class="line" v-if="navigation === 'pg-functions'">
 							<img src="images/codeDatabase.png" />
 							<h1>{{ capApp.navigationPgFunctions }}</h1>
@@ -195,7 +213,7 @@ let MyBuilder = {
 								:title="capApp.navigationFilterHint"
 							/>
 							<my-button image="add.png"
-								v-if="['collections','forms','js-functions','pg-functions','relations','roles'].includes(navigation)"
+								v-if="['apis','collections','forms','js-functions','pg-functions','relations','roles'].includes(navigation)"
 								@trigger="add"
 								:active="moduleOwner"
 								:captionTitle="capGen.button.add"
@@ -242,6 +260,15 @@ let MyBuilder = {
 							>{{ c.name }}</router-link>
 						</template>
 						
+						<!-- APIs -->
+						<template v-if="navigation === 'apis'">
+							<router-link class="entry clickable"
+								v-for="a in module.apis.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
+								:key="a.id"
+								:to="'/builder/api/'+a.id" 
+							>{{ a.name + ' (v' + a.version + ')' }}</router-link>
+						</template>
+						
 						<!-- PG functions -->
 						<template v-if="navigation === 'pg-functions'">
 							<router-link class="entry clickable"
@@ -265,11 +292,12 @@ let MyBuilder = {
 		</div>
 		
 		<router-view
-			v-if="ready"
+			v-if="isReady"
 			v-show="!showDocs"
 			@createNew="createNew = $event"
 			@hotkey="handleHotkeys"
 			@hotkeysRegister="hotkeysChild = $event"
+			@nextLanguage="nextLanguage"
 			@toggleDocs="showDocs = !showDocs"
 			:builderLanguage="builderLanguage"
 			:readonly="!moduleOwner"
@@ -282,76 +310,89 @@ let MyBuilder = {
 		
 		<!-- new entity dialog -->
 		<my-builder-new
-			v-if="createNew !== null"
+			v-if="createNewOpen"
 			@close="createNew = null"
 			:entity="createNew"
 			:moduleId="moduleId"
 		/>
 	</div>`,
-	created:function() {
+	created() {
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
-	unmounted:function() {
+	unmounted() {
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
-	data:function() {
+	data() {
 		return {
 			builderLanguage:'', // selected language for translations
 			createNew:null,     // entity to create (module, relation, ...)
 			filter:'',          // simple text filter for menu
 			hotkeysChild:[],    // hotkeys from child components
+			isReady:false,      // ready to show content
 			moduleId:'',        // selected module ID
 			navigation:'module',
-			ready:false,
 			showDocs:false
 		};
 	},
-	mounted:function() {
+	mounted() {
 		this.$store.commit('moduleColor1','');
 		this.$store.commit('pageTitle',this.capApp.pageTitle);
 		
 		if(!this.builderEnabled)
 			return this.$router.push('/');
 		
-		this.ready = true;
+		this.isReady = true;
 	},
 	watch:{
 		$route:{
-			handler:function(val) {
+			handler(val) {
 				if(val.hash === '')
 					this.showDocs = false;
 				
-				if(typeof val.meta.nav === 'undefined')
-					return this.moduleId = '';
+				if(typeof val.meta.nav === 'undefined') {
+					this.moduleId = '';
+					this.isReady  = true;
+					return;
+				}
 				
 				// ascertain navigation
 				this.navigation = val.meta.nav;
 				
 				// ascertain module ID to be loaded
-				let id;
-				switch(val.meta.target) {
-					case 'module':      id = val.params.id;                                break;
-					case 'docs':        id = val.params.id;                                break;
-					case 'relation':    id = this.relationIdMap[val.params.id].moduleId;   break;
-					case 'form':        id = this.formIdMap[val.params.id].moduleId;       break;
-					case 'role':        id = this.roleIdMap[val.params.id].moduleId;       break;
-					case 'collection':  id = this.collectionIdMap[val.params.id].moduleId; break;
-					case 'pg-function': id = this.pgFunctionIdMap[val.params.id].moduleId; break;
-					case 'js-function': id = this.jsFunctionIdMap[val.params.id].moduleId; break;
+				let isModule    = ['docs','module','start'].includes(val.meta.target);
+				let targetIdMap = this.moduleIdMap;
+				
+				if(!isModule) {
+					switch(val.meta.target) {
+						case 'api':         targetIdMap = this.apiIdMap;        break;
+						case 'collection':  targetIdMap = this.collectionIdMap; break;
+						case 'form':        targetIdMap = this.formIdMap;       break;
+						case 'js-function': targetIdMap = this.jsFunctionIdMap; break;
+						case 'relation':    targetIdMap = this.relationIdMap;   break;
+						case 'role':        targetIdMap = this.roleIdMap;       break;
+						case 'pg-function': targetIdMap = this.pgFunctionIdMap; break;
+					}
 				}
-				this.moduleId = id;
+				
+				// reroute if invalid target (usually navigating back to deleted entity)
+				if(typeof targetIdMap[val.params.id] === 'undefined') {
+					this.$router.replace('/builder/modules');
+					this.isReady = false;
+					return;
+				}
+				
+				// apply module ID from target
+				this.moduleId = isModule ? val.params.id : targetIdMap[val.params.id].moduleId;
 				
 				// set module translation language
-				if(id !== '') {
-					let mod = this.moduleIdMap[id];
-					
-					if(mod.languages.indexOf(this.settings.languageCode) !== -1)
-						this.builderLanguage = this.settings.languageCode;
-					else if(mod.languages.length !== 0)
-						this.builderLanguage = mod.languages[0];
-				} else {
-					this.builderLanguage = 'en_us';
-				}
+				let mod = this.moduleIdMap[this.moduleId];
+				
+				if(mod.languages.indexOf(this.settings.languageCode) !== -1)
+					this.builderLanguage = this.settings.languageCode;
+				else if(mod.languages.length !== 0)
+					this.builderLanguage = mod.languages[0];
+				
+				this.isReady = true;
 			},
 			immediate:true
 		}
@@ -361,6 +402,7 @@ let MyBuilder = {
 			|| s.navigation === 'forms'        && s.module.forms.length !== 0
 			|| s.navigation === 'roles'        && s.module.roles.length !== 0
 			|| s.navigation === 'collections'  && s.module.collections.length !== 0
+			|| s.navigation === 'apis'         && s.module.apis.length !== 0
 			|| s.navigation === 'js-functions' && s.module.jsFunctions.length !== 0
 			|| s.navigation === 'pg-functions' && s.module.pgFunctions.length !== 0,
 		moduleIdInput:{
@@ -372,9 +414,10 @@ let MyBuilder = {
 		},
 		
 		// simple
-		isNew:      (s) => s.moduleId === '',
-		module:     (s) => s.isNew ? false : s.moduleIdMap[s.moduleId],
-		moduleOwner:(s) => s.isNew ? true  : s.moduleIdMapOptions[s.moduleId].owner,
+		createNewOpen:(s) => s.createNew !== null,
+		isNew:        (s) => s.moduleId === '',
+		module:       (s) => s.isNew ? false : s.moduleIdMap[s.moduleId],
+		moduleOwner:  (s) => s.isNew ? true  : s.moduleIdMapOptions[s.moduleId].owner,
 		
 		// stores
 		modules:           (s) => s.$store.getters['schema/modules'],
@@ -388,6 +431,7 @@ let MyBuilder = {
 		pgFunctionIdMap:   (s) => s.$store.getters['schema/pgFunctionIdMap'],
 		roleIdMap:         (s) => s.$store.getters['schema/roleIdMap'],
 		collectionIdMap:   (s) => s.$store.getters['schema/collectionIdMap'],
+		apiIdMap:          (s) => s.$store.getters['schema/apiIdMap'],
 		builderEnabled:    (s) => s.$store.getters.builderEnabled,
 		capApp:            (s) => s.$store.getters.captions.builder,
 		capGen:            (s) => s.$store.getters.captions.generic,
@@ -400,6 +444,9 @@ let MyBuilder = {
 		
 		// handlers
 		handleHotkeys(evt) {
+			if(this.createNewOpen)
+				return;
+			
 			// language switch
 			if(evt.ctrlKey && evt.key === 'q')
 				this.nextLanguage();
@@ -422,6 +469,7 @@ let MyBuilder = {
 		// actions
 		add() {
 			switch(this.navigation) {
+				case 'apis':         this.createNew = 'api';        break;
 				case 'collections':  this.createNew = 'collection'; break;
 				case 'forms':        this.createNew = 'form';       break;
 				case 'js-functions': this.createNew = 'jsFunction'; break;

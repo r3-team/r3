@@ -82,11 +82,11 @@ let MyGanttLineRecord = {
 	},
 	emits:['record-selected'],
 	computed:{
-		isFullDay:function() {
+		isFullDay() {
 			return this.isUnixUtcZero(this.getUnixFromDate(this.date0))
 				&& this.isUnixUtcZero(this.getUnixFromDate(this.date1));
 		},
-		style:function() {
+		style() {
 			let d0 = new Date(this.date0.getTime());
 			let d1 = new Date(this.date1.getTime());
 			
@@ -121,7 +121,7 @@ let MyGanttLineRecord = {
 			// max-width is overwritten by CSS if hovered over (show full entry)
 			return [`min-width:${width}px`,`max-width:${width}px`,`left:${offset}px`].join(';');
 		},
-		styleBg:function(r) {
+		styleBg(r) {
 			return this.color === null
 				? '' : `background-color:#${this.color};`;
 		}
@@ -133,7 +133,7 @@ let MyGanttLineRecord = {
 		isUnixUtcZero,
 		
 		// actions
-		clickRecord:function(middleClick) {
+		clickRecord(middleClick) {
 			if(this.rowSelect)
 				this.$emit('record-selected',this.recordId,[],middleClick);
 		}
@@ -182,7 +182,7 @@ let MyGantt = {
 		MyInputCollection,
 		MyValueRich
 	},
-	template:`<div class="gantt shade" v-if="ready">
+	template:`<div class="gantt" :class="{ isSingleField:isSingleField }" v-if="ready">
 		
 		<!-- header -->
 		<div class="top lower">
@@ -249,10 +249,11 @@ let MyGantt = {
 				
 				<my-input-collection class="selector"
 					v-for="c in collections"
-					@update:indexes="$emit('set-collection-indexes',c.collectionId,$event)"
+					@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event)"
 					:collectionId="c.collectionId"
 					:columnIdDisplay="c.columnIdDisplay"
 					:key="c.collectionId"
+					:modelValue="collectionIdMapIndexes[c.collectionId]"
 					:multiValue="c.multiValue"
 				/>
 				
@@ -354,6 +355,7 @@ let MyGantt = {
 		choices:         { type:Array,   required:false, default:() => [] },
 		columns:         { type:Array,   required:true }, // processed list columns
 		collections:     { type:Array,   required:true },
+		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		fieldId:         { type:String,  required:true },
 		filters:         { type:Array,   required:true }, // processed query filters
 		formLoading:     { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
@@ -361,14 +363,15 @@ let MyGantt = {
 		indexColor:      { required:true },               // index of attribute that provides record color
 		indexDate0:      { type:Number,  required:true }, // index of attribute that provides record date from
 		indexDate1:      { type:Number,  required:true }, // index of attribute that provides record date to
-		isHiddenInTab:   { type:Boolean, required:false, default:false }, // Gantt is in a non-visible tab-field
+		isHidden:        { type:Boolean, required:false, default:false },
+		isSingleField:   { type:Boolean, required:false, default:false },
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:true },
 		stepTypeDefault: { type:String,  required:true },
 		stepTypeToggle:  { type:Boolean, required:true },
 		usesPageHistory: { type:Boolean, required:true }
 	},
-	emits:['open-form','record-selected','set-args','set-collection-indexes'],
+	emits:['open-form','record-count-change','record-selected','set-args','set-collection-indexes'],
 	data() {
 		return {
 			choiceId:null,
@@ -498,7 +501,7 @@ let MyGantt = {
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
 		});
-		this.$watch('isHiddenInTab',(val) => {
+		this.$watch('isHidden',(val) => {
 			// if field is hidden, steps cannot be calculated
 			if(!val) this.$nextTick(() => this.setSteps(true));
 		});
@@ -789,7 +792,7 @@ let MyGantt = {
 		
 		// backend calls
 		get() {
-			if(this.formLoading || this.isHiddenInTab)
+			if(this.formLoading || this.isHidden)
 				return;
 			
 			ws.send('data','get',{
@@ -822,6 +825,7 @@ let MyGantt = {
 					let groupMap = {}; // map of all groups, key: groupBy
 					let groupColumns = []; // group column values
 					let values   = [];
+					this.$emit('record-count-change',res.payload.rows.length);
 					
 					for(let i = 0, j = res.payload.rows.length; i < j; i++) {
 						let r = res.payload.rows[i];
@@ -865,7 +869,6 @@ let MyGantt = {
 						
 						// check in which line record fits (no overlapping)
 						let lineIndex = this.getFreeLineIndex(groupMap[groupName].lines,date0,date1);
-						
 						if(lineIndex === -1) {
 							lineIndex = groupMap[groupName].lines.length;
 							groupMap[groupName].lines.push([]);

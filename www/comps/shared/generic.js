@@ -1,4 +1,23 @@
-import MyStore from '../../stores/store.js';
+import tinycolor from '../../externals/tinycolor2.js';
+import MyStore   from '../../stores/store.js';
+
+export function colorAdjustBg(colorRgb,isDarkMode) {
+	// adjust background color in dark mode
+	let c = tinycolor(colorRgb);
+	if(isDarkMode) {
+		if(c.isDark()) c.darken(10).desaturate(20);
+		else           c.darken(45).desaturate(30);
+	}
+	return c.toString();
+};
+
+export function colorMakeContrastFont(colorRbgBg) {
+	// create contrast font color from background color
+	let c = tinycolor(colorRbgBg);
+	if(c.isDark()) c.lighten(40);
+	else           c.darken(65);
+	return c.toString();
+};
 
 export function copyValueDialog(captionTop,captionBody,copyClipboardValue) {
 	let copy = function() {

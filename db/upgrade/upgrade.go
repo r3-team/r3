@@ -15,13 +15,13 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // run upgrade if DB version is different to application version
 // DB version is related to major+minor application version (e. g. app: 1.3.2.1999 -> 1.3)
-//  -> DB changes are therefore exclusive to major or minor releases
+// -> DB changes are therefore exclusive to major or minor releases
 func RunIfRequired() error {
 	_, appVersionCut, _, dbVersionCut := config.GetAppVersions()
 	if appVersionCut == dbVersionCut {
@@ -99,9 +99,378 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	// clean up on next release
-	// ALTER TABLE app.caption ALTER COLUMN content
-	//  TYPE app.caption_content USING content::text::app.caption_content;
+	// ALTER TABLE app.attribute ALTER COLUMN content_use
+	//  TYPE app.attribute_content_use USING content_use::text::app.attribute_content_use;
 
+	"3.2": func(tx pgx.Tx) (string, error) {
+		if _, err := tx.Exec(db.Ctx, `
+			-- clean up from last release
+			ALTER TABLE app.caption ALTER COLUMN content
+				TYPE app.caption_content USING content::text::app.caption_content;
+			
+			-- new user setting
+			ALTER TABLE instance.login_setting ADD COLUMN tab_remember BOOLEAN NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.login_setting ALTER COLUMN tab_remember DROP DEFAULT;
+			ALTER TABLE instance.login_setting ADD COLUMN field_clean BOOLEAN NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.login_setting ALTER COLUMN field_clean DROP DEFAULT;
+			
+			-- new attribute content
+			ALTER TYPE app.attribute_content ADD VALUE 'uuid';
+			
+			-- attribute content used as option
+			CREATE TYPE app.attribute_content_use AS ENUM ('default', 'textarea', 'richtext', 'date', 'datetime', 'time', 'color');
+			ALTER TABLE app.attribute ADD COLUMN content_use VARCHAR(8) NOT NULL DEFAULT 'default';
+			
+			-- migrate integer/bigint attributes
+			UPDATE app.attribute AS a
+			SET content_use = (
+				SELECT CASE
+					WHEN (
+						SELECT (
+							SELECT COUNT(*)
+							FROM app.field_data AS d
+							WHERE (
+								d.attribute_id = a.id
+								OR d.attribute_id_alt = a.id
+							)
+							AND d.display = 'datetime'
+						) + (
+							SELECT COUNT(*)
+							FROM app.column AS c
+							WHERE c.attribute_id = a.id
+							AND c.display = 'datetime'
+						)
+					) <> 0 THEN 'datetime'
+					WHEN (
+						SELECT (
+							SELECT COUNT(*)
+							FROM app.field_data AS d
+							WHERE (
+								d.attribute_id = a.id
+								OR d.attribute_id_alt = a.id
+							)
+							AND d.display = 'date'
+						) + (
+							SELECT COUNT(*)
+							FROM app.column AS c
+							WHERE c.attribute_id = a.id
+							AND c.display = 'date'
+						)
+					) <> 0 THEN 'date'
+					WHEN (
+						SELECT (
+							SELECT COUNT(*)
+							FROM app.field_data AS d
+							WHERE d.attribute_id = a.id
+							AND d.display = 'time'
+						) + (
+							SELECT COUNT(*)
+							FROM app.column AS c
+							WHERE c.attribute_id = a.id
+							AND c.display = 'time'
+						)
+					) <> 0 THEN 'time'
+					ELSE 'default'
+				END
+			)
+			WHERE content IN ('integer','bigint');
+			
+			-- migrate text/varchar attributes
+			UPDATE app.attribute AS a
+			SET content_use = (
+				SELECT CASE
+					WHEN (
+						SELECT (
+							SELECT COUNT(*)
+							FROM app.field_data AS d
+							WHERE d.attribute_id = a.id
+							AND d.display = 'richtext'
+						) + (
+							SELECT COUNT(*)
+							FROM app.column AS c
+							WHERE c.attribute_id = a.id
+							AND c.display = 'richtext'
+						)
+					) <> 0 THEN 'richtext'
+					WHEN (
+						SELECT (
+							SELECT COUNT(*)
+							FROM app.field_data AS d
+							WHERE d.attribute_id = a.id
+							AND d.display = 'textarea'
+						) + (
+							SELECT COUNT(*)
+							FROM app.column AS c
+							WHERE c.attribute_id = a.id
+							AND c.display = 'textarea'
+						)
+					) <> 0 THEN 'textarea'
+					WHEN (
+						SELECT (
+							SELECT COUNT(*)
+							FROM app.field_data AS d
+							WHERE d.attribute_id = a.id
+							AND d.display = 'color'
+						) + (
+							SELECT COUNT(*)
+							FROM app.column AS c
+							WHERE c.attribute_id = a.id
+							AND c.display = 'color'
+						)
+					) <> 0 THEN 'color'
+					ELSE 'default'
+				END
+			)
+			WHERE content IN ('text','varchar');
+			
+			UPDATE app.field_data SET display = 'default'
+			WHERE display IN ('datetime','date','time','richtext','textarea','color');
+			
+			UPDATE app.column SET display = 'default'
+			WHERE display IN ('datetime','date','time','richtext','textarea','color');
+			
+			-- remove invalid data display options
+			ALTER TYPE app.data_display RENAME TO data_display_old;
+			CREATE TYPE app.data_display AS ENUM ('default', 'email', 'gallery', 'hidden', 'login', 'password', 'phone', 'slider', 'url');
+			ALTER TABLE app.field_data ALTER COLUMN display TYPE app.data_display USING display::text::app.data_display;
+			ALTER TABLE app.column ALTER COLUMN display TYPE app.data_display USING display::text::app.data_display;
+			DROP TYPE app.data_display_old;
+			
+			-- new filter options
+			ALTER TYPE app.filter_side_content ADD VALUE 'nowDate';
+			ALTER TYPE app.filter_side_content ADD VALUE 'nowDatetime';
+			ALTER TYPE app.filter_side_content ADD VALUE 'nowTime';
+			
+			ALTER TABLE app.query_filter_side ADD COLUMN now_offset INTEGER;
+			
+			-- new tab field option
+			ALTER TABLE app.tab ADD COLUMN content_counter bool NOT NULL DEFAULT false;
+			ALTER TABLE app.tab ALTER COLUMN content_counter DROP DEFAULT;
+			
+			-- new API entity
+			ALTER TYPE instance.log_context ADD VALUE 'api';
+			INSERT INTO instance.config (name,value) VALUES ('logApi','2');
+			
+			CREATE TABLE app.api (
+				id uuid NOT NULL,
+				module_id uuid NOT NULL,
+				name varchar(64) NOT NULL,
+				comment text,
+				has_delete bool NOT NULL,
+				has_get bool NOT NULL,
+				has_post bool NOT NULL,
+				limit_def int NOT NULL,
+				limit_max int NOT NULL,
+				verbose_def bool NOT NULL,
+				version int NOT NULL,
+			    CONSTRAINT api_pkey PRIMARY KEY (id),
+				CONSTRAINT api_name_version_key UNIQUE (module_id,name,version)
+					DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT api_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID
+			);
+			
+			ALTER TABLE app.query ADD COLUMN api_id uuid;
+			ALTER TABLE app.query ADD CONSTRAINT query_api_id_fkey FOREIGN KEY (api_id)
+				REFERENCES app.api (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_query_api_id_fkey
+				ON app.query USING btree (api_id ASC NULLS LAST);
+			
+			ALTER TABLE app.query DROP CONSTRAINT query_single_parent;
+			ALTER TABLE app.query ADD  CONSTRAINT query_single_parent CHECK (1 = (
+				CASE WHEN api_id        IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN collection_id IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN column_id     IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN field_id      IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN form_id       IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN query_filter_query_id IS NULL THEN 0 ELSE 1
+				END
+			));
+			
+			ALTER TABLE app.column ADD COLUMN api_id uuid;
+			ALTER TABLE app.column ADD CONSTRAINT column_api_id_fkey FOREIGN KEY (api_id)
+				REFERENCES app.api (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_column_api_id_fkey
+			    ON app."column" USING btree (api_id ASC NULLS LAST);
+			
+			ALTER TABLE app.column DROP CONSTRAINT column_single_parent;
+			ALTER TABLE app.column ADD  CONSTRAINT column_single_parent CHECK (1 = (
+				CASE WHEN api_id        IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN collection_id IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN field_id      IS NULL THEN 0 ELSE 1
+				END
+			));
+			
+			ALTER TABLE app.role_access ADD COLUMN api_id uuid;
+			ALTER TABLE app.role_access ADD CONSTRAINT role_access_api_id_fkey FOREIGN KEY (api_id)
+				REFERENCES app.api (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_role_access_api_id_fkey
+			    ON app.role_access USING btree (api_id ASC NULLS LAST);
+			
+			-- relation comments
+			ALTER TABLE app.relation ADD COLUMN comment text;
+			
+			-- login templates
+			CREATE TABLE instance.login_template (
+				id SERIAL NOT NULL,
+				name character varying(64) NOT NULL,
+				comment text,
+			    CONSTRAINT login_template_pkey PRIMARY KEY (id)
+			);
+			ALTER TABLE instance.login_template ADD CONSTRAINT login_template_name_unique
+				UNIQUE (name) DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE instance.login_setting ADD COLUMN login_template_id integer;
+			ALTER TABLE instance.login_setting ADD CONSTRAINT login_setting_login_template_id_fkey
+				FOREIGN KEY (login_template_id)
+				REFERENCES instance.login_template (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE instance.login_setting DROP CONSTRAINT login_setting_pkey;
+			ALTER TABLE instance.login_setting ALTER COLUMN login_id DROP NOT NULL;
+			ALTER TABLE instance.login_setting ADD CONSTRAINT login_setting_login_id_unique
+				UNIQUE (login_id) DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE instance.login_setting ADD CONSTRAINT login_setting_login_template_id_unique
+				UNIQUE (login_template_id) DEFERRABLE INITIALLY DEFERRED;
+			
+			ALTER TABLE instance.login_setting ADD CONSTRAINT login_setting_single_parent CHECK (1 = (
+				CASE WHEN login_id          IS NULL THEN 0 ELSE 1 END +
+				CASE WHEN login_template_id IS NULL THEN 0 ELSE 1 END
+			));
+			
+			CREATE INDEX IF NOT EXISTS fki_login_setting_login_id_fkey
+			    ON instance.login_setting USING btree (login_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_login_setting_login_template_id_fkey
+			    ON instance.login_setting USING btree (login_template_id ASC NULLS LAST);
+			
+			ALTER TABLE instance.ldap ADD COLUMN login_template_id INTEGER;
+			ALTER TABLE instance.ldap ADD CONSTRAINT ldap_login_template_id_fkey
+				FOREIGN KEY (login_template_id)
+				REFERENCES instance.login_template (id) MATCH SIMPLE
+				ON UPDATE SET NULL
+				ON DELETE SET NULL
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_ldap_login_template_id_fkey
+			    ON instance.ldap USING btree (login_template_id ASC NULLS LAST);
+			
+			-- default login template
+			INSERT INTO instance.login_template (name) VALUES ('GLOBAL');
+			INSERT INTO instance.login_setting (login_template_id, language_code, date_format,
+				sunday_first_dow, font_size, borders_all, borders_corner, page_limit, 
+				header_captions, spacing, dark, compact, hint_update_version,
+				mobile_scroll_form, warn_unsaved, menu_colored, pattern, font_family,
+				tab_remember, field_clean)
+			SELECT id, 'en_us', 'Y-m-d', true, 100, false, 'keep', 2000, true, 3, false,
+				true, 0, true, true, false, 'bubbles', 'helvetica', true, true
+			FROM instance.login_template
+			WHERE name = 'GLOBAL';
+			
+			-- new filter condition: field invalid
+			ALTER TYPE app.filter_side_content ADD VALUE 'fieldValid';
+			
+			-- missing index: query filter side preset & content
+			CREATE INDEX IF NOT EXISTS fki_query_filter_side_preset_id_fkey
+			    ON app.query_filter_side USING btree (preset_id ASC NULLS LAST);
+			
+			CREATE INDEX IF NOT EXISTS fki_query_filter_side_content_fkey
+			    ON app.query_filter_side USING btree (content ASC NULLS LAST);
+			
+			-- add function to retrieve all nested presets inside queries (for schema checks)
+			CREATE OR REPLACE FUNCTION app.get_preset_ids_inside_queries(query_ids_in uuid[])
+			    RETURNS uuid[]
+			    LANGUAGE 'plpgsql'
+				IMMUTABLE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+				preset_ids    UUID[];
+				query_ids_sub UUID[];
+			BEGIN
+				IF array_length(query_ids_in,1) = 0 THEN
+					RETURN preset_ids;
+				END IF;
+			
+				-- collect preset directly
+				SELECT ARRAY_AGG(preset_id) INTO preset_ids
+				FROM app.query_filter_side
+				WHERE query_id = ANY(query_ids_in)
+				AND   content  = 'preset';
+			
+				-- collect presets from filters inside sub queries
+				SELECT ARRAY_AGG(q.id) INTO query_ids_sub
+				FROM app.query_filter_side AS s
+				JOIN app.query AS q
+					ON  q.query_filter_query_id = s.query_id
+					AND q.query_filter_position = s.query_filter_position
+					AND q.query_filter_side     = s.side
+				WHERE s.query_id = ANY(query_ids_in)
+				AND   s.content  = 'subQuery';
+			
+				IF array_length(query_ids_sub,1) <> 0 THEN
+					preset_ids := array_cat(preset_ids, app.get_preset_ids_inside_queries(query_ids_sub));
+				END IF;
+				
+				RETURN preset_ids;
+			END;
+			$BODY$;
+			
+			-- add new instance function: get record ID from preset
+			CREATE OR REPLACE FUNCTION instance.get_preset_record_id(preset_id_in UUID)
+			    RETURNS text
+			    LANGUAGE 'plpgsql'
+			    COST 100
+			    IMMUTABLE PARALLEL UNSAFE
+			AS $BODY$
+				DECLARE
+				BEGIN
+					RETURN (
+						SELECT record_id_wofk
+						FROM instance.preset_record
+						WHERE preset_id = preset_id_in
+					);
+				END;
+			$BODY$;
+			
+			-- add references for PKs as PG indexes (used for API)
+			ALTER TABLE app.pg_index ADD COLUMN primary_key bool NOT NULL DEFAULT false;
+			ALTER TABLE app.pg_index ALTER COLUMN primary_key DROP DEFAULT;
+			
+			INSERT INTO app.pg_index (id, relation_id, auto_fki, no_duplicates, primary_key)
+				SELECT gen_random_uuid(), id, false, true, true FROM app.relation;
+		`); err != nil {
+			return "", err
+		}
+
+		_, err := tx.Exec(db.Ctx, `
+			INSERT INTO app.pg_index_attribute (pg_index_id, position, order_asc, attribute_id)
+				SELECT id, 0, true, (
+					SELECT id
+					FROM app.attribute
+					WHERE name = $1
+					AND relation_id = pgi.relation_id
+				)
+				FROM app.pg_index AS pgi
+				WHERE primary_key;
+		`, schema.PkName)
+		return "3.3", err
+	},
 	"3.1": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
 			-- new tabs field
@@ -1276,7 +1645,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			FieldChanged pgtype.Bool
 			NewRecord    pgtype.Bool
 			Login1       pgtype.Bool
-			Value1       pgtype.Varchar
+			Value1       pgtype.Text
 		}
 		rows, err := tx.Query(db.Ctx, `
 			SELECT form_state_id, position, field_id0, field_id1, preset_id1, role_id,
@@ -1304,7 +1673,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 		rows.Close()
 
 		var insertSide = func(formStateId uuid.UUID, position int, side int,
-			brackets int, content string, value pgtype.Varchar,
+			brackets int, content string, value pgtype.Text,
 			fieldId pgtype.UUID, presetId pgtype.UUID, roleId pgtype.UUID) error {
 
 			_, err := tx.Exec(db.Ctx, `
@@ -1323,23 +1692,16 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			content0 := ""
 			content1 := ""
 			operatorOverwrite := ""
-			value0 := pgtype.Varchar{}
-			value0.Status = pgtype.Null
-			value1 := pgtype.Varchar{}
-			value1.Status = pgtype.Null
+			value0 := pgtype.Text{}
+			value1 := pgtype.Text{}
 			emptyId := pgtype.UUID{}
-			emptyId.Status = pgtype.Null
 			field0 := pgtype.UUID{}
-			field0.Status = pgtype.Null
 			field1 := pgtype.UUID{}
-			field1.Status = pgtype.Null
 			preset1 := pgtype.UUID{}
-			preset1.Status = pgtype.Null
 			role := pgtype.UUID{}
-			role.Status = pgtype.Null
 
 			// field, value
-			if c.FieldChanged.Status == pgtype.Present {
+			if c.FieldChanged.Valid {
 				content0 = "fieldChanged"
 				content1 = "true"
 				field0 = c.FieldId0
@@ -1347,19 +1709,19 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				if !c.FieldChanged.Bool {
 					operatorOverwrite = "<>"
 				}
-			} else if c.NewRecord.Status == pgtype.Present {
+			} else if c.NewRecord.Valid {
 				content0 = "recordNew"
 				content1 = "true"
 				operatorOverwrite = "="
 				if !c.NewRecord.Bool {
 					operatorOverwrite = "<>"
 				}
-			} else if c.RoleId.Status == pgtype.Present {
+			} else if c.RoleId.Valid {
 				content0 = "role"
 				content1 = "true"
 				role = c.RoleId
 			} else {
-				if c.FieldId0.Status == pgtype.Present {
+				if c.FieldId0.Valid {
 					content0 = "field"
 					field0 = c.FieldId0
 
@@ -1367,18 +1729,18 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 						content1 = "value"
 					}
 				}
-				if c.FieldId1.Status == pgtype.Present {
+				if c.FieldId1.Valid {
 					content1 = "field"
 					field1 = c.FieldId1
 				}
-				if c.Login1.Status == pgtype.Present {
+				if c.Login1.Valid {
 					content1 = "login"
 				}
-				if c.PresetId1.Status == pgtype.Present {
+				if c.PresetId1.Valid {
 					content1 = "preset"
 					preset1 = c.PresetId1
 				}
-				if c.Value1.Status == pgtype.Present && c.Value1.String != "" {
+				if c.Value1.Valid && c.Value1.String != "" {
 					content1 = "value"
 					value1 = c.Value1
 				}
@@ -3177,7 +3539,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			`, ar.moduleName, ar.attributeId.String())); err != nil {
 				return "", err
 			}
-			if err := pgIndex.SetAutoFkiForAttribute_tx(tx, ar.relationId, ar.attributeId, (ar.content == "1:1")); err != nil {
+			if err := pgIndex.SetAutoFkiForAttribute_tx(tx, ar.relationId,
+				ar.attributeId, (ar.content == "1:1")); err != nil {
+
 				return "", err
 			}
 		}

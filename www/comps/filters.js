@@ -37,7 +37,7 @@ let MyFilterBrackets = {
 		}
 	},
 	methods:{
-		add:function(increase) {
+		add(increase) {
 			let v = this.value;
 			
 			if(increase) v++;
@@ -48,7 +48,7 @@ let MyFilterBrackets = {
 			
 			this.value = v;
 		},
-		display:function() {
+		display() {
 			let out = '';
 			let brk = this.left ? '(' : ')';
 			
@@ -211,9 +211,7 @@ let MyFilterAttribute = {
 				// if nothing else is available: attribute name
 				return atr.name;
 			}
-			
-			let rel = this.relationIdMap[atr.relationId];
-			return this.getItemTitleNoRelationship(rel,atr,v[1]);
+			return this.getItemTitleNoRelationship(atr.id,v[1]);
 		},
 		getQueryLabel(nestingLevel) {
 			if(nestingLevel === 0)
@@ -241,14 +239,34 @@ let MyFilterSide = {
 					@input="setContent"
 					:value="content"
 				>
-					<option
-						v-for="c in contentEnabled"
-						:disabled="contentUnusable.includes(c)"
-						:title="capApp.option.contentHint[c]"
-						:value="c"
-					>
-						{{ capApp.option.content[c] }}
-					</option>
+					<optgroup v-if="contentData.length !== 0" :label="capApp.contentData">
+						<option
+							v-for="c in contentData"
+							:title="capApp.option.contentHint[c]"
+							:value="c"
+						>{{ capApp.option.content[c] }}</option>
+					</optgroup>
+					<optgroup v-if="contentForm.length !== 0" :label="capApp.contentForm">
+						<option
+							v-for="c in contentForm"
+							:title="capApp.option.contentHint[c]"
+							:value="c"
+						>{{ capApp.option.content[c] }}</option>
+					</optgroup>
+					<optgroup v-if="contentDate.length !== 0" :label="capApp.contentDate">
+						<option
+							v-for="c in contentDate"
+							:title="capApp.option.contentHint[c]"
+							:value="c"
+						>{{ capApp.option.content[c] }}</option>
+					</optgroup>
+					<optgroup v-if="contentLogin.length !== 0" :label="capApp.contentLogin">
+						<option
+							v-for="c in contentLogin"
+							:title="capApp.option.contentHint[c]"
+							:value="c"
+						>{{ capApp.option.content[c] }}</option>
+					</optgroup>
 				</select>
 				
 				<!-- sub query show toggle -->
@@ -305,13 +323,24 @@ let MyFilterSide = {
 				<select v-model="presetId" v-if="!columnsMode && isPreset">
 					<option :value="null"></option>
 					<optgroup
-						v-for="r in module.relations.filter(v => v.presets.length !== 0)"
+						v-for="r in module.relations.filter(v => v.presets.filter(p => p.protected).length !== 0)"
 						:label="r.name"
 					>
 						<option v-for="p in r.presets.filter(v => v.protected)" :value="p.id">
 							{{ p.name }}
 						</option>
 					</optgroup>
+					
+					<template v-for="m in getDependentModules(module,modules).filter(v => v.id !== module.id)">
+						<optgroup
+							v-for="r in m.relations.filter(v => v.presets.filter(p => p.protected).length !== 0)"
+							:label="m.name + '.' + r.name"
+						>
+							<option v-for="p in r.presets.filter(v => v.protected)" :value="p.id">
+								{{ p.name }}
+							</option>
+						</optgroup>
+					</template>
 				</select>
 				
 				<!-- role input -->
@@ -321,6 +350,21 @@ let MyFilterSide = {
 						{{ r.name }}
 					</option>
 				</select>
+				
+				<!-- date offset input -->
+				<template v-if="!columnsMode && isAnyDate">
+					<input
+						v-model.number="nowOffset"
+						:placeholder="capApp.nowOffsetHint.replace('{MODE}',capApp.option.nowMode[nowOffsetMode])"
+						:title="capApp.nowOffsetTitle"
+					/>
+					<select v-model="nowOffsetMode" @change="changeOffsetMode">
+						<option value="seconds">{{ capApp.option.nowMode.seconds }}</option>
+						<option value="minutes">{{ capApp.option.nowMode.minutes }}</option>
+						<option value="hours">{{ capApp.option.nowMode.hours }}</option>
+						<option value="days">{{ capApp.option.nowMode.days }}</option>
+					</select>
+				</template>
 				
 				<!-- fixed value input -->
 				<template v-if="isValue || isJavascript">
@@ -421,28 +465,14 @@ let MyFilterSide = {
 		nestingLevels: { type:Number,  required:true }
 	},
 	emits:['apply-value','update:modelValue'],
-	data:function() {
+	data() {
 		return {
-			showQuery:false // show existing sub query
+			nowOffsetMode:'seconds', // mode for date/time offset (days, hours, minutes, seconds)
+			showQuery:false          // show existing sub query
 		};
 	},
 	computed:{
 		// entities
-		contentEnabled:(s) => {
-			return [
-				'attribute','field','fieldChanged','value','record',
-				'recordNew','login','preset','role','languageCode',
-				'javascript','true','collection','subQuery'
-			].filter(v => !s.disableContent.includes(v));
-		},
-		contentUnusable:(s) => {
-			let out = [];
-			if(Object.keys(s.fieldIdMap).length === 0) {
-				out.push('field');
-				out.push('fieldChanged');
-			}
-			return out;
-		},
 		nestedIndexAttributeIdsSubQuery:(s) => {
 			if(!s.isSubQuery) return [];
 			
@@ -487,6 +517,35 @@ let MyFilterSide = {
 				this.setAttribute(vs[2],parseInt(vs[1]),parseInt(vs[0]));
 			}
 		},
+		nowOffset:{
+			get()  {
+				if(this.modelValue.nowOffset !== null) {
+					if(this.modelValue.nowOffset % 86400 === 0) {
+						this.nowOffsetMode = 'days';
+						return this.modelValue.nowOffset / 86400;
+					}
+					if(this.modelValue.nowOffset % 3600 === 0) {
+						this.nowOffsetMode = 'hours';
+						return this.modelValue.nowOffset / 3600;
+					}
+					if(this.modelValue.nowOffset % 60 === 0) {
+						this.nowOffsetMode = 'minutes';
+						return this.modelValue.nowOffset / 60;
+					}
+				}
+				return this.modelValue.nowOffset;
+			},
+			set(v) {
+				if(v !== '') {
+					switch(this.nowOffsetMode) {
+						case 'days': v = v * 86400; break;
+						case 'hours': v = v * 3600; break;
+						case 'minutes': v = v * 60; break;
+					}
+				}
+				this.set('nowOffset',v === '' ? null : v);
+			}
+		},
 		presetId:{
 			get()  { return this.modelValue.presetId; },
 			set(v) { this.set('presetId',v); }
@@ -516,18 +575,23 @@ let MyFilterSide = {
 		},
 		
 		// simple
-		module:(s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
+		contentData: (s) => ['attribute','collection','preset','subQuery','value','true'].filter(v => !s.disableContent.includes(v)),
+		contentDate: (s) => ['nowDate','nowDatetime','nowTime'].filter(v => !s.disableContent.includes(v)),
+		contentForm: (s) => ['field','fieldChanged','fieldValid','javascript','record','recordNew'].filter(v => !s.disableContent.includes(v)),
+		contentLogin:(s) => ['languageCode','login','role'].filter(v => !s.disableContent.includes(v)),
+		module:      (s) => s.moduleId === '' ? false : s.moduleIdMap[s.moduleId],
 		
 		// states
+		isAnyDate:    (s) => ['nowDate','nowDatetime','nowTime'].includes(s.content),
 		isAttribute:  (s) => s.content === 'attribute',
 		isCollection: (s) => s.content === 'collection',
-		isField:      (s) => s.content === 'field' || s.content === 'fieldChanged',
+		isField:      (s) => ['field','fieldChanged','fieldValid'].includes(s.content),
 		isJavascript: (s) => s.content === 'javascript',
+		isNullPartner:(s) => !s.leftSide && s.isNullOperator,
 		isPreset:     (s) => s.content === 'preset',
 		isRole:       (s) => s.content === 'role',
 		isSubQuery:   (s) => s.content === 'subQuery',
 		isValue:      (s) => s.content === 'value',
-		isNullPartner:(s) => !s.leftSide && s.isNullOperator,
 		
 		// stores
 		modules:        (s) => s.$store.getters['schema/modules'],
@@ -567,12 +631,16 @@ let MyFilterSide = {
 				v.attributeNested = 0;
 			}
 			
+			// remove unneeded date offset
+			if(!['nowDate','nowDatetime','nowTime'].includes(v.content))
+				v.nowOffset = null;
+			
 			// remove invalid references
 			if(v.content !== 'collection') {
 				v.collectionId = null;
 				v.columnId     = null;
 			}
-			if(v.content !== 'field' && v.content !== 'fieldChanged')
+			if(!['field','fieldChanged','fieldValid'].includes(v.content))
 				v.fieldId  = null;
 			
 			if(v.content !== 'preset') v.presetId = null;
@@ -593,6 +661,10 @@ let MyFilterSide = {
 			let v = JSON.parse(JSON.stringify(this.modelValue.query));
 			v[name] = newValue;
 			this.set('query',v);
+		},
+		changeOffsetMode() {
+			if(this.nowOffset !== 0 && this.nowOffset !== null)
+				this.nowOffset = this.nowOffset;
 		}
 	}
 };
@@ -726,36 +798,24 @@ let MyFilter = {
 		
 		// states
 		side0Column:(s) => {
-			for(let i = 0, j = s.columns.length; i < j; i++) {
-				let c = s.columns[i];
-				
-				if(c.index !== s.side0.attributeIndex || c.attributeId !== s.side0.attributeId)
-					continue;
-				
-				return c;
+			for(let c of s.columns) {
+				if(c.index === s.side0.attributeIndex && c.attributeId === s.side0.attributeId)
+					return c;
 			}
 			return false;
 		},
-		side0ColumDate:(s) => {
-			return ['date','datetime'].includes(s.side0Column.display);
-		},
-		side0ColumTime:(s) => {
-			return ['datetime','time'].includes(s.side0Column.display);
-		},
-		isNullOperator:(s) => {
-			return ['IS NULL','IS NOT NULL'].includes(s.operator);
-		},
-		isStringInput:(s) => {
-			return (
-				typeof s.side0.attributeId !== 'undefined' &&
-				s.side0.attributeId !== null &&
-				s.isAttributeString(s.attributeIdMap[s.side0.attributeId].content)
-			) || (
-				typeof s.side1.attributeId !== 'undefined' &&
-				s.side1.attributeId !== null &&
-				s.isAttributeString(s.attributeIdMap[s.side1.attributeId].content)
-			);
-		},
+		side0ColumDate:(s) => s.side0Column && ['date','datetime'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
+		side0ColumTime:(s) => s.side0Column && ['datetime','time'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
+		isNullOperator:(s) => ['IS NULL','IS NOT NULL'].includes(s.operator),
+		isStringInput: (s) => (
+			typeof s.side0.attributeId !== 'undefined' &&
+			s.side0.attributeId !== null &&
+			s.isAttributeString(s.attributeIdMap[s.side0.attributeId].content)
+		) || (
+			typeof s.side1.attributeId !== 'undefined' &&
+			s.side1.attributeId !== null &&
+			s.isAttributeString(s.attributeIdMap[s.side1.attributeId].content)
+		),
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap']

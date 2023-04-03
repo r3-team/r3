@@ -5,7 +5,7 @@ import (
 	"r3/module_option"
 	"r3/types"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func ModuleOptionGet() (interface{}, error) {

@@ -13,7 +13,7 @@ let MyBuilderPgIndex = {
 			<my-button image="delete.png"
 				v-if="!isNew"
 				@trigger="del"
-				:active="!autoFki && !readonly"
+				:active="!autoFki && !primaryKey && !readonly"
 				:cancel="true"
 				:captionTitle="capGen.button.delete"
 			/>
@@ -36,6 +36,7 @@ let MyBuilderPgIndex = {
 				</template>
 			</select>
 		</td>
+		<td><my-bool v-model="primaryKey" :readonly="true" /></td>
 		<td><my-bool v-model="autoFki" :readonly="true" /></td>
 		<td><my-bool v-model="noDuplicates" :readonly="!isNew || readonly" /></td>
 	</tr>`,
@@ -45,72 +46,70 @@ let MyBuilderPgIndex = {
 				id:null,
 				autoFki:false,
 				noDuplicates:false,
+				primaryKey:false,
 				attributes:[]
 			}}
 		},
 		readonly:{ type:Boolean, required:true },
 		relation:{ type:Object,  required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			attributeInput:'',
 			
 			// values
 			autoFki:this.index.autoFki,
 			noDuplicates:this.index.noDuplicates,
+			primaryKey:this.index.primaryKey,
 			attributes:JSON.parse(JSON.stringify(this.index.attributes))
 		};
 	},
 	computed:{
-		attributeIdsUsed:function() {
+		attributeIdsUsed:(s) => {
 			let ids = [];
-			
-			for(let i = 0, j = this.attributes.length; i < j; i++) {
-				ids.push(this.attributes[i].attributeId);
+			for(let a of s.attributes) {
+				ids.push(a.attributeId);
 			}
 			return ids;
 		},
-		pgIndexAttributesCaption:function() {
+		pgIndexAttributesCaption:(s) => {
 			let out = [];
-			for(let i = 0, j = this.attributes.length; i < j; i++) {
-				let atr = this.attributeIdMap[this.attributes[i].attributeId];
-				
-				out.push(this.getAttributeCaption(atr.name,this.attributes[i].orderAsc));
+			for(let a of s.attributes) {
+				out.push(s.getAttributeCaption(s.attributeIdMap[a.attributeId].name,a.orderAsc));
 			}
 			return out.join(' + ');
 		},
 		
 		// simple states
-		isNew:function() { return this.index.id === null; },
+		isNew:(s) => s.index.id === null,
 		
 		// stores
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.relation; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.relation,
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
-		addAttribute:function() {
+		addAttribute() {
 			if(this.attributeInput === '') return;
 			
 			let s = this.attributeInput.split('_');
-			
 			this.attributes.push({
 				attributeId:s[0],
 				orderAsc:s[1] === 'ASC'
 			});
 			this.attributeInput = '';
 		},
-		getAttributeCaption:function(attributeName,orderAsc) {
+		getAttributeCaption(attributeName,orderAsc) {
 			return `${attributeName} (${orderAsc ? 'ASC' : 'DESC'})`;
 		},
 		
-		del:function(rel) {
+		del(rel) {
 			ws.send('pgIndex','del',{id:this.index.id},true).then(
 				() => this.$root.schemaReload(this.relation.moduleId),
 				this.$root.genericError
 			);
 		},
-		set:function() {
+		set() {
 			ws.send('pgIndex','set',{
 				id:this.index.id,
 				relationId:this.relation.id,

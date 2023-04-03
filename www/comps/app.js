@@ -151,6 +151,7 @@ let MyApp = {
 			
 			if(s.settings.bordersAll)       classes.push('user-bordersAll');
 			if(s.settings.compact)          classes.push('user-compact');
+			if(s.settings.fieldClean)       classes.push('user-clean');
 			if(s.settings.dark)             classes.push('user-dark');
 			if(s.settings.mobileScrollForm) classes.push('user-mobile-scroll-form');
 			if(s.isMobile)                  classes.push('is-mobile');
@@ -433,8 +434,10 @@ let MyApp = {
 		// session control
 		sessionInvalid() {
 			this.$store.commit('local/loginKeyAes',null);
+			this.$store.commit('local/loginKeySalt',null);
 			this.$store.commit('local/token','');
 			this.$store.commit('local/tokenKeep',false);
+			this.$store.commit('loginEncryption',false);
 			this.$store.commit('loginPrivateKey',null);
 			this.$store.commit('loginPrivateKeyEnc',null);
 			this.$store.commit('loginPrivateKeyEncBackup',null);
@@ -487,8 +490,8 @@ let MyApp = {
 					if(res.status !== 200)
 						return this.setInitErr('Failed to load schema cache');
 					
-					res.json().then((data) => {
-						this.$store.commit('schema/set',data);
+					res.json().then(v => {
+						this.$store.commit('schema/set',v);
 						this.schemaLoaded = true;
 						this.stateChange();
 					});
@@ -502,7 +505,6 @@ let MyApp = {
 			let requests = [
 				ws.prepare('setting','get',{}),
 				ws.prepare('lookup','get',{name:'access'}),
-				ws.prepare('lookup','get',{name:'caption'}),
 				ws.prepare('lookup','get',{name:'feedback'}),
 				ws.prepare('lookup','get',{name:'loginHasClient'}),
 				ws.prepare('lookup','get',{name:'loginKeys'}),
@@ -519,41 +521,41 @@ let MyApp = {
 				async res => {
 					this.$store.commit('settings',res[0].payload);
 					this.$store.commit('access',res[1].payload);
-					this.$store.commit('captions',res[2].payload);
-					this.$store.commit('feedback',res[3].payload === 1);
-					this.$store.commit('loginHasClient',res[4].payload);
+					this.$store.commit('feedback',res[2].payload === 1);
+					this.$store.commit('loginHasClient',res[3].payload);
 					
-					if(this.loginKeyAes !== null && res[5].payload.privateEnc !== null) {
+					if(this.loginKeyAes !== null && res[4].payload.privateEnc !== null) {
 						this.$store.commit('loginEncryption',true);
 						this.$store.commit('loginPrivateKey',null);
-						this.$store.commit('loginPrivateKeyEnc',res[5].payload.privateEnc);
-						this.$store.commit('loginPrivateKeyEncBackup',res[5].payload.privateEncBackup);
+						this.$store.commit('loginPrivateKeyEnc',res[4].payload.privateEnc);
+						this.$store.commit('loginPrivateKeyEncBackup',res[4].payload.privateEncBackup);
 						
-						await this.pemImport(res[5].payload.public,'RSA',true)
+						await this.pemImport(res[4].payload.public,'RSA',true)
 							.then(res => this.$store.commit('loginPublicKey',res))
 							.catch(this.setInitErr);
 						
-						await this.pemImportPrivateEnc(res[5].payload.privateEnc)
+						await this.pemImportPrivateEnc(res[4].payload.privateEnc)
 							.catch(this.setInitErr);
 					}
 					
 					if(this.isAdmin) {
-						this.$store.commit('config',res[6].payload);
-						this.$store.commit('license',res[7].payload);
-						this.$store.commit('system',res[8].payload);
+						this.$store.commit('config',res[5].payload);
+						this.$store.commit('license',res[6].payload);
+						this.$store.commit('system',res[7].payload);
 					}
 					
-					// in case of errors during collection retrieval, continue
-					//  if user is admin, otherwise the error cannot be corrected
-					// normal users should not login as the system does not handle as expected
-					return this.updateCollections(this.isAdmin,
-						err => alert(this.capErr.initCollection.replace('{MSG}',err)));
+					// load captions & collections
+					// if collection update error, continue for admins - otherwise it cannot be corrected
+					// non-admins are blocked as the system does not handle as expected
+					const p1 = this.captionsReload();
+					const p2 = this.updateCollections(this.isAdmin,err => alert(this.capErr.initCollection.replace('{MSG}',err)));
+					Promise.all([p1,p2]).then(
+						() => this.appReady = true,
+						this.setInitErr
+					);
 				},
 				this.setInitErr
-			).then(
-				() => this.appReady = true,
-				this.setInitErr
-			);
+			)
 		},
 		
 		// crypto
@@ -580,6 +582,19 @@ let MyApp = {
 		},
 		
 		// backend reloads
+		captionsReload() {
+			return new Promise((resolve,reject) => {
+				fetch(`./langs/${R3.appBuild}/${this.settings.languageCode}`).then(
+					res => {
+						if(res.status !== 200)
+							return reject('Failed to load captions');
+						
+						res.json().then(v => this.$store.commit('captions',v));
+						resolve();
+					}
+				);
+			});
+		},
 		loginReauthAll(blocking) {
 			ws.send('login','reauthAll',{},blocking).then(
 				() => {},

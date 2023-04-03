@@ -9,6 +9,7 @@ import (
 	"r3/cache"
 	"r3/config"
 	"r3/data"
+	"r3/data/data_query"
 	"r3/db"
 	"r3/handler"
 	"r3/login/login_auth"
@@ -21,7 +22,7 @@ import (
 
 	ics "github.com/arran4/golang-ical"
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var handlerContext = "ics_download"
@@ -96,7 +97,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// apply field filters
 	// some filters are not compatible with backend requests (field value, open form record ID, ...)
-	dataGet.Filters = convertQueryToDataFilter(f.Query.Filters, loginId, languageCode)
+	dataGet.Filters = data_query.ConvertQueryToDataFilter(f.Query.Filters, loginId, languageCode)
 
 	// define ICS event range, if defined
 	dateRange0 := f.DateRange0
@@ -119,15 +120,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			Operator:  ">=",
 			Side0: types.DataGetFilterSide{
 				AttributeId: pgtype.UUID{
-					Bytes:  f.AttributeIdDate0,
-					Status: pgtype.Present,
+					Bytes: f.AttributeIdDate0,
+					Valid: true,
 				},
 				AttributeIndex:  f.IndexDate0,
-				QueryAggregator: pgtype.Varchar{Status: pgtype.Null},
+				QueryAggregator: pgtype.Text{},
 			},
 			Side1: types.DataGetFilterSide{
-				AttributeId:     pgtype.UUID{Status: pgtype.Null},
-				QueryAggregator: pgtype.Varchar{Status: pgtype.Null},
+				AttributeId:     pgtype.UUID{},
+				QueryAggregator: pgtype.Text{},
 				Value:           tools.GetTimeUnix() - dateRange0,
 			},
 		})
@@ -138,15 +139,15 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			Operator:  "<=",
 			Side0: types.DataGetFilterSide{
 				AttributeId: pgtype.UUID{
-					Bytes:  f.AttributeIdDate1,
-					Status: pgtype.Present,
+					Bytes: f.AttributeIdDate1,
+					Valid: true,
 				},
 				AttributeIndex:  f.IndexDate1,
-				QueryAggregator: pgtype.Varchar{Status: pgtype.Null},
+				QueryAggregator: pgtype.Text{},
 			},
 			Side1: types.DataGetFilterSide{
-				AttributeId:     pgtype.UUID{Status: pgtype.Null},
-				QueryAggregator: pgtype.Varchar{Status: pgtype.Null},
+				AttributeId:     pgtype.UUID{},
+				QueryAggregator: pgtype.Text{},
 				Value:           tools.GetTimeUnix() + dateRange1,
 			},
 		})
@@ -155,20 +156,20 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// add date value expressions
 	dataGet.Expressions = append(dataGet.Expressions, types.DataGetExpression{
 		AttributeId: pgtype.UUID{
-			Bytes:  f.AttributeIdDate0,
-			Status: pgtype.Present,
+			Bytes: f.AttributeIdDate0,
+			Valid: true,
 		},
-		AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-		Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+		AttributeIdNm: pgtype.UUID{},
+		Aggregator:    pgtype.Text{},
 		Index:         f.IndexDate0,
 	})
 	dataGet.Expressions = append(dataGet.Expressions, types.DataGetExpression{
 		AttributeId: pgtype.UUID{
-			Bytes:  f.AttributeIdDate1,
-			Status: pgtype.Present,
+			Bytes: f.AttributeIdDate1,
+			Valid: true,
 		},
-		AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-		Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+		AttributeIdNm: pgtype.UUID{},
+		Aggregator:    pgtype.Text{},
 		Index:         f.IndexDate1,
 	})
 
@@ -180,27 +181,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 			return
 		}
-
 		if schema.IsContentFiles(atr.Content) {
 			continue
 		}
 
-		atrId := pgtype.UUID{
-			Bytes:  column.AttributeId,
-			Status: pgtype.Present,
-		}
-
-		expr := types.DataGetExpression{
-			AttributeId:   atrId,
-			AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-			Aggregator:    pgtype.Varchar{Status: pgtype.Null},
-			Index:         column.Index,
-		}
-		if column.SubQuery {
-			expr.Query = convertSubQueryToDataGet(column.Query, column.Aggregator,
-				atrId, column.Index, loginId, languageCode)
-		}
-		dataGet.Expressions = append(dataGet.Expressions, expr)
+		dataGet.Expressions = append(dataGet.Expressions,
+			data_query.ConvertColumnToExpression(column, loginId, languageCode))
 	}
 
 	// get data
@@ -345,100 +331,4 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 func isUtcZero(unix int64) bool {
 	return unix%86400 == 0
-}
-
-func convertSubQueryToDataGet(query types.Query, queryAggregator pgtype.Varchar,
-	attributeId pgtype.UUID, attributeIndex int, loginId int64, languageCode string) types.DataGet {
-
-	var dataGet types.DataGet
-
-	joins := make([]types.DataGetJoin, 0)
-	for _, j := range query.Joins {
-		joins = append(joins, types.DataGetJoin{
-			AttributeId: j.AttributeId.Bytes,
-			Connector:   j.Connector,
-			Index:       j.Index,
-			IndexFrom:   j.IndexFrom,
-		})
-	}
-
-	orders := make([]types.DataGetOrder, 0)
-	for _, o := range query.Orders {
-		orders = append(orders, types.DataGetOrder{
-			Ascending: o.Ascending,
-			AttributeId: pgtype.UUID{
-				Bytes:  o.AttributeId,
-				Status: pgtype.Present,
-			},
-			Index: pgtype.Int4{
-				Int:    int32(o.Index),
-				Status: pgtype.Present,
-			},
-		})
-	}
-
-	dataGet.Joins = joins
-	dataGet.Orders = orders
-	dataGet.RelationId = query.RelationId.Bytes
-	dataGet.Limit = query.FixedLimit
-	dataGet.Expressions = []types.DataGetExpression{
-		types.DataGetExpression{
-			Aggregator:    queryAggregator,
-			AttributeId:   attributeId,
-			AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-			Index:         attributeIndex,
-		},
-	}
-	dataGet.Filters = convertQueryToDataFilter(query.Filters, loginId, languageCode)
-
-	return dataGet
-}
-
-func convertQueryToDataFilter(filters []types.QueryFilter, loginId int64, languageCode string) []types.DataGetFilter {
-	filtersOut := make([]types.DataGetFilter, len(filters))
-
-	var processSide = func(side types.QueryFilterSide) types.DataGetFilterSide {
-		sideOut := types.DataGetFilterSide{
-			AttributeId:     side.AttributeId,
-			AttributeIndex:  side.AttributeIndex,
-			AttributeNested: side.AttributeNested,
-			Brackets:        side.Brackets,
-			Query:           types.DataGet{},
-			QueryAggregator: side.QueryAggregator,
-			Value:           side.Value,
-		}
-
-		if side.Content == "languageCode" {
-			sideOut.Value = languageCode
-		}
-		if side.Content == "login" {
-			sideOut.Value = loginId
-		}
-		if side.Content == "subQuery" {
-			sideOut.Query = convertSubQueryToDataGet(side.Query, side.QueryAggregator,
-				side.AttributeId, side.AttributeIndex, loginId, languageCode)
-		}
-		if side.Content == "true" {
-			sideOut.Value = true
-		}
-		return sideOut
-	}
-
-	for i, filter := range filters {
-
-		filterOut := types.DataGetFilter{
-			Connector: filter.Connector,
-			Operator:  filter.Operator,
-			Side0:     processSide(filter.Side0),
-			Side1:     processSide(filter.Side1),
-		}
-		if i == 0 {
-			filterOut.Side0.Brackets++
-		}
-		if i == len(filters)-1 {
-			filterOut.Side1.Brackets++
-		}
-		filtersOut[i] = filterOut
-	}
-	return filtersOut
 }

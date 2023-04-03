@@ -53,7 +53,7 @@ let MyAdminLdaps = {
 				</table>
 			</div>
 			
-			<div class="contentPart long" v-if="showEdit">
+			<div class="contentPart long" v-if="idEdit !== -1">
 				
 				<div class="contentPartHeader">
 					<img class="icon" src="images/edit.png" />
@@ -93,32 +93,42 @@ let MyAdminLdaps = {
 					<tbody>
 						<tr>
 							<td>{{ capGen.name }}</td>
-							<td><input v-model="inputs.name" :placeholder="capApp.nameHint" /></td>
+							<td><input v-model="name" :placeholder="capApp.nameHint" /></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.template }}</td>
+							<td>
+								<select v-model="loginTemplateId">
+									<option v-for="t in templates" :title="t.comment" :value="t.id">
+										{{ t.name }}
+									</option>
+								</select>
+							</td>
 						</tr>
 						<tr>
 							<td>{{ capApp.host }}</td>
-							<td><input v-model="inputs.host" :placeholder="capApp.hostHint" /></td>
+							<td><input v-model="host" :placeholder="capApp.hostHint" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.port }}</td>
-							<td><input v-model.number="inputs.port" :placeholder="capApp.portHint" /></td>
+							<td><input v-model.number="port" :placeholder="capApp.portHint" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.bindUserDn }}</td>
-							<td><input v-model="inputs.bindUserDn" :placeholder="capApp.bindUserDnHint" /></td>
+							<td><input v-model="bindUserDn" :placeholder="capApp.bindUserDnHint" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.bindUserPw }}</td>
-							<td><input v-model="inputs.bindUserPw" type="password" /></td>
+							<td><input v-model="bindUserPw" type="password" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.searchDn }}</td>
-							<td><input v-model="inputs.searchDn" :placeholder="capApp.searchDnHint" /></td>
+							<td><input v-model="searchDn" :placeholder="capApp.searchDnHint" /></td>
 						</tr>
 						<tr v-if="showExpert">
 							<td>{{ capApp.searchClass }}</td>
 							<td>
-								<input v-model="inputs.searchClass"
+								<input v-model="searchClass"
 									:placeholder="capApp.searchClassHint"
 								/>
 							</td>
@@ -126,7 +136,7 @@ let MyAdminLdaps = {
 						<tr v-if="showExpert">
 							<td>{{ capApp.keyAttribute }}</td>
 							<td>
-								<input v-model="inputs.keyAttribute"
+								<input v-model="keyAttribute"
 									:placeholder="capApp.keyAttributeHint"
 								/>
 							</td>
@@ -134,38 +144,38 @@ let MyAdminLdaps = {
 						<tr v-if="showExpert">
 							<td>{{ capApp.loginAttribute }}</td>
 							<td>
-								<input v-model="inputs.loginAttribute"
+								<input v-model="loginAttribute"
 									:placeholder="capApp.loginAttributeHint"
 								/>
 							</td>
 						</tr>
 						<tr>
 							<td>{{ capApp.tls }}</td>
-							<td><my-bool v-model="inputs.tls" :readonly="inputs.starttls" /></td>
+							<td><my-bool v-model="tls" :readonly="starttls" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.starttls }}</td>
-							<td><my-bool v-model="inputs.starttls" :readonly="inputs.tls" /></td>
+							<td><my-bool v-model="starttls" :readonly="tls" /></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.tlsVerify }}</td>
-							<td><my-bool v-model="inputs.tlsVerify" :readonly="!inputs.tls && !inputs.starttls" /></td>
+							<td><my-bool v-model="tlsVerify" :readonly="!tls && !starttls" /></td>
 						</tr>
 						<tr v-if="showExpert">
 							<td>{{ capApp.msAdExt }}</td>
 							<td>
-								<my-bool v-model="inputs.msAdExt" />
+								<my-bool v-model="msAdExt" />
 								<span>{{ capApp.msAdExtHint }}</span>
 							</td>
 						</tr>
 						<tr>
 							<td><span v-html="capApp.assignRoles" /></td>
-							<td><my-bool v-model="inputs.assignRoles" /></td>
+							<td><my-bool v-model="assignRoles" /></td>
 						</tr>
-						<tr v-if="showExpert && inputs.assignRoles">
+						<tr v-if="showExpert && assignRoles">
 							<td>{{ capApp.memberAttribute }}</td>
 							<td>
-								<input v-model="inputs.memberAttribute"
+								<input v-model="memberAttribute"
 									:placeholder="capApp.memberAttributeHint"
 								/>
 							</td>
@@ -173,7 +183,7 @@ let MyAdminLdaps = {
 					</tbody>
 				</table>
 				
-				<template v-if="inputs.assignRoles">
+				<template v-if="assignRoles">
 				
 					<h2 class="roles-title">{{ capApp.titleRoles }}</h2>
 					<div>
@@ -184,7 +194,7 @@ let MyAdminLdaps = {
 					</div>
 					<br />
 					
-					<table v-if="inputs.roles.length !== 0">
+					<table v-if="roles.length !== 0">
 						<thead>
 							<tr>
 								<th>{{ capApp.groupDn }}</th>
@@ -193,7 +203,7 @@ let MyAdminLdaps = {
 							</tr>
 						</thead>
 						<tbody>
-							<tr v-for="(r,i) in inputs.roles" class="default-inputs">
+							<tr v-for="(r,i) in roles" class="default-inputs">
 								<td>
 									<input v-model="r.groupDn"
 										:placeholder="capApp.groupDnHint"
@@ -229,51 +239,75 @@ let MyAdminLdaps = {
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
-	data:function() {
+	data() {
 		return {
-			ldaps:[],
-			inputs:{},
+			// inputs
+			name:'',
+			host:'',
+			port:'',
+			bindUserDn:'',
+			bindUserPw:'',
+			keyAttribute:'',
+			loginAttribute:'',
+			loginTemplateId:'',
+			memberAttribute:'',
+			searchClass:'',
+			searchDn:'',
+			assignRoles:'',
+			msAdExt:'',
+			starttls:'',
+			tls:'',
+			tlsVerify:'',
+			roles:'',
 			
 			// states
-			idEdit:0,
-			showEdit:false,
-			showExpert:false
+			idEdit:-1,         // ID of LDAP connection being edited (0 = new)
+			inputKeys:['name','host','port','bindUserDn','bindUserPw',
+				'keyAttribute','loginAttribute','loginTemplateId',
+				'memberAttribute','searchClass','searchDn','assignRoles',
+				'msAdExt','starttls','tls','tlsVerify','roles'],
+			inputsOrg:{},      // map of original input values, key = input key
+			ldaps:[],
+			showExpert:false,
+			templates:[]
 		};
 	},
-	mounted:function() {
+	mounted() {
 		this.get();
 		this.$store.commit('pageTitle',this.menuTitle);
 	},
 	computed:{
-		hasChanges:function() {
-			return this.ldap.name            !== this.inputs.name
-				|| this.ldap.host            !== this.inputs.host
-				|| this.ldap.port            !== this.inputs.port
-				|| this.ldap.bindUserDn      !== this.inputs.bindUserDn
-				|| this.ldap.bindUserPw      !== this.inputs.bindUserPw
-				|| this.ldap.keyAttribute    !== this.inputs.keyAttribute
-				|| this.ldap.loginAttribute  !== this.inputs.loginAttribute
-				|| this.ldap.memberAttribute !== this.inputs.memberAttribute
-				|| this.ldap.searchClass     !== this.inputs.searchClass
-				|| this.ldap.searchDn        !== this.inputs.searchDn
-				|| this.ldap.assignRoles     !== this.inputs.assignRoles
-				|| this.ldap.msAdExt         !== this.inputs.msAdExt
-				|| this.ldap.starttls        !== this.inputs.starttls
-				|| this.ldap.tls             !== this.inputs.tls
-				|| this.ldap.tlsVerify       !== this.inputs.tlsVerify
-				|| JSON.stringify(this.ldap.roles) !== JSON.stringify(this.inputs.roles)
-			;
-		},
-		isNew:function() {
-			return this.idEdit === 0;
+		hasChanges:(s) => {
+			if(s.idEdit === -1)
+				return false;
+			
+			for(let k of s.inputKeys) {
+				if(JSON.stringify(s.inputsOrg[k]) !== JSON.stringify(s[k]))
+					return true;
+			}
+			return false;
 		},
 		
-		ldap:function() {
-			for(let i = 0, j = this.ldaps.length; i < j; i++) {
-				if(this.ldaps[i].id === this.idEdit)
-					return this.ldaps[i];
-			}
-			return {
+		// simple
+		isNew:(s) => s.idEdit === 0,
+		
+		// stores
+		modules:     (s) => s.$store.getters['schema/modules'],
+		roleIdMap:   (s) => s.$store.getters['schema/roleIdMap'],
+		capApp:      (s) => s.$store.getters.captions.admin.ldaps,
+		capGen:      (s) => s.$store.getters.captions.generic,
+		licenseValid:(s) => s.$store.getters.licenseValid
+	},
+	methods:{
+		// externals
+		hasAnyAssignableRole,
+		
+		// actions
+		close() {
+			this.idEdit = -1;
+		},
+		open(id) {
+			let ldap = {
 				name:'',
 				host:'',
 				port:636,
@@ -281,6 +315,7 @@ let MyAdminLdaps = {
 				bindUserPw:'',
 				keyAttribute:'objectGUID',
 				loginAttribute:'sAMAccountName',
+				loginTemplateId:null,
 				memberAttribute:'memberOf',
 				searchClass:'user',
 				searchDn:'',
@@ -291,42 +326,39 @@ let MyAdminLdaps = {
 				tlsVerify:true,
 				roles:[]
 			};
+			
+			if(id > 0) {
+				for(let l of this.ldaps) {
+					if(l.id === id) {
+						ldap = l;
+						break;
+					}
+				}
+			}
+			
+			// apply global template if empty
+			if(ldap.loginTemplateId === null && this.templates.length > 0)
+				ldap.loginTemplateId = this.templates[0].id;
+			
+			for(let k of this.inputKeys) {
+				this[k]           = JSON.parse(JSON.stringify(ldap[k]));
+				this.inputsOrg[k] = JSON.parse(JSON.stringify(ldap[k]));
+			}
+			this.idEdit = id;
 		},
-		
-		// stores
-		modules:     function() { return this.$store.getters['schema/modules']; },
-		roleIdMap:   function() { return this.$store.getters['schema/roleIdMap']; },
-		capApp:      function() { return this.$store.getters.captions.admin.ldaps; },
-		capGen:      function() { return this.$store.getters.captions.generic; },
-		licenseValid:function() { return this.$store.getters.licenseValid; }
-	},
-	methods:{
-		// externals
-		hasAnyAssignableRole,
-		
-		// actions
-		close:function() {
-			this.showEdit = false;
-			this.idEdit   = 0;
-		},
-		open:function(id) {
-			this.showEdit = true;
-			this.idEdit   = id;
-			this.inputs   = JSON.parse(JSON.stringify(this.ldap));
-		},
-		roleAdd:function() {
-			this.inputs.roles.push({
+		roleAdd() {
+			this.roles.push({
 				ldapId:this.idEdit,
 				roleId:null,
 				groupDn:''
 			});
 		},
-		roleRemove:function(i) {
-			this.inputs.roles.splice(i,1);
+		roleRemove(i) {
+			this.roles.splice(i,1);
 		},
 		
 		// backend calls
-		runImport:function(id) {
+		runImport(id) {
 			ws.send('ldap','import',{id:id},true).then(
 				() => {
 					this.$store.commit('dialog',{
@@ -341,7 +373,7 @@ let MyAdminLdaps = {
 				this.$root.genericError
 			);
 		},
-		runCheck:function() {
+		runCheck() {
 			ws.send('ldap','check',{id:this.idEdit},true).then(
 				() => {
 					this.$store.commit('dialog',{
@@ -356,13 +388,13 @@ let MyAdminLdaps = {
 				this.$root.genericError
 			);
 		},
-		reloadBackendCache:function() {
+		reloadBackendCache() {
 			ws.send('ldap','reload',{},false).then(
 				() => {},
 				this.$root.genericError
 			);
 		},
-		delAsk:function() {
+		delAsk() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.delete,
 				buttons:[{
@@ -376,7 +408,7 @@ let MyAdminLdaps = {
 				}]
 			});
 		},
-		del:function() {
+		del() {
 			ws.send('ldap','del',{id:this.idEdit},true).then(
 				() => {
 					this.close();
@@ -386,36 +418,41 @@ let MyAdminLdaps = {
 				this.$root.genericError
 			);
 		},
-		get:function() {
-			ws.send('ldap','get',{},true).then(
-				res => this.ldaps = res.payload.ldaps,
+		get() {
+			ws.sendMultiple([
+				ws.prepare('ldap','get',{}),
+				ws.prepare('loginTemplate','get',{byId:0})
+			],true).then(
+				res => {
+					this.ldaps     = res[0].payload;
+					this.templates = res[1].payload;
+				},
 				this.$root.genericError
 			);
 		},
-		set:function() {
+		set() {
 			ws.send('ldap','set',{
 				id:this.idEdit,
-				name:this.inputs.name,
-				host:this.inputs.host,
-				port:this.inputs.port,
-				bindUserDn:this.inputs.bindUserDn,
-				bindUserPw:this.inputs.bindUserPw,
-				keyAttribute:this.inputs.keyAttribute,
-				loginAttribute:this.inputs.loginAttribute,
-				memberAttribute:this.inputs.memberAttribute,
-				searchClass:this.inputs.searchClass,
-				searchDn:this.inputs.searchDn,
-				assignRoles:this.inputs.assignRoles,
-				msAdExt:this.inputs.msAdExt,
-				starttls:this.inputs.starttls,
-				tls:this.inputs.tls,
-				tlsVerify:this.inputs.tlsVerify,
-				roles:this.inputs.roles
+				name:this.name,
+				host:this.host,
+				port:this.port,
+				bindUserDn:this.bindUserDn,
+				bindUserPw:this.bindUserPw,
+				keyAttribute:this.keyAttribute,
+				loginAttribute:this.loginAttribute,
+				loginTemplateId:this.loginTemplateId,
+				memberAttribute:this.memberAttribute,
+				searchClass:this.searchClass,
+				searchDn:this.searchDn,
+				assignRoles:this.assignRoles,
+				msAdExt:this.msAdExt,
+				starttls:this.starttls,
+				tls:this.tls,
+				tlsVerify:this.tlsVerify,
+				roles:this.roles
 			},true).then(
 				() => {
-					if(this.isNew)
-						this.showEdit = false;
-					
+					this.idEdit = -1;
 					this.get();
 					this.reloadBackendCache();
 				},

@@ -25,8 +25,8 @@ type loginType struct {
 	roleIds []uuid.UUID
 }
 
-var msAdExtDisabledAtrFlags = []string{"514", "546", "66050", "66082", "262658",
-	"262690", "328194", "328226"}
+var msAdExtDisabledAtrFlags = []string{"514", "546", "66050",
+	"66082", "262658", "262690", "328194", "328226"}
 
 func RunAll() error {
 
@@ -178,7 +178,7 @@ func Run(ldapId int32) error {
 
 	// import logins
 	for key, l := range logins {
-		if err := importLogin(l, key, ldap.Id, ldap.AssignRoles); err != nil {
+		if err := importLogin(l, key, ldap); err != nil {
 			log.Warning("ldap", fmt.Sprintf("failed to import login '%s'", l.name), err)
 			continue
 		}
@@ -188,7 +188,7 @@ func Run(ldapId int32) error {
 	return nil
 }
 
-func importLogin(l loginType, key string, ldapId int32, assignRoles bool) error {
+func importLogin(l loginType, key string, ldap types.Ldap) error {
 
 	log.Info("ldap", fmt.Sprintf("importing login '%s' (key: %s, roles: %d)",
 		l.name, key, len(l.roleIds)))
@@ -199,8 +199,8 @@ func importLogin(l loginType, key string, ldapId int32, assignRoles bool) error 
 	}
 	defer tx.Rollback(db.Ctx)
 
-	loginId, changed, err := login.SetLdapLogin_tx(tx, ldapId, key, l.name,
-		l.active, l.roleIds, assignRoles)
+	loginId, changed, err := login.SetLdapLogin_tx(tx, ldap.Id, key, l.name,
+		l.active, l.roleIds, ldap.LoginTemplateId, ldap.AssignRoles)
 
 	if err != nil {
 		return err

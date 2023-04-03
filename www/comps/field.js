@@ -5,6 +5,7 @@ import MyInputDate            from './inputDate.js';
 import MyInputFiles           from './inputFiles.js';
 import MyInputLogin           from './inputLogin.js';
 import MyInputRichtext        from './inputRichtext.js';
+import MyInputUuid            from './inputUuid.js';
 import MyList                 from './list.js';
 import {hasAccessToAttribute} from './shared/access.js';
 import {srcBase64}            from './shared/image.js';
@@ -33,7 +34,8 @@ import {
 	isAttributeFiles,
 	isAttributeInteger,
 	isAttributeRelationship,
-	isAttributeString
+	isAttributeString,
+	isAttributeUuid
 } from './shared/attribute.js';
 export {MyField as default};
 
@@ -48,6 +50,7 @@ let MyField = {
 		MyInputFiles,
 		MyInputLogin,
 		MyInputRichtext,
+		MyInputUuid,
 		MyList
 	},
 	template:`<div class="field"
@@ -59,26 +62,23 @@ let MyField = {
 			
 			<div class="input-box"
 			 	v-click-outside="clickOutside"
-				:class="{ hasCaption:value !== null, disabled:isReadonly }"
+				:class="{ disabled:isReadonly }"
 				:id="getInputFieldName(field.id)"
 			>
 				<div class="caption"
-					v-if="focused || value !== null || isBoolean || isDateInput || isSlider || isRichtext || isCategory || isRelationship || isFiles"
+					v-if="hasCaption"
 					:class="{ invalid:showInvalid }"
-				>{{ caption }}</div>
+				>
+					<img src="images/lock.png" v-if="isEncrypted" :title="capApp.dialog.encrypted" />
+					<span>{{ caption }}</span>
+				</div>
 				
-				<div class="input-line">
+				<div class="input-line" :class="{ isSingleField:isAloneInForm || isAloneInTab }">
 					
 					<!-- data field icon -->
 					<img class="field-icon"
-						v-if="iconId && !isRelationship && !isFiles"
+						v-if="iconId && !isRelationship && !isFiles && !isRichtext && !isTextarea"
 						:src="srcBase64(iconIdMap[iconId].file)"
-					/>
-					
-					<!-- encryption indicator -->
-					<img class="field-icon" src="images/lock.png"
-						v-if="isEncrypted"
-						:title="capApp.dialog.encrypted"
 					/>
 					
 					<!-- regular text line input (numeric, strings, etc.) -->
@@ -90,8 +90,15 @@ let MyField = {
 						@click="click"
 						:class="{ invalid:showInvalid }"
 						:disabled="isReadonly"
-						:placeholder="!focused ? caption : ''"
+						:placeholder="!focused && !isCleanUi ? caption : ''"
 						:type="!isPassword || showPassword ? 'text' : 'password'"
+					/>
+					
+					<!-- UUID input -->
+					<my-input-uuid
+						v-if="isUuid"
+						v-model="value"
+						:readonly="isReadonly"
 					/>
 					
 					<!-- password show action -->
@@ -120,7 +127,7 @@ let MyField = {
 							v-model="value"
 							:class="{ invalid:showInvalid }"
 							:disabled="isReadonly"
-							:placeholder="!focused ? caption : ''"
+							:placeholder="!focused && !isCleanUi ? caption : ''"
 						/>
 						
 						<!-- preview -->
@@ -148,7 +155,7 @@ let MyField = {
 						@click="click"
 						:class="{ invalid:showInvalid }"
 						:disabled="isReadonly"
-						:placeholder="!focused ? caption : ''"
+						:placeholder="!focused && !isCleanUi ? caption : ''"
 					></textarea>
 					
 					<!-- richtext input -->
@@ -181,7 +188,7 @@ let MyField = {
 						v-model="value"
 						@blurred="blur"
 						@focused="focus"
-						:placeholder="!focused ? caption : ''"
+						:placeholder="!focused && !isCleanUi ? caption : ''"
 						:readonly="isReadonly"
 					/>
 					
@@ -211,6 +218,7 @@ let MyField = {
 					<my-input-files
 						v-if="isFiles"
 						v-model="value"
+						@file-count-change="$emit('set-counter',field.id,$event)"
 						:attributeId="field.attributeId"
 						:countAllowed="field.max !== null ? field.max : 0"
 						:fieldId="field.id"
@@ -256,7 +264,7 @@ let MyField = {
 						:rowSelect="true"
 					>
 						<template #input-icon>
-							<img class="field-icon"
+							<img class="field-icon inList"
 								v-if="iconId"
 								:src="srcBase64(iconIdMap[iconId].file)"
 							/>
@@ -309,6 +317,7 @@ let MyField = {
 			v-if="isList"
 			@clipboard="$emit('clipboard')"
 			@open-form="(...args) => openForm(args[0],[],args[1])"
+			@record-count-change="$emit('set-counter',field.id,$event)"
 			@record-selected="(...args) => openForm(args[0],[],args[1])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
@@ -316,6 +325,7 @@ let MyField = {
 			:autoRenew="field.autoRenew"
 			:choices="choicesProcessed"
 			:collections="field.collections"
+			:collectionIdMapIndexes="collectionIdMapIndexes"
 			:columns="columnsProcessed"
 			:csvExport="field.csvExport"
 			:csvImport="field.csvImport"
@@ -326,10 +336,10 @@ let MyField = {
 			:iconId="iconId ? iconId : null"
 			:layout="field.layout"
 			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
-			:isHiddenInTab="isHiddenInTab"
+			:isHidden="isHidden"
+			:isSingleField="isAloneInForm || isAloneInTab"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
-			:scrolls="isAloneInForm || isAloneInTab"
 			:usesPageHistory="isAloneInForm && !formIsPopUp"
 		/>
 		
@@ -337,6 +347,7 @@ let MyField = {
 		<my-calendar
 			v-if="isCalendar && !field.gantt"
 			@open-form="(...args) => openForm(args[0],args[1],args[2])"
+			@record-count-change="$emit('set-counter',field.id,$event)"
 			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
@@ -346,6 +357,7 @@ let MyField = {
 			:choices="choicesProcessed"
 			:columns="columnsProcessed"
 			:collections="field.collections"
+			:collectionIdMapIndexes="collectionIdMapIndexes"
 			:fieldId="field.id"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
@@ -354,7 +366,8 @@ let MyField = {
 			:indexColor="field.indexColor"
 			:indexDate0="field.indexDate0"
 			:indexDate1="field.indexDate1"
-			:isHiddenInTab="isHiddenInTab"
+			:isHidden="isHidden"
+			:isSingleField="isAloneInForm || isAloneInTab"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
 			:usesPageHistory="isAloneInForm && !formIsPopUp"
@@ -364,6 +377,7 @@ let MyField = {
 		<my-gantt
 			v-if="isCalendar && field.gantt"
 			@open-form="(...args) => openForm(args[0],args[1],args[2])"
+			@record-count-change="$emit('set-counter',field.id,$event)"
 			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
@@ -373,6 +387,7 @@ let MyField = {
 			:choices="choicesProcessed"
 			:columns="columnsProcessed"
 			:collections="field.collections"
+			:collectionIdMapIndexes="collectionIdMapIndexes"
 			:fieldId="field.id"
 			:days0="field.dateRange0 / 86400"
 			:days1="field.dateRange1 / 86400"
@@ -382,7 +397,8 @@ let MyField = {
 			:indexColor="field.indexColor"
 			:indexDate0="field.indexDate0"
 			:indexDate1="field.indexDate1"
-			:isHiddenInTab="isHiddenInTab"
+			:isHidden="isHidden"
+			:isSingleField="isAloneInForm || isAloneInTab"
 			:rowSelect="field.openForm !== null"
 			:stepTypeDefault="field.ganttSteps"
 			:stepTypeToggle="field.ganttStepsToggle"
@@ -404,7 +420,7 @@ let MyField = {
 		/>
 		
 		<!-- tabs -->
-		<div class="tabs shade" v-if="isTabs">
+		<div class="tabs" v-if="isTabs">
 			<div class="tabs-entries">
 				<div class="tabs-icon">
 					<img v-if="iconId" :src="srcBase64(iconIdMap[iconId].file)" />
@@ -416,12 +432,12 @@ let MyField = {
 					@click="setTab(i)"
 					:class="getTabClasses(i)"
 				>
-					{{ t.captions.tabTitle[this.moduleLanguage] }}
+					{{ tabIndexesTitle[i] }}
 				</div>
 				<select v-if="isMobile" @change="setTab(parseInt($event.target.value))" :value="tabIndexShow">
 					<template v-for="(t,i) in field.tabs">
 						<option v-if="!tabIndexesHidden.includes(i)" :value="i">
-							{{ t.captions.tabTitle[this.moduleLanguage] }}
+							{{ tabIndexesTitle[i] }}
 						</option>
 					</template>
 				</select>
@@ -431,12 +447,14 @@ let MyField = {
 				v-show="i === tabIndexShow"
 				:class="{ onlyOne:t.fields.length === 1 && t.fields[0].content !== 'container' }"
 			>
+				<!-- tab children -->
 				<my-field flexDirParent="column" :ref="'tabField_'+f.id"
 					v-for="f in t.fields"
 					@clipboard="$emit('clipboard')"
 					@execute-function="$emit('execute-function',$event)"
 					@hotkey="$emit('hotkey',$event)"
 					@open-form="(...args) => $emit('open-form',...args)"
+					@set-counter="(...args) => setTabCounter(i,args[0],args[1])"
 					@set-form-args="(...args) => $emit('set-form-args',...args)"
 					@set-valid="(...args) => $emit('set-valid',...args)"
 					@set-value="(...args) => $emit('set-value',...args)"
@@ -444,15 +462,17 @@ let MyField = {
 					:dataFieldMap="dataFieldMap"
 					:entityIdMapState="entityIdMapState"
 					:field="f"
+					:fieldIdsChanged="fieldIdsChanged"
 					:fieldIdsInvalid="fieldIdsInvalid"
 					:fieldIdMapCaption="fieldIdMapCaption"
+					:fieldIdMapError="fieldIdMapError"
 					:formBadSave="formBadSave"
 					:formIsPopUp="formIsPopUp"
 					:formLoading="formLoading"
 					:formReadonly="formReadonly"
 					:isAloneInTab="t.fields.length === 1"
 					:isAloneInForm="false"
-					:isHiddenInTab="isHiddenInTab || i !== tabIndexShow"
+					:isHiddenInParent="isHidden || (i !== tabIndexShow && !t.contentCounter)"
 					:joinsIndexMap="joinsIndexMap"
 					:key="f.id"
 					:values="values"
@@ -468,6 +488,7 @@ let MyField = {
 			@execute-function="$emit('execute-function',$event)"
 			@hotkey="$emit('hotkey',$event)"
 			@open-form="(...args) => $emit('open-form',...args)"
+			@set-counter="(...args) => $emit('set-counter',...args)"
 			@set-form-args="(...args) => $emit('set-form-args',...args)"
 			@set-valid="(...args) => $emit('set-valid',...args)"
 			@set-value="(...args) => $emit('set-value',...args)"
@@ -475,15 +496,17 @@ let MyField = {
 			:dataFieldMap="dataFieldMap"
 			:entityIdMapState="entityIdMapState"
 			:field="f"
+			:fieldIdsChanged="fieldIdsChanged"
 			:fieldIdsInvalid="fieldIdsInvalid"
 			:fieldIdMapCaption="fieldIdMapCaption"
+			:fieldIdMapError="fieldIdMapError"
 			:formBadSave="formBadSave"
 			:formIsPopUp="formIsPopUp"
 			:formLoading="formLoading"
 			:formReadonly="formReadonly"
 			:flexDirParent="field.direction"
 			:isAloneInForm="isAloneInForm"
-			:isHiddenInTab="isHiddenInTab"
+			:isHiddenInParent="isHidden"
 			:joinsIndexMap="joinsIndexMap"
 			:key="f.id"
 			:values="values"
@@ -493,8 +516,10 @@ let MyField = {
 		dataFieldMap:     { type:Object,  required:true },
 		entityIdMapState: { type:Object,  required:false, default:() => {return {}} }, // overwritten states
 		field:            { type:Object,  required:true },
+		fieldIdsChanged:  { type:Array,   required:false, default:() => {return []} },
 		fieldIdsInvalid:  { type:Array,   required:false, default:() => {return []} },
 		fieldIdMapCaption:{ type:Object,  required:false, default:() => {return {}} }, // overwritten captions
+		fieldIdMapError:  { type:Object,  required:false, default:() => {return {}} }, // overwritten error messages
 		formBadSave:      { type:Boolean, required:true }, // attempted save with invalid inputs
 		formIsPopUp:      { type:Boolean, required:true }, // parent form is a pop-up form
 		formLoading:      { type:Boolean, required:true },
@@ -503,41 +528,44 @@ let MyField = {
 		joinsIndexMap:    { type:Object,  required:true },
 		isAloneInForm:    { type:Boolean, required:true }, // parent form contains only this field
 		isAloneInTab:     { type:Boolean, required:false, default:false }, // only field in a tab
-		isHiddenInTab:    { type:Boolean, required:false, default:false }, // field is in a non-visible tab
+		isHiddenInParent: { type:Boolean, required:false, default:false }, // field is hidden in parent (tab/container)
 		logViewer:        { type:Boolean, required:false, default:false }, // is part of log viewer
 		values:           { type:Object,  required:true }
 	},
 	emits:[
 		'clipboard','execute-function','hotkey','open-form','set-form-args',
-		'set-valid','set-value','set-value-init'
+		'set-counter','set-valid','set-value','set-value-init'
 	],
-	data:function() {
+	data() {
 		return {
-			collectionIdMapIndexes:{},  // active record indexes of collection, used to filter with
+			collectionIdMapIndexes:{},    // selected record indexes of collection, used to filter with
 			focused:false,
-			notTouched:true,            // data field was not touched by user
-			showColorPickerInput:false, // for color picker fields
-			showPassword:false,         // for password fields
-			tabIndexShow:0              // tabs only: which tab is shown
+			notTouched:true,              // data field was not touched by user
+			showColorPickerInput:false,   // for color picker fields
+			showPassword:false,           // for password fields
+			tabIndexFieldIdMapCounter:{}, // tabs only: counter (by tab index + field ID) of child values (like combined list row counts)
+			tabIndexShow:0                // tabs only: which tab is shown
 		};
 	},
 	watch:{
-		formLoading:function(val) {
+		formLoading(val) {
 			if(!val) this.notTouched = true;
 		},
 		isValid:{ // inform parent form about field validity
-			handler:function(v) { this.$emit('set-valid',v,this.field.id); },
+			handler(v) { this.$emit('set-valid',v,this.field.id); },
 			immediate:true
 		},
 		tabIndexesHidden:{
-			handler:function(v) {
+			handler(v) {
 				if(!this.isTabs) return;
 				
-				// use stored tab index if valid, otherwise use first valid one
-				let tabIndex = this.fieldOptionGet(this.field.id,'tabIndex',0);
-				if(this.field.tabs.length > tabIndex && !v.includes(tabIndex))
-					return this.tabIndexShow = tabIndex;
-				
+				// use remembered tab if enabled and available
+				if(this.settings.tabRemember) {
+					let tabIndex = this.fieldOptionGet(this.field.id,'tabIndex',0);
+					if(this.field.tabs.length > tabIndex && !v.includes(tabIndex))
+						return this.tabIndexShow = tabIndex;
+				}
+				// use first valid tab
 				for(let i = 0, j = this.field.tabs.length; i < j; i++) {
 					if(!v.includes(i))
 						return this.tabIndexShow = i;
@@ -547,243 +575,232 @@ let MyField = {
 		}
 	},
 	computed:{
-		attribute:function() {
-			return !this.isData || typeof this.attributeIdMap[this.field.attributeId] === 'undefined'
-				? false : this.attributeIdMap[this.field.attributeId];
+		// field value for data attribute
+		value:{
+			get() {
+				if(!this.isData) return false;
+				
+				// if only alt attribute is set, field still needs primary attribute value (form log)
+				return typeof this.values[this.fieldAttributeId] !== 'undefined'
+					? this.values[this.fieldAttributeId] : null;
+			},
+			set(val,valOld) {
+				if(this.isDecimal)
+					val = val.replace(',','.');
+				
+				this.setValue(val,valOld,this.fieldAttributeId);
+			}
 		},
-		caption:function() {
+		
+		// field value for alternative data attribute
+		valueAlt:{
+			get() {
+				if(!this.isData) return false;
+				
+				// if only primary attribute is set, field still needs alt attribute value (form log)
+				return typeof this.values[this.fieldAttributeIdAlt] !== 'undefined'
+					? this.values[this.fieldAttributeIdAlt] : null;
+			},
+			set(val,valOld) {
+				if(this.fieldAttributeIdAlt !== false)
+					this.setValue(val,valOld,this.fieldAttributeIdAlt);
+			}
+		},
+		
+		caption:(s) => {
 			let out = '';
 			
-			if(typeof this.fieldIdMapCaption[this.field.id] !== 'undefined') {
+			if(typeof s.fieldIdMapCaption[s.field.id] !== 'undefined') {
 				// 1st preference: field caption overwrite
-				out = this.fieldIdMapCaption[this.field.id];
+				out = s.fieldIdMapCaption[s.field.id];
 			}
-			else if(typeof this.field.captions !== 'undefined' && typeof this.field.captions.fieldTitle[this.moduleLanguage] !== 'undefined') {
+			else if(typeof s.field.captions !== 'undefined' && typeof s.field.captions.fieldTitle[s.moduleLanguage] !== 'undefined') {
 				// 2nd preference: field caption
-				out = this.field.captions.fieldTitle[this.moduleLanguage];
+				out = s.field.captions.fieldTitle[s.moduleLanguage];
 			}
-			else if(this.attribute) {
+			else if(s.attribute) {
 				// 3rd / 4th preference: dedicated attribute title / name
-				if(typeof this.attribute.captions.attributeTitle[this.moduleLanguage] !== 'undefined')
-					out = this.attribute.captions.attributeTitle[this.moduleLanguage];
+				if(typeof s.attribute.captions.attributeTitle[s.moduleLanguage] !== 'undefined')
+					out = s.attribute.captions.attributeTitle[s.moduleLanguage];
 				else
-					out = this.attribute.name;
+					out = s.attribute.name;
 			}
 			
 			// if empty: mark as missing
 			if(out === '')
-				out = this.capGen.missingCaption;
+				out = s.capGen.missingCaption;
 			
 			// required marker
-			if(this.isRequired)
+			if(s.isRequired)
 				out += '*';
 			
 			return out;
 		},
-		captionError:function() {
-			if(!this.showInvalid) return '';
+		captionError:(s) => {
+			if(s.customErr !== null) return s.customErr; // custom error is always shown
+			if(!s.showInvalid)       return '';
 			
-			if(!this.isValidMin) {
-				if(this.isString) return this.capGen.inputShort.replace('{MIN}',this.field.min);
-				if(this.isFiles)  return this.capGen.inputTooFewFiles;
-				return this.capGen.inputSmall.replace('{MIN}',this.field.min);
+			if(!s.isValidMin) {
+				if(s.isString) return s.capGen.inputShort.replace('{MIN}',s.field.min);
+				if(s.isFiles)  return s.capGen.inputTooFewFiles;
+				return s.capGen.inputSmall.replace('{MIN}',s.field.min);
 			}
-			if(!this.isValidMax) {
-				if(this.isString) return this.capGen.inputLong.replace('{MAX}',this.field.max);
-				if(this.isFiles)  return this.capGen.inputTooManyFiles;
-				return this.capGen.inputLarge.replace('{MAX}',this.field.max);
+			if(!s.isValidMax) {
+				if(s.isString) return s.capGen.inputLong.replace('{MAX}',s.field.max);
+				if(s.isFiles)  return s.capGen.inputTooManyFiles;
+				return s.capGen.inputLarge.replace('{MAX}',s.field.max);
 			}
 			
-			if(this.isDecimal)     return this.capGen.inputDecimal;
-			if(this.isRequired)    return this.capGen.inputRequired;
-			if(!this.isValidValue) return this.capGen.inputInvalid; // generic error
+			if(s.isDecimal)     return s.capGen.inputDecimal;
+			if(s.isRequired)    return s.capGen.inputRequired;
+			if(!s.isValidValue) return s.capGen.inputInvalid; // generic error
 			return '';
 		},
-		captionHelp:function() {
-			return typeof this.field.captions !== 'undefined'
-				&& typeof this.field.captions.fieldHelp[this.moduleLanguage] !== 'undefined'
-				? this.field.captions.fieldHelp[this.moduleLanguage] : '';
-		},
-		domClass:function() {
+		captionHelp:(s) => typeof s.field.captions !== 'undefined'
+			&& typeof s.field.captions.fieldHelp[s.moduleLanguage] !== 'undefined'
+			? s.field.captions.fieldHelp[s.moduleLanguage] : '',
+		domClass:(s) => {
 			let out = [];
 			
-			if(this.isHidden)
+			if(s.isHidden)
 				out.push('hidden');
 			
-			if(this.isContainer) {
+			if(s.isContainer) {
 				out.push('container');
-				out.push(this.field.direction);
+				out.push(s.field.direction);
 			}
 			
-			if(this.isReadonly)
+			if(s.isReadonly)
 				out.push('readonly');
 			
-			if(this.isTextarea || this.isRichtext || this.isFiles)
+			if(s.isTextarea || s.isRichtext || s.isFiles)
 				out.push('top-aligned');
 			
-			if(this.isRichtext)
+			if(s.isRichtext)
 				out.push('richtext');
 			
 			return out;
 		},
-		domStyle:function() {
-			if(!this.isContainer) return '';
+		domStyle:(s) => !s.isContainer ? '' : s.getFlexStyle(
+			s.flexDirParent,s.field.justifyContent,s.field.alignItems,
+			s.field.alignContent,s.field.wrap,s.field.grow,s.field.shrink,
+			s.field.basis,s.field.perMax,s.field.perMin),
+		fieldAttributeId:(s) => {
+			if(!s.isData) return false;
 			
-			return this.getFlexStyle(this.flexDirParent,
-				this.field.justifyContent,this.field.alignItems,
-				this.field.alignContent,this.field.wrap,this.field.grow,
-				this.field.shrink,this.field.basis,this.field.perMax,
-				this.field.perMin);
+			let atrIdNm = typeof s.field.attributeIdNm !== 'undefined' ?
+				s.field.attributeIdNm : null;
+			
+			return s.getIndexAttributeId(s.field.index,
+				s.field.attributeId,s.field.outsideIn === true,atrIdNm);
 		},
-		fieldAttributeId:function() {
-			if(!this.isData) return false;
+		fieldAttributeIdAlt:(s) => !s.isData || s.field.attributeIdAlt === null ? false
+			: s.getIndexAttributeId(s.field.index,s.field.attributeIdAlt,false,null),
+		columnsProcessed:(s) => !s.isQuery ? [] : s.getQueryColumnsProcessed(
+			s.field.columns,s.joinsIndexMap,s.dataFieldMap,
+			s.fieldIdsChanged,s.fieldIdsInvalid,s.values),
+		choicesProcessed:(s) => {
+			if(!s.isQuery) return [];
 			
-			let atrIdNm = typeof this.field.attributeIdNm !== 'undefined' ?
-				this.field.attributeIdNm : null;
-			
-			return this.getIndexAttributeId(this.field.index,
-				this.field.attributeId,this.field.outsideIn === true,atrIdNm);
-		},
-		fieldAttributeIdAlt:function() {
-			if(!this.isData || this.field.attributeIdAlt === null)
-				return false;
-			
-			return this.getIndexAttributeId(this.field.index,
-				this.field.attributeIdAlt,false,null);
-		},
-		columnsProcessed:function() {
-			if(!this.isQuery) return [];
-			
-			return this.getQueryColumnsProcessed(this.field.columns,
-				this.dataFieldMap,this.joinsIndexMap,this.values);
-		},
-		choicesProcessed:function() {
-			if(!this.isQuery) return [];
-			
-			let choices = JSON.parse(JSON.stringify(this.field.query.choices));
+			let choices = JSON.parse(JSON.stringify(s.field.query.choices));
 			for(let i = 0, j = choices.length; i < j; i++) {
-				choices[i].filters = this.getQueryFiltersProcessed(
-					choices[i].filters,
-					this.dataFieldMap,
-					this.joinsIndexMap,
-					this.values,
-					[],
-					this.collectionIdMapIndexes
+				choices[i].filters = s.getQueryFiltersProcessed(
+					choices[i].filters,s.joinsIndexMap,s.dataFieldMap,
+					s.fieldIdsChanged,s.fieldIdsInvalid,s.values,
+					s.collectionIdMapIndexes
 				);
 			}
 			return choices;
 		},
-		filtersProcessed:function() {
-			if(!this.isQuery) return [];
-			
-			return this.getQueryFiltersProcessed(
-				this.field.query.filters,
-				this.dataFieldMap,
-				this.joinsIndexMap,
-				this.values,
-				[],
-				this.collectionIdMapIndexes
-			);
-		},
-		iconId:function() {
-			if(this.field.iconId !== null)
-				return this.field.iconId;
-			
-			if(this.isData && this.attribute.iconId !== null)
-				return this.attribute.iconId;
-			
+		filtersProcessed:(s) => !s.isQuery ? [] : s.getQueryFiltersProcessed(
+			s.field.query.filters,s.joinsIndexMap,s.dataFieldMap,
+			s.fieldIdsChanged,s.fieldIdsInvalid,s.values,s.collectionIdMapIndexes
+		),
+		iconId:(s) => {
+			if(s.field.iconId !== null)                 return s.field.iconId;
+			if(s.isData && s.attribute.iconId !== null) return s.attribute.iconId;
 			return false;
 		},
-		link:function() {
-			return !this.isData
-				? false : this.getLinkMeta(this.field.display,this.value);
-		},
-		presetValue:function() {
-			if(!this.isData) return false;
+		presetValue:(s) => {
+			if(!s.isData) return false;
 			
-			let join = this.joinsIndexMap[this.field.index];
-			let rel  = this.relationIdMap[join.relationId];
-			
-			for(let i = 0, j = rel.presets.length; i < j; i++) {
+			let join = s.joinsIndexMap[s.field.index];
+			let rel  = s.relationIdMap[join.relationId];
+			for(let preset of rel.presets) {
+				if(s.presetIdMapRecordId[preset.id] !== join.recordId)
+					continue;
 				
-				let preset = rel.presets[i];
-				
-				if(this.presetIdMapRecordId[preset.id] === join.recordId) {
-					
-					for(let x = 0, y = preset.values.length; x < y; x++) {
-						
-						if(preset.values[x].attributeId === this.attribute.id)
-							return preset.values[x];
-					}
+				for(let i = 0, j = preset.values.length; i < j; i++) {
+					if(preset.values[i].attributeId === s.attribute.id)
+						return preset.values[i];
 				}
 			}
 			return false;
 		},
-		relationshipRecordIds:function() {
-			if(!this.isData || this.value === null) return [];
+		relationshipRecordIds:(s) => {
+			if(!s.isData || s.value === null) return [];
+			if(!s.isRelationship1N)           return [s.value];
 			
-			if(this.isRelationship1N) {
-				let ids = [];
-				for(let i = 0, j = this.value.length; i < j; i++) {
-					ids.push(this.value[i]);
-				}
-				return ids;
+			let ids = [];
+			for(let i = 0, j = s.value.length; i < j; i++) {
+				ids.push(s.value[i]);
 			}
-			return [this.value];
+			return ids;
 		},
-		stateFinal:function() {
+		stateFinal:(s) => {
 			// field state has a default value, which can be overwritten by form states
 			// hidden: field is not shown
 			// default: field is shown, data field state is overwritten depending on circumstance
 			// optional: data field only, input is optional
 			// required: data field only, input is required
 			// readonly: data or button field, input is readonly
-			let state = this.field.state;
+			let state = s.field.state;
 			
 			// apply form state if available
-			if(typeof this.entityIdMapState.field[this.field.id] !== 'undefined')
-				state = this.entityIdMapState.field[this.field.id];
+			if(typeof s.entityIdMapState.field[s.field.id] !== 'undefined')
+				state = s.entityIdMapState.field[s.field.id];
 			
 			// overwrites for 'default' state for data fields
-			if(this.isData && state === 'default') {
-				if(!this.inputCanWrite)  state = 'readonly';
-				if(this.inputIsRequired) state = 'required';
+			if(s.isData && state === 'default') {
+				if(!s.inputCanWrite) state = 'readonly';
+				
+				if(s.inputCanWrite                          // can write
+					&& !s.attribute.nullable                // value not optional
+					&& !s.isRelationship1N                  // not 0...n partners
+					&& (!s.isNew || s.attribute.def === '') // existing record or new one with no defaults
+				) state = 'required';
 			}
 			
 			// overwrite in log viewer context, only hidden or readonly allowed
-			if(this.logViewer && state !== 'hidden')
+			if(s.logViewer && state !== 'hidden')
 				state = 'readonly';
 			
 			// overwrite visible data field to readonly if form could not load record
-			if(this.isData && this.formReadonly && state !== 'hidden')
+			if(s.isData && s.formReadonly && state !== 'hidden')
 				state = 'readonly';
 			
 			return state;
 		},
-		tabIndexesHidden:function() {
-			if(!this.isTabs) return [];
+		tabIndexesHidden:(s) => {
+			if(!s.isTabs) return [];
 			let out = [];
-			for(let i = 0, j = this.field.tabs.length; i < j; i++) {
-				let t     = this.field.tabs[i];
-				let state = typeof this.entityIdMapState.tab[t.id] !== 'undefined'
-					? this.entityIdMapState.tab[t.id] : t.state;
+			for(let i = 0, j = s.field.tabs.length; i < j; i++) {
+				let t     = s.field.tabs[i];
+				let state = typeof s.entityIdMapState.tab[t.id] !== 'undefined'
+					? s.entityIdMapState.tab[t.id] : t.state;
 				
 				if(state === 'hidden')
 					out.push(i);
 			}
 			return out;
 		},
-		tabIndexesInvalidFields:function() {
-			if(!this.isTabs) return [];
+		tabIndexesInvalidFields:(s) => {
+			if(!s.isTabs) return [];
 			let hasAnyInvalid = (fields) => {
 				for(let f of fields) {
 					switch(f.content) {
-						case 'data':
-							if(this.fieldIdsInvalid.includes(f.id)) return true;
-						break;
-						case 'container':
-							if(hasAnyInvalid(f.fields)) return true;
-						break;
+						case 'data':      if(s.fieldIdsInvalid.includes(f.id)) return true; break;
+						case 'container': if(hasAnyInvalid(f.fields))          return true; break;
 						case 'tabs':
 							for(let t of f.tabs) {
 								if(hasAnyInvalid(t.fields)) return true;
@@ -795,76 +812,62 @@ let MyField = {
 			};
 			
 			let out = [];
-			for(let i = 0, j = this.field.tabs.length; i < j; i++) {
-				if(hasAnyInvalid(this.field.tabs[i].fields))
+			for(let i = 0, j = s.field.tabs.length; i < j; i++) {
+				if(hasAnyInvalid(s.field.tabs[i].fields))
 					out.push(i);
 			}
 			return out;
 		},
-		
-		// field value for data attribute
-		value:{
-			get:function() {
-				if(!this.isData) return false;
+		tabIndexesTitle:(s) => {
+			let out = [];
+			for(let i = 0, j = s.field.tabs.length; i < j; i++) {
+				let tab = s.field.tabs[i];
+				out.push(tab.captions.tabTitle[s.moduleLanguage]);
 				
-				// if only alt attribute is set, field still needs primary attribute value (form log)
-				return typeof this.values[this.fieldAttributeId] !== 'undefined'
-					? this.values[this.fieldAttributeId] : null;
-			},
-			set:function(val,valOld) {
-				if(this.isDecimal)
-					val = val.replace(',','.');
+				if(typeof s.tabIndexFieldIdMapCounter[String(i)] === 'undefined')
+					continue;
 				
-				this.setValue(val,valOld,this.fieldAttributeId);
+				// aggregate tab counters
+				let ctr = 0;
+				for(let fieldId in s.tabIndexFieldIdMapCounter[String(i)]) {
+					ctr += s.tabIndexFieldIdMapCounter[String(i)][fieldId];
+				}
+				out[out.length-1] += ` (${ctr})`;
 			}
-		},
-		
-		// field value for alternative data attribute
-		valueAlt:{
-			get:function() {
-				if(!this.isData) return false;
-				
-				// if only primary attribute is set, field still needs alt attribute value (form log)
-				return typeof this.values[this.fieldAttributeIdAlt] !== 'undefined'
-					? this.values[this.fieldAttributeIdAlt] : null;
-			},
-			set:function(val,valOld) {
-				if(this.fieldAttributeIdAlt !== false)
-					this.setValue(val,valOld,this.fieldAttributeIdAlt);
-			}
+			return out;
 		},
 		
 		// data input states
-		inputCanWrite:function() {
-			if(!this.isData) return false;
+		inputCanWrite:(s) => {
+			if(!s.isData) return false;
 			
 			// if field shows preset value and it is protected (set more than once)
-			if(this.presetValue !== false && this.presetValue.protected)
+			if(s.presetValue !== false && s.presetValue.protected)
 				return false;
 			
 			// check SET(2) permission for attribute
-			if(!this.hasAccessToAttribute(this.access,this.field.attributeId,
-				this.attributeIdMap[this.field.attributeId].relationId,2)) {
+			if(!s.hasAccessToAttribute(s.access,s.field.attributeId,
+				s.attributeIdMap[s.field.attributeId].relationId,2)) {
 				
 				return false;
 			}
 			
-			if(this.isRelationship && this.field.attributeIdNm !== null
-				&& !this.hasAccessToAttribute(this.access,this.field.attributeIdNm,
-				this.attributeIdMap[this.field.attributeIdNm].relationId,2)) {
+			if(s.isRelationship && s.field.attributeIdNm !== null
+				&& !s.hasAccessToAttribute(s.access,s.field.attributeIdNm,
+				s.attributeIdMap[s.field.attributeIdNm].relationId,2)) {
 				
 				return false;
 			}
 			
 			// check join of field attribute
-			let join = this.joinsIndexMap[this.field.index];
+			let join = s.joinsIndexMap[s.field.index];
 			if(join.recordNoSet)    return false;            // SET denied on join due to relation policy
 			if(join.recordId !== 0) return join.applyUpdate; // SET dependent on join allowing record update
 			
 			// field attribute relation has no record ID
 			// collect relationship chain until source relation
 			let indexChain = [join.index];
-			for(let index = join.indexFrom; index !== -1; index = this.joinsIndexMap[index].indexFrom) {
+			for(let index = join.indexFrom; index !== -1; index = s.joinsIndexMap[index].indexFrom) {
 				indexChain.push(index);
 			}
 			
@@ -875,7 +878,7 @@ let MyField = {
 			let chainBroken = false;
 			for(let i = 0, j = indexChain.length; i < j; i++) {
 				
-				let relCheck = this.joinsIndexMap[indexChain[i]];
+				let relCheck = s.joinsIndexMap[indexChain[i]];
 				if(relCheck.recordId === 0 && !relCheck.applyCreate) {
 					chainBroken = true;
 					break;
@@ -883,153 +886,129 @@ let MyField = {
 			}
 			return !chainBroken;
 		},
-		inputIsRequired:function() {
-			if(!this.inputCanWrite                           // cannot write
-				|| this.attribute.nullable                   // value optional
-				|| this.isRelationship1N                     // 0...n partners (optional)
-				|| (this.isNew && this.attribute.def !== '') // new record and has defaults
-			) return false;
-			
-			return true;
-		},
-		inputCheckRegex:function() {
-			return !this.isData || this.field.regexCheck === null
-				? null : new RegExp(this.field.regexCheck);
-		},
 		
 		// bool states
-		isLineInput:function() {
-			return this.isData
-				&& !this.isRelationship
-				&& !this.isFiles
-				&& !this.isBoolean
-				&& !this.isDateInput
-				&& !this.isLogin
-				&& !this.isSlider
-				&& !this.isTextarea
-				&& !this.isRichtext
-				&& !this.isColor
-			;
+		isLineInput:(s) => s.isData
+			&& !s.isBoolean
+			&& !s.isColor
+			&& !s.isFiles
+			&& !s.isDateInput
+			&& !s.isLogin
+			&& !s.isSlider
+			&& !s.isTextarea
+			&& !s.isRelationship
+			&& !s.isRichtext
+			&& !s.isUuid,
+		isValid:(s) => {
+			if(!s.isData || s.isReadonly) return true;
+			if(s.value === null)          return !s.isRequired;
+			if(!s.isValidValue)           return false;
+			return true;
 		},
-		isValid:function() {
-			if(!this.isData || this.isReadonly)
-				return true;
+		isValidValue:(s) => {
+			if(!s.isData)                                            return true;
+			if(s.customErr !== null)                                 return false;
+			if(s.inputRegex !== null && !s.inputRegex.test(s.value)) return false;
+			if(s.isDecimal && !/^-?\d+\.?\d*$/.test(s.value))        return false;
+			if(s.isInteger && !/^-?\d+$/.test(s.value))              return false;
 			
-			if(this.value === null)
-				return !this.isRequired;
-			
-			if(!this.isValidValue)
+			if(s.isUuid && !/^[0-9a-f]{8}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{4}\-[0-9a-f]{12}$/i.test(s.value))
 				return false;
+			
+			return s.isValidMin && s.isValidMax;
+		},
+		isValidMin:(s) => {
+			if(!s.isData || s.value === null || s.field.min === null) return true;
+			if((s.isDecimal || s.isInteger) && s.value < s.field.min) return false;
+			if(s.isString && s.value.length < s.field.min)            return false;
+			
+			if(s.isFiles) return typeof s.value.fileCount !== 'undefined'
+				? s.value.fileCount >= s.field.min : s.value.length >= s.field.min;
 			
 			return true;
 		},
-		isValidValue:function() {
-			if(!this.isData) return true;
+		isValidMax:(s) => {
+			if(!s.isData || s.value === null || s.field.max === null) return true;
+			if((s.isDecimal || s.isInteger) && s.value > s.field.max) return false;
+			if(s.isString && s.value.length > s.field.max)            return false;
 			
-			if(this.inputCheckRegex !== null && !this.inputCheckRegex.test(this.value))
-				return false;
-			
-			if(this.isDecimal && !/^-?\d+\.?\d*$/.test(this.value))
-				return false;
-			
-			if(this.isInteger && !/^-?\d+$/.test(this.value))
-				return false;
-			
-			return this.isValidMin && this.isValidMax;
-		},
-		isValidMin:function() {
-			if(!this.isData || this.value === null || this.field.min === null)
-				return true;
-			
-			if((this.isDecimal || this.isInteger) && this.value < this.field.min)
-				return false;
-				
-			if(this.isString && this.value.length < this.field.min)
-				return false;
-			
-			if(this.isFiles && typeof this.value.fileCount !== 'undefined')
-				return this.value.fileCount >= this.field.min;
-			
-			if(this.isFiles)
-				return this.value.length >= this.field.min;
-			
-			return true;
-		},
-		isValidMax:function() {
-			if(!this.isData || this.value === null || this.field.max === null)
-				return true;
-			
-			if((this.isDecimal || this.isInteger) && this.value > this.field.max)
-				return false;
-				
-			if(this.isString && this.value.length > this.field.max)
-				return false;
-			
-			if(this.isFiles && typeof this.value.fileCount !== 'undefined')
-				return this.value.fileCount <= this.field.max;
-			
-			if(this.isFiles)
-				return this.value.length <= this.field.max;
+			if(s.isFiles) return typeof s.value.fileCount !== 'undefined'
+				? s.value.fileCount <= s.field.max : s.value.length <= s.field.max;
 			
 			return true;
 		},
 		
 		// simple
-		showInvalid:function() { return !this.isValid && (this.formBadSave || !this.notTouched) },
+		attribute:  (s) => !s.isData || typeof s.attributeIdMap[s.field.attributeId] === 'undefined'
+			? false : s.attributeIdMap[s.field.attributeId],
+		customErr:  (s) => typeof s.fieldIdMapError[s.field.id] !== 'undefined'
+			&& s.fieldIdMapError[s.field.id] !== null ? s.fieldIdMapError[s.field.id] : null,
+		hasCaption: (s) => !s.isAloneInTab && (s.focused || s.value !== null || s.isCleanUi || s.isBoolean
+			|| s.isDateInput || s.isSlider || s.isRichtext || s.isCategory || s.isRelationship || s.isFiles || s.isUuid),
+		isCleanUi:  (s) => s.settings.fieldClean,
+		inputRegex: (s) => !s.isData || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
+		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
+		showInvalid:(s) => !s.isValid && (s.formBadSave || !s.notTouched),
 		
 		// content
-		isButton:   function() { return this.field.content === 'button'; },
-		isCalendar: function() { return this.field.content === 'calendar'; },
-		isChart:    function() { return this.field.content === 'chart'; },
-		isContainer:function() { return this.field.content === 'container'; },
-		isData:     function() { return this.field.content === 'data'; },
-		isList:     function() { return this.field.content === 'list'; },
-		isTabs:     function() { return this.field.content === 'tabs'; },
+		isButton:   (s) => s.field.content === 'button',
+		isCalendar: (s) => s.field.content === 'calendar',
+		isChart:    (s) => s.field.content === 'chart',
+		isContainer:(s) => s.field.content === 'container',
+		isData:     (s) => s.field.content === 'data',
+		isList:     (s) => s.field.content === 'list',
+		isTabs:     (s) => s.field.content === 'tabs',
 		
-		// display
-		isHidden:  function() { return this.stateFinal === 'hidden'; },
-		isReadonly:function() { return this.stateFinal === 'readonly'; },
-		isRequired:function() { return this.stateFinal === 'required'; },
+		// states
+		isHidden:  (s) => s.stateFinal === 'hidden' || s.isHiddenInParent,
+		isReadonly:(s) => s.stateFinal === 'readonly',
+		isRequired:(s) => s.stateFinal === 'required',
 		
 		// display options
-		isColor:   function() { return this.isData && this.field.display === 'color'; },
-		isDate:    function() { return this.isData && this.field.display === 'date'; },
-		isDatetime:function() { return this.isData && this.field.display === 'datetime'; },
-		isLogin:   function() { return this.isData && this.field.display === 'login'; },
-		isPassword:function() { return this.isData && this.field.display === 'password'; },
-		isSlider:  function() { return this.isData && this.field.display === 'slider'; },
-		isTime:    function() { return this.isData && this.field.display === 'time'; },
-		isTextarea:function() { return this.isData && this.field.display === 'textarea'; },
-		isRichtext:function() { return this.isData && this.field.display === 'richtext'; },
+		isLogin:   (s) => s.isData && s.field.display === 'login',
+		isPassword:(s) => s.isData && s.field.display === 'password',
+		isSlider:  (s) => s.isData && s.field.display === 'slider',
 		
 		// composite
-		isActive:   function() { return !this.isMobile || this.field.onMobile; },
-		isEncrypted:function() { return this.isData && this.attribute.encrypted; },
-		isNew:      function() { return this.isData && this.joinsIndexMap[this.field.index].recordId === 0; },
-		isBoolean:  function() { return this.isData && this.isAttributeBoolean(this.attribute.content); },
-		isCategory: function() { return this.isData && this.isRelationship && this.field.category; },
-		isClipboard:function() { return this.isData && this.field.clipboard && !this.isFiles && !this.isRelationship; },
-		isDateInput:function() { return this.isData && this.isDatetime || this.isDate || this.isTime; },
-		isDateRange:function() { return this.isDateInput && this.field.attributeIdAlt !== null; },
-		isDecimal:  function() { return this.isData && this.isAttributeDecimal(this.attribute.content); },
-		isFiles:    function() { return this.isData && this.isAttributeFiles(this.attribute.content); },
-		isInteger:  function() { return this.isData && this.isAttributeInteger(this.attribute.content); },
-		isQuery:    function() { return this.isCalendar || this.isChart || this.isList || this.isRelationship },
-		isString:   function() { return this.isData && this.isAttributeString(this.attribute.content); },
-		isRelationship:  function() { return this.isData && this.isAttributeRelationship(this.attribute.content); },
-		isRelationship1N:function() { return this.isRelationship && this.field.outsideIn === true && this.attribute.content === 'n:1'; },
+		isActive:        (s) => !s.isMobile || s.field.onMobile,
+		isEncrypted:     (s) => s.isData && s.attribute.encrypted,
+		isNew:           (s) => s.isData && s.joinsIndexMap[s.field.index].recordId === 0,
+		isBoolean:       (s) => s.isData && s.isAttributeBoolean(s.attribute.content),
+		isCategory:      (s) => s.isData && s.isRelationship && s.field.category,
+		isClipboard:     (s) => s.isData && s.field.clipboard && !s.isFiles && !s.isRelationship,
+		isColor:         (s) => s.isData && s.attribute.contentUse === 'color',
+		isDate:          (s) => s.isData && s.attribute.contentUse === 'date',
+		isDatetime:      (s) => s.isData && s.attribute.contentUse === 'datetime',
+		isDateInput:     (s) => s.isData && s.isDatetime || s.isDate || s.isTime,
+		isDateRange:     (s) => s.isDateInput && s.field.attributeIdAlt !== null,
+		isDecimal:       (s) => s.isData && s.isAttributeDecimal(s.attribute.content),
+		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
+		isInteger:       (s) => s.isData && s.isAttributeInteger(s.attribute.content),
+		isQuery:         (s) => s.isCalendar || s.isChart || s.isList || s.isRelationship,
+		isRichtext:      (s) => s.isData && s.attribute.contentUse === 'richtext',
+		isString:        (s) => s.isData && s.isAttributeString(s.attribute.content),
+		isTextarea:      (s) => s.isData && s.attribute.contentUse === 'textarea',
+		isTime:          (s) => s.isData && s.attribute.contentUse === 'time',
+		isUuid:          (s) => s.isData && s.isAttributeUuid(s.attribute.content),
+		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.attribute.content),
+		isRelationship1N:(s) => s.isRelationship && s.field.outsideIn === true && s.attribute.content === 'n:1',
 		
 		// stores
-		token:         function() { return this.$store.getters['local/token']; },
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		iconIdMap:     function() { return this.$store.getters['schema/iconIdMap']; },
-		presetIdMapRecordId:function() { return this.$store.getters['schema/presetIdMapRecordId']; },
-		access:        function() { return this.$store.getters.access; },
-		capApp:        function() { return this.$store.getters.captions.form; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		isMobile:      function() { return this.$store.getters.isMobile; },
-		moduleLanguage:function() { return this.$store.getters.moduleLanguage; }
+		token:              (s) => s.$store.getters['local/token'],
+		relationIdMap:      (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:     (s) => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap:          (s) => s.$store.getters['schema/iconIdMap'],
+		presetIdMapRecordId:(s) => s.$store.getters['schema/presetIdMapRecordId'],
+		access:             (s) => s.$store.getters.access,
+		capApp:             (s) => s.$store.getters.captions.form,
+		capGen:             (s) => s.$store.getters.captions.generic,
+		isMobile:           (s) => s.$store.getters.isMobile,
+		moduleLanguage:     (s) => s.$store.getters.moduleLanguage,
+		settings:           (s) => s.$store.getters.settings
+	},
+	mounted() {
+		// fill stored collection row indexes
+		this.collectionIdMapIndexes = this.fieldOptionGet(this.field.id,'collectionIdMapIndexes',{});
 	},
 	methods:{
 		// externals
@@ -1049,12 +1028,13 @@ let MyField = {
 		isAttributeInteger,
 		isAttributeRelationship,
 		isAttributeString,
+		isAttributeUuid,
 		openLink,
 		setGetterArgs,
 		srcBase64,
 		
 		// presentation
-		getTabClasses:function(tabIndex) {
+		getTabClasses(tabIndex) {
 			if(!this.isTabs) return {};
 			let active   = tabIndex === this.tabIndexShow;
 			let fields   = this.field.tabs[tabIndex].fields;
@@ -1077,25 +1057,25 @@ let MyField = {
 		},
 		
 		// actions
-		blur:function() {
+		blur() {
 			this.focused = false;
 		},
-		copyToClipboard:function() {
+		copyToClipboard() {
 			navigator.clipboard.writeText(this.value);
 			this.$emit('clipboard');
 		},
-		focus:function() {
+		focus() {
 			this.focused = true;
 		},
-		click:function() {
-			if(this.field.display === 'color' && !this.isReadonly)
+		click() {
+			if(this.isColor && !this.isReadonly)
 				this.showColorPickerInput = !this.showColorPickerInput;
 		},
-		clickOutside:function() {
+		clickOutside() {
 			if(this.showColorPickerInput)
 				this.showColorPickerInput = false;
 		},
-		openForm:function(recordId,getters,middleClick) {
+		openForm(recordId,getters,middleClick) {
 			// set defaults
 			if(typeof recordId    === 'undefined') recordId    = 0;
 			if(typeof getters     === 'undefined') getters     = [];
@@ -1118,7 +1098,7 @@ let MyField = {
 			
 			this.$emit('open-form',recordId,options,getters,middleClick);
 		},
-		relationshipRecordSelected:function(recordId,middleClick) {
+		relationshipRecordSelected(recordId,middleClick) {
 			if(recordId === null)
 				return this.value = null;
 			
@@ -1129,7 +1109,7 @@ let MyField = {
 			v.push(recordId);
 			this.value = v;
 		},
-		relationshipRecordRemoved:function(recordId) {
+		relationshipRecordRemoved(recordId) {
 			if(!this.isRelationship1N)
 				return this.value = null;
 			
@@ -1140,15 +1120,24 @@ let MyField = {
 			}
 			this.value = valueNew.length !== 0 ? valueNew : null;
 		},
-		setCollectionIndexes:function(collectionId,indexes) {
-			if(indexes.length === 0) delete(this.collectionIdMapIndexes[collectionId]);
-			else                     this.collectionIdMapIndexes[collectionId] = indexes;
+		setCollectionIndexes(collectionId,indexes) {
+			this.collectionIdMapIndexes[collectionId] = indexes;
+			this.fieldOptionSet(this.field.id,'collectionIdMapIndexes',this.collectionIdMapIndexes);
 		},
-		setTab:function(tabIndex) {
+		setTab(tabIndex) {
 			this.fieldOptionSet(this.field.id,'tabIndex',tabIndex);
 			this.tabIndexShow = tabIndex;
 		},
-		setValue:function(val,valOld,indexAttributeId) {
+		setTabCounter(tabIndex,fieldId,value) {
+			if(!this.field.tabs[tabIndex].contentCounter)
+				return;
+			
+			if(typeof this.tabIndexFieldIdMapCounter[String(tabIndex)] === 'undefined')
+				this.tabIndexFieldIdMapCounter[String(tabIndex)] = {};
+			
+			this.tabIndexFieldIdMapCounter[String(tabIndex)][fieldId] = value;
+		},
+		setValue(val,valOld,indexAttributeId) {
 			if(val === '')
 				val = null;
 			
@@ -1164,7 +1153,7 @@ let MyField = {
 			if(this.field.jsFunctionId !== null)
 				this.$emit('execute-function',this.field.jsFunctionId);
 		},
-		triggerButton:function(middleClick) {
+		triggerButton(middleClick) {
 			if(this.field.openForm !== null)
 				this.openForm(0,[],middleClick);
 			

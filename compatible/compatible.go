@@ -5,12 +5,37 @@ import (
 	"encoding/json"
 	"fmt"
 	"r3/db"
+	"r3/tools"
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
+
+// < 3.3
+// migrate attribute content use
+func FixAttributeContentUse(contentUse string) string {
+	if contentUse == "" {
+		return "default"
+	}
+	return contentUse
+}
+func MigrateDisplayToContentUse_tx(tx pgx.Tx, attributeId uuid.UUID, display string) (string, error) {
+
+	if tools.StringInSlice(display, []string{"textarea",
+		"richtext", "date", "datetime", "time", "color"}) {
+
+		_, err := tx.Exec(db.Ctx, `
+			UPDATE app.attribute
+			SET content_use = $1
+			WHERE id = $2
+		`, display, attributeId)
+
+		return "default", err
+	}
+	return display, nil
+}
 
 // < 3.2
 // migrate old module/form help pages to help articles
@@ -130,13 +155,87 @@ func FixLegacyFileAttributeValue(jsonValue []byte) []types.DataGetValueFile {
 	return filesNew
 }
 
+// < 2.7
+// migrate to new format of form state conditions
+func MigrateNewConditions(c types.FormStateCondition) types.FormStateCondition {
+
+	// if either sides content is filled, new version is used, nothing to do
+	if c.Side0.Content != "" || c.Side1.Content != "" {
+		return c
+	}
+
+	// set empty
+	c.Side0.CollectionId.Valid = false
+	c.Side0.ColumnId.Valid = false
+	c.Side0.FieldId.Valid = false
+	c.Side0.PresetId.Valid = false
+	c.Side0.RoleId.Valid = false
+	c.Side0.Value.Valid = false
+	c.Side1.CollectionId.Valid = false
+	c.Side1.ColumnId.Valid = false
+	c.Side1.FieldId.Valid = false
+	c.Side1.PresetId.Valid = false
+	c.Side1.RoleId.Valid = false
+	c.Side1.Value.Valid = false
+
+	c.Side0.Brackets = c.Brackets0
+	c.Side1.Brackets = c.Brackets1
+
+	if c.FieldChanged.Valid {
+		c.Side0.Content = "fieldChanged"
+		c.Side1.Content = "true"
+		c.Side0.FieldId = c.FieldId0
+
+		c.Operator = "="
+		if !c.FieldChanged.Bool {
+			c.Operator = "<>"
+		}
+	} else if c.NewRecord.Valid {
+		c.Side0.Content = "recordNew"
+		c.Side1.Content = "true"
+		c.Operator = "="
+		if !c.NewRecord.Bool {
+			c.Operator = "<>"
+		}
+	} else if c.RoleId.Valid {
+		c.Side0.Content = "role"
+		c.Side1.Content = "true"
+		c.Side0.RoleId = c.RoleId
+	} else {
+		if c.FieldId0.Valid {
+			c.Side0.Content = "field"
+			c.Side0.FieldId = c.FieldId0
+
+			if c.Operator == "IS NULL" || c.Operator == "IS NOT NULL" {
+				c.Side1.Content = "value"
+			}
+		}
+		if c.FieldId1.Valid {
+			c.Side1.Content = "field"
+			c.Side1.FieldId = c.FieldId1
+		}
+		if c.Login1.Valid {
+			c.Side1.Content = "login"
+		}
+		if c.PresetId1.Valid {
+			c.Side1.Content = "preset"
+			c.Side1.PresetId = c.PresetId1
+		}
+		if c.Value1.Valid && c.Value1.String != "" {
+			c.Side1.Content = "value"
+			c.Side1.Value = c.Value1
+		}
+	}
+	return c
+}
+
 // < 2.6
 // fix empty 'open form' entity for fields
 func FixMissingOpenForm(formIdOpen pgtype.UUID, attributeIdRecord pgtype.UUID,
 	oForm types.OpenForm) types.OpenForm {
 
 	// legacy option was used
-	if formIdOpen.Status == pgtype.Present {
+	if formIdOpen.Valid {
 		return types.OpenForm{
 			FormIdOpen:       formIdOpen.Bytes,
 			AttributeIdApply: attributeIdRecord,
@@ -147,39 +246,4 @@ func FixMissingOpenForm(formIdOpen pgtype.UUID, attributeIdRecord pgtype.UUID,
 		}
 	}
 	return oForm
-}
-
-// general fix: pgx types use UNDEFINED as default state, we need NULL to work with them
-func FixPgxNull(input interface{}) interface{} {
-
-	switch v := input.(type) {
-	case pgtype.Bool:
-		if v.Status == pgtype.Undefined {
-			v.Status = pgtype.Null
-		}
-		return v
-	case pgtype.Int4:
-		if v.Status == pgtype.Undefined {
-			v.Status = pgtype.Null
-		}
-		return v
-	case pgtype.Varchar:
-		if v.Status == pgtype.Undefined {
-			v.Status = pgtype.Null
-		}
-		return v
-	case pgtype.UUID:
-		if v.Status == pgtype.Undefined {
-			v.Status = pgtype.Null
-		}
-		return v
-	}
-	return input
-}
-
-// helpers
-func GetNullUuid() pgtype.UUID {
-	return pgtype.UUID{
-		Status: pgtype.Null,
-	}
 }

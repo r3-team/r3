@@ -11,7 +11,7 @@ let MyAdminLogs = {
 		
 		<div class="top lower">
 			<div class="area">
-				<img class="icon" src="images/log.png" />
+				<img class="icon" src="images/fileText.png" />
 				<h1>{{ menuTitle }}</h1>
 			</div>
 		</div>
@@ -144,11 +144,11 @@ let MyAdminLogs = {
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			contextsValid:[
-				'module','backup','cache','cluster','csv','imager','ldap',
-				'mail','scheduler','server','transfer','websocket'
+				'module','api','backup','cache','cluster','csv','imager',
+				'ldap','mail','scheduler','server','transfer','websocket'
 			],
 			messageLengthShow:200,
 			
@@ -167,7 +167,7 @@ let MyAdminLogs = {
 			logs:[]
 		};
 	},
-	mounted:function() {
+	mounted() {
 		this.$store.commit('pageTitle',this.menuTitle);
 		this.configInput = JSON.parse(JSON.stringify(this.config));
 		
@@ -179,40 +179,38 @@ let MyAdminLogs = {
 	},
 	computed:{
 		// stores
-		settings:function() { return this.$store.getters.settings; },
-		capApp:  function() { return this.$store.getters.captions.admin.logs; },
-		capGen:  function() { return this.$store.getters.captions.generic; },
-		config:  function() { return this.$store.getters.config; }
+		settings:(s) => s.$store.getters.settings,
+		capApp:  (s) => s.$store.getters.captions.admin.logs,
+		capGen:  (s) => s.$store.getters.captions.generic,
+		config:  (s) => s.$store.getters.config
 	},
 	methods:{
 		// externals
 		getLineBreaksParsedToHtml,
 		getUnixFormat,
 		
-		getConfigLogContextName:function(context) {
+		getConfigLogContextName(context) {
 			return `log${context[0].toUpperCase() + context.slice(1)}`;
 		},
-		displayDate:function(date) {
+		displayDate(date) {
 			let format = [this.settings.dateFormat,'H:i:S'];
 			return this.getUnixFormat(date,format.join(' '));
 		},
-		displayIndicator:function(level) {
+		displayIndicator(level) {
 			switch(level) {
 				case 1: return '#ca2a2a'; break;
 				case 2: return '#caac2a'; break;
 			}
 			return '#b0b0b0';
 		},
-		displayLevel:function(level) {
+		displayLevel(level) {
 			return this.capApp['level'+level];
 		},
-		displayMessage:function(msg) {
-			if(msg.length > this.messageLengthShow)
-				return msg.substr(0,this.messageLengthShow)+'...';
-			
-			return msg;
+		displayMessage(msg) {
+			return msg.length > this.messageLengthShow
+				? msg.substr(0,this.messageLengthShow)+'...' : msg;
 		},
-		setDate:function(unix,from) {
+		setDate(unix,from) {
 			if(from) {
 				this.unixFrom = unix;
 			}
@@ -226,7 +224,7 @@ let MyAdminLogs = {
 			}
 			this.get();
 		},
-		showMessage:function(index) {
+		showMessage(index) {
 			this.$store.commit('dialog',{
 				captionBody:this.getLineBreaksParsedToHtml(this.logs[index].message),
 				textDisplay:'textarea',
@@ -240,7 +238,7 @@ let MyAdminLogs = {
 		},
 		
 		// backend calls
-		get:function() {
+		get() {
 			ws.send('log','get',{
 				byString:this.byString,
 				context:this.context,
@@ -256,7 +254,7 @@ let MyAdminLogs = {
 				this.$root.genericError
 			);
 		},
-		setConfig:function() {
+		setConfig() {
 			ws.send('config','set',this.configInput,true).then(
 				() => {},
 				this.$root.genericError

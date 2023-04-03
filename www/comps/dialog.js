@@ -53,40 +53,34 @@ let MyDialog = {
 			</div>
 		</div>
 	</div>`,
-	mounted:function() {
+	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
-	unmounted:function() {
+	unmounted() {
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
-	data:function() {
+	data() {
 		return {
 			richtextClosing:false
 		};
 	},
 	computed:{
-		captionTop: function() {
-			if(this.$store.getters.dialogCaptionTop === '')
-				return this.capGen.dialog.confirm;
-			
-			return this.$store.getters.dialogCaptionTop;
-		},
-		
-		// simple
-		isHtml:    function() { return this.textDisplay === 'html'; },
-		isRichtext:function() { return this.textDisplay === 'richtext'; },
-		isTextarea:function() { return this.textDisplay === 'textarea'; },
+		captionTop:(s) => s.$store.getters.dialogCaptionTop === ''
+			? s.capGen.dialog.confirm : s.$store.getters.dialogCaptionTop,
+		isHtml:    (s) => s.textDisplay === 'html',
+		isRichtext:(s) => s.textDisplay === 'richtext',
+		isTextarea:(s) => s.textDisplay === 'textarea',
 		
 		// stores
-		buttons:    function() { return this.$store.getters.dialogButtons; },
-		captionBody:function() { return this.$store.getters.dialogCaptionBody; },
-		capGen:     function() { return this.$store.getters.captions.generic; },
-		image:      function() { return this.$store.getters.dialogImage; },
-		styles:     function() { return this.$store.getters.dialogStyles; },
-		textDisplay:function() { return this.$store.getters.dialogTextDisplay; }
+		buttons:    (s) => s.$store.getters.dialogButtons,
+		captionBody:(s) => s.$store.getters.dialogCaptionBody,
+		capGen:     (s) => s.$store.getters.captions.generic,
+		image:      (s) => s.$store.getters.dialogImage,
+		styles:     (s) => s.$store.getters.dialogStyles,
+		textDisplay:(s) => s.$store.getters.dialogTextDisplay
 	},
 	methods:{
-		handleHotkeys:function(e) {
+		handleHotkeys(e) {
 			let search = null;
 			switch(e.key) {
 				case 'Enter':  search = 'keyEnter';  break;
@@ -107,10 +101,10 @@ let MyDialog = {
 		},
 		
 		// actions
-		close:function() {
+		close() {
 			this.$store.commit('isAtDialog',false);
 		},
-		executeButton:function(btn) {
+		executeButton(btn) {
 			// execute action if set
 			if(typeof btn.exec !== 'undefined') {
 				if(Array.isArray(btn.params)) btn.exec(...btn.params);
@@ -120,7 +114,7 @@ let MyDialog = {
 			// close dialog window
 			this.close();
 		},
-		trigger:function(i) {
+		trigger(i) {
 			// richtext looses all styling during close
 			// remove before fade out occurs
 			this.richtextClosing = true;

@@ -4,11 +4,9 @@ import (
 	"fmt"
 	"r3/db"
 	"r3/schema"
-	"reflect"
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
 )
 
 func GetPreview(id uuid.UUID, limit int, offset int) (interface{}, error) {
@@ -70,12 +68,6 @@ func GetPreview(id uuid.UUID, limit int, offset int) (interface{}, error) {
 
 		if err := rows.Scan(valuePointers...); err != nil {
 			return nil, err
-		}
-
-		for i := 0; i < len(atrNames); i++ {
-			if fmt.Sprintf("%s", reflect.TypeOf(valuesAll[i])) == "pgtype.Numeric" {
-				valuesAll[i] = db.PgxNumericToString(valuesAll[i].(pgtype.Numeric))
-			}
 		}
 		res.Rows = append(res.Rows, valuesAll)
 	}

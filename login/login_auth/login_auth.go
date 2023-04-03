@@ -15,8 +15,8 @@ import (
 	"time"
 
 	"github.com/gbrlsnchs/jwt/v3"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/xlzd/gotp"
 )
 
@@ -58,7 +58,7 @@ func createToken(loginId int64, username string, admin bool, noAuth bool) (strin
 // performs authentication attempt for user by using username and password
 // returns JWT, KDF salt, MFA token list (if MFA is required)
 func User(username string, password string, mfaTokenId pgtype.Int4,
-	mfaTokenPin pgtype.Varchar, grantLoginId *int64, grantAdmin *bool,
+	mfaTokenPin pgtype.Text, grantLoginId *int64, grantAdmin *bool,
 	grantNoAuth *bool) (string, string, []types.LoginMfaToken, error) {
 
 	mfaTokens := make([]types.LoginMfaToken, 0)
@@ -99,9 +99,9 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 	}
 
 	if !noAuth {
-		if ldapId.Status == pgtype.Present {
+		if ldapId.Valid {
 			// authentication against LDAP
-			if err := ldap_auth.Check(ldapId.Int, username, password); err != nil {
+			if err := ldap_auth.Check(ldapId.Int32, username, password); err != nil {
 				return "", "", mfaTokens, errors.New(handler.ErrAuthFailed)
 			}
 		} else {
@@ -118,7 +118,7 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 
 	// login ok
 
-	if mfaTokenId.Status == pgtype.Present && mfaTokenPin.Status == pgtype.Present {
+	if mfaTokenId.Valid && mfaTokenPin.Valid {
 
 		// validate provided MFA token
 		var mfaToken []byte
@@ -128,7 +128,7 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 			WHERE login_id = $1
 			AND   id       = $2
 			AND   context  = 'totp'
-		`, loginId, mfaTokenId.Int).Scan(&mfaToken); err != nil {
+		`, loginId, mfaTokenId.Int32).Scan(&mfaToken); err != nil {
 			return "", "", mfaTokens, err
 		}
 

@@ -24,7 +24,7 @@ import (
 	"time"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type task struct {
@@ -317,8 +317,8 @@ func load() error {
 
 		// for tasks that all nodes have to execute, get node specific schedules
 		if !s.clusterMasterOnly {
-			if runLastUnixNode.Status == pgtype.Present {
-				s.runLastUnix = runLastUnixNode.Int
+			if runLastUnixNode.Valid {
+				s.runLastUnix = runLastUnixNode.Int64
 			} else {
 				s.runLastUnix = 0 // never executed before
 			}

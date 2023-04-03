@@ -136,7 +136,7 @@ func do(mail types.Mail) error {
 	rel, _ := cache.RelationIdMap[atr.RelationId]
 	for _, f := range filesMail {
 		if err := data.FileApplyVersion_tx(db.Ctx, tx, true, atr.Id, rel.Id,
-			f.Id, f.Hash, f.Name, f.Size, 0, []int64{mail.RecordId.Int}, -1); err != nil {
+			f.Id, f.Hash, f.Name, f.Size, 0, []int64{mail.RecordId.Int64}, -1); err != nil {
 
 			return err
 		}
@@ -147,7 +147,7 @@ func do(mail types.Mail) error {
 			Version: -1,
 		}
 	}
-	if err := data.FilesApplyAttributChanges_tx(db.Ctx, tx, mail.RecordId.Int,
+	if err := data.FilesApplyAttributChanges_tx(db.Ctx, tx, mail.RecordId.Int64,
 		atr.Id, fileIdMapChange); err != nil {
 		return err
 	}

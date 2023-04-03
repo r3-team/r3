@@ -9,7 +9,7 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func DelAutoFkiForAttribute_tx(tx pgx.Tx, attributeId uuid.UUID) error {
@@ -53,55 +53,48 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 		return err
 	}
 
-	if _, err := tx.Exec(db.Ctx, `
-		DELETE FROM app.pg_index
-		WHERE id = $1
-	`, id); err != nil {
-		return err
-	}
-	return nil
+	_, err = tx.Exec(db.Ctx, `DELETE FROM app.pg_index WHERE id = $1`, id)
+	return err
 }
 
 func Get(relationId uuid.UUID) ([]types.PgIndex, error) {
-
-	indexes := make([]types.PgIndex, 0)
+	pgIndexes := make([]types.PgIndex, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, no_duplicates, auto_fki
+		SELECT id, no_duplicates, auto_fki, primary_key
 		FROM app.pg_index
 		WHERE relation_id = $1
 		-- an order is required for hash comparisson (module changes)
 		ORDER BY auto_fki DESC, id ASC
 	`, relationId)
 	if err != nil {
-		return indexes, err
+		return pgIndexes, err
 	}
 
 	for rows.Next() {
-		var ind types.PgIndex
+		var pgi types.PgIndex
 
-		if err := rows.Scan(&ind.Id, &ind.NoDuplicates, &ind.AutoFki); err != nil {
-			return indexes, err
+		if err := rows.Scan(&pgi.Id, &pgi.NoDuplicates, &pgi.AutoFki, &pgi.PrimaryKey); err != nil {
+			return pgIndexes, err
 		}
-		ind.RelationId = relationId
-		indexes = append(indexes, ind)
+		pgi.RelationId = relationId
+		pgIndexes = append(pgIndexes, pgi)
 	}
 	rows.Close()
 
 	// get index attributes
-	for i, ind := range indexes {
+	for i, pgi := range pgIndexes {
 
-		ind.Attributes, err = GetAttributes(ind.Id)
+		pgi.Attributes, err = GetAttributes(pgi.Id)
 		if err != nil {
-			return indexes, err
+			return pgIndexes, err
 		}
-		indexes[i] = ind
+		pgIndexes[i] = pgi
 	}
-	return indexes, nil
+	return pgIndexes, nil
 }
 
 func GetAttributes(pgIndexId uuid.UUID) ([]types.PgIndexAttribute, error) {
-
 	attributes := make([]types.PgIndexAttribute, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
@@ -128,23 +121,44 @@ func GetAttributes(pgIndexId uuid.UUID) ([]types.PgIndexAttribute, error) {
 }
 
 func SetAutoFkiForAttribute_tx(tx pgx.Tx, relationId uuid.UUID, attributeId uuid.UUID, noDuplicates bool) error {
-	atrs := []types.PgIndexAttribute{
-		types.PgIndexAttribute{
-			AttributeId: attributeId,
-			Position:    0,
-			OrderAsc:    true,
+	return Set_tx(tx, types.PgIndex{
+		Id:           uuid.Nil,
+		RelationId:   relationId,
+		AutoFki:      true,
+		NoDuplicates: noDuplicates,
+		PrimaryKey:   false,
+		Attributes: []types.PgIndexAttribute{
+			types.PgIndexAttribute{
+				AttributeId: attributeId,
+				Position:    0,
+				OrderAsc:    true,
+			},
 		},
-	}
-	return Set_tx(tx, relationId, uuid.Nil, noDuplicates, true, atrs)
+	})
 }
-func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, noDuplicates bool,
-	autoFki bool, attributes []types.PgIndexAttribute) error {
+func SetPrimaryKeyForAttribute_tx(tx pgx.Tx, relationId uuid.UUID, attributeId uuid.UUID) error {
+	return Set_tx(tx, types.PgIndex{
+		Id:           uuid.Nil,
+		RelationId:   relationId,
+		AutoFki:      false,
+		NoDuplicates: true,
+		PrimaryKey:   true,
+		Attributes: []types.PgIndexAttribute{
+			types.PgIndexAttribute{
+				AttributeId: attributeId,
+				Position:    0,
+				OrderAsc:    true,
+			},
+		},
+	})
+}
+func Set_tx(tx pgx.Tx, pgi types.PgIndex) error {
 
-	if len(attributes) == 0 {
+	if len(pgi.Attributes) == 0 {
 		return errors.New("cannot create index without attributes")
 	}
 
-	known, err := schema.CheckCreateId_tx(tx, &id, "pg_index", "id")
+	known, err := schema.CheckCreateId_tx(tx, &pgi.Id, "pg_index", "id")
 	if err != nil {
 		return err
 	}
@@ -156,16 +170,16 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, noDuplicates bool,
 
 	// insert pg index reference
 	if _, err := tx.Exec(db.Ctx, `
-		INSERT INTO app.pg_index (id,relation_id,no_duplicates,auto_fki)
-		VALUES ($1,$2,$3,$4)
-	`, id, relationId, noDuplicates, autoFki); err != nil {
+		INSERT INTO app.pg_index (
+			id, relation_id, no_duplicates, auto_fki, primary_key)
+		VALUES ($1,$2,$3,$4,$5)
+	`, pgi.Id, pgi.RelationId, pgi.NoDuplicates, pgi.AutoFki, pgi.PrimaryKey); err != nil {
 		return err
 	}
 
-	// work out pg index columns
+	// work out PG index columns
 	indexCols := make([]string, 0)
-
-	for position, atr := range attributes {
+	for position, atr := range pgi.Attributes {
 
 		name, err := schema.GetAttributeNameById_tx(tx, atr.AttributeId)
 		if err != nil {
@@ -181,31 +195,33 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, noDuplicates bool,
 		// insert index attribute references
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.pg_index_attribute (
-				pg_index_id, attribute_id, position, order_asc
-			)
+				pg_index_id, attribute_id, position, order_asc)
 			VALUES ($1,$2,$3,$4)
-		`, id, atr.AttributeId, position, atr.OrderAsc); err != nil {
+		`, pgi.Id, atr.AttributeId, position, atr.OrderAsc); err != nil {
 			return err
 		}
 	}
 
+	// primary key already has an index
+	if pgi.PrimaryKey {
+		return nil
+	}
+
 	// create index in module
-	moduleName, relationName, err := schema.GetRelationNamesById_tx(tx, relationId)
+	moduleName, relationName, err := schema.GetRelationNamesById_tx(tx, pgi.RelationId)
 	if err != nil {
 		return err
 	}
 
 	options := "INDEX"
-	if noDuplicates {
+	if pgi.NoDuplicates {
 		options = "UNIQUE INDEX"
 	}
 
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	_, err = tx.Exec(db.Ctx, fmt.Sprintf(`
 		CREATE %s "%s" ON "%s"."%s" (%s)
-	`, options, schema.GetPgIndexName(id), moduleName, relationName,
-		strings.Join(indexCols, ","))); err != nil {
+	`, options, schema.GetPgIndexName(pgi.Id), moduleName, relationName,
+		strings.Join(indexCols, ",")))
 
-		return err
-	}
-	return nil
+	return err
 }

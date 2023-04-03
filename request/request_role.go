@@ -6,7 +6,7 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func RoleDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
@@ -14,7 +14,6 @@ func RoleDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		Id uuid.UUID `json:"id"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
@@ -50,8 +49,5 @@ func RoleSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, role.Set_tx(tx, req.ModuleId, req.Id, req.Name, req.Content,
-		req.Assignable, req.ChildrenIds, req.AccessAttributes,
-		req.AccessCollections, req.AccessMenus, req.AccessRelations,
-		req.Captions)
+	return nil, role.Set_tx(tx, req)
 }

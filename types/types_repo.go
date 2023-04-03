@@ -2,14 +2,14 @@ package types
 
 import (
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type RepoModule struct {
 	ModuleId         uuid.UUID                 `json:"moduleId"`
 	FileId           uuid.UUID                 `json:"fileId"`
 	Name             string                    `json:"name"`
-	ChangeLog        pgtype.Varchar            `json:"changeLog"`
+	ChangeLog        pgtype.Text               `json:"changeLog"`
 	Author           string                    `json:"author"`
 	InStore          bool                      `json:"inStore"`
 	ReleaseBuild     int                       `json:"releaseBuild"`    // module version

@@ -100,7 +100,7 @@ let MyBuilderModule = {
 		</div>
 		
 		<div class="content default-inputs">
-			<table class="builder-table-vertical">
+			<table class="generic-table-vertical">
 				<tr>
 					<td>{{ capGen.name }}</td>
 					<td><input v-model="name" :disabled="readonly" :placeholder="capApp.nameHolder" /></td>
@@ -301,13 +301,13 @@ let MyBuilderModule = {
 		id:             { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
-	mounted:function() {
+	mounted() {
 		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
 	},
-	unmounted:function() {
+	unmounted() {
 		this.$emit('hotkeysRegister',[]);
 	},
-	data:function() {
+	data() {
 		return {
 			// inputs
 			parentId:null,
@@ -365,7 +365,7 @@ let MyBuilderModule = {
 	},
 	watch:{
 		module:{
-			handler:function() { this.reset(); },
+			handler() { this.reset(); },
 			immediate:true
 		}
 	},

@@ -7,7 +7,6 @@ import (
 	"r3/cache"
 	"r3/data/data_enc"
 	"r3/data/data_sql"
-	"r3/db"
 	"r3/handler"
 	"r3/schema"
 	"r3/tools"
@@ -17,8 +16,8 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var regexRelId = regexp.MustCompile(`^\_r(\d+)id`) // finds: _r3id
@@ -55,15 +54,8 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 	columns := rows.FieldDescriptions()
 
 	for rows.Next() {
-
-		// put unknown data types into interfaces
-		valuePointers := make([]interface{}, len(columns))
-		valuesAll := make([]interface{}, len(columns))
-		for i, _ := range columns {
-			valuePointers[i] = &valuesAll[i]
-		}
-
-		if err := rows.Scan(valuePointers...); err != nil {
+		valuesAll, err := rows.Values()
+		if err != nil {
 			return results, 0, err
 		}
 
@@ -73,9 +65,6 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 
 		// collect values for expressions
 		for i := 0; i < len(data.Expressions); i++ {
-			if fmt.Sprintf("%T", valuesAll[i]) == "pgtype.Numeric" {
-				valuesAll[i] = db.PgxNumericToString(valuesAll[i].(pgtype.Numeric))
-			}
 			values = append(values, valuesAll[i])
 		}
 
@@ -207,7 +196,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 	for _, expr := range data.Expressions {
 
 		// ignore non-attribute and sub query expressions
-		if expr.AttributeId.Status != pgtype.Present {
+		if !expr.AttributeId.Valid {
 			continue
 		}
 		if expr.Query.RelationId != uuid.Nil {
@@ -288,7 +277,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 
 	// check for authorized access, READ(1) for GET
 	for _, expr := range data.Expressions {
-		if expr.AttributeId.Status == pgtype.Present &&
+		if expr.AttributeId.Valid &&
 			!authorizedAttribute(loginId, expr.AttributeId.Bytes, 1) {
 
 			return "", "", errors.New(handler.ErrUnauthorized)
@@ -379,7 +368,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 		}
 
 		// non-attribute expression
-		if expr.AttributeId.Status != pgtype.Present {
+		if !expr.AttributeId.Valid {
 
 			// in expressions of main query, disable SQL arguments for count query
 			//  count query has no sub queries with arguments and only 1 expression: COUNT(*)
@@ -407,7 +396,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 			return "", "", err
 		}
 
-		if expr.Aggregator.Status == pgtype.Present {
+		if expr.Aggregator.Valid {
 			mapIndex_agg[expr.Index] = true
 		}
 		if expr.Aggregator.String == "record" {
@@ -438,7 +427,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 	groupByItems := make([]string, 0)
 	for i, expr := range data.Expressions {
 
-		if expr.AttributeId.Status != pgtype.Present || (!expr.GroupBy && expr.Aggregator.Status != pgtype.Present) {
+		if !expr.AttributeId.Valid || (!expr.GroupBy && !expr.Aggregator.Valid) {
 			continue
 		}
 
@@ -512,8 +501,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 }
 
 // add SELECT for attribute in given relation index
-// if attribute is from another relation than the given index (relationship),
-//  attribute value = tupel IDs in relation with given index via given attribute
+// if attribute is from another relation than given index (relationship), attribute value = tupel IDs in relation with given index via given attribute
 // 'outside in' is important in cases of self reference, where direction cannot be ascertained by attribute
 func addSelect(exprPos int, expr types.DataGetExpression,
 	indexRelationIds map[int]uuid.UUID, inSelect *[]string, nestingLevel int) error {
@@ -570,7 +558,7 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 	}
 
 	// get tupel IDs from other relation
-	if expr.AttributeIdNm.Status != pgtype.Present {
+	if !expr.AttributeIdNm.Valid {
 
 		var selectExpr string
 
@@ -620,7 +608,7 @@ func addJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin,
 		return errors.New("join attribute does not exist")
 	}
 
-	if atr.RelationshipId.Status != pgtype.Present {
+	if !atr.RelationshipId.Valid {
 		return errors.New("relationship of attribute is invalid")
 	}
 
@@ -713,7 +701,7 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 		}
 
 		// attribute filter
-		if s.AttributeId.Status == pgtype.Present {
+		if s.AttributeId.Valid {
 			*comp, err = getAttributeCode(s.AttributeId.Bytes,
 				getRelationCode(s.AttributeIndex, s.AttributeNested))
 
@@ -749,7 +737,10 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 		}
 
 		if isLikeOperator(filter.Operator) {
-			// special syntax for ILIKE comparison (add wildcard characters)
+			if v, ok := s.Value.(pgtype.Text); ok {
+				s.Value = v.String
+			}
+			// special syntax for (I)LIKE comparison (add wildcard characters)
 			s.Value = fmt.Sprintf("%%%s%%", s.Value)
 		}
 
@@ -810,15 +801,15 @@ func addOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 
 	for i, ord := range data.Orders {
 
-		if ord.AttributeId.Status == pgtype.Present {
+		if ord.AttributeId.Valid {
 
 			// order by attribute, check for use as an expression
 			// expressions can be grouped/aggregated, in this case alias is required to order by
 			expressionPosAlias := -1
 			for i, expr := range data.Expressions {
 
-				if expr.AttributeId.Bytes == ord.AttributeId.Bytes && expr.Index == int(ord.Index.Int) {
-					if expr.Aggregator.Status == pgtype.Present || expr.GroupBy {
+				if expr.AttributeId.Bytes == ord.AttributeId.Bytes && expr.Index == int(ord.Index.Int32) {
+					if expr.Aggregator.Valid || expr.GroupBy {
 						expressionPosAlias = i
 					}
 					break
@@ -829,16 +820,16 @@ func addOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 				alias = data_sql.GetExpressionAlias(expressionPosAlias)
 			} else {
 				alias, err = getAttributeCode(ord.AttributeId.Bytes,
-					getRelationCode(int(ord.Index.Int), nestingLevel))
+					getRelationCode(int(ord.Index.Int32), nestingLevel))
 
 				if err != nil {
 					return "", err
 				}
 			}
 
-		} else if ord.ExpressionPos.Status == pgtype.Present {
+		} else if ord.ExpressionPos.Valid {
 			// order by chosen expression (by position in array)
-			alias = data_sql.GetExpressionAlias(int(ord.ExpressionPos.Int))
+			alias = data_sql.GetExpressionAlias(int(ord.ExpressionPos.Int32))
 		} else {
 			return "", errors.New("unknown data GET order parameter")
 		}

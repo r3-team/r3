@@ -11,8 +11,8 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // delete data change logs according to retention settings
@@ -24,7 +24,7 @@ func DelLogsBackground() error {
 	for _, r := range cache.RelationIdMap {
 
 		// delete logs for relations with no retention
-		if r.RetentionCount.Status != pgtype.Present && r.RetentionDays.Status != pgtype.Present {
+		if !r.RetentionCount.Valid && !r.RetentionDays.Valid {
 
 			if _, err := db.Pool.Exec(db.Ctx, `
 				DELETE FROM instance.data_log
@@ -62,7 +62,7 @@ func DelLogsBackground() error {
 			
 			-- exclude retained change logs by age
 			AND date_change < $3
-		`, r.Id, r.RetentionCount.Int, now-(int64(r.RetentionDays.Int)*86400)); err != nil {
+		`, r.Id, r.RetentionCount.Int32, now-(int64(r.RetentionDays.Int32)*86400)); err != nil {
 			return err
 		}
 	}
@@ -100,7 +100,7 @@ func GetLogs_tx(ctx context.Context, tx pgx.Tx, recordId int64,
 
 	for rows.Next() {
 		var l types.DataLog
-		var name pgtype.Varchar
+		var name pgtype.Text
 
 		if err := rows.Scan(&l.Id, &l.RelationId, &name, &l.DateChange); err != nil {
 			return logs, err
@@ -264,13 +264,13 @@ func setLogValue_tx(ctx context.Context, tx pgx.Tx, logId uuid.UUID, atr types.D
 		return err
 	}
 
-	valueInput := pgtype.Varchar{
+	valueInput := pgtype.Text{
 		String: string(valueJson),
-		Status: pgtype.Present,
+		Valid:  true,
 	}
 
 	if string(valueJson) == "null" {
-		valueInput.Status = pgtype.Null
+		valueInput.Valid = false
 	}
 
 	if _, err := tx.Exec(ctx, `

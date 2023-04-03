@@ -3,11 +3,13 @@ import MyBuilderPreset       from './builderPreset.js';
 import MyBuilderPgTrigger    from './builderPgTrigger.js';
 import MyBuilderPgIndex      from './builderPgIndex.js';
 import {getDependentModules} from '../shared/builder.js';
+import {srcBase64}           from '../shared/image.js';
 import {
 	copyValueDialog,
 	getNilUuid
 } from '../shared/generic.js';
 import {
+	getAttributeIcon,
 	isAttributeFiles,
 	isAttributeRelationship,
 	isAttributeRelationship11
@@ -156,6 +158,96 @@ let MyBuilderRelation = {
 		
 		<div class="content no-padding">
 			
+			<!-- attributes -->
+			<div class="contentPart full">
+				<div class="contentPartHeader clickable" @click="showAttributes = !showAttributes">
+					<img class="icon" :src="displayArrow(showAttributes)" />
+					<div class="row centered grow space-between gap">
+						<h1>{{ capApp.attributes.replace('{CNT}',relation.attributes.length) }}</h1>
+						<div class="default-inputs" v-if="showAttributes">
+							<input @click.stop="" v-model="attributeFilter" :placeholder="capGen.threeDots" />
+						</div>
+					</div>
+				</div>
+				
+				<div class="generic-entry-list height-limit" v-if="showAttributes">
+					<div class="entry"
+						v-if="!readonly"
+						@click="attributeIdEdit = null"
+						:class="{ clickable:!readonly }"
+					>
+						<div class="row gap centered">
+							<img class="icon" src="images/add.png" />
+							<span>{{ capGen.button.new }}</span>
+						</div>
+					</div>
+					
+					<div class="entry clickable"
+						@click="attributeIdEdit = atr.id"
+						v-for="atr in relation.attributes.filter(v => attributeFilter === '' || v.name.includes(attributeFilter.toLowerCase()))"
+					>
+						<div class="row centered gap">
+							<my-button
+								:active="false"
+								:captionTitle="capApp.attributeContent"
+								:image="getAttributeIcon(atr,false)"
+								:naked="true"
+								:tight="true"
+							/>
+							<div class="lines">
+								<span>{{ atr.name }}</span>
+								<span class="subtitle" v-if="typeof atr.captions.attributeTitle[builderLanguage] !== 'undefined'">
+									[{{ atr.captions.attributeTitle[builderLanguage] }}]
+								</span>
+							</div>
+						</div>
+						<div class="row centered">
+							<my-button image="lock.png"
+								v-if="atr.encrypted"
+								:active="false"
+								:captionTitle="capApp.attributeEncrypted"
+								:naked="true"
+								:tight="true"
+							/>
+							<my-button
+								v-if="atr.length !== 0"
+								:active="false"
+								:caption="'['+String(atr.length)+']'"
+								:captionTitle="capApp.attributeLength"
+								:naked="true"
+								:tight="true"
+							/>
+							<my-button image="asterisk.png"
+								v-if="!atr.nullable"
+								:active="false"
+								:captionTitle="capApp.attributeNotNullable"
+								:naked="true"
+								:tight="true"
+							/>
+							<my-button
+								:active="false"
+								:captionTitle="atr.iconId === null ? capApp.attributeNoIcon : capGen.icon"
+								:image="atr.iconId === null ? 'icon_missing.png' : ''"
+								:imageBase64="atr.iconId !== null ? srcBase64(iconIdMap[atr.iconId].file) : ''"
+								:naked="true"
+								:tight="true"
+							/>
+						</div>
+					</div>
+					
+					<!-- new attribute dialog -->
+					<my-builder-attribute
+						v-if="attributeIdEdit !== false"
+						@close="attributeIdEdit = false"
+						@nextLanguage="$emit('next-language')"
+						:attributeId="attributeIdEdit"
+						:builderLanguage="builderLanguage"
+						:readonly="readonly"
+						:relation="relation"
+					/>
+				</div>
+			</div>
+			
 			<!-- relation properties -->
 			<div class="contentPart full">
 				<div class="contentPartHeader clickable" @click="showRelation = !showRelation">
@@ -164,11 +256,15 @@ let MyBuilderRelation = {
 				</div>
 				
 				<template v-if="showRelation">
-					<table class="builder-table-vertical default-inputs">
+					<table class="generic-table-vertical default-inputs">
 						<tr>
 							<td>{{ capGen.name }}</td>
 							<td><input class="long" v-model="name" :disabled="readonly" /></td>
 							<td>{{ capApp.nameHint }}</td>
+						</tr>
+						<tr>
+							<td>{{ capGen.comments }}</td>
+							<td colspan="2"><textarea class="dynamic" v-model="comment" :disabled="readonly"></textarea></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.encryption }}</td>
@@ -204,76 +300,6 @@ let MyBuilderRelation = {
 				</template>
 			</div>
 			
-			<!-- attributes -->
-			<div class="contentPart full">
-				<div class="contentPartHeader clickable" @click="showAttributes = !showAttributes">
-					<img class="icon" :src="displayArrow(showAttributes)" />
-					<h1>{{ capApp.attributes.replace('{CNT}',relation.attributes.length) }}</h1>
-				</div>
-				
-				<table class="default-inputs" v-if="showAttributes">
-					<thead>
-						<tr>
-							<th>{{ capGen.actions }}</th>
-							<th>{{ capGen.icon }}</th>
-							<th>{{ capGen.name }}</th>
-							<th>{{ capGen.id }}</th>
-							<th>{{ capGen.title }}</th>
-							<th>{{ capApp.content }}</th>
-							<th>{{ capApp.relationship }}</th>
-							<th>{{ capApp.length }}</th>
-							<th>{{ capApp.nullable }}</th>
-							<th v-if="relation.encryption">{{ capApp.encrypted }}</th>
-							<th>{{ capApp.def }}</th>
-							<th>{{ capApp.onUpdate }}</th>
-							<th>{{ capApp.onDelete }}</th>
-						</tr>
-					</thead>
-					<tbody>
-						<!-- new record -->
-						<my-builder-attribute
-							:builder-language="builderLanguage"
-							:foreign="false"
-							:readonly="readonly"
-							:relation="relation"
-						/>
-						
-						<!-- existing records -->
-						<my-builder-attribute
-							v-for="atr in relation.attributes"
-							:attribute="atr"
-							:builder-language="builderLanguage"
-							:foreign="false"
-							:key="atr.id"
-							:readonly="readonly"
-							:relation="relation"
-						/>
-						
-						<!-- existing records by relationship (different key is important!) -->
-						<template v-if="relationshipAttributes.length !== 0">
-							<tr>
-								<td colspan="999" class="clickable" @click="showExternal = !showExternal">
-									<div class="references">
-										<img :src="displayArrow(showExternal)" />
-										<span>{{ capApp.external.replace('{CNT}',relationshipAttributes.length) }}</span>
-									</div>
-								</td>
-							</tr>
-							<my-builder-attribute
-								v-if="showExternal"
-								v-for="atr in relationshipAttributes"
-								:attribute="atr"
-								:builder-language="builderLanguage"
-								:foreign="true"
-								:key="atr.id+'_outsideIn'"
-								:readonly="true"
-								:relation="relationIdMap[atr.relationId]"
-							/>
-						</template>
-					</tbody>
-				</table>
-			</div>
-			
 			<!-- indexes -->
 			<div class="contentPart full" v-if="relation.attributes.length !== 0">
 				<div class="contentPartHeader clickable" @click="showIndexes = !showIndexes">
@@ -286,6 +312,7 @@ let MyBuilderRelation = {
 						<tr>
 							<th>{{ capGen.actions }}</th>
 							<th>{{ capApp.indexAttributes }}</th>
+							<th>{{ capApp.indexPrimaryKey }}</th>
 							<th>{{ capApp.indexAutoFki }}</th>
 							<th>{{ capApp.indexUnique }}</th>
 						</tr>
@@ -424,6 +451,7 @@ let MyBuilderRelation = {
 						<tr>
 							<th>{{ capGen.actions }}</th>
 							<th>{{ capGen.name }}</th>
+							<th>{{ capGen.id }}</th>
 							<th>{{ capApp.presetProtected }}</th>
 							<th>{{ capApp.presetValues }}</th>
 							<th>{{ capApp.presetValuesPreview }}</th>
@@ -524,29 +552,32 @@ let MyBuilderRelation = {
 		id:             { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
+	emits:['next-language'],
 	watch:{
 		relation:{
 			handler:function() { this.reset(); },
 			immediate:true
 		}
 	},
-	data:function() {
+	data() {
 		return {
 			// inputs
-			name:'',
+			attributeIdEdit:false,
 			encryption:false,
+			name:'',
+			comment:null,
 			retentionCount:null,
 			retentionDays:null,
 			policies:[],
 			
 			// states
+			attributeFilter:'',
 			previewLimit:10,
 			previewOffset:0,
 			previewRows:[],
 			previewRowCount:0,
 			previewValueLength:50,
 			showAttributes:true,
-			showExternal:false,
 			showGraph:false,
 			showIndexes:false,
 			showPolicies:false,
@@ -642,20 +673,11 @@ let MyBuilderRelation = {
 			};
 		},
 		hasChanges:(s) => s.name          !== s.relation.name
+			|| s.comment                  !== s.relation.comment
 			|| s.encryption               !== s.relation.encryption
 			|| s.retentionCount           !== s.relation.retentionCount
 			|| s.retentionDays            !== s.relation.retentionDays
 			|| JSON.stringify(s.policies) !== JSON.stringify(s.relation.policies),
-		relationshipAttributes:(s) => {
-			let atrs = [];
-			for(let key in s.attributeIdMap) {
-				let atr = s.attributeIdMap[key];
-				
-				if(atr.relationId !== s.id && atr.relationshipId === s.id)
-					atrs.push(atr);
-			}
-			return atrs;
-		},
 		
 		// simple
 		attributesNotFiles:(s) => s.relation === false ? [] : s.relation.attributes.filter(v => !s.isAttributeFiles(v.content)),
@@ -666,6 +688,7 @@ let MyBuilderRelation = {
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
 		capApp:        (s) => s.$store.getters.captions.builder.relation,
 		capGen:        (s) => s.$store.getters.captions.generic,
 		settings:      (s) => s.$store.getters.settings
@@ -673,10 +696,12 @@ let MyBuilderRelation = {
 	methods:{
 		// externals
 		copyValueDialog,
+		getAttributeIcon,
 		getNilUuid,
 		isAttributeFiles,
 		isAttributeRelationship,
 		isAttributeRelationship11,
+		srcBase64,
 		
 		// presentation
 		displayArrow(state) {
@@ -713,6 +738,7 @@ let MyBuilderRelation = {
 		},
 		reset() {
 			this.name           = this.relation.name;
+			this.comment        = this.relation.comment;
 			this.encryption     = this.relation.encryption;
 			this.retentionCount = this.relation.retentionCount;
 			this.retentionDays  = this.relation.retentionDays;
@@ -770,12 +796,13 @@ let MyBuilderRelation = {
 				id:this.id,
 				moduleId:this.relation.moduleId,
 				name:this.name,
+				comment:this.comment === '' ? null : this.comment,
 				encryption:this.relation.encryption,
-				retentionCount:this.retentionCount,
-				retentionDays:this.retentionDays,
+				retentionCount:this.retentionCount === '' ? null : this.retentionCount,
+				retentionDays:this.retentionDays === '' ? null : this.retentionDays,
 				policies:this.policies
 			},true).then(
-				() => this.$root.schemaReload(this.moduleId),
+				() => this.$root.schemaReload(this.relation.moduleId),
 				this.$root.genericError
 			);
 		}

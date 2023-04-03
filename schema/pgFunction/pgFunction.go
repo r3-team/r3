@@ -13,7 +13,7 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {

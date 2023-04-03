@@ -9,13 +9,13 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
 )
 
 // get relation records as login associate
 // returns slice of up to 10 records
-func GetRecords(attributeIdLookup uuid.UUID, idsExclude []int64, byString string) ([]types.LoginRecord, error) {
+func GetRecords(attributeIdLookup uuid.UUID, idsExclude []int64,
+	byId int64, byString string) ([]types.LoginRecord, error) {
+
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
@@ -43,6 +43,9 @@ func GetRecords(attributeIdLookup uuid.UUID, idsExclude []int64, byString string
 	if byString != "" {
 		qb.Add("WHERE", fmt.Sprintf(`"%s" ILIKE {FILTER}`, atr.Name))
 		qb.AddPara("{FILTER}", fmt.Sprintf("%%%s%%", byString))
+	} else if byId != 0 {
+		qb.Add("WHERE", fmt.Sprintf(`"%s" = {FILTER}`, schema.PkName))
+		qb.AddPara("{FILTER}", byId)
 	}
 
 	qb.Add("ORDER", fmt.Sprintf(`"%s" ASC`, atr.Name))
@@ -67,22 +70,4 @@ func GetRecords(attributeIdLookup uuid.UUID, idsExclude []int64, byString string
 		records = append(records, r)
 	}
 	return records, nil
-}
-
-// set login attribute value for specified record ID
-func SetRecord_tx(tx pgx.Tx, attributeIdLogin uuid.UUID, loginId pgtype.Int4, recordId int64) error {
-
-	atr, exists := cache.AttributeIdMap[attributeIdLogin]
-	if !exists {
-		return fmt.Errorf("cannot find attribute for ID %s", attributeIdLogin)
-	}
-	rel := cache.RelationIdMap[atr.RelationId]
-	mod := cache.ModuleIdMap[rel.ModuleId]
-
-	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-		UPDATE "%s"."%s"
-		SET "%s" = $1
-		WHERE "%s" = $2
-	`, mod.Name, rel.Name, atr.Name, schema.PkName), loginId, recordId)
-	return err
 }

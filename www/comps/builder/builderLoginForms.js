@@ -82,7 +82,7 @@ let MyBuilderLoginFormsItem = {
 		},
 		readonly:{ type:Boolean, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			attributeIdLogin:this.loginForm.attributeIdLogin,
 			attributeIdLookup:this.loginForm.attributeIdLookup,
@@ -92,54 +92,45 @@ let MyBuilderLoginFormsItem = {
 		};
 	},
 	computed:{
-		loginAttributeCandidates:function() {
+		loginAttributeCandidates:(s) => {
 			let atrs = [];
-			for(let i = 0, j = this.module.relations.length; i < j; i++) {
-				let r = this.module.relations[i];
-				
-				for(let x = 0, y = r.attributes.length; x < y; x++) {
-					let a = r.attributes[x];
-					
-					if(a.name !== 'id' && this.isAttributeInteger(a.content))
+			for(let r of s.module.relations) {
+				for(let a of r.attributes) {
+					if(a.name !== 'id' && s.isAttributeInteger(a.content))
 						atrs.push(a);
 				}
 			}
 			return atrs;
 		},
-		lookupAttributeCandidates:function() {
-			if(this.attributeIdLogin === null)
+		lookupAttributeCandidates:(s) => {
+			if(s.attributeIdLogin === null)
 				return [];
 			
 			// get lookup attribute from same relation as login attribute
-			let r = this.relationIdMap[this.attributeIdMap[this.attributeIdLogin].relationId];
+			let r = s.relationIdMap[s.attributeIdMap[s.attributeIdLogin].relationId];
 			
 			let atrs = [];
-			for(let i = 0, j = r.attributes.length; i < j; i++) {
-				let a = r.attributes[i];
-				
-				if(this.isAttributeString(a.content))
+			for(let a of r.attributes) {
+				if(s.isAttributeString(a.content))
 					atrs.push(a);
 			}
 			return atrs;
 		},
-		hasChanges:function() {
-			return this.name              !== this.loginForm.name
-				|| this.attributeIdLogin  !== this.loginForm.attributeIdLogin
-				|| this.attributeIdLookup !== this.loginForm.attributeIdLookup
-				|| this.formId            !== this.loginForm.formId
-				|| JSON.stringify(this.captions) !== JSON.stringify(this.loginForm.captions)
-			;
-		},
+		hasChanges:(s) => s.name   !== s.loginForm.name
+			|| s.attributeIdLogin  !== s.loginForm.attributeIdLogin
+			|| s.attributeIdLookup !== s.loginForm.attributeIdLookup
+			|| s.formId            !== s.loginForm.formId
+			|| JSON.stringify(s.captions) !== JSON.stringify(s.loginForm.captions),
 		
 		// simple states
-		isNew:function() { return this.loginForm.id === null; },
+		isNew:(s) => s.loginForm.id === null,
 		
 		// stores
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.loginForm; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.loginForm,
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -147,13 +138,13 @@ let MyBuilderLoginFormsItem = {
 		isAttributeString,
 		
 		// actions
-		del:function() {
+		del() {
 			ws.send('loginForm','del',{id:this.loginForm.id},true).then(
 				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);
 		},
-		set:function() {
+		set() {
 			ws.send('loginForm','set',{
 				id:this.loginForm.id,
 				moduleId:this.module.id,
@@ -229,17 +220,12 @@ let MyBuilderLoginForms = {
 		readonly:       { type:Boolean, required:true }
 	},
 	computed:{
-		module:function() {
-			if(typeof this.moduleIdMap[this.id] === 'undefined')
-				return false;
-			
-			return this.moduleIdMap[this.id];
-		},
+		module:(s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
 		
 		// stores
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		formIdMap:  function() { return this.$store.getters['schema/formIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.builder.loginForm; },
-		capGen:     function() { return this.$store.getters.captions.generic; }
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		formIdMap:  (s) => s.$store.getters['schema/formIdMap'],
+		capApp:     (s) => s.$store.getters.captions.builder.loginForm,
+		capGen:     (s) => s.$store.getters.captions.generic
 	}
 };

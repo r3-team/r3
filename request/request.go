@@ -15,7 +15,7 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func ExecTransaction(ctxClient context.Context, loginId int64, isAdmin bool,
@@ -179,8 +179,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		}
 	case "pgFunction":
 		switch action {
-		case "exec":
-			return PgFunctionExec_tx(tx, reqJson)
+		case "exec": // user may exec non-trigger backend function, available to frontend
+			return PgFunctionExec_tx(tx, reqJson, true)
 		}
 	case "setting":
 		switch action {
@@ -200,6 +200,15 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 	}
 
 	switch ressource {
+	case "api":
+		switch action {
+		case "copy":
+			return ApiCopy_tx(tx, reqJson)
+		case "del":
+			return ApiDel_tx(tx, reqJson)
+		case "set":
+			return ApiSet_tx(tx, reqJson)
+		}
 	case "article":
 		switch action {
 		case "assign":
@@ -349,8 +358,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return LoginSet_tx(tx, reqJson)
 		case "setMembers":
 			return LoginSetMembers_tx(tx, reqJson)
-		case "setRecord":
-			return LoginSetRecord_tx(tx, reqJson)
 		}
 	case "loginForm":
 		switch action {
@@ -360,6 +367,15 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return LoginFormGet(reqJson)
 		case "set":
 			return LoginFormSet_tx(tx, reqJson)
+		}
+	case "loginTemplate":
+		switch action {
+		case "del":
+			return LoginTemplateDel_tx(tx, reqJson)
+		case "get":
+			return LoginTemplateGet(reqJson)
+		case "set":
+			return LoginTemplateSet_tx(tx, reqJson)
 		}
 	case "mail":
 		switch action {
@@ -419,6 +435,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		switch action {
 		case "del":
 			return PgFunctionDel_tx(tx, reqJson)
+		case "execAny": // admin may exec any non-trigger backend function
+			return PgFunctionExec_tx(tx, reqJson, false)
 		case "get":
 			return PgFunctionGet(reqJson)
 		case "set":

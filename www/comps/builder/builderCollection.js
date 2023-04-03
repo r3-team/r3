@@ -120,7 +120,6 @@ let MyBuilderCollection = {
 							<my-builder-column-templates groupName="columns"
 								:builderLanguage="builderLanguage"
 								:columns="columns"
-								:hasCaptions="true"
 								:joins="joins"
 								:moduleId="module.id"
 							/>
@@ -157,11 +156,10 @@ let MyBuilderCollection = {
 					:allowLookups="false"
 					:allowOrders="true"
 					:builderLanguage="builderLanguage"
-					:choices="[]"
 					:filters="filters"
+					:filtersDisable="filtersDisable"
 					:fixedLimit="fixedLimit"
 					:joins="joins"
-					:lookups="[]"
 					:moduleId="module.id"
 					:orders="orders"
 					:relationId="relationId"
@@ -186,6 +184,7 @@ let MyBuilderCollection = {
 						:builderLanguage="builderLanguage"
 						:choices="columnShow.query.choices"
 						:filters="columnShow.query.filters"
+						:filtersDisable="filtersDisable"
 						:fixedLimit="columnShow.query.fixedLimit"
 						:joins="columnShow.query.joins"
 						:joinsParents="[joins]"
@@ -207,7 +206,7 @@ let MyBuilderCollection = {
 			
 			<!-- collection properties -->
 			<div class="content" v-if="tabTarget === 'properties'">
-				<table class="builder-table-vertical tight fullWidth default-inputs">
+				<table class="generic-table-vertical tight fullWidth default-inputs">
 					<tr>
 						<td>{{ capGen.name }}</td>
 						<td><input v-model="name" :disabled="readonly" /></td>
@@ -280,12 +279,13 @@ let MyBuilderCollection = {
 			
 			// inputs
 			columns:[],
-			columnIdShow:null,
 			iconId:null,
 			inHeader:[],
 			name:'',
 			
 			// state
+			columnIdShow:null,
+			filtersDisable:['collection','field','fieldChanged','fieldValid','javascript','record','recordNew'],
 			showPreview:false,
 			showSidebar:true,
 			tabTarget:'content'
@@ -323,8 +323,8 @@ let MyBuilderCollection = {
 			|| JSON.stringify(s.inHeader) !== JSON.stringify(s.collection.inHeader),
 		
 		// simple
-		collection:     (s) => typeof s.collectionIdMap[s.id] === 'undefined' ? false : s.collectionIdMap[s.id],
-		module:         (s) => s.moduleIdMap[s.collection.moduleId],
+		collection:(s) => typeof s.collectionIdMap[s.id] === 'undefined' ? false : s.collectionIdMap[s.id],
+		module:    (s) => s.moduleIdMap[s.collection.moduleId],
 		
 		// stores
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
@@ -336,7 +336,7 @@ let MyBuilderCollection = {
 	},
 	watch:{
 		collection:{
-			handler:function() { this.reset(); },
+			handler() { this.reset(); },
 			immediate:true
 		}
 	},
@@ -371,9 +371,7 @@ let MyBuilderCollection = {
 		},
 		removeIndex(index) {
 			for(let i = 0, j = this.columns.length; i < j; i++) {
-				let c = this.columns[i];
-				
-				if(c.index === index) {
+				if(this.columns[i].index === index) {
 					this.columns.splice(i,1);
 					i--; j--;
 				}

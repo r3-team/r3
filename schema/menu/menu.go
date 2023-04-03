@@ -9,13 +9,13 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, moduleIdNew uuid.UUID) error {
 
-	menus, err := Get(moduleId, pgtype.UUID{Status: pgtype.Null})
+	menus, err := Get(moduleId, pgtype.UUID{})
 	if err != nil {
 		return err
 	}
@@ -23,7 +23,7 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, moduleIdNew uuid.UUID) error {
 	// reset entity IDs
 	menus = NilIds(menus, moduleIdNew)
 
-	return Set_tx(tx, pgtype.UUID{Status: pgtype.Null}, menus)
+	return Set_tx(tx, pgtype.UUID{}, menus)
 }
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
@@ -36,7 +36,7 @@ func Get(moduleId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 	menus := make([]types.Menu, 0)
 
 	nullCheck := "AND (parent_id IS NULL OR parent_id = $2)"
-	if parentId.Status == pgtype.Present {
+	if parentId.Valid {
 		nullCheck = "AND parent_id = $2"
 	}
 
@@ -65,7 +65,7 @@ func Get(moduleId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 	for i, m := range menus {
 
 		// get children & collections & captions
-		m.Menus, err = Get(moduleId, pgtype.UUID{Bytes: m.Id, Status: pgtype.Present})
+		m.Menus, err = Get(moduleId, pgtype.UUID{Bytes: m.Id, Valid: true})
 		if err != nil {
 			return menus, err
 		}
@@ -110,7 +110,7 @@ func Set_tx(tx pgx.Tx, parentId pgtype.UUID, menus []types.Menu) error {
 		}
 
 		// set children
-		if err := Set_tx(tx, pgtype.UUID{Bytes: m.Id, Status: pgtype.Present}, m.Menus); err != nil {
+		if err := Set_tx(tx, pgtype.UUID{Bytes: m.Id, Valid: true}, m.Menus); err != nil {
 			return err
 		}
 

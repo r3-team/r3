@@ -8,10 +8,8 @@ export function getDaysBetween(d0,d1) {
 // returns date shifted by local timezone offset (added or removed)
 export function getDateShifted(dInput,add) {
 	let d = new Date(dInput.getTime());
-	
 	if(add) d.setMinutes(d.getMinutes()+d.getTimezoneOffset());
 	else    d.setMinutes(d.getMinutes()-d.getTimezoneOffset());
-	
 	return d;
 };
 
@@ -82,4 +80,19 @@ export function getDateFromUnix(unixTime) {
 export function getUnixFormat(unixTime,format) {
 	if(unixTime === null) return '';
 	return getDateFormat(new Date(unixTime * 1000),format);
+};
+
+export function getUnixNowDate() {
+	return getUnixFromDate(getDateAtUtcZero(new Date()));
+};
+
+export function getUnixNowDatetime() {
+	return getUnixFromDate(new Date());
+};
+
+export function getUnixNowTime() {
+	let n = new Date();
+	let d = new Date(0);
+	d.setHours(n.getHours(),n.getMinutes(),n.getSeconds());
+	return getUnixFromDate(getDateShifted(d,false));
 };

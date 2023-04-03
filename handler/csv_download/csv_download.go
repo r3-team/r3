@@ -23,7 +23,6 @@ import (
 	"unicode/utf8"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
 )
 
 var (
@@ -195,7 +194,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		for i, expr := range get.Expressions {
 
 			// handle non-attribute expression
-			if expr.AttributeId.Status != pgtype.Present {
+			if !expr.AttributeId.Valid {
 				columnNames[i] = "[ --- ]"
 				continue
 			}
@@ -236,9 +235,22 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	// store attribute content use for each column
+	columnAttributeContentUse := make([]string, len(columns))
+	for i, column := range columns {
+		atr, exists := cache.AttributeIdMap[column.AttributeId]
+		if !exists {
+			handler.AbortRequest(w, handlerContext, nil,
+				handler.ErrSchemaUnknownAttribute(column.AttributeId).Error())
+
+			return
+		}
+		columnAttributeContentUse[i] = atr.ContentUse
+	}
+
 	for {
 		total, err := dataToCsv(writer, get, locUser, boolTrue, boolFalse,
-			dateFormat, columns, loginId)
+			dateFormat, columnAttributeContentUse, loginId)
 
 		if err != nil {
 			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
@@ -264,8 +276,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func dataToCsv(writer *csv.Writer, get types.DataGet, locUser *time.Location,
-	boolTrue string, boolFalse string, dateFormat string, columns []types.Column,
-	loginId int64) (int, error) {
+	boolTrue string, boolFalse string, dateFormat string,
+	columnAttributeContentUse []string, loginId int64) (int, error) {
 
 	ctx, ctxCancel := context.WithTimeout(context.Background(),
 		time.Duration(int64(config.GetUint64("dbTimeoutCsv")))*time.Second)
@@ -290,8 +302,6 @@ func dataToCsv(writer *csv.Writer, get types.DataGet, locUser *time.Location,
 
 	parseIntegerValues := func(display string, value int64) string {
 		switch display {
-		case "time":
-			return time.Unix(value, 0).UTC().Format("15:04:05")
 		case "date", "datetime":
 			// date values are always stored as UTC at midnight
 			loc := time.UTC
@@ -316,6 +326,8 @@ func dataToCsv(writer *csv.Writer, get types.DataGet, locUser *time.Location,
 				format = fmt.Sprintf("%s 15:04:05", format)
 			}
 			return time.Unix(value, 0).In(loc).Format(format)
+		case "time":
+			return time.Unix(value, 0).UTC().Format("15:04:05")
 		}
 		return fmt.Sprintf("%v", value)
 	}
@@ -336,9 +348,9 @@ func dataToCsv(writer *csv.Writer, get types.DataGet, locUser *time.Location,
 			case string:
 				stringValues[pos] = v
 			case int32:
-				stringValues[pos] = parseIntegerValues(columns[pos].Display, int64(v))
+				stringValues[pos] = parseIntegerValues(columnAttributeContentUse[pos], int64(v))
 			case int64:
-				stringValues[pos] = parseIntegerValues(columns[pos].Display, v)
+				stringValues[pos] = parseIntegerValues(columnAttributeContentUse[pos], v)
 			default:
 				stringValues[pos] = fmt.Sprintf("%v", value)
 			}

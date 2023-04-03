@@ -14,42 +14,46 @@ import {
 } from './comps/input.js';
 
 // admin
-import MyAdmin             from './comps/admin/admin.js';
-import MyAdminBackups      from './comps/admin/adminBackups.js';
-import MyAdminCluster      from './comps/admin/adminCluster.js';
-import MyAdminConfig       from './comps/admin/adminConfig.js';
-import MyAdminFiles        from './comps/admin/adminFiles.js';
-import MyAdminLdaps        from './comps/admin/adminLdaps.js';
-import MyAdminLicense      from './comps/admin/adminLicense.js';
-import MyAdminLogins       from './comps/admin/adminLogins.js';
-import MyAdminLogs         from './comps/admin/adminLogs.js';
-import MyAdminMails        from './comps/admin/adminMails.js';
-import MyAdminMailAccounts from './comps/admin/adminMailAccounts.js';
-import MyAdminModules      from './comps/admin/adminModules.js';
-import MyAdminRepo         from './comps/admin/adminRepo.js';
-import MyAdminRoles        from './comps/admin/adminRoles.js';
-import MyAdminScheduler    from './comps/admin/adminScheduler.js';
+import MyAdmin               from './comps/admin/admin.js';
+import MyAdminBackups        from './comps/admin/adminBackups.js';
+import MyAdminCluster        from './comps/admin/adminCluster.js';
+import MyAdminConfig         from './comps/admin/adminConfig.js';
+import MyAdminFiles          from './comps/admin/adminFiles.js';
+import MyAdminLdaps          from './comps/admin/adminLdaps.js';
+import MyAdminLicense        from './comps/admin/adminLicense.js';
+import MyAdminLogins         from './comps/admin/adminLogins.js';
+import MyAdminLoginTemplates from './comps/admin/adminLoginTemplates.js';
+import MyAdminLogs           from './comps/admin/adminLogs.js';
+import MyAdminMails          from './comps/admin/adminMails.js';
+import MyAdminMailAccounts   from './comps/admin/adminMailAccounts.js';
+import MyAdminModules        from './comps/admin/adminModules.js';
+import MyAdminRepo           from './comps/admin/adminRepo.js';
+import MyAdminRoles          from './comps/admin/adminRoles.js';
+import MyAdminScheduler      from './comps/admin/adminScheduler.js';
 
 // builder
 import MyBuilder            from './comps/builder/builder.js';
+import MyBuilderApi         from './comps/builder/builderApi.js';
+import MyBuilderApis        from './comps/builder/builderApis.js';
+import MyBuilderArticles    from './comps/builder/builderArticles.js';
+import MyBuilderCollection  from './comps/builder/builderCollection.js';
+import MyBuilderCollections from './comps/builder/builderCollections.js';
+import MyBuilderForm        from './comps/builder/builderForm.js';
+import MyBuilderForms       from './comps/builder/builderForms.js';
+import MyBuilderIcons       from './comps/builder/builderIcons.js';
+import MyBuilderJsFunction  from './comps/builder/builderJsFunction.js';
+import MyBuilderJsFunctions from './comps/builder/builderJsFunctions.js';
+import MyBuilderLoginForms  from './comps/builder/builderLoginForms.js';
+import MyBuilderMenu        from './comps/builder/builderMenu.js';
 import MyBuilderModule      from './comps/builder/builderModule.js';
 import MyBuilderModules     from './comps/builder/builderModules.js';
-import MyBuilderRelations   from './comps/builder/builderRelations.js';
-import MyBuilderRelation    from './comps/builder/builderRelation.js';
-import MyBuilderIcons       from './comps/builder/builderIcons.js';
-import MyBuilderMenu        from './comps/builder/builderMenu.js';
-import MyBuilderForms       from './comps/builder/builderForms.js';
-import MyBuilderForm        from './comps/builder/builderForm.js';
-import MyBuilderRoles       from './comps/builder/builderRoles.js';
-import MyBuilderRole        from './comps/builder/builderRole.js';
-import MyBuilderCollections from './comps/builder/builderCollections.js';
-import MyBuilderCollection  from './comps/builder/builderCollection.js';
-import MyBuilderLoginForms  from './comps/builder/builderLoginForms.js';
-import MyBuilderPgFunctions from './comps/builder/builderPgFunctions.js';
 import MyBuilderPgFunction  from './comps/builder/builderPgFunction.js';
-import MyBuilderJsFunctions from './comps/builder/builderJsFunctions.js';
-import MyBuilderJsFunction  from './comps/builder/builderJsFunction.js';
-import MyBuilderArticles    from './comps/builder/builderArticles.js';
+import MyBuilderPgFunctions from './comps/builder/builderPgFunctions.js';
+import MyBuilderRelation    from './comps/builder/builderRelation.js';
+import MyBuilderRelations   from './comps/builder/builderRelations.js';
+import MyBuilderRole        from './comps/builder/builderRole.js';
+import MyBuilderRoles       from './comps/builder/builderRoles.js';
+import MyBuilderStart       from './comps/builder/builderStart.js';
 
 // router
 const MyRouterPositions = Object.create(null);
@@ -76,20 +80,21 @@ const MyRouter = VueRouter.createRouter({
 		redirect:'/admin/config',
 		component:MyAdmin,
 		children:[
-			{ path:'backups',     component:MyAdminBackups },
-			{ path:'cluster',     component:MyAdminCluster },
-			{ path:'config',      component:MyAdminConfig },
-			{ path:'files',       component:MyAdminFiles },
-			{ path:'ldaps',       component:MyAdminLdaps },
-			{ path:'license',     component:MyAdminLicense },
-			{ path:'logins',      component:MyAdminLogins },
-			{ path:'logs',        component:MyAdminLogs },
-			{ path:'mails',       component:MyAdminMails },
-			{ path:'mailaccounts',component:MyAdminMailAccounts },
-			{ path:'modules',     component:MyAdminModules },
-			{ path:'repo',        component:MyAdminRepo },
-			{ path:'roles',       component:MyAdminRoles },
-			{ path:'scheduler',   component:MyAdminScheduler }
+			{ path:'backups',        component:MyAdminBackups },
+			{ path:'cluster',        component:MyAdminCluster },
+			{ path:'config',         component:MyAdminConfig },
+			{ path:'files',          component:MyAdminFiles },
+			{ path:'ldaps',          component:MyAdminLdaps },
+			{ path:'license',        component:MyAdminLicense },
+			{ path:'logins',         component:MyAdminLogins },
+			{ path:'logintemplates', component:MyAdminLoginTemplates },
+			{ path:'logs',           component:MyAdminLogs },
+			{ path:'mails',          component:MyAdminMails },
+			{ path:'mailaccounts',   component:MyAdminMailAccounts },
+			{ path:'modules',        component:MyAdminModules },
+			{ path:'repo',           component:MyAdminRepo },
+			{ path:'roles',          component:MyAdminRoles },
+			{ path:'scheduler',      component:MyAdminScheduler }
 		]
 	},{
 		path:'/builder',
@@ -99,6 +104,11 @@ const MyRouter = VueRouter.createRouter({
 			{
 				path:'modules',
 				component:MyBuilderModules
+			},{
+				path:'start/:id',
+				meta:{ nav:'start', target:'module' },
+				component:MyBuilderStart,
+				props:true
 			},{
 				path:'module/:id',
 				meta:{ nav:'module', target:'module' },
@@ -184,13 +194,23 @@ const MyRouter = VueRouter.createRouter({
 				meta:{ nav:'articles', target:'module' },
 				component:MyBuilderArticles,
 				props:true
+			},{
+				path:'apis/:id',
+				meta:{ nav:'apis', target:'module' },
+				component:MyBuilderApis,
+				props:true
+			},{
+				path:'api/:id',
+				meta:{ nav:'apis', target:'api' },
+				component:MyBuilderApi,
+				props:true
 			}
 		]
 	},{
 		path:'/:pathMatch(.*)*',
 		redirect:'/home'
 	}],
-	scrollBehavior:function(to,from,savedPosition) {
+	scrollBehavior(to,from,savedPosition) {
 		
 		// recover scroll position of form element if available
 		if(typeof MyRouterPositions[to.path] !== 'undefined') {
@@ -247,7 +267,7 @@ const app = Vue.createApp(MyApp)
 ;
 
 app.directive('click-outside',{
-	beforeMount:function(el,binding,vnode) {
+	beforeMount(el,binding,vnode) {
 		el.clickOutsideEvent = function(event) {
 			
 			if(el !== event.target && !el.contains(event.target))
@@ -255,7 +275,7 @@ app.directive('click-outside',{
 		};
 		document.body.addEventListener('click',el.clickOutsideEvent);
 	},
-	unmounted:function(el) {
+	unmounted(el) {
 		document.body.removeEventListener('click',el.clickOutsideEvent);
 	}
 });

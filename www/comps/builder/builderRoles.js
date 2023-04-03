@@ -15,11 +15,12 @@ let MyBuilderRoles = {
 		</div>
 		
 		<div class="content default-inputs" v-if="module">
-			<div class="builder-entry-list">
+			<div class="generic-entry-list">
 				
 				<div class="entry"
-					@click="$emit('createNew',readonly ? null : 'role')"
-					:class="{ clickable:!readonly, off:readonly }"
+					v-if="!readonly"
+					@click="$emit('createNew','role')"
+					:class="{ clickable:!readonly }"
 				>
 					<div class="row gap centered">
 						<img class="icon" src="images/add.png" />
@@ -66,7 +67,7 @@ let MyBuilderRoles = {
 		id:             { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			filter:'',
 		};

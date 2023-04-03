@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func PgFunctionDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
@@ -25,7 +25,7 @@ func PgFunctionDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	return nil, pgFunction.Del_tx(tx, req.Id)
 }
 
-func PgFunctionExec_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func PgFunctionExec_tx(tx pgx.Tx, reqJson json.RawMessage, onlyFrontendFnc bool) (interface{}, error) {
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
@@ -42,15 +42,14 @@ func PgFunctionExec_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) 
 	if !exists {
 		return nil, fmt.Errorf("backend function (ID %s) does not exist", req.Id)
 	}
-
-	if !fnc.IsFrontendExec {
+	if fnc.IsTrigger {
+		return nil, fmt.Errorf("backend function (ID %s) is a trigger function, it cannot be called directly", req.Id)
+	}
+	if onlyFrontendFnc && !fnc.IsFrontendExec {
 		return nil, fmt.Errorf("backend function (ID %s) may not be called from the frontend", req.Id)
 	}
 
-	mod, exists := cache.ModuleIdMap[fnc.ModuleId]
-	if !exists {
-		return nil, fmt.Errorf("module (ID %s) does not exist", fnc.ModuleId)
-	}
+	mod := cache.ModuleIdMap[fnc.ModuleId]
 
 	placeholders := make([]string, 0)
 	for i, _ := range req.Args {

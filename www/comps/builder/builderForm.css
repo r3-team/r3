@@ -6,7 +6,7 @@
 
 /* form builder sidebar area */
 .builder-form .sidebar{
-	min-width:420px;
+	min-width:500px;
 	flex:0 0 auto;
 	overflow:auto;
 }
@@ -14,7 +14,7 @@
 	margin-top:20px;
 }
 .builder-form .sidebar .templates{
-	margin-bottom:16px;
+	margin:10px 0px 16px;
 	overflow:auto;
 	border-radius:5px;
 	overflow:hidden;
@@ -22,7 +22,6 @@
 .builder-form .sidebar .templates-filter{
 	display:flex;
 	flex-flow:row nowrap;
-	margin-bottom:10px;
 }
 .builder-form .sidebar .columns{
 	display:flex;
@@ -176,6 +175,9 @@
 	padding:1px;
 	filter:var(--image-filter);
 }
+.builder-field-header img.action.warning{
+	filter:var(--image-filter-error);
+}
 .builder-field-header img.action.selected{
 	outline:2px solid var(--color-border);
 }
@@ -204,6 +206,25 @@
 	max-height:90px;
 	white-space:break-spaces;
 	word-break:break-all;
+}
+.builder-field-button{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:5px;
+	padding:2px 4px;
+	margin:0px 3px 0px 0px;
+	font-weight:bold;
+}
+.builder-field-button:hover{
+	border-bottom:2px solid var(--color-form-builder-selected);
+}
+.builder-field-button.selected{
+	border-bottom:3px solid var(--color-form-builder-selected);
+}
+.builder-field-button img{
+	height:24px;
+	filter:var(--image-filter);
 }
 
 .builder-field .fields-nested{
@@ -256,10 +277,6 @@
 .builder-field .fields-nested.style-align-items-center           { align-items:center; }
 .builder-field .fields-nested.style-align-items-baseline         { align-items:baseline; }
 
-.builder-field .field-ref{
-	font-weight:bold;
-	font-family:Consolas,Courier,monospace,cursive;
-}
 .builder-field.column .batch-set{
 	font-weight:bold;
 	font-family:Consolas,Courier,monospace,cursive;

@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"r3/db"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func Set_tx(tx pgx.Tx, name string, interval int64, active bool) error {

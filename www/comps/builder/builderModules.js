@@ -56,7 +56,7 @@ let MyBuilderModulesKeyCreate = {
 		capApp:(s) => s.$store.getters.captions.builder.module,
 		capGen:(s) => s.$store.getters.captions.generic
 	},
-	data:function() {
+	data() {
 		return {
 			keyLength:'0',
 			keyPrivate:'',
@@ -159,7 +159,7 @@ let MyBuilderModulesGraph = {
 		capApp:  (s) => s.$store.getters.captions.builder.module,
 		settings:(s) => s.$store.getters.settings
 	},
-	data:function() {
+	data() {
 		return {
 			show:false
 		};
@@ -300,7 +300,7 @@ let MyBuilderModulesExport = {
 		capApp:     (s) => s.$store.getters.captions.builder.module,
 		capGen:     (s) => s.$store.getters.captions.generic
 	},
-	data:function() {
+	data() {
 		return {
 			exportPrivateKey:'',
 			id:null,
@@ -394,7 +394,7 @@ let MyBuilderModules = {
 					<div class="item-wrap shade" v-for="m in modules.filter(v => v.parentId === null)">
 						<router-link class="item parent"
 							:title="capApp.position+': '+m.position"
-							:to="'/builder/module/'+m.id"
+							:to="'/builder/start/'+m.id"
 						>
 							<div class="color" :style="'background-color:#'+m.color1"></div>
 							<img :src="srcBase64Icon(m.iconId,'images/module.png')" />
@@ -405,7 +405,7 @@ let MyBuilderModules = {
 							<router-link class="item"
 								v-for="mc in modules.filter(v => v.parentId === m.id)"
 								:title="capApp.position+': '+m.position" 
-								:to="'/builder/module/'+mc.id"
+								:to="'/builder/start/'+mc.id"
 							>
 								<div class="color" :style="'background-color:#'+mc.color1"></div>
 								<img :src="srcBase64Icon(mc.iconId,'images/module.png')" />
@@ -425,7 +425,7 @@ let MyBuilderModules = {
 		builderLanguage:{ type:String, required:true }
 	},
 	emits:['createNew','toggleDocs'],
-	data:function() {
+	data() {
 		return {
 			show:true
 		};

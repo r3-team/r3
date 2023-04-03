@@ -1,7 +1,7 @@
 .button{
 	height:30px;
 	margin:0px var(--spacing-button-horz-outside) 0px 0px;
-	padding:4px var(--spacing-button-horz-inside) 4px var(--spacing-button-horz-inside);
+	padding:4px var(--spacing-button-horz-inside);
 	font-size:inherit;
 	color:var(--color-bg-font);
 	display:flex;
@@ -15,10 +15,14 @@
 	border-radius:4px;
 	transition:height 0.1s, margin 0.1s, padding 0.1s, box-shadow 0.1s, border-bottom 0.1s, filter 0.1s;
 }
+.button.adjusts{
+	flex:1 0 auto;
+}
 .button.cancel{
 	background-color:var(--color-cancel);
 }
 .button.naked{
+	padding:4px 6px;
 	color:inherit;
 	background-color:transparent;
 	box-shadow:unset;
@@ -66,6 +70,14 @@
 .button span{
 	white-space:nowrap;
 }
+.button.adjusts span{
+	flex:1 0 auto;
+	width:10px;
+	min-width:0px;
+	text-overflow:ellipsis;
+	white-space:nowrap;
+	overflow:hidden;
+}
 .button img{
 	width:20px;
 	height:20px;
@@ -85,7 +97,12 @@
 	margin-left:-2px;
 	margin-right:-2px;
 }
-
+.button.naked:active:not(.inactive) img{
+	width:22px;
+	height:22px;
+	margin-left:-1px;
+	margin-right:-1px;
+}
 
 
 /* layout overwrites */

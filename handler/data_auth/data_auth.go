@@ -9,7 +9,7 @@ import (
 	"r3/handler"
 	"r3/login/login_auth"
 
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var context = "data_auth"
@@ -44,8 +44,8 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	var loginId int64
 	var isAdmin bool
 	var noAuth bool
-	var mfaTokenId = pgtype.Int4{Status: pgtype.Null}
-	var mfaTokenPin = pgtype.Varchar{Status: pgtype.Null}
+	var mfaTokenId = pgtype.Int4{}
+	var mfaTokenPin = pgtype.Text{}
 
 	token, _, _, err := login_auth.User(req.Username, req.Password,
 		mfaTokenId, mfaTokenPin, &loginId, &isAdmin, &noAuth)

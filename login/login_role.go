@@ -4,7 +4,7 @@ import (
 	"r3/db"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func getRoleIds(loginId int64) ([]uuid.UUID, error) {

@@ -10,7 +10,7 @@ let MyInputSelect = {
 			<input class="input" type="text"
 				v-model="textInput"
 				@focus="$emit('focused')"
-				@keyup="getIfNotEmpty"
+				@keyup="inputChange"
 				@keyup.enter="enter"
 				@keyup.esc="escape"
 				:disabled="readonly"
@@ -24,7 +24,7 @@ let MyInputSelect = {
 					@trigger="clear"
 					:naked="nakedIcons"
 				/>
-				<my-button image="arrowDown.png"
+				<my-button image="pageDown.png"
 					v-if="!readonly"
 					@trigger="toggle"
 					:naked="nakedIcons"
@@ -57,7 +57,7 @@ let MyInputSelect = {
 		selected:    { required:false, default:null }                    // selected option ID (as in: 12)
 	},
 	emits:['blurred','focused','request-data','updated-text-input','update:selected'],
-	data:function() {
+	data() {
 		return {
 			limit:10,     // fixed result limit
 			textInput:'', // text line input
@@ -65,28 +65,23 @@ let MyInputSelect = {
 		};
 	},
 	watch:{
-		inputTextSet:function(valNew) {
+		inputTextSet(valNew) {
 			this.textInput = valNew;
 		}
 	},
 	computed:{
-		selectedInput:{
-			get:function()  { return this.selected; },
-			set:function(v) { this.$emit('update:selected',v); }
-		},
-		
 		// stores
-		capGen:function() { return this.$store.getters.captions.generic; }
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
-		apply:function(i) {
-			this.selectedInput = this.options[i].id;
+		apply(i) {
+			this.$emit('update:selected',this.options[i].id);
 			this.showDropdown  = false;
 		},
-		clear:function() {
-			this.selectedInput = null;
+		clear() {
+			this.$emit('update:selected',null);
 		},
-		enter:function() {
+		enter() {
 			if(!this.showDropdown)
 				return this.openDropdown();
 			
@@ -94,27 +89,27 @@ let MyInputSelect = {
 			if(this.options.length > 0)
 				this.apply(0);
 		},
-		escape:function() {
+		escape() {
 			this.$emit('blurred');
 			this.showDropdown = false;
 		},
-		toggle:function() {
-			if(this.showDropdown) {
-				this.showDropdown = false;
-				return;
-			}
-			this.openDropdown();
-		},
-		getIfNotEmpty:function() {
+		inputChange() {
 			if(!this.showDropdown && this.textInput === '')
 				return;
 			
 			this.$emit('updated-text-input',this.textInput);
 			this.openDropdown();
 		},
-		openDropdown:function() {
+		openDropdown() {
 			this.showDropdown = true;
 			this.$emit('request-data');
+		},
+		toggle() {
+			if(this.showDropdown) {
+				this.showDropdown = false;
+				return;
+			}
+			this.openDropdown();
 		}
 	}
 };

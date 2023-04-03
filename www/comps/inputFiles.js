@@ -77,8 +77,13 @@ let MyInputFiles = {
 		>
 		<!-- header -->
 		<div v-if="!dragActive" class="input-files-header default-inputs">
-			<div class="row">
+			<div class="row centered">
 				<slot name="input-icon" />
+	   			<transition name="fade_out">
+					<div v-if="progress !== 100">
+						{{ progress + '%' }}
+					</div>
+				</transition>
 				<my-button image="files.png"
 					v-if="!unsavedSelected && fileIdsSelected.length !== 0"
 					@trigger="copyFilesSelected"
@@ -131,12 +136,6 @@ let MyInputFiles = {
 					<input type="file" multiple="multiple"
 						@change="upload($event.target.files)"
 					/>
-					
-		   			<transition name="fade_out">
-						<div v-if="progress !== 100" class="counter">
-							{{ progress + '%' }}
-						</div>
-					</transition>
 				</div>
 				
 				<!-- toggle all -->
@@ -348,13 +347,13 @@ let MyInputFiles = {
 		recordId:    { type:Number,  required:true },
 		showGallery: { type:Boolean, required:false, default:false }
 	},
-	emits:['update:modelValue'],
+	emits:['file-count-change','update:modelValue'],
 	data() {
 		return {
 			extPreview:[
 				'bmp','gif','jpg','jpeg','pdf','png','psd','svg','xcf','webp',
 				'cfg','conf','css','csv','go','html','ini','java','js','json',
-				'log','md','php','sql','txt','xml'
+				'log','md','php','pl','ps1','py','sql','txt','xml'
 			],
 			
 			extRegex:/(?:\.([^.]+))?$/,
@@ -474,6 +473,7 @@ let MyInputFiles = {
 				let v = JSON.parse(JSON.stringify(this.modelValue));
 				this.files = v !== null ? v : [];
 				this.fileIdMapChange = {};
+				this.$emit('file-count-change',this.files.length);
 			}
 		},
 		
@@ -493,10 +493,29 @@ let MyInputFiles = {
 			return this.sortDirAsc ? ' \u25B2' : ' \u25BC';
 		},
 		imagePreview(fileId,name,version) {
-			if(!this.extPreview.includes(this.extRegex.exec(name)[1]))
-				return 'images/noPic.png';
+			let ext = this.extRegex.exec(name)[1].toLowerCase();
+			if(this.extPreview.includes(ext))
+				return this.getAttributeFileThumbHref(this.attributeId,fileId,name,version,this.token);
 			
-			return this.getAttributeFileThumbHref(this.attributeId,fileId,name,version,this.token);
+			if(['doc','docx','odt'].includes(ext))
+				return 'images/fileRichtext.png';
+			
+			if(['xls','xlsx','ods'].includes(ext))
+				return 'images/fileSheet.png';
+			
+			if(['7z','gz','iso','rar','zip'].includes(ext))
+				return 'images/fileZip.png';
+			
+			if(['asc','der','key','p12','pem','pfx','ppk','pub'].includes(ext))
+				return 'images/fileKey.png';
+			
+			if(['aac','flac','m4a','mp3','mp4','ogg','wav','wma'].includes(ext))
+				return 'images/fileAudio.png';
+			
+			if(['avi','flv','m4v','mp4','mov','mpg','mpeg','mkv','ogv','webm','wmv'].includes(ext))
+				return 'images/fileVideo.png';
+			
+			return 'images/noPic.png';
 		},
 		setNoSpaceMode() {
 			this.noSpace = this.$refs.main.clientWidth <= 700;
@@ -647,6 +666,7 @@ let MyInputFiles = {
 				this.files.push(f);
 				this.update(f.id,'create',f.name);
 			}
+			this.$emit('file-count-change',this.files.length);
 		},
 		updateDelete(fileIds) {
 			for(let fileId of fileIds) {
@@ -658,6 +678,7 @@ let MyInputFiles = {
 					}
 				}
 			}
+			this.$emit('file-count-change',this.files.length);
 		},
 		updateName(fileId,name) {
 			// name is not immediately updated in files list to conserve sorting
@@ -668,17 +689,13 @@ let MyInputFiles = {
 			let maxSize = this.attributeIdMap[this.attributeId].length;
 			let updateTotal = () => {
 				let total = 0;
-				for(let i = 0, j = files.length; i < j; i++) {
-					total += files[i].hasProgress;
+				for(let f of files) {
+					total += f.hasProgress;
 				}
 				this.progress = Math.floor(total / files.length);
 			}
 			
-			for(let i = 0, j = files.length; i < j; i++) {
-				
-				// check file
-				let file = files[i];
-				
+			for(let file of files) {
 				if(maxSize !== 0 && Math.floor(file.size/1024) > maxSize) {
 					file.hasProgress = 100;
 					this.$root.genericError(this.capApp.tooLarge.replace(
@@ -688,10 +705,9 @@ let MyInputFiles = {
 				}
 				
 				// upload file
-				file.hasProgress = 0;
-				
 				let formData = new FormData();
 				let xhr      = new XMLHttpRequest();
+				file.hasProgress = 0;
 				
 				xhr.upload.onprogress = function(event) {
 					if(event.lengthComputable) {

@@ -1,6 +1,4 @@
-import MyBuilderIconInput from './builderIconInput.js';
-import {copyValueDialog}  from '../shared/generic.js';
-import {srcBase64}        from '../shared/image.js';
+import {srcBase64} from '../shared/image.js';
 export {MyBuilderCollections as default};
 
 let MyBuilderCollections = {
@@ -17,11 +15,12 @@ let MyBuilderCollections = {
 		</div>
 		
 		<div class="content default-inputs" v-if="module">
-			<div class="builder-entry-list">
+			<div class="generic-entry-list">
 				
 				<div class="entry"
-					@click="$emit('createNew',readonly ? null : 'collection')"
-					:class="{ clickable:!readonly, off:readonly }"
+					v-if="!readonly"
+					@click="$emit('createNew','collection')"
+					:class="{ clickable:!readonly }"
 				>
 					<div class="row gap centered">
 						<img class="icon" src="images/add.png" />
@@ -62,7 +61,7 @@ let MyBuilderCollections = {
 		id:      { type:String,  required:true },
 		readonly:{ type:Boolean, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			filter:'',
 		};

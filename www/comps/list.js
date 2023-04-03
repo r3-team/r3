@@ -20,6 +20,10 @@ import {
 	getRowsDecrypted
 } from './shared/form.js';
 import {
+	colorAdjustBg,
+	colorMakeContrastFont
+} from './shared/generic.js';
+import {
 	fillRelationRecordIds,
 	getFiltersEncapsulated,
 	getQueryAttributesPkFilter,
@@ -46,7 +50,7 @@ let MyList = {
 	template:`<div class="list" ref="content"
 		@keydown="keyDown"
 		v-click-outside="escape"
-		:class="{shade:!isInput, asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly }"
+		:class="{asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly, isSingleField:isSingleField }"
 	>
 		<!-- list as input field (showing record(s) from active field value) -->
 		<template v-if="isInput">
@@ -117,7 +121,6 @@ let MyList = {
 								@trigger="inputTriggerRowRemove(i)"
 								:captionTitle="capApp.inputHintRemove"
 								:naked="true"
-								:tight="true"
 							/>
 							<my-button image="open.png"
 								v-if="inputOpenForm && hasUpdate"
@@ -125,15 +128,13 @@ let MyList = {
 								@trigger-middle="$emit('open-form',r.indexRecordIds['0'],true)"
 								:captionTitle="capApp.inputHintOpen"
 								:naked="true"
-								:tight="true"
 							/>
 							
 							<!-- show dropdown toggle if single input -->
-							<my-button image="arrowDown.png"
+							<my-button image="pageDown.png"
 								v-if="!inputAsCategory && !showInputAddLine && !inputIsReadonly"
 								@trigger="toggleDropdown"
 								:naked="true"
-								:tight="true"
 							/>
 						</div>
 					</td>
@@ -171,14 +172,12 @@ let MyList = {
 										@trigger-middle="$emit('open-form',0,true)"
 										:captionTitle="capApp.inputHintCreate"
 										:naked="true"
-										:tight="true"
 									/>
-									<my-button image="arrowDown.png"
+									<my-button image="pageDown.png"
 										v-if="!inputIsReadonly"
 										@trigger="toggleDropdown"
 										:captionTitle="capApp.inputHintSelect"
 										:naked="true"
-										:tight="true"
 									/>
 								</div>
 							</td>
@@ -204,7 +203,7 @@ let MyList = {
 						:caption="!isMobile ? capGen.button.new : ''"
 						:captionTitle="capGen.button.newHint"
 					/>
-					<my-button image="sheet.png"
+					<my-button image="fileSheet.png"
 						v-if="csvImport || csvExport"
 						@trigger="showCsv = !showCsv"
 						:caption="!isMobile ? capApp.button.csv : ''"
@@ -276,10 +275,11 @@ let MyList = {
 					
 					<my-input-collection class="selector"
 						v-for="c in collections"
-						@update:indexes="$emit('set-collection-indexes',c.collectionId,$event)"
+						@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event)"
 						:collectionId="c.collectionId"
 						:columnIdDisplay="c.columnIdDisplay"
 						:key="c.collectionId"
+						:modelValue="collectionIdMapIndexes[c.collectionId]"
 						:multiValue="c.multiValue"
 					/>
 					
@@ -333,7 +333,6 @@ let MyList = {
 						@apply="reloadInside('filtersUser')"
 						@close="showFilters = false"
 						:columns="columns"
-						:disableContent="['fieldChanged','subQuery']"
 						:joins="joins"
 						:showReset="true"
 						:userFilter="true"
@@ -365,7 +364,7 @@ let MyList = {
 			<!-- list results as table -->
 			<div class="layoutTable"
 				v-if="layout === 'table'"
-				:class="{ scrolls:scrolls, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
+				:class="{ scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
 				:id="usesPageHistory ? scrollFormId : null"
 			>
 				<table :class="{ 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
@@ -378,7 +377,7 @@ let MyList = {
 									:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
 								/>
 							</th>
-							<th v-for="(b,i) in columnBatches" :style="b.style" class="no-padding">
+							<th v-for="(b,i) in columnBatches" :style="b.style">
 								<my-list-column-batch
 									@close="columnBatchIndexOption = -1"
 									@del-aggregator="setAggregators(i,null)"
@@ -465,13 +464,13 @@ let MyList = {
 							</td>
 							
 							<!-- row values per column batch -->
-							<td
-								v-for="b in columnBatches"
-								:style="b.style"
-							>
-								<div class="batch">
+							<td v-for="b in columnBatches" :style="b.style">
+								<div class="batch"
+									:class="{ colored:b.columnIndexColor !== -1 }"
+									:style="b.columnIndexColor === -1 ? '' : displayColorColumn(r.values[b.columnIndexColor])"
+								>
 									<my-value-rich class="context-list-table"
-										v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
+										v-for="ind in b.columnIndexes.filter(v => v !== b.columnIndexColor && r.values[v] !== null)"
 										@clipboard="$emit('clipboard')"
 										:attributeId="columns[ind].attributeId"
 										:basis="b.columnIndexes.length === 1 ? columns[ind].basis : 0"
@@ -495,7 +494,7 @@ let MyList = {
 								</div>
 							</td>
 							<td v-if="!rowsFetching" colspan="999">
-								{{ capGen.resultsNone }}
+								<div class="batch">{{ capGen.resultsNone }}</div>
 							</td>
 						</tr>
 					</tbody>
@@ -620,6 +619,7 @@ let MyList = {
 		autoRenew:   { required:false,default:null },                    // refresh list data every x seconds
 		choices:     { type:Array,   required:false, default:() => [] }, // processed query choices
 		collections: { type:Array,   required:false, default:() => [] }, // consumed collections to filter by user input
+		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		columns:     { type:Array,   required:true },                    // processed list columns
 		fieldId:     { type:String,  required:true },
 		filters:     { type:Array,   required:true },                    // processed query filters
@@ -636,9 +636,9 @@ let MyList = {
 		formLoading:    { type:Boolean, required:false, default:false }, // trigger and control list reloads
 		header:         { type:Boolean, required:false, default:true  }, // show list header
 		isInput:        { type:Boolean, required:false, default:false }, // use list as input
-		isHiddenInTab:  { type:Boolean, required:false, default:false }, // list is in a non-visible tab-field
+		isHidden:       { type:Boolean, required:false, default:false }, // list is not visible and therefore not loaded/updated
+		isSingleField:  { type:Boolean, required:false, default:false }, // list is single field within a parent (form/tab - not container!)
 		rowSelect:      { type:Boolean, required:false, default:false }, // list rows can be selected (to open record in form)
-		scrolls:        { type:Boolean, required:false, default:false }, // list should scroll its contents (instead of growing)
 		usesPageHistory:{ type:Boolean, required:false, default:false }, // list uses page getters for filtering/sorting/etc.
 		
 		// list as input field
@@ -652,11 +652,11 @@ let MyList = {
 		inputValid:     { type:Boolean, required:false, default:true }
 	},
 	emits:[
-		'blurred','clipboard','focused','open-form','record-removed',
-		'record-selected','records-selected-init','set-args',
+		'blurred','clipboard','focused','open-form','record-count-change',
+		'record-removed','record-selected','records-selected-init','set-args',
 		'set-collection-indexes'
 	],
-	data:function() {
+	data() {
 		return {
 			// list state
 			autoRenewInput:null,        // current auto renew input value
@@ -702,188 +702,146 @@ let MyList = {
 	computed:{
 		// columns can be batched by using the same batch number
 		// first column in batch is used for header caption and ordering
-		columnBatches:function() {
-			let out = [];
+		columnBatches:(s) => {
+			let batches   = [];
 			let addColumn = (column,index) => {
-				const hidden = column.display === 'hidden' || (this.isMobile && !column.onMobile);
-				const atr    = this.attributeIdMap[column.attributeId];
+				const hidden = column.display === 'hidden' || (s.isMobile && !column.onMobile);
+				const atr    = s.attributeIdMap[column.attributeId];
 				
 				// first non-encrypted/non-file attribute in batch can be sorted by
-				const noSort = atr.encrypted || this.isAttributeFiles(atr.content);
+				const noSort  = atr.encrypted || s.isAttributeFiles(atr.content);
+				const isColor = atr.contentUse === 'color';
 				
 				if(column.batch !== null) {
-					for(let i = 0, j = out.length; i < j; i++) {
+					for(let i = 0, j = batches.length; i < j; i++) {
+						if(batches[i].batch !== column.batch)
+							continue;
 						
-						if(out[i].batch === column.batch) {
-							// batch already exists
-							
-							// do not add column if its hidden
-							if(hidden) return;
-							
-							// add its own column index + sort setting + width to batch
-							out[i].columnIndexes.push(index);
-							out[i].columnIndexSortBy = out[i].columnIndexSortBy !== -1 || noSort
-								? out[i].columnIndexSortBy : index;
-							out[i].width += column.basis;
-							return;
-						}
+						// do not add column if its hidden
+						if(hidden) return;
+						
+						// add its own column index + sort setting + width to batch
+						batches[i].columnIndexes.push(index);
+						batches[i].columnIndexSortBy = batches[i].columnIndexSortBy !== -1 || noSort
+							? batches[i].columnIndexSortBy : index;
+						batches[i].width += column.basis;
+						
+						if(isColor)
+							batches[i].columnIndexColor = index;
+						
+						return;
 					}
 				}
 				
 				// create new column batch with itself as first column
 				// create even if first column is hidden as other columns in same batch might not be
-				out.push({
+				batches.push({
 					batch:column.batch,
-					caption:this.getColumnTitle(column),
+					caption:s.getColumnTitle(column),
 					columnIndexes:!hidden ? [index] : [],
+					columnIndexColor:!isColor ? -1 : index,
 					columnIndexSortBy:noSort ? -1 : index,
 					style:'',
 					width:column.basis
 				});
 			};
-			for(let i = 0, j = this.columns.length; i < j; i++) {
-				addColumn(this.columns[i],i);
+			for(let i = 0, j = s.columns.length; i < j; i++) {
+				addColumn(s.columns[i],i);
 			}
 			
 			// finalize batches
-			for(let i = 0, j = out.length; i < j; i++) {
+			for(let i = 0, j = batches.length; i < j; i++) {
 				
 				// remove batches that have no columns
-				if(out[i].columnIndexes.length === 0) {
-					out.splice(i,1);
+				if(batches[i].columnIndexes.length === 0) {
+					batches.splice(i,1);
 					i--; j--;
 					continue;
 				}
 				
 				// finalize style
-				if(out[i].width !== 0)
-					out[i].style = `max-width:${out[i].width}px;`;
+				if(batches[i].width !== 0)
+					batches[i].style = `max-width:${batches[i].width}px;`;
 			}
-			return out;
+			return batches;
 		},
-		choiceIdDefault:function() {
-			// default is user field option, fallback is first choice in list
-			return this.fieldOptionGet(
-				this.fieldId,'choiceId',
-				this.choices.length === 0 ? null : this.choices[0].id
-			);
-		},
-		filtersCombined:function() {
-			let filters = this.filters
-				.concat(this.filtersParsedColumn)
-				.concat(this.filtersParsedQuick)
-				.concat(this.filtersParsedUser)
-				.concat(this.choiceFilters);
+		filtersCombined:(s) => {
+			let filters = s.filters
+				.concat(s.filtersParsedColumn)
+				.concat(s.filtersParsedQuick)
+				.concat(s.filtersParsedUser)
+				.concat(s.choiceFilters);
 			
-			if(this.anyInputRows)
-				filters.push(this.getQueryAttributesPkFilter(
-					this.query.relationId,this.inputRecordIds,0,true
+			if(s.anyInputRows)
+				filters.push(s.getQueryAttributesPkFilter(
+					s.query.relationId,s.inputRecordIds,0,true
 				));
 			
 			return filters;
 		},
-		hasBulkActions:function() {
-			if(this.isInput || this.rows.length === 0)
+		hasBulkActions:(s) => {
+			if(s.isInput || s.rows.length === 0)
 				return false;
 			
-			for(let i = 0, j = this.joins.length; i < j; i++) {
-				if(this.joins[i].applyDelete)
+			for(let join of s.joins) {
+				if(join.applyDelete)
 					return true;
 			}
 			return false;
 		},
-		hasChoices:function() {
-			return this.query.choices.length > 1;
-		},
-		hasCreate:function() {
-			if(this.joins.length === 0) return false;
-			return this.joins[0].applyCreate && this.rowSelect;
-		},
-		hasGalleryIcon:function() {
-			return this.columns.length !== 0 &&
-				this.columns[0].display === 'gallery' &&
-				(this.columns[0].onMobile || !this.isMobile) &&
-				(!this.isInput || this.rowsInput.length !== 0) &&
-				this.attributeIdMap[this.columns[0].attributeId].content === 'files'
+		hasGalleryIcon:(s) => {
+			return s.columns.length !== 0 &&
+				s.columns[0].display === 'gallery' &&
+				(s.columns[0].onMobile || !s.isMobile) &&
+				(!s.isInput || s.rowsInput.length !== 0) &&
+				s.attributeIdMap[s.columns[0].attributeId].content === 'files'
 			;
 		},
-		hasUpdate:function() {
-			if(this.joins.length === 0) return false;
-			return this.joins[0].applyUpdate && this.rowSelect;
+		inputLinePlaceholder:(s) => {
+			if(s.focused) return '';
+			return s.anyInputRows ? s.capApp.inputPlaceholderAdd : s.capGen.threeDots;
 		},
-		inputLinePlaceholder:function() {
-			if(this.focused) return '';
-			
-			return this.anyInputRows
-				? this.capApp.inputPlaceholderAdd
-				: this.capGen.threeDots;
-		},
-		limitOptions:function() {
+		limitOptions:(s) => {
 			let out = [10,25,50,100,250,500,1000];
 			
-			if(!out.includes(this.limitDefault))
-				out.unshift(this.limitDefault);
+			if(!out.includes(s.limitDefault))
+				out.unshift(s.limitDefault);
 			
 			return out.sort((a,b) => a-b);
 		},
-		pageCount:function() {
-			if(this.count === 0) return 0;
+		pageCount:(s) => {
+			if(s.count === 0) return 0;
 			
-			let cnt = Math.floor(this.count / this.limit);
-			return this.count % this.limit !== 0 ? cnt+1 : cnt;
+			let cnt = Math.floor(s.count / s.limit);
+			return s.count % s.limit !== 0 ? cnt+1 : cnt;
 		},
-		rowsClear:function() {
+		rowsClear:(s) => {
 			let rows = [];
-			for(let i = 0, j = this.rows.length; i < j; i++) {
-				if(!this.inputRecordIds.includes(this.rows[i].indexRecordIds['0']))
-					rows.push(this.rows[i]);
+			for(let r of s.rows) {
+				if(!s.inputRecordIds.includes(r.indexRecordIds['0']))
+					rows.push(r);
 			}
 			return rows;
 		},
-		showInputAddLine:function() {
-			return !this.inputAsCategory && (
-				!this.anyInputRows || (this.inputMulti && !this.inputIsReadonly)
-			);
-		},
-		showInputAddAll:function() {
-			return this.inputMulti && this.rowsClear.length > 0;
-		},
-		showInputHeader:function() {
-			return this.isInput && (
-				this.filterQuick ||
-				this.hasChoices ||
-				this.showInputAddAll ||
-				this.offset !== 0 ||
-				this.count > this.limit
-			);
-		},
 		
 		// filters
-		filtersParsedColumn:function() {
-			return this.getFiltersEncapsulated(
-				JSON.parse(JSON.stringify(this.filtersColumn))
-			);
-		},
-		filtersParsedUser:function() {
-			return this.getFiltersEncapsulated(
-				JSON.parse(JSON.stringify(this.filtersUser))
-			);
-		},
-		filtersParsedQuick:function() {
-			if(this.filtersQuick === '')
-				return [];
+		filtersParsedColumn:(s) => s.getFiltersEncapsulated(
+			JSON.parse(JSON.stringify(s.filtersColumn))
+		),
+		filtersParsedUser:(s) => s.getFiltersEncapsulated(
+			JSON.parse(JSON.stringify(s.filtersUser))
+		),
+		filtersParsedQuick:(s) => {
+			if(s.filtersQuick === '') return [];
 			
 			let out = [];
-			for(let i = 0, j = this.columns.length; i < j; i++) {
-				let c = this.columns[i];
-				let a = this.attributeIdMap[c.attributeId];
-				
-				if(c.subQuery || this.isAttributeFiles(a.content) ||
+			for(let c of s.columns) {
+				let a = s.attributeIdMap[c.attributeId];
+				if(c.subQuery || s.isAttributeFiles(a.content) ||
 					(c.aggregator !== null && c.aggregator !== 'record')) {
 					
 					continue;
 				}
-				
 				out.push({
 					connector:out.length === 0 ? 'AND' : 'OR',
 					operator:'ILIKE',
@@ -894,32 +852,40 @@ let MyList = {
 					},
 					side1:{
 						brackets:0,
-						value:this.filtersQuick
+						value:s.filtersQuick
 					}
 				});
 			}
-			return this.getFiltersEncapsulated(out);
+			return s.getFiltersEncapsulated(out);
 		},
 		
 		// simple
-		anyInputRows:   function() { return this.inputRecordIds.length !== 0; },
-		autoSelect:     function() { return this.inputIsNew && this.inputAutoSelect !== 0 && !this.inputAutoSelectDone; },
-		choiceFilters:  function() { return this.getChoiceFilters(this.choices,this.choiceId); },
-		expressions:    function() { return this.getQueryExpressions(this.columns); },
-		joins:          function() { return this.fillRelationRecordIds(this.query.joins); },
-		relationsJoined:function() { return this.getRelationsJoined(this.joins); },
+		anyInputRows:    (s) => s.inputRecordIds.length !== 0,
+		autoSelect:      (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
+		choiceFilters:   (s) => s.getChoiceFilters(s.choices,s.choiceId),
+		choiceIdDefault: (s) => s.fieldOptionGet(s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		expressions:     (s) => s.getQueryExpressions(s.columns),
+		hasChoices:      (s) => s.query.choices.length > 1,
+		hasCreate:       (s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.rowSelect,
+		hasUpdate:       (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.rowSelect,
+		joins:           (s) => s.fillRelationRecordIds(s.query.joins),
+		relationsJoined: (s) => s.getRelationsJoined(s.joins),
+		showInputAddLine:(s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
+		showInputAddAll: (s) => s.inputMulti && s.rowsClear.length > 0,
+		showInputHeader: (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
 		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		iconIdMap:     function() { return this.$store.getters['schema/iconIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.list; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		isMobile:      function() { return this.$store.getters.isMobile; },
-		moduleLanguage:function() { return this.$store.getters.moduleLanguage; },
-		scrollFormId:  function() { return this.$store.getters.constants.scrollFormId; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
+		capApp:        (s) => s.$store.getters.captions.list,
+		capGen:        (s) => s.$store.getters.captions.generic,
+		isMobile:      (s) => s.$store.getters.isMobile,
+		moduleLanguage:(s) => s.$store.getters.moduleLanguage,
+		scrollFormId:  (s) => s.$store.getters.constants.scrollFormId,
+		settings:      (s) => s.$store.getters.settings
 	},
-	mounted:function() {
+	mounted() {
 		this.showTable = !this.isInput;
 		
 		// react to field resize
@@ -934,7 +900,7 @@ let MyList = {
 			this.inputAutoSelectDone = false;
 			this.reloadOutside();
 		});
-		this.$watch('isHiddenInTab',(val) => {
+		this.$watch('isHidden',(val) => {
 			if(!val) this.reloadOutside();
 		});
 		this.$watch(() => [this.choices,this.columns,this.filters],(newVals,oldVals) => {
@@ -989,15 +955,17 @@ let MyList = {
 		this.filtersUser   = this.fieldOptionGet(this.fieldId,'filtersUser',[]);
 		this.columnBatchIndexMapAggr = this.fieldOptionGet(this.fieldId,'columnBatchIndexMapAggr',{});
 	},
-	beforeUnmount:function() {
+	beforeUnmount() {
 		this.setAutoRenewTimer(true);
 	},
-	unmounted:function() {
+	unmounted() {
 		if(!this.Input)
 			window.removeEventListener('resize',this.resize);
 	},
 	methods:{
 		// externals
+		colorAdjustBg,
+		colorMakeContrastFont,
 		consoleError,
 		fieldOptionGet,
 		fieldOptionSet,
@@ -1017,16 +985,23 @@ let MyList = {
 		srcBase64,
 		
 		// presentation
-		displayRecordCheck:function(state) {
+		displayRecordCheck(state) {
 			if(this.inputMulti)
 				return state ? 'checkbox1.png' : 'checkbox0.png';
 			
 			return state ? 'radio1.png' : 'radio0.png';
 		},
-		resize:function() {
+		displayColorColumn(color) {
+			if(color === null) return '';
+			
+			let bg   = this.colorAdjustBg(color,this.settings.dark);
+			let font = this.colorMakeContrastFont(bg);
+			return `background-color:${bg};color:${font};`;
+		},
+		resize() {
 			this.smallSize = this.$refs.content.offsetWidth < 700;
 		},
-		updateDropdownDirection:function() {
+		updateDropdownDirection() {
 			let headersPx  = 200; // rough height in px of all headers (menu/form) combined
 			let rowPx      = 40;  // rough height in px of one dropdown list row
 			let dropdownPx = rowPx * (this.rows.length+1); // +1 for action row
@@ -1036,14 +1011,14 @@ let MyList = {
 		},
 		
 		// reloads
-		reloadOutside:function() {
+		reloadOutside() {
 			// outside state has changed, reload list or list input
 			if(!this.isInput)
 				return this.get();
 			
 			this.getInput();
 		},
-		reloadInside:function(entity) {
+		reloadInside(entity) {
 			// inside state has changed, reload list (not relevant for list input)
 			switch(entity) {
 				case 'dropdown':      // fallthrough
@@ -1072,7 +1047,7 @@ let MyList = {
 		},
 		
 		// parsing
-		paramsUpdate:function(pushHistory) {
+		paramsUpdate(pushHistory) {
 			// fullpage lists update their form arguments, this results in history change
 			// history change then triggers form load
 			let orders = [];
@@ -1095,7 +1070,7 @@ let MyList = {
 			
 			this.$emit('set-args',args,pushHistory);
 		},
-		paramsUpdated:function() {
+		paramsUpdated() {
 			// apply query parameters
 			// initial filter choice is set to first available choice (if there are any)
 			// initial order by parameter follows query order
@@ -1126,25 +1101,25 @@ let MyList = {
 		},
 		
 		// user actions, generic
-		blur:function() {
+		blur() {
 			this.focused   = false;
 			this.showTable = false;
 			this.$emit('blurred');
 		},
-		escape:function() {
+		escape() {
 			if(this.isInput) {
 				this.blur();
 				this.showTable = false;
 			}
 		},
-		focus:function() {
+		focus() {
 			if(!this.inputIsReadonly && this.isInput && !this.inputAsCategory && !this.showTable) {
 				this.focused      = true;
 				this.filtersQuick = '';
 				this.$emit('focused');
 			}
 		},
-		keyDown:function(e) {
+		keyDown(e) {
 			let focusTarget = null;
 			let arrow       = false;
 			
@@ -1182,7 +1157,16 @@ let MyList = {
 				}
 			}
 		},
-		toggleDropdown:function() {
+		setAggregators(columnBatchIndex,aggregator) {
+			if(aggregator !== null)
+				this.columnBatchIndexMapAggr[columnBatchIndex] = aggregator;
+			else
+				delete(this.columnBatchIndexMapAggr[columnBatchIndex]);
+			
+			this.fieldOptionSet(this.fieldId,'columnBatchIndexMapAggr',this.columnBatchIndexMapAggr);
+			this.$refs.aggregations.get();
+		},
+		toggleDropdown() {
 			this.showTable = !this.showTable;
 			
 			if(this.showTable) {
@@ -1190,16 +1174,16 @@ let MyList = {
 				this.reloadInside('dropdown');
 			}
 		},
-		toggleUserFilters:function() {
+		toggleUserFilters() {
 			this.showFilters = !this.showFilters;
 		},
-		toggleRecordId:function(id,middleClick) {
+		toggleRecordId(id,middleClick) {
 			if(this.inputRecordIds.includes(id))
 				this.$emit('record-removed',id);
 			else
 				this.$emit('record-selected',id,middleClick);
 		},
-		updatedTextInput:function(event) {
+		updatedTextInput(event) {
 			if(event.code === 'Tab' || event.code === 'Escape')
 				return;
 			
@@ -1222,7 +1206,7 @@ let MyList = {
 				this.reloadInside('dropdown');
 			}
 		},
-		updatedFilterQuick:function() {
+		updatedFilterQuick() {
 			if(this.isInput && !this.showTable)
 				this.showTable = true;
 			
@@ -1230,11 +1214,11 @@ let MyList = {
 		},
 		
 		// user actions, table layout
-		clickColumn:function(columnBatchIndex) {
+		clickColumn(columnBatchIndex) {
 			this.columnBatchIndexOption = this.columnBatchIndexOption === columnBatchIndex
 				? -1 : columnBatchIndex;
 		},
-		clickRow:function(row,middleClick) {
+		clickRow(row,middleClick) {
 			const recordId = row.indexRecordIds['0'];
 			
 			if(this.isInput && !this.inputAsCategory) {
@@ -1251,14 +1235,14 @@ let MyList = {
 			if(this.rowSelect)
 				this.toggleRecordId(recordId,middleClick);
 		},
-		clickRowAll:function() {
-			for(let i = 0, j = this.rows.length; i < j; i++) {
-				this.clickRow(this.rows[i],false);
+		clickRowAll() {
+			for(let r of this.rows) {
+				this.clickRow(r,false);
 			}
 		},
 		
 		// user actions, card layout
-		selectOrderBy:function(columnIndexSortByString) {
+		selectOrderBy(columnIndexSortByString) {
 			const columnIndexSortBy = parseInt(columnIndexSortByString);
 			this.orders = [];
 			
@@ -1280,16 +1264,7 @@ let MyList = {
 			}
 			this.reloadInside('order');
 		},
-		setAggregators:function(columnBatchIndex,aggregator) {
-			if(aggregator !== null)
-				this.columnBatchIndexMapAggr[columnBatchIndex] = aggregator;
-			else
-				delete(this.columnBatchIndexMapAggr[columnBatchIndex]);
-			
-			this.fieldOptionSet(this.fieldId,'columnBatchIndexMapAggr',this.columnBatchIndexMapAggr);
-			this.$refs.aggregations.get();
-		},
-		setAutoRenewTimer:function(justClear) {
+		setAutoRenewTimer(justClear) {
 			// clear last timer
 			if(this.autoRenewTimer !== null)
 				clearInterval(this.autoRenewTimer);
@@ -1307,7 +1282,7 @@ let MyList = {
 			// store timer option for field
 			this.fieldOptionSet(this.fieldId,'autoRenew',this.autoRenewInput);
 		},
-		setOrder:function(columnBatch,directionAsc) {
+		setOrder(columnBatch,directionAsc) {
 			// remove initial sorting when changing anything
 			if(!this.orderOverwritten)
 				this.orders = [];
@@ -1343,34 +1318,34 @@ let MyList = {
 			}
 			this.reloadInside('order');
 		},
-		toggleOrderBy:function() {
+		toggleOrderBy() {
 			this.orders[0].ascending = !this.orders[0].ascending;
 			this.reloadInside('order');
 		},
 		
 		// user actions, inputs
-		inputTriggerRow:function(row) {
+		inputTriggerRow(row) {
 			if(this.inputAsCategory && !this.inputIsReadonly)
 				this.toggleRecordId(row.indexRecordIds['0'],false);
 			
 			this.focus();
 		},
-		inputTriggerRowRemove:function(i) {
+		inputTriggerRowRemove(i) {
 			this.$emit('record-removed',this.rowsInput[i].indexRecordIds['0']);
 			this.rowsInput.splice(i,1);
 			this.blur();
 		},
 		
 		// bulk selection
-		selectRow:function(rowIndex) {
+		selectRow(rowIndex) {
 			let pos = this.selectedRows.indexOf(rowIndex);
 			if(pos === -1) this.selectedRows.push(rowIndex);
 			else           this.selectedRows.splice(pos,1);
 		},
-		selectReset:function() {
+		selectReset() {
 			this.selectedRows = [];
 		},
-		selectRowsAllToggle:function() {
+		selectRowsAllToggle() {
 			if(this.rows.length === this.selectedRows.length) {
 				this.selectedRows = [];
 				return;
@@ -1383,11 +1358,11 @@ let MyList = {
 		},
 		
 		// helpers
-		getColumnBatchSortPos:function(columnBatch) {
+		getColumnBatchSortPos(columnBatch) {
 			return !this.orderOverwritten
 				? -1 : this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
 		},
-		getColumnPosInOrder:function(columnIndex) {
+		getColumnPosInOrder(columnIndex) {
 			if(columnIndex === -1)
 				return -1;
 			
@@ -1411,7 +1386,7 @@ let MyList = {
 		},
 		
 		// backend calls
-		delAsk:function(rowIndexes) {
+		delAsk(rowIndexes) {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.delete,
 				buttons:[{
@@ -1426,7 +1401,7 @@ let MyList = {
 				}]
 			});
 		},
-		del:function(rowIndexes) {
+		del(rowIndexes) {
 			let requests = [];
 			for(let j of this.joins) {
 				if(!j.applyDelete)
@@ -1450,9 +1425,9 @@ let MyList = {
 				this.$root.genericError
 			);
 		},
-		get:function() {
+		get() {
 			// do nothing if nothing is shown, form is loading or list is in a non-visible tab
-			if(!this.showTable || this.formLoading || this.isHiddenInTab)
+			if(!this.showTable || this.formLoading || this.isHidden)
 				return;
 			
 			// fix invalid offset (can occur when limit is changed)
@@ -1479,6 +1454,8 @@ let MyList = {
 							this.rowsFetching = false;
 							this.selectReset();
 							
+							this.$emit('record-count-change',this.count);
+							
 							// update aggregations as well
 							if(typeof this.$refs.aggregations !== 'undefined')
 								this.$refs.aggregations.get();
@@ -1498,7 +1475,7 @@ let MyList = {
 				this.$root.genericError
 			);
 		},
-		getInput:function() {
+		getInput() {
 			// nothing to get if form is currently loading
 			if(this.formLoading)
 				return;

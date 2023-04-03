@@ -14,15 +14,16 @@ export function getIndexAttributeId(index,attributeId,outsideIn,attributeIdNm) {
 	// used to ascertain whether attribute has already been used
 	// usually, attributes can only be used once (on a form for example)
 	//  if relationship exists that is a self reference, attribute can exist twice
-	if(attributeId === null)   attributeId   = 'null';
+	if(index         === null) index         = 'null';
+	if(attributeId   === null) attributeId   = 'null';
 	if(attributeIdNm === null) attributeIdNm = 'null';
 	
 	return [
 		index,
 		attributeId,
 		outsideIn ? 'rel' : 'org',
-		attributeIdNm].join('_')
-	;
+		attributeIdNm
+	].join('_');
 };
 
 export function getIndexAttributeIdByField(f,altAttribute) {
@@ -85,21 +86,11 @@ export function getValueFromQuery(content,queryValue) {
 };
 
 export function getAttributeValueFromString(content,value) {
-	if(isAttributeBoolean(content))
-		return value === 'true' || value === 'TRUE';
-	
-	if(isAttributeInteger(content))
-		return parseInt(value);
-	
-	if(isAttributeDecimal(content))
-		return parseFloat(value);
-	
-	if(isAttributeRelationship11(content))
-		return parseInt(value);
-	
-	if(isAttributeRelationshipN1(content))
-		return JSON.parse(value);
-	
+	if(isAttributeBoolean(content))        return value === 'true' || value === 'TRUE';
+	if(isAttributeInteger(content))        return parseInt(value);
+	if(isAttributeDecimal(content))        return parseFloat(value);
+	if(isAttributeRelationship11(content)) return parseInt(value);
+	if(isAttributeRelationshipN1(content)) return JSON.parse(value);
 	return value;
 };
 
@@ -125,6 +116,37 @@ export function getAttributeValuesFromGetter(getter) {
 	return map;
 };
 
+export function getAttributeIcon(attribute,outsideIn) {
+	if(isAttributeString(attribute.content)) {
+		switch(attribute.contentUse) {
+			case 'default':  return 'text.png';       break;
+			case 'richtext': return 'text_rich.png';  break;
+			case 'textarea': return 'text_lines.png'; break;
+			case 'color':    return 'colors.png';     break;
+		}
+	}
+	if(isAttributeInteger(attribute.content)) {
+		switch(attribute.contentUse) {
+			case 'datetime': return 'calendar_time.png'; break;
+			case 'date':     return 'calendar.png';      break;
+			case 'time':     return 'clock.png';         break;
+			default:         return 'numbers.png';       break;
+		}
+	}
+	if(isAttributeBoolean(attribute.content)) return 'bool.png';
+	if(isAttributeUuid(attribute.content))    return 'uuid.png';
+	if(isAttributeFloat(attribute.content))   return 'numbers_float.png';
+	if(isAttributeNumeric(attribute.content)) return 'numbers_decimal.png';
+	if(isAttributeFiles(attribute.content))   return 'files.png';
+	
+	if(isAttributeRelationship11(attribute.content))
+		return 'link1.png';
+	if(isAttributeRelationshipN1(attribute.content))
+		return outsideIn ? 'link2.png' : 'link3.png';
+	
+	return 'noPic.png';
+};
+
 export function isAttributeBoolean(content) { return content === 'boolean'; };
 export function isAttributeDecimal(content) { return attributeContentNames.decimal.includes(content); };
 export function isAttributeFiles(content)   { return content === 'files'; };
@@ -132,10 +154,7 @@ export function isAttributeFloat(content)   { return attributeContentNames.float
 export function isAttributeInteger(content) { return attributeContentNames.integer.includes(content); };
 export function isAttributeNumeric(content) { return content === 'numeric'; };
 export function isAttributeString(content)  { return attributeContentNames.text.includes(content); };
+export function isAttributeUuid(content)    { return content === 'uuid'; };
 export function isAttributeRelationship(content)   { return attributeContentNames.relationship.includes(content); };
 export function isAttributeRelationship11(content) { return content === '1:1'; };
 export function isAttributeRelationshipN1(content) { return content === 'n:1'; };
-export function isAttributeValueEqual(v1,v2) {
-	// stringify values to (naively) compare arrays as well
-	return JSON.stringify(v1) === JSON.stringify(v2);
-};

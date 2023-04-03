@@ -4,7 +4,8 @@ import {getNilUuid}                   from '../shared/generic.js';
 import {getCaptionByIndexAttributeId} from '../shared/query.js';
 import {
 	getIndexAttributeIdsByJoins,
-	isAttributeRelationship
+	isAttributeRelationship,
+	isAttributeRelationship11
 } from '../shared/attribute.js';
 export {MyBuilderQuery as default};
 
@@ -49,7 +50,6 @@ let MyBuilderQueryChoice = {
 		<my-filters
 			v-model="filtersInput"
 			:builderMode="true"
-			:disableContent="['fieldChanged']"
 			:entityIdMapRef="entityIdMapRef"
 			:fieldIdMap="fieldIdMap"
 			:joins="joins"
@@ -78,25 +78,25 @@ let MyBuilderQueryChoice = {
 	emits:['move-down','move-up','remove','update'],
 	computed:{
 		filtersInput:{
-			get:function()  { return JSON.parse(JSON.stringify(this.choice.filters)); },
-			set:function(v) { this.update('filters',v); }
+			get()  { return JSON.parse(JSON.stringify(this.choice.filters)); },
+			set(v) { this.update('filters',v); }
 		},
 		nameInput:{
-			get:function()  { return this.choice.name; },
-			set:function(v) { this.update('name',v); }
+			get()  { return this.choice.name; },
+			set(v) { this.update('name',v); }
 		},
 		
 		// stores
-		capApp:function() { return this.$store.getters.captions.builder.query; },
-		capGen:function() { return this.$store.getters.captions.generic; }
+		capApp:(s) => s.$store.getters.captions.builder.query,
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
-		updateCaption:function(content,value) {
+		updateCaption(content,value) {
 			let captionsInput = JSON.parse(JSON.stringify(this.choice.captions));
 			captionsInput[content] = value;
 			this.update('captions',captionsInput);
 		},
-		update:function(content,value) {
+		update(content,value) {
 			let choice = JSON.parse(JSON.stringify(this.choice));
 			choice[content] = value;
 			this.$emit('update',choice);
@@ -122,16 +122,13 @@ let MyBuilderQueryLookupItem = {
 	emits:['update:modelValue'],
 	computed:{
 		value:{
-			get:function()  { return this.modelValue; },
-			set:function(v) { this.$emit('update:modelValue',v); }
+			get()  { return this.modelValue; },
+			set(v) { this.$emit('update:modelValue',v); }
 		},
-		pgIndexCandidates:function() {
+		pgIndexCandidates:(s) => {
 			let out = [];
-			let rel = this.relationIdMap[this.join.relationId];
-			
-			for(let i = 0, j = rel.indexes.length; i < j; i++) {
-				let index = rel.indexes[i];
-				
+			let rel = s.relationIdMap[s.join.relationId];
+			for(let index of rel.indexes) {
 				if(index.noDuplicates)
 					out.push(index);
 			}
@@ -139,16 +136,14 @@ let MyBuilderQueryLookupItem = {
 		},
 		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap']
 	},
 	methods:{
-		displayPgIndexDesc:function(pgIndex) {
+		displayPgIndexDesc(pgIndex) {
 			let out = [];
-			
-			for(let i = 0, j = pgIndex.attributes.length; i < j; i++) {
-				
-				let atr = this.attributeIdMap[pgIndex.attributes[i].attributeId];
+			for(let a of pgIndex.attributes) {
+				let atr = this.attributeIdMap[a.attributeId];
 				out.push(`${atr.name} (${atr.content})`);
 			}
 			return out.join(' + ');
@@ -167,49 +162,40 @@ let MyBuilderQueryLookups = {
 			:key="j.index"
 			:modelValue="getValueForJoin(j)"
 		/>
-		<span v-html="capApp.lookupWarning"></span>
 	</div>`,
 	props:{
 		joins:  { type:Array, required:true },
-		lookups:{ type:Array, required:true }
+		lookups:{ type:Array, required:true } // [{pgIndexId:123,index:0},{...}]
 	},
 	emits:['update'],
 	computed:{
-		lookupsInput:{
-			get:function()  { return JSON.parse(JSON.stringify(this.lookups)); },
-			set:function(v) { this.$emit('update',v); }
-		},
-		
 		// stores
-		capApp:function() { return this.$store.getters.captions.builder.query; }
+		capApp:(s) => s.$store.getters.captions.builder.query
 	},
 	methods:{
-		getValueForJoin:function(join) {
-			for(let i = 0, j = this.lookupsInput.length; i < j; i++) {
-				if(this.lookupsInput[i].index === join.index)
-					return this.lookupsInput[i].pgIndexId;
+		getValueForJoin(join) {
+			for(let lookup of this.lookups) {
+				if(lookup.index === join.index)
+					return lookup.pgIndexId;
 			}
 			return null;
 		},
-		setValueForJoin:function(join,pgIndexId) {
-			let pos = -1;
-			for(let i = 0, j = this.lookupsInput.length; i < j; i++) {
-				if(this.lookupsInput[i].index === join.index) {
-					pos = i;
+		setValueForJoin(join,pgIndexId) {
+			let lookups = JSON.parse(JSON.stringify(this.lookups));
+			for(let i = 0, j = lookups.length; i < j; i++) {
+				if(lookups[i].index === join.index) {
+					lookups.splice(i,1);
 					break;
 				}
 			}
 			
-			if(pgIndexId === null && pos !== -1)
-				this.lookupsInput.splice(pos,1);
-			
-			if(pgIndexId !== null && pos === -1)
-				this.lookupsInput.push({
+			if(pgIndexId !== null)
+				lookups.push({
 					pgIndexId:pgIndexId,
 					index:join.index
 				});
 			
-			this.lookupsInput = this.lookupsInput;
+			this.$emit('update',lookups);
 		}
 	}
 };
@@ -249,28 +235,27 @@ let MyBuilderQueryOrderItem = {
 	},
 	emits:['remove','set-ascending','set-attribute-id','set-index'],
 	computed:{
-		indexAttributeIds:function() {
-			return this.getIndexAttributeIdsByJoins(this.joins);
-		},
-		
 		// inputs
 		ascendingInput:{
-			get:function()  { return this.ascending; },
-			set:function(v) { this.$emit('set-ascending',v); }
+			get()  { return this.ascending; },
+			set(v) { this.$emit('set-ascending',v); }
 		},
 		attributeIdInput:{
-			get:function()  { return this.attributeId; },
-			set:function(v) { this.$emit('set-attribute-id',v); }
+			get()  { return this.attributeId; },
+			set(v) { this.$emit('set-attribute-id',v); }
 		},
 		indexInput:{
-			get:function()  { return this.index; },
-			set:function(v) { this.$emit('set-index',v); }
+			get()  { return this.index; },
+			set(v) { this.$emit('set-index',v); }
 		},
 		
+		// simple
+		indexAttributeIds:(s) => s.getIndexAttributeIdsByJoins(s.joins),
+		
 		// stores
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -278,7 +263,7 @@ let MyBuilderQueryOrderItem = {
 		getIndexAttributeIdsByJoins,
 		
 		// actions
-		setIndexAttribute:function(indexAttributeId) {
+		setIndexAttribute(indexAttributeId) {
 			let v = indexAttributeId.split('_');
 			
 			if(v[1] === 'null') {
@@ -317,16 +302,16 @@ let MyBuilderQueryOrders = {
 	emits:['update'],
 	computed:{
 		ordersInput:{
-			get:function()  { return JSON.parse(JSON.stringify(this.orders)); },
-			set:function(v) { this.$emit('update',v); }
+			get()  { return JSON.parse(JSON.stringify(this.orders)); },
+			set(v) { this.$emit('update',v); }
 		}
 	},
 	methods:{
-		remove:function(i) {
+		remove(i) {
 			this.ordersInput.splice(i,1);
 			this.ordersInput = this.ordersInput;
 		},
-		update:function(i,name,value) {
+		update(i,name,value) {
 			this.ordersInput[i][name] = value;
 			this.ordersInput = this.ordersInput;
 		}
@@ -339,39 +324,40 @@ let MyBuilderQueryNestedJoin = {
 	
 		<!-- descriptive summary line with relation options -->
 		<div class="summary">
+			<img class="relationship" :src="'images/'+iconRelationship" :title="iconRelationshipTitle" />
 			
-			<div v-html="displayName()" />
+			<span>{{ index }}</span>
+			<span>{{ joinRelation.name }}</span>
+			<span v-if="!isBaseRelation" :title="joinReferenceFull">({{ joinReference }})</span>
 		
 			<!-- relation options -->
 			<div class="options" v-if="!readonly">
-				<div class="option clickable"
+				<img v-if="index !== 0" class="option clickable" :src="iconJoin" :title="iconJoinTitle" @click="toggleConnector" />
+				
+				<img class="option clickable" src="images/databaseAdd.png"
 					@click="relationAddShow = !relationAddShow"
 					:title="capApp.joinAddHint"
-				>{{ displayJoin() }}</div>
+				/>
 				
-				<div class="option clickable"
-					@click="toggleConnector"
-					:title="capApp.joinConnectorHint"
-				>{{ displayConnector(index) }}</div>
-				
-				<div class="option clickable"
+				<img class="option clickable toggle" src="images/recordCreate.png"
 					@click="toggleApply('create')"
+					:class="{ off:!applyCreate }"
 					:title="capApp.joinApplyCreateHint"
-				>{{ displayApply('create') }}</div>
-				
-				<div class="option clickable"
+				/>
+				<img class="option clickable toggle" src="images/recordUpdate.png"
 					@click="toggleApply('update')"
+					:class="{ off:!applyUpdate }"
 					:title="capApp.joinApplyUpdateHint"
-				>{{ displayApply('update') }}</div>
-				
-				<div class="option clickable"
+				/>
+				<img class="option clickable toggle" src="images/recordDelete.png"
 					@click="toggleApply('delete')"
+					:class="{ off:!applyDelete }"
 					:title="capApp.joinApplyDeleteHint"
-				>{{ displayApply('delete') }}</div>
+				/>
 				
 				<!-- delete only if last relation in chain -->
-				<div v-if="joins.length === 0" class="option clickable" @click="$emit('relation-remove',index)">X</div>
-				<div v-if="joins.length !== 0" class="option">-</div>
+				<img v-if="joins.length === 0" class="option clickable" src="images/cancel.png" @click="$emit('relation-remove',index)" />
+				<img v-else class="option" src="images/clear.png" />
 			</div>
 		</div>
 		
@@ -405,12 +391,11 @@ let MyBuilderQueryNestedJoin = {
 				:joinAttributeId="j.joinAttributeId"
 				:joinRelationId="j.joinRelationId"
 				:module="module"
-				:name="j.name"
 				:readonly="readonly"
 			/>
 		</div>
 	</div>`,
-	data:function() {
+	data() {
 		return {
 			relationAddId:null,
 			relationAddShow:false
@@ -426,7 +411,6 @@ let MyBuilderQueryNestedJoin = {
 		joinAttributeId:{ type:String, required:true },
 		joinRelationId: { type:String, required:true },
 		module:         { type:Object, required:true },
-		name:           { type:String, required:true },
 		readonly:       { type:Boolean,required:true }
 	},
 	emits:[
@@ -434,31 +418,31 @@ let MyBuilderQueryNestedJoin = {
 		'relation-connector-set','relation-remove'
 	],
 	computed:{
-		attributesUnused:function() {
+		attributesUnused:(s) => {
 			let atrs = [];
 			
 			// get attributes of this relation and in relationship with this relation
-			for(let key in this.attributeIdMap) {
-				let atr = this.attributeIdMap[key];
+			for(let key in s.attributeIdMap) {
+				let atr = s.attributeIdMap[key];
 				
-				if(!this.isAttributeRelationship(atr.content))
+				if(!s.isAttributeRelationship(atr.content))
 					continue;
 				
 				// relationship attribute is from current relation, add
-				if(atr.relationId === this.joinRelationId) {
+				if(atr.relationId === s.joinRelationId) {
 					atrs.push(atr);
 					continue;
 				}
 				
 				// relationship attribute is not pointing to us, ignore
-				if(atr.relationshipId !== this.joinRelationId)
+				if(atr.relationshipId !== s.joinRelationId)
 					continue;
 				
 				// if attribute is from other relation, check module dependency first
-				let rel = this.relationIdMap[atr.relationId];
-				let mod = this.moduleIdMap[rel.moduleId];
+				let rel = s.relationIdMap[atr.relationId];
+				let mod = s.moduleIdMap[rel.moduleId];
 				
-				if(mod.id !== this.module.id && !this.module.dependsOn.includes(mod.id))
+				if(mod.id !== s.module.id && !s.module.dependsOn.includes(mod.id))
 					continue;
 				
 				atrs.push(atr);
@@ -466,26 +450,63 @@ let MyBuilderQueryNestedJoin = {
 			return atrs;
 		},
 		
+		// simple
+		hasNoJoinOptions:(s) => s.attributesUnused.length === 0,
+		iconJoin:        (s) => {
+			switch(s.connector) {
+				case 'INNER': return 'images/joinInner.png'; break;
+				case 'LEFT':  return 'images/joinLeft.png';  break;
+				case 'RIGHT': return 'images/joinRight.png'; break;
+				case 'FULL':  return 'images/joinOuter.png'; break;
+			}
+			return 'images/clear.png';
+		},
+		iconJoinTitle:   (s) => s.capApp.join.replace('{NAME}',s.connector),
+		iconRelationship:(s) => {
+			if(s.isBaseRelation) return 'link0.png';
+			if(s.isRelation11)   return 'link1.png';
+			if(s.isRelation1N)   return 'link2.png';
+			if(s.isRelationN1)   return 'link3.png';
+			return 'noPic.png';
+		},
+		iconRelationshipTitle:(s) => {
+			if(s.isBaseRelation) return '';
+			if(s.isRelation11)   return '1:1';
+			if(s.isRelation1N)   return '1:n';
+			if(s.isRelationN1)   return 'n:1';
+			return '';
+		},
+		isBaseRelation:   (s) => s.index === 0,
+		isOutsideIn:      (s) => !s.isBaseRelation && s.joinAttribute.relationId !== s.joinRelationId,
+		isRelation11:     (s) => !s.isBaseRelation && s.isAttributeRelationship11(s.joinAttribute.content),
+		isRelationN1:     (s) => !s.isBaseRelation && !s.isRelation11 && s.isOutsideIn,
+		isRelation1N:     (s) => !s.isBaseRelation && !s.isRelation11 && !s.isOutsideIn,
+		joinAttribute:    (s) => !s.isBaseRelation ? s.attributeIdMap[s.joinAttributeId] : false,
+		joinReference:    (s) => !s.isOutsideIn ? s.joinAttribute.name : s.joinReferenceFull,
+		joinReferenceFull:(s) => `${s.relationIdMap[s.joinAttribute.relationId].name}.${s.joinAttribute.name}`,
+		joinRelation:     (s) => s.relationIdMap[s.joinRelationId],
+		
 		// stores
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.query; }
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.query
 	},
 	methods:{
 		// externals
 		isAttributeRelationship,
+		isAttributeRelationship11,
 		
 		// actions
-		relationAdd:function(event) {
+		relationAdd(event) {
 			this.$emit('relation-add',this.index,this.joinRelationId,this.relationAddId,'LEFT');
 			this.relationAddId   = null;
 			this.relationAddShow = false;
 		},
-		toggleApply:function(content) {
+		toggleApply(content) {
 			this.$emit('relation-apply-toggle',this.index,content);
 		},
-		toggleConnector:function() {
+		toggleConnector() {
 			switch(this.connector) {
 				case 'INNER': this.$emit('relation-connector-set',this.index,'LEFT');  break;
 				case 'LEFT':  this.$emit('relation-connector-set',this.index,'RIGHT'); break;
@@ -495,7 +516,7 @@ let MyBuilderQueryNestedJoin = {
 		},
 		
 		// presentation
-		displayApply:function(content) {
+		displayApply(content) {
 			switch(content) {
 				case 'create': return this.applyCreate ? 'C' : 'c'; break;
 				case 'update': return this.applyUpdate ? 'U' : 'u'; break;
@@ -503,28 +524,19 @@ let MyBuilderQueryNestedJoin = {
 			}
 			return '?';
 		},
-		displayName:function() {
-			return `${this.index}) ${this.name}`;
-		},
-		displayJoin:function() {
-			return this.attributesUnused.length !== 0 ? 'A' : '-';
-		},
-		displayJoinOption:function(atr) {
-			let relIdResolve = atr.relationId === this.joinRelationId ? atr.relationshipId : atr.relationId;
+		displayJoinOption(atr) {
+			let outsideIn    = atr.relationId !== this.joinRelationId;
+			let relIdPartner = !outsideIn ? atr.relationshipId : atr.relationId;
 			let atrRel       = this.relationIdMap[atr.relationId];
+			let relType      = outsideIn ? '1:n' : 'n:1';
 			
-			return `+ ${this.relationIdMap[relIdResolve].name} via ${atrRel.name}.${atr.name}`;
+			if(this.isAttributeRelationship11(atr.content))
+				relType = '1:1';
+			
+			return `[${relType}] ${this.relationIdMap[relIdPartner].name} (${atrRel.name}.${atr.name})`;
 		},
-		displayConnector:function(index) {
-			if(index === 0) return '-';
-			
-			switch(this.connector) {
-				case 'INNER': return 'I'; break;
-				case 'LEFT':  return 'L'; break;
-				case 'RIGHT': return 'R'; break;
-				case 'FULL':  return 'F'; break;
-			}
-			return '?';
+		displayCheck(state) {
+			return `images/${state ? 'checkbox1' : 'checkbox0'}.png`;
 		}
 	}
 };
@@ -557,13 +569,12 @@ let MyBuilderQuery = {
 				v-model="relationIdInput"
 			>
 				<option :value="null">-</option>
+				<option v-for="rel in module.relations" :value="rel.id">{{ rel.name }}</option>
 				<optgroup
-					v-for="mod in getDependentModules(module,modules)"
+					v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id)"
 					:label="mod.name"
 				>
-					<option v-for="rel in mod.relations"
-						:value="rel.id"
-					>
+					<option v-for="rel in mod.relations" :value="rel.id">
 						{{ rel.name }}
 					</option>
 				</optgroup>
@@ -587,7 +598,6 @@ let MyBuilderQuery = {
 				:joinRelationId="relationsNested.joinRelationId"
 				:key="relationsNested.index"
 				:module="module"
-				:name="relationsNested.name"
 				:readonly="!allowJoinEdit"
 			/>
 		</div>
@@ -638,7 +648,7 @@ let MyBuilderQuery = {
 				v-model="filtersInput"
 				v-show="showFilters"
 				:builderMode="true"
-				:disableContent="['fieldChanged']"
+				:disableContent="filtersDisable"
 				:entityIdMapRef="entityIdMapRef"
 				:fieldIdMap="fieldIdMap"
 				:filterAddCnt="filterAddCnt"
@@ -699,9 +709,14 @@ let MyBuilderQuery = {
 				<my-button
 					@trigger="showLookups = !showLookups"
 					:active="joins.length !== 0"
-					:caption="capApp.lookups.replace('{COUNT}',joins.length)"
+					:caption="capApp.lookups.replace('{COUNT}',lookups.length)"
 					:image="displayArrow(showLookups,joins.length)"
 					:large="true"
+					:naked="true"
+				/>
+				<my-button image="question.png"
+					@trigger="showLookupHelp"
+					:caption="capGen.help"
 					:naked="true"
 				/>
 			</div>
@@ -745,6 +760,7 @@ let MyBuilderQuery = {
 		entityIdMapRef: { type:Object,  required:false, default:() => {return {}} },
 		fieldIdMap:     { type:Object,  required:false, default:() => {return {}} }, // form field map, key: field ID
 		filters:        { type:Array,   required:true },
+		filtersDisable: { type:Array,   required:false, default:() => [] }, // filter content to disable (attribute, javascript, collection, preset, ...)
 		fixedLimit:     { type:Number,  required:true },
 		lookups:        { type:Array,   required:false, default:() => [] },
 		joins:          { type:Array,   required:true },                    // available relations, incl. source relation
@@ -758,7 +774,7 @@ let MyBuilderQuery = {
 		'index-removed','set-choices','set-filters','set-fixed-limit',
 		'set-joins','set-lookups','set-orders','set-relation-id'
 	],
-	data:function() {
+	data() {
 		return {
 			filterAddCnt:0, // ugly hack to add filter
 			showChoices:false,
@@ -769,99 +785,35 @@ let MyBuilderQuery = {
 		};
 	},
 	computed:{
-		// entities
-		module:function() {
-			return typeof this.moduleIdMap[this.moduleId] === 'undefined'
-				? false : this.moduleIdMap[this.moduleId];
-		},
-		relation:function() {
-			return typeof this.relationIdMap[this.relationId] === 'undefined'
-				? false : this.relationIdMap[this.relationId];
-		},
-		relationNextIndex:function() {
-			let indexCandidate = 0;
-			for(let i = 0, j = this.joinsInput.length; i < j; i++) {
-				if(this.joinsInput[i].index >= indexCandidate)
-					indexCandidate = this.joinsInput[i].index + 1;
-			}
-			return indexCandidate;
-		},
-		relationsNested:function() {
-			let that = this;
-			
-			let getChildRelationsByIndex = function(indexFrom) {
-				let rels = [];
-				
-				for(let i = 0, j = that.joinsInput.length; i < j; i++) {
-					if(that.joinsInput[i].indexFrom !== indexFrom)
-						continue;
-					
-					let join   = JSON.parse(JSON.stringify(that.joinsInput[i]));
-					let atr    = that.attributeIdMap[join.attributeId];
-					let atrRel = that.relationIdMap[atr.relationId];
-					let rel    = that.relationIdMap[join.relationId];
-					
-					rels.push({
-						applyCreate:join.applyCreate,
-						applyUpdate:join.applyUpdate,
-						applyDelete:join.applyDelete,
-						connector:join.connector,
-						index:join.index,
-						joins:getChildRelationsByIndex(join.index),
-						joinAttributeId:atr.id,
-						joinRelationId:rel.id,
-						name:`${rel.name} <b>via</b> ${atrRel.name}.${atr.name}`
-					});
-				}
-				return rels;
-			};
-			
-			if(!this.module || !this.relation)
-				return false;
-			
-			// source relation with all relations deep-nested
-			return {
-				applyCreate:this.joinsInput[0].applyCreate,
-				applyUpdate:this.joinsInput[0].applyUpdate,
-				applyDelete:this.joinsInput[0].applyDelete,
-				connector:'INNER',
-				index:0,
-				joins:getChildRelationsByIndex(0),
-				joinAttributeId:this.getNilUuid(),
-				joinRelationId:this.relation.id,
-				name:this.relation.name
-			};
-		},
 		
 		// inputs
 		choicesInput:{
-			get:function()  { return this.choices; },
-			set:function(v) { this.$emit('set-choices',v); }
+			get()  { return this.choices; },
+			set(v) { this.$emit('set-choices',v); }
 		},
 		filtersInput:{
-			get:function()  { return this.filters; },
-			set:function(v) { this.$emit('set-filters',v); }
+			get()  { return this.filters; },
+			set(v) { this.$emit('set-filters',v); }
 		},
 		fixedLimitInput:{
-			get:function()  { return this.fixedLimit; },
-			set:function(v) { this.$emit('set-fixed-limit',v === '' ? 0 : v); }
+			get()  { return this.fixedLimit; },
+			set(v) { this.$emit('set-fixed-limit',v === '' ? 0 : v); }
 		},
 		joinsInput:{
-			get:function()  { return this.joins; },
-			set:function(v) { this.$emit('set-joins',v); }
+			get()  { return this.joins; },
+			set(v) { this.$emit('set-joins',v); }
 		},
 		lookupsInput:{
-			get:function()  { return this.lookups; },
-			set:function(v) { this.$emit('set-lookups',v); }
+			get()  { return this.lookups; },
+			set(v) { this.$emit('set-lookups',v); }
 		},
 		ordersInput:{
-			get:function()  { return this.orders; },
-			set:function(v) { this.$emit('set-orders',v); }
+			get()  { return this.orders; },
+			set(v) { this.$emit('set-orders',v); }
 		},
 		relationIdInput:{
-			get:function() {
+			get() {
 				let relId = this.relationId;
-				
 				if(relId === null && this.relationIdStart !== null) {
 					
 					// if source relation not set, but default given: set
@@ -876,19 +828,71 @@ let MyBuilderQuery = {
 				}
 				return relId;
 			},
-			set:function(newVal) {
-				this.$emit('set-relation-id',newVal);
-			}
+			set(v) { this.$emit('set-relation-id',v); }
 		},
 		
+		// entities
+		relationNextIndex:(s) => {
+			let indexCandidate = 0;
+			for(let join of s.joinsInput) {
+				if(join.index >= indexCandidate)
+					indexCandidate = join.index + 1;
+			}
+			return indexCandidate;
+		},
+		relationsNested:(s) => {
+			let getChildRelationsByIndex = function(indexFrom) {
+				let rels = [];
+				for(let i = 0, j = s.joinsInput.length; i < j; i++) {
+					if(s.joinsInput[i].indexFrom !== indexFrom)
+						continue;
+					
+					let join = JSON.parse(JSON.stringify(s.joinsInput[i]));
+					let atr  = s.attributeIdMap[join.attributeId];
+					let rel  = s.relationIdMap[join.relationId];
+					
+					rels.push({
+						applyCreate:join.applyCreate,
+						applyUpdate:join.applyUpdate,
+						applyDelete:join.applyDelete,
+						connector:join.connector,
+						index:join.index,
+						joins:getChildRelationsByIndex(join.index),
+						joinAttributeId:atr.id,
+						joinRelationId:rel.id
+					});
+				}
+				return rels;
+			};
+			
+			if(!s.module || !s.relation)
+				return false;
+			
+			// source relation with all relations deep-nested
+			return {
+				applyCreate:s.joinsInput[0].applyCreate,
+				applyUpdate:s.joinsInput[0].applyUpdate,
+				applyDelete:s.joinsInput[0].applyDelete,
+				connector:'INNER',
+				index:0,
+				joins:getChildRelationsByIndex(0),
+				joinAttributeId:s.getNilUuid(),
+				joinRelationId:s.relation.id,
+				name:s.relation.name
+			};
+		},
+		
+		// entities, simple
+		module:  (s) => typeof s.moduleIdMap[s.moduleId]     === 'undefined' ? false : s.moduleIdMap[s.moduleId],
+		relation:(s) => typeof s.relationIdMap[s.relationId] === 'undefined' ? false : s.relationIdMap[s.relationId],
+		
 		// stores
-		module:        function() { return this.moduleIdMap[this.moduleId]; },
-		modules:       function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		relationIdMap: function() { return this.$store.getters['schema/relationIdMap']; },
-		attributeIdMap:function() { return this.$store.getters['schema/attributeIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.builder.query; },
-		capGen:        function() { return this.$store.getters.captions.generic; }
+		modules:       (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.query,
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -896,18 +900,20 @@ let MyBuilderQuery = {
 		getNilUuid,
 		
 		// presentation
-		displayArrow:function(state,count) {
+		displayArrow(state,count) {
 			return state && count !== 0 ? 'triangleDown.png' : 'triangleRight.png';
 		},
 		
-		getRelationByIndex:function(index) {
+		getRelationByIndex(index) {
 			for(let i = 0, j = this.joinsInput.length; i < j; i++) {
 				if(this.joinsInput[i].index === index)
 					return this.joinsInput[i];
 			}
 			return false;
 		},
-		choiceAdd:function() {
+		
+		// actions
+		choiceAdd() {
 			this.choicesInput.push({
 				id:this.getNilUuid(),
 				name:'',
@@ -920,26 +926,26 @@ let MyBuilderQuery = {
 			if(!this.showChoices)
 				this.showChoices = true;
 		},
-		choiceApply:function(i,value) {
+		choiceApply(i,value) {
 			this.choicesInput[i] = value;
 			this.choicesInput = this.choicesInput;
 		},
-		choiceMove:function(i,down) {
+		choiceMove(i,down) {
 			let c = this.choicesInput[i];
 			this.choicesInput.splice(i,1);
 			this.choicesInput.splice((down ? i + 1 : i - 1),0,c);
 		},
-		choiceRemove:function(i) {
+		choiceRemove(i) {
 			this.choicesInput.splice(i,1);
 			this.choicesInput = this.choicesInput;
 		},
-		filterAdd:function() {
+		filterAdd() {
 			this.filterAddCnt++;
 			
 			if(!this.showFilters)
 				this.showFilters = true;
 		},
-		orderAdd:function() {
+		orderAdd() {
 			this.ordersInput.push({
 				ascending:true,
 				attributeId:null,
@@ -950,9 +956,21 @@ let MyBuilderQuery = {
 			if(!this.showOrders)
 				this.showOrders = true;
 		},
+		showLookupHelp() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.lookupsHelp,
+				captionTop:this.capGen.help,
+				image:'question.png',
+				buttons:[{
+					caption:this.capGen.button.close,
+					cancel:true,
+					image:'cancel.png'
+				}]
+			});
+		},
 		
 		// relation manipulation
-		relationAdd:function(indexFrom,relationIdFrom,attributeId,connector) {
+		relationAdd(indexFrom,relationIdFrom,attributeId,connector) {
 			let isSource = indexFrom === -1;
 			let relId    = '';
 			if(!isSource) {
@@ -974,7 +992,7 @@ let MyBuilderQuery = {
 			});
 			this.joinsInput = this.joinsInput;
 		},
-		relationRemove:function(index) {
+		relationRemove(index) {
 			for(let i = 0, j = this.joinsInput.length; i < j; i++) {
 				if(this.joinsInput[i].index !== index)
 					continue;
@@ -990,7 +1008,7 @@ let MyBuilderQuery = {
 			}
 			this.$emit('index-removed',index);
 		},
-		relationApplyToggle:function(index,content) {
+		relationApplyToggle(index,content) {
 			let r = this.getRelationByIndex(index);
 			if(r === false) return;
 			
@@ -1001,7 +1019,7 @@ let MyBuilderQuery = {
 			}
 			this.joinsInput = this.joinsInput;
 		},
-		relationConnectorSet:function(index,connector) {
+		relationConnectorSet(index,connector) {
 			let r = this.getRelationByIndex(index);
 			if(r === false) return;
 			

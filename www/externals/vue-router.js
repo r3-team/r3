@@ -1,5 +1,5 @@
 /*!
-  * vue-router v4.1.5
+  * vue-router v4.1.6
   * (c) 2022 Eduardo San Martin Morote
   * @license MIT
   */
@@ -1338,7 +1338,14 @@ var VueRouter = (function (exports, vue) {
               // if (parent && isAliasRecord(originalRecord)) {
               //   parent.children.push(originalRecord)
               // }
-              insertMatcher(matcher);
+              // Avoid adding a record that doesn't display anything. This allows passing through records without a component to
+              // not be reached and pass through the catch all route
+              if ((matcher.record.components &&
+                  Object.keys(matcher.record.components).length) ||
+                  matcher.record.name ||
+                  matcher.record.redirect) {
+                  insertMatcher(matcher);
+              }
           }
           return originalMatcher
               ? () => {
@@ -2192,6 +2199,9 @@ var VueRouter = (function (exports, vue) {
               }, { flush: 'post' });
           }
       }
+      /**
+       * NOTE: update {@link _RouterLinkI}'s `$slots` type when updating this
+       */
       return {
           route,
           href: vue.computed(() => route.value.href),

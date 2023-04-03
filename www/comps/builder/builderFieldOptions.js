@@ -10,11 +10,12 @@ import {
 import {
 	getDependentModules,
 	getItemTitle,
-	getItemTitleRelation,
+	getItemTitlePath,
 	getValueFromJson,
 	setValueInJson
 } from '../shared/builder.js';
 import {
+	getAttributeIcon,
 	getDetailsFromIndexAttributeId,
 	getIndexAttributeId,
 	isAttributeFiles,
@@ -39,19 +40,19 @@ let MyBuilderFieldOptionsChartSerie = {
 				<select v-model="columnX">
 					<option disabled :value="-1">{{ capApp.serieColumnX }}</option>
 					<option v-for="(c,i) in columns" :value="i" >
-						{{ getItemTitle(relationIdMap[attributeIdMap[c.attributeId].relationId],attributeIdMap[c.attributeId],c.index,false,false) }}
+						{{ getItemTitle(c.attributeId,c.index,false,null) }}
 					</option>
 				</select>
 				<select v-model="columnY">
 					<option disabled :value="-1">{{ capApp.serieColumnY }}</option>
 					<option v-for="(c,i) in columns" :value="i" >
-						{{ getItemTitle(relationIdMap[attributeIdMap[c.attributeId].relationId],attributeIdMap[c.attributeId],c.index,false,false) }}
+						{{ getItemTitle(c.attributeId,c.index,false,null) }}
 					</option>
 				</select>
 				<select v-model="tooltip">
 					<option disabled :value="-1">{{ capApp.serieColumnTooltip }}</option>
 					<option v-for="(c,i) in columns" :value="i" >
-						{{ getItemTitle(relationIdMap[attributeIdMap[c.attributeId].relationId],attributeIdMap[c.attributeId],c.index,false,false) }}
+						{{ getItemTitle(c.attributeId,c.index,false,null) }}
 					</option>
 				</select>
 				<my-button image="cancel.png"
@@ -186,7 +187,7 @@ let MyBuilderFieldOptionsChart = {
 		modelValue:{ type:String, required:true }
 	},
 	emits:['update:modelValue'],
-	data:function() {
+	data() {
 		return {
 			jsonBad:false,      // JSON validity check failed
 			jsonFirstLoad:true, // prettify JSON input on first load
@@ -217,7 +218,7 @@ let MyBuilderFieldOptionsChart = {
 	},
 	watch:{
 		option:{
-			handler:function(v) {
+			handler(v) {
 				if(this.jsonFirstLoad) {
 					this.jsonInput     = JSON.stringify(JSON.parse(v),null,2);
 					this.jsonFirstLoad = false;
@@ -278,7 +279,7 @@ let MyBuilderFieldOptions = {
 		MyBuilderOpenFormInput
 	},
 	template:`<div class="builder-field-options">
-		<table class="builder-table-vertical tight fullWidth default-inputs">
+		<table class="generic-table-vertical tight fullWidth default-inputs">
 			<tr v-if="isButton || isData || isHeader">
 				<td>{{ capGen.title }}</td>
 				<td>
@@ -351,6 +352,29 @@ let MyBuilderFieldOptions = {
 			</tr>
 			
 			<template v-if="isData">
+				<tr>
+					<td>{{ capGen.attribute }}</td>
+					<td>
+						<div class="row centered gap">
+							<my-button
+								:active="false"
+								:image="getAttributeIcon(attribute,field.outsideIn)"
+								:naked="true"
+								:tight="true"
+							/>
+							<input disabled="disabled"
+								:title="getItemTitlePath(field.attributeId)"
+								:value="getItemTitle(field.attributeId,field.index,field.outsideIn,field.attributeIdNm)"
+							/>
+							<my-button image="open.png"
+								@trigger="openAttribute(attribute.relationId,false)"
+								@trigger-middle="openAttribute(attribute.relationId,true)"
+								:caption="capGen.open"
+								:tight="true"
+							/>
+						</div>
+					</td>
+				</tr>
 				<tr v-if="!isRelationship">
 					<td>{{ capApp.fieldMin }}</td>
 					<td>
@@ -369,27 +393,14 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<tr v-if="!isRelationship">
+				<tr v-if="!isRelationship && displayOptions.length > 1">
 					<td>{{ capApp.display }}</td>
 					<td>
 						<select
 							@input="set('display',$event.target.value)"
 							:value="field.display"
 						>
-							<option value="default">{{ capApp.option.displayDefault }}</option>
-							<option v-if="isInteger" value="datetime">{{ capApp.option.displayDatetime }}</option>
-							<option v-if="isInteger" value="date"    >{{ capApp.option.displayDate }}</option>
-							<option v-if="isInteger" value="time"    >{{ capApp.option.displayTime }}</option>
-							<option v-if="isInteger" value="slider"  >{{ capApp.option.displaySlider }}</option>
-							<option v-if="isInteger" value="login"   >{{ capApp.option.displayLogin }}</option>
-							<option v-if="isString"  value="textarea">{{ capApp.option.displayTextarea }}</option>
-							<option v-if="isString"  value="richtext">{{ capApp.option.displayRichtext }}</option>
-							<option v-if="isString"  value="password">{{ capApp.option.displayPassword }}</option>
-							<option v-if="isString"  value="color"   >{{ capApp.option.displayColor }}</option>
-							<option v-if="isString"  value="email"   >{{ capApp.option.displayEmail }}</option>
-							<option v-if="isString"  value="phone"   >{{ capApp.option.displayPhone }}</option>
-							<option v-if="isString"  value="url"     >{{ capApp.option.displayUrl }}</option>
-							<option v-if="isFiles"   value="gallery" >{{ capApp.option.displayGallery }}</option>
+							<option v-for="o in displayOptions" :value="o">{{ capApp.option.display[o] }}</option>
 						</select>
 					</td>
 				</tr>
@@ -464,7 +475,7 @@ let MyBuilderFieldOptions = {
 				</tr>
 				
 				<!-- alternative field inputs -->
-				<tr v-if="isString && field.display === 'richtext'">
+				<tr v-if="isString && attribute.contentUse === 'richtext'">
 					<td>{{ capApp.fieldAttributeIdAltRichtextFiles }}</td>
 					<td>
 						<select
@@ -490,7 +501,7 @@ let MyBuilderFieldOptions = {
 						>
 							<option :value="null">-</option>
 							<option
-								v-for="a in relationIdMap[joinsIndexMap[field.index].relationId].attributes.filter(v => v.id !== field.attributeId && isAttributeInteger(v.content))"
+								v-for="a in relationIdMap[joinsIndexMap[field.index].relationId].attributes.filter(v => v.id !== field.attributeId && v.contentUse === attribute.contentUse)"
 								:value="a.id"
 							>
 								{{ a.name }}
@@ -540,7 +551,7 @@ let MyBuilderFieldOptions = {
 							@input="setIndexAttribute('date0',$event.target.value)"
 							:value="getIndexAttributeId(field.indexDate0,field.attributeIdDate0,false,null)"
 						>
-							<option :value="null">-</option>
+							<option :value="getIndexAttributeId(null,null,false,null)">-</option>
 							<optgroup
 								v-for="j in field.query.joins"
 								:label="j.index+') '+relationIdMap[j.relationId].name"
@@ -562,7 +573,7 @@ let MyBuilderFieldOptions = {
 							@input="setIndexAttribute('date1',$event.target.value)"
 							:value="getIndexAttributeId(field.indexDate1,field.attributeIdDate1,false,null)"
 						>
-							<option :value="null">-</option>
+							<option :value="getIndexAttributeId(null,null,false,null)">-</option>
 							<optgroup
 								v-for="j in field.query.joins"
 								:label="j.index+') '+relationIdMap[j.relationId].name"
@@ -584,7 +595,7 @@ let MyBuilderFieldOptions = {
 							@input="setIndexAttribute('color',$event.target.value)"
 							:value="getIndexAttributeId(field.indexColor,field.attributeIdColor,false,null)"
 						>
-							<option :value="null">-</option>
+							<option :value="getIndexAttributeId(null,null,false,null)">-</option>
 							<optgroup
 								v-for="j in field.query.joins"
 								:label="j.index+') '+relationIdMap[j.relationId].name"
@@ -845,6 +856,7 @@ let MyBuilderFieldOptions = {
 								<tr>
 									<th colspan="2"></th>
 									<th>{{ capGen.title }}</th>
+									<th :title="capApp.tabContentCounterHint">{{ capApp.tabContentCounter }}</th>
 									<th colspan="2">{{ capGen.status }}</th>
 								</tr>
 								</thead>
@@ -864,7 +876,13 @@ let MyBuilderFieldOptions = {
 												/>
 											</td>
 											<td>
-												<select
+												<my-bool
+													@update:modelValue="element.contentCounter = $event;set('tabs',field.tabs)"
+													:modelValue="element.contentCounter"
+												/>
+											</td>
+											<td>
+												<select class="short"
 													@input="element.state = $event.target.value;set('tabs',field.tabs)"
 													:value="element.state"
 												>
@@ -1057,6 +1075,13 @@ let MyBuilderFieldOptions = {
 	computed:{
 		attribute:(s) => !s.isData || typeof s.attributeIdMap[s.field.attributeId] === 'undefined'
 			? false : s.attributeIdMap[s.field.attributeId],
+		displayOptions:(s) => {
+			let out = ['default'];
+			if(s.isInteger && s.isDisplayDefault) out.push('slider','login');
+			if(s.isString  && s.isDisplayDefault) out.push('password','email','phone','url');
+			if(s.isFiles)                         out.push('gallery');
+			return out;
+		},
 		presetIdMap:(s) => {
 			if(!s.isRelationship)
 				return {};
@@ -1066,8 +1091,7 @@ let MyBuilderFieldOptions = {
 			
 			let presets = !s.field.outsideIn || nm
 				? s.relationIdMap[s.attributeIdMap[trgAtrId].relationshipId].presets
-				: s.relationIdMap[s.attributeIdMap[trgAtrId].relationId].presets
-			;
+				: s.relationIdMap[s.attributeIdMap[trgAtrId].relationId].presets;
 			
 			let map = {};
 			for(let i = 0, j = presets.length; i < j; i++) {
@@ -1077,23 +1101,24 @@ let MyBuilderFieldOptions = {
 		},
 		
 		// simple states
-		hasCaption:    (s) => s.isData || s.isHeader,
-		isButton:      (s) => s.field.content === 'button',
-		isCalendar:    (s) => s.field.content === 'calendar',
-		isChart:       (s) => s.field.content === 'chart',
-		isContainer:   (s) => s.field.content === 'container',
-		isData:        (s) => s.field.content === 'data',
-		isDate:        (s) => s.isData && s.field.display === 'date',
-		isDatetime:    (s) => s.isData && s.field.display === 'datetime',
-		isHeader:      (s) => s.field.content === 'header',
-		isList:        (s) => s.field.content === 'list',
-		isOpenForm:    (s) => typeof s.field.openForm !== 'undefined' && s.field.openForm !== null,
-		isQuery:       (s) => s.isCalendar || s.isChart || s.isList || s.isRelationship,
-		isTabs:        (s) => s.field.content === 'tabs',
-		isFiles:       (s) => s.isData && s.isAttributeFiles(s.attribute.content),
-		isInteger:     (s) => s.isData && s.isAttributeInteger(s.attribute.content),
-		isRelationship:(s) => s.isData && s.isAttributeRelationship(s.attribute.content),
-		isString:      (s) => s.isData && s.isAttributeString(s.attribute.content),
+		hasCaption:      (s) => s.isData || s.isHeader,
+		isButton:        (s) => s.field.content === 'button',
+		isCalendar:      (s) => s.field.content === 'calendar',
+		isChart:         (s) => s.field.content === 'chart',
+		isContainer:     (s) => s.field.content === 'container',
+		isData:          (s) => s.field.content === 'data',
+		isDate:          (s) => s.isData && s.attribute.contentUse === 'date',
+		isDatetime:      (s) => s.isData && s.attribute.contentUse === 'datetime',
+		isDisplayDefault:(s) => s.isData && s.attribute.contentUse === 'default',
+		isHeader:        (s) => s.field.content === 'header',
+		isList:          (s) => s.field.content === 'list',
+		isOpenForm:      (s) => typeof s.field.openForm !== 'undefined' && s.field.openForm !== null,
+		isQuery:         (s) => s.isCalendar || s.isChart || s.isList || s.isRelationship,
+		isTabs:          (s) => s.field.content === 'tabs',
+		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
+		isInteger:       (s) => s.isData && s.isAttributeInteger(s.attribute.content),
+		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.attribute.content),
+		isString:        (s) => s.isData && s.isAttributeString(s.attribute.content),
 		
 		// stores
 		module:        (s) => s.moduleIdMap[s.moduleId],
@@ -1107,11 +1132,13 @@ let MyBuilderFieldOptions = {
 	},
 	methods:{
 		// externals
+		getAttributeIcon,
 		getCollectionConsumerTemplate,
 		getDependentModules,
 		getDetailsFromIndexAttributeId,
 		getIndexAttributeId,
-		getItemTitleRelation,
+		getItemTitle,
+		getItemTitlePath,
 		getNilUuid,
 		getRandomInt,
 		isAttributeFiles,
@@ -1124,6 +1151,7 @@ let MyBuilderFieldOptions = {
 			let v = JSON.parse(JSON.stringify(this.field.tabs));
 			v.push({
 				id:'new_tab' + this.getRandomInt(1,99999),
+				contentCounter:false,
 				state:'default',
 				fields:[],
 				captions:{
@@ -1141,6 +1169,10 @@ let MyBuilderFieldOptions = {
 			let v = JSON.parse(JSON.stringify(this.field.collections));
 			v.splice(i,1);
 			this.set('collections',v);
+		},
+		openAttribute(relationId,middle) {
+			if(!middle) this.$router.push('/builder/relation/'+relationId);
+			else        window.open('#/builder/relation/'+relationId,'_blank');
 		},
 		presetIdAdd(value) {
 			let ids = JSON.parse(JSON.stringify(this.field.defPresetIds));
@@ -1182,7 +1214,6 @@ let MyBuilderFieldOptions = {
 		},
 		setIndexAttribute(name,indexAttributeId) {
 			let values = this.getDetailsFromIndexAttributeId(indexAttributeId);
-			
 			switch(name) {
 				case 'dateTo':
 					this.set('attributeIdAlt',values.attributeId);

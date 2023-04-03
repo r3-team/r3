@@ -3,6 +3,7 @@ package attribute
 import (
 	"errors"
 	"fmt"
+	"r3/compatible"
 	"r3/db"
 	"r3/db/check"
 	"r3/schema"
@@ -13,12 +14,16 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var contentTypes = []string{"integer", "bigint", "numeric", "real",
-	"double precision", "varchar", "text", "boolean", "1:1", "n:1", "files"}
+	"double precision", "varchar", "text", "boolean", "uuid", "1:1",
+	"n:1", "files"}
+
+var contentUseTypes = []string{"default", "textarea",
+	"richtext", "date", "datetime", "time", "color"}
 
 var fkBreakActions = []string{"NO ACTION", "RESTRICT", "CASCADE", "SET NULL",
 	"SET DEFAULT"}
@@ -59,13 +64,13 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 
 func Get(relationId uuid.UUID) ([]types.Attribute, error) {
 
-	var onUpdateNull pgtype.Varchar
-	var onDeleteNull pgtype.Varchar
+	var onUpdateNull pgtype.Text
+	var onDeleteNull pgtype.Text
 
 	attributes := make([]types.Attribute, 0)
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, relationship_id, icon_id, name, content, length, nullable,
-			encrypted, def, on_update, on_delete
+		SELECT id, relationship_id, icon_id, name, content, content_use,
+			length, nullable, encrypted, def, on_update, on_delete
 		FROM app.attribute
 		WHERE relation_id = $1
 		ORDER BY CASE WHEN name = 'id' THEN 0 END, name ASC
@@ -77,8 +82,8 @@ func Get(relationId uuid.UUID) ([]types.Attribute, error) {
 	for rows.Next() {
 		var atr types.Attribute
 		if err := rows.Scan(&atr.Id, &atr.RelationshipId, &atr.IconId,
-			&atr.Name, &atr.Content, &atr.Length, &atr.Nullable, &atr.Encrypted,
-			&atr.Def, &onUpdateNull, &onDeleteNull); err != nil {
+			&atr.Name, &atr.Content, &atr.ContentUse, &atr.Length, &atr.Nullable,
+			&atr.Encrypted, &atr.Def, &onUpdateNull, &onDeleteNull); err != nil {
 
 			return attributes, err
 		}
@@ -102,17 +107,25 @@ func Get(relationId uuid.UUID) ([]types.Attribute, error) {
 
 func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 	relationshipId pgtype.UUID, iconId pgtype.UUID, name string,
-	content string, length int, nullable bool, encrypted bool, def string,
-	onUpdate string, onDelete string, captions types.CaptionMap) error {
+	content string, contentUse string, length int, nullable bool,
+	encrypted bool, def string, onUpdate string, onDelete string,
+	captions types.CaptionMap) error {
 
 	if err := checkName(name); err != nil {
 		return err
 	}
+
+	// fix imports < 3.3: Empty content use
+	contentUse = compatible.FixAttributeContentUse(contentUse)
+
 	if encrypted && content != "text" {
 		return fmt.Errorf("only text attributes can be encrypted")
 	}
 	if !tools.StringInSlice(content, contentTypes) {
 		return fmt.Errorf("invalid attribute content type '%s'", content)
+	}
+	if !tools.StringInSlice(contentUse, contentUseTypes) {
+		return fmt.Errorf("invalid attribute content use type '%s'", contentUse)
 	}
 
 	_, moduleName, err := schema.GetModuleDetailsByRelationId_tx(tx, relationId)
@@ -133,14 +146,14 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 	}
 
 	// prepare onUpdate / onDelete values
-	var onUpdateNull = pgtype.Varchar{Status: pgtype.Null}
-	var onDeleteNull = pgtype.Varchar{Status: pgtype.Null}
+	var onUpdateNull = pgtype.Text{}
+	var onDeleteNull = pgtype.Text{}
 
 	if isRel {
 		onUpdateNull.String = onUpdate
-		onUpdateNull.Status = pgtype.Present
+		onUpdateNull.Valid = true
 		onDeleteNull.String = onDelete
-		onDeleteNull.Status = pgtype.Present
+		onDeleteNull.Valid = true
 	} else {
 		onUpdate = ""
 		onDelete = ""
@@ -153,12 +166,12 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		var lengthEx int
 		var nullableEx bool
 		var defEx string
-		var onUpdateEx pgtype.Varchar
-		var onDeleteEx pgtype.Varchar
+		var onUpdateEx pgtype.Text
+		var onDeleteEx pgtype.Text
 		var relationshipIdEx pgtype.UUID
 		if err := tx.QueryRow(db.Ctx, `
-			SELECT name, content, length, nullable, def, on_update, on_delete,
-				relationship_id
+			SELECT name, content, length, nullable, def,
+				on_update, on_delete, relationship_id
 			FROM app.attribute
 			WHERE id = $1
 		`, id).Scan(&nameEx, &contentEx, &lengthEx, &nullableEx, &defEx,
@@ -200,6 +213,9 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		case "boolean": // keep boolean
 			contentUpdateOk = content == "boolean"
 
+		case "uuid": // keep UUID
+			contentUpdateOk = content == "uuid"
+
 		case "1:1": // keep 1:1 or switch to n:1
 			fallthrough
 		case "n:1": // keep n:1 or switch to 1:1
@@ -216,7 +232,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		// do not allow relationship target change
 		// if data exists, IDs will not match new target relation
 		// if data does not exist, attribute can be recreated with new target relation instead
-		if relationshipIdEx.Status == pgtype.Present && relationshipIdEx.Bytes != relationshipId.Bytes {
+		if relationshipIdEx.Valid && relationshipIdEx.Bytes != relationshipId.Bytes {
 			return fmt.Errorf("cannot change relationship target for existing attribute")
 		}
 
@@ -309,10 +325,12 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		// encrypted option cannot be updated
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.attribute
-			SET icon_id = $1, content = $2, length = $3, nullable = $4,
-				def = $5, on_update = $6, on_delete = $7
-			WHERE id = $8
-		`, iconId, content, length, nullable, def, onUpdateNull, onDeleteNull, id); err != nil {
+			SET icon_id = $1, content = $2, content_use = $3, length = $4,
+				nullable = $5, def = $6, on_update = $7, on_delete = $8
+			WHERE id = $9
+		`, iconId, content, contentUse, length, nullable,
+			def, onUpdateNull, onDeleteNull, id); err != nil {
+
 			return err
 		}
 
@@ -335,7 +353,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 			// check relationship target if relationship attribute
 			var contentRel string
 			if isRel {
-				if relationshipId.Status != pgtype.Present {
+				if !relationshipId.Valid {
 					return fmt.Errorf("relationship requires valid target")
 				}
 
@@ -344,7 +362,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 					return err
 				}
 
-			} else if relationshipId.Status == pgtype.Present {
+			} else if relationshipId.Valid {
 				return errors.New("cannot define non-relationship with relationship target")
 			}
 
@@ -382,11 +400,12 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 
 		// insert attribute reference
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.attribute (id, relation_id, relationship_id, icon_id,
-				name, content, length, nullable, encrypted, def, on_update, on_delete)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-		`, id, relationId, relationshipId, iconId, name, content, length,
-			nullable, encrypted, def, onUpdateNull, onDeleteNull); err != nil {
+			INSERT INTO app.attribute (id, relation_id, relationship_id,
+				icon_id, name, content, content_use, length, nullable,
+				encrypted, def, on_update, on_delete)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+		`, id, relationId, relationshipId, iconId, name, content, contentUse,
+			length, nullable, encrypted, def, onUpdateNull, onDeleteNull); err != nil {
 
 			return err
 		}
@@ -394,6 +413,11 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		// apply PK characteristics, if PK attribute
 		if name == schema.PkName {
 			if err := createPK_tx(tx, moduleName, relationName, id, relationId); err != nil {
+				return err
+			}
+
+			// create PK PG index reference
+			if err := pgIndex.SetPrimaryKeyForAttribute_tx(tx, relationId, id); err != nil {
 				return err
 			}
 
@@ -450,10 +474,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 	}
 
 	// set captions
-	if err := caption.Set_tx(tx, id, captions); err != nil {
-		return err
-	}
-	return nil
+	return caption.Set_tx(tx, id, captions)
 }
 
 func SetName_tx(tx pgx.Tx, id uuid.UUID, name string, ignoreNameCheck bool) error {

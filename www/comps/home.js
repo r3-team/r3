@@ -58,7 +58,7 @@ let MyHome = {
 				/>
 			</div>
 			<div class="content home-wizardAction" v-if="wizardTarget === 'file'">
-				<img class="preview small" src="images/zip.png" />
+				<img class="preview small" src="images/fileZip.png" />
 				<p v-html="capApp.wizard.installFileDesc" />
 				<my-button image="upload.png"
 					@trigger="goToApps"

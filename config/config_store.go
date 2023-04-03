@@ -7,7 +7,7 @@ import (
 	"r3/log"
 	"strconv"
 
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 var (
@@ -27,7 +27,7 @@ var (
 		"clusterNodeMissingAfter", "dbTimeoutCsv", "dbTimeoutDataRest",
 		"dbTimeoutDataWs", "dbTimeoutIcs", "filesKeepDaysDeleted",
 		"fileVersionsKeepCount", "fileVersionsKeepDays", "icsDaysPost",
-		"icsDaysPre", "icsDownload", "imagerThumbWidth", "logBackup",
+		"icsDaysPre", "icsDownload", "imagerThumbWidth", "logApi", "logBackup",
 		"logCache", "logCluster", "logCsv", "logImager", "logLdap", "logMail",
 		"logModule", "logServer", "logScheduler", "logTransfer", "logWebsocket",
 		"logsKeepDays", "productionMode", "pwForceDigit", "pwForceLower",

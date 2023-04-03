@@ -6,7 +6,7 @@ let ws = {
 	transactions:{}, // active transactions: key = transaction number
 	
 	// open websocket connection to defined URL with optional event callbacks
-	open:function(url,callbackOpen,callbackBlocking,callbackUnrequested,callbackClose) {
+	open(url,callbackOpen,callbackBlocking,callbackUnrequested,callbackClose) {
 		this.callbacks.blocking    = callbackBlocking;    // blocking change
 		this.callbacks.close       = callbackClose;       // connection closed
 		this.callbacks.open        = callbackOpen;        // connection opened
@@ -20,14 +20,14 @@ let ws = {
 	},
 	
 	// clear running transactions
-	clear:function() {
+	clear() {
 		this.blockingCount = 0;
 		this.transactions  = {};
 		this.event('blocking',false);
 	},
 	
 	// close websocket connection
-	close:function() {
+	close() {
 		if(this.conn !== null) {
 			this.conn.close(1000); // code 1000: Normal Closure
 			this.conn = null;
@@ -38,13 +38,13 @@ let ws = {
 	},
 	
 	// trigger websocket event, executes registered callback
-	event:function(name,argument) {
+	event(name,argument) {
 		if(typeof this.callbacks[name] !== 'undefined')
 			this.callbacks[name](argument);
 	},
 	
 	// prepares a request object for sending
-	prepare:function(ressource,action,payload) {
+	prepare(ressource,action,payload) {
 		return {
 			ressource:ressource,
 			action:action,
@@ -53,7 +53,7 @@ let ws = {
 	},
 	
 	// receives messages from websocket channel
-	received:function(msg) {
+	received(msg) {
 		if(this.debug)
 			console.log('WebSocket <-', msg);
 		
@@ -88,10 +88,10 @@ let ws = {
 	
 	// send requests message over websocket channel
 	// can optionally trigger block event
-	send:function(ressource,action,payload,blocking) {
+	send(ressource,action,payload,blocking) {
 		return this.sendMultiple([this.prepare(ressource,action,payload)],blocking,true);
 	},
-	sendMultiple:function(requests,blocking,singleResponse) {
+	sendMultiple(requests,blocking,singleResponse) {
 		return new Promise((resolve,reject) => {
 			if(this.conn === null)
 				return reject('websocket connection not open');

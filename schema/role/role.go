@@ -10,7 +10,7 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
@@ -41,7 +41,6 @@ func Get(moduleId uuid.UUID) ([]types.Role, error) {
 
 	for rows.Next() {
 		var r types.Role
-
 		if err := rows.Scan(&r.Id, &r.Name, &r.Content, &r.Assignable, &r.ChildrenIds); err != nil {
 			return roles, err
 		}
@@ -69,13 +68,14 @@ func Get(moduleId uuid.UUID) ([]types.Role, error) {
 
 func getAccess(role types.Role) (types.Role, error) {
 
+	role.AccessApis = make(map[uuid.UUID]int)
 	role.AccessAttributes = make(map[uuid.UUID]int)
 	role.AccessCollections = make(map[uuid.UUID]int)
 	role.AccessRelations = make(map[uuid.UUID]int)
 	role.AccessMenus = make(map[uuid.UUID]int)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT attribute_id, collection_id, menu_id, relation_id, access
+		SELECT api_id, attribute_id, collection_id, menu_id, relation_id, access
 		FROM app.role_access
 		WHERE role_id = $1
 	`, role.Id)
@@ -85,16 +85,16 @@ func getAccess(role types.Role) (types.Role, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var attributeId uuid.NullUUID
-		var collectionId uuid.NullUUID
-		var menuId uuid.NullUUID
-		var relationId uuid.NullUUID
+		var apiId, attributeId, collectionId, menuId, relationId uuid.NullUUID
 		var access int
 
-		if err := rows.Scan(&attributeId, &collectionId,
+		if err := rows.Scan(&apiId, &attributeId, &collectionId,
 			&menuId, &relationId, &access); err != nil {
 
 			return role, err
+		}
+		if apiId.Valid {
+			role.AccessApis[apiId.UUID] = access
 		}
 		if attributeId.Valid {
 			role.AccessAttributes[attributeId.UUID] = access
@@ -112,32 +112,28 @@ func getAccess(role types.Role) (types.Role, error) {
 	return role, nil
 }
 
-func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
-	content string, assignable bool, childrenIds []uuid.UUID,
-	accessAttributes map[uuid.UUID]int, accessCollections map[uuid.UUID]int,
-	accessMenus map[uuid.UUID]int, accessRelations map[uuid.UUID]int,
-	captions types.CaptionMap) error {
+func Set_tx(tx pgx.Tx, role types.Role) error {
 
-	if name == "" {
+	if role.Name == "" {
 		return errors.New("missing name")
 	}
 
 	// compatibility fix: missing role content <3.0
-	if content == "" {
-		if name == "everyone" {
-			content = "everyone"
-		} else if strings.Contains(strings.ToLower(name), "admin") {
-			content = "admin"
-		} else if strings.Contains(strings.ToLower(name), "data") {
-			content = "other"
-		} else if strings.Contains(strings.ToLower(name), "csv") {
-			content = "other"
+	if role.Content == "" {
+		if role.Name == "everyone" {
+			role.Content = "everyone"
+		} else if strings.Contains(strings.ToLower(role.Name), "admin") {
+			role.Content = "admin"
+		} else if strings.Contains(strings.ToLower(role.Name), "data") {
+			role.Content = "other"
+		} else if strings.Contains(strings.ToLower(role.Name), "csv") {
+			role.Content = "other"
 		} else {
-			content = "user"
+			role.Content = "user"
 		}
 	}
 
-	known, err := schema.CheckCreateId_tx(tx, &id, "role", "id")
+	known, err := schema.CheckCreateId_tx(tx, &role.Id, "role", "id")
 	if err != nil {
 		return err
 	}
@@ -148,14 +144,14 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 			SET name = $1, content = $2, assignable = $3
 			WHERE id = $4
 			AND content <> 'everyone' -- cannot update default role
-		`, name, content, assignable, id); err != nil {
+		`, role.Name, role.Content, role.Assignable, role.Id); err != nil {
 			return err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.role (id, module_id, name, content, assignable)
 			VALUES ($1,$2,$3,$4,$5)
-		`, id, moduleId, name, content, assignable); err != nil {
+		`, role.Id, role.ModuleId, role.Name, role.Content, role.Assignable); err != nil {
 			return err
 		}
 	}
@@ -164,14 +160,14 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	if _, err := tx.Exec(db.Ctx, `
 		DELETE FROM app.role_child
 		WHERE role_id = $1
-	`, id); err != nil {
+	`, role.Id); err != nil {
 		return err
 	}
-	for _, childId := range childrenIds {
+	for _, childId := range role.ChildrenIds {
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.role_child (role_id, role_id_child)
 			VALUES ($1,$2)
-		`, id, childId); err != nil {
+		`, role.Id, childId); err != nil {
 			return err
 		}
 	}
@@ -180,43 +176,48 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	if _, err := tx.Exec(db.Ctx, `
 		DELETE FROM app.role_access
 		WHERE role_id = $1
-	`, id); err != nil {
+	`, role.Id); err != nil {
 		return err
 	}
 
-	for trgId, access := range accessAttributes {
-		if err := setAccess_tx(tx, id, trgId, "attribute", access); err != nil {
+	for trgId, access := range role.AccessApis {
+		if err := setAccess_tx(tx, role.Id, trgId, "api", access); err != nil {
 			return err
 		}
 	}
-	for trgId, access := range accessCollections {
-		if err := setAccess_tx(tx, id, trgId, "collection", access); err != nil {
+	for trgId, access := range role.AccessAttributes {
+		if err := setAccess_tx(tx, role.Id, trgId, "attribute", access); err != nil {
 			return err
 		}
 	}
-	for trgId, access := range accessMenus {
-		if err := setAccess_tx(tx, id, trgId, "menu", access); err != nil {
+	for trgId, access := range role.AccessCollections {
+		if err := setAccess_tx(tx, role.Id, trgId, "collection", access); err != nil {
 			return err
 		}
 	}
-	for trgId, access := range accessRelations {
-		if err := setAccess_tx(tx, id, trgId, "relation", access); err != nil {
+	for trgId, access := range role.AccessMenus {
+		if err := setAccess_tx(tx, role.Id, trgId, "menu", access); err != nil {
+			return err
+		}
+	}
+	for trgId, access := range role.AccessRelations {
+		if err := setAccess_tx(tx, role.Id, trgId, "relation", access); err != nil {
 			return err
 		}
 	}
 
 	// set captions
-	if err := caption.Set_tx(tx, id, captions); err != nil {
-		return err
-	}
-	return nil
+	return caption.Set_tx(tx, role.Id, role.Captions)
 }
 
-func setAccess_tx(tx pgx.Tx, roleId uuid.UUID, id uuid.UUID, entity string,
-	access int) error {
+func setAccess_tx(tx pgx.Tx, roleId uuid.UUID, id uuid.UUID, entity string, access int) error {
 
 	// check valid access levels
 	switch entity {
+	case "api": // 1 access API
+		if access < -1 || access > 1 {
+			return errors.New("invalid access level")
+		}
 	case "attribute": // 1 read, 2 write attribute value
 		if access < -1 || access > 2 {
 			return errors.New("invalid access level")
@@ -242,11 +243,10 @@ func setAccess_tx(tx pgx.Tx, roleId uuid.UUID, id uuid.UUID, entity string,
 		return nil
 	}
 
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+	_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 		INSERT INTO app.role_access (role_id, %s_id, access)
 		VALUES ($1,$2,$3)
-	`, entity), roleId, id, access); err != nil {
-		return err
-	}
-	return nil
+	`, entity), roleId, id, access)
+
+	return err
 }

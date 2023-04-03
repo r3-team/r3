@@ -8,7 +8,7 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func Assign_tx(tx pgx.Tx, target string, targetId uuid.UUID, articleIds []uuid.UUID) error {

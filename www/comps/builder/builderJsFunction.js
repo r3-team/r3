@@ -1,12 +1,14 @@
-import MyBuilderCaption  from './builderCaption.js';
-import MyBuilderQuery    from './builderQuery.js';
-import {getDataFieldMap} from '../shared/form.js';
-import {copyValueDialog} from '../shared/generic.js';
-import MyTabs            from '../tabs.js';
+import MyBuilderCaption   from './builderCaption.js';
+import MyBuilderQuery     from './builderQuery.js';
+import {getDataFieldMap}  from '../shared/form.js';
+import {copyValueDialog}  from '../shared/generic.js';
+import {getJoinsIndexMap} from '../shared/query.js';
+import MyTabs             from '../tabs.js';
 import {
 	getDependentModules,
 	getFunctionHelp,
-	getItemTitle
+	getItemTitle,
+	getItemTitlePath
 } from '../shared/builder.js';
 export {MyBuilderJsFunction as default};
 
@@ -136,7 +138,7 @@ let MyBuilderJsFunction = {
 						<!-- current form data field input -->
 						<div class="placeholders">
 							<div class="title">
-								<img src="images/form.png" />
+								<img src="images/fileText.png" />
 								<span>{{ capApp.placeholdersFormFields }}</span>
 							</div>
 							
@@ -145,20 +147,22 @@ let MyBuilderJsFunction = {
 									<option value="get_field_value"  >{{ capApp.option.fieldGetValue   }}</option>
 									<option value="set_field_value"  >{{ capApp.option.fieldSetValue   }}</option>
 									<option value="set_field_caption">{{ capApp.option.fieldSetCaption }}</option>
+									<option value="set_field_error"  >{{ capApp.option.fieldSetError }}</option>
 								</select>
 								<select
 									@change="toggleEntity('field',$event.target.value)"
 									:value="entity === 'field' ? entityId : ''"
 								>
 									<option value="" disabled>{{ capApp.fieldId }}</option>
-									<option v-for="fieldId in dataFieldIdsSorted" :value="fieldId">
+									<option
+										v-for="fieldId in dataFieldIdsSorted"
+										:title="getItemTitlePath(dataFieldMap[fieldId].attributeId)"
+										:value="fieldId"
+									>
 										{{ displayFieldName(fieldId) }}
 									</option>
 								</select>
 							</div>
-							<span class="insert-ref" v-if="entity === 'field' && entityId !== null">
-								{{ capApp.placeholderInsert }}
-							</span>
 						</div>
 					</template>
 					
@@ -189,9 +193,6 @@ let MyBuilderJsFunction = {
 								</optgroup>
 							</select>
 						</div>
-						<span class="insert-ref" v-if="entity === 'collection' && entityId !== null">
-							{{ capApp.placeholderInsert }}
-						</span>
 					</div>
 					
 					<!-- frontend functions input -->
@@ -232,9 +233,6 @@ let MyBuilderJsFunction = {
 								</td>
 							</tr>
 						</table>
-						<span class="insert-ref" v-if="entity === 'jsFunction' && entityId !== null">
-							{{ capApp.placeholderInsert }}
-						</span>
 					</div>
 					
 					<!-- backend functions input -->
@@ -275,9 +273,6 @@ let MyBuilderJsFunction = {
 								</td>
 							</tr>
 						</table>
-						<span class="insert-ref" v-if="entity === 'pgFunction' && entityId !== null">
-							{{ capApp.placeholderInsert }}
-						</span>
 					</div>
 					
 					<!-- instance functions -->
@@ -306,14 +301,24 @@ let MyBuilderJsFunction = {
 								</td>
 							</tr>
 						</table>
-						<span class="insert-ref" v-if="entity === 'appFunction' && entityId !== null">
+					</div>
+					
+					<div class="column gap" v-if="entityId !== null">
+						<span class="insert-ref">
 							{{ capApp.placeholderInsert }}
 						</span>
+						<div>
+							<my-button image="cancel.png"
+								@trigger="entity = ''; entityId = null"
+								:caption="capApp.button.clear"
+								:cancel="true"
+							/>
+						</div>
 					</div>
 				</template>
 				
 				<template v-if="tabTarget === 'properties'">
-					<table class="builder-table-vertical tight fullWidth">
+					<table class="generic-table-vertical tight fullWidth">
 						<tr>
 							<td>{{ capGen.name }}</td>
 							<td><input v-model="name" :disabled="readonly" /></td>
@@ -389,7 +394,7 @@ let MyBuilderJsFunction = {
 	},
 	watch:{
 		jsFunction:{
-			handler:function() { this.reset(); },
+			handler() { this.reset(); },
 			immediate:true
 		}
 	},
@@ -399,7 +404,7 @@ let MyBuilderJsFunction = {
 	unmounted() {
 		this.$emit('hotkeysRegister',[]);
 	},
-	data:function() {
+	data() {
 		return {
 			name:'',
 			formId:null,
@@ -410,9 +415,9 @@ let MyBuilderJsFunction = {
 			appFunctions:[
 				'block_inputs','copy_to_clipboard','get_e2ee_data_key',
 				'get_e2ee_data_value','get_language_code','get_login_id',
-				'get_record_id','get_role_ids','go_back',	'has_role','open_form',
-				'pdf_create','record_delete','record_new','record_reload',
-				'record_save','set_e2ee_by_login_ids',
+				'get_preset_record_id','get_record_id','get_role_ids','go_back',
+				'has_role','open_form','pdf_create','record_delete','record_new',
+				'record_reload','record_save','set_e2ee_by_login_ids',
 				'set_e2ee_by_login_ids_and_relation','show_form_message',
 				'timer_clear','timer_set','value_store_get','value_store_set'
 			],
@@ -437,14 +442,16 @@ let MyBuilderJsFunction = {
 			let map = {};
 			for(let k in s.dataFieldMap) {
 				let f = s.dataFieldMap[k];
-				map[`${f.index}_${s.attributeIdMap[f.attributeId].name}`] = f.id;
+				let a = s.attributeIdMap[f.attributeId];
+				let r = s.relationIdMap[a.relationId];
+				let m = s.moduleIdMap[r.moduleId];
+				map[`${f.index}_${m.name}.${r.name}.${a.name}`] = f.id;
 			}
 			let keysSorted = Object.keys(map).sort();
-			
 			let out = [];
-			for(let i = 0, j = keysSorted.length; i < j; i++) {
-				out.push(map[keysSorted[i]]);
-			}			
+			for(let k of keysSorted) {
+				out.push(map[k]);
+			}
 			return out;
 		},
 		hasChanges:(s) => s.name     !== s.jsFunction.name
@@ -460,11 +467,12 @@ let MyBuilderJsFunction = {
 			? s.getFunctionHelp('pg',s.pgFunctionIdMap[s.entityId],s.builderLanguage) : '',
 		
 		// simple
-		dataFieldMap:(s) => s.formId === null ? {} : s.getDataFieldMap(s.formIdMap[s.formId].fields),
-		form:        (s) => s.formId === null ? false : s.formIdMap[s.formId],
-		jsFunction:  (s) => typeof s.jsFunctionIdMap[s.id] === 'undefined' ? false : s.jsFunctionIdMap[s.id],
-		module:      (s) => s.jsFunction === false ? false : s.moduleIdMap[s.jsFunction.moduleId],
-		preview:     (s) => !s.showPreview ? '' : s.placeholdersUnset(),
+		dataFieldMap: (s) => s.formId === null ? {} : s.getDataFieldMap(s.formIdMap[s.formId].fields),
+		form:         (s) => s.formId === null ? false : s.formIdMap[s.formId],
+		joinsIndexMap:(s) => s.form !== false ? s.getJoinsIndexMap(s.form.query.joins) : {},
+		jsFunction:   (s) => typeof s.jsFunctionIdMap[s.id] === 'undefined' ? false : s.jsFunctionIdMap[s.id],
+		module:       (s) => s.jsFunction === false ? false : s.moduleIdMap[s.jsFunction.moduleId],
+		preview:      (s) => !s.showPreview ? '' : s.placeholdersUnset(),
 		
 		// stores
 		modules:        (s) => s.$store.getters['schema/modules'],
@@ -486,13 +494,13 @@ let MyBuilderJsFunction = {
 		getDependentModules,
 		getFunctionHelp,
 		getItemTitle,
+		getItemTitlePath,
+		getJoinsIndexMap,
 		
 		// presentation
 		displayFieldName(fieldId) {
 			let f = this.dataFieldMap[fieldId];
-			let a = this.attributeIdMap[f.attributeId];
-			let r = this.relationIdMap[a.relationId];
-			return this.getItemTitle(r,a,f.index,false,false);
+			return this.getItemTitle(f.attributeId,f.index,false,null);
 		},
 		
 		// actions
@@ -563,8 +571,9 @@ let MyBuilderJsFunction = {
 					fld  = this.dataFieldMap[this.entityId];
 					atr  = this.attributeIdMap[fld.attributeId];
 					rel  = this.relationIdMap[atr.relationId];
+					mod  = this.moduleIdMap[rel.moduleId];
 					opt  = this.fieldMode.includes('set') ? ', '+this.capApp.value : '';
-					text = `${prefix}.${this.fieldMode}({${fld.index}:${rel.name}.${atr.name}}${opt})`;
+					text = `${prefix}.${this.fieldMode}({${fld.index}:${mod.name}.${rel.name}.${atr.name}}${opt})`;
 				break;
 				case 'form':
 					frm  = this.formIdMap[this.entityId];
@@ -665,7 +674,7 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace field IDs with placeholders
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption)\\('(${uuid})'`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|error)\\('(${uuid})'`,'g');
 			body = body.replace(pat,function(match,mode,part,id) {
 				
 				let fld = false;
@@ -680,7 +689,8 @@ let MyBuilderJsFunction = {
 				
 				let atr = that.attributeIdMap[fld.attributeId];
 				let rel = that.relationIdMap[atr.relationId];
-				return `${prefix}.${mode}_field_${part}({${fld.index}:${rel.name}.${atr.name}}`;
+				let mod = that.moduleIdMap[rel.moduleId];
+				return `${prefix}.${mode}_field_${part}({${fld.index}:${mod.name}.${rel.name}.${atr.name}}`;
 			});
 			
 			// replace function IDs with placeholders
@@ -747,17 +757,17 @@ let MyBuilderJsFunction = {
 			
 			// replace field value/caption get/set placeholders
 			// stored as: app.get_field_value({0:contact.is_active}...
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption)\\(\{(\\d+)\:(${dbName})\.(${dbName})\}`,'g');
-			body = body.replace(pat,function(match,mode,part,index,relName,atrName) {
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|error)\\(\{(\\d+)\:(${dbName})\.(${dbName})\.(${dbName})\}`,'g');
+			body = body.replace(pat,function(match,mode,part,index,modName,relName,atrName) {
 				
-				// resolve relation by name
+				// resolve relation inside given module
+				let mod = that.moduleNameMap[modName];
 				let rel = false;
-				for(let i = 0, j = that.module.relations.length; i < j; i++) {
-					if(that.module.relations[i].name !== relName)
-						continue;
-					
-					rel = that.module.relations[i];
-					break;
+				for(let r of mod.relations) {
+					if(r.name === relName) {
+						rel = r;
+						break;
+					}
 				}
 				if(rel === false)
 					return match;

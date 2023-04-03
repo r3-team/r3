@@ -6,8 +6,8 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func MenuCopy_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
@@ -50,7 +50,7 @@ func MenuGet(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	res.Menus, err = menu.Get(req.ModuleId, pgtype.UUID{Status: pgtype.Null})
+	res.Menus, err = menu.Get(req.ModuleId, pgtype.UUID{})
 	if err != nil {
 		return nil, err
 	}
@@ -64,5 +64,5 @@ func MenuSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, menu.Set_tx(tx, pgtype.UUID{Status: pgtype.Null}, req)
+	return nil, menu.Set_tx(tx, pgtype.UUID{}, req)
 }

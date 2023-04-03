@@ -12,8 +12,8 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func GetPublic(ctx context.Context, relationId uuid.UUID,
@@ -40,7 +40,7 @@ func GetPublic(ctx context.Context, relationId uuid.UUID,
 	for rows.Next() {
 		var loginId int64
 		var name string
-		var key pgtype.Varchar
+		var key pgtype.Text
 		var recordIdsReady []int64
 
 		if err := rows.Scan(&loginId, &name, &key, &recordIdsReady); err != nil {
@@ -53,7 +53,7 @@ func GetPublic(ctx context.Context, relationId uuid.UUID,
 		}
 
 		// login has no public key, error
-		if key.Status == pgtype.Null {
+		if !key.Valid {
 			loginNamesNoPublicKey = append(loginNamesNoPublicKey, name)
 			continue
 		}

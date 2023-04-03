@@ -14,6 +14,7 @@ import (
 	"r3/log"
 	"r3/module_option"
 	"r3/schema"
+	"r3/schema/api"
 	"r3/schema/article"
 	"r3/schema/attribute"
 	"r3/schema/collection"
@@ -35,8 +36,8 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type importMeta struct {
@@ -242,10 +243,7 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		}
 		log.Info("transfer", fmt.Sprintf("set relation %s", e.Id))
 
-		if err := importCheckResultAndApply(tx, relation.Set_tx(tx,
-			e.ModuleId, e.Id, e.Name, e.Encryption, e.RetentionCount,
-			e.RetentionDays, e.Policies), e.Id, idMapSkipped); err != nil {
-
+		if err := importCheckResultAndApply(tx, relation.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
@@ -253,7 +251,6 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 	// attributes, refer to relations
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Attributes {
-
 			run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 			if err != nil {
 				return err
@@ -265,8 +262,8 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 			if err := importCheckResultAndApply(tx, attribute.Set_tx(tx,
 				e.RelationId, e.Id, e.RelationshipId, e.IconId, e.Name,
-				e.Content, e.Length, e.Nullable, e.Encrypted, e.Def, e.OnUpdate, e.OnDelete,
-				e.Captions), e.Id, idMapSkipped); err != nil {
+				e.Content, e.ContentUse, e.Length, e.Nullable, e.Encrypted,
+				e.Def, e.OnUpdate, e.OnDelete, e.Captions), e.Id, idMapSkipped); err != nil {
 
 				return err
 			}
@@ -275,7 +272,6 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 	// collections
 	for _, e := range mod.Collections {
-
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
@@ -293,9 +289,24 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		}
 	}
 
+	// APIs
+	for _, e := range mod.Apis {
+		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info("transfer", fmt.Sprintf("set API %s", e.Id))
+
+		if err := importCheckResultAndApply(tx, api.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
+			return err
+		}
+	}
+
 	// PG functions, refer to relations/attributes/pg_functions (self reference)
 	for _, e := range mod.PgFunctions {
-
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
@@ -317,7 +328,6 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 	// PG triggers, refer to PG functions
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Triggers {
-
 			run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 			if err != nil {
 				return err
@@ -340,7 +350,6 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 	// PG indexes
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Indexes {
-
 			run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 			if err != nil {
 				return err
@@ -350,10 +359,7 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 			}
 			log.Info("transfer", fmt.Sprintf("set index %s", e.Id))
 
-			if err := importCheckResultAndApply(tx, pgIndex.Set_tx(tx,
-				e.RelationId, e.Id, e.NoDuplicates, e.AutoFki, e.Attributes),
-				e.Id, idMapSkipped); err != nil {
-
+			if err := importCheckResultAndApply(tx, pgIndex.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
 				return err
 			}
 		}
@@ -361,7 +367,6 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 	// forms, refer to relations/attributes/collections/JS functions
 	for _, e := range mod.Forms {
-
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
@@ -401,13 +406,12 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 
 	// menus, refer to forms/icons
 	log.Info("transfer", "set menus")
-	if err := menu.Set_tx(tx, pgtype.UUID{Status: pgtype.Null}, mod.Menus); err != nil {
+	if err := menu.Set_tx(tx, pgtype.UUID{}, mod.Menus); err != nil {
 		return err
 	}
 
 	// roles, refer to relations/attributes/menu
 	for _, e := range mod.Roles {
-
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err
@@ -417,18 +421,13 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		}
 		log.Info("transfer", fmt.Sprintf("set role %s", e.Id))
 
-		if err := importCheckResultAndApply(tx, role.Set_tx(tx,
-			e.ModuleId, e.Id, e.Name, e.Content, e.Assignable, e.ChildrenIds,
-			e.AccessAttributes, e.AccessCollections, e.AccessMenus,
-			e.AccessRelations, e.Captions), e.Id, idMapSkipped); err != nil {
-
+		if err := importCheckResultAndApply(tx, role.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}
 
 	// JS functions, refer to forms/fields/roles/pg_functions/js_functions (self reference)
 	for _, e := range mod.JsFunctions {
-
 		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 		if err != nil {
 			return err

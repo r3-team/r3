@@ -207,9 +207,9 @@ let MyBuilderPgFunction = {
 			
 			<my-tabs
 				v-model="tabTarget"
-				:entries="['content','properties']"
-				:entriesIcon="['images/database.png','images/edit.png']"
-				:entriesText="[capApp.placeholders,capGen.properties]"
+				:entries="tabs.keys"
+				:entriesIcon="tabs.icons"
+				:entriesText="tabs.labels"
 			/>
 			
 			<div class="content padding default-inputs">
@@ -240,101 +240,186 @@ let MyBuilderPgFunction = {
 					
 					<div class="message" v-html="capApp.entityInput"></div>
 					
-					<div class="placeholders">
-						<div class="title">
-							<img src="images/builder.png" />
-							<span>{{ capGen.applications }}</span>
+					<!-- module data -->
+					<div class="entities-title">
+						<my-button
+							@trigger="showHolderRelation = !showHolderRelation"
+							:caption="capApp.placeholderRelations"
+							:image="showHolderRelation ? 'triangleDown.png' : 'triangleRight.png'"
+							:large="true"
+							:naked="true"
+						/>
+						<div class="row centered gap">
+							<template v-if="showHolderRelation">
+								<input class="short" v-model="holderRelationText" :placeholder="capGen.threeDots" :title="capGen.button.filter" />
+								<select class="dynamic" v-model="holderRelationModuleId">
+									<option v-for="m in modulesData" :value="m.id">{{ m.name }}</option>
+								</select>
+							</template>
+							<my-button image="question.png"
+								@trigger="showHelp(capApp.placeholderRelations,capApp.placeholderRelationsHelp)"
+								:tight="true"
+							/>
 						</div>
-						<table>
-							<tr>
-								<td>
-									<select v-model="entityModuleId" @change="entityId = null; entity = 'relation'">
-										<option :value="null">-</option>
-										<option
-											v-for="mod in getDependentModules(module,modules).filter(v => v.relations.length !== 0 || v.pgFunctions.length !== 0)"
-											:value="mod.id"
-										>{{ mod.name }}</option>
-									</select>
-								</td>
-								<td v-if="entityModuleId !== null">
-									<select class="dynamic" v-model="entity" @change="entityId = null">
-										<option value="relation">{{ capApp.placeholderRelation }}</option>
-										<option value="attribute">{{ capApp.placeholderAttribute }}</option>
-										<option value="pgFunction">{{ capApp.placeholderFunction }}</option>
-									</select>
-								</td>
-								<td>
-									<select v-model="entityId" v-if="entityModuleId !== null && entity === 'relation'">
-										<option :value="null">-</option>
-										<option
-											v-for="r in moduleIdMap[entityModuleId].relations"
-											:value="r.id"
-										>{{ r.name }}</option>
-									</select>
-									<select v-model="entityId" v-if="entityModuleId !== null && entity === 'attribute'">
-										<option :value="null">-</option>
-										<optgroup v-for="r in moduleIdMap[entityModuleId].relations" :label="r.name">
-											<option
-												v-for="a in relationIdMap[r.id].attributes"
-												:value="a.id"
-											>{{ a.name }}</option>
-										</optgroup>
-									</select>
-									<select v-model="entityId" v-if="entityModuleId !== null && entity === 'pgFunction'">
-										<option :value="null">-</option>
-										<option
-											v-for="f in moduleIdMap[entityModuleId].pgFunctions"
-											:value="f.id"
-										>{{ f.name }}</option>
-									</select>
-								</td>
-								<td v-if="entity === 'pgFunction'">
-									<my-button image="question.png"
-										@trigger="showHelp(pgFunctionIdMap[entityId].name+'()',functionHelp)"
-										:active="functionHelp !== ''"
+					</div>
+					<div class="entities" v-if="showHolderRelation">
+						<template v-for="mod in modulesData.filter(v => holderRelationModuleId === null || holderRelationModuleId === v.id)">
+							<div class="entity" v-for="rel in mod.relations.filter(v => holderRelationText === '' || v.name.toLowerCase().includes(holderRelationText.toLowerCase()))">
+								<div class="entity-title">
+									<div class="row centered grow">
+										<my-button
+											@trigger="toggleRelationShow(rel.id)"
+											:image="holderRelationIdsOpen.includes(rel.id) ? 'triangleDown.png' : 'triangleRight.png'"
+											:naked="true"
+											:tight="true"
+										/>
+										<my-button
+											@trigger="selectEntity('relation',rel.id)"
+											:adjusts="true"
+											:caption="rel.name"
+											:captionTitle="rel.name"
+											:image="radioIcon('relation',rel.id)"
+											:naked="true"
+											:tight="true"
+										/>
+									</div>
+									<router-link :key="rel.id" :to="'/builder/relation/'+rel.id">
+										<my-button image="open.png" :captionTitle="capGen.button.open" :naked="true" />
+									</router-link>
+								</div>
+								<div class="entity-children" v-if="holderRelationIdsOpen.includes(rel.id)">
+									<div class="entity-title" v-for="atr in rel.attributes">
+										<my-button
+											@trigger="selectEntity('attribute',atr.id)"
+											:caption="atr.name"
+											:captionTitle="atr.name"
+											:image="radioIcon('attribute',atr.id)"
+											:naked="true"
+											:tight="true"
+										/>
+									</div>
+								</div>
+							</div>
+						</template>
+					</div>
+					
+					<!-- module functions -->
+					<div class="entities-title">
+						<my-button
+							@trigger="showHolderFncModule = !showHolderFncModule"
+							:caption="capApp.placeholderFunctions"
+							:image="showHolderFncModule ? 'triangleDown.png' : 'triangleRight.png'"
+							:large="true"
+							:naked="true"
+						/>
+						<div class="row centered gap">
+							<template v-if="showHolderFncModule">
+								<input class="short" v-model="holderFunctionText" :placeholder="capGen.threeDots" :title="capGen.button.filter" />
+								<select class="dynamic" v-model="holderFunctionModuleId">
+									<option v-for="m in modulesFnc" :value="m.id">{{ m.name }}</option>
+								</select>
+							</template>
+							<my-button image="question.png"
+								@trigger="showHelp(capApp.placeholderFunctions,capApp.placeholderFunctionsHelp)"
+								:tight="true"
+							/>
+						</div>
+					</div>
+					<div class="entities" v-if="showHolderFncModule">
+						<template v-for="mod in modulesFnc.filter(v => holderFunctionModuleId === null || holderFunctionModuleId === v.id)">
+							<div class="entity" v-for="fnc in mod.pgFunctions.filter(v => !v.isTrigger && (holderFunctionText === '' || v.name.toLowerCase().includes(holderFunctionText.toLowerCase())))">
+								<div class="entity-title">
+									<my-button
+										@trigger="selectEntity('pgFunction',fnc.id)"
+										:adjusts="true"
+										:caption="fnc.name"
+										:captionTitle="fnc.name"
+										:image="radioIcon('pgFunction',fnc.id)"
+										:naked="true"
+										:tight="true"
 									/>
-								</td>
-							</tr>
-						</table>
-						<span class="insert-ref" v-if="['relation','attribute','pgFunction'].includes(entity) && entityId !== null">
-							{{ capApp.placeholderInsert }}
-						</span>
+									
+									<div class="row centered">
+										<my-button image="question.png"
+											@trigger="showHelp(fnc.name+'()',getFunctionHelp('pg',fnc,builderLanguage))"
+											:active="getFunctionHelp('pg',fnc,builderLanguage) !== ''"
+											:captionTitle="capGen.help"
+											:naked="true"
+										/>
+										<router-link :key="fnc.id" :to="'/builder/pg-function/'+fnc.id">
+											<my-button image="open.png" :captionTitle="capGen.button.open" :naked="true" />
+										</router-link>
+									</div>
+								</div>
+							</div>
+						</template>
 					</div>
 					
 					<!-- instance functions -->
-					<div class="placeholders">
-						<div class="title">
-							<img src="images/server.png" />
-							<span>{{ capApp.placeholdersInstance }}</span>
+					<div class="entities-title">
+						<my-button
+							@trigger="showHolderFncInstance = !showHolderFncInstance"
+							:caption="capApp.placeholderInstance"
+							:image="showHolderFncInstance ? 'triangleDown.png' : 'triangleRight.png'"
+							:large="true"
+							:naked="true"
+						/>
+						<my-button image="question.png"
+							@trigger="showHelp(capApp.placeholderInstance,capApp.placeholderInstanceHelp)"
+							:tight="true"
+						/>
+					</div>
+					<div class="entities" v-if="showHolderFncInstance">
+						<div class="entity" v-for="fnc in instanceFunctionIds">
+							<div class="entity-title">
+								<my-button
+									@trigger="selectEntity('instanceFunction',fnc)"
+									:adjusts="true"
+									:caption="fnc"
+									:captionTitle="fnc"
+									:image="radioIcon('instanceFunction',fnc)"
+									:naked="true"
+									:tight="true"
+								/>
+								<my-button image="question.png"
+									@trigger="showHelp(fnc+'()',capApp.helpPg[fnc])"
+									:captionTitle="capGen.help"
+									:naked="true"
+								/>
+							</div>
 						</div>
-						<table>
-							<tr>
-								<td>
-									<select v-model="entityId" @change="entity = 'instanceFunction'; entityModuleId = null">
-										<option :value="null">-</option>
-										<option
-											v-for="f in instanceFunctionIds"
-											:value="f"
-										>{{ f }}</option>
-									</select>
-								</td>
-								<td>
-									<my-button image="question.png"
-										@trigger="showHelp(entityId+'()',capApp.helpPg[entityId])"
-										:active="entity === 'instanceFunction' && entityId !== null"
-										:captionTitle="capGen.button.help"
-									/>
-								</td>
-							</tr>
-						</table>
-						<span class="insert-ref" v-if="entity === 'instanceFunction' && entityId !== null">
-							{{ capApp.placeholderInsert }}
-						</span>
 					</div>
 				</template>
 				
+				<template v-if="tabTarget === 'exec'">
+					<table class="generic-table-vertical tight fullWidth">
+						<tr v-if="execArgInputs.length > 0">
+							<td>{{ capApp.codeArgs }}</td>
+							<td>
+								<div class="column gap">
+									<input class="long"
+										v-model="execArgs[i]"
+										v-for="(a,i) in execArgInputs"
+										:disabled="readonly"
+										:placeholder="a.trim()"
+									/>
+								</div>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.execResponse }}</td>
+							<td><textarea class="long response" v-model="execResponse" disabled></textarea></td>
+						</tr>
+					</table>
+					<my-button image="settingsPlay.png"
+						@trigger="exec"
+						:active="!readonly"
+						:caption="capApp.exec"
+					/>
+				</template>
+				
 				<template v-if="tabTarget === 'properties'">
-					<table class="builder-table-vertical tight fullWidth">
+					<table class="generic-table-vertical tight fullWidth">
 						<tr>
 							<td>{{ capGen.name }}</td>
 							<td><input v-model="name" :disabled="readonly" /></td>
@@ -362,7 +447,7 @@ let MyBuilderPgFunction = {
 						</tr>
 						<tr v-if="!isTrigger">
 							<td>{{ capApp.codeArgs }}</td>
-							<td><textarea v-model="codeArgs" :disabled="isTrigger || readonly" placeholder="-"></textarea></td>
+							<td><textarea v-model="codeArgs" @keyup="resetExec" :disabled="isTrigger || readonly" placeholder="-"></textarea></td>
 						</tr>
 						<tr>
 							<td>{{ capApp.codeReturns }}</td>
@@ -407,17 +492,21 @@ let MyBuilderPgFunction = {
 	},
 	watch:{
 		pgFunction:{
-			handler:function() { this.reset(); },
+			handler() { this.reset(); },
 			immediate:true
 		}
 	},
 	mounted() {
 		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+		
+		// set defaults
+		this.holderRelationModuleId = this.module.id;
+		this.holderFunctionModuleId = this.module.id;
 	},
 	unmounted() {
 		this.$emit('hotkeysRegister',[]);
 	},
-	data:function() {
+	data() {
 		return {
 			// inputs
 			name:'',
@@ -429,26 +518,38 @@ let MyBuilderPgFunction = {
 			isTrigger:false,
 			schedules:[],
 			
+			// execution
+			execArgs:[],
+			execResponse:'',
+			
 			// states
 			addNew:false,
 			addOld:false,
 			entity:'relation', // selected placeholder entity (relation, attribute, pgFunction, instanceFunction)
 			entityId:null,
-			entityModuleId:null,
+			holderFunctionModuleId:null, // module filter for backend functions
+			holderFunctionText:'',       // text filter for backend functions
+			holderRelationModuleId:null, // module filter for relations
+			holderRelationIdsOpen:[],    // opened relation placeholders (shows attributes)
+			holderRelationText:'',       // text filter for module relations
 			instanceFunctionIds:[
 				'abort_show_message','clean_up_e2ee_keys','file_link',
 				'files_get','get_name','get_login_id','get_login_language_code',
-				'get_public_hostname','get_role_ids','has_role','has_role_any',
-				'log_error','log_info','log_warning','mail_delete',
-				'mail_delete_after_attach','mail_get_next','mail_send',
-				'update_collection'
+				'get_preset_record_id','get_public_hostname','get_role_ids',
+				'has_role','has_role_any','log_error','log_info','log_warning',
+				'mail_delete','mail_delete_after_attach','mail_get_next',
+				'mail_send','update_collection'
 			],
+			showHolderFncInstance:false,
+			showHolderFncModule:false,
+			showHolderRelation:false,
 			showPreview:false,
 			showSidebar:true,
 			tabTarget:'content'
 		};
 	},
 	computed:{
+		execArgInputs:(s) => s.codeArgs.trim() === '' ? [] : s.codeArgs.split(','),
 		hasChanges:(s) => s.name !== s.pgFunction.name
 			|| s.codeArgs        !== s.pgFunction.codeArgs
 			|| s.codeFunction    !== s.placeholdersSet(s.pgFunction.codeFunction)
@@ -456,9 +557,21 @@ let MyBuilderPgFunction = {
 			|| s.isFrontendExec  !== s.pgFunction.isFrontendExec
 			|| JSON.stringify(s.schedules) !== JSON.stringify(s.pgFunction.schedules)
 			|| JSON.stringify(s.captions)  !== JSON.stringify(s.pgFunction.captions),
-		
-		functionHelp:(s) => s.entity === 'pgFunction' && s.entityId !== null
-			? s.getFunctionHelp('pg',s.pgFunctionIdMap[s.entityId],s.builderLanguage) : '',
+		modulesData:(s) => s.getDependentModules(s.module,s.modules).filter(v => v.relations.length   !== 0),
+		modulesFnc: (s) => s.getDependentModules(s.module,s.modules).filter(v => v.pgFunctions.length !== 0),
+		tabs:(s) => {
+			let out = {
+				icons:['images/database.png','images/edit.png'],
+				keys:['content','properties'],
+				labels:[s.capApp.placeholders,s.capGen.properties]
+			};
+			if(!s.isTrigger) {
+				out.icons.splice(1,0,'images/settingsPlay.png');
+				out.keys.splice(1,0,'exec');
+				out.labels.splice(1,0,s.capApp.exec);
+			}
+			return out;
+		},
 		
 		// simple
 		module:    (s) => s.pgFunction === false ? false : s.moduleIdMap[s.pgFunction.moduleId],
@@ -483,6 +596,12 @@ let MyBuilderPgFunction = {
 		getNilUuid,
 		getPgFunctionTemplate,
 		
+		// presentation
+		radioIcon(entity,id) {
+			return this.entity === entity && this.entityId === id
+				? 'radio1.png' : 'radio0.png';
+		},
+		
 		// actions
 		addSchedule() {
 			this.schedules.push({
@@ -506,18 +625,6 @@ let MyBuilderPgFunction = {
 			field.selectionStart = startPos + 1;
 			field.selectionEnd   = startPos + 1;
 			this.codeFunction    = field.value;
-		},
-		reset() {
-			this.name           = this.pgFunction.name;
-			this.captions       = JSON.parse(JSON.stringify(this.pgFunction.captions));
-			this.codeArgs       = this.pgFunction.codeArgs;
-			this.codeFunction   = this.placeholdersSet(this.pgFunction.codeFunction);
-			this.codeReturns    = this.pgFunction.codeReturns;
-			this.isFrontendExec = this.pgFunction.isFrontendExec;
-			this.isTrigger      = this.pgFunction.isTrigger;
-			this.schedules      = JSON.parse(JSON.stringify(this.pgFunction.schedules));
-			this.addNew         = false;
-			this.addOld         = false;
 		},
 		insertEntity(evt) {
 			if(this.entityId === null)
@@ -574,16 +681,54 @@ let MyBuilderPgFunction = {
 			this.codeFunction = field.value;
 			this.entityId = null;
 		},
+		reset() {
+			this.name           = this.pgFunction.name;
+			this.captions       = JSON.parse(JSON.stringify(this.pgFunction.captions));
+			this.codeArgs       = this.pgFunction.codeArgs;
+			this.codeFunction   = this.placeholdersSet(this.pgFunction.codeFunction);
+			this.codeReturns    = this.pgFunction.codeReturns;
+			this.isFrontendExec = this.pgFunction.isFrontendExec;
+			this.isTrigger      = this.pgFunction.isTrigger;
+			this.schedules      = JSON.parse(JSON.stringify(this.pgFunction.schedules));
+			this.addNew         = false;
+			this.addOld         = false;
+			
+			if(this.isTrigger && this.tabTarget === 'exec')
+				this.tabTarget = 'content';
+			
+			this.resetExec();
+		},
+		resetExec() {
+			this.execArgs     = [];
+			this.execResponse = '';
+			
+			for(let a of this.execArgInputs) {
+				this.execArgs.push('');
+			}
+		},
+		selectEntity(entity,id) {
+			if(entity === this.entity && id === this.entityId)
+				return this.entityId = null;
+			
+			this.entity   = entity;
+			this.entityId = id;
+		},
 		showHelp(top,text) {
 			this.$store.commit('dialog',{
 				captionTop:top,
 				captionBody:text,
+				image:'question.png',
 				buttons:[{
 					caption:this.capGen.button.close,
 					cancel:true,
 					image:'cancel.png'
 				}]
 			});
+		},
+		toggleRelationShow(relationId) {
+			let pos = this.holderRelationIdsOpen.indexOf(relationId);
+			if(pos === -1) this.holderRelationIdsOpen.push(relationId);
+			else           this.holderRelationIdsOpen.splice(pos,1);
 		},
 		
 		// placeholders are used for storing entities via ID instead of name (which can change)
@@ -638,7 +783,6 @@ let MyBuilderPgFunction = {
 				
 				// resolve relation by name
 				let rel = false;
-				
 				for(let i = 0, j = mod.relations.length; i < j; i++) {
 					if(mod.relations[i].name !== relName)
 						continue;
@@ -651,7 +795,6 @@ let MyBuilderPgFunction = {
 				
 				// resolve attribute by name
 				let atr = false;
-				
 				for(let i = 0, j = rel.attributes.length; i < j; i++) {
 					if(rel.attributes[i].name !== atrName)
 						continue;
@@ -682,7 +825,6 @@ let MyBuilderPgFunction = {
 				
 				// resolve function by name
 				let fnc = false;
-				
 				for(let i = 0, j = mod.pgFunctions.length; i < j; i++) {
 					if(mod.pgFunctions[i].name !== fncName)
 						continue;
@@ -713,7 +855,6 @@ let MyBuilderPgFunction = {
 				
 				// resolve relation by name
 				let rel = false;
-				
 				for(let i = 0, j = mod.relations.length; i < j; i++) {
 					if(mod.relations[i].name !== relName)
 						continue;
@@ -754,6 +895,15 @@ let MyBuilderPgFunction = {
 					this.$root.schemaReload(this.pgFunction.moduleId);
 					this.$router.push('/builder/pg-functions/'+this.pgFunction.moduleId);
 				},
+				this.$root.genericError
+			);
+		},
+		exec() {
+			ws.send('pgFunction','execAny',{
+				id:this.pgFunction.id,
+				args:this.execArgs
+			},true).then(
+				res => this.execResponse = res.payload,
 				this.$root.genericError
 			);
 		},

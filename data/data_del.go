@@ -9,7 +9,7 @@ import (
 	"r3/schema"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
@@ -47,14 +47,12 @@ func Del_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 		return err
 	}
 
-	if _, err := tx.Exec(ctx, fmt.Sprintf(`
+	_, err = tx.Exec(ctx, fmt.Sprintf(`
 		DELETE FROM "%s"."%s" AS "%s"
 		WHERE "%s"."%s" = $1
 		%s
 	`, mod.Name, rel.Name, tableAlias, tableAlias,
-		schema.PkName, policyFilter), recordId); err != nil {
+		schema.PkName, policyFilter), recordId)
 
-		return err
-	}
-	return nil
+	return err
 }

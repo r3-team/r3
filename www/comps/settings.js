@@ -124,7 +124,7 @@ let MySettingsEncryption = {
 	props:{
 		moduleEntries:{ type:Array, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			running:false,
 			
@@ -406,7 +406,7 @@ let MySettingsAccount = {
 		
 		<div class="message" v-if="message !== ''">{{ message }}</div>
 	</div>`,
-	data:function() {
+	data() {
 		return {
 			// states
 			newInput:false,  // new input was entered by user
@@ -467,7 +467,7 @@ let MySettingsAccount = {
 		capGen:            (s) => s.$store.getters.captions.generic,
 		clusterNodeName:   (s) => s.$store.getters.clusterNodeName
 	},
-	mounted:function() {
+	mounted() {
 		ws.send('lookup','get',{name:'passwordSettings'},true).then(
 			res => this.pwSettings = res.payload,
 			this.$root.genericError
@@ -481,7 +481,7 @@ let MySettingsAccount = {
 		aesGcmImportBase64,
 		pbkdf2PassToAesGcmKey,
 		
-		generateOldPwKey:function() {
+		generateOldPwKey() {
 			this.pbkdf2PassToAesGcmKey(this.pwOld,this.loginKeySalt,this.kdfIterations,true).then(
 				key => {
 					this.aesGcmExportBase64(key).then(
@@ -494,7 +494,7 @@ let MySettingsAccount = {
 		},
 		
 		// actions
-		setCheck:function() {
+		setCheck() {
 			// encryption not enabled (or private key locked), just save new credentials
 			if(!this.loginEncryption || this.loginPrivateKey === null)
 				return this.set(null,null);
@@ -524,7 +524,7 @@ let MySettingsAccount = {
 		},
 		
 		// backend calls
-		set:function(newPrivateKeyEnc,newLoginKey) {
+		set(newPrivateKeyEnc,newLoginKey) {
 			let requests = [
 				ws.prepare('password','set',{
 					pwNew0:this.pwNew0,
@@ -745,7 +745,7 @@ let MySettingsFixedTokens = {
 			</div>
 		</div>
 	</div>`,
-	data:function() {
+	data() {
 		return {
 			tokensFixed:[],
 			showInstall:false,
@@ -789,7 +789,7 @@ let MySettingsFixedTokens = {
 			}
 		}
 	},
-	mounted:function() {
+	mounted() {
 		this.get();
 		
 		// set default client
@@ -955,6 +955,10 @@ let MySettings = {
 								<td><my-bool v-model="settingsInput.sundayFirstDow" /></td>
 							</tr>
 							<tr>
+								<td>{{ capApp.tabRemember }}</td>
+								<td><my-bool v-model="settingsInput.tabRemember" /></td>
+							</tr>
+							<tr>
 								<td>{{ capApp.warnUnsaved }}</td>
 								<td><my-bool v-model="settingsInput.warnUnsaved" /></td>
 							</tr>
@@ -1055,6 +1059,10 @@ let MySettings = {
 								<td><my-bool v-model="settingsInput.dark" /></td>
 							</tr>
 							<tr>
+								<td>{{ capApp.fieldClean }}</td>
+								<td><my-bool v-model="settingsInput.fieldClean" :reversed="true" /></td>
+							</tr>
+							<tr>
 								<td>{{ capApp.compact }}</td>
 								<td><my-bool v-model="settingsInput.compact" /></td>
 							</tr>
@@ -1120,7 +1128,7 @@ let MySettings = {
 	},
 	watch:{
 		settingsInput:{
-			handler:function() {
+			handler() {
 				if(this.settingsLoaded)
 					this.setSetting(this.settingsInput);
 			},

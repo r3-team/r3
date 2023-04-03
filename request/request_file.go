@@ -9,7 +9,7 @@ import (
 	"r3/schema"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // request file(s) to be copied (synchronized across all clients for login)
@@ -56,7 +56,7 @@ func FileRequest(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 
 	// get current file name and latest hash
 	// files before 3.1 do not have a hash value, empty hash is then compared against new file version hash
-	var hash pgtype.Varchar
+	var hash pgtype.Text
 	var name string
 	if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
 		SELECT v.hash, r.name

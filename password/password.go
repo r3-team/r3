@@ -7,8 +7,8 @@ import (
 	"r3/tools"
 	"regexp"
 
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // change login password
@@ -32,7 +32,7 @@ func Set_tx(tx pgx.Tx, loginId int64, pwOld string, pwNew0 string, pwNew1 string
 		return err
 	}
 
-	if ldapId.Status == pgtype.Present {
+	if ldapId.Valid {
 		return fmt.Errorf("cannot set password for LDAP login")
 	}
 

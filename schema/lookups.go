@@ -5,7 +5,7 @@ import (
 	"r3/db"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 func GetModuleNameById_tx(tx pgx.Tx, id uuid.UUID) (string, error) {

@@ -6,7 +6,7 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func getModules(token string, url string, skipVerify bool,
@@ -25,32 +25,32 @@ func getModules(token string, url string, skipVerify bool,
 		Expressions: []types.DataGetExpression{
 			types.DataGetExpression{ // module UUID
 				AttributeId:   tools.UuidStringToNullUuid("98bc635b-097e-4cf0-92c9-2bb97a7c2a5e"),
-				AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-				Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+				AttributeIdNm: pgtype.UUID{},
+				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // module name
 				AttributeId:   tools.UuidStringToNullUuid("fbab278a-4898-4f46-a1d7-35d1a80ee3dc"),
-				AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-				Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+				AttributeIdNm: pgtype.UUID{},
+				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // module is visible in store?
 				AttributeId:   tools.UuidStringToNullUuid("0ba7005c-834b-4d2b-a967-d748f91c2bed"),
-				AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-				Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+				AttributeIdNm: pgtype.UUID{},
+				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // module change log
 				AttributeId:   tools.UuidStringToNullUuid("f36130a9-bfed-42dc-920f-036ffd0d35b0"),
-				AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-				Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+				AttributeIdNm: pgtype.UUID{},
+				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // author name
 				AttributeId:   tools.UuidStringToNullUuid("295f5bd9-772a-41f0-aa81-530a0678e441"),
-				AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-				Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+				AttributeIdNm: pgtype.UUID{},
+				Aggregator:    pgtype.Text{},
 				Index:         1,
 			},
 		},
@@ -89,13 +89,11 @@ func getModules(token string, url string, skipVerify bool,
 			case 2:
 				repo.InStore = value.(bool)
 			case 3:
-				repo.ChangeLog = pgtype.Varchar{
-					Status: pgtype.Null,
-				}
+				repo.ChangeLog = pgtype.Text{}
 				if value != nil {
-					repo.ChangeLog = pgtype.Varchar{
-						Status: pgtype.Present,
+					repo.ChangeLog = pgtype.Text{
 						String: value.(string),
+						Valid:  true,
 					}
 				}
 			case 4:

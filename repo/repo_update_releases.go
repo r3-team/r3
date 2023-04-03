@@ -9,7 +9,7 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func getModuleReleases(token string, url string, skipVerify bool,
@@ -28,32 +28,32 @@ func getModuleReleases(token string, url string, skipVerify bool,
 		Expressions: []types.DataGetExpression{
 			types.DataGetExpression{ // module UUID
 				AttributeId:   tools.UuidStringToNullUuid("98bc635b-097e-4cf0-92c9-2bb97a7c2a5e"),
-				AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-				Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+				AttributeIdNm: pgtype.UUID{},
+				Aggregator:    pgtype.Text{},
 				Index:         1,
 			},
 			types.DataGetExpression{ // module release build
 				AttributeId:   tools.UuidStringToNullUuid("d0766fcc-7a68-490c-9c81-f542ad37109b"),
-				AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-				Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+				AttributeIdNm: pgtype.UUID{},
+				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // module release application build
 				AttributeId:   tools.UuidStringToNullUuid("ce998cfd-a66f-423c-b82b-d2b48a21c288"),
-				AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-				Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+				AttributeIdNm: pgtype.UUID{},
+				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // module release date
 				AttributeId:   tools.UuidStringToNullUuid("9f9b6cda-069d-405b-bbb8-c0d12bbce910"),
-				AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-				Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+				AttributeIdNm: pgtype.UUID{},
+				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // module release file
 				AttributeId:   tools.UuidStringToNullUuid("b28e8f5c-ebeb-4565-941b-4d942eedc588"),
-				AttributeIdNm: pgtype.UUID{Status: pgtype.Null},
-				Aggregator:    pgtype.Varchar{Status: pgtype.Null},
+				AttributeIdNm: pgtype.UUID{},
+				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 		},
@@ -72,14 +72,14 @@ func getModuleReleases(token string, url string, skipVerify bool,
 				Operator:  ">",
 				Side0: types.DataGetFilterSide{
 					AttributeId: pgtype.UUID{ // module release date
-						Bytes:  uuid.FromStringOrNil("9f9b6cda-069d-405b-bbb8-c0d12bbce910"),
-						Status: pgtype.Present,
+						Bytes: uuid.FromStringOrNil("9f9b6cda-069d-405b-bbb8-c0d12bbce910"),
+						Valid: true,
 					},
-					QueryAggregator: pgtype.Varchar{Status: pgtype.Null},
+					QueryAggregator: pgtype.Text{},
 				},
 				Side1: types.DataGetFilterSide{
-					AttributeId:     pgtype.UUID{Status: pgtype.Null},
-					QueryAggregator: pgtype.Varchar{Status: pgtype.Null},
+					AttributeId:     pgtype.UUID{},
+					QueryAggregator: pgtype.Text{},
 					Value:           lastRun,
 				},
 			},
@@ -87,14 +87,14 @@ func getModuleReleases(token string, url string, skipVerify bool,
 		Orders: []types.DataGetOrder{
 			types.DataGetOrder{
 				AttributeId: pgtype.UUID{ // module release build
-					Bytes:  uuid.FromStringOrNil("d0766fcc-7a68-490c-9c81-f542ad37109b"),
-					Status: pgtype.Present,
+					Bytes: uuid.FromStringOrNil("d0766fcc-7a68-490c-9c81-f542ad37109b"),
+					Valid: true,
 				},
 				Index: pgtype.Int4{
-					Int:    0,
-					Status: pgtype.Present,
+					Int32: 0,
+					Valid: true,
 				},
-				ExpressionPos: pgtype.Int4{Status: pgtype.Null},
+				ExpressionPos: pgtype.Int4{},
 				Ascending:     false,
 			},
 		},

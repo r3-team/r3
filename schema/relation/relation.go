@@ -10,8 +10,8 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
@@ -73,7 +73,7 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 
 	relations := make([]types.Relation, 0)
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, name, encryption, retention_count, retention_days, (
+		SELECT id, name, comment, encryption, retention_count, retention_days, (
 			SELECT id
 			FROM app.attribute
 			WHERE relation_id = app.relation.id
@@ -90,7 +90,7 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 
 	for rows.Next() {
 		var r types.Relation
-		if err := rows.Scan(&r.Id, &r.Name, &r.Encryption,
+		if err := rows.Scan(&r.Id, &r.Name, &r.Comment, &r.Encryption,
 			&r.RetentionCount, &r.RetentionDays, &r.AttributeIdPk); err != nil {
 
 			return relations, err
@@ -108,27 +108,25 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 	return relations, nil
 }
 
-func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
-	encryption bool, retentionCount pgtype.Int4, retentionDays pgtype.Int4,
-	policies []types.RelationPolicy) error {
+func Set_tx(tx pgx.Tx, rel types.Relation) error {
 
-	if err := check.DbIdentifier(name); err != nil {
+	if err := check.DbIdentifier(rel.Name); err != nil {
 		return err
 	}
 
-	moduleName, err := schema.GetModuleNameById_tx(tx, moduleId)
+	moduleName, err := schema.GetModuleNameById_tx(tx, rel.ModuleId)
 	if err != nil {
 		return err
 	}
 
-	isNew := id == uuid.Nil
-	known, err := schema.CheckCreateId_tx(tx, &id, "relation", "id")
+	isNew := rel.Id == uuid.Nil
+	known, err := schema.CheckCreateId_tx(tx, &rel.Id, "relation", "id")
 	if err != nil {
 		return err
 	}
 
 	if known {
-		_, nameEx, err := schema.GetRelationNamesById_tx(tx, id)
+		_, nameEx, err := schema.GetRelationNamesById_tx(tx, rel.Id)
 		if err != nil {
 			return err
 		}
@@ -136,48 +134,48 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 		// update relation reference
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.relation
-			SET name = $1, retention_count = $2, retention_days = $3
-			WHERE id = $4
-		`, name, retentionCount, retentionDays, id); err != nil {
+			SET name = $1, comment = $2, retention_count = $3, retention_days = $4
+			WHERE id = $5
+		`, rel.Name, rel.Comment, rel.RetentionCount, rel.RetentionDays, rel.Id); err != nil {
 			return err
 		}
 
 		// if name changed, update relation and all affected entities
-		if nameEx != name {
+		if nameEx != rel.Name {
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 				ALTER TABLE "%s"."%s"
 				RENAME TO "%s"
-			`, moduleName, nameEx, name)); err != nil {
+			`, moduleName, nameEx, rel.Name)); err != nil {
 				return err
 			}
 
-			if err := pgFunction.RecreateAffectedBy_tx(tx, "relation", id); err != nil {
+			if err := pgFunction.RecreateAffectedBy_tx(tx, "relation", rel.Id); err != nil {
 				return fmt.Errorf("failed to recreate affected PG functions, %s", err)
 			}
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 			CREATE TABLE "%s"."%s" ()
-		`, moduleName, name)); err != nil {
+		`, moduleName, rel.Name)); err != nil {
 			return err
 		}
 
 		// insert relation reference
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.relation
-				(id, module_id, name, encryption, retention_count, retention_days)
-			VALUES ($1,$2,$3,$4,$5,$6)
-		`, id, moduleId, name, encryption, retentionCount, retentionDays); err != nil {
+			INSERT INTO app.relation (id, module_id, name, comment,
+				encryption, retention_count, retention_days)
+			VALUES ($1,$2,$3,$4,$5,$6,$7)
+		`, rel.Id, rel.ModuleId, rel.Name, rel.Comment, rel.Encryption,
+			rel.RetentionCount, rel.RetentionDays); err != nil {
+
 			return err
 		}
 
 		// create primary key attribute if relation is new (e. g. not imported or updated)
 		if isNew {
-			if err := attribute.Set_tx(tx, id, uuid.Nil,
-				pgtype.UUID{Status: pgtype.Null},
-				pgtype.UUID{Status: pgtype.Null},
-				schema.PkName, "integer", 0, false, false, "", "", "",
-				types.CaptionMap{}); err != nil {
+			if err := attribute.Set_tx(tx, rel.Id, uuid.Nil,
+				pgtype.UUID{}, pgtype.UUID{}, schema.PkName, "integer", "default",
+				0, false, false, "", "", "", types.CaptionMap{}); err != nil {
 
 				return err
 			}
@@ -185,8 +183,5 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, name string,
 	}
 
 	// set policies
-	if err := setPolicies_tx(tx, id, policies); err != nil {
-		return err
-	}
-	return nil
+	return setPolicies_tx(tx, rel.Id, rel.Policies)
 }

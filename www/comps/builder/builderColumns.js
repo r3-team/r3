@@ -1,15 +1,13 @@
-import MyBuilderCaption   from './builderCaption.js';
-import {getFlexBasis}     from '../shared/form.js';
-import {getRandomInt}     from '../shared/generic.js';
-import {getQueryTemplate} from '../shared/query.js';
+import MyBuilderCaption     from './builderCaption.js';
+import {getItemTitleColumn} from '../shared/builder.js';
+import {getFlexBasis}       from '../shared/form.js';
+import {getRandomInt}       from '../shared/generic.js';
+import {getQueryTemplate}   from '../shared/query.js';
 import {
+	getAttributeIcon,
 	getIndexAttributeId,
 	isAttributeRelationship
 } from '../shared/attribute.js';
-import {
-	getItemTitle,
-	getItemTitleColumn
-} from '../shared/builder.js';
 
 export let MyBuilderColumns = {
 	name:'my-builder-columns',
@@ -22,19 +20,12 @@ export let MyBuilderColumns = {
 	   	 	<div class="builder-field column column-wrap dragAnchor" :class="{ selected:columnIdShow === element.id }">
 				<div class="builder-field-header">
 					
-					<div class="batch-set clickable"
-						v-if="!isTemplate && showOptions"
-						@click="batchSet(index,1)"
-						@click.right.prevent="batchSet(index,-1)"
-						:title="element.batch === null ? capApp.columnBatchHintNot : capApp.columnBatchHint.replace('{CNT}',element.batch)"
-					>
-						[{{ element.batch === null ? 'B-' : 'B'+element.batch }}]
-					</div>
-					
-					<img class="on-hover on-selected action clickable" src="images/edit.png"
-						v-if="!isTemplate"
-						@click="$emit('column-id-show',element.id)"
-						:class="{ selected:columnIdShow === element.id }"
+					<my-button
+						@trigger="$emit('column-id-show',element.id)"
+						:active="!isTemplate"
+						:image="!element.subQuery ? getAttributeIcon(attributeIdMap[element.attributeId],false) : 'database.png'"
+						:naked="true"
+						:tight="true"
 					/>
 					
 					<!-- toggle: show on mobile -->
@@ -44,6 +35,15 @@ export let MyBuilderColumns = {
 						:src="element.onMobile ? 'images/smartphone.png' : 'images/smartphoneOff.png'"
 						:title="capApp.onMobile"
 					/>
+					
+					<div class="batch-set clickable on-hover"
+						v-if="!isTemplate && showOptions"
+						@click="batchSet(index,1)"
+						@click.right.prevent="batchSet(index,-1)"
+						:title="element.batch === null ? capApp.columnBatchHintNot : capApp.columnBatchHint.replace('{CNT}',element.batch)"
+					>
+						[{{ element.batch === null ? 'B-' : 'B'+element.batch }}]
+					</div>
 					
 					<div class="clickable on-hover"
 						v-if="!isTemplate && showOptions"
@@ -56,13 +56,13 @@ export let MyBuilderColumns = {
 					
 					<!-- column title -->
 					<div class="title word-break"
-						:class="{ 'no-hover':hasCaptions && showOptions }"
+						:class="{ 'no-hover':hasCaptions }"
 						:title="getItemTitleColumn(element,false)"
 					>
 						{{ getItemTitleColumn(element,false) }}
 					</div>
 					<my-builder-caption class="on-hover"
-						v-if="hasCaptions && showOptions"
+						v-if="hasCaptions"
 						@update:modelValue="propertySet(index,'captions',{columnTitle:$event})"
 						:contentName="getItemTitleColumn(element,false)"
 						:language="builderLanguage"
@@ -111,8 +111,8 @@ export let MyBuilderColumns = {
 	},
 	methods:{
 		// externals
+		getAttributeIcon,
 		getFlexBasis,
-		getItemTitle,
 		getItemTitleColumn,
 		
 		// actions

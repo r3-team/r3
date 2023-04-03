@@ -3,6 +3,7 @@ package column
 import (
 	"errors"
 	"fmt"
+	"r3/compatible"
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
@@ -11,11 +12,11 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var allowedEntities = []string{"collection", "field"}
+var allowedEntities = []string{"api", "collection", "field"}
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 	_, err := tx.Exec(db.Ctx, `DELETE FROM app.column WHERE id = $1`, id)
@@ -59,7 +60,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 				return columns, err
 			}
 		} else {
-			c.Query.RelationId = pgtype.UUID{Status: pgtype.Null}
+			c.Query.RelationId = pgtype.UUID{}
 		}
 
 		// get captions
@@ -96,6 +97,12 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column
 	for position, c := range columns {
 
 		known, err := schema.CheckCreateId_tx(tx, &c.Id, "column", "id")
+		if err != nil {
+			return err
+		}
+
+		// fix imports < 3.3: Migrate display option to attribute content use
+		c.Display, err = compatible.MigrateDisplayToContentUse_tx(tx, c.AttributeId, c.Display)
 		if err != nil {
 			return err
 		}

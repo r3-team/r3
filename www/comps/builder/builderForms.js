@@ -8,7 +8,7 @@ let MyBuilderForms = {
 		
 		<div class="top lower">
 			<div class="area nowrap">
-				<img class="icon" src="images/form.png" />
+				<img class="icon" src="images/fileText.png" />
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
 			<div class="area default-inputs">
@@ -41,10 +41,11 @@ let MyBuilderForms = {
 		
 		<div class="content default-inputs" v-if="module">
 			
-			<div class="builder-entry-list">
+			<div class="generic-entry-list">
 				<div class="entry"
-					@click="$emit('createNew',readonly ? null : 'form')"
-					:class="{ clickable:!readonly, off:readonly }"
+					v-if="!readonly"
+					@click="$emit('createNew','form')"
+					:class="{ clickable:!readonly }"
 				>
 					<div class="row gap centered">
 						<img class="icon" src="images/add.png" />
@@ -80,7 +81,7 @@ let MyBuilderForms = {
 		id:             { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			copyFormId:null,
 			copyNewName:'',

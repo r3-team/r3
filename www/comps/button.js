@@ -37,16 +37,18 @@ let MyButton = {
 		imageBase64: { type:String,  required:false, default:'' },
 		
 		// style props
-		cancel:{ type:Boolean, required:false, default:false },
-		large: { type:Boolean, required:false, default:false },
-		naked: { type:Boolean, required:false, default:false },
-		right: { type:Boolean, required:false, default:false },
-		tight: { type:Boolean, required:false, default:false }
+		adjusts:{ type:Boolean, required:false, default:false }, // adjusts its length to avail. space (text is ellipsed if too small)
+		cancel: { type:Boolean, required:false, default:false },
+		large:  { type:Boolean, required:false, default:false },
+		naked:  { type:Boolean, required:false, default:false },
+		right:  { type:Boolean, required:false, default:false },
+		tight:  { type:Boolean, required:false, default:false }
 	},
 	emits:['trigger','trigger-middle','trigger-right','trigger-shift'],
 	computed:{
-		classes:function() {
+		classes() {
 			return {
+				adjusts:this.adjusts,
 				cancel:this.cancel,
 				clickable:this.active,
 				inactive:!this.active,
@@ -59,7 +61,7 @@ let MyButton = {
 		}
 	},
 	methods:{
-		trigger:function(ev) {
+		trigger(ev) {
 			if(!this.active) return;
 			
 			if(this.blockBubble)
@@ -67,7 +69,7 @@ let MyButton = {
 			
 			this.$emit('trigger');
 		},
-		triggerMiddle:function(ev) {
+		triggerMiddle(ev) {
 			if(!this.active) return;
 			
 			if(this.blockBubble)
@@ -75,7 +77,7 @@ let MyButton = {
 			
 			this.$emit('trigger-middle');
 		},
-		triggerRight:function(ev) {
+		triggerRight(ev) {
 			if(!this.active) return;
 			
 			if(this.blockBubble)
@@ -83,7 +85,7 @@ let MyButton = {
 			
 			this.$emit('trigger-right');
 		},
-		triggerShift:function(ev) {
+		triggerShift(ev) {
 			if(!this.active) return;
 			
 			if(this.blockBubble)

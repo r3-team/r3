@@ -6,7 +6,7 @@ import (
 	"r3/db"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 // checks the given ID
@@ -27,16 +27,6 @@ func CheckCreateId_tx(tx pgx.Tx, id *uuid.UUID, relName string, pkName string) (
 	`, relName, pkName), id).Scan(&known)
 
 	return known, err
-}
-
-// replace given UUID with a new one while storing the state change in a given map (oldstate -> newstate)
-func ReplaceUuid(id uuid.UUID, idMapReplaced map[uuid.UUID]uuid.UUID) (uuid.UUID, error) {
-	newId, err := uuid.NewV4()
-	if err != nil {
-		return uuid.Nil, err
-	}
-	idMapReplaced[id] = newId
-	return newId, nil
 }
 
 // attribute checks
@@ -558,39 +548,93 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 			name1.String)
 	}
 
-	// check data field presets as default value(s) without dependency
+	// check data presets without dependency
 	if err := tx.QueryRow(db.Ctx, `
 		SELECT COUNT(*)
-		FROM app.field_data_relationship_preset
-		WHERE field_id IN (
+		FROM app.preset
+		WHERE id IN (
+			-- presets from query filters (and their sub query filters)
 			SELECT id
-			FROM app.field
-			WHERE form_id IN (
+			FROM app.preset
+			WHERE id = ANY(
+				app.get_preset_ids_inside_queries((
+					SELECT ARRAY_AGG(id)
+					FROM app.query
+					WHERE form_id IN (
+						SELECT id
+						FROM app.form
+						WHERE module_id = $1
+					)
+					OR field_id IN (
+						SELECT id
+						FROM app.field
+						WHERE form_id IN (
+							SELECT id
+							FROM app.form
+							WHERE module_id = $2
+						)
+					)
+					OR column_id IN (
+						SELECT id
+						FROM app.column
+						WHERE field_id IN (
+							SELECT id
+							FROM app.field
+							WHERE form_id IN (
+								SELECT id
+								FROM app.form
+								WHERE module_id = $3
+							)
+						)
+					)
+					OR api_id IN (
+						SELECT id
+						FROM app.api
+						WHERE module_id = $4
+					)
+					OR collection_id IN (
+						SELECT id
+						FROM app.collection
+						WHERE module_id = $5
+					)
+				))
+			)
+			
+			UNION
+			
+			-- presets from field default values
+			SELECT preset_id
+			FROM app.field_data_relationship_preset
+			WHERE field_id IN (
 				SELECT id
-				FROM app.form
-				WHERE module_id = $1
+				FROM app.field
+				WHERE form_id IN (
+					SELECT id
+					FROM app.form
+					WHERE module_id = $6
+				)
 			)
 		)
-		AND preset_id NOT IN (
+		AND id NOT IN (
 			SELECT id
 			FROM app.preset
 			WHERE relation_id IN (
 				SELECT id
 				FROM app.relation
-				WHERE module_id = $2
+				WHERE module_id = $7
 				OR module_id IN (
 					SELECT module_id_on
 					FROM app.module_depends
-					WHERE module_id = $3
+					WHERE module_id = $8
 				)
 			)
 		)
-	`, moduleId, moduleId, moduleId).Scan(&cnt); err != nil {
+	`, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId, moduleId).Scan(&cnt); err != nil {
 		return err
 	}
 
 	if cnt != 0 {
-		return fmt.Errorf("dependency check failed, %d data field(s) using presets as default values from independent module(s)",
+		return fmt.Errorf("dependency check failed, %d presets (either as field default or inside filters) referenced from independent module(s)",
 			cnt)
 	}
 	return nil

@@ -8,8 +8,8 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 // user requests
@@ -68,24 +68,20 @@ func LoginDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		Id int64 `json:"id"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-
-	if err := login.Del_tx(tx, req.Id); err != nil {
-		return nil, err
-	}
-	return nil, nil
+	return nil, login.Del_tx(tx, req.Id)
 }
 func LoginGet(reqJson json.RawMessage) (interface{}, error) {
 
 	var (
 		req struct {
-			ByString       string                          `json:"byString"`
-			Limit          int                             `json:"limit"`
-			Offset         int                             `json:"offset"`
-			RecordRequests []types.LoginAdminRecordRequest `json:"recordRequests"`
+			ById           int64                       `json:"byId"`
+			ByString       string                      `json:"byString"`
+			Limit          int                         `json:"limit"`
+			Offset         int                         `json:"offset"`
+			RecordRequests []types.LoginAdminRecordGet `json:"recordRequests"`
 		}
 		res struct {
 			Total  int                `json:"total"`
@@ -97,14 +93,10 @@ func LoginGet(reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
+	res.Logins, res.Total, err = login.Get(req.ById, req.ByString,
+		req.Limit, req.Offset, req.RecordRequests)
 
-	res.Logins, res.Total, err = login.Get(req.ByString, req.Limit, req.Offset,
-		req.RecordRequests)
-
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
+	return res, err
 }
 func LoginGetMembers(reqJson json.RawMessage) (interface{}, error) {
 
@@ -132,35 +124,38 @@ func LoginGetRecords(reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
 		AttributeIdLookup uuid.UUID `json:"attributeIdLookup"`
-		IdsExclude        []int64   `json:"idsExclude"`
+		ById              int64     `json:"byId"`
 		ByString          string    `json:"byString"`
+		IdsExclude        []int64   `json:"idsExclude"`
 	}
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return login.GetRecords(req.AttributeIdLookup, req.IdsExclude, req.ByString)
+	return login.GetRecords(req.AttributeIdLookup, req.IdsExclude, req.ById, req.ByString)
 }
 func LoginSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req struct {
-		Id           int64          `json:"id"`
-		LdapId       pgtype.Int4    `json:"ldapId"`
-		LdapKey      pgtype.Varchar `json:"ldapKey"`
-		Name         string         `json:"name"`
-		Pass         string         `json:"pass"`
-		LanguageCode string         `json:"languageCode"`
-		Active       bool           `json:"active"`
-		Admin        bool           `json:"admin"`
-		NoAuth       bool           `json:"noAuth"`
-		RoleIds      []uuid.UUID    `json:"roleIds"`
+		Id         int64                       `json:"id"`
+		LdapId     pgtype.Int4                 `json:"ldapId"`
+		LdapKey    pgtype.Text                 `json:"ldapKey"`
+		Name       string                      `json:"name"`
+		Pass       string                      `json:"pass"`
+		Active     bool                        `json:"active"`
+		Admin      bool                        `json:"admin"`
+		NoAuth     bool                        `json:"noAuth"`
+		RoleIds    []uuid.UUID                 `json:"roleIds"`
+		Records    []types.LoginAdminRecordSet `json:"records"`
+		TemplateId pgtype.Int8                 `json:"templateId"`
 	}
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, login.Set_tx(tx, req.Id, req.LdapId, req.LdapKey, req.LanguageCode,
-		req.Name, req.Pass, req.Admin, req.NoAuth, req.Active, req.RoleIds)
+	return login.Set_tx(tx, req.Id, req.TemplateId, req.LdapId, req.LdapKey,
+		req.Name, req.Pass, req.Admin, req.NoAuth, req.Active, req.RoleIds,
+		req.Records)
 }
 func LoginSetMembers_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
@@ -173,19 +168,6 @@ func LoginSetMembers_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error)
 		return nil, err
 	}
 	return nil, login.SetRoleLoginIds_tx(tx, req.RoleId, req.LoginIds)
-}
-func LoginSetRecord_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
-	var req struct {
-		AttributeIdLogin uuid.UUID   `json:"attributeIdLogin"`
-		LoginId          pgtype.Int4 `json:"loginId"`
-		RecordId         int64       `json:"recordId"`
-	}
-
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-	return nil, login.SetRecord_tx(tx, req.AttributeIdLogin, req.LoginId, req.RecordId)
 }
 func LoginKick(reqJson json.RawMessage) (interface{}, error) {
 

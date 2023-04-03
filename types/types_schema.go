@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgtype"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 type Module struct {
@@ -32,6 +32,7 @@ type Module struct {
 	PgFunctions     []PgFunction      `json:"pgFunctions"`
 	JsFunctions     []JsFunction      `json:"jsFunctions"`
 	Collections     []Collection      `json:"collections"`
+	Apis            []Api             `json:"apis"`
 	ArticleIdsHelp  []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
 	Captions        CaptionMap        `json:"captions"`
 }
@@ -39,6 +40,21 @@ type ModuleStartForm struct {
 	Position int       `json:"position"`
 	RoleId   uuid.UUID `json:"roleId"`
 	FormId   uuid.UUID `json:"formId"`
+}
+type Api struct {
+	Id         uuid.UUID   `json:"id"`
+	ModuleId   uuid.UUID   `json:"moduleId"`
+	Name       string      `json:"name"`
+	Comment    pgtype.Text `json:"comment"` // author comment
+	Query      Query       `json:"query"`
+	Columns    []Column    `json:"columns"`
+	HasDelete  bool        `json:"hasDelete"`
+	HasGet     bool        `json:"hasGet"`
+	HasPost    bool        `json:"hasPost"`
+	LimitDef   int         `json:"limitDef"`   // default limit, if nothing else is specified
+	LimitMax   int         `json:"limitMax"`   // maximum limit that can be requested
+	VerboseDef bool        `json:"verboseDef"` // default input/output option, verbose shows relation indexes and attribute names
+	Version    int         `json:"version"`
 }
 type Article struct {
 	Id       uuid.UUID  `json:"id"`
@@ -49,8 +65,9 @@ type Article struct {
 type Relation struct {
 	Id             uuid.UUID        `json:"id"`
 	ModuleId       uuid.UUID        `json:"moduleId"`
-	AttributeIdPk  uuid.UUID        `json:"attributeIdPk"` // read only, ID of PK attribute
-	Name           string           `json:"name"`
+	AttributeIdPk  uuid.UUID        `json:"attributeIdPk"`  // read only, ID of PK attribute
+	Name           string           `json:"name"`           // unique (within module) relation name
+	Comment        pgtype.Text      `json:"comment"`        // author comment
 	Encryption     bool             `json:"encryption"`     // relation supports encrypted attribute values
 	RetentionCount pgtype.Int4      `json:"retentionCount"` // minimum number of retained change events
 	RetentionDays  pgtype.Int4      `json:"retentionDays"`  // minimum age of retained change events
@@ -87,15 +104,16 @@ type Attribute struct {
 	Id             uuid.UUID   `json:"id"`
 	RelationId     uuid.UUID   `json:"relationId"`     // attribute belongs to this relation
 	RelationshipId pgtype.UUID `json:"relationshipId"` // ID of target relation
-	IconId         pgtype.UUID `json:"iconId"`         // default icon for attribute
-	Name           string      `json:"name"`           // name of attributes, used as table column
-	Content        string      `json:"content"`        // attribute content (integer, text, ...)
+	IconId         pgtype.UUID `json:"iconId"`         // default icon
+	Name           string      `json:"name"`           // name, used as table column
+	Content        string      `json:"content"`        // content (integer, varchar, text, real, uuid, files, n:1, ...)
+	ContentUse     string      `json:"contentUse"`     // content use (default, richtext, color, datetime, ...)
 	Length         int         `json:"length"`         // varchar length or max file size in KB (files attribute)
-	Nullable       bool        `json:"nullable"`
-	Encrypted      bool        `json:"encrypted"` // content is encrypted (end-to-end for logins)
-	Def            string      `json:"def"`
-	OnUpdate       string      `json:"onUpdate"`
-	OnDelete       string      `json:"onDelete"`
+	Nullable       bool        `json:"nullable"`       // value is nullable
+	Encrypted      bool        `json:"encrypted"`      // value is encrypted (end-to-end for logins)
+	Def            string      `json:"def"`            // default value
+	OnUpdate       string      `json:"onUpdate"`       // relationship attribute, action on 'UPDATE'
+	OnDelete       string      `json:"onDelete"`       // relationship attribute, action on 'DELETE'
 	Captions       CaptionMap  `json:"captions"`
 }
 type Menu struct {
@@ -165,26 +183,26 @@ type FormStateCondition struct {
 	Side1     FormStateConditionSide `json:"side1"`     // comparison: right side
 
 	// legacy, replaced by FormStateConditionSide
-	Brackets0    int            `json:"brackets0"`
-	Brackets1    int            `json:"brackets1"`
-	FieldId0     pgtype.UUID    `json:"fieldId0"`     // if set: field0 value for match (not required for: newRecord, roleId)
-	FieldId1     pgtype.UUID    `json:"fieldId1"`     // if set: field0 value must match field1 value
-	PresetId1    pgtype.UUID    `json:"presetId1"`    // if set: field0 value must match preset record value
-	RoleId       pgtype.UUID    `json:"roleId"`       // if set: with operator '=' login must have role ('<>' must not have role)
-	FieldChanged pgtype.Bool    `json:"fieldChanged"` // if set: true matches field value changed, false matches unchanged
-	NewRecord    pgtype.Bool    `json:"newRecord"`    // if set: true matches new, false existing record
-	Login1       pgtype.Bool    `json:"login1"`       // if set: true matches login ID of current user
-	Value1       pgtype.Varchar `json:"value1"`       // fixed value for direct field0 match
+	Brackets0    int         `json:"brackets0"`
+	Brackets1    int         `json:"brackets1"`
+	FieldId0     pgtype.UUID `json:"fieldId0"`     // if set: field0 value for match (not required for: newRecord, roleId)
+	FieldId1     pgtype.UUID `json:"fieldId1"`     // if set: field0 value must match field1 value
+	PresetId1    pgtype.UUID `json:"presetId1"`    // if set: field0 value must match preset record value
+	RoleId       pgtype.UUID `json:"roleId"`       // if set: with operator '=' login must have role ('<>' must not have role)
+	FieldChanged pgtype.Bool `json:"fieldChanged"` // if set: true matches field value changed, false matches unchanged
+	NewRecord    pgtype.Bool `json:"newRecord"`    // if set: true matches new, false existing record
+	Login1       pgtype.Bool `json:"login1"`       // if set: true matches login ID of current user
+	Value1       pgtype.Text `json:"value1"`       // fixed value for direct field0 match
 }
 type FormStateConditionSide struct {
-	Brackets     int            `json:"brackets"`     // opening/closing brackets (side 0/1)
-	Content      string         `json:"content"`      // collection, field, fieldChanged, login, preset, recordNew, role, true, value
-	CollectionId pgtype.UUID    `json:"collectionId"` // collection ID of which column value to compare
-	ColumnId     pgtype.UUID    `json:"columnId"`     // column ID from collection of which value to compare
-	FieldId      pgtype.UUID    `json:"fieldId"`      // field for value/has changed?
-	PresetId     pgtype.UUID    `json:"presetId"`     // preset ID of record to be compared
-	RoleId       pgtype.UUID    `json:"roleId"`       // role ID assigned to user
-	Value        pgtype.Varchar `json:"value"`        // fixed value, can be anything including NULL
+	Brackets     int         `json:"brackets"`     // opening/closing brackets (side 0/1)
+	Content      string      `json:"content"`      // collection, field, fieldChanged, fieldValid, login, preset, recordNew, role, true, value
+	CollectionId pgtype.UUID `json:"collectionId"` // collection ID of which column value to compare
+	ColumnId     pgtype.UUID `json:"columnId"`     // column ID from collection of which value to compare
+	FieldId      pgtype.UUID `json:"fieldId"`      // field for value/has changed?
+	PresetId     pgtype.UUID `json:"presetId"`     // preset ID of record to be compared
+	RoleId       pgtype.UUID `json:"roleId"`       // role ID assigned to user
+	Value        pgtype.Text `json:"value"`        // fixed value, can be anything including NULL
 }
 type FormStateEffect struct {
 	FieldId  pgtype.UUID `json:"fieldId"`  // affected field
@@ -228,7 +246,7 @@ type FieldCalendar struct {
 	IndexDate1       int                  `json:"indexDate1"`
 	IndexColor       pgtype.Int4          `json:"indexColor"`
 	Gantt            bool                 `json:"gantt"`            // gantt presentation
-	GanttSteps       pgtype.Varchar       `json:"ganttSteps"`       // gantt step type (hours, days)
+	GanttSteps       pgtype.Text          `json:"ganttSteps"`       // gantt step type (hours, days)
 	GanttStepsToggle bool                 `json:"ganttStepsToggle"` // user can toggle between gantt step types
 	Ics              bool                 `json:"ics"`              // calendar available as ICS download
 	DateRange0       int64                `json:"dateRange0"`       // ICS/gantt time range before NOW (seconds)
@@ -288,7 +306,7 @@ type FieldData struct {
 	DefCollection  CollectionConsumer `json:"defCollection"`  // data field default value from collection
 	Min            pgtype.Int4        `json:"min"`
 	Max            pgtype.Int4        `json:"max"`
-	RegexCheck     pgtype.Varchar     `json:"regexCheck"`   // regex expression to check field value against
+	RegexCheck     pgtype.Text        `json:"regexCheck"`   // regex expression to check field value against
 	JsFunctionId   pgtype.UUID        `json:"jsFunctionId"` // JS function to exec when changing values
 	Captions       CaptionMap         `json:"captions"`
 
@@ -317,7 +335,7 @@ type FieldDataRelationship struct {
 	DefPresetIds  []uuid.UUID        `json:"defPresetIds"`  // data field default from record IDs via presets
 	Min           pgtype.Int4        `json:"min"`
 	Max           pgtype.Int4        `json:"max"`
-	RegexCheck    pgtype.Varchar     `json:"regexCheck"` // not used for relationships
+	RegexCheck    pgtype.Text        `json:"regexCheck"` // not used for relationships
 	JsFunctionId  pgtype.UUID        `json:"jsFunctionId"`
 	Columns       []Column           `json:"columns"`
 	Category      bool               `json:"category"`
@@ -393,22 +411,22 @@ type CollectionConsumer struct {
 	OpenForm        OpenForm    `json:"openForm"`
 }
 type Column struct {
-	Id          uuid.UUID      `json:"id"`
-	AttributeId uuid.UUID      `json:"attributeId"`
-	Index       int            `json:"index"`      // attribute index
-	Batch       pgtype.Int4    `json:"batch"`      // index of column batch (multiple columns as one)
-	Basis       int            `json:"basis"`      // size basis (usually width)
-	Length      int            `json:"length"`     // text length limit (in characters)
-	Wrap        bool           `json:"wrap"`       // text wrap
-	Display     string         `json:"display"`    // how to display value (text, date, color, etc.)
-	GroupBy     bool           `json:"groupBy"`    // group by column attribute value?
-	Aggregator  pgtype.Varchar `json:"aggregator"` // aggregator (SUM, COUNT, etc.)
-	Distincted  bool           `json:"distincted"` // attribute values are distinct?
-	SubQuery    bool           `json:"subQuery"`   // column uses sub query?
-	OnMobile    bool           `json:"onMobile"`   // display this column on mobile?
-	Clipboard   bool           `json:"clipboard"`  // show copy-to-clipboard action?
-	Query       Query          `json:"query"`      // sub query
-	Captions    CaptionMap     `json:"captions"`
+	Id          uuid.UUID   `json:"id"`
+	AttributeId uuid.UUID   `json:"attributeId"`
+	Index       int         `json:"index"`      // attribute index
+	Batch       pgtype.Int4 `json:"batch"`      // index of column batch (multiple columns as one)
+	Basis       int         `json:"basis"`      // size basis (usually width)
+	Length      int         `json:"length"`     // text length limit (in characters)
+	Wrap        bool        `json:"wrap"`       // text wrap
+	Display     string      `json:"display"`    // how to display value (text, date, color, etc.)
+	GroupBy     bool        `json:"groupBy"`    // group by column attribute value?
+	Aggregator  pgtype.Text `json:"aggregator"` // aggregator (SUM, COUNT, etc.)
+	Distincted  bool        `json:"distincted"` // attribute values are distinct?
+	SubQuery    bool        `json:"subQuery"`   // column uses sub query?
+	OnMobile    bool        `json:"onMobile"`   // display this column on mobile?
+	Clipboard   bool        `json:"clipboard"`  // show copy-to-clipboard action?
+	Query       Query       `json:"query"`      // sub query
+	Captions    CaptionMap  `json:"captions"`
 }
 type Role struct {
 	Id                uuid.UUID         `json:"id"`
@@ -417,6 +435,7 @@ type Role struct {
 	Name              string            `json:"name"`
 	Content           string            `json:"content"`
 	Assignable        bool              `json:"assignable"`
+	AccessApis        map[uuid.UUID]int `json:"accessApis"`
 	AccessAttributes  map[uuid.UUID]int `json:"accessAttributes"`
 	AccessCollections map[uuid.UUID]int `json:"accessCollections"`
 	AccessMenus       map[uuid.UUID]int `json:"accessMenus"`
@@ -461,9 +480,10 @@ type PgTrigger struct {
 type PgIndex struct {
 	Id           uuid.UUID          `json:"id"`
 	RelationId   uuid.UUID          `json:"relationId"`
-	NoDuplicates bool               `json:"noDuplicates"`
-	AutoFki      bool               `json:"autoFki"`
-	Attributes   []PgIndexAttribute `json:"attributes"`
+	NoDuplicates bool               `json:"noDuplicates"` // index is unique
+	AutoFki      bool               `json:"autoFki"`      // index belongs to foreign key attribute (auto-generated)
+	PrimaryKey   bool               `json:"primaryKey"`   // index belongs to primary key attribute
+	Attributes   []PgIndexAttribute `json:"attributes"`   // attributes the index is made of
 }
 type PgIndexAttribute struct {
 	PgIndexId   uuid.UUID `json:"pgIndexId"`
@@ -482,11 +502,12 @@ type JsFunction struct {
 	Captions     CaptionMap  `json:"captions"`
 }
 type Tab struct {
-	Id       uuid.UUID     `json:"id"`
-	Position int           `json:"position"`
-	State    string        `json:"state"`  // tab default state (default, hidden)
-	Fields   []interface{} `json:"fields"` // fields assigned to tab
-	Captions CaptionMap    `json:"captions"`
+	Id             uuid.UUID     `json:"id"`
+	Position       int           `json:"position"`
+	ContentCounter bool          `json:"contentCounter"` // tab shows counter of its child field values (list rows, calendar entries, file counts)
+	State          string        `json:"state"`          // tab default state (default, hidden)
+	Fields         []interface{} `json:"fields"`         // fields assigned to tab
+	Captions       CaptionMap    `json:"captions"`
 }
 type Deletion struct {
 	Id     uuid.UUID `json:"id"`

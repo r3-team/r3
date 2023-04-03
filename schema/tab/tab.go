@@ -10,7 +10,7 @@ import (
 	"r3/types"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v4"
+	"github.com/jackc/pgx/v5"
 )
 
 var allowedEntities = []string{"field"}
@@ -28,7 +28,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Tab, error) {
 	}
 
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
-		SELECT id, state
+		SELECT id, content_counter, state
 		FROM app.tab
 		WHERE %s_id = $1
 		ORDER BY position ASC
@@ -40,7 +40,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Tab, error) {
 
 	for rows.Next() {
 		var t types.Tab
-		if err := rows.Scan(&t.Id, &t.State); err != nil {
+		if err := rows.Scan(&t.Id, &t.ContentCounter, &t.State); err != nil {
 			return tabs, err
 		}
 		tabs = append(tabs, t)
@@ -69,16 +69,16 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, position int, tab type
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.tab
-			SET position = $1, state = $2
-			WHERE id = $3
-		`, position, tab.State, tab.Id); err != nil {
+			SET position = $1, content_counter = $2, state = $3
+			WHERE id = $4
+		`, position, tab.ContentCounter, tab.State, tab.Id); err != nil {
 			return tab.Id, err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-			INSERT INTO app.tab (id, %s_id, position, state)
-			VALUES ($1,$2,$3,$4)
-		`, entity), tab.Id, entityId, position, tab.State); err != nil {
+			INSERT INTO app.tab (id, %s_id, position, content_counter, state)
+			VALUES ($1,$2,$3,$4,$5)
+		`, entity), tab.Id, entityId, position, tab.ContentCounter, tab.State); err != nil {
 			return tab.Id, err
 		}
 	}

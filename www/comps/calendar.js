@@ -91,10 +91,11 @@ let MyCalendarMonth = {
 			<div class="area nowrap default-inputs">
 				<my-input-collection class="selector"
 					v-for="c in collections"
-					@update:indexes="$emit('set-collection-indexes',c.collectionId,$event)"
+					@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event)"
 					:collectionId="c.collectionId"
 					:columnIdDisplay="c.columnIdDisplay"
 					:key="c.collectionId"
+					:modelValue="collectionIdMapIndexes[c.collectionId]"
 					:multiValue="c.multiValue"
 				/>
 				
@@ -235,6 +236,7 @@ let MyCalendarMonth = {
 		choices:    { type:Array,   required:false, default:() => [] },
 		columns:    { type:Array,   required:false, default:() => [] },
 		collections:{ type:Array,   required:false, default:() => [] },
+		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		date:       { type:Date,    required:true },                    // selected date to work around
 		date0:      { type:Date,    required:true },                    // start date of calendar
 		date1:      { type:Date,    required:true },                    // end date of calendar
@@ -567,8 +569,8 @@ let MyCalendarMonth = {
 let MyCalendar = {
 	name:'my-calendar',
 	components:{MyCalendarMonth},
-	template:`<div class="calendar" v-if="ready">
-		<my-calendar-month class="shade"
+	template:`<div class="calendar" :class="{ isSingleField:isSingleField }" v-if="ready">
+		<my-calendar-month
 			v-if="view === 'month'"
 			@day-selected="daySelected"
 			@open-form="(...args) => $emit('open-form',...args)"
@@ -580,6 +582,7 @@ let MyCalendar = {
 			:choices="choices"
 			:columns="columns"
 			:collections="collections"
+			:collectionIdMapIndexes="collectionIdMapIndexes"
 			:date="date"
 			:date0="date0"
 			:date1="date1"
@@ -603,6 +606,7 @@ let MyCalendar = {
 		choices:         { type:Array,   required:false, default:() => [] },
 		columns:         { type:Array,   required:true },
 		collections:     { type:Array,   required:true },
+		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		fieldId:         { type:String,  required:false, default:'' },
 		filters:         { type:Array,   required:true },
 		formLoading:     { type:Boolean, required:false, default:false },
@@ -611,12 +615,13 @@ let MyCalendar = {
 		indexColor:      { required:true },
 		indexDate0:      { type:Number,  required:true },
 		indexDate1:      { type:Number,  required:true },
-		isHiddenInTab:   { type:Boolean, required:false, default:false }, // calendar is in a non-visible tab-field
+		isHidden:        { type:Boolean, required:false, default:false },
+		isSingleField:   { type:Boolean, required:false, default:false },
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:false, default:false },
 		usesPageHistory: { type:Boolean, required:true }
 	},
-	emits:['open-form','record-selected','set-args','set-collection-indexes'],
+	emits:['open-form','record-count-change','record-selected','set-args','set-collection-indexes'],
 	data() {
 		return {
 			// calendar state
@@ -664,7 +669,7 @@ let MyCalendar = {
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
 		});
-		this.$watch('isHiddenInTab',(val) => {
+		this.$watch('isHidden',(val) => {
 			if(!val) this.reloadOutside();
 		});
 		this.$watch(() => [this.choices,this.columns,this.filters],(newVals, oldVals) => {
@@ -793,7 +798,7 @@ let MyCalendar = {
 		
 		// backend calls
 		get() {
-			if(this.query.relationId === null || this.isHiddenInTab)
+			if(this.query.relationId === null || this.isHidden)
 				return;
 			
 			let dateStart = this.getUnixFromDate(this.date0);
@@ -833,7 +838,10 @@ let MyCalendar = {
 				)).concat(this.choiceFilters),
 				orders:orders
 			},true).then(
-				res => this.rows = res.payload.rows,
+				res => {
+					this.rows = res.payload.rows;
+					this.$emit('record-count-change',this.rows.length);
+				},
 				this.$root.genericError
 			);
 		}
