@@ -218,7 +218,7 @@
 			"pwForceSpecial":"Require special characters",
 			"pwForceUpper":"Require upper case letters",
 			"pwLengthMin":"Minimum length",
-			"pwTitle":"Passwort settings",
+			"pwTitle":"Password settings",
 			"repoFeedback":"Allow anonymous user feedback",
 			"repoKeyManagement":"Trusted key management",
 			"repoPublicKeys":"Public keys",
