@@ -176,7 +176,7 @@
 	margin:4px;
 }
 .list .layoutTable td .batch{
-	height:100%;
+	min-height:100%; /* relevant for color inputs */
 	padding:0px 10px;
 	display:flex;
 	flex-flow:row nowrap;
