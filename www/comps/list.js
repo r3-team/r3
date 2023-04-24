@@ -152,7 +152,7 @@ let MyList = {
 							</td>
 							<td>
 								<div class="list-input-row-items">
-									<input class="input"
+									<input class="input" enterkeyhint="send"
 										@click="focus"
 										@focus="focus"
 										@keyup="updatedTextInput"
@@ -265,12 +265,12 @@ let MyList = {
 						:tight="true"
 					/>
 					
-					<input class="selector lookup" type="text"
+					<input class="selector lookup" enterkeyhint="send" type="text"
 						v-if="filterQuick"
 						@keyup.enter="updatedFilterQuick"
 						v-model="filtersQuick"
+						:placeholder="capGen.threeDots"
 						:title="capApp.quick"
-						placeholder="..."
 					/>
 					
 					<my-input-collection class="selector"
@@ -425,10 +425,11 @@ let MyList = {
 										:total="count"
 									/>
 									
-									<input class="selector lookup small" type="text" placeholder="..."
+									<input class="selector lookup small" enterkeyhint="send" type="text"
 										v-if="filterQuick"
 										@keyup.enter="updatedFilterQuick"
 										v-model="filtersQuick"
+										:placeholder="capGen.threeDots"
 										:title="capApp.quick"
 									/>
 									
