@@ -666,8 +666,8 @@
 			"nullableHint":"If enabled, this value must never be empty. Inputs for this attribute are mandatory by default.",
 			"lengthText":"Max. characters",
 			"lengthFiles":"Max. size in KB",
-			"onDelete":"Aktion bei Löschung",
-			"onUpdate":"Aktion bei Änderung",
+			"onDelete":"Action when deleted",
+			"onUpdate":"Action when changed",
 			"relationshipId":"Relationship with",
 			"titleHint":"The title can be translated in available application languages. It is shown to users if not overwritten by a field or column title.",
 			"usedFor":"Value type"

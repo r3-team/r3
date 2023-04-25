@@ -237,10 +237,9 @@ let MyBuilderAttribute = {
 							<td>
 								<select v-model="values.onUpdate" :disabled="readonly">
 									<option value="NO ACTION">NO ACTION</option>
-									<option value="RESTRICT">RESTRICT</option>
 									<option value="CASCADE">CASCADE</option>
 									<option value="SET NULL">SET NULL</option>
-									<option value="SET DEFAULT">SET DEFAULT</option>
+									<option value="RESTRICT">RESTRICT</option>
 								</select>
 							</td>
 							<td></td>
@@ -250,10 +249,9 @@ let MyBuilderAttribute = {
 							<td>
 								<select v-model="values.onDelete" :disabled="readonly">
 									<option value="NO ACTION">NO ACTION</option>
-									<option value="RESTRICT">RESTRICT</option>
 									<option value="CASCADE">CASCADE</option>
 									<option value="SET NULL">SET NULL</option>
-									<option value="SET DEFAULT">SET DEFAULT</option>
+									<option value="RESTRICT">RESTRICT</option>
 								</select>
 							</td>
 							<td></td>
