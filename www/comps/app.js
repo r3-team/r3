@@ -584,7 +584,11 @@ let MyApp = {
 		// backend reloads
 		captionsReload() {
 			return new Promise((resolve,reject) => {
-				fetch(`./langs/${R3.appBuild}/${this.settings.languageCode}`).then(
+				// force valid system captions
+				let lang = ['de_de','en_us','it_it','ro_ro'].includes(this.settings.languageCode)
+					? this.settings.languageCode : 'en_us';
+				
+				fetch(`./langs/${R3.appBuild}/${lang}`).then(
 					res => {
 						if(res.status !== 200)
 							return reject('Failed to load captions');
@@ -602,8 +606,6 @@ let MyApp = {
 			);
 		},
 		schemaReload(moduleId) {
-			
-			// all or specific module
 			let payload = typeof moduleId === 'undefined'
 				? {} : {moduleId:moduleId};
 			
