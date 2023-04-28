@@ -65,9 +65,7 @@ let MyAdminConfig = {
 						<td>{{ capApp.defaultLanguageCode }}</td>
 						<td>
 							<select v-model="configInput.defaultLanguageCode">
-								<option v-for="l in languageCodes" :value="l">
-									{{ l }}
-								</option>
+								<option v-for="l in languageCodes" :value="l">{{ l }}</option>
 							</select>
 						</td>
 					</tr>
@@ -453,13 +451,13 @@ let MyAdminConfig = {
 	},
 	watch:{
 		config:{
-			handler:function(v) {
+			handler(v) {
 				this.configInput = JSON.parse(JSON.stringify(v));
 			},
 			immediate:true
 		}
 	},
-	data:function() {
+	data() {
 		return {
 			ready:false,
 			configInput:{},
@@ -471,72 +469,64 @@ let MyAdminConfig = {
 			showColorLogin:false
 		};
 	},
-	mounted:function() {
+	mounted() {
 		this.get();
 		this.$store.commit('pageTitle',this.menuTitle);
 	},
 	computed:{
-		hasChanges:function() {
-			return JSON.stringify(this.config) !== JSON.stringify(this.configInput);
-		},
+		hasChanges:(s) => JSON.stringify(s.config) !== JSON.stringify(s.configInput),
 		publicKeys:{
-			get:function()  { return JSON.parse(this.configInput.repoPublicKeys); },
-			set:function(v) { this.configInput.repoPublicKeys = JSON.stringify(v); }
+			get()  { return JSON.parse(this.configInput.repoPublicKeys); },
+			set(v) { this.configInput.repoPublicKeys = JSON.stringify(v); }
 		},
-		updateCheckText:function() {
-			if(this.config.updateCheckVersion === '')
-				return this.capApp.updateCheckUnknown;
+		updateCheckText:(s) => {
+			if(s.config.updateCheckVersion === '')
+				return s.capApp.updateCheckUnknown;
 			
-			let buildNew = this.getBuildFromVersion(this.config.updateCheckVersion);
-			let buildOld = this.getBuildFromVersion(this.appVersion);
+			let buildNew = s.getBuildFromVersion(s.config.updateCheckVersion);
+			let buildOld = s.getBuildFromVersion(s.appVersion);
 			
-			if(buildNew === buildOld)
-				return this.capApp.updateCheckCurrent;
+			if(buildNew === buildOld) return s.capApp.updateCheckCurrent;
+			if(buildNew > buildOld)   return s.capApp.updateCheckOlder;
 			
-			if(buildNew > buildOld)
-				return this.capApp.updateCheckOlder;
-			
-			return this.capApp.updateCheckNewer;
+			return s.capApp.updateCheckNewer;
 		},
 		
 		// stores
-		activated:    function() { return this.$store.getters['local/activated']; },
-		appVersion:   function() { return this.$store.getters['local/appVersion']; },
-		token:        function() { return this.$store.getters['local/token']; },
-		languageCodes:function() { return this.$store.getters['schema/languageCodes']; },
-		modules:      function() { return this.$store.getters['schema/modules']; },
-		config:       function() { return this.$store.getters.config; },
-		license:      function() { return this.$store.getters.license; },
-		licenseDays:  function() { return this.$store.getters.licenseDays; },
-		licenseValid: function() { return this.$store.getters.licenseValid; },
-		capApp:       function() { return this.$store.getters.captions.admin.config; },
-		capGen:       function() { return this.$store.getters.captions.generic; }
+		activated:    (s) => s.$store.getters['local/activated'],
+		appVersion:   (s) => s.$store.getters['local/appVersion'],
+		token:        (s) => s.$store.getters['local/token'],
+		languageCodes:(s) => s.$store.getters['schema/languageCodes'],
+		modules:      (s) => s.$store.getters['schema/modules'],
+		config:       (s) => s.$store.getters.config,
+		license:      (s) => s.$store.getters.license,
+		licenseDays:  (s) => s.$store.getters.licenseDays,
+		licenseValid: (s) => s.$store.getters.licenseValid,
+		capApp:       (s) => s.$store.getters.captions.admin.config,
+		capGen:       (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
 		getBuildFromVersion,
 		srcBase64,
 		
-		applyColor:function(target,value) {
+		applyColor(target,value) {
 			switch(target) {
 				case 'header': this.configInput.companyColorHeader = value.hex.substr(1); break;
 				case 'login':  this.configInput.companyColorLogin  = value.hex.substr(1); break;
 			}
 		},
-		applyLogo:function(evt) {
-			let that = this;
+		applyLogo(evt) {
 			let file = evt.target.files[0];
 			
 			var reader = new FileReader();
 			reader.readAsDataURL(file);
-			reader.onload = function() {
-				that.configInput.companyLogo = reader.result.split(',')[1];
-			};
+			reader.onload = () => this.configInput.companyLogo = reader.result.split(',')[1];
 			reader.onerror = function(error) {
 				that.$root.genericError(error);
 			};
 		},
-		informBuilderMode:function() {
+		informBuilderMode() {
 			if(this.configInput.builderMode === '0')
 				return;
 			
@@ -550,7 +540,7 @@ let MyAdminConfig = {
 				}]
 			});
 		},
-		informProductionMode:function() {
+		informProductionMode() {
 			if(this.configInput.productionMode !== '0')
 				return;
 			
@@ -564,7 +554,7 @@ let MyAdminConfig = {
 				}]
 			});
 		},
-		publicKeyShow:function(name,key) {
+		publicKeyShow(name,key) {
 			this.$store.commit('dialog',{
 				captionBody:key,
 				captionTop:name,
@@ -577,11 +567,11 @@ let MyAdminConfig = {
 				}]
 			});
 		},
-		publicKeyAdd:function() {
+		publicKeyAdd() {
 			this.publicKeys[this.publicKeyInputName] = this.publicKeyInputValue;
 			this.publicKeys = this.publicKeys;
 		},
-		publicKeyRemove:function(keyName) {
+		publicKeyRemove(keyName) {
 			if(typeof this.publicKeys[keyName] !== 'undefined')
 				delete this.publicKeys[keyName];
 			
@@ -589,7 +579,7 @@ let MyAdminConfig = {
 		},
 		
 		// backend calls
-		get:function() {
+		get() {
 			ws.send('bruteforce','get',{},true).then(
 				res => {
 					this.bruteforceCountBlocked = res.payload.hostsBlocked;
@@ -599,10 +589,9 @@ let MyAdminConfig = {
 				this.$root.genericError
 			);
 		},
-		set:function() {
+		set() {
 			ws.send('config','set',this.configInput,true).then(
-				() => {},
-				this.$root.genericError
+				() => {}, this.$root.genericError
 			);
 		}
 	}

@@ -84,13 +84,6 @@ const MyStoreSchema = {
 				state.moduleIdMap[mod.id]     = mod;
 				state.moduleNameMap[mod.name] = mod;
 				
-				// process languages
-				for(const lang of mod.languages) {
-					
-					if(state.languageCodes.indexOf(lang) === -1)
-						state.languageCodes.push(lang);
-				}
-				
 				// process articles
 				for(const art of mod.articles) {
 					state.articleIdMap[art.id] = art;
@@ -168,7 +161,6 @@ const MyStoreSchema = {
 		iconIdMap:          (state) => state.iconIdMap,
 		indexIdMap:         (state) => state.indexIdMap,
 		jsFunctionIdMap:    (state) => state.jsFunctionIdMap,
-		languageCodes:      (state) => state.languageCodes,
 		modules:            (state) => state.modules,
 		moduleIdMap:        (state) => state.moduleIdMap,
 		moduleIdMapOptions: (state) => state.moduleIdMapOptions,
@@ -176,6 +168,16 @@ const MyStoreSchema = {
 		pgFunctionIdMap:    (state) => state.pgFunctionIdMap,
 		presetIdMapRecordId:(state) => state.presetIdMapRecordId,
 		relationIdMap:      (state) => state.relationIdMap,
-		roleIdMap:          (state) => state.roleIdMap
+		roleIdMap:          (state) => state.roleIdMap,
+		
+		languageCodes:(state) => {
+			for(const mod of state.modules) {
+				for(const lang of mod.languages) {
+					if(state.languageCodes.indexOf(lang) === -1)
+						state.languageCodes.push(lang);
+				}
+			}
+			return state.languageCodes;
+		}
 	}
 };
