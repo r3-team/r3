@@ -99,9 +99,54 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	// clean up on next release
-	// ALTER TABLE app.attribute ALTER COLUMN content_use
-	//  TYPE app.attribute_content_use USING content_use::text::app.attribute_content_use;
+	//
 
+	"3.3": func(tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(db.Ctx, `
+			-- cleanup from last release
+			ALTER TABLE app.attribute ALTER COLUMN content_use DROP DEFAULT;
+			ALTER TABLE app.attribute ALTER COLUMN content_use
+				TYPE app.attribute_content_use USING content_use::text::app.attribute_content_use;
+			
+			-- new tasks
+			INSERT INTO instance.task (
+				name,interval_seconds,cluster_master_only,
+				embedded_only,active_only,active
+			) VALUES ('restExecute',15,true,false,false,true);
+			
+			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
+			VALUES ('restExecute',0,0);
+			
+			-- REST calls
+			CREATE TYPE instance.rest_method AS ENUM ('DELETE','GET','HEAD','PATCH','POST','PUT');
+			
+			CREATE TABLE instance.rest_spool (
+			    id uuid NOT NULL DEFAULT gen_random_uuid(),
+				pg_function_id_callback uuid,
+			    method instance.rest_method NOT NULL,
+			    headers jsonb,
+			    url text COLLATE pg_catalog."default" NOT NULL,
+			    body text COLLATE pg_catalog."default",
+				callback_value TEXT,
+				skip_verify boolean NOT NULL,
+			    date_added bigint NOT NULL,
+				attempt_count integer NOT NULL DEFAULT 0,
+			    CONSTRAINT rest_spool_pkey PRIMARY KEY (id),
+			    CONSTRAINT rest_spool_pg_function_id_callback_fkey FOREIGN KEY (pg_function_id_callback)
+			        REFERENCES app.pg_function (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX fki_rest_spool_pg_function_id_callback_fkey
+				ON instance.rest_spool USING btree (pg_function_id_callback ASC NULLS LAST);
+			
+			CREATE INDEX ind_rest_spool_date_added ON instance.rest_spool
+				USING btree (date_added ASC NULLS LAST);
+		`)
+		return "3.4", err
+	},
 	"3.2": func(tx pgx.Tx) (string, error) {
 		if _, err := tx.Exec(db.Ctx, `
 			-- clean up from last release

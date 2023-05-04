@@ -488,6 +488,7 @@
 				"mailRetrieve":"E-Mails abholen",
 				"mailSend":"E-Mails versenden",
 				"repoCheck":"Aktualisieren des Repository",
+				"restExecute":"REST-Aufrufe durchführen",
 				"updateCheck":"Nach Plattform-Updates suchen"
 			},
 			"dateAttempt":"Letzter Start",

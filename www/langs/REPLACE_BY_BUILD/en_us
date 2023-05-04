@@ -488,6 +488,7 @@
 				"mailRetrieve":"Email retrieval",
 				"mailSend":"Email dispatch",
 				"repoCheck":"Execute repository update",
+				"restExecute":"Execute REST calls",
 				"updateCheck":"Check for platform updates"
 			},
 			"dateAttempt":"Last start",

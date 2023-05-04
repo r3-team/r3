@@ -488,6 +488,7 @@
 				"mailRetrieve":"Preluare e-mail",
 				"mailSend":"Expediere prin e-mail",
 				"repoCheck":"Executați actualizarea depozitului",
+				"restExecute":"Execute REST calls",
 				"updateCheck":"Verificați dacă există actualizări ale platformei"
 			},
 			"dateAttempt":"Ultimul rulaj",

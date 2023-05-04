@@ -488,6 +488,7 @@
 				"mailRetrieve":"Recupero e-mail",
 				"mailSend":"Invio email",
 				"repoCheck":"Esegui l'aggiornamento dell'archivio",
+				"restExecute":"Execute REST calls",
 				"updateCheck":"Verifica aggiornamenti della piattaforma"
 			},
 			"dateAttempt":"Ultimo avvio",
