@@ -538,7 +538,7 @@ let MyBuilderPgFunction = {
 				'get_preset_record_id','get_public_hostname','get_role_ids',
 				'has_role','has_role_any','log_error','log_info','log_warning',
 				'mail_delete','mail_delete_after_attach','mail_get_next',
-				'mail_send','update_collection'
+				'mail_send','rest_call','update_collection'
 			],
 			showHolderFncInstance:false,
 			showHolderFncModule:false,
