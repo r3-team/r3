@@ -1,6 +1,10 @@
-import {getQueryTemplate}      from '../shared/query.js';
-import {getNilUuid}            from '../shared/generic.js';
-import {getPgFunctionTemplate} from '../shared/builder.js';
+import {getQueryTemplate} from '../shared/query.js';
+import {getNilUuid}       from '../shared/generic.js';
+import {
+	getRestTemplateArgs,
+	getRestTemplateFnc,
+	getRestTemplateReturn
+} from '../shared/rest.js';
 export {MyBuilderNew as default};
 
 let MyBuilderNew = {
@@ -51,6 +55,17 @@ let MyBuilderNew = {
 					
 					<!-- PG function: is trigger -->
 					<template v-if="entity === 'pgFunction'">
+						<div class="row centered gap">
+							<span>{{ capApp.pgFunctionTemplate }}</span>
+							<select v-model="template">
+								<option value="">-</option>
+								<option value="restAuthRequest">{{ capApp.template.restAuthRequest }}</option>
+								<option value="restAuthResponse">{{ capApp.template.restAuthResponse }}</option>
+								<option value="restDataResponse">{{ capApp.template.restDataResponse }}</option>
+							</select>
+						</div>
+						<hr />
+						
 						<div class="row centered">
 							<span>{{ capApp.pgFunctionTrigger }}</span>
 							<my-bool v-model="isTrigger" />
@@ -93,6 +108,7 @@ let MyBuilderNew = {
 			
 			// PG function
 			isTrigger:false,
+			template:'',
 			
 			// relation
 			encryption:false
@@ -146,7 +162,9 @@ let MyBuilderNew = {
 		// externals
 		getNilUuid,
 		getQueryTemplate,
-		getPgFunctionTemplate,
+		getRestTemplateArgs,
+		getRestTemplateFnc,
+		getRestTemplateReturn,
 		
 		// actions
 		handleHotkeys(e) {
@@ -252,9 +270,9 @@ let MyBuilderNew = {
 						id:this.getNilUuid(),
 						moduleId:this.moduleId,
 						name:this.name,
-						codeArgs:'',
-						codeFunction:this.getPgFunctionTemplate(),
-						codeReturns:this.isTrigger ? 'TRIGGER' : 'INTEGER',
+						codeArgs:this.getRestTemplateArgs(this.template),
+						codeFunction:this.getRestTemplateFnc(this.template,this.isTrigger),
+						codeReturns:this.getRestTemplateReturn(this.isTrigger),
 						isFrontendExec:false,
 						isTrigger:this.isTrigger,
 						schedules:[],

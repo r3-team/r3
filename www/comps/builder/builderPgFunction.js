@@ -6,8 +6,7 @@ import {
 } from '../shared/generic.js';
 import {
 	getDependentModules,
-	getFunctionHelp,
-	getPgFunctionTemplate
+	getFunctionHelp
 } from '../shared/builder.js';
 export {MyBuilderPgFunction as default};
 
@@ -229,11 +228,6 @@ let MyBuilderPgFunction = {
 							:active="!readonly"
 							:caption="capApp.button.addOld"
 							:image="addOld ? 'checkbox1.png' : 'checkbox0.png'"
-						/>
-						<my-button image="refresh.png"
-							@trigger="codeFunction = getPgFunctionTemplate()"
-							:active="!readonly"
-							:caption="capApp.button.template"
 						/>
 					</div>
 					<br />
@@ -594,7 +588,6 @@ let MyBuilderPgFunction = {
 		getDependentModules,
 		getFunctionHelp,
 		getNilUuid,
-		getPgFunctionTemplate,
 		
 		// presentation
 		radioIcon(entity,id) {

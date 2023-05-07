@@ -951,7 +951,7 @@
 				"mail_delete_after_attach":"instance.mail_delete_after_attach(<blockquote>mail_id INTEGER,<br />attach_record_id INTEGER,<br />attach_attribute_id UUID</blockquote>) => INTEGER<br /><br />Flag email attachments to be added to a file attribute of the specified record; the email and its attachments are deleted afterwards.",
 				"mail_get_next":"instance.mail_get_next(account_name TEXT DEFAULT NULL) => instance.mail<br /><br />Returns the next incoming email from the mail spooler; returns NULL if no email is available. When an account name is specified, returns only mails received with the given account.<br /><br />The returned type 'instance.mail' consists of:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>After processing an email it should be deleted; either directly (mail_delete) or after storing its attachments (mail_delete_after_attach).",
 				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Generates an outgoing email for the mail spooler. Optional parameters:<ul><li>Comma separated list of TO/CC/BCC recipients (one of these must be set)</li><li>Mail account name to send from (random account is used if not specified)</li><li>File attribute and record from which to attach files from</li></ul>",
-				"rest_call":"instance.rest_call(<blockquote>method TEXT,<br />url TEXT,<br />body TEXT,<br />headers JSONB DEFAULT NULL,<br />tls_skip_verify BOOLEAN DEFAULT FALSE,<br />callback_function_id UUID DEFAULT NULL,<br />callback_value TEXT DEFAULT NULL</blockquote>) => INTEGER<br /><br />Adds a HTTP REST call to the internal spooler for immediate execution. Supported methods are: DELETE, GET, HEAD, PATCH, POST, PUT.<br /><br />URL can include query paramenters if needed.<br /><br />Headers must be provided as JSONB - each key value pair will result in one header.<br /><br />Validity check for TLS/SSL can be disabled if needed.<br /><br />If the REST response needs to be processed, another backend function can be set for callback. This callback function must have three arguments: INTEGER (for HTTP status code), TEXT (HTTP response body), TEXT (callback value).<br /><br />If a 'callback value' is set in instance.rest_call(...), it will be passed to the callback function - this is useful when multiple calls must be executed in order (like authentication before a data call).",
+				"rest_call":"instance.rest_call(<blockquote>method TEXT,<br />url TEXT,<br />body TEXT,<br />headers JSONB DEFAULT NULL,<br />tls_skip_verify BOOLEAN DEFAULT FALSE,<br />callback_function_id UUID DEFAULT NULL,<br />callback_value TEXT DEFAULT NULL</blockquote>) => INTEGER<br /><br />Adds a HTTP REST call to the internal spooler for immediate execution. Supported methods are: DELETE, GET, PATCH, POST, PUT.<br /><br />URL can include query paramenters if needed.<br /><br />Headers must be provided as JSONB - each key value pair will result in one header.<br /><br />Validity check for TLS/SSL can be disabled if needed.<br /><br />If the REST response needs to be processed, another backend function can be set for callback. This callback function must have three arguments: INTEGER (for HTTP status code), TEXT (HTTP response body), TEXT (callback value).<br /><br />If a 'callback value' is set in instance.rest_call(...), it will be passed to the callback function - this is useful when multiple calls must be executed in order (like authentication before a data call).",
 				"update_collection":"instance.update_collection(collection_id, login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]) => INTEGER<br /><br />Informs connected clients to update the specified collection. If login IDs are given, only clients that belong to these logins are affected."
 			},
 			"option":{
@@ -1100,6 +1100,11 @@
 				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
 				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
 			},
+			"template":{
+				"restAuthRequest":"REST authentication (via JSON)",
+				"restAuthResponse":"REST authentication response callback",
+				"restDataResponse":"REST data response callback"
+			},
 			"api":"New API",
 			"collection":"New collection",
 			"form":"New form",
@@ -1109,6 +1114,7 @@
 			"module":"New application",
 			"options":"Additional options",
 			"pgFunction":"New backend function",
+			"pgFunctionTemplate":"Use template",
 			"pgFunctionTrigger":"Trigger",
 			"pgFunctionTriggerHint":"Makes this backend function a trigger. A trigger can be referenced inside a relation to react to events in the database, like when records are created, updated or deleted. This setting cannot be changed later.",
 			"relation":"New relation",

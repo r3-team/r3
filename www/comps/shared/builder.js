@@ -123,7 +123,3 @@ export function getItemTitleColumn(column,withTitle) {
 export function getItemTitleRelation(relationId,index) {
 	return `${index} ${MyStore.getters['schema/relationIdMap'][relationId].name}`;
 };
-
-export function getPgFunctionTemplate() {
-	return '$BODY$\nDECLARE\nBEGIN\n\tRETURN NEW;\nEND;\n$BODY$';
-};

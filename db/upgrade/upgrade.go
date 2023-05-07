@@ -118,7 +118,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			VALUES ('restExecute',0,0);
 			
 			-- REST calls
-			CREATE TYPE instance.rest_method AS ENUM ('DELETE','GET','HEAD','PATCH','POST','PUT');
+			CREATE TYPE instance.rest_method AS ENUM ('DELETE','GET','PATCH','POST','PUT');
 			
 			CREATE TABLE instance.rest_spool (
 			    id uuid NOT NULL DEFAULT gen_random_uuid(),
@@ -145,7 +145,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX ind_rest_spool_date_added ON instance.rest_spool
 				USING btree (date_added ASC NULLS LAST);
 			
-			CREATE OR REPLACE FUNCTION instance.rest_call(http_method instance.rest_method, url TEXT, body TEXT, headers JSONB DEFAULT NULL, tls_skip_verify BOOLEAN DEFAULT FALSE, callback_function_id UUID DEFAULT NULL, callback_value TEXT DEFAULT NULL)
+			CREATE OR REPLACE FUNCTION instance.rest_call(http_method TEXT, url TEXT, body TEXT, headers JSONB DEFAULT NULL, tls_skip_verify BOOLEAN DEFAULT FALSE, callback_function_id UUID DEFAULT NULL, callback_value TEXT DEFAULT NULL)
 				RETURNS integer
 				LANGUAGE 'plpgsql'
 				COST 100
@@ -154,7 +154,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				DECLARE
 				BEGIN
 					INSERT INTO instance.rest_spool(pg_function_id_callback, method, headers, url, body, date_added, skip_verify, callback_value)
-					VALUES (callback_function_id, http_method, headers, url, body, EXTRACT(EPOCH FROM NOW()), tls_skip_verify, callback_value);
+					VALUES (callback_function_id, http_method::instance.rest_method, headers, url, body, EXTRACT(EPOCH FROM NOW()), tls_skip_verify, callback_value);
 					
 					RETURN 0;
 				END;
