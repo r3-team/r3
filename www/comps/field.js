@@ -34,6 +34,7 @@ import {
 	isAttributeFiles,
 	isAttributeInteger,
 	isAttributeRelationship,
+	isAttributeRegconfig,
 	isAttributeString,
 	isAttributeUuid
 } from './shared/attribute.js';
@@ -985,6 +986,7 @@ let MyField = {
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
 		isInteger:       (s) => s.isData && s.isAttributeInteger(s.attribute.content),
 		isQuery:         (s) => s.isCalendar || s.isChart || s.isList || s.isRelationship,
+		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.attribute.content),
 		isRichtext:      (s) => s.isData && s.attribute.contentUse === 'richtext',
 		isString:        (s) => s.isData && s.isAttributeString(s.attribute.content),
 		isTextarea:      (s) => s.isData && s.attribute.contentUse === 'textarea',
@@ -1027,6 +1029,7 @@ let MyField = {
 		isAttributeFiles,
 		isAttributeInteger,
 		isAttributeRelationship,
+		isAttributeRegconfig,
 		isAttributeString,
 		isAttributeUuid,
 		openLink,

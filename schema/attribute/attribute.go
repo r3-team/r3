@@ -19,8 +19,8 @@ import (
 )
 
 var contentTypes = []string{"integer", "bigint", "numeric", "real",
-	"double precision", "varchar", "text", "boolean", "uuid", "1:1",
-	"n:1", "files"}
+	"double precision", "varchar", "text", "boolean", "regconfig", "uuid",
+	"1:1", "n:1", "files"}
 
 var contentUseTypes = []string{"default", "textarea",
 	"richtext", "date", "datetime", "time", "color"}
@@ -212,6 +212,9 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 
 		case "boolean": // keep boolean
 			contentUpdateOk = content == "boolean"
+
+		case "regconfig": // keep regconfig
+			contentUpdateOk = content == "regconfig"
 
 		case "uuid": // keep UUID
 			contentUpdateOk = content == "uuid"

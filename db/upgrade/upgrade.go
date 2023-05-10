@@ -108,6 +108,24 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.attribute ALTER COLUMN content_use
 				TYPE app.attribute_content_use USING content_use::text::app.attribute_content_use;
 			
+			-- text indexing
+			ALTER TYPE app.attribute_content ADD VALUE 'regconfig';
+			
+			CREATE TYPE app.pg_index_method AS ENUM ('BTREE','GIN');
+			
+			ALTER TABLE app.pg_index ADD COLUMN method app.pg_index_method NOT NULL DEFAULT 'BTREE';
+			ALTER TABLE app.pg_index ALTER COLUMN method DROP DEFAULT;
+			
+			ALTER TABLE app.pg_index ADD COLUMN attribute_id_dict UUID;
+			ALTER TABLE app.pg_index ADD CONSTRAINT pg_index_attribute_id_dict_fkey FOREIGN KEY (attribute_id_dict)
+				REFERENCES app.attribute (id) MATCH SIMPLE
+		        ON UPDATE CASCADE
+		        ON DELETE CASCADE
+		        DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_pg_index_attribute_id_dict_fkey
+				ON app.pg_index USING btree (attribute_id_dict ASC NULLS LAST);
+			
 			-- new tasks
 			INSERT INTO instance.task (
 				name,interval_seconds,cluster_master_only,

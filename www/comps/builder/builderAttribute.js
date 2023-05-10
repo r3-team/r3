@@ -9,6 +9,7 @@ import {
 	isAttributeFloat,
 	isAttributeInteger,
 	isAttributeNumeric,
+	isAttributeRegconfig,
 	isAttributeRelationship,
 	isAttributeRelationship11,
 	isAttributeRelationshipN1,
@@ -129,8 +130,9 @@ let MyBuilderAttribute = {
 										<option value="relationship11">{{ capApp.option.relationship11 }}</option>
 									</optgroup>
 									<optgroup :label="capApp.expert" :disabled="!isNew && !isFloat && !isUuid">
-										<option value="float" :disabled="!isNew && !isFloat">{{ capApp.option.float }}</option>
-										<option value="uuid"  :disabled="!isNew && !isUuid">{{ capApp.option.uuid }}</option>
+										<option value="float"     :disabled="!isNew && !isFloat">{{ capApp.option.float }}</option>
+										<option value="uuid"      :disabled="!isNew && !isUuid">{{ capApp.option.uuid }}</option>
+										<option value="regconfig" :disabled="!isNew && !isRegconfig">{{ capApp.option.regconfig }}</option>
 									</optgroup>
 								</select>
 								<my-button
@@ -296,19 +298,20 @@ let MyBuilderAttribute = {
 		},
 		usedFor:{
 			get() {
-				if(this.isBoolean)  return 'boolean';
-				if(this.isColor)    return 'color';
-				if(this.isDate)     return 'date';
-				if(this.isDatetime) return 'datetime';
-				if(this.isNumber)   return 'number';
-				if(this.isNumeric)  return 'decimal';
-				if(this.isFiles)    return 'files';
-				if(this.isFloat)    return 'float';
-				if(this.isRichtext) return 'richtext';
-				if(this.isText)     return 'text';
-				if(this.isTextarea) return 'textarea';
-				if(this.isTime)     return 'time';
-				if(this.isUuid)     return 'uuid';
+				if(this.isBoolean)   return 'boolean';
+				if(this.isColor)     return 'color';
+				if(this.isDate)      return 'date';
+				if(this.isDatetime)  return 'datetime';
+				if(this.isNumber)    return 'number';
+				if(this.isNumeric)   return 'decimal';
+				if(this.isFiles)     return 'files';
+				if(this.isFloat)     return 'float';
+				if(this.isRegconfig) return 'regconfig';
+				if(this.isRichtext)  return 'richtext';
+				if(this.isText)      return 'text';
+				if(this.isTextarea)  return 'textarea';
+				if(this.isTime)      return 'time';
+				if(this.isUuid)      return 'uuid';
 				if(this.isRelationship11) return 'relationship11';
 				if(this.isRelationshipN1) return 'relationshipN1';
 				
@@ -378,6 +381,12 @@ let MyBuilderAttribute = {
 						this.values.contentUse = 'default';
 					break;
 					
+					// regconfig uses
+					case 'regconfig':
+						this.values.content    = 'regconfig';
+						this.values.contentUse = 'default';
+					break;
+					
 					// UUID uses
 					case 'uuid':
 						this.values.content    = 'uuid';
@@ -406,6 +415,7 @@ let MyBuilderAttribute = {
 		isFloat:         (s) => s.isAttributeFloat(s.values.content),
 		isInteger:       (s) => s.isAttributeInteger(s.values.content),
 		isNumeric:       (s) => s.isAttributeNumeric(s.values.content),
+		isRegconfig:     (s) => s.isAttributeRegconfig(s.values.content),
 		isRelationship:  (s) => s.isAttributeRelationship(s.values.content),
 		isRelationship11:(s) => s.isAttributeRelationship11(s.values.content),
 		isRelationshipN1:(s) => s.isAttributeRelationshipN1(s.values.content),
@@ -447,6 +457,7 @@ let MyBuilderAttribute = {
 		isAttributeFloat,
 		isAttributeInteger,
 		isAttributeNumeric,
+		isAttributeRegconfig,
 		isAttributeRelationship,
 		isAttributeRelationship11,
 		isAttributeRelationshipN1,

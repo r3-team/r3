@@ -13,6 +13,15 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// < 3.4
+// migrate PG index method
+func FixPgIndexMethod(method string) string {
+	if method == "" {
+		return "BTREE"
+	}
+	return method
+}
+
 // < 3.3
 // migrate attribute content use
 func FixAttributeContentUse(contentUse string) string {

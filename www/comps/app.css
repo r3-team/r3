@@ -806,7 +806,10 @@ table td.maximum{
 	max-height:100%;
 	align-content:flex-start;
 }
-.generic-entry-list.height-limit{
+.generic-entry-list.height-small{
+	max-height:300px;
+}
+.generic-entry-list.height-large{
 	max-height:700px;
 }
 .generic-entry-list .entry{

@@ -620,6 +620,7 @@
 				"float":"Number, floating",
 				"files":"Files",
 				"number":"Number, whole",
+				"regconfig":"Text search dictionary",
 				"relationship11":"Relationship, one-to-one (1:1)",
 				"relationshipN1":"Relationship, many-to-one (n:1)",
 				"richtext":"Text, with formatting",
@@ -637,6 +638,7 @@
 				"files":"One or many files. Depending on max. file count/size settings, users can permanently store files. With the client application, files can be opened locally for direct editing.",
 				"float":"Number values with floating decimal. Mostly used for expensive calculations.",
 				"number":"Full number values, like counters, priorities, reference numbers and so on.",
+				"regconfig":"Dictionary for a fulltext search index. Available dictionaries depend on the database system (s. Postgres dictionaries). Examples: english, german, french, spanish, romanian. The value 'simple' can be used for less useful but language-agnostic search.",
 				"relationship11":"Connects one relation to another. One-to-one relationships (1:1) only allow one record of a relation to reference the same record on another. Examples: The teacher of a class or owner of a car.",
 				"relationshipN1":"Connects one relation to another. Many-to-one relationships (n:1) allow multiple records of a relation to reference the same record on another. Examples: Students attending a class or employees of an organization.",
 				"richtext":"Multiple lines of formatted text. Useful for larger articles as well as document templates for PDF or email generation. Can include headers, links, tables, images and more.",
@@ -1131,6 +1133,29 @@
 			"popUp":"Pop-up form",
 			"relationIndex":"Use record from relation"
 		},
+		"pgIndex":{
+			"description":{
+				"BTREE":"Default index for fast lookups. Suitable for most all attribute value types but not for texts larger than a few paragraphs.",
+				"GIN":"Text index for enabling fast lookups on even very large texts. Can use a dictionary attribute to support language specific features like related words, synonyms and more; as an example, a lookup for 'computer' would also find results for 'computation' or 'to compute'."
+			},
+			"dialog":{
+				"delete":"Are you sure you want to delete this index?"
+			},
+			"method":{
+				"BTREE":"Default index",
+				"GIN":"Text index"
+			},
+			"attributes":"Attribute(s)",
+			"attributesHint":"Attribute(s) that the index covers. If multiple are given, the order decides on whether a particular index is used for a query. Text indexes currently only support a single attribute.",
+			"dictionary":"Dictionary attribute (optional)",
+			"dictionaryHint":"If used, a text index will be able to use advanced language features to improve text lookups. Must be an attribute of the value type 'Text search dictionary'.",
+			"noUpdate":"Existing indexes cannot be changed but safely recreated at any time. Depending on the data size, index creation can take a while.",
+			"system":"This index is managed by the system and cannot be deleted directly.",
+			"title":"View index",
+			"titleNew":"Create index",
+			"unique":"Unique",
+			"uniqueHint":"If enabled, the same value cannot exist twice for the given attribute. If multiple attributes are given, the combined value can only exist once."
+		},
 		"pgTrigger":{
 			"dialog":{
 				"delete":"Are you sure you want to delete this trigger?"
@@ -1182,10 +1207,10 @@
 			"graph":"Relationship graph",
 			"graphBase":"Base relation",
 			"indexes":"Indexes ({CNT})",
-			"indexAttributes":"Attributes",
-			"indexAutoFki":"Relationship",
-			"indexCreate":"Add attribute to new index",
-			"indexPrimaryKey":"Primary key",
+			"indexAutoFki":"Relationship index",
+			"indexPrimaryKey":"Primary key index",
+			"indexSystem":"System index (managed by the system)",
+			"indexText":"Text index",
 			"indexUnique":"Unique",
 			"isDeferred":"DEFERRED",
 			"nameHint":"Reference name for this relation. Must be unique within this application.",

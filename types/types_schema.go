@@ -478,12 +478,14 @@ type PgTrigger struct {
 	CodeCondition string    `json:"codeCondition"`
 }
 type PgIndex struct {
-	Id           uuid.UUID          `json:"id"`
-	RelationId   uuid.UUID          `json:"relationId"`
-	NoDuplicates bool               `json:"noDuplicates"` // index is unique
-	AutoFki      bool               `json:"autoFki"`      // index belongs to foreign key attribute (auto-generated)
-	PrimaryKey   bool               `json:"primaryKey"`   // index belongs to primary key attribute
-	Attributes   []PgIndexAttribute `json:"attributes"`   // attributes the index is made of
+	Id              uuid.UUID          `json:"id"`
+	RelationId      uuid.UUID          `json:"relationId"`
+	AttributeIdDict pgtype.UUID        `json:"attributeIdDict"` // attribute used as dictionary for full text search (if set, GIN is used)
+	Method          string             `json:"method"`          // BTREE/GIN
+	NoDuplicates    bool               `json:"noDuplicates"`    // index is unique
+	AutoFki         bool               `json:"autoFki"`         // index belongs to foreign key attribute (auto-generated)
+	PrimaryKey      bool               `json:"primaryKey"`      // index belongs to primary key attribute
+	Attributes      []PgIndexAttribute `json:"attributes"`      // attributes the index is made of
 }
 type PgIndexAttribute struct {
 	PgIndexId   uuid.UUID `json:"pgIndexId"`

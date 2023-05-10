@@ -170,7 +170,7 @@ let MyBuilderRelation = {
 					</div>
 				</div>
 				
-				<div class="generic-entry-list height-limit" v-if="showAttributes">
+				<div class="generic-entry-list height-large" v-if="showAttributes">
 					<div class="entry"
 						v-if="!readonly"
 						@click="attributeIdEdit = null"
@@ -307,33 +307,80 @@ let MyBuilderRelation = {
 					<h1>{{ capApp.indexes.replace('{CNT}',relation.indexes.length) }}</h1>
 				</div>
 				
-				<table class="indexes default-inputs" v-if="showIndexes">
-					<thead>
-						<tr>
-							<th>{{ capGen.actions }}</th>
-							<th>{{ capApp.indexAttributes }}</th>
-							<th>{{ capApp.indexPrimaryKey }}</th>
-							<th>{{ capApp.indexAutoFki }}</th>
-							<th>{{ capApp.indexUnique }}</th>
-						</tr>
-					</thead>
-					<tbody>
-						<!-- new index -->
-						<my-builder-pg-index
-							:readonly="readonly"
-							:relation="relation"
-						/>
-						
-						<!-- existing indexes -->
-						<my-builder-pg-index
-							v-for="ind in relation.indexes"
-							:key="ind.id"
-							:index="ind"
-							:readonly="readonly"
-							:relation="relation"
-						/>
-					</tbody>
-				</table>
+				<div class="generic-entry-list height-small" v-if="showIndexes">
+					<div class="entry"
+						v-if="!readonly"
+						@click="indexIdEdit = null"
+						:class="{ clickable:!readonly }"
+					>
+						<div class="row gap centered">
+							<img class="icon" src="images/add.png" />
+							<span>{{ capGen.button.new }}</span>
+						</div>
+					</div>
+					
+					<div class="entry clickable"
+						@click="indexIdEdit = ind.id"
+						v-for="ind in relation.indexes"
+					>
+						<div class="row centered gap">
+							<my-button image="databaseAsterisk.png"
+								:active="false"
+								:naked="true"
+								:tight="true"
+							/>
+							<div class="lines"><span>{{ displayIndexName(ind) }}</span></div>
+						</div>
+						<div class="row centered">
+							<my-button image="asterisk.png"
+								v-if="ind.noDuplicates"
+								:active="false"
+								:captionTitle="capApp.indexUnique"
+								:naked="true"
+								:tight="true"
+							/>
+							<my-button image="cogMultiple.png"
+								v-if="ind.primaryKey || ind.autoFki"
+								:active="false"
+								:captionTitle="capApp.indexSystem"
+								:naked="true"
+								:tight="true"
+							/>
+							<my-button image="key.png"
+								v-if="ind.primaryKey"
+								:active="false"
+								:captionTitle="capApp.indexPrimaryKey"
+								:naked="true"
+								:tight="true"
+							/>
+							<my-button
+								v-if="ind.autoFki"
+								:active="false"
+								:captionTitle="capApp.indexAutoFki"
+								:image="attributeIdMap[ind.attributes[0].attributeId].content === '1:1' ? 'link1.png' : 'link3.png'"
+								:naked="true"
+								:tight="true"
+							/>
+							<my-button image="languages.png"
+								v-if="ind.method === 'GIN'"
+								:active="false"
+								:captionTitle="capApp.indexText"
+								:naked="true"
+								:tight="true"
+							/>
+						</div>
+					</div>
+					
+					<!-- new index dialog -->
+					<my-builder-pg-index
+						v-if="indexIdEdit !== false"
+						@close="indexIdEdit = false"
+						:pgIndexId="indexIdEdit"
+						:builderLanguage="builderLanguage"
+						:readonly="readonly"
+						:relation="relation"
+					/>
+				</div>
 			</div>
 			
 			<!-- triggers -->
@@ -564,6 +611,7 @@ let MyBuilderRelation = {
 			// inputs
 			attributeIdEdit:false,
 			encryption:false,
+			indexIdEdit:false,
 			name:'',
 			comment:null,
 			retentionCount:null,
@@ -713,6 +761,16 @@ let MyBuilderRelation = {
 			
 			return v.length < this.previewValueLength
 				? v : v.substring(0, this.previewValueLength-3) + '...';
+		},
+		displayIndexName(ind) {
+			if(ind.method === 'GIN')
+				return `${this.attributeIdMap[ind.attributes[0].attributeId].name}`;
+			
+			let atrs = [];
+			for(let indAtr of ind.attributes) {
+				atrs.push(`${this.attributeIdMap[indAtr.attributeId].name} (${indAtr.orderAsc ? 'ASC' : 'DESC'})`);
+			}
+			return atrs.join(', ');
 		},
 		
 		// actions
