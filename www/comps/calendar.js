@@ -505,15 +505,21 @@ let MyCalendarMonth = {
 			// day selected
 			if(this.dateSelect0 !== null && this.dateSelect1 !== null) {
 				
-				let d = new Date(this.date0.valueOf());
-				d.setDate(d.getDate() + dayOffset);
+				let dDay = new Date(this.date0.valueOf());
+				dDay.setDate(dDay.getDate() + dayOffset);
 				
-				// compare at UTC zero to remove DST issue
-				d         = this.getDateAtUtcZero(d);
-				let dSel0 = this.getDateAtUtcZero(this.dateSelect0);
-				let dSel1 = this.getDateAtUtcZero(this.dateSelect1);
+				// use calendar day at UTC zero
+				dDay = this.getDateAtUtcZero(dDay);
 				
-				if(d.valueOf() >= dSel0.valueOf() && d.valueOf() <= dSel1.valueOf())
+				// date selections are UTC zero, can be compared directly
+				// datetime selections are not UTC zero, must be converted (also to remove DST issues)
+				let dSelIsFullDay = this.isUnixUtcZero(this.getUnixFromDate(this.dateSelect0))
+					&& this.isUnixUtcZero(this.getUnixFromDate(this.dateSelect1));
+				
+				let dSel0 = dSelIsFullDay ? this.dateSelect0 : this.getDateAtUtcZero(this.dateSelect0);
+				let dSel1 = dSelIsFullDay ? this.dateSelect1 : this.getDateAtUtcZero(this.dateSelect1);
+				
+				if(dDay.valueOf() >= dSel0.valueOf() && dDay.valueOf() <= dSel1.valueOf())
 					cls.selected = true;
 			}
 			return cls;

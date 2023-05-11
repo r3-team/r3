@@ -92,7 +92,11 @@ export function getUnixNowDatetime() {
 
 export function getUnixNowTime() {
 	let n = new Date();
-	let d = new Date(0);
-	d.setHours(n.getHours(),n.getMinutes(),n.getSeconds());
-	return getUnixFromDate(getDateShifted(d,false));
+	let d = new Date(0); // unix at 1970-01-01 00:00:00
+	d.setHours(
+		d.getHours()   + n.getHours(),
+		d.getMinutes() + n.getMinutes(),
+		d.getSeconds() + n.getSeconds()
+	);
+	return getUnixFromDate(d);
 };

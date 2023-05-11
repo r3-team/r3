@@ -128,8 +128,8 @@ let MyInputDateEntry = {
 				}
 				let d = new Date(v * 1000);
 				
-				// time is handled without zones as UTC
-				if(this.isTimeOnly)
+				// non-datetime is always handled as UTC
+				if(!this.isDateTime)
 					d = this.getDateShifted(d,true);
 				
 				this.year   = d.getFullYear();
@@ -149,6 +149,12 @@ let MyInputDateEntry = {
 		};
 	},
 	computed:{
+		isDateOnly:function() {
+			return this.isDate && !this.isTime;
+		},
+		isDateTime:function() {
+			return this.isDate && this.isTime;
+		},
 		isTimeOnly:function() {
 			return !this.isDate && this.isTime;
 		},
@@ -232,36 +238,39 @@ let MyInputDateEntry = {
 				d = new Date(this.modelValue * 1000);
 			}
 			else {
-				if(!this.isTime) {
-					// date is not set, apply current date and time to UTC midnight
-					d = this.getDateAtUtcZero(new Date());
-				}
-				else {
-					// time is not set, apply UTC zero
-					d = new Date(0);
-				}
-			}
-			
-			// apply date input value
-			switch(name) {
-				case 'Y': d.setFullYear(p); break;
-				case 'm': d.setMonth(p-1);  break;
-				case 'd': d.setDate(p);     break;
-				case 'H': d.setHours(p);    break;
-				case 'M': d.setMinutes(p);  break;
-				case 'S': d.setSeconds(p);  break;
+				// empty date: start with current date and time at UTC midnight
+				// empty time: start with UTC zero
+				d = !this.isTimeOnly ? this.getDateAtUtcZero(new Date()) : new Date(0);
 			}
 			
 			if(this.isTimeOnly) {
-				if(name === 'H')
-					d = this.getDateShifted(d,false);
+				switch(name) {
+					case 'H': d.setUTCHours(p);   break;
+					case 'M': d.setUTCMinutes(p); break;
+					case 'S': d.setUTCSeconds(p); break;
+				}
 				
-				// if value > 24 is entered for hour input, date rolls over to next day
-				// time values are only allowed to go to 23:59:59 (86399)
-				if(Math.floor(d.getTime() / 1000) > 86399)
-					d = new Date(86399000);
+				// allowed values: between 0 (00:00:00) and 86399 (23:59:59)
+				if(Math.floor(d.getTime() / 1000) > 86399) d = new Date(86399000);
+				if(Math.floor(d.getTime() / 1000) < 0)     d = new Date(0);
+				
+			} else {
+				// apply timezone offset for pure dates to correctly apply day input
+				if(this.isDateOnly)
+					d = this.getDateShifted(d,true);
+				
+				switch(name) {
+					case 'Y': d.setFullYear(p); break;
+					case 'm': d.setMonth(p-1);  break;
+					case 'd': d.setDate(p);     break;
+					case 'H': d.setHours(p);   break;
+					case 'M': d.setMinutes(p); break;
+					case 'S': d.setSeconds(p); break;
+				}
+				
+				if(this.isDateOnly)
+					d = this.getDateShifted(d,false);
 			}
-			
 			this.$emit('update:modelValue',Math.floor(d.getTime() / 1000));
 		},
 		getInputCaption:function(position) {
@@ -513,22 +522,16 @@ let MyInputDate = {
 					new Date(this.unixTo*1000),this.fullDay)));
 		},
 		dateSet:function(dSet,shift) {
-			let that = this;
-			let apply = function(d,fullDay,unixOld) {
-				if(!fullDay) {
+			let apply = (d,unixOld) => {
+				if(!this.fullDay) {
+					// dates are always UTC zero
+					// add offset to make it local zero for datetime
+					d = this.getDateShifted(d,true);
+					
 					if(unixOld !== null) {
 						// keep previous time component
 						let dOld = new Date(unixOld * 1000);
-						d.setHours(
-							dOld.getHours(),
-							dOld.getMinutes(),
-							dOld.getSeconds()
-						);
-					}
-					else {
-						// dates are always UTC zero
-						// add offset to make it local zero
-						d = that.getDateShifted(d,true);
+						d.setHours(dOld.getHours(),dOld.getMinutes(),dOld.getSeconds());
 					}
 				}
 				return Math.floor(d.getTime() / 1000);
@@ -539,7 +542,7 @@ let MyInputDate = {
 				this.dateSelect0 = dSet;
 				this.dateSelect1 = dSet;
 				
-				this.unixFromInput = apply(dSet,this.fullDay,this.unixFrom);
+				this.unixFromInput = apply(dSet,this.unixFrom);
 				this.calendarFresh = false;
 				
 				if(!this.isRange)
@@ -550,7 +553,7 @@ let MyInputDate = {
 			
 			// set second date of range
 			this.dateSelect1  = dSet;
-			this.unixToInput  = apply(dSet,this.fullDay,this.unixTo);
+			this.unixToInput  = apply(dSet,this.unixTo);
 			this.showCalendar = false;
 		},
 		setNull:function() {
