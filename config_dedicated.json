@@ -8,7 +8,9 @@
 		"port": 5432,
 		"name": "app",
 		"user": "app",
-		"pass": "app"
+		"pass": "app",
+		"ssl": false,
+		"sslSkipVerify": false
 	},
 	"paths": {
 		"certificates": "data/certificates/",

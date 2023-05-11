@@ -2,6 +2,7 @@ package db
 
 import (
 	"context"
+	"crypto/tls"
 	"fmt"
 	"net/url"
 	"r3/tools"
@@ -34,16 +35,27 @@ func OpenWait(timeoutSeconds int64, config types.FileTypeDb) error {
 }
 
 func Open(config types.FileTypeDb) error {
-	var err error
+
+	sslMode := "disable"
+	if config.Ssl {
+		sslMode = "require"
+	}
 
 	// connect_timeout specifies how long new connections wait for DB to respond
 	// it has no influence on initial DB connection
-	conString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=disable&connect_timeout=5",
-		config.User, url.QueryEscape(config.Pass), config.Host, config.Port, config.Name)
+	conString := fmt.Sprintf("postgres://%s:%s@%s:%d/%s?sslmode=%s&connect_timeout=5",
+		config.User, url.QueryEscape(config.Pass), config.Host, config.Port, config.Name, sslMode)
 
 	poolConfig, err := pgxpool.ParseConfig(conString)
 	if err != nil {
 		return err
+	}
+
+	if config.Ssl {
+		poolConfig.ConnConfig.TLSConfig = &tls.Config{
+			InsecureSkipVerify: config.SslSkipVerify,
+			ServerName:         config.Host,
+		}
 	}
 
 	poolConfig.AfterConnect = func(ctx context.Context, con *pgx.Conn) error {
@@ -55,11 +67,7 @@ func Open(config types.FileTypeDb) error {
 	if err != nil {
 		return err
 	}
-
-	if err := Pool.Ping(context.Background()); err != nil {
-		return err
-	}
-	return nil
+	return Pool.Ping(context.Background())
 }
 
 func Close() {
