@@ -126,6 +126,37 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX fki_pg_index_attribute_id_dict_fkey
 				ON app.pg_index USING btree (attribute_id_dict ASC NULLS LAST);
 			
+			CREATE TABLE IF NOT EXISTS instance.login_search_dict (
+				login_id integer,
+				login_template_id integer,
+				name regconfig NOT NULL,
+				CONSTRAINT login_search_dict_login_id_fkey FOREIGN KEY (login_id)
+					REFERENCES instance.login (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT login_search_dict_login_template_id_fkey FOREIGN KEY (login_template_id)
+					REFERENCES instance.login_template (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX fki_login_search_dict_login_id_fkey
+				ON instance.login_search_dict USING btree (login_id ASC NULLS LAST);
+			
+			CREATE INDEX fki_login_search_dict_login_template_id_fkey
+				ON instance.login_search_dict USING btree (login_template_id ASC NULLS LAST);
+			
+			CREATE UNIQUE INDEX ind_login_search_dict ON instance.login_search_dict USING BTREE
+				(login_id ASC NULLS LAST, login_template_id ASC NULLS LAST, name ASC NULLS LAST);
+			
+			-- create initial text search config based on user languages
+			INSERT INTO instance.login_search_dict (login_id, login_template_id, name) SELECT login_id, login_template_id, 'english'  FROM instance.login_setting WHERE language_code = 'en_us';
+			INSERT INTO instance.login_search_dict (login_id, login_template_id, name) SELECT login_id, login_template_id, 'german'   FROM instance.login_setting WHERE language_code = 'de_de';
+			INSERT INTO instance.login_search_dict (login_id, login_template_id, name) SELECT login_id, login_template_id, 'italian'  FROM instance.login_setting WHERE language_code = 'it_it';
+			INSERT INTO instance.login_search_dict (login_id, login_template_id, name) SELECT login_id, login_template_id, 'romanian' FROM instance.login_setting WHERE language_code = 'ro_ro';
+			
 			-- new tasks
 			INSERT INTO instance.task (
 				name,interval_seconds,cluster_master_only,

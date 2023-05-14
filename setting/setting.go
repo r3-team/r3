@@ -29,14 +29,20 @@ func Get(loginId pgtype.Int8, loginTemplateId pgtype.Int8) (types.Settings, erro
 		SELECT language_code, date_format, sunday_first_dow, font_size, borders_all,
 			borders_corner, page_limit, header_captions, spacing, dark, compact,
 			hint_update_version, mobile_scroll_form, warn_unsaved, menu_colored,
-			pattern, font_family, tab_remember, field_clean
-		FROM instance.login_setting
+			pattern, font_family, tab_remember, field_clean, ARRAY(
+				SELECT name::TEXT
+				FROM instance.login_search_dict
+				WHERE login_id          = ls.login_id
+				OR    login_template_id = ls.login_template_id
+				ORDER BY name::TEXT
+			)
+		FROM instance.login_setting AS ls
 		WHERE %s = $1
 	`, entryName), entryId).Scan(&s.LanguageCode, &s.DateFormat, &s.SundayFirstDow,
 		&s.FontSize, &s.BordersAll, &s.BordersCorner, &s.PageLimit,
 		&s.HeaderCaptions, &s.Spacing, &s.Dark, &s.Compact, &s.HintUpdateVersion,
 		&s.MobileScrollForm, &s.WarnUnsaved, &s.MenuColored, &s.Pattern,
-		&s.FontFamily, &s.TabRemember, &s.FieldClean)
+		&s.FontFamily, &s.TabRemember, &s.FieldClean, &s.SearchDictionaries)
 
 	return s, err
 }
@@ -47,7 +53,6 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 		return errors.New("settings can only be applied for either login or login template")
 	}
 
-	var err error
 	entryId := loginId.Int64
 	entryName := "login_id"
 
@@ -57,7 +62,7 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 	}
 
 	if isNew {
-		_, err = tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 			INSERT INTO instance.login_setting (%s, language_code, date_format,
 				sunday_first_dow, font_size, borders_all, borders_corner, page_limit, 
 				header_captions, spacing, dark, compact, hint_update_version,
@@ -68,9 +73,12 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 			s.FontSize, s.BordersAll, s.BordersCorner, s.PageLimit,
 			s.HeaderCaptions, s.Spacing, s.Dark, s.Compact, s.HintUpdateVersion,
 			s.MobileScrollForm, s.WarnUnsaved, s.MenuColored, s.Pattern,
-			s.FontFamily, s.TabRemember, s.FieldClean)
+			s.FontFamily, s.TabRemember, s.FieldClean); err != nil {
+
+			return err
+		}
 	} else {
-		_, err = tx.Exec(db.Ctx, fmt.Sprintf(`
+		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 			UPDATE instance.login_setting
 			SET language_code = $1, date_format = $2, sunday_first_dow = $3,
 				font_size = $4, borders_all = $5, borders_corner = $6,
@@ -83,16 +91,29 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 			s.BordersCorner, s.PageLimit, s.HeaderCaptions, s.Spacing, s.Dark,
 			s.Compact, s.HintUpdateVersion, s.MobileScrollForm, s.WarnUnsaved,
 			s.MenuColored, s.Pattern, s.FontFamily, s.TabRemember, s.FieldClean,
-			entryId)
-	}
-	return err
-}
+			entryId); err != nil {
 
-func SetLanguageCode_tx(tx pgx.Tx, id int64, languageCode string) error {
-	_, err := tx.Exec(db.Ctx, `
-		UPDATE instance.login_setting
-		SET language_code = $1
-		WHERE login_id = $2
-	`, languageCode, id)
-	return err
+			return err
+		}
+	}
+
+	// update full text search dictionaries
+	if !isNew {
+		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			DELETE FROM instance.login_search_dict
+			WHERE %s = $1
+		`, entryName), entryId); err != nil {
+			return err
+		}
+	}
+
+	for _, dictName := range s.SearchDictionaries {
+		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+			INSERT INTO instance.login_search_dict (%s, name)
+			VALUES ($1, $2)
+		`, entryName), entryId, dictName); err != nil {
+			return err
+		}
+	}
+	return nil
 }

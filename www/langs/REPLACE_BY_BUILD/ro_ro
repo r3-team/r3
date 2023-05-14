@@ -1685,6 +1685,9 @@
 		"button":{
 			"logout":"Deconectare"
 		},
+		"dialog":{
+			"searchDictionary":"This system offers full text search capabilities. Where full text search is used, even very large texts can be looked up quickly with advanced search features such as comparing synonyms and word stems.<br /><br />'Dictionaries for full text search' informs the system of which languages a user works with to use language specific search features."
+		},
 		"encryption":{
 			"button":{
 				"createKeys":"Create keys",
@@ -1778,13 +1781,15 @@
 		"pageLimit":"Lățimea paginii maximă",
 		"pageTitle":"Setări",
 		"pattern":"Background pattern",
+		"searchDictionaries":"Dictionaries for full text search",
+		"searchDictionaryNew":"Add dictionary",
 		"spacing":"Spaţierea",
 		"sundayFirstDow":"Duminică este prima zi a săptămânii",
 		"tabRemember":"Open last used tab",
 		"titleAccount":"Account",
-		"titleDisplay":"Afișare",
 		"titleEncryption":"End-to-end encryption",
 		"titleFixedTokens":"Devices",
+		"titleGeneral":"General",
 		"titleTheme":"Temă",
 		"warnUnsaved":"Avertismente pentru modificări nesalvate"
 	}

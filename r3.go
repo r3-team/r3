@@ -396,6 +396,12 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
+	// cache full text search dictionaries from the database
+	if err := cache.LoadSearchDictionaries(); err != nil {
+		// failure is not mission critical (in case of no access to DB system tables)
+		log.Error("server", "failed to read/update text search dictionaries", err)
+	}
+
 	// prepare image processing
 	image.PrepareProcessing(cli.imageMagick)
 

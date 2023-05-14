@@ -293,6 +293,9 @@ h3{
 .column.space-between{
 	justify-content:space-between;
 }
+.column.wrap{
+	flex-wrap:wrap;
+}
 .row{
 	display:flex;
 	flex-direction:row;
@@ -308,6 +311,9 @@ h3{
 }
 .row.space-between{
 	justify-content:space-between;
+}
+.row.wrap{
+	flex-wrap:wrap;
 }
 .shade{
 	box-shadow:1px 1px 4px var(--color-shade);

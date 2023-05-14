@@ -26,7 +26,7 @@ let MyHeader = {
 					</router-link>
 					
 					<router-link class="entry no-wrap clickable" to="/admin">
-						<img src="images/settings.png" />
+						<img src="images/serverCog.png" />
 					</router-link>
 				</template>
 				

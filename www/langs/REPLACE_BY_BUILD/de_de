@@ -1685,6 +1685,9 @@
 		"button":{
 			"logout":"Abmelden"
 		},
+		"dialog":{
+			"searchDictionary":"Dieses System bietet eine Volltextsuche. Wo Volltextsuchen verfügbar sind, können selbst sehr große Texte schnell gefunden werden, mit erweiterten Suchfunktionen wie der Vergleich mit Synonymen oder Wortstämmen.<br /><br />\"Wörterbücher für Volltextsuchen\" lassen das System wissen, in welchen Sprachen ein Benutzer arbeitet, damit sprachspezifische Funktionen genutzt werden können."
+		},
 		"encryption":{
 			"button":{
 				"createKeys":"Schlüssel erzeugen",
@@ -1778,13 +1781,15 @@
 		"pageLimit":"Max. Seitenbreite",
 		"pageTitle":"Einstellungen",
 		"pattern":"Hintergrundmuster",
+		"searchDictionaries":"Wörterbücher für Volltextsuche",
+		"searchDictionaryNew":"Wörterbuch hinzufügen",
 		"spacing":"Abstände",
 		"sundayFirstDow":"Sonntag ist 1. Wochentag",
 		"tabRemember":"Zuletzt genutzten Tab öffnen",
 		"titleAccount":"Konto",
-		"titleDisplay":"Anzeige",
 		"titleEncryption":"Ende-zu-Ende-Verschlüsselung",
 		"titleFixedTokens":"Geräte",
+		"titleGeneral":"Allgemein",
 		"titleTheme":"Darstellung",
 		"warnUnsaved":"Warnung bei ungespeicherten Änderungen"
 	}

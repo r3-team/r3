@@ -913,13 +913,13 @@ let MySettings = {
 					/>
 				</div>
 			</div>
-			<div class="content" :style="patternStyle">
+			<div class="content" :style="patternStyle" v-if="settingsLoaded">
 			
-				<!-- display -->
+				<!-- general -->
 				<div class="contentPart short">
 					<div class="contentPartHeader">
-						<img class="icon" src="images/visible1.png" />
-						<h1>{{ capApp.titleDisplay }}</h1>
+						<img class="icon" src="images/settings.png" />
+						<h1>{{ capApp.titleGeneral }}</h1>
 					</div>
 					<table class="default-inputs">
 						<tbody>
@@ -966,6 +966,28 @@ let MySettings = {
 								<td>{{ capApp.mobileScrollForm }}</td>
 								<td><my-bool v-model="settingsInput.mobileScrollForm" /></td>
 							</tr>
+							<tr>
+								<td>{{ capApp.searchDictionaries }}</td>
+								<td>
+									<div class="column gap">
+										<div class="row gap">
+											<select v-model="searchDictionaryNew" @change="dictAdd($event.target.value)">
+												<option value="">{{ capApp.searchDictionaryNew }}</option>
+												<option v-for="d in searchDictionaries.filter(v => !settingsInput.searchDictionaries.includes(v) && v !== 'simple')">
+													{{ d }}
+												</option>
+											</select>
+											<my-button image="question.png" @trigger="dictMsg(d)" />
+										</div>
+										<div class="row wrap gap">
+											<div v-for="d in settingsInput.searchDictionaries" class="row centered gap">
+												<span>{{ d }}</span>
+												<my-button image="delete.png" @trigger="dictDel(d)" :cancel="true" />
+											</div>
+										</div>
+									</div>
+								</td>
+							</tr>
 						</tbody>
 					</table>
 				</div>
@@ -973,7 +995,7 @@ let MySettings = {
 				<!-- theme -->
 				<div class="contentPart short">
 					<div class="contentPartHeader">
-						<img class="icon" src="images/layout.png" />
+						<img class="icon" src="images/visible1.png" />
 						<h1>{{ capApp.titleTheme }}</h1>
 					</div>
 					<table class="default-inputs">
@@ -1122,8 +1144,9 @@ let MySettings = {
 	emits:['logout'],
 	data() {
 		return {
-			settingsInput:{},
-			settingsLoaded:false
+			searchDictionaryNew:'', // input for new search dictionary
+			settingsInput:{},       // copy of the settings object to work on
+			settingsLoaded:false    // once settings have been loaded, each change triggers DB update
 		};
 	},
 	watch:{
@@ -1137,11 +1160,12 @@ let MySettings = {
 	},
 	computed:{
 		// stores
-		languageCodes:(s) => s.$store.getters['schema/languageCodes'],
-		capGen:       (s) => s.$store.getters.captions.generic,
-		capApp:       (s) => s.$store.getters.captions.settings,
-		patternStyle: (s) => s.$store.getters.patternStyle,
-		settings:     (s) => s.$store.getters.settings
+		languageCodes:     (s) => s.$store.getters['schema/languageCodes'],
+		searchDictionaries:(s) => s.$store.getters['searchDictionaries'],
+		capGen:            (s) => s.$store.getters.captions.generic,
+		capApp:            (s) => s.$store.getters.captions.settings,
+		patternStyle:      (s) => s.$store.getters.patternStyle,
+		settings:          (s) => s.$store.getters.settings
 	},
 	mounted() {
 		this.settingsInput = JSON.parse(JSON.stringify(this.settings));
@@ -1154,6 +1178,27 @@ let MySettings = {
 	},
 	methods:{
 		// externals
-		setSetting
+		setSetting,
+		
+		// actions
+		dictAdd(entry) {
+			this.settingsInput.searchDictionaries.push(entry);
+			this.searchDictionaryNew = '';
+		},
+		dictDel(entry) {
+			let pos = this.settingsInput.searchDictionaries.indexOf(entry);
+			if(pos !== -1)
+				this.settingsInput.searchDictionaries.splice(pos,1);
+		},
+		dictMsg() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.searchDictionary,
+				buttons:[{
+					caption:this.capGen.button.close,
+					cancel:true,
+					image:'cancel.png'
+				}]
+			});
+		}
 	}
 };

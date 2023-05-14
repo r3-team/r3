@@ -1685,6 +1685,9 @@
 		"button":{
 			"logout":"Logout"
 		},
+		"dialog":{
+			"searchDictionary":"This system offers full text search capabilities. Where full text search is used, even very large texts can be looked up quickly with advanced search features such as comparing synonyms and word stems.<br /><br />'Dictionaries for full text search' informs the system of which languages a user works with to use language specific search features."
+		},
 		"encryption":{
 			"button":{
 				"createKeys":"Create keys",
@@ -1778,13 +1781,15 @@
 		"pageLimit":"Max. larghezza della pagina",
 		"pageTitle":"Impostazioni",
 		"pattern":"Background pattern",
+		"searchDictionaries":"Dictionaries for full text search",
+		"searchDictionaryNew":"Add dictionary",
 		"spacing":"Spaziatura",
 		"sundayFirstDow":"Domenica è il primo giorno della settimana",
 		"tabRemember":"Open last used tab",
 		"titleAccount":"Account",
-		"titleDisplay":"Visualizza",
 		"titleEncryption":"End-to-end encryption",
 		"titleFixedTokens":"Devices",
+		"titleGeneral":"General",
 		"titleTheme":"Tema",
 		"warnUnsaved":"Avviso per cambiamenti non salvati"
 	}

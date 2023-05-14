@@ -56,6 +56,7 @@ const MyStore = Vuex.createStore({
 		pageTitleFull:'',     // web page title + instance name
 		popUpFormGlobal:null, // configuration of global pop-up form
 		productionMode:false, // system in production mode, false if maintenance
+		searchDictionaries:[],// list of dictionaries used for full text search for this login, ['english', 'german', ...]
 		settings:{},          // setting values for logged in user, key: settings name
 		sessionValueStore:{}, // user session key-value store for frontend functions, { moduleId1:{ key1:value1, key2:value2 }, moduleId2:{ ... } }
 		system:{}             // system details (admin only)
@@ -158,6 +159,7 @@ const MyStore = Vuex.createStore({
 		moduleLanguage: (state,payload) => state.moduleLanguage  = payload,
 		popUpFormGlobal:(state,payload) => state.popUpFormGlobal = payload,
 		productionMode: (state,payload) => state.productionMode  = payload,
+		searchDictionaries:(state,payload) => state.searchDictionaries = payload,
 		settings:       (state,payload) => state.settings        = payload,
 		system:         (state,payload) => state.system          = payload
 	},
@@ -216,6 +218,7 @@ const MyStore = Vuex.createStore({
 		pageTitleFull:    (state) => state.pageTitleFull,
 		popUpFormGlobal:  (state) => state.popUpFormGlobal,
 		productionMode:   (state) => state.productionMode,
+		searchDictionaries:(state) => state.searchDictionaries,
 		sessionValueStore:(state) => state.sessionValueStore,
 		settings:         (state) => state.settings,
 		system:           (state) => state.system

@@ -21,6 +21,7 @@ func PublicGet() (interface{}, error) {
 		LanguageCodes      []string `json:"languageCodes"`
 		ProductionMode     uint64   `json:"productionMode"`
 		SchemaTimestamp    int64    `json:"schemaTimestamp"`
+		SearchDictionaries []string `json:"searchDictionaries"`
 	}
 	res.Activated = config.GetLicenseActive()
 	res.AppName = config.GetString("appName")
@@ -36,5 +37,6 @@ func PublicGet() (interface{}, error) {
 	res.LanguageCodes = cache.GetCaptionLanguageCodes()
 	res.ProductionMode = config.GetUint64("productionMode")
 	res.SchemaTimestamp = cache.GetSchemaTimestamp()
+	res.SearchDictionaries = cache.GetSearchDictionaries()
 	return res, nil
 }

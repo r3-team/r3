@@ -12,7 +12,7 @@ let MyAdmin = {
 			<div class="navigation contentBox">
 				<div class="top lower">
 					<div class="area">
-						<img class="icon" src="images/settings.png" />
+						<img class="icon" src="images/serverCog.png" />
 						<h1>{{ capApp.title }}</h1>
 					</div>
 					<div class="area">
