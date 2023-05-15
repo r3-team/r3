@@ -48,7 +48,6 @@ let MyInputSelect = {
 		</div>
 	</div>`,
 	props:{
-		idsExclude:  { type:Array,   required:false, default:() => [] },
 		inputTextSet:{ type:String,  required:false, default:'' },
 		nakedIcons:  { type:Boolean, required:false, default:true },
 		options:     { type:Array,   required:false, default:() => [] }, // options: [{'id':12,'name':'Hans-Martin'},{...}]
@@ -65,8 +64,9 @@ let MyInputSelect = {
 		};
 	},
 	watch:{
-		inputTextSet(valNew) {
-			this.textInput = valNew;
+		inputTextSet:{
+			handler(v) { this.textInput = v; },
+			immediate:true
 		}
 	},
 	computed:{

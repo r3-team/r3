@@ -20,6 +20,7 @@ import {
 	getIndexAttributeId,
 	isAttributeFiles,
 	isAttributeInteger,
+	isAttributeRegconfig,
 	isAttributeRelationship,
 	isAttributeString
 } from '../shared/attribute.js';
@@ -375,7 +376,7 @@ let MyBuilderFieldOptions = {
 						</div>
 					</td>
 				</tr>
-				<tr v-if="!isRelationship">
+				<tr v-if="!isRelationship && !isRegconfig">
 					<td>{{ capApp.fieldMin }}</td>
 					<td>
 						<input
@@ -384,7 +385,7 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<tr v-if="!isRelationship">
+				<tr v-if="!isRelationship && !isRegconfig">
 					<td>{{ capApp.fieldMax }}</td>
 					<td>
 						<input
@@ -1117,6 +1118,7 @@ let MyBuilderFieldOptions = {
 		isTabs:          (s) => s.field.content === 'tabs',
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
 		isInteger:       (s) => s.isData && s.isAttributeInteger(s.attribute.content),
+		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.attribute.content),
 		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.attribute.content),
 		isString:        (s) => s.isData && s.isAttributeString(s.attribute.content),
 		
@@ -1143,6 +1145,7 @@ let MyBuilderFieldOptions = {
 		getRandomInt,
 		isAttributeFiles,
 		isAttributeInteger,
+		isAttributeRegconfig,
 		isAttributeRelationship,
 		isAttributeString,
 		

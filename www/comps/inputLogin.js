@@ -9,7 +9,6 @@ let MyInputLogin = {
 		v-model:selected="loginId"
 		@request-data="get"
 		@updated-text-input="inputText = $event"
-		:idsExclude="idsExclude"
 		:inputTextSet="inputTextSet"
 		:options="logins"
 		:placeholder="placeholder"

@@ -5,6 +5,7 @@ import MyInputDate            from './inputDate.js';
 import MyInputFiles           from './inputFiles.js';
 import MyInputLogin           from './inputLogin.js';
 import MyInputRichtext        from './inputRichtext.js';
+import MyInputSelect          from './inputSelect.js';
 import MyInputUuid            from './inputUuid.js';
 import MyList                 from './list.js';
 import {hasAccessToAttribute} from './shared/access.js';
@@ -51,6 +52,7 @@ let MyField = {
 		MyInputFiles,
 		MyInputLogin,
 		MyInputRichtext,
+		MyInputSelect,
 		MyInputUuid,
 		MyList
 	},
@@ -100,6 +102,18 @@ let MyField = {
 						v-if="isUuid"
 						v-model="value"
 						:readonly="isReadonly"
+					/>
+					
+					<!-- regconfig input -->
+					<my-input-select
+						v-if="isRegconfig"
+						@updated-text-input="regconfigInput = $event"
+						@update:selected="value = $event;regconfigInput = ''"
+						:inputTextSet="value"
+						:nakedIcons="true"
+						:options="regconfigOptions"
+						:placeholder="!focused && !isCleanUi ? caption : capGen.threeDots"
+						:selected="value"
 					/>
 					
 					<!-- password show action -->
@@ -542,6 +556,7 @@ let MyField = {
 			collectionIdMapIndexes:{},    // selected record indexes of collection, used to filter with
 			focused:false,
 			notTouched:true,              // data field was not touched by user
+			regconfigInput:'',
 			showColorPickerInput:false,   // for color picker fields
 			showPassword:false,           // for password fields
 			tabIndexFieldIdMapCounter:{}, // tabs only: counter (by tab index + field ID) of child values (like combined list row counts)
@@ -738,6 +753,14 @@ let MyField = {
 			}
 			return false;
 		},
+		regconfigOptions:(s) => {
+			let out = [];
+			for(let d of s.searchDictionaries) {
+				if((s.regconfigInput === '' || d.startsWith(s.regconfigInput)) && d !== 'simple' && s.value !== d)
+					out.push({id:d,name:d});
+			}
+			return out;
+		},
 		relationshipRecordIds:(s) => {
 			if(!s.isData || s.value === null) return [];
 			if(!s.isRelationship1N)           return [s.value];
@@ -897,6 +920,7 @@ let MyField = {
 			&& !s.isLogin
 			&& !s.isSlider
 			&& !s.isTextarea
+			&& !s.isRegconfig
 			&& !s.isRelationship
 			&& !s.isRichtext
 			&& !s.isUuid,
@@ -1006,6 +1030,7 @@ let MyField = {
 		capGen:             (s) => s.$store.getters.captions.generic,
 		isMobile:           (s) => s.$store.getters.isMobile,
 		moduleLanguage:     (s) => s.$store.getters.moduleLanguage,
+		searchDictionaries: (s) => s.$store.getters.searchDictionaries,
 		settings:           (s) => s.$store.getters.settings
 	},
 	mounted() {

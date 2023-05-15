@@ -238,7 +238,7 @@ func Set_tx(tx pgx.Tx, pgi types.PgIndex) error {
 	}
 
 	if isGin {
-		nameDict := "'simple'"
+		nameDict := ""
 		if pgi.AttributeIdDict.Valid {
 			nameDict, err = schema.GetAttributeNameById_tx(tx, pgi.AttributeIdDict.Bytes)
 			if err != nil {
@@ -250,7 +250,14 @@ func Set_tx(tx pgx.Tx, pgi types.PgIndex) error {
 		if err != nil {
 			return err
 		}
-		indexDef = fmt.Sprintf("GIN (TO_TSVECTOR(%s,%s))", nameDict, name)
+
+		if nameDict == "" {
+			indexDef = fmt.Sprintf("GIN (TO_TSVECTOR('simple'::REGCONFIG,%s))", name)
+		} else {
+			indexDef = fmt.Sprintf("GIN (TO_TSVECTOR(CASE WHEN %s IS NULL THEN 'simple'::REGCONFIG ELSE %s END,%s))",
+				nameDict, nameDict, name)
+		}
+
 	}
 
 	modName, relName, err := schema.GetRelationNamesById_tx(tx, pgi.RelationId)
