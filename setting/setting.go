@@ -34,7 +34,7 @@ func Get(loginId pgtype.Int8, loginTemplateId pgtype.Int8) (types.Settings, erro
 				FROM instance.login_search_dict
 				WHERE login_id          = ls.login_id
 				OR    login_template_id = ls.login_template_id
-				ORDER BY name::TEXT
+				ORDER BY position ASC
 			)
 		FROM instance.login_setting AS ls
 		WHERE %s = $1
@@ -107,11 +107,11 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 		}
 	}
 
-	for _, dictName := range s.SearchDictionaries {
+	for i, dictName := range s.SearchDictionaries {
 		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-			INSERT INTO instance.login_search_dict (%s, name)
-			VALUES ($1, $2)
-		`, entryName), entryId, dictName); err != nil {
+			INSERT INTO instance.login_search_dict (%s, position, name)
+			VALUES ($1, $2, $3)
+		`, entryName), entryId, i, dictName); err != nil {
 			return err
 		}
 	}

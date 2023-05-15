@@ -28,6 +28,7 @@ type DataGetFilterSide struct {
 	AttributeIndex  int         `json:"attributeIndex"`  // attribute relation index
 	AttributeNested int         `json:"attributeNested"` // attribute nesting level (0 = main query, 1 = 1st sub query)
 	Brackets        int         `json:"brackets"`        // brackets before (side0) or after (side1)
+	FtsDict         pgtype.Text `json:"ftsDict"`         // dictionary for full text search, execute tsquery on value and convert attribute side to tsvector if set
 	Query           DataGet     `json:"query"`           // sub query, optional
 	QueryAggregator pgtype.Text `json:"queryAggregator"` // sub query aggregator, optional
 	Value           interface{} `json:"value"`           // fixed value, optional, filled by frontend with value of field/login ID/record/...

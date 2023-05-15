@@ -129,6 +129,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE TABLE IF NOT EXISTS instance.login_search_dict (
 				login_id integer,
 				login_template_id integer,
+				position integer NOT NULL,
 				name regconfig NOT NULL,
 				CONSTRAINT login_search_dict_login_id_fkey FOREIGN KEY (login_id)
 					REFERENCES instance.login (id) MATCH SIMPLE

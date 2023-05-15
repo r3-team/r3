@@ -19,6 +19,7 @@
 	align-items:center;
 	margin:0px 0px 6px 0px;
 	position:relative;
+	gap:3px;
 }
 .filter img.dragAnchor{
 	height:24px;
@@ -49,7 +50,6 @@
 	flex:0 0 80px;
 	width:80px !important;
 	min-width:unset;
-	margin-right:3px;
 }
 .filter select.operator{
 	flex:0.5 0.3 80px;
@@ -62,11 +62,11 @@
 .filter-side-inputs{
 	display:flex;
 	flex-flow:row nowrap;
+	gap:3px;
 }
 .filter-side-inputs>input,
 .filter-side-inputs>select,
 .filter-side-inputs>.input-custom{
 	min-width:unset !important;
 	max-width:unset !important;
-	margin-right:3px !important;
 }

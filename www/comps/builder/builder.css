@@ -445,6 +445,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 	margin:0px 0px 6px 0px;
+	gap:3px;
 }
 .builder-query .query-lookups{
 	display:flex;
@@ -481,6 +482,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 	margin:0px 0px 6px 0px;
+	gap:3px;
 }
 .builder-query .fixed-limit{
 	display:flex;

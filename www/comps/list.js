@@ -340,7 +340,7 @@ let MyList = {
 						<template #title>
 							<div class="list-header-title">
 								<img src="images/filterCog.png" />
-								<span>{{ capApp.filtersExpert }}</span>
+								<span>{{ capGen.button.filterHint }}</span>
 							</div>
 						</template>
 					</my-filters>
@@ -836,6 +836,15 @@ let MyList = {
 			if(s.filtersQuick === '') return [];
 			
 			let out = [];
+			let addFilter = (operator,atrId,atrIndex,dict) => {
+				out.push({
+					connector:out.length === 0 ? 'AND' : 'OR',
+					operator:operator,
+					side0:{ attributeId:atrId, attributeIndex:atrIndex, brackets:0 },
+					side1:{ brackets:0, ftsDict:dict, value:s.filtersQuick }
+				});
+			};
+			
 			for(let c of s.columns) {
 				let a = s.attributeIdMap[c.attributeId];
 				if(c.subQuery || s.isAttributeFiles(a.content) ||
@@ -843,19 +852,30 @@ let MyList = {
 					
 					continue;
 				}
-				out.push({
-					connector:out.length === 0 ? 'AND' : 'OR',
-					operator:'ILIKE',
-					side0:{
-						attributeId:c.attributeId,
-						attributeIndex:c.index,
-						brackets:0
-					},
-					side1:{
-						brackets:0,
-						value:s.filtersQuick
+				
+				// check for available full text search
+				let ftsAvailable = false;
+				let r = s.relationIdMap[a.relationId];
+				for(let ind of r.indexes) {
+					if(ind.method === 'GIN' && ind.attributes.length === 1
+						&& ind.attributes[0].attributeId === a.id) {
+						
+						ftsAvailable = true;
+						break;
 					}
-				});
+				}
+				
+				if(!ftsAvailable) {
+					addFilter('ILIKE',c.attributeId,c.index,null);
+				}
+				else {
+					// add FTS filter for each active dictionary, use 'simple' otherwise
+					for(let dict of s.settings.searchDictionaries) {
+						addFilter('@@',c.attributeId,c.index,dict);
+					}
+					if(s.settings.searchDictionaries.length === 0)
+						addFilter('@@',c.attributeId,c.index,'simple');
+				}
 			}
 			return s.getFiltersEncapsulated(out);
 		},

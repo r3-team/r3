@@ -179,6 +179,10 @@ func Set_tx(tx pgx.Tx, pgi types.PgIndex) error {
 	isGin := pgi.Method == "GIN"
 	isBtree := pgi.Method == "BTREE"
 
+	if !isGin && !isBtree {
+		return fmt.Errorf("unsupported index type '%s'", pgi.Method)
+	}
+
 	if isGin && len(pgi.Attributes) != 1 {
 		// we currently use GIN exclusively with to_tsvector on a single column
 		// reason: doing any regular lookup (such as quick filters) checks attributes individually

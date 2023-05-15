@@ -679,6 +679,8 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 		return errors.New("bad filter operator")
 	}
 
+	// check for full text search
+	ftsActive := filter.Side0.FtsDict.Valid || filter.Side1.FtsDict.Valid
 	isNullOp := isNullOperator(filter.Operator)
 
 	// define comparisons
@@ -707,6 +709,32 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 
 			if err != nil {
 				return err
+			}
+
+			if ftsActive {
+				ftsDict := "'simple'"
+
+				// use dictionary attribute on corresponding text index, if there is one
+				atr, exists := cache.AttributeIdMap[s.AttributeId.Bytes]
+				if !exists {
+					return handler.ErrSchemaUnknownAttribute(s.AttributeId.Bytes)
+				}
+				rel := cache.RelationIdMap[atr.RelationId]
+				for _, ind := range rel.Indexes {
+					if ind.Method == "GIN" &&
+						len(ind.Attributes) == 1 &&
+						ind.Attributes[0].AttributeId == s.AttributeId.Bytes &&
+						ind.AttributeIdDict.Valid {
+
+						// use dictionary attribute name without quotes as its a column
+						atrDict := cache.AttributeIdMap[ind.AttributeIdDict.Bytes]
+						ftsDict = atrDict.Name
+						break
+					}
+				}
+
+				// apply ts_vector operation with or without dictionary definition
+				*comp = fmt.Sprintf("to_tsvector(%s,%s)", ftsDict, *comp)
 			}
 
 			// special case: (I)LIKE comparison needs attribute cast as TEXT
@@ -759,7 +787,21 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 			*queryCountArgs = append(*queryCountArgs, s.Value)
 		}
 
-		*comp = fmt.Sprintf("$%d", len(*queryArgs))
+		if s.FtsDict.Valid {
+			if !cache.GetSearchDictionaryIsValid(s.FtsDict.String) {
+				s.FtsDict.String = "simple"
+			}
+
+			// websearch_to_tsquery supports
+			// AND logic: 'coffee tea'    results in: 'coffe' & 'tea'
+			// OR  logic: 'coffee or tea' results in: 'coffe' | 'tea'
+			// negation:  'coffee -tea'   results in: 'coffe' & !'tea'
+			// followed:  '"coffe tea"'   results in: 'coffe' <-> 'tea'
+			// https://www.postgresql.org/docs/current/textsearch-controls.html
+			*comp = fmt.Sprintf("websearch_to_tsquery('%s',$%d)", s.FtsDict.String, len(*queryArgs))
+		} else {
+			*comp = fmt.Sprintf("$%d", len(*queryArgs))
+		}
 		return nil
 	}
 

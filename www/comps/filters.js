@@ -24,6 +24,7 @@ let MyFilterBrackets = {
 		@trigger="add(true)"
 		@trigger-right="add(false)"
 		:caption="display(1)"
+		:tight="true"
 	/>`,
 	props:{
 		left:      { type:Boolean, required:true },
@@ -60,58 +61,75 @@ let MyFilterBrackets = {
 	}
 };
 
-let MyFilterOperatorOption = {
-	name:'my-filter-operator-option',
-	template:`<option :value="value">{{ displayCaption }}</option>`,
-	props:{
-		builderMode:{ type:Boolean, required:true },
-		caption:    { type:String,  required:true },
-		value:      { type:String,  required:true }
-	},
-	computed:{
-		displayCaption:(s) => !s.builderMode ? s.caption : s.value
-	}
-};
-
 let MyFilterOperator = {
 	name:'my-filter-operator',
-	components:{ MyFilterOperatorOption },
 	template:`<select v-model="value">
-		<my-filter-operator-option value="="  :caption="capApp.option.operator.eq" :builderMode="builderMode" />
-		<my-filter-operator-option value="<>" :caption="capApp.option.operator.ne" :builderMode="builderMode" />
 		
-		<optgroup v-if="!onlyEquals && !onlyString" :label="capApp.operatorsSize">
-			<my-filter-operator-option value="<"  :caption="capApp.option.operator.st" :builderMode="builderMode" />
-			<my-filter-operator-option value=">"  :caption="capApp.option.operator.lt" :builderMode="builderMode" />
-			<my-filter-operator-option value="<=" :caption="capApp.option.operator.se" :builderMode="builderMode" />
-			<my-filter-operator-option value=">=" :caption="capApp.option.operator.le" :builderMode="builderMode" />
-		</optgroup>
+		<!-- operators in Builder mode -->
+		<template v-if="builderMode">
+			<option value="="  :title="capApp.option.operator.eq">=</option>
+			<option value="<>" :title="capApp.option.operator.ne">&lt;&gt;</option>
+			
+			<optgroup :label="capApp.operatorsSize">
+				<option value="<"  :title="capApp.option.operator.st">&lt;</option>
+				<option value=">"  :title="capApp.option.operator.lt">&gt;</option>
+				<option value="<=" :title="capApp.option.operator.se">&lt;=</option>
+				<option value=">=" :title="capApp.option.operator.le">&gt;=</option>
+			</optgroup>
+			
+			<optgroup :label="capApp.operatorsText">
+				<option value="ILIKE"     :title="capApp.option.operator.ilike"    >ILIKE</option>
+				<option value="LIKE"      :title="capApp.option.operator.like"     >LIKE</option>
+				<option value="NOT ILIKE" :title="capApp.option.operator.not_ilike">NOT ILIKE</option>
+				<option value="NOT LIKE"  :title="capApp.option.operator.not_like" >NOT LIKE</option>
+			</optgroup>
+			
+			<optgroup :label="capApp.operatorsNull">
+				<option value="IS NULL"     :title="capApp.option.operator.null"    >IS NULL</option>
+				<option value="IS NOT NULL" :title="capApp.option.operator.not_null">IS NOT NULL</option>
+			</optgroup>
+			
+			<optgroup :label="capApp.operatorsSets">
+				<option value="= ANY"  :title="capApp.option.operator.eqAny">= ANY</option>
+				<option value="<> ALL" :title="capApp.option.operator.neAll">&lt;&gt; ALL</option>
+			</optgroup>
+			
+			<optgroup :label="capApp.operatorsArray">
+				<option value="@>" :title="capApp.option.operator.arrContains" >@&gt;</option>
+				<option value="<@" :title="capApp.option.operator.arrContained">&lt;@</option>
+				<option value="&&" :title="capApp.option.operator.arrOverlap"  >&&</option>
+			</optgroup>
+		</template>
 		
-		<optgroup v-if="!onlyEquals && !onlyDates" :label="capApp.operatorsText">
-			<my-filter-operator-option value="LIKE"      :caption="capApp.option.operator.like"      :builderMode="builderMode" />
-			<my-filter-operator-option value="ILIKE"     :caption="capApp.option.operator.ilike"     :builderMode="builderMode" />
-			<my-filter-operator-option value="NOT LIKE"  :caption="capApp.option.operator.not_like"  :builderMode="builderMode" />
-			<my-filter-operator-option value="NOT ILIKE" :caption="capApp.option.operator.not_ilike" :builderMode="builderMode" />
-		</optgroup>
-		
-		<optgroup v-if="!onlyEquals" :label="capApp.operatorsNull">
-			<my-filter-operator-option value="IS NULL"     :caption="capApp.option.operator.null"     :builderMode="builderMode" />
-			<my-filter-operator-option value="IS NOT NULL" :caption="capApp.option.operator.not_null" :builderMode="builderMode" />
-		</optgroup>
-		
-		<optgroup v-if="!onlyEquals && builderMode" :label="capApp.operatorsSets">
-			<my-filter-operator-option value="= ANY"  caption="= ANY"  :builderMode="builderMode" />
-			<my-filter-operator-option value="<> ALL" caption="<> ALL" :builderMode="builderMode" />
-		</optgroup>
-		
-		<optgroup v-if="!onlyEquals && builderMode" :label="capApp.operatorsArray">
-			<my-filter-operator-option value="@>" caption="@>" :builderMode="builderMode" />
-			<my-filter-operator-option value="<@" caption="<@" :builderMode="builderMode" />
-			<my-filter-operator-option value="&&" caption="&&" :builderMode="builderMode" />
-		</optgroup>
+		<!-- operators in user mode -->
+		<template v-if="!builderMode">
+			<template v-if="!onlyFts">
+				<option value="=" >{{ capApp.option.operator.eq }}</option>
+				<option value="<>">{{ capApp.option.operator.ne }}</option>
+			</template>
+			
+			<template v-if="!onlyString && !onlyFts">
+				<option value="<" >{{ capApp.option.operator.st }}</option>
+				<option value=">" >{{ capApp.option.operator.lt }}</option>
+				<option value="<=">{{ capApp.option.operator.se }}</option>
+				<option value=">=">{{ capApp.option.operator.le }}</option>
+			</template>
+			
+			<template v-if="!onlyDates && !onlyFts">
+				<option value="ILIKE"    >{{ capApp.option.operator.ilike     }}</option>
+				<option value="LIKE"     >{{ capApp.option.operator.like      }}</option>
+				<option value="NOT ILIKE">{{ capApp.option.operator.not_ilike }}</option>
+				<option value="NOT LIKE" >{{ capApp.option.operator.not_like  }}</option>
+			</template>
+			
+			<option v-if="onlyFts" value="@@">{{ capApp.option.operator.fts }}</option>
+			
+			<option value="IS NULL"    >{{ capApp.option.operator.null     }}</option>
+			<option value="IS NOT NULL">{{ capApp.option.operator.not_null }}</option>
+		</template>
 	</select>`,
 	watch:{
-		onlyDates:function(v) {
+		onlyDates(v) {
 			if(v && (this.value === 'ILIKE' || this.value === 'LIKE'))
 				this.$emit('update:modelValue','=');
 		}
@@ -120,7 +138,7 @@ let MyFilterOperator = {
 		builderMode:{ type:Boolean, required:true },                 // only show in Builder mode (e. g. not for regular users)
 		modelValue: { type:String,  required:true },
 		onlyDates:  { type:Boolean, required:false, default:false }, // only show operators that can be used for date values (e. g. unix time)
-		onlyEquals: { type:Boolean, required:false, default:false }, // only show equal/non-equal operators
+		onlyFts:    { type:Boolean, required:false, default:false }, // only show full text search operators
 		onlyString: { type:Boolean, required:false, default:false }  // only show string operators
 	},
 	emits:['update:modelValue'],
@@ -678,13 +696,14 @@ let MyFilter = {
 		MyFilterSide
 	},
 	template:`<div class="filter">
-		<img v-if="expertMode" class="dragAnchor" src="images/drag.png" />
+		<img v-if="multipleFilters" class="dragAnchor" src="images/drag.png" />
 		<my-filter-connector class="connector"
+			v-if="multipleFilters"
 			v-model="connectorInput"
 			:readonly="position === 0"
 		/>
 		<my-filter-brackets class="brackets"
-			v-if="expertMode"
+			v-if="multipleFilters"
 			v-model="brackets0Input"
 			:left="true"
 		/>
@@ -708,6 +727,7 @@ let MyFilter = {
 			v-model="operatorInput"
 			:builderMode="builderMode"
 			:onlyDates="side0ColumDate || side0ColumTime"
+			:onlyFts="side0ColumFts"
 			:onlyString="isStringInput"
 		/>
 		<my-filter-side
@@ -728,8 +748,15 @@ let MyFilter = {
 			:nestedIndexAttributeIds="nestedIndexAttributeIds"
 			:nestingLevels="nestingLevels"
 		/>
+		<select class="short"
+			v-if="operator === '@@' && settings.searchDictionaries.length !== 0"
+			v-model="searchDictionaryInput"
+		>
+			<option v-for="d in settings.searchDictionaries">{{ d }}</option>
+		</select>
+		
 		<my-filter-brackets class="brackets"
-			v-if="expertMode"
+			v-if="multipleFilters"
 			v-model="brackets1Input"
 			:left="false"
 		/>
@@ -740,18 +767,18 @@ let MyFilter = {
 		/>
 	</div>`,
 	props:{
-		builderMode:   { type:Boolean, required:true },
-		columns:       { type:Array,   required:false, default:() => [] },
-		columnsMode:   { type:Boolean, required:true },
-		disableContent:{ type:Array,   required:true },
-		entityIdMapRef:{ type:Object,  required:true },
-		expertMode:    { type:Boolean, required:true },
-		fieldIdMap:    { type:Object,  required:true },
-		joins:         { type:Array,   required:true },
-		joinsParents:  { type:Array,   required:true },
-		moduleId:      { type:String,  required:true },
+		builderMode:    { type:Boolean, required:true },
+		columns:        { type:Array,   required:false, default:() => [] },
+		columnsMode:    { type:Boolean, required:true },
+		disableContent: { type:Array,   required:true },
+		entityIdMapRef: { type:Object,  required:true },
+		fieldIdMap:     { type:Object,  required:true },
+		joins:          { type:Array,   required:true },
+		joinsParents:   { type:Array,   required:true },
+		moduleId:       { type:String,  required:true },
+		multipleFilters:{ type:Boolean, required:true },
 		nestedIndexAttributeIds:{ type:Array, required:true },
-		nestingLevels: { type:Number,  required:true },
+		nestingLevels:  { type:Number,  required:true },
 		
 		// filter inputs
 		connector:{ type:String, required:true },
@@ -761,6 +788,18 @@ let MyFilter = {
 		side1:    { type:Object, required:true }
 	},
 	emits:['apply-value','remove','update'],
+	watch:{
+		side0ColumFts:{
+			handler(isFts) {
+				if(isFts && this.operator !== '@@')
+					return this.operatorInput = '@@';
+				
+				if(!isFts && this.operator === '@@')
+					return this.operatorInput = '=';
+			},
+			immediate:true
+		}
+	},
 	computed:{
 		// inputs
 		brackets0Input:{
@@ -785,7 +824,27 @@ let MyFilter = {
 		},
 		operatorInput:{
 			get()  { return this.operator; },
-			set(v) { this.$emit('update',this.position,'operator',v); }
+			set(v) {
+				this.$emit('update',this.position,'operator',v);
+				
+				if(v !== '@@') {
+					this.side1Input.ftsDict = null;
+				}
+				else if(this.side1Input.ftsDict === null) {
+					if(this.settings.searchDictionaries.length === 0)
+						this.side1Input.ftsDict = 'simple';
+					else
+						this.side1Input.ftsDict = this.settings.searchDictionaries[0];
+				}
+				this.$emit('update',this.position,'side1',this.side1Input);
+			}
+		},
+		searchDictionaryInput:{
+			get()  { return this.side1.ftsDict; },
+			set(v) {
+				this.side1Input.ftsDict = v;
+				this.$emit('update',this.position,'side1',this.side1Input);
+			}
 		},
 		side0Input:{
 			get()  { return this.side0; },
@@ -804,6 +863,20 @@ let MyFilter = {
 			}
 			return false;
 		},
+		side0ColumFts:(s) => {
+			if(!s.side0Column) return false;
+			
+			let atr = s.attributeIdMap[s.side0Column.attributeId];
+			let rel = s.relationIdMap[atr.relationId];
+			for(let ind of rel.indexes) {
+				if(ind.method === 'GIN' && ind.attributes.length === 1
+					&& ind.attributes[0].attributeId === s.side0Column.attributeId) {
+					
+					return true;
+				}
+			}
+			return false;
+		},
 		side0ColumDate:(s) => s.side0Column && ['date','datetime'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
 		side0ColumTime:(s) => s.side0Column && ['datetime','time'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
 		isNullOperator:(s) => ['IS NULL','IS NOT NULL'].includes(s.operator),
@@ -818,7 +891,9 @@ let MyFilter = {
 		),
 		
 		// stores
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap']
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		settings:      (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
@@ -834,13 +909,6 @@ let MyFilters = {
 			<slot name="title" />
 			
 			<div>
-				<my-button
-					v-if="anyFilters && !builderMode"
-					@trigger="expertMode = !expertMode"
-					:caption="capGen.button.expert"
-					:image="expertMode ? 'checkbox1.png' : 'checkbox0.png'"
-					:naked="true"
-				/>
 				<my-button image="add.png"
 					v-if="showAdd && !userFilter"
 					@trigger="add"
@@ -866,12 +934,12 @@ let MyFilters = {
 					:connector="element.connector"
 					:disableContent="disableContent"
 					:entityIdMapRef="entityIdMapRef"
-					:expertMode="expertMode"
 					:fieldIdMap="fieldIdMap"
 					:joins="joins"
 					:joinsParents="joinsParents"
 					:key="index"
 					:moduleId="moduleId"
+					:multipleFilters="filters.length > 1"
 					:nestedIndexAttributeIds="nestedIndexAttributeIds"
 					:nestingLevels="joinsParents.length+1"
 					:operator="element.operator"
@@ -939,7 +1007,6 @@ let MyFilters = {
 	},
 	data() {
 		return {
-			expertMode:this.builderMode,
 			filters:[]
 		};
 	},
@@ -1019,6 +1086,7 @@ let MyFilters = {
 					columnId:null,
 					content:'field',
 					fieldId:null,
+					ftsDict:null,
 					presetId:null,
 					roleId:null,
 					value:''
@@ -1029,6 +1097,7 @@ let MyFilters = {
 					columnId:null,
 					content:'value',
 					fieldId:null,
+					ftsDict:null,
 					presetId:null,
 					roleId:null,
 					value:''
