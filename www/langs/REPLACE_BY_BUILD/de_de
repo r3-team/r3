@@ -78,6 +78,7 @@
 		"category":"Kategorie",
 		"comments":"Kommentare",
 		"content":"Inhalt",
+		"contextHelp":"Kontexthilfe",
 		"date":"Datum",
 		"description":"Beschreibung",
 		"details":"Details",
@@ -1482,6 +1483,9 @@
 				"subQuery":"Rückgabewert der gewählten Sub-Query.",
 				"true":"WAHR-Wert zum Vergleich mit anderen WAHR-Werten.",
 				"value":"Ein statischer Wert zum Vergleich."
+			},
+			"dialog":{
+				"ftsHelp":"Eine Volltextsuche findet selbst in umfangreichen Texten schnell Übereinstimmungen anhand von Wörtern oder Ausdrücken. Anstatt nach bestimmten Zeichen zu suchen, werden bei der Volltextsuche Wörter zu ihren Wurzeln aufgeschlüsselt und mit einer Suchabfrage verglichen.<br /><br />Folgende Suchoptionen existieren:<ul><li>Spezifisches Wort</li><ul><li>Suche: <b>Eintrag</b></li><li>'Eintrag' findet Texte die vergleichbare Wörter zu 'Eintrag', 'Einträge' oder 'Eintragung' beinhalten.</li><li>Gültiges Ergebnis: 'Ich habe alle relevanten Einträge geprüft.'</li></ul><li>Alle Wörter</li><ul><li>Suche: <b>Kaffee kochen</b></li><li>'Kaffee kochen' findet Texte, die vergleichbare Wörter sowohl zu 'Kaffee' als auch zu 'kochen' beinhalten. Es wird kein Ergebnis für bspw. 'Kaffeekocher' gefunden, da 'Kaffeekocher' einen eigenen Wortstamm besitzt.</li><li>Gültiges Ergebnis: 'Die Maschine ist gefixt, guten Kaffee tut sie aber weiterhin nicht kochen.'</li></ul><li>Beliebige Wörter</li><ul><li>Suche: <b>Tee OR Kaffee</b></li><li>'Tee OR Kaffee' findet Texte, die Wörter beinhalten, die entweder vergleichbar sind mit 'Tee' oder mit 'Kaffee'.</li><li>Gültiges Ergebnis: 'Ohne Kaffee geht bei mir nix.'</li></ul><li>Ausgeschlossene Wörter</li><ul><li>Suche: <b>Tee -Kaffee</b></li><li>'Tee -Kaffee' findet Texte, die Wörter beinhalten, die nur mit 'Tee' aber nicht mit 'Kaffee' vergleichbar sind.</li><li>Gültiges Ergebnis: 'Ich trinke gerne Tee.'</li></ul><li>Gefolgte Wörter</li><ul><li>Suche: <b>\"Kaffee kochen\"</b></li><li>'\"Kaffee kochen\"' (in doppelten Anführungszeichen) findet Texte mit Wörtern vergleichbar mit 'Kaffee', gefolgt von Wörtern vergleichbar mit 'kochen'. Die Reihenfolge wird hierbei auch beachtet - Texte mit den gleichen Wörtern in umgedrehter Reihenfolge werden nicht gefunden.</li><li>Gültiges Ergebnis: 'Ich verbringe die Pause mit Kaffee kochen.'</li></ul></ul>Um die besten Ergebnisse zu erzielen, sollte die Volltextsuche in derselben Sprache ausgeführt werden, in der der Text verfasst ist. Ohne eine zugewiesene Sprache kann ein Text immer noch mit direkten Übereinstimmungen gefunden werden, aber weitergehende Funktionen wie der Abgleich von Wortstämmen funktionieren nicht."
 			},
 			"nowMode":{
 				"days":"Tage",

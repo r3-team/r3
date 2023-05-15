@@ -730,6 +730,11 @@ let MyFilter = {
 			:onlyFts="side0ColumFts"
 			:onlyString="isStringInput"
 		/>
+		<my-button image="question.png"
+			v-if="operator === '@@'"
+			@trigger="showFtsHelp"
+			:tight="true"
+		/>
 		<my-filter-side
 			v-model="side1Input"
 			@apply-value="$emit('apply-value')"
@@ -748,6 +753,8 @@ let MyFilter = {
 			:nestedIndexAttributeIds="nestedIndexAttributeIds"
 			:nestingLevels="nestingLevels"
 		/>
+		
+		<!-- full text search input -->
 		<select class="short"
 			v-if="operator === '@@' && settings.searchDictionaries.length !== 0"
 			v-model="searchDictionaryInput"
@@ -893,11 +900,28 @@ let MyFilter = {
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		capApp:        (s) => s.$store.getters.captions.filter,
+		capGen:        (s) => s.$store.getters.captions.generic,
 		settings:      (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
-		isAttributeString
+		isAttributeString,
+		
+		// actions
+		showFtsHelp() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.option.dialog.ftsHelp,
+				captionTop:this.capGen.contextHelp,
+				image:'question.png',
+				width:1000,
+				buttons:[{
+					caption:this.capGen.button.close,
+					cancel:true,
+					image:'cancel.png'
+				}]
+			});
+		}
 	}
 };
 

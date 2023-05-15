@@ -78,6 +78,7 @@
 		"category":"Category",
 		"comments":"Comments",
 		"content":"Content",
+		"contextHelp":"Context help",
 		"date":"Data",
 		"description":"Descriere",
 		"details":"Details",
@@ -1483,6 +1484,9 @@
 				"true":"TRUE value to compare other TRUE values against.",
 				"value":"A static value to compare against."
 			},
+			"dialog":{
+				"ftsHelp":"Full-text search can quickly find matches in large texts based on words or phrases. Instead of searching for specific characters, full-text search breaks down words to their roots to match against a search query.<br /><br />The following search options exist:<ul><li>Specific word</li><ul><li>Search: <b>entry</b></li><li>'entry' will find texts containing words like 'entry', 'entries' or 'list-entries'.</li><li>Valid match: 'I have checked all relevant data entries.'</li></ul><li>All words</li><ul><li>Search: <b>making coffee</b></li><li>'making coffee' will find texts if they contain both words related to 'make' (like 'making') and 'coffee' (like 'coffee machine'). It will not find 'coffee maker' as 'maker' is its own word-stem.</li><li>Valid match: 'We fixed the machine, still makes terrible coffee.'</li></ul><li>Any words</li><ul><li>Search: <b>tea or coffee</b></li><li>'tea or coffee' will find texts if they contain either words related to 'tea' (like 'tea drinker') or 'coffee' (like 'coffee machine').</li><li>Valid match: 'Coffee gets me through the day.'</li></ul><li>Without words</li><ul><li>Search: <b>tea -coffee</b></li><li>'tea -coffee' will find texts if they contain words related to 'tea' but not words related to 'coffee'.</li><li>Valid match: 'I enjoy tea regularly.'</li></ul><li>Followed words</li><ul><li>Search: <b>\"make coffee\"</b></li><li>'\"make coffee\"' (in double-quotes) will find texts if they contain words related to 'make' being followed by words related to 'coffee'. The order is important - texts containing 'coffee making' will not be included, as the word order is wrong.</li><li>Valid match: 'I´ll spent the lunch break making coffee for my colleagues.'</li></ul></ul>To get the best results, the full-text search should be executed in the same language the text is in. Without an assigned language, a text can still be found with direct matches but more advanced features like matching word-stems will not work."
+			},
 			"nowMode":{
 				"days":"days",
 				"hours":"hours",
@@ -1495,7 +1499,7 @@
 				"arrOverlap":"has overlap with",
 				"eq":"egal",
 				"eqAny":"is included in",
-				"fts":"conține (full text search)",
+				"fts":"conține (full-text search)",
 				"le":"mai mare sau egal",
 				"lt":"mai mare",
 				"ilike":"conține",
@@ -1691,7 +1695,7 @@
 			"logout":"Deconectare"
 		},
 		"dialog":{
-			"searchDictionary":"This system offers full text search capabilities. Where full text search is used, even very large texts can be looked up quickly with advanced search features such as comparing synonyms and word stems.<br /><br />'Dictionaries for full text search' informs the system of which languages a user works with to use language specific search features."
+			"searchDictionary":"This system offers full-text search capabilities. Where full-text search is used, even very large texts can be looked up quickly with advanced search features such as comparing synonyms and word stems.<br /><br />'Dictionaries for full-text search' informs the system of which languages a user works with to use language specific search features."
 		},
 		"encryption":{
 			"button":{
@@ -1786,7 +1790,7 @@
 		"pageLimit":"Lățimea paginii maximă",
 		"pageTitle":"Setări",
 		"pattern":"Background pattern",
-		"searchDictionaries":"Dictionaries for full text search",
+		"searchDictionaries":"Dictionaries for full-text search",
 		"searchDictionaryNew":"Add dictionary",
 		"spacing":"Spaţierea",
 		"sundayFirstDow":"Duminică este prima zi a săptămânii",
