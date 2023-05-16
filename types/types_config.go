@@ -27,10 +27,16 @@ type FileType struct {
 }
 
 type FileTypeDb struct {
-	Embedded bool   `json:"embedded"`
-	Host     string `json:"host"`
-	Port     int    `json:"port"`
-	Name     string `json:"name"`
-	User     string `json:"user"`
-	Pass     string `json:"pass"`
+	Host string `json:"host"`
+	Port int    `json:"port"`
+	Name string `json:"name"`
+	User string `json:"user"`
+	Pass string `json:"pass"`
+
+	// use embedded database
+	Embedded bool `json:"embedded"`
+
+	// SSL/TLS settings
+	Ssl           bool `json:"ssl"`
+	SslSkipVerify bool `json:"sslSkipVerify"`
 }

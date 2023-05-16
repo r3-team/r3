@@ -613,6 +613,12 @@
 					"fixed":"Custom value",
 					"uuid":"New UUID"
 				},
+				"relationshipActionsHints":{
+					"CASCADE":"Cascade the deletion, if a record referenced by this relationship attribute is being deleted. This means that all records that are in a relationship via this attribute are automatically deleted when the referenced record is being deleted. Very useful for parent-child relationships, deleting the child elements together with the main element.",
+					"NO ACTION":"Block the deletion, if a record referenced by this relationship attribute is being deleted. The referenced record can only be deleted after it has been removed from the relationship.",
+					"RESTRICT":"Similar to NO ACTION but usually only relevant for special use cases. Like NO ACTION, it blocks the action if a referenced record is being deleted. But in contrast to NO ACTION, this is done immediately and not at the end of a database transaction.",
+					"SET NULL":"Removes the reference, if a record referenced by this relationship attribute is being deleted. This is only possible if this attribute can be empty (not set to 'must have a value')."
+				},
 				"boolean":"Yes/no",
 				"color":"Color",
 				"date":"Date",
@@ -624,6 +630,7 @@
 				"regconfig":"Text search dictionary",
 				"relationship11":"Relationship, one-to-one (1:1)",
 				"relationshipN1":"Relationship, many-to-one (n:1)",
+				"relationshipActionsHintsOnUpdate":"Works identical to the setting for 'Action when deleted'. In contrast to deletion, this setting affects what happens when the primary key ('id') of a record that is referenced by this relationship attribute is changed. Seldom used, as there are few reasons to update primary keys.",
 				"richtext":"Text, with formatting",
 				"text":"Text",
 				"textarea":"Text, multiple lines",

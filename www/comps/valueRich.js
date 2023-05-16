@@ -4,6 +4,7 @@ import {
 } from './shared/attribute.js';
 import {
 	getUnixFormat,
+	getUnixShifted,
 	getUtcTimeStringFromUnix
 } from './shared/time.js';
 import {
@@ -127,6 +128,7 @@ let MyValueRich = {
 		getHtmlStripped,
 		getLinkMeta,
 		getUnixFormat,
+		getUnixShifted,
 		getUtcTimeStringFromUnix,
 		openLink,
 		
@@ -180,7 +182,10 @@ let MyValueRich = {
 				case 'integer': // fallthrough
 				case 'bigint':
 					switch(atr.contentUse) {
-						case 'date':     this.stringValueFull = this.getUnixFormat(this.value,this.settings.dateFormat);          break;
+						case 'date': // shift to local offset to show correct date
+							this.stringValueFull = this.value === null ? ''
+								: this.getUnixFormat(this.getUnixShifted(this.value,true),this.settings.dateFormat);
+						break;
 						case 'datetime': this.stringValueFull = this.getUnixFormat(this.value,this.settings.dateFormat + ' H:i'); break;
 						case 'time':     this.stringValueFull = this.getUtcTimeStringFromUnix(this.value);                        break;
 						default:         directValue = true; break;
