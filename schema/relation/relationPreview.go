@@ -60,13 +60,8 @@ func GetPreview(id uuid.UUID, limit int, offset int) (interface{}, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		valuePointers := make([]interface{}, len(atrNames))
-		valuesAll := make([]interface{}, len(atrNames))
-		for i := 0; i < len(atrNames); i++ {
-			valuePointers[i] = &valuesAll[i]
-		}
-
-		if err := rows.Scan(valuePointers...); err != nil {
+		valuesAll, err := rows.Values()
+		if err != nil {
 			return nil, err
 		}
 		res.Rows = append(res.Rows, valuesAll)

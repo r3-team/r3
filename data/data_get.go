@@ -538,11 +538,9 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 
 	if !expr.OutsideIn {
 		// attribute is from index relation
-		code, err := getAttributeCode(expr.AttributeId.Bytes, relCode)
-		if err != nil {
-			return err
-		}
-		*inSelect = append(*inSelect, data_sql.GetExpression(expr, code, alias))
+		*inSelect = append(*inSelect, data_sql.GetExpression(
+			expr, getAttributeCode(relCode, atr.Name), alias))
+
 		return nil
 	}
 
@@ -551,11 +549,7 @@ func addSelect(exprPos int, expr types.DataGetExpression,
 	if !exists {
 		return handler.ErrSchemaUnknownRelation(atr.RelationId)
 	}
-
-	shipMod, exists := cache.ModuleIdMap[shipRel.ModuleId]
-	if !exists {
-		return handler.ErrSchemaUnknownModule(shipRel.ModuleId)
-	}
+	shipMod := cache.ModuleIdMap[shipRel.ModuleId]
 
 	// get tupel IDs from other relation
 	if !expr.AttributeIdNm.Valid {
@@ -607,7 +601,6 @@ func addJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin,
 	if !exists {
 		return errors.New("join attribute does not exist")
 	}
-
 	if !atr.RelationshipId.Valid {
 		return errors.New("relationship of attribute is invalid")
 	}
@@ -639,11 +632,7 @@ func addJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin,
 	if !exists {
 		return handler.ErrSchemaUnknownRelation(relIdTarget)
 	}
-
-	modTarget, exists := cache.ModuleIdMap[relTarget.ModuleId]
-	if !exists {
-		return handler.ErrSchemaUnknownModule(relTarget.ModuleId)
-	}
+	modTarget := cache.ModuleIdMap[relTarget.ModuleId]
 
 	// define JOIN type
 	if !tools.StringInSlice(join.Connector, types.QueryJoinConnectors) {
@@ -685,7 +674,6 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 
 	// define comparisons
 	var getComp = func(s types.DataGetFilterSide, comp *string) error {
-		var err error
 		var isQuery = s.Query.RelationId != uuid.Nil
 
 		// sub query filter
@@ -704,21 +692,17 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 
 		// attribute filter
 		if s.AttributeId.Valid {
-			*comp, err = getAttributeCode(s.AttributeId.Bytes,
-				getRelationCode(s.AttributeIndex, s.AttributeNested))
 
-			if err != nil {
-				return err
+			atr, exists := cache.AttributeIdMap[s.AttributeId.Bytes]
+			if !exists {
+				return handler.ErrSchemaUnknownAttribute(s.AttributeId.Bytes)
 			}
+			*comp = getAttributeCode(getRelationCode(s.AttributeIndex, s.AttributeNested), atr.Name)
 
 			if ftsActive {
 				ftsDict := "'simple'"
 
 				// use dictionary attribute on corresponding text index, if there is one
-				atr, exists := cache.AttributeIdMap[s.AttributeId.Bytes]
-				if !exists {
-					return handler.ErrSchemaUnknownAttribute(s.AttributeId.Bytes)
-				}
 				rel := cache.RelationIdMap[atr.RelationId]
 				for _, ind := range rel.Indexes {
 					if ind.Method == "GIN" &&
@@ -734,13 +718,15 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 				}
 
 				// apply ts_vector operation with or without dictionary definition
-				*comp = fmt.Sprintf("to_tsvector(%s,%s)", ftsDict, *comp)
-			}
-
-			// special case: (I)LIKE comparison needs attribute cast as TEXT
-			// this is relevant for integers/floats/etc.
-			if isLikeOperator(filter.Operator) {
-				*comp = fmt.Sprintf("%s::TEXT", *comp)
+				*comp = fmt.Sprintf("to_tsvector(CASE WHEN %s IS NULL THEN 'simple'::REGCONFIG ELSE %s END,%s)",
+					ftsDict, ftsDict, *comp)
+			} else {
+				// special cases
+				// (I)LIKE comparison needs attribute cast as TEXT (relevant for integers/floats/etc.)
+				// REGCONFIG attributes must be cast as TEXT
+				if isLikeOperator(filter.Operator) || atr.Content == "regconfig" {
+					*comp = fmt.Sprintf("%s::TEXT", *comp)
+				}
 			}
 			return nil
 		}
@@ -839,7 +825,6 @@ func addOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 
 	orderItems := make([]string, len(data.Orders))
 	var alias string
-	var err error
 
 	for i, ord := range data.Orders {
 
@@ -861,12 +846,12 @@ func addOrderBy(data types.DataGet, nestingLevel int) (string, error) {
 			if expressionPosAlias != -1 {
 				alias = data_sql.GetExpressionAlias(expressionPosAlias)
 			} else {
-				alias, err = getAttributeCode(ord.AttributeId.Bytes,
-					getRelationCode(int(ord.Index.Int32), nestingLevel))
-
-				if err != nil {
-					return "", err
+				atr, exists := cache.AttributeIdMap[ord.AttributeId.Bytes]
+				if !exists {
+					return "", handler.ErrSchemaUnknownAttribute(ord.AttributeId.Bytes)
 				}
+
+				alias = getAttributeCode(getRelationCode(int(ord.Index.Int32), nestingLevel), atr.Name)
 			}
 
 		} else if ord.ExpressionPos.Valid {
@@ -906,12 +891,8 @@ func getTupelIdCode(relationIndex int, nestingLevel int) string {
 // an attribute is referenced by the relation code + the attribute name
 // due to the relation code, this will always uniquely identify an attribute from a specific index
 // example: _r3.surname maps to person.surname from index 3
-func getAttributeCode(attributeId uuid.UUID, relCode string) (string, error) {
-	atr, exists := cache.AttributeIdMap[attributeId]
-	if !exists {
-		return "", handler.ErrSchemaUnknownAttribute(attributeId)
-	}
-	return fmt.Sprintf(`"%s"."%s"`, relCode, atr.Name), nil
+func getAttributeCode(relationCode string, attributeName string) string {
+	return fmt.Sprintf(`"%s"."%s"`, relationCode, attributeName)
 }
 
 func getBrackets(count int, right bool) string {

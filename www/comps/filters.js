@@ -758,6 +758,7 @@ let MyFilter = {
 		<select class="short"
 			v-if="operator === '@@' && settings.searchDictionaries.length !== 0"
 			v-model="searchDictionaryInput"
+			:title="capApp.searchDictionaryHint"
 		>
 			<option v-for="d in settings.searchDictionaries">{{ d }}</option>
 		</select>
@@ -911,7 +912,7 @@ let MyFilter = {
 		// actions
 		showFtsHelp() {
 			this.$store.commit('dialog',{
-				captionBody:this.capApp.option.dialog.ftsHelp,
+				captionBody:this.capApp.dialog.ftsHelp,
 				captionTop:this.capGen.contextHelp,
 				image:'question.png',
 				width:1000,
