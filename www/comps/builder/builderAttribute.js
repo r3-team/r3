@@ -233,18 +233,6 @@ let MyBuilderAttribute = {
 							<td></td>
 						</tr>
 						<tr>
-							<td>{{ capApp.onUpdate }}</td>
-							<td>
-								<select v-model="values.onUpdate" :disabled="readonly">
-									<option value="NO ACTION">NO ACTION</option>
-									<option value="CASCADE">CASCADE</option>
-									<option value="SET NULL">SET NULL</option>
-									<option value="RESTRICT">RESTRICT</option>
-								</select>
-							</td>
-							<td></td>
-						</tr>
-						<tr>
 							<td>{{ capApp.onDelete }}</td>
 							<td>
 								<select v-model="values.onDelete" :disabled="readonly">
@@ -254,7 +242,19 @@ let MyBuilderAttribute = {
 									<option value="RESTRICT">RESTRICT</option>
 								</select>
 							</td>
-							<td></td>
+							<td>{{ capApp.option.relationshipActionsHints[values.onDelete] }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.onUpdate }}</td>
+							<td>
+								<select v-model="values.onUpdate" :disabled="readonly">
+									<option value="NO ACTION">NO ACTION</option>
+									<option value="CASCADE">CASCADE</option>
+									<option value="SET NULL">SET NULL</option>
+									<option value="RESTRICT">RESTRICT</option>
+								</select>
+							</td>
+							<td>{{ capApp.option.relationshipActionsHintsOnUpdate }}</td>
 						</tr>
 					</template>
 					

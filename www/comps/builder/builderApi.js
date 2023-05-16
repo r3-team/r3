@@ -87,7 +87,7 @@ let MyBuilderApiPreview = {
 						<tr><th>Key</th><th>Value</th></tr>
 					</thead>
 					<tbody>
-						<tr><th>Authentication</th><th>Bearer {TOKEN_FROM_AUTH_CALL}</th></tr>
+						<tr><th>Authorization</th><th>Bearer {TOKEN_FROM_AUTH_CALL}</th></tr>
 					</tbody>
 				</table>
 			</td>
