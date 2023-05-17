@@ -727,7 +727,7 @@ let MyFilter = {
 			v-model="operatorInput"
 			:builderMode="builderMode"
 			:onlyDates="side0ColumDate || side0ColumTime"
-			:onlyFts="side0ColumFts"
+			:onlyFts="side0ColumFtsMode !== null"
 			:onlyString="isStringInput"
 		/>
 		<my-button image="question.png"
@@ -754,13 +754,16 @@ let MyFilter = {
 			:nestingLevels="nestingLevels"
 		/>
 		
-		<!-- full text search input -->
+		<!-- full text search, dictionary input (only with dictionary attribute) -->
 		<select class="short"
-			v-if="operator === '@@' && settings.searchDictionaries.length !== 0"
+			v-if="side0ColumFtsMode === 'dict'"
 			v-model="searchDictionaryInput"
 			:title="capApp.searchDictionaryHint"
 		>
 			<option v-for="d in settings.searchDictionaries">{{ d }}</option>
+			<option value="simple" :title="capApp.searchDictionarySimpleHint">
+				{{ capApp.searchDictionarySimple }}
+			</option>
 		</select>
 		
 		<my-filter-brackets class="brackets"
@@ -797,12 +800,12 @@ let MyFilter = {
 	},
 	emits:['apply-value','remove','update'],
 	watch:{
-		side0ColumFts:{
-			handler(isFts) {
-				if(isFts && this.operator !== '@@')
+		side0ColumFtsMode:{
+			handler(ftsMode) {
+				if(ftsMode !== null && this.operator !== '@@')
 					return this.operatorInput = '@@';
 				
-				if(!isFts && this.operator === '@@')
+				if(ftsMode === null && this.operator === '@@')
 					return this.operatorInput = '=';
 			},
 			immediate:true
@@ -871,8 +874,8 @@ let MyFilter = {
 			}
 			return false;
 		},
-		side0ColumFts:(s) => {
-			if(!s.side0Column) return false;
+		side0ColumFtsMode:(s) => {
+			if(!s.side0Column) return null;
 			
 			let atr = s.attributeIdMap[s.side0Column.attributeId];
 			let rel = s.relationIdMap[atr.relationId];
@@ -880,10 +883,10 @@ let MyFilter = {
 				if(ind.method === 'GIN' && ind.attributes.length === 1
 					&& ind.attributes[0].attributeId === s.side0Column.attributeId) {
 					
-					return true;
+					return ind.attributeIdDict !== null ? 'dict' : 'simple';
 				}
 			}
-			return false;
+			return null;
 		},
 		side0ColumDate:(s) => s.side0Column && ['date','datetime'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
 		side0ColumTime:(s) => s.side0Column && ['datetime','time'].includes(s.attributeIdMap[s.side0Column.attributeId].contentUse),
