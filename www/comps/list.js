@@ -259,6 +259,7 @@ let MyList = {
 					<my-button image="filterCog.png"
 						v-if="!smallSize"
 						@trigger="toggleUserFilters"
+						@trigger-right="filtersUser = [];reloadInside('filtersUser')"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
 						:naked="true"
