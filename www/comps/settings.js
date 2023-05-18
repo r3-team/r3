@@ -812,14 +812,21 @@ let MySettingsFixedTokens = {
 			let langCode = ['en_us','de_de'].includes(this.languageCode)
 				? this.languageCode : 'en_us';
 			
+			let isSsl = location.protocol.includes('https');
+			let port  = location.port;
+			
+			// known issue, empty is returned if port is default HTTP(S)
+			if(port === null || port === '')
+				port = isSsl ? '443' : '80';
+			
 			let call = [
 				`deviceName=${this.tokenName}`,
 				`hostName=${location.hostname}`,
-				`hostPort=${location.port}`,
+				`hostPort=${port}`,
 				`languageCode=${langCode}`,
 				`tokenFixed=${this.tokenFixed}`,
 				`token=${this.token}`,
-				`ssl=${location.protocol.includes('https') ? 1 : 0}`
+				`ssl=${ isSsl ? 1 : 0}`
 			];
 			window.open(`/client/download/config/?${call.join('&')}`);
 		},
