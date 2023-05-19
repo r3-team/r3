@@ -1,11 +1,14 @@
 package mail
 
 import (
+	"fmt"
 	"r3/db"
 	"r3/types"
 
 	"github.com/jackc/pgx/v5"
 )
+
+var searchFields = []string{"from_list", "to_list", "cc_list", "bcc_list", "subject", "body"}
 
 // mail spooler
 func Del_tx(tx pgx.Tx, ids []int64) error {
@@ -20,28 +23,45 @@ func Del_tx(tx pgx.Tx, ids []int64) error {
 	return nil
 }
 
-func Get(limit int, offset int) ([]types.Mail, int64, error) {
-	mails := make([]types.Mail, 0)
+func Get(limit int, offset int, search string) ([]types.Mail, int64, error) {
 
-	rows, err := db.Pool.Query(db.Ctx, `
+	// prepare SQL request and arguments
+	sqlArgs := make([]interface{}, 0)
+	sqlArgs = append(sqlArgs, limit)
+	sqlArgs = append(sqlArgs, offset)
+	sqlWhere := ""
+	if search != "" {
+		for i, field := range searchFields {
+			connector := "WHERE"
+			if i != 0 {
+				connector = "OR"
+			}
+			sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", search))
+			sqlWhere = fmt.Sprintf("%s%s %s ILIKE $%d\n", sqlWhere, connector, field, len(sqlArgs))
+		}
+	}
+
+	mails := make([]types.Mail, 0)
+	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
 		SELECT id, from_list, to_list, cc_list, bcc_list, subject,
 			body, attempt_count, attempt_date, outgoing, date,
 			mail_account_id, record_id_wofk, attribute_id,
 			COALESCE((
 				SELECT COUNT(position)
 				FROM instance.mail_spool_file
-				WHERE mail_id = id
+				WHERE mail_id = m.id
 			),0),
 			COALESCE((
 				SELECT SUM(file_size)
 				FROM instance.mail_spool_file
-				WHERE mail_id = id
+				WHERE mail_id = m.id
 			),0)
 		FROM instance.mail_spool AS m
+		%s
 		ORDER BY date DESC
 		LIMIT $1
 		OFFSET $2
-	`, limit, offset)
+	`, sqlWhere), sqlArgs...)
 	if err != nil {
 		return mails, 0, err
 	}
@@ -59,12 +79,26 @@ func Get(limit int, offset int) ([]types.Mail, int64, error) {
 		mails = append(mails, m)
 	}
 
-	// get total
+	// get total count
+	sqlArgs = make([]interface{}, 0)
+	sqlWhere = ""
+	if search != "" {
+		for i, field := range searchFields {
+			connector := "WHERE"
+			if i != 0 {
+				connector = "OR"
+			}
+			sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", search))
+			sqlWhere = fmt.Sprintf("%s%s %s ILIKE $%d\n", sqlWhere, connector, field, len(sqlArgs))
+		}
+	}
+
 	var total int64
-	if err := db.Pool.QueryRow(db.Ctx, `
+	if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
 		SELECT COUNT(*)
 		FROM instance.mail_spool
-	`).Scan(&total); err != nil {
+		%s
+	`, sqlWhere), sqlArgs...).Scan(&total); err != nil {
 		return mails, 0, err
 	}
 	return mails, total, nil

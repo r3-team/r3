@@ -53,6 +53,11 @@ let MyAdminMails = {
 					<option>500</option>
 					<option>1000</option>
 				</select>
+				
+				<div class="row gap">
+					<input v-model="search" @keyup.enter="startAtPageFirst" :placeholder="capGen.threeDots" />
+					<my-button image="search.png" @trigger="startAtPageFirst" />
+				</div>
 			</div>
 		</div>
 		
@@ -112,11 +117,14 @@ let MyAdminMails = {
 	},
 	data() {
 		return {
+			// inputs
+			limit:50,
+			offset:0,
+			search:'',
+			
 			// mails
 			mails:[],
 			mailIdsSelected:[],
-			limit:50,
-			offset:0,
 			total:0,
 			
 			// mail accounts
@@ -130,7 +138,7 @@ let MyAdminMails = {
 	},
 	computed:{
 		// simple
-		noMails:(s) => s.offset === 0 && s.mails.length === 0,
+		noMails:(s) => s.total === 0,
 		pages:  (s) => Math.ceil(s.total / s.limit),
 		
 		// stores
@@ -145,12 +153,8 @@ let MyAdminMails = {
 		
 		// presentation
 		displaySendAttempts(mail) {
-			if(!mail.outgoing)
-				return '';
-			
-			if(mail.attemptCount === 0)
-				return '-';
-			
+			if(!mail.outgoing)          return '';
+			if(mail.attemptCount === 0) return '-';
 			return `${mail.attemptCount}/5 (${this.getUnixFormat(mail.attemptDate,this.settings.dateFormat+' H:i')})`;
 		},
 		displayAttach(mail) {
@@ -185,7 +189,6 @@ let MyAdminMails = {
 		offsetSet(add) {
 			if(add) this.offset += this.limit;
 			else    this.offset -= this.limit;
-			
 			this.get();
 		},
 		toggleMailAll() {
@@ -221,7 +224,8 @@ let MyAdminMails = {
 		get() {
 			ws.send('mail','get',{
 				limit:this.limit,
-				offset:this.offset
+				offset:this.offset,
+				search:this.search
 			},true).then(
 				res => {
 					this.mails           = res.payload.mails;
