@@ -10,6 +10,7 @@
 			"copy":"Copy",
 			"copyClipboard":"Copy to clipboard",
 			"create":"Crează",
+			"createNew":"Crează+Nou",
 			"delete":"Șterge",
 			"deleteHint":"Șterge definitiv înregistrarea selectată",
 			"deleteSelected":"Șterge selecția",

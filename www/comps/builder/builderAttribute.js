@@ -40,9 +40,14 @@ let MyBuilderAttribute = {
 			<div class="top lower">
 				<div class="area">
 					<my-button image="save.png"
-						@trigger="set"
+						@trigger="set(false)"
 						:active="canSave"
 						:caption="isNew ? capGen.button.create : capGen.button.save"
+					/>
+					<my-button image="save_new.png"
+						@trigger="set(true)"
+						:active="canSave"
+						:caption="isNew ? capGen.button.createNew : capGen.button.saveNew"
 					/>
 					<my-button image="refresh.png"
 						@trigger="reset"
@@ -108,7 +113,7 @@ let MyBuilderAttribute = {
 						<td>{{ capApp.usedFor }}</td>
 						<td>
 							<div class="row centered gap">
-								<select v-model="usedFor" :disabled="readonly">
+								<select v-model="usedFor" :disabled="readonly" @change="changedUsedFor">
 									<optgroup :label="capGen.standard">
 										<option value="text"     :disabled="!isNew && !isString">{{ capApp.option.text }}</option>
 										<option value="textarea" :disabled="!isNew && !isString">{{ capApp.option.textarea }}</option>
@@ -274,7 +279,7 @@ let MyBuilderAttribute = {
 		readonly:       { type:Boolean, required:true },
 		relation:       { type:Object,  required:true }
 	},
-	emits:['close','next-language'],
+	emits:['close','next-language','new-record'],
 	data() {
 		return {
 			defaultsOption:'fixed',
@@ -454,6 +459,10 @@ let MyBuilderAttribute = {
 		isAttributeUuid,
 		
 		// actions
+		changedUsedFor() {
+			if(!this.isRelationship && this.values.relationshipId !== null)
+				this.values.relationshipId = null;
+		},
 		handleHotkeys(e) {
 			if(e.ctrlKey && e.key === 's' && this.canSave) {
 				this.set();
@@ -487,7 +496,7 @@ let MyBuilderAttribute = {
 					}
 				};
 			
-			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
+			this.resetOrg();
 			
 			// set defaults option
 			switch(this.values.def) {
@@ -495,6 +504,9 @@ let MyBuilderAttribute = {
 				case 'EXTRACT(EPOCH FROM NOW())':        this.defaultsOption = 'datetime'; break;
 				case 'GEN_RANDOM_UUID()':                this.defaultsOption = 'uuid';     break;
 			}
+		},
+		resetOrg() {
+			this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 		},
 		updateDefaultsOption() {
 			switch(this.defaultsOption) {
@@ -537,7 +549,7 @@ let MyBuilderAttribute = {
 				this.$root.genericError
 			);
 		},
-		set() {
+		set(saveAndNew) {
 			if(this.values.encrypted && !this.canEncrypt)
 				this.values.encrypted = false;
 			
@@ -547,6 +559,14 @@ let MyBuilderAttribute = {
 			],true).then(
 				() => {
 					this.$root.schemaReload(this.module.id);
+					
+					if(saveAndNew) {
+						this.$emit('new-record');
+						this.values.id   = null;
+						this.values.name = '';
+						this.resetOrg();
+						return;
+					}
 					this.$emit('close');
 				},
 				this.$root.genericError
