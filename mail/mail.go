@@ -20,7 +20,7 @@ func Del_tx(tx pgx.Tx, ids []int64) error {
 	return nil
 }
 
-func Get(limit int, offset int) ([]types.Mail, error) {
+func Get(limit int, offset int) ([]types.Mail, int64, error) {
 	mails := make([]types.Mail, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
@@ -43,7 +43,7 @@ func Get(limit int, offset int) ([]types.Mail, error) {
 		OFFSET $2
 	`, limit, offset)
 	if err != nil {
-		return mails, err
+		return mails, 0, err
 	}
 	defer rows.Close()
 
@@ -54,11 +54,20 @@ func Get(limit int, offset int) ([]types.Mail, error) {
 			&m.Outgoing, &m.Date, &m.AccountId, &m.RecordId, &m.AttributeId,
 			&m.Files, &m.FilesSize); err != nil {
 
-			return mails, err
+			return mails, 0, err
 		}
 		mails = append(mails, m)
 	}
-	return mails, nil
+
+	// get total
+	var total int64
+	if err := db.Pool.QueryRow(db.Ctx, `
+		SELECT COUNT(*)
+		FROM instance.mail_spool
+	`).Scan(&total); err != nil {
+		return mails, 0, err
+	}
+	return mails, total, nil
 }
 
 // mail accounts

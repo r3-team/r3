@@ -33,6 +33,7 @@ func MailGet(reqJson json.RawMessage) (interface{}, error) {
 		}
 		res struct {
 			Mails []types.Mail `json:"mails"`
+			Total int64        `json:"total"`
 		}
 	)
 
@@ -40,7 +41,7 @@ func MailGet(reqJson json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 
-	res.Mails, err = mail.Get(req.Limit, req.Offset)
+	res.Mails, res.Total, err = mail.Get(req.Limit, req.Offset)
 	if err != nil {
 		return nil, err
 	}
