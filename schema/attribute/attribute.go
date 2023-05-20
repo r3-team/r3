@@ -245,7 +245,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		// update attribute name
 		// must happen first, as other statements refer to new attribute name
 		if nameEx != name {
-			if err := SetName_tx(tx, id, name, false); err != nil {
+			if err := setName_tx(tx, id, name, false, isFiles); err != nil {
 				return err
 			}
 		}
@@ -480,7 +480,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 	return caption.Set_tx(tx, id, captions)
 }
 
-func SetName_tx(tx pgx.Tx, id uuid.UUID, name string, ignoreNameCheck bool) error {
+func setName_tx(tx pgx.Tx, id uuid.UUID, name string, ignoreNameCheck bool, isFiles bool) error {
 
 	// name check can be ignored by internal tasks, never ignore for user input
 	if !ignoreNameCheck {
@@ -500,11 +500,13 @@ func SetName_tx(tx pgx.Tx, id uuid.UUID, name string, ignoreNameCheck bool) erro
 	}
 
 	if nameEx != name {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-			ALTER TABLE "%s"."%s"
-			RENAME COLUMN "%s" TO "%s"
-		`, moduleName, relationName, nameEx, name)); err != nil {
-			return err
+		if !isFiles {
+			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
+				ALTER TABLE "%s"."%s"
+				RENAME COLUMN "%s" TO "%s"
+			`, moduleName, relationName, nameEx, name)); err != nil {
+				return err
+			}
 		}
 
 		if _, err := tx.Exec(db.Ctx, `

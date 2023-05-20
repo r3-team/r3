@@ -240,6 +240,7 @@ let MyBuilderRelation = {
 						v-if="attributeIdEdit !== false"
 						@close="attributeIdEdit = false"
 						@nextLanguage="$emit('next-language')"
+						@new-record="attributeIdEdit = null"
 						:attributeId="attributeIdEdit"
 						:builderLanguage="builderLanguage"
 						:readonly="readonly"
@@ -602,7 +603,7 @@ let MyBuilderRelation = {
 	emits:['next-language'],
 	watch:{
 		relation:{
-			handler:function() { this.reset(); },
+			handler() { this.reset(); },
 			immediate:true
 		}
 	},

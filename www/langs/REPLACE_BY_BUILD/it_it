@@ -10,6 +10,7 @@
 			"copy":"Copy",
 			"copyClipboard":"Copy to clipboard",
 			"create":"Crea",
+			"createNew":"Crea+Nuovo",
 			"delete":"Cancella",
 			"deleteHint":"Cancella il record definitivamente",
 			"deleteSelected":"Cancella selezionati",

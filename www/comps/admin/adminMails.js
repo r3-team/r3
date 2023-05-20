@@ -9,7 +9,7 @@ let MyAdminMails = {
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/mail_spool.png" />
-				<h1>{{ menuTitle }}</h1>
+				<h1>{{ menuTitle + ' (' + total + ')' }}</h1>
 			</div>
 		</div>
 		<div class="top lower">
@@ -26,22 +26,38 @@ let MyAdminMails = {
 					:caption="capGen.button.delete"
 				/>
 			</div>
-			<div class="area" v-if="!noMails">
+			<div class="area default-inputs" v-if="!noMails">
 				<my-button image="triangleLeft.png"
 					@trigger="offsetSet(false)"
+					@trigger-shift="startAtPageFirst"
 					:active="offset-limit >= 0"
 					:naked="true"
+					:tight="true"
 				/>
-				<my-button
-					@trigger="startSet"
-					:caption="String((offset / limit) + 1)"
-					:naked="true"
-				/>
+				
+				<span>{{ String((offset / limit) + 1) + ' / ' + pages  }}</span>
+				
 				<my-button image="triangleRight.png"
 					@trigger="offsetSet(true)"
-					:active="mails.length === limit"
+					@trigger-shift="startAtPageLast"
+					:active="offset+limit < total"
 					:naked="true"
+					:tight="true"
 				/>
+				
+				<select v-model.number="limit" @change="startAtPageFirst">
+					<option>10</option>
+					<option>25</option>
+					<option>50</option>
+					<option>100</option>
+					<option>500</option>
+					<option>1000</option>
+				</select>
+				
+				<div class="row gap">
+					<input v-model="search" @keyup.enter="startAtPageFirst" :placeholder="capGen.threeDots" />
+					<my-button image="search.png" @trigger="startAtPageFirst" />
+				</div>
 			</div>
 		</div>
 		
@@ -99,31 +115,36 @@ let MyAdminMails = {
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
-	data:function() {
+	data() {
 		return {
+			// inputs
+			limit:50,
+			offset:0,
+			search:'',
+			
 			// mails
 			mails:[],
 			mailIdsSelected:[],
-			limit:50,
-			offset:0,
+			total:0,
 			
 			// mail accounts
 			accountIdMap:{}
 		};
 	},
-	mounted:function() {
+	mounted() {
 		this.$store.commit('pageTitle',this.menuTitle);
 		this.get();
 		this.getAccounts();
 	},
 	computed:{
 		// simple
-		noMails:function() { return this.offset === 0 && this.mails.length === 0 },
+		noMails:(s) => s.total === 0,
+		pages:  (s) => Math.ceil(s.total / s.limit),
 		
 		// stores
-		capApp:  function() { return this.$store.getters.captions.admin.mails; },
-		capGen:  function() { return this.$store.getters.captions.generic; },
-		settings:function() { return this.$store.getters.settings; }
+		capApp:  (s) => s.$store.getters.captions.admin.mails,
+		capGen:  (s) => s.$store.getters.captions.generic,
+		settings:(s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
@@ -131,23 +152,19 @@ let MyAdminMails = {
 		getUnixFormat,
 		
 		// presentation
-		displaySendAttempts:function(mail) {
-			if(!mail.outgoing)
-				return '';
-			
-			if(mail.attemptCount === 0)
-				return '-';
-			
+		displaySendAttempts(mail) {
+			if(!mail.outgoing)          return '';
+			if(mail.attemptCount === 0) return '-';
 			return `${mail.attemptCount}/5 (${this.getUnixFormat(mail.attemptDate,this.settings.dateFormat+' H:i')})`;
 		},
-		displayAttach:function(mail) {
+		displayAttach(mail) {
 			if(mail.outgoing)    return `<i>${this.capApp.attachmentsNoPreview}</i>`;
 			if(mail.files === 0) return '-';
 			return `${mail.files} (${this.getSizeReadable(mail.filesSize)})`;
 		},
 		
 		// actions
-		showMail:function(mail) {
+		showMail(mail) {
 			this.$store.commit('dialog',{
 				captionBody:mail.body,
 				captionTop:this.capApp.body,
@@ -161,17 +178,20 @@ let MyAdminMails = {
 				}]
 			});
 		},
-		startSet:function() {
+		startAtPageFirst() {
 			this.offset = 0;
 			this.get();
 		},
-		offsetSet:function(add) {
-			if(add) this.offset += this.limit;
-			else    this.offset -= this.limit;
-			
+		startAtPageLast() {
+			this.offset = this.limit * (this.pages-1);
 			this.get();
 		},
-		toggleMailAll:function() {
+		offsetSet(add) {
+			if(add) this.offset += this.limit;
+			else    this.offset -= this.limit;
+			this.get();
+		},
+		toggleMailAll() {
 			if(this.mailIdsSelected.length === this.mails.length) {
 				this.mailIdsSelected = [];
 				return;
@@ -182,7 +202,7 @@ let MyAdminMails = {
 				this.mailIdsSelected.push(this.mails[i].id);
 			}
 		},
-		toggleMailId:function(id) {
+		toggleMailId(id) {
 			let pos = this.mailIdsSelected.indexOf(id);
 			
 			if(pos === -1)
@@ -192,25 +212,30 @@ let MyAdminMails = {
 		},
 		
 		// backend calls
-		del:function() {
+		del() {
 			ws.send('mail','del',{ids:this.mailIdsSelected},true).then(
-				() => this.get(),
-				this.$root.genericError
-			);
-		},
-		get:function() {
-			ws.send('mail','get',{
-				limit:this.limit,
-				offset:this.offset
-			},true).then(
-				res => {
-					this.mails           = res.payload.mails;
-					this.mailIdsSelected = [];
+				() => {
+					this.offset = 0;
+					this.get();
 				},
 				this.$root.genericError
 			);
 		},
-		getAccounts:function() {
+		get() {
+			ws.send('mail','get',{
+				limit:this.limit,
+				offset:this.offset,
+				search:this.search
+			},true).then(
+				res => {
+					this.mails           = res.payload.mails;
+					this.mailIdsSelected = [];
+					this.total           = res.payload.total;
+				},
+				this.$root.genericError
+			);
+		},
+		getAccounts() {
 			ws.send('mailAccount','get',{},true).then(
 				res => this.accountIdMap = res.payload.accounts,
 				this.$root.genericError

@@ -10,6 +10,7 @@
 			"copy":"Kopieren",
 			"copyClipboard":"In Zwischenablage kopieren",
 			"create":"Erstellen",
+			"createNew":"Erstellen+Neu",
 			"delete":"Löschen",
 			"deleteHint":"Datensatz dauerhaft löschen",
 			"deleteSelected":"Ausgewählte löschen",
