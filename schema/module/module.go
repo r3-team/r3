@@ -17,7 +17,6 @@ import (
 	"strings"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5"
 )
 
@@ -93,8 +92,9 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 	}
 
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
-		SELECT id, parent_id, form_id, icon_id, name, color1, position,
-			language_main, release_build, release_build_app, release_date,
+		SELECT id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2,
+			name, name_pwa, name_pwa_short, color1, position, language_main,
+			release_build, release_build_app, release_date,
 			ARRAY(
 				SELECT module_id_on
 				FROM app.module_depends
@@ -131,7 +131,8 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 
 	for rows.Next() {
 		var m types.Module
-		if err := rows.Scan(&m.Id, &m.ParentId, &m.FormId, &m.IconId, &m.Name,
+		if err := rows.Scan(&m.Id, &m.ParentId, &m.FormId, &m.IconId,
+			&m.IconIdPwa1, &m.IconIdPwa2, &m.Name, &m.NamePwa, &m.NamePwaShort,
 			&m.Color1, &m.Position, &m.LanguageMain, &m.ReleaseBuild,
 			&m.ReleaseBuildApp, &m.ReleaseDate, &m.DependsOn, &m.ArticleIdsHelp,
 			&m.Languages); err != nil {
@@ -160,22 +161,18 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 	return modules, nil
 }
 
-func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
-	formId pgtype.UUID, iconId pgtype.UUID, name string, color1 string,
-	position int, languageMain string, releaseBuild int, releaseBuildApp int,
-	releaseDate int64, dependsOn []uuid.UUID, startForms []types.ModuleStartForm,
-	languages []string, articleIdsHelp []uuid.UUID, captions types.CaptionMap) error {
+func Set_tx(tx pgx.Tx, mod types.Module) error {
 
-	if err := check.DbIdentifier(name); err != nil {
+	if err := check.DbIdentifier(mod.Name); err != nil {
 		return err
 	}
 
-	if len(languageMain) != 5 {
+	if len(mod.LanguageMain) != 5 {
 		return errors.New("language code must have 5 characters")
 	}
 
-	create := id == uuid.Nil
-	known, err := schema.CheckCreateId_tx(tx, &id, "module", "id")
+	create := mod.Id == uuid.Nil
+	known, err := schema.CheckCreateId_tx(tx, &mod.Id, "module", "id")
 	if err != nil {
 		return err
 	}
@@ -186,46 +183,53 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 			SELECT name
 			FROM app.module
 			WHERE id = $1
-		`, id).Scan(&nameEx); err != nil {
+		`, mod.Id).Scan(&nameEx); err != nil {
 			return err
 		}
 
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.module SET parent_id = $1, form_id = $2, icon_id = $3,
-				name = $4, color1 = $5, position = $6, language_main = $7,
-				release_build = $8, release_build_app = $9, release_date = $10
-			WHERE id = $11
-		`, parentId, formId, iconId, name, color1, position, languageMain,
-			releaseBuild, releaseBuildApp, releaseDate, id); err != nil {
+				icon_id_pwa1 = $4, icon_id_pwa2 = $5, name = $6, name_pwa = $7,
+				name_pwa_short = $8, color1 = $9, position = $10,
+				language_main = $11, release_build = $12, release_build_app = $13,
+				release_date = $14
+			WHERE id = $15
+		`, mod.ParentId, mod.FormId, mod.IconId, mod.IconIdPwa1, mod.IconIdPwa2,
+			mod.Name, mod.NamePwa, mod.NamePwaShort, mod.Color1, mod.Position,
+			mod.LanguageMain, mod.ReleaseBuild, mod.ReleaseBuildApp,
+			mod.ReleaseDate, mod.Id); err != nil {
 
 			return err
 		}
 
-		if name != nameEx {
+		if mod.Name != nameEx {
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`ALTER SCHEMA "%s" RENAME TO "%s"`,
-				nameEx, name)); err != nil {
+				nameEx, mod.Name)); err != nil {
 
 				return err
 			}
 
-			if err := pgFunction.RecreateAffectedBy_tx(tx, "module", id); err != nil {
+			if err := pgFunction.RecreateAffectedBy_tx(tx, "module", mod.Id); err != nil {
 				return fmt.Errorf("failed to recreate affected PG functions, %s", err)
 			}
 		}
 	} else {
-		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`CREATE SCHEMA "%s"`, name)); err != nil {
+		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`CREATE SCHEMA "%s"`, mod.Name)); err != nil {
 			return err
 		}
 
 		// insert module reference
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.module (
-				id, parent_id, form_id, icon_id, name, color1, position,
-				language_main, release_build, release_build_app, release_date
+				id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2,
+				name, name_pwa, name_pwa_short, color1, position, language_main,
+				release_build, release_build_app, release_date
 			)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)
-		`, id, parentId, formId, iconId, name, color1, position,
-			languageMain, releaseBuild, releaseBuildApp, releaseDate); err != nil {
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+		`, mod.Id, mod.ParentId, mod.FormId, mod.IconId, mod.IconIdPwa1,
+			mod.IconIdPwa2, mod.Name, mod.NamePwa, mod.NamePwaShort, mod.Color1,
+			mod.Position, mod.LanguageMain, mod.ReleaseBuild, mod.ReleaseBuildApp,
+			mod.ReleaseDate); err != nil {
 
 			return err
 		}
@@ -242,26 +246,26 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 			if _, err := tx.Exec(db.Ctx, `
 				INSERT INTO app.role (id, module_id, name, content, assignable)
 				VALUES ($1,$2,'everyone','everyone',false)
-			`, roleId, id); err != nil {
+			`, roleId, mod.Id); err != nil {
 				return err
 			}
 		}
 
 		// insert module options for this instance
-		if err := module_option.Set_tx(tx, id, false, create, position); err != nil {
+		if err := module_option.Set_tx(tx, mod.Id, false, create, mod.Position); err != nil {
 			return err
 		}
 	}
 
 	// set dependencies to other modules
-	dependsOnCurrent, err := getDependsOn_tx(tx, id)
+	dependsOnCurrent, err := getDependsOn_tx(tx, mod.Id)
 	if err != nil {
 		return err
 	}
 
 	for _, moduleIdOn := range dependsOnCurrent {
 
-		if tools.UuidInSlice(moduleIdOn, dependsOn) {
+		if tools.UuidInSlice(moduleIdOn, mod.DependsOn) {
 			continue
 		}
 
@@ -270,26 +274,26 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 			DELETE FROM app.module_depends
 			WHERE module_id = $1
 			AND module_id_on = $2
-		`, id, moduleIdOn); err != nil {
+		`, mod.Id, moduleIdOn); err != nil {
 			return err
 		}
 	}
 
-	for _, moduleIdOn := range dependsOn {
+	for _, moduleIdOn := range mod.DependsOn {
 
 		if tools.UuidInSlice(moduleIdOn, dependsOnCurrent) {
 			continue
 		}
 
 		// new dependency has been added
-		if id == moduleIdOn {
+		if mod.Id == moduleIdOn {
 			return errors.New("module dependency to itself is not allowed")
 		}
 
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.module_depends (module_id, module_id_on)
 			VALUES ($1,$2)
-		`, id, moduleIdOn); err != nil {
+		`, mod.Id, moduleIdOn); err != nil {
 			return err
 		}
 	}
@@ -298,15 +302,15 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 	if _, err := tx.Exec(db.Ctx, `
 		DELETE FROM app.module_start_form
 		WHERE module_id = $1
-	`, id); err != nil {
+	`, mod.Id); err != nil {
 		return err
 	}
 
-	for i, sf := range startForms {
+	for i, sf := range mod.StartForms {
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.module_start_form (module_id, position, role_id, form_id)
 			VALUES ($1,$2,$3,$4)
-		`, id, i, sf.RoleId, sf.FormId); err != nil {
+		`, mod.Id, i, sf.RoleId, sf.FormId); err != nil {
 			return err
 		}
 	}
@@ -315,11 +319,11 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 	if _, err := tx.Exec(db.Ctx, `
 		DELETE FROM app.module_language
 		WHERE module_id = $1
-	`, id); err != nil {
+	`, mod.Id); err != nil {
 		return err
 	}
 
-	for _, code := range languages {
+	for _, code := range mod.Languages {
 		if len(code) != 5 {
 			return errors.New("language code must have 5 characters")
 		}
@@ -327,23 +331,23 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, parentId pgtype.UUID,
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.module_language (module_id, language_code)
 			VALUES ($1,$2)
-		`, id, code); err != nil {
+		`, mod.Id, code); err != nil {
 			return err
 		}
 	}
 
 	// set help articles
-	if err := article.Assign_tx(tx, "module", id, articleIdsHelp); err != nil {
+	if err := article.Assign_tx(tx, "module", mod.Id, mod.ArticleIdsHelp); err != nil {
 		return err
 	}
 
 	// set captions
 	// fix imports < 3.2: Migration from help captions to help articles
-	captions, err = compatible.FixCaptions_tx(tx, "module", id, captions)
+	mod.Captions, err = compatible.FixCaptions_tx(tx, "module", mod.Id, mod.Captions)
 	if err != nil {
 		return err
 	}
-	return caption.Set_tx(tx, id, captions)
+	return caption.Set_tx(tx, mod.Id, mod.Captions)
 }
 
 func getStartForms(id uuid.UUID) ([]types.ModuleStartForm, error) {
@@ -366,7 +370,6 @@ func getStartForms(id uuid.UUID) ([]types.ModuleStartForm, error) {
 			return startForms, err
 		}
 		startForms = append(startForms, sf)
-
 	}
 	return startForms, nil
 }
@@ -390,7 +393,6 @@ func getDependsOn_tx(tx pgx.Tx, id uuid.UUID) ([]uuid.UUID, error) {
 			return moduleIdsDependsOn, err
 		}
 		moduleIdsDependsOn = append(moduleIdsDependsOn, moduleIdDependsOn)
-
 	}
 	return moduleIdsDependsOn, nil
 }

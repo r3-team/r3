@@ -153,10 +153,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				(login_id ASC NULLS LAST, login_template_id ASC NULLS LAST, name ASC NULLS LAST);
 			
 			-- create initial text search config based on user languages
-			INSERT INTO instance.login_search_dict (login_id, login_template_id, name) SELECT login_id, login_template_id, 'english'  FROM instance.login_setting WHERE language_code = 'en_us';
-			INSERT INTO instance.login_search_dict (login_id, login_template_id, name) SELECT login_id, login_template_id, 'german'   FROM instance.login_setting WHERE language_code = 'de_de';
-			INSERT INTO instance.login_search_dict (login_id, login_template_id, name) SELECT login_id, login_template_id, 'italian'  FROM instance.login_setting WHERE language_code = 'it_it';
-			INSERT INTO instance.login_search_dict (login_id, login_template_id, name) SELECT login_id, login_template_id, 'romanian' FROM instance.login_setting WHERE language_code = 'ro_ro';
+			INSERT INTO instance.login_search_dict (login_id, login_template_id, position, name) SELECT login_id, login_template_id, 0, 'english'  FROM instance.login_setting WHERE language_code = 'en_us';
+			INSERT INTO instance.login_search_dict (login_id, login_template_id, position, name) SELECT login_id, login_template_id, 0, 'german'   FROM instance.login_setting WHERE language_code = 'de_de';
+			INSERT INTO instance.login_search_dict (login_id, login_template_id, position, name) SELECT login_id, login_template_id, 0, 'italian'  FROM instance.login_setting WHERE language_code = 'it_it';
+			INSERT INTO instance.login_search_dict (login_id, login_template_id, position, name) SELECT login_id, login_template_id, 0, 'romanian' FROM instance.login_setting WHERE language_code = 'ro_ro';
 			
 			-- new tasks
 			INSERT INTO instance.task (
@@ -209,6 +209,25 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					RETURN 0;
 				END;
 			$BODY$;
+			
+			-- PWA changes
+			ALTER TABLE app.module ADD COLUMN name_pwa character varying(60);
+			ALTER TABLE app.module ADD COLUMN name_pwa_short character varying(12);
+			ALTER TABLE app.module ADD COLUMN icon_id_pwa1 UUID;
+			ALTER TABLE app.module ADD COLUMN icon_id_pwa2 UUID;
+			ALTER TABLE app.module ADD CONSTRAINT module_icon_id_pwa1_fkey FOREIGN KEY (icon_id_pwa1)
+				REFERENCES app.icon (id) MATCH SIMPLE 
+				ON UPDATE SET NULL
+				ON DELETE SET NULL
+				DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE app.module ADD CONSTRAINT module_icon_id_pwa2_fkey FOREIGN KEY (icon_id_pwa2)
+				REFERENCES app.icon (id) MATCH SIMPLE 
+				ON UPDATE SET NULL
+				ON DELETE SET NULL
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_module_icon_id_pwa1_fkey ON app.module USING btree (icon_id_pwa1 ASC NULLS LAST);
+			CREATE INDEX fki_module_icon_id_pwa2_fkey ON app.module USING btree (icon_id_pwa2 ASC NULLS LAST);
 		`)
 		return "3.4", err
 	},

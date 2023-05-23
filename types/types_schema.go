@@ -12,7 +12,11 @@ type Module struct {
 	ParentId        pgtype.UUID       `json:"parentId"`        // module parent ID
 	FormId          pgtype.UUID       `json:"formId"`          // default start form
 	IconId          pgtype.UUID       `json:"iconId"`          // module icon in header/menu
+	IconIdPwa1      pgtype.UUID       `json:"iconIdPwa1"`      // PWA icon, 192x192
+	IconIdPwa2      pgtype.UUID       `json:"iconIdPwa2"`      // PWA icon, 512x512
 	Name            string            `json:"name"`            // name of module, is used for DB schema
+	NamePwa         pgtype.Text       `json:"namePwa"`         // name of module shown for PWA
+	NamePwaShort    pgtype.Text       `json:"namePwaShort"`    // name of module shown for PWA, short version
 	Color1          string            `json:"color1"`          // primary module color (used for header)
 	Position        int               `json:"position"`        // position of module in nav. contexts (home, header)
 	LanguageMain    string            `json:"languageMain"`    // language code of main language (for fallback)

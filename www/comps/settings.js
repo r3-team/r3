@@ -1178,6 +1178,7 @@ let MySettings = {
 		this.settingsInput = JSON.parse(JSON.stringify(this.settings));
 		this.$store.commit('moduleColor1','');
 		this.$store.commit('pageTitle',this.capApp.pageTitle);
+		this.$root.setPwaManifest(null);
 		
 		this.$nextTick(function() {
 			this.settingsLoaded = true;

@@ -197,6 +197,7 @@ let MyHome = {
 	mounted() {
 		this.$store.commit('moduleColor1','');
 		this.$store.commit('pageTitle',this.capApp.title);
+		this.$root.setPwaManifest(null);
 	},
 	methods:{
 		// externals

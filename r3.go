@@ -35,6 +35,7 @@ import (
 	"r3/handler/icon_upload"
 	"r3/handler/ics_download"
 	"r3/handler/license_upload"
+	"r3/handler/manifest_download"
 	"r3/handler/transfer_export"
 	"r3/handler/transfer_import"
 	"r3/handler/websocket"
@@ -437,6 +438,7 @@ func (prg *program) execute(svc service.Service) {
 	mux.HandleFunc("/icon/upload", icon_upload.Handler)
 	mux.HandleFunc("/ics/download/", ics_download.Handler)
 	mux.HandleFunc("/license/upload", license_upload.Handler)
+	mux.HandleFunc("/manifests/", manifest_download.Handler)
 	mux.HandleFunc("/websocket", websocket.Handler)
 	mux.HandleFunc("/export/", transfer_export.Handler)
 	mux.HandleFunc("/import", transfer_import.Handler)

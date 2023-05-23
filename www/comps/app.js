@@ -343,6 +343,17 @@ let MyApp = {
 		setMobileView() {
 			this.$store.commit('isMobile',window.innerWidth <= 800 || window.innerHeight <= 400);
 		},
+		setPwaManifest(moduleId) {
+			let e = document.getElementById('app-pwa-manifest');
+			if(typeof e !== 'undefined' && e !== null)
+				e.parentNode.removeChild(e);
+			
+			e = document.createElement('link');
+			e.id   = 'app-pwa-manifest';
+			e.href = `/manifests/${moduleId !== null ? moduleId : ''}`;
+			e.rel  = 'manifest';
+			document.head.appendChild(e);
+		},
 		
 		// web socket control
 		wsConnect() {

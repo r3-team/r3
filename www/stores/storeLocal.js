@@ -22,47 +22,47 @@ const MyStoreLocal = {
 		tokenKeep:false       // keep JWT token between sessions
 	},
 	mutations:{
-		activated:function(state,payload) {
+		activated(state,payload) {
 			state.activated = payload;
 			set('activated',payload);
 		},
-		appName:function(state,payload) {
+		appName(state,payload) {
 			state.appName = payload;
 			set('appName',payload);
 		},
-		appNameShort:function(state,payload) {
+		appNameShort(state,payload) {
 			state.appNameShort = payload;
 			set('appNameShort',payload);
 		},
-		appVersion:function(state,payload) {
+		appVersion(state,payload) {
 			state.appVersion = payload;
 			set('appVersion',payload);
 		},
-		companyColorHeader:function(state,payload) {
+		companyColorHeader(state,payload) {
 			state.companyColorHeader = payload;
 			set('companyColorHeader',payload);
 		},
-		companyColorLogin:function(state,payload) {
+		companyColorLogin(state,payload) {
 			state.companyColorLogin = payload;
 			set('companyColorLogin',payload);
 		},
-		companyLogo:function(state,payload) {
+		companyLogo(state,payload) {
 			state.companyLogo = payload;
 			set('companyLogo',payload);
 		},
-		companyLogoUrl:function(state,payload) {
+		companyLogoUrl(state,payload) {
 			state.companyLogoUrl = payload;
 			set('companyLogoUrl',payload);
 		},
-		companyName:function(state,payload) {
+		companyName(state,payload) {
 			state.companyName = payload;
 			set('companyName',payload);
 		},
-		companyWelcome:function(state,payload) {
+		companyWelcome(state,payload) {
 			state.companyWelcome = payload;
 			set('companyWelcome',payload);
 		},
-		fieldOptionSet:function(state,payload) {
+		fieldOptionSet(state,payload) {
 			let fieldId = payload.fieldId;
 			let name    = payload.name;
 			let value   = payload.value;
@@ -74,15 +74,15 @@ const MyStoreLocal = {
 			
 			set('fieldIdMapOption',state.fieldIdMapOption);
 		},
-		loginKeyAes:function(state,payload) {
+		loginKeyAes(state,payload) {
 			state.loginKeyAes = payload;
 			set('loginKeyAes',payload);
 		},
-		loginKeySalt:function(state,payload) {
+		loginKeySalt(state,payload) {
 			state.loginKeySalt = payload;
 			set('loginKeySalt',payload);
 		},
-		menuIdMapOpenToggle:function(state,payload) {
+		menuIdMapOpenToggle(state,payload) {
 			if(typeof state.menuIdMapOpen[payload] === 'undefined')
 				state.menuIdMapOpen[payload] = true;
 			else
@@ -90,15 +90,15 @@ const MyStoreLocal = {
 			
 			set('menuIdMapOpen',state.menuIdMapOpen);
 		},
-		token:function(state,payload) {
+		token(state,payload) {
 			state.token = payload;
 			set('token',payload);
 		},
-		tokenKeep:function(state,payload) {
+		tokenKeep(state,payload) {
 			state.tokenKeep = payload;
 			set('tokenKeep',payload);
 		},
-		schemaTimestamp:function(state,payload) {
+		schemaTimestamp(state,payload) {
 			// if schema timestamp changed from last known one, reset dependent data
 			if(state.schemaTimestamp !== payload) {
 				state.fieldIdMapOption = {};
@@ -109,22 +109,17 @@ const MyStoreLocal = {
 		}
 	},
 	getters:{
-		customBgLogin:function(state) {
-			return !state.activated || state.companyColorLogin === ''
-				? '' : `background-color:#${state.companyColorLogin};`;
-		},
-		customBgHeader:function(state) {
-			return !state.activated || state.companyColorHeader === ''
-				? '' : `background-color:#${state.companyColorHeader};`;
-		},
-		customLogo:function(state) {
-			return !state.activated || state.companyLogo === ''
-				? 'images/logo.png' : `data:image/png;base64,${state.companyLogo}`;
-		},
-		customLogoUrl:function(state) {
-			return !state.activated || state.companyLogoUrl === ''
-				? 'https://rei3.de/' : state.companyLogoUrl;
-		},
+		customBgLogin:(state) => !state.activated || state.companyColorLogin === ''
+			? '' : `background-color:#${state.companyColorLogin};`,
+		
+		customBgHeader:(state) => !state.activated || state.companyColorHeader === ''
+			? '' : `background-color:#${state.companyColorHeader};`,
+		
+		customLogo:(state) => !state.activated || state.companyLogo === ''
+			? 'images/logo.png' : `data:image/png;base64,${state.companyLogo}`,
+		
+		customLogoUrl:(state) => !state.activated || state.companyLogoUrl === ''
+			? 'https://rei3.de/' : state.companyLogoUrl,
 		
 		// simple getters
 		activated:         (state) => state.activated,

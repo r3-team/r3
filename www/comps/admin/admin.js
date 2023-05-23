@@ -146,6 +146,7 @@ let MyAdmin = {
 		
 		this.ready = true;
 		this.$store.commit('moduleColor1','');
+		this.$root.setPwaManifest(null);
 	},
 	computed:{
 		contentTitle:(s) => {

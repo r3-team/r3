@@ -14,11 +14,11 @@ let MyGoModule = {
 		moduleNameChild:{ type:String, required:false, default:'' }
 	},
 	computed:{
-		access:       function() { return this.$store.getters.access; },
-		modules:      function() { return this.$store.getters['schema/modules']; },
-		moduleNameMap:function() { return this.$store.getters['schema/moduleNameMap']; }
+		access:       (s) => s.$store.getters.access,
+		modules:      (s) => s.$store.getters['schema/modules'],
+		moduleNameMap:(s) => s.$store.getters['schema/moduleNameMap']
 	},
-	mounted:function() {
+	mounted() {
 		// route to home if invalid module was given
 		if(typeof this.moduleNameMap[this.moduleName] === 'undefined')
 			return this.$router.push('/');
@@ -53,7 +53,7 @@ let MyGoModule = {
 		}
 		
 		// no start form exists, route to home
-		return this.$router.push('/');
+		this.$router.push('/');
 	},
 	methods:{
 		getStartFormId
@@ -88,14 +88,14 @@ let MyGoForm = {
 		moduleNameChild:{ type:String, required:false, default:'' },
 		recordIdString: { type:String, required:false, default:'' }
 	},
-	data:function() {
+	data() {
 		return {
 			moduleId:null
 		};
 	},
 	watch:{
 		moduleNameActive:{
-			handler:function() {
+			handler() {
 				// if module cannot be resolved, go home
 				if(typeof this.moduleNameMap[this.moduleNameActive] === 'undefined')
 					return this.$router.replace('/');
@@ -104,37 +104,27 @@ let MyGoForm = {
 				this.moduleId = module.id;
 				this.$store.commit('moduleColor1',module.color1);
 				this.$store.commit('moduleLanguage',this.getValidLanguageCode(module));
+				this.$store.commit('moduleIdLast',module.id);
+				this.$root.setPwaManifest(module.id);
 			},
 			immediate:true
 		}
 	},
 	computed:{
-		getterAttributeIdMapDefaults:function() {
-			if(typeof this.$route.query.attributes === 'undefined')
-				return {};
-			
-			return this.getAttributeValuesFromGetter(this.$route.query.attributes);
-		},
-		moduleNameActive:function() {
-			// child takes precedence if active
-			return this.moduleNameChild !== ''
-				? this.moduleNameChild
-				: this.moduleName
-			;
-		},
-		recordId:function() {
-			if(typeof this.recordIdString === 'undefined' || this.recordIdString === '')
-				return 0;
-			
-			return parseInt(this.recordIdString);
-		},
+		getterAttributeIdMapDefaults:(s) => typeof s.$route.query.attributes === 'undefined'
+			? {} : s.getAttributeValuesFromGetter(s.$route.query.attributes),
+		
+		moduleNameActive:(s) => s.moduleNameChild !== '' ? s.moduleNameChild : s.moduleName,
+		
+		recordId:(s) => typeof s.recordIdString === 'undefined' || s.recordIdString === ''
+			? 0 : parseInt(s.recordIdString),
 		
 		// stores
-		modules:      function() { return this.$store.getters['schema/modules']; },
-		moduleNameMap:function() { return this.$store.getters['schema/moduleNameMap']; },
-		formIdMap:    function() { return this.$store.getters['schema/formIdMap']; },
-		isAtMenu:     function() { return this.$store.getters.isAtMenu; },
-		isMobile:     function() { return this.$store.getters.isMobile; }
+		modules:      (s) => s.$store.getters['schema/modules'],
+		moduleNameMap:(s) => s.$store.getters['schema/moduleNameMap'],
+		formIdMap:    (s) => s.$store.getters['schema/formIdMap'],
+		isAtMenu:     (s) => s.$store.getters.isAtMenu,
+		isMobile:     (s) => s.$store.getters.isMobile
 	},
 	methods:{
 		// externals

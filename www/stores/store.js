@@ -52,6 +52,7 @@ const MyStore = Vuex.createStore({
 		moduleColor1:'',      // color1 (header) of currently active module
 		moduleEntries:[],     // module entries for header/home page
 		moduleLanguage:'',    // module language (either equal to user language or module fallback)
+		moduleIdLast:null,    // module ID of last active module
 		pageTitle:'',         // web page title, set by app/form depending on navigation
 		pageTitleFull:'',     // web page title + instance name
 		popUpFormGlobal:null, // configuration of global pop-up form
@@ -101,6 +102,15 @@ const MyStore = Vuex.createStore({
 				return state.licenseValid = false;
 			
 			state.licenseValid = payload.validUntil > Math.floor(new Date().getTime() / 1000);
+		},
+		moduleColor1:(state,payload) => {
+			state.moduleColor1 = payload;
+			
+			if(payload === null || payload === '')
+				payload = '444444';
+			
+			// set theme color, relevant for PWAs
+			document.querySelector('meta[name="theme-color"]').setAttribute('content',`#${payload}`);
 		},
 		pageTitle:(state,payload) => {
 			state.pageTitle = payload;
@@ -154,9 +164,9 @@ const MyStore = Vuex.createStore({
 		loginPrivateKeyEnc:      (state,payload) => state.loginPrivateKeyEnc       = payload,
 		loginPrivateKeyEncBackup:(state,payload) => state.loginPrivateKeyEncBackup = payload,
 		loginPublicKey: (state,payload) => state.loginPublicKey  = payload,
-		moduleColor1:   (state,payload) => state.moduleColor1    = payload,
 		moduleEntries:  (state,payload) => state.moduleEntries   = payload,
 		moduleLanguage: (state,payload) => state.moduleLanguage  = payload,
+		moduleIdLast:   (state,payload) => state.moduleIdLast    = payload,
 		popUpFormGlobal:(state,payload) => state.popUpFormGlobal = payload,
 		productionMode: (state,payload) => state.productionMode  = payload,
 		searchDictionaries:(state,payload) => state.searchDictionaries = payload,
@@ -215,6 +225,7 @@ const MyStore = Vuex.createStore({
 		moduleColor1:     (state) => state.moduleColor1,
 		moduleEntries:    (state) => state.moduleEntries,
 		moduleLanguage:   (state) => state.moduleLanguage,
+		moduleIdLast:     (state) => state.moduleIdLast,
 		pageTitleFull:    (state) => state.pageTitleFull,
 		popUpFormGlobal:  (state) => state.popUpFormGlobal,
 		productionMode:   (state) => state.productionMode,

@@ -321,7 +321,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// deliver ICS
-	w.Header().Set("Content-type", "text/calendar")
+	w.Header().Set("Content-Type", "text/calendar")
 	w.Header().Set("charset", "utf-8")
 	w.Header().Set("Content-Disposition", "inline")
 	w.Header().Set("filename", "calendar.ics")
