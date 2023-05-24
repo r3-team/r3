@@ -1,6 +1,13 @@
 import tinycolor from '../../externals/tinycolor2.js';
 import MyStore   from '../../stores/store.js';
 
+export function colorAdjustBgHeader(colorRgb,isDarkMode) {
+	let c = tinycolor(colorRgb);
+	if(isDarkMode) c.darken(14).desaturate(12);
+	else           c.darken(5).desaturate(6);
+	return c.toString();
+};
+
 export function colorAdjustBg(colorRgb,isDarkMode) {
 	// adjust background color in dark mode
 	let c = tinycolor(colorRgb);

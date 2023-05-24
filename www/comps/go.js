@@ -1,7 +1,6 @@
 import MyForm                         from './form.js';
 import MyMenu                         from './menu.js';
 import {getAttributeValuesFromGetter} from './shared/attribute.js';
-import {getValidLanguageCode}         from './shared/language.js';
 import {getStartFormId }              from './shared/access.js';
 export {MyGoForm, MyGoModule};
 
@@ -102,10 +101,7 @@ let MyGoForm = {
 				
 				let module = this.moduleNameMap[this.moduleNameActive];
 				this.moduleId = module.id;
-				this.$store.commit('moduleColor1',module.color1);
-				this.$store.commit('moduleLanguage',this.getValidLanguageCode(module));
-				this.$store.commit('moduleIdLast',module.id);
-				this.$root.setPwaManifest(module.id);
+				this.$root.setModuleIdActive(module.id);
 			},
 			immediate:true
 		}
@@ -128,7 +124,6 @@ let MyGoForm = {
 	},
 	methods:{
 		// externals
-		getAttributeValuesFromGetter,
-		getValidLanguageCode
+		getAttributeValuesFromGetter
 	}
 };

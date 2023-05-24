@@ -335,9 +335,8 @@ let MyBuilder = {
 		};
 	},
 	mounted() {
-		this.$store.commit('moduleColor1','');
 		this.$store.commit('pageTitle',this.capApp.pageTitle);
-		this.$root.setPwaManifest(null);
+		this.$root.setModuleIdActive(null);
 		
 		if(!this.builderEnabled)
 			return this.$router.push('/');

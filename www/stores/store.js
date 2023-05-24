@@ -1,5 +1,6 @@
-import MyStoreLocal  from './storeLocal.js';
-import MyStoreSchema from './storeSchema.js';
+import MyStoreLocal            from './storeLocal.js';
+import MyStoreSchema           from './storeSchema.js';
+import { colorAdjustBgHeader } from '../comps/shared/generic.js';
 export {MyStore as default};
 
 const MyStore = Vuex.createStore({
@@ -49,7 +50,6 @@ const MyStore = Vuex.createStore({
 		loginPrivateKeyEncBackup:null, // user login private key PEM, encrypted with backup code
 		loginPublicKey:null,  // user login public key for encryption (exportable key)
 		logo:'',
-		moduleColor1:'',      // color1 (header) of currently active module
 		moduleEntries:[],     // module entries for header/home page
 		moduleLanguage:'',    // module language (either equal to user language or module fallback)
 		moduleIdLast:null,    // module ID of last active module
@@ -102,15 +102,6 @@ const MyStore = Vuex.createStore({
 				return state.licenseValid = false;
 			
 			state.licenseValid = payload.validUntil > Math.floor(new Date().getTime() / 1000);
-		},
-		moduleColor1:(state,payload) => {
-			state.moduleColor1 = payload;
-			
-			if(payload === null || payload === '')
-				payload = '444444';
-			
-			// set theme color, relevant for PWAs
-			document.querySelector('meta[name="theme-color"]').setAttribute('content',`#${payload}`);
 		},
 		pageTitle:(state,payload) => {
 			state.pageTitle = payload;
@@ -222,7 +213,6 @@ const MyStore = Vuex.createStore({
 		loginPrivateKeyEnc:      (state) => state.loginPrivateKeyEnc,
 		loginPrivateKeyEncBackup:(state) => state.loginPrivateKeyEncBackup,
 		loginPublicKey:   (state) => state.loginPublicKey,
-		moduleColor1:     (state) => state.moduleColor1,
 		moduleEntries:    (state) => state.moduleEntries,
 		moduleLanguage:   (state) => state.moduleLanguage,
 		moduleIdLast:     (state) => state.moduleIdLast,

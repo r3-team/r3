@@ -145,8 +145,7 @@ let MyAdmin = {
 			return this.$router.push('/');
 		
 		this.ready = true;
-		this.$store.commit('moduleColor1','');
-		this.$root.setPwaManifest(null);
+		this.$root.setModuleIdActive(null);
 	},
 	computed:{
 		contentTitle:(s) => {

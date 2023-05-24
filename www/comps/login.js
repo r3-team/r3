@@ -20,7 +20,7 @@ let MyLogin = {
 		<template v-if="!backendReady">
 			
 			<div class="contentBox">
-				<div class="top lower" :style="customBgLogin">
+				<div class="top lower" :style="bgStyles">
 					<div class="area">
 						<img class="icon bg" src="images/lock.png" />
 						<h1>{{ appName }}</h1>
@@ -40,7 +40,7 @@ let MyLogin = {
 		<!-- not ready for login yet (downloading schema/public data/...) -->
 		<template v-if="backendReady && !loginReady">
 			<div class="contentBox">
-				<div class="top lower" :style="customBgLogin">
+				<div class="top lower" :style="bgStyles">
 					<div class="area">
 						<img class="icon bg" src="images/lock.png" />
 						<h1>{{ appName }}</h1>
@@ -97,7 +97,7 @@ let MyLogin = {
 			
 			<!-- login dialog -->
 			<div class="contentBox">
-				<div class="top lower" :style="customBgLogin">
+				<div class="top lower" :style="bgStyles">
 					<div class="area">
 						<img class="icon bg" src="images/lock.png" />
 						<h1>{{ appName }}</h1>
@@ -161,7 +161,7 @@ let MyLogin = {
 			
 		<!-- custom company message -->
 		<div class="contentBox" v-if="showCustom">
-			<div class="top lower" :style="customBgLogin">
+			<div class="top lower" :style="bgStyles">
 				<div class="area">
 					<img class="icon bg" src="images/home.png" />
 					<h1>{{ companyName }}</h1>
@@ -252,7 +252,8 @@ let MyLogin = {
 		},
 		
 		// states
-		isValid:(s) => {
+		bgStyles:(s) => s.activated && s.companyColorLogin !== '' ? `background-color:#${s.companyColorLogin};` : '',
+		isValid: (s) => {
 			if(!s.showMfa)
 				return !s.badAuth && s.username !== '' && s.password !== '';
 			
@@ -268,7 +269,6 @@ let MyLogin = {
 		companyColorLogin:(s) => s.$store.getters['local/companyColorLogin'],
 		companyName:      (s) => s.$store.getters['local/companyName'],
 		companyWelcome:   (s) => s.$store.getters['local/companyWelcome'],
-		customBgLogin:    (s) => s.$store.getters['local/customBgLogin'],
 		customLogo:       (s) => s.$store.getters['local/customLogo'],
 		customLogoUrl:    (s) => s.$store.getters['local/customLogoUrl'],
 		token:            (s) => s.$store.getters['local/token'],

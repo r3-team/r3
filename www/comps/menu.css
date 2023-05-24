@@ -118,7 +118,7 @@
 	flex-grow:1;
 }
 .user-dark .menu .items-bg{
-	filter:brightness(60%) saturate(50%);
+	filter:brightness(80%) saturate(70%);
 }
 
 /* mobile overwrites */

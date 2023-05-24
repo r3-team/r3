@@ -1,14 +1,12 @@
-import MyDialog              from './dialog.js';
-import MyFeedback            from './feedback.js';
-import MyForm                from './form.js';
-import MyHeader              from './header.js';
-import MyLogin               from './login.js';
-import {getStartFormId}      from './shared/access.js';
-import {updateCollections}   from './shared/collection.js';
-import {formOpen}            from './shared/form.js';
-import srcBase64Icon         from './shared/image.js';
-import {getCaptionForModule} from './shared/language.js';
-import {openLink}            from './shared/generic.js';
+import MyDialog            from './dialog.js';
+import MyFeedback          from './feedback.js';
+import MyForm              from './form.js';
+import MyHeader            from './header.js';
+import MyLogin             from './login.js';
+import {getStartFormId}    from './shared/access.js';
+import {updateCollections} from './shared/collection.js';
+import {formOpen}          from './shared/form.js';
+import srcBase64Icon       from './shared/image.js';
 import {
 	aesGcmDecryptBase64,
 	aesGcmImportBase64,
@@ -19,6 +17,14 @@ import {
 	genericError,
 	genericErrorWithFallback
 } from './shared/error.js';
+import {
+	colorAdjustBgHeader,
+	openLink
+} from './shared/generic.js';
+import {
+	getCaptionForModule,
+	getValidLanguageCode
+} from './shared/language.js';
 export {MyApp as default};
 
 let MyApp = {
@@ -121,6 +127,7 @@ let MyApp = {
 	data() {
 		return {
 			appReady:false,       // app is loaded and user authenticated
+			color1:'#444',        // app color 1, used for header/menus
 			loginReady:false,     // app is ready for authentication
 			publicLoaded:false,   // public data has been loaded
 			schemaLoaded:false,   // app schema has been loaded
@@ -130,16 +137,7 @@ let MyApp = {
 	},
 	computed:{
 		// presentation
-		bgStyle:(s) => {
-			// custom color before specific module color
-			if(s.customBgHeader !== '')
-				return s.customBgHeader;
-			
-			if(s.moduleColor1 !== '')
-				return `background-color:#${s.moduleColor1};`;
-			
-			return '';
-		},
+		bgStyle:(s) => `background-color:${s.color1};`,
 		classes:(s) => {
 			if(!s.appReady)
 				return 'is-not-ready';
@@ -162,6 +160,13 @@ let MyApp = {
 			}
 			return classes.join(' ');
 		},
+		moduleIdMapColor:(s) => {
+			let out = {};
+			for(let m of s.modules) {
+				out[m.id] = s.colorAdjustBgHeader(`#${m.color1}`,s.settings.dark);
+			}
+			return out;
+		},
 		styles:(s) => {
 			if(!s.appReady) return '';
 			
@@ -172,12 +177,8 @@ let MyApp = {
 			
 			return styles.join(';');
 		},
-		stylesContent:(s) => {
-			if(!s.appReady || s.settings.compact)
-				return '';
-			
-			return [`max-width:${s.settings.pageLimit}px`].join(';');
-		},
+		stylesContent:(s) => !s.appReady || s.settings.compact ? ''
+			: [`max-width:${s.settings.pageLimit}px`].join(';'),
 		
 		// navigation
 		moduleEntries:(s) => {
@@ -273,31 +274,31 @@ let MyApp = {
 		httpMode:(s) => location.protocol === 'http:',
 		
 		// stores
-		activated:      (s) => s.$store.getters['local/activated'],
-		appVersion:     (s) => s.$store.getters['local/appVersion'],
-		customBgHeader: (s) => s.$store.getters['local/customBgHeader'],
-		customLogo:     (s) => s.$store.getters['local/customLogo'],
-		customLogoUrl:  (s) => s.$store.getters['local/customLogoUrl'],
-		loginKeyAes:    (s) => s.$store.getters['local/loginKeyAes'],
-		schemaTimestamp:(s) => s.$store.getters['local/schemaTimestamp'],
-		modules:        (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		moduleIdMapOpts:(s) => s.$store.getters['schema/moduleIdMapOptions'],
-		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
-		access:         (s) => s.$store.getters.access,
-		blockInput:     (s) => s.$store.getters.blockInput,
-		capErr:         (s) => s.$store.getters.captions.error,
-		capGen:         (s) => s.$store.getters.captions.generic,
-		isAdmin:        (s) => s.$store.getters.isAdmin,
-		isAtDialog:     (s) => s.$store.getters.isAtDialog,
-		isAtFeedback:   (s) => s.$store.getters.isAtFeedback,
-		isMobile:       (s) => s.$store.getters.isMobile,
-		loginEncryption:(s) => s.$store.getters.loginEncryption,
-		loginPrivateKey:(s) => s.$store.getters.loginPrivateKey,
-		moduleColor1:   (s) => s.$store.getters.moduleColor1,
-		patternStyle:   (s) => s.$store.getters.patternStyle,
-		popUpFormGlobal:(s) => s.$store.getters.popUpFormGlobal,
-		settings:       (s) => s.$store.getters.settings
+		activated:        (s) => s.$store.getters['local/activated'],
+		appVersion:       (s) => s.$store.getters['local/appVersion'],
+		customColorHeader:(s) => s.$store.getters['local/companyColorHeader'],
+		customLogo:       (s) => s.$store.getters['local/customLogo'],
+		customLogoUrl:    (s) => s.$store.getters['local/customLogoUrl'],
+		loginKeyAes:      (s) => s.$store.getters['local/loginKeyAes'],
+		schemaTimestamp:  (s) => s.$store.getters['local/schemaTimestamp'],
+		modules:          (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:      (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleIdMapOpts:  (s) => s.$store.getters['schema/moduleIdMapOptions'],
+		formIdMap:        (s) => s.$store.getters['schema/formIdMap'],
+		access:           (s) => s.$store.getters.access,
+		blockInput:       (s) => s.$store.getters.blockInput,
+		capErr:           (s) => s.$store.getters.captions.error,
+		capGen:           (s) => s.$store.getters.captions.generic,
+		isAdmin:          (s) => s.$store.getters.isAdmin,
+		isAtDialog:       (s) => s.$store.getters.isAtDialog,
+		isAtFeedback:     (s) => s.$store.getters.isAtFeedback,
+		isMobile:         (s) => s.$store.getters.isMobile,
+		loginEncryption:  (s) => s.$store.getters.loginEncryption,
+		loginPrivateKey:  (s) => s.$store.getters.loginPrivateKey,
+		moduleIdLast:     (s) => s.$store.getters.moduleIdLast,
+		patternStyle:     (s) => s.$store.getters.patternStyle,
+		popUpFormGlobal:  (s) => s.$store.getters.popUpFormGlobal,
+		settings:         (s) => s.$store.getters.settings
 	},
 	created() {
 		window.addEventListener('resize',this.setMobileView);
@@ -314,12 +315,14 @@ let MyApp = {
 		// externals
 		aesGcmDecryptBase64,
 		aesGcmImportBase64,
+		colorAdjustBgHeader,
 		consoleError,
 		formOpen,
 		genericError,
 		genericErrorWithFallback,
 		getCaptionForModule,
 		getStartFormId,
+		getValidLanguageCode,
 		openLink,
 		pemImport,
 		srcBase64Icon,
@@ -343,7 +346,24 @@ let MyApp = {
 		setMobileView() {
 			this.$store.commit('isMobile',window.innerWidth <= 800 || window.innerHeight <= 400);
 		},
-		setPwaManifest(moduleId) {
+		setModuleIdActive(moduleId) {
+			if(moduleId !== null) {
+				this.$store.commit('moduleIdLast',moduleId);
+				this.$store.commit('moduleLanguage',this.getValidLanguageCode(this.moduleIdMap[moduleId]));
+			}
+			
+			// set header color & set meta theme color (for PWA window color)
+			if(this.activated && this.customColorHeader !== '')
+				this.color1 = `#${this.customColorHeader}`;
+			else if(moduleId !== null)
+				this.color1 = this.moduleIdMapColor[moduleId];
+			else
+				this.color1 = this.settings.dark ? '#222' : '#444';
+			
+			// set meta theme color (for PWA window color)
+			document.querySelector('meta[name="theme-color"]').setAttribute('content',this.color1);
+			
+			// set manifest (for PWA installation)
 			let e = document.getElementById('app-pwa-manifest');
 			if(typeof e !== 'undefined' && e !== null)
 				e.parentNode.removeChild(e);

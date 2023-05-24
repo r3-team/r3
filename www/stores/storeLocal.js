@@ -109,12 +109,6 @@ const MyStoreLocal = {
 		}
 	},
 	getters:{
-		customBgLogin:(state) => !state.activated || state.companyColorLogin === ''
-			? '' : `background-color:#${state.companyColorLogin};`,
-		
-		customBgHeader:(state) => !state.activated || state.companyColorHeader === ''
-			? '' : `background-color:#${state.companyColorHeader};`,
-		
 		customLogo:(state) => !state.activated || state.companyLogo === ''
 			? 'images/logo.png' : `data:image/png;base64,${state.companyLogo}`,
 		
