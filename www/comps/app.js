@@ -1,12 +1,13 @@
-import MyDialog            from './dialog.js';
-import MyFeedback          from './feedback.js';
-import MyForm              from './form.js';
-import MyHeader            from './header.js';
-import MyLogin             from './login.js';
-import {getStartFormId}    from './shared/access.js';
-import {updateCollections} from './shared/collection.js';
-import {formOpen}          from './shared/form.js';
-import srcBase64Icon       from './shared/image.js';
+import MyDialog              from './dialog.js';
+import MyFeedback            from './feedback.js';
+import MyForm                from './form.js';
+import MyHeader              from './header.js';
+import MyLogin               from './login.js';
+import {getStartFormId}      from './shared/access.js';
+import {updateCollections}   from './shared/collection.js';
+import {formOpen}            from './shared/form.js';
+import {getCaptionForModule} from './shared/language.js';
+import srcBase64Icon         from './shared/image.js';
 import {
 	aesGcmDecryptBase64,
 	aesGcmImportBase64,
@@ -21,10 +22,6 @@ import {
 	colorAdjustBgHeader,
 	openLink
 } from './shared/generic.js';
-import {
-	getCaptionForModule,
-	getValidLanguageCode
-} from './shared/language.js';
 export {MyApp as default};
 
 let MyApp = {
@@ -127,13 +124,30 @@ let MyApp = {
 	data() {
 		return {
 			appReady:false,       // app is loaded and user authenticated
-			color1:'#444',        // app color 1, used for header/menus
+			collectionEntries:[], // collection entries shown in pop-up window (for mobile use)
 			loginReady:false,     // app is ready for authentication
 			publicLoaded:false,   // public data has been loaded
 			schemaLoaded:false,   // app schema has been loaded
-			collectionEntries:[], // show collection entries in pop-up window (for mobile use)
 			wsConnected:false     // connection to backend has been established (websocket)
 		};
+	},
+	watch:{
+		color1(v) {
+			// set meta theme color (for PWA window color)
+			document.querySelector('meta[name="theme-color"]').setAttribute('content',v);
+		},
+		pwaManifestHref(v) {
+			// set manifest (for PWA installation)
+			let e = document.getElementById('app-pwa-manifest');
+			if(typeof e !== 'undefined' && e !== null)
+				e.parentNode.removeChild(e);
+			
+			e = document.createElement('link');
+			e.href = v;
+			e.id   = 'app-pwa-manifest';
+			e.rel  = 'manifest';
+			document.head.appendChild(e);
+		}
 	},
 	computed:{
 		// presentation
@@ -159,6 +173,16 @@ let MyApp = {
 				case 'squared': classes.push('user-bordersSquared'); break;
 			}
 			return classes.join(' ');
+		},
+		color1:(s) => {
+			let c = s.settings.dark ? '#222' : '#444'; // default colors
+			
+			if(s.activated && s.customColorHeader !== '')
+				c = `#${s.customColorHeader}`;
+			else if(s.isAtModule)
+				c = s.moduleIdMapColor[s.moduleIdLast];
+			
+			return c;
 		},
 		moduleIdMapColor:(s) => {
 			let out = {};
@@ -271,7 +295,9 @@ let MyApp = {
 		},
 		
 		// simple
-		httpMode:(s) => location.protocol === 'http:',
+		httpMode:       (s) => location.protocol === 'http:',
+		isAtModule:     (s) => typeof s.$route.meta.atModule !== 'undefined' && s.moduleIdLast !== null,
+		pwaManifestHref:(s) => `/manifests/${s.isAtModule ? s.moduleIdLast : ''}`,
 		
 		// stores
 		activated:        (s) => s.$store.getters['local/activated'],
@@ -322,7 +348,6 @@ let MyApp = {
 		genericErrorWithFallback,
 		getCaptionForModule,
 		getStartFormId,
-		getValidLanguageCode,
 		openLink,
 		pemImport,
 		srcBase64Icon,
@@ -345,34 +370,6 @@ let MyApp = {
 		},
 		setMobileView() {
 			this.$store.commit('isMobile',window.innerWidth <= 800 || window.innerHeight <= 400);
-		},
-		setModuleIdActive(moduleId) {
-			if(moduleId !== null) {
-				this.$store.commit('moduleIdLast',moduleId);
-				this.$store.commit('moduleLanguage',this.getValidLanguageCode(this.moduleIdMap[moduleId]));
-			}
-			
-			// set header color & set meta theme color (for PWA window color)
-			if(this.activated && this.customColorHeader !== '')
-				this.color1 = `#${this.customColorHeader}`;
-			else if(moduleId !== null)
-				this.color1 = this.moduleIdMapColor[moduleId];
-			else
-				this.color1 = this.settings.dark ? '#222' : '#444';
-			
-			// set meta theme color (for PWA window color)
-			document.querySelector('meta[name="theme-color"]').setAttribute('content',this.color1);
-			
-			// set manifest (for PWA installation)
-			let e = document.getElementById('app-pwa-manifest');
-			if(typeof e !== 'undefined' && e !== null)
-				e.parentNode.removeChild(e);
-			
-			e = document.createElement('link');
-			e.id   = 'app-pwa-manifest';
-			e.href = `/manifests/${moduleId !== null ? moduleId : ''}`;
-			e.rel  = 'manifest';
-			document.head.appendChild(e);
 		},
 		
 		// web socket control

@@ -1177,7 +1177,6 @@ let MySettings = {
 	mounted() {
 		this.settingsInput = JSON.parse(JSON.stringify(this.settings));
 		this.$store.commit('pageTitle',this.capApp.pageTitle);
-		this.$root.setModuleIdActive(null);
 		
 		this.$nextTick(function() {
 			this.settingsLoaded = true;

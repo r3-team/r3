@@ -2,6 +2,7 @@ import MyForm                         from './form.js';
 import MyMenu                         from './menu.js';
 import {getAttributeValuesFromGetter} from './shared/attribute.js';
 import {getStartFormId }              from './shared/access.js';
+import {getValidLanguageCode}         from './shared/language.js';
 export {MyGoForm, MyGoModule};
 
 let MyGoModule = {
@@ -101,7 +102,8 @@ let MyGoForm = {
 				
 				let module = this.moduleNameMap[this.moduleNameActive];
 				this.moduleId = module.id;
-				this.$root.setModuleIdActive(module.id);
+				this.$store.commit('moduleIdLast',module.id);
+				this.$store.commit('moduleLanguage',this.getValidLanguageCode(module));
 			},
 			immediate:true
 		}
@@ -124,6 +126,7 @@ let MyGoForm = {
 	},
 	methods:{
 		// externals
-		getAttributeValuesFromGetter
+		getAttributeValuesFromGetter,
+		getValidLanguageCode
 	}
 };

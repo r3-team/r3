@@ -145,7 +145,6 @@ let MyAdmin = {
 			return this.$router.push('/');
 		
 		this.ready = true;
-		this.$root.setModuleIdActive(null);
 	},
 	computed:{
 		contentTitle:(s) => {

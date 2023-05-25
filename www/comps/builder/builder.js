@@ -336,7 +336,6 @@ let MyBuilder = {
 	},
 	mounted() {
 		this.$store.commit('pageTitle',this.capApp.pageTitle);
-		this.$root.setModuleIdActive(null);
 		
 		if(!this.builderEnabled)
 			return this.$router.push('/');

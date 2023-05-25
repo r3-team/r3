@@ -257,8 +257,7 @@ let MyHeader = {
 		},
 		
 		// simple
-		menuAvailable:(s) => typeof s.$route.meta.menu !== 'undefined',
-		styles:       (s) => s.settings.compact ? '' : `max-width:${s.settings.pageLimit}px;`,
+		styles:(s) => s.settings.compact ? '' : `max-width:${s.settings.pageLimit}px;`,
 		
 		// stores
 		modules:        (s) => s.$store.getters['schema/modules'],

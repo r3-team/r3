@@ -196,7 +196,6 @@ let MyHome = {
 	},
 	mounted() {
 		this.$store.commit('pageTitle',this.capApp.title);
-		this.$root.setModuleIdActive(null);
 	},
 	methods:{
 		// externals

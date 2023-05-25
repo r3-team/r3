@@ -73,7 +73,7 @@ const MyRouter = VueRouter.createRouter({
 	},{
 		path:'/app/:moduleName/:moduleNameChild?/form/:formId/:recordIdString(\\d+)?',
 		component:MyGoForm,
-		meta:{ menu:true },
+		meta:{ atModule:true },
 		props:true
 	},{
 		path:'/admin',
