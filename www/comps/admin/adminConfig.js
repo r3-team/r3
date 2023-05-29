@@ -323,6 +323,7 @@ let MyAdminConfig = {
 			</div>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
@@ -347,6 +348,10 @@ let MyAdminConfig = {
 	mounted() {
 		this.get();
 		this.$store.commit('pageTitle',this.menuTitle);
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted() {
+		this.$emit('hotkeysRegister',[]);
 	},
 	computed:{
 		hasChanges:(s) => JSON.stringify(s.config) !== JSON.stringify(s.configInput),

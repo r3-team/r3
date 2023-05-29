@@ -173,47 +173,48 @@ let MyAdminScheduler = {
 			</div>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			schedulers:[],
 			schedulersInput:[],
 			schedulersExpanded:[] // indexes of schedules that show all nodes
 		};
 	},
-	mounted:function() {
+	mounted() {
 		this.get();
 		this.$store.commit('pageTitle',this.menuTitle);
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted() {
+		this.$emit('hotkeysRegister',[]);
 	},
 	computed:{
-		hasChanges:function() {
-			return JSON.stringify(this.schedulers) !== JSON.stringify(this.schedulersInput);
-		},
-		hasAppSchedules:function() {
-			for(let i = 0, j = this.schedulers.length; i < j; i++) {
-				if(this.schedulers[i].taskName === '')
+		hasChanges:(s) => JSON.stringify(s.schedulers) !== JSON.stringify(s.schedulersInput),
+		hasAppSchedules:(s) => {
+			for(let e of s.schedulers) {
+				if(e.taskName === '')
 					return true;
 			}
 			return false;
 		},
-		pgFunctionSchedulers:function() {
+		pgFunctionSchedulers:(s) => {
 			let out = [];
-			for(let i = 0, j = this.schedulers.length; i < j; i++) {
-				let s = this.schedulers[i];
-				
-				if(s.taskName === '' && s.intervalType !== 'once')
-					out.push(s);
+			for(let e of s.schedulers) {
+				if(e.taskName === '' && e.intervalType !== 'once')
+					out.push(e);
 			}
 			return out;
 		},
 		
 		// stores
-		moduleIdMap:    function() { return this.$store.getters['schema/moduleIdMap']; },
-		pgFunctionIdMap:function() { return this.$store.getters['schema/pgFunctionIdMap']; },
-		capApp:         function() { return this.$store.getters.captions.admin.scheduler; },
-		capGen:         function() { return this.$store.getters.captions.generic; }
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
+		capApp:         (s) => s.$store.getters.captions.admin.scheduler,
+		capGen:         (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
@@ -223,23 +224,23 @@ let MyAdminScheduler = {
 		getUnixFormat,
 		
 		// presentation
-		displayTime:function(unixTime) {
+		displayTime(unixTime) {
 			return unixTime === 0 ? '-' : this.getUnixFormat(unixTime,'Y-m-d H:i:S');
 		},
-		displayName:function(name) {
+		displayName(name) {
 			return typeof this.capApp.names[name] === 'undefined'
 				? name : this.capApp.names[name];
 		},
-		displayModuleName:function(pgFunctionId) {
+		displayModuleName(pgFunctionId) {
 			let m = this.moduleIdMap[this.pgFunctionIdMap[pgFunctionId].moduleId];
 			return this.getCaptionForModule(m.captions.moduleTitle,m.name,m);
 		},
-		displayFunctionName:function(pgFunctionId) {
+		displayFunctionName(pgFunctionId) {
 			let f = this.pgFunctionIdMap[pgFunctionId];
 			
 			return this.getCaption(f.captions.pgFunctionTitle,f.name);
 		},
-		displaySchedule:function(pgFunctionId,pgFunctionScheduleId) {
+		displaySchedule(pgFunctionId,pgFunctionScheduleId) {
 			let f = this.pgFunctionIdMap[pgFunctionId];
 			let s = null;
 			
@@ -286,7 +287,7 @@ let MyAdminScheduler = {
 			
 			return parts.join(', ');
 		},
-		expandScheduler:function(i) {
+		expandScheduler(i) {
 			let pos = this.schedulersExpanded.indexOf(i);
 			
 			if(pos === -1) this.schedulersExpanded.push(i);
@@ -294,7 +295,7 @@ let MyAdminScheduler = {
 		},
 		
 		// backend calls
-		get:function() {
+		get() {
 			ws.send('scheduler','get',{},true).then(
 				res => {
 					this.schedulers      = res.payload;
@@ -303,7 +304,7 @@ let MyAdminScheduler = {
 				this.$root.genericError
 			);
 		},
-		runPgFunction:function(pgFunctionId,pgFunctionScheduleId) {
+		runPgFunction(pgFunctionId,pgFunctionScheduleId) {
 			ws.send('task','run',{
 				clusterMasterOnly:true,
 				pgFunctionId:pgFunctionId,
@@ -313,7 +314,7 @@ let MyAdminScheduler = {
 				this.$root.genericError
 			);
 		},
-		runSystemTask:function(name,clusterMasterOnly) {
+		runSystemTask(name,clusterMasterOnly) {
 			ws.send('task','run',{
 				clusterMasterOnly:clusterMasterOnly,
 				taskName:name
@@ -322,7 +323,10 @@ let MyAdminScheduler = {
 				this.$root.genericError
 			);
 		},
-		set:function() {
+		set() {
+			if(!this.hasChanges)
+				return;
+			
 			let requests = [];
 			for(let i = 0, j = this.schedulersInput.length; i < j; i++) {
 				let s = this.schedulersInput[i];
