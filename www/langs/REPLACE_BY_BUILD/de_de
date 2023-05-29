@@ -175,16 +175,13 @@
 		},
 		"config":{
 			"button":{
-				"apply":"Änderungen übernehmen",
-				"removeLogo":"Logo entfernen"
+				"apply":"Änderungen übernehmen"
 			},
 			"dialog":{
 				"builderMode":"Der Builder dient zum Erstellen oder Verändern von Anwendungen.<br /><br />Das Ändern von Anwendungen kann zum Datenverlust führen und sollte <b>NIEMALS</b> in produktiven Umgebungen getan werden.<br /><br />Um den Builder sicher zu nutzen, bitte eine dedizierte Instanz von REI3 verwenden; fertige und getestete Anwendungen können dann in ein Produktivsystem transferiert werden.<br /><br />Um mehr zu lernen, steht die <a href=\"https://rei3.de/en/docs/builder/\" target=\"_blank\">Builder-Dokumentation</a> zur Verfügung.",
 				"productionMode":"Der Wartungsmodus wird genutzt, um Anwendungen zu aktualisieren, installieren oder zu entfernen.<br /><br />Beim Aktivieren des Wartungsmodus werden <b>alle Benutzer ohne Adminrechte abgemeldet</b>.",
 				"pleaseRead":"Bitte vor dem Speichern lesen"
 			},
-			"appName":"Instanzname",
-			"appNameShort":"Seitentitel",
 			"appVersion":"Plattform-Version",
 			"bruteforceAttempts":"Host blocken nach Versuchen",
 			"bruteforceCountBlocked":"Blockierte Hosts",
@@ -192,15 +189,6 @@
 			"bruteforceProtection":"Bruteforce-Schutz aktivieren",
 			"bruteforceTitle":"Bruteforce-Schutz",
 			"builderMode":"Builder-Modus",
-			"colorHint":"Leer lassen für Standardwerte",
-			"companyColorHeader":"Titelfarbe (Hauptmenü)",
-			"companyColorLogin":"Titelfarbe (Anmeldung)",
-			"companyLogo":"Firmenlogo",
-			"companyLogoDesc":"(PNG-Datei, max. 64kb)",
-			"companyLogoUrl":"Firmenlogo-Link",
-			"companyLogoUrlDesc":"Beliebige, gültige URL",
-			"companyName":"Firmenname",
-			"companyWelcome":"Willkommenstext (Anmeldung)",
 			"dbTimeoutCsv":"Datenbank-Timeout: Stabelverarbeitung (CSV)",
 			"dbTimeoutDataRest":"Datenbank-Timeout: Datenanfragen (REST)",
 			"dbTimeoutDataWs":"Datenbank-Timeout: Datenanfragen (HTTP/WS)",
@@ -230,7 +218,6 @@
 			"repoSkipVerify":"Nicht vertrauenswürdige Zertifikate zulassen",
 			"repoUrl":"Repository-URL",
 			"title":"Systemkonfiguration",
-			"titleCustom":"Anpassungen",
 			"titleGeneral":"Allgemein",
 			"titleIcs":"Kalender-Abonnements",
 			"titleLogins":"Anmeldungen",
@@ -243,6 +230,33 @@
 			"updateCheckNewer":"Cutting-Edge",
 			"updateCheckOlder":"Update verfügbar",
 			"updateCheckUnknown":"Unbekannt"
+		},
+		"customizing":{
+			"button":{
+				"removeLogo":"Logo entfernen"
+			},
+			"appName":"Instanzname",
+			"appNameHint":"Name der REI3-Instanz, wird angezeigt auf der Anmeldeseite.",
+			"appNameShort":"Kurzer Name",
+			"appNameShortHint":"Kurze Version des Instanznamens, wird als Seitentitel verwendet sowie als Beschriftung wenn REI3 als Progressive-Web-App (PWA) installiert wird.",
+			"colorHint":"Farbe als HEX, wie 3EA9B9",
+			"companyColorHeader":"Titelfarbe (Hauptmenü)",
+			"companyColorHeaderHint":"Definiert eine feste Farbe auf dem Header, Farben einzelner Anwendungen werden ignoriert.",
+			"companyColorLogin":"Titelfarbe (Anmeldung)",
+			"companyColorLoginHint":"Überschreibt die Standardfarbe auf der Anmeldemaske.",
+			"companyLogo":"Firmenlogo",
+			"companyLogoHint":"PNG-Datei, max. 64kb. Wird angezeigt auf der Anmelde- und Startseite.",
+			"companyLogoUrl":"Firmenlogo-Link",
+			"companyLogoUrlDesc":"Beliebige, gültige URL",
+			"companyLogoUrlHint":"Link, der geöffnet wird, wenn man auf das Firmenlogo klickt.",
+			"companyName":"Firmenname",
+			"companyNameHint":"Firmenname, wird angezeigt auf der Anmeldeseite.",
+			"companyWelcome":"Willkommenstext",
+			"companyWelcomeHint":"Ein kurzer Willkommenstext, wird angezeigt auf der Anmeldeseite. HTML kann für Textformatierung und für Links verwendet werden.",
+			"titleCaptions":"Beschriftungen",
+			"titleColors":"Farben",
+			"titleCss":"CSS-Regeln",
+			"titleLogos":"Logos"
 		},
 		"files":{
 			"deleteDate":"Datei gelöscht",
@@ -516,9 +530,10 @@
 		"navigationBackups":"Sicherungen",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"System",
+		"navigationCustom":"Anpassungen",
 		"navigationFiles":"Dateien",
 		"navigationLdaps":"LDAP-Anmeldungen",
-		"navigationLicense":"Lizenz",
+		"navigationLicense":"REI3 Professional",
 		"navigationLogins":"Anmeldungen",
 		"navigationLoginTemplates":"Anmeldevorlagen",
 		"navigationLogs":"Logs",

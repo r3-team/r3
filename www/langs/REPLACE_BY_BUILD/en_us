@@ -175,16 +175,13 @@
 		},
 		"config":{
 			"button":{
-				"apply":"Apply changes",
-				"removeLogo":"Remove logo"
+				"apply":"Apply changes"
 			},
 			"dialog":{
 				"builderMode":"The Builder is used to create or change applications.<br /><br />Changing applications can result in data loss and should <b>NEVER</b> be done in production environments.<br /><br />To safely use the Builder, please use a dedicated instance of REI3; ready and tested applications can then be transferred to a production system.<br /><br />Please refer to the <a href=\"https://rei3.de/en/docs/builder/\" target=\"_blank\">Builder documentation</a> to learn more.",
 				"productionMode":"The maintenance mode is used to update, install or remove applications from the system.<br /><br />Switching to maintenance mode will <b>logout all users without admin permissions</b>.",
 				"pleaseRead":"Please read before saving"
 			},
-			"appName":"Instance name",
-			"appNameShort":"Page title",
 			"appVersion":"Platform version",
 			"bruteforceAttempts":"Block hosts after attempts",
 			"bruteforceCountBlocked":"Blocked hosts",
@@ -192,15 +189,6 @@
 			"bruteforceProtection":"Enable bruteforce protection",
 			"bruteforceTitle":"Bruteforce protection",
 			"builderMode":"Builder mode",
-			"colorHint":"Keep empty for default",
-			"companyColorHeader":"Title color (header)",
-			"companyColorLogin":"Title color (login)",
-			"companyLogo":"Company logo",
-			"companyLogoDesc":"(PNG file, max. 64kb)",
-			"companyLogoUrl":"Company logo link",
-			"companyLogoUrlDesc":"Any valid URL",
-			"companyName":"Company name",
-			"companyWelcome":"Welcome text (login)",
 			"dbTimeoutCsv":"Database timeout: Batch processing (CSV)",
 			"dbTimeoutDataRest":"Database timeout: Data requests (REST)",
 			"dbTimeoutDataWs":"Database timeout: Data requests (HTTP/WS)",
@@ -230,7 +218,6 @@
 			"repoSkipVerify":"Allow untrusted certificates",
 			"repoUrl":"Repository URL",
 			"title":"System configuration",
-			"titleCustom":"Customizing",
 			"titleGeneral":"General",
 			"titleIcs":"Calendar subscriptions",
 			"titleLogins":"Logins",
@@ -243,6 +230,33 @@
 			"updateCheckNewer":"Cutting edge",
 			"updateCheckOlder":"Update available",
 			"updateCheckUnknown":"Unknown"
+		},
+		"customizing":{
+			"button":{
+				"removeLogo":"Remove logo"
+			},
+			"appName":"Instance name",
+			"appNameHint":"Name of the REI3 instance, shown on the login page.",
+			"appNameShort":"Short name",
+			"appNameShortHint":"Short version of the instance name, shown in the page title and as label if installed as progressive web app (PWA).",
+			"colorHint":"Color as HEX, like 3EA9B9",
+			"companyColorHeader":"Title color (header)",
+			"companyColorHeaderHint":"Sets a fixed color for the header, application colors are ignored.",
+			"companyColorLogin":"Title color (login)",
+			"companyColorLoginHint":"Overwrites the default color on the login screen.",
+			"companyLogo":"Company logo",
+			"companyLogoHint":"PNG file, max. 64kb. Shown on the login screen and start page.",
+			"companyLogoUrl":"Company logo link",
+			"companyLogoUrlDesc":"Any valid URL",
+			"companyLogoUrlHint":"Link which is opened when clicking on the company logo.",
+			"companyName":"Company name",
+			"companyNameHint":"Company name, shown on the login page.",
+			"companyWelcome":"Welcome text",
+			"companyWelcomeHint":"A short welcome text, shown on the login page. HTML can be used for text formatting and links.",
+			"titleCaptions":"Captions",
+			"titleColors":"Colors",
+			"titleCss":"Custom CSS rules",
+			"titleLogos":"Logos"
 		},
 		"files":{
 			"deleteDate":"File deleted",
@@ -516,9 +530,10 @@
 		"navigationBackups":"Backups",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"System",
+		"navigationCustom":"Customizing",
 		"navigationFiles":"Files",
 		"navigationLdaps":"LDAP-Logins",
-		"navigationLicense":"License",
+		"navigationLicense":"REI3 Professional",
 		"navigationLogins":"Logins",
 		"navigationLoginTemplates":"Login templates",
 		"navigationLogs":"Logs",

@@ -228,6 +228,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX fki_module_icon_id_pwa1_fkey ON app.module USING btree (icon_id_pwa1 ASC NULLS LAST);
 			CREATE INDEX fki_module_icon_id_pwa2_fkey ON app.module USING btree (icon_id_pwa2 ASC NULLS LAST);
+			
+			-- custom CSS
+			INSERT INTO instance.config (name,value) VALUES ('css','');
 		`)
 		return "3.4", err
 	},

@@ -15,11 +15,12 @@ var (
 	storeUint64 map[string]uint64 = make(map[string]uint64)
 	storeString map[string]string = make(map[string]string)
 
-	NamesString = []string{"appName", "appNameShort", "backupDir", "companyColorHeader",
-		"companyColorLogin", "companyLogo", "companyLogoUrl", "companyName",
-		"companyWelcome", "dbVersionCut", "defaultLanguageCode", "exportPrivateKey",
-		"instanceId", "licenseFile", "publicHostName", "repoPass", "repoPublicKeys",
-		"repoUrl", "repoUser", "tokenSecret", "updateCheckUrl", "updateCheckVersion"}
+	NamesString = []string{"appName", "appNameShort", "backupDir",
+		"companyColorHeader", "companyColorLogin", "companyLogo",
+		"companyLogoUrl", "companyName", "companyWelcome", "css",
+		"dbVersionCut", "defaultLanguageCode", "exportPrivateKey", "instanceId",
+		"licenseFile", "publicHostName", "repoPass", "repoPublicKeys", "repoUrl",
+		"repoUser", "tokenSecret", "updateCheckUrl", "updateCheckVersion"}
 
 	NamesUint64 = []string{"backupDaily", "backupMonthly", "backupWeekly",
 		"backupCountDaily", "backupCountMonthly", "backupCountWeekly",

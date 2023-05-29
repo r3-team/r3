@@ -175,16 +175,13 @@
 		},
 		"config":{
 			"button":{
-				"apply":"Aplică modificările",
-				"removeLogo":"Îndepărtează logo"
+				"apply":"Aplică modificările"
 			},
 			"dialog":{
 				"builderMode":"Builder este folosit pentru a crea sau modifica aplicații.<br /><br />Schimbarea aplicațiilor poate duce la pierderea de date și ar trebui ca <b>NICIODATĂ</b> acestea să fie realizate în medii de producție.<br /><br />Pentru a putea să utilizați în siguranță Builder, vă rugăm să utilizați o instanță dedicată a REI3; aplicațiile gata și testate pot fi apoi transferate într-un sistem de producție.<br /><br />Vă rugăm să consultați <a href=\"https://rei3.de/en/docs/builder/\" target=\"_blank \">Documentația Builder</a> pentru a afla mai multe.",
 				"productionMode":"Modul de întreținere este folosit pentru a actualiza, instala sau elimina aplicații din sistem.<br /><br />Comutarea la modul întreținere <b>va deconecta toți utilizatorii fără permisiuni de administrator</b>.",
 				"pleaseRead":"Vă rugăm să citiți înainte de a salva"
 			},
-			"appName":"Nume instanță",
-			"appNameShort":"Titlul paginii",
 			"appVersion":"Versiunea platformei",
 			"bruteforceAttempts":"Nr. de încercări după care gazdele vor fi blocate",
 			"bruteforceCountBlocked":"Gazde blocate",
@@ -192,15 +189,6 @@
 			"bruteforceProtection":"Activați protecția împotriva forței brute (bruteforce)",
 			"bruteforceTitle":"Protecția forței brute (bruteforce)",
 			"builderMode":"Modul Builder",
-			"colorHint":"Păstrați gol pentru implicit",
-			"companyColorHeader":"Culoarea titlului (antet)",
-			"companyColorLogin":"Culoarea titlului (autentificare)",
-			"companyLogo":"Logoul companiei",
-			"companyLogoDesc":"(Fișier PNG, max. 64kb)",
-			"companyLogoUrl":"Logoul companiei - legătură",
-			"companyLogoUrlDesc":"Orice URL valid",
-			"companyName":"Numele companiei",
-			"companyWelcome":"Textul de bun venit (autentificare)",
 			"dbTimeoutCsv":"Timeout database: Procesare lot (CSV)",
 			"dbTimeoutDataRest":"Timeout database: Cereri de date (REST)",
 			"dbTimeoutDataWs":"Timeout database: Cereri de date (HTTP/WS)",
@@ -230,7 +218,6 @@
 			"repoSkipVerify":"Permite certificate care nu sunt de încredere",
 			"repoUrl":"Adresa depozitului (URL)",
 			"title":"Configuratia sistemului",
-			"titleCustom":"Personalizare",
 			"titleGeneral":"General",
 			"titleIcs":"Abonamente la calendar",
 			"titleLogins":"Autentificări",
@@ -243,6 +230,33 @@
 			"updateCheckNewer":"De ultimă oră",
 			"updateCheckOlder":"Actualizare disponibilă",
 			"updateCheckUnknown":"Necunoscut"
+		},
+		"customizing":{
+			"button":{
+				"removeLogo":"Îndepărtează logo"
+			},
+			"appName":"Nume instanță",
+			"appNameHint":"Name of the REI3 instance, shown on the login page.",
+			"appNameShort":"Titlul paginii",
+			"appNameShortHint":"Short version of the instance name, shown in the page title and as label if installed as progressive web app (PWA).",
+			"colorHint":"Color as HEX, like 3EA9B9",
+			"companyColorHeader":"Culoarea titlului (antet)",
+			"companyColorHeaderHint":"Sets a fixed color for the header, application colors are ignored.",
+			"companyColorLogin":"Culoarea titlului (autentificare)",
+			"companyColorLoginHint":"Overwrites the default color on the login screen.",
+			"companyLogo":"Logoul companiei",
+			"companyLogoHint":"PNG file, max. 64kb. Shown on the login screen and start page.",
+			"companyLogoUrl":"Logoul companiei - legătură",
+			"companyLogoUrlDesc":"Orice URL valid",
+			"companyLogoUrlHint":"Link which is opened when clicking on the company logo.",
+			"companyName":"Numele companiei",
+			"companyNameHint":"Company name, shown on the login page.",
+			"companyWelcome":"Textul de bun venit",
+			"companyWelcomeHint":"A short welcome text, shown on the login page. HTML can be used for text formatting and links.",
+			"titleCaptions":"Captions",
+			"titleColors":"Colors",
+			"titleCss":"Custom CSS rules",
+			"titleLogos":"Logos"
 		},
 		"files":{
 			"deleteDate":"File deleted",
@@ -516,9 +530,10 @@
 		"navigationBackups":"Backups",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"Sistem",
+		"navigationCustom":"Personalizare",
 		"navigationFiles":"Files",
 		"navigationLdaps":"Autentificări-LDAP",
-		"navigationLicense":"Licență",
+		"navigationLicense":"REI3 Professional",
 		"navigationLogins":"Autentificări",
 		"navigationLoginTemplates":"Login templates",
 		"navigationLogs":"Jurnale",

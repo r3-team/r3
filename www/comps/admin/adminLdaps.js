@@ -24,10 +24,6 @@ let MyAdminLdaps = {
 		<div class="content no-padding">
 		
 			<div class="contentPart long">
-				<div v-if="!licenseValid" class="license-required">
-					{{ capGen.licenseRequired }}
-				</div>
-				
 				<span v-html="capApp.description"></span>
 				<br /><br />
 				

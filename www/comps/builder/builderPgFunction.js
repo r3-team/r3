@@ -2,7 +2,8 @@ import MyBuilderCaption from './builderCaption.js';
 import MyTabs           from '../tabs.js';
 import {
 	copyValueDialog,
-	getNilUuid
+	getNilUuid,
+	textAddTab
 } from '../shared/generic.js';
 import {
 	getDependentModules,
@@ -183,7 +184,7 @@ let MyBuilderPgFunction = {
 					v-if="!showPreview"
 					v-model="codeFunction"
 					@click="insertEntity"
-					@keydown.tab.prevent="addTab"
+					@keydown.tab.prevent="codeFunction = textAddTab($event)"
 					:disabled="readonly"
 					:placeholder="capApp.code"
 				></textarea>
@@ -588,6 +589,7 @@ let MyBuilderPgFunction = {
 		getDependentModules,
 		getFunctionHelp,
 		getNilUuid,
+		textAddTab,
 		
 		// presentation
 		radioIcon(entity,id) {
@@ -606,18 +608,6 @@ let MyBuilderPgFunction = {
 				intervalType:'days',
 				intervalValue:3
 			});
-		},
-		addTab(evt) {
-			let field    = evt.target;
-			let startPos = field.selectionStart;
-			let endPos   = field.selectionEnd;
-			
-			field.value = field.value.substring(0, startPos)
-				+ "\t"+ field.value.substring(endPos);
-			
-			field.selectionStart = startPos + 1;
-			field.selectionEnd   = startPos + 1;
-			this.codeFunction    = field.value;
 		},
 		insertEntity(evt) {
 			if(this.entityId === null)

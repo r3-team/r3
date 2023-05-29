@@ -18,6 +18,7 @@ func PublicGet() (interface{}, error) {
 		CompanyLogoUrl     string   `json:"companyLogoUrl"`
 		CompanyName        string   `json:"companyName"`
 		CompanyWelcome     string   `json:"companyWelcome"`
+		Css                string   `json:"css"`
 		LanguageCodes      []string `json:"languageCodes"`
 		ProductionMode     uint64   `json:"productionMode"`
 		SchemaTimestamp    int64    `json:"schemaTimestamp"`
@@ -34,6 +35,7 @@ func PublicGet() (interface{}, error) {
 	res.CompanyLogoUrl = config.GetString("companyLogoUrl")
 	res.CompanyName = config.GetString("companyName")
 	res.CompanyWelcome = config.GetString("companyWelcome")
+	res.Css = config.GetString("css")
 	res.LanguageCodes = cache.GetCaptionLanguageCodes()
 	res.ProductionMode = config.GetUint64("productionMode")
 	res.SchemaTimestamp = cache.GetSchemaTimestamp()

@@ -13,6 +13,7 @@ const MyStoreLocal = {
 		companyLogoUrl:'',    // custom company logo, href URL when clicked on
 		companyName:'',       // custom company name on login screen
 		companyWelcome:'',    // custom welcome message on login screen
+		css:'',               // custom CSS, applied to everything
 		fieldIdMapOption:{},  // map of field IDs with field options (reset on schema change)
 		loginKeyAes:null,     // en-/decryption key for login private key
 		loginKeySalt:null,    // salt for login key KDF
@@ -61,6 +62,10 @@ const MyStoreLocal = {
 		companyWelcome(state,payload) {
 			state.companyWelcome = payload;
 			set('companyWelcome',payload);
+		},
+		css(state,payload) {
+			state.css = payload;
+			set('css',payload);
 		},
 		fieldOptionSet(state,payload) {
 			let fieldId = payload.fieldId;
@@ -126,6 +131,7 @@ const MyStoreLocal = {
 		companyLogoUrl:    (state) => state.companyLogoUrl,
 		companyName:       (state) => state.companyName,
 		companyWelcome:    (state) => state.companyWelcome,
+		css:               (state) => state.css,
 		fieldIdMapOption:  (state) => state.fieldIdMapOption,
 		loginKeyAes:       (state) => state.loginKeyAes,
 		loginKeySalt:      (state) => state.loginKeySalt,
@@ -141,11 +147,12 @@ let init = function() {
 	for(let k in MyStoreLocal.state) {
 		let value = localStorage.getItem(k);
 		
-		if(value !== null)
+		if(typeof value !== 'undefined' && value !== null)
 			MyStoreLocal.state[k] = JSON.parse(value);
 	}
 } ()
 
 let set = function(name,value) {
-	localStorage.setItem(name,JSON.stringify(value));
+	if(typeof value !== 'undefined')
+		localStorage.setItem(name,JSON.stringify(value));
 };

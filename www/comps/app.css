@@ -758,6 +758,14 @@ table td.maximum{
 	text-decoration:none;
 	outline:none;
 }
+.navigation .entry.inactive{
+	color:var(--color-font-alt);
+}
+.navigation .entry.separator{
+	margin:16px 0px 0px;
+	font-weight:bold;
+	border-bottom:1px solid var(--color-border);
+}
 .navigation .entry.center{
 	justify-content:center;
 }
@@ -766,6 +774,9 @@ table td.maximum{
 	width:auto;
 	margin-right:9px;
 	filter:var(--image-filter);
+}
+.navigation .entry.inactive img{
+	filter:var(--image-filter-alt);
 }
 .navigation .entry:focus,
 .navigation .entry:hover{

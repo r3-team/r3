@@ -136,6 +136,16 @@ let MyApp = {
 			// set meta theme color (for PWA window color)
 			document.querySelector('meta[name="theme-color"]').setAttribute('content',v);
 		},
+		css(v) {
+			let e = document.getElementById('app-custom-css');
+			if(typeof e !== 'undefined' && e !== null)
+				e.parentNode.removeChild(e);
+			
+			e = document.createElement("style");
+			e.id        = 'app-custom-css';
+			e.innerText = v;
+			document.head.appendChild(e);
+		},
 		pwaManifestHref(v) {
 			// set manifest (for PWA installation)
 			let e = document.getElementById('app-pwa-manifest');
@@ -305,6 +315,7 @@ let MyApp = {
 		customColorHeader:(s) => s.$store.getters['local/companyColorHeader'],
 		customLogo:       (s) => s.$store.getters['local/customLogo'],
 		customLogoUrl:    (s) => s.$store.getters['local/customLogoUrl'],
+		css:              (s) => s.$store.getters['local/css'],
 		loginKeyAes:      (s) => s.$store.getters['local/loginKeyAes'],
 		schemaTimestamp:  (s) => s.$store.getters['local/schemaTimestamp'],
 		modules:          (s) => s.$store.getters['schema/modules'],
@@ -498,6 +509,7 @@ let MyApp = {
 					this.$store.commit('local/companyLogoUrl',res.payload.companyLogoUrl);
 					this.$store.commit('local/companyName',res.payload.companyName);
 					this.$store.commit('local/companyWelcome',res.payload.companyWelcome);
+					this.$store.commit('local/css',res.payload.css);
 					this.$store.commit('local/schemaTimestamp',res.payload.schemaTimestamp);
 					this.$store.commit('clusterNodeName',res.payload.clusterNodeName);
 					this.$store.commit('productionMode',res.payload.productionMode === 1);
