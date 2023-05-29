@@ -2,13 +2,63 @@ import {textAddTab} from '../shared/generic.js';
 import {srcBase64}  from '../shared/image.js';
 export {MyAdminCustom as default};
 
+let MyAdminCustomLogo = {
+	name:'my-admin-custom-logo',
+	template:`<td>
+		<input type="file"
+			v-if="!hasValue"
+			@change="set"
+			:disabled="readonly"
+		/>
+		
+		<div class="row gap" v-if="hasValue">
+			<img class="logo" :src="srcBase64(modelValue)" />
+			<my-button image="cancel.png"
+				@trigger="$emit('update:modelValue','')"
+				:active="!readonly"
+				:cancel="true"
+			/>
+		</div>
+	</td>`,
+	emits:['update:modelValue'],
+	props:{
+		maxSizeKb: { type:Number,  required:true },
+		modelValue:{ type:String,  required:true },
+		readonly:  { type:Boolean, required:true }
+	},
+	computed:{
+		hasValue:(s) => s.modelValue !== '',
+		
+		// stores
+		capApp:(s) => s.$store.getters.captions.admin.customizing
+	},
+	methods:{
+		// externals
+		srcBase64,
+		
+		// actions
+		set(evt) {
+			let file = evt.target.files[0];
+			if(Math.floor(file.size/1024) > this.maxSizeKb)
+				return this.$root.genericError(this.capApp.error.fileTooLarge.replace('{SIZE}',this.maxSizeKb));
+			
+			var reader = new FileReader();
+			reader.readAsDataURL(file);
+			reader.onload = () => this.$emit('update:modelValue',reader.result.split(',')[1]);
+			reader.onerror = function(error) {
+				that.$root.genericError(error);
+			};
+		}
+	}
+};
+
 let MyAdminCustom = {
 	name:'my-admin-custom',
 	components:{
+		MyAdminCustomLogo,
 		'chrome-picker':VueColor.Chrome
 	},
 	template:`<div class="admin-custom contentBox grow">
-		
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/colors.png" />
@@ -39,23 +89,23 @@ let MyAdminCustom = {
 			<table class="generic-table-vertical default-inputs">
 				<tr>
 					<td>{{ capApp.appName }}</td>
-					<td><input :disabled="!activated" v-model="configInput.appName" /></td>
+					<td><input class="long" :disabled="!activated" v-model="configInput.appName" /></td>
 					<td>{{ capApp.appNameHint }}</td>
 				</tr>
 				<tr>
 					<td>{{ capApp.appNameShort }}</td>
-					<td><input :disabled="!activated" v-model="configInput.appNameShort" /></td>
+					<td><input class="long" :disabled="!activated" v-model="configInput.appNameShort" /></td>
 					<td>{{ capApp.appNameShortHint }}</td>
 				</tr>
 				<tr>
 					<td>{{ capApp.companyName }}</td>
-					<td><input :disabled="!activated" v-model="configInput.companyName" /></td>
+					<td><input class="long" :disabled="!activated" v-model="configInput.companyName" /></td>
 					<td>{{ capApp.companyNameHint }}</td>
 				</tr>
 				<tr>
 					<td>{{ capApp.companyWelcome }}</td>
 					<td>
-						<textarea class="companyWelcome"
+						<textarea class="companyWelcome long"
 							v-model="configInput.companyWelcome"
 							:disabled="!activated"
 						></textarea>
@@ -90,7 +140,7 @@ let MyAdminCustom = {
 							</div>
 							<my-button image="cancel.png"
 								@trigger="configInput.companyColorLogin = ''; showColorLogin = false"
-								:active="configInput.companyColorLogin !== ''"
+								:active="activated && configInput.companyColorLogin !== ''"
 								:cancel="true"
 							/>
 						</div>
@@ -125,7 +175,7 @@ let MyAdminCustom = {
 							</div>
 							<my-button image="cancel.png"
 								@trigger="configInput.companyColorHeader = ''; showColorHeader = false"
-								:active="configInput.companyColorHeader !== ''"
+								:active="activated && configInput.companyColorHeader !== ''"
 								:cancel="true"
 							/>
 						</div>
@@ -151,21 +201,10 @@ let MyAdminCustom = {
 				<tr>
 					<td>{{ capApp.companyLogo }}</td>
 					<td>
-						<img class="logo"
-							v-if="configInput.companyLogo !== ''"
-							:src="srcBase64(configInput.companyLogo)"
-						/>
-						<br />
-						<input type="file"
-							v-if="configInput.companyLogo === ''"
-							@change="applyLogo"
-							:disabled="!activated"
-						/>
-						<my-button image="cancel.png"
-							@trigger="configInput.companyLogo = ''"
-							v-if="activated && configInput.companyLogo !== ''"
-							:cancel="true"
-							:caption="capApp.button.removeLogo"
+						<my-admin-custom-logo
+							v-model="configInput.companyLogo"
+							:maxSizeKb="64"
+							:readonly="!activated"
 						/>
 					</td>
 					<td>{{ capApp.companyLogoHint }}</td>
@@ -180,6 +219,28 @@ let MyAdminCustom = {
 						/>
 					</td>
 					<td>{{ capApp.companyLogoUrlHint }}</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.iconPwa1 }}</td>
+					<td>
+						<my-admin-custom-logo
+							v-model="configInput.iconPwa1"
+							:maxSizeKb="128"
+							:readonly="!activated"
+						/>
+					</td>
+					<td>{{ capApp.iconPwa1Hint }}</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.iconPwa2 }}</td>
+					<td>
+						<my-admin-custom-logo
+							v-model="configInput.iconPwa2"
+							:maxSizeKb="128"
+							:readonly="!activated"
+						/>
+					</td>
+					<td>{{ capApp.iconPwa2Hint }}</td>
 				</tr>
 			</table>
 			
@@ -233,7 +294,6 @@ let MyAdminCustom = {
 	},
 	methods:{
 		// externals
-		srcBase64,
 		textAddTab,
 		
 		// actions
@@ -242,16 +302,6 @@ let MyAdminCustom = {
 				case 'header': this.configInput.companyColorHeader = value.hex.substr(1); break;
 				case 'login':  this.configInput.companyColorLogin  = value.hex.substr(1); break;
 			}
-		},
-		applyLogo(evt) {
-			let file = evt.target.files[0];
-			
-			var reader = new FileReader();
-			reader.readAsDataURL(file);
-			reader.onload = () => this.configInput.companyLogo = reader.result.split(',')[1];
-			reader.onerror = function(error) {
-				that.$root.genericError(error);
-			};
 		},
 		reset() {
 			this.configInput = JSON.parse(JSON.stringify(this.config));

@@ -132,31 +132,40 @@ let MyApp = {
 		};
 	},
 	watch:{
-		color1(v) {
-			// set meta theme color (for PWA window color)
-			document.querySelector('meta[name="theme-color"]').setAttribute('content',v);
+		color1:{
+			handler(v) {
+				// set meta theme color (for PWA window color)
+				document.querySelector('meta[name="theme-color"]').setAttribute('content',v);
+			},
+			immediate:true
 		},
-		css(v) {
-			let e = document.getElementById('app-custom-css');
-			if(typeof e !== 'undefined' && e !== null)
-				e.parentNode.removeChild(e);
-			
-			e = document.createElement("style");
-			e.id        = 'app-custom-css';
-			e.innerText = v;
-			document.head.appendChild(e);
+		css:{
+			handler(v) {
+				let e = document.getElementById('app-custom-css');
+				if(typeof e !== 'undefined' && e !== null)
+					e.parentNode.removeChild(e);
+				
+				e = document.createElement("style");
+				e.id        = 'app-custom-css';
+				e.innerText = v;
+				document.head.appendChild(e);
+			},
+			immediate:true
 		},
-		pwaManifestHref(v) {
-			// set manifest (for PWA installation)
-			let e = document.getElementById('app-pwa-manifest');
-			if(typeof e !== 'undefined' && e !== null)
-				e.parentNode.removeChild(e);
-			
-			e = document.createElement('link');
-			e.href = v;
-			e.id   = 'app-pwa-manifest';
-			e.rel  = 'manifest';
-			document.head.appendChild(e);
+		pwaManifestHref:{
+			handler(v) {
+				// set manifest (for PWA installation)
+				let e = document.getElementById('app-pwa-manifest');
+				if(typeof e !== 'undefined' && e !== null)
+					e.parentNode.removeChild(e);
+				
+				e = document.createElement('link');
+				e.href = v;
+				e.id   = 'app-pwa-manifest';
+				e.rel  = 'manifest';
+				document.head.appendChild(e);
+			},
+			immediate:true
 		}
 	},
 	computed:{

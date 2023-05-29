@@ -36,6 +36,20 @@ func GetTimeFromSql(sqlTime string) (time.Time, error) {
 	return t, nil
 }
 
+func Substring(s string, start, end int) string {
+	ctr, index0 := 0, 0
+	for index1 := range s {
+		if ctr == start {
+			index0 = index1
+		}
+		if ctr == end {
+			return s[index0:index1]
+		}
+		ctr++
+	}
+	return s[index0:]
+}
+
 func CheckCreateDir(dir string) error {
 	exists, err := Exists(dir)
 

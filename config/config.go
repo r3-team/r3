@@ -16,7 +16,7 @@ import (
 )
 
 var (
-	access_mx = &sync.Mutex{}
+	access_mx = &sync.RWMutex{}
 
 	// application names
 	appName      string
@@ -36,8 +36,8 @@ var (
 	File types.FileType
 
 	// operation data
-	TokenSecret *jwt.HMACSHA
-	License     types.License = types.License{}
+	license     = types.License{}
+	tokenSecret *jwt.HMACSHA
 )
 
 // returns
@@ -46,37 +46,59 @@ var (
 // *build number (1023)
 // *database version (1.2), which is kept equal to major+minor app version
 func GetAppVersions() (string, string, string, string) {
-	dbVersionCut := GetString("dbVersionCut")
-
-	access_mx.Lock()
-	defer access_mx.Unlock()
-	return appVersion, appVersionCut, appVersionBuild, dbVersionCut
+	access_mx.RLock()
+	defer access_mx.RUnlock()
+	return appVersion, appVersionCut, appVersionBuild, GetString("dbVersionCut")
 }
 func GetAppName() (string, string) {
+	access_mx.RLock()
+	defer access_mx.RUnlock()
 	return appName, appNameShort
 }
 func GetConfigFilepath() string {
+	access_mx.RLock()
+	defer access_mx.RUnlock()
 	return filePath
 }
+func GetLicense() types.License {
+	access_mx.RLock()
+	defer access_mx.RUnlock()
+	return license
+}
 func GetLicenseActive() bool {
-	return License.ValidUntil > tools.GetTimeUnix()
+	access_mx.RLock()
+	defer access_mx.RUnlock()
+	return license.ValidUntil > tools.GetTimeUnix()
+}
+func GetTokenSecret() *jwt.HMACSHA {
+	access_mx.RLock()
+	defer access_mx.RUnlock()
+	return tokenSecret
 }
 
 // setters
 func SetAppVersion(version string) {
 	access_mx.Lock()
 	defer access_mx.Unlock()
-
 	appVersion = version
 	appVersionCut = regexp.MustCompile(`\.\d+\.\d+$`).ReplaceAllString(version, "")
 	appVersionBuild = regexp.MustCompile(`^\d+\.\d+\.\d+\.`).ReplaceAllString(version, "")
 }
 func SetAppName(name string, nameShort string) {
+	access_mx.Lock()
+	defer access_mx.Unlock()
 	appName = name
 	appNameShort = nameShort
 }
 func SetConfigFilePath(path string) {
+	access_mx.Lock()
+	defer access_mx.Unlock()
 	filePath = path
+}
+func SetLicense(l types.License) {
+	access_mx.Lock()
+	defer access_mx.Unlock()
+	license = l
 }
 func SetLogLevels() {
 	log.SetLogLevel("api", int(GetUint64("logApi")))
@@ -93,7 +115,6 @@ func SetLogLevels() {
 	log.SetLogLevel("transfer", int(GetUint64("logTransfer")))
 	log.SetLogLevel("websocket", int(GetUint64("logWebsocket")))
 }
-
 func SetInstanceIdIfEmpty() error {
 	if GetString("instanceId") != "" {
 		return nil
@@ -158,12 +179,6 @@ func WriteFile() error {
 }
 
 // token
-func GetTokenSecret() *jwt.HMACSHA {
-	access_mx.Lock()
-	defer access_mx.Unlock()
-
-	return TokenSecret
-}
 func ProcessTokenSecret() error {
 	secret := GetString("tokenSecret")
 	if secret == "" {
@@ -185,6 +200,6 @@ func ProcessTokenSecret() error {
 	access_mx.Lock()
 	defer access_mx.Unlock()
 
-	TokenSecret = jwt.NewHS256([]byte(secret))
+	tokenSecret = jwt.NewHS256([]byte(secret))
 	return nil
 }

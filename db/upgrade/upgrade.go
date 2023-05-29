@@ -229,8 +229,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX fki_module_icon_id_pwa1_fkey ON app.module USING btree (icon_id_pwa1 ASC NULLS LAST);
 			CREATE INDEX fki_module_icon_id_pwa2_fkey ON app.module USING btree (icon_id_pwa2 ASC NULLS LAST);
 			
-			-- custom CSS
+			-- custom CSS & PWA icons
 			INSERT INTO instance.config (name,value) VALUES ('css','');
+			INSERT INTO instance.config (name,value) VALUES ('iconPwa1','');
+			INSERT INTO instance.config (name,value) VALUES ('iconPwa2','');
 			
 			-- remove outdated config
 			DELETE FROM instance.config WHERE name = 'defaultLanguageCode';

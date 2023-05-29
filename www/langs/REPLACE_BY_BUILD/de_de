@@ -231,8 +231,8 @@
 			"updateCheckUnknown":"Unbekannt"
 		},
 		"customizing":{
-			"button":{
-				"removeLogo":"Logo entfernen"
+			"error":{
+				"fileTooLarge":"Datei ist zu groß, maximale Größe: {SIZE} KB."
 			},
 			"appName":"Instanzname",
 			"appNameHint":"Name der REI3-Instanz, wird angezeigt auf der Anmeldeseite.",
@@ -252,10 +252,14 @@
 			"companyNameHint":"Firmenname, wird angezeigt auf der Anmeldeseite.",
 			"companyWelcome":"Willkommenstext",
 			"companyWelcomeHint":"Ein kurzer Willkommenstext, wird angezeigt auf der Anmeldeseite. HTML kann für Textformatierung und für Links verwendet werden.",
+			"iconPwa1":"PWA-Icon, klein",
+			"iconPwa1Hint":"Bild, welches als Icon für die Progressive-Web-App genutzt wird. Muss eine PNG-Datei mit max. 128kb und genau 192x192 Pixel groß sein.",
+			"iconPwa2":"PWA-Icon, groß",
+			"iconPwa2Hint":"Bild, welches als Icon für die Progressive-Web-App genutzt wird. Muss eine PNG-Datei mit max. 128kb und genau 512x512 Pixel groß sein.",
 			"titleCaptions":"Beschriftungen",
 			"titleColors":"Farben",
 			"titleCss":"CSS-Regeln",
-			"titleLogos":"Logos"
+			"titleLogos":"Bilder"
 		},
 		"files":{
 			"deleteDate":"Datei gelöscht",

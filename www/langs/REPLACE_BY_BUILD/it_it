@@ -231,8 +231,8 @@
 			"updateCheckUnknown":"Sconosciuto"
 		},
 		"customizing":{
-			"button":{
-				"removeLogo":"Rimuovi logo"
+			"error":{
+				"fileTooLarge":"File is too large, max. allowed size: {SIZE} kb."
 			},
 			"appName":"Nome Istanza",
 			"appNameHint":"Name of the REI3 instance, shown on the login page.",
@@ -252,10 +252,14 @@
 			"companyNameHint":"Company name, shown on the login page.",
 			"companyWelcome":"Testo di benvenuto",
 			"companyWelcomeHint":"A short welcome text, shown on the login page. HTML can be used for text formatting and links.",
+			"iconPwa1":"PWA icon, small",
+			"iconPwa1Hint":"Image used for progressive web app icons. Must be PNG file, max. 128kb and precisely 192x192 pixels in size.",
+			"iconPwa2":"PWA icon, large",
+			"iconPwa2Hint":"Image used for progressive web app icons. Must be PNG file, max. 128kb and precisely 512x512 pixels in size.",
 			"titleCaptions":"Captions",
 			"titleColors":"Colors",
 			"titleCss":"Custom CSS rules",
-			"titleLogos":"Logos"
+			"titleLogos":"Images"
 		},
 		"files":{
 			"deleteDate":"File deleted",

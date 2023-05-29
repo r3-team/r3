@@ -174,13 +174,11 @@
 	height:900px;
 }
 .admin-custom .companyWelcome{
-	height:70px;
+	height:180px;
 }
 .admin-custom .logo{
 	object-fit:contain;
 	height:60px;
-	margin:10px 0px 0px;
-	padding:3px;
 	border:1px solid var(--color-border);
 	border-radius:3px;
 }

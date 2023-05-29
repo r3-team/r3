@@ -5,7 +5,9 @@ import (
 	"fmt"
 	"net/http"
 	"r3/cache"
+	"r3/config"
 	"r3/handler"
+	"r3/tools"
 	"strings"
 
 	"github.com/gofrs/uuid"
@@ -80,7 +82,26 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// platform PWA
 	if elements[2] == "" {
-		payloadJson, err := json.Marshal(manifestDefault)
+		manifestApp := manifestDefault
+		if config.GetLicenseActive() {
+			if config.GetString("appName") != "" {
+				manifestApp.Name = tools.Substring(config.GetString("appName"), 0, 60)
+			}
+			if config.GetString("appNameShort") != "" {
+				manifestApp.ShortName = tools.Substring(config.GetString("appNameShort"), 0, 12)
+			}
+			if config.GetString("companyColorHeader") != "" {
+				manifestApp.ThemeColor = fmt.Sprintf("#%s", config.GetString("companyColorHeader"))
+			}
+			if config.GetString("iconPwa1") != "" && config.GetString("iconPwa2") != "" {
+				manifestApp.Icons = []icon{
+					icon{Purpose: "any", Sizes: "192x192", Src: fmt.Sprintf("data:image/png;base64,%s", config.GetString("iconPwa1")), Type: "image/png"},
+					icon{Purpose: "any", Sizes: "512x512", Src: fmt.Sprintf("data:image/png;base64,%s", config.GetString("iconPwa2")), Type: "image/png"},
+				}
+			}
+		}
+
+		payloadJson, err := json.Marshal(manifestApp)
 		if err != nil {
 			handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 			return

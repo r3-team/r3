@@ -329,7 +329,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 	case "license":
 		switch action {
 		case "get":
-			return config.License, nil
+			return config.GetLicense(), nil
 		}
 	case "log":
 		switch action {

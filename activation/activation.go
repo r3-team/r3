@@ -107,5 +107,5 @@ func SetLicense() {
 
 	// set license
 	log.Info("server", "setting license")
-	config.License = licFile.License
+	config.SetLicense(licFile.License)
 }
