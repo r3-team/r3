@@ -194,7 +194,6 @@
 			"dbTimeoutDataWs":"Timeout database: Cereri de date (HTTP/WS)",
 			"dbTimeoutHint":"În secunde",
 			"dbTimeoutIcs":"Timeout database: Descărcare de calendare (ICS)",
-			"defaultLanguageCode":"Limba implicită",
 			"icsDaysPost":"Excludeți evenimentele după data curentă (în zile)",
 			"icsDaysPre":"Excludeți evenimentele înainte de data curentă (în zile)",
 			"icsDownload":"Activați abonamentele la calendar",

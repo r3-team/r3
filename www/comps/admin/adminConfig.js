@@ -58,14 +58,6 @@ let MyAdminConfig = {
 						<td><input v-model="configInput.publicHostName" /></td>
 					</tr>
 					<tr>
-						<td>{{ capApp.defaultLanguageCode }}</td>
-						<td>
-							<select v-model="configInput.defaultLanguageCode">
-								<option v-for="l in languageCodes" :value="l">{{ l }}</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
 						<td>{{ capApp.productionMode }}</td>
 						<td>
 							<my-bool-string-number
@@ -373,16 +365,15 @@ let MyAdminConfig = {
 		},
 		
 		// stores
-		appVersion:   (s) => s.$store.getters['local/appVersion'],
-		token:        (s) => s.$store.getters['local/token'],
-		languageCodes:(s) => s.$store.getters['schema/languageCodes'],
-		modules:      (s) => s.$store.getters['schema/modules'],
-		config:       (s) => s.$store.getters.config,
-		license:      (s) => s.$store.getters.license,
-		licenseDays:  (s) => s.$store.getters.licenseDays,
-		licenseValid: (s) => s.$store.getters.licenseValid,
-		capApp:       (s) => s.$store.getters.captions.admin.config,
-		capGen:       (s) => s.$store.getters.captions.generic
+		appVersion:  (s) => s.$store.getters['local/appVersion'],
+		token:       (s) => s.$store.getters['local/token'],
+		modules:     (s) => s.$store.getters['schema/modules'],
+		config:      (s) => s.$store.getters.config,
+		license:     (s) => s.$store.getters.license,
+		licenseDays: (s) => s.$store.getters.licenseDays,
+		licenseValid:(s) => s.$store.getters.licenseValid,
+		capApp:      (s) => s.$store.getters.captions.admin.config,
+		capGen:      (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals

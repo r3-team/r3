@@ -98,7 +98,7 @@ func renewDbUserPw_tx(tx pgx.Tx) error {
 
 // for later inits
 /*
-	create default login template
+	-- create default login template
 	INSERT INTO instance.login_template (name)
 	VALUES ('GLOBAL');
 
@@ -111,6 +111,9 @@ func renewDbUserPw_tx(tx pgx.Tx) error {
 		true, 0, true, true, false, 'bubbles', 'helvetica', true, true
 	FROM instance.login_template
 	WHERE name = 'GLOBAL';
+
+	-- remove default language code (function replaced by login templates)
+	Remove 'defaultLanguageCode' from instance.config
 */
 
 // instance initalized to 3.0

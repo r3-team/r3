@@ -231,6 +231,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			-- custom CSS
 			INSERT INTO instance.config (name,value) VALUES ('css','');
+			
+			-- remove outdated config
+			DELETE FROM instance.config WHERE name = 'defaultLanguageCode';
 		`)
 		return "3.4", err
 	},

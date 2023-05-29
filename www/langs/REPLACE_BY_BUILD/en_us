@@ -194,7 +194,6 @@
 			"dbTimeoutDataWs":"Database timeout: Data requests (HTTP/WS)",
 			"dbTimeoutHint":"In seconds",
 			"dbTimeoutIcs":"Database timeout: Calendar downloads (ICS)",
-			"defaultLanguageCode":"Default language",
 			"icsDaysPost":"Exclude events after current date (in days)",
 			"icsDaysPre":"Exclude events before current date (in days)",
 			"icsDownload":"Enable calendar subscriptions",

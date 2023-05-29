@@ -194,7 +194,6 @@
 			"dbTimeoutDataWs":"Datenbank-Timeout: Datenanfragen (HTTP/WS)",
 			"dbTimeoutHint":"In Sekunden",
 			"dbTimeoutIcs":"Datenbank-Timeout: Kalender-Downloads (ICS)",
-			"defaultLanguageCode":"Standardsprache",
 			"icsDaysPost":"Einträge nach akt. Datum exkludieren (in Tagen)",
 			"icsDaysPre":"Einträge vor akt. Datum exkludieren (in Tagen)",
 			"icsDownload":"Kalender-Abonnements aktivieren",

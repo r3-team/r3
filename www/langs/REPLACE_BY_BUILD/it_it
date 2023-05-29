@@ -194,7 +194,6 @@
 			"dbTimeoutDataWs":"Timeout database: richieste dati (HTTP/WS)",
 			"dbTimeoutHint":"In secondi",
 			"dbTimeoutIcs":"Timeout database: download del calendario (ICS)",
-			"defaultLanguageCode":"Lingua predefinita",
 			"icsDaysPost":"Escludi eventi dopo la data corrente (in giorni)",
 			"icsDaysPre":"Escludi eventi prima la data corrente (in giorni)",
 			"icsDownload":"Abilita iscrizioni al calendario",
