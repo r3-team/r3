@@ -103,6 +103,7 @@ let MyList = {
 									:attribute-id="columns[ci].attributeId"
 									:class="{ clickable:inputAsCategory && !inputIsReadonly }"
 									:basis="b.columnIndexes.length === 1 ? columns[ci].basis : 0"
+									:clipboard="columns[ci].clipboard"
 									:display="columns[ci].display"
 									:key="ci"
 									:length="columns[ci].length"
