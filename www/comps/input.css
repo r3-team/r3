@@ -200,6 +200,47 @@
 }
 
 
+/* input iframe */
+.input-iframe{
+	display:flex;
+	flex-flow:column nowrap;
+	flex:1 1 auto;
+	background-color:var(--color-bg);
+}
+.input-iframe-actions{
+	display:flex;
+	flex-flow:row nowrap;
+	padding:2px 0px 0px;
+	border-bottom:1px solid var(--color-border);
+	background-color:var(--color-bg);
+	box-shadow:0px 0px 4px var(--color-shade);
+	gap:6px;
+}
+.input-iframe-input{
+	height:24px;
+	padding:4px 8px;
+	font-family:inherit;
+	font-size:inherit;
+	color:inherit;
+	background-color:transparent;
+	border:none;
+	outline:none;
+	flex:1 1 auto;
+}
+.input-iframe-content{
+	flex:1 1 auto;
+}
+.input-iframe-empty{
+	display:flex;
+	flex:1 1 auto;
+	flex-flow:row nowrap;
+	justify-content:center;
+	align-items:center;
+	font-size:120%;
+	font-style:italic;
+}
+
+
 /* offset input */
 .input-offset{
 	display:flex;

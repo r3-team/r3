@@ -3,6 +3,7 @@ import MyChart                from './chart.js';
 import MyGantt                from './gantt.js';
 import MyInputDate            from './inputDate.js';
 import MyInputFiles           from './inputFiles.js';
+import MyInputIframe          from './inputIframe.js';
 import MyInputLogin           from './inputLogin.js';
 import MyInputRichtext        from './inputRichtext.js';
 import MyInputSelect          from './inputSelect.js';
@@ -50,6 +51,7 @@ let MyField = {
 		MyGantt,
 		MyInputDate,
 		MyInputFiles,
+		MyInputIframe,
 		MyInputLogin,
 		MyInputRichtext,
 		MyInputSelect,
@@ -95,6 +97,15 @@ let MyField = {
 						:disabled="isReadonly"
 						:placeholder="!focused && !isCleanUi ? caption : ''"
 						:type="!isPassword || showPassword ? 'text' : 'password'"
+					/>
+					
+					<!-- iframe input -->
+					<my-input-iframe
+						v-if="isIframe"
+						v-model="value"
+						@copyToClipboard="copyToClipboard"
+						:clipboard="isClipboard"
+						:readonly="isReadonly"
 					/>
 					
 					<!-- UUID input -->
@@ -288,7 +299,7 @@ let MyField = {
 					
 					<!-- copy to clipboard action -->
 					<my-button image="copyClipboard.png"
-						v-if="isClipboard && !isFiles"
+						v-if="isClipboard && !isFiles && !isIframe"
 						@trigger="copyToClipboard"
 						:active="value !== null"
 						:captionTitle="capGen.button.copyClipboard"
@@ -677,23 +688,18 @@ let MyField = {
 			? s.field.captions.fieldHelp[s.moduleLanguage] : '',
 		domClass:(s) => {
 			let out = [];
-			
-			if(s.isHidden)
-				out.push('hidden');
+			if(s.isHidden)   out.push('hidden');
+			if(s.isReadonly) out.push('readonly');
+			if(s.isIframe)   out.push('iframe');
+			if(s.isRichtext) out.push('richtext');
 			
 			if(s.isContainer) {
 				out.push('container');
 				out.push(s.field.direction);
 			}
 			
-			if(s.isReadonly)
-				out.push('readonly');
-			
 			if(s.isTextarea || s.isRichtext || s.isFiles)
 				out.push('top-aligned');
-			
-			if(s.isRichtext)
-				out.push('richtext');
 			
 			return out;
 		},
@@ -915,8 +921,9 @@ let MyField = {
 		isLineInput:(s) => s.isData
 			&& !s.isBoolean
 			&& !s.isColor
-			&& !s.isFiles
 			&& !s.isDateInput
+			&& !s.isFiles
+			&& !s.isIframe
 			&& !s.isLogin
 			&& !s.isSlider
 			&& !s.isTextarea
@@ -969,7 +976,7 @@ let MyField = {
 		customErr:  (s) => typeof s.fieldIdMapError[s.field.id] !== 'undefined'
 			&& s.fieldIdMapError[s.field.id] !== null ? s.fieldIdMapError[s.field.id] : null,
 		hasCaption: (s) => !s.isAloneInTab && (s.focused || s.value !== null || s.isCleanUi || s.isBoolean
-			|| s.isDateInput || s.isSlider || s.isRichtext || s.isCategory || s.isRelationship || s.isFiles || s.isUuid),
+			|| s.isDateInput || s.isSlider || s.isRichtext || s.isCategory || s.isRelationship || s.isFiles || s.isIframe || s.isUuid),
 		isCleanUi:  (s) => s.settings.fieldClean,
 		inputRegex: (s) => !s.isData || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
@@ -1008,6 +1015,7 @@ let MyField = {
 		isDateRange:     (s) => s.isDateInput && s.field.attributeIdAlt !== null,
 		isDecimal:       (s) => s.isData && s.isAttributeDecimal(s.attribute.content),
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
+		isIframe:        (s) => s.isData && s.attribute.contentUse === 'iframe',
 		isInteger:       (s) => s.isData && s.isAttributeInteger(s.attribute.content),
 		isQuery:         (s) => s.isCalendar || s.isChart || s.isList || s.isRelationship,
 		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.attribute.content),

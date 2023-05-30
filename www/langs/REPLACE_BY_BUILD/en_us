@@ -656,6 +656,7 @@
 				"decimal":"Number, decimal",
 				"float":"Number, floating",
 				"files":"Files",
+				"iframe":"iframe",
 				"number":"Number, whole",
 				"regconfig":"Text search dictionary",
 				"relationship11":"Relationship, one-to-one (1:1)",
@@ -675,6 +676,7 @@
 				"decimal":"Decimal values, often used for currency amounts.",
 				"files":"One or many files. Depending on max. file count/size settings, users can permanently store files. With the client application, files can be opened locally for direct editing.",
 				"float":"Number values with floating decimal. Mostly used for expensive calculations.",
+				"iframe":"A URL value, which is used to show an external resource like a web site.",
 				"number":"Full number values, like counters, priorities, reference numbers and so on.",
 				"regconfig":"Dictionary for a fulltext search index. Available dictionaries depend on the database system (s. Postgres dictionaries). Examples: english, german, french, spanish, romanian. The value 'simple' can be used for less useful but language-agnostic search.",
 				"relationship11":"Connects one relation to another. One-to-one relationships (1:1) only allow one record of a relation to reference the same record on another. Examples: The teacher of a class or owner of a car.",
@@ -1671,6 +1673,9 @@
 			"fileSize":"File size",
 			"tooLarge":"Cannot upload file '{NAME}', max. allowed size is {SIZE}.",
 			"unsaved":"(unsaved)"
+		},
+		"iframe":{
+			"empty":"No URL set - nothing to show"
 		}
 	},
 	"list":{

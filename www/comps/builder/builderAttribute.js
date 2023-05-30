@@ -122,8 +122,9 @@ let MyBuilderAttribute = {
 										<option value="number"   :disabled="!isNew && !isInteger">{{ capApp.option.number }}</option>
 										<option value="decimal"  :disabled="!isNew && !isNumeric">{{ capApp.option.decimal }}</option>
 										<option value="color"    :disabled="!isNew && !isString">{{ capApp.option.color }}</option>
-										<option value="files"    :disabled="!isNew && !isFiles">{{ capApp.option.files }}</option>
+										<option value="iframe"   :disabled="!isNew && !isString">{{ capApp.option.iframe }}</option>
 										<option value="boolean"  :disabled="!isNew && !isBoolean">{{ capApp.option.boolean }}</option>
+										<option value="files"    :disabled="!isNew && !isFiles">{{ capApp.option.files }}</option>
 									</optgroup>
 									<optgroup :label="capApp.datetimes" :disabled="!isNew && !isInteger">
 										<option value="datetime">{{ capApp.option.datetime }}</option>
@@ -147,7 +148,7 @@ let MyBuilderAttribute = {
 								/>
 							</div>
 						</td>
-						<td>{{ capApp['usedForHint'][usedFor] }}</td>
+						<td>{{ capApp.usedForHint[usedFor] }}</td>
 					</tr>
 					
 					<!-- bigint -->
@@ -311,6 +312,7 @@ let MyBuilderAttribute = {
 				if(this.isNumeric)   return 'decimal';
 				if(this.isFiles)     return 'files';
 				if(this.isFloat)     return 'float';
+				if(this.isIframe)    return 'iframe';
 				if(this.isRegconfig) return 'regconfig';
 				if(this.isRichtext)  return 'richtext';
 				if(this.isText)      return 'text';
@@ -339,6 +341,11 @@ let MyBuilderAttribute = {
 						this.values.content    = 'varchar';
 						this.values.contentUse = 'color';
 						this.values.length     = 6;
+					break;
+					case 'iframe':
+						this.values.content    = 'text';
+						this.values.contentUse = 'iframe';
+						this.values.length     = 0;
 					break;
 					
 					// boolean uses
@@ -431,6 +438,7 @@ let MyBuilderAttribute = {
 		isColor:   (s) => s.isString  && s.values.contentUse === 'color',
 		isDate:    (s) => s.isInteger && s.values.contentUse === 'date',
 		isDatetime:(s) => s.isInteger && s.values.contentUse === 'datetime',
+		isIframe:  (s) => s.isString  && s.values.contentUse === 'iframe',
 		isNumber:  (s) => s.isInteger && s.values.contentUse === 'default',
 		isRichtext:(s) => s.isString  && s.values.contentUse === 'richtext',
 		isText:    (s) => s.isString  && s.values.contentUse === 'default',

@@ -656,6 +656,7 @@
 				"decimal":"Nummer, dezimal",
 				"float":"Nummer, gleitkomma",
 				"files":"Dateien",
+				"iframe":"iframe",
 				"number":"Nummer, ganzzahl",
 				"regconfig":"Textsuche-Wörterbuch",
 				"relationship11":"Beziehung, eins-zu-eins (1:1)",
@@ -675,6 +676,7 @@
 				"decimal":"Dezimalwerte, oft für Währungsbeträge verwendet.",
 				"files":"Eine oder mehrere Dateien. Abhängig von den Einstellungen für die maximale Anzahl/Größe von Dateien können Benutzer Dateien dauerhaft speichern. Mit der Client-Anwendung können Dateien lokal zur direkten Bearbeitung geöffnet werden.",
 				"float":"Zahlenwerte mit gleitenden Dezimalpunkt. Meistens für aufwändige Berechnungen genutzt.",
+				"iframe":"Ein URL-Wert, der genutzt wird, eine externe Ressource anzuzeigen wie z. B. eine Webseite.",
 				"number":"Zahlenwerte aus vollen Zahlen - wie bspw. Zähler, Prioritäten und Referenznummern.",
 				"regconfig":"Wörterbuch für einen Volltextsuchindex. Verfügbare Wörterbücher hängen vom Datenbanksystem ab (s. Postgres dictionaries). Beispiele: english, german, french, spanish, romanian. Der Wert 'simple' kann für eine weniger nützlich aber sprachunabhängige Suche verwendet werden.",
 				"relationship11":"Verbindet eine Relation mit einer anderen. Eins-zu-eins-Beziehungen (1:1) erlauben nur, dass nur ein einzelner Datensatz einer Relation auf denselben Datensatz einer anderen Relation verweist. Beispiele: Der Lehrer einer Klasse oder der Besitzer eines Autos.",
@@ -1671,6 +1673,9 @@
 			"fileSize":"Dateigröße",
 			"tooLarge":"Datei \"{NAME}\" kann nicht hochgeladen werden, maximal erlaubte Größe ist {SIZE}.",
 			"unsaved":"(ungespeichert)"
+		},
+		"iframe":{
+			"empty":"Keine URL gesetzt - nichts anzuzeigen"
 		}
 	},
 	"list":{

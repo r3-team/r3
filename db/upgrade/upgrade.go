@@ -240,6 +240,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- add last login date
 			ALTER TABLE instance.login ADD COLUMN date_auth_last BIGINT;
 			CREATE INDEX ind_login_date_auth_last ON instance.login USING BTREE (date_auth_last ASC NULLS LAST);
+			
+			-- iframes
+			ALTER TYPE app.attribute_content_use ADD VALUE 'iframe';
 		`)
 		return "3.4", err
 	},

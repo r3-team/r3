@@ -190,6 +190,8 @@ body                                         { --depth:6; }
 .input-files .item                           { --depth:2; }
 .input-files .item img.prev                  { --depth:5; }
 .input-files-name input                      { --depth:0; }
+.input-iframe                                { --depth:3; }
+.input-iframe-actions                        { --depth:0; }
 .tabs .tab-entry:not(.active)                { --depth:1; }
 .admin .logs .actions                        { --depth:7; }
 .admin .table-default th                     { --depth:4; }
