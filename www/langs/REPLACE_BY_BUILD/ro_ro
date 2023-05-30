@@ -314,14 +314,23 @@
 			"tlsVerify":"Verifică TLS"
 		},
 		"license":{
+			"button":{
+				"delete":"Remove license file"
+			},
+			"dialog":{
+				"delete":"Are you sure you want to remove the license file? To reactivate REI3 Professional, a valid license file must be uploaded."
+			},
 			"active":"Licență instalată",
 			"clientId":"Client ID",
-			"licenseEmpty":"Nu există",
+			"extCommunity":"REI3 Community Forum",
+			"extLicense":"REI3 Professional",
+			"intro":"REI3 is fully <a href=\"https://github.com/r3-team/r3\" target=\"_blank\">open source</a> and can be used free of charge.<br /><br />For those needing enterprise features or support, there is <b>REI3 Professional</b>. It is priced to be affordable to organizations of any size, often costing much less than comparable low-code offerings.<br /><br />While supporting continuous development, REI3 Professional customers can also activate the full range of features and get support from Lean Softworks, the primary developer of REI3.",
+			"introMore":"More information:",
 			"licenseExpired":"Licența este expirată",
 			"licenseId":"Licență ID",
 			"licenseValid":"Licența este valabilă pentru încă {COUNT} zi(le)",
 			"registeredFor":"Înregistrat pentru",
-			"upload":"Încărcați fișierul de licență",
+			"upload":"Încărcați fișierul de licență:",
 			"validUntil":"Valabilă până la"
 		},
 		"login":{

@@ -314,14 +314,23 @@
 			"tlsVerify":"TLS überprüfen"
 		},
 		"license":{
+			"button":{
+				"delete":"Lizenzdatei entfernen"
+			},
+			"dialog":{
+				"delete":"Möchten Sie die Lizenzdatei wirklich entfernen? Um REI3 Professional erneut zu aktivieren, muss eine gültige Lizenzdatei eingespielt werden."
+			},
 			"active":"Installierte Lizenz",
 			"clientId":"Kunden-ID",
-			"licenseEmpty":"Keine",
+			"extCommunity":"REI3 Community Forum",
+			"extLicense":"REI3 Professional",
+			"intro":"REI3 ist vollständig <a href=\"https://github.com/r3-team/r3\" target=\"_blank\">Open-Source</a> und kann kostenlos genutzt werden.<br /><br />Für Enterprise-Features oder -Support gibt es <b>REI3 Professional</b>. Preislich so gestaltet, dass es für Unternehmen jeder Größe bezahlbar sein sollte, ist es oft deutlich günstiger als vergleichbare Low-Code-Produkte am Markt.<br /><br />REI3 Professional-Kunden unterstützen nicht nur die kontinuierliche Weiterentwicklung, sondern können auch alle Features aktivieren und erhalten professionelle Unterstützung von Lean Softworks, dem primären Entwickler von REI3.",
+			"introMore":"Mehr Informationen:",
 			"licenseExpired":"Lizenz ist abgelaufen",
 			"licenseId":"Lizenz-ID",
 			"licenseValid":"Lizenz ist noch gültig für {COUNT} Tag(e)",
 			"registeredFor":"Registriert für",
-			"upload":"Lizenzdatei hochladen",
+			"upload":"Lizenzdatei hochladen:",
 			"validUntil":"Gültig bis"
 		},
 		"login":{

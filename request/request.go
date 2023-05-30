@@ -328,6 +328,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		}
 	case "license":
 		switch action {
+		case "del":
+			return LicenseDel_tx(tx)
 		case "get":
 			return config.GetLicense(), nil
 		}

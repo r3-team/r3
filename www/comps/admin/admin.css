@@ -307,6 +307,25 @@
 	font-size:130%;
 	color:var(--color-success);
 }
+.admin-license .intro{
+	display:flex;
+	flex-flow:row wrap;
+	padding:10px 0px 0px;
+	margin:0px 0px 20px;
+	gap:30px;
+}
+.admin-license .intro span{
+	max-width:800px;
+	min-width:400px;
+	margin:0px 0px 20px;
+	flex:0 1 auto;
+	font-size:120%;
+	line-height:160%;
+}
+.admin-license .intro img{
+	width:300px;
+	height:200px;
+}
 
 
 /* modules */

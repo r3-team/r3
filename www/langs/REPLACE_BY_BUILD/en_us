@@ -314,14 +314,23 @@
 			"tlsVerify":"Verify TLS"
 		},
 		"license":{
+			"button":{
+				"delete":"Remove license file"
+			},
+			"dialog":{
+				"delete":"Are you sure you want to remove the license file? To reactivate REI3 Professional, a valid license file must be uploaded."
+			},
 			"active":"Installed license",
 			"clientId":"Client ID",
-			"licenseEmpty":"None",
+			"extCommunity":"REI3 Community Forum",
+			"extLicense":"REI3 Professional",
+			"intro":"REI3 is fully <a href=\"https://github.com/r3-team/r3\" target=\"_blank\">open source</a> and can be used free of charge.<br /><br />For those needing enterprise features or support, there is <b>REI3 Professional</b>. It is priced to be affordable to organizations of any size, often costing much less than comparable low-code offerings.<br /><br />While supporting continuous development, REI3 Professional customers can also activate the full range of features and get support from Lean Softworks, the primary developer of REI3.",
+			"introMore":"More information:",
 			"licenseExpired":"License is expired",
 			"licenseId":"License ID",
 			"licenseValid":"License is valid for {COUNT} more day(s)",
 			"registeredFor":"Registered for",
-			"upload":"Upload license file",
+			"upload":"Upload license file:",
 			"validUntil":"Valid until"
 		},
 		"login":{
