@@ -145,10 +145,12 @@ let MyApp = {
 				if(typeof e !== 'undefined' && e !== null)
 					e.parentNode.removeChild(e);
 				
-				e = document.createElement("style");
-				e.id        = 'app-custom-css';
-				e.innerText = v;
-				document.head.appendChild(e);
+				if(this.activated) {
+					e = document.createElement("style");
+					e.id        = 'app-custom-css';
+					e.innerText = v;
+					document.head.appendChild(e);
+				}
 			},
 			immediate:true
 		},
