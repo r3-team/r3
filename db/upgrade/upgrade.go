@@ -236,6 +236,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			-- remove outdated config
 			DELETE FROM instance.config WHERE name = 'defaultLanguageCode';
+			
+			-- add last login date
+			ALTER TABLE instance.login ADD COLUMN date_auth_last BIGINT;
+			CREATE INDEX ind_login_date_auth_last ON instance.login USING BTREE (date_auth_last ASC NULLS LAST);
 		`)
 		return "3.4", err
 	},

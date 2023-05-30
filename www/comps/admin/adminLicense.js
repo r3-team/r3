@@ -51,28 +51,39 @@ let MyAdminLicense = {
 							<td>{{ license.registeredFor }}</td>
 						</tr>
 						<tr>
+							<td>{{ capApp.loginCount }}</td>
+							<td>{{ license.loginCount }}</td>
+						</tr>
+						<tr>
 							<td>{{ capApp.validUntil }}</td>
 							<td>{{ getUnixFormat(license.validUntil,settings.dateFormat) }}</td>
 						</tr>
 					</table>
 					<img src="images/logo_license.webp" />
+					<div class="actions">
+						<my-button image="cancel.png"
+							@trigger="delAsk"
+							:cancel="true"
+							:tight="true"
+						/>
+					</div>
 				</div>
 				
-				<span v-if="licenseValid" class="valid">
-					{{ capApp.licenseValid.replace('{COUNT}',this.licenseDays) }}
-				</span>
-				
-				<span v-if="!licenseValid" class="invalid">
-					{{ capApp.licenseExpired }}
-				</span>
-				
-				<span>
-					<my-button image="cancel.png"
-						@trigger="delAsk"
-						:cancel="true"
-						:caption="capApp.button.delete"
-					/>
-				</span>
+				<h2>{{ capApp.currentState }}</h2>
+				<table class="current-values">
+					<tr>
+						<td>{{ capApp.untilDays }}</td>
+						<td :class="{ invalid:!licenseValid }">
+							<b>{{ licenseValid ? this.licenseDays : capApp.licenseExpired }}</b>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.loginCount }}</td>
+						<td :class="{ invalid:concurrentLogins >= license.loginCount }">
+							<b>{{ concurrentLogins + ' / ' + license.loginCount }}</b>
+						</td>
+					</tr>
+				</table>
 			</div>
 			
 			<br />
@@ -83,7 +94,8 @@ let MyAdminLicense = {
 		</div>
 	</div>`,
 	props:{
-		menuTitle:{ type:String, required:true }
+		concurrentLogins:{ type:Number, required:true },
+		menuTitle:       { type:String, required:true }
 	},
 	computed:{
 		licenseInstalled:(s) => s.license.validUntil !== 0,

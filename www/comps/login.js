@@ -88,6 +88,15 @@ let MyLogin = {
 				</div>
 			</div>
 			
+			<!-- license error message -->
+			<div class="contentBox" v-if="licenseErrCode !== null">
+				<div class="top warning">
+					<div class="area">
+						<h1>{{ message.license[licenseErrCode][language] }}</h1>
+					</div>
+				</div>
+			</div>
+			
 			<!-- busy overlay -->
 			<div class="input-block-overlay-bg" :class="{show:loading}">
 				<div class="input-block-overlay">
@@ -192,8 +201,9 @@ let MyLogin = {
 			username:'',
 			
 			// states
-			appInitErr:false, // application failed to initialize
-			badAuth:false,    // authentication failed
+			appInitErr:false,    // application failed to initialize
+			badAuth:false,       // authentication failed
+			licenseErrCode:null, // error with system license
 			loading:false,
 			showError:false,
 			
@@ -212,6 +222,16 @@ let MyLogin = {
 				httpMode:{
 					de:'Verbindung ist nicht verschlüsselt',
 					en_US:'Connection is not encrypted'
+				},
+				license:{
+					'{ERR_LIC_001}':{
+						de:'Systemaktivierung ist abgelaufen - bitte den Systemadministrator kontaktieren',
+						en_US:'System activation has expired - please contact your system administrator'
+					},
+					'{ERR_LIC_002}':{
+						de:'Anzahl gleichzeitiger Anmeldungen erreicht - bitte den Systemadministrator kontaktieren',
+						en_US:'Concurrent login count reached - please contact your system administrator'
+					}
 				},
 				loading:{
 					de:'Am Laden...',
@@ -335,7 +355,12 @@ let MyLogin = {
 		openLink,
 		
 		// misc
-		handleError(action) {
+		handleError(action,msg) {
+			if(msg.startsWith('{ERR_LIC'))
+				this.licenseErrCode = msg;
+			else
+				this.licenseErrCode = null;
+			
 			switch(action) {
 				case 'aesExport': break;                      // very unexpected, should not happen
 				case 'authToken': break;                      // token auth failed, to be expected, can expire
@@ -377,7 +402,7 @@ let MyLogin = {
 						res.payload.saltKdf
 					);
 				},
-				() => this.handleError('authUser')
+				err => this.handleError('authUser',err)
 			);
 			this.loading = true;
 		},
@@ -392,7 +417,7 @@ let MyLogin = {
 					res.payload.token,
 					null
 				),
-				() => this.handleError('authUser')
+				err => this.handleError('authUser',err)
 			);
 			this.loading = true;
 		},
@@ -402,13 +427,13 @@ let MyLogin = {
 					res.payload.loginId,
 					res.payload.loginName
 				),
-				() => this.handleError('authToken')
+				err => this.handleError('authToken',err)
 			);
 			this.loading = true;
 		},
 		authenticatedByUser(loginId,loginName,token,saltKdf) {
 			if(token === '')
-				return this.handleError('authUser');
+				return this.handleError('authUser','');
 			
 			// store authentication token
 			this.$store.commit('local/token',token);
@@ -426,10 +451,10 @@ let MyLogin = {
 							this.$store.commit('local/loginKeySalt',saltKdf);
 							this.appEnable(loginId,loginName);
 						},
-						err => this.handleError('aesExport')
+						() => this.handleError('aesExport','')
 					);
 				},
-				err => this.handleError('kdfCreate')
+				() => this.handleError('kdfCreate','')
 			);
 		},
 		

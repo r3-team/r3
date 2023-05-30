@@ -70,6 +70,16 @@ func GetLicenseActive() bool {
 	defer access_mx.RUnlock()
 	return license.ValidUntil > tools.GetTimeUnix()
 }
+func GetLicenseLoginCount() int64 {
+	access_mx.RLock()
+	defer access_mx.RUnlock()
+	return license.LoginCount
+}
+func GetLicenseUsed() bool {
+	access_mx.RLock()
+	defer access_mx.RUnlock()
+	return license.ValidUntil != 0
+}
 func GetTokenSecret() *jwt.HMACSHA {
 	access_mx.RLock()
 	defer access_mx.RUnlock()

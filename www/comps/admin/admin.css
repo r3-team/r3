@@ -280,32 +280,33 @@
 	flex-flow:row nowrap;
 	justify-content:space-between;
 	align-items:center;
+	position:relative;
 	max-width:520px;
 	padding:0px 16px;
-	margin:0px 0px 12px 0px;
+	margin:0px 0px 24px 0px;
 	color:var(--color-font);
 	border:2px solid var(--color-border);
 	border-radius:5px;
 	background-color:var(--color-bg);
 }
-.admin-license .file img{
+.admin-license .file>img{
 	width:auto;
 	height:120px;
 	margin-left:12px;
 }
-.admin-license table{
+.admin-license .file .actions{
+	position:absolute;
+	top:6px;
+	right:6px;
+}
+.admin-license .file table{
 	margin:6px 0px;
 }
-.admin-license table td{
-	padding:5px 32px 5px 0px;
+.admin-license .file table td{
+	padding:5px 20px 5px 0px;
 }
 .admin-license .invalid{
-	font-size:130%;
 	color:var(--color-error);
-}
-.admin-license .valid{
-	font-size:130%;
-	color:var(--color-success);
 }
 .admin-license .intro{
 	display:flex;
@@ -325,6 +326,10 @@
 .admin-license .intro img{
 	width:300px;
 	height:200px;
+}
+.admin-license .current-values td{
+	padding:5px 8px;
+	font-size:120%;
 }
 
 

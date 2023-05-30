@@ -100,7 +100,7 @@ let MyAdmin = {
 					<!-- REI3 Professional -->
 					<router-link class="entry clickable separator" tag="div" to="/admin/license">
 						<img src="images/key.png" />
-						<span>{{ capApp.navigationLicense }}</span>
+						<span>{{ licenseTitle }}</span>
 					</router-link>
 					
 					<!-- customizing -->
@@ -128,6 +128,7 @@ let MyAdmin = {
 			v-if="ready"
 			v-show="!showDocs"
 			@hotkeysRegister="hotkeysChild = $event"
+			:concurrentLogins="concurrentLogins"
 			:menuTitle="contentTitle"
 		/>
 		
@@ -144,7 +145,8 @@ let MyAdmin = {
 	},
 	data() {
 		return {
-			hotkeysChild:[], // hotkeys from child components
+			concurrentLogins:0, // count of concurrent logins
+			hotkeysChild:[],    // hotkeys from child components
 			ready:false,
 			showDocs:false
 		};
@@ -153,6 +155,7 @@ let MyAdmin = {
 		if(!this.isAdmin)
 			return this.$router.push('/');
 		
+		this.getConcurrentLogins();
 		this.ready = true;
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
@@ -180,11 +183,15 @@ let MyAdmin = {
 			if(s.$route.path.includes('scheduler'))      return s.capApp.navigationScheduler;
 			return '';
 		},
+		licenseTitle:(s) => !s.activated
+			? s.capApp.navigationLicense
+			:`${s.capApp.navigationLicense} (${s.concurrentLogins} / ${s.license.loginCount})`,
 		
 		// stores
 		activated:(s) => s.$store.getters['local/activated'],
 		capApp:   (s) => s.$store.getters.captions.admin,
-		isAdmin:  (s) => s.$store.getters.isAdmin
+		isAdmin:  (s) => s.$store.getters.isAdmin,
+		license:  (s) => s.$store.getters.license
 	},
 	methods:{
 		// handlers
@@ -200,5 +207,13 @@ let MyAdmin = {
 				}
 			}
 		},
+		
+		// backend calls
+		getConcurrentLogins() {
+			ws.send('login','getConcurrent',{},true).then(
+				res => this.concurrentLogins = res.payload,
+				this.$root.genericError
+			);
+		}
 	}
 };

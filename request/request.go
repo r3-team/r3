@@ -344,6 +344,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return LoginDel_tx(tx, reqJson)
 		case "get":
 			return LoginGet(reqJson)
+		case "getConcurrent":
+			return LoginGetConcurrent()
 		case "getMembers":
 			return LoginGetMembers(reqJson)
 		case "getRecords":
