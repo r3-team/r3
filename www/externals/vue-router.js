@@ -1,6 +1,6 @@
 /*!
-  * vue-router v4.1.6
-  * (c) 2022 Eduardo San Martin Morote
+  * vue-router v4.2.2
+  * (c) 2023 Eduardo San Martin Morote
   * @license MIT
   */
 var VueRouter = (function (exports, vue) {
@@ -103,6 +103,7 @@ var VueRouter = (function (exports, vue) {
    * pointing towards the same {@link RouteRecord} and that all `params`, `query`
    * parameters and `hash` are the same
    *
+   * @param stringifyQuery - A function that takes a query object of type LocationQueryRaw and returns a string representation of it.
    * @param a - first {@link RouteLocation}
    * @param b - second {@link RouteLocation}
    */
@@ -174,6 +175,12 @@ var VueRouter = (function (exports, vue) {
           return from;
       const fromSegments = from.split('/');
       const toSegments = to.split('/');
+      const lastToSegment = toSegments[toSegments.length - 1];
+      // make . and ./ the same (../ === .., ../../ === ../..)
+      // this is the same behavior as new URL()
+      if (lastToSegment === '..' || lastToSegment === '.') {
+          toSegments.push('');
+      }
       let position = fromSegments.length - 1;
       let toPosition;
       let segment;
@@ -360,7 +367,8 @@ var VueRouter = (function (exports, vue) {
   let createBaseLocation = () => location.protocol + '//' + location.host;
   /**
    * Creates a normalized history location from a window.location object
-   * @param location -
+   * @param base - The base path
+   * @param location - The window.location object
    */
   function createCurrentLocation(base, location) {
       const { pathname, search, hash } = location;
@@ -450,7 +458,11 @@ var VueRouter = (function (exports, vue) {
       }
       // set up the listeners and prepare teardown callbacks
       window.addEventListener('popstate', popStateHandler);
-      window.addEventListener('beforeunload', beforeUnloadListener);
+      // TODO: could we use 'pagehide' or 'visibilitychange' instead?
+      // https://developer.chrome.com/blog/page-lifecycle-api/
+      window.addEventListener('beforeunload', beforeUnloadListener, {
+          passive: true,
+      });
       return {
           pauseListeners,
           listen,
@@ -2462,8 +2474,11 @@ var VueRouter = (function (exports, vue) {
   function warnDeprecatedUsage() {
       const instance = vue.getCurrentInstance();
       const parentName = instance.parent && instance.parent.type.name;
+      const parentSubTreeType = instance.parent && instance.parent.subTree && instance.parent.subTree.type;
       if (parentName &&
-          (parentName === 'KeepAlive' || parentName.includes('Transition'))) {
+          (parentName === 'KeepAlive' || parentName.includes('Transition')) &&
+          typeof parentSubTreeType === 'object' &&
+          parentSubTreeType.name === 'RouterView') {
           const comp = parentName === 'KeepAlive' ? 'keep-alive' : 'transition';
           warn(`<router-view> can no longer be used directly inside <transition> or <keep-alive>.\n` +
               `Use slot props instead:\n\n` +
@@ -3170,9 +3185,7 @@ var VueRouter = (function (exports, vue) {
                   !('name' in rawLocation) &&
                   // @ts-expect-error: the type is never
                   Object.keys(rawLocation.params).length) {
-                  warn(`Path "${
-                // @ts-expect-error: the type is never
-                rawLocation.path}" was passed with params but they will be ignored. Use a named route alongside params instead.`);
+                  warn(`Path "${rawLocation.path}" was passed with params but they will be ignored. Use a named route alongside params instead.`);
               }
               matcherLocation = assign({}, rawLocation, {
                   path: parseURL(parseQuery$1, rawLocation.path, currentLocation.path).path,
@@ -3188,7 +3201,7 @@ var VueRouter = (function (exports, vue) {
               }
               // pass encoded values to the matcher, so it can produce encoded path and fullPath
               matcherLocation = assign({}, rawLocation, {
-                  params: encodeParams(rawLocation.params),
+                  params: encodeParams(targetParams),
               });
               // current location params are decoded, we need to encode them in case the
               // matcher merges the params
@@ -3333,8 +3346,8 @@ var VueRouter = (function (exports, vue) {
                           (redirectedFrom._count = redirectedFrom._count
                               ? // @ts-expect-error
                                   redirectedFrom._count + 1
-                              : 1) > 10) {
-                          warn(`Detected an infinite redirection in a navigation guard when going from "${from.fullPath}" to "${toLocation.fullPath}". Aborting to avoid a Stack Overflow. This will break in production if not fixed.`);
+                              : 1) > 30) {
+                          warn(`Detected a possibly infinite redirection in a navigation guard when going from "${from.fullPath}" to "${toLocation.fullPath}". Aborting to avoid a Stack Overflow.\n Are you always returning a new location within a navigation guard? That would lead to this error. Only return when redirecting or aborting, that should fix this. This might break in production if not fixed.`);
                           return Promise.reject(new Error('Infinite redirect in navigation guard'));
                       }
                       return pushWithRedirect(
@@ -3368,6 +3381,13 @@ var VueRouter = (function (exports, vue) {
       function checkCanceledNavigationAndReject(to, from) {
           const error = checkCanceledNavigation(to, from);
           return error ? Promise.reject(error) : Promise.resolve();
+      }
+      function runWithContext(fn) {
+          const app = installedApps.values().next().value;
+          // support Vue < 3.3
+          return app && typeof app.runWithContext === 'function'
+              ? app.runWithContext(fn)
+              : fn();
       }
       // TODO: refactor the whole before guards by internally using router.beforeEach
       function navigate(to, from) {
@@ -3452,8 +3472,9 @@ var VueRouter = (function (exports, vue) {
       function triggerAfterEach(to, from, failure) {
           // navigation is confirmed, call afterGuards
           // TODO: wrap with error handlers
-          for (const guard of afterGuards.list())
-              guard(to, from, failure);
+          for (const guard of afterGuards.list()) {
+              runWithContext(() => guard(to, from, failure));
+          }
       }
       /**
        * - Cleans up any navigation guards
@@ -3711,10 +3732,11 @@ var VueRouter = (function (exports, vue) {
               }
           },
       };
+      // TODO: type this as NavigationGuardReturn or similar instead of any
+      function runGuardQueue(guards) {
+          return guards.reduce((promise, guard) => promise.then(() => runWithContext(guard)), Promise.resolve());
+      }
       return router;
-  }
-  function runGuardQueue(guards) {
-      return guards.reduce((promise, guard) => promise.then(() => guard()), Promise.resolve());
   }
   function extractChangingRecords(to, from) {
       const leavingRecords = [];
@@ -3777,8 +3799,6 @@ var VueRouter = (function (exports, vue) {
   exports.useRoute = useRoute;
   exports.useRouter = useRouter;
   exports.viewDepthKey = viewDepthKey;
-
-  Object.defineProperty(exports, '__esModule', { value: true });
 
   return exports;
 
