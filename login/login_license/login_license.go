@@ -7,23 +7,36 @@ import (
 	"r3/tools"
 )
 
-func GetConcurrentCount(loginIdIgnore int64) (int64, error) {
-	// concurrent count is calculated based on logins in the last 24h
-	var cnt int64
-	err := db.Pool.QueryRow(db.Ctx, `
-		SELECT COUNT(*)
-		FROM instance.login
-		WHERE date_auth_last > $1
-		AND id <> $2
-	`, tools.GetTimeUnix()-86400, loginIdIgnore).Scan(&cnt)
+// returns count of concurrent logins and whether the requested login has recently logged in
+// we check recent login as concurrent limit is always exceeded if admins login afterwards
+// (admins can login even with exceeded limit to fix the issue)
+func CheckConcurrent(loginIdRequested int64) (int64, bool, error) {
 
-	return cnt, err
+	// logins are considered recent if they occurred in the last 24 hours
+	dateStart := tools.GetTimeUnix() - 86400
+
+	var cntConcurrent int64
+	var wasRecent bool
+
+	err := db.Pool.QueryRow(db.Ctx, `
+		SELECT COUNT(*), EXISTS(
+			SELECT id
+			FROM instance.login
+			WHERE id = $1
+			AND   date_auth_last > $2
+		)
+		FROM instance.login
+		WHERE date_auth_last > $3
+	`, loginIdRequested, dateStart, dateStart).Scan(
+		&cntConcurrent, &wasRecent)
+
+	return cntConcurrent, wasRecent, err
 }
 
 func RequestConcurrent(loginId int64, isAdmin bool) error {
 
 	if isAdmin {
-		// admins can always login
+		// admins can always login (necessary to fix issues)
 		return nil
 	}
 	if !config.GetLicenseUsed() {
@@ -35,14 +48,14 @@ func RequestConcurrent(loginId int64, isAdmin bool) error {
 		return handler.CreateErrCode("LIC", handler.ErrCodeLicValidityExpired)
 	}
 
-	// license used and active, check concurrent count
-	cnt, err := GetConcurrentCount(loginId)
+	// license used and active, check concurrent access
+	cnt, wasRecent, err := CheckConcurrent(loginId)
 	if err != nil {
 		return err
 	}
 
-	if cnt >= config.GetLicenseLoginCount() {
-		// concurrent login count at least equal to allowed amount, block login
+	if !wasRecent && cnt >= config.GetLicenseLoginCount() {
+		// login was not recent and concurrent limit has been exceeded, block login
 		return handler.CreateErrCode("LIC", handler.ErrCodeLicLoginsReached)
 	}
 	return nil

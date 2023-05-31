@@ -100,7 +100,8 @@ func LoginGet(reqJson json.RawMessage) (interface{}, error) {
 	return res, err
 }
 func LoginGetConcurrent() (interface{}, error) {
-	return login_license.GetConcurrentCount(0)
+	cnt, _, err := login_license.CheckConcurrent(0)
+	return cnt, err
 }
 func LoginGetMembers(reqJson json.RawMessage) (interface{}, error) {
 
