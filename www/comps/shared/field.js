@@ -6,7 +6,8 @@ export function getFieldIcon(field) {
 		case 'data':
 			return getAttributeIcon(
 				MyStore.getters['schema/attributeIdMap'][field.attributeId],
-				field.outsideIn);
+				field.outsideIn,
+				field.attributeIdNm !== null);
 		break;
 		case 'button':    return 'circle_play.png'; break;
 		case 'calendar':  return 'calendar.png'; break;

@@ -7,6 +7,7 @@ import MyBuilderFormStates    from './builderFormStates.js';
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderFields        from './builderFields.js';
 import MyTabs                 from '../tabs.js';
+import {getFieldHasQuery}     from '../shared/builder.js';
 import {getFieldIcon}         from '../shared/field.js';
 import {
 	MyBuilderColumns,
@@ -21,10 +22,6 @@ import {
 	isAttributeRelationship,
 	isAttributeRelationshipN1
 } from '../shared/attribute.js';
-import {
-	getFieldHasQuery,
-	getItemTitle
-} from '../shared/builder.js';
 import {
 	getDataFields,
 	getFormRoute
@@ -730,7 +727,6 @@ let MyBuilderForm = {
 		getFieldIcon,
 		getFormRoute,
 		getIndexAttributeId,
-		getItemTitle,
 		getJoinsIndexMap,
 		getNilUuid,
 		getQueryTemplate,

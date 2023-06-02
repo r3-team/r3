@@ -359,7 +359,7 @@ let MyBuilderFieldOptions = {
 						<div class="row centered gap">
 							<my-button
 								:active="false"
-								:image="getAttributeIcon(attribute,field.outsideIn)"
+								:image="getAttributeIcon(attribute,field.outsideIn,field.attributeIdNm !== null)"
 								:naked="true"
 								:tight="true"
 							/>

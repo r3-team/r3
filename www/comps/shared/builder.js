@@ -1,8 +1,5 @@
-import {
-	isAttributeRelationship,
-	isAttributeRelationship11
-} from './attribute.js';
-import MyStore from '../../stores/store.js';
+import {isAttributeRelationship} from './attribute.js';
+import MyStore                   from '../../stores/store.js';
 
 export function getFieldHasQuery(field) {
 	return ['calendar','chart','list'].includes(field.content)
@@ -82,18 +79,11 @@ export function getItemTitle(attributeId,index,outsideIn,attributeIdNm) {
 	let atr = MyStore.getters['schema/attributeIdMap'][attributeId];
 	let rel = MyStore.getters['schema/relationIdMap'][atr.relationId];
 	
-	let isRel = isAttributeRelationship(atr.content);
-	
-	if(!isRel)     return `${index} ${rel.name}.${atr.name}`;
-	if(!outsideIn) return `${index} [${atr.content}] ${rel.name}.${atr.name}`;
-	
-	if(typeof attributeIdNm !== 'undefined' && attributeIdNm !== null) {
+	if(isAttributeRelationship(atr.content) && typeof attributeIdNm !== 'undefined' && attributeIdNm !== null) {
 		let atrNm = MyStore.getters['schema/attributeIdMap'][attributeIdNm];
-		return `${index} [n:m] ${rel.name}.${atr.name} -> ${atrNm.name}`;
+		return `${index} ${rel.name}.${atr.name} -> ${atrNm.name}`;
 	}
-	
-	let relCap = isAttributeRelationship11(atr.content) ? '1:1' : '1:n';
-	return `${index} [${relCap}] ${rel.name}.${atr.name}`;
+	return `${index} ${rel.name}.${atr.name}`;
 };
 
 export function getItemTitlePath(attributeId) {

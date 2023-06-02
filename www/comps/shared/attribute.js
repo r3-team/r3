@@ -116,7 +116,7 @@ export function getAttributeValuesFromGetter(getter) {
 	return map;
 };
 
-export function getAttributeIcon(attribute,outsideIn) {
+export function getAttributeIcon(attribute,outsideIn,isNm) {
 	if(isAttributeString(attribute.content)) {
 		switch(attribute.contentUse) {
 			case 'default':  return 'text.png';       break;
@@ -143,8 +143,12 @@ export function getAttributeIcon(attribute,outsideIn) {
 	
 	if(isAttributeRelationship11(attribute.content))
 		return 'link1.png';
-	if(isAttributeRelationshipN1(attribute.content))
+	
+	if(isAttributeRelationshipN1(attribute.content)) {
+		if(isNm) return 'link4.png';
+		
 		return outsideIn ? 'link2.png' : 'link3.png';
+	}
 	
 	return 'noPic.png';
 };
