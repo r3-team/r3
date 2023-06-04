@@ -787,6 +787,10 @@
 					"slider":"value slider",
 					"url":"URL"
 				},
+				"style":{
+					"bold":"bold",
+					"italic":"italic"
+				},
 				"effectField":"Field",
 				"effectTab":"Tab",
 				"ganttStepsDays":"days",
@@ -821,12 +825,14 @@
 			"columnBatchNot":"not batched",
 			"columnBatchHint":"Column is part of batch {CNT}",
 			"columnBatchHintNot":"Column is not batched with others",
+			"columnBatchVertical":"Vertical batch",
 			"columnClipboard":"Clipboard",
 			"columnHeaderData":"Data retrieval",
 			"columnLength":"Length (chars.)",
 			"columnLength0":"no limit",
 			"columnSize":"Size (pixel)",
 			"columnSize0":"automatic",
+			"columnStyles":"Styles",
 			"columnTitle":"Title",
 			"columnWrap":"Text wrap",
 			"copy":"Duplicate form",

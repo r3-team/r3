@@ -787,6 +787,10 @@
 					"slider":"valore a cursore",
 					"url":"URL"
 				},
+				"style":{
+					"bold":"bold",
+					"italic":"italic"
+				},
 				"effectField":"Field",
 				"effectTab":"Tab",
 				"ganttStepsDays":"giorni",
@@ -821,12 +825,14 @@
 			"columnBatchNot":"non raggruppata",
 			"columnBatchHint":"La colonna fa parte del gruppo {CNT}",
 			"columnBatchHintNot":"La colonna non è raggruppata con altre",
+			"columnBatchVertical":"Vertical batch",
 			"columnClipboard":"Clipboard",
 			"columnHeaderData":"Recupero dei dati",
 			"columnLength":"Lunghezza (carat.)",
 			"columnLength0":"senza limite",
 			"columnSize":"Dimensione (pixel)",
 			"columnSize0":"automatico",
+			"columnStyles":"Styles",
 			"columnTitle":"Titolo",
 			"columnWrap":"A capo automatico",
 			"copy":"Duplica modulo",

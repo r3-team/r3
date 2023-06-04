@@ -31,8 +31,9 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 	}
 
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
-		SELECT id, attribute_id, index, batch, basis, length, wrap, display,
-			group_by, aggregator, distincted, sub_query, on_mobile, clipboard
+		SELECT id, attribute_id, index, batch, batch_vertical, basis, length,
+			wrap, display, group_by, aggregator, distincted, sub_query,
+			on_mobile, clipboard, styles
 		FROM app.column
 		WHERE %s_id = $1
 		ORDER BY position ASC
@@ -43,11 +44,15 @@ func Get(entity string, entityId uuid.UUID) ([]types.Column, error) {
 
 	for rows.Next() {
 		var c types.Column
-		if err := rows.Scan(&c.Id, &c.AttributeId, &c.Index, &c.Batch, &c.Basis,
-			&c.Length, &c.Wrap, &c.Display, &c.GroupBy, &c.Aggregator,
-			&c.Distincted, &c.SubQuery, &c.OnMobile, &c.Clipboard); err != nil {
+		if err := rows.Scan(&c.Id, &c.AttributeId, &c.Index, &c.Batch,
+			&c.BatchVertical, &c.Basis, &c.Length, &c.Wrap, &c.Display,
+			&c.GroupBy, &c.Aggregator, &c.Distincted, &c.SubQuery, &c.OnMobile,
+			&c.Clipboard, &c.Styles); err != nil {
 
 			return columns, err
+		}
+		if c.Styles == nil {
+			c.Styles = make([]string, 0)
 		}
 		columns = append(columns, c)
 	}
@@ -111,27 +116,31 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, columns []types.Column
 			if _, err := tx.Exec(db.Ctx, `
 				UPDATE app.column
 				SET attribute_id = $1, index = $2, position = $3, batch = $4,
-					basis = $5, length = $6, wrap = $7, display = $8,
-					group_by = $9, aggregator = $10, distincted = $11,
-					sub_query = $12, on_mobile = $13, clipboard = $14
-				WHERE id = $15
-			`, c.AttributeId, c.Index, position, c.Batch, c.Basis, c.Length,
-				c.Wrap, c.Display, c.GroupBy, c.Aggregator, c.Distincted,
-				c.SubQuery, c.OnMobile, c.Clipboard, c.Id); err != nil {
+					batch_vertical = $5, basis = $6, length = $7, wrap = $8,
+					display = $9, group_by = $10, aggregator = $11,
+					distincted = $12, sub_query = $13, on_mobile = $14,
+					clipboard = $15, styles = $16
+				WHERE id = $17
+			`, c.AttributeId, c.Index, position, c.Batch, c.BatchVertical,
+				c.Basis, c.Length, c.Wrap, c.Display, c.GroupBy, c.Aggregator,
+				c.Distincted, c.SubQuery, c.OnMobile, c.Clipboard, c.Styles,
+				c.Id); err != nil {
 
 				return err
 			}
 		} else {
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 				INSERT INTO app.column (
-					id, %s_id, attribute_id, index, position, batch, basis,
-					length, wrap, display, group_by, aggregator, distincted,
-					on_mobile, sub_query, clipboard
+					id, %s_id, attribute_id, index, position, batch,
+					batch_vertical, basis, length, wrap, display, group_by,
+					aggregator, distincted, on_mobile, sub_query, clipboard,
+					styles
 				)
-				VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
-			`, entity), c.Id, entityId, c.AttributeId, c.Index, position, c.Batch,
-				c.Basis, c.Length, c.Wrap, c.Display, c.GroupBy, c.Aggregator,
-				c.Distincted, c.OnMobile, c.SubQuery, c.Clipboard); err != nil {
+				VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+			`, entity), c.Id, entityId, c.AttributeId, c.Index, position,
+				c.Batch, c.BatchVertical, c.Basis, c.Length, c.Wrap, c.Display,
+				c.GroupBy, c.Aggregator, c.Distincted, c.OnMobile, c.SubQuery,
+				c.Clipboard, c.Styles); err != nil {
 
 				return err
 			}

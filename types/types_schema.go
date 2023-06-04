@@ -418,19 +418,23 @@ type Column struct {
 	Id          uuid.UUID   `json:"id"`
 	AttributeId uuid.UUID   `json:"attributeId"`
 	Index       int         `json:"index"`      // attribute index
-	Batch       pgtype.Int4 `json:"batch"`      // index of column batch (multiple columns as one)
-	Basis       int         `json:"basis"`      // size basis (usually width)
-	Length      int         `json:"length"`     // text length limit (in characters)
-	Wrap        bool        `json:"wrap"`       // text wrap
-	Display     string      `json:"display"`    // how to display value (text, date, color, etc.)
 	GroupBy     bool        `json:"groupBy"`    // group by column attribute value?
 	Aggregator  pgtype.Text `json:"aggregator"` // aggregator (SUM, COUNT, etc.)
 	Distincted  bool        `json:"distincted"` // attribute values are distinct?
 	SubQuery    bool        `json:"subQuery"`   // column uses sub query?
-	OnMobile    bool        `json:"onMobile"`   // display this column on mobile?
-	Clipboard   bool        `json:"clipboard"`  // show copy-to-clipboard action?
 	Query       Query       `json:"query"`      // sub query
-	Captions    CaptionMap  `json:"captions"`
+	Captions    CaptionMap  `json:"captions"`   // column titles
+
+	// presentation
+	Basis         int         `json:"basis"`         // size basis (usually width)
+	Batch         pgtype.Int4 `json:"batch"`         // index of column batch (multiple columns as one)
+	BatchVertical bool        `json:"batchVertical"` // batch uses vertical layout for columns
+	Clipboard     bool        `json:"clipboard"`     // show copy-to-clipboard action?
+	Display       string      `json:"display"`       // how to display value (text, date, color, etc.)
+	Length        int         `json:"length"`        // text length limit (in characters)
+	OnMobile      bool        `json:"onMobile"`      // display this column on mobile?
+	Styles        []string    `json:"styles"`        // applied styles: bold, italic
+	Wrap          bool        `json:"wrap"`          // text wrap
 }
 type Role struct {
 	Id                uuid.UUID         `json:"id"`

@@ -787,6 +787,10 @@
 					"slider":"Werteschieber",
 					"url":"URL"
 				},
+				"style":{
+					"bold":"fett",
+					"italic":"kursiv"
+				},
 				"effectField":"Feld",
 				"effectTab":"Tab",
 				"ganttStepsDays":"Tage",
@@ -821,12 +825,14 @@
 			"columnBatchNot":"nicht gestapelt",
 			"columnBatchHint":"Spalte ist Teil von Stapel {CNT}",
 			"columnBatchHintNot":"Spalte ist nicht gestapelt",
+			"columnBatchVertical":"Vertikaler Stapel",
 			"columnClipboard":"Zwischenablage",
 			"columnHeaderData":"Datenabfrage",
 			"columnLength":"Länge (Charakt.)",
 			"columnLength0":"kein Limit",
 			"columnSize":"Größe (Pixel)",
 			"columnSize0":"automatisch",
+			"columnStyles":"Style",
 			"columnTitle":"Title",
 			"columnWrap":"Textumbruch",
 			"copy":"Formular duplizieren",

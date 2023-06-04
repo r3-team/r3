@@ -243,6 +243,13 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			-- iframes
 			ALTER TYPE app.attribute_content_use ADD VALUE 'iframe';
+			
+			-- more list column options
+			CREATE TYPE app.column_style AS ENUM('bold','italic');
+			ALTER TABLE app.column ADD COLUMN styles app.column_style[];
+			
+			ALTER TABLE app.column ADD COLUMN batch_vertical BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.column ALTER COLUMN batch_vertical DROP DEFAULT;
 		`)
 		return "3.4", err
 	},

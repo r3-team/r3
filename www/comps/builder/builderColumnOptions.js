@@ -71,6 +71,25 @@ let MyBuilderColumnOptions = {
 					</td>
 				</tr>
 				<tr>
+					<td>{{ capApp.columnStyles }}</td>
+					<td>
+						<div class="row gap">
+							<my-bool
+								@update:modelValue="setStyle('bold',$event)"
+								:caption0="capApp.option.style.bold"
+								:caption1="capApp.option.style.bold"
+								:modelValue="column.styles.includes('bold')"
+							/>
+							<my-bool
+								@update:modelValue="setStyle('italic',$event)"
+								:caption0="capApp.option.style.italic"
+								:caption1="capApp.option.style.italic"
+								:modelValue="column.styles.includes('italic')"
+							/>
+						</div>
+					</td>
+				</tr>
+				<tr>
 					<td>{{ capApp.columnWrap }}</td>
 					<td>
 						<my-bool
@@ -89,6 +108,23 @@ let MyBuilderColumnOptions = {
 					</td>
 				</tr>
 				<tr>
+					<td>{{ capApp.display }}</td>
+					<td>
+						<select
+							@input="set('display',$event.target.value)"
+							:value="column.display"
+						>
+							<option value="default">{{ capApp.option.display.default }}</option>
+							<option v-if="isString" value="email"   >{{ capApp.option.display.email }}</option>
+							<option v-if="isString" value="password">{{ capApp.option.display.password }}</option>
+							<option v-if="isString" value="phone"   >{{ capApp.option.display.phone }}</option>
+							<option v-if="isString" value="url"     >{{ capApp.option.display.url }}</option>
+							<option v-if="isFiles"  value="gallery" >{{ capApp.option.display.gallery }}</option>
+							<option value="hidden">{{ capApp.option.display.hidden }}</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
 					<td>{{ capApp.columnBatch }}</td>
 					<td>
 						<input
@@ -104,21 +140,13 @@ let MyBuilderColumnOptions = {
 						/>
 					</td>
 				</tr>
-				<tr>
-					<td>{{ capApp.display }}</td>
+				<tr v-if="column.batch !== null">
+					<td>{{ capApp.columnBatchVertical }}</td>
 					<td>
-						<select
-							@input="set('display',$event.target.value)"
-							:value="column.display"
-						>
-							<option value="default">{{ capApp.option.display.default }}</option>
-							<option v-if="isString"  value="email"   >{{ capApp.option.display.email }}</option>
-							<option v-if="isString"  value="password">{{ capApp.option.display.password }}</option>
-							<option v-if="isString"  value="phone"   >{{ capApp.option.display.phone }}</option>
-							<option v-if="isString"  value="url"     >{{ capApp.option.display.url }}</option>
-							<option v-if="isFiles"   value="gallery" >{{ capApp.option.display.gallery }}</option>
-							<option value="hidden">{{ capApp.option.display.hidden }}</option>
-						</select>
+						<my-bool
+							@update:modelValue="set('batchVertical',$event)"
+							:modelValue="column.batchVertical"
+						/>
 					</td>
 				</tr>
 			</template>
@@ -231,6 +259,15 @@ let MyBuilderColumnOptions = {
 			}
 			this.set('index',parseInt(v[0]));
 			this.set('attributeId',v[1]);
+		},
+		setStyle(name,val) {
+			let styles = JSON.parse(JSON.stringify(this.column.styles));
+			let pos    = styles.indexOf(name);
+			
+			if(pos === -1 && val)  styles.push(name);
+			if(pos !== -1 && !val) styles.splice(pos,1);
+			
+			this.set('styles',styles);
 		}
 	}
 };

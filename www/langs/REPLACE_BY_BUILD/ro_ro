@@ -787,6 +787,10 @@
 					"slider":"valoarea cursorului",
 					"url":"URL"
 				},
+				"style":{
+					"bold":"bold",
+					"italic":"italic"
+				},
 				"effectField":"Field",
 				"effectTab":"Tab",
 				"ganttStepsDays":"zile",
@@ -821,12 +825,14 @@
 			"columnBatchNot":"negrupate",
 			"columnBatchHint":"Coloana este parte a lotului {CNT}",
 			"columnBatchHintNot":"Coloana nu este grupată cu altele",
+			"columnBatchVertical":"Vertical batch",
 			"columnClipboard":"Clipboard",
 			"columnHeaderData":"Preluarea datelor",
 			"columnLength":"Lungime (caractere)",
 			"columnLength0":"fără limită",
 			"columnSize":"Mărime (pixel)",
 			"columnSize0":"automatic",
+			"columnStyles":"Styles",
 			"columnTitle":"Titlu",
 			"columnWrap":"Text continuu",
 			"copy":"Copie formular",

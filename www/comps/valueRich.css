@@ -1,11 +1,13 @@
 .value-rich{
-	margin-right:6px;
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
 	
 	/* auto cutting text */
 	overflow:hidden;
+}
+.value-rich.bold{
+	font-weight:bold;
 }
 .value-rich.color{
 	width:40px;
@@ -15,9 +17,11 @@
 }
 .value-rich.files{
 	max-width:700px;
-	margin-right:0px;
 	display:flex;
 	flex-flow:row wrap;
+}
+.value-rich.italic{
+	font-style:italic;
 }
 .value-rich .gallery-item{
 	object-fit:cover;

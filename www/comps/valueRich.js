@@ -21,7 +21,7 @@ let MyValueRich = {
 		@focus="$emit('focus')"
 		@click="$emit('trigger')"
 		@keyup.space.enter="$emit('trigger')"
-		:class="{ color:isColor, files:isFiles, wrap:wrap }"
+		:class="{ bold:bold, color:isColor, files:isFiles, italic:italic, wrap:wrap }"
 		:style="style"
 	>
 		<!-- copy to clipboard action -->
@@ -81,8 +81,10 @@ let MyValueRich = {
 	props:{
 		attributeId:{ type:String,  required:true },
 		basis:      { type:Number,  required:false, default:0 },         // size basis (usually column width)
+		bold:       { type:Boolean, required:false, default:false },
 		clipboard:  { type:Boolean, required:false, default:false },     // copy-to-clipboard action
 		display:    { type:String,  required:false, default:'default' }, // variant (url, gallery, password ...)
+		italic:     { type:Boolean, required:false, default:false },
 		length:     { type:Number,  required:false, default:0 },         // string length limit
 		value:      { required:true },
 		wrap:       { type:Boolean, required:false, default:false }      // wrap string value

@@ -32,6 +32,7 @@
 	line-height:30px;
 	display:flex;
 	flex-flow:row nowrap;
+	gap:6px;
 	box-sizing:border-box;
 	border-bottom:1px solid var(--color-border);
 }
@@ -132,6 +133,7 @@
 	line-height:24px;
 	display:flex;
 	flex-flow:row nowrap;
+	gap:6px;
 	align-items:center;
 	overflow:hidden;
 	position:relative;

@@ -103,8 +103,10 @@ let MyList = {
 									:attribute-id="columns[ci].attributeId"
 									:class="{ clickable:inputAsCategory && !inputIsReadonly }"
 									:basis="b.columnIndexes.length === 1 ? columns[ci].basis : 0"
+									:bold="columns[ci].styles.includes('bold')"
 									:clipboard="columns[ci].clipboard"
 									:display="columns[ci].display"
+									:italic="columns[ci].styles.includes('italic')"
 									:key="ci"
 									:length="columns[ci].length"
 									:value="r.values[ci]"
@@ -469,7 +471,7 @@ let MyList = {
 							<!-- row values per column batch -->
 							<td v-for="b in columnBatches" :style="b.style">
 								<div class="batch"
-									:class="{ colored:b.columnIndexColor !== -1 }"
+									:class="{ colored:b.columnIndexColor !== -1, vertical:b.vertical }"
 									:style="b.columnIndexColor === -1 ? '' : displayColorColumn(r.values[b.columnIndexColor])"
 								>
 									<my-value-rich class="context-list-table"
@@ -477,8 +479,10 @@ let MyList = {
 										@clipboard="$emit('clipboard')"
 										:attributeId="columns[ind].attributeId"
 										:basis="b.columnIndexes.length === 1 ? columns[ind].basis : 0"
+										:bold="columns[ind].styles.includes('bold')"
 										:clipboard="columns[ind].clipboard"
 										:display="columns[ind].display"
+										:italic="columns[ind].styles.includes('italic')"
 										:key="ind"
 										:length="columns[ind].length"
 										:value="r.values[ind]"
@@ -597,14 +601,16 @@ let MyList = {
 						<tr v-for="b in columnBatches">
 							<td>{{ b.caption }}</td>
 							<td>
-								<div class="batch">
+								<div class="batch" :class="{ vertical:b.vertical }">
 									<my-value-rich class="context-list-cards"
 										v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null || columns[v].display === 'gallery')"
 										@clipboard="$emit('clipboard')"
 										:attributeId="columns[ind].attributeId"
 										:basis="b.columnIndexes.length === 1 ? columns[ind].basis : 0"
+										:bold="columns[ind].styles.includes('bold')"
 										:clipboard="columns[ind].clipboard"
 										:display="columns[ind].display"
+										:italic="columns[ind].styles.includes('italic')"
 										:key="ind"
 										:length="columns[ind].length"
 										:value="r.values[ind]"
@@ -744,6 +750,7 @@ let MyList = {
 					columnIndexes:!hidden ? [index] : [],
 					columnIndexColor:!isColor ? -1 : index,
 					columnIndexSortBy:noSort ? -1 : index,
+					vertical:column.batchVertical,
 					style:'',
 					width:column.basis
 				});

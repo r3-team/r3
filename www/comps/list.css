@@ -181,10 +181,18 @@
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
+	gap:6px;
 	
 	/* auto cutting text */
 	width:inherit; /* inherit from table cell */
 	overflow:hidden;
+}
+.list .layoutTable td .batch.vertical{
+	margin:5px 0px;
+	flex-flow:column nowrap;
+	justify-content:center;
+	align-items:flex-start;
+	gap:4px;
 }
 .list .layoutTable .sub-actions{
 	display:flex;
@@ -290,10 +298,18 @@
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:flex-end;
+	gap:6px;
 	
 	/* auto cutting text */
 	max-width:250px;
 	overflow:hidden;
+}
+.list .layoutCards .card .batch.vertical{
+	margin:5px 0px;
+	flex-flow:column nowrap;
+	justify-content:center;
+	align-items:flex-start;
+	gap:4px;
 }
 
 
@@ -315,6 +331,7 @@
 	display:flex;
 	flex-flow:row wrap;
 	align-items:center;
+	gap:6px;
 }
 .list-input-row-items.nowrap{
 	flex-wrap:nowrap;
