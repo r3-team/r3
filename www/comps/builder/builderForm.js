@@ -408,35 +408,13 @@ let MyBuilderForm = {
 						<br />
 						<h2>{{ capApp.sidebarFieldColumns }}</h2>
 						
-						<div class="columns">
-							<div class="side">
-								<h3>{{ capGen.available }}</h3>
-								<my-builder-column-templates class="shade"
-									:builderLanguage="builderLanguage"
-									:columns="fieldShow.columns"
-									:groupName="fieldIdShow+'_columns'"
-									:joins="fieldShow.query.joins"
-									:moduleId="module.id"
-								/>
-							</div>
-							
-							<div class="side">
-								<!-- columns for query fields -->
-								<h3>{{ capGen.displayed }}</h3>
-								<my-builder-columns class="shade"
-									@columns-set="fieldPropertySet('columns',$event)"
-									@column-id-show="setFieldShow(fieldIdShow,$event,'content')"
-									:builderLanguage="builderLanguage"
-									:columnIdShow="columnIdShow"
-									:columns="fieldShow.columns"
-									:groupName="fieldIdShow+'_columns'"
-									:hasCaptions="fieldShow.content === 'list'"
-									:joins="fieldShow.query.joins"
-									:isTemplate="false"
-									:moduleId="module.id"
-									:showOptions="false"
-								/>
-							</div>
+						<div class="columns shade">
+							<my-builder-column-templates
+								@column-add="fieldShow.columns.push($event)"
+								:columns="fieldShow.columns"
+								:groupName="'batches_' + fieldIdShow+'_columns'"
+								:joins="fieldShow.query.joins"
+							/>
 						</div>
 						
 						<!-- column settings -->

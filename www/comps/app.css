@@ -69,6 +69,7 @@
 	--color-form-builder-actions:hsl(196deg 45% 86%);
 	--color-form-builder-actions-bg:hsl(200deg 30% 94%);
 	--color-form-builder-columns:hsl(226deg 25% 77%);
+	--color-form-builder-column-batch:hsl(199deg 28% 79%);
 	--color-form-builder-container:hsl(99deg 47% 83%);
 	--color-form-builder-selected:hsl(59deg 100% 50%);
 	--color-form-builder-tabs:hsl(135deg 45% 78%);
@@ -209,12 +210,12 @@ body                                         { --depth:6; }
 .admin-repo .repo-module .part.right         { --depth:6; }
 .builder .filter .filter-side>.subQuery      { --depth:5; }
 .builder .lookup                             { --depth:1; }
+.builder-column-batches                      { --depth:1; }
 .builder-icon-input .iconLine                { --depth:0; }
 .builder-icon-input .iconLine.disabled       { --depth:5; }
 .builder-form-state                          { --depth:5; }
 .builder-form-state-effect                   { --depth:7; }
 .builder-field                               { --depth:7; }
-.builder-field .builder-columns              { --depth:1; }
 .builder-field .fields-nested                { --depth:1; }
 .builder-field-button                        { --depth:7; }
 .builder-function .entity                    { --depth:5; }
@@ -1226,6 +1227,7 @@ table td.maximum{
 	--color-form-builder-actions:hsl(195,17%,29%,1.00);
 	--color-form-builder-actions-bg:hsl(195deg 3% 25%);
 	--color-form-builder-columns:hsl(176deg 9% 32%);
+	--color-form-builder-column-batch:hsl(176deg 2% 32%);
 	--color-form-builder-container:hsl(125deg 17% 31%);
 	--color-form-builder-selected:hsl(59deg 72% 44%);
 	--color-form-builder-tabs:hsl(104deg 15% 32%);

@@ -39,22 +39,6 @@ let MyBuilderColumnOptions = {
 					</td>
 				</tr>
 				<tr>
-					<td>{{ capApp.columnSize }}</td>
-					<td>
-						<input
-							v-if="column.basis !== 0"
-							@change="setInt('basis',$event.target.value,false)"
-							:value="column.basis"
-						/>
-						<my-button
-							v-else
-							@trigger="setInt('basis',25,false)"
-							:caption="capApp.columnSize0"
-							:naked="true"
-						/>
-					</td>
-				</tr>
-				<tr>
 					<td>{{ capApp.columnLength }}</td>
 					<td>
 						<input
@@ -122,31 +106,6 @@ let MyBuilderColumnOptions = {
 							<option v-if="isFiles"  value="gallery" >{{ capApp.option.display.gallery }}</option>
 							<option value="hidden">{{ capApp.option.display.hidden }}</option>
 						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.columnBatch }}</td>
-					<td>
-						<input
-							v-if="column.batch !== null"
-							@change="setInt('batch',$event.target.value,true)"
-							:value="column.batch"
-						/>
-						<my-button
-							v-else
-							@trigger="setInt('batch',1,true)"
-							:caption="capApp.columnBatchNot"
-							:naked="true"
-						/>
-					</td>
-				</tr>
-				<tr v-if="column.batch !== null">
-					<td>{{ capApp.columnBatchVertical }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="set('batchVertical',$event)"
-							:modelValue="column.batchVertical"
-						/>
 					</td>
 				</tr>
 			</template>

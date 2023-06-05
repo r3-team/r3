@@ -399,22 +399,18 @@ let MyBuilderApi = {
 							:builderLanguage="builderLanguage"
 							:columnIdShow="columnIdShow"
 							:columns="columns"
+							:hasBatches="false"
 							:hasCaptions="true"
-							:joins="joins"
-							:isTemplate="false"
-							:moduleId="module.id"
-							:showOptions="false"
 						/>
 					</div>
 					
 					<div class="builder-api-columns-available">
 						<h2>{{ capApp.columnsAvailable }}</h2>
 						<div class="builder-api-column-templates">
-							<my-builder-column-templates groupName="columns"
-								:builderLanguage="builderLanguage"
+							<my-builder-column-templates groupName="batches_columns"
+								@column-add="columns.push($event)"
 								:columns="columns"
 								:joins="joins"
-								:moduleId="module.id"
 							/>
 						</div>
 					</div>

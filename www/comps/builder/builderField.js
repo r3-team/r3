@@ -209,10 +209,6 @@ let MyBuilderField = {
 			:columnIdShow="columnIdShow"
 			:groupName="field.id+'_columns'"
 			:hasCaptions="isList"
-			:joins="field.query.joins"
-			:isTemplate="false"
-			:moduleId="moduleId"
-			:showOptions="true"
 		/>
 		
 		<!-- nested fields in container -->
