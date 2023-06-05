@@ -13,6 +13,9 @@ export function getColumnTitle(c,langOverwrite) {
 	if(typeof c.captions.columnTitle[lang] !== 'undefined')
 		return c.captions.columnTitle[lang];
 	
+	if(c.subQuery)
+		return 'SubQuery';
+	
 	// 2nd preference: dedicated attribute title or attribute name
 	if(c.attributeId !== null) {
 		let a = MyStore.getters['schema/attributeIdMap'][c.attributeId];

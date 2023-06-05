@@ -158,7 +158,6 @@
 .list .layoutTable td{
 	padding:0px;
 	border-bottom:1px solid var(--color-border);
-	border-right:1px solid var(--color-border);
 }
 .list .layoutTable td:last-child{
 	border-right:none;
@@ -178,6 +177,7 @@
 .list .layoutTable td .batch{
 	min-height:100%; /* relevant for color inputs */
 	padding:0px 10px;
+	margin:5px 0px;
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;

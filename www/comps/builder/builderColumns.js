@@ -40,13 +40,6 @@ export let MyBuilderColumns = {
 						:src="batch.columns[0].batchVertical ? 'images/flexColumn.png' : 'images/flexRow.png'"
 						:title="capApp.columnBatchDir"
 					/>
-					<div class="clickable"
-						@click="batch.columns[0].basis = toggleSize(batch.columns[0].basis,25)"
-						@click.prevent.right="batch.columns[0].basis = toggleSize(batch.columns[0].basis,-25)"
-						:title="capApp.columnSize"
-					>
-						<span>{{ getFlexBasis(batch.columns[0].basis) }}</span>
-					</div>
 					<img class="icon clickable" src="images/delete.png"
 						@click="batchRemove(batchIndex)"
 						:title="capGen.button.delete"
@@ -80,11 +73,20 @@ export let MyBuilderColumns = {
 									{{ getItemTitleColumn(column,false) }}
 								</div>
 								
-								<img class="action end clickable" src="images/columnOff.png"
-									v-if="batch.columns.length !== 1"
-									@click="columnSetBy(column.id,'batch',null)"
-									:title="capApp.columnBatchOff"
-								/>
+								<div class="row centered gap">
+									<div class="clickable"
+										@click="columnSetBy(column.id,'basis',toggleSize(column.basis,25))"
+										@click.prevent.right="columnSetBy(column.id,'basis',toggleSize(column.basis,-25))"
+										:title="capApp.columnSize"
+									>
+										<span>{{ getFlexBasis(column.basis) }}</span>
+									</div>
+									<img class="action end clickable" src="images/columnOff.png"
+										v-if="batch.columns.length !== 1"
+										@click="columnSetBy(column.id,'batch',null)"
+										:title="capApp.columnBatchOff"
+									/>
+								</div>
 							</div>
 						</div>
 					</template>

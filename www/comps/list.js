@@ -90,10 +90,7 @@ let MyList = {
 					</td>
 					
 					<!-- values -->
-					<td
-						v-for="(b,bi) in columnBatches"
-						:style="b.style"
-					>
+					<td v-for="(b,bi) in columnBatches" :style="b.style">
 						<div class="list-input-row-items">
 							<template v-for="(ci,cii) in b.columnIndexes">
 								<my-value-rich class="context-list-input"
@@ -102,7 +99,7 @@ let MyList = {
 									@trigger="inputTriggerRow(r)"
 									:attribute-id="columns[ci].attributeId"
 									:class="{ clickable:inputAsCategory && !inputIsReadonly }"
-									:basis="b.columnIndexes.length === 1 ? columns[ci].basis : 0"
+									:basis="columns[ci].basis"
 									:bold="columns[ci].styles.includes('bold')"
 									:clipboard="columns[ci].clipboard"
 									:display="columns[ci].display"
@@ -381,7 +378,7 @@ let MyList = {
 									:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
 								/>
 							</th>
-							<th v-for="(b,i) in columnBatches" :style="b.style">
+							<th v-for="(b,i) in columnBatches">
 								<my-list-column-batch
 									@close="columnBatchIndexOption = -1"
 									@del-aggregator="setAggregators(i,null)"
@@ -474,11 +471,11 @@ let MyList = {
 									:class="{ colored:b.columnIndexColor !== -1, vertical:b.vertical }"
 									:style="b.columnIndexColor === -1 ? '' : displayColorColumn(r.values[b.columnIndexColor])"
 								>
-									<my-value-rich class="context-list-table"
+									<my-value-rich
 										v-for="ind in b.columnIndexes.filter(v => v !== b.columnIndexColor && r.values[v] !== null)"
 										@clipboard="$emit('clipboard')"
 										:attributeId="columns[ind].attributeId"
-										:basis="b.columnIndexes.length === 1 ? columns[ind].basis : 0"
+										:basis="columns[ind].basis"
 										:bold="columns[ind].styles.includes('bold')"
 										:clipboard="columns[ind].clipboard"
 										:display="columns[ind].display"
@@ -602,11 +599,11 @@ let MyList = {
 							<td>{{ b.caption }}</td>
 							<td>
 								<div class="batch" :class="{ vertical:b.vertical }">
-									<my-value-rich class="context-list-cards"
+									<my-value-rich
 										v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null || columns[v].display === 'gallery')"
 										@clipboard="$emit('clipboard')"
 										:attributeId="columns[ind].attributeId"
-										:basis="b.columnIndexes.length === 1 ? columns[ind].basis : 0"
+										:basis="columns[ind].basis"
 										:bold="columns[ind].styles.includes('bold')"
 										:clipboard="columns[ind].clipboard"
 										:display="columns[ind].display"
@@ -733,10 +730,15 @@ let MyList = {
 						batches[i].columnIndexes.push(index);
 						batches[i].columnIndexSortBy = batches[i].columnIndexSortBy !== -1 || noSort
 							? batches[i].columnIndexSortBy : index;
-						batches[i].width += column.basis;
 						
 						if(isColor)
 							batches[i].columnIndexColor = index;
+						
+						if(!batches[i].vertical)
+							batches[i].basis += column.basis;
+						
+						if(batches[i].vertical && column.basis > batches[i].basis)
+							batches[i].basis = column.basis;
 						
 						return;
 					}
@@ -745,33 +747,29 @@ let MyList = {
 				// create new column batch with itself as first column
 				// create even if first column is hidden as other columns in same batch might not be
 				batches.push({
+					basis:column.basis,
 					batch:column.batch,
 					caption:s.getColumnTitle(column),
 					columnIndexes:!hidden ? [index] : [],
 					columnIndexColor:!isColor ? -1 : index,
 					columnIndexSortBy:noSort ? -1 : index,
-					vertical:column.batchVertical,
 					style:'',
-					width:column.basis
+					vertical:column.batchVertical
 				});
 			};
 			for(let i = 0, j = s.columns.length; i < j; i++) {
 				addColumn(s.columns[i],i);
 			}
 			
-			// finalize batches
+			// batches with no columns are removed
 			for(let i = 0, j = batches.length; i < j; i++) {
-				
-				// remove batches that have no columns
 				if(batches[i].columnIndexes.length === 0) {
 					batches.splice(i,1);
 					i--; j--;
 					continue;
 				}
-				
-				// finalize style
-				if(batches[i].width !== 0)
-					batches[i].style = `max-width:${batches[i].width}px;`;
+				if(batches[i].basis !== 0)
+					batches[i].style = `max-width:${batches[i].basis}px`;
 			}
 			return batches;
 		},
