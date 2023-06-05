@@ -36,6 +36,7 @@ export let MyBuilderColumns = {
 						:modelValue="batch.columns[0].captions.columnTitle"
 					/>
 					<img class="icon clickable"
+						v-if="hasStyling"
 						@click="batch.columns[0].batchVertical = !batch.columns[0].batchVertical"
 						:src="batch.columns[0].batchVertical ? 'images/flexColumn.png' : 'images/flexRow.png'"
 						:title="capApp.columnBatchDir"
@@ -101,7 +102,8 @@ export let MyBuilderColumns = {
 		firstBatchTitle:{ type:String,  required:false, default:'' },
 		groupName:      { type:String,  required:true },
 		hasBatches:     { type:Boolean, required:false, default:true },
-		hasCaptions:    { type:Boolean, required:true }
+		hasCaptions:    { type:Boolean, required:true },
+		hasStyling:     { type:Boolean, required:false, default:true } // display/formatting options
 	},
 	emits:['column-id-show','columns-set'],
 	computed:{

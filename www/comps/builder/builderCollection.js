@@ -108,6 +108,7 @@ let MyBuilderCollection = {
 							:columns="columns"
 							:hasBatches="false"
 							:hasCaptions="true"
+							:hasStyling="false"
 						/>
 					</div>
 					

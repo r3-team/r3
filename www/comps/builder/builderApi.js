@@ -401,6 +401,7 @@ let MyBuilderApi = {
 							:columns="columns"
 							:hasBatches="false"
 							:hasCaptions="true"
+							:hasStyling="false"
 						/>
 					</div>
 					

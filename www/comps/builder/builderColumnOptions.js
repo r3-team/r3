@@ -74,6 +74,22 @@ let MyBuilderColumnOptions = {
 					</td>
 				</tr>
 				<tr>
+					<td>{{ capApp.columnSize }}</td>
+					<td>
+						<input
+							v-if="column.basis !== 0"
+							@change="setInt('basis',$event.target.value,false)"
+							:value="column.basis"
+						/>
+						<my-button
+							v-else
+							@trigger="setInt('basis',25,false)"
+							:caption="capApp.columnSize0"
+							:naked="true"
+						/>
+					</td>
+				</tr>
+				<tr>
 					<td>{{ capApp.columnWrap }}</td>
 					<td>
 						<my-bool
