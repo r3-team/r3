@@ -207,6 +207,7 @@ let MyBuilderField = {
 			:builderLanguage="builderLanguage"
 			:columns="field.columns"
 			:columnIdShow="columnIdShow"
+			:firstBatchTitle="isGantt ? capApp.ganttBatch : ''"
 			:groupName="field.id+'_columns'"
 			:hasCaptions="isList"
 		/>
@@ -374,6 +375,7 @@ let MyBuilderField = {
 		isChart:       (s) => s.field.content === 'chart',
 		isContainer:   (s) => s.field.content === 'container',
 		isData:        (s) => s.field.content === 'data',
+		isGantt:       (s) => s.isCalendar && s.field.gantt,
 		isHeader:      (s) => s.field.content === 'header',
 		isList:        (s) => s.field.content === 'list',
 		isTabs:        (s) => s.field.content === 'tabs',

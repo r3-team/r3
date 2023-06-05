@@ -450,11 +450,19 @@ let MyGantt = {
 		//  group 0 label expression indexes define, which expression index(es) hold grouping label value(s)
 		group0LabelExpressionIndexes:(s) => {
 			let out = [];
-			
-			// get columns with batch 1 (fixed definition)
+			let batchIndexUsed;
 			for(let i = 0, j = s.columns.length; i < j; i++) {
-				if(s.columns[i].batch === 1)
+				if(i === 0) {
+					// get all columns from first used batch index
+					batchIndexUsed = s.columns[i].batch;
 					out.push(i);
+					
+					// if no batch index is used, only use first column
+					if(batchIndexUsed === null) break;
+					
+				} else if(s.columns[i].batch === batchIndexUsed) {
+					out.push(i);
+				}
 			}
 			return out;
 		},
