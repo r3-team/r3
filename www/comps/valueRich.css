@@ -48,7 +48,8 @@
 
 /* list input context */
 .value-rich.context-list-input .gallery-item{
-	max-height:32px; /* input row can never show more */
+	min-width:32px;
+	max-height:32px;
 	margin:1px 5px 1px 0px;
 }
 
