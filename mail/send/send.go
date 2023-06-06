@@ -2,6 +2,7 @@ package send
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"net/smtp"
 	"r3/cache"
@@ -193,12 +194,44 @@ func do(m types.Mail) error {
 		len(e.Attachments)))
 
 	// send mail with SMTP
-	auth := smtp.PlainAuth("", ma.Username, ma.Password, ma.HostName)
+	tlsConfig := tls.Config{ServerName: ma.HostName}
+	var auth smtp.Auth
 
-	if ma.StartTls {
-		return e.Send(fmt.Sprintf("%s:%d", ma.HostName, ma.HostPort), auth)
+	// temporary hotfix for O365 legacy login auth
+	if strings.ToLower(ma.HostName) == "smtp.office365.com" {
+		auth = o365LoginAuth(ma.Username, ma.Password)
+	} else {
+		auth = smtp.PlainAuth("", ma.Username, ma.Password, ma.HostName)
 	}
 
-	return e.SendWithTLS(fmt.Sprintf("%s:%d", ma.HostName, ma.HostPort), auth,
-		&tls.Config{ServerName: ma.HostName})
+	if ma.StartTls {
+		return e.SendWithStartTLS(fmt.Sprintf("%s:%d", ma.HostName, ma.HostPort), auth, &tlsConfig)
+	}
+	return e.SendWithTLS(fmt.Sprintf("%s:%d", ma.HostName, ma.HostPort), auth, &tlsConfig)
+}
+
+// legacy O365 SMTP login auth
+type loginAuthSimple struct {
+	username string
+	password string
+}
+
+func o365LoginAuth(username, password string) smtp.Auth {
+	return &loginAuthSimple{username, password}
+}
+func (a *loginAuthSimple) Start(server *smtp.ServerInfo) (string, []byte, error) {
+	return "LOGIN", []byte{}, nil
+}
+func (a *loginAuthSimple) Next(fromServer []byte, more bool) ([]byte, error) {
+	if more {
+		switch string(fromServer) {
+		case "Username:":
+			return []byte(a.username), nil
+		case "Password:":
+			return []byte(a.password), nil
+		default:
+			return nil, errors.New("Unkown fromServer")
+		}
+	}
+	return nil, nil
 }
