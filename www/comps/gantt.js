@@ -137,7 +137,7 @@ let MyGanttLineRecord = {
 		// actions
 		clickRecord(middleClick) {
 			if(this.rowSelect)
-				this.$emit('record-selected',this.recordId,[],middleClick);
+				this.$emit('record-selected',this.recordId,middleClick);
 		}
 	}
 };
@@ -193,8 +193,8 @@ let MyGantt = {
 			<div class="area nowrap">
 				<my-button image="new.png"
 					v-if="hasCreate"
-					@trigger="$emit('open-form',0,[],false)"
-					@trigger-middle="$emit('open-form',0,[],true)"
+					@trigger="$emit('open-form',[],[],false)"
+					@trigger-middle="$emit('open-form',[],[],true)"
 					:caption="!isMobile ? capGen.button.new : ''"
 					:captionTitle="capGen.button.newHint"
 				/>
@@ -332,7 +332,7 @@ let MyGantt = {
 				<div class="gantt-group" v-for="(g,i) in groups">
 					<my-gantt-line
 						v-for="(l,li) in g.lines"
-						@record-selected="(...args) => $emit('record-selected',...args)"
+						@record-selected="(...args) => $emit('open-form',[args[0]],[],args[1])"
 						:class="{ 'show-line':li === g.lines.length-1 }"
 						:columns="columns"
 						:date0-range="date0"
@@ -375,7 +375,7 @@ let MyGantt = {
 		stepTypeToggle:  { type:Boolean, required:true },
 		usesPageHistory: { type:Boolean, required:true }
 	},
-	emits:['open-form','record-count-change','record-selected','set-args','set-collection-indexes'],
+	emits:['open-form','record-count-change','set-args','set-collection-indexes'],
 	data() {
 		return {
 			choiceId:null,
@@ -665,7 +665,7 @@ let MyGantt = {
 				`${this.attributeIdDate0}_${this.unixTimeRangeStart}`,
 				`${this.attributeIdDate1}_${unixTime}`
 			];
-			this.$emit('open-form',0,[`attributes=${attributes.join(',')}`],middleClick);
+			this.$emit('open-form',[],[`attributes=${attributes.join(',')}`],middleClick);
 			this.unixTimeRangeStart = null;
 		},
 		pageChange(factor) {

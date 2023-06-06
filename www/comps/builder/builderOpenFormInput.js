@@ -37,7 +37,7 @@ let MyBuilderOpenFormInput = {
 					<my-bool
 						@update:modelValue="set('popUp',$event)"
 						:modelValue="openForm.popUp"
-						:readonly="readonly"
+						:readonly="readonly || forcePopUp"
 					/>
 				</td>
 			</tr>
@@ -105,6 +105,7 @@ let MyBuilderOpenFormInput = {
 	props:{
 		allowAllForms:   { type:Boolean, required:false, default:false },
 		allowNewRecords: { type:Boolean, required:false, default:false },
+		forcePopUp:      { type:Boolean, required:false, default:false },
 		joinsIndexMap:   { type:Object,  required:false, default:function() { return {}; } },
 		module:          { type:Object,  required:true },
 		openForm:        { required:true },
@@ -114,52 +115,40 @@ let MyBuilderOpenFormInput = {
 	emits:['update:openForm'],
 	computed:{
 		// simple
-		formIsSet:function() { return this.openForm !== null && this.openForm.formIdOpen !== null; },
+		formIsSet:(s) => s.openForm !== null && s.openForm.formIdOpen !== null,
 		
 		// options
-		targetAttributes:function() {
-			if(!this.formIsSet)
-				return [];
+		targetAttributes:(s) => {
+			if(!s.formIsSet) return [];
 			
 			// parse from which relation the record is applied, based on the chosen relation index
 			let recordRelationId = null;
-			for(let k in this.joinsIndexMap) {
-				
-				if(this.joinsIndexMap[k].index === this.openForm.relationIndex) {
-					recordRelationId = this.joinsIndexMap[k].relationId;
+			for(let k in s.joinsIndexMap) {
+				if(s.joinsIndexMap[k].index === s.openForm.relationIndex) {
+					recordRelationId = s.joinsIndexMap[k].relationId;
 					break;
 				}
 			}
 			if(recordRelationId === null)
 				return [];
 			
-			let form = this.formIdMap[this.openForm.formIdOpen];
+			let form = s.formIdMap[s.openForm.formIdOpen];
 			let out  = [];
 			
 			// collect fitting attributes
-			for(let i = 0, j = form.query.joins.length; i < j; i++) {
-				let r = this.relationIdMap[form.query.joins[i].relationId];
+			for(let join of form.query.joins) {
+				let rel = s.relationIdMap[join.relationId];
 				
 				// attributes on relation from target form, in relationship with record relation
-				for(let x = 0, y = r.attributes.length; x < y; x++) {
-					let a = r.attributes[x];
-				
-					if(!this.isAttributeRelationship(a.content))
-						continue;
-					
-					if(a.relationshipId === recordRelationId)
-						out.push(a);
+				for(let atr of rel.attributes) {
+					if(s.isAttributeRelationship(atr.content) && atr.relationshipId === recordRelationId)
+						out.push(atr);
 				}
 				
 				// attributes on record relation, in relationship with relation from target form
-				for(let x = 0, y = this.relationIdMap[recordRelationId].attributes.length; x < y; x++) {
-					let a = this.relationIdMap[recordRelationId].attributes[x];
-				
-					if(!this.isAttributeRelationship(a.content))
-						continue;
-					
-					if(a.relationshipId === r.id)
-						out.push(a);
+				for(let atr of s.relationIdMap[recordRelationId].attributes) {
+					if(s.isAttributeRelationship(atr.content) && atr.relationshipId === rel.id)
+						out.push(atr);
 				}
 			}
 			return out;
@@ -177,7 +166,7 @@ let MyBuilderOpenFormInput = {
 		getItemTitleRelation,
 		isAttributeRelationship,
 		
-		set:function(name,val) {
+		set(name,val) {
 			// clear if no form is opened
 			if(name === 'formIdOpen' && val === '')
 				return this.$emit('update:openForm',null);
@@ -190,7 +179,7 @@ let MyBuilderOpenFormInput = {
 					formIdOpen:null,
 					attributeIdApply:null,
 					relationIndex:-1,
-					popUp:false,
+					popUp:this.forcePopUp ? true : false,
 					maxHeight:0,
 					maxWidth:0
 				};

@@ -49,8 +49,8 @@ let MyCalendarMonth = {
 			<div class="area nowrap">
 				<my-button image="new.png"
 					v-if="hasCreate"
-					@trigger="$emit('open-form',0,[],false)"
-					@trigger-middle="$emit('open-form',0,[],true)"
+					@trigger="$emit('open-form',[],[],false)"
+					@trigger-middle="$emit('open-form',[],[],true)"
 					:caption="!isMobile ? capGen.button.new : ''"
 					:captionTitle="capGen.button.newHint"
 				/>
@@ -167,8 +167,8 @@ let MyCalendarMonth = {
 				
 				<!-- full day events -->
 				<div class="event"
-					@click.stop="clickRecord(e.recordId,false)"
-					@click.middle.stop="clickRecord(e.recordId,true)"
+					@click="clickRecord($event,e.recordId,e.placeholder,false)"
+					@click.middle="clickRecord($event,e.recordId,e.placeholder,true)"
 					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => v.fullDay || v.placeholder)"
 					:class="{ first:e.entryFirst, last:e.entryLast, placeholder:e.placeholder, clickable:rowSelect }"
 				>
@@ -208,8 +208,8 @@ let MyCalendarMonth = {
 				
 				<!-- partial day events -->
 				<div class="part"
-					@click.stop="clickRecord(e.recordId,false)"
-					@click.middle.stop="clickRecord(e.recordId,true)"
+					@click="clickRecord($event,e.recordId,false,false)"
+					@click.middle="clickRecord($event,e.recordId,false,true)"
 					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => !v.fullDay && !v.placeholder)"
 					:class="{ clickable:rowSelect }"
 				>
@@ -259,8 +259,7 @@ let MyCalendarMonth = {
 		rowSelect:  { type:Boolean, required:false, default:false }
 	},
 	emits:[
-		'day-selected','open-form','record-selected','set-choice-id',
-		'set-collection-indexes','set-date'
+		'day-selected','open-form','set-choice-id','set-collection-indexes','set-date'
 	],
 	data() {
 		return {
@@ -447,9 +446,14 @@ let MyCalendarMonth = {
 			// dates are stored as UTC zero
 			this.$emit('day-selected',this.getDateAtUtcZero(d),shift,middleClick);
 		},
-		clickRecord(recordId,middleClick) {
+		clickRecord(event,recordId,placeholder,middleClick) {
+			if(placeholder) return;
+			
+			// block clickDay() event (placeholders must bubble)
+			event.stopPropagation();
+			
 			if(this.rowSelect)
-				this.$emit('record-selected',recordId,[],middleClick);
+				this.$emit('open-form',(typeof recordId === 'undefined' ? [] : [recordId]),[],middleClick);
 		},
 		goToToday() {
 			// switch to current month if not there (to show 'today')
@@ -584,7 +588,6 @@ let MyCalendar = {
 			v-if="view === 'month'"
 			@day-selected="daySelected"
 			@open-form="(...args) => $emit('open-form',...args)"
-			@record-selected="(...args) => $emit('record-selected',...args)"
 			@set-choice-id="choiceIdSet"
 			@set-collection-indexes="(...args) => $emit('set-collection-indexes',...args)"
 			@set-date="dateSet"
@@ -631,7 +634,7 @@ let MyCalendar = {
 		rowSelect:       { type:Boolean, required:false, default:false },
 		usesPageHistory: { type:Boolean, required:true }
 	},
-	emits:['open-form','record-count-change','record-selected','set-args','set-collection-indexes'],
+	emits:['open-form','record-count-change','set-args','set-collection-indexes'],
 	data() {
 		return {
 			// calendar state
@@ -754,7 +757,7 @@ let MyCalendar = {
 				`${this.attributeIdDate0}_${this.getUnixFromDate(this.dateSelect0)}`,
 				`${this.attributeIdDate1}_${this.getUnixFromDate(this.dateSelect1)}`
 			];
-			this.$emit('open-form',0,[`attributes=${attributes.join(',')}`],middleClick);
+			this.$emit('open-form',[],[`attributes=${attributes.join(',')}`],middleClick);
 			this.dateSelect0 = null;
 			this.dateSelect1 = null;
 		},

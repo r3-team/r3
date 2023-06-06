@@ -78,7 +78,7 @@ let MyGoForm = {
 			:attributeIdMapDef="getterAttributeIdMapDefaults"
 			:formId="formId"
 			:moduleId="moduleId"
-			:recordId="recordId"
+			:recordIds="recordIds"
 		/>
 	</div>`,
 	props:{
@@ -114,8 +114,8 @@ let MyGoForm = {
 		
 		moduleNameActive:(s) => s.moduleNameChild !== '' ? s.moduleNameChild : s.moduleName,
 		
-		recordId:(s) => typeof s.recordIdString === 'undefined' || s.recordIdString === ''
-			? 0 : parseInt(s.recordIdString),
+		recordIds:(s) => typeof s.recordIdString === 'undefined' || s.recordIdString === ''
+			? [] : [parseInt(s.recordIdString)],
 		
 		// stores
 		modules:      (s) => s.$store.getters['schema/modules'],

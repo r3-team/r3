@@ -144,6 +144,7 @@ type OpenForm struct {
 	AttributeIdApply pgtype.UUID `json:"attributeIdApply"` // apply record ID to attribute on opened form
 	RelationIndex    int         `json:"relationIndex"`    // relation index of record to apply to attribute
 	PopUp            bool        `json:"popUp"`            // opened form is pop-up-form
+	Context          pgtype.Text `json:"context"`          // used when same entity needs multiple open forms, values: bulk
 	MaxHeight        int         `json:"maxHeight"`        // max. height in PX for opened form (pop-up only)
 	MaxWidth         int         `json:"maxWidth"`         // max. width  in PX for opened form (pop-up only)
 }
@@ -366,22 +367,23 @@ type FieldHeader struct {
 	Captions CaptionMap  `json:"captions"`
 }
 type FieldList struct {
-	Id          uuid.UUID            `json:"id"`
-	TabId       pgtype.UUID          `json:"tabId"`
-	IconId      pgtype.UUID          `json:"iconId"`
-	Content     string               `json:"content"`
-	State       string               `json:"state"`
-	OnMobile    bool                 `json:"onMobile"`
-	CsvExport   bool                 `json:"csvExport"`
-	CsvImport   bool                 `json:"csvImport"`
-	AutoRenew   pgtype.Int4          `json:"autoRenew"`   // automatic list refresh
-	Layout      string               `json:"layout"`      // list layout: table, cards
-	FilterQuick bool                 `json:"filterQuick"` // enable quickfilter (uses all visible columns)
-	ResultLimit int                  `json:"resultLimit"` // predefined limit, overwritable by user
-	Columns     []Column             `json:"columns"`
-	Collections []CollectionConsumer `json:"collections"` // collections to select values for query filters
-	OpenForm    OpenForm             `json:"openForm"`
-	Query       Query                `json:"query"`
+	Id           uuid.UUID            `json:"id"`
+	TabId        pgtype.UUID          `json:"tabId"`
+	IconId       pgtype.UUID          `json:"iconId"`
+	Content      string               `json:"content"`
+	State        string               `json:"state"`
+	OnMobile     bool                 `json:"onMobile"`
+	CsvExport    bool                 `json:"csvExport"`
+	CsvImport    bool                 `json:"csvImport"`
+	AutoRenew    pgtype.Int4          `json:"autoRenew"`   // automatic list refresh
+	Layout       string               `json:"layout"`      // list layout: table, cards
+	FilterQuick  bool                 `json:"filterQuick"` // enable quickfilter (uses all visible columns)
+	ResultLimit  int                  `json:"resultLimit"` // predefined limit, overwritable by user
+	Columns      []Column             `json:"columns"`
+	Collections  []CollectionConsumer `json:"collections"`  // collections to select values for query filters
+	OpenForm     OpenForm             `json:"openForm"`     // regular form to open records with
+	OpenFormBulk OpenForm             `json:"openFormBulk"` // form for bulk actions (multiple record updates)
+	Query        Query                `json:"query"`
 
 	// legacy
 	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`

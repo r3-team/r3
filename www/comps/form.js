@@ -67,13 +67,13 @@ let MyForm = {
 			<my-form ref="popUpForm"
 				@close="popUp = null; $store.commit('formHasChanges',hasChanges)"
 				@record-deleted="popUpRecordChanged('deleted',$event)"
-				@record-open="popUp.recordId = $event"
 				@record-updated="popUpRecordChanged('updated',$event)"
+				@records-open="popUp.recordIds = $event"
 				:attributeIdMapDef="popUp.attributeIdMapDef"
 				:formId="popUp.formId"
 				:isPopUp="true"
 				:moduleId="popUp.moduleId"
-				:recordId="popUp.recordId"
+				:recordIds="popUp.recordIds"
 				:style="popUp.style"
 			/>
 		</div>
@@ -110,10 +110,10 @@ let MyForm = {
 				</div>
 				
 				<div class="area">
-					<template v-if="isData">
+					<template v-if="isData && !isBulkUpdate">
 						<my-button image="refresh.png"
 							@trigger="get"
-							@trigger-middle="openForm(recordId,null,null,true)"
+							@trigger-middle="openForm(recordIds,null,null,true)"
 							:active="!isNew"
 							:captionTitle="capGen.button.refreshHint"
 						/>
@@ -154,7 +154,7 @@ let MyForm = {
 			<div class="top lower" v-if="hasBarLower">
 				<div class="area">
 					<my-button image="new.png"
-						v-if="allowNew && !noDataActions"
+						v-if="!isBulkUpdate && allowNew && !noDataActions"
 						@trigger="openNewAsk(false)"
 						@trigger-middle="openNewAsk(true)"
 						:active="(!isNew || hasChanges) && canCreate"
@@ -162,18 +162,25 @@ let MyForm = {
 						:captionTitle="capGen.button.newHint"
 					/>
 					<my-button image="save.png"
-						v-if="!noDataActions"
+						v-if="!isBulkUpdate && !noDataActions"
 						@trigger="set(false)"
-						:active="canUpdate"
+						:active="hasChanges && canUpdate"
 						:caption="capGen.button.save"
 						:captionTitle="capGen.button.saveHint"
 					/>
 					<my-button image="save_new.png"
-						v-if="!isPopUp && !isMobile && allowNew && !noDataActions"
+						v-if="!isBulkUpdate && !isPopUp && !isMobile && allowNew && !noDataActions"
 						@trigger="set(true)"
-						:active="canUpdate && canCreate"
+						:active="hasChanges && canUpdate && canCreate"
 						:caption="capGen.button.saveNew"
 						:captionTitle="capGen.button.saveNewHint"
+					/>
+					<my-button image="save.png"
+						v-if="isBulkUpdate && !noDataActions"
+						@trigger="setBulkUpdate"
+						:active="hasChangesBulk && canUpdate"
+						:caption="capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length))"
+						:captionTitle="capGen.button.saveHint"
 					/>
 					<my-button image="upward.png"
 						v-if="!isMobile && !isPopUp"
@@ -183,7 +190,7 @@ let MyForm = {
 						:caption="capGen.button.goBack"
 					/>
 					<my-button image="shred.png"
-						v-if="allowDel && !noDataActions"
+						v-if="!isBulkUpdate && allowDel && !noDataActions"
 						@trigger="delAsk"
 						:active="canDelete"
 						:cancel="true"
@@ -218,9 +225,11 @@ let MyForm = {
 					@hotkey="handleHotkeys"
 					@open-form="openForm"
 					@set-form-args="setFormArgs"
-					@set-valid="validSet"
+					@set-touched="fieldSetTouched"
+					@set-valid="fieldSetValid"
 					@set-value="valueSetByField"
 					@set-value-init="valueSet"
+					:isBulkUpdate="isBulkUpdate"
 					:dataFieldMap="fieldIdMapData"
 					:entityIdMapState="entityIdMapState"
 					:field="f"
@@ -271,12 +280,12 @@ let MyForm = {
 		formId:           { type:String, required:true },
 		isPopUp:          { type:Boolean,required:false, default:false },
 		moduleId:         { type:String, required:true },
-		recordId:         { type:Number, required:true }
+		recordIds:        { type:Array,  required:true } // to be handled records, [] is new
 	},
-	emits:['close','record-deleted','record-open','record-updated'],
+	emits:['close','record-deleted','record-updated','records-open'],
 	mounted() {
 		// reset form if either content or record changes
-		this.$watch(() => [this.formId,this.recordId],() => { this.reset() },{
+		this.$watch(() => [this.formId,this.recordIds],() => { this.reset() },{
 			immediate:true
 		});
 		
@@ -309,6 +318,7 @@ let MyForm = {
 			// form data
 			fields:[],            // all fields (nested within each other)
 			fieldIdsInvalid:[],   // field IDs with invalid values
+			fieldIdsTouched:[],   // field IDs that were touched (changed their value in some way)
 			fieldIdMapCaption:{}, // overwrites for field captions
 			fieldIdMapError:{},   // overwrites for field error messages (custom errors)
 			indexMapRecordId:{},  // record IDs for form, key: relation index
@@ -342,21 +352,23 @@ let MyForm = {
 			// check for protected preset record
 			let rel = s.relationIdMap[s.joins[0].relationId];
 			for(let p of rel.presets) {
-				if(p.protected && s.presetIdMapRecordId[p.id] === s.recordId)
+				if(p.protected && s.recordIds.includes(s.presetIdMapRecordId[p.id]))
 					return false;
 			}
 			return true;
 		},
-		canUpdate:    (s) => s.hasChanges && !s.badLoad && !s.updatingRecord,
-		hasBarLower:  (s) => s.isData || s.form.fields.length === 0,
-		hasChanges:   (s) => !s.noDataActions && s.fieldIdsChanged.length !== 0,
-		helpAvailable:(s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
-		isData:       (s) => s.relationId !== null,
-		isNew:        (s) => s.recordId === 0,
-		isSingleField:(s) => s.fields.length === 1 && ['calendar','chart','list','tabs'].includes(s.fields[0].content),
-		menuActive:   (s) => typeof s.formIdMapMenu[s.form.id] === 'undefined' ? null : s.formIdMapMenu[s.form.id],
-		noDataActions:(s) => s.form.noDataActions || s.blockInputs,
-		warnUnsaved:  (s) => s.hasChanges && s.settings.warnUnsaved,
+		canUpdate:     (s) => !s.badLoad && !s.updatingRecord,
+		hasBarLower:   (s) => s.isData || s.form.fields.length === 0,
+		hasChanges:    (s) => !s.noDataActions && s.fieldIdsChanged.length !== 0,
+		hasChangesBulk:(s) => s.isBulkUpdate && s.fieldIdsTouched.length !== 0,
+		helpAvailable: (s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
+		isBulkUpdate:  (s) => s.isData && s.recordIds.length > 1,
+		isData:        (s) => s.relationId !== null,
+		isNew:         (s) => s.recordIds.length === 0,
+		isSingleField: (s) => s.fields.length === 1 && ['calendar','chart','list','tabs'].includes(s.fields[0].content),
+		menuActive:    (s) => typeof s.formIdMapMenu[s.form.id] === 'undefined' ? null : s.formIdMapMenu[s.form.id],
+		noDataActions: (s) => s.form.noDataActions || s.blockInputs,
+		warnUnsaved:   (s) => s.hasChanges && s.settings.warnUnsaved,
 		
 		// entities
 		fieldIdMapData:(s) => s.getDataFieldMap(s.fields),
@@ -417,7 +429,7 @@ let MyForm = {
 				go_back:             ()  => window.history.back(),
 				has_role:            (v) => s.access.roleIds.includes(v),
 				open_form:           (formId,recordId,newTab,popUp,maxY,maxX) =>
-					s.openForm(recordId,{
+					s.openForm((recordId === 0 ? [] : [recordId]),{
 						formIdOpen:formId,
 						popUp:popUp,
 						maxHeight:maxY,
@@ -652,8 +664,10 @@ let MyForm = {
 			if(e.key === 's' && e.ctrlKey) {
 				e.preventDefault();
 				
-				if(this.hasChanges && !this.blockInputs)
-					this.set(false);
+				if(!this.blockInputs && this.canUpdate) {
+					if(!this.isBulkUpdate && this.hasChanges)     this.set(false);
+					if(this.isBulkUpdate  && this.hasChangesBulk) this.setBulkUpdate();
+				}
 			}
 		},
 		messageSet(message,duration) {
@@ -759,6 +773,7 @@ let MyForm = {
 				
 				this.fields = this.form.fields;
 				this.fieldIdsInvalid = [];
+				this.fieldIdsTouched = [];
 				fillFieldValueTemplates(this.fields);
 				
 				this.relationId = this.form.query.relationId;
@@ -769,7 +784,7 @@ let MyForm = {
 				if(this.form.presetIdOpen !== null && this.relationId !== null) {
 					for(const p of this.relationIdMap[this.relationId].presets) {
 						if(p.id === this.form.presetIdOpen)
-							return this.openForm(this.presetIdMapRecordId[p.id]);
+							return this.openForm([this.presetIdMapRecordId[p.id]]);
 					}
 				}
 			}
@@ -901,8 +916,11 @@ let MyForm = {
 			);
 		},
 		
-		// field validity control
-		validSet(state,fieldId) {
+		// field meta changes
+		fieldSetTouched(fieldId) {
+			this.fieldIdsTouched.push(fieldId);
+		},
+		fieldSetValid(state,fieldId) {
 			let pos = this.fieldIdsInvalid.indexOf(fieldId);
 			if(state  && pos !== -1) return this.fieldIdsInvalid.splice(pos,1); 
 			if(!state && pos === -1) return this.fieldIdsInvalid.push(fieldId);
@@ -1001,7 +1019,7 @@ let MyForm = {
 		},
 		openNew(middleClick) {
 			this.$store.commit('formHasChanges',false);
-			this.openForm(0,null,null,middleClick);
+			this.openForm([],null,null,middleClick);
 		},
 		openPrevAsk() {
 			if(!this.warnUnsaved)
@@ -1098,10 +1116,10 @@ let MyForm = {
 		},
 		
 		// navigation
-		openForm(recordId,options,getterArgs,newTab) {
+		openForm(recordIds,options,getterArgs,newTab) {
 			// set defaults if not given
-			if(typeof recordId === 'undefined' || recordId === null)
-				recordId = 0; // open empty record if none is given
+			if(typeof recordIds === 'undefined' || recordIds === null)
+				recordIds = []; // open empty record if none is given
 			
 			if(typeof options === 'undefined' || options === null)
 				options = { formIdOpen:this.form.id, popUp:false }; // stay on form by default
@@ -1113,7 +1131,7 @@ let MyForm = {
 			
 			if(this.isPopUp) {
 				if(stayOnForm)
-					return this.$emit('record-open',recordId);
+					return this.$emit('records-open',recordIds);
 				
 				if(!options.popUp)
 					options.popUp = true;
@@ -1122,9 +1140,9 @@ let MyForm = {
 			// open pop-up form if configured
 			if(options.popUp) {
 				let popUpConfig = this.getFormPopUpTemplate();
-				popUpConfig.formId   = options.formIdOpen;
-				popUpConfig.recordId = recordId;
-				popUpConfig.moduleId = this.moduleId;
+				popUpConfig.formId    = options.formIdOpen;
+				popUpConfig.recordIds = recordIds;
+				popUpConfig.moduleId  = this.moduleId;
 				
 				const getter = this.getGetterArg(getterArgs,'attributes');
 				popUpConfig.attributeIdMapDef = getter === '' ? {}
@@ -1158,7 +1176,9 @@ let MyForm = {
 					getterArgs.push(`attributes=${this.$route.query.attributes}`);
 			}
 			
-			const path = this.getFormRoute(options.formIdOpen,recordId,true,getterArgs);
+			// full form navigation, only single record allowed as target
+			let recordIdOpen = recordIds.length === 1 ? recordIds[0] : 0;
+			const path = this.getFormRoute(options.formIdOpen,recordIdOpen,true,getterArgs);
 			
 			if(newTab)
 				return this.openLink('#'+path,true);
@@ -1171,14 +1191,15 @@ let MyForm = {
 			if(!stayOnForm)
 				return this.$router.push(path);
 			
-			// switch between two existing records or from existing to new one
-			if(recordId !== this.recordId && this.recordId !== 0)
+			// switch from existing to new one or between two existing records
+			if(!this.isNew && recordIdOpen !== this.recordIds[0])
 				return this.$router.push(path);
 			
 			return this.$router.replace(path);
 		},
 		setFormArgs(args,push) {
-			const path = this.getFormRoute(this.form.id,this.recordId,true,args);
+			const path = this.getFormRoute(this.form.id,
+				(this.isNew ? 0 : this.recordIds[0]),true,args);
 			
 			if(this.$route.fullPath === path || this.isPopUp)
 				return; // nothing changed or pop-up form, ignore
@@ -1218,7 +1239,7 @@ let MyForm = {
 			ws.sendMultiple(requests,true).then(
 				() => {
 					if(this.isPopUp)
-						this.$emit('record-deleted',this.recordId);
+						this.$emit('record-deleted',this.recordIds[0]);
 					
 					this.triggerEventAfter('delete');
 					this.openForm();
@@ -1233,14 +1254,14 @@ let MyForm = {
 		get() {
 			this.triggerEventBefore('open');
 			
-			// no record defined, form is done loading
-			if(this.recordId === 0) {
+			// no or multiple records defined, no need to load record data
+			if(this.isNew || this.isBulkUpdate) {
 				this.triggerEventAfter('open');
 				return this.releaseLoadingOnNextTick();
 			}
 			
 			// set base record ID, necessary for form filter 'recordNew'
-			this.indexMapRecordId[0] = this.recordId;
+			this.indexMapRecordId[0] = this.recordIds[0];
 			
 			// add index attributes to be retrieved
 			let expressions = [];
@@ -1256,7 +1277,7 @@ let MyForm = {
 			
 			let filters = this.getQueryFiltersProcessed(
 				this.form.query.filters,this.joinsIndexMap).concat([
-					this.getQueryAttributePkFilter(this.relationId,this.recordId,0,false)
+					this.getQueryAttributePkFilter(this.relationId,this.recordIds[0],0,false)
 				]);
 			
 			ws.send('data','get',{
@@ -1587,7 +1608,7 @@ let MyForm = {
 					else           this.messageSet('[UPDATED]');
 					
 					if(this.isPopUp)
-						this.$emit('record-updated',resSet.payload.indexRecordIds[0]);
+						this.$emit('record-updated',resSet.payload.indexRecordIds['0']);
 					
 					this.triggerEventAfter('save');
 					
@@ -1597,12 +1618,83 @@ let MyForm = {
 					
 					// load newly created record
 					if(this.isNew)
-						return this.openForm(resSet.payload.indexRecordIds[0]);
+						return this.openForm([resSet.payload.indexRecordIds['0']]);
 					
 					// reload same record
 					// unfortunately necessary as update trigger in backend can change values
 					// if we knew nothing triggered, we could update our values without reload
 					this.get();
+				},
+				this.$root.genericError
+			).finally(
+				() => this.updatingRecord = false
+			);
+		},
+		setBulkUpdate() {
+			// bulk update, limitations:
+			// only existing records, only pop-up, no encryption, no joins
+			if(this.fieldIdsInvalid.length !== 0)
+				return this.badSave = true;
+			
+			this.triggerEventBefore('save');
+			this.updatingRecord = true;
+			
+			let attributes = [];
+			for(let fieldId of this.fieldIdsTouched) {
+				if(typeof this.fieldIdMapData[fieldId] === 'undefined')
+					continue;
+				
+				let f   = this.fieldIdMapData[fieldId];
+				let err = null;
+				
+				if(f.index !== 0)
+					err = this.capApp.dialog.bulkMultiple;
+				
+				if(this.attributeIdMap[f.attributeId].encrypted)
+					err = this.capApp.dialog.bulkEncrypted;
+				
+				if(err !== null)
+					return this.$store.commit('dialog',{
+						captionBody:err,
+						buttons:[{
+							cancel:true,
+							caption:this.capGen.button.close,
+							exec:this.close,
+							keyEnter:true,
+							image:'ok.png'
+						}]
+					});
+				
+				attributes.push({
+					attributeId:f.attributeId,
+					attributeIdNm:f.attributeIdNm,
+					outsideIn:f.outsideIn,
+					value:this.values[this.getIndexAttributeId(
+						f.index,f.attributeId,f.outsideIn === true,(
+						typeof f.attributeIdNm !== 'undefined'
+						? f.attributeIdNm : null)
+					)]
+				});
+			}
+			
+			let requests = [];
+			for(let recordId of this.recordIds) {
+				requests.push(
+					ws.prepare('data','set',{'0':{
+						relationId:this.relationId,
+						attributeId:null,
+						indexFrom:-1,
+						recordId:recordId,
+						attributes:attributes
+					}})
+				);
+			}
+			
+			ws.sendMultiple(requests,true).then(
+				res => {
+					this.$emit('record-updated');
+					this.triggerEventAfter('save');
+					this.close();
 				},
 				this.$root.genericError
 			).finally(

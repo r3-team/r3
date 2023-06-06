@@ -159,7 +159,7 @@ export function getFormPopUpTemplate() {
 		fieldId:null,           // field ID that pop-up form was opened from
 		formId:null,            // form ID to show as pop-up
 		moduleId:null,
-		recordId:0,
+		recordIds:[],           // empty array means new record
 		style:''                // CSS styles for pop-up form
 	};
 };

@@ -16,6 +16,7 @@
 			"deleteSelected":"Ausgewählte löschen",
 			"download":"Herunterladen",
 			"edit":"Bearbeiten",
+			"editBulk":"Bearbeiten ({COUNT})",
 			"empty":"Leer",
 			"expert":"Erweitert",
 			"export":"Exportieren",
@@ -35,6 +36,7 @@
 			"reset":"Zurücksetzen",
 			"restore":"Wiederherstellen",
 			"save":"Speichern",
+			"saveBulk":"Speichern ({COUNT})",
 			"saveHint":"Änderungen speichern",
 			"saveNew":"Speichern+Neu",
 			"saveNewHint":"Änderungen speichern und neuen Datensatz erstellen",
@@ -901,6 +903,7 @@
 			"noDataActions":"Keine Datenaktionen",
 			"onMobile":"In mobiler Ansicht",
 			"openForm":"Formular öffnen",
+			"openFormBulk":"Formular öffnen<br />(Massenbearbeitung)",
 			"presetOpen":"Vord. Datensatz öffnen",
 			"readonly":"Lesend",
 			"required":"Benötigt",
@@ -1601,6 +1604,8 @@
 			"logHint":"Änderungshistorie anzeigen"
 		},
 		"dialog":{
+			"bulkEncrypted":"Massenaktualisierung für verschlüsselte Daten wird aktuell nicht unterstützt.",
+			"bulkMultiple":"Massenaktualisierung mit mehreren Relationen wird aktuell nicht unterstützt.",
 			"close":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem das Formular schließen?",
 			"delete":"Bist du sicher, dass du diesen Datensatz <b>permanent</b> löschen möchtest?",
 			"encrypted":"Der Feldinhalt wird auf deinem System verschlüsselt bevor er zum Server geschickt wird.",
@@ -1616,6 +1621,7 @@
 			"recordValueCopied":"In die Zwischenablage kopiert",
 			"recordUpdated":"Datensatz aktualisiert"
 		},
+		"bulkTouched":"Wert wird aktualisiert",
 		"invalidInputs":"Eingaben prüfen!",
 		"noAccess":"Kein Zugriff"
 	},

@@ -16,6 +16,7 @@
 			"deleteSelected":"Cancella selezionati",
 			"download":"Download",
 			"edit":"Modifica",
+			"editBulk":"Modifica ({COUNT})",
 			"empty":"Empty",
 			"expert":"Avanzato",
 			"export":"Esporta",
@@ -35,6 +36,7 @@
 			"reset":"Resetta",
 			"restore":"Restore",
 			"save":"Salva",
+			"saveBulk":"Salva ({COUNT})",
 			"saveHint":"Salva i cambiamenti",
 			"saveNew":"Salva+Nuovo",
 			"saveNewHint":"Salva il record e ne crea uno nuovo",
@@ -901,6 +903,7 @@
 			"noDataActions":"No data actions",
 			"onMobile":"Nella vista mobile",
 			"openForm":"Apri modulo",
+			"openFormBulk":"Apri modulo<br />(bulk editing)",
 			"presetOpen":"Preimpostazione apertura",
 			"readonly":"Solo lettura",
 			"required":"Obbligatorio",
@@ -1601,6 +1604,8 @@
 			"logHint":"Apri log modifiche"
 		},
 		"dialog":{
+			"bulkEncrypted":"Bulk update for encrypted data is currently not supported.",
+			"bulkMultiple":"Bulk update with multiple relations is currently not supported.",
 			"close":"Ci sono modifiche non salvate.<br /><br />Chiudere comunque questo modulo?",
 			"delete":"Sei sicuro di voler eliminare questo record <b>in modo permanente</b>?",
 			"encrypted":"The field content will be encrypted on your system before it is being sent to the server.",
@@ -1616,6 +1621,7 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"Il record è stato aggiornato"
 		},
+		"bulkTouched":"Value will be updated",
 		"invalidInputs":"Controlla input!",
 		"noAccess":"Nessun accesso"
 	},

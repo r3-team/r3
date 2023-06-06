@@ -16,6 +16,7 @@
 			"deleteSelected":"Șterge selecția",
 			"download":"Download",
 			"edit":"Editare",
+			"editBulk":"Editare ({COUNT})",
 			"empty":"Empty",
 			"expert":"Avansat",
 			"export":"Exportă",
@@ -35,6 +36,7 @@
 			"reset":"Resetează",
 			"restore":"Restore",
 			"save":"Salvare",
+			"saveBulk":"Salvare ({COUNT})",
 			"saveHint":"Salvează modificările",
 			"saveNew":"Salvează+Nou",
 			"saveNewHint":"Salvează modificările și deschide o nouă înregistrare",
@@ -901,6 +903,7 @@
 			"noDataActions":"No data actions",
 			"onMobile":"Vizualizare dispozitiv mobil",
 			"openForm":"Deschideți formularul",
+			"openFormBulk":"Deschideți formularul<br />(bulk editing)",
 			"presetOpen":"Deschide presetarea",
 			"readonly":"Numai citire",
 			"required":"Necesar",
@@ -1601,6 +1604,8 @@
 			"logHint":"Deschideți jurnalele de modificări"
 		},
 		"dialog":{
+			"bulkEncrypted":"Bulk update for encrypted data is currently not supported.",
+			"bulkMultiple":"Bulk update with multiple relations is currently not supported.",
 			"close":"Există modificări nesalvate.<br /><br />Doriți în continuare să închideți acest formular?",
 			"delete":"Sunteți sigur că doriți să ștergeți <b>permanent</b> această înregistrare?",
 			"encrypted":"The field content will be encrypted on your system before it is being sent to the server.",
@@ -1616,6 +1621,7 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"înregistrarea a fost actualizată"
 		},
+		"bulkTouched":"Value will be updated",
 		"invalidInputs":"Verificați intrările!",
 		"noAccess":"Fără acces"
 	},

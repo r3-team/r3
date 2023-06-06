@@ -313,6 +313,11 @@ let MyField = {
 				{{ captionHelp }}
 			</div>
 			
+			<!-- bulk notice -->
+			<div class="captionSub" v-if="isBulkUpdate && !notTouched">
+				{{ capApp.bulkTouched }}
+			</div>
+			
 			<!-- error text -->
 			<div class="captionSub invalid" v-if="captionError !== ''">
 				{{ captionError }}
@@ -343,10 +348,12 @@ let MyField = {
 			v-if="isList"
 			@clipboard="$emit('clipboard')"
 			@open-form="(...args) => openForm(args[0],[],args[1])"
+			@open-form-bulk="openFormBulk"
 			@record-count-change="$emit('set-counter',field.id,$event)"
-			@record-selected="(...args) => openForm(args[0],[],args[1])"
+			@record-selected="(...args) => openForm([args[0]],[],args[1])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
+			:allowBulk="field.openFormBulk !== null"
 			:allowPaging="field.query.fixedLimit === 0"
 			:autoRenew="field.autoRenew"
 			:choices="choicesProcessed"
@@ -374,7 +381,6 @@ let MyField = {
 			v-if="isCalendar && !field.gantt"
 			@open-form="(...args) => openForm(args[0],args[1],args[2])"
 			@record-count-change="$emit('set-counter',field.id,$event)"
-			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
 			:attributeIdColor="field.attributeIdColor"
@@ -404,7 +410,6 @@ let MyField = {
 			v-if="isCalendar && field.gantt"
 			@open-form="(...args) => openForm(args[0],args[1],args[2])"
 			@record-count-change="$emit('set-counter',field.id,$event)"
-			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
 			:attributeIdColor="field.attributeIdColor"
@@ -482,9 +487,11 @@ let MyField = {
 					@open-form="(...args) => $emit('open-form',...args)"
 					@set-counter="(...args) => setTabCounter(i,args[0],args[1])"
 					@set-form-args="(...args) => $emit('set-form-args',...args)"
+					@set-touched="(...args) => $emit('set-touched',...args)"
 					@set-valid="(...args) => $emit('set-valid',...args)"
 					@set-value="(...args) => $emit('set-value',...args)"
 					@set-value-init="(...args) => $emit('set-value-init',...args)"
+					:isBulkUpdate="isBulkUpdate"
 					:dataFieldMap="dataFieldMap"
 					:entityIdMapState="entityIdMapState"
 					:field="f"
@@ -516,9 +523,11 @@ let MyField = {
 			@open-form="(...args) => $emit('open-form',...args)"
 			@set-counter="(...args) => $emit('set-counter',...args)"
 			@set-form-args="(...args) => $emit('set-form-args',...args)"
+			@set-touched="(...args) => $emit('set-touched',...args)"
 			@set-valid="(...args) => $emit('set-valid',...args)"
 			@set-value="(...args) => $emit('set-value',...args)"
 			@set-value-init="(...args) => $emit('set-value-init',...args)"
+			:isBulkUpdate="isBulkUpdate"
 			:dataFieldMap="dataFieldMap"
 			:entityIdMapState="entityIdMapState"
 			:field="f"
@@ -554,13 +563,14 @@ let MyField = {
 		joinsIndexMap:    { type:Object,  required:true },
 		isAloneInForm:    { type:Boolean, required:true }, // parent form contains only this field
 		isAloneInTab:     { type:Boolean, required:false, default:false }, // only field in a tab
+		isBulkUpdate:     { type:Boolean, required:false, default:false }, // form is in bulk update mode
 		isHiddenInParent: { type:Boolean, required:false, default:false }, // field is hidden in parent (tab/container)
 		logViewer:        { type:Boolean, required:false, default:false }, // is part of log viewer
 		values:           { type:Object,  required:true }
 	},
 	emits:[
 		'clipboard','execute-function','hotkey','open-form','set-form-args',
-		'set-counter','set-valid','set-value','set-value-init'
+		'set-counter','set-touched','set-valid','set-value','set-value-init'
 	],
 	data() {
 		return {
@@ -1111,9 +1121,9 @@ let MyField = {
 			if(this.showColorPickerInput)
 				this.showColorPickerInput = false;
 		},
-		openForm(recordId,getters,middleClick) {
+		openForm(recordIds,getters,middleClick) {
 			// set defaults
-			if(typeof recordId    === 'undefined') recordId    = 0;
+			if(typeof recordIds   === 'undefined') recordIds   = [];
 			if(typeof getters     === 'undefined') getters     = [];
 			if(typeof middleClick === 'undefined') middleClick = false;
 			
@@ -1132,7 +1142,12 @@ let MyField = {
 			let options = JSON.parse(JSON.stringify(this.field.openForm));
 			options.fieldId = this.field.id;
 			
-			this.$emit('open-form',recordId,options,getters,middleClick);
+			this.$emit('open-form',recordIds,options,getters,middleClick);
+		},
+		openFormBulk(recordIds) {
+			let options = JSON.parse(JSON.stringify(this.field.openFormBulk));
+			options.fieldId = this.field.id;
+			this.$emit('open-form',recordIds,options,[],false);
 		},
 		relationshipRecordSelected(recordId,middleClick) {
 			if(recordId === null)
@@ -1181,8 +1196,10 @@ let MyField = {
 			if(this.isInteger && val !== null && /^\-?\d+$/.test(val))
 				val = parseInt(val);
 			
-			if(val !== valOld)
+			if(this.notTouched && val !== valOld) {
 				this.notTouched = false;
+				this.$emit('set-touched',this.field.id);
+			}
 			
 			this.$emit('set-value',indexAttributeId,val);
 			
@@ -1191,7 +1208,7 @@ let MyField = {
 		},
 		triggerButton(middleClick) {
 			if(this.field.openForm !== null)
-				this.openForm(0,[],middleClick);
+				this.openForm([],[],middleClick);
 			
 			if(this.field.jsFunctionId !== null)
 				this.$emit('execute-function',this.field.jsFunctionId);

@@ -124,8 +124,8 @@ let MyList = {
 							/>
 							<my-button image="open.png"
 								v-if="inputOpenForm && hasUpdate"
-								@trigger="$emit('open-form',r.indexRecordIds['0'],false)"
-								@trigger-middle="$emit('open-form',r.indexRecordIds['0'],true)"
+								@trigger="$emit('open-form',[r.indexRecordIds['0']],false)"
+								@trigger-middle="$emit('open-form',[r.indexRecordIds['0']],true)"
 								:captionTitle="capApp.inputHintOpen"
 								:naked="true"
 							/>
@@ -168,8 +168,8 @@ let MyList = {
 								<div class="list-input-row-items nowrap">
 									<my-button image="add.png"
 										v-if="inputOpenForm && !inputIsReadonly && hasCreate"
-										@trigger="$emit('open-form',0,false)"
-										@trigger-middle="$emit('open-form',0,true)"
+										@trigger="$emit('open-form',[],false)"
+										@trigger-middle="$emit('open-form',[],true)"
 										:captionTitle="capApp.inputHintCreate"
 										:naked="true"
 									/>
@@ -198,10 +198,17 @@ let MyList = {
 					
 					<my-button image="new.png"
 						v-if="hasCreate"
-						@trigger="$emit('open-form',0,false)"
-						@trigger-middle="$emit('open-form',0,true)"
+						@trigger="$emit('open-form',[],false)"
+						@trigger-middle="$emit('open-form',[],true)"
 						:caption="!isMobile ? capGen.button.new : ''"
 						:captionTitle="capGen.button.newHint"
+					/>
+					<my-button image="edit.png"
+						v-if="allowBulk"
+						@trigger="selectRowsBulkEdit(selectedRows)"
+						:active="selectedRows.length !== 0"
+						:caption="capGen.button.editBulk.replace('{COUNT}',selectedRows.length)"
+						:captionTitle="capGen.button.editBulk.replace('{COUNT}',selectedRows.length)"
 					/>
 					<my-button image="fileSheet.png"
 						v-if="csvImport || csvExport"
@@ -635,6 +642,7 @@ let MyList = {
 		query:       { type:Object,  required:true },                    // list query
 		
 		// toggles
+		allowBulk:      { type:Boolean, required:false, default:false }, // enable bulk editing
 		allowPaging:    { type:Boolean, required:false, default:true },  // enable paging
 		csvExport:      { type:Boolean, required:false, default:false },
 		csvImport:      { type:Boolean, required:false, default:false },
@@ -658,9 +666,9 @@ let MyList = {
 		inputValid:     { type:Boolean, required:false, default:true }
 	},
 	emits:[
-		'blurred','clipboard','focused','open-form','record-count-change',
-		'record-removed','record-selected','records-selected-init','set-args',
-		'set-collection-indexes'
+		'blurred','clipboard','focused','open-form','open-form-bulk',
+		'record-count-change','record-removed','record-selected',
+		'records-selected-init','set-args','set-collection-indexes'
 	],
 	data() {
 		return {
@@ -1383,6 +1391,20 @@ let MyList = {
 			for(let i = 0, j = this.rows.length; i < j; i++) {
 				this.selectedRows.push(i);
 			}
+		},
+		selectRowsBulkEdit(rowIndexes) {
+			// bulk edit only works on source relation
+			let recordIds = [];
+			for(let j of this.joins) {
+				if(j.index !== 0 || !j.applyUpdate) continue;
+				
+				for(let rowIndex of rowIndexes) {
+					if(this.rows[rowIndex].indexRecordIds[j.index] !== 0)
+						recordIds.push(this.rows[rowIndex].indexRecordIds[j.index]);
+				}
+			}
+			if(recordIds.length !== 0)
+				this.$emit('open-form-bulk',recordIds);
 		},
 		
 		// helpers

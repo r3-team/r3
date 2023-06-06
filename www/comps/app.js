@@ -74,7 +74,7 @@ let MyApp = {
 					:formId="popUpFormGlobal.formId"
 					:isPopUp="true"
 					:moduleId="popUpFormGlobal.moduleId"
-					:recordId="popUpFormGlobal.recordId"
+					:recordIds="popUpFormGlobal.recordIds"
 					:style="popUpFormGlobal.style"
 				/>
 			</div>

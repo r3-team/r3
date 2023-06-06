@@ -1010,7 +1010,7 @@ let MyBuilderFieldOptions = {
 				</tr>
 			</template>
 			
-			<!-- open form -->
+			<!-- open form & open form bulk -->
 			<tr v-if="isButton || ((isList || isCalendar || isRelationship) && field.query.relationId !== null)">
 				<td>{{ capApp.openForm }}</td>
 				<td>
@@ -1022,6 +1022,21 @@ let MyBuilderFieldOptions = {
 						:module="module"
 						:openForm="field.openForm"
 						:relationIdSource="isButton ? null : field.query.relationId"
+					/>
+				</td>
+			</tr>
+			<tr v-if="isList && field.query.relationId !== null">
+				<td v-html="capApp.openFormBulk"></td>
+				<td>
+					<my-builder-open-form-input
+						@update:openForm="set('openFormBulk',$event)"
+						:allowNewRecords="false"
+						:allowAllForms="false"
+						:forcePopUp="true"
+						:joinsIndexMap="joinsIndexMap"
+						:module="module"
+						:openForm="field.openFormBulk"
+						:relationIdSource="field.query.relationId"
 					/>
 				</td>
 			</tr>

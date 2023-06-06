@@ -16,6 +16,7 @@
 			"deleteSelected":"Delete selected",
 			"download":"Download",
 			"edit":"Edit",
+			"editBulk":"Edit ({COUNT})",
 			"empty":"Empty",
 			"expert":"Advanced",
 			"export":"Export",
@@ -35,6 +36,7 @@
 			"reset":"Reset",
 			"restore":"Restore",
 			"save":"Save",
+			"saveBulk":"Save ({COUNT})",
 			"saveHint":"Save changes",
 			"saveNew":"Save+New",
 			"saveNewHint":"Save changes and open new record",
@@ -901,6 +903,7 @@
 			"noDataActions":"No data actions",
 			"onMobile":"In mobile view",
 			"openForm":"Open form",
+			"openFormBulk":"Open form<br />(bulk editing)",
 			"presetOpen":"Open preset",
 			"readonly":"Read only",
 			"required":"Required",
@@ -1601,6 +1604,8 @@
 			"logHint":"Open change logs"
 		},
 		"dialog":{
+			"bulkEncrypted":"Bulk update for encrypted data is currently not supported.",
+			"bulkMultiple":"Bulk update with multiple relations is currently not supported.",
 			"close":"There are unsaved changes.<br /><br />Do you still want to close this form?",
 			"delete":"Are you sure that you want to <b>permanently</b> delete this record?",
 			"encrypted":"The field content will be encrypted on your system before it is being sent to the server.",
@@ -1616,6 +1621,7 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"Record updated"
 		},
+		"bulkTouched":"Value will be updated",
 		"invalidInputs":"Check inputs!",
 		"noAccess":"No access"
 	},

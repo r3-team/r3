@@ -250,6 +250,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			ALTER TABLE app.column ADD COLUMN batch_vertical BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.column ALTER COLUMN batch_vertical DROP DEFAULT;
+			
+			-- bulk update forms
+			CREATE TYPE app.open_form_context AS ENUM('bulk');
+			ALTER TABLE app.open_form ADD COLUMN context app.open_form_context;
 		`)
 		return "3.4", err
 	},
