@@ -1,5 +1,6 @@
 import isDropdownUpwards  from './shared/layout.js';
 import MyFilters          from './filters.js';
+import MyForm             from './form.js';
 import MyInputCollection  from './inputCollection.js';
 import MyInputOffset      from './inputOffset.js';
 import MyListAggregate    from './listAggregate.js';
@@ -187,15 +188,14 @@ let MyList = {
 			</template>
 		</template>
 		
+		<!-- regular list view (either view or input dropdown) -->
 		<template v-if="showTable && !inputAsCategory">
-			<!-- regular list view (either view or input dropdown) -->
 			
+			<!-- list header line -->
 			<div class="top lower" v-if="header">
-				<!-- list header line -->
 				
+				<!-- actions -->
 				<div class="area nowrap">
-					<!-- actions -->
-					
 					<my-button image="new.png"
 						v-if="hasCreate"
 						@trigger="$emit('open-form',[],false)"
@@ -369,92 +369,211 @@ let MyList = {
 				/>
 			</div>
 			
-			<!-- list results as table -->
-			<div class="layoutTable"
-				v-if="layout === 'table'"
-				:class="{ scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
-				:id="usesPageHistory ? scrollFormId : null"
-			>
-				<table :class="{ 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
-					<thead v-if="header">
-						<tr>
-							<th v-if="hasBulkActions" class="minimum checkbox">
-								<img class="clickable" tabindex="0"
-									@click="selectRowsAllToggle"
-									@keyup.enter.space.stop="selectRowsAllToggle"
-									:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
-								/>
-							</th>
-							<th v-for="(b,i) in columnBatches">
-								<my-list-column-batch
-									@close="columnBatchIndexOption = -1"
-									@del-aggregator="setAggregators(i,null)"
-									@del-order="setOrder(b,null)"
-									@set-aggregator="setAggregators(i,$event)"
-									@set-filters="filtersColumn = $event;reloadInside('filtersColumn')"
-									@set-order="setOrder(b,$event)"
-									@toggle="clickColumn(i)"
-									:aggregator="columnBatchIndexMapAggr[i]"
-									:columnBatch="b"
-									:columns="columns"
-									:columnSortPos="getColumnBatchSortPos(b)"
-									:filters="filters"
-									:filtersColumn="filtersColumn"
-									:lastInRow="i === columnBatches.length - 1"
-									:joins="relationsJoined"
-									:orders="orders"
-									:relationId="query.relationId"
-									:rowCount="count"
-									:show="columnBatchIndexOption === i"
-								/>
-							</th>
-						</tr>
-					</thead>
-					<tbody>
-						<!-- result row actions (only available if list is input) -->
-						<tr v-if="showInputHeader">
-							<td colspan="999">
-								<div class="sub-actions default-inputs">
-									<select
-										v-if="hasChoices"
-										@change="reloadInside('choice')"
-										v-model="choiceId"
+			<!-- list results -->
+			<div class="layoutWrap">
+				<!-- list results as table or card layout -->
+				<div
+					:class="{ layoutCards:isCards, layoutTable:isTable, scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
+					:id="usesPageHistory ? scrollFormId : null"
+				>
+					<table v-if="isTable" :class="{ 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
+						<thead v-if="header">
+							<tr>
+								<th v-if="hasBulkActions" class="minimum checkbox">
+									<img class="clickable" tabindex="0"
+										@click="selectRowsAllToggle"
+										@keyup.enter.space.stop="selectRowsAllToggle"
+										:src="rows.length !== 0 && selectedRows.length === rows.length ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
+									/>
+								</th>
+								<th v-for="(b,i) in columnBatches">
+									<my-list-column-batch
+										@close="columnBatchIndexOption = -1"
+										@del-aggregator="setAggregators(i,null)"
+										@del-order="setOrder(b,null)"
+										@set-aggregator="setAggregators(i,$event)"
+										@set-filters="filtersColumn = $event;reloadInside('filtersColumn')"
+										@set-order="setOrder(b,$event)"
+										@toggle="clickColumn(i)"
+										:aggregator="columnBatchIndexMapAggr[i]"
+										:columnBatch="b"
+										:columns="columns"
+										:columnSortPos="getColumnBatchSortPos(b)"
+										:filters="filters"
+										:filtersColumn="filtersColumn"
+										:lastInRow="i === columnBatches.length - 1"
+										:joins="relationsJoined"
+										:orders="orders"
+										:relationId="query.relationId"
+										:rowCount="count"
+										:show="columnBatchIndexOption === i"
+									/>
+								</th>
+							</tr>
+						</thead>
+						<tbody>
+							<!-- result row actions (only available if list is input) -->
+							<tr v-if="showInputHeader">
+								<td colspan="999">
+									<div class="sub-actions default-inputs">
+										<select
+											v-if="hasChoices"
+											@change="reloadInside('choice')"
+											v-model="choiceId"
+										>
+											<option v-for="c in query.choices" :value="c.id">
+												{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
+											</option>
+										</select>
+										
+										<my-input-offset
+											@input="offset = $event;reloadInside()"
+											:caption="false"
+											:limit="limit"
+											:offset="offset"
+											:total="count"
+										/>
+										
+										<input class="selector lookup small" enterkeyhint="send" type="text"
+											v-if="filterQuick"
+											@keyup.enter="updatedFilterQuick"
+											v-model="filtersQuick"
+											:placeholder="capGen.threeDots"
+											:title="capApp.quick"
+										/>
+										
+										<my-button image="checkbox1.png"
+											v-if="showInputAddAll"
+											@trigger="clickRowAll"
+											:caption="capApp.button.all"
+											:captionTitle="capApp.button.allHint"
+											:naked="true"
+											:tight="true"
+										/>
+									</div>
+								</td>
+							</tr>
+							
+							<!-- result rows -->
+							<tr
+								v-for="(r,ri) in rowsClear"
+								@click="clickRow(r,false)"
+								@click.middle="clickRow(r,true)"
+								@keyup.enter.space="clickRow(r,false)"
+								:class="{ rowSelect:rowSelect && !inputIsReadonly }"
+								:key="ri + '_' + r.indexRecordIds['0']"
+								:ref="refTabindex+String(ri)"
+								:tabindex="isInput ? '0' : '-1'"
+							>
+								<td v-if="hasBulkActions" @click.stop="" class="minimum checkbox">
+									<img class="clickable" tabindex="0"
+										@click="selectRow(ri)"
+										@keyup.enter.space.stop="selectRow(ri)"
+										:src="selectedRows.includes(ri) ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
+									/>
+								</td>
+								
+								<!-- row values per column batch -->
+								<td v-for="b in columnBatches" :style="b.style">
+									<div class="batch"
+										:class="{ colored:b.columnIndexColor !== -1, vertical:b.vertical }"
+										:style="b.columnIndexColor === -1 ? '' : displayColorColumn(r.values[b.columnIndexColor])"
 									>
-										<option v-for="c in query.choices" :value="c.id">
-											{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
-										</option>
-									</select>
-									
-									<my-input-offset
-										@input="offset = $event;reloadInside()"
-										:caption="false"
-										:limit="limit"
-										:offset="offset"
-										:total="count"
-									/>
-									
-									<input class="selector lookup small" enterkeyhint="send" type="text"
-										v-if="filterQuick"
-										@keyup.enter="updatedFilterQuick"
-										v-model="filtersQuick"
-										:placeholder="capGen.threeDots"
-										:title="capApp.quick"
-									/>
-									
-									<my-button image="checkbox1.png"
-										v-if="showInputAddAll"
-										@trigger="clickRowAll"
-										:caption="capApp.button.all"
-										:captionTitle="capApp.button.allHint"
-										:naked="true"
-										:tight="true"
-									/>
+										<my-value-rich
+											v-for="ind in b.columnIndexes.filter(v => v !== b.columnIndexColor && r.values[v] !== null)"
+											@clipboard="$emit('clipboard')"
+											:attributeId="columns[ind].attributeId"
+											:basis="columns[ind].basis"
+											:bold="columns[ind].styles.includes('bold')"
+											:clipboard="columns[ind].clipboard"
+											:display="columns[ind].display"
+											:italic="columns[ind].styles.includes('italic')"
+											:key="ind"
+											:length="columns[ind].length"
+											:value="r.values[ind]"
+											:wrap="columns[ind].wrap"
+										/>
+									</div>
+								</td>
+							</tr>
+							
+							<!-- no results message -->
+							<tr v-if="rows.length === 0">
+								<td v-if="rowsFetching" colspan="999">
+									<div class="fetching">
+										<img src="images/load.gif">
+										<span>{{ capApp.fetching }}</span>
+									</div>
+								</td>
+								<td v-if="!rowsFetching" colspan="999">
+									<div class="batch">{{ capGen.resultsNone }}</div>
+								</td>
+							</tr>
+						</tbody>
+						<tfoot>
+							<!-- result aggregations -->
+							<my-list-aggregate ref="aggregations"
+								:columnBatches="columnBatches"
+								:columnBatchIndexMapAggr="columnBatchIndexMapAggr"
+								:columns="columns"
+								:filters="filtersCombined"
+								:leaveOneEmpty="hasBulkActions"
+								:joins="relationsJoined"
+								:relationId="query.relationId"
+							/>
+						</tfoot>
+					</table>
+				
+					<!-- list results as cards -->
+					<template v-if="isCards">
+					
+						<!-- actions -->
+						<div class="top-actions default-inputs">
+							<my-button
+								v-if="hasBulkActions"
+								@trigger="selectRowsAllToggle"
+								:caption="capApp.button.all"
+								:captionTitle="capApp.button.allHint"
+								:image="rows.length !== 0 && selectedRows.length === rows.length ? 'checkbox1.png' : 'checkbox0.png'"
+								:naked="true"
+							/>
+							
+							<!-- sorting -->
+							<template v-if="rowsClear.length !== 0">
+								<span class="select">{{ capApp.orderBy }}</span>
+								<select
+									@change="selectOrderBy($event.target.value)"
+									v-model.number="orderByColumnBatchIndex"
+								>
+									<option value="-1">-</option>
+									<option
+										v-for="(b,i) in columnBatches.filter(v => v.columnIndexSortBy !== -1)"
+										:value="b.columnIndexSortBy"
+									>
+										{{ b.caption }}
+									</option>
+								</select>
+								<my-button
+									v-if="orders.length !== 0"
+									@trigger="toggleOrderBy"
+									:image="orders[0].ascending ? 'triangleUp.png' : 'triangleDown.png'"
+									:naked="true"
+								/>
+							</template>
+							
+							<!-- no results message -->
+							<template v-if="rowsClear.length === 0">
+								<div class="no-results" v-if="!rowsFetching">
+									{{ capGen.resultsNone }}
 								</div>
-							</td>
-						</tr>
+								<div class="no-results fetching" v-if="rowsFetching">
+									<img src="images/load.gif">
+									<span>{{ capApp.fetching }}</span>
+								</div>
+							</template>
+						</div>
 						
-						<!-- result rows -->
-						<tr
+						<div class="card"
 							v-for="(r,ri) in rowsClear"
 							@click="clickRow(r,false)"
 							@click.middle="clickRow(r,true)"
@@ -464,182 +583,82 @@ let MyList = {
 							:ref="refTabindex+String(ri)"
 							:tabindex="isInput ? '0' : '-1'"
 						>
-							<td v-if="hasBulkActions" @click.stop="" class="minimum checkbox">
-								<img class="clickable" tabindex="0"
-									@click="selectRow(ri)"
-									@keyup.enter.space.stop="selectRow(ri)"
-									:src="selectedRows.includes(ri) ? 'images/checkboxSmall1.png' : 'images/checkboxSmall0.png'"
+							<div class="actions" v-if="hasBulkActions" @click.stop="">
+								<my-button
+									@trigger="selectRow(ri)"
+									:image="selectedRows.includes(ri) ? 'checkbox1.png' : 'checkbox0.png'"
+									:naked="true"
+									:tight="true"
 								/>
-							</td>
+								<my-button image="delete.png"
+									@trigger="delAsk([ri])"
+									:naked="true"
+									:tight="true"
+								/>
+							</div>
+							<div class="header"></div>
 							
 							<!-- row values per column batch -->
-							<td v-for="b in columnBatches" :style="b.style">
-								<div class="batch"
-									:class="{ colored:b.columnIndexColor !== -1, vertical:b.vertical }"
-									:style="b.columnIndexColor === -1 ? '' : displayColorColumn(r.values[b.columnIndexColor])"
-								>
-									<my-value-rich
-										v-for="ind in b.columnIndexes.filter(v => v !== b.columnIndexColor && r.values[v] !== null)"
-										@clipboard="$emit('clipboard')"
-										:attributeId="columns[ind].attributeId"
-										:basis="columns[ind].basis"
-										:bold="columns[ind].styles.includes('bold')"
-										:clipboard="columns[ind].clipboard"
-										:display="columns[ind].display"
-										:italic="columns[ind].styles.includes('italic')"
-										:key="ind"
-										:length="columns[ind].length"
-										:value="r.values[ind]"
-										:wrap="columns[ind].wrap"
-									/>
-								</div>
-							</td>
-						</tr>
-						
-						<!-- no results message -->
-						<tr v-if="rows.length === 0">
-							<td v-if="rowsFetching" colspan="999">
-								<div class="fetching">
-									<img src="images/load.gif">
-									<span>{{ capApp.fetching }}</span>
-								</div>
-							</td>
-							<td v-if="!rowsFetching" colspan="999">
-								<div class="batch">{{ capGen.resultsNone }}</div>
-							</td>
-						</tr>
-					</tbody>
-					<tfoot>
-						<!-- result aggregations -->
-						<my-list-aggregate ref="aggregations"
-							:columnBatches="columnBatches"
-							:columnBatchIndexMapAggr="columnBatchIndexMapAggr"
-							:columns="columns"
-							:filters="filtersCombined"
-							:leaveOneEmpty="hasBulkActions"
-							:joins="relationsJoined"
-							:relationId="query.relationId"
-						/>
-					</tfoot>
-				</table>
-			</div>
-			
-			<!-- list results as cards -->
-			<div class="layoutCards"
-				v-if="layout === 'cards'"
-				:id="usesPageHistory ? scrollFormId : null"
-			>
-				<!-- actions -->
-				<div class="top-actions default-inputs">
-					<my-button
-						v-if="hasBulkActions"
-						@trigger="selectRowsAllToggle"
-						:caption="capApp.button.all"
-						:captionTitle="capApp.button.allHint"
-						:image="rows.length !== 0 && selectedRows.length === rows.length ? 'checkbox1.png' : 'checkbox0.png'"
-						:naked="true"
-					/>
-					
-					<!-- sorting -->
-					<template v-if="rowsClear.length !== 0">
-						<span class="select">{{ capApp.orderBy }}</span>
-						<select
-							@change="selectOrderBy($event.target.value)"
-							v-model.number="orderByColumnBatchIndex"
-						>
-							<option value="-1">-</option>
-							<option
-								v-for="(b,i) in columnBatches.filter(v => v.columnIndexSortBy !== -1)"
-								:value="b.columnIndexSortBy"
-							>
-								{{ b.caption }}
-							</option>
-						</select>
-						<my-button
-							v-if="orders.length !== 0"
-							@trigger="toggleOrderBy"
-							:image="orders[0].ascending ? 'triangleUp.png' : 'triangleDown.png'"
-							:naked="true"
-						/>
-					</template>
-					
-					<!-- no results message -->
-					<template v-if="rowsClear.length === 0">
-						<div class="no-results" v-if="!rowsFetching">
-							{{ capGen.resultsNone }}
-						</div>
-						<div class="no-results fetching" v-if="rowsFetching">
-							<img src="images/load.gif">
-							<span>{{ capApp.fetching }}</span>
+							<table>
+								<tr v-for="b in columnBatches">
+									<td>{{ b.caption }}</td>
+									<td>
+										<div class="batch" :class="{ vertical:b.vertical }">
+											<my-value-rich
+												v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null || columns[v].display === 'gallery')"
+												@clipboard="$emit('clipboard')"
+												:attributeId="columns[ind].attributeId"
+												:basis="columns[ind].basis"
+												:bold="columns[ind].styles.includes('bold')"
+												:clipboard="columns[ind].clipboard"
+												:display="columns[ind].display"
+												:italic="columns[ind].styles.includes('italic')"
+												:key="ind"
+												:length="columns[ind].length"
+												:value="r.values[ind]"
+												:wrap="columns[ind].wrap"
+											/>
+										</div>
+									</td>
+								</tr>
+							</table>
 						</div>
 					</template>
 				</div>
 				
-				<div class="card"
-					v-for="(r,ri) in rowsClear"
-					@click="clickRow(r,false)"
-					@click.middle="clickRow(r,true)"
-					@keyup.enter.space="clickRow(r,false)"
-					:class="{ rowSelect:rowSelect && !inputIsReadonly }"
-					:key="ri + '_' + r.indexRecordIds['0']"
-					:ref="refTabindex+String(ri)"
-					:tabindex="isInput ? '0' : '-1'"
-				>
-					<div class="actions" v-if="hasBulkActions" @click.stop="">
-						<my-button
-							@trigger="selectRow(ri)"
-							:image="selectedRows.includes(ri) ? 'checkbox1.png' : 'checkbox0.png'"
-							:naked="true"
-							:tight="true"
-						/>
-						<my-button image="delete.png"
-							@trigger="delAsk([ri])"
-							:naked="true"
-							:tight="true"
-						/>
-					</div>
-					<div class="header"></div>
-					
-					<!-- row values per column batch -->
-					<table>
-						<tr v-for="b in columnBatches">
-							<td>{{ b.caption }}</td>
-							<td>
-								<div class="batch" :class="{ vertical:b.vertical }">
-									<my-value-rich
-										v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null || columns[v].display === 'gallery')"
-										@clipboard="$emit('clipboard')"
-										:attributeId="columns[ind].attributeId"
-										:basis="columns[ind].basis"
-										:bold="columns[ind].styles.includes('bold')"
-										:clipboard="columns[ind].clipboard"
-										:display="columns[ind].display"
-										:italic="columns[ind].styles.includes('italic')"
-										:key="ind"
-										:length="columns[ind].length"
-										:value="r.values[ind]"
-										:wrap="columns[ind].wrap"
-									/>
-								</div>
-							</td>
-						</tr>
-					</table>
-				</div>
+				<!-- list inline form -->
+				<my-form
+					v-if="popUpFormInline !== null"
+					@close="$emit('close-inline')"
+					@record-deleted="get"
+					@record-updated="get"
+					@records-open="popUpFormInline.recordIds = $event"
+					:attributeIdMapDef="popUpFormInline.attributeIdMapDef"
+					:formId="popUpFormInline.formId"
+					:hasHelp="false"
+					:hasLog="false"
+					:isPopUp="true"
+					:isPopUpFloating="false"
+					:moduleId="popUpFormInline.moduleId"
+					:recordIds="popUpFormInline.recordIds"
+					:style="popUpFormInline.style"
+				/>
 			</div>
 		</template>
 	</div>`,
 	props:{
-		autoRenew:   { required:false,default:null },                    // refresh list data every x seconds
-		choices:     { type:Array,   required:false, default:() => [] }, // processed query choices
-		collections: { type:Array,   required:false, default:() => [] }, // consumed collections to filter by user input
+		autoRenew:      { required:false, default:null },                   // refresh list data every x seconds
+		choices:        { type:Array,   required:false, default:() => [] }, // processed query choices
+		collections:    { type:Array,   required:false, default:() => [] }, // consumed collections to filter by user input
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
-		columns:     { type:Array,   required:true },                    // processed list columns
-		fieldId:     { type:String,  required:true },
-		filters:     { type:Array,   required:true },                    // processed query filters
-		iconId:      { required:false,default:null },
-		layout:      { type:String,  required:false, default:'table' },  // list layout: table, cards
-		limitDefault:{ type:Number,  required:false, default:10 },       // default list limit
-		query:       { type:Object,  required:true },                    // list query
+		columns:        { type:Array,   required:true },                    // processed list columns
+		fieldId:        { type:String,  required:true },
+		filters:        { type:Array,   required:true },                    // processed query filters
+		iconId:         { required:false, default:null },
+		layout:         { type:String,  required:false, default:'table' },  // list layout: table, cards
+		limitDefault:   { type:Number,  required:false, default:10 },       // default list limit
+		popUpFormInline:{ required:false, default:null },                   // form to show inside list
+		query:          { type:Object,  required:true },                    // list query
 		
 		// toggles
 		allowBulk:      { type:Boolean, required:false, default:false }, // enable bulk editing
@@ -666,9 +685,10 @@ let MyList = {
 		inputValid:     { type:Boolean, required:false, default:true }
 	},
 	emits:[
-		'blurred','clipboard','focused','open-form','open-form-bulk',
-		'record-count-change','record-removed','record-selected',
-		'records-selected-init','set-args','set-collection-indexes'
+		'blurred','clipboard','close-inline','focused','open-form',
+		'open-form-bulk','record-count-change','record-removed',
+		'record-selected','records-selected-init','set-args',
+		'set-collection-indexes'
 	],
 	data() {
 		return {
@@ -904,6 +924,8 @@ let MyList = {
 		hasChoices:      (s) => s.query.choices.length > 1,
 		hasCreate:       (s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.rowSelect,
 		hasUpdate:       (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.rowSelect,
+		isCards:         (s) => s.layout === 'cards',
+		isTable:         (s) => s.layout === 'table',
 		joins:           (s) => s.fillRelationRecordIds(s.query.joins),
 		relationsJoined: (s) => s.getRelationsJoined(s.joins),
 		showInputAddLine:(s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
@@ -920,6 +942,10 @@ let MyList = {
 		moduleLanguage:(s) => s.$store.getters.moduleLanguage,
 		scrollFormId:  (s) => s.$store.getters.constants.scrollFormId,
 		settings:      (s) => s.$store.getters.settings
+	},
+	beforeCreate() {
+		// import at runtime due to circular dependencies
+		this.$options.components.MyForm = MyForm;
 	},
 	mounted() {
 		this.showTable = !this.isInput;
@@ -1258,7 +1284,6 @@ let MyList = {
 			const recordId = row.indexRecordIds['0'];
 			
 			if(this.isInput && !this.inputAsCategory) {
-				
 				if(!this.inputRecordIds.includes(recordId)) {
 					if(this.inputMulti) this.rowsInput.push(row);
 					else                this.rowsInput = [row];
@@ -1268,8 +1293,12 @@ let MyList = {
 				this.filtersQuick = '';
 			}
 			
-			if(this.rowSelect)
-				this.toggleRecordId(recordId,middleClick);
+			if(this.rowSelect) {
+				if(this.isInput)
+					this.toggleRecordId(recordId,middleClick);
+				else
+					this.$emit('open-form',[recordId],middleClick);
+			}
 		},
 		clickRowAll() {
 			for(let r of this.rows) {

@@ -5,7 +5,7 @@
 	overflow:visible;
 	z-index:var(--z-index-form);
 }
-.form-wrap.pop-up{
+.form-wrap.popUp.float{
 	width:100%;
 	padding:var(--spacing) 0px 0px var(--spacing);
 	max-width:1200px;
@@ -13,15 +13,23 @@
 	overflow:auto;
 	box-sizing:border-box;
 }
-.form-wrap.pop-up.fullscreen{
+.form-wrap.popUp.fullscreen{
 	max-width:unset !important;
 	max-height:unset !important;
 }
-.form-wrap.pop-up .form,
-.form-wrap.pop-up .form-help,
-.form-wrap.pop-up .form-log{
+.form-wrap.popUp>.form,
+.form-wrap.popUp>.form-help,
+.form-wrap.popUp>.form-log{
+	box-shadow:none;
+	margin:0px;
+	border-left:1px solid var(--color-border);
+}
+.form-wrap.popUp.float>.form,
+.form-wrap.popUp.float>.form-help,
+.form-wrap.popUp.float>.form-log{
 	border:1px solid var(--color-border);
 	border-radius:8px;
+	box-shadow:1px 1px 8px var(--color-shade);
 }
 
 /* fields */
@@ -118,9 +126,9 @@
 	border:1px solid var(--color-border);
 }
 .user-bordersSquared .form .top .state,
-.user-bordersSquared .form-wrap.pop-up .form,
-.user-bordersSquared .form-wrap.pop-up .form-help,
-.user-bordersSquared .form-wrap.pop-up .form-log,
+.user-bordersSquared .form-wrap.popUp .form,
+.user-bordersSquared .form-wrap.popUp .form-help,
+.user-bordersSquared .form-wrap.popUp .form-log,
 .user-bordersSquared .calendar .month,
 .user-bordersSquared .calendar .month .day .part>span,
 .user-bordersSquared .gantt,

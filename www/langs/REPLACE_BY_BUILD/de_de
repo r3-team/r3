@@ -1183,12 +1183,17 @@
 			"role":"Neue Rolle"
 		},
 		"openFormInput":{
+			"option":{
+				"float":"Schwebendes Fenster",
+				"inline":"Subformular im Feld",
+				"none":"Ganze Seite"
+			},
 			"attributeApply":"...um Wert auf Formular zu setzen",
 			"formIdOpen":"Formular",
 			"maxHeight":"Max. Höhe (px)",
 			"maxWidth":"Max. Breite (px)",
 			"newRecord":"Beim Erstellen neuer Datensätze",
-			"popUp":"Pop-up-Formular",
+			"popUpType":"Öffnen als",
 			"relationIndex":"Verwende Datensatz von Relation"
 		},
 		"pgIndex":{
@@ -1261,7 +1266,7 @@
 			"encryptionHint":"Relation unterstützt Ende-zu-Ende verschlüsselte Attributwerte.",
 			"execute":"Ausführen",
 			"external":"Referenzierende Beziehungen ({CNT})",
-			"fires":"Started",
+			"fires":"Startet",
 			"graph":"Beziehungsdiagramm",
 			"graphBase":"Basisrelation",
 			"indexes":"Indexe ({CNT})",

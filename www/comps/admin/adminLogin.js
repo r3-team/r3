@@ -56,6 +56,7 @@ let MyAdminLogin = {
 				:allowNew="false"
 				:formId="loginForms[loginFormIndexOpen].formId"
 				:isPopUp="true"
+				:isPopUpFloating="true"
 				:moduleId="formIdMap[loginForms[loginFormIndexOpen].formId].moduleId"
 				:recordIds="loginFormRecords"
 			/>

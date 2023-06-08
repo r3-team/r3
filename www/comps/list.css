@@ -36,6 +36,17 @@
 	margin-right:8px;
 	filter:var(--image-filter);
 }
+.list .layoutWrap{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
+	overflow:auto;
+}
+.list .layoutWrap .form-wrap.popUp{
+	flex:1 1 auto;
+	width:100%;
+	z-index:var(--z-index-inline-pop-up-form);
+}
 
 /* list as lookup or dropdown */
 /* HTML table view */
@@ -208,6 +219,7 @@
 	flex-flow:row wrap;
 	padding:16px 0px 0px 16px;
 	overflow:auto;
+	align-content:flex-start;
 }
 .list .layoutCards .top-actions{
 	width:100%;

@@ -22,6 +22,7 @@ import {
 } from './shared/field.js';
 import {
 	getFlexStyle,
+	getFormPopUpConfig,
 	getInputFieldName,
 	setGetterArgs
 } from './shared/form.js';
@@ -266,7 +267,7 @@ let MyField = {
 						v-if="isRelationship"
 						@blurred="blur"
 						@focused="focus"
-						@open-form="(...args) => openForm(args[0],[],args[1])"
+						@open-form="(...args) => openForm(args[0],[],args[1],null)"
 						@record-selected="relationshipRecordSelected"
 						@record-removed="relationshipRecordRemoved"
 						@records-selected-init="$emit('set-value-init',fieldAttributeId,$event,true,true)"
@@ -347,10 +348,10 @@ let MyField = {
 		<my-list
 			v-if="isList"
 			@clipboard="$emit('clipboard')"
-			@open-form="(...args) => openForm(args[0],[],args[1])"
-			@open-form-bulk="openFormBulk"
+			@close-inline="popUpFormInline = null"
+			@open-form="(...args) => openForm(args[0],[],args[1],null)"
+			@open-form-bulk="(...args) => openForm(args[0],[],args[1],'bulk')"
 			@record-count-change="$emit('set-counter',field.id,$event)"
-			@record-selected="(...args) => openForm([args[0]],[],args[1])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
 			:allowBulk="field.openFormBulk !== null"
@@ -367,10 +368,11 @@ let MyField = {
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
 			:iconId="iconId ? iconId : null"
-			:layout="field.layout"
-			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 			:isHidden="isHidden"
 			:isSingleField="isAloneInForm || isAloneInTab"
+			:layout="field.layout"
+			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
+			:popUpFormInline="popUpFormInline"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
 			:usesPageHistory="isAloneInForm && !formIsPopUp"
@@ -379,7 +381,7 @@ let MyField = {
 		<!-- calendar -->
 		<my-calendar
 			v-if="isCalendar && !field.gantt"
-			@open-form="(...args) => openForm(args[0],args[1],args[2])"
+			@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
 			@record-count-change="$emit('set-counter',field.id,$event)"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
@@ -408,7 +410,7 @@ let MyField = {
 		<!-- gantt -->
 		<my-gantt
 			v-if="isCalendar && field.gantt"
-			@open-form="(...args) => openForm(args[0],args[1],args[2])"
+			@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
 			@record-count-change="$emit('set-counter',field.id,$event)"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
@@ -560,11 +562,11 @@ let MyField = {
 		formLoading:      { type:Boolean, required:true },
 		formReadonly:     { type:Boolean, required:true }, // form is read only, disable all inputs
 		flexDirParent:    { type:String,  required:true }, // flex direction (row/column) of parent
-		joinsIndexMap:    { type:Object,  required:true },
 		isAloneInForm:    { type:Boolean, required:true }, // parent form contains only this field
 		isAloneInTab:     { type:Boolean, required:false, default:false }, // only field in a tab
 		isBulkUpdate:     { type:Boolean, required:false, default:false }, // form is in bulk update mode
 		isHiddenInParent: { type:Boolean, required:false, default:false }, // field is hidden in parent (tab/container)
+		joinsIndexMap:    { type:Object,  required:true },
 		logViewer:        { type:Boolean, required:false, default:false }, // is part of log viewer
 		values:           { type:Object,  required:true }
 	},
@@ -577,6 +579,7 @@ let MyField = {
 			collectionIdMapIndexes:{},    // selected record indexes of collection, used to filter with
 			focused:false,
 			notTouched:true,              // data field was not touched by user
+			popUpFormInline:null,         // inline form for some field types (list)
 			regconfigInput:'',
 			showColorPickerInput:false,   // for color picker fields
 			showPassword:false,           // for password fields
@@ -805,6 +808,7 @@ let MyField = {
 				if(!s.inputCanWrite) state = 'readonly';
 				
 				if(s.inputCanWrite                          // can write
+					&& !s.isBulkUpdate                      // bulk update is always optional
 					&& !s.attribute.nullable                // value not optional
 					&& !s.isRelationship1N                  // not 0...n partners
 					&& (!s.isNew || s.attribute.def === '') // existing record or new one with no defaults
@@ -1060,6 +1064,7 @@ let MyField = {
 		fieldOptionGet,
 		fieldOptionSet,
 		getFlexStyle,
+		getFormPopUpConfig,
 		getIndexAttributeId,
 		getInputFieldName,
 		getLinkMeta,
@@ -1121,33 +1126,34 @@ let MyField = {
 			if(this.showColorPickerInput)
 				this.showColorPickerInput = false;
 		},
-		openForm(recordIds,getters,middleClick) {
+		openForm(recordIds,getterArgs,middleClick,openFormContext) {
 			// set defaults
-			if(typeof recordIds   === 'undefined') recordIds   = [];
-			if(typeof getters     === 'undefined') getters     = [];
-			if(typeof middleClick === 'undefined') middleClick = false;
+			if(typeof recordIds       === 'undefined') recordIds       = [];
+			if(typeof getterArgs      === 'undefined') getterArgs         = [];
+			if(typeof middleClick     === 'undefined') middleClick     = false;
+			if(typeof openFormContext === 'undefined') openFormContext = null;
+			
+			// form open context
+			let openForm = openFormContext === 'bulk' ? this.field.openFormBulk : this.field.openForm;
 			
 			// apply record from defined relation index as attribute value via getter
-			if(this.field.openForm.attributeIdApply !== null
-				&& typeof this.joinsIndexMap[this.field.openForm.relationIndex] !== 'undefined'
-				&& this.joinsIndexMap[this.field.openForm.relationIndex].recordId !== 0) {
+			if(openForm.attributeIdApply !== null
+				&& typeof this.joinsIndexMap[openForm.relationIndex] !== 'undefined'
+				&& this.joinsIndexMap[openForm.relationIndex].recordId !== 0) {
 				
-				let atrId    = this.field.openForm.attributeIdApply;
-				let recordId = this.joinsIndexMap[this.field.openForm.relationIndex].recordId;
+				let atrId    = openForm.attributeIdApply;
+				let recordId = this.joinsIndexMap[openForm.relationIndex].recordId;
 				
-				getters = this.setGetterArgs(getters,'attributes',`${atrId}_${recordId}`);
+				getterArgs = this.setGetterArgs(getterArgs,'attributes',`${atrId}_${recordId}`);
 			}
 			
-			// apply source field ID
-			let options = JSON.parse(JSON.stringify(this.field.openForm));
-			options.fieldId = this.field.id;
+			// pop-up inline form (only inside none-inputs fields)
+			// pop-up float forms are sent upwards to the parent form to deal with
+			if(openForm.popUpType === 'inline')
+				return this.popUpFormInline = this.getFormPopUpConfig(
+					recordIds,openForm,getterArgs,'attributes');
 			
-			this.$emit('open-form',recordIds,options,getters,middleClick);
-		},
-		openFormBulk(recordIds) {
-			let options = JSON.parse(JSON.stringify(this.field.openFormBulk));
-			options.fieldId = this.field.id;
-			this.$emit('open-form',recordIds,options,[],false);
+			this.$emit('open-form',recordIds,openForm,getterArgs,middleClick,this.field.id);
 		},
 		relationshipRecordSelected(recordId,middleClick) {
 			if(recordId === null)
@@ -1208,7 +1214,7 @@ let MyField = {
 		},
 		triggerButton(middleClick) {
 			if(this.field.openForm !== null)
-				this.openForm([],[],middleClick);
+				this.openForm([],[],middleClick,null);
 			
 			if(this.field.jsFunctionId !== null)
 				this.$emit('execute-function',this.field.jsFunctionId);

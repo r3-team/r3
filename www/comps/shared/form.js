@@ -1,5 +1,6 @@
-import MyStore        from '../../stores/store.js';
-import {consoleError} from './error.js';
+import MyStore                        from '../../stores/store.js';
+import {getAttributeValuesFromGetter} from './attribute.js';
+import {consoleError}                 from './error.js';
 import {
 	aesGcmDecryptBase64WithPhrase,
 	rsaDecrypt
@@ -262,25 +263,34 @@ export function setGetterArgs(argsArray,name,value) {
 	return argsArray;
 };
 
-export function formOpen(options) {
-	if(options === null)
-		return;
+export function getFormPopUpConfig(recordIds,openForm,getterArgs,getterName) {
+	let conf = getFormPopUpTemplate();
+	conf.formId    = openForm.formIdOpen;
+	conf.moduleId  = MyStore.getters['schema/formIdMap'][openForm.formIdOpen].moduleId;
+	conf.recordIds = recordIds;
+
+	let styles = [];
+	if(openForm.maxWidth  !== 0)
+		styles.push(`max-width:${openForm.maxWidth}px`);
 	
-	// pop-up form
-	if(options.popUp) {
-		let popUpConfig = getFormPopUpTemplate();
-		popUpConfig.formId   = options.formIdOpen;
-		popUpConfig.moduleId = MyStore.getters['schema/formIdMap'][options.formIdOpen].moduleId;
-		
-		let styles = [];
-		if(options.maxWidth  !== 0) styles.push(`max-width:${options.maxWidth}px`);
-		if(options.maxHeight !== 0) styles.push(`max-height:${options.maxHeight}px`);
-		popUpConfig.style = styles.join(';');
-		
-		MyStore.commit('popUpFormGlobal',popUpConfig);
-		return;
+	if(openForm.maxHeight !== 0 && openForm.popUpType !== 'inline')
+		styles.push(`max-height:${openForm.maxHeight}px`);
+	
+	conf.style = styles.join(';');
+	
+	if(getterName !== null) {
+		const getter = getGetterArg(getterArgs,getterName);
+		conf.attributeIdMapDef = getter === '' ? {} : getAttributeValuesFromGetter(getter);
 	}
+	return conf;
+};
+
+export function formOpen(openForm) {
+	if(openForm === null)
+		return;
 	
-	// regular form navigation
-	this.$router.push(getFormRoute(options.formIdOpen,0,false));
+	if(openForm.popUpType !== null)
+		return MyStore.commit('popUpFormGlobal',getFormPopUpConfig([],openForm,[],null));
+	
+	this.$router.push(getFormRoute(openForm.formIdOpen,0,false));
 };

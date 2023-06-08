@@ -32,32 +32,38 @@ let MyBuilderOpenFormInput = {
 		
 		<template v-if="formIsSet">
 			<tr>
-				<td>{{ capApp.popUp }}</td>
+				<td>{{ capApp.popUpType }}</td>
 				<td>
-					<my-bool
-						@update:modelValue="set('popUp',$event)"
-						:modelValue="openForm.popUp"
-						:readonly="readonly || forcePopUp"
-					/>
+					<select v-model="popUpType" :disabled="readonly">
+						<option value="" :disabled="forcePopUp">
+							{{ capApp.option.none }}
+						</option>
+						<option value="float">
+							{{ capApp.option.float }}
+						</option>
+						<option value="inline" :disabled="!allowPopUpInline">
+							{{ capApp.option.inline }}
+						</option>
+					</select>
 				</td>
 			</tr>
-			<tr v-if="openForm.popUp">
-				<td>{{ capApp.maxHeight }}</td>
-				<td>
-					<input
-						@input="set('maxHeight',$event.target.value)"
-						:disabled="readonly"
-						:value="openForm.maxHeight"
-					/>
-				</td>
-			</tr>
-			<tr v-if="openForm.popUp">
+			<tr v-if="popUpType !== ''">
 				<td>{{ capApp.maxWidth }}</td>
 				<td>
 					<input
 						@input="set('maxWidth',$event.target.value)"
 						:disabled="readonly"
 						:value="openForm.maxWidth"
+					/>
+				</td>
+			</tr>
+			<tr v-if="popUpType === 'float'">
+				<td>{{ capApp.maxHeight }}</td>
+				<td>
+					<input
+						@input="set('maxHeight',$event.target.value)"
+						:disabled="readonly"
+						:value="openForm.maxHeight"
 					/>
 				</td>
 			</tr>
@@ -105,6 +111,7 @@ let MyBuilderOpenFormInput = {
 	props:{
 		allowAllForms:   { type:Boolean, required:false, default:false },
 		allowNewRecords: { type:Boolean, required:false, default:false },
+		allowPopUpInline:{ type:Boolean, required:false, default:false },
 		forcePopUp:      { type:Boolean, required:false, default:false },
 		joinsIndexMap:   { type:Object,  required:false, default:function() { return {}; } },
 		module:          { type:Object,  required:true },
@@ -114,8 +121,11 @@ let MyBuilderOpenFormInput = {
 	},
 	emits:['update:openForm'],
 	computed:{
-		// simple
-		formIsSet:(s) => s.openForm !== null && s.openForm.formIdOpen !== null,
+		// inputs
+		popUpType:{
+			get()  { return this.openForm.popUpType === null ? '' : this.openForm.popUpType; },
+			set(v) { this.set('popUpType',v === '' ? null : v); }
+		},
 		
 		// options
 		targetAttributes:(s) => {
@@ -154,6 +164,9 @@ let MyBuilderOpenFormInput = {
 			return out;
 		},
 		
+		// simple
+		formIsSet:(s) => s.openForm !== null && s.openForm.formIdOpen !== null,
+		
 		// stores
 		modules:      (s) => s.$store.getters['schema/modules'],
 		relationIdMap:(s) => s.$store.getters['schema/relationIdMap'],
@@ -179,7 +192,7 @@ let MyBuilderOpenFormInput = {
 					formIdOpen:null,
 					attributeIdApply:null,
 					relationIndex:-1,
-					popUp:this.forcePopUp ? true : false,
+					popUpType:this.forcePopUp ? 'float' : null,
 					maxHeight:0,
 					maxWidth:0
 				};

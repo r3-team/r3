@@ -99,7 +99,8 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	// clean up on next release
-	//
+	// ALTER TABLE app.open_form ALTER COLUMN pop_up_type
+	//  TYPE app.open_form_pop_up_type USING pop_up_type::text::app.open_form_pop_up_type;
 
 	"3.3": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
@@ -254,6 +255,12 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- bulk update forms
 			CREATE TYPE app.open_form_context AS ENUM('bulk');
 			ALTER TABLE app.open_form ADD COLUMN context app.open_form_context;
+			
+			-- inline pop-up forms
+			CREATE TYPE app.open_form_pop_up_type AS ENUM('float','inline');
+			ALTER TABLE app.open_form ADD COLUMN pop_up_type TEXT;
+			UPDATE app.open_form SET pop_up_type = 'float' WHERE pop_up;
+			ALTER TABLE app.open_form DROP COLUMN pop_up;
 		`)
 		return "3.4", err
 	},

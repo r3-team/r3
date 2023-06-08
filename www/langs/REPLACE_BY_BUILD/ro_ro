@@ -1183,12 +1183,17 @@
 			"role":"New role"
 		},
 		"openFormInput":{
+			"option":{
+				"float":"Floating window",
+				"inline":"Sub form inside field",
+				"none":"Full page form"
+			},
 			"attributeApply":"...pentru a seta valoare formularului",
 			"formIdOpen":"Formular",
 			"maxHeight":"Înălțimea maximă (px)",
 			"maxWidth":"Lățimea maximă (px)",
 			"newRecord":"La crearea înregistrărilor noi",
-			"popUp":"Formular de tip pop-up",
+			"popUpType":"Open as",
 			"relationIndex":"Folosește înregistrarea din relația"
 		},
 		"pgIndex":{

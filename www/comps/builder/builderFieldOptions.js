@@ -1016,8 +1016,9 @@ let MyBuilderFieldOptions = {
 				<td>
 					<my-builder-open-form-input
 						@update:openForm="set('openForm',$event)"
-						:allowNewRecords="true"
 						:allowAllForms="isButton"
+						:allowNewRecords="true"
+						:allowPopUpInline="isList"
 						:joinsIndexMap="joinsIndexMap"
 						:module="module"
 						:openForm="field.openForm"
@@ -1030,8 +1031,9 @@ let MyBuilderFieldOptions = {
 				<td>
 					<my-builder-open-form-input
 						@update:openForm="set('openFormBulk',$event)"
-						:allowNewRecords="false"
 						:allowAllForms="false"
+						:allowNewRecords="false"
+						:allowPopUpInline="isList"
 						:forcePopUp="true"
 						:joinsIndexMap="joinsIndexMap"
 						:module="module"

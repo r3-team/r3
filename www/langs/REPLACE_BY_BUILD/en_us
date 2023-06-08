@@ -1183,12 +1183,17 @@
 			"role":"New role"
 		},
 		"openFormInput":{
+			"option":{
+				"float":"Floating window",
+				"inline":"Sub form inside field",
+				"none":"Full page form"
+			},
 			"attributeApply":"...to set value on form",
 			"formIdOpen":"Form",
 			"maxHeight":"Max. height (px)",
 			"maxWidth":"Max. width (px)",
 			"newRecord":"When creating new records",
-			"popUp":"Pop-up form",
+			"popUpType":"Open as",
 			"relationIndex":"Use record from relation"
 		},
 		"pgIndex":{

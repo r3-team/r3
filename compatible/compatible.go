@@ -13,6 +13,16 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// < 3.5
+// migrate open form pop-up type
+func FixOpenFormPopUpType(openForm types.OpenForm) types.OpenForm {
+	if openForm.PopUp && !openForm.PopUpType.Valid {
+		openForm.PopUpType.String = "float"
+		openForm.PopUpType.Valid = true
+	}
+	return openForm
+}
+
 // < 3.4
 // migrate PG index method
 func FixPgIndexMethod(method string) string {

@@ -143,10 +143,13 @@ type OpenForm struct {
 	FormIdOpen       uuid.UUID   `json:"formIdOpen"`       // form to open
 	AttributeIdApply pgtype.UUID `json:"attributeIdApply"` // apply record ID to attribute on opened form
 	RelationIndex    int         `json:"relationIndex"`    // relation index of record to apply to attribute
-	PopUp            bool        `json:"popUp"`            // opened form is pop-up-form
+	PopUpType        pgtype.Text `json:"popUpType"`        // if set, form is opened as pop-up, values: float, inline
 	Context          pgtype.Text `json:"context"`          // used when same entity needs multiple open forms, values: bulk
 	MaxHeight        int         `json:"maxHeight"`        // max. height in PX for opened form (pop-up only)
 	MaxWidth         int         `json:"maxWidth"`         // max. width  in PX for opened form (pop-up only)
+
+	// legacy
+	PopUp bool `json:"popUp"` // replaced by popUpType, if null pop-up is not used
 }
 type Icon struct {
 	Id       uuid.UUID `json:"id"`

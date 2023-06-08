@@ -6,6 +6,7 @@
 	--z-index-dialog-wrap:100;         /* dialog wrap */
 	--z-index-header-entry:60;
 	--z-index-header:50;               /* header, main menu, top of the page */
+	--z-index-inline-pop-up-form:40;
 	
 	/* form dropdowns */
 	--z-index-dropdown:20;
@@ -1178,7 +1179,7 @@ table td.maximum{
 .user-compact .app-content{
 	padding:0px;
 }
-.user-compact .app-content .contentBox:not(.pop-up){
+.user-compact .app-content .contentBox:not(.popUp){
 	margin:0px;
 	border:none;
 	border-bottom:1px solid var(--color-border);
@@ -1187,10 +1188,10 @@ table td.maximum{
 	box-shadow:none;
 	--content-box-max-width:unset;
 }
-.user-compact .app-content .contentBox:not(.pop-up):last-child{
+.user-compact .app-content .contentBox:not(.popUp):last-child{
 	border-right:none;
 }
-.user-compact .app-content .contentBox:not(.pop-up) .top{
+.user-compact .app-content .contentBox:not(.popUp) .top{
 	border-radius:0px;
 }
 .user-compact .navigationWrap{

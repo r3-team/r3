@@ -73,6 +73,7 @@ let MyApp = {
 					@close="$store.commit('popUpFormGlobal',null)"
 					:formId="popUpFormGlobal.formId"
 					:isPopUp="true"
+					:isPopUpFloating="true"
 					:moduleId="popUpFormGlobal.moduleId"
 					:recordIds="popUpFormGlobal.recordIds"
 					:style="popUpFormGlobal.style"
