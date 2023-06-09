@@ -626,7 +626,7 @@ let MyList = {
 					</template>
 				</div>
 				
-				<!-- list inline form -->
+				<!-- inline form -->
 				<my-form
 					v-if="popUpFormInline !== null"
 					@close="$emit('close-inline')"

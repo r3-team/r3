@@ -381,6 +381,7 @@ let MyField = {
 		<!-- calendar -->
 		<my-calendar
 			v-if="isCalendar && !field.gantt"
+			@close-inline="popUpFormInline = null"
 			@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
 			@record-count-change="$emit('set-counter',field.id,$event)"
 			@set-args="(...args) => $emit('set-form-args',...args)"
@@ -402,6 +403,7 @@ let MyField = {
 			:indexDate1="field.indexDate1"
 			:isHidden="isHidden"
 			:isSingleField="isAloneInForm || isAloneInTab"
+			:popUpFormInline="popUpFormInline"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
 			:usesPageHistory="isAloneInForm && !formIsPopUp"
@@ -410,6 +412,7 @@ let MyField = {
 		<!-- gantt -->
 		<my-gantt
 			v-if="isCalendar && field.gantt"
+			@close-inline="popUpFormInline = null"
 			@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
 			@record-count-change="$emit('set-counter',field.id,$event)"
 			@set-args="(...args) => $emit('set-form-args',...args)"
@@ -432,6 +435,7 @@ let MyField = {
 			:indexDate1="field.indexDate1"
 			:isHidden="isHidden"
 			:isSingleField="isAloneInForm || isAloneInTab"
+			:popUpFormInline="popUpFormInline"
 			:rowSelect="field.openForm !== null"
 			:stepTypeDefault="field.ganttSteps"
 			:stepTypeToggle="field.ganttStepsToggle"

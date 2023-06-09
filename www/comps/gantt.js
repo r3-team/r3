@@ -1,4 +1,5 @@
 import MyInputCollection from './inputCollection.js';
+import MyForm            from './form.js';
 import MyValueRich       from './valueRich.js';
 import srcBase64Icon     from './shared/image.js';
 import {getCaption}      from './shared/language.js';
@@ -350,6 +351,24 @@ let MyGantt = {
 					{{ capGen.nothingThere }}
 				</div>
 			</div>
+			
+			<!-- inline form -->
+			<my-form
+				v-if="popUpFormInline !== null"
+				@close="$emit('close-inline')"
+				@record-deleted="get"
+				@record-updated="get"
+				@records-open="popUpFormInline.recordIds = $event"
+				:attributeIdMapDef="popUpFormInline.attributeIdMapDef"
+				:formId="popUpFormInline.formId"
+				:hasHelp="false"
+				:hasLog="false"
+				:isPopUp="true"
+				:isPopUpFloating="false"
+				:moduleId="popUpFormInline.moduleId"
+				:recordIds="popUpFormInline.recordIds"
+				:style="popUpFormInline.style"
+			/>
 		</div>
 	</div>`,
 	props:{
@@ -369,13 +388,14 @@ let MyGantt = {
 		indexDate1:      { type:Number,  required:true }, // index of attribute that provides record date to
 		isHidden:        { type:Boolean, required:false, default:false },
 		isSingleField:   { type:Boolean, required:false, default:false },
+		popUpFormInline: { required:false, default:null },
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:true },
 		stepTypeDefault: { type:String,  required:true },
 		stepTypeToggle:  { type:Boolean, required:true },
 		usesPageHistory: { type:Boolean, required:true }
 	},
-	emits:['open-form','record-count-change','set-args','set-collection-indexes'],
+	emits:['close-inline','open-form','record-count-change','set-args','set-collection-indexes'],
 	data() {
 		return {
 			choiceId:null,
@@ -502,6 +522,10 @@ let MyGantt = {
 		capGen:        (s) => s.$store.getters.captions.generic,
 		settings:      (s) => s.$store.getters.settings
 	},
+	beforeCreate() {
+		// import at runtime due to circular dependencies
+		this.$options.components.MyForm = MyForm;
+	},
 	created() {
 		window.addEventListener('resize',this.resize);
 	},
@@ -510,6 +534,7 @@ let MyGantt = {
 		this.dateStart = this.getDateNowRounded();
 		
 		// setup watchers
+		this.$watch('popUpFormInline',this.resize);
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
 		});
