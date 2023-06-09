@@ -1151,9 +1151,9 @@ let MyField = {
 				getterArgs = this.setGetterArgs(getterArgs,'attributes',`${atrId}_${recordId}`);
 			}
 			
-			// pop-up inline form (only inside none-inputs fields)
+			// pop-up inline form (only inside none-inputs fields) and never on mobile
 			// pop-up float forms are sent upwards to the parent form to deal with
-			if(openForm.popUpType === 'inline')
+			if(openForm.popUpType === 'inline' && !this.isMobile)
 				return this.popUpFormInline = this.getFormPopUpConfig(
 					recordIds,openForm,getterArgs,'attributes');
 			
