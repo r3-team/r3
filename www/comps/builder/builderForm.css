@@ -15,6 +15,7 @@
 }
 .builder-form .sidebar .templates{
 	margin:10px 0px 16px;
+	max-width:500px;
 	overflow:auto;
 	border-radius:5px;
 	overflow:hidden;

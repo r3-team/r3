@@ -611,19 +611,9 @@ let MyBuilderFieldOptions = {
 						</select>
 					</td>
 				</tr>
-				<tr>
-					<td>{{ capApp.gantt }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="set('gantt',$event)"
-							:modelValue="field.gantt"
-							:readonly="field.ics"
-						/>
-					</td>
-				</tr>
 				<template v-if="field.gantt">
 					<tr>
-						<td></td>
+						<td>{{ capApp.gantt }}</td>
 						<td><i>{{ capApp.ganttNotes }}</i></td>
 					</tr>
 					<tr>
@@ -1219,11 +1209,6 @@ let MyBuilderFieldOptions = {
 				let q = JSON.parse(JSON.stringify(this.field.query));
 				q.lookups = [];
 				this.$emit('set','query',q);
-			}
-			if(name === 'gantt') {
-				// gantt, set or remove gantt step option
-				if(!val) this.$emit('set','ganttSteps',null);
-				else     this.$emit('set','ganttSteps','days');
 			}
 			this.$emit('set',name,val);
 		},

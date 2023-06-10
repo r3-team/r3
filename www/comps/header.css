@@ -3,7 +3,9 @@
 	display:flex;
 	flex-direction:row;
 	justify-content:center;
+	align-items:flex-end;
 	background-size:16px 16px;
+	height:var(--app-header-height);
 	z-index:var(--z-index-header);
 	position:relative;
 	box-shadow:1px 1px 4px var(--color-shade);
@@ -17,7 +19,7 @@
 	background-color:var(--color-navigation-default);
 }
 .app-header-content{
-	padding:20px 10px 0px;
+	padding:0px 10px;
 	flex:1 1 auto;
 	display:flex;
 	flex-direction:row;
@@ -167,8 +169,7 @@
 	filter:brightness(94%) grayscale(15%);
 }
 
-
 /* mobile overwrites */
 .is-mobile .app-header-content{
-	padding:10px 2px 0px;
+	padding:0px 0px 0px 5px;
 }

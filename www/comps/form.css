@@ -7,7 +7,7 @@
 }
 .form-wrap.popUp.float{
 	width:100%;
-	padding:var(--spacing) 0px 0px var(--spacing);
+	padding:var(--spacing);
 	max-width:1200px;
 	max-height:1200px;
 	overflow:auto;
@@ -143,6 +143,11 @@
 .is-mobile .form-wrap{
 	flex-direction:column;
 	padding-left:0px;
+}
+.is-mobile .form-wrap.popUp.float{
+	padding:0px;
+	max-width:unset !important;
+	max-height:unset !important;
 }
 
 /* combined mobile & user overwrites */

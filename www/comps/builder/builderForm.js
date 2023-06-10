@@ -607,6 +607,7 @@ let MyBuilderForm = {
 				fields.push(this.createFieldTabs());      // tabs
 				fields.push(this.createFieldList());      // list
 				fields.push(this.createFieldCalendar());  // calendar
+				fields.push(this.createFieldGantt());     // Gantt
 				fields.push(this.createFieldChart());     // chart
 				fields.push(this.createFieldHeader());    // header
 				fields.push(this.createFieldButton());    // button
@@ -790,6 +791,30 @@ let MyBuilderForm = {
 				indexColor:null,
 				gantt:false,
 				ganttSteps:null,
+				ics:false,
+				dateRange0:0,
+				dateRange1:0,
+				openForm:null,
+				query:this.getQueryTemplate(),
+				columns:[],
+				collections:[]
+			};
+		},
+		createFieldGantt() {
+			return {
+				id:'template_gantt',
+				iconId:null,
+				content:'calendar',
+				state:'default',
+				onMobile:true,
+				attributeIdDate0:null,
+				attributeIdDate1:null,
+				attributeIdColor:null,
+				indexDate0:null,
+				indexDate1:null,
+				indexColor:null,
+				gantt:true,
+				ganttSteps:'days',
 				ics:false,
 				dateRange0:0,
 				dateRange1:0,

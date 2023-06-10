@@ -59,6 +59,7 @@
 	/**/
 	/* heights */
 	--row-height:42px;
+	--app-header-height:70px;
 	
 	/**/
 	/* colors */
@@ -398,7 +399,7 @@ h3{
 	overflow:hidden;
 }
 .app-sub-window.under-header{
-	padding-top:70px;
+	padding-top:var(--app-header-height);
 }
 
 /* input block overlay */
@@ -1259,6 +1260,9 @@ table td.maximum{
 }
 
 /* mobile overwrites */
+.is-mobile{
+	--app-header-height:50px;
+}
 .is-mobile .app-content{
 	padding:0px !important;
 	align-content:flex-start;

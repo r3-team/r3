@@ -338,11 +338,11 @@ let MyBuilderField = {
 		title:(s) => {
 			switch(s.field.content) {
 				case 'button':    return 'Button';    break;
-				case 'calendar':  return 'Calendar';  break;
 				case 'chart':     return 'Chart';     break;
 				case 'container': return 'Container'; break;
 				case 'header':    return 'Header';    break;
 				case 'tabs':      return 'Tabs';      break;
+				case 'calendar':  return s.field.gantt ? 'Gantt' : 'Calendar'; break;
 				case 'data':      return s.getItemTitle(s.field.attributeId,s.field.index,s.field.outsideIn,s.field.attributeIdNm); break;
 				case 'list':      return s.field.query.relationId === null ? 'List' : `List: ${s.relationIdMap[s.field.query.relationId].name}`; break;
 			}
