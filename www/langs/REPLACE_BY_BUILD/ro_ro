@@ -420,8 +420,15 @@
 			"dialog":{
 				"imapWarn":"Please note that the IMAP connector loads and then deletes messages from the chosen mailbox. It should only be used with a dedicated mailbox and not to access personal mail accounts."
 			},
+			"option":{
+				"authMethod":{
+					"login":"LOGIN (for O365 legacy SMTP)",
+					"plain":"PLAIN (default)"
+				}
+			},
 			"account":"Cont de email",
 			"accounts":"Conturi de email",
+			"accountAuthMethod":"Auth. method",
 			"accountHost":"Nume gazdă",
 			"accountMode":"Modul",
 			"accountNew":"Cont nou",

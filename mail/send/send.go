@@ -14,7 +14,7 @@ import (
 	"r3/types"
 	"strings"
 
-	"github.com/jordan-wright/email"
+	"github.com/wneessen/go-mail"
 )
 
 var (
@@ -108,26 +108,34 @@ func do(m types.Mail) error {
 	}
 
 	// build mail
-	e := email.NewEmail()
-	e.From = ma.SendAs
+	msg := mail.NewMsg()
+	msg.Subject(m.Subject)
+
+	if err := msg.From(ma.SendAs); err != nil {
+		return err
+	}
 	if m.ToList != "" {
-		e.To = strings.Split(m.ToList, ",")
+		if err := msg.To(strings.Split(m.ToList, ",")...); err != nil {
+			return err
+		}
 	}
 	if m.CcList != "" {
-		e.Cc = strings.Split(m.CcList, ",")
+		if err := msg.Cc(strings.Split(m.CcList, ",")...); err != nil {
+			return err
+		}
 	}
 	if m.BccList != "" {
-		e.Bcc = strings.Split(m.BccList, ",")
+		if err := msg.Bcc(strings.Split(m.BccList, ",")...); err != nil {
+			return err
+		}
 	}
-
-	e.Subject = m.Subject
 
 	// dirty trick to assume body content by looking for beginning of HTML tag
 	// we should find a way to store our preference when sending mails
 	if strings.Contains(m.Body, "<") {
-		e.HTML = []byte(m.Body)
+		msg.SetBodyString(mail.TypeTextHTML, m.Body)
 	} else {
-		e.Text = []byte(m.Body)
+		msg.SetBodyString(mail.TypeTextPlain, m.Body)
 	}
 
 	// parse attachments from file attribute, if set
@@ -182,32 +190,37 @@ func do(m types.Mail) error {
 				continue
 			}
 
-			att, err := e.AttachFile(filePath)
-			if err != nil {
-				return err
-			}
-			att.Filename = f.Name
+			msg.AttachFile(filePath, getAttachedFileWithName(f.Name))
 		}
 	}
 
+	// send mail
 	log.Info("mail", fmt.Sprintf("sending message (%d attachments)",
-		len(e.Attachments)))
+		len(msg.GetAttachments())))
 
-	// send mail with SMTP
-	tlsConfig := tls.Config{ServerName: ma.HostName}
-	var auth smtp.Auth
+	client, err := mail.NewClient(ma.HostName, mail.WithPort(int(ma.HostPort)),
+		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(ma.Username),
+		mail.WithPassword(ma.Password),
+		mail.WithTLSConfig(&tls.Config{ServerName: ma.HostName}))
 
-	// temporary hotfix for O365 legacy login auth
-	if strings.ToLower(ma.HostName) == "smtp.office365.com" {
-		auth = o365LoginAuth(ma.Username, ma.Password)
-	} else {
-		auth = smtp.PlainAuth("", ma.Username, ma.Password, ma.HostName)
+	if err != nil {
+		return err
 	}
 
-	if ma.StartTls {
-		return e.SendWithStartTLS(fmt.Sprintf("%s:%d", ma.HostName, ma.HostPort), auth, &tlsConfig)
+	// use SSL if STARTTLS is disabled - otherwise STARTTLS is attempted
+	client.SetSSL(!ma.StartTls)
+
+	// apply authentication method
+	switch ma.AuthMethod {
+	case "plain":
+		client.SetSMTPAuth(mail.SMTPAuthPlain)
+	case "login":
+		client.SetSMTPAuth(mail.SMTPAuthLogin)
+	default:
+		return fmt.Errorf("unsupported authentication method '%s'", ma.AuthMethod)
 	}
-	return e.SendWithTLS(fmt.Sprintf("%s:%d", ma.HostName, ma.HostPort), auth, &tlsConfig)
+
+	return client.DialAndSend(msg)
 }
 
 // legacy O365 SMTP login auth
@@ -234,4 +247,11 @@ func (a *loginAuthSimple) Next(fromServer []byte, more bool) ([]byte, error) {
 		}
 	}
 	return nil, nil
+}
+
+// helper
+func getAttachedFileWithName(n string) mail.FileOption {
+	return func(f *mail.File) {
+		f.Name = n
+	}
 }

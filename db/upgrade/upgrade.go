@@ -101,6 +101,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 	// clean up on next release
 	// ALTER TABLE app.open_form ALTER COLUMN pop_up_type
 	//  TYPE app.open_form_pop_up_type USING pop_up_type::text::app.open_form_pop_up_type;
+	// ALTER TABLE instance.mail_account ALTER COLUMN auth_method
+	//  TYPE instance.mail_account_auth_method USING auth_method::text::instance.mail_account_auth_method;
 
 	"3.3": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
@@ -261,6 +263,17 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.open_form ADD COLUMN pop_up_type TEXT;
 			UPDATE app.open_form SET pop_up_type = 'float' WHERE pop_up;
 			ALTER TABLE app.open_form DROP COLUMN pop_up;
+			
+			-- mail account authentication methods
+			ALTER TABLE instance.mail_account ADD COLUMN auth_method TEXT NOT NULL DEFAULT 'plain';
+			ALTER TABLE instance.mail_account ALTER COLUMN auth_method DROP DEFAULT;
+			
+			UPDATE instance.mail_account
+			SET auth_method = 'login'
+			WHERE mode = 'smtp'
+			AND LOWER(host_name) = 'smtp.office365.com';
+			
+			CREATE TYPE instance.mail_account_auth_method AS ENUM ('plain','login');
 		`)
 		return "3.4", err
 	},

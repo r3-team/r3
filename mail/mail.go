@@ -113,26 +113,28 @@ func DelAccount_tx(tx pgx.Tx, id int64) error {
 	return err
 }
 
-func SetAccount_tx(tx pgx.Tx, id int32, name string, mode string, sendAs string,
-	username string, password string, startTls bool, hostName string, hostPort int64) error {
-
-	newRecord := id == 0
+func SetAccount_tx(tx pgx.Tx, ma types.MailAccount) error {
+	newRecord := ma.Id == 0
 
 	if newRecord {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO instance.mail_account (name, mode, send_as, username,
-				password, start_tls, host_name, host_port)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
-		`, name, mode, sendAs, username, password, startTls, hostName, hostPort); err != nil {
+			INSERT INTO instance.mail_account (name, mode, auth_method, send_as,
+				username, password, start_tls, host_name, host_port)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+		`, ma.Name, ma.Mode, ma.AuthMethod, ma.SendAs, ma.Username,
+			ma.Password, ma.StartTls, ma.HostName, ma.HostPort); err != nil {
+
 			return err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE instance.mail_account
-			SET name = $1, mode = $2, send_as = $3, username = $4, password = $5,
-				start_tls = $6, host_name = $7, host_port = $8
-			WHERE id = $9
-		`, name, mode, sendAs, username, password, startTls, hostName, hostPort, id); err != nil {
+			SET name = $1, mode = $2, auth_method = $3, send_as = $4,
+				username = $5, password = $6, start_tls = $7, host_name = $8,
+				host_port = $9
+			WHERE id = $10
+		`, ma.Name, ma.Mode, ma.AuthMethod, ma.SendAs, ma.Username,
+			ma.Password, ma.StartTls, ma.HostName, ma.HostPort, ma.Id); err != nil {
 			return err
 		}
 	}

@@ -15,9 +15,15 @@ let MyAdminMailAccount = {
 				<option value="imap">IMAP</option>
 			</select>
 		</td>
-		<td>	<input v-if="mode === 'smtp'" v-model="sendAs" /></td>
+		<td>	<input v-if="isSmtp" v-model="sendAs" /></td>
 		<td>	<input v-model="username" /></td>
-		<td>	<input v-model="password" type="password" /></td>
+		<td>	<input v-model="password" class="short" type="password" /></td>
+		<td>	
+			<select v-if="isSmtp" class="short" v-model="authMethod">
+				<option value="plain">{{ capApp.option.authMethod.plain }}</option>
+				<option value="login">{{ capApp.option.authMethod.login }}</option>
+			</select>
+		</td>
 		<td>	<my-bool v-model="startTls" /></td>
 		<td>	<input v-model="hostName" /></td>
 		<td>	<input class="short" v-model.number="hostPort" /></td>
@@ -45,6 +51,7 @@ let MyAdminMailAccount = {
 				id:0,
 				name:'',
 				mode:'smtp',
+				authMethod:'plain',
 				username:'',
 				password:'',
 				startTls:false,
@@ -55,11 +62,12 @@ let MyAdminMailAccount = {
 		}
 	},
 	emits:['reloaded'],
-	data:function() {
+	data() {
 		return {
 			id:this.account.id,
 			name:this.account.name,
 			mode:this.account.mode,
+			authMethod:this.account.authMethod,
 			username:this.account.username,
 			password:this.account.password,
 			startTls:this.account.startTls,
@@ -69,30 +77,28 @@ let MyAdminMailAccount = {
 		};
 	},
 	computed:{
-		hasChanges:function() {
-			return this.account.id       !== this.id
-				|| this.account.name     !== this.name
-				|| this.account.mode     !== this.mode
-				|| this.account.username !== this.username
-				|| this.account.password !== this.password
-				|| this.account.startTls !== this.startTls
-				|| this.account.sendAs   !== this.sendAs
-				|| this.account.hostName !== this.hostName
-				|| this.account.hostPort !== this.hostPort
-			;
-		},
+		hasChanges:(s) => s.account.id !== s.id
+			|| s.account.name       !== s.name
+			|| s.account.mode       !== s.mode
+			|| s.account.authMethod !== s.authMethod
+			|| s.account.username   !== s.username
+			|| s.account.password   !== s.password
+			|| s.account.startTls   !== s.startTls
+			|| s.account.sendAs     !== s.sendAs
+			|| s.account.hostName   !== s.hostName
+			|| s.account.hostPort   !== s.hostPort,
 		
 		// simple
-		isNew:function() { return this.id === 0; },
+		isNew: (s) => s.id === 0,
+		isSmtp:(s) => s.mode === 'smtp',
 		
 		// stores
-		capApp:function() { return this.$store.getters.captions.admin.mails; },
-		capGen:function() { return this.$store.getters.captions.generic; }
+		capApp:(s) => s.$store.getters.captions.admin.mails,
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
-		warning:function(v) {
-			if(v !== 'imap')
-				return;
+		warning(v) {
+			if(v !== 'imap') return;
 			
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.imapWarn,
@@ -106,17 +112,18 @@ let MyAdminMailAccount = {
 		},
 		
 		// backend calls
-		del:function() {
+		del() {
 			ws.send('mailAccount','del',{id:this.id},true).then(
 				() => this.reload(),
 				this.$root.genericError
 			);
 		},
-		set:function() {
+		set() {
 			ws.send('mailAccount','set',{
 				id:this.id,
 				name:this.name,
 				mode:this.mode,
+				authMethod:this.authMethod,
 				username:this.username,
 				password:this.password,
 				startTls:this.startTls,
@@ -133,7 +140,7 @@ let MyAdminMailAccount = {
 				this.$root.genericError
 			);
 		},
-		reload:function() {
+		reload() {
 			// reload mail account cache after change
 			ws.send('mailAccount','reload',{},true).then(
 				() => this.$emit('reloaded'),
@@ -188,6 +195,7 @@ let MyAdminMailAccounts = {
 						<th>{{ capApp.accountSendAs }}</th>
 						<th>{{ capApp.accountUser }}</th>
 						<th>{{ capApp.accountPass }}</th>
+						<th>{{ capApp.accountAuthMethod }}</th>
 						<th>{{ capApp.accountStartTls }}</th>
 						<th>{{ capApp.accountHost }}</th>
 						<th colspan="2">{{ capApp.accountPort }}</th>
@@ -210,7 +218,7 @@ let MyAdminMailAccounts = {
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			// mail accounts
 			accountIdMap:{},
@@ -221,33 +229,33 @@ let MyAdminMailAccounts = {
 			testSubject:'R3 test mail'
 		};
 	},
-	mounted:function() {
+	mounted() {
 		this.$store.commit('pageTitle',this.menuTitle);
 		this.get();
 	},
 	computed:{
-		accountNamesSmtp:function() {
+		accountNamesSmtp:(s) => {
 			let out = [];
-			for(let k in this.accountIdMap) {
-				if(this.accountIdMap[k].mode === 'smtp')
-					out.push(this.accountIdMap[k].name);
+			for(let k in s.accountIdMap) {
+				if(s.accountIdMap[k].mode === 'smtp')
+					out.push(s.accountIdMap[k].name);
 			}
 			return out;
 		},
 		
 		// stores
-		capApp:  function() { return this.$store.getters.captions.admin.mails; },
-		capGen:  function() { return this.$store.getters.captions.generic; }
+		capApp:(s) => s.$store.getters.captions.admin.mails,
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// backend calls
-		get:function() {
+		get() {
 			ws.send('mailAccount','get',{},true).then(
 				res => this.accountIdMap = res.payload.accounts,
 				this.$root.genericError
 			);
 		},
-		test:function() {
+		test() {
 			ws.send('mailAccount','test',{
 				accountName:this.testAccountName,
 				recipient:this.testRecipient,

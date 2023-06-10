@@ -12,7 +12,6 @@ require (
 	github.com/gofrs/uuid v4.4.0+incompatible
 	github.com/gorilla/websocket v1.5.0
 	github.com/h2non/filetype v1.1.3
-	github.com/jordan-wright/email v4.0.1-0.20210109023952-943e75fe5223+incompatible
 	github.com/kardianos/service v1.2.2
 	github.com/magefile/mage v1.15.0 // indirect
 	golang.org/x/crypto v0.9.0 // indirect
@@ -23,6 +22,7 @@ require (
 require (
 	github.com/jackc/pgx-gofrs-uuid v0.0.0-20230224015001-1d428863c2e2
 	github.com/jackc/pgx/v5 v5.3.1
+	github.com/wneessen/go-mail v0.3.9
 	github.com/xlzd/gotp v0.1.0
 )
 

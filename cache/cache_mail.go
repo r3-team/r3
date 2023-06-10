@@ -56,8 +56,8 @@ func LoadMailAccountMap() error {
 	mailAccountIdMap = make(map[int32]types.MailAccount)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, name, mode, username, password, start_tls, send_as,
-			host_name, host_port
+		SELECT id, name, mode, auth_method, username, password,
+			start_tls, send_as, host_name, host_port
 		FROM instance.mail_account
 	`)
 	if err != nil {
@@ -68,8 +68,9 @@ func LoadMailAccountMap() error {
 	for rows.Next() {
 		var ma types.MailAccount
 
-		if err := rows.Scan(&ma.Id, &ma.Name, &ma.Mode, &ma.Username, &ma.Password,
-			&ma.StartTls, &ma.SendAs, &ma.HostName, &ma.HostPort); err != nil {
+		if err := rows.Scan(&ma.Id, &ma.Name, &ma.Mode, &ma.AuthMethod,
+			&ma.Username, &ma.Password, &ma.StartTls, &ma.SendAs,
+			&ma.HostName, &ma.HostPort); err != nil {
 
 			return err
 		}

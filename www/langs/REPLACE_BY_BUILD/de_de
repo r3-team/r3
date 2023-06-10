@@ -420,8 +420,15 @@
 			"dialog":{
 				"imapWarn":"Bitte beachte, dass der IMAP-Konnektor E-Mails ladet und sie danach vom gewählten Postfach löscht. Er sollte nur mit einem dedizierten Postfach und nicht für den Zugriff auf persönliche E-Mail-Accounts verwendet werden."
 			},
+			"option":{
+				"authMethod":{
+					"login":"LOGIN (für O365 Legacy-SMTP)",
+					"plain":"PLAIN (Standard)"
+				}
+			},
 			"account":"E-Mail-Account",
 			"accounts":"E-Mail-Accounts",
+			"accountAuthMethod":"Auth-Methode",
 			"accountHost":"Hostname",
 			"accountMode":"Modus",
 			"accountNew":"Neuer Account",
