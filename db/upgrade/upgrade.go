@@ -274,6 +274,55 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			AND LOWER(host_name) = 'smtp.office365.com';
 			
 			CREATE TYPE instance.mail_account_auth_method AS ENUM ('plain','login');
+			
+			-- fix duplicate primary key references (clean up query lookup references, then delete duplicate PK index references)
+			UPDATE app.query_lookup AS ql
+			SET pg_index_id = (
+				-- valid PK index reference for this relation
+				SELECT id
+				FROM app.pg_index
+				WHERE relation_id = (
+					SELECT relation_id
+					FROM app.pg_index
+					WHERE id = ql.pg_index_id
+				)
+				AND primary_key
+				ORDER BY id ASC
+				LIMIT 1
+			)
+			WHERE pg_index_id IN (
+				-- invalid PK index references
+				SELECT id
+				FROM app.pg_index
+				WHERE primary_key
+				AND id NOT IN (
+					-- valid PK index reference for each relation
+					SELECT (
+						SELECT id
+						FROM app.pg_index
+						WHERE relation_id = r.id
+						AND   primary_key
+						ORDER BY id ASC
+						LIMIT 1
+					)
+					FROM app.relation AS r
+				)
+			);
+			
+			DELETE FROM app.pg_index
+			WHERE primary_key
+			AND id NOT IN (
+				-- valid PK index reference for each relation
+				SELECT (
+					SELECT id
+					FROM app.pg_index
+					WHERE relation_id = r.id
+					AND   primary_key
+					ORDER BY id ASC
+					LIMIT 1
+				)
+				FROM app.relation AS r
+			);
 		`)
 		return "3.4", err
 	},

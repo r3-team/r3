@@ -419,9 +419,11 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 				return err
 			}
 
-			// create PK PG index reference
-			if err := pgIndex.SetPrimaryKeyForAttribute_tx(tx, relationId, id); err != nil {
-				return err
+			// create PK PG index reference for new attributes
+			if isNew {
+				if err := pgIndex.SetPrimaryKeyForAttribute_tx(tx, relationId, id); err != nil {
+					return err
+				}
 			}
 
 			// create table for encrypted record keys if relation supports encryption
