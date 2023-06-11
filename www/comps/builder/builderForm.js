@@ -952,6 +952,7 @@ let MyBuilderForm = {
 				filterQuick:false,
 				layout:'table',
 				openForm:null,
+				openFormBulk:null,
 				query:this.getQueryTemplate(),
 				recordSelector:false,
 				resultLimit:50
