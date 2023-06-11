@@ -542,8 +542,8 @@ let MyList = {
 							<template v-if="rowsClear.length !== 0">
 								<span class="select">{{ capApp.orderBy }}</span>
 								<select
-									@change="selectOrderBy($event.target.value)"
-									v-model.number="orderByColumnBatchIndex"
+									@change="cardsSetOrderBy($event.target.value)"
+									v-model.number="cardsOrderByColumnIndex"
 								>
 									<option value="-1">-</option>
 									<option
@@ -555,7 +555,7 @@ let MyList = {
 								</select>
 								<my-button
 									v-if="orders.length !== 0"
-									@trigger="toggleOrderBy"
+									@trigger="cardsToggleOrderBy"
 									:image="orders[0].ascending ? 'triangleUp.png' : 'triangleDown.png'"
 									:naked="true"
 								/>
@@ -712,7 +712,7 @@ let MyList = {
 			smallSize:false,            // limit UI options as list is small
 			
 			// list card layout state
-			orderByColumnBatchIndex:-1,
+			cardsOrderByColumnIndex:-1,
 			
 			// list data
 			columnBatchIndexMapAggr:{}, // map of aggregators, key: column batch index
@@ -1153,10 +1153,10 @@ let MyList = {
 			this.orders = JSON.parse(params['orderby'].value);
 			
 			// apply first order for card layout selector
-			this.orderByColumnBatchIndex = -1;
-			for(let i = 0, j = this.columnBatches.length; i < j; i++) {
-				if(this.getColumnPosInOrder(this.columnBatches[i].columnIndexSortBy) !== -1) {
-					this.orderByColumnBatchIndex = i;
+			this.cardsOrderByColumnIndex = -1;
+			for(let i = 0, j = this.columns.length; i < j; i++) {
+				if(this.getColumnPosInOrder(i) !== -1) {
+					this.cardsOrderByColumnIndex = i;
 					break;
 				}
 			}
@@ -1167,6 +1167,35 @@ let MyList = {
 			this.focused   = false;
 			this.showTable = false;
 			this.$emit('blurred');
+		},
+		clickColumn(columnBatchIndex) {
+			this.columnBatchIndexOption = this.columnBatchIndexOption === columnBatchIndex
+				? -1 : columnBatchIndex;
+		},
+		clickRow(row,middleClick) {
+			const recordId = row.indexRecordIds['0'];
+			
+			if(this.isInput && !this.inputAsCategory) {
+				if(!this.inputRecordIds.includes(recordId)) {
+					if(this.inputMulti) this.rowsInput.push(row);
+					else                this.rowsInput = [row];
+				}
+				
+				this.showTable    = false;
+				this.filtersQuick = '';
+			}
+			
+			if(this.rowSelect) {
+				if(this.isInput)
+					this.toggleRecordId(recordId,middleClick);
+				else
+					this.$emit('open-form',[recordId],middleClick);
+			}
+		},
+		clickRowAll() {
+			for(let r of this.rows) {
+				this.clickRow(r,false);
+			}
 		},
 		escape() {
 			if(this.isInput) {
@@ -1228,107 +1257,6 @@ let MyList = {
 			this.fieldOptionSet(this.fieldId,'columnBatchIndexMapAggr',this.columnBatchIndexMapAggr);
 			this.$refs.aggregations.get();
 		},
-		toggleDropdown() {
-			this.showTable = !this.showTable;
-			
-			if(this.showTable) {
-				this.filtersQuick = '';
-				this.reloadInside('dropdown');
-			}
-		},
-		toggleUserFilters() {
-			this.showFilters = !this.showFilters;
-		},
-		toggleRecordId(id,middleClick) {
-			if(this.inputRecordIds.includes(id))
-				this.$emit('record-removed',id);
-			else
-				this.$emit('record-selected',id,middleClick);
-		},
-		updatedTextInput(event) {
-			if(event.code === 'Tab' || event.code === 'Escape')
-				return;
-			
-			// any input opens table (dropdown) if not open already
-			if(!this.showTable) {
-				this.showTable = true;
-				this.reloadInside('dropdown');
-			}
-			else if(event.code === 'Enter') {
-				
-				// if open already, enter can select first result
-				if(this.rows.length !== 0)
-					this.clickRow(this.rows[0],false);
-				
-				this.showTable = false;
-			}
-			else if(event.code !== 'Escape') {
-				
-				// table already open, no enter/escape -> reload
-				this.reloadInside('dropdown');
-			}
-		},
-		updatedFilterQuick() {
-			if(this.isInput && !this.showTable)
-				this.showTable = true;
-			
-			this.reloadInside('filtersQuick');
-		},
-		
-		// user actions, table layout
-		clickColumn(columnBatchIndex) {
-			this.columnBatchIndexOption = this.columnBatchIndexOption === columnBatchIndex
-				? -1 : columnBatchIndex;
-		},
-		clickRow(row,middleClick) {
-			const recordId = row.indexRecordIds['0'];
-			
-			if(this.isInput && !this.inputAsCategory) {
-				if(!this.inputRecordIds.includes(recordId)) {
-					if(this.inputMulti) this.rowsInput.push(row);
-					else                this.rowsInput = [row];
-				}
-				
-				this.showTable    = false;
-				this.filtersQuick = '';
-			}
-			
-			if(this.rowSelect) {
-				if(this.isInput)
-					this.toggleRecordId(recordId,middleClick);
-				else
-					this.$emit('open-form',[recordId],middleClick);
-			}
-		},
-		clickRowAll() {
-			for(let r of this.rows) {
-				this.clickRow(r,false);
-			}
-		},
-		
-		// user actions, card layout
-		selectOrderBy(columnIndexSortByString) {
-			const columnIndexSortBy = parseInt(columnIndexSortByString);
-			this.orders = [];
-			
-			if(columnIndexSortBy !== -1) {
-				const col = this.columns[columnIndexSortBy];
-				if(col.subQuery) {
-					this.orders.push({
-						expressionPos:columnIndexSortBy, // equal to expression index
-						ascending:true
-					});
-				}
-				else {
-					this.orders.push({
-						attributeId:col.attributeId,
-						index:col.index,
-						ascending:true
-					});
-				}
-			}
-			this.reloadInside('order');
-		},
 		setAutoRenewTimer(justClear) {
 			// clear last timer
 			if(this.autoRenewTimer !== null)
@@ -1383,7 +1311,77 @@ let MyList = {
 			}
 			this.reloadInside('order');
 		},
-		toggleOrderBy() {
+		toggleDropdown() {
+			this.showTable = !this.showTable;
+			
+			if(this.showTable) {
+				this.filtersQuick = '';
+				this.reloadInside('dropdown');
+			}
+		},
+		toggleUserFilters() {
+			this.showFilters = !this.showFilters;
+		},
+		toggleRecordId(id,middleClick) {
+			if(this.inputRecordIds.includes(id))
+				this.$emit('record-removed',id);
+			else
+				this.$emit('record-selected',id,middleClick);
+		},
+		updatedTextInput(event) {
+			if(event.code === 'Tab' || event.code === 'Escape')
+				return;
+			
+			// any input opens table (dropdown) if not open already
+			if(!this.showTable) {
+				this.showTable = true;
+				this.reloadInside('dropdown');
+			}
+			else if(event.code === 'Enter') {
+				
+				// if open already, enter can select first result
+				if(this.rows.length !== 0)
+					this.clickRow(this.rows[0],false);
+				
+				this.showTable = false;
+			}
+			else if(event.code !== 'Escape') {
+				
+				// table already open, no enter/escape -> reload
+				this.reloadInside('dropdown');
+			}
+		},
+		updatedFilterQuick() {
+			if(this.isInput && !this.showTable)
+				this.showTable = true;
+			
+			this.reloadInside('filtersQuick');
+		},
+		
+		// user actions, cards layout
+		cardsSetOrderBy(columnIndexSortByString) {
+			const columnIndexSortBy = parseInt(columnIndexSortByString);
+			this.orders = [];
+			
+			if(columnIndexSortBy !== -1) {
+				const col = this.columns[columnIndexSortBy];
+				if(col.subQuery) {
+					this.orders.push({
+						expressionPos:columnIndexSortBy, // equal to expression index
+						ascending:true
+					});
+				}
+				else {
+					this.orders.push({
+						attributeId:col.attributeId,
+						index:col.index,
+						ascending:true
+					});
+				}
+			}
+			this.reloadInside('order');
+		},
+		cardsToggleOrderBy() {
 			this.orders[0].ascending = !this.orders[0].ascending;
 			this.reloadInside('order');
 		},
