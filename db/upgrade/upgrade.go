@@ -275,6 +275,32 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE TYPE instance.mail_account_auth_method AS ENUM ('plain','login');
 			
+			-- fix missing primary key references (rare but we found 1 relevant case)
+			INSERT INTO app.pg_index (id, relation_id, auto_fki, no_duplicates, primary_key, method)
+				SELECT gen_random_uuid(), r.id, false, true, true, 'BTREE'
+				FROM app.relation AS r
+				WHERE 0 = (
+					SELECT COUNT(*)
+					FROM app.pg_index
+					WHERE relation_id = r.id
+					AND primary_key
+				);
+			
+			INSERT INTO app.pg_index_attribute (pg_index_id, position, order_asc, attribute_id)
+				SELECT id, 0, true, (
+					SELECT id
+					FROM app.attribute
+					WHERE name = 'id'
+					AND relation_id = pgi.relation_id
+				)
+				FROM app.pg_index AS pgi
+				WHERE primary_key
+				AND 0 = (
+					SELECT COUNT(*)
+					FROM app.pg_index_attribute
+					WHERE pg_index_id = pgi.id
+				);
+			
 			-- fix duplicate primary key references (clean up query lookup references, then delete duplicate PK index references)
 			UPDATE app.query_lookup AS ql
 			SET pg_index_id = (
@@ -323,11 +349,16 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				)
 				FROM app.relation AS r
 			);
+			
+			-- update schema as apps have changed
+			UPDATE instance.config
+			SET value = EXTRACT(EPOCH FROM NOW() at time zone 'utc')::BIGINT
+			WHERE name = 'schemaTimestamp';
 		`)
 		return "3.4", err
 	},
 	"3.2": func(tx pgx.Tx) (string, error) {
-		if _, err := tx.Exec(db.Ctx, `
+		_, err := tx.Exec(db.Ctx, `
 			-- clean up from last release
 			ALTER TABLE app.caption ALTER COLUMN content
 				TYPE app.caption_content USING content::text::app.caption_content;
@@ -678,21 +709,17 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			INSERT INTO app.pg_index (id, relation_id, auto_fki, no_duplicates, primary_key)
 				SELECT gen_random_uuid(), id, false, true, true FROM app.relation;
-		`); err != nil {
-			return "", err
-		}
-
-		_, err := tx.Exec(db.Ctx, `
+			
 			INSERT INTO app.pg_index_attribute (pg_index_id, position, order_asc, attribute_id)
 				SELECT id, 0, true, (
 					SELECT id
 					FROM app.attribute
-					WHERE name = $1
+					WHERE name = 'id'
 					AND relation_id = pgi.relation_id
 				)
 				FROM app.pg_index AS pgi
 				WHERE primary_key;
-		`, schema.PkName)
+		`)
 		return "3.3", err
 	},
 	"3.1": func(tx pgx.Tx) (string, error) {
@@ -1237,7 +1264,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				        ON DELETE CASCADE
 				        DEFERRABLE INITIALLY DEFERRED,
 				    CONSTRAINT "%s_record_id_fkey" FOREIGN KEY (record_id)
-				        REFERENCES "%s"."%s" ("%s") MATCH SIMPLE
+				        REFERENCES "%s"."%s" ("id") MATCH SIMPLE
 				        ON UPDATE CASCADE
 				        ON DELETE CASCADE
 				        DEFERRABLE INITIALLY DEFERRED
@@ -1252,7 +1279,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				CREATE INDEX "fki_%s_record_id_fkey"
 					ON instance_file."%s" USING btree (record_id ASC NULLS LAST);
 			`, tNameR, tNameR, tNameR, tNameR, fa.moduleName, fa.relationName,
-				schema.PkName, tNameR, tNameR, tNameR, tNameR, tNameR, tNameR)); err != nil {
+				tNameR, tNameR, tNameR, tNameR, tNameR, tNameR)); err != nil {
 
 				return "", err
 			}
