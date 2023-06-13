@@ -17,8 +17,7 @@ let MyHeader = {
 		<div class="app-header-content" :style="styles">
 			<div ref="content" class="entries">
 				
-				<template v-if="!isMobile && isAdmin && !pwaDomain" >
-					
+				<template v-if="!isMobile && isAdmin && !pwaSingle" >
 					<router-link class="entry no-wrap clickable" to="/builder"
 						v-if="builderEnabled"
 						:title="capGen.button.openBuilder"
@@ -32,11 +31,12 @@ let MyHeader = {
 				</template>
 				
 				<!-- home page -->
-				<router-link v-if="!pwaDomain" class="entry no-wrap clickable" to="/home">
+				<router-link class="entry no-wrap clickable" to="/home">
 					<img src="images/home.png" />
+					<span v-if="!isMobile && pwaSingle">{{ capGen.home }}</span>
 				</router-link>
 				
-				<!-- single module link (for mobile view or PWA domain) -->
+				<!-- single module link (for mobile view) -->
 				<div class="entry no-wrap clickable" tabindex="0"
 					v-if="moduleSingle !== false"
 					@click="clickSingleModuleLink"
@@ -49,7 +49,7 @@ let MyHeader = {
 				
 				<!-- modules -->
 				<div class="entry-wrap"
-					v-if="!isMobile && !pwaDomain"
+					v-if="!isMobile && !pwaSingle"
 					v-for="me in moduleEntries"
 					:key="me.id"
 				>
@@ -243,11 +243,8 @@ let MyHeader = {
 		},
 		
 		// returns which module to show if regular navigation is disabled
-		moduleSingle:(s) => {
-			if(s.pwaModuleId !== null) return s.moduleIdMap[s.pwaModuleId];
-			
-			return s.moduleIdLast !== null && s.isMobile ? s.moduleIdMap[s.moduleIdLast] : false;
-		},
+		moduleSingle:(s) => s.moduleIdLast !== null && s.isMobile
+			? s.moduleIdMap[s.moduleIdLast] : false,
 		moduleSingleActive:(s) => s.moduleSingle !== false && (
 			(typeof s.$route.params.moduleName      !== 'undefined' && s.$route.params.moduleName      === s.moduleSingle.name) ||
 			(typeof s.$route.params.moduleNameChild !== 'undefined' && s.$route.params.moduleNameChild === s.moduleSingle.name)
@@ -261,7 +258,7 @@ let MyHeader = {
 		},
 		
 		// simple
-		pwaDomain:(s) => s.pwaModuleId !== null,
+		pwaSingle:(s) => s.pwaModuleId !== null,
 		styles:   (s) => s.settings.compact ? '' : `max-width:${s.settings.pageLimit}px;`,
 		
 		// stores
@@ -342,8 +339,8 @@ let MyHeader = {
 			if(this.moduleSingleActive && this.isMobile)
 				return this.$store.commit('isAtMenu',!this.isAtMenu);
 			
-			// no active module in mobile mode or with PWA domain: navigate to module
-			if(!this.moduleSingleActive && (this.isMobile || this.pwaDomain))
+			// no active module in mobile mode: navigate to module
+			if(!this.moduleSingleActive && this.isMobile)
 				return this.$router.push(`/app/${this.moduleSingle.name}/${this.moduleSingle.name}`);
 		},
 		openFeedback() { this.$store.commit('isAtFeedback',true); },
