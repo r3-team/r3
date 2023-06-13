@@ -385,6 +385,12 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
+	// initialize PWA domain cache
+	if err := cache.LoadPwaDomainMap(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to initialize PWA domain cache, %v", err))
+		return
+	}
+
 	// process token secret for future client authentication from database
 	if err := config.ProcessTokenSecret(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to process token secret, %v", err))

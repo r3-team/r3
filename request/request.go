@@ -469,6 +469,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "set":
 			return PresetSet_tx(tx, reqJson)
 		}
+	case "pwaDomain":
+		switch action {
+		case "reset":
+			return nil, cache.LoadPwaDomainMap()
+		case "set":
+			return PwaDomainSet_tx(tx, reqJson)
+		}
 	case "relation":
 		switch action {
 		case "del":

@@ -255,14 +255,19 @@
 			"companyNameHint":"Firmenname, wird angezeigt auf der Anmeldeseite.",
 			"companyWelcome":"Willkommenstext",
 			"companyWelcomeHint":"Ein kurzer Willkommenstext, wird angezeigt auf der Anmeldeseite. HTML kann für Textformatierung und für Links verwendet werden.",
-			"iconPwa1":"PWA-Icon, klein",
+			"iconPwa1":"Icon, klein",
 			"iconPwa1Hint":"Bild, welches als Icon für die Progressive-Web-App genutzt wird. Muss eine PNG-Datei mit max. 128kb und genau 192x192 Pixel groß sein.",
-			"iconPwa2":"PWA-Icon, groß",
+			"iconPwa2":"Icon, groß",
 			"iconPwa2Hint":"Bild, welches als Icon für die Progressive-Web-App genutzt wird. Muss eine PNG-Datei mit max. 128kb und genau 512x512 Pixel groß sein.",
+			"pwaDomain":"Direkter Zugriff auf Anwendungen",
+			"pwaDomainHint":"Nur die Subdomäne (bspw. 'my-app' von 'my-app.my-domain.com')",
+			"pwaDomainHint1":"Auf individuelle Anwendungen kann direkt zugegriffen und diese können auch einzelnd als PWAs auf Geräten installiert werden. Anwendungen haben dann ihre eigenen Startseiten, Icons und exklusive Navigation. Hierfür muss ein Subdomänen-DNS-Eintrag für jede Anwendung gesetzt sein, damit das REI3-System über verschiedene Domänen erreichbar ist. Zusätzlich wird ein Wildcard-Zertifikat benötigt, damit der REI3-Server korrekt auf HTTPS-Anfragen reagieren kann.<br /><br />Sobald DNS-Einträge und Wildcard-Zertifikat gesetzt sind, muss eine Subdomäne je gewünschter Anwendung hier eingetragen werden.",
+			"pwaDomainHint2":"Bitte sicherstellen, dass eine Subdomäne existiert, die hier nicht referenziert wird, damit das allgemeine REI3-System noch erreicht werden kann. Anderweitig ist kein Zugriff auf die Adminoberfläche möglich, da Subdomänen für Anwendungen nur Zugriff auf die jeweilige Anwendung selbst zulassen.",
 			"titleCaptions":"Beschriftungen",
 			"titleColors":"Farben",
 			"titleCss":"CSS-Regeln",
-			"titleLogos":"Bilder"
+			"titleLogos":"Logos",
+			"titlePwas":"Progressive-Web-Apps (PWAs)"
 		},
 		"files":{
 			"deleteDate":"Datei gelöscht",

@@ -57,6 +57,7 @@ const MyStore = Vuex.createStore({
 		pageTitleFull:'',     // web page title + instance name
 		popUpFormGlobal:null, // configuration of global pop-up form
 		productionMode:false, // system in production mode, false if maintenance
+		pwaDomainMap:{},      // map of modules per PWA sub domain, key: sub domain, value: module ID
 		searchDictionaries:[],// list of dictionaries used for full text search for this login, ['english', 'german', ...]
 		settings:{},          // setting values for logged in user, key: settings name
 		sessionValueStore:{}, // user session key-value store for frontend functions, { moduleId1:{ key1:value1, key2:value2 }, moduleId2:{ ... } }
@@ -160,6 +161,7 @@ const MyStore = Vuex.createStore({
 		moduleIdLast:   (state,payload) => state.moduleIdLast    = payload,
 		popUpFormGlobal:(state,payload) => state.popUpFormGlobal = payload,
 		productionMode: (state,payload) => state.productionMode  = payload,
+		pwaDomainMap:   (state,payload) => state.pwaDomainMap  = payload,
 		searchDictionaries:(state,payload) => state.searchDictionaries = payload,
 		settings:       (state,payload) => state.settings        = payload,
 		system:         (state,payload) => state.system          = payload
@@ -176,6 +178,14 @@ const MyStore = Vuex.createStore({
 			return state.settings.pattern !== null
 				? `background-image:url('images/pattern_${state.settings.pattern}.webp');background-repeat:repeat-x`
 				: '';
+		},
+		pwaModuleId:(state) => {
+			if(!MyStoreLocal.state.activated)
+				return null;
+			
+			let subDomain = window.location.host.split('.')[0];
+			return typeof state.pwaDomainMap[subDomain] !== 'undefined'
+				? state.pwaDomainMap[subDomain] : null;
 		},
 		
 		// simple
@@ -219,6 +229,7 @@ const MyStore = Vuex.createStore({
 		pageTitleFull:    (state) => state.pageTitleFull,
 		popUpFormGlobal:  (state) => state.popUpFormGlobal,
 		productionMode:   (state) => state.productionMode,
+		pwaDomainMap:     (state) => state.pwaDomainMap,
 		searchDictionaries:(state) => state.searchDictionaries,
 		sessionValueStore:(state) => state.sessionValueStore,
 		settings:         (state) => state.settings,

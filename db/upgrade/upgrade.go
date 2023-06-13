@@ -237,6 +237,18 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			INSERT INTO instance.config (name,value) VALUES ('iconPwa1','');
 			INSERT INTO instance.config (name,value) VALUES ('iconPwa2','');
 			
+			-- PWA sub domains
+			CREATE TABLE instance.pwa_domain (
+				module_id UUID NOT NULL,
+				domain TEXT NOT NULL,
+			    CONSTRAINT pwa_domain_pkey PRIMARY KEY (module_id),
+			    CONSTRAINT pwa_domain_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
 			-- remove outdated config
 			DELETE FROM instance.config WHERE name = 'defaultLanguageCode';
 			

@@ -526,6 +526,7 @@ let MyApp = {
 					this.$store.commit('clusterNodeName',res.payload.clusterNodeName);
 					this.$store.commit('productionMode',res.payload.productionMode === 1);
 					this.$store.commit('pageTitleRefresh'); // update page title with new app name
+					this.$store.commit('pwaDomainMap',res.payload.pwaDomainMap);
 					this.$store.commit('searchDictionaries',res.payload.searchDictionaries);
 					this.$store.commit('schema/languageCodes',res.payload.languageCodes);
 					this.publicLoaded = true;

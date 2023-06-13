@@ -1,5 +1,6 @@
-import {textAddTab} from '../shared/generic.js';
-import {srcBase64}  from '../shared/image.js';
+import {textAddTab}     from '../shared/generic.js';
+import {srcBase64}      from '../shared/image.js';
+import {MyModuleSelect} from '../input.js';
 export {MyAdminCustom as default};
 
 let MyAdminCustomLogo = {
@@ -56,6 +57,7 @@ let MyAdminCustom = {
 	name:'my-admin-custom',
 	components:{
 		MyAdminCustomLogo,
+		MyModuleSelect,
 		'chrome-picker':VueColor.Chrome
 	},
 	template:`<div class="admin-custom contentBox grow">
@@ -220,6 +222,14 @@ let MyAdminCustom = {
 					</td>
 					<td>{{ capApp.companyLogoUrlHint }}</td>
 				</tr>
+			</table>
+			
+			<br />
+			<div class="contentPartHeader">
+				<img class="icon" src="images/fileImage.png" />
+				<h1>{{ capApp.titlePwas }}</h1>
+			</div>
+			<table class="generic-table-vertical default-inputs">
 				<tr>
 					<td>{{ capApp.iconPwa1 }}</td>
 					<td>
@@ -241,6 +251,44 @@ let MyAdminCustom = {
 						/>
 					</td>
 					<td>{{ capApp.iconPwa2Hint }}</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.pwaDomain }}</td>
+					<td>
+						<div class="column gap">
+							<div class="row centered gap" v-for="(pd,i) in pwaDomains" :key="pd.moduleId">
+								<input
+									@keyup="applyPwaDomain(i,'domain',$event.target.value)"
+									:disabled="!activated"
+									:placeholder="capApp.pwaDomainHint"
+									:title="capApp.pwaDomainHint"
+									:value="pd.domain"
+								/>
+								<my-module-select
+									v-if="activated"
+									@update:modelValue="applyPwaDomain(i,'moduleId',$event)"
+									:modelValue="pd.moduleId"
+									:moduleIdsFilter="pwaModuleIdsUsed.filter(v => v !== pd.moduleId)"
+									:preSelectOne="true"
+								/>
+								<my-button image="delete.png"
+									@trigger="pwaDomainDel(i)"
+									:captionTitle="capGen.button.delete"
+									:cancel="true"
+								/>
+							</div>
+							<div>
+								<my-button image="add.png"
+									@trigger="pwaDomainAdd"
+									:caption="capGen.button.add"
+								/>
+							</div>
+							<p v-if="pwaDomains.length !== 0">
+								{{ capApp.pwaDomainHint2 }}
+							</p>
+						</div>
+					</td>
+					<td v-html="capApp.pwaDomainHint1"></td>
 				</tr>
 			</table>
 			
@@ -267,17 +315,55 @@ let MyAdminCustom = {
 		menuTitle:{ type:String, required:true }
 	},
 	computed:{
-		hasChanges:(s) => JSON.stringify(s.config) !== JSON.stringify(s.configInput),
+		hasChanges:(s) => JSON.stringify(s.config) !== JSON.stringify(s.configInput)
+			|| JSON.stringify(s.pwaDomainMap) !== JSON.stringify(s.pwaDomainMapInput),
+		
+		// inputs
+		pwaDomains:{
+			get() {
+				let out = [];
+				let domains = Object.keys(this.pwaDomainMapInput);
+				domains.sort();
+				
+				for(let domain of domains) {
+					out.push({
+						moduleId:this.pwaDomainMapInput[domain],
+						domain:domain
+					});
+				}
+				return out;
+			},
+			set(v) {
+				let map = {};
+				for(let e of v) {
+					map[e.domain] = e.moduleId;
+				}
+				this.pwaDomainMapInput = map;
+			}
+		},
+		pwaModuleIdsUsed:(s) => {
+			let out = [];
+			for(let pd of s.pwaDomains) {
+				out.push(pd.moduleId);
+			}
+			return out;
+		},
 		
 		// stores
-		activated:(s) => s.$store.getters['local/activated'],
-		capApp:   (s) => s.$store.getters.captions.admin.customizing,
-		capGen:   (s) => s.$store.getters.captions.generic,
-		config:   (s) => s.$store.getters.config
+		activated:   (s) => s.$store.getters['local/activated'],
+		modules:     (s) => s.$store.getters['schema/modules'],
+		capApp:      (s) => s.$store.getters.captions.admin.customizing,
+		capGen:      (s) => s.$store.getters.captions.generic,
+		config:      (s) => s.$store.getters.config,
+		pwaDomainMap:(s) => s.$store.getters.pwaDomainMap
 	},
 	data() {
 		return {
+			// inputs
 			configInput:{},
+			pwaDomainMapInput:{},
+			
+			// states
 			ready:false,
 			showColorHeader:false,
 			showColorLogin:false
@@ -303,14 +389,40 @@ let MyAdminCustom = {
 				case 'login':  this.configInput.companyColorLogin  = value.hex.substr(1); break;
 			}
 		},
+		applyPwaDomain(i,target,value) {
+			this.pwaDomains[i][target] = value;
+			this.pwaDomains = this.pwaDomains;
+		},
+		pwaDomainAdd() {
+			this.pwaDomains.push({
+				moduleId:null,
+				domain:'my_new_subdomain'
+			});
+			this.pwaDomains = this.pwaDomains;
+		},
+		pwaDomainDel(i) {
+			this.pwaDomains.splice(i,1);
+			this.pwaDomains = this.pwaDomains;
+		},
 		reset() {
-			this.configInput = JSON.parse(JSON.stringify(this.config));
+			this.configInput       = JSON.parse(JSON.stringify(this.config));
+			this.pwaDomainMapInput = JSON.parse(JSON.stringify(this.pwaDomainMap));
 		},
 		
 		// backend calls
 		set() {
-			ws.send('config','set',this.configInput,true).then(
-				() => {}, this.$root.genericError
+			ws.sendMultiple([
+				ws.prepare('config','set',this.configInput),
+				ws.prepare('pwaDomain','set',this.pwaDomainMapInput)
+			],true).then(
+				() => {
+					// manually update store as its only updated on page refresh
+					this.$store.commit('pwaDomainMap',this.pwaDomainMapInput);
+					
+					// after transaction is through
+					ws.send('pwaDomain','reset',{},true);
+				},
+				this.$root.genericError
 			);
 		}
 	}

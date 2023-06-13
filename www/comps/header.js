@@ -17,7 +17,7 @@ let MyHeader = {
 		<div class="app-header-content" :style="styles">
 			<div ref="content" class="entries">
 				
-				<template v-if="!isMobile && isAdmin" >
+				<template v-if="!isMobile && isAdmin && !pwaDomain" >
 					
 					<router-link class="entry no-wrap clickable" to="/builder"
 						v-if="builderEnabled"
@@ -32,11 +32,11 @@ let MyHeader = {
 				</template>
 				
 				<!-- home page -->
-				<router-link class="entry no-wrap clickable" to="/home">
+				<router-link v-if="!pwaDomain" class="entry no-wrap clickable" to="/home">
 					<img src="images/home.png" />
 				</router-link>
 				
-				<!-- single module link (for mobile view) -->
+				<!-- single module link (for mobile view or PWA domain) -->
 				<div class="entry no-wrap clickable" tabindex="0"
 					v-if="moduleSingle !== false"
 					@click="clickSingleModuleLink"
@@ -44,14 +44,12 @@ let MyHeader = {
 					:class="{ 'router-link-active':isAtMenu || moduleSingleActive }"
 				>
 					<img :src="srcBase64Icon(moduleSingle.iconId,'images/module.png')" />
-					<span>
-						{{ moduleSingleCaption }}
-					</span>
+					<span>{{ moduleSingleCaption }}</span>
 				</div>
 				
 				<!-- modules -->
 				<div class="entry-wrap"
-					v-if="!isMobile"
+					v-if="!isMobile && !pwaDomain"
 					v-for="me in moduleEntries"
 					:key="me.id"
 				>
@@ -219,6 +217,9 @@ let MyHeader = {
 					if(!consumer.onMobile && s.isMobile)
 						continue;
 					
+					if(s.pwaModuleId !== null && collection.moduleId !== s.pwaModuleId)
+						continue;
+					
 					let value = s.getCollectionValues(
 						collection.id,
 						consumer.columnIdDisplay,
@@ -242,8 +243,11 @@ let MyHeader = {
 		},
 		
 		// returns which module to show if regular navigation is disabled
-		moduleSingle:(s) => s.moduleIdLast !== null && s.isMobile
-			? s.moduleIdMap[s.moduleIdLast] : false,
+		moduleSingle:(s) => {
+			if(s.pwaModuleId !== null) return s.moduleIdMap[s.pwaModuleId];
+			
+			return s.moduleIdLast !== null && s.isMobile ? s.moduleIdMap[s.moduleIdLast] : false;
+		},
 		moduleSingleActive:(s) => s.moduleSingle !== false && (
 			(typeof s.$route.params.moduleName      !== 'undefined' && s.$route.params.moduleName      === s.moduleSingle.name) ||
 			(typeof s.$route.params.moduleNameChild !== 'undefined' && s.$route.params.moduleNameChild === s.moduleSingle.name)
@@ -257,7 +261,8 @@ let MyHeader = {
 		},
 		
 		// simple
-		styles:(s) => s.settings.compact ? '' : `max-width:${s.settings.pageLimit}px;`,
+		pwaDomain:(s) => s.pwaModuleId !== null,
+		styles:   (s) => s.settings.compact ? '' : `max-width:${s.settings.pageLimit}px;`,
 		
 		// stores
 		modules:        (s) => s.$store.getters['schema/modules'],
@@ -274,6 +279,7 @@ let MyHeader = {
 		isAtMenu:       (s) => s.$store.getters.isAtMenu,
 		isMobile:       (s) => s.$store.getters.isMobile,
 		isNoAuth:       (s) => s.$store.getters.isNoAuth,
+		pwaModuleId:    (s) => s.$store.getters.pwaModuleId,
 		moduleIdLast:   (s) => s.$store.getters.moduleIdLast,
 		settings:       (s) => s.$store.getters.settings
 	},
@@ -332,12 +338,12 @@ let MyHeader = {
 		
 		// actions
 		clickSingleModuleLink() {
-			// mobile view, module active: toggle menu
-			if(this.isMobile && this.moduleSingleActive)
+			// module active in mobile mode: toggle menu
+			if(this.moduleSingleActive && this.isMobile)
 				return this.$store.commit('isAtMenu',!this.isAtMenu);
 			
-			// mobile view, no active module: navigate to module
-			if(this.isMobile && !this.moduleSingleActive)
+			// no active module in mobile mode or with PWA domain: navigate to module
+			if(!this.moduleSingleActive && (this.isMobile || this.pwaDomain))
 				return this.$router.push(`/app/${this.moduleSingle.name}/${this.moduleSingle.name}`);
 		},
 		openFeedback() { this.$store.commit('isAtFeedback',true); },

@@ -255,14 +255,19 @@
 			"companyNameHint":"Company name, shown on the login page.",
 			"companyWelcome":"Textul de bun venit",
 			"companyWelcomeHint":"A short welcome text, shown on the login page. HTML can be used for text formatting and links.",
-			"iconPwa1":"PWA icon, small",
+			"iconPwa1":"Icon, small",
 			"iconPwa1Hint":"Image used for progressive web app icons. Must be PNG file, max. 128kb and precisely 192x192 pixels in size.",
-			"iconPwa2":"PWA icon, large",
+			"iconPwa2":"Icon, large",
 			"iconPwa2Hint":"Image used for progressive web app icons. Must be PNG file, max. 128kb and precisely 512x512 pixels in size.",
+			"pwaDomain":"Direct app access",
+			"pwaDomainHint":"Only the sub domain (as in 'my-app' from  'my-app.my-domain.com')",
+			"pwaDomainHint1":"Individual applications can be accessed directly and installed separately on devices as PWAs. They then have their own start page, icons and exclusive navigation. This requires a sub domain DNS record for each application so that the REI3 system is reachable via different domains. It also requires a wildcard certificate on the REI3 server to respond correctly to HTTPS requests.<br /><br />Once both DNS records and wildcard certificate are ready, please enter a sub domain for each desired application.",
+			"pwaDomainHint2":"Make sure to have one sub domain available that is not in this list, to reach the general REI3 system. Otherwise you have no access to the admin user interface as each application sub domain only gives access to the specific application.",
 			"titleCaptions":"Captions",
 			"titleColors":"Colors",
 			"titleCss":"Custom CSS rules",
-			"titleLogos":"Images"
+			"titleLogos":"Logos",
+			"titlePwas":"Progressive web apps (PWAs)"
 		},
 		"files":{
 			"deleteDate":"File deleted",

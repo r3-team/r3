@@ -192,10 +192,20 @@ let MyHome = {
 		config:     (s) => s.$store.getters.config,
 		isAdmin:    (s) => s.$store.getters.isAdmin,
 		isMobile:   (s) => s.$store.getters.isMobile,
+		pwaModuleId:(s) => s.$store.getters.pwaModuleId,
 		settings:   (s) => s.$store.getters.settings
 	},
 	mounted() {
 		this.$store.commit('pageTitle',this.capApp.title);
+		
+		// forward to PWA if enabled
+		if(this.pwaModuleId !== null) {
+			let mod = this.moduleIdMap[this.pwaModuleId];
+			let modParent = mod.parentId !== null
+				? this.moduleIdMap[mod.parentId] : mod;
+			
+			this.$router.replace(`/app/${modParent.name}/${mod.name}`);
+		}
 	},
 	methods:{
 		// externals
