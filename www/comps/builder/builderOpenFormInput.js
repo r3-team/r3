@@ -193,13 +193,16 @@ let MyBuilderOpenFormInput = {
 					attributeIdApply:null,
 					relationIndex:-1,
 					popUpType:this.forcePopUp ? 'float' : null,
-					maxHeight:0,
-					maxWidth:0
+					maxHeight:1000,
+					maxWidth:1200
 				};
 			
 			// set changed value
-			if(['relationIndex','maxHeight','maxWidth'].includes(name))
-				val = val !== '' ? parseInt(val) : -1;
+			if(['maxHeight','maxWidth'].includes(name))
+				val = val !== '' && !isNaN(val) ? parseInt(val) : 0;
+			
+			if(name === 'relationIndex')
+				val = val !== '' && !isNaN(val) ? parseInt(val) : -1;
 			
 			if(name === 'attributeIdApply' && val === '')
 				val = null;
