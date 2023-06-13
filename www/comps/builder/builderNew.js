@@ -1,10 +1,10 @@
 import {getQueryTemplate} from '../shared/query.js';
 import {getNilUuid}       from '../shared/generic.js';
 import {
-	getRestTemplateArgs,
-	getRestTemplateFnc,
-	getRestTemplateReturn
-} from '../shared/rest.js';
+	getTemplateArgs,
+	getTemplateFnc,
+	getTemplateReturn
+} from '../shared/templates.js';
 export {MyBuilderNew as default};
 
 let MyBuilderNew = {
@@ -53,12 +53,13 @@ let MyBuilderNew = {
 						<p v-html="capApp.jsFunctionFormIdHint"></p>
 					</template>
 					
-					<!-- PG function: is trigger -->
+					<!-- PG function: trigger/function template -->
 					<template v-if="entity === 'pgFunction'">
 						<div class="row centered gap">
 							<span>{{ capApp.pgFunctionTemplate }}</span>
 							<select v-model="template">
 								<option value="">-</option>
+								<option value="mailsFromSpooler">{{ capApp.template.mailsFromSpooler }}</option>
 								<option value="restAuthRequest">{{ capApp.template.restAuthRequest }}</option>
 								<option value="restAuthResponse">{{ capApp.template.restAuthResponse }}</option>
 								<option value="restDataResponse">{{ capApp.template.restDataResponse }}</option>
@@ -162,9 +163,9 @@ let MyBuilderNew = {
 		// externals
 		getNilUuid,
 		getQueryTemplate,
-		getRestTemplateArgs,
-		getRestTemplateFnc,
-		getRestTemplateReturn,
+		getTemplateArgs,
+		getTemplateFnc,
+		getTemplateReturn,
 		
 		// actions
 		handleHotkeys(e) {
@@ -270,9 +271,9 @@ let MyBuilderNew = {
 						id:this.getNilUuid(),
 						moduleId:this.moduleId,
 						name:this.name,
-						codeArgs:this.getRestTemplateArgs(this.template),
-						codeFunction:this.getRestTemplateFnc(this.template,this.isTrigger),
-						codeReturns:this.getRestTemplateReturn(this.isTrigger),
+						codeArgs:this.getTemplateArgs(this.template),
+						codeFunction:this.getTemplateFnc(this.template,this.isTrigger),
+						codeReturns:this.getTemplateReturn(this.isTrigger),
 						isFrontendExec:false,
 						isTrigger:this.isTrigger,
 						schedules:[],

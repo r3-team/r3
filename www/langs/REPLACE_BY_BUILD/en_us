@@ -1173,6 +1173,7 @@
 				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
 			},
 			"template":{
+				"mailsFromSpooler":"Email processing (incoming)",
 				"restAuthRequest":"REST authentication (via JSON)",
 				"restAuthResponse":"REST authentication response callback",
 				"restDataResponse":"REST data response callback"
