@@ -55,14 +55,15 @@
 	flex:0.5 0.3 80px;
 }
 .filter-side{
+	flex:1 1 auto;
 	display:flex;
 	flex-flow:row wrap;
-	flex:0 1 auto;
 }
 .filter-side-inputs{
+	gap:3px;
+	flex:1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
-	gap:3px;
 }
 .filter-side-inputs>input,
 .filter-side-inputs>select,

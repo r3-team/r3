@@ -325,10 +325,14 @@
 	line-height:28px;
 	font-size:inherit;
 	text-align:center;
+	padding:0px;
 	color:var(--color-font);
 	border:none;
 	background-color:transparent;
 	box-shadow:none;
+}
+.input-date .date-inputs input::placeholder{
+	font-family:monospace;
 }
 .input-date .date-inputs .mobile-inputs input{
 	min-width:100px;
