@@ -200,7 +200,7 @@ let MyList = {
 						v-if="hasCreate"
 						@trigger="$emit('open-form',[],false)"
 						@trigger-middle="$emit('open-form',[],true)"
-						:caption="!isMobile ? capGen.button.new : ''"
+						:caption="capGen.button.new"
 						:captionTitle="capGen.button.newHint"
 					/>
 					<my-button image="edit.png"
@@ -221,7 +221,7 @@ let MyList = {
 						@trigger="delAsk(selectedRows)"
 						:active="selectedRows.length !== 0"
 						:cancel="true"
-						:caption="!isMobile ? capGen.button.delete : ''"
+						:caption="capGen.button.delete"
 						:captionTitle="capGen.button.deleteHint"
 					/>
 				</div>
@@ -243,7 +243,7 @@ let MyList = {
 					/>
 				</div>
 				
-				<div class="area nowrap default-inputs">
+				<div class="area nowrap gap default-inputs">
 					<!-- auto renew / user filter / quick filter / query choices / page limits -->
 					
 					<my-button image="autoRenew.png"

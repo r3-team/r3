@@ -442,3 +442,7 @@
 .is-mobile .input-collection input{
 	width:60px;
 }
+.is-mobile .input-dropdown-wrap.overhang{
+	left:0px;
+	right:0px;
+}

@@ -488,6 +488,8 @@ h3{
 	line-height:30px;
 	background-color:var(--color-bg);
 	flex:0 0 auto;
+	gap:12px;
+	padding:12px 10px;
 	display:flex;
 	flex-flow:row wrap;
 	justify-content:space-between;
@@ -499,7 +501,6 @@ h3{
 .contentBox .top.lower .area>input,
 .contentBox .top.lower .area>select{
 	width:auto;
-	margin:0px 5px 0px 0px;
 	min-width:unset;
 }
 .contentBox .top.nowrap{
@@ -544,10 +545,9 @@ h3{
 	display:flex;
 	flex-flow:row wrap;
 	align-items:center;
-	padding:12px 0px;
 }
 .contentBox .top .area.gap{
-	gap:9px;
+	gap:var(--spacing-button-horz-outside);
 }
 .contentBox .top .area.nowrap{
 	flex-wrap:nowrap;

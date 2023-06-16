@@ -52,11 +52,11 @@ let MyCalendarMonth = {
 					v-if="hasCreate"
 					@trigger="$emit('open-form',[],[],false)"
 					@trigger-middle="$emit('open-form',[],[],true)"
-					:caption="!isMobile ? capGen.button.new : ''"
+					:caption="capGen.button.new"
 					:captionTitle="capGen.button.newHint"
 				/>
 			</div>
-		
+			
 			<div class="area nowrap default-inputs">
 				<img class="icon"
 					v-if="iconId !== null"
@@ -89,7 +89,7 @@ let MyCalendarMonth = {
 				/>
 			</div>
 			
-			<div class="area nowrap default-inputs">
+			<div class="area wrap gap default-inputs">
 				<my-input-collection class="selector"
 					v-for="c in collections"
 					@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event)"
@@ -114,12 +114,15 @@ let MyCalendarMonth = {
 					@trigger="showIcs = !showIcs"
 					:caption="!isMobile ? capApp.button.ics : ''"
 					:captionTitle="capApp.button.icsHint"
+					:tight="true"
 				/>
 				
 				<my-button image="calendar.png"
+					v-if="!isMobile"
 					@trigger="goToToday()"
 					:caption="!isMobile && !isInput ? capApp.today : ''"
 					:captionTitle="capApp.todayHint"
+					:tight="true"
 				/>
 			</div>
 		</div>

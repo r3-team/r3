@@ -103,6 +103,11 @@ let MyBuilderForm = {
 							@trigger="copyValueDialog(form.name,form.id,form.id)"
 							:caption="capGen.id"
 						/>
+						<my-button
+							@trigger="showColumnsAll = !showColumnsAll"
+							:caption="capApp.button.columnsAll"
+							:image="showColumnsAll ? 'checkbox1.png' : 'checkbox0.png'"
+						/>
 						<my-button image="delete.png"
 							@trigger="delAsk"
 							:active="!readonly"
@@ -162,6 +167,7 @@ let MyBuilderForm = {
 					:isTemplate="false"
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="form.moduleId"
+					:showColumnsAll="showColumnsAll"
 					:uiScale="uiScale"
 				/>
 			</div>
@@ -498,6 +504,7 @@ let MyBuilderForm = {
 			fieldIdShow:null,    // field ID which is shown in sidebar to be edited
 			fieldMoveList:null,  // fields list from which to move field (move by click)
 			fieldMoveIndex:0,    // index of field which to move (move by click)
+			showColumnsAll:false,// show columns from all relevant fields regardless of whether field is selected
 			showFunctions:false, // show form functions
 			showSidebar:true,    // show form Builder sidebar
 			showStates:false,    // show form states
@@ -694,7 +701,7 @@ let MyBuilderForm = {
 	},
 	watch:{
 		form:{
-			handler:function() { this.reset(); },
+			handler() { this.reset(); },
 			immediate:true
 		}
 	},
@@ -760,7 +767,9 @@ let MyBuilderForm = {
 			this.filters        = JSON.parse(JSON.stringify(this.form.query.filters));
 			this.fieldIdShow    = null;
 			this.fieldIdsRemove = [];
-			this.columnIdShow  = null;
+			this.columnIdShow   = null;
+			this.showColumnsAll = this.fields.length === 1
+				&& !['container','tabs'].includes(this.fields[0].content);
 		},
 		
 		createFieldButton() {

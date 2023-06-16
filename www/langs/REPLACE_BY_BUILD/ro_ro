@@ -754,6 +754,7 @@
 		},
 		"form":{
 			"button":{
+				"columnsAll":"All columns",
 				"layoutColumns":"{CNT} columns"
 			},
 			"chart":{

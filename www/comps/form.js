@@ -83,8 +83,8 @@ let MyForm = {
 			:class="{ popUp:isPopUp }"
 		>
 			<!-- title bar upper -->
-			<div class="top" :class="{ lower:!hasBarLower && !isSingleField }">
-				<div class="area">
+			<div class="top nowrap" :class="{ lower:!hasBarLower && !isSingleField }">
+				<div class="area nowrap">
 					<img class="icon"
 						v-if="iconId !== null"
 						:src="srcBase64(iconIdMap[iconId].file)"
@@ -108,19 +108,22 @@ let MyForm = {
 					</transition>
 				</div>
 				
-				<div class="area">
+				<div class="area gap">
 					<template v-if="isData && !isBulkUpdate">
 						<my-button image="refresh.png"
+							v-if="!isMobile"
 							@trigger="get"
 							@trigger-middle="openForm(recordIds,null,null,true)"
 							:active="!isNew"
 							:captionTitle="capGen.button.refreshHint"
+							:tight="true"
 						/>
 						<my-button image="time.png"
 							v-if="hasLog"
 							@trigger="showLog = !showLog"
 							:active="!isNew"
 							:captionTitle="capApp.button.logHint"
+							:tight="true"
 						/>
 					</template>
 					
@@ -129,31 +132,35 @@ let MyForm = {
 						@trigger="showHelp = !showHelp"
 						:active="helpAvailable"
 						:captionTitle="capApp.button.helpHint"
+						:tight="true"
 					/>
 					<my-button
 						v-if="isPopUp && !isMobile"
 						@trigger="popUpFullscreen = !popUpFullscreen"
 						:captionTitle="capApp.button.fullscreenHint"
 						:image="popUpFullscreen ? 'shrink.png' : 'expand.png'"
+						:tight="true"
 					/>
 					<my-button image="builder.png"
 						v-if="isAdmin && builderEnabled && !isMobile"
 						@trigger="openBuilder(false)"
 						@trigger-middle="openBuilder(true)"
 						:captionTitle="capGen.button.openBuilder"
+						:tight="true"
 					/>
 					<my-button image="cancel.png"
 						v-if="isPopUp"
 						@trigger="closeAsk"
 						:cancel="true"
 						:captionTitle="capGen.button.close"
+						:tight="true"
 					/>
 				</div>
 			</div>
 			
 			<!-- title bar lower -->
 			<div class="top lower" v-if="hasBarLower">
-				<div class="area">
+				<div class="area gap">
 					<my-button image="new.png"
 						v-if="!isBulkUpdate && allowNew && !noDataActions"
 						@trigger="openNewAsk(false)"
@@ -161,6 +168,7 @@ let MyForm = {
 						:active="(!isNew || hasChanges) && canCreate"
 						:caption="capGen.button.new"
 						:captionTitle="capGen.button.newHint"
+						:tight="true"
 					/>
 					<my-button image="save.png"
 						v-if="!isBulkUpdate && !noDataActions"
@@ -168,6 +176,7 @@ let MyForm = {
 						:active="hasChanges && canUpdate"
 						:caption="capGen.button.save"
 						:captionTitle="capGen.button.saveHint"
+						:tight="true"
 					/>
 					<my-button image="save_new.png"
 						v-if="!isBulkUpdate && !isPopUp && !isMobile && allowNew && !noDataActions"
@@ -175,6 +184,7 @@ let MyForm = {
 						:active="hasChanges && canUpdate && canCreate"
 						:caption="capGen.button.saveNew"
 						:captionTitle="capGen.button.saveNewHint"
+						:tight="true"
 					/>
 					<my-button image="save.png"
 						v-if="isBulkUpdate && !noDataActions"
@@ -182,6 +192,7 @@ let MyForm = {
 						:active="hasChangesBulk && canUpdate"
 						:caption="capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length))"
 						:captionTitle="capGen.button.saveHint"
+						:tight="true"
 					/>
 					<my-button image="upward.png"
 						v-if="!isMobile && !isPopUp"
@@ -189,6 +200,7 @@ let MyForm = {
 						:active="!updatingRecord"
 						:cancel="true"
 						:caption="capGen.button.goBack"
+						:tight="true"
 					/>
 					<my-button image="shred.png"
 						v-if="!isBulkUpdate && allowDel && !noDataActions"
@@ -197,19 +209,22 @@ let MyForm = {
 						:cancel="true"
 						:caption="capGen.button.delete"
 						:captionTitle="capGen.button.deleteHint"
+						:tight="true"
 					/>
 				</div>
-				<div class="area">
+				<div class="area gap">
 					<my-button image="warning.png"
 						v-if="badLoad"
 						:caption="capApp.noAccess"
 						:cancel="true"
+						:tight="true"
 					/>
 					<my-button image="warning.png"
 						v-if="badSave && fieldIdsInvalid.length !== 0"
 						@trigger="scrollToInvalidField"
 						:caption="capApp.invalidInputs"
 						:cancel="true"
+						:tight="true"
 					/>
 				</div>
 			</div>

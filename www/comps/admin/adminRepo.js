@@ -152,7 +152,7 @@ let MyAdminRepo = {
 				/>
 			</div>
 				
-			<div class="area nowrap default-inputs">
+			<div class="area gap wrap default-inputs">
 				<my-button
 					@trigger="limit = 10;limitSet()"
 					:caption="capGen.limit"

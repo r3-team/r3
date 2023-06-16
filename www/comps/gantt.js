@@ -196,7 +196,7 @@ let MyGantt = {
 					v-if="hasCreate"
 					@trigger="$emit('open-form',[],[],false)"
 					@trigger-middle="$emit('open-form',[],[],true)"
-					:caption="!isMobile ? capGen.button.new : ''"
+					:caption="capGen.button.new"
 					:captionTitle="capGen.button.newHint"
 				/>
 				<my-button
@@ -227,9 +227,9 @@ let MyGantt = {
 				/>
 			</div>
 			
-			<div class="area nowrap default-inputs">
+			<div class="area wrap gap default-inputs">
 				<my-button
-					v-if="stepTypeToggle"
+					v-if="!isMobile && stepTypeToggle"
 					@trigger="toggleStepType"
 					:captionTitle="capApp.button.ganttToggleHint"
 					:image="isDays ? 'clock.png' : 'clock24.png'"
@@ -275,6 +275,7 @@ let MyGantt = {
 					@trigger="scrollToNow"
 					:caption="!isMobile ? capApp.now : ''"
 					:captionTitle="capApp.nowHint"
+					:tight="true"
 				/>
 			</div>
 		</div>

@@ -163,7 +163,7 @@ let MyAdminMailAccounts = {
 		</div>
 		<div class="top lower">
 			<div class="area" />
-			<div class="area default-inputs mail-testing">
+			<div class="area gap wrap default-inputs mail-testing">
 				<h1>{{ capApp.accountTest }}</h1>
 				
 				<select v-model="testAccountName">
@@ -182,6 +182,7 @@ let MyAdminMailAccounts = {
 					@trigger="test"
 					:active="accountIdMap.length !== 0 && testRecipient !== ''"
 					:caption="capGen.button.send"
+					:tight="true"
 				/>
 			</div>
 		</div>

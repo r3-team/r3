@@ -63,19 +63,19 @@ let MyBuilderField = {
 				/>
 			</template>
 			
+			<!-- action: edit field content -->
+			<img class="action clickable" src="images/database.png"
+				v-if="!isTemplate && !moveActive && hasQuery"
+				@click="$emit('field-id-show',field.id,'content')"
+				:class="{ selected:isSelected && fieldIdShowTab === 'content' }"
+				:title="capApp.contentField"
+			/>
+			
 			<!-- display: field is hidden -->
 			<img class="action clickable" src="images/visible0.png"
 				v-if="!isTemplate && !moveActive && field.state === 'hidden'"
 				@click="$emit('field-property-set','state','default')"
 				:title="capApp.hidden"
-			/>
-			
-			<!-- action: edit field content -->
-			<img class="action clickable on-hover on-selected" src="images/database.png"
-				v-if="!isTemplate && !moveActive && hasQuery"
-				@click="$emit('field-id-show',field.id,'content')"
-				:class="{ selected:isSelected && fieldIdShowTab === 'content' }"
-				:title="capApp.contentField"
 			/>
 			
 			<!-- action: move this field -->
@@ -195,13 +195,14 @@ let MyBuilderField = {
 				:isTemplate="false"
 				:joinsIndexMap="joinsIndexMap"
 				:moduleId="moduleId"
+				:showColumnsAll="showColumnsAll"
 				:uiScale="uiScale"
 			/>
 		</div>
 		
 		<!-- columns -->
 		<my-builder-columns
-			v-if="!isTemplate && hasQuery"
+			v-if="showColumns"
 			@column-id-show="$emit('column-id-show',field.id,$event)"
 			@columns-set="$emit('field-property-set','columns',$event)"
 			:builderLanguage="builderLanguage"
@@ -236,6 +237,7 @@ let MyBuilderField = {
 			:isTemplate="isTemplate"
 			:joinsIndexMap="joinsIndexMap"
 			:moduleId="moduleId"
+			:showColumnsAll="showColumnsAll"
 			:uiScale="uiScale"
 		/>
 	</div>`,
@@ -261,6 +263,7 @@ let MyBuilderField = {
 		joinsIndexMap:  { type:Object,  required:true },
 		moduleId:       { type:String,  required:true },
 		noMovement:     { type:Boolean, required:true },
+		showColumnsAll: { type:Boolean, required:true },
 		uiScale:        { type:Number,  required:true }
 	},
 	emits:[
@@ -383,6 +386,7 @@ let MyBuilderField = {
 		isRelationship:(s) => !s.isData ? false : s.isAttributeRelationship(s.attribute.content),
 		moveActive:    (s) => s.fieldMoveList !== null,
 		reference:     (s) => s.isTemplate ? '' : 'F' + s.entityIdMapRef.field[s.field.id],
+		showColumns:   (s) => !s.isTemplate && s.hasQuery && ((s.fieldIdShow === s.field.id && s.fieldIdShowTab === 'content') || s.showColumnsAll),
 		tabIndexShown: (s) => s.tabIndex >= s.field.tabs.length ? 0 : s.tabIndex,
 		
 		// stores

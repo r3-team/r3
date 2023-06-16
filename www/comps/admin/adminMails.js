@@ -53,10 +53,10 @@ let MyAdminMails = {
 					<option>500</option>
 					<option>1000</option>
 				</select>
-				
+			</div>
+			<div class="area default-inputs">
 				<div class="row gap">
 					<input v-model="search" @keyup.enter="startAtPageFirst" :placeholder="capGen.threeDots" />
-					<my-button image="search.png" @trigger="startAtPageFirst" />
 				</div>
 			</div>
 		</div>

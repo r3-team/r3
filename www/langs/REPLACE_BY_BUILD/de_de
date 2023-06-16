@@ -754,6 +754,7 @@
 		},
 		"form":{
 			"button":{
+				"columnsAll":"Alle Spalten",
 				"layoutColumns":"{CNT} Spalten"
 			},
 			"chart":{

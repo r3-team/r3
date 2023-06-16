@@ -145,7 +145,7 @@
 	padding-left:0px;
 }
 .is-mobile .form-wrap.popUp.float{
-	padding:0px;
+	padding:10px 0px 0px;
 	max-width:unset !important;
 	max-height:unset !important;
 }
