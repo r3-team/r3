@@ -8,18 +8,18 @@ import (
 
 var (
 	dict    []string // list of dictionaries for full text search, read from DB
-	dict_mx sync.Mutex
+	dict_mx sync.RWMutex
 )
 
 func GetSearchDictionaries() []string {
-	dict_mx.Lock()
-	defer dict_mx.Unlock()
+	dict_mx.RLock()
+	defer dict_mx.RUnlock()
 	return dict
 }
 
 func GetSearchDictionaryIsValid(entry string) bool {
-	dict_mx.Lock()
-	defer dict_mx.Unlock()
+	dict_mx.RLock()
+	defer dict_mx.RUnlock()
 	return tools.StringInSlice(entry, dict)
 }
 

@@ -8,20 +8,20 @@ import (
 )
 
 var (
-	mail_mx          sync.Mutex
+	mail_mx          sync.RWMutex
 	mailAccountIdMap map[int32]types.MailAccount
 )
 
 func GetMailAccountMap() map[int32]types.MailAccount {
-	mail_mx.Lock()
-	defer mail_mx.Unlock()
+	mail_mx.RLock()
+	defer mail_mx.RUnlock()
 
 	return mailAccountIdMap
 }
 
 func GetMailAccount(id int32, mode string) (types.MailAccount, error) {
-	mail_mx.Lock()
-	defer mail_mx.Unlock()
+	mail_mx.RLock()
+	defer mail_mx.RUnlock()
 
 	ma, exists := mailAccountIdMap[id]
 	if !exists || mode != ma.Mode {
@@ -31,8 +31,8 @@ func GetMailAccount(id int32, mode string) (types.MailAccount, error) {
 }
 
 func GetMailAccountAny(mode string) (types.MailAccount, error) {
-	mail_mx.Lock()
-	defer mail_mx.Unlock()
+	mail_mx.RLock()
+	defer mail_mx.RUnlock()
 
 	for _, ma := range mailAccountIdMap {
 		if mode == ma.Mode {
@@ -43,8 +43,8 @@ func GetMailAccountAny(mode string) (types.MailAccount, error) {
 }
 
 func GetMailAccountsExist() bool {
-	mail_mx.Lock()
-	defer mail_mx.Unlock()
+	mail_mx.RLock()
+	defer mail_mx.RUnlock()
 
 	return len(mailAccountIdMap) != 0
 }

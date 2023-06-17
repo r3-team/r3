@@ -8,18 +8,18 @@ import (
 )
 
 var (
-	preset_mx           sync.Mutex
+	preset_mx           sync.RWMutex
 	presetIdMapRecordId map[uuid.UUID]int64
 )
 
 func GetPresetRecordIds() map[uuid.UUID]int64 {
-	preset_mx.Lock()
-	defer preset_mx.Unlock()
+	preset_mx.RLock()
+	defer preset_mx.RUnlock()
 	return presetIdMapRecordId
 }
 func GetPresetRecordId(presetId uuid.UUID) int64 {
-	preset_mx.Lock()
-	defer preset_mx.Unlock()
+	preset_mx.RLock()
+	defer preset_mx.RUnlock()
 
 	v, exists := presetIdMapRecordId[presetId]
 	if !exists {

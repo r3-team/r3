@@ -19,7 +19,6 @@ func GetLdapIdMap() map[int32]types.Ldap {
 }
 
 func GetLdap(id int32) (types.Ldap, error) {
-
 	ldap_mx.Lock()
 	defer ldap_mx.Unlock()
 

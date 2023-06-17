@@ -10,7 +10,7 @@ import (
 )
 
 var (
-	access_mx        sync.Mutex
+	access_mx        sync.RWMutex
 	loginIdMapAccess = make(map[int64]types.LoginAccess) // access permissions by login ID
 )
 
@@ -21,8 +21,8 @@ func GetAccessById(loginId int64) (types.LoginAccess, error) {
 		return types.LoginAccess{}, errors.New("invalid login ID 0")
 	}
 
-	access_mx.Lock()
-	defer access_mx.Unlock()
+	access_mx.RLock()
+	defer access_mx.RUnlock()
 
 	if _, exists := loginIdMapAccess[loginId]; !exists {
 		if err := load(loginId); err != nil {
@@ -116,7 +116,6 @@ func load(loginId int64) error {
 }
 
 func loadRoleIds(loginId int64) ([]uuid.UUID, error) {
-
 	roleIds := make([]uuid.UUID, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
