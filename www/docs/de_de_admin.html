@@ -1,4 +1,4 @@
-<p><em>Aktualisiert 2022-12-21</em></p>
+<p><em>Aktualisiert 2023-06-18</em></p>
 <h1 id="inhaltsverzeichnis">Inhaltsverzeichnis</h1>
 <ol type="1">
 <li><a href="#einführung">Einführung</a></li>
@@ -22,6 +22,7 @@
 <li><a href="#konfiguration">Konfiguration</a>
 <ol type="1">
 <li><a href="#ssl-zertifikate">SSL-Zertifikate</a></li>
+<li><a href="#proxies">Proxies</a></li>
 </ol></li>
 <li><a href="#allgemeine-administration">Allgemeine Administration</a>
 <ol type="1">
@@ -127,7 +128,7 @@
 <p>Während der Ausführung ist REI3 standardmäßig über Port 443 erreichbar. Sie können jeden modernen Browser verwenden, um lokal auf REI3 unter <code>https://localhost/</code> oder über das Netzwerk mit einer entsprechend konfigurierten Firewall zuzugreifen. Während der Installation wird ein einzelner Administratorbenutzer erstellt. Benutzername und Passwort sind jeweils auf "admin" gesetzt.</p>
 <p>Nach der Anmeldung kann auf die Adminoberfläche zugegriffen werden, um Benutzer zu verwalten, Anwendungen zu installieren, auf Systemprotokolle zuzugreifen usw. Das Standardkennwort sollte sofort nach der ersten Anmeldung geändert werden.</p>
 <h1 id="konfiguration">Konfiguration</h1>
-<p>Die Kernkonfiguration von REI3 kann in der Konfigurationsdatei (<code>config.json</code>) geändert werden, die sich im ausgewählten REI3-Installationsverzeichnis befindet. Das Festlegen von Dateipfaden, Webserver-Port und Datenbankverbindungsdetails ist unkompliziert. Änderungen werden beim Neustart des Anwendungsdienstes angewendet. Spezielle Konfigurationsoptionen und Zertifizierungsmanagement werden separat erläutert.</p>
+<p>Die Kernkonfiguration von REI3 kann in der Konfigurationsdatei (<code>config.json</code>) geändert werden, die sich im ausgewählten REI3-Installationsverzeichnis befindet. Das Festlegen von Dateipfaden, Webserver-Port und Datenbankverbindungsdetails ist unkompliziert. Änderungen werden beim Neustart des Anwendungsdienstes angewendet.</p>
 <h2 id="ssl-zertifikate">SSL-Zertifikate</h2>
 <p>Während der Installation erstellt REI3 ein selbstsigniertes Zertifikat, um den verschlüsselten Zugriff auf die Anwendung zu ermöglichen. Es wird nicht empfohlen, dieses Zertifikat dauerhaft zu nutzen. Wenn möglich, sollte für REI3 ein ordnungsgemäß signiertes Zertifikat bereitgestellt werden, um eine sichere Kommunikation mit Vertrauen zwischen Endgeräten und Server zu gewährleisten.</p>
 <p>Einige allgemeine Überlegungen / Fallstricke:</p>
@@ -136,6 +137,15 @@
 <li>Stellen Sie sicher, dass der Hostname im Zertifikat, derselbe ist, den die Clients zum Zugriff auf den REI3-Server verwenden. Der Port ist irrelevant.</li>
 <li>Wenn Sie REI3 intern betreiben (nicht über die Cloud erreichbar), müssen die Clients das Zertifikat trotzdem überprüfen können. Stellen Sie sicher, dass Ihre Zertifikatsdatei (*.crt) alle Zertifikate in der Kette bis zu dem Zertifikat enthält, das den Clients bekannt ist - dies ist in der Regel ein vertrauenswürdiges Stammzertifikat oder ein Zwischenzertifikat.</li>
 </ul>
+<h2 id="proxies">Proxies</h2>
+<p>Wenn Clients mit einem REI3-Server kommunizieren, verwenden sie zwei Methoden - beide laufen über den gleichen Port (normalerweise 443) als TCP:</p>
+<ul>
+<li>HTTP(S)-Anfragen, um Dateien, Bilder und andere Webressourcen zu laden.</li>
+<li>Eine kontinuierliche Websocket-Verbindung für den bidirektionalen Datenaustausch zwischen Server und Client. Wenn diese Verbindung unterbrochen wird, versucht der Client, diese wiederherzustellen.</li>
+</ul>
+<p>Bei Proxy-Servern (egal ob Forward- oder Reverse-Proxy) können HTTP(s)-Anfragen wie jede andere Webanwendung behandelt werden. Daher sind Good-Practices wie Anfrage-Timeouts sinnvoll.</p>
+<p>Websockets hingegen sollen so lange aktiv bleiben, bis eine der beiden Seiten (Server oder Client) die Verbindung absichtlich schließt. Dies kann aufgrund von Ereignissen wie einem Logout oder einem Server, der in den Wartungsmodus geht, geschehen. Bei der Konfiguration eines Proxys sollte das Anfrage-Timeout für Websocket-Verbindungen deaktiviert oder zumindest auf mehrere Stunden eingestellt werden. Einige Proxys (wie HAProxy) nennen diese Verbindungen "Tunnel" statt "Client" oder "Server". Jedes Mal, wenn eine Websocket-Verbindung von einem Proxy zwangsweise geschlossen wird, muss der Client die Verbindung neu aufbauen und es können ungespeicherte Änderungen verloren gehen.</p>
+<p>Im Falle von <a href="#clusterbetrieb-und-systemleistung">Cluster-Setups</a> muss eine Websocket-Verbindung bei einem bestimmten Server 'hängen bleiben', bis sie geschlossen wird. Auch wenn die ersten Anfragen z.B. über Round-Robin zugewiesen werden, ist ein bestimmter Server für die laufende Websocket-Kommunikation mit einem bestimmten Client zuständig. HTTP(S)-Anfragen können jedoch jederzeit von einem beliebigen Cluster-Server bearbeitet werden.</p>
 <h1 id="allgemeine-administration">Allgemeine Administration</h1>
 <p>Nach der Konfiguration werden grundsätzlich alle administrativen Aufgaben über die Adminoberfläche in der REI3-Hauptwebanwendung ausgeführt. Jeder Benutzer, der als "Administrator" definiert ist, hat vollen Zugriff auf diese Funktionen.</p>
 <h2 id="wartungsmodus">Wartungsmodus</h2>
