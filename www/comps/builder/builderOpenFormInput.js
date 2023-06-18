@@ -96,11 +96,8 @@ let MyBuilderOpenFormInput = {
 							:value="openForm.attributeIdApply !== null ? openForm.attributeIdApply : ''"
 						>
 							<option value="">-</option>
-							<option
-								v-for="a in targetAttributes"
-								:value="a.id"
-							>
-								{{ relationIdMap[a.relationId].name + '.' + a.name }}
+							<option v-for="ta in targetAttributes" :value="ta.atrId">
+								{{ ta.caption }}
 							</option>
 						</select>
 					</td>
@@ -132,18 +129,26 @@ let MyBuilderOpenFormInput = {
 			if(!s.formIsSet) return [];
 			
 			// parse from which relation the record is applied, based on the chosen relation index
-			let recordRelationId = null;
+			let relationIdRecord = null;
 			for(let k in s.joinsIndexMap) {
 				if(s.joinsIndexMap[k].index === s.openForm.relationIndex) {
-					recordRelationId = s.joinsIndexMap[k].relationId;
+					relationIdRecord = s.joinsIndexMap[k].relationId;
 					break;
 				}
 			}
-			if(recordRelationId === null)
+			if(relationIdRecord === null)
 				return [];
 			
-			let form = s.formIdMap[s.openForm.formIdOpen];
-			let out  = [];
+			let form   = s.formIdMap[s.openForm.formIdOpen];
+			let out    = [];
+			let atrAdd = (join,atrId,atrIdNm) => {
+				let atr = s.attributeIdMap[atrId];
+				let cap = atrIdNm === null
+					? `${join} ${s.relationIdMap[atr.relationId].name}.${atr.name}`
+					: `${join} ${s.relationIdMap[atr.relationId].name}.${s.attributeIdMap[atrIdNm].name} -> ${atr.name}`;
+				
+				out.push({atrId:atrId,caption:cap});
+			};
 			
 			// collect fitting attributes
 			for(let join of form.query.joins) {
@@ -151,14 +156,44 @@ let MyBuilderOpenFormInput = {
 				
 				// attributes on relation from target form, in relationship with record relation
 				for(let atr of rel.attributes) {
-					if(s.isAttributeRelationship(atr.content) && atr.relationshipId === recordRelationId)
-						out.push(atr);
+					if(s.isAttributeRelationship(atr.content) && atr.relationshipId === relationIdRecord)
+						atrAdd(join.index,atr.id,null)
 				}
 				
 				// attributes on record relation, in relationship with relation from target form
-				for(let atr of s.relationIdMap[recordRelationId].attributes) {
+				for(let atr of s.relationIdMap[relationIdRecord].attributes) {
 					if(s.isAttributeRelationship(atr.content) && atr.relationshipId === rel.id)
-						out.push(atr);
+						atrAdd(join.index,atr.id,null)
+				}
+				
+				// attributes on n:m relations
+				for(let relId in s.relationIdMap) {
+					let r = s.relationIdMap[relId];
+					
+					// only allow relations from own module or modules we declared as dependency
+					if(r.moduleId !== s.module.id && !s.module.dependsOn.includes(r.moduleId))
+						continue;
+					
+					// skip if record relation itself is n:m candidate
+					if(r.id === relationIdRecord)
+						continue;
+					
+					let atrToSource = null; // attribute pointing to relation of record to be applied
+					let atrToTarget = null; // attribute pointing to form join relation
+					
+					for(let atr of r.attributes) {
+						if(!s.isAttributeRelationship(atr.content))
+							continue;
+						
+						if(atr.relationshipId === relationIdRecord)
+							atrToSource = atr;
+						
+						if(atr.relationshipId === rel.id)
+							atrToTarget = atr;
+					}
+					
+					if(atrToSource !== null && atrToTarget !== null)
+						atrAdd(join.index,atrToSource.id,atrToTarget.id)
 				}
 			}
 			return out;
@@ -168,10 +203,11 @@ let MyBuilderOpenFormInput = {
 		formIsSet:(s) => s.openForm !== null && s.openForm.formIdOpen !== null,
 		
 		// stores
-		modules:      (s) => s.$store.getters['schema/modules'],
-		relationIdMap:(s) => s.$store.getters['schema/relationIdMap'],
-		formIdMap:    (s) => s.$store.getters['schema/formIdMap'],
-		capApp:       (s) => s.$store.getters.captions.builder.openFormInput
+		modules:       (s) => s.$store.getters['schema/modules'],
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		formIdMap:     (s) => s.$store.getters['schema/formIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.openFormInput
 	},
 	methods:{
 		// externals

@@ -871,6 +871,9 @@ let MyForm = {
 						? [this.attributeIdMapDef[ia.attributeId]] : this.attributeIdMapDef[ia.attributeId];
 				}
 				
+				if(typeof this.attributeIdMapDef[ia.attributeIdNm] !== 'undefined')
+					this.valuesDef[k] = [this.attributeIdMapDef[ia.attributeIdNm]];
+				
 				// set default value, default value can be an object so it should be cloned as to not overwrite it
 				this.valueSet(k,JSON.parse(JSON.stringify(this.valuesDef[k])),true,true);
 			}
