@@ -57,7 +57,7 @@ let MyForm = {
 	},
 	template:`<div class="form-wrap" :class="{ popUp:isPopUp, float:isPopUpFloating, fullscreen:popUpFullscreen }" :key="form.id">
 		
-		<!-- pop-up sub-form -->
+		<!-- pop-up form -->
 		<div class="app-sub-window under-header"
 			v-if="popUp !== null"
 			@mousedown.self="$refs.popUpForm.closeAsk()"
@@ -236,6 +236,7 @@ let MyForm = {
 			>
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
+					@close-inline="$store.commit('formHasChanges',hasChanges)"
 					@clipboard="messageSet('[CLIPBOARD]')"
 					@execute-function="executeFunction"
 					@hotkey="handleHotkeys"

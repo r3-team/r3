@@ -348,7 +348,7 @@ let MyField = {
 		<my-list
 			v-if="isList"
 			@clipboard="$emit('clipboard')"
-			@close-inline="popUpFormInline = null"
+			@close-inline="closeInline"
 			@open-form="(...args) => openForm(args[0],[],args[1],null)"
 			@open-form-bulk="(...args) => openForm(args[0],[],args[1],'bulk')"
 			@record-count-change="$emit('set-counter',field.id,$event)"
@@ -381,7 +381,7 @@ let MyField = {
 		<!-- calendar -->
 		<my-calendar
 			v-if="isCalendar && !field.gantt"
-			@close-inline="popUpFormInline = null"
+			@close-inline="closeInline"
 			@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
 			@record-count-change="$emit('set-counter',field.id,$event)"
 			@set-args="(...args) => $emit('set-form-args',...args)"
@@ -412,7 +412,7 @@ let MyField = {
 		<!-- gantt -->
 		<my-gantt
 			v-if="isCalendar && field.gantt"
-			@close-inline="popUpFormInline = null"
+			@close-inline="closeInline"
 			@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
 			@record-count-change="$emit('set-counter',field.id,$event)"
 			@set-args="(...args) => $emit('set-form-args',...args)"
@@ -488,6 +488,7 @@ let MyField = {
 				<my-field flexDirParent="column" :ref="'tabField_'+f.id"
 					v-for="f in t.fields"
 					@clipboard="$emit('clipboard')"
+					@close-inline="$emit('close-inline')"
 					@execute-function="$emit('execute-function',$event)"
 					@hotkey="$emit('hotkey',$event)"
 					@open-form="(...args) => $emit('open-form',...args)"
@@ -524,6 +525,7 @@ let MyField = {
 			v-if="isContainer"
 			v-for="f in field.fields"
 			@clipboard="$emit('clipboard')"
+			@close-inline="$emit('close-inline')"
 			@execute-function="$emit('execute-function',$event)"
 			@hotkey="$emit('hotkey',$event)"
 			@open-form="(...args) => $emit('open-form',...args)"
@@ -575,8 +577,9 @@ let MyField = {
 		values:           { type:Object,  required:true }
 	},
 	emits:[
-		'clipboard','execute-function','hotkey','open-form','set-form-args',
-		'set-counter','set-touched','set-valid','set-value','set-value-init'
+		'clipboard','close-inline','execute-function','hotkey','open-form',
+		'set-form-args','set-counter','set-touched','set-valid','set-value',
+		'set-value-init'
 	],
 	data() {
 		return {
@@ -1129,6 +1132,10 @@ let MyField = {
 		clickOutside() {
 			if(this.showColorPickerInput)
 				this.showColorPickerInput = false;
+		},
+		closeInline() {
+			this.popUpFormInline = null;
+			this.$emit('close-inline');
 		},
 		openForm(recordIds,getterArgs,middleClick,openFormContext) {
 			// set defaults
