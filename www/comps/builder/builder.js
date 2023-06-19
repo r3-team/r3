@@ -335,7 +335,6 @@ let MyBuilder = {
 		};
 	},
 	mounted() {
-		this.$store.commit('moduleColor1','');
 		this.$store.commit('pageTitle',this.capApp.pageTitle);
 		
 		if(!this.builderEnabled)

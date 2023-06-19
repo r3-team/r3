@@ -186,12 +186,7 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		log.Info("transfer", fmt.Sprintf("set module '%s' v%d, %s",
 			mod.Name, mod.ReleaseBuild, mod.Id))
 
-		if err := importCheckResultAndApply(tx, module.Set_tx(tx, mod.Id,
-			mod.ParentId, mod.FormId, mod.IconId, mod.Name, mod.Color1,
-			mod.Position, mod.LanguageMain, mod.ReleaseBuild,
-			mod.ReleaseBuildApp, mod.ReleaseDate, mod.DependsOn, mod.StartForms,
-			mod.Languages, mod.ArticleIdsHelp, mod.Captions), mod.Id, idMapSkipped); err != nil {
-
+		if err := importCheckResultAndApply(tx, module.Set_tx(tx, mod), mod.Id, idMapSkipped); err != nil {
 			return err
 		}
 	}

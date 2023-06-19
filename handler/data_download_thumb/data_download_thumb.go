@@ -1,7 +1,6 @@
 package data_download_thumb
 
 import (
-	"fmt"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -59,7 +58,6 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 	// check file access privilege
 	if err := data.MayAccessFile(loginId, attributeId); err != nil {
-		fmt.Println("bad access")
 		handler.AbortRequest(w, context, err, handler.ErrUnauthorized)
 		return
 	}

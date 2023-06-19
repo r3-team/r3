@@ -35,7 +35,7 @@ let MyAdminLogins = {
 					:total="total"
 				/>
 			</div>
-			<div class="area nowrap default-inputs">
+			<div class="area wrap gap default-inputs">
 				<my-button
 					@trigger="limitSet(20)"
 					:caption="capGen.limit"

@@ -1,5 +1,6 @@
-import MyStoreLocal  from './storeLocal.js';
-import MyStoreSchema from './storeSchema.js';
+import MyStoreLocal            from './storeLocal.js';
+import MyStoreSchema           from './storeSchema.js';
+import { colorAdjustBgHeader } from '../comps/shared/generic.js';
 export {MyStore as default};
 
 const MyStore = Vuex.createStore({
@@ -49,13 +50,15 @@ const MyStore = Vuex.createStore({
 		loginPrivateKeyEncBackup:null, // user login private key PEM, encrypted with backup code
 		loginPublicKey:null,  // user login public key for encryption (exportable key)
 		logo:'',
-		moduleColor1:'',      // color1 (header) of currently active module
 		moduleEntries:[],     // module entries for header/home page
 		moduleLanguage:'',    // module language (either equal to user language or module fallback)
+		moduleIdLast:null,    // module ID of last active module
 		pageTitle:'',         // web page title, set by app/form depending on navigation
 		pageTitleFull:'',     // web page title + instance name
 		popUpFormGlobal:null, // configuration of global pop-up form
 		productionMode:false, // system in production mode, false if maintenance
+		pwaDomainMap:{},      // map of modules per PWA sub domain, key: sub domain, value: module ID
+		searchDictionaries:[],// list of dictionaries used for full text search for this login, ['english', 'german', ...]
 		settings:{},          // setting values for logged in user, key: settings name
 		sessionValueStore:{}, // user session key-value store for frontend functions, { moduleId1:{ key1:value1, key2:value2 }, moduleId2:{ ... } }
 		system:{}             // system details (admin only)
@@ -153,11 +156,13 @@ const MyStore = Vuex.createStore({
 		loginPrivateKeyEnc:      (state,payload) => state.loginPrivateKeyEnc       = payload,
 		loginPrivateKeyEncBackup:(state,payload) => state.loginPrivateKeyEncBackup = payload,
 		loginPublicKey: (state,payload) => state.loginPublicKey  = payload,
-		moduleColor1:   (state,payload) => state.moduleColor1    = payload,
 		moduleEntries:  (state,payload) => state.moduleEntries   = payload,
 		moduleLanguage: (state,payload) => state.moduleLanguage  = payload,
+		moduleIdLast:   (state,payload) => state.moduleIdLast    = payload,
 		popUpFormGlobal:(state,payload) => state.popUpFormGlobal = payload,
 		productionMode: (state,payload) => state.productionMode  = payload,
+		pwaDomainMap:   (state,payload) => state.pwaDomainMap  = payload,
+		searchDictionaries:(state,payload) => state.searchDictionaries = payload,
 		settings:       (state,payload) => state.settings        = payload,
 		system:         (state,payload) => state.system          = payload
 	},
@@ -173,6 +178,14 @@ const MyStore = Vuex.createStore({
 			return state.settings.pattern !== null
 				? `background-image:url('images/pattern_${state.settings.pattern}.webp');background-repeat:repeat-x`
 				: '';
+		},
+		pwaModuleId:(state) => {
+			if(!MyStoreLocal.state.activated)
+				return null;
+			
+			let subDomain = window.location.host.split('.')[0];
+			return typeof state.pwaDomainMap[subDomain] !== 'undefined'
+				? state.pwaDomainMap[subDomain] : null;
 		},
 		
 		// simple
@@ -210,12 +223,14 @@ const MyStore = Vuex.createStore({
 		loginPrivateKeyEnc:      (state) => state.loginPrivateKeyEnc,
 		loginPrivateKeyEncBackup:(state) => state.loginPrivateKeyEncBackup,
 		loginPublicKey:   (state) => state.loginPublicKey,
-		moduleColor1:     (state) => state.moduleColor1,
 		moduleEntries:    (state) => state.moduleEntries,
 		moduleLanguage:   (state) => state.moduleLanguage,
+		moduleIdLast:     (state) => state.moduleIdLast,
 		pageTitleFull:    (state) => state.pageTitleFull,
 		popUpFormGlobal:  (state) => state.popUpFormGlobal,
 		productionMode:   (state) => state.productionMode,
+		pwaDomainMap:     (state) => state.pwaDomainMap,
+		searchDictionaries:(state) => state.searchDictionaries,
 		sessionValueStore:(state) => state.sessionValueStore,
 		settings:         (state) => state.settings,
 		system:           (state) => state.system

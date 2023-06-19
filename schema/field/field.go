@@ -344,7 +344,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posButtonLookup {
 		var field = fields[pos].(types.FieldButton)
 
-		field.OpenForm, err = openForm.Get("field", field.Id)
+		field.OpenForm, err = openForm.Get("field", field.Id, pgtype.Text{})
 		if err != nil {
 			return fields, err
 		}
@@ -359,7 +359,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posCalendarLookup {
 		var field = fields[pos].(types.FieldCalendar)
 
-		field.OpenForm, err = openForm.Get("field", field.Id)
+		field.OpenForm, err = openForm.Get("field", field.Id, pgtype.Text{})
 		if err != nil {
 			return fields, err
 		}
@@ -412,7 +412,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posDataRelLookup {
 		var field = fields[pos].(types.FieldDataRelationship)
 
-		field.OpenForm, err = openForm.Get("field", field.Id)
+		field.OpenForm, err = openForm.Get("field", field.Id, pgtype.Text{})
 		if err != nil {
 			return fields, err
 		}
@@ -450,7 +450,11 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	for _, pos := range posListLookup {
 		var field = fields[pos].(types.FieldList)
 
-		field.OpenForm, err = openForm.Get("field", field.Id)
+		field.OpenForm, err = openForm.Get("field", field.Id, pgtype.Text{})
+		if err != nil {
+			return fields, err
+		}
+		field.OpenFormBulk, err = openForm.Get("field", field.Id, pgtype.Text{String: "bulk", Valid: true})
 		if err != nil {
 			return fields, err
 		}
@@ -544,7 +548,7 @@ func GetCalendar(fieldId uuid.UUID) (types.FieldCalendar, error) {
 		return f, err
 	}
 
-	f.OpenForm, err = openForm.Get("field", f.Id)
+	f.OpenForm, err = openForm.Get("field", f.Id, pgtype.Text{})
 	if err != nil {
 		return f, err
 	}
@@ -697,7 +701,8 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			}
 			if err := setList_tx(tx, fieldId, f.AttributeIdRecord, f.FormIdOpen,
 				f.AutoRenew, f.CsvExport, f.CsvImport, f.Layout, f.FilterQuick,
-				f.ResultLimit, f.Columns, f.Collections, f.OpenForm); err != nil {
+				f.ResultLimit, f.Columns, f.Collections, f.OpenForm,
+				f.OpenFormBulk); err != nil {
 
 				return err
 			}
@@ -802,7 +807,7 @@ func setButton_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	}
 
 	// set open form
-	return openForm.Set_tx(tx, "field", fieldId, oForm)
+	return openForm.Set_tx(tx, "field", fieldId, oForm, pgtype.Text{})
 }
 func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	attributeIdDate0 uuid.UUID, attributeIdDate1 uuid.UUID,
@@ -852,7 +857,7 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
 
 	// set open form
-	if err := openForm.Set_tx(tx, "field", fieldId, oForm); err != nil {
+	if err := openForm.Set_tx(tx, "field", fieldId, oForm, pgtype.Text{}); err != nil {
 		return err
 	}
 
@@ -1040,7 +1045,7 @@ func setDataRelationship_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID
 	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
 
 	// set open form
-	if err := openForm.Set_tx(tx, "field", fieldId, oForm); err != nil {
+	if err := openForm.Set_tx(tx, "field", fieldId, oForm, pgtype.Text{}); err != nil {
 		return err
 	}
 	return column.Set_tx(tx, "field", fieldId, columns)
@@ -1073,7 +1078,8 @@ func setHeader_tx(tx pgx.Tx, fieldId uuid.UUID, size int) error {
 func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	formIdOpen pgtype.UUID, autoRenew pgtype.Int4, csvExport bool, csvImport bool,
 	layout string, filterQuick bool, resultLimit int, columns []types.Column,
-	collections []types.CollectionConsumer, oForm types.OpenForm) error {
+	collections []types.CollectionConsumer, oForm types.OpenForm,
+	oFormBulk types.OpenForm) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_list", "field_id")
 	if err != nil {
@@ -1107,8 +1113,11 @@ func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	// fix imports < 2.6: New open form entity
 	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
 
-	// set open form
-	if err := openForm.Set_tx(tx, "field", fieldId, oForm); err != nil {
+	// set open forms
+	if err := openForm.Set_tx(tx, "field", fieldId, oForm, pgtype.Text{}); err != nil {
+		return err
+	}
+	if err := openForm.Set_tx(tx, "field", fieldId, oFormBulk, pgtype.Text{String: "bulk", Valid: true}); err != nil {
 		return err
 	}
 

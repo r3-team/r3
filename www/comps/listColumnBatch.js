@@ -166,14 +166,14 @@ let MyListColumnBatch = {
 		'close','del-aggregator','del-order','set-aggregator',
 		'set-filters','set-order','toggle'
 	],
-	data:function() {
+	data() {
 		return {
 			input:'',          // value input (either string if text, or array if selected from values)
 			values:[],         // values available to filter with (all values a list could have for column)
 			valuesLoaded:false // values loaded once
 		};
 	},
-	mounted:function() {
+	mounted() {
 		if(this.isValidFilter)
 			this.$watch('show',v => this.loadValues());
 		

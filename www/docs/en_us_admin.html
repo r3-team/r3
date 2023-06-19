@@ -1,4 +1,4 @@
-<p><em>Updated 2022-12-21</em></p>
+<p><em>Updated 2023-06-18</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -22,6 +22,7 @@
 <li><a href="#configuration">Configuration</a>
 <ol type="1">
 <li><a href="#ssl-certificates">SSL certificates</a></li>
+<li><a href="#proxies">Proxies</a></li>
 </ol></li>
 <li><a href="#general-administration">General administration</a>
 <ol type="1">
@@ -127,7 +128,7 @@
 <p>When running, REI3 is by default reachable on port 443. You can use any modern browser to access REI3 locally at <code>https://localhost/</code> or from the network, given a configured firewall. During installation, a single admin user is created; username and password are both 'admin'.</p>
 <p>After login, an admin user can access the admin panel to manage users, install applications, access system logs and so on. The default password should be changed immediately.</p>
 <h1 id="configuration">Configuration</h1>
-<p>REI3s core configuration can be changed within its configuration file (<code>config.json</code>), which is located in the chosen REI3 installation directory. Setting file paths, web server port and database connection details is straightforward. Changes are applied when the application service restarts. Special configuration options and certification management is explained separately.</p>
+<p>REI3s core configuration can be changed within its configuration file (<code>config.json</code>), which is located in the chosen REI3 installation directory. Setting file paths, web server port and database connection details is straightforward. Changes are applied when the application service restarts.</p>
 <h2 id="ssl-certificates">SSL certificates</h2>
 <p>During installation, REI3 creates a self-signed certificate to allow encrypted access to the application. It is not recommended to keep this certificate. If at all possible, a properly signed certificate should be provided for REI3 to ensure secure communication with trust between clients and server.</p>
 <p>Some common considerations / pitfalls:</p>
@@ -136,6 +137,15 @@
 <li>Make sure that the hostname that the certificate is set to, is the same as clients use to connect to the REI3 server. The port is irrelevant.</li>
 <li>When running REI3 internally (not reachable from the cloud), clients still need to be able to verify the certificate. Make sure that your certificate file (*.crt) includes all certificates up the chain until the one that is known to the clients - this is usually a trusted root certificate or intermediary.</li>
 </ul>
+<h2 id="proxies">Proxies</h2>
+<p>When clients talk to a REI3 server, they use two methods - both are running on the same port (usually 443) as TCP:</p>
+<ul>
+<li>HTTP(S) requests to load files, images and other web resources.</li>
+<li>A continous Websocket connection for exchanging data bidirectionally between server and client. If this connection breaks down, the client tries to re-establish the it.</li>
+</ul>
+<p>When it comes to proxy servers (regardless of forward or reverse proxy), HTTP(s) requests can be handled like any other web application. So good-practices such as request timeouts are sensible.</p>
+<p>Websockets however are meant to stay active until either side (server or client) purposefully closes the connection. This can be because of events like a logout or a server going into maintenance mode. When configuring a proxy, request timeouts for Websocket connections should be disabled or at least set to multiple hours. Some proxies (like HAProxy) call these connections 'tunnel' instead of 'client' or 'server'. Every time a Websocket connection is forcefully closed by a proxy, the client must re-connect and can loose unsaved changes.</p>
+<p>In case of <a href="#clustering-and-system-performance">cluster-setups</a>, a Websocket connection must 'stick' with one particular server until its closed. Even if the initial requests are assigned via round-robin for example, a particular server is responsible for ongoing Websocket communication with a specific client. HTTP(S) requests can be handled by any cluster server at any time however.</p>
 <h1 id="general-administration">General administration</h1>
 <p>After configuration, basically all administrative tasks are executed via the admin user interface inside the main REI3 web application. Any user defined as 'admin' has full access to these features.</p>
 <h2 id="maintenance-mode">Maintenance mode</h2>

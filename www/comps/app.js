@@ -6,9 +6,8 @@ import MyLogin               from './login.js';
 import {getStartFormId}      from './shared/access.js';
 import {updateCollections}   from './shared/collection.js';
 import {formOpen}            from './shared/form.js';
-import srcBase64Icon         from './shared/image.js';
 import {getCaptionForModule} from './shared/language.js';
-import {openLink}            from './shared/generic.js';
+import srcBase64Icon         from './shared/image.js';
 import {
 	aesGcmDecryptBase64,
 	aesGcmImportBase64,
@@ -19,6 +18,10 @@ import {
 	genericError,
 	genericErrorWithFallback
 } from './shared/error.js';
+import {
+	colorAdjustBgHeader,
+	openLink
+} from './shared/generic.js';
 export {MyApp as default};
 
 let MyApp = {
@@ -70,8 +73,9 @@ let MyApp = {
 					@close="$store.commit('popUpFormGlobal',null)"
 					:formId="popUpFormGlobal.formId"
 					:isPopUp="true"
+					:isPopUpFloating="true"
 					:moduleId="popUpFormGlobal.moduleId"
-					:recordId="popUpFormGlobal.recordId"
+					:recordIds="popUpFormGlobal.recordIds"
 					:style="popUpFormGlobal.style"
 				/>
 			</div>
@@ -121,25 +125,55 @@ let MyApp = {
 	data() {
 		return {
 			appReady:false,       // app is loaded and user authenticated
+			collectionEntries:[], // collection entries shown in pop-up window (for mobile use)
 			loginReady:false,     // app is ready for authentication
 			publicLoaded:false,   // public data has been loaded
 			schemaLoaded:false,   // app schema has been loaded
-			collectionEntries:[], // show collection entries in pop-up window (for mobile use)
 			wsConnected:false     // connection to backend has been established (websocket)
 		};
 	},
+	watch:{
+		color1:{
+			handler(v) {
+				// set meta theme color (for PWA window color)
+				document.querySelector('meta[name="theme-color"]').setAttribute('content',v);
+			},
+			immediate:true
+		},
+		css:{
+			handler(v) {
+				let e = document.getElementById('app-custom-css');
+				if(typeof e !== 'undefined' && e !== null)
+					e.parentNode.removeChild(e);
+				
+				if(this.activated) {
+					e = document.createElement("style");
+					e.id        = 'app-custom-css';
+					e.innerText = v;
+					document.head.appendChild(e);
+				}
+			},
+			immediate:true
+		},
+		pwaManifestHref:{
+			handler(v) {
+				// set manifest (for PWA installation)
+				let e = document.getElementById('app-pwa-manifest');
+				if(typeof e !== 'undefined' && e !== null)
+					e.parentNode.removeChild(e);
+				
+				e = document.createElement('link');
+				e.href = v;
+				e.id   = 'app-pwa-manifest';
+				e.rel  = 'manifest';
+				document.head.appendChild(e);
+			},
+			immediate:true
+		}
+	},
 	computed:{
 		// presentation
-		bgStyle:(s) => {
-			// custom color before specific module color
-			if(s.customBgHeader !== '')
-				return s.customBgHeader;
-			
-			if(s.moduleColor1 !== '')
-				return `background-color:#${s.moduleColor1};`;
-			
-			return '';
-		},
+		bgStyle:(s) => `background-color:${s.color1};`,
 		classes:(s) => {
 			if(!s.appReady)
 				return 'is-not-ready';
@@ -162,6 +196,23 @@ let MyApp = {
 			}
 			return classes.join(' ');
 		},
+		color1:(s) => {
+			let c = s.settings.dark ? '#222' : '#444'; // default colors
+			
+			if(s.activated && s.customColorHeader !== '')
+				c = `#${s.customColorHeader}`;
+			else if(s.isAtModule)
+				c = s.moduleIdMapColor[s.moduleIdLast];
+			
+			return c;
+		},
+		moduleIdMapColor:(s) => {
+			let out = {};
+			for(let m of s.modules) {
+				out[m.id] = s.colorAdjustBgHeader(`#${m.color1}`,s.settings.dark);
+			}
+			return out;
+		},
 		styles:(s) => {
 			if(!s.appReady) return '';
 			
@@ -172,12 +223,8 @@ let MyApp = {
 			
 			return styles.join(';');
 		},
-		stylesContent:(s) => {
-			if(!s.appReady || s.settings.compact)
-				return '';
-			
-			return [`max-width:${s.settings.pageLimit}px`].join(';');
-		},
+		stylesContent:(s) => !s.appReady || s.settings.compact ? ''
+			: [`max-width:${s.settings.pageLimit}px`].join(';'),
 		
 		// navigation
 		moduleEntries:(s) => {
@@ -270,34 +317,37 @@ let MyApp = {
 		},
 		
 		// simple
-		httpMode:(s) => location.protocol === 'http:',
+		httpMode:       (s) => location.protocol === 'http:',
+		isAtModule:     (s) => typeof s.$route.meta.atModule !== 'undefined' && s.moduleIdLast !== null,
+		pwaManifestHref:(s) => `/manifests/${s.isAtModule ? s.moduleIdLast : ''}`,
 		
 		// stores
-		activated:      (s) => s.$store.getters['local/activated'],
-		appVersion:     (s) => s.$store.getters['local/appVersion'],
-		customBgHeader: (s) => s.$store.getters['local/customBgHeader'],
-		customLogo:     (s) => s.$store.getters['local/customLogo'],
-		customLogoUrl:  (s) => s.$store.getters['local/customLogoUrl'],
-		loginKeyAes:    (s) => s.$store.getters['local/loginKeyAes'],
-		schemaTimestamp:(s) => s.$store.getters['local/schemaTimestamp'],
-		modules:        (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		moduleIdMapOpts:(s) => s.$store.getters['schema/moduleIdMapOptions'],
-		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
-		access:         (s) => s.$store.getters.access,
-		blockInput:     (s) => s.$store.getters.blockInput,
-		capErr:         (s) => s.$store.getters.captions.error,
-		capGen:         (s) => s.$store.getters.captions.generic,
-		isAdmin:        (s) => s.$store.getters.isAdmin,
-		isAtDialog:     (s) => s.$store.getters.isAtDialog,
-		isAtFeedback:   (s) => s.$store.getters.isAtFeedback,
-		isMobile:       (s) => s.$store.getters.isMobile,
-		loginEncryption:(s) => s.$store.getters.loginEncryption,
-		loginPrivateKey:(s) => s.$store.getters.loginPrivateKey,
-		moduleColor1:   (s) => s.$store.getters.moduleColor1,
-		patternStyle:   (s) => s.$store.getters.patternStyle,
-		popUpFormGlobal:(s) => s.$store.getters.popUpFormGlobal,
-		settings:       (s) => s.$store.getters.settings
+		activated:        (s) => s.$store.getters['local/activated'],
+		appVersion:       (s) => s.$store.getters['local/appVersion'],
+		customColorHeader:(s) => s.$store.getters['local/companyColorHeader'],
+		customLogo:       (s) => s.$store.getters['local/customLogo'],
+		customLogoUrl:    (s) => s.$store.getters['local/customLogoUrl'],
+		css:              (s) => s.$store.getters['local/css'],
+		loginKeyAes:      (s) => s.$store.getters['local/loginKeyAes'],
+		schemaTimestamp:  (s) => s.$store.getters['local/schemaTimestamp'],
+		modules:          (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:      (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleIdMapOpts:  (s) => s.$store.getters['schema/moduleIdMapOptions'],
+		formIdMap:        (s) => s.$store.getters['schema/formIdMap'],
+		access:           (s) => s.$store.getters.access,
+		blockInput:       (s) => s.$store.getters.blockInput,
+		capErr:           (s) => s.$store.getters.captions.error,
+		capGen:           (s) => s.$store.getters.captions.generic,
+		isAdmin:          (s) => s.$store.getters.isAdmin,
+		isAtDialog:       (s) => s.$store.getters.isAtDialog,
+		isAtFeedback:     (s) => s.$store.getters.isAtFeedback,
+		isMobile:         (s) => s.$store.getters.isMobile,
+		loginEncryption:  (s) => s.$store.getters.loginEncryption,
+		loginPrivateKey:  (s) => s.$store.getters.loginPrivateKey,
+		moduleIdLast:     (s) => s.$store.getters.moduleIdLast,
+		patternStyle:     (s) => s.$store.getters.patternStyle,
+		popUpFormGlobal:  (s) => s.$store.getters.popUpFormGlobal,
+		settings:         (s) => s.$store.getters.settings
 	},
 	created() {
 		window.addEventListener('resize',this.setMobileView);
@@ -314,6 +364,7 @@ let MyApp = {
 		// externals
 		aesGcmDecryptBase64,
 		aesGcmImportBase64,
+		colorAdjustBgHeader,
 		consoleError,
 		formOpen,
 		genericError,
@@ -470,10 +521,13 @@ let MyApp = {
 					this.$store.commit('local/companyLogoUrl',res.payload.companyLogoUrl);
 					this.$store.commit('local/companyName',res.payload.companyName);
 					this.$store.commit('local/companyWelcome',res.payload.companyWelcome);
+					this.$store.commit('local/css',res.payload.css);
 					this.$store.commit('local/schemaTimestamp',res.payload.schemaTimestamp);
 					this.$store.commit('clusterNodeName',res.payload.clusterNodeName);
 					this.$store.commit('productionMode',res.payload.productionMode === 1);
 					this.$store.commit('pageTitleRefresh'); // update page title with new app name
+					this.$store.commit('pwaDomainMap',res.payload.pwaDomainMap);
+					this.$store.commit('searchDictionaries',res.payload.searchDictionaries);
 					this.$store.commit('schema/languageCodes',res.payload.languageCodes);
 					this.publicLoaded = true;
 					this.stateChange();

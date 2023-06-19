@@ -226,6 +226,14 @@
 	margin:0px;
 }
 
+/* iframe field */
+.field.iframe{
+	min-height:200px;
+}
+.field.iframe .input-box .input-line{
+	padding:0px;
+}
+
 /* chart field */
 .field .chart{
 	flex:1 1 auto;

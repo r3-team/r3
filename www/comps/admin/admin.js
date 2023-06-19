@@ -12,7 +12,7 @@ let MyAdmin = {
 			<div class="navigation contentBox">
 				<div class="top lower">
 					<div class="area">
-						<img class="icon" src="images/settings.png" />
+						<img class="icon" src="images/serverCog.png" />
 						<h1>{{ capApp.title }}</h1>
 					</div>
 					<div class="area">
@@ -48,12 +48,6 @@ let MyAdmin = {
 						<span>{{ capApp.navigationLoginTemplates }}</span>
 					</router-link>
 					
-					<!-- LDAP -->
-					<router-link class="entry clickable" tag="div" to="/admin/ldaps">
-						<img src="images/hierarchy.png" />
-						<span>{{ capApp.navigationLdaps }}</span>
-					</router-link>
-					
 					<!-- modules -->
 					<router-link class="entry clickable" tag="div" to="/admin/modules">
 						<img src="images/builder.png" />
@@ -84,12 +78,6 @@ let MyAdmin = {
 						<span>{{ capApp.navigationBackups }}</span>
 					</router-link>
 					
-					<!-- cluster -->
-					<router-link class="entry clickable" tag="div" to="/admin/cluster">
-						<img src="images/cluster.png" />
-						<span>{{ capApp.navigationCluster }}</span>
-					</router-link>
-					
 					<!-- files -->
 					<router-link class="entry clickable" tag="div" to="/admin/files">
 						<img src="images/files.png" />
@@ -108,10 +96,29 @@ let MyAdmin = {
 						<span>{{ capApp.navigationScheduler }}</span>
 					</router-link>
 					
-					<!-- license -->
-					<router-link class="entry clickable" tag="div" to="/admin/license">
+					
+					<!-- REI3 Professional -->
+					<router-link class="entry clickable separator" tag="div" to="/admin/license">
 						<img src="images/key.png" />
-						<span>{{ capApp.navigationLicense }}</span>
+						<span>{{ licenseTitle }}</span>
+					</router-link>
+					
+					<!-- customizing -->
+					<router-link class="entry clickable" tag="div" to="/admin/custom" :class="{ inactive:!activated }">
+						<img src="images/colors.png" />
+						<span>{{ capApp.navigationCustom }}</span>
+					</router-link>
+					
+					<!-- LDAP -->
+					<router-link class="entry clickable" tag="div" to="/admin/ldaps" :class="{ inactive:!activated }">
+						<img src="images/hierarchy.png" />
+						<span>{{ capApp.navigationLdaps }}</span>
+					</router-link>
+					
+					<!-- cluster -->
+					<router-link class="entry clickable" tag="div" to="/admin/cluster" :class="{ inactive:!activated }">
+						<img src="images/cluster.png" />
+						<span>{{ capApp.navigationCluster }}</span>
 					</router-link>
 				</div>
 			</div>
@@ -120,6 +127,8 @@ let MyAdmin = {
 		<router-view
 			v-if="ready"
 			v-show="!showDocs"
+			@hotkeysRegister="hotkeysChild = $event"
+			:concurrentLogins="concurrentLogins"
 			:menuTitle="contentTitle"
 		/>
 		
@@ -136,6 +145,8 @@ let MyAdmin = {
 	},
 	data() {
 		return {
+			concurrentLogins:0, // count of concurrent logins
+			hotkeysChild:[],    // hotkeys from child components
 			ready:false,
 			showDocs:false
 		};
@@ -144,14 +155,19 @@ let MyAdmin = {
 		if(!this.isAdmin)
 			return this.$router.push('/');
 		
+		this.getConcurrentLogins();
 		this.ready = true;
-		this.$store.commit('moduleColor1','');
+		window.addEventListener('keydown',this.handleHotkeys);
+	},
+	unmounted() {
+		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	computed:{
 		contentTitle:(s) => {
 			if(s.$route.path.includes('backups'))        return s.capApp.navigationBackups;
 			if(s.$route.path.includes('cluster'))        return s.capApp.navigationCluster;
 			if(s.$route.path.includes('config'))         return s.capApp.navigationConfig;
+			if(s.$route.path.includes('custom'))         return s.capApp.navigationCustom;
 			if(s.$route.path.includes('docs'))           return s.capApp.navigationDocs;
 			if(s.$route.path.includes('files'))          return s.capApp.navigationFiles;
 			if(s.$route.path.includes('license'))        return s.capApp.navigationLicense;
@@ -167,9 +183,37 @@ let MyAdmin = {
 			if(s.$route.path.includes('scheduler'))      return s.capApp.navigationScheduler;
 			return '';
 		},
+		licenseTitle:(s) => !s.activated
+			? s.capApp.navigationLicense
+			:`${s.capApp.navigationLicense} (${s.concurrentLogins} / ${s.license.loginCount})`,
 		
 		// stores
-		capApp: (s) => s.$store.getters.captions.admin,
-		isAdmin:(s) => s.$store.getters.isAdmin
+		activated:(s) => s.$store.getters['local/activated'],
+		capApp:   (s) => s.$store.getters.captions.admin,
+		isAdmin:  (s) => s.$store.getters.isAdmin,
+		license:  (s) => s.$store.getters.license
+	},
+	methods:{
+		// handlers
+		handleHotkeys(evt) {
+			// registered child hotkeys
+			for(let k of this.hotkeysChild) {
+				if(k.keyCtrl && !evt.ctrlKey)
+					continue;
+				
+				if(k.key === evt.key) {
+					evt.preventDefault();
+					k.fnc();
+				}
+			}
+		},
+		
+		// backend calls
+		getConcurrentLogins() {
+			ws.send('login','getConcurrent',{},true).then(
+				res => this.concurrentLogins = res.payload,
+				this.$root.genericError
+			);
+		}
 	}
 };

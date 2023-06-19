@@ -45,6 +45,8 @@ const (
 	ErrCodeDbsConstraintNotNull     int = 5
 	ErrCodeDbsIndexFailUnique       int = 6
 	ErrCodeDbsInvalidTypeSyntax     int = 7
+	ErrCodeLicValidityExpired       int = 1
+	ErrCodeLicLoginsReached         int = 2
 	ErrCodeSecUnauthorized          int = 1
 	ErrCodeSecDataKeysNotAvailable  int = 5
 	ErrCodeSecNoPublicKeys          int = 6
@@ -52,8 +54,9 @@ const (
 
 var (
 	// errors
-	errContexts     = []string{"APP", "CSV", "DBS", "SEC"}
+	errContexts     = []string{"APP", "CSV", "DBS", "LIC", "SEC"}
 	errCodeRx       = regexp.MustCompile(`^{ERR_([A-Z]{3})_(\d{3})}`)
+	errCodeLicRx    = regexp.MustCompile(`^{ERR_LIC_(\d{3})}`)
 	errExpectedList = []errExpected{
 
 		// security/access
@@ -200,6 +203,10 @@ func ConvertToErrCode(err error, anonymizeIfUnexpected bool) (error, bool) {
 		return CreateErrCode("APP", ErrCodeAppUnknown), false
 	}
 	return err, false
+}
+
+func CheckForLicenseErrCode(err error) bool {
+	return errCodeLicRx.MatchString(err.Error())
 }
 
 // default schema errors

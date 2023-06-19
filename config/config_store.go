@@ -15,11 +15,13 @@ var (
 	storeUint64 map[string]uint64 = make(map[string]uint64)
 	storeString map[string]string = make(map[string]string)
 
-	NamesString = []string{"appName", "appNameShort", "backupDir", "companyColorHeader",
-		"companyColorLogin", "companyLogo", "companyLogoUrl", "companyName",
-		"companyWelcome", "dbVersionCut", "defaultLanguageCode", "exportPrivateKey",
-		"instanceId", "licenseFile", "publicHostName", "repoPass", "repoPublicKeys",
-		"repoUrl", "repoUser", "tokenSecret", "updateCheckUrl", "updateCheckVersion"}
+	NamesString = []string{"appName", "appNameShort", "backupDir",
+		"companyColorHeader", "companyColorLogin", "companyLogo",
+		"companyLogoUrl", "companyName", "companyWelcome", "css",
+		"dbVersionCut", "exportPrivateKey", "iconPwa1", "iconPwa2",
+		"instanceId", "licenseFile", "publicHostName", "repoPass",
+		"repoPublicKeys", "repoUrl", "repoUser", "tokenSecret",
+		"updateCheckUrl", "updateCheckVersion"}
 
 	NamesUint64 = []string{"backupDaily", "backupMonthly", "backupWeekly",
 		"backupCountDaily", "backupCountMonthly", "backupCountWeekly",
@@ -71,8 +73,8 @@ func SetUint64_tx(tx pgx.Tx, name string, value uint64) error {
 
 // store getters
 func GetString(name string) string {
-	access_mx.Lock()
-	defer access_mx.Unlock()
+	access_mx.RLock()
+	defer access_mx.RUnlock()
 
 	if _, exists := storeString[name]; !exists {
 		log.Error("server", "configuration store get error",
@@ -83,8 +85,8 @@ func GetString(name string) string {
 	return storeString[name]
 }
 func GetUint64(name string) uint64 {
-	access_mx.Lock()
-	defer access_mx.Unlock()
+	access_mx.RLock()
+	defer access_mx.RUnlock()
 
 	if _, exists := storeUint64[name]; !exists {
 		log.Error("server", "configuration store get error",

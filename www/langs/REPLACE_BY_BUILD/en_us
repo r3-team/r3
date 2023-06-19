@@ -16,6 +16,7 @@
 			"deleteSelected":"Delete selected",
 			"download":"Download",
 			"edit":"Edit",
+			"editBulk":"Edit ({COUNT})",
 			"empty":"Empty",
 			"expert":"Advanced",
 			"export":"Export",
@@ -31,9 +32,11 @@
 			"paste":"Paste",
 			"refresh":"Reload",
 			"refreshHint":"Reload record",
+			"remove":"Remove",
 			"reset":"Reset",
 			"restore":"Restore",
 			"save":"Save",
+			"saveBulk":"Save ({COUNT})",
 			"saveHint":"Save changes",
 			"saveNew":"Save+New",
 			"saveNewHint":"Save changes and open new record",
@@ -79,6 +82,7 @@
 		"category":"Category",
 		"comments":"Comments",
 		"content":"Content",
+		"contextHelp":"Context help",
 		"date":"Date",
 		"description":"Description",
 		"details":"Details",
@@ -174,16 +178,13 @@
 		},
 		"config":{
 			"button":{
-				"apply":"Apply changes",
-				"removeLogo":"Remove logo"
+				"apply":"Apply changes"
 			},
 			"dialog":{
 				"builderMode":"The Builder is used to create or change applications.<br /><br />Changing applications can result in data loss and should <b>NEVER</b> be done in production environments.<br /><br />To safely use the Builder, please use a dedicated instance of REI3; ready and tested applications can then be transferred to a production system.<br /><br />Please refer to the <a href=\"https://rei3.de/en/docs/builder/\" target=\"_blank\">Builder documentation</a> to learn more.",
 				"productionMode":"The maintenance mode is used to update, install or remove applications from the system.<br /><br />Switching to maintenance mode will <b>logout all users without admin permissions</b>.",
 				"pleaseRead":"Please read before saving"
 			},
-			"appName":"Instance name",
-			"appNameShort":"Page title",
 			"appVersion":"Platform version",
 			"bruteforceAttempts":"Block hosts after attempts",
 			"bruteforceCountBlocked":"Blocked hosts",
@@ -191,21 +192,11 @@
 			"bruteforceProtection":"Enable bruteforce protection",
 			"bruteforceTitle":"Bruteforce protection",
 			"builderMode":"Builder mode",
-			"colorHint":"Keep empty for default",
-			"companyColorHeader":"Title color (header)",
-			"companyColorLogin":"Title color (login)",
-			"companyLogo":"Company logo",
-			"companyLogoDesc":"(PNG file, max. 64kb)",
-			"companyLogoUrl":"Company logo link",
-			"companyLogoUrlDesc":"Any valid URL",
-			"companyName":"Company name",
-			"companyWelcome":"Welcome text (login)",
 			"dbTimeoutCsv":"Database timeout: Batch processing (CSV)",
 			"dbTimeoutDataRest":"Database timeout: Data requests (REST)",
 			"dbTimeoutDataWs":"Database timeout: Data requests (HTTP/WS)",
 			"dbTimeoutHint":"In seconds",
 			"dbTimeoutIcs":"Database timeout: Calendar downloads (ICS)",
-			"defaultLanguageCode":"Default language",
 			"icsDaysPost":"Exclude events after current date (in days)",
 			"icsDaysPre":"Exclude events before current date (in days)",
 			"icsDownload":"Enable calendar subscriptions",
@@ -229,7 +220,6 @@
 			"repoSkipVerify":"Allow untrusted certificates",
 			"repoUrl":"Repository URL",
 			"title":"System configuration",
-			"titleCustom":"Customizing",
 			"titleGeneral":"General",
 			"titleIcs":"Calendar subscriptions",
 			"titleLogins":"Logins",
@@ -242,6 +232,42 @@
 			"updateCheckNewer":"Cutting edge",
 			"updateCheckOlder":"Update available",
 			"updateCheckUnknown":"Unknown"
+		},
+		"customizing":{
+			"error":{
+				"fileTooLarge":"File is too large, max. allowed size: {SIZE} kb."
+			},
+			"appName":"Instance name",
+			"appNameHint":"Name of the REI3 instance, shown on the login page.",
+			"appNameShort":"Short name",
+			"appNameShortHint":"Short version of the instance name, shown in the page title and as label if installed as progressive web app (PWA).",
+			"colorHint":"Color as HEX, like 3EA9B9",
+			"companyColorHeader":"Title color (header)",
+			"companyColorHeaderHint":"Sets a fixed color for the header, application colors are ignored.",
+			"companyColorLogin":"Title color (login)",
+			"companyColorLoginHint":"Overwrites the default color on the login screen.",
+			"companyLogo":"Company logo",
+			"companyLogoHint":"PNG file, max. 64kb. Shown on the login screen and start page.",
+			"companyLogoUrl":"Company logo link",
+			"companyLogoUrlDesc":"Any valid URL",
+			"companyLogoUrlHint":"Link which is opened when clicking on the company logo.",
+			"companyName":"Company name",
+			"companyNameHint":"Company name, shown on the login page.",
+			"companyWelcome":"Welcome text",
+			"companyWelcomeHint":"A short welcome text, shown on the login page. HTML can be used for text formatting and links.",
+			"iconPwa1":"Icon, small",
+			"iconPwa1Hint":"Image used for progressive web app icons. Must be PNG file, max. 128kb and precisely 192x192 pixels in size.",
+			"iconPwa2":"Icon, large",
+			"iconPwa2Hint":"Image used for progressive web app icons. Must be PNG file, max. 128kb and precisely 512x512 pixels in size.",
+			"pwaDomain":"Direct app access",
+			"pwaDomainHint":"Only the sub domain (as in 'my-app' from  'my-app.my-domain.com')",
+			"pwaDomainHint1":"Individual applications can be accessed directly and installed separately on devices as PWAs. They then have their own start page, icons and exclusive navigation. This requires a sub domain DNS record for each application so that the REI3 system is reachable via different domains. It also requires a wildcard certificate on the REI3 server to respond correctly to HTTPS requests.<br /><br />Once both DNS records and wildcard certificate are ready, please enter a sub domain for each desired application.",
+			"pwaDomainHint2":"Make sure to have one sub domain available that is not in this list, to reach the general REI3 system. Otherwise you have no access to the admin user interface as each application sub domain only gives access to the specific application.",
+			"titleCaptions":"Captions",
+			"titleColors":"Colors",
+			"titleCss":"Custom CSS rules",
+			"titleLogos":"Logos",
+			"titlePwas":"Progressive web apps (PWAs)"
 		},
 		"files":{
 			"deleteDate":"File deleted",
@@ -296,14 +322,25 @@
 			"tlsVerify":"Verify TLS"
 		},
 		"license":{
+			"button":{
+				"delete":"Remove license file"
+			},
+			"dialog":{
+				"delete":"Are you sure you want to remove the license file? To reactivate REI3 Professional, a valid license file must be uploaded."
+			},
 			"active":"Installed license",
 			"clientId":"Client ID",
-			"licenseEmpty":"None",
-			"licenseExpired":"License is expired",
+			"currentState":"Current values",
+			"extCommunity":"REI3 Community Forum",
+			"extLicense":"REI3 Professional",
+			"intro":"REI3 is fully <a href=\"https://github.com/r3-team/r3\" target=\"_blank\">open source</a> and can be used free of charge.<br /><br />For those needing enterprise features or support, there is <b>REI3 Professional</b>. It is priced to be affordable to organizations of any size, often costing much less than comparable low-code offerings.<br /><br />While supporting continuous development, REI3 Professional customers can also activate the full range of features and get support from Lean Softworks, the primary developer of REI3.",
+			"introMore":"More information:",
+			"licenseExpired":"License has expired",
 			"licenseId":"License ID",
-			"licenseValid":"License is valid for {COUNT} more day(s)",
+			"loginCount":"Concurrent logins",
 			"registeredFor":"Registered for",
-			"upload":"Upload license file",
+			"untilDays":"Valid for days",
+			"upload":"Upload license file:",
 			"validUntil":"Valid until"
 		},
 		"login":{
@@ -388,8 +425,15 @@
 			"dialog":{
 				"imapWarn":"Please note that the IMAP connector loads and then deletes messages from the chosen mailbox. It should only be used with a dedicated mailbox and not to access personal mail accounts."
 			},
+			"option":{
+				"authMethod":{
+					"login":"LOGIN (for O365 legacy SMTP)",
+					"plain":"PLAIN (default)"
+				}
+			},
 			"account":"Email account",
 			"accounts":"Email accounts",
+			"accountAuthMethod":"Auth. method",
 			"accountHost":"Hostname",
 			"accountMode":"Mode",
 			"accountNew":"New account",
@@ -489,6 +533,7 @@
 				"mailRetrieve":"Email retrieval",
 				"mailSend":"Email dispatch",
 				"repoCheck":"Execute repository update",
+				"restExecute":"Execute REST calls",
 				"updateCheck":"Check for platform updates"
 			},
 			"dateAttempt":"Last start",
@@ -514,9 +559,10 @@
 		"navigationBackups":"Backups",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"System",
+		"navigationCustom":"Customizing",
 		"navigationFiles":"Files",
 		"navigationLdaps":"LDAP-Logins",
-		"navigationLicense":"License",
+		"navigationLicense":"REI3 Professional",
 		"navigationLogins":"Logins",
 		"navigationLoginTemplates":"Login templates",
 		"navigationLogs":"Logs",
@@ -625,7 +671,9 @@
 				"decimal":"Number, decimal",
 				"float":"Number, floating",
 				"files":"Files",
+				"iframe":"iframe",
 				"number":"Number, whole",
+				"regconfig":"Text search dictionary",
 				"relationship11":"Relationship, one-to-one (1:1)",
 				"relationshipN1":"Relationship, many-to-one (n:1)",
 				"relationshipActionsHintsOnUpdate":"Works identical to the setting for 'Action when deleted'. In contrast to deletion, this setting affects what happens when the primary key ('id') of a record that is referenced by this relationship attribute is changed. Seldom used, as there are few reasons to update primary keys.",
@@ -643,7 +691,9 @@
 				"decimal":"Decimal values, often used for currency amounts.",
 				"files":"One or many files. Depending on max. file count/size settings, users can permanently store files. With the client application, files can be opened locally for direct editing.",
 				"float":"Number values with floating decimal. Mostly used for expensive calculations.",
+				"iframe":"A URL value, which is used to show an external resource like a web site.",
 				"number":"Full number values, like counters, priorities, reference numbers and so on.",
+				"regconfig":"Dictionary for a fulltext search index. Available dictionaries depend on the database system (s. Postgres dictionaries). Examples: english, german, french, spanish, romanian. The value 'simple' can be used for less useful but language-agnostic search.",
 				"relationship11":"Connects one relation to another. One-to-one relationships (1:1) only allow one record of a relation to reference the same record on another. Examples: The teacher of a class or owner of a car.",
 				"relationshipN1":"Connects one relation to another. Many-to-one relationships (n:1) allow multiple records of a relation to reference the same record on another. Examples: Students attending a class or employees of an organization.",
 				"richtext":"Multiple lines of formatted text. Useful for larger articles as well as document templates for PDF or email generation. Can include headers, links, tables, images and more.",
@@ -704,6 +754,7 @@
 		},
 		"form":{
 			"button":{
+				"columnsAll":"All columns",
 				"layoutColumns":"{CNT} columns"
 			},
 			"chart":{
@@ -752,6 +803,10 @@
 					"slider":"value slider",
 					"url":"URL"
 				},
+				"style":{
+					"bold":"bold",
+					"italic":"italic"
+				},
 				"effectField":"Field",
 				"effectTab":"Tab",
 				"ganttStepsDays":"days",
@@ -782,16 +837,16 @@
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*Collection is only affected if selected as filter criteria in data query.",
 			"collectionTitle":"Filter collection",
-			"columnBatch":"Column batch",
-			"columnBatchNot":"not batched",
-			"columnBatchHint":"Column is part of batch {CNT}",
-			"columnBatchHintNot":"Column is not batched with others",
+			"columnBatch":"Column batch (drag&drop columns to expand)",
+			"columnBatchDir":"Column alignment (left-right, up-down)",
+			"columnBatchOff":"Remove column from batch",
 			"columnClipboard":"Clipboard",
 			"columnHeaderData":"Data retrieval",
 			"columnLength":"Length (chars.)",
 			"columnLength0":"no limit",
 			"columnSize":"Size (pixel)",
 			"columnSize0":"automatic",
+			"columnStyles":"Styles",
 			"columnTitle":"Title",
 			"columnWrap":"Text wrap",
 			"copy":"Duplicate form",
@@ -842,7 +897,8 @@
 			"flexWrap":"Wrap content",
 			"formTitle":"Form title",
 			"gantt":"Gantt",
-			"ganttNotes":"Column batch 1 groups results.",
+			"ganttBatch":"Gantt group",
+			"ganttNotes":"First column batch groups results.",
 			"ganttSteps":"Gantt interval",
 			"ganttStepsToggle":"Gantt interval toggle",
 			"groupBy":"Group by",
@@ -860,12 +916,13 @@
 			"noDataActions":"No data actions",
 			"onMobile":"In mobile view",
 			"openForm":"Open form",
+			"openFormBulk":"Open form<br />(bulk editing)",
 			"presetOpen":"Open preset",
 			"readonly":"Read only",
 			"required":"Required",
 			"scale":"UI scale",
 			"sidebarField":"{NAME}: Field settings",
-			"sidebarFieldColumns":"Columns",
+			"sidebarFieldColumns":"Available columns",
 			"sidebarFieldColumnSettings":"Column settings",
 			"sidebarForm":"Form settings",
 			"sql":"SQL preview",
@@ -956,8 +1013,9 @@
 				"log_warning":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Logs warning message. If application name can be resolved, log is associated with it.",
 				"mail_delete":"instance.mail_delete(mail_id INTEGER) => INTEGER<br /><br />Deletes the specified email, including attachments.",
 				"mail_delete_after_attach":"instance.mail_delete_after_attach(<blockquote>mail_id INTEGER,<br />attach_record_id INTEGER,<br />attach_attribute_id UUID</blockquote>) => INTEGER<br /><br />Flag email attachments to be added to a file attribute of the specified record; the email and its attachments are deleted afterwards.",
-				"mail_get_next":"instance.mail_get_next(account_name TEXT DEFAULT NULL) => instance.mail<br /><br />Returns the next email from the mail spooler; returns NULL if no email is available. When an account name is specified, returns only mails received with the given account.<br /><br />The returned type 'instance.mail' consists of:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>After processing an email it should be deleted; either directly (mail_delete) or after storing its attachments (mail_delete_after_attach).",
+				"mail_get_next":"instance.mail_get_next(account_name TEXT DEFAULT NULL) => instance.mail<br /><br />Returns the next incoming email from the mail spooler; returns NULL if no email is available. When an account name is specified, returns only mails received with the given account.<br /><br />The returned type 'instance.mail' consists of:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>After processing an email it should be deleted; either directly (mail_delete) or after storing its attachments (mail_delete_after_attach).",
 				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Generates an outgoing email for the mail spooler. Optional parameters:<ul><li>Comma separated list of TO/CC/BCC recipients (one of these must be set)</li><li>Mail account name to send from (random account is used if not specified)</li><li>File attribute and record from which to attach files from</li></ul>",
+				"rest_call":"instance.rest_call(<blockquote>method TEXT,<br />url TEXT,<br />body TEXT,<br />headers JSONB DEFAULT NULL,<br />tls_skip_verify BOOLEAN DEFAULT FALSE,<br />callback_function_id UUID DEFAULT NULL,<br />callback_value TEXT DEFAULT NULL</blockquote>) => INTEGER<br /><br />Adds a HTTP REST call to the internal spooler for immediate execution. Supported methods are: DELETE, GET, PATCH, POST, PUT.<br /><br />URL can include query paramenters if needed.<br /><br />Headers must be provided as JSONB - each key value pair will result in one header.<br /><br />Validity check for TLS/SSL can be disabled if needed.<br /><br />If the REST response needs to be processed, another backend function can be set for callback. This callback function must have three arguments: INTEGER (for HTTP status code), TEXT (HTTP response body), TEXT (callback value).<br /><br />If a 'callback value' is set in instance.rest_call(...), it will be passed to the callback function - this is useful when multiple calls must be executed in order (like authentication before a data call).",
 				"update_collection":"instance.update_collection(collection_id, login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]) => INTEGER<br /><br />Informs connected clients to update the specified collection. If login IDs are given, only clients that belong to these logins are affected."
 			},
 			"option":{
@@ -1074,6 +1132,8 @@
 			"exportStateOk":"Ready",
 			"graphDependsOn":"Dependent on: {COUNT}",
 			"iconHint":"Icons are available, once they have been added to this application. Icons from applications that are being built on, can also be used.",
+			"iconPwa":"Application icons",
+			"iconPwaHint":"Icons that represent the application. Both icons must be PNG and must have a specific size (s. icon inputs) - not following these rules can cause the PWA to be not installable on some operating systems or devices.",
 			"keyCreate":"Transfer - Generate new signing key pair",
 			"keyCreateInfo":"Make sure to keep the private key safe at all times. The public key must be imported in target REI3 instances to accept your applications.",
 			"keyCreateLength":"Select key length",
@@ -1085,10 +1145,17 @@
 			"languagesHint":"Languages that the application is available in.",
 			"nameHint":"Reference name for this application. The name must be unique within a REI3 system, so consider using a prefix based on your organization name.",
 			"nameHolder":"work_scheduler, inventory_planner, ...",
+			"namePwa":"Application title",
+			"namePwaHint":"The full application title shown in the list of installed applications. Can be up to 60 characters long. No translation possible.",
+			"namePwaShort":"Short title",
+			"namePwaShortHint":"A shorter version of the application title, usually shown on homescreens of mobile devices and as label for icons. Can be up to 12 characters long. No translation possible.",
 			"parent":"Assigned to",
 			"parentHint":"When assigned to another application, it will be displayed as its child in menus and overviews - there is no other functional change. Applications can only be assigned to applications that they build on.",
 			"position":"Default position",
 			"positionHint":"Position of the application in the header (smaller ones first). Can be overwritten by system administrators.",
+			"pwa":"Progressive web app (PWA)",
+			"pwaHint":"REI3 applications can be installed on desktop computers and mobile devices as progressive web apps (PWA) from inside modern browsers. They are then listed as installed applications, get their own icons and shortcuts and behave similar to native applications.",
+			"release":"Deployment",
 			"releaseBuild":"Application version",
 			"releaseBuildApp":"Platform version",
 			"releaseDate":"Release date",
@@ -1106,6 +1173,12 @@
 				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
 				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
 			},
+			"template":{
+				"mailsFromSpooler":"Email processing (incoming)",
+				"restAuthRequest":"REST authentication (via JSON)",
+				"restAuthResponse":"REST authentication response callback",
+				"restDataResponse":"REST data response callback"
+			},
 			"api":"New API",
 			"collection":"New collection",
 			"form":"New form",
@@ -1115,6 +1188,7 @@
 			"module":"New application",
 			"options":"Additional options",
 			"pgFunction":"New backend function",
+			"pgFunctionTemplate":"Use template",
 			"pgFunctionTrigger":"Trigger",
 			"pgFunctionTriggerHint":"Makes this backend function a trigger. A trigger can be referenced inside a relation to react to events in the database, like when records are created, updated or deleted. This setting cannot be changed later.",
 			"relation":"New relation",
@@ -1123,13 +1197,41 @@
 			"role":"New role"
 		},
 		"openFormInput":{
+			"option":{
+				"float":"Floating window",
+				"inline":"Sub form inside field",
+				"none":"Full page form"
+			},
 			"attributeApply":"...to set value on form",
 			"formIdOpen":"Form",
 			"maxHeight":"Max. height (px)",
 			"maxWidth":"Max. width (px)",
 			"newRecord":"When creating new records",
-			"popUp":"Pop-up form",
+			"popUpType":"Open as",
 			"relationIndex":"Use record from relation"
+		},
+		"pgIndex":{
+			"description":{
+				"BTREE":"Default index for fast lookups. Suitable for most all attribute value types but not for texts larger than a few paragraphs.",
+				"GIN":"Text index for enabling fast lookups on even very large texts. Can use a dictionary attribute to support language specific features like related words, synonyms and more; as an example, a lookup for 'computer' would also find results for 'computation' or 'to compute'."
+			},
+			"dialog":{
+				"delete":"Are you sure you want to delete this index?"
+			},
+			"method":{
+				"BTREE":"Default index",
+				"GIN":"Text index"
+			},
+			"attributes":"Attribute(s)",
+			"attributesHint":"Attribute(s) that the index covers. If multiple are given, the order decides on whether a particular index is used for a query. Text indexes currently only support a single attribute.",
+			"dictionary":"Dictionary attribute (optional)",
+			"dictionaryHint":"If used, a text index will be able to use advanced language features to improve text lookups. Must be an attribute of the value type 'Text search dictionary'.",
+			"noUpdate":"Existing indexes cannot be changed but safely recreated at any time. Depending on the data size, index creation can take a while.",
+			"system":"This index is managed by the system and cannot be deleted directly.",
+			"title":"View index",
+			"titleNew":"Create index",
+			"unique":"Unique",
+			"uniqueHint":"If enabled, the same value cannot exist twice for the given attribute. If multiple attributes are given, the combined value can only exist once."
 		},
 		"pgTrigger":{
 			"dialog":{
@@ -1182,10 +1284,10 @@
 			"graph":"Relationship graph",
 			"graphBase":"Base relation",
 			"indexes":"Indexes ({CNT})",
-			"indexAttributes":"Attributes",
-			"indexAutoFki":"Relationship",
-			"indexCreate":"Add attribute to new index",
-			"indexPrimaryKey":"Primary key",
+			"indexAutoFki":"Relationship index",
+			"indexPrimaryKey":"Primary key index",
+			"indexSystem":"System index (managed by the system)",
+			"indexText":"Text index",
 			"indexUnique":"Unique",
 			"isDeferred":"DEFERRED",
 			"nameHint":"Reference name for this relation. Must be unique within this application.",
@@ -1413,6 +1515,9 @@
 		"whatIsSentPost":"This data helps processing feedback. No personal information is being sent. We take privacy very seriously."
 	},
 	"filter":{
+		"dialog":{
+			"ftsHelp":"Full-text search can quickly find matches in large texts based on words or phrases. Instead of searching for specific characters, full-text search breaks down words to their roots to match against a search query.<br /><br />The following search options exist:<ul><li>Specific word</li><ul><li>Search: <b>entry</b></li><li>'entry' will find texts containing words like 'entry', 'entries' or 'list-entries'.</li><li>Valid match: 'I have checked all relevant data entries.'</li></ul><li>All words</li><ul><li>Search: <b>making coffee</b></li><li>'making coffee' will find texts if they contain both words related to 'make' (like 'making') and 'coffee' (like 'coffee machine'). It will not find 'coffee maker' as 'maker' is its own word-stem.</li><li>Valid match: 'We fixed the machine, still makes terrible coffee.'</li></ul><li>Any words</li><ul><li>Search: <b>tea or coffee</b></li><li>'tea or coffee' will find texts if they contain either words related to 'tea' (like 'tea drinker') or 'coffee' (like 'coffee machine').</li><li>Valid match: 'Coffee gets me through the day.'</li></ul><li>Without words</li><ul><li>Search: <b>tea -coffee</b></li><li>'tea -coffee' will find texts if they contain words related to 'tea' but not words related to 'coffee'.</li><li>Valid match: 'I enjoy tea regularly.'</li></ul><li>Followed words</li><ul><li>Search: <b>\"make coffee\"</b></li><li>'\"make coffee\"' (in double-quotes) will find texts if they contain words related to 'make' being followed by words related to 'coffee'. The order is important - texts containing 'coffee making' will not be included, as the word order is wrong.</li><li>Valid match: 'I´ll spent the lunch break making coffee for my colleagues.'</li></ul></ul>"
+		},
 		"option":{
 			"connector":{
 				"AND":"AND",
@@ -1465,12 +1570,18 @@
 				"seconds":"sec."
 			},
 			"operator":{
+				"arrContained":"contained by",
+				"arrContains":"contains",
+				"arrOverlap":"has overlap with",
 				"eq":"equal",
+				"eqAny":"is included in",
+				"fts":"contains (full-text search)",
 				"le":"larger/equal",
 				"lt":"larger",
 				"ilike":"contains",
 				"like":"contains (match case)",
 				"ne":"unequal",
+				"neAll":"is not included in",
 				"not_ilike":"not contains",
 				"not_like":"not contains (match case)",
 				"not_null":"not empty",
@@ -1496,6 +1607,9 @@
 		"operatorsText":"Text",
 		"queryAggregatorNull":"no aggregation",
 		"queryShow":"Show sub query",
+		"searchDictionaryHint":"Used dictionary - should reflect the search input and the expected result texts. Additional dictionaries can be added in the user settings.",
+		"searchDictionarySimple":"[No dictionary]",
+		"searchDictionarySimpleHint":"This is option is for when expected result texts do not have a dictionary assigned.",
 		"subQueryAttribute":"Attribute",
 		"subQueryAggregator":"Aggregate",
 		"valueHint":"Text or number value"
@@ -1509,6 +1623,8 @@
 			"logHint":"Open change logs"
 		},
 		"dialog":{
+			"bulkEncrypted":"Bulk update for encrypted data is currently not supported.",
+			"bulkMultiple":"Bulk update with multiple relations is currently not supported.",
 			"close":"There are unsaved changes.<br /><br />Do you still want to close this form?",
 			"delete":"Are you sure that you want to <b>permanently</b> delete this record?",
 			"encrypted":"The field content will be encrypted on your system before it is being sent to the server.",
@@ -1524,6 +1640,7 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"Record updated"
 		},
+		"bulkTouched":"Value will be updated",
 		"invalidInputs":"Check inputs!",
 		"noAccess":"No access"
 	},
@@ -1587,6 +1704,9 @@
 			"fileSize":"File size",
 			"tooLarge":"Cannot upload file '{NAME}', max. allowed size is {SIZE}.",
 			"unsaved":"(unsaved)"
+		},
+		"iframe":{
+			"empty":"No URL set - nothing to show"
 		}
 	},
 	"list":{
@@ -1633,7 +1753,6 @@
 		"csvTimezone":"Timezone",
 		"csvTotalLimit":"Row count (0 = all)",
 		"fetching":"Data is being retrieved...",
-		"filtersExpert":"Expert filters",
 		"inputHintCreate":"Create new record",
 		"inputHintOpen":"Open record",
 		"inputHintRemove":"Remove record",
@@ -1659,6 +1778,9 @@
 		},
 		"button":{
 			"logout":"Logout"
+		},
+		"dialog":{
+			"searchDictionary":"This system offers full-text search capabilities. Where full-text search is used, even very large texts can be looked up quickly with advanced search features such as comparing synonyms and word stems.<br /><br />'Dictionaries for full-text search' informs the system of which languages a user works with to use language specific search features."
 		},
 		"encryption":{
 			"button":{
@@ -1753,13 +1875,15 @@
 		"pageLimit":"Max. page width",
 		"pageTitle":"Settings",
 		"pattern":"Background pattern",
+		"searchDictionaries":"Dictionaries for full-text search",
+		"searchDictionaryNew":"Add dictionary",
 		"spacing":"Spacing",
 		"sundayFirstDow":"Sunday is 1st weekday",
 		"tabRemember":"Open last used tab",
 		"titleAccount":"Account",
-		"titleDisplay":"Display",
 		"titleEncryption":"End-to-end encryption",
 		"titleFixedTokens":"Devices",
+		"titleGeneral":"General",
 		"titleTheme":"Theme",
 		"warnUnsaved":"Warnings for unsaved changes"
 	}

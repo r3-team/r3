@@ -281,24 +281,29 @@ func (client *clientType) handleTransaction(reqTransJson json.RawMessage) json.R
 
 		switch req.Action {
 		case "token": // authentication via JSON web token
-			resPayload, err = request.LoginAuthToken(req.Payload, &client.loginId,
-				&client.admin, &client.noAuth)
+			resPayload, err = request.LoginAuthToken(req.Payload,
+				&client.loginId, &client.admin, &client.noAuth)
 
 		case "tokenFixed": // authentication via fixed token (fat-client)
-			resPayload, err = request.LoginAuthTokenFixed(req.Payload, &client.loginId)
-			if err == nil {
-				client.fixedToken = true
-			}
+			resPayload, err = request.LoginAuthTokenFixed(req.Payload,
+				&client.loginId, &client.fixedToken)
 
 		case "user": // authentication via credentials
-			resPayload, err = request.LoginAuthUser(req.Payload, &client.loginId,
-				&client.admin, &client.noAuth)
+			resPayload, err = request.LoginAuthUser(req.Payload,
+				&client.loginId, &client.admin, &client.noAuth)
 		}
 
 		if err != nil {
 			log.Warning(handlerContext, "failed to authenticate user", err)
 			bruteforce.BadAttemptByHost(client.address)
-			resTrans.Error = "AUTH_ERROR"
+
+			if handler.CheckForLicenseErrCode(err) {
+				// license errors are relevant to the client
+				resTrans.Error = err.Error()
+			} else {
+				// any other error is not relevant to the client and could reveal internals
+				resTrans.Error = "AUTH_ERROR"
+			}
 		} else {
 			var res types.Response
 			res.Payload, err = json.Marshal(resPayload)

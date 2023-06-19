@@ -32,6 +32,7 @@
 	line-height:30px;
 	display:flex;
 	flex-flow:row nowrap;
+	gap:6px;
 	box-sizing:border-box;
 	border-bottom:1px solid var(--color-border);
 }
@@ -48,6 +49,11 @@
 	flex: 1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
+}
+.gantt-content .form-wrap.popUp{
+	flex:1 1 auto;
+	width:100%;
+	z-index:var(--z-index-inline-pop-up-form);
 }
 .gantt-lines{
 	flex:1 1 auto;
@@ -132,6 +138,7 @@
 	line-height:24px;
 	display:flex;
 	flex-flow:row nowrap;
+	gap:6px;
 	align-items:center;
 	overflow:hidden;
 	position:relative;

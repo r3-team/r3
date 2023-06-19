@@ -167,9 +167,6 @@
 .user-bordersSquared .home .module .entry:hover{
 	border-radius:0px;
 }
-.user-dark .home .module-title{
-	filter:brightness(70%) saturate(70%);
-}
 
 /* mobile overwrites */
 .is-mobile .home .modules{

@@ -39,22 +39,6 @@ let MyBuilderColumnOptions = {
 					</td>
 				</tr>
 				<tr>
-					<td>{{ capApp.columnSize }}</td>
-					<td>
-						<input
-							v-if="column.basis !== 0"
-							@change="setInt('basis',$event.target.value,false)"
-							:value="column.basis"
-						/>
-						<my-button
-							v-else
-							@trigger="setInt('basis',25,false)"
-							:caption="capApp.columnSize0"
-							:naked="true"
-						/>
-					</td>
-				</tr>
-				<tr>
 					<td>{{ capApp.columnLength }}</td>
 					<td>
 						<input
@@ -66,6 +50,41 @@ let MyBuilderColumnOptions = {
 							v-else
 							@trigger="setInt('length',50,false)"
 							:caption="capApp.columnLength0"
+							:naked="true"
+						/>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.columnStyles }}</td>
+					<td>
+						<div class="row gap">
+							<my-bool
+								@update:modelValue="setStyle('bold',$event)"
+								:caption0="capApp.option.style.bold"
+								:caption1="capApp.option.style.bold"
+								:modelValue="column.styles.includes('bold')"
+							/>
+							<my-bool
+								@update:modelValue="setStyle('italic',$event)"
+								:caption0="capApp.option.style.italic"
+								:caption1="capApp.option.style.italic"
+								:modelValue="column.styles.includes('italic')"
+							/>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.columnSize }}</td>
+					<td>
+						<input
+							v-if="column.basis !== 0"
+							@change="setInt('basis',$event.target.value,false)"
+							:value="column.basis"
+						/>
+						<my-button
+							v-else
+							@trigger="setInt('basis',25,false)"
+							:caption="capApp.columnSize0"
 							:naked="true"
 						/>
 					</td>
@@ -89,22 +108,6 @@ let MyBuilderColumnOptions = {
 					</td>
 				</tr>
 				<tr>
-					<td>{{ capApp.columnBatch }}</td>
-					<td>
-						<input
-							v-if="column.batch !== null"
-							@change="setInt('batch',$event.target.value,true)"
-							:value="column.batch"
-						/>
-						<my-button
-							v-else
-							@trigger="setInt('batch',1,true)"
-							:caption="capApp.columnBatchNot"
-							:naked="true"
-						/>
-					</td>
-				</tr>
-				<tr>
 					<td>{{ capApp.display }}</td>
 					<td>
 						<select
@@ -112,11 +115,11 @@ let MyBuilderColumnOptions = {
 							:value="column.display"
 						>
 							<option value="default">{{ capApp.option.display.default }}</option>
-							<option v-if="isString"  value="email"   >{{ capApp.option.display.email }}</option>
-							<option v-if="isString"  value="password">{{ capApp.option.display.password }}</option>
-							<option v-if="isString"  value="phone"   >{{ capApp.option.display.phone }}</option>
-							<option v-if="isString"  value="url"     >{{ capApp.option.display.url }}</option>
-							<option v-if="isFiles"   value="gallery" >{{ capApp.option.display.gallery }}</option>
+							<option v-if="isString" value="email"   >{{ capApp.option.display.email }}</option>
+							<option v-if="isString" value="password">{{ capApp.option.display.password }}</option>
+							<option v-if="isString" value="phone"   >{{ capApp.option.display.phone }}</option>
+							<option v-if="isString" value="url"     >{{ capApp.option.display.url }}</option>
+							<option v-if="isFiles"  value="gallery" >{{ capApp.option.display.gallery }}</option>
 							<option value="hidden">{{ capApp.option.display.hidden }}</option>
 						</select>
 					</td>
@@ -231,6 +234,15 @@ let MyBuilderColumnOptions = {
 			}
 			this.set('index',parseInt(v[0]));
 			this.set('attributeId',v[1]);
+		},
+		setStyle(name,val) {
+			let styles = JSON.parse(JSON.stringify(this.column.styles));
+			let pos    = styles.indexOf(name);
+			
+			if(pos === -1 && val)  styles.push(name);
+			if(pos !== -1 && !val) styles.splice(pos,1);
+			
+			this.set('styles',styles);
 		}
 	}
 };

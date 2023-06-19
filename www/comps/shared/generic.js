@@ -1,6 +1,13 @@
 import tinycolor from '../../externals/tinycolor2.js';
 import MyStore   from '../../stores/store.js';
 
+export function colorAdjustBgHeader(colorRgb,isDarkMode) {
+	let c = tinycolor(colorRgb);
+	if(isDarkMode) c.darken(14).desaturate(12);
+	else           c.darken(5).desaturate(6);
+	return c.toString();
+};
+
 export function colorAdjustBg(colorRgb,isDarkMode) {
 	// adjust background color in dark mode
 	let c = tinycolor(colorRgb);
@@ -186,4 +193,17 @@ export function filterIsCorrect(operator,value0,value1) {
 
 export function filterOperatorIsSingleValue(operator) {
 	return !['= ANY','<> ALL','@>','<@','&&'].includes(operator);
+};
+
+export function textAddTab(evt) {
+	let elem     = evt.target;
+	let selStart = elem.selectionStart;
+	let selEnd   = elem.selectionEnd;
+	
+	elem.value = elem.value.substring(0,selStart)
+		+ "\t"+ elem.value.substring(selEnd);
+	
+	elem.selectionStart = selStart + 1;
+	elem.selectionEnd   = selStart + 1;
+	return elem.value;
 };

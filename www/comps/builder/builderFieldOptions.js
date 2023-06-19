@@ -20,6 +20,7 @@ import {
 	getIndexAttributeId,
 	isAttributeFiles,
 	isAttributeInteger,
+	isAttributeRegconfig,
 	isAttributeRelationship,
 	isAttributeString
 } from '../shared/attribute.js';
@@ -358,7 +359,7 @@ let MyBuilderFieldOptions = {
 						<div class="row centered gap">
 							<my-button
 								:active="false"
-								:image="getAttributeIcon(attribute,field.outsideIn)"
+								:image="getAttributeIcon(attribute,field.outsideIn,field.attributeIdNm !== null)"
 								:naked="true"
 								:tight="true"
 							/>
@@ -375,7 +376,7 @@ let MyBuilderFieldOptions = {
 						</div>
 					</td>
 				</tr>
-				<tr v-if="!isRelationship">
+				<tr v-if="!isRelationship && !isRegconfig">
 					<td>{{ capApp.fieldMin }}</td>
 					<td>
 						<input
@@ -384,7 +385,7 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<tr v-if="!isRelationship">
+				<tr v-if="!isRelationship && !isRegconfig">
 					<td>{{ capApp.fieldMax }}</td>
 					<td>
 						<input
@@ -610,19 +611,9 @@ let MyBuilderFieldOptions = {
 						</select>
 					</td>
 				</tr>
-				<tr>
-					<td>{{ capApp.gantt }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="set('gantt',$event)"
-							:modelValue="field.gantt"
-							:readonly="field.ics"
-						/>
-					</td>
-				</tr>
 				<template v-if="field.gantt">
 					<tr>
-						<td></td>
+						<td>{{ capApp.gantt }}</td>
 						<td><i>{{ capApp.ganttNotes }}</i></td>
 					</tr>
 					<tr>
@@ -1009,18 +1000,35 @@ let MyBuilderFieldOptions = {
 				</tr>
 			</template>
 			
-			<!-- open form -->
+			<!-- open form & open form bulk -->
 			<tr v-if="isButton || ((isList || isCalendar || isRelationship) && field.query.relationId !== null)">
 				<td>{{ capApp.openForm }}</td>
 				<td>
 					<my-builder-open-form-input
 						@update:openForm="set('openForm',$event)"
-						:allowNewRecords="true"
 						:allowAllForms="isButton"
+						:allowNewRecords="true"
+						:allowPopUpInline="isList || isCalendar"
 						:joinsIndexMap="joinsIndexMap"
 						:module="module"
 						:openForm="field.openForm"
 						:relationIdSource="isButton ? null : field.query.relationId"
+					/>
+				</td>
+			</tr>
+			<tr v-if="isList && field.query.relationId !== null">
+				<td v-html="capApp.openFormBulk"></td>
+				<td>
+					<my-builder-open-form-input
+						@update:openForm="set('openFormBulk',$event)"
+						:allowAllForms="false"
+						:allowNewRecords="false"
+						:allowPopUpInline="true"
+						:forcePopUp="true"
+						:joinsIndexMap="joinsIndexMap"
+						:module="module"
+						:openForm="field.openFormBulk"
+						:relationIdSource="field.query.relationId"
 					/>
 				</td>
 			</tr>
@@ -1117,6 +1125,7 @@ let MyBuilderFieldOptions = {
 		isTabs:          (s) => s.field.content === 'tabs',
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
 		isInteger:       (s) => s.isData && s.isAttributeInteger(s.attribute.content),
+		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.attribute.content),
 		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.attribute.content),
 		isString:        (s) => s.isData && s.isAttributeString(s.attribute.content),
 		
@@ -1143,6 +1152,7 @@ let MyBuilderFieldOptions = {
 		getRandomInt,
 		isAttributeFiles,
 		isAttributeInteger,
+		isAttributeRegconfig,
 		isAttributeRelationship,
 		isAttributeString,
 		
@@ -1199,11 +1209,6 @@ let MyBuilderFieldOptions = {
 				let q = JSON.parse(JSON.stringify(this.field.query));
 				q.lookups = [];
 				this.$emit('set','query',q);
-			}
-			if(name === 'gantt') {
-				// gantt, set or remove gantt step option
-				if(!val) this.$emit('set','ganttSteps',null);
-				else     this.$emit('set','ganttSteps','days');
 			}
 			this.$emit('set',name,val);
 		},

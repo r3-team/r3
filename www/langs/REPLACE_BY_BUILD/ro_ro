@@ -16,6 +16,7 @@
 			"deleteSelected":"Șterge selecția",
 			"download":"Download",
 			"edit":"Editare",
+			"editBulk":"Editare ({COUNT})",
 			"empty":"Empty",
 			"expert":"Avansat",
 			"export":"Exportă",
@@ -31,9 +32,11 @@
 			"paste":"Paste",
 			"refresh":"Reîncarcă",
 			"refreshHint":"Reîncarcă înregistrarea",
+			"remove":"Remove",
 			"reset":"Resetează",
 			"restore":"Restore",
 			"save":"Salvare",
+			"saveBulk":"Salvare ({COUNT})",
 			"saveHint":"Salvează modificările",
 			"saveNew":"Salvează+Nou",
 			"saveNewHint":"Salvează modificările și deschide o nouă înregistrare",
@@ -79,6 +82,7 @@
 		"category":"Category",
 		"comments":"Comments",
 		"content":"Content",
+		"contextHelp":"Context help",
 		"date":"Data",
 		"description":"Descriere",
 		"details":"Details",
@@ -174,16 +178,13 @@
 		},
 		"config":{
 			"button":{
-				"apply":"Aplică modificările",
-				"removeLogo":"Îndepărtează logo"
+				"apply":"Aplică modificările"
 			},
 			"dialog":{
 				"builderMode":"Builder este folosit pentru a crea sau modifica aplicații.<br /><br />Schimbarea aplicațiilor poate duce la pierderea de date și ar trebui ca <b>NICIODATĂ</b> acestea să fie realizate în medii de producție.<br /><br />Pentru a putea să utilizați în siguranță Builder, vă rugăm să utilizați o instanță dedicată a REI3; aplicațiile gata și testate pot fi apoi transferate într-un sistem de producție.<br /><br />Vă rugăm să consultați <a href=\"https://rei3.de/en/docs/builder/\" target=\"_blank \">Documentația Builder</a> pentru a afla mai multe.",
 				"productionMode":"Modul de întreținere este folosit pentru a actualiza, instala sau elimina aplicații din sistem.<br /><br />Comutarea la modul întreținere <b>va deconecta toți utilizatorii fără permisiuni de administrator</b>.",
 				"pleaseRead":"Vă rugăm să citiți înainte de a salva"
 			},
-			"appName":"Nume instanță",
-			"appNameShort":"Titlul paginii",
 			"appVersion":"Versiunea platformei",
 			"bruteforceAttempts":"Nr. de încercări după care gazdele vor fi blocate",
 			"bruteforceCountBlocked":"Gazde blocate",
@@ -191,21 +192,11 @@
 			"bruteforceProtection":"Activați protecția împotriva forței brute (bruteforce)",
 			"bruteforceTitle":"Protecția forței brute (bruteforce)",
 			"builderMode":"Modul Builder",
-			"colorHint":"Păstrați gol pentru implicit",
-			"companyColorHeader":"Culoarea titlului (antet)",
-			"companyColorLogin":"Culoarea titlului (autentificare)",
-			"companyLogo":"Logoul companiei",
-			"companyLogoDesc":"(Fișier PNG, max. 64kb)",
-			"companyLogoUrl":"Logoul companiei - legătură",
-			"companyLogoUrlDesc":"Orice URL valid",
-			"companyName":"Numele companiei",
-			"companyWelcome":"Textul de bun venit (autentificare)",
 			"dbTimeoutCsv":"Timeout database: Procesare lot (CSV)",
 			"dbTimeoutDataRest":"Timeout database: Cereri de date (REST)",
 			"dbTimeoutDataWs":"Timeout database: Cereri de date (HTTP/WS)",
 			"dbTimeoutHint":"În secunde",
 			"dbTimeoutIcs":"Timeout database: Descărcare de calendare (ICS)",
-			"defaultLanguageCode":"Limba implicită",
 			"icsDaysPost":"Excludeți evenimentele după data curentă (în zile)",
 			"icsDaysPre":"Excludeți evenimentele înainte de data curentă (în zile)",
 			"icsDownload":"Activați abonamentele la calendar",
@@ -229,7 +220,6 @@
 			"repoSkipVerify":"Permite certificate care nu sunt de încredere",
 			"repoUrl":"Adresa depozitului (URL)",
 			"title":"Configuratia sistemului",
-			"titleCustom":"Personalizare",
 			"titleGeneral":"General",
 			"titleIcs":"Abonamente la calendar",
 			"titleLogins":"Autentificări",
@@ -242,6 +232,42 @@
 			"updateCheckNewer":"De ultimă oră",
 			"updateCheckOlder":"Actualizare disponibilă",
 			"updateCheckUnknown":"Necunoscut"
+		},
+		"customizing":{
+			"error":{
+				"fileTooLarge":"File is too large, max. allowed size: {SIZE} kb."
+			},
+			"appName":"Nume instanță",
+			"appNameHint":"Name of the REI3 instance, shown on the login page.",
+			"appNameShort":"Titlul paginii",
+			"appNameShortHint":"Short version of the instance name, shown in the page title and as label if installed as progressive web app (PWA).",
+			"colorHint":"Color as HEX, like 3EA9B9",
+			"companyColorHeader":"Culoarea titlului (antet)",
+			"companyColorHeaderHint":"Sets a fixed color for the header, application colors are ignored.",
+			"companyColorLogin":"Culoarea titlului (autentificare)",
+			"companyColorLoginHint":"Overwrites the default color on the login screen.",
+			"companyLogo":"Logoul companiei",
+			"companyLogoHint":"PNG file, max. 64kb. Shown on the login screen and start page.",
+			"companyLogoUrl":"Logoul companiei - legătură",
+			"companyLogoUrlDesc":"Orice URL valid",
+			"companyLogoUrlHint":"Link which is opened when clicking on the company logo.",
+			"companyName":"Numele companiei",
+			"companyNameHint":"Company name, shown on the login page.",
+			"companyWelcome":"Textul de bun venit",
+			"companyWelcomeHint":"A short welcome text, shown on the login page. HTML can be used for text formatting and links.",
+			"iconPwa1":"Icon, small",
+			"iconPwa1Hint":"Image used for progressive web app icons. Must be PNG file, max. 128kb and precisely 192x192 pixels in size.",
+			"iconPwa2":"Icon, large",
+			"iconPwa2Hint":"Image used for progressive web app icons. Must be PNG file, max. 128kb and precisely 512x512 pixels in size.",
+			"pwaDomain":"Direct app access",
+			"pwaDomainHint":"Only the sub domain (as in 'my-app' from  'my-app.my-domain.com')",
+			"pwaDomainHint1":"Individual applications can be accessed directly and installed separately on devices as PWAs. They then have their own start page, icons and exclusive navigation. This requires a sub domain DNS record for each application so that the REI3 system is reachable via different domains. It also requires a wildcard certificate on the REI3 server to respond correctly to HTTPS requests.<br /><br />Once both DNS records and wildcard certificate are ready, please enter a sub domain for each desired application.",
+			"pwaDomainHint2":"Make sure to have one sub domain available that is not in this list, to reach the general REI3 system. Otherwise you have no access to the admin user interface as each application sub domain only gives access to the specific application.",
+			"titleCaptions":"Captions",
+			"titleColors":"Colors",
+			"titleCss":"Custom CSS rules",
+			"titleLogos":"Logos",
+			"titlePwas":"Progressive web apps (PWAs)"
 		},
 		"files":{
 			"deleteDate":"File deleted",
@@ -296,14 +322,25 @@
 			"tlsVerify":"Verifică TLS"
 		},
 		"license":{
+			"button":{
+				"delete":"Remove license file"
+			},
+			"dialog":{
+				"delete":"Are you sure you want to remove the license file? To reactivate REI3 Professional, a valid license file must be uploaded."
+			},
 			"active":"Licență instalată",
 			"clientId":"Client ID",
-			"licenseEmpty":"Nu există",
+			"currentState":"Current values",
+			"extCommunity":"REI3 Community Forum",
+			"extLicense":"REI3 Professional",
+			"intro":"REI3 is fully <a href=\"https://github.com/r3-team/r3\" target=\"_blank\">open source</a> and can be used free of charge.<br /><br />For those needing enterprise features or support, there is <b>REI3 Professional</b>. It is priced to be affordable to organizations of any size, often costing much less than comparable low-code offerings.<br /><br />While supporting continuous development, REI3 Professional customers can also activate the full range of features and get support from Lean Softworks, the primary developer of REI3.",
+			"introMore":"More information:",
 			"licenseExpired":"Licența este expirată",
 			"licenseId":"Licență ID",
-			"licenseValid":"Licența este valabilă pentru încă {COUNT} zi(le)",
+			"loginCount":"Concurrent logins",
 			"registeredFor":"Înregistrat pentru",
-			"upload":"Încărcați fișierul de licență",
+			"untilDays":"Valid for days",
+			"upload":"Încărcați fișierul de licență:",
 			"validUntil":"Valabilă până la"
 		},
 		"login":{
@@ -388,8 +425,15 @@
 			"dialog":{
 				"imapWarn":"Please note that the IMAP connector loads and then deletes messages from the chosen mailbox. It should only be used with a dedicated mailbox and not to access personal mail accounts."
 			},
+			"option":{
+				"authMethod":{
+					"login":"LOGIN (for O365 legacy SMTP)",
+					"plain":"PLAIN (default)"
+				}
+			},
 			"account":"Cont de email",
 			"accounts":"Conturi de email",
+			"accountAuthMethod":"Auth. method",
 			"accountHost":"Nume gazdă",
 			"accountMode":"Modul",
 			"accountNew":"Cont nou",
@@ -489,6 +533,7 @@
 				"mailRetrieve":"Preluare e-mail",
 				"mailSend":"Expediere prin e-mail",
 				"repoCheck":"Executați actualizarea depozitului",
+				"restExecute":"Execute REST calls",
 				"updateCheck":"Verificați dacă există actualizări ale platformei"
 			},
 			"dateAttempt":"Ultimul rulaj",
@@ -514,9 +559,10 @@
 		"navigationBackups":"Backups",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"Sistem",
+		"navigationCustom":"Personalizare",
 		"navigationFiles":"Files",
 		"navigationLdaps":"Autentificări-LDAP",
-		"navigationLicense":"Licență",
+		"navigationLicense":"REI3 Professional",
 		"navigationLogins":"Autentificări",
 		"navigationLoginTemplates":"Login templates",
 		"navigationLogs":"Jurnale",
@@ -625,7 +671,9 @@
 				"decimal":"Number, decimal",
 				"float":"Number, floating",
 				"files":"Files",
+				"iframe":"iframe",
 				"number":"Number, whole",
+				"regconfig":"Text search dictionary",
 				"relationship11":"Relationship, one-to-one (1:1)",
 				"relationshipN1":"Relationship, many-to-one (n:1)",
 				"relationshipActionsHintsOnUpdate":"Works identical to the setting for 'Action when deleted'. In contrast to deletion, this setting affects what happens when the primary key ('id') of a record that is referenced by this relationship attribute is changed. Seldom used, as there are few reasons to update primary keys.",
@@ -643,7 +691,9 @@
 				"decimal":"Decimal values, often used for currency amounts.",
 				"files":"One or many files. Depending on max. file count/size settings, users can permanently store files. With the client application, files can be opened locally for direct editing.",
 				"float":"Number values with floating decimal. Mostly used for expensive calculations.",
+				"iframe":"A URL value, which is used to show an external resource like a web site.",
 				"number":"Full number values, like counters, priorities, reference numbers and so on.",
+				"regconfig":"Dictionary for a fulltext search index. Available dictionaries depend on the database system (s. Postgres dictionaries). Examples: english, german, french, spanish, romanian. The value 'simple' can be used for less useful but language-agnostic search.",
 				"relationship11":"Connects one relation to another. One-to-one relationships (1:1) only allow one record of a relation to reference the same record on another. Examples: The teacher of a class or owner of a car.",
 				"relationshipN1":"Connects one relation to another. Many-to-one relationships (n:1) allow multiple records of a relation to reference the same record on another. Examples: Students attending a class or employees of an organization.",
 				"richtext":"Multiple lines of formatted text. Useful for larger articles as well as document templates for PDF or email generation. Can include headers, links, tables, images and more.",
@@ -704,6 +754,7 @@
 		},
 		"form":{
 			"button":{
+				"columnsAll":"All columns",
 				"layoutColumns":"{CNT} columns"
 			},
 			"chart":{
@@ -752,6 +803,10 @@
 					"slider":"valoarea cursorului",
 					"url":"URL"
 				},
+				"style":{
+					"bold":"bold",
+					"italic":"italic"
+				},
 				"effectField":"Field",
 				"effectTab":"Tab",
 				"ganttStepsDays":"zile",
@@ -782,16 +837,16 @@
 			"collectionIdDef":"Default value(s) from collection",
 			"collectionHint":"*Collection is only affected if selected as filter criteria in data query.",
 			"collectionTitle":"Filter collection",
-			"columnBatch":"Grup de coloane",
-			"columnBatchNot":"negrupate",
-			"columnBatchHint":"Coloana este parte a lotului {CNT}",
-			"columnBatchHintNot":"Coloana nu este grupată cu altele",
+			"columnBatch":"Column batch (drag&drop columns to expand)",
+			"columnBatchDir":"Column alignment (left-right, up-down)",
+			"columnBatchOff":"Remove column from batch",
 			"columnClipboard":"Clipboard",
 			"columnHeaderData":"Preluarea datelor",
 			"columnLength":"Lungime (caractere)",
 			"columnLength0":"fără limită",
 			"columnSize":"Mărime (pixel)",
 			"columnSize0":"automatic",
+			"columnStyles":"Styles",
 			"columnTitle":"Titlu",
 			"columnWrap":"Text continuu",
 			"copy":"Copie formular",
@@ -842,7 +897,8 @@
 			"flexWrap":"Conținu continuu",
 			"formTitle":"Titlul formularului",
 			"gantt":"Gantt",
-			"ganttNotes":"Lotul 1 în coloana grupează rezultatele.",
+			"ganttBatch":"Gantt group",
+			"ganttNotes":"First column batch groups results.",
 			"ganttSteps":"Gantt interval",
 			"ganttStepsToggle":"Comutare interval Gantt",
 			"groupBy":"Grupați după",
@@ -860,12 +916,13 @@
 			"noDataActions":"No data actions",
 			"onMobile":"Vizualizare dispozitiv mobil",
 			"openForm":"Deschideți formularul",
+			"openFormBulk":"Deschideți formularul<br />(bulk editing)",
 			"presetOpen":"Deschide presetarea",
 			"readonly":"Numai citire",
 			"required":"Necesar",
 			"scale":"UI scale",
 			"sidebarField":"{NAME}: Field settings",
-			"sidebarFieldColumns":"Columns",
+			"sidebarFieldColumns":"Available columns",
 			"sidebarFieldColumnSettings":"Column settings",
 			"sidebarForm":"Form settings",
 			"sql":"Previzualizare SQL",
@@ -958,6 +1015,7 @@
 				"mail_delete_after_attach":"instance.mail_delete_after_attach(<blockquote>mail_id INTEGER,<br />attach_record_id INTEGER,<br />attach_attribute_id UUID</blockquote>) => INTEGER<br /><br />Semnalați atașamentele de e-mail pentru a fi adăugate la un atribut de fișier al înregistrării specificate; e-mailul cu atașamentele sale sunt șterse ulterior.",
 				"mail_get_next":"instance.mail_get_next(account_name TEXT DEFAULT NULL) => instance.mail<br /><br />Returnează următorul e-mail din spoolerul de e-mail; returnează NULL dacă nu este disponibil niciun e-mail. Când este specificat un nume de cont, returnează numai e-mailurile primite cu contul dat.<br /><br />Tipul returnat 'instance.mail' este format din:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>După procesarea unui e-mail, acesta trebuie șters; în mod direct (mail_delete) sau după stocarea atașamentelor acestuia (mail_delete_after_attach).",
 				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Generates an outgoing email for the mail spooler. Optional parameters:<ul><li>Comma separated list of TO/CC/BCC recipients (one of these must be set)</li><li>Mail account name to send from (random account is used if not specified)</li><li>Atributul fișierului și înregistrarea din care să atașați fișiere</li></ul>",
+				"rest_call":"instance.rest_call(<blockquote>method TEXT,<br />url TEXT,<br />body TEXT,<br />headers JSONB DEFAULT NULL,<br />tls_skip_verify BOOLEAN DEFAULT FALSE,<br />callback_function_id UUID DEFAULT NULL,<br />callback_value TEXT DEFAULT NULL</blockquote>) => INTEGER<br /><br />Adds a HTTP REST call to the internal spooler for immediate execution. Supported methods are: DELETE, GET, PATCH, POST, PUT.<br /><br />URL can include query paramenters if needed.<br /><br />Headers must be provided as JSONB - each key value pair will result in one header.<br /><br />Validity check for TLS/SSL can be disabled if needed.<br /><br />If the REST response needs to be processed, another backend function can be set for callback. This callback function must have three arguments: INTEGER (for HTTP status code), TEXT (HTTP response body), TEXT (callback value).<br /><br />If a 'callback value' is set in instance.rest_call(...), it will be passed to the callback function - this is useful when multiple calls must be executed in order (like authentication before a data call).",
 				"update_collection":"instance.update_collection(collection_id, login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]) => INTEGER<br /><br />Informs connected clients to update the specified collection. If login IDs are given, only clients that belong to these logins are affected."
 			},
 			"option":{
@@ -1074,6 +1132,8 @@
 			"exportStateOk":"Gata",
 			"graphDependsOn":"Depinde de: {COUNT}",
 			"iconHint":"Icons are available, once they have been added to this application. Icons from applications that are being built on, can also be used.",
+			"iconPwa":"Application icons",
+			"iconPwaHint":"Icons that represent the application. Both icons must be PNG and must have a specific size (s. icon inputs) - not following these rules can cause the PWA to be not installable on some operating systems or devices.",
 			"keyCreate":"Transfer - Generați o nouă pereche de chei pentru semnătură",
 			"keyCreateInfo":"Asigurați-vă că păstrați cheia privată, în orice moment, în siguranță. Cheia publică trebuie importată în instanțele REI3 țintă pentru a vă accepta aplicațiile.",
 			"keyCreateLength":"Selectați lungimea cheii",
@@ -1085,10 +1145,17 @@
 			"languagesHint":"Languages that the application is available in.",
 			"nameHint":"Reference name for this application. The name must be unique within a REI3 system, so consider using a prefix based on your organization name.",
 			"nameHolder":"work_scheduler, inventory_planner, ...",
+			"namePwa":"Application title",
+			"namePwaHint":"The full application title shown in the list of installed applications. Can be up to 60 characters long. No translation possible.",
+			"namePwaShort":"Short title",
+			"namePwaShortHint":"A shorter version of the application title, usually shown on homescreens of mobile devices and as label for icons. Can be up to 12 characters long. No translation possible.",
 			"parent":"Atribuit către",
 			"parentHint":"When assigned to another application, it will be displayed as its child in menus and overviews - there is no other functional change. Applications can only be assigned to applications that they build on.",
 			"position":"Poziția implicită",
 			"positionHint":"Position of the application in the header (smaller ones first). Can be overwritten by system administrators.",
+			"pwa":"Progressive web app (PWA)",
+			"pwaHint":"REI3 applications can be installed on desktop computers and mobile devices as progressive web apps (PWA) from inside modern browsers. They are then listed as installed applications, get their own icons and shortcuts and behave similar to native applications.",
+			"release":"Deployment",
 			"releaseBuild":"Versiune aplicației",
 			"releaseBuildApp":"Versiune platformei",
 			"releaseDate":"Data lansării",
@@ -1106,6 +1173,12 @@
 				"module":"<p>Please choose a name for your application. This name serves to uniquely identify your application inside a REI3 system. It is not visible to users.</p><h3>Examples:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Because application names must be unique, it can help to use a prefix named after your organization. If your organization is called 'Modern Fashion Limited', you could use 'mfl' as prefix (as in 'mfl_shift_planner').</p>",
 				"relation":"<p>A relation name should reflect what is stored inside it. It must be unique within an application.</p><h3>Examples:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
 			},
+			"template":{
+				"mailsFromSpooler":"Email processing (incoming)",
+				"restAuthRequest":"REST authentication (via JSON)",
+				"restAuthResponse":"REST authentication response callback",
+				"restDataResponse":"REST data response callback"
+			},
 			"api":"New API",
 			"collection":"New collection",
 			"form":"New form",
@@ -1115,6 +1188,7 @@
 			"module":"Aplicație nouă",
 			"options":"Additional options",
 			"pgFunction":"New backend function",
+			"pgFunctionTemplate":"Use template",
 			"pgFunctionTrigger":"Trigger",
 			"pgFunctionTriggerHint":"Makes this backend function a trigger. A trigger can be referenced inside a relation to react to events in the database, like when records are created, updated or deleted. This setting cannot be changed later.",
 			"relation":"Relație nouă",
@@ -1123,13 +1197,41 @@
 			"role":"New role"
 		},
 		"openFormInput":{
+			"option":{
+				"float":"Floating window",
+				"inline":"Sub form inside field",
+				"none":"Full page form"
+			},
 			"attributeApply":"...pentru a seta valoare formularului",
 			"formIdOpen":"Formular",
 			"maxHeight":"Înălțimea maximă (px)",
 			"maxWidth":"Lățimea maximă (px)",
 			"newRecord":"La crearea înregistrărilor noi",
-			"popUp":"Formular de tip pop-up",
+			"popUpType":"Open as",
 			"relationIndex":"Folosește înregistrarea din relația"
+		},
+		"pgIndex":{
+			"description":{
+				"BTREE":"Default index for fast lookups. Suitable for most all attribute value types but not for texts larger than a few paragraphs.",
+				"GIN":"Text index for enabling fast lookups on even very large texts. Can use a dictionary attribute to support language specific features like related words, synonyms and more; as an example, a lookup for 'computer' would also find results for 'computation' or 'to compute'."
+			},
+			"dialog":{
+				"delete":"Are you sure you want to delete this index?"
+			},
+			"method":{
+				"BTREE":"Default index",
+				"GIN":"Text index"
+			},
+			"attributes":"Attribute(s)",
+			"attributesHint":"Attribute(s) that the index covers. If multiple are given, the order decides on whether a particular index is used for a query. Text indexes currently only support a single attribute.",
+			"dictionary":"Dictionary attribute (optional)",
+			"dictionaryHint":"If used, a text index will be able to use advanced language features to improve text lookups. Must be an attribute of the value type 'Text search dictionary'.",
+			"noUpdate":"Existing indexes cannot be changed but safely recreated at any time. Depending on the data size, index creation can take a while.",
+			"system":"This index is managed by the system and cannot be deleted directly.",
+			"title":"View index",
+			"titleNew":"Create index",
+			"unique":"Unique",
+			"uniqueHint":"If enabled, the same value cannot exist twice for the given attribute. If multiple attributes are given, the combined value can only exist once."
 		},
 		"pgTrigger":{
 			"dialog":{
@@ -1182,10 +1284,10 @@
 			"graph":"Graficul relațiilor",
 			"graphBase":"Relația de bază",
 			"indexes":"Indexuri ({CNT})",
-			"indexAttributes":"Atribute",
-			"indexAutoFki":"Relationship",
-			"indexCreate":"Adăugați un atribut la noul index",
-			"indexPrimaryKey":"Primary key",
+			"indexAutoFki":"Relationship index",
+			"indexPrimaryKey":"Primary key index",
+			"indexSystem":"System index (managed by the system)",
+			"indexText":"Text index",
 			"indexUnique":"Unic",
 			"isDeferred":"AMÂNAT",
 			"nameHint":"Reference name for this relation. Must be unique within this application.",
@@ -1413,6 +1515,9 @@
 		"whatIsSentPost":"Aceste date ajută la procesarea feedback-ului. Nu sunt trimise informații personale. Luăm intimitatea foarte în serios."
 	},
 	"filter":{
+		"dialog":{
+			"ftsHelp":"Full-text search can quickly find matches in large texts based on words or phrases. Instead of searching for specific characters, full-text search breaks down words to their roots to match against a search query.<br /><br />The following search options exist:<ul><li>Specific word</li><ul><li>Search: <b>entry</b></li><li>'entry' will find texts containing words like 'entry', 'entries' or 'list-entries'.</li><li>Valid match: 'I have checked all relevant data entries.'</li></ul><li>All words</li><ul><li>Search: <b>making coffee</b></li><li>'making coffee' will find texts if they contain both words related to 'make' (like 'making') and 'coffee' (like 'coffee machine'). It will not find 'coffee maker' as 'maker' is its own word-stem.</li><li>Valid match: 'We fixed the machine, still makes terrible coffee.'</li></ul><li>Any words</li><ul><li>Search: <b>tea or coffee</b></li><li>'tea or coffee' will find texts if they contain either words related to 'tea' (like 'tea drinker') or 'coffee' (like 'coffee machine').</li><li>Valid match: 'Coffee gets me through the day.'</li></ul><li>Without words</li><ul><li>Search: <b>tea -coffee</b></li><li>'tea -coffee' will find texts if they contain words related to 'tea' but not words related to 'coffee'.</li><li>Valid match: 'I enjoy tea regularly.'</li></ul><li>Followed words</li><ul><li>Search: <b>\"make coffee\"</b></li><li>'\"make coffee\"' (in double-quotes) will find texts if they contain words related to 'make' being followed by words related to 'coffee'. The order is important - texts containing 'coffee making' will not be included, as the word order is wrong.</li><li>Valid match: 'I´ll spent the lunch break making coffee for my colleagues.'</li></ul></ul>"
+		},
 		"option":{
 			"connector":{
 				"AND":"ȘI",
@@ -1465,12 +1570,18 @@
 				"seconds":"sec."
 			},
 			"operator":{
+				"arrContained":"contained by",
+				"arrContains":"contains",
+				"arrOverlap":"has overlap with",
 				"eq":"egal",
+				"eqAny":"is included in",
+				"fts":"conține (full-text search)",
 				"le":"mai mare sau egal",
 				"lt":"mai mare",
 				"ilike":"conține",
 				"like":"conține (potrivire exactă)",
 				"ne":"diferit",
+				"neAll":"is not included in",
 				"not_ilike":"nu conține",
 				"not_like":"nu conține (potrivire exactă)",
 				"not_null":"ne nul",
@@ -1496,6 +1607,9 @@
 		"operatorsText":"Text",
 		"queryAggregatorNull":"fără agregare",
 		"queryShow":"Afișează subinterogarea",
+		"searchDictionaryHint":"Used dictionary - should reflect the search input and the expected result texts. Additional dictionaries can be added in the user settings.",
+		"searchDictionarySimple":"[No dictionary]",
+		"searchDictionarySimpleHint":"This is option is for when expected result texts do not have a dictionary assigned.",
 		"subQueryAttribute":"Attribute",
 		"subQueryAggregator":"Aggregate",
 		"valueHint":"Valoare text sau număr"
@@ -1509,6 +1623,8 @@
 			"logHint":"Deschideți jurnalele de modificări"
 		},
 		"dialog":{
+			"bulkEncrypted":"Bulk update for encrypted data is currently not supported.",
+			"bulkMultiple":"Bulk update with multiple relations is currently not supported.",
 			"close":"Există modificări nesalvate.<br /><br />Doriți în continuare să închideți acest formular?",
 			"delete":"Sunteți sigur că doriți să ștergeți <b>permanent</b> această înregistrare?",
 			"encrypted":"The field content will be encrypted on your system before it is being sent to the server.",
@@ -1524,6 +1640,7 @@
 			"recordValueCopied":"Copied to clipboard",
 			"recordUpdated":"înregistrarea a fost actualizată"
 		},
+		"bulkTouched":"Value will be updated",
 		"invalidInputs":"Verificați intrările!",
 		"noAccess":"Fără acces"
 	},
@@ -1587,6 +1704,9 @@
 			"fileSize":"File size",
 			"tooLarge":"Nu se poate încărca fișierul'{NAME}', mărimea maxim permisă este {SIZE}.",
 			"unsaved":"(unsaved)"
+		},
+		"iframe":{
+			"empty":"No URL set - nothing to show"
 		}
 	},
 	"list":{
@@ -1633,7 +1753,6 @@
 		"csvTimezone":"Zona de timp",
 		"csvTotalLimit":"Număr de rânduri (0 = toate)",
 		"fetching":"Data is being retrieved...",
-		"filtersExpert":"Expert filters",
 		"inputHintCreate":"Creați o înregistrare nouă",
 		"inputHintOpen":"Deschideți înregistrarea",
 		"inputHintRemove":"Ștergeți înregistrarea",
@@ -1659,6 +1778,9 @@
 		},
 		"button":{
 			"logout":"Deconectare"
+		},
+		"dialog":{
+			"searchDictionary":"This system offers full-text search capabilities. Where full-text search is used, even very large texts can be looked up quickly with advanced search features such as comparing synonyms and word stems.<br /><br />'Dictionaries for full-text search' informs the system of which languages a user works with to use language specific search features."
 		},
 		"encryption":{
 			"button":{
@@ -1753,13 +1875,15 @@
 		"pageLimit":"Lățimea paginii maximă",
 		"pageTitle":"Setări",
 		"pattern":"Background pattern",
+		"searchDictionaries":"Dictionaries for full-text search",
+		"searchDictionaryNew":"Add dictionary",
 		"spacing":"Spaţierea",
 		"sundayFirstDow":"Duminică este prima zi a săptămânii",
 		"tabRemember":"Open last used tab",
 		"titleAccount":"Account",
-		"titleDisplay":"Afișare",
 		"titleEncryption":"End-to-end encryption",
 		"titleFixedTokens":"Devices",
+		"titleGeneral":"General",
 		"titleTheme":"Temă",
 		"warnUnsaved":"Avertismente pentru modificări nesalvate"
 	}

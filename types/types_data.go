@@ -15,7 +15,8 @@ import (
 // to build complex filters, multiple clauses can be connected by AND|OR
 // if attributes are used, the index of which relation the attribute belongs to, is required
 // if sub queries are used, the nesting level needs to be specified (0 = main query, 1 = 1st sub query)
-//  this is required as a sub query from the same relation might refer to itself or to a parent query with similar relations/attributes
+//
+//	this is required as a sub query from the same relation might refer to itself or to a parent query with similar relations/attributes
 type DataGetFilter struct {
 	Connector string            `json:"connector"` // clause connector (AND|OR), first clause is always AND
 	Operator  string            `json:"operator"`  // operator (=, <, >, ...)
@@ -27,6 +28,7 @@ type DataGetFilterSide struct {
 	AttributeIndex  int         `json:"attributeIndex"`  // attribute relation index
 	AttributeNested int         `json:"attributeNested"` // attribute nesting level (0 = main query, 1 = 1st sub query)
 	Brackets        int         `json:"brackets"`        // brackets before (side0) or after (side1)
+	FtsDict         pgtype.Text `json:"ftsDict"`         // dictionary for full text search, execute tsquery on value and convert attribute side to tsvector if set
 	Query           DataGet     `json:"query"`           // sub query, optional
 	QueryAggregator pgtype.Text `json:"queryAggregator"` // sub query aggregator, optional
 	Value           interface{} `json:"value"`           // fixed value, optional, filled by frontend with value of field/login ID/record/...
@@ -34,7 +36,9 @@ type DataGetFilterSide struct {
 
 // a JOIN connects multiple relations via a relationship attribute
 // the join index is a unique number for each relation
-//  this is required as the same relation can be joined multiple times or even be self-joined
+//
+//	this is required as the same relation can be joined multiple times or even be self-joined
+//
 // index from is used to ascertain the join chain until the first relation (usually index=0)
 type DataGetJoin struct {
 	AttributeId uuid.UUID `json:"attributeId"` // relationship attribute ID
@@ -83,6 +87,7 @@ type DataGet struct {
 	Limit       int                 `json:"limit"`       // result limit
 	Offset      int                 `json:"offset"`      // result offset
 	GetPerm     bool                `json:"getPerm"`     // get result permissions (SET/DEL) from relation policy, GET is ignored as results are filtered by it already
+	SearchDicts []string            `json:"searchDicts"` // list of fulltext search dictionaries (english, german, ...)
 }
 type DataGetResult struct {
 	IndexRecordIds     map[int]interface{} `json:"indexRecordIds"`     // IDs of relation records, key: relation index

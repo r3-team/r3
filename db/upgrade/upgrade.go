@@ -99,11 +99,278 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	// clean up on next release
-	// ALTER TABLE app.attribute ALTER COLUMN content_use
-	//  TYPE app.attribute_content_use USING content_use::text::app.attribute_content_use;
+	// ALTER TABLE app.open_form ALTER COLUMN pop_up_type
+	//  TYPE app.open_form_pop_up_type USING pop_up_type::text::app.open_form_pop_up_type;
+	// ALTER TABLE instance.mail_account ALTER COLUMN auth_method
+	//  TYPE instance.mail_account_auth_method USING auth_method::text::instance.mail_account_auth_method;
 
+	"3.3": func(tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(db.Ctx, `
+			-- cleanup from last release
+			ALTER TABLE app.attribute ALTER COLUMN content_use DROP DEFAULT;
+			ALTER TABLE app.attribute ALTER COLUMN content_use
+				TYPE app.attribute_content_use USING content_use::text::app.attribute_content_use;
+			
+			-- text indexing
+			ALTER TYPE app.attribute_content ADD VALUE 'regconfig';
+			
+			CREATE TYPE app.pg_index_method AS ENUM ('BTREE','GIN');
+			
+			ALTER TABLE app.pg_index ADD COLUMN method app.pg_index_method NOT NULL DEFAULT 'BTREE';
+			ALTER TABLE app.pg_index ALTER COLUMN method DROP DEFAULT;
+			
+			ALTER TABLE app.pg_index ADD COLUMN attribute_id_dict UUID;
+			ALTER TABLE app.pg_index ADD CONSTRAINT pg_index_attribute_id_dict_fkey FOREIGN KEY (attribute_id_dict)
+				REFERENCES app.attribute (id) MATCH SIMPLE
+		        ON UPDATE CASCADE
+		        ON DELETE CASCADE
+		        DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_pg_index_attribute_id_dict_fkey
+				ON app.pg_index USING btree (attribute_id_dict ASC NULLS LAST);
+			
+			CREATE TABLE IF NOT EXISTS instance.login_search_dict (
+				login_id integer,
+				login_template_id integer,
+				position integer NOT NULL,
+				name regconfig NOT NULL,
+				CONSTRAINT login_search_dict_login_id_fkey FOREIGN KEY (login_id)
+					REFERENCES instance.login (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT login_search_dict_login_template_id_fkey FOREIGN KEY (login_template_id)
+					REFERENCES instance.login_template (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX fki_login_search_dict_login_id_fkey
+				ON instance.login_search_dict USING btree (login_id ASC NULLS LAST);
+			
+			CREATE INDEX fki_login_search_dict_login_template_id_fkey
+				ON instance.login_search_dict USING btree (login_template_id ASC NULLS LAST);
+			
+			CREATE UNIQUE INDEX ind_login_search_dict ON instance.login_search_dict USING BTREE
+				(login_id ASC NULLS LAST, login_template_id ASC NULLS LAST, name ASC NULLS LAST);
+			
+			-- create initial text search config based on user languages
+			INSERT INTO instance.login_search_dict (login_id, login_template_id, position, name) SELECT login_id, login_template_id, 0, 'english'  FROM instance.login_setting WHERE language_code = 'en_us';
+			INSERT INTO instance.login_search_dict (login_id, login_template_id, position, name) SELECT login_id, login_template_id, 0, 'german'   FROM instance.login_setting WHERE language_code = 'de_de';
+			INSERT INTO instance.login_search_dict (login_id, login_template_id, position, name) SELECT login_id, login_template_id, 0, 'italian'  FROM instance.login_setting WHERE language_code = 'it_it';
+			INSERT INTO instance.login_search_dict (login_id, login_template_id, position, name) SELECT login_id, login_template_id, 0, 'romanian' FROM instance.login_setting WHERE language_code = 'ro_ro';
+			
+			-- new tasks
+			INSERT INTO instance.task (
+				name,interval_seconds,cluster_master_only,
+				embedded_only,active_only,active
+			) VALUES ('restExecute',15,true,false,false,true);
+			
+			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
+			VALUES ('restExecute',0,0);
+			
+			-- REST calls
+			CREATE TYPE instance.rest_method AS ENUM ('DELETE','GET','PATCH','POST','PUT');
+			
+			CREATE TABLE instance.rest_spool (
+			    id uuid NOT NULL DEFAULT gen_random_uuid(),
+				pg_function_id_callback uuid,
+			    method instance.rest_method NOT NULL,
+			    headers jsonb,
+			    url text COLLATE pg_catalog."default" NOT NULL,
+			    body text COLLATE pg_catalog."default",
+				callback_value TEXT,
+				skip_verify boolean NOT NULL,
+			    date_added bigint NOT NULL,
+				attempt_count integer NOT NULL DEFAULT 0,
+			    CONSTRAINT rest_spool_pkey PRIMARY KEY (id),
+			    CONSTRAINT rest_spool_pg_function_id_callback_fkey FOREIGN KEY (pg_function_id_callback)
+			        REFERENCES app.pg_function (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX fki_rest_spool_pg_function_id_callback_fkey
+				ON instance.rest_spool USING btree (pg_function_id_callback ASC NULLS LAST);
+			
+			CREATE INDEX ind_rest_spool_date_added ON instance.rest_spool
+				USING btree (date_added ASC NULLS LAST);
+			
+			CREATE OR REPLACE FUNCTION instance.rest_call(http_method TEXT, url TEXT, body TEXT, headers JSONB DEFAULT NULL, tls_skip_verify BOOLEAN DEFAULT FALSE, callback_function_id UUID DEFAULT NULL, callback_value TEXT DEFAULT NULL)
+				RETURNS integer
+				LANGUAGE 'plpgsql'
+				COST 100
+				VOLATILE PARALLEL UNSAFE
+			AS $BODY$
+				DECLARE
+				BEGIN
+					INSERT INTO instance.rest_spool(pg_function_id_callback, method, headers, url, body, date_added, skip_verify, callback_value)
+					VALUES (callback_function_id, http_method::instance.rest_method, headers, url, body, EXTRACT(EPOCH FROM NOW()), tls_skip_verify, callback_value);
+					
+					RETURN 0;
+				END;
+			$BODY$;
+			
+			-- PWA changes
+			ALTER TABLE app.module ADD COLUMN name_pwa character varying(60);
+			ALTER TABLE app.module ADD COLUMN name_pwa_short character varying(12);
+			ALTER TABLE app.module ADD COLUMN icon_id_pwa1 UUID;
+			ALTER TABLE app.module ADD COLUMN icon_id_pwa2 UUID;
+			ALTER TABLE app.module ADD CONSTRAINT module_icon_id_pwa1_fkey FOREIGN KEY (icon_id_pwa1)
+				REFERENCES app.icon (id) MATCH SIMPLE 
+				ON UPDATE SET NULL
+				ON DELETE SET NULL
+				DEFERRABLE INITIALLY DEFERRED;
+			ALTER TABLE app.module ADD CONSTRAINT module_icon_id_pwa2_fkey FOREIGN KEY (icon_id_pwa2)
+				REFERENCES app.icon (id) MATCH SIMPLE 
+				ON UPDATE SET NULL
+				ON DELETE SET NULL
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_module_icon_id_pwa1_fkey ON app.module USING btree (icon_id_pwa1 ASC NULLS LAST);
+			CREATE INDEX fki_module_icon_id_pwa2_fkey ON app.module USING btree (icon_id_pwa2 ASC NULLS LAST);
+			
+			-- custom CSS & PWA icons
+			INSERT INTO instance.config (name,value) VALUES ('css','');
+			INSERT INTO instance.config (name,value) VALUES ('iconPwa1','');
+			INSERT INTO instance.config (name,value) VALUES ('iconPwa2','');
+			
+			-- PWA sub domains
+			CREATE TABLE instance.pwa_domain (
+				module_id UUID NOT NULL,
+				domain TEXT NOT NULL,
+			    CONSTRAINT pwa_domain_pkey PRIMARY KEY (module_id),
+			    CONSTRAINT pwa_domain_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			-- remove outdated config
+			DELETE FROM instance.config WHERE name = 'defaultLanguageCode';
+			
+			-- add last login date
+			ALTER TABLE instance.login ADD COLUMN date_auth_last BIGINT;
+			CREATE INDEX ind_login_date_auth_last ON instance.login USING BTREE (date_auth_last ASC NULLS LAST);
+			
+			-- iframes
+			ALTER TYPE app.attribute_content_use ADD VALUE 'iframe';
+			
+			-- more list column options
+			CREATE TYPE app.column_style AS ENUM('bold','italic');
+			ALTER TABLE app.column ADD COLUMN styles app.column_style[];
+			
+			ALTER TABLE app.column ADD COLUMN batch_vertical BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.column ALTER COLUMN batch_vertical DROP DEFAULT;
+			
+			-- bulk update forms
+			CREATE TYPE app.open_form_context AS ENUM('bulk');
+			ALTER TABLE app.open_form ADD COLUMN context app.open_form_context;
+			
+			-- inline pop-up forms
+			CREATE TYPE app.open_form_pop_up_type AS ENUM('float','inline');
+			ALTER TABLE app.open_form ADD COLUMN pop_up_type TEXT;
+			UPDATE app.open_form SET pop_up_type = 'float' WHERE pop_up;
+			ALTER TABLE app.open_form DROP COLUMN pop_up;
+			
+			-- mail account authentication methods
+			ALTER TABLE instance.mail_account ADD COLUMN auth_method TEXT NOT NULL DEFAULT 'plain';
+			ALTER TABLE instance.mail_account ALTER COLUMN auth_method DROP DEFAULT;
+			
+			UPDATE instance.mail_account
+			SET auth_method = 'login'
+			WHERE mode = 'smtp'
+			AND LOWER(host_name) = 'smtp.office365.com';
+			
+			CREATE TYPE instance.mail_account_auth_method AS ENUM ('plain','login');
+			
+			-- fix missing primary key references (rare but we found 1 relevant case)
+			INSERT INTO app.pg_index (id, relation_id, auto_fki, no_duplicates, primary_key, method)
+				SELECT gen_random_uuid(), r.id, false, true, true, 'BTREE'
+				FROM app.relation AS r
+				WHERE 0 = (
+					SELECT COUNT(*)
+					FROM app.pg_index
+					WHERE relation_id = r.id
+					AND primary_key
+				);
+			
+			INSERT INTO app.pg_index_attribute (pg_index_id, position, order_asc, attribute_id)
+				SELECT id, 0, true, (
+					SELECT id
+					FROM app.attribute
+					WHERE name = 'id'
+					AND relation_id = pgi.relation_id
+				)
+				FROM app.pg_index AS pgi
+				WHERE primary_key
+				AND 0 = (
+					SELECT COUNT(*)
+					FROM app.pg_index_attribute
+					WHERE pg_index_id = pgi.id
+				);
+			
+			-- fix duplicate primary key references (clean up query lookup references, then delete duplicate PK index references)
+			UPDATE app.query_lookup AS ql
+			SET pg_index_id = (
+				-- valid PK index reference for this relation
+				SELECT id
+				FROM app.pg_index
+				WHERE relation_id = (
+					SELECT relation_id
+					FROM app.pg_index
+					WHERE id = ql.pg_index_id
+				)
+				AND primary_key
+				ORDER BY id ASC
+				LIMIT 1
+			)
+			WHERE pg_index_id IN (
+				-- invalid PK index references
+				SELECT id
+				FROM app.pg_index
+				WHERE primary_key
+				AND id NOT IN (
+					-- valid PK index reference for each relation
+					SELECT (
+						SELECT id
+						FROM app.pg_index
+						WHERE relation_id = r.id
+						AND   primary_key
+						ORDER BY id ASC
+						LIMIT 1
+					)
+					FROM app.relation AS r
+				)
+			);
+			
+			DELETE FROM app.pg_index
+			WHERE primary_key
+			AND id NOT IN (
+				-- valid PK index reference for each relation
+				SELECT (
+					SELECT id
+					FROM app.pg_index
+					WHERE relation_id = r.id
+					AND   primary_key
+					ORDER BY id ASC
+					LIMIT 1
+				)
+				FROM app.relation AS r
+			);
+			
+			-- update schema as apps have changed
+			UPDATE instance.config
+			SET value = EXTRACT(EPOCH FROM NOW() at time zone 'utc')::BIGINT
+			WHERE name = 'schemaTimestamp';
+		`)
+		return "3.4", err
+	},
 	"3.2": func(tx pgx.Tx) (string, error) {
-		if _, err := tx.Exec(db.Ctx, `
+		_, err := tx.Exec(db.Ctx, `
 			-- clean up from last release
 			ALTER TABLE app.caption ALTER COLUMN content
 				TYPE app.caption_content USING content::text::app.caption_content;
@@ -454,21 +721,17 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			INSERT INTO app.pg_index (id, relation_id, auto_fki, no_duplicates, primary_key)
 				SELECT gen_random_uuid(), id, false, true, true FROM app.relation;
-		`); err != nil {
-			return "", err
-		}
-
-		_, err := tx.Exec(db.Ctx, `
+			
 			INSERT INTO app.pg_index_attribute (pg_index_id, position, order_asc, attribute_id)
 				SELECT id, 0, true, (
 					SELECT id
 					FROM app.attribute
-					WHERE name = $1
+					WHERE name = 'id'
 					AND relation_id = pgi.relation_id
 				)
 				FROM app.pg_index AS pgi
 				WHERE primary_key;
-		`, schema.PkName)
+		`)
 		return "3.3", err
 	},
 	"3.1": func(tx pgx.Tx) (string, error) {
@@ -1013,7 +1276,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				        ON DELETE CASCADE
 				        DEFERRABLE INITIALLY DEFERRED,
 				    CONSTRAINT "%s_record_id_fkey" FOREIGN KEY (record_id)
-				        REFERENCES "%s"."%s" ("%s") MATCH SIMPLE
+				        REFERENCES "%s"."%s" ("id") MATCH SIMPLE
 				        ON UPDATE CASCADE
 				        ON DELETE CASCADE
 				        DEFERRABLE INITIALLY DEFERRED
@@ -1028,7 +1291,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				CREATE INDEX "fki_%s_record_id_fkey"
 					ON instance_file."%s" USING btree (record_id ASC NULLS LAST);
 			`, tNameR, tNameR, tNameR, tNameR, fa.moduleName, fa.relationName,
-				schema.PkName, tNameR, tNameR, tNameR, tNameR, tNameR, tNameR)); err != nil {
+				tNameR, tNameR, tNameR, tNameR, tNameR, tNameR)); err != nil {
 
 				return "", err
 			}

@@ -1,4 +1,5 @@
 import MyInputCollection from './inputCollection.js';
+import MyForm            from './form.js';
 import MyValueRich       from './valueRich.js';
 import srcBase64Icon     from './shared/image.js';
 import {getCaption}      from './shared/language.js';
@@ -58,7 +59,9 @@ let MyGanttLineRecord = {
 					v-if="!indexesHidden.includes(i) && v !== null"
 					:attribute-id="columns[i].attributeId"
 					:basis="columns[i].basis"
+					:bold="columns[i].styles.includes('bold')"
 					:display="columns[i].display"
+					:italic="columns[i].styles.includes('italic')"
 					:key="i"
 					:length="columns[i].length"
 					:value="v"
@@ -135,7 +138,7 @@ let MyGanttLineRecord = {
 		// actions
 		clickRecord(middleClick) {
 			if(this.rowSelect)
-				this.$emit('record-selected',this.recordId,[],middleClick);
+				this.$emit('record-selected',this.recordId,middleClick);
 		}
 	}
 };
@@ -191,9 +194,9 @@ let MyGantt = {
 			<div class="area nowrap">
 				<my-button image="new.png"
 					v-if="hasCreate"
-					@trigger="$emit('open-form',0,[],false)"
-					@trigger-middle="$emit('open-form',0,[],true)"
-					:caption="!isMobile ? capGen.button.new : ''"
+					@trigger="$emit('open-form',[],[],false)"
+					@trigger-middle="$emit('open-form',[],[],true)"
+					:caption="capGen.button.new"
 					:captionTitle="capGen.button.newHint"
 				/>
 				<my-button
@@ -224,9 +227,9 @@ let MyGantt = {
 				/>
 			</div>
 			
-			<div class="area nowrap default-inputs">
+			<div class="area wrap gap default-inputs">
 				<my-button
-					v-if="stepTypeToggle"
+					v-if="!isMobile && stepTypeToggle"
 					@trigger="toggleStepType"
 					:captionTitle="capApp.button.ganttToggleHint"
 					:image="isDays ? 'clock.png' : 'clock24.png'"
@@ -272,6 +275,7 @@ let MyGantt = {
 					@trigger="scrollToNow"
 					:caption="!isMobile ? capApp.now : ''"
 					:captionTitle="capApp.nowHint"
+					:tight="true"
 				/>
 			</div>
 		</div>
@@ -288,7 +292,9 @@ let MyGantt = {
 					<my-value-rich class="context-calendar-gantt"
 						v-for="c in g.columns.filter(v => !columnIndexesHidden.includes(v.index) && v.value !== null)"
 						:attribute-id="columns[c.index].attributeId"
+						:bold="columns[c.index].styles.includes('bold')"
 						:display="columns[c.index].display"
+						:italic="columns[c.index].styles.includes('italic')"
 						:key="c.index"
 						:length="columns[c.index].length"
 						:value="c.value"
@@ -328,7 +334,7 @@ let MyGantt = {
 				<div class="gantt-group" v-for="(g,i) in groups">
 					<my-gantt-line
 						v-for="(l,li) in g.lines"
-						@record-selected="(...args) => $emit('record-selected',...args)"
+						@record-selected="(...args) => $emit('open-form',[args[0]],[],args[1])"
 						:class="{ 'show-line':li === g.lines.length-1 }"
 						:columns="columns"
 						:date0-range="date0"
@@ -346,6 +352,24 @@ let MyGantt = {
 					{{ capGen.nothingThere }}
 				</div>
 			</div>
+			
+			<!-- inline form -->
+			<my-form
+				v-if="popUpFormInline !== null"
+				@close="$emit('close-inline')"
+				@record-deleted="get"
+				@record-updated="get"
+				@records-open="popUpFormInline.recordIds = $event"
+				:attributeIdMapDef="popUpFormInline.attributeIdMapDef"
+				:formId="popUpFormInline.formId"
+				:hasHelp="false"
+				:hasLog="false"
+				:isPopUp="true"
+				:isPopUpFloating="false"
+				:moduleId="popUpFormInline.moduleId"
+				:recordIds="popUpFormInline.recordIds"
+				:style="popUpFormInline.style"
+			/>
 		</div>
 	</div>`,
 	props:{
@@ -365,13 +389,14 @@ let MyGantt = {
 		indexDate1:      { type:Number,  required:true }, // index of attribute that provides record date to
 		isHidden:        { type:Boolean, required:false, default:false },
 		isSingleField:   { type:Boolean, required:false, default:false },
+		popUpFormInline: { required:false, default:null },
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:true },
 		stepTypeDefault: { type:String,  required:true },
 		stepTypeToggle:  { type:Boolean, required:true },
 		usesPageHistory: { type:Boolean, required:true }
 	},
-	emits:['open-form','record-count-change','record-selected','set-args','set-collection-indexes'],
+	emits:['close-inline','open-form','record-count-change','set-args','set-collection-indexes'],
 	data() {
 		return {
 			choiceId:null,
@@ -446,11 +471,19 @@ let MyGantt = {
 		//  group 0 label expression indexes define, which expression index(es) hold grouping label value(s)
 		group0LabelExpressionIndexes:(s) => {
 			let out = [];
-			
-			// get columns with batch 1 (fixed definition)
+			let batchIndexUsed;
 			for(let i = 0, j = s.columns.length; i < j; i++) {
-				if(s.columns[i].batch === 1)
+				if(i === 0) {
+					// get all columns from first used batch index
+					batchIndexUsed = s.columns[i].batch;
 					out.push(i);
+					
+					// if no batch index is used, only use first column
+					if(batchIndexUsed === null) break;
+					
+				} else if(s.columns[i].batch === batchIndexUsed) {
+					out.push(i);
+				}
 			}
 			return out;
 		},
@@ -490,6 +523,10 @@ let MyGantt = {
 		capGen:        (s) => s.$store.getters.captions.generic,
 		settings:      (s) => s.$store.getters.settings
 	},
+	beforeCreate() {
+		// import at runtime due to circular dependencies
+		this.$options.components.MyForm = MyForm;
+	},
 	created() {
 		window.addEventListener('resize',this.resize);
 	},
@@ -498,6 +535,7 @@ let MyGantt = {
 		this.dateStart = this.getDateNowRounded();
 		
 		// setup watchers
+		this.$watch('popUpFormInline',this.resize);
 		this.$watch('formLoading',(val) => {
 			if(!val) this.reloadOutside();
 		});
@@ -653,7 +691,7 @@ let MyGantt = {
 				`${this.attributeIdDate0}_${this.unixTimeRangeStart}`,
 				`${this.attributeIdDate1}_${unixTime}`
 			];
-			this.$emit('open-form',0,[`attributes=${attributes.join(',')}`],middleClick);
+			this.$emit('open-form',[],[`attributes=${attributes.join(',')}`],middleClick);
 			this.unixTimeRangeStart = null;
 		},
 		pageChange(factor) {

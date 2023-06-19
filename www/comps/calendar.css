@@ -1,7 +1,13 @@
 .calendar{
 	display:flex;
+	flex-flow:row nowrap;
 	flex:1 1 auto;
 	box-shadow:1px 1px 4px var(--color-shade);
+}
+.calendar .form-wrap.popUp{
+	flex:1 1 auto;
+	width:100%;
+	z-index:var(--z-index-inline-pop-up-form);
 }
 
 /* month view */
@@ -12,6 +18,20 @@
 	border-radius:3px;
 	flex-direction:column;
 	overflow:hidden;
+}
+.calendar .month .data{
+	display:flex;
+	flex-flow:row nowrap;
+}
+.calendar .month .resultsWrap{
+	display:flex;
+	flex-flow:row nowrap;
+	flex:1 1 auto;
+}
+.calendar .month .results{
+	display:flex;
+	flex-flow:column nowrap;
+	flex:1 1 auto;
 }
 
 /* calendar header */
@@ -126,6 +146,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
+	gap:6px;
 	height:22px;
 	line-height:22px;
 	padding:0px 3px;

@@ -1,4 +1,4 @@
-<p><em>Updated 2023-03-30</em></p>
+<p><em>Updated 2023-06-17</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -14,7 +14,10 @@
 <li><a href="#attributes">Attributes</a></li>
 <li><a href="#relationships">Relationships</a></li>
 <li><a href="#presets">Presets</a></li>
-<li><a href="#indexing">Indexing</a></li>
+<li><a href="#indexing">Indexing</a>
+<ol type="1">
+<li><a href="#text-indexing">Text indexing</a></li>
+</ol></li>
 <li><a href="#triggers">Triggers</a></li>
 <li><a href="#policies">Policies</a></li>
 <li><a href="#change-logs">Change logs</a></li>
@@ -47,7 +50,10 @@
 <li><a href="#frontend-functions">Frontend functions</a></li>
 <li><a href="#backend-functions">Backend functions</a></li>
 </ol></li>
-<li><a href="#apis">APIs</a></li>
+<li><a href="#apis">APIs</a>
+<ol type="1">
+<li><a href="#calling-apis">Calling APIs</a></li>
+</ol></li>
 <li><a href="#collections">Collections</a></li>
 <li><a href="#end-to-end-encryption">End-to-end encryption</a>
 <ol type="1">
@@ -168,6 +174,7 @@
 <li>Relationship (n:1): Stores a reference value to another record, usually on another relation. Used to build relationships like 'student attends class' or 'employee belongs to company'.</li>
 <li>Relationship (1:1): Like 'relationship n:1', but the specific relationship must only exist once inside a relation. This is often used for relationships like 'owner of a car' or 'teacher of a class' - in these cases only a single person can be the owner of a car or teacher of a class.</li>
 <li>Universally unique identifier (UUID): A 128bit label used to identify an entity. UUID values are statistically extremely unlikely to ever exist twice, even if they are created in different, disconnected systems. Useful to create unique keys for data exchange between systems.</li>
+<li>Text search dictionary: A name of a language. Used for <a href="#text-indexing">text indexes</a> to know which language another text attribute on the same <a href="#relations">relation</a> is in. The number of available languages depends on which languages the database system supports.</li>
 </ul></li>
 <li>Max. size in KB: Only for value type 'files'. Limits max. upload size for each file. 0 equals not limited.</li>
 <li>Max. characters: Only for value type 'text'. Limits the amount of characters allowed. 0 equals not limited.</li>
@@ -239,6 +246,11 @@
 <li>Unique indexes can be used to enforce unique values in all kinds of attributes (unique names/numbers/dates/...). This is one use-case for indexing besides performance.</li>
 <li>Indexes can be used to enforce unique, composite keys by using multiple attributes to form a unique index.</li>
 </ul>
+<h3 id="text-indexing">Text indexing</h3>
+<p>REI3 offers a default index, which works on almost all <a href="#attributes">attribute</a> types, like numbers, dates or names, to quickly find specific data. It is however limited when it comes to larger text values, such as articles.</p>
+<p>When text attribute values become too large (more than a few paragraphs) the default index does not work anymore as its not designed to work with large texts. Its also very inefficient to scan for specific characters in a growing number of large texts.</p>
+<p>For this situation, REI3 offers a dedicated text index option. A text index does not index every character, but instead breaks down the text content to its components. This gives us full-text search capabilities, which offer very fast, mult-word lookups. To use a text index, just select the option when adding a new index on a <a href="#relations">relation</a>.</p>
+<p>There is however another benefit with text indexes: Language specific lookups. If its possible to know the language of a text, full-text search can also break down words to their stems and remove stop-words. This enables lookups for words of the same stem as well as further improve performance. To enable this option, the relation on which the text attribute is stored, requires a dictionary attribute. This attribute is used to store the language of a text. If a dictionary attribute is used and given a value, lookups take into account specifics of the defined language to better find results.</p>
 <h2 id="triggers">Triggers</h2>
 <p>Triggers are an advanced feature, executing predefined functions when records inside your <a href="#relations">relations</a> are changed (created, updated or deleted). They are usually used for complex or event driven business logic and are not required in most use cases.</p>
 <p>To setup a trigger, a trigger function must be created first. A trigger function is a regular <a href="#backend-functions">backend function</a> of the type 'Trigger' - read its <a href="#backend-functions">documentation</a> for more details.</p>
@@ -687,6 +699,13 @@ END IF;</code></pre>
 <li>When API calls affect records, <a href="#triggers">relation triggers</a> will fire accordingly. It is not relevant to the system whether changes are made by a user on a form or by an external script/system via API.</li>
 <li>To update existing records or resolve records for joined relations, a record lookup must be defined for each relation in the API query. Record lookups work the same as in <a href="#csv-import-and-export">CSV imports</a> - any attribute with a unique index can be used to identify a record. The attribute values used as record lookups must be part of the API call.</li>
 </ul>
+<h2 id="calling-apis">Calling APIs</h2>
+<p>REI3 can either serve APIs as a server (s. <a href="#apis">APIs</a> above) or execute API calls against an external REST server. Calling APIs can be done in either <a href="#frontend-functions">frontend functions</a> or <a href="#backend-functions">backend functions</a>.</p>
+<ul>
+<li>Calling REST APIs on the frontend is just JavaScript, so any tutorial on how to execute REST calls in JavaScript can be used. Frontend functions can call backend functions to retrieve things like credentials or tokens, stored in relations.</li>
+<li>Calling REST APIs on the backend is done by the REI3 server. When creating new backend functions you can select from a list of templates, which includes examples of REST calls for authentication, sending data with authentication headers and how to handle JSON responses. REST calls are executed asynchronously so a callback function (e. g. another backend function) is used to handle REST responses if needed.</li>
+</ul>
+<p>REI3 instances can exchange data, with one instance offering APIs as server with the other calling these APIs as client to receive or update records.</p>
 <h1 id="collections">Collections</h1>
 <p>A collection is a data store that is available on the frontend, which can be accessed by other frontend elements (like <a href="#field-settings">form fields</a> or <a href="#frontend-functions">frontend-functions</a>). It contains data based on a defined <a href="#queries">query</a>. Depending on the selected <a href="#columns">columns</a> and <a href="#query-filters">filters</a>, a collection will retrieve records and their values.</p>
 <p>Collections are retrieved when a user logs into the system and updated when user permissions change; collections can also be updated directly by executing a <a href="#functions">function</a>. When updating a collection via a frontend function, only the current user will be affected - updating from a backend function can however affect one, many or all users.</p>

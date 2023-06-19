@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"os"
 	"r3/config"
+	"r3/rest"
 	"r3/tools"
 
 	"github.com/gofrs/uuid"
@@ -29,7 +30,7 @@ func Download(fileId uuid.UUID) (string, error) {
 	fileUrl := fmt.Sprintf("%s/data/download/file.zip?attribute_id=%s&file_id=%s&token=%s",
 		baseUrl, fileAttributeId, fileId, token)
 
-	httpClient := getHttpClient(skipVerify)
+	httpClient := rest.GetHttpClient(skipVerify)
 	httpRes, err := httpClient.Get(fileUrl)
 	if err != nil {
 		return "", err

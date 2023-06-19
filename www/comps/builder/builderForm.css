@@ -15,6 +15,7 @@
 }
 .builder-form .sidebar .templates{
 	margin:10px 0px 16px;
+	max-width:500px;
 	overflow:auto;
 	border-radius:5px;
 	overflow:hidden;
@@ -25,17 +26,11 @@
 }
 .builder-form .sidebar .columns{
 	display:flex;
-	flex-flow:row nowrap;
-	max-height:300px;
-}
-.builder-form .sidebar .columns .side{
-	flex:1 1 auto;
-	display:flex;
 	flex-flow:column nowrap;
-	
-	width:100px;
-	border-bottom:2px solid var(--color-border);
-	border-radius:5px;
+	overflow:auto;
+	max-height:400px;
+	border-bottom:1px solid var(--color-border);
+	border-radius:3px;
 }
 .builder-form .sidebar .column-options{
 	margin-top:20px;
@@ -103,6 +98,8 @@
 }
 .builder-field.column{
 	background-color:var(--color-form-builder-columns);
+	padding:0px 5px 0px 0px;
+	cursor:move;
 }
 .builder-field.isTemplate{
 	margin:0px 2px 2px 0px;
@@ -342,7 +339,6 @@
 .builder-form-states input,
 .builder-form-states select{
 	min-width:unset;
-	margin-right:6px;
 }
 .builder-form-states .actions{
 	display:flex;
@@ -361,7 +357,7 @@
 	border-radius:5px;
 }
 .builder-form-state .description{
-	width:400px;
+	max-width:400px;
 	margin-right:6px;
 }
 .builder-form-state .title{
@@ -389,6 +385,7 @@
 .builder-form-state-effect{
 	display:flex;
 	flex-flow:row nowrap;
+	min-width:300px;
 	margin:0px 4px 2px 0px;
 	padding:2px 3px;
 	border:1px solid var(--color-border);

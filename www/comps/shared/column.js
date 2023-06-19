@@ -5,21 +5,22 @@ import {
 } from './attribute.js';
 import MyStore from '../../stores/store.js';
 
-export function getColumnTitle(c) {
-	let lang = MyStore.getters.moduleLanguage;
+export function getColumnTitle(c,langOverwrite) {
+	let lang = typeof langOverwrite === 'undefined'
+		? MyStore.getters.moduleLanguage : langOverwrite;
 	
 	// 1st preference: dedicated column title
 	if(typeof c.captions.columnTitle[lang] !== 'undefined')
 		return c.captions.columnTitle[lang];
 	
-	let a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-	
-	// 2nd preference: dedicated attribute title
-	if(typeof a.captions.attributeTitle[lang] !== 'undefined')
-		return a.captions.attributeTitle[lang];
-	
-	// if nothing else is available: attribute name
-	return a.name;
+	// 2nd preference: dedicated attribute title or attribute name
+	if(c.attributeId !== null) {
+		let a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+		
+		return typeof a.captions.attributeTitle[lang] !== 'undefined'
+			? a.captions.attributeTitle[lang] : a.name;
+	}
+	return '';
 };
 
 export function getFirstColumnUsableAsAggregator(batch,columns) {

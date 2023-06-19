@@ -1,8 +1,8 @@
 import MyForm                         from './form.js';
 import MyMenu                         from './menu.js';
 import {getAttributeValuesFromGetter} from './shared/attribute.js';
-import {getValidLanguageCode}         from './shared/language.js';
 import {getStartFormId }              from './shared/access.js';
+import {getValidLanguageCode}         from './shared/language.js';
 export {MyGoForm, MyGoModule};
 
 let MyGoModule = {
@@ -14,11 +14,11 @@ let MyGoModule = {
 		moduleNameChild:{ type:String, required:false, default:'' }
 	},
 	computed:{
-		access:       function() { return this.$store.getters.access; },
-		modules:      function() { return this.$store.getters['schema/modules']; },
-		moduleNameMap:function() { return this.$store.getters['schema/moduleNameMap']; }
+		access:       (s) => s.$store.getters.access,
+		modules:      (s) => s.$store.getters['schema/modules'],
+		moduleNameMap:(s) => s.$store.getters['schema/moduleNameMap']
 	},
-	mounted:function() {
+	mounted() {
 		// route to home if invalid module was given
 		if(typeof this.moduleNameMap[this.moduleName] === 'undefined')
 			return this.$router.push('/');
@@ -53,7 +53,7 @@ let MyGoModule = {
 		}
 		
 		// no start form exists, route to home
-		return this.$router.push('/');
+		this.$router.push('/');
 	},
 	methods:{
 		getStartFormId
@@ -78,7 +78,7 @@ let MyGoForm = {
 			:attributeIdMapDef="getterAttributeIdMapDefaults"
 			:formId="formId"
 			:moduleId="moduleId"
-			:recordId="recordId"
+			:recordIds="recordIds"
 		/>
 	</div>`,
 	props:{
@@ -88,53 +88,41 @@ let MyGoForm = {
 		moduleNameChild:{ type:String, required:false, default:'' },
 		recordIdString: { type:String, required:false, default:'' }
 	},
-	data:function() {
+	data() {
 		return {
 			moduleId:null
 		};
 	},
 	watch:{
 		moduleNameActive:{
-			handler:function() {
+			handler() {
 				// if module cannot be resolved, go home
 				if(typeof this.moduleNameMap[this.moduleNameActive] === 'undefined')
 					return this.$router.replace('/');
 				
 				let module = this.moduleNameMap[this.moduleNameActive];
 				this.moduleId = module.id;
-				this.$store.commit('moduleColor1',module.color1);
+				this.$store.commit('moduleIdLast',module.id);
 				this.$store.commit('moduleLanguage',this.getValidLanguageCode(module));
 			},
 			immediate:true
 		}
 	},
 	computed:{
-		getterAttributeIdMapDefaults:function() {
-			if(typeof this.$route.query.attributes === 'undefined')
-				return {};
-			
-			return this.getAttributeValuesFromGetter(this.$route.query.attributes);
-		},
-		moduleNameActive:function() {
-			// child takes precedence if active
-			return this.moduleNameChild !== ''
-				? this.moduleNameChild
-				: this.moduleName
-			;
-		},
-		recordId:function() {
-			if(typeof this.recordIdString === 'undefined' || this.recordIdString === '')
-				return 0;
-			
-			return parseInt(this.recordIdString);
-		},
+		getterAttributeIdMapDefaults:(s) => typeof s.$route.query.attributes === 'undefined'
+			? {} : s.getAttributeValuesFromGetter(s.$route.query.attributes),
+		
+		moduleNameActive:(s) => s.moduleNameChild !== '' ? s.moduleNameChild : s.moduleName,
+		
+		recordIds:(s) => typeof s.recordIdString === 'undefined' || s.recordIdString === ''
+			? [] : [parseInt(s.recordIdString)],
 		
 		// stores
-		modules:      function() { return this.$store.getters['schema/modules']; },
-		moduleNameMap:function() { return this.$store.getters['schema/moduleNameMap']; },
-		formIdMap:    function() { return this.$store.getters['schema/formIdMap']; },
-		isAtMenu:     function() { return this.$store.getters.isAtMenu; },
-		isMobile:     function() { return this.$store.getters.isMobile; }
+		modules:      (s) => s.$store.getters['schema/modules'],
+		moduleNameMap:(s) => s.$store.getters['schema/moduleNameMap'],
+		formIdMap:    (s) => s.$store.getters['schema/formIdMap'],
+		isAtMenu:     (s) => s.$store.getters.isAtMenu,
+		isMobile:     (s) => s.$store.getters.isMobile
 	},
 	methods:{
 		// externals

@@ -12,7 +12,7 @@ let MyAdminClusterNode = {
 		/>
 		
 		<!-- node status -->
-		<div class="icons">
+		<div class="icons left">
 			<img class="status running" src="images/circle_ok.png"
 				v-if="available"
 				:title="displayTitle"
@@ -25,20 +25,19 @@ let MyAdminClusterNode = {
 				v-if="running && missing"
 				:title="displayTitle"
 			/>
-			
+		</div>
+		<div class="icons">
 			<my-button image="logoff.png"
 				v-if="available"
 				@trigger="shutdownAsk"
 				:active="licenseValid"
-				:naked="true"
-				:tight="true"
+				:cancel="true"
 			/>
 			<my-button image="delete.png"
 				v-if="!available"
 				@trigger="delAsk"
 				:active="licenseValid"
-				:naked="true"
-				:tight="true"
+				:cancel="true"
 			/>
 		</div>
 		
@@ -48,34 +47,35 @@ let MyAdminClusterNode = {
 			</tr>
 			<tr class="default-inputs">
 				<td>{{ capGen.name }}</td>
-				<td><input v-model="nameInput" :disabled="!licenseValid" /></td>
 				<td>
-					<my-button image="save.png"
-						v-if="name !== nameInput"
-						@trigger="$emit('set',nameInput)"
-						:naked="true"
-					/>
+					<div class="row gap centered">
+						<input v-model="nameInput" :disabled="!licenseValid" />
+						<my-button image="save.png"
+							@trigger="$emit('set',nameInput)"
+							:active="name !== nameInput"
+						/>
+					</div>
 				</td>
 			</tr>
 			<tr>
 				<td>{{ capApp.hostname }}</td>
-				<td colspan="2"><b>{{ hostname }}</b></td>
+				<td><b>{{ hostname }}</b></td>
 			</tr>
 			<tr>
 				<td>{{ capApp.dateCheckIn }}</td>
-				<td colspan="2"><b>{{ displayDate(dateCheckIn) }}</b></td>
+				<td><b>{{ displayDate(dateCheckIn) }}</b></td>
 			</tr>
 			<tr>
 				<td>{{ capApp.dateStarted }}</td>
-				<td colspan="2"><b>{{ displayDate(dateStarted) }}</b></td>
+				<td><b>{{ displayDate(dateStarted) }}</b></td>
 			</tr>
 			<tr>
 				<td>{{ capApp.statMemory }}</td>
-				<td colspan="2"><b>{{ statMemory }} MB</b></td>
+				<td><b>{{ statMemory }} MB</b></td>
 			</tr>
 			<tr>
 				<td>{{ capApp.statSessions }}</td>
-				<td colspan="2"><b>{{ statSessions }}</b></td>
+				<td><b>{{ statSessions }}</b></td>
 			</tr>
 		</table>
 	</div>`,
@@ -91,26 +91,24 @@ let MyAdminClusterNode = {
 		statSessions:{ type:Number,  required:true }
 	},
 	computed:{
-		available:function() {
-			return this.running && !this.missing;
+		available:(s) => s.running && !s.missing,
+		displayTitle:(s) => {
+			if(!s.running) return s.capApp.title.offline;
+			if(!s.missing) return s.capApp.title.connected;
+			return s.capApp.title.missing;
 		},
-		displayTitle:function() {
-			if(!this.running) return this.capApp.title.offline;
-			if(!this.missing) return this.capApp.title.connected;
-			return this.capApp.title.missing;
-		},
-		missing:function() {
-			return this.dateCheckIn + parseInt(this.config.clusterNodeMissingAfter) < this.getUnixFromDate(new Date());
+		missing:(s) => {
+			return s.dateCheckIn + parseInt(s.config.clusterNodeMissingAfter) < s.getUnixFromDate(new Date());
 		},
 		
 		// stores
-		capApp:      function() { return this.$store.getters.captions.admin.cluster; },
-		capGen:      function() { return this.$store.getters.captions.generic; },
-		config:      function() { return this.$store.getters.config; },
-		licenseValid:function() { return this.$store.getters.licenseValid; },
-		settings:    function() { return this.$store.getters.settings; }
+		capApp:      (s) => s.$store.getters.captions.admin.cluster,
+		capGen:      (s) => s.$store.getters.captions.generic,
+		config:      (s) => s.$store.getters.config,
+		licenseValid:(s) => s.$store.getters.licenseValid,
+		settings:    (s) => s.$store.getters.settings
 	},
-	data:function() {
+	data() {
 		return {
 			nameInput:this.name
 		};
@@ -121,12 +119,12 @@ let MyAdminClusterNode = {
 		getUnixFromDate,
 		
 		// presentation
-		displayDate:function(date) {
+		displayDate(date) {
 			return this.getUnixFormat(date,[this.settings.dateFormat,'H:i:S'].join(' '));
 		},
 		
 		// actions
-		delAsk:function() {
+		delAsk() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.delete,
 				buttons:[{
@@ -140,7 +138,7 @@ let MyAdminClusterNode = {
 				}]
 			});
 		},
-		shutdownAsk:function() {
+		shutdownAsk() {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.shutdown,
 				buttons:[{
@@ -183,10 +181,6 @@ let MyAdminCluster = {
 		</div>
 		
 		<div class="content">
-			<div v-if="!licenseValid" class="license-required">
-				{{ capGen.licenseRequired }}
-			</div>
-			
 			<div class="contentPartHeader">
 				<img class="icon" src="images/settings.png" />
 				<h1>{{ capApp.title.config }}</h1>
@@ -245,33 +239,35 @@ let MyAdminCluster = {
 			</template>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
 	computed:{
-		nodeIndexMaster:function() {
-			for(let i = 0, j = this.nodes.length; i < j; i++) {
-				if(this.nodes[i].clusterMaster)
+		nodeIndexMaster:(s) => {
+			for(let i = 0, j = s.nodes.length; i < j; i++) {
+				if(s.nodes[i].clusterMaster)
 					return i;
 			}
 			return -1;
 		},
 		
 		// stores
-		capApp:      function() { return this.$store.getters.captions.admin.cluster; },
-		capGen:      function() { return this.$store.getters.captions.generic; },
-		config:      function() { return this.$store.getters.config; },
-		licenseValid:function() { return this.$store.getters.licenseValid; }
+		capApp:      (s) => s.$store.getters.captions.admin.cluster,
+		capGen:      (s) => s.$store.getters.captions.generic,
+		config:      (s) => s.$store.getters.config,
+		licenseValid:(s) => s.$store.getters.licenseValid
 	},
-	data:function() {
+	data() {
 		return {
 			configInput:{},
 			nodes:[]
 		};
 	},
-	mounted:function() {
+	mounted() {
 		this.reset();
 		this.$store.commit('pageTitle',this.menuTitle);
+		this.$emit('hotkeysRegister',[{fnc:this.setConfig,key:'s',keyCtrl:true}]);
 	},
 	methods:{
 		// actions
@@ -281,20 +277,20 @@ let MyAdminCluster = {
 		},
 		
 		// backend calls,
-		del:function(id) {
+		del(id) {
 			ws.send('cluster','delNode',{id:id},true).then(
 				this.get,
 				this.$root.genericError
 			);
 		},
-		get:function() {
+		get() {
 			this.nodes = [];
 			ws.send('cluster','getNodes',{},true).then(
 				res => this.nodes = res.payload,
 				this.$root.genericError
 			);
 		},
-		set:function(id,name) {
+		set(id,name) {
 			ws.send('cluster','setNode',{
 				id:id,
 				name:name
@@ -303,13 +299,13 @@ let MyAdminCluster = {
 				this.$root.genericError
 			);
 		},
-		setConfig:function() {
+		setConfig() {
 			ws.send('config','set',this.configInput,true).then(
 				() => {},
 				this.$root.genericError
 			);
 		},
-		shutdown:function(id) {
+		shutdown(id) {
 			ws.send('cluster','shutdownNode',{id:id},true).then(
 				() => {},
 				this.$root.genericError

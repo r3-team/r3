@@ -3,6 +3,7 @@ package pgIndex
 import (
 	"errors"
 	"fmt"
+	"r3/compatible"
 	"r3/db"
 	"r3/schema"
 	"r3/types"
@@ -61,11 +62,11 @@ func Get(relationId uuid.UUID) ([]types.PgIndex, error) {
 	pgIndexes := make([]types.PgIndex, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, no_duplicates, auto_fki, primary_key
+		SELECT id, attribute_id_dict, method, no_duplicates, auto_fki, primary_key
 		FROM app.pg_index
 		WHERE relation_id = $1
 		-- an order is required for hash comparisson (module changes)
-		ORDER BY auto_fki DESC, id ASC
+		ORDER BY primary_key DESC, auto_fki DESC, id ASC
 	`, relationId)
 	if err != nil {
 		return pgIndexes, err
@@ -74,7 +75,9 @@ func Get(relationId uuid.UUID) ([]types.PgIndex, error) {
 	for rows.Next() {
 		var pgi types.PgIndex
 
-		if err := rows.Scan(&pgi.Id, &pgi.NoDuplicates, &pgi.AutoFki, &pgi.PrimaryKey); err != nil {
+		if err := rows.Scan(&pgi.Id, &pgi.AttributeIdDict, &pgi.Method,
+			&pgi.NoDuplicates, &pgi.AutoFki, &pgi.PrimaryKey); err != nil {
+
 			return pgIndexes, err
 		}
 		pgi.RelationId = relationId
@@ -125,6 +128,7 @@ func SetAutoFkiForAttribute_tx(tx pgx.Tx, relationId uuid.UUID, attributeId uuid
 		Id:           uuid.Nil,
 		RelationId:   relationId,
 		AutoFki:      true,
+		Method:       "BTREE",
 		NoDuplicates: noDuplicates,
 		PrimaryKey:   false,
 		Attributes: []types.PgIndexAttribute{
@@ -141,6 +145,7 @@ func SetPrimaryKeyForAttribute_tx(tx pgx.Tx, relationId uuid.UUID, attributeId u
 		Id:           uuid.Nil,
 		RelationId:   relationId,
 		AutoFki:      false,
+		Method:       "BTREE",
 		NoDuplicates: true,
 		PrimaryKey:   true,
 		Attributes: []types.PgIndexAttribute{
@@ -158,6 +163,7 @@ func Set_tx(tx pgx.Tx, pgi types.PgIndex) error {
 		return errors.New("cannot create index without attributes")
 	}
 
+	var err error
 	known, err := schema.CheckCreateId_tx(tx, &pgi.Id, "pg_index", "id")
 	if err != nil {
 		return err
@@ -168,31 +174,37 @@ func Set_tx(tx pgx.Tx, pgi types.PgIndex) error {
 		return nil
 	}
 
-	// insert pg index reference
-	if _, err := tx.Exec(db.Ctx, `
-		INSERT INTO app.pg_index (
-			id, relation_id, no_duplicates, auto_fki, primary_key)
-		VALUES ($1,$2,$3,$4,$5)
-	`, pgi.Id, pgi.RelationId, pgi.NoDuplicates, pgi.AutoFki, pgi.PrimaryKey); err != nil {
-		return err
+	pgi.Method = compatible.FixPgIndexMethod(pgi.Method)
+
+	isGin := pgi.Method == "GIN"
+	isBtree := pgi.Method == "BTREE"
+
+	if !isGin && !isBtree {
+		return fmt.Errorf("unsupported index type '%s'", pgi.Method)
 	}
 
-	// work out PG index columns
-	indexCols := make([]string, 0)
+	if isGin && len(pgi.Attributes) != 1 {
+		// we currently use GIN exclusively with to_tsvector on a single column
+		// reason: doing any regular lookup (such as quick filters) checks attributes individually
+		//  the same with complex filters where each line is a single attribute
+		return fmt.Errorf("text index must have a single attribute")
+	}
+
+	if isGin {
+		// no unique constraints on GIN
+		pgi.NoDuplicates = false
+	}
+
+	// insert pg index references
+	if _, err := tx.Exec(db.Ctx, `
+		INSERT INTO app.pg_index (id, relation_id, attribute_id_dict,
+			method, no_duplicates, auto_fki, primary_key)
+		VALUES ($1,$2,$3,$4,$5,$6,$7)
+	`, pgi.Id, pgi.RelationId, pgi.AttributeIdDict, pgi.Method,
+		pgi.NoDuplicates, pgi.AutoFki, pgi.PrimaryKey); err != nil {
+		return err
+	}
 	for position, atr := range pgi.Attributes {
-
-		name, err := schema.GetAttributeNameById_tx(tx, atr.AttributeId)
-		if err != nil {
-			return err
-		}
-
-		order := "ASC"
-		if !atr.OrderAsc {
-			order = "DESC"
-		}
-		indexCols = append(indexCols, fmt.Sprintf(`"%s" %s`, name, order))
-
-		// insert index attribute references
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.pg_index_attribute (
 				pg_index_id, attribute_id, position, order_asc)
@@ -208,20 +220,59 @@ func Set_tx(tx pgx.Tx, pgi types.PgIndex) error {
 	}
 
 	// create index in module
-	moduleName, relationName, err := schema.GetRelationNamesById_tx(tx, pgi.RelationId)
+	indexDef := ""
+	if isBtree {
+		indexCols := make([]string, 0)
+		for _, atr := range pgi.Attributes {
+			name, err := schema.GetAttributeNameById_tx(tx, atr.AttributeId)
+			if err != nil {
+				return err
+			}
+			order := "ASC"
+			if !atr.OrderAsc {
+				order = "DESC"
+			}
+			indexCols = append(indexCols, fmt.Sprintf(`"%s" %s`, name, order))
+		}
+		indexDef = fmt.Sprintf("BTREE (%s)", strings.Join(indexCols, ","))
+	}
+
+	if isGin {
+		nameDict := ""
+		if pgi.AttributeIdDict.Valid {
+			nameDict, err = schema.GetAttributeNameById_tx(tx, pgi.AttributeIdDict.Bytes)
+			if err != nil {
+				return err
+			}
+		}
+
+		name, err := schema.GetAttributeNameById_tx(tx, pgi.Attributes[0].AttributeId)
+		if err != nil {
+			return err
+		}
+
+		if nameDict == "" {
+			indexDef = fmt.Sprintf("GIN (TO_TSVECTOR('simple'::REGCONFIG,%s))", name)
+		} else {
+			indexDef = fmt.Sprintf("GIN (TO_TSVECTOR(CASE WHEN %s IS NULL THEN 'simple'::REGCONFIG ELSE %s END,%s))",
+				nameDict, nameDict, name)
+		}
+
+	}
+
+	modName, relName, err := schema.GetRelationNamesById_tx(tx, pgi.RelationId)
 	if err != nil {
 		return err
 	}
 
-	options := "INDEX"
+	indexType := "INDEX"
 	if pgi.NoDuplicates {
-		options = "UNIQUE INDEX"
+		indexType = "UNIQUE INDEX"
 	}
 
 	_, err = tx.Exec(db.Ctx, fmt.Sprintf(`
-		CREATE %s "%s" ON "%s"."%s" (%s)
-	`, options, schema.GetPgIndexName(pgi.Id), moduleName, relationName,
-		strings.Join(indexCols, ",")))
+		CREATE %s "%s" ON "%s"."%s" USING %s
+	`, indexType, schema.GetPgIndexName(pgi.Id), modName, relName, indexDef))
 
 	return err
 }

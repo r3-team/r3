@@ -116,13 +116,14 @@ export function getAttributeValuesFromGetter(getter) {
 	return map;
 };
 
-export function getAttributeIcon(attribute,outsideIn) {
+export function getAttributeIcon(attribute,outsideIn,isNm) {
 	if(isAttributeString(attribute.content)) {
 		switch(attribute.contentUse) {
 			case 'default':  return 'text.png';       break;
 			case 'richtext': return 'text_rich.png';  break;
 			case 'textarea': return 'text_lines.png'; break;
 			case 'color':    return 'colors.png';     break;
+			case 'iframe':   return 'iframe.png';     break;
 		}
 	}
 	if(isAttributeInteger(attribute.content)) {
@@ -133,28 +134,34 @@ export function getAttributeIcon(attribute,outsideIn) {
 			default:         return 'numbers.png';       break;
 		}
 	}
-	if(isAttributeBoolean(attribute.content)) return 'bool.png';
-	if(isAttributeUuid(attribute.content))    return 'uuid.png';
-	if(isAttributeFloat(attribute.content))   return 'numbers_float.png';
-	if(isAttributeNumeric(attribute.content)) return 'numbers_decimal.png';
-	if(isAttributeFiles(attribute.content))   return 'files.png';
+	if(isAttributeBoolean(attribute.content))   return 'bool.png';
+	if(isAttributeUuid(attribute.content))      return 'uuid.png';
+	if(isAttributeFloat(attribute.content))     return 'numbers_float.png';
+	if(isAttributeNumeric(attribute.content))   return 'numbers_decimal.png';
+	if(isAttributeFiles(attribute.content))     return 'files.png';
+	if(isAttributeRegconfig(attribute.content)) return 'languages.png';
 	
 	if(isAttributeRelationship11(attribute.content))
 		return 'link1.png';
-	if(isAttributeRelationshipN1(attribute.content))
+	
+	if(isAttributeRelationshipN1(attribute.content)) {
+		if(isNm) return 'link4.png';
+		
 		return outsideIn ? 'link2.png' : 'link3.png';
+	}
 	
 	return 'noPic.png';
 };
 
-export function isAttributeBoolean(content) { return content === 'boolean'; };
-export function isAttributeDecimal(content) { return attributeContentNames.decimal.includes(content); };
-export function isAttributeFiles(content)   { return content === 'files'; };
-export function isAttributeFloat(content)   { return attributeContentNames.float.includes(content); };
-export function isAttributeInteger(content) { return attributeContentNames.integer.includes(content); };
-export function isAttributeNumeric(content) { return content === 'numeric'; };
-export function isAttributeString(content)  { return attributeContentNames.text.includes(content); };
-export function isAttributeUuid(content)    { return content === 'uuid'; };
+export function isAttributeBoolean(content)   { return content === 'boolean'; };
+export function isAttributeDecimal(content)   { return attributeContentNames.decimal.includes(content); };
+export function isAttributeFiles(content)     { return content === 'files'; };
+export function isAttributeFloat(content)     { return attributeContentNames.float.includes(content); };
+export function isAttributeInteger(content)   { return attributeContentNames.integer.includes(content); };
+export function isAttributeNumeric(content)   { return content === 'numeric'; };
+export function isAttributeRegconfig(content) { return content === 'regconfig'; };
+export function isAttributeString(content)    { return attributeContentNames.text.includes(content); };
+export function isAttributeUuid(content)      { return content === 'uuid'; };
 export function isAttributeRelationship(content)   { return attributeContentNames.relationship.includes(content); };
 export function isAttributeRelationship11(content) { return content === '1:1'; };
 export function isAttributeRelationshipN1(content) { return content === 'n:1'; };

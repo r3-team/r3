@@ -2,13 +2,12 @@ package repo
 
 import (
 	"bytes"
-	"crypto/tls"
 	"encoding/json"
 	"fmt"
 	"io"
 	"net/http"
 	"r3/config"
-	"time"
+	"r3/rest"
 )
 
 func getToken(url string, skipVerify bool) (string, error) {
@@ -29,24 +28,6 @@ func getToken(url string, skipVerify bool) (string, error) {
 	return res.Token, nil
 }
 
-func getHttpClient(skipVerify bool) http.Client {
-
-	tlsConfig := tls.Config{
-		PreferServerCipherSuites: true,
-	}
-	if skipVerify {
-		tlsConfig.InsecureSkipVerify = true
-	}
-	httpTransport := &http.Transport{
-		TLSHandshakeTimeout: 5 * time.Second,
-		TLSClientConfig:     &tlsConfig,
-	}
-	return http.Client{
-		Timeout:   time.Second * 30,
-		Transport: httpTransport,
-	}
-}
-
 func post(url string, reqIf interface{}, resIf interface{}, skipVerify bool) error {
 
 	reqJson, err := json.Marshal(reqIf)
@@ -60,7 +41,7 @@ func post(url string, reqIf interface{}, resIf interface{}, skipVerify bool) err
 	}
 	httpReq.Header.Set("User-Agent", "r3-application")
 
-	httpClient := getHttpClient(skipVerify)
+	httpClient := rest.GetHttpClient(skipVerify)
 	httpRes, err := httpClient.Do(httpReq)
 	if err != nil {
 		return err

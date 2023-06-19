@@ -32,32 +32,38 @@ let MyBuilderOpenFormInput = {
 		
 		<template v-if="formIsSet">
 			<tr>
-				<td>{{ capApp.popUp }}</td>
+				<td>{{ capApp.popUpType }}</td>
 				<td>
-					<my-bool
-						@update:modelValue="set('popUp',$event)"
-						:modelValue="openForm.popUp"
-						:readonly="readonly"
-					/>
+					<select v-model="popUpType" :disabled="readonly">
+						<option value="" :disabled="forcePopUp">
+							{{ capApp.option.none }}
+						</option>
+						<option value="float">
+							{{ capApp.option.float }}
+						</option>
+						<option value="inline" :disabled="!allowPopUpInline">
+							{{ capApp.option.inline }}
+						</option>
+					</select>
 				</td>
 			</tr>
-			<tr v-if="openForm.popUp">
-				<td>{{ capApp.maxHeight }}</td>
-				<td>
-					<input
-						@input="set('maxHeight',$event.target.value)"
-						:disabled="readonly"
-						:value="openForm.maxHeight"
-					/>
-				</td>
-			</tr>
-			<tr v-if="openForm.popUp">
+			<tr v-if="popUpType !== ''">
 				<td>{{ capApp.maxWidth }}</td>
 				<td>
 					<input
 						@input="set('maxWidth',$event.target.value)"
 						:disabled="readonly"
 						:value="openForm.maxWidth"
+					/>
+				</td>
+			</tr>
+			<tr v-if="popUpType === 'float'">
+				<td>{{ capApp.maxHeight }}</td>
+				<td>
+					<input
+						@input="set('maxHeight',$event.target.value)"
+						:disabled="readonly"
+						:value="openForm.maxHeight"
 					/>
 				</td>
 			</tr>
@@ -90,11 +96,8 @@ let MyBuilderOpenFormInput = {
 							:value="openForm.attributeIdApply !== null ? openForm.attributeIdApply : ''"
 						>
 							<option value="">-</option>
-							<option
-								v-for="a in targetAttributes"
-								:value="a.id"
-							>
-								{{ relationIdMap[a.relationId].name + '.' + a.name }}
+							<option v-for="ta in targetAttributes" :value="ta.atrId">
+								{{ ta.caption }}
 							</option>
 						</select>
 					</td>
@@ -105,6 +108,8 @@ let MyBuilderOpenFormInput = {
 	props:{
 		allowAllForms:   { type:Boolean, required:false, default:false },
 		allowNewRecords: { type:Boolean, required:false, default:false },
+		allowPopUpInline:{ type:Boolean, required:false, default:false },
+		forcePopUp:      { type:Boolean, required:false, default:false },
 		joinsIndexMap:   { type:Object,  required:false, default:function() { return {}; } },
 		module:          { type:Object,  required:true },
 		openForm:        { required:true },
@@ -113,63 +118,96 @@ let MyBuilderOpenFormInput = {
 	},
 	emits:['update:openForm'],
 	computed:{
-		// simple
-		formIsSet:function() { return this.openForm !== null && this.openForm.formIdOpen !== null; },
+		// inputs
+		popUpType:{
+			get()  { return this.openForm.popUpType === null ? '' : this.openForm.popUpType; },
+			set(v) { this.set('popUpType',v === '' ? null : v); }
+		},
 		
 		// options
-		targetAttributes:function() {
-			if(!this.formIsSet)
-				return [];
+		targetAttributes:(s) => {
+			if(!s.formIsSet) return [];
 			
 			// parse from which relation the record is applied, based on the chosen relation index
-			let recordRelationId = null;
-			for(let k in this.joinsIndexMap) {
-				
-				if(this.joinsIndexMap[k].index === this.openForm.relationIndex) {
-					recordRelationId = this.joinsIndexMap[k].relationId;
+			let relationIdRecord = null;
+			for(let k in s.joinsIndexMap) {
+				if(s.joinsIndexMap[k].index === s.openForm.relationIndex) {
+					relationIdRecord = s.joinsIndexMap[k].relationId;
 					break;
 				}
 			}
-			if(recordRelationId === null)
+			if(relationIdRecord === null)
 				return [];
 			
-			let form = this.formIdMap[this.openForm.formIdOpen];
-			let out  = [];
+			let form   = s.formIdMap[s.openForm.formIdOpen];
+			let out    = [];
+			let atrAdd = (join,atrId,atrIdNm) => {
+				let atr = s.attributeIdMap[atrId];
+				let cap = atrIdNm === null
+					? `${join} ${s.relationIdMap[atr.relationId].name}.${atr.name}`
+					: `${join} ${s.relationIdMap[atr.relationId].name}.${s.attributeIdMap[atrIdNm].name} -> ${atr.name}`;
+				
+				out.push({atrId:atrId,caption:cap});
+			};
 			
 			// collect fitting attributes
-			for(let i = 0, j = form.query.joins.length; i < j; i++) {
-				let r = this.relationIdMap[form.query.joins[i].relationId];
+			for(let join of form.query.joins) {
+				let rel = s.relationIdMap[join.relationId];
 				
 				// attributes on relation from target form, in relationship with record relation
-				for(let x = 0, y = r.attributes.length; x < y; x++) {
-					let a = r.attributes[x];
-				
-					if(!this.isAttributeRelationship(a.content))
-						continue;
-					
-					if(a.relationshipId === recordRelationId)
-						out.push(a);
+				for(let atr of rel.attributes) {
+					if(s.isAttributeRelationship(atr.content) && atr.relationshipId === relationIdRecord)
+						atrAdd(join.index,atr.id,null)
 				}
 				
 				// attributes on record relation, in relationship with relation from target form
-				for(let x = 0, y = this.relationIdMap[recordRelationId].attributes.length; x < y; x++) {
-					let a = this.relationIdMap[recordRelationId].attributes[x];
+				for(let atr of s.relationIdMap[relationIdRecord].attributes) {
+					if(s.isAttributeRelationship(atr.content) && atr.relationshipId === rel.id)
+						atrAdd(join.index,atr.id,null)
+				}
 				
-					if(!this.isAttributeRelationship(a.content))
+				// attributes on n:m relations
+				for(let relId in s.relationIdMap) {
+					let r = s.relationIdMap[relId];
+					
+					// only allow relations from own module or modules we declared as dependency
+					if(r.moduleId !== s.module.id && !s.module.dependsOn.includes(r.moduleId))
 						continue;
 					
-					if(a.relationshipId === r.id)
-						out.push(a);
+					// skip if record relation itself is n:m candidate
+					if(r.id === relationIdRecord)
+						continue;
+					
+					let atrToSource = null; // attribute pointing to relation of record to be applied
+					let atrToTarget = null; // attribute pointing to form join relation
+					
+					for(let atr of r.attributes) {
+						if(!s.isAttributeRelationship(atr.content))
+							continue;
+						
+						if(atr.relationshipId === relationIdRecord)
+							atrToSource = atr;
+						
+						if(atr.relationshipId === rel.id)
+							atrToTarget = atr;
+					}
+					
+					if(atrToSource !== null && atrToTarget !== null)
+						atrAdd(join.index,atrToSource.id,atrToTarget.id)
 				}
 			}
 			return out;
 		},
 		
+		// simple
+		formIsSet:(s) => s.openForm !== null && s.openForm.formIdOpen !== null,
+		
 		// stores
-		modules:      (s) => s.$store.getters['schema/modules'],
-		relationIdMap:(s) => s.$store.getters['schema/relationIdMap'],
-		formIdMap:    (s) => s.$store.getters['schema/formIdMap'],
-		capApp:       (s) => s.$store.getters.captions.builder.openFormInput
+		modules:       (s) => s.$store.getters['schema/modules'],
+		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
+		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		formIdMap:     (s) => s.$store.getters['schema/formIdMap'],
+		capApp:        (s) => s.$store.getters.captions.builder.openFormInput
 	},
 	methods:{
 		// externals
@@ -177,7 +215,7 @@ let MyBuilderOpenFormInput = {
 		getItemTitleRelation,
 		isAttributeRelationship,
 		
-		set:function(name,val) {
+		set(name,val) {
 			// clear if no form is opened
 			if(name === 'formIdOpen' && val === '')
 				return this.$emit('update:openForm',null);
@@ -190,14 +228,17 @@ let MyBuilderOpenFormInput = {
 					formIdOpen:null,
 					attributeIdApply:null,
 					relationIndex:-1,
-					popUp:false,
-					maxHeight:0,
-					maxWidth:0
+					popUpType:this.forcePopUp ? 'float' : null,
+					maxHeight:1000,
+					maxWidth:1200
 				};
 			
 			// set changed value
-			if(['relationIndex','maxHeight','maxWidth'].includes(name))
-				val = val !== '' ? parseInt(val) : -1;
+			if(['maxHeight','maxWidth'].includes(name))
+				val = val !== '' && !isNaN(val) ? parseInt(val) : 0;
+			
+			if(name === 'relationIndex')
+				val = val !== '' && !isNaN(val) ? parseInt(val) : -1;
 			
 			if(name === 'attributeIdApply' && val === '')
 				val = null;

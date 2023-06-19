@@ -1,7 +1,6 @@
 import MyBuilderCaption   from './builderCaption.js';
 import MyBuilderQuery     from './builderQuery.js';
 import {getDataFieldMap}  from '../shared/form.js';
-import {copyValueDialog}  from '../shared/generic.js';
 import {getJoinsIndexMap} from '../shared/query.js';
 import MyTabs             from '../tabs.js';
 import {
@@ -10,6 +9,10 @@ import {
 	getItemTitle,
 	getItemTitlePath
 } from '../shared/builder.js';
+import {
+	copyValueDialog,
+	textAddTab
+} from '../shared/generic.js';
 export {MyBuilderJsFunction as default};
 
 let MyBuilderJsFunction = {
@@ -80,7 +83,7 @@ let MyBuilderJsFunction = {
 					v-if="!showPreview"
 					v-model="codeFunction"
 					@click="insertEntity"
-					@keydown.tab.prevent="addTab"
+					@keydown.tab.prevent="codeFunction = textAddTab($event)"
 					:disabled="readonly"
 					:placeholder="capApp.code"
 				></textarea>
@@ -496,6 +499,7 @@ let MyBuilderJsFunction = {
 		getItemTitle,
 		getItemTitlePath,
 		getJoinsIndexMap,
+		textAddTab,
 		
 		// presentation
 		displayFieldName(fieldId) {
@@ -504,18 +508,6 @@ let MyBuilderJsFunction = {
 		},
 		
 		// actions
-		addTab(evt) {
-			let field    = evt.target;
-			let startPos = field.selectionStart;
-			let endPos   = field.selectionEnd;
-			
-			field.value = field.value.substring(0, startPos)
-				+ "\t"+ field.value.substring(endPos);
-			
-			field.selectionStart = startPos + 1;
-			field.selectionEnd   = startPos + 1;
-			this.codeFunction    = field.value;
-		},
 		openForm() {
 			this.$router.push('/builder/form/'+this.formId);
 		},

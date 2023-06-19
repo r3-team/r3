@@ -9,7 +9,7 @@ import (
 )
 
 var (
-	access_mx sync.Mutex
+	access_mx sync.RWMutex
 	attempts  int  = 100   // max allowed failed attempts before block
 	enabled   bool = false // enable bruteforce protection
 
@@ -30,8 +30,8 @@ func SetConfig() {
 
 // returns counts of tracked and blocked hosts
 func GetCounts() (int, int) {
-	access_mx.Lock()
-	defer access_mx.Unlock()
+	access_mx.RLock()
+	defer access_mx.RUnlock()
 	return len(hostMapTracked), len(hostMapBlocked)
 }
 
@@ -47,9 +47,8 @@ func Check(r *http.Request) bool {
 
 // like Check() but with host string instead of http.Request
 func CheckByHost(host string) bool {
-
-	access_mx.Lock()
-	defer access_mx.Unlock()
+	access_mx.RLock()
+	defer access_mx.RUnlock()
 
 	if !enabled {
 		return false
@@ -100,7 +99,6 @@ func BadAttemptByHost(host string) {
 }
 
 func ClearHostMap() error {
-
 	access_mx.Lock()
 	defer access_mx.Unlock()
 

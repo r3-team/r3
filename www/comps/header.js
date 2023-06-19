@@ -1,6 +1,7 @@
-import srcBase64Icon    from './shared/image.js';
-import {getColumnTitle} from './shared/column.js';
-import {formOpen}       from './shared/form.js';
+import srcBase64Icon         from './shared/image.js';
+import {getColumnTitle}      from './shared/column.js';
+import {formOpen}            from './shared/form.js';
+import {getCaptionForModule} from './shared/language.js';
 import {
 	getCollectionColumn,
 	getCollectionValues
@@ -16,8 +17,7 @@ let MyHeader = {
 		<div class="app-header-content" :style="styles">
 			<div ref="content" class="entries">
 				
-				<template v-if="!isMobile && isAdmin" >
-					
+				<template v-if="!isMobile && isAdmin && !pwaSingle" >
 					<router-link class="entry no-wrap clickable" to="/builder"
 						v-if="builderEnabled"
 						:title="capGen.button.openBuilder"
@@ -26,29 +26,30 @@ let MyHeader = {
 					</router-link>
 					
 					<router-link class="entry no-wrap clickable" to="/admin">
-						<img src="images/settings.png" />
+						<img src="images/serverCog.png" />
 					</router-link>
 				</template>
 				
 				<!-- home page -->
 				<router-link class="entry no-wrap clickable" to="/home">
 					<img src="images/home.png" />
+					<span v-if="!isMobile && pwaSingle">{{ capGen.home }}</span>
 				</router-link>
 				
-				<!-- mobile menu toggle -->
+				<!-- single module link (for mobile view) -->
 				<div class="entry no-wrap clickable" tabindex="0"
-					v-if="menuAvailable && isMobile && moduleActive !== false"
-					@click="$store.commit('isAtMenu',!isAtMenu)"
-					@keyup.enter.space="$store.commit('isAtMenu',!isAtMenu)"
-					:class="{ 'router-link-active':isAtMenu }"
+					v-if="moduleSingle !== false"
+					@click="clickSingleModuleLink"
+					@keyup.enter.space="clickSingleModuleLink"
+					:class="{ 'router-link-active':isAtMenu || moduleSingleActive }"
 				>
-					<img :src="srcBase64Icon(moduleActive.iconId,'images/module.png')" />
-					<span>{{ capGen.menu }}</span>
+					<img :src="srcBase64Icon(moduleSingle.iconId,'images/module.png')" />
+					<span>{{ moduleSingleCaption }}</span>
 				</div>
 				
 				<!-- modules -->
 				<div class="entry-wrap"
-					v-if="!isMobile"
+					v-if="!isMobile && !pwaSingle"
 					v-for="me in moduleEntries"
 					:key="me.id"
 				>
@@ -216,6 +217,9 @@ let MyHeader = {
 					if(!consumer.onMobile && s.isMobile)
 						continue;
 					
+					if(s.pwaModuleId !== null && collection.moduleId !== s.pwaModuleId)
+						continue;
+					
 					let value = s.getCollectionValues(
 						collection.id,
 						consumer.columnIdDisplay,
@@ -237,22 +241,29 @@ let MyHeader = {
 			}
 			return out;
 		},
-		moduleActive:(s) => {
-			if(s.$route.params.moduleName === '')
-				return false;
+		
+		// returns which module to show if regular navigation is disabled
+		moduleSingle:(s) => s.moduleIdLast !== null && s.isMobile
+			? s.moduleIdMap[s.moduleIdLast] : false,
+		moduleSingleActive:(s) => s.moduleSingle !== false && (
+			(typeof s.$route.params.moduleName      !== 'undefined' && s.$route.params.moduleName      === s.moduleSingle.name) ||
+			(typeof s.$route.params.moduleNameChild !== 'undefined' && s.$route.params.moduleNameChild === s.moduleSingle.name)
+		),
+		moduleSingleCaption:(s) => {
+			if(s.moduleSingleActive && s.isMobile)
+				return s.capGen.menu;
 			
-			if(s.$route.params.moduleNameChild !== '')
-				return s.moduleNameMap[s.$route.params.moduleNameChild];
-			
-			return s.moduleNameMap[s.$route.params.moduleName];
+			return s.moduleSingle === false
+				? '' : s.getCaptionForModule(s.moduleSingle.captions.moduleTitle,s.moduleSingle.name,s.moduleSingle);
 		},
 		
 		// simple
-		menuAvailable:(s) => typeof s.$route.meta.menu !== 'undefined',
-		styles:       (s) => s.settings.compact ? '' : `max-width:${s.settings.pageLimit}px;`,
+		pwaSingle:(s) => s.pwaModuleId !== null,
+		styles:   (s) => s.settings.compact ? '' : `max-width:${s.settings.pageLimit}px;`,
 		
 		// stores
 		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		moduleNameMap:  (s) => s.$store.getters['schema/moduleNameMap'],
 		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
@@ -265,6 +276,8 @@ let MyHeader = {
 		isAtMenu:       (s) => s.$store.getters.isAtMenu,
 		isMobile:       (s) => s.$store.getters.isMobile,
 		isNoAuth:       (s) => s.$store.getters.isNoAuth,
+		pwaModuleId:    (s) => s.$store.getters.pwaModuleId,
+		moduleIdLast:   (s) => s.$store.getters.moduleIdLast,
 		settings:       (s) => s.$store.getters.settings
 	},
 	created() {
@@ -279,6 +292,7 @@ let MyHeader = {
 	methods:{
 		// externals
 		formOpen,
+		getCaptionForModule,
 		getCollectionColumn,
 		getCollectionValues,
 		getColumnTitle,
@@ -320,8 +334,17 @@ let MyHeader = {
 		},
 		
 		// actions
+		clickSingleModuleLink() {
+			// module active in mobile mode: toggle menu
+			if(this.moduleSingleActive && this.isMobile)
+				return this.$store.commit('isAtMenu',!this.isAtMenu);
+			
+			// no active module in mobile mode: navigate to module
+			if(!this.moduleSingleActive && this.isMobile)
+				return this.$router.push(`/app/${this.moduleSingle.name}/${this.moduleSingle.name}`);
+		},
 		openFeedback() { this.$store.commit('isAtFeedback',true); },
-		pagePrev() { window.history.back(); },
-		pageNext() { window.history.forward(); }
+		pagePrev()     { window.history.back(); },
+		pageNext()     { window.history.forward(); }
 	}
 };

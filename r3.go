@@ -35,6 +35,7 @@ import (
 	"r3/handler/icon_upload"
 	"r3/handler/ics_download"
 	"r3/handler/license_upload"
+	"r3/handler/manifest_download"
 	"r3/handler/transfer_export"
 	"r3/handler/transfer_import"
 	"r3/handler/websocket"
@@ -384,6 +385,12 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
+	// initialize PWA domain cache
+	if err := cache.LoadPwaDomainMap(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to initialize PWA domain cache, %v", err))
+		return
+	}
+
 	// process token secret for future client authentication from database
 	if err := config.ProcessTokenSecret(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to process token secret, %v", err))
@@ -394,6 +401,12 @@ func (prg *program) execute(svc service.Service) {
 	if err := config.SetInstanceIdIfEmpty(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to set instance ID, %v", err))
 		return
+	}
+
+	// cache full text search dictionaries from the database
+	if err := cache.LoadSearchDictionaries(); err != nil {
+		// failure is not mission critical (in case of no access to DB system tables)
+		log.Error("server", "failed to read/update text search dictionaries", err)
 	}
 
 	// prepare image processing
@@ -431,6 +444,7 @@ func (prg *program) execute(svc service.Service) {
 	mux.HandleFunc("/icon/upload", icon_upload.Handler)
 	mux.HandleFunc("/ics/download/", ics_download.Handler)
 	mux.HandleFunc("/license/upload", license_upload.Handler)
+	mux.HandleFunc("/manifests/", manifest_download.Handler)
 	mux.HandleFunc("/websocket", websocket.Handler)
 	mux.HandleFunc("/export/", transfer_export.Handler)
 	mux.HandleFunc("/import", transfer_import.Handler)

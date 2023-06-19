@@ -130,11 +130,11 @@ let MyFormLog = {
 	},
 	emits:['close-log'],
 	watch:{
-		formLoading:function(v) {
+		formLoading(v) {
 			if(!v) this.get();
 		}
 	},
-	data:function() {
+	data() {
 		return {
 			loading:false,
 			logs:[],
@@ -173,7 +173,7 @@ let MyFormLog = {
 		settings:      (s) => s.$store.getters.settings,
 		token:         (s) => s.$store.getters['local/token']
 	},
-	mounted:function() {
+	mounted() {
 		this.get();
 	},
 	methods:{
@@ -189,7 +189,7 @@ let MyFormLog = {
 		isAttributeFiles,
 		
 		// presentation
-		displayFieldCaption:function(f) {
+		displayFieldCaption(f) {
 			if(typeof f.captions.fieldTitle[this.moduleLanguage] !== 'undefined')
 				return f.captions.fieldTitle[this.moduleLanguage];
 			
@@ -199,20 +199,20 @@ let MyFormLog = {
 				? atr.captions.attributeTitle[this.moduleLanguage]
 				: atr.name;
 		},
-		displayTitle:function(i,unixTime,name) {
+		displayTitle(i,unixTime,name) {
 			if(name === '') name = this.capApp.deletedUser;
 			let prefix = this.logsShown.includes(i) ? '\u2BC6' : '\u2BC8';
 			let format = [this.settings.dateFormat,'H:i:S'];
 			return `${prefix} ${this.getUnixFormat(unixTime,format.join(' '))} (${name})`;
 		},
-		isFiles:function(ia) {
+		isFiles(ia) {
 			let d = this.getDetailsFromIndexAttributeId(ia);
 			let a = this.attributeIdMap[d.attributeId];
 			return this.isAttributeFiles(a.content);
 		},
 		
 		// actions
-		toggleLog:function(i) {
+		toggleLog(i) {
 			const pos = this.logsShown.indexOf(i);
 			
 			if(pos === -1) this.logsShown.push(i);
@@ -221,7 +221,7 @@ let MyFormLog = {
 			this.loading = true;
 			this.releaseLoadingOnNextTick();
 		},
-		toggleAll:function() {
+		toggleAll() {
 			if(this.logsShown.length < this.logs.length) {
 				for(let i = this.logs.length - 1; i >= 0; i--) {
 					this.logsShown.push(i);
@@ -232,18 +232,18 @@ let MyFormLog = {
 			}
 			this.logsShown = [];
 		},
-		releaseLoadingOnNextTick:function() {
+		releaseLoadingOnNextTick() {
 			this.$nextTick(function() {
 				this.loading = false;
 			});
 		},
-		reset:function() {
+		reset() {
 			this.logs      = [];
 			this.logsShown = [];
 		},
 		
 		// backend calls
-		get:function() {
+		get() {
 			if(this.formLoading)
 				return;
 			

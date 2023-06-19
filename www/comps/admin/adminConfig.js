@@ -1,12 +1,8 @@
 import {getBuildFromVersion} from '../shared/generic.js';
-import {srcBase64}           from '../shared/image.js';
 export {MyAdminConfig as default};
 
 let MyAdminConfig = {
 	name:'my-admin-config',
-	components:{
-		'chrome-picker':VueColor.Chrome
-	},
 	template:`<div class="contentBox admin-config" v-if="ready">
 		<div class="top">
 			<div class="area">
@@ -62,14 +58,6 @@ let MyAdminConfig = {
 						<td><input v-model="configInput.publicHostName" /></td>
 					</tr>
 					<tr>
-						<td>{{ capApp.defaultLanguageCode }}</td>
-						<td>
-							<select v-model="configInput.defaultLanguageCode">
-								<option v-for="l in languageCodes" :value="l">{{ l }}</option>
-							</select>
-						</td>
-					</tr>
-					<tr>
 						<td>{{ capApp.productionMode }}</td>
 						<td>
 							<my-bool-string-number
@@ -87,125 +75,6 @@ let MyAdminConfig = {
 								v-model="configInput.builderMode"
 								@update:modelValue="informBuilderMode"
 								:readonly="configInput.productionMode === '1'"
-							/>
-						</td>
-					</tr>
-				</table>
-			</div>
-			
-			<!-- application -->
-			<div class="contentPart">
-				<div class="contentPartHeader">
-					<img class="icon" src="images/edit.png" />
-					<h1>{{ capApp.titleCustom }}</h1>
-				</div>
-				
-				<div v-if="!licenseValid" class="license-required">
-					{{ capGen.licenseRequired }}
-				</div>
-				
-				<table class="default-inputs">
-					<tr>
-						<td>{{ capApp.appName }}</td>
-						<td><input :disabled="!activated" v-model="configInput.appName" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.appNameShort }}</td>
-						<td><input :disabled="!activated" v-model="configInput.appNameShort" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.companyName }}</td>
-						<td><input :disabled="!activated" v-model="configInput.companyName" /></td>
-					</tr>
-					<tr>
-						<td>{{ capApp.companyColorLogin }}</td>
-						<td>
-							<div class="colorInputWrap">
-								<input v-model="configInput.companyColorLogin"
-									:disabled="!activated"
-									:placeholder="capApp.colorHint"
-								/>
-								<div class="preview clickable"
-									v-if="activated"
-									@click="showColorLogin = !showColorLogin"
-									:style="'background-color:#'+configInput.companyColorLogin"
-								></div>
-							</div>
-							
-							<chrome-picker
-								v-if="showColorLogin"
-								@update:modelValue="applyColor('login',$event)"
-								:disableAlpha="true"
-								:disableFields="true"
-								:modelValue="configInput.companyColorLogin"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.companyColorHeader }}</td>
-						<td>
-							<div class="colorInputWrap">
-								<input v-model="configInput.companyColorHeader"
-									:disabled="!activated"
-									:placeholder="capApp.colorHint"
-								/>
-								<div class="preview clickable"
-									v-if="activated"
-									@click="showColorHeader = !showColorHeader"
-									:style="'background-color:#'+configInput.companyColorHeader"
-								></div>
-							</div>
-							
-							<chrome-picker
-								v-if="showColorHeader"
-								@update:modelValue="applyColor('header',$event)"
-								:disableAlpha="true"
-								:disableFields="true"
-								:modelValue="configInput.companyColorHeader"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.companyWelcome }}</td>
-						<td>
-							<textarea class="companyWelcome"
-								v-model="configInput.companyWelcome"
-								:disabled="!activated"
-							></textarea>
-						</td>
-					</tr>
-					<tr>
-						<td>
-							{{ capApp.companyLogo }}
-							<br />
-							{{ capApp.companyLogoDesc }}
-						</td>
-						<td>
-							<img class="logo"
-								v-if="configInput.companyLogo !== ''"
-								:src="srcBase64(configInput.companyLogo)"
-							/>
-							<br />
-							<input type="file"
-								v-if="configInput.companyLogo === ''"
-								@change="applyLogo"
-								:disabled="!activated"
-							/>
-							<my-button image="cancel.png"
-								@trigger="configInput.companyLogo = ''"
-								v-if="configInput.companyLogo !== ''"
-								:cancel="true"
-								:caption="capApp.button.removeLogo"
-							/>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.companyLogoUrl }}</td>
-						<td>
-							<input
-								v-model="configInput.companyLogoUrl"
-								:disabled="!activated"
-								:placeholder="capApp.companyLogoUrlDesc"
 							/>
 						</td>
 					</tr>
@@ -446,6 +315,7 @@ let MyAdminConfig = {
 			</div>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
@@ -464,14 +334,16 @@ let MyAdminConfig = {
 			bruteforceCountBlocked:0,
 			bruteforceCountTracked:0,
 			publicKeyInputName:'',
-			publicKeyInputValue:'',
-			showColorHeader:false,
-			showColorLogin:false
+			publicKeyInputValue:''
 		};
 	},
 	mounted() {
 		this.get();
 		this.$store.commit('pageTitle',this.menuTitle);
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted() {
+		this.$emit('hotkeysRegister',[]);
 	},
 	computed:{
 		hasChanges:(s) => JSON.stringify(s.config) !== JSON.stringify(s.configInput),
@@ -493,39 +365,20 @@ let MyAdminConfig = {
 		},
 		
 		// stores
-		activated:    (s) => s.$store.getters['local/activated'],
-		appVersion:   (s) => s.$store.getters['local/appVersion'],
-		token:        (s) => s.$store.getters['local/token'],
-		languageCodes:(s) => s.$store.getters['schema/languageCodes'],
-		modules:      (s) => s.$store.getters['schema/modules'],
-		config:       (s) => s.$store.getters.config,
-		license:      (s) => s.$store.getters.license,
-		licenseDays:  (s) => s.$store.getters.licenseDays,
-		licenseValid: (s) => s.$store.getters.licenseValid,
-		capApp:       (s) => s.$store.getters.captions.admin.config,
-		capGen:       (s) => s.$store.getters.captions.generic
+		appVersion:  (s) => s.$store.getters['local/appVersion'],
+		token:       (s) => s.$store.getters['local/token'],
+		modules:     (s) => s.$store.getters['schema/modules'],
+		config:      (s) => s.$store.getters.config,
+		license:     (s) => s.$store.getters.license,
+		licenseDays: (s) => s.$store.getters.licenseDays,
+		licenseValid:(s) => s.$store.getters.licenseValid,
+		capApp:      (s) => s.$store.getters.captions.admin.config,
+		capGen:      (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
 		getBuildFromVersion,
-		srcBase64,
 		
-		applyColor(target,value) {
-			switch(target) {
-				case 'header': this.configInput.companyColorHeader = value.hex.substr(1); break;
-				case 'login':  this.configInput.companyColorLogin  = value.hex.substr(1); break;
-			}
-		},
-		applyLogo(evt) {
-			let file = evt.target.files[0];
-			
-			var reader = new FileReader();
-			reader.readAsDataURL(file);
-			reader.onload = () => this.configInput.companyLogo = reader.result.split(',')[1];
-			reader.onerror = function(error) {
-				that.$root.genericError(error);
-			};
-		},
 		informBuilderMode() {
 			if(this.configInput.builderMode === '0')
 				return;

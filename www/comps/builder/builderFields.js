@@ -40,6 +40,7 @@ let MyBuilderFields = {
 				:joinsIndexMap="joinsIndexMap"
 				:moduleId="moduleId"
 				:noMovement="noMovement"
+				:showColumnsAll="showColumnsAll"
 				:uiScale="uiScale"
 			/>
 		</template>
@@ -66,6 +67,7 @@ let MyBuilderFields = {
 		joinsIndexMap:  { type:Object,  required:false, default:() => {return {}} },
 		moduleId:       { type:String,  required:false, default:'' },
 		noMovement:     { type:Boolean, required:false, default:false },
+		showColumnsAll: { type:Boolean, required:false, default:false },
 		uiScale:        { type:Number,  required:false, default:100 }
 	},
 	emits:['column-id-show','field-counter-set','field-id-show','field-remove','field-move-store'],

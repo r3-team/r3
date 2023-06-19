@@ -2,12 +2,12 @@ import MyBuilderCaption from './builderCaption.js';
 import MyTabs           from '../tabs.js';
 import {
 	copyValueDialog,
-	getNilUuid
+	getNilUuid,
+	textAddTab
 } from '../shared/generic.js';
 import {
 	getDependentModules,
-	getFunctionHelp,
-	getPgFunctionTemplate
+	getFunctionHelp
 } from '../shared/builder.js';
 export {MyBuilderPgFunction as default};
 
@@ -184,7 +184,7 @@ let MyBuilderPgFunction = {
 					v-if="!showPreview"
 					v-model="codeFunction"
 					@click="insertEntity"
-					@keydown.tab.prevent="addTab"
+					@keydown.tab.prevent="codeFunction = textAddTab($event)"
 					:disabled="readonly"
 					:placeholder="capApp.code"
 				></textarea>
@@ -229,11 +229,6 @@ let MyBuilderPgFunction = {
 							:active="!readonly"
 							:caption="capApp.button.addOld"
 							:image="addOld ? 'checkbox1.png' : 'checkbox0.png'"
-						/>
-						<my-button image="refresh.png"
-							@trigger="codeFunction = getPgFunctionTemplate()"
-							:active="!readonly"
-							:caption="capApp.button.template"
 						/>
 					</div>
 					<br />
@@ -538,7 +533,7 @@ let MyBuilderPgFunction = {
 				'get_preset_record_id','get_public_hostname','get_role_ids',
 				'has_role','has_role_any','log_error','log_info','log_warning',
 				'mail_delete','mail_delete_after_attach','mail_get_next',
-				'mail_send','update_collection'
+				'mail_send','rest_call','update_collection'
 			],
 			showHolderFncInstance:false,
 			showHolderFncModule:false,
@@ -594,7 +589,7 @@ let MyBuilderPgFunction = {
 		getDependentModules,
 		getFunctionHelp,
 		getNilUuid,
-		getPgFunctionTemplate,
+		textAddTab,
 		
 		// presentation
 		radioIcon(entity,id) {
@@ -613,18 +608,6 @@ let MyBuilderPgFunction = {
 				intervalType:'days',
 				intervalValue:3
 			});
-		},
-		addTab(evt) {
-			let field    = evt.target;
-			let startPos = field.selectionStart;
-			let endPos   = field.selectionEnd;
-			
-			field.value = field.value.substring(0, startPos)
-				+ "\t"+ field.value.substring(endPos);
-			
-			field.selectionStart = startPos + 1;
-			field.selectionEnd   = startPos + 1;
-			this.codeFunction    = field.value;
 		},
 		insertEntity(evt) {
 			if(this.entityId === null)

@@ -16,6 +16,7 @@
 			"deleteSelected":"Ausgewählte löschen",
 			"download":"Herunterladen",
 			"edit":"Bearbeiten",
+			"editBulk":"Bearbeiten ({COUNT})",
 			"empty":"Leer",
 			"expert":"Erweitert",
 			"export":"Exportieren",
@@ -31,9 +32,11 @@
 			"paste":"Einfügen",
 			"refresh":"Neu laden",
 			"refreshHint":"Datensatz neu laden",
+			"remove":"Entfernen",
 			"reset":"Zurücksetzen",
 			"restore":"Wiederherstellen",
 			"save":"Speichern",
+			"saveBulk":"Speichern ({COUNT})",
 			"saveHint":"Änderungen speichern",
 			"saveNew":"Speichern+Neu",
 			"saveNewHint":"Änderungen speichern und neuen Datensatz erstellen",
@@ -79,6 +82,7 @@
 		"category":"Kategorie",
 		"comments":"Kommentare",
 		"content":"Inhalt",
+		"contextHelp":"Kontexthilfe",
 		"date":"Datum",
 		"description":"Beschreibung",
 		"details":"Details",
@@ -174,16 +178,13 @@
 		},
 		"config":{
 			"button":{
-				"apply":"Änderungen übernehmen",
-				"removeLogo":"Logo entfernen"
+				"apply":"Änderungen übernehmen"
 			},
 			"dialog":{
 				"builderMode":"Der Builder dient zum Erstellen oder Verändern von Anwendungen.<br /><br />Das Ändern von Anwendungen kann zum Datenverlust führen und sollte <b>NIEMALS</b> in produktiven Umgebungen getan werden.<br /><br />Um den Builder sicher zu nutzen, bitte eine dedizierte Instanz von REI3 verwenden; fertige und getestete Anwendungen können dann in ein Produktivsystem transferiert werden.<br /><br />Um mehr zu lernen, steht die <a href=\"https://rei3.de/en/docs/builder/\" target=\"_blank\">Builder-Dokumentation</a> zur Verfügung.",
 				"productionMode":"Der Wartungsmodus wird genutzt, um Anwendungen zu aktualisieren, installieren oder zu entfernen.<br /><br />Beim Aktivieren des Wartungsmodus werden <b>alle Benutzer ohne Adminrechte abgemeldet</b>.",
 				"pleaseRead":"Bitte vor dem Speichern lesen"
 			},
-			"appName":"Instanzname",
-			"appNameShort":"Seitentitel",
 			"appVersion":"Plattform-Version",
 			"bruteforceAttempts":"Host blocken nach Versuchen",
 			"bruteforceCountBlocked":"Blockierte Hosts",
@@ -191,21 +192,11 @@
 			"bruteforceProtection":"Bruteforce-Schutz aktivieren",
 			"bruteforceTitle":"Bruteforce-Schutz",
 			"builderMode":"Builder-Modus",
-			"colorHint":"Leer lassen für Standardwerte",
-			"companyColorHeader":"Titelfarbe (Hauptmenü)",
-			"companyColorLogin":"Titelfarbe (Anmeldung)",
-			"companyLogo":"Firmenlogo",
-			"companyLogoDesc":"(PNG-Datei, max. 64kb)",
-			"companyLogoUrl":"Firmenlogo-Link",
-			"companyLogoUrlDesc":"Beliebige, gültige URL",
-			"companyName":"Firmenname",
-			"companyWelcome":"Willkommenstext (Anmeldung)",
 			"dbTimeoutCsv":"Datenbank-Timeout: Stabelverarbeitung (CSV)",
 			"dbTimeoutDataRest":"Datenbank-Timeout: Datenanfragen (REST)",
 			"dbTimeoutDataWs":"Datenbank-Timeout: Datenanfragen (HTTP/WS)",
 			"dbTimeoutHint":"In Sekunden",
 			"dbTimeoutIcs":"Datenbank-Timeout: Kalender-Downloads (ICS)",
-			"defaultLanguageCode":"Standardsprache",
 			"icsDaysPost":"Einträge nach akt. Datum exkludieren (in Tagen)",
 			"icsDaysPre":"Einträge vor akt. Datum exkludieren (in Tagen)",
 			"icsDownload":"Kalender-Abonnements aktivieren",
@@ -229,7 +220,6 @@
 			"repoSkipVerify":"Nicht vertrauenswürdige Zertifikate zulassen",
 			"repoUrl":"Repository-URL",
 			"title":"Systemkonfiguration",
-			"titleCustom":"Anpassungen",
 			"titleGeneral":"Allgemein",
 			"titleIcs":"Kalender-Abonnements",
 			"titleLogins":"Anmeldungen",
@@ -242,6 +232,42 @@
 			"updateCheckNewer":"Cutting-Edge",
 			"updateCheckOlder":"Update verfügbar",
 			"updateCheckUnknown":"Unbekannt"
+		},
+		"customizing":{
+			"error":{
+				"fileTooLarge":"Datei ist zu groß, maximale Größe: {SIZE} KB."
+			},
+			"appName":"Instanzname",
+			"appNameHint":"Name der REI3-Instanz, wird angezeigt auf der Anmeldeseite.",
+			"appNameShort":"Kurzer Name",
+			"appNameShortHint":"Kurze Version des Instanznamens, wird als Seitentitel verwendet sowie als Beschriftung wenn REI3 als Progressive-Web-App (PWA) installiert wird.",
+			"colorHint":"Farbe als HEX, wie 3EA9B9",
+			"companyColorHeader":"Titelfarbe (Hauptmenü)",
+			"companyColorHeaderHint":"Definiert eine feste Farbe auf dem Header, Farben einzelner Anwendungen werden ignoriert.",
+			"companyColorLogin":"Titelfarbe (Anmeldung)",
+			"companyColorLoginHint":"Überschreibt die Standardfarbe auf der Anmeldemaske.",
+			"companyLogo":"Firmenlogo",
+			"companyLogoHint":"PNG-Datei, max. 64kb. Wird angezeigt auf der Anmelde- und Startseite.",
+			"companyLogoUrl":"Firmenlogo-Link",
+			"companyLogoUrlDesc":"Beliebige, gültige URL",
+			"companyLogoUrlHint":"Link, der geöffnet wird, wenn man auf das Firmenlogo klickt.",
+			"companyName":"Firmenname",
+			"companyNameHint":"Firmenname, wird angezeigt auf der Anmeldeseite.",
+			"companyWelcome":"Willkommenstext",
+			"companyWelcomeHint":"Ein kurzer Willkommenstext, wird angezeigt auf der Anmeldeseite. HTML kann für Textformatierung und für Links verwendet werden.",
+			"iconPwa1":"Icon, klein",
+			"iconPwa1Hint":"Bild, welches als Icon für die Progressive-Web-App genutzt wird. Muss eine PNG-Datei mit max. 128kb und genau 192x192 Pixel groß sein.",
+			"iconPwa2":"Icon, groß",
+			"iconPwa2Hint":"Bild, welches als Icon für die Progressive-Web-App genutzt wird. Muss eine PNG-Datei mit max. 128kb und genau 512x512 Pixel groß sein.",
+			"pwaDomain":"Direkter Zugriff auf Anwendungen",
+			"pwaDomainHint":"Nur die Subdomäne (bspw. 'my-app' von 'my-app.my-domain.com')",
+			"pwaDomainHint1":"Auf individuelle Anwendungen kann direkt zugegriffen und diese können auch einzelnd als PWAs auf Geräten installiert werden. Anwendungen haben dann ihre eigenen Startseiten, Icons und exklusive Navigation. Hierfür muss ein Subdomänen-DNS-Eintrag für jede Anwendung gesetzt sein, damit das REI3-System über verschiedene Domänen erreichbar ist. Zusätzlich wird ein Wildcard-Zertifikat benötigt, damit der REI3-Server korrekt auf HTTPS-Anfragen reagieren kann.<br /><br />Sobald DNS-Einträge und Wildcard-Zertifikat gesetzt sind, muss eine Subdomäne je gewünschter Anwendung hier eingetragen werden.",
+			"pwaDomainHint2":"Bitte sicherstellen, dass eine Subdomäne existiert, die hier nicht referenziert wird, damit das allgemeine REI3-System noch erreicht werden kann. Anderweitig ist kein Zugriff auf die Adminoberfläche möglich, da Subdomänen für Anwendungen nur Zugriff auf die jeweilige Anwendung selbst zulassen.",
+			"titleCaptions":"Beschriftungen",
+			"titleColors":"Farben",
+			"titleCss":"CSS-Regeln",
+			"titleLogos":"Logos",
+			"titlePwas":"Progressive-Web-Apps (PWAs)"
 		},
 		"files":{
 			"deleteDate":"Datei gelöscht",
@@ -296,14 +322,25 @@
 			"tlsVerify":"TLS überprüfen"
 		},
 		"license":{
+			"button":{
+				"delete":"Lizenzdatei entfernen"
+			},
+			"dialog":{
+				"delete":"Möchten Sie die Lizenzdatei wirklich entfernen? Um REI3 Professional erneut zu aktivieren, muss eine gültige Lizenzdatei eingespielt werden."
+			},
 			"active":"Installierte Lizenz",
 			"clientId":"Kunden-ID",
-			"licenseEmpty":"Keine",
+			"currentState":"Aktuelle Werte",
+			"extCommunity":"REI3 Community Forum",
+			"extLicense":"REI3 Professional",
+			"intro":"REI3 ist vollständig <a href=\"https://github.com/r3-team/r3\" target=\"_blank\">Open-Source</a> und kann kostenlos genutzt werden.<br /><br />Für Enterprise-Features oder -Support gibt es <b>REI3 Professional</b>. Preislich so gestaltet, dass es für Unternehmen jeder Größe bezahlbar sein sollte, ist es oft deutlich günstiger als vergleichbare Low-Code-Produkte am Markt.<br /><br />REI3 Professional-Kunden unterstützen nicht nur die kontinuierliche Weiterentwicklung, sondern können auch alle Features aktivieren und erhalten professionelle Unterstützung von Lean Softworks, dem primären Entwickler von REI3.",
+			"introMore":"Mehr Informationen:",
 			"licenseExpired":"Lizenz ist abgelaufen",
 			"licenseId":"Lizenz-ID",
-			"licenseValid":"Lizenz ist noch gültig für {COUNT} Tag(e)",
+			"loginCount":"Gleichzeitige Anmeldungen",
 			"registeredFor":"Registriert für",
-			"upload":"Lizenzdatei hochladen",
+			"untilDays":"Gültig für Tage",
+			"upload":"Lizenzdatei hochladen:",
 			"validUntil":"Gültig bis"
 		},
 		"login":{
@@ -388,8 +425,15 @@
 			"dialog":{
 				"imapWarn":"Bitte beachte, dass der IMAP-Konnektor E-Mails ladet und sie danach vom gewählten Postfach löscht. Er sollte nur mit einem dedizierten Postfach und nicht für den Zugriff auf persönliche E-Mail-Accounts verwendet werden."
 			},
+			"option":{
+				"authMethod":{
+					"login":"LOGIN (für O365 Legacy-SMTP)",
+					"plain":"PLAIN (Standard)"
+				}
+			},
 			"account":"E-Mail-Account",
 			"accounts":"E-Mail-Accounts",
+			"accountAuthMethod":"Auth-Methode",
 			"accountHost":"Hostname",
 			"accountMode":"Modus",
 			"accountNew":"Neuer Account",
@@ -489,6 +533,7 @@
 				"mailRetrieve":"E-Mails abholen",
 				"mailSend":"E-Mails versenden",
 				"repoCheck":"Aktualisieren des Repository",
+				"restExecute":"REST-Aufrufe durchführen",
 				"updateCheck":"Nach Plattform-Updates suchen"
 			},
 			"dateAttempt":"Letzter Start",
@@ -514,9 +559,10 @@
 		"navigationBackups":"Sicherungen",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"System",
+		"navigationCustom":"Anpassungen",
 		"navigationFiles":"Dateien",
 		"navigationLdaps":"LDAP-Anmeldungen",
-		"navigationLicense":"Lizenz",
+		"navigationLicense":"REI3 Professional",
 		"navigationLogins":"Anmeldungen",
 		"navigationLoginTemplates":"Anmeldevorlagen",
 		"navigationLogs":"Logs",
@@ -625,7 +671,9 @@
 				"decimal":"Nummer, dezimal",
 				"float":"Nummer, gleitkomma",
 				"files":"Dateien",
+				"iframe":"iframe",
 				"number":"Nummer, ganzzahl",
+				"regconfig":"Textsuche-Wörterbuch",
 				"relationship11":"Beziehung, eins-zu-eins (1:1)",
 				"relationshipN1":"Beziehung, viele-zu-eins (n:1)",
 				"relationshipActionsHintsOnUpdate":"Funktioniert genauso wie die Einstellung für \"Aktion bei Löschung\". Im Gegensatz zur Löschung wirkt diese Einstellung wenn der Primärschlüssel (\"id\") eines Datensatzes, auf den dieses Beziehungsattribut referenziert, geändert wird. Wird selten verwendet, da es nur wenige Gründe gibt, Primärschlüssel zu aktualisieren.",
@@ -643,7 +691,9 @@
 				"decimal":"Dezimalwerte, oft für Währungsbeträge verwendet.",
 				"files":"Eine oder mehrere Dateien. Abhängig von den Einstellungen für die maximale Anzahl/Größe von Dateien können Benutzer Dateien dauerhaft speichern. Mit der Client-Anwendung können Dateien lokal zur direkten Bearbeitung geöffnet werden.",
 				"float":"Zahlenwerte mit gleitenden Dezimalpunkt. Meistens für aufwändige Berechnungen genutzt.",
+				"iframe":"Ein URL-Wert, der genutzt wird, eine externe Ressource anzuzeigen wie z. B. eine Webseite.",
 				"number":"Zahlenwerte aus vollen Zahlen - wie bspw. Zähler, Prioritäten und Referenznummern.",
+				"regconfig":"Wörterbuch für einen Volltextsuchindex. Verfügbare Wörterbücher hängen vom Datenbanksystem ab (s. Postgres dictionaries). Beispiele: english, german, french, spanish, romanian. Der Wert 'simple' kann für eine weniger nützlich aber sprachunabhängige Suche verwendet werden.",
 				"relationship11":"Verbindet eine Relation mit einer anderen. Eins-zu-eins-Beziehungen (1:1) erlauben nur, dass nur ein einzelner Datensatz einer Relation auf denselben Datensatz einer anderen Relation verweist. Beispiele: Der Lehrer einer Klasse oder der Besitzer eines Autos.",
 				"relationshipN1":"Verbindet eine Relation mit einer anderen. Viele-zu-eins-Beziehungen (n:1) erlauben, dass mehrere Datensätze einer Relation auf denselben Datensatz einer anderen Relation verweisen. Beispiele: Schüler in einer Klasse oder Mitarbeiter einer Organisation.",
 				"richtext":"Mehrere Zeilen formatierten Textes. Nützlich für größere Artikel sowie Dokumentvorlagen für PDF- oder E-Mail-Erstellung. Kann Überschriften, Links, Tabellen, Bilder und mehr enthalten.",
@@ -704,6 +754,7 @@
 		},
 		"form":{
 			"button":{
+				"columnsAll":"Alle Spalten",
 				"layoutColumns":"{CNT} Spalten"
 			},
 			"chart":{
@@ -752,6 +803,10 @@
 					"slider":"Werteschieber",
 					"url":"URL"
 				},
+				"style":{
+					"bold":"fett",
+					"italic":"kursiv"
+				},
 				"effectField":"Feld",
 				"effectTab":"Tab",
 				"ganttStepsDays":"Tage",
@@ -782,16 +837,16 @@
 			"collectionIdDef":"Standardwert(e) aus Sammlung",
 			"collectionHint":"*Sammlung wird nur beeinflusst, wenn sie als Filterkriterium in der Datenabfrage genutzt wird.",
 			"collectionTitle":"Sammlung filtern",
-			"columnBatch":"Spaltenstapel",
-			"columnBatchNot":"nicht gestapelt",
-			"columnBatchHint":"Spalte ist Teil von Stapel {CNT}",
-			"columnBatchHintNot":"Spalte ist nicht gestapelt",
+			"columnBatch":"Spaltenstapel (Spalten hier ablegen um zu erweitern)",
+			"columnBatchDir":"Spaltenausrichtung (links-rechts, hoch-runter)",
+			"columnBatchOff":"Spalte vom Stapel entfernen",
 			"columnClipboard":"Zwischenablage",
 			"columnHeaderData":"Datenabfrage",
 			"columnLength":"Länge (Charakt.)",
 			"columnLength0":"kein Limit",
 			"columnSize":"Größe (Pixel)",
 			"columnSize0":"automatisch",
+			"columnStyles":"Style",
 			"columnTitle":"Title",
 			"columnWrap":"Textumbruch",
 			"copy":"Formular duplizieren",
@@ -842,7 +897,8 @@
 			"flexWrap":"Inhalte umbrechen",
 			"formTitle":"Formulartitel",
 			"gantt":"Gantt",
-			"ganttNotes":"Spaltenstapel 1 gruppiert Ergebnisse.",
+			"ganttBatch":"Gantt-Gruppe",
+			"ganttNotes":"Erster Spaltenstapel gruppiert Ergebnisse.",
 			"ganttSteps":"Gantt-Intervall",
 			"ganttStepsToggle":"Gantt-Intervall-Auswahl",
 			"groupBy":"Gruppieren",
@@ -860,12 +916,13 @@
 			"noDataActions":"Keine Datenaktionen",
 			"onMobile":"In mobiler Ansicht",
 			"openForm":"Formular öffnen",
+			"openFormBulk":"Formular öffnen<br />(Massenbearbeitung)",
 			"presetOpen":"Vord. Datensatz öffnen",
 			"readonly":"Lesend",
 			"required":"Benötigt",
 			"scale":"UI-Skalierung",
 			"sidebarField":"{NAME}: Feldeinstellungen",
-			"sidebarFieldColumns":"Spalten",
+			"sidebarFieldColumns":"Verfügbare Spalten",
 			"sidebarFieldColumnSettings":"Spalteneinstellungen",
 			"sidebarForm":"Formulareinstellungen",
 			"sql":"SQL-Vorschau",
@@ -956,8 +1013,9 @@
 				"log_warning":"instance.log_error(message TEXT, app_name TEXT DEFAULT NULL) => VOID<br /><br />Logged Warnmeldung. Falls der Anwendungsname aufgelöst werden kann, wird das Log damit assoziiert.",
 				"mail_delete":"instance.mail_delete(mail_id INTEGER) => INTEGER<br /><br />Löscht die spezifizierte E-Mail, inklusive Anhänge.",
 				"mail_delete_after_attach":"instance.mail_delete_after_attach(<blockquote>mail_id INTEGER,<br />attach_record_id INTEGER,<br />attach_attribute_id UUID</blockquote>) => INTEGER<br /><br />Markiert die E-Mail-Anhänge, zum Hinzufügen an das Dateiattribut eines spezifizierten Datensatzes; die E-Mail und Anhänge werden danach gelöscht.",
-				"mail_get_next":"instance.mail_get_next(account_name TEXT DEFAULT NULL) => instance.mail<br /><br />Liefert die nächste E-Mail vom Mail-Spooler; liefert NULL wenn keine E-Mail verfügbar ist. Falls ein Account-Name angegeben wird, werden nur E-Mails geliefert, die von diesem Account abgeholt worden sind.<br /><br />Der gelieferte Typ \"instance.mail\" besteht aus:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>Nachdem eine E-Mail verarbeitet worden ist, sollte diese gelöscht werden; entweder direkt (mail_delete) oder nachdem Anhänge gespeichert worden sind (mail_delete_after_attach).",
-				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Erzeugt eine ausgehende E-Mail für den Mail-Spooler. Optionale Parameter:<ul><li>Komma-getrennte Liste für TO/CC/BCC-Empfänger (einer davon muss gesetzt sein)</li><li>Name des sendenen Mail-Accounts (zufälliger Account wird verwendet, wenn nicht spezifiziert)</li><li>Dateiattribut und ID des Datensatzes, dessen Dateien an die E-Mail angehängt werden sollen</li></ul>",
+				"mail_get_next":"instance.mail_get_next(account_name TEXT DEFAULT NULL) => instance.mail<br /><br />Liefert die nächste eingegangene E-Mail von der Mail-Warteschlange; liefert NULL wenn keine E-Mail verfügbar ist. Falls ein Account-Name angegeben wird, werden nur E-Mails geliefert, die von diesem Account abgeholt worden sind.<br /><br />Der gelieferte Typ \"instance.mail\" besteht aus:<blockquote>id INTEGER,<br />from_list TEXT,<br />to_list TEXT,<br />cc_list TEXT,<br />subject TEXT,<br />body TEXT</blockquote>Nachdem eine E-Mail verarbeitet worden ist, sollte diese gelöscht werden; entweder direkt (mail_delete) oder nachdem Anhänge gespeichert worden sind (mail_delete_after_attach).",
+				"mail_send":"instance.mail_send(<blockquote>subject TEXT,<br />body TEXT,<br />to_list TEXT DEFAULT '',<br />cc_list TEXT DEFAULT '',<br />bcc_list TEXT DEFAULT '',<br />account_name TEXT DEFAULT NULL,<br />attach_record_id INTEGER DEFAULT NULL,<br />attach_attribute_id UUID DEFAULT NULL</blockquote>) => INTEGER<br /><br />Erzeugt eine ausgehende E-Mail in der Mail-Warteschlange. Optionale Parameter:<ul><li>Komma-getrennte Liste für TO/CC/BCC-Empfänger (einer davon muss gesetzt sein)</li><li>Name des sendenen Mail-Accounts (zufälliger Account wird verwendet, wenn nicht spezifiziert)</li><li>Dateiattribut und ID des Datensatzes, dessen Dateien an die E-Mail angehängt werden sollen</li></ul>",
+				"rest_call":"instance.rest_call(<blockquote>method TEXT,<br />url TEXT,<br />body TEXT,<br />headers JSONB DEFAULT NULL,<br />tls_skip_verify BOOLEAN DEFAULT FALSE,<br />callback_function_id UUID DEFAULT NULL,<br />callback_value TEXT DEFAULT NULL</blockquote>) => INTEGER<br /><br />Fügt einen HTTP-REST-Aufruf der internen Warteschlange zur sofortigen Ausführung hinzu. Unterstützte Methoden sind: DELETE, GET, PATCH, POST, PUT.<br /><br />URL kann Query-Parameter beinhalten, falls erforderlich.<br /><br />Headers müssen als JSONB definiert sein - jedes Schlüssel/Wert-Paar führt zu einem Header-Eintrag.<br /><br />Validitätsprüfung für TLS/SSL lässt sich deaktivieren, falls erforderlich.<br /><br />Falls die REST-Antwort verarbeitet werden muss, kann eine weitere Backend-Funktion als Callback definiert werden. Diese Callback-Funktion muss diese drei Argumente haben: INTEGER (für HTTP-Status-Code), TEXT (HTTP-Antwortkörper), TEXT (Callback-Wert).<br /><br />Falls ein 'Callback-Wert' in instance.rest_call(...) gesetzt ist, wird dieser der Callback-Funktion übergeben - dies ist nützlich, falls mehrere Aufrufe in einer bestimmten Reihenfolge ausgeführt werden müssen (wie bspw. eine Authentifizierung vor einem Datenaufruf).",
 				"update_collection":"instance.update_collection(collection_id, login_ids INTEGER[] DEFAULT ARRAY[]::INTEGER[]) => INTEGER<br /><br />Informiert verbundene Clients, die angegebene Sammlung zu aktualisieren. Wenn Anmelde-IDs mitgegeben worden sind, werden nur Clients informiert, die zu den jeweiligen Anmeldungen gehören."
 			},
 			"option":{
@@ -1074,6 +1132,8 @@
 			"exportStateOk":"Bereit",
 			"graphDependsOn":"Abhängig von: {COUNT}",
 			"iconHint":"Icons sind verfügbar, sobald sie dieser Anwendung hinzugefügt worden sind. Icons von Anwendungen, auf denen aufgebaut wird, können ebenfalls genutzt werden.",
+			"iconPwa":"Anwendungs-Icons",
+			"iconPwaHint":"Icons, welche die Anwendung repräsentieren. Beide Icons müssen PNG sein und eine spezifische Größe haben (s. Icon-Eingabefelder) - wenn diese nicht eingehalten werden, kann die Installation der PWA auf manchen Betriebssystemen fehlschlagen.",
 			"keyCreate":"Transfer - Neues Signierschlüsselpaar erzeugen",
 			"keyCreateInfo":"Stelle sicher, dass der private Schlüssel zu jeder Zeit sicher verwahrt wird. Der öffentliche Schlüssel muss in Zielinstanzen von REI3 importiert werden, bevor Anwendungen installiert werden können.",
 			"keyCreateLength":"Schlüssellänge auswählen",
@@ -1085,10 +1145,17 @@
 			"languagesHint":"Sprachen, in der diese Anwendung verfügbar ist.",
 			"nameHint":"Referenzname für diese Anwendung. Dieser Name muss in einem REI3-System einzigartig sein, deswegen kann ein Präfix basierend auf dem Organisationsnamen sinnvoll sein.",
 			"nameHolder":"work_scheduler, inventory_planner, ...",
+			"namePwa":"Anwendungstitel",
+			"namePwaHint":"Der volle Anwendungstitel, welcher in der Liste installierter Anwendungen zu sehen ist. Kann bis zu 60 Zeichen lang sein. Keine Übersetzung möglich.",
+			"namePwaShort":"Kurzer Titel",
+			"namePwaShortHint":"Eine kurze Version vom Anwendungstitel, wird normalerweise auf Homescreens mobiler Geräte als Icon-Beschriftung genutzt. Kann bis zu 12 Zeichen lang sein. Keine Übersetzung möglich.",
 			"parent":"Zugeordnet zu",
 			"parentHint":"Wenn eine Anwendung einer anderen Anwendung zugewiesen wird, wird sie in Menüs und Übersichten als deren Kind angezeigt - es gibt keine weitere funktionale Änderung. Anwendungen können nur anderen Anwendungen zugewiesen werden, auf denen sie aufbauen.",
 			"position":"Standardposition",
 			"positionHint":"Position der Anwendung in der Kopfzeile (kleinere zuerst). Kann von Systemadministratoren überschrieben werden.",
+			"pwa":"Progressive Web App (PWA)",
+			"pwaHint":"REI3-Anwendungen können auf Desktop-Computern sowie auf mobilen Geräten als Progressive Web Apps (PWA) über moderne Browser installiert werden. Sie werden bei den installierten Anwendungen aufgeführt, haben eigene Icons sowie Verknüpfungen und verhalten sich ähnlich zu nativen Anwendungen.",
+			"release":"Veröffentlichung",
 			"releaseBuild":"Anwendungsversion",
 			"releaseBuildApp":"Plattformversion",
 			"releaseDate":"Veröffentlichungsdatum",
@@ -1106,6 +1173,12 @@
 				"module":"<p>Bitte wählen Sie einen Namen für Ihre Anwendung. Dieser Name dient zur eindeutigen Identifizierung Ihrer Anwendung in einem REI3-System. Er ist nicht für Benutzer sichtbar.</p><h3>Beispiele:</h3><ul><li>shift_planner</li><li>inventory_flow</li><li>time_tracker</li></ul><p>Da der Anwendungsname eindeutig sein muss, kann ein nach Ihrer Organisation benannter Präfix sinnvoll sein. Falls Ihre Organisation bspw. \"Modern Fashion GmbH\" heißt, könnten Sie \"mfg\" als Präfix nutzen (also \"mfg_shift_planner\").</p>",
 				"relation":"<p>Ein Relationsname sollte darstellen, was in dieser gespeichert wird. Er muss in einer Anwendung einzigartig sein.</p><h3>Beispiele:</h3><ul><li>event</li><li>event_attendance</li><li>location</li><li>location_event</li></ul>"
 			},
+			"template":{
+				"mailsFromSpooler":"E-Mail-Verarbeitung (eingehend)",
+				"restAuthRequest":"REST-Authentifizierung (via JSON)",
+				"restAuthResponse":"REST-Authentifizierung, Antwortverarbeitung",
+				"restDataResponse":"REST-Datenaufruf, Antwortverarbeitung"
+			},
 			"api":"Neue API",
 			"collection":"Neue Sammlung",
 			"form":"Neues Formular",
@@ -1115,6 +1188,7 @@
 			"module":"Neue Anwendung",
 			"options":"Weitere Optionen",
 			"pgFunction":"Neue Backend-Funktion",
+			"pgFunctionTemplate":"Vorlage verwenden",
 			"pgFunctionTrigger":"Trigger",
 			"pgFunctionTriggerHint":"Macht aus dieser Backend-Funktion einen Trigger. Ein Trigger kann in einer Relation referenziert werden, um auf Datenbank-Ereignisse zu reagieren, wie z. B. wenn Datensätze erstellt, aktualisiert oder gelöscht werden. Diese Einstellung kann nachträglich nicht geändert werden.",
 			"relation":"Neue Relation",
@@ -1123,13 +1197,41 @@
 			"role":"Neue Rolle"
 		},
 		"openFormInput":{
+			"option":{
+				"float":"Schwebendes Fenster",
+				"inline":"Subformular im Feld",
+				"none":"Ganze Seite"
+			},
 			"attributeApply":"...um Wert auf Formular zu setzen",
 			"formIdOpen":"Formular",
 			"maxHeight":"Max. Höhe (px)",
 			"maxWidth":"Max. Breite (px)",
 			"newRecord":"Beim Erstellen neuer Datensätze",
-			"popUp":"Pop-up-Formular",
+			"popUpType":"Öffnen als",
 			"relationIndex":"Verwende Datensatz von Relation"
+		},
+		"pgIndex":{
+			"description":{
+				"BTREE":"Standardindex für schnelle Datenabfragen. Passt für fast alle Attributwerttypen, ausgenommen von Texten die mehr als ein paar Absätze haben.",
+				"GIN":"Textindex für schnelle Datenabfragen, selbst bei sehr großen Texten. Kann ein Wörterbuchattribut verwenden, um sprachspezifische Funktionen wie verwandte Wörter, Synonyme und mehr zu nutzen; ein Beispiel: Eine Suche nach 'Bücher' würde auch Ergebnisse für 'Buch' finden."
+			},
+			"dialog":{
+				"delete":"Bist du sicher, dass du diesen Index löschen möchtest?"
+			},
+			"method":{
+				"BTREE":"Standardindex",
+				"GIN":"Textindex"
+			},
+			"attributes":"Attribut(e)",
+			"attributesHint":"Attribut(e), die ein Index beinhaltet. Wenn mehrere genutzt werden, entscheidet die Reihenfolge, wann ein spezifischer Index für eine Abfrage genutzt wird. Textindexe erlauben aktuell nur jeweils 1 Attribut.",
+			"dictionary":"Wörterbuchattribut (optional)",
+			"dictionaryHint":"Falls genutzt, kann ein Textindex erweiterte Sprachfunktionen nutzen, um eine Textabfrage zu verbessern. Muss ein Attribut vom Wertetyp \"Testsuche-Wörterbuch\" sein.",
+			"noUpdate":"Bestehende Indexe können nicht verändert aber jederzeit ohne Risiko neu erstellt werden. Abhängig von der Datenmenge kann die Indexerstellung eine Weile dauern.",
+			"system":"Dieser Index wird vom System verwaltet und kann nicht direkt gelöscht werden.",
+			"title":"Index ansehen",
+			"titleNew":"Index erstellen",
+			"unique":"Einzigartig",
+			"uniqueHint":"Falls aktiviert, kann der gleiche Wert nicht zwei mal für das gesetzte Attribut existieren. Falls mehrere Attribute genutzt werden, kann der kombinierte Wert nur einmal existieren."
 		},
 		"pgTrigger":{
 			"dialog":{
@@ -1178,14 +1280,14 @@
 			"encryptionHint":"Relation unterstützt Ende-zu-Ende verschlüsselte Attributwerte.",
 			"execute":"Ausführen",
 			"external":"Referenzierende Beziehungen ({CNT})",
-			"fires":"Started",
+			"fires":"Startet",
 			"graph":"Beziehungsdiagramm",
 			"graphBase":"Basisrelation",
 			"indexes":"Indexe ({CNT})",
-			"indexAttributes":"Attribute",
-			"indexAutoFki":"Beziehung",
-			"indexCreate":"Attribut neuen Index hinzufügen",
-			"indexPrimaryKey":"Primärer Schlüssel",
+			"indexAutoFki":"Beziehungsindex",
+			"indexPrimaryKey":"Primärer Schlüssel-Index",
+			"indexSystem":"Systemindex (vom System verwaltet)",
+			"indexText":"Textindex",
 			"indexUnique":"Einzigartig",
 			"isDeferred":"DEFERRED",
 			"nameHint":"Referenzname für diese Relation. Muss einzigartig in dieser Anwendung sein.",
@@ -1413,6 +1515,9 @@
 		"whatIsSentPost":"Diese Daten helfen, Feedback zu verarbeiten. Es werden keine persönlichen Informationen gesendet. Wir nehmen Privatsphäre sehr ernst."
 	},
 	"filter":{
+		"dialog":{
+			"ftsHelp":"Eine Volltextsuche findet selbst in umfangreichen Texten schnell Übereinstimmungen anhand von Wörtern oder Ausdrücken. Anstatt nach bestimmten Zeichen zu suchen, werden bei der Volltextsuche Wörter zu ihren Wurzeln aufgeschlüsselt und mit einer Suchabfrage verglichen.<br /><br />Folgende Suchoptionen existieren:<ul><li>Spezifisches Wort</li><ul><li>Suche: <b>Eintrag</b></li><li>'Eintrag' findet Texte die vergleichbare Wörter zu 'Eintrag', 'Einträge' oder 'Eintragung' beinhalten.</li><li>Gültiges Ergebnis: 'Ich habe alle relevanten Einträge geprüft.'</li></ul><li>Alle Wörter</li><ul><li>Suche: <b>Kaffee kochen</b></li><li>'Kaffee kochen' findet Texte, die vergleichbare Wörter sowohl zu 'Kaffee' als auch zu 'kochen' beinhalten. Es wird kein Ergebnis für bspw. 'Kaffeekocher' gefunden, da 'Kaffeekocher' einen eigenen Wortstamm besitzt.</li><li>Gültiges Ergebnis: 'Die Maschine ist gefixt, guten Kaffee tut sie aber weiterhin nicht kochen.'</li></ul><li>Beliebige Wörter</li><ul><li>Suche: <b>Tee OR Kaffee</b></li><li>'Tee OR Kaffee' findet Texte, die Wörter beinhalten, die entweder vergleichbar sind mit 'Tee' oder mit 'Kaffee'.</li><li>Gültiges Ergebnis: 'Ohne Kaffee geht bei mir nix.'</li></ul><li>Ausgeschlossene Wörter</li><ul><li>Suche: <b>Tee -Kaffee</b></li><li>'Tee -Kaffee' findet Texte, die Wörter beinhalten, die nur mit 'Tee' aber nicht mit 'Kaffee' vergleichbar sind.</li><li>Gültiges Ergebnis: 'Ich trinke gerne Tee.'</li></ul><li>Gefolgte Wörter</li><ul><li>Suche: <b>\"Kaffee kochen\"</b></li><li>'\"Kaffee kochen\"' (in doppelten Anführungszeichen) findet Texte mit Wörtern vergleichbar mit 'Kaffee', gefolgt von Wörtern vergleichbar mit 'kochen'. Die Reihenfolge wird hierbei auch beachtet - Texte mit den gleichen Wörtern in umgedrehter Reihenfolge werden nicht gefunden.</li><li>Gültiges Ergebnis: 'Ich verbringe die Pause mit Kaffee kochen.'</li></ul></ul>"
+		},
 		"option":{
 			"connector":{
 				"AND":"UND",
@@ -1465,12 +1570,18 @@
 				"seconds":"Sek."
 			},
 			"operator":{
+				"arrContained":"ist beinhaltet in",
+				"arrContains":"beinhaltet",
+				"arrOverlap":"hat Überschneidung mit",
 				"eq":"gleich",
+				"eqAny":"ist inkludiert in",
+				"fts":"enthält (Volltextsuche)",
 				"le":"größer/gleich",
 				"lt":"größer",
 				"ilike":"enthält",
 				"like":"enthält (groß/klein)",
 				"ne":"ungleich",
+				"neAll":"ist nicht inkludiert in",
 				"not_ilike":"enthält nicht",
 				"not_like":"enthält nicht (groß/klein)",
 				"not_null":"nicht leer",
@@ -1496,6 +1607,9 @@
 		"operatorsText":"Text",
 		"queryAggregatorNull":"keine Aggregation",
 		"queryShow":"Sub-Query anzeigen",
+		"searchDictionaryHint":"Verwendetes Wörterbuch - sollte der Sucheingabe und den erwarteten Textergebnissen entsprechen. Weitere Wörterbücher können in den Benutzereinstellungen hinzugefügt werden.",
+		"searchDictionarySimple":"[Kein Wörterbuch]",
+		"searchDictionarySimpleHint":"Diese Option ist für wenn die erwarteten Textergebnisse kein Wörterbuch zugewiesen haben.",
 		"subQueryAttribute":"Attribut",
 		"subQueryAggregator":"Aggregieren",
 		"valueHint":"Text oder Zahlenwert"
@@ -1509,6 +1623,8 @@
 			"logHint":"Änderungshistorie anzeigen"
 		},
 		"dialog":{
+			"bulkEncrypted":"Massenaktualisierung für verschlüsselte Daten wird aktuell nicht unterstützt.",
+			"bulkMultiple":"Massenaktualisierung mit mehreren Relationen wird aktuell nicht unterstützt.",
 			"close":"Es existieren ungespeicherte Änderungen.<br /><br />Möchtest du trotzdem das Formular schließen?",
 			"delete":"Bist du sicher, dass du diesen Datensatz <b>permanent</b> löschen möchtest?",
 			"encrypted":"Der Feldinhalt wird auf deinem System verschlüsselt bevor er zum Server geschickt wird.",
@@ -1524,6 +1640,7 @@
 			"recordValueCopied":"In die Zwischenablage kopiert",
 			"recordUpdated":"Datensatz aktualisiert"
 		},
+		"bulkTouched":"Wert wird aktualisiert",
 		"invalidInputs":"Eingaben prüfen!",
 		"noAccess":"Kein Zugriff"
 	},
@@ -1587,6 +1704,9 @@
 			"fileSize":"Dateigröße",
 			"tooLarge":"Datei \"{NAME}\" kann nicht hochgeladen werden, maximal erlaubte Größe ist {SIZE}.",
 			"unsaved":"(ungespeichert)"
+		},
+		"iframe":{
+			"empty":"Keine URL gesetzt - nichts anzuzeigen"
 		}
 	},
 	"list":{
@@ -1633,7 +1753,6 @@
 		"csvTimezone":"Zeitzone",
 		"csvTotalLimit":"Zeilenanzahl (0 = alle)",
 		"fetching":"Daten werden geladen...",
-		"filtersExpert":"Expertenfilter",
 		"inputHintCreate":"Neuen Datensatz anlegen",
 		"inputHintOpen":"Datensatz öffnen",
 		"inputHintRemove":"Datensatz entfernen",
@@ -1659,6 +1778,9 @@
 		},
 		"button":{
 			"logout":"Abmelden"
+		},
+		"dialog":{
+			"searchDictionary":"Dieses System bietet eine Volltextsuche. Wo Volltextsuchen verfügbar sind, können selbst sehr große Texte schnell gefunden werden, mit erweiterten Suchfunktionen wie der Vergleich mit Synonymen oder Wortstämmen.<br /><br />\"Wörterbücher für Volltextsuchen\" lassen das System wissen, in welchen Sprachen ein Benutzer arbeitet, damit sprachspezifische Funktionen genutzt werden können."
 		},
 		"encryption":{
 			"button":{
@@ -1753,13 +1875,15 @@
 		"pageLimit":"Max. Seitenbreite",
 		"pageTitle":"Einstellungen",
 		"pattern":"Hintergrundmuster",
+		"searchDictionaries":"Wörterbücher für Volltextsuche",
+		"searchDictionaryNew":"Wörterbuch hinzufügen",
 		"spacing":"Abstände",
 		"sundayFirstDow":"Sonntag ist 1. Wochentag",
 		"tabRemember":"Zuletzt genutzten Tab öffnen",
 		"titleAccount":"Konto",
-		"titleDisplay":"Anzeige",
 		"titleEncryption":"Ende-zu-Ende-Verschlüsselung",
 		"titleFixedTokens":"Geräte",
+		"titleGeneral":"Allgemein",
 		"titleTheme":"Darstellung",
 		"warnUnsaved":"Warnung bei ungespeicherten Änderungen"
 	}

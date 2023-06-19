@@ -15,7 +15,7 @@ let MyAdminFiles = {
 		<div class="top lower">
 			<div class="area">
 				<my-button image="save.png"
-					@trigger="setConfig"
+					@trigger="set"
 					:active="hasChanged"
 					:caption="capGen.button.save"
 				/>
@@ -108,19 +108,24 @@ let MyAdminFiles = {
 			</table>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			attributeIdMapDeleted:{},
 			attributeIdsShowDeleted:[],
 			configInput:{}
 		};
 	},
-	mounted:function() {
+	mounted() {
 		this.reset();
 		this.$store.commit('pageTitle',this.menuTitle);
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted() {
+		this.$emit('hotkeysRegister',[]);
 	},
 	computed:{
 		// simple
@@ -181,7 +186,7 @@ let MyAdminFiles = {
 				this.$root.genericError
 			);
 		},
-		setConfig() {
+		set() {
 			ws.send('config','set',this.configInput,true).then(
 				() => {},
 				this.$root.genericError

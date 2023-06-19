@@ -46,7 +46,11 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 	}
 
 	// drop relation
-	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`DROP TABLE "%s"."%s"`,
+	// CASCADE is relevant if relation is deleted together with other elements during transfer (import)
+	// issue can occur if deletion order is wrong (relation deleted before referencing relationship attribute)
+	// CASCADE removes the foreign key from the affected attribute - then either the attribute or its relation is deleted afterwards during the transfer
+	// invalid CASCADE is blocked by the system as referenced relations cannot be deleted in the first place
+	if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`DROP TABLE "%s"."%s" CASCADE`,
 		modName, relName)); err != nil {
 
 		return err

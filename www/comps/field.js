@@ -3,8 +3,10 @@ import MyChart                from './chart.js';
 import MyGantt                from './gantt.js';
 import MyInputDate            from './inputDate.js';
 import MyInputFiles           from './inputFiles.js';
+import MyInputIframe          from './inputIframe.js';
 import MyInputLogin           from './inputLogin.js';
 import MyInputRichtext        from './inputRichtext.js';
+import MyInputSelect          from './inputSelect.js';
 import MyInputUuid            from './inputUuid.js';
 import MyList                 from './list.js';
 import {hasAccessToAttribute} from './shared/access.js';
@@ -20,6 +22,7 @@ import {
 } from './shared/field.js';
 import {
 	getFlexStyle,
+	getFormPopUpConfig,
 	getInputFieldName,
 	setGetterArgs
 } from './shared/form.js';
@@ -34,6 +37,7 @@ import {
 	isAttributeFiles,
 	isAttributeInteger,
 	isAttributeRelationship,
+	isAttributeRegconfig,
 	isAttributeString,
 	isAttributeUuid
 } from './shared/attribute.js';
@@ -48,8 +52,10 @@ let MyField = {
 		MyGantt,
 		MyInputDate,
 		MyInputFiles,
+		MyInputIframe,
 		MyInputLogin,
 		MyInputRichtext,
+		MyInputSelect,
 		MyInputUuid,
 		MyList
 	},
@@ -94,11 +100,32 @@ let MyField = {
 						:type="!isPassword || showPassword ? 'text' : 'password'"
 					/>
 					
+					<!-- iframe input -->
+					<my-input-iframe
+						v-if="isIframe"
+						v-model="value"
+						@copyToClipboard="copyToClipboard"
+						:clipboard="isClipboard"
+						:readonly="isReadonly"
+					/>
+					
 					<!-- UUID input -->
 					<my-input-uuid
 						v-if="isUuid"
 						v-model="value"
 						:readonly="isReadonly"
+					/>
+					
+					<!-- regconfig input -->
+					<my-input-select
+						v-if="isRegconfig"
+						@updated-text-input="regconfigInput = $event"
+						@update:selected="value = $event;regconfigInput = ''"
+						:inputTextSet="value"
+						:nakedIcons="true"
+						:options="regconfigOptions"
+						:placeholder="!focused && !isCleanUi ? caption : capGen.threeDots"
+						:selected="value"
 					/>
 					
 					<!-- password show action -->
@@ -240,7 +267,7 @@ let MyField = {
 						v-if="isRelationship"
 						@blurred="blur"
 						@focused="focus"
-						@open-form="(...args) => openForm(args[0],[],args[1])"
+						@open-form="(...args) => openForm(args[0],[],args[1],null)"
 						@record-selected="relationshipRecordSelected"
 						@record-removed="relationshipRecordRemoved"
 						@records-selected-init="$emit('set-value-init',fieldAttributeId,$event,true,true)"
@@ -273,7 +300,7 @@ let MyField = {
 					
 					<!-- copy to clipboard action -->
 					<my-button image="copyClipboard.png"
-						v-if="isClipboard && !isFiles"
+						v-if="isClipboard && !isFiles && !isIframe"
 						@trigger="copyToClipboard"
 						:active="value !== null"
 						:captionTitle="capGen.button.copyClipboard"
@@ -285,6 +312,11 @@ let MyField = {
 			<!-- helper text -->
 			<div class="captionSub" v-if="captionHelp !== '' && captionError === ''">
 				{{ captionHelp }}
+			</div>
+			
+			<!-- bulk notice -->
+			<div class="captionSub" v-if="isBulkUpdate && !notTouched">
+				{{ capApp.bulkTouched }}
 			</div>
 			
 			<!-- error text -->
@@ -316,11 +348,13 @@ let MyField = {
 		<my-list
 			v-if="isList"
 			@clipboard="$emit('clipboard')"
-			@open-form="(...args) => openForm(args[0],[],args[1])"
+			@close-inline="closeInline"
+			@open-form="(...args) => openForm(args[0],[],args[1],null)"
+			@open-form-bulk="(...args) => openForm(args[0],[],args[1],'bulk')"
 			@record-count-change="$emit('set-counter',field.id,$event)"
-			@record-selected="(...args) => openForm(args[0],[],args[1])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
+			:allowBulk="field.openFormBulk !== null"
 			:allowPaging="field.query.fixedLimit === 0"
 			:autoRenew="field.autoRenew"
 			:choices="choicesProcessed"
@@ -334,10 +368,11 @@ let MyField = {
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
 			:iconId="iconId ? iconId : null"
-			:layout="field.layout"
-			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 			:isHidden="isHidden"
 			:isSingleField="isAloneInForm || isAloneInTab"
+			:layout="field.layout"
+			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
+			:popUpFormInline="popUpFormInline"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
 			:usesPageHistory="isAloneInForm && !formIsPopUp"
@@ -346,9 +381,9 @@ let MyField = {
 		<!-- calendar -->
 		<my-calendar
 			v-if="isCalendar && !field.gantt"
-			@open-form="(...args) => openForm(args[0],args[1],args[2])"
+			@close-inline="closeInline"
+			@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
 			@record-count-change="$emit('set-counter',field.id,$event)"
-			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
 			:attributeIdColor="field.attributeIdColor"
@@ -368,6 +403,7 @@ let MyField = {
 			:indexDate1="field.indexDate1"
 			:isHidden="isHidden"
 			:isSingleField="isAloneInForm || isAloneInTab"
+			:popUpFormInline="popUpFormInline"
 			:query="field.query"
 			:rowSelect="field.openForm !== null"
 			:usesPageHistory="isAloneInForm && !formIsPopUp"
@@ -376,9 +412,9 @@ let MyField = {
 		<!-- gantt -->
 		<my-gantt
 			v-if="isCalendar && field.gantt"
-			@open-form="(...args) => openForm(args[0],args[1],args[2])"
+			@close-inline="closeInline"
+			@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
 			@record-count-change="$emit('set-counter',field.id,$event)"
-			@record-selected="(...args) => openForm(args[0],args[1],args[2])"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
 			:attributeIdColor="field.attributeIdColor"
@@ -399,6 +435,7 @@ let MyField = {
 			:indexDate1="field.indexDate1"
 			:isHidden="isHidden"
 			:isSingleField="isAloneInForm || isAloneInTab"
+			:popUpFormInline="popUpFormInline"
 			:rowSelect="field.openForm !== null"
 			:stepTypeDefault="field.ganttSteps"
 			:stepTypeToggle="field.ganttStepsToggle"
@@ -451,14 +488,17 @@ let MyField = {
 				<my-field flexDirParent="column" :ref="'tabField_'+f.id"
 					v-for="f in t.fields"
 					@clipboard="$emit('clipboard')"
+					@close-inline="$emit('close-inline')"
 					@execute-function="$emit('execute-function',$event)"
 					@hotkey="$emit('hotkey',$event)"
 					@open-form="(...args) => $emit('open-form',...args)"
 					@set-counter="(...args) => setTabCounter(i,args[0],args[1])"
 					@set-form-args="(...args) => $emit('set-form-args',...args)"
+					@set-touched="(...args) => $emit('set-touched',...args)"
 					@set-valid="(...args) => $emit('set-valid',...args)"
 					@set-value="(...args) => $emit('set-value',...args)"
 					@set-value-init="(...args) => $emit('set-value-init',...args)"
+					:isBulkUpdate="isBulkUpdate"
 					:dataFieldMap="dataFieldMap"
 					:entityIdMapState="entityIdMapState"
 					:field="f"
@@ -485,14 +525,17 @@ let MyField = {
 			v-if="isContainer"
 			v-for="f in field.fields"
 			@clipboard="$emit('clipboard')"
+			@close-inline="$emit('close-inline')"
 			@execute-function="$emit('execute-function',$event)"
 			@hotkey="$emit('hotkey',$event)"
 			@open-form="(...args) => $emit('open-form',...args)"
 			@set-counter="(...args) => $emit('set-counter',...args)"
 			@set-form-args="(...args) => $emit('set-form-args',...args)"
+			@set-touched="(...args) => $emit('set-touched',...args)"
 			@set-valid="(...args) => $emit('set-valid',...args)"
 			@set-value="(...args) => $emit('set-value',...args)"
 			@set-value-init="(...args) => $emit('set-value-init',...args)"
+			:isBulkUpdate="isBulkUpdate"
 			:dataFieldMap="dataFieldMap"
 			:entityIdMapState="entityIdMapState"
 			:field="f"
@@ -525,22 +568,26 @@ let MyField = {
 		formLoading:      { type:Boolean, required:true },
 		formReadonly:     { type:Boolean, required:true }, // form is read only, disable all inputs
 		flexDirParent:    { type:String,  required:true }, // flex direction (row/column) of parent
-		joinsIndexMap:    { type:Object,  required:true },
 		isAloneInForm:    { type:Boolean, required:true }, // parent form contains only this field
 		isAloneInTab:     { type:Boolean, required:false, default:false }, // only field in a tab
+		isBulkUpdate:     { type:Boolean, required:false, default:false }, // form is in bulk update mode
 		isHiddenInParent: { type:Boolean, required:false, default:false }, // field is hidden in parent (tab/container)
+		joinsIndexMap:    { type:Object,  required:true },
 		logViewer:        { type:Boolean, required:false, default:false }, // is part of log viewer
 		values:           { type:Object,  required:true }
 	},
 	emits:[
-		'clipboard','execute-function','hotkey','open-form','set-form-args',
-		'set-counter','set-valid','set-value','set-value-init'
+		'clipboard','close-inline','execute-function','hotkey','open-form',
+		'set-form-args','set-counter','set-touched','set-valid','set-value',
+		'set-value-init'
 	],
 	data() {
 		return {
 			collectionIdMapIndexes:{},    // selected record indexes of collection, used to filter with
 			focused:false,
 			notTouched:true,              // data field was not touched by user
+			popUpFormInline:null,         // inline form for some field types (list)
+			regconfigInput:'',
 			showColorPickerInput:false,   // for color picker fields
 			showPassword:false,           // for password fields
 			tabIndexFieldIdMapCounter:{}, // tabs only: counter (by tab index + field ID) of child values (like combined list row counts)
@@ -661,23 +708,18 @@ let MyField = {
 			? s.field.captions.fieldHelp[s.moduleLanguage] : '',
 		domClass:(s) => {
 			let out = [];
-			
-			if(s.isHidden)
-				out.push('hidden');
+			if(s.isHidden)   out.push('hidden');
+			if(s.isReadonly) out.push('readonly');
+			if(s.isIframe)   out.push('iframe');
+			if(s.isRichtext) out.push('richtext');
 			
 			if(s.isContainer) {
 				out.push('container');
 				out.push(s.field.direction);
 			}
 			
-			if(s.isReadonly)
-				out.push('readonly');
-			
 			if(s.isTextarea || s.isRichtext || s.isFiles)
 				out.push('top-aligned');
-			
-			if(s.isRichtext)
-				out.push('richtext');
 			
 			return out;
 		},
@@ -737,6 +779,14 @@ let MyField = {
 			}
 			return false;
 		},
+		regconfigOptions:(s) => {
+			let out = [];
+			for(let d of s.searchDictionaries) {
+				if((s.regconfigInput === '' || d.startsWith(s.regconfigInput)) && d !== 'simple' && s.value !== d)
+					out.push({id:d,name:d});
+			}
+			return out;
+		},
 		relationshipRecordIds:(s) => {
 			if(!s.isData || s.value === null) return [];
 			if(!s.isRelationship1N)           return [s.value];
@@ -765,6 +815,7 @@ let MyField = {
 				if(!s.inputCanWrite) state = 'readonly';
 				
 				if(s.inputCanWrite                          // can write
+					&& !s.isBulkUpdate                      // bulk update is always optional
 					&& !s.attribute.nullable                // value not optional
 					&& !s.isRelationship1N                  // not 0...n partners
 					&& (!s.isNew || s.attribute.def === '') // existing record or new one with no defaults
@@ -891,11 +942,13 @@ let MyField = {
 		isLineInput:(s) => s.isData
 			&& !s.isBoolean
 			&& !s.isColor
-			&& !s.isFiles
 			&& !s.isDateInput
+			&& !s.isFiles
+			&& !s.isIframe
 			&& !s.isLogin
 			&& !s.isSlider
 			&& !s.isTextarea
+			&& !s.isRegconfig
 			&& !s.isRelationship
 			&& !s.isRichtext
 			&& !s.isUuid,
@@ -944,7 +997,7 @@ let MyField = {
 		customErr:  (s) => typeof s.fieldIdMapError[s.field.id] !== 'undefined'
 			&& s.fieldIdMapError[s.field.id] !== null ? s.fieldIdMapError[s.field.id] : null,
 		hasCaption: (s) => !s.isAloneInTab && (s.focused || s.value !== null || s.isCleanUi || s.isBoolean
-			|| s.isDateInput || s.isSlider || s.isRichtext || s.isCategory || s.isRelationship || s.isFiles || s.isUuid),
+			|| s.isDateInput || s.isSlider || s.isRichtext || s.isCategory || s.isRelationship || s.isFiles || s.isIframe || s.isUuid),
 		isCleanUi:  (s) => s.settings.fieldClean,
 		inputRegex: (s) => !s.isData || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
@@ -983,8 +1036,10 @@ let MyField = {
 		isDateRange:     (s) => s.isDateInput && s.field.attributeIdAlt !== null,
 		isDecimal:       (s) => s.isData && s.isAttributeDecimal(s.attribute.content),
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
+		isIframe:        (s) => s.isData && s.attribute.contentUse === 'iframe',
 		isInteger:       (s) => s.isData && s.isAttributeInteger(s.attribute.content),
 		isQuery:         (s) => s.isCalendar || s.isChart || s.isList || s.isRelationship,
+		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.attribute.content),
 		isRichtext:      (s) => s.isData && s.attribute.contentUse === 'richtext',
 		isString:        (s) => s.isData && s.isAttributeString(s.attribute.content),
 		isTextarea:      (s) => s.isData && s.attribute.contentUse === 'textarea',
@@ -1004,6 +1059,7 @@ let MyField = {
 		capGen:             (s) => s.$store.getters.captions.generic,
 		isMobile:           (s) => s.$store.getters.isMobile,
 		moduleLanguage:     (s) => s.$store.getters.moduleLanguage,
+		searchDictionaries: (s) => s.$store.getters.searchDictionaries,
 		settings:           (s) => s.$store.getters.settings
 	},
 	mounted() {
@@ -1015,6 +1071,7 @@ let MyField = {
 		fieldOptionGet,
 		fieldOptionSet,
 		getFlexStyle,
+		getFormPopUpConfig,
 		getIndexAttributeId,
 		getInputFieldName,
 		getLinkMeta,
@@ -1027,6 +1084,7 @@ let MyField = {
 		isAttributeFiles,
 		isAttributeInteger,
 		isAttributeRelationship,
+		isAttributeRegconfig,
 		isAttributeString,
 		isAttributeUuid,
 		openLink,
@@ -1075,28 +1133,38 @@ let MyField = {
 			if(this.showColorPickerInput)
 				this.showColorPickerInput = false;
 		},
-		openForm(recordId,getters,middleClick) {
+		closeInline() {
+			this.popUpFormInline = null;
+			this.$emit('close-inline');
+		},
+		openForm(recordIds,getterArgs,middleClick,openFormContext) {
 			// set defaults
-			if(typeof recordId    === 'undefined') recordId    = 0;
-			if(typeof getters     === 'undefined') getters     = [];
-			if(typeof middleClick === 'undefined') middleClick = false;
+			if(typeof recordIds       === 'undefined') recordIds       = [];
+			if(typeof getterArgs      === 'undefined') getterArgs         = [];
+			if(typeof middleClick     === 'undefined') middleClick     = false;
+			if(typeof openFormContext === 'undefined') openFormContext = null;
+			
+			// form open context
+			let openForm = openFormContext === 'bulk' ? this.field.openFormBulk : this.field.openForm;
 			
 			// apply record from defined relation index as attribute value via getter
-			if(this.field.openForm.attributeIdApply !== null
-				&& typeof this.joinsIndexMap[this.field.openForm.relationIndex] !== 'undefined'
-				&& this.joinsIndexMap[this.field.openForm.relationIndex].recordId !== 0) {
+			if(openForm.attributeIdApply !== null
+				&& typeof this.joinsIndexMap[openForm.relationIndex] !== 'undefined'
+				&& this.joinsIndexMap[openForm.relationIndex].recordId !== 0) {
 				
-				let atrId    = this.field.openForm.attributeIdApply;
-				let recordId = this.joinsIndexMap[this.field.openForm.relationIndex].recordId;
+				let atrId    = openForm.attributeIdApply;
+				let recordId = this.joinsIndexMap[openForm.relationIndex].recordId;
 				
-				getters = this.setGetterArgs(getters,'attributes',`${atrId}_${recordId}`);
+				getterArgs = this.setGetterArgs(getterArgs,'attributes',`${atrId}_${recordId}`);
 			}
 			
-			// apply source field ID
-			let options = JSON.parse(JSON.stringify(this.field.openForm));
-			options.fieldId = this.field.id;
+			// pop-up inline form (only inside none-inputs fields) and never on mobile
+			// pop-up float forms are sent upwards to the parent form to deal with
+			if(openForm.popUpType === 'inline' && !this.isMobile)
+				return this.popUpFormInline = this.getFormPopUpConfig(
+					recordIds,openForm,getterArgs,'attributes');
 			
-			this.$emit('open-form',recordId,options,getters,middleClick);
+			this.$emit('open-form',recordIds,openForm,getterArgs,middleClick,this.field.id);
 		},
 		relationshipRecordSelected(recordId,middleClick) {
 			if(recordId === null)
@@ -1145,8 +1213,10 @@ let MyField = {
 			if(this.isInteger && val !== null && /^\-?\d+$/.test(val))
 				val = parseInt(val);
 			
-			if(val !== valOld)
+			if(this.notTouched && val !== valOld) {
 				this.notTouched = false;
+				this.$emit('set-touched',this.field.id);
+			}
 			
 			this.$emit('set-value',indexAttributeId,val);
 			
@@ -1155,7 +1225,7 @@ let MyField = {
 		},
 		triggerButton(middleClick) {
 			if(this.field.openForm !== null)
-				this.openForm(0,[],middleClick);
+				this.openForm([],[],middleClick,null);
 			
 			if(this.field.jsFunctionId !== null)
 				this.$emit('execute-function',this.field.jsFunctionId);

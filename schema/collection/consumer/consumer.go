@@ -10,6 +10,7 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var entitiesAllowed = []string{"collection", "field", "menu"}
@@ -34,7 +35,7 @@ func GetOne(entity string, entityId uuid.UUID, content string) (types.Collection
 		return c, err
 	}
 
-	c.OpenForm, err = openForm.Get("collection_consumer", c.Id)
+	c.OpenForm, err = openForm.Get("collection_consumer", c.Id, pgtype.Text{})
 	if err != nil {
 		return c, err
 	}
@@ -67,7 +68,7 @@ func Get(entity string, entityId uuid.UUID, content string) ([]types.CollectionC
 
 			return consumers, err
 		}
-		c.OpenForm, err = openForm.Get("collection_consumer", c.Id)
+		c.OpenForm, err = openForm.Get("collection_consumer", c.Id, pgtype.Text{})
 		if err != nil {
 			return consumers, err
 		}
@@ -127,7 +128,9 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, content string,
 			}
 		}
 
-		if err := openForm.Set_tx(tx, "collection_consumer", c.Id, c.OpenForm); err != nil {
+		if err := openForm.Set_tx(tx, "collection_consumer",
+			c.Id, c.OpenForm, pgtype.Text{}); err != nil {
+
 			return err
 		}
 	}

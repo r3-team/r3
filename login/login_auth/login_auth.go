@@ -9,6 +9,7 @@ import (
 	"r3/db"
 	"r3/handler"
 	"r3/ldap/ldap_auth"
+	"r3/login/login_license"
 	"r3/tools"
 	"r3/types"
 	"strings"
@@ -53,6 +54,15 @@ func createToken(loginId int64, username string, admin bool, noAuth bool) (strin
 		NoAuth:  noAuth,
 	}, config.GetTokenSecret())
 	return string(token), err
+}
+func storeLastAuthDate(loginId int64) error {
+	_, err := db.Pool.Exec(db.Ctx, `
+		UPDATE instance.login
+		SET date_auth_last = $1
+		WHERE id = $2
+	`, tools.GetTimeUnix(), loginId)
+
+	return err
 }
 
 // performs authentication attempt for user by using username and password
@@ -172,6 +182,12 @@ func User(username string, password string, mfaTokenId pgtype.Int4,
 	}
 
 	// everything in order, auth successful
+	if err := login_license.RequestConcurrent(loginId, admin); err != nil {
+		return "", "", mfaTokens, err
+	}
+	if err := storeLastAuthDate(loginId); err != nil {
+		return "", "", mfaTokens, err
+	}
 	*grantLoginId = loginId
 	*grantAdmin = admin
 	*grantNoAuth = noAuth
@@ -215,6 +231,12 @@ func Token(token string, grantLoginId *int64, grantAdmin *bool, grantNoAuth *boo
 	}
 
 	// everything in order, auth successful
+	if err := login_license.RequestConcurrent(tp.LoginId, tp.Admin); err != nil {
+		return "", err
+	}
+	if err := storeLastAuthDate(tp.LoginId); err != nil {
+		return "", err
+	}
 	*grantLoginId = tp.LoginId
 	*grantAdmin = tp.Admin
 	*grantNoAuth = tp.NoAuth

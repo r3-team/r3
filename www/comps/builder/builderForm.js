@@ -7,6 +7,7 @@ import MyBuilderFormStates    from './builderFormStates.js';
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderFields        from './builderFields.js';
 import MyTabs                 from '../tabs.js';
+import {getFieldHasQuery}     from '../shared/builder.js';
 import {getFieldIcon}         from '../shared/field.js';
 import {
 	MyBuilderColumns,
@@ -21,10 +22,6 @@ import {
 	isAttributeRelationship,
 	isAttributeRelationshipN1
 } from '../shared/attribute.js';
-import {
-	getFieldHasQuery,
-	getItemTitle
-} from '../shared/builder.js';
 import {
 	getDataFields,
 	getFormRoute
@@ -106,6 +103,11 @@ let MyBuilderForm = {
 							@trigger="copyValueDialog(form.name,form.id,form.id)"
 							:caption="capGen.id"
 						/>
+						<my-button
+							@trigger="showColumnsAll = !showColumnsAll"
+							:caption="capApp.button.columnsAll"
+							:image="showColumnsAll ? 'checkbox1.png' : 'checkbox0.png'"
+						/>
 						<my-button image="delete.png"
 							@trigger="delAsk"
 							:active="!readonly"
@@ -165,6 +167,7 @@ let MyBuilderForm = {
 					:isTemplate="false"
 					:joinsIndexMap="joinsIndexMap"
 					:moduleId="form.moduleId"
+					:showColumnsAll="showColumnsAll"
 					:uiScale="uiScale"
 				/>
 			</div>
@@ -411,35 +414,13 @@ let MyBuilderForm = {
 						<br />
 						<h2>{{ capApp.sidebarFieldColumns }}</h2>
 						
-						<div class="columns">
-							<div class="side">
-								<h3>{{ capGen.available }}</h3>
-								<my-builder-column-templates class="shade"
-									:builderLanguage="builderLanguage"
-									:columns="fieldShow.columns"
-									:groupName="fieldIdShow+'_columns'"
-									:joins="fieldShow.query.joins"
-									:moduleId="module.id"
-								/>
-							</div>
-							
-							<div class="side">
-								<!-- columns for query fields -->
-								<h3>{{ capGen.displayed }}</h3>
-								<my-builder-columns class="shade"
-									@columns-set="fieldPropertySet('columns',$event)"
-									@column-id-show="setFieldShow(fieldIdShow,$event,'content')"
-									:builderLanguage="builderLanguage"
-									:columnIdShow="columnIdShow"
-									:columns="fieldShow.columns"
-									:groupName="fieldIdShow+'_columns'"
-									:hasCaptions="fieldShow.content === 'list'"
-									:joins="fieldShow.query.joins"
-									:isTemplate="false"
-									:moduleId="module.id"
-									:showOptions="false"
-								/>
-							</div>
+						<div class="columns shade">
+							<my-builder-column-templates
+								@column-add="fieldShow.columns.push($event)"
+								:columns="fieldShow.columns"
+								:groupName="'batches_' + fieldIdShow+'_columns'"
+								:joins="fieldShow.query.joins"
+							/>
 						</div>
 						
 						<!-- column settings -->
@@ -523,6 +504,7 @@ let MyBuilderForm = {
 			fieldIdShow:null,    // field ID which is shown in sidebar to be edited
 			fieldMoveList:null,  // fields list from which to move field (move by click)
 			fieldMoveIndex:0,    // index of field which to move (move by click)
+			showColumnsAll:false,// show columns from all relevant fields regardless of whether field is selected
 			showFunctions:false, // show form functions
 			showSidebar:true,    // show form Builder sidebar
 			showStates:false,    // show form states
@@ -632,6 +614,7 @@ let MyBuilderForm = {
 				fields.push(this.createFieldTabs());      // tabs
 				fields.push(this.createFieldList());      // list
 				fields.push(this.createFieldCalendar());  // calendar
+				fields.push(this.createFieldGantt());     // Gantt
 				fields.push(this.createFieldChart());     // chart
 				fields.push(this.createFieldHeader());    // header
 				fields.push(this.createFieldButton());    // button
@@ -718,7 +701,7 @@ let MyBuilderForm = {
 	},
 	watch:{
 		form:{
-			handler:function() { this.reset(); },
+			handler() { this.reset(); },
 			immediate:true
 		}
 	},
@@ -730,7 +713,6 @@ let MyBuilderForm = {
 		getFieldIcon,
 		getFormRoute,
 		getIndexAttributeId,
-		getItemTitle,
 		getJoinsIndexMap,
 		getNilUuid,
 		getQueryTemplate,
@@ -785,7 +767,9 @@ let MyBuilderForm = {
 			this.filters        = JSON.parse(JSON.stringify(this.form.query.filters));
 			this.fieldIdShow    = null;
 			this.fieldIdsRemove = [];
-			this.columnIdShow  = null;
+			this.columnIdShow   = null;
+			this.showColumnsAll = this.fields.length === 1
+				&& !['container','tabs'].includes(this.fields[0].content);
 		},
 		
 		createFieldButton() {
@@ -816,6 +800,30 @@ let MyBuilderForm = {
 				indexColor:null,
 				gantt:false,
 				ganttSteps:null,
+				ics:false,
+				dateRange0:0,
+				dateRange1:0,
+				openForm:null,
+				query:this.getQueryTemplate(),
+				columns:[],
+				collections:[]
+			};
+		},
+		createFieldGantt() {
+			return {
+				id:'template_gantt',
+				iconId:null,
+				content:'calendar',
+				state:'default',
+				onMobile:true,
+				attributeIdDate0:null,
+				attributeIdDate1:null,
+				attributeIdColor:null,
+				indexDate0:null,
+				indexDate1:null,
+				indexColor:null,
+				gantt:true,
+				ganttSteps:'days',
 				ics:false,
 				dateRange0:0,
 				dateRange1:0,
@@ -953,6 +961,7 @@ let MyBuilderForm = {
 				filterQuick:false,
 				layout:'table',
 				openForm:null,
+				openFormBulk:null,
 				query:this.getQueryTemplate(),
 				recordSelector:false,
 				resultLimit:50

@@ -20,7 +20,7 @@ func LoginAuthUser(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth 
 			Password string `json:"password"`
 
 			// MFA details, sent together with credentials (usually on second auth attempt)
-			MfaTokenId  pgtype.Int4    `json:"mfaTokenId"`
+			MfaTokenId  pgtype.Int4 `json:"mfaTokenId"`
 			MfaTokenPin pgtype.Text `json:"mfaTokenPin"`
 		}
 		res struct {
@@ -78,7 +78,7 @@ func LoginAuthToken(reqJson json.RawMessage, loginId *int64, admin *bool, noAuth
 }
 
 // attempt login via fixed token
-func LoginAuthTokenFixed(reqJson json.RawMessage, loginId *int64) (interface{}, error) {
+func LoginAuthTokenFixed(reqJson json.RawMessage, loginId *int64, fixedToken *bool) (interface{}, error) {
 
 	var (
 		req struct {
@@ -98,5 +98,6 @@ func LoginAuthTokenFixed(reqJson json.RawMessage, loginId *int64) (interface{}, 
 		return nil, err
 	}
 	*loginId = req.LoginId
+	*fixedToken = true
 	return res, nil
 }

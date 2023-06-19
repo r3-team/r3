@@ -62,39 +62,34 @@ let MyAdminRoleItem = {
 		showDesc:{ type:Boolean, required:true }
 	},
 	emits:['add','remove-by-index'],
-	data:function() {
+	data() {
 		return {
 			loginId:null,
 			showMembers:false
 		};
 	},
 	computed:{
-		description:function() {
-			return this.getCaptionForModule(this.role.captions['roleDesc'],'',this.module);
-		},
-		loginIds:function() {
+		loginIds:(s) => {
 			let out = [];
-			for(let i = 0, j = this.logins.length; i < j; i++) {
-				out.push(this.logins[i].id);
+			for(let l of s.logins) {
+				out.push(l.id);
 			}
 			return out;
 		},
-		titleIcon:function() {
-			if(this.showAll)
-				return '';
-			
-			return this.showMembers ? 'triangleDown.png' : 'triangleRight.png';
-		},
+		
+		// simple
+		description:(s) => s.getCaptionForModule(s.role.captions['roleDesc'],'',s.module),
+		titleIcon:  (s) => s.showAll ? '' : (s.showMembers ? 'triangleDown.png' : 'triangleRight.png'),
 		
 		// stores
-		capApp:function() { return this.$store.getters.captions.admin.roles; }
+		capApp:(s) => s.$store.getters.captions.admin.roles
 	},
 	methods:{
 		// externals
 		getCaptionForModule,
 		
 		// actions
-		add:function(loginId) {
+		add(loginId) {
 			// clear login input
 			this.loginId = loginId;
 			this.$nextTick(function() {
@@ -108,12 +103,12 @@ let MyAdminRoleItem = {
 			}
 			this.getNewName(loginId);
 		},
-		remove:function(loginIndex) {
+		remove(loginIndex) {
 			this.$emit('remove-by-index',loginIndex);
 		},
 		
 		// backend calls
-		getNewName:function(id) {
+		getNewName(id) {
 			ws.send('login','getNames',{id:id},true).then(
 				res => this.$emit('add',{id:id,name:res.payload[0].name}),
 				this.$root.genericError
@@ -194,10 +189,11 @@ let MyAdminRoles = {
 			/>
 		</div>
 	</div>`,
+	emits:['hotkeysRegister'],
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			loginIdsChanged:[],
 			moduleId:null,
@@ -209,21 +205,19 @@ let MyAdminRoles = {
 			showDesc:false
 		};
 	},
+	mounted() {
+		this.$store.commit('pageTitle',this.menuTitle);
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted() {
+		this.$emit('hotkeysRegister',[]);
+	},
 	computed:{
-		module:function() {
-			if(this.moduleId === null)
-				return false;
-			
-			return this.moduleIdMap[this.moduleId];
-		},
-		rolesValid:function() {
-			if(this.module === false)
-				return [];
+		rolesValid:(s) => {
+			if(s.module === false) return [];
 			
 			let out = [];
-			for(let i = 0, j = this.module.roles.length; i < j; i++) {
-				let r  = this.module.roles[i];
-				
+			for(let r of s.module.roles) {
 				if(!r.hidden && r.assignable && r.name !== 'everyone')
 					out.push(r);
 			}
@@ -231,23 +225,21 @@ let MyAdminRoles = {
 		},
 		
 		// simple
-		hasChanges:function() { return this.loginIdsChanged.length !== 0; },
+		hasChanges:(s) => s.loginIdsChanged.length !== 0,
+		module:(s) => s.moduleId === null ? false : s.moduleIdMap[s.moduleId],
 		
 		// stores
-		modules:    function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.admin.roles; },
-		capGen:     function() { return this.$store.getters.captions.generic; }
-	},
-	mounted:function() {
-		this.$store.commit('pageTitle',this.menuTitle);
+		modules:    (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:     (s) => s.$store.getters.captions.admin.roles,
+		capGen:     (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals
 		srcBase64Icon,
 		
 		// actions
-		add:function(roleId,login) {
+		add(roleId,login) {
 			let c = JSON.parse(JSON.stringify(this.roleIdMapLogins));
 			c[roleId].push(login);
 			this.roleIdMapLogins = c;
@@ -255,7 +247,7 @@ let MyAdminRoles = {
 			if(!this.loginIdsChanged.includes(login.id))
 				this.loginIdsChanged.push(login.id);
 		},
-		remove:function(roleId,loginIndex) {
+		remove(roleId,loginIndex) {
 			let login = this.roleIdMapLogins[roleId][loginIndex];
 			
 			let c = JSON.parse(JSON.stringify(this.roleIdMapLogins));
@@ -267,7 +259,7 @@ let MyAdminRoles = {
 		},
 		
 		// backend calls
-		get:function() {
+		get() {
 			// reset and get logins for all valid roles
 			this.roleIdMapLogins = {};
 			
@@ -290,7 +282,10 @@ let MyAdminRoles = {
 				this.$root.genericError
 			);
 		},
-		set:function() {
+		set() {
+			if(!this.hasChanges)
+				return;
+			
 			let requests = [];
 			for(let i = 0, j = this.rolesValid.length; i < j; i++) {
 				

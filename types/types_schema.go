@@ -12,7 +12,11 @@ type Module struct {
 	ParentId        pgtype.UUID       `json:"parentId"`        // module parent ID
 	FormId          pgtype.UUID       `json:"formId"`          // default start form
 	IconId          pgtype.UUID       `json:"iconId"`          // module icon in header/menu
+	IconIdPwa1      pgtype.UUID       `json:"iconIdPwa1"`      // PWA icon, 192x192
+	IconIdPwa2      pgtype.UUID       `json:"iconIdPwa2"`      // PWA icon, 512x512
 	Name            string            `json:"name"`            // name of module, is used for DB schema
+	NamePwa         pgtype.Text       `json:"namePwa"`         // name of module shown for PWA
+	NamePwaShort    pgtype.Text       `json:"namePwaShort"`    // name of module shown for PWA, short version
 	Color1          string            `json:"color1"`          // primary module color (used for header)
 	Position        int               `json:"position"`        // position of module in nav. contexts (home, header)
 	LanguageMain    string            `json:"languageMain"`    // language code of main language (for fallback)
@@ -139,9 +143,13 @@ type OpenForm struct {
 	FormIdOpen       uuid.UUID   `json:"formIdOpen"`       // form to open
 	AttributeIdApply pgtype.UUID `json:"attributeIdApply"` // apply record ID to attribute on opened form
 	RelationIndex    int         `json:"relationIndex"`    // relation index of record to apply to attribute
-	PopUp            bool        `json:"popUp"`            // opened form is pop-up-form
+	PopUpType        pgtype.Text `json:"popUpType"`        // if set, form is opened as pop-up, values: float, inline
+	Context          pgtype.Text `json:"context"`          // used when same entity needs multiple open forms, values: bulk
 	MaxHeight        int         `json:"maxHeight"`        // max. height in PX for opened form (pop-up only)
 	MaxWidth         int         `json:"maxWidth"`         // max. width  in PX for opened form (pop-up only)
+
+	// legacy
+	PopUp bool `json:"popUp"` // replaced by popUpType, if null pop-up is not used
 }
 type Icon struct {
 	Id       uuid.UUID `json:"id"`
@@ -362,22 +370,23 @@ type FieldHeader struct {
 	Captions CaptionMap  `json:"captions"`
 }
 type FieldList struct {
-	Id          uuid.UUID            `json:"id"`
-	TabId       pgtype.UUID          `json:"tabId"`
-	IconId      pgtype.UUID          `json:"iconId"`
-	Content     string               `json:"content"`
-	State       string               `json:"state"`
-	OnMobile    bool                 `json:"onMobile"`
-	CsvExport   bool                 `json:"csvExport"`
-	CsvImport   bool                 `json:"csvImport"`
-	AutoRenew   pgtype.Int4          `json:"autoRenew"`   // automatic list refresh
-	Layout      string               `json:"layout"`      // list layout: table, cards
-	FilterQuick bool                 `json:"filterQuick"` // enable quickfilter (uses all visible columns)
-	ResultLimit int                  `json:"resultLimit"` // predefined limit, overwritable by user
-	Columns     []Column             `json:"columns"`
-	Collections []CollectionConsumer `json:"collections"` // collections to select values for query filters
-	OpenForm    OpenForm             `json:"openForm"`
-	Query       Query                `json:"query"`
+	Id           uuid.UUID            `json:"id"`
+	TabId        pgtype.UUID          `json:"tabId"`
+	IconId       pgtype.UUID          `json:"iconId"`
+	Content      string               `json:"content"`
+	State        string               `json:"state"`
+	OnMobile     bool                 `json:"onMobile"`
+	CsvExport    bool                 `json:"csvExport"`
+	CsvImport    bool                 `json:"csvImport"`
+	AutoRenew    pgtype.Int4          `json:"autoRenew"`   // automatic list refresh
+	Layout       string               `json:"layout"`      // list layout: table, cards
+	FilterQuick  bool                 `json:"filterQuick"` // enable quickfilter (uses all visible columns)
+	ResultLimit  int                  `json:"resultLimit"` // predefined limit, overwritable by user
+	Columns      []Column             `json:"columns"`
+	Collections  []CollectionConsumer `json:"collections"`  // collections to select values for query filters
+	OpenForm     OpenForm             `json:"openForm"`     // regular form to open records with
+	OpenFormBulk OpenForm             `json:"openFormBulk"` // form for bulk actions (multiple record updates)
+	Query        Query                `json:"query"`
 
 	// legacy
 	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
@@ -414,19 +423,23 @@ type Column struct {
 	Id          uuid.UUID   `json:"id"`
 	AttributeId uuid.UUID   `json:"attributeId"`
 	Index       int         `json:"index"`      // attribute index
-	Batch       pgtype.Int4 `json:"batch"`      // index of column batch (multiple columns as one)
-	Basis       int         `json:"basis"`      // size basis (usually width)
-	Length      int         `json:"length"`     // text length limit (in characters)
-	Wrap        bool        `json:"wrap"`       // text wrap
-	Display     string      `json:"display"`    // how to display value (text, date, color, etc.)
 	GroupBy     bool        `json:"groupBy"`    // group by column attribute value?
 	Aggregator  pgtype.Text `json:"aggregator"` // aggregator (SUM, COUNT, etc.)
 	Distincted  bool        `json:"distincted"` // attribute values are distinct?
 	SubQuery    bool        `json:"subQuery"`   // column uses sub query?
-	OnMobile    bool        `json:"onMobile"`   // display this column on mobile?
-	Clipboard   bool        `json:"clipboard"`  // show copy-to-clipboard action?
 	Query       Query       `json:"query"`      // sub query
-	Captions    CaptionMap  `json:"captions"`
+	Captions    CaptionMap  `json:"captions"`   // column titles
+
+	// presentation
+	Basis         int         `json:"basis"`         // size basis (usually width)
+	Batch         pgtype.Int4 `json:"batch"`         // index of column batch (multiple columns as one)
+	BatchVertical bool        `json:"batchVertical"` // batch uses vertical layout for columns
+	Clipboard     bool        `json:"clipboard"`     // show copy-to-clipboard action?
+	Display       string      `json:"display"`       // how to display value (text, date, color, etc.)
+	Length        int         `json:"length"`        // text length limit (in characters)
+	OnMobile      bool        `json:"onMobile"`      // display this column on mobile?
+	Styles        []string    `json:"styles"`        // applied styles: bold, italic
+	Wrap          bool        `json:"wrap"`          // text wrap
 }
 type Role struct {
 	Id                uuid.UUID         `json:"id"`
@@ -478,12 +491,14 @@ type PgTrigger struct {
 	CodeCondition string    `json:"codeCondition"`
 }
 type PgIndex struct {
-	Id           uuid.UUID          `json:"id"`
-	RelationId   uuid.UUID          `json:"relationId"`
-	NoDuplicates bool               `json:"noDuplicates"` // index is unique
-	AutoFki      bool               `json:"autoFki"`      // index belongs to foreign key attribute (auto-generated)
-	PrimaryKey   bool               `json:"primaryKey"`   // index belongs to primary key attribute
-	Attributes   []PgIndexAttribute `json:"attributes"`   // attributes the index is made of
+	Id              uuid.UUID          `json:"id"`
+	RelationId      uuid.UUID          `json:"relationId"`
+	AttributeIdDict pgtype.UUID        `json:"attributeIdDict"` // attribute used as dictionary for full text search (if set, GIN is used)
+	Method          string             `json:"method"`          // BTREE/GIN
+	NoDuplicates    bool               `json:"noDuplicates"`    // index is unique
+	AutoFki         bool               `json:"autoFki"`         // index belongs to foreign key attribute (auto-generated)
+	PrimaryKey      bool               `json:"primaryKey"`      // index belongs to primary key attribute
+	Attributes      []PgIndexAttribute `json:"attributes"`      // attributes the index is made of
 }
 type PgIndexAttribute struct {
 	PgIndexId   uuid.UUID `json:"pgIndexId"`

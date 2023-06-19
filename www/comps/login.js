@@ -1,9 +1,12 @@
-import {getLineBreaksParsedToHtml} from './shared/generic.js';
-import {openLink}                  from './shared/generic.js';
+import {consoleError} from './shared/error.js';
 import {
 	aesGcmExportBase64,
 	pbkdf2PassToAesGcmKey
 } from './shared/crypto.js';
+import {
+	getLineBreaksParsedToHtml,
+	openLink
+} from './shared/generic.js';
 export {MyLogin as default};
 
 let MyLogin = {
@@ -20,7 +23,7 @@ let MyLogin = {
 		<template v-if="!backendReady">
 			
 			<div class="contentBox">
-				<div class="top lower" :style="customBgLogin">
+				<div class="top lower" :style="bgStyles">
 					<div class="area">
 						<img class="icon bg" src="images/lock.png" />
 						<h1>{{ appName }}</h1>
@@ -40,7 +43,7 @@ let MyLogin = {
 		<!-- not ready for login yet (downloading schema/public data/...) -->
 		<template v-if="backendReady && !loginReady">
 			<div class="contentBox">
-				<div class="top lower" :style="customBgLogin">
+				<div class="top lower" :style="bgStyles">
 					<div class="area">
 						<img class="icon bg" src="images/lock.png" />
 						<h1>{{ appName }}</h1>
@@ -88,6 +91,15 @@ let MyLogin = {
 				</div>
 			</div>
 			
+			<!-- license error message -->
+			<div class="contentBox" v-if="licenseErrCode !== null">
+				<div class="top warning">
+					<div class="area">
+						<h1>{{ message.license[licenseErrCode][language] }}</h1>
+					</div>
+				</div>
+			</div>
+			
 			<!-- busy overlay -->
 			<div class="input-block-overlay-bg" :class="{show:loading}">
 				<div class="input-block-overlay">
@@ -97,7 +109,7 @@ let MyLogin = {
 			
 			<!-- login dialog -->
 			<div class="contentBox">
-				<div class="top lower" :style="customBgLogin">
+				<div class="top lower" :style="bgStyles">
 					<div class="area">
 						<img class="icon bg" src="images/lock.png" />
 						<h1>{{ appName }}</h1>
@@ -161,7 +173,7 @@ let MyLogin = {
 			
 		<!-- custom company message -->
 		<div class="contentBox" v-if="showCustom">
-			<div class="top lower" :style="customBgLogin">
+			<div class="top lower" :style="bgStyles">
 				<div class="area">
 					<img class="icon bg" src="images/home.png" />
 					<h1>{{ companyName }}</h1>
@@ -192,8 +204,9 @@ let MyLogin = {
 			username:'',
 			
 			// states
-			appInitErr:false, // application failed to initialize
-			badAuth:false,    // authentication failed
+			appInitErr:false,    // application failed to initialize
+			badAuth:false,       // authentication failed
+			licenseErrCode:null, // error with system license
 			loading:false,
 			showError:false,
 			
@@ -212,6 +225,16 @@ let MyLogin = {
 				httpMode:{
 					de:'Verbindung ist nicht verschlüsselt',
 					en_US:'Connection is not encrypted'
+				},
+				license:{
+					'{ERR_LIC_001}':{
+						de:'Systemaktivierung ist abgelaufen - bitte den Systemadministrator kontaktieren',
+						en_US:'System activation has expired - please contact your system administrator'
+					},
+					'{ERR_LIC_002}':{
+						de:'Anzahl gleichzeitiger Anmeldungen erreicht - bitte den Systemadministrator kontaktieren',
+						en_US:'Concurrent login count reached - please contact your system administrator'
+					}
 				},
 				loading:{
 					de:'Am Laden...',
@@ -252,7 +275,8 @@ let MyLogin = {
 		},
 		
 		// states
-		isValid:(s) => {
+		bgStyles:(s) => s.activated && s.companyColorLogin !== '' ? `background-color:#${s.companyColorLogin};` : '',
+		isValid: (s) => {
 			if(!s.showMfa)
 				return !s.badAuth && s.username !== '' && s.password !== '';
 			
@@ -268,7 +292,6 @@ let MyLogin = {
 		companyColorLogin:(s) => s.$store.getters['local/companyColorLogin'],
 		companyName:      (s) => s.$store.getters['local/companyName'],
 		companyWelcome:   (s) => s.$store.getters['local/companyWelcome'],
-		customBgLogin:    (s) => s.$store.getters['local/customBgLogin'],
 		customLogo:       (s) => s.$store.getters['local/customLogo'],
 		customLogoUrl:    (s) => s.$store.getters['local/customLogoUrl'],
 		token:            (s) => s.$store.getters['local/token'],
@@ -330,12 +353,18 @@ let MyLogin = {
 	methods:{
 		// externals
 		aesGcmExportBase64,
+		consoleError,
 		getLineBreaksParsedToHtml,
 		pbkdf2PassToAesGcmKey,
 		openLink,
 		
 		// misc
-		handleError(action) {
+		handleError(action,msg) {
+			if(msg.startsWith('{ERR_LIC'))
+				this.licenseErrCode = msg;
+			else
+				this.licenseErrCode = null;
+			
 			switch(action) {
 				case 'aesExport': break;                      // very unexpected, should not happen
 				case 'authToken': break;                      // token auth failed, to be expected, can expire
@@ -377,7 +406,7 @@ let MyLogin = {
 						res.payload.saltKdf
 					);
 				},
-				() => this.handleError('authUser')
+				err => this.handleError('authUser',err)
 			);
 			this.loading = true;
 		},
@@ -392,7 +421,7 @@ let MyLogin = {
 					res.payload.token,
 					null
 				),
-				() => this.handleError('authUser')
+				err => this.handleError('authUser',err)
 			);
 			this.loading = true;
 		},
@@ -402,19 +431,24 @@ let MyLogin = {
 					res.payload.loginId,
 					res.payload.loginName
 				),
-				() => this.handleError('authToken')
+				err => this.handleError('authToken',err)
 			);
 			this.loading = true;
 		},
 		authenticatedByUser(loginId,loginName,token,saltKdf) {
 			if(token === '')
-				return this.handleError('authUser');
+				return this.handleError('authUser','');
 			
 			// store authentication token
 			this.$store.commit('local/token',token);
 			
 			if(saltKdf === null)
 				return this.appEnable(loginId,loginName);
+			
+			if(typeof crypto.subtle === 'undefined') {
+				this.consoleError('crypto API not available');
+				return this.appEnable(loginId,loginName);
+			}
 			
 			// generate AES key from credentials and login private key salt
 			this.pbkdf2PassToAesGcmKey(this.password,saltKdf,this.kdfIterations,true).then(
@@ -426,10 +460,10 @@ let MyLogin = {
 							this.$store.commit('local/loginKeySalt',saltKdf);
 							this.appEnable(loginId,loginName);
 						},
-						err => this.handleError('aesExport')
+						() => this.handleError('aesExport','')
 					);
 				},
-				err => this.handleError('kdfCreate')
+				() => this.handleError('kdfCreate','')
 			);
 		},
 		

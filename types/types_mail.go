@@ -24,15 +24,16 @@ type Mail struct {
 	AttributeId  pgtype.UUID `json:"attributeId"` // file attribute to update/get attachment of/from
 }
 type MailAccount struct {
-	Id       int32  `json:"id"`
-	Name     string `json:"name"`
-	Mode     string `json:"mode"`
-	Username string `json:"username"`
-	Password string `json:"password"`
-	StartTls bool   `json:"startTls"`
-	SendAs   string `json:"sendAs"`
-	HostName string `json:"hostName"`
-	HostPort int64  `json:"hostPort"`
+	Id         int32  `json:"id"`
+	Name       string `json:"name"`
+	Mode       string `json:"mode"`       // smtp/imap
+	AuthMethod string `json:"authMethod"` // plain/login (login is used in O365 legacy SMTP authentication)
+	Username   string `json:"username"`
+	Password   string `json:"password"`
+	StartTls   bool   `json:"startTls"`
+	SendAs     string `json:"sendAs"`
+	HostName   string `json:"hostName"`
+	HostPort   int64  `json:"hostPort"`
 }
 type MailFile struct {
 	Id   uuid.UUID `json:"id"`

@@ -45,7 +45,6 @@ func ModuleDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 }
 
 func ModuleGet() (interface{}, error) {
-
 	var (
 		err error
 		res struct {
@@ -61,13 +60,9 @@ func ModuleGet() (interface{}, error) {
 }
 
 func ModuleSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
 	var req types.Module
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, module.Set_tx(tx, req.Id, req.ParentId, req.FormId, req.IconId,
-		req.Name, req.Color1, req.Position, req.LanguageMain, req.ReleaseBuild,
-		req.ReleaseBuildApp, req.ReleaseDate, req.DependsOn, req.StartForms,
-		req.Languages, req.ArticleIdsHelp, req.Captions)
+	return nil, module.Set_tx(tx, req)
 }

@@ -13,41 +13,78 @@ let MyAdminLicense = {
 		</div>
 		
 		<div class="content">
-			<h2>{{ capApp.active }}</h2>
 			
-			<div class="file shade" v-if="licenseInstalled">
-				<table>
+			<template v-if="!licenseInstalled">
+				<div class="intro">
+					<span v-html="capApp.intro"></span>
+					<img src="images/logo_professional.png" />
+				</div>
+				<h2>{{ capApp.introMore }}</h2>
+				<div class="row gap">
+					<my-button image="globe.png"
+						@trigger="open('https://rei3.de/en/services')"
+						:caption="capApp.extLicense"
+						:large="true"
+					/>
+					<my-button image="globe.png"
+						@trigger="open('https://community.rei3.de/')"
+						:caption="capApp.extCommunity"
+						:large="true"
+					/>
+				</div>
+			</template>
+			
+			<div v-if="licenseInstalled" class="column gap">
+				<h2>{{ capApp.active }}</h2>
+				<div class="file shade" v-if="licenseInstalled">
+					<table>
+						<tr>
+							<td>{{ capApp.licenseId }}</td>
+							<td>{{ license.licenseId }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.clientId }}</td>
+							<td>{{ license.clientId }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.registeredFor }}</td>
+							<td>{{ license.registeredFor }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.loginCount }}</td>
+							<td>{{ license.loginCount }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.validUntil }}</td>
+							<td>{{ getUnixFormat(license.validUntil,settings.dateFormat) }}</td>
+						</tr>
+					</table>
+					<img src="images/logo_license.webp" />
+					<div class="actions">
+						<my-button image="cancel.png"
+							@trigger="delAsk"
+							:cancel="true"
+							:tight="true"
+						/>
+					</div>
+				</div>
+				
+				<h2>{{ capApp.currentState }}</h2>
+				<table class="current-values">
 					<tr>
-						<td>{{ capApp.licenseId }}</td>
-						<td>{{ license.licenseId }}</td>
+						<td>{{ capApp.untilDays }}</td>
+						<td :class="{ invalid:!licenseValid }">
+							<b>{{ licenseValid ? this.licenseDays : capApp.licenseExpired }}</b>
+						</td>
 					</tr>
 					<tr>
-						<td>{{ capApp.clientId }}</td>
-						<td>{{ license.clientId }}</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.registeredFor }}</td>
-						<td>{{ license.registeredFor }}</td>
-					</tr>
-					<tr>
-						<td>{{ capApp.validUntil }}</td>
-						<td>{{ getUnixFormat(license.validUntil,settings.dateFormat) }}</td>
+						<td>{{ capApp.loginCount }}</td>
+						<td :class="{ invalid:concurrentLogins >= license.loginCount }">
+							<b>{{ concurrentLogins + ' / ' + license.loginCount }}</b>
+						</td>
 					</tr>
 				</table>
-				<img src="images/logo_license.webp" />
 			</div>
-			
-			<span v-if="!licenseInstalled">
-				{{ capApp.licenseEmpty }}
-			</span>
-			
-			<span v-if="licenseInstalled && licenseValid" class="valid">
-				{{ capApp.licenseValid.replace('{COUNT}',this.licenseDays) }}
-			</span>
-			
-			<span v-if="licenseInstalled && !licenseValid" class="invalid">
-				{{ capApp.licenseExpired }}
-			</span>
 			
 			<br />
 			<br />
@@ -57,36 +94,60 @@ let MyAdminLicense = {
 		</div>
 	</div>`,
 	props:{
-		menuTitle:{ type:String, required:true }
+		concurrentLogins:{ type:Number, required:true },
+		menuTitle:       { type:String, required:true }
 	},
 	computed:{
-		licenseInstalled:function() {
-			return this.license.validUntil !== 0;
-		},
+		licenseInstalled:(s) => s.license.validUntil !== 0,
 		
 		// stores
-		token:       function() { return this.$store.getters['local/token']; },
-		capApp:      function() { return this.$store.getters.captions.admin.license; },
-		license:     function() { return this.$store.getters.license; },
-		licenseDays: function() { return this.$store.getters.licenseDays; },
-		licenseValid:function() { return this.$store.getters.licenseValid; },
-		settings:    function() { return this.$store.getters.settings; }
+		token:       (s) => s.$store.getters['local/token'],
+		capApp:      (s) => s.$store.getters.captions.admin.license,
+		capGen:      (s) => s.$store.getters.captions.generic,
+		license:     (s) => s.$store.getters.license,
+		licenseDays: (s) => s.$store.getters.licenseDays,
+		licenseValid:(s) => s.$store.getters.licenseValid,
+		settings:    (s) => s.$store.getters.settings
 	},
-	mounted:function() {
+	mounted() {
 		this.$store.commit('pageTitle',this.menuTitle);
 	},
 	methods:{
 		// externals
 		getUnixFormat,
 		
+		// actions
+		open(url) {
+			window.open(url);
+		},
+		
 		// backend calls
-		get:function() {
+		delAsk() {
+			this.$store.commit('dialog',{
+				captionBody:this.capApp.dialog.delete,
+				buttons:[{
+					cancel:true,
+					caption:this.capGen.button.delete,
+					exec:this.del,
+					image:'delete.png'
+				},{
+					caption:this.capGen.button.cancel,
+					image:'cancel.png'
+				}]
+			});
+		},
+		del() {
+			ws.send('license','del',{},true).then(
+				res => {}, this.$root.genericError
+			);
+		},
+		get() {
 			ws.send('license','get',{},true).then(
 				res => this.$store.commit('license',res.payload),
 				this.$root.genericError
 			);
 		},
-		set:function(evt) {
+		set(evt) {
 			let that = this;
 			let formData    = new FormData();
 			let httpRequest = new XMLHttpRequest();

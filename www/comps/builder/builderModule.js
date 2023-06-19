@@ -280,6 +280,46 @@ let MyBuilderModule = {
 					</td>
 					<td>{{ capApp.languageMainHint }}</td>
 				</tr>
+				
+				<tr>
+					<td colspan="2"><b>{{ capApp.pwa }}</b></td>
+					<td>{{ capApp.pwaHint }}</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.namePwa }}</td>
+					<td><input v-model="namePwa" :disabled="readonly" /></td>
+					<td>{{ capApp.namePwaHint }}</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.namePwaShort }}</td>
+					<td><input v-model="namePwaShort" :disabled="readonly" /></td>
+					<td>{{ capApp.namePwaShortHint }}</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.iconPwa }}</td>
+					<td>
+						<div class="row gap centered">
+							<span>192x192 px</span>
+							<my-builder-icon-input
+								@input="iconIdPwa1 = $event"
+								:icon-id-selected="iconIdPwa1"
+								:module="module"
+								:readonly="readonly"
+							/>
+							<span></span>
+							<span>512x512 px</span>
+							<my-builder-icon-input
+								@input="iconIdPwa2 = $event"
+								:icon-id-selected="iconIdPwa2"
+								:module="module"
+								:readonly="readonly"
+							/>
+						</div>
+					</td>
+					<td>{{ capApp.iconPwaHint }}</td>
+				</tr>
+				
+				<tr><td colspan="3"><b>{{ capApp.release }}</b></td></tr>
 				<tr>
 					<td>{{ capApp.releaseDate }}</td>
 					<td colspan="2"><input :value="displayReleaseDate" disabled="disabled" /></td>
@@ -313,7 +353,11 @@ let MyBuilderModule = {
 			parentId:null,
 			formId:null,
 			iconId:null,
+			iconIdPwa1:null,
+			iconIdPwa2:null,
 			name:'',
+			namePwa:null,
+			namePwaShort:null,
 			color1:'217A4D',
 			position:0,
 			releaseBuild:0,
@@ -341,7 +385,11 @@ let MyBuilderModule = {
 			s.parentId        !== s.module.parentId
 			|| s.formId       !== s.module.formId
 			|| s.iconId       !== s.module.iconId
+			|| s.iconIdPwa1   !== s.module.iconIdPwa1
+			|| s.iconIdPwa2   !== s.module.iconIdPwa2
 			|| s.name         !== s.module.name
+			|| s.namePwa      !== s.module.namePwa
+			|| s.namePwaShort !== s.module.namePwaShort
 			|| s.color1       !== s.module.color1
 			|| s.position     !== s.module.position
 			|| s.languageMain !== s.module.languageMain
@@ -384,7 +432,11 @@ let MyBuilderModule = {
 			this.parentId        = this.module.parentId;
 			this.formId          = this.module.formId;
 			this.iconId          = this.module.iconId;
+			this.iconIdPwa1      = this.module.iconIdPwa1;
+			this.iconIdPwa2      = this.module.iconIdPwa2;
 			this.name            = this.module.name;
+			this.namePwa         = this.module.namePwa;
+			this.namePwaShort    = this.module.namePwaShort;
 			this.color1          = this.module.color1;
 			this.position        = this.module.position;
 			this.languageMain    = this.module.languageMain;
@@ -436,7 +488,11 @@ let MyBuilderModule = {
 					parentId:this.parentId,
 					formId:this.formId,
 					iconId:this.iconId,
+					iconIdPwa1:this.iconIdPwa1,
+					iconIdPwa2:this.iconIdPwa2,
 					name:this.name,
+					namePwa:this.namePwa !== '' ? this.namePwa : null,
+					namePwaShort:this.namePwaShort !== '' ? this.namePwaShort : null,
 					color1:this.color1,
 					position:this.position,
 					languageMain:this.languageMain,

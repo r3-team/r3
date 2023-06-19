@@ -328,8 +328,10 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		}
 	case "license":
 		switch action {
+		case "del":
+			return LicenseDel_tx(tx)
 		case "get":
-			return config.License, nil
+			return config.GetLicense(), nil
 		}
 	case "log":
 		switch action {
@@ -342,6 +344,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return LoginDel_tx(tx, reqJson)
 		case "get":
 			return LoginGet(reqJson)
+		case "getConcurrent":
+			return LoginGetConcurrent()
 		case "getMembers":
 			return LoginGetMembers(reqJson)
 		case "getRecords":
@@ -464,6 +468,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return PresetDel_tx(tx, reqJson)
 		case "set":
 			return PresetSet_tx(tx, reqJson)
+		}
+	case "pwaDomain":
+		switch action {
+		case "reset":
+			return nil, cache.LoadPwaDomainMap()
+		case "set":
+			return PwaDomainSet_tx(tx, reqJson)
 		}
 	case "relation":
 		switch action {

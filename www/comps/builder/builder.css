@@ -445,6 +445,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 	margin:0px 0px 6px 0px;
+	gap:3px;
 }
 .builder-query .query-lookups{
 	display:flex;
@@ -481,6 +482,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 	margin:0px 0px 6px 0px;
+	gap:3px;
 }
 .builder-query .fixed-limit{
 	display:flex;
@@ -743,22 +745,78 @@
 }
 
 /* columns */
-.builder-columns{
+.builder-column-batches{
+	overflow:auto;
+	min-height:32px;
+	margin:5px;
+	padding:5px;
+	gap:5px;
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row wrap;
+	align-content:flex-start;
+	background-color:var(--color-bg);
+	background-size:31px 31px;
+	background-image:linear-gradient(var(--color-form-builder-actions-bg) 1px, transparent 1px),
+		linear-gradient(to right, var(--color-form-builder-actions-bg) 1px, var(--color-bg) 1px);
+}
+.builder-column-batches.template{
+	flex-flow:column nowrap;
+	margin:0px;
+	cursor:move;
+}
+.builder-column-batch{
+	display:flex;
+	min-width:220px;
+	flex:1 1 auto;
+	flex-flow:column nowrap;
+	background-color:var(--color-form-builder-column-batch);
+	border-radius:5px;
+}
+.builder-column-batch-options{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	padding:3px 8px;
+	gap:6px;
+}
+.builder-column-batch-options .icon{
+	width:24px;
+	padding:1px;
+	filter:var(--image-filter);
+}
+.builder-column-batch-options .caption{
+	width:100px;
+}
+.builder-column-batch-options .icon.move{
+	cursor:move;
+}
+.builder-column-batch-options .icon.clickable:hover{
+	width:26px;
+	padding:0px;
+}
+.builder-column-batch .children{
 	overflow:auto;
 	flex:1 1 auto;
 	min-height:20px;
 	margin:4px;
 	margin-top:0px;
-	padding:3px 0px 0px 3px;
+	padding:5px 0px 0px 5px;
 	display:flex;
 	flex-flow:row wrap;
-	align-items:flex-start;
-	align-content:flex-start;
 	border-radius:2px;
 	background-color:var(--color-bg);
-	background-size:31px 31px;
-	background-image:linear-gradient(var(--color-form-builder-actions-bg) 1px, transparent 1px),
-		linear-gradient(to right, var(--color-form-builder-actions-bg) 1px, var(--color-bg) 1px);
+}
+.builder-column-batch .children.vertical{
+	flex-direction:column;
+}
+.builder-column-batch .children>div{
+	min-width:240px;
+	max-width:360px;
+}
+.builder-column-batch.preview .children{
+	margin:0px;
+	padding:0px;
 }
 .builder-columns .column-wrap{
 	width:100%;

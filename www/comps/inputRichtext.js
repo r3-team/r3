@@ -45,6 +45,7 @@ let MyInputRichtext = {
 				content_style:`
 					.mce-content-body{ background-color:transparent; }
 				`,
+				entity_encoding:'raw', // disable encoding of things like umlaute, not required for UTF8 storage and makes searches easier
 				height:'100%',
 				image_advtab:true,
 				image_list:s.imageList,
@@ -74,9 +75,8 @@ let MyInputRichtext = {
 				obj.content_css = 'dark';
 			}
 			
-			if(!s.isMobile) {
+			if(!s.isMobile)
 				obj.toolbar = `undo redo ${obj.toolbar} outdent indent insertgroup code print searchreplace`;
-			}
 			
 			if(s.readonly)
 				obj.toolbar = false;

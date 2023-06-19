@@ -71,28 +71,11 @@ func MailAccountGet() (interface{}, error) {
 }
 
 func MailAccountSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
-	var req struct {
-		Id       int32  `json:"id"`
-		Name     string `json:"name"`
-		Mode     string `json:"mode"`
-		SendAs   string `json:"sendAs"`
-		Username string `json:"username"`
-		Password string `json:"password"`
-		StartTls bool   `json:"startTls"`
-		HostName string `json:"hostName"`
-		HostPort int64  `json:"hostPort"`
-	}
+	var req types.MailAccount
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-
-	if err := mail.SetAccount_tx(tx, req.Id, req.Name, req.Mode, req.SendAs,
-		req.Username, req.Password, req.StartTls, req.HostName, req.HostPort); err != nil {
-
-		return nil, err
-	}
-	return nil, nil
+	return nil, mail.SetAccount_tx(tx, req)
 }
 
 func MailAccountReload() (interface{}, error) {

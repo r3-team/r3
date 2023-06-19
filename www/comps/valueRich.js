@@ -21,7 +21,7 @@ let MyValueRich = {
 		@focus="$emit('focus')"
 		@click="$emit('trigger')"
 		@keyup.space.enter="$emit('trigger')"
-		:class="{ color:isColor, files:isFiles, wrap:wrap }"
+		:class="{ bold:bold, color:isColor, files:isFiles, italic:italic, wrap:wrap }"
 		:style="style"
 	>
 		<!-- copy to clipboard action -->
@@ -32,6 +32,7 @@ let MyValueRich = {
 			:blockBubble="true"
 			:captionTitle="capGen.button.copyClipboard"
 			:naked="true"
+			:tight="true"
 		/>
 		
 		<!-- link open action -->
@@ -43,6 +44,7 @@ let MyValueRich = {
 			:blockBubble="true"
 			:image="link.image"
 			:naked="true"
+			:tight="true"
 		/>
 		
 		<!-- string value -->
@@ -69,20 +71,21 @@ let MyValueRich = {
 			<img class="gallery-item"
 				v-for="f in files"
 				:src="getAttributeFileThumbHref(attributeId,f.id,f.name,f.version,token)"
-				:style="styleGallery"
+				:style="styleImage"
 			/>
 			
 			<img class="gallery-item placeholder" src="images/noPic.png"
 				v-if="files.length === 0"
-				:style="styleGallery"
 			/>
 		</template>
 	</div>`,
 	props:{
 		attributeId:{ type:String,  required:true },
 		basis:      { type:Number,  required:false, default:0 },         // size basis (usually column width)
+		bold:       { type:Boolean, required:false, default:false },
 		clipboard:  { type:Boolean, required:false, default:false },     // copy-to-clipboard action
 		display:    { type:String,  required:false, default:'default' }, // variant (url, gallery, password ...)
+		italic:     { type:Boolean, required:false, default:false },
 		length:     { type:Number,  required:false, default:0 },         // string length limit
 		value:      { required:true },
 		wrap:       { type:Boolean, required:false, default:false }      // wrap string value
@@ -111,8 +114,17 @@ let MyValueRich = {
 		link: (s) => !s.isLink || s.value === null ? false : s.getLinkMeta(s.display,s.value),
 		
 		// styles
-		style:       (s) => !s.isColor ? '' : `background-color:${s.colorAdjustBg(s.value,s.settings.dark)}`,
-		styleGallery:(s) => !s.isGallery || s.basis === 0 ? '' : `width:${s.basis}px;height:${s.basis}px;`,
+		style:(s) => {
+			let out = [];
+			if(s.basis !== 0)    out.push(`max-width:${s.basis}px`);
+			else if(s.isGallery) out.push(`max-width:40px`);
+			
+			if(s.isColor)
+				out.push(`background-color:${s.colorAdjustBg(s.value,s.settings.dark)}`);
+			
+			return out.join(';');
+		},
+		styleImage:(s) => `width:${(99 - s.files.length) / s.files.length}%`,
 		
 		// store
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],

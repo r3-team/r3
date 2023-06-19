@@ -1,7 +1,6 @@
 import srcBase64Icon                   from './shared/image.js';
 import {getBuildFromVersion}           from './shared/generic.js';
 import {setSingle as setSettingSingle} from './shared/settings.js';
-
 export {MyHome as default};
 
 let MyHome = {
@@ -181,22 +180,32 @@ let MyHome = {
 			? 0 : s.getBuildFromVersion(s.config.updateCheckVersion),		
 		
 		// stores
-		appName:       (s) => s.$store.getters['local/appName'],
-		appVersion:    (s) => s.$store.getters['local/appVersion'],
-		customBgHeader:(s) => s.$store.getters['local/customBgHeader'],
-		modules:       (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
-		capApp:        (s) => s.$store.getters.captions.home,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		config:        (s) => s.$store.getters.config,
-		isAdmin:       (s) => s.$store.getters.isAdmin,
-		isMobile:      (s) => s.$store.getters.isMobile,
-		settings:      (s) => s.$store.getters.settings
+		activated:  (s) => s.$store.getters['local/activated'],
+		appName:    (s) => s.$store.getters['local/appName'],
+		appVersion: (s) => s.$store.getters['local/appVersion'],
+		colorHeader:(s) => s.$store.getters['local/companyColorHeader'],
+		modules:    (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		iconIdMap:  (s) => s.$store.getters['schema/iconIdMap'],
+		capApp:     (s) => s.$store.getters.captions.home,
+		capGen:     (s) => s.$store.getters.captions.generic,
+		config:     (s) => s.$store.getters.config,
+		isAdmin:    (s) => s.$store.getters.isAdmin,
+		isMobile:   (s) => s.$store.getters.isMobile,
+		pwaModuleId:(s) => s.$store.getters.pwaModuleId,
+		settings:   (s) => s.$store.getters.settings
 	},
 	mounted() {
-		this.$store.commit('moduleColor1','');
 		this.$store.commit('pageTitle',this.capApp.title);
+		
+		// forward to PWA if enabled
+		if(this.pwaModuleId !== null) {
+			let mod = this.moduleIdMap[this.pwaModuleId];
+			let modParent = mod.parentId !== null
+				? this.moduleIdMap[mod.parentId] : mod;
+			
+			this.$router.replace(`/app/${modParent.name}/${mod.name}`);
+		}
 	},
 	methods:{
 		// externals
@@ -206,8 +215,10 @@ let MyHome = {
 		
 		// presentation
 		bgStyle(moduleId) {
-			return this.customBgHeader !== '' ? this.customBgHeader
-				: `background-color:#${this.moduleIdMap[moduleId].color1};`;
+			let color = this.activated && this.colorHeader !== ''
+				? `#${this.colorHeader}` : this.$root.moduleIdMapColor[moduleId];
+			
+			return `background-color:${color};`;
 		},
 		
 		// actions

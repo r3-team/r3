@@ -17,6 +17,7 @@ import (
 	"r3/mail/receive"
 	"r3/mail/send"
 	"r3/repo"
+	"r3/rest"
 	"r3/schema"
 	"r3/tools"
 	"r3/transfer"
@@ -380,6 +381,9 @@ func load() error {
 		case "repoCheck":
 			t.nameLog = "Check for updates from repository"
 			t.fn = repo.Update
+		case "restExecute":
+			t.nameLog = "REST call execution"
+			t.fn = rest.DoAll
 		case "updateCheck":
 			t.nameLog = "Check for platform updates from official website"
 			t.fn = updateCheck

@@ -64,6 +64,9 @@ vCPF8QXc4V/wgJZtn6vdSXGR5W0dByItU5TLOlk6kLX4Aj6G8T+J//7NX5InD5Q/
 func SetLicense() {
 	if config.GetString("licenseFile") == "" {
 		log.Info("server", "skipping activation check, no license installed")
+
+		// set empty in case license was removed
+		config.SetLicense(types.License{})
 		return
 	}
 
@@ -107,5 +110,5 @@ func SetLicense() {
 
 	// set license
 	log.Info("server", "setting license")
-	config.License = licFile.License
+	config.SetLicense(licFile.License)
 }

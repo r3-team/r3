@@ -139,7 +139,7 @@ let MyChart = {
 					
 					// set dataset defaults if empty
 					// source header is false, otherwise first column will be used as dimension name
-					if(typeof this.option.dataset === 'undefined') 
+					if(typeof this.option.dataset === 'undefined')
 						this.option.dataset = {
 							source:[],
 							sourceHeader:false

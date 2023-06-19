@@ -9,6 +9,7 @@ import {
 	isAttributeFloat,
 	isAttributeInteger,
 	isAttributeNumeric,
+	isAttributeRegconfig,
 	isAttributeRelationship,
 	isAttributeRelationship11,
 	isAttributeRelationshipN1,
@@ -27,7 +28,7 @@ let MyBuilderAttribute = {
 		<div class="contentBox builder-attribute pop-up" v-if="values !== null">
 			<div class="top">
 				<div class="area nowrap">
-					<img class="icon" :src="'images/'+getAttributeIcon(values,false)" />
+					<img class="icon" :src="'images/'+getAttributeIcon(values,false,false)" />
 					<h1 class="title">{{ title }}</h1>
 				</div>
 				<div class="area">
@@ -121,8 +122,9 @@ let MyBuilderAttribute = {
 										<option value="number"   :disabled="!isNew && !isInteger">{{ capApp.option.number }}</option>
 										<option value="decimal"  :disabled="!isNew && !isNumeric">{{ capApp.option.decimal }}</option>
 										<option value="color"    :disabled="!isNew && !isString">{{ capApp.option.color }}</option>
-										<option value="files"    :disabled="!isNew && !isFiles">{{ capApp.option.files }}</option>
+										<option value="iframe"   :disabled="!isNew && !isString">{{ capApp.option.iframe }}</option>
 										<option value="boolean"  :disabled="!isNew && !isBoolean">{{ capApp.option.boolean }}</option>
+										<option value="files"    :disabled="!isNew && !isFiles">{{ capApp.option.files }}</option>
 									</optgroup>
 									<optgroup :label="capApp.datetimes" :disabled="!isNew && !isInteger">
 										<option value="datetime">{{ capApp.option.datetime }}</option>
@@ -134,18 +136,19 @@ let MyBuilderAttribute = {
 										<option value="relationship11">{{ capApp.option.relationship11 }}</option>
 									</optgroup>
 									<optgroup :label="capApp.expert" :disabled="!isNew && !isFloat && !isUuid">
-										<option value="float" :disabled="!isNew && !isFloat">{{ capApp.option.float }}</option>
-										<option value="uuid"  :disabled="!isNew && !isUuid">{{ capApp.option.uuid }}</option>
+										<option value="float"     :disabled="!isNew && !isFloat">{{ capApp.option.float }}</option>
+										<option value="uuid"      :disabled="!isNew && !isUuid">{{ capApp.option.uuid }}</option>
+										<option value="regconfig" :disabled="!isNew && !isRegconfig">{{ capApp.option.regconfig }}</option>
 									</optgroup>
 								</select>
 								<my-button
 									:active="false"
-									:image="getAttributeIcon(values,false)"
+									:image="getAttributeIcon(values,false,false)"
 									:naked="true"
 								/>
 							</div>
 						</td>
-						<td>{{ capApp['usedForHint'][usedFor] }}</td>
+						<td>{{ capApp.usedForHint[usedFor] }}</td>
 					</tr>
 					
 					<!-- bigint -->
@@ -301,19 +304,21 @@ let MyBuilderAttribute = {
 		},
 		usedFor:{
 			get() {
-				if(this.isBoolean)  return 'boolean';
-				if(this.isColor)    return 'color';
-				if(this.isDate)     return 'date';
-				if(this.isDatetime) return 'datetime';
-				if(this.isNumber)   return 'number';
-				if(this.isNumeric)  return 'decimal';
-				if(this.isFiles)    return 'files';
-				if(this.isFloat)    return 'float';
-				if(this.isRichtext) return 'richtext';
-				if(this.isText)     return 'text';
-				if(this.isTextarea) return 'textarea';
-				if(this.isTime)     return 'time';
-				if(this.isUuid)     return 'uuid';
+				if(this.isBoolean)   return 'boolean';
+				if(this.isColor)     return 'color';
+				if(this.isDate)      return 'date';
+				if(this.isDatetime)  return 'datetime';
+				if(this.isNumber)    return 'number';
+				if(this.isNumeric)   return 'decimal';
+				if(this.isFiles)     return 'files';
+				if(this.isFloat)     return 'float';
+				if(this.isIframe)    return 'iframe';
+				if(this.isRegconfig) return 'regconfig';
+				if(this.isRichtext)  return 'richtext';
+				if(this.isText)      return 'text';
+				if(this.isTextarea)  return 'textarea';
+				if(this.isTime)      return 'time';
+				if(this.isUuid)      return 'uuid';
 				if(this.isRelationship11) return 'relationship11';
 				if(this.isRelationshipN1) return 'relationshipN1';
 				
@@ -336,6 +341,11 @@ let MyBuilderAttribute = {
 						this.values.content    = 'varchar';
 						this.values.contentUse = 'color';
 						this.values.length     = 6;
+					break;
+					case 'iframe':
+						this.values.content    = 'text';
+						this.values.contentUse = 'iframe';
+						this.values.length     = 0;
 					break;
 					
 					// boolean uses
@@ -383,6 +393,12 @@ let MyBuilderAttribute = {
 						this.values.contentUse = 'default';
 					break;
 					
+					// regconfig uses
+					case 'regconfig':
+						this.values.content    = 'regconfig';
+						this.values.contentUse = 'default';
+					break;
+					
 					// UUID uses
 					case 'uuid':
 						this.values.content    = 'uuid';
@@ -411,6 +427,7 @@ let MyBuilderAttribute = {
 		isFloat:         (s) => s.isAttributeFloat(s.values.content),
 		isInteger:       (s) => s.isAttributeInteger(s.values.content),
 		isNumeric:       (s) => s.isAttributeNumeric(s.values.content),
+		isRegconfig:     (s) => s.isAttributeRegconfig(s.values.content),
 		isRelationship:  (s) => s.isAttributeRelationship(s.values.content),
 		isRelationship11:(s) => s.isAttributeRelationship11(s.values.content),
 		isRelationshipN1:(s) => s.isAttributeRelationshipN1(s.values.content),
@@ -421,6 +438,7 @@ let MyBuilderAttribute = {
 		isColor:   (s) => s.isString  && s.values.contentUse === 'color',
 		isDate:    (s) => s.isInteger && s.values.contentUse === 'date',
 		isDatetime:(s) => s.isInteger && s.values.contentUse === 'datetime',
+		isIframe:  (s) => s.isString  && s.values.contentUse === 'iframe',
 		isNumber:  (s) => s.isInteger && s.values.contentUse === 'default',
 		isRichtext:(s) => s.isString  && s.values.contentUse === 'richtext',
 		isText:    (s) => s.isString  && s.values.contentUse === 'default',
@@ -452,6 +470,7 @@ let MyBuilderAttribute = {
 		isAttributeFloat,
 		isAttributeInteger,
 		isAttributeNumeric,
+		isAttributeRegconfig,
 		isAttributeRelationship,
 		isAttributeRelationship11,
 		isAttributeRelationshipN1,

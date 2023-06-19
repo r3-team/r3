@@ -56,8 +56,9 @@ let MyAdminLogin = {
 				:allowNew="false"
 				:formId="loginForms[loginFormIndexOpen].formId"
 				:isPopUp="true"
+				:isPopUpFloating="true"
 				:moduleId="formIdMap[loginForms[loginFormIndexOpen].formId].moduleId"
-				:recordId="loginFormRecord"
+				:recordIds="loginFormRecords"
 			/>
 		</div>
 		
@@ -322,7 +323,7 @@ let MyAdminLogin = {
 			
 			// login form
 			loginFormIndexOpen:null,
-			loginFormRecord:null
+			loginFormRecords:null
 		};
 	},
 	computed:{
@@ -424,8 +425,8 @@ let MyAdminLogin = {
 			this.$store.commit('moduleLanguage',this.getValidLanguageCode(mod));
 			
 			this.loginFormIndexOpen = index;
-			this.loginFormRecord    = this.records[index].id !== null
-				? this.records[index].id : 0;
+			this.loginFormRecords   = this.records[index].id !== null
+				? [this.records[index].id] : [];
 		},
 		toggleRoleId(roleId) {
 			let pos = this.roleIds.indexOf(roleId);

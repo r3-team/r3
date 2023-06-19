@@ -58,13 +58,13 @@ let MyAdminLoginTemplate = {
 						<td><textarea v-model="comment" /></td>
 					</tr>
 					
-					<!-- display settings -->
+					<!-- general settings -->
 					<tr>
 						<td class="grouping" colspan="2">
 							<br />
 							<div class="contentPartHeader">
-								<img class="icon" src="images/visible1.png" />
-								<h1>{{ capAppSet.titleDisplay }}</h1>
+								<img class="icon" src="images/settings.png" />
+								<h1>{{ capAppSet.titleGeneral }}</h1>
 							</div>
 						</td>
 					</tr>
@@ -108,13 +108,32 @@ let MyAdminLoginTemplate = {
 						<td>{{ capAppSet.mobileScrollForm }}</td>
 						<td><my-bool v-model="settings.mobileScrollForm" /></td>
 					</tr>
+					<tr>
+						<td>{{ capAppSet.searchDictionaries }}</td>
+						<td>
+							<div class="column gap">
+								<select v-model="searchDictionaryNew" @change="dictAdd($event.target.value)">
+									<option value="">{{ capAppSet.searchDictionaryNew }}</option>
+									<option v-for="d in searchDictionaries.filter(v => !settings.searchDictionaries.includes(v) && v !== 'simple')">
+										{{ d }}
+									</option>
+								</select>
+								<div class="row wrap gap">
+									<div v-for="d in settings.searchDictionaries" class="row centered gap">
+										<span>{{ d }}</span>
+										<my-button image="delete.png" @trigger="dictDel(d)" :cancel="true" />
+									</div>
+								</div>
+							</div>
+						</td>
+					</tr>
 					
 					<!-- theming -->
 					<tr>
 						<td class="grouping" colspan="2">
 							<br />
 							<div class="contentPartHeader">
-								<img class="icon" src="images/layout.png" />
+								<img class="icon" src="images/visible1.png" />
 								<h1>{{ capAppSet.titleTheme }}</h1>
 							</div>
 						</td>
@@ -236,6 +255,7 @@ let MyAdminLoginTemplate = {
 			id:0,
 			name:'',
 			comment:'',
+			searchDictionaryNew:'',
 			settings:{},
 			
 			// states
@@ -262,11 +282,12 @@ let MyAdminLoginTemplate = {
 		isNew:   (s) => s.id     === 0,
 		
 		// stores
-		languageCodes:(s) => s.$store.getters['schema/languageCodes'],
-		capApp:       (s) => s.$store.getters.captions.admin.loginTemplate,
-		capAppSet:    (s) => s.$store.getters.captions.settings,
-		capGen:       (s) => s.$store.getters.captions.generic,
-		config:       (s) => s.$store.getters.config
+		languageCodes:     (s) => s.$store.getters['schema/languageCodes'],
+		searchDictionaries:(s) => s.$store.getters['searchDictionaries'],
+		capApp:            (s) => s.$store.getters.captions.admin.loginTemplate,
+		capAppSet:         (s) => s.$store.getters.captions.settings,
+		capGen:            (s) => s.$store.getters.captions.generic,
+		config:            (s) => s.$store.getters.config
 	},
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);
@@ -292,6 +313,7 @@ let MyAdminLoginTemplate = {
 			mobileScrollForm:true,
 			pageLimit:2000,
 			pattern:'bubbles',
+			searchDictionaries:['english'],
 			spacing:3,
 			sundayFirstDow:true,
 			tabRemember:true,
@@ -320,6 +342,17 @@ let MyAdminLoginTemplate = {
 				this.inputsOrg[k] = JSON.parse(JSON.stringify(this[k]));
 			}
 			this.inputsReady = true;
+		},
+		
+		// actions
+		dictAdd(entry) {
+			this.settings.searchDictionaries.push(entry);
+			this.searchDictionaryNew = '';
+		},
+		dictDel(entry) {
+			let pos = this.settings.searchDictionaries.indexOf(entry);
+			if(pos !== -1)
+				this.settings.searchDictionaries.splice(pos,1);
 		},
 		
 		// backend calls

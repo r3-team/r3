@@ -1,4 +1,5 @@
 import MyInputCollection from './inputCollection.js';
+import MyForm            from './form.js';
 import MyValueRich       from './valueRich.js';
 import {srcBase64}       from './shared/image.js';
 import {getCaption}      from './shared/language.js';
@@ -49,13 +50,13 @@ let MyCalendarMonth = {
 			<div class="area nowrap">
 				<my-button image="new.png"
 					v-if="hasCreate"
-					@trigger="$emit('open-form',0,[],false)"
-					@trigger-middle="$emit('open-form',0,[],true)"
-					:caption="!isMobile ? capGen.button.new : ''"
+					@trigger="$emit('open-form',[],[],false)"
+					@trigger-middle="$emit('open-form',[],[],true)"
+					:caption="capGen.button.new"
 					:captionTitle="capGen.button.newHint"
 				/>
 			</div>
-		
+			
 			<div class="area nowrap default-inputs">
 				<img class="icon"
 					v-if="iconId !== null"
@@ -88,7 +89,7 @@ let MyCalendarMonth = {
 				/>
 			</div>
 			
-			<div class="area nowrap default-inputs">
+			<div class="area wrap gap default-inputs">
 				<my-input-collection class="selector"
 					v-for="c in collections"
 					@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event)"
@@ -113,12 +114,15 @@ let MyCalendarMonth = {
 					@trigger="showIcs = !showIcs"
 					:caption="!isMobile ? capApp.button.ics : ''"
 					:captionTitle="capApp.button.icsHint"
+					:tight="true"
 				/>
 				
 				<my-button image="calendar.png"
+					v-if="!isMobile"
 					@trigger="goToToday()"
 					:caption="!isMobile && !isInput ? capApp.today : ''"
 					:captionTitle="capApp.todayHint"
+					:tight="true"
 				/>
 			</div>
 		</div>
@@ -146,89 +150,115 @@ let MyCalendarMonth = {
 			</template>
 		</div>
 		
-		<!-- week day header -->
-		<div class="days">
-			<div class="item" v-for="day in 7">{{ getWeekDayCaption(day-1) }}</div>
-		</div>
-		
-		<!-- weeks -->
-		<div class="week" v-for="week in 6">
-			
-			<!-- days -->
-			<div class="day"
-				v-for="day in 7"
-				@click.exact="clickDay(((week-1)*7)+day-1,false,false)"
-				@click.shift="clickDay(((week-1)*7)+day-1,true,false)"
-				@click.middle.exact="clickDay(((week-1)*7)+day-1,false,true)"
-				@click.middle.shift="clickDay(((week-1)*7)+day-1,true,true)"
-				:class="getDayClasses(((week-1)*7)+day-1,day)"
-			>
-				<h1 class="noHighlight">{{ getDayNumber(((week-1)*7)+day-1) }}</h1>
+		<div class="resultsWrap">
+			<div class="results">
+				<!-- week day header -->
+				<div class="days">
+					<div class="item" v-for="day in 7">{{ getWeekDayCaption(day-1) }}</div>
+				</div>
 				
-				<!-- full day events -->
-				<div class="event"
-					@click.stop="clickRecord(e.recordId,false)"
-					@click.middle.stop="clickRecord(e.recordId,true)"
-					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => v.fullDay || v.placeholder)"
-					:class="{ first:e.entryFirst, last:e.entryLast, placeholder:e.placeholder, clickable:rowSelect }"
-				>
-					<template v-if="!e.placeholder">
-						<!-- border line -->
-						<div class="background"
-							:style="getColor('border-bottom-color',e.color)"
-						></div>
+				<!-- weeks -->
+				<div class="week" v-for="week in 6">
+					
+					<!-- days -->
+					<div class="day"
+						v-for="day in 7"
+						@click.exact="clickDay(((week-1)*7)+day-1,false,false)"
+						@click.shift="clickDay(((week-1)*7)+day-1,true,false)"
+						@click.middle.exact="clickDay(((week-1)*7)+day-1,false,true)"
+						@click.middle.shift="clickDay(((week-1)*7)+day-1,true,true)"
+						:class="getDayClasses(((week-1)*7)+day-1,day)"
+					>
+						<h1 class="noHighlight">{{ getDayNumber(((week-1)*7)+day-1) }}</h1>
 						
-						<!-- caption -->
-						<span class="values"
-							v-if="day === 1 || e.entryFirst"
-							:style="getFullDayTextStyles(day,e)"
+						<!-- full day events -->
+						<div class="event"
+							@click="clickRecord($event,e.recordId,e.placeholder,false)"
+							@click.middle="clickRecord($event,e.recordId,e.placeholder,true)"
+							v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => v.fullDay || v.placeholder)"
+							:class="{ first:e.entryFirst, last:e.entryLast, placeholder:e.placeholder, clickable:rowSelect }"
 						>
+							<template v-if="!e.placeholder">
+								<!-- border line -->
+								<div class="background"
+									:style="getColor('border-bottom-color',e.color)"
+								></div>
+								
+								<!-- caption -->
+								<span class="values"
+									v-if="day === 1 || e.entryFirst"
+									:style="getFullDayTextStyles(day,e)"
+								>
+									<template v-for="(v,i) in e.values">
+										<my-value-rich class="context-calendar"
+											v-if="v !== null"
+											:attributeId="columns[i].attributeId"
+											:basis="columns[i].basis"
+											:bold="columns[i].styles.includes('bold')"
+											:display="columns[i].display"
+											:italic="columns[i].styles.includes('italic')"
+											:key="i"
+											:length="columns[i].length"
+											:value="v"
+										/>
+									</template>
+								</span>
+								
+								<!-- ending beam -->
+								<div class="ending-beam"
+									v-if="e.entryLast"
+									:style="getColor('background-color',e.color)"
+								></div>
+							</template>
+						</div>
+						
+						<!-- partial day events -->
+						<div class="part"
+							@click="clickRecord($event,e.recordId,false,false)"
+							@click.middle="clickRecord($event,e.recordId,false,true)"
+							v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => !v.fullDay && !v.placeholder)"
+							:class="{ clickable:rowSelect }"
+						>
+							<span :style="getColor('background-color',e.color)">
+								{{ getPartCaption(e.date0) }}
+							</span>
+							
 							<template v-for="(v,i) in e.values">
 								<my-value-rich class="context-calendar"
 									v-if="v !== null"
 									:attributeId="columns[i].attributeId"
 									:basis="columns[i].basis"
+									:bold="columns[i].styles.includes('bold')"
 									:display="columns[i].display"
+									:italic="columns[i].styles.includes('italic')"
 									:key="i"
 									:length="columns[i].length"
+									:wrap="true"
 									:value="v"
 								/>
 							</template>
-						</span>
-						
-						<!-- ending beam -->
-						<div class="ending-beam"
-							v-if="e.entryLast"
-							:style="getColor('background-color',e.color)"
-						></div>
-					</template>
-				</div>
-				
-				<!-- partial day events -->
-				<div class="part"
-					@click.stop="clickRecord(e.recordId,false)"
-					@click.middle.stop="clickRecord(e.recordId,true)"
-					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => !v.fullDay && !v.placeholder)"
-					:class="{ clickable:rowSelect }"
-				>
-					<span :style="getColor('background-color',e.color)">
-						{{ getPartCaption(e.date0) }}
-					</span>
-					
-					<template v-for="(v,i) in e.values">
-						<my-value-rich class="context-calendar"
-							v-if="v !== null"
-							:attributeId="columns[i].attributeId"
-							:basis="columns[i].basis"
-							:display="columns[i].display"
-							:key="i"
-							:length="columns[i].length"
-							:wrap="true"
-							:value="v"
-						/>
-					</template>
+						</div>
+					</div>
 				</div>
 			</div>
+			
+			<!-- inline form -->
+			<my-form
+				v-if="popUpFormInline !== null"
+				@close="$emit('close-inline')"
+				@record-deleted="$emit('reload')"
+				@record-updated="$emit('reload')"
+				@records-open="popUpFormInline.recordIds = $event"
+				:attributeIdMapDef="popUpFormInline.attributeIdMapDef"
+				:formId="popUpFormInline.formId"
+				:hasHelp="false"
+				:hasLog="false"
+				:isPopUp="true"
+				:isPopUpFloating="false"
+				:moduleId="popUpFormInline.moduleId"
+				:recordIds="popUpFormInline.recordIds"
+				:style="popUpFormInline.style"
+			/>
 		</div>
 	</div>`,
 	props:{
@@ -251,12 +281,13 @@ let MyCalendarMonth = {
 		isInput:    { type:Boolean, required:false, default:false },
 		hasColor:   { type:Boolean, required:false, default:false },    // color attribute exists
 		hasCreate:  { type:Boolean, required:false, default:false },    // has action for creating new record
+		popUpFormInline:{ required:false, default:null },
 		rows:       { type:Array,   required:false, default:() => [] },
 		rowSelect:  { type:Boolean, required:false, default:false }
 	},
 	emits:[
-		'day-selected','open-form','record-selected','set-choice-id',
-		'set-collection-indexes','set-date'
+		'close-inline','day-selected','open-form','reload',
+		'set-choice-id','set-collection-indexes','set-date'
 	],
 	data() {
 		return {
@@ -422,6 +453,10 @@ let MyCalendarMonth = {
 		loginId:       (s) => s.$store.getters.loginId,
 		settings:      (s) => s.$store.getters.settings
 	},
+	beforeCreate() {
+		// import at runtime due to circular dependencies
+		this.$options.components.MyForm = MyForm;
+	},
 	methods:{
 		// externals
 		getCaption,
@@ -443,9 +478,14 @@ let MyCalendarMonth = {
 			// dates are stored as UTC zero
 			this.$emit('day-selected',this.getDateAtUtcZero(d),shift,middleClick);
 		},
-		clickRecord(recordId,middleClick) {
+		clickRecord(event,recordId,placeholder,middleClick) {
+			if(placeholder) return;
+			
+			// block clickDay() event (placeholders must bubble)
+			event.stopPropagation();
+			
 			if(this.rowSelect)
-				this.$emit('record-selected',recordId,[],middleClick);
+				this.$emit('open-form',(typeof recordId === 'undefined' ? [] : [recordId]),[],middleClick);
 		},
 		goToToday() {
 			// switch to current month if not there (to show 'today')
@@ -578,9 +618,10 @@ let MyCalendar = {
 	template:`<div class="calendar" :class="{ isSingleField:isSingleField }" v-if="ready">
 		<my-calendar-month
 			v-if="view === 'month'"
+			@close-inline="$emit('close-inline')"
 			@day-selected="daySelected"
 			@open-form="(...args) => $emit('open-form',...args)"
-			@record-selected="(...args) => $emit('record-selected',...args)"
+			@reload="get"
 			@set-choice-id="choiceIdSet"
 			@set-collection-indexes="(...args) => $emit('set-collection-indexes',...args)"
 			@set-date="dateSet"
@@ -601,6 +642,7 @@ let MyCalendar = {
 			:hasCreate="hasCreate"
 			:iconId="iconId"
 			:ics="ics"
+			:popUpFormInline="popUpFormInline"
 			:rows="rows"
 			:rowSelect="rowSelect"
 		/>
@@ -623,11 +665,12 @@ let MyCalendar = {
 		indexDate1:      { type:Number,  required:true },
 		isHidden:        { type:Boolean, required:false, default:false },
 		isSingleField:   { type:Boolean, required:false, default:false },
+		popUpFormInline: { required:true },
 		query:           { type:Object,  required:true },
 		rowSelect:       { type:Boolean, required:false, default:false },
 		usesPageHistory: { type:Boolean, required:true }
 	},
-	emits:['open-form','record-count-change','record-selected','set-args','set-collection-indexes'],
+	emits:['close-inline','open-form','record-count-change','set-args','set-collection-indexes'],
 	data() {
 		return {
 			// calendar state
@@ -750,7 +793,7 @@ let MyCalendar = {
 				`${this.attributeIdDate0}_${this.getUnixFromDate(this.dateSelect0)}`,
 				`${this.attributeIdDate1}_${this.getUnixFromDate(this.dateSelect1)}`
 			];
-			this.$emit('open-form',0,[`attributes=${attributes.join(',')}`],middleClick);
+			this.$emit('open-form',[],[`attributes=${attributes.join(',')}`],middleClick);
 			this.dateSelect0 = null;
 			this.dateSelect1 = null;
 		},
