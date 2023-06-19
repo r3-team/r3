@@ -1,9 +1,12 @@
-import {getLineBreaksParsedToHtml} from './shared/generic.js';
-import {openLink}                  from './shared/generic.js';
+import {consoleError} from './shared/error.js';
 import {
 	aesGcmExportBase64,
 	pbkdf2PassToAesGcmKey
 } from './shared/crypto.js';
+import {
+	getLineBreaksParsedToHtml,
+	openLink
+} from './shared/generic.js';
 export {MyLogin as default};
 
 let MyLogin = {
@@ -350,6 +353,7 @@ let MyLogin = {
 	methods:{
 		// externals
 		aesGcmExportBase64,
+		consoleError,
 		getLineBreaksParsedToHtml,
 		pbkdf2PassToAesGcmKey,
 		openLink,
@@ -440,6 +444,11 @@ let MyLogin = {
 			
 			if(saltKdf === null)
 				return this.appEnable(loginId,loginName);
+			
+			if(typeof crypto.subtle === 'undefined') {
+				this.consoleError('crypto API not available');
+				return this.appEnable(loginId,loginName);
+			}
 			
 			// generate AES key from credentials and login private key salt
 			this.pbkdf2PassToAesGcmKey(this.password,saltKdf,this.kdfIterations,true).then(

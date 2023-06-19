@@ -36,7 +36,7 @@ export function genericErrorWithFallback(message,fallbackContext,fallbackNumber)
 // these are errors that should not occur
 // they are printed to the console for troubleshooting
 export function consoleError(err) {
-	console.log(`${new Date().toLocaleString()}: An error occurred`,
+	console.log(`${new Date().toLocaleString()}: An error occurred,`,
 		resolveErrCode(err));
 };
 
