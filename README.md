@@ -17,16 +17,17 @@ Applications are built with the integrated, graphical [Builder](https://rei3.de/
   * ICS calendar access.
   * Multi-language support.
   * Multi factor authentication.
+  * Full-text search capabilities.
 * For enterprise environments:
   * LDAP import for user logins and access permissions.
   * Cluster management.
   * Customization of application colors, names, welcome messages and so on.
 
 ## :ticket: Community
-***New!*** We just created a new forum to serve as an official site for REI3 discussions. Feel free to browse or sign-up to post questions, requests, issues and feedback. You can find the new forum at [community.rei3.de](https://community.rei3.de).
+We´ve created a new forum to serve as an official site for REI3 discussions. Feel free to browse or sign-up to post questions, requests, issues and feedback. You can find the new forum at [community.rei3.de](https://community.rei3.de).
 
 ## 📀 How to install
-REI3 is easy to setup, with a graphical installer and portable version on Windows, packages for Linux systems as well as a compose file for Docker environments.
+REI3 is easy to setup, with a graphical installer and portable version on Windows, packages for Linux systems as well as a compose file for Docker environments. Installation packages are available on the [website](https://rei3.de/en/downloads).
 
 To get a full step-by-step manuel, visit the [admin documentation](https://rei3.de/en/docs/admin). It also includes details about different deployment options and system requirements.
 
@@ -39,7 +40,7 @@ For information about how to use the Builder, please visit the [Builder document
 If you want to make changes to the REI3 platform itself, you can fork this repository or download the source code and then build your own executable.
 
 1. Install the latest version of [Golang](https://golang.org/dl/).
-1. Choose the source code for the version you want to build - usually that´s the master branch, but you can also choose any released version (as in `2.5.1.2980`).
+1. Choose the source code for the version you want to build - usually that´s the master branch, but you can also choose any released version (as in `3.4.0.4705`).
 1. Go into the source code directory (where `r3.go` is located) and execute: `go build -ldflags "-X main.appVersion={YOUR_APP_VERSION}"`.
    * Replace `{YOUR_APP_VERSION}` with the version of the extracted source code. Example: `go build -ldflags "-X main.appVersion=2.5.1.2980"`
    * You can change the build version anytime. If you want to upgrade the major/minor version numbers however, you need to deal with upgrading the REI3 database (see `db/upgrade/upgrade.go`).
