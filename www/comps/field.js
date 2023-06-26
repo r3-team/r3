@@ -1145,7 +1145,9 @@ let MyField = {
 			if(typeof openFormContext === 'undefined') openFormContext = null;
 			
 			// form open context
-			let openForm = openFormContext === 'bulk' ? this.field.openFormBulk : this.field.openForm;
+			let openForm = JSON.parse(JSON.stringify(
+				openFormContext === 'bulk' ? this.field.openFormBulk : this.field.openForm
+			));
 			
 			// apply record from defined relation index as attribute value via getter
 			if(openForm.attributeIdApply !== null

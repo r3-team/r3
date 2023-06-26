@@ -1156,7 +1156,7 @@ let MyForm = {
 			let openPopUpForm = openForm.popUpType !== null;
 			
 			if(this.isPopUp) {
-				// a pop-up form can be reloaded by using itself as target (the same as regular forms)
+				// a pop-up form (floating/inline) can be reloaded by using itself as target (the same as regular forms)
 				// unless it wants to open itself again as pop-up
 				if(openSameForm && !openPopUpForm)
 					return this.$emit('records-open',recordIds);
