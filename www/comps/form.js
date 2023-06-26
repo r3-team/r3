@@ -298,7 +298,7 @@ let MyForm = {
 		hasHelp:          { type:Boolean, required:false, default:true },
 		hasLog:           { type:Boolean, required:false, default:true },
 		isPopUp:          { type:Boolean, required:false, default:false }, // form pop-ups from another element (either floating or inline)
-		isPopUpFloating:  { type:Boolean, required:false, default:false },
+		isPopUpFloating:  { type:Boolean, required:false, default:false }, // this form is a floating pop-up
 		moduleId:         { type:String,  required:true },
 		recordIds:        { type:Array,   required:true } // to be handled records, [] is new
 	},
@@ -1161,8 +1161,9 @@ let MyForm = {
 				if(openSameForm && !openPopUpForm)
 					return this.$emit('records-open',recordIds);
 				
-				// a pop-up form can only open other pop-ups
-				if(!openPopUpForm)
+				// a floating pop-up form can only open other floating pop-ups
+				// otherwise navigation becomes difficult and confusing
+				if(this.isPopUpFloating && !openPopUpForm)
 					openForm.popUpType = 'float';
 			}
 			
