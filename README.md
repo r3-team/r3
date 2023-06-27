@@ -60,3 +60,4 @@ Contributions are always welcome - feel free to fork and submit pull requests.
 REI3 follows a four-digit versioning syntax, such as 3.2.0.4246 (MAJOR.MINOR.PATCH.BUILD). The major release will stay at 3 indefinitely, while we introduce new features and database changes with each minor release. Patch releases primarily focus on fixes, but may include small features as long as the database is not changed.
 
 The branch `main` will contain the currently released minor version of REI3; patches for this version can directly be submitted for the main branch. Each new minor release will use a separate branch, which will merge with `main` once the latest minor version is released.
+![start_page_apps](https://github.com/r3-team/r3/assets/91757492/e3fa544d-6f37-4675-a13e-156a0ea9185e)
