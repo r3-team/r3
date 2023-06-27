@@ -706,7 +706,7 @@ let MyBuilderForm = {
 		fieldShowHasQuery:(s) => s.getFieldHasQuery(s.fieldShow),
 		form:             (s) => typeof s.formIdMap[s.id] === 'undefined' ? false : s.formIdMap[s.id],
 		joinsIndexMap:    (s) => s.getJoinsIndexMap(s.joins),
-		presetCandidates: (s) => s.relation === false ? [] : s.relationIdMap[s.form.query.relationId].presets,
+		presetCandidates: (s) => s.relation === false ? [] : s.relationIdMap[s.relationId].presets,
 		relation:         (s) => typeof s.relationIdMap[s.relationId] === 'undefined' ? false : s.relationIdMap[s.relationId],
 		
 		// stores
