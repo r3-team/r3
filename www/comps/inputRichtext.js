@@ -28,7 +28,7 @@ let MyInputRichtext = {
 		return {
 			imageList:[], // list of available images
 			key:0,        // key is used to force update richtext editor
-			knownHotkeys:['q','s'],
+			knownCtrlKeys:['q','s'],
 			
 			// tokens are used to authenticate with the current user session
 			// we cannot store sensitive tokens inside richtext, but tokens are required for accessing files
@@ -148,7 +148,7 @@ let MyInputRichtext = {
 		
 		// actions
 		handleHotkeys(e) {
-			if(e.ctrlKey && this.knownHotkeys.includes(e.key)) {
+			if(e.key === 'Escape' || (e.ctrlKey && this.knownCtrlKeys.includes(e.key))) {
 				this.$emit('hotkey',e);
 				e.preventDefault();
 			}

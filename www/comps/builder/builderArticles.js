@@ -63,6 +63,11 @@ let MyBuilderArticlesItem = {
 									:language="builderLanguage"
 									:readonly="readonly"
 								/>
+								<my-button image="languages.png"
+									@trigger="$emit('nextLanguage')"
+									:active="module.languages.length > 1"
+									:caption="builderLanguage"
+								/>
 							</div>
 							
 							<div class="area">
@@ -82,6 +87,7 @@ let MyBuilderArticlesItem = {
 						<div class="content grow no-padding builder-articles-body-richtext">
 							<my-builder-caption
 								v-model="captions.articleBody"
+								@hotkey="handleHotkeys"
 								:contentName="''"
 								:language="builderLanguage"
 								:readonly="readonly"
@@ -95,10 +101,10 @@ let MyBuilderArticlesItem = {
 	</tbody>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },
-		moduleId:       { type:String,  required:true },
+		module:         { type:Object,  required:true },
 		readonly:       { type:Boolean, required:true },
 		article:        { type:Object,  required:false,
-			default:function() { return{
+			default() { return{
 				id:null,
 				name:'',
 				captions:{
@@ -108,7 +114,8 @@ let MyBuilderArticlesItem = {
 			}}
 		}
 	},
-	data:function() {
+	emits:['nextLanguage'],
+	data() {
 		return {
 			captions:JSON.parse(JSON.stringify(this.article.captions)),
 			name:this.article.name,
@@ -128,9 +135,34 @@ let MyBuilderArticlesItem = {
 		capApp:(s) => s.$store.getters.captions.builder.articles,
 		capGen:(s) => s.$store.getters.captions.generic
 	},
+	mounted() {
+		window.addEventListener('keydown',this.handleHotkeys);
+	},
+	unmounted() {
+		window.removeEventListener('keydown',this.handleHotkeys);
+	},
 	methods:{
 		// externals
 		copyValueDialog,
+		
+		// actions
+		handleHotkeys(e) {
+			if(e.key === 'Escape' && this.showContent)
+				this.showContent = false;
+			
+			if(e.ctrlKey && e.key === 's') {
+				e.preventDefault();
+				
+				if(this.hasChanges)
+					this.set();
+			}
+			
+			if(e.ctrlKey && e.key === 'q') {
+				e.preventDefault();
+				
+				this.$emit('nextLanguage');
+			}
+		},
 		
 		// backend calls
 		delAsk() {
@@ -149,14 +181,14 @@ let MyBuilderArticlesItem = {
 		},
 		del() {
 			ws.send('article','del',{id:this.article.id},true).then(
-				() => this.$root.schemaReload(this.moduleId),
+				() => this.$root.schemaReload(this.module.id),
 				this.$root.genericError
 			);
 		},
 		set() {
 			ws.send('article','set',{
 				id:this.article.id,
-				moduleId:this.moduleId,
+				moduleId:this.module.id,
 				name:this.name,
 				captions:this.captions
 			},true).then(
@@ -168,7 +200,7 @@ let MyBuilderArticlesItem = {
 							articleBody:{}
 						};
 					}
-					this.$root.schemaReload(this.moduleId);
+					this.$root.schemaReload(this.module.id);
 				},
 				this.$root.genericError
 			);
@@ -205,18 +237,20 @@ let MyBuilderArticles = {
 					
 					<!-- new article -->
 					<my-builder-articles-item
+						@nextLanguage="$emit('nextLanguage')"
 						:builderLanguage="builderLanguage"
-						:moduleId="module.id"
+						:module="module"
 						:readonly="readonly"
 					/>
 					
 					<!-- existing articles -->
 					<my-builder-articles-item
 						v-for="art in module.articles"
+						@nextLanguage="$emit('nextLanguage')"
 						:article="art"
 						:builderLanguage="builderLanguage"
 						:key="art.id"
-						:moduleId="module.id"
+						:module="module"
 						:readonly="readonly"
 					/>
 				</table>
@@ -312,7 +346,7 @@ let MyBuilderArticles = {
 			</div>
 		</div>
 	</div>`,
-	emits:['hotkeysRegister'],
+	emits:['hotkeysRegister','nextLanguage'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		id:             { type:String,  required:true },
@@ -351,7 +385,7 @@ let MyBuilderArticles = {
 	},
 	watch:{
 		module:{
-			handler:function() { this.reset(); },
+			handler() { this.reset(); },
 			immediate:true
 		}
 	},
