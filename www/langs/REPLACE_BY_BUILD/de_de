@@ -824,6 +824,8 @@
 			"warning":{
 				"calendarNoDateFromTo":"Kein Attribut ausgewählt für \"Datum von\" oder \"Datum zu\". Beide sind notwendig, damit ein Kalenderfeld arbeiten kann.",
 				"columnNoSubQueryAttribute":"Keine Relation & Attribut ausgewählt für eine Sub-Query-Spalte.",
+				"joinN1":"Relationen zu verbinden dient der gleichzeitigen Bearbeitung mehrerer, assoziierter Datensätze. Ein Formular kann aber immer nur einen Datensatz je Relation verarbeiten.<br /><br />Wenn eine 1:n-Beziehung zur Verbindung genutzt wird, können mehrere Datensätze für eine Relation existieren. Falls dies geschieht, zeigt das Formular einen Fehler.<br /><br />1:n-Beziehungen zu verwenden ist valide, solange der Formularinhalt so gefiltert wird, dass jede Relation maximal 1 Datensatz haben kann.",
+				"joinN1Hint":"Warnung! 1:n-Verbindung im Formularinhalt erkannt",
 				"queryColumnsNotSet":"Keine angezeigten Spalten. Eine Spalte hinzufügen, um Daten anzuzeigen.",
 				"queryRelationNotSet":"Keine Relation ausgewählt. Feld hat keinen Zugriff auf Daten."
 			},

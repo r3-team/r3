@@ -44,6 +44,30 @@
 	text-decoration-thickness:4px;
 }
 
+.builder-form .sidebar .warning{
+	margin:6px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:6px;
+	cursor:pointer;
+}
+.builder-form .sidebar .warning>img{
+	width:24px;
+	margin:2px;
+	filter:var(--image-filter-error);
+}
+.builder-form .sidebar .warning>span{
+	color:var(--color-error);
+}
+.builder-form .sidebar .warning:hover>img{
+	width:28px;
+	margin:0px;
+}
+.builder-form .sidebar .warning:hover>span{
+	text-decoration:underline;
+}
+
 /* form builder main area */
 .builder-form-main{
 	flex:2 1 auto;

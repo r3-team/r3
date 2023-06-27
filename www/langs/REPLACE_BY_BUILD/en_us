@@ -824,6 +824,8 @@
 			"warning":{
 				"calendarNoDateFromTo":"No attribute selected for 'date from' or 'date to'. Both are required for a calendar field to work.",
 				"columnNoSubQueryAttribute":"No relation & attribute chosen for a sub query column.",
+				"joinN1":"Joining relations on a form serves to update multiple, connected records at the same time. However, a form can only handle a single record per relation.<br /><br />Using a 1:n relationship for a join can lead to multiple records being available on a single relation. If this happens, the form will show an error.<br /><br />Using 1:n relationships for joins is valid, if the form content is being filtered so that each relation can never have more than 1 record.",
+				"joinN1Hint":"Warning! 1:n join detected in form content",
 				"queryColumnsNotSet":"No displayed columns. Add any column to show data.",
 				"queryRelationNotSet":"No relation selected. Field has no access to data."
 			},

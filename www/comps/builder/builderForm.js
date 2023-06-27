@@ -222,6 +222,14 @@ let MyBuilderForm = {
 						:relationId="relationId"
 					/>
 					
+					<!-- 1:n join warning -->
+					<div v-if="tabTarget === 'content' && hasAny1nJoin" class="warning"
+						@click="showMessage(capApp.warning.joinN1,capApp.warning.joinN1Hint,'link2.png')"
+					>
+						<img src="images/link2.png" />
+						<span>{{ capApp.warning.joinN1Hint }}</span>
+					</div>
+					
 					<!-- template fields -->
 					<div class="templates-wrap" v-if="tabTarget === 'content'">
 						<h2>{{ capApp.fields }}</h2>
@@ -677,6 +685,19 @@ let MyBuilderForm = {
 			
 			return atr.relationId;
 		},
+		hasAny1nJoin:(s) => {
+			for(let j of s.joins) {
+				if(j.index === 0)
+					continue;
+				
+				let joinAtr = s.attributeIdMap[j.attributeId];
+				
+				// join via 1:n attribute (outside-in join)
+				if(s.isAttributeRelationshipN1(joinAtr.content) && joinAtr.relationId === j.relationId)
+					return true;
+			}
+			return false;
+		},
 		
 		// simple
 		columnShow:       (s) => s.columnIdShow === null ? false : s.columnIdMap[s.columnIdShow],
@@ -741,9 +762,11 @@ let MyBuilderForm = {
 			this.fieldMoveList  = evt.fieldList;
 			this.fieldMoveIndex = evt.fieldIndex;
 		},
-		showMessage(msg) {
+		showMessage(msg,top,image) {
 			this.$store.commit('dialog',{
+				captionTop:top,
 				captionBody:msg,
+				image:image,
 				buttons:[{
 					caption:this.capGen.button.close,
 					cancel:true,
