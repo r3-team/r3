@@ -111,7 +111,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 	encrypted bool, def string, onUpdate string, onDelete string,
 	captions types.CaptionMap) error {
 
-	if err := checkName(name); err != nil {
+	if err := check.DbIdentifier(name); err != nil {
 		return err
 	}
 
@@ -486,7 +486,7 @@ func setName_tx(tx pgx.Tx, id uuid.UUID, name string, ignoreNameCheck bool, isFi
 
 	// name check can be ignored by internal tasks, never ignore for user input
 	if !ignoreNameCheck {
-		if err := checkName(name); err != nil {
+		if err := check.DbIdentifier(name); err != nil {
 			return err
 		}
 	}
@@ -545,14 +545,6 @@ func getContentColumnDefinition(content string, length int, contentRel string) (
 		columnDef = contentRel
 	}
 	return columnDef, nil
-}
-
-func checkName(name string) error {
-	// check valid DB identifier as attribute also becomes column
-	if err := check.DbIdentifier(name); err != nil {
-		return err
-	}
-	return nil
 }
 
 // primary key handling

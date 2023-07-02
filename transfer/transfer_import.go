@@ -13,7 +13,6 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/module_option"
-	"r3/schema"
 	"r3/schema/api"
 	"r3/schema/article"
 	"r3/schema/attribute"
@@ -33,6 +32,7 @@ import (
 	"r3/tools"
 	"r3/transfer/transfer_delete"
 	"r3/types"
+	"sort"
 	"strings"
 
 	"github.com/gofrs/uuid"
@@ -74,6 +74,12 @@ func ImportFromFiles(filePathsImport []string) error {
 	moduleIdMapMeta := make(map[uuid.UUID]importMeta)
 	modules, err := parseModulesFromPaths(filePathsModules, moduleIdMapMeta)
 	if err != nil {
+		return err
+	}
+
+	// run a full VACUUM before imports
+	log.Info("transfer", "import starts full DB vacuum")
+	if _, err := db.Pool.Exec(db.Ctx, `VACUUM FULL`); err != nil {
 		return err
 	}
 
@@ -138,12 +144,6 @@ func ImportFromFiles(filePathsImport []string) error {
 	// after all tasks were successful, final checks and clean ups
 	for _, m := range modules {
 
-		// validate dependency between modules
-		log.Info("transfer", fmt.Sprintf("validity check for module '%s', %s", m.Name, m.Id))
-		if err := schema.ValidateDependency_tx(tx, m.Id); err != nil {
-			return err
-		}
-
 		// set new module hash value in instance
 		if err := module_option.SetHashById_tx(tx, m.Id, moduleIdMapMeta[m.Id].hash); err != nil {
 			return err
@@ -157,7 +157,6 @@ func ImportFromFiles(filePathsImport []string) error {
 		}
 	}
 
-	log.Info("transfer", "module dependencies were validated successfully")
 	log.Info("transfer", "module files were moved to transfer path if imported")
 
 	if err := tx.Commit(db.Ctx); err != nil {
@@ -609,42 +608,46 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]imp
 		}
 	}
 
-	// add modules following optimized import order
+	// return modules in optimized import order
+	// add modules in order of least dependencies
 	moduleIdsAdded := make([]uuid.UUID, 0)
+	moduleIdsSort := make([]uuid.UUID, 0)
+	moduleNames := make([]string, 0)
 
-	var addModule func(m types.Module)
-	addModule = func(m types.Module) {
+	for id, _ := range moduleIdMapMeta {
+		moduleIdsSort = append(moduleIdsSort, id)
+	}
+	sort.SliceStable(moduleIdsSort, func(i, j int) bool {
+		return len(moduleIdMapMeta[moduleIdsSort[i]].module.DependsOn) <
+			len(moduleIdMapMeta[moduleIdsSort[j]].module.DependsOn)
+	})
 
-		if tools.UuidInSlice(m.Id, moduleIdsAdded) {
+	// finalize import order
+	var addModule func(id uuid.UUID)
+	addModule = func(id uuid.UUID) {
+		if tools.UuidInSlice(id, moduleIdsAdded) {
 			return
 		}
 
-		// add itself before dependencies (avoids infinite loops from circular dependencies)
-		modules = append(modules, m)
-		moduleIdsAdded = append(moduleIdsAdded, m.Id)
+		// add ID before dependencies to avoid circular references
+		moduleIdsAdded = append(moduleIdsAdded, id)
 
-		// add dependencies
-		for _, dependId := range m.DependsOn {
-
-			if _, exists := moduleIdMapMeta[dependId]; !exists {
-				// dependency was not included or is not needed
-				continue
+		// dependencies are imported first
+		for _, dependId := range moduleIdMapMeta[id].module.DependsOn {
+			if _, exists := moduleIdMapMeta[dependId]; exists {
+				addModule(dependId)
 			}
-			addModule(moduleIdMapMeta[dependId].module)
 		}
+
+		modules = append(modules, moduleIdMapMeta[id].module)
+		moduleNames = append(moduleNames, moduleIdMapMeta[id].module.Name)
+	}
+	for _, id := range moduleIdsSort {
+		addModule(id)
 	}
 
-	for _, meta := range moduleIdMapMeta {
-		addModule(meta.module)
-	}
-
-	// log chosen installation order
-	logNames := make([]string, len(modules))
-	for i, m := range modules {
-		logNames[i] = m.Name
-	}
 	log.Info("transfer", fmt.Sprintf("import has decided on installation order: %s",
-		strings.Join(logNames, ", ")))
+		strings.Join(moduleNames, ", ")))
 
 	return modules, nil
 }
