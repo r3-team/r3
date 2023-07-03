@@ -13,6 +13,7 @@ import (
 	"r3/db"
 	"r3/log"
 	"r3/module_option"
+	"r3/schema"
 	"r3/schema/api"
 	"r3/schema/article"
 	"r3/schema/attribute"
@@ -242,9 +243,36 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 		}
 	}
 
-	// attributes, refer to relations
+	// primary key attributes
+	// add before other attributes to enable relationships
 	for _, relation := range mod.Relations {
 		for _, e := range relation.Attributes {
+			if e.Name != schema.PkName {
+				continue
+			}
+
+			run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+			if err != nil {
+				return err
+			}
+			if !run {
+				continue
+			}
+			log.Info("transfer", fmt.Sprintf("set PK attribute %s", e.Id))
+
+			if err := importCheckResultAndApply(tx, attribute.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
+				return err
+			}
+		}
+	}
+
+	// attributes
+	for _, relation := range mod.Relations {
+		for _, e := range relation.Attributes {
+			if e.Name == schema.PkName {
+				continue
+			}
+
 			run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
 			if err != nil {
 				return err
@@ -254,11 +282,7 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 			}
 			log.Info("transfer", fmt.Sprintf("set attribute %s", e.Id))
 
-			if err := importCheckResultAndApply(tx, attribute.Set_tx(tx,
-				e.RelationId, e.Id, e.RelationshipId, e.IconId, e.Name,
-				e.Content, e.ContentUse, e.Length, e.Nullable, e.Encrypted,
-				e.Def, e.OnUpdate, e.OnDelete, e.Captions), e.Id, idMapSkipped); err != nil {
-
+			if err := importCheckResultAndApply(tx, attribute.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
 				return err
 			}
 		}

@@ -46,8 +46,5 @@ func AttributeSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, attribute.Set_tx(tx, req.RelationId, req.Id, req.RelationshipId,
-		req.IconId, req.Name, req.Content, req.ContentUse, req.Length,
-		req.Nullable, req.Encrypted, req.Def, req.OnUpdate, req.OnDelete,
-		req.Captions)
+	return nil, attribute.Set_tx(tx, req)
 }

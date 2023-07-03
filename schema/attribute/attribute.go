@@ -105,42 +105,38 @@ func Get(relationId uuid.UUID) ([]types.Attribute, error) {
 	return attributes, nil
 }
 
-func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
-	relationshipId pgtype.UUID, iconId pgtype.UUID, name string,
-	content string, contentUse string, length int, nullable bool,
-	encrypted bool, def string, onUpdate string, onDelete string,
-	captions types.CaptionMap) error {
+func Set_tx(tx pgx.Tx, atr types.Attribute) error {
 
-	if err := check.DbIdentifier(name); err != nil {
+	if err := check.DbIdentifier(atr.Name); err != nil {
 		return err
 	}
 
 	// fix imports < 3.3: Empty content use
-	contentUse = compatible.FixAttributeContentUse(contentUse)
+	atr.ContentUse = compatible.FixAttributeContentUse(atr.ContentUse)
 
-	if encrypted && content != "text" {
+	if atr.Encrypted && atr.Content != "text" {
 		return fmt.Errorf("only text attributes can be encrypted")
 	}
-	if !tools.StringInSlice(content, contentTypes) {
-		return fmt.Errorf("invalid attribute content type '%s'", content)
+	if !tools.StringInSlice(atr.Content, contentTypes) {
+		return fmt.Errorf("invalid attribute content type '%s'", atr.Content)
 	}
-	if !tools.StringInSlice(contentUse, contentUseTypes) {
-		return fmt.Errorf("invalid attribute content use type '%s'", contentUse)
+	if !tools.StringInSlice(atr.ContentUse, contentUseTypes) {
+		return fmt.Errorf("invalid attribute content use type '%s'", atr.ContentUse)
 	}
 
-	_, moduleName, err := schema.GetModuleDetailsByRelationId_tx(tx, relationId)
+	_, moduleName, err := schema.GetModuleDetailsByRelationId_tx(tx, atr.RelationId)
 	if err != nil {
 		return err
 	}
-	relationName, relEncryption, err := schema.GetRelationDetailsById_tx(tx, relationId)
+	relationName, relEncryption, err := schema.GetRelationDetailsById_tx(tx, atr.RelationId)
 	if err != nil {
 		return err
 	}
 
-	isNew := id == uuid.Nil
-	isRel := schema.IsContentRelationship(content)
-	isFiles := schema.IsContentFiles(content)
-	known, err := schema.CheckCreateId_tx(tx, &id, "attribute", "id")
+	isNew := atr.Id == uuid.Nil
+	isRel := schema.IsContentRelationship(atr.Content)
+	isFiles := schema.IsContentFiles(atr.Content)
+	known, err := schema.CheckCreateId_tx(tx, &atr.Id, "attribute", "id")
 	if err != nil {
 		return err
 	}
@@ -150,13 +146,13 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 	var onDeleteNull = pgtype.Text{}
 
 	if isRel {
-		onUpdateNull.String = onUpdate
+		onUpdateNull.String = atr.OnUpdate
 		onUpdateNull.Valid = true
-		onDeleteNull.String = onDelete
+		onDeleteNull.String = atr.OnDelete
 		onDeleteNull.Valid = true
 	} else {
-		onUpdate = ""
-		onDelete = ""
+		atr.OnUpdate = ""
+		atr.OnDelete = ""
 	}
 
 	if known {
@@ -174,15 +170,15 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 				on_update, on_delete, relationship_id
 			FROM app.attribute
 			WHERE id = $1
-		`, id).Scan(&nameEx, &contentEx, &lengthEx, &nullableEx, &defEx,
+		`, atr.Id).Scan(&nameEx, &contentEx, &lengthEx, &nullableEx, &defEx,
 			&onUpdateEx, &onDeleteEx, &relationshipIdEx); err != nil {
 
 			return err
 		}
 
 		// check for primary key attribute
-		if nameEx == schema.PkName && (name != nameEx || length != lengthEx ||
-			nullable != nullableEx || def != defEx) {
+		if nameEx == schema.PkName && (atr.Name != nameEx || atr.Length != lengthEx ||
+			atr.Nullable != nullableEx || atr.Def != defEx) {
 
 			return errors.New("primary key attribute may only update: content, title")
 		}
@@ -195,47 +191,47 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 		case "integer": // keep integer or upgrade to bigint
 			fallthrough
 		case "bigint": // keep bigint or downgrade to integer
-			contentUpdateOk = tools.StringInSlice(content, []string{"integer", "bigint"})
+			contentUpdateOk = tools.StringInSlice(atr.Content, []string{"integer", "bigint"})
 
 		case "numeric": // keep numeric
-			contentUpdateOk = content == "numeric"
+			contentUpdateOk = atr.Content == "numeric"
 
 		case "real": // keep real or upgrade to double
 			fallthrough
 		case "double precision": // keep double or downgrade to real
-			contentUpdateOk = tools.StringInSlice(content, []string{"real", "double precision"})
+			contentUpdateOk = tools.StringInSlice(atr.Content, []string{"real", "double precision"})
 
 		case "varchar": // keep varchar or upgrade to text
 			fallthrough
 		case "text": // keep text or downgrade to varchar
-			contentUpdateOk = tools.StringInSlice(content, []string{"varchar", "text"})
+			contentUpdateOk = tools.StringInSlice(atr.Content, []string{"varchar", "text"})
 
 		case "boolean": // keep boolean
-			contentUpdateOk = content == "boolean"
+			contentUpdateOk = atr.Content == "boolean"
 
 		case "regconfig": // keep regconfig
-			contentUpdateOk = content == "regconfig"
+			contentUpdateOk = atr.Content == "regconfig"
 
 		case "uuid": // keep UUID
-			contentUpdateOk = content == "uuid"
+			contentUpdateOk = atr.Content == "uuid"
 
 		case "1:1": // keep 1:1 or switch to n:1
 			fallthrough
 		case "n:1": // keep n:1 or switch to 1:1
-			contentUpdateOk = tools.StringInSlice(content, []string{"1:1", "n:1"})
+			contentUpdateOk = tools.StringInSlice(atr.Content, []string{"1:1", "n:1"})
 
 		case "files": // keep files
-			contentUpdateOk = content == "files"
+			contentUpdateOk = atr.Content == "files"
 		}
 
 		if !contentUpdateOk {
-			return fmt.Errorf("'%s' and '%s' are not compatible types", contentEx, content)
+			return fmt.Errorf("'%s' and '%s' are not compatible types", contentEx, atr.Content)
 		}
 
 		// do not allow relationship target change
 		// if data exists, IDs will not match new target relation
 		// if data does not exist, attribute can be recreated with new target relation instead
-		if relationshipIdEx.Valid && relationshipIdEx.Bytes != relationshipId.Bytes {
+		if relationshipIdEx.Valid && relationshipIdEx.Bytes != atr.RelationshipId.Bytes {
 			return fmt.Errorf("cannot change relationship target for existing attribute")
 		}
 
@@ -244,15 +240,15 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 
 		// update attribute name
 		// must happen first, as other statements refer to new attribute name
-		if nameEx != name {
-			if err := setName_tx(tx, id, name, false, isFiles); err != nil {
+		if nameEx != atr.Name {
+			if err := setName_tx(tx, atr.Id, atr.Name, false, isFiles); err != nil {
 				return err
 			}
 		}
 
 		// update attribute column definition (not for files attributes: no column)
-		if !isFiles && (contentEx != content || nullableEx != nullable || defEx != def ||
-			(content == "varchar" && lengthEx != length)) {
+		if !isFiles && (contentEx != atr.Content || nullableEx != atr.Nullable || defEx != atr.Def ||
+			(atr.Content == "varchar" && lengthEx != atr.Length)) {
 
 			// handle relationship attribute
 			var contentRel string
@@ -260,41 +256,41 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 			if isRel {
 				// rebuild foreign key index if content changed (as in 1:1 -> n:1)
 				// this also adds/removes unique constraint, if required
-				if content != contentEx {
-					if err := pgIndex.DelAutoFkiForAttribute_tx(tx, id); err != nil {
+				if atr.Content != contentEx {
+					if err := pgIndex.DelAutoFkiForAttribute_tx(tx, atr.Id); err != nil {
 						return err
 					}
-					if err := pgIndex.SetAutoFkiForAttribute_tx(tx, relationId, id, (content == "1:1")); err != nil {
+					if err := pgIndex.SetAutoFkiForAttribute_tx(tx, atr.RelationId, atr.Id, (atr.Content == "1:1")); err != nil {
 						return err
 					}
 				}
 
-				contentRel, err = schema.GetAttributeContentByRelationPk_tx(tx, relationshipId.Bytes)
+				contentRel, err = schema.GetAttributeContentByRelationPk_tx(tx, atr.RelationshipId.Bytes)
 				if err != nil {
 					return err
 				}
 			}
 
 			// column definition
-			columnDef, err := getContentColumnDefinition(content, length, contentRel)
+			columnDef, err := getContentColumnDefinition(atr.Content, atr.Length, contentRel)
 			if err != nil {
 				return err
 			}
 
 			// nullable definition
 			nullableDef := "DROP NOT NULL"
-			if !nullable {
+			if !atr.Nullable {
 				nullableDef = "SET NOT NULL"
 			}
 
 			// default definition
 			defaultDef := "DROP DEFAULT"
-			if def != "" {
-				if schema.IsContentText(content) {
+			if atr.Def != "" {
+				if schema.IsContentText(atr.Content) {
 					// add quotes around default value for text
-					defaultDef = fmt.Sprintf("SET DEFAULT '%s'", def)
+					defaultDef = fmt.Sprintf("SET DEFAULT '%s'", atr.Def)
 				} else {
-					defaultDef = fmt.Sprintf("SET DEFAULT %s", def)
+					defaultDef = fmt.Sprintf("SET DEFAULT %s", atr.Def)
 				}
 			}
 
@@ -304,21 +300,21 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 					ALTER COLUMN "%s" %s,
 					ALTER COLUMN "%s" %s
 			`, moduleName, relationName,
-				name, columnDef,
-				name, nullableDef,
-				name, defaultDef)); err != nil {
+				atr.Name, columnDef,
+				atr.Name, nullableDef,
+				atr.Name, defaultDef)); err != nil {
 				return err
 			}
 		}
 
 		// update onUpdate / onDelete for relationship attributes
-		if (onUpdateEx.String != onUpdate || onDeleteEx.String != onDelete) && isRel {
+		if (onUpdateEx.String != atr.OnUpdate || onDeleteEx.String != atr.OnDelete) && isRel {
 
-			if err := deleteFK_tx(tx, moduleName, relationName, id); err != nil {
+			if err := deleteFK_tx(tx, moduleName, relationName, atr.Id); err != nil {
 				return err
 			}
-			if err := createFK_tx(tx, moduleName, relationName, id, name,
-				relationshipId.Bytes, onUpdate, onDelete); err != nil {
+			if err := createFK_tx(tx, moduleName, relationName, atr.Id, atr.Name,
+				atr.RelationshipId.Bytes, atr.OnUpdate, atr.OnDelete); err != nil {
 
 				return err
 			}
@@ -331,64 +327,64 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 			SET icon_id = $1, content = $2, content_use = $3, length = $4,
 				nullable = $5, def = $6, on_update = $7, on_delete = $8
 			WHERE id = $9
-		`, iconId, content, contentUse, length, nullable,
-			def, onUpdateNull, onDeleteNull, id); err != nil {
+		`, atr.IconId, atr.Content, atr.ContentUse, atr.Length, atr.Nullable,
+			atr.Def, onUpdateNull, onDeleteNull, atr.Id); err != nil {
 
 			return err
 		}
 
 		// update PK characteristics, if PK attribute
-		if name == schema.PkName && content != contentEx {
-			if err := updatePK_tx(tx, moduleName, relationName, relationId, content); err != nil {
+		if atr.Name == schema.PkName && atr.Content != contentEx {
+			if err := updatePK_tx(tx, moduleName, relationName, atr.RelationId, atr.Content); err != nil {
 				return err
 			}
-			if err := updateReferingFKs_tx(tx, relationId, content); err != nil {
+			if err := updateReferingFKs_tx(tx, atr.RelationId, atr.Content); err != nil {
 				return err
 			}
 		}
 	} else {
 		// create attribute column (files attribute have no column)
 		if isFiles {
-			if err := fileRelationsCreate_tx(tx, id, moduleName, relationName); err != nil {
+			if err := fileRelationsCreate_tx(tx, atr.Id, moduleName, relationName); err != nil {
 				return err
 			}
 		} else {
 			// check relationship target if relationship attribute
 			var contentRel string
 			if isRel {
-				if !relationshipId.Valid {
+				if !atr.RelationshipId.Valid {
 					return fmt.Errorf("relationship requires valid target")
 				}
 
-				contentRel, err = schema.GetAttributeContentByRelationPk_tx(tx, relationshipId.Bytes)
+				contentRel, err = schema.GetAttributeContentByRelationPk_tx(tx, atr.RelationshipId.Bytes)
 				if err != nil {
 					return err
 				}
 
-			} else if relationshipId.Valid {
+			} else if atr.RelationshipId.Valid {
 				return errors.New("cannot define non-relationship with relationship target")
 			}
 
 			// column definition
-			columnDef, err := getContentColumnDefinition(content, length, contentRel)
+			columnDef, err := getContentColumnDefinition(atr.Content, atr.Length, contentRel)
 			if err != nil {
 				return err
 			}
 
 			// nullable definition
 			nullableDef := ""
-			if !nullable {
+			if !atr.Nullable {
 				nullableDef = "NOT NULL"
 			}
 
 			// default definition
 			defaultDef := ""
-			if def != "" {
-				if schema.IsContentText(content) {
+			if atr.Def != "" {
+				if schema.IsContentText(atr.Content) {
 					// add quotes around default value for text
-					defaultDef = fmt.Sprintf("DEFAULT '%s'", def)
+					defaultDef = fmt.Sprintf("DEFAULT '%s'", atr.Def)
 				} else {
-					defaultDef = fmt.Sprintf("DEFAULT %s", def)
+					defaultDef = fmt.Sprintf("DEFAULT %s", atr.Def)
 				}
 			}
 
@@ -396,7 +392,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 				ALTER TABLE "%s"."%s" 
 				ADD COLUMN "%s" %s %s %s
-			`, moduleName, relationName, name, columnDef, nullableDef, defaultDef)); err != nil {
+			`, moduleName, relationName, atr.Name, columnDef, nullableDef, defaultDef)); err != nil {
 				return err
 			}
 		}
@@ -407,28 +403,29 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 				icon_id, name, content, content_use, length, nullable,
 				encrypted, def, on_update, on_delete)
 			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
-		`, id, relationId, relationshipId, iconId, name, content, contentUse,
-			length, nullable, encrypted, def, onUpdateNull, onDeleteNull); err != nil {
+		`, atr.Id, atr.RelationId, atr.RelationshipId, atr.IconId, atr.Name,
+			atr.Content, atr.ContentUse, atr.Length, atr.Nullable, atr.Encrypted,
+			atr.Def, onUpdateNull, onDeleteNull); err != nil {
 
 			return err
 		}
 
 		// apply PK characteristics, if PK attribute
-		if name == schema.PkName {
-			if err := createPK_tx(tx, moduleName, relationName, id, relationId); err != nil {
+		if atr.Name == schema.PkName {
+			if err := createPK_tx(tx, moduleName, relationName, atr.Id, atr.RelationId); err != nil {
 				return err
 			}
 
 			// create PK PG index reference for new attributes
 			if isNew {
-				if err := pgIndex.SetPrimaryKeyForAttribute_tx(tx, relationId, id); err != nil {
+				if err := pgIndex.SetPrimaryKeyForAttribute_tx(tx, atr.RelationId, atr.Id); err != nil {
 					return err
 				}
 			}
 
 			// create table for encrypted record keys if relation supports encryption
 			if relEncryption {
-				tName := schema.GetEncKeyTableName(relationId)
+				tName := schema.GetEncKeyTableName(atr.RelationId)
 
 				if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 					CREATE TABLE IF NOT EXISTS instance_e2ee."%s" (
@@ -462,15 +459,15 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 
 		if isRel {
 			// add FK constraint
-			if err := createFK_tx(tx, moduleName, relationName, id, name,
-				relationshipId.Bytes, onUpdate, onDelete); err != nil {
+			if err := createFK_tx(tx, moduleName, relationName, atr.Id, atr.Name,
+				atr.RelationshipId.Bytes, atr.OnUpdate, atr.OnDelete); err != nil {
 
 				return err
 			}
 			if isNew {
 				// add automatic FK index for new attributes
-				if err := pgIndex.SetAutoFkiForAttribute_tx(tx, relationId, id,
-					(content == "1:1")); err != nil {
+				if err := pgIndex.SetAutoFkiForAttribute_tx(tx, atr.RelationId,
+					atr.Id, (atr.Content == "1:1")); err != nil {
 
 					return err
 				}
@@ -479,7 +476,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID,
 	}
 
 	// set captions
-	return caption.Set_tx(tx, id, captions)
+	return caption.Set_tx(tx, atr.Id, atr.Captions)
 }
 
 func setName_tx(tx pgx.Tx, id uuid.UUID, name string, ignoreNameCheck bool, isFiles bool) error {

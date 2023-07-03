@@ -177,10 +177,22 @@ func Set_tx(tx pgx.Tx, rel types.Relation) error {
 
 		// create primary key attribute if relation is new (e. g. not imported or updated)
 		if isNew {
-			if err := attribute.Set_tx(tx, rel.Id, uuid.Nil,
-				pgtype.UUID{}, pgtype.UUID{}, schema.PkName, "integer", "default",
-				0, false, false, "", "", "", types.CaptionMap{}); err != nil {
-
+			if err := attribute.Set_tx(tx, types.Attribute{
+				Id:             uuid.Nil,
+				RelationId:     rel.Id,
+				RelationshipId: pgtype.UUID{},
+				IconId:         pgtype.UUID{},
+				Name:           schema.PkName,
+				Content:        "integer",
+				ContentUse:     "default",
+				Length:         0,
+				Nullable:       false,
+				Encrypted:      false,
+				Def:            "",
+				OnUpdate:       "",
+				OnDelete:       "",
+				Captions:       types.CaptionMap{},
+			}); err != nil {
 				return err
 			}
 		}
