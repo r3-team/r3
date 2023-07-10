@@ -12,7 +12,8 @@ import {
 	getAttributeIcon,
 	isAttributeFiles,
 	isAttributeRelationship,
-	isAttributeRelationship11
+	isAttributeRelationship11,
+	isAttributeWithLength
 } from '../shared/attribute.js';
 
 export {MyBuilderRelation as default};
@@ -210,7 +211,7 @@ let MyBuilderRelation = {
 								:tight="true"
 							/>
 							<my-button
-								v-if="atr.length !== 0"
+								v-if="isAttributeWithLength(atr.content) && atr.length !== 0"
 								:active="false"
 								:caption="'['+String(atr.length)+']'"
 								:captionTitle="capApp.attributeLength"
@@ -750,6 +751,7 @@ let MyBuilderRelation = {
 		isAttributeFiles,
 		isAttributeRelationship,
 		isAttributeRelationship11,
+		isAttributeWithLength,
 		srcBase64,
 		
 		// presentation
