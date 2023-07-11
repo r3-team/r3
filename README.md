@@ -1,6 +1,6 @@
 ![r3_logo](https://github.com/r3-team/r3/assets/91060542/cc3918b6-7a11-4613-8dd8-de8a9fdbac7f)
 
-<p align="center">REI3 - Free and open low code for everyone. Build and host powerful applications with full control and ownership.</p>
+<p align="center">REI3 - Free and open low code. Build and host powerful applications with full control and ownership.</p>
 
 <p align="center">
 	<a href="https://github.com/r3-team/r3/releases" target="_blank">
@@ -27,6 +27,13 @@
 	<a href="https://github.com/r3-team/r3/blob/main/LICENSE" target="_blank">
 		<img src="https://img.shields.io/github/license/r3-team/r3" alt="License" />
 	</a>
+</p>
+<p align="center">
+	<a href="https://demo.rei3.de/" target="_blank">Live demo</a>
+	-
+	<a href="https://rei3.de/en/downloads" target="_blank">Downloads</a>
+	-
+	<a href="https://rei3.de/en/docs" target="_blank">Documentation</a>
 </p>
 
 <br />
