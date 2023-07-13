@@ -48,22 +48,21 @@
 ## :star: Features
 * **Fast results**: Quickly replace grown, spreadsheet based 'solutions' with proper multi-user applications.
 * **It can count**: Summarize records, do date calculations, apply business rules and much more.
-* **Make things visible**: Show tasks or events on Gantt planners, generate charts, display calendars or compute complex lists.
-* **Workflows included**: Adjust forms based on the current state of a record, export to PDF or send notifications on update.
-* **Compliance tools**: With roles, access policies and triggers, REI3 can give and restrict access even on a per-record basis.
+* **Make things visible**: Show tasks on Gantt charts, generate diagrams or display information-dense lists.
+* **Workflows included**: Adjust forms based on the current state of a record, export to PDF or send notifications.
+* **Compliance tools**: With roles and access policies, REI3 can give and restrict access even on a per-record basis.
 * **End-to-end encryption**: Built-in support for E2EE - easy to use with integrated key management features.
-* **Integration options**: REI3 can serve as and connect to REST endpoints, create or import CSV files and even offer ICS for calendar access.
-* **Ready for mobile**: Works out of the box on mobile, with optimizations and PWA features available for great-feeling mobile apps.
+* **Integration options**: REI3 can serve as and connect to REST endpoints, create or import CSV files and also includes ICS access for regularly updating calendars on devices.
+* **Ready for mobile**: Works well on all devices, with specific mobile settings and PWA features for great-feeling apps.
 * **Fulltext search**: Users can quickly find desired content by using search phrases and language specific lookups.
 * **Blazingly fast**: REI3 is built to take advantage of multi-core processors and communicates with clients over bi-directional data channels.
 * **Security features**: Apply password policies, block brute-force attempts and enable MFA for your users.
-* **Fully transparent**: Directly read and even change data in the REI3 database - everything is human-readable and accessible.
+* **Fully transparent**: Directly read and even change data in the REI3 database - everything is human-readable.
 * **Selfhosted**: Run REI3 as you wish, locally or in the cloud - with full control on where your data is located.
-* **Enterprise-ready**: Adjust REI3 to your corporate identity, manage users & access via LDAP and grow with your needs by clustering.
+* **Enterprise-ready**: Adjust REI3 to your corporate identity, manage users & access via LDAP and grow with your organization by extending applications and clustering REI3.
 
 ![Screenshot Calendar - DEMO](https://github.com/r3-team/r3/assets/91060542/79f6a4c2-b7ec-4d15-85b7-b0992699bddf)
 ![Screenshot IT Assets - DEMO](https://github.com/r3-team/r3/assets/91060542/845ef560-f96c-4270-afd9-4a6f000013c2)
-
 
 ## :rocket: Quickstart
 ### Linux
