@@ -1,6 +1,6 @@
-![r3_logo](https://github.com/r3-team/r3/assets/91060542/cc3918b6-7a11-4613-8dd8-de8a9fdbac7f)
-
-<p align="center">REI3 - Free and open low code. Build and host powerful applications with full control and ownership.</p>
+![r3_logo_git](https://github.com/r3-team/r3/assets/91060542/a759e7ec-e1a0-4a4e-a426-509abc764352)
+<h1 align="center">REI3</h1>
+<p align="center"><strong>Free and open low code</strong><br />Build and host powerful applications with full control and ownership</p>
 
 <p align="center">
 	<a href="https://github.com/r3-team/r3/releases" target="_blank">
@@ -31,33 +31,39 @@
 <p align="center">
 	<a href="https://demo.rei3.de/" target="_blank">Live demo</a>
 	-
+	<a href="https://rei3.de/en/news" target="_blank">News</a>
+	-
 	<a href="https://rei3.de/en/downloads" target="_blank">Downloads</a>
 	-
 	<a href="https://rei3.de/en/docs" target="_blank">Documentation</a>
+	-
+	<a href="https://rei3.de/en/applications" target="_blank">Applications</a>
 </p>
 
-<br />
-<p align="center">Free yourself from walled gardens and cloud-only SaaS offerings. REI3 enables powerful low code applications, selfhosted in the cloud or on-premise - installed quickly on almost any system. Applications you build with REI3 are yours, can be shared with others and can even be sold.</p>
+<p align="center">Free yourself from walled gardens and cloud-only SaaS offerings. REI3 enables powerful low code applications, selfhosted in the cloud or on-premise. Create and then use, share or even sell your REI3 applications.</p>
 
-![Screenshot 2023-07-11 at 11-30-12 Contact - DEMO](https://github.com/r3-team/r3/assets/91060542/a99b7651-49a7-4d4b-9a7d-f90689bf4577)
-![Screenshot 2023-07-11 at 11-28-20 Ticket - DEMO](https://github.com/r3-team/r3/assets/91060542/e88c5d55-0e57-400d-a25a-8e274d58cc4e)
-![Screenshot 2023-07-11 at 11-27-14 Calendar view - DEMO](https://github.com/r3-team/r3/assets/91060542/79f6a4c2-b7ec-4d15-85b7-b0992699bddf)
+![Screenshot Orgas - DEMO](https://github.com/r3-team/r3/assets/91060542/fc7d54e5-fc29-4a5a-8593-eae60cfd8541)
+![Screenshot Gantt - DEMO](https://github.com/r3-team/r3/assets/91060542/ae3dc953-6ea9-4304-a446-e05c28be7459)
 
 ## :star: Features
-* **Get going quickly**: Replace grown 'solutions' with a modern multi-user REI3 application, capabable of replacing even the most complex excel macros.
-* **Make things visible**: Show tasks or events on Gantt planners, generate charts, display calendars or styled lists for quick access.
-* **Build workflows**: Adjust forms based on the current state of a record, export to PDF or send notifications on update.
+* **Fast results**: Quickly replace grown, spreadsheet based 'solutions' with proper multi-user applications.
 * **It can count**: Summarize records, do date calculations, apply business rules and much more.
+* **Make things visible**: Show tasks or events on Gantt planners, generate charts, display calendars or compute complex lists.
+* **Workflows included**: Adjust forms based on the current state of a record, export to PDF or send notifications on update.
 * **Compliance tools**: With roles, access policies and triggers, REI3 can give and restrict access even on a per-record basis.
 * **End-to-end encryption**: Built-in support for E2EE - easy to use with integrated key management features.
 * **Integration options**: REI3 can serve as and connect to REST endpoints, create or import CSV files and even offer ICS for calendar access.
-* **Ready for mobile**: REI3 interfaces work on mobile devices out-of-the-box but can be optimized to create apps with great usability. PWA features also enable native-like app experiences on mobile devices and PCs.
+* **Ready for mobile**: Works out of the box on mobile, with optimizations and PWA features available for great-feeling mobile apps.
 * **Fulltext search**: Users can quickly find desired content by using search phrases and language specific lookups.
-* **Blazingly fast**: REI3 is built to take advantage of modern, multi-core processors and communicates with its clients over a bi-directional data connection for fast updates.
+* **Blazingly fast**: REI3 is built to take advantage of multi-core processors and communicates with clients over bi-directional data channels.
 * **Security features**: Apply password policies, block brute-force attempts and enable MFA for your users.
 * **Fully transparent**: Directly read and even change data in the REI3 database - everything is human-readable and accessible.
 * **Selfhosted**: Run REI3 as you wish, locally or in the cloud - with full control on where your data is located.
-* **Enterprise-ready**: Customize logos, texts and looks for your corporate environment. Grow REI3 with your organization by using clustering and connect to LDAP for authentication and authorization of users.
+* **Enterprise-ready**: Adjust REI3 to your corporate identity, manage users & access via LDAP and grow with your needs by clustering.
+
+![Screenshot Calendar - DEMO](https://github.com/r3-team/r3/assets/91060542/79f6a4c2-b7ec-4d15-85b7-b0992699bddf)
+![Screenshot IT Assets - DEMO](https://github.com/r3-team/r3/assets/91060542/845ef560-f96c-4270-afd9-4a6f000013c2)
+
 
 ## :rocket: Quickstart
 ### Linux
@@ -77,7 +83,7 @@ There are also Docker Compose files ([x64](https://rei3.de/docker_x64)/[arm64](h
 You can visit our [community forum](https://community.rei3.de) for anything related to REI3. The full documentation is available on [rei3.de](https://rei3.de/en/docs), including documentation for [admins](https://rei3.de/en/docs/admin) and [application authors](https://rei3.de/en/docs/builder) as well as [Youtube videos](https://www.youtube.com/channel/UCKb1YPyUV-O4GxcCdHc4Csw).
 
 ## :clap: Thank you
-REI3 would not be possible without the help of our contributors and people using and providing feedback for continous improvement. So thank you to everybody involved with the REI3 project!
+REI3 would not be possible without the help of our contributors and people using REI3 and providing feedback for continous improvement. So thank you to everybody involved with the REI3 project!
 
 [![Stargazers repo roster for @r3-team/r3](https://reporoster.com/stars/dark/r3-team/r3)](https://github.com/r3-team/r3/stargazers)
 
