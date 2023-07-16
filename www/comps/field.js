@@ -106,6 +106,7 @@ let MyField = {
 						v-model="value"
 						@copyToClipboard="copyToClipboard"
 						:clipboard="isClipboard"
+						:formLoading="formLoading"
 						:readonly="isReadonly"
 					/>
 					

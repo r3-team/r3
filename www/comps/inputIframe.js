@@ -3,19 +3,22 @@ export {MyInputIframe as default};
 let MyInputIframe = {
 	name:'my-input-iframe',
 	template:`<div class="input-iframe">
-		<div class="input-iframe-actions">
+		<div class="input-iframe-actions" :class="{ readonly:readonly }">
 			<input class="input-iframe-input"
 				v-model="srcInput"
 				@keyup.enter="set"
+				:disabled="readonly"
 				:placeholder="capGen.threeDots"
 			/>
 			<my-button image="ok.png"
+				v-if="!readonly"
 				@trigger="set"
 				:active="isChanged && !noInput"
 				:naked="true"
 				:tight="true"
 			/>
 			<my-button image="cancel.png"
+				v-if="!readonly"
 				@trigger="del"
 				:active="src !== false"
 				:naked="true"
@@ -38,9 +41,15 @@ let MyInputIframe = {
 		</div>
 	</div>`,
 	props:{
-		clipboard: { type:Boolean, required:true },
-		modelValue:{ required:true },
-		readonly:  { type:Boolean, required:true }
+		clipboard:  { type:Boolean, required:true },
+		formLoading:{ type:Boolean, required:true },
+		modelValue: { required:true },
+		readonly:   { type:Boolean, required:true }
+	},
+	watch:{
+		formLoading(val) {
+			if(!val) this.reset();
+		}
 	},
 	data() {
 		return {
@@ -60,9 +69,14 @@ let MyInputIframe = {
 		capGen:(s) => s.$store.getters.captions.generic
 	},
 	mounted() {
-		this.srcInput = this.modelValue === null ? '' : this.modelValue;
+		this.reset();
 	},
 	methods:{
+		reset() {
+			this.srcInput = this.modelValue === null ? '' : this.modelValue;
+		},
+		
+		// actions
 		del() {
 			this.srcInput = '';
 			this.$emit('update:modelValue',null);
