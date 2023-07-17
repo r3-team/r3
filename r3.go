@@ -157,7 +157,7 @@ func main() {
 		}
 	}()
 
-	// add shut down in case of SIGTERM
+	// add shut down in case of SIGTERM (terminal closed)
 	if service.Interactive() {
 		signal.Notify(scheduler.OsExit, syscall.SIGTERM)
 	}
@@ -508,17 +508,13 @@ func (prg *program) execute(svc service.Service) {
 
 // properly shuts down application, if execution is aborted prematurely
 func (prg *program) executeAborted(svc service.Service, err error) {
-
 	if err != nil {
 		prg.logger.Error(err)
 	}
-
-	// properly shut down
 	if service.Interactive() {
 		if err := prg.Stop(svc); err != nil {
 			prg.logger.Error(err)
 		}
-		os.Exit(0)
 	} else {
 		if err := svc.Stop(); err != nil {
 			prg.logger.Error(err)
@@ -532,9 +528,9 @@ func (prg *program) Stop(svc service.Service) error {
 	if !service.Interactive() {
 		prg.logger.Info("Stopping service...")
 	} else {
-		// keep shut down message visible for 1 second
+		// keep shut down message visible
 		fmt.Println("Shutting down...")
-		time.Sleep(1 * time.Second)
+		time.Sleep(500 * time.Millisecond)
 	}
 
 	if prg.stopping {
