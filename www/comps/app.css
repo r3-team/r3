@@ -396,6 +396,9 @@ h3{
 .app-sub-window.at-top{
 	justify-content:flex-start;
 }
+.app-sub-window.at-top.with-margin{
+	top:var(--spacing);
+}
 .app-sub-window.no-scroll{
 	overflow:hidden;
 }

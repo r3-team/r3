@@ -42,7 +42,7 @@ let MyAdminLogin = {
 		MyInputSelect,
 		MyTabs
 	},
-	template:`<div class="app-sub-window under-header at-top" @mousedown.self="$emit('close')">
+	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
 		
 		<!-- login record form -->
 		<div class="app-sub-window under-header"
@@ -62,7 +62,7 @@ let MyAdminLogin = {
 			/>
 		</div>
 		
-		<div class="contentBox admin-login pop-up" v-if="inputsReady">
+		<div class="contentBox admin-login popUp" v-if="inputsReady">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/person.png" />

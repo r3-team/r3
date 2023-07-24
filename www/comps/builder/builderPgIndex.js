@@ -3,7 +3,7 @@ export {MyBuilderPgIndex as default};
 let MyBuilderPgIndex = {
 	name:'my-builder-pg-index',
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
-		<div class="contentBox builder-pg-index pop-up" v-if="values !== null">
+		<div class="contentBox builder-pg-index popUp" v-if="values !== null">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/databaseAsterisk.png" />

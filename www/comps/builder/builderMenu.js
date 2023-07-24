@@ -73,7 +73,7 @@ let MyBuilderMenuItems = {
 					v-if="showCollectionsIndex === index"
 					@mousedown.self="showCollectionsIndex = -1"
 				>
-					<div class="contentBox builder-new pop-up">
+					<div class="contentBox builder-new popUp">
 						<div class="top lower">
 							<div class="area nowrap">
 								<h1 class="title">{{ capApp.collections }}</h1>

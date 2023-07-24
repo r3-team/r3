@@ -49,7 +49,7 @@ let MyBuilderArticlesItem = {
 			<td>
 				<!-- article body pop up window -->
 				<div class="app-sub-window under-header" v-if="showContent" @mousedown.self="showContent = false">
-					<div class="contentBox builder-articles-body shade pop-up">
+					<div class="contentBox builder-articles-body shade popUp">
 						<div class="top lower">
 							<div class="area">
 								<img class="icon" src="images/question.png" />
@@ -336,7 +336,7 @@ let MyBuilderArticles = {
 			
 			<!-- articles preview -->
 			<div class="app-sub-window under-header" v-if="showPreview" @mousedown.self="showPreview = false">
-				<my-articles class="builder-articles-preview shade pop-up"
+				<my-articles class="builder-articles-preview shade popUp"
 					@close="showPreview = false"
 					:form="formIdAssignTo !== null ? formIdMap[formIdAssignTo] : null"
 					:isPopUp="false"

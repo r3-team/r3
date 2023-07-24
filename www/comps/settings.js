@@ -605,7 +605,7 @@ let MySettingsFixedTokens = {
 		
 		<!-- MFA sub window -->
 		<div class="app-sub-window" v-if="showMfa">
-			<div class="contentBox pop-up settings-mfa">
+			<div class="contentBox popUp settings-mfa">
 				<div class="top lower">
 					<div class="area">
 						<img class="icon" src="images/smartphone.png" />
@@ -670,7 +670,7 @@ let MySettingsFixedTokens = {
 		
 		<!-- device install sub window -->
 		<div class="app-sub-window" v-if="showInstall">
-			<div class="contentBox pop-up">
+			<div class="contentBox popUp">
 				<div class="top lower">
 					<div class="area">
 						<img class="icon" src="images/screen.png" />

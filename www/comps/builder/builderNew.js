@@ -10,7 +10,7 @@ export {MyBuilderNew as default};
 let MyBuilderNew = {
 	name:'my-builder-new',
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
-		<div class="contentBox builder-new pop-up">
+		<div class="contentBox builder-new popUp">
 			<div class="top lower">
 				<div class="area nowrap">
 					<img class="icon" :src="titleImgSrc" />

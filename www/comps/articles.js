@@ -7,7 +7,7 @@ export {MyArticles as default};
 let MyArticles = {
 	name:'my-articles',
 	components:{ MyTabs },
-	template:`<div class="contentBox" :class="{ large:showLarge || isMobile, 'pop-up':isPopUp }">
+	template:`<div class="contentBox" :class="{ large:showLarge || isMobile, 'popUp':isPopUp }">
 		<div class="top lower">
 			<div class="area">
 				<img class="icon" src="images/question.png" />
