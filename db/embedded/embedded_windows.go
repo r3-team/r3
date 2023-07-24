@@ -90,7 +90,7 @@ func execWaitFor(call string, args []string, waitFor []string, waitTime int) (st
 	tools.CmdAddSysProgAttrs(cmd)
 	cmd.Env = append(os.Environ(), fmt.Sprintf("LC_MESSAGES=%s", locale))
 
-	// create as seperate process for clean shutdown, otherwise child progs are killed immediately on CTRL+C
+	// create as seperate process for clean shutdown, otherwise child progs are killed immediately on SIGINT
 	cmd.SysProcAttr = &syscall.SysProcAttr{
 		CreationFlags: syscall.CREATE_NEW_PROCESS_GROUP,
 	}
