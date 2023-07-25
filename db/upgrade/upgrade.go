@@ -117,6 +117,17 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
 			VALUES ('dbOptimize',0,0);
+			
+			-- mark relevant instance functions as STABLE to optimize their use
+			ALTER FUNCTION instance.files_get STABLE;
+			ALTER FUNCTION instance.get_login_id STABLE;
+			ALTER FUNCTION instance.get_login_language_code STABLE;
+			ALTER FUNCTION instance.get_name STABLE;
+			ALTER FUNCTION instance.get_public_hostname STABLE;
+			ALTER FUNCTION instance.get_role_ids STABLE;
+			ALTER FUNCTION instance.has_role STABLE;
+			ALTER FUNCTION instance.has_role_any STABLE;
+			ALTER FUNCTION instance.mail_get_next STABLE;
 		`)
 		return "3.5", err
 	},
