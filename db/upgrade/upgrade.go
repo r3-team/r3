@@ -128,6 +128,23 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER FUNCTION instance.has_role STABLE;
 			ALTER FUNCTION instance.has_role_any STABLE;
 			ALTER FUNCTION instance.mail_get_next STABLE;
+			
+			-- fix wrong return type for get preset record function
+			DROP FUNCTION instance.get_preset_record_id(uuid);
+			CREATE OR REPLACE FUNCTION instance.get_preset_record_id(_preset_id uuid)
+			    RETURNS BIGINT
+			    LANGUAGE 'plpgsql'
+			    STABLE PARALLEL UNSAFE
+			AS $BODY$
+			DECLARE
+			BEGIN
+				RETURN (
+					SELECT record_id_wofk
+					FROM instance.preset_record
+					WHERE preset_id = _preset_id
+				);
+			END;
+			$BODY$;
 		`)
 		return "3.5", err
 	},
