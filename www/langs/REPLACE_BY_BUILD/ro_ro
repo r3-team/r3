@@ -527,6 +527,7 @@
 				"cleanupTempDir":"Curățați directorul temporar",
 				"clusterCheckIn":"Cluster check-in",
 				"clusterProcessEvents":"Cluster event processing",
+				"dbOptimize":"Database optimization",
 				"httpCertRenew":"Reload SSL certificate if updated",
 				"importLdapLogins":"Importați autentificări și roluri prin LDAP",
 				"mailAttach":"Transfer de atașamente prin e-mail",

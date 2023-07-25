@@ -527,6 +527,7 @@
 				"cleanupTempDir":"Bereinigung des temporären Verzeichnisses",
 				"clusterCheckIn":"Cluster-Knoten einchecken",
 				"clusterProcessEvents":"Cluster-Ereignisse verarbeiten",
+				"dbOptimize":"Datenbankoptimierung",
 				"httpCertRenew":"Neuladen des SSL-Zertifikates falls es erneuert wurde",
 				"importLdapLogins":"Import von Anmeldungen und Rollen über LDAP",
 				"mailAttach":"E-Mail-Anhänge transferieren",

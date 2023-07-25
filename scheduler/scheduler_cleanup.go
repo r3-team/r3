@@ -16,6 +16,12 @@ import (
 
 var oneDayInSeconds int64 = 60 * 60 * 24
 
+// optimize DB
+func dbOptimize() error {
+	_, err := db.Pool.Exec(db.Ctx, `VACUUM`)
+	return err
+}
+
 // deletes files older than 1 day from temporary directory
 func cleanupTemp() error {
 	files, err := os.ReadDir(config.File.Paths.Temp)

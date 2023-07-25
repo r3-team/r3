@@ -99,11 +99,27 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	// clean up on next release
-	// ALTER TABLE app.open_form ALTER COLUMN pop_up_type
-	//  TYPE app.open_form_pop_up_type USING pop_up_type::text::app.open_form_pop_up_type;
-	// ALTER TABLE instance.mail_account ALTER COLUMN auth_method
-	//  TYPE instance.mail_account_auth_method USING auth_method::text::instance.mail_account_auth_method;
+	// nothing yet
 
+	"3.4": func(tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(db.Ctx, `
+			-- cleanup from last release
+			ALTER TABLE app.open_form ALTER COLUMN pop_up_type
+			 TYPE app.open_form_pop_up_type USING pop_up_type::text::app.open_form_pop_up_type;
+			ALTER TABLE instance.mail_account ALTER COLUMN auth_method
+			 TYPE instance.mail_account_auth_method USING auth_method::text::instance.mail_account_auth_method;
+			
+			-- regular VACUUM task
+			INSERT INTO instance.task (
+				name,interval_seconds,cluster_master_only,
+				embedded_only,active_only,active
+			) VALUES ('dbOptimize',2580000,true,false,false,true);
+			
+			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
+			VALUES ('dbOptimize',0,0);
+		`)
+		return "3.5", err
+	},
 	"3.3": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
 			-- cleanup from last release

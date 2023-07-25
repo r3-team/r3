@@ -360,6 +360,9 @@ func load() error {
 		case "clusterCheckIn":
 			t.nameLog = "Cluster node check-in to database"
 			t.fn = cluster.CheckInNode
+		case "dbOptimize":
+			t.nameLog = "Database optimization"
+			t.fn = dbOptimize
 		case "clusterProcessEvents":
 			t.nameLog = "Cluster event processing"
 			t.fn = clusterProcessEvents
