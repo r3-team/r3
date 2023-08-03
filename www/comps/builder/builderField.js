@@ -135,7 +135,7 @@ let MyBuilderField = {
 					
 					<!-- action: list data SQL preview -->
 					<img class="action clickable" src="images/code.png"
-						v-if="['calendar','chart','list'].includes(field.content)"
+						v-if="['calendar','chart','kanban','list'].includes(field.content)"
 						@click="getSqlPreview(field)"
 						:title="capApp.sql"
 					/>
@@ -205,10 +205,10 @@ let MyBuilderField = {
 			v-if="showColumns"
 			@column-id-show="$emit('column-id-show',field.id,$event)"
 			@columns-set="$emit('field-property-set','columns',$event)"
+			:batchIndexTitle="columnBatchIndexTitle"
 			:builderLanguage="builderLanguage"
 			:columns="field.columns"
 			:columnIdShow="columnIdShow"
-			:firstBatchTitle="isGantt ? capApp.ganttBatch : ''"
 			:groupName="field.id+'_columns'"
 			:hasCaptions="isList"
 		/>
@@ -276,6 +276,25 @@ let MyBuilderField = {
 		};
 	},
 	computed:{
+		columnBatchIndexTitle:(s) => {
+			if(s.isGantt) return [s.capApp.ganttBatch];
+			if(s.isKanban) {
+				const joinsIndexMap = s.getJoinsIndexMap(s.field.query.joins);
+				const getCaption = function(relationIndex) {
+					const j = joinsIndexMap[relationIndex];
+					return `${relationIndex} ${s.relationIdMap[j.relationId].name}`;
+				};
+				
+				let out = [];
+				if(s.field.relationIndexAxisX !== null)
+					out.push(s.capApp.kanban.columnBatchX.replace('{REL}',getCaption(s.field.relationIndexAxisX)));
+				if(s.field.relationIndexAxisY !== null)
+					out.push(s.capApp.kanban.columnBatchY.replace('{REL}',getCaption(s.field.relationIndexAxisY)));
+				
+				return out;
+			}
+			return [];
+		},
 		cssClass:(s) => {
 			return {
 				container:s.isContainer,
@@ -347,6 +366,7 @@ let MyBuilderField = {
 				case 'tabs':      return 'Tabs';      break;
 				case 'calendar':  return s.field.gantt ? 'Gantt' : 'Calendar'; break;
 				case 'data':      return s.getItemTitle(s.field.attributeId,s.field.index,s.field.outsideIn,s.field.attributeIdNm); break;
+				case 'kanban':    return s.field.query.relationId === null ? 'Kanban' : `Kanban: ${s.relationIdMap[s.field.query.relationId].name}`; break;
 				case 'list':      return s.field.query.relationId === null ? 'List' : `List: ${s.relationIdMap[s.field.query.relationId].name}`; break;
 			}
 			return '';
@@ -375,11 +395,11 @@ let MyBuilderField = {
 		hasQuery:      (s) => s.getFieldHasQuery(s.field),
 		isButton:      (s) => s.field.content === 'button',
 		isCalendar:    (s) => s.field.content === 'calendar',
-		isChart:       (s) => s.field.content === 'chart',
 		isContainer:   (s) => s.field.content === 'container',
 		isData:        (s) => s.field.content === 'data',
 		isGantt:       (s) => s.isCalendar && s.field.gantt,
 		isHeader:      (s) => s.field.content === 'header',
+		isKanban:      (s) => s.field.content === 'kanban',
 		isList:        (s) => s.field.content === 'list',
 		isTabs:        (s) => s.field.content === 'tabs',
 		isSelected:    (s) => s.field.id      === s.fieldIdShow,

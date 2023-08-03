@@ -16,6 +16,8 @@
 	--z-index-builder-break-out:11;
 	
 	/* list header */
+	--z-index-kanban-header-top-left:11;
+	--z-index-kanban-header:10;
 	--z-index-list-header:10;
 	
 	/* calendar elements */
@@ -98,6 +100,7 @@
 	--color-font:          hsl(0,  0%, var(--light-read));
 	--color-font-alt:      hsl(0,  0%, var(--light-read-less));
 	--color-shade:         hsl(0,  0%, calc(25% - var(--light-depth)));
+	--color-shade-bright:  hsl(0,  0%, calc(99% - var(--light-depth)));
 	
 	--color-accent1:       hsl(311,57%,calc(40% - var(--light-depth))); /* field captions */
 	--color-accent2:       hsl(127,86%,calc(96% - var(--light-depth))); /* calendar/gantt weekend */
@@ -157,6 +160,7 @@ body                                         { --depth:6; }
 .field .tabs-entry.active.showsCal           { --depth:4; }
 .field .tabs-entry.active.showsChart         { --depth:4; }
 .field .tabs-entry.active.showsData          { --depth:0; }
+.field .tabs-entry.active.showsKanban        { --depth:4; }
 .field .tabs-entry.active.showsList          { --depth:4; }
 .field .tabs-entry.active.showsTabs          { --depth:6; }
 .field .tabs-entry.active.readonly           { --depth:6; }
@@ -178,6 +182,12 @@ body                                         { --depth:6; }
 .gantt-group                                 { --depth:0; }
 .gantt-group:nth-child(odd)                  { --depth:2; }
 .gantt-line                                  { --depth:-2; }
+.kanban-card                                 { --depth:0; }
+.kanban-card:hover                           { --depth:3; }
+.kanban-card .dragAnchor                     { --depth:6; }
+.kanban-card:hover .dragAnchor               { --depth:9; }
+.kanban-content table td                     { --depth:4; }
+.kanban-content table .label                 { --depth:8; }
 .button                                      { --depth:4; }
 .button.background:focus                     { --depth:0; }
 .button.background:hover                     { --depth:0; }
@@ -1215,9 +1225,10 @@ table td.maximum{
 	--light-read-less:  calc(78% - (var(--light-depth) * 2.5));
 	--light-contrast:   calc(23% - var(--light-depth));
 	
-	--color-border:     hsl(0,0%,calc(32% - (var(--light-depth) * 3.5)));
-	--color-border-bg:  hsl(0,0%,calc(70% - var(--light-depth)));
-	--color-shade:      #000;
+	--color-border:      hsl(0,0%,calc(32% - (var(--light-depth) * 3.5)));
+	--color-border-bg:   hsl(0,0%,calc(70% - var(--light-depth)));
+	--color-shade:       #000;
+	--color-shade-bright:#222;
 	
 	--color-accent1:       hsl(311,47%,calc(70% - (1.50% * var(--depth)) ));
 	--color-accent2:       hsl(127,06%,calc(25% - (1.50% * var(--depth)) ));

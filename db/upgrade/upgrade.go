@@ -109,6 +109,31 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE instance.mail_account ALTER COLUMN auth_method
 			 TYPE instance.mail_account_auth_method USING auth_method::text::instance.mail_account_auth_method;
 			
+			-- kanban fields
+			ALTER TYPE app.field_content ADD VALUE 'kanban';
+			
+			CREATE TABLE IF NOT EXISTS app.field_kanban (
+			    field_id uuid NOT NULL,
+				relation_index_data smallint NOT NULL,
+				relation_index_axis_x smallint NOT NULL,
+				relation_index_axis_y smallint,
+				attribute_id_sort uuid,
+			    CONSTRAINT field_kanban_pkey PRIMARY KEY (field_id),
+			    CONSTRAINT field_kanban_field_id_fkey FOREIGN KEY (field_id)
+			        REFERENCES app.field (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT field_kanban_attribute_id_sort_fkey FOREIGN KEY (attribute_id_sort)
+			        REFERENCES app.attribute (id) MATCH SIMPLE
+			        ON UPDATE SET NULL
+			        ON DELETE SET NULL
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX fki_field_kanban_attribute_id_sort_fkey
+				ON app.field_kanban USING btree (attribute_id_sort ASC NULLS LAST);
+			
 			-- regular VACUUM task
 			INSERT INTO instance.task (
 				name,interval_seconds,cluster_master_only,

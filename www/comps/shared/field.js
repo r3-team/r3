@@ -9,11 +9,12 @@ export function getFieldIcon(field) {
 				field.outsideIn,
 				field.attributeIdNm !== null);
 		break;
-		case 'calendar':  return field.gantt ? 'gantt.png' : 'calendar.png'; break;
 		case 'button':    return 'circle_play.png'; break;
+		case 'calendar':  return field.gantt ? 'gantt.png' : 'calendar.png'; break;
 		case 'chart':     return 'chart.png'; break;
 		case 'container': return 'layout.png'; break;
 		case 'header':    return 'header.png'; break;
+		case 'kanban':    return 'kanban.png'; break;
 		case 'list':      return 'files_list2.png'; break;
 		case 'tabs':      return 'tabs.png'; break;
 	}

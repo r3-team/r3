@@ -240,7 +240,7 @@ let MyGantt = {
 				<my-button image="search.png"
 					v-if="!isMobile"
 					@trigger="stepZoom = stepZoomDefault"
-					:captionTitle="capApp.button.zoomResetHint"
+					:captionTitle="capGen.button.zoomReset"
 					:naked="true"
 					:tight="true"
 				/>

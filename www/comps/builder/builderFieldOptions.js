@@ -3,6 +3,7 @@ import MyBuilderCollectionInput        from './builderCollectionInput.js';
 import MyBuilderIconInput              from './builderIconInput.js';
 import MyBuilderOpenFormInput          from './builderOpenFormInput.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
+import {getJoinsIndexMap}              from '../shared/query.js';
 import {
 	getNilUuid,
 	getRandomInt
@@ -897,6 +898,99 @@ let MyBuilderFieldOptions = {
 				</tr>
 			</template>
 			
+			<template v-if="isKanban">
+				<tr v-if="field.query.relationId !== null">
+					<td>{{ capApp.kanban.relationIndexData }}</td>
+					<td>
+						<div class="row gap">
+							<select
+								@input="setInt('relationIndexData',$event.target.value,true)"
+								:value="field.relationIndexData === null ? '' : field.relationIndexData"
+							>
+								<option value="">-</option>
+								<option
+									v-for="j in field.query.joins"
+									:value="j.index"
+								>{{ j.index+') '+relationIdMap[j.relationId].name }}</option>
+							</select>
+							<my-button image="question.png"
+								@trigger="showHelp(capApp.kanban.relationIndexDataHelp)"
+								:tight="true"
+							/>
+						</div>
+					</td>
+				</tr>
+				<tr v-if="field.relationIndexData !== null">
+					<td>{{ capApp.kanban.relationIndexAxisX }}</td>
+					<td>
+						<div class="row gap">
+							<select
+								@input="setInt('relationIndexAxisX',$event.target.value,true)"
+								:value="field.relationIndexAxisX === null ? '' : field.relationIndexAxisX"
+							>
+								<option value="">-</option>
+								<option
+									v-for="j in joinsKanbanAxis.filter(v => v.index !== field.relationIndexAxisY)"
+									:value="j.index"
+								>{{ j.index+') '+relationIdMap[j.relationId].name }}</option>
+							</select>
+							<my-button image="question.png"
+								@trigger="showHelp(capApp.kanban.relationIndexAxisXHelp)"
+								:tight="true"
+							/>
+						</div>
+					</td>
+				</tr>
+				<tr v-if="field.relationIndexData !== null">
+					<td>{{ capApp.kanban.relationIndexAxisY }}</td>
+					<td>
+						<div class="row gap">
+							<select
+								@input="setInt('relationIndexAxisY',$event.target.value,true)"
+								:value="field.relationIndexAxisY === null ? '' : field.relationIndexAxisY"
+							>
+								<option value="">-</option>
+								<option
+									v-for="j in joinsKanbanAxis.filter(v => v.index !== field.relationIndexAxisX)"
+									:value="j.index"
+								>{{ j.index+') '+relationIdMap[j.relationId].name }}</option>
+							</select>
+							<my-button image="question.png"
+								@trigger="showHelp(capApp.kanban.relationIndexAxisYHelp)"
+								:tight="true"
+							/>
+						</div>
+					</td>
+				</tr>
+				<tr v-if="field.relationIndexData !== null">
+					<td v-html="capApp.kanban.attributeIdSort"></td>
+					<td>
+						<div class="row gap">
+							<select
+								@input="setNull('attributeIdSort',$event.target.value)"
+								:value="field.attributeIdSort === null ? '' : field.attributeIdSort"
+							>
+								<option value="">-</option>
+								<optgroup v-for="j in field.query.joins.filter(v => v.index === field.relationIndexData)"
+									:label="j.index+') '+relationIdMap[j.relationId].name"
+								>
+									<option
+										v-for="a in relationIdMap[j.relationId].attributes.filter(v => isAttributeInteger(v.content) && v.name !== 'id')"
+										:value="a.id"
+									>
+										{{ a.name }}
+									</option>
+								</optgroup>
+							</select>
+							<my-button image="question.png"
+								@trigger="showHelp(capApp.kanban.attributeIdSortHelp)"
+								:tight="true"
+							/>
+						</div>
+					</td>
+				</tr>
+			</template>
+			
 			<template v-if="isList">
 				<tr>
 					<td>{{ capApp.display }}</td>
@@ -1001,14 +1095,14 @@ let MyBuilderFieldOptions = {
 			</template>
 			
 			<!-- open form & open form bulk -->
-			<tr v-if="isButton || ((isList || isCalendar || isRelationship) && field.query.relationId !== null)">
+			<tr v-if="isButton || ((isList || isCalendar || isKanban || isRelationship) && field.query.relationId !== null)">
 				<td>{{ capApp.openForm }}</td>
 				<td>
 					<my-builder-open-form-input
 						@update:openForm="set('openForm',$event)"
 						:allowAllForms="isButton"
 						:allowNewRecords="true"
-						:allowPopUpInline="isList || isCalendar"
+						:allowPopUpInline="isCalendar || isKanban || isList"
 						:joinsIndexMap="joinsIndexMap"
 						:module="module"
 						:openForm="field.openForm"
@@ -1034,7 +1128,7 @@ let MyBuilderFieldOptions = {
 			</tr>
 			
 			<!-- consume collection -->
-			<template v-if="isList || isCalendar">
+			<template v-if="isList || isCalendar || isKanban">
 				<tr>
 					<td>
 						<div class="column">
@@ -1090,6 +1184,18 @@ let MyBuilderFieldOptions = {
 			if(s.isFiles)                         out.push('gallery');
 			return out;
 		},
+		joinsIndexMapField:(s) => {
+			return s.isQuery ? s.getJoinsIndexMap(s.field.query.joins) : {};
+		},
+		joinsKanbanAxis:(s) => {
+			if(!s.isKanban || s.field.relationIndexData === null)
+				return [];
+			
+			const ind = s.field.relationIndexData;
+			return s.field.query.joins.filter(v =>
+				v.indexFrom === ind &&
+				s.attributeIdMap[v.attributeId].relationId === s.joinsIndexMapField[ind].relationId);
+		},
 		presetIdMap:(s) => {
 			if(!s.isRelationship)
 				return {};
@@ -1120,8 +1226,9 @@ let MyBuilderFieldOptions = {
 		isDisplayDefault:(s) => s.isData && s.attribute.contentUse === 'default',
 		isHeader:        (s) => s.field.content === 'header',
 		isList:          (s) => s.field.content === 'list',
+		isKanban:        (s) => s.field.content === 'kanban',
 		isOpenForm:      (s) => typeof s.field.openForm !== 'undefined' && s.field.openForm !== null,
-		isQuery:         (s) => s.isCalendar || s.isChart || s.isList || s.isRelationship,
+		isQuery:         (s) => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
 		isTabs:          (s) => s.field.content === 'tabs',
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
 		isInteger:       (s) => s.isData && s.isAttributeInteger(s.attribute.content),
@@ -1148,6 +1255,7 @@ let MyBuilderFieldOptions = {
 		getIndexAttributeId,
 		getItemTitle,
 		getItemTitlePath,
+		getJoinsIndexMap,
 		getNilUuid,
 		getRandomInt,
 		isAttributeFiles,
@@ -1157,19 +1265,6 @@ let MyBuilderFieldOptions = {
 		isAttributeString,
 		
 		// actions
-		tabAdd(i) {
-			let v = JSON.parse(JSON.stringify(this.field.tabs));
-			v.push({
-				id:'new_tab' + this.getRandomInt(1,99999),
-				contentCounter:false,
-				state:'default',
-				fields:[],
-				captions:{
-					tabTitle:{}
-				}
-			});
-			this.set('tabs',v);
-		},
 		collectionAdd() {
 			let v = JSON.parse(JSON.stringify(this.field.collections));
 			v.push(this.getCollectionConsumerTemplate());
@@ -1210,6 +1305,11 @@ let MyBuilderFieldOptions = {
 				q.lookups = [];
 				this.$emit('set','query',q);
 			}
+			if(name === 'relationIndexData') {
+				this.$emit('set','attributeIdSort',null);
+				this.$emit('set','relationIndexAxisX',null);
+				this.$emit('set','relationIndexAxisY',null);
+			}
 			this.$emit('set',name,val);
 		},
 		setCollection(i,value) {
@@ -1246,6 +1346,31 @@ let MyBuilderFieldOptions = {
 		},
 		setNull(name,val) {
 			this.set(name,val === '' ? null : val);
+		},
+		showHelp(help) {
+			this.$store.commit('dialog',{
+				captionBody:help,
+				captionTop:this.capGen.contextHelp,
+				image:'question.png',
+				buttons:[{
+					caption:this.capGen.button.close,
+					cancel:true,
+					image:'cancel.png'
+				}]
+			});
+		},
+		tabAdd(i) {
+			let v = JSON.parse(JSON.stringify(this.field.tabs));
+			v.push({
+				id:'new_tab' + this.getRandomInt(1,99999),
+				contentCounter:false,
+				state:'default',
+				fields:[],
+				captions:{
+					tabTitle:{}
+				}
+			});
+			this.set('tabs',v);
 		}
 	}
 };

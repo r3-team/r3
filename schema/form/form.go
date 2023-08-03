@@ -402,6 +402,28 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 		}
 		fieldIf = field
 
+	case types.FieldKanban:
+		if setFieldIds {
+			field.Id, err = schema.ReplaceUuid(field.Id, idMapReplaced)
+			if err != nil {
+				return nil, err
+			}
+		} else {
+			field.OpenForm = replaceOpenForm(field.OpenForm)
+			field.Columns, err = schema.ReplaceColumnIds(field.Columns, idMapReplaced)
+			if err != nil {
+				return nil, err
+			}
+			field.Query, err = schema.ReplaceQueryIds(field.Query, idMapReplaced)
+			if err != nil {
+				return nil, err
+			}
+			for i, _ := range field.Collections {
+				field.Collections[i] = replaceCollectionConsumer(field.Collections[i])
+			}
+		}
+		fieldIf = field
+
 	case types.FieldList:
 		if setFieldIds {
 			field.Id, err = schema.ReplaceUuid(field.Id, idMapReplaced)
@@ -410,6 +432,7 @@ func replaceFieldIds(fieldIf interface{}, idMapReplaced map[uuid.UUID]uuid.UUID,
 			}
 		} else {
 			field.OpenForm = replaceOpenForm(field.OpenForm)
+			field.OpenFormBulk = replaceOpenForm(field.OpenFormBulk)
 			field.Columns, err = schema.ReplaceColumnIds(field.Columns, idMapReplaced)
 			if err != nil {
 				return nil, err

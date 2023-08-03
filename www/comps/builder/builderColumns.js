@@ -23,8 +23,8 @@ export let MyBuilderColumns = {
 				<div class="builder-column-batch-options">
 					<img class="icon move" src="images/column.png" :title="capApp.columnBatch" />
 					
-					<span v-if="batchIndex === 0 && firstBatchTitle !== ''">
-						{{ firstBatchTitle }}
+					<span v-if="batchIndex < batchIndexTitle.length">
+						{{ batchIndexTitle[batchIndex] }}
 					</span>
 					
 					<my-builder-caption class="caption"
@@ -96,10 +96,10 @@ export let MyBuilderColumns = {
 		</template>
 	</draggable>`,
 	props:{
+		batchIndexTitle:{ type:Array,   required:false, default:() => [] }, // titles by batch index (0 is for first batch)
 		builderLanguage:{ type:String,  required:true },
 		columns:        { type:Array,   required:true },
 		columnIdShow:   { required:false,default:null },
-		firstBatchTitle:{ type:String,  required:false, default:'' },
 		groupName:      { type:String,  required:true },
 		hasBatches:     { type:Boolean, required:false, default:true },
 		hasCaptions:    { type:Boolean, required:true },

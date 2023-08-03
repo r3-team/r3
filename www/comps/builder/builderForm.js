@@ -623,6 +623,7 @@ let MyBuilderForm = {
 				fields.push(this.createFieldList());      // list
 				fields.push(this.createFieldCalendar());  // calendar
 				fields.push(this.createFieldGantt());     // Gantt
+				fields.push(this.createFieldKanban());    // Kanban
 				fields.push(this.createFieldChart());     // chart
 				fields.push(this.createFieldHeader());    // header
 				fields.push(this.createFieldButton());    // button
@@ -969,6 +970,23 @@ let MyBuilderForm = {
 				}
 			};
 		},
+		createFieldKanban() {
+			return {
+				id:'template_kanban',
+				iconId:null,
+				content:'kanban',
+				state:'default',
+				onMobile:true,
+				columns:[],
+				collections:[],
+				relationIndexData:null,
+				relationIndexAxisX:null,
+				relationIndexAxisY:null,
+				attributeIdSort:null,
+				openForm:null,
+				query:this.getQueryTemplate()
+			};
+		},
 		createFieldList() {
 			return {
 				id:'template_list',
@@ -986,7 +1004,6 @@ let MyBuilderForm = {
 				openForm:null,
 				openFormBulk:null,
 				query:this.getQueryTemplate(),
-				recordSelector:false,
 				resultLimit:50
 			};
 		},

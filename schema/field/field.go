@@ -66,6 +66,10 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			WHERE field_id = fr.field_id
 		) AS preset_ids,
 		
+		-- kanban field
+		fk.relation_index_data, fk.relation_index_axis_x,
+		fk.relation_index_axis_y, fk.attribute_id_sort,
+		
 		-- list field
 		fl.auto_renew, fl.csv_export, fl.csv_import, fl.layout,
 		fl.filter_quick, fl.result_limit
@@ -78,6 +82,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		LEFT JOIN app.field_data              AS fd ON fd.field_id = f.id
 		LEFT JOIN app.field_data_relationship AS fr ON fr.field_id = f.id
 		LEFT JOIN app.field_header            AS fh ON fh.field_id = f.id
+		LEFT JOIN app.field_kanban            AS fk ON fk.field_id = f.id
 		LEFT JOIN app.field_list              AS fl ON fl.field_id = f.id
 		LEFT JOIN app.attribute               AS a  ON a.id        = fd.attribute_id
 		WHERE f.form_id = $1
@@ -96,6 +101,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	posDataLookup := make([]int, 0)
 	posDataRelLookup := make([]int, 0)
 	posHeaderLookup := make([]int, 0)
+	posKanbanLookup := make([]int, 0)
 	posListLookup := make([]int, 0)
 	posParentLookup := make([]int, 0)
 	posTabsLookup := make([]int, 0)
@@ -112,11 +118,13 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		var alignItems, alignContent, chartOption, def, direction, display,
 			ganttSteps, justifyContent, layout, regexCheck pgtype.Text
 		var autoSelect, grow, shrink, basis, perMin, perMax, index, indexDate0,
-			indexDate1, size, resultLimit pgtype.Int2
+			indexDate1, size, relationIndexKanbanData, relationIndexKanbanAxisX,
+			relationIndexKanbanAxisY, resultLimit pgtype.Int2
 		var autoRenew, dateRange0, dateRange1, indexColor, min, max pgtype.Int4
 		var attributeId, attributeIdAlt, attributeIdNm, attributeIdDate0,
-			attributeIdDate1, attributeIdColor, fieldParentId, iconId,
-			jsFunctionIdButton, jsFunctionIdData, tabId pgtype.UUID
+			attributeIdDate1, attributeIdColor, attributeIdKanbanSort,
+			fieldParentId, iconId, jsFunctionIdButton, jsFunctionIdData,
+			tabId pgtype.UUID
 		var category, clipboard, csvExport, csvImport, filterQuick,
 			filterQuickList, gantt, ganttStepsToggle, ics, outsideIn,
 			wrap pgtype.Bool
@@ -131,8 +139,9 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			&perMax, &size, &attributeId, &attributeIdAlt, &index, &display,
 			&min, &max, &def, &regexCheck, &jsFunctionIdData, &clipboard,
 			&attributeIdNm, &category, &filterQuick, &outsideIn, &autoSelect,
-			&defPresetIds, &autoRenew, &csvExport, &csvImport, &layout,
-			&filterQuickList, &resultLimit); err != nil {
+			&defPresetIds, &relationIndexKanbanData, &relationIndexKanbanAxisX,
+			&relationIndexKanbanAxisY, &attributeIdKanbanSort, &autoRenew,
+			&csvExport, &csvImport, &layout, &filterQuickList, &resultLimit); err != nil {
 
 			rows.Close()
 			return fields, err
@@ -300,6 +309,24 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			})
 			posHeaderLookup = append(posHeaderLookup, pos)
 
+		case "kanban":
+			fields = append(fields, types.FieldKanban{
+				Id:                 fieldId,
+				TabId:              tabId,
+				IconId:             iconId,
+				Content:            content,
+				State:              state,
+				OnMobile:           onMobile,
+				RelationIndexData:  int(relationIndexKanbanData.Int16),
+				RelationIndexAxisX: int(relationIndexKanbanAxisX.Int16),
+				RelationIndexAxisY: relationIndexKanbanAxisY,
+				AttributeIdSort:    attributeIdKanbanSort,
+				OpenForm:           types.OpenForm{},
+				Columns:            []types.Column{},
+				Query:              types.Query{},
+			})
+			posKanbanLookup = append(posKanbanLookup, pos)
+
 		case "list":
 			fields = append(fields, types.FieldList{
 				Id:          fieldId,
@@ -323,6 +350,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				AttributeIdRecord: pgtype.UUID{},
 			})
 			posListLookup = append(posListLookup, pos)
+
 		case "tabs":
 			fields = append(fields, types.FieldTabs{
 				Id:       fieldId,
@@ -440,6 +468,29 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		var field = fields[pos].(types.FieldHeader)
 
 		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle"})
+		if err != nil {
+			return fields, err
+		}
+		fields[pos] = field
+	}
+
+	// lookup kanban fields: open form, query, columns, consumed collections
+	for _, pos := range posKanbanLookup {
+		var field = fields[pos].(types.FieldKanban)
+
+		field.OpenForm, err = openForm.Get("field", field.Id, pgtype.Text{})
+		if err != nil {
+			return fields, err
+		}
+		field.Query, err = query.Get("field", field.Id, 0, 0)
+		if err != nil {
+			return fields, err
+		}
+		field.Columns, err = column.Get("field", field.Id)
+		if err != nil {
+			return fields, err
+		}
+		field.Collections, err = consumer.Get("field", field.Id, "fieldFilterSelector")
 		if err != nil {
 			return fields, err
 		}
@@ -693,6 +744,16 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
 				return err
 			}
+
+		case "kanban":
+			var f types.FieldKanban
+			if err := json.Unmarshal(fieldJson, &f); err != nil {
+				return err
+			}
+			if err := setKanban_tx(tx, fieldId, f); err != nil {
+				return err
+			}
+			fieldIdMapQuery[fieldId] = f.Query
 
 		case "list":
 			var f types.FieldList
@@ -1074,6 +1135,58 @@ func setHeader_tx(tx pgx.Tx, fieldId uuid.UUID, size int) error {
 		}
 	}
 	return nil
+}
+func setKanban_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldKanban) error {
+
+	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_kanban", "field_id")
+	if err != nil {
+		return err
+	}
+
+	if f.RelationIndexData == f.RelationIndexAxisX {
+		return errors.New("a separate relation must be chosen for Kanban columns")
+	}
+	if f.RelationIndexAxisY.Valid && int(f.RelationIndexAxisY.Int16) == f.RelationIndexAxisX {
+		return errors.New("relations for Kanban columns & rows must be different")
+	}
+
+	if known {
+		if _, err := tx.Exec(db.Ctx, `
+			UPDATE app.field_kanban
+			SET relation_index_data = $1, relation_index_axis_x = $2,
+				relation_index_axis_y = $3, attribute_id_sort = $4
+			WHERE field_id = $5
+		`, f.RelationIndexData, f.RelationIndexAxisX, f.RelationIndexAxisY,
+			f.AttributeIdSort, fieldId); err != nil {
+
+			return err
+		}
+	} else {
+		if _, err := tx.Exec(db.Ctx, `
+			INSERT INTO app.field_kanban (
+				field_id, relation_index_data, relation_index_axis_x,
+				relation_index_axis_y, attribute_id_sort
+			)
+			VALUES ($1,$2,$3,$4,$5)
+		`, fieldId, f.RelationIndexData, f.RelationIndexAxisX,
+			f.RelationIndexAxisY, f.AttributeIdSort); err != nil {
+
+			return err
+		}
+	}
+
+	// set open form
+	if err := openForm.Set_tx(tx, "field", fieldId, f.OpenForm, pgtype.Text{}); err != nil {
+		return err
+	}
+
+	// set collection consumer
+	if err := consumer.Set_tx(tx, "field", fieldId, "fieldFilterSelector", f.Collections); err != nil {
+		return err
+	}
+
+	// set columns
+	return column.Set_tx(tx, "field", fieldId, f.Columns)
 }
 func setList_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	formIdOpen pgtype.UUID, autoRenew pgtype.Int4, csvExport bool, csvImport bool,

@@ -369,6 +369,22 @@ type FieldHeader struct {
 	Size     int         `json:"size"`
 	Captions CaptionMap  `json:"captions"`
 }
+type FieldKanban struct {
+	Id                 uuid.UUID            `json:"id"`
+	TabId              pgtype.UUID          `json:"tabId"`
+	IconId             pgtype.UUID          `json:"iconId"`
+	Content            string               `json:"content"`
+	State              string               `json:"state"`
+	OnMobile           bool                 `json:"onMobile"`
+	RelationIndexData  int                  `json:"relationIndexData"`
+	RelationIndexAxisX int                  `json:"relationIndexAxisX"`
+	RelationIndexAxisY pgtype.Int2          `json:"relationIndexAxisY"`
+	AttributeIdSort    pgtype.UUID          `json:"attributeIdSort"`
+	Columns            []Column             `json:"columns"`
+	Collections        []CollectionConsumer `json:"collections"` // collections to select values for query filters
+	OpenForm           OpenForm             `json:"openForm"`
+	Query              Query                `json:"query"`
+}
 type FieldList struct {
 	Id           uuid.UUID            `json:"id"`
 	TabId        pgtype.UUID          `json:"tabId"`

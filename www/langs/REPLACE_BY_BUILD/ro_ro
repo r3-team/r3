@@ -44,7 +44,8 @@
 			"selectAllShort":"All",
 			"send":"Trimite",
 			"show":"Arată",
-			"unlock":"Unlock"
+			"unlock":"Unlock",
+			"zoomReset":"Resetați nivelul de zoom"
 		},
 		"dialog":{
 			"confirm":"Va rog confirmați"
@@ -106,6 +107,7 @@
 		"inputTooFewFiles":"Prea puține fișiere",
 		"inputTooManyFiles":"Prea mult fișiere",
 		"interval":"Interval",
+		"label":"Label",
 		"licenseRequired":"Implică o licență",
 		"limit":"Limita",
 		"menu":"Menu",
@@ -139,6 +141,7 @@
 		"type":"Type",
 		"username":"Nume utilizator",
 		"version":"Versiune",
+		"unassigned":"Unassigned",
 		"warnings":"Warnings"
 	},
 	"admin":{
@@ -791,6 +794,18 @@
 				"eventBefore":"Inaintea evenimentului",
 				"jsFunctionId":"Executați funcția de interfață"
 			},
+			"kanban":{
+				"attributeIdSort":"Card sort attribute (optional)",
+				"attributeIdSortHelp":"If used, this attribute value will be updated for the Kanban card record according to the position of the card within the Kanban column. This enables users to keep card orders inside Kanbans.<br /><br />To make use of this feature, the field content should be sorted by this attribute in ascending order; it is valid to first order by a Kanban column/row value and then by the card sort attribute.<br /><br />If the same records are accessed in multiple Kanbans with other columns/rows, a different sort attribute is required - otherwise card sorting will be incorrect as its context-dependent on the Kanban layout.",
+				"columnBatchX":"Kanban column (relation: '{REL}')",
+				"columnBatchY":"Kanban row (relation: '{REL}')",
+				"relationIndexData":"Kanban cards",
+				"relationIndexDataHelp":"Relation from which every available record is displayed as a Kanban card. The card can show values from other, joined relations - but for the card itself, there must be a record from the chosen relation.<br /><br />Within the field data selection, values from column batches (not assigned to Kanban column/row) are displayed on the Kanban card.",
+				"relationIndexAxisX":"Kanban columns",
+				"relationIndexAxisXHelp":"Relation from which every available record is used as a Kanban column. This relation needs to be joined n:1 to the Kanban cards relation.<br /><br />By moving cards between Kanban columns, the relationship value is being updated.<br /><br />Within the field data selection, values from the first batched column are used as Kanban column labels.",
+				"relationIndexAxisY":"Kanban rows (optional)",
+				"relationIndexAxisYHelp":"Relation from which every available record is used as a Kanban row. If used, the Kanban becomes two-dimensional (columns & rows). This relation needs to be joined n:1 to the Kanban cards relation.<br /><br />By moving cards between Kanban rows, the relationship value is being updated.<br /><br />Within the field data selection, values from the second batched column are used as Kanban row labels."
+			},
 			"option":{
 				"display":{
 					"color":"culoare",
@@ -1424,8 +1439,7 @@
 			"icsPublish":"Publică pentru uz personal",
 			"ganttToggleHint":"Comutați între modul zi și oră",
 			"ganttShowLabels":"Grupuri",
-			"ganttShowLabelsHint":"Afișați/ascundeți grupurile",
-			"zoomResetHint":"Resetați nivelul de zoom"
+			"ganttShowLabelsHint":"Afișați/ascundeți grupurile"
 		},
 		"icsDesc":"Utilizați această adresă URL pentru a vă abona la calendar (iCalendar, ICS).",
 		"icsTokenNameHint":"Device name (optional)",

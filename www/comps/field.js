@@ -1,6 +1,7 @@
 import MyCalendar             from './calendar.js';
 import MyChart                from './chart.js';
 import MyGantt                from './gantt.js';
+import MyKanban               from './kanban.js';
 import MyInputDate            from './inputDate.js';
 import MyInputFiles           from './inputFiles.js';
 import MyInputIframe          from './inputIframe.js';
@@ -50,6 +51,7 @@ let MyField = {
 		MyCalendar,
 		MyChart,
 		MyGantt,
+		MyKanban,
 		MyInputDate,
 		MyInputFiles,
 		MyInputIframe,
@@ -440,6 +442,35 @@ let MyField = {
 			:rowSelect="field.openForm !== null"
 			:stepTypeDefault="field.ganttSteps"
 			:stepTypeToggle="field.ganttStepsToggle"
+			:query="field.query"
+			:usesPageHistory="isAloneInForm && !formIsPopUp"
+		/>
+		
+		<!-- kanban -->
+		<my-kanban
+			v-if="isKanban"
+			@clipboard="$emit('clipboard')"
+			@close-inline="closeInline"
+			@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
+			@record-count-change="$emit('set-counter',field.id,$event)"
+			@set-args="(...args) => $emit('set-form-args',...args)"
+			@set-collection-indexes="setCollectionIndexes"
+			:attributeIdSort="field.attributeIdSort"
+			:choices="choicesProcessed"
+			:columns="columnsProcessed"
+			:collections="field.collections"
+			:collectionIdMapIndexes="collectionIdMapIndexes"
+			:fieldId="field.id"
+			:filters="filtersProcessed"
+			:formLoading="formLoading"
+			:iconId="iconId ? iconId : null"
+			:isHidden="isHidden"
+			:isSingleField="isAloneInForm || isAloneInTab"
+			:popUpFormInline="popUpFormInline"
+			:relationIndexData="field.relationIndexData"
+			:relationIndexAxisX="field.relationIndexAxisX"
+			:relationIndexAxisY="field.relationIndexAxisY"
+			:rowSelect="field.openForm !== null"
 			:query="field.query"
 			:usesPageHistory="isAloneInForm && !formIsPopUp"
 		/>
@@ -1010,6 +1041,7 @@ let MyField = {
 		isChart:    (s) => s.field.content === 'chart',
 		isContainer:(s) => s.field.content === 'container',
 		isData:     (s) => s.field.content === 'data',
+		isKanban:   (s) => s.field.content === 'kanban',
 		isList:     (s) => s.field.content === 'list',
 		isTabs:     (s) => s.field.content === 'tabs',
 		
@@ -1039,7 +1071,7 @@ let MyField = {
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
 		isIframe:        (s) => s.isData && s.attribute.contentUse === 'iframe',
 		isInteger:       (s) => s.isData && s.isAttributeInteger(s.attribute.content),
-		isQuery:         (s) => s.isCalendar || s.isChart || s.isList || s.isRelationship,
+		isQuery:         (s) => s.isCalendar || s.isChart || s.isKanban || s.isList || s.isRelationship,
 		isRegconfig:     (s) => s.isData && s.isAttributeRegconfig(s.attribute.content),
 		isRichtext:      (s) => s.isData && s.attribute.contentUse === 'richtext',
 		isString:        (s) => s.isData && s.isAttributeString(s.attribute.content),
@@ -1106,12 +1138,13 @@ let MyField = {
 			return {
 				active:tabIndex === this.tabIndexShow,
 				error:this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
-				readonly:  active && oneField && readonly,
-				showsCal:  active && oneField && fields[0].content === 'calendar',
-				showsChart:active && oneField && fields[0].content === 'chart',
-				showsData: active && oneField && fields[0].content === 'data',
-				showsList: active && oneField && fields[0].content === 'list',
-				showsTabs: active && oneField && fields[0].content === 'tabs'
+				readonly:   active && oneField && readonly,
+				showsCal:   active && oneField && fields[0].content === 'calendar',
+				showsChart: active && oneField && fields[0].content === 'chart',
+				showsData:  active && oneField && fields[0].content === 'data',
+				showsKanban:active && oneField && fields[0].content === 'kanban',
+				showsList:  active && oneField && fields[0].content === 'list',
+				showsTabs:  active && oneField && fields[0].content === 'tabs'
 			};
 		},
 		
@@ -1141,7 +1174,7 @@ let MyField = {
 		openForm(recordIds,getterArgs,middleClick,openFormContext) {
 			// set defaults
 			if(typeof recordIds       === 'undefined') recordIds       = [];
-			if(typeof getterArgs      === 'undefined') getterArgs         = [];
+			if(typeof getterArgs      === 'undefined') getterArgs      = [];
 			if(typeof middleClick     === 'undefined') middleClick     = false;
 			if(typeof openFormContext === 'undefined') openFormContext = null;
 			

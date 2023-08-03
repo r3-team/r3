@@ -44,7 +44,8 @@
 			"selectAllShort":"Alles",
 			"send":"Senden",
 			"show":"Anzeigen",
-			"unlock":"Entsperren"
+			"unlock":"Entsperren",
+			"zoomReset":"Zoom-Level zurücksetzen"
 		},
 		"dialog":{
 			"confirm":"Bitte bestätigen"
@@ -106,6 +107,7 @@
 		"inputTooFewFiles":"Zu wenige Dateien",
 		"inputTooManyFiles":"Zu viele Dateien",
 		"interval":"Intervall",
+		"label":"Beschreibung",
 		"licenseRequired":"Lizenz erforderlich",
 		"limit":"Anzahl",
 		"menu":"Menü",
@@ -139,6 +141,7 @@
 		"type":"Typ",
 		"username":"Benutzername",
 		"version":"Version",
+		"unassigned":"Nicht zugewiesen",
 		"warnings":"Warnungen"
 	},
 	"admin":{
@@ -791,6 +794,18 @@
 				"eventBefore":"Vor Ereignis",
 				"jsFunctionId":"Frontend-Funktion ausführen"
 			},
+			"kanban":{
+				"attributeIdSort":"Kartensortier-Attribut (optional)",
+				"attributeIdSortHelp":"Falls verwendet, wird der Attributwert für Kanban-Karten anhand der Position in einer Kanban-Spalte aktualisiert. Hierdurch können Benutzer Karten innerhalb von Kanban sortieren.<br /><br />Um dieses Feature einzusetzen, sollte der Feldinhalt nach dem gewählten Attribut aufsteigend sortiert werden; es ist valide, zuerst nach Werten in den Kanban-Spalten/Zeilen zu sortieren und dann nach diesem Attribut.<br /><br />Falls die gleichen Datensätze in mehreren Kanbans mit anderen Spalten/Zeilen gezeigt werden, muss ein anderes Sortierattribut genutzt werden, da dieses vom aktuellen Kanban-Layout abhängig ist.",
+				"columnBatchX":"Kanban-Spalten (Relation: '{REL}')",
+				"columnBatchY":"Kanban-Zeilen (Relation: '{REL}')",
+				"relationIndexData":"Kanban-Karten",
+				"relationIndexDataHelp":"Relation, von welcher jeder verfügbare Datensatz als Kanban-Karte angezeigt wird. Die Karte kann Werte von anderen, verbundenen Relationen anzeigen - die Karte selbst muss jedoch ein Datensatz der gewählten Relation sein.<br /><br />Innerhalb der Felddatenauswahl, Werte von Spaltenstapeln (die nicht an Kanban-Spalten/Zeilen zugewiesen sind) werden auf der Karte dargestellt.",
+				"relationIndexAxisX":"Kanban-Spalten",
+				"relationIndexAxisXHelp":"Relation, von welcher jeder verfügbare Datensatz als Kanban-Spalte angezeigt wird. Diese Relation muss per n:1 mit der Kanban-Karten-Relation verbunden sein.<br /><br />Durch Bewegen der Karten zwischen den Kanban-Spalten, wird der Beziehungswert aktualisiert.<br /><br />Innerhalb der Felddatenauswahl, Werte vom ersten Spaltenstapel werden als Beschriftung der Kanban-Spalten genutzt.",
+				"relationIndexAxisY":"Kanban-Zeilen (optional)",
+				"relationIndexAxisYHelp":"Relation, von welcher jeder verfügbare Datensatz als Kanban-Zeile angezeigt wird. Falls genutzt, wird das Kanban zwei-dimensional (Spalten & Zeilen). Diese Relation muss per n:1 mit der Kanban-Karten-Relation verbunden sein.<br /><br />Durch Bewegen der Karten zwischen den Kanban-Zeilen, wird der Beziehungswert aktualisiert.<br /><br />Innerhalb der Felddatenauswahl, Werte vom zweiten Spaltenstapel werden als Beschriftung der Kanban-Zeilen genutzt."
+			},
 			"option":{
 				"display":{
 					"color":"Farbe",
@@ -1424,8 +1439,7 @@
 			"icsPublish":"Für persönliche Nutzung veröffentlichen",
 			"ganttToggleHint":"Zwischen Stunden- & Tagmodus wechseln",
 			"ganttShowLabels":"Gruppen",
-			"ganttShowLabelsHint":"Gruppen anzeigen/verstecken",
-			"zoomResetHint":"Zoom-Level zurücksetzen"
+			"ganttShowLabelsHint":"Gruppen anzeigen/verstecken"
 		},
 		"icsDesc":"Diese URL verwenden, um Kalender zu abonnieren (iCalendar, ICS).",
 		"icsTokenNameHint":"Gerätename (optional)",

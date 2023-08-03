@@ -1,0 +1,208 @@
+.kanban{
+	flex:1 1 auto;
+	overflow:auto;
+	display:flex;
+	flex-flow:column nowrap;
+	background-color:var(--color-bg);
+	box-shadow:1px 1px 4px var(--color-shade);
+	--kanban-spacing:calc(var(--spacing) / 2) 0px;
+	--kanban-card-margin:6px;
+	--kanban-card-template-height:40px;
+}
+.kanban input.zoom-factor{
+	width:80px !important;
+}
+.kanban-wrap{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
+}
+.kanban-content{
+	flex:1 1 auto;
+	padding:var(--kanban-spacing);
+	overflow:auto;
+}
+.kanban-table{
+	border-spacing:var(--kanban-spacing);
+    border-collapse:separate;
+    
+    /* to make table shrink for table content scrolling */
+	display:block;
+	width:1px;
+	height:1px;
+	min-width:100%;
+	min-height:100%;
+}
+.kanban-table th,
+.kanban-table td{
+	min-width:80px;
+	max-width:var(--kanban-width-max);
+	padding:0px;
+	background-color:var(--color-bg);
+	vertical-align:top;
+	box-shadow:2px 2px 3px 1px var(--color-shade-bright);
+	
+	/* make td content 100% hack */
+	height:1px;
+	overflow:hidden;
+}
+@-moz-document url-prefix() {
+	.kanban-table th,
+	.kanban-table td{
+		height:100%;
+	}
+}
+.kanban-table td{
+	border-bottom:1px dotted var(--color-border);
+	position:relative;
+}
+.kanban-table .label{
+	position:sticky;
+	font-size:120%;
+	padding:6px;
+	z-index:var(--z-index-kanban-header);
+}
+.kanban-table .label .label-line.unassigned{
+	font-style:italic;
+	color:var(--color-font-alt);
+}
+.kanban-table .label .label-line{
+	gap:9px;
+	display:flex;
+	flex-flow:row nowrap;
+}
+.kanban-table th.label{
+	top:0px;
+	padding:9px 12px;
+	border-radius:6px 6px 0px 0px;
+	border-bottom:1px solid var(--color-border);
+}
+.kanban-table th.label.top-left{
+	left:0px;
+	z-index:var(--z-index-kanban-header-top-left);
+}
+.kanban-table td.label{
+	left:0px;
+}
+.kanban-table th.label .label-line{
+	height:100%;
+	align-items:center;
+}
+.kanban-table tfoot td{
+	margin-top:-5px;
+	border-radius:0px 0px 6px 6px;
+	border-bottom:none;
+}
+.kanban-box-wrap{
+	width:100%;
+	height:100%;
+	min-height:30px;
+	display:inline-table;
+}
+.kanban-box{
+	height:100%;
+	display:flex;
+	flex-flow:column nowrap;
+}
+.kanban-box.dragActive{
+	margin-bottom:calc(var(--kanban-card-template-height) + (var(--kanban-card-margin) * 2));
+}
+.kanban-table td:hover .kanban-box{
+	margin-bottom:0px;
+}
+.kanban-card{
+	flex:0 0 auto;
+	margin:var(--kanban-card-margin) 0px;
+	display:flex;
+	flex-flow:column nowrap;
+	background-color:var(--color-bg);
+	box-shadow:1px 1px 3px var(--color-shade);
+	box-sizing:border-box;
+	border-radius:5px;
+	overflow:hidden;
+	transition:box-shadow 0.3s,background-color 0.3s;
+}
+.kanban-card:hover{
+	box-shadow:1px 1px 6px var(--color-shade);
+}
+.kanban-card.template{
+	flex:1 1 auto;
+	height:var(--kanban-card-template-height);
+	max-height:160px;
+	display:flex;
+	visibility:hidden;
+	flex-flow:column nowrap;
+	border:2px dotted var(--color-border);
+	cursor:pointer;
+	opacity:0.7;
+}
+.kanban-table td:hover .kanban-card.template{
+	display:flex;
+	visibility:visible;
+}
+.kanban-card.template span{
+	font-size:110%;
+	font-style:italic;
+}
+.kanban-card-content{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
+}
+.kanban-card-content.template{
+	align-items:center;
+	justify-content:center;
+}
+.kanban-card-header{
+	height:16px;
+	background-color:var(--color-bg);
+	border-bottom:1px solid var(--color-border);
+	transition:background-color 0.3s;
+}
+.kanban-card-header.dragAnchor{
+	cursor:move;
+}
+.kanban-card table{
+	margin:0px 6px 3px;
+	border-spacing:calc(var(--spacing) / 2) calc(var(--spacing) / 3);
+    border-collapse:separate;
+}
+.kanban-card table td{
+	all:unset;
+	display:revert;
+	padding:0px;
+}
+.kanban-card table td.kanban-label{
+	color:var(--color-font-alt);
+}
+.kanban-card table td .batch{
+	min-height:100%; /* relevant for color inputs */
+	margin:0px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	gap:6px;
+	
+	/* auto cutting text */
+	width:inherit; /* inherit from table cell */
+	overflow:hidden;
+}
+.kanban-card table td .batch.vertical{
+	margin:5px 0px;
+	flex-flow:column nowrap;
+	justify-content:center;
+	align-items:flex-start;
+	gap:4px;
+}
+
+/* user overwrites */
+.user-clean .kanban:not(.isSingleField){
+	box-shadow:none;
+	border:1px solid var(--color-border);
+	border-radius:5px;
+}
+.user-bordersSquared .kanban-table th.label,
+.user-bordersSquared .kanban-table tfoot td,
+.user-bordersSquared .kanban-card{
+	border-radius:0px !important;
+}
