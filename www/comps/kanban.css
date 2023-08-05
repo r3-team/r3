@@ -101,6 +101,7 @@
 }
 .kanban-box{
 	height:100%;
+	min-height:50px;
 	display:flex;
 	flex-flow:column nowrap;
 }
