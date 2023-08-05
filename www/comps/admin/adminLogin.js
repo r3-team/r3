@@ -19,7 +19,6 @@ let MyAdminLoginRole = {
 			:captionTitle="getCaptionForModule(r.captions['roleDesc'],'',module)"
 			:image="roleIds.includes(r.id) ? 'checkbox1.png' : 'checkbox0.png'"
 			:naked="true"
-			:tight="true"
 		/>
 	</td>`,
 	props:{
@@ -147,13 +146,13 @@ let MyAdminLogin = {
 								<span>{{ getCaptionForModule(lf.captions['loginFormTitle'],lf.name,moduleIdMap[lf.moduleId]) }}</span>
 							</div>
 						</td>
-						<td colspan="2" class="login-record">
+						<td colspan="2" class="login-record row gap">
 							<my-button
 								@trigger="openLoginForm(lfi)"
 								:captionTitle="records[lfi].id !== null ? capGen.button.edit : capGen.button.create"
 								:image="records[lfi].id ? 'open.png' : 'add.png'"
 							/>
-							<div class="login-record-input">
+							<div class="login-record-input row gap">
 								<input disabled="disabled"
 									v-if="records[lfi].id !== null"
 									:value="records[lfi].label"

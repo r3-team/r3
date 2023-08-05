@@ -362,7 +362,6 @@ let MyBuilderFieldOptions = {
 								:active="false"
 								:image="getAttributeIcon(attribute,field.outsideIn,field.attributeIdNm !== null)"
 								:naked="true"
-								:tight="true"
 							/>
 							<input disabled="disabled"
 								:title="getItemTitlePath(field.attributeId)"
@@ -372,7 +371,6 @@ let MyBuilderFieldOptions = {
 								@trigger="openAttribute(attribute.relationId,false)"
 								@trigger-middle="openAttribute(attribute.relationId,true)"
 								:caption="capGen.open"
-								:tight="true"
 							/>
 						</div>
 					</td>
@@ -705,12 +703,10 @@ let MyBuilderFieldOptions = {
 							/>
 							<my-button image="add.png"
 								@trigger="setInt('basis',field.basis+50,false)"
-								:tight="true"
 							/>
 							<my-button image="remove.png"
 								@trigger="setInt('basis',field.basis-50,false)"
 								:active="field.basis >= 50"
-								:tight="true"
 							/>
 						</div>
 						<my-button
@@ -731,12 +727,10 @@ let MyBuilderFieldOptions = {
 							/>
 							<my-button image="add.png"
 								@trigger="setInt('grow',field.grow+1,false)"
-								:tight="true"
 							/>
 							<my-button image="remove.png"
 								@trigger="setInt('grow',field.grow-1,false)"
 								:active="field.grow > 0"
-								:tight="true"
 							/>
 						</div>
 					</td>
@@ -760,12 +754,10 @@ let MyBuilderFieldOptions = {
 							/>
 							<my-button image="add.png"
 								@trigger="setInt('shrink',field.shrink+1,false)"
-								:tight="true"
 							/>
 							<my-button image="remove.png"
 								@trigger="setInt('shrink',field.shrink-1,false)"
 								:active="field.shrink > 0"
-								:tight="true"
 							/>
 						</div>
 					</td>
@@ -915,7 +907,6 @@ let MyBuilderFieldOptions = {
 							</select>
 							<my-button image="question.png"
 								@trigger="showHelp(capApp.kanban.relationIndexDataHelp)"
-								:tight="true"
 							/>
 						</div>
 					</td>
@@ -936,7 +927,6 @@ let MyBuilderFieldOptions = {
 							</select>
 							<my-button image="question.png"
 								@trigger="showHelp(capApp.kanban.relationIndexAxisXHelp)"
-								:tight="true"
 							/>
 						</div>
 					</td>
@@ -957,7 +947,6 @@ let MyBuilderFieldOptions = {
 							</select>
 							<my-button image="question.png"
 								@trigger="showHelp(capApp.kanban.relationIndexAxisYHelp)"
-								:tight="true"
 							/>
 						</div>
 					</td>
@@ -984,7 +973,6 @@ let MyBuilderFieldOptions = {
 							</select>
 							<my-button image="question.png"
 								@trigger="showHelp(capApp.kanban.attributeIdSortHelp)"
-								:tight="true"
 							/>
 						</div>
 					</td>
@@ -1137,7 +1125,6 @@ let MyBuilderFieldOptions = {
 								@trigger="collectionAdd"
 								:caption="capGen.button.add"
 								:naked="true"
-								:tight="true"
 							/>
 						</div>
 					</td>

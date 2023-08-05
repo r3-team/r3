@@ -85,7 +85,6 @@ let MyList = {
 								:active="!inputIsReadonly"
 								:image="displayRecordCheck(inputRecordIds.includes(r.indexRecordIds['0']))"
 								:naked="true"
-								:tight="true"
 							/>
 						</div>
 					</td>
@@ -216,7 +215,7 @@ let MyList = {
 						:caption="!isMobile ? capApp.button.csv : ''"
 						:captionTitle="capApp.button.csvHint"
 					/>
-					<my-button image="delete.png"
+					<my-button image="shred.png"
 						v-if="hasBulkActions"
 						@trigger="delAsk(selectedRows)"
 						:active="selectedRows.length !== 0"
@@ -243,7 +242,7 @@ let MyList = {
 					/>
 				</div>
 				
-				<div class="area nowrap gap default-inputs">
+				<div class="area nowrap default-inputs">
 					<!-- auto renew / user filter / quick filter / query choices / page limits -->
 					
 					<my-button image="autoRenew.png"
@@ -252,7 +251,6 @@ let MyList = {
 						:caption="capApp.button.autoRenew.replace('{VALUE}',autoRenewInput)"
 						:captionTitle="capApp.button.autoRenewHint.replace('{VALUE}',autoRenewInput)"
 						:naked="true"
-						:tight="true"
 					/>
 					
 					<my-button image="refresh.png"
@@ -260,7 +258,6 @@ let MyList = {
 						@trigger="reloadInside('manual')"
 						:captionTitle="capGen.button.refresh"
 						:naked="true"
-						:tight="true"
 					/>
 					
 					<my-button image="filterCog.png"
@@ -270,7 +267,6 @@ let MyList = {
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
 						:captionTitle="capGen.button.filterHint"
 						:naked="true"
-						:tight="true"
 					/>
 					
 					<input class="selector lookup" enterkeyhint="send" type="text"
@@ -448,7 +444,6 @@ let MyList = {
 											:caption="capApp.button.all"
 											:captionTitle="capApp.button.allHint"
 											:naked="true"
-											:tight="true"
 										/>
 									</div>
 								</td>
@@ -588,12 +583,10 @@ let MyList = {
 									@trigger="selectRow(ri)"
 									:image="selectedRows.includes(ri) ? 'checkbox1.png' : 'checkbox0.png'"
 									:naked="true"
-									:tight="true"
 								/>
 								<my-button image="delete.png"
 									@trigger="delAsk([ri])"
 									:naked="true"
-									:tight="true"
 								/>
 							</div>
 							<div class="header"></div>

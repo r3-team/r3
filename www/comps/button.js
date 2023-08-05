@@ -13,13 +13,8 @@ let MyButton = {
 		:title="captionTitle"
 	>
 		<img draggable="false"
-			v-if="image !== ''"
-			:src="'images/'+image"
-			:title="captionTitle"
-		/>
-		<img draggable="false"
-			v-if="imageBase64 !== ''"
-			:src="imageBase64"
+			v-if="image !== '' || imageBase64 !== ''"
+			:src="image !== '' ? 'images/'+image : imageBase64"
 			:title="captionTitle"
 		/>
 		<span
@@ -40,23 +35,19 @@ let MyButton = {
 		adjusts:{ type:Boolean, required:false, default:false }, // adjusts its length to avail. space (text is ellipsed if too small)
 		cancel: { type:Boolean, required:false, default:false },
 		large:  { type:Boolean, required:false, default:false },
-		naked:  { type:Boolean, required:false, default:false },
-		right:  { type:Boolean, required:false, default:false },
-		tight:  { type:Boolean, required:false, default:false }
+		naked:  { type:Boolean, required:false, default:false }
 	},
 	emits:['trigger','trigger-middle','trigger-right','trigger-shift'],
 	computed:{
-		classes() {
+		classes:(s) => {
 			return {
-				adjusts:this.adjusts,
-				cancel:this.cancel,
-				clickable:this.active,
-				inactive:!this.active,
-				large:this.large,
-				naked:this.naked,
-				noHighlight:!this.active,
-				noMargin:this.tight,
-				right:this.right
+				adjusts:s.adjusts,
+				cancel:s.cancel,
+				clickable:s.active,
+				inactive:!s.active,
+				large:s.large,
+				naked:s.naked,
+				noHighlight:!s.active
 			};
 		}
 	},

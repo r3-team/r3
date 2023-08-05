@@ -42,7 +42,6 @@ let MyBuilderFormStateEffect = {
 		<my-button image="delete.png"
 			@trigger="$emit('remove')"
 			:cancel="true"
-			:tight="true"
 		/>
 	</div>`,
 	props:{
@@ -104,7 +103,6 @@ let MyBuilderFormState = {
 				@trigger="$emit('remove')"
 				:cancel="true"
 				:captionTitle="capGen.button.delete"
-				:tight="true"
 			/>
 		</div>
 		

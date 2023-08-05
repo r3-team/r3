@@ -52,7 +52,6 @@ let MyInputFilesRequest = {
 		:captionTitle="capApp.button.fileRequestHint"
 		:active="hasClient && productionMode"
 		:naked="true"
-		:tight="true"
 	/>`,
 	emits:['open'],
 	computed:{
@@ -90,7 +89,6 @@ let MyInputFiles = {
 					:caption="!noSpace ? capGen.button.copy : ''"
 					:captionTitle="capApp.button.copyHint"
 					:naked="true"
-					:tight="true"
 				/>
 				<my-button image="paste.png"
 					v-if="filesCopy.attributeId !== null"
@@ -98,14 +96,12 @@ let MyInputFiles = {
 					:caption="!noSpace ? capGen.button.paste : ''"
 					:captionTitle="capApp.button.pasteHint"
 					:naked="true"
-					:tight="true"
 				/>
 				<my-button image="delete.png"
 					v-if="fileIdsSelected.length !== 0"
 					@trigger="removeSelected"
 					:caption="!noSpace ? capGen.button.delete : ''"
 					:naked="true"
-					:tight="true"
 				/>
 			</div>
 			
@@ -146,7 +142,6 @@ let MyInputFiles = {
 						:caption="!noSpace ? capGen.button.selectAll : capGen.button.selectAllShort"
 						:image="displayChecked(allSelected)"
 						:naked="true"
-						:tight="true"
 					/>
 					
 					<!-- gallery option: show meta -->
@@ -156,7 +151,6 @@ let MyInputFiles = {
 						:caption="capGen.details"
 						:image="displayChecked(galleryMeta)"
 						:naked="true"
-						:tight="true"
 					/>
 				</div>
 				
@@ -166,7 +160,6 @@ let MyInputFiles = {
 						@trigger="toggleSortDir"
 						:image="sortDirAsc ? 'triangleUp.png' : 'triangleDown.png'"
 						:naked="true"
-						:tight="true"
 					/>
 					<select @change="setSortMode($event.target.value)" :value="sortMode">
 						<option value="name">{{ capApp.fileName }}</option>
@@ -185,7 +178,6 @@ let MyInputFiles = {
 								@trigger="toggleAll"
 								:image="displayChecked(allSelected)"
 								:naked="true"
-								:tight="true"
 							/>
 						</th>
 						<th>
@@ -194,7 +186,6 @@ let MyInputFiles = {
 								@trigger-right="setSortModeClear('name')"
 								:caption="capApp.fileName + displaySortDir('name')"
 								:naked="true"
-								:tight="true"
 							/>
 						</th>
 						<th>
@@ -203,7 +194,6 @@ let MyInputFiles = {
 								@trigger-right="setSortModeClear('size')"
 								:caption="capApp.fileSize + displaySortDir('size')"
 								:naked="true"
-								:tight="true"
 							/>
 						</th>
 						<th v-if="!noSpace">
@@ -212,7 +202,6 @@ let MyInputFiles = {
 								@trigger-right="setSortModeClear('changed')"
 								:caption="capApp.fileChanged + displaySortDir('changed')"
 								:naked="true"
-								:tight="true"
 							/>
 						</th>
 						<th></th>
@@ -225,7 +214,6 @@ let MyInputFiles = {
 								@trigger="toggle(f.id)"
 								:image="displayChecked(fileIdsSelected.includes(f.id))"
 								:naked="true"
-								:tight="true"
 							/>
 						</td>
 						<td>
@@ -247,7 +235,6 @@ let MyInputFiles = {
 									<my-button image="download.png"
 										:captionTitle="capApp.button.downloadHint"
 										:naked="true"
-										:tight="true"
 									/>
 								</a>
 								<my-input-files-request
@@ -289,7 +276,6 @@ let MyInputFiles = {
 							@trigger="toggle(f.id)"
 							:image="displayChecked(fileIdsSelected.includes(f.id))"
 							:naked="true"
-							:tight="true"
 						/>
 						<my-input-files-request
 							v-if="!readonly && !fileIdsUnsaved.includes(f.id)"
@@ -326,7 +312,6 @@ let MyInputFiles = {
 							@trigger="toggle(f.id)"
 							:image="displayChecked(fileIdsSelected.includes(f.id))"
 							:naked="true"
-							:tight="true"
 						/>
 						<my-input-files-request
 							v-if="!readonly && !fileIdsUnsaved.includes(f.id)"

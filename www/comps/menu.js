@@ -174,7 +174,6 @@ let MyMenu = {
 						@trigger="openBuilder(false)"
 						@trigger-middle="openBuilder(true)"
 						:captionTitle="capGen.button.openBuilder"
-						:tight="true"
 					/>
 				</div>
 			</div>

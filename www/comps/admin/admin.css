@@ -104,19 +104,11 @@
 /* logins */
 .admin-logins .login-record{
 	max-width:400px;
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
 }
 .admin-logins .login-record-input{
 	flex:1 1 auto;
 	position:relative;
-	display:flex;
-	flex-flow:row nowrap;
 	align-items:center;
-}
-.admin-logins .login-record-input input{
-	margin-right:5px;
 }
 .admin-logins .module-icon{
 	width:24px;
@@ -383,6 +375,7 @@
 .admin-ldaps .entry-actions{
 	display:flex;
 	flex-flow:row nowrap;
+	gap:calc(var(--spacing) / 2);
 	margin:5px 0px 12px;
 }
 
@@ -528,10 +521,6 @@
 
 /* mails */
 .admin-mails{}
-.admin-mails .row-actions{
-	display:flex;
-	flex-flow:row nowrap;
-}
 .admin-mails .mail-testing{
 	display:flex;
 	flex-flow:row nowrap;

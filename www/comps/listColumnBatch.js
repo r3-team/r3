@@ -22,7 +22,6 @@ let MyListColumnBatch = {
 			:caption="isArrayInput ? String(input.length) : ''"
 			:captionTitle="capApp.button.columnFilters"
 			:naked="true"
-			:tight="true"
 		/>
 		
 		<my-button
@@ -34,7 +33,6 @@ let MyListColumnBatch = {
 			:captionTitle="capApp.button.columnOrderFlip"
 			:image="isOrderedAsc ? 'triangleUp.png' : 'triangleDown.png'"
 			:naked="true"
-			:tight="true"
 		/>
 		
 		<!-- column options dropdown -->
@@ -52,19 +50,16 @@ let MyListColumnBatch = {
 						:active="isOrdered"
 						:captionTitle="capApp.orderBy"
 						:naked="true"
-						:tight="true"
 					/>
 					<my-button caption="\u25B2"
 						@trigger="$emit('set-order',true)"
 						:image="isOrderedAsc ? 'radio1.png' : 'radio0.png'"
 						:naked="true"
-						:tight="true"
 					/>
 					<my-button caption="\u25BC"
 						@trigger="$emit('set-order',false)"
 						:image="isOrderedDesc ? 'radio1.png' : 'radio0.png'"
 						:naked="true"
-						:tight="true"
 					/>
 				</div>
 				
@@ -75,7 +70,6 @@ let MyListColumnBatch = {
 						:active="aggregatorProcessed !== ''"
 						:captionTitle="capApp.button.aggregatorsHint"
 						:naked="true"
-						:tight="true"
 					/>
 					<select v-model="aggregatorProcessed">
 						<option value="">-</option>
@@ -94,7 +88,6 @@ let MyListColumnBatch = {
 						:active="isFiltered"
 						:captionTitle="capGen.button.filter"
 						:naked="true"
-						:tight="true"
 					/>
 					<input
 						v-model="input"
@@ -116,7 +109,6 @@ let MyListColumnBatch = {
 						:caption="'['+capGen.button.selectAll+']'"
 						:image="input.length === values.length ? 'checkbox1.png' : 'checkbox0.png'"
 						:naked="true"
-						:tight="true"
 					/>
 					<div class="columnFilterValues">
 						<my-button
@@ -125,7 +117,6 @@ let MyListColumnBatch = {
 							:caption="displayValue(v)"
 							:image="input.includes(v) ? 'checkbox1.png' : 'checkbox0.png'"
 							:naked="true"
-							:tight="true"
 						/>
 					</div>
 				</template>

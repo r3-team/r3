@@ -41,7 +41,6 @@ let MyAdminLoginTemplates = {
 							:active="false"
 							:captionTitle="capApp.global"
 							:naked="true"
-							:tight="true"
 						/>
 					</div>
 				</div>

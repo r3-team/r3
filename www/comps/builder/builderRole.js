@@ -67,7 +67,6 @@ let MyBuilderRoleAccessMenu = {
 					@trigger="showSubs = !showSubs"
 					:image="showSubs ? 'triangleDown.png' : 'triangleRight.png'"
 					:naked="true"
-					:tight="true"
 				/>
 			</td>
 			<td class="clickable" @click="showSubs = !showSubs">
@@ -145,7 +144,6 @@ let MyBuilderRoleAccessRelation = {
 					:caption="relation.name + (brokenInheritance ? '*' : '')"
 					:image="showEntries ? 'triangleDown.png' : 'triangleRight.png'"
 					:naked="true"
-					:tight="true"
 				/>
 			</td>
 			<td>

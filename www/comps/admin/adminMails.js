@@ -32,7 +32,6 @@ let MyAdminMails = {
 					@trigger-shift="startAtPageFirst"
 					:active="offset-limit >= 0"
 					:naked="true"
-					:tight="true"
 				/>
 				
 				<span>{{ String((offset / limit) + 1) + ' / ' + pages  }}</span>
@@ -42,7 +41,6 @@ let MyAdminMails = {
 					@trigger-shift="startAtPageLast"
 					:active="offset+limit < total"
 					:naked="true"
-					:tight="true"
 				/>
 				
 				<select v-model.number="limit" @change="startAtPageFirst">

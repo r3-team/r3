@@ -40,7 +40,6 @@ let MyBuilderFormFunction = {
 				@trigger="$emit('remove')"
 				:cancel="true"
 				:captionTitle="capGen.button.delete"
-				:tight="true"
 			/>
 		</td>
 	</tr>`,

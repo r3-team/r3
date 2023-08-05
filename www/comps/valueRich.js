@@ -32,7 +32,6 @@ let MyValueRich = {
 			:blockBubble="true"
 			:captionTitle="capGen.button.copyClipboard"
 			:naked="true"
-			:tight="true"
 		/>
 		
 		<!-- link open action -->
@@ -44,7 +43,6 @@ let MyValueRich = {
 			:blockBubble="true"
 			:image="link.image"
 			:naked="true"
-			:tight="true"
 		/>
 		
 		<!-- string value -->

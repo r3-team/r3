@@ -36,13 +36,12 @@ let MyBuilderCollections = {
 					<div class="lines">
 						<span>{{ c.name }}</span>
 					</div>
-					<div class="row">
+					<div class="row gap">
 						<my-button image="menu.png"
 							v-if="c.inHeader.length !== 0"
 							:active="false"
 							:captionTitle="capApp.inHeader"
 							:naked="true"
-							:tight="true"
 						/>
 						<my-button
 							v-if="c.iconId !== null"
@@ -50,7 +49,6 @@ let MyBuilderCollections = {
 							:captionTitle="capGen.icon"
 							:imageBase64="srcBase64(iconIdMap[c.iconId].file)"
 							:naked="true"
-							:tight="true"
 						/>
 					</div>
 				</router-link>

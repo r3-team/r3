@@ -41,6 +41,9 @@
 }
 .login .actions{
 	margin:6px 0px;
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:space-between;
 }
 .login button{
 	font-size:110%;

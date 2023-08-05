@@ -27,7 +27,6 @@ let MyArticles = {
 				<my-button image="cancel.png"
 					@trigger="$emit('close')"
 					:cancel="true"
-					:tight="true"
 				/>
 			</div>
 		</div>
@@ -57,7 +56,6 @@ let MyArticles = {
 						@trigger="articleToggle(a.id)"
 						:image="!articleIdsClosed.includes(a.id) ? 'triangleDown.png' : 'triangleRight.png'"
 						:naked="true"
-						:tight="true"
 					/>
 					<span>{{ (i+1) + '. ' + getArticleTitle(a) }}</span>
 				</div>

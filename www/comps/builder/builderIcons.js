@@ -10,7 +10,6 @@ let MyBuilderIcon = {
 			@trigger="$emit('toggle')"
 			:active="!readonly"
 			:image="selected ? 'checkbox1.png' : 'checkbox0.png'"
-			:tight="true"
 		/>
 		<img class="preview" :src="srcBase64(icon.file)" />
 		<span class="default-inputs">

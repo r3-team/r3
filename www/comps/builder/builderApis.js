@@ -35,20 +35,18 @@ let MyBuilderApis = {
 					<div class="lines">
 						<span>{{ a.name }}</span>
 					</div>
-					<div class="row">
+					<div class="row gap">
 						<my-button
 							:active="false"
 							:caption="caption(a)"
 							:captionTitle="captionTitle(a)"
 							:naked="true"
-							:tight="true"
 						/>
 						<my-button
 							:active="false"
 							:caption="'v' + a.version"
 							:captionTitle="capGen.version"
 							:naked="true"
-							:tight="true"
 						/>
 					</div>
 				</router-link>

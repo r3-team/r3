@@ -35,7 +35,7 @@ let MyAdminLogins = {
 					:total="total"
 				/>
 			</div>
-			<div class="area wrap gap default-inputs">
+			<div class="area wrap default-inputs">
 				<my-button
 					@trigger="limitSet(20)"
 					:caption="capGen.limit"
@@ -88,35 +88,30 @@ let MyAdminLogins = {
 							:active="false"
 							:captionTitle="capApp.hint.isNoAuth"
 							:naked="true"
-							:tight="true"
 						/>
 						<my-button image="personCog.png"
 							v-if="l.admin"
 							:active="false"
 							:captionTitle="capApp.hint.isAdmin"
 							:naked="true"
-							:tight="true"
 						/>
 						<my-button image="hierarchy.png"
 							v-if="l.ldapId !== null"
 							:active="false"
 							:captionTitle="capApp.hint.isLdap"
 							:naked="true"
-							:tight="true"
 						/>
 						<my-button image="admin.png"
 							:active="false"
 							:caption="String(l.roleIds.length)"
 							:captionTitle="capApp.hint.roles.replace('{COUNT}',String(l.roleIds.length))"
 							:naked="true"
-							:tight="true"
 						/>
 						<my-button image="builder.png"
 							:active="false"
 							:caption="String(l.records.filter(v => v.id !== null).length)"
 							:captionTitle="capApp.hint.records.replace('{COUNT}',String(l.records.filter(v => v.id !== null).length))"
 							:naked="true"
-							:tight="true"
 						/>
 					</div>
 				</div>

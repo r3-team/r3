@@ -77,7 +77,6 @@ let MyAdminFiles = {
 									:caption="displayAttribute(atrId,files.length)"
 									:image="attributeIdsShowDeleted.includes(atrId) ? 'triangleDown.png' : 'triangleRight.png'"
 									:naked="true"
-									:tight="true"
 								/>
 							</td>
 						</tr>

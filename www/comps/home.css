@@ -21,6 +21,9 @@
 
 /* no access */
 .home-noAccess .actions{
+	display:flex;
+	flex-flow:row nowrap;
+	justify-content:flex-end;
 	margin:20px 0px 0px 0px;
 }
 

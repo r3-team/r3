@@ -58,7 +58,6 @@ let MyBuilderRelationsItemPolicy = {
 				@trigger="$emit('remove')"
 				:active="!readonly"
 				:naked="true"
-				:tight="true"
 			/>
 		</td>
 	</tr>`,
@@ -193,7 +192,6 @@ let MyBuilderRelation = {
 								:captionTitle="capApp.attributeContent"
 								:image="getAttributeIcon(atr,false,false)"
 								:naked="true"
-								:tight="true"
 							/>
 							<div class="lines">
 								<span>{{ atr.name }}</span>
@@ -202,13 +200,12 @@ let MyBuilderRelation = {
 								</span>
 							</div>
 						</div>
-						<div class="row centered">
+						<div class="row centered gap">
 							<my-button image="lock.png"
 								v-if="atr.encrypted"
 								:active="false"
 								:captionTitle="capApp.attributeEncrypted"
 								:naked="true"
-								:tight="true"
 							/>
 							<my-button
 								v-if="isAttributeWithLength(atr.content) && atr.length !== 0"
@@ -216,14 +213,12 @@ let MyBuilderRelation = {
 								:caption="'['+String(atr.length)+']'"
 								:captionTitle="capApp.attributeLength"
 								:naked="true"
-								:tight="true"
 							/>
 							<my-button image="asterisk.png"
 								v-if="!atr.nullable"
 								:active="false"
 								:captionTitle="capApp.attributeNotNullable"
 								:naked="true"
-								:tight="true"
 							/>
 							<my-button
 								:active="false"
@@ -231,7 +226,6 @@ let MyBuilderRelation = {
 								:image="atr.iconId === null ? 'icon_missing.png' : ''"
 								:imageBase64="atr.iconId !== null ? srcBase64(iconIdMap[atr.iconId].file) : ''"
 								:naked="true"
-								:tight="true"
 							/>
 						</div>
 					</div>
@@ -329,31 +323,27 @@ let MyBuilderRelation = {
 							<my-button image="databaseAsterisk.png"
 								:active="false"
 								:naked="true"
-								:tight="true"
 							/>
 							<div class="lines"><span>{{ displayIndexName(ind) }}</span></div>
 						</div>
-						<div class="row centered">
+						<div class="row centered gap">
 							<my-button image="asterisk.png"
 								v-if="ind.noDuplicates"
 								:active="false"
 								:captionTitle="capApp.indexUnique"
 								:naked="true"
-								:tight="true"
 							/>
 							<my-button image="cogMultiple.png"
 								v-if="ind.primaryKey || ind.autoFki"
 								:active="false"
 								:captionTitle="capApp.indexSystem"
 								:naked="true"
-								:tight="true"
 							/>
 							<my-button image="key.png"
 								v-if="ind.primaryKey"
 								:active="false"
 								:captionTitle="capApp.indexPrimaryKey"
 								:naked="true"
-								:tight="true"
 							/>
 							<my-button
 								v-if="ind.autoFki"
@@ -361,14 +351,12 @@ let MyBuilderRelation = {
 								:captionTitle="capApp.indexAutoFki"
 								:image="attributeIdMap[ind.attributes[0].attributeId].content === '1:1' ? 'link1.png' : 'link3.png'"
 								:naked="true"
-								:tight="true"
 							/>
 							<my-button image="languages.png"
 								v-if="ind.method === 'GIN'"
 								:active="false"
 								:captionTitle="capApp.indexText"
 								:naked="true"
-								:tight="true"
 							/>
 						</div>
 					</div>
@@ -472,7 +460,7 @@ let MyBuilderRelation = {
 						{{ capApp.policyExplanation }}
 					</p>
 					
-					<div class="row">
+					<div class="row gap">
 						<my-button image="add.png"
 							@trigger="addPolicy"
 							:active="!readonly"

@@ -15,21 +15,18 @@ let MyInputIframe = {
 				@trigger="set"
 				:active="isChanged && !noInput"
 				:naked="true"
-				:tight="true"
 			/>
 			<my-button image="cancel.png"
 				v-if="!readonly"
 				@trigger="del"
 				:active="src !== false"
 				:naked="true"
-				:tight="true"
 			/>
 			<my-button image="copyClipboard.png"
 				v-if="clipboard"
 				@trigger="$emit('copyToClipboard')"
 				:active="src !== false"
 				:naked="true"
-				:tight="true"
 			/>
 		</div>
 		<iframe class="input-iframe-content" allowfullscreen="true" frameBorder="0" height="100%" width="100%"

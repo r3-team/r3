@@ -164,7 +164,6 @@ let MyLogin = {
 							:active="isValid"
 							:caption="message.login[language]"
 							:image="loading ? 'load.gif' : 'ok.png'"
-							:right="true"
 						/>
 					</div>
 				</div>

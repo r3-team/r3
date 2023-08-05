@@ -61,7 +61,6 @@ export let MyBuilderColumns = {
 									@trigger="$emit('column-id-show',column.id)"
 									:image="!column.subQuery ? getAttributeIcon(attributeIdMap[column.attributeId],false,false) : 'database.png'"
 									:naked="true"
-									:tight="true"
 								/>
 								<img class="action clickable"
 									@click="columnSetBy(column.id,'onMobile',!column.onMobile)"
@@ -220,7 +219,6 @@ export let MyBuilderColumnTemplates = {
 						:active="false"
 						:image="!c.subQuery ? getAttributeIcon(attributeIdMap[c.attributeId],false,false) : 'database.png'"
 						:naked="true"
-						:tight="true"
 					/>
 					<div class="title word-break" :title="getItemTitleColumn(c,false)">
 						{{ getItemTitleColumn(c,false) }}

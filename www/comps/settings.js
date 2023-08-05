@@ -615,7 +615,6 @@ let MySettingsFixedTokens = {
 						<my-button
 							@trigger="showMfa = false" image="cancel.png"
 							:cancel="true"
-							:tight="true"
 						/>
 					</div>
 				</div>
@@ -680,7 +679,6 @@ let MySettingsFixedTokens = {
 						<my-button
 							@trigger="showInstall = false" image="cancel.png"
 							:cancel="true"
-							:tight="true"
 						/>
 					</div>
 				</div>

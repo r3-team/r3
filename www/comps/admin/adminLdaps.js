@@ -33,16 +33,17 @@ let MyAdminLdaps = {
 							<td>{{ l.name }}</td>
 							<td>{{ l.host+':'+l.port }}</td>
 							<td>
-								<my-button image="download.png"
-									@trigger="runImport(l.id)"
-									:active="licenseValid"
-									:caption="capApp.button.import"
-								/>
-								
-								<my-button image="edit.png"
-									@trigger="open(l.id)"
-									:active="licenseValid"
-								/>
+								<div class="row gap">
+									<my-button image="download.png"
+										@trigger="runImport(l.id)"
+										:active="licenseValid"
+										:caption="capApp.button.import"
+									/>
+									<my-button image="edit.png"
+										@trigger="open(l.id)"
+										:active="licenseValid"
+									/>
+								</div>
 							</td>
 						</tr>
 					</tbody>
@@ -78,7 +79,7 @@ let MyAdminLdaps = {
 						:cancel="true"
 						:caption="capGen.button.delete"
 					/>
-					<my-button class="right" image="cancel.png"
+					<my-button image="cancel.png"
 						@trigger="close"
 						:cancel="true"
 						:caption="capGen.button.close"

@@ -18,7 +18,6 @@ let MyAdmin = {
 					<div class="area">
 						<my-button image="question.png"
 							@trigger="showDocs = !showDocs"
-							:tight="true"
 						/>
 					</div>
 				</div>

@@ -51,7 +51,6 @@ let MyInputCollection = {
 			v-if="!readonly"
 			@trigger="toggle"
 			:naked="true"
-			:tight="true"
 		/>
 		
 		<!-- context menu dropdown -->
@@ -86,7 +85,6 @@ let MyInputCollection = {
 						:blockBubble="true"
 						:caption="capGen.more"
 						:naked="true"
-						:tight="true"
 					/>
 				</div>
 			

@@ -64,7 +64,6 @@ let MyAdminLicense = {
 						<my-button image="cancel.png"
 							@trigger="delAsk"
 							:cancel="true"
-							:tight="true"
 						/>
 					</div>
 				</div>

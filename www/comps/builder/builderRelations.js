@@ -34,14 +34,12 @@ let MyBuilderRelations = {
 					:to="'/builder/relation/'+r.id" 
 				>
 					<span>{{ r.name }}</span>
-					<div class="row">
-						
+					<div class="row gap">
 						<my-button image="lock.png"
 							v-if="r.encryption"
 							:active="false"
 							:captionTitle="capApp.encryptionHint"
 							:naked="true"
-							:tight="true"
 						/>
 						<my-button image="time.png"
 							v-if="r.retentionCount !== null || r.retentionDays !== null"
@@ -49,7 +47,6 @@ let MyBuilderRelations = {
 							:caption="displayRetention(r)"
 							:captionTitle="capApp.retentionHint"
 							:naked="true"
-							:tight="true"
 						/>
 						<my-button image="files_list2.png"
 							v-if="r.attributes.length !== 0"
@@ -57,7 +54,6 @@ let MyBuilderRelations = {
 							:caption="String(r.attributes.length)"
 							:captionTitle="capApp.attributes.replace('{CNT}',r.attributes.length)"
 							:naked="true"
-							:tight="true"
 						/>
 					</div>
 				</router-link>

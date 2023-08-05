@@ -227,14 +227,13 @@ let MyGantt = {
 				/>
 			</div>
 			
-			<div class="area wrap gap default-inputs">
+			<div class="area wrap default-inputs">
 				<my-button
 					v-if="!isMobile && stepTypeToggle"
 					@trigger="toggleStepType"
 					:captionTitle="capApp.button.ganttToggleHint"
 					:image="isDays ? 'clock.png' : 'clock24.png'"
 					:naked="true"
-					:tight="true"
 				/>
 				
 				<my-button image="search.png"
@@ -242,7 +241,6 @@ let MyGantt = {
 					@trigger="stepZoom = stepZoomDefault"
 					:captionTitle="capGen.button.zoomReset"
 					:naked="true"
-					:tight="true"
 				/>
 				
 				<input class="zoom-factor clickable" type="range" min="3" max="12"
@@ -275,7 +273,6 @@ let MyGantt = {
 					@trigger="scrollToNow"
 					:caption="!isMobile ? capApp.now : ''"
 					:captionTitle="capApp.nowHint"
-					:tight="true"
 				/>
 			</div>
 		</div>

@@ -30,7 +30,6 @@ let MyBuilderModuleStartForm = {
 			@trigger="$emit('remove')"
 			:active="!readonly"
 			:cancel="true"
-			:tight="true"
 		/>
 	</div>`,
 	props:{

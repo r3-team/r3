@@ -11,7 +11,7 @@ let MyAdminModulesItem = {
 	name:'my-admin-modules-item',
 	template:`<tr :class="{ grouping:module.parentId === null }">
 		<td>
-			<div class="row">
+			<div class="row gap">
 				<my-button image="save.png"
 					@trigger="set"
 					:active="hasChanges && !productionMode"
@@ -74,7 +74,6 @@ let MyAdminModulesItem = {
 				@trigger="$emit('showHelp',module.id)"
 				:active="hasHelp"
 				:captionTitle="capGen.help"
-				:tight="true"
 			/>
 		</td>
 		<td class="noWrap">
@@ -82,7 +81,6 @@ let MyAdminModulesItem = {
 				@trigger="changeLogShow"
 				:active="changeLog !== '' && changeLog !== null"
 				:captionTitle="capApp.changeLog"
-				:tight="true"
 			/>
 		</td>
 		<td class="noWrap" v-if="builderEnabled">

@@ -24,7 +24,6 @@ let MyFilterBrackets = {
 		@trigger="add(true)"
 		@trigger-right="add(false)"
 		:caption="display(1)"
-		:tight="true"
 	/>`,
 	props:{
 		left:      { type:Boolean, required:true },
@@ -733,7 +732,6 @@ let MyFilter = {
 		<my-button image="question.png"
 			v-if="operator === '@@'"
 			@trigger="showFtsHelp"
-			:tight="true"
 		/>
 		<my-filter-side
 			v-model="side1Input"
@@ -774,7 +772,6 @@ let MyFilter = {
 		<my-button image="delete.png"
 			@trigger="$emit('remove',position)"
 			:cancel="true"
-			:tight="true"
 		/>
 	</div>`,
 	props:{

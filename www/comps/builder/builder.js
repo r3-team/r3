@@ -26,7 +26,6 @@ let MyBuilder = {
 						<my-button image="question.png"
 							@trigger="showDocs = !showDocs"
 							:captionTitle="capGen.help"
-							:tight="true"
 						/>
 					</div>
 				</div>

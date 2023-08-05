@@ -183,7 +183,7 @@ let MyAdminConfig = {
 									:caption="name"
 									:naked="true"
 								/>
-								<div>
+								<div class="row gap">
 									<my-button image="search.png"
 										@trigger="publicKeyShow(name,key)"
 									/>

@@ -70,7 +70,6 @@ let MyBuilderForms = {
 						:captionTitle="capGen.icon"
 						:imageBase64="srcBase64(iconIdMap[f.iconId].file)"
 						:naked="true"
-						:tight="true"
 					/>
 				</router-link>
 			</div>

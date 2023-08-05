@@ -6,7 +6,7 @@ let MyInputSelect = {
 		@keyup.esc="escape"
 		v-click-outside="escape"
 	>
-		<div class="part">
+		<div class="part row gap">
 			<input class="input" type="text"
 				v-model="textInput"
 				@focus="$emit('focused')"

@@ -85,7 +85,7 @@ let MyHome = {
 					<span v-html="capApp.noAccessAdmin" />
 					
 					<div class="actions">
-						<my-button class="right" image="person.png"
+						<my-button image="person.png"
 							@trigger="goToLogins"
 							:caption="capApp.button.goToLogins"
 						/>

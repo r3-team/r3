@@ -209,7 +209,6 @@ let MyKanban = {
 					@trigger="showCaptions = !showCaptions"
 					:caption="capGen.label"
 					:image="showCaptions ? 'visible1.png' : 'visible0.png'"
-					:tight="true"
 				/>
 			</div>
 			<div class="area nowrap">
@@ -223,7 +222,6 @@ let MyKanban = {
 					@trigger="zoom = zoomDefault"
 					:captionTitle="capGen.button.zoomReset"
 					:naked="true"
-					:tight="true"
 				/>
 				
 				<input class="zoom-factor clickable" type="range" min="1" max="10"
@@ -231,7 +229,7 @@ let MyKanban = {
 					v-model="zoom"
 				/>
 			</div>
-			<div class="area gap nowrap default-inputs">
+			<div class="area nowrap default-inputs">
 				
 				<input
 					v-model="searchInput"
@@ -262,7 +260,6 @@ let MyKanban = {
 				<my-button image="refresh.png"
 					@trigger="get"
 					:caption="capGen.refresh"
-					:tight="true"
 				/>
 			</div>
 		</div>

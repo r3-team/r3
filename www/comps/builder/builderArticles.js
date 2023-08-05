@@ -56,7 +56,7 @@ let MyBuilderArticlesItem = {
 								<h1>{{ article.name }}</h1>
 							</div>
 							
-							<div class="area gap">
+							<div class="area">
 								<span>{{ capGen.title }}</span>
 								<my-builder-caption
 									v-model="captions.articleTitle"
@@ -80,7 +80,6 @@ let MyBuilderArticlesItem = {
 									@trigger="showContent = false"
 									:cancel="true"
 									:captionTitle="capGen.button.close"
-									:tight="true"
 								/>
 							</div>
 						</div>

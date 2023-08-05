@@ -17,7 +17,6 @@ let MyDialog = {
 					<my-button
 						@trigger="close" image="cancel.png"
 						:cancel="true"
-						:tight="true"
 					/>
 				</div>
 			</div>

@@ -44,7 +44,6 @@ let MyBuilderJsFunctions = {
 							:active="false"
 							:captionTitle="capApp.form"
 							:naked="true"
-							:tight="true"
 						/>
 					</div>
 				</router-link>

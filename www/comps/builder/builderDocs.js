@@ -13,7 +13,6 @@ let MyBuilderDocs = {
 				<my-button image="cancel.png"
 					@trigger="$emit('close')"
 					:cancel="true"
-					:tight="true"
 				/>
 			</div>
 		</div>

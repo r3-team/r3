@@ -85,6 +85,13 @@ let MyForm = {
 			<!-- title bar upper -->
 			<div class="top nowrap" :class="{ lower:!hasBarLower && !isSingleField }">
 				<div class="area nowrap">
+					<my-button image="upward.png"
+						v-if="hasGoBack"
+						@trigger="openPrevAsk"
+						:active="!updatingRecord"
+						:captionTitle="capGen.button.goBack"
+					/>
+					
 					<img class="icon"
 						v-if="iconId !== null"
 						:src="srcBase64(iconIdMap[iconId].file)"
@@ -108,7 +115,7 @@ let MyForm = {
 					</transition>
 				</div>
 				
-				<div class="area gap">
+				<div class="area">
 					<template v-if="isData && !isBulkUpdate">
 						<my-button image="refresh.png"
 							v-if="!isMobile"
@@ -116,14 +123,12 @@ let MyForm = {
 							@trigger-middle="openForm(recordIds,null,null,true)"
 							:active="!isNew"
 							:captionTitle="capGen.button.refreshHint"
-							:tight="true"
 						/>
 						<my-button image="time.png"
 							v-if="hasLog"
 							@trigger="showLog = !showLog"
 							:active="!isNew"
 							:captionTitle="capApp.button.logHint"
-							:tight="true"
 						/>
 					</template>
 					
@@ -132,35 +137,31 @@ let MyForm = {
 						@trigger="showHelp = !showHelp"
 						:active="helpAvailable"
 						:captionTitle="capApp.button.helpHint"
-						:tight="true"
 					/>
 					<my-button
 						v-if="isPopUp && !isMobile"
 						@trigger="popUpFullscreen = !popUpFullscreen"
 						:captionTitle="capApp.button.fullscreenHint"
 						:image="popUpFullscreen ? 'shrink.png' : 'expand.png'"
-						:tight="true"
 					/>
 					<my-button image="builder.png"
 						v-if="isAdmin && builderEnabled && !isMobile"
 						@trigger="openBuilder(false)"
 						@trigger-middle="openBuilder(true)"
 						:captionTitle="capGen.button.openBuilder"
-						:tight="true"
 					/>
 					<my-button image="cancel.png"
 						v-if="isPopUp"
 						@trigger="closeAsk"
 						:cancel="true"
 						:captionTitle="capGen.button.close"
-						:tight="true"
 					/>
 				</div>
 			</div>
 			
 			<!-- title bar lower -->
 			<div class="top lower" v-if="hasBarLower">
-				<div class="area gap">
+				<div class="area">
 					<my-button image="new.png"
 						v-if="!isBulkUpdate && allowNew && !noDataActions"
 						@trigger="openNewAsk(false)"
@@ -168,7 +169,6 @@ let MyForm = {
 						:active="(!isNew || hasChanges) && canCreate"
 						:caption="capGen.button.new"
 						:captionTitle="capGen.button.newHint"
-						:tight="true"
 					/>
 					<my-button image="save.png"
 						v-if="!isBulkUpdate && !noDataActions"
@@ -176,7 +176,6 @@ let MyForm = {
 						:active="hasChanges && canUpdate"
 						:caption="capGen.button.save"
 						:captionTitle="capGen.button.saveHint"
-						:tight="true"
 					/>
 					<my-button image="save_new.png"
 						v-if="!isBulkUpdate && !isPopUp && !isMobile && allowNew && !noDataActions"
@@ -184,7 +183,6 @@ let MyForm = {
 						:active="hasChanges && canUpdate && canCreate"
 						:caption="capGen.button.saveNew"
 						:captionTitle="capGen.button.saveNewHint"
-						:tight="true"
 					/>
 					<my-button image="save.png"
 						v-if="isBulkUpdate && !noDataActions"
@@ -192,15 +190,19 @@ let MyForm = {
 						:active="hasChangesBulk && canUpdate"
 						:caption="capGen.button.saveBulk.replace('{COUNT}',String(recordIds.length))"
 						:captionTitle="capGen.button.saveHint"
-						:tight="true"
 					/>
-					<my-button image="upward.png"
-						v-if="!isMobile && !isPopUp"
-						@trigger="openPrevAsk"
-						:active="!updatingRecord"
+				</div>
+				<div class="area">
+					<my-button image="warning.png"
+						v-if="badLoad"
+						:caption="capApp.noAccess"
 						:cancel="true"
-						:caption="capGen.button.goBack"
-						:tight="true"
+					/>
+					<my-button image="warning.png"
+						v-if="badSave && fieldIdsInvalid.length !== 0"
+						@trigger="scrollToInvalidField"
+						:caption="capApp.invalidInputs"
+						:cancel="true"
 					/>
 					<my-button image="shred.png"
 						v-if="!isBulkUpdate && allowDel && !noDataActions"
@@ -209,22 +211,6 @@ let MyForm = {
 						:cancel="true"
 						:caption="capGen.button.delete"
 						:captionTitle="capGen.button.deleteHint"
-						:tight="true"
-					/>
-				</div>
-				<div class="area gap">
-					<my-button image="warning.png"
-						v-if="badLoad"
-						:caption="capApp.noAccess"
-						:cancel="true"
-						:tight="true"
-					/>
-					<my-button image="warning.png"
-						v-if="badSave && fieldIdsInvalid.length !== 0"
-						@trigger="scrollToInvalidField"
-						:caption="capApp.invalidInputs"
-						:cancel="true"
-						:tight="true"
 					/>
 				</div>
 			</div>
@@ -382,6 +368,7 @@ let MyForm = {
 		hasBarLower:   (s) => s.isData || s.form.fields.length === 0,
 		hasChanges:    (s) => !s.noDataActions && s.fieldIdsChanged.length !== 0,
 		hasChangesBulk:(s) => s.isBulkUpdate && s.fieldIdsTouched.length !== 0,
+		hasGoBack:     (s) => s.isData && !s.isMobile && !s.isPopUp,
 		helpAvailable: (s) => s.form.articleIdsHelp.length !== 0 || s.moduleIdMap[s.moduleId].articleIdsHelp.length !== 0,
 		isBulkUpdate:  (s) => s.isData && s.recordIds.length > 1,
 		isData:        (s) => s.relationId !== null,

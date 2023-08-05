@@ -44,21 +44,18 @@ let MyBuilderPgFunctions = {
 							:active="false"
 							:captionTitle="capApp.isTrigger"
 							:naked="true"
-							:tight="true"
 						/>
 						<my-button image="screen.png"
 							v-if="f.isFrontendExec"
 							:active="false"
 							:captionTitle="capApp.isFrontendExec"
 							:naked="true"
-							:tight="true"
 						/>
 						<my-button image="time.png"
 							v-if="f.schedules.length !== 0"
 							:active="false"
 							:captionTitle="capApp.schedules"
 							:naked="true"
-							:tight="true"
 						/>
 					</div>
 				</router-link>

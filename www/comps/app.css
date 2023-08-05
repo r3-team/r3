@@ -55,8 +55,6 @@
 	--spacing:16px;
 	--spacing-child:0px var(--spacing) var(--spacing) 0px;
 	--spacing-parent:var(--spacing) 0px 0px var(--spacing);
-	--spacing-button-horz-outside:6px;
-	--spacing-button-horz-inside:10px;
 	
 	/**/
 	/* heights */
@@ -320,7 +318,7 @@ h3{
 	align-items:center;
 }
 .row.gap{
-	gap:10px;
+	gap:calc(var(--spacing) / 2.5);
 }
 .row.grow{
 	flex:1 1 auto;
@@ -531,12 +529,9 @@ h3{
 }
 .contentBox .top .icon {
 	height:22px;
-    margin:4px 12px 4px 0px;
     filter:var(--image-filter);
 }
 .contentBox .top .icon.bg {
-	height:22px;
-    margin:4px 12px 4px 0px;
     filter:var(--image-filter-bg);
 }
 .contentBox .top .selector{
@@ -559,9 +554,7 @@ h3{
 	display:flex;
 	flex-flow:row wrap;
 	align-items:center;
-}
-.contentBox .top .area.gap{
-	gap:var(--spacing-button-horz-outside);
+	gap:calc(var(--spacing) / 2.5);
 }
 .contentBox .top .area.nowrap{
 	flex-wrap:nowrap;

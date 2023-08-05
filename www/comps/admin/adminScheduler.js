@@ -101,7 +101,6 @@ let MyAdminScheduler = {
 											@trigger="expandScheduler(i)"
 											:image="schedulersExpanded.includes(i) ? 'triangleDown.png' : 'triangleRight.png'"
 											:naked="true"
-											:tight="true"
 										/>
 									</td>
 									<td>{{ displayName(s.taskName) }}</td>

@@ -77,13 +77,13 @@ let MyFeedback = {
 					:class="{ error:messageError }"
 				><span>{{ message }}</span></div>
 				
-				<div>
+				<div class="row gap space-between">
 					<my-button
 						@trigger="showWhatIsSent = !showWhatIsSent"
 						:caption="capApp.button.whatIsSent"
 						:naked="true"
 					/>
-					<my-button class="right" image="ok.png"
+					<my-button image="ok.png"
 						@trigger="send"
 						:active="message === ''"
 						:caption="capGen.button.send"

@@ -39,14 +39,12 @@ let MyBuilderRoles = {
 							[{{ r.captions.roleTitle[builderLanguage] }}]
 						</span>
 					</div>
-					<div class="row">
-						
+					<div class="row gap">
 						<my-button image="personArrow.png"
 							v-if="r.assignable && r.name !== 'everyone'"
 							:active="false"
 							:captionTitle="capApp.assignable"
 							:naked="true"
-							:tight="true"
 						/>
 						
 						<my-button image="department.png"
@@ -55,7 +53,6 @@ let MyBuilderRoles = {
 							:caption="String(r.childrenIds.length)"
 							:captionTitle="capApp.children"
 							:naked="true"
-							:tight="true"
 						/>
 					</div>
 				</router-link>

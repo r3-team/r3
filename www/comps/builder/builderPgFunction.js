@@ -253,7 +253,6 @@ let MyBuilderPgFunction = {
 							</template>
 							<my-button image="question.png"
 								@trigger="showHelp(capApp.placeholderRelations,capApp.placeholderRelationsHelp)"
-								:tight="true"
 							/>
 						</div>
 					</div>
@@ -266,7 +265,6 @@ let MyBuilderPgFunction = {
 											@trigger="toggleRelationShow(rel.id)"
 											:image="holderRelationIdsOpen.includes(rel.id) ? 'triangleDown.png' : 'triangleRight.png'"
 											:naked="true"
-											:tight="true"
 										/>
 										<my-button
 											@trigger="selectEntity('relation',rel.id)"
@@ -275,7 +273,6 @@ let MyBuilderPgFunction = {
 											:captionTitle="rel.name"
 											:image="radioIcon('relation',rel.id)"
 											:naked="true"
-											:tight="true"
 										/>
 									</div>
 									<router-link :key="rel.id" :to="'/builder/relation/'+rel.id">
@@ -290,7 +287,6 @@ let MyBuilderPgFunction = {
 											:captionTitle="atr.name"
 											:image="radioIcon('attribute',atr.id)"
 											:naked="true"
-											:tight="true"
 										/>
 									</div>
 								</div>
@@ -316,7 +312,6 @@ let MyBuilderPgFunction = {
 							</template>
 							<my-button image="question.png"
 								@trigger="showHelp(capApp.placeholderFunctions,capApp.placeholderFunctionsHelp)"
-								:tight="true"
 							/>
 						</div>
 					</div>
@@ -331,7 +326,6 @@ let MyBuilderPgFunction = {
 										:captionTitle="fnc.name"
 										:image="radioIcon('pgFunction',fnc.id)"
 										:naked="true"
-										:tight="true"
 									/>
 									
 									<div class="row centered">
@@ -361,7 +355,6 @@ let MyBuilderPgFunction = {
 						/>
 						<my-button image="question.png"
 							@trigger="showHelp(capApp.placeholderInstance,capApp.placeholderInstanceHelp)"
-							:tight="true"
 						/>
 					</div>
 					<div class="entities" v-if="showHolderFncInstance">
@@ -374,7 +367,6 @@ let MyBuilderPgFunction = {
 									:captionTitle="fnc"
 									:image="radioIcon('instanceFunction',fnc)"
 									:naked="true"
-									:tight="true"
 								/>
 								<my-button image="question.png"
 									@trigger="showHelp(fnc+'()',capApp.helpPg[fnc])"
