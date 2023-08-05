@@ -230,13 +230,16 @@ let MyKanban = {
 				/>
 			</div>
 			<div class="area nowrap default-inputs">
-				
+				<my-button image="refresh.png"
+					@trigger="get"
+					:caption="capGen.refresh"
+					:naked="true"
+				/>
 				<input
 					v-model="searchInput"
 					@keyup.enter="search = searchInput"
 					:placeholder="capGen.threeDots"
 				/>
-				
 				<my-input-collection class="selector"
 					v-for="c in collections"
 					@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event)"
@@ -246,7 +249,6 @@ let MyKanban = {
 					:modelValue="collectionIdMapIndexes[c.collectionId]"
 					:multiValue="c.multiValue"
 				/>
-				
 				<select class="selector"
 					v-if="hasChoices"
 					v-model="choiceId"
@@ -256,11 +258,6 @@ let MyKanban = {
 						{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
 					</option>
 				</select>
-				
-				<my-button image="refresh.png"
-					@trigger="get"
-					:caption="capGen.refresh"
-				/>
 			</div>
 		</div>
 		

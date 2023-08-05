@@ -170,19 +170,15 @@ let MyForm = {
 						:caption="capGen.button.new"
 						:captionTitle="capGen.button.newHint"
 					/>
-					<my-button image="save.png"
+					<my-button image="save.png" alt-image="add.png"
 						v-if="!isBulkUpdate && !noDataActions"
 						@trigger="set(false)"
+						@trigger-alt="set(true)"
 						:active="hasChanges && canUpdate"
+						:altAction="!isMobile && allowNew && canCreate"
+						:altCaptionTitle="capGen.button.saveNewHint"
 						:caption="capGen.button.save"
 						:captionTitle="capGen.button.saveHint"
-					/>
-					<my-button image="save_new.png"
-						v-if="!isBulkUpdate && !isPopUp && !isMobile && allowNew && !noDataActions"
-						@trigger="set(true)"
-						:active="hasChanges && canUpdate && canCreate"
-						:caption="capGen.button.saveNew"
-						:captionTitle="capGen.button.saveNewHint"
 					/>
 					<my-button image="save.png"
 						v-if="isBulkUpdate && !noDataActions"
