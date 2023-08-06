@@ -32,7 +32,7 @@ let MyBuilderIconInput = {
 			/>
 		</template>
 		
-		<div class="app-sub-window" v-if="showInput && iconIdMap !== null" @click.self="close">
+		<div class="app-sub-window under-header" v-if="showInput && iconIdMap !== null" @click.self="close">
 			<div class="build-icon-input-window">
 				<div class="contentBox popUp">
 					<div class="top lower">
@@ -63,7 +63,8 @@ let MyBuilderIconInput = {
 								:title="icon.name"
 							/>
 						</div>
-						<div class="actions">
+						<br />
+						<div class="row gap">
 							<my-button image="ok.png"
 								@trigger="close"
 								:caption="capGen.button.ok"
@@ -87,7 +88,7 @@ let MyBuilderIconInput = {
 		readonly:      { type:Boolean, required:false, default:false }
 	},
 	emits:['input'],
-	data:function() {
+	data() {
 		return {
 			filter:'',
 			showInput:false

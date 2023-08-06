@@ -1011,6 +1011,8 @@
 .build-icon-input-window {
 	max-width:500px;
 	min-width:300px;
+	max-height:95%;
+	display:flex;
 }
 .build-icon-input-window .module{
 	display:flex;
@@ -1023,9 +1025,6 @@
 }
 .build-icon-input-window .module.first span{
 	margin:0px;
-}
-.build-icon-input-window .actions{
-	margin-top:20px;
 }
 
 /* role */
