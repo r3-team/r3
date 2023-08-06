@@ -1,10 +1,5 @@
-import MyBuilderCaption      from './builderCaption.js';
-import MyBuilderIconInput    from './builderIconInput.js';
-import {MyModuleSelect}      from '../input.js';
-import srcBase64Icon         from '../shared/image.js';
-import {getDependentModules} from '../shared/builder.js';
-import {copyValueDialog}     from '../shared/generic.js';
-import {getUnixFormat}       from '../shared/time.js';
+import {MyModuleSelect} from '../input.js';
+import srcBase64Icon    from '../shared/image.js';
 export {MyBuilderModules as default};
 
 let displayArrow = function(state) {

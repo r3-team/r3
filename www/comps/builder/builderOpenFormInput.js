@@ -17,8 +17,12 @@ let MyBuilderOpenFormInput = {
 					:value="openForm !== null ? openForm.formIdOpen : null"
 				>
 					<option value="">-</option>
+					<option
+						v-for="f in module.forms.filter(v => allowAllForms || v.query.relationId === relationIdSource)" 
+						:value="f.id"
+					>{{ f.name }}</option>
 					<optgroup
-						v-for="mod in getDependentModules(module,modules)"
+						v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.forms.length !== 0)"
 						:label="mod.name"
 					>
 						<option

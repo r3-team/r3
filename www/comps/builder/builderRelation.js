@@ -24,13 +24,12 @@ let MyBuilderRelationsItemPolicy = {
 		<td><img v-if="!readonly" class="action dragAnchor" src="images/drag.png" /></td>
 		<td>
 			<select v-model="roleId" :disabled="readonly">
+				<option v-for="r in module.roles" :value="r.id">{{ r.name }}</option>
 				<optgroup
-					v-for="mod in getDependentModules(module,modules)"
+					v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id)"
 					:label="mod.name"
 				>
-					<option v-for="r in mod.roles" :value="r.id">
-						{{ r.name }}
-					</option>
+					<option v-for="r in mod.roles" :value="r.id">{{ r.name }}</option>
 				</optgroup>
 			</select>
 		</td>

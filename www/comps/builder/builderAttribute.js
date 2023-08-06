@@ -151,6 +151,59 @@ let MyBuilderAttribute = {
 						<td>{{ capApp.usedForHint[usedFor] }}</td>
 					</tr>
 					
+					<!-- relationship settings -->
+					<template v-if="isRelationship">
+						<tr>
+							<td>{{ capApp.relationshipId }}</td>
+							<td>
+								<select
+									v-model="values.relationshipId"
+									:disabled="!isNew || readonly"
+								>
+									<option :value="null">-</option>
+									<option v-for="rel in module.relations" :value="rel.id">
+										{{ rel.name }}
+									</option>
+									
+									<!-- relations from other modules -->
+									<optgroup
+										v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.relations.length !== 0)"
+										:label="mod.name"
+									>
+										<option v-for="rel in mod.relations" :value="rel.id">
+											{{ mod.name + ': ' + rel.name }}
+										</option>
+									</optgroup>
+								</select>
+							</td>
+							<td></td>
+						</tr>
+						<tr>
+							<td>{{ capApp.onDelete }}</td>
+							<td>
+								<select v-model="values.onDelete" :disabled="readonly">
+									<option value="NO ACTION">NO ACTION</option>
+									<option value="CASCADE">CASCADE</option>
+									<option value="SET NULL">SET NULL</option>
+									<option value="RESTRICT">RESTRICT</option>
+								</select>
+							</td>
+							<td>{{ capApp.option.relationshipActionsHints[values.onDelete] }}</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.onUpdate }}</td>
+							<td>
+								<select v-model="values.onUpdate" :disabled="readonly">
+									<option value="NO ACTION">NO ACTION</option>
+									<option value="CASCADE">CASCADE</option>
+									<option value="SET NULL">SET NULL</option>
+									<option value="RESTRICT">RESTRICT</option>
+								</select>
+							</td>
+							<td>{{ capApp.option.relationshipActionsHintsOnUpdate }}</td>
+						</tr>
+					</template>
+					
 					<!-- bigint -->
 					<tr v-if="isInteger && !isTime">
 						<td>{{ isDate || isDatetime ? capApp.bigintDates : capApp.bigint }}</td>
@@ -212,59 +265,6 @@ let MyBuilderAttribute = {
 						</td>
 						<td>{{ capApp.defaultsHint }}</td>
 					</tr>
-					
-					<!-- relationship settings -->
-					<template v-if="isRelationship">
-						<tr>
-							<td>{{ capApp.relationshipId }}</td>
-							<td>
-								<select
-									v-model="values.relationshipId"
-									:disabled="!isNew || readonly"
-								>
-									<option :value="null">-</option>
-									<option v-for="rel in module.relations" :value="rel.id">
-										{{ rel.name }}
-									</option>
-									
-									<!-- relations from other modules -->
-									<optgroup
-										v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.relations.length !== 0)"
-										:label="mod.name"
-									>
-										<option v-for="rel in mod.relations" :value="rel.id">
-											{{ mod.name + ': ' + rel.name }}
-										</option>
-									</optgroup>
-								</select>
-							</td>
-							<td></td>
-						</tr>
-						<tr>
-							<td>{{ capApp.onDelete }}</td>
-							<td>
-								<select v-model="values.onDelete" :disabled="readonly">
-									<option value="NO ACTION">NO ACTION</option>
-									<option value="CASCADE">CASCADE</option>
-									<option value="SET NULL">SET NULL</option>
-									<option value="RESTRICT">RESTRICT</option>
-								</select>
-							</td>
-							<td>{{ capApp.option.relationshipActionsHints[values.onDelete] }}</td>
-						</tr>
-						<tr>
-							<td>{{ capApp.onUpdate }}</td>
-							<td>
-								<select v-model="values.onUpdate" :disabled="readonly">
-									<option value="NO ACTION">NO ACTION</option>
-									<option value="CASCADE">CASCADE</option>
-									<option value="SET NULL">SET NULL</option>
-									<option value="RESTRICT">RESTRICT</option>
-								</select>
-							</td>
-							<td>{{ capApp.option.relationshipActionsHintsOnUpdate }}</td>
-						</tr>
-					</template>
 					
 					<!-- expert info -->
 					<tr>

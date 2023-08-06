@@ -14,13 +14,12 @@ let MyBuilderForms = {
 			<div class="area default-inputs">
 				<select v-model="copyFormId" @change="copySelected" :disabled="readonly">
 					<option :value="null">{{ capApp.copy }}</option>
+					<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
 					<optgroup
-						v-for="mod in getDependentModules(module,modules)"
+						v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.forms.length !== 0)"
 						:label="mod.name"
 					>
-						<option v-for="f in mod.forms" :value="f.id">
-							{{ f.name }}
-						</option>
+						<option v-for="f in mod.forms" :value="f.id">{{ f.name }}</option>
 					</optgroup>
 				</select>
 				<input

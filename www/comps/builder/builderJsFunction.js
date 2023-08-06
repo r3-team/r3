@@ -190,9 +190,7 @@ let MyBuilderJsFunction = {
 									v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
 									:label="m.name"
 								>
-									<option v-for="c in m.collections" :value="c.id">
-										{{ c.name }}
-									</option>
+									<option v-for="c in m.collections" :value="c.id">{{ c.name }}</option>
 								</optgroup>
 							</select>
 						</div>

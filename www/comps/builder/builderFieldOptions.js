@@ -1066,8 +1066,14 @@ let MyBuilderFieldOptions = {
 							:value="field.jsFunctionId"
 						>
 							<option value="">-</option>
+							<option
+								v-for="fnc in module.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
+								:value="fnc.id"
+							>
+								{{ fnc.name }}
+							</option>
 							<optgroup
-								v-for="mod in getDependentModules(module,modules)"
+								v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.jsFunctions.length !== 0)"
 								:label="mod.name"
 							>
 								<option

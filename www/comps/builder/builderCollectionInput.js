@@ -16,8 +16,11 @@ let MyBuilderCollectionInput = {
 			<td>
 				<select v-model="collectionIdInput" :disabled="fixedCollection || readonly">
 					<option :value="null">-</option>
+					<option v-for="c in module.collections" :value="c.id">
+						{{ c.name }}
+					</option>
 					<optgroup
-						v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
+						v-for="m in getDependentModules(module,modules).filter(v => v.id !== module.id && v.collections.length !== 0)"
 						:label="m.name"
 					>
 						<option v-for="c in m.collections" :value="c.id">
