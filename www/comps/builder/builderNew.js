@@ -1,5 +1,6 @@
-import {getQueryTemplate} from '../shared/query.js';
-import {getNilUuid}       from '../shared/generic.js';
+import {getDependentModules} from '../shared/builder.js';
+import {getQueryTemplate}    from '../shared/query.js';
+import {getNilUuid}          from '../shared/generic.js';
 import {
 	getTemplateArgs,
 	getTemplateFnc,
@@ -39,15 +40,30 @@ let MyBuilderNew = {
 				<div class="options" v-if="showOptions">
 					<h2>{{ capApp.options }}</h2>
 					
+					<!-- form: duplicate form -->
+					<template v-if="entity === 'form'">
+						<div class="row centered gap">
+							<span>{{ capApp.formIdDuplicate }}</span>
+							<select v-model="formIdDuplicate">
+								<option :value="null">-</option>
+								<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
+								<optgroup
+									v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.forms.length !== 0)"
+									:label="mod.name"
+								>
+									<option v-for="f in mod.forms" :value="f.id">{{ f.name }}</option>
+								</optgroup>
+							</select>
+						</div>
+					</template>
+					
 					<!-- JS function: assigned form -->
 					<template v-if="entity === 'jsFunction'">
 						<div class="row centered gap">
 							<span>{{ capApp.jsFunctionFormId }}</span>
 							<select v-model="formId">
 								<option :value="null">-</option>
-								<option v-for="f in moduleIdMap[moduleId].forms" :value="f.id">
-									{{ f.name }}
-								</option>
+								<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
 							</select>
 						</div>
 						<p v-html="capApp.jsFunctionFormIdHint"></p>
@@ -104,6 +120,9 @@ let MyBuilderNew = {
 			// all entities
 			name:'',
 			
+			// form
+			formIdDuplicate:null,
+			
 			// JS function
 			formId:null,
 			
@@ -146,9 +165,11 @@ let MyBuilderNew = {
 			}
 			return '';
 		},
-		showOptions:(s) => ['jsFunction','pgFunction','relation'].includes(s.entity),
+		showOptions:(s) => ['form','jsFunction','pgFunction','relation'].includes(s.entity),
 		
 		// stores
+		module:     (s) => s.moduleIdMap[s.moduleId],
+		modules:    (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		capApp:     (s) => s.$store.getters.captions.builder.new,
 		capGen:     (s) => s.$store.getters.captions.generic
@@ -161,6 +182,7 @@ let MyBuilderNew = {
 	},
 	methods:{
 		// externals
+		getDependentModules,
 		getNilUuid,
 		getQueryTemplate,
 		getTemplateArgs,
@@ -181,6 +203,7 @@ let MyBuilderNew = {
 		
 		// backend calls
 		set() {
+			let action = 'set';
 			let request;
 			switch(this.entity) {
 				case 'api':
@@ -212,22 +235,31 @@ let MyBuilderNew = {
 					};
 				break;
 				case 'form':
-					request = {
-						id:this.getNilUuid(),
-						moduleId:this.moduleId,
-						presetIdOpen:null,
-						iconId:null,
-						name:this.name,
-						noDataActions:false,
-						query:this.getQueryTemplate(),
-						fields:[],
-						functions:[],
-						states:[],
-						articleIdsHelp:[],
-						captions:{
-							formTitle:{}
-						}
-					};
+					if(this.formIdDuplicate !== null) {
+						action = 'copy';
+						request = {
+							id:this.formIdDuplicate,
+							moduleId:this.moduleId,
+							newName:this.name
+						};
+					} else {
+						request = {
+							id:this.getNilUuid(),
+							moduleId:this.moduleId,
+							presetIdOpen:null,
+							iconId:null,
+							name:this.name,
+							noDataActions:false,
+							query:this.getQueryTemplate(),
+							fields:[],
+							functions:[],
+							states:[],
+							articleIdsHelp:[],
+							captions:{
+								formTitle:{}
+							}
+						};
+					}
 				break;
 				case 'jsFunction':
 					request = {
@@ -314,7 +346,7 @@ let MyBuilderNew = {
 				default: return; break;
 			}
 			
-			ws.send(this.entity,'set',request,true).then(
+			ws.send(this.entity,action,request,true).then(
 				() => {
 					if(this.entity === 'module')
 						this.$root.schemaReload();

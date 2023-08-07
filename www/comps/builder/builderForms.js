@@ -1,5 +1,4 @@
-import {getDependentModules} from '../shared/builder.js';
-import {srcBase64}           from '../shared/image.js';
+import {srcBase64} from '../shared/image.js';
 export {MyBuilderForms as default};
 
 let MyBuilderForms = {
@@ -11,28 +10,7 @@ let MyBuilderForms = {
 				<img class="icon" src="images/fileText.png" />
 				<h1 class="title">{{ capApp.title }}</h1>
 			</div>
-			<div class="area default-inputs">
-				<select v-model="copyFormId" @change="copySelected" :disabled="readonly">
-					<option :value="null">{{ capApp.copy }}</option>
-					<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
-					<optgroup
-						v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.forms.length !== 0)"
-						:label="mod.name"
-					>
-						<option v-for="f in mod.forms" :value="f.id">{{ f.name }}</option>
-					</optgroup>
-				</select>
-				<input
-					v-model="copyNewName"
-					:disabled="readonly"
-					:placeholder="capApp.copyNewName"
-				/>
-				<my-button image="save.png"
-					@trigger="copy"
-					:active="canCopy && !readonly"
-				/>
-			</div>
-			
+			<div class="area"></div>
 			<div class="area default-inputs">
 				<input placeholder="..." v-model="filter" />
 			</div>
@@ -81,15 +59,12 @@ let MyBuilderForms = {
 	},
 	data() {
 		return {
-			copyFormId:null,
-			copyNewName:'',
 			filter:''
 		};
 	},
 	computed:{
 		// simple
-		canCopy:(s) => s.copyFormId !== null && s.copyNewName !== '',
-		module: (s) => s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
+		module:(s) => s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
 		
 		// stores
 		modules:    (s) => s.$store.getters['schema/modules'],
@@ -101,39 +76,6 @@ let MyBuilderForms = {
 	},
 	methods:{
 		// externals
-		getDependentModules,
-		srcBase64,
-		
-		// actions
-		copySelected() {
-			if(this.copyFormId === null)
-				return;
-			
-			let form = this.formIdMap[this.copyFormId];
-			let name = `${form.name}_`;
-			
-			// check if name is free in this module
-			for(let i = 1; i < 10; i++) {
-				
-				if(typeof this.module.formNameMap[name+i] === 'undefined') {
-					this.copyNewName = name+i;
-					break;
-				}
-			}
-		},
-		copy() {
-			ws.send('form','copy',{
-				id:this.copyFormId,
-				moduleId:this.module.id,
-				newName:this.copyNewName
-			},true).then(
-				() => {
-					this.copyFormId  = null;
-					this.copyNewName = '';
-					this.$root.schemaReload(this.module.id);
-				},
-				this.$root.genericError
-			);
-		}
+		srcBase64
 	}
 };

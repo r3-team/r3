@@ -536,7 +536,7 @@ let MyBuilderRelation = {
 				</div>
 				
 				<div class="preview default-inputs" v-if="showPreview">
-					<div class="actions">
+					<div class="row gap centered actions">
 						<my-button image="pagePrev.png"
 							@trigger="previewPage(false)"
 							:active="previewOffset > 0"

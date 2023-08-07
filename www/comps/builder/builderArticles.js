@@ -10,7 +10,7 @@ let MyBuilderArticlesItem = {
 	template:`<tbody>
 		<tr>
 			<td>
-				<div class="row">
+				<div class="row gap">
 					<my-button image="save.png"
 						@trigger="set"
 						:active="!readonly && hasChanges"

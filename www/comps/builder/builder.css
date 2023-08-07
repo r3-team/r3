@@ -900,9 +900,6 @@
 	border-spacing:2px;
 }
 .builder-relation .preview .actions{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
 	margin:8px 12px 12px 12px;
 }
 .builder-relation .preview .actions span{

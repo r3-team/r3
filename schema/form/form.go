@@ -30,6 +30,8 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 		return errors.New("form copy target does not exist")
 	}
 	form := forms[0]
+	form.Name = newName
+	form.ModuleId = moduleId
 
 	// replace IDs with new ones
 	// keep association between old (replaced) and new ID
@@ -114,9 +116,7 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 			}
 		}
 	}
-	return Set_tx(tx, moduleId, form.Id, form.PresetIdOpen, form.IconId, newName,
-		form.NoDataActions, form.Query, form.Fields, form.Functions, form.States,
-		form.ArticleIdsHelp, form.Captions)
+	return Set_tx(tx, form)
 }
 
 func Del_tx(tx pgx.Tx, id uuid.UUID) error {
@@ -198,12 +198,9 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 	return forms, nil
 }
 
-func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUID,
-	iconId pgtype.UUID, name string, noDataActions bool, queryIn types.Query,
-	fields []interface{}, functions []types.FormFunction, states []types.FormState,
-	articleIdsHelp []uuid.UUID, captions types.CaptionMap) error {
+func Set_tx(tx pgx.Tx, frm types.Form) error {
 
-	known, err := schema.CheckCreateId_tx(tx, &id, "form", "id")
+	known, err := schema.CheckCreateId_tx(tx, &frm.Id, "form", "id")
 	if err != nil {
 		return err
 	}
@@ -213,7 +210,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUI
 			UPDATE app.form
 			SET preset_id_open = $1, icon_id = $2, name = $3, no_data_actions = $4
 			WHERE id = $5
-		`, presetIdOpen, iconId, name, noDataActions, id); err != nil {
+		`, frm.PresetIdOpen, frm.IconId, frm.Name, frm.NoDataActions, frm.Id); err != nil {
 			return err
 		}
 	} else {
@@ -222,20 +219,20 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUI
 				id, module_id, preset_id_open, icon_id, name, no_data_actions
 			)
 			VALUES ($1,$2,$3,$4,$5,$6)
-		`, id, moduleId, presetIdOpen, iconId, name, noDataActions); err != nil {
+		`, frm.Id, frm.ModuleId, frm.PresetIdOpen, frm.IconId, frm.Name, frm.NoDataActions); err != nil {
 			return err
 		}
 	}
 
 	// set form query
-	if err := query.Set_tx(tx, "form", id, 0, 0, queryIn); err != nil {
+	if err := query.Set_tx(tx, "form", frm.Id, 0, 0, frm.Query); err != nil {
 		return err
 	}
 
 	// set fields (recursive)
 	fieldIdMapQuery := make(map[uuid.UUID]types.Query)
-	if err := field.Set_tx(tx, id, pgtype.UUID{}, pgtype.UUID{},
-		fields, fieldIdMapQuery); err != nil {
+	if err := field.Set_tx(tx, frm.Id, pgtype.UUID{}, pgtype.UUID{},
+		frm.Fields, fieldIdMapQuery); err != nil {
 
 		return err
 	}
@@ -249,27 +246,27 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, presetIdOpen pgtype.UUI
 	}
 
 	// set form functions
-	if err := setFunctions_tx(tx, id, functions); err != nil {
+	if err := setFunctions_tx(tx, frm.Id, frm.Functions); err != nil {
 		return err
 	}
 
 	// set form states
-	if err := setStates_tx(tx, id, states); err != nil {
+	if err := setStates_tx(tx, frm.Id, frm.States); err != nil {
 		return err
 	}
 
 	// set help articles
-	if err := article.Assign_tx(tx, "form", id, articleIdsHelp); err != nil {
+	if err := article.Assign_tx(tx, "form", frm.Id, frm.ArticleIdsHelp); err != nil {
 		return err
 	}
 
 	// set form captions
 	// fix imports < 3.2: Migration from help captions to help articles
-	captions, err = compatible.FixCaptions_tx(tx, "form", id, captions)
+	frm.Captions, err = compatible.FixCaptions_tx(tx, "form", frm.Id, frm.Captions)
 	if err != nil {
 		return err
 	}
-	return caption.Set_tx(tx, id, captions)
+	return caption.Set_tx(tx, frm.Id, frm.Captions)
 }
 
 // form duplication

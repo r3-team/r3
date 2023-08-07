@@ -66,7 +66,7 @@ let MyBuilderPreset = {
 	template:`<tbody class="builder-preset">
 		<tr>
 			<td>
-				<div class="row">
+				<div class="row gap">
 					<my-button image="save.png"
 						@trigger="set"
 						:active="hasChanges && !readonly"
