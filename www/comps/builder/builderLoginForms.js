@@ -10,7 +10,7 @@ let MyBuilderLoginFormsItem = {
 	components:{ MyBuilderCaption },
 	template:`<tr>
 		<td>
-			<div class="row">
+			<div class="row gap">
 				<my-button image="save.png"
 					@trigger="set"
 					:active="hasChanges && formId !== null && attributeIdLogin !== null && attributeIdLookup !== null && name !== '' && !readonly"

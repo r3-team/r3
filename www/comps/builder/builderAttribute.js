@@ -78,6 +78,7 @@ let MyBuilderAttribute = {
 									:caption="capGen.id"
 								/>
 							</div>
+							<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
 						</td>
 						<td>{{ capApp.nameHint }}</td>
 					</tr>
@@ -412,9 +413,17 @@ let MyBuilderAttribute = {
 			}
 		},
 		
+		nameTaken:(s) => {
+			for(let a of s.relation.attributes) {
+				if(a.id !== s.attributeId && a.name === s.values.name)
+					return true;
+			}
+			return false;
+		},
+		
 		// simple
 		canEncrypt:    (s) => s.relation.encryption && s.values.content === 'text',
-		canSave:       (s) => !s.readonly && s.hasChanges,
+		canSave:       (s) => !s.readonly && s.hasChanges && !s.nameTaken,
 		hasChanges:    (s) => s.values.name !== '' && JSON.stringify(s.values) !== JSON.stringify(s.valuesOrg),
 		hasLength:     (s) => ['files','richtext','text','textarea'].includes(s.usedFor),
 		isId:          (s) => !s.isNew && s.values.name === 'id',

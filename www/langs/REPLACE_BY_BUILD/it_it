@@ -50,6 +50,9 @@
 		"dialog":{
 			"confirm":"Si prega di confermare"
 		},
+		"error":{
+			"nameTaken":"Name is already taken, please choose another."
+		},
 		"option":{
 			"aggArray":"vettore",
 			"aggAvg":"media",

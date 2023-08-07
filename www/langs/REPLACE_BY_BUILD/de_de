@@ -50,6 +50,9 @@
 		"dialog":{
 			"confirm":"Bitte bestätigen"
 		},
+		"error":{
+			"nameTaken":"Name bereits in Benutzung, bitte einen anderen wählen."
+		},
 		"option":{
 			"aggArray":"Array",
 			"aggAvg":"Durchschnitt",

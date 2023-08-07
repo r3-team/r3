@@ -100,7 +100,10 @@ let MyBuilderNew = {
 					</template>
 				</div>
 				
-				<div class="actions">
+				<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
+				
+				<br />
+				<div class="row">
 					<my-button image="save.png"
 						@trigger="set"
 						:active="canSave"
@@ -136,7 +139,28 @@ let MyBuilderNew = {
 	},
 	computed:{
 		// inputs
-		canSave:(s) => s.name !== '',
+		canSave:  (s) => s.name !== '' && !s.nameTaken,
+		nameTaken:(s) => {
+			if(s.name === '')
+				return false;
+			
+			let searchList;
+			switch(s.entity) {
+				case 'module':     searchList = s.modules;            break;
+				case 'api':        searchList = s.module.apis;        break;
+				case 'collection': searchList = s.module.collections; break;
+				case 'form':       searchList = s.module.forms;       break;
+				case 'jsFunction': searchList = s.module.jsFunctions; break;
+				case 'pgFunction': searchList = s.module.pgFunctions; break;
+				case 'relation':   searchList = s.module.relations;   break;
+				case 'role':       searchList = s.module.roles;       break;
+			}
+			for(let e of searchList) {
+				if(e.name === s.name)
+					return true;
+			}
+			return false;
+		},
 		
 		// presentation
 		title:(s) => {

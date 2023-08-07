@@ -50,6 +50,9 @@
 		"dialog":{
 			"confirm":"Va rog confirmați"
 		},
+		"error":{
+			"nameTaken":"Name is already taken, please choose another."
+		},
 		"option":{
 			"aggArray":"vector",
 			"aggAvg":"medie",

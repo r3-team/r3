@@ -50,6 +50,9 @@
 		"dialog":{
 			"confirm":"Please confirm"
 		},
+		"error":{
+			"nameTaken":"Name is already taken, please choose another."
+		},
 		"option":{
 			"aggArray":"array",
 			"aggAvg":"average",

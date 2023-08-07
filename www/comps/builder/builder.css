@@ -126,9 +126,8 @@
 	flex:1 1 auto;
 	margin-top:20px;
 }
-.builder-new .actions{
-	flex:1 1 auto;
-	margin-top:20px;
+.builder-new .error{
+	color:var(--color-error);
 }
 
 
@@ -1056,6 +1055,11 @@
 	width:24px;
 	height:24px;
 	filter:var(--image-filter);
+}
+
+/* attributes */
+.builder-attribute .error{
+	color:var(--color-error);
 }
 
 /* functions */
