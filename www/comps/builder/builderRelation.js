@@ -233,7 +233,7 @@ let MyBuilderRelation = {
 					<my-builder-attribute
 						v-if="attributeIdEdit !== false"
 						@close="attributeIdEdit = false"
-						@nextLanguage="$emit('next-language')"
+						@nextLanguage="$emit('nextLanguage')"
 						@new-record="attributeIdEdit = null"
 						:attributeId="attributeIdEdit"
 						:builderLanguage="builderLanguage"
@@ -396,6 +396,7 @@ let MyBuilderRelation = {
 					<tbody>
 						<!-- new record -->
 						<my-builder-pg-trigger
+							@createNew="(...args) => $emit('createNew',...args)"
 							:readonly="readonly"
 							:relation="relation"
 						/>
@@ -403,6 +404,7 @@ let MyBuilderRelation = {
 						<!-- existing records -->
 						<my-builder-pg-trigger
 							v-for="trg in relation.triggers"
+							@createNew="(...args) => $emit('createNew',...args)"
 							:key="trg.id"
 							:readonly="readonly"
 							:relation="relation"
@@ -588,7 +590,7 @@ let MyBuilderRelation = {
 		id:             { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
-	emits:['next-language'],
+	emits:['createNew','nextLanguage'],
 	watch:{
 		relation:{
 			handler() { this.reset(); },

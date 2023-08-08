@@ -362,6 +362,7 @@ let MyBuilderForm = {
 					<my-builder-form-functions
 						v-if="tabTarget === 'functions'"
 						v-model="functions"
+						@createNew="(...args) => $emit('createNew',...args)"
 						:formId="form.id"
 					/>
 				</div>
@@ -381,6 +382,7 @@ let MyBuilderForm = {
 					<!-- field options -->
 					<my-builder-field-options
 						v-if="tabTargetField === 'properties'"
+						@createNew="(...args) => $emit('createNew',...args)"
 						@set="(...args) => fieldPropertySet(args[0],args[1])"
 						:builderLanguage="builderLanguage"
 						:dataFields="dataFields"
@@ -474,7 +476,7 @@ let MyBuilderForm = {
 			</template>
 		</div>
 	</div>`,
-	emits:['hotkeysRegister'],
+	emits:['createNew','hotkeysRegister'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		id:             { type:String,  required:false, default:'' },
@@ -800,6 +802,7 @@ let MyBuilderForm = {
 			return {
 				id:'template_button',
 				iconId:null,
+				jsFunctionId:null,
 				content:'button',
 				state:'default',
 				openForm:null,

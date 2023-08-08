@@ -56,7 +56,7 @@ let MyBuilderJsFunctions = {
 		id:             { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			filter:''
 		};

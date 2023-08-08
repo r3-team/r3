@@ -293,7 +293,7 @@ let MyBuilder = {
 		<router-view
 			v-if="isReady"
 			v-show="!showDocs"
-			@createNew="createNew = $event"
+			@createNew="createNew"
 			@hotkey="handleHotkeys"
 			@hotkeysRegister="hotkeysChild = $event"
 			@nextLanguage="nextLanguage"
@@ -310,9 +310,10 @@ let MyBuilder = {
 		<!-- new entity dialog -->
 		<my-builder-new
 			v-if="createNewOpen"
-			@close="createNew = null"
-			:entity="createNew"
+			@close="createNewEntity = null"
+			:entity="createNewEntity"
 			:moduleId="moduleId"
+			:presets="createNewPresets"
 		/>
 	</div>`,
 	created() {
@@ -323,12 +324,13 @@ let MyBuilder = {
 	},
 	data() {
 		return {
-			builderLanguage:'', // selected language for translations
-			createNew:null,     // entity to create (module, relation, ...)
-			filter:'',          // simple text filter for menu
-			hotkeysChild:[],    // hotkeys from child components
-			isReady:false,      // ready to show content
-			moduleId:'',        // selected module ID
+			builderLanguage:'',   // selected language for translations
+			createNewEntity:null, // entity to create (module, relation, ...)
+			createNewPresets:{},  // preset inputs for new entity (to provide defaults)
+			filter:'',            // simple text filter for menu
+			hotkeysChild:[],      // hotkeys from child components
+			isReady:false,        // ready to show content
+			moduleId:'',          // selected module ID
 			navigation:'module',
 			showDocs:false
 		};
@@ -412,7 +414,7 @@ let MyBuilder = {
 		},
 		
 		// simple
-		createNewOpen:(s) => s.createNew !== null,
+		createNewOpen:(s) => s.createNewEntity !== null,
 		isNew:        (s) => s.moduleId === '',
 		module:       (s) => s.isNew ? false : s.moduleIdMap[s.moduleId],
 		moduleOwner:  (s) => s.isNew ? true  : s.moduleIdMapOptions[s.moduleId].owner,
@@ -467,14 +469,18 @@ let MyBuilder = {
 		// actions
 		add() {
 			switch(this.navigation) {
-				case 'apis':         this.createNew = 'api';        break;
-				case 'collections':  this.createNew = 'collection'; break;
-				case 'forms':        this.createNew = 'form';       break;
-				case 'js-functions': this.createNew = 'jsFunction'; break;
-				case 'pg-functions': this.createNew = 'pgFunction'; break;
-				case 'relations':    this.createNew = 'relation';   break;
-				case 'roles':        this.createNew = 'role';       break;
+				case 'apis':         this.createNew('api');        break;
+				case 'collections':  this.createNew('collection'); break;
+				case 'forms':        this.createNew('form');       break;
+				case 'js-functions': this.createNew('jsFunction'); break;
+				case 'pg-functions': this.createNew('pgFunction'); break;
+				case 'relations':    this.createNew('relation');   break;
+				case 'roles':        this.createNew('role');       break;
 			}
+		},
+		createNew(entity,presets) {
+			this.createNewEntity  = entity;
+			this.createNewPresets = typeof presets !== 'undefined' ? presets : {};
 		},
 		nextLanguage() {
 			let pos = this.module.languages.indexOf(this.builderLanguage);

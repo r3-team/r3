@@ -28,7 +28,7 @@ let MyBuilderNew = {
 			<div class="content default-inputs">
 				<div class="row gap centered">
 					<span>{{ capGen.name }}</span>
-					<input v-model="name" v-focus />
+					<input v-model="inputs.name" v-focus />
 				</div>
 				
 				<div
@@ -44,7 +44,7 @@ let MyBuilderNew = {
 					<template v-if="entity === 'form'">
 						<div class="row centered gap">
 							<span>{{ capApp.formIdDuplicate }}</span>
-							<select v-model="formIdDuplicate">
+							<select v-model="inputs.formIdDuplicate">
 								<option :value="null">-</option>
 								<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
 								<optgroup
@@ -61,7 +61,7 @@ let MyBuilderNew = {
 					<template v-if="entity === 'jsFunction'">
 						<div class="row centered gap">
 							<span>{{ capApp.jsFunctionFormId }}</span>
-							<select v-model="formId">
+							<select v-model="inputs.formId">
 								<option :value="null">-</option>
 								<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
 							</select>
@@ -73,7 +73,7 @@ let MyBuilderNew = {
 					<template v-if="entity === 'pgFunction'">
 						<div class="row centered gap">
 							<span>{{ capApp.pgFunctionTemplate }}</span>
-							<select v-model="template">
+							<select v-model="inputs.template">
 								<option value="">-</option>
 								<option value="mailsFromSpooler">{{ capApp.template.mailsFromSpooler }}</option>
 								<option value="restAuthRequest">{{ capApp.template.restAuthRequest }}</option>
@@ -85,7 +85,7 @@ let MyBuilderNew = {
 						
 						<div class="row centered">
 							<span>{{ capApp.pgFunctionTrigger }}</span>
-							<my-bool v-model="isTrigger" />
+							<my-bool v-model="inputs.isTrigger" />
 						</div>
 						<p v-html="capApp.pgFunctionTriggerHint"></p>
 					</template>
@@ -94,7 +94,7 @@ let MyBuilderNew = {
 					<template v-if="entity === 'relation'">
 						<div class="row centered">
 							<span>{{ capApp.relationEncryption }}</span>
-							<my-bool v-model="encryption" />
+							<my-bool v-model="inputs.encryption" />
 						</div>
 						<p v-html="capApp.relationEncryptionHint"></p>
 					</template>
@@ -116,32 +116,35 @@ let MyBuilderNew = {
 	props:{
 		entity:  { type:String, required:true },
 		moduleId:{ type:String, required:true },
+		presets: { type:Object, required:true } // preset values for inputs
 	},
 	emits:['close'],
 	data() {
 		return {
-			// all entities
-			name:'',
-			
-			// form
-			formIdDuplicate:null,
-			
-			// JS function
-			formId:null,
-			
-			// PG function
-			isTrigger:false,
-			template:'',
-			
-			// relation
-			encryption:false
+			inputs:{
+				// all
+				name:'',
+				
+				// form
+				formIdDuplicate:null,
+				
+				// JS function
+				formId:null,
+				
+				// PG function
+				isTrigger:false,
+				template:'',
+				
+				// relation
+				encryption:false
+			}
 		};
 	},
 	computed:{
 		// inputs
-		canSave:  (s) => s.name !== '' && !s.nameTaken,
+		canSave:  (s) => s.inputs.name !== '' && !s.nameTaken,
 		nameTaken:(s) => {
-			if(s.name === '')
+			if(s.inputs.name === '')
 				return false;
 			
 			let searchList;
@@ -156,7 +159,7 @@ let MyBuilderNew = {
 				case 'role':       searchList = s.module.roles;       break;
 			}
 			for(let e of searchList) {
-				if(e.name === s.name)
+				if(e.name === s.inputs.name)
 					return true;
 			}
 			return false;
@@ -199,6 +202,12 @@ let MyBuilderNew = {
 		capGen:     (s) => s.$store.getters.captions.generic
 	},
 	mounted() {
+		// apply preset input values
+		for(let k in this.inputs) {
+			if(typeof this.presets[k] !== 'undefined')
+				this.inputs[k] = this.presets[k];
+		}
+		
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
 	unmounted() {
@@ -234,7 +243,7 @@ let MyBuilderNew = {
 					request = {
 						id:this.getNilUuid(),
 						moduleId:this.moduleId,
-						name:this.name,
+						name:this.inputs.name,
 						comment:null,
 						columns:[],
 						query:this.getQueryTemplate(),
@@ -252,19 +261,19 @@ let MyBuilderNew = {
 						id:this.getNilUuid(),
 						moduleId:this.moduleId,
 						iconId:null,
-						name:this.name,
+						name:this.inputs.name,
 						columns:[],
 						query:this.getQueryTemplate(),
 						inHeader:[]
 					};
 				break;
 				case 'form':
-					if(this.formIdDuplicate !== null) {
+					if(this.inputs.formIdDuplicate !== null) {
 						action = 'copy';
 						request = {
-							id:this.formIdDuplicate,
+							id:this.inputs.formIdDuplicate,
 							moduleId:this.moduleId,
-							newName:this.name
+							newName:this.inputs.name
 						};
 					} else {
 						request = {
@@ -272,7 +281,7 @@ let MyBuilderNew = {
 							moduleId:this.moduleId,
 							presetIdOpen:null,
 							iconId:null,
-							name:this.name,
+							name:this.inputs.name,
 							noDataActions:false,
 							query:this.getQueryTemplate(),
 							fields:[],
@@ -289,8 +298,8 @@ let MyBuilderNew = {
 					request = {
 						id:this.getNilUuid(),
 						moduleId:this.moduleId,
-						formId:this.formId,
-						name:this.name,
+						formId:this.inputs.formId,
+						name:this.inputs.name,
 						codeArgs:'',
 						codeFunction:'',
 						codeReturns:'',
@@ -306,7 +315,7 @@ let MyBuilderNew = {
 						parentId:null,
 						formId:null,
 						iconId:null,
-						name:this.name,
+						name:this.inputs.name,
 						color1:'217A4D',
 						position:0,
 						releaseBuild:0,
@@ -326,12 +335,12 @@ let MyBuilderNew = {
 					request = {
 						id:this.getNilUuid(),
 						moduleId:this.moduleId,
-						name:this.name,
-						codeArgs:this.getTemplateArgs(this.template),
-						codeFunction:this.getTemplateFnc(this.template,this.isTrigger),
-						codeReturns:this.getTemplateReturn(this.isTrigger),
+						name:this.inputs.name,
+						codeArgs:this.getTemplateArgs(this.inputs.template),
+						codeFunction:this.getTemplateFnc(this.inputs.template,this.inputs.isTrigger),
+						codeReturns:this.getTemplateReturn(this.inputs.isTrigger),
 						isFrontendExec:false,
-						isTrigger:this.isTrigger,
+						isTrigger:this.inputs.isTrigger,
 						schedules:[],
 						captions:{
 							pgFunctionTitle:{},
@@ -343,9 +352,9 @@ let MyBuilderNew = {
 					request = {
 						id:this.getNilUuid(),
 						moduleId:this.moduleId,
-						name:this.name,
+						name:this.inputs.name,
 						comment:null,
-						encryption:this.encryption,
+						encryption:this.inputs.encryption,
 						retentionCount:null,
 						retentionDays:null,
 						policies:[]
@@ -356,7 +365,7 @@ let MyBuilderNew = {
 						id:this.getNilUuid(),
 						moduleId:this.moduleId,
 						content:'user',
-						name:this.name,
+						name:this.inputs.name,
 						assignable:true,
 						captions:{},
 						childrenIds:[],

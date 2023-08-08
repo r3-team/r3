@@ -5,10 +5,10 @@ let MyBuilderPgTrigger = {
 	name:'my-builder-pg-trigger',
 	template:`<tr>
 		<td>
-			<div class="row">
+			<div class="row gap">
 				<my-button image="save.png"
 					@trigger="set"
-					:active="hasChanges && !readonly"
+					:active="canSave"
 					:caption="isNew ? capGen.button.create : ''"
 					:captionTitle="isNew ? capGen.button.create : capGen.button.save"
 				/>
@@ -45,12 +45,9 @@ let MyBuilderPgTrigger = {
 			/>
 		</td>
 		<td>
-			<div class="row">
-				<my-button image="open.png"
-					@trigger="open"
-					:active="pgFunctionId !== null"
-				/>
+			<div class="row gap">
 				<select v-model="pgFunctionId" :disabled="readonly">
+					<option :value="null">[{{ capGen.nothingSelected }}]</option>
 					<option
 						v-for="fnc in module.pgFunctions.filter(v => v.codeReturns === 'trigger' || v.codeReturns === 'TRIGGER')"
 						:value="fnc.id"
@@ -58,6 +55,16 @@ let MyBuilderPgTrigger = {
 						{{ fnc.name }}
 					</option>
 				</select>
+				<my-button image="add.png"
+					v-if="pgFunctionId === null"
+					@trigger="$emit('createNew','pgFunction',{isTrigger:true})"
+					:captionTitle="capGen.button.create"
+				/>
+				<my-button image="open.png"
+					v-if="pgFunctionId !== null"
+					@trigger="open"
+					:captionTitle="capGen.button.open"
+				/>
 			</div>
 		</td>
 	</tr>`,
@@ -83,6 +90,7 @@ let MyBuilderPgTrigger = {
 		readonly:{ type:Boolean, required:true },
 		relation:{ type:Object,  required:true }
 	},
+	emits:['createNew'],
 	data() {
 		return {
 			pgFunctionId:this.pgTrigger.pgFunctionId,
@@ -111,6 +119,7 @@ let MyBuilderPgTrigger = {
 			|| s.codeCondition !== s.pgTrigger.codeCondition,
 		
 		// simple
+		canSave:     (s) => s.hasChanges && !s.readonly && s.pgFunctionId !== null,
 		constraintOk:(s) => s.fires === 'AFTER' && s.perRow,
 		isNew:       (s) => s.pgTrigger.id === null,
 		

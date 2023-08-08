@@ -1061,29 +1061,41 @@ let MyBuilderFieldOptions = {
 					<td v-if="isButton">{{ capApp.jsFunctionButton }}</td>
 					<td v-if="isData">{{ capApp.jsFunctionData }}</td>
 					<td>
-						<select
-							@input="setNull('jsFunctionId',$event.target.value)"
-							:value="field.jsFunctionId"
-						>
-							<option value="">-</option>
-							<option
-								v-for="fnc in module.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
-								:value="fnc.id"
+						<div class="row gap">
+							<select
+								@input="setNull('jsFunctionId',$event.target.value)"
+								:value="field.jsFunctionId"
 							>
-								{{ fnc.name }}
-							</option>
-							<optgroup
-								v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.jsFunctions.length !== 0)"
-								:label="mod.name"
-							>
+								<option value="">-</option>
 								<option
-									v-for="fnc in mod.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
+									v-for="fnc in module.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
 									:value="fnc.id"
 								>
 									{{ fnc.name }}
 								</option>
-							</optgroup>
-						</select>
+								<optgroup
+									v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.jsFunctions.length !== 0)"
+									:label="mod.name"
+								>
+									<option
+										v-for="fnc in mod.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
+										:value="fnc.id"
+									>
+										{{ fnc.name }}
+									</option>
+								</optgroup>
+							</select>
+							<my-button image="add.png"
+								v-if="field.jsFunctionId === null"
+								@trigger="$emit('createNew','jsFunction',{formId:formId})"
+								:captionTitle="capGen.button.new"
+							/>
+							<my-button image="open.png"
+								v-if="field.jsFunctionId !== null"
+								@trigger="$router.push('/builder/js-function/'+field.jsFunctionId)"
+								:captionTitle="capGen.button.open"
+							/>
+						</div>
 					</td>
 				</tr>
 			</template>
@@ -1166,7 +1178,7 @@ let MyBuilderFieldOptions = {
 		joinsIndexMap:  { type:Object, required:true },
 		moduleId:       { type:String, required:true }
 	},
-	emits:['set'],
+	emits:['createNew','set'],
 	computed:{
 		attribute:(s) => !s.isData || typeof s.attributeIdMap[s.field.attributeId] === 'undefined'
 			? false : s.attributeIdMap[s.field.attributeId],
