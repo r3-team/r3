@@ -28,7 +28,7 @@ let MyBuilderNew = {
 			<div class="content default-inputs">
 				<div class="row gap centered">
 					<span>{{ capGen.name }}</span>
-					<input v-model="inputs.name" v-focus />
+					<input spellcheck="false" v-model="inputs.name" v-focus />
 				</div>
 				
 				<div

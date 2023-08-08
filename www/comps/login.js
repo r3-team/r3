@@ -120,7 +120,7 @@ let MyLogin = {
 					
 					<!-- credentials input -->
 					<template v-if="!showMfa">
-						<input class="default" type="text"
+						<input class="default" type="text" spellcheck="false"
 							@keyup="badAuth = false"
 							@keyup.enter="authenticate"
 							v-model="username"

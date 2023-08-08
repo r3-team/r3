@@ -218,7 +218,7 @@ let MyBuilder = {
 							:naked="true"
 						/>
 						<div class="row gap centered default-inputs">
-							<input class="short" placeholder="..."
+							<input class="short" placeholder="..." spellcheck="false"
 								v-model="filter"
 								:title="capApp.navigationFilterHint"
 							/>

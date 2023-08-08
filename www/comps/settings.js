@@ -375,25 +375,25 @@ let MySettingsAccount = {
 				<!-- pw change -->
 				<tr>
 					<td>{{ capGen.username }}</td>
-					<td>	<input disabled="disabled" :value="loginName" /></td>
+					<td><input disabled="disabled" :value="loginName" /></td>
 				</tr>
 				<tr>
 					<td>{{ capApp.pwOld }}</td>
-					<td>	<input v-model="pwOld" @input="newInput = true; generateOldPwKey()" type="password" /></td>
+					<td><input v-model="pwOld" @input="newInput = true; generateOldPwKey()" type="password" /></td>
 				</tr>
 				<tr>
 					<td>{{ capApp.pwNew0 }}</td>
-					<td>	<input v-model="pwNew0" @input="newInput = true" type="password" /></td>
+					<td><input v-model="pwNew0" @input="newInput = true" type="password" /></td>
 				</tr>
 				<tr>
 					<td>{{ capApp.pwNew1 }}</td>
-					<td>	<input v-model="pwNew1" @input="newInput = true" type="password" /></td>
+					<td><input v-model="pwNew1" @input="newInput = true" type="password" /></td>
 				</tr>
 			</tbody>
 		</table>
 		
 		<div class="settings-account-action">
-			<my-button image="save.png" class="right"
+			<my-button image="save.png"
 				@trigger="setCheck"
 				:active="canSave"
 				:caption="capGen.button.save"
