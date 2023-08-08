@@ -175,38 +175,48 @@ let MyBuilder = {
 					
 					<!-- module sub component navigation header -->
 					<div class="navigation-entities-header" v-if="subMenu">
-						<div class="line" v-if="navigation === 'forms'">
-							<img src="images/fileText.png" />
-							<h1>{{ capApp.navigationForms }}</h1>
-						</div>
-						<div class="line" v-if="navigation === 'functions'">
-							<img src="images/code.png" />
-							<h1>{{ capApp.navigationFunctions }}</h1>
-						</div>
-						<div class="line" v-if="navigation === 'roles'">
-							<img src="images/personMultiple.png" />
-							<h1>{{ capApp.navigationRoles }}</h1>
-						</div>
-						<div class="line" v-if="navigation === 'relations'">
-							<img src="images/database.png" />
-							<h1>{{ capApp.navigationRelations }}</h1>
-						</div>
-						<div class="line" v-if="navigation === 'collections'">
-							<img src="images/tray.png" />
-							<h1>{{ capApp.navigationCollections }}</h1>
-						</div>
-						<div class="line" v-if="navigation === 'apis'">
-							<img src="images/api.png" />
-							<h1>{{ capApp.navigationApis }}</h1>
-						</div>
-						<div class="line" v-if="navigation === 'pg-functions'">
-							<img src="images/codeDatabase.png" />
-							<h1>{{ capApp.navigationPgFunctions }}</h1>
-						</div>
-						<div class="line" v-if="navigation === 'js-functions'">
-							<img src="images/codeScreen.png" />
-							<h1>{{ capApp.navigationJsFunctions }}</h1>
-						</div>
+						<my-button image="fileText.png"
+							v-if="navigation === 'forms'"
+							@trigger="$router.push('/builder/forms/'+moduleId)"
+							:caption="capApp.navigationForms"
+							:naked="true"
+						/>
+						<my-button image="personMultiple.png"
+							v-if="navigation === 'roles'"
+							@trigger="$router.push('/builder/roles/'+moduleId)"
+							:caption="capApp.navigationRoles"
+							:naked="true"
+						/>
+						<my-button image="database.png"
+							v-if="navigation === 'relations'"
+							@trigger="$router.push('/builder/relations/'+moduleId)"
+							:caption="capApp.navigationRelations"
+							:naked="true"
+						/>
+						<my-button image="tray.png"
+							v-if="navigation === 'collections'"
+							@trigger="$router.push('/builder/collections/'+moduleId)"
+							:caption="capApp.navigationCollections"
+							:naked="true"
+						/>
+						<my-button image="api.png"
+							v-if="navigation === 'apis'"
+							@trigger="$router.push('/builder/apis/'+moduleId)"
+							:caption="capApp.navigationApis"
+							:naked="true"
+						/>
+						<my-button image="codeDatabase.png"
+							v-if="navigation === 'pg-functions'"
+							@trigger="$router.push('/builder/pg-functions/'+moduleId)"
+							:caption="capApp.navigationPgFunctions"
+							:naked="true"
+						/>
+						<my-button image="codeScreen.png"
+							v-if="navigation === 'js-functions'"
+							@trigger="$router.push('/builder/js-functions/'+moduleId)"
+							:caption="capApp.navigationJsFunctions"
+							:naked="true"
+						/>
 						<div class="row gap centered default-inputs">
 							<input class="short" placeholder="..."
 								v-model="filter"

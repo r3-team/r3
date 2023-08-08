@@ -72,25 +72,6 @@
 	border-bottom:1px solid var(--color-border);
 	background-color:var(--color-bg);
 }
-.builder .navigation-entities-header .line{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	gap:8px;
-}
-.builder .navigation-entities-header .line h1{
-	margin:0px;
-	font-size:110%;
-}
-.builder .navigation-entities-header .line img{
-	width:18px;
-	height:18px;
-	filter:var(--image-filter);
-}
-.builder .navigation-entities-header-sub{
-	margin:7px 9px 2px;
-	color:var(--color-font-alt);
-}
 .builder .navigation-entities{
 	display:flex;
 	flex-flow:column nowrap;
