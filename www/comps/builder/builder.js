@@ -483,15 +483,17 @@ let MyBuilder = {
 		
 		// actions
 		add() {
+			let entity;
 			switch(this.navigation) {
-				case 'apis':         this.createNew('api');        break;
-				case 'collections':  this.createNew('collection'); break;
-				case 'forms':        this.createNew('form');       break;
-				case 'js-functions': this.createNew('jsFunction'); break;
-				case 'pg-functions': this.createNew('pgFunction'); break;
-				case 'relations':    this.createNew('relation');   break;
-				case 'roles':        this.createNew('role');       break;
+				case 'apis':         entity = 'api';        break;
+				case 'collections':  entity = 'collection'; break;
+				case 'forms':        entity = 'form';       break;
+				case 'js-functions': entity = 'jsFunction'; break;
+				case 'pg-functions': entity = 'pgFunction'; break;
+				case 'relations':    entity = 'relation';   break;
+				case 'roles':        entity = 'role';       break;
 			}
+			this.createNew(entity,{name:this.filter});
 		},
 		createNew(entity,presets) {
 			this.createNewEntity  = entity;
