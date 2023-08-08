@@ -49,16 +49,20 @@ let MyMenuItem = {
 			<my-menu-item class="item sub"
 				v-for="m in menu.menus"
 				:formIdActive="formIdActive"
+				:formOpensPreset="formOpensPreset"
 				:key="m.id"
 				:menu="m"
 				:module="module"
+				:recordOpen="recordOpen"
 			/>
 		</template>
 	</div>`,
 	props:{
-		formIdActive:{ type:String, required:true },
-		menu:        { type:Object, required:true },
-		module:      { type:Object, required:true }
+		formIdActive:   { type:String,  required:true },
+		formOpensPreset:{ type:Boolean, required:true },
+		menu:           { type:Object,  required:true },
+		module:         { type:Object,  required:true },
+		recordOpen:     { type:Boolean, required:true }
 	},
 	mounted() {
 		// show children if no preference is recorded and default is true
@@ -104,7 +108,7 @@ let MyMenuItem = {
 		// simple
 		active:      (s) => s.menuAccess[s.menu.id] === 1,
 		hasChildren: (s) => s.menu.menus.length !== 0,
-		selected:    (s) => s.menu.formId === s.formIdActive,
+		selected:    (s) => (!s.recordOpen || s.formOpensPreset) && s.menu.formId === s.formIdActive,
 		showChildren:(s) => s.hasChildren && s.menuIdMapOpen[s.menu.id],
 		subIcon:     (s) => s.showChildren ? 'images/triangleDown.png' : 'images/triangleLeft.png',
 		title:       (s) => typeof s.menu.captions.menuTitle[s.moduleLanguage] !== 'undefined'
@@ -134,7 +138,7 @@ let MyMenuItem = {
 			if(this.menu.formId === null)
 				return this.clickSubMenus();
 			
-			if(this.menu.formId !== this.formIdActive)
+			if(this.menu.formId !== this.formIdActive || (this.recordOpen && !this.formOpensPreset))
 				return this.$router.push(this.getFormRoute(this.menu.formId,0,true));
 			
 			// form is set and we are already there
@@ -184,19 +188,23 @@ let MyMenu = {
 			<div class="items">
 				<my-menu-item
 					v-for="m in module.menus"
-					:formIdActive="formId"
+					:formIdActive="formIdActive"
+					:formOpensPreset="formOpensPreset"
 					:key="m.id"
 					:menu="m"
 					:module="module"
+					:recordOpen="recordOpen"
 				/>
 			</div>
 		</div>
 	</div>`,
 	props:{
-		bgStyle:       { type:String,  required:true },
-		isActiveModule:{ type:Boolean, required:true },
-		formId:        { type:String,  required:false, default:'' },
-		module:        { type:Object,  required:true }
+		bgStyle:        { type:String,  required:true },
+		isActiveModule: { type:Boolean, required:true },
+		formIdActive:   { type:String,  required:true },
+		formOpensPreset:{ type:Boolean, required:true },
+		module:         { type:Object,  required:true },
+		recordOpen:     { type:Boolean, required:true }
 	},
 	computed:{
 		// stores
