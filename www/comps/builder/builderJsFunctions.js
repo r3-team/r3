@@ -1,3 +1,4 @@
+import {getJsFunctionsProcessed} from '../shared/builder.js';
 export {MyBuilderJsFunctions as default};
 
 let MyBuilderJsFunctions = {
@@ -28,12 +29,13 @@ let MyBuilderJsFunctions = {
 				</div>
 				
 				<router-link class="entry clickable"
-					v-for="f in module.jsFunctions.filter(v => filter === '' || v.name.toLowerCase().includes(filter.toLowerCase()))"
+					v-for="f in jsFunctions"
 					:key="f.id"
 					:to="'/builder/js-function/'+f.id" 
 				>
 					<div class="lines">
-						<span>{{ f.name }}</span>
+						<span v-if="f.formId === null">{{ f.name }}</span>
+						<span v-if="f.formId !== null"><b>{{ formIdMap[f.formId].name }}:</b> {{ f.name }}</span>
 						<span class="subtitle" v-if="typeof f.captions.jsFunctionTitle[builderLanguage] !== 'undefined'">
 							[{{ f.captions.jsFunctionTitle[builderLanguage] }}]
 						</span>
@@ -62,10 +64,17 @@ let MyBuilderJsFunctions = {
 		};
 	},
 	computed:{
+		jsFunctions:(s) => s.getJsFunctionsProcessed(s.module.jsFunctions,s.filter),
+		
 		// stores
 		module:     (s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		formIdMap:  (s) => s.$store.getters['schema/formIdMap'],
 		capApp:     (s) => s.$store.getters.captions.builder.function,
 		capGen:     (s) => s.$store.getters.captions.generic
+	},
+	methods:{
+		// external
+		getJsFunctionsProcessed
 	}
 };

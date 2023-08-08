@@ -134,6 +134,13 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX fki_field_kanban_attribute_id_sort_fkey
 				ON app.field_kanban USING btree (attribute_id_sort ASC NULLS LAST);
 			
+			-- make frontend function names unique only within their scope (global, form)
+			ALTER TABLE app.js_function DROP CONSTRAINT js_function_module_id_name_key;
+			CREATE UNIQUE INDEX ind_js_function_name_global_unique ON app.js_function
+				(module_id, name) WHERE form_id IS NULL;
+			CREATE UNIQUE INDEX ind_js_function_name_form_unique ON app.js_function
+				(module_id, name, form_id) WHERE form_id IS NOT NULL;
+			
 			-- regular VACUUM task
 			INSERT INTO instance.task (
 				name,interval_seconds,cluster_master_only,

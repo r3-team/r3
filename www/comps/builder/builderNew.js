@@ -159,6 +159,10 @@ let MyBuilderNew = {
 				case 'role':       searchList = s.module.roles;       break;
 			}
 			for(let e of searchList) {
+				// only compare names of functions within the same scope (global or form)
+				if(s.entity === 'jsFunction' && e.formId !== s.inputs.formId)
+					continue;
+				
 				if(e.name === s.inputs.name)
 					return true;
 			}

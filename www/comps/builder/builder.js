@@ -1,8 +1,9 @@
-import MyBuilderDocs      from './builderDocs.js';
-import MyBuilderNew       from './builderNew.js';
-import srcBase64Icon      from '../shared/image.js';
-import {getModuleCaption} from '../shared/generic.js';
-import {MyModuleSelect}   from '../input.js';
+import MyBuilderDocs             from './builderDocs.js';
+import MyBuilderNew              from './builderNew.js';
+import {getJsFunctionsProcessed} from '../shared/builder.js';
+import srcBase64Icon             from '../shared/image.js';
+import {getModuleCaption}        from '../shared/generic.js';
+import {MyModuleSelect}          from '../input.js';
 export {MyBuilder as default};
 
 let MyBuilder = {
@@ -280,10 +281,12 @@ let MyBuilder = {
 						<!-- JS functions -->
 						<template v-if="navigation === 'js-functions'">
 							<router-link class="entry clickable"
-								v-for="fnc in module.jsFunctions.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
+								v-for="fnc in jsFunctions"
 								:key="fnc.id"
 								:to="'/builder/js-function/'+fnc.id" 
-							>{{ fnc.name }}</router-link>
+							>
+								<span><b v-if="fnc.formId !== null">{{ formIdMap[fnc.formId].name }}: </b>{{ fnc.name }}</span>
+							</router-link>
 						</template>
 					</div>
 				</div>
@@ -416,6 +419,7 @@ let MyBuilder = {
 		// simple
 		createNewOpen:(s) => s.createNewEntity !== null,
 		isNew:        (s) => s.moduleId === '',
+		jsFunctions:  (s) => s.getJsFunctionsProcessed(s.module.jsFunctions,s.filter),
 		module:       (s) => s.isNew ? false : s.moduleIdMap[s.moduleId],
 		moduleOwner:  (s) => s.isNew ? true  : s.moduleIdMapOptions[s.moduleId].owner,
 		
@@ -439,6 +443,7 @@ let MyBuilder = {
 	},
 	methods:{
 		// externals
+		getJsFunctionsProcessed,
 		getModuleCaption,
 		srcBase64Icon,
 		

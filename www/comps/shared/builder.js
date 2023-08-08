@@ -8,6 +8,35 @@ export function getFieldHasQuery(field) {
 		);
 };
 
+export function getJsFunctionsProcessed(fncs,filter) {
+	let outGlobal = [];
+	let outForm   = [];
+	let formIdMap = MyStore.getters['schema/formIdMap'];
+	filter        = filter.toLowerCase();
+	
+	for(let fnc of fncs) {
+		if(filter !== '') {
+			if(fnc.formId === null && !fnc.name.toLowerCase().includes(filter))
+				continue;
+			
+			if(fnc.formId !== null && !fnc.name.toLowerCase().includes(filter)
+				&& !formIdMap[fnc.formId].name.toLowerCase().includes(filter)) {
+				
+				continue;
+			}
+		}
+		
+		if(fnc.formId === null) outGlobal.push(fnc);
+		else                    outForm.push(fnc);
+	}
+	
+	// sort by form name
+	outForm.sort((a,b) => (formIdMap[a.formId].name > formIdMap[b.formId].name) ? 1 : -1);
+	
+	// order: generic then functions assigned to a form
+	return outGlobal.concat(outForm);
+};
+
 export function getDependentModules(moduleSource,modulesAll) {
 	let out = [];
 	for(let i = 0, j = modulesAll.length; i < j; i++) {
