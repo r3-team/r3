@@ -141,6 +141,11 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE UNIQUE INDEX ind_js_function_name_form_unique ON app.js_function
 				(module_id, name, form_id) WHERE form_id IS NOT NULL;
 			
+			-- cleanup, extend open-form
+			ALTER TABLE app.open_form RENAME relation_index TO relation_index_apply;
+			ALTER TABLE app.open_form ADD COLUMN relation_index_open INTEGER NOT NULL DEFAULT 0;
+			ALTER TABLE app.open_form ALTER COLUMN relation_index_open DROP DEFAULT;
+			
 			-- regular VACUUM task
 			INSERT INTO instance.task (
 				name,interval_seconds,cluster_master_only,

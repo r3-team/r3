@@ -8,15 +8,31 @@ export {MyBuilderOpenFormInput as default};
 let MyBuilderOpenFormInput = {
 	name:'my-builder-open-form-input',
 	template:`<table>
-		<tr>
+		<tr v-if="!allowAllForms">
+			<td>{{ capApp.relationIndexOpen }}</td>
+			<td>
+				<select
+					@input="set('relationIndexOpen',$event.target.value)"
+					:disabled="readonly"
+					:value="isActive ? openForm.relationIndexOpen : -1"
+				>
+					<option :value="-1">-</option>
+					<option
+						v-for="j in joinsIndexMapField"
+						:value="j.index"
+					>{{ getItemTitleRelation(j.relationId,j.index) }}</option>
+				</select>
+			</td>
+		</tr>
+		<tr v-if="isActive && openForm.relationIndexOpen !== -1">
 			<td>{{ capApp.formIdOpen }}</td>
 			<td>
 				<select
 					@input="set('formIdOpen',$event.target.value)"
 					:disabled="readonly"
-					:value="openForm !== null ? openForm.formIdOpen : null"
+					:value="isActive ? openForm.formIdOpen : null"
 				>
-					<option value="">-</option>
+					<option :value="null">-</option>
 					<option
 						v-for="f in module.forms.filter(v => allowAllForms || v.query.relationId === relationIdSource)" 
 						:value="f.id"
@@ -71,17 +87,17 @@ let MyBuilderOpenFormInput = {
 					/>
 				</td>
 			</tr>
-			<template v-if="allowNewRecords">
+			<template v-if="allowNewRecords && formIsData">
 				<tr>
 					<td colspan="2"><b>{{ capApp.newRecord }}</b></td>
 				</tr>
 				<tr>
-					<td>{{ capApp.relationIndex }}</td>
+					<td>{{ capApp.relationIndexApply }}</td>
 					<td>
 						<select
-							@input="set('relationIndex',$event.target.value)"
+							@input="set('relationIndexApply',$event.target.value)"
 							:disabled="readonly"
-							:value="openForm.relationIndex"
+							:value="openForm.relationIndexApply"
 						>
 							<option :value="-1">-</option>
 							<option
@@ -91,7 +107,7 @@ let MyBuilderOpenFormInput = {
 						</select>
 					</td>
 				</tr>
-				<tr v-if="openForm.relationIndex !== -1">
+				<tr v-if="openForm.relationIndexApply !== -1">
 					<td>{{ capApp.attributeApply }}</td>
 					<td>
 						<select
@@ -110,15 +126,15 @@ let MyBuilderOpenFormInput = {
 		</template>
 	</table>`,
 	props:{
-		allowAllForms:   { type:Boolean, required:false, default:false },
-		allowNewRecords: { type:Boolean, required:false, default:false },
-		allowPopUpInline:{ type:Boolean, required:false, default:false },
-		forcePopUp:      { type:Boolean, required:false, default:false },
-		joinsIndexMap:   { type:Object,  required:false, default:function() { return {}; } },
-		module:          { type:Object,  required:true },
-		openForm:        { required:true },
-		readonly:        { type:Boolean, required:false, default:false },
-		relationIdSource:{ type:String,  required:false, default:null }
+		allowAllForms:     { type:Boolean, required:false, default:false },
+		allowNewRecords:   { type:Boolean, required:false, default:false },
+		allowPopUpInline:  { type:Boolean, required:false, default:false },
+		forcePopUp:        { type:Boolean, required:false, default:false },
+		joinsIndexMap:     { type:Object,  required:false, default:function() { return {}; } },
+		joinsIndexMapField:{ type:Object,  required:false, default:function() { return {}; } },
+		module:            { type:Object,  required:true },
+		openForm:          { required:true },
+		readonly:          { type:Boolean, required:false, default:false }
 	},
 	emits:['update:openForm'],
 	computed:{
@@ -129,13 +145,19 @@ let MyBuilderOpenFormInput = {
 		},
 		
 		// options
+		relationIdSource:(s) => {
+			if(!s.isActive) return null;
+			
+			return typeof s.joinsIndexMapField[s.openForm.relationIndexOpen] !== 'undefined'
+				? s.joinsIndexMapField[s.openForm.relationIndexOpen].relationId : null;
+		},
 		targetAttributes:(s) => {
 			if(!s.formIsSet) return [];
 			
 			// parse from which relation the record is applied, based on the chosen relation index
 			let relationIdRecord = null;
 			for(let k in s.joinsIndexMap) {
-				if(s.joinsIndexMap[k].index === s.openForm.relationIndex) {
+				if(s.joinsIndexMap[k].index === s.openForm.relationIndexApply) {
 					relationIdRecord = s.joinsIndexMap[k].relationId;
 					break;
 				}
@@ -204,7 +226,9 @@ let MyBuilderOpenFormInput = {
 		},
 		
 		// simple
-		formIsSet:(s) => s.openForm !== null && s.openForm.formIdOpen !== null,
+		formIsData:(s) => typeof s.joinsIndexMap['0'] !== 'undefined',
+		formIsSet: (s) => s.isActive && s.openForm.formIdOpen !== null,
+		isActive:  (s) => s.openForm !== null,
 		
 		// stores
 		modules:       (s) => s.$store.getters['schema/modules'],
@@ -229,9 +253,10 @@ let MyBuilderOpenFormInput = {
 			// set initial value if empty
 			if(v === null)
 				v = {
+					relationIndexOpen:-1,
 					formIdOpen:null,
+					relationIndexApply:-1,
 					attributeIdApply:null,
-					relationIndex:-1,
 					popUpType:this.forcePopUp ? 'float' : null,
 					maxHeight:1000,
 					maxWidth:1200
@@ -241,7 +266,10 @@ let MyBuilderOpenFormInput = {
 			if(['maxHeight','maxWidth'].includes(name))
 				val = val !== '' && !isNaN(val) ? parseInt(val) : 0;
 			
-			if(name === 'relationIndex')
+			if(name === 'relationIndexOpen')
+				val = val !== '' && !isNaN(val) ? parseInt(val) : 0;
+			
+			if(name === 'relationIndexApply')
 				val = val !== '' && !isNaN(val) ? parseInt(val) : -1;
 			
 			if(name === 'attributeIdApply' && val === '')

@@ -1228,7 +1228,8 @@
 			"maxWidth":"Max. Breite (px)",
 			"newRecord":"Beim Erstellen neuer Datensätze",
 			"popUpType":"Öffnen als",
-			"relationIndex":"Verwende Datensatz von Relation"
+			"relationIndexApply":"Verwende Datensatz von Relation",
+			"relationIndexOpen":"Von Relation öffnen"
 		},
 		"pgIndex":{
 			"description":{

@@ -14,6 +14,19 @@ import (
 )
 
 // < 3.5
+// migrate relation index apply
+func FixOpenFormRelationIndexApply(openForm types.OpenForm) types.OpenForm {
+	if openForm.RelationIndex != -1 {
+		openForm.RelationIndexApply = openForm.RelationIndex
+	}
+	return openForm
+}
+func FixOpenFormRelationIndexApplyDefault(openForm types.OpenForm) types.OpenForm {
+	openForm.RelationIndex = -1
+	return openForm
+}
+
+// < 3.4
 // migrate open form pop-up type
 func FixOpenFormPopUpType(openForm types.OpenForm) types.OpenForm {
 	if openForm.PopUp && !openForm.PopUpType.Valid {

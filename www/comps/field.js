@@ -286,12 +286,11 @@ let MyField = {
 						:inputIsNew="isNew"
 						:inputIsReadonly="isReadonly"
 						:inputMulti="isRelationship1N"
-						:inputOpenForm="field.openForm !== null"
 						:inputRecordIds="relationshipRecordIds"
 						:inputValid="!showInvalid"
 						:isInput="true"
+						:openForm="field.openForm"
 						:query="field.query"
-						:rowSelect="true"
 					>
 						<template #input-icon>
 							<img class="field-icon inList"
@@ -357,8 +356,6 @@ let MyField = {
 			@record-count-change="$emit('set-counter',field.id,$event)"
 			@set-args="(...args) => $emit('set-form-args',...args)"
 			@set-collection-indexes="setCollectionIndexes"
-			:allowBulk="field.openFormBulk !== null"
-			:allowPaging="field.query.fixedLimit === 0"
 			:autoRenew="field.autoRenew"
 			:choices="choicesProcessed"
 			:collections="field.collections"
@@ -375,9 +372,10 @@ let MyField = {
 			:isSingleField="isAloneInForm || isAloneInTab"
 			:layout="field.layout"
 			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
+			:openForm="field.openForm"
+			:openFormBulk="field.openFormBulk"
 			:popUpFormInline="popUpFormInline"
 			:query="field.query"
-			:rowSelect="field.openForm !== null"
 			:usesPageHistory="isAloneInForm && !formIsPopUp"
 		/>
 		
@@ -1185,11 +1183,11 @@ let MyField = {
 			
 			// apply record from defined relation index as attribute value via getter
 			if(openForm.attributeIdApply !== null
-				&& typeof this.joinsIndexMap[openForm.relationIndex] !== 'undefined'
-				&& this.joinsIndexMap[openForm.relationIndex].recordId !== 0) {
+				&& typeof this.joinsIndexMap[openForm.relationIndexApply] !== 'undefined'
+				&& this.joinsIndexMap[openForm.relationIndexApply].recordId !== 0) {
 				
 				let atrId    = openForm.attributeIdApply;
-				let recordId = this.joinsIndexMap[openForm.relationIndex].recordId;
+				let recordId = this.joinsIndexMap[openForm.relationIndexApply].recordId;
 				
 				getterArgs = this.setGetterArgs(getterArgs,'attributes',`${atrId}_${recordId}`);
 			}

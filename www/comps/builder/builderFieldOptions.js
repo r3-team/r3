@@ -1110,9 +1110,9 @@ let MyBuilderFieldOptions = {
 						:allowNewRecords="true"
 						:allowPopUpInline="isCalendar || isKanban || isList"
 						:joinsIndexMap="joinsIndexMap"
+						:joinsIndexMapField="joinsIndexMapField"
 						:module="module"
 						:openForm="field.openForm"
-						:relationIdSource="isButton ? null : field.query.relationId"
 					/>
 				</td>
 			</tr>
@@ -1126,9 +1126,9 @@ let MyBuilderFieldOptions = {
 						:allowPopUpInline="true"
 						:forcePopUp="true"
 						:joinsIndexMap="joinsIndexMap"
+						:joinsIndexMapField="joinsIndexMapField"
 						:module="module"
 						:openForm="field.openFormBulk"
-						:relationIdSource="field.query.relationId"
 					/>
 				</td>
 			</tr>

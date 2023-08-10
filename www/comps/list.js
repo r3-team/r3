@@ -123,9 +123,9 @@ let MyList = {
 								:naked="true"
 							/>
 							<my-button image="open.png"
-								v-if="inputOpenForm && hasUpdate"
-								@trigger="$emit('open-form',[r.indexRecordIds['0']],false)"
-								@trigger-middle="$emit('open-form',[r.indexRecordIds['0']],true)"
+								v-if="hasOpenForm && hasUpdate"
+								@trigger="clickOpen(r,false)"
+								@trigger-middle="clickOpen(r,true)"
 								:captionTitle="capApp.inputHintOpen"
 								:naked="true"
 							/>
@@ -167,7 +167,7 @@ let MyList = {
 							<td class="minimum">
 								<div class="list-input-row-items nowrap">
 									<my-button image="add.png"
-										v-if="inputOpenForm && !inputIsReadonly && hasCreate"
+										v-if="hasOpenForm && !inputIsReadonly && hasCreate"
 										@trigger="$emit('open-form',[],false)"
 										@trigger-middle="$emit('open-form',[],true)"
 										:captionTitle="capApp.inputHintCreate"
@@ -203,7 +203,7 @@ let MyList = {
 						:captionTitle="capGen.button.newHint"
 					/>
 					<my-button image="edit.png"
-						v-if="allowBulk"
+						v-if="hasOpenFormBulk"
 						@trigger="selectRowsBulkEdit(selectedRows)"
 						:active="selectedRows.length !== 0"
 						:caption="capGen.button.editBulk.replace('{COUNT}',selectedRows.length)"
@@ -216,7 +216,7 @@ let MyList = {
 						:captionTitle="capApp.button.csvHint"
 					/>
 					<my-button image="shred.png"
-						v-if="hasBulkActions"
+						v-if="hasDeleteAny"
 						@trigger="delAsk(selectedRows)"
 						:active="selectedRows.length !== 0"
 						:cancel="true"
@@ -233,7 +233,7 @@ let MyList = {
 					
 					<!-- offset -->
 					<my-input-offset class-input="selector"
-						v-if="allowPaging"
+						v-if="hasPaging"
 						@input="offset = $event;reloadInside()"
 						:caption="!isMobile ? true : false"
 						:limit="limit"
@@ -298,7 +298,7 @@ let MyList = {
 					</select>
 					
 					<select class="selector"
-						v-if="allowPaging && !smallSize && !isMobile"
+						v-if="hasPaging && !smallSize && !isMobile"
 						v-model.number="limit"
 						@change="reloadInside()"
 					>
@@ -650,12 +650,12 @@ let MyList = {
 		iconId:         { required:false, default:null },
 		layout:         { type:String,  required:false, default:'table' },  // list layout: table, cards
 		limitDefault:   { type:Number,  required:false, default:10 },       // default list limit
+		openForm:       { required:false, default:null },                   // list can open record in form
+		openFormBulk:   { required:false, default:null },                   // list can open records in bulk form
 		popUpFormInline:{ required:false, default:null },                   // form to show inside list
 		query:          { type:Object,  required:true },                    // list query
 		
 		// toggles
-		allowBulk:      { type:Boolean, required:false, default:false }, // enable bulk editing
-		allowPaging:    { type:Boolean, required:false, default:true },  // enable paging
 		csvExport:      { type:Boolean, required:false, default:false },
 		csvImport:      { type:Boolean, required:false, default:false },
 		filterQuick:    { type:Boolean, required:false, default:false }, // enable quick filter
@@ -664,7 +664,6 @@ let MyList = {
 		isInput:        { type:Boolean, required:false, default:false }, // use list as input
 		isHidden:       { type:Boolean, required:false, default:false }, // list is not visible and therefore not loaded/updated
 		isSingleField:  { type:Boolean, required:false, default:false }, // list is single field within a parent (form/tab - not container!)
-		rowSelect:      { type:Boolean, required:false, default:false }, // list rows can be selected (to open record in form)
 		usesPageHistory:{ type:Boolean, required:false, default:false }, // list uses page getters for filtering/sorting/etc.
 		
 		// list as input field
@@ -672,7 +671,6 @@ let MyList = {
 		inputAutoSelect:{ type:Number,  required:false, default:0 },        // # of records to auto select (2 = first two, -3 = last three, 0 = none)
 		inputIsNew:     { type:Boolean, required:false, default:false },    // input field belongs to new record
 		inputIsReadonly:{ type:Boolean, required:false, default:false },    // input field is readonly
-		inputOpenForm:  { type:Boolean, required:false, default:false },    // input can open another form
 		inputMulti:     { type:Boolean, required:false, default:false },    // input has multiple records to represent (instead of just one)
 		inputRecordIds: { type:Array,   required:false, default:() => [] }, // input record IDs, representing active values to show
 		inputValid:     { type:Boolean, required:false, default:true }
@@ -808,10 +806,7 @@ let MyList = {
 			
 			return filters;
 		},
-		hasBulkActions:(s) => {
-			if(s.isInput || s.rows.length === 0)
-				return false;
-			
+		hasDeleteAny:(s) => {
 			for(let join of s.joins) {
 				if(join.applyDelete)
 					return true;
@@ -823,8 +818,7 @@ let MyList = {
 				s.columns[0].display === 'gallery' &&
 				(s.columns[0].onMobile || !s.isMobile) &&
 				(!s.isInput || s.rowsInput.length !== 0) &&
-				s.attributeIdMap[s.columns[0].attributeId].content === 'files'
-			;
+				s.attributeIdMap[s.columns[0].attributeId].content === 'files';
 		},
 		inputLinePlaceholder:(s) => {
 			if(s.focused) return '';
@@ -914,13 +908,18 @@ let MyList = {
 		choiceFilters:   (s) => s.getChoiceFilters(s.choices,s.choiceId),
 		choiceIdDefault: (s) => s.fieldOptionGet(s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
 		expressions:     (s) => s.getQueryExpressions(s.columns),
+		hasBulkActions:  (s) => !s.isInput && s.rows.length !== 0 && (s.hasOpenFormBulk || s.hasDeleteAny),
 		hasChoices:      (s) => s.query.choices.length > 1,
 		hasCreate:       (s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.rowSelect,
+		hasOpenForm:     (s) => s.openForm !== null,
+		hasOpenFormBulk: (s) => s.openFormBulk !== null,
+		hasPaging:       (s) => s.query.fixedLimit === 0,
 		hasUpdate:       (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.rowSelect,
 		isCards:         (s) => s.layout === 'cards',
 		isTable:         (s) => s.layout === 'table',
 		joins:           (s) => s.fillRelationRecordIds(s.query.joins),
 		relationsJoined: (s) => s.getRelationsJoined(s.joins),
+		rowSelect:       (s) => s.isInput || s.hasOpenForm,
 		showInputAddLine:(s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
 		showInputAddAll: (s) => s.inputMulti && s.rowsClear.length > 0,
 		showInputHeader: (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
@@ -1165,25 +1164,28 @@ let MyList = {
 			this.columnBatchIndexOption = this.columnBatchIndexOption === columnBatchIndex
 				? -1 : columnBatchIndex;
 		},
+		clickOpen(row,middleClick) {
+			if(!this.rowSelect || !this.hasUpdate || typeof row.indexRecordIds[this.openForm.relationIndexOpen] === 'undefined')
+				return;
+			
+			const recordId = row.indexRecordIds[this.openForm.relationIndexOpen];
+			this.$emit('open-form',recordId !== null ? [recordId] : [],middleClick);
+		},
 		clickRow(row,middleClick) {
+			if(!this.isInput)
+				return this.clickOpen(row,middleClick);
+			
 			const recordId = row.indexRecordIds['0'];
 			
-			if(this.isInput && !this.inputAsCategory) {
+			if(!this.inputAsCategory) {
 				if(!this.inputRecordIds.includes(recordId)) {
 					if(this.inputMulti) this.rowsInput.push(row);
 					else                this.rowsInput = [row];
 				}
-				
 				this.showTable    = false;
 				this.filtersQuick = '';
 			}
-			
-			if(this.rowSelect) {
-				if(this.isInput)
-					this.toggleRecordId(recordId,middleClick);
-				else
-					this.$emit('open-form',[recordId],middleClick);
-			}
+			this.toggleRecordId(recordId,middleClick);
 		},
 		clickRowAll() {
 			for(let r of this.rows) {
@@ -1413,17 +1415,17 @@ let MyList = {
 			}
 		},
 		selectRowsBulkEdit(rowIndexes) {
-			// bulk edit only works on source relation
+			const relIndex = this.openFormBulk.relationIndexOpen;
+			if(this.rows.length === 0 || typeof this.rows[0].indexRecordIds[relIndex] === 'undefined')
+				return;
+			
 			let recordIds = [];
-			for(let j of this.joins) {
-				if(j.index !== 0 || !j.applyUpdate) continue;
-				
-				for(let rowIndex of rowIndexes) {
-					if(this.rows[rowIndex].indexRecordIds[j.index] !== 0)
-						recordIds.push(this.rows[rowIndex].indexRecordIds[j.index]);
-				}
+			for(let rowIndex of rowIndexes) {
+				if(this.rows[rowIndex].indexRecordIds[relIndex] !== 0)
+					recordIds.push(this.rows[rowIndex].indexRecordIds[relIndex]);
 			}
-			if(recordIds.length !== 0)
+			
+			if(this.hasUpdate && recordIds.length !== 0)
 				this.$emit('open-form-bulk',recordIds);
 		},
 		

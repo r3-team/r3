@@ -140,16 +140,22 @@ type LoginForm struct {
 	Captions          CaptionMap `json:"captions"`
 }
 type OpenForm struct {
-	FormIdOpen       uuid.UUID   `json:"formIdOpen"`       // form to open
-	AttributeIdApply pgtype.UUID `json:"attributeIdApply"` // apply record ID to attribute on opened form
-	RelationIndex    int         `json:"relationIndex"`    // relation index of record to apply to attribute
-	PopUpType        pgtype.Text `json:"popUpType"`        // if set, form is opened as pop-up, values: float, inline
-	Context          pgtype.Text `json:"context"`          // used when same entity needs multiple open forms, values: bulk
-	MaxHeight        int         `json:"maxHeight"`        // max. height in PX for opened form (pop-up only)
-	MaxWidth         int         `json:"maxWidth"`         // max. width  in PX for opened form (pop-up only)
+	PopUpType pgtype.Text `json:"popUpType"` // if set, form is opened as pop-up, values: float, inline
+	Context   pgtype.Text `json:"context"`   // used when same entity needs multiple open forms, values: bulk
+	MaxHeight int         `json:"maxHeight"` // max. height in PX for opened form (pop-up only)
+	MaxWidth  int         `json:"maxWidth"`  // max. width  in PX for opened form (pop-up only)
+
+	// open form
+	RelationIndexOpen int       `json:"relationIndexOpen"` // relation index of record to open
+	FormIdOpen        uuid.UUID `json:"formIdOpen"`        // form to open record in (must have chosen relation as base relation)
+
+	// apply record from current form as relationship value on target form
+	RelationIndexApply int         `json:"relationIndexApply"` // relation index of record to use as relationship value
+	AttributeIdApply   pgtype.UUID `json:"attributeIdApply"`   // apply record ID as relationship value to attribute on opened form
 
 	// legacy
-	PopUp bool `json:"popUp"` // replaced by popUpType, if null pop-up is not used
+	RelationIndex int  `json:"relationIndex"` // replaced by relationIndexApply
+	PopUp         bool `json:"popUp"`         // replaced by popUpType
 }
 type Icon struct {
 	Id       uuid.UUID `json:"id"`

@@ -1228,7 +1228,8 @@
 			"maxWidth":"Max. width (px)",
 			"newRecord":"When creating new records",
 			"popUpType":"Open as",
-			"relationIndex":"Use record from relation"
+			"relationIndexApply":"Use record from relation",
+			"relationIndexOpen":"Open from relation"
 		},
 		"pgIndex":{
 			"description":{
