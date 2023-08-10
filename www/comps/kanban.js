@@ -41,7 +41,7 @@ let MyKanbanCard = {
 		<div class="kanban-card-content"
 			@click="$emit('click')"
 			@click.middle="$emit('click-middle')"
-			:class="{ clickable:rowSelect, template:isTemplate }"
+			:class="{ clickable:hasOpenForm, template:isTemplate }"
 		>
 			<span v-if="isTemplate">{{ capGen.button.new }}</span>
 			
@@ -74,9 +74,9 @@ let MyKanbanCard = {
 	props:{
 		columns:      { type:Array,   required:true },
 		columnBatches:{ type:Array,   required:true },
+		hasOpenForm:  { type:Boolean, required:true },
 		headerStyle:  { type:String,  required:true },
 		isTemplate:   { type:Boolean, required:true },
-		rowSelect:    { type:Boolean, required:true },
 		values:       { type:Array,   required:true }
 	},
 	computed:{
@@ -102,22 +102,22 @@ let MyKanbanBox = {
 					@clipboard="$emit('clipboard')"
 					:columns="columns"
 					:columnBatches="columnBatches"
+					:hasOpenForm="hasOpenForm"
 					:headerStyle="headerStyle"
 					:isTemplate="false"
-					:rowSelect="rowSelect"
 					:values="element.values"
 				/>
 			</template>
 			<template #footer>
 				<my-kanban-card
-					v-if="rowSelect && !dragActive"
+					v-if="hasOpenForm && !dragActive"
 					@click="click(null,true,false)"
 					@click-middle="click(null,true,true)"
 					:columns="columns"
 					:columnBatches="columnBatches"
+					:hasOpenForm="hasOpenForm"
 					:headerStyle="headerStyle"
 					:isTemplate="true"
-					:rowSelect="rowSelect"
 					:values="[]"
 				/>
 			</template>
@@ -131,9 +131,9 @@ let MyKanbanBox = {
 		columnIndexesData:{ type:Array,   required:true },
 		dragActive:       { type:Boolean, required:true },
 		hasCreate:        { type:Boolean, required:true },
+		hasOpenForm:      { type:Boolean, required:true },
 		headerStyle:      { type:String,  required:false, default:'' },
 		relationIndexData:{ type:Number,  required:true },
-		rowSelect:        { type:Boolean, required:true },
 		search:           { type:String,  required:true }
 	},
 	computed:{
@@ -188,7 +188,7 @@ let MyKanbanBox = {
 			if(isTemplate)
 				return this.$emit('card-create',middleClick);
 			
-			return this.$emit('open-form',element.indexRecordIds['0'],middleClick);
+			return this.$emit('open-form',element,middleClick);
 		}
 	}
 };
@@ -309,37 +309,37 @@ let MyKanban = {
 							<td v-if="hasNullsInX">
 								<my-kanban-box
 									@clipboard="$emit('clipboard')"
-									@openForm="openForm"
 									@card-create="cardCreate(null,null,$event)"
 									@cards-changed="(...args) => set(null,null,args[0],args[1],args[2])"
 									@drag-active="dragActive = $event"
+									@open-form="openForm"
 									:cards="recordIdMapAxisXY['null']['null']"
 									:columns="columns"
 									:columnBatches="columnBatches"
 									:columnIndexesData="columnIndexesData"
 									:dragActive="dragActive"
 									:hasCreate="hasCreate"
+									:hasOpenForm="hasOpenForm"
 									:relationIndexData="relationIndexData"
-									:rowSelect="rowSelect"
 									:search="search"
 								/>
 							</td>
 							<td v-for="x in axisEntriesX">
 								<my-kanban-box
 									@clipboard="$emit('clipboard')"
-									@openForm="openForm"
 									@card-create="cardCreate(x.id,null,$event)"
 									@cards-changed="(...args) => set(x.id,null,args[0],args[1],args[2])"
 									@drag-active="dragActive = $event"
+									@open-form="openForm"
 									:cards="recordIdMapAxisXY[x.id]['null']"
 									:columns="columns"
 									:columnBatches="columnBatches"
 									:columnIndexesData="columnIndexesData"
 									:dragActive="dragActive"
 									:hasCreate="hasCreate"
+									:hasOpenForm="hasOpenForm"
 									:headerStyle="x.style"
 									:relationIndexData="relationIndexData"
-									:rowSelect="rowSelect"
 									:search="search"
 								/>
 							</td>
@@ -369,19 +369,19 @@ let MyKanban = {
 							<td v-if="hasNullsInX">
 								<my-kanban-box
 									@clipboard="$emit('clipboard')"
-									@openForm="openForm"
 									@card-create="cardCreate(null,y.id,$event)"
 									@cards-changed="(...args) => set(null,y.id,args[0],args[1],args[2])"
 									@drag-active="dragActive = $event"
+									@open-form="openForm"
 									:cards="recordIdMapAxisXY['null'][y.id]"
 									:columns="columns"
 									:columnBatches="columnBatches"
 									:columnIndexesData="columnIndexesData"
 									:dragActive="dragActive"
 									:hasCreate="hasCreate"
+									:hasOpenForm="hasOpenForm"
 									:headerStyle="y.style"
 									:relationIndexData="relationIndexData"
-									:rowSelect="rowSelect"
 									:search="search"
 								/>
 							</td>
@@ -390,19 +390,19 @@ let MyKanban = {
 							<td v-for="x in axisEntriesX">
 								<my-kanban-box
 									@clipboard="$emit('clipboard')"
-									@openForm="openForm"
 									@card-create="cardCreate(x.id,y.id,$event)"
 									@cards-changed="(...args) => set(x.id,y.id,args[0],args[1],args[2])"
 									@drag-active="dragActive = $event"
+									@open-form="openForm"
 									:cards="recordIdMapAxisXY[x.id][y.id]"
 									:columns="columns"
 									:columnBatches="columnBatches"
 									:columnIndexesData="columnIndexesData"
 									:dragActive="dragActive"
 									:hasCreate="hasCreate"
+									:hasOpenForm="hasOpenForm"
 									:headerStyle="x.style !== '' ? x.style : y.style"
 									:relationIndexData="relationIndexData"
-									:rowSelect="rowSelect"
 									:search="search"
 								/>
 							</td>
@@ -446,6 +446,7 @@ let MyKanban = {
 		fieldId:            { type:String,  required:true },
 		filters:            { type:Array,   required:true }, // processed query filters
 		formLoading:        { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
+		hasOpenForm:        { type:Boolean, required:true },
 		iconId:             { required:true },
 		isHidden:           { type:Boolean, required:false, default:false },
 		isSingleField:      { type:Boolean, required:false, default:false },
@@ -454,7 +455,6 @@ let MyKanban = {
 		relationIndexData:  { type:Number,  required:true },                // relation by index, serving as base for data (cards)
 		relationIndexAxisX: { type:Number,  required:true },                // relation by index, serving as base for X axis (columns)
 		relationIndexAxisY: { type:Number,  required:false, default:null }, // relation by index, serving as base for Y axis (rows), multi-axis kanban
-		rowSelect:          { type:Boolean, required:true },
 		usesPageHistory:    { type:Boolean, required:true }
 	},
 	emits:['clipboard','close-inline','open-form','record-count-change','set-args','set-collection-indexes'],
@@ -542,7 +542,7 @@ let MyKanban = {
 		dataReady:          (s) => typeof s.recordIdMapAxisXY.null !== 'undefined',
 		expressions:        (s) => s.getQueryExpressions(s.columns),
 		hasChoices:         (s) => s.choices.length > 1,
-		hasCreate:          (s) => s.query.joins.length === 0 ? false : s.query.joins[0].applyCreate && s.rowSelect,
+		hasCreate:          (s) => s.query.joins.length === 0 ? false : s.query.joins[0].applyCreate && s.hasOpenForm,
 		hasNullsInX:        (s) => s.attributeIdMap[s.attributeIdAxisX].nullable,
 		hasNullsInY:        (s) => s.attributeIdAxisY !== null && s.attributeIdMap[s.attributeIdAxisY].nullable,
 		joins:              (s) => s.fillRelationRecordIds(s.query.joins),
@@ -635,8 +635,8 @@ let MyKanban = {
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},
-		openForm(recordId,middleClick) {
-			this.$emit('open-form',[recordId],[],middleClick);
+		openForm(row,middleClick) {
+			this.$emit('open-form',[row],[],middleClick);
 		},
 		
 		// presentation
