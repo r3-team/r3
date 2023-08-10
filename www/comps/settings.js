@@ -271,13 +271,7 @@ let MySettingsEncryption = {
 		unlockError() {
 			this.$store.commit('dialog',{
 				captionBody:this.capErr.SEC['002'],
-				image:'key.png',
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.close,
-					keyEscape:true,
-					image:'cancel.png'
-				}]
+				image:'key.png'
 			});
 		},
 		unlockWithBackupCode() {
@@ -1196,12 +1190,7 @@ let MySettings = {
 		},
 		dictMsg() {
 			this.$store.commit('dialog',{
-				captionBody:this.capApp.dialog.searchDictionary,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
+				captionBody:this.capApp.dialog.searchDictionary
 			});
 		}
 	}

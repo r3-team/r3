@@ -1222,14 +1222,15 @@
 				"inline":"Sub form inside field",
 				"none":"Full page form"
 			},
-			"attributeApply":"...per impopstare il valore sul modulo",
+			"attributeApply":"Use as default on opened form",
 			"formIdOpen":"Modulo",
 			"maxHeight":"Altezza massima (px)",
 			"maxWidth":"Larghezza massima (px)",
-			"newRecord":"Quando si creano nuovi record",
+			"newRecord":"Establish relationship with new records",
+			"newRecordHelp":"When creating a new record with this field, a record ID of the current form can be used as default value for a field on the opened form. This is often used to establish a parent-child relationship.<br /><br />Example: The current form manages a department. A list field on this form shows employees of this department. It is desired that from the list field, new employees for the department can be created. To make this convenient, the department record (from the current form) can be applied as input for a relationship input field on the employee form (the opened form). For this example, the input field on the opened form would be a 'employee.department' 1:n relationship attribute.",
 			"popUpType":"Open as",
-			"relationIndexApply":"Utilizza record da relazione",
-			"relationIndexOpen":"Open from relation"
+			"relationIndexApply":"Record on current form",
+			"relationIndexOpen":"From relation"
 		},
 		"pgIndex":{
 			"description":{

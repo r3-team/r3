@@ -98,12 +98,7 @@ let MyAdminRepoModule = {
 			ws.send('repoModule','install',{fileId:fileId},true).then(
 				() => {
 					this.$store.commit('dialog',{
-						captionBody:this.capApp.fetchDone,
-						buttons:[{
-							caption:this.capGen.button.close,
-							cancel:true,
-							image:'cancel.png'
-						}]
+						captionBody:this.capApp.fetchDone
 					});
 					this.installStarted = false;
 				},

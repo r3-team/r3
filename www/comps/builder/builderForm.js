@@ -769,12 +769,7 @@ let MyBuilderForm = {
 			this.$store.commit('dialog',{
 				captionTop:top,
 				captionBody:msg,
-				image:image,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
+				image:image
 			});
 		},
 		reset() {

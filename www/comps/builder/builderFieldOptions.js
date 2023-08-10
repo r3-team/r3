@@ -1356,12 +1356,7 @@ let MyBuilderFieldOptions = {
 			this.$store.commit('dialog',{
 				captionBody:help,
 				captionTop:this.capGen.contextHelp,
-				image:'question.png',
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
+				image:'question.png'
 			});
 		},
 		tabAdd(i) {

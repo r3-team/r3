@@ -914,12 +914,7 @@ let MyFilter = {
 				captionBody:this.capApp.dialog.ftsHelp,
 				captionTop:this.capGen.contextHelp,
 				image:'question.png',
-				width:1000,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
+				width:1000
 			});
 		}
 	}

@@ -960,12 +960,7 @@ let MyBuilderQuery = {
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.lookupsHelp,
 				captionTop:this.capGen.help,
-				image:'question.png',
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
+				image:'question.png'
 			});
 		},
 		

@@ -1222,14 +1222,15 @@
 				"inline":"Subformular im Feld",
 				"none":"Ganze Seite"
 			},
-			"attributeApply":"...um Wert auf Formular zu setzen",
+			"attributeApply":"Als Standardwert auf geöffneten Formular nutzen",
 			"formIdOpen":"Formular",
 			"maxHeight":"Max. Höhe (px)",
 			"maxWidth":"Max. Breite (px)",
-			"newRecord":"Beim Erstellen neuer Datensätze",
+			"newRecord":"Beziehung herstellen für neue Datensätze",
+			"newRecordHelp":"Beim Erstellen eines neuen Datensatzes mit diesem Feld, kann eine Datensatz-ID des aktuellen Formulars als Standardwert für ein Feld im geöffneten Formular verwendet werden. Dies dient häufig, eine Eltern-Kind-Beziehung herzustellen.<br /><br />Beispiel: Das aktuelle Formular verwaltet eine Abteilung. Ein Listenfeld auf diesem Formular zeigt die Mitarbeiter dieser Abteilung an. Es ist gewünscht, dass aus dem Listenfeld heraus neue Mitarbeiter für die Abteilung angelegt werden können. Um dies zu ermöglichen, kann der Abteilungsdatensatz (aus dem aktuellen Formular) als Standardwert für ein Beziehungsfeld auf dem Mitarbeiterformular (dem geöffneten Formular) verwendet werden. In diesem Beispiel wäre das Eingabefeld auf dem geöffneten Formular ein 1:n-Beziehungsattribut \"mitarbeiter.abteilung\".",
 			"popUpType":"Öffnen als",
-			"relationIndexApply":"Verwende Datensatz von Relation",
-			"relationIndexOpen":"Von Relation öffnen"
+			"relationIndexApply":"Datensatz auf akt. Formular",
+			"relationIndexOpen":"Von Relation"
 		},
 		"pgIndex":{
 			"description":{

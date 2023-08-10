@@ -89,7 +89,14 @@ let MyBuilderOpenFormInput = {
 			</tr>
 			<template v-if="allowNewRecords && formIsData">
 				<tr>
-					<td colspan="2"><b>{{ capApp.newRecord }}</b></td>
+					<td colspan="2">
+						<div class="row gap centered space-between">
+							<b>{{ capApp.newRecord }}</b>
+							<my-button image="question.png"
+								@trigger="$store.commit('dialog',{captionBody:capApp.newRecordHelp})"
+							/>
+						</div>
+					</td>
 				</tr>
 				<tr>
 					<td>{{ capApp.relationIndexApply }}</td>
@@ -274,6 +281,11 @@ let MyBuilderOpenFormInput = {
 			
 			if(name === 'attributeIdApply' && val === '')
 				val = null;
+			
+			if(name === 'relationIndexOpen') {
+				v.formIdOpen       = null;
+				v.attributeIdApply = null;
+			}
 			
 			if(name === 'formIdOpen')
 				v.attributeIdApply = null;

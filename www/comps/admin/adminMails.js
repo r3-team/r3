@@ -168,12 +168,7 @@ let MyAdminMails = {
 				captionTop:this.capApp.body,
 				image:'mail2.png',
 				textDisplay:'richtext',
-				width:800,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
+				width:800
 			});
 		},
 		startAtPageFirst() {

@@ -623,12 +623,7 @@ let MyBuilderJsFunction = {
 		showHelp(top,text) {
 			this.$store.commit('dialog',{
 				captionTop:top,
-				captionBody:text,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
+				captionBody:text
 			});
 		},
 		

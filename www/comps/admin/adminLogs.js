@@ -228,12 +228,7 @@ let MyAdminLogs = {
 			this.$store.commit('dialog',{
 				captionBody:this.getLineBreaksParsedToHtml(this.logs[index].message),
 				textDisplay:'textarea',
-				width:800,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
+				width:800
 			});
 		},
 		

@@ -263,12 +263,7 @@ let MyAdminMailAccounts = {
 			},true).then(
 				() => {
 					this.$store.commit('dialog',{
-						captionBody:this.capApp.testOk,
-						buttons:[{
-							caption:this.capGen.button.close,
-							cancel:true,
-							image:'cancel.png'
-						}]
+						captionBody:this.capApp.testOk
 					});
 					this.testRecipient = '';
 					this.get();

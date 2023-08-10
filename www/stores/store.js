@@ -86,6 +86,14 @@ const MyStore = Vuex.createStore({
 			if(typeof payload.width !== 'undefined')
 				styles += `max-width:${payload.width}px;`;
 			
+			if(typeof payload.buttons === 'undefined')
+				payload.buttons = [{
+					caption:state.captions.generic.button.close,
+					cancel:true,
+					image:'cancel.png',
+					keyEscape:true
+				}];
+			
 			state.dialogStyles  = styles;
 			state.dialogButtons = payload.buttons;
 			state.isAtDialog    = true;

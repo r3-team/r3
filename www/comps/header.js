@@ -302,13 +302,7 @@ let MyHeader = {
 		keysLockedMsg() {
 			this.$store.commit('dialog',{
 				captionBody:this.capErr.SEC['002'],
-				image:'key_locked.png',
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.close,
-					keyEscape:true,
-					image:'cancel.png'
-				}]
+				image:'key_locked.png'
 			});
 		},
 		windowResized() {

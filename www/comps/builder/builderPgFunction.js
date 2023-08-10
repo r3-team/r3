@@ -692,12 +692,7 @@ let MyBuilderPgFunction = {
 			this.$store.commit('dialog',{
 				captionTop:top,
 				captionBody:text,
-				image:'question.png',
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
+				image:'question.png'
 			});
 		},
 		toggleRelationShow(relationId) {

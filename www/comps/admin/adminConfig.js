@@ -385,12 +385,7 @@ let MyAdminConfig = {
 			
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.builderMode,
-				captionTop:this.capApp.dialog.pleaseRead,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
+				captionTop:this.capApp.dialog.pleaseRead
 			});
 		},
 		informProductionMode() {
@@ -399,12 +394,7 @@ let MyAdminConfig = {
 			
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.productionMode,
-				captionTop:this.capApp.dialog.pleaseRead,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
+				captionTop:this.capApp.dialog.pleaseRead
 			});
 		},
 		publicKeyShow(name,key) {
@@ -412,12 +402,7 @@ let MyAdminConfig = {
 				captionBody:key,
 				captionTop:name,
 				image:'key.png',
-				textDisplay:'textarea',
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
+				textDisplay:'textarea'
 			});
 		},
 		publicKeyAdd() {

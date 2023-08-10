@@ -440,12 +440,7 @@ let MyBuilderField = {
 			this.$store.commit('dialog',{
 				captionBody:`<ul><li>${this.warnings.join('</li><li>')}</li></ul>`,
 				captionTop:this.capGen.warnings,
-				image:'warning.png',
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
+				image:'warning.png'
 			});
 		},
 		toggleBool(oldBool) {
@@ -478,12 +473,7 @@ let MyBuilderField = {
 						captionBody:res.payload,
 						image:'database.png',
 						textDisplay:'textarea',
-						width:800,
-						buttons:[{
-							caption:this.capGen.button.close,
-							cancel:true,
-							image:'cancel.png'
-						}]
+						width:800
 					});
 				},
 				this.$root.genericError

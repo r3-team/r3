@@ -359,12 +359,7 @@ let MyAdminLdaps = {
 			ws.send('ldap','import',{id:id},true).then(
 				() => {
 					this.$store.commit('dialog',{
-						captionBody:this.capApp.dialog.importDone,
-						buttons:[{
-							caption:this.capGen.button.close,
-							cancel:true,
-							image:'cancel.png'
-						}]
+						captionBody:this.capApp.dialog.importDone
 					});
 				},
 				this.$root.genericError
@@ -374,12 +369,7 @@ let MyAdminLdaps = {
 			ws.send('ldap','check',{id:this.idEdit},true).then(
 				() => {
 					this.$store.commit('dialog',{
-						captionBody:this.capApp.dialog.testDone,
-						buttons:[{
-							caption:this.capGen.button.close,
-							cancel:true,
-							image:'cancel.png'
-						}]
+						captionBody:this.capApp.dialog.testDone
 					});
 				},
 				this.$root.genericError

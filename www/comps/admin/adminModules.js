@@ -197,12 +197,7 @@ let MyAdminModulesItem = {
 				captionTop:this.capApp.changeLog,
 				captionBody:this.changeLog,
 				image:'time.png',
-				width:1000,
-				buttons:[{
-					cancel:true,
-					caption:this.capGen.button.close,
-					image:'cancel.png'
-				}]
+				width:1000
 			});
 		},
 		openBuilder(middle) {
@@ -564,12 +559,7 @@ let MyAdminModules = {
 		},
 		installOk() {
 			this.$store.commit('dialog',{
-				captionBody:this.capApp.updateDone,
-				buttons:[{
-					caption:this.capGen.button.close,
-					cancel:true,
-					image:'cancel.png'
-				}]
+				captionBody:this.capApp.updateDone
 			});
 			this.installStarted = false;
 		}
