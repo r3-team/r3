@@ -650,8 +650,6 @@ let MyList = {
 		iconId:         { required:false, default:null },
 		layout:         { type:String,  required:false, default:'table' },  // list layout: table, cards
 		limitDefault:   { type:Number,  required:false, default:10 },       // default list limit
-		openForm:       { required:false, default:null },                   // list can open record in form
-		openFormBulk:   { required:false, default:null },                   // list can open records in bulk form
 		popUpFormInline:{ required:false, default:null },                   // form to show inside list
 		query:          { type:Object,  required:true },                    // list query
 		
@@ -660,6 +658,8 @@ let MyList = {
 		csvImport:      { type:Boolean, required:false, default:false },
 		filterQuick:    { type:Boolean, required:false, default:false }, // enable quick filter
 		formLoading:    { type:Boolean, required:false, default:false }, // trigger and control list reloads
+		hasOpenForm:    { type:Boolean, required:false, default:false }, // list can open record in form
+		hasOpenFormBulk:{ type:Boolean, required:false, default:false }, // list can open records in bulk form
 		header:         { type:Boolean, required:false, default:true  }, // show list header
 		isInput:        { type:Boolean, required:false, default:false }, // use list as input
 		isHidden:       { type:Boolean, required:false, default:false }, // list is not visible and therefore not loaded/updated
@@ -911,8 +911,6 @@ let MyList = {
 		hasBulkActions:  (s) => !s.isInput && s.rows.length !== 0 && (s.hasOpenFormBulk || s.hasDeleteAny),
 		hasChoices:      (s) => s.query.choices.length > 1,
 		hasCreate:       (s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.rowSelect,
-		hasOpenForm:     (s) => s.openForm !== null,
-		hasOpenFormBulk: (s) => s.openFormBulk !== null,
 		hasPaging:       (s) => s.query.fixedLimit === 0,
 		hasUpdate:       (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.rowSelect,
 		isCards:         (s) => s.layout === 'cards',
@@ -1165,11 +1163,8 @@ let MyList = {
 				? -1 : columnBatchIndex;
 		},
 		clickOpen(row,middleClick) {
-			if(!this.rowSelect || !this.hasUpdate || typeof row.indexRecordIds[this.openForm.relationIndexOpen] === 'undefined')
-				return;
-			
-			const recordId = row.indexRecordIds[this.openForm.relationIndexOpen];
-			this.$emit('open-form',recordId !== null ? [recordId] : [],middleClick);
+			if(this.rowSelect && this.hasUpdate)
+				this.$emit('open-form',[row],middleClick);
 		},
 		clickRow(row,middleClick) {
 			if(!this.isInput)
@@ -1415,18 +1410,12 @@ let MyList = {
 			}
 		},
 		selectRowsBulkEdit(rowIndexes) {
-			const relIndex = this.openFormBulk.relationIndexOpen;
-			if(this.rows.length === 0 || typeof this.rows[0].indexRecordIds[relIndex] === 'undefined')
-				return;
-			
-			let recordIds = [];
+			let rows = [];
 			for(let rowIndex of rowIndexes) {
-				if(this.rows[rowIndex].indexRecordIds[relIndex] !== 0)
-					recordIds.push(this.rows[rowIndex].indexRecordIds[relIndex]);
+				rows.push(this.rows[rowIndex]);
 			}
-			
-			if(this.hasUpdate && recordIds.length !== 0)
-				this.$emit('open-form-bulk',recordIds);
+			if(this.hasUpdate && rows.length !== 0)
+				this.$emit('open-form-bulk',rows,false);
 		},
 		
 		// helpers

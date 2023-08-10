@@ -280,6 +280,7 @@ let MyField = {
 						:filterQuick="field.filterQuick"
 						:filters="filtersProcessed"
 						:formLoading="formLoading"
+						:hasOpenForm="field.openForm !== null"
 						:header="false"
 						:inputAsCategory="field.category"
 						:inputAutoSelect="field.autoSelect"
@@ -289,7 +290,6 @@ let MyField = {
 						:inputRecordIds="relationshipRecordIds"
 						:inputValid="!showInvalid"
 						:isInput="true"
-						:openForm="field.openForm"
 						:query="field.query"
 					>
 						<template #input-icon>
@@ -367,13 +367,13 @@ let MyField = {
 			:filterQuick="field.filterQuick"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
+			:hasOpenForm="field.openForm !== null"
+			:hasOpenFormBulk="field.openFormBulk !== null"
 			:iconId="iconId ? iconId : null"
 			:isHidden="isHidden"
 			:isSingleField="isAloneInForm || isAloneInTab"
 			:layout="field.layout"
 			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
-			:openForm="field.openForm"
-			:openFormBulk="field.openFormBulk"
 			:popUpFormInline="popUpFormInline"
 			:query="field.query"
 			:usesPageHistory="isAloneInForm && !formIsPopUp"
@@ -461,6 +461,7 @@ let MyField = {
 			:fieldId="field.id"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
+			:hasOpenForm="field.openForm !== null"
 			:iconId="iconId ? iconId : null"
 			:isHidden="isHidden"
 			:isSingleField="isAloneInForm || isAloneInTab"
@@ -468,7 +469,6 @@ let MyField = {
 			:relationIndexData="field.relationIndexData"
 			:relationIndexAxisX="field.relationIndexAxisX"
 			:relationIndexAxisY="field.relationIndexAxisY"
-			:rowSelect="field.openForm !== null"
 			:query="field.query"
 			:usesPageHistory="isAloneInForm && !formIsPopUp"
 		/>
@@ -1169,9 +1169,9 @@ let MyField = {
 			this.popUpFormInline = null;
 			this.$emit('close-inline');
 		},
-		openForm(recordIds,getterArgs,middleClick,openFormContext) {
+		openForm(rows,getterArgs,middleClick,openFormContext) {
 			// set defaults
-			if(typeof recordIds       === 'undefined') recordIds       = [];
+			if(typeof rows            === 'undefined') rows            = [];
 			if(typeof getterArgs      === 'undefined') getterArgs      = [];
 			if(typeof middleClick     === 'undefined') middleClick     = false;
 			if(typeof openFormContext === 'undefined') openFormContext = null;
@@ -1181,15 +1181,23 @@ let MyField = {
 				openFormContext === 'bulk' ? this.field.openFormBulk : this.field.openForm
 			));
 			
-			// apply record from defined relation index as attribute value via getter
+			// apply relationship default attribute value via getter if used
 			if(openForm.attributeIdApply !== null
 				&& typeof this.joinsIndexMap[openForm.relationIndexApply] !== 'undefined'
 				&& this.joinsIndexMap[openForm.relationIndexApply].recordId !== 0) {
 				
-				let atrId    = openForm.attributeIdApply;
-				let recordId = this.joinsIndexMap[openForm.relationIndexApply].recordId;
+				const atrId    = openForm.attributeIdApply;
+				const recordId = this.joinsIndexMap[openForm.relationIndexApply].recordId;
 				
 				getterArgs = this.setGetterArgs(getterArgs,'attributes',`${atrId}_${recordId}`);
+			}
+			
+			let recordIds = [];
+			for(let row of rows) {
+				const id = row.indexRecordIds[openForm.relationIndexOpen];
+				
+				if(typeof id !== 'undefined' && id !== null)
+					recordIds.push(id);
 			}
 			
 			// pop-up inline form (only inside none-inputs fields) and never on mobile
