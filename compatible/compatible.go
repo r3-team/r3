@@ -269,12 +269,13 @@ func FixMissingOpenForm(formIdOpen pgtype.UUID, attributeIdRecord pgtype.UUID,
 	// legacy option was used
 	if formIdOpen.Valid {
 		return types.OpenForm{
-			FormIdOpen:       formIdOpen.Bytes,
-			AttributeIdApply: attributeIdRecord,
-			RelationIndex:    0,
-			PopUp:            false,
-			MaxHeight:        0,
-			MaxWidth:         0,
+			RelationIndexOpen:  0,
+			FormIdOpen:         formIdOpen.Bytes,
+			RelationIndexApply: 0,
+			AttributeIdApply:   attributeIdRecord,
+			PopUp:              false,
+			MaxHeight:          0,
+			MaxWidth:           0,
 		}
 	}
 	return oForm
