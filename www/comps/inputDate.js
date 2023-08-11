@@ -360,7 +360,6 @@ let MyInputDate = {
 				:dateSelect1="dateSelect1"
 				:inputTime="isTime"
 				:isInput="true"
-				:rowSelect="true"
 			/>
 		</div>
 	</div>`,

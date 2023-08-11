@@ -397,6 +397,7 @@ let MyField = {
 			:fieldId="field.id"
 			:filters="filtersProcessed"
 			:formLoading="formLoading"
+			:hasOpenForm="field.openForm !== null"
 			:iconId="iconId ? iconId : null"
 			:ics="field.ics"
 			:indexColor="field.indexColor"
@@ -406,7 +407,6 @@ let MyField = {
 			:isSingleField="isAloneInForm || isAloneInTab"
 			:popUpFormInline="popUpFormInline"
 			:query="field.query"
-			:rowSelect="field.openForm !== null"
 			:usesPageHistory="isAloneInForm && !formIsPopUp"
 		/>
 		

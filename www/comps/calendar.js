@@ -171,10 +171,10 @@ let MyCalendarMonth = {
 						
 						<!-- full day events -->
 						<div class="event"
-							@click="clickRecord($event,e.recordId,e.placeholder,false)"
-							@click.middle="clickRecord($event,e.recordId,e.placeholder,true)"
+							@click="clickRecord($event,e.row,e.placeholder,false)"
+							@click.middle="clickRecord($event,e.row,e.placeholder,true)"
 							v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => v.fullDay || v.placeholder)"
-							:class="{ first:e.entryFirst, last:e.entryLast, placeholder:e.placeholder, clickable:rowSelect }"
+							:class="{ first:e.entryFirst, last:e.entryLast, placeholder:e.placeholder, clickable:daysSelectable }"
 						>
 							<template v-if="!e.placeholder">
 								<!-- border line -->
@@ -212,10 +212,10 @@ let MyCalendarMonth = {
 						
 						<!-- partial day events -->
 						<div class="part"
-							@click="clickRecord($event,e.recordId,false,false)"
-							@click.middle="clickRecord($event,e.recordId,false,true)"
+							@click="clickRecord($event,e.row,false,false)"
+							@click.middle="clickRecord($event,e.row,false,true)"
 							v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => !v.fullDay && !v.placeholder)"
-							:class="{ clickable:rowSelect }"
+							:class="{ clickable:daysSelectable }"
 						>
 							<span :style="getColor('background-color',e.color)">
 								{{ getPartCaption(e.date0) }}
@@ -279,9 +279,9 @@ let MyCalendarMonth = {
 		isInput:    { type:Boolean, required:false, default:false },
 		hasColor:   { type:Boolean, required:false, default:false },    // color attribute exists
 		hasCreate:  { type:Boolean, required:false, default:false },    // has action for creating new record
+		hasOpenForm:{ type:Boolean, required:false, default:false },
 		popUpFormInline:{ required:false, default:null },
-		rows:       { type:Array,   required:false, default:() => [] },
-		rowSelect:  { type:Boolean, required:false, default:false }
+		rows:       { type:Array,   required:false, default:() => [] }
 	},
 	emits:[
 		'close-inline','day-selected','open-form','reload',
@@ -340,9 +340,8 @@ let MyCalendarMonth = {
 					entryLast:false,
 					fullDay:false,
 					fullDaysLeft:0,
-					indexRecordIds:s.rows[i].indexRecordIds,
 					placeholder:false,
-					recordId:s.rows[i].indexRecordIds['0'],
+					row:s.rows[i],
 					values:[]
 				};
 				
@@ -439,6 +438,7 @@ let MyCalendarMonth = {
 		// simple
 		columnIndexesHidden:(s) => s.getColumnIndexesHidden(s.columns),
 		daysAfter:          (s) => s.date1.getDate(),
+		daysSelectable:     (s) => s.hasOpenForm || s.isInput,
 		month:              (s) => s.date.getMonth(), // active month (0-11)
 		hasChoices:         (s) => s.choices.length > 1,
 		
@@ -468,7 +468,7 @@ let MyCalendarMonth = {
 		
 		// actions
 		clickDay(dayOffset,shift,middleClick) {
-			if(!this.rowSelect) return;
+			if(!this.daysSelectable) return;
 			
 			let d = new Date(this.date0.valueOf());
 			d.setDate(d.getDate() + dayOffset);
@@ -476,14 +476,14 @@ let MyCalendarMonth = {
 			// dates are stored as UTC zero
 			this.$emit('day-selected',this.getDateAtUtcZero(d),shift,middleClick);
 		},
-		clickRecord(event,recordId,placeholder,middleClick) {
+		clickRecord(event,row,placeholder,middleClick) {
 			if(placeholder) return;
 			
 			// block clickDay() event (placeholders must bubble)
 			event.stopPropagation();
 			
-			if(this.rowSelect)
-				this.$emit('open-form',(typeof recordId === 'undefined' ? [] : [recordId]),[],middleClick);
+			if(this.hasOpenForm)
+				this.$emit('open-form',[row],[],middleClick);
 		},
 		goToToday() {
 			// switch to current month if not there (to show 'today')
@@ -495,7 +495,7 @@ let MyCalendarMonth = {
 			}
 			
 			// if already on current month, select 'today'
-			if(this.rowSelect)
+			if(this.daysSelectable)
 				this.$emit('day-selected',this.getDateAtUtcZero(now),false,false);
 		},
 		icsCopyToClipboard() {
@@ -520,7 +520,7 @@ let MyCalendarMonth = {
 		getDayClasses(dayOffset,day) {
 			let cls = {};
 			
-			if(this.rowSelect)
+			if(this.daysSelectable)
 				cls.clickable = true;
 			
 			// today
@@ -638,11 +638,11 @@ let MyCalendar = {
 			:formLoading="formLoading"
 			:hasColor="attributeIdColor !== null"
 			:hasCreate="hasCreate"
+			:hasOpenForm="hasOpenForm"
 			:iconId="iconId"
 			:ics="ics"
 			:popUpFormInline="popUpFormInline"
 			:rows="rows"
-			:rowSelect="rowSelect"
 		/>
 	</div>`,
 	props:{
@@ -656,6 +656,7 @@ let MyCalendar = {
 		fieldId:         { type:String,  required:false, default:'' },
 		filters:         { type:Array,   required:true },
 		formLoading:     { type:Boolean, required:false, default:false },
+		hasOpenForm:     { type:Boolean, required:false, default:false },
 		iconId:          { required:false,default:null },
 		ics:             { type:Boolean, required:false, default:false },
 		indexColor:      { required:true },
@@ -665,7 +666,6 @@ let MyCalendar = {
 		isSingleField:   { type:Boolean, required:false, default:false },
 		popUpFormInline: { required:true },
 		query:           { type:Object,  required:true },
-		rowSelect:       { type:Boolean, required:false, default:false },
 		usesPageHistory: { type:Boolean, required:true }
 	},
 	emits:['close-inline','open-form','record-count-change','set-args','set-collection-indexes'],
@@ -696,7 +696,7 @@ let MyCalendar = {
 		
 		// simple
 		choiceFilters:(s) => s.getChoiceFilters(s.choices,s.choiceId),
-		hasCreate:    (s) => s.query.joins.length === 0 ? false : s.query.joins[0].applyCreate && s.rowSelect,
+		hasCreate:    (s) => s.query.joins.length === 0 ? false : s.query.joins[0].applyCreate && s.hasOpenForm,
 		
 		// start/end date of calendar
 		date0:(s) => s.getCalendarCutOff0(s.view,new Date(s.date.valueOf())),
