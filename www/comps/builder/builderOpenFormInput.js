@@ -24,7 +24,7 @@ let MyBuilderOpenFormInput = {
 				</select>
 			</td>
 		</tr>
-		<tr v-if="isActive && openForm.relationIndexOpen !== -1">
+		<tr v-if="allowAllForms || (isActive && openForm.relationIndexOpen !== -1)">
 			<td>{{ capApp.formIdOpen }}</td>
 			<td>
 				<select
