@@ -39,7 +39,7 @@ let MyGanttLineRecord = {
 	`<div class="gantt-line-record"
 		@click="clickRecord(false)"
 		@click.middle="clickRecord(true)"
-		:class="{ clickable:rowSelect }"
+		:class="{ clickable:hasOpenForm }"
 		:style="style"
 	>
 		<div class="record-line start"
@@ -76,11 +76,11 @@ let MyGanttLineRecord = {
 		date0Range:   { type:Date,   required:true }, // start date of gantt range
 		date1:        { type:Date,   required:true }, // end date of record
 		date1Range:   { type:Date,   required:true }, // end date of gantt range
+		hasOpenForm:  { type:Boolean,required:true },
 		indexesHidden:{ type:Array,  required:true }, // hidden column indexes (either it is hidden or used as Gantt group)
 		isDays:       { type:Boolean,required:true },
 		pxPerSec:     { type:Number, required:true }, // pixel per second on gantt
-		recordId:     { type:Number, required:true },
-		rowSelect:    { type:Boolean,required:true },
+		row:          { type:Object, required:true },
 		values:       { type:Array,  required:true }
 	},
 	emits:['record-selected'],
@@ -137,8 +137,8 @@ let MyGanttLineRecord = {
 		
 		// actions
 		clickRecord(middleClick) {
-			if(this.rowSelect)
-				this.$emit('record-selected',this.recordId,middleClick);
+			if(this.hasOpenForm)
+				this.$emit('record-selected',this.row,middleClick);
 		}
 	}
 };
@@ -153,15 +153,15 @@ let MyGanttLine = {
 			:color="r.color"
 			:columns="columns"
 			:date0="r.date0"
-			:date0-range="date0Range"
+			:date0Range="date0Range"
 			:date1="r.date1"
-			:date1-range="date1Range"
-			:indexes-hidden="indexesHidden"
-			:is-days="isDays"
-			:px-per-sec="pxPerSec"
-			:key="i+'_'+r.id"
-			:record-id="r.id"
-			:row-select="rowSelect"
+			:date1Range="date1Range"
+			:hasOpenForm="hasOpenForm"
+			:indexesHidden="indexesHidden"
+			:isDays="isDays"
+			:pxPerSec="pxPerSec"
+			:key="i+'_'+r.row.indexRecordIds['0']"
+			:row="r.row"
 			:values="r.values"
 		/>
 	</div>`,
@@ -170,10 +170,10 @@ let MyGanttLine = {
 		indexesHidden:{ type:Array,  required:true },
 		date0Range:   { type:Date,   required:true },
 		date1Range:   { type:Date,   required:true },
+		hasOpenForm:  { type:Boolean,required:true },
 		isDays:       { type:Boolean,required:true },
 		pxPerSec:     { type:Number, required:true },
-		records:      { type:Array,  required:true },
-		rowSelect:    { type:Boolean,required:true }
+		records:      { type:Array,  required:true }
 	},
 	emits:['record-selected']
 };
@@ -334,13 +334,13 @@ let MyGantt = {
 						@record-selected="(...args) => $emit('open-form',[args[0]],[],args[1])"
 						:class="{ 'show-line':li === g.lines.length-1 }"
 						:columns="columns"
-						:date0-range="date0"
-						:date1-range="date1"
-						:indexes-hidden="columnIndexesHidden.concat(group0LabelExpressionIndexes)"
-						:is-days="isDays"
-						:px-per-sec="pxPerSec"
+						:date0Range="date0"
+						:date1Range="date1"
+						:hasOpenForm="hasOpenForm"
+						:indexesHidden="columnIndexesHidden.concat(group0LabelExpressionIndexes)"
+						:isDays="isDays"
+						:pxPerSec="pxPerSec"
 						:key="i+'_'+li"
-						:row-select="rowSelect"
 						:style="styleLine"
 						:records="l"
 					/>
@@ -380,6 +380,7 @@ let MyGantt = {
 		fieldId:         { type:String,  required:true },
 		filters:         { type:Array,   required:true }, // processed query filters
 		formLoading:     { type:Boolean, required:true }, // block GET while form is still loading (avoid redundant GET calls)
+		hasOpenForm:     { type:Boolean, required:true },
 		iconId:          { required:true },
 		indexColor:      { required:true },               // index of attribute that provides record color
 		indexDate0:      { type:Number,  required:true }, // index of attribute that provides record date from
@@ -388,7 +389,6 @@ let MyGantt = {
 		isSingleField:   { type:Boolean, required:false, default:false },
 		popUpFormInline: { required:false, default:null },
 		query:           { type:Object,  required:true },
-		rowSelect:       { type:Boolean, required:true },
 		stepTypeDefault: { type:String,  required:true },
 		stepTypeToggle:  { type:Boolean, required:true },
 		usesPageHistory: { type:Boolean, required:true }
@@ -504,7 +504,7 @@ let MyGantt = {
 		expressions:        (s) => s.getQueryExpressions(s.columns),
 		hasChoices:         (s) => s.choices.length > 1,
 		hasColor:           (s) => s.attributeIdColor !== null,
-		hasCreate:          (s) => s.query.joins.length === 0 ? false : s.query.joins[0].applyCreate && s.rowSelect,
+		hasCreate:          (s) => s.query.joins.length === 0 ? false : s.query.joins[0].applyCreate && s.hasOpenForm,
 		isDays:             (s) => s.stepType === 'days',
 		isEmpty:            (s) => s.groups.length === 0,
 		isHours:            (s) => s.stepType === 'hours',
@@ -910,10 +910,10 @@ let MyGantt = {
 						}
 						
 						groupMap[groupName].lines[lineIndex].push({
-							id:r.indexRecordIds['0'],
 							color:color,
 							date0:date0,
 							date1:date1,
+							row:r,
 							values:values
 						});
 					}
