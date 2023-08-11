@@ -146,6 +146,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.open_form ADD COLUMN relation_index_open INTEGER NOT NULL DEFAULT 0;
 			ALTER TABLE app.open_form ALTER COLUMN relation_index_open DROP DEFAULT;
 			
+			-- add richtext option to header field
+			ALTER TABLE app.field_header ADD COLUMN richtext BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE app.field_header ALTER COLUMN richtext DROP DEFAULT;
+			
 			-- regular VACUUM task
 			INSERT INTO instance.task (
 				name,interval_seconds,cluster_master_only,

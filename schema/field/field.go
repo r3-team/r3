@@ -52,7 +52,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		fc.wrap, fc.grow, fc.shrink, fc.basis, fc.per_min, fc.per_max,
 		
 		-- header field
-		fh.size,
+		fh.richtext, fh.size,
 		
 		-- data field
 		fd.attribute_id, fd.attribute_id_alt, fd.index, fd.display, fd.min,
@@ -126,7 +126,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			fieldParentId, iconId, jsFunctionIdButton, jsFunctionIdData,
 			tabId pgtype.UUID
 		var category, clipboard, csvExport, csvImport, filterQuick,
-			filterQuickList, gantt, ganttStepsToggle, ics, outsideIn,
+			filterQuickList, gantt, ganttStepsToggle, ics, outsideIn, richtext,
 			wrap pgtype.Bool
 		var defPresetIds []uuid.UUID
 
@@ -136,12 +136,13 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			&indexColor, &ics, &gantt, &ganttSteps, &ganttStepsToggle,
 			&dateRange0, &dateRange1, &chartOption, &direction, &justifyContent,
 			&alignItems, &alignContent, &wrap, &grow, &shrink, &basis, &perMin,
-			&perMax, &size, &attributeId, &attributeIdAlt, &index, &display,
-			&min, &max, &def, &regexCheck, &jsFunctionIdData, &clipboard,
-			&attributeIdNm, &category, &filterQuick, &outsideIn, &autoSelect,
-			&defPresetIds, &relationIndexKanbanData, &relationIndexKanbanAxisX,
-			&relationIndexKanbanAxisY, &attributeIdKanbanSort, &autoRenew,
-			&csvExport, &csvImport, &layout, &filterQuickList, &resultLimit); err != nil {
+			&perMax, &richtext, &size, &attributeId, &attributeIdAlt, &index,
+			&display, &min, &max, &def, &regexCheck, &jsFunctionIdData,
+			&clipboard, &attributeIdNm, &category, &filterQuick, &outsideIn,
+			&autoSelect, &defPresetIds, &relationIndexKanbanData,
+			&relationIndexKanbanAxisX, &relationIndexKanbanAxisY,
+			&attributeIdKanbanSort, &autoRenew, &csvExport, &csvImport, &layout,
+			&filterQuickList, &resultLimit); err != nil {
 
 			rows.Close()
 			return fields, err
@@ -304,6 +305,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				Content:  content,
 				State:    state,
 				OnMobile: onMobile,
+				Richtext: richtext.Bool,
 				Size:     int(size.Int16),
 				Captions: types.CaptionMap{},
 			})
@@ -738,7 +740,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setHeader_tx(tx, fieldId, f.Size); err != nil {
+			if err := setHeader_tx(tx, fieldId, f); err != nil {
 				return err
 			}
 			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
@@ -1111,7 +1113,7 @@ func setDataRelationship_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID
 	}
 	return column.Set_tx(tx, "field", fieldId, columns)
 }
-func setHeader_tx(tx pgx.Tx, fieldId uuid.UUID, size int) error {
+func setHeader_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldHeader) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_header", "field_id")
 	if err != nil {
@@ -1121,16 +1123,16 @@ func setHeader_tx(tx pgx.Tx, fieldId uuid.UUID, size int) error {
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.field_header
-			SET size = $1
-			WHERE field_id = $2
-		`, size, fieldId); err != nil {
+			SET richtext = $1, size = $2
+			WHERE field_id = $3
+		`, f.Richtext, f.Size, fieldId); err != nil {
 			return err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.field_header (field_id, size)
-			VALUES ($1,$2)
-		`, fieldId, size); err != nil {
+			INSERT INTO app.field_header (field_id, richtext, size)
+			VALUES ($1,$2,$3)
+		`, fieldId, f.Richtext, f.Size); err != nil {
 			return err
 		}
 	}

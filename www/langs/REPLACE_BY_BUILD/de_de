@@ -921,6 +921,7 @@
 			"ganttSteps":"Gantt-Intervall",
 			"ganttStepsToggle":"Gantt-Intervall-Auswahl",
 			"groupBy":"Gruppieren",
+			"headerRichtext":"Rich-Text",
 			"headerSize":"Größe",
 			"helpText":"Hilfetext",
 			"hidden":"Feld ist standardmäßig versteckt",

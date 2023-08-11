@@ -317,6 +317,10 @@
 
 /* options */
 .builder-field-options{}
+.builder-field-options .headerRichtext{
+	height:800px;
+	display:flex;
+}
 .builder-field-options .chart-option{
 	width:100%;
 	min-width:300px;

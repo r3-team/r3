@@ -142,7 +142,7 @@ let MyBuilderField = {
 					
 					<!-- field title -->
 					<my-builder-caption
-						v-if="isButton || isData || isHeader"
+						v-if="isButton || isData || (isHeader && !field.richtext)"
 						v-model="field.captions.fieldTitle"
 						:contentName="title"
 						:dynamicSize="true"
@@ -363,7 +363,7 @@ let MyBuilderField = {
 				case 'button':    return 'Button';    break;
 				case 'chart':     return 'Chart';     break;
 				case 'container': return 'Container'; break;
-				case 'header':    return 'Header';    break;
+				case 'header':    return 'Label';     break;
 				case 'tabs':      return 'Tabs';      break;
 				case 'calendar':  return s.field.gantt ? 'Gantt' : 'Calendar'; break;
 				case 'data':      return s.getItemTitle(s.field.attributeId,s.field.index,s.field.outsideIn,s.field.attributeIdNm); break;

@@ -372,6 +372,7 @@ type FieldHeader struct {
 	Content  string      `json:"content"`
 	State    string      `json:"state"`
 	OnMobile bool        `json:"onMobile"`
+	Richtext bool        `json:"richtext"`
 	Size     int         `json:"size"`
 	Captions CaptionMap  `json:"captions"`
 }

@@ -337,13 +337,16 @@ let MyField = {
 			:imageBase64="iconId ? srcBase64(iconIdMap[iconId].file) : ''"
 		/>
 		
-		<!-- header -->
-		<div class="heading"
-			v-if="field.content === 'header'"
-			:class="'size'+field.size"
-		>
-			<img v-if="iconId" :src="srcBase64(iconIdMap[iconId].file)" />
-			{{ caption }}
+		<!-- label/header -->
+		<div class="label" v-if="isHeader">
+			<div class="heading"
+				v-if="!field.richtext"
+				:class="'size'+field.size"
+			>
+				<img v-if="iconId" :src="srcBase64(iconIdMap[iconId].file)" />
+				{{ caption }}
+			</div>
+			<div class="richtext" v-if="field.richtext" v-html="caption" />
 		</div>
 		
 		<!-- list -->
@@ -751,6 +754,9 @@ let MyField = {
 			if(s.isTextarea || s.isRichtext || s.isFiles)
 				out.push('top-aligned');
 			
+			if(s.isHeader && s.field.richtext)
+				out.push('headerRichtext');
+			
 			return out;
 		},
 		domStyle:(s) => !s.isContainer ? '' : s.getFlexStyle(
@@ -1039,6 +1045,7 @@ let MyField = {
 		isChart:    (s) => s.field.content === 'chart',
 		isContainer:(s) => s.field.content === 'container',
 		isData:     (s) => s.field.content === 'data',
+		isHeader:   (s) => s.field.content === 'header',
 		isKanban:   (s) => s.field.content === 'kanban',
 		isList:     (s) => s.field.content === 'list',
 		isTabs:     (s) => s.field.content === 'tabs',

@@ -921,6 +921,7 @@
 			"ganttSteps":"Intervallo Gantt",
 			"ganttStepsToggle":"Attiva/disattiva intervallo di Gantt",
 			"groupBy":"Raggruppa per",
+			"headerRichtext":"Richtext",
 			"headerSize":"Dimensione",
 			"helpText":"testo aiuto",
 			"hidden":"Il campo è nascosto per impostazione predefinita",

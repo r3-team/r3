@@ -282,7 +282,7 @@ let MyBuilderFieldOptions = {
 	},
 	template:`<div class="builder-field-options">
 		<table class="generic-table-vertical tight fullWidth default-inputs">
-			<tr v-if="isButton || isData || isHeader">
+			<tr v-if="isButton || isData || (isHeader && !field.richtext)">
 				<td>{{ capGen.title }}</td>
 				<td>
 					<my-builder-caption
@@ -303,7 +303,7 @@ let MyBuilderFieldOptions = {
 					/>
 				</td>
 			</tr>
-			<tr v-if="!isContainer">
+			<tr v-if="!isContainer && (!isHeader || !field.richtext)">
 				<td>{{ capGen.icon }}</td>
 				<td>
 					<my-builder-icon-input
@@ -339,19 +339,42 @@ let MyBuilderFieldOptions = {
 				</td>
 			</tr>
 			
-			<tr v-if="isHeader">
-				<td>{{ capApp.headerSize }}</td>
-				<td>
-					<select
-						@input="setInt('size',$event.target.value,false)"
-						:value="field.size"
-					>
-						<option value="1">h1</option>
-						<option value="2">h2</option>
-						<option value="3">h3</option>
-					</select>
-				</td>
-			</tr>
+			<template v-if="isHeader">
+				<tr>
+					<td>{{ capApp.headerRichtext }}</td>
+					<td>
+						<my-bool
+							@update:modelValue="set('richtext',$event)"
+							:modelValue="field.richtext"
+						/>
+					</td>
+				</tr>
+				<tr v-if="field.richtext">
+					<td colspan="2">
+						<div class="headerRichtext">
+							<my-builder-caption
+								@update:modelValue="field.captions.fieldTitle = $event;set('captions',field.captions)"
+								:language="builderLanguage"
+								:modelValue="field.captions.fieldTitle"
+								:richtext="true"
+							/>
+						</div>
+					</td>
+				</tr>
+				<tr v-if="!field.richtext">
+					<td>{{ capApp.headerSize }}</td>
+					<td>
+						<select
+							@input="setInt('size',$event.target.value,false)"
+							:value="field.size"
+						>
+							<option value="1">h1</option>
+							<option value="2">h2</option>
+							<option value="3">h3</option>
+						</select>
+					</td>
+				</tr>
+			</template>
 			
 			<template v-if="isData">
 				<tr>

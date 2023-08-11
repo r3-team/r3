@@ -921,6 +921,7 @@
 			"ganttSteps":"Gantt interval",
 			"ganttStepsToggle":"Gantt interval toggle",
 			"groupBy":"Group by",
+			"headerRichtext":"Richtext",
 			"headerSize":"Size",
 			"helpText":"Help text",
 			"hidden":"Field is hidden by default",

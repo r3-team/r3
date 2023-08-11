@@ -921,6 +921,7 @@
 			"ganttSteps":"Gantt interval",
 			"ganttStepsToggle":"Comutare interval Gantt",
 			"groupBy":"Grupați după",
+			"headerRichtext":"Richtext",
 			"headerSize":"Mărime",
 			"helpText":"Text de ajutor",
 			"hidden":"Câmpul este implicit ascuns",

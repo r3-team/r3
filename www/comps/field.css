@@ -90,26 +90,30 @@
 	cursor:default;
 }
 
-/* header field */
-.field .heading{
+/* label field */
+.field .label{
+	display:flex;
+	flex-flow:column nowrap;
+}
+.field .label .heading{
 	display:flex;
 	flex-flow:row nowrap;
-	margin:6px 0px 0px 0px;
 	align-items:center;
+	gap:9px;
+	margin:6px 0px 0px 0px;
 }
-.field .heading.size1{
-	font-size:160%;
-}
-.field .heading.size2{
-	font-size:140%;
-}
-.field .heading.size3{
-	font-size:120%;
-}
-.field .heading img{
-	height:30px;
-	margin-right:9px;
+.field .label .heading img{
 	filter:var(--image-filter);
+}
+.field .label .heading.size1{ font-size:160%; }
+.field .label .heading.size2{ font-size:140%; }
+.field .label .heading.size3{ font-size:120%; }
+.field .label .heading.size1 img{ height:32px; }
+.field .label .heading.size2 img{ height:28px; }
+.field .label .heading.size3 img{ height:24px; }
+.field .label .richtext{
+	flex:1 1 auto;
+	overflow:auto;
 }
 
 
@@ -232,6 +236,11 @@
 }
 .field.iframe .input-box .input-line{
 	padding:0px;
+}
+
+/* header field with richtext */
+.field.headerRichtext{
+	overflow:auto;
 }
 
 /* chart field */
