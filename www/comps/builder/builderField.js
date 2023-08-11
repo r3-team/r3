@@ -299,6 +299,7 @@ let MyBuilderField = {
 			return {
 				container:s.isContainer,
 				isTemplate:s.isTemplate,
+				notData:!s.isData,
 				selected:s.isSelected,
 				tabs:s.isTabs
 			};

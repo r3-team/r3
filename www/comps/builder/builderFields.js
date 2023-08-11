@@ -4,7 +4,8 @@ export {MyBuilderFields as default};
 let MyBuilderFields = {
 	name:'my-builder-fields',
 	components:{ MyBuilderField },
-	template:`<draggable handle=".dragAnchor" animation="100" itemKey="id"
+	template:`<draggable class="builder-fields" handle=".dragAnchor" animation="100" itemKey="id"
+		:class="{ isTemplate:isTemplate }"
 		:clone="moveByDragClone"
 		:fallbackOnBody="true"
 		:group="getGroup()"

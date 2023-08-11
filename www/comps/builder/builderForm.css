@@ -97,6 +97,12 @@
 
 
 /* fields */
+.builder-fields.isTemplate{
+	width:100%;
+	display:flex;
+	flex-flow:row wrap;
+	gap:1px;
+}
 .builder-field{
 	flex:1 1 auto;
 	margin:0px 5px 5px 0px;
@@ -125,9 +131,14 @@
 	padding:0px 5px 0px 0px;
 	cursor:move;
 }
-.builder-field.isTemplate{
-	margin:0px 2px 2px 0px;
+.builder-field.isTemplate:not(.sortable-ghost){
+	width:100%;
+	margin:0px;
 	border-radius:0px;
+}
+.builder-field.isTemplate.notData:not(.sortable-ghost){
+	width:33%;
+	flex:1 0 auto;
 }
 .builder-field.selected{
 	outline:4px solid var(--color-form-builder-selected);
