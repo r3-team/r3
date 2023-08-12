@@ -1,4 +1,4 @@
-package receive
+package mail_receive
 
 import (
 	"crypto/tls"

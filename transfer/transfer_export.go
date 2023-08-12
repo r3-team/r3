@@ -17,7 +17,6 @@ import (
 	"r3/config"
 	"r3/db"
 	"r3/log"
-	"r3/module_option"
 	"r3/tools"
 	"r3/types"
 
@@ -27,7 +26,8 @@ import (
 
 // export a module stored as compressed file
 // if the exported module had any changes, the module meta (version,
-//  dependent app version, release date) will be updated
+//
+//	dependent app version, release date) will be updated
 func ExportToFile(moduleId uuid.UUID, zipFilePath string) error {
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
@@ -110,7 +110,7 @@ func export_tx(tx pgx.Tx, moduleId uuid.UUID, original bool, filePaths *[]string
 	}
 	hashed := sha256.Sum256(jsonContent)
 	hashedStr := base64.URLEncoding.EncodeToString(hashed[:])
-	hashedStrEx, err := module_option.GetHashById(moduleId)
+	hashedStrEx, err := getModuleHash(moduleId)
 	if err != nil {
 		return err
 	}

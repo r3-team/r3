@@ -150,6 +150,23 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.field_header ADD COLUMN richtext BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.field_header ALTER COLUMN richtext DROP DEFAULT;
 			
+			-- separate module options from transfer hash
+			CREATE TABLE instance.module_hash (
+			    module_id uuid NOT NULL,
+			    hash character(44) NOT NULL,
+			    CONSTRAINT module_hash_pkey PRIMARY KEY (module_id),
+			    CONSTRAINT module_hash_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			);
+			
+			INSERT INTO instance.module_hash (module_id, hash)
+				SELECT module_id, COALESCE(hash, '00000000000000000000000000000000000000000000')
+				FROM instance.module_option;
+			
+			ALTER TABLE instance.module_option DROP COLUMN hash;
+			
 			-- regular VACUUM task
 			INSERT INTO instance.task (
 				name,interval_seconds,cluster_master_only,

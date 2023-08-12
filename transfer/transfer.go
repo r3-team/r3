@@ -20,7 +20,6 @@ import (
 	"r3/cache"
 	"r3/config"
 	"r3/db"
-	"r3/module_option"
 	"r3/tools"
 	"r3/types"
 	"strconv"
@@ -68,7 +67,7 @@ func AddVersion_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 		return err
 	}
 
-	if err := module_option.SetHashById_tx(tx, moduleId, hashedStr); err != nil {
+	if err := setModuleHash_tx(tx, moduleId, hashedStr); err != nil {
 		return err
 	}
 
@@ -284,14 +283,15 @@ func writeFilesToZip(zipPath string, filePaths []string) error {
 }
 
 // returns whether the module inside the given transfer file has changed
-//  checked against the stored module hash from the last module version change
+//
+//	checked against the stored module hash from the last module version change
 func hasModuleChanged(file types.TransferFile) (bool, error) {
 
 	hashedStr, err := getModuleHashFromFile(file)
 	if err != nil {
 		return false, err
 	}
-	hashedStrEx, err := module_option.GetHashById(file.Content.Module.Id)
+	hashedStrEx, err := getModuleHash(file.Content.Module.Id)
 	if err != nil {
 		return false, err
 	}
@@ -301,14 +301,4 @@ func hasModuleChanged(file types.TransferFile) (bool, error) {
 // get the export name of a module transfer file
 func getModuleFilename(moduleId uuid.UUID) string {
 	return fmt.Sprintf("%s.json", moduleId.String())
-}
-
-// returns the hash from the content part of a module transfer file
-func getModuleHashFromFile(file types.TransferFile) (string, error) {
-	jsonContent, err := json.Marshal(file.Content)
-	if err != nil {
-		return "", err
-	}
-	hashed := sha256.Sum256(jsonContent)
-	return base64.URLEncoding.EncodeToString(hashed[:]), nil
 }

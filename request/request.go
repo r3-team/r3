@@ -167,30 +167,30 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "storePrivate":
 			return LoginKeysStorePrivate_tx(tx, reqJson, loginId)
 		}
+	case "loginPassword":
+		switch action {
+		case "set":
+			return LoginPasswortSet_tx(tx, reqJson, loginId)
+		}
+	case "loginSetting":
+		switch action {
+		case "get":
+			return LoginSettingsGet(loginId)
+		case "set":
+			if isNoAuth {
+				return nil, errors.New(handler.ErrUnauthorized)
+			}
+			return LoginSettingsSet_tx(tx, reqJson, loginId)
+		}
 	case "lookup":
 		switch action {
 		case "get":
 			return LookupGet(reqJson, loginId)
 		}
-	case "password":
-		switch action {
-		case "set":
-			return PasswortSet_tx(tx, reqJson, loginId)
-		}
 	case "pgFunction":
 		switch action {
 		case "exec": // user may exec non-trigger backend function, available to frontend
 			return PgFunctionExec_tx(tx, reqJson, true)
-		}
-	case "setting":
-		switch action {
-		case "get":
-			return SettingsGet(loginId)
-		case "set":
-			if isNoAuth {
-				return nil, errors.New(handler.ErrUnauthorized)
-			}
-			return SettingsSet_tx(tx, reqJson, loginId)
 		}
 	}
 
@@ -425,8 +425,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		}
 	case "moduleOption":
 		switch action {
-		case "get":
-			return ModuleOptionGet()
 		case "set":
 			return ModuleOptionSet_tx(tx, reqJson)
 		}

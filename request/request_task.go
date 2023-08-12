@@ -2,15 +2,14 @@ package request
 
 import (
 	"encoding/json"
+	"fmt"
 	"r3/db"
-	"r3/task"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
 )
 
 func TaskSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
 	var req struct {
 		Active   bool   `json:"active"`
 		Interval int64  `json:"interval"`
@@ -20,7 +19,26 @@ func TaskSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, task.Set_tx(tx, req.Name, req.Interval, req.Active)
+
+	var activeOnly bool
+	if err := tx.QueryRow(db.Ctx, `
+		SELECT active_only
+		FROM instance.task
+		WHERE name = $1
+	`, req.Name).Scan(&activeOnly); err != nil {
+		return nil, err
+	}
+
+	if activeOnly && !req.Active {
+		return nil, fmt.Errorf("cannot disable active-only task")
+	}
+
+	_, err := tx.Exec(db.Ctx, `
+		UPDATE instance.task
+		SET interval_seconds = $1, active = $2
+		WHERE name = $3
+	`, req.Interval, req.Active, req.Name)
+	return nil, err
 }
 
 func TaskRun(reqJson json.RawMessage) (interface{}, error) {

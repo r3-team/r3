@@ -3,7 +3,7 @@ package login_template
 import (
 	"fmt"
 	"r3/db"
-	"r3/setting"
+	"r3/login/login_setting"
 	"r3/types"
 
 	"github.com/jackc/pgx/v5"
@@ -49,7 +49,7 @@ func Get(byId int64) ([]types.LoginTemplateAdmin, error) {
 	rows.Close()
 
 	for i, _ := range templates {
-		templates[i].Settings, err = setting.Get(
+		templates[i].Settings, err = login_setting.Get(
 			pgtype.Int8{},
 			pgtype.Int8{Int64: templates[i].Id, Valid: true})
 
@@ -82,7 +82,7 @@ func Set_tx(tx pgx.Tx, t types.LoginTemplateAdmin) (int64, error) {
 		}
 	}
 
-	return t.Id, setting.Set_tx(tx,
+	return t.Id, login_setting.Set_tx(tx,
 		pgtype.Int8{},
 		pgtype.Int8{Int64: t.Id, Valid: true},
 		t.Settings, isNew)

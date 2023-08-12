@@ -1,17 +1,16 @@
 // for executing REST calls from instance spooler
 
-package rest
+package rest_send
 
 import (
-	"crypto/tls"
 	"fmt"
 	"io"
 	"net/http"
 	"r3/cache"
 	"r3/db"
 	"r3/log"
+	"r3/tools"
 	"strings"
-	"time"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -101,7 +100,7 @@ func callExecute(c restCall) error {
 		httpReq.Header.Set(k, v)
 	}
 
-	httpClient := GetHttpClient(c.skipVerify)
+	httpClient := tools.GetHttpClient(c.skipVerify)
 	httpRes, err := httpClient.Do(httpReq)
 	if err != nil {
 		return err
@@ -146,21 +145,4 @@ func callExecute(c restCall) error {
 		return err
 	}
 	return tx.Commit(db.Ctx)
-}
-
-// helpers
-func GetHttpClient(skipVerify bool) http.Client {
-
-	tlsConfig := tls.Config{
-		InsecureSkipVerify:       skipVerify,
-		PreferServerCipherSuites: true,
-	}
-	httpTransport := &http.Transport{
-		TLSHandshakeTimeout: 5 * time.Second,
-		TLSClientConfig:     &tlsConfig,
-	}
-	return http.Client{
-		Timeout:   time.Second * 30,
-		Transport: httpTransport,
-	}
 }

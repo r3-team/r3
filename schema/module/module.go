@@ -3,14 +3,14 @@ package module
 import (
 	"errors"
 	"fmt"
-	"r3/compatible"
+	"r3/config/module_option"
 	"r3/db"
 	"r3/db/check"
-	"r3/module_option"
 	"r3/schema"
 	"r3/schema/article"
 	"r3/schema/attribute"
 	"r3/schema/caption"
+	"r3/schema/compatible"
 	"r3/schema/pgFunction"
 	"r3/tools"
 	"r3/types"
@@ -251,8 +251,16 @@ func Set_tx(tx pgx.Tx, mod types.Module) error {
 			}
 		}
 
-		// insert module options for this instance
+		// insert module options
 		if err := module_option.Set_tx(tx, mod.Id, false, create, mod.Position); err != nil {
+			return err
+		}
+
+		// insert module hash (updated after import transfer or on first version for new modules)
+		if _, err := tx.Exec(db.Ctx, `
+			INSERT INTO instance.module_hash (module_id, hash)
+			VALUES ($1,'00000000000000000000000000000000000000000000')
+		`, mod.Id); err != nil {
 			return err
 		}
 	}

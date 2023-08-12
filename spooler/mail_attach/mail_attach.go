@@ -1,4 +1,4 @@
-package attach
+package mail_attach
 
 import (
 	"bytes"

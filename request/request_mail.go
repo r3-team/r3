@@ -2,9 +2,8 @@ package request
 
 import (
 	"encoding/json"
-	"r3/cache"
+	"fmt"
 	"r3/db"
-	"r3/mail"
 	"r3/types"
 
 	"github.com/jackc/pgx/v5"
@@ -12,15 +11,22 @@ import (
 
 // mails from spooler
 func MailDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
 	var req struct {
 		Ids []int64 `json:"ids"`
 	}
-
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, mail.Del_tx(tx, req.Ids)
+
+	for _, id := range req.Ids {
+		if _, err := tx.Exec(db.Ctx, `
+			DELETE FROM instance.mail_spool
+			WHERE id = $1
+		`, id); err != nil {
+			return nil, err
+		}
+	}
+	return nil, nil
 }
 
 func MailGet(reqJson json.RawMessage) (interface{}, error) {
@@ -42,64 +48,93 @@ func MailGet(reqJson json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 
-	res.Mails, res.Total, err = mail.Get(req.Limit, req.Offset, req.Search)
+	res.Mails, res.Total, err = mailGetFromSpooler(req.Limit, req.Offset, req.Search)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-// mail accounts
-func MailAccountDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func mailGetFromSpooler(limit int, offset int, search string) ([]types.Mail, int64, error) {
 
-	var req struct {
-		Id int64 `json:"id"`
+	var searchFields = []string{"from_list", "to_list",
+		"cc_list", "bcc_list", "subject", "body"}
+
+	// prepare SQL request and arguments
+	sqlArgs := make([]interface{}, 0)
+	sqlArgs = append(sqlArgs, limit)
+	sqlArgs = append(sqlArgs, offset)
+	sqlWhere := ""
+	if search != "" {
+		for i, field := range searchFields {
+			connector := "WHERE"
+			if i != 0 {
+				connector = "OR"
+			}
+			sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", search))
+			sqlWhere = fmt.Sprintf("%s%s %s ILIKE $%d\n", sqlWhere, connector, field, len(sqlArgs))
+		}
 	}
 
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+	mails := make([]types.Mail, 0)
+	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+		SELECT id, from_list, to_list, cc_list, bcc_list, subject,
+			body, attempt_count, attempt_date, outgoing, date,
+			mail_account_id, record_id_wofk, attribute_id,
+			COALESCE((
+				SELECT COUNT(position)
+				FROM instance.mail_spool_file
+				WHERE mail_id = m.id
+			),0),
+			COALESCE((
+				SELECT SUM(file_size)
+				FROM instance.mail_spool_file
+				WHERE mail_id = m.id
+			),0)
+		FROM instance.mail_spool AS m
+		%s
+		ORDER BY date DESC
+		LIMIT $1
+		OFFSET $2
+	`, sqlWhere), sqlArgs...)
+	if err != nil {
+		return mails, 0, err
 	}
-	return nil, mail.DelAccount_tx(tx, req.Id)
-}
+	defer rows.Close()
 
-func MailAccountGet() (interface{}, error) {
-	var res struct {
-		Accounts map[int32]types.MailAccount `json:"accounts"`
-	}
-	res.Accounts = cache.GetMailAccountMap()
-	return res, nil
-}
+	for rows.Next() {
+		var m types.Mail
+		if err := rows.Scan(&m.Id, &m.FromList, &m.ToList, &m.CcList,
+			&m.BccList, &m.Subject, &m.Body, &m.AttemptCount, &m.AttemptDate,
+			&m.Outgoing, &m.Date, &m.AccountId, &m.RecordId, &m.AttributeId,
+			&m.Files, &m.FilesSize); err != nil {
 
-func MailAccountSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-	var req types.MailAccount
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-	return nil, mail.SetAccount_tx(tx, req)
-}
-
-func MailAccountReload() (interface{}, error) {
-	return nil, cache.LoadMailAccountMap()
-}
-
-func MailAccountTest_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
-	var req struct {
-		AccountName string `json:"accountName"`
-		Recipient   string `json:"recipient"`
-		Subject     string `json:"subject"`
+			return mails, 0, err
+		}
+		mails = append(mails, m)
 	}
 
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
+	// get total count
+	sqlArgs = make([]interface{}, 0)
+	sqlWhere = ""
+	if search != "" {
+		for i, field := range searchFields {
+			connector := "WHERE"
+			if i != 0 {
+				connector = "OR"
+			}
+			sqlArgs = append(sqlArgs, fmt.Sprintf("%%%s%%", search))
+			sqlWhere = fmt.Sprintf("%s%s %s ILIKE $%d\n", sqlWhere, connector, field, len(sqlArgs))
+		}
 	}
 
-	body := "If you can read this, your mail configuration appears to work."
-
-	if _, err := tx.Exec(db.Ctx, `
-		SELECT instance.mail_send($1,$2,$3,'','',$4)
-	`, req.Subject, body, req.Recipient, req.AccountName); err != nil {
-		return nil, err
+	var total int64
+	if err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
+		SELECT COUNT(*)
+		FROM instance.mail_spool
+		%s
+	`, sqlWhere), sqlArgs...).Scan(&total); err != nil {
+		return mails, 0, err
 	}
-	return nil, nil
+	return mails, total, nil
 }

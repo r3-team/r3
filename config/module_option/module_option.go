@@ -31,16 +31,6 @@ func Get() ([]types.ModuleOption, error) {
 	return options, nil
 }
 
-func GetHashById(moduleId uuid.UUID) (string, error) {
-	var hash string
-	err := db.Pool.QueryRow(db.Ctx, `
-		SELECT hash
-		FROM instance.module_option
-		WHERE module_id = $1
-	`, moduleId).Scan(&hash)
-	return hash, err
-}
-
 func Set_tx(tx pgx.Tx, moduleId uuid.UUID, hidden bool, owner bool, position int) error {
 	exists := false
 
@@ -71,13 +61,4 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, hidden bool, owner bool, position int
 		}
 	}
 	return nil
-}
-
-func SetHashById_tx(tx pgx.Tx, moduleId uuid.UUID, hash string) error {
-	_, err := tx.Exec(db.Ctx, `
-		UPDATE instance.module_option
-		SET hash = $1
-		WHERE module_id = $2
-	`, hash, moduleId)
-	return err
 }

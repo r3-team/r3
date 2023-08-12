@@ -10,9 +10,9 @@ import (
 	"path/filepath"
 	"r3/cache"
 	"r3/config"
+	"r3/data/data_image"
 	"r3/db"
 	"r3/handler"
-	"r3/image"
 	"r3/schema"
 	"r3/tools"
 	"r3/types"
@@ -138,7 +138,7 @@ func SetFile(loginId int64, attributeId uuid.UUID, fileId uuid.UUID,
 	}
 
 	// create/update thumbnail - failure should not block progress
-	image.CreateThumbnail(fileId, filepath.Ext(part.FileName()), filePath,
+	data_image.CreateThumbnail(fileId, filepath.Ext(part.FileName()), filePath,
 		GetFilePathThumb(fileId), false)
 
 	// store file meta data in database

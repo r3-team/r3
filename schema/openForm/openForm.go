@@ -3,8 +3,8 @@ package openForm
 import (
 	"errors"
 	"fmt"
-	"r3/compatible"
 	"r3/db"
+	"r3/schema/compatible"
 	"r3/tools"
 	"r3/types"
 

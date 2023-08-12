@@ -13,12 +13,12 @@ import (
 	"r3/db"
 	"r3/ldap/ldap_import"
 	"r3/log"
-	"r3/mail/attach"
-	"r3/mail/receive"
-	"r3/mail/send"
 	"r3/repo"
-	"r3/rest"
 	"r3/schema"
+	"r3/spooler/mail_attach"
+	"r3/spooler/mail_receive"
+	"r3/spooler/mail_send"
+	"r3/spooler/rest_send"
 	"r3/tools"
 	"r3/transfer"
 	"sync"
@@ -374,19 +374,19 @@ func load() error {
 			t.fn = ldap_import.RunAll
 		case "mailAttach":
 			t.nameLog = "Email attachment transfer"
-			t.fn = attach.DoAll
+			t.fn = mail_attach.DoAll
 		case "mailRetrieve":
 			t.nameLog = "Email retrieval"
-			t.fn = receive.DoAll
+			t.fn = mail_receive.DoAll
 		case "mailSend":
 			t.nameLog = "Email dispatch"
-			t.fn = send.DoAll
+			t.fn = mail_send.DoAll
 		case "repoCheck":
 			t.nameLog = "Check for updates from repository"
 			t.fn = repo.Update
 		case "restExecute":
 			t.nameLog = "REST call execution"
-			t.fn = rest.DoAll
+			t.fn = rest_send.DoAll
 		case "updateCheck":
 			t.nameLog = "Check for platform updates from official website"
 			t.fn = updateCheck

@@ -1,6 +1,6 @@
 //go:build !windows
 
-package image
+package data_image
 
 import "os/exec"
 

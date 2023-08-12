@@ -7,8 +7,8 @@ import (
 	"r3/cache"
 	"r3/db"
 	"r3/handler"
+	"r3/login/login_setting"
 	"r3/schema"
-	"r3/setting"
 	"r3/tools"
 	"r3/types"
 	"strconv"
@@ -187,16 +187,8 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 	}
 
 	// generate password hash, if password was provided
-	var salt, hash = pgtype.Text{}, pgtype.Text{}
-	var saltKdf = tools.RandStringRunes(16)
-
-	if pass != "" {
-		salt.String = tools.RandStringRunes(32)
-		salt.Valid = true
-
-		hash.String = tools.Hash(salt.String + pass)
-		hash.Valid = true
-	}
+	salt, hash := GenerateSaltHash(pass)
+	saltKdf := tools.RandStringRunes(16)
 
 	if isNew {
 		if err := tx.QueryRow(db.Ctx, `
@@ -223,11 +215,11 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 				return 0, err
 			}
 		}
-		s, err := setting.Get(pgtype.Int8{}, loginTemplateId)
+		s, err := login_setting.Get(pgtype.Int8{}, loginTemplateId)
 		if err != nil {
 			return 0, err
 		}
-		if err := setting.Set_tx(tx, pgtype.Int8{Int64: id, Valid: true}, pgtype.Int8{}, s, true); err != nil {
+		if err := login_setting.Set_tx(tx, pgtype.Int8{Int64: id, Valid: true}, pgtype.Int8{}, s, true); err != nil {
 			return 0, err
 		}
 	} else {
@@ -241,11 +233,7 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 		}
 
 		if pass != "" {
-			if _, err := tx.Exec(db.Ctx, `
-				UPDATE instance.login
-				SET salt = $1, hash = $2
-				WHERE id = $3
-			`, &salt, &hash, id); err != nil {
+			if err := SetSaltHash_tx(tx, salt, hash, id); err != nil {
 				return 0, err
 			}
 		}
@@ -283,6 +271,16 @@ func Set_tx(tx pgx.Tx, id int64, loginTemplateId pgtype.Int8, ldapId pgtype.Int4
 
 	// set roles
 	return id, setRoleIds_tx(tx, id, roleIds)
+}
+
+func SetSaltHash_tx(tx pgx.Tx, salt pgtype.Text, hash pgtype.Text, id int64) error {
+	_, err := tx.Exec(db.Ctx, `
+		UPDATE instance.login
+		SET salt = $1, hash = $2
+		WHERE id = $3
+	`, &salt, &hash, id)
+
+	return err
 }
 
 // get login to role memberships
@@ -516,4 +514,14 @@ func SetLdapLogin_tx(tx pgx.Tx, ldapId int32, ldapKey string, ldapName string,
 		return id, true, err
 	}
 	return id, false, nil
+}
+
+func GenerateSaltHash(pw string) (salt pgtype.Text, hash pgtype.Text) {
+	if pw != "" {
+		salt.String = tools.RandStringRunes(32)
+		salt.Valid = true
+		hash.String = tools.Hash(salt.String + pw)
+		hash.Valid = true
+	}
+	return salt, hash
 }

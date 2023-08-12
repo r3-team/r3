@@ -6,8 +6,8 @@ import (
 	"path/filepath"
 	"r3/bruteforce"
 	"r3/data"
+	"r3/data/data_image"
 	"r3/handler"
-	"r3/image"
 	"r3/login/login_auth"
 	"strings"
 )
@@ -22,7 +22,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// check if thumbnail processing is available
-	if !image.GetCanProcess() {
+	if !data_image.GetCanProcess() {
 		w.Write(handler.NoImage)
 		return
 	}
@@ -83,7 +83,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		}
 		filePathSrc := data.GetFilePathVersion(fileId, version)
 
-		if err := image.CreateThumbnail(fileId, fileExt, filePathSrc, filePath, true); err != nil {
+		if err := data_image.CreateThumbnail(fileId, fileExt, filePathSrc, filePath, true); err != nil {
 			w.Write(handler.NoImage)
 			return
 		}

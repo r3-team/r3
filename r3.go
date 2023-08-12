@@ -16,6 +16,7 @@ import (
 	"r3/cache"
 	"r3/cluster"
 	"r3/config"
+	"r3/data/data_image"
 	"r3/db"
 	"r3/db/embedded"
 	"r3/db/initialize"
@@ -39,7 +40,6 @@ import (
 	"r3/handler/transfer_export"
 	"r3/handler/transfer_import"
 	"r3/handler/websocket"
-	"r3/image"
 	"r3/log"
 	"r3/login"
 	"r3/scheduler"
@@ -410,7 +410,7 @@ func (prg *program) execute(svc service.Service) {
 	}
 
 	// prepare image processing
-	image.PrepareProcessing(cli.imageMagick)
+	data_image.PrepareProcessing(cli.imageMagick)
 
 	log.Info("server", fmt.Sprintf("is ready to start application (%s)", appVersion))
 

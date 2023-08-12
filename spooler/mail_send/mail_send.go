@@ -1,4 +1,4 @@
-package send
+package mail_send
 
 import (
 	"crypto/tls"

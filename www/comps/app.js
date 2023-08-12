@@ -557,7 +557,7 @@ let MyApp = {
 		// final app meta retrieval, after authentication
 		initApp() {
 			let requests = [
-				ws.prepare('setting','get',{}),
+				ws.prepare('loginSetting','get',{}),
 				ws.prepare('lookup','get',{name:'access'}),
 				ws.prepare('lookup','get',{name:'feedback'}),
 				ws.prepare('lookup','get',{name:'loginHasClient'}),

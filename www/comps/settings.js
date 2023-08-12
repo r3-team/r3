@@ -520,7 +520,7 @@ let MySettingsAccount = {
 		// backend calls
 		set(newPrivateKeyEnc,newLoginKey) {
 			let requests = [
-				ws.prepare('password','set',{
+				ws.prepare('loginPassword','set',{
 					pwNew0:this.pwNew0,
 					pwNew1:this.pwNew1,
 					pwOld:this.pwOld

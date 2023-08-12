@@ -1,9 +1,9 @@
 package form
 
 import (
-	"r3/compatible"
 	"r3/db"
 	"r3/schema"
+	"r3/schema/compatible"
 	"r3/types"
 
 	"github.com/gofrs/uuid"

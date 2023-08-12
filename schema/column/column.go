@@ -3,10 +3,10 @@ package column
 import (
 	"errors"
 	"fmt"
-	"r3/compatible"
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
+	"r3/schema/compatible"
 	"r3/schema/query"
 	"r3/tools"
 	"r3/types"

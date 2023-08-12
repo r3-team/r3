@@ -1,4 +1,4 @@
-package activation
+package config
 
 import (
 	"crypto"
@@ -9,7 +9,6 @@ import (
 	"encoding/json"
 	"encoding/pem"
 	"errors"
-	"r3/config"
 	"r3/log"
 	"r3/types"
 )
@@ -61,18 +60,18 @@ vCPF8QXc4V/wgJZtn6vdSXGR5W0dByItU5TLOlk6kLX4Aj6G8T+J//7NX5InD5Q/
 7YPTU7NMcyC54h7EbTSPO8dQu0mQuo/dHEONCFaVEpaKVGYMY3Au8tUCAwEAAQ==
 -----END RSA PUBLIC KEY-----`
 
-func SetLicense() {
-	if config.GetString("licenseFile") == "" {
+func ActivateLicense() {
+	if GetString("licenseFile") == "" {
 		log.Info("server", "skipping activation check, no license installed")
 
 		// set empty in case license was removed
-		config.SetLicense(types.License{})
+		SetLicense(types.License{})
 		return
 	}
 
 	var licFile types.LicenseFile
 
-	if err := json.Unmarshal([]byte(config.GetString("licenseFile")), &licFile); err != nil {
+	if err := json.Unmarshal([]byte(GetString("licenseFile")), &licFile); err != nil {
 		log.Error("server", "could not unmarshal license from config", err)
 		return
 	}
@@ -110,5 +109,5 @@ func SetLicense() {
 
 	// set license
 	log.Info("server", "setting license")
-	config.SetLicense(licFile.License)
+	SetLicense(licFile.License)
 }

@@ -1,4 +1,4 @@
-package setting
+package login_setting
 
 import (
 	"errors"

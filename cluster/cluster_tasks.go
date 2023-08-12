@@ -2,7 +2,6 @@ package cluster
 
 import (
 	"fmt"
-	"r3/activation"
 	"r3/bruteforce"
 	"r3/cache"
 	"r3/config"
@@ -94,8 +93,8 @@ func ConfigChanged(updateNodes bool, loadConfigFromDb bool, switchToMaintenance 
 	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, ConfigChanged: true}
 
 	// apply config to other areas
-	activation.SetLicense()
 	bruteforce.SetConfig()
+	config.ActivateLicense()
 	config.SetLogLevels()
 	return nil
 }

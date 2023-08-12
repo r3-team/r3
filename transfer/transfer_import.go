@@ -12,7 +12,6 @@ import (
 	"r3/config"
 	"r3/db"
 	"r3/log"
-	"r3/module_option"
 	"r3/schema"
 	"r3/schema/api"
 	"r3/schema/article"
@@ -146,7 +145,7 @@ func ImportFromFiles(filePathsImport []string) error {
 	for _, m := range modules {
 
 		// set new module hash value in instance
-		if err := module_option.SetHashById_tx(tx, m.Id, moduleIdMapMeta[m.Id].hash); err != nil {
+		if err := setModuleHash_tx(tx, m.Id, moduleIdMapMeta[m.Id].hash); err != nil {
 			return err
 		}
 
@@ -593,7 +592,7 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]imp
 			}
 
 			// check whether installed module hash changed at all
-			hashedStrEx, err := module_option.GetHashById(moduleId)
+			hashedStrEx, err := getModuleHash(moduleId)
 			if err != nil {
 				return modules, err
 			}
