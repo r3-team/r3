@@ -91,27 +91,27 @@
 }
 
 /* label field */
-.field .label{
+.field .header-label{
 	display:flex;
 	flex-flow:column nowrap;
 }
-.field .label .heading{
+.field .header-label .heading{
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
 	gap:9px;
 	margin:6px 0px 0px 0px;
 }
-.field .label .heading img{
+.field .header-label .heading img{
 	filter:var(--image-filter);
 }
-.field .label .heading.size1{ font-size:160%; }
-.field .label .heading.size2{ font-size:140%; }
-.field .label .heading.size3{ font-size:120%; }
-.field .label .heading.size1 img{ height:32px; }
-.field .label .heading.size2 img{ height:28px; }
-.field .label .heading.size3 img{ height:24px; }
-.field .label .richtext{
+.field .header-label .heading.size1{ font-size:160%; }
+.field .header-label .heading.size2{ font-size:140%; }
+.field .header-label .heading.size3{ font-size:120%; }
+.field .header-label .heading.size1 img{ height:32px; }
+.field .header-label .heading.size2 img{ height:28px; }
+.field .header-label .heading.size3 img{ height:24px; }
+.field .header-label .richtext{
 	flex:1 1 auto;
 	overflow:auto;
 }

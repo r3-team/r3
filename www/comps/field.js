@@ -337,8 +337,8 @@ let MyField = {
 			:imageBase64="iconId ? srcBase64(iconIdMap[iconId].file) : ''"
 		/>
 		
-		<!-- label/header -->
-		<div class="label" v-if="isHeader">
+		<!-- header -->
+		<div class="header-label" v-if="isHeader">
 			<div class="heading"
 				v-if="!field.richtext"
 				:class="'size'+field.size"
