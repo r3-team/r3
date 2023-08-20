@@ -351,7 +351,7 @@ let MyInputDate = {
 		>
 			<my-calendar-month
 				@set-date="date = $event"
-				@day-selected="dateSet"
+				@date-selected="dateSet"
 				:class="{ upwards:showUpwards }"
 				:date="date"
 				:date0="date0"
@@ -374,11 +374,10 @@ let MyInputDate = {
 	emits:['blurred','focused','set-unix-from','set-unix-to'],
 	data() {
 		return {
-			calendarFresh:false, // new calendar opened, new date range selection
-			date:new Date(),     // date to control calendar navigation
-			dateSelect0:null,    // for date range selection, start date
-			dateSelect1:null,    // for date range selection, end date
-			showUpwards:false,   // show calendar dropdown above input
+			date:new Date(),   // date to control calendar navigation
+			dateSelect0:null,  // for date range selection, start date
+			dateSelect1:null,  // for date range selection, end date
+			showUpwards:false, // show calendar dropdown above input
 			showCalendar:false
 		};
 	},
@@ -462,7 +461,6 @@ let MyInputDate = {
 					this.dateSelect0 = this.unixFrom !== null ? new Date(this.unixFrom * 1000) : null;
 					this.dateSelect1 = this.unixFrom !== null ? new Date(this.unixFrom * 1000) : null;
 				}
-				this.calendarFresh = true;
 				
 				// fresh selection, start calendar in month of start date
 				if(this.unixFrom !== null) {
@@ -501,39 +499,28 @@ let MyInputDate = {
 				this.$emit('set-unix-to',this.getUnixFromDate(this.getDateFullDayToggled(
 					new Date(this.unixTo*1000),this.fullDay)));
 		},
-		dateSet(dSet,shift) {
-			let apply = (d,unixOld) => {
-				if(!this.fullDay) {
-					// dates are always UTC zero
-					// add offset to make it local zero for datetime
-					d = this.getDateShifted(d,true);
-					
-					if(unixOld !== null) {
-						// keep previous time component
-						let dOld = new Date(unixOld * 1000);
-						d.setHours(dOld.getHours(),dOld.getMinutes(),dOld.getSeconds());
-					}
+		dateSet(unix0,unix1,middleClick) {
+			let toDateTime = (unix,unixOld) => {
+				// dates are always UTC zero, add offset to make it local zero for datetime
+				let d = new Date(unix * 1000);
+				d = this.getDateShifted(d,true);
+				
+				if(unixOld !== null) {
+					// keep previous time component
+					let dOld = new Date(unixOld * 1000);
+					d.setHours(dOld.getHours(),dOld.getMinutes(),dOld.getSeconds());
 				}
-				return Math.floor(d.getTime() / 1000);
+				return this.getUnixFromDate(d);
 			};
 			
 			// first date of range or only date
-			if(!this.isRange || this.calendarFresh || this.dateSelect0 === null) {
-				this.dateSelect0 = dSet;
-				this.dateSelect1 = dSet;
-				
-				this.unixFromInput = apply(dSet,this.unixFrom);
-				this.calendarFresh = false;
-				
-				if(!this.isRange)
-					this.showCalendar = false;
-				
-				return;
-			}
+			this.dateSelect0   = new Date(unix0 * 1000);
+			this.$emit('set-unix-from',this.fullDay ? unix0 : toDateTime(unix0,this.unixFrom));
 			
-			// set second date of range
-			this.dateSelect1  = dSet;
-			this.unixToInput  = apply(dSet,this.unixTo);
+			if(this.isRange) {
+				this.dateSelect1 = new Date(unix1 * 1000);
+				this.$emit('set-unix-to',this.fullDay ? unix1 : toDateTime(unix1,this.unixTo));
+			}
 			this.showCalendar = false;
 		},
 		setNull() {

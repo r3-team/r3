@@ -32,8 +32,8 @@ let MyCalendar = {
 		<my-calendar-days
 			v-if="!showsMonth"
 			@clipboard="$emit('clipboard')"
-			@closeInline="$emit('close-inline')"
-			@dateSelected="dateSelected"
+			@close-inline="$emit('close-inline')"
+			@date-selected="dateSelected"
 			@open-form="(...args) => $emit('open-form',...args)"
 			@reload="get"
 			@set-choice-id="choiceIdSet"
@@ -67,7 +67,7 @@ let MyCalendar = {
 		<my-calendar-month
 			v-if="showsMonth"
 			@close-inline="$emit('close-inline')"
-			@day-selected="daySelected"
+			@date-selected="dateSelected"
 			@open-form="(...args) => $emit('open-form',...args)"
 			@reload="get"
 			@set-choice-id="choiceIdSet"
@@ -132,7 +132,7 @@ let MyCalendar = {
 			dateSelect0:null, // for date range selection, start date
 			dateSelect1:null, // for date range selection, end date
 			ready:false,
-			daysSlider:'4',     // 1-5, controls number of shown days
+			daysSlider:'5',     // 1-5, controls number of shown days
 			
 			// calendar data
 			rows:[]

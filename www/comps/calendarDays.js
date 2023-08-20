@@ -529,26 +529,19 @@ let MyCalendarDays = {
 		srcBase64,
 		
 		// actions
-		clickDay(dayOffset,shift,middleClick) {
-			if(!this.daysSelectable) return;
-			
-			let d = new Date(this.date0.valueOf());
-			d.setDate(d.getDate() + dayOffset);
-			
-			// dates are stored as UTC zero
-			this.$emit('day-selected',this.getDateAtUtcZero(d),shift,middleClick);
-		},
 		clickHour(hourInput,mousedown) {
 			this.hoursInputActive = mousedown;
-			if(!mousedown) {
-				if(this.hoursInput0 !== null && this.hoursInput1 !== null)
-					this.$emit('date-selected',this.hoursInput0,this.hoursInput1+3600);
-				
-				this.hoursInput0 = null;
-				this.hoursInput1 = null;
-			} else {
-				this.hoverHour(hourInput);
+			if(mousedown) {
+				this.hoursInput0 = hourInput;
+				this.hoursInput1 = hourInput;
+				return;
 			}
+			
+			if(this.hoursInput0 !== null && this.hoursInput1 !== null)
+				this.$emit('date-selected',this.hoursInput0,this.hoursInput1+3600,false);
+			
+			this.hoursInput0 = null;
+			this.hoursInput1 = null;
 		},
 		clickRecord(event,row,placeholder,middleClick) {
 			if(placeholder) return;
@@ -573,11 +566,12 @@ let MyCalendarDays = {
 				this.$emit('day-selected',this.getDateAtUtcZero(now),false,false);
 		},
 		hoverHour(hourInput) {
-			if(!this.hoursInputActive)
-				return;
+			if(!this.hoursInputActive) return;
 			
-			if(this.hoursInput0 === null || this.hoursInput0 > hourInput) this.hoursInput0 = hourInput;
-			if(this.hoursInput1 === null || this.hoursInput1 < hourInput) this.hoursInput1 = hourInput;
+			if(hourInput < this.hoursInput0)
+				this.hoursInput0 = hourInput;
+			else
+				this.hoursInput1 = hourInput;
 		},
 		icsCopyToClipboard() {
 			navigator.clipboard.writeText(this.icsUrl);

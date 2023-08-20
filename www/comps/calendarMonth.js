@@ -139,10 +139,9 @@ let MyCalendarMonth = {
 					<!-- days -->
 					<div class="day"
 						v-for="day in 7"
-						@click.exact="clickDay(((week-1)*7)+day-1,false,false)"
-						@click.shift="clickDay(((week-1)*7)+day-1,true,false)"
-						@click.middle.exact="clickDay(((week-1)*7)+day-1,false,true)"
-						@click.middle.shift="clickDay(((week-1)*7)+day-1,true,true)"
+						@mousedown="clickDay(eventsByDay[((week-1)*7)+day-1].unix,true)"
+						@mouseover="hoverDay(eventsByDay[((week-1)*7)+day-1].unix)"
+						@mouseup="clickDay(eventsByDay[((week-1)*7)+day-1].unix,false)"
 						:class="getDayClasses(((week-1)*7)+day-1,day)"
 					>
 						<h1 class="noHighlight">{{ getDayNumber(((week-1)*7)+day-1) }}</h1>
@@ -262,11 +261,14 @@ let MyCalendarMonth = {
 		rows:       { type:Array,   required:false, default:() => [] }
 	},
 	emits:[
-		'close-inline','day-selected','open-form','reload',
+		'close-inline','date-selected','open-form','reload',
 		'set-choice-id','set-collection-indexes','set-date'
 	],
 	data() {
 		return {
+			dayInputActive:false,
+			dayInput0:null,
+			dayInput1:null,
 			icsToken:'',
 			icsTokenName:'',
 			showIcs:false
@@ -302,9 +304,11 @@ let MyCalendarMonth = {
 		// they are processed for display on each day of the calendar
 		eventsByDay:(s) => {
 			let days = [];
-			
 			for(let i = 0; i < 42; i++) {
-				days.push({ events:[] });
+				days.push({
+					events:[],
+					unix:Math.floor(s.date0.getTime() / 1000) + (i * 86400)
+				});
 			}
 			
 			// each row is one event (partial day, full day or spanning multiple days)
@@ -445,14 +449,23 @@ let MyCalendarMonth = {
 		srcBase64,
 		
 		// actions
-		clickDay(dayOffset,shift,middleClick) {
+		clickDay(dayInput,mousedown) {
 			if(!this.daysSelectable) return;
 			
-			let d = new Date(this.date0.valueOf());
-			d.setDate(d.getDate() + dayOffset);
+			this.dayInputActive = mousedown;
+			if(mousedown) {
+				this.dayInput0 = dayInput;
+				this.dayInput1 = dayInput;
+				return;
+			}
 			
-			// dates are stored as UTC zero
-			this.$emit('day-selected',this.getDateAtUtcZero(d),shift,middleClick);
+			if(this.dayInput0 !== null && this.dayInput1 !== null) {
+				let d0 = this.getDateAtUtcZero(new Date(this.dayInput0 * 1000));
+				let d1 = this.getDateAtUtcZero(new Date(this.dayInput1 * 1000));
+				this.$emit('date-selected',this.getUnixFromDate(d0),this.getUnixFromDate(d1),false);
+			}
+			this.dayInput0 = null;
+			this.dayInput1 = null;
 		},
 		clickRecord(event,row,placeholder,middleClick) {
 			if(placeholder) return;
@@ -475,6 +488,15 @@ let MyCalendarMonth = {
 			// if already on current month, select 'today'
 			if(this.daysSelectable)
 				this.$emit('day-selected',this.getDateAtUtcZero(now),false,false);
+		},
+		hoverDay(dayInput) {
+			if(!this.dayInputActive)
+				return;
+			
+			if(dayInput < this.dayInput0)
+				this.dayInput0 = dayInput;
+			else
+				this.dayInput1 = dayInput;
 		},
 		icsCopyToClipboard() {
 			navigator.clipboard.writeText(this.icsUrl);
@@ -504,8 +526,8 @@ let MyCalendarMonth = {
 			// today
 			let now = new Date();
 			cls.today = now.getMonth() === this.date.getMonth()
-				&& now.getFullYear() === this.date.getFullYear()
-				&& now.getDate() === dayOffset-this.daysBefore+1;
+				&& now.getFullYear()   === this.date.getFullYear()
+				&& now.getDate()       === dayOffset-this.daysBefore+1;
 			
 			// weekend day?
 			if((this.settings.sundayFirstDow && (day === 1 || day === 7))
@@ -518,9 +540,19 @@ let MyCalendarMonth = {
 			if(dayOffset < this.daysBefore || dayOffset >= (42-this.daysAfter))
 				cls.outside = true;
 			
-			// day selected
-			if(this.dateSelect0 !== null && this.dateSelect1 !== null) {
+			// day used as active input
+			if(this.dayInput0 !== null && this.dayInput1 !== null) {
+				let dDay = new Date(this.date0.valueOf());
+				dDay.setDate(dDay.getDate() + dayOffset);
+				dDay = this.getDateAtUtcZero(dDay);
 				
+				let unix = this.getUnixFromDate(dDay);
+				if(unix >= this.dayInput0 && unix <= this.dayInput1)
+					cls.selected = true;
+			}
+			
+			// day selected
+			if(!this.dayInputActive && this.dateSelect0 !== null && this.dateSelect1 !== null) {
 				let dDay = new Date(this.date0.valueOf());
 				dDay.setDate(dDay.getDate() + dayOffset);
 				
