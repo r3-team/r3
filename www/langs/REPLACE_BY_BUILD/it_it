@@ -1446,6 +1446,7 @@
 			"ganttShowLabels":"Gruppi",
 			"ganttShowLabelsHint":"Mostra/nascondi groppi"
 		},
+		"fullDay":"Full day",
 		"icsDesc":"Usa questo URL per iscriverti a questo calendario (iCalendar, ICS).",
 		"icsTokenNameHint":"Device name (optional)",
 		"month0":"Gennaio",

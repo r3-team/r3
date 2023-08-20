@@ -1,6 +1,6 @@
+import MyCalendarMonth   from './calendarMonth.js';
 import isDropdownUpwards from './shared/layout.js';
 import {getStringFilled} from './shared/generic.js';
-import {MyCalendarMonth} from './calendar.js';
 import {
 	getCalendarCutOff0,
 	getCalendarCutOff1
@@ -416,8 +416,8 @@ let MyInputDate = {
 		},
 		
 		// start/end date of calendar (month input)
-		date0:(s) => s.getCalendarCutOff0('month',new Date(s.date.valueOf())),
-		date1:(s) => s.getCalendarCutOff1('month',new Date(s.date.valueOf()),s.date0),
+		date0:(s) => s.getCalendarCutOff0(42,new Date(s.date.valueOf())),
+		date1:(s) => s.getCalendarCutOff1(42,new Date(s.date.valueOf()),s.date0),
 		
 		// stores
 		capApp:(s) => s.$store.getters.captions.input.date

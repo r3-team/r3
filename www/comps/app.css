@@ -22,11 +22,14 @@
 	
 	/* calendar elements */
 	--z-index-gantt-hover:5;
-	--z-index-calendar-day-event-text-hover:4;
-	--z-index-calendar-day-event-text:2;
-	--z-index-calendar-day-event-ending-beam:3;
-	--z-index-calendar-line:2;
-	--z-index-calendar-caption:3;
+	--z-index-calendar-month-day-event-text-hover:4;
+	--z-index-calendar-month-day-event-text:2;
+	--z-index-calendar-month-day-event-ending-beam:3;
+	--z-index-calendar-month-line:2;
+	--z-index-calendar-month-caption:3;
+	--z-index-calendar-days-full-days:4;
+	--z-index-calendar-days-event-hover:3;
+	--z-index-calendar-days-full-day:2;
 	
 	/* input field elements */
 	--z-index-field-file-header:3;
@@ -172,9 +175,12 @@ body                                         { --depth:6; }
 .list .layoutCards .card .actions            { --depth:7; }
 .list .layoutCards .card .header             { --depth:7; }
 .list-headers                                { --depth:3; }
-.calendar .month .days                       { --depth:6; }
-.calendar .month .day                        { --depth:0; }
-.calendar .month .day.outside                { --depth:3; }
+.calendar-month .days                        { --depth:6; }
+.calendar-month .day                         { --depth:0; }
+.calendar-month .day.outside                 { --depth:3; }
+.calendar-days .header                       { --depth:6; }
+.calendar-days .labels                       { --depth:6; }
+.calendar-days .day                          { --depth:0; }
 .gantt-header                                { --depth:7; }
 .gantt-header.lower                          { --depth:5; }
 .gantt-group                                 { --depth:0; }

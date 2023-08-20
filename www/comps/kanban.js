@@ -2,7 +2,7 @@ import MyInputCollection  from './inputCollection.js';
 import MyForm             from './form.js';
 import MyValueRich        from './valueRich.js';
 import srcBase64Icon      from './shared/image.js';
-import {getColumnTitle}   from './shared/column.js';
+import {getColumnBatches} from './shared/column.js';
 import {getChoiceFilters} from './shared/form.js';
 import {getCaption}       from './shared/language.js';
 import {
@@ -474,51 +474,11 @@ let MyKanban = {
 		};
 	},
 	computed:{
-		// default is user field option, fallback is first choice in list
 		choiceIdDefault:(s) => s.fieldOptionGet(
+			// default is user field option, fallback is first choice in list
 			s.fieldId,'choiceId',
 			s.choices.length === 0 ? null : s.choices[0].id
 		),
-		columnBatches:(s) => {
-			let batches   = [];
-			let addColumn = (column,index) => {
-				const hidden = column.display === 'hidden' || (s.isMobile && !column.onMobile);
-				
-				if(column.batch !== null) {
-					for(let i = 0, j = batches.length; i < j; i++) {
-						if(batches[i].batch !== column.batch || hidden)
-							continue;
-						
-						batches[i].columnIndexes.push(index);
-						return;
-					}
-				}
-				
-				// create new column batch with itself as first column
-				// create even if first column is hidden as other columns in same batch might not be
-				batches.push({
-					batch:column.batch,
-					caption:s.showCaptions ? s.getColumnTitle(column) : null,
-					columnIndexes:!hidden ? [index] : [],
-					style:'',
-					vertical:column.batchVertical
-				});
-			};
-			for(let i = 0, j = s.columns.length; i < j; i++) {
-				if(!s.columnIndexesAxisX.includes(i) && !s.columnIndexesAxisY.includes(i))
-					addColumn(s.columns[i],i);
-			}
-			
-			// batches with no columns are removed
-			for(let i = 0, j = batches.length; i < j; i++) {
-				if(batches[i].columnIndexes.length === 0) {
-					batches.splice(i,1);
-					i--; j--;
-					continue;
-				}
-			}
-			return batches;
-		},
 		columnIndexesData:(s) => {
 			let out = [];
 			for(let i = 0, j = s.columns.length; i < j; i++) {
@@ -527,18 +487,19 @@ let MyKanban = {
 			}
 			return out;
 		},
-		columnStyleVars:(s) => `--kanban-width-min:${s.columnWidthMin}px;--kanban-width-max:${s.columnWidthMax}px;`,
-		columnWidthMin: (s) => s.zoom * 40,
-		columnWidthMax: (s) => s.columnWidthMin * 1.5,
 		
 		// simple
 		attributeIdAxisX:   (s) => s.joinsIndexMap[s.relationIndexAxisX].attributeId,
 		attributeIdAxisY:   (s) => s.relationIndexAxisY !== null && typeof s.joinsIndexMap[s.relationIndexAxisY] !== 'undefined'
 			? s.joinsIndexMap[s.relationIndexAxisY].attributeId : null,
 		choiceFilters:      (s) => s.getChoiceFilters(s.choices,s.choiceId),
+		columnBatches:      (s) => s.getColumnBatches(s.columns,s.columnIndexesAxisX.concat(s.columnIndexesAxisY),s.showCaptions),
 		columnIndexesAxisX: (s) => s.getAxisColumnIndexes([]),
 		columnIndexesAxisY: (s) => s.relationIndexAxisY === null
 			? [] : s.getAxisColumnIndexes(s.columnIndexesAxisX),
+		columnStyleVars:    (s) => `--kanban-width-min:${s.columnWidthMin}px;--kanban-width-max:${s.columnWidthMax}px;`,
+		columnWidthMin:     (s) => s.zoom * 40,
+		columnWidthMax:     (s) => s.columnWidthMin * 1.5,
 		dataReady:          (s) => typeof s.recordIdMapAxisXY.null !== 'undefined',
 		expressions:        (s) => s.getQueryExpressions(s.columns),
 		hasChoices:         (s) => s.choices.length > 1,
@@ -613,7 +574,7 @@ let MyKanban = {
 		fillRelationRecordIds,
 		getCaption,
 		getChoiceFilters,
-		getColumnTitle,
+		getColumnBatches,
 		getJoinsIndexMap,
 		getQueryExpressions,
 		getRelationsJoined,

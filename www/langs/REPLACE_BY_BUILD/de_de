@@ -1446,6 +1446,7 @@
 			"ganttShowLabels":"Gruppen",
 			"ganttShowLabelsHint":"Gruppen anzeigen/verstecken"
 		},
+		"fullDay":"Voller Tag",
 		"icsDesc":"Diese URL verwenden, um Kalender zu abonnieren (iCalendar, ICS).",
 		"icsTokenNameHint":"Gerätename (optional)",
 		"month0":"Januar",

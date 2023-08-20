@@ -343,7 +343,7 @@
 }
 
 /* calendar overwrites (month view) */
-.input-date .month{
+.input-date .calendar-month{
 	border-radius:0px;
 	width:98%;
 	top:0px;
@@ -356,18 +356,18 @@
 	box-shadow:1px 6px 12px var(--color-shade);
 	z-index:var(--z-index-input-date-month);
 }
-.input-date .month.upwards{
+.input-date .calendar-month.upwards{
 	top:unset;
 	bottom:0px;
 }
-.input-date .month .day{
+.input-date .calendar-month .day{
 	min-height:unset !important;
 }
-.input-date .month .days .item{
+.input-date .calendar-month .days .item{
 	padding:0px;
 	text-align:center;
 }
-.input-date .month .day h1{
+.input-date .calendar-month .day h1{
 	margin:4px 6px;
 	text-align:center;
 	font-size:100%;

@@ -41,3 +41,47 @@ export function getFirstColumnUsableAsAggregator(batch,columns) {
 	}
 	return null;
 };
+
+export function getColumnBatches(columns,columnIndexesIgnore,showCaptions) {
+	const isMobile = MyStore.getters.isMobile;
+	let batches   = [];
+	
+	let addColumn = (column,index) => {
+		const hidden = column.display === 'hidden' || (isMobile && !column.onMobile);
+		
+		if(column.batch !== null) {
+			for(let i = 0, j = batches.length; i < j; i++) {
+				if(batches[i].batch !== column.batch || hidden)
+					continue;
+				
+				batches[i].columnIndexes.push(index);
+				return;
+			}
+		}
+		
+		// create new column batch with itself as first column
+		// create even if first column is hidden as other columns in same batch might not be
+		batches.push({
+			batch:column.batch,
+			caption:showCaptions ? getColumnTitle(column) : null,
+			columnIndexes:!hidden ? [index] : [],
+			style:'',
+			vertical:column.batchVertical
+		});
+	};
+	
+	for(let i = 0, j = columns.length; i < j; i++) {
+		if(!columnIndexesIgnore.includes(i))
+			addColumn(columns[i],i);
+	}
+	
+	// batches with no columns are removed
+	for(let i = 0, j = batches.length; i < j; i++) {
+		if(batches[i].columnIndexes.length === 0) {
+			batches.splice(i,1);
+			i--; j--;
+			continue;
+		}
+	}
+	return batches;
+};

@@ -49,7 +49,7 @@
 	margin:0px;
 	overflow:auto;
 }
-.form .fields.onlyOne>.field>.calendar .month,
+.form .fields.onlyOne>.field>.calendar-month,
 .form .fields.onlyOne>.field>.chart,
 .form .fields.onlyOne>.field>.list,
 .form .fields.onlyOne>.field>.gantt,
@@ -111,13 +111,13 @@
 }
 
 /* user overwrites */
-.user-bordersAll .form .container>.field>.calendar .month,
+.user-bordersAll .form .container>.field>.calendar-month,
 .user-bordersAll .form .container>.field>.chart,
 .user-bordersAll .form .container>.field>.gantt,
 .user-bordersAll .form .container>.field>.input-box,
 .user-bordersAll .form .container>.field>.list,
 .user-bordersAll .form .container>.field>.tabs,
-.user-bordersAll .form .fields:not(.onlyOne)>.field>.calendar .month,
+.user-bordersAll .form .fields:not(.onlyOne)>.field>.calendar-month,
 .user-bordersAll .form .fields:not(.onlyOne)>.field>.chart,
 .user-bordersAll .form .fields:not(.onlyOne)>.field>.gantt,
 .user-bordersAll .form .fields:not(.onlyOne)>.field>.input-box,
@@ -129,8 +129,8 @@
 .user-bordersSquared .form-wrap.popUp .form,
 .user-bordersSquared .form-wrap.popUp .form-help,
 .user-bordersSquared .form-wrap.popUp .form-log,
-.user-bordersSquared .calendar .month,
-.user-bordersSquared .calendar .month .day .part>span,
+.user-bordersSquared .calendar-month,
+.user-bordersSquared .calendar-month .day .part>span,
 .user-bordersSquared .gantt,
 .user-bordersSquared .gantt-line-record .record-line{
 	border-radius:0px;

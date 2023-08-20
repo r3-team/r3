@@ -385,6 +385,7 @@ let MyField = {
 		<!-- calendar -->
 		<my-calendar
 			v-if="isCalendar && !field.gantt"
+			@clipboard="$emit('clipboard')"
 			@close-inline="closeInline"
 			@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
 			@record-count-change="$emit('set-counter',field.id,$event)"

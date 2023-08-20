@@ -143,13 +143,13 @@
 	overflow:hidden;
 	position:relative;
 	padding:0px 6px;
-	z-index:var(--z-index-calendar-caption);
+	z-index:var(--z-index-calendar-month-caption);
 }
 .gantt-line-record .record-line{
 	position:absolute;
 	border-radius:5px;
 	background-color:var(--color-accent4);
-	z-index:var(--z-index-calendar-line);
+	z-index:var(--z-index-calendar-month-line);
 }
 .gantt-line-record .record-line.start{
 	width:3px;
