@@ -9,10 +9,12 @@ export function getCalendarCutOff0(daysShow,date) {
 	
 	date.setHours(0,0,0);
 	
-	// go backwards until we hit the first day of the calendar (sunday or monday)
-	const targetDay = MyStore.getters.settings.sundayFirstDow ? 0 : 1;
-	for(; date.getDay() !== targetDay; date.setDate(date.getDate()-1)) {}
-	
+	// month/week: go backwards until we hit the first day of the calendar (sunday or monday)
+	if(daysShow === 7 || daysShow === 42) {
+		const targetDay = MyStore.getters.settings.sundayFirstDow ? 0 : 1;
+		
+		for(; date.getDay() !== targetDay; date.setDate(date.getDate()-1)) {}
+	}
 	return date;
 };
 

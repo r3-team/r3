@@ -22,11 +22,32 @@ import {
 } from './shared/router.js';
 export {MyCalendar as default};
 
+let MyCalendarViewSelect = {
+	name:'my-calendar-view-select',
+	template:`<select 
+		@change="$emit('update:modelValue',parseInt($event.target.value))"
+		:value="modelValue"
+	>
+		<option :value="1">{{ capApp.option.days1 }}</option>
+		<option :value="3">{{ capApp.option.days3 }}</option>
+		<option :value="5">{{ capApp.option.days5 }}</option>
+		<option :value="7">{{ capApp.option.days7 }}</option>
+		<option :value="42">{{ capApp.option.days42 }}</option>
+	</select>`,
+	props:{
+		modelValue:{ type:Number, required:true }
+	},
+	computed:{
+		capApp:(s) => s.$store.getters.captions.calendar
+	},
+	emits:['update:modelValue','updated']
+};
 let MyCalendar = {
 	name:'my-calendar',
 	components:{
 		MyCalendarDays,
-		MyCalendarMonth
+		MyCalendarMonth,
+		MyCalendarViewSelect
 	},
 	template:`<div class="calendar" :class="{ isSingleField:isSingleField, overflow:!showsMonth }" v-if="ready">
 		<my-calendar-days
@@ -58,9 +79,8 @@ let MyCalendar = {
 			:popUpFormInline="popUpFormInline"
 			:rows="rows"
 		>
-			<template #days-slider>
-				<span>{{ daysShow }}</span>
-				<input v-model="daysSlider" type="range" min="1" max="5">
+			<template #days-view>
+				<my-calendar-view-select v-model="daysShow" @update:modelValue="daysShowChanged" />
 			</template>
 		</my-calendar-days>
 		
@@ -94,9 +114,8 @@ let MyCalendar = {
 			:popUpFormInline="popUpFormInline"
 			:rows="rows"
 		>
-			<template #days-slider>
-				<span>{{ daysShow }}</span>
-				<input v-model="daysSlider" type="range" min="1" max="5">
+			<template #days-view>
+				<my-calendar-view-select v-model="daysShow" @update:modelValue="daysShowChanged" />
 			</template>
 		</my-calendar-month>
 	</div>`,
@@ -132,24 +151,13 @@ let MyCalendar = {
 			dateSelect0:null, // for date range selection, start date
 			dateSelect1:null, // for date range selection, end date
 			ready:false,
-			daysSlider:'5',     // 1-5, controls number of shown days
+			daysShow:42,
 			
 			// calendar data
 			rows:[]
 		};
 	},
 	computed:{
-		daysShow:(s) => {
-			switch(s.daysSlider) {
-				case '1': return 1;  break;
-				case '2': return 3;  break;
-				case '3': return 5;  break;
-				case '4': return 7;  break;
-				case '5': return 42; break;
-			}
-			return 1;
-		},
-		
 		// special date range expressions + regular column expressions
 		expressions:(s) => s.getQueryExpressionsDateRange(
 			s.attributeIdDate0,s.indexDate0,
@@ -209,6 +217,7 @@ let MyCalendar = {
 			this.choiceId = this.choiceIdDefault;
 		}
 		
+		this.daysShow = parseInt(this.fieldOptionGet(this.fieldId,'daysShow',42));
 		this.ready = true;
 	},
 	methods:{
@@ -248,25 +257,8 @@ let MyCalendar = {
 			];
 			this.$emit('open-form',[],[`attributes=${attributes.join(',')}`],middleClick);
 		},
-		daySelected(d,shift,middleClick) {
-			if(!shift) {
-				this.dateSelect0 = d;
-				this.dateSelect1 = d;
-			}
-			else {
-				if(this.dateSelect0 === null)
-					return this.dateSelect0 = d;
-				
-				this.dateSelect1 = d;
-			}
-			
-			let attributes = [
-				`${this.attributeIdDate0}_${this.getUnixFromDate(this.dateSelect0)}`,
-				`${this.attributeIdDate1}_${this.getUnixFromDate(this.dateSelect1)}`
-			];
-			this.$emit('open-form',[],[`attributes=${attributes.join(',')}`],middleClick);
-			this.dateSelect0 = null;
-			this.dateSelect1 = null;
+		daysShowChanged(v) {
+			this.fieldOptionSet(this.fieldId,'daysShow',v);
 		},
 		
 		// reloads

@@ -92,14 +92,14 @@ let MyCalendarMonth = {
 					:captionTitle="capApp.button.icsHint"
 				/>
 				
+				<slot name="days-view" />
+				
 				<my-button image="calendar.png"
 					v-if="!isMobile"
 					@trigger="goToToday()"
 					:caption="!isMobile && !isInput ? capApp.today : ''"
 					:captionTitle="capApp.todayHint"
 				/>
-				
-				<slot name="days-slider" />
 			</div>
 		</div>
 		
@@ -486,8 +486,10 @@ let MyCalendarMonth = {
 			}
 			
 			// if already on current month, select 'today'
-			if(this.daysSelectable)
-				this.$emit('day-selected',this.getDateAtUtcZero(now),false,false);
+			if(this.daysSelectable) {
+				const todayUnix = this.getUnixFromDate(this.getDateAtUtcZero(now));
+				this.$emit('date-selected',todayUnix,todayUnix);
+			}
 		},
 		hoverDay(dayInput) {
 			if(!this.dayInputActive)

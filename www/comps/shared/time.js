@@ -29,6 +29,20 @@ export function getDateFormat(d,format) {
 	return format;
 };
 
+export function getDateFormatNoYear(d,format) {
+	format = format.replace('Y','');
+	format = format.replace('y','');
+	format = format.replace(/[\-\/]+$/,'');
+	format = format.replace(/^[\-\/]+/,'');
+	
+	format = format.replace('m',getStringFilled(d.getMonth()+1,2,'0'));
+	format = format.replace('d',getStringFilled(d.getDate(),2,'0'));
+	format = format.replace('H',getStringFilled(d.getHours(),2,'0'));
+	format = format.replace('i',getStringFilled(d.getMinutes(),2,'0'));
+	format = format.replace('S',getStringFilled(d.getSeconds(),2,'0'));
+	return format;
+};
+
 export function getUnixFromDate(d) {
 	return Math.floor(d.getTime() / 1000);
 };

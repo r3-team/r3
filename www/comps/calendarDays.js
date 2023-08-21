@@ -1,14 +1,3 @@
-
-/* unconfirmed */
-import {
-	getDateAtUtcZero,
-	getDateFormat,
-	getDaysBetween,
-	getUnixFromDate,
-	isUnixUtcZero
-} from './shared/time.js';
-
-/* confirmed */
 import MyInputCollection        from './inputCollection.js';
 import MyForm                   from './form.js';
 import MyValueRich              from './valueRich.js';
@@ -21,6 +10,13 @@ import {
 	colorMakeContrastFont,
 	getStringFilled
 } from './shared/generic.js';
+import {
+	getDateAtUtcZero,
+	getDateFormat,
+	getDateFormatNoYear,
+	getUnixFromDate,
+	isUnixUtcZero
+} from './shared/time.js';
 export {MyCalendarDays as default};
 
 let MyCalendarDaysEvent = {
@@ -131,14 +127,14 @@ let MyCalendarDays = {
 				/>
 				<input class="zoomSlider" type="range" min="3" max="7" v-model="zoom">
 				
+				<slot name="days-view" />
+				
 				<my-button image="calendar.png"
 					v-if="!isMobile"
 					@trigger="goToToday()"
 					:caption="!isMobile ? capApp.today : ''"
 					:captionTitle="capApp.todayHint"
 				/>
-				
-				<slot name="days-slider" />
 			</div>
 		</div>
 		
@@ -289,7 +285,8 @@ let MyCalendarDays = {
 		},
 		
 		events:(s) => {
-			const unix0 = Math.floor(s.date0.getTime() / 1000);
+			const unix0    = Math.floor(s.date0.getTime() / 1000);
+			const dayLabel = s.isMobile ? 'weekDayShort' : 'weekDay';
 			let events = {
 				fullDays:[],        // 1 day per column in calendar
 				fullDaysEvents:[],  // full day events
@@ -303,7 +300,7 @@ let MyCalendarDays = {
 				d.setDate(d.getDate() + i);
 				
 				events.fullDays.push({
-					caption:s.getDateFormat(d,s.settings.dateFormat),
+					caption:`${s.capApp[dayLabel+d.getDay()]}, ${s.getDateFormatNoYear(d,s.settings.dateFormat)}`,
 					eventIndexes:[],
 					weekend:[0,6].includes(d.getDay())
 				});
@@ -522,7 +519,7 @@ let MyCalendarDays = {
 		getColumnIndexesHidden,
 		getDateAtUtcZero,
 		getDateFormat,
-		getDaysBetween,
+		getDateFormatNoYear,
 		getStringFilled,
 		getUnixFromDate,
 		isUnixUtcZero,

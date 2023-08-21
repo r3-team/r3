@@ -44,6 +44,7 @@
 	border-bottom:1px dotted var(--color-border);
 }
 .calendar-days .labels.fullDay span{
+	overflow:hidden;
 	border-bottom:none;
 }
 .calendar-days .days{

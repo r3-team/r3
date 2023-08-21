@@ -1446,6 +1446,13 @@
 			"ganttShowLabels":"Gruppi",
 			"ganttShowLabelsHint":"Mostra/nascondi groppi"
 		},
+		"option":{
+			"days1":"1 day",
+			"days3":"3 days",
+			"days5":"Mo-Fr",
+			"days7":"Week",
+			"days42":"Month"
+		},
 		"fullDay":"Full day",
 		"icsDesc":"Usa questo URL per iscriverti a questo calendario (iCalendar, ICS).",
 		"icsTokenNameHint":"Device name (optional)",
