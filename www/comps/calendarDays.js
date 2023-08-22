@@ -173,6 +173,15 @@ let MyCalendarDays = {
 					<div v-for="d in events.fullDays" class="day" :class="{ weekend:d.weekend }">
 						<div class="header">{{ d.caption }}</div>
 						<div class="events-full" :style="events.fullDaysHeight">
+							
+							<!-- date input (days) -->
+							<div class="dayInput clickable"
+								@mousedown.left="dateClick(d.unix,true,true)"
+								@mouseover="dateHover(d.unix)"
+								@mouseup.left="dateClick(d.unix,false,true)"
+								:class="{ active:dateInputDay && d.unix >= dateInput0 && d.unix <= dateInput1 }"
+							></div>
+							
 							<my-calendar-days-event class="full"
 								v-for="ei in d.eventIndexes"
 								@click="$emit('open-form',[events.fullDaysEvents[ei].row],[],false)"
@@ -195,16 +204,17 @@ let MyCalendarDays = {
 						</span>
 					</div>
 					<div class="day" v-for="(d,i) in events.partDays" :class="{ weekend:d.weekend }">
-					
+						
+						<!-- date input (hours) -->
 						<div class="hourInput clickable"
 							v-for="h in d.hours"
-							@mousedown.left="clickHour(h,true)"
-							@mouseover="hoverHour(h)"
-							@mouseup.left="clickHour(h,false)"
-							:class="{ active:h >= hoursInput0 && h <= hoursInput1 }"
+							@mousedown.left="dateClick(h,true,false)"
+							@mouseover="dateHover(h)"
+							@mouseup.left="dateClick(h,false,false)"
+							:class="{ active:!dateInputDay && h >= dateInput0 && h <= dateInput1 }"
 							:style="heightHourStyle"
 						></div>
-					
+						
 						<my-calendar-days-event
 							v-for="e in d.events"
 							@click="$emit('open-form',[e.row],[],false)"
@@ -267,9 +277,10 @@ let MyCalendarDays = {
 	],
 	data() {
 		return {
-			hoursInput0:null,       // hours being hovered over for event input, start
-			hoursInput1:null,       // hours being hovered over for event input, end
-			hoursInputActive:false, // activated on first mousedown over an empty hour input
+			dateInput0:null,       // dates being hovered over for event input, start
+			dateInput1:null,       // dates being hovered over for event input, end
+			dateInputActive:false, // activated on first mousedown over an empty date input
+			dateInputDay:false,
 			icsToken:'',
 			icsTokenName:'',
 			refHourLabel:'hourLabel',
@@ -304,6 +315,7 @@ let MyCalendarDays = {
 				events.fullDays.push({
 					caption:`${s.capApp[dayLabel+d.getDay()]}, ${s.getDateFormatNoYear(d,s.settings.dateFormat)}`,
 					eventIndexes:[],
+					unix:unix0CalDay + (i * 86400),
 					weekend:[0,6].includes(d.getDay())
 				});
 				
@@ -441,8 +453,8 @@ let MyCalendarDays = {
 				processEvent(ev);
 			}
 			
-			// calculate total full day event height
-			events.fullDaysHeight = `height:${events.fullDaysLanes.length * s.heightHourPxFull}px;`;
+			// calculate total full day event height (add 1 lane for date input)
+			events.fullDaysHeight = `height:${(events.fullDaysLanes.length + 1) * s.heightHourPxFull}px;`;
 			
 			// calculate part day event widths and positions
 			for(let day of events.partDays) {
@@ -535,19 +547,26 @@ let MyCalendarDays = {
 		srcBase64,
 		
 		// actions
-		clickHour(hourInput,mousedown) {
-			this.hoursInputActive = mousedown;
+		dateClick(input,mousedown,isDay) {
+			this.dateInputActive = mousedown;
 			if(mousedown) {
-				this.hoursInput0 = hourInput;
-				this.hoursInput1 = hourInput;
+				this.dateInput0   = input;
+				this.dateInput1   = input;
+				this.dateInputDay = isDay;
 				return;
 			}
 			
-			if(this.hoursInput0 !== null && this.hoursInput1 !== null)
-				this.$emit('date-selected',this.hoursInput0,this.hoursInput1+3600,false);
+			if(this.dateInput0 !== null && this.dateInput1 !== null)
+				this.$emit('date-selected',this.dateInput0,this.dateInput1+(isDay ? 0 : 3600),false);
 			
-			this.hoursInput0 = null;
-			this.hoursInput1 = null;
+			this.dateInput0 = null;
+			this.dateInput1 = null;
+		},
+		dateHover(input) {
+			if(!this.dateInputActive) return;
+			
+			if(input < this.dateInput0) this.dateInput0 = input;
+			else                        this.dateInput1 = input;
 		},
 		goToToday() {
 			let now = new Date();
@@ -556,14 +575,6 @@ let MyCalendarDays = {
 			
 			if(this.hasOpenForm)
 				this.$emit('date-selected',this.getDateAtUtcZero(now),false,false);
-		},
-		hoverHour(hourInput) {
-			if(!this.hoursInputActive) return;
-			
-			if(hourInput < this.hoursInput0)
-				this.hoursInput0 = hourInput;
-			else
-				this.hoursInput1 = hourInput;
 		},
 		icsCopyToClipboard() {
 			navigator.clipboard.writeText(this.icsUrl);

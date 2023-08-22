@@ -126,14 +126,20 @@
 .calendar-days .zoomSlider{
 	width:80px !important;
 }
+.calendar-days .dayInput{
+	height:100%;
+}
+.calendar-days .dayInput,
 .calendar-days .hourInput{
 	opacity:0.9;
 	box-sizing:border-box;
 	border-bottom:1px dotted var(--color-border);
 }
+.calendar-days .dayInput.active,
 .calendar-days .hourInput.active{
 	background-color:var(--color-accent3-alt);
 }
+.calendar-days .dayInput:hover,
 .calendar-days .hourInput:hover{
 	background-color:var(--color-accent3);
 }
