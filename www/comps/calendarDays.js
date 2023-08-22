@@ -286,14 +286,15 @@ let MyCalendarDays = {
 		},
 		
 		events:(s) => {
-			const unix0    = Math.floor(s.date0.getTime() / 1000);
-			const dayLabel = s.isMobile ? 'weekDayShort' : 'weekDay';
+			const unix0Cal    = Math.floor(s.date0.getTime() / 1000); // unix start of calendar
+			const unix0CalDay = Math.floor(s.date0.getTime() / 1000) - s.date0.getTimezoneOffset()*60;
+			const dayLabel    = s.isMobile ? 'weekDayShort' : 'weekDay';
 			let events = {
 				fullDays:[],        // 1 day per column in calendar
 				fullDaysEvents:[],  // full day events
-				fullDaysLanes:[[]], // full day event lanes (to avoid overlaps)
+				fullDaysLanes:[[]], // full day event lanes (event indexes per lane, to calculate overlaps)
 				fullDaysHeight:'',  // total height of all full day events
-				partDays:[]         // part day events
+				partDays:[]         // partial day events (each day has their own event blocks/lanes to manage)
 			};
 			
 			for(let i = 0; i < s.daysShow; i++) {
@@ -308,11 +309,11 @@ let MyCalendarDays = {
 				
 				let hours = [];
 				for(let x = 0; x < 24; x++) {
-					hours.push(unix0 + (i * 86400) + (x * 3600));
+					hours.push(unix0Cal + (i * 86400) + (x * 3600));
 				}
 				
 				events.partDays.push({
-					blocks:[],
+					blocks:[], // blocks of event lanes, used to separate events with overlapping times
 					events:[],
 					hours:hours,
 					weekend:[0,6].includes(d.getDay())
@@ -347,21 +348,23 @@ let MyCalendarDays = {
 				const isFullDay = s.isUnixUtcZero(ev.unix0) && s.isUnixUtcZero(ev.unix1);
 				
 				if(isFullDay) {
-					const dayIndex      = Math.floor((ev.unix0 - Math.floor(s.date0.getTime() / 1000)) / 86400);
-					const eventIndexNew = events.fullDaysEvents.length;
-					let   eventDays     = ((ev.unix1 - ev.unix0) / 86400) + 1;
+					let unix0EvCal = ev.unix0 < unix0CalDay ? unix0CalDay : ev.unix0; // start of event within calendar
+					let eventDays  = ((ev.unix1 - unix0EvCal) / 86400) + 1;           // event day count from start of calendar
+					let dayIndex   = Math.floor((unix0EvCal - unix0CalDay) / 86400);  // day in which event starts
+					
+					// cut off event length, if it goes over calendar
+					if(dayIndex + eventDays > s.daysShow)
+						eventDays = s.daysShow - dayIndex;
 					
 					if(dayIndex < 0 || dayIndex >= events.fullDays.length)
 						continue;
 					
+					const eventIndexNew = events.fullDaysEvents.length;
 					events.fullDays[dayIndex].eventIndexes.push(eventIndexNew);
 					events.fullDaysEvents.push(ev);
 					
 					const laneIndex = s.addToFreeLane(
 						events.fullDaysLanes,events.fullDaysEvents,ev,eventIndexNew,true);
-					
-					if(dayIndex + eventDays > s.daysShow)
-						eventDays = s.daysShow - dayIndex;
 					
 					ev.style =
 						`width:${100 * eventDays}%;`+
@@ -373,7 +376,10 @@ let MyCalendarDays = {
 				
 				// partial day event
 				// like Monday 19:00, until Tuesday 03:00
-				const processDay = function(evPart) {
+				const processEvent = function(evPart) {
+					if(evPart.unix0 < unix0Cal)
+						evPart.unix0 = unix0Cal;
+					
 					const d0 = new Date(evPart.unix0 * 1000);
 					const d1 = new Date(evPart.unix1 * 1000);
 					
@@ -389,7 +395,7 @@ let MyCalendarDays = {
 						`top:${hoursStart * s.heightHourPx}px;`;
 					
 					// add event to correct day
-					const dayIndex = Math.floor((evPart.unix0 - Math.floor(s.date0.getTime() / 1000)) / 86400);
+					const dayIndex = evPart.unix0 < unix0Cal ? 0 : Math.floor((evPart.unix0 - unix0Cal) / 86400);
 					
 					if(dayIndex < 0 || dayIndex >= events.partDays.length)
 						return;
@@ -429,10 +435,10 @@ let MyCalendarDays = {
 					if(intoNextDay) {
 						let evPartCopy = JSON.parse(JSON.stringify(evPart));
 						evPartCopy.unix0 += hoursLengthThisDay * 3600; // set to 00:00
-						processDay(evPartCopy);
+						processEvent(evPartCopy);
 					}
 				};
-				processDay(ev);
+				processEvent(ev);
 			}
 			
 			// calculate total full day event height
