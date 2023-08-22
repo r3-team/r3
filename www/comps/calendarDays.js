@@ -6,6 +6,10 @@ import {getColumnIndexesHidden} from './shared/form.js';
 import {srcBase64}              from './shared/image.js';
 import {getCaption}             from './shared/language.js';
 import {
+	fieldOptionGet,
+	fieldOptionSet
+} from './shared/field.js';
+import {
 	colorAdjustBg,
 	colorMakeContrastFont,
 	getStringFilled
@@ -82,14 +86,7 @@ let MyCalendarDays = {
 					v-if="iconId !== null"
 					:src="srcBase64(iconIdMap[iconId].file)"
 				/>
-				<my-button image="pagePrev.png"
-					@trigger=""
-					:naked="true"
-				/>
-				<my-button image="pageNext.png"
-					@trigger=""
-					:naked="true"
-				/>
+				<slot name="date-select" />
 			</div>
 			
 			<div class="area wrap default-inputs">
@@ -125,9 +122,12 @@ let MyCalendarDays = {
 					:captionTitle="capGen.button.zoomReset"
 					:naked="true"
 				/>
-				<input class="zoomSlider" type="range" min="3" max="7" v-model="zoom">
+				<input class="zoomSlider" type="range" min="3" max="7"
+					v-model="zoom"
+					@change="fieldOptionSet(fieldId,'zoom',$event.target.value);"
+				>
 				
-				<slot name="days-view" />
+				<slot name="view-select" />
 				
 				<my-button image="calendar.png"
 					v-if="!isMobile"
@@ -198,9 +198,9 @@ let MyCalendarDays = {
 					
 						<div class="hourInput clickable"
 							v-for="h in d.hours"
-							@mousedown="clickHour(h,true)"
+							@mousedown.left="clickHour(h,true)"
 							@mouseover="hoverHour(h)"
-							@mouseup="clickHour(h,false)"
+							@mouseup.left="clickHour(h,false)"
 							:class="{ active:h >= hoursInput0 && h <= hoursInput1 }"
 							:style="heightHourStyle"
 						></div>
@@ -246,6 +246,7 @@ let MyCalendarDays = {
 		columns:    { type:Array,   required:true },
 		collections:{ type:Array,   required:true },
 		collectionIdMapIndexes:{ type:Object, required:true },
+		date:       { type:Date,    required:true }, // selected date to work around
 		date0:      { type:Date,    required:true }, // start date of calendar
 		date1:      { type:Date,    required:true }, // end date of calendar
 		daysShow:   { type:Number,  required:true },
@@ -482,7 +483,6 @@ let MyCalendarDays = {
 		// simple
 		columnBatches:      (s) => s.getColumnBatches(s.columns,[],false),
 		columnIndexesHidden:(s) => s.getColumnIndexesHidden(s.columns),
-		daysSelectable:     (s) => s.hasOpenForm,
 		hasChoices:         (s) => s.choices.length > 1,
 		heightHourPx:       (s) => 12 * s.zoom,
 		heightHourPxFull:   (s) => 8 * s.zoom,
@@ -502,18 +502,21 @@ let MyCalendarDays = {
 		this.$options.components.MyForm = MyForm;
 	},
 	mounted() {
-		this.$nextTick(() => {
-			// scroll to 07:00
-			const el = this.$refs[this.refHourLabel + 8];
-			
-			if(typeof el !== 'undefined')
-				el[0].scrollIntoView();
-		});
+		// scroll to 07:00
+		const el = this.$refs[this.refHourLabel + 8];
+		
+		if(typeof el !== 'undefined')
+			el[0].scrollIntoView();
+		
+		// load field options
+		this.zoom = this.fieldOptionGet(this.fieldId,'zoom',this.zoomDefault);
 	},
 	methods:{
 		// externals
 		colorAdjustBg,
 		colorMakeContrastFont,
+		fieldOptionGet,
+		fieldOptionSet,
 		getCaption,
 		getColumnBatches,
 		getColumnIndexesHidden,
@@ -540,27 +543,13 @@ let MyCalendarDays = {
 			this.hoursInput0 = null;
 			this.hoursInput1 = null;
 		},
-		clickRecord(event,row,placeholder,middleClick) {
-			if(placeholder) return;
-			
-			// block clickDay() event (placeholders must bubble)
-			event.stopPropagation();
+		goToToday() {
+			let now = new Date();
+			if(now < this.date0 || now > this.date1)
+				return this.$emit('set-date',now);
 			
 			if(this.hasOpenForm)
-				this.$emit('open-form',[row],[],middleClick);
-		},
-		goToToday() {
-			// switch to current month if not there (to show 'today')
-			let now = new Date();
-			if(now.getMonth() !== this.date.getMonth()
-				|| now.getFullYear() !== this.date.getFullYear()) {
-				
-				return this.$emit('set-date',now);
-			}
-			
-			// if already on current month, select 'today'
-			if(this.daysSelectable)
-				this.$emit('day-selected',this.getDateAtUtcZero(now),false,false);
+				this.$emit('date-selected',this.getDateAtUtcZero(now),false,false);
 		},
 		hoverHour(hourInput) {
 			if(!this.hoursInputActive) return;

@@ -38,31 +38,7 @@ let MyCalendarMonth = {
 					v-if="iconId !== null"
 					:src="srcBase64(iconIdMap[iconId].file)"
 				/>
-				<my-button image="pagePrev.png"
-					@trigger="monthInput -= 1"
-					:naked="true"
-				/>
-				<input class="selector date-input" type="text"
-					v-model="yearInput"
-				/>
-				<select class="selector date-input" v-model="monthInput">
-					<option value="0">01</option>
-					<option value="1">02</option>
-					<option value="2">03</option>
-					<option value="3">04</option>
-					<option value="4">05</option>
-					<option value="5">06</option>
-					<option value="6">07</option>
-					<option value="7">08</option>
-					<option value="8">09</option>
-					<option value="9">10</option>
-					<option value="10">11</option>
-					<option value="11">12</option>
-				</select>
-				<my-button image="pageNext.png"
-					@trigger="monthInput += 1"
-					:naked="true"
-				/>
+				<slot name="date-select" />
 			</div>
 			
 			<div class="area wrap default-inputs">
@@ -92,7 +68,7 @@ let MyCalendarMonth = {
 					:captionTitle="capApp.button.icsHint"
 				/>
 				
-				<slot name="days-view" />
+				<slot name="view-select" />
 				
 				<my-button image="calendar.png"
 					v-if="!isMobile"
@@ -139,9 +115,9 @@ let MyCalendarMonth = {
 					<!-- days -->
 					<div class="day"
 						v-for="day in 7"
-						@mousedown="clickDay(eventsByDay[((week-1)*7)+day-1].unix,true)"
+						@mousedown.left="clickDay(eventsByDay[((week-1)*7)+day-1].unix,true)"
 						@mouseover="hoverDay(eventsByDay[((week-1)*7)+day-1].unix)"
-						@mouseup="clickDay(eventsByDay[((week-1)*7)+day-1].unix,false)"
+						@mouseup.left="clickDay(eventsByDay[((week-1)*7)+day-1].unix,false)"
 						:class="getDayClasses(((week-1)*7)+day-1,day)"
 					>
 						<h1 class="noHighlight">{{ getDayNumber(((week-1)*7)+day-1) }}</h1>
@@ -279,25 +255,6 @@ let MyCalendarMonth = {
 		choiceIdInput:{
 			get()  { return this.choiceId; },
 			set(v) { this.$emit('set-choice-id',v); }
-		},
-		monthInput:{
-			get() { return this.date.getMonth(); },
-			set(v) {
-				let d = new Date(this.date.valueOf());
-				d.setDate(1); // set to 1st to add month correctly
-				d.setMonth(v);
-				this.$emit('set-date',d);
-			}
-		},
-		yearInput:{
-			get() { return this.date.getFullYear(); },
-			set(v) {
-				if(v.length !== 4) return;
-				
-				let d = new Date(this.date.valueOf());
-				d.setFullYear(v);
-				this.$emit('set-date',d);
-			}
 		},
 		
 		// event values arrive sorted by start date

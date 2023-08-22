@@ -12,6 +12,12 @@
 	width:100%;
 	z-index:var(--z-index-inline-pop-up-form);
 }
+.calendar .date-input{
+	flex:1 1 50px;
+	max-width:70px;
+	min-width:auto;
+	text-align:center;
+}
 
 /* days view */
 .calendar-days{
@@ -125,7 +131,9 @@
 	box-sizing:border-box;
 	border-bottom:1px dotted var(--color-border);
 }
-.calendar-days .hourInput.active,
+.calendar-days .hourInput.active{
+	background-color:var(--color-accent3-alt);
+}
 .calendar-days .hourInput:hover{
 	background-color:var(--color-accent3);
 }
@@ -155,12 +163,6 @@
 }
 
 /* calendar header */
-.calendar .date-input{
-	flex:1 1 50px;
-	max-width:70px;
-	min-width:auto;
-	text-align:center;
-}
 .calendar-month .header-optional{
 	display:flex;
 	flex-flow:column nowrap;

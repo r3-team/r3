@@ -1,6 +1,7 @@
-import MyCalendarMonth   from './calendarMonth.js';
-import isDropdownUpwards from './shared/layout.js';
-import {getStringFilled} from './shared/generic.js';
+import MyCalendarMonth        from './calendarMonth.js';
+import {MyCalendarDateSelect} from './calendar.js';
+import isDropdownUpwards      from './shared/layout.js';
+import {getStringFilled}      from './shared/generic.js';
 import {
 	getCalendarCutOff0,
 	getCalendarCutOff1
@@ -289,6 +290,7 @@ let MyInputDateEntry = {
 let MyInputDate = {
 	name:'my-input-date',
 	components:{
+		MyCalendarDateSelect,
 		MyCalendarMonth,
 		MyInputDateEntry
 	},
@@ -360,7 +362,11 @@ let MyInputDate = {
 				:dateSelect1="dateSelect1"
 				:inputTime="isTime"
 				:isInput="true"
-			/>
+			>
+				<template #date-select>
+					<my-calendar-date-select v-model="date" :daysShow="42" />
+				</template>
+			</my-calendar-month>
 		</div>
 	</div>`,
 	props:{

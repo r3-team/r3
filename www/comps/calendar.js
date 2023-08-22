@@ -1,7 +1,12 @@
 import MyCalendarDays     from './calendarDays.js';
 import MyCalendarMonth    from './calendarMonth.js';
 import {getChoiceFilters} from './shared/form.js';
-import {getUnixFromDate}  from './shared/time.js';
+import {
+	getDateFromWeek,
+	getUnixFromDate,
+	getWeeksInYear,
+	getWeek
+} from './shared/time.js';
 import {
 	getCalendarCutOff0,
 	getCalendarCutOff1
@@ -21,6 +26,126 @@ import {
 	routeParseParams
 } from './shared/router.js';
 export {MyCalendar as default};
+export {MyCalendarDateSelect};
+
+let MyCalendarDateSelect = {
+	name:'my-calendar-date-select',
+	template:`<my-button image="pagePrev.png"
+		@trigger="pageMove(false)"
+		:naked="true"
+	/>
+	<input class="selector date-input" type="text"
+		v-if="isMonth || isWeek || isDays"
+		v-model="yearInput"
+	/>
+	<select class="selector date-input"
+		v-if="isMonth || isDays"
+		v-model="monthInput"
+	>
+		<option value="0">01</option>
+		<option value="1">02</option>
+		<option value="2">03</option>
+		<option value="3">04</option>
+		<option value="4">05</option>
+		<option value="5">06</option>
+		<option value="6">07</option>
+		<option value="7">08</option>
+		<option value="8">09</option>
+		<option value="9">10</option>
+		<option value="10">11</option>
+		<option value="11">12</option>
+	</select>
+	<input class="selector date-input" type="text"
+		v-if="isDays"
+		v-model="dayInput"
+	/>
+	<select class="selector"
+		v-if="isWeek"
+		v-model="weekInput"
+	>
+		<option v-for="i in weeksInYear" :value="i">
+			{{ capApp.option.calendarWeek + ' ' + i }}
+		</option>
+	</select>
+	<my-button image="pageNext.png"
+		@trigger="pageMove(true)"
+		:naked="true"
+	/>`,
+	props:{
+		daysShow:  { type:Number, required:true },
+		modelValue:{ type:Date,   required:true }
+	},
+	computed:{
+		dayInput:{
+			get()  { return this.modelValue.getDate(); },
+			set(v) {
+				let d = new Date(this.modelValue.valueOf());
+				d.setDate(v);
+				this.$emit('update:modelValue',d);
+			}
+		},
+		monthInput:{
+			get()  { return this.modelValue.getMonth(); },
+			set(v) {
+				let d = new Date(this.modelValue.valueOf());
+				
+				if(this.isMonth)
+					d.setDate(1); // set to 1st to add month correctly
+				
+				d.setMonth(v);
+				this.$emit('update:modelValue',d);
+			}
+		},
+		weekInput:{
+			get()  { return this.getWeek(this.modelValue); },
+			set(v) {
+				let d = new Date(this.modelValue.valueOf());
+				d = this.getDateFromWeek(v,d.getFullYear());
+				this.$emit('update:modelValue',d);
+			}
+		},
+		yearInput:{
+			get()  { return this.modelValue.getFullYear(); },
+			set(v) {
+				if(v.length !== 4) return;
+				
+				let d = new Date(this.modelValue.valueOf());
+				d.setFullYear(v);
+				this.$emit('update:modelValue',d);
+			}
+		},
+		
+		// simple
+		isDays:     (s) => s.daysShow === 1 || s.daysShow === 3,
+		isMonth:    (s) => s.daysShow === 42,
+		isWeek:     (s) => s.daysShow === 5 || s.daysShow === 7,
+		weeksInYear:(s) => s.isWeek ? s.getWeeksInYear(s.modelValue.getFullYear()) : 0,
+		
+		// stores
+		capApp:(s) => s.$store.getters.captions.calendar
+	},
+	emits:['update:modelValue'],
+	methods:{
+		// external
+		getDateFromWeek,
+		getWeek,
+		getWeeksInYear,
+		
+		// actions
+		pageMove(forward) {
+			if(this.isMonth)
+				return this.monthInput = forward ? this.monthInput + 1 : this.monthInput - 1;
+			
+			let d = new Date(this.modelValue.valueOf());
+			
+			// 5-days view (Mo-Fr) moves full week
+			let dOffset = this.daysShow !== 5 ? this.daysShow : 7;
+			
+			d.setDate(d.getDate() + (forward ? dOffset : dOffset - (dOffset * 2)));
+			this.$emit('update:modelValue',d);
+		}
+	}
+};
 
 let MyCalendarViewSelect = {
 	name:'my-calendar-view-select',
@@ -40,18 +165,20 @@ let MyCalendarViewSelect = {
 	computed:{
 		capApp:(s) => s.$store.getters.captions.calendar
 	},
-	emits:['update:modelValue','updated']
+	emits:['update:modelValue']
 };
+
 let MyCalendar = {
 	name:'my-calendar',
 	components:{
 		MyCalendarDays,
 		MyCalendarMonth,
+		MyCalendarDateSelect,
 		MyCalendarViewSelect
 	},
-	template:`<div class="calendar" :class="{ isSingleField:isSingleField, overflow:!showsMonth }" v-if="ready">
+	template:`<div class="calendar" :class="{ isSingleField:isSingleField, overflow:!isMonth }" v-if="ready">
 		<my-calendar-days
-			v-if="!showsMonth"
+			v-if="!isMonth"
 			@clipboard="$emit('clipboard')"
 			@close-inline="$emit('close-inline')"
 			@date-selected="dateSelected"
@@ -65,6 +192,7 @@ let MyCalendar = {
 			:columns="columns"
 			:collections="collections"
 			:collectionIdMapIndexes="collectionIdMapIndexes"
+			:date="date"
 			:date0="date0"
 			:date1="date1"
 			:daysShow="daysShow"
@@ -79,13 +207,16 @@ let MyCalendar = {
 			:popUpFormInline="popUpFormInline"
 			:rows="rows"
 		>
-			<template #days-view>
-				<my-calendar-view-select v-model="daysShow" @update:modelValue="daysShowChanged" />
+			<template #date-select>
+				<my-calendar-date-select :daysShow="daysShow" :modelValue="date" @update:modelValue="dateSet" />
+			</template>
+			<template #view-select>
+				<my-calendar-view-select :modelValue="daysShow" @update:modelValue="daysShowSet" />
 			</template>
 		</my-calendar-days>
 		
 		<my-calendar-month
-			v-if="showsMonth"
+			v-if="isMonth"
 			@close-inline="$emit('close-inline')"
 			@date-selected="dateSelected"
 			@open-form="(...args) => $emit('open-form',...args)"
@@ -114,8 +245,11 @@ let MyCalendar = {
 			:popUpFormInline="popUpFormInline"
 			:rows="rows"
 		>
-			<template #days-view>
-				<my-calendar-view-select v-model="daysShow" @update:modelValue="daysShowChanged" />
+			<template #date-select>
+				<my-calendar-date-select :daysShow="daysShow" :modelValue="date" @update:modelValue="dateSet" />
+			</template>
+			<template #view-select>
+				<my-calendar-view-select :modelValue="daysShow" @update:modelValue="daysShowSet" />
 			</template>
 		</my-calendar-month>
 	</div>`,
@@ -131,7 +265,7 @@ let MyCalendar = {
 		filters:         { type:Array,   required:true },
 		formLoading:     { type:Boolean, required:false, default:false },
 		hasOpenForm:     { type:Boolean, required:false, default:false },
-		iconId:          { required:false,default:null },
+		iconId:          { required:false, default:null },
 		ics:             { type:Boolean, required:false, default:false },
 		indexColor:      { required:true },
 		indexDate0:      { type:Number,  required:true },
@@ -171,7 +305,9 @@ let MyCalendar = {
 		// simple
 		choiceFilters:(s) => s.getChoiceFilters(s.choices,s.choiceId),
 		hasCreate:    (s) => s.query.joins.length === 0 ? false : s.query.joins[0].applyCreate && s.hasOpenForm,
-		showsMonth:   (s) => s.daysShow === 42,
+		isDays:       (s) => s.daysShow === 1 || s.daysShow === 3,
+		isMonth:      (s) => s.daysShow === 42,
+		isWeek:       (s) => s.daysShow === 5 || s.daysShow === 7,
 		
 		// start/end date of calendar
 		date0:(s) => s.getCalendarCutOff0(s.daysShow,new Date(s.date.valueOf())),
@@ -227,11 +363,13 @@ let MyCalendar = {
 		getCalendarCutOff0,
 		getCalendarCutOff1,
 		getChoiceFilters,
+		getDateFromWeek,
 		getQueryExpressions,
 		getQueryExpressionsDateRange,
 		getQueryFiltersDateRange,
 		getRelationsJoined,
 		getUnixFromDate,
+		getWeek,
 		routeChangeFieldReload,
 		routeParseParams,
 		
@@ -257,8 +395,10 @@ let MyCalendar = {
 			];
 			this.$emit('open-form',[],[`attributes=${attributes.join(',')}`],middleClick);
 		},
-		daysShowChanged(v) {
+		daysShowSet(v) {
+			this.daysShow = v;
 			this.fieldOptionSet(this.fieldId,'daysShow',v);
+			this.reloadInside();
 		},
 		
 		// reloads
@@ -277,9 +417,13 @@ let MyCalendar = {
 		// page routing
 		paramsUpdate(pushHistory) {
 			let args = [
-				`month=${this.date.getMonth()}`,
+				`daysShow=${this.daysShow}`,
 				`year=${this.date.getFullYear()}`
 			];
+			
+			if(this.isMonth || this.isDays) args.push(`month=${this.date.getMonth()}`);
+			if(this.isWeek)                 args.push(`week=${this.getWeek(this.date)}`);
+			if(this.isDays)                 args.push(`day=${this.date.getDate()}`);
 			
 			if(this.choiceId !== null)
 				args.push(`choice=${this.choiceId}`);
@@ -288,22 +432,35 @@ let MyCalendar = {
 		},
 		paramsUpdated() {
 			let params = {
-				choice:{ parse:'string', value:this.choiceIdDefault },
-				month: { parse:'int',    value:this.date.getMonth() },
-				year:  { parse:'int',    value:this.date.getFullYear() }
+				choice:  { parse:'string', value:this.choiceIdDefault },
+				daysShow:{ parse:'int',    value:this.daysShow },
+				day:     { parse:'int',    value:this.date.getDate() },
+				month:   { parse:'int',    value:this.date.getMonth() },
+				week:    { parse:'int',    value:this.getWeek(this.date) },
+				year:    { parse:'int',    value:this.date.getFullYear() }
 			};
-			
 			this.routeParseParams(params);
 			
-			if(this.choiceId !== params['choice'].value)
-				this.choiceId = params['choice'].value;
+			if(this.choiceId !== params.choice.value)   this.choiceId = params.choice.value;
+			if(this.daysShow !== params.daysShow.value) this.daysShow = params.daysShow.value;
 			
-			if(this.date.getMonth() !== params['month'].value
-				|| this.date.getFullYear() !== params['year'].value) {
-				
+			const dateChanges =
+				this.date.getFullYear() !== params.year.value
+				|| (this.isMonth && this.date.getMonth()    !== params.month.value)
+				|| (this.isWeek  && this.getWeek(this.date) !== params.week.value)
+				|| (this.isDays && (
+					this.date.getDate()     !== params.day.value
+					|| this.date.getMonth() !== params.month.value)
+			);
+			
+			if(dateChanges) {
 				let d = new Date(this.date.getTime());
-				d.setMonth(params['month'].value);
-				d.setFullYear(params['year'].value);
+				d.setFullYear(params.year.value);
+				
+				if(this.isDays || this.isMonth) d.setMonth(params.month.value);
+				if(this.isDays)                 d.setDate(params.day.value);
+				if(this.isWeek)                 d = this.getDateFromWeek(params.week.value,d.getFullYear());
+				
 				this.date = d;
 			}
 		},

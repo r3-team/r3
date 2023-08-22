@@ -1447,6 +1447,7 @@
 			"ganttShowLabelsHint":"Gruppen anzeigen/verstecken"
 		},
 		"option":{
+			"calendarWeek":"KW",
 			"days1":"1 Tag",
 			"days3":"3 Tage",
 			"days5":"Mo-Fr",

@@ -114,3 +114,37 @@ export function getUnixNowTime() {
 	);
 	return getUnixFromDate(d);
 };
+
+export function getWeek(dInput) {
+	let d = new Date(dInput.valueOf());
+	d.setHours(0,0,0,0);
+	
+	// Thursday in current week decides the year
+	d.setDate(d.getDate() + 3 - (d.getDay() + 6) % 7);
+	
+	// January 4 is always in first week
+	let w1 = new Date(d.getFullYear(), 0, 4);
+	
+	// adjust to Thursday in week 1 and count number of weeks from date to week1
+	return 1 + Math.round(
+		((d.getTime() - w1.getTime()) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7
+	);
+};
+
+export function getDateFromWeek(week,year) {
+	const d        = new Date(year, 0, 1 + (week - 1) * 7);
+	const dow      = d.getDay();
+	const dIsoWeek = d;
+	
+	// get the Monday past, and add a week if the day was Friday, Saturday or Sunday
+	dIsoWeek.setDate(d.getDate() - dow + 1);
+	if(dow > 4)
+		dIsoWeek.setDate(dIsoWeek.getDate() + 7);
+	
+	return dIsoWeek;
+};
+
+export function getWeeksInYear(year) {
+	let w = getWeek(new Date(year,12,1));
+	return w === 1 ? 52 : w;
+};

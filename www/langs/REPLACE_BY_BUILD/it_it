@@ -1447,6 +1447,7 @@
 			"ganttShowLabelsHint":"Mostra/nascondi groppi"
 		},
 		"option":{
+			"calendarWeek":"CW",
 			"days1":"1 day",
 			"days3":"3 days",
 			"days5":"Mo-Fr",
