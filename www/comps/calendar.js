@@ -149,7 +149,13 @@ let MyCalendarDateSelect = {
 
 let MyCalendarViewSelect = {
 	name:'my-calendar-view-select',
-	template:`<select 
+	template:`<my-button image="arrowInside.png"
+		v-if="ics"
+		@trigger="$emit('toggle-ics')"
+		:caption="!isMobile ? capApp.button.ics : ''"
+		:captionTitle="capApp.button.icsHint"
+	/>
+	<select 
 		@change="$emit('update:modelValue',parseInt($event.target.value))"
 		:value="modelValue"
 	>
@@ -160,12 +166,14 @@ let MyCalendarViewSelect = {
 		<option :value="42">{{ capApp.option.days42 }}</option>
 	</select>`,
 	props:{
-		modelValue:{ type:Number, required:true }
+		ics:       { type:Boolean, required:true },
+		modelValue:{ type:Number,  required:true }
 	},
 	computed:{
-		capApp:(s) => s.$store.getters.captions.calendar
+		capApp:  (s) => s.$store.getters.captions.calendar,
+		isMobile:(s) => s.$store.getters.isMobile
 	},
-	emits:['update:modelValue']
+	emits:['toggle-ics','update:modelValue']
 };
 
 let MyCalendar = {
@@ -177,6 +185,47 @@ let MyCalendar = {
 		MyCalendarViewSelect
 	},
 	template:`<div class="calendar" :class="{ isSingleField:isSingleField, overflow:!isMonth }" v-if="ready">
+		
+		<div class="app-sub-window under-header"
+			v-if="showIcs"
+			@mousedown.self="showIcs = false"
+		>
+			<div class="contentBox popUp">
+				<div class="top lower">
+					<div class="area">
+						<img class="icon" src="images/calendar.png" />
+						<div class="caption">{{ capApp.button.icsHint }}</div>
+					</div>
+					<div class="area">
+						<my-button image="cancel.png"
+							@trigger="showIcs = false"
+							:cancel="true"
+						/>
+					</div>
+				</div>
+				<div class="content">
+					<div v-if="icsToken === ''" class="row gap default-inputs">
+						<input v-model="icsTokenName" :placeholder="capApp.icsTokenNameHint" />
+						<my-button image="ok.png"
+							@trigger="setIcsTokenFixed"
+							:caption="capApp.button.icsPublish"
+						/>
+					</div>
+					
+					<template v-if="icsToken !== ''">
+						<div class="row gap default-inputs">
+							<input class="long" :value="icsUrl" readonly />
+							<my-button image="copyClipboard.png"
+								@trigger="icsCopyToClipboard"
+								:captionTitle="capGen.button.copyClipboard"
+							/>
+						</div>
+						<p>{{ capApp.icsDesc }}</p>
+					</template>
+				</div>
+			</div>
+		</div>
+		
 		<my-calendar-days
 			v-if="!isMonth"
 			@clipboard="$emit('clipboard')"
@@ -203,7 +252,6 @@ let MyCalendar = {
 			:hasCreate="hasCreate"
 			:hasOpenForm="hasOpenForm"
 			:iconId="iconId"
-			:ics="ics"
 			:popUpFormInline="popUpFormInline"
 			:rows="rows"
 		>
@@ -211,7 +259,7 @@ let MyCalendar = {
 				<my-calendar-date-select :daysShow="daysShow" :modelValue="date" @update:modelValue="dateSet" />
 			</template>
 			<template #view-select>
-				<my-calendar-view-select :modelValue="daysShow" @update:modelValue="daysShowSet" />
+				<my-calendar-view-select :ics="ics" :modelValue="daysShow" @toggle-ics="showIcs = !showIcs" @update:modelValue="daysShowSet" />
 			</template>
 		</my-calendar-days>
 		
@@ -241,7 +289,6 @@ let MyCalendar = {
 			:hasCreate="hasCreate"
 			:hasOpenForm="hasOpenForm"
 			:iconId="iconId"
-			:ics="ics"
 			:popUpFormInline="popUpFormInline"
 			:rows="rows"
 		>
@@ -249,7 +296,7 @@ let MyCalendar = {
 				<my-calendar-date-select :daysShow="daysShow" :modelValue="date" @update:modelValue="dateSet" />
 			</template>
 			<template #view-select>
-				<my-calendar-view-select :modelValue="daysShow" @update:modelValue="daysShowSet" />
+				<my-calendar-view-select :ics="ics" :modelValue="daysShow" @toggle-ics="showIcs = !showIcs" @update:modelValue="daysShowSet" />
 			</template>
 		</my-calendar-month>
 	</div>`,
@@ -284,8 +331,13 @@ let MyCalendar = {
 			date:null,        // date base that the calendar moves around (by default now(), at 00:00:00)
 			dateSelect0:null, // for date range selection, start date
 			dateSelect1:null, // for date range selection, end date
-			ready:false,
 			daysShow:42,
+			ready:false,
+			showIcs:false,
+			
+			// ICS access
+			icsToken:'',
+			icsTokenName:'',
 			
 			// calendar data
 			rows:[]
@@ -308,6 +360,8 @@ let MyCalendar = {
 		isDays:       (s) => s.daysShow === 1 || s.daysShow === 3,
 		isMonth:      (s) => s.daysShow === 42,
 		isWeek:       (s) => s.daysShow === 5 || s.daysShow === 7,
+		icsUrl:       (s) => `${location.protocol}//${location.host}/ics/download/cal.ics`
+			+ `?field_id=${s.fieldId}&login_id=${s.loginId}&token_fixed=${s.icsToken}`,
 		
 		// start/end date of calendar
 		date0:(s) => s.getCalendarCutOff0(s.daysShow,new Date(s.date.valueOf())),
@@ -317,6 +371,8 @@ let MyCalendar = {
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		capApp:        (s) => s.$store.getters.captions.calendar,
+		capGen:        (s) => s.$store.getters.captions.generic,
+		loginId:       (s) => s.$store.getters.loginId,
 		settings:      (s) => s.$store.getters.settings
 	},
 	mounted() {
@@ -399,6 +455,9 @@ let MyCalendar = {
 			this.daysShow = v;
 			this.fieldOptionSet(this.fieldId,'daysShow',v);
 			this.reloadInside();
+		},
+		icsCopyToClipboard() {
+			navigator.clipboard.writeText(this.icsUrl);
 		},
 		
 		// reloads
@@ -511,6 +570,15 @@ let MyCalendar = {
 					this.rows = res.payload.rows;
 					this.$emit('record-count-change',this.rows.length);
 				},
+				this.$root.genericError
+			);
+		},
+		setIcsTokenFixed() {
+			ws.send('login','setTokenFixed',{
+				name:this.icsTokenName,
+				context:'ics'
+			},true).then(
+				res => this.icsToken = res.payload.tokenFixed,
 				this.$root.genericError
 			);
 		}

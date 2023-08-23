@@ -61,13 +61,6 @@ let MyCalendarMonth = {
 					</option>
 				</select>
 				
-				<my-button image="arrowInside.png"
-					v-if="ics"
-					@trigger="showIcs = !showIcs"
-					:caption="!isMobile ? capApp.button.ics : ''"
-					:captionTitle="capApp.button.icsHint"
-				/>
-				
 				<slot name="view-select" />
 				
 				<my-button image="calendar.png"
@@ -77,29 +70,6 @@ let MyCalendarMonth = {
 					:captionTitle="capApp.todayHint"
 				/>
 			</div>
-		</div>
-		
-		<!-- optional headers -->
-		<div class="header-optional ics default-inputs" v-if="showIcs">
-			
-			<div v-if="icsToken === ''" class="row gap">
-				<input v-model="icsTokenName" :placeholder="capApp.icsTokenNameHint" />
-				<my-button image="ok.png"
-					@trigger="setIcsTokenFixed"
-					:caption="capApp.button.icsPublish"
-				/>
-			</div>
-			
-			<template v-if="icsToken !== ''">
-				<div class="row gap">
-					<input :value="icsUrl" readonly />
-					<my-button image="copyClipboard.png"
-						@trigger="icsCopyToClipboard"
-						:captionTitle="capGen.button.copyClipboard"
-					/>
-				</div>
-				<p>{{ capApp.icsDesc }}</p>
-			</template>
 		</div>
 		
 		<div class="resultsWrap">
@@ -227,7 +197,6 @@ let MyCalendarMonth = {
 		fieldId:    { type:String,  required:false, default:'' },
 		filters:    { type:Array,   required:false, default:() => [] },
 		formLoading:{ type:Boolean, required:false, default:false },
-		ics:        { type:Boolean, required:false, default:false },
 		inputTime:  { type:Boolean, required:false, default:false },
 		isInput:    { type:Boolean, required:false, default:false },
 		hasColor:   { type:Boolean, required:false, default:false },    // color attribute exists
@@ -244,10 +213,7 @@ let MyCalendarMonth = {
 		return {
 			dayInputActive:false,
 			dayInput0:null,
-			dayInput1:null,
-			icsToken:'',
-			icsTokenName:'',
-			showIcs:false
+			dayInput1:null
 		};
 	},
 	computed:{
@@ -371,8 +337,6 @@ let MyCalendarMonth = {
 			d.setDate(1);
 			return s.getDaysBetween(s.date0,d);
 		},
-		icsUrl:(s) => `${location.protocol}//${location.host}/ics/download/cal.ics`
-			+ `?field_id=${s.fieldId}&login_id=${s.loginId}&token_fixed=${s.icsToken}`,
 		
 		// simple
 		columnIndexesHidden:(s) => s.getColumnIndexesHidden(s.columns),
@@ -387,7 +351,6 @@ let MyCalendarMonth = {
 		capApp:        (s) => s.$store.getters.captions.calendar,
 		capGen:        (s) => s.$store.getters.captions.generic,
 		isMobile:      (s) => s.$store.getters.isMobile,
-		loginId:       (s) => s.$store.getters.loginId,
 		settings:      (s) => s.$store.getters.settings
 	},
 	beforeCreate() {
@@ -456,9 +419,6 @@ let MyCalendarMonth = {
 				this.dayInput0 = dayInput;
 			else
 				this.dayInput1 = dayInput;
-		},
-		icsCopyToClipboard() {
-			navigator.clipboard.writeText(this.icsUrl);
 		},
 		
 		// presentation
@@ -564,17 +524,6 @@ let MyCalendarMonth = {
 				return this.capApp['weekDayShort'+dayOffset];
 			
 			return this.capApp['weekDay'+dayOffset];
-		},
-		
-		// backend calls
-		setIcsTokenFixed() {
-			ws.send('login','setTokenFixed',{
-				name:this.icsTokenName,
-				context:'ics'
-			},true).then(
-				res => this.icsToken = res.payload.tokenFixed,
-				this.$root.genericError
-			);
 		}
 	}
 };

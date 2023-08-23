@@ -109,13 +109,6 @@ let MyCalendarDays = {
 					</option>
 				</select>
 				
-				<my-button image="arrowInside.png"
-					v-if="ics"
-					@trigger="showIcs = !showIcs"
-					:caption="!isMobile ? capApp.button.ics : ''"
-					:captionTitle="capApp.button.icsHint"
-				/>
-				
 				<my-button image="search.png"
 					@trigger="zoom = zoomDefault"
 					:active="zoom !== zoomDefault"
@@ -136,29 +129,6 @@ let MyCalendarDays = {
 					:captionTitle="capApp.todayHint"
 				/>
 			</div>
-		</div>
-		
-		<!-- optional headers -->
-		<div class="header-optional ics default-inputs" v-if="showIcs">
-			
-			<div v-if="icsToken === ''" class="row gap">
-				<input v-model="icsTokenName" :placeholder="capApp.icsTokenNameHint" />
-				<my-button image="ok.png"
-					@trigger="setIcsTokenFixed"
-					:caption="capApp.button.icsPublish"
-				/>
-			</div>
-			
-			<template v-if="icsToken !== ''">
-				<div class="row gap">
-					<input :value="icsUrl" readonly />
-					<my-button image="copyClipboard.png"
-						@trigger="icsCopyToClipboard"
-						:captionTitle="capGen.button.copyClipboard"
-					/>
-				</div>
-				<p>{{ capApp.icsDesc }}</p>
-			</template>
 		</div>
 		
 		<div class="resultsWrap">
@@ -264,7 +234,6 @@ let MyCalendarDays = {
 		fieldId:    { type:String,  required:true },
 		filters:    { type:Array,   required:true },
 		formLoading:{ type:Boolean, required:true },
-		ics:        { type:Boolean, required:true },
 		hasColor:   { type:Boolean, required:true }, // color attribute exists
 		hasCreate:  { type:Boolean, required:true }, // has action for creating new record
 		hasOpenForm:{ type:Boolean, required:true },
@@ -281,10 +250,7 @@ let MyCalendarDays = {
 			dateInput1:null,       // dates being hovered over for event input, end
 			dateInputActive:false, // activated on first mousedown over an empty date input
 			dateInputDay:false,
-			icsToken:'',
-			icsTokenName:'',
 			refHourLabel:'hourLabel',
-			showIcs:false,
 			zoom:5,
 			zoomDefault:5
 		};
@@ -494,10 +460,6 @@ let MyCalendarDays = {
 			return events;
 		},
 		
-		// helpers
-		icsUrl:(s) => `${location.protocol}//${location.host}/ics/download/cal.ics`
-			+ `?field_id=${s.fieldId}&login_id=${s.loginId}&token_fixed=${s.icsToken}`,
-		
 		// simple
 		columnBatches:      (s) => s.getColumnBatches(s.columns,[],false),
 		columnIndexesHidden:(s) => s.getColumnIndexesHidden(s.columns),
@@ -512,7 +474,6 @@ let MyCalendarDays = {
 		capApp:        (s) => s.$store.getters.captions.calendar,
 		capGen:        (s) => s.$store.getters.captions.generic,
 		isMobile:      (s) => s.$store.getters.isMobile,
-		loginId:       (s) => s.$store.getters.loginId,
 		settings:      (s) => s.$store.getters.settings
 	},
 	beforeCreate() {
@@ -576,9 +537,6 @@ let MyCalendarDays = {
 			if(this.hasOpenForm)
 				this.$emit('date-selected',this.getDateAtUtcZero(now),false,false);
 		},
-		icsCopyToClipboard() {
-			navigator.clipboard.writeText(this.icsUrl);
-		},
 		
 		// processing
 		addToFreeLane(lanes,events,event,eventIndexNew,touchMatch) {
@@ -609,17 +567,6 @@ let MyCalendarDays = {
 				}
 			}
 			return laneIndex;
-		},
-		
-		// backend calls
-		setIcsTokenFixed() {
-			ws.send('login','setTokenFixed',{
-				name:this.icsTokenName,
-				context:'ics'
-			},true).then(
-				res => this.icsToken = res.payload.tokenFixed,
-				this.$root.genericError
-			);
 		}
 	}
 };
