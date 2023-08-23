@@ -55,7 +55,7 @@ let MyCalendarDateSelect = {
 		<option value="10">11</option>
 		<option value="11">12</option>
 	</select>
-	<input class="selector date-input" type="text"
+	<input class="selector date-input day" type="text"
 		v-if="isDays"
 		v-model="dayInput"
 	/>
@@ -204,7 +204,7 @@ let MyCalendar = {
 					</div>
 				</div>
 				<div class="content">
-					<div v-if="icsToken === ''" class="row gap default-inputs">
+					<div v-if="icsToken === ''" class="row wrap gap default-inputs">
 						<input v-model="icsTokenName" :placeholder="capApp.icsTokenNameHint" />
 						<my-button image="ok.png"
 							@trigger="setIcsTokenFixed"
@@ -213,7 +213,7 @@ let MyCalendar = {
 					</div>
 					
 					<template v-if="icsToken !== ''">
-						<div class="row gap default-inputs">
+						<div class="row wrap gap default-inputs">
 							<input class="long" :value="icsUrl" readonly />
 							<my-button image="copyClipboard.png"
 								@trigger="icsCopyToClipboard"

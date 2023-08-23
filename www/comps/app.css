@@ -27,8 +27,7 @@
 	--z-index-calendar-month-day-event-ending-beam:3;
 	--z-index-calendar-month-line:2;
 	--z-index-calendar-month-caption:3;
-	--z-index-calendar-days-full-days:4;
-	--z-index-calendar-days-event-hover:3;
+	--z-index-calendar-days-full-days:3;
 	--z-index-calendar-days-full-day:2;
 	
 	/* input field elements */

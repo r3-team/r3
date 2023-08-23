@@ -1,3 +1,4 @@
+import MyCalendarDays         from './calendarDays.js';
 import MyCalendarMonth        from './calendarMonth.js';
 import {MyCalendarDateSelect} from './calendar.js';
 import isDropdownUpwards      from './shared/layout.js';
@@ -291,6 +292,7 @@ let MyInputDate = {
 	name:'my-input-date',
 	components:{
 		MyCalendarDateSelect,
+		MyCalendarDays,
 		MyCalendarMonth,
 		MyInputDateEntry
 	},
@@ -351,7 +353,26 @@ let MyInputDate = {
 			v-if="showCalendar"
 			:class="{ upwards:showUpwards }"
 		>
+			<my-calendar-days
+				v-if="!fullDay"
+				@set-date="date = $event"
+				@date-selected="dateSet"
+				:class="{ upwards:showUpwards }"
+				:date="date"
+				:date0="date0"
+				:date1="date1"
+				:dateSelect0="dateSelect0"
+				:dateSelect1="dateSelect1"
+				:daysShow="7"
+				:isInput="true"
+			>
+				<template #date-select>
+					<my-calendar-date-select v-model="date" :daysShow="7" />
+				</template>
+			</my-calendar-days>
+			
 			<my-calendar-month
+				v-if="fullDay"
 				@set-date="date = $event"
 				@date-selected="dateSet"
 				:class="{ upwards:showUpwards }"
@@ -421,8 +442,8 @@ let MyInputDate = {
 		},
 		
 		// start/end date of calendar (month input)
-		date0:(s) => s.getCalendarCutOff0(42,new Date(s.date.valueOf())),
-		date1:(s) => s.getCalendarCutOff1(42,new Date(s.date.valueOf()),s.date0),
+		date0:(s) => s.getCalendarCutOff0((s.fullDay ? 42 : 7),new Date(s.date.valueOf())),
+		date1:(s) => s.getCalendarCutOff1((s.fullDay ? 42 : 7),new Date(s.date.valueOf()),s.date0),
 		
 		// stores
 		capApp:(s) => s.$store.getters.captions.input.date
@@ -506,26 +527,13 @@ let MyInputDate = {
 					new Date(this.unixTo*1000),this.fullDay)));
 		},
 		dateSet(unix0,unix1,middleClick) {
-			let toDateTime = (unix,unixOld) => {
-				// dates are always UTC zero, add offset to make it local zero for datetime
-				let d = new Date(unix * 1000);
-				d = this.getDateShifted(d,true);
-				
-				if(unixOld !== null) {
-					// keep previous time component
-					let dOld = new Date(unixOld * 1000);
-					d.setHours(dOld.getHours(),dOld.getMinutes(),dOld.getSeconds());
-				}
-				return this.getUnixFromDate(d);
-			};
-			
 			// first date of range or only date
-			this.dateSelect0   = new Date(unix0 * 1000);
-			this.$emit('set-unix-from',this.fullDay ? unix0 : toDateTime(unix0,this.unixFrom));
+			this.dateSelect0 = new Date(unix0 * 1000);
+			this.$emit('set-unix-from',unix0);
 			
 			if(this.isRange) {
 				this.dateSelect1 = new Date(unix1 * 1000);
-				this.$emit('set-unix-to',this.fullDay ? unix1 : toDateTime(unix1,this.unixTo));
+				this.$emit('set-unix-to',unix1);
 			}
 			this.showCalendar = false;
 		},

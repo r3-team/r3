@@ -18,6 +18,9 @@
 	min-width:auto;
 	text-align:center;
 }
+.calendar .date-input.day{
+	max-width:42px;
+}
 
 /* days view */
 .calendar-days{
@@ -78,6 +81,7 @@
 	background-color:var(--color-accent2);
 }
 .calendar-days .header{
+	flex:1 1 auto;
 	min-height:30px;
 	text-align:center;
 	line-height:30px;
@@ -95,10 +99,6 @@
 }
 .calendar-days .eventWrap.full{
 	z-index:var(--z-index-calendar-days-full-day);
-}
-.calendar-days .eventWrap:hover{
-	min-width:100%;
-	z-index:var(--z-index-calendar-days-event-hover);
 }
 .calendar-days .event{
 	flex:1 1 auto;
@@ -119,9 +119,6 @@
 }
 .calendar-days .event .batch.vertical{
 	flex-flow:column nowrap;
-}
-.calendar-days .event:hover{
-	overflow:visible;
 }
 .calendar-days .zoomSlider{
 	width:80px !important;

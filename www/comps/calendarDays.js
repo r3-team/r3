@@ -76,7 +76,7 @@ let MyCalendarDays = {
 					v-if="hasCreate"
 					@trigger="$emit('open-form',[],[],false)"
 					@trigger-middle="$emit('open-form',[],[],true)"
-					:caption="capGen.button.new"
+					:caption="isMobile ? '' : capGen.button.new"
 					:captionTitle="capGen.button.newHint"
 				/>
 			</div>
@@ -109,16 +109,18 @@ let MyCalendarDays = {
 					</option>
 				</select>
 				
-				<my-button image="search.png"
-					@trigger="zoom = zoomDefault"
-					:active="zoom !== zoomDefault"
-					:captionTitle="capGen.button.zoomReset"
-					:naked="true"
-				/>
-				<input class="zoomSlider" type="range" min="3" max="7"
-					v-model="zoom"
-					@change="fieldOptionSet(fieldId,'zoom',$event.target.value);"
-				>
+				<template v-if="!isInput && !isMobile">
+					<my-button image="search.png"
+						@trigger="zoom = zoomDefault"
+						:active="zoom !== zoomDefault"
+						:captionTitle="capGen.button.zoomReset"
+						:naked="true"
+					/>
+					<input class="zoomSlider" type="range" min="2" max="8"
+						v-model="zoom"
+						@change="fieldOptionSet(fieldId,'zoom',$event.target.value);"
+					>
+				</template>
 				
 				<slot name="view-select" />
 				
@@ -136,7 +138,7 @@ let MyCalendarDays = {
 				<div class="days full">
 					<div class="labels fullDay">
 						<div class="header"></div>
-						<span v-if="events.fullDays.length !== 0"
+						<span v-if="!isInput && events.fullDays.length !== 0"
 							:style="events.fullDaysHeight"
 						>{{ capApp.fullDay }}</span>
 					</div>
@@ -149,7 +151,7 @@ let MyCalendarDays = {
 								@mousedown.left="dateClick(d.unix,true,true)"
 								@mouseover="dateHover(d.unix)"
 								@mouseup.left="dateClick(d.unix,false,true)"
-								:class="{ active:dateInputDay && d.unix >= dateInput0 && d.unix <= dateInput1 }"
+								:class="{ active:dateInputActive(d.unix,true) }"
 							></div>
 							
 							<my-calendar-days-event class="full"
@@ -181,7 +183,7 @@ let MyCalendarDays = {
 							@mousedown.left="dateClick(h,true,false)"
 							@mouseover="dateHover(h)"
 							@mouseup.left="dateClick(h,false,false)"
-							:class="{ active:!dateInputDay && h >= dateInput0 && h <= dateInput1 }"
+							:class="{ active:dateInputActive(h,false) }"
 							:style="heightHourStyle"
 						></div>
 						
@@ -221,24 +223,27 @@ let MyCalendarDays = {
 		</div>
 	</div>`,
 	props:{
-		choiceId:   { required:true, default:null },
-		choices:    { type:Array,   required:true },
-		columns:    { type:Array,   required:true },
-		collections:{ type:Array,   required:true },
-		collectionIdMapIndexes:{ type:Object, required:true },
+		choiceId:   { required:false, default:null },
+		choices:    { type:Array,   required:false, default:() => [] },
+		columns:    { type:Array,   required:false, default:() => [] },
+		collections:{ type:Array,   required:false, default:() => [] },
+		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		date:       { type:Date,    required:true }, // selected date to work around
 		date0:      { type:Date,    required:true }, // start date of calendar
 		date1:      { type:Date,    required:true }, // end date of calendar
+		dateSelect0:{ required:false, default:null },
+		dateSelect1:{ required:false, default:null },
 		daysShow:   { type:Number,  required:true },
-		iconId:     { required:true, default:null },
-		fieldId:    { type:String,  required:true },
-		filters:    { type:Array,   required:true },
-		formLoading:{ type:Boolean, required:true },
-		hasColor:   { type:Boolean, required:true }, // color attribute exists
-		hasCreate:  { type:Boolean, required:true }, // has action for creating new record
-		hasOpenForm:{ type:Boolean, required:true },
+		iconId:     { required:false, default:null },
+		isInput:    { type:Boolean, required:false, default:false },
+		fieldId:    { type:String,  required:false, default:'' },
+		filters:    { type:Array,   required:false, default:() => [] },
+		formLoading:{ type:Boolean, required:false, default:false },
+		hasColor:   { type:Boolean, required:false, default:false }, // color attribute exists
+		hasCreate:  { type:Boolean, required:false, default:false }, // has action for creating new record
+		hasOpenForm:{ type:Boolean, required:false, default:false },
 		popUpFormInline:{ required:false, default:null },
-		rows:       { type:Array,   required:true }
+		rows:       { type:Array,   required:false, default:() => [] }
 	},
 	emits:[
 		'clipboard','close-inline','date-selected','open-form','reload',
@@ -246,11 +251,11 @@ let MyCalendarDays = {
 	],
 	data() {
 		return {
-			dateInput0:null,       // dates being hovered over for event input, start
-			dateInput1:null,       // dates being hovered over for event input, end
-			dateInputActive:false, // activated on first mousedown over an empty date input
-			dateInputDay:false,
 			refHourLabel:'hourLabel',
+			unixInput0:null,       // dates being hovered over for event input, start
+			unixInput1:null,       // dates being hovered over for event input, end
+			unixInputActive:false, // activated on first mousedown over an empty date input
+			unixInputDay:false,
 			zoom:5,
 			zoomDefault:5
 		};
@@ -265,7 +270,7 @@ let MyCalendarDays = {
 		events:(s) => {
 			const unix0Cal    = Math.floor(s.date0.getTime() / 1000); // unix start of calendar
 			const unix0CalDay = Math.floor(s.date0.getTime() / 1000) - s.date0.getTimezoneOffset()*60;
-			const dayLabel    = s.isMobile ? 'weekDayShort' : 'weekDay';
+			const dayLabel    = s.isMobile || s.isInput ? 'weekDayShort' : 'weekDay';
 			let events = {
 				fullDays:[],        // 1 day per column in calendar
 				fullDaysEvents:[],  // full day events
@@ -352,12 +357,8 @@ let MyCalendarDays = {
 					continue;
 				}
 				
-				// partial day event
-				// like Monday 19:00, until Tuesday 03:00
+				// partial day event - like Monday 19:00 to Tuesday 03:00
 				const processEvent = function(evPart) {
-					if(evPart.unix0 < unix0Cal)
-						evPart.unix0 = unix0Cal;
-					
 					const d0 = new Date(evPart.unix0 * 1000);
 					const d1 = new Date(evPart.unix1 * 1000);
 					
@@ -372,41 +373,38 @@ let MyCalendarDays = {
 						`height:${hoursLengthThisDay * s.heightHourPx}px;`+
 						`top:${hoursStart * s.heightHourPx}px;`;
 					
-					// add event to correct day
-					const dayIndex = evPart.unix0 < unix0Cal ? 0 : Math.floor((evPart.unix0 - unix0Cal) / 86400);
-					
-					if(dayIndex < 0 || dayIndex >= events.partDays.length)
-						return;
-					
-					// add event
-					const day           = events.partDays[dayIndex];
-					const eventIndexNew = day.events.length;
-					day.events.push(evPart);
-					
-					// check if a block with overlapping time already exists
-					let blockFound = false;
-					
-					for(let block of day.blocks) {
-						if(evPart.unix0 >= block.unix1 || block.unix0 >= evPart.unix1)
-							continue;
+					// add event if it starts within calendar
+					const dayIndex = d0.getDate() - s.date0.getDate();
+					if(dayIndex >= 0 && dayIndex < events.partDays.length) {
+						// add event
+						const day           = events.partDays[dayIndex];
+						const eventIndexNew = day.events.length;
+						day.events.push(evPart);
 						
-						// add event to next free lane
-						s.addToFreeLane(block.lanes,day.events,evPart,eventIndexNew,false);
+						// check if a block with overlapping time already exists
+						let blockFound = false;
+						for(let block of day.blocks) {
+							if(evPart.unix0 >= block.unix1 || block.unix0 >= evPart.unix1)
+								continue;
+							
+							// add event to next free lane
+							s.addToFreeLane(block.lanes,day.events,evPart,eventIndexNew,false);
+							
+							// if events did fit in block, extend block time range
+							if(block.unix0 > evPart.unix0) block.unix0 = evPart.unix0;
+							if(block.unix1 < evPart.unix1) block.unix1 = evPart.unix1;
+							blockFound = true;
+							break;
+						}
 						
-						// if events did fit in block, extend block time range
-						if(block.unix0 > evPart.unix0) block.unix0 = evPart.unix0;
-						if(block.unix1 < evPart.unix1) block.unix1 = evPart.unix1;
-						blockFound = true;
-						break;
-					}
-					
-					if(!blockFound) {
-						// no block found, create new one and add event to first lane
-						day.blocks.push({
-							lanes:[[eventIndexNew]],
-							unix0:evPart.unix0,
-							unix1:evPart.unix1
-						});
+						if(!blockFound) {
+							// no block found, create new one and add event to first lane
+							day.blocks.push({
+								lanes:[[eventIndexNew]],
+								unix0:evPart.unix0,
+								unix1:evPart.unix1
+							});
+						}
 					}
 					
 					// if event goes into next day, duplicate event entry for next day
@@ -420,7 +418,7 @@ let MyCalendarDays = {
 			}
 			
 			// calculate total full day event height (add 1 lane for date input)
-			events.fullDaysHeight = `height:${(events.fullDaysLanes.length + 1) * s.heightHourPxFull}px;`;
+			events.fullDaysHeight = s.isInput ? '0px' : `height:${(events.fullDaysLanes.length + 1) * s.heightHourPxFull}px;`;
 			
 			// calculate part day event widths and positions
 			for(let day of events.partDays) {
@@ -448,9 +446,10 @@ let MyCalendarDays = {
 								
 								lanesAvailable++;
 							}
-							const percLane  = 100 / laneCount;
+							// leave some percent free for mouse-hover inputs
+							const percLane  = 94 / laneCount;
 							const percWidth = percLane * lanesAvailable;
-							const percLeft  = laneIndex * (100 / laneCount);
+							const percLeft  = percLane * laneIndex;
 							
 							day.events[eventIndex].style += `width:${ percWidth }%;left:${ percLeft }%;`;
 						}
@@ -464,9 +463,11 @@ let MyCalendarDays = {
 		columnBatches:      (s) => s.getColumnBatches(s.columns,[],false),
 		columnIndexesHidden:(s) => s.getColumnIndexesHidden(s.columns),
 		hasChoices:         (s) => s.choices.length > 1,
-		heightHourPx:       (s) => 12 * s.zoom,
+		heightHourPx:       (s) => (s.isInput ? 3 : 11) * s.zoom,
 		heightHourPxFull:   (s) => 8 * s.zoom,
 		heightHourStyle:    (s) => `height:${s.heightHourPx}px;`,
+		unixSelect0:        (s) => s.dateSelect0 !== null ? Math.floor(s.dateSelect0.getTime() / 1000) : 0,
+		unixSelect1:        (s) => s.dateSelect1 !== null ? Math.floor(s.dateSelect1.getTime() / 1000) : 0,
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -508,26 +509,26 @@ let MyCalendarDays = {
 		srcBase64,
 		
 		// actions
-		dateClick(input,mousedown,isDay) {
-			this.dateInputActive = mousedown;
+		dateClick(unix,mousedown,isDay) {
+			this.unixInputActive = mousedown;
 			if(mousedown) {
-				this.dateInput0   = input;
-				this.dateInput1   = input;
-				this.dateInputDay = isDay;
+				this.unixInput0   = unix;
+				this.unixInput1   = unix;
+				this.unixInputDay = isDay;
 				return;
 			}
 			
-			if(this.dateInput0 !== null && this.dateInput1 !== null)
-				this.$emit('date-selected',this.dateInput0,this.dateInput1+(isDay ? 0 : 3600),false);
+			if(this.unixInput0 !== null && this.unixInput1 !== null)
+				this.$emit('date-selected',this.unixInput0,this.unixInput1+(isDay ? 0 : 3600),false);
 			
-			this.dateInput0 = null;
-			this.dateInput1 = null;
+			this.unixInput0 = null;
+			this.unixInput1 = null;
 		},
-		dateHover(input) {
-			if(!this.dateInputActive) return;
+		dateHover(unix) {
+			if(!this.unixInputActive) return;
 			
-			if(input < this.dateInput0) this.dateInput0 = input;
-			else                        this.dateInput1 = input;
+			if(unix < this.unixInput0) this.unixInput0 = unix;
+			else                       this.unixInput1 = unix;
 		},
 		goToToday() {
 			let now = new Date();
@@ -536,6 +537,17 @@ let MyCalendarDays = {
 			
 			if(this.hasOpenForm)
 				this.$emit('date-selected',this.getDateAtUtcZero(now),false,false);
+		},
+		
+		// presentation
+		dateInputActive(unix,dayInput) {
+			return ( // either hour is selected as new input
+				this.unixInputActive && dayInput === this.unixInputDay &&
+				unix >= this.unixInput0 && unix <= this.unixInput1)
+			|| ( // or hour is part of current date selection
+				!this.unixInputActive &&
+				unix >= this.unixSelect0 && unix < this.unixSelect1
+			);
 		},
 		
 		// processing

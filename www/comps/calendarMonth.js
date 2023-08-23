@@ -28,7 +28,7 @@ let MyCalendarMonth = {
 					v-if="hasCreate"
 					@trigger="$emit('open-form',[],[],false)"
 					@trigger-middle="$emit('open-form',[],[],true)"
-					:caption="capGen.button.new"
+					:caption="isMobile ? '' : capGen.button.new"
 					:captionTitle="capGen.button.newHint"
 				/>
 			</div>
@@ -211,9 +211,9 @@ let MyCalendarMonth = {
 	],
 	data() {
 		return {
-			dayInputActive:false,
-			dayInput0:null,
-			dayInput1:null
+			unixInputActive:false,
+			unixInput0:null,
+			unixInput1:null
 		};
 	},
 	computed:{
@@ -369,23 +369,23 @@ let MyCalendarMonth = {
 		srcBase64,
 		
 		// actions
-		clickDay(dayInput,mousedown) {
+		clickDay(unix,mousedown) {
 			if(!this.daysSelectable) return;
 			
-			this.dayInputActive = mousedown;
+			this.unixInputActive = mousedown;
 			if(mousedown) {
-				this.dayInput0 = dayInput;
-				this.dayInput1 = dayInput;
+				this.unixInput0 = unix;
+				this.unixInput1 = unix;
 				return;
 			}
 			
-			if(this.dayInput0 !== null && this.dayInput1 !== null) {
-				let d0 = this.getDateAtUtcZero(new Date(this.dayInput0 * 1000));
-				let d1 = this.getDateAtUtcZero(new Date(this.dayInput1 * 1000));
+			if(this.unixInput0 !== null && this.unixInput1 !== null) {
+				let d0 = this.getDateAtUtcZero(new Date(this.unixInput0 * 1000));
+				let d1 = this.getDateAtUtcZero(new Date(this.unixInput1 * 1000));
 				this.$emit('date-selected',this.getUnixFromDate(d0),this.getUnixFromDate(d1),false);
 			}
-			this.dayInput0 = null;
-			this.dayInput1 = null;
+			this.unixInput0 = null;
+			this.unixInput1 = null;
 		},
 		clickRecord(event,row,placeholder,middleClick) {
 			if(placeholder) return;
@@ -411,14 +411,11 @@ let MyCalendarMonth = {
 				this.$emit('date-selected',todayUnix,todayUnix);
 			}
 		},
-		hoverDay(dayInput) {
-			if(!this.dayInputActive)
-				return;
+		hoverDay(unix) {
+			if(!this.unixInputActive) return;
 			
-			if(dayInput < this.dayInput0)
-				this.dayInput0 = dayInput;
-			else
-				this.dayInput1 = dayInput;
+			if(unix < this.unixInput0) this.unixInput0 = unix;
+			else                       this.unixInput1 = unix;
 		},
 		
 		// presentation
@@ -460,18 +457,18 @@ let MyCalendarMonth = {
 				cls.outside = true;
 			
 			// day used as active input
-			if(this.dayInput0 !== null && this.dayInput1 !== null) {
+			if(this.unixInput0 !== null && this.unixInput1 !== null) {
 				let dDay = new Date(this.date0.valueOf());
 				dDay.setDate(dDay.getDate() + dayOffset);
 				dDay = this.getDateAtUtcZero(dDay);
 				
 				let unix = this.getUnixFromDate(dDay);
-				if(unix >= this.dayInput0 && unix <= this.dayInput1)
+				if(unix >= this.unixInput0 && unix <= this.unixInput1)
 					cls.selected = true;
 			}
 			
 			// day selected
-			if(!this.dayInputActive && this.dateSelect0 !== null && this.dateSelect1 !== null) {
+			if(!this.unixInputActive && this.dateSelect0 !== null && this.dateSelect1 !== null) {
 				let dDay = new Date(this.date0.valueOf());
 				dDay.setDate(dDay.getDate() + dayOffset);
 				

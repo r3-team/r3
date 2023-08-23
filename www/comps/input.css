@@ -342,7 +342,8 @@
 	line-height:28px;
 }
 
-/* calendar overwrites (month view) */
+/* calendar overwrites (month/days views) */
+.input-date .calendar-days,
 .input-date .calendar-month{
 	border-radius:0px;
 	width:98%;
@@ -372,6 +373,13 @@
 	text-align:center;
 	font-size:100%;
 	color:var(--color-font) !important;
+}
+
+.input-date .calendar-days .header,
+.input-date .calendar-days .labels span{
+	padding:0px 3px;
+	font-size:80%;
+	line-height:unset;
 }
 
 /* UUID input */
