@@ -72,8 +72,9 @@ let MyCalendarDateSelect = {
 		:naked="true"
 	/>`,
 	props:{
-		daysShow:  { type:Number, required:true },
-		modelValue:{ type:Date,   required:true }
+		daysShow:  { type:Number,  required:true },
+		modelValue:{ type:Date,    required:true },
+		useHotkeys:{ type:Boolean, required:false, default:false }
 	},
 	computed:{
 		dayInput:{
@@ -125,6 +126,14 @@ let MyCalendarDateSelect = {
 		capApp:(s) => s.$store.getters.captions.calendar
 	},
 	emits:['update:modelValue'],
+	mounted() {
+		if(this.useHotkeys)
+			window.addEventListener('keydown',this.handleHotkeys);
+	},
+	unmounted() {
+		if(this.useHotkeys)
+			window.removeEventListener('keydown',this.handleHotkeys);
+	},
 	methods:{
 		// external
 		getDateFromWeek,
@@ -132,6 +141,12 @@ let MyCalendarDateSelect = {
 		getWeeksInYear,
 		
 		// actions
+		handleHotkeys(e) {
+			switch(e.key) {
+				case 'ArrowLeft':  this.pageMove(false); break;
+				case 'ArrowRight': this.pageMove(true);  break;
+			}
+		},
 		pageMove(forward) {
 			if(this.isMonth)
 				return this.monthInput = forward ? this.monthInput + 1 : this.monthInput - 1;
@@ -256,7 +271,7 @@ let MyCalendar = {
 			:rows="rows"
 		>
 			<template #date-select>
-				<my-calendar-date-select :daysShow="daysShow" :modelValue="date" @update:modelValue="dateSet" />
+				<my-calendar-date-select :daysShow="daysShow" :modelValue="date" :useHotkeys="isSingleField" @update:modelValue="dateSet" />
 			</template>
 			<template #view-select>
 				<my-calendar-view-select :ics="ics" :modelValue="daysShow" @toggle-ics="showIcs = !showIcs" @update:modelValue="daysShowSet" />
@@ -293,7 +308,7 @@ let MyCalendar = {
 			:rows="rows"
 		>
 			<template #date-select>
-				<my-calendar-date-select :daysShow="daysShow" :modelValue="date" @update:modelValue="dateSet" />
+				<my-calendar-date-select :daysShow="daysShow" :modelValue="date" :useHotkeys="isSingleField" @update:modelValue="dateSet" />
 			</template>
 			<template #view-select>
 				<my-calendar-view-select :ics="ics" :modelValue="daysShow" @toggle-ics="showIcs = !showIcs" @update:modelValue="daysShowSet" />
