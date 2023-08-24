@@ -18,6 +18,7 @@ import {
 	getDateAtUtcZero,
 	getDateFormat,
 	getDateFormatNoYear,
+	getDaysBetween,
 	getUnixFromDate,
 	isUnixUtcZero
 } from './shared/time.js';
@@ -374,7 +375,7 @@ let MyCalendarDays = {
 						`top:${hoursStart * s.heightHourPx}px;`;
 					
 					// add event if it starts within calendar
-					const dayIndex = d0.getDate() - s.date0.getDate();
+					const dayIndex = s.getDaysBetween(s.date0,d0);
 					if(dayIndex >= 0 && dayIndex < events.partDays.length) {
 						// add event
 						const day           = events.partDays[dayIndex];
@@ -503,6 +504,7 @@ let MyCalendarDays = {
 		getDateAtUtcZero,
 		getDateFormat,
 		getDateFormatNoYear,
+		getDaysBetween,
 		getStringFilled,
 		getUnixFromDate,
 		isUnixUtcZero,
