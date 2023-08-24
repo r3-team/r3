@@ -141,7 +141,7 @@ let MyCalendarMonth = {
 							:class="{ clickable:daysSelectable }"
 						>
 							<span :style="getColor('background-color',e.color)">
-								{{ getPartCaption(e.date0) }}
+								{{ getPartCaption(e.unix0) }}
 							</span>
 							
 							<template v-for="(v,i) in e.values">
@@ -234,19 +234,27 @@ let MyCalendarMonth = {
 				});
 			}
 			
+			const getFullDayPosInDay = function(events) {
+				let cnt = 0;
+				for(let e of events) {
+					if(e.fullDay) cnt++;
+				}
+				return cnt;
+			};
+			
 			// each row is one event (partial day, full day or spanning multiple days)
 			for(let i = 0, j = s.rows.length; i < j; i++) {
 				
 				let ev = {
 					color:s.hasColor ? s.rows[i].values[2] : null,
-					date0:s.rows[i].values[0],
-					date1:s.rows[i].values[1],
 					entryFirst:true,
 					entryLast:false,
 					fullDay:false,
 					fullDaysLeft:0,
 					placeholder:false,
 					row:s.rows[i],
+					unix0:s.rows[i].values[0],
+					unix1:s.rows[i].values[1],
 					values:[]
 				};
 				
@@ -260,15 +268,15 @@ let MyCalendarMonth = {
 				// check for full day event (stored as UTC zero)
 				// add timezone offset to display correctly on calendar
 				// because DST can be different for each date, we must use their individual offsets
-				if(s.isUnixUtcZero(ev.date0) && s.isUnixUtcZero(ev.date1)) {
-					ev.date0 += new Date(ev.date0 * 1000).getTimezoneOffset() * 60;
-					ev.date1 += new Date(ev.date1 * 1000).getTimezoneOffset() * 60;
+				if(s.isUnixUtcZero(ev.unix0) && s.isUnixUtcZero(ev.unix1)) {
+					ev.unix0 += new Date(ev.unix0 * 1000).getTimezoneOffset() * 60;
+					ev.unix1 += new Date(ev.unix1 * 1000).getTimezoneOffset() * 60;
 					ev.fullDay = true;
-					ev.fullDaysLeft = ((ev.date1 - ev.date0) / 86400)+1;
+					ev.fullDaysLeft = ((ev.unix1 - ev.unix0) / 86400)+1;
 				}
 				
 				// calculate position from start of calendar
-				let dEvent = new Date(ev.date0 * 1000);
+				let dEvent = new Date(ev.unix0 * 1000);
 				dEvent.setHours(0,0,0); // use midnight
 				
 				let fullDaysLeft  = ev.fullDaysLeft;
@@ -279,12 +287,12 @@ let MyCalendarMonth = {
 				let eventPosition;
 				
 				if(s.dayOffsetWithinBounds(daysFromStart)) {
-					eventPosition = days[daysFromStart].events.length;
+					eventPosition = getFullDayPosInDay(days[daysFromStart].events);
 					days[daysFromStart].events.push(ev);
 				}
 				else {
 					// if event started outside of calendar bounds, use position from first day
-					eventPosition = days[0].events.length;
+					eventPosition = getFullDayPosInDay(days[0].events);
 				}
 				
 				// event is less than 1 day, is only shown once
@@ -296,7 +304,7 @@ let MyCalendarMonth = {
 					
 					// check if event reaches into next day
 					dEvent.setDate(dEvent.getDate()+1);
-					if(dEvent.getTime() / 1000 > ev.date1)
+					if(dEvent.getTime() / 1000 > ev.unix1)
 						break;
 					
 					// get to next day
@@ -309,11 +317,12 @@ let MyCalendarMonth = {
 					
 					// reset event position if it reaches into next week
 					if(daysFromStart !== 0 && daysFromStart % 7 === 0)
-						eventPosition = days[daysFromStart].events.length;
+						eventPosition = getFullDayPosInDay(days[daysFromStart].events);
 					
 					// add placeholder events to fill empty line space
 					while(days[daysFromStart].events.length < eventPosition) {
 						days[daysFromStart].events.push({
+							fullDay:true,
 							placeholder:true
 						});
 					}
@@ -423,8 +432,8 @@ let MyCalendarMonth = {
 			// currently, calendar is always 42 days
 			return day >= 0 && day <= 41;
 		},
-		getPartCaption(date0) {
-			let d = new Date(date0 * 1000);
+		getPartCaption(unix0) {
+			let d = new Date(unix0 * 1000);
 			let h = this.getStringFilled(d.getHours(),2,"0");
 			let m = this.getStringFilled(d.getMinutes(),2,"0");
 			return `${h}:${m}`;
@@ -509,7 +518,6 @@ let MyCalendarMonth = {
 			return d.getDate();
 		},
 		getWeekDayCaption(dayOffset) {
-			
 			if(!this.settings.sundayFirstDow) {
 				dayOffset++;
 				
