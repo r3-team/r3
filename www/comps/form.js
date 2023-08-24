@@ -587,7 +587,17 @@ let MyForm = {
 		fieldIdsChanged:(s) => {
 			let out = [];
 			for(let fieldId in s.fieldIdMapData) {
-				let ia = s.getIndexAttributeIdByField(s.fieldIdMapData[fieldId],false);
+				const f  = s.fieldIdMapData[fieldId];
+				let   ia = s.getIndexAttributeIdByField(f,false);
+				
+				if(!s.valueIsEqual(s.values[ia],s.valuesOrg[ia]))
+					out.push(fieldId);
+				
+				if(f.attributeIdAlt === null)
+					continue;
+				
+				ia = s.getIndexAttributeIdByField(f,true);
+			
 				if(!s.valueIsEqual(s.values[ia],s.valuesOrg[ia]))
 					out.push(fieldId);
 			}
