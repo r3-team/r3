@@ -416,6 +416,9 @@ let MyCalendar = {
 			});
 		}
 		
+		// apply field options (before paramsUpdated)
+		this.daysShow = parseInt(this.fieldOptionGet(this.fieldId,'daysShow',42));
+		
 		if(this.usesPageHistory) {
 			// set initial states via route parameters
 			this.paramsUpdated();     // load existing parameters from route query
@@ -423,8 +426,6 @@ let MyCalendar = {
 		} else {
 			this.choiceId = this.choiceIdDefault;
 		}
-		
-		this.daysShow = parseInt(this.fieldOptionGet(this.fieldId,'daysShow',42));
 		this.ready = true;
 	},
 	methods:{
@@ -518,25 +519,14 @@ let MyCalendar = {
 			if(this.choiceId !== params.choice.value)   this.choiceId = params.choice.value;
 			if(this.daysShow !== params.daysShow.value) this.daysShow = params.daysShow.value;
 			
-			const dateChanges =
-				this.date.getFullYear() !== params.year.value
-				|| (this.isMonth && this.date.getMonth()    !== params.month.value)
-				|| (this.isWeek  && this.getWeek(this.date) !== params.week.value)
-				|| (this.isDays && (
-					this.date.getDate()     !== params.day.value
-					|| this.date.getMonth() !== params.month.value)
-			);
+			let d = new Date(this.date.getTime());
+			d.setFullYear(params.year.value);
 			
-			if(dateChanges) {
-				let d = new Date(this.date.getTime());
-				d.setFullYear(params.year.value);
-				
-				if(this.isDays || this.isMonth) d.setMonth(params.month.value);
-				if(this.isDays)                 d.setDate(params.day.value);
-				if(this.isWeek)                 d = this.getDateFromWeek(params.week.value,d.getFullYear());
-				
-				this.date = d;
-			}
+			if(this.isDays || this.isMonth) d.setMonth(params.month.value);
+			if(this.isDays)                 d.setDate(params.day.value);
+			if(this.isWeek)                 d = this.getDateFromWeek(params.week.value,d.getFullYear());
+			
+			this.date = d;
 		},
 		
 		// backend calls

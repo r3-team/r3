@@ -279,8 +279,7 @@ let MyCalendarMonth = {
 				let dEvent = new Date(ev.unix0 * 1000);
 				dEvent.setHours(0,0,0); // use midnight
 				
-				let fullDaysLeft  = ev.fullDaysLeft;
-				let daysFromStart = s.getDaysBetween(s.date0,dEvent)+1;
+				let daysFromStart = s.getDaysBetween(s.date0,dEvent);
 				
 				// show first event only if within calendar bounds
 				// store position in case we have a multi day event
@@ -300,6 +299,7 @@ let MyCalendarMonth = {
 					continue;
 				
 				// place following days
+				let fullDaysLeft  = ev.fullDaysLeft;
 				while(true) {
 					
 					// check if event reaches into next day

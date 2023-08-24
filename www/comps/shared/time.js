@@ -2,7 +2,7 @@ import {getStringFilled} from './generic.js';
 
 // set both dates to UTC zero to remove issues with DST
 export function getDaysBetween(d0,d1) {
-	return Math.floor( (getDateAtUtcZero(d1)-getDateAtUtcZero(d0)) / (1000*60*60*24) );
+	return (getUnixFromDate(getDateAtUtcZero(d1)) - getUnixFromDate(getDateAtUtcZero(d0))) / 86400;
 };
 
 // returns date shifted by local timezone offset (added or removed)
@@ -43,10 +43,6 @@ export function getDateFormatNoYear(d,format) {
 	return format;
 };
 
-export function getUnixFromDate(d) {
-	return Math.floor(d.getTime() / 1000);
-};
-
 export function getDateNoUtcZero(dInput) {
 	let d = new Date(dInput.getTime());
 	
@@ -80,6 +76,10 @@ export function getUtcTimeStringFromUnix(unixTime) {
 
 export function isUnixUtcZero(unixTime) {
 	return unixTime % 86400 === 0;
+};
+
+export function getUnixFromDate(d) {
+	return Math.floor(d.getTime() / 1000);
 };
 
 export function getUnixShifted(unixTime,add) {
