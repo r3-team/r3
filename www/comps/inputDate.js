@@ -54,9 +54,9 @@ let MyInputDateEntry = {
 	
 		<!-- mobile date inputs -->
 		<div class="mobile-inputs" v-if="isMobile">
-			<input step="1" type="datetime-local" v-if="isDate && isTime" v-model="valueDatetimeInput" :disabled="isReadonly" />
-			<input step="1" type="date" v-if="isDate && !isTime" v-model="valueDateInput" :disabled="isReadonly" />
-			<input step="1" type="time" v-if="!isDate && isTime" v-model="valueTimeInput" :disabled="isReadonly" />
+			<input step="1" type="datetime-local" v-if="isDate && isTime" v-model="inputMobileDatetime" :disabled="isReadonly" />
+			<input step="1" type="date" v-if="isDate && !isTime" v-model="inputMobileDate" :disabled="isReadonly" />
+			<input step="1" type="time" v-if="!isDate && isTime" v-model="inputMobileTime" :disabled="isReadonly" />
 		</div>
 		
 		<!-- non-mobile date inputs -->
@@ -84,7 +84,7 @@ let MyInputDateEntry = {
 				@update:modelValue="parseInput('H',$event)"
 				:caption="capApp.inputHour"
 				:isReadonly="isReadonly"
-				:modelValue="hour"
+				:modelValue="inputHour"
 				:size="2"
 			/>
 			<span>:</span>
@@ -92,7 +92,7 @@ let MyInputDateEntry = {
 				@update:modelValue="parseInput('M',$event)"
 				:caption="capApp.inputMinute"
 				:isReadonly="isReadonly"
-				:modelValue="minute"
+				:modelValue="inputMinute"
 				:size="2"
 			/>
 			<span>:</span>
@@ -100,62 +100,43 @@ let MyInputDateEntry = {
 				@update:modelValue="parseInput('S',$event)"
 				:caption="capApp.inputSecond"
 				:isReadonly="isReadonly"
-				:modelValue="second"
+				:modelValue="inputSecond"
 				:size="2"
 			/>
 		</template>
 	</div>`,
 	props:{
-		captionPrefix:{ type:String,  required:false, default:'' },
-		isDate:       { type:Boolean, required:false, default:false },
-		isTime:       { type:Boolean, required:false, default:false },
-		isReadonly:   { type:Boolean, required:false, default:false },
+		captionPrefix:{ type:String,  required:true },
+		isDate:       { type:Boolean, required:true },
+		isTime:       { type:Boolean, required:true },
+		isReadonly:   { type:Boolean, required:true },
 		modelValue:   { required:true }
 	},
 	emits:['update:modelValue'],
-	watch:{
-		modelValue:{
-			handler(v) {
-				// fill input fields if value changed
-				if(v === null) {
-					this.year   = '';
-					this.month  = '';
-					this.day    = '';
-					this.hour   = '';
-					this.minute = '';
-					this.second = '';
-					return;
-				}
-				let d = new Date(v * 1000);
-				
-				// non-datetime is always handled as UTC
-				if(!this.isDateTime)
-					d = this.getDateShifted(d,true);
-				
-				this.year   = d.getFullYear();
-				this.month  = this.getStringFilled(d.getMonth()+1,2,'0');
-				this.day    = this.getStringFilled(d.getDate(),2,'0');
-				this.hour   = this.getStringFilled(d.getHours(),2,'0');
-				this.minute = this.getStringFilled(d.getMinutes(),2,'0');
-				this.second = this.getStringFilled(d.getSeconds(),2,'0');
-			},
-			immediate:true
-		}
-	},
-	data() {
-		return {
-			year:'', month:'',  day:'',
-			hour:'', minute:'', second:''
-		};
-	},
 	computed:{
+		localDate() {
+			if(this.modelValue === null) return null;
+			
+			// non-datetime is always handled as UTC
+			let d = new Date(this.modelValue * 1000);
+			return this.isDateTime ? d : this.getDateShifted(d,true);
+		},
+		
+		// inputs
+		inputYear:  (s) => s.localDate === null ? '' : s.localDate.getFullYear(),
+		inputMonth: (s) => s.localDate === null ? '' : s.getStringFilled(s.localDate.getMonth()+1,2,'0'),
+		inputDay:   (s) => s.localDate === null ? '' : s.getStringFilled(s.localDate.getDate(),2,'0'),
+		inputHour:  (s) => s.localDate === null ? '' : s.getStringFilled(s.localDate.getHours(),2,'0'),
+		inputMinute:(s) => s.localDate === null ? '' : s.getStringFilled(s.localDate.getMinutes(),2,'0'),
+		inputSecond:(s) => s.localDate === null ? '' : s.getStringFilled(s.localDate.getSeconds(),2,'0'),
+		
 		/* alternative inputs for mobile devices */
 		/* uses datetime-local for native datetime inputs on mobile devices */
 		/* works reliably with format 2019-12-31T12:12:00 */
-		valueDatetimeInput:{
+		inputMobileDatetime:{
 			get() {
 				return this.modelValue !== null
-					? `${this.year}-${this.month}-${this.day}T${this.hour}:${this.minute}:${this.second}` : '';
+					? `${this.inputYear}-${this.inputMonth}-${this.inputDay}T${this.inputHour}:${this.inputMinute}:${this.inputSecond}` : '';
 			},
 			set(v) {
 				let d = new Date(v);
@@ -163,10 +144,10 @@ let MyInputDateEntry = {
 					this.$emit('update:modelValue',d.getTime() / 1000);
 			}
 		},
-		valueDateInput:{
+		inputMobileDate:{
 			get() {
 				return this.modelValue !== null
-					? `${this.year}-${this.month}-${this.day}` : '';
+					? `${this.inputYear}-${this.inputMonth}-${this.inputDay}` : '';
 			},
 			set(v) {
 				let d = new Date(v);
@@ -174,10 +155,10 @@ let MyInputDateEntry = {
 					this.$emit('update:modelValue',d.getTime() / 1000);
 			}
 		},
-		valueTimeInput:{
+		inputMobileTime:{
 			get() {
 				return this.modelValue !== null
-					? `${this.hour}:${this.minute}:${this.second}` : '';
+					? `${this.inputHour}:${this.inputMinute}:${this.inputSecond}` : '';
 			},
 			set(v) {
 				let m = v.match(/^(\d+)\:(\d+)\:(\d+)$/);
@@ -278,11 +259,11 @@ let MyInputDateEntry = {
 		},
 		getInputValue(position) {
 			switch(this.getInputType(position)) {
-				case 'Y': return this.year;   break;
-				case 'm': return this.month;  break;
-				case 'd': return this.day;    break;
-				case 'H': return this.hour;   break;
-				case 'M': return this.minute; break;
+				case 'Y': return this.inputYear;   break;
+				case 'm': return this.inputMonth;  break;
+				case 'd': return this.inputDay;    break;
+				case 'H': return this.inputHour;   break;
+				case 'M': return this.inputMinute; break;
 			}
 		}
 	}
@@ -307,7 +288,7 @@ let MyInputDate = {
 			<div class="entries">
 				<my-input-date-entry
 					v-model="unixFromInput"
-					:caption-prefix="isRange ? capApp.dateFrom : ''"
+					:captionPrefix="isRange ? capApp.dateFrom : ''"
 					:isDate="isDate"
 					:isTime="isTime && !fullDay"
 					:isReadonly="isReadonly"
@@ -316,7 +297,7 @@ let MyInputDate = {
 				<my-input-date-entry
 					v-if="isRange"
 					v-model="unixToInput"
-					:caption-prefix="capApp.dateTo"
+					:captionPrefix="capApp.dateTo"
 					:isDate="isDate"
 					:isTime="isTime && !fullDay"
 					:isReadonly="isReadonly"
@@ -391,8 +372,8 @@ let MyInputDate = {
 		</div>
 	</div>`,
 	props:{
-		isDate:    { type:Boolean, required:false, default:false },
-		isTime:    { type:Boolean, required:false, default:false },
+		isDate:    { type:Boolean, required:true },
+		isTime:    { type:Boolean, required:true },
 		isRange:   { type:Boolean, required:false, default:false },
 		isReadonly:{ type:Boolean, required:false, default:false },
 		unixFrom:  { required:true },
