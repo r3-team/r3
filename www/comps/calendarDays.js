@@ -1,25 +1,14 @@
-import MyInputCollection        from './inputCollection.js';
-import MyForm                   from './form.js';
 import MyValueRich              from './valueRich.js';
 import {getColumnBatches}       from './shared/column.js';
 import {getColumnIndexesHidden} from './shared/form.js';
-import {srcBase64}              from './shared/image.js';
-import {getCaption}             from './shared/language.js';
-import {
-	fieldOptionGet,
-	fieldOptionSet
-} from './shared/field.js';
 import {
 	colorAdjustBg,
 	colorMakeContrastFont,
 	getStringFilled
 } from './shared/generic.js';
 import {
-	getDateAtUtcZero,
-	getDateFormat,
 	getDateFormatNoYear,
 	getDaysBetween,
-	getUnixFromDate,
 	isUnixUtcZero
 } from './shared/time.js';
 export {MyCalendarDays as default};
@@ -64,211 +53,100 @@ let MyCalendarDaysEvent = {
 
 let MyCalendarDays = {
 	name:'my-calendar-days',
-	components:{
-		MyCalendarDaysEvent,
-		MyInputCollection
-	},
+	components:{ MyCalendarDaysEvent },
 	template:`<div class="calendar-days">
-		
-		<!-- header -->
-		<div class="top lower">
-			<div class="area nowrap">
-				<my-button image="new.png"
-					v-if="hasCreate"
-					@trigger="$emit('open-form',[],[],false)"
-					@trigger-middle="$emit('open-form',[],[],true)"
-					:caption="isMobile ? '' : capGen.button.new"
-					:captionTitle="capGen.button.newHint"
-				/>
+		<div class="days full">
+			<div class="labels fullDay">
+				<div class="header"></div>
+				<span v-if="!isInput && events.fullDays.length !== 0"
+					:style="events.fullDaysHeight"
+				>{{ capApp.fullDay }}</span>
 			</div>
-			
-			<div class="area nowrap default-inputs">
-				<img class="icon"
-					v-if="iconId !== null"
-					:src="srcBase64(iconIdMap[iconId].file)"
-				/>
-				<slot name="date-select" />
-			</div>
-			
-			<div class="area wrap default-inputs">
-				<my-input-collection class="selector"
-					v-for="c in collections"
-					@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event)"
-					:collectionId="c.collectionId"
-					:columnIdDisplay="c.columnIdDisplay"
-					:key="c.collectionId"
-					:modelValue="collectionIdMapIndexes[c.collectionId]"
-					:multiValue="c.multiValue"
-				/>
-				
-				<select class="selector"
-					v-if="hasChoices"
-					v-model="choiceIdInput"
-				>
-					<option v-for="c in choices" :value="c.id">
-						{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
-					</option>
-				</select>
-				
-				<template v-if="!isInput && !isMobile">
-					<my-button image="search.png"
-						@trigger="zoom = zoomDefault"
-						:active="zoom !== zoomDefault"
-						:captionTitle="capGen.button.zoomReset"
-						:naked="true"
+			<div v-for="d in events.fullDays" class="day" :class="{ weekend:d.weekend }">
+				<div class="header">{{ d.caption }}</div>
+				<div class="events-full" :style="events.fullDaysHeight">
+					
+					<!-- date input (days) -->
+					<div class="dayInput clickable"
+						@mousedown.left="dateClick(d.unix,true,true)"
+						@mouseover="dateHover(d.unix)"
+						@mouseup.left="dateClick(d.unix,false,true)"
+						:class="{ active:dateInputActive(d.unix,true) }"
+					></div>
+					
+					<my-calendar-days-event class="full"
+						v-for="ei in d.eventIndexes"
+						@click="$emit('open-form',[events.fullDaysEvents[ei].row],[],false)"
+						@click-middle="$emit('open-form',[events.fullDaysEvents[ei].row],[],true)"
+						@clipboard="$emit('clipboard')"
+						:columns="columns"
+						:columnBatches="columnBatches"
+						:row="events.fullDaysEvents[ei].row"
+						:style="events.fullDaysEvents[ei].style"
+						:styleCard="events.fullDaysEvents[ei].styleCard"
+						:values="events.fullDaysEvents[ei].values"
 					/>
-					<input class="zoomSlider" type="range" min="2" max="8"
-						v-model="zoom"
-						@change="fieldOptionSet(fieldId,'zoom',$event.target.value);"
-					>
-				</template>
-				
-				<slot name="ics-button" />
-				<slot name="view-select" />
-				
-				<my-button image="calendar.png"
-					v-if="!isMobile"
-					@trigger="goToToday()"
-					:caption="!isMobile ? capApp.today : ''"
-					:captionTitle="capApp.todayHint"
-				/>
+				</div>
 			</div>
 		</div>
-		
-		<div class="resultsWrap">
-			<div class="results">
-				<div class="days full">
-					<div class="labels fullDay">
-						<div class="header"></div>
-						<span v-if="!isInput && events.fullDays.length !== 0"
-							:style="events.fullDaysHeight"
-						>{{ capApp.fullDay }}</span>
-					</div>
-					<div v-for="d in events.fullDays" class="day" :class="{ weekend:d.weekend }">
-						<div class="header">{{ d.caption }}</div>
-						<div class="events-full" :style="events.fullDaysHeight">
-							
-							<!-- date input (days) -->
-							<div class="dayInput clickable"
-								@mousedown.left="dateClick(d.unix,true,true)"
-								@mouseover="dateHover(d.unix)"
-								@mouseup.left="dateClick(d.unix,false,true)"
-								:class="{ active:dateInputActive(d.unix,true) }"
-							></div>
-							
-							<my-calendar-days-event class="full"
-								v-for="ei in d.eventIndexes"
-								@click="$emit('open-form',[events.fullDaysEvents[ei].row],[],false)"
-								@click-middle="$emit('open-form',[events.fullDaysEvents[ei].row],[],true)"
-								@clipboard="$emit('clipboard')"
-								:columns="columns"
-								:columnBatches="columnBatches"
-								:row="events.fullDaysEvents[ei].row"
-								:style="events.fullDaysEvents[ei].style"
-								:styleCard="events.fullDaysEvents[ei].styleCard"
-								:values="events.fullDaysEvents[ei].values"
-							/>
-						</div>
-					</div>
-				</div>
-				<div class="days">
-					<div class="labels">
-						<span v-for="i in 24" :style="heightHourStyle" :ref="refHourLabel + i">
-							{{ getStringFilled(i-1,2,'0')+':00' }}
-						</span>
-					</div>
-					<div class="day" v-for="(d,i) in events.partDays" :class="{ weekend:d.weekend }">
-						
-						<!-- date input (hours) -->
-						<div class="hourInput clickable"
-							v-for="h in d.hours"
-							@mousedown.left="dateClick(h,true,false)"
-							@mouseover="dateHover(h)"
-							@mouseup.left="dateClick(h,false,false)"
-							:class="{ active:dateInputActive(h,false) }"
-							:style="heightHourStyle"
-						></div>
-						
-						<my-calendar-days-event
-							v-for="e in d.events"
-							@click="$emit('open-form',[e.row],[],false)"
-							@click-middle="$emit('open-form',[e.row],[],true)"
-							@clipboard="$emit('clipboard')"
-							:columns="columns"
-							:columnBatches="columnBatches"
-							:row="e.row"
-							:style="e.style"
-							:styleCard="e.styleCard"
-							:values="e.values"
-						/>
-					</div>
-				</div>
+		<div class="days">
+			<div class="labels">
+				<span v-for="i in 24" :style="heightHourStyle" :ref="refHourLabel + i">
+					{{ getStringFilled(i-1,2,'0')+':00' }}
+				</span>
 			</div>
-			
-			<!-- inline form -->
-			<my-form
-				v-if="popUpFormInline !== null"
-				@close="$emit('close-inline')"
-				@record-deleted="$emit('reload')"
-				@record-updated="$emit('reload')"
-				@records-open="popUpFormInline.recordIds = $event"
-				:attributeIdMapDef="popUpFormInline.attributeIdMapDef"
-				:formId="popUpFormInline.formId"
-				:hasHelp="false"
-				:hasLog="false"
-				:isPopUp="true"
-				:isPopUpFloating="false"
-				:moduleId="popUpFormInline.moduleId"
-				:recordIds="popUpFormInline.recordIds"
-				:style="popUpFormInline.style"
-			/>
+			<div class="day" v-for="(d,i) in events.partDays" :class="{ weekend:d.weekend }">
+				
+				<!-- date input (hours) -->
+				<div class="hourInput clickable"
+					v-for="h in d.hours"
+					@mousedown.left="dateClick(h,true,false)"
+					@mouseover="dateHover(h)"
+					@mouseup.left="dateClick(h,false,false)"
+					:class="{ active:dateInputActive(h,false) }"
+					:style="heightHourStyle"
+				></div>
+				
+				<my-calendar-days-event
+					v-for="e in d.events"
+					@click="$emit('open-form',[e.row],[],false)"
+					@click-middle="$emit('open-form',[e.row],[],true)"
+					@clipboard="$emit('clipboard')"
+					:columns="columns"
+					:columnBatches="columnBatches"
+					:row="e.row"
+					:style="e.style"
+					:styleCard="e.styleCard"
+					:values="e.values"
+				/>
+			</div>
 		</div>
 	</div>`,
 	props:{
-		choiceId:   { required:false, default:null },
-		choices:    { type:Array,   required:false, default:() => [] },
 		columns:    { type:Array,   required:false, default:() => [] },
-		collections:{ type:Array,   required:false, default:() => [] },
-		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
 		date:       { type:Date,    required:true }, // selected date to work around
 		date0:      { type:Date,    required:true }, // start date of calendar
 		date1:      { type:Date,    required:true }, // end date of calendar
 		dateSelect0:{ required:false, default:null },
 		dateSelect1:{ required:false, default:null },
 		daysShow:   { type:Number,  required:true },
-		iconId:     { required:false, default:null },
 		isInput:    { type:Boolean, required:false, default:false },
-		fieldId:    { type:String,  required:false, default:'' },
-		filters:    { type:Array,   required:false, default:() => [] },
-		formLoading:{ type:Boolean, required:false, default:false },
 		hasColor:   { type:Boolean, required:false, default:false }, // color attribute exists
-		hasCreate:  { type:Boolean, required:false, default:false }, // has action for creating new record
 		hasOpenForm:{ type:Boolean, required:false, default:false },
-		popUpFormInline:{ required:false, default:null },
-		rows:       { type:Array,   required:false, default:() => [] }
+		rows:       { type:Array,   required:false, default:() => [] },
+		zoom:       { type:Number,  required:false, default:5 }
 	},
-	emits:[
-		'clipboard','close-inline','date-selected','open-form','reload',
-		'set-choice-id','set-collection-indexes','set-date'
-	],
+	emits:['clipboard','date-selected','open-form'],
 	data() {
 		return {
 			refHourLabel:'hourLabel',
 			unixInput0:null,       // dates being hovered over for event input, start
 			unixInput1:null,       // dates being hovered over for event input, end
 			unixInputActive:false, // activated on first mousedown over an empty date input
-			unixInputDay:false,
-			zoom:5,
-			zoomDefault:5
+			unixInputDay:false
 		};
 	},
 	computed:{
-		// inputs
-		choiceIdInput:{
-			get()  { return this.choiceId; },
-			set(v) { this.$emit('set-choice-id',v); }
-		},
-		
 		events:(s) => {
 			const unix0Cal    = Math.floor(s.date0.getTime() / 1000); // unix start of calendar
 			const unix0CalDay = Math.floor(s.date0.getTime() / 1000) - s.date0.getTimezoneOffset()*60;
@@ -464,7 +342,6 @@ let MyCalendarDays = {
 		// simple
 		columnBatches:      (s) => s.getColumnBatches(s.columns,[],false),
 		columnIndexesHidden:(s) => s.getColumnIndexesHidden(s.columns),
-		hasChoices:         (s) => s.choices.length > 1,
 		heightHourPx:       (s) => (s.isInput ? 3 : 11) * s.zoom,
 		heightHourPxFull:   (s) => 8 * s.zoom,
 		heightHourStyle:    (s) => `height:${s.heightHourPx}px;`,
@@ -473,15 +350,10 @@ let MyCalendarDays = {
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
 		capApp:        (s) => s.$store.getters.captions.calendar,
 		capGen:        (s) => s.$store.getters.captions.generic,
 		isMobile:      (s) => s.$store.getters.isMobile,
 		settings:      (s) => s.$store.getters.settings
-	},
-	beforeCreate() {
-		// import at runtime due to circular dependencies
-		this.$options.components.MyForm = MyForm;
 	},
 	mounted() {
 		if(!this.isInput) {
@@ -491,27 +363,17 @@ let MyCalendarDays = {
 			if(typeof el !== 'undefined')
 				el[0].scrollIntoView();
 		}
-		
-		// load field options
-		this.zoom = this.fieldOptionGet(this.fieldId,'zoom',this.zoomDefault);
 	},
 	methods:{
 		// externals
 		colorAdjustBg,
 		colorMakeContrastFont,
-		fieldOptionGet,
-		fieldOptionSet,
-		getCaption,
 		getColumnBatches,
 		getColumnIndexesHidden,
-		getDateAtUtcZero,
-		getDateFormat,
 		getDateFormatNoYear,
 		getDaysBetween,
 		getStringFilled,
-		getUnixFromDate,
 		isUnixUtcZero,
-		srcBase64,
 		
 		// actions
 		dateClick(unix,mousedown,isDay) {
@@ -534,14 +396,6 @@ let MyCalendarDays = {
 			
 			if(unix < this.unixInput0) this.unixInput0 = unix;
 			else                       this.unixInput1 = unix;
-		},
-		goToToday() {
-			let now = new Date();
-			if(now < this.date0 || now > this.date1)
-				return this.$emit('set-date',now);
-			
-			if(this.hasOpenForm)
-				this.$emit('date-selected',this.getDateAtUtcZero(now),false,false);
 		},
 		
 		// presentation

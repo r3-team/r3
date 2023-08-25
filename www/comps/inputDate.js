@@ -330,45 +330,41 @@ let MyInputDate = {
 			</div>
 		</div>
 		
-		<div class="calendar-wrap calendar"
-			v-if="showCalendar"
-			:class="{ upwards:showUpwards }"
-		>
-			<my-calendar-days
-				v-if="!fullDay"
-				@set-date="date = $event"
-				@date-selected="dateSet"
-				:class="{ upwards:showUpwards }"
-				:date="date"
-				:date0="date0"
-				:date1="date1"
-				:dateSelect0="dateSelect0"
-				:dateSelect1="dateSelect1"
-				:daysShow="7"
-				:isInput="true"
-			>
-				<template #date-select>
-					<my-calendar-date-select v-model="date" :daysShow="7" />
-				</template>
-			</my-calendar-days>
-			
-			<my-calendar-month
-				v-if="fullDay"
-				@set-date="date = $event"
-				@date-selected="dateSet"
-				:class="{ upwards:showUpwards }"
-				:date="date"
-				:date0="date0"
-				:date1="date1"
-				:dateSelect0="dateSelect0"
-				:dateSelect1="dateSelect1"
-				:inputTime="isTime"
-				:isInput="true"
-			>
-				<template #date-select>
-					<my-calendar-date-select v-model="date" :daysShow="42" />
-				</template>
-			</my-calendar-month>
+		<div class="input-date-cal-wrap" v-if="showCalendar" :class="{ upwards:showUpwards }">
+			<div class="input-date-cal" :class="{ upwards:showUpwards }">
+				<div class="top lower">
+					<div class="area nowrap"></div>
+					<div class="area nowrap default-inputs">
+						<my-calendar-date-select v-model="date" :daysShow="fullDay ? 42 : 7" />
+					</div>
+					<div class="area nowrap"></div>
+				</div>
+				
+				<my-calendar-days
+					v-if="!fullDay"
+					@set-date="date = $event"
+					@date-selected="dateSet"
+					:date="date"
+					:date0="date0"
+					:date1="date1"
+					:dateSelect0="dateSelect0"
+					:dateSelect1="dateSelect1"
+					:daysShow="7"
+					:isInput="true"
+				/>
+				<my-calendar-month
+					v-if="fullDay"
+					@set-date="date = $event"
+					@date-selected="dateSet"
+					:date="date"
+					:date0="date0"
+					:date1="date1"
+					:dateSelect0="dateSelect0"
+					:dateSelect1="dateSelect1"
+					:inputTime="isTime"
+					:isInput="true"
+				/>
+			</div>
 		</div>
 	</div>`,
 	props:{
@@ -427,7 +423,8 @@ let MyInputDate = {
 		date1:(s) => s.getCalendarCutOff1((s.fullDay ? 42 : 7),new Date(s.date.valueOf()),s.date0),
 		
 		// stores
-		capApp:(s) => s.$store.getters.captions.input.date
+		capApp:  (s) => s.$store.getters.captions.input.date,
+		isMobile:(s) => s.$store.getters.isMobile
 	},
 	methods:{
 		// externals

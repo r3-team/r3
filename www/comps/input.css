@@ -294,17 +294,38 @@
 	align-self:center;
 	flex:0 1 auto;
 }
-.input-date .calendar-wrap{
+.input-date-cal-wrap{
 	flex:0 0 auto;
 	max-width:500px;
 	position:absolute;
 	left:1%;
 	right:1%;
 	bottom:0px;
+	overflow:visible;
 }
-.input-date .calendar-wrap.upwards{
+.input-date-cal-wrap.upwards{
 	top:0px;
 	bottom:unset;
+}
+.input-date-cal{
+	width:100%;
+	position:absolute;
+	top:0px;
+	border-radius:0px;
+	background-color:var(--color-bg);
+	border:1px solid var(--color-border);
+	border-top:none;
+	border-bottom-width:2px;
+	box-shadow:1px 6px 12px var(--color-shade);
+	z-index:var(--z-index-input-date-month);
+	display:flex;
+	flex-flow:column nowrap;
+}
+.input-date-cal.upwards{
+	top:unset;
+	bottom:0px;
+	border-top:2px solid var(--color-border);
+	border-bottom:none;
 }
 
 /* date time inputs */
@@ -343,24 +364,6 @@
 }
 
 /* calendar overwrites (month/days views) */
-.input-date .calendar-days,
-.input-date .calendar-month{
-	border-radius:0px;
-	width:98%;
-	top:0px;
-	left:1%;
-	position:absolute;
-	background-color:var(--color-bg);
-	border:1px solid var(--color-border);
-	border-top:none;
-	border-bottom-width:2px;
-	box-shadow:1px 6px 12px var(--color-shade);
-	z-index:var(--z-index-input-date-month);
-}
-.input-date .calendar-month.upwards{
-	top:unset;
-	bottom:0px;
-}
 .input-date .calendar-month .day{
 	min-height:unset !important;
 }

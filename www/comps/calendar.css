@@ -1,10 +1,8 @@
 .calendar{
 	flex:1 1 auto;
 	display:flex;
-	flex-flow:row nowrap;
+	flex-flow:column nowrap;
 	box-shadow:1px 1px 4px var(--color-shade);
-}
-.calendar.overflow{
 	overflow:auto;
 }
 .calendar .form-wrap.popUp{
@@ -12,14 +10,27 @@
 	width:100%;
 	z-index:var(--z-index-inline-pop-up-form);
 }
-.calendar .date-input{
-	flex:1 1 50px;
-	max-width:70px;
-	min-width:auto;
+.calendar .zoomSlider{
+	width:80px !important;
+}
+.calendar-content{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
+	overflow:auto;
+}
+
+/* selector */
+.calendar-select .date-input{
+	width:auto;
+	min-width:unset;
 	text-align:center;
 }
-.calendar .date-input.day{
-	max-width:42px;
+.calendar-select .date-input.short{
+	width:42px;
+}
+.calendar-select .date-input.medium{
+	width:60px;
 }
 
 /* days view */
@@ -28,16 +39,8 @@
 	display:flex;
 	flex-flow:column nowrap;
 }
-.calendar-days .resultsWrap{
-	flex:1 1 auto;
+.calendar-days.scroll{
 	overflow:auto;
-	display:flex;
-	flex-flow:row nowrap;
-}
-.calendar-days .results{
-	display:flex;
-	flex-flow:column nowrap;
-	flex:1 1 auto;
 }
 .calendar-days .labels{
 	width:60px;
@@ -120,9 +123,6 @@
 .calendar-days .event .batch.vertical{
 	flex-flow:column nowrap;
 }
-.calendar-days .zoomSlider{
-	width:80px !important;
-}
 .calendar-days .dayInput{
 	height:100%;
 }
@@ -146,40 +146,32 @@
 	flex:1 1 auto;
 	min-width:300px; /* for usable calender input */
 	display:flex;
+	flex-flow:column nowrap;
 	border-radius:3px;
-	flex-direction:column;
-	overflow:hidden;
+	overflow:auto;
+}
+.calendar-month.scroll{
+	overflow:auto;
 }
 .calendar-month .data{
 	display:flex;
 	flex-flow:row nowrap;
 }
-.calendar-month .resultsWrap{
-	display:flex;
-	flex-flow:row nowrap;
-	flex:1 1 auto;
-}
-.calendar-month .results{
-	display:flex;
-	flex-flow:column nowrap;
-	flex:1 1 auto;
-}
-
-/* calendar header */
 .calendar-month .days{
 	flex:0 1 38px;
 	line-height:38px;
 	box-sizing:border-box;
+	position:sticky;
+	top:0px;
 	display:flex;
 	flex-direction:row;
 	background-color:var(--color-bg);
+	z-index:var(--z-index-calendar-month-header);
 }
 .calendar-month .days .item{
 	padding:0px 8px;
 	flex:1 1 0px;
 }
-
-/* calendar content */
 .calendar-month .week{
 	flex:1 1 auto;
 	display:flex;
