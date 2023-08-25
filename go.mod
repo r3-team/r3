@@ -3,7 +3,7 @@ module r3
 go 1.18
 
 require (
-	github.com/arran4/golang-ical v0.0.0-20230425234049-f69e132f2b0c
+	github.com/arran4/golang-ical v0.1.0
 	github.com/emersion/go-imap v1.2.1
 	github.com/emersion/go-message v0.16.0
 	github.com/gbrlsnchs/jwt/v3 v3.0.1
@@ -14,14 +14,14 @@ require (
 	github.com/h2non/filetype v1.1.3
 	github.com/kardianos/service v1.2.2
 	github.com/magefile/mage v1.15.0 // indirect
-	golang.org/x/crypto v0.11.0 // indirect
-	golang.org/x/sys v0.10.0 // indirect
-	golang.org/x/text v0.11.0 // indirect
+	golang.org/x/crypto v0.12.0 // indirect
+	golang.org/x/sys v0.11.0 // indirect
+	golang.org/x/text v0.12.0 // indirect
 )
 
 require (
 	github.com/jackc/pgx-gofrs-uuid v0.0.0-20230224015001-1d428863c2e2
-	github.com/jackc/pgx/v5 v5.4.1
+	github.com/jackc/pgx/v5 v5.4.3
 	github.com/wneessen/go-mail v0.4.0
 	github.com/xlzd/gotp v0.1.0
 )
@@ -34,7 +34,7 @@ require (
 	github.com/google/go-cmp v0.5.4 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20221227161230-091c0ba34f0a // indirect
-	github.com/jackc/puddle/v2 v2.2.0 // indirect
+	github.com/jackc/puddle/v2 v2.2.1 // indirect
 	golang.org/x/sync v0.3.0 // indirect
 	golang.org/x/xerrors v0.0.0-20220907171357-04be3eba64a2 // indirect
 )
