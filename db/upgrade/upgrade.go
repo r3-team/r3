@@ -150,6 +150,12 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.field_header ADD COLUMN richtext BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE app.field_header ALTER COLUMN richtext DROP DEFAULT;
 			
+			-- add options to calendar field
+			ALTER TABLE app.field_calendar ADD COLUMN days SMALLINT NOT NULL DEFAULT 42;
+			ALTER TABLE app.field_calendar ALTER COLUMN days DROP DEFAULT;
+			ALTER TABLE app.field_calendar ADD COLUMN days_toggle BOOLEAN NOT NULL DEFAULT false;
+			ALTER TABLE app.field_calendar ALTER COLUMN days_toggle DROP DEFAULT;
+			
 			-- separate module options from transfer hash
 			CREATE TABLE instance.module_hash (
 			    module_id uuid NOT NULL,

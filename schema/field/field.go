@@ -43,6 +43,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		fn.attribute_id_date0, fn.attribute_id_date1, fn.attribute_id_color,
 		fn.index_date0, fn.index_date1, fn.index_color, fn.ics, fn.gantt,
 		fn.gantt_steps, fn.gantt_steps_toggle, fn.date_range0, fn.date_range1,
+		fn.days, fn.days_toggle,
 		
 		-- chart field
 		fa.chart_option,
@@ -117,15 +118,16 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 
 		var alignItems, alignContent, chartOption, def, direction, display,
 			ganttSteps, justifyContent, layout, regexCheck pgtype.Text
-		var autoSelect, grow, shrink, basis, perMin, perMax, index, indexDate0,
-			indexDate1, size, relationIndexKanbanData, relationIndexKanbanAxisX,
-			relationIndexKanbanAxisY, resultLimit pgtype.Int2
+		var autoSelect, days, grow, shrink, basis, perMin, perMax, index,
+			indexDate0, indexDate1, size, relationIndexKanbanData,
+			relationIndexKanbanAxisX, relationIndexKanbanAxisY,
+			resultLimit pgtype.Int2
 		var autoRenew, dateRange0, dateRange1, indexColor, min, max pgtype.Int4
 		var attributeId, attributeIdAlt, attributeIdNm, attributeIdDate0,
 			attributeIdDate1, attributeIdColor, attributeIdKanbanSort,
 			fieldParentId, iconId, jsFunctionIdButton, jsFunctionIdData,
 			tabId pgtype.UUID
-		var category, clipboard, csvExport, csvImport, filterQuick,
+		var category, clipboard, csvExport, csvImport, daysToggle, filterQuick,
 			filterQuickList, gantt, ganttStepsToggle, ics, outsideIn, richtext,
 			wrap pgtype.Bool
 		var defPresetIds []uuid.UUID
@@ -134,15 +136,15 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			&state, &onMobile, &atrContent, &jsFunctionIdButton, &attributeIdDate0,
 			&attributeIdDate1, &attributeIdColor, &indexDate0, &indexDate1,
 			&indexColor, &ics, &gantt, &ganttSteps, &ganttStepsToggle,
-			&dateRange0, &dateRange1, &chartOption, &direction, &justifyContent,
-			&alignItems, &alignContent, &wrap, &grow, &shrink, &basis, &perMin,
-			&perMax, &richtext, &size, &attributeId, &attributeIdAlt, &index,
-			&display, &min, &max, &def, &regexCheck, &jsFunctionIdData,
-			&clipboard, &attributeIdNm, &category, &filterQuick, &outsideIn,
-			&autoSelect, &defPresetIds, &relationIndexKanbanData,
-			&relationIndexKanbanAxisX, &relationIndexKanbanAxisY,
-			&attributeIdKanbanSort, &autoRenew, &csvExport, &csvImport, &layout,
-			&filterQuickList, &resultLimit); err != nil {
+			&dateRange0, &dateRange1, &days, &daysToggle, &chartOption,
+			&direction, &justifyContent, &alignItems, &alignContent, &wrap,
+			&grow, &shrink, &basis, &perMin, &perMax, &richtext, &size,
+			&attributeId, &attributeIdAlt, &index, &display, &min, &max, &def,
+			&regexCheck, &jsFunctionIdData, &clipboard, &attributeIdNm,
+			&category, &filterQuick, &outsideIn, &autoSelect, &defPresetIds,
+			&relationIndexKanbanData, &relationIndexKanbanAxisX,
+			&relationIndexKanbanAxisY, &attributeIdKanbanSort, &autoRenew,
+			&csvExport, &csvImport, &layout, &filterQuickList, &resultLimit); err != nil {
 
 			rows.Close()
 			return fields, err
@@ -189,6 +191,8 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				GanttStepsToggle: ganttStepsToggle.Bool,
 				DateRange0:       int64(dateRange0.Int32),
 				DateRange1:       int64(dateRange1.Int32),
+				Days:             int(days.Int16),
+				DaysToggle:       daysToggle.Bool,
 				Columns:          []types.Column{},
 				Query:            types.Query{},
 				OpenForm:         types.OpenForm{},
@@ -589,13 +593,13 @@ func GetCalendar(fieldId uuid.UUID) (types.FieldCalendar, error) {
 
 	err := db.Pool.QueryRow(db.Ctx, `
 		SELECT attribute_id_date0, attribute_id_date1, index_date0, index_date1,
-			date_range0, date_range1
+			date_range0, date_range1, days, days_toggle
 		FROM app.field_calendar
 		WHERE ics
 		AND gantt = FALSE
 		AND field_id = $1
 	`, fieldId).Scan(&f.AttributeIdDate0, &f.AttributeIdDate1, &f.IndexDate0,
-		&f.IndexDate1, &f.DateRange0, &f.DateRange1)
+		&f.IndexDate1, &f.DateRange0, &f.DateRange1, &f.Days, &f.DaysToggle)
 
 	if err != nil {
 		return f, err
@@ -660,12 +664,7 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 			if err := json.Unmarshal(fieldJson, &f); err != nil {
 				return err
 			}
-			if err := setCalendar_tx(tx, fieldId, f.FormIdOpen,
-				f.AttributeIdDate0, f.AttributeIdDate1, f.AttributeIdColor,
-				f.AttributeIdRecord, f.IndexDate0, f.IndexDate1, f.IndexColor,
-				f.Gantt, f.GanttSteps, f.GanttStepsToggle, f.Ics, f.DateRange0,
-				f.DateRange1, f.Columns, f.Collections, f.OpenForm); err != nil {
-
+			if err := setCalendar_tx(tx, fieldId, f); err != nil {
 				return err
 			}
 			fieldIdMapQuery[fieldId] = f.Query
@@ -872,13 +871,7 @@ func setButton_tx(tx pgx.Tx, fieldId uuid.UUID, attributeIdRecord pgtype.UUID,
 	// set open form
 	return openForm.Set_tx(tx, "field", fieldId, oForm, pgtype.Text{})
 }
-func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
-	attributeIdDate0 uuid.UUID, attributeIdDate1 uuid.UUID,
-	attributeIdColor pgtype.UUID, attributeIdRecord pgtype.UUID, indexDate0 int,
-	indexDate1 int, indexColor pgtype.Int4, gantt bool, ganttSteps pgtype.Text,
-	ganttStepsToggle bool, ics bool, dateRange0 int64, dateRange1 int64,
-	columns []types.Column, collections []types.CollectionConsumer,
-	oForm types.OpenForm) error {
+func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldCalendar) error {
 
 	known, err := schema.CheckCreateId_tx(tx, &fieldId, "field_calendar", "field_id")
 	if err != nil {
@@ -892,11 +885,12 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 				attribute_id_color = $3, index_date0 = $4, index_date1 = $5,
 				index_color = $6, gantt = $7, gantt_steps = $8,
 				gantt_steps_toggle = $9, ics = $10, date_range0 = $11,
-				date_range1 = $12
-			WHERE field_id = $13
-		`, attributeIdDate0, attributeIdDate1, attributeIdColor, indexDate0,
-			indexDate1, indexColor, gantt, ganttSteps, ganttStepsToggle, ics,
-			dateRange0, dateRange1, fieldId); err != nil {
+				date_range1 = $12, days = $13, days_toggle = $14
+			WHERE field_id = $15
+		`, f.AttributeIdDate0, f.AttributeIdDate1, f.AttributeIdColor,
+			f.IndexDate0, f.IndexDate1, f.IndexColor, f.Gantt, f.GanttSteps,
+			f.GanttStepsToggle, f.Ics, f.DateRange0, f.DateRange1, f.Days,
+			f.DaysToggle, fieldId); err != nil {
 
 			return err
 		}
@@ -906,31 +900,32 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, formIdOpen pgtype.UUID,
 				field_id, attribute_id_date0, attribute_id_date1,
 				attribute_id_color, index_date0, index_date1, index_color,
 				gantt, gantt_steps, 	gantt_steps_toggle, ics, date_range0,
-				date_range1
-			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
-		`, fieldId, attributeIdDate0, attributeIdDate1, attributeIdColor,
-			indexDate0, indexDate1, indexColor, gantt, ganttSteps,
-			ganttStepsToggle, ics, dateRange0, dateRange1); err != nil {
+				date_range1, days, days_toggle
+			) VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+		`, fieldId, f.AttributeIdDate0, f.AttributeIdDate1, f.AttributeIdColor,
+			f.IndexDate0, f.IndexDate1, f.IndexColor, f.Gantt, f.GanttSteps,
+			f.GanttStepsToggle, f.Ics, f.DateRange0, f.DateRange1, f.Days,
+			f.DaysToggle); err != nil {
 
 			return err
 		}
 	}
 
 	// fix imports < 2.6: New open form entity
-	oForm = compatible.FixMissingOpenForm(formIdOpen, attributeIdRecord, oForm)
+	f.OpenForm = compatible.FixMissingOpenForm(f.FormIdOpen, f.AttributeIdRecord, f.OpenForm)
 
 	// set open form
-	if err := openForm.Set_tx(tx, "field", fieldId, oForm, pgtype.Text{}); err != nil {
+	if err := openForm.Set_tx(tx, "field", fieldId, f.OpenForm, pgtype.Text{}); err != nil {
 		return err
 	}
 
 	// set collection consumer
-	if err := consumer.Set_tx(tx, "field", fieldId, "fieldFilterSelector", collections); err != nil {
+	if err := consumer.Set_tx(tx, "field", fieldId, "fieldFilterSelector", f.Collections); err != nil {
 		return err
 	}
 
 	// set columns
-	return column.Set_tx(tx, "field", fieldId, columns)
+	return column.Set_tx(tx, "field", fieldId, f.Columns)
 }
 func setChart_tx(tx pgx.Tx, fieldId uuid.UUID, chartOption string, columns []types.Column) error {
 

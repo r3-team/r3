@@ -164,13 +164,7 @@ let MyCalendarDateSelect = {
 
 let MyCalendarViewSelect = {
 	name:'my-calendar-view-select',
-	template:`<my-button image="arrowInside.png"
-		v-if="ics"
-		@trigger="$emit('toggle-ics')"
-		:caption="!isMobile ? capApp.button.ics : ''"
-		:captionTitle="capApp.button.icsHint"
-	/>
-	<select 
+	template:`<select 
 		@change="$emit('update:modelValue',parseInt($event.target.value))"
 		:value="modelValue"
 	>
@@ -181,14 +175,12 @@ let MyCalendarViewSelect = {
 		<option :value="42">{{ capApp.option.days42 }}</option>
 	</select>`,
 	props:{
-		ics:       { type:Boolean, required:true },
 		modelValue:{ type:Number,  required:true }
 	},
 	computed:{
-		capApp:  (s) => s.$store.getters.captions.calendar,
-		isMobile:(s) => s.$store.getters.isMobile
+		capApp:(s) => s.$store.getters.captions.calendar
 	},
-	emits:['toggle-ics','update:modelValue']
+	emits:['update:modelValue']
 };
 
 let MyCalendar = {
@@ -273,8 +265,15 @@ let MyCalendar = {
 			<template #date-select>
 				<my-calendar-date-select :daysShow="daysShow" :modelValue="date" :useHotkeys="isSingleField" @update:modelValue="dateSet" />
 			</template>
-			<template #view-select>
-				<my-calendar-view-select :ics="ics" :modelValue="daysShow" @toggle-ics="showIcs = !showIcs" @update:modelValue="daysShowSet" />
+			<template #view-select v-if="daysShowToggle">
+				<my-calendar-view-select :modelValue="daysShow" @update:modelValue="daysShowSet" />
+			</template>
+			<template #ics-button v-if="ics">
+				<my-button image="arrowInside.png"
+					@trigger="showIcs = !showIcs"
+					:caption="!isMobile ? capApp.button.ics : ''"
+					:captionTitle="capApp.button.icsHint"
+				/>
 			</template>
 		</my-calendar-days>
 		
@@ -310,8 +309,15 @@ let MyCalendar = {
 			<template #date-select>
 				<my-calendar-date-select :daysShow="daysShow" :modelValue="date" :useHotkeys="isSingleField" @update:modelValue="dateSet" />
 			</template>
-			<template #view-select>
-				<my-calendar-view-select :ics="ics" :modelValue="daysShow" @toggle-ics="showIcs = !showIcs" @update:modelValue="daysShowSet" />
+			<template #view-select v-if="daysShowToggle">
+				<my-calendar-view-select :modelValue="daysShow" @update:modelValue="daysShowSet" />
+			</template>
+			<template #ics-button v-if="ics">
+				<my-button image="arrowInside.png"
+					@trigger="showIcs = !showIcs"
+					:caption="!isMobile ? capApp.button.ics : ''"
+					:captionTitle="capApp.button.icsHint"
+				/>
 			</template>
 		</my-calendar-month>
 	</div>`,
@@ -323,6 +329,8 @@ let MyCalendar = {
 		columns:         { type:Array,   required:true },
 		collections:     { type:Array,   required:true },
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
+		daysShowDef:     { type:Number,  required:true },
+		daysShowToggle:  { type:Boolean, required:true },
 		fieldId:         { type:String,  required:false, default:'' },
 		filters:         { type:Array,   required:true },
 		formLoading:     { type:Boolean, required:false, default:false },
@@ -387,6 +395,7 @@ let MyCalendar = {
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		capApp:        (s) => s.$store.getters.captions.calendar,
 		capGen:        (s) => s.$store.getters.captions.generic,
+		isMobile:      (s) => s.$store.getters.isMobile,
 		loginId:       (s) => s.$store.getters.loginId,
 		settings:      (s) => s.$store.getters.settings
 	},
@@ -416,8 +425,11 @@ let MyCalendar = {
 			});
 		}
 		
-		// apply field options (before paramsUpdated)
-		this.daysShow = parseInt(this.fieldOptionGet(this.fieldId,'daysShow',42));
+		this.daysShow = this.daysShowDef;
+		
+		// apply field options (before paramsUpdated to apply calendar view)
+		if(this.daysShowToggle)
+			this.daysShow = parseInt(this.fieldOptionGet(this.fieldId,'daysShow',this.daysShowDef));
 		
 		if(this.usesPageHistory) {
 			// set initial states via route parameters

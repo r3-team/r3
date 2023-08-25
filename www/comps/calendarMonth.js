@@ -61,6 +61,7 @@ let MyCalendarMonth = {
 					</option>
 				</select>
 				
+				<slot name="ics-button" />
 				<slot name="view-select" />
 				
 				<my-button image="calendar.png"

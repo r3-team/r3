@@ -878,6 +878,8 @@
 			"dateRange0":"Eventi giorni prima",
 			"dateRange1":"Eventi giorni dopo",
 			"dateRangeHint":"rispetto alla data attuale",
+			"days":"Default view",
+			"daysToggle":"User can change view",
 			"display":"Visualizza",
 			"distincted":"Distinto",
 			"dragDrop":"Place fields here via drag & drop from the selection on the right to add them to the form.",

@@ -878,6 +878,8 @@
 			"dateRange0":"Ereignisse Tage davor",
 			"dateRange1":"Ereignisse Tage danach",
 			"dateRangeHint":"relativ zum akt. Datum",
+			"days":"Standardansicht",
+			"daysToggle":"Benutzer kann Ansicht verändern",
 			"display":"Darstellung",
 			"distincted":"Unterscheiden",
 			"dragDrop":"Felder von der Auswahl rechts per Drag&Drop hier ablegen, um sie zum Formular hinzuzufügen.",

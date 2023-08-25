@@ -633,6 +633,32 @@ let MyBuilderFieldOptions = {
 						</select>
 					</td>
 				</tr>
+				<template v-if="!field.gantt">
+					<tr>
+						<td>{{ capApp.days }}</td>
+						<td>
+							<select
+								@input="setInt('days',$event.target.value,false)"
+								:value="field.days"
+							>
+								<option :value="1" >{{ capCal.option.days1  }}</option>
+								<option :value="3" >{{ capCal.option.days3  }}</option>
+								<option :value="5" >{{ capCal.option.days5  }}</option>
+								<option :value="7" >{{ capCal.option.days7  }}</option>
+								<option :value="42">{{ capCal.option.days42 }}</option>
+							</select>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.daysToggle }}</td>
+						<td>
+							<my-bool
+								@update:modelValue="set('daysToggle',$event)"
+								:modelValue="field.daysToggle"
+							/>
+						</td>
+					</tr>
+				</template>
 				<template v-if="field.gantt">
 					<tr>
 						<td>{{ capApp.gantt }}</td>
@@ -1272,6 +1298,7 @@ let MyBuilderFieldOptions = {
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		formIdMap:     (s) => s.$store.getters['schema/formIdMap'],
 		capApp:        (s) => s.$store.getters.captions.builder.form,
+		capCal:        (s) => s.$store.getters.captions.calendar,
 		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	methods:{

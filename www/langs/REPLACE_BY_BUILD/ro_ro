@@ -878,6 +878,8 @@
 			"dateRange0":"Evenimente zile înainte",
 			"dateRange1":"Evenimente zile după",
 			"dateRangeHint":"raportat la data curentă",
+			"days":"Default view",
+			"daysToggle":"User can change view",
 			"display":"Afișare",
 			"distincted":"Distinct",
 			"dragDrop":"Place fields here via drag & drop from the selection on the right to add them to the form.",

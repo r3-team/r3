@@ -265,6 +265,8 @@ type FieldCalendar struct {
 	Ics              bool                 `json:"ics"`              // calendar available as ICS download
 	DateRange0       int64                `json:"dateRange0"`       // ICS/gantt time range before NOW (seconds)
 	DateRange1       int64                `json:"dateRange1"`       // ICS/gantt time range after NOW (seconds)
+	Days             int                  `json:"days"`             // how many days to show on calendar by default (1,3,5,7,42)
+	DaysToggle       bool                 `json:"daysToggle"`       // if enabled, user can choose how many days to show
 	OpenForm         OpenForm             `json:"openForm"`
 	Columns          []Column             `json:"columns"`
 	Collections      []CollectionConsumer `json:"collections"` // collections to select values for query filters
