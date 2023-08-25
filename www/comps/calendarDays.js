@@ -483,11 +483,13 @@ let MyCalendarDays = {
 		this.$options.components.MyForm = MyForm;
 	},
 	mounted() {
-		// scroll to 07:00
-		const el = this.$refs[this.refHourLabel + 8];
-		
-		if(typeof el !== 'undefined')
-			el[0].scrollIntoView();
+		if(!this.isInput) {
+			// scroll to 07:00
+			const el = this.$refs[this.refHourLabel + 8];
+			
+			if(typeof el !== 'undefined')
+				el[0].scrollIntoView();
+		}
 		
 		// load field options
 		this.zoom = this.fieldOptionGet(this.fieldId,'zoom',this.zoomDefault);

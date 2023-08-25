@@ -381,6 +381,9 @@
 	font-size:80%;
 	line-height:unset;
 }
+.input-date .calendar-days .header{
+	font-size:90%;
+}
 
 /* UUID input */
 .input-uuid{

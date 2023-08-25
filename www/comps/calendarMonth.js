@@ -94,8 +94,8 @@ let MyCalendarMonth = {
 						
 						<!-- full day events -->
 						<div class="event"
-							@click="clickRecord($event,e.row,e.placeholder,false)"
-							@click.middle="clickRecord($event,e.row,e.placeholder,true)"
+							@mouseup.left="clickRecord($event,e.row,e.placeholder,false)"
+							@mouseup.middle="clickRecord($event,e.row,e.placeholder,true)"
 							v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => v.fullDay || v.placeholder)"
 							:class="{ first:e.entryFirst, last:e.entryLast, placeholder:e.placeholder, clickable:daysSelectable }"
 						>
@@ -135,8 +135,8 @@ let MyCalendarMonth = {
 						
 						<!-- partial day events -->
 						<div class="part"
-							@click="clickRecord($event,e.row,false,false)"
-							@click.middle="clickRecord($event,e.row,false,true)"
+							@mouseup.left="clickRecord($event,e.row,false,false)"
+							@mouseup.middle="clickRecord($event,e.row,false,true)"
 							v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => !v.fullDay && !v.placeholder)"
 							:class="{ clickable:daysSelectable }"
 						>
