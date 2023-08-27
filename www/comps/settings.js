@@ -628,6 +628,7 @@ let MySettingsFixedTokens = {
 							<div class="settings-mfa-input">
 								<input class="dynamic"
 									v-model="tokenName"
+									v-focus
 									:disabled="tokenSet"
 									:placeholder="capApp.mfa.nameHint"
 								/>
@@ -688,7 +689,7 @@ let MySettingsFixedTokens = {
 								<div class="column gap default-inputs">
 									<span>{{ capApp.install.step1 }}</span>
 									<div class="row gap">
-										<input v-model="tokenName" :placeholder="capApp.install.nameHint" />
+										<input v-model="tokenName" v-focus :placeholder="capApp.install.nameHint" />
 										<my-button image="save.png"
 											@trigger="set('client')"
 											:active="tokenName !== '' && !tokenSet"

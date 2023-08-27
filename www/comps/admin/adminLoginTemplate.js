@@ -48,7 +48,7 @@ let MyAdminLoginTemplate = {
 				<table class="table-default generic-table-vertical fullWidth">
 					<tr>
 						<td>{{ capGen.name }}*</td>
-						<td><input v-model="name" :disabled="isGlobal" /></td>
+						<td><input v-model="name" v-focus :disabled="isGlobal" /></td>
 					</tr>
 					<tr v-if="isGlobal">
 						<td colspan="2">{{ capApp.global }}</td>

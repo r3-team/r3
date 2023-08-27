@@ -124,7 +124,7 @@ let MyAdminLogin = {
 								<span>{{ capGen.name }}</span>
 							</div>
 						</td>
-						<td><input v-model="name" :disabled="isLdap" /></td>
+						<td><input v-model="name" v-focus :disabled="isLdap" /></td>
 						<td>{{ capApp.hint.name }}</td>
 					</tr>
 					<tr>

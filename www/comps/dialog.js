@@ -47,6 +47,7 @@ let MyDialog = {
 						:caption="b.caption"
 						:image="b.image"
 						:key="'button'+i"
+						:ref="'btn'+i"
 					/>
 				</div>
 			</div>
@@ -54,6 +55,10 @@ let MyDialog = {
 	</div>`,
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);
+		
+		// place focus on first available button
+		if(this.buttons.length !== 0)
+			this.$refs['btn0'][0].$el.focus();
 	},
 	unmounted() {
 		window.removeEventListener('keydown',this.handleHotkeys);
@@ -88,9 +93,7 @@ let MyDialog = {
 			}
 			
 			// search for a button with this particular action key assigned
-			for(let i = 0, j = this.buttons.length; i < j; i++) {
-				let btn = this.buttons[i];
-				
+			for(let btn of this.buttons) {
 				if(typeof btn[search] !== 'undefined' && btn[search]) {
 					this.executeButton(btn);
 					e.preventDefault();
