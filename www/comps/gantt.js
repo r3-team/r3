@@ -39,7 +39,7 @@ let MyGanttLineRecord = {
 	`<div class="gantt-line-record"
 		@click="clickRecord(false)"
 		@click.middle="clickRecord(true)"
-		:class="{ clickable:hasOpenForm }"
+		:class="{ clickable:hasUpdate }"
 		:style="style"
 	>
 		<div class="record-line start"
@@ -76,7 +76,7 @@ let MyGanttLineRecord = {
 		date0Range:   { type:Date,   required:true }, // start date of gantt range
 		date1:        { type:Date,   required:true }, // end date of record
 		date1Range:   { type:Date,   required:true }, // end date of gantt range
-		hasOpenForm:  { type:Boolean,required:true },
+		hasUpdate:    { type:Boolean,required:true },
 		indexesHidden:{ type:Array,  required:true }, // hidden column indexes (either it is hidden or used as Gantt group)
 		isDays:       { type:Boolean,required:true },
 		pxPerSec:     { type:Number, required:true }, // pixel per second on gantt
@@ -137,7 +137,7 @@ let MyGanttLineRecord = {
 		
 		// actions
 		clickRecord(middleClick) {
-			if(this.hasOpenForm)
+			if(this.hasUpdate)
 				this.$emit('record-selected',this.row,middleClick);
 		}
 	}
@@ -156,7 +156,7 @@ let MyGanttLine = {
 			:date0Range="date0Range"
 			:date1="r.date1"
 			:date1Range="date1Range"
-			:hasOpenForm="hasOpenForm"
+			:hasUpdate="hasUpdate"
 			:indexesHidden="indexesHidden"
 			:isDays="isDays"
 			:pxPerSec="pxPerSec"
@@ -170,7 +170,7 @@ let MyGanttLine = {
 		indexesHidden:{ type:Array,  required:true },
 		date0Range:   { type:Date,   required:true },
 		date1Range:   { type:Date,   required:true },
-		hasOpenForm:  { type:Boolean,required:true },
+		hasUpdate:    { type:Boolean,required:true },
 		isDays:       { type:Boolean,required:true },
 		pxPerSec:     { type:Number, required:true },
 		records:      { type:Array,  required:true }
@@ -336,7 +336,7 @@ let MyGantt = {
 						:columns="columns"
 						:date0Range="date0"
 						:date1Range="date1"
-						:hasOpenForm="hasOpenForm"
+						:hasUpdate="hasUpdate"
 						:indexesHidden="columnIndexesHidden.concat(group0LabelExpressionIndexes)"
 						:isDays="isDays"
 						:pxPerSec="pxPerSec"
