@@ -38,7 +38,7 @@ let MyCalendarMonth = {
 					@mouseup.left="clickRecord($event,e.row,e.placeholder,false)"
 					@mouseup.middle="clickRecord($event,e.row,e.placeholder,true)"
 					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => v.fullDay || v.placeholder)"
-					:class="{ first:e.entryFirst, last:e.entryLast, placeholder:e.placeholder, clickable:daysSelectable }"
+					:class="{ first:e.entryFirst, last:e.entryLast, placeholder:e.placeholder, clickable:hasUpdate }"
 				>
 					<template v-if="!e.placeholder">
 						<!-- border line -->
@@ -80,7 +80,7 @@ let MyCalendarMonth = {
 					@mouseup.left="clickRecord($event,e.row,false,false)"
 					@mouseup.middle="clickRecord($event,e.row,false,true)"
 					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => !v.fullDay && !v.placeholder)"
-					:class="{ clickable:daysSelectable }"
+					:class="{ clickable:hasUpdate }"
 				>
 					<span :style="getColor('background-color',e.color)">
 						{{ getPartCaption(e.unix0) }}
@@ -113,7 +113,8 @@ let MyCalendarMonth = {
 		dateSelect1:{ required:false, default:null },
 		isInput:    { type:Boolean, required:false, default:false },
 		hasColor:   { type:Boolean, required:false, default:false },    // color attribute exists
-		hasOpenForm:{ type:Boolean, required:false, default:false },
+		hasCreate:  { type:Boolean, required:false, default:false },
+		hasUpdate:  { type:Boolean, required:false, default:false },
 		rows:       { type:Array,   required:false, default:() => [] }
 	},
 	emits:['date-selected','open-form'],
@@ -252,7 +253,7 @@ let MyCalendarMonth = {
 		// simple
 		columnIndexesHidden:(s) => s.getColumnIndexesHidden(s.columns),
 		daysAfter:          (s) => s.date1.getDate(),
-		daysSelectable:     (s) => s.hasOpenForm || s.isInput,
+		daysSelectable:     (s) => s.hasCreate || s.isInput,
 		month:              (s) => s.date.getMonth(), // active month (0-11)
 		
 		// stores
@@ -296,10 +297,8 @@ let MyCalendarMonth = {
 			// block clickDay() event (placeholders must bubble)
 			event.stopPropagation();
 			
-			if(this.hasOpenForm)
+			if(this.hasUpdate)
 				this.$emit('open-form',[row],[],middleClick);
-		},
-		goToToday() {
 		},
 		hoverDay(unix) {
 			if(!this.unixInputActive) return;

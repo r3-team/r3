@@ -198,7 +198,7 @@ let MyCalendar = {
 				</div>
 				<div class="content">
 					<div v-if="icsToken === ''" class="row wrap gap default-inputs">
-						<input v-model="icsTokenName" :placeholder="capApp.icsTokenNameHint" />
+						<input v-model="icsTokenName" v-focus :placeholder="capApp.icsTokenNameHint" />
 						<my-button image="ok.png"
 							@trigger="setIcsTokenFixed"
 							:caption="capApp.button.icsPublish"
@@ -246,6 +246,25 @@ let MyCalendar = {
 			</div>
 			
 			<div class="area wrap default-inputs">
+				
+				<template v-if="!isMobile && !isMonth">
+					<my-button image="search.png"
+						@trigger="zoom = zoomDefault"
+						:active="zoom !== zoomDefault"
+						:captionTitle="capGen.button.zoomReset"
+						:naked="true"
+					/>
+					<input class="zoomSlider" type="range" min="2" max="8"
+						v-model.number="zoom"
+						@change="fieldOptionSet(fieldId,'zoom',$event.target.value);"
+					>
+				</template>
+				
+				<my-button image="refresh.png"
+					@trigger="get"
+					:naked="true"
+				/>
+				
 				<my-input-collection class="selector"
 					v-for="c in collections"
 					@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event)"
@@ -261,19 +280,6 @@ let MyCalendar = {
 						{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
 					</option>
 				</select>
-				
-				<template v-if="!isMobile && !isMonth">
-					<my-button image="search.png"
-						@trigger="zoom = zoomDefault"
-						:active="zoom !== zoomDefault"
-						:captionTitle="capGen.button.zoomReset"
-						:naked="true"
-					/>
-					<input class="zoomSlider" type="range" min="2" max="8"
-						v-model.number="zoom"
-						@change="fieldOptionSet(fieldId,'zoom',$event.target.value);"
-					>
-				</template>
 				
 				<select
 					v-if="daysShowToggle"
@@ -313,7 +319,8 @@ let MyCalendar = {
 				:date1="date1"
 				:daysShow="daysShow"
 				:hasColor="attributeIdColor !== null"
-				:hasOpenForm="hasOpenForm"
+				:hasCreate="hasCreate"
+				:hasUpdate="hasUpdate"
 				:rows="rows"
 				:zoom="zoom"
 			/>
@@ -328,7 +335,8 @@ let MyCalendar = {
 				:dateSelect0="dateSelect0"
 				:dateSelect1="dateSelect1"
 				:hasColor="attributeIdColor !== null"
-				:hasOpenForm="hasOpenForm"
+				:hasCreate="hasCreate"
+				:hasUpdate="hasUpdate"
 				:rows="rows"
 			/>
 			
@@ -418,7 +426,8 @@ let MyCalendar = {
 		// simple
 		choiceFilters:(s) => s.getChoiceFilters(s.choices,s.choiceId),
 		hasChoices:   (s) => s.choices.length > 1,
-		hasCreate:    (s) => s.query.joins.length === 0 ? false : s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasCreate:    (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyCreate,
+		hasUpdate:    (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate,
 		isDays:       (s) => s.daysShow === 1 || s.daysShow === 3,
 		isMonth:      (s) => s.daysShow === 42,
 		isWeek:       (s) => s.daysShow === 5 || s.daysShow === 7,

@@ -21,7 +21,10 @@ let MyCalendarDaysEvent = {
 		@click.middle="$emit('click-middle')"
 		:style="style"
 	>
-		<div class="event clickable shade" :style="styleCard">
+		<div class="event shade" tabindex="0"
+			:class="{ clickable:hasUpdate }"
+			:style="styleCard"
+		>
 			<div class="batch" v-for="b in columnBatches" :class="{ vertical:b.vertical }">
 				<my-value-rich
 					v-for="ind in b.columnIndexes.filter(v => values[v] !== null)"
@@ -41,12 +44,13 @@ let MyCalendarDaysEvent = {
 		</div>
 	</div>`,
 	props:{
-		columns:      { type:Array,  required:true },
-		columnBatches:{ type:Array,  required:true },
-		row:          { type:Object, required:true },
-		style:        { type:String, required:true },
-		styleCard:    { type:String, required:true },
-		values:       { type:Array,  required:true }
+		columns:      { type:Array,   required:true },
+		columnBatches:{ type:Array,   required:true },
+		hasUpdate:    { type:Boolean, required:true },
+		row:          { type:Object,  required:true },
+		style:        { type:String,  required:true },
+		styleCard:    { type:String,  required:true },
+		values:       { type:Array,   required:true }
 	},
 	emits:['click','click-middle','clipboard']
 };
@@ -67,20 +71,21 @@ let MyCalendarDays = {
 				<div class="events-full" :style="events.fullDaysHeight">
 					
 					<!-- date input (days) -->
-					<div class="dayInput clickable"
+					<div class="dayInput"
 						@mousedown.left="dateClick(d.unix,true,true)"
 						@mouseover="dateHover(d.unix)"
 						@mouseup.left="dateClick(d.unix,false,true)"
-						:class="{ active:dateInputActive(d.unix,true) }"
+						:class="{ active:dateInputActive(d.unix,true), clickable:hasCreate || isInput }"
 					></div>
 					
 					<my-calendar-days-event class="full"
 						v-for="ei in d.eventIndexes"
-						@click="$emit('open-form',[events.fullDaysEvents[ei].row],[],false)"
-						@click-middle="$emit('open-form',[events.fullDaysEvents[ei].row],[],true)"
+						@click="eventClick(events.fullDaysEvents[ei].row,false)"
+						@click-middle="eventClick(events.fullDaysEvents[ei].row,false)"
 						@clipboard="$emit('clipboard')"
 						:columns="columns"
 						:columnBatches="columnBatches"
+						:hasUpdate="hasUpdate"
 						:row="events.fullDaysEvents[ei].row"
 						:style="events.fullDaysEvents[ei].style"
 						:styleCard="events.fullDaysEvents[ei].styleCard"
@@ -98,22 +103,23 @@ let MyCalendarDays = {
 			<div class="day" v-for="(d,i) in events.partDays" :class="{ weekend:d.weekend }">
 				
 				<!-- date input (hours) -->
-				<div class="hourInput clickable"
+				<div class="hourInput"
 					v-for="h in d.hours"
 					@mousedown.left="dateClick(h,true,false)"
 					@mouseover="dateHover(h)"
 					@mouseup.left="dateClick(h,false,false)"
-					:class="{ active:dateInputActive(h,false) }"
+					:class="{ active:dateInputActive(h,false), clickable:hasCreate || isInput }"
 					:style="heightHourStyle"
 				></div>
 				
 				<my-calendar-days-event
 					v-for="e in d.events"
-					@click="$emit('open-form',[e.row],[],false)"
-					@click-middle="$emit('open-form',[e.row],[],true)"
+					@click="eventClick(e.row,false)"
+					@click-middle="eventClick(e.row,true)"
 					@clipboard="$emit('clipboard')"
 					:columns="columns"
 					:columnBatches="columnBatches"
+					:hasUpdate="hasUpdate"
 					:row="e.row"
 					:style="e.style"
 					:styleCard="e.styleCard"
@@ -132,7 +138,8 @@ let MyCalendarDays = {
 		daysShow:   { type:Number,  required:true },
 		isInput:    { type:Boolean, required:false, default:false },
 		hasColor:   { type:Boolean, required:false, default:false }, // color attribute exists
-		hasOpenForm:{ type:Boolean, required:false, default:false },
+		hasCreate:  { type:Boolean, required:false, default:false },
+		hasUpdate:  { type:Boolean, required:false, default:false },
 		rows:       { type:Array,   required:false, default:() => [] },
 		zoom:       { type:Number,  required:false, default:5 }
 	},
@@ -343,7 +350,7 @@ let MyCalendarDays = {
 		columnBatches:      (s) => s.getColumnBatches(s.columns,[],false),
 		columnIndexesHidden:(s) => s.getColumnIndexesHidden(s.columns),
 		heightHourPx:       (s) => (s.isInput ? 3 : 11) * s.zoom,
-		heightHourPxFull:   (s) => 8 * s.zoom,
+		heightHourPxFull:   (s) => 9 * s.zoom,
 		heightHourStyle:    (s) => `height:${s.heightHourPx}px;`,
 		unixSelect0:        (s) => s.dateSelect0 !== null ? Math.floor(s.dateSelect0.getTime() / 1000) : 0,
 		unixSelect1:        (s) => s.dateSelect1 !== null ? Math.floor(s.dateSelect1.getTime() / 1000) : 0,
@@ -377,6 +384,8 @@ let MyCalendarDays = {
 		
 		// actions
 		dateClick(unix,mousedown,isDay) {
+			if(!this.hasCreate && !this.isInput) return;
+			
 			this.unixInputActive = mousedown;
 			if(mousedown) {
 				this.unixInput0   = unix;
@@ -396,6 +405,10 @@ let MyCalendarDays = {
 			
 			if(unix < this.unixInput0) this.unixInput0 = unix;
 			else                       this.unixInput1 = unix;
+		},
+		eventClick(row,middleClick) {
+			if(this.hasUpdate)
+				this.$emit('open-form',[row],[],middleClick);
 		},
 		
 		// presentation
