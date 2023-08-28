@@ -970,7 +970,7 @@ let MyFilters = {
 		</draggable>
 		
 		<div class="filter-actions end" v-if="userFilter && nestedIndexAttributeIds.length !== 0">
-			<div class="row">
+			<div class="row gap">
 				<my-button image="ok.png"
 					@trigger="apply"
 					:active="anyFilters && bracketsEqual"
@@ -983,7 +983,7 @@ let MyFilters = {
 					:naked="false"
 				/>
 			</div>
-			<div class="row">
+			<div class="row gap">
 				<my-button image="delete.png"
 					@trigger="removeAll"
 					:active="anyFilters"

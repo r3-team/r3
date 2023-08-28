@@ -9,11 +9,6 @@ export {MyListColumnBatch as default};
 let MyListColumnBatch = {
 	name:'my-list-column-batch',
 	template:`<div class="columnBatch">
-		<div class="columBatchCaption" @click.stop="click" :class="{ clickable:canOpen }">
-			<span v-if="show"><b>{{ columnBatch.caption }}</b></span>
-			<span v-else>{{ columnBatch.caption }}</span>
-		</div>
-		
 		<my-button image="filter.png"
 			v-if="isValidFilter && isFiltered"
 			@trigger="click"
@@ -34,6 +29,11 @@ let MyListColumnBatch = {
 			:image="isOrderedAsc ? 'triangleUp.png' : 'triangleDown.png'"
 			:naked="true"
 		/>
+		
+		<div class="columBatchCaption" @click.stop="click" :class="{ clickable:canOpen }">
+			<span v-if="show"><b>{{ columnBatch.caption }}</b></span>
+			<span v-else>{{ columnBatch.caption }}</span>
+		</div>
 		
 		<!-- column options dropdown -->
 		<div class="input-dropdown-wrap columnOptionWrap"
