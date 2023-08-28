@@ -215,9 +215,10 @@
 
 /* box layout view */
 .list .layoutCards{
+	flex:1 1 auto;
+	padding:16px 0px 0px 16px;
 	display:flex;
 	flex-flow:row wrap;
-	padding:16px 0px 0px 16px;
 	overflow:auto;
 	align-content:flex-start;
 }
