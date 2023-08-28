@@ -316,11 +316,10 @@ let MyGantt = {
 					<div class="gantt-header lower">
 						<div class="gantt-header-item lower"
 							v-for="i in headerItems"
-							@click.exact="clickHeaderItem(i.unixTime,false,false)"
-							@click.shift="clickHeaderItem(i.unixTime,true,false)"
-							@click.middle.exact="clickHeaderItem(i.unixTime,false,true)"
-							@click.middle.shift="clickHeaderItem(i.unixTime,true,true)"
-							:class="{ clickable:hasCreate, today:getUnixFromDate(dateStart) === i.unixTime, weekend:i.isWeekend }"
+							@mousedown.left="clickHeaderItem(i.unixTime,true)"
+							@mouseover="hoverHeaderItem(i.unixTime)"
+							@mouseup.left="clickHeaderItem(i.unixTime,false)"
+							:class="{ clickable:hasCreate, selected:i.unixTime >= unixInput0 && i.unixTime <= unixInput1, today:getUnixFromDate(dateStart) === i.unixTime, weekend:i.isWeekend }"
 							:style="'width:'+stepPixels+'px'"
 						>
 							{{ i.caption }}
@@ -399,20 +398,23 @@ let MyGantt = {
 			choiceId:null,
 			dateStart:null,
 			notScrolled:true,
-			groups:[],        // gantt groups, by defined column, each with its lines of records
+			groups:[],              // gantt groups, by defined column, each with its lines of records
 			headerItems:[],
 			headerItemsMeta:[],
-			linePixels:30,    // line height in pixels
-			page:0,           // which page we are on (0: default, 1: next, -1: prev)
-			ready:false,      // component ready to be used
+			linePixels:30,          // line height in pixels
+			page:0,                 // which page we are on (0: default, 1: next, -1: prev)
+			ready:false,            // component ready to be used
 			resizeTimer:null,
 			showGroupLabels:true,
-			startDate:0,      // start date (TZ), base for date ranges, set once to keep navigation clear
-			stepBase:8,       // base size of step width in pixels, used to multiply with zoom factor
-			stepType:'days',  // gantt step type (hours, days)
-			stepZoom:7,       // zoom factor for step, 7 is default (7*8=56)
-			stepZoomDefault:7,// zoom reset to
-			steps:0,          // available steps, calculated based on field size and zoom factor
+			startDate:0,            // start date (TZ), base for date ranges, set once to keep navigation clear
+			stepBase:8,             // base size of step width in pixels, used to multiply with zoom factor
+			stepType:'days',        // gantt step type (hours, days)
+			stepZoom:7,             // zoom factor for step, 7 is default (7*8=56)
+			stepZoomDefault:7,      // zoom reset to
+			steps:0,                // available steps, calculated based on field size and zoom factor
+			unixInput0:null,        // date input, start
+			unixInput1:null,        // date input, end
+			unixInputActive:false,
 			unixTimeRangeStart:null // for time range input
 		};
 	},
@@ -673,24 +675,31 @@ let MyGantt = {
 			this.choiceId = choiceId;
 			this.reloadInside();
 		},
-		clickHeaderItem(unixTime,shift,middleClick) {
+		clickHeaderItem(unix,mousedown) {
 			if(!this.hasCreate) return;
 			
-			if(this.isDays)
-				unixTime = this.getUnixShifted(unixTime,false);
-			
-			if(this.unixTimeRangeStart === null) {
-				this.unixTimeRangeStart = unixTime;
-				
-				if(shift) return;
+			this.unixInputActive = mousedown;
+			if(mousedown) {
+				this.unixInput0 = unix;
+				this.unixInput1 = unix;
+				return;
 			}
 			
-			let attributes = [
-				`${this.attributeIdDate0}_${this.unixTimeRangeStart}`,
-				`${this.attributeIdDate1}_${unixTime}`
-			];
-			this.$emit('open-form',[],[`attributes=${attributes.join(',')}`],middleClick);
-			this.unixTimeRangeStart = null;
+			if(this.unixInput0 !== null && this.unixInput1 !== null) {
+				let attributes = [
+					`${this.attributeIdDate0}_${this.isDays ? this.getUnixShifted(this.unixInput0,false) : this.unixInput0}`,
+					`${this.attributeIdDate1}_${this.isDays ? this.getUnixShifted(this.unixInput1,false) : this.unixInput1}`
+				];
+				this.$emit('open-form',[],[`attributes=${attributes.join(',')}`],false);
+			}
+			this.unixInput0 = null;
+			this.unixInput1 = null;
+		},
+		hoverHeaderItem(unix) {
+			if(!this.unixInputActive) return;
+			
+			if(unix < this.unixInput0) this.unixInput0 = unix;
+			else                       this.unixInput1 = unix;
 		},
 		pageChange(factor) {
 			this.page += factor;
