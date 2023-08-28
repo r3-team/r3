@@ -23,6 +23,7 @@ import (
 	"unicode/utf8"
 
 	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var (
@@ -201,12 +202,12 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 
 			atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
 			if !exists {
-				handler.AbortRequest(w, handlerContext, errors.New("unknown attribute"), handler.ErrGeneral)
+				handler.AbortRequest(w, handlerContext, handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes), handler.ErrGeneral)
 				return
 			}
 			rel, exists := cache.RelationIdMap[atr.RelationId]
 			if !exists {
-				handler.AbortRequest(w, handlerContext, errors.New("unknown relation"), handler.ErrGeneral)
+				handler.AbortRequest(w, handlerContext, handler.ErrSchemaUnknownRelation(atr.RelationId), handler.ErrGeneral)
 				return
 			}
 			columnNames[i] = rel.Name + "." + atr.Name
@@ -351,6 +352,8 @@ func dataToCsv(writer *csv.Writer, get types.DataGet, locUser *time.Location,
 				stringValues[pos] = parseIntegerValues(columnAttributeContentUse[pos], int64(v))
 			case int64:
 				stringValues[pos] = parseIntegerValues(columnAttributeContentUse[pos], v)
+			case pgtype.Numeric:
+				stringValues[pos] = tools.PgxNumericToString(v)
 			default:
 				stringValues[pos] = fmt.Sprintf("%v", value)
 			}
