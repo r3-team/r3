@@ -255,8 +255,6 @@ func processMessage(mailAccountId int32, msg *imap.Message,
 			}
 
 		case *mail.AttachmentHeader:
-
-			// attachment
 			name, err := h.Filename()
 			if err != nil {
 				return err
@@ -294,21 +292,35 @@ func processMessage(mailAccountId int32, msg *imap.Message,
 		}
 	}
 
-	// store message in spooler
 	tx, err := db.Pool.Begin(db.Ctx)
 	if err != nil {
 		return err
 	}
 
+	// log to mail traffic log
+	fileList := make([]string, 0)
+	for _, file := range files {
+		fileList = append(fileList, fmt.Sprintf("%s (%dkb)", file.Name, file.Size))
+	}
+	if _, err := tx.Exec(db.Ctx, `
+		INSERT INTO instance.mail_traffic (from_list, to_list, cc_list,
+			subject, date, files, mail_account_id, outgoing)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,FALSE)
+	`, getStringListFromAddress(from), getStringListFromAddress(to), getStringListFromAddress(cc),
+		subject, date.Unix(), fileList, mailAccountId); err != nil {
+
+		tx.Rollback(db.Ctx)
+		return fmt.Errorf("%w, %s", errors.New("failed to store message in traffic log"), err)
+	}
+
+	// store message in spooler
 	var mailId int64
 	if err := tx.QueryRow(db.Ctx, `
 		INSERT INTO instance.mail_spool (from_list, to_list, cc_list,
 			subject, body, date, mail_account_id, outgoing)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,FALSE)
 		RETURNING id
-	`, getStringListFromAddress(from),
-		getStringListFromAddress(to),
-		getStringListFromAddress(cc),
+	`, getStringListFromAddress(from), getStringListFromAddress(to), getStringListFromAddress(cc),
 		subject, body, date.Unix(), mailAccountId).Scan(&mailId); err != nil {
 
 		tx.Rollback(db.Ctx)

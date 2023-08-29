@@ -173,6 +173,31 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			ALTER TABLE instance.module_option DROP COLUMN hash;
 			
+			-- mail traffic log
+			CREATE TABLE instance.mail_traffic (
+				mail_account_id integer,
+				from_list text NOT NULL DEFAULT '',
+				to_list text NOT NULL,
+				cc_list text NOT NULL DEFAULT '',
+				bcc_list text NOT NULL DEFAULT '',
+				subject text NOT NULL,
+				date bigint NOT NULL,
+				outgoing boolean NOT NULL,
+				files text[],
+			    CONSTRAINT mail_traffic_mail_account_fkey FOREIGN KEY (mail_account_id)
+			        REFERENCES instance.mail_account (id) MATCH SIMPLE
+			        ON UPDATE SET NULL
+			        ON DELETE SET NULL
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX fki_mail_traffic_mail_account_id_fkey ON instance.mail_traffic USING btree (mail_account_id ASC NULLS LAST);
+			CREATE INDEX ind_mail_traffic_date                 ON instance.mail_traffic USING btree (date DESC NULLS LAST);
+			CREATE INDEX ind_mail_traffic_outgoing             ON instance.mail_traffic USING btree (outgoing ASC NULLS LAST);
+			
+			-- missing mail spool index
+			CREATE INDEX fki_mail_spool_mail_account_id_fkey ON instance.mail_spool USING btree (mail_account_id ASC NULLS LAST);
+			
 			-- regular VACUUM task
 			INSERT INTO instance.task (
 				name,interval_seconds,cluster_master_only,

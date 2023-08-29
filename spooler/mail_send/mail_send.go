@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"net/smtp"
+	"os"
 	"r3/cache"
 	"r3/data"
 	"r3/db"
@@ -139,6 +140,7 @@ func do(m types.Mail) error {
 	}
 
 	// parse attachments from file attribute, if set
+	fileList := make([]string, 0)
 	if m.RecordId.Valid && m.AttributeId.Valid {
 
 		atr, exists := cache.AttributeIdMap[m.AttributeId.Bytes]
@@ -178,17 +180,18 @@ func do(m types.Mail) error {
 
 		for _, f := range files {
 			filePath := data.GetFilePathVersion(f.Id, f.Version)
-
-			exists, err = tools.Exists(filePath)
+			fileInfo, err := os.Stat(filePath)
 			if err != nil {
+				if os.IsNotExist(err) {
+					log.Error("mail", "could not attach file to message",
+						fmt.Errorf("'%s' does not exist, ignoring it", filePath))
+
+					continue
+				}
 				return err
 			}
-			if !exists {
-				log.Warning("mail", "could not attach file to message",
-					fmt.Errorf("'%s' does not exist, ignoring it", filePath))
 
-				continue
-			}
+			fileList = append(fileList, fmt.Sprintf("%s (%dkb)", f.Name, fileInfo.Size()/1024))
 
 			msg.AttachFile(filePath, getAttachedFileWithName(f.Name))
 		}
@@ -220,7 +223,19 @@ func do(m types.Mail) error {
 		return fmt.Errorf("unsupported authentication method '%s'", ma.AuthMethod)
 	}
 
-	return client.DialAndSend(msg)
+	if err := client.DialAndSend(msg); err != nil {
+		return err
+	}
+
+	// add to mail traffic log
+	if _, err := db.Pool.Exec(db.Ctx, `
+		INSERT INTO instance.mail_traffic (from_list, to_list, cc_list,
+			subject, date, files, mail_account_id, outgoing)
+		VALUES ($1,$2,$3,$4,$5,$6,$7,TRUE)
+	`, m.FromList, m.ToList, m.CcList, m.Subject, tools.GetTimeUnix(), fileList, m.AccountId); err != nil {
+		return err
+	}
+	return nil
 }
 
 // legacy O365 SMTP login auth

@@ -42,3 +42,14 @@ type MailFile struct {
 	Name string    `json:"name"`
 	Size int64     `json:"size"`
 }
+type MailTraffic struct {
+	FromList  string      `json:"fromList"`
+	ToList    string      `json:"toList"`
+	CcList    string      `json:"ccList"`
+	BccList   string      `json:"bccList"`
+	Subject   string      `json:"subject"`
+	Date      int64       `json:"date"`
+	Files     []string    `json:"files"`
+	Outgoing  bool        `json:"outgoing"`
+	AccountId pgtype.Int4 `json:"accountId"`
+}

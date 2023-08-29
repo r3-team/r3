@@ -381,13 +381,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "set":
 			return LoginTemplateSet_tx(tx, reqJson)
 		}
-	case "mail":
-		switch action {
-		case "del":
-			return MailDel_tx(tx, reqJson)
-		case "get":
-			return MailGet(reqJson)
-		}
 	case "mailAccount":
 		switch action {
 		case "del":
@@ -400,6 +393,18 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return MailAccountSet_tx(tx, reqJson)
 		case "test":
 			return MailAccountTest_tx(tx, reqJson)
+		}
+	case "mailSpooler":
+		switch action {
+		case "del":
+			return MailSpoolerDel_tx(tx, reqJson)
+		case "get":
+			return MailSpoolerGet(reqJson)
+		}
+	case "mailTraffic":
+		switch action {
+		case "get":
+			return MailTrafficGet(reqJson)
 		}
 	case "menu":
 		switch action {

@@ -66,9 +66,15 @@ let MyAdmin = {
 					</router-link>
 					
 					<!-- mail spooler -->
-					<router-link class="entry clickable" tag="div" to="/admin/mails">
+					<router-link class="entry clickable" tag="div" to="/admin/mailspooler">
 						<img src="images/mail_spool.png" />
-						<span>{{ capApp.navigationMails }}</span>
+						<span>{{ capApp.navigationMailSpooler }}</span>
+					</router-link>
+					
+					<!-- mail traffic -->
+					<router-link class="entry clickable" tag="div" to="/admin/mailtraffic">
+						<img src="images/mail_clock.png" />
+						<span>{{ capApp.navigationMailTraffic }}</span>
 					</router-link>
 					
 					<!-- backups -->
@@ -175,7 +181,8 @@ let MyAdmin = {
 			if(s.$route.path.includes('logs'))           return s.capApp.navigationLogs;
 			if(s.$route.path.includes('ldaps'))          return s.capApp.navigationLdaps;
 			if(s.$route.path.includes('mailaccounts'))   return s.capApp.navigationMailAccounts;
-			if(s.$route.path.includes('mails'))          return s.capApp.navigationMails;
+			if(s.$route.path.includes('mailspooler'))    return s.capApp.navigationMailSpooler;
+			if(s.$route.path.includes('mailtraffic'))    return s.capApp.navigationMailTraffic;
 			if(s.$route.path.includes('modules'))        return s.capApp.navigationModules;
 			if(s.$route.path.includes('repo'))           return s.capApp.navigationRepo;
 			if(s.$route.path.includes('roles'))          return s.capApp.navigationRoles;

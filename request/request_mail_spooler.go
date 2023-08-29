@@ -9,8 +9,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-// mails from spooler
-func MailDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+func MailSpoolerDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		Ids []int64 `json:"ids"`
 	}
@@ -29,7 +28,7 @@ func MailDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	return nil, nil
 }
 
-func MailGet(reqJson json.RawMessage) (interface{}, error) {
+func MailSpoolerGet(reqJson json.RawMessage) (interface{}, error) {
 
 	var (
 		err error
@@ -48,14 +47,14 @@ func MailGet(reqJson json.RawMessage) (interface{}, error) {
 		return nil, err
 	}
 
-	res.Mails, res.Total, err = mailGetFromSpooler(req.Limit, req.Offset, req.Search)
+	res.Mails, res.Total, err = mailSpoolerRead(req.Limit, req.Offset, req.Search)
 	if err != nil {
 		return nil, err
 	}
 	return res, nil
 }
 
-func mailGetFromSpooler(limit int, offset int, search string) ([]types.Mail, int64, error) {
+func mailSpoolerRead(limit int, offset int, search string) ([]types.Mail, int64, error) {
 
 	var searchFields = []string{"from_list", "to_list",
 		"cc_list", "bcc_list", "subject", "body"}

@@ -1,14 +1,14 @@
 import {getSizeReadable} from '../shared/generic.js';
 import {getUnixFormat}   from '../shared/time.js';
-export {MyAdminMails as default};
+export {MyAdminMailTraffic as default};
 
-let MyAdminMails = {
-	name:'my-admin-mails',
-	template:`<div class="admin-mails contentBox grow">
+let MyAdminMailTraffic = {
+	name:'my-admin-mail-traffic',
+	template:`<div class="admin-mail-traffic contentBox grow">
 		
 		<div class="top">
 			<div class="area">
-				<img class="icon" src="images/mail_spool.png" />
+				<img class="icon" src="images/mail_clock.png" />
 				<h1>{{ menuTitle + ' (' + total + ')' }}</h1>
 			</div>
 		</div>
@@ -17,13 +17,6 @@ let MyAdminMails = {
 				<my-button image="refresh.png"
 					@trigger="get"
 					:caption="capGen.button.refresh"
-				/>
-				<my-button image="delete.png"
-					v-if="!noMails"
-					@trigger="del"
-					:active="mailIdsSelected.length !== 0"
-					:cancel="true"
-					:caption="capGen.button.delete"
 				/>
 			</div>
 			<div class="area default-inputs" v-if="!noMails">
@@ -60,50 +53,31 @@ let MyAdminMails = {
 		</div>
 		
 		<div class="content mails default-inputs" :class="{ 'no-padding':!noMails }">
-			<span v-if="noMails"><i>{{ capApp.noMails }}</i></span>
+			<span v-if="noMails"><i>{{ capApp.noMailsInTraffic }}</i></span>
 			
 			<table class="table-default shade" v-if="!noMails">
 				<thead>
 					<tr>
-						<th>
-							<my-button
-								@trigger="toggleMailAll"
-								:image="mailIdsSelected.length === mails.length ? 'checkbox1.png' : 'checkbox0.png'"
-								:naked="true"
-							/>
-						</th>
 						<th>{{ capApp.dir }}</th>
 						<th>{{ capApp.toList }}</th>
 						<th>{{ capApp.ccList }}</th>
 						<th>{{ capApp.bccList }}</th>
 						<th>{{ capApp.subject }}</th>
-						<th>{{ capApp.body }}</th>
 						<th>{{ capApp.files }}</th>
 						<th>{{ capGen.date }}</th>
-						<th>{{ capApp.attempts }}</th>
 						<th>{{ capApp.account }}</th>
 					</tr>
 				</thead>
 				<tbody>
 					<tr v-for="m in mails">
-						<td class="minimum">
-							<my-button
-								@trigger="toggleMailId(m.id)"
-								:image="mailIdsSelected.includes(m.id) ? 'checkbox1.png' : 'checkbox0.png'"
-								:naked="true"
-							/>
-						</td>
 						<td>{{ m.outgoing ? capApp.dirOut : capApp.dirIn }}</td>
 						<td>{{ m.toList }}</td>
 						<td>{{ m.ccList }}</td>
 						<td>{{ m.bccList }}</td>
 						<td>{{ m.subject }}</td>
-						<td class="minimum">
-							<my-button image="search.png" @trigger="showMail(m)" />
-						</td>
-						<td v-html="displayAttach(m)"></td>
+						<td v-if="m.files.length === 0">-</td>
+						<td v-else><my-button image="visible1.png" @trigger="showFiles(m.files)" :caption="String(m.files.length)" /></td>
 						<td>{{ getUnixFormat(m.date,settings.dateFormat+' H:i') }}</td>
-						<td>{{ displaySendAttempts(m) }}</td>
 						<td>{{ typeof accountIdMap[m.accountId] !== 'undefined' ? accountIdMap[m.accountId].name : '-' }}</td>
 					</tr>
 				</tbody>
@@ -122,7 +96,6 @@ let MyAdminMails = {
 			
 			// mails
 			mails:[],
-			mailIdsSelected:[],
 			total:0,
 			
 			// mail accounts
@@ -149,26 +122,15 @@ let MyAdminMails = {
 		getSizeReadable,
 		getUnixFormat,
 		
-		// presentation
-		displaySendAttempts(mail) {
-			if(!mail.outgoing)          return '';
-			if(mail.attemptCount === 0) return '-';
-			return `${mail.attemptCount}/5 (${this.getUnixFormat(mail.attemptDate,this.settings.dateFormat+' H:i')})`;
-		},
-		displayAttach(mail) {
-			if(mail.outgoing)    return `<i>${this.capApp.attachmentsNoPreview}</i>`;
-			if(mail.files === 0) return '-';
-			return `${mail.files} (${this.getSizeReadable(mail.filesSize)})`;
-		},
-		
 		// actions
-		showMail(mail) {
+		offsetSet(add) {
+			if(add) this.offset += this.limit;
+			else    this.offset -= this.limit;
+			this.get();
+		},
+		showFiles(files) {
 			this.$store.commit('dialog',{
-				captionBody:mail.body,
-				captionTop:this.capApp.body,
-				image:'mail2.png',
-				textDisplay:'richtext',
-				width:800
+				captionBody:files.join('<br />')
 			});
 		},
 		startAtPageFirst() {
@@ -179,51 +141,17 @@ let MyAdminMails = {
 			this.offset = this.limit * (this.pages-1);
 			this.get();
 		},
-		offsetSet(add) {
-			if(add) this.offset += this.limit;
-			else    this.offset -= this.limit;
-			this.get();
-		},
-		toggleMailAll() {
-			if(this.mailIdsSelected.length === this.mails.length) {
-				this.mailIdsSelected = [];
-				return;
-			}
-			
-			this.mailIdsSelected = [];
-			for(let i = 0, j = this.mails.length; i < j; i++) {
-				this.mailIdsSelected.push(this.mails[i].id);
-			}
-		},
-		toggleMailId(id) {
-			let pos = this.mailIdsSelected.indexOf(id);
-			
-			if(pos === -1)
-				return this.mailIdsSelected.push(id);
-			
-			this.mailIdsSelected.splice(pos,1);
-		},
 		
 		// backend calls
-		del() {
-			ws.send('mail','del',{ids:this.mailIdsSelected},true).then(
-				() => {
-					this.offset = 0;
-					this.get();
-				},
-				this.$root.genericError
-			);
-		},
 		get() {
-			ws.send('mail','get',{
+			ws.send('mailTraffic','get',{
 				limit:this.limit,
 				offset:this.offset,
 				search:this.search
 			},true).then(
 				res => {
-					this.mails           = res.payload.mails;
-					this.mailIdsSelected = [];
-					this.total           = res.payload.total;
+					this.mails = res.payload.mails;
+					this.total = res.payload.total;
 				},
 				this.$root.genericError
 			);

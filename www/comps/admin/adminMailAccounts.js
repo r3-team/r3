@@ -102,12 +102,7 @@ let MyAdminMailAccount = {
 			
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.imapWarn,
-				image:'warning.png',
-				buttons:[{
-					caption:this.capGen.button.ok,
-					keyEscape:true,
-					image:'ok.png'
-				}]
+				image:'warning.png'
 			});
 		},
 		

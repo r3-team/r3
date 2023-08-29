@@ -519,13 +519,13 @@
 }
 
 
-/* mails */
-.admin-mails{}
-.admin-mails .mail-testing{
+/* mail spooler */
+.admin-mail-spooler{}
+.admin-mail-spooler .mail-testing{
 	display:flex;
 	flex-flow:row nowrap;
 }
-.admin-mails .mail-testing h1{
+.admin-mail-spooler .mail-testing h1{
 	margin-right:9px;
 }
 
