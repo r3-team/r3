@@ -138,6 +138,7 @@
 		"size":"Size",
 		"standard":"Standard",
 		"status":"Status",
+		"textSearch":"Căutare text",
 		"threeDots":"...",
 		"title":"Titlu",
 		"token":"Token",
@@ -411,7 +412,6 @@
 				"transfer":"Transfer",
 				"websocket":"Websocket clients"
 			},
-			"byString":"Text search",
 			"context":"Context",
 			"date":"Timestamp",
 			"keepDays":"Păstrează logurile (în zile)",
@@ -465,7 +465,8 @@
 			"testAccount":"Selectează contul",
 			"testOk":"E-mailul de testare a fost adăugat cu succes la spooler.",
 			"testRecipient":"Adresa destinatarului",
-			"testSubject":"Subiectul"
+			"testSubject":"Subiectul",
+			"trafficKeepDays":"Keep data (in days)"
 		},
 		"modules":{
 			"button":{
@@ -505,7 +506,6 @@
 				"showInstalled":"Afișează instalările"
 			},
 			"author":"după {NAME}",
-			"byString":"Căutare text",
 			"fetchDone":"Aplicația a fost instalată cu succes.<br /><br />Pentru a obține acces, trebuie să fie atribuite roluri.",
 			"maintenanceBlock":"Instalare numai în modul de întreținere",
 			"notCompatible":"Este necesară actualizarea platformei",
@@ -531,6 +531,7 @@
 				"cleanupDataLogs":"Curățare jurnalele de modificări expirate",
 				"cleanupFiles":"Curățați fișierele încărcate expirate",
 				"cleanupLogs":"Curățați jurnalele de sistem expirate",
+				"cleanupMailTraffic":"Cleanup expired email traffic entries",
 				"cleanupTempDir":"Curățați directorul temporar",
 				"clusterCheckIn":"Cluster check-in",
 				"clusterProcessEvents":"Cluster event processing",

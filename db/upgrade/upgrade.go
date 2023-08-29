@@ -198,6 +198,17 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- missing mail spool index
 			CREATE INDEX fki_mail_spool_mail_account_id_fkey ON instance.mail_spool USING btree (mail_account_id ASC NULLS LAST);
 			
+			-- mail traffic config & cleanup task
+			INSERT INTO instance.config (name,value) VALUES ('mailTrafficKeepDays','90');
+			
+			INSERT INTO instance.task (
+				name,interval_seconds,cluster_master_only,
+				embedded_only,active_only,active
+			) VALUES ('cleanupMailTraffic',604800,true,false,false,true);
+			
+			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
+			VALUES ('cleanupMailTraffic',0,0);
+			
 			-- regular VACUUM task
 			INSERT INTO instance.task (
 				name,interval_seconds,cluster_master_only,

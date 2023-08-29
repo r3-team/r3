@@ -45,56 +45,49 @@ let MyAdminRepoModule = {
 	props:{
 		repoModule:{ type:Object, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			installStarted:false
 		};
 	},
 	computed:{
-		description:function() {
-			return this.meta.description.replace(/(?:\r\n|\r|\n)/g,'<br />');
-		},
-		meta:function() {
-			let code = this.settings.languageCode;
+		meta:(s) => {
+			let code = s.settings.languageCode;
 			
 			// en_us is global fallback
-			if(typeof this.repoModule.languageCodeMeta[code] === 'undefined')
+			if(typeof s.repoModule.languageCodeMeta[code] === 'undefined')
 				code = 'en_us';
 			
-			return this.repoModule.languageCodeMeta[code];
+			return s.repoModule.languageCodeMeta[code];
 		},
-		releaseDate:function() {
-			return this.getUnixFormat(this.repoModule.releaseDate,this.settings.dateFormat);
-		},
-		languageCodes:function() {
+		languageCodes:(s) => {
 			let codes = [];
-			for(let k in this.repoModule.languageCodeMeta) {
+			for(let k in s.repoModule.languageCodeMeta) {
 				codes.push(k);
 			}
 			return codes.join(', ');
 		},
 		
-		isInstalled:function() {
-			return typeof this.moduleIdMap[this.repoModule.moduleId] !== 'undefined';
-		},
-		isCompatible:function() {
-			return parseInt(this.system.appBuild) >= this.repoModule.releaseBuildApp;
-		},
+		// simple
+		description: (s) => s.meta.description.replace(/(?:\r\n|\r|\n)/g,'<br />'),
+		isCompatible:(s) => parseInt(s.system.appBuild) >= s.repoModule.releaseBuildApp,
+		isInstalled: (s) => typeof s.moduleIdMap[s.repoModule.moduleId] !== 'undefined',
+		releaseDate: (s) => s.getUnixFormat(s.repoModule.releaseDate,s.settings.dateFormat),
 		
 		// stores
-		moduleIdMap:   function() { return this.$store.getters['schema/moduleIdMap']; },
-		capApp:        function() { return this.$store.getters.captions.admin.repo; },
-		capGen:        function() { return this.$store.getters.captions.generic; },
-		productionMode:function() { return this.$store.getters.productionMode; },
-		settings:      function() { return this.$store.getters.settings; },
-		system:        function() { return this.$store.getters.system; }
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:        (s) => s.$store.getters.captions.admin.repo,
+		capGen:        (s) => s.$store.getters.captions.generic,
+		productionMode:(s) => s.$store.getters.productionMode,
+		settings:      (s) => s.$store.getters.settings,
+		system:        (s) => s.$store.getters.system
 	},
 	methods:{
 		// externals
 		getUnixFormat,
 		
 		// backend calls
-		install:function(fileId) {
+		install(fileId) {
 			ws.send('repoModule','install',{fileId:fileId},true).then(
 				() => {
 					this.$store.commit('dialog',{
@@ -164,7 +157,7 @@ let MyAdminRepo = {
 				<input class="entry selector"
 					v-model="byString"
 					@keyup.enter="get"
-					:placeholder="capApp.byString"
+					:placeholder="capGen.textSearch"
 				/>
 			</div>
 		</div>
@@ -184,7 +177,7 @@ let MyAdminRepo = {
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
-	data:function() {
+	data() {
 		return {
 			repoModules:[],
 			byString:'',
@@ -195,36 +188,36 @@ let MyAdminRepo = {
 			showInstalled:true
 		};
 	},
-	mounted:function() {
+	mounted() {
 		this.$store.commit('pageTitle',this.menuTitle);
 		this.get();
 	},
 	computed:{
 		// stores
-		modules:    function() { return this.$store.getters['schema/modules']; },
-		moduleIdMap:function() { return this.$store.getters['schema/moduleIdMap']; },
-		capApp:     function() { return this.$store.getters.captions.admin.repo; },
-		capGen:     function() { return this.$store.getters.captions.generic; },
-		settings:   function() { return this.$store.getters.settings; }
+		modules:    (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:     (s) => s.$store.getters.captions.admin.repo,
+		capGen:     (s) => s.$store.getters.captions.generic,
+		settings:   (s) => s.$store.getters.settings
 	},
 	methods:{
 		// actions
-		limitSet:function() {
+		limitSet() {
 			this.offset = 0;
 			this.get();
 		},
-		offsetSet:function(newOffset) {
+		offsetSet(newOffset) {
 			this.offset = newOffset;
 			this.get();
 		},
-		toggleShowInstalled:function() {
+		toggleShowInstalled() {
 			this.showInstalled = !this.showInstalled;
 			this.offset = 0;
 			this.get();
 		},
 		
 		// backend calls
-		get:function() {
+		get() {
 			ws.send('repoModule','get',{
 				byString:this.byString,
 				languageCode:this.settings.languageCode,
@@ -246,7 +239,7 @@ let MyAdminRepo = {
 				this.$root.genericError
 			);
 		},
-		updateRepo:function() {
+		updateRepo() {
 			ws.send('repoModule','update',{},true).then(
 				() => {
 					this.offset = 0;

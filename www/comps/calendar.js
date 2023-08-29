@@ -556,7 +556,7 @@ let MyCalendar = {
 			}
 			
 			// if today is already visible, open 'today'
-			if(this.hasOpenForm) {
+			if(this.hasCreate) {
 				const u = this.getUnixFromDate(this.getDateAtUtcZero(now));
 				this.dateSelected(u,u,false);
 			}

@@ -46,13 +46,36 @@ let MyAdminMailTraffic = {
 				</select>
 			</div>
 			<div class="area default-inputs">
-				<div class="row gap">
-					<input v-model="search" @keyup.enter="startAtPageFirst" :placeholder="capGen.threeDots" />
+				<div class="row gap default-inputs">
+					<input class="short"
+						v-model="search"
+						@keyup.enter="startAtPageFirst"
+						:placeholder="capGen.textSearch"
+					/>
+					<my-button
+						@trigger="showOptions = !showOptions"
+						:caption="capGen.settings"
+						:image="showOptions ? 'visible1.png' : 'visible0.png'"
+					/>
 				</div>
 			</div>
 		</div>
 		
-		<div class="content mails default-inputs" :class="{ 'no-padding':!noMails }">
+		<div class="content default-inputs" :class="{ 'no-padding':!noMails }">
+			
+			<!-- options -->
+			<div v-if="showOptions" class="admin-mail-traffic-settings">
+				<div class="row gap centered default-inputs">
+					<span>{{ capApp.trafficKeepDays }}</span>
+					<input class="short" v-model="configInput.mailTrafficKeepDays" />
+					<my-button image="save.png"
+						@trigger="setConfig"
+						:caption="capGen.button.save"
+						:active="config.mailTrafficKeepDays !== configInput.mailTrafficKeepDays"
+					/>
+				</div>
+			</div>
+			
 			<span v-if="noMails"><i>{{ capApp.noMailsInTraffic }}</i></span>
 			
 			<table class="table-default shade" v-if="!noMails">
@@ -90,9 +113,11 @@ let MyAdminMailTraffic = {
 	data() {
 		return {
 			// inputs
+			configInput:{},
 			limit:50,
 			offset:0,
 			search:'',
+			showOptions:false,
 			
 			// mails
 			mails:[],
@@ -104,6 +129,8 @@ let MyAdminMailTraffic = {
 	},
 	mounted() {
 		this.$store.commit('pageTitle',this.menuTitle);
+		this.configInput = JSON.parse(JSON.stringify(this.config));
+		
 		this.get();
 		this.getAccounts();
 	},
@@ -115,6 +142,7 @@ let MyAdminMailTraffic = {
 		// stores
 		capApp:  (s) => s.$store.getters.captions.admin.mails,
 		capGen:  (s) => s.$store.getters.captions.generic,
+		config:  (s) => s.$store.getters.config,
 		settings:(s) => s.$store.getters.settings
 	},
 	methods:{
@@ -159,6 +187,12 @@ let MyAdminMailTraffic = {
 		getAccounts() {
 			ws.send('mailAccount','get',{},true).then(
 				res => this.accountIdMap = res.payload.accounts,
+				this.$root.genericError
+			);
+		},
+		setConfig() {
+			ws.send('config','set',this.configInput,true).then(
+				() => {},
 				this.$root.genericError
 			);
 		}

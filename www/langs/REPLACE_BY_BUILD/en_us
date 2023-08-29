@@ -138,6 +138,7 @@
 		"size":"Size",
 		"standard":"Standard",
 		"status":"Status",
+		"textSearch":"Text search",
 		"threeDots":"...",
 		"title":"Title",
 		"token":"Token",
@@ -411,7 +412,6 @@
 				"transfer":"Transfer",
 				"websocket":"Websocket clients"
 			},
-			"byString":"Text search",
 			"context":"Context",
 			"date":"Timestamp",
 			"keepDays":"Keep logs (in days)",
@@ -465,7 +465,8 @@
 			"testAccount":"Select account",
 			"testOk":"Test email was successfully added to the spooler.",
 			"testRecipient":"Recipient address",
-			"testSubject":"Subject"
+			"testSubject":"Subject",
+			"trafficKeepDays":"Keep data (in days)"
 		},
 		"modules":{
 			"button":{
@@ -505,7 +506,6 @@
 				"showInstalled":"Show installed"
 			},
 			"author":"by {NAME}",
-			"byString":"Text search",
 			"fetchDone":"Application was successfully installed.<br /><br />To get access, roles have to be assigned.",
 			"maintenanceBlock":"Installation only in maintenance mode",
 			"notCompatible":"Platform upgrade required",
@@ -531,6 +531,7 @@
 				"cleanupDataLogs":"Cleanup expired change logs",
 				"cleanupFiles":"Cleanup expired file uploads",
 				"cleanupLogs":"Cleanup expired system logs",
+				"cleanupMailTraffic":"Cleanup expired email traffic entries",
 				"cleanupTempDir":"Cleanup temporary directory",
 				"clusterCheckIn":"Cluster check-in",
 				"clusterProcessEvents":"Cluster event processing",

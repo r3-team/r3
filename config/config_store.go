@@ -32,9 +32,10 @@ var (
 		"icsDaysPre", "icsDownload", "imagerThumbWidth", "logApi", "logBackup",
 		"logCache", "logCluster", "logCsv", "logImager", "logLdap", "logMail",
 		"logModule", "logServer", "logScheduler", "logTransfer", "logWebsocket",
-		"logsKeepDays", "productionMode", "pwForceDigit", "pwForceLower",
-		"pwForceSpecial", "pwForceUpper", "pwLengthMin", "schemaTimestamp",
-		"repoChecked", "repoFeedback", "repoSkipVerify", "tokenExpiryHours"}
+		"logsKeepDays", "mailTrafficKeepDays", "productionMode", "pwForceDigit",
+		"pwForceLower", "pwForceSpecial", "pwForceUpper", "pwLengthMin",
+		"schemaTimestamp", "repoChecked", "repoFeedback", "repoSkipVerify",
+		"tokenExpiryHours"}
 )
 
 // store setters

@@ -138,6 +138,7 @@
 		"size":"Size",
 		"standard":"Standard",
 		"status":"Status",
+		"textSearch":"Cerca testo",
 		"threeDots":"...",
 		"title":"Titolo",
 		"token":"Token",
@@ -411,7 +412,6 @@
 				"transfer":"Trasferimento",
 				"websocket":"Websocket clients"
 			},
-			"byString":"Cerca testo",
 			"context":"Contesto",
 			"date":"Timestamp",
 			"keepDays":"Mantieni log (in giorni)",
@@ -465,7 +465,8 @@
 			"testAccount":"Seleziona account",
 			"testOk":"L'e-mail di prova è stata aggiunta con successo allo spooler.",
 			"testRecipient":"Indirizzo del destinatario",
-			"testSubject":"Oggetto"
+			"testSubject":"Oggetto",
+			"trafficKeepDays":"Keep data (in days)"
 		},
 		"modules":{
 			"button":{
@@ -505,7 +506,6 @@
 				"showInstalled":"Mostra installati"
 			},
 			"author":"per {NAME}",
-			"byString":"Cerca testo",
 			"fetchDone":"L'applicazione è stata installata con successo.<br /><br />Per ottenere l'accesso, è necessario assegnare i ruoli.",
 			"maintenanceBlock":"Installazione solo in modalità manutenzione",
 			"notCompatible":"Richiesto aggiornamento della piattaforma",
@@ -531,6 +531,7 @@
 				"cleanupDataLogs":"Pulisci i log delle modifiche scadute",
 				"cleanupFiles":"Elimina i caricamenti di file scaduti",
 				"cleanupLogs":"Pulisci i log di sistema scaduti",
+				"cleanupMailTraffic":"Cleanup expired email traffic entries",
 				"cleanupTempDir":"Pulisci cartella temporanea",
 				"clusterCheckIn":"Cluster check-in",
 				"clusterProcessEvents":"Cluster event processing",

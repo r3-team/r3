@@ -53,7 +53,7 @@ let MyAdminLogs = {
 						<input class="entry"
 							v-model="byString"
 							@keyup.enter="offset = 0;get()"
-							:placeholder="capApp.byString"
+							:placeholder="capGen.textSearch"
 						/>
 						<span>{{ capGen.limit }}</span>
 						<select class="entry short" v-model.number="limit" @change="offset = 0;get()">
@@ -154,6 +154,7 @@ let MyAdminLogs = {
 			
 			// inputs
 			byString:'',
+			configInput:{},
 			context:'',
 			levelContext:'logModule',
 			limit:100,
@@ -163,7 +164,6 @@ let MyAdminLogs = {
 			unixTo:null,
 			
 			// data
-			configInput:{},
 			logs:[]
 		};
 	},

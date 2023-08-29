@@ -530,6 +530,13 @@
 }
 
 
+/* mail traffic */
+.admin-mail-traffic{}
+.admin-mail-traffic-settings{
+	margin:16px;
+}
+
+
 /* cluster */
 .admin-cluster .config{
 	max-width:400px !important;

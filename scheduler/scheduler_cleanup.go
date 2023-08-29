@@ -50,21 +50,30 @@ func cleanupTemp() error {
 
 // deletes expired logs
 func cleanupLogs() error {
-
 	keepForDays := config.GetUint64("logsKeepDays")
 	if keepForDays == 0 {
 		return nil
 	}
 
-	deleteOlderMilli := (tools.GetTimeUnix() - (oneDayInSeconds * int64(keepForDays))) * 1000
-
-	if _, err := db.Pool.Exec(db.Ctx, `
+	_, err := db.Pool.Exec(db.Ctx, `
 		DELETE FROM instance.log
 		WHERE date_milli < $1
-	`, deleteOlderMilli); err != nil {
-		return err
+	`, (tools.GetTimeUnix()-(oneDayInSeconds*int64(keepForDays)))*1000)
+	return err
+}
+
+// deletes expired mail traffic entries
+func cleanupMailTraffic() error {
+	keepForDays := config.GetUint64("mailTrafficKeepDays")
+	if keepForDays == 0 {
+		return nil
 	}
-	return nil
+
+	_, err := db.Pool.Exec(db.Ctx, `
+		DELETE FROM instance.mail_traffic
+		WHERE date < $1
+	`, tools.GetTimeUnix()-(oneDayInSeconds*int64(keepForDays)))
+	return err
 }
 
 // removes files that were deleted from their attribute or that are not assigned to a record

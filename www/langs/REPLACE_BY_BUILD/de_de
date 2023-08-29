@@ -138,6 +138,7 @@
 		"size":"Größe",
 		"standard":"Standard",
 		"status":"Status",
+		"textSearch":"Textsuche",
 		"threeDots":"...",
 		"title":"Titel",
 		"token":"Token",
@@ -411,7 +412,6 @@
 				"transfer":"Transfer",
 				"websocket":"Websocket-Clients"
 			},
-			"byString":"Textsuche",
 			"context":"Kontext",
 			"date":"Zeitstempel",
 			"keepDays":"Logs aufheben (in Tagen)",
@@ -465,7 +465,8 @@
 			"testAccount":"Account auswählen",
 			"testOk":"Test-E-Mail wurde erfolgreich zur Warteschlange hinzugefügt.",
 			"testRecipient":"Empfängeradresse",
-			"testSubject":"Betreff"
+			"testSubject":"Betreff",
+			"trafficKeepDays":"Daten aufheben (in Tagen)"
 		},
 		"modules":{
 			"button":{
@@ -505,7 +506,6 @@
 				"showInstalled":"Installierte anzeigen"
 			},
 			"author":"von {NAME}",
-			"byString":"Textsuche",
 			"fetchDone":"Anwendung wurde erfolgreich installiert.<br /><br />Um Zugriff zu erlangen, müssen Rollen zugewiesen werden.",
 			"maintenanceBlock":"Installation nur im Wartungsmodus",
 			"notCompatible":"Plattform-Update erforderlich",
@@ -531,6 +531,7 @@
 				"cleanupDataLogs":"Bereinigung abgelaufener Änderungshistorie",
 				"cleanupFiles":"Bereinigung abgelaufener Datei-Uploads",
 				"cleanupLogs":"Bereinigung abgelaufener Systemlogs",
+				"cleanupMailTraffic":"Bereinigung abgelaufener E-Mail-Verkehr-Einträge",
 				"cleanupTempDir":"Bereinigung des temporären Verzeichnisses",
 				"clusterCheckIn":"Cluster-Knoten einchecken",
 				"clusterProcessEvents":"Cluster-Ereignisse verarbeiten",
