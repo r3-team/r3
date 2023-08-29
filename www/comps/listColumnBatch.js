@@ -247,6 +247,10 @@ let MyListColumnBatch = {
 				return '[' + this.capGen.button.empty + ']';
 			
 			let atr = this.attributeIdMap[this.columnUsedFilter.attributeId];
+			
+			if(atr.content === 'boolean')
+				return v ? this.capGen.option.yes : this.capGen.option.no;
+			
 			switch(atr.contentUse) {
 				case 'datetime': return this.getUnixFormat(v,this.dateFormat + ' H:i:S'); break;
 				case 'date':     return this.getUnixFormat(v,this.dateFormat);            break;
