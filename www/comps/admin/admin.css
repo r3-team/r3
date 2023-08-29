@@ -417,8 +417,16 @@
 
 /* logs */
 .admin-logs{}
+.admin-logs-content{
+	display:flex;
+	flex-flow:column nowrap;
+}
 .admin-logs-settings{
 	margin:16px;
+}
+.admin-logs-table{
+	flex:1 1 auto;
+	overflow:auto;
 }
 
 

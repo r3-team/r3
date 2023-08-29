@@ -68,7 +68,7 @@ let MyAdminLogs = {
 			</div>
 		</div>
 		
-		<div class="content no-padding">
+		<div class="content admin-logs-content no-padding">
 		
 			<!-- options -->
 			<div v-if="showOptions" class="admin-logs-settings">
@@ -114,7 +114,7 @@ let MyAdminLogs = {
 			</div>
 			
 			<!-- logs -->
-			<div class="table-default-wrap shade">
+			<div class="admin-logs-table">
 				<table class="table-default sticky-top">
 					<thead>
 						<tr class="title">
