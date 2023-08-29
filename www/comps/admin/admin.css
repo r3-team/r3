@@ -22,6 +22,11 @@
 	border-bottom:1px solid var(--color-border);
 	background-color:var(--color-bg);
 }
+.admin .table-default.sticky-top>thead>tr>th{
+	position:sticky;
+	top:0px;
+	z-index:var(--z-index-admin-table-sticky-top);
+}
 .admin .table-default>thead>tr>th.gab{
 	width:200px;
 }
@@ -52,52 +57,20 @@
 }
 
 /* system logs */
-.admin .logs{
+.admin-logs{
 	display:flex;
 	flex-direction:column;
 	flex:1 1 auto;
 }
-.admin .logs .actions{
-	flex:0 0 auto;
-	padding:12px;
-	display:flex;
-	flex-flow:row wrap;
-	justify-content:space-between;
-	background-color:var(--color-bg);
-	gap:6px;
-}
-.admin .logs .actions .action-bar{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	gap:6px;
-}
-.admin .logs .actions .right-bar{
-	display:flex;
-	flex-flow:column nowrap;
-	gap:8px;
-}
-.admin .logs .actions .right-bar input,
-.admin .logs .actions .right-bar select{
-	width:auto;
-	min-width:unset;
-}
-.admin .logs .actions .entry{
-	flex:0 1 200px;
-}
-.admin .logs .actions .entry input{
-	border:none;
-}
-.admin .logs .actions .input-date{
-	flex:0 1 300px;
-	position:relative;
-}
-.admin .logs .level-indicator{
+.admin-logs .level-indicator{
 	width:6px;
 	height:16px;
 	margin-right:5px;
 	border:1px solid var(--color-border);
 	border-radius:2px;
+}
+.admin-logs-date-wrap{
+	position:relative;
 }
 
 
@@ -439,6 +412,13 @@
 	align-items:flex-start;
 	border-left:2px solid var(--color-border);
 	flex:0 1 300px;
+}
+
+
+/* logs */
+.admin-logs{}
+.admin-logs-settings{
+	margin:16px;
 }
 
 

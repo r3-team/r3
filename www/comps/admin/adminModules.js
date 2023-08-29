@@ -368,7 +368,7 @@ let MyAdminModules = {
 			</p>
 			
 			<!-- installed modules -->
-			<table class="table-default" v-if="modules.length !== 0">
+			<table class="table-default sticky-top" v-if="modules.length !== 0">
 				<thead>
 					<tr>
 						<th>

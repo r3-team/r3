@@ -7,19 +7,17 @@ export {MyAdminLogs as default};
 let MyAdminLogs = {
 	name:'my-admin-logs',
 	components:{MyInputDate,MyInputOffset},
-	template:`<div class="contentBox grow">
+	template:`<div class="contentBox admin-logs grow">
 		
-		<div class="top lower">
+		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/fileText.png" />
 				<h1>{{ menuTitle }}</h1>
 			</div>
 		</div>
-		
-		<div class="content logs no-padding">
-			<div class="actions">
-				
-				<my-input-date class="entry"
+		<div class="top lower">
+			<div class="area admin-logs-date-wrap">
+				<my-input-date
 					@set-unix-from="setDate($event,true)"
 					@set-unix-to="setDate($event,false)"
 					:isDate="true"
@@ -29,76 +27,95 @@ let MyAdminLogs = {
 					:unixFrom="unixFrom"
 					:unixTo="unixTo"
 				/>
-				
-				<div class="action-bar">
-					<my-input-offset
-						@input="offset = $event;get()"
-						:caption="true"
-						:limit="limit"
-						:offset="offset"
-						:total="total"
-					/>
-				</div>
-				
-				<div class="right-bar default-inputs">
-					<div class="action-bar">
-						<!-- log filters -->
-						<span>{{ capGen.filters }}</span>
-						<select class="entry" v-model="context" @change="offset = 0;get()">
-							<option value="">[{{ capApp.context }}]</option>
-							<option v-for="c in contextsValid" :value="c">
-								{{ capApp.contextLabel[c] }}
-							</option>
-						</select>
-						<input class="entry"
-							v-model="byString"
-							@keyup.enter="offset = 0;get()"
-							:placeholder="capGen.textSearch"
-						/>
-						<span>{{ capGen.limit }}</span>
-						<select class="entry short" v-model.number="limit" @change="offset = 0;get()">
-							<option value="100">100</option>
-							<option value="250">250</option>
-							<option value="500">500</option>
-							<option value="1000">1000</option>
-						</select>
-						<my-button image="refresh.png"
-							@trigger="get"
-							:caption="capGen.button.refresh"
-						/>
-					</div>
-				
-					<div class="action-bar default-inputs">
-						<!-- log configs -->
-						<span>{{ capApp.keepDays }}</span>
-						<input class="short" v-model="configInput.logsKeepDays" />
-						<my-button image="save.png"
-							@trigger="setConfig"
-							:active="config.logsKeepDays !== configInput.logsKeepDays"
-						/>
-						
-						<span>{{ capApp.logLevel }}</span>
-						<select class="short" v-model="levelContext">
-							<option v-for="c in contextsValid" :value="getConfigLogContextName(c)">
-								{{ capApp.contextLabel[c] }}
-							</option>
-						</select>
-						<select v-model="configInput[levelContext]">
-							<option value="1">{{ capApp.logLevel1 }}</option>
-							<option value="2">{{ capApp.logLevel2 }}</option>
-							<option value="3">{{ capApp.logLevel3 }}</option>
-						</select>
-						<my-button image="save.png"
-							@trigger="setConfig"
-							:active="config[levelContext] !== configInput[levelContext]"
-						/>
-					</div>
-				</div>
+			</div>
+			<div class="area">
+				<my-input-offset
+					@input="offset = $event;get()"
+					:caption="true"
+					:limit="limit"
+					:offset="offset"
+					:total="total"
+				/>
+			</div>
+			<div class="area gap default-inputs">
+				<my-button image="refresh.png"
+					@trigger="get"
+					:captionTitle="capGen.button.refresh"
+					:naked="true"
+				/>
+				<input class="short"
+					v-model="byString"
+					@keyup.enter="offset = 0;get()"
+					:placeholder="capGen.textSearch"
+				/>
+				<select v-model="context" @change="offset = 0;get()">
+					<option value="">[{{ capGen.everything }}]</option>
+					<option v-for="c in contextsValid" :value="c">
+						{{ capApp.contextLabel[c] }}
+					</option>
+				</select>
+				<select class="short" v-model.number="limit" @change="offset = 0;get()">
+					<option value="100">100</option>
+					<option value="250">250</option>
+					<option value="500">500</option>
+					<option value="1000">1000</option>
+				</select>
+				<my-button
+					@trigger="showOptions = !showOptions"
+					:caption="capGen.settings"
+					:image="showOptions ? 'visible1.png' : 'visible0.png'"
+				/>
+			</div>
+		</div>
+		
+		<div class="content no-padding">
+		
+			<!-- options -->
+			<div v-if="showOptions" class="admin-logs-settings">
+				<table class="default-inputs">
+					<tr>
+						<td>{{ capApp.keepDays }}</td>
+						<td colspan="2">
+							<input class="short" v-model="configInput.logsKeepDays" />
+						</td>
+						<td>
+							<my-button image="save.png"
+								@trigger="setConfig"
+								:active="config.logsKeepDays !== configInput.logsKeepDays"
+								:caption="capGen.button.save"
+							/>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.logLevel }}</td>
+						<td>
+							<select v-model="levelContext">
+								<option v-for="c in contextsValid" :value="getConfigLogContextName(c)">
+									{{ capApp.contextLabel[c] }}
+								</option>
+							</select>
+						</td>
+						<td>
+							<select v-model="configInput[levelContext]">
+								<option value="1">{{ capApp.logLevel1 }}</option>
+								<option value="2">{{ capApp.logLevel2 }}</option>
+								<option value="3">{{ capApp.logLevel3 }}</option>
+							</select>
+						</td>
+						<td>
+							<my-button image="save.png"
+								@trigger="setConfig"
+								:active="config[levelContext] !== configInput[levelContext]"
+								:caption="capGen.button.save"
+							/>
+						</td>
+					</tr>
+				</table>
 			</div>
 			
 			<!-- logs -->
 			<div class="table-default-wrap shade">
-				<table class="table-default">
+				<table class="table-default sticky-top">
 					<thead>
 						<tr class="title">
 							<th class="minimum">{{ capGen.button.show }}</th>
@@ -162,6 +179,9 @@ let MyAdminLogs = {
 			total:0,
 			unixFrom:null,
 			unixTo:null,
+			
+			// states
+			showOptions:false,
 			
 			// data
 			logs:[]

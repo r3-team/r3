@@ -12,8 +12,9 @@
 	--z-index-dropdown:20;
 	--z-index-input-date-month:19;
 	
-	/* builder */
+	/* builder / admin */
 	--z-index-builder-break-out:11;
+	--z-index-admin-table-sticky-top:11;
 	
 	/* list header */
 	--z-index-kanban-header-top-left:11;
