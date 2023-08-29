@@ -109,6 +109,7 @@ let MyField = {
 						@copyToClipboard="copyToClipboard"
 						:clipboard="isClipboard"
 						:formLoading="formLoading"
+						:isHidden="isHidden"
 						:readonly="isReadonly"
 					/>
 					
