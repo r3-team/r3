@@ -219,6 +219,7 @@ func dumpDb(path string) error {
 	args := []string{
 		"-h", config.File.Db.Host,
 		"-p", fmt.Sprintf("%d", config.File.Db.Port),
+		"-d", config.File.Db.Name,
 		"-U", config.File.Db.User,
 		"-j", "4", // number of parallel jobs
 		"-Fd", // custom format, to file directory
