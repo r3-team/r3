@@ -120,14 +120,14 @@ let MyLogin = {
 					
 					<!-- credentials input -->
 					<template v-if="!showMfa">
-						<input class="default" type="text" spellcheck="false"
+						<input autocomplete="username" class="default" type="text" spellcheck="false"
 							@keyup="badAuth = false"
 							@keyup.enter="authenticate"
 							v-model="username"
 							v-focus
 							placeholder="username"
 						/>
-						<input class="default" type="password"
+						<input autocomplete="current-password" class="default" type="password"
 							@keyup="badAuth = false"
 							@keyup.enter="authenticate"
 							v-model="password"
@@ -143,7 +143,7 @@ let MyLogin = {
 								{{ t.name }}
 							</option>
 						</select>
-						<input class="default" type="text" maxlength="6"
+						<input autocomplete="one-time-code" class="default" type="text" maxlength="6"
 							@keyup="badAuth = false"
 							@keyup.enter="authenticate"
 							v-model="mfaTokenPin"

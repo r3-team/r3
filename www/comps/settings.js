@@ -373,15 +373,15 @@ let MySettingsAccount = {
 				</tr>
 				<tr>
 					<td>{{ capApp.pwOld }}</td>
-					<td><input v-model="pwOld" @input="newInput = true; generateOldPwKey()" type="password" /></td>
+					<td><input autocomplete="current-password" type="password" v-model="pwOld" @input="newInput = true; generateOldPwKey()" /></td>
 				</tr>
 				<tr>
 					<td>{{ capApp.pwNew0 }}</td>
-					<td><input v-model="pwNew0" @input="newInput = true" type="password" /></td>
+					<td><input autocomplete="new-password" type="password" v-model="pwNew0" @input="newInput = true" /></td>
 				</tr>
 				<tr>
 					<td>{{ capApp.pwNew1 }}</td>
-					<td><input v-model="pwNew1" @input="newInput = true" type="password" /></td>
+					<td><input autocomplete="new-password" type="password" v-model="pwNew1" @input="newInput = true" /></td>
 				</tr>
 			</tbody>
 		</table>
