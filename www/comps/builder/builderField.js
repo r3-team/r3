@@ -315,7 +315,7 @@ let MyBuilderField = {
 			if(s.field.wrap)                   out.push('wrap');
 			
 			out.push(`style-justify-content-${s.field.justifyContent}`);
-			out.push(`style-justify-content-${s.field.alignContent}`);
+			out.push(`style-align-content-${s.field.alignContent}`);
 			out.push(`style-align-items-${s.field.alignItems}`);
 			return out;
 		},
@@ -335,12 +335,6 @@ let MyBuilderField = {
 				out.push(`${dirMin}:${basis*s.field.perMin/100}px`);
 			}
 			return out.join(';');
-		},
-		parentChildren:(s) => {
-			if(s.isContainer)
-				return s.field.fields;
-			
-			return s.field.tabs[s.tabIndex].fields;
 		},
 		show:(s) => {
 			// filter only data fields
@@ -405,6 +399,7 @@ let MyBuilderField = {
 		isTabs:        (s) => s.field.content === 'tabs',
 		isSelected:    (s) => s.field.id      === s.fieldIdShow,
 		isRelationship:(s) => !s.isData ? false : s.isAttributeRelationship(s.attribute.content),
+		parentChildren:(s) => s.isContainer ? s.field.fields : s.field.tabs[s.tabIndex].fields,
 		moveActive:    (s) => s.fieldMoveList !== null,
 		reference:     (s) => s.isTemplate ? '' : 'F' + s.entityIdMapRef.field[s.field.id],
 		showColumns:   (s) => !s.isTemplate && s.hasQuery && ((s.fieldIdShow === s.field.id && s.fieldIdShowTab === 'content') || s.showColumnsAll),
