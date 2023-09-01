@@ -47,10 +47,15 @@
 	width:100%;
 	z-index:var(--z-index-inline-pop-up-form);
 }
+.list .layoutWrap .empty-space{
+	flex:1 1 auto;
+}
 
 /* list as lookup or dropdown */
 /* HTML table view */
 .list .layoutTable{
+	display:flex;
+	flex-flow:column nowrap;
 	flex:1 1 auto;
 	overflow:auto;
 }
@@ -218,12 +223,11 @@
 	flex:1 1 auto;
 	padding:16px 0px 0px 16px;
 	display:flex;
-	flex-flow:row wrap;
+	flex-flow:column nowrap;
 	overflow:auto;
 	align-content:flex-start;
 }
 .list .layoutCards .top-actions{
-	width:100%;
 	margin:0px 0px 16px 0px;
 	display:flex;
 	flex-flow:row wrap;
@@ -243,6 +247,10 @@
 .list .layoutCards .top-actions .no-results{
 	font-style:italic;
 	font-size:120%;
+}
+.list .layoutCards .cards{
+	display:flex;
+	flex-flow:row wrap;
 }
 .list .layoutCards .card{
 	flex:1 1 400px;
@@ -344,7 +352,7 @@
 	display:flex;
 	flex-flow:row wrap;
 	align-items:center;
-	gap:6px;
+	gap:4px;
 }
 .list-input-row-items.nowrap{
 	flex-wrap:nowrap;

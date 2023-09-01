@@ -518,7 +518,7 @@ let MyList = {
 							/>
 						</tfoot>
 					</table>
-				
+					
 					<!-- list results as cards -->
 					<template v-if="isCards">
 					
@@ -568,55 +568,59 @@ let MyList = {
 							</template>
 						</div>
 						
-						<div class="card"
-							v-for="(r,ri) in rowsClear"
-							@click="clickRow(r,false)"
-							@click.middle="clickRow(r,true)"
-							@keyup.enter.space="clickRow(r,false)"
-							:class="{ rowSelect:rowSelect && !inputIsReadonly }"
-							:key="ri + '_' + r.indexRecordIds['0']"
-							:ref="refTabindex+String(ri)"
-							:tabindex="isInput ? '0' : '-1'"
-						>
-							<div class="actions" v-if="hasBulkActions" @click.stop="">
-								<my-button
-									@trigger="selectRow(ri)"
-									:image="selectedRows.includes(ri) ? 'checkbox1.png' : 'checkbox0.png'"
-									:naked="true"
-								/>
-								<my-button image="delete.png"
-									@trigger="delAsk([ri])"
-									:naked="true"
-								/>
+						<div class="cards">
+							<div class="card"
+								v-for="(r,ri) in rowsClear"
+								@click="clickRow(r,false)"
+								@click.middle="clickRow(r,true)"
+								@keyup.enter.space="clickRow(r,false)"
+								:class="{ rowSelect:rowSelect && !inputIsReadonly }"
+								:key="ri + '_' + r.indexRecordIds['0']"
+								:ref="refTabindex+String(ri)"
+								:tabindex="isInput ? '0' : '-1'"
+							>
+								<div class="actions" v-if="hasBulkActions" @click.stop="">
+									<my-button
+										@trigger="selectRow(ri)"
+										:image="selectedRows.includes(ri) ? 'checkbox1.png' : 'checkbox0.png'"
+										:naked="true"
+									/>
+									<my-button image="delete.png"
+										@trigger="delAsk([ri])"
+										:naked="true"
+									/>
+								</div>
+								<div class="header"></div>
+								
+								<!-- row values per column batch -->
+								<table>
+									<tr v-for="b in columnBatches">
+										<td>{{ b.caption }}</td>
+										<td>
+											<div class="batch" :class="{ vertical:b.vertical }">
+												<my-value-rich
+													v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null || columns[v].display === 'gallery')"
+													@clipboard="$emit('clipboard')"
+													:attributeId="columns[ind].attributeId"
+													:basis="columns[ind].basis"
+													:bold="columns[ind].styles.includes('bold')"
+													:clipboard="columns[ind].clipboard"
+													:display="columns[ind].display"
+													:italic="columns[ind].styles.includes('italic')"
+													:key="ind"
+													:length="columns[ind].length"
+													:value="r.values[ind]"
+													:wrap="columns[ind].wrap"
+												/>
+											</div>
+										</td>
+									</tr>
+								</table>
 							</div>
-							<div class="header"></div>
-							
-							<!-- row values per column batch -->
-							<table>
-								<tr v-for="b in columnBatches">
-									<td>{{ b.caption }}</td>
-									<td>
-										<div class="batch" :class="{ vertical:b.vertical }">
-											<my-value-rich
-												v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null || columns[v].display === 'gallery')"
-												@clipboard="$emit('clipboard')"
-												:attributeId="columns[ind].attributeId"
-												:basis="columns[ind].basis"
-												:bold="columns[ind].styles.includes('bold')"
-												:clipboard="columns[ind].clipboard"
-												:display="columns[ind].display"
-												:italic="columns[ind].styles.includes('italic')"
-												:key="ind"
-												:length="columns[ind].length"
-												:value="r.values[ind]"
-												:wrap="columns[ind].wrap"
-											/>
-										</div>
-									</td>
-								</tr>
-							</table>
 						</div>
 					</template>
+					
+					<div class="empty-space" @click="clickOnEmpty"></div>
 				</div>
 				
 				<!-- inline form -->
@@ -1165,6 +1169,9 @@ let MyList = {
 		clickOpen(row,middleClick) {
 			if(this.rowSelect && this.hasUpdate)
 				this.$emit('open-form',[row],middleClick);
+		},
+		clickOnEmpty() {
+			this.$emit('close-inline');
 		},
 		clickRow(row,middleClick) {
 			if(!this.isInput)
