@@ -722,27 +722,6 @@ let MyBuilderFieldOptions = {
 			
 			<template v-if="isContainer">
 				<tr>
-					<td>{{ capApp.fieldDirection }}</td>
-					<td>
-						<select
-							@input="set('direction',$event.target.value)"
-							:value="field.direction"
-						>
-							<option value="row">row</option>
-							<option value="column">column</option>
-						</select>
-					</td>
-				</tr>
-				<tr>
-					<td>{{ capApp.flexWrap }}</td>
-					<td>
-						<my-bool
-							@update:modelValue="set('wrap',$event)"
-							:modelValue="field.wrap"
-						/>
-					</td>
-				</tr>
-				<tr>
 					<td>{{ capApp.fieldSize }}</td>
 					<td>
 						<div class="row gap" v-if="field.basis !== 0">
@@ -821,51 +800,115 @@ let MyBuilderFieldOptions = {
 					</td>
 				</tr>
 				<tr>
+					<td colspan="2"><b>{{ capApp.containerContent }}</b></td>
+				</tr>
+				<tr>
+					<td>{{ capApp.fieldDirection }}</td>
+					<td>
+						<div class="row gap">
+							<select
+								@input="set('direction',$event.target.value)"
+								:value="field.direction"
+							>
+								<option value="row">row</option>
+								<option value="column">column</option>
+							</select>
+							<my-button
+								@trigger="set('direction',field.direction === 'row' ? 'column' : 'row' )"
+								:captionTitle="capApp.fieldDirection+': '+field.direction"
+								:image="field.direction === 'row' ? 'flexRow.png' : 'flexColumn.png'"
+							/>
+						</div>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.flexWrap }}</td>
+					<td>
+						<div class="row gap">
+							<my-bool
+								@update:modelValue="set('wrap',$event)"
+								:modelValue="field.wrap"
+							/>
+							<my-button
+								:active="false"
+								:captionTitle="capApp.flexWrap+': '+field.wrap"
+								:image="field.wrap ? 'wrap1.png' : 'wrap0.png'"
+								:naked="true"
+							/>
+						</div>
+					</td>
+				</tr>
+				<tr>
 					<td>{{ capApp.flexJustifyContent }}</td>
 					<td>
-						<select
-							@input="set('justifyContent',$event.target.value)"
-							:value="field.justifyContent"
-						>
-							<option value="flex-start">flex-start</option>
-							<option value="flex-end">flex-end</option>
-							<option value="center">center</option>
-							<option value="space-between">space-between</option>
-							<option value="space-around">space-around</option>
-							<option value="space-evenly">space-evenly</option>
-						</select>
+						<div class="row">
+							<select
+								@input="set('justifyContent',$event.target.value)"
+								:value="field.justifyContent"
+							>
+								<option value="flex-start">flex-start</option>
+								<option value="flex-end">flex-end</option>
+								<option value="center">center</option>
+								<option value="space-between">space-between</option>
+								<option value="space-around">space-around</option>
+								<option value="space-evenly">space-evenly</option>
+							</select>
+							<my-button
+								:active="false"
+								:captionTitle="capApp.flexJustifyContentHint"
+								:image="field.direction === 'row' ? 'axisX.png' : 'axisY.png'"
+								:naked="true"
+							/>
+						</div>
 					</td>
 				</tr>
 				<tr>
 					<td>{{ capApp.flexAlignItems }}</td>
 					<td>
-						<select
-							@input="set('alignItems',$event.target.value)"
-							:value="field.alignItems"
-						>
-							<option value="flex-start">flex-start</option>
-							<option value="flex-end">flex-end</option>
-							<option value="center">center</option>
-							<option value="baseline">baseline</option>
-							<option value="stretch">stretch</option>
-						</select>
+						<div class="row">
+							<select
+								@input="set('alignItems',$event.target.value)"
+								:value="field.alignItems"
+							>
+								<option value="flex-start">flex-start</option>
+								<option value="flex-end">flex-end</option>
+								<option value="center">center</option>
+								<option value="baseline">baseline</option>
+								<option value="stretch">stretch</option>
+							</select>
+							<my-button
+								:active="false"
+								:captionTitle="capApp.flexAlignItemsHint"
+								:image="field.direction === 'row' ? 'axisY.png' : 'axisX.png'"
+								:naked="true"
+							/>
+						</div>
 					</td>
 				</tr>
 				<tr>
 					<td>{{ capApp.flexAlignContent }}</td>
 					<td>
-						<select
-							@input="set('alignContent',$event.target.value)"
-							:value="field.alignContent"
-						>
-							<option value="flex-start">flex-start</option>
-							<option value="flex-end">flex-end</option>
-							<option value="center">center</option>
-							<option value="space-between">space-between</option>
-							<option value="space-around">space-around</option>
-							<option value="space-evenly">space-evenly</option>
-							<option value="stretch">stretch</option>
-						</select>
+						<div class="row">
+							<select
+								@input="set('alignContent',$event.target.value)"
+								:disabled="!field.wrap"
+								:value="field.alignContent"
+							>
+								<option value="flex-start">flex-start</option>
+								<option value="flex-end">flex-end</option>
+								<option value="center">center</option>
+								<option value="space-between">space-between</option>
+								<option value="space-around">space-around</option>
+								<option value="space-evenly">space-evenly</option>
+								<option value="stretch">stretch</option>
+							</select>
+							<my-button
+								:active="false"
+								:captionTitle="capApp.flexAlignContentHint"
+								:image="field.direction === 'row' ? 'axisXAlign.png' : 'axisYAlign.png'"
+								:naked="true"
+							/>
+						</div>
 					</td>
 				</tr>
 			</template>

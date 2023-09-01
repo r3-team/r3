@@ -20,10 +20,6 @@
 	border-radius:5px;
 	overflow:hidden;
 }
-.builder-form .sidebar .templates-filter{
-	display:flex;
-	flex-flow:row nowrap;
-}
 .builder-form .sidebar .columns{
 	display:flex;
 	flex-flow:column nowrap;

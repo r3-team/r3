@@ -233,23 +233,20 @@ let MyBuilderForm = {
 					<!-- template fields -->
 					<div class="templates-wrap" v-if="tabTarget === 'content'">
 						<h2>{{ capApp.fields }}</h2>
-						<div class="content-row default-inputs">
+						<div class="row gap default-inputs">
 							<select v-model="fieldsShow" class="dynamic">
 								<option value="add">{{ capGen.button.add }}</option>
 								<option value="edit">{{ capApp.fieldsEditInputs }}</option>
 							</select>
-							
-							<div class="templates-filter">
-								<my-bool caption0="n:1" caption1="n:1" v-model="showTemplateN1" />
-								<my-bool caption0="1:n" caption1="1:n" v-model="showTemplate1n" />
-								<my-bool caption0="n:m" caption1="n:m" v-model="showTemplateNm" />
-								<select v-model="templateIndex" class="dynamic">
-									<option value="-1">{{ capGen.option.all }}</option>
-									<option v-for="j in joinsIndexMap" :value="j.index">
-										{{ j.index }})
-									</option>
-								</select>
-							</div>
+							<select v-model="templateIndex" class="short">
+								<option value="-1">{{ capGen.option.all }}</option>
+								<option v-for="j in joinsIndexMap" :value="j.index">
+									{{ j.index }})
+								</option>
+							</select>
+							<my-bool caption0="n:1" caption1="n:1" v-model="showTemplateN1" />
+							<my-bool caption0="1:n" caption1="1:n" v-model="showTemplate1n" />
+							<my-bool caption0="n:m" caption1="n:m" v-model="showTemplateNm" />
 						</div>
 						
 						<div class="templates">
