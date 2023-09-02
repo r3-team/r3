@@ -2,7 +2,7 @@ export {MyButton as default};
 
 let MyButton = {
 	name:'my-button',
-	template:`<div class="button"
+	template:`<div class="button" data-is-input="1"
 		@click.exact="trigger"
 		@click.shift="triggerShift"
 		@click.prevent.middle="triggerMiddle"

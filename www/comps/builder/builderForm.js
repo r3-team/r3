@@ -350,7 +350,7 @@ let MyBuilderForm = {
 									<option :value="null">-</option>
 									<template v-for="(ref,fieldId) in entityIdMapRef.field">
 										<option
-											v-if="fieldIdMap[fieldId].content === 'data'"
+											v-if="fieldContentFocus.includes(fieldIdMap[fieldId].content)"
 											:disabled="fieldId.startsWith('new')"
 											:value="fieldId"
 										>F{{ fieldId.startsWith('new') ? ref + ' (' + capGen.notSaved + ')' : ref }}</option>
@@ -719,6 +719,7 @@ let MyBuilderForm = {
 		// simple
 		columnShow:       (s) => s.columnIdShow === null ? false : s.columnIdMap[s.columnIdShow],
 		dataFields:       (s) => s.getDataFields(s.fields),
+		fieldContentFocus:(s) => ['button','data'],
 		fieldShow:        (s) => s.fieldIdShow === null ? false : s.fieldIdMap[s.fieldIdShow],
 		fieldShowHasQuery:(s) => s.getFieldHasQuery(s.fieldShow),
 		form:             (s) => typeof s.formIdMap[s.id] === 'undefined' ? false : s.formIdMap[s.id],
