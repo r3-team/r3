@@ -1055,6 +1055,7 @@
 				"fieldGetValue":"citește valoarea",
 				"fieldSetCaption":"write caption",
 				"fieldSetError":"write error message",
+				"fieldSetFocus":"jump to field input",
 				"fieldSetValue":"scrie valoarea",
 				"intervalDays":"Zile",
 				"intervalHours":"Ore",

@@ -1055,6 +1055,7 @@
 				"fieldGetValue":"Wert lesen",
 				"fieldSetCaption":"Titel setzen",
 				"fieldSetError":"Fehlermeldung setzen",
+				"fieldSetFocus":"Zur Feldeingabe springen",
 				"fieldSetValue":"Wert setzen",
 				"intervalDays":"Tage",
 				"intervalHours":"Stunden",

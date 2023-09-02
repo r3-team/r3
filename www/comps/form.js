@@ -504,6 +504,7 @@ let MyForm = {
 				set_field_error:(fieldId,errorMsg) => {
 					s.fieldIdMapError[fieldId] = errorMsg;
 				},
+				set_field_focus:(fieldId) => s.fieldSetFocus(fieldId,false),
 				set_field_value:(fieldId,value) => {
 					// use common return codes: 0 = success, 1 = error
 					if(typeof s.fieldIdMapData[fieldId] === 'undefined')
@@ -817,19 +818,7 @@ let MyForm = {
 			this.popUpFieldIdSrc = null;
 			this.get();
 			
-			this.$nextTick(() => {
-				// put focus on defined or first field input
-				let searchEl = this.form.fieldIdFocus !== null
-					? this.$refs.fields.querySelector(`[data-field-id="${this.form.fieldIdFocus}"]`)
-					: this.$refs.fields;
-				
-				if(searchEl === null)
-					searchEl = this.$refs.fields;
-				
-				const inputEl = searchEl.querySelector('[data-is-input="1"]');
-				if(inputEl !== null)
-					inputEl.focus();
-			});
+			this.$nextTick(() => this.fieldSetFocus(this.form.fieldIdFocus,true));
 		},
 		releaseLoadingOnNextTick() {
 			// releases state on next tick for watching components to react to with updated data
@@ -945,6 +934,21 @@ let MyForm = {
 		},
 		
 		// field meta changes
+		fieldSetFocus(fieldId,fallbackToFirstInput) {
+			let searchEl = fieldId !== null
+				? this.$refs.fields.querySelector(`[data-field-id="${fieldId}"]`)
+				: this.$refs.fields;
+			
+			if(searchEl === null && fallbackToFirstInput)
+				searchEl = this.$refs.fields;
+			
+			if(searchEl === null)
+				return;
+			
+			const inputEl = searchEl.querySelector('[data-is-input="1"]');
+			if(inputEl !== null)
+				inputEl.focus();
+		},
 		fieldSetTouched(fieldId) {
 			this.fieldIdsTouched.push(fieldId);
 		},

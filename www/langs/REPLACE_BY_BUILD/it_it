@@ -1055,6 +1055,7 @@
 				"fieldGetValue":"legge valore",
 				"fieldSetCaption":"write caption",
 				"fieldSetError":"write error message",
+				"fieldSetFocus":"jump to field input",
 				"fieldSetValue":"scrive valore",
 				"intervalDays":"Giorni",
 				"intervalHours":"Ore",

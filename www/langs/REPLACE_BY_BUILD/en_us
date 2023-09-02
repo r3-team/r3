@@ -1055,6 +1055,7 @@
 				"fieldGetValue":"read value",
 				"fieldSetCaption":"write caption",
 				"fieldSetError":"write error message",
+				"fieldSetFocus":"jump to field input",
 				"fieldSetValue":"write value",
 				"intervalDays":"Days",
 				"intervalHours":"Hours",

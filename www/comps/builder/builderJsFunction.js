@@ -150,7 +150,8 @@ let MyBuilderJsFunction = {
 									<option value="get_field_value"  >{{ capApp.option.fieldGetValue   }}</option>
 									<option value="set_field_value"  >{{ capApp.option.fieldSetValue   }}</option>
 									<option value="set_field_caption">{{ capApp.option.fieldSetCaption }}</option>
-									<option value="set_field_error"  >{{ capApp.option.fieldSetError }}</option>
+									<option value="set_field_error"  >{{ capApp.option.fieldSetError   }}</option>
+									<option value="set_field_focus"  >{{ capApp.option.fieldSetFocus   }}</option>
 								</select>
 								<select
 									@change="toggleEntity('field',$event.target.value)"
@@ -562,7 +563,7 @@ let MyBuilderJsFunction = {
 					atr  = this.attributeIdMap[fld.attributeId];
 					rel  = this.relationIdMap[atr.relationId];
 					mod  = this.moduleIdMap[rel.moduleId];
-					opt  = this.fieldMode.includes('set') ? ', '+this.capApp.value : '';
+					opt  = this.fieldMode.includes('set') && this.fieldMode !== 'set_field_focus' ? ', '+this.capApp.value : '';
 					text = `${prefix}.${this.fieldMode}({${fld.index}:${mod.name}.${rel.name}.${atr.name}}${opt})`;
 				break;
 				case 'form':
@@ -659,7 +660,7 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace field IDs with placeholders
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|error)\\('(${uuid})'`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|error|focus)\\('(${uuid})'`,'g');
 			body = body.replace(pat,function(match,mode,part,id) {
 				
 				let fld = false;
@@ -742,7 +743,7 @@ let MyBuilderJsFunction = {
 			
 			// replace field value/caption get/set placeholders
 			// stored as: app.get_field_value({0:contact.is_active}...
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|error)\\(\{(\\d+)\:(${dbName})\.(${dbName})\.(${dbName})\}`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|error|focus)\\(\{(\\d+)\:(${dbName})\.(${dbName})\.(${dbName})\}`,'g');
 			body = body.replace(pat,function(match,mode,part,index,modName,relName,atrName) {
 				
 				// resolve relation inside given module
