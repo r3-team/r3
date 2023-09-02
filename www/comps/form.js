@@ -817,16 +817,19 @@ let MyForm = {
 			this.popUpFieldIdSrc = null;
 			this.get();
 			
-			if(this.form.fieldIdFocus !== null) {
-				this.$nextTick(() => {
-					const fieldEl = this.$refs.fields.querySelector(`[data-field-id="${this.form.fieldIdFocus}"]`);
-					if(fieldEl === null) return;
-					
-					const inputEl = fieldEl.querySelector('[data-is-input="1"]');
-					if(inputEl !== null)
-						inputEl.focus();
-				});
-			}
+			this.$nextTick(() => {
+				// put focus on defined or first field input
+				let searchEl = this.form.fieldIdFocus !== null
+					? this.$refs.fields.querySelector(`[data-field-id="${this.form.fieldIdFocus}"]`)
+					: this.$refs.fields;
+				
+				if(searchEl === null)
+					searchEl = this.$refs.fields;
+				
+				const inputEl = searchEl.querySelector('[data-is-input="1"]');
+				if(inputEl !== null)
+					inputEl.focus();
+			});
 		},
 		releaseLoadingOnNextTick() {
 			// releases state on next tick for watching components to react to with updated data
