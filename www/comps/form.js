@@ -315,6 +315,7 @@ let MyForm = {
 			popUpFullscreen:false,// set this pop-up form to fullscreen mode
 			showHelp:false,       // show form context help
 			showLog:false,        // show data change log
+			titleOverwrite:null,  // custom form title, can be set via frontend function
 			updatingRecord:false, // form is currently attempting to update the current record (saving/deleting)
 			
 			// form data
@@ -403,6 +404,9 @@ let MyForm = {
 		
 		// presentation
 		title:(s) => {
+			if(s.titleOverwrite !== null)
+				return s.titleOverwrite;
+			
 			// apply dedicated form title
 			if(typeof s.form.captions.formTitle[s.moduleLanguage] !== 'undefined')
 				return s.form.captions.formTitle[s.moduleLanguage];
@@ -431,14 +435,6 @@ let MyForm = {
 				get_role_ids:        ()  => s.access.roleIds,
 				go_back:             ()  => window.history.back(),
 				has_role:            (v) => s.access.roleIds.includes(v),
-				open_form:           (formId,recordId,newTab,popUp,maxY,maxX) =>
-					s.openForm((recordId === 0 ? [] : [recordId]),{
-						formIdOpen:formId,
-						popUpType:popUp ? 'float' : null,
-						maxHeight:maxY,
-						maxWidth:maxX
-					},[],newTab,null),
-				show_form_message:s.messageSet,
 				
 				// collection functions
 				collection_read:s.getCollectionMultiValues,
@@ -455,7 +451,17 @@ let MyForm = {
 				},
 				call_frontend:(id,...args) => s.executeFunction(id,args),
 				
-				// direct translations
+				// form functions
+				form_close:s.isPopUp ? s.closeAsk : s.openPrevAsk,
+				form_open:(formId,recordId,newTab,popUp,maxY,maxX) =>
+					s.openForm((recordId === 0 ? [] : [recordId]),{
+						formIdOpen:formId, popUpType:popUp ? 'float' : null,
+						maxHeight:maxY, maxWidth:maxX
+					},[],newTab,null),
+				form_set_title:(v) => s.titleOverwrite = v,
+				form_show_message:s.messageSet,
+				
+				// record functions
 				record_delete:s.delAsk,
 				record_new:   s.openNewAsk,
 				record_reload:s.get,
@@ -515,6 +521,14 @@ let MyForm = {
 					
 					return 0;
 				},
+				
+				// legacy calls (<3.5)
+				open_form:(formId,recordId,newTab,popUp,maxY,maxX) =>
+					s.openForm((recordId === 0 ? [] : [recordId]),{
+						formIdOpen:formId, popUpType:popUp ? 'float' : null,
+						maxHeight:maxY, maxWidth:maxX
+					},[],newTab,null),
+				show_form_message:s.messageSet,
 				
 				// legacy calls (<3.0)
 				update_collection:(v) => s.updateCollections(false,undefined,v)

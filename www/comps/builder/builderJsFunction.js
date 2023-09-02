@@ -415,13 +415,14 @@ let MyBuilderJsFunction = {
 			codeFunction:'',
 			codeReturns:'',
 			appFunctions:[
-				'block_inputs','copy_to_clipboard','get_e2ee_data_key',
+				'block_inputs','copy_to_clipboard','form_close','form_open',
+				'form_set_title','form_show_message','get_e2ee_data_key',
 				'get_e2ee_data_value','get_language_code','get_login_id',
 				'get_preset_record_id','get_record_id','get_role_ids','go_back',
-				'has_role','open_form','pdf_create','record_delete','record_new',
+				'has_role','pdf_create','record_delete','record_new',
 				'record_reload','record_save','set_e2ee_by_login_ids',
-				'set_e2ee_by_login_ids_and_relation','show_form_message',
-				'timer_clear','timer_set','value_store_get','value_store_set'
+				'set_e2ee_by_login_ids_and_relation','timer_clear','timer_set',
+				'value_store_get','value_store_set'
 			],
 			appFunctionsAsync:[
 				'get_e2ee_data_key','get_e2ee_data_value'
