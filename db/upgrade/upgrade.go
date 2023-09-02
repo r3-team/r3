@@ -156,6 +156,17 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.field_calendar ADD COLUMN days_toggle BOOLEAN NOT NULL DEFAULT false;
 			ALTER TABLE app.field_calendar ALTER COLUMN days_toggle DROP DEFAULT;
 			
+			-- add field focus on form load option
+			ALTER TABLE app.form ADD COLUMN field_id_focus UUID;
+			ALTER TABLE app.form ADD CONSTRAINT form_field_id_focus_fkey FOREIGN KEY (field_id_focus)
+				REFERENCES app.field (id) MATCH SIMPLE
+		        ON UPDATE SET NULL
+		        ON DELETE SET NULL
+		        DEFERRABLE INITIALLY DEFERRED;
+				
+			CREATE INDEX IF NOT EXISTS fki_form_field_id_focus_fkey
+				ON app.form USING btree (field_id_focus ASC NULLS LAST);
+			
 			-- separate module options from transfer hash
 			CREATE TABLE instance.module_hash (
 			    module_id uuid NOT NULL,

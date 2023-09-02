@@ -5,7 +5,7 @@ let MyInputRichtext = {
 	name:'my-input-richtext',
 	components:{'editor':Editor},
 	template:`<div class="input-richtext" :key="key">
-		<editor api-key="API_KEY" ref="editor"
+		<editor api-key="API_KEY"
 			v-model="input"
 			@keyDown="handleHotkeys"
 			:disabled="readonly"

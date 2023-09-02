@@ -261,6 +261,7 @@ let MyCalendar = {
 				</template>
 				
 				<my-button image="refresh.png"
+					v-if="!isMobile"
 					@trigger="get"
 					:naked="true"
 				/>

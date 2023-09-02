@@ -22,7 +22,6 @@ import {
 	getDataFieldMap,
 	getFormPopUpConfig,
 	getFormRoute,
-	getInputFieldName,
 	getResolvedPlaceholders,
 	getRowsDecrypted
 } from './shared/form.js';
@@ -212,7 +211,7 @@ let MyForm = {
 			</div>
 			
 			<!-- form fields -->
-			<div class="content grow fields"
+			<div class="content grow fields" ref="fields"
 				:class="{ onlyOne:isSingleField }"
 				:style="patternStyle"
 			>
@@ -647,7 +646,6 @@ let MyForm = {
 		getFormRoute,
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
-		getInputFieldName,
 		getJoinIndexMapExpanded,
 		getQueryAttributePkFilter,
 		getQueryFiltersProcessed,
@@ -818,6 +816,17 @@ let MyForm = {
 			this.popUp = null;
 			this.popUpFieldIdSrc = null;
 			this.get();
+			
+			if(this.form.fieldIdFocus !== null) {
+				this.$nextTick(() => {
+					const fieldEl = this.$refs.fields.querySelector(`[data-field-id="${this.form.fieldIdFocus}"]`);
+					if(fieldEl === null) return;
+					
+					const inputEl = fieldEl.querySelector('[data-is-input="1"]');
+					if(inputEl !== null)
+						inputEl.focus();
+				});
+			}
 		},
 		releaseLoadingOnNextTick() {
 			// releases state on next tick for watching components to react to with updated data
@@ -1095,9 +1104,9 @@ let MyForm = {
 			this.releaseLoadingOnNextTick();
 		},
 		scrollToInvalidField() {
-			if(this.fieldIdsInvalid.length !== 0)
-				document.getElementById(this.getInputFieldName(
-					this.fieldIdsInvalid[0])).scrollIntoView();
+			const el = this.$refs.fields.querySelector(`[data-field-is-valid="0"]`);
+			if(el !== null)
+				el.scrollIntoView();
 		},
 		
 		// timer

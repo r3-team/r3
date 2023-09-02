@@ -899,6 +899,7 @@
 			"fieldDirection":"Direzione",
 			"fieldHelp":"Testo aiuto",
 			"fieldIcon":"Icona campo",
+			"fieldIdFocus":"Set field focus on load",
 			"fieldMax":"Massimo valore/lunghezza",
 			"fieldMin":"Minimo valore/lunghezza",
 			"fieldMoveSource":"Sposta questo campo",

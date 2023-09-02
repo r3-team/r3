@@ -899,6 +899,7 @@
 			"fieldDirection":"Ausrichtung",
 			"fieldHelp":"Hilfetext",
 			"fieldIcon":"Feld-Icon",
+			"fieldIdFocus":"Feldfokus setzen beim Öffnen",
 			"fieldMax":"Max. Wert/Länge",
 			"fieldMin":"Min. Wert/Länge",
 			"fieldMoveSource":"Dieses Feld bewegen",

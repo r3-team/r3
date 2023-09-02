@@ -24,7 +24,6 @@ import {
 import {
 	getFlexStyle,
 	getFormPopUpConfig,
-	getInputFieldName,
 	setGetterArgs
 } from './shared/form.js';
 import {
@@ -64,6 +63,8 @@ let MyField = {
 	template:`<div class="field"
 		v-if="isActive"
 		:class="domClass"
+		:data-field-id="field.id"
+		:data-field-is-valid="isValid ? '1' : '0'"
 		:style="domStyle"
 	>
 		<template v-if="isData">
@@ -71,7 +72,6 @@ let MyField = {
 			<div class="input-box"
 			 	v-click-outside="clickOutside"
 				:class="{ disabled:isReadonly }"
-				:id="getInputFieldName(field.id)"
 			>
 				<div class="caption"
 					v-if="hasCaption"
@@ -90,7 +90,7 @@ let MyField = {
 					/>
 					
 					<!-- regular text line input (numeric, strings, etc.) -->
-					<input class="input"
+					<input class="input" data-is-input="1"
 						v-if="isLineInput"
 						v-model="value"
 						@blur="blur"
@@ -152,7 +152,7 @@ let MyField = {
 					<!-- color input -->
 					<div class="color-input" v-if="isColor">
 						
-						<input class="input" type="text"
+						<input class="input" data-is-input="1" type="text"
 							@blur="blur"
 							@focus="focus"
 							v-model="value"
@@ -178,7 +178,7 @@ let MyField = {
 					</div>
 					
 					<!-- textarea input -->
-					<textarea class="input textarea"
+					<textarea class="input textarea" data-is-input="1"
 						v-if="isTextarea"
 						v-model="value"
 						@blur="blur"
@@ -207,7 +207,7 @@ let MyField = {
 							:min="field.min"
 							:max="field.max"
 						/>
-						<input class="value"
+						<input class="value" data-is-input="1"
 							v-model="value"
 							:disabled="isReadonly"
 						/>
@@ -1115,7 +1115,6 @@ let MyField = {
 		getFlexStyle,
 		getFormPopUpConfig,
 		getIndexAttributeId,
-		getInputFieldName,
 		getLinkMeta,
 		getNilUuid,
 		getQueryColumnsProcessed,

@@ -221,10 +221,6 @@ export function getFlexStyle(dir,justifyContent,alignItems,alignContent,
 	return out.join(';');
 };
 
-export function getInputFieldName(fieldId) {
-	return `input_${fieldId}`;
-};
-
 export function getResolvedPlaceholders(value) {
 	switch(value) {
 		case '{CURR_TIME}':      return getUnixNowTime();          break;

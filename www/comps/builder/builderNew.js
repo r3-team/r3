@@ -283,6 +283,7 @@ let MyBuilderNew = {
 						request = {
 							id:this.getNilUuid(),
 							moduleId:this.moduleId,
+							fieldIdFocus:null,
 							presetIdOpen:null,
 							iconId:null,
 							name:this.inputs.name,

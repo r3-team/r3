@@ -3,7 +3,7 @@ export {MyInputUuid as default};
 let MyInputUuid = {
 	name:'my-input-uuid',
 	template:`<div class="input-uuid">
-		<input v-model="val[0]" :placeholder="getHolder(8)"  size="8" @keyup="setFirstBlock($event.target.value)" />
+		<input v-model="val[0]" :placeholder="getHolder(8)"  size="8" @keyup="setFirstBlock($event.target.value)" data-is-input="1" />
 		<span>-</span>
 		<input v-model="val[1]" :placeholder="getHolder(4)"  size="4"  maxlength="4"  @keyup="set" />
 		<span>-</span>

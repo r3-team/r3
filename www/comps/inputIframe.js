@@ -4,7 +4,7 @@ let MyInputIframe = {
 	name:'my-input-iframe',
 	template:`<div class="input-iframe">
 		<div class="input-iframe-actions" :class="{ readonly:readonly }">
-			<input class="input-iframe-input"
+			<input class="input-iframe-input" data-is-input="1"
 				v-model="srcInput"
 				@keyup.enter="set"
 				:disabled="readonly"

@@ -152,7 +152,7 @@ let MyList = {
 							</td>
 							<td>
 								<div class="list-input-row-items">
-									<input class="input" enterkeyhint="send"
+									<input class="input" data-is-input="1" enterkeyhint="send"
 										@click="focus"
 										@focus="focus"
 										@keyup="updatedTextInput"

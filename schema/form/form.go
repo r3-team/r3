@@ -47,8 +47,11 @@ func Copy_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, newName string) error 
 		return err
 	}
 
-	// remove form functions (cannot be copied without recreating all functions)
+	// remove form functions (cannot be copied without recreating functions)
 	form.Functions = make([]types.FormFunction, 0)
+
+	// remove field focus (copy not supported)
+	form.FieldIdFocus = pgtype.UUID{}
 
 	// replace IDs from fields as well as their (sub)queries, columns, etc.
 	// run twice: once for all field IDs and again to update dependent field sub entities
@@ -143,7 +146,7 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 	}
 
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
-		SELECT id, preset_id_open, icon_id, name, no_data_actions, ARRAY(
+		SELECT id, preset_id_open, icon_id, field_id_focus, name, no_data_actions, ARRAY(
 			SELECT article_id
 			FROM app.article_form
 			WHERE form_id = f.id
@@ -161,8 +164,8 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 	for rows.Next() {
 		var f types.Form
 
-		if err := rows.Scan(&f.Id, &f.PresetIdOpen, &f.IconId, &f.Name,
-			&f.NoDataActions, &f.ArticleIdsHelp); err != nil {
+		if err := rows.Scan(&f.Id, &f.PresetIdOpen, &f.IconId, &f.FieldIdFocus,
+			&f.Name, &f.NoDataActions, &f.ArticleIdsHelp); err != nil {
 
 			return forms, err
 		}
@@ -208,18 +211,22 @@ func Set_tx(tx pgx.Tx, frm types.Form) error {
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.form
-			SET preset_id_open = $1, icon_id = $2, name = $3, no_data_actions = $4
-			WHERE id = $5
-		`, frm.PresetIdOpen, frm.IconId, frm.Name, frm.NoDataActions, frm.Id); err != nil {
+			SET preset_id_open = $1, icon_id = $2, field_id_focus = $3,
+				name = $4, no_data_actions = $5
+			WHERE id = $6
+		`, frm.PresetIdOpen, frm.IconId, frm.FieldIdFocus,
+			frm.Name, frm.NoDataActions, frm.Id); err != nil {
+
 			return err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.form (
-				id, module_id, preset_id_open, icon_id, name, no_data_actions
-			)
-			VALUES ($1,$2,$3,$4,$5,$6)
-		`, frm.Id, frm.ModuleId, frm.PresetIdOpen, frm.IconId, frm.Name, frm.NoDataActions); err != nil {
+			INSERT INTO app.form (id, module_id, preset_id_open, icon_id,
+				field_id_focus, name, no_data_actions)
+			VALUES ($1,$2,$3,$4,$5,$6,$7)
+		`, frm.Id, frm.ModuleId, frm.PresetIdOpen, frm.IconId,
+			frm.FieldIdFocus, frm.Name, frm.NoDataActions); err != nil {
+
 			return err
 		}
 	}

@@ -343,6 +343,21 @@ let MyBuilderForm = {
 								</select>
 							</td>
 						</tr>
+						<tr>
+							<td>{{ capApp.fieldIdFocus }}</td>
+							<td>
+								<select v-model="fieldIdFocus">
+									<option :value="null">-</option>
+									<template v-for="(ref,fieldId) in entityIdMapRef.field">
+										<option
+											v-if="fieldIdMap[fieldId].content === 'data'"
+											:disabled="fieldId.startsWith('new')"
+											:value="fieldId"
+										>F{{ fieldId.startsWith('new') ? ref + ' (' + capGen.notSaved + ')' : ref }}</option>
+									</template>
+								</select>
+							</td>
+						</tr>
 					</table>
 					
 					<!-- form states -->
@@ -490,6 +505,7 @@ let MyBuilderForm = {
 			// form data
 			iconId:null,         // form icon
 			presetIdOpen:null,   // open specific preset record on form open
+			fieldIdFocus:null,   // field input to place focus on form load
 			name:'',             // form name
 			noDataActions:false, // disable all data actions (save, new, delete)
 			captions:{},         // form captions
@@ -532,6 +548,7 @@ let MyBuilderForm = {
 			s.fieldIdsRemove.length        !== 0
 			|| s.iconId                    !== s.form.iconId
 			|| s.presetIdOpen              !== s.form.presetIdOpen
+			|| s.fieldIdFocus              !== s.form.fieldIdFocus
 			|| s.name                      !== s.form.name
 			|| s.noDataActions             !== s.form.noDataActions
 			|| JSON.stringify(s.captions)  !== JSON.stringify(s.form.captions)
@@ -772,9 +789,10 @@ let MyBuilderForm = {
 		reset() {
 			if(!this.form) return;
 			
-			this.iconId         = this.form.iconId;
 			this.name           = this.form.name;
+			this.iconId         = this.form.iconId;
 			this.presetIdOpen   = this.form.presetIdOpen;
+			this.fieldIdFocus   = this.form.fieldIdFocus;
 			this.noDataActions  = this.form.noDataActions;
 			this.captions       = JSON.parse(JSON.stringify(this.form.captions));
 			this.fields         = JSON.parse(JSON.stringify(this.form.fields));
@@ -1265,6 +1283,10 @@ let MyBuilderForm = {
 				}
 			}
 			
+			// clear focus on removed field
+			if(this.fieldIdsRemove.includes(this.fieldIdFocus))
+				this.fieldIdFocus = null;
+			
 			// save form and delete removed fields
 			let requests = [];
 			for(let i = 0, j = this.fieldIdsRemove.length; i < j; i++) {
@@ -1274,8 +1296,9 @@ let MyBuilderForm = {
 			requests.push(ws.prepare('form','set',{
 				id:this.form.id,
 				moduleId:this.form.moduleId,
-				presetIdOpen:this.presetIdOpen,
 				iconId:this.iconId,
+				presetIdOpen:this.presetIdOpen,
+				fieldIdFocus:this.fieldIdFocus,
 				name:this.name,
 				noDataActions:this.noDataActions,
 				query:{

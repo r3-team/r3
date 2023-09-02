@@ -167,6 +167,7 @@ type Form struct {
 	Id             uuid.UUID      `json:"id"`
 	ModuleId       uuid.UUID      `json:"moduleId"`
 	PresetIdOpen   pgtype.UUID    `json:"presetIdOpen"`
+	FieldIdFocus   pgtype.UUID    `json:"fieldIdFocus"` // field to set focus to on form load
 	IconId         pgtype.UUID    `json:"iconId"`
 	Name           string         `json:"name"`
 	NoDataActions  bool           `json:"noDataActions"` // disables record manipulation actions (new/save/delete)

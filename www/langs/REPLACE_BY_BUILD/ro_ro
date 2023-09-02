@@ -899,6 +899,7 @@
 			"fieldDirection":"Direcția",
 			"fieldHelp":"Textul pentru ajutor",
 			"fieldIcon":"Pictograma câmpului",
+			"fieldIdFocus":"Set field focus on load",
 			"fieldMax":"Valoare/lungime maximă",
 			"fieldMin":"Valoare/lungime minimă",
 			"fieldMoveSource":"Mutați acest câmp",

@@ -19,7 +19,7 @@ export {MyInputDate as default};
 
 let MyInputDateEntryInput = {
 	name:'my-input-date-entry-input',
-	template:`<input
+	template:`<input data-is-input="1"
 		v-model="value"
 		@change="$emit('update:modelValue',$event.target.value)"
 		@keyup.enter.stop="$emit('update:modelValue',$event.target.value)"
