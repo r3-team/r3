@@ -430,11 +430,17 @@ let MyForm = {
 				get_login_id:        ()  => s.loginId,
 				get_preset_record_id:(v) => typeof s.presetIdMapRecordId[v] !== 'undefined'
 					? s.presetIdMapRecordId[v] : null,
-				get_record_id:       (i) => typeof s.indexMapRecordId[i] !== 'undefined'
-					? s.indexMapRecordId[i] : -1,
 				get_role_ids:        ()  => s.access.roleIds,
 				go_back:             ()  => window.history.back(),
 				has_role:            (v) => s.access.roleIds.includes(v),
+				get_record_id:(relationIndex) => {
+					// bulk forms do not retrieve record values, only base record IDs are available
+					if(s.isBulkUpdate && relationIndex === 0)
+						return s.recordIds;
+					
+					return typeof s.indexMapRecordId[relationIndex] !== 'undefined'
+						? s.indexMapRecordId[relationIndex] : -1;
+				},
 				
 				// collection functions
 				collection_read:s.getCollectionMultiValues,

@@ -997,7 +997,7 @@
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Restituisce le 5 lettere del codice lingua ('en_us', ...) del login attuale.",
 				"get_login_id":"app.get_login_id() => NUMBER<br /><br />Restituisce l'ID del login attuale.",
 				"get_preset_record_id":"instance.get_preset_record_id(preset_id UUID) => INTEGER<br /><br />Returns the ID of the record that is associated with the given preset.",
-				"get_record_id":"app.get_record_id(relation_index) => NUMBER<br /><br />Restituisce l'Id del record del modulo aperto per l'indice della relazione specificata (0 per predefinita).",
+				"get_record_id":"app.get_record_id(relation_index) => NUMBER|ARRAY<br /><br />Restituisce l'Id del record del modulo aperto per l'indice della relazione specificata (0 per predefinita).<br /><br />If form is used in bulk editing mode, only record IDs of relation index 0 are available - in this case, an array for all used record IDs is returned.",
 				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Restituisce tutti gli ID dei ruoli assegnati al login attuale (i ruoli annidati sono inclusi).",
 				"go_back":"app.go_back() => UNDEFINED<br /><br />Esegue una navigazione indietro del browser.",
 				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />Restituisce true (vero) se il login corrente ha il ruolo assegnato (i ruoli annidati sono inclusi).",
