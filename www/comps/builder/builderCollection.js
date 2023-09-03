@@ -117,6 +117,7 @@ let MyBuilderCollection = {
 						<div class="builder-collection-column-templates">
 							<my-builder-column-templates groupName="batches_columns"
 								@column-add="columns.push($event)"
+								:allowRelationships="true"
 								:columns="columns"
 								:joins="joins"
 							/>
