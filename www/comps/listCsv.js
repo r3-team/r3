@@ -146,6 +146,7 @@ let MyListCsv = {
 				`comma_char=${encodeURIComponent(s.commaChar)}`,
 				`date_format=${encodeURIComponent(s.settings.dateFormat)}`,
 				`timezone=${encodeURIComponent(s.timezone)}`,
+				`language_code=${s.settings.languageCode}`,
 				`ignore_header=${s.hasHeader ? 'false' : 'true'}`,
 				`relation_id=${s.query.relationId}`,
 				`columns=${JSON.stringify(s.columns)}`,

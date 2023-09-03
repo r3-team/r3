@@ -60,6 +60,11 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
 		return
 	}
+	languageCode, err := handler.ReadGetterFromUrl(r, "language_code")
+	if err != nil {
+		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
+		return
+	}
 	boolFalse, err := handler.ReadGetterFromUrl(r, "bool_false")
 	if err != nil {
 		handler.AbortRequest(w, handlerContext, err, handler.ErrGeneral)
@@ -200,11 +205,25 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 				continue
 			}
 
+			// choose best caption for header
+			columnNames[i] = getCaption(columns[i].Captions, "columnTitle", languageCode)
+			if columnNames[i] != "" {
+				continue
+			}
+
+			// fallback to attribute title
 			atr, exists := cache.AttributeIdMap[expr.AttributeId.Bytes]
 			if !exists {
 				handler.AbortRequest(w, handlerContext, handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes), handler.ErrGeneral)
 				return
 			}
+
+			columnNames[i] = getCaption(atr.Captions, "attributeTitle", languageCode)
+			if columnNames[i] != "" {
+				continue
+			}
+
+			// fallback to attribute + relation name
 			rel, exists := cache.RelationIdMap[atr.RelationId]
 			if !exists {
 				handler.AbortRequest(w, handlerContext, handler.ErrSchemaUnknownRelation(atr.RelationId), handler.ErrGeneral)
@@ -364,4 +383,16 @@ func dataToCsv(writer *csv.Writer, get types.DataGet, locUser *time.Location,
 		}
 	}
 	return total, nil
+}
+
+func getCaption(captionMap map[string]map[string]string, contentName string, languageCode string) string {
+	content, exists := captionMap[contentName]
+	if !exists {
+		return ""
+	}
+	value, exists := content[languageCode]
+	if !exists {
+		return ""
+	}
+	return value
 }
