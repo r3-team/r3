@@ -410,6 +410,7 @@ let MyBuilderApi = {
 						<div class="builder-api-column-templates">
 							<my-builder-column-templates groupName="batches_columns"
 								@column-add="columns.push($event)"
+								:allowRelationships="true"
 								:columns="columns"
 								:joins="joins"
 							/>

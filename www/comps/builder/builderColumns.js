@@ -228,9 +228,10 @@ export let MyBuilderColumnTemplates = {
 		</template>
 	</draggable>`,
 	props:{
-		columns:  { type:Array,  required:true },
-		groupName:{ type:String, required:true },
-		joins:    { type:Array,  required:true }
+		allowRelationships:{ type:Boolean, required:false, default:false },
+		columns:           { type:Array,   required:true },
+		groupName:         { type:String,  required:true },
+		joins:             { type:Array,   required:true }
 	},
 	emits:['column-add'],
 	computed:{
@@ -242,15 +243,17 @@ export let MyBuilderColumnTemplates = {
 					let rel = this.relationIdMap[join.relationId];
 					
 					for(let atr of rel.attributes) {
-						if(!this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(join.index,atr.id,false,null))
-							&& !this.isAttributeRelationship(atr.content)) {
-							
-							out.push({
-								batch:null,
-								columns:[this.createColumn(join.index,atr.id,false)],
-								vertical:false
-							});
-						}
+						if(this.indexAttributeIdsUsed.includes(this.getIndexAttributeId(join.index,atr.id,false,null)))
+							continue;
+						
+						if(this.isAttributeRelationship(atr.content) && !this.allowRelationships)
+							continue;
+						
+						out.push({
+							batch:null,
+							columns:[this.createColumn(join.index,atr.id,false)],
+							vertical:false
+						});
 					}
 				}
 				
@@ -290,13 +293,14 @@ export let MyBuilderColumnTemplates = {
 		createColumn(index,attributeId,subQuery) {
 			let id = !subQuery
 				? 'new_'+this.getIndexAttributeId(index,attributeId,false,null)
-				: 'new_sub_query' + this.getRandomInt(1,99999)
-			;
+				: 'new_sub_query' + this.getRandomInt(1,99999);
+			
 			return {
 				id:id,
 				attributeId:attributeId,
 				index:index,
 				batch:null,
+				batchVertical:false,
 				basis:0,
 				length:0,
 				wrap:false,
