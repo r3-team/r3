@@ -209,7 +209,7 @@ let MyApp = {
 		moduleIdMapColor:(s) => {
 			let out = {};
 			for(let m of s.modules) {
-				out[m.id] = s.colorAdjustBgHeader(`#${m.color1}`,s.settings.dark);
+				out[m.id] = s.colorAdjustBgHeader(`#${m.color1}`);
 			}
 			return out;
 		},

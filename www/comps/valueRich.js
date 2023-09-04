@@ -118,7 +118,7 @@ let MyValueRich = {
 			else if(s.isGallery) out.push(`max-width:40px`);
 			
 			if(s.isColor)
-				out.push(`background-color:${s.colorAdjustBg(s.value,s.settings.dark)}`);
+				out.push(`background-color:${s.colorAdjustBg(s.value)}`);
 			
 			return out.join(';');
 		},

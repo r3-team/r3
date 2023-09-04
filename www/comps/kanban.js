@@ -514,8 +514,7 @@ let MyKanban = {
 		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
 		isMobile:      (s) => s.$store.getters.isMobile,
 		capApp:        (s) => s.$store.getters.captions.calendar,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		settings:      (s) => s.$store.getters.settings
+		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	beforeCreate() {
 		// import at runtime due to circular dependencies
@@ -604,7 +603,7 @@ let MyKanban = {
 		displayColorColumn(color) {
 			if(color === null) return '';
 			
-			let bg   = this.colorAdjustBg(color,this.settings.dark);
+			let bg   = this.colorAdjustBg(color);
 			let font = this.colorMakeContrastFont(bg);
 			return `background-color:${bg};color:${font};`;
 		},

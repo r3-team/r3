@@ -1050,7 +1050,7 @@ let MyList = {
 		displayColorColumn(color) {
 			if(color === null) return '';
 			
-			let bg   = this.colorAdjustBg(color,this.settings.dark);
+			let bg   = this.colorAdjustBg(color);
 			let font = this.colorMakeContrastFont(bg);
 			return `background-color:${bg};color:${font};`;
 		},

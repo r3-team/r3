@@ -202,7 +202,7 @@ let MyCalendarDays = {
 				};
 				
 				if(s.hasColor && row.values[2] !== null) {
-					const bg   = s.colorAdjustBg(row.values[2],s.settings.dark);
+					const bg   = s.colorAdjustBg(row.values[2]);
 					const font = s.colorMakeContrastFont(bg);
 					ev.styleCard = `background-color:${bg};color:${font};`;
 				}

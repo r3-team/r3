@@ -1,28 +1,37 @@
 import tinycolor from '../../externals/tinycolor2.js';
 import MyStore   from '../../stores/store.js';
 
-export function colorAdjustBgHeader(colorRgb,isDarkMode) {
+export function colorAdjustBgHeader(colorRgb) {
 	let c = tinycolor(colorRgb);
-	if(isDarkMode) c.darken(14).desaturate(12);
-	else           c.darken(5).desaturate(6);
+	
+	if(MyStore.getters.settings.dark)
+		c.darken(14).desaturate(12);
+	else
+		c.darken(5).desaturate(6);
+	
 	return c.toString();
 };
 
-export function colorAdjustBg(colorRgb,isDarkMode) {
+export function colorAdjustBg(colorRgb) {
 	// adjust background color in dark mode
 	let c = tinycolor(colorRgb);
-	if(isDarkMode) {
-		if(c.isDark()) c.darken(10).desaturate(20);
-		else           c.darken(45).desaturate(30);
-	}
+	if(MyStore.getters.settings.dark)
+		c.darken(20).desaturate(20);
+	
 	return c.toString();
 };
 
 export function colorMakeContrastFont(colorRbgBg) {
 	// create contrast font color from background color
 	let c = tinycolor(colorRbgBg);
-	if(c.isDark()) c.lighten(40);
-	else           c.darken(65);
+	if(MyStore.getters.settings.dark) {
+		// dark mode always uses bright fonts
+		c.lighten(40);
+	} else {
+		// bright mode uses light fonts on dark backgrounds and the other way around
+		if(c.isDark()) c.lighten(40);
+		else           c.darken(65);
+	}
 	return c.toString();
 };
 
