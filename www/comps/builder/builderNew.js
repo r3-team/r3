@@ -102,7 +102,6 @@ let MyBuilderNew = {
 				
 				<p class="error" v-if="nameTaken">{{ capGen.error.nameTaken }}</p>
 				
-				<br />
 				<div class="row">
 					<my-button image="save.png"
 						@trigger="set"

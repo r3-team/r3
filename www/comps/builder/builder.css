@@ -105,7 +105,7 @@
 }
 .builder-new .options{
 	flex:1 1 auto;
-	margin-top:20px;
+	margin:20px 0px;
 }
 .builder-new .error{
 	color:var(--color-error);
