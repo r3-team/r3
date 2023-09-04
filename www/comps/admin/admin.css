@@ -224,15 +224,6 @@
 	justify-content:space-between;
 	margin:0px 0px 5px 0px;
 }
-.admin-config .repo-key-input{
-	display:flex;
-	flex-flow:column nowrap;
-	align-items:flex-start;
-}
-.admin-config .repo-key-input input,
-.admin-config .repo-key-input textarea{
-	min-width:350px;
-}
 .admin-config .mail-test-input{
 	display:flex;
 	flex-flow:row nowrap;

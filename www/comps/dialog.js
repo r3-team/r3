@@ -121,7 +121,7 @@ let MyDialog = {
 			// remove before fade out occurs
 			this.richtextClosing = true;
 			
-			this.$nextTick(function() {
+			this.$nextTick(() => {
 				this.executeButton(this.buttons[i]);
 			});
 		}

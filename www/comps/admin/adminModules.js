@@ -258,7 +258,7 @@ let MyAdminModulesItem = {
 			});
 		},
 		delAsk2() {
-			this.$nextTick(function() {
+			this.$nextTick(() => {
 				this.$store.commit('dialog',{
 					captionBody:this.capApp.dialog.deleteMulti.replace('{COUNT}',this.moduleNamesDependendOnUs.length + 1),
 					captionTop:this.capApp.dialog.deleteTitle.replace('{APP}',this.module.name),

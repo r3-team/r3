@@ -198,19 +198,20 @@ let MyAdminConfig = {
 					<tr>
 						<td>{{ capApp.repoPublicKeyAdd }}</td>
 						<td>
-							<div class="repo-key-input">
+							<div class="column gap">
 								<input v-model="publicKeyInputName"
 									:placeholder="capApp.repoPublicKeyInputNameHint"
 								/>
 								<textarea v-model="publicKeyInputValue"
 									:placeholder="capApp.repoPublicKeyInputValueHint"
 								></textarea>
-								
-								<my-button image="add.png"
-									@trigger="publicKeyAdd"
-									:active="publicKeyInputName !== '' && publicKeyInputValue !== ''"
-									:caption="capGen.button.add"
-								/>
+								<div>
+									<my-button image="add.png"
+										@trigger="publicKeyAdd"
+										:active="publicKeyInputName !== '' && publicKeyInputValue !== ''"
+										:caption="capGen.button.add"
+									/>
+								</div>
 							</div>
 						</td>
 					</tr>
