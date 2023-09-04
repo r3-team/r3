@@ -112,6 +112,7 @@ let MyCalendarMonth = {
 		dateSelect0:{ required:false, default:null },
 		dateSelect1:{ required:false, default:null },
 		isInput:    { type:Boolean, required:false, default:false },
+		isRange:    { type:Boolean, required:false, default:false },
 		hasColor:   { type:Boolean, required:false, default:false },    // color attribute exists
 		hasCreate:  { type:Boolean, required:false, default:false },
 		hasUpdate:  { type:Boolean, required:false, default:false },
@@ -301,7 +302,7 @@ let MyCalendarMonth = {
 				this.$emit('open-form',[row],[],middleClick);
 		},
 		hoverDay(unix) {
-			if(!this.unixInputActive) return;
+			if(!this.isRange || !this.unixInputActive) return;
 			
 			if(unix < this.unixInput0) this.unixInput0 = unix;
 			else                       this.unixInput1 = unix;

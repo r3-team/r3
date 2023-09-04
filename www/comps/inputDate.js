@@ -351,6 +351,7 @@ let MyInputDate = {
 					:dateSelect1="dateSelect1"
 					:daysShow="7"
 					:isInput="true"
+					:isRange="isRange"
 				/>
 				<my-calendar-month
 					v-if="fullDay"
@@ -363,6 +364,7 @@ let MyInputDate = {
 					:dateSelect1="dateSelect1"
 					:inputTime="isTime"
 					:isInput="true"
+					:isRange="isRange"
 				/>
 			</div>
 		</div>

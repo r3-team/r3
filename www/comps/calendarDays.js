@@ -67,7 +67,7 @@ let MyCalendarDays = {
 				>{{ capApp.fullDay }}</span>
 			</div>
 			<div v-for="d in events.fullDays" class="day" :class="{ weekend:d.weekend }">
-				<div class="header">{{ d.caption }}</div>
+				<div class="header" v-html="d.caption"></div>
 				<div class="events-full" :style="events.fullDaysHeight">
 					
 					<!-- date input (days) -->
@@ -137,6 +137,7 @@ let MyCalendarDays = {
 		dateSelect1:{ required:false, default:null },
 		daysShow:   { type:Number,  required:true },
 		isInput:    { type:Boolean, required:false, default:false },
+		isRange:    { type:Boolean, required:false, default:false },
 		hasColor:   { type:Boolean, required:false, default:false }, // color attribute exists
 		hasCreate:  { type:Boolean, required:false, default:false },
 		hasUpdate:  { type:Boolean, required:false, default:false },
@@ -158,6 +159,7 @@ let MyCalendarDays = {
 			const unix0Cal    = Math.floor(s.date0.getTime() / 1000); // unix start of calendar
 			const unix0CalDay = Math.floor(s.date0.getTime() / 1000) - s.date0.getTimezoneOffset()*60;
 			const dayLabel    = s.isMobile || s.isInput ? 'weekDayShort' : 'weekDay';
+			const dayLabelBr  = s.isMobile || s.isInput ? '<br />' : ' ';
 			let events = {
 				fullDays:[],        // 1 day per column in calendar
 				fullDaysEvents:[],  // full day events
@@ -171,7 +173,7 @@ let MyCalendarDays = {
 				d.setDate(d.getDate() + i);
 				
 				events.fullDays.push({
-					caption:`${s.capApp[dayLabel+d.getDay()]}, ${s.getDateFormatNoYear(d,s.settings.dateFormat)}`,
+					caption:`${s.capApp[dayLabel+d.getDay()]},${dayLabelBr + s.getDateFormatNoYear(d,s.settings.dateFormat)}`,
 					eventIndexes:[],
 					unix:unix0CalDay + (i * 86400),
 					weekend:[0,6].includes(d.getDay())
@@ -401,7 +403,7 @@ let MyCalendarDays = {
 			this.unixInput1 = null;
 		},
 		dateHover(unix) {
-			if(!this.unixInputActive) return;
+			if(!this.isRange || !this.unixInputActive) return;
 			
 			if(unix < this.unixInput0) this.unixInput0 = unix;
 			else                       this.unixInput1 = unix;

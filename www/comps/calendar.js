@@ -322,6 +322,7 @@ let MyCalendar = {
 				:hasColor="attributeIdColor !== null"
 				:hasCreate="hasCreate"
 				:hasUpdate="hasUpdate"
+				:isRange="true"
 				:rows="rows"
 				:zoom="zoom"
 			/>
@@ -338,6 +339,7 @@ let MyCalendar = {
 				:hasColor="attributeIdColor !== null"
 				:hasCreate="hasCreate"
 				:hasUpdate="hasUpdate"
+				:isRange="true"
 				:rows="rows"
 			/>
 			
