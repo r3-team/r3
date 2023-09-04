@@ -286,8 +286,7 @@ let MyAdminLoginTemplate = {
 		searchDictionaries:(s) => s.$store.getters['searchDictionaries'],
 		capApp:            (s) => s.$store.getters.captions.admin.loginTemplate,
 		capAppSet:         (s) => s.$store.getters.captions.settings,
-		capGen:            (s) => s.$store.getters.captions.generic,
-		config:            (s) => s.$store.getters.config
+		capGen:            (s) => s.$store.getters.captions.generic
 	},
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);
@@ -308,7 +307,7 @@ let MyAdminLoginTemplate = {
 			fontSize:100,
 			headerCaptions:true,
 			hintUpdateVersion:0,
-			languageCode:this.config.defaultLanguageCode,
+			languageCode:'en_us',
 			menuColored:false,
 			mobileScrollForm:true,
 			pageLimit:2000,
