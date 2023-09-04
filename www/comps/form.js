@@ -686,13 +686,13 @@ let MyForm = {
 		
 		// form management
 		handleHotkeys(e) {
-			// not data or pop-up form open
-			if(!this.isData || this.popUp !== null) return;
+			// ignore hotkeys if a pop-up form (child of this form) is open
+			if(this.popUp !== null) return;
 			
 			if(this.isPopUp && e.key === 'Escape')
 				this.closeAsk();
 			
-			if(e.key === 's' && e.ctrlKey) {
+			if(this.isData && e.ctrlKey && e.key === 's') {
 				e.preventDefault();
 				
 				if(!this.blockInputs && this.canUpdate) {
