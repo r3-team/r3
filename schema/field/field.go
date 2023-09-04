@@ -878,6 +878,12 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldCalendar) error {
 		return err
 	}
 
+	// fix imports < 2.6: New open form entity
+	f.OpenForm = compatible.FixMissingOpenForm(f.FormIdOpen, f.AttributeIdRecord, f.OpenForm)
+
+	// fix imports < 3.5: Default view
+	f.Days = compatible.FixCalendarDefaultView(f.Days)
+
 	if known {
 		if _, err := tx.Exec(db.Ctx, `
 			UPDATE app.field_calendar
@@ -910,9 +916,6 @@ func setCalendar_tx(tx pgx.Tx, fieldId uuid.UUID, f types.FieldCalendar) error {
 			return err
 		}
 	}
-
-	// fix imports < 2.6: New open form entity
-	f.OpenForm = compatible.FixMissingOpenForm(f.FormIdOpen, f.AttributeIdRecord, f.OpenForm)
 
 	// set open form
 	if err := openForm.Set_tx(tx, "field", fieldId, f.OpenForm, pgtype.Text{}); err != nil {

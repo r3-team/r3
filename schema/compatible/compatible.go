@@ -26,6 +26,14 @@ func FixOpenFormRelationIndexApplyDefault(openForm types.OpenForm) types.OpenFor
 	return openForm
 }
 
+// migrate default calendar view if not set
+func FixCalendarDefaultView(days int) int {
+	if days == 0 {
+		return 42
+	}
+	return days
+}
+
 // < 3.4
 // migrate open form pop-up type
 func FixOpenFormPopUpType(openForm types.OpenForm) types.OpenForm {
