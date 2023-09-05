@@ -393,12 +393,9 @@
 }
 .builder-form-state .description{
 	max-width:400px;
-	margin-right:6px;
 }
 .builder-form-state .title{
 	width:100%;
-	display:flex;
-	flex-flow:row nowrap;
 }
 .builder-form-state .details{
 	display:flex;
@@ -418,8 +415,6 @@
 	flex-flow:row nowrap;
 }
 .builder-form-state-effect{
-	display:flex;
-	flex-flow:row nowrap;
 	min-width:300px;
 	margin:0px 4px 2px 0px;
 	padding:2px 3px;

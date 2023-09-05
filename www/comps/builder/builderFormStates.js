@@ -3,7 +3,7 @@ export {MyBuilderFormStates as default};
 
 let MyBuilderFormStateEffect = {
 	name:'my-builder-form-state-effect',
-	template:`<div class="builder-form-state-effect">
+	template:`<div class="builder-form-state-effect row gap">
 		
 		<!-- target -->
 		<select v-model="target" @input="changeTarget($event.target.value)">
@@ -86,7 +86,7 @@ let MyBuilderFormState = {
 	name:'my-builder-form-state',
 	components:{MyBuilderFormStateEffect},
 	template:`<div class="builder-form-state">
-		<div class="title">
+		<div class="title row gap">
 			<my-button
 				@trigger="$emit('open')"
 				:captionTitle="capGen.button.show"
