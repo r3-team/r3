@@ -686,13 +686,12 @@ let MyBuilderFieldOptions = {
 						</td>
 					</tr>
 				</template>
-				<tr>
+				<tr v-if="!field.gantt">
 					<td>{{ capApp.ics }}</td>
 					<td>
 						<my-bool
 							@update:modelValue="set('ics',$event)"
 							:modelValue="field.ics"
-							:readonly="field.gantt"
 						/>
 					</td>
 				</tr>
