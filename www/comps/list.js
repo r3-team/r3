@@ -123,7 +123,7 @@ let MyList = {
 								:naked="true"
 							/>
 							<my-button image="open.png"
-								v-if="hasOpenForm && hasUpdate"
+								v-if="hasUpdate"
 								@trigger="clickOpen(r,false)"
 								@trigger-middle="clickOpen(r,true)"
 								:captionTitle="capApp.inputHintOpen"
@@ -203,7 +203,7 @@ let MyList = {
 						:captionTitle="capGen.button.newHint"
 					/>
 					<my-button image="edit.png"
-						v-if="hasOpenFormBulk"
+						v-if="hasUpdateBulk"
 						@trigger="selectRowsBulkEdit(selectedRows)"
 						:active="selectedRows.length !== 0"
 						:caption="capGen.button.editBulk.replace('{COUNT}',selectedRows.length)"
@@ -912,16 +912,17 @@ let MyList = {
 		choiceFilters:   (s) => s.getChoiceFilters(s.choices,s.choiceId),
 		choiceIdDefault: (s) => s.fieldOptionGet(s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
 		expressions:     (s) => s.getQueryExpressions(s.columns),
-		hasBulkActions:  (s) => !s.isInput && s.rows.length !== 0 && (s.hasOpenFormBulk || s.hasDeleteAny),
+		hasBulkActions:  (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
 		hasChoices:      (s) => s.query.choices.length > 1,
 		hasCreate:       (s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.hasOpenForm,
 		hasPaging:       (s) => s.query.fixedLimit === 0,
-		hasUpdate:       (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && (s.hasOpenForm || s.hasOpenFormBulk),
+		hasUpdate:       (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenForm,
+		hasUpdateBulk:   (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenFormBulk,
 		isCards:         (s) => s.layout === 'cards',
 		isTable:         (s) => s.layout === 'table',
 		joins:           (s) => s.fillRelationRecordIds(s.query.joins),
 		relationsJoined: (s) => s.getRelationsJoined(s.joins),
-		rowSelect:       (s) => s.isInput || s.hasOpenForm,
+		rowSelect:       (s) => s.isInput || s.hasUpdate,
 		showInputAddLine:(s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
 		showInputAddAll: (s) => s.inputMulti && s.rowsClear.length > 0,
 		showInputHeader: (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
@@ -1167,7 +1168,7 @@ let MyList = {
 				? -1 : columnBatchIndex;
 		},
 		clickOpen(row,middleClick) {
-			if(this.rowSelect && this.hasUpdate)
+			if(this.hasUpdate)
 				this.$emit('open-form',[row],middleClick);
 		},
 		clickOnEmpty() {
@@ -1421,7 +1422,7 @@ let MyList = {
 			for(let rowIndex of rowIndexes) {
 				rows.push(this.rows[rowIndex]);
 			}
-			if(this.hasUpdate && rows.length !== 0)
+			if(this.hasUpdateBulk && rows.length !== 0)
 				this.$emit('open-form-bulk',rows,false);
 		},
 		
