@@ -167,7 +167,7 @@ let MyList = {
 							<td class="minimum">
 								<div class="list-input-row-items nowrap">
 									<my-button image="add.png"
-										v-if="hasOpenForm && !inputIsReadonly && hasCreate"
+										v-if="!inputIsReadonly && hasCreate"
 										@trigger="$emit('open-form',[],false)"
 										@trigger-middle="$emit('open-form',[],true)"
 										:captionTitle="capApp.inputHintCreate"
@@ -914,9 +914,9 @@ let MyList = {
 		expressions:     (s) => s.getQueryExpressions(s.columns),
 		hasBulkActions:  (s) => !s.isInput && s.rows.length !== 0 && (s.hasOpenFormBulk || s.hasDeleteAny),
 		hasChoices:      (s) => s.query.choices.length > 1,
-		hasCreate:       (s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.rowSelect,
+		hasCreate:       (s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.hasOpenForm,
 		hasPaging:       (s) => s.query.fixedLimit === 0,
-		hasUpdate:       (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.rowSelect,
+		hasUpdate:       (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && (s.hasOpenForm || s.hasOpenFormBulk),
 		isCards:         (s) => s.layout === 'cards',
 		isTable:         (s) => s.layout === 'table',
 		joins:           (s) => s.fillRelationRecordIds(s.query.joins),
