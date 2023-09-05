@@ -1,4 +1,4 @@
-<p><em>Updated 2023-06-17</em></p>
+<p><em>Updated 2023-09-05</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -29,9 +29,7 @@
 <ol type="1">
 <li><a href="#form-layouts">Form layouts</a></li>
 <li><a href="#field-settings">Field settings</a></li>
-<li><a href="#list-fields">List fields</a></li>
-<li><a href="#calendar-fields">Calendar fields</a></li>
-<li><a href="#chart-fields">Chart fields</a></li>
+<li><a href="#data-display-fields">Data display fields</a></li>
 <li><a href="#form-states">Form states</a></li>
 </ol></li>
 <li><a href="#queries">Queries</a>
@@ -276,7 +274,7 @@
 END IF;</code></pre>
 <p>For more details about triggers, you can lookup the <a href="https://www.postgresql.org/docs/15/trigger-definition.html">PostgreSQL trigger documentation</a>.</p>
 <h2 id="policies">Policies</h2>
-<p>A relation policy can limit what specific records are accessible to a logged in user via their <a href="#roles-and-access-management">role memberships</a>. This is done by using <a href="#backend-functions">backend functions</a> that serve as filter for specific actions. While forms, lists and other frontend elements can also <a href="#query-filters">filter records</a>, relation policies are applied globally and cannot be circumvented by changing the frontend.</p>
+<p>A relation policy can limit what specific records are accessible to a logged in user via their <a href="#roles-and-access-management">role memberships</a>. This is done by using <a href="#backend-functions">backend functions</a> that serve as filter for specific actions. While <a href="#forms">forms</a>, <a href="#data-display-fields">data display fields</a> and other frontend elements can also <a href="#query-filters">filter records</a>, relation policies are applied globally and cannot be circumvented by changing the frontend.</p>
 <p>A policy can be set for different actions, these are:</p>
 <ul>
 <li>Select: Users can only see records based on the results of the policy; they have no way of knowing whether or how many other records exist.</li>
@@ -322,36 +320,27 @@ END IF;</code></pre>
 <li>Title: The translated title of your form (see <a href="#translations">Translations</a>). Shown to users. Can be overwritten by a menu entry.</li>
 <li>No data actions: Option to remove all data actions (new, save, delete) from a data form. Useful when working with records without wanting to make changes to them, like as input for <a href="#frontend-functions">frontend functions</a>.</li>
 <li>Open preset: Option to open a specific <a href="#presets">preset record</a> when opening a form. Useful for central configuration records.</li>
+<li>Set field focus on load: To place focus on a specific data input field when the form loads.</li>
 </ul>
-<p>Once created, you can start designing your form. Generally, forms can be separated in two types:</p>
+<p>Once created, you can start designing your form. Generally, forms can be separated into two types:</p>
 <ul>
-<li>Data: You define a <a href="#queries">query</a> to create, update or delete <a href="#relations">relation</a> records. This will give you access to attribute input fields from the selected and <a href="#queries">joined</a> relations.</li>
+<li>Data: You define a <a href="#queries">query</a> to create, update or delete <a href="#relations">relation</a> records (inside the form content tab). This will give you access to attribute input fields from the selected and <a href="#queries">joined</a> relations.</li>
 <li>Non-data: You do not define a <a href="#queries">query</a>. This type of forms usually serve purposes other than record manipulation. Some examples:
 <ul>
-<li>Showing a full page <a href="#list-fields">list</a> to view and navigate to relation records.</li>
-<li>Showing a <a href="#calendar-fields">calendar</a> to view and access time based records.</li>
+<li>Showing a full page <a href="#data-display-fields">data display field</a> to view and navigate to records.</li>
 <li>Showing a dashboard of multiple lists and buttons to reach different parts of your application.</li>
 </ul></li>
 </ul>
 <p><img src="en_us_builder_pics/form.webp" alt="Form" /></p>
-<p>Forms are designed by working with fields. Fields serve to create layouts, manipulate data, execute actions and more. Available fields are shown in the sidebar, depending on what the form has access to. These types of fields exist:</p>
+<p>Forms are designed by adding and configuring fields. Fields serve to create layouts, manipulate data, execute actions and more. Available fields are shown in the sidebar, depending on what the form has access to. These types of fields exist:</p>
 <ul>
 <li>Container: These construct the layout of your form. Containers 'contain' other fields, including other containers to create simple or complex <a href="#form-layouts">layouts</a>.</li>
 <li>Tabs: A field consisting of one or more tabs, which then contain other fields. Useful to separate UI elements, hide seldom used fields or improve usability of very large forms. To add layouts inside tab fields, you can use container fields.</li>
-<li>List/calendar: A <a href="#list-fields">list</a> or <a href="#calendar-fields">calendar</a> representation of relation records. By default, independent of the current data form record but can use <a href="#query-filters">filters</a> to access field values or the currently open record. Common use-cases:
-<ul>
-<li>Single page: A calendar or list filling the entire form. Gives overview and access to specific records.</li>
-<li>Dashboard page: Part of a dashboard, showing unrelated relation records.</li>
-<li>Contextual: As part of a data form, showing contextually connected records to the record currently being handled by the data form.</li>
-</ul></li>
-<li>Chart: A <a href="#chart-fields">chart</a>, using data based on, and filtered by, a defined <a href="#queries">query</a>.</li>
-<li>Header: Simply text with an optional preceding icon. Used for titles or small explanations.</li>
+<li><a href="#data-display-fields">Data display field</a>: A field showing records from other relations. Can be used to show or create associated/child records. Also often used as jumping off point to other forms. Depending on the chosen type, records can be presented as list, calendar, Gantt plan, Kanban board and so on.</li>
+<li>Label: Can either show a simple line of text with a fixed size and icon (useful for headings) or any HTML value.</li>
 <li>Button: Actions that a user can execute (see <a href="#field-settings">Button fields</a>).</li>
-<li>Data: Data forms only. Dependent on the defined <a href="#queries">query</a>, attribute input fields are available to view and manipulate record values. They are labeled by a relation index number, the relation and the attribute name, as in '0) employee.forename'.
-<ul>
-<li>Depending on the attribute type, fields will behave differently and offer different <a href="#field-settings">settings</a>. For example: Text attributes can be presented as a line input, a URL or with a richtext editor, while integer attributes can be presented as number or date inputs.</li>
-</ul></li>
-<li>Data by referring relationship: Like data fields but for N:1 &amp; N:M relationships. With these fields users can see and manipulate multiple relationship references at once. Depending on the field settings, they can be displayed as multi-input dropdowns or checkboxes.</li>
+<li>Data input (data forms only): Dependent on the defined <a href="#queries">query</a>, attribute input fields are available to view and manipulate record values. They are labeled by the relation index, the relation name and the attribute name, as in '0 employee.forename'. Depending on the attribute type, fields will behave differently and offer different <a href="#field-settings">settings</a>.</li>
+<li>Data input by referring relationship: Like data fields but for N:1 &amp; N:M relationships. With these fields users can see and manipulate multiple relationship references at once. Depending on the field settings, they can be displayed as multi-input dropdowns or checkboxes.</li>
 </ul>
 <p>To summarize: A form can handle a relation record by defining a <a href="#queries">query</a> (data) or not (non-data). It consists entirely of fields, with container fields being used to create a <a href="#form-layouts">layout</a>. To view/manipulate records, attribute input fields are available for selected relations (see <a href="#queries">Queries</a>), while many settings exist to customize these (see <a href="#field-settings">Field settings</a>).</p>
 <h3 id="form-layouts">Form layouts</h3>
@@ -446,48 +435,58 @@ END IF;</code></pre>
 <li>Open form: Navigates to or opens a form as pop-up window.</li>
 <li>Function on click: Executes a <a href="#frontend-functions">frontend function</a> when the button is triggered.</li>
 </ul></li>
-<li><a href="#list-fields">List fields</a></li>
-<li><a href="#calendar-fields">Calendar fields</a></li>
-<li><a href="#chart-fields">Chart fields</a></li>
+<li><a href="#data-display-fields">Data display fields</a></li>
 </ul>
-<h3 id="list-fields">List fields</h3>
-<p>List fields serve to view multiple records, do bulk actions on them or open individual records. They can span an entire form (full page lists) or be placed as another field on a data form to lookup connected records (sub lists).</p>
+<h3 id="data-display-fields">Data display fields</h3>
+<p>These fields serve to present and/or make accessible data from multiple records. Currently, these data display fields exist:</p>
 <ul>
-<li>Full page lists: Are created by placing a single list field on a form without any containers. Forms with a full page list are often used to access records on other data forms by selecting a record from the list or by creating new ones.</li>
-<li>Sub lists: Are created by placing a list field on any existing data form. By <a href="#query-filters">filtering</a> the list query, a list field can show records connected to the record of the parent form.</li>
+<li>List: A regular list of records. Has many options for data presentation and access.</li>
+<li>Calendar: Presents time-related records on different calendar views (month, full week, etc.). Very useful for viewing, creating or updating time-based records.</li>
+<li>Gantt: Presents time-related records as a Gantt plan, grouped by associated entities (owners, states, etc.).</li>
+<li>Kanban: Presents records as Kanban cards, with the option to drag&amp;drop them between Kanban columns (and optionally rows) for reassignment to things like people or states.</li>
+<li>Chart: Presents record values as charts or diagrams.</li>
 </ul>
-<p>A list field can have the following options:</p>
+<p>In general, all data display fields can be placed on any form. When placed on a data form, which handles creation of specific records, they can serve to display related data (child or associated records). They can also be used to navigate to other forms/records.</p>
+<p>When placing a single data display field on a form by itself, it becomes a full page field. This not only makes the field more usable (more available space) but also enables full page navigation and hotkeys. Most often, full page fields are used as starting points to access top-level records, with child-records being shown inside data forms with smaller data display fields.</p>
+<p>Data display fields use <a href="#queries">queries</a> to access data - these can be configued in the field content tab. Once the query has been defined with at least one relation, <a href="#columns">columns</a> can be added; column values are then shown as part of the field.</p>
+<p>Depending on the type of data display field, different field options are available:</p>
+<ul>
+<li>Lists
 <ul>
 <li>Display: Table or card layout. The default view is the table; showing records, one per row, with <a href="#columns">columns</a> separating the record values. The card view is an alternative that shows each record as a separate card, with values being placed vertically inside it.</li>
 <li>Result count: The default page result limit. If more results are available, the user needs to navigate between pages. Can be overwritten by the user.</li>
-<li>Quick filter: A simple text box with which a user can filter the entire list. Inefficient, as all visible attribute values are being looked through. Advisable only for lists handling limited data or when all shown attributes are indexed. Useful for sub lists that are already being filtered by a currently open form record.</li>
 <li><a href="#csv-import-and-export">CSV import/export</a></li>
-<li>Open form: A list field can be used to open records on data forms either directly or as pop-up window. The following options are available:
+<li>Quick filter: A simple text box with which a user can filter the entire list. Inefficient, as all visible attribute values are being looked through. Advisable only for lists handling limited data or when all shown attributes are indexed. Useful for sub lists that are already being filtered by a currently open form record.</li>
+</ul></li>
+<li>Calendar/Gantt
 <ul>
-<li>Form: If a record is being selected from the list, it will be opened on this form. Both the data form and list field must have the same base relation (see <a href="#queries">queries</a>) to be compatible.</li>
-<li>Pop-up form: Option to open the selected form as pop-up window. Useful for quickly editing small or child records without disturbing inputs on the current form.</li>
-<li>Maximum height/width: Options for the pop-up form to limit the maximum size the pop-up window will take.</li>
-<li>Use record from relation to set value on form (for new records): When creating a new record, the record ID (of the chosen relation) will be used as default value on an input field on the opened form. This is useful when creating child-records from a sub list. Usually the record ID of the parent is used as default value on a relationship input field on the target form to connect the new child record to its parent without any user inputs.</li>
+<li>Date from/to: <a href="#attributes">Attributes</a> that define the date/time of shown records on the calendar / Gantt. Given attribute values must be <a href="#date-and-time-management">date or datetime</a> and must not be mixed. If date values are used, only full day entries are shown on the calendar; if datetime values are used, both full day as well as non-full day entries are displayed.</li>
+<li>Color: (Optional) attribute value that is used to color the date entries.</li>
+</ul></li>
+<li>Calendar
+<ul>
+<li>iCAL subscriptions: This feature allows users to subscribe to a calendar with their personal devices. If enabled, how far the calendar data is provided (before/after the current date), can be defined in days.</li>
+<li>Default view / users can change view: Controls what calendar view is shown as default and whether or not users can change this setting for themselves.</li>
+</ul></li>
+<li>Gantt
+<ul>
+<li>Gantt interval / interval toggle: Controls what Gantt interval is used by default (days/hours) and whether users can change this setting for themselves.</li>
+<li>Gantt fields in general require some data to be used for grouping, because each line of a Gantt plan displays date values of a specific entity. This can be a person, a task, project or whatever else. Gantt fields automatically use all values within the first column batch to populate the Gantt group - so multiple columns can be used to describe the entity of a Gantt line. Example: Portrait, forename + surename of a task owner.</li>
 </ul></li>
 </ul>
-<p>List fields use <a href="#queries">queries</a> to access data. Once the query has been defined with at least one relation, <a href="#columns">columns</a> can be added to the list. These columns are then shown as part of the list.</p>
-<p>When designing complex lists with many joins, sub queries, groupings, filters and so on, logic errors or badly chosen configuration options can result in non-desirable data sets. To troubleshoot this, a SQL-preview function is available on the list field when inside the Builder. This function returns the raw SQL that is being used to retrieve the current list data. With this preview, you can directly see how the chosen options affect the final SQL query.</p>
-<h3 id="calendar-fields">Calendar fields</h3>
-<p>Calendar fields work very similar to <a href="#list-fields">list fields</a>. They have their own <a href="#queries">query</a> like list fields and can use the same <a href="#columns">columns</a> and configuration options. Please refer to <a href="#list-fields">list fields</a> for detailed explanations.</p>
-<p>Besides options that are also available to list fields, calendar fields have additional options for generating and styling the calendar entries:</p>
+<p>Options, available to all data display fields:</p>
 <ul>
-<li>Date from/to: <a href="#attributes">Attributes</a> that define the date/time of shown records on the calendar. Given attribute values must be <a href="#date-and-time-management">date or datetime</a> and must not be mixed. If date values are used, only full day entries are shown on the calendar; if datetime values are used, both full day as well as non-full day entries are displayed.</li>
-<li>Color: (Optional) attribute value that is used to color in the date entries on the calendar. Should be combined with the 'Color' display option for text attributes to make inputting valid color values easy on data forms.</li>
-<li>Open record (relation 0): Open calendar entry (or create new one) in target form. Records must be compatible with chosen form (relation 0 of form must be the displayed record relation, see <a href="#queries">Queries</a>).</li>
-<li>Gantt: A different presentation option for the calendar. All date entries are shown on a horizontal time axis instead of a calendar grid. This option becomes useful, when date records can be grouped by a common criteria. A group is defined by the value of one or more columns assigned to column batch 1 (see <a href="#list-fields">Column batches</a>). Some use cases:
+<li>Open form: To create, open or update a record.
 <ul>
-<li>Date records belonging to specific individuals, with their full names used for grouping.</li>
-<li>Availability time date records for departments, with their department names used for grouping.</li>
-<li>Combined availability time records for all members of a team, with the team name used for grouping.</li>
+<li>From relation: Defines, which record to handle - based on the chosen relation in the field´s <a href="#queries">query</a>.</li>
+<li>Form: The form opened for a record. The form must have the record´s relation (s. 'from relation' above), as its base relation. Whether or not options to create a new or open an existing record are shown, follows the relation settings, defined in the <a href="#queries">query</a> of the data display field.</li>
+<li>Opens as: Whether the form is opened by navigating the browser, as a floating window or within the current data display field as a sub form.</li>
+<li>Establish relationship with new records: Applies a record ID of the current form, to an input field on the opened form. Usually used to create child records, by pre-filling relationship input fields with the record ID of the parent record, currently being edited.</li>
 </ul></li>
+<li>Open form (bulk editing): To update multiple records at once. Basically has the same options as the regular 'open form'. Can only be used to update records - not to view, create or delete them.</li>
 </ul>
-<h3 id="chart-fields">Chart fields</h3>
-<p>Similar to <a href="#list-fields">list fields</a>, chart fields access a defined <a href="#queries">query</a> to receive and then present data. This is achieved by inclusion of the powerful open source visualization library <a href="https://echarts.apache.org/en/index.html">echarts</a>. REI3 ships with the full version of echarts, in theory supporting all available charts (see <a href="https://echarts.apache.org/examples/en/index.html">examples</a>). There are however some implementation details to be aware of:</p>
+<p>Every data display field can use simple or complex <a href="#query-filters">filters</a> to limit the amount of records being shown. Different filter types exist that either completely remove records or can be set by users (filter sets). Setting filters on data display fields only affect the current field. To filter records regardless of where they are being accessed, <a href="#policies">policies</a> can be used.</p>
+<p>Lastly, there are chart fields. These use the powerful open source visualization library <a href="https://echarts.apache.org/en/index.html">echarts</a>. REI3 ships with the full version of echarts, in theory supporting all available charts (see <a href="https://echarts.apache.org/examples/en/index.html">examples</a>). There are however some implementation details to be aware of:</p>
 <ul>
 <li>The Builder does not offer visual configuration of all echart options - there is a huge number of them and they are expanded with new releases. Instead application authors can edit the echarts 'options' object, which gives access to basically all configuration options (see <a href="https://echarts.apache.org/en/option.html#title">echarts documentation</a>).</li>
 <li>For some simple chart types (bar, line, pie, scatter), the Builder offers some UI inputs. For more complicated types (like boxplots, funnel, etc.), the 'options' object can freely be used (see <a href="https://echarts.apache.org/en/option.html#series">series</a>). Legends, styles and many other elements can be configured this way. If the 'options' object is used, the Builder inputs can safely be ignored - they only help to fill the object initially or when using simple charts.</li>
@@ -495,7 +494,7 @@ END IF;</code></pre>
 <li>When using the 'time' axis type, the column display should be set to a time type (either 'date time', 'date' or 'time'); this will cause REI3 to automatically convert time values for echarts to properly display. If the display type is set to 'standard', the unix timestamps are used by echarts (unix timestamps are the native format of time &amp; date storage in REI3, see <a href="#date-and-time-management">date and time management</a>).</li>
 </ul>
 <h3 id="form-states">Form states</h3>
-<p>Form states serve to change the behavior of fields; this is done by applying effects on fields based on form state conditions. Multiple form states can be used and will work in parallel.</p>
+<p>Form states serve to change the behavior of fields and tabs; this is done by applying effects based on form state conditions. Multiple form states can be used and will work in parallel.</p>
 <p>Similar to <a href="#query-filters">query filters</a> having one or many filter lines, form states have conditions. Each condition contains a connector (AND/OR), comparison criteria (field value, user role, etc.), an operator (equals, greater than, etc.) as well as brackets to facility grouped comparisons.</p>
 <p><img src="en_us_builder_pics/form_states.webp" alt="Form states" /></p>
 <p>Many condition criteria are available:</p>
@@ -522,30 +521,32 @@ END IF;</code></pre>
 </ul>
 <p>If multiple states would apply to the same field the last one is used. Form states are executed in order of their description, so numbered prefixes can be used to achieve a desired state execution order.</p>
 <h2 id="queries">Queries</h2>
-<p>To show or manipulate data, REI3 components (like <a href="#forms">forms</a>, <a href="#field-settings">fields</a> or <a href="#apis">APIs</a>) need to know how to access data. This is done by defining data access queries or 'queries' for short. When a form defines a query, it becomes a <a href="#forms">data form</a>; list or calendar fields also require queries to access data. In short, queries control how data is retrieved and (if desired) updated or deleted. Because data is stored in relations, queries access relations to handle attribute values from data records.</p>
-<p>To define a query, you start by selecting a <a href="#relations">relation</a> - this is the 'base relation' or relation index 0. A relation index is a simple number, that uniquely identifies a specific relation within a query. Indexes are needed, because we can connect or 'join' multiple relations if they are linked with <a href="#relationships">relationship attributes</a>; these index numbers indicate, which relation is referenced when we later create input fields or filters. Each joined relation gets its own, unique index number.</p>
+<p>To show or manipulate data, REI3 components (like <a href="#forms">forms</a>, <a href="#data-display-fields">data display fields</a> or <a href="#apis">APIs</a>) need to know how to access data. This is done by defining data access queries or 'queries' for short. Queries control how data is retrieved and (if desired) updated or deleted.</p>
+<p>To define a query, you start by selecting a <a href="#relations">relation</a> - this is the 'base relation' or relation index 0. A relation index is a number, that uniquely identifies a specific relation within a query. Once a base relation is set, we can connect or 'join' multiple relations if they are linked with <a href="#relationships">relationship attributes</a>, with each receiving a unique index number.</p>
 <p><img src="en_us_builder_pics/query.webp" alt="List field query" /></p>
-<p>Because relations can also be in relationships with themselves (self-reference), we cannot use the relation name to uniquely identify a relation. Example: Relation 'employee' has a relationship attribute 'superior' ('an employee has a superior') to connect to itself (the superior is also an employee). In this example, relation index 0 would be 'employee', which is joined to relation 'employee' with relation index 1. When adding input fields, we can then choose to access the employee (relation 0) or its superior (relation 1) and create attribute input fields on our form accordingly.</p>
-<p>When joining relations with each other, there a couple of options to consider.</p>
+<p>Relation index numbers are important, because relationships can be circular (an 'employee' is part of a 'department', which has a leader that is also an 'employee') or can be a self-reference (an 'employee' can substitute another 'employee'). Because of this, the same relation can be joined multiple times, but would contain different records (due to different relationships). With relation indexes, we can reference the correct records when placing input fields or displaying record data.</p>
+<p>When joining relations with each other, there a couple of options:</p>
 <ul>
-<li>Join type (F)ull, (I)nner, (L)eft or (R)ight. These values define, how the join handles its relationship. An inner join, for example, only receives records for a relation, if the relationship partner is valid, while a left join still shows the relation record even with no valid relationship partner. These values directly follow common relational database systems; for more information please lookup 'SQL joins' from external resources.</li>
-<li>Record handling: The following options define how records of specific relations are handled. Relation 0 is the most important one as its record is the base that is opened on forms or accessed on list fields. Joined records from other relations are available as well and are created/updated or deleted based on the defined options below.
+<li>Join type (F)ull, (I)nner, (L)eft or (R)ight. Primarily useful in <a href="#data-display-fields">data display fields</a>. These values define, how the join handles its relationship. An inner join, for example, only receives records for a relation, if the relationship partner is valid, while a left join still shows the relation record even with no valid relationship partner. These settings directly follow common relational database systems; for more information please lookup 'SQL joins' from external resources.</li>
+<li>Record handling: The following options define how records of specific relations are handled. Relation 0 is the most important one as its record is the base that is opened on forms and used as base in <a href="#data-display-fields">data display fields</a>. Joined records from other relations are available as well and are created/updated/deleted based on the defined options below.
 <ul>
-<li>(C)reate: If set, a record can be created by a form or, if set for list fields, an option to open a pre-defined form is offered (see <a href="#list-fields">List fields</a>).</li>
-<li>(U)pdate: It set, a record can be changed by a form. List fields cannot yet do record updates - this will likely come in a future release.</li>
-<li>(D)elete: If set, a record can be deleted by a form or, if set for list fields, an option to delete one or many records is shown.</li>
+<li>(C)reate: If set, a record can be created by a form or, if set for <a href="#data-display-fields">data display fields</a>, new records can be created when a form is defined.</li>
+<li>(U)pdate: It set, a record can be changed by a form or, if set for <a href="#data-display-fields">data display fields</a>, records can be updated when a form is defined. Some data display fields (like Kanban) can also live update record values via drag&amp;drop.</li>
+<li>(D)elete: If set, a record can be deleted by a form or, if set for <a href="#data-display-fields">data display fields</a>, an option to delete records is shown.</li>
 <li>The record handling options directly affect the specified relation. Example: If relation 0 is set to (C)reate and a joined relation 1 is not, only the record for relation 0 can be created and all input fields for relation 1 are presented as 'read only' on the form. The same with (U)pdate and (D)elete: Only records from relations with these enabled can be changed when the base record (relation 0) is updated or deleted.</li>
 </ul></li>
 </ul>
 <p>Queries can be defined for the following entities:</p>
 <ul>
-<li>Forms: What records are handled on this data form. A form can only ever manipulate the record of its base relation (index 0), together with the records of all joined relations.</li>
-<li>List/calendar fields: What records are shown in the list/calendar. Usually a list/calendar is used to display records, which are then opened on a data form to make changes to these records (see <a href="#list-fields">Open record (relation 0)</a>). These fields show all available records from the defined relations within the defined <a href="#query-filters">filter criteria</a>.</li>
-<li>Sub queries: These can be used as <a href="#query-filters">filter criteria</a> or as column values in list/calendar fields. They return a single attribute value that can be used as condition or to display values, like aggregations in list columns.</li>
+<li>Forms: What records are handled on this data form. A form manipulates the record of its base relation (index 0), together with the records of all joined relations.</li>
+<li><a href="#apis">APIs</a>: What data can be retrieved, created, updated or deleted.</li>
+<li><a href="#collection">Collections</a>: What data is available to the collection.</li>
+<li><a href="#data-display-fields">Data display fields</a>: What records are shown. Most often used to display and then open records on a data form to make changes to these records. These fields show all available records from the chosen relations within the defined <a href="#query-filters">filter criteria</a>.</li>
+<li>Sub queries: These can be used as <a href="#query-filters">filter criteria</a> or as column values in fields. They return a single attribute value that can be used as condition or to display values, like aggregations in columns.</li>
 </ul>
-<p>Besides selecting relations, if more than one record is to be handled (lists/calendar fields), sorting can be applied to the results. Sorting is applied to the selected attribute (chosen via relation index + attribute name) in the defined order; when multiple sorting options are defined, results are sorted by the first, then the second and so on.</p>
+<p>Besides selecting relations, if more than one record is to be handled, sorting can be applied to the results. Sorting is applied to the selected attribute in the defined order; when multiple sorting options are defined, results are sorted by the first, then the second and so on.</p>
 <h3 id="query-filters">Query filters</h3>
-<p>Query filters serve to filter <a href="#queries">query</a> results. They are used by frontend components like <a href="#forms">forms</a>, <a href="#list-fields">lists</a>, data fields showing <a href="#relationships">relationship attributes</a>, <a href="#collections">collections</a> and so on.</p>
+<p>Query filters serve to filter <a href="#queries">query</a> results. They are used by frontend components like <a href="#forms">forms</a>, <a href="#data-display-fields">data display fields</a>, data input fields showing <a href="#relationships">relationship attributes</a>, <a href="#collections">collections</a> and so on.</p>
 <p>Filters are made up from filter lines. Each line contains an AND/OR connector (first line is always AND), two filter criteria (to compare them) and a comparison operator (equals, greater than, etc.). Additionally, filter lines can be grouped with left and right brackets to create more complex AND/OR conditions.</p>
 <p>Query filters can be defined in two ways:</p>
 <ul>
@@ -575,7 +576,7 @@ END IF;</code></pre>
 </ul>
 <p>Since the frontend is running on a users device (e. g. browser), its code can be manipulated and query filters overwritten or removed; to limit access to sensitive data to specific individuals, <a href="#policies">relation policies</a> can be used to safely filter data on the backend.</p>
 <h1 id="columns">Columns</h1>
-<p>Columns are used to choose data to be retrieved from a <a href="#queries">query</a> when working with things like <a href="#list-fields">lists</a> or <a href="#collections">collections</a>.</p>
+<p>Columns are used to choose data to be retrieved from a <a href="#queries">query</a> when working with things like <a href="#data-display-fields">data display fields</a>, <a href="#apis">APIs</a> or <a href="#collections">collections</a>.</p>
 <p>There are two types of columns:</p>
 <ul>
 <li>Attribute columns: These are available automatically, based on the selected relations from the <a href="#queries">query</a>. They display the value for the selected attribute for each record.</li>
@@ -587,9 +588,8 @@ END IF;</code></pre>
 <li>Size (pixel): A size in pixel (usually width) that a column attempts to populate. Can be used to limit the size or reserve space for important columns. If text wrapping is disabled, text values are cut off with '...' when they reach the target size or the available space is insufficient (up to a point).</li>
 <li>Length (characters): If set, text values in a column are limited to the specified length. Text values are cut off with '...' when they reach the specified length.</li>
 <li>Text wrap: Text values wrap to a new line when space is insufficient. Can be combined with column size and length settings to control how text is displayed.</li>
-<li>Column batch: In some cases, it is desired to merge two or more columns. Example: A single column showing both fore- &amp; surname for employees. By adding two attribute columns (forename &amp; surname in this example) and using a column batch, a single batch column is created. Column batches use a number to decide which columns are merged. Columns with the same batch number, when placed next to each other, result in a merged batch column. Only the title of the first column in a batch (first column from the left) is used as title for the entire column batch. The same is true for sorting: Only the first column in a batch is sorted by.</li>
 <li>Clipboard: Shows a copy-to-clipboard action inside the column.</li>
-<li>Display: Similar to <a href="#field-settings">field display options</a>. Depending on the attribute type of a column, different display options are available. These serve to specify how to present attribute values.</li>
+<li>Display: Depending on the attribute type of a column, different display options are available. These serve to specify how to present attribute values.</li>
 <li>Data retrieval: Multiple options exist to configure, how column values are being retrieved.
 <ul>
 <li>Distinct: Useful when joining N:1 or N:M relationships or when using sub queries. Filters out duplicate values for the given column attribute.</li>
@@ -597,6 +597,7 @@ END IF;</code></pre>
 <li>Aggregate: Use aggregation functions on the given column attribute. Like with 'Group by' this requires other attribute columns to either be grouped or aggregated as well. Aggregate functions follow well-known SQL standards (sums, counts, etc.) - there is one special case however for REI3: 'single record'. This is basically a 'FIRST' aggregation, taking the first available result from the group or aggregation set. 'Single record' exists to allow REI3 to still make a specific record selectable on the current list even with grouping and aggregations combining and merging results; this can be useful when working with complicated joins, but often can be avoided by using sub queries.</li>
 </ul></li>
 </ul>
+<p>Columns can be 'batched' by dragging&amp;dropping a column over another one. Batched columns merge their record values to show a single column instead of multiple ones.</p>
 <h2 id="help-articles">Help articles</h2>
 <p>Sometimes it becomes necessary to explain concepts, data structures or workflows to application users. Besides titles and small help texts next to input fields, application authors can create help articles that go into more detail. A help article is a piece of richtext that can include descriptions, tables, bullet-point lists, images, external links and so on.</p>
 <p>After creating a help article, you can assign it to different places:</p>
@@ -616,7 +617,7 @@ END IF;</code></pre>
 <li>Form context help: Shown in the help page if the specific form is open. Serves as contextual help for a form.</li>
 <li>Field title: Shown in form over a field. If it is a data field and has no title, it uses the attribute title as fallback.</li>
 <li>Field help text: Shown in form under a field. Additional context help for how to use a data field.</li>
-<li>Column title: Shown in lists. Describes the content of a column. Can fallback to attribute title if not set. If column batches are used (see <a href="#list-fields">List fields</a>), only the title of the first column is used.</li>
+<li>Column title: Shown in <a href="#data-display-fields">data display fields</a>. Describes the content of a column. Can fallback to attribute title if not set. If <a href="#columns">column batches</a> are used, only the title of the first column is used.</li>
 <li>Menu title: Shown in application menu. Can be used as fallback for form titles if these are not set.</li>
 <li>Application help page: Shown in the help page, independent of which form is open.</li>
 </ul>
@@ -712,11 +713,11 @@ END IF;</code></pre>
 <p>Some use cases for collections are:</p>
 <ul>
 <li>As filter criteria in field <a href="#query-filters">query filters</a>: When complex or expensive filter criteria are needed in a list view (for example, using multiple conditions and sub queries) it can be very useful to use a collection instead. Collections are retrieved once, expensive lookups are therefore not repeated on every list view. It also removes the need to repeat complex filters on other but similar views; the same collection can be referenced multiple times.</li>
-<li>As user filter for data fields (<a href="#list-fields">lists</a>, <a href="#calendar-fields">calendars</a>, etc.): Once a collection is defined within a <a href="#query-filters">query filter</a> for a data field, they can be used to offer additional user filter inputs, in which a user can select from existing collection values to filter the current view.</li>
-<li>As default value for <a href="#field-settings">fields</a>: Collections can also be used as default values for input fields, like adding values to a relationship input field based on the logged in user´s team memberships. They can also be used to support user configuration options for default inputs.</li>
+<li>As user filter for data input fields: Once a collection is defined within a <a href="#query-filters">query filter</a> for a data input field, they can be used to offer additional user filter inputs, in which a user can select from existing collection values to filter the current view.</li>
+<li>As default value for <a href="#field-settings">data input fields</a>: Collections can also be used as default values for data input fields, like adding values to a relationship input field based on the logged in user´s team memberships. They can also be used to support user configuration options for default inputs.</li>
 <li>As input to a condition of a <a href="#form-states">form state</a>: Form states control how form fields behave - with collections, application authors can use configurations independent of the current record to show/hide/force field inputs depending on global or user-based settings.</li>
-<li>As a data field, shown in the header menu (top header bar): Any collection value can also be shown in the header menu to serve as a notification for example. Showing values like the number of open requests to be approved, it can also be used to navigate to another form showing data connected to the notification.</li>
-<li>As a data field, shown within a menu entry: Menu entries can reference collection values to show context-relevant data, like counters reflecting the total number of items on a list that the menu entry would show.</li>
+<li>As a notification, shown in the header menu (top header bar): Any collection value can also be shown in the header menu to serve as a notification. Showing values like the number of open requests to be approved, it can also be used to navigate to another form showing data connected to the notification.</li>
+<li>As a notification, shown within a menu entry: Menu entries can reference collection values to show context-relevant data, like counters reflecting the total number of items on a list that the menu entry would show.</li>
 </ul>
 <p>Collections can offer any data from the database, to be used on the frontend, regardless of context. They have downsides however. As they are not regularly updated during a user´s session, their values might be outdated. When manipulating data affecting a collection, the user would need to refresh the page or a function would need to trigger a collection update. Depending on the contents of the collection, this limitation may not be relevant or might be easily addressable by rare, event-driven updates.</p>
 <h1 id="end-to-end-encryption">End-to-end encryption</h1>
@@ -725,12 +726,12 @@ END IF;</code></pre>
 <p>For more information on how end-to-end encryption is implemented in REI3, please take a look at the <a href="https://rei3.de/downloads/docs/REI3_e2ee_concept.pdf">concept document</a>.</p>
 <p>Beware! Because E2EE blocks even the system itself from reading the data, only users that already have access to it may read or re-encrypt the data for others. Neither administrators, nor the REI3 developers can access encrypted data for which privileged users have lost access to.</p>
 <h2 id="how-to-use">How to use</h2>
-<p>Application authors can enable E2EE for a new <a href="#relations">relation</a> within the Builder. With encryption enabled, new <a href="#attributes">attributes</a> of a relation can be set to be encrypted. After that, data will be automatically encrypted for the current login when saved on <a href="#forms">data forms</a> and decrypted when accessed by things like <a href="#list-fields">lists</a>.</p>
+<p>Application authors can enable E2EE for a new <a href="#relations">relation</a> within the Builder. With encryption enabled, new <a href="#attributes">attributes</a> of a relation can be set to be encrypted. After that, data will be automatically encrypted for the current login when saved on <a href="#forms">data forms</a> and decrypted when accessed by things like <a href="#data-display-fields">lists</a>.</p>
 <p>For E2EE to work, users that work with encrypted data need to setup their personal encryption once for their login inside the user settings interface. If they attempt to work with encrypted data without that setup, an error message will be shown.</p>
 <p><img src="en_us_builder_pics/settings_e2ee.webp" alt="E2EE user settings" /></p>
 <p>When a user attempts to read encrypted data that was not encrypted for it, an error message is shown. It is up to the application author to filter records, based on things like record ownership or group membership, to make data accessible to only privileged users.</p>
 <h2 id="encrypt-for-multiple-users">Encrypt for multiple users</h2>
-<p>By default, REI3 encrypts for the current user´s login only. Often sensitive data needs to be shared between individuals or groups however. For this, REI3 can receive a list of user logins to encrypt data for. This is done by calling a specific <a href="#frontend-functions">frontend-function</a> when a list of privileged users is set or updated.</p>
+<p>By default, REI3 encrypts for the current user´s login only. Sometimes sensitive data needs to be shared between individuals or groups however. For this, REI3 can receive a list of user logins to encrypt data for. This is done by calling a specific <a href="#frontend-functions">frontend-function</a> when a list of privileged users is set or updated.</p>
 <p>Example: A record is by default accessible to its creator and should be encrypted as such; this works automatically once the relation and specific attributes are set to be encrypted. The creator can however share access with others by selecting a list of contacts from its organization within a relationship input field. When this field is updated, the frontend function 'app.set_e2ee_by_login_ids(loginIds)' is called with an array of login IDs from the selected contacts. As not every contact is necessarily connected to a login (see <a href="#login-forms">login forms</a>), the relationship input should be filtered to contacts with logins. With login IDs set by the frontend function, REI3 will automatically encrypt the data for all affected logins. If any selected logins do not have encryption enabled, an error message will be shown.</p>
 <h2 id="encrypt-for-groups">Encrypt for groups</h2>
 <p>A bit more work but also supported: Encrypt data for groups instead of specific individuals.</p>
@@ -753,7 +754,7 @@ END IF;</code></pre>
 <p>Once your application has a parent, you can access the following components:</p>
 <ul>
 <li>Data (<a href="#relations">relations</a> &amp; <a href="#attributes">attributes</a>): Access to parent relations in relationships within the child application; effectively extending these directly (with 1:1 relationships) or creating new data structures attached to the parent relations. Parent relations &amp; attributes can also be accessed in <a href="#queries">queries</a>, enabling access to these as if they were part of the child application.</li>
-<li><a href="#forms">Forms</a>: Access to forms from the parent application as targets in <a href="#list-fields">lists</a>, <a href="#field-settings">buttons</a> or within <a href="#menus">menus</a>. This allows for re-use of existing user interfaces.</li>
+<li><a href="#forms">Forms</a>: Access to forms from the parent application as targets in <a href="#data-display-fields">data display fields</a>, <a href="#field-settings">buttons</a> or within <a href="#menus">menus</a>. This allows for re-use of existing user interfaces.</li>
 <li><a href="#menus">Menus</a>: Access to menus from the parent application. It is also possible to copy an entire menu structure of an application to quickly recreate the parent, while making desired changes to specific menu entries.</li>
 <li><a href="#functions">Functions</a>: Parent functions (backend &amp; frontend) can be accessed directly, while access to entities from within functions in the child application is also enabled. To keep applications upgrade safe, always use the provided placeholders when referencing entities in functions. This will not protect against deletions (see below) but will keep your application running when entities are renamed.</li>
 </ul>
@@ -798,10 +799,10 @@ END IF;</code></pre>
 <p>While it is true that all applications are usable on mobile devices, some adaptations should be considered to improve usability. It is for example possible to use the same large, full page lists on mobile as on a desktop - they will work the same and will look good enough. However, it is much easier to deal with list views on mobile devices, if they do not scroll in multiple directions. The same is true for complex forms. REI3 will size and scroll on smaller devices, but adapting forms will often result in a better user experience.</p>
 <p>Multiple options exist to adapt applications for smaller screens:</p>
 <ul>
-<li><a href="#list-fields">Lists</a> and <a href="#calendar-fields">calendars</a> have a 'mobile device' toggle for each column. If toggled off, these columns are not shown if the screen size is too small. In most cases it is easier for mobile device users to see less on a list/calendar and click on a specific record to get details than to scroll a large view.</li>
+<li>Data fields (relationship inputs, lists, calendars, Gantts, etc.) have a 'mobile device' toggle for each column. If toggled off, these columns are not shown if the screen size is too small. In most cases it is easier for mobile device users to see less data and click on a specific record to get details than to scroll a large view.</li>
 <li><a href="#form-layouts">Forms</a> offer hiding of specific fields/containers for mobile devices. While it is not useful to hide important input fields, on some forms, related data is shown because there is more screen space available; these fields can be hidden on mobile devices to make form handling easier.</li>
 </ul>
-<p>To simulate mobile devices, resizing the browser window is sufficient - REI3 will switch to mobile view when the screen space reaches a specific threshold. With small adjustments, existing forms/list views can be adjusted for better usability on mobile devices without sacrificing functionality. Even if applications are not meant to be used on these devices, it is always welcome when no other device is available und the application just works.</p>
+<p>To simulate mobile devices, resizing the browser window is sufficient - REI3 will switch to mobile view when the screen space reaches a threshold. With small adjustments, existing forms/list views can be adjusted for better usability on mobile devices without sacrificing functionality. Even if applications are not meant to be used on these devices, it is always welcome when no other device is available und the application just works.</p>
 <h1 id="working-with-emails">Working with emails</h1>
 <p>REI3 can retrieve emails from IMAP mailboxes and send emails with SMTP. Mail functions are executed by a central mail spooler, included in every REI3 instance. This spooler periodically fetches and sends emails with defined mail accounts.</p>
 <p>To enable mailing features for different applications within the same instance, unique mail account names can be chosen by administrators. These account names can then be used in <a href="#backend-functions">backend functions</a> to process messages coming in from (or be send with) defined mail accounts. By adding corresponding options in their applications, authors can let administrators choose the appropriate mail account.</p>
@@ -858,3 +859,5 @@ END IF;</code></pre>
 <li>Using invalid operators, like comparing strings with 'larger than'.</li>
 <li>Having logic errors in <a href="#functions">functions</a>. Besides offering placeholders for upgrade safe access to existing entities, the Builder will deliver an error if the function has invalid syntax. Logic errors however will not be caught. Please test your functions thoroughly.</li>
 </ul>
+<h2 id="data-display-fields-not-showing-expected-records">Data display fields not showing expected records</h2>
+<p>When designing complex data display fields with many joins, sub queries, groupings, filters and so on, logic errors or badly chosen configuration options can result in non-desirable data sets. To troubleshoot this, a SQL-preview function is available on the data display field when inside the Builder. This returns the raw SQL that is being used to retrieve the current list data. With this preview, you can directly see how the chosen options affect the final SQL query.</p>
