@@ -6,7 +6,7 @@
 	--z-index-dialog-wrap:100;         /* dialog wrap */
 	--z-index-header-entry:60;
 	--z-index-header:50;               /* header, main menu, top of the page */
-	--z-index-inline-pop-up-form:40;
+	--z-index-form-pop-up:40;
 	
 	/* form dropdowns */
 	--z-index-dropdown:20;

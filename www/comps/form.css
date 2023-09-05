@@ -5,6 +5,9 @@
 	overflow:visible;
 	z-index:var(--z-index-form);
 }
+.form-wrap.popUp{
+	z-index:var(--z-index-form-pop-up);
+}
 .form-wrap.popUp.float{
 	width:100%;
 	padding:var(--spacing);

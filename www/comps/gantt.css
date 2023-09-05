@@ -53,7 +53,6 @@
 .gantt-content .form-wrap.popUp{
 	flex:1 1 auto;
 	width:100%;
-	z-index:var(--z-index-inline-pop-up-form);
 }
 .gantt-lines{
 	flex:1 1 auto;

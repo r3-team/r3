@@ -45,7 +45,6 @@
 .list .layoutWrap .form-wrap.popUp{
 	flex:1 1 auto;
 	width:100%;
-	z-index:var(--z-index-inline-pop-up-form);
 }
 .list .layoutWrap .empty-space{
 	flex:1 1 auto;
