@@ -205,10 +205,12 @@ let MyKanban = {
 		<!-- header -->
 		<div class="top lower">
 			<div class="area nowrap">
-				<my-button
-					@trigger="showCaptions = !showCaptions"
-					:caption="capGen.label"
-					:image="showCaptions ? 'visible1.png' : 'visible0.png'"
+				<my-button image="new.png"
+					v-if="hasCreate"
+					@trigger="$emit('open-form',[],false)"
+					@trigger-middle="$emit('open-form',[],true)"
+					:caption="capGen.button.new"
+					:captionTitle="capGen.button.newHint"
 				/>
 			</div>
 			<div class="area nowrap">
@@ -235,7 +237,7 @@ let MyKanban = {
 					:caption="capGen.refresh"
 					:naked="true"
 				/>
-				<input
+				<input class="short"
 					v-model="searchInput"
 					@keyup.enter="search = searchInput"
 					:placeholder="capGen.threeDots"
@@ -258,6 +260,11 @@ let MyKanban = {
 						{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
 					</option>
 				</select>
+				<my-button
+					@trigger="showCaptions = !showCaptions"
+					:caption="capGen.label"
+					:image="showCaptions ? 'visible1.png' : 'visible0.png'"
+				/>
 			</div>
 		</div>
 		
