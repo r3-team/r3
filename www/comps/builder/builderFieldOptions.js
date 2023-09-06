@@ -577,7 +577,7 @@ let MyBuilderFieldOptions = {
 							<option :value="getIndexAttributeId(null,null,false,null)">-</option>
 							<optgroup
 								v-for="j in field.query.joins"
-								:label="j.index+') '+relationIdMap[j.relationId].name"
+								:label="j.index+' '+relationIdMap[j.relationId].name"
 							>
 								<option
 									v-for="a in relationIdMap[j.relationId].attributes.filter(v => isAttributeInteger(v.content))"
@@ -599,7 +599,7 @@ let MyBuilderFieldOptions = {
 							<option :value="getIndexAttributeId(null,null,false,null)">-</option>
 							<optgroup
 								v-for="j in field.query.joins"
-								:label="j.index+') '+relationIdMap[j.relationId].name"
+								:label="j.index+' '+relationIdMap[j.relationId].name"
 							>
 								<option
 									v-for="a in relationIdMap[j.relationId].attributes.filter(v => isAttributeInteger(v.content))"
@@ -621,7 +621,7 @@ let MyBuilderFieldOptions = {
 							<option :value="getIndexAttributeId(null,null,false,null)">-</option>
 							<optgroup
 								v-for="j in field.query.joins"
-								:label="j.index+') '+relationIdMap[j.relationId].name"
+								:label="j.index+' '+relationIdMap[j.relationId].name"
 							>
 								<option
 									v-for="a in relationIdMap[j.relationId].attributes.filter(v => isAttributeString(v.content))"
@@ -994,7 +994,7 @@ let MyBuilderFieldOptions = {
 								<option
 									v-for="j in field.query.joins"
 									:value="j.index"
-								>{{ j.index+') '+relationIdMap[j.relationId].name }}</option>
+								>{{ j.index+' '+relationIdMap[j.relationId].name }}</option>
 							</select>
 							<my-button image="question.png"
 								@trigger="showHelp(capApp.kanban.relationIndexDataHelp)"
@@ -1014,7 +1014,7 @@ let MyBuilderFieldOptions = {
 								<option
 									v-for="j in joinsKanbanAxis.filter(v => v.index !== field.relationIndexAxisY)"
 									:value="j.index"
-								>{{ j.index+') '+relationIdMap[j.relationId].name }}</option>
+								>{{ j.index+' '+relationIdMap[j.relationId].name }}</option>
 							</select>
 							<my-button image="question.png"
 								@trigger="showHelp(capApp.kanban.relationIndexAxisXHelp)"
@@ -1034,7 +1034,7 @@ let MyBuilderFieldOptions = {
 								<option
 									v-for="j in joinsKanbanAxis.filter(v => v.index !== field.relationIndexAxisX)"
 									:value="j.index"
-								>{{ j.index+') '+relationIdMap[j.relationId].name }}</option>
+								>{{ j.index+' '+relationIdMap[j.relationId].name }}</option>
 							</select>
 							<my-button image="question.png"
 								@trigger="showHelp(capApp.kanban.relationIndexAxisYHelp)"
@@ -1052,7 +1052,7 @@ let MyBuilderFieldOptions = {
 							>
 								<option value="">-</option>
 								<optgroup v-for="j in field.query.joins.filter(v => v.index === field.relationIndexData)"
-									:label="j.index+') '+relationIdMap[j.relationId].name"
+									:label="j.index+' '+relationIdMap[j.relationId].name"
 								>
 									<option
 										v-for="a in relationIdMap[j.relationId].attributes.filter(v => isAttributeInteger(v.content) && v.name !== 'id')"
