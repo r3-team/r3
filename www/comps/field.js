@@ -952,8 +952,14 @@ let MyField = {
 			
 			// check join of field attribute
 			let join = s.joinsIndexMap[s.field.index];
-			if(join.recordNoSet)    return false;            // SET denied on join due to relation policy
-			if(join.recordId !== 0) return join.applyUpdate; // SET dependent on join allowing record update
+			
+			// SET denied on join due to relation policy
+			if(join.recordNoSet)
+				return false;
+			
+			// SET dependent on join allowing record update
+			if(join.recordId !== 0 || s.isBulkUpdate)
+				return join.applyUpdate;
 			
 			// field attribute relation has no record ID
 			// collect relationship chain until source relation
