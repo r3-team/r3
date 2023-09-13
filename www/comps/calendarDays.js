@@ -415,12 +415,15 @@ let MyCalendarDays = {
 		
 		// presentation
 		dateInputActive(unix,dayInput) {
-			return ( // either hour is selected as new input
+			return ( // hour is selected as new input
 				this.unixInputActive && dayInput === this.unixInputDay &&
-				unix >= this.unixInput0 && unix <= this.unixInput1)
-			|| ( // or hour is part of current date selection
+				unix >= this.unixInput0 && unix <= this.unixInput1
+			) || ( // hour is part of date range selection
 				!this.unixInputActive &&
 				unix >= this.unixSelect0 && unix < this.unixSelect1
+			) || ( // hour represents single date selection
+				this.isInput && !this.isRange &&
+				unix === this.unixSelect0
 			);
 		},
 		
