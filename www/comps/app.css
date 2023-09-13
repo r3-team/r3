@@ -157,7 +157,7 @@ body                                         { --depth:6; }
 .field                                       { --depth:0; }
 .field .caption                              { --depth:3; }
 .field .disabled                             { --depth:6; }
-.field .tabs-entries                         { --depth:6; }
+.field .tabs-entries                         { --depth:4; }
 .field .tabs-entry.active                    { --depth:2; }
 .field .tabs-entry.active.showsCal           { --depth:4; }
 .field .tabs-entry.active.showsChart         { --depth:4; }

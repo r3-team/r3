@@ -315,6 +315,7 @@
 .field .tabs-entry{
 	line-height:40px;
 	padding:0px 9px;
+	margin-left:-1px;
 	border:1px solid var(--color-border);
 	border-bottom:none;
 	border-radius:5px 5px 0px 0px;

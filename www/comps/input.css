@@ -381,7 +381,7 @@
 .input-date .calendar-days .labels span{
 	padding:0px 3px;
 	font-size:80%;
-	line-height:unset;
+	line-height:100%;
 }
 .input-date .calendar-days .header{
 	font-size:90%;

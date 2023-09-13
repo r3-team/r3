@@ -82,7 +82,7 @@ let MyAdminFiles = {
 						</tr>
 						<tr v-if="attributeIdsShowDeleted.includes(atrId)" v-for="f in files">
 							<td class="minimum">
-								<div class="row">
+								<div class="row gap">
 									<my-button image="time.png"
 										@trigger="restore(atrId,f.id,f.recordId)"
 										:caption="capGen.button.restore"

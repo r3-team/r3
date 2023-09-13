@@ -215,7 +215,7 @@ let MyBuilderPgFunction = {
 			<div class="content padding default-inputs">
 				
 				<template v-if="tabTarget === 'content'">
-					<div class="row">
+					<div class="row gap">
 						<my-button
 							v-if="isTrigger"
 							@trigger="addNew = !addNew"
