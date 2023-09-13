@@ -1,5 +1,5 @@
 package cache
 
 func GetCaptionLanguageCodes() []string {
-	return []string{"en_us", "de_de", "it_it", "ro_ro"}
+	return []string{"en_us", "de_de", "hu_hu", "it_it", "ro_ro"}
 }

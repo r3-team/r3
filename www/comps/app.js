@@ -639,7 +639,7 @@ let MyApp = {
 		captionsReload() {
 			return new Promise((resolve,reject) => {
 				// force valid system captions
-				let lang = ['de_de','en_us','it_it','ro_ro'].includes(this.settings.languageCode)
+				let lang = ['de_de','en_us','hu_hu','it_it','ro_ro'].includes(this.settings.languageCode)
 					? this.settings.languageCode : 'en_us';
 				
 				fetch(`./langs/${R3.appBuild}/${lang}`).then(
