@@ -44,10 +44,14 @@
 			"selectAllShort":"Mind",
 			"send":"Küldés",
 			"show":"Megjelenítés",
-			"unlock":"Feloldás"
+			"unlock":"Feloldás",
+			"zoomReset":"Zoom szint visszaállítása"
 		},
 		"dialog":{
 			"confirm":"Kérem, erősítse meg"
+		},
+		"error":{
+			"nameTaken":"Name is already taken, please choose another."
 		},
 		"option":{
 			"aggArray":"Tömb",
@@ -88,6 +92,7 @@
 		"details":"Részletek",
 		"displayed":"Megjelenített",
 		"errorTitle":"Hiba",
+		"everything":"Everything",
 		"files":"Fájlok",
 		"filters":"Szűrők",
 		"form":"Űrlap",
@@ -106,6 +111,7 @@
 		"inputTooFewFiles":"Túl kevés fájl",
 		"inputTooManyFiles":"Túl sok fájl",
 		"interval":"Intervallum",
+		"label":"Label",
 		"licenseRequired":"Licenc szükséges",
 		"limit":"Korlát",
 		"menu":"Menü",
@@ -133,10 +139,12 @@
 		"size":"Méret",
 		"standard":"Szabvány",
 		"status":"Állapot",
+		"textSearch":"Szövegkeresés",
 		"threeDots":"...",
 		"title":"Cím",
 		"token":"Token",
 		"type":"Típus",
+		"unassigned":"Unassigned",
 		"username":"Felhasználónév",
 		"version":"Verzió",
 		"warnings":"Figyelmeztetések"
@@ -405,7 +413,6 @@
 				"transfer":"Átvitel",
 				"websocket":"Websocket kliensek"
 			},
-			"byString":"Szövegkeresés",
 			"context":"Kontextus",
 			"date":"Időbélyeg",
 			"keepDays":"Naplók megőrzése (napokban)",
@@ -452,13 +459,15 @@
 			"dirIn":"BE",
 			"dirOut":"KI",
 			"files":"Csatolmányok",
-			"noMails":"Az e-mail várólista üres.",
+			"noMailsInSpool":"Az e-mail várólista üres.",
+			"noMailsInTraffic":"No recorded email traffic.",
 			"toList":"Címzettek",
 			"subject":"Tárgy",
 			"testAccount":"Fiók kiválasztása",
 			"testOk":"A teszt e-mail sikeresen hozzá lett adva a várólistához.",
 			"testRecipient":"Címzett e-mail címe",
-			"testSubject":"Tárgy"
+			"testSubject":"Tárgy",
+			"trafficKeepDays": "Keep data (in days)"
 		},
 		"modules":{
 			"button":{
@@ -498,7 +507,6 @@
 				"showInstalled":"Telepített alkalmazások megjelenítése"
 			},
 			"author":"tőle: {NAME}",
-			"byString":"Szövegkeresés",
 			"fetchDone":"Az alkalmazás sikeresen telepítve lett.<br /><br />Az eléréshez szerepeket kell hozzárendelni.",
 			"maintenanceBlock":"Telepítés csak karbantartási módban engedélyezett",
 			"notCompatible":"Platform frissítés szükséges",
@@ -524,9 +532,11 @@
 				"cleanupDataLogs":"Lejárt változásnaplók tisztítása",
 				"cleanupFiles":"Lejárt fájlfeltöltések tisztítása",
 				"cleanupLogs":"Lejárt rendszer naplók tisztítása",
+				"cleanupMailTraffic":"Cleanup expired email traffic entries",
 				"cleanupTempDir":"Ideiglenes könyvtár tisztítása",
 				"clusterCheckIn":"Klaszter csomópont regisztráció",
 				"clusterProcessEvents":"Klaszter események feldolgozása",
+				"dbOptimize":"Database optimization",
 				"httpCertRenew":"SSL tanúsítvány újratöltése, ha megújították",
 				"importLdapLogins":"Bejelentkezések és szerepek LDAP importálása",
 				"mailAttach":"E-mail mellékletek átvitele",
@@ -567,7 +577,8 @@
 		"navigationLoginTemplates":"Bejelentkezési Sablonok",
 		"navigationLogs":"Naplók",
 		"navigationMailAccounts":"E-mail Fiókok",
-		"navigationMails":"E-mail Várólista",
+		"navigationMailSpooler":"E-mail Várólista",
+		"navigationMailTraffic": "Email traffic",
 		"navigationModules":"Alkalmazások",
 		"navigationRepo":"Repository",
 		"navigationRoles":"Szerepek",
@@ -790,6 +801,18 @@
 				"eventBefore":"Esemény előtt",
 				"jsFunctionId":"Előtéri funkció végrehajtása"
 			},
+			"kanban":{
+				"attributeIdSort":"Card sort attribute (optional)",
+				"attributeIdSortHelp":"If used, this attribute value will be updated for the Kanban card record according to the position of the card within the Kanban column. This enables users to keep card orders inside Kanbans.<br /><br />To make use of this feature, the field content should be sorted by this attribute in ascending order; it is valid to first order by a Kanban column/row value and then by the card sort attribute.<br /><br />If the same records are accessed in multiple Kanbans with other columns/rows, a different sort attribute is required - otherwise card sorting will be incorrect as its context-dependent on the Kanban layout.",
+				"columnBatchX":"Kanban column (relation: '{REL}')",
+				"columnBatchY":"Kanban row (relation: '{REL}')",
+				"relationIndexData":"Kanban cards",
+				"relationIndexDataHelp":"Relation from which every available record is displayed as a Kanban card. The card can show values from other, joined relations - but for the card itself, there must be a record from the chosen relation.<br /><br />Within the field data selection, values from column batches (not assigned to Kanban column/row) are displayed on the Kanban card.",
+				"relationIndexAxisX":"Kanban columns",
+				"relationIndexAxisXHelp":"Relation from which every available record is used as a Kanban column. This relation needs to be joined n:1 to the Kanban cards relation.<br /><br />By moving cards between Kanban columns, the relationship value is being updated.<br /><br />Within the field data selection, values from the first batched column are used as Kanban column labels.",
+				"relationIndexAxisY":"Kanban rows (optional)",
+				"relationIndexAxisYHelp":"Relation from which every available record is used as a Kanban row. If used, the Kanban becomes two-dimensional (columns & rows). This relation needs to be joined n:1 to the Kanban cards relation.<br /><br />By moving cards between Kanban rows, the relationship value is being updated.<br /><br />Within the field data selection, values from the second batched column are used as Kanban row labels."
+			},
 			"option":{
 				"display":{
 					"color":"Szín",
@@ -851,8 +874,7 @@
 			"columnStyles":"Stílus",
 			"columnTitle":"Cím",
 			"columnWrap":"Sor tördelés",
-			"copy":"Űrlap másolása",
-			"copyNewName":"Új űrlap neve",
+			"containerContent":"Container content",
 			"csvExport":"CSV Exportálás",
 			"csvImport":"CSV Importálás",
 			"date0":"Dátumtól",
@@ -861,6 +883,8 @@
 			"dateRange0":"Események előtti napok",
 			"dateRange1":"Események utáni napok",
 			"dateRangeHint":"aktuális dátumhoz képest",
+			"days":"Default view",
+			"daysToggle":"User can change view",
 			"display":"Megjelenítés",
 			"distincted":"Különböztetve",
 			"dragDrop":"Jobb oldali kiválasztott mezőket ide húzva hozzáadhatod az űrlaphoz.",
@@ -875,6 +899,7 @@
 			"fieldDirection":"Irány",
 			"fieldHelp":"Súgószöveg",
 			"fieldIcon":"Mező ikon",
+			"fieldIdFocus":"Set field focus on load",
 			"fieldMax":"Max. érték/Hossz",
 			"fieldMin":"Min. érték/Hossz",
 			"fieldMoveSource":"Ezt a mezőt mozgatni",
@@ -890,8 +915,11 @@
 			"filterExpert":"Szakértő szűrő",
 			"filterQuick":"Gyors szűrő",
 			"flexAlignContent":"Tartalom igazítása",
+			"flexAlignContentHint":"Place lines within cross axis (if container can wrap & content has multiple lines)",
 			"flexAlignItems":"Elemek igazítása",
+			"flexAlignItemsHint":"Place container content on the cross axis",
 			"flexJustifyContent":"Tartalom igazítása",
+			"flexJustifyContentHint": "Place container content on the main axis",
 			"flexSizeGrow":"Növekedési mérték",
 			"flexSizeMax":"Nő maximumig (százalék)",
 			"flexSizeMin":"Csökken minimumig (százalék)",
@@ -904,6 +932,7 @@
 			"ganttSteps":"Gantt-intervallum",
 			"ganttStepsToggle":"Gantt-intervallum választás",
 			"groupBy":"Csoportosítás",
+			"headerRichtext":"Richtext",
 			"headerSize":"Fej méret",
 			"helpText":"Segítség szöveg",
 			"hidden":"Mező alapértelmezetten rejtett",
@@ -959,6 +988,10 @@
 				"block_inputs":"app.block_inputs(true/false) => UNDEFINED<br /><br />Az összes bemenetet letiltja vagy engedélyezi az aktuális űrlapon.",
 				"collection_update":"app.collection_update(collection_id) => UNDEFINED<br /><br />Frissíti az adott gyűjtemény értékeit.",
 				"copy_to_clipboard":"app.copy_to_clipboard(text) => UNDEFINED<br /><br />Másolja a szöveget a felhasználó vágólapjára.",
+				"form_close":"app.form_close() => UNDEFINED<br /><br />Closes the form (if floating or sub form), otherwise goes back in browser history.",
+				"form_open":"app.form_open(form_id, record_id, new_tab, pop_up, max_height, max_width) => UNDEFINED<br /><br />Űrlap megnyitása közvetlenül, új böngészőfülön vagy felugró ablakban.",
+				"form_set_title":"app.form_set_title(title) => UNDEFINED<br /><br />Overwrites the current form title. Set to <i>null</i> to reset it to the original form title.",
+				"form_show_message":"app.form_show_message(message,duration_in_ms) => UNDEFINED<br /><br />Az űrlap címét egy meghatározott üzenettel helyettesíti rövid időre. A második argumentum meghatározza, hány milliomodpercen keresztül jelenjen meg az üzenet.",
 				"get_e2ee_data_key":"app.get_e2ee_data_key(dataKeyEncrypted) => STRING<br /><br />A mellékelt adatkulcsot a jelenlegi bejelentkezés privát kulcsával visszafejti.",
 				"get_e2ee_data_value":"app.get_e2ee_data_value(dataKey, valueEncrypted) => STRING<br /><br />A mellékelt adatkulcs segítségével visszafejti az adatértéket.",
 				"get_language_code":"app.get_language_code() => STRING<br /><br />Visszaadja a jelenlegi bejelentkezés 5 karakteres nyelvi kódját ('en_us', ...).",
@@ -968,7 +1001,6 @@
 				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Visszaadja az összes hozzárendelt szerepkör azonosítóját a jelenlegi bejelentkezéshez (örökölt szerepek is benne vannak).",
 				"go_back":"app.go_back() => UNDEFINED<br /><br />Visszalépés a böngészőben.",
 				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />Visszaadja, hogy a megadott szerepkör hozzá van-e rendelve a jelenlegi bejelentkezéshez (örökölt szerepek is figyelembe vannak véve).",
-				"open_form":"app.open_form(form_id, record_id, new_tab, pop_up, max_height, max_width) => UNDEFINED<br /><br />Űrlap megnyitása közvetlenül, új böngészőfülön vagy felugró ablakban.",
 				"pdf_create":"app.pdf_create(filename, pageFormat, pageOrientation, pageMarginX, pageMarginY, htmlHeader, htmlBody, htmlFooter, cssStyles) => UNDEFINED<br /><br />PDF-fájl létrehozása HTML sablonok és CSS szabályok felhasználásával. Paraméterek:<ul><li>filename: Bármilyen fájlnév .pdf kiterjesztéssel</li><li>pageFormat: Oldal formátuma, például: 'a4', 'letter', 'legal'</li><li>pageOrientation: 'portrait' vagy 'landscape'</li><li>pageMarginX: Bal/jobb margó pixelben</li><li>pageMarginY: Felső/alsó margó pixelben</li><li>htmlHeader: HTML sablon a fejléc minden oldalához</li><li>htmlBody: HTML sablon a dokumentum kitöltéséhez</li><li>htmlFooter: HTML sablon a lábléc minden oldalához</li><li>cssStyles: CSS szabályok az HTML sablonokhoz</li></ul>",
 				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Az aktuális űrlap rekordjának törlése.",
 				"record_new":"app.record_new() => UNDEFINED<br /><br />Új rekord létrehozása.",
@@ -976,22 +1008,22 @@
 				"record_save":"app.record_save() => UNDEFINED<br /><br />Az aktuális űrlap rekordjának mentése.",
 				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />Ha meghívják, a következő mentéskor frissíti az end-to-end titkosítást. A űrlapon engedélyezett titkosítással rendelkező kapcsolatokhoz tartozó adatkulcsokat minden meghatározott bejelentkezés nyilvános kulcsával titkosítja. Ez lehetővé teszi a felhasználók számára, hogy később dekódolják az adatokat.<br /><br />Ha ezt a függvényt nem hívják meg, csak a létrehozó tudja dekódolni az adatokat.",
 				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids, relation_id, record_ids) => UNDEFINED<br /><br />Ha meghívják, a következő mentéskor frissíti az end-to-end titkosítást a meghatározott kapcsolat és rekordok számára. Az adatkapcsolat rekordjait minden meghatározott bejelentkezés nyilvános kulcsával titkosítja. Ez lehetővé teszi a felhasználók számára, hogy később dekódolják az adatokat.",
-				"show_form_message":"app.show_form_message(message, duration_in_ms) => UNDEFINED<br /><br />Az űrlap címét egy meghatározott üzenettel helyettesíti rövid időre. A második argumentum meghatározza, hány milliomodpercen keresztül jelenjen meg az üzenet.",
 				"timer_clear":"app.timer_clear(name) => UNDEFINED<br /><br />Egy meghatározott névvel rendelkező időzítőt töröl, amelyet korábban az \"app.timer_set()\" segítségével hoztak létre.",
-					"timer_set":"app.timer_set(name, isInterval, function, milliseconds) => UNDEFINED<br /><br />Egy funkciót meghatározott időintervallumon belül futtat. Ha az \"isInterval\" igazra van állítva, a funkció ismétlődően fut. Minden időzítő mindig az aktuális űrlaphoz van kötve. Ha az űrlapot visszaállítják vagy elhagyják, az időzítők is visszaállnak. Minden időzítőnek egyedi nevet kell adni, amelyet később az \"app.timer_clear()\" segítségével lehet megszüntetni; az azonos névvel rendelkező időzítők felülírják egymást.",
+				"timer_set":"app.timer_set(name, isInterval, function, milliseconds) => UNDEFINED<br /><br />Egy funkciót meghatározott időintervallumon belül futtat. Ha az \"isInterval\" igazra van állítva, a funkció ismétlődően fut. Minden időzítő mindig az aktuális űrlaphoz van kötve. Ha az űrlapot visszaállítják vagy elhagyják, az időzítők is visszaállnak. Minden időzítőnek egyedi nevet kell adni, amelyet később az \"app.timer_clear()\" segítségével lehet megszüntetni; az azonos névvel rendelkező időzítők felülírják egymást.",
 				"value_store_get":"app.value_store_get(key) => VALUE_ANY_TYPE<br /><br />Visszaad egy értéket, amelyet korábban egy választott kulccsal tároltak.",
 				"value_store_set":"app.value_store_set(key, value) => UNDEFINED<br /><br />Egy érték tárolása későbbi felhasználásra. Az értékek hivatkozási kulcsokkal vannak tárolva (bármilyen név), és csak ugyanazon alkalmazásban használhatók. Az érték tároló munkamenet alapú; az értékek nem érhetők el más eszközökön vagy az oldal újratöltése után."
 			},
 			"helpJsHint":{
 				"copy_to_clipboard":"VALUE",
+				"form_open":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
+				"form_set_title": "TITLE_STRING",
+				"form_show_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
 				"get_e2ee_data_key":"DATA_KEY_ENCRYPTED",
 				"get_e2ee_data_value":"DATA_KEY, VALUE_ENCRYPTED",
 				"get_preset_record_id":"PRESET_ID",
 				"get_record_id":"RELATION_INDEX_NUMBER",
 				"has_role":"ROLE_ID_STRING",
-				"open_form":"FORM_ID_STRING, RECORD_ID_NUMBER, NEW_TAB_BOOL, POP_UP_BOOL, MAX_HEIGHT_NUMBER, MAX_WIDTH_NUMBER",
 				"pdf_create":"FILE_NAME, PAGE_FORMAT, PAGE_ORIENTATION, PAGE_MARGIN_X, PAGE_MARGIN_Y, HTML_HEADER, HTML_BODY, HTML_FOOTER, CSS_STYLES",
-				"show_form_message":"MESSAGE_STRING, DURATION_IN_MILLISECONDS",
 				"timer_clear":"TIMER_NAME",
 				"timer_set":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS",
 				"value_store_get":"KEY",
@@ -1026,6 +1058,7 @@
 				"fieldGetValue":"Érték olvasása",
 				"fieldSetCaption":"Címke beállítása",
 				"fieldSetError":"Hibaüzenet beállítása",
+				"fieldSetFocus":"jump to field input",
 				"fieldSetValue":"Érték beállítása",
 				"intervalDays":"Napok",
 				"intervalHours":"Órák",
@@ -1184,6 +1217,7 @@
 			"api":"Új API",
 			"collection":"Új gyűjtemény",
 			"form":"Új űrlap",
+			"formIdDuplicate":"Copy form",
 			"jsFunction":"Új frontend funkció",
 			"jsFunctionFormId":"Hozzárendelt űrlaphoz",
 			"jsFunctionFormIdHint":"A hozzárendelt funkciók interakcióba léphetnek egy űrlappal, például olvashatják vagy írhatják az űrlapmezőket. Ha hozzárendelve, a funkciókat csak a kiválasztott űrlapon lehet kiválasztani, és más frontend funkciókban nem hívhatók meg. Ezt a beállítást később nem lehet megváltoztatni.",
@@ -1209,8 +1243,10 @@
 			"maxHeight":"Maximális magasság (px)",
 			"maxWidth":"Maximális szélesség (px)",
 			"newRecord":"Új rekord létrehozásakor",
+			"newRecordHelp":"When creating a new record with this field, a record ID of the current form can be used as default value for a field on the opened form. This is often used to establish a parent-child relationship.<br /><br />Example: The current form manages a department. A list field on this form shows employees of this department. It is desired that from the list field, new employees for the department can be created. To make this convenient, the department record (from the current form) can be applied as input for a relationship input field on the employee form (the opened form). For this example, the input field on the opened form would be a 'employee.department' 1:n relationship attribute.",
 			"popUpType":"Megnyitás mint",
-			"relationIndex":"Kapcsolat a rekorddal az összefüggésben"
+			"relationIndexApply":"Record on current form",
+			"relationIndexOpen":"From relation"
 		},
 		"pgIndex":{
 			"description":{
@@ -1384,9 +1420,7 @@
 			"titleRoles":"Szerepek előkészítése",
 			"titleRolesHint":"Beállítani, hogy ki mit láthat és tehet meg.",
 			"titleRelations":"Relációk definiálása",
-			"titleRelationsHint":"Adatok tárolása és kapcsolódása.",
-			"titleTriggers":"Triggerek konfigurálása",
-			"titleTriggersHint":"Eseményekre adott válaszok beállítása."
+			"titleRelationsHint":"Adatok tárolása és kapcsolódása."
 		},
 		"backHint":"Vissza az alkalmazás áttekintőhöz",
 		"language":"Fordítás",
@@ -1425,9 +1459,17 @@
 			"icsPublish":"Személyes használatra közzétesz",
 			"ganttToggleHint":"Váltás Óra- és Napnézet között",
 			"ganttShowLabels":"Csoportok",
-			"ganttShowLabelsHint":"Csoportok megjelenítése/elrejtése",
-			"zoomResetHint":"Zoom szint visszaállítása"
+			"ganttShowLabelsHint":"Csoportok megjelenítése/elrejtése"
 		},
+		"option": {
+			"calendarWeek":"CW",
+			"days1":"1 day",
+			"days3":"3 days",
+			"days42":"Month",
+			"days5":"Mo-Fr",
+			"days7":"Week"
+		},
+		"fullDay":"Full day",
 		"icsDesc":"Ezt az URL-t használja a naptár feliratkozásához (iCalendar, ICS formátum).",
 		"icsTokenNameHint":"Eszköz név (opcionális)",
 		"month0":"Január",
@@ -1487,7 +1529,8 @@
 			"003":"Ez a bejelentkezési név már használatban van.",
 			"004":"A rekordot nem lehet törölni - még hivatkoznak rá mint \"{ATR}\" a(z) \"{MOD}\" modulban.",
 			"005":"Az oszlop \"{NAME}\" nem tartalmaz értéket vagy nem oldható fel.",
-			"006":"Nem lehet egyedi indexet létrehozni, mivel a meglévő attribútumértékek nem egyediek."
+			"006":"Nem lehet egyedi indexet létrehozni, mivel a meglévő attribútumértékek nem egyediek.",
+			"007":"Invalid value '{VALUE}'."
 		},
 		"SEC":{
 			"001":"Nincs engedélye a művelet végrehajtásához vagy a forráshoz való hozzáféréshez.",
@@ -1584,7 +1627,7 @@
 				"ilike":"tartalmazza (nagy- és kisbetűre nem érzékeny)",
 				"like":"tartalmazza (nagy- és kisbetűre érzékeny)",
 				"ne":"nem egyenlő",
-				"neAny":"egyenlők között nincs egyenlő",
+				"neAll":"egyenlők között nincs egyenlő",
 				"not_ilike":"nem tartalmazza (nagy- és kisbetűre nem érzékeny)",
 				"not_like":"nem tartalmazza (nagy- és kisbetűre érzékeny)",
 				"not_null":"nem üres",
@@ -1649,6 +1692,8 @@
 	},
 	"formLog":{
 		"button":{
+			"showAll":"Show all ({CNT})"
+		},
 		"deletedUser":"törölt felhasználó",
 		"fileCreated":"Fájl hozzáadva",
 		"fileDeleted":"Fájl törölve",
@@ -1887,7 +1932,5 @@
 		"titleGeneral":"Általános",
 		"titleTheme":"Téma",
 		"warnUnsaved":"Figyelmeztetés mentetlen változtatásoknál"
-		}
 	}
 }
-
