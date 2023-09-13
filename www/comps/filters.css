@@ -1,5 +1,5 @@
 .filters{
-	max-width:850px;
+	max-width:1000px;
 	min-width:500px;
 	display:flex;
 	flex-flow:column nowrap;
