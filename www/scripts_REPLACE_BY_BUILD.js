@@ -242,12 +242,8 @@ const MyRouter = VueRouter.createRouter({
 });
 MyRouter.beforeEach((to,from) => {
 	// confirm unsaved form changes
-	if(MyStore.getters.formHasChanges && MyStore.getters.settings.warnUnsaved) {
-		
-		if(!confirm(MyStore.getters.captions.form.dialog.prevBrowser))
-			return false;
-		
-		MyStore.commit('formHasChanges',false);
+	for(let f of MyStore.getters.routingGuards) {
+		if(!f()) return false;
 	}
 	
 	// store scroll position of form element if available

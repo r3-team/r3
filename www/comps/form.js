@@ -62,7 +62,7 @@ let MyForm = {
 			@mousedown.self="$refs.popUpForm.closeAsk()"
 		>
 			<my-form ref="popUpForm"
-				@close="popUp = null; $store.commit('formHasChanges',hasChanges)"
+				@close="popUp = null"
 				@record-deleted="popUpRecordChanged('deleted',$event)"
 				@record-updated="popUpRecordChanged('updated',$event)"
 				@records-open="popUp.recordIds = $event"
@@ -217,7 +217,6 @@ let MyForm = {
 			>
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
-					@close-inline="$store.commit('formHasChanges',hasChanges)"
 					@clipboard="messageSet('[CLIPBOARD]')"
 					@execute-function="executeFunction"
 					@hotkey="handleHotkeys"
@@ -290,14 +289,11 @@ let MyForm = {
 			immediate:true
 		});
 		
-		// inform system that a data form has changes
-		this.$watch('hasChanges',(val) => {
-			this.$store.commit('formHasChanges',val);
-		});
-		
+		this.$store.commit('routingGuardAdd',this.routingGuard);
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
 	unmounted() {
+		this.$store.commit('routingGuardDel',this.routingGuard);
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	data() {
@@ -685,6 +681,9 @@ let MyForm = {
 		updateCollections,
 		
 		// form management
+		routingGuard() {
+			return !this.warnUnsaved || confirm(this.capApp.dialog.prevBrowser);
+		},
 		handleHotkeys(e) {
 			// ignore hotkeys if a pop-up form (child of this form) is open
 			if(this.popUp !== null) return;
@@ -1070,7 +1069,6 @@ let MyForm = {
 			});
 		},
 		openNew(middleClick) {
-			this.$store.commit('formHasChanges',false);
 			this.openForm([],null,null,middleClick,null);
 		},
 		openPrevAsk() {
@@ -1093,7 +1091,6 @@ let MyForm = {
 			});
 		},
 		openPrev() {
-			this.$store.commit('formHasChanges',false);
 			window.history.back();
 		},
 		popUpRecordChanged(change,recordId) {
@@ -1157,9 +1154,7 @@ let MyForm = {
 		triggerEventAfter (e) { this.triggerEvent(e,false); },
 		triggerEventBefore(e) { this.triggerEvent(e,true); },
 		triggerEvent      (event,before) {
-			for(let i = 0, j = this.form.functions.length; i < j; i++) {
-				let f = this.form.functions[i];
-				
+			for(let f of this.form.functions) {
 				if(f.event !== event || f.eventBefore !== before)
 					continue;
 				
@@ -1643,8 +1638,6 @@ let MyForm = {
 			ws.sendMultiple(requests,true).then(
 				res => {
 					const resSet = res[0];
-					
-					this.$store.commit('formHasChanges',false);
 					
 					// set record-saved timestamp
 					if(this.isNew) this.messageSet('[CREATED]');

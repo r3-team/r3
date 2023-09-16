@@ -32,7 +32,6 @@ const MyStore = Vuex.createStore({
 			attributeId:null,
 			fileIds:[]
 		},
-		formHasChanges:false, // a data form has unsaved changes
 		isAdmin:false,        // user is admin
 		isAtDialog:false,     // app shows generic dialog
 		isAtFeedback:false,   // app shows feedback dialog
@@ -58,7 +57,8 @@ const MyStore = Vuex.createStore({
 		popUpFormGlobal:null, // configuration of global pop-up form
 		productionMode:false, // system in production mode, false if maintenance
 		pwaDomainMap:{},      // map of modules per PWA sub domain, key: sub domain, value: module ID
-		searchDictionaries:[],// list of dictionaries used for full text search for this login, ['english', 'german', ...]
+		routingGuards:[],     // functions to call before routing, abort if any returns falls
+		searchDictionaries:[],// dictionaries used for full text search for this login, ['english', 'german', ...]
 		settings:{},          // setting values for logged in user, key: settings name
 		sessionValueStore:{}, // user session key-value store for frontend functions, { moduleId1:{ key1:value1, key2:value2 }, moduleId2:{ ... } }
 		system:{}             // system details (admin only)
@@ -134,6 +134,16 @@ const MyStore = Vuex.createStore({
 			state.sessionValueStore[payload.moduleId][payload.key] = payload.value;
 		},
 		
+		routingGuardAdd:(state,payload) => {
+			state.routingGuards.push(payload);
+		},
+		routingGuardDel:(state,payload) => {
+			for(let i = 0, j = state.routingGuards.length; i < j; i++) {
+				if(state.routingGuards[i] === payload)
+					return state.routingGuards.splice(i,1);
+			}
+		},
+		
 		// collections
 		collection:      (state,payload) => state.collectionIdMap[payload.id] = payload.rows,
 		collectionsClear:(state,payload) => state.collectionIdMap = {},
@@ -149,7 +159,6 @@ const MyStore = Vuex.createStore({
 		clusterNodeName:(state,payload) => state.clusterNodeName = payload,
 		feedback:       (state,payload) => state.feedback        = payload,
 		filesCopy:      (state,payload) => state.filesCopy       = payload,
-		formHasChanges: (state,payload) => state.formHasChanges  = payload,
 		isAdmin:        (state,payload) => state.isAdmin         = payload,
 		isAtDialog:     (state,payload) => state.isAtDialog      = payload,
 		isAtFeedback:   (state,payload) => state.isAtFeedback    = payload,
@@ -214,7 +223,6 @@ const MyStore = Vuex.createStore({
 		dialogTextDisplay:(state) => state.dialogTextDisplay,
 		feedback:         (state) => state.feedback,
 		filesCopy:        (state) => state.filesCopy,
-		formHasChanges:   (state) => state.formHasChanges,
 		isAdmin:          (state) => state.isAdmin,
 		isAtDialog:       (state) => state.isAtDialog,
 		isAtFeedback:     (state) => state.isAtFeedback,
@@ -238,6 +246,7 @@ const MyStore = Vuex.createStore({
 		popUpFormGlobal:  (state) => state.popUpFormGlobal,
 		productionMode:   (state) => state.productionMode,
 		pwaDomainMap:     (state) => state.pwaDomainMap,
+		routingGuards:    (state) => state.routingGuards,
 		searchDictionaries:(state) => state.searchDictionaries,
 		sessionValueStore:(state) => state.sessionValueStore,
 		settings:         (state) => state.settings,

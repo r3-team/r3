@@ -525,7 +525,6 @@ let MyField = {
 				<my-field flexDirParent="column" :ref="'tabField_'+f.id"
 					v-for="f in t.fields"
 					@clipboard="$emit('clipboard')"
-					@close-inline="$emit('close-inline')"
 					@execute-function="$emit('execute-function',$event)"
 					@hotkey="$emit('hotkey',$event)"
 					@open-form="(...args) => $emit('open-form',...args)"
@@ -562,7 +561,6 @@ let MyField = {
 			v-if="isContainer"
 			v-for="f in field.fields"
 			@clipboard="$emit('clipboard')"
-			@close-inline="$emit('close-inline')"
 			@execute-function="$emit('execute-function',$event)"
 			@hotkey="$emit('hotkey',$event)"
 			@open-form="(...args) => $emit('open-form',...args)"
@@ -614,9 +612,8 @@ let MyField = {
 		values:           { type:Object,  required:true }
 	},
 	emits:[
-		'clipboard','close-inline','execute-function','hotkey','open-form',
-		'set-form-args','set-counter','set-touched','set-valid','set-value',
-		'set-value-init'
+		'clipboard','execute-function','hotkey','open-form','set-form-args',
+		'set-counter','set-touched','set-valid','set-value','set-value-init'
 	],
 	data() {
 		return {
@@ -1183,7 +1180,6 @@ let MyField = {
 		},
 		closeInline() {
 			this.popUpFormInline = null;
-			this.$emit('close-inline');
 		},
 		openForm(rows,getterArgs,middleClick,openFormContext) {
 			// set defaults
