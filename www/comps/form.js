@@ -309,6 +309,7 @@ let MyForm = {
 			popUp:null,           // configuration for pop-up form (float)
 			popUpFieldIdSrc:null, // ID of field that pop-up form originated from
 			popUpFullscreen:false,// set this pop-up form to fullscreen mode
+			recordActionFree:false, // set by DEL/SET calls before form functions, which can negate it to block following record actions
 			showHelp:false,       // show form context help
 			showLog:false,        // show data change log
 			titleOverwrite:null,  // custom form title, can be set via frontend function
@@ -455,19 +456,21 @@ let MyForm = {
 				
 				// form functions
 				form_close:s.isPopUp ? s.closeAsk : s.openPrevAsk,
-				form_open:(formId,recordId,newTab,popUp,maxY,maxX) =>
+				form_open:(formId,recordId,newTab,popUp,maxY,maxX) => {
 					s.openForm((recordId === 0 ? [] : [recordId]),{
 						formIdOpen:formId, popUpType:popUp ? 'float' : null,
 						maxHeight:maxY, maxWidth:maxX
-					},[],newTab,null),
+					},[],newTab,null);
+					s.recordActionFree = false;
+				},
 				form_set_title:(v) => s.titleOverwrite = v,
 				form_show_message:s.messageSet,
 				
 				// record functions
-				record_delete:s.delAsk,
-				record_new:   s.openNewAsk,
-				record_reload:s.get,
-				record_save:  s.set,
+				record_delete:() => { s.delAsk();     s.recordActionFree = false; },
+				record_new:   () => { s.openNewAsk(); s.recordActionFree = false; },
+				record_reload:() => { s.get();        s.recordActionFree = false; },
+				record_save:  () => { s.set();        s.recordActionFree = false; },
 				
 				// PDF functions
 				pdf_create:s.generatePdf,
@@ -525,11 +528,13 @@ let MyForm = {
 				},
 				
 				// legacy calls (<3.5)
-				open_form:(formId,recordId,newTab,popUp,maxY,maxX) =>
+				open_form:(formId,recordId,newTab,popUp,maxY,maxX) => {
 					s.openForm((recordId === 0 ? [] : [recordId]),{
 						formIdOpen:formId, popUpType:popUp ? 'float' : null,
 						maxHeight:maxY, maxWidth:maxX
-					},[],newTab,null),
+					},[],newTab,null);
+					s.recordActionFree = false;
+				},
 				show_form_message:s.messageSet,
 				
 				// legacy calls (<3.0)
@@ -681,9 +686,6 @@ let MyForm = {
 		updateCollections,
 		
 		// form management
-		routingGuard() {
-			return !this.warnUnsaved || confirm(this.capApp.dialog.prevBrowser);
-		},
 		handleHotkeys(e) {
 			// ignore hotkeys if a pop-up form (child of this form) is open
 			if(this.popUp !== null) return;
@@ -842,6 +844,9 @@ let MyForm = {
 		releaseLoadingOnNextTick() {
 			// releases state on next tick for watching components to react to with updated data
 			this.$nextTick(() => this.loading = false);
+		},
+		routingGuard() {
+			return !this.warnUnsaved || confirm(this.capApp.dialog.prevBrowser);
 		},
 		
 		// field value control
@@ -1279,8 +1284,13 @@ let MyForm = {
 					if(this.isPopUp)
 						this.$emit('record-deleted',this.recordIds[0]);
 					
+					this.recordActionFree = true;
+					
 					this.triggerEventAfter('delete');
-					this.openForm();
+					
+					if(this.recordActionFree)
+						this.openForm();
+					
 					this.messageSet('[DELETED]');
 				},
 				this.$root.genericError
@@ -1456,7 +1466,6 @@ let MyForm = {
 			
 			let relations = {};
 			let addRelationByIndex = async index => {
-				
 				if(typeof relations[index] !== 'undefined')
 					return;
 				
@@ -1639,17 +1648,21 @@ let MyForm = {
 				res => {
 					const resSet = res[0];
 					
-					// set record-saved timestamp
 					if(this.isNew) this.messageSet('[CREATED]');
 					else           this.messageSet('[UPDATED]');
 					
 					if(this.isPopUp)
 						this.$emit('record-updated',resSet.payload.indexRecordIds['0']);
 					
+					this.recordActionFree = true;
+					
 					// clear form changes, relevant for after-save functions that open a form
 					this.valuesOrg = JSON.parse(JSON.stringify(this.values));
 					
 					this.triggerEventAfter('save');
+					
+					if(!this.recordActionFree)
+						return;
 					
 					// load empty record if requested
 					if(saveAndNew)
