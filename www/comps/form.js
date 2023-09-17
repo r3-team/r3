@@ -1646,6 +1646,9 @@ let MyForm = {
 					if(this.isPopUp)
 						this.$emit('record-updated',resSet.payload.indexRecordIds['0']);
 					
+					// clear form changes, relevant for after-save functions that open a form
+					this.valuesOrg = JSON.parse(JSON.stringify(this.values));
+					
 					this.triggerEventAfter('save');
 					
 					// load empty record if requested
