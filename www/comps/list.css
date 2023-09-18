@@ -88,6 +88,9 @@
 	filter:brightness(88%);
 	transition:filter 0.5s;
 }
+.list .layoutTable tbody tr.rowSelect.active{
+	background-color:var(--color-accent3-alt);
+}
 .list .layoutTable tfoot tr{
 	background-color:var(--color-bg);
 }

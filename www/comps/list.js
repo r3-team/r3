@@ -455,7 +455,7 @@ let MyList = {
 								@click="clickRow(r,false)"
 								@click.middle="clickRow(r,true)"
 								@keyup.enter.space="clickRow(r,false)"
-								:class="{ rowSelect:rowSelect && !inputIsReadonly }"
+								:class="{ rowSelect:rowSelect && !inputIsReadonly, active:popUpFormInline !== null && popUpFormInline.recordIds.includes(r.indexRecordIds['0']) }"
 								:key="ri + '_' + r.indexRecordIds['0']"
 								:ref="refTabindex+String(ri)"
 								:tabindex="isInput ? '0' : '-1'"
