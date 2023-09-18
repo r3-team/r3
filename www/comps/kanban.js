@@ -207,8 +207,8 @@ let MyKanban = {
 			<div class="area nowrap">
 				<my-button image="new.png"
 					v-if="hasCreate"
-					@trigger="$emit('open-form',[],false)"
-					@trigger-middle="$emit('open-form',[],true)"
+					@trigger="$emit('open-form',[],[],false)"
+					@trigger-middle="$emit('open-form',[],[],true)"
 					:caption="capGen.button.new"
 					:captionTitle="capGen.button.newHint"
 				/>
