@@ -356,6 +356,15 @@ func deleteFormFields_tx(tx pgx.Tx, moduleId uuid.UUID, form types.Form) error {
 					idsKeepColumns = append(idsKeepColumns, column.Id)
 				}
 
+			case "kanban":
+				var fieldKanban types.FieldKanban
+				if err := json.Unmarshal(fieldJson, &fieldKanban); err != nil {
+					return err
+				}
+				for _, column := range fieldKanban.Columns {
+					idsKeepColumns = append(idsKeepColumns, column.Id)
+				}
+
 			case "list":
 				var fieldList types.FieldList
 				if err := json.Unmarshal(fieldJson, &fieldList); err != nil {
