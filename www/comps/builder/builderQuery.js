@@ -392,6 +392,7 @@ let MyBuilderQueryNestedJoin = {
 				:joinRelationId="j.joinRelationId"
 				:module="module"
 				:readonly="readonly"
+				:relationIdParent="joinRelationId"
 			/>
 		</div>
 	</div>`,
@@ -402,16 +403,17 @@ let MyBuilderQueryNestedJoin = {
 		};
 	},
 	props:{
-		applyCreate:    { type:Boolean,required:true },
-		applyUpdate:    { type:Boolean,required:true },
-		applyDelete:    { type:Boolean,required:true },
-		connector:      { type:String, required:true },
-		index:          { type:Number, required:true },
-		joins:          { type:Array,  required:true },
-		joinAttributeId:{ type:String, required:true },
-		joinRelationId: { type:String, required:true },
-		module:         { type:Object, required:true },
-		readonly:       { type:Boolean,required:true }
+		applyCreate:     { type:Boolean,required:true },
+		applyUpdate:     { type:Boolean,required:true },
+		applyDelete:     { type:Boolean,required:true },
+		connector:       { type:String, required:true },
+		index:           { type:Number, required:true },
+		joins:           { type:Array,  required:true },
+		joinAttributeId: { type:String, required:true },
+		joinRelationId:  { type:String, required:true },
+		module:          { type:Object, required:true },
+		readonly:        { type:Boolean,required:true },
+		relationIdParent:{ type:String, required:false, default: null}
 	},
 	emits:[
 		'relation-add','relation-apply-toggle',
@@ -423,7 +425,7 @@ let MyBuilderQueryNestedJoin = {
 			
 			// get attributes of this relation and in relationship with this relation
 			for(let key in s.attributeIdMap) {
-				let atr = s.attributeIdMap[key];
+				const atr = s.attributeIdMap[key];
 				
 				if(!s.isAttributeRelationship(atr.content))
 					continue;
@@ -439,8 +441,8 @@ let MyBuilderQueryNestedJoin = {
 					continue;
 				
 				// if attribute is from other relation, check module dependency first
-				let rel = s.relationIdMap[atr.relationId];
-				let mod = s.moduleIdMap[rel.moduleId];
+				const rel = s.relationIdMap[atr.relationId];
+				const mod = s.moduleIdMap[rel.moduleId];
 				
 				if(mod.id !== s.module.id && !s.module.dependsOn.includes(mod.id))
 					continue;
@@ -477,7 +479,7 @@ let MyBuilderQueryNestedJoin = {
 			return '';
 		},
 		isBaseRelation:   (s) => s.index === 0,
-		isOutsideIn:      (s) => !s.isBaseRelation && s.joinAttribute.relationId !== s.joinRelationId,
+		isOutsideIn:      (s) => !s.isBaseRelation && (s.joinRelationId !== s.joinAttribute.relationId || s.joinRelationId === s.relationIdParent),
 		isRelation11:     (s) => !s.isBaseRelation && s.isAttributeRelationship11(s.joinAttribute.content),
 		isRelationN1:     (s) => !s.isBaseRelation && !s.isRelation11 && s.isOutsideIn,
 		isRelation1N:     (s) => !s.isBaseRelation && !s.isRelation11 && !s.isOutsideIn,
@@ -785,7 +787,6 @@ let MyBuilderQuery = {
 		};
 	},
 	computed:{
-		
 		// inputs
 		choicesInput:{
 			get()  { return this.choices; },

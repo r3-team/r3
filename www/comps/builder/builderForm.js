@@ -707,11 +707,14 @@ let MyBuilderForm = {
 				if(j.index === 0)
 					continue;
 				
-				let joinAtr = s.attributeIdMap[j.attributeId];
+				const joinAtr = s.attributeIdMap[j.attributeId];
 				
 				// join via 1:n attribute (outside-in join)
-				if(s.isAttributeRelationshipN1(joinAtr.content) && joinAtr.relationId === j.relationId)
-					return true;
+				// ignore self-join as its currently only allowed as n:1
+				if(s.isAttributeRelationshipN1(joinAtr.content) &&
+					j.relationId === joinAtr.relationId &&
+					j.relationId !== s.joinsIndexMap[j.indexFrom].relationId
+				) return true;
 			}
 			return false;
 		},
