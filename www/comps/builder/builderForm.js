@@ -720,8 +720,8 @@ let MyBuilderForm = {
 		columnShow:       (s) => s.columnIdShow === null ? false : s.columnIdMap[s.columnIdShow],
 		dataFields:       (s) => s.getDataFields(s.fields),
 		fieldContentFocus:(s) => ['button','data'],
-		fieldShow:        (s) => s.fieldIdShow === null ? false : s.fieldIdMap[s.fieldIdShow],
-		fieldShowHasQuery:(s) => s.getFieldHasQuery(s.fieldShow),
+		fieldShow:        (s) => s.fieldIdShow === null || typeof s.fieldIdMap[s.fieldIdShow] === 'undefined' ? false : s.fieldIdMap[s.fieldIdShow],
+		fieldShowHasQuery:(s) => s.fieldShow !== false && s.getFieldHasQuery(s.fieldShow),
 		form:             (s) => typeof s.formIdMap[s.id] === 'undefined' ? false : s.formIdMap[s.id],
 		joinsIndexMap:    (s) => s.getJoinsIndexMap(s.joins),
 		presetCandidates: (s) => s.relation === false ? [] : s.relationIdMap[s.relationId].presets,
@@ -802,9 +802,7 @@ let MyBuilderForm = {
 			this.relationId     = this.form.query.relationId;
 			this.joins          = JSON.parse(JSON.stringify(this.form.query.joins));
 			this.filters        = JSON.parse(JSON.stringify(this.form.query.filters));
-			this.fieldIdShow    = null;
 			this.fieldIdsRemove = [];
-			this.columnIdShow   = null;
 			this.showColumnsAll = this.fields.length === 1
 				&& !['container','tabs'].includes(this.fields[0].content);
 		},
