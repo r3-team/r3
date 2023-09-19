@@ -1006,6 +1006,7 @@
 				"record_new":"app.record_new() => UNDEFINED<br /><br />Opens new record.",
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Reloads the current form record.",
 				"record_save":"app.record_save() => UNDEFINED<br /><br />Saves the current form record.",
+				"record_save_new":"app.record_save_new() => UNDEFINED<br /><br />Saves the current form record and then opens an new record.",
 				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated on the next form save. Data keys for relations on the form with encryption enabled will be encrypted with the public key of each defined login. This enables later decryption of these records for users.<br /><br />If this function is not used, decryption is only ever possible for the creator.",
 				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids,relation_id,record_ids) => UNDEFINED<br /><br />When called, end-to-end encryption is updated for the specified relation and records on the next form save. Data keys for relation records will be encrypted with the public key of each defined login. This enables later decryption of these records for users.",
 				"timer_clear":"app.timer_clear(name) => UNDEFINED<br /><br />Aborts a timer with the given name, previously created with 'app.timer_set()'.",

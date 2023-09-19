@@ -467,10 +467,11 @@ let MyForm = {
 				form_show_message:s.messageSet,
 				
 				// record functions
-				record_delete:() => { s.delAsk();     s.recordActionFree = false; },
-				record_new:   () => { s.openNewAsk(); s.recordActionFree = false; },
-				record_reload:() => { s.get();        s.recordActionFree = false; },
-				record_save:  () => { s.set();        s.recordActionFree = false; },
+				record_delete:  () => { s.delAsk();     s.recordActionFree = false; },
+				record_new:     () => { s.openNewAsk(); s.recordActionFree = false; },
+				record_reload:  () => { s.get();        s.recordActionFree = false; },
+				record_save:    () => { s.set(false);   s.recordActionFree = false; },
+				record_save_new:() => { s.set(true);    s.recordActionFree = false; },
 				
 				// PDF functions
 				pdf_create:s.generatePdf,

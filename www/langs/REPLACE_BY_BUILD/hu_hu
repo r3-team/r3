@@ -1006,6 +1006,7 @@
 				"record_new":"app.record_new() => UNDEFINED<br /><br />Új rekord létrehozása.",
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Az aktuális űrlap rekordjának újratöltése.",
 				"record_save":"app.record_save() => UNDEFINED<br /><br />Az aktuális űrlap rekordjának mentése.",
+				"record_save_new":"app.record_save_new() => UNDEFINED<br /><br />Saves the current form record and then opens an new record.",
 				"set_e2ee_by_login_ids":"app.set_e2ee_by_login_ids(login_ids) => UNDEFINED<br /><br />Ha meghívják, a következő mentéskor frissíti az end-to-end titkosítást. A űrlapon engedélyezett titkosítással rendelkező kapcsolatokhoz tartozó adatkulcsokat minden meghatározott bejelentkezés nyilvános kulcsával titkosítja. Ez lehetővé teszi a felhasználók számára, hogy később dekódolják az adatokat.<br /><br />Ha ezt a függvényt nem hívják meg, csak a létrehozó tudja dekódolni az adatokat.",
 				"set_e2ee_by_login_ids_and_relation":"app.set_e2ee_by_login_ids_and_relation(login_ids, relation_id, record_ids) => UNDEFINED<br /><br />Ha meghívják, a következő mentéskor frissíti az end-to-end titkosítást a meghatározott kapcsolat és rekordok számára. Az adatkapcsolat rekordjait minden meghatározott bejelentkezés nyilvános kulcsával titkosítja. Ez lehetővé teszi a felhasználók számára, hogy később dekódolják az adatokat.",
 				"timer_clear":"app.timer_clear(name) => UNDEFINED<br /><br />Egy meghatározott névvel rendelkező időzítőt töröl, amelyet korábban az \"app.timer_set()\" segítségével hoztak létre.",
