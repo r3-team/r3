@@ -9,6 +9,16 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
+func AttributeDelCheck_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
+	var req struct {
+		Id uuid.UUID `json:"id"`
+	}
+	if err := json.Unmarshal(reqJson, &req); err != nil {
+		return nil, err
+	}
+	return attribute.DelCheck_tx(tx, req.Id)
+}
+
 func AttributeDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req struct {
 		Id uuid.UUID `json:"id"`

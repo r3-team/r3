@@ -128,10 +128,12 @@ func loadRoleIds(loginId int64) ([]uuid.UUID, error) {
 				FROM instance.login_role
 				WHERE login_id = $1
 			)
+			
 			UNION
-				SELECT c.role_id_child
-				FROM app.role_child AS c
-				INNER JOIN child_ids AS r ON c.role_id = r.role_id_child
+			
+			SELECT c.role_id_child
+			FROM app.role_child AS c
+			INNER JOIN child_ids AS r ON c.role_id = r.role_id_child
 		)
 		SELECT *
 		FROM child_ids

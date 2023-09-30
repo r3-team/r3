@@ -44,6 +44,7 @@
 			"selectAllShort":"Mind",
 			"send":"Küldés",
 			"show":"Megjelenítés",
+			"tryAnyway":"Try anyway",
 			"unlock":"Feloldás",
 			"zoomReset":"Zoom szint visszaállítása"
 		},
@@ -76,6 +77,7 @@
 		},
 		"actions":"Műveletek",
 		"active":"Aktív",
+		"api":"API",
 		"application":"Alkalmazás",
 		"applications":"Alkalmazások",
 		"appName":"REI3",
@@ -84,6 +86,7 @@
 		"available":"Elérhető",
 		"busy":"Folyamatban - Kattintson ide a megszakításhoz",
 		"category":"Kategória",
+		"collection":"Gyűjtemény",
 		"comments":"Megjegyzések",
 		"content":"Tartalom",
 		"contextHelp":"Kontextussegítség",
@@ -93,6 +96,7 @@
 		"displayed":"Megjelenített",
 		"errorTitle":"Hiba",
 		"everything":"Everything",
+		"field":"Field",
 		"files":"Fájlok",
 		"filters":"Szűrők",
 		"form":"Űrlap",
@@ -100,6 +104,7 @@
 		"help":"Segítség",
 		"icon":"Ikon",
 		"id":"Azonosító (ID)",
+		"index":"Index",
 		"inputDecimal":"Az értéknek decimálisnak kell lennie",
 		"inputInvalid":"Az érték érvénytelen",
 		"inputLarge":"Az érték túl nagy (max. {MAX})",
@@ -114,6 +119,7 @@
 		"label":"Label",
 		"licenseRequired":"Licenc szükséges",
 		"limit":"Korlát",
+		"loginForm":"Login form",
 		"menu":"Menü",
 		"missingCaption":"HIÁNYZÓ CÍM",
 		"more":"Továbbiak...",
@@ -660,7 +666,8 @@
 		},
 		"attribute":{
 			"dialog":{
-				"delete":"Biztos vagy benne, hogy törölni szeretnéd ezt az attribútumot? Ez az összes inkludált adatot is törölni fogja.<br /><br /><b>Ez a művelet mentés nélkül nem visszavonható.</b>"
+				"delete":"Biztos vagy benne, hogy törölni szeretnéd ezt az attribútumot? Ez az összes inkludált adatot is törölni fogja.<br /><br /><b>Ez a művelet mentés nélkül nem visszavonható.</b>",
+				"deleteCheckFailed":"Attribute cannot be deleted - references to it still exist"
 			},
 			"option":{
 				"defaults":{

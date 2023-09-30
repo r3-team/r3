@@ -44,6 +44,7 @@
 			"selectAllShort":"Alles",
 			"send":"Senden",
 			"show":"Anzeigen",
+			"tryAnyway":"Trotzdem versuchen",
 			"unlock":"Entsperren",
 			"zoomReset":"Zoom-Level zurücksetzen"
 		},
@@ -76,6 +77,7 @@
 		},
 		"actions":"Aktionen",
 		"active":"Aktiv",
+		"api":"API",
 		"application":"Anwendung",
 		"applications":"Anwendungen",
 		"appName":"REI3",
@@ -84,6 +86,7 @@
 		"available":"Verfügbar",
 		"busy":"Arbeitet - Zum Abbrechen hier klicken",
 		"category":"Kategorie",
+		"collection":"Sammlung",
 		"comments":"Kommentare",
 		"content":"Inhalt",
 		"contextHelp":"Kontexthilfe",
@@ -93,6 +96,7 @@
 		"displayed":"Angezeigt",
 		"errorTitle":"Fehler",
 		"everything":"Alles",
+		"field":"Feld",
 		"files":"Dateien",
 		"filters":"Filter",
 		"form":"Formular",
@@ -100,6 +104,7 @@
 		"help":"Hilfe",
 		"icon":"Icon",
 		"id":"ID",
+		"index":"Index",
 		"inputDecimal":"Wert muss dezimal sein",
 		"inputInvalid":"Wert ist ungültig",
 		"inputLarge":"Wert ist zu groß (max. {MAX})",
@@ -114,6 +119,7 @@
 		"label":"Beschreibung",
 		"licenseRequired":"Lizenz erforderlich",
 		"limit":"Anzahl",
+		"loginForm":"Anmeldeformular",
 		"menu":"Menü",
 		"missingCaption":"MISSING CAPTION",
 		"more":"Weitere...",
@@ -660,7 +666,8 @@
 		},
 		"attribute":{
 			"dialog":{
-				"delete":"Bist du sicher, dass du dieses Attribut löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelle Sicherung nicht rückgängig zu machen.</b>"
+				"delete":"Bist du sicher, dass du dieses Attribut löschen möchtest? Dies wird auch alle inkludierten Daten vom System löschen.<br /><br /><b>Diese Aktion ist ohne aktuelle Sicherung nicht rückgängig zu machen.</b>",
+				"deleteCheckFailed":"Attribut kann nicht gelöscht werden - Verweise darauf existieren noch"
 			},
 			"option":{
 				"defaults":{

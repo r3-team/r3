@@ -1,7 +1,11 @@
 import MyBuilderCaption      from './builderCaption.js';
 import MyBuilderIconInput    from './builderIconInput.js';
-import {getDependentModules} from '../shared/builder.js';
+import {getFieldMap}         from '../shared/form.js';
 import {copyValueDialog}     from '../shared/generic.js';
+import {
+	getDependentModules,
+	getItemTitle
+} from '../shared/builder.js';
 import {
 	getAttributeIcon,
 	isAttributeBoolean,
@@ -57,7 +61,7 @@ let MyBuilderAttribute = {
 					/>
 					<my-button image="delete.png"
 						v-if="!isNew"
-						@trigger="delAsk"
+						@trigger="delCheck"
 						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
@@ -455,12 +459,17 @@ let MyBuilderAttribute = {
 		isTime:    (s) => s.isInteger && s.values.contentUse === 'time',
 		
 		// stores
-		modules:       (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.builder.attribute,
-		capGen:        (s) => s.$store.getters.captions.generic,
-		module:        (s) => s.moduleIdMap[s.relation.moduleId]
+		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		apiIdMap:       (s) => s.$store.getters['schema/apiIdMap'],
+		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
+		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
+		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
+		indexIdMap:     (s) => s.$store.getters['schema/indexIdMap'],
+		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
+		capApp:         (s) => s.$store.getters.captions.builder.attribute,
+		capGen:         (s) => s.$store.getters.captions.generic,
+		module:         (s) => s.moduleIdMap[s.relation.moduleId]
 	},
 	mounted() {
 		this.reset();
@@ -474,6 +483,8 @@ let MyBuilderAttribute = {
 		copyValueDialog,
 		getAttributeIcon,
 		getDependentModules,
+		getFieldMap,
+		getItemTitle,
 		isAttributeBoolean,
 		isAttributeFiles,
 		isAttributeFloat,
@@ -567,6 +578,76 @@ let MyBuilderAttribute = {
 					image:'cancel.png'
 				}]
 			});
+		},
+		delCheck() {
+			ws.send('attribute','delCheck',{id:this.attributeId},true).then(
+				res => {
+					const noDependencies =
+						res.payload.apiIds.length         === 0 &&
+						res.payload.collectionIds.length  === 0 &&
+						res.payload.formIds.length        === 0 &&
+						res.payload.pgIndexIds.length     === 0 &&
+						res.payload.loginFormNames.length === 0 &&
+						res.payload.fields.length         === 0;
+					
+					if(noDependencies)
+						return this.delAsk();
+					
+					// display open dependencies
+					let dependencies = [];
+					for(let id of res.payload.apiIds) {
+						const api = this.apiIdMap[id];
+						const url = `#/builder/api/${id}`;
+						dependencies.push(`${this.moduleIdMap[api.moduleId].name}: ${this.capGen.api} <a href="${url}">'${api.name}'</a>`);
+					}
+					for(let id of res.payload.collectionIds) {
+						const col = this.collectionIdMap[id];
+						const url = `#/builder/collection/${id}`;
+						dependencies.push(`${this.moduleIdMap[col.moduleId].name}: ${this.capGen.collection} <a href="${url}">'${col.name}'</a>`);
+					}
+					for(let id of res.payload.formIds) {
+						const frm = this.formIdMap[id];
+						const url = `#/builder/form/${id}`;
+						dependencies.push(`${this.moduleIdMap[frm.moduleId].name}: ${this.capGen.form} <a href="${url}">'${frm.name}'</a>`);
+					}
+					for(let id of res.payload.pgIndexIds) {
+						const rel = this.relationIdMap[this.indexIdMap[id].relationId];
+						const url = `#/builder/relation/${id}`;
+						dependencies.push(`${this.moduleIdMap[rel.moduleId].name}: ${this.capGen.index} <a href="${url}">'${rel.name}'</a>`);
+					}
+					for(let f of res.payload.fields) {
+						const form       = this.formIdMap[f.formId];
+						const fieldIdMap = this.getFieldMap(form.fields);
+						const field      = fieldIdMap[f.fieldId];
+						const url        = `#/builder/form/${f.formId}?fieldIdShow=${f.fieldId}`;
+						const label      = field.content !== 'data'
+							? field.content
+							: this.getItemTitle(field.attributeId,field.index,
+								false,field.attribute_id_nm);
+						
+						dependencies.push(`${this.moduleIdMap[form.moduleId].name}: ${this.capGen.field} <a href="${url}">'${label}'</a> (${this.capGen.form}: ${form.name})`);
+					}
+					for(let name of res.payload.loginFormNames) {
+						dependencies.push(`${this.capGen.loginForm}: '${name}'`);
+					}
+					
+					this.$store.commit('dialog',{
+						captionBody:`<ul><li>${dependencies.join('</li><li>')}</li></ul>`,
+						captionTop:`${this.capApp.dialog.deleteCheckFailed}`,
+						width:800,
+						buttons:[{
+							cancel:true,
+							caption:this.capGen.button.tryAnyway,
+							exec:this.del,
+							image:'delete.png'
+						},{
+							caption:this.capGen.button.cancel,
+							image:'cancel.png'
+						}]
+					});
+				},
+				this.$root.genericError
+			);
 		},
 		del() {
 			ws.send('attribute','del',{id:this.attributeId},true).then(

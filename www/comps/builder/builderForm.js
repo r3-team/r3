@@ -9,6 +9,7 @@ import MyBuilderFields        from './builderFields.js';
 import MyTabs                 from '../tabs.js';
 import {getFieldHasQuery}     from '../shared/builder.js';
 import {getFieldIcon}         from '../shared/field.js';
+import {routeParseParams}     from '../shared/router.js';
 import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
@@ -742,6 +743,10 @@ let MyBuilderForm = {
 		capGen:        (s) => s.$store.getters.captions.generic
 	},
 	watch:{
+		$route:{
+			handler() { this.resetRouteParams(); },
+			immediate:true
+		},
 		form:{
 			handler() { this.reset(); },
 			immediate:true
@@ -760,6 +765,7 @@ let MyBuilderForm = {
 		getQueryTemplate,
 		isAttributeRelationship,
 		isAttributeRelationshipN1,
+		routeParseParams,
 		
 		// actions
 		addLayoutColumns(count) {
@@ -808,6 +814,15 @@ let MyBuilderForm = {
 			this.fieldIdsRemove = [];
 			this.showColumnsAll = this.fields.length === 1
 				&& !['container','tabs'].includes(this.fields[0].content);
+		},
+		resetRouteParams() {
+			let params = { fieldIdShow:{ parse:'string', value:null } };
+			this.routeParseParams(params);
+			
+			if(params.fieldIdShow.value !== null) {
+				this.tabTargetField = 'properties';
+				this.fieldIdShow    = params.fieldIdShow.value;
+			}
 		},
 		
 		createFieldButton() {

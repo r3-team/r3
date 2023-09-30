@@ -1,6 +1,5 @@
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderColumnOptions from './builderColumnOptions.js';
-import {getItemTitleColumn}   from '../shared/builder.js';
 import MyTabs                 from '../tabs.js';
 import {
 	isAttributeBoolean,
@@ -708,7 +707,6 @@ let MyBuilderApi = {
 	methods:{
 		// externals
 		copyValueDialog,
-		getItemTitleColumn,
 		getNilUuid,
 		
 		// actions
