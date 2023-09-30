@@ -60,7 +60,7 @@ let MyBuilderAttribute = {
 						:caption="capGen.button.refresh"
 					/>
 					<my-button image="delete.png"
-						v-if="!isNew"
+						v-if="!isNew && !isId"
 						@trigger="delCheck"
 						:active="!readonly"
 						:cancel="true"
