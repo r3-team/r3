@@ -12,8 +12,8 @@ import (
 	"r3/schema/caption"
 	"r3/schema/compatible"
 	"r3/schema/pgFunction"
-	"r3/tools"
 	"r3/types"
+	"slices"
 	"strings"
 
 	"github.com/gofrs/uuid"
@@ -273,7 +273,7 @@ func Set_tx(tx pgx.Tx, mod types.Module) error {
 
 	for _, moduleIdOn := range dependsOnCurrent {
 
-		if tools.UuidInSlice(moduleIdOn, mod.DependsOn) {
+		if slices.Contains(mod.DependsOn, moduleIdOn) {
 			continue
 		}
 
@@ -289,7 +289,7 @@ func Set_tx(tx pgx.Tx, mod types.Module) error {
 
 	for _, moduleIdOn := range mod.DependsOn {
 
-		if tools.UuidInSlice(moduleIdOn, dependsOnCurrent) {
+		if slices.Contains(dependsOnCurrent, moduleIdOn) {
 			continue
 		}
 

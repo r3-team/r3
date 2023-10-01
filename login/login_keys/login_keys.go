@@ -7,8 +7,8 @@ import (
 	"r3/db"
 	"r3/handler"
 	"r3/schema"
-	"r3/tools"
 	"r3/types"
+	"slices"
 	"strings"
 
 	"github.com/gofrs/uuid"
@@ -60,7 +60,7 @@ func GetPublic(ctx context.Context, relationId uuid.UUID,
 
 		recordIdsMissing := make([]int64, 0)
 		for _, recordId := range recordIds {
-			if !tools.Int64InSlice(recordId, recordIdsReady) {
+			if !slices.Contains(recordIdsReady, recordId) {
 				recordIdsMissing = append(recordIdsMissing, recordId)
 			}
 		}

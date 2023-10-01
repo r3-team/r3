@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"r3/cluster"
 	"r3/config"
-	"r3/tools"
+	"slices"
 	"strconv"
 
 	"github.com/jackc/pgx/v5"
@@ -20,7 +20,7 @@ func ConfigGet() (interface{}, error) {
 
 	for _, name := range config.NamesString {
 
-		if tools.StringInSlice(name, ignore) {
+		if slices.Contains(ignore, name) {
 			continue
 		}
 		res[name] = config.GetString(name)
@@ -28,7 +28,7 @@ func ConfigGet() (interface{}, error) {
 
 	for _, name := range config.NamesUint64 {
 
-		if tools.StringInSlice(name, ignore) {
+		if slices.Contains(ignore, name) {
 			continue
 		}
 		res[name] = fmt.Sprintf("%d", config.GetUint64(name))
@@ -54,11 +54,11 @@ func ConfigSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	// update config values in DB and local config store
 	for name, value := range req {
 
-		if tools.StringInSlice(name, config.NamesString) {
+		if slices.Contains(config.NamesString, name) {
 			if err := config.SetString_tx(tx, name, value); err != nil {
 				return nil, err
 			}
-		} else if tools.StringInSlice(name, config.NamesUint64) {
+		} else if slices.Contains(config.NamesUint64, name) {
 
 			val, err := strconv.ParseUint(value, 10, 64)
 			if err != nil {

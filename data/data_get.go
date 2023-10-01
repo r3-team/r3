@@ -9,9 +9,9 @@ import (
 	"r3/data/data_sql"
 	"r3/handler"
 	"r3/schema"
-	"r3/tools"
 	"r3/types"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 
@@ -176,15 +176,15 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 				}
 
 				// deny DEL if record ID is in blacklist or not in whitelist (if used)
-				if tools.Int64InSlice(recordId, indexMapDelBlacklist[index]) ||
-					(indexMapDelWhitelistUsed[index] && !tools.Int64InSlice(recordId, indexMapDelWhitelist[index])) {
+				if slices.Contains(indexMapDelBlacklist[index], recordId) ||
+					(indexMapDelWhitelistUsed[index] && !slices.Contains(indexMapDelWhitelist[index], recordId)) {
 
 					results[i].IndexesPermNoDel = append(results[i].IndexesPermNoDel, index)
 				}
 
 				// deny SET if record ID is in blacklist or not in whitelist (if used)
-				if tools.Int64InSlice(recordId, indexMapSetBlacklist[index]) ||
-					(indexMapSetWhitelistUsed[index] && !tools.Int64InSlice(recordId, indexMapSetWhitelist[index])) {
+				if slices.Contains(indexMapSetBlacklist[index], recordId) ||
+					(indexMapSetWhitelistUsed[index] && !slices.Contains(indexMapSetWhitelist[index], recordId)) {
 
 					results[i].IndexesPermNoSet = append(results[i].IndexesPermNoSet, index)
 				}
@@ -208,7 +208,7 @@ func Get_tx(ctx context.Context, tx pgx.Tx, data types.DataGet, loginId int64,
 			return results, 0, handler.ErrSchemaUnknownAttribute(expr.AttributeId.Bytes)
 		}
 
-		if !atr.Encrypted || tools.IntInSlice(expr.Index, relationIndexesEnc) {
+		if !atr.Encrypted || slices.Contains(relationIndexesEnc, expr.Index) {
 			continue
 		}
 		relationIndexesEnc = append(relationIndexesEnc, expr.Index)
@@ -435,7 +435,7 @@ func prepareQuery(data types.DataGet, indexRelationIds map[int]uuid.UUID,
 		if expr.Aggregator.String == "record" {
 			relId := getTupelIdCode(expr.Index, nestingLevel)
 
-			if !tools.StringInSlice(relId, groupByItems) {
+			if !slices.Contains(groupByItems, relId) {
 				groupByItems = append(groupByItems, relId)
 			}
 		}
@@ -635,7 +635,7 @@ func addJoin(indexRelationIds map[int]uuid.UUID, join types.DataGetJoin,
 	modTarget := cache.ModuleIdMap[relTarget.ModuleId]
 
 	// define JOIN type
-	if !tools.StringInSlice(join.Connector, types.QueryJoinConnectors) {
+	if !slices.Contains(types.QueryJoinConnectors, join.Connector) {
 		return errors.New("invalid join type")
 	}
 
@@ -661,10 +661,10 @@ func addWhere(filter types.DataGetFilter, queryArgs *[]interface{},
 	queryCountArgs *[]interface{}, loginId int64, inWhere *[]string,
 	nestingLevel int) error {
 
-	if !tools.StringInSlice(filter.Connector, types.QueryFilterConnectors) {
+	if !slices.Contains(types.QueryFilterConnectors, filter.Connector) {
 		return errors.New("bad filter connector")
 	}
-	if !tools.StringInSlice(filter.Operator, types.QueryFilterOperators) {
+	if !slices.Contains(types.QueryFilterOperators, filter.Operator) {
 		return errors.New("bad filter operator")
 	}
 
@@ -915,11 +915,11 @@ func getBrackets(count int, right bool) string {
 
 // operator types
 func isArrayOperator(operator string) bool {
-	return tools.StringInSlice(operator, []string{"= ANY", "<> ALL"})
+	return slices.Contains([]string{"= ANY", "<> ALL"}, operator)
 }
 func isLikeOperator(operator string) bool {
-	return tools.StringInSlice(operator, []string{"LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE"})
+	return slices.Contains([]string{"LIKE", "ILIKE", "NOT LIKE", "NOT ILIKE"}, operator)
 }
 func isNullOperator(operator string) bool {
-	return tools.StringInSlice(operator, []string{"IS NULL", "IS NOT NULL"})
+	return slices.Contains([]string{"IS NULL", "IS NOT NULL"}, operator)
 }

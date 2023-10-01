@@ -5,13 +5,13 @@ import (
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
-	"r3/tools"
 	"r3/types"
 	"regexp"
+	"slices"
 
 	"github.com/gofrs/uuid"
-	"github.com/jackc/pgx/v5/pgtype"
 	"github.com/jackc/pgx/v5"
+	"github.com/jackc/pgx/v5/pgtype"
 )
 
 var (
@@ -132,7 +132,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, formId pgtype.UUID,
 func storeDependencies_tx(tx pgx.Tx, functionId uuid.UUID, entity string,
 	regex string, submatchIndexId int, body string) error {
 
-	if !tools.StringInSlice(entity, []string{"collection", "field", "form", "js_function", "pg_function", "role"}) {
+	if !slices.Contains([]string{"collection", "field", "form", "js_function", "pg_function", "role"}, entity) {
 		return fmt.Errorf("unknown JS function dependency '%s'", entity)
 	}
 

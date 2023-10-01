@@ -12,6 +12,7 @@ import (
 	"r3/login/login_license"
 	"r3/tools"
 	"r3/types"
+	"slices"
 	"strings"
 	"time"
 
@@ -253,7 +254,7 @@ func TokenFixed(loginId int64, context string, tokenFixed string, grantLanguageC
 	}
 
 	// only specific contexts may be used for token authentication
-	if !tools.StringInSlice(context, []string{"client", "ics"}) {
+	if !slices.Contains([]string{"client", "ics"}, context) {
 		return fmt.Errorf("invalid token authentication context '%s'", context)
 	}
 

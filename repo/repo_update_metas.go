@@ -24,31 +24,31 @@ func getModuleMetas(token string, url string, skipVerify bool,
 		RelationId: uuid.FromStringOrNil("08dfb28b-dbb4-4b70-8231-142235516385"), // module
 		Expressions: []types.DataGetExpression{
 			types.DataGetExpression{ // module UUID
-				AttributeId:   tools.UuidStringToNullUuid("98bc635b-097e-4cf0-92c9-2bb97a7c2a5e"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("98bc635b-097e-4cf0-92c9-2bb97a7c2a5e"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // module meta description
-				AttributeId:   tools.UuidStringToNullUuid("3cd8b8b1-3d3f-41b0-ba6c-d7ef567a686f"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("3cd8b8b1-3d3f-41b0-ba6c-d7ef567a686f"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         1,
 			},
 			types.DataGetExpression{ // module meta support page
-				AttributeId:   tools.UuidStringToNullUuid("4793cd87-0bc9-4797-9538-ca733007a1d1"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("4793cd87-0bc9-4797-9538-ca733007a1d1"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         1,
 			},
 			types.DataGetExpression{ // module meta title
-				AttributeId:   tools.UuidStringToNullUuid("6f66272a-7713-45a8-9565-b0157939399b"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("6f66272a-7713-45a8-9565-b0157939399b"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         1,
 			},
 			types.DataGetExpression{ // language code
-				AttributeId:   tools.UuidStringToNullUuid("19bd7a3b-9b3d-45da-9c07-4d8f62874b35"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("19bd7a3b-9b3d-45da-9c07-4d8f62874b35"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         2,

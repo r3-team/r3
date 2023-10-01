@@ -14,8 +14,8 @@ import (
 	"r3/schema/openForm"
 	"r3/schema/query"
 	"r3/schema/tab"
-	"r3/tools"
 	"r3/types"
+	"slices"
 	"sort"
 
 	"github.com/gofrs/uuid"
@@ -558,13 +558,13 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 			}
 
 			// no parent field
-			if !tools.IntInSlice(pos, posParentLookup) {
+			if !slices.Contains(posParentLookup, pos) {
 				children = append(children, fields[pos])
 				continue
 			}
 
 			// tabs field
-			if tools.IntInSlice(pos, posTabsLookup) {
+			if slices.Contains(posTabsLookup, pos) {
 				field := fields[pos].(types.FieldTabs)
 
 				for i, tab := range field.Tabs {

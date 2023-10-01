@@ -32,6 +32,7 @@ import (
 	"r3/tools"
 	"r3/transfer/transfer_delete"
 	"r3/types"
+	"slices"
 	"sort"
 	"strings"
 
@@ -644,7 +645,7 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]imp
 	// finalize import order
 	var addModule func(id uuid.UUID)
 	addModule = func(id uuid.UUID) {
-		if tools.UuidInSlice(id, moduleIdsAdded) {
+		if slices.Contains(moduleIdsAdded, id) {
 			return
 		}
 

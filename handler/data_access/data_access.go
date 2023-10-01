@@ -13,7 +13,7 @@ import (
 	"r3/log"
 	"r3/login/login_auth"
 	"r3/request"
-	"r3/tools"
+	"slices"
 	"time"
 )
 
@@ -51,7 +51,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	if !tools.StringInSlice(req.Action, allowedActions) {
+	if !slices.Contains(allowedActions, req.Action) {
 		handler.AbortRequest(w, handlerContext, errors.New("invalid action"),
 			"invalid action, allowed: del, get, set")
 

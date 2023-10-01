@@ -14,6 +14,18 @@ import (
 	"github.com/h2non/filetype"
 )
 
+func GetFileContents(filePath string, removeUtf8Bom bool) ([]byte, error) {
+
+	output, err := ioutil.ReadFile(filePath)
+	if err != nil {
+		return []byte("{}"), err
+	}
+	if removeUtf8Bom {
+		output = RemoveUtf8Bom(output)
+	}
+	return output, nil
+}
+
 func GetFileHash(filePath string) (string, error) {
 	file, err := os.Open(filePath)
 	if err != nil {
@@ -140,20 +152,6 @@ func FileCopy(src string, dst string, copyModTime bool) error {
 	return nil
 }
 
-// set file to read only in file system
-func FileSetRead(filePath string) error {
-
-	// set read permissions for owner only
-	// windows only supports owner bit, for linux owner is fine as files are only supposed to be accessed by owner
-	return os.Chmod(filePath, 0400)
-}
-func FileSetWrite(filePath string) error {
-
-	// set write permissions for owner only
-	// windows only supports owner bit, for linux owner is fine as files are only supposed to be accessed by owner
-	return os.Chmod(filePath, 0600)
-}
-
 func Exists(path string) (bool, error) {
 	_, err := os.Stat(path)
 	if err == nil {
@@ -174,30 +172,4 @@ func PathCreateIfNotExists(path string, perm fs.FileMode) error {
 		return err
 	}
 	return os.Mkdir(path, perm)
-}
-
-func IsEmpty(path string) (bool, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return false, err
-	}
-	defer f.Close()
-
-	_, err = f.Readdirnames(1)
-	if err == io.EOF {
-		return true, nil
-	}
-	return false, err
-}
-
-func RemoveIfExists(path string) error {
-	exists, err := Exists(path)
-	if err != nil {
-		return err
-	}
-
-	if !exists {
-		return nil
-	}
-	return os.Remove(path)
 }

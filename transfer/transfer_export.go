@@ -17,8 +17,8 @@ import (
 	"r3/config"
 	"r3/db"
 	"r3/log"
-	"r3/tools"
 	"r3/types"
+	"slices"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -62,7 +62,7 @@ func export_tx(tx pgx.Tx, moduleId uuid.UUID, original bool, filePaths *[]string
 	moduleIdsExported *[]uuid.UUID) error {
 
 	// ignore if already exported (dependent on modules can have similar dependencies)
-	if tools.UuidInSlice(moduleId, *moduleIdsExported) {
+	if slices.Contains(*moduleIdsExported, moduleId) {
 		return nil
 	}
 	*moduleIdsExported = append(*moduleIdsExported, moduleId)

@@ -9,6 +9,7 @@ import (
 	"r3/handler"
 	"r3/tools"
 	"r3/types"
+	"slices"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -178,7 +179,7 @@ func setLog_tx(ctx context.Context, tx pgx.Tx, relationId uuid.UUID,
 
 		// special case: file attributes
 		// new value is always delta (file uploaded/removed/etc.), old value is not needed
-		if tools.IntInSlice(i, fileAttributeIndexes) {
+		if slices.Contains(fileAttributeIndexes, i) {
 			if atr.Value == nil {
 				continue
 			}

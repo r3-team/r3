@@ -8,8 +8,8 @@ import (
 	"r3/data"
 	"r3/handler"
 	"r3/schema"
-	"r3/tools"
 	"r3/types"
+	"slices"
 	"strings"
 
 	"github.com/gofrs/uuid"
@@ -126,7 +126,7 @@ func FromInterfaceValues_tx(ctx context.Context, tx pgx.Tx, loginId int64,
 				continue // no unique PG index defined, nothing to do
 			}
 
-			if tools.IntInSlice(join.Index, indexesResolved) {
+			if slices.Contains(indexesResolved, join.Index) {
 				continue // lookup already done
 			}
 

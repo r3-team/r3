@@ -3,8 +3,8 @@ package handler
 import (
 	"errors"
 	"fmt"
-	"r3/tools"
 	"regexp"
+	"slices"
 
 	"github.com/gofrs/uuid"
 )
@@ -162,7 +162,7 @@ var (
 // message is the original error message, which is also appended in case error code is not translated
 // example error code: {ERR_DBS_069} My error message
 func CreateErrCode(context string, number int) error {
-	if !tools.StringInSlice(context, errContexts) {
+	if !slices.Contains(errContexts, context) {
 		return errors.New("{INVALID_ERROR_CONTEXT}")
 	}
 	return fmt.Errorf("{ERR_%s_%03d}", context, number)
@@ -171,7 +171,7 @@ func CreateErrCode(context string, number int) error {
 // creates standardized error code with arguments to send error related data for error interpretation
 // example error code: {ERR_DBS_069} [name2:value2] [name1:value1] My error message
 func CreateErrCodeWithArgs(context string, number int, argMapValues map[string]string) error {
-	if !tools.StringInSlice(context, errContexts) {
+	if !slices.Contains(errContexts, context) {
 		return errors.New("{INVALID_ERROR_CONTEXT}")
 	}
 	var args string

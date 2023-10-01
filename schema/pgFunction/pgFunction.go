@@ -7,9 +7,9 @@ import (
 	"r3/db/check"
 	"r3/schema"
 	"r3/schema/caption"
-	"r3/tools"
 	"r3/types"
 	"regexp"
+	"slices"
 	"strings"
 
 	"github.com/gofrs/uuid"
@@ -292,7 +292,7 @@ func RecreateAffectedBy_tx(tx pgx.Tx, entity string, entityId uuid.UUID) error {
 
 	pgFunctionIds := make([]uuid.UUID, 0)
 
-	if !tools.StringInSlice(entity, []string{"module", "relation", "attribute", "pg_function"}) {
+	if !slices.Contains([]string{"module", "relation", "attribute", "pg_function"}, entity) {
 		return errors.New("unknown dependent on entity for pg function")
 	}
 

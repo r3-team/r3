@@ -6,8 +6,8 @@ import (
 	"r3/cache"
 	"r3/handler"
 	"r3/schema"
-	"r3/tools"
 	"r3/types"
+	"slices"
 	"strings"
 
 	"github.com/gofrs/uuid"
@@ -76,7 +76,7 @@ func getPolicyFunctionNames(loginId int64, policies []types.RelationPolicy, acti
 	for _, p := range policies {
 
 		// ignore if login does not have role
-		if !tools.UuidInSlice(p.RoleId, access.RoleIds) {
+		if !slices.Contains(access.RoleIds, p.RoleId) {
 			continue
 		}
 

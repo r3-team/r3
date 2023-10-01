@@ -5,8 +5,8 @@ import (
 	"encoding/json"
 	"fmt"
 	"r3/db"
-	"r3/tools"
 	"r3/types"
+	"slices"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -63,9 +63,7 @@ func FixAttributeContentUse(contentUse string) string {
 }
 func MigrateDisplayToContentUse_tx(tx pgx.Tx, attributeId uuid.UUID, display string) (string, error) {
 
-	if tools.StringInSlice(display, []string{"textarea",
-		"richtext", "date", "datetime", "time", "color"}) {
-
+	if slices.Contains([]string{"textarea", "richtext", "date", "datetime", "time", "color"}, display) {
 		_, err := tx.Exec(db.Ctx, `
 			UPDATE app.attribute
 			SET content_use = $1

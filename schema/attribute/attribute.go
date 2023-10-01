@@ -10,8 +10,8 @@ import (
 	"r3/schema/compatible"
 	"r3/schema/pgFunction"
 	"r3/schema/pgIndex"
-	"r3/tools"
 	"r3/types"
+	"slices"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -336,10 +336,10 @@ func Set_tx(tx pgx.Tx, atr types.Attribute) error {
 	if atr.Encrypted && atr.Content != "text" {
 		return fmt.Errorf("only text attributes can be encrypted")
 	}
-	if !tools.StringInSlice(atr.Content, contentTypes) {
+	if !slices.Contains(contentTypes, atr.Content) {
 		return fmt.Errorf("invalid attribute content type '%s'", atr.Content)
 	}
-	if !tools.StringInSlice(atr.ContentUse, contentUseTypes) {
+	if !slices.Contains(contentUseTypes, atr.ContentUse) {
 		return fmt.Errorf("invalid attribute content use type '%s'", atr.ContentUse)
 	}
 
@@ -410,7 +410,7 @@ func Set_tx(tx pgx.Tx, atr types.Attribute) error {
 		case "integer": // keep integer or upgrade to bigint
 			fallthrough
 		case "bigint": // keep bigint or downgrade to integer
-			contentUpdateOk = tools.StringInSlice(atr.Content, []string{"integer", "bigint"})
+			contentUpdateOk = slices.Contains([]string{"integer", "bigint"}, atr.Content)
 
 		case "numeric": // keep numeric
 			contentUpdateOk = atr.Content == "numeric"
@@ -418,12 +418,12 @@ func Set_tx(tx pgx.Tx, atr types.Attribute) error {
 		case "real": // keep real or upgrade to double
 			fallthrough
 		case "double precision": // keep double or downgrade to real
-			contentUpdateOk = tools.StringInSlice(atr.Content, []string{"real", "double precision"})
+			contentUpdateOk = slices.Contains([]string{"real", "double precision"}, atr.Content)
 
 		case "varchar": // keep varchar or upgrade to text
 			fallthrough
 		case "text": // keep text or downgrade to varchar
-			contentUpdateOk = tools.StringInSlice(atr.Content, []string{"varchar", "text"})
+			contentUpdateOk = slices.Contains([]string{"varchar", "text"}, atr.Content)
 
 		case "boolean": // keep boolean
 			contentUpdateOk = atr.Content == "boolean"
@@ -437,7 +437,7 @@ func Set_tx(tx pgx.Tx, atr types.Attribute) error {
 		case "1:1": // keep 1:1 or switch to n:1
 			fallthrough
 		case "n:1": // keep n:1 or switch to 1:1
-			contentUpdateOk = tools.StringInSlice(atr.Content, []string{"1:1", "n:1"})
+			contentUpdateOk = slices.Contains([]string{"1:1", "n:1"}, atr.Content)
 
 		case "files": // keep files
 			contentUpdateOk = atr.Content == "files"
@@ -815,10 +815,10 @@ func createFK_tx(tx pgx.Tx, moduleName string, relationName string,
 	attributeId uuid.UUID, attributeName string, relationshipId uuid.UUID,
 	onUpdate string, onDelete string) error {
 
-	if !tools.StringInSlice(onUpdate, fkBreakActions) {
+	if !slices.Contains(fkBreakActions, onUpdate) {
 		return fmt.Errorf("invalid attribute ON UPDATE definition '%s'", onUpdate)
 	}
-	if !tools.StringInSlice(onDelete, fkBreakActions) {
+	if !slices.Contains(fkBreakActions, onDelete) {
 		return fmt.Errorf("invalid attribute ON DELETE definition '%s'", onDelete)
 	}
 

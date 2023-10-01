@@ -7,6 +7,7 @@ import (
 	"r3/schema/compatible"
 	"r3/tools"
 	"r3/types"
+	"slices"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
@@ -27,31 +28,31 @@ func getModuleReleases(token string, url string, skipVerify bool,
 		RelationId: uuid.FromStringOrNil("a300afae-a8c5-4cfc-9375-d85f45c6347c"), // module release
 		Expressions: []types.DataGetExpression{
 			types.DataGetExpression{ // module UUID
-				AttributeId:   tools.UuidStringToNullUuid("98bc635b-097e-4cf0-92c9-2bb97a7c2a5e"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("98bc635b-097e-4cf0-92c9-2bb97a7c2a5e"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         1,
 			},
 			types.DataGetExpression{ // module release build
-				AttributeId:   tools.UuidStringToNullUuid("d0766fcc-7a68-490c-9c81-f542ad37109b"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("d0766fcc-7a68-490c-9c81-f542ad37109b"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // module release application build
-				AttributeId:   tools.UuidStringToNullUuid("ce998cfd-a66f-423c-b82b-d2b48a21c288"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("ce998cfd-a66f-423c-b82b-d2b48a21c288"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // module release date
-				AttributeId:   tools.UuidStringToNullUuid("9f9b6cda-069d-405b-bbb8-c0d12bbce910"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("9f9b6cda-069d-405b-bbb8-c0d12bbce910"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // module release file
-				AttributeId:   tools.UuidStringToNullUuid("b28e8f5c-ebeb-4565-941b-4d942eedc588"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("b28e8f5c-ebeb-4565-941b-4d942eedc588"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         0,
@@ -124,7 +125,7 @@ func getModuleReleases(token string, url string, skipVerify bool,
 				moduleId := uuid.FromStringOrNil(value.(string))
 
 				// add only first release per module (are sorted descending by build)
-				if tools.UuidInSlice(moduleId, moduleIdsAdded) {
+				if slices.Contains(moduleIdsAdded, moduleId) {
 					break
 				}
 

@@ -17,9 +17,9 @@ import (
 	"r3/log"
 	"r3/login/login_auth"
 	"r3/schema"
-	"r3/tools"
 	"r3/types"
 	"regexp"
+	"slices"
 	"strconv"
 	"strings"
 	"time"
@@ -192,7 +192,7 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	// get valid module language code (for captions)
 	languageCodeModule := languageCode
 	mod := cache.ModuleIdMap[api.ModuleId]
-	if !tools.StringInSlice(languageCode, mod.Languages) {
+	if !slices.Contains(mod.Languages, languageCode) {
 		languageCodeModule = mod.LanguageMain
 	}
 

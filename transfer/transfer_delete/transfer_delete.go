@@ -23,8 +23,8 @@ import (
 	"r3/schema/relation"
 	"r3/schema/role"
 	"r3/schema/tab"
-	"r3/tools"
 	"r3/types"
+	"slices"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -508,8 +508,8 @@ func importGetIdsToDeleteFromModule_tx(tx pgx.Tx, entity string,
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !tools.StringInSlice(entity, []string{"article", "collection", "form", "icon",
-		"js_function", "login_form", "menu", "pg_function", "relation", "role"}) {
+	if !slices.Contains([]string{"article", "collection", "form", "icon",
+		"js_function", "login_form", "menu", "pg_function", "relation", "role"}, entity) {
 
 		return idsDelete, errors.New("unsupported type for delete check")
 	}
@@ -531,7 +531,7 @@ func importGetIdsToDeleteFromRelation_tx(tx pgx.Tx, entity string, moduleId uuid
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !tools.StringInSlice(entity, []string{"attribute", "pg_index", "pg_trigger", "preset"}) {
+	if !slices.Contains([]string{"attribute", "pg_index", "pg_trigger", "preset"}, entity) {
 		return idsDelete, errors.New("unsupport type for delete check")
 	}
 
@@ -556,7 +556,7 @@ func importGetIdsToDeleteFromForm_tx(tx pgx.Tx, entity string, formId uuid.UUID,
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !tools.StringInSlice(entity, []string{"field"}) {
+	if !slices.Contains([]string{"field"}, entity) {
 		return idsDelete, errors.New("unsupport type for delete check")
 	}
 
@@ -577,7 +577,7 @@ func importGetIdsToDeleteFromField_tx(tx pgx.Tx, entity string, formId uuid.UUID
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !tools.StringInSlice(entity, []string{"column", "tab"}) {
+	if !slices.Contains([]string{"column", "tab"}, entity) {
 		return idsDelete, errors.New("unsupport type for delete check")
 	}
 

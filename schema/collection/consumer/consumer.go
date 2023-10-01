@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"r3/db"
 	"r3/schema/openForm"
-	"r3/tools"
 	"r3/types"
+	"slices"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -19,7 +19,7 @@ func GetOne(entity string, entityId uuid.UUID, content string) (types.Collection
 
 	var err error
 	var c types.CollectionConsumer
-	if !tools.StringInSlice(entity, entitiesAllowed) {
+	if !slices.Contains(entitiesAllowed, entity) {
 		return c, errors.New("invalid collection consumer entity")
 	}
 
@@ -44,7 +44,7 @@ func GetOne(entity string, entityId uuid.UUID, content string) (types.Collection
 func Get(entity string, entityId uuid.UUID, content string) ([]types.CollectionConsumer, error) {
 	var consumers = make([]types.CollectionConsumer, 0)
 
-	if !tools.StringInSlice(entity, entitiesAllowed) {
+	if !slices.Contains(entitiesAllowed, entity) {
 		return consumers, errors.New("invalid collection consumer entity")
 	}
 
@@ -79,7 +79,7 @@ func Get(entity string, entityId uuid.UUID, content string) ([]types.CollectionC
 func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, content string,
 	consumers []types.CollectionConsumer) error {
 
-	if !tools.StringInSlice(entity, entitiesAllowed) {
+	if !slices.Contains(entitiesAllowed, entity) {
 		return errors.New("invalid collection consumer entity")
 	}
 

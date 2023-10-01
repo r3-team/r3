@@ -24,31 +24,31 @@ func getModules(token string, url string, skipVerify bool,
 		RelationId: uuid.FromStringOrNil("08dfb28b-dbb4-4b70-8231-142235516385"), // module
 		Expressions: []types.DataGetExpression{
 			types.DataGetExpression{ // module UUID
-				AttributeId:   tools.UuidStringToNullUuid("98bc635b-097e-4cf0-92c9-2bb97a7c2a5e"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("98bc635b-097e-4cf0-92c9-2bb97a7c2a5e"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // module name
-				AttributeId:   tools.UuidStringToNullUuid("fbab278a-4898-4f46-a1d7-35d1a80ee3dc"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("fbab278a-4898-4f46-a1d7-35d1a80ee3dc"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // module is visible in store?
-				AttributeId:   tools.UuidStringToNullUuid("0ba7005c-834b-4d2b-a967-d748f91c2bed"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("0ba7005c-834b-4d2b-a967-d748f91c2bed"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // module change log
-				AttributeId:   tools.UuidStringToNullUuid("f36130a9-bfed-42dc-920f-036ffd0d35b0"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("f36130a9-bfed-42dc-920f-036ffd0d35b0"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         0,
 			},
 			types.DataGetExpression{ // author name
-				AttributeId:   tools.UuidStringToNullUuid("295f5bd9-772a-41f0-aa81-530a0678e441"),
+				AttributeId:   tools.PgxUuidFromStringOrNil("295f5bd9-772a-41f0-aa81-530a0678e441"),
 				AttributeIdNm: pgtype.UUID{},
 				Aggregator:    pgtype.Text{},
 				Index:         1,

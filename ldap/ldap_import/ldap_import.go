@@ -11,8 +11,8 @@ import (
 	"r3/ldap/ldap_conn"
 	"r3/log"
 	"r3/login"
-	"r3/tools"
 	"r3/types"
+	"slices"
 	"unicode/utf8"
 
 	goldap "github.com/go-ldap/ldap/v3"
@@ -149,14 +149,14 @@ func Run(ldapId int32) error {
 
 				if ldap.MsAdExt {
 					for _, value := range entry.GetAttributeValues("userAccountControl") {
-						if tools.StringInSlice(value, msAdExtDisabledAtrFlags) {
+						if slices.Contains(msAdExtDisabledAtrFlags, value) {
 							l.active = false
 						}
 					}
 				}
 
 				// role ID is empty if just users are queried
-				if ldap.AssignRoles && role.RoleId != uuid.Nil && !tools.UuidInSlice(role.RoleId, l.roleIds) {
+				if ldap.AssignRoles && role.RoleId != uuid.Nil && !slices.Contains(l.roleIds, role.RoleId) {
 					l.roleIds = append(l.roleIds, role.RoleId)
 				}
 				logins[key] = l

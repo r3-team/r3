@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"r3/db"
 	"r3/schema/compatible"
-	"r3/tools"
 	"r3/types"
+	"slices"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -17,7 +17,7 @@ var entitiesAllowed = []string{"column", "collection_consumer", "field"}
 
 func Get(entity string, id uuid.UUID, context pgtype.Text) (f types.OpenForm, err error) {
 
-	if !tools.StringInSlice(entity, entitiesAllowed) {
+	if !slices.Contains(entitiesAllowed, entity) {
 		return f, errors.New("invalid open form entity")
 	}
 
@@ -53,7 +53,7 @@ func Get(entity string, id uuid.UUID, context pgtype.Text) (f types.OpenForm, er
 
 func Set_tx(tx pgx.Tx, entity string, id uuid.UUID, f types.OpenForm, context pgtype.Text) error {
 
-	if !tools.StringInSlice(entity, entitiesAllowed) {
+	if !slices.Contains(entitiesAllowed, entity) {
 		return errors.New("invalid open form entity")
 	}
 

@@ -9,8 +9,8 @@ import (
 	"r3/data/data_enc"
 	"r3/handler"
 	"r3/schema"
-	"r3/tools"
 	"r3/types"
+	"slices"
 	"sort"
 	"strings"
 
@@ -459,7 +459,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 
 			// remove old references to this tupel
 			for _, value := range valuesCurr {
-				if tools.Int64InSlice(value, shipValues.values) {
+				if slices.Contains(shipValues.values, value) {
 					continue
 				}
 
@@ -476,7 +476,7 @@ func setForIndex_tx(ctx context.Context, tx pgx.Tx, index int,
 
 			// add new references to this tupel
 			for _, value := range shipValues.values {
-				if tools.Int64InSlice(value, valuesCurr) {
+				if slices.Contains(valuesCurr, value) {
 					continue
 				}
 
@@ -538,7 +538,7 @@ func collectCurrentValuesForLog_tx(ctx context.Context, tx pgx.Tx,
 
 			// special case: file attribute
 			// no need to lookup current values as file attribute values already only include changes
-			ReturnNull: tools.IntInSlice(i, fileAttributeIndexes),
+			ReturnNull: slices.Contains(fileAttributeIndexes, i),
 		})
 	}
 

@@ -6,8 +6,8 @@ import (
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
-	"r3/tools"
 	"r3/types"
+	"slices"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -23,7 +23,7 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 func Get(entity string, entityId uuid.UUID) ([]types.Tab, error) {
 	tabs := make([]types.Tab, 0)
 
-	if !tools.StringInSlice(entity, allowedEntities) {
+	if !slices.Contains(allowedEntities, entity) {
 		return tabs, errors.New("bad entity")
 	}
 
@@ -57,7 +57,7 @@ func Get(entity string, entityId uuid.UUID) ([]types.Tab, error) {
 }
 
 func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, position int, tab types.Tab) (uuid.UUID, error) {
-	if !tools.StringInSlice(entity, allowedEntities) {
+	if !slices.Contains(allowedEntities, entity) {
 		return tab.Id, errors.New("bad entity")
 	}
 

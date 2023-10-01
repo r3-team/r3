@@ -6,8 +6,8 @@ import (
 	"r3/db"
 	"r3/schema"
 	"r3/schema/caption"
-	"r3/tools"
 	"r3/types"
+	"slices"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -25,7 +25,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 	q.Lookups = make([]types.QueryLookup, 0)
 	q.Choices = make([]types.QueryChoice, 0)
 
-	if !tools.StringInSlice(entity, allowedEntities) {
+	if !slices.Contains(allowedEntities, entity) {
 		return q, errors.New("bad entity")
 	}
 
@@ -172,7 +172,7 @@ func Get(entity string, id uuid.UUID, filterPosition int, filterSide int) (types
 func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 	filterSide int, query types.Query) error {
 
-	if !tools.StringInSlice(entity, allowedEntities) {
+	if !slices.Contains(allowedEntities, entity) {
 		return fmt.Errorf("unknown query parent entity '%s'", entity)
 	}
 
@@ -260,7 +260,7 @@ func Set_tx(tx pgx.Tx, entity string, entityId uuid.UUID, filterPosition int,
 
 	for position, j := range query.Joins {
 
-		if !tools.StringInSlice(j.Connector, types.QueryJoinConnectors) {
+		if !slices.Contains(types.QueryJoinConnectors, j.Connector) {
 			return errors.New("invalid join connector")
 		}
 
@@ -458,11 +458,11 @@ func setFilters_tx(tx pgx.Tx, queryId uuid.UUID, queryChoiceId pgtype.UUID,
 
 	for position, f := range filters {
 
-		if !tools.StringInSlice(f.Connector, types.QueryFilterConnectors) {
+		if !slices.Contains(types.QueryFilterConnectors, f.Connector) {
 			return errors.New("invalid filter connector")
 		}
 
-		if !tools.StringInSlice(f.Operator, types.QueryFilterOperators) {
+		if !slices.Contains(types.QueryFilterOperators, f.Operator) {
 			return errors.New("invalid filter operator")
 		}
 

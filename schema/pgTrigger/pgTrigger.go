@@ -5,8 +5,8 @@ import (
 	"fmt"
 	"r3/db"
 	"r3/schema"
-	"r3/tools"
 	"r3/types"
+	"slices"
 	"strings"
 
 	"github.com/gofrs/uuid"
@@ -83,7 +83,7 @@ func Set_tx(tx pgx.Tx, pgFunctionId uuid.UUID, id uuid.UUID,
 	}
 
 	// overwrite invalid options
-	if !tools.StringInSlice(fires, []string{"BEFORE", "AFTER"}) {
+	if !slices.Contains([]string{"BEFORE", "AFTER"}, fires) {
 		return errors.New("invalid trigger start")
 	}
 

@@ -2,7 +2,7 @@ package cache
 
 import (
 	"r3/db"
-	"r3/tools"
+	"slices"
 	"sync"
 )
 
@@ -20,7 +20,7 @@ func GetSearchDictionaries() []string {
 func GetSearchDictionaryIsValid(entry string) bool {
 	dict_mx.RLock()
 	defer dict_mx.RUnlock()
-	return tools.StringInSlice(entry, dict)
+	return slices.Contains(dict, entry)
 }
 
 func LoadSearchDictionaries() error {

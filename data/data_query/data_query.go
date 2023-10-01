@@ -2,8 +2,8 @@ package data_query
 
 import (
 	"r3/cache"
-	"r3/tools"
 	"r3/types"
+	"slices"
 	"time"
 
 	"github.com/jackc/pgx/v5/pgtype"
@@ -101,7 +101,7 @@ func ConvertQueryToDataFilter(filters []types.QueryFilter,
 		case "role":
 			access, err := cache.GetAccessById(loginId)
 			if err == nil {
-				sideOut.Value = tools.UuidInSlice(side.RoleId.Bytes, access.RoleIds)
+				sideOut.Value = slices.Contains(access.RoleIds, side.RoleId.Bytes)
 			} else {
 				sideOut.Value = false
 			}
