@@ -1862,11 +1862,6 @@
 			"resetAccessDesc":"Ha sem a korábbi jelszavadhoz, sem a biztonsági kódodhoz nincs hozzáférésed, az titkosított adatokhoz való hozzáférést már elveszítetted.<br /><br />Ebben az esetben dönthetsz úgy, hogy visszaállítod a személyes kulcsaidat, hogy az új adatokat titkosítsd - EZ NEM fogja visszaállítani a korábban titkosított adatokhoz való hozzáférést.",
 			"resetAccessHint":"Biztos vagy benne, hogy vissza szeretnéd állítani a személyes kulcsaidat? Ha igen, akkor nincs visszaút, még akkor sem, ha később megtalálod az előző biztonsági kódodat."
 		},
-		"option":{
-			"cornerKeep":"- változatlan -",
-			"cornerRounded":"kerekített",
-			"cornerSquared":"szögletes"
-		},
 		"tokensFixed":{
 			"button":{
 				"loadApp":"Alkalmazás",
@@ -1910,8 +1905,7 @@
 			"titleName":"Eszköz neve"
 		},
 		"bordersAll":"Keretek hozzáadása",
-		"bordersCorners":"Sarokkeretek",
-		"compact":"Kompakt elrendezés",
+		"bordersSquared":"Squared borders",
 		"dateFormat":"Dátumformátum",
 		"dateFormat0":"É-h-n (2012-12-30)",
 		"dateFormat1":"É/h/n (2012/12/30)",
@@ -1919,14 +1913,11 @@
 		"dateFormat3":"n/h/É (30/12/2012)",
 		"dateFormat4":"h/n/É (12/30/2012)",
 		"dark":"Sötét nézet",
-		"fieldClean":"Mező háttér",
 		"fontFamily":"Betűtípus",
 		"fontSize":"Betűméret",
 		"headerCaptions":"Főmenü címek megjelenítése",
 		"languageCode":"Nyelv",
-		"menuColored":"Színes menü",
 		"mobileScrollForm":"Mobil: Teljes űrlap görgetése",
-		"pageLimit":"Max. oldalszélesség",
 		"pageTitle":"Beállítások",
 		"pattern":"Háttérminta",
 		"searchDictionaries":"Teljes szövegkeresés szótárai",

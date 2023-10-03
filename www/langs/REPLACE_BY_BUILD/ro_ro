@@ -1862,11 +1862,6 @@
 			"resetAccessDesc":"If you do not have access to either your previous password nor your backup code, you permanently lost access to your encrypted data.<br /><br />If this is the case, you can decide to reset your personal keys to encrypt new data - this will <b>NOT</b> re-establish access to previously encrypted data.",
 			"resetAccessHint":"Are you sure you want to reset your personal keys? If you do this, there is no going back even if you find your old backup code later."
 		},
-		"option":{
-			"cornerKeep":"- implicit -",
-			"cornerRounded":"rotunjit",
-			"cornerSquared":"colțuros"
-		},
 		"tokensFixed":{
 			"button":{
 				"loadApp":"Application",
@@ -1910,8 +1905,7 @@
 			"titleName":"Device name"
 		},
 		"bordersAll":"Adăugați chenaruri",
-		"bordersCorners":"Colțuri la margine",
-		"compact":"Aspect compact",
+		"bordersSquared":"Squared borders",
 		"dateFormat":"Formatul datei",
 		"dateFormat0":"aaaa-ll-zz (2012-12-30)",
 		"dateFormat1":"aaaa/ll/zzz (2012/12/30)",
@@ -1919,14 +1913,11 @@
 		"dateFormat3":"aaaa/ll/zz (30/12/2012)",
 		"dateFormat4":"ll/zz/aa (12/30/2012)",
 		"dark":"Mod întunecat",
-		"fieldClean":"Field backgrounds",
 		"fontFamily":"Font",
 		"fontSize":"Mărime font",
 		"headerCaptions":"Afișează titlurile din meniul principal",
 		"languageCode":"Limba",
-		"menuColored":"Colored menu",
 		"mobileScrollForm":"Mobile: Scroll entire form",
-		"pageLimit":"Lățimea paginii maximă",
 		"pageTitle":"Setări",
 		"pattern":"Background pattern",
 		"searchDictionaries":"Dictionaries for full-text search",

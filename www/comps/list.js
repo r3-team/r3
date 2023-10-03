@@ -115,7 +115,7 @@ let MyList = {
 					
 					<!-- actions -->
 					<td class="minimum">
-						<div class="list-input-row-items nowrap">
+						<div class="list-input-row-items nogap nowrap">
 							<my-button image="cancel.png"
 								v-if="!inputIsReadonly && !inputAsCategory"
 								@trigger="inputTriggerRowRemove(i)"
@@ -144,46 +144,44 @@ let MyList = {
 			<template v-if="showInputAddLine">
 				<!-- empty record input field -->
 				
-				<div class="list-input-row-empty">
-					<table class="list-input-rows">
-						<tr>
-							<td class="minimum">
-								<slot name="input-icon" />
-							</td>
-							<td>
-								<div class="list-input-row-items">
-									<input class="input" data-is-input="1" enterkeyhint="send"
-										@click="focus"
-										@focus="focus"
-										@keyup="updatedTextInput"
-										v-model="filtersQuick"
-										:class="{ invalid:!inputValid }"
-										:disabled="inputIsReadonly"
-										:placeholder="inputLinePlaceholder"
-										:tabindex="!inputIsReadonly ? 0 : -1"
-									/>
-								</div>
-							</td>
-							<td class="minimum">
-								<div class="list-input-row-items nowrap">
-									<my-button image="add.png"
-										v-if="!inputIsReadonly && hasCreate"
-										@trigger="$emit('open-form',[],false)"
-										@trigger-middle="$emit('open-form',[],true)"
-										:captionTitle="capApp.inputHintCreate"
-										:naked="true"
-									/>
-									<my-button image="pageDown.png"
-										v-if="!inputIsReadonly"
-										@trigger="toggleDropdown"
-										:captionTitle="capApp.inputHintSelect"
-										:naked="true"
-									/>
-								</div>
-							</td>
-						</tr>
-					</table>
-				</div>
+				<table class="list-input-rows">
+					<tr>
+						<td class="minimum">
+							<slot name="input-icon" />
+						</td>
+						<td>
+							<div class="list-input-row-items">
+								<input class="input" data-is-input="1" enterkeyhint="send"
+									@click="focus"
+									@focus="focus"
+									@keyup="updatedTextInput"
+									v-model="filtersQuick"
+									:class="{ invalid:!inputValid }"
+									:disabled="inputIsReadonly"
+									:placeholder="inputLinePlaceholder"
+									:tabindex="!inputIsReadonly ? 0 : -1"
+								/>
+							</div>
+						</td>
+						<td class="minimum">
+							<div class="list-input-row-items nogap nowrap">
+								<my-button image="add.png"
+									v-if="!inputIsReadonly && hasCreate"
+									@trigger="$emit('open-form',[],false)"
+									@trigger-middle="$emit('open-form',[],true)"
+									:captionTitle="capApp.inputHintCreate"
+									:naked="true"
+								/>
+								<my-button image="pageDown.png"
+									v-if="!inputIsReadonly"
+									@trigger="toggleDropdown"
+									:captionTitle="capApp.inputHintSelect"
+									:naked="true"
+								/>
+							</div>
+						</td>
+					</tr>
+				</table>
 			</template>
 		</template>
 		
@@ -369,7 +367,7 @@ let MyList = {
 			<div class="layoutWrap">
 				<!-- list results as table or card layout -->
 				<div
-					:class="{ layoutCards:isCards, layoutTable:isTable, scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
+					:class="{ layoutCards:isCards, layoutTable:isTable, scrolls:isSingleField, 'input-dropdown-wrap':isInput, 'dropdown-list-input':isInput, upwards:inputDropdownUpwards }"
 					:id="usesPageHistory ? scrollFormId : null"
 				>
 					<table v-if="isTable" :class="{ 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
@@ -409,7 +407,7 @@ let MyList = {
 						</thead>
 						<tbody>
 							<!-- result row actions (only available if list is input) -->
-							<tr v-if="showInputHeader">
+							<tr v-if="showInputHeader" class="list-input-row-actions">
 								<td colspan="999">
 									<div class="sub-actions default-inputs">
 										<select

@@ -263,8 +263,7 @@ const app = Vue.createApp(MyApp)
 	.component('my-bool',MyBool)
 	.component('my-bool-string-number',MyBoolStringNumber)
 	.component('my-button',MyButton)
-	.component('my-filters',MyFilters)
-;
+	.component('my-filters',MyFilters);
 
 app.directive('click-outside',{
 	beforeMount(el,binding,vnode) {

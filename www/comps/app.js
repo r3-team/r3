@@ -53,9 +53,7 @@ let MyApp = {
 			
 			<router-view class="app-content"
 				@logout="sessionInvalid"
-				:bgStyle="bgStyle"
 				:moduleEntries="moduleEntries"
-				:style="stylesContent"
 			/>
 			
 			<img class="app-logo-bottom clickable"
@@ -133,10 +131,10 @@ let MyApp = {
 		};
 	},
 	watch:{
-		color1:{
+		colorMain:{
 			handler(v) {
 				// set meta theme color (for PWA window color)
-				document.querySelector('meta[name="theme-color"]').setAttribute('content',v);
+				document.querySelector('meta[name="theme-color"]').setAttribute('content','rgba(34,34,34,1)');
 			},
 			immediate:true
 		},
@@ -169,11 +167,16 @@ let MyApp = {
 				document.head.appendChild(e);
 			},
 			immediate:true
+		},
+		$route:{
+			handler(v) {
+				this.$store.commit('isAtModule',typeof v.meta.atModule !== 'undefined');
+			},
+			immediate:true
 		}
 	},
 	computed:{
 		// presentation
-		bgStyle:(s) => `background-color:${s.color1};`,
 		classes:(s) => {
 			if(!s.appReady)
 				return 'is-not-ready';
@@ -184,34 +187,12 @@ let MyApp = {
 			];
 			
 			if(s.settings.bordersAll)       classes.push('user-bordersAll');
-			if(s.settings.compact)          classes.push('user-compact');
-			if(s.settings.fieldClean)       classes.push('user-clean');
+			if(s.settings.bordersSquared)   classes.push('user-bordersSquared');
 			if(s.settings.dark)             classes.push('user-dark');
 			if(s.settings.mobileScrollForm) classes.push('user-mobile-scroll-form');
 			if(s.isMobile)                  classes.push('is-mobile');
 			
-			switch(s.settings.bordersCorner) {
-				case 'rounded': classes.push('user-bordersRounded'); break;
-				case 'squared': classes.push('user-bordersSquared'); break;
-			}
 			return classes.join(' ');
-		},
-		color1:(s) => {
-			let c = s.settings.dark ? '#222' : '#444'; // default colors
-			
-			if(s.activated && s.customColorHeader !== '')
-				c = `#${s.customColorHeader}`;
-			else if(s.isAtModule)
-				c = s.moduleIdMapColor[s.moduleIdLast];
-			
-			return c;
-		},
-		moduleIdMapColor:(s) => {
-			let out = {};
-			for(let m of s.modules) {
-				out[m.id] = s.colorAdjustBgHeader(`#${m.color1}`);
-			}
-			return out;
 		},
 		styles:(s) => {
 			if(!s.appReady) return '';
@@ -223,8 +204,6 @@ let MyApp = {
 			
 			return styles.join(';');
 		},
-		stylesContent:(s) => !s.appReady || s.settings.compact ? ''
-			: [`max-width:${s.settings.pageLimit}px`].join(';'),
 		
 		// navigation
 		moduleEntries:(s) => {
@@ -317,14 +296,24 @@ let MyApp = {
 		},
 		
 		// simple
+		//color1:(s) => `linear-gradient(175deg, rgba(34,34,34,1) 60%, ${s.colorMain} 110%)`,
+		
+		bgStyle:(s) => {
+			return `
+				background-color:rgba(34,34,34,1);
+				background-image:radial-gradient(at bottom right, ${s.colorMain} 0%, rgba(34,34,34,1) 60%);
+				background-size:70% 120%;
+				background-position:bottom right;
+				background-repeat:no-repeat;
+			`;
+		},
+		
 		httpMode:       (s) => location.protocol === 'http:',
-		isAtModule:     (s) => typeof s.$route.meta.atModule !== 'undefined' && s.moduleIdLast !== null,
 		pwaManifestHref:(s) => `/manifests/${s.isAtModule ? s.moduleIdLast : ''}`,
 		
 		// stores
 		activated:        (s) => s.$store.getters['local/activated'],
 		appVersion:       (s) => s.$store.getters['local/appVersion'],
-		customColorHeader:(s) => s.$store.getters['local/companyColorHeader'],
 		customLogo:       (s) => s.$store.getters['local/customLogo'],
 		customLogoUrl:    (s) => s.$store.getters['local/customLogoUrl'],
 		css:              (s) => s.$store.getters['local/css'],
@@ -338,9 +327,11 @@ let MyApp = {
 		blockInput:       (s) => s.$store.getters.blockInput,
 		capErr:           (s) => s.$store.getters.captions.error,
 		capGen:           (s) => s.$store.getters.captions.generic,
+		colorMain:        (s) => s.$store.getters.colorMain,
 		isAdmin:          (s) => s.$store.getters.isAdmin,
 		isAtDialog:       (s) => s.$store.getters.isAtDialog,
 		isAtFeedback:     (s) => s.$store.getters.isAtFeedback,
+		isAtModule:       (s) => s.$store.getters.isAtModule,
 		isMobile:         (s) => s.$store.getters.isMobile,
 		loginEncryption:  (s) => s.$store.getters.loginEncryption,
 		loginPrivateKey:  (s) => s.$store.getters.loginPrivateKey,

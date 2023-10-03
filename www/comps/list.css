@@ -4,17 +4,17 @@
 	border-radius:3px;
 	display:flex;
 	flex-flow:column nowrap;
-	box-shadow:1px 1px 4px var(--color-shade);
+	background-color:var(--color-input);
 	overflow:auto;
 }
 .list.asInput{
 	min-height:unset;
-	align-self:stretch;
+	align-self:flex-end;
 	justify-content:space-between;
-	box-shadow:none;
+	background-color:transparent;
 }
 .list.asInput.inputAddShown{
-	margin-bottom:var(--row-height);
+	/*margin-bottom:var(--row-height);*/
 }
 .list .lookup{
 	width:110px !important;
@@ -69,7 +69,6 @@
 }
 .list .layoutTable tbody tr{
 	color:var(--color-font);
-	background-color:var(--color-bg);
 }
 .list .layoutTable tbody tr.rowSelect:hover,
 .list .layoutTable tbody tr.rowSelect:focus{
@@ -148,6 +147,7 @@
 	display:flex;
 	flex-flow:column nowrap;
 	gap:6px;
+	background-color:var(--color-bg);
 }
 .list .layoutTable th .columnOptionItem{
 	display:flex;
@@ -158,8 +158,8 @@
 	display:flex;
 	flex-flow:column nowrap;
 	max-height:250px;
-	border-top:1px solid var(--color-border);
-	border-bottom:1px solid var(--color-border);
+	background-color:var(--color-input);
+	box-shadow:1px 1px 4px var(--color-shade-input);
 	overflow-y:scroll;
 }
 .list .layoutTable th.checkbox,
@@ -356,14 +356,14 @@
 	align-items:center;
 	gap:4px;
 }
+.list-input-row-items.nogap{
+	gap:0px;
+}
 .list-input-row-items.nowrap{
 	flex-wrap:nowrap;
 }
-.list-input-row-empty{
-	position:absolute;
-	bottom:2px; /* keep field underline visible */
-	left:8px;
-	right:2px;
+.list-input-row-actions{
+	background-color:var(--color-bg);
 }
 
 
@@ -451,14 +451,6 @@
 
 
 /* user overwrites */
-.user-clean .list:not(.asInput):not(.isSingleField){
-	box-shadow:none;
-	border:1px solid var(--color-border);
-	border-radius:5px;
-}
-.user-bordersRounded .list-input-row-empty{
-	border-radius:0px 0px 3px 3px;
-}
 .user-bordersSquared .list,
 .user-bordersSquared .list .layoutCards .card,
 .user-bordersSquared .list .layoutCards .card .header,

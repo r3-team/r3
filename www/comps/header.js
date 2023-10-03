@@ -14,7 +14,7 @@ let MyHeader = {
 		
 		<div class="app-header-bg" :style="bgStyle" />
 		
-		<div class="app-header-content" :style="styles">
+		<div class="app-header-content">
 			<div ref="content" class="entries">
 				
 				<template v-if="!isMobile && isAdmin && !pwaSingle" >
@@ -55,7 +55,6 @@ let MyHeader = {
 				>
 					<div class="entry-bg"
 						:class="{ 'router-link-active':$route.params.moduleName === me.name }"
-						:style="bgStyle"
 					/>
 					
 					<router-link class="entry clickable"
@@ -71,7 +70,6 @@ let MyHeader = {
 					<!-- sub header -->
 					<div class="children shade"
 						v-if="me.children.length !== 0"
-						:style="bgStyle"
 					>
 						<!-- parent module (if accessible) -->
 						<router-link class="entry child clickable"
@@ -259,7 +257,6 @@ let MyHeader = {
 		
 		// simple
 		pwaSingle:(s) => s.pwaModuleId !== null,
-		styles:   (s) => s.settings.compact ? '' : `max-width:${s.settings.pageLimit}px;`,
 		
 		// stores
 		modules:        (s) => s.$store.getters['schema/modules'],

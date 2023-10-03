@@ -67,7 +67,6 @@ let MyGoForm = {
 		<my-menu class="noPrint"
 			v-if="!isMobile || isAtMenu"
 			v-for="m in modules.filter(v => v.id === moduleId)"
-			:bgStyle="bgStyle"
 			:isActiveModule="m.id === moduleId"
 			:formIdActive="formId"
 			:formOpensPreset="formIdMap[formId].presetIdOpen !== null"
@@ -84,7 +83,6 @@ let MyGoForm = {
 		/>
 	</div>`,
 	props:{
-		bgStyle:        { type:String, required:true },
 		formId:         { type:String, required:true },
 		moduleName:     { type:String, required:true },
 		moduleNameChild:{ type:String, required:false, default:'' },

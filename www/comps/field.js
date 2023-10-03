@@ -67,249 +67,446 @@ let MyField = {
 		:data-field-is-valid="isValid ? '1' : '0'"
 		:style="domStyle"
 	>
-		<template v-if="isData">
+		<template v-if="isData || isList || isTabs || isCalendar || isKanban || isChart">
 			
-			<div class="input-box"
-			 	v-click-outside="clickOutside"
-				:class="{ disabled:isReadonly }"
+			<div class="field-caption"
+				v-if="hasCaption"
+				:class="{ invalid:showInvalid }"
 			>
-				<div class="caption"
-					v-if="hasCaption"
-					:class="{ invalid:showInvalid }"
-				>
-					<img src="images/lock.png" v-if="isEncrypted" :title="capApp.dialog.encrypted" />
-					<span>{{ caption }}</span>
+				<img src="images/lock.png" v-if="isEncrypted" :title="capApp.dialog.encrypted" />
+				<span>{{ caption }}</span>
+			</div>
+			
+			<div class="field-content"
+				:class="{ data:isData, disabled:isReadonly, isSingleField:isAloneInForm || isAloneInTab, intent:hasIntent }"
+		 		v-click-outside="clickOutside"
+			>
+				<!-- data field icon -->
+				<div class="field-icon" v-if="iconId && isData && !isRelationship && !isFiles && !isRichtext && !isTextarea">
+					<img :src="srcBase64(iconIdMap[iconId].file)" />
 				</div>
 				
-				<div class="input-line" :class="{ isSingleField:isAloneInForm || isAloneInTab }">
+				<!-- calendar -->
+				<my-calendar
+					v-if="isCalendar && !field.gantt"
+					@clipboard="$emit('clipboard')"
+					@close-inline="closeInline"
+					@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
+					@record-count-change="$emit('set-counter',field.id,$event)"
+					@set-args="(...args) => $emit('set-form-args',...args)"
+					@set-collection-indexes="setCollectionIndexes"
+					:attributeIdColor="field.attributeIdColor"
+					:attributeIdDate0="field.attributeIdDate0"
+					:attributeIdDate1="field.attributeIdDate1"
+					:choices="choicesProcessed"
+					:columns="columnsProcessed"
+					:collections="field.collections"
+					:collectionIdMapIndexes="collectionIdMapIndexes"
+					:daysShowDef="field.days"
+					:daysShowToggle="field.daysToggle"
+					:fieldId="field.id"
+					:filters="filtersProcessed"
+					:formLoading="formLoading"
+					:hasOpenForm="field.openForm !== null"
+					:iconId="iconId ? iconId : null"
+					:ics="field.ics"
+					:indexColor="field.indexColor"
+					:indexDate0="field.indexDate0"
+					:indexDate1="field.indexDate1"
+					:isHidden="isHidden"
+					:isSingleField="isAloneInForm || isAloneInTab"
+					:popUpFormInline="popUpFormInline"
+					:query="field.query"
+					:usesPageHistory="isAloneInForm && !formIsPopUp"
+				/>
+				
+				<!-- gantt -->
+				<my-gantt
+					v-if="isCalendar && field.gantt"
+					@close-inline="closeInline"
+					@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
+					@record-count-change="$emit('set-counter',field.id,$event)"
+					@set-args="(...args) => $emit('set-form-args',...args)"
+					@set-collection-indexes="setCollectionIndexes"
+					:attributeIdColor="field.attributeIdColor"
+					:attributeIdDate0="field.attributeIdDate0"
+					:attributeIdDate1="field.attributeIdDate1"
+					:choices="choicesProcessed"
+					:columns="columnsProcessed"
+					:collections="field.collections"
+					:collectionIdMapIndexes="collectionIdMapIndexes"
+					:fieldId="field.id"
+					:days0="field.dateRange0 / 86400"
+					:days1="field.dateRange1 / 86400"
+					:filters="filtersProcessed"
+					:formLoading="formLoading"
+					:hasOpenForm="field.openForm !== null"
+					:iconId="iconId ? iconId : null"
+					:indexColor="field.indexColor"
+					:indexDate0="field.indexDate0"
+					:indexDate1="field.indexDate1"
+					:isHidden="isHidden"
+					:isSingleField="isAloneInForm || isAloneInTab"
+					:popUpFormInline="popUpFormInline"
+					:stepTypeDefault="field.ganttSteps"
+					:stepTypeToggle="field.ganttStepsToggle"
+					:query="field.query"
+					:usesPageHistory="isAloneInForm && !formIsPopUp"
+				/>
+				
+				<!-- kanban -->
+				<my-kanban
+					v-if="isKanban"
+					@clipboard="$emit('clipboard')"
+					@close-inline="closeInline"
+					@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
+					@record-count-change="$emit('set-counter',field.id,$event)"
+					@set-args="(...args) => $emit('set-form-args',...args)"
+					@set-collection-indexes="setCollectionIndexes"
+					:attributeIdSort="field.attributeIdSort"
+					:choices="choicesProcessed"
+					:columns="columnsProcessed"
+					:collections="field.collections"
+					:collectionIdMapIndexes="collectionIdMapIndexes"
+					:fieldId="field.id"
+					:filters="filtersProcessed"
+					:formLoading="formLoading"
+					:hasOpenForm="field.openForm !== null"
+					:iconId="iconId ? iconId : null"
+					:isHidden="isHidden"
+					:isSingleField="isAloneInForm || isAloneInTab"
+					:popUpFormInline="popUpFormInline"
+					:relationIndexData="field.relationIndexData"
+					:relationIndexAxisX="field.relationIndexAxisX"
+					:relationIndexAxisY="field.relationIndexAxisY"
+					:query="field.query"
+					:usesPageHistory="isAloneInForm && !formIsPopUp"
+				/>
+				
+				<!-- chart -->
+				<my-chart
+					v-if="isChart"
+					:choices="choicesProcessed"
+					:columns="columnsProcessed"
+					:filters="filtersProcessed"
+					:formLoading="formLoading"
+					:limit="field.query.fixedLimit"
+					:needsHeader="isAloneInForm || isAloneInTab"
+					:optionJson="field.chartOption"
+					:query="field.query"
+				/>
+				
+				<!-- list -->
+				<my-list
+					v-if="isList"
+					@clipboard="$emit('clipboard')"
+					@close-inline="closeInline"
+					@open-form="(...args) => openForm(args[0],[],args[1],null)"
+					@open-form-bulk="(...args) => openForm(args[0],[],args[1],'bulk')"
+					@record-count-change="$emit('set-counter',field.id,$event)"
+					@set-args="(...args) => $emit('set-form-args',...args)"
+					@set-collection-indexes="setCollectionIndexes"
+					:autoRenew="field.autoRenew"
+					:choices="choicesProcessed"
+					:collections="field.collections"
+					:collectionIdMapIndexes="collectionIdMapIndexes"
+					:columns="columnsProcessed"
+					:csvExport="field.csvExport"
+					:csvImport="field.csvImport"
+					:fieldId="field.id"
+					:filterQuick="field.filterQuick"
+					:filters="filtersProcessed"
+					:formLoading="formLoading"
+					:hasOpenForm="field.openForm !== null"
+					:hasOpenFormBulk="field.openFormBulk !== null"
+					:iconId="iconId ? iconId : null"
+					:isHidden="isHidden"
+					:isSingleField="isAloneInForm || isAloneInTab"
+					:layout="field.layout"
+					:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
+					:popUpFormInline="popUpFormInline"
+					:query="field.query"
+					:usesPageHistory="isAloneInForm && !formIsPopUp"
+				/>
+				
+				<!-- tabs -->
+				<div class="tabs" v-if="isTabs" :class="{ isSingleField:isAloneInForm || isAloneInTab }">
+					<div class="tabs-entries">
+						<div class="tabs-icon" v-if="iconId">
+							<img :src="srcBase64(iconIdMap[iconId].file)" />
+						</div>
+						<div class="tabs-entry clickable"
+							v-if="!isMobile"
+							v-for="(t,i) in field.tabs"
+							v-show="!tabIndexesHidden.includes(i)"
+							@click="setTab(i)"
+							:class="getTabClasses(i)"
+						>
+							{{ tabIndexesTitle[i] }}
+						</div>
+						<select v-if="isMobile" @change="setTab(parseInt($event.target.value))" :value="tabIndexShow">
+							<template v-for="(t,i) in field.tabs">
+								<option v-if="!tabIndexesHidden.includes(i)" :value="i">
+									{{ tabIndexesTitle[i] }}
+								</option>
+							</template>
+						</select>
+					</div>
+					<div class="fields"
+						v-for="(t,i) in field.tabs"
+						v-show="i === tabIndexShow"
+						:class="{ onlyOne:t.fields.length === 1 && t.fields[0].content !== 'container' }"
+					>
+						<!-- tab children -->
+						<my-field flexDirParent="column" :ref="'tabField_'+f.id"
+							v-for="f in t.fields"
+							@clipboard="$emit('clipboard')"
+							@execute-function="$emit('execute-function',$event)"
+							@hotkey="$emit('hotkey',$event)"
+							@open-form="(...args) => $emit('open-form',...args)"
+							@set-counter="(...args) => setTabCounter(i,args[0],args[1])"
+							@set-form-args="(...args) => $emit('set-form-args',...args)"
+							@set-touched="(...args) => $emit('set-touched',...args)"
+							@set-valid="(...args) => $emit('set-valid',...args)"
+							@set-value="(...args) => $emit('set-value',...args)"
+							@set-value-init="(...args) => $emit('set-value-init',...args)"
+							:isBulkUpdate="isBulkUpdate"
+							:dataFieldMap="dataFieldMap"
+							:entityIdMapState="entityIdMapState"
+							:field="f"
+							:fieldIdsChanged="fieldIdsChanged"
+							:fieldIdsInvalid="fieldIdsInvalid"
+							:fieldIdMapCaption="fieldIdMapCaption"
+							:fieldIdMapError="fieldIdMapError"
+							:formBadSave="formBadSave"
+							:formIsPopUp="formIsPopUp"
+							:formLoading="formLoading"
+							:formReadonly="formReadonly"
+							:isAloneInTab="t.fields.length === 1"
+							:isAloneInForm="false"
+							:isHiddenInParent="isHidden || (i !== tabIndexShow && !t.contentCounter)"
+							:joinsIndexMap="joinsIndexMap"
+							:key="f.id"
+							:values="values"
+						/>
+					</div>
+				</div>
+				
+				<!-- regular text line input (numeric, strings, etc.) -->
+				<input class="input" data-is-input="1"
+					v-if="isLineInput"
+					v-model="value"
+					@blur="blur"
+					@focus="focus"
+					@click="click"
+					:class="{ invalid:showInvalid }"
+					:disabled="isReadonly"
+					:placeholder="capGen.threeDots"
+					:type="!isPassword || showPassword ? 'text' : 'password'"
+				/>
+				
+				<!-- iframe input -->
+				<my-input-iframe
+					v-if="isIframe"
+					v-model="value"
+					@copyToClipboard="copyToClipboard"
+					:clipboard="isClipboard"
+					:formLoading="formLoading"
+					:isHidden="isHidden"
+					:readonly="isReadonly"
+				/>
+				
+				<!-- UUID input -->
+				<my-input-uuid
+					v-if="isUuid"
+					v-model="value"
+					:readonly="isReadonly"
+				/>
+				
+				<!-- regconfig input -->
+				<my-input-select
+					v-if="isRegconfig"
+					@updated-text-input="regconfigInput = $event"
+					@update:selected="value = $event;regconfigInput = ''"
+					:inputTextSet="value"
+					:nakedIcons="true"
+					:options="regconfigOptions"
+					:placeholder="capGen.threeDots"
+					:selected="value"
+				/>
+				
+				<!-- password show action -->
+				<my-button
+					v-if="isPassword"
+					@trigger="showPassword = !showPassword"
+					:image="showPassword ? 'visible0.png' : 'visible1.png'"
+					:naked="true"
+				/>
+				
+				<!-- link open action -->
+				<my-button
+					v-if="link !== false"
+					@trigger="openLink(link.href,link.blank)"
+					:active="value !== null"
+					:image="link.image"
+					:naked="true"
+				/>
+				
+				<!-- color input -->
+				<div class="color-input" v-if="isColor">
 					
-					<!-- data field icon -->
-					<img class="field-icon"
-						v-if="iconId && !isRelationship && !isFiles && !isRichtext && !isTextarea"
-						:src="srcBase64(iconIdMap[iconId].file)"
-					/>
-					
-					<!-- regular text line input (numeric, strings, etc.) -->
-					<input class="input" data-is-input="1"
-						v-if="isLineInput"
-						v-model="value"
+					<input class="input" data-is-input="1" type="text"
 						@blur="blur"
 						@focus="focus"
-						@click="click"
+						v-model="value"
 						:class="{ invalid:showInvalid }"
 						:disabled="isReadonly"
-						:placeholder="!focused && !isCleanUi ? caption : ''"
-						:type="!isPassword || showPassword ? 'text' : 'password'"
 					/>
 					
-					<!-- iframe input -->
-					<my-input-iframe
-						v-if="isIframe"
-						v-model="value"
-						@copyToClipboard="copyToClipboard"
-						:clipboard="isClipboard"
-						:formLoading="formLoading"
-						:isHidden="isHidden"
-						:readonly="isReadonly"
-					/>
-					
-					<!-- UUID input -->
-					<my-input-uuid
-						v-if="isUuid"
-						v-model="value"
-						:readonly="isReadonly"
-					/>
-					
-					<!-- regconfig input -->
-					<my-input-select
-						v-if="isRegconfig"
-						@updated-text-input="regconfigInput = $event"
-						@update:selected="value = $event;regconfigInput = ''"
-						:inputTextSet="value"
-						:nakedIcons="true"
-						:options="regconfigOptions"
-						:placeholder="!focused && !isCleanUi ? caption : capGen.threeDots"
-						:selected="value"
-					/>
-					
-					<!-- password show action -->
-					<my-button
-						v-if="isPassword"
-						@trigger="showPassword = !showPassword"
-						:image="showPassword ? 'visible0.png' : 'visible1.png'"
-						:naked="true"
-					/>
-					
-					<!-- link open action -->
-					<my-button
-						v-if="link !== false"
-						@trigger="openLink(link.href,link.blank)"
-						:active="value !== null"
-						:image="link.image"
-						:naked="true"
-					/>
-					
-					<!-- color input -->
-					<div class="color-input" v-if="isColor">
-						
-						<input class="input" data-is-input="1" type="text"
-							@blur="blur"
-							@focus="focus"
-							v-model="value"
-							:class="{ invalid:showInvalid }"
-							:disabled="isReadonly"
-							:placeholder="!focused && !isCleanUi ? caption : ''"
-						/>
-						
-						<!-- preview -->
-						<div class="preview"
-							@click="click"
-							:class="{ clickable:!isReadonly }"
-							:style="value !== null ? 'background-color:#'+value : ''"
-						></div>
-					</div>
-					<div class="input-dropdown-wrap" v-if="showColorPickerInput">
-						<chrome-picker class="input-dropdown"
-							@update:modelValue="value = $event.hex.substr(1)"
-							:disable-alpha="true"
-							:disable-fields="true"
-							:modelValue="value !== null ? value : '000000'"
-						/>
-					</div>
-					
-					<!-- textarea input -->
-					<textarea class="input textarea" data-is-input="1"
-						v-if="isTextarea"
-						v-model="value"
-						@blur="blur"
-						@focus="focus"
+					<!-- preview -->
+					<div class="preview"
 						@click="click"
-						:class="{ invalid:showInvalid }"
-						:disabled="isReadonly"
-						:placeholder="!focused && !isCleanUi ? caption : ''"
-					></textarea>
-					
-					<!-- richtext input -->
-					<my-input-richtext
-						v-if="isRichtext"
-						v-model="value"
-						@hotkey="$emit('hotkey',$event)"
-						:attributeIdFile="field.attributeIdAlt"
-						:readonly="isReadonly"
-						:valueFiles="valueAlt"
-					/>
-					
-					<!-- slider input -->
-					<div class="slider-input" v-if="isSlider">
-						<input class="range" type="range"
-							v-model="value"
-							:disabled="isReadonly"
-							:min="field.min"
-							:max="field.max"
-						/>
-						<input class="value" data-is-input="1"
-							v-model="value"
-							:disabled="isReadonly"
-						/>
-					</div>
-					
-					<!-- login input -->
-					<my-input-login
-						v-if="isLogin"
-						v-model="value"
-						@blurred="blur"
-						@focused="focus"
-						:placeholder="!focused && !isCleanUi ? caption : ''"
-						:readonly="isReadonly"
-					/>
-					
-					<!-- date / datetime / time input -->
-					<my-input-date
-						v-if="isDateInput"
-						@blurred="blur"
-						@focused="focus"
-						@set-unix-from="value = $event"
-						@set-unix-to="valueAlt = $event"
-						:isDate="isDatetime || isDate"
-						:isTime="isDatetime || isTime"
-						:isRange="isDateRange"
-						:isReadonly="isReadonly"
-						:unixFrom="value"
-						:unixTo="valueAlt"
-					/>
-					
-					<!-- boolean input -->
-					<my-bool
-						v-if="isBoolean"
-						v-model="value"
-						:readonly="isReadonly"
-					/>
-					
-					<!-- files input -->
-					<my-input-files
-						v-if="isFiles"
-						v-model="value"
-						@file-count-change="$emit('set-counter',field.id,$event)"
-						:attributeId="field.attributeId"
-						:countAllowed="field.max !== null ? field.max : 0"
-						:fieldId="field.id"
-						:formLoading="formLoading"
-						:readonly="isReadonly"
-						:recordId="joinsIndexMap[field.index].recordId"
-						:showGallery="field.display === 'gallery'"
-					>
-						<template #input-icon>
-							<img class="field-icon"
-								v-if="iconId"
-								:src="srcBase64(iconIdMap[iconId].file)"
-							/>
-						</template>
-					</my-input-files>
-					
-					<!-- relationship input -->
-					<my-list
-						v-if="isRelationship"
-						@blurred="blur"
-						@focused="focus"
-						@open-form="(...args) => openForm(args[0],[],args[1],null)"
-						@record-selected="relationshipRecordSelected"
-						@record-removed="relationshipRecordRemoved"
-						@records-selected-init="$emit('set-value-init',fieldAttributeId,$event,true,true)"
-						:choices="choicesProcessed"
-						:columns="columnsProcessed"
-						:fieldId="field.id"
-						:filterQuick="field.filterQuick"
-						:filters="filtersProcessed"
-						:formLoading="formLoading"
-						:hasOpenForm="field.openForm !== null"
-						:header="false"
-						:inputAsCategory="field.category"
-						:inputAutoSelect="field.autoSelect"
-						:inputIsNew="isNew"
-						:inputIsReadonly="isReadonly"
-						:inputMulti="isRelationship1N"
-						:inputRecordIds="relationshipRecordIds"
-						:inputValid="!showInvalid"
-						:isInput="true"
-						:query="field.query"
-					>
-						<template #input-icon>
-							<img class="field-icon inList"
-								v-if="iconId"
-								:src="srcBase64(iconIdMap[iconId].file)"
-							/>
-						</template>
-					</my-list>
-					
-					<!-- copy to clipboard action -->
-					<my-button image="copyClipboard.png"
-						v-if="isClipboard && !isFiles && !isIframe"
-						@trigger="copyToClipboard"
-						:active="value !== null"
-						:captionTitle="capGen.button.copyClipboard"
-						:naked="true"
+						:class="{ clickable:!isReadonly }"
+						:style="value !== null ? 'background-color:#'+value : ''"
+					></div>
+				</div>
+				<div class="input-dropdown-wrap" v-if="showColorPickerInput">
+					<chrome-picker class="input-dropdown"
+						@update:modelValue="value = $event.hex.substr(1)"
+						:disable-alpha="true"
+						:disable-fields="true"
+						:modelValue="value !== null ? value : '000000'"
 					/>
 				</div>
+				
+				<!-- textarea input -->
+				<textarea class="input textarea" data-is-input="1"
+					v-if="isTextarea"
+					v-model="value"
+					@blur="blur"
+					@focus="focus"
+					@click="click"
+					:class="{ invalid:showInvalid }"
+					:disabled="isReadonly"
+				></textarea>
+				
+				<!-- richtext input -->
+				<my-input-richtext
+					v-if="isRichtext"
+					v-model="value"
+					@hotkey="$emit('hotkey',$event)"
+					:attributeIdFile="field.attributeIdAlt"
+					:readonly="isReadonly"
+					:valueFiles="valueAlt"
+				/>
+				
+				<!-- slider input -->
+				<div class="slider-input" v-if="isSlider">
+					<input class="range" type="range"
+						v-model="value"
+						:disabled="isReadonly"
+						:min="field.min"
+						:max="field.max"
+					/>
+					<input class="value" data-is-input="1"
+						v-model="value"
+						:disabled="isReadonly"
+					/>
+				</div>
+				
+				<!-- login input -->
+				<my-input-login
+					v-if="isLogin"
+					v-model="value"
+					@blurred="blur"
+					@focused="focus"
+					:readonly="isReadonly"
+				/>
+				
+				<!-- date / datetime / time input -->
+				<my-input-date
+					v-if="isDateInput"
+					@blurred="blur"
+					@focused="focus"
+					@set-unix-from="value = $event"
+					@set-unix-to="valueAlt = $event"
+					:isDate="isDatetime || isDate"
+					:isTime="isDatetime || isTime"
+					:isRange="isDateRange"
+					:isReadonly="isReadonly"
+					:unixFrom="value"
+					:unixTo="valueAlt"
+				/>
+				
+				<!-- boolean input -->
+				<my-bool
+					v-if="isBoolean"
+					v-model="value"
+					:readonly="isReadonly"
+				/>
+				
+				<!-- files input -->
+				<my-input-files
+					v-if="isFiles"
+					v-model="value"
+					@file-count-change="$emit('set-counter',field.id,$event)"
+					:attributeId="field.attributeId"
+					:countAllowed="field.max !== null ? field.max : 0"
+					:fieldId="field.id"
+					:formLoading="formLoading"
+					:readonly="isReadonly"
+					:recordId="joinsIndexMap[field.index].recordId"
+					:showGallery="field.display === 'gallery'"
+				>
+					<template #input-icon>
+						<div class="field-icon" v-if="iconId">
+							<img :src="srcBase64(iconIdMap[iconId].file)" />
+						</div>
+					</template>
+				</my-input-files>
+				
+				<!-- relationship input -->
+				<my-list
+					v-if="isRelationship"
+					@blurred="blur"
+					@focused="focus"
+					@open-form="(...args) => openForm(args[0],[],args[1],null)"
+					@record-selected="relationshipRecordSelected"
+					@record-removed="relationshipRecordRemoved"
+					@records-selected-init="$emit('set-value-init',fieldAttributeId,$event,true,true)"
+					:choices="choicesProcessed"
+					:columns="columnsProcessed"
+					:fieldId="field.id"
+					:filterQuick="field.filterQuick"
+					:filters="filtersProcessed"
+					:formLoading="formLoading"
+					:hasOpenForm="field.openForm !== null"
+					:header="false"
+					:inputAsCategory="field.category"
+					:inputAutoSelect="field.autoSelect"
+					:inputIsNew="isNew"
+					:inputIsReadonly="isReadonly"
+					:inputMulti="isRelationship1N"
+					:inputRecordIds="relationshipRecordIds"
+					:inputValid="!showInvalid"
+					:isInput="true"
+					:query="field.query"
+				>
+					<template #input-icon>
+						<div class="field-icon inList" v-if="iconId">
+							<img :src="srcBase64(iconIdMap[iconId].file)" />
+						</div>
+					</template>
+				</my-list>
+				
+				<!-- copy to clipboard action -->
+				<my-button image="copyClipboard.png"
+					v-if="isClipboard && !isFiles && !isIframe"
+					@trigger="copyToClipboard"
+					:active="value !== null"
+					:captionTitle="capGen.button.copyClipboard"
+					:naked="true"
+				/>
 			</div>
 			
 			<!-- helper text -->
@@ -348,212 +545,6 @@ let MyField = {
 				{{ caption }}
 			</div>
 			<div class="richtext" v-if="field.richtext" v-html="caption" />
-		</div>
-		
-		<!-- list -->
-		<my-list
-			v-if="isList"
-			@clipboard="$emit('clipboard')"
-			@close-inline="closeInline"
-			@open-form="(...args) => openForm(args[0],[],args[1],null)"
-			@open-form-bulk="(...args) => openForm(args[0],[],args[1],'bulk')"
-			@record-count-change="$emit('set-counter',field.id,$event)"
-			@set-args="(...args) => $emit('set-form-args',...args)"
-			@set-collection-indexes="setCollectionIndexes"
-			:autoRenew="field.autoRenew"
-			:choices="choicesProcessed"
-			:collections="field.collections"
-			:collectionIdMapIndexes="collectionIdMapIndexes"
-			:columns="columnsProcessed"
-			:csvExport="field.csvExport"
-			:csvImport="field.csvImport"
-			:fieldId="field.id"
-			:filterQuick="field.filterQuick"
-			:filters="filtersProcessed"
-			:formLoading="formLoading"
-			:hasOpenForm="field.openForm !== null"
-			:hasOpenFormBulk="field.openFormBulk !== null"
-			:iconId="iconId ? iconId : null"
-			:isHidden="isHidden"
-			:isSingleField="isAloneInForm || isAloneInTab"
-			:layout="field.layout"
-			:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
-			:popUpFormInline="popUpFormInline"
-			:query="field.query"
-			:usesPageHistory="isAloneInForm && !formIsPopUp"
-		/>
-		
-		<!-- calendar -->
-		<my-calendar
-			v-if="isCalendar && !field.gantt"
-			@clipboard="$emit('clipboard')"
-			@close-inline="closeInline"
-			@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
-			@record-count-change="$emit('set-counter',field.id,$event)"
-			@set-args="(...args) => $emit('set-form-args',...args)"
-			@set-collection-indexes="setCollectionIndexes"
-			:attributeIdColor="field.attributeIdColor"
-			:attributeIdDate0="field.attributeIdDate0"
-			:attributeIdDate1="field.attributeIdDate1"
-			:choices="choicesProcessed"
-			:columns="columnsProcessed"
-			:collections="field.collections"
-			:collectionIdMapIndexes="collectionIdMapIndexes"
-			:daysShowDef="field.days"
-			:daysShowToggle="field.daysToggle"
-			:fieldId="field.id"
-			:filters="filtersProcessed"
-			:formLoading="formLoading"
-			:hasOpenForm="field.openForm !== null"
-			:iconId="iconId ? iconId : null"
-			:ics="field.ics"
-			:indexColor="field.indexColor"
-			:indexDate0="field.indexDate0"
-			:indexDate1="field.indexDate1"
-			:isHidden="isHidden"
-			:isSingleField="isAloneInForm || isAloneInTab"
-			:popUpFormInline="popUpFormInline"
-			:query="field.query"
-			:usesPageHistory="isAloneInForm && !formIsPopUp"
-		/>
-		
-		<!-- gantt -->
-		<my-gantt
-			v-if="isCalendar && field.gantt"
-			@close-inline="closeInline"
-			@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
-			@record-count-change="$emit('set-counter',field.id,$event)"
-			@set-args="(...args) => $emit('set-form-args',...args)"
-			@set-collection-indexes="setCollectionIndexes"
-			:attributeIdColor="field.attributeIdColor"
-			:attributeIdDate0="field.attributeIdDate0"
-			:attributeIdDate1="field.attributeIdDate1"
-			:choices="choicesProcessed"
-			:columns="columnsProcessed"
-			:collections="field.collections"
-			:collectionIdMapIndexes="collectionIdMapIndexes"
-			:fieldId="field.id"
-			:days0="field.dateRange0 / 86400"
-			:days1="field.dateRange1 / 86400"
-			:filters="filtersProcessed"
-			:formLoading="formLoading"
-			:hasOpenForm="field.openForm !== null"
-			:iconId="iconId ? iconId : null"
-			:indexColor="field.indexColor"
-			:indexDate0="field.indexDate0"
-			:indexDate1="field.indexDate1"
-			:isHidden="isHidden"
-			:isSingleField="isAloneInForm || isAloneInTab"
-			:popUpFormInline="popUpFormInline"
-			:stepTypeDefault="field.ganttSteps"
-			:stepTypeToggle="field.ganttStepsToggle"
-			:query="field.query"
-			:usesPageHistory="isAloneInForm && !formIsPopUp"
-		/>
-		
-		<!-- kanban -->
-		<my-kanban
-			v-if="isKanban"
-			@clipboard="$emit('clipboard')"
-			@close-inline="closeInline"
-			@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
-			@record-count-change="$emit('set-counter',field.id,$event)"
-			@set-args="(...args) => $emit('set-form-args',...args)"
-			@set-collection-indexes="setCollectionIndexes"
-			:attributeIdSort="field.attributeIdSort"
-			:choices="choicesProcessed"
-			:columns="columnsProcessed"
-			:collections="field.collections"
-			:collectionIdMapIndexes="collectionIdMapIndexes"
-			:fieldId="field.id"
-			:filters="filtersProcessed"
-			:formLoading="formLoading"
-			:hasOpenForm="field.openForm !== null"
-			:iconId="iconId ? iconId : null"
-			:isHidden="isHidden"
-			:isSingleField="isAloneInForm || isAloneInTab"
-			:popUpFormInline="popUpFormInline"
-			:relationIndexData="field.relationIndexData"
-			:relationIndexAxisX="field.relationIndexAxisX"
-			:relationIndexAxisY="field.relationIndexAxisY"
-			:query="field.query"
-			:usesPageHistory="isAloneInForm && !formIsPopUp"
-		/>
-		
-		<!-- chart -->
-		<my-chart
-			v-if="isChart"
-			:choices="choicesProcessed"
-			:columns="columnsProcessed"
-			:filters="filtersProcessed"
-			:formLoading="formLoading"
-			:limit="field.query.fixedLimit"
-			:needsHeader="isAloneInForm || isAloneInTab"
-			:optionJson="field.chartOption"
-			:query="field.query"
-		/>
-		
-		<!-- tabs -->
-		<div class="tabs" v-if="isTabs">
-			<div class="tabs-entries">
-				<div class="tabs-icon">
-					<img v-if="iconId" :src="srcBase64(iconIdMap[iconId].file)" />
-				</div>
-				<div class="tabs-entry clickable"
-					v-if="!isMobile"
-					v-for="(t,i) in field.tabs"
-					v-show="!tabIndexesHidden.includes(i)"
-					@click="setTab(i)"
-					:class="getTabClasses(i)"
-				>
-					{{ tabIndexesTitle[i] }}
-				</div>
-				<select v-if="isMobile" @change="setTab(parseInt($event.target.value))" :value="tabIndexShow">
-					<template v-for="(t,i) in field.tabs">
-						<option v-if="!tabIndexesHidden.includes(i)" :value="i">
-							{{ tabIndexesTitle[i] }}
-						</option>
-					</template>
-				</select>
-			</div>
-			<div class="fields"
-				v-for="(t,i) in field.tabs"
-				v-show="i === tabIndexShow"
-				:class="{ onlyOne:t.fields.length === 1 && t.fields[0].content !== 'container' }"
-			>
-				<!-- tab children -->
-				<my-field flexDirParent="column" :ref="'tabField_'+f.id"
-					v-for="f in t.fields"
-					@clipboard="$emit('clipboard')"
-					@execute-function="$emit('execute-function',$event)"
-					@hotkey="$emit('hotkey',$event)"
-					@open-form="(...args) => $emit('open-form',...args)"
-					@set-counter="(...args) => setTabCounter(i,args[0],args[1])"
-					@set-form-args="(...args) => $emit('set-form-args',...args)"
-					@set-touched="(...args) => $emit('set-touched',...args)"
-					@set-valid="(...args) => $emit('set-valid',...args)"
-					@set-value="(...args) => $emit('set-value',...args)"
-					@set-value-init="(...args) => $emit('set-value-init',...args)"
-					:isBulkUpdate="isBulkUpdate"
-					:dataFieldMap="dataFieldMap"
-					:entityIdMapState="entityIdMapState"
-					:field="f"
-					:fieldIdsChanged="fieldIdsChanged"
-					:fieldIdsInvalid="fieldIdsInvalid"
-					:fieldIdMapCaption="fieldIdMapCaption"
-					:fieldIdMapError="fieldIdMapError"
-					:formBadSave="formBadSave"
-					:formIsPopUp="formIsPopUp"
-					:formLoading="formLoading"
-					:formReadonly="formReadonly"
-					:isAloneInTab="t.fields.length === 1"
-					:isAloneInForm="false"
-					:isHiddenInParent="isHidden || (i !== tabIndexShow && !t.contentCounter)"
-					:joinsIndexMap="joinsIndexMap"
-					:key="f.id"
-					:values="values"
-				/>
-			</div>
 		</div>
 		
 		<!-- container children -->
@@ -1039,9 +1030,8 @@ let MyField = {
 			? false : s.attributeIdMap[s.field.attributeId],
 		customErr:  (s) => typeof s.fieldIdMapError[s.field.id] !== 'undefined'
 			&& s.fieldIdMapError[s.field.id] !== null ? s.fieldIdMapError[s.field.id] : null,
-		hasCaption: (s) => !s.isAloneInTab && (s.focused || s.value !== null || s.isCleanUi || s.isBoolean
-			|| s.isDateInput || s.isSlider || s.isRichtext || s.isCategory || s.isRelationship || s.isFiles || s.isIframe || s.isUuid),
-		isCleanUi:  (s) => s.settings.fieldClean,
+		hasCaption: (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isAloneInTab,
+		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList,
 		inputRegex: (s) => !s.isData || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
 		showInvalid:(s) => !s.isValid && (s.formBadSave || !s.notTouched),

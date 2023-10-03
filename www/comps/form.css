@@ -8,6 +8,9 @@
 .form-wrap.popUp{
 	z-index:var(--z-index-form-pop-up);
 }
+.form-wrap:not(.popUp){
+	background-color:rgba(40,40,40,1);
+}
 .form-wrap.popUp.float{
 	width:100%;
 	padding:var(--spacing);
@@ -25,6 +28,7 @@
 .form-wrap.popUp>.form-log{
 	box-shadow:none;
 	margin:0px;
+	margin-right:var(--spacing);
 	border-left:1px solid var(--color-border);
 }
 .form-wrap.popUp.float>.form,
@@ -33,6 +37,11 @@
 	border:1px solid var(--color-border);
 	border-radius:8px;
 	box-shadow:1px 1px 8px var(--color-shade);
+}
+.form:not(.popUp){
+	padding-left:1px;
+	border-radius:20px 0px 0px 0px;
+	border-left:2px solid #000;
 }
 
 /* fields */
@@ -51,13 +60,6 @@
 .form .fields.onlyOne>.field{
 	margin:0px;
 	overflow:auto;
-}
-.form .fields.onlyOne>.field>.calendar-month,
-.form .fields.onlyOne>.field>.chart,
-.form .fields.onlyOne>.field>.list,
-.form .fields.onlyOne>.field>.gantt,
-.form .fields.onlyOne>.field>.tabs{
-	border-radius:0px;
 }
 
 /* data change log */
@@ -114,20 +116,10 @@
 }
 
 /* user overwrites */
-.user-bordersAll .form .container>.field>.calendar-month,
-.user-bordersAll .form .container>.field>.chart,
-.user-bordersAll .form .container>.field>.gantt,
-.user-bordersAll .form .container>.field>.input-box,
-.user-bordersAll .form .container>.field>.list,
-.user-bordersAll .form .container>.field>.tabs,
-.user-bordersAll .form .fields:not(.onlyOne)>.field>.calendar-month,
-.user-bordersAll .form .fields:not(.onlyOne)>.field>.chart,
-.user-bordersAll .form .fields:not(.onlyOne)>.field>.gantt,
-.user-bordersAll .form .fields:not(.onlyOne)>.field>.input-box,
-.user-bordersAll .form .fields:not(.onlyOne)>.field>.list,
-.user-bordersAll .form .fields:not(.onlyOne)>.field>.tabs{
+.user-bordersAll .field-content{
 	border:1px solid var(--color-border);
 }
+.user-bordersSquared .form,
 .user-bordersSquared .form .top .state,
 .user-bordersSquared .form-wrap.popUp .form,
 .user-bordersSquared .form-wrap.popUp .form-help,
@@ -137,9 +129,6 @@
 .user-bordersSquared .gantt,
 .user-bordersSquared .gantt-line-record .record-line{
 	border-radius:0px;
-}
-.user-compact .form{
-	padding-left:2px;
 }
 
 /* mobile overwrites */

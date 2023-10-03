@@ -14,72 +14,87 @@
 .field.hidden{
 	display:none;
 }
-
-.field .input-box{
-	flex:1 1 auto;
-	min-height:64px;
-	border:none;
-	border-color:var(--color-border);
-	border-radius:3px 3px 0px 0px;
-	box-sizing:border-box;
-	display:flex;
-	flex-flow:column nowrap;
-	justify-content:center;
-	position:relative;
-	background-color:var(--color-bg);
-	box-shadow:inset 0 0 0 0 transparent,1px 1px 3px var(--color-shade);
-}
-.field .input-box:focus-within:not(.disabled){
-	box-shadow:inset 0 -2px 0 0 var(--color-accent1),1px 1px 5px var(--color-shade);
-	transition:box-shadow 0.3s, background-color 0.3s;
-}
-.field .input-box .input-line{
-	flex:1 1 auto;
+.field-caption{
 	display:flex;
 	flex-flow:row nowrap;
-	padding-left:8px;
+	align-items:center;
+	margin:1px 0px 3px 4px;
+	font-size:90%;
+	font-weight:550;
+	color:var(--color-font);
+	flex:0 0 auto;
+	cursor:default;
+}
+.field-caption img{
+	height:16px;
+	margin:0px 6px 0px 0px;
+	filter:var(--image-filter);
+}
+.field .field-content{
+	flex:1 1 auto;
+	min-height:var(--row-height);
+	margin:0px;
+	display:flex;
+	flex-flow:row nowrap;
 	align-items:stretch;
-	overflow:auto;
+	gap:8px;
+	border-radius:5px;
+	background-color:var(--color-input);
+	box-shadow:1px 1px 4px var(--color-shade-input);
+	box-sizing:border-box;
+	position:relative;
+	overflow:visible;
 }
-.field .input-box .input-line>.input-files,
-.field .input-box .input-line>.input.textarea{
+.field .field-content.data:focus-within:not(.disabled){
+	transition:box-shadow 0.3s, outline 0.2s;
+	outline:2px solid var(--color-accent1);
+	box-shadow:1px 1px 8px var(--color-shade-input-sel);
+}
+.field .field-content.data.disabled{
+	color:var(--color-font-disabled);
+	background-color:var(--color-input-disabled);
+}
+.field .field-content.intent{
 	padding-left:8px;
 }
-.field .input-box .input-line>.button,
-.field .input-box .input-line>.bool{
+.field .field-content.isSingleField{
+	border:none;
+	box-shadow:none;
+	border-radius:0px;
+}
+.field .field-content .input.textarea{
+	padding:0px 0px 0px 8px;
+}
+.field .field-content>.input-files,
+.field .field-content>.input.textarea{
+	padding-left:8px;
+}
+.field .field-content>.button,
+.field .field-content>.bool{
 	align-self:center;
 }
+
+
 .field .field-icon{
-	height:22px;
-	margin:4px 8px 4px 0px;
+	padding:0px 8px 0px 0px;
 	align-self:center;
 	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	border-right:1px solid var(--color-border);
+}
+.field .field-icon img{
+	height:24px;
 	filter:var(--image-filter);
 }
 .field .field-icon.inList{
 	margin-right:8px;
 }
-.field.top-aligned .input-line{
+.field.top-aligned .field-content{
 	padding:5px 0px 3px;
 }
 .field.top-aligned .field-icon{
 	align-self:flex-start;
-}
-.field .caption{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	margin:6px 0px 0px 8px;
-	font-size:85%;
-	font-weight:500;
-	color:var(--color-accent1);
-	flex:0 0 auto;
-	cursor:default;
-}
-.field .caption img{
-	height:16px;
-	margin:0px 6px 0px 0px;
-	filter:var(--image-filter);
 }
 .field .disabled .caption{
 	color:var(--color-font);
@@ -226,7 +241,7 @@
 .field.richtext{
 	min-height:200px;
 }
-.field.richtext .input-box .input-line{
+.field.richtext .field-content{
 	margin:0px;
 }
 
@@ -234,7 +249,7 @@
 .field.iframe{
 	min-height:200px;
 }
-.field.iframe .input-box .input-line{
+.field.iframe .field-content{
 	padding:0px;
 }
 
@@ -248,7 +263,7 @@
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
-	background-color:var(--color-bg);
+	background-color:var(--color-input);
 	border-radius:3px;
 	box-shadow:1px 1px 4px var(--color-shade);
 }
@@ -276,14 +291,15 @@
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
-	border-radius:3px;
-	box-shadow:1px 1px 4px var(--color-shade);
+	border-radius:5px;
 	overflow:auto;
+}
+.field .tabs.isSingleField{
+	border-radius:0px;
 }
 .field .tabs-entries{
 	display:flex;
 	flex-flow:row wrap;
-	padding:7px 0px 0px 0px;
 	background-color:var(--color-bg);
 }
 .field .tabs-entries select{
@@ -292,9 +308,7 @@
 	font-size:110%;
 	color:var(--color-font);
 	background-color:transparent;
-	border:1px solid var(--color-border);
-	border-bottom:none;
-	border-radius:5px 0px 0px 0px;
+	border:none;
 	outline:none;
 }
 .field .tabs-entries option{
@@ -317,81 +331,44 @@
 	padding:0px 9px;
 	margin-left:-1px;
 	border:1px solid var(--color-border);
+	border-top:none;
 	border-bottom:none;
-	border-radius:5px 5px 0px 0px;
 	box-sizing:border-box;
 	background-color:var(--color-bg);
 	font-size:85%;
 }
 .field .tabs-entry.active{
-	margin-top:-3px;
 	margin-bottom:-1px;
-	border-top:2px solid var(--color-border);
-	font-size:100%;
+	font-size:110%;
 	z-index:var(--z-index-tab-active);
 }
 .field .tabs-entry.error{
 	color:var(--color-error);
+}
+.field .tabs-entry.active.showsData{
+	background-color:var(--color-input);
+}
+.field .tabs-entry.active.showsData.readonly{
+	background-color:var(--color-input-disabled);
 }
 .field .tabs>.fields{
 	flex:1 1 auto;
 	border-top:1px solid var(--color-border);
 	background-color:var(--color-bg);
 }
+.field .tabs.isSingleField .tabs-entry{
+	margin-top:4px;
+	border-top:1px solid var(--color-border);
+}
+.field .tabs.isSingleField .tabs-entry.active{
+	margin-top:2px;
+	border-top:2px solid var(--color-border);
+}
 
 /* user overwrites */
-.user-clean .field .caption{
-	margin:1px 0px 3px 4px;
-	font-size:90%;
-	color:var(--color-font);
-	font-weight:550;
-}
-.user-clean .field .input-box{
-	background-color:transparent;
-	box-shadow:none;
-}
-.user-clean .field .input-box .input-line{
-	border:1px solid var(--color-border);
-	border-radius:5px;
-	margin:0px;
-	background-color:var(--color-bg);
-}
-.user-clean .field .input-box .input-line.isSingleField{
-	border:none;
-}
-.user-clean .field .input-box .input-line .input.textarea{
-	padding:0px 0px 0px 8px;
-}
-.user-clean .field .input-box:focus-within:not(.disabled){
-	box-shadow:none;
-}
-.user-clean .field .input-box:focus-within:not(.disabled) .input-line{
-	border-color:var(--color-accent1);
-}
-.user-clean .field .chart,
-.user-clean .field .tabs{
-	box-shadow:none;
-}
-.user-clean .field .tabs .tabs-entries{
-	background-color:transparent;
-}
-.user-clean .field .tabs>.fields{
-	border:1px solid var(--color-border);
-	border-radius:5px;
-}
 .user-bordersSquared .field .color-input .preview,
-.user-bordersSquared .field .chart,
-.user-bordersSquared .field .input-box,
-.user-bordersSquared .field .input-box .input-line,
+.user-bordersSquared .field .field-content,
 .user-bordersSquared .field .slider input,
-.user-bordersSquared .field .slider .slider-value,
-.user-bordersSquared .field .tabs,
-.user-bordersSquared .field .tabs>.fields,
-.user-bordersSquared .field .tabs-entries select,
-.user-bordersSquared .field .tabs-entry{
+.user-bordersSquared .field .slider .slider-value{
 	border-radius:0px;
-}
-
-.user-bordersRounded .field .input-box{
-	border-radius:5px;
 }

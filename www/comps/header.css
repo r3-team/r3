@@ -8,7 +8,8 @@
 	height:var(--app-header-height);
 	z-index:var(--z-index-header);
 	position:relative;
-	box-shadow:1px 1px 4px var(--color-shade);
+	box-shadow:none;
+	border-bottom:1px solid #000;
 }
 .app-header-bg{
 	position:absolute;
@@ -55,7 +56,7 @@
 	padding:10px 10px 8px 10px;
 	border-radius:5px 5px 0px 0px;
 	font-size:110%;
-	color:var(--color-bg-font);
+	color:var(--color-bright);
 	box-sizing:border-box;
 	text-decoration:none;
 	outline:none;
@@ -153,10 +154,6 @@
 }
 .user-bordersSquared .app-header .entry-wrap .children{
 	border-radius:0px;
-}
-.user-compact .app-header{
-	box-shadow:none;
-	border-bottom:1px solid #000;
 }
 .user-dark .app-header .entry-wrap:focus .entry-bg,
 .user-dark .app-header .entry-wrap:hover .entry-bg{

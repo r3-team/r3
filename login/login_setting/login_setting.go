@@ -26,10 +26,10 @@ func Get(loginId pgtype.Int8, loginTemplateId pgtype.Int8) (types.Settings, erro
 	}
 
 	err := db.Pool.QueryRow(db.Ctx, fmt.Sprintf(`
-		SELECT language_code, date_format, sunday_first_dow, font_size, borders_all,
-			borders_corner, page_limit, header_captions, spacing, dark, compact,
-			hint_update_version, mobile_scroll_form, warn_unsaved, menu_colored,
-			pattern, font_family, tab_remember, field_clean, ARRAY(
+		SELECT language_code, date_format, sunday_first_dow, font_size,
+			borders_all, borders_squared, header_captions, spacing, dark,
+			hint_update_version, mobile_scroll_form, warn_unsaved, pattern,
+			font_family, tab_remember, color_header, color_menu, ARRAY(
 				SELECT name::TEXT
 				FROM instance.login_search_dict
 				WHERE login_id          = ls.login_id
@@ -38,11 +38,11 @@ func Get(loginId pgtype.Int8, loginTemplateId pgtype.Int8) (types.Settings, erro
 			)
 		FROM instance.login_setting AS ls
 		WHERE %s = $1
-	`, entryName), entryId).Scan(&s.LanguageCode, &s.DateFormat, &s.SundayFirstDow,
-		&s.FontSize, &s.BordersAll, &s.BordersCorner, &s.PageLimit,
-		&s.HeaderCaptions, &s.Spacing, &s.Dark, &s.Compact, &s.HintUpdateVersion,
-		&s.MobileScrollForm, &s.WarnUnsaved, &s.MenuColored, &s.Pattern,
-		&s.FontFamily, &s.TabRemember, &s.FieldClean, &s.SearchDictionaries)
+	`, entryName), entryId).Scan(&s.LanguageCode, &s.DateFormat,
+		&s.SundayFirstDow, &s.FontSize, &s.BordersAll, &s.BordersSquared,
+		&s.HeaderCaptions, &s.Spacing, &s.Dark, &s.HintUpdateVersion,
+		&s.MobileScrollForm, &s.WarnUnsaved, &s.Pattern, &s.FontFamily,
+		&s.TabRemember, &s.ColorHeader, &s.ColorMenu, &s.SearchDictionaries)
 
 	return s, err
 }
@@ -64,16 +64,16 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 	if isNew {
 		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 			INSERT INTO instance.login_setting (%s, language_code, date_format,
-				sunday_first_dow, font_size, borders_all, borders_corner, page_limit, 
-				header_captions, spacing, dark, compact, hint_update_version,
-				mobile_scroll_form, warn_unsaved, menu_colored, pattern, font_family,
-				tab_remember, field_clean)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20)
+				sunday_first_dow, font_size, borders_all, borders_squared,
+				header_captions, spacing, dark, hint_update_version,
+				mobile_scroll_form, warn_unsaved, pattern, font_family,
+				tab_remember, color_header, color_menu)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
 		`, entryName), entryId, s.LanguageCode, s.DateFormat, s.SundayFirstDow,
-			s.FontSize, s.BordersAll, s.BordersCorner, s.PageLimit,
-			s.HeaderCaptions, s.Spacing, s.Dark, s.Compact, s.HintUpdateVersion,
-			s.MobileScrollForm, s.WarnUnsaved, s.MenuColored, s.Pattern,
-			s.FontFamily, s.TabRemember, s.FieldClean); err != nil {
+			s.FontSize, s.BordersAll, s.BordersSquared, s.HeaderCaptions,
+			s.Spacing, s.Dark, s.HintUpdateVersion, s.MobileScrollForm,
+			s.WarnUnsaved, s.Pattern, s.FontFamily, s.TabRemember,
+			s.ColorHeader, s.ColorMenu); err != nil {
 
 			return err
 		}
@@ -81,17 +81,17 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 			UPDATE instance.login_setting
 			SET language_code = $1, date_format = $2, sunday_first_dow = $3,
-				font_size = $4, borders_all = $5, borders_corner = $6,
-				page_limit = $7, header_captions = $8, spacing = $9, dark = $10,
-				compact = $11, hint_update_version = $12, mobile_scroll_form = $13,
-				warn_unsaved = $14, menu_colored = $15, pattern = $16,
-				font_family = $17, tab_remember = $18, field_clean = $19
-			WHERE %s = $20
-		`, entryName), s.LanguageCode, s.DateFormat, s.SundayFirstDow, s.FontSize, s.BordersAll,
-			s.BordersCorner, s.PageLimit, s.HeaderCaptions, s.Spacing, s.Dark,
-			s.Compact, s.HintUpdateVersion, s.MobileScrollForm, s.WarnUnsaved,
-			s.MenuColored, s.Pattern, s.FontFamily, s.TabRemember, s.FieldClean,
-			entryId); err != nil {
+				font_size = $4, borders_all = $5, borders_squared = $6,
+				header_captions = $7, spacing = $8, dark = $9,
+				hint_update_version = $10, mobile_scroll_form = $11,
+				warn_unsaved = $12, pattern = $13, font_family = $14,
+				tab_remember = $15, color_header = $16, color_menu = $17
+			WHERE %s = $18
+		`, entryName), s.LanguageCode, s.DateFormat, s.SundayFirstDow,
+			s.FontSize, s.BordersAll, s.BordersSquared, s.HeaderCaptions,
+			s.Spacing, s.Dark, s.HintUpdateVersion, s.MobileScrollForm,
+			s.WarnUnsaved, s.Pattern, s.FontFamily, s.TabRemember,
+			s.ColorHeader, s.ColorMenu, entryId); err != nil {
 
 			return err
 		}

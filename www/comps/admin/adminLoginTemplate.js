@@ -143,14 +143,8 @@ let MyAdminLoginTemplate = {
 						<td><my-bool v-model="settings.bordersAll" /></td>
 					</tr>
 					<tr>
-						<td>{{ capAppSet.bordersCorners }}</td>
-						<td>
-							<select v-model="settings.bordersCorner">
-								<option value="keep"   >{{ capAppSet.option.cornerKeep }}</option>
-								<option value="rounded">{{ capAppSet.option.cornerRounded }}</option>
-								<option value="squared">{{ capAppSet.option.cornerSquared }}</option>
-							</select>
-						</td>
+						<td>{{ capAppSet.bordersSquared }}</td>
+						<td><my-bool v-model="settings.bordersSquared" /></td>
 					</tr>
 					<tr>
 						<td>{{ capAppSet.fontFamily }}</td>
@@ -211,35 +205,8 @@ let MyAdminLoginTemplate = {
 						</td>
 					</tr>
 					<tr>
-						<td>{{ capAppSet.menuColored }}</td>
-						<td><my-bool v-model="settings.menuColored" /></td>
-					</tr>
-					<tr>
 						<td>{{ capAppSet.dark }}</td>
 						<td><my-bool v-model="settings.dark" /></td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.fieldClean }}</td>
-						<td><my-bool v-model="settings.fieldClean" :reversed="true" /></td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.compact }}</td>
-						<td><my-bool v-model="settings.compact" /></td>
-					</tr>
-					<tr v-if="!settings.compact">
-						<td>{{ capAppSet.pageLimit }}</td>
-						<td>
-							<div class="row centered gap">
-								<my-button image="remove.png"
-									@trigger="settings.pageLimit -= 50"
-									:active="settings.pageLimit > 1200"
-								/>
-								<div>{{ settings.pageLimit + 'px' }}</div>
-								<my-button image="add.png"
-									@trigger="settings.pageLimit += 50"
-								/>
-							</div>
-						</td>
 					</tr>
 				</table>
 			</div>
@@ -298,19 +265,15 @@ let MyAdminLoginTemplate = {
 		// new template, apply defaults
 		this.settings = {
 			bordersAll:false,
-			bordersCorner:'keep',
-			compact:true,
+			bordersSquared:false,
 			dark:false,
 			dateFormat:'Y-m-d',
-			fieldClean:true,
 			fontFamily:'helvetica',
 			fontSize:100,
 			headerCaptions:true,
 			hintUpdateVersion:0,
 			languageCode:'en_us',
-			menuColored:false,
 			mobileScrollForm:true,
-			pageLimit:2000,
 			pattern:'bubbles',
 			searchDictionaries:['english'],
 			spacing:3,

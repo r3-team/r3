@@ -13,7 +13,7 @@
 	line-height:26px;
 	box-sizing:border-box;
 	text-align:center;
-	color:var(--color-bg-font);
+	color:var(--color-bright);
 	margin:1px 0px;
 	padding:0px 8px;
 	background-color:var(--color-action);
@@ -31,7 +31,7 @@
 }
 .bool:not(.readonly):focus>div,
 .bool:not(.readonly):hover>div{
-	border-bottom:2px solid var(--color-border-bg);
+	border-bottom:2px solid var(--color-bright);
 	box-shadow:0px 2px 5px var(--color-shade);
 }
 .bool>div.left{
@@ -180,13 +180,24 @@
 	border:1px solid #888;
 	border-top:none;
 	border-bottom-width:2px;
-	background-color:var(--color-bg);
+	background-color:var(--color-input);
 	box-shadow:1px 6px 6px var(--color-shade);
 }
 .input-dropdown.upwards{
 	bottom:0px;
 	border-bottom:none;
 	border-top:1px solid #888;
+}
+.input-dropdown-wrap.dropdown-list-input .input-dropdown{
+	border:2px solid var(--color-accent1);
+	border-radius:0px 0px 5px 5px;
+	border-top:none;
+}
+.input-dropdown-wrap.dropdown-list-input .input-dropdown.upwards{
+	border-top:2px solid var(--color-accent1);
+	border-bottom:none;
+	border-radius:5px 5px 0px 0px;
+	box-shadow:none;
 }
 .input-dropdown .entry{
 	padding:5px 10px;

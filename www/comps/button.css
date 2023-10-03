@@ -3,7 +3,7 @@
 	margin:0px;
 	padding:4px calc(var(--spacing) / 1.5);
 	font-size:inherit;
-	color:var(--color-bg-font);
+	color:var(--color-bright);
 	display:flex;
 	flex-flow:row nowrap;
 	gap:calc(var(--spacing) / 2);
@@ -37,7 +37,7 @@
 .button:hover:not(.naked):not(.inactive){
 	filter:brightness(120%);
 	box-shadow:1px 2px 6px var(--color-shade);
-	border-bottom:2px solid var(--color-border-bg);
+	border-bottom:2px solid var(--color-bright);
 }
 .button:active:hover:not(.naked):not(.inactive){
 	height:28px;
@@ -102,7 +102,7 @@
 	align-items:center;
 	padding-left:calc(var(--spacing) / 2);
 	gap:calc(var(--spacing) / 2);
-	border-left:2px solid var(--color-border-bg);
+	border-left:2px solid var(--color-bright);
 }
 
 

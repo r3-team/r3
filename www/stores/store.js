@@ -36,6 +36,7 @@ const MyStore = Vuex.createStore({
 		isAtDialog:false,     // app shows generic dialog
 		isAtFeedback:false,   // app shows feedback dialog
 		isAtMenu:false,       // user navigated to menu (only relevant if isMobile)
+		isAtModule:false,     // app currently shows a module (instead of Builder, admin panel, settings, etc.)
 		isMobile:false,       // app runs on small screen (probably mobile)
 		isNoAuth:false,       // user logged in without authentication
 		license:{},           // license info (admin only)
@@ -163,6 +164,7 @@ const MyStore = Vuex.createStore({
 		isAtDialog:     (state,payload) => state.isAtDialog      = payload,
 		isAtFeedback:   (state,payload) => state.isAtFeedback    = payload,
 		isAtMenu:       (state,payload) => state.isAtMenu        = payload,
+		isAtModule:     (state,payload) => state.isAtModule      = payload,
 		isNoAuth:       (state,payload) => state.isNoAuth        = payload,
 		isMobile:       (state,payload) => state.isMobile        = payload,
 		loginEncryption:(state,payload) => state.loginEncryption = payload,
@@ -184,6 +186,17 @@ const MyStore = Vuex.createStore({
 		system:         (state,payload) => state.system          = payload
 	},
 	getters:{
+		colorMain:(state,payload) => {
+			let c = state.settings.dark ? '#222' : '#444'; // default colors
+			
+			// overwrite customizing header color
+			if(MyStoreLocal.state.activated && MyStoreLocal.state.companyColorHeader !== '')
+				c = `${MyStoreLocal.state.companyColorHeader}`;
+			else if(state.isAtModule && state.moduleIdLast !== null && MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1 !== null)
+				c = MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1;
+			
+			return `#${c}`;
+		},
 		licenseDays:(state) => {
 			if(!state.licenseValid)
 				return 0;
@@ -227,6 +240,7 @@ const MyStore = Vuex.createStore({
 		isAtDialog:       (state) => state.isAtDialog,
 		isAtFeedback:     (state) => state.isAtFeedback,
 		isAtMenu:         (state) => state.isAtMenu,
+		isAtModule:       (state) => state.isAtModule && state.moduleIdLast !== null,
 		isMobile:         (state) => state.isMobile,
 		isNoAuth:         (state) => state.isNoAuth,
 		license:          (state) => state.license,

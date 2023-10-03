@@ -1862,11 +1862,6 @@
 			"resetAccessDesc":"Falls du weder Zugriff auf dein vorheriges Passwort noch auf dein Backup-Code hast, ist Zugriff auf verschlüsselte Daten bereits verloren.<br /><br />In diesem Fall kannst du entscheiden, deine persönlichen Schlüssel zurückzusetzen, um neue Daten zu verschlüsseln - dies wird <b>NICHT</b> den Zugriff auf vorher verschlüsselte Daten wiederherstellen.",
 			"resetAccessHint":"Bist du sicher, dass du deine persönlichen Schlüssel zurücksetzen möchtest? Falls ja, kannst du nicht mehr zurück, selbst wenn du deinen alten Backup-Code später wiederfindest."
 		},
-		"option":{
-			"cornerKeep":"- unverändert -",
-			"cornerRounded":"abgerundet",
-			"cornerSquared":"kantig"
-		},
 		"tokensFixed":{
 			"button":{
 				"loadApp":"Anwendung",
@@ -1910,8 +1905,7 @@
 			"titleName":"Gerätename"
 		},
 		"bordersAll":"Rahmen hinzufügen",
-		"bordersCorners":"Rahmenecken",
-		"compact":"Kompaktes Layout",
+		"bordersSquared":"Rechteckige Rahmen",
 		"dateFormat":"Datumsformat",
 		"dateFormat0":"Y-m-d (2012-12-30)",
 		"dateFormat1":"Y/m/d (2012/12/30)",
@@ -1919,14 +1913,11 @@
 		"dateFormat3":"d/m/Y (30/12/2012)",
 		"dateFormat4":"m/d/Y (12/30/2012)",
 		"dark":"Dunkle Ansicht",
-		"fieldClean":"Feldhintergründe",
 		"fontFamily":"Schriftart",
 		"fontSize":"Schriftgröße",
 		"headerCaptions":"Hauptmenütitel anzeigen",
 		"languageCode":"Sprache",
-		"menuColored":"Farbiges Menü",
 		"mobileScrollForm":"Mobil: Gesamtes Formular scrollen",
-		"pageLimit":"Max. Seitenbreite",
 		"pageTitle":"Einstellungen",
 		"pattern":"Hintergrundmuster",
 		"searchDictionaries":"Wörterbücher für Volltextsuche",

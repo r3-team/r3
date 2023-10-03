@@ -65,13 +65,6 @@
 	--row-height:42px;
 	--app-header-height:70px;
 	
-	/**/
-	/* colors */
-	--color-header-border:hsl(0,0%,96%,1.00);
-	--color-hover-underlay:rgba(0,0,0,0.35);
-	--color-menu-border:hsl(0,0%,96%,1.00);
-	--color-navigation-default:#444;
-	
 	--color-form-builder-actions:hsl(196deg 45% 86%);
 	--color-form-builder-actions-bg:hsl(200deg 30% 94%);
 	--color-form-builder-columns:hsl(226deg 25% 77%);
@@ -85,166 +78,50 @@
 	/* images */
 	--image-filter-contrast:100%;
 	--image-list-cards:     url('../images/texture_paper01.webp');
-}
-
-*{
-	/* depth based lightness values in percent */
-	--light-depth:     calc(2%   * var(--depth));
-	--light-read:      calc(12%  + var(--light-depth));       /* stuff to read easily, fonts usually */
-	--light-read-less: calc(25%  + (var(--light-depth)*2.5)); /* stuff to read less easily - fonts for readonly content etc. */
-	--light-contrast:  calc(100% - (var(--light-depth)/3));   /* stuff to contrast with read content, backgrounds mostly */
 	
-	/* depth based colors */
-	--color-bg:            hsl(315,10%,var(--light-contrast));
-	--color-bg-font:       hsl(0,  0%, var(--light-contrast));
-	--color-border:        hsl(0,  0%, calc(60% - (var(--light-depth) * 3) ));
-	--color-border-bg:     hsl(0,  0%, var(--light-contrast));
-	--color-font:          hsl(0,  0%, var(--light-read));
-	--color-font-alt:      hsl(0,  0%, var(--light-read-less));
-	--color-shade:         hsl(0,  0%, calc(25% - var(--light-depth)));
-	--color-shade-bright:  hsl(0,  0%, calc(99% - var(--light-depth)));
+	/**/
+	/* colors */
+	--color-bg:            #f7f7f7;
+	--color-bg-font:       black;
+	--color-border:        #9b9b9b;
+	--color-border-bg:     black;
+	--color-font:          black;
+	--color-font-alt:      grey;
+	--color-font-disabled: #797979;
+	--color-shade:         #333;
+	--color-shade-bright:  grey;
+	--color-header-border: hsl(0,0%,96%,1.00);
+	--color-hover-underlay:rgba(0,0,0,0.35);
+	--color-navigation-default:#444;
 	
-	--color-accent1:       hsl(311,57%,calc(40% - var(--light-depth))); /* field captions */
-	--color-accent2:       hsl(127,86%,calc(96% - var(--light-depth))); /* calendar/gantt weekend */
-	--color-accent3:       hsl(199,11%,calc(96% - var(--light-depth))); /* menu/list/calendar entry hover */
-	--color-accent3-alt:   hsl(199,11%,calc(93% - var(--light-depth))); /* menu/list/calendar entry active */
-	--color-accent4:       hsl(339, 4%,calc(61% - var(--light-depth))); /* gantt entry */
-	--color-error:         hsl(0,  84%,calc(61% - var(--light-depth)));
-	--color-success:       hsl(113,84%,calc(44% - var(--light-depth)));
-	--color-action:        hsl(196,27%,calc(47% - var(--light-depth)));
-	--color-action-bright: hsl(196,22%,calc(72% - var(--light-depth)));
-	--color-action-disable:hsl(0,   0%,calc(77% - var(--light-depth)));
-	--color-cancel:        hsl(0,  57%,calc(40% - var(--light-depth)));
-	--color-cancel-border: hsl(0,  57%,calc(71% - var(--light-depth)));
+	--color-bright:        #ebebeb;
+	--color-input:         #ffffff;
+	--color-input-disabled:#efefef;
+	--color-menu-active:   #3e5e6d;
+	--color-menu-hover:    #58717d;
 	
-	/* depth based image filters */
-	--image-filter:        invert(1) contrast(var(--image-filter-contrast)) brightness(var(--light-read));
+	--color-shade-input:    #757575;
+	--color-shade-input-sel:hsl(311,57%,20%);
+	
+	--color-accent1:       hsl(311,57%,40%);
+	--color-accent2:       hsl(127,86%,96%); /* calendar/gantt weekend */
+	--color-accent3:       hsl(199,11%,96%); /* menu/list/calendar entry hover */
+	--color-accent3-alt:   hsl(199,11%,93%); /* menu/list/calendar entry active */
+	--color-accent4:       hsl(339, 4%,61%); /* gantt entry */
+	--color-error:         hsl(0,  84%,61%);
+	--color-success:       hsl(113,84%,44%);
+	--color-action:        hsl(196,27%,39%);
+	--color-action-bright: hsl(196,22%,72%);
+	--color-action-disable:hsl(0,   0%,77%);
+	--color-cancel:        hsl(0,  57%,32%);
+	--color-cancel-border: hsl(0,  57%,71%);
+	
+	--image-filter:        invert(1) contrast(var(--image-filter-contrast)) brightness(10%);
 	--image-filter-error:  invert(13%) sepia(92%) saturate(4089%) hue-rotate(359deg) brightness(97%) contrast(88%);
 	--image-filter-success:invert(36%) sepia(95%) saturate(788%) hue-rotate(76deg) brightness(98%) contrast(93%);
-	--image-filter-alt:    invert(1) contrast(var(--image-filter-contrast)) brightness(var(--light-read-less));
-	--image-filter-bg:     invert(1) contrast(var(--image-filter-contrast)) brightness(var(--light-contrast));
+	--image-filter-alt:    invert(1) contrast(var(--image-filter-contrast)) brightness(60%);
+	--image-filter-bg:     invert(1) contrast(var(--image-filter-contrast)) brightness(90%);
 }
-
-/* depth association */
-body                                         { --depth:6; }
-.app-header                                  { --depth:0; }
-.contentBox                                  { --depth:3; }
-.contentBox .top                             { --depth:4; }
-.contentBox .top .selector                   { --depth:0; }
-.contentBox .contentPart                     { --depth:5; }
-.default-inputs input,
-.default-inputs select,
-.default-inputs textarea,
-.default-inputs .input-custom                { --depth:0; }
-.default-inputs *:disabled                   { --depth:6; }
-.generic-entry-list .entry                   { --depth:0; }
-.generic-entry-list .entry:not(.off):hover   { --depth:3; }
-.generic-entry-list .entry:not(.off):focus   { --depth:5; }
-.generic-table-vertical td                   { --depth:5; }
-.home .modules-title                         { --depth:0; }
-.home .module                                { --depth:4; }
-.home-wizard                                 { --depth:7; }
-.home-wizard .tabBar .entry.active           { --depth:3; }
-.home-wizard .tabBar .entry:hover            { --depth:1; }
-.home-wizardAction                           { --depth:3; }
-.login input                                 { --depth:0; }
-.login select                                { --depth:0; }
-.menu .items-bg                              { --depth:5; }
-.menu .item .line:focus,
-.menu .item .line:hover                      { --depth:7; }
-.menu .item .line.active                     { --depth:9; }
-.settings .backup-code                       { --depth:0; }
-.field                                       { --depth:0; }
-.field .caption                              { --depth:3; }
-.field .disabled                             { --depth:6; }
-.field .tabs-entries                         { --depth:4; }
-.field .tabs-entry.active                    { --depth:2; }
-.field .tabs-entry.active.showsCal           { --depth:4; }
-.field .tabs-entry.active.showsChart         { --depth:4; }
-.field .tabs-entry.active.showsData          { --depth:0; }
-.field .tabs-entry.active.showsKanban        { --depth:4; }
-.field .tabs-entry.active.showsList          { --depth:4; }
-.field .tabs-entry.active.showsTabs          { --depth:6; }
-.field .tabs-entry.active.readonly           { --depth:6; }
-.field .tabs>.fields                         { --depth:2; }
-.list .layoutTable th                        { --depth:0; }
-.list .layoutTable .columBatchCaption.clickable:hover{ --depth:3; }
-.list .layoutTable tbody tr                  { --depth:1; }
-.list .layoutTable tbody tr:nth-child(odd)   { --depth:0; }
-.list .layoutCards .card                     { --depth:7; }
-.list .layoutCards .card.rowSelect:hover     { --depth:2; }
-.list .layoutCards .card .actions            { --depth:7; }
-.list .layoutCards .card .header             { --depth:7; }
-.list-headers                                { --depth:3; }
-.calendar-month .days                        { --depth:6; }
-.calendar-month .day                         { --depth:0; }
-.calendar-month .day.outside                 { --depth:3; }
-.calendar-days .header                       { --depth:6; }
-.calendar-days .labels                       { --depth:6; }
-.calendar-days .day                          { --depth:0; }
-.gantt-header                                { --depth:7; }
-.gantt-header.lower                          { --depth:5; }
-.gantt-group                                 { --depth:0; }
-.gantt-group:nth-child(odd)                  { --depth:2; }
-.gantt-line                                  { --depth:-2; }
-.kanban-card                                 { --depth:0; }
-.kanban-card:hover                           { --depth:3; }
-.kanban-card .dragAnchor                     { --depth:6; }
-.kanban-card:hover .dragAnchor               { --depth:9; }
-.kanban-content table td                     { --depth:4; }
-.kanban-content table .label                 { --depth:8; }
-.button                                      { --depth:4; }
-.button.background:focus                     { --depth:0; }
-.button.background:hover                     { --depth:0; }
-.button.inactive                             { --depth:6; }
-.bool                                        { --depth:6; }
-.bool:focus                                  { --depth:0; }
-.bool:hover                                  { --depth:0; }
-.input-dropdown                              { --depth:1; }
-.input-dropdown .entry:focus                 { --depth:0; }
-.input-dropdown .entry:hover                 { --depth:0; }
-.input-files-header                          { --depth:2; }
-.input-files-header input                    { --depth:0; }
-.input-files .item                           { --depth:2; }
-.input-files .item img.prev                  { --depth:5; }
-.input-files-name input                      { --depth:0; }
-.input-iframe                                { --depth:3; }
-.input-iframe-actions                        { --depth:0; }
-.input-iframe-actions.readonly               { --depth:6; }
-.tabs .tab-entry:not(.active)                { --depth:1; }
-.admin .logs .actions                        { --depth:7; }
-.admin .table-default th                     { --depth:4; }
-.admin .table-default td                     { --depth:1; }
-.admin .table-default tr.grouping td         { --depth:4; }
-.admin-cluster-node                          { --depth:2; }
-.admin-cluster-node img                      { --depth:5; }
-.admin-license .file                         { --depth:1; }
-.admin-logins .role-select                   { --depth:3; }
-.admin-logins .role-select th                { --depth:3; }
-.admin-modules .message                      { --depth:7; }
-.admin-roles .admin-role-title               { --depth:7; }
-.admin-roles .admin-role-members             { --depth:1; }
-.admin-repo .repo-module .part.left          { --depth:0; }
-.admin-repo .repo-module .part.right         { --depth:6; }
-.builder .filter .filter-side>.subQuery      { --depth:5; }
-.builder .lookup                             { --depth:1; }
-.builder-column-batches                      { --depth:1; }
-.builder-icon-input .iconLine                { --depth:0; }
-.builder-icon-input .iconLine.disabled       { --depth:5; }
-.builder-form-state                          { --depth:5; }
-.builder-form-state-effect                   { --depth:7; }
-.builder-field                               { --depth:7; }
-.builder-field .fields-nested                { --depth:1; }
-.builder-field-button                        { --depth:7; }
-.builder-function .entity                    { --depth:5; }
-.builder-modules .item-wrap                  { --depth:5; }
-.builder-menu .nested                        { --depth:6; }
-.builder-articles-assign                     { --depth:2; }
-.builder-articles-body-richtext              { --depth:0; }
-.builder-function .placeholders              { --depth:2; }
-.builder-start .builder-start-box            { --depth:6; }
-.builder-start .builder-start-entity:hover   { --depth:1; }
-
 
 html,body{
 	width:100%;
@@ -373,7 +250,7 @@ h3{
 	width:100%;
 	flex:1 1 auto;
 	overflow:auto;
-	padding:var(--spacing-parent);
+	padding:0px;
 	display:flex;
 	flex-flow:row nowrap;
 	align-self:center;
@@ -390,6 +267,7 @@ h3{
 	max-height:60px;
 	margin:5px;
 }
+
 
 /* sub windows in main app */
 .app-sub-window{
@@ -478,6 +356,20 @@ h3{
 	z-index:var(--z-index-content);
 	--content-box-max-width:unset; /* overwritable by compact mode */
 }
+.contentBox:not(.popUp){
+	margin:0px;
+	border:none;
+	border-right:1px solid var(--color-border);
+	border-radius:0px;
+	box-shadow:none;
+	--content-box-max-width:unset;
+}
+.contentBox:not(.popUp):last-child{
+	border-right:none;
+}
+.contentBox:not(.popUp) .top{
+	border-radius:0px;
+}
 .contentBox.grow{
 	flex:1 1 auto;
 }
@@ -548,7 +440,7 @@ h3{
 	box-sizing:border-box;
 	border-radius:4px;
 	color:var(--color-font);
-	background-color:var(--color-bg);
+	background-color:var(--color-input);
 }
 .contentBox .top .selector::placeholder{
 	opacity:1;
@@ -684,7 +576,7 @@ table td.maximum{
 	font-family:inherit;
 	font-size:inherit;
 	color:var(--color-font);
-	background-color:var(--color-bg);
+	background-color:var(--color-input);
 	border:none;
 	border-color:var(--color-border);
 	border-radius:3px 3px 0px 0px;
@@ -753,14 +645,18 @@ table td.maximum{
 	display:flex;
 	flex-flow:column nowrap;
 	box-sizing:border-box;
+	border-right:1px solid var(--color-border);
 }
 .navigation{
 	flex:0 1 auto;
 	display:flex;
 	overflow:auto;
 }
+.navigation.contentBox{
+	flex-grow:1;
+}
 .navigation.contentBox .content{
-	flex:0 1 auto;
+	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
 	overflow:auto;
@@ -862,7 +758,7 @@ table td.maximum{
 	border-radius:6px;
 	border-bottom:3px solid var(--color-border);
 	text-decoration:none;
-	background-color:var(--color-bg);
+	background-color:var(--color-input);
 	box-shadow:1px 1px 3px var(--color-shade);
 	box-sizing:border-box;
 	transition:background-color 0.2s, border-bottom 0.2s, box-shadow 0.2s;
@@ -1146,18 +1042,6 @@ table td.maximum{
 .user-bordersSquared .loading-state{
 	border-radius:0px;
 }
-.user-bordersRounded .default-inputs input,
-.user-bordersRounded .default-inputs select,
-.user-bordersRounded .default-inputs textarea,
-.user-bordersRounded .default-inputs .input-custom{
-	border-radius:3px;
-}
-.user-bordersRounded .contentBox{
-	border-radius:4px;
-}
-.user-bordersRounded .contentBox .top{
-	border-radius:4px 4px 0px 0px;
-}
 .user-spacing.spacing-value1{
 	--spacing:10px;
 }
@@ -1191,31 +1075,6 @@ table td.maximum{
 .user-font.trebuchet_ms   { font-family:'Trebuchet MS',Arial,sans-serif; }
 .user-font.verdana        { font-family:Verdana,Arial,sans-serif; }
 
-.user-compact .app-content{
-	padding:0px;
-}
-.user-compact .app-content .contentBox:not(.popUp){
-	margin:0px;
-	border:none;
-	border-bottom:1px solid var(--color-border);
-	border-right:1px solid var(--color-border);
-	border-radius:0px;
-	box-shadow:none;
-	--content-box-max-width:unset;
-}
-.user-compact .app-content .contentBox:not(.popUp):last-child{
-	border-right:none;
-}
-.user-compact .app-content .contentBox:not(.popUp) .top{
-	border-radius:0px;
-}
-.user-compact .navigationWrap{
-	border-right:1px solid var(--color-border);
-}
-.user-compact .navigation.contentBox,
-.user-compact .navigation.contentBox .content{
-	flex-grow:1;
-}
 
 .user-dark,
 .user-dark *{
@@ -1255,7 +1114,6 @@ table td.maximum{
 	/* dark mode is simpler, overwrite some cases */
 	--color-bg:                    hsl(315,1%,var(--light-contrast));
 	--color-bg-font:               var(--color-font);
-	--color-menu-border:           var(--color-border);
 	--color-header-border:         hsl(0,0%,55%,1.00);
 	--color-cancel-border:         var(--color-cancel);
 	--image-filter-bg:             var(--image-filter);

@@ -16,7 +16,7 @@ let MyMenuItem = {
 	template:`<div class="item" v-if="active">
 		<!-- menu item line -->
 		<div class="line noHighlight" tabindex="0"
-			:class="{ active:selected, noForm:menu.formId === null }"
+			:class="{ active:selected, noForm:menu.formId === null, showsChildren:showChildren }"
 			@click="click"
 			@click.middle="clickMiddle"
 			@keyup.enter.space="click"
@@ -45,7 +45,7 @@ let MyMenuItem = {
 		</div>
 		
 		<!-- menu item children -->
-		<template v-if="showChildren && anyAccessibleChildren">
+		<div class="menu-items-children" v-if="showChildren && anyAccessibleChildren">
 			<my-menu-item class="item sub"
 				v-for="m in menu.menus"
 				:formIdActive="formIdActive"
@@ -55,7 +55,7 @@ let MyMenuItem = {
 				:module="module"
 				:recordOpen="recordOpen"
 			/>
-		</template>
+		</div>
 	</div>`,
 	props:{
 		formIdActive:   { type:String,  required:true },
@@ -159,47 +159,38 @@ let MyMenu = {
 	name:'my-menu',
 	components:{MyMenuItem},
 	template:`<div class="menu"
-		:class="{ colored:settings.menuColored }"
+		:style="bgStyle"
 		v-if="hasAccessToAnyMenu(module.menus,menuAccess)"
 	>
-		<div class="contentBox scroll relative">
-			<div class="top lower">
-				<div class="area">
-					<img class="icon"
-						v-if="module.iconId !== null"
-						:src="srcBase64(iconIdMap[module.iconId].file)"
-					/>
-					<h1>{{ getModuleCaption(module,moduleLanguage) }}</h1>
-				</div>
-				
-				<div class="area">
-					<my-button image="builder.png"
-						v-if="isAdmin && builderEnabled && !isMobile"
-						@trigger="openBuilder(false)"
-						@trigger-middle="openBuilder(true)"
-						:captionTitle="capGen.button.openBuilder"
-					/>
-				</div>
+		<div class="menu-header row space-between gap">
+			<div class="row centered gap">
+				<img class="icon"
+					v-if="module.iconId !== null"
+					:src="srcBase64(iconIdMap[module.iconId].file)"
+				/>
+				<span>{{ getModuleCaption(module,moduleLanguage) }}</span>
 			</div>
 			
-			<div class="items-bg"
-				:style="settings.menuColored ? bgStyle : ''"
-			></div>
-			<div class="items">
-				<my-menu-item
-					v-for="m in module.menus"
-					:formIdActive="formIdActive"
-					:formOpensPreset="formOpensPreset"
-					:key="m.id"
-					:menu="m"
-					:module="module"
-					:recordOpen="recordOpen"
-				/>
-			</div>
+			<my-button image="builder.png"
+				v-if="isAdmin && builderEnabled && !isMobile"
+				@trigger="openBuilder(false)"
+				@trigger-middle="openBuilder(true)"
+				:captionTitle="capGen.button.openBuilder"
+			/>
+		</div>
+		<div class="menu-items">
+			<my-menu-item
+				v-for="m in module.menus"
+				:formIdActive="formIdActive"
+				:formOpensPreset="formOpensPreset"
+				:key="m.id"
+				:menu="m"
+				:module="module"
+				:recordOpen="recordOpen"
+			/>
 		</div>
 	</div>`,
 	props:{
-		bgStyle:        { type:String,  required:true },
 		isActiveModule: { type:Boolean, required:true },
 		formIdActive:   { type:String,  required:true },
 		formOpensPreset:{ type:Boolean, required:true },
@@ -207,11 +198,16 @@ let MyMenu = {
 		recordOpen:     { type:Boolean, required:true }
 	},
 	computed:{
+		bgStyle:(s) => {
+			return `background:radial-gradient(at right bottom, rgba(52,52,52,1) 20%, rgba(40,40,40,1) 60%);`;
+		},
+		
 		// stores
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
 		builderEnabled:(s) => s.$store.getters.builderEnabled,
 		capGen:        (s) => s.$store.getters.captions.generic,
+		colorMain:     (s) => s.$store.getters.colorMain,
 		isAdmin:       (s) => s.$store.getters.isAdmin,
 		isMobile:      (s) => s.$store.getters.isMobile,
 		menuAccess:    (s) => s.$store.getters.access.menu,

@@ -101,6 +101,27 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 	// clean up on next release
 	// nothing yet
 
+	"3.5": func(tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(db.Ctx, `
+			-- remove outdated login settings / add new login settings
+			ALTER TABLE instance.login_setting DROP COLUMN field_clean;
+			ALTER TABLE instance.login_setting DROP COLUMN menu_colored;
+			ALTER TABLE instance.login_setting DROP COLUMN compact;
+			ALTER TABLE instance.login_setting DROP COLUMN page_limit;
+			
+			ALTER TABLE instance.login_setting ADD COLUMN borders_squared BOOLEAN NOT NULL DEFAULT FALSE;
+			ALTER TABLE instance.login_setting ALTER COLUMN borders_squared DROP DEFAULT;
+			UPDATE instance.login_setting SET borders_squared = true WHERE borders_corner = 'squared';
+			ALTER TABLE instance.login_setting DROP COLUMN borders_corner;
+			DROP TYPE instance.login_setting_border_corner;
+			
+			ALTER TABLE instance.login_setting ADD COLUMN color_header CHARACTER VARYING(6) NOT NULL DEFAULT '222222';
+			ALTER TABLE instance.login_setting ADD COLUMN color_menu   CHARACTER VARYING(6) NOT NULL DEFAULT '282828';
+			ALTER TABLE instance.login_setting ALTER COLUMN color_header DROP DEFAULT;
+			ALTER TABLE instance.login_setting ALTER COLUMN color_menu   DROP DEFAULT;
+		`)
+		return "3.6", err
+	},
 	"3.4": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
 			-- cleanup from last release

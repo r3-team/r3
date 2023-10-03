@@ -1862,11 +1862,6 @@
 			"resetAccessDesc":"If you do not have access to either your previous password nor your backup code, you permanently lost access to your encrypted data.<br /><br />If this is the case, you can decide to reset your personal keys to encrypt new data - this will <b>NOT</b> re-establish access to previously encrypted data.",
 			"resetAccessHint":"Are you sure you want to reset your personal keys? If you do this, there is no going back even if you find your old backup code later."
 		},
-		"option":{
-			"cornerKeep":"- predefinito -",
-			"cornerRounded":"arrotondato",
-			"cornerSquared":"squadrato"
-		},
 		"tokensFixed":{
 			"button":{
 				"loadApp":"Application",
@@ -1910,8 +1905,7 @@
 			"titleName":"Device name"
 		},
 		"bordersAll":"Aggiungi bordi",
-		"bordersCorners":"Angoli del bordo",
-		"compact":"Layout compatto",
+		"bordersSquared":"Squared borders",
 		"dateFormat":"Formato Data",
 		"dateFormat0":"Y-m-d (2012-12-30)",
 		"dateFormat1":"Y/m/d (2012/12/30)",
@@ -1919,14 +1913,11 @@
 		"dateFormat3":"d/m/Y (30/12/2012)",
 		"dateFormat4":"m/d/Y (12/30/2012)",
 		"dark":"Modalità scura",
-		"fieldClean":"Field backgrounds",
 		"fontFamily":"Font",
 		"fontSize":"Dimensione font",
 		"headerCaptions":"Mostra titolo menu principale",
 		"languageCode":"Lingua",
-		"menuColored":"Colored menu",
 		"mobileScrollForm":"Mobile: Scroll entire form",
-		"pageLimit":"Max. larghezza della pagina",
 		"pageTitle":"Impostazioni",
 		"pattern":"Background pattern",
 		"searchDictionaries":"Dictionaries for full-text search",

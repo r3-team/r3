@@ -215,10 +215,7 @@ let MyHome = {
 		
 		// presentation
 		bgStyle(moduleId) {
-			let color = this.activated && this.colorHeader !== ''
-				? `#${this.colorHeader}` : this.$root.moduleIdMapColor[moduleId];
-			
-			return `background-color:${color};`;
+			return `background-color:#${this.moduleIdMap[moduleId].color1};`;
 		},
 		
 		// actions

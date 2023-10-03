@@ -63,6 +63,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 	border-bottom:1px solid var(--color-border);
+	background-color:var(--color-input);
 }
 .calendar-days .days.full{
 	flex:0 0 auto;
@@ -74,7 +75,6 @@
 .calendar-days .day{
 	flex:1 1 0px;
 	position:relative;
-	background-color:var(--color-bg);
 	border-left:1px solid var(--color-border);
 	display:flex;
 	flex-flow:column nowrap;
@@ -190,7 +190,7 @@
 	flex:1 1 0px;
 	display:flex;
 	flex-direction:column;
-	background-color:var(--color-bg);
+	background-color:var(--color-input);
 	border-right:1px solid var(--color-border);
 }
 .calendar-month .day:last-child{
@@ -304,11 +304,6 @@
 
 
 /* user overwrites */
-.user-clean .calendar:not(.isSingleField){
-	box-shadow:none;
-	border:1px solid var(--color-border);
-	border-radius:5px;
-}
 .user-bordersSquared .calendar,
 .user-bordersSquared .calendar-days .event{
 	border-radius:0px !important;

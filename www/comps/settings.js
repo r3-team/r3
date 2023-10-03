@@ -1005,14 +1005,8 @@ let MySettings = {
 								<td><my-bool v-model="settingsInput.bordersAll" /></td>
 							</tr>
 							<tr>
-								<td>{{ capApp.bordersCorners }}</td>
-								<td>
-									<select v-model="settingsInput.bordersCorner">
-										<option value="keep"   >{{ capApp.option.cornerKeep }}</option>
-										<option value="rounded">{{ capApp.option.cornerRounded }}</option>
-										<option value="squared">{{ capApp.option.cornerSquared }}</option>
-									</select>
-								</td>
+								<td>{{ capApp.bordersSquared }}</td>
+								<td><my-bool v-model="settingsInput.bordersSquared" /></td>
 							</tr>
 							<tr>
 								<td>{{ capApp.fontFamily }}</td>
@@ -1073,35 +1067,8 @@ let MySettings = {
 								</td>
 							</tr>
 							<tr>
-								<td>{{ capApp.menuColored }}</td>
-								<td><my-bool v-model="settingsInput.menuColored" /></td>
-							</tr>
-							<tr>
 								<td>{{ capApp.dark }}</td>
 								<td><my-bool v-model="settingsInput.dark" /></td>
-							</tr>
-							<tr>
-								<td>{{ capApp.fieldClean }}</td>
-								<td><my-bool v-model="settingsInput.fieldClean" :reversed="true" /></td>
-							</tr>
-							<tr>
-								<td>{{ capApp.compact }}</td>
-								<td><my-bool v-model="settingsInput.compact" /></td>
-							</tr>
-							<tr v-if="!settingsInput.compact">
-								<td>{{ capApp.pageLimit }}</td>
-								<td>
-									<div class="settings-page-limit">
-										<my-button image="remove.png"
-											@trigger="settingsInput.pageLimit -= 50"
-											:active="settingsInput.pageLimit > 1200"
-										/>
-										<div>{{ settingsInput.pageLimit + 'px' }}</div>
-										<my-button image="add.png"
-											@trigger="settingsInput.pageLimit += 50"
-										/>
-									</div>
-								</td>
 							</tr>
 						</tbody>
 					</table>
