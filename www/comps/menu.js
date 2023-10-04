@@ -207,7 +207,6 @@ let MyMenu = {
 		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
 		builderEnabled:(s) => s.$store.getters.builderEnabled,
 		capGen:        (s) => s.$store.getters.captions.generic,
-		colorMain:     (s) => s.$store.getters.colorMain,
 		isAdmin:       (s) => s.$store.getters.isAdmin,
 		isMobile:      (s) => s.$store.getters.isMobile,
 		menuAccess:    (s) => s.$store.getters.access.menu,

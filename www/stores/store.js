@@ -186,16 +186,21 @@ const MyStore = Vuex.createStore({
 		system:         (state,payload) => state.system          = payload
 	},
 	getters:{
-		colorMain:(state,payload) => {
-			let c = state.settings.dark ? '#222' : '#444'; // default colors
-			
+		colorHeaderAccent:(state,payload) => {
 			// overwrite customizing header color
 			if(MyStoreLocal.state.activated && MyStoreLocal.state.companyColorHeader !== '')
-				c = `${MyStoreLocal.state.companyColorHeader}`;
-			else if(state.isAtModule && state.moduleIdLast !== null && MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1 !== null)
-				c = MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1;
+				return `${MyStoreLocal.state.companyColorHeader}`;
 			
-			return `#${c}`;
+			if(state.isAtModule && state.moduleIdLast !== null && MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1 !== null)
+				return MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1;
+			
+			return state.settings.dark ? '222222' : '444444'; // default colors
+		},
+		colorHeaderMain:(state,payload) => {
+			return state.settings.colorHeader !== '' ? state.settings.colorHeader : '222222';
+		},
+		colorMenu:(state,payload) => {
+			return state.settings.colorMenu !== '' ? state.settings.colorHeader : '282828';
 		},
 		licenseDays:(state) => {
 			if(!state.licenseValid)

@@ -1070,6 +1070,14 @@ let MySettings = {
 								<td>{{ capApp.dark }}</td>
 								<td><my-bool v-model="settingsInput.dark" /></td>
 							</tr>
+							<tr>
+								<td>{{ capApp.colorHeader }}</td>
+								<td><input v-model="settingsInput.colorHeader" /></td>
+							</tr>
+							<tr>
+								<td>{{ capApp.colorMenu }}</td>
+								<td><input v-model="settingsInput.colorMenu" /></td>
+							</tr>
 						</tbody>
 					</table>
 				</div>

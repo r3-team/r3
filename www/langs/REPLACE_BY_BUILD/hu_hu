@@ -1906,6 +1906,8 @@
 		},
 		"bordersAll":"Keretek hozzáadása",
 		"bordersSquared":"Squared borders",
+		"colorHeader":"Header color",
+		"colorMenu":"Menu color",
 		"dateFormat":"Dátumformátum",
 		"dateFormat0":"É-h-n (2012-12-30)",
 		"dateFormat1":"É/h/n (2012/12/30)",

@@ -46,7 +46,6 @@ let MyApp = {
 			<my-header
 				@logout="sessionInvalid"
 				@show-collection-input="collectionEntries = $event"
-				:bgStyle="bgStyle"
 				:keysLocked="loginEncryption && loginPrivateKey === null"
 				:moduleEntries="moduleEntries"
 			/>
@@ -131,13 +130,6 @@ let MyApp = {
 		};
 	},
 	watch:{
-		colorMain:{
-			handler(v) {
-				// set meta theme color (for PWA window color)
-				document.querySelector('meta[name="theme-color"]').setAttribute('content','rgba(34,34,34,1)');
-			},
-			immediate:true
-		},
 		css:{
 			handler(v) {
 				let e = document.getElementById('app-custom-css');
@@ -296,18 +288,6 @@ let MyApp = {
 		},
 		
 		// simple
-		//color1:(s) => `linear-gradient(175deg, rgba(34,34,34,1) 60%, ${s.colorMain} 110%)`,
-		
-		bgStyle:(s) => {
-			return `
-				background-color:rgba(34,34,34,1);
-				background-image:radial-gradient(at bottom right, ${s.colorMain} 0%, rgba(34,34,34,1) 60%);
-				background-size:70% 120%;
-				background-position:bottom right;
-				background-repeat:no-repeat;
-			`;
-		},
-		
 		httpMode:       (s) => location.protocol === 'http:',
 		pwaManifestHref:(s) => `/manifests/${s.isAtModule ? s.moduleIdLast : ''}`,
 		
@@ -327,7 +307,6 @@ let MyApp = {
 		blockInput:       (s) => s.$store.getters.blockInput,
 		capErr:           (s) => s.$store.getters.captions.error,
 		capGen:           (s) => s.$store.getters.captions.generic,
-		colorMain:        (s) => s.$store.getters.colorMain,
 		isAdmin:          (s) => s.$store.getters.isAdmin,
 		isAtDialog:       (s) => s.$store.getters.isAtDialog,
 		isAtFeedback:     (s) => s.$store.getters.isAtFeedback,

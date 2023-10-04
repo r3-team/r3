@@ -24,6 +24,7 @@ export function colorAdjustBg(colorRgb) {
 export function colorMakeContrastFont(colorRbgBg) {
 	// create contrast font color from background color
 	let c = tinycolor(colorRbgBg);
+	
 	if(MyStore.getters.settings.dark) {
 		// dark mode always uses bright fonts
 		c.lighten(40);
@@ -33,6 +34,10 @@ export function colorMakeContrastFont(colorRbgBg) {
 		else           c.darken(65);
 	}
 	return c.toString();
+};
+
+export function colorIsDark(colorRbgBg) {
+	return tinycolor(colorRbgBg).isDark();
 };
 
 export function copyValueDialog(captionTop,captionBody,copyClipboardValue) {

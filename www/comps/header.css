@@ -8,8 +8,12 @@
 	height:var(--app-header-height);
 	z-index:var(--z-index-header);
 	position:relative;
+	color:var(--color-font);
 	box-shadow:none;
 	border-bottom:1px solid #000;
+}
+.app-header.isDark{
+	color:var(--color-font-bright);
 }
 .app-header-bg{
 	position:absolute;
@@ -56,7 +60,7 @@
 	padding:10px 10px 8px 10px;
 	border-radius:5px 5px 0px 0px;
 	font-size:110%;
-	color:var(--color-bright);
+	color:inherit;
 	box-sizing:border-box;
 	text-decoration:none;
 	outline:none;
@@ -70,6 +74,9 @@
 }
 .app-header .entry img{
 	height:22px;
+	filter:var(--image-filter);
+}
+.app-header.isDark .entry img{
 	filter:var(--image-filter-bg);
 }
 .app-header .entry span{
