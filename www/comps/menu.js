@@ -4,6 +4,7 @@ import {hasAccessToAnyMenu} from './shared/access.js';
 import {getColumnTitle}     from './shared/column.js';
 import {getFormRoute}       from './shared/form.js';
 import {getModuleCaption}   from './shared/generic.js';
+import tinycolor            from '../externals/tinycolor2.js';
 import {
 	getCollectionColumn,
 	getCollectionValues
@@ -159,6 +160,7 @@ let MyMenu = {
 	name:'my-menu',
 	components:{MyMenuItem},
 	template:`<div class="menu"
+		:class="{ isDark:isDark }"
 		:style="bgStyle"
 		v-if="hasAccessToAnyMenu(module.menus,menuAccess)"
 	>
@@ -199,14 +201,18 @@ let MyMenu = {
 	},
 	computed:{
 		bgStyle:(s) => {
-			return `background:radial-gradient(at right bottom, rgba(52,52,52,1) 20%, rgba(40,40,40,1) 60%);`;
+			let c = s.tinycolor(s.color);
+			c.lighten(3);
+			return `background:radial-gradient(at right bottom, ${c.toString()} 20%, #${s.color} 60%);`;
 		},
+		isDark:(s) => s.tinycolor(s.color).isDark(),
 		
 		// stores
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
 		builderEnabled:(s) => s.$store.getters.builderEnabled,
 		capGen:        (s) => s.$store.getters.captions.generic,
+		color:         (s) => s.$store.getters.colorMenu,
 		isAdmin:       (s) => s.$store.getters.isAdmin,
 		isMobile:      (s) => s.$store.getters.isMobile,
 		menuAccess:    (s) => s.$store.getters.access.menu,
@@ -218,6 +224,7 @@ let MyMenu = {
 		getModuleCaption,
 		hasAccessToAnyMenu,
 		srcBase64,
+		tinycolor,
 		
 		// actions
 		openBuilder(middle) {

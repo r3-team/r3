@@ -36,8 +36,8 @@ export function colorMakeContrastFont(colorRbgBg) {
 	return c.toString();
 };
 
-export function colorIsDark(colorRbgBg) {
-	return tinycolor(colorRbgBg).isDark();
+export function colorIsDark(colorRbg) {
+	return tinycolor(colorRbg).isDark();
 };
 
 export function copyValueDialog(captionTop,captionBody,copyClipboardValue) {

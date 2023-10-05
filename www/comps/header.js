@@ -71,6 +71,7 @@ let MyHeader = {
 					<!-- sub header -->
 					<div class="children shade"
 						v-if="me.children.length !== 0"
+						:style="bgStyleEntries"
 					>
 						<!-- parent module (if accessible) -->
 						<router-link class="entry child clickable"
@@ -214,6 +215,7 @@ let MyHeader = {
 				background-repeat:no-repeat;
 			`;
 		},
+		bgStyleEntries:(s) => `background-color:#${s.colorHeaderMain};`,
 		collectionCounter:(s) => {
 			if(!s.isMobile) return 0;
 			

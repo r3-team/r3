@@ -4,6 +4,9 @@
 	display:flex;
 	flex-flow:column nowrap;
 	box-sizing:border-box;
+	color:var(--color-font);
+}
+.menu.isDark{
 	color:var(--color-bright);
 }
 .menu-header{
@@ -12,6 +15,9 @@
 .menu-header img.icon{
 	width:22px;
 	height:22px;
+	filter:var(--image-filter);
+}
+.menu.isDark .menu-header img.icon{
 	filter:var(--image-filter-bg);
 }
 .menu-header span{
@@ -31,7 +37,7 @@
 	z-index:var(--z-index-menu-items);
 }
 .menu-items-children{
-	background-color:rgba(0,0,0,0.2);
+	background-color:rgba(0,0,0,0.1);
 	border-radius:10px 0px 0px 10px;
 	margin:0px 0px 3px 10px;
 	padding:3px 0px 3px 3px;
@@ -73,6 +79,9 @@
 .menu .item .line img{
 	height:18px;
 	outline:none;
+	filter:var(--image-filter);
+}
+.menu.isDark .line img{
 	filter:var(--image-filter-bg);
 }
 .menu .item .line .caption{

@@ -54,8 +54,11 @@ let MyForm = {
 		MyField,
 		MyFormLog
 	},
-	template:`<div class="form-wrap" :class="{ popUp:isPopUp, float:isPopUpFloating, fullscreen:popUpFullscreen }" :key="form.id">
-		
+	template:`<div class="form-wrap"
+		:class="{ popUp:isPopUp, float:isPopUpFloating, fullscreen:popUpFullscreen }"
+		:key="form.id"
+		:style="bgStyle"
+	>
 		<!-- pop-up form -->
 		<div class="app-sub-window under-header"
 			v-if="popUp !== null"
@@ -341,6 +344,7 @@ let MyForm = {
 	},
 	computed:{
 		// states
+		bgStyle:(s) => s.isPopUp ? '' : `background-color:#${s.colorMenu};`,
 		canCreate:(s) =>!s.updatingRecord
 			&& s.joins.length !== 0
 			&& s.joins[0].applyCreate
@@ -640,6 +644,7 @@ let MyForm = {
 		capApp:             (s) => s.$store.getters.captions.form,
 		capErr:             (s) => s.$store.getters.captions.error,
 		capGen:             (s) => s.$store.getters.captions.generic,
+		colorMenu:          (s) => s.$store.getters.colorMenu,
 		isAdmin:            (s) => s.$store.getters.isAdmin,
 		isMobile:           (s) => s.$store.getters.isMobile,
 		keyLength:          (s) => s.$store.getters.constants.keyLength,

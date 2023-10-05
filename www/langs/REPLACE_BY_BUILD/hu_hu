@@ -255,7 +255,6 @@
 			"appNameHint":"A REI3 intézmény neve, amely a bejelentkező oldalon jelenik meg.",
 			"appNameShort":"Rövid név",
 			"appNameShortHint":"Az intézmény nevének rövid változata, amelyet oldalcímként használnak, valamint az REI3 Progresszív Webalkalmazásként (PWA) való telepítés során.",
-			"colorHint":"Szín HEX formátumban, például 3EA9B9",
 			"companyColorHeader":"Címfej színe (Főmenü)",
 			"companyColorHeaderHint":"Rögzített szín a fejlécben, az egyes alkalmazások színeit figyelmen kívül hagyja.",
 			"companyColorLogin":"Címfej színe (Bejelentkezés)",
@@ -1734,6 +1733,9 @@
 		"title":"Kezdőlap"
 	},
 	"input":{
+		"color":{
+			"hint":"Szín HEX formátumban, például 3EA9B9"
+		},
 		"date":{
 			"dateFrom":"Tól",
 			"dateTo":"Ig",

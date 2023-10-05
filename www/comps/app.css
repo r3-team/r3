@@ -98,8 +98,8 @@
 	--color-bright:        #ebebeb;
 	--color-input:         #ffffff;
 	--color-input-disabled:#efefef;
-	--color-menu-active:   #3e5e6d;
-	--color-menu-hover:    #58717d;
+	--color-menu-active:   hsl(199,24%,37%,0.5);
+	--color-menu-hover:    hsl(199,24%,57%,0.5);
 	
 	--color-shade-input:    #757575;
 	--color-shade-input-sel:hsl(311,57%,20%);

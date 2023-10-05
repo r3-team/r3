@@ -200,7 +200,7 @@ const MyStore = Vuex.createStore({
 			return state.settings.colorHeader !== '' ? state.settings.colorHeader : '222222';
 		},
 		colorMenu:(state,payload) => {
-			return state.settings.colorMenu !== '' ? state.settings.colorHeader : '282828';
+			return state.settings.colorMenu !== '' ? state.settings.colorMenu : '282828';
 		},
 		licenseDays:(state) => {
 			if(!state.licenseValid)

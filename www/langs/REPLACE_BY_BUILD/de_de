@@ -255,7 +255,6 @@
 			"appNameHint":"Name der REI3-Instanz, wird angezeigt auf der Anmeldeseite.",
 			"appNameShort":"Kurzer Name",
 			"appNameShortHint":"Kurze Version des Instanznamens, wird als Seitentitel verwendet sowie als Beschriftung wenn REI3 als Progressive-Web-App (PWA) installiert wird.",
-			"colorHint":"Farbe als HEX, wie 3EA9B9",
 			"companyColorHeader":"Titelfarbe (Hauptmenü)",
 			"companyColorHeaderHint":"Definiert eine feste Farbe auf dem Header, Farben einzelner Anwendungen werden ignoriert.",
 			"companyColorLogin":"Titelfarbe (Anmeldung)",
@@ -1734,6 +1733,9 @@
 		"title":"Startseite"
 	},
 	"input":{
+		"color":{
+			"hint":"Farbe als HEX, wie 3EA9B9"
+		},
 		"date":{
 			"dateFrom":"Von",
 			"dateTo":"Bis",

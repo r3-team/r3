@@ -1,6 +1,7 @@
 import {textAddTab}     from '../shared/generic.js';
 import {srcBase64}      from '../shared/image.js';
 import {MyModuleSelect} from '../input.js';
+import MyInputColor     from '../inputColor.js';
 export {MyAdminCustom as default};
 
 let MyAdminCustomLogo = {
@@ -57,8 +58,8 @@ let MyAdminCustom = {
 	name:'my-admin-custom',
 	components:{
 		MyAdminCustomLogo,
-		MyModuleSelect,
-		'chrome-picker':VueColor.Chrome
+		MyInputColor,
+		MyModuleSelect
 	},
 	template:`<div class="admin-custom contentBox grow">
 		<div class="top">
@@ -124,72 +125,12 @@ let MyAdminCustom = {
 			<table class="generic-table-vertical default-inputs">
 				<tr>
 					<td>{{ capApp.companyColorLogin }}</td>
-					<td>
-						<div class="colorInputWrap">
-							<input v-model="configInput.companyColorLogin"
-								:disabled="!activated"
-								:placeholder="capApp.colorHint"
-							/>
-							<div class="preview clickable shade"
-								v-if="activated"
-								@click="showColorLogin = !showColorLogin"
-								:style="'background-color:#'+configInput.companyColorLogin"
-							>
-								<img
-									:class="{ active:configInput.companyColorLogin !== '' }"
-									:src="showColorLogin ? 'images/pageUp.png' : 'images/pageDown.png'"
-								/>
-							</div>
-							<my-button image="cancel.png"
-								@trigger="configInput.companyColorLogin = ''; showColorLogin = false"
-								:active="activated && configInput.companyColorLogin !== ''"
-								:cancel="true"
-							/>
-						</div>
-						
-						<chrome-picker
-							v-if="showColorLogin"
-							@update:modelValue="applyColor('login',$event)"
-							:disableAlpha="true"
-							:disableFields="true"
-							:modelValue="configInput.companyColorLogin"
-						/>
-					</td>
+					<td><my-input-color v-model="configInput.companyColorLogin" :readonly="!activated" /></td>
 					<td>{{ capApp.companyColorLoginHint }}</td>
 				</tr>
 				<tr>
 					<td>{{ capApp.companyColorHeader }}</td>
-					<td>
-						<div class="colorInputWrap">
-							<input v-model="configInput.companyColorHeader"
-								:disabled="!activated"
-								:placeholder="capApp.colorHint"
-							/>
-							<div class="preview clickable shade"
-								v-if="activated"
-								@click="showColorHeader = !showColorHeader"
-								:style="'background-color:#'+configInput.companyColorHeader"
-							>
-								<img
-									:class="{ active:configInput.companyColorHeader !== '' }"
-									:src="showColorHeader ? 'images/pageUp.png' : 'images/pageDown.png'"
-								/>
-							</div>
-							<my-button image="cancel.png"
-								@trigger="configInput.companyColorHeader = ''; showColorHeader = false"
-								:active="activated && configInput.companyColorHeader !== ''"
-								:cancel="true"
-							/>
-						</div>
-						
-						<chrome-picker
-							v-if="showColorHeader"
-							@update:modelValue="applyColor('header',$event)"
-							:disableAlpha="true"
-							:disableFields="true"
-							:modelValue="configInput.companyColorHeader"
-						/>
-					</td>
+					<td><my-input-color v-model="configInput.companyColorHeader" :readonly="!activated" /></td>
 					<td>{{ capApp.companyColorHeaderHint }}</td>
 				</tr>
 			</table>

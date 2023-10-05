@@ -1,5 +1,6 @@
 import {set as setSetting} from './shared/settings.js';
 import {getUnixFormat}     from './shared/time.js';
+import MyInputColor        from './inputColor.js';
 import {
 	aesGcmDecryptBase64,
 	aesGcmDecryptBase64WithPhrase,
@@ -893,9 +894,10 @@ let MySettingsFixedTokens = {
 let MySettings = {
 	name:'my-settings',
 	components:{
+		MyInputColor,
 		MySettingsAccount,
 		MySettingsEncryption,
-		MySettingsFixedTokens,
+		MySettingsFixedTokens
 	},
 	template:`<div class="settings">
 		
@@ -1072,11 +1074,11 @@ let MySettings = {
 							</tr>
 							<tr>
 								<td>{{ capApp.colorHeader }}</td>
-								<td><input v-model="settingsInput.colorHeader" /></td>
+								<td><my-input-color v-model="settingsInput.colorHeader" /></td>
 							</tr>
 							<tr>
 								<td>{{ capApp.colorMenu }}</td>
-								<td><input v-model="settingsInput.colorMenu" /></td>
+								<td><my-input-color v-model="settingsInput.colorMenu" /></td>
 							</tr>
 						</tbody>
 					</table>

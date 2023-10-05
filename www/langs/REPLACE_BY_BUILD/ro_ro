@@ -255,7 +255,6 @@
 			"appNameHint":"Name of the REI3 instance, shown on the login page.",
 			"appNameShort":"Titlul paginii",
 			"appNameShortHint":"Short version of the instance name, shown in the page title and as label if installed as progressive web app (PWA).",
-			"colorHint":"Color as HEX, like 3EA9B9",
 			"companyColorHeader":"Culoarea titlului (antet)",
 			"companyColorHeaderHint":"Sets a fixed color for the header, application colors are ignored.",
 			"companyColorLogin":"Culoarea titlului (autentificare)",
@@ -1734,6 +1733,9 @@
 		"title":"Pagina principală"
 	},
 	"input":{
+		"color":{
+			"hint":"Color as HEX, like 3EA9B9"
+		},
 		"date":{
 			"dateFrom":"Din",
 			"dateTo":"La",

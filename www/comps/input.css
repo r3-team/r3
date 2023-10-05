@@ -419,6 +419,32 @@
 	font-family:'Lucida Console',Courier,monospace;
 }
 
+/* color input */
+.input-color{
+	display:flex;
+	flex-flow:row nowrap;
+	gap:6px;
+	position:relative;
+}
+.input-color-preview{
+	width:30px;
+	height:30px;
+	border-radius:4px;
+}
+.input-color-preview img{
+	height:100%;
+}
+.input-color-preview.isDark img{
+	filter:var(--image-filter-bg);
+}
+.input-color-picker{
+	width:100% !important;
+	position:absolute;
+	left:0px;
+	right:0px;
+	bottom:30px;
+	z-index:var(--z-index-dropdown);
+}
 
 /* richtext input */
 .input-richtext{
