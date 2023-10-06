@@ -189,10 +189,10 @@ let MyList = {
 		<template v-if="showTable && !inputAsCategory">
 			
 			<!-- list header line -->
-			<div class="top lower" v-if="header">
+			<div class="list-header" v-if="header">
 				
 				<!-- actions -->
-				<div class="area nowrap">
+				<div class="row gap nowrap">
 					<my-button image="new.png"
 						v-if="hasCreate"
 						@trigger="$emit('open-form',[],false)"
@@ -223,7 +223,7 @@ let MyList = {
 					/>
 				</div>
 				
-				<div class="area nowrap">
+				<div class="row gap nowrap">
 					<img class="icon"
 						v-if="iconId !== null"
 						:src="srcBase64(iconIdMap[iconId].file)"
@@ -240,7 +240,7 @@ let MyList = {
 					/>
 				</div>
 				
-				<div class="area nowrap default-inputs">
+				<div class="row gap nowrap default-inputs">
 					<!-- auto renew / user filter / quick filter / query choices / page limits -->
 					
 					<my-button image="autoRenew.png"
@@ -305,12 +305,12 @@ let MyList = {
 				</div>
 			</div>
 			
-			<div class="list-headers" v-if="showAggregators || showCsv || showFilters || showAutoRenew">
+			<div class="list-options-wrap" v-if="showAggregators || showCsv || showFilters || showAutoRenew">
 				<!-- list header functions -->
 				
 				<!-- auto renew -->
-				<div class="list-header" v-if="showAutoRenew">
-					<div class="list-header-title">
+				<div class="list-options" v-if="showAutoRenew">
+					<div class="list-options-title">
 						<img src="images/autoRenew.png" />
 						<span>{{ capApp.autoRenew }}</span>
 					</div>
@@ -329,7 +329,7 @@ let MyList = {
 				</div>
 				
 				<!-- filters -->
-				<div class="list-header" v-if="showFilters">
+				<div class="list-options" v-if="showFilters">
 					<my-filters class="default-inputs"
 						v-model="filtersUser"
 						@apply="reloadInside('filtersUser')"
@@ -340,7 +340,7 @@ let MyList = {
 						:userFilter="true"
 					>
 						<template #title>
-							<div class="list-header-title">
+							<div class="list-options-title">
 								<img src="images/filterCog.png" />
 								<span>{{ capGen.button.filterHint }}</span>
 							</div>

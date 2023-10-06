@@ -41,7 +41,7 @@
 .form:not(.popUp){
 	padding-left:1px;
 	border-radius:20px 0px 0px 0px;
-	border-left:2px solid #000;
+	border-left:1px solid #000;
 }
 
 /* fields */

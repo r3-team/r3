@@ -1,10 +1,9 @@
 .list{
 	flex:1 1 auto;
 	min-height:240px;
-	border-radius:3px;
+	border-radius:5px;
 	display:flex;
 	flex-flow:column nowrap;
-	background-color:var(--color-input);
 	overflow:auto;
 }
 .list.asInput{
@@ -41,6 +40,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 	overflow:auto;
+	background-color:var(--color-input);
 }
 .list .layoutWrap .form-wrap.popUp{
 	flex:1 1 auto;
@@ -48,6 +48,20 @@
 }
 .list .layoutWrap .empty-space{
 	flex:1 1 auto;
+}
+.list-header{
+    line-height:30px;
+    background-color:var(--color-bg);
+    flex:0 0 auto;
+    gap:12px;
+    padding:12px 10px;
+    display:flex;
+    flex-flow:row wrap;
+    justify-content:space-between;
+    align-content:center;
+}
+.list-header .selector{
+	min-width:unset;
 }
 
 /* list as lookup or dropdown */
@@ -228,6 +242,7 @@
 	flex-flow:column nowrap;
 	overflow:auto;
 	align-content:flex-start;
+	border-top:1px solid var(--color-border);
 }
 .list .layoutCards .top-actions{
 	margin:0px 0px 16px 0px;
@@ -368,34 +383,34 @@
 
 
 /* list header functions (CSV, filters, aggregations) */
-.list-headers{
+.list-options-wrap{
 	display:flex;
 	flex-flow:column nowrap;
 	background-color:var(--color-bg);
 }
-.list-header{
+.list-options{
 	display:flex;
 	flex-flow:column nowrap;
 	padding:12px 16px 20px 16px;
 	border-bottom:1px solid #d2d2d2;
 }
-.list-header span.message{
+.list-options span.message{
 	margin:0px 0px 12px 0px;
 }
-.list-header span.message.error{
+.list-options span.message.error{
 	color:red;
 }
-.list-header-title{
+.list-options-title{
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
 	margin-bottom:12px;
 }
-.list-header-title span{
+.list-options-title span{
 	font-size:120%;
 	line-height:22px;
 }
-.list-header-title img{
+.list-options-title img{
 	height:22px;
 	margin-right:9px;
 	filter:var(--image-filter);
