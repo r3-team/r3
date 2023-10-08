@@ -21,7 +21,6 @@
 	right:0px;
 	bottom:0px;
 	left:0px;
-	background-color:var(--color-navigation-default);
 }
 .app-header-content{
 	padding:0px 10px;
@@ -90,7 +89,7 @@
 .app-header .entry:hover:not(.readonly),
 .app-header .entry-wrap:focus .entry,
 .app-header .entry-wrap:hover .entry{
-	border:2px solid var(--color-header-border);
+	border:2px solid var(--color-bright);
 	border-bottom:none;
 	padding:6px 8px 8px 8px;
 	transition:padding-top 0.2s;
@@ -101,7 +100,7 @@
 }
 .app-header .entry.router-link-active{
 	height:44px;
-	border:2px solid var(--color-header-border);
+	border:2px solid var(--color-bright);
 	border-bottom:none;
 	padding:4px 8px 8px 8px;
 	margin-top:-4px;
@@ -121,7 +120,6 @@
 	visibility:hidden;
 	opacity:0;
 	overflow:visible;
-	background-color:var(--color-navigation-default);
 	filter:brightness(1.2) grayscale(40%);
 	border:2px solid #bbb;
 	border-top:1px solid #bbb;

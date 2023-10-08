@@ -2,9 +2,12 @@
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
-    border-radius:3px;
+    border-radius:5px;
 	box-shadow:1px 1px 4px var(--color-shade);
     overflow:auto;
+}
+.gantt.isSingleField{
+	border-radius:0px;
 }
 .gantt input.zoom-factor{
 	width:80px !important;
@@ -129,7 +132,7 @@
 }
 .gantt-line-record:hover{
 	max-width:unset !important;
-	color:var(--color-bg-font);
+	color:var(--color-font-bright);
 	background:rgba(0,0,0,0.7);
 	z-index:var(--z-index-gantt-hover);
 	border-radius:3px;

@@ -65,44 +65,33 @@
 	--row-height:42px;
 	--app-header-height:70px;
 	
-	--color-form-builder-actions:hsl(196deg 45% 86%);
-	--color-form-builder-actions-bg:hsl(200deg 30% 94%);
-	--color-form-builder-columns:hsl(226deg 25% 77%);
-	--color-form-builder-column-batch:hsl(199deg 28% 79%);
-	--color-form-builder-container:hsl(99deg 47% 83%);
-	--color-form-builder-selected:hsl(59deg 100% 50%);
-	--color-form-builder-tabs:hsl(135deg 45% 78%);
-	--color-form-builder-tabs-active:hsl(135deg 54% 87%);
-	
 	/**/
 	/* images */
-	--image-filter-contrast:100%;
 	--image-list-cards:     url('../images/texture_paper01.webp');
+	--image-filter:         invert(1) contrast(var(--image-filter-contrast)) brightness(10%);
+	--image-filter-alt:     invert(1) contrast(var(--image-filter-contrast)) brightness(60%);
+	--image-filter-bg:      invert(1) contrast(var(--image-filter-contrast)) brightness(90%);
+	--image-filter-contrast:100%;
+	--image-filter-error:   invert(13%) sepia(92%) saturate(4089%) hue-rotate(359deg) brightness(97%) contrast(88%);
+	--image-filter-success: invert(36%) sepia(95%) saturate(788%) hue-rotate(76deg) brightness(98%) contrast(93%);
 	
 	/**/
 	/* colors */
 	--color-bg:            #f7f7f7;
-	--color-bg-font:       black;
-	--color-border:        #9b9b9b;
-	--color-border-bg:     black;
-	--color-font:          black;
-	--color-font-bright:   white;
-	--color-font-alt:      grey;
-	--color-font-disabled: #797979;
-	--color-shade:         #333;
-	--color-shade-bright:  grey;
-	--color-header-border: hsl(0,0%,96%,1.00);
-	--color-hover-underlay:rgba(0,0,0,0.35);
-	--color-navigation-default:#444;
-	
 	--color-bright:        #ebebeb;
+	--color-border:        #9b9b9b;
+	--color-font:          #101010;
+	--color-font-bright:   #ffffff;
+	--color-font-disabled: #797979;
 	--color-input:         #ffffff;
 	--color-input-disabled:#efefef;
 	--color-menu-active:   hsl(199,24%,37%,0.5);
 	--color-menu-hover:    hsl(199,24%,57%,0.5);
-	
-	--color-shade-input:    #757575;
+	--color-shade:         #333333;
+	--color-shade-bright:  #dddddd;
+	--color-shade-input:   #757575;
 	--color-shade-input-sel:hsl(311,57%,20%);
+	--color-hover-underlay:rgba(0,0,0,0.35);
 	
 	--color-accent1:       hsl(311,57%,40%);
 	--color-accent2:       hsl(127,86%,96%); /* calendar/gantt weekend */
@@ -115,13 +104,15 @@
 	--color-action-bright: hsl(196,22%,72%);
 	--color-action-disable:hsl(0,   0%,77%);
 	--color-cancel:        hsl(0,  57%,32%);
-	--color-cancel-border: hsl(0,  57%,71%);
 	
-	--image-filter:        invert(1) contrast(var(--image-filter-contrast)) brightness(10%);
-	--image-filter-error:  invert(13%) sepia(92%) saturate(4089%) hue-rotate(359deg) brightness(97%) contrast(88%);
-	--image-filter-success:invert(36%) sepia(95%) saturate(788%) hue-rotate(76deg) brightness(98%) contrast(93%);
-	--image-filter-alt:    invert(1) contrast(var(--image-filter-contrast)) brightness(60%);
-	--image-filter-bg:     invert(1) contrast(var(--image-filter-contrast)) brightness(90%);
+	--color-form-builder-actions:     hsl(196deg 45% 86%);
+	--color-form-builder-actions-bg:  hsl(200deg 30% 94%);
+	--color-form-builder-columns:     hsl(226deg 25% 77%);
+	--color-form-builder-column-batch:hsl(199deg 28% 79%);
+	--color-form-builder-container:   hsl(99deg 47% 83%);
+	--color-form-builder-selected:    hsl(59deg 100% 50%);
+	--color-form-builder-tabs:        hsl(135deg 45% 78%);
+	--color-form-builder-tabs-active: hsl(135deg 54% 87%);
 }
 
 html,body{
@@ -445,7 +436,7 @@ h3{
 }
 .contentBox .top .selector::placeholder{
 	opacity:1;
-	color:var(--color-font-alt);
+	color:var(--color-font-disabled);
 }
 .contentBox .top .selector option{
 	padding:0px 5px;
@@ -682,7 +673,7 @@ table td.maximum{
 	outline:none;
 }
 .navigation .entry.inactive{
-	color:var(--color-font-alt);
+	color:var(--color-font-disabled);
 }
 .navigation .entry.separator{
 	margin:16px 0px 0px;
@@ -798,7 +789,7 @@ table td.maximum{
 }
 .generic-entry-list .subtitle{
 	font-size:80%;
-	color:var(--color-font-alt);
+	color:var(--color-font-disabled);
 }
 
 
@@ -1087,46 +1078,46 @@ table td.maximum{
 .user-dark,
 .user-dark *{
 	/* color overwites */
-	--light-depth:      calc(2% * var(--depth));
-	--light-read:       calc(90% - var(--light-depth));
-	--light-read-less:  calc(78% - (var(--light-depth) * 2.5));
-	--light-contrast:   calc(23% - var(--light-depth));
+	--color-bg:            #2d2d2d;
+	/*--color-bright:        #ebebeb;*/
+	--color-border:        #111111;
+	--color-font:          #f7f7f7;
+	/*--color-font-bright:   #ffffff;
+	--color-font-disabled: #797979;*/
+	--color-input:         #444444;
+	--color-input-disabled:#222222;
+	--color-shade:         #000000;
+	--color-shade-bright:  #222222;
+	--color-shade-input:   #080808;
+	--color-shade-input-sel:hsl(311,57%,20%);
 	
-	--color-border:      hsl(0,0%,calc(32% - (var(--light-depth) * 3.5)));
-	--color-border-bg:   hsl(0,0%,calc(70% - var(--light-depth)));
-	--color-shade:       #000;
-	--color-shade-bright:#222;
+	--color-accent1:       hsl(311,47%,70%);
+	--color-accent2:       hsl(127,06%,25%);
+	--color-accent3:       hsl(199,11%,35%);
+	--color-accent3-alt:   hsl(199,11%,45%);
+	--color-accent4:       hsl(339, 4%,61%);
+	--color-action:        hsl(196,27%,30%);
+	--color-action-bright: hsl(196,22%,60%);
+	--color-action-disable:hsl(0,   0%,28%);
+	/*--color-cancel:        hsl(0,  57%,32%);*/
+	--color-error:         hsl(0,  64%,49%);
+	--color-success:       hsl(113,54%,32%);
 	
-	--color-accent1:       hsl(311,47%,calc(70% - (1.50% * var(--depth)) ));
-	--color-accent2:       hsl(127,06%,calc(25% - (1.50% * var(--depth)) ));
-	--color-accent3:       hsl(199,11%,calc(35% - (1.50% * var(--depth)) ));
-	--color-accent3-alt:   hsl(199,11%,calc(45% - (1.50% * var(--depth)) ));
-	--color-accent4:       hsl(339, 4%,calc(61% - (1.50% * var(--depth)) ));
-	--color-error:         hsl(0,  64%,calc(61% - var(--light-depth)));
-	--color-success:       hsl(113,54%,calc(44% - var(--light-depth)));
-	--color-action:        hsl(196,27%,calc(37% - var(--light-depth)) );
-	--color-action-disable:hsl(0,   0%,calc(40% - var(--light-depth)) );
-	
-	--color-hover-underlay:rgba(0,0,0,0.50);
-	--color-form-builder-actions:hsl(195,17%,29%,1.00);
-	--color-form-builder-actions-bg:hsl(195deg 3% 25%);
-	--color-form-builder-columns:hsl(176deg 9% 32%);
+	--color-hover-underlay:           rgba(0,0,0,0.50);
+	--color-form-builder-actions:     hsl(195,17%,29%,1.00);
+	--color-form-builder-actions-bg:  hsl(195deg 3% 25%);
+	--color-form-builder-columns:     hsl(176deg 9% 32%);
 	--color-form-builder-column-batch:hsl(176deg 2% 32%);
-	--color-form-builder-container:hsl(125deg 17% 31%);
-	--color-form-builder-selected:hsl(59deg 72% 44%);
-	--color-form-builder-tabs:hsl(104deg 15% 32%);
-	--color-form-builder-tabs-active:hsl(104deg 12% 39%);
+	--color-form-builder-container:   hsl(125deg 17% 31%);
+	--color-form-builder-selected:    hsl(59deg 72% 44%);
+	--color-form-builder-tabs:        hsl(104deg 15% 32%);
+	--color-form-builder-tabs-active: hsl(104deg 12% 39%);
 	
-	--image-list-cards: url('../images/texture_paper02.webp');
-	
-	/* dark mode is simpler, overwrite some cases */
-	--color-bg:                    hsl(315,1%,var(--light-contrast));
-	--color-bg-font:               var(--color-font);
-	--color-header-border:         hsl(0,0%,55%,1.00);
-	--color-cancel-border:         var(--color-cancel);
-	--image-filter-bg:             var(--image-filter);
-	--image-filter-error:          invert(13%) sepia(92%) saturate(4889%) hue-rotate(359deg) brightness(97%) contrast(calc(50% + (var(--light-depth)*2)));
-	--image-filter-success:        invert(36%) sepia(75%) saturate(1288%) hue-rotate(76deg) brightness(92%) contrast(calc(30% + (var(--light-depth)*2)));
+	--image-filter:        invert(1) contrast(var(--image-filter-contrast)) brightness(90%);
+	--image-filter-bg:     var(--image-filter);
+	--image-filter-error:  invert(13%) sepia(92%) saturate(4889%) hue-rotate(359deg) brightness(97%) contrast(38%);
+	--image-filter-success:invert(36%) sepia(75%) saturate(1288%) hue-rotate(76deg) brightness(92%) contrast(18%);
+	--image-list-cards:    url('../images/texture_paper02.webp');
 }
 .user-dark *::-webkit-scrollbar {
 	width:15px;
@@ -1135,7 +1126,7 @@ table td.maximum{
 	background-color:transparent;
 }
 .user-dark *::-webkit-scrollbar-thumb {
-	background-color:var(--color-font-alt);
+	background-color:var(--color-font-disabled);
 	border:1px solid var(--color-border);
 	border-radius:2px;
 }

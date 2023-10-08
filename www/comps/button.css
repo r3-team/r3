@@ -52,7 +52,7 @@
 
 /* naked button styles */
 .button.naked.inactive{
-	color:var(--color-font-alt);
+	color:var(--color-font-disabled);
 }
 .button.naked:focus:not(.inactive),
 .button.naked:hover:not(.inactive){

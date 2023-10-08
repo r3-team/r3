@@ -1,6 +1,9 @@
 import MyValueRich              from './valueRich.js';
-import {getStringFilled}        from './shared/generic.js';
 import {getColumnIndexesHidden} from './shared/form.js';
+import {
+	colorMakeContrastFont,
+	getStringFilled
+} from './shared/generic.js';
 import {
 	getDateAtUtcZero,
 	getDaysBetween,
@@ -82,7 +85,7 @@ let MyCalendarMonth = {
 					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => !v.fullDay && !v.placeholder)"
 					:class="{ clickable:hasUpdate }"
 				>
-					<span :style="getColor('background-color',e.color)">
+					<span :style="getStylesPartialDayEvent(e.color)">
 						{{ getPartCaption(e.unix0) }}
 					</span>
 					
@@ -266,6 +269,7 @@ let MyCalendarMonth = {
 	},
 	methods:{
 		// externals
+		colorMakeContrastFont,
 		getColumnIndexesHidden,
 		getDateAtUtcZero,
 		getDaysBetween,
@@ -322,6 +326,10 @@ let MyCalendarMonth = {
 		getColor(styleName,color) {
 			if(color !== null) return `${styleName}:#${color};`;
 			return '';
+		},
+		getStylesPartialDayEvent(color) {
+			return color === null ? ''
+				: `background-color:#${color};color:${this.colorMakeContrastFont(color)};`;
 		},
 		getDayClasses(dayOffset,day) {
 			let cls = {};

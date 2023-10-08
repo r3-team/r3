@@ -12,7 +12,6 @@
 	min-width:350px;
 }
 .login .contentBox .top{
-	color:var(--color-bg-font);
 	background-color:#444;
 }
 .login .content{

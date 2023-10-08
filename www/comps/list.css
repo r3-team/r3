@@ -6,6 +6,9 @@
 	flex-flow:column nowrap;
 	overflow:auto;
 }
+.list.isSingleField{
+	border-radius:0px;
+}
 .list.asInput{
 	min-height:unset;
 	align-self:flex-end;
@@ -330,7 +333,7 @@
 	vertical-align:bottom;
 }
 .list .layoutCards .card td:first-child{
-	color:var(--color-font-alt);
+	color:var(--color-font-disabled);
 }
 .list .layoutCards .card .batch{
 	display:flex;

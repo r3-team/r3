@@ -159,7 +159,7 @@
 	color:var(--color-font);
 }
 .field .input::placeholder{
-	color:var(--color-font-alt);
+	color:var(--color-font-disabled);
 	opacity:1; /* standardize across browsers */
 }
 .field .input:disabled{
@@ -234,6 +234,7 @@
 	border-radius:5px;
 	text-align:center;
 	color:var(--color-font);
+	background-color:var(--color-input);
 }
 
 /* richtext field */

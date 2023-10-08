@@ -211,7 +211,7 @@
 .calendar-month .day h1{
 	margin:6px 8px;
 	font-size:110%;
-	color:var(--color-font-alt);
+	color:var(--color-font-disabled);
 }
 .calendar-month .day.today h1{
 	color:var(--color-font);
@@ -298,7 +298,6 @@
 	padding:0px 3px;
 	margin-right:4px;
 	border-radius:4px;
-	color:var(--color-bg-font);
 	background-color:var(--color-accent3-alt);
 }
 
