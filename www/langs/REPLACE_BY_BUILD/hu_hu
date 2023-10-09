@@ -1734,9 +1734,6 @@
 		"title":"Kezdőlap"
 	},
 	"input":{
-		"color":{
-			"hint":"Szín HEX formátumban, például 3EA9B9"
-		},
 		"date":{
 			"dateFrom":"Tól",
 			"dateTo":"Ig",
@@ -1909,8 +1906,9 @@
 		},
 		"bordersAll":"Keretek hozzáadása",
 		"bordersSquared":"Squared borders",
-		"colorHeader":"Header color",
-		"colorMenu":"Menu color",
+		"colorHeader":"Header bar, overwrite color",
+		"colorHeaderSingle":"Header bar, add application color",
+		"colorMenu":"Application menu, overwrite color",
 		"dateFormat":"Dátumformátum",
 		"dateFormat0":"É-h-n (2012-12-30)",
 		"dateFormat1":"É/h/n (2012/12/30)",

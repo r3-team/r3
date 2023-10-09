@@ -215,7 +215,8 @@ let MyHome = {
 		
 		// presentation
 		bgStyle(moduleId) {
-			return `background-color:#${this.moduleIdMap[moduleId].color1};`;
+			return this.moduleIdMap[moduleId].color1 === null ? ''
+				: `background-color:#${this.moduleIdMap[moduleId].color1};`;
 		},
 		
 		// actions

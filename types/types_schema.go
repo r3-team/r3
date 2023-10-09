@@ -17,7 +17,7 @@ type Module struct {
 	Name            string            `json:"name"`            // name of module, is used for DB schema
 	NamePwa         pgtype.Text       `json:"namePwa"`         // name of module shown for PWA
 	NamePwaShort    pgtype.Text       `json:"namePwaShort"`    // name of module shown for PWA, short version
-	Color1          string            `json:"color1"`          // primary module color (used for header)
+	Color1          pgtype.Text       `json:"color1"`          // primary module color (used for header)
 	Position        int               `json:"position"`        // position of module in nav. contexts (home, header)
 	LanguageMain    string            `json:"languageMain"`    // language code of main language (for fallback)
 	ReleaseBuild    int               `json:"releaseBuild"`    // build of this module, incremented with each release

@@ -207,8 +207,7 @@ let MyMenu = {
 	},
 	computed:{
 		bgStyle:(s) => {
-			let c = s.tinycolor(s.color);
-			c.lighten(3);
+			const c = s.tinycolor(s.color).lighten(4);
 			return `background:radial-gradient(at right bottom, ${c.toString()} 20%, #${s.color} 60%);`;
 		},
 		isDark:(s) => s.tinycolor(s.color).isDark(),

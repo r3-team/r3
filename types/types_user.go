@@ -5,8 +5,9 @@ import "github.com/jackc/pgx/v5/pgtype"
 type Settings struct {
 	BordersAll         bool        `json:"bordersAll"`
 	BordersSquared     bool        `json:"bordersSquared"`
-	ColorHeader        string      `json:"colorHeader"`
-	ColorMenu          string      `json:"colorMenu"`
+	ColorHeader        pgtype.Text `json:"colorHeader"`
+	ColorHeaderSingle  bool        `json:"colorHeaderSingle"`
+	ColorMenu          pgtype.Text `json:"colorMenu"`
 	DateFormat         string      `json:"dateFormat"`
 	Dark               bool        `json:"dark"`
 	FontFamily         string      `json:"fontFamily"`

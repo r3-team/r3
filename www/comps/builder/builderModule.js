@@ -4,6 +4,7 @@ import srcBase64Icon         from '../shared/image.js';
 import {getDependentModules} from '../shared/builder.js';
 import {getUnixFormat}       from '../shared/time.js';
 import {MyModuleSelect}      from '../input.js';
+import MyInputColor          from '../inputColor.js';
 import {
 	copyValueDialog,
 	getNilUuid
@@ -66,10 +67,10 @@ let MyBuilderModuleStartForm = {
 let MyBuilderModule = {
 	name:'my-builder-module',
 	components:{
-		'chrome-picker':VueColor.Chrome,
 		MyBuilderCaption,
 		MyBuilderIconInput,
 		MyBuilderModuleStartForm,
+		MyInputColor,
 		MyModuleSelect
 	},
 	template:`<div class="builder-module contentBox grow" v-if="module">
@@ -153,31 +154,7 @@ let MyBuilderModule = {
 				</tr>
 				<tr>
 					<td>{{ capApp.color }}</td>
-					<td>
-						<div class="row gap">
-							<input class="short"
-								v-model="color1"
-								:disabled="readonly"
-							/>
-							<div v-click-outside="hideColorPicker">
-								<div class="builder-color shade"
-									@click="showColorPicker = !showColorPicker"
-									:class="{ clickable:!readonly }"
-									:style="styleColorPreview"
-								></div>
-								
-								<div class="colorPickerWrap" v-if="!readonly">
-									<chrome-picker class="colorPickerFloating"
-										v-if="showColorPicker"
-										@update:modelValue="setColor"
-										:disable-alpha="true"
-										:disable-fields="true"
-										:modelValue="color1"
-									/>
-								</div>
-							</div>
-						</div>
-					</td>
+					<td><my-input-color v-model="color1" :allowNull="true" :readonly="readonly" /></td>
 					<td>{{ capApp.colorHint }}</td>
 				</tr>
 				<tr>
@@ -373,7 +350,6 @@ let MyBuilderModule = {
 			
 			// states
 			moduleIdDependsOnInput:null,
-			showColorPicker:false,
 			showDependencies:false,
 			showLanguages:false,
 			showStartForms:false
@@ -400,7 +376,6 @@ let MyBuilderModule = {
 		// simple
 		displayReleaseDate:(s) => s.releaseDate === 0 ? '-' : s.getUnixFormat(s.releaseDate,'Y-m-d H:i'),
 		module:            (s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
-		styleColorPreview: (s) => `background-color:#${s.color1};`,
 		
 		// stores
 		modules:           (s) => s.$store.getters['schema/modules'],
@@ -446,9 +421,6 @@ let MyBuilderModule = {
 			this.startForms      = JSON.parse(JSON.stringify(this.module.startForms));
 			this.languages       = JSON.parse(JSON.stringify(this.module.languages));
 			this.captions        = JSON.parse(JSON.stringify(this.module.captions));
-			
-			// states
-			this.showColorPicker  = false;
 		},
 		
 		// actions
@@ -461,12 +433,6 @@ let MyBuilderModule = {
 		},
 		goBack() {
 			window.history.back();
-		},
-		hideColorPicker() {
-			this.showColorPicker = false;
-		},
-		setColor(newVal) {
-			this.color1 = newVal.hex.substr(1);
 		},
 		toggleDependsOn(moduleId,state) {
 			let pos = this.dependsOn.indexOf(moduleId);

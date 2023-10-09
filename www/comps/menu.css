@@ -48,7 +48,7 @@
 }
 .menu .item .line{
 	margin:0px;
-	padding:8px 8px;
+	padding:0px 2px 0px 8px;
 	cursor:pointer;
 	outline:none;
 	display:flex;
@@ -58,7 +58,6 @@
 	gap:8px;
 }
 .menu .item .line.active{
-	transition:font-weight 0.2s;
 	border-right:6px solid var(--color-border-dark);
 }
 .menu.isDark .item .line.active{
@@ -76,9 +75,9 @@
 .menu .item .line.showsChildren:focus,
 .menu .item .line.showsChildren:hover{
 	padding-left:11px;
-	padding-bottom:6px;
-	transition:padding-left 0.2s;
+	margin-bottom:-2px;
 	border-bottom:2px solid var(--color-border-dark);
+	transition:padding-left 0.2s;
 }
 .menu.isDark .item .line:focus,
 .menu.isDark .item .line:hover,
@@ -92,17 +91,21 @@
 }
 .menu .item .line img{
 	height:18px;
+	margin:0px 3px;
 	outline:none;
 	filter:var(--image-filter-dark);
 }
 .menu .item .line img:focus,
 .menu .item .line img:hover{
-	height:20px;
+	height:24px;
+	margin:0px;
+	transition:height 0.2s, margin 0.2s;
 }
 .menu.isDark .line img{
 	filter:var(--image-filter-bright);
 }
 .menu .item .line .caption{
+	line-height:32px;
 	vertical-align:middle;
 	flex:1 1 auto;
 	outline:none;

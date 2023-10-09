@@ -29,7 +29,8 @@ func Get(loginId pgtype.Int8, loginTemplateId pgtype.Int8) (types.Settings, erro
 		SELECT language_code, date_format, sunday_first_dow, font_size,
 			borders_all, borders_squared, header_captions, spacing, dark,
 			hint_update_version, mobile_scroll_form, warn_unsaved, pattern,
-			font_family, tab_remember, color_header, color_menu, ARRAY(
+			font_family, tab_remember, color_header, color_header_single,
+			color_menu, ARRAY(
 				SELECT name::TEXT
 				FROM instance.login_search_dict
 				WHERE login_id          = ls.login_id
@@ -42,7 +43,8 @@ func Get(loginId pgtype.Int8, loginTemplateId pgtype.Int8) (types.Settings, erro
 		&s.SundayFirstDow, &s.FontSize, &s.BordersAll, &s.BordersSquared,
 		&s.HeaderCaptions, &s.Spacing, &s.Dark, &s.HintUpdateVersion,
 		&s.MobileScrollForm, &s.WarnUnsaved, &s.Pattern, &s.FontFamily,
-		&s.TabRemember, &s.ColorHeader, &s.ColorMenu, &s.SearchDictionaries)
+		&s.TabRemember, &s.ColorHeader, &s.ColorHeaderSingle, &s.ColorMenu,
+		&s.SearchDictionaries)
 
 	return s, err
 }
@@ -67,13 +69,13 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 				sunday_first_dow, font_size, borders_all, borders_squared,
 				header_captions, spacing, dark, hint_update_version,
 				mobile_scroll_form, warn_unsaved, pattern, font_family,
-				tab_remember, color_header, color_menu)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18)
+				tab_remember, color_header, color_header_single, color_menu)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19)
 		`, entryName), entryId, s.LanguageCode, s.DateFormat, s.SundayFirstDow,
 			s.FontSize, s.BordersAll, s.BordersSquared, s.HeaderCaptions,
 			s.Spacing, s.Dark, s.HintUpdateVersion, s.MobileScrollForm,
 			s.WarnUnsaved, s.Pattern, s.FontFamily, s.TabRemember,
-			s.ColorHeader, s.ColorMenu); err != nil {
+			s.ColorHeader, s.ColorHeaderSingle, s.ColorMenu); err != nil {
 
 			return err
 		}
@@ -85,13 +87,14 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 				header_captions = $7, spacing = $8, dark = $9,
 				hint_update_version = $10, mobile_scroll_form = $11,
 				warn_unsaved = $12, pattern = $13, font_family = $14,
-				tab_remember = $15, color_header = $16, color_menu = $17
-			WHERE %s = $18
+				tab_remember = $15, color_header = $16,
+				color_header_single = $17, color_menu = $18
+			WHERE %s = $19
 		`, entryName), s.LanguageCode, s.DateFormat, s.SundayFirstDow,
 			s.FontSize, s.BordersAll, s.BordersSquared, s.HeaderCaptions,
 			s.Spacing, s.Dark, s.HintUpdateVersion, s.MobileScrollForm,
 			s.WarnUnsaved, s.Pattern, s.FontFamily, s.TabRemember,
-			s.ColorHeader, s.ColorMenu, entryId); err != nil {
+			s.ColorHeader, s.ColorHeaderSingle, s.ColorMenu, entryId); err != nil {
 
 			return err
 		}

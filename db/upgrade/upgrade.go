@@ -115,13 +115,19 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE instance.login_setting DROP COLUMN borders_corner;
 			DROP TYPE instance.login_setting_border_corner;
 			
-			ALTER TABLE instance.login_setting ADD COLUMN color_header CHARACTER VARYING(6) NOT NULL DEFAULT '222222';
-			ALTER TABLE instance.login_setting ADD COLUMN color_menu   CHARACTER VARYING(6) NOT NULL DEFAULT '282828';
+			ALTER TABLE instance.login_setting ADD COLUMN color_header CHARACTER VARYING(6) DEFAULT '222222';
+			ALTER TABLE instance.login_setting ADD COLUMN color_menu   CHARACTER VARYING(6) DEFAULT '282828';
 			ALTER TABLE instance.login_setting ALTER COLUMN color_header DROP DEFAULT;
 			ALTER TABLE instance.login_setting ALTER COLUMN color_menu   DROP DEFAULT;
 			
+			ALTER TABLE instance.login_setting ADD COLUMN color_header_single BOOLEAN NOT NULL DEFAULT FALSE;
+			
 			-- menu colors
 			ALTER TABLE app.menu ADD COLUMN color CHARACTER VARYING(6);
+			
+			-- add NULL to module color
+			ALTER TABLE app.module ALTER COLUMN color1 DROP NOT NULL;
+			UPDATE app.module SET color1 = null WHERE color1 = '      ';
 		`)
 		return "3.6", err
 	},

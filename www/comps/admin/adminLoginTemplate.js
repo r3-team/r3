@@ -266,6 +266,9 @@ let MyAdminLoginTemplate = {
 		this.settings = {
 			bordersAll:false,
 			bordersSquared:false,
+			colorHeader:'222222',
+			colorHeaderSingle:false,
+			colorMenu:'282828',
 			dark:false,
 			dateFormat:'Y-m-d',
 			fontFamily:'helvetica',

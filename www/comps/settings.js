@@ -923,13 +923,13 @@ let MySettings = {
 						<img class="icon" src="images/settings.png" />
 						<h1>{{ capApp.titleGeneral }}</h1>
 					</div>
-					<table class="default-inputs">
+					<table>
 						<tbody>
 							<tr>
 								<td>{{ capApp.headerCaptions }}</td>
 								<td><my-bool v-model="settingsInput.headerCaptions" /></td>
 							</tr>
-							<tr>
+							<tr class="default-inputs">
 								<td>{{ capApp.languageCode }}</td>
 								<td>
 									<select v-model="settingsInput.languageCode">
@@ -940,7 +940,7 @@ let MySettings = {
 									</select>
 								</td>
 							</tr>
-							<tr>
+							<tr class="default-inputs">
 								<td>{{ capApp.dateFormat }}</td>
 								<td>
 									<select v-model="settingsInput.dateFormat">
@@ -968,7 +968,7 @@ let MySettings = {
 								<td>{{ capApp.mobileScrollForm }}</td>
 								<td><my-bool v-model="settingsInput.mobileScrollForm" /></td>
 							</tr>
-							<tr>
+							<tr class="default-inputs">
 								<td>{{ capApp.searchDictionaries }}</td>
 								<td>
 									<div class="column gap">
@@ -1000,7 +1000,7 @@ let MySettings = {
 						<img class="icon" src="images/visible1.png" />
 						<h1>{{ capApp.titleTheme }}</h1>
 					</div>
-					<table class="default-inputs">
+					<table>
 						<tbody>
 							<tr>
 								<td>{{ capApp.bordersAll }}</td>
@@ -1010,7 +1010,7 @@ let MySettings = {
 								<td>{{ capApp.bordersSquared }}</td>
 								<td><my-bool v-model="settingsInput.bordersSquared" /></td>
 							</tr>
-							<tr>
+							<tr class="default-inputs">
 								<td>{{ capApp.fontFamily }}</td>
 								<td>
 									<select v-model="settingsInput.fontFamily">
@@ -1036,7 +1036,7 @@ let MySettings = {
 									</select>
 								</td>
 							</tr>
-							<tr>
+							<tr class="default-inputs">
 								<td>{{ capApp.fontSize }}</td>
 								<td>
 									<select v-model="settingsInput.fontSize">
@@ -1046,7 +1046,7 @@ let MySettings = {
 									</select>
 								</td>
 							</tr>
-							<tr>
+							<tr class="default-inputs">
 								<td>{{ capApp.spacing }}</td>
 								<td>
 									<select v-model.number="settingsInput.spacing">
@@ -1058,7 +1058,7 @@ let MySettings = {
 									</select>
 								</td>
 							</tr>
-							<tr>
+							<tr class="default-inputs">
 								<td>{{ capApp.pattern }}</td>
 								<td>
 									<select v-model="settingsInput.pattern">
@@ -1074,11 +1074,15 @@ let MySettings = {
 							</tr>
 							<tr>
 								<td>{{ capApp.colorHeader }}</td>
-								<td><my-input-color v-model="settingsInput.colorHeader" /></td>
+								<td><my-input-color v-model="settingsInput.colorHeader" :allowNull="true" /></td>
+							</tr>
+							<tr v-if="capApp.colorHeader !== null">
+								<td>{{ capApp.colorHeaderSingle }}</td>
+								<td><my-bool v-model="settingsInput.colorHeaderSingle" :reversed="true" /></td>
 							</tr>
 							<tr>
 								<td>{{ capApp.colorMenu }}</td>
-								<td><my-input-color v-model="settingsInput.colorMenu" /></td>
+								<td><my-input-color v-model="settingsInput.colorMenu" :allowNull="true" /></td>
 							</tr>
 						</tbody>
 					</table>

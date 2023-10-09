@@ -1734,9 +1734,6 @@
 		"title":"Startseite"
 	},
 	"input":{
-		"color":{
-			"hint":"Farbe als HEX, wie 3EA9B9"
-		},
 		"date":{
 			"dateFrom":"Von",
 			"dateTo":"Bis",
@@ -1909,8 +1906,9 @@
 		},
 		"bordersAll":"Rahmen hinzufügen",
 		"bordersSquared":"Rechteckige Rahmen",
-		"colorHeader":"Titelleistenfarbe",
-		"colorMenu":"Menüfarbe",
+		"colorHeader":"Titelleiste, Farbe überschreiben",
+		"colorHeaderSingle":"Titelleiste, Anwendungsfarbe hinzufügen",
+		"colorMenu":"Anwendungsmenü, Farbe überschreiben",
 		"dateFormat":"Datumsformat",
 		"dateFormat0":"Y-m-d (2012-12-30)",
 		"dateFormat1":"Y/m/d (2012/12/30)",

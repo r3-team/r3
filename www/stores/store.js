@@ -1,5 +1,6 @@
 import MyStoreLocal            from './storeLocal.js';
 import MyStoreSchema           from './storeSchema.js';
+import tinycolor               from '../externals/tinycolor2.js';
 import { colorAdjustBgHeader } from '../comps/shared/generic.js';
 export {MyStore as default};
 
@@ -15,6 +16,8 @@ const MyStore = Vuex.createStore({
 		captions:{},                   // all application captions in the user interface language
 		clusterNodeName:'',            // name of the cluster node that session is connected to
 		collectionIdMap:{},            // map of all collection values, key = collection ID
+		colorHeaderDefault:'222222',   // default header color, if not overwritten
+		colorMenuDefault:'282828',     // default menu color, if not overwritten
 		config:{},                     // configuration values (admin only)
 		constants:{                    // constant variables, codes/messages/IDs
 			kdfIterations:10000,       // number of iterations for PBKDF2 key derivation function
@@ -187,20 +190,31 @@ const MyStore = Vuex.createStore({
 	},
 	getters:{
 		colorHeaderAccent:(state,payload) => {
-			// overwrite customizing header color
-			if(MyStoreLocal.state.activated && MyStoreLocal.state.companyColorHeader !== '')
-				return `${MyStoreLocal.state.companyColorHeader}`;
+			let colorRgb = state.colorHeaderDefault;
+			let brighten = state.settings.dark ? -30 : 0; // by default, darken accent color in dark mode
+			let desature = state.settings.dark ? 50  : 0;
 			
-			if(state.isAtModule && state.moduleIdLast !== null && MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1 !== null)
-				return MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1;
-			
-			return state.settings.dark ? '222222' : '444444'; // default colors
+			if(state.settings.colorHeaderSingle) {
+				// accent color disabled, use adjusted main color for gradient
+				colorRgb = state.settings.colorHeader !== null ? state.settings.colorHeader : state.colorHeaderDefault;
+				brighten = state.settings.dark ? -10 : 25;
+			} else {
+				if(MyStoreLocal.state.activated && MyStoreLocal.state.companyColorHeader !== '') {
+					// accent color from customizing
+					colorRgb = MyStoreLocal.state.companyColorHeader;
+				}
+				else if(state.isAtModule && state.moduleIdLast !== null && MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1 !== null) {
+					// accent color from module
+					colorRgb = MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1;
+				}
+			}
+			return tinycolor(colorRgb).brighten(brighten).desaturate(desature).toString().substring(1);
 		},
 		colorHeaderMain:(state,payload) => {
-			return state.settings.colorHeader !== '' ? state.settings.colorHeader : '222222';
+			return state.settings.colorHeader !== null ? state.settings.colorHeader : state.colorHeaderDefault;
 		},
 		colorMenu:(state,payload) => {
-			return state.settings.colorMenu !== '' ? state.settings.colorMenu : '282828';
+			return state.settings.colorMenu !== null ? state.settings.colorMenu : state.colorMenuDefault;
 		},
 		licenseDays:(state) => {
 			if(!state.licenseValid)
