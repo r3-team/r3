@@ -17,10 +17,11 @@ let MyMenuItem = {
 	template:`<div class="item" v-if="active">
 		<!-- menu item line -->
 		<div class="line noHighlight" tabindex="0"
-			:class="{ active:selected, noForm:menu.formId === null, showsChildren:showChildren }"
 			@click="click"
 			@click.middle="clickMiddle"
 			@keyup.enter.space="click"
+			:class="{ active:selected, noForm:menu.formId === null, showsChildren:showChildren }"
+			:style="style"
 		>
 			<img
 				v-if="menu.iconId !== null"
@@ -49,6 +50,7 @@ let MyMenuItem = {
 		<div class="menu-items-children" v-if="showChildren && anyAccessibleChildren">
 			<my-menu-item class="item sub"
 				v-for="m in menu.menus"
+				:colorParent="menu.color"
 				:formIdActive="formIdActive"
 				:formOpensPreset="formOpensPreset"
 				:key="m.id"
@@ -59,6 +61,7 @@ let MyMenuItem = {
 		</div>
 	</div>`,
 	props:{
+		colorParent:    { required:true },
 		formIdActive:   { type:String,  required:true },
 		formOpensPreset:{ type:Boolean, required:true },
 		menu:           { type:Object,  required:true },
@@ -108,9 +111,11 @@ let MyMenuItem = {
 		
 		// simple
 		active:      (s) => s.menuAccess[s.menu.id] === 1,
+		color:       (s) => s.menu.color !== null ? s.menu.color : (s.colorParent !== null ? s.colorParent : null),
 		hasChildren: (s) => s.menu.menus.length !== 0,
 		selected:    (s) => (!s.recordOpen || s.formOpensPreset) && s.menu.formId === s.formIdActive,
 		showChildren:(s) => s.hasChildren && s.menuIdMapOpen[s.menu.id],
+		style:       (s) => s.color === null ? `border-left:5px solid transparent;` : `border-left:5px solid #${s.color};`,
 		subIcon:     (s) => s.showChildren ? 'images/triangleDown.png' : 'images/triangleLeft.png',
 		title:       (s) => typeof s.menu.captions.menuTitle[s.moduleLanguage] !== 'undefined'
 			? s.menu.captions.menuTitle[s.moduleLanguage] : s.capGen.missingCaption,
@@ -183,6 +188,7 @@ let MyMenu = {
 		<div class="menu-items">
 			<my-menu-item
 				v-for="m in module.menus"
+				:colorParent="null"
 				:formIdActive="formIdActive"
 				:formOpensPreset="formOpensPreset"
 				:key="m.id"

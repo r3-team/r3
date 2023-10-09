@@ -119,6 +119,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE instance.login_setting ADD COLUMN color_menu   CHARACTER VARYING(6) NOT NULL DEFAULT '282828';
 			ALTER TABLE instance.login_setting ALTER COLUMN color_header DROP DEFAULT;
 			ALTER TABLE instance.login_setting ALTER COLUMN color_menu   DROP DEFAULT;
+			
+			-- menu colors
+			ALTER TABLE app.menu ADD COLUMN color CHARACTER VARYING(6);
 		`)
 		return "3.6", err
 	},

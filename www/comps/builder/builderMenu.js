@@ -9,6 +9,7 @@ export {MyBuilderMenu as default};
 let MyBuilderMenuItems = {
 	name:'my-builder-menu-items',
 	components:{
+		'chrome-picker':VueColor.Chrome,
 		MyBuilderCaption,
 		MyBuilderCollectionInput,
 		MyBuilderIconInput
@@ -23,6 +24,11 @@ let MyBuilderMenuItems = {
 				
 				<div class="inputs">
 					<div class="line">
+						<!-- color preview -->
+						<div class="color-preview"
+							:style="'background-color:' + (element.color !== null ? '#' + element.color : 'transparent')"
+						></div>
+						
 						<!-- icon input -->
 						<my-builder-icon-input
 							@input="element.iconId = $event"
@@ -51,61 +57,94 @@ let MyBuilderMenuItems = {
 							</optgroup>
 						</select>
 						
-						<my-button
-							@trigger="element.showChildren = !element.showChildren"
-							:active="!readonly"
-							:captionTitle="capApp.showChildrenHint"
-							:image="element.showChildren ? 'visible1.png' : 'visible0.png'"
-						/>
-						
-						<!-- show collections -->
-						<my-button image="tray.png"
-							@trigger="showCollectionsIndex = index"
-							:caption="String(element.collections.length)"
-							:captionTitle="capApp.collections + ' (' + element.collections.length + ')'"
+						<!-- show options -->
+						<my-button image="settings.png"
+							@trigger="showOptionsIndex = index"
+							:captionTitle="capGen.settings"
 						/>
 					</div>
 				</div>
 				
-				<!-- collections -->
+				<!-- options -->
 				<div class="app-sub-window under-header"
-					v-if="showCollectionsIndex === index"
-					@mousedown.self="showCollectionsIndex = -1"
+					v-if="showOptionsIndex === index"
+					@mousedown.self="showOptionsIndex = -1"
 				>
-					<div class="contentBox builder-new popUp">
+					<div class="contentBox popUp">
 						<div class="top lower">
 							<div class="area nowrap">
-								<h1 class="title">{{ capApp.collections }}</h1>
+								<img class="icon" src="images/settings.png" />
+								<h1 class="title">{{ capGen.settings }}</h1>
 							</div>
 							<div class="area">
-								<my-button image="cancel.png"
-									@trigger="showCollectionsIndex = -1"
-									:cancel="true"
+								<my-button image="ok.png"
+									@trigger="showOptionsIndex = -1"
+									:caption="capGen.button.ok"
 								/>
 							</div>
 						</div>
 						
 						<div class="content default-inputs">
-							<my-button image="add.png"
-								@trigger="element.collections.push(getCollectionConsumerTemplate())"
-								:active="!readonly"
-								:caption="capGen.button.add"
-								:naked="true"
-							/>
-							<my-builder-collection-input
-								v-for="(c,i) in element.collections"
-								@remove="element.collections.splice(i,1)"
-								@update:consumer="element.collections[i] = $event"
-								:allowFormOpen="false"
-								:allowRemove="true"
-								:consumer="c"
-								:fixedCollection="false"
-								:module="module"
-								:readonly="readonly"
-								:showMultiValue="false"
-								:showNoDisplayEmpty="true"
-								:showOnMobile="true"
-							/>
+							<table class="generic-table-vertical tight fullWidth default-inputs">
+								<tr>
+									<td>{{ capApp.showChildrenHint }}</td>
+									<td>
+										<my-bool v-model="element.showChildren"
+											:readonly="readonly"
+										/>
+									</td>
+								</tr>
+								<tr>
+									<td>{{ capGen.color }}</td>
+									<td>
+										<div class="column gap">
+											<div class="row gap">
+												<input class="short"
+													@input="element.color = applyColor($event.target.value)"
+													:disabled="readonly"
+													:value="element.color"
+												/>
+											</div>
+											<chrome-picker
+												v-if="!readonly"
+												@update:modelValue="element.color = $event.hex.substr(1)"
+												:disable-alpha="true"
+												:disable-fields="true"
+												:modelValue="element.color !== null ? element.color : '000000'"
+											/>
+										</div>
+									</td>
+								</tr>
+								<tr>
+									<td>
+										<div class="column gap">
+											<span>{{ capApp.collections }}</span>
+											<my-button image="add.png"
+												@trigger="element.collections.push(getCollectionConsumerTemplate())"
+												:active="!readonly"
+												:caption="capGen.button.add"
+												:naked="true"
+											/>
+										</div>
+									</td>
+									<td>
+										<my-builder-collection-input
+											v-for="(c,i) in element.collections"
+											@remove="element.collections.splice(i,1)"
+											@update:consumer="element.collections[i] = $event"
+											:allowFormOpen="false"
+											:allowRemove="true"
+											:consumer="c"
+											:fixedCollection="false"
+											:module="module"
+											:readonly="readonly"
+											:showMultiValue="false"
+											:showNoDisplayEmpty="true"
+											:showOnMobile="true"
+										/>
+									</td>
+								</tr>
+							</table>
 						</div>
 					</div>
 				</div>
@@ -135,9 +174,9 @@ let MyBuilderMenuItems = {
 		list:           { type:Array,   required:true },
 		readonly:       { type:Boolean, required:true }
 	},
-	data:function() {
+	data() {
 		return {
-			showCollectionsIndex:-1
+			showOptionsIndex:-1
 		};
 	},
 	computed:{
@@ -155,6 +194,9 @@ let MyBuilderMenuItems = {
 		getNilUuid,
 		
 		// actions
+		applyColor(input) {
+			return input === '' ? null : input;
+		},
 		remove(id,i) {
 			this.list.splice(i,1);
 			
@@ -247,7 +289,7 @@ let MyBuilderMenu = {
 	},
 	watch:{
 		module:{
-			handler:function() { this.reset(); },
+			handler() { this.reset(); },
 			immediate:true
 		}
 	},
@@ -276,6 +318,7 @@ let MyBuilderMenu = {
 				iconId:null,
 				menus:[],
 				showChildren:false,
+				color:null,
 				collections:[],
 				captions:{
 					menuTitle:{}

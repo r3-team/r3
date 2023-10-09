@@ -3,7 +3,7 @@
 	margin:0px;
 	padding:4px calc(var(--spacing) / 1.5);
 	font-size:inherit;
-	color:var(--color-bright);
+	color:var(--color-font-bright);
 	display:flex;
 	flex-flow:row nowrap;
 	gap:calc(var(--spacing) / 2);

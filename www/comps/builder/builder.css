@@ -250,9 +250,9 @@
 	flex-flow:column nowrap;
 	display:flex;
 	color:inherit;
-	border:1px solid var(--color-border);
+	border:1px solid var(--color-border-bright);
 	border-radius:12px;
-	box-shadow:1px 2px 2px var(--color-shade);
+	box-shadow:1px 1px 3px var(--color-shade);
 	background-color:var(--color-bg);
 }
 .builder-start .builder-start-entities{
@@ -319,11 +319,6 @@
 
 /* module */
 .builder-module{}
-.builder-module .builder-color{
-	width:30px;
-	height:30px;
-	border-radius:6px;
-}
 .builder-module .item-list{
 	display:flex;
 	flex-flow:row wrap;
@@ -344,6 +339,13 @@
 	height:24px;
 	cursor:pointer;
     filter:var(--image-filter);
+}
+
+/* color inputs */
+.builder-color{
+	width:30px;
+	height:30px;
+	border-radius:6px;
 }
 
 /* attributes */
@@ -1158,6 +1160,13 @@
 	padding:0px 5px;
 	box-sizing:border-box;
 	flex:0 1 220px;
+}
+.builder-menu .color-preview{
+	width:10px;
+	height:28px;
+	border:1px solid var(--color-border);
+	border-radius:3px;
+	box-shadow:1px 1px 3px var(--color-shade);
 }
 .builder-menu .nested{
 	padding:5px 0px 0px 5px;

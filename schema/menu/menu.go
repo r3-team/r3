@@ -41,7 +41,7 @@ func Get(moduleId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 	}
 
 	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
-		SELECT id, form_id, icon_id, show_children
+		SELECT id, form_id, icon_id, show_children, color
 		FROM app.menu
 		WHERE module_id = $1
 		%s
@@ -54,7 +54,7 @@ func Get(moduleId uuid.UUID, parentId pgtype.UUID) ([]types.Menu, error) {
 	for rows.Next() {
 		var m types.Menu
 
-		if err := rows.Scan(&m.Id, &m.FormId, &m.IconId, &m.ShowChildren); err != nil {
+		if err := rows.Scan(&m.Id, &m.FormId, &m.IconId, &m.ShowChildren, &m.Color); err != nil {
 			return menus, err
 		}
 		m.ModuleId = moduleId
@@ -94,17 +94,17 @@ func Set_tx(tx pgx.Tx, parentId pgtype.UUID, menus []types.Menu) error {
 			if _, err := tx.Exec(db.Ctx, `
 				UPDATE app.menu
 				SET parent_id = $1, form_id = $2, icon_id = $3, position = $4,
-					show_children = $5
-				WHERE id = $6
-			`, parentId, m.FormId, m.IconId, i, m.ShowChildren, m.Id); err != nil {
+					show_children = $5, color = $6
+				WHERE id = $7
+			`, parentId, m.FormId, m.IconId, i, m.ShowChildren, m.Color, m.Id); err != nil {
 				return err
 			}
 		} else {
 			if _, err := tx.Exec(db.Ctx, `
 				INSERT INTO app.menu (id, module_id, parent_id, form_id,
-					icon_id, position, show_children)
-				VALUES ($1,$2,$3,$4,$5,$6,$7)
-			`, m.Id, m.ModuleId, parentId, m.FormId, m.IconId, i, m.ShowChildren); err != nil {
+					icon_id, position, show_children, color)
+				VALUES ($1,$2,$3,$4,$5,$6,$7,$8)
+			`, m.Id, m.ModuleId, parentId, m.FormId, m.IconId, i, m.ShowChildren, m.Color); err != nil {
 				return err
 			}
 		}

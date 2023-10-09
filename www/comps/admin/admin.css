@@ -241,9 +241,9 @@
 	padding:0px 16px;
 	margin:0px 0px 24px 0px;
 	color:var(--color-font);
-	border:2px solid var(--color-border);
+	border:2px solid var(--color-border-bright);
 	border-radius:5px;
-	background-color:var(--color-bg);
+	background-color:var(--color-bright);
 }
 .admin-license .file>img{
 	width:auto;

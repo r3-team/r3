@@ -126,6 +126,7 @@ type Menu struct {
 	FormId       pgtype.UUID          `json:"formId"`
 	IconId       pgtype.UUID          `json:"iconId"`
 	Menus        []Menu               `json:"menus"`
+	Color        pgtype.Text          `json:"color"`
 	ShowChildren bool                 `json:"showChildren"`
 	Collections  []CollectionConsumer `json:"collections"` // collection values to display on menu entry
 	Captions     CaptionMap           `json:"captions"`

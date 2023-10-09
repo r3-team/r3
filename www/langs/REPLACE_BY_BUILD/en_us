@@ -87,6 +87,7 @@
 		"busy":"Working - Click here to abort",
 		"category":"Category",
 		"collection":"Collection",
+		"color":"Color",
 		"comments":"Comments",
 		"content":"Content",
 		"contextHelp":"Context help",

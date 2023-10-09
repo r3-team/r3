@@ -71,6 +71,8 @@
 	--image-filter:         invert(1) contrast(var(--image-filter-contrast)) brightness(10%);
 	--image-filter-alt:     invert(1) contrast(var(--image-filter-contrast)) brightness(60%);
 	--image-filter-bg:      invert(1) contrast(var(--image-filter-contrast)) brightness(90%);
+	--image-filter-bright:  invert(1) contrast(var(--image-filter-contrast)) brightness(90%);
+	--image-filter-dark:    invert(1) contrast(var(--image-filter-contrast)) brightness(10%);
 	--image-filter-contrast:100%;
 	--image-filter-error:   invert(13%) sepia(92%) saturate(4089%) hue-rotate(359deg) brightness(97%) contrast(88%);
 	--image-filter-success: invert(36%) sepia(95%) saturate(788%) hue-rotate(76deg) brightness(98%) contrast(93%);
@@ -78,15 +80,16 @@
 	/**/
 	/* colors */
 	--color-bg:            #f7f7f7;
-	--color-bright:        #ebebeb;
+	--color-bright:        #f5f5f5;
 	--color-border:        #9b9b9b;
+	--color-border-bright: #efefef;
+	--color-border-dark:   #2f2f2f;
 	--color-font:          #101010;
 	--color-font-bright:   #ffffff;
+	--color-font-dark:     #101010;
 	--color-font-disabled: #797979;
 	--color-input:         #ffffff;
 	--color-input-disabled:#efefef;
-	--color-menu-active:   hsl(199,24%,37%,0.5);
-	--color-menu-hover:    hsl(199,24%,57%,0.5);
 	--color-shade:         #333333;
 	--color-shade-bright:  #dddddd;
 	--color-shade-input:   #757575;
@@ -473,8 +476,8 @@ h3{
 	flex-flow:column nowrap;
 	box-shadow:1px 1px 3px var(--color-shade);
 	border-radius:6px;
-	border-color:var(--color-border);
-	background-color:var(--color-bg);
+	border-color:var(--color-border-bright);
+	background-color:var(--color-bright);
 	overflow:auto;
 }
 .contentBox .content .contentPart.short{
@@ -572,7 +575,7 @@ table td.maximum{
 	border:none;
 	border-color:var(--color-border);
 	border-radius:4px;
-	box-shadow:1px 1px 4px var(--color-shade);
+	box-shadow:1px 1px 3px var(--color-shade);
 	box-sizing:border-box;
 	flex:1 1 auto;
 }
@@ -709,9 +712,9 @@ table td.maximum{
 	max-width:420px;
 	padding:10px 15px;
 	vertical-align:top;
-	background-color:var(--color-bg);
-	box-shadow:1px 1px 2px var(--color-shade);
-	border-bottom:1px solid var(--color-border);
+	background-color:var(--color-bright);
+	border:1px solid var(--color-border-bright);
+	box-shadow:1px 1px 3px var(--color-shade);
 }
 .generic-table-vertical.tight>tr>td{
 	padding:4px 6px 4px 15px;
@@ -1079,11 +1082,12 @@ table td.maximum{
 .user-dark *{
 	/* color overwites */
 	--color-bg:            #2d2d2d;
-	/*--color-bright:        #ebebeb;*/
+	--color-bright:        #323232;
 	--color-border:        #111111;
+	--color-border-bright: #494949;
 	--color-font:          #f7f7f7;
-	/*--color-font-bright:   #ffffff;
-	--color-font-disabled: #797979;*/
+	--color-font-bright:   #ffffff;
+	--color-font-disabled: #797979;
 	--color-input:         #444444;
 	--color-input-disabled:#222222;
 	--color-shade:         #000000;
@@ -1099,7 +1103,7 @@ table td.maximum{
 	--color-action:        hsl(196,27%,30%);
 	--color-action-bright: hsl(196,22%,60%);
 	--color-action-disable:hsl(0,   0%,28%);
-	/*--color-cancel:        hsl(0,  57%,32%);*/
+	--color-cancel:        hsl(0,  57%,32%);
 	--color-error:         hsl(0,  64%,49%);
 	--color-success:       hsl(113,54%,32%);
 	

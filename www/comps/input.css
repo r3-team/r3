@@ -13,7 +13,7 @@
 	line-height:26px;
 	box-sizing:border-box;
 	text-align:center;
-	color:var(--color-bright);
+	color:var(--color-font-bright);
 	margin:1px 0px;
 	padding:0px 8px;
 	background-color:var(--color-action);
