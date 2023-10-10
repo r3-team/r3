@@ -4,7 +4,6 @@ import {hasAccessToAnyMenu} from './shared/access.js';
 import {getColumnTitle}     from './shared/column.js';
 import {getFormRoute}       from './shared/form.js';
 import {getModuleCaption}   from './shared/generic.js';
-import tinycolor            from '../externals/tinycolor2.js';
 import {
 	getCollectionColumn,
 	getCollectionValues
@@ -115,7 +114,7 @@ let MyMenuItem = {
 		hasChildren: (s) => s.menu.menus.length !== 0,
 		selected:    (s) => (!s.recordOpen || s.formOpensPreset) && s.menu.formId === s.formIdActive,
 		showChildren:(s) => s.hasChildren && s.menuIdMapOpen[s.menu.id],
-		style:       (s) => s.color === null ? `border-left:5px solid transparent;` : `border-left:5px solid #${s.color};`,
+		style:       (s) => s.color === null ? '' : `border-left-color:#${s.color};`,
 		subIcon:     (s) => s.showChildren ? 'images/triangleDown.png' : 'images/triangleLeft.png',
 		title:       (s) => typeof s.menu.captions.menuTitle[s.moduleLanguage] !== 'undefined'
 			? s.menu.captions.menuTitle[s.moduleLanguage] : s.capGen.missingCaption,
@@ -206,19 +205,15 @@ let MyMenu = {
 		recordOpen:     { type:Boolean, required:true }
 	},
 	computed:{
-		bgStyle:(s) => {
-			const c = s.tinycolor(s.color).lighten(4);
-			return `background:radial-gradient(at right bottom, ${c.toString()} 20%, #${s.color} 60%);`;
-		},
-		isDark:(s) => s.tinycolor(s.color).isDark(),
-		
 		// stores
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
+		bgStyle:       (s) => s.$store.getters.colorMenuStyle,
 		builderEnabled:(s) => s.$store.getters.builderEnabled,
 		capGen:        (s) => s.$store.getters.captions.generic,
 		color:         (s) => s.$store.getters.colorMenu,
 		isAdmin:       (s) => s.$store.getters.isAdmin,
+		isDark:        (s) => s.$store.getters.colorMenuDark,
 		isMobile:      (s) => s.$store.getters.isMobile,
 		menuAccess:    (s) => s.$store.getters.access.menu,
 		moduleLanguage:(s) => s.$store.getters.moduleLanguage,
@@ -229,7 +224,6 @@ let MyMenu = {
 		getModuleCaption,
 		hasAccessToAnyMenu,
 		srcBase64,
-		tinycolor,
 		
 		// actions
 		openBuilder(middle) {

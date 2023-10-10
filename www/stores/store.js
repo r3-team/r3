@@ -216,6 +216,14 @@ const MyStore = Vuex.createStore({
 		colorMenu:(state,payload) => {
 			return state.settings.colorMenu !== null ? state.settings.colorMenu : state.colorMenuDefault;
 		},
+		colorMenuDark:(state,payload) => {
+			return  tinycolor(state.settings.colorMenu !== null ? state.settings.colorMenu : state.colorMenuDefault).isDark();
+		},
+		colorMenuStyle:(state,payload) => {
+			const colorRgb = state.settings.colorMenu !== null ? state.settings.colorMenu : state.colorMenuDefault;
+			const color    = tinycolor(colorRgb).lighten(4);
+			return `background:radial-gradient(at right bottom, ${color.toString()} 20%, #${colorRgb} 60%);`;
+		},
 		licenseDays:(state) => {
 			if(!state.licenseValid)
 				return 0;

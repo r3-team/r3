@@ -23,10 +23,11 @@
 
 /* content */
 .builder .moduleSelect{
-	margin:12px;
+	margin:12px 8px;
 	display:flex;
 	flex-direction:row;
 	align-items:center;
+	gap:8px;
 }
 .builder .moduleSelect.translation{
 	margin-top:-6px;
@@ -35,7 +36,7 @@
 	margin:0px 9px 0px 6px;
 }
 .builder .moduleNoOwner{
-	margin:0px 12px 9px 12px;
+	margin:0px 8px 9px 8px;
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
@@ -43,11 +44,6 @@
 .builder .moduleNoOwner span{
 	flex:1 1 auto;
 	color:var(--color-error);
-}
-.builder .navigation select{
-	flex:1 1 auto;
-	margin-right:9px;
-	width:auto;
 }
 .builder .navigation-two-columns{
 	display:flex;
@@ -62,17 +58,15 @@
 	border-right:1px solid var(--color-border);
 }
 .builder .navigation-entities-header{
-	margin-top:15px;
-	padding:4px 10px;
+	padding:15px 8px 2px 2px;
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
 	justify-content:space-between;
-	color:var(--color-font);
 	border-bottom:1px solid var(--color-border);
-	background-color:var(--color-bg);
 }
 .builder .navigation-entities{
+	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
 	align-items:stretch;

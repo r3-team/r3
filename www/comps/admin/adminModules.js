@@ -310,7 +310,7 @@ let MyAdminModules = {
 		MyAdminModulesItem,
 		MyArticles
 	},
-	template:`<div class="contentBox admin-modules limited1500 grow">
+	template:`<div class="contentBox admin-modules grow">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/builder.png" />

@@ -14,292 +14,292 @@ let MyBuilder = {
 		MyModuleSelect
 	},
 	template:`<div class="builder equal-width">
-		<div class="navigationWrap" v-if="module">
-			<div class="navigation contentBox">
-				<div class="top lower nowrap">
-					<div class="area">
-						<img class="icon"
-							:src="srcBase64Icon(module.iconId,'images/module.png')"
-						/>
-						<h1>{{ getModuleCaption(module,builderLanguage) }}</h1>
-					</div>
-					<div class="area">
-						<my-button image="question.png"
-							@trigger="showDocs = !showDocs"
-							:captionTitle="capGen.help"
-						/>
-					</div>
+		<div class="navigation" v-if="module" :class="{ isDark:isDark }" :style="bgStyle">
+			<div class="navigation-header">
+				<div class="row gap centered">
+					<img class="icon"
+						:src="srcBase64Icon(module.iconId,'images/module.png')"
+					/>
+					<span>{{ getModuleCaption(module,builderLanguage) }}</span>
 				</div>
+				<my-button image="question.png"
+					@trigger="showDocs = !showDocs"
+					:captionTitle="capGen.help"
+				/>
+			</div>
+			
+			<!-- module navigation -->
+			<div class="moduleSelect default-inputs">
+				<my-module-select
+					v-model="moduleIdInput"
+				/>
+				<my-button image="upward.png"
+					@trigger="moduleIdInput = ''"
+					:active="moduleIdInput !== ''"
+					:captionTitle="capApp.backHint"
+				/>
+			</div>
+			
+			<!-- language selection -->
+			<div class="moduleSelect translation default-inputs">
 				
-				<div class="content no-padding">
-					
-					<!-- module navigation -->
-					<div class="moduleSelect default-inputs">
-						<my-module-select
-							v-model="moduleIdInput"
-						/>
-						<my-button image="upward.png"
-							@trigger="moduleIdInput = ''"
-							:active="moduleIdInput !== ''"
-							:captionTitle="capApp.backHint"
-						/>
-					</div>
-					
-					<!-- language selection -->
-					<div class="moduleSelect translation default-inputs">
-						
-						<span>{{ capApp.language }}</span>
-						<select v-model="builderLanguage">
-							<option
-								v-for="l in module.languages"
-								:value="l"
-							>{{ l }}</option>
-						</select>
-						<my-button image="languages.png"
-							@trigger="nextLanguage"
-							:active="module.languages.length > 1"
-							:captionTitle="capApp.languageNextHint"
-						/>
-					</div>
-					
-					<!-- module read only -->
-					<div class="moduleNoOwner"
-						v-if="!moduleOwner"
-						:title="capApp.noOwnerHint"
+				<span>{{ capApp.language }}</span>
+				<select class="dynamic" v-model="builderLanguage">
+					<option
+						v-for="l in module.languages"
+						:value="l"
+					>{{ l }}</option>
+				</select>
+				<my-button image="languages.png"
+					@trigger="nextLanguage"
+					:active="module.languages.length > 1"
+					:captionTitle="capApp.languageNextHint"
+				/>
+			</div>
+			
+			<!-- module read only -->
+			<div class="moduleNoOwner"
+				v-if="!moduleOwner"
+				:title="capApp.noOwnerHint"
+			>
+				<span>{{ capApp.noOwner }}</span>
+				<my-button image="settings.png"
+					@trigger="$router.push('/admin/modules')"
+				/>
+			</div>
+			
+			<!-- module component navigation -->
+			<div class="navigation-two-columns" v-if="module">
+				<div class="navigation-column">
+					<router-link class="entry clickable"
+						:to="'/builder/start/'+module.id"
 					>
-						<span>{{ capApp.noOwner }}</span>
-						<my-button image="settings.png"
-							@trigger="$router.push('/admin/modules')"
-						/>
-					</div>
+						<img src="images/flag.png" />
+						<span>{{ capApp.navigationStart }}</span>
+					</router-link>
 					
-					<!-- module component navigation -->
-					<div class="navigation-two-columns" v-if="module">
-						<div class="navigation-column">
-							<router-link class="entry clickable"
-								:to="'/builder/start/'+module.id"
-							>
-								<img src="images/flag.png" />
-								<span>{{ capApp.navigationStart }}</span>
-							</router-link>
-							
-							<router-link class="entry clickable"
-								:to="'/builder/module/'+module.id"
-							>
-								<img src="images/module.png" />
-								<span>{{ capApp.navigationModule }}</span>
-							</router-link>
-							
-							<router-link class="entry clickable"
-								:to="'/builder/relations/'+module.id"
-							>
-								<img src="images/database.png" />
-								<span>{{ capApp.navigationRelations }}</span>
-							</router-link>
-							
-							<router-link class="entry clickable"
-								:to="'/builder/forms/'+module.id"
-							>
-								<img src="images/fileText.png" />
-								<span>{{ capApp.navigationForms }}</span>
-							</router-link>
-							
-							<router-link class="entry clickable"
-								:to="'/builder/menu/'+module.id"
-							>
-								<img src="images/menu.png" />
-								<span>{{ capApp.navigationMenu }}</span>
-							</router-link>
-							
-							<router-link class="entry clickable"
-								:to="'/builder/roles/'+module.id"
-							>
-								<img src="images/personMultiple.png" />
-								<span>{{ capApp.navigationRoles }}</span>
-							</router-link>
-							
-							<router-link class="entry clickable"
-								:to="'/builder/icons/'+module.id"
-							>
-								<img src="images/fileImage.png" />
-								<span>{{ capApp.navigationIcons }}</span>
-							</router-link>
-						</div>
-						<div class="navigation-column">
-							<router-link class="entry clickable"
-								:to="'/builder/pg-functions/'+module.id"
-							>
-								<img src="images/codeDatabase.png" />
-								<span>{{ capApp.navigationPgFunctions }}</span>
-							</router-link>
-							
-							<router-link class="entry clickable"
-								:to="'/builder/js-functions/'+module.id"
-							>
-								<img src="images/codeScreen.png" />
-								<span>{{ capApp.navigationJsFunctions }}</span>
-							</router-link>
-							
-							<router-link class="entry clickable"
-								:to="'/builder/collections/'+module.id"
-							>
-								<img src="images/tray.png" />
-								<span>{{ capApp.navigationCollections }}</span>
-							</router-link>
-							
-							<router-link class="entry clickable"
-								:to="'/builder/login-forms/'+module.id"
-							>
-								<img src="images/personCog.png" />
-								<span>{{ capApp.navigationLoginForms }}</span>
-							</router-link>
-							
-							<router-link class="entry clickable"
-								:to="'/builder/articles/'+module.id"
-							>
-								<img src="images/question.png" />
-								<span>{{ capApp.navigationArticles }}</span>
-							</router-link>
-							
-							<router-link class="entry clickable"
-								:to="'/builder/apis/'+module.id"
-							>
-								<img src="images/api.png" />
-								<span>{{ capApp.navigationApis }}</span>
-							</router-link>
-							
-							<!-- so router link is not last child (CSS) -->
-							<div />
-						</div>
-					</div>
+					<router-link class="entry clickable"
+						:to="'/builder/module/'+module.id"
+					>
+						<img src="images/module.png" />
+						<span>{{ capApp.navigationModule }}</span>
+					</router-link>
 					
-					<!-- module sub component navigation header -->
-					<div class="navigation-entities-header" v-if="subMenu">
-						<my-button image="fileText.png"
-							v-if="navigation === 'forms'"
-							@trigger="$router.push('/builder/forms/'+moduleId)"
-							:caption="capApp.navigationForms"
-							:naked="true"
-						/>
-						<my-button image="personMultiple.png"
-							v-if="navigation === 'roles'"
-							@trigger="$router.push('/builder/roles/'+moduleId)"
-							:caption="capApp.navigationRoles"
-							:naked="true"
-						/>
-						<my-button image="database.png"
-							v-if="navigation === 'relations'"
-							@trigger="$router.push('/builder/relations/'+moduleId)"
-							:caption="capApp.navigationRelations"
-							:naked="true"
-						/>
-						<my-button image="tray.png"
-							v-if="navigation === 'collections'"
-							@trigger="$router.push('/builder/collections/'+moduleId)"
-							:caption="capApp.navigationCollections"
-							:naked="true"
-						/>
-						<my-button image="api.png"
-							v-if="navigation === 'apis'"
-							@trigger="$router.push('/builder/apis/'+moduleId)"
-							:caption="capApp.navigationApis"
-							:naked="true"
-						/>
-						<my-button image="codeDatabase.png"
-							v-if="navigation === 'pg-functions'"
-							@trigger="$router.push('/builder/pg-functions/'+moduleId)"
-							:caption="capApp.navigationPgFunctions"
-							:naked="true"
-						/>
-						<my-button image="codeScreen.png"
-							v-if="navigation === 'js-functions'"
-							@trigger="$router.push('/builder/js-functions/'+moduleId)"
-							:caption="capApp.navigationJsFunctions"
-							:naked="true"
-						/>
-						<div class="row gap centered default-inputs">
-							<input class="short" placeholder="..." spellcheck="false"
-								v-model="filter"
-								:title="capApp.navigationFilterHint"
-							/>
-							<my-button image="add.png"
-								v-if="['apis','collections','forms','js-functions','pg-functions','relations','roles'].includes(navigation)"
-								@trigger="add"
-								:active="moduleOwner"
-								:captionTitle="capGen.button.add"
-							/>
-						</div>
-					</div>
+					<router-link class="entry clickable"
+						:to="'/builder/relations/'+module.id"
+					>
+						<img src="images/database.png" />
+						<span>{{ capApp.navigationRelations }}</span>
+					</router-link>
 					
-					<!-- module sub component navigation -->
-					<div class="navigation-entities" v-if="subMenu">
-						
-						<!-- relations -->
-						<template v-if="navigation === 'relations'">
-							<router-link class="entry clickable"
-								v-for="rel in module.relations.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
-								:key="rel.id"
-								:to="'/builder/relation/'+rel.id" 
-							>{{ rel.name }}</router-link>
-						</template>
-						
-						<!-- forms -->
-						<template v-if="navigation === 'forms'">
-							<router-link class="entry clickable"
-								v-for="frm in module.forms.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
-								:key="frm.id"
-								:to="'/builder/form/'+frm.id" 
-							>{{ frm.name }}</router-link>
-						</template>
-						
-						<!-- roles -->
-						<template v-if="navigation === 'roles'">
-							<router-link class="entry clickable"
-								v-for="rol in module.roles.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
-								:key="rol.id"
-								:to="'/builder/role/'+rol.id" 
-							>{{ rol.name }}</router-link>
-						</template>
-						
-						<!-- collections -->
-						<template v-if="navigation === 'collections'">
-							<router-link class="entry clickable"
-								v-for="c in module.collections.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
-								:key="c.id"
-								:to="'/builder/collection/'+c.id" 
-							>{{ c.name }}</router-link>
-						</template>
-						
-						<!-- APIs -->
-						<template v-if="navigation === 'apis'">
-							<router-link class="entry clickable"
-								v-for="a in module.apis.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
-								:key="a.id"
-								:to="'/builder/api/'+a.id" 
-							>{{ a.name + ' (v' + a.version + ')' }}</router-link>
-						</template>
-						
-						<!-- PG functions -->
-						<template v-if="navigation === 'pg-functions'">
-							<router-link class="entry clickable"
-								v-for="fnc in module.pgFunctions.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
-								:key="fnc.id"
-								:to="'/builder/pg-function/'+fnc.id" 
-							>{{ fnc.name }}</router-link>
-						</template>
-						
-						<!-- JS functions -->
-						<template v-if="navigation === 'js-functions'">
-							<router-link class="entry clickable"
-								v-for="fnc in jsFunctions"
-								:key="fnc.id"
-								:to="'/builder/js-function/'+fnc.id" 
-							>
-								<span><b v-if="fnc.formId !== null">{{ formIdMap[fnc.formId].name }}: </b>{{ fnc.name }}</span>
-							</router-link>
-						</template>
-					</div>
+					<router-link class="entry clickable"
+						:to="'/builder/forms/'+module.id"
+					>
+						<img src="images/fileText.png" />
+						<span>{{ capApp.navigationForms }}</span>
+					</router-link>
+					
+					<router-link class="entry clickable"
+						:to="'/builder/menu/'+module.id"
+					>
+						<img src="images/menu.png" />
+						<span>{{ capApp.navigationMenu }}</span>
+					</router-link>
+					
+					<router-link class="entry clickable"
+						:to="'/builder/roles/'+module.id"
+					>
+						<img src="images/personMultiple.png" />
+						<span>{{ capApp.navigationRoles }}</span>
+					</router-link>
+					
+					<router-link class="entry clickable"
+						:to="'/builder/icons/'+module.id"
+					>
+						<img src="images/fileImage.png" />
+						<span>{{ capApp.navigationIcons }}</span>
+					</router-link>
 				</div>
+				<div class="navigation-column">
+					<router-link class="entry clickable"
+						:to="'/builder/pg-functions/'+module.id"
+					>
+						<img src="images/codeDatabase.png" />
+						<span>{{ capApp.navigationPgFunctions }}</span>
+					</router-link>
+					
+					<router-link class="entry clickable"
+						:to="'/builder/js-functions/'+module.id"
+					>
+						<img src="images/codeScreen.png" />
+						<span>{{ capApp.navigationJsFunctions }}</span>
+					</router-link>
+					
+					<router-link class="entry clickable"
+						:to="'/builder/collections/'+module.id"
+					>
+						<img src="images/tray.png" />
+						<span>{{ capApp.navigationCollections }}</span>
+					</router-link>
+					
+					<router-link class="entry clickable"
+						:to="'/builder/login-forms/'+module.id"
+					>
+						<img src="images/personCog.png" />
+						<span>{{ capApp.navigationLoginForms }}</span>
+					</router-link>
+					
+					<router-link class="entry clickable"
+						:to="'/builder/articles/'+module.id"
+					>
+						<img src="images/question.png" />
+						<span>{{ capApp.navigationArticles }}</span>
+					</router-link>
+					
+					<router-link class="entry clickable"
+						:to="'/builder/apis/'+module.id"
+					>
+						<img src="images/api.png" />
+						<span>{{ capApp.navigationApis }}</span>
+					</router-link>
+					
+					<!-- so router link is not last child (CSS) -->
+					<div />
+				</div>
+			</div>
+			
+			<!-- module sub component navigation header -->
+			<div class="navigation-entities-header" v-if="subMenu">
+				<router-link class="entry isTitle clickable"
+					v-if="navigation === 'forms'"
+					:to="'/builder/forms/'+module.id"
+				>
+					<img src="images/fileText.png" />
+					<span>{{ capApp.navigationForms }}</span>
+				</router-link>
+				<router-link class="entry isTitle clickable"
+					v-if="navigation === 'roles'"
+					:to="'/builder/roles/'+module.id"
+				>
+					<img src="images/personMultiple.png" />
+					<span>{{ capApp.navigationRoles }}</span>
+				</router-link>
+				<router-link class="entry isTitle clickable"
+					v-if="navigation === 'relations'"
+					:to="'/builder/relations/'+module.id"
+				>
+					<img src="images/database.png" />
+					<span>{{ capApp.navigationRelations }}</span>
+				</router-link>
+				<router-link class="entry isTitle clickable"
+					v-if="navigation === 'collections'"
+					:to="'/builder/collections/'+module.id"
+				>
+					<img src="images/tray.png" />
+					<span>{{ capApp.navigationCollections }}</span>
+				</router-link>
+				<router-link class="entry isTitle clickable"
+					v-if="navigation === 'apis'"
+					:to="'/builder/apis/'+module.id"
+				>
+					<img src="images/api.png" />
+					<span>{{ capApp.navigationApis }}</span>
+				</router-link>
+				<router-link class="entry isTitle clickable"
+					v-if="navigation === 'pg-functions'"
+					:to="'/builder/pg-functions/'+module.id"
+				>
+					<img src="images/codeDatabase.png" />
+					<span>{{ capApp.navigationPgFunctions }}</span>
+				</router-link>
+				<router-link class="entry isTitle clickable"
+					v-if="navigation === 'js-functions'"
+					:to="'/builder/js-functions/'+module.id"
+				>
+					<img src="images/codeScreen.png" />
+					<span>{{ capApp.navigationJsFunctions }}</span>
+				</router-link>
+				<div class="row gap centered default-inputs">
+					<input class="short" placeholder="..." spellcheck="false"
+						v-model="filter"
+						:title="capApp.navigationFilterHint"
+					/>
+					<my-button image="add.png"
+						v-if="['apis','collections','forms','js-functions','pg-functions','relations','roles'].includes(navigation)"
+						@trigger="add"
+						:active="moduleOwner"
+						:captionTitle="capGen.button.add"
+					/>
+				</div>
+			</div>
+			
+			<!-- module sub component navigation -->
+			<div class="navigation-entities" v-if="subMenu">
+				
+				<!-- relations -->
+				<template v-if="navigation === 'relations'">
+					<router-link class="entry clickable"
+						v-for="rel in module.relations.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
+						:key="rel.id"
+						:to="'/builder/relation/'+rel.id" 
+					>{{ rel.name }}</router-link>
+				</template>
+				
+				<!-- forms -->
+				<template v-if="navigation === 'forms'">
+					<router-link class="entry clickable"
+						v-for="frm in module.forms.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
+						:key="frm.id"
+						:to="'/builder/form/'+frm.id" 
+					>{{ frm.name }}</router-link>
+				</template>
+				
+				<!-- roles -->
+				<template v-if="navigation === 'roles'">
+					<router-link class="entry clickable"
+						v-for="rol in module.roles.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
+						:key="rol.id"
+						:to="'/builder/role/'+rol.id" 
+					>{{ rol.name }}</router-link>
+				</template>
+				
+				<!-- collections -->
+				<template v-if="navigation === 'collections'">
+					<router-link class="entry clickable"
+						v-for="c in module.collections.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
+						:key="c.id"
+						:to="'/builder/collection/'+c.id" 
+					>{{ c.name }}</router-link>
+				</template>
+				
+				<!-- APIs -->
+				<template v-if="navigation === 'apis'">
+					<router-link class="entry clickable"
+						v-for="a in module.apis.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
+						:key="a.id"
+						:to="'/builder/api/'+a.id" 
+					>{{ a.name + ' (v' + a.version + ')' }}</router-link>
+				</template>
+				
+				<!-- PG functions -->
+				<template v-if="navigation === 'pg-functions'">
+					<router-link class="entry clickable"
+						v-for="fnc in module.pgFunctions.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
+						:key="fnc.id"
+						:to="'/builder/pg-function/'+fnc.id" 
+					>{{ fnc.name }}</router-link>
+				</template>
+				
+				<!-- JS functions -->
+				<template v-if="navigation === 'js-functions'">
+					<router-link class="entry clickable"
+						v-for="fnc in jsFunctions"
+						:key="fnc.id"
+						:to="'/builder/js-function/'+fnc.id" 
+					>
+						<span><b v-if="fnc.formId !== null">{{ formIdMap[fnc.formId].name }}: </b>{{ fnc.name }}</span>
+					</router-link>
+				</template>
 			</div>
 		</div>
 		
@@ -446,9 +446,11 @@ let MyBuilder = {
 		roleIdMap:         (s) => s.$store.getters['schema/roleIdMap'],
 		collectionIdMap:   (s) => s.$store.getters['schema/collectionIdMap'],
 		apiIdMap:          (s) => s.$store.getters['schema/apiIdMap'],
+		bgStyle:           (s) => s.$store.getters.colorMenuStyle,
 		builderEnabled:    (s) => s.$store.getters.builderEnabled,
 		capApp:            (s) => s.$store.getters.captions.builder,
 		capGen:            (s) => s.$store.getters.captions.generic,
+		isDark:            (s) => s.$store.getters.colorMenuDark,
 		settings:          (s) => s.$store.getters.settings
 	},
 	methods:{

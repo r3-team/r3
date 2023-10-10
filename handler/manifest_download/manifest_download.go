@@ -147,7 +147,10 @@ func Handler(w http.ResponseWriter, r *http.Request) {
 	manifestMod.Id = module.Id.String()
 	manifestMod.Scope = pathMod
 	manifestMod.StartUrl = pathMod
-	manifestMod.ThemeColor = fmt.Sprintf("#%s", module.Color1)
+
+	if module.Color1.Valid {
+		manifestMod.ThemeColor = fmt.Sprintf("#%s", module.Color1.String)
+	}
 
 	// optional PWA settings
 	if module.NamePwa.Valid {

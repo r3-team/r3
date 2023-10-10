@@ -108,7 +108,7 @@ let MyAdminRepo = {
 		MyInputOffset,
 		MyAdminRepoModule
 	},
-	template:`<div class="admin-repo contentBox grow limited1500">
+	template:`<div class="admin-repo contentBox grow">
 		
 		<div class="top">
 			<div class="area">
