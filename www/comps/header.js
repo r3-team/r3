@@ -1,12 +1,15 @@
 import srcBase64Icon         from './shared/image.js';
 import {getColumnTitle}      from './shared/column.js';
 import {formOpen}            from './shared/form.js';
-import {colorIsDark}         from './shared/generic.js';
 import {getCaptionForModule} from './shared/language.js';
 import {
 	getCollectionColumn,
 	getCollectionValues
 } from './shared/collection.js';
+import {
+	colorIsDark,
+	openLink
+} from './shared/generic.js';
 export {MyHeader as default};
 
 let MyHeader = {
@@ -179,6 +182,13 @@ let MyHeader = {
 				>
 					<img src="images/logoff.png" />
 				</div>
+				
+				<!-- logo -->
+				<img class="app-header-logo clickable"
+					v-if="!isMobile"
+					@click="openLink(customLogoUrl,true)"
+					:src="customLogo"
+				/>
 			</div>
 		</div>
 	</div>`,
@@ -280,6 +290,8 @@ let MyHeader = {
 		pwaSingle:(s) => s.pwaModuleId !== null,
 		
 		// stores
+		customLogo:       (s) => s.$store.getters['local/customLogo'],
+		customLogoUrl:    (s) => s.$store.getters['local/customLogoUrl'],
 		modules:          (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:      (s) => s.$store.getters['schema/moduleIdMap'],
 		moduleNameMap:    (s) => s.$store.getters['schema/moduleNameMap'],
@@ -317,6 +329,7 @@ let MyHeader = {
 		getCollectionColumn,
 		getCollectionValues,
 		getColumnTitle,
+		openLink,
 		srcBase64Icon,
 		
 		// display

@@ -254,14 +254,6 @@ h3{
 .app-content.wrap{
 	flex-wrap:wrap;
 }
-.app-logo-bottom{
-	position:absolute;
-	bottom:var(--spacing);
-	left:var(--spacing);
-	max-width:100%; /* chrome fix */
-	max-height:60px;
-	margin:5px;
-}
 
 
 /* sub windows in main app */

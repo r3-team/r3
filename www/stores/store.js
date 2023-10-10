@@ -16,8 +16,8 @@ const MyStore = Vuex.createStore({
 		captions:{},                   // all application captions in the user interface language
 		clusterNodeName:'',            // name of the cluster node that session is connected to
 		collectionIdMap:{},            // map of all collection values, key = collection ID
-		colorHeaderDefault:'222222',   // default header color, if not overwritten
-		colorMenuDefault:'282828',     // default menu color, if not overwritten
+		colorHeaderDefault:'262626',   // default header color, if not overwritten
+		colorMenuDefault:'2d3033',     // default menu color, if not overwritten
 		config:{},                     // configuration values (admin only)
 		constants:{                    // constant variables, codes/messages/IDs
 			kdfIterations:10000,       // number of iterations for PBKDF2 key derivation function
@@ -191,13 +191,13 @@ const MyStore = Vuex.createStore({
 	getters:{
 		colorHeaderAccent:(state,payload) => {
 			let colorRgb = state.colorHeaderDefault;
-			let brighten = state.settings.dark ? -30 : 0; // by default, darken accent color in dark mode
+			let brighten = state.settings.dark ? -30 : 0;
 			let desature = state.settings.dark ? 50  : 0;
 			
 			if(state.settings.colorHeaderSingle) {
 				// accent color disabled, use adjusted main color for gradient
 				colorRgb = state.settings.colorHeader !== null ? state.settings.colorHeader : state.colorHeaderDefault;
-				brighten = state.settings.dark ? -10 : 25;
+				brighten = state.settings.dark ? -10 : 20;
 			} else {
 				if(MyStoreLocal.state.activated && MyStoreLocal.state.companyColorHeader !== '') {
 					// accent color from customizing

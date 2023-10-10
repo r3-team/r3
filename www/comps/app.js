@@ -6,6 +6,7 @@ import MyLogin               from './login.js';
 import {getStartFormId}      from './shared/access.js';
 import {updateCollections}   from './shared/collection.js';
 import {formOpen}            from './shared/form.js';
+import {colorAdjustBgHeader} from './shared/generic.js';
 import {getCaptionForModule} from './shared/language.js';
 import srcBase64Icon         from './shared/image.js';
 import {
@@ -18,10 +19,7 @@ import {
 	genericError,
 	genericErrorWithFallback
 } from './shared/error.js';
-import {
-	colorAdjustBgHeader,
-	openLink
-} from './shared/generic.js';
+
 export {MyApp as default};
 
 let MyApp = {
@@ -53,12 +51,6 @@ let MyApp = {
 			<router-view class="app-content"
 				@logout="sessionInvalid"
 				:moduleEntries="moduleEntries"
-			/>
-			
-			<img class="app-logo-bottom clickable"
-				v-if="!isMobile"
-				@click="openLink(customLogoUrl,true)"
-				:src="customLogo"
 			/>
 			
 			<!-- global pop-up form window -->
@@ -294,8 +286,6 @@ let MyApp = {
 		// stores
 		activated:        (s) => s.$store.getters['local/activated'],
 		appVersion:       (s) => s.$store.getters['local/appVersion'],
-		customLogo:       (s) => s.$store.getters['local/customLogo'],
-		customLogoUrl:    (s) => s.$store.getters['local/customLogoUrl'],
 		css:              (s) => s.$store.getters['local/css'],
 		loginKeyAes:      (s) => s.$store.getters['local/loginKeyAes'],
 		schemaTimestamp:  (s) => s.$store.getters['local/schemaTimestamp'],
@@ -341,7 +331,6 @@ let MyApp = {
 		genericErrorWithFallback,
 		getCaptionForModule,
 		getStartFormId,
-		openLink,
 		pemImport,
 		srcBase64Icon,
 		updateCollections,
