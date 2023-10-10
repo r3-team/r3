@@ -53,7 +53,7 @@ let MyHeader = {
 				
 				<!-- modules -->
 				<div class="entry-wrap"
-					v-if="!isMobile && !pwaSingle"
+					v-if="showModuleIcons"
 					v-for="me in moduleEntries"
 					:key="me.id"
 				>
@@ -66,7 +66,7 @@ let MyHeader = {
 						:to="'/app/'+me.name"
 					>
 						<img :src="srcBase64Icon(me.iconId,'images/module.png')" />
-						<span v-if="settings.headerCaptions && !reducedHeader">
+						<span v-if="settings.headerCaptions && showModuleTitles">
 							{{ me.caption }}
 						</span>
 					</router-link>
@@ -115,7 +115,7 @@ let MyHeader = {
 				
 				<!-- collection entries -->
 				<div class="entry no-wrap" tabindex="0"
-					v-if="collectionCounter === 0"
+					v-if="showCollections"
 					v-for="e in collectionEntries"
 					@click="formOpen(e.openForm)"
 					@keyup.enter="formOpen(e.openForm)"
@@ -201,8 +201,15 @@ let MyHeader = {
 		return {
 			contentSizePx:0,        // width in pixel required by all application entries
 			contentSizePxBuffer:50, // keep this space free (currently only for busy indicator)
-			reducedHeader:false,    // reduce sizes for application entries if space is limited
-			sizeCheckTimedOut:false // time-out for checking header size
+			
+			// layout adjustment
+			layoutCheckTimer:null,
+			layoutReducedElements:[],        // list of elements that needed to be reduced to fit the current window width
+			layoutReducibleElementsInOrder:[ // list of elements that can be reduced, in order of priority
+				'moduleTitles', // module titles, take up the most space, removed fully
+				'collections',  // collection values/icons, replaced by hover menu
+				'moduleIcons'   // module icons, replaced by hover menu
+			],
 		};
 	},
 	watch:{
@@ -227,7 +234,7 @@ let MyHeader = {
 		},
 		bgStyleEntries:(s) => `background-color:#${s.colorHeaderMain};`,
 		collectionCounter:(s) => {
-			if(!s.isMobile) return 0;
+			if(s.showCollections) return 0;
 			
 			let cnt = 0;
 			for(let c of s.collectionEntries) {
@@ -270,6 +277,16 @@ let MyHeader = {
 			}
 			return out;
 		},
+		elementsReduced:(s) => {
+			let elms = JSON.parse(JSON.stringify(s.layoutReducedElements));
+			
+			// reduce elements based on app && login settings
+			if(s.isMobile || !s.settings.headerCaptions) elms.push('moduleTitles');
+			if(s.isMobile)                               elms.push('collections');
+			if(s.isMobile || s.pwaSingle)                elms.push('moduleIcons');
+			
+			return elms;
+		},
 		
 		// returns which module to show if regular navigation is disabled
 		moduleSingle:(s) => s.moduleIdLast !== null && s.isMobile
@@ -287,7 +304,10 @@ let MyHeader = {
 		},
 		
 		// simple
-		pwaSingle:(s) => s.pwaModuleId !== null,
+		pwaSingle:       (s) => s.pwaModuleId !== null,
+		showCollections: (s) => !s.elementsReduced.includes('collections'),
+		showModuleIcons: (s) => !s.elementsReduced.includes('moduleIcons'),
+		showModuleTitles:(s) => !s.elementsReduced.includes('moduleTitles'),
 		
 		// stores
 		customLogo:       (s) => s.$store.getters['local/customLogo'],
@@ -333,6 +353,25 @@ let MyHeader = {
 		srcBase64Icon,
 		
 		// display
+		layoutAdjust() {
+			this.layoutCheckTimer = null;
+			const enoughSpace = this.$refs.empty.offsetWidth > this.contentSizePxBuffer;
+			
+			if(enoughSpace || this.elementsReduced.length === this.layoutReducibleElementsInOrder.length)
+				return;
+			
+			// space insufficient and still elements available to reduce
+			for(const elm of this.layoutReducibleElementsInOrder) {
+				if(this.elementsReduced.includes(elm))
+					continue;
+				
+				this.layoutReducedElements.push(elm);
+				
+				// recheck after adjustment, in case further reduction is required
+				this.$nextTick(this.layoutAdjust);
+				break;
+			}
+		},
 		keysLockedMsg() {
 			this.$store.commit('dialog',{
 				captionBody:this.capErr.SEC['002'],
@@ -340,25 +379,13 @@ let MyHeader = {
 			});
 		},
 		windowResized() {
-			if(this.sizeCheckTimedOut)
-				return;
+			if(this.layoutCheckTimer !== null)
+				clearTimeout(this.layoutCheckTimer);
 			
-			if(!this.reducedHeader) {
-				if(this.$refs.empty.offsetWidth < this.contentSizePxBuffer) {
-					// empty space in header is too small, store currently required space for content, enable reduced header
-					this.contentSizePx = this.$refs.content.offsetWidth;
-					this.reducedHeader = true;
-				}
-			}
-			else {
-				// if empty space is large enough to show full content size, disable reduced header
-				if(this.$refs.empty.offsetWidth > this.contentSizePxBuffer + this.contentSizePx - this.$refs.content.offsetWidth)
-					this.reducedHeader = false;
-			}
-			
-			// limit header size checks
-			this.sizeCheckTimedOut = true;
-			setTimeout(() => this.sizeCheckTimedOut = false,100);
+			this.layoutCheckTimer = setTimeout(() => {
+				this.layoutReducedElements = [];   // reset reduced elements for new window size
+				this.$nextTick(this.layoutAdjust); // wait for layout to settle before adjustments
+			},300);
 		},
 		
 		// actions

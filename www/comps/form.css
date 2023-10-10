@@ -4,6 +4,7 @@
 	flex-flow:row nowrap;
 	overflow:visible;
 	z-index:var(--z-index-form);
+	gap:var(--spacing);
 }
 .form-wrap.popUp{
 	z-index:var(--z-index-form-pop-up);
@@ -28,7 +29,6 @@
 .form-wrap.popUp>.form-log{
 	box-shadow:none;
 	margin:0px;
-	margin-right:var(--spacing);
 	border-left:1px solid var(--color-border);
 }
 .form-wrap.popUp.float>.form,
