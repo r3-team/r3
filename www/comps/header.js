@@ -1,25 +1,31 @@
 import srcBase64Icon         from './shared/image.js';
 import {getColumnTitle}      from './shared/column.js';
 import {formOpen}            from './shared/form.js';
+import {openLink}            from './shared/generic.js';
 import {getCaptionForModule} from './shared/language.js';
 import {
 	getCollectionColumn,
 	getCollectionValues
 } from './shared/collection.js';
-import {
-	colorIsDark,
-	openLink
-} from './shared/generic.js';
 export {MyHeader as default};
 
 let MyHeader = {
 	name:'my-header',
-	template:`<div class="app-header shade noPrint" :class="{ isDark:bgIsDark }">
+	template:`<div class="app-header shade noPrint" :class="{ isDark:colorHeaderMainDark }">
 		
 		<div class="app-header-bg" :style="bgStyle" />
 		
 		<div class="app-header-content">
 			<div ref="content" class="entries">
+				
+				<!-- module hover menu action -->
+				<div class="entry no-wrap clickable" tabindex="0"
+					v-if="!showModuleIcons"
+					@click="$emit('show-module-hover-menu')"
+					@keyup.enter="$emit('show-module-hover-menu')"
+				>
+					<img src="images/dots.png" />
+				</div>
 				
 				<template v-if="!isMobile && isAdmin && !pwaSingle" >
 					<router-link class="entry no-wrap clickable" to="/builder"
@@ -35,7 +41,7 @@ let MyHeader = {
 				</template>
 				
 				<!-- home page -->
-				<router-link class="entry no-wrap clickable" to="/home">
+				<router-link class="entry no-wrap clickable" to="/home" v-if="!isMobile">
 					<img src="images/home.png" />
 					<span v-if="!isMobile && pwaSingle">{{ capGen.home }}</span>
 				</router-link>
@@ -106,7 +112,7 @@ let MyHeader = {
 			<div ref="system" class="entries">
 				
 				<!-- busy indicator -->
-    				<transition name="fade_out">
+    			<transition name="fade_out">
 					<div class="entry no-wrap"
 						v-if="busyCounter > 0"
 						:title="capGen.busy"
@@ -182,13 +188,6 @@ let MyHeader = {
 				>
 					<img src="images/logoff.png" />
 				</div>
-				
-				<!-- logo -->
-				<img class="app-header-logo clickable"
-					v-if="!isMobile"
-					@click="openLink(customLogoUrl,true)"
-					:src="customLogo"
-				/>
 			</div>
 		</div>
 	</div>`,
@@ -196,7 +195,7 @@ let MyHeader = {
 		keysLocked:   { type:Boolean, required:true },
 		moduleEntries:{ type:Array,   required:true }
 	},
-	emits:['logout','show-collection-input'],
+	emits:['logout','show-collection-input','show-module-hover-menu'],
 	data() {
 		return {
 			contentSizePx:0,        // width in pixel required by all application entries
@@ -222,7 +221,6 @@ let MyHeader = {
 		}
 	},
 	computed:{
-		bgIsDark:(s) => s.colorIsDark(s.colorHeaderMain),
 		bgStyle:(s) => {
 			return `
 				background-color:#${s.colorHeaderMain};
@@ -310,27 +308,26 @@ let MyHeader = {
 		showModuleTitles:(s) => !s.elementsReduced.includes('moduleTitles'),
 		
 		// stores
-		customLogo:       (s) => s.$store.getters['local/customLogo'],
-		customLogoUrl:    (s) => s.$store.getters['local/customLogoUrl'],
-		modules:          (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:      (s) => s.$store.getters['schema/moduleIdMap'],
-		moduleNameMap:    (s) => s.$store.getters['schema/moduleNameMap'],
-		formIdMap:        (s) => s.$store.getters['schema/formIdMap'],
-		collectionIdMap:  (s) => s.$store.getters['schema/collectionIdMap'],
-		builderEnabled:   (s) => s.$store.getters.builderEnabled,
-		busyCounter:      (s) => s.$store.getters.busyCounter,
-		capErr:           (s) => s.$store.getters.captions.error,
-		capGen:           (s) => s.$store.getters.captions.generic,
-		colorHeaderAccent:(s) => s.$store.getters.colorHeaderAccent,
-		colorHeaderMain:  (s) => s.$store.getters.colorHeaderMain,
-		feedback:         (s) => s.$store.getters.feedback,
-		isAdmin:          (s) => s.$store.getters.isAdmin,
-		isAtMenu:         (s) => s.$store.getters.isAtMenu,
-		isMobile:         (s) => s.$store.getters.isMobile,
-		isNoAuth:         (s) => s.$store.getters.isNoAuth,
-		pwaModuleId:      (s) => s.$store.getters.pwaModuleId,
-		moduleIdLast:     (s) => s.$store.getters.moduleIdLast,
-		settings:         (s) => s.$store.getters.settings
+		modules:            (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleNameMap:      (s) => s.$store.getters['schema/moduleNameMap'],
+		formIdMap:          (s) => s.$store.getters['schema/formIdMap'],
+		collectionIdMap:    (s) => s.$store.getters['schema/collectionIdMap'],
+		builderEnabled:     (s) => s.$store.getters.builderEnabled,
+		busyCounter:        (s) => s.$store.getters.busyCounter,
+		capErr:             (s) => s.$store.getters.captions.error,
+		capGen:             (s) => s.$store.getters.captions.generic,
+		colorHeaderAccent:  (s) => s.$store.getters.colorHeaderAccent,
+		colorHeaderMain:    (s) => s.$store.getters.colorHeaderMain,
+		colorHeaderMainDark:(s) => s.$store.getters.colorHeaderMainDark,
+		feedback:           (s) => s.$store.getters.feedback,
+		isAdmin:            (s) => s.$store.getters.isAdmin,
+		isAtMenu:           (s) => s.$store.getters.isAtMenu,
+		isMobile:           (s) => s.$store.getters.isMobile,
+		isNoAuth:           (s) => s.$store.getters.isNoAuth,
+		pwaModuleId:        (s) => s.$store.getters.pwaModuleId,
+		moduleIdLast:       (s) => s.$store.getters.moduleIdLast,
+		settings:           (s) => s.$store.getters.settings
 	},
 	created() {
 		window.addEventListener('resize',this.windowResized);
@@ -344,7 +341,6 @@ let MyHeader = {
 	methods:{
 		// externals
 		formOpen,
-		colorIsDark,
 		getCaptionForModule,
 		getCollectionColumn,
 		getCollectionValues,

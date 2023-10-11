@@ -213,11 +213,14 @@ const MyStore = Vuex.createStore({
 		colorHeaderMain:(state,payload) => {
 			return state.settings.colorHeader !== null ? state.settings.colorHeader : state.colorHeaderDefault;
 		},
+		colorHeaderMainDark:(state,payload) => {
+			return tinycolor(state.settings.colorHeader !== null ? state.settings.colorHeader : state.colorHeaderDefault).isDark();
+		},
 		colorMenu:(state,payload) => {
 			return state.settings.colorMenu !== null ? state.settings.colorMenu : state.colorMenuDefault;
 		},
 		colorMenuDark:(state,payload) => {
-			return  tinycolor(state.settings.colorMenu !== null ? state.settings.colorMenu : state.colorMenuDefault).isDark();
+			return tinycolor(state.settings.colorMenu !== null ? state.settings.colorMenu : state.colorMenuDefault).isDark();
 		},
 		colorMenuStyle:(state,payload) => {
 			const colorRgb = state.settings.colorMenu !== null ? state.settings.colorMenu : state.colorMenuDefault;

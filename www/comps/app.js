@@ -44,6 +44,7 @@ let MyApp = {
 			<my-header
 				@logout="sessionInvalid"
 				@show-collection-input="collectionEntries = $event"
+				@show-module-hover-menu="showHoverNav = true"
 				:keysLocked="loginEncryption && loginPrivateKey === null"
 				:moduleEntries="moduleEntries"
 			/>
@@ -67,6 +68,54 @@ let MyApp = {
 					:recordIds="popUpFormGlobal.recordIds"
 					:style="popUpFormGlobal.style"
 				/>
+			</div>
+			
+			<!-- alternative module hover menu -->
+			<div class="app-sub-window at-left no-scroll"
+				v-if="showHoverNav"
+				@mousedown.self="showHoverNav = false"
+			>
+				<div class="module-hover-menu"
+					:class="{dark:colorHeaderMainDark}"
+					:style="'background-color:#'+colorHeaderMain"
+				>
+					<div class="module-hover-menu-header">
+						<div class="row centered space-between">
+							<div class="row centered">
+								<img src="images/dots.png" />
+								<span>{{ capGen.applications }}</span>
+							</div>
+							<img class="clickable" src="images/cancel.png" tabindex="0"
+								@click="showHoverNav = false"
+							/>
+						</div>
+					</div>
+					<div class="module-hover-menu-entry parent"
+						v-for="me in moduleEntries"
+						:key="me.id"
+					>
+						<div class="module-hover-menu-entry-color" :style="me.styleBg"></div>
+						<div class="module-hover-menu-entry-content">
+							<router-link class="parent clickable" :to="'/app/'+me.name" @click="showHoverNav = false">
+								<img :src="srcBase64Icon(me.iconId,'images/module.png')" />
+								<span>{{ me.caption }}</span>
+							</router-link>
+							
+							<div class="module-hover-menu-entry-children">
+								<div class="module-hover-menu-entry" v-for="mec in me.children">
+									<router-link class="clickable"
+										@click="showHoverNav = false"
+										:key="mec.id"
+										:to="'/app/'+me.name+'/'+mec.name"
+									>
+										<img :src="srcBase64Icon(mec.iconId,'images/module.png')" />
+										<span>{{ mec.caption }}</span>
+									</router-link>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
 			</div>
 			
 			<!-- mobile collection selection input -->
@@ -118,6 +167,7 @@ let MyApp = {
 			loginReady:false,     // app is ready for authentication
 			publicLoaded:false,   // public data has been loaded
 			schemaLoaded:false,   // app schema has been loaded
+			showHoverNav:false,   // alternative hover menu for module navigation
 			wsConnected:false     // connection to backend has been established (websocket)
 		};
 	},
@@ -253,6 +303,7 @@ let MyApp = {
 					iconId:module.iconId,
 					id:module.id,
 					name:module.name,
+					styleBg:module.color1 === null ? '' : `background-color:#${module.color1};`,
 					position:s.moduleIdMapOpts[module.id].position
 				};
 			};
@@ -297,6 +348,8 @@ let MyApp = {
 		blockInput:       (s) => s.$store.getters.blockInput,
 		capErr:           (s) => s.$store.getters.captions.error,
 		capGen:           (s) => s.$store.getters.captions.generic,
+		colorHeaderMain:  (s) => s.$store.getters.colorHeaderMain,
+		colorHeaderMainDark:(s) => s.$store.getters.colorHeaderMainDark,
 		isAdmin:          (s) => s.$store.getters.isAdmin,
 		isAtDialog:       (s) => s.$store.getters.isAtDialog,
 		isAtFeedback:     (s) => s.$store.getters.isAtFeedback,

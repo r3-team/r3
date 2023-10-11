@@ -23,7 +23,7 @@
 	left:0px;
 }
 .app-header-content{
-	padding:0px 10px;
+	padding:0px 6px;
 	flex:1 1 auto;
 	display:flex;
 	flex-direction:row;
@@ -166,11 +166,6 @@
 .app-header.isDark .entry.child.active,
 .app-header.isDark .entry.child.router-link-active{
 	box-shadow:inset 0 -2px 0 0 var(--color-border-bright);
-}
-.app-header-logo{
-	height:calc(var(--app-header-height) - 25px);
-	margin-left:5px;
-	position:relative;
 }
 
 

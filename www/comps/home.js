@@ -123,7 +123,7 @@ let MyHome = {
 				v-for="me in moduleEntries"
 				:key="me.id"
 			>
-				<div class="module-title" :style="bgStyle(me.id)"></div>
+				<div class="module-title" :style="me.styleBg"></div>
 				
 				<div class="entries">
 					<div class="entry">
@@ -151,7 +151,7 @@ let MyHome = {
 					<img class="watermark" :src="srcBase64Icon(me.iconId,'images/module.png')" />
 				</div>
 				
-				<div class="module-title lower" :style="bgStyle(me.id)"></div>
+				<div class="module-title lower" :style="me.styleBg"></div>
 			</div>
 		</div>
 		
@@ -212,12 +212,6 @@ let MyHome = {
 		getBuildFromVersion,
 		srcBase64Icon,
 		setSettingSingle,
-		
-		// presentation
-		bgStyle(moduleId) {
-			return this.moduleIdMap[moduleId].color1 === null ? ''
-				: `background-color:#${this.moduleIdMap[moduleId].color1};`;
-		},
 		
 		// actions
 		installPackage() {
