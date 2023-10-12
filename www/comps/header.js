@@ -279,9 +279,14 @@ let MyHeader = {
 			let elms = JSON.parse(JSON.stringify(s.layoutReducedElements));
 			
 			// reduce elements based on app && login settings
-			if(s.isMobile || !s.settings.headerCaptions) elms.push('moduleTitles');
-			if(s.isMobile)                               elms.push('collections');
-			if(s.isMobile || s.pwaSingle)                elms.push('moduleIcons');
+			if(s.isMobile || !s.settings.headerCaptions || !s.settings.headerModules)
+				elms.push('moduleTitles');
+			
+			if(s.isMobile)
+				elms.push('collections');
+			
+			if(s.isMobile || s.pwaSingle || !s.settings.headerModules)
+				elms.push('moduleIcons');
 			
 			return elms;
 		},

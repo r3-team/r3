@@ -486,6 +486,7 @@
 /* user overwrites */
 .user-bordersSquared .bool>div,
 .user-bordersSquared .button,
+.user-bordersSquared .input-color-preview,
 .user-bordersSquared .input-dropdown-wrap.left-overhang .input-dropdown{
 	border-radius:0px !important;
 }

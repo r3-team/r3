@@ -925,10 +925,6 @@ let MySettings = {
 					</div>
 					<table>
 						<tbody>
-							<tr>
-								<td>{{ capApp.headerCaptions }}</td>
-								<td><my-bool v-model="settingsInput.headerCaptions" /></td>
-							</tr>
 							<tr class="default-inputs">
 								<td>{{ capApp.languageCode }}</td>
 								<td>
@@ -1013,37 +1009,35 @@ let MySettings = {
 							<tr class="default-inputs">
 								<td>{{ capApp.fontFamily }}</td>
 								<td>
-									<select v-model="settingsInput.fontFamily">
-										<optgroup label="sans-serif">
-											<option value="calibri">Calibri</option>
-											<option value="helvetica">Helvetica</option>
-											<option value="segoe_ui">Segoe UI</option>
-											<option value="trebuchet_ms">Trebuchet MS</option>
-											<option value="verdana">Verdana</option>
-										</optgroup>
-										<optgroup label="serif">
-											<option value="georgia">Georgia</option>
-											<option value="times_new_roman">Times New Roman</option>
-										</optgroup>
-										<optgroup label="cursive">
-											<option value="comic_sans_ms">Comic Sans</option>
-											<option value="segoe_script">Segoe Script</option>
-										</optgroup>
-										<optgroup label="monospace">
-											<option value="consolas">Consolas</option>
-											<option value="lucida_console">Lucida Console</option>
-										</optgroup>
-									</select>
-								</td>
-							</tr>
-							<tr class="default-inputs">
-								<td>{{ capApp.fontSize }}</td>
-								<td>
-									<select v-model="settingsInput.fontSize">
-										<option v-for="i in 11"
-											:value="70 + (i*5)"
-										>{{ (70 + (i*5)) + '%' }}</option>
-									</select>
+									<div class="row gap">
+										<select v-model="settingsInput.fontFamily">
+											<optgroup label="sans-serif">
+												<option value="calibri">Calibri</option>
+												<option value="helvetica">Helvetica</option>
+												<option value="segoe_ui">Segoe UI</option>
+												<option value="trebuchet_ms">Trebuchet MS</option>
+												<option value="verdana">Verdana</option>
+											</optgroup>
+											<optgroup label="serif">
+												<option value="georgia">Georgia</option>
+												<option value="times_new_roman">Times New Roman</option>
+											</optgroup>
+											<optgroup label="cursive">
+												<option value="comic_sans_ms">Comic Sans</option>
+												<option value="segoe_script">Segoe Script</option>
+											</optgroup>
+											<optgroup label="monospace">
+												<option value="consolas">Consolas</option>
+												<option value="lucida_console">Lucida Console</option>
+											</optgroup>
+										</select>
+										
+										<select class="dynamic" v-model="settingsInput.fontSize" :title="capApp.fontSize">
+											<option v-for="i in 11"
+												:value="70 + (i*5)"
+											>{{ (70 + (i*5)) + '%' }}</option>
+										</select>
+									</div>
 								</td>
 							</tr>
 							<tr class="default-inputs">
@@ -1073,12 +1067,26 @@ let MySettings = {
 								<td><my-bool v-model="settingsInput.dark" /></td>
 							</tr>
 							<tr>
+								<td colspan="2"><b>{{ capApp.titleSubHeader }}</b></td>
+							</tr>
+							<tr>
+								<td>{{ capApp.headerModules }}</td>
+								<td><my-bool v-model="settingsInput.headerModules" /></td>
+							</tr>
+							<tr v-if="settingsInput.headerModules">
+								<td>{{ capApp.headerCaptions }}</td>
+								<td><my-bool v-model="settingsInput.headerCaptions" /></td>
+							</tr>
+							<tr>
+								<td>{{ capApp.colorHeaderSingle }}</td>
+								<td><my-bool v-model="settingsInput.colorHeaderSingle" :reversed="true" /></td>
+							</tr>
+							<tr>
 								<td>{{ capApp.colorHeader }}</td>
 								<td><my-input-color v-model="settingsInput.colorHeader" :allowNull="true" /></td>
 							</tr>
-							<tr v-if="capApp.colorHeader !== null">
-								<td>{{ capApp.colorHeaderSingle }}</td>
-								<td><my-bool v-model="settingsInput.colorHeaderSingle" :reversed="true" /></td>
+							<tr>
+								<td colspan="2"><b>{{ capApp.titleSubMenu }}</b></td>
 							</tr>
 							<tr>
 								<td>{{ capApp.colorMenu }}</td>

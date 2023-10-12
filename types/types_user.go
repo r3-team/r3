@@ -13,6 +13,7 @@ type Settings struct {
 	FontFamily         string      `json:"fontFamily"`
 	FontSize           int         `json:"fontSize"`
 	HeaderCaptions     bool        `json:"headerCaptions"`
+	HeaderModules      bool        `json:"headerModules"`
 	HintUpdateVersion  int         `json:"hintUpdateVersion"`
 	LanguageCode       string      `json:"languageCode"`
 	MobileScrollForm   bool        `json:"mobileScrollForm"`
