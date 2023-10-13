@@ -1156,17 +1156,21 @@ table td.maximum{
 }
 
 /* keyframe animations */
-@keyframes slide-up {
+@keyframes slide-up{
 	from{ top:-60px; }
-	to{ top:0px; }
+	to  { top:0px; }
 }
-@keyframes slide-right {
+@keyframes slide-right{
 	from{ left:-60px; }
-	to{ left:0px; }
+	to  { left:0px; }
 }
-@keyframes fade-in {
+@keyframes loading-inf{
+    from{ left: -50%; }
+    to  { left: 100%; }
+}
+@keyframes fade-in{
 	from{ opacity:0; }
-	to{ opacity:1; }
+	to  { opacity:1; }
 }
 
 
