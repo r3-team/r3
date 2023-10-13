@@ -657,12 +657,11 @@ table td.maximum{
 	display:flex;
 	flex-flow:row nowrap;
 	justify-content:space-between;
-	padding:12px 8px;
+	padding:12px;
 }
 .navigation-header img.icon{
 	width:22px;
 	height:22px;
-	margin-right:3px;
 	filter:var(--image-filter-dark);
 }
 .navigation.isDark .navigation-header img.icon{
@@ -673,7 +672,7 @@ table td.maximum{
 	font-size:130%;
 }
 .navigation .entry{
-	padding:8px;
+	padding:8px 8px 8px 12px;
 	margin:0px;
 	display:flex;
 	color:inherit;
@@ -724,7 +723,7 @@ table td.maximum{
 	margin-bottom:-2px;
 	border-bottom:2px solid var(--color-border-dark);
 	padding-right:calc(8px - 3px);
-	padding-left:calc(8px + 3px);
+	padding-left:calc(12px + 3px);
 	transition:padding-left 0.2s, padding-right 0.2s;
 	background-color:rgba(0,0,0,0.08);
 }

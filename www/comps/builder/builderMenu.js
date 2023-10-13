@@ -19,14 +19,15 @@ let MyBuilderMenuItems = {
 		:list="list"
 	>
 		<template #item="{element,index}">
-	    		<div class="builder-menu">
+	    	<div class="builder-menu">
 				<img v-if="!readonly" class="dragAnchor" src="images/drag.png" />
 				
 				<div class="inputs">
 					<div class="line">
 						<!-- color preview -->
-						<div class="color-preview"
-							:style="'background-color:' + (element.color !== null ? '#' + element.color : 'transparent')"
+						<div class="color-preview clickable"
+							@click="showOptionsIndex = index"
+							:style="colorStyle(element.color)"
 						></div>
 						
 						<!-- icon input -->
@@ -104,6 +105,11 @@ let MyBuilderMenuItems = {
 													:disabled="readonly"
 													:value="element.color"
 												/>
+												<my-button image="cancel.png"
+													@trigger="element.color = null"
+													:active="element.color !== null"
+													:naked="true"
+												/>
 											</div>
 											<chrome-picker
 												v-if="!readonly"
@@ -160,6 +166,7 @@ let MyBuilderMenuItems = {
 				<my-builder-menu-items class="nested"
 					@remove="$emit('remove',$event)"
 					:builderLanguage="builderLanguage"
+					:colorParent="element.color"
 					:list="element.menus"
 					:module="module"
 					:readonly="readonly"
@@ -170,6 +177,7 @@ let MyBuilderMenuItems = {
 	emits:['remove'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
+		colorParent:    { required:false, default:null },
 		module:         { type:Object,  required:true },
 		list:           { type:Array,   required:true },
 		readonly:       { type:Boolean, required:true }
@@ -192,6 +200,12 @@ let MyBuilderMenuItems = {
 		getCollectionConsumerTemplate,
 		getDependentModules,
 		getNilUuid,
+		
+		// presentation
+		colorStyle(color) {
+			const c = color !== null ? color : (this.colorParent !== null ? this.colorParent : 'transparent');
+			return `background-color:#${c}`;
+		},
 		
 		// actions
 		applyColor(input) {

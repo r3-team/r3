@@ -18,110 +18,108 @@ let MyAdmin = {
 				/>
 			</div>
 			
-			<div class="content no-padding">
-				<!-- system configuration -->
-				<router-link class="entry clickable" tag="div" to="/admin/config">
-					<img src="images/server.png" />
-					<span>{{ capApp.navigationConfig }}</span>
-				</router-link>
-				
-				<!-- logins -->
-				<router-link class="entry clickable" tag="div" to="/admin/logins">
-					<img src="images/person.png" />
-					<span>{{ capApp.navigationLogins }}</span>
-				</router-link>
-				
-				<!-- roles -->
-				<router-link class="entry clickable" tag="div" to="/admin/roles">
-					<img src="images/admin.png" />
-					<span>{{ capApp.navigationRoles }}</span>
-				</router-link>
-				
-				<!-- login templates -->
-				<router-link class="entry clickable" tag="div" to="/admin/logintemplates">
-					<img src="images/personTemplate.png" />
-					<span>{{ capApp.navigationLoginTemplates }}</span>
-				</router-link>
-				
-				<!-- modules -->
-				<router-link class="entry clickable" tag="div" to="/admin/modules">
-					<img src="images/builder.png" />
-					<span>{{ capApp.navigationModules }}</span>
-				</router-link>
-				
-				<!-- repo -->
-				<router-link class="entry clickable" tag="div" to="/admin/repo">
-					<img src="images/box.png" />
-					<span>{{ capApp.navigationRepo }}</span>
-				</router-link>
-				
-				<!-- mail accounts -->
-				<router-link class="entry clickable" tag="div" to="/admin/mailaccounts">
-					<img src="images/mail2.png" />
-					<span>{{ capApp.navigationMailAccounts }}</span>
-				</router-link>
-				
-				<!-- mail spooler -->
-				<router-link class="entry clickable" tag="div" to="/admin/mailspooler">
-					<img src="images/mail_spool.png" />
-					<span>{{ capApp.navigationMailSpooler }}</span>
-				</router-link>
-				
-				<!-- mail traffic -->
-				<router-link class="entry clickable" tag="div" to="/admin/mailtraffic">
-					<img src="images/mail_clock.png" />
-					<span>{{ capApp.navigationMailTraffic }}</span>
-				</router-link>
-				
-				<!-- backups -->
-				<router-link class="entry clickable" tag="div" to="/admin/backups">
-					<img src="images/backup.png" />
-					<span>{{ capApp.navigationBackups }}</span>
-				</router-link>
-				
-				<!-- files -->
-				<router-link class="entry clickable" tag="div" to="/admin/files">
-					<img src="images/files.png" />
-					<span>{{ capApp.navigationFiles }}</span>
-				</router-link>
-				
-				<!-- logs -->
-				<router-link class="entry clickable" tag="div" to="/admin/logs">
-					<img src="images/fileText.png" />
-					<span>{{ capApp.navigationLogs }}</span>
-				</router-link>
-				
-				<!-- scheduler -->
-				<router-link class="entry clickable" tag="div" to="/admin/scheduler">
-					<img src="images/clock.png" />
-					<span>{{ capApp.navigationScheduler }}</span>
-				</router-link>
-				
-				
-				<!-- REI3 Professional -->
-				<router-link class="entry clickable separator" tag="div" to="/admin/license">
-					<img src="images/key.png" />
-					<span>{{ licenseTitle }}</span>
-				</router-link>
-				
-				<!-- customizing -->
-				<router-link class="entry clickable" tag="div" to="/admin/custom" :class="{ inactive:!activated }">
-					<img src="images/colors.png" />
-					<span>{{ capApp.navigationCustom }}</span>
-				</router-link>
-				
-				<!-- LDAP -->
-				<router-link class="entry clickable" tag="div" to="/admin/ldaps" :class="{ inactive:!activated }">
-					<img src="images/hierarchy.png" />
-					<span>{{ capApp.navigationLdaps }}</span>
-				</router-link>
-				
-				<!-- cluster -->
-				<router-link class="entry clickable" tag="div" to="/admin/cluster" :class="{ inactive:!activated }">
-					<img src="images/cluster.png" />
-					<span>{{ capApp.navigationCluster }}</span>
-				</router-link>
-			</div>
+			<!-- system configuration -->
+			<router-link class="entry clickable" tag="div" to="/admin/config">
+				<img src="images/server.png" />
+				<span>{{ capApp.navigationConfig }}</span>
+			</router-link>
+			
+			<!-- logins -->
+			<router-link class="entry clickable" tag="div" to="/admin/logins">
+				<img src="images/person.png" />
+				<span>{{ capApp.navigationLogins }}</span>
+			</router-link>
+			
+			<!-- roles -->
+			<router-link class="entry clickable" tag="div" to="/admin/roles">
+				<img src="images/admin.png" />
+				<span>{{ capApp.navigationRoles }}</span>
+			</router-link>
+			
+			<!-- login templates -->
+			<router-link class="entry clickable" tag="div" to="/admin/logintemplates">
+				<img src="images/personTemplate.png" />
+				<span>{{ capApp.navigationLoginTemplates }}</span>
+			</router-link>
+			
+			<!-- modules -->
+			<router-link class="entry clickable" tag="div" to="/admin/modules">
+				<img src="images/builder.png" />
+				<span>{{ capApp.navigationModules }}</span>
+			</router-link>
+			
+			<!-- repo -->
+			<router-link class="entry clickable" tag="div" to="/admin/repo">
+				<img src="images/box.png" />
+				<span>{{ capApp.navigationRepo }}</span>
+			</router-link>
+			
+			<!-- mail accounts -->
+			<router-link class="entry clickable" tag="div" to="/admin/mailaccounts">
+				<img src="images/mail2.png" />
+				<span>{{ capApp.navigationMailAccounts }}</span>
+			</router-link>
+			
+			<!-- mail spooler -->
+			<router-link class="entry clickable" tag="div" to="/admin/mailspooler">
+				<img src="images/mail_spool.png" />
+				<span>{{ capApp.navigationMailSpooler }}</span>
+			</router-link>
+			
+			<!-- mail traffic -->
+			<router-link class="entry clickable" tag="div" to="/admin/mailtraffic">
+				<img src="images/mail_clock.png" />
+				<span>{{ capApp.navigationMailTraffic }}</span>
+			</router-link>
+			
+			<!-- backups -->
+			<router-link class="entry clickable" tag="div" to="/admin/backups">
+				<img src="images/backup.png" />
+				<span>{{ capApp.navigationBackups }}</span>
+			</router-link>
+			
+			<!-- files -->
+			<router-link class="entry clickable" tag="div" to="/admin/files">
+				<img src="images/files.png" />
+				<span>{{ capApp.navigationFiles }}</span>
+			</router-link>
+			
+			<!-- logs -->
+			<router-link class="entry clickable" tag="div" to="/admin/logs">
+				<img src="images/fileText.png" />
+				<span>{{ capApp.navigationLogs }}</span>
+			</router-link>
+			
+			<!-- scheduler -->
+			<router-link class="entry clickable" tag="div" to="/admin/scheduler">
+				<img src="images/clock.png" />
+				<span>{{ capApp.navigationScheduler }}</span>
+			</router-link>
+			
+			
+			<!-- REI3 Professional -->
+			<router-link class="entry clickable separator" tag="div" to="/admin/license">
+				<img src="images/key.png" />
+				<span>{{ licenseTitle }}</span>
+			</router-link>
+			
+			<!-- customizing -->
+			<router-link class="entry clickable" tag="div" to="/admin/custom" :class="{ inactive:!activated }">
+				<img src="images/colors.png" />
+				<span>{{ capApp.navigationCustom }}</span>
+			</router-link>
+			
+			<!-- LDAP -->
+			<router-link class="entry clickable" tag="div" to="/admin/ldaps" :class="{ inactive:!activated }">
+				<img src="images/hierarchy.png" />
+				<span>{{ capApp.navigationLdaps }}</span>
+			</router-link>
+			
+			<!-- cluster -->
+			<router-link class="entry clickable" tag="div" to="/admin/cluster" :class="{ inactive:!activated }">
+				<img src="images/cluster.png" />
+				<span>{{ capApp.navigationCluster }}</span>
+			</router-link>
 		</div>
 		
 		<router-view
