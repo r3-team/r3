@@ -112,7 +112,7 @@
 	border-bottom:none;
 	padding:4px 8px 8px 8px;
 	margin-top:-4px;
-	transition:padding-top 0.4s, height 0.4, margin-top 0.4;
+	transition:padding-top 0.4s, height 0.4s, margin-top 0.4s;
 }
 .app-header.isDark .entry.router-link-active{
 	border-color:var(--color-border-bright);

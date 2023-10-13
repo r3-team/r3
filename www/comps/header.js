@@ -1,7 +1,6 @@
 import srcBase64Icon         from './shared/image.js';
 import {getColumnTitle}      from './shared/column.js';
 import {formOpen}            from './shared/form.js';
-import {openLink}            from './shared/generic.js';
 import {getCaptionForModule} from './shared/language.js';
 import {
 	getCollectionColumn,
@@ -343,7 +342,6 @@ let MyHeader = {
 		getCollectionColumn,
 		getCollectionValues,
 		getColumnTitle,
-		openLink,
 		srcBase64Icon,
 		
 		// display

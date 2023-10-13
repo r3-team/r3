@@ -3,11 +3,14 @@ import {srcBase64}          from './shared/image.js';
 import {hasAccessToAnyMenu} from './shared/access.js';
 import {getColumnTitle}     from './shared/column.js';
 import {getFormRoute}       from './shared/form.js';
-import {getModuleCaption}   from './shared/generic.js';
 import {
 	getCollectionColumn,
 	getCollectionValues
 } from './shared/collection.js';
+import {
+	getModuleCaption,
+	openLink
+} from './shared/generic.js';
 
 export {MyMenu as default};
 
@@ -184,17 +187,25 @@ let MyMenu = {
 				:captionTitle="capGen.button.openBuilder"
 			/>
 		</div>
-		<div class="menu-items">
-			<my-menu-item
-				v-for="m in module.menus"
-				:colorParent="null"
-				:formIdActive="formIdActive"
-				:formOpensPreset="formOpensPreset"
-				:key="m.id"
-				:menu="m"
-				:module="module"
-				:recordOpen="recordOpen"
-			/>
+		<div class="menu-content">
+			<div class="menu-items">
+				<my-menu-item
+					v-for="m in module.menus"
+					:colorParent="null"
+					:formIdActive="formIdActive"
+					:formOpensPreset="formOpensPreset"
+					:key="m.id"
+					:menu="m"
+					:module="module"
+					:recordOpen="recordOpen"
+				/>
+			</div>
+			<div class="menu-footer">
+				<img class="menu-footer-logo clickable"
+					@click="openLink(customLogoUrl,true)"
+					:src="customLogo"
+				/>
+			</div>
 		</div>
 	</div>`,
 	props:{
@@ -206,6 +217,8 @@ let MyMenu = {
 	},
 	computed:{
 		// stores
+		customLogo:    (s) => s.$store.getters['local/customLogo'],
+		customLogoUrl: (s) => s.$store.getters['local/customLogoUrl'],
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
 		bgStyle:       (s) => s.$store.getters.colorMenuStyle,
@@ -223,6 +236,7 @@ let MyMenu = {
 		// externals
 		getModuleCaption,
 		hasAccessToAnyMenu,
+		openLink,
 		srcBase64,
 		
 		// actions

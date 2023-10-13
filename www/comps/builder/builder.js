@@ -29,7 +29,7 @@ let MyBuilder = {
 			</div>
 			
 			<!-- module navigation -->
-			<div class="moduleSelect default-inputs">
+			<div class="moduleSelect default-inputs transparent">
 				<my-module-select
 					v-model="moduleIdInput"
 				/>
@@ -41,7 +41,7 @@ let MyBuilder = {
 			</div>
 			
 			<!-- language selection -->
-			<div class="moduleSelect translation default-inputs">
+			<div class="moduleSelect translation default-inputs transparent">
 				
 				<span>{{ capApp.language }}</span>
 				<select class="dynamic" v-model="builderLanguage">
@@ -219,7 +219,7 @@ let MyBuilder = {
 					<img src="images/codeScreen.png" />
 					<span>{{ capApp.navigationJsFunctions }}</span>
 				</router-link>
-				<div class="row gap centered default-inputs">
+				<div class="row gap centered default-inputs transparent">
 					<input class="short" placeholder="..." spellcheck="false"
 						v-model="filter"
 						:title="capApp.navigationFilterHint"

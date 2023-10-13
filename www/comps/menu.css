@@ -1,8 +1,8 @@
 .menu{
 	flex:0 0 320px;
 	max-height:100%;
-	display:flex;
 	padding:0px 0px 0px 3px;
+	display:flex;
 	flex-flow:column nowrap;
 	box-sizing:border-box;
 	color:var(--color-font-dark);
@@ -12,6 +12,10 @@
 }
 .menu-header{
 	padding:12px 8px;
+	border-bottom:1px solid var(--color-border-dark);
+}
+.menu.isDark .menu-header{
+	border-color:var(--color-border-bright);
 }
 .menu-header img.icon{
 	width:22px;
@@ -25,10 +29,15 @@
 	font-weight:bold;
 	font-size:130%;
 }
+.menu-content{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:column nowrap;
+	overflow-y:auto;
+}
 .menu-items{
 	font-size:105%;
 	flex:1 1 auto;
-	overflow-y:auto;
 	padding:4px 0px 0px 0px;
 }
 .menu-items-children{
@@ -106,6 +115,18 @@
 	flex:1 1 auto;
 	outline:none;
 }
+.menu-footer{
+	flex:0 0 auto;
+	height:60px;
+	padding:5px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+}
+.menu-footer-logo{
+	width:auto;
+	height:90%;
+}
 .menu .collectionEntry{
 	display:flex;
 	flex-flow:row nowrap;
@@ -113,9 +134,6 @@
 }
 
 /* mobile overwrites */
-.is-mobile .menus{
-	flex:1 1 auto;
-}
 .is-mobile .menu{
 	flex:1 1 auto; /* menu takes entire screen */
 	max-height:none;
