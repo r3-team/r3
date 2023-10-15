@@ -237,7 +237,7 @@ h3{
 #app.is-not-ready{
 	height:auto;
 	min-height:100%;
-	background-image:url('../images/login_bg.webp');
+	background-image:url('../images/backgrounds/0.webp');
 	background-repeat:no-repeat;
 	background-size:cover;
 	justify-content:center;

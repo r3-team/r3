@@ -15,6 +15,7 @@ const MyStoreLocal = {
 		companyWelcome:'',    // custom welcome message on login screen
 		css:'',               // custom CSS, applied to everything
 		fieldIdMapOption:{},  // map of field IDs with field options (reset on schema change)
+		loginBackground:0,    // background image for login page
 		loginKeyAes:null,     // en-/decryption key for login private key
 		loginKeySalt:null,    // salt for login key KDF
 		menuIdMapOpen:{},     // map of menu IDs with open state (true/false)
@@ -79,6 +80,10 @@ const MyStoreLocal = {
 			
 			set('fieldIdMapOption',state.fieldIdMapOption);
 		},
+		loginBackground(state,payload) {
+			state.loginBackground = payload;
+			set('loginBackground',payload);
+		},
 		loginKeyAes(state,payload) {
 			state.loginKeyAes = payload;
 			set('loginKeyAes',payload);
@@ -133,6 +138,7 @@ const MyStoreLocal = {
 		companyWelcome:    (state) => state.companyWelcome,
 		css:               (state) => state.css,
 		fieldIdMapOption:  (state) => state.fieldIdMapOption,
+		loginBackground:   (state) => state.loginBackground,
 		loginKeyAes:       (state) => state.loginKeyAes,
 		loginKeySalt:      (state) => state.loginKeySalt,
 		menuIdMapOpen:     (state) => state.menuIdMapOpen,

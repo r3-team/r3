@@ -135,6 +135,23 @@ let MyAdminConfig = {
 				</table>
 			</div>
 			
+			<!-- login backgrounds -->
+			<div class="contentPart">
+				<div class="contentPartHeader">
+					<img class="icon" src="images/admin.png" />
+					<h1>{{ capApp.titleLoginBackgrounds }}</h1>
+				</div>
+				
+				<div class="login-bg">
+					<div class="preview clickable"
+						v-for="n in loginBackgroundCount"
+						@click="loginBgToggle(n-1)"
+						:class="{ inactive:!loginBackgrounds.includes(n-1) }"
+						:style="loginBgStyle(n-1)"
+					></div>
+				</div>
+			</div>
+			
 			<!-- repository -->
 			<div class="contentPart">
 				<div class="contentPartHeader">
@@ -334,6 +351,7 @@ let MyAdminConfig = {
 			configInput:{},
 			bruteforceCountBlocked:0,
 			bruteforceCountTracked:0,
+			loginBackgroundCount:13,
 			publicKeyInputName:'',
 			publicKeyInputValue:''
 		};
@@ -348,6 +366,7 @@ let MyAdminConfig = {
 	},
 	computed:{
 		hasChanges:(s) => JSON.stringify(s.config) !== JSON.stringify(s.configInput),
+		loginBackgrounds:(s) => JSON.parse(s.configInput.loginBackgrounds),
 		publicKeys:{
 			get()  { return JSON.parse(this.configInput.repoPublicKeys); },
 			set(v) { this.configInput.repoPublicKeys = JSON.stringify(v); }
@@ -380,6 +399,12 @@ let MyAdminConfig = {
 		// externals
 		getBuildFromVersion,
 		
+		// presentation
+		loginBgStyle(n) {
+			return `background-image:url('../images/backgrounds/${n}_prev.webp')`;
+		},
+		
+		// actions
 		informBuilderMode() {
 			if(this.configInput.builderMode === '0')
 				return;
@@ -415,6 +440,15 @@ let MyAdminConfig = {
 				delete this.publicKeys[keyName];
 			
 			this.publicKeys = this.publicKeys;
+		},
+		loginBgToggle(n) {
+			var list = JSON.parse(this.configInput.loginBackgrounds);
+			
+			const pos = list.indexOf(n);
+			if(pos !== -1) list.splice(pos,1);
+			else           list.push(n);
+			
+			this.configInput.loginBackgrounds = JSON.stringify(list);
 		},
 		
 		// backend calls

@@ -1,6 +1,7 @@
 package request
 
 import (
+	"math/rand"
 	"r3/cache"
 	"r3/config"
 
@@ -22,6 +23,7 @@ func PublicGet() (interface{}, error) {
 		CompanyWelcome     string               `json:"companyWelcome"`
 		Css                string               `json:"css"`
 		LanguageCodes      []string             `json:"languageCodes"`
+		LoginBackground    uint64               `json:"loginBackground"`
 		ProductionMode     uint64               `json:"productionMode"`
 		PwaDomainMap       map[string]uuid.UUID `json:"pwaDomainMap"`
 		SchemaTimestamp    int64                `json:"schemaTimestamp"`
@@ -44,5 +46,14 @@ func PublicGet() (interface{}, error) {
 	res.PwaDomainMap = cache.GetPwaDomainMap()
 	res.SchemaTimestamp = cache.GetSchemaTimestamp()
 	res.SearchDictionaries = cache.GetSearchDictionaries()
+
+	// random background from available list
+	var loginBackgrounds = config.GetUint64Slice("loginBackgrounds")
+	if len(loginBackgrounds) == 0 {
+		res.LoginBackground = 0
+	} else {
+		res.LoginBackground = loginBackgrounds[rand.Intn(len(loginBackgrounds))]
+	}
+
 	return res, nil
 }

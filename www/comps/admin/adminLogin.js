@@ -370,8 +370,7 @@ let MyAdminLogin = {
 		formIdMap:         (s) => s.$store.getters['schema/formIdMap'],
 		roleIdMap:         (s) => s.$store.getters['schema/roleIdMap'],
 		capApp:            (s) => s.$store.getters.captions.admin.login,
-		capGen:            (s) => s.$store.getters.captions.generic,
-		config:            (s) => s.$store.getters.config
+		capGen:            (s) => s.$store.getters.captions.generic
 	},
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);

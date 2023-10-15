@@ -33,6 +33,18 @@ func ConfigGet() (interface{}, error) {
 		}
 		res[name] = fmt.Sprintf("%d", config.GetUint64(name))
 	}
+
+	for _, name := range config.NamesUint64Slice {
+
+		if slices.Contains(ignore, name) {
+			continue
+		}
+		json, err := json.Marshal(config.GetUint64Slice(name))
+		if err != nil {
+			return nil, err
+		}
+		res[name] = string(json)
+	}
 	return res, nil
 }
 
@@ -66,6 +78,17 @@ func ConfigSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 			}
 
 			if err := config.SetUint64_tx(tx, name, val); err != nil {
+				return nil, err
+			}
+
+		} else if slices.Contains(config.NamesUint64Slice, name) {
+
+			var val []uint64
+			if err := json.Unmarshal([]byte(value), &val); err != nil {
+				return nil, err
+			}
+
+			if err := config.SetUint64Slice_tx(tx, name, val); err != nil {
 				return nil, err
 			}
 		}

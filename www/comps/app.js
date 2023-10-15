@@ -229,7 +229,8 @@ let MyApp = {
 			return classes.join(' ');
 		},
 		styles:(s) => {
-			if(!s.appReady) return '';
+			if(!s.appReady)
+				return `background-image:url('../images/backgrounds/${s.loginBackground}.webp');`;
 			
 			let styles = [`font-size:${s.settings.fontSize}%`];
 			
@@ -338,6 +339,7 @@ let MyApp = {
 		activated:        (s) => s.$store.getters['local/activated'],
 		appVersion:       (s) => s.$store.getters['local/appVersion'],
 		css:              (s) => s.$store.getters['local/css'],
+		loginBackground:  (s) => s.$store.getters['local/loginBackground'],
 		loginKeyAes:      (s) => s.$store.getters['local/loginKeyAes'],
 		schemaTimestamp:  (s) => s.$store.getters['local/schemaTimestamp'],
 		modules:          (s) => s.$store.getters['schema/modules'],
@@ -534,6 +536,7 @@ let MyApp = {
 					this.$store.commit('local/companyName',res.payload.companyName);
 					this.$store.commit('local/companyWelcome',res.payload.companyWelcome);
 					this.$store.commit('local/css',res.payload.css);
+					this.$store.commit('local/loginBackground',res.payload.loginBackground);
 					this.$store.commit('local/schemaTimestamp',res.payload.schemaTimestamp);
 					this.$store.commit('clusterNodeName',res.payload.clusterNodeName);
 					this.$store.commit('productionMode',res.payload.productionMode === 1);

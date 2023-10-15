@@ -11,181 +11,127 @@ export {MyLogin as default};
 
 let MyLogin = {
 	name:'my-login',
-	template:`<div class="login">
+	template:`<div class="login" :class="{ badAuth:badAuth }">
 		
-		<!-- centered logo -->
+		<!-- busy overlay -->
+		<div class="input-block-overlay-bg" :class="{ show:loading }">
+			<div class="input-block-overlay">
+				<img class="busy" src="images/load.gif" />
+			</div>
+		</div>
+		
 		<img class="logo clickable"
 			@click="openLink(customLogoUrl,true)"
 			:src="customLogo"
 		/>
 		
+		<div class="header" :class="{ dark:true }">
+			<img src="images/lock.png" />
+			<span>{{ appName }}</span>
+		</div>
+		
 		<!-- server not connected -->
-		<template v-if="!backendReady">
+		<div class="message" v-if="!backendReady">
+			<span>{{ message.wsBroken[language] }}</span>
+		</div>
+		
+		<template v-if="backendReady && loginReady">
 			
-			<div class="contentBox">
-				<div class="top lower" :style="bgStyles">
-					<div class="area">
-						<img class="icon bg" src="images/lock.png" />
-						<h1>{{ appName }}</h1>
-					</div>
-				</div>
+			<!-- maintenance mode message -->
+			<div class="message warning" v-if="!productionMode">
+				<img src="images/warning.png" />
+				<span>{{ message.maintenanceMode[language] }}</span>
+			</div>
+			
+			<!-- HTTP message -->
+			<div class="message warning" v-if="httpMode">
+				<img src="images/warning.png" />
+				<span>{{ message.httpMode[language] }}</span>
+			</div>
+			
+			<!-- unexpected error message -->
+			<div class="message warning" v-if="appInitErr">
+				<img src="images/warning.png" />
+				<span>{{ message.error[language] }}</span>
+			</div>
+			
+			<!-- license error message -->
+			<div class="message warning" v-if="licenseErrCode !== null">
+				<img src="images/warning.png" />
+				<span>{{ message.license[licenseErrCode][language] }}</span>
+			</div>
+			
+			<!-- credentials input -->
+			<div class="credentials" v-if="!showMfa">
+				<input autocomplete="username" type="text" spellcheck="false"
+					@keyup="badAuth = false"
+					@keyup.enter="authenticate"
+					v-model="username"
+					v-focus
+					:placeholder="message.username[language]"
+				/>
 				
-				<div class="content">
-					<my-button image="load.gif"
-						:active="false"
-						:caption="message.wsBroken[language]"
-						:naked="true"
-					/>
-				</div>
+				<input autocomplete="current-password" type="password"
+					@keyup="badAuth = false"
+					@keyup.enter="authenticate"
+					v-model="password"
+					:placeholder="message.password[language]"
+				/>
+			</div>
+			
+			<!-- MFA input -->
+			<template v-if="showMfa">
+				<h3>{{ message.mfa[language] }}</h3>
+				<select v-model.number="mfaTokenId">
+					<option v-for="t in mfaTokens" :value="t.id">
+						{{ t.name }}
+					</option>
+				</select>
+				<input autocomplete="one-time-code" type="text" maxlength="6"
+					@keyup="badAuth = false"
+					@keyup.enter="authenticate"
+					v-model="mfaTokenPin"
+					v-focus
+					:placeholder="message.mfaHint[language]"
+				/>
+			</template>
+			
+			<div class="row centered space-between">
+				<my-button
+					@trigger="tokenKeepInput = !tokenKeepInput"
+					:caption="message.stayLoggedIn[language]"
+					:image="tokenKeep ? 'checkbox1.png' : 'checkbox0.png'"
+					:naked="true"
+				/>
+				<button
+					@click="authenticate"
+					@keyup.enter="authenticate"
+					:class="{ active:isValid, clickable:isValid }"
+				>{{ message.login[language] }}</button>
 			</div>
 		</template>
 		
 		<!-- not ready for login yet (downloading schema/public data/...) -->
 		<template v-if="backendReady && !loginReady">
-			<div class="contentBox">
-				<div class="top lower" :style="bgStyles">
-					<div class="area">
-						<img class="icon bg" src="images/lock.png" />
-						<h1>{{ appName }}</h1>
-					</div>
-				</div>
-				<div class="content">
-					<my-button image="load.gif"
-						:caption="message.loading[language]"
-						:naked="true"
-					/>
-				</div>
-			</div>
+			<my-button image="load.gif"
+				:caption="message.loading[language]"
+				:naked="true"
+			/>
 		</template>
 		
-		<!-- ready for login -->
-		<template v-if="backendReady && loginReady">
-			
-			<!-- HTTP message -->
-			<div class="contentBox" v-if="httpMode">
-				<div class="top warning">
-					<div class="area">
-						<img class="icon bg" src="images/warning.png" />
-						<h1>{{ message.httpMode[language] }}</h1>
-					</div>
-				</div>
-			</div>
-			
-			<!-- maintenance mode message -->
-			<div class="contentBox" v-if="!productionMode">
-				<div class="top warning">
-					<div class="area">
-						<img class="icon bg" src="images/warning.png" />
-						<h1>{{ message.maintenanceMode[language] }}</h1>
-					</div>
-				</div>
-			</div>
-			
-			<!-- unexpected error message -->
-			<div class="contentBox" v-if="appInitErr">
-				<div class="top warning">
-					<div class="area">
-						<img class="icon bg" src="images/warning.png" />
-						<h1>{{ message.error[language] }}</h1>
-					</div>
-				</div>
-			</div>
-			
-			<!-- license error message -->
-			<div class="contentBox" v-if="licenseErrCode !== null">
-				<div class="top warning">
-					<div class="area">
-						<h1>{{ message.license[licenseErrCode][language] }}</h1>
-					</div>
-				</div>
-			</div>
-			
-			<!-- busy overlay -->
-			<div class="input-block-overlay-bg" :class="{show:loading}">
-				<div class="input-block-overlay">
-					<img class="busy" src="images/load.gif" />
-				</div>
-			</div>
-			
-			<!-- login dialog -->
-			<div class="contentBox">
-				<div class="top lower" :style="bgStyles">
-					<div class="area">
-						<img class="icon bg" src="images/lock.png" />
-						<h1>{{ appName }}</h1>
-					</div>
-				</div>
-				
-				<div class="content" :class="{ badAuth:badAuth }">
-					
-					<!-- credentials input -->
-					<template v-if="!showMfa">
-						<input autocomplete="username" class="default" type="text" spellcheck="false"
-							@keyup="badAuth = false"
-							@keyup.enter="authenticate"
-							v-model="username"
-							v-focus
-							placeholder="username"
-						/>
-						<input autocomplete="current-password" class="default" type="password"
-							@keyup="badAuth = false"
-							@keyup.enter="authenticate"
-							v-model="password"
-							placeholder="password"
-						/>
-					</template>
-					
-					<!-- MFA input -->
-					<template v-if="showMfa">
-						<span>{{ message.mfa[language] }}</span>
-						<select v-model.number="mfaTokenId">
-							<option v-for="t in mfaTokens" :value="t.id">
-								{{ t.name }}
-							</option>
-						</select>
-						<input autocomplete="one-time-code" class="default" type="text" maxlength="6"
-							@keyup="badAuth = false"
-							@keyup.enter="authenticate"
-							v-model="mfaTokenPin"
-							v-focus
-							:placeholder="message.mfaHint[language]"
-						/>
-					</template>
-					
-					<div class="actions">
-						<my-button
-							@trigger="tokenKeepInput = !tokenKeepInput"
-							:caption="message.stayLoggedIn[language]"
-							:image="tokenKeep ? 'checkbox1.png' : 'checkbox0.png'"
-							:naked="true"
-						/>
-						<my-button
-							@trigger="authenticate"
-							:active="isValid"
-							:caption="message.login[language]"
-							:image="loading ? 'load.gif' : 'ok.png'"
-						/>
-					</div>
-				</div>
-			</div>
-		</template>
-			
 		<!-- custom company message -->
-		<div class="contentBox" v-if="showCustom">
-			<div class="top lower" :style="bgStyles">
-				<div class="area">
-					<img class="icon bg" src="images/home.png" />
-					<h1>{{ companyName }}</h1>
-				</div>
-			</div>
-			
-			<div class="content" v-if="companyWelcome !== ''">
-				<span v-html="getLineBreaksParsedToHtml(companyWelcome)"></span>
-			</div>
+		<div class="custom" v-if="showCustom">
+			<span class="title">{{ companyName }}</span>
+			<span class="content"
+				v-if="companyWelcome !== ''"
+				v-html="getLineBreaksParsedToHtml(companyWelcome)"
+			></span>
 		</div>
 		
 		<!-- cluster node ID -->
-		<div class="clusterNode">{{ message.clusterNode[language] + clusterNodeName }}</div>
+		<div class="cluster" v-if="backendReady">
+			{{ message.clusterNode[language] + clusterNodeName }}
+		</div>
 	</div>`,
 	props:{
 		backendReady:{ type:Boolean, required:true }, // can talk to backend
@@ -255,13 +201,21 @@ let MyLogin = {
 					de:'6-stelliger Validierungs-Code',
 					en_US:'6 digit validation code'
 				},
+				password:{
+					de:'Passwort',
+					en_US:'Password'
+				},
 				stayLoggedIn:{
 					de:'Angemeldet bleiben',
 					en_US:'Stay logged in'
 				},
+				username:{
+					de:'Benutzername',
+					en_US:'Username'
+				},
 				wsBroken:{
-					de:'Warten auf Serververbindung',
-					en_US:'Waiting for server connection'
+					de:'Warten auf Serververbindung...',
+					en_US:'Waiting for server connection...'
 				}
 			}
 		};
@@ -274,7 +228,7 @@ let MyLogin = {
 		},
 		
 		// states
-		bgStyles:(s) => s.activated && s.companyColorLogin !== '' ? `background-color:#${s.companyColorLogin};` : '',
+		//bgStyles:(s) => s.activated && s.companyColorLogin !== '' ? `background-color:#${s.companyColorLogin};` : '',
 		isValid: (s) => {
 			if(!s.showMfa)
 				return !s.badAuth && s.username !== '' && s.password !== '';
