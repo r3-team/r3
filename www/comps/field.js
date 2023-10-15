@@ -421,6 +421,7 @@ let MyField = {
 					@blurred="blur"
 					@focused="focus"
 					:readonly="isReadonly"
+					:placeholder="capGen.threeDots"
 				/>
 				
 				<!-- date / datetime / time input -->
@@ -733,9 +734,10 @@ let MyField = {
 			? s.field.captions.fieldHelp[s.moduleLanguage] : '',
 		domClass:(s) => {
 			let out = [];
+			if(s.isDropdown) out.push('dropdown');
 			if(s.isHidden)   out.push('hidden');
-			if(s.isReadonly) out.push('readonly');
 			if(s.isIframe)   out.push('iframe');
+			if(s.isReadonly) out.push('readonly');
 			if(s.isRichtext) out.push('richtext');
 			
 			if(s.isContainer) {
@@ -1070,6 +1072,7 @@ let MyField = {
 		isDateInput:     (s) => s.isData && s.isDatetime || s.isDate || s.isTime,
 		isDateRange:     (s) => s.isDateInput && s.field.attributeIdAlt !== null,
 		isDecimal:       (s) => s.isData && s.isAttributeDecimal(s.attribute.content),
+		isDropdown:      (s) => s.isData && (s.isRelationship || s.isDateInput || s.isLogin || s.isColor || s.isRegconfig),
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
 		isIframe:        (s) => s.isData && s.attribute.contentUse === 'iframe',
 		isInteger:       (s) => s.isData && s.isAttributeInteger(s.attribute.content),

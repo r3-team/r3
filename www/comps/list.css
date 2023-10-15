@@ -164,6 +164,7 @@
 	display:flex;
 	flex-flow:column nowrap;
 	gap:6px;
+	border-color:var(--color-border);
 	background-color:var(--color-bg);
 }
 .list .layoutTable th .columnOptionItem{

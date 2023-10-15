@@ -170,34 +170,22 @@
 .input-dropdown-wrap.left-overhang .input-dropdown{
 	border-radius:5px 0px 0px 0px;
 }
-.input-dropdown-wrap.upwards{
-	bottom:calc(var(--row-height) + 1px);
-}
 .input-dropdown{
 	width:100% !important;
 	position:absolute;
 	margin:0px;
-	border:1px solid #888;
-	border-top:none;
-	border-bottom-width:2px;
 	background-color:var(--color-input);
 	box-shadow:1px 6px 6px var(--color-shade);
-}
-.input-dropdown.upwards{
-	bottom:0px;
-	border-bottom:none;
-	border-top:1px solid #888;
-}
-.input-dropdown-wrap.dropdown-list-input .input-dropdown{
 	border:2px solid var(--color-accent1);
 	border-radius:0px 0px 5px 5px;
 	border-top:none;
 }
-.input-dropdown-wrap.dropdown-list-input .input-dropdown.upwards{
+.input-dropdown.upwards{
 	border-top:2px solid var(--color-accent1);
 	border-bottom:none;
 	border-radius:5px 5px 0px 0px;
 	box-shadow:none;
+	bottom:calc(var(--row-height) + 1px);
 }
 .input-dropdown .entry{
 	padding:5px 10px;

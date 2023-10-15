@@ -330,8 +330,8 @@ let MyInputDate = {
 			</div>
 		</div>
 		
-		<div class="input-date-cal-wrap" v-if="showCalendar" :class="{ upwards:showUpwards }">
-			<div class="input-date-cal" :class="{ upwards:showUpwards }">
+		<div class="input-dropdown-wrap" v-if="showCalendar" :class="{ upwards:showUpwards }">
+			<div class="input-dropdown" :class="{ upwards:showUpwards }">
 				<div class="top lower">
 					<div class="area nowrap"></div>
 					<div class="area nowrap default-inputs">

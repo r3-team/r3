@@ -30,7 +30,7 @@
 	margin:0px 6px 0px 0px;
 	filter:var(--image-filter);
 }
-.field .field-content{
+.field-content{
 	flex:1 1 auto;
 	min-height:var(--row-height);
 	margin:0px;
@@ -42,36 +42,38 @@
 	background-color:var(--color-input);
 	box-shadow:1px 1px 4px var(--color-shade-input);
 	box-sizing:border-box;
-	position:relative;
 	overflow:visible;
 }
-.field .field-content.data:focus-within:not(.disabled){
+.field-content.data:focus-within:not(.disabled){
 	transition:box-shadow 0.3s, outline 0.2s;
 	outline:2px solid var(--color-accent1);
 	box-shadow:1px 1px 8px var(--color-shade-input-sel);
 }
-.field .field-content.data.disabled{
+.field-content.data.disabled{
 	color:var(--color-font-disabled);
 	background-color:var(--color-input-disabled);
 }
-.field .field-content.intent{
+.field-content.intent{
 	padding-left:8px;
 }
-.field .field-content.isSingleField{
+.field-content.isSingleField{
 	border:none;
 	box-shadow:none;
 	border-radius:0px;
 }
-.field .field-content .input.textarea{
+.field-content .input.textarea{
 	padding:0px 0px 0px 8px;
 }
-.field .field-content>.input-files,
-.field .field-content>.input.textarea{
+.field-content>.input-files,
+.field-content>.input.textarea{
 	padding-left:8px;
 }
-.field .field-content>.button,
-.field .field-content>.bool{
+.field-content>.button,
+.field-content>.bool{
 	align-self:center;
+}
+.field.dropdown .field-content{
+	position:relative;
 }
 
 
@@ -351,8 +353,8 @@
 }
 
 /* user overwrites */
+.user-bordersSquared .field-content,
 .user-bordersSquared .field .color-input .preview,
-.user-bordersSquared .field .field-content,
 .user-bordersSquared .field .slider input,
 .user-bordersSquared .field .slider .slider-value{
 	border-radius:0px;

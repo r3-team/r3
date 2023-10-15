@@ -74,7 +74,7 @@ let MyGoForm = {
 			:module="m"
 			:recordOpen="recordIdString !== ''"
 		/>
-		<my-form
+		<my-form class="isMain"
 			v-show="!isMobile || !isAtMenu"
 			:attributeIdMapDef="getterAttributeIdMapDefaults"
 			:formId="formId"
