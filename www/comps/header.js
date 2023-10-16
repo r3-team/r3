@@ -202,17 +202,11 @@ let MyHeader = {
 			],
 		};
 	},
-	watch:{
-		colorHeaderMain:{
-			handler(v) {
-				// set meta theme color (for PWA window color)
-				document.querySelector('meta[name="theme-color"]').setAttribute('content',`${v.toString()}`);
-			},
-			immediate:true
-		}
-	},
 	computed:{
 		bgStyle:(s) => {
+			if(s.settings.colorClassicMode)
+				return `background-color:${s.colorHeaderAccent.toString()};`;
+			
 			return `
 				background-color:${s.colorHeaderMain.toString()};
 				background-image:radial-gradient(at bottom right, ${s.colorHeaderAccent.toString()} 0%, ${s.colorHeaderMain.toString()} 60%);
@@ -221,7 +215,11 @@ let MyHeader = {
 				background-repeat:no-repeat;
 			`;
 		},
-		bgStyleEntries:(s) => `background-color:${s.colorHeaderMain.toString()};`,
+		bgStyleEntries:(s) => {
+			return s.settings.colorClassicMode
+				? `background-color:${s.colorHeaderAccent.toString()};`
+				: `background-color:${s.colorHeaderMain.toString()};`;
+		},
 		collectionCounter:(s) => {
 			if(s.showCollections) return 0;
 			
@@ -331,6 +329,10 @@ let MyHeader = {
 		window.addEventListener('resize',this.windowResized);
 	},
 	mounted() {
+		this.$watch(() => [this.colorHeaderAccent,this.colorHeaderMain],() => { this.updateMetaThemeColor() },{
+			immediate:true
+		});
+		
 		this.windowResized();
 	},
 	unmounted() {
@@ -370,6 +372,14 @@ let MyHeader = {
 				captionBody:this.capErr.SEC['002'],
 				image:'key_locked.png'
 			});
+		},
+		updateMetaThemeColor() {
+			const color = this.settings.colorClassicMode
+				? this.colorHeaderAccent
+				: this.colorHeaderMain;
+			
+			// set meta theme color (for PWA window color)
+			document.querySelector('meta[name="theme-color"]').setAttribute('content',color.toString());
 		},
 		windowResized() {
 			if(this.layoutCheckTimer !== null)

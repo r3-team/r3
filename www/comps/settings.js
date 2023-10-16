@@ -950,19 +950,19 @@ let MySettings = {
 							</tr>
 							<tr>
 								<td>{{ capApp.sundayFirstDow }}</td>
-								<td><my-bool v-model="settingsInput.sundayFirstDow" /></td>
+								<td><div class="row"><my-bool v-model="settingsInput.sundayFirstDow" :grow="false" /></div></td>
 							</tr>
 							<tr>
 								<td>{{ capApp.tabRemember }}</td>
-								<td><my-bool v-model="settingsInput.tabRemember" /></td>
+								<td><div class="row"><my-bool v-model="settingsInput.tabRemember" :grow="false" /></div></td>
 							</tr>
 							<tr>
 								<td>{{ capApp.warnUnsaved }}</td>
-								<td><my-bool v-model="settingsInput.warnUnsaved" /></td>
+								<td><div class="row"><my-bool v-model="settingsInput.warnUnsaved" :grow="false" /></div></td>
 							</tr>
 							<tr>
 								<td>{{ capApp.mobileScrollForm }}</td>
-								<td><my-bool v-model="settingsInput.mobileScrollForm" /></td>
+								<td><div class="row"><my-bool v-model="settingsInput.mobileScrollForm" :grow="false" /></div></td>
 							</tr>
 							<tr class="default-inputs">
 								<td>{{ capApp.searchDictionaries }}</td>
@@ -999,12 +999,23 @@ let MySettings = {
 					<table>
 						<tbody>
 							<tr>
-								<td>{{ capApp.bordersAll }}</td>
-								<td><my-bool v-model="settingsInput.bordersAll" /></td>
-							</tr>
-							<tr>
-								<td>{{ capApp.bordersSquared }}</td>
-								<td><my-bool v-model="settingsInput.bordersSquared" /></td>
+								<td>{{ capApp.borders }}</td>
+								<td>
+									<div class="row gap">
+										<my-bool
+											v-model="settingsInput.bordersAll"
+											:caption0="capGen.less"
+											:caption1="capGen.more"
+											:grow="false"
+										/>
+										<my-bool
+											v-model="settingsInput.bordersSquared"
+											:caption0="capApp.bordersSquaredOff"
+											:caption1="capApp.bordersSquared"
+											:grow="false"
+										/>
+									</div>
+								</td>
 							</tr>
 							<tr class="default-inputs">
 								<td>{{ capApp.fontFamily }}</td>
@@ -1064,26 +1075,49 @@ let MySettings = {
 							</tr>
 							<tr>
 								<td>{{ capApp.dark }}</td>
-								<td><my-bool v-model="settingsInput.dark" /></td>
+								<td><div class="row"><my-bool v-model="settingsInput.dark" :grow="false" /></div></td>
 							</tr>
 							<tr>
 								<td colspan="2"><b>{{ capApp.titleSubHeader }}</b></td>
 							</tr>
 							<tr>
-								<td>{{ capApp.headerModules }}</td>
-								<td><my-bool v-model="settingsInput.headerModules" /></td>
+								<td>{{ capGen.applications }}</td>
+								<td>
+									<div class="row gap">
+										<my-bool v-model="settingsInput.headerModules"
+											:caption0="capGen.button.hide"
+											:caption1="capGen.button.show"
+											:grow="false"
+										/>
+										<my-bool
+											v-if="settingsInput.headerModules"
+											v-model="settingsInput.headerCaptions"
+											:caption0="capApp.headerCaptionsOff"
+											:caption1="capApp.headerCaptions"
+											:grow="false"
+										/>
+									</div>
+								</td>
 							</tr>
-							<tr v-if="settingsInput.headerModules">
-								<td>{{ capApp.headerCaptions }}</td>
-								<td><my-bool v-model="settingsInput.headerCaptions" /></td>
+							<tr class="default-inputs">
+								<td>{{ capApp.colorClassicMode }}</td>
+								<td>
+									<select
+										@input="settingsInput.colorClassicMode = $event.target.value === '1'"
+										:value="settingsInput.colorClassicMode ? '1' : '0'"
+									>
+										<option value="0">{{ capApp.colorClassicMode0 }}</option>
+										<option value="1">{{ capApp.colorClassicMode1 }}</option>
+									</select>
+								</td>
 							</tr>
-							<tr>
-								<td>{{ capApp.colorHeaderSingle }}</td>
-								<td><my-bool v-model="settingsInput.colorHeaderSingle" :reversed="true" /></td>
-							</tr>
-							<tr>
+							<tr v-if="!settingsInput.colorClassicMode">
 								<td>{{ capApp.colorHeader }}</td>
 								<td><my-input-color v-model="settingsInput.colorHeader" :allowNull="true" /></td>
+							</tr>
+							<tr v-if="!settingsInput.colorClassicMode">
+								<td>{{ capApp.colorHeaderSingle }}</td>
+								<td><div class="row"><my-bool v-model="settingsInput.colorHeaderSingle" :grow="false" :reversed="true" /></div></td>
 							</tr>
 							<tr>
 								<td colspan="2"><b>{{ capApp.titleSubMenu }}</b></td>

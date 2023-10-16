@@ -83,7 +83,7 @@ let MyInputCollection = {
 						v-if="rowIndexesVisible.length > limitVisible"
 						@trigger="limitVisible += 10"
 						:blockBubble="true"
-						:caption="capGen.more"
+						:caption="capGen.more + '...'"
 						:naked="true"
 					/>
 				</div>

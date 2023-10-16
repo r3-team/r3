@@ -195,19 +195,26 @@ const MyStore = Vuex.createStore({
 			let brighten = state.settings.dark ? -30 : 0;
 			let desature = state.settings.dark ? 50  : 0;
 			
-			if(state.settings.colorHeaderSingle) {
-				// accent color disabled, use adjusted main color for gradient
-				colorRgb = state.settings.colorHeader !== null ? state.settings.colorHeader : state.colorHeaderDefault;
-				brighten = state.settings.dark ? -10 : 20;
-			} else {
+			// accent color is used (it was enabled or classic color mode is active)
+			if(state.settings.colorClassicMode || !state.settings.colorHeaderSingle) {
+				
+				if(state.settings.colorClassicMode) {
+					brighten = state.settings.dark ? -18: -8;
+					desature = state.settings.dark ? 40  : 14;
+				}
+				
+				// get accent color either from customizing or currently shown module
 				if(MyStoreLocal.state.activated && MyStoreLocal.state.companyColorHeader !== '') {
-					// accent color from customizing
 					colorRgb = MyStoreLocal.state.companyColorHeader;
 				}
 				else if(state.isAtModule && state.moduleIdLast !== null && MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1 !== null) {
-					// accent color from module
 					colorRgb = MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1;
 				}
+			} else {
+				// accent color disabled, use main color for gradient
+				colorRgb = state.settings.colorHeader !== null ? state.settings.colorHeader : state.colorHeaderDefault;
+				brighten = 0;
+				desature = 0;
 			}
 			return tinycolor(colorRgb).brighten(brighten).desaturate(desature);
 		},

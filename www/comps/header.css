@@ -127,7 +127,7 @@
 }
 .app-header .entry-bg.router-link-active{
 	top:-4px;
-	filter:brightness(1.2) grayscale(40%);
+	background-color:rgba(255,255,255,0.04);
 }
 
 .app-header .entry-wrap .children{

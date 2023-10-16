@@ -113,9 +113,6 @@
 }
 
 /* user overwrites */
-.user-bordersAll .field-content{
-	border:1px solid var(--color-border);
-}
 .user-bordersSquared .form-wrap.popUp .form,
 .user-bordersSquared .form-wrap.popUp .form-help,
 .user-bordersSquared .form-wrap.popUp .form-log,

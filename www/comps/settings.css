@@ -10,7 +10,7 @@
 }
 .settings td,
 .settings th{
-	padding:2px 8px 2px 0px;
+	padding:4px 8px 4px 0px;
 }
 .settings .encryption .backup-code{
 	font-family:monospace;

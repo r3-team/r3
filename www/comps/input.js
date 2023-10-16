@@ -8,7 +8,7 @@ let MyBool = {
 	template:`<div class="bool" tabindex="0"
 		@click="trigger"
 		@keyup.enter.space="trigger"
-		:class="{ active:boolOn, readonly:readonly }"
+		:class="{ active:boolOn, grow:grow, readonly:readonly }"
 	>
 		<div class="noHighlight left"  :class="{ small:!boolOn }">{{ displayLeft }}</div>
 		<div class="noHighlight right" :class="{ small:boolOn }" >{{ displayRight }}</div>
@@ -16,6 +16,7 @@ let MyBool = {
 	props:{
 		caption0:  { type:String,  required:false, default:'0' },
 		caption1:  { type:String,  required:false, default:'1' },
+		grow:      { type:Boolean, required:false, default:true },
 		modelValue:{ required:true },
 		readonly:  { type:Boolean, required:false, default:false },
 		reversed:  { type:Boolean, required:false, default:false }

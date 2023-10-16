@@ -353,6 +353,9 @@
 }
 
 /* user overwrites */
+.user-bordersAll .field-content:not(.isSingleField){
+	border:1px solid var(--color-border);
+}
 .user-bordersSquared .field-content,
 .user-bordersSquared .field .color-input .preview,
 .user-bordersSquared .field .slider input,

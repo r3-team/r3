@@ -266,6 +266,7 @@ let MyAdminLoginTemplate = {
 		this.settings = {
 			bordersAll:false,
 			bordersSquared:false,
+			colorClassicMode:false,
 			colorHeader:null,
 			colorHeaderSingle:false,
 			colorMenu:null,

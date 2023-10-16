@@ -77,7 +77,7 @@ let MyApp = {
 			>
 				<div class="module-hover-menu"
 					:class="{dark:colorHeaderMain.isDark()}"
-					:style="'background-color:#'+colorHeaderMain.toString()"
+					:style="'background-color:'+colorHeaderMain.toString()"
 				>
 					<div class="module-hover-menu-header">
 						<div class="row centered space-between">
