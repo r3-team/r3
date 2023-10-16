@@ -3,6 +3,7 @@ import MyFeedback            from './feedback.js';
 import MyForm                from './form.js';
 import MyHeader              from './header.js';
 import MyLogin               from './login.js';
+import MySettings            from './settings.js';
 import {getStartFormId}      from './shared/access.js';
 import {updateCollections}   from './shared/collection.js';
 import {formOpen}            from './shared/form.js';
@@ -29,7 +30,8 @@ let MyApp = {
 		MyFeedback,
 		MyForm,
 		MyHeader,
-		MyLogin
+		MyLogin,
+		MySettings
 	},
 	template:`<div :class="classes" id="app" :style="styles">
 		
@@ -45,12 +47,12 @@ let MyApp = {
 				@logout="sessionInvalid"
 				@show-collection-input="collectionEntries = $event"
 				@show-module-hover-menu="showHoverNav = true"
+				@show-settings="showSettings = !showSettings"
 				:keysLocked="loginEncryption && loginPrivateKey === null"
 				:moduleEntries="moduleEntries"
 			/>
 			
 			<router-view class="app-content"
-				@logout="sessionInvalid"
 				:moduleEntries="moduleEntries"
 			/>
 			
@@ -70,14 +72,26 @@ let MyApp = {
 				/>
 			</div>
 			
+			<!-- login settings -->
+			<div class="app-sub-window under-header"
+				v-if="showSettings"
+				@mousedown.self="showSettings = false"
+			>
+				<my-settings
+					@close="showSettings = false"
+					@logout="showSettings = false;sessionInvalid()"
+					:moduleEntries="moduleEntries"
+				/>
+			</div>
+			
 			<!-- alternative module hover menu -->
 			<div class="app-sub-window at-left no-scroll"
 				v-if="showHoverNav"
 				@mousedown.self="showHoverNav = false"
 			>
 				<div class="module-hover-menu"
-					:class="{dark:colorHeaderMain.isDark()}"
-					:style="'background-color:'+colorHeaderMain.toString()"
+					:class="{dark:colorModuleMenu.isDark()}"
+					:style="'background-color:'+colorModuleMenu.toString()"
 				>
 					<div class="module-hover-menu-header">
 						<div class="row centered space-between">
@@ -168,6 +182,7 @@ let MyApp = {
 			publicLoaded:false,   // public data has been loaded
 			schemaLoaded:false,   // app schema has been loaded
 			showHoverNav:false,   // alternative hover menu for module navigation
+			showSettings:false,   // login settings
 			wsConnected:false     // connection to backend has been established (websocket)
 		};
 	},
@@ -332,36 +347,38 @@ let MyApp = {
 		},
 		
 		// simple
+		colorModuleMenu:(s) => s.settings.colorClassicMode ? s.colorHeaderAccent : s.colorHeaderMain,
 		httpMode:       (s) => location.protocol === 'http:',
 		pwaManifestHref:(s) => `/manifests/${s.isAtModule ? s.moduleIdLast : ''}`,
 		
 		// stores
-		activated:      (s) => s.$store.getters['local/activated'],
-		appVersion:     (s) => s.$store.getters['local/appVersion'],
-		css:            (s) => s.$store.getters['local/css'],
-		loginBackground:(s) => s.$store.getters['local/loginBackground'],
-		loginKeyAes:    (s) => s.$store.getters['local/loginKeyAes'],
-		schemaTimestamp:(s) => s.$store.getters['local/schemaTimestamp'],
-		modules:        (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
-		moduleIdMapOpts:(s) => s.$store.getters['schema/moduleIdMapOptions'],
-		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
-		access:         (s) => s.$store.getters.access,
-		blockInput:     (s) => s.$store.getters.blockInput,
-		capErr:         (s) => s.$store.getters.captions.error,
-		capGen:         (s) => s.$store.getters.captions.generic,
-		colorHeaderMain:(s) => s.$store.getters.colorHeaderMain,
-		isAdmin:        (s) => s.$store.getters.isAdmin,
-		isAtDialog:     (s) => s.$store.getters.isAtDialog,
-		isAtFeedback:   (s) => s.$store.getters.isAtFeedback,
-		isAtModule:     (s) => s.$store.getters.isAtModule,
-		isMobile:       (s) => s.$store.getters.isMobile,
-		loginEncryption:(s) => s.$store.getters.loginEncryption,
-		loginPrivateKey:(s) => s.$store.getters.loginPrivateKey,
-		moduleIdLast:   (s) => s.$store.getters.moduleIdLast,
-		patternStyle:   (s) => s.$store.getters.patternStyle,
-		popUpFormGlobal:(s) => s.$store.getters.popUpFormGlobal,
-		settings:       (s) => s.$store.getters.settings
+		activated:        (s) => s.$store.getters['local/activated'],
+		appVersion:       (s) => s.$store.getters['local/appVersion'],
+		css:              (s) => s.$store.getters['local/css'],
+		loginBackground:  (s) => s.$store.getters['local/loginBackground'],
+		loginKeyAes:      (s) => s.$store.getters['local/loginKeyAes'],
+		schemaTimestamp:  (s) => s.$store.getters['local/schemaTimestamp'],
+		modules:          (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:      (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleIdMapOpts:  (s) => s.$store.getters['schema/moduleIdMapOptions'],
+		formIdMap:        (s) => s.$store.getters['schema/formIdMap'],
+		access:           (s) => s.$store.getters.access,
+		blockInput:       (s) => s.$store.getters.blockInput,
+		capErr:           (s) => s.$store.getters.captions.error,
+		capGen:           (s) => s.$store.getters.captions.generic,
+		colorHeaderAccent:(s) => s.$store.getters.colorHeaderAccent,
+		colorHeaderMain:  (s) => s.$store.getters.colorHeaderMain,
+		isAdmin:          (s) => s.$store.getters.isAdmin,
+		isAtDialog:       (s) => s.$store.getters.isAtDialog,
+		isAtFeedback:     (s) => s.$store.getters.isAtFeedback,
+		isAtModule:       (s) => s.$store.getters.isAtModule,
+		isMobile:         (s) => s.$store.getters.isMobile,
+		loginEncryption:  (s) => s.$store.getters.loginEncryption,
+		loginPrivateKey:  (s) => s.$store.getters.loginPrivateKey,
+		moduleIdLast:     (s) => s.$store.getters.moduleIdLast,
+		patternStyle:     (s) => s.$store.getters.patternStyle,
+		popUpFormGlobal:  (s) => s.$store.getters.popUpFormGlobal,
+		settings:         (s) => s.$store.getters.settings
 	},
 	created() {
 		window.addEventListener('resize',this.setMobileView);

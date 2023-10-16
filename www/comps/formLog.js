@@ -15,7 +15,7 @@ export {MyFormLog as default};
 let MyFormLog = {
 	name:'my-form-log',
 	components:{MyField},
-	template:`<div class="form-log contentBox" :class="{ 'popUp':isPopUp }">
+	template:`<div class="form-log contentBox" :class="{ 'float':isPopUpFloating }">
 		<div class="top">
 			<div class="area">
 				<img class="icon" src="images/time.png" />
@@ -123,6 +123,7 @@ let MyFormLog = {
 		form:             { type:Object,  required:true },
 		formLoading:      { type:Boolean, required:true },
 		isPopUp:          { type:Boolean, required:true },
+		isPopUpFloating:  { type:Boolean, required:true },
 		indexMapRecordKey:{ type:Object,  required:true },
 		joinsIndexMap:    { type:Object,  required:true },
 		values:           { type:Object,  required:true }

@@ -29,7 +29,7 @@ let MyBuilderAttribute = {
 		MyBuilderIconInput
 	},
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
-		<div class="contentBox builder-attribute popUp" v-if="values !== null">
+		<div class="contentBox builder-attribute float" v-if="values !== null">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" :src="'images/'+getAttributeIcon(values,false,false)" />

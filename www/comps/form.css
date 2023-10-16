@@ -4,7 +4,6 @@
 	flex-flow:row nowrap;
 	overflow:visible;
 	z-index:var(--z-index-form);
-	gap:var(--spacing);
 }
 .form-wrap.popUp{
 	z-index:var(--z-index-form-pop-up);
@@ -16,24 +15,11 @@
 	max-height:1200px;
 	overflow:auto;
 	box-sizing:border-box;
+	gap:var(--spacing);
 }
 .form-wrap.popUp.fullscreen{
 	max-width:unset !important;
 	max-height:unset !important;
-}
-.form-wrap.popUp>.form,
-.form-wrap.popUp>.form-help,
-.form-wrap.popUp>.form-log{
-	box-shadow:none;
-	margin:0px;
-	border-left:1px solid var(--color-border);
-}
-.form-wrap.popUp.float>.form,
-.form-wrap.popUp.float>.form-help,
-.form-wrap.popUp.float>.form-log{
-	border:1px solid var(--color-border);
-	border-radius:12px;
-	box-shadow:1px 1px 8px var(--color-shade);
 }
 .form-wrap.isMain>.form{
 	padding-left:1px;
@@ -68,6 +54,9 @@
 	flex-direction:column;
 	overflow:auto;
 }
+.form-log:not(.float){
+	border-left:1px solid var(--color-border);
+}
 .form-log .log-entries{
 	flex:1 1 auto;
 	display:flex;
@@ -101,9 +90,13 @@
 	display:flex;
 	flex-direction:column;
 	overflow:auto;
+	border-left:1px solid var(--color-border);
 }
 .form-help.large{
 	max-width:800px;
+}
+.form-help:not(.float){
+	border-left:1px solid var(--color-border);
 }
 
 /* messages */

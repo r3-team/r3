@@ -4,7 +4,7 @@ export {MyFeedback as default};
 let MyFeedback = {
 	name:'my-feedback',
 	template:`<div class="app-sub-window" @click.self="close">
-		<div class="contentBox feedback popUp">
+		<div class="contentBox feedback float">
 			<div class="top lower">
 				<div class="area">
 					<img class="icon" src="images/feedback.png" />

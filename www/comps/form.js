@@ -82,7 +82,7 @@ let MyForm = {
 		<!-- form proper -->
 		<div class="form contentBox grow scroll"
 			v-if="!isMobile || (!showLog && !showHelp)"
-			:class="{ popUp:isPopUp }"
+			:class="{ popUp:isPopUp, float:isPopUpFloating }"
 		>
 			<!-- title bar upper -->
 			<div class="top nowrap" :class="{ lower:!hasBarLower && !isSingleField }">
@@ -258,6 +258,7 @@ let MyForm = {
 			:form="form"
 			:formLoading="loading"
 			:isPopUp="isPopUp"
+			:isPopUpFloating="isPopUpFloating"
 			:indexMapRecordKey="indexMapRecordKey"
 			:joinsIndexMap="joinsIndexMap"
 			:values="values"
@@ -268,7 +269,7 @@ let MyForm = {
 			v-if="showHelp"
 			@close="showHelp = false"
 			:form="form"
-			:isPopUp="isPopUp"
+			:isFloat="isPopUpFloating"
 			:language="moduleLanguage"
 			:moduleId="moduleId"
 		/>

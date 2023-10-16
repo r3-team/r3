@@ -5,7 +5,7 @@ let MyDialog = {
 	name:'my-dialog',
 	components:{MyInputRichtext},
 	template:`<div class="app-sub-window" @mousedown.self="close">
-		<div class="contentBox dialog popUp" :style="styles">
+		<div class="contentBox dialog float" :style="styles">
 			<div class="top lower">
 				<div class="area">
 					<img class="icon"

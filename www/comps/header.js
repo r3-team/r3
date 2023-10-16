@@ -163,11 +163,13 @@ let MyHeader = {
 			</div>
 			
 			<!-- settings -->
-			<router-link class="entry no-wrap clickable" to="/settings"
+			<div class="entry no-wrap clickable" tabindex="0"
 				v-if="!isNoAuth"
+				@click="$emit('show-settings')"
+				@keyup.enter="$emit('show-settings')"
 			>
 				<img src="images/person.png" />
-			</router-link>
+			</div>
 			
 			<!-- log off -->
 			<div class="entry no-wrap clickable" tabindex="0"
@@ -187,7 +189,7 @@ let MyHeader = {
 		keysLocked:   { type:Boolean, required:true },
 		moduleEntries:{ type:Array,   required:true }
 	},
-	emits:['logout','show-collection-input','show-module-hover-menu'],
+	emits:['logout','show-collection-input','show-module-hover-menu','show-settings'],
 	data() {
 		return {
 			layoutCheckTimer:null,

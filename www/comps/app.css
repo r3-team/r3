@@ -340,30 +340,17 @@ h3{
 
 /* generic boxes */
 .contentBox{
-	max-width:var(--content-box-max-width);
-	margin:var(--spacing-child);
 	display:flex;
 	flex-direction:column;
-	box-sizing:border-box;
-	box-shadow:1px 1px 8px var(--color-shade);
 	color:var(--color-font);
+	box-sizing:border-box;
 	background-color:var(--color-bg);
+	border-color:var(--color-border); /* default for border setting */
 	z-index:var(--z-index-content);
-	--content-box-max-width:unset; /* overwritable by compact mode */
 }
-.contentBox:not(.popUp){
-	margin:0px;
-	border:none;
-	border-right:1px solid var(--color-border);
-	border-radius:0px;
-	box-shadow:none;
-	--content-box-max-width:unset;
-}
-.contentBox:not(.popUp):last-child{
-	border-right:none;
-}
-.contentBox:not(.popUp) .top{
-	border-radius:0px;
+.contentBox.float{
+	border-radius:12px;
+	box-shadow:1px 1px 8px var(--color-shade);
 }
 .contentBox.grow{
 	flex:1 1 auto;
@@ -411,6 +398,9 @@ h3{
 }
 .contentBox .top.nowrap{
 	flex-wrap:nowrap;
+}
+.contentBox.float .top{
+	border-radius:12px 12px 0px 0px;
 }
 .contentBox .top h1{
 	margin:0px;
@@ -1206,6 +1196,7 @@ table td.maximum{
 
 
 /* user overwrites */
+.user-bordersAll .contentBox,
 .user-bordersAll .default-inputs input,
 .user-bordersAll .default-inputs select,
 .user-bordersAll .default-inputs textarea,
@@ -1214,6 +1205,8 @@ table td.maximum{
 	border-width:1px;
 	border-style:solid;
 }
+.user-bordersSquared .contentBox,
+.user-bordersSquared .contentBox .top,
 .user-bordersSquared .contentBox .top .selector,
 .user-bordersSquared .contentBox .content .contentPart,
 .user-bordersSquared .default-inputs input,

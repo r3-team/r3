@@ -351,7 +351,7 @@ let MyAdminModules = {
 			<my-articles class="admin-modules-help shade popUp"
 				@close="moduleIdShowHelp = null"
 				:moduleId="moduleIdShowHelp"
-				:isPopUp="false"
+				:isFloat="false"
 				:language="moduleLanguage"
 			/>
 		</div>

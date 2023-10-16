@@ -244,22 +244,27 @@
 	border-radius:3px;
 	box-shadow:1px 1px 3px var(--color-shade);
 	box-sizing:border-box;
-	border:2px solid #fff;
+	border:3px solid #fff;
+	transition:width 0.2s, height 0.2s, margin 0.2s, filter 0.2s;
+	filter:saturate(90%);
+}
+.admin-config .login-bg .preview:hover{
+	border-width:5px;
+	filter:saturate(110%);
 }
 .admin-config .login-bg .preview.inactive{
-	width:100px;
-	height:60px;
-	margin:10px;
-	filter:saturate(30%) brightness(70%);
+	width:90px;
+	height:50px;
+	margin:15px;
+	filter:saturate(10%) brightness(70%);
 	border-width:1px;
 	border-color:#000;
 }
 .admin-config .login-bg .preview.inactive:hover{
-	width:110px;
-	height:70px;
-	margin:5px;
-	filter:saturate(60%) brightness(90%);
-	transition:width 0.2s, height 0.2s, margin 0.2s, filter 0.2s;
+	width:100px;
+	height:60px;
+	margin:10px;
+	filter:saturate(50%) brightness(90%);
 }
 
 

@@ -1,9 +1,8 @@
-import MyApp      from './comps/app.js';
-import MyButton   from './comps/button.js';
-import MyFilters  from './comps/filters.js';
-import MyHome     from './comps/home.js';
-import MySettings from './comps/settings.js';
-import MyStore    from './stores/store.js';
+import MyApp     from './comps/app.js';
+import MyButton  from './comps/button.js';
+import MyFilters from './comps/filters.js';
+import MyHome    from './comps/home.js';
+import MyStore   from './stores/store.js';
 import {
 	MyGoForm,
 	MyGoModule
@@ -65,9 +64,6 @@ const MyRouter = VueRouter.createRouter({
 		path:'/home',
 		component:MyHome,
 		props:true
-	},{
-		path:'/settings',
-		component:MySettings
 	},{
 		path:'/app/:moduleName/:moduleNameChild?',
 		component:MyGoModule,

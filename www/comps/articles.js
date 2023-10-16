@@ -7,7 +7,7 @@ export {MyArticles as default};
 let MyArticles = {
 	name:'my-articles',
 	components:{ MyTabs },
-	template:`<div class="contentBox" :class="{ large:showLarge || isMobile, 'popUp':isPopUp }">
+	template:`<div class="contentBox" :class="{ large:showLarge || isMobile, 'float':isFloat }">
 		<div class="top lower">
 			<div class="area">
 				<img class="icon" src="images/question.png" />
@@ -49,7 +49,7 @@ let MyArticles = {
 					</li>
 				</ol>
 			</div>
-		
+			
 			<div class="article" v-for="(a,i) in articlesShown">
 				<div class="article-title pdf-title" :ref="'article_'+a.id" v-if="hasArticleIndex || getArticleTitle(a) !== articleTitleEmpty">
 					<my-button class="pdf-hide"
@@ -68,7 +68,7 @@ let MyArticles = {
 	</div>`,
 	props:{
 		form:    { type:Object,  required:false, default:null }, // show context help of which form
-		isPopUp: { type:Boolean, required:true },
+		isFloat: { type:Boolean, required:true },
 		language:{ type:String,  required:false, default:null }, // language to use (5-letter code)
 		moduleId:{ type:String,  required:true }                 // show help of which module
 	},

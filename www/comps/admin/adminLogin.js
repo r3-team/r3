@@ -61,7 +61,7 @@ let MyAdminLogin = {
 			/>
 		</div>
 		
-		<div class="contentBox admin-login popUp" v-if="inputsReady">
+		<div class="contentBox admin-login float" v-if="inputsReady">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/person.png" />

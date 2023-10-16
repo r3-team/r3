@@ -4,7 +4,7 @@ let MyAdminLoginTemplate = {
 	name:'my-admin-login-template',
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
 		
-		<div class="contentBox admin-login-template popUp" v-if="inputsReady">
+		<div class="contentBox admin-login-template float" v-if="inputsReady">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/personTemplate.png" />

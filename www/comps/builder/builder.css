@@ -617,7 +617,6 @@
 	display:flex;
 	flex-flow:column nowrap;
 	border:1px solid var(--color-border);
-	border-radius:8px;
 	overflow:hidden;
 }
 .builder-articles-preview.large{

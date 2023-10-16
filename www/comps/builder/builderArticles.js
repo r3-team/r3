@@ -335,10 +335,10 @@ let MyBuilderArticles = {
 			
 			<!-- articles preview -->
 			<div class="app-sub-window under-header" v-if="showPreview" @mousedown.self="showPreview = false">
-				<my-articles class="builder-articles-preview shade popUp"
+				<my-articles class="builder-articles-preview float"
 					@close="showPreview = false"
 					:form="formIdAssignTo !== null ? formIdMap[formIdAssignTo] : null"
-					:isPopUp="false"
+					:isFloat="true"
 					:language="builderLanguage"
 					:moduleId="module.id"
 				/>
