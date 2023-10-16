@@ -17,6 +17,7 @@ const MyStore = Vuex.createStore({
 		clusterNodeName:'',            // name of the cluster node that session is connected to
 		collectionIdMap:{},            // map of all collection values, key = collection ID
 		colorHeaderDefault:'262626',   // default header color, if not overwritten
+		colorLoginDefault:'262626',    // default login color, if not overwritten
 		colorMenuDefault:'2d3033',     // default menu color, if not overwritten
 		config:{},                     // configuration values (admin only)
 		constants:{                    // constant variables, codes/messages/IDs
@@ -208,19 +209,16 @@ const MyStore = Vuex.createStore({
 					colorRgb = MyStoreSchema.state.moduleIdMap[state.moduleIdLast].color1;
 				}
 			}
-			return tinycolor(colorRgb).brighten(brighten).desaturate(desature).toString().substring(1);
+			return tinycolor(colorRgb).brighten(brighten).desaturate(desature);
 		},
 		colorHeaderMain:(state,payload) => {
-			return state.settings.colorHeader !== null ? state.settings.colorHeader : state.colorHeaderDefault;
+			return tinycolor(state.settings.colorHeader !== null ? state.settings.colorHeader : state.colorHeaderDefault);
 		},
-		colorHeaderMainDark:(state,payload) => {
-			return tinycolor(state.settings.colorHeader !== null ? state.settings.colorHeader : state.colorHeaderDefault).isDark();
+		colorLogin:(state,payload) => {
+			return tinycolor(MyStoreLocal.state.activated && MyStoreLocal.state.companyColorLogin !== '' ? MyStoreLocal.state.companyColorLogin : state.colorLoginDefault);
 		},
 		colorMenu:(state,payload) => {
-			return state.settings.colorMenu !== null ? state.settings.colorMenu : state.colorMenuDefault;
-		},
-		colorMenuDark:(state,payload) => {
-			return tinycolor(state.settings.colorMenu !== null ? state.settings.colorMenu : state.colorMenuDefault).isDark();
+			return tinycolor(state.settings.colorMenu !== null ? state.settings.colorMenu : state.colorMenuDefault);
 		},
 		colorMenuStyle:(state,payload) => {
 			const colorRgb = state.settings.colorMenu !== null ? state.settings.colorMenu : state.colorMenuDefault;

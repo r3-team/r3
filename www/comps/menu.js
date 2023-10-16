@@ -167,7 +167,7 @@ let MyMenu = {
 	name:'my-menu',
 	components:{MyMenuItem},
 	template:`<div class="menu"
-		:class="{ isDark:isDark }"
+		:class="{ isDark:color.isDark() }"
 		:style="bgStyle"
 		v-if="hasAccessToAnyMenu(module.menus,menuAccess)"
 	>
@@ -226,7 +226,6 @@ let MyMenu = {
 		capGen:        (s) => s.$store.getters.captions.generic,
 		color:         (s) => s.$store.getters.colorMenu,
 		isAdmin:       (s) => s.$store.getters.isAdmin,
-		isDark:        (s) => s.$store.getters.colorMenuDark,
 		isMobile:      (s) => s.$store.getters.isMobile,
 		menuAccess:    (s) => s.$store.getters.access.menu,
 		moduleLanguage:(s) => s.$store.getters.moduleLanguage,

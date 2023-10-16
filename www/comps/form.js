@@ -344,7 +344,7 @@ let MyForm = {
 	},
 	computed:{
 		// states
-		bgStyle:(s) => s.isPopUp ? '' : `background-color:#${s.colorMenu};`,
+		bgStyle:(s) => s.isPopUp ? '' : `background-color:${s.colorMenu.toString()};`,
 		canCreate:(s) =>!s.updatingRecord
 			&& s.joins.length !== 0
 			&& s.joins[0].applyCreate

@@ -10,7 +10,7 @@ export {MyHeader as default};
 
 let MyHeader = {
 	name:'my-header',
-	template:`<div class="app-header shade noPrint" :class="{ isDark:colorHeaderMainDark }" :style="bgStyle">
+	template:`<div class="app-header shade noPrint" :class="{ isDark:colorHeaderMain.isDark() }" :style="bgStyle">
 		
 		<div ref="content" class="entries">
 			
@@ -179,7 +179,9 @@ let MyHeader = {
 			</div>
 		</div>
 		
-		<div class="app-header-loading" v-if="busyCounter > 0"></div>
+		<div class="app-header-loading-wrap" v-if="busyCounter > 0">
+			<div class="app-header-loading"></div>
+		</div>
 	</div>`,
 	props:{
 		keysLocked:   { type:Boolean, required:true },
@@ -204,7 +206,7 @@ let MyHeader = {
 		colorHeaderMain:{
 			handler(v) {
 				// set meta theme color (for PWA window color)
-				document.querySelector('meta[name="theme-color"]').setAttribute('content',`#${v}`);
+				document.querySelector('meta[name="theme-color"]').setAttribute('content',`${v.toString()}`);
 			},
 			immediate:true
 		}
@@ -212,14 +214,14 @@ let MyHeader = {
 	computed:{
 		bgStyle:(s) => {
 			return `
-				background-color:#${s.colorHeaderMain};
-				background-image:radial-gradient(at bottom right, #${s.colorHeaderAccent} 0%, #${s.colorHeaderMain} 60%);
+				background-color:${s.colorHeaderMain.toString()};
+				background-image:radial-gradient(at bottom right, ${s.colorHeaderAccent.toString()} 0%, ${s.colorHeaderMain.toString()} 60%);
 				background-size:70% 120%;
 				background-position:bottom right;
 				background-repeat:no-repeat;
 			`;
 		},
-		bgStyleEntries:(s) => `background-color:#${s.colorHeaderMain};`,
+		bgStyleEntries:(s) => `background-color:${s.colorHeaderMain.toString()};`,
 		collectionCounter:(s) => {
 			if(s.showCollections) return 0;
 			
@@ -305,26 +307,25 @@ let MyHeader = {
 		showNavPrev:     (s) => !s.elementsReduced.includes('navigationPrev'),
 		
 		// stores
-		modules:            (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
-		moduleNameMap:      (s) => s.$store.getters['schema/moduleNameMap'],
-		formIdMap:          (s) => s.$store.getters['schema/formIdMap'],
-		collectionIdMap:    (s) => s.$store.getters['schema/collectionIdMap'],
-		builderEnabled:     (s) => s.$store.getters.builderEnabled,
-		busyCounter:        (s) => s.$store.getters.busyCounter,
-		capErr:             (s) => s.$store.getters.captions.error,
-		capGen:             (s) => s.$store.getters.captions.generic,
-		colorHeaderAccent:  (s) => s.$store.getters.colorHeaderAccent,
-		colorHeaderMain:    (s) => s.$store.getters.colorHeaderMain,
-		colorHeaderMainDark:(s) => s.$store.getters.colorHeaderMainDark,
-		feedback:           (s) => s.$store.getters.feedback,
-		isAdmin:            (s) => s.$store.getters.isAdmin,
-		isAtMenu:           (s) => s.$store.getters.isAtMenu,
-		isMobile:           (s) => s.$store.getters.isMobile,
-		isNoAuth:           (s) => s.$store.getters.isNoAuth,
-		pwaModuleId:        (s) => s.$store.getters.pwaModuleId,
-		moduleIdLast:       (s) => s.$store.getters.moduleIdLast,
-		settings:           (s) => s.$store.getters.settings
+		modules:          (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:      (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleNameMap:    (s) => s.$store.getters['schema/moduleNameMap'],
+		formIdMap:        (s) => s.$store.getters['schema/formIdMap'],
+		collectionIdMap:  (s) => s.$store.getters['schema/collectionIdMap'],
+		builderEnabled:   (s) => s.$store.getters.builderEnabled,
+		busyCounter:      (s) => s.$store.getters.busyCounter,
+		capErr:           (s) => s.$store.getters.captions.error,
+		capGen:           (s) => s.$store.getters.captions.generic,
+		colorHeaderAccent:(s) => s.$store.getters.colorHeaderAccent,
+		colorHeaderMain:  (s) => s.$store.getters.colorHeaderMain,
+		feedback:         (s) => s.$store.getters.feedback,
+		isAdmin:          (s) => s.$store.getters.isAdmin,
+		isAtMenu:         (s) => s.$store.getters.isAtMenu,
+		isMobile:         (s) => s.$store.getters.isMobile,
+		isNoAuth:         (s) => s.$store.getters.isNoAuth,
+		pwaModuleId:      (s) => s.$store.getters.pwaModuleId,
+		moduleIdLast:     (s) => s.$store.getters.moduleIdLast,
+		settings:         (s) => s.$store.getters.settings
 	},
 	created() {
 		window.addEventListener('resize',this.windowResized);

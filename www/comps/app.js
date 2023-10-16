@@ -76,8 +76,8 @@ let MyApp = {
 				@mousedown.self="showHoverNav = false"
 			>
 				<div class="module-hover-menu"
-					:class="{dark:colorHeaderMainDark}"
-					:style="'background-color:#'+colorHeaderMain"
+					:class="{dark:colorHeaderMain.isDark()}"
+					:style="'background-color:#'+colorHeaderMain.toString()"
 				>
 					<div class="module-hover-menu-header">
 						<div class="row centered space-between">
@@ -336,33 +336,32 @@ let MyApp = {
 		pwaManifestHref:(s) => `/manifests/${s.isAtModule ? s.moduleIdLast : ''}`,
 		
 		// stores
-		activated:        (s) => s.$store.getters['local/activated'],
-		appVersion:       (s) => s.$store.getters['local/appVersion'],
-		css:              (s) => s.$store.getters['local/css'],
-		loginBackground:  (s) => s.$store.getters['local/loginBackground'],
-		loginKeyAes:      (s) => s.$store.getters['local/loginKeyAes'],
-		schemaTimestamp:  (s) => s.$store.getters['local/schemaTimestamp'],
-		modules:          (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:      (s) => s.$store.getters['schema/moduleIdMap'],
-		moduleIdMapOpts:  (s) => s.$store.getters['schema/moduleIdMapOptions'],
-		formIdMap:        (s) => s.$store.getters['schema/formIdMap'],
-		access:           (s) => s.$store.getters.access,
-		blockInput:       (s) => s.$store.getters.blockInput,
-		capErr:           (s) => s.$store.getters.captions.error,
-		capGen:           (s) => s.$store.getters.captions.generic,
-		colorHeaderMain:  (s) => s.$store.getters.colorHeaderMain,
-		colorHeaderMainDark:(s) => s.$store.getters.colorHeaderMainDark,
-		isAdmin:          (s) => s.$store.getters.isAdmin,
-		isAtDialog:       (s) => s.$store.getters.isAtDialog,
-		isAtFeedback:     (s) => s.$store.getters.isAtFeedback,
-		isAtModule:       (s) => s.$store.getters.isAtModule,
-		isMobile:         (s) => s.$store.getters.isMobile,
-		loginEncryption:  (s) => s.$store.getters.loginEncryption,
-		loginPrivateKey:  (s) => s.$store.getters.loginPrivateKey,
-		moduleIdLast:     (s) => s.$store.getters.moduleIdLast,
-		patternStyle:     (s) => s.$store.getters.patternStyle,
-		popUpFormGlobal:  (s) => s.$store.getters.popUpFormGlobal,
-		settings:         (s) => s.$store.getters.settings
+		activated:      (s) => s.$store.getters['local/activated'],
+		appVersion:     (s) => s.$store.getters['local/appVersion'],
+		css:            (s) => s.$store.getters['local/css'],
+		loginBackground:(s) => s.$store.getters['local/loginBackground'],
+		loginKeyAes:    (s) => s.$store.getters['local/loginKeyAes'],
+		schemaTimestamp:(s) => s.$store.getters['local/schemaTimestamp'],
+		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleIdMapOpts:(s) => s.$store.getters['schema/moduleIdMapOptions'],
+		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
+		access:         (s) => s.$store.getters.access,
+		blockInput:     (s) => s.$store.getters.blockInput,
+		capErr:         (s) => s.$store.getters.captions.error,
+		capGen:         (s) => s.$store.getters.captions.generic,
+		colorHeaderMain:(s) => s.$store.getters.colorHeaderMain,
+		isAdmin:        (s) => s.$store.getters.isAdmin,
+		isAtDialog:     (s) => s.$store.getters.isAtDialog,
+		isAtFeedback:   (s) => s.$store.getters.isAtFeedback,
+		isAtModule:     (s) => s.$store.getters.isAtModule,
+		isMobile:       (s) => s.$store.getters.isMobile,
+		loginEncryption:(s) => s.$store.getters.loginEncryption,
+		loginPrivateKey:(s) => s.$store.getters.loginPrivateKey,
+		moduleIdLast:   (s) => s.$store.getters.moduleIdLast,
+		patternStyle:   (s) => s.$store.getters.patternStyle,
+		popUpFormGlobal:(s) => s.$store.getters.popUpFormGlobal,
+		settings:       (s) => s.$store.getters.settings
 	},
 	created() {
 		window.addEventListener('resize',this.setMobileView);

@@ -8,6 +8,7 @@
 	gap:8px;
 	border-radius:10px;
 	backdrop-filter:blur(3px);
+	-webkit-backdrop-filter:blur(3px);
 	background-color:rgba(0,0,0,0.1);
 	border:1px solid rgba(255,255,255,0.1);
 	box-shadow:1px 1px 6px rgba(0,0,0,0.8);
@@ -27,6 +28,7 @@
 	padding:10px;
 	font-size:120%;
 	color:var(--color-font-dark);
+	border:1px solid #000;
 	border-radius:var(--login-border-radius);
 	display:flex;
 	flex-flow:row nowrap;
@@ -35,14 +37,14 @@
 }
 .login .header img{
 	width:30px;
-	filter:var(--image-filter-dark);
+	filter:var(--image-filter-dark-shade);
 }
 .login .header.dark{
 	color:var(--color-font-bright);
 	background-color:rgba(0,0,0,0.8);
 }
 .login .header.dark img{
-	filter:var(--image-filter-bright);
+	filter:var(--image-filter-bright-shade);
 }
 .login .credentials{
 	display:flex;
@@ -93,6 +95,7 @@
 	background:linear-gradient(0deg, rgba(50,50,50,0.3) 0%, rgba(117,138,145,0.5) 93%);
 	box-shadow:1px 1px 1px #333;
 	box-sizing:border-box;
+	text-shadow:inherit;
 	outline:none;
 }
 .login button.active{
@@ -127,8 +130,8 @@
 }
 .login .message img{
 	width:24px;
-	margin:0px 2px;
-	filter:var(--image-filter-bright);
+	margin:0px 3px;
+	filter:var(--image-filter-bright-shade);
 }
 
 .login .custom{
@@ -154,5 +157,5 @@
 	font-style:italic;
 }
 .login .button img{
-	filter:var(--image-filter-bright);
+	filter:var(--image-filter-bright-shade);
 }

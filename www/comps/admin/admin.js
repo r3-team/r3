@@ -7,7 +7,7 @@ let MyAdmin = {
 		MyAdminDocs,
 	},
 	template:`<div class="admin">
-		<div class="navigation" :class="{ isDark:isDark }" :style="bgStyle">
+		<div class="navigation" :class="{ isDark:colorMenu.isDark() }" :style="bgStyle">
 			<div class="navigation-header">
 				<div class="row gap centered">
 					<img class="icon" src="images/serverCog.png" />
@@ -190,8 +190,8 @@ let MyAdmin = {
 		activated:(s) => s.$store.getters['local/activated'],
 		bgStyle:  (s) => s.$store.getters.colorMenuStyle,
 		capApp:   (s) => s.$store.getters.captions.admin,
+		colorMenu:(s) => s.$store.getters.colorMenu,
 		isAdmin:  (s) => s.$store.getters.isAdmin,
-		isDark:   (s) => s.$store.getters.colorMenuDark,
 		license:  (s) => s.$store.getters.license
 	},
 	methods:{

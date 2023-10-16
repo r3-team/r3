@@ -66,15 +66,16 @@
 	
 	/**/
 	/* images */
-	--image-list-cards:     url('../images/texture_paper01.webp');
-	--image-filter:         invert(1) contrast(var(--image-filter-contrast)) brightness(10%);
-	--image-filter-alt:     invert(1) contrast(var(--image-filter-contrast)) brightness(60%);
-	--image-filter-bg:      invert(1) contrast(var(--image-filter-contrast)) brightness(90%);
-	--image-filter-bright:  invert(1) contrast(var(--image-filter-contrast)) brightness(90%);
-	--image-filter-dark:    invert(1) contrast(var(--image-filter-contrast)) brightness(10%);
-	--image-filter-contrast:100%;
-	--image-filter-error:   invert(13%) sepia(92%) saturate(4089%) hue-rotate(359deg) brightness(97%) contrast(88%);
-	--image-filter-success: invert(36%) sepia(95%) saturate(788%) hue-rotate(76deg) brightness(98%) contrast(93%);
+	--image-list-cards:         url('../images/texture_paper01.webp');
+	--image-filter:             invert(1) brightness(10%);
+	--image-filter-alt:         invert(1) brightness(60%);
+	--image-filter-bg:          invert(1) brightness(90%);
+	--image-filter-bright:      invert(1) brightness(95%);
+	--image-filter-bright-shade:invert(1) brightness(95%) drop-shadow(1px 1px 2px rgba(0,0,0,0.6));
+	--image-filter-dark:        invert(1) brightness(10%);
+	--image-filter-dark-shade:  invert(1) brightness(10%) drop-shadow(1px 1px 2px rgba(0,0,0,0.6));
+	--image-filter-error:       invert(13%) sepia(92%) saturate(4089%) hue-rotate(359deg) brightness(97%) contrast(88%);
+	--image-filter-success:     invert(36%) sepia(95%) saturate(788%) hue-rotate(76deg) brightness(98%) contrast(93%);
 	
 	/**/
 	/* colors */
@@ -1293,7 +1294,7 @@ table td.maximum{
 	--color-form-builder-tabs:        hsl(104deg 15% 32%);
 	--color-form-builder-tabs-active: hsl(104deg 12% 39%);
 	
-	--image-filter:        invert(1) contrast(var(--image-filter-contrast)) brightness(90%);
+	--image-filter:        invert(1) brightness(90%);
 	--image-filter-bg:     var(--image-filter);
 	--image-filter-error:  invert(13%) sepia(92%) saturate(4889%) hue-rotate(359deg) brightness(97%) contrast(38%);
 	--image-filter-success:invert(36%) sepia(75%) saturate(1288%) hue-rotate(76deg) brightness(92%) contrast(18%);

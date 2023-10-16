@@ -25,7 +25,10 @@ let MyLogin = {
 			:src="customLogo"
 		/>
 		
-		<div class="header" :class="{ dark:true }">
+		<div class="header"
+			:class="{ dark:colorLogin.isDark() }"
+			:style="bgStyles"
+		>
 			<img src="images/lock.png" />
 			<span>{{ appName }}</span>
 		</div>
@@ -228,7 +231,10 @@ let MyLogin = {
 		},
 		
 		// states
-		//bgStyles:(s) => s.activated && s.companyColorLogin !== '' ? `background-color:#${s.companyColorLogin};` : '',
+		bgStyles:(s) => `
+			background-color:${s.colorLogin.setAlpha(0.8).toString()};
+			border-color:${s.colorLogin.darken(30).toString()};
+		`,
 		isValid: (s) => {
 			if(!s.showMfa)
 				return !s.badAuth && s.username !== '' && s.password !== '';
@@ -242,7 +248,6 @@ let MyLogin = {
 		activated:        (s) => s.$store.getters['local/activated'],
 		appName:          (s) => s.$store.getters['local/appName'],
 		appVersion:       (s) => s.$store.getters['local/appVersion'],
-		companyColorLogin:(s) => s.$store.getters['local/companyColorLogin'],
 		companyName:      (s) => s.$store.getters['local/companyName'],
 		companyWelcome:   (s) => s.$store.getters['local/companyWelcome'],
 		customLogo:       (s) => s.$store.getters['local/customLogo'],
@@ -250,6 +255,7 @@ let MyLogin = {
 		token:            (s) => s.$store.getters['local/token'],
 		tokenKeep:        (s) => s.$store.getters['local/tokenKeep'],
 		clusterNodeName:  (s) => s.$store.getters.clusterNodeName,
+		colorLogin:       (s) => s.$store.getters.colorLogin,
 		kdfIterations:    (s) => s.$store.getters.constants.kdfIterations,
 		productionMode:   (s) => s.$store.getters.productionMode
 	},

@@ -14,7 +14,7 @@ let MyBuilder = {
 		MyModuleSelect
 	},
 	template:`<div class="builder equal-width">
-		<div class="navigation" v-if="module" :class="{ isDark:isDark }" :style="bgStyle">
+		<div class="navigation" v-if="module" :class="{ isDark:colorMenu.isDark() }" :style="bgStyle">
 			<div class="navigation-header">
 				<div class="row gap centered">
 					<img class="icon"
@@ -450,7 +450,7 @@ let MyBuilder = {
 		builderEnabled:    (s) => s.$store.getters.builderEnabled,
 		capApp:            (s) => s.$store.getters.captions.builder,
 		capGen:            (s) => s.$store.getters.captions.generic,
-		isDark:            (s) => s.$store.getters.colorMenuDark,
+		colorMenu:         (s) => s.$store.getters.colorMenu,
 		settings:          (s) => s.$store.getters.settings
 	},
 	methods:{
