@@ -1,7 +1,9 @@
+import MyInputColor from '../inputColor.js';
 export {MyAdminLoginTemplate as default};
 
 let MyAdminLoginTemplate = {
 	name:'my-admin-login-template',
+	components:{ MyInputColor },
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
 		
 		<div class="contentBox admin-login-template float" v-if="inputsReady">
@@ -69,10 +71,6 @@ let MyAdminLoginTemplate = {
 						</td>
 					</tr>
 					<tr>
-						<td>{{ capAppSet.headerCaptions }}</td>
-						<td><my-bool v-model="settings.headerCaptions" /></td>
-					</tr>
-					<tr>
 						<td>{{ capAppSet.languageCode }}</td>
 						<td>
 							<select v-model="settings.languageCode">
@@ -94,19 +92,19 @@ let MyAdminLoginTemplate = {
 					</tr>
 					<tr>
 						<td>{{ capAppSet.sundayFirstDow }}</td>
-						<td><my-bool v-model="settings.sundayFirstDow" /></td>
+						<td><div class="row"><my-bool v-model="settings.sundayFirstDow" :grow="false" /></div></td>
 					</tr>
 					<tr>
 						<td>{{ capAppSet.tabRemember }}</td>
-						<td><my-bool v-model="settings.tabRemember" /></td>
+						<td><div class="row"><my-bool v-model="settings.tabRemember" :grow="false" /></div></td>
 					</tr>
 					<tr>
 						<td>{{ capAppSet.warnUnsaved }}</td>
-						<td><my-bool v-model="settings.warnUnsaved" /></td>
+						<td><div class="row"><my-bool v-model="settings.warnUnsaved" :grow="false" /></div></td>
 					</tr>
 					<tr>
 						<td>{{ capAppSet.mobileScrollForm }}</td>
-						<td><my-bool v-model="settings.mobileScrollForm" /></td>
+						<td><div class="row"><my-bool v-model="settings.mobileScrollForm" :grow="false" /></div></td>
 					</tr>
 					<tr>
 						<td>{{ capAppSet.searchDictionaries }}</td>
@@ -139,47 +137,56 @@ let MyAdminLoginTemplate = {
 						</td>
 					</tr>
 					<tr>
-						<td>{{ capAppSet.bordersAll }}</td>
-						<td><my-bool v-model="settings.bordersAll" /></td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.bordersSquared }}</td>
-						<td><my-bool v-model="settings.bordersSquared" /></td>
+						<td>{{ capAppSet.borders }}</td>
+						<td>
+							<div class="row gap">
+								<my-bool
+									v-model="settings.bordersAll"
+									:caption0="capGen.less"
+									:caption1="capGen.more"
+									:grow="false"
+								/>
+								<my-bool
+									v-model="settings.bordersSquared"
+									:caption0="capAppSet.bordersSquaredOff"
+									:caption1="capAppSet.bordersSquared"
+									:grow="false"
+								/>
+							</div>
+						</td>
 					</tr>
 					<tr>
 						<td>{{ capAppSet.fontFamily }}</td>
 						<td>
-							<select v-model="settings.fontFamily">
-								<optgroup label="sans-serif">
-									<option value="calibri">Calibri</option>
-									<option value="helvetica">Helvetica</option>
-									<option value="segoe_ui">Segoe UI</option>
-									<option value="trebuchet_ms">Trebuchet MS</option>
-									<option value="verdana">Verdana</option>
-								</optgroup>
-								<optgroup label="serif">
-									<option value="georgia">Georgia</option>
-									<option value="times_new_roman">Times New Roman</option>
-								</optgroup>
-								<optgroup label="cursive">
-									<option value="comic_sans_ms">Comic Sans</option>
-									<option value="segoe_script">Segoe Script</option>
-								</optgroup>
-								<optgroup label="monospace">
-									<option value="consolas">Consolas</option>
-									<option value="lucida_console">Lucida Console</option>
-								</optgroup>
-							</select>
-						</td>
-					</tr>
-					<tr>
-						<td>{{ capAppSet.fontSize }}</td>
-						<td>
-							<select v-model="settings.fontSize">
-								<option v-for="i in 11"
-									:value="70 + (i*5)"
-								>{{ (70 + (i*5)) + '%' }}</option>
-							</select>
+							<div class="row gap">
+								<select v-model="settings.fontFamily">
+									<optgroup label="sans-serif">
+										<option value="calibri">Calibri</option>
+										<option value="helvetica">Helvetica</option>
+										<option value="segoe_ui">Segoe UI</option>
+										<option value="trebuchet_ms">Trebuchet MS</option>
+										<option value="verdana">Verdana</option>
+									</optgroup>
+									<optgroup label="serif">
+										<option value="georgia">Georgia</option>
+										<option value="times_new_roman">Times New Roman</option>
+									</optgroup>
+									<optgroup label="cursive">
+										<option value="comic_sans_ms">Comic Sans</option>
+										<option value="segoe_script">Segoe Script</option>
+									</optgroup>
+									<optgroup label="monospace">
+										<option value="consolas">Consolas</option>
+										<option value="lucida_console">Lucida Console</option>
+									</optgroup>
+								</select>
+									
+								<select class="short" v-model="settings.fontSize" :title="capAppSet.fontSize">
+									<option v-for="i in 11"
+										:value="70 + (i*5)"
+									>{{ (70 + (i*5)) + '%' }}</option>
+								</select>
+							</div>
 						</td>
 					</tr>
 					<tr>
@@ -206,7 +213,56 @@ let MyAdminLoginTemplate = {
 					</tr>
 					<tr>
 						<td>{{ capAppSet.dark }}</td>
-						<td><my-bool v-model="settings.dark" /></td>
+						<td><div class="row"><my-bool v-model="settings.dark" :grow="false" /></div></td>
+					</tr>
+					<tr>
+						<td colspan="2"><b>{{ capAppSet.titleSubHeader }}</b></td>
+					</tr>
+					<tr>
+						<td>{{ capGen.applications }}</td>
+						<td>
+							<div class="row gap">
+								<my-bool v-model="settings.headerModules"
+									:caption0="capGen.button.hide"
+									:caption1="capGen.button.show"
+									:grow="false"
+								/>
+								<my-bool
+									v-if="settings.headerModules"
+									v-model="settings.headerCaptions"
+									:caption0="capAppSet.headerCaptionsOff"
+									:caption1="capAppSet.headerCaptions"
+									:grow="false"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr class="default-inputs">
+						<td>{{ capAppSet.colorClassicMode }}</td>
+						<td>
+							<select
+								@input="settings.colorClassicMode = $event.target.value === '1'"
+								:value="settings.colorClassicMode ? '1' : '0'"
+							>
+								<option value="0">{{ capAppSet.colorClassicMode0 }}</option>
+								<option value="1">{{ capAppSet.colorClassicMode1 }}</option>
+							</select>
+						</td>
+					</tr>
+					<tr v-if="!settings.colorClassicMode">
+						<td>{{ capAppSet.colorHeader }}</td>
+						<td><my-input-color v-model="settings.colorHeader" :allowNull="true" /></td>
+					</tr>
+					<tr v-if="!settings.colorClassicMode">
+						<td>{{ capAppSet.colorHeaderSingle }}</td>
+						<td><div class="row"><my-bool v-model="settings.colorHeaderSingle" :grow="false" :reversed="true" /></div></td>
+					</tr>
+					<tr>
+						<td colspan="2"><b>{{ capAppSet.titleSubMenu }}</b></td>
+					</tr>
+					<tr>
+						<td>{{ capAppSet.colorMenu }}</td>
+						<td><my-input-color v-model="settings.colorMenu" :allowNull="true" /></td>
 					</tr>
 				</table>
 			</div>
