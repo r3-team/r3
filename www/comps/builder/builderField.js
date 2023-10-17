@@ -267,8 +267,8 @@ let MyBuilderField = {
 		uiScale:        { type:Number,  required:true }
 	},
 	emits:[
-		'column-id-show','field-counter-set','field-id-show','field-remove',
-		'field-move','field-property-set','field-move-store'
+		'column-id-show','field-counter-set','field-id-show','field-move',
+		'field-move-store','field-property-set','field-remove'
 	],
 	data() {
 		return {
@@ -305,6 +305,9 @@ let MyBuilderField = {
 			};
 		},
 		cssClassChildren:(s) => {
+			if(s.isTemplate || !s.isContainer)
+				return [];
+			
 			// default classed
 			let out = [];
 			if(s.field.fields.length === 0) out.push('empty');
@@ -399,11 +402,11 @@ let MyBuilderField = {
 		isTabs:        (s) => s.field.content === 'tabs',
 		isSelected:    (s) => s.field.id      === s.fieldIdShow,
 		isRelationship:(s) => !s.isData ? false : s.isAttributeRelationship(s.attribute.content),
-		parentChildren:(s) => s.isContainer ? s.field.fields : s.field.tabs[s.tabIndex].fields,
+		parentChildren:(s) => s.isContainer ? s.field.fields : (s.isTabs ? s.field.tabs[s.tabIndex].fields : []),
 		moveActive:    (s) => s.fieldMoveList !== null,
 		reference:     (s) => s.isTemplate ? '' : 'F' + s.entityIdMapRef.field[s.field.id],
 		showColumns:   (s) => !s.isTemplate && s.hasQuery && ((s.fieldIdShow === s.field.id && s.fieldIdShowTab === 'content') || s.showColumnsAll),
-		tabIndexShown: (s) => s.tabIndex >= s.field.tabs.length ? 0 : s.tabIndex,
+		tabIndexShown: (s) => s.isTabs && s.field.tabs.length > s.tabIndex ? s.tabIndex : 0,
 		
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
