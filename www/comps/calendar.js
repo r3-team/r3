@@ -444,6 +444,7 @@ let MyCalendar = {
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
 		capApp:        (s) => s.$store.getters.captions.calendar,
 		capGen:        (s) => s.$store.getters.captions.generic,
 		isMobile:      (s) => s.$store.getters.isMobile,
