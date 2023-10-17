@@ -117,15 +117,15 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			ALTER TABLE instance.login_setting ADD   COLUMN color_classic_mode  BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.login_setting ALTER COLUMN color_classic_mode  DROP DEFAULT;
-			ALTER TABLE instance.login_setting ADD   COLUMN color_header        CHARACTER VARYING(6);
-			ALTER TABLE instance.login_setting ADD   COLUMN color_menu          CHARACTER VARYING(6);
+			ALTER TABLE instance.login_setting ADD   COLUMN color_header        CHARACTER(6);
+			ALTER TABLE instance.login_setting ADD   COLUMN color_menu          CHARACTER(6);
 			ALTER TABLE instance.login_setting ADD   COLUMN color_header_single BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.login_setting ALTER COLUMN color_header_single DROP DEFAULT;
 			ALTER TABLE instance.login_setting ADD   COLUMN header_modules BOOLEAN NOT NULL DEFAULT TRUE;
 			ALTER TABLE instance.login_setting ALTER COLUMN header_modules DROP DEFAULT;
 			
 			-- menu colors
-			ALTER TABLE app.menu ADD COLUMN color CHARACTER VARYING(6);
+			ALTER TABLE app.menu ADD COLUMN color CHARACTER(6);
 			
 			-- login background images
 			INSERT INTO instance.config (name,value) VALUES ('loginBackgrounds','[1,2,3,4,5,6,7,8,9,10,11,12]');
