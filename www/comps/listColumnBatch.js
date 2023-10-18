@@ -64,14 +64,14 @@ let MyListColumnBatch = {
 				</div>
 				
 				<!-- aggregation -->
-				<div class="columnOptionItem" v-if="canAggregate">
+				<div class="columnOptionItem" v-if="aggrColumn !== null">
 					<my-button image="sum.png"
-						@trigger="aggregatorProcessed = ''"
-						:active="aggregatorProcessed !== ''"
+						@trigger="aggregatorInput = ''"
+						:active="aggregatorInput !== ''"
 						:captionTitle="capApp.button.aggregatorsHint"
 						:naked="true"
 					/>
-					<select v-model="aggregatorProcessed">
+					<select v-model="aggregatorInput">
 						<option value="">-</option>
 						<option value="avg">{{ capGen.option.aggAvg }}</option>
 						<option value="count">{{ capGen.option.aggCount }}</option>
@@ -140,18 +140,18 @@ let MyListColumnBatch = {
 		</div>
 	</div>`,
 	props:{
-		aggregator:   { required:true },
-		columnBatch:  { type:Object,  required:true }, // column batch to show options for
-		columns:      { type:Array,   required:true }, // list columns
-		columnSortPos:{ type:Number,  required:true }, // list sort for this column (number indicates sort position)
-		filters:      { type:Array,   required:true }, // list filters (predefined)
-		filtersColumn:{ type:Array,   required:true }, // list filters from users column selection
-		lastInRow:    { type:Boolean, required:true },
-		joins:        { type:Array,   required:true }, // list joins
-		orders:       { type:Array,   required:true }, // list orders
-		relationId:   { type:String,  required:true }, // list query base relation ID
-		rowCount:     { type:Number,  required:true }, // list total row count
-		show:         { type:Boolean, required:true }
+		columnBatch:    { type:Object,  required:true }, // column batch to show options for
+		columnIdMapAggr:{ type:Object,  required:true },
+		columns:        { type:Array,   required:true }, // list columns
+		columnSortPos:  { type:Number,  required:true }, // list sort for this column (number indicates sort position)
+		filters:        { type:Array,   required:true }, // list filters (predefined)
+		filtersColumn:  { type:Array,   required:true }, // list filters from users column selection
+		lastInRow:      { type:Boolean, required:true },
+		joins:          { type:Array,   required:true }, // list joins
+		orders:         { type:Array,   required:true }, // list orders
+		relationId:     { type:String,  required:true }, // list query base relation ID
+		rowCount:       { type:Number,  required:true }, // list total row count
+		show:           { type:Boolean, required:true }
 	},
 	emits:[
 		'close','del-aggregator','del-order','set-aggregator',
@@ -176,9 +176,16 @@ let MyListColumnBatch = {
 		}
 	},
 	computed:{
-		aggregatorProcessed:{
-			get()  { return typeof this.aggregator !== 'undefined' ? this.aggregator : ''; },
-			set(v) { this.$emit(v === '' ? 'del-aggregator' : 'set-aggregator', v); }
+		aggregatorInput:{
+			get()  {
+				return this.aggrColumn !== null &&
+					typeof this.columnIdMapAggr[this.aggrColumn.id] !== 'undefined'
+					? this.columnIdMapAggr[this.aggrColumn.id] : '';
+			},
+			set(v) {
+				if(v === '') this.$emit('del-aggregator',this.aggrColumn.id,null);
+				else         this.$emit('set-aggregator',this.aggrColumn.id,v);
+			}
 		},
 		
 		// returns column of the column batch that is used for filtering (null if none is available)
@@ -215,7 +222,7 @@ let MyListColumnBatch = {
 		},
 		
 		// simple
-		canAggregate:   (s) => s.getFirstColumnUsableAsAggregator(s.columnBatch,s.columns) !== null,
+		aggrColumn:     (s) => s.getFirstColumnUsableAsAggregator(s.columnBatch,s.columns),
 		canOpen:        (s) => s.rowCount > 1 || s.isFiltered,
 		showFilterAny:  (s) => s.showFilterItems || s.showFilterText,
 		showFilterItems:(s) => s.values.length != 0,

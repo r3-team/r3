@@ -385,14 +385,14 @@ let MyList = {
 								<th v-for="(b,i) in columnBatches">
 									<my-list-column-batch
 										@close="columnBatchIndexOption = -1"
-										@del-aggregator="setAggregators(i,null)"
+										@del-aggregator="setAggregators"
 										@del-order="setOrder(b,null)"
-										@set-aggregator="setAggregators(i,$event)"
+										@set-aggregator="setAggregators"
 										@set-filters="filtersColumn = $event;reloadInside('filtersColumn')"
 										@set-order="setOrder(b,$event)"
 										@toggle="clickColumn(i)"
-										:aggregator="columnBatchIndexMapAggr[i]"
 										:columnBatch="b"
+										:columnIdMapAggr="columnIdMapAggr"
 										:columns="columns"
 										:columnSortPos="getColumnBatchSortPos(b)"
 										:filters="filters"
@@ -509,7 +509,7 @@ let MyList = {
 							<!-- result aggregations -->
 							<my-list-aggregate ref="aggregations"
 								:columnBatches="columnBatches"
-								:columnBatchIndexMapAggr="columnBatchIndexMapAggr"
+								:columnIdMapAggr="columnIdMapAggr"
 								:columns="columns"
 								:filters="filtersCombined"
 								:leaveOneEmpty="hasBulkActions"
@@ -710,15 +710,15 @@ let MyList = {
 			cardsOrderByColumnIndex:-1,
 			
 			// list data
-			columnBatchIndexMapAggr:{}, // map of aggregators, key: column batch index
-			count:0,          // total result set count
-			limit:0,          // current result limit
-			offset:0,         // current result offset
-			orders:[],        // column orderings, copied on mount, changable by user
-			rows:[],          // current result set
-			filtersColumn:[], // current user column filters
-			filtersQuick:'',  // current user quick text filter
-			filtersUser:[],   // current user filters
+			columnIdMapAggr:{}, // aggregators by column ID
+			count:0,            // total result set count
+			limit:0,            // current result limit
+			offset:0,           // current result offset
+			orders:[],          // column orderings, copied on mount, changable by user
+			rows:[],            // current result set
+			filtersColumn:[],   // current user column filters
+			filtersQuick:'',    // current user quick text filter
+			filtersUser:[],     // current user filters
 			
 			// list constants
 			refTabindex:'input_row_', // prefix for vue references to tabindex elements
@@ -1007,10 +1007,10 @@ let MyList = {
 		}
 		
 		// load cached list options
-		this.filtersColumn = this.fieldOptionGet(this.fieldId,'filtersColumn',[]);
-		this.filtersQuick  = this.fieldOptionGet(this.fieldId,'filtersQuick','');
-		this.filtersUser   = this.fieldOptionGet(this.fieldId,'filtersUser',[]);
-		this.columnBatchIndexMapAggr = this.fieldOptionGet(this.fieldId,'columnBatchIndexMapAggr',{});
+		this.filtersColumn   = this.fieldOptionGet(this.fieldId,'filtersColumn',[]);
+		this.filtersQuick    = this.fieldOptionGet(this.fieldId,'filtersQuick','');
+		this.filtersUser     = this.fieldOptionGet(this.fieldId,'filtersUser',[]);
+		this.columnIdMapAggr = this.fieldOptionGet(this.fieldId,'columnIdMapAggr',{});
 	},
 	beforeUnmount() {
 		this.setAutoRenewTimer(true);
@@ -1246,13 +1246,11 @@ let MyList = {
 				}
 			}
 		},
-		setAggregators(columnBatchIndex,aggregator) {
-			if(aggregator !== null)
-				this.columnBatchIndexMapAggr[columnBatchIndex] = aggregator;
-			else
-				delete(this.columnBatchIndexMapAggr[columnBatchIndex]);
+		setAggregators(columnId,aggregator) {
+			if(aggregator !== null) this.columnIdMapAggr[columnId] = aggregator;
+			else                    delete(this.columnIdMapAggr[columnId]);
 			
-			this.fieldOptionSet(this.fieldId,'columnBatchIndexMapAggr',this.columnBatchIndexMapAggr);
+			this.fieldOptionSet(this.fieldId,'columnIdMapAggr',this.columnIdMapAggr);
 			this.$refs.aggregations.get();
 		},
 		setAutoRenewTimer(justClear) {
