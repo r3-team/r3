@@ -11,25 +11,37 @@ let MyListAggregate = {
 	template:`<tr class="aggregation" v-if="anyValues">
 		<td v-if="leaveOneEmpty"></td>
 		<td v-for="(b,i) in columnBatches">
-			{{ typeof columnBatchIndexMapValue[i] !== 'undefined' ? columnBatchIndexMapValue[i] : '' }}
+			{{ valuesByColumnBatch[i] !== null ? valuesByColumnBatch[i] : '' }}
 		</td>
 	</tr>`,
 	props:{
-		columnBatches:          { type:Array,   required:true }, // list column batches
-		columnBatchIndexMapAggr:{ type:Object,  required:true }, // list aggregators
-		columns:                { type:Array,   required:true }, // list columns
-		filters:                { type:Array,   required:true }, // list filters
-		leaveOneEmpty:          { type:Boolean, required:true },
-		joins:                  { type:Array,   required:true }, // list joins
-		relationId:             { type:String,  required:true }  // list base relation
+		columnBatches:  { type:Array,   required:true }, // list column batches
+		columnIdMapAggr:{ type:Object,  required:true }, // map of aggregators by column ID
+		columns:        { type:Array,   required:true }, // list columns
+		filters:        { type:Array,   required:true }, // list filters
+		leaveOneEmpty:  { type:Boolean, required:true },
+		joins:          { type:Array,   required:true }, // list joins
+		relationId:     { type:String,  required:true }  // list base relation
 	},
 	data() {
 		return {
-			columnBatchIndexMapValue:{}
+			valuesByColumnBatch:[]
 		};
 	},
 	computed:{
-		anyValues: (s) => Object.keys(s.columnBatchIndexMapValue).length !== 0,
+		// map aggregator column ID to corresponding column batch index
+		columnIdMapColumnBatchIndex:(s) => {
+			let out = {};
+			for(let i = 0, j = s.columnBatches.length; i < j; i++) {
+				const c = s.getFirstColumnUsableAsAggregator(s.columnBatches[i],s.columns);
+				
+				if(c !== null)
+					out[c.id] = i;
+			}
+			return out;
+		},
+		
+		anyValues: (s) => s.valuesByColumnBatch.length !== 0,
 		dateFormat:(s) => s.$store.getters.settings.dateFormat,
 		
 		// stores
@@ -44,22 +56,19 @@ let MyListAggregate = {
 		
 		// calls
 		get() {
-			this.columnBatchIndexMapValue = {};
+			this.valuesByColumnBatch = [];
+			
 			let columns = [];
-			for(let i = 0, j = this.columnBatches.length; i < j; i++) {
-				if(typeof this.columnBatchIndexMapAggr[i] === 'undefined')
-					continue;
-				
-				let b = this.columnBatches[i];
-				let c = JSON.parse(JSON.stringify(
-					this.getFirstColumnUsableAsAggregator(b,this.columns)
-				));
-				
-				if(c === null)
-					continue;
-				
-				c.aggregator = this.columnBatchIndexMapAggr[i];
-				columns.push(c);
+			for(let columnId in this.columnIdMapAggr) {
+				for(let column of this.columns) {
+					if(column.id !== columnId)
+						continue;
+					
+					const c = JSON.parse(JSON.stringify(column));
+					c.aggregator = this.columnIdMapAggr[columnId];
+					columns.push(c);
+					break;
+				}
 			}
 			
 			if(columns.length === 0)
@@ -72,36 +81,30 @@ let MyListAggregate = {
 				filters:this.filters
 			},false).then(
 				res => {
-					let values = [];
-					for(let r of res.payload.rows) {
-						for(let v of r.values) {
-							values.push(v);
-						}
+					if(res.payload.rows.length !== 1 || res.payload.rows[0].values.length !== columns.length)
+						return;
+					
+					const row = res.payload.rows[0];
+					
+					for(let b of this.columnBatches) {
+						this.valuesByColumnBatch.push(null);
 					}
 					
-					// set aggregated values
-					let valueIndex = -1;
-					for(let i = 0, j = this.columnBatches.length; i < j; i++) {
-						
-						if(typeof this.columnBatchIndexMapAggr[i] === 'undefined')
-							continue;
-						
-						valueIndex++;
-						let a = this.columnBatchIndexMapAggr[i];
-						let v = values[valueIndex];
+					for(let i = 0, j = columns.length; i < j; i++) {
+						const c  = columns[i];
+						let   v  = row.values[i];
 						
 						// count aggregations can be taken directly
-						if(a === 'count') {
-							this.columnBatchIndexMapValue[i] = v;
-							continue;
+						if(c.aggregator !== 'count') {
+							switch(this.attributeIdMap[c.attributeId].contentUse) {
+								case 'date':     v = this.getUnixFormat(v,this.dateFormat);          break;
+								case 'datetime': v = this.getUnixFormat(v,this.dateFormat + ' H:i'); break;
+								case 'time':     v = this.getUtcTimeStringFromUnix(v);               break;
+							}
 						}
 						
-						switch(this.attributeIdMap[columns[valueIndex].attributeId].contentUse) {
-							case 'date':     v = this.getUnixFormat(v,this.dateFormat); break;
-							case 'datetime': v = this.getUnixFormat(v,this.dateFormat + ' H:i'); break;
-							case 'time':     v = this.getUtcTimeStringFromUnix(v); break;
-						}
-						this.columnBatchIndexMapValue[i] = v;
+						const bi = this.columnIdMapColumnBatchIndex[c.id];
+						this.valuesByColumnBatch[bi] = v;
 					}
 				},
 				this.$root.genericError

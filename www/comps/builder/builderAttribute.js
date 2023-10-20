@@ -552,6 +552,7 @@ let MyBuilderAttribute = {
 				case 'date':     this.values.def = 'EXTRACT(EPOCH FROM CURRENT_DATE)'; break;
 				case 'datetime': this.values.def = 'EXTRACT(EPOCH FROM NOW())';        break;
 				case 'uuid':     this.values.def = 'GEN_RANDOM_UUID()';                break;
+				default:         this.values.def = '';                                 break;
 			}
 		},
 		updateLength() {

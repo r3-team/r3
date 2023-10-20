@@ -109,11 +109,6 @@ const MyStoreLocal = {
 			set('tokenKeep',payload);
 		},
 		schemaTimestamp(state,payload) {
-			// if schema timestamp changed from last known one, reset dependent data
-			if(state.schemaTimestamp !== payload) {
-				state.fieldIdMapOption = {};
-				set('fieldIdMapOption',{});
-			}
 			state.schemaTimestamp = payload;
 			set('schemaTimestamp',payload);
 		}
@@ -156,7 +151,7 @@ let init = function() {
 		if(typeof value !== 'undefined' && value !== null)
 			MyStoreLocal.state[k] = JSON.parse(value);
 	}
-} ()
+}();
 
 let set = function(name,value) {
 	if(typeof value !== 'undefined')

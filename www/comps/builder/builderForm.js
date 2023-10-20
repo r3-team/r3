@@ -149,7 +149,6 @@ let MyBuilderForm = {
 				<!-- form builder fields -->
 				<my-builder-fields class="builder-form-fields default-inputs" flexDirParent="column"
 					@column-id-show="(...args) => setFieldShow(args[0],args[1],'content')"
-					@fields-set="fields = $event"
 					@field-counter-set="fieldCounter = $event"
 					@field-id-show="(...args) => setFieldShow(args[0],null,args[1])"
 					@field-move-store="fieldMoveStore"

@@ -670,6 +670,11 @@ let MyKanban = {
 					if(columnIndex === columnIndexColor)
 						continue;
 					
+					const column = this.columns[columnIndex];
+					
+					if(column.display === 'hidden' || (this.isMobile && !column.onMobile))
+						continue;
+					
 					values.push({
 						columnIndex:columnIndex,
 						value:r.values[columnIndex]
