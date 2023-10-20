@@ -6,7 +6,7 @@ let MyInputSelect = {
 		@keyup.esc="escape"
 		v-click-outside="escape"
 	>
-		<div class="part row gap">
+		<div class="part row gap" @click="toggle" :class="{ clickable:!readonly }">
 			<input class="input" data-is-input="1" type="text"
 				v-model="textInput"
 				@focus="$emit('focused')"
@@ -18,15 +18,16 @@ let MyInputSelect = {
 				:tabindex="!readonly ? 0 : -1"
 			/>
 			
-			<div class="actions">
+			<div class="row centered">
 				<my-button image="cancel.png"
-					v-if="selected !== null && !readonly"
+					v-if="selected !== null"
 					@trigger="clear"
+					:active="!readonly"
 					:naked="nakedIcons"
 				/>
 				<my-button image="pageDown.png"
-					v-if="!readonly"
-					@trigger="toggle"
+					v-if="selected === null"
+					:active="!readonly"
 					:naked="nakedIcons"
 				/>
 			</div>
@@ -105,6 +106,9 @@ let MyInputSelect = {
 			this.$emit('request-data');
 		},
 		toggle() {
+			if(this.readonly)
+				return;
+			
 			if(this.showDropdown) {
 				this.showDropdown = false;
 				return;

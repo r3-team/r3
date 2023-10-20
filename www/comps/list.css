@@ -368,9 +368,6 @@
 .list-input-rows td{
 	padding:0px;
 }
-.list-input-rows.multi-line td{
-	border-bottom:1px dotted var(--color-border);
-}
 .list-input-row-items{
 	display:flex;
 	flex-flow:row wrap;
@@ -385,6 +382,9 @@
 }
 .list-input-row-actions{
 	background-color:var(--color-bg);
+}
+.list-input-rows-wrap.multi-line .list-input-rows td{
+	border-bottom:1px dotted var(--color-border);
 }
 
 

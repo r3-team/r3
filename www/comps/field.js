@@ -354,7 +354,6 @@ let MyField = {
 				
 				<!-- color input -->
 				<div class="color-input" v-if="isColor">
-					
 					<input class="input" data-is-input="1" type="text"
 						@blur="blur"
 						@focus="focus"

@@ -314,17 +314,17 @@ let MyInputDate = {
 					:naked="true"
 				/>
 				
-				<!-- set null -->
-				<my-button image="cancel.png"
-					v-if="unixFrom !== null || unixTo !== null"
-					@trigger="setNull()"
-					:naked="true"
-				/>
-				
 				<!-- toggle calendar -->
 				<my-button image="calendar.png"
 					v-if="isDate"
 					@trigger="toggleCalendar"
+					:naked="true"
+				/>
+				
+				<!-- set null -->
+				<my-button image="cancel.png"
+					@trigger="setNull()"
+					:active="unixFrom !== null || unixTo !== null"
 					:naked="true"
 				/>
 			</div>

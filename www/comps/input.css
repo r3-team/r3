@@ -85,11 +85,6 @@
 .input-select .part{
 	flex:1 1 auto;
 }
-.input-select .actions{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-}
 .input-select .entry.inactive{
 	color:var(--color-font-disabled);
 }
@@ -191,7 +186,8 @@
 	bottom:calc(var(--row-height) + 1px);
 }
 .input-dropdown .entry{
-	padding:5px 10px;
+	padding:4px 10px;
+	border-bottom:1px solid var(--color-border);
 }
 .input-dropdown .entry:focus,
 .input-dropdown .entry:hover{

@@ -55,8 +55,11 @@ let MyList = {
 	>
 		<!-- list as input field (showing record(s) from active field value) -->
 		<template v-if="isInput">
-			<div class="list-input-rows-wrap">
-				<table class="list-input-rows" :class="{ 'multi-line':inputMulti }">
+			<div class="list-input-rows-wrap"
+				@click="clickInputRow"
+				:class="{ clickable:!inputMulti && !inputIsReadonly, 'multi-line':inputMulti }"
+			>
+				<table class="list-input-rows">
 					<tr v-for="(r,i) in rowsInput">
 						
 						<!-- icons / checkboxes -->
@@ -117,24 +120,19 @@ let MyList = {
 						<!-- actions -->
 						<td class="minimum">
 							<div class="list-input-row-items nogap nowrap">
-								<my-button image="cancel.png"
-									v-if="!inputIsReadonly && !inputAsCategory"
-									@trigger="inputTriggerRowRemove(i)"
-									:captionTitle="capApp.inputHintRemove"
-									:naked="true"
-								/>
 								<my-button image="open.png"
 									v-if="hasUpdate"
 									@trigger="clickOpen(r,false)"
 									@trigger-middle="clickOpen(r,true)"
+									:blockBubble="true"
 									:captionTitle="capApp.inputHintOpen"
 									:naked="true"
 								/>
-								
-								<!-- show dropdown toggle if single input -->
-								<my-button image="pageDown.png"
-									v-if="!inputAsCategory && !showInputAddLine && !inputIsReadonly"
-									@trigger="toggleDropdown"
+								<my-button image="cancel.png"
+									v-if="!inputAsCategory"
+									@trigger="inputTriggerRowRemove(i)"
+									:active="!inputIsReadonly"
+									:captionTitle="capApp.inputHintRemove"
 									:naked="true"
 								/>
 							</div>
@@ -144,7 +142,11 @@ let MyList = {
 			</div>
 			
 			<!-- empty record input field -->
-			<table class="list-input-rows" v-if="showInputAddLine">
+			<table class="list-input-rows"
+				v-if="showInputAddLine"
+				@click="clickInputEmpty"
+				:class="{ clickable:!inputIsReadonly }"
+			>
 				<tr>
 					<td class="minimum">
 						<slot name="input-icon" />
@@ -169,13 +171,12 @@ let MyList = {
 								v-if="!inputIsReadonly && hasCreate"
 								@trigger="$emit('open-form',[],false)"
 								@trigger-middle="$emit('open-form',[],true)"
+								:blockBubble="true"
 								:captionTitle="capApp.inputHintCreate"
 								:naked="true"
 							/>
 							<my-button image="pageDown.png"
-								v-if="!inputIsReadonly"
-								@trigger="toggleDropdown"
-								:captionTitle="capApp.inputHintSelect"
+								:active="!inputIsReadonly"
 								:naked="true"
 							/>
 						</div>
@@ -1171,6 +1172,14 @@ let MyList = {
 		clickOnEmpty() {
 			this.$emit('close-inline');
 		},
+		clickInputEmpty() {
+			if(!this.inputIsReadonly)
+				this.toggleDropdown();
+		},
+		clickInputRow() {
+			if(!this.inputAsCategory && !this.showInputAddLine && !this.inputIsReadonly)
+				this.toggleDropdown();
+		},
 		clickRow(row,middleClick) {
 			if(!this.isInput)
 				return this.clickOpen(row,middleClick);
@@ -1310,6 +1319,10 @@ let MyList = {
 			if(this.showTable) {
 				this.filtersQuick = '';
 				this.reloadInside('dropdown');
+				
+				const inputEl = this.$refs.content.querySelector('[data-is-input="1"]');
+				if(inputEl !== null)
+					inputEl.focus();
 			}
 		},
 		toggleUserFilters() {
