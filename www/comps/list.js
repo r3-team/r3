@@ -55,134 +55,133 @@ let MyList = {
 	>
 		<!-- list as input field (showing record(s) from active field value) -->
 		<template v-if="isInput">
-			<table class="list-input-rows" :class="{ 'multi-line':inputMulti }">
-				<tr v-for="(r,i) in rowsInput">
-					
-					<!-- icons / checkboxes -->
-					<td class="minimum">
-						<div class="list-input-row-items nowrap">
-							
-							<!-- either field/attribute icon or gallery file from first column -->
-							<slot name="input-icon"
-								v-if="!hasGalleryIcon || r.values[0] === null"
-							/>
-							<my-value-rich class="context-list-input"
-								v-else
-								@focus="focus"
-								:attribute-id="columns[0].attributeId"
-								:class="{ clickable:inputAsCategory && !inputIsReadonly }"
-								:basis="columns[0].basis"
-								:display="columns[0].display"
-								:length="columns[0].length"
-								:value="r.values[0]"
-								:wrap="columns[0].wrap"
-							/>
-							
-							<!-- category input check box -->
-							<my-button
-								v-if="inputAsCategory"
-								@trigger="inputTriggerRow(r)"
-								:active="!inputIsReadonly"
-								:image="displayRecordCheck(inputRecordIds.includes(r.indexRecordIds['0']))"
-								:naked="true"
-							/>
-						</div>
-					</td>
-					
-					<!-- values -->
-					<td v-for="(b,bi) in columnBatches" :style="b.style">
-						<div class="list-input-row-items">
-							<template v-for="(ci,cii) in b.columnIndexes">
-								<my-value-rich class="context-list-input"
-									v-if="r.values[ci] !== null && (!hasGalleryIcon || bi !== 0 || cii !== 0)"
-									@focus="focus"
-									@trigger="inputTriggerRow(r)"
-									:attribute-id="columns[ci].attributeId"
-									:class="{ clickable:inputAsCategory && !inputIsReadonly }"
-									:basis="columns[ci].basis"
-									:bold="columns[ci].styles.includes('bold')"
-									:clipboard="columns[ci].clipboard"
-									:display="columns[ci].display"
-									:italic="columns[ci].styles.includes('italic')"
-									:key="ci"
-									:length="columns[ci].length"
-									:value="r.values[ci]"
-									:wrap="columns[ci].wrap"
-								/>
-							</template>
-						</div>
-					</td>
-					
-					<!-- actions -->
-					<td class="minimum">
-						<div class="list-input-row-items nogap nowrap">
-							<my-button image="cancel.png"
-								v-if="!inputIsReadonly && !inputAsCategory"
-								@trigger="inputTriggerRowRemove(i)"
-								:captionTitle="capApp.inputHintRemove"
-								:naked="true"
-							/>
-							<my-button image="open.png"
-								v-if="hasUpdate"
-								@trigger="clickOpen(r,false)"
-								@trigger-middle="clickOpen(r,true)"
-								:captionTitle="capApp.inputHintOpen"
-								:naked="true"
-							/>
-							
-							<!-- show dropdown toggle if single input -->
-							<my-button image="pageDown.png"
-								v-if="!inputAsCategory && !showInputAddLine && !inputIsReadonly"
-								@trigger="toggleDropdown"
-								:naked="true"
-							/>
-						</div>
-					</td>
-				</tr>
-			</table>
-			
-			<template v-if="showInputAddLine">
-				<!-- empty record input field -->
-				
-				<table class="list-input-rows">
-					<tr>
+			<div class="list-input-rows-wrap">
+				<table class="list-input-rows" :class="{ 'multi-line':inputMulti }">
+					<tr v-for="(r,i) in rowsInput">
+						
+						<!-- icons / checkboxes -->
 						<td class="minimum">
-							<slot name="input-icon" />
-						</td>
-						<td>
-							<div class="list-input-row-items">
-								<input class="input" data-is-input="1" enterkeyhint="send"
-									@click="focus"
+							<div class="list-input-row-items nowrap">
+								
+								<!-- either field/attribute icon or gallery file from first column -->
+								<slot name="input-icon"
+									v-if="!hasGalleryIcon || r.values[0] === null"
+								/>
+								<my-value-rich class="context-list-input"
+									v-else
 									@focus="focus"
-									@keyup="updatedTextInput"
-									v-model="filtersQuick"
-									:class="{ invalid:!inputValid }"
-									:disabled="inputIsReadonly"
-									:placeholder="inputLinePlaceholder"
-									:tabindex="!inputIsReadonly ? 0 : -1"
+									:attribute-id="columns[0].attributeId"
+									:class="{ clickable:inputAsCategory && !inputIsReadonly }"
+									:basis="columns[0].basis"
+									:display="columns[0].display"
+									:length="columns[0].length"
+									:value="r.values[0]"
+									:wrap="columns[0].wrap"
+								/>
+								
+								<!-- category input check box -->
+								<my-button
+									v-if="inputAsCategory"
+									@trigger="inputTriggerRow(r)"
+									:active="!inputIsReadonly"
+									:image="displayRecordCheck(inputRecordIds.includes(r.indexRecordIds['0']))"
+									:naked="true"
 								/>
 							</div>
 						</td>
+						
+						<!-- values -->
+						<td v-for="(b,bi) in columnBatches" :style="b.style">
+							<div class="list-input-row-items">
+								<template v-for="(ci,cii) in b.columnIndexes">
+									<my-value-rich class="context-list-input"
+										v-if="r.values[ci] !== null && (!hasGalleryIcon || bi !== 0 || cii !== 0)"
+										@focus="focus"
+										@trigger="inputTriggerRow(r)"
+										:attribute-id="columns[ci].attributeId"
+										:class="{ clickable:inputAsCategory && !inputIsReadonly }"
+										:basis="columns[ci].basis"
+										:bold="columns[ci].styles.includes('bold')"
+										:clipboard="columns[ci].clipboard"
+										:display="columns[ci].display"
+										:italic="columns[ci].styles.includes('italic')"
+										:key="ci"
+										:length="columns[ci].length"
+										:value="r.values[ci]"
+										:wrap="columns[ci].wrap"
+									/>
+								</template>
+							</div>
+						</td>
+						
+						<!-- actions -->
 						<td class="minimum">
 							<div class="list-input-row-items nogap nowrap">
-								<my-button image="add.png"
-									v-if="!inputIsReadonly && hasCreate"
-									@trigger="$emit('open-form',[],false)"
-									@trigger-middle="$emit('open-form',[],true)"
-									:captionTitle="capApp.inputHintCreate"
+								<my-button image="cancel.png"
+									v-if="!inputIsReadonly && !inputAsCategory"
+									@trigger="inputTriggerRowRemove(i)"
+									:captionTitle="capApp.inputHintRemove"
 									:naked="true"
 								/>
+								<my-button image="open.png"
+									v-if="hasUpdate"
+									@trigger="clickOpen(r,false)"
+									@trigger-middle="clickOpen(r,true)"
+									:captionTitle="capApp.inputHintOpen"
+									:naked="true"
+								/>
+								
+								<!-- show dropdown toggle if single input -->
 								<my-button image="pageDown.png"
-									v-if="!inputIsReadonly"
+									v-if="!inputAsCategory && !showInputAddLine && !inputIsReadonly"
 									@trigger="toggleDropdown"
-									:captionTitle="capApp.inputHintSelect"
 									:naked="true"
 								/>
 							</div>
 						</td>
 					</tr>
 				</table>
-			</template>
+			</div>
+			
+			<!-- empty record input field -->
+			<table class="list-input-rows" v-if="showInputAddLine">
+				<tr>
+					<td class="minimum">
+						<slot name="input-icon" />
+					</td>
+					<td>
+						<div class="list-input-row-items">
+							<input class="input" data-is-input="1" enterkeyhint="send"
+								@click="focus"
+								@focus="focus"
+								@keyup="updatedTextInput"
+								v-model="filtersQuick"
+								:class="{ invalid:!inputValid }"
+								:disabled="inputIsReadonly"
+								:placeholder="inputLinePlaceholder"
+								:tabindex="!inputIsReadonly ? 0 : -1"
+							/>
+						</div>
+					</td>
+					<td class="minimum">
+						<div class="list-input-row-items nogap nowrap">
+							<my-button image="add.png"
+								v-if="!inputIsReadonly && hasCreate"
+								@trigger="$emit('open-form',[],false)"
+								@trigger-middle="$emit('open-form',[],true)"
+								:captionTitle="capApp.inputHintCreate"
+								:naked="true"
+							/>
+							<my-button image="pageDown.png"
+								v-if="!inputIsReadonly"
+								@trigger="toggleDropdown"
+								:captionTitle="capApp.inputHintSelect"
+								:naked="true"
+							/>
+						</div>
+					</td>
+				</tr>
+			</table>
 		</template>
 		
 		<!-- regular list view (either view or input dropdown) -->

@@ -11,12 +11,7 @@
 }
 .list.asInput{
 	min-height:unset;
-	align-self:flex-end;
-	justify-content:space-between;
 	background-color:transparent;
-}
-.list.asInput.inputAddShown{
-	/*margin-bottom:var(--row-height);*/
 }
 .list .lookup{
 	width:110px !important;
@@ -51,6 +46,9 @@
 }
 .list .layoutWrap .empty-space{
 	flex:1 1 auto;
+}
+.list.asInput .layoutWrap{
+	flex:0 0 auto;
 }
 .list-header{
     line-height:30px;
@@ -356,6 +354,10 @@
 
 
 /* list as input field */
+.list-input-rows-wrap{
+	flex:1 1 auto;
+	overflow:auto;
+}
 .list-input-rows{
 	width:100%;
 	overflow:hidden;
