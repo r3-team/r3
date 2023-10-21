@@ -462,7 +462,7 @@ let MyForm = {
 				// form functions
 				form_close:s.isPopUp ? s.closeAsk : s.openPrevAsk,
 				form_open:(formId,recordId,newTab,popUp,maxY,maxX) => {
-					s.openForm((recordId === 0 ? [] : [recordId]),{
+					s.openForm((recordId === 0 || recordId === null ? [] : [recordId]),{
 						formIdOpen:formId, popUpType:popUp ? 'float' : null,
 						maxHeight:maxY, maxWidth:maxX
 					},[],newTab,null);
