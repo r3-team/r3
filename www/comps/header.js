@@ -193,15 +193,15 @@ let MyHeader = {
 	data() {
 		return {
 			layoutCheckTimer:null,
-			layoutReducedElements:[],        // list of elements that needed to be reduced to fit the current window width
-			layoutReducibleElementsInOrder:[ // list of elements that can be reduced, in order of priority
+			layoutReducedElements:[],        // elements that needed to be reduced to fit the current window width
+			layoutReducibleElementsInOrder:[ // elements that can be reduced, in order of priority
 				'moduleTitles',   // module titles, take up the most space, removed fully
 				'collections',    // collection values/icons, replaced by hover menu
 				'moduleIcons',    // module icons, replaced by hover menu
-				'navigationNext', // browser forward navigation
-				'navigationPrev', // browser previous navigation
-				'feedback'        // feedback action
-			],
+				'navigationNext', // browser forward navigation, optional
+				'navigationPrev', // browser previous navigation, optional
+				'feedback'        // feedback action, optional
+			]
 		};
 	},
 	computed:{

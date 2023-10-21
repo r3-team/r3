@@ -57,9 +57,12 @@
     gap:12px;
     padding:12px 10px;
     display:flex;
-    flex-flow:row wrap;
+    flex-flow:row nowrap;
     justify-content:space-between;
     align-content:center;
+}
+.list-header .empty{
+	flex:1 1 auto;
 }
 .list-header .selector{
 	min-width:unset;

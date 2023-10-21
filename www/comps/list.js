@@ -197,20 +197,20 @@ let MyList = {
 						v-if="hasCreate"
 						@trigger="$emit('open-form',[],false)"
 						@trigger-middle="$emit('open-form',[],true)"
-						:caption="capGen.button.new"
+						:caption="showActionTitles ? capGen.button.new : ''"
 						:captionTitle="capGen.button.newHint"
 					/>
 					<my-button image="edit.png"
 						v-if="hasUpdateBulk"
 						@trigger="selectRowsBulkEdit(selectedRows)"
 						:active="selectedRows.length !== 0"
-						:caption="capGen.button.editBulk.replace('{COUNT}',selectedRows.length)"
+						:caption="showActionTitles ? capGen.button.editBulk.replace('{COUNT}',selectedRows.length) : '(' + String(selectedRows.length) + ')'"
 						:captionTitle="capGen.button.editBulk.replace('{COUNT}',selectedRows.length)"
 					/>
 					<my-button image="fileSheet.png"
 						v-if="csvImport || csvExport"
 						@trigger="showCsv = !showCsv"
-						:caption="!isMobile ? capApp.button.csv : ''"
+						:caption="showActionTitles ? capApp.button.csv : ''"
 						:captionTitle="capApp.button.csvHint"
 					/>
 					<my-button image="shred.png"
@@ -218,10 +218,12 @@ let MyList = {
 						@trigger="delAsk(selectedRows)"
 						:active="selectedRows.length !== 0"
 						:cancel="true"
-						:caption="capGen.button.delete"
+						:caption="showActionTitles ? capGen.button.delete : ''"
 						:captionTitle="capGen.button.deleteHint"
 					/>
 				</div>
+				
+				<div ref="empty" class="empty"></div>
 				
 				<div class="row gap nowrap">
 					<img class="icon"
@@ -244,7 +246,7 @@ let MyList = {
 					<!-- auto renew / user filter / quick filter / query choices / page limits -->
 					
 					<my-button image="autoRenew.png"
-						v-if="!isMobile && autoRenew !== null"
+						v-if="showAutoRenewIcon && autoRenew !== null"
 						@trigger="showAutoRenew = !showAutoRenew"
 						:caption="capApp.button.autoRenew.replace('{VALUE}',autoRenewInput)"
 						:captionTitle="capApp.button.autoRenewHint.replace('{VALUE}',autoRenewInput)"
@@ -252,14 +254,13 @@ let MyList = {
 					/>
 					
 					<my-button image="refresh.png"
-						v-if="!isMobile"
+						v-if="showRefresh"
 						@trigger="reloadInside('manual')"
 						:captionTitle="capGen.button.refresh"
 						:naked="true"
 					/>
 					
 					<my-button image="filterCog.png"
-						v-if="!smallSize"
 						@trigger="toggleUserFilters"
 						@trigger-right="filtersUser = [];reloadInside('filtersUser')"
 						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
@@ -296,7 +297,7 @@ let MyList = {
 					</select>
 					
 					<select class="selector"
-						v-if="hasPaging && !smallSize && !isMobile"
+						v-if="showPageLimit && hasPaging"
 						v-model.number="limit"
 						@change="reloadInside()"
 					>
@@ -702,7 +703,9 @@ let MyList = {
 			showCsv:false,              // show UI for CSV import/export
 			showFilters:false,          // show UI for user filters
 			showTable:false,            // show regular list table as view or input dropdown
-			smallSize:false,            // limit UI options as list is small
+			
+			// list constants
+			refTabindex:'input_row_', // prefix for vue references to tabindex elements
 			
 			// list card layout state
 			cardsOrderByColumnIndex:-1,
@@ -718,12 +721,19 @@ let MyList = {
 			filtersQuick:'',    // current user quick text filter
 			filtersUser:[],     // current user filters
 			
-			// list constants
-			refTabindex:'input_row_', // prefix for vue references to tabindex elements
-			
 			// list input data
-			rowsInput:[]     // rows that reflect current input (following active record IDs)
-			                 // as opposed to list rows which show lookup data (regular list or input dropdown)
+			rowsInput:[], // rows that reflect current input (following active record IDs)
+			              // as opposed to list rows which show lookup data (regular list or input dropdown)
+			
+			// list layout
+			layoutCheckTimer:null,
+			layoutReducedElements:[],        // elements that needed to be reduced to fit the current window width
+			layoutReducibleElementsInOrder:[ // elements that can be reduced, in order of priority
+				'actionTitles',              // optional
+				'refresh',                   // optional
+				'pageLimit',                 // not important
+				'autoRenewIcon'              // not important
+			]
 		};
 	},
 	computed:{
@@ -905,25 +915,29 @@ let MyList = {
 		},
 		
 		// simple
-		anyInputRows:    (s) => s.inputRecordIds.length !== 0,
-		autoSelect:      (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
-		choiceFilters:   (s) => s.getChoiceFilters(s.choices,s.choiceId),
-		choiceIdDefault: (s) => s.fieldOptionGet(s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
-		expressions:     (s) => s.getQueryExpressions(s.columns),
-		hasBulkActions:  (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
-		hasChoices:      (s) => s.query.choices.length > 1,
-		hasCreate:       (s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.hasOpenForm,
-		hasPaging:       (s) => s.query.fixedLimit === 0,
-		hasUpdate:       (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenForm,
-		hasUpdateBulk:   (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenFormBulk,
-		isCards:         (s) => s.layout === 'cards',
-		isTable:         (s) => s.layout === 'table',
-		joins:           (s) => s.fillRelationRecordIds(s.query.joins),
-		relationsJoined: (s) => s.getRelationsJoined(s.joins),
-		rowSelect:       (s) => s.isInput || s.hasUpdate,
-		showInputAddLine:(s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
-		showInputAddAll: (s) => s.inputMulti && s.rowsClear.length > 0,
-		showInputHeader: (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
+		anyInputRows:     (s) => s.inputRecordIds.length !== 0,
+		autoSelect:       (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
+		choiceFilters:    (s) => s.getChoiceFilters(s.choices,s.choiceId),
+		choiceIdDefault:  (s) => s.fieldOptionGet(s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		expressions:      (s) => s.getQueryExpressions(s.columns),
+		hasBulkActions:   (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
+		hasChoices:       (s) => s.query.choices.length > 1,
+		hasCreate:        (s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.hasOpenForm,
+		hasPaging:        (s) => s.query.fixedLimit === 0,
+		hasUpdate:        (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenForm,
+		hasUpdateBulk:    (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenFormBulk,
+		isCards:          (s) => s.layout === 'cards',
+		isTable:          (s) => s.layout === 'table',
+		joins:            (s) => s.fillRelationRecordIds(s.query.joins),
+		relationsJoined:  (s) => s.getRelationsJoined(s.joins),
+		rowSelect:        (s) => s.isInput || s.hasUpdate,
+		showActionTitles: (s) => !s.layoutReducedElements.includes('actionTitles'),
+		showPageLimit:    (s) => !s.layoutReducedElements.includes('pageLimit'),
+		showInputAddLine: (s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
+		showInputAddAll:  (s) => s.inputMulti && s.rowsClear.length > 0,
+		showInputHeader:  (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
+		showRefresh:      (s) => !s.layoutReducedElements.includes('refresh'),
+		showAutoRenewIcon:(s) => !s.layoutReducedElements.includes('autoRenewIcon'),
 		
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
@@ -945,8 +959,8 @@ let MyList = {
 		
 		// react to field resize
 		if(!this.Input) {
-			window.addEventListener('resize',this.resize);
-			this.resize();
+			window.addEventListener('resize',this.resized);
+			this.resized();
 		}
 		
 		// setup watchers
@@ -1015,7 +1029,7 @@ let MyList = {
 	},
 	unmounted() {
 		if(!this.Input)
-			window.removeEventListener('resize',this.resize);
+			window.removeEventListener('resize',this.resized);
 	},
 	methods:{
 		// externals
@@ -1053,8 +1067,36 @@ let MyList = {
 			let font = this.colorMakeContrastFont(bg);
 			return `background-color:${bg};color:${font};`;
 		},
-		resize() {
-			this.smallSize = this.$refs.content.offsetWidth < 700;
+		layoutAdjust() {
+			if(typeof this.$refs.empty === 'undefined')
+				return;
+			
+			this.layoutCheckTimer = null;
+			const enoughSpace = this.$refs.empty.offsetWidth > 10;
+			
+			if(enoughSpace || this.layoutReducedElements.length === this.layoutReducibleElementsInOrder.length)
+				return;
+			
+			// space insufficient and still elements available to reduce
+			for(const elm of this.layoutReducibleElementsInOrder) {
+				if(this.layoutReducedElements.includes(elm))
+					continue;
+				
+				this.layoutReducedElements.push(elm);
+				
+				// recheck after adjustment, in case further reduction is required
+				this.$nextTick(this.layoutAdjust);
+				break;
+			}
+		},
+		resized() {
+			if(this.layoutCheckTimer !== null)
+				clearTimeout(this.layoutCheckTimer);
+			
+			this.layoutCheckTimer = setTimeout(() => {
+				this.layoutReducedElements = [];   // reset reduced elements for new window size
+				this.$nextTick(this.layoutAdjust); // wait for layout to settle before adjustments
+			},300);
 		},
 		updateDropdownDirection() {
 			let headersPx  = 200; // rough height in px of all headers (menu/form) combined
