@@ -78,11 +78,6 @@
 .admin-logins .login-record{
 	max-width:400px;
 }
-.admin-logins .login-record-input{
-	flex:1 1 auto;
-	position:relative;
-	align-items:center;
-}
 .admin-logins .module-icon{
 	width:24px;
 	margin-right:9px;

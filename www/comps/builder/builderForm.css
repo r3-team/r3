@@ -7,8 +7,6 @@
 /* form builder sidebar area */
 .builder-form .sidebar{
 	min-width:500px;
-	flex:0 0 auto;
-	overflow:auto;
 }
 .builder-form .sidebar .templates-wrap{
 	margin-top:20px;

@@ -198,7 +198,7 @@ let MyBuilderPgFunction = {
 		</div>
 		
 		<!-- sidebar -->
-		<div class="contentBox right" v-if="pgFunction && showSidebar">
+		<div class="contentBox sidebar right" v-if="pgFunction && showSidebar">
 			<div class="top lower">
 				<div class="area nowrap">
 					<h1 class="title">{{ capGen.settings }}</h1>

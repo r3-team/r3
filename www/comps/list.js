@@ -49,9 +49,9 @@ let MyList = {
 		MyValueRich
 	},
 	template:`<div class="list" ref="content"
-		@keydown="keyDown"
 		v-click-outside="escape"
-		:class="{asInput:isInput, inputAddShown:showInputAddLine, readonly:inputIsReadonly, isSingleField:isSingleField }"
+		@keydown="keyDown"
+		:class="{asInput:isInput, readonly:inputIsReadonly, isSingleField:isSingleField }"
 	>
 		<!-- list as input field (showing record(s) from active field value) -->
 		<template v-if="isInput">

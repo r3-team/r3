@@ -50,7 +50,7 @@ let MyAdminLogin = {
 		>
 			<my-form ref="popUpForm"
 				@close="loginFormIndexOpen = null"
-				@record-updated="updateLoginRecord(loginFormIndexOpen,$event,true);loginFormIndexOpen = null"
+				@record-updated="updateLoginRecord(loginFormIndexOpen,$event);loginFormIndexOpen = null"
 				:allowDel="false"
 				:allowNew="false"
 				:formId="loginForms[loginFormIndexOpen].formId"
@@ -115,7 +115,7 @@ let MyAdminLogin = {
 				:entriesText="[capGen.properties,capApp.roles.replace('{COUNT}',roleTotalNonHidden)]"
 			/>
 			
-			<div class="content default-inputs" :class="{ 'no-padding':tabTarget === 'roles' }">
+			<div class="content" :class="{ 'no-padding':tabTarget === 'roles' }">
 				<table class="table-default generic-table-vertical fullWidth" v-if="tabTarget === 'properties'">
 					<tr>
 						<td>
@@ -124,7 +124,7 @@ let MyAdminLogin = {
 								<span>{{ capGen.name }}</span>
 							</div>
 						</td>
-						<td><input v-model="name" v-focus :disabled="isLdap" /></td>
+						<td class="default-inputs"><input v-model="name" v-focus :disabled="isLdap" /></td>
 						<td>{{ capApp.hint.name }}</td>
 					</tr>
 					<tr>
@@ -146,31 +146,22 @@ let MyAdminLogin = {
 								<span>{{ getCaptionForModule(lf.captions['loginFormTitle'],lf.name,moduleIdMap[lf.moduleId]) }}</span>
 							</div>
 						</td>
-						<td colspan="2" class="login-record row gap">
-							<my-button
-								@trigger="openLoginForm(lfi)"
-								:captionTitle="records[lfi].id !== null ? capGen.button.edit : capGen.button.create"
-								:image="records[lfi].id ? 'open.png' : 'add.png'"
-							/>
-							<div class="login-record-input row gap">
-								<input disabled="disabled"
-									v-if="records[lfi].id !== null"
-									:value="records[lfi].label"
-								/>
-								<my-input-select
-									v-if="records[lfi].id === null"
-									@request-data="getRecords(lfi)"
-									@updated-text-input="recordInput = $event"
-									@update:selected="updateLoginRecord(lfi,$event,true)"
-									:nakedIcons="false"
-									:options="recordList"
-									:placeholder="capGen.threeDots"
-								/>
-								<my-button image="cancel.png"
-									v-if="records[lfi].id !== null"
-									@trigger="updateLoginRecord(lfi,records[lfi].id,false)"
-									:cancel="true"
-								/>
+						<td>
+							<div class="field dropdown">
+								<div class="field-content data intent">
+									<my-input-select
+										@open="openLoginForm(lfi)"
+										@request-data="getRecords(lfi)"
+										@updated-text-input="recordInput = $event"
+										@update:selected="updateLoginRecord(lfi,$event)"
+										:nakedIcons="true"
+										:options="recordList"
+										:placeholder="capGen.threeDots"
+										:selected="records[lfi].id"
+										:showOpen="true"
+										:inputTextSet="records[lfi].label"
+									/>
+								</div>
 							</div>
 						</td>
 						<td></td>
@@ -203,7 +194,7 @@ let MyAdminLogin = {
 								<span>{{ capApp.template }}</span>
 							</div>
 						</td>
-						<td>
+						<td class="default-inputs">
 							<select v-model="templateId">
 								<option v-for="t in templates" :title="t.comment" :value="t.id">
 									{{ t.name }}
@@ -219,7 +210,7 @@ let MyAdminLogin = {
 								<span>{{ capApp.password }}</span>
 							</div>
 						</td>
-						<td><input v-model="pass" :placeholder="capGen.threeDots" /></td>
+						<td class="default-inputs"><input v-model="pass" :placeholder="capGen.threeDots" /></td>
 						<td>{{ capApp.hint.password }}</td>
 					</tr>
 					<tr v-if="isLdap">
@@ -229,7 +220,7 @@ let MyAdminLogin = {
 								<span>{{ capApp.ldap }}</span>
 							</div>
 						</td>
-						<td>
+						<td class="default-inputs">
 							<select v-model="ldapId" disabled="disabled">
 								<option :value="l.id" v-for="l in ldaps">{{ l.name }}</option>
 							</select>
@@ -457,12 +448,12 @@ let MyAdminLogin = {
 					this.roleIds.push(roleIdsByContent[i]);
 			}
 		},
-		updateLoginRecord(loginFormIndex,recordId,add) {
+		updateLoginRecord(loginFormIndex,recordId) {
 			this.recordInput = '';
-			this.records[loginFormIndex].id = add ? recordId : null;
+			this.records[loginFormIndex].id = recordId;
 			
-			if(add)
-				this.getRecords(loginFormIndex);
+			if(recordId !== null) this.getRecords(loginFormIndex);
+			else                  this.records[loginFormIndex].label = '';
 		},
 		
 		// backend calls

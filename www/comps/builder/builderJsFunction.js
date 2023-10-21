@@ -96,7 +96,7 @@ let MyBuilderJsFunction = {
 			</div>
 		</div>
 		
-		<div class="contentBox right" v-if="jsFunction && showSidebar">
+		<div class="contentBox sidebar right" v-if="jsFunction && showSidebar">
 			<div class="top lower">
 				<div class="area nowrap">
 					<h1 class="title">{{ capGen.settings }}</h1>

@@ -19,14 +19,21 @@ let MyInputSelect = {
 			/>
 			
 			<div class="row centered">
+				<my-button
+					v-if="showOpen"
+					@trigger="$emit('open')"
+					:captionTitle="hasValue ? capGen.button.edit : capGen.button.create"
+					:image="hasValue ? 'open.png' : 'add.png'"
+					:naked="nakedIcons"
+				/>
 				<my-button image="cancel.png"
-					v-if="selected !== null"
+					v-if="hasValue"
 					@trigger="clear"
 					:active="!readonly"
 					:naked="nakedIcons"
 				/>
 				<my-button image="pageDown.png"
-					v-if="selected === null"
+					v-if="!hasValue"
 					:active="!readonly"
 					:naked="nakedIcons"
 				/>
@@ -54,9 +61,10 @@ let MyInputSelect = {
 		options:     { type:Array,   required:false, default:() => [] }, // options: [{'id':12,'name':'Hans-Martin'},{...}]
 		placeholder: { type:String,  required:false, default:'' },
 		readonly:    { type:Boolean, required:false, default:false },
-		selected:    { required:false, default:null }                    // selected option ID (as in: 12)
+		selected:    { required:false, default:null },                   // selected option ID (as in: 12)
+		showOpen:    { type:Boolean, required:false, default:false }
 	},
-	emits:['blurred','focused','request-data','updated-text-input','update:selected'],
+	emits:['blurred','focused','open','request-data','updated-text-input','update:selected'],
 	data() {
 		return {
 			limit:10,     // fixed result limit
@@ -71,6 +79,8 @@ let MyInputSelect = {
 		}
 	},
 	computed:{
+		hasValue:(s) => s.selected !== null,
+		
 		// stores
 		capGen:(s) => s.$store.getters.captions.generic
 	},

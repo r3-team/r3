@@ -3,6 +3,11 @@
 	flex-flow:row nowrap;
 	z-index:var(--z-index-content);
 }
+.builder .sidebar{
+	flex:0 0 auto;
+	overflow:auto;
+	border-left:1px solid var(--color-border);
+}
 
 /* generics */
 .builder .builder-sub-container{
@@ -458,8 +463,6 @@
 }
 .builder-collection .sidebar{
 	min-width:400px;
-	flex:0 0 auto;
-	overflow:auto;
 }
 .builder-collection .inHeader{
 	padding:6px 8px;
@@ -517,8 +520,6 @@
 }
 .builder-api .sidebar{
 	min-width:800px;
-	flex:0 0 auto;
-	overflow:auto;
 }
 .builder-api .selected-ref{
 	text-decoration:underline;
