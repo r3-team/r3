@@ -13,16 +13,6 @@
 	min-height:unset;
 	background-color:transparent;
 }
-.list .lookup{
-	width:110px !important;
-	min-width:unset;
-	max-width:unset;
-	margin:0px 3px;
-	padding:6px 8px;
-}
-.list .lookup.small{
-	width:30px !important;
-}
 .list .fetching{
 	display:flex;
 	flex-flow:row nowrap;
@@ -63,6 +53,7 @@
 }
 .list-header .empty{
 	flex:1 1 auto;
+	max-width:11px;
 }
 .list-header .selector{
 	min-width:unset;
@@ -488,7 +479,4 @@
 }
 .is-mobile .list .layoutTable td{
 	padding:8px 6px;
-}
-.is-mobile .list .lookup{
-	width:120px;
 }

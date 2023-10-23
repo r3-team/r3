@@ -13,8 +13,9 @@ let MyInputCollection = {
 		<my-button
 			@trigger="click"
 			:active="!readonly"
-			:caption="label"
-			:imageBase64="collection.iconId !== null ? srcBase64(iconIdMap[collection.iconId].file) : ''"
+			:caption="titleAction"
+			:captionTitle="title"
+			:imageBase64="hasIcon ? srcBase64(iconIdMap[collection.iconId].file) : ''"
 			:naked="true"
 		/>
 		
@@ -39,10 +40,10 @@ let MyInputCollection = {
 				<div class="top lower">
 					<div class="area">
 						<img class="icon"
-							v-if="collection.iconId !== null"
+							v-if="hasIcon"
 							:src="srcBase64(iconIdMap[collection.iconId].file)"
 						/>
-						<div class="caption">{{ labelSimple }}</div>
+						<div class="caption">{{ title }}</div>
 					</div>
 					<div class="area">
 						<my-button image="cancel.png"
@@ -104,7 +105,8 @@ let MyInputCollection = {
 		modelValue:     { required:true }, // indexes of selected rows in collection
 		multiValue:     { type:Boolean, required:false, default:false },
 		previewCount:   { type:Number,  required:true },
-		readonly:       { type:Boolean, required:false, default:false }
+		readonly:       { type:Boolean, required:false, default:false },
+		showTitle:      { type:Boolean, required:false, default:true }
 	},
 	emits:['update:modelValue'],
 	data() {
@@ -114,11 +116,14 @@ let MyInputCollection = {
 		};
 	},
 	computed:{
-		label:(s) => {
-			if(s.rowIndexesSelected.length <= s.previewCount)
-				return s.labelSimple;
+		titleAction:(s) => {
+			const cnt         = (s.previewCount === 0 ? '' : '+') + (s.rowIndexesSelected.length - s.previewCount).toString();
+			const enoughSpace = s.rowIndexesSelected.length <= s.previewCount;
 			
-			return `${s.labelSimple} (${ (s.previewCount === 0 ? '' : '+') + (s.rowIndexesSelected.length - s.previewCount).toString() })`;
+			if(!s.showTitle && s.hasIcon)
+				return enoughSpace ? '' : cnt;
+			
+			return enoughSpace ? s.title : `${s.title} (${ cnt })`;
 		},
 		rowIndexesSelected:(s) => typeof s.modelValue === 'undefined' ? [] : s.modelValue,
 		rowIndexesVisible: (s) => {
@@ -136,9 +141,10 @@ let MyInputCollection = {
 		
 		// simple states
 		collection:       (s) => s.collectionIdMapSchema[s.collectionId],
+		hasIcon:          (s) => s.collection.iconId !== null,
 		hasSelections:    (s) => s.rowIndexesSelected.length !== 0,
-		labelSimple:      (s) => s.getColumnTitle(s.getCollectionColumn(s.collectionId,s.columnIdDisplay)),
 		rows:             (s) => s.collectionIdMap[s.collectionId],
+		title:            (s) => s.getColumnTitle(s.getCollectionColumn(s.collectionId,s.columnIdDisplay)),
 		valueIndexDisplay:(s) => s.getCollectionColumnIndex(s.collectionId,s.columnIdDisplay),
 		
 		// stores

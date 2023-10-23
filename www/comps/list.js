@@ -235,7 +235,8 @@ let MyList = {
 					<my-input-offset class-input="selector"
 						v-if="hasPaging"
 						@input="offset = $event;reloadInside()"
-						:caption="!isMobile ? true : false"
+						:arrows="showOffsetArrows"
+						:caption="false"
 						:limit="limit"
 						:offset="offset"
 						:total="count"
@@ -243,7 +244,7 @@ let MyList = {
 				</div>
 				
 				<div class="row gap nowrap default-inputs">
-					<!-- auto renew / user filter / quick filter / query choices / page limits -->
+					<!-- auto renew / user filter / quick filter / collection filter / query choice filter / page limits -->
 					
 					<my-button image="autoRenew.png"
 						v-if="showAutoRenewIcon && autoRenew !== null"
@@ -285,6 +286,7 @@ let MyList = {
 						:modelValue="collectionIdMapIndexes[c.collectionId]"
 						:multiValue="c.multiValue"
 						:previewCount="showCollectionCnt"
+						:showTitle="showCollectionTitles"
 					/>
 					
 					<select class="selector"
@@ -734,6 +736,8 @@ let MyList = {
 				'collectionValuesFew',       // optional, show few collection filter values
 				'actionTitles',              // optional
 				'refresh',                   // optional
+				'offsetArrows',              // optional
+				'collectionTitles',          // optional, show collection titles
 				'pageLimit',                 // not important
 				'autoRenewIcon'              // not important
 			]
@@ -918,31 +922,33 @@ let MyList = {
 		},
 		
 		// simple
-		anyInputRows:     (s) => s.inputRecordIds.length !== 0,
-		autoSelect:       (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
-		choiceFilters:    (s) => s.getChoiceFilters(s.choices,s.choiceId),
-		choiceIdDefault:  (s) => s.fieldOptionGet(s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
-		expressions:      (s) => s.getQueryExpressions(s.columns),
-		hasBulkActions:   (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
-		hasChoices:       (s) => s.query.choices.length > 1,
-		hasCreate:        (s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.hasOpenForm,
-		hasPaging:        (s) => s.query.fixedLimit === 0,
-		hasUpdate:        (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenForm,
-		hasUpdateBulk:    (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenFormBulk,
-		isCards:          (s) => s.layout === 'cards',
-		isTable:          (s) => s.layout === 'table',
-		joins:            (s) => s.fillRelationRecordIds(s.query.joins),
-		relationsJoined:  (s) => s.getRelationsJoined(s.joins),
-		rowSelect:        (s) => s.isInput || s.hasUpdate,
-		showActionTitles: (s) => s.layoutElements.includes('actionTitles'),
-		showAutoRenewIcon:(s) => s.layoutElements.includes('autoRenewIcon'),
-		showPageLimit:    (s) => s.layoutElements.includes('pageLimit'),
-		showInputAddLine: (s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
-		showInputAddAll:  (s) => s.inputMulti && s.rowsClear.length > 0,
-		showInputHeader:  (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
-		showRefresh:      (s) => s.layoutElements.includes('refresh'),
-		showCollectionCnt:(s) => {
-			if(s.layoutElements.includes('collectionValuesAll'))  return 999;
+		anyInputRows:        (s) => s.inputRecordIds.length !== 0,
+		autoSelect:          (s) => s.inputIsNew && s.inputAutoSelect !== 0 && !s.inputAutoSelectDone,
+		choiceFilters:       (s) => s.getChoiceFilters(s.choices,s.choiceId),
+		choiceIdDefault:     (s) => s.fieldOptionGet(s.fieldId,'choiceId',s.choices.length === 0 ? null : s.choices[0].id),
+		expressions:         (s) => s.getQueryExpressions(s.columns),
+		hasBulkActions:      (s) => !s.isInput && s.rows.length !== 0 && (s.hasUpdateBulk || s.hasDeleteAny),
+		hasChoices:          (s) => s.query.choices.length > 1,
+		hasCreate:           (s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.hasOpenForm,
+		hasPaging:           (s) => s.query.fixedLimit === 0,
+		hasUpdate:           (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenForm,
+		hasUpdateBulk:       (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenFormBulk,
+		isCards:             (s) => s.layout === 'cards',
+		isTable:             (s) => s.layout === 'table',
+		joins:               (s) => s.fillRelationRecordIds(s.query.joins),
+		relationsJoined:     (s) => s.getRelationsJoined(s.joins),
+		rowSelect:           (s) => s.isInput || s.hasUpdate,
+		showActionTitles:    (s) => s.layoutElements.includes('actionTitles'),
+		showAutoRenewIcon:   (s) => s.layoutElements.includes('autoRenewIcon'),
+		showCollectionTitles:(s) => s.layoutElements.includes('collectionTitles'),
+		showPageLimit:       (s) => s.layoutElements.includes('pageLimit'),
+		showInputAddLine:    (s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
+		showInputAddAll:     (s) => s.inputMulti && s.rowsClear.length > 0,
+		showInputHeader:     (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
+		showOffsetArrows:    (s) => s.layoutElements.includes('offsetArrows'),
+		showRefresh:         (s) => s.layoutElements.includes('refresh'),
+		showCollectionCnt:   (s) => {
+			if(s.layoutElements.includes('collectionValuesAll')) return 999;
 			if(s.layoutElements.includes('collectionValuesFew')) return 2;
 			return 0;
 		},
