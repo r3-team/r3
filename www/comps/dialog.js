@@ -14,8 +14,8 @@ let MyDialog = {
 					<div class="caption">{{ captionTop }}</div>
 				</div>
 				<div class="area">
-					<my-button
-						@trigger="close" image="cancel.png"
+					<my-button image="cancel.png"
+						@trigger="close"
 						:cancel="true"
 					/>
 				</div>

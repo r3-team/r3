@@ -207,7 +207,7 @@ let MyGantt = {
 				/>
 			</div>
 			
-			<div class="area nowrap navigation default-inputs">
+			<div class="area nowrap">
 				<img class="icon"
 					v-if="iconId !== null"
 					:src="srcBase64Icon(iconId)"
@@ -227,7 +227,7 @@ let MyGantt = {
 				/>
 			</div>
 			
-			<div class="area wrap default-inputs">
+			<div class="area nowrap default-inputs">
 				<my-button
 					v-if="!isMobile && stepTypeToggle"
 					@trigger="toggleStepType"
@@ -256,6 +256,7 @@ let MyGantt = {
 					:key="c.collectionId"
 					:modelValue="collectionIdMapIndexes[c.collectionId]"
 					:multiValue="c.multiValue"
+					:previewCount="isMobile ? 0 : 2"
 				/>
 				
 				<select class="selector"

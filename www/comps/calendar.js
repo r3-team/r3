@@ -245,7 +245,7 @@ let MyCalendar = {
 				/>
 			</div>
 			
-			<div class="area wrap default-inputs">
+			<div class="area nowrap default-inputs">
 				
 				<template v-if="!isMobile && !isMonth">
 					<my-button image="search.png"
@@ -274,6 +274,7 @@ let MyCalendar = {
 					:key="c.collectionId"
 					:modelValue="collectionIdMapIndexes[c.collectionId]"
 					:multiValue="c.multiValue"
+					:previewCount="isMobile ? 0 : 2"
 				/>
 				
 				<select class="selector" v-if="hasChoices" v-model="choiceIdInput">

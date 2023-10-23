@@ -8,94 +8,91 @@ export {MyInputCollection as default};
 
 let MyInputCollection = {
 	name:'my-input-collection',
-	template:`<div class="input-collection input-custom"
-		@keyup.esc="escape"
-		v-click-outside="escape"
-	>
-		<img class="line-icon"
-			v-if="collection.iconId !== null"
-			:src="srcBase64(iconIdMap[collection.iconId].file)"
+	template:`<div class="input-collection input-custom" @keyup.esc="escape">
+	
+		<my-button
+			@trigger="click"
+			:active="!readonly"
+			:caption="label"
+			:imageBase64="collection.iconId !== null ? srcBase64(iconIdMap[collection.iconId].file) : ''"
+			:naked="true"
 		/>
 		
-		<input type="text"
-			v-model="textInput"
-			@keyup="keyup"
-			@keyup.enter="enter"
-			@keyup.esc="escape"
-			:class="{ small:rowIndexesSelected.length !== 0 }"
-			:disabled="readonly"
-			:placeholder="placeholder"
-			:tabindex="!readonly ? 0 : -1"
-		/>
-		
-		<!-- first two selections as preview -->
-		<div class="entries preview">
+		<!-- value previews -->
+		<div class="preview row gap centered">
 			<template v-for="(recIndex,i) in rowIndexesSelected">
 				<div class="entry clickable"
-					v-if="i < resultPreviewCnt"
+					v-if="i < previewCount"
 					@click="entryRemove(recIndex)"
 				>
 					{{ rows[recIndex].values[valueIndexDisplay] }}
 				</div>
 			</template>
-				
-			<div class="entry clickable"
-				v-if="rowIndexesSelected.length > resultPreviewCnt"
-				@click="toggle"
-			>
-				{{ '+' + (rowIndexesSelected.length-resultPreviewCnt).toString() }}
-			</div>
 		</div>
 		
-		<my-button image="arrowDown.png"
-			v-if="!readonly"
-			@trigger="toggle"
-			:naked="true"
-		/>
-		
-		<!-- context menu dropdown -->
-		<div class="input-dropdown-wrap overhang">
-			<div v-if="showDropdown" class="input-dropdown context">
-				
-				<!-- search results -->
-				<div class="entries">
-					<div class="label" v-if="rowIndexesVisible.length === 0">
-						{{ capGen.resultsNone }}
+		<!-- hover input -->
+		<div class="app-sub-window under-header"
+			v-if="showHover"
+			@click.self.stop="showHover = false"
+		>
+			<div class="input-collection-hover contentBox float">
+				<div class="top lower">
+					<div class="area">
+						<img class="icon"
+							v-if="collection.iconId !== null"
+							:src="srcBase64(iconIdMap[collection.iconId].file)"
+						/>
+						<div class="caption">{{ labelSimple }}</div>
 					</div>
-					<div class="label" v-if="rowIndexesVisible.length !== 0">
-						{{ capGen.available }}
+					<div class="area">
+						<my-button image="cancel.png"
+							@trigger="showHover = false"
+							:blockBubble="true"
+							:cancel="true"
+						/>
+					</div>
+				</div>
+				<div class="content grow input-collection-sides">
+					
+					<!-- available -->
+					<div class="input-collection-side">
+						<div class="row gap centered space-between default-inputs">
+							<span class="label">{{ capGen.available }}</span>
+							<input class="short"
+								v-model="textInput"
+								:placeholder="capGen.threeDots"
+							/>
+						</div>
+						<div class="entries">
+							<div class="entry clickable" tabindex="0"
+								v-for="(index,i) in rowIndexesVisible"
+								@click.stop="entrySelect(index)"
+								@keyup.enter.space="entrySelect(index)"
+							>
+								{{ rows[index].values[valueIndexDisplay] }}
+							</div>
+						</div>
 					</div>
 					
-					<template v-for="(index,i) in rowIndexesVisible">
-						<div class="entry clickable" tabindex="0"
-							v-if="i < limitVisible"
-							@click.stop="entrySelect(index)"
-							@keyup.enter.space="entrySelect(index)"
-						>
-							{{ rows[index].values[valueIndexDisplay] }}
+					<!-- active selections -->
+					<div class="input-collection-side">
+						<div class="row gap centered">
+							<span class="label">{{ capGen.selected }}</span>
+							<my-button image="delete.png"
+								@trigger="$emit('update:modelValue',[])"
+								:active="hasSelections"
+								:cancel="true"
+								:caption="capGen.button.clear"
+							/>
 						</div>
-					</template>
-				</div>
-				
-				<!-- more results -->
-				<div class="actions">
-					<my-button
-						v-if="rowIndexesVisible.length > limitVisible"
-						@trigger="limitVisible += 10"
-						:blockBubble="true"
-						:caption="capGen.more + '...'"
-						:naked="true"
-					/>
-				</div>
-			
-				<!-- all active selections -->
-				<div class="entries box" v-if="multiValue && rowIndexesSelected.length !== 0">
-					<div class="label">{{ capGen.selected }}</div>
-					<div v-for="i in rowIndexesSelected" class="entry clickable" tabindex="0"
-						@click.stop="entryRemove(i)"
-						@keyup.enter.space="entryRemove(i)"
-					>
-						{{ rows[i].values[valueIndexDisplay] }}
+						<div class="entries">
+							<div v-for="i in rowIndexesSelected" class="entry clickable" tabindex="0"
+								@click.stop="entryRemove(i)"
+								@keyup.enter.space="entryRemove(i)"
+							>
+								{{ rows[i].values[valueIndexDisplay] }}
+							</div>
+						</div>
 					</div>
 				</div>
 			</div>
@@ -106,17 +103,23 @@ let MyInputCollection = {
 		columnIdDisplay:{ type:String,  required:true },
 		modelValue:     { required:true }, // indexes of selected rows in collection
 		multiValue:     { type:Boolean, required:false, default:false },
+		previewCount:   { type:Number,  required:true },
 		readonly:       { type:Boolean, required:false, default:false }
 	},
 	emits:['update:modelValue'],
 	data() {
 		return {
-			limitVisible:10,       // number of available entries shown in context menu
-			textInput:'',          // text line input
-			showDropdown:false
+			textInput:'', // text line input
+			showHover:false
 		};
 	},
 	computed:{
+		label:(s) => {
+			if(s.rowIndexesSelected.length <= s.previewCount)
+				return s.labelSimple;
+			
+			return `${s.labelSimple} (${ (s.previewCount === 0 ? '' : '+') + (s.rowIndexesSelected.length - s.previewCount).toString() })`;
+		},
 		rowIndexesSelected:(s) => typeof s.modelValue === 'undefined' ? [] : s.modelValue,
 		rowIndexesVisible: (s) => {
 			let out = [];
@@ -133,8 +136,8 @@ let MyInputCollection = {
 		
 		// simple states
 		collection:       (s) => s.collectionIdMapSchema[s.collectionId],
-		placeholder:      (s) => s.getColumnTitle(s.getCollectionColumn(s.collectionId,s.columnIdDisplay)),
-		resultPreviewCnt: (s) => !s.isMobile ? 2 : 0,
+		hasSelections:    (s) => s.rowIndexesSelected.length !== 0,
+		labelSimple:      (s) => s.getColumnTitle(s.getCollectionColumn(s.collectionId,s.columnIdDisplay)),
 		rows:             (s) => s.collectionIdMap[s.collectionId],
 		valueIndexDisplay:(s) => s.getCollectionColumnIndex(s.collectionId,s.columnIdDisplay),
 		
@@ -153,12 +156,9 @@ let MyInputCollection = {
 		srcBase64,
 		
 		// actions
-		enter() {
-			if(this.textInput === '' && !this.showDropdown)
-				return this.toggle();
-			
-			if(this.rowIndexesVisible.length > 0)
-				this.entrySelect(this.rowIndexesVisible[0]);
+		click() {
+			if(!this.readonly)
+				this.showHover = true;
 		},
 		entryRemove(i) {
 			const pos = this.rowIndexesSelected.indexOf(i);
@@ -178,8 +178,6 @@ let MyInputCollection = {
 			rowIndexes.push(i);
 			this.$emit('update:modelValue',rowIndexes);
 		},
-		escape() { this.showDropdown = false; },
-		keyup () { this.showDropdown = true; },
-		toggle() { this.showDropdown = !this.showDropdown; }
+		escape() { this.showHover = false; }
 	}
 };

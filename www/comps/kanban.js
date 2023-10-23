@@ -250,6 +250,7 @@ let MyKanban = {
 					:key="c.collectionId"
 					:modelValue="collectionIdMapIndexes[c.collectionId]"
 					:multiValue="c.multiValue"
+					:previewCount="isMobile ? 0 : 2"
 				/>
 				<select class="selector"
 					v-if="hasChoices"

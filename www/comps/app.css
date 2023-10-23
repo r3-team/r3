@@ -103,6 +103,8 @@
 	--color-accent3:       hsl(199,11%,96%); /* menu/list/calendar entry hover */
 	--color-accent3-alt:   hsl(199,11%,93%); /* menu/list/calendar entry active */
 	--color-accent4:       hsl(339, 4%,61%); /* gantt entry */
+	--color-accent5:       hsl(207,20%,42%); /* collection entry */
+	--color-accent5-alt:   hsl(207,20%,34%); /* collection entry hover */
 	--color-error:         hsl(0,  84%,61%);
 	--color-success:       hsl(113,84%,44%);
 	--color-action:        hsl(196,27%,39%);
@@ -118,6 +120,10 @@
 	--color-form-builder-selected:    hsl(59deg 100% 50%);
 	--color-form-builder-tabs:        hsl(135deg 45% 78%);
 	--color-form-builder-tabs-active: hsl(135deg 54% 87%);
+	
+	/**/
+	/* shadows */
+	--shadow-input:1px 1px 4px var(--color-shade);
 }
 
 html,body{
@@ -565,7 +571,7 @@ table td.maximum{
 	border:none;
 	border-color:var(--color-border);
 	border-radius:4px;
-	box-shadow:1px 1px 4px var(--color-shade);
+	box-shadow:var(--shadow-input);
 	box-sizing:border-box;
 	flex:1 1 auto;
 }
@@ -1286,6 +1292,8 @@ table td.maximum{
 	--color-form-builder-selected:    hsl(59deg 72% 44%);
 	--color-form-builder-tabs:        hsl(104deg 15% 32%);
 	--color-form-builder-tabs-active: hsl(104deg 12% 39%);
+	
+	--shadow-input:1px 1px 4px #000000;
 	
 	--image-filter:        invert(1) brightness(90%);
 	--image-filter-bg:     var(--image-filter);

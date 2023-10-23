@@ -193,8 +193,8 @@ let MyHeader = {
 	data() {
 		return {
 			layoutCheckTimer:null,
-			layoutReducedElements:[],        // elements that needed to be reduced to fit the current window width
-			layoutReducibleElementsInOrder:[ // elements that can be reduced, in order of priority
+			layoutElements:[],               // elements that are shown, based on available space
+			layoutElementsAvailableInOrder:[ // elements that can be shown, in order of priority
 				'moduleTitles',   // module titles, take up the most space, removed fully
 				'collections',    // collection values/icons, replaced by hover menu
 				'moduleIcons',    // module icons, replaced by hover menu
@@ -266,18 +266,23 @@ let MyHeader = {
 			}
 			return out;
 		},
-		elementsReduced:(s) => {
-			let elms = JSON.parse(JSON.stringify(s.layoutReducedElements));
+		layoutElementsProcessed:(s) => {
+			let elms   = JSON.parse(JSON.stringify(s.layoutElements));
+			let elmDel = function(name) {
+				const pos = elms.indexOf(name);
+				if(pos !== -1)
+					elms.splice(pos,1);
+			};
 			
 			// reduce elements based on app && login settings
 			if(s.isMobile || !s.settings.headerCaptions || !s.settings.headerModules)
-				elms.push('moduleTitles');
+				elmDel('moduleTitles');
 			
 			if(s.isMobile)
-				elms.push('collections');
+				elmDel('collections');
 			
 			if(s.isMobile || s.pwaSingle || !s.settings.headerModules)
-				elms.push('moduleIcons');
+				elmDel('moduleIcons');
 			
 			return elms;
 		},
@@ -299,12 +304,12 @@ let MyHeader = {
 		
 		// simple
 		pwaSingle:       (s) => s.pwaModuleId !== null,
-		showCollections: (s) => !s.elementsReduced.includes('collections'),
-		showFeedback:    (s) => !s.elementsReduced.includes('feedback') && s.feedback && !s.isNoAuth,
-		showModuleIcons: (s) => !s.elementsReduced.includes('moduleIcons'),
-		showModuleTitles:(s) => !s.elementsReduced.includes('moduleTitles'),
-		showNavNext:     (s) => !s.elementsReduced.includes('navigationNext'),
-		showNavPrev:     (s) => !s.elementsReduced.includes('navigationPrev'),
+		showCollections: (s) => s.layoutElementsProcessed.includes('collections'),
+		showFeedback:    (s) => s.layoutElementsProcessed.includes('feedback') && s.feedback && !s.isNoAuth,
+		showModuleIcons: (s) => s.layoutElementsProcessed.includes('moduleIcons'),
+		showModuleTitles:(s) => s.layoutElementsProcessed.includes('moduleTitles'),
+		showNavNext:     (s) => s.layoutElementsProcessed.includes('navigationNext'),
+		showNavPrev:     (s) => s.layoutElementsProcessed.includes('navigationPrev'),
 		
 		// stores
 		modules:          (s) => s.$store.getters['schema/modules'],
@@ -352,22 +357,13 @@ let MyHeader = {
 		// display
 		layoutAdjust() {
 			this.layoutCheckTimer = null;
-			const enoughSpace = this.$refs.empty.offsetWidth > 10;
 			
-			if(enoughSpace || this.elementsReduced.length === this.layoutReducibleElementsInOrder.length)
+			if(typeof this.$refs.empty === 'undefined' || this.$refs.empty.offsetWidth > 10 || this.layoutElements.length === 0)
 				return;
 			
 			// space insufficient and still elements available to reduce
-			for(const elm of this.layoutReducibleElementsInOrder) {
-				if(this.elementsReduced.includes(elm))
-					continue;
-				
-				this.layoutReducedElements.push(elm);
-				
-				// recheck after adjustment, in case further reduction is required
-				this.$nextTick(this.layoutAdjust);
-				break;
-			}
+			this.layoutElements.shift();       // remove next element
+			this.$nextTick(this.layoutAdjust); // recheck after change
 		},
 		keysLockedMsg() {
 			this.$store.commit('dialog',{
@@ -388,8 +384,9 @@ let MyHeader = {
 				clearTimeout(this.layoutCheckTimer);
 			
 			this.layoutCheckTimer = setTimeout(() => {
-				this.layoutReducedElements = [];   // reset reduced elements for new window size
-				this.$nextTick(this.layoutAdjust); // wait for layout to settle before adjustments
+				// reset elements, then wait for layout to settle to check
+				this.layoutElements = JSON.parse(JSON.stringify(this.layoutElementsAvailableInOrder));
+				this.$nextTick(this.layoutAdjust);
 			},300);
 		},
 		

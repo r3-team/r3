@@ -45,45 +45,42 @@ let MyInputOffset = {
 	},
 	emits:['input'],
 	computed:{
-		captionText:function() {
-			if(this.offsetSelectShow)
-				return this.capGen.resultsOf.replace('{CNT}',this.total);
-			
-			return this.capGen.results.replace('{CNT}',this.total);
-		},
-		offsetSelect:{
-			get:function()  { return this.offset; },
-			set:function(v) { this.$emit('input',v); }
-		},
-		offsetSelectShow:function() {
-			return this.total > this.limit || this.offset !== 0;
-		},
-		pageCount:function() {
-			if(this.total === 0 || this.limit === 0)
+		captionText:(s) => s.offsetSelectShow
+			? s.capGen.resultsOf.replace('{CNT}',s.total)
+			: s.capGen.results.replace('{CNT}',s.total),
+		offsetSelectShow:(s) => s.total > s.limit || s.offset !== 0,
+		pageCount:(s) => {
+			if(s.total === 0 || s.limit === 0)
 				return 0;
 			
 			let count = 0;
-			let countResults = this.total;
+			let countResults = s.total;
 			
 			do {
-				countResults -= this.limit;
+				countResults -= s.limit;
 				count++; 
 			} while(countResults > 0);
 			
 			return count;
 		},
 		
+		// inputs
+		offsetSelect:{
+			get()  { return this.offset; },
+			set(v) { this.$emit('input',v); }
+		},
+		
 		// stores
-		capGen:function() { return this.$store.getters.captions.generic; }
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
-		displayOffset:function(page,pageCount) {
+		displayOffset(page,pageCount) {
 			if(page === pageCount)
 				return ((page-1)*this.limit)+1 + ' - ' + this.total;
 			
 			return ((page-1)*this.limit)+1 + ' - ' + (((page-1)*this.limit) + this.limit);
 		},
-		pageChanged:function(next) {
+		pageChanged(next) {
 			if(next) this.$emit('input',this.offset + this.limit);
 			else     this.$emit('input',this.offset - this.limit);
 		}

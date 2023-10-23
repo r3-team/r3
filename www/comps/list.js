@@ -276,14 +276,15 @@ let MyList = {
 						:title="capApp.quick"
 					/>
 					
-					<my-input-collection class="selector"
+					<my-input-collection
 						v-for="c in collections"
-						@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event)"
+						@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event);resized()"
 						:collectionId="c.collectionId"
 						:columnIdDisplay="c.columnIdDisplay"
 						:key="c.collectionId"
 						:modelValue="collectionIdMapIndexes[c.collectionId]"
 						:multiValue="c.multiValue"
+						:previewCount="showCollectionCnt"
 					/>
 					
 					<select class="selector"
@@ -727,8 +728,10 @@ let MyList = {
 			
 			// list layout
 			layoutCheckTimer:null,
-			layoutReducedElements:[],        // elements that needed to be reduced to fit the current window width
-			layoutReducibleElementsInOrder:[ // elements that can be reduced, in order of priority
+			layoutElements:[],               // elements that are shown, based on available space
+			layoutElementsAvailableInOrder:[ // elements that can be shown, in order of priority
+				'collectionValuesAll',       // optional, show all collection filter values
+				'collectionValuesFew',       // optional, show few collection filter values
 				'actionTitles',              // optional
 				'refresh',                   // optional
 				'pageLimit',                 // not important
@@ -931,13 +934,18 @@ let MyList = {
 		joins:            (s) => s.fillRelationRecordIds(s.query.joins),
 		relationsJoined:  (s) => s.getRelationsJoined(s.joins),
 		rowSelect:        (s) => s.isInput || s.hasUpdate,
-		showActionTitles: (s) => !s.layoutReducedElements.includes('actionTitles'),
-		showPageLimit:    (s) => !s.layoutReducedElements.includes('pageLimit'),
+		showActionTitles: (s) => s.layoutElements.includes('actionTitles'),
+		showAutoRenewIcon:(s) => s.layoutElements.includes('autoRenewIcon'),
+		showPageLimit:    (s) => s.layoutElements.includes('pageLimit'),
 		showInputAddLine: (s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
 		showInputAddAll:  (s) => s.inputMulti && s.rowsClear.length > 0,
 		showInputHeader:  (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
-		showRefresh:      (s) => !s.layoutReducedElements.includes('refresh'),
-		showAutoRenewIcon:(s) => !s.layoutReducedElements.includes('autoRenewIcon'),
+		showRefresh:      (s) => s.layoutElements.includes('refresh'),
+		showCollectionCnt:(s) => {
+			if(s.layoutElements.includes('collectionValuesAll'))  return 999;
+			if(s.layoutElements.includes('collectionValuesFew')) return 2;
+			return 0;
+		},
 		
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
@@ -1068,34 +1076,23 @@ let MyList = {
 			return `background-color:${bg};color:${font};`;
 		},
 		layoutAdjust() {
-			if(typeof this.$refs.empty === 'undefined')
-				return;
-			
 			this.layoutCheckTimer = null;
-			const enoughSpace = this.$refs.empty.offsetWidth > 10;
 			
-			if(enoughSpace || this.layoutReducedElements.length === this.layoutReducibleElementsInOrder.length)
+			if(typeof this.$refs.empty === 'undefined' || this.$refs.empty.offsetWidth > 10 || this.layoutElements.length === 0)
 				return;
 			
 			// space insufficient and still elements available to reduce
-			for(const elm of this.layoutReducibleElementsInOrder) {
-				if(this.layoutReducedElements.includes(elm))
-					continue;
-				
-				this.layoutReducedElements.push(elm);
-				
-				// recheck after adjustment, in case further reduction is required
-				this.$nextTick(this.layoutAdjust);
-				break;
-			}
+			this.layoutElements.shift();       // remove next element
+			this.$nextTick(this.layoutAdjust); // recheck after change
 		},
 		resized() {
 			if(this.layoutCheckTimer !== null)
 				clearTimeout(this.layoutCheckTimer);
 			
 			this.layoutCheckTimer = setTimeout(() => {
-				this.layoutReducedElements = [];   // reset reduced elements for new window size
-				this.$nextTick(this.layoutAdjust); // wait for layout to settle before adjustments
+				// reset elements, then wait for layout to settle to check
+				this.layoutElements = JSON.parse(JSON.stringify(this.layoutElementsAvailableInOrder));
+				this.$nextTick(this.layoutAdjust);
 			},300);
 		},
 		updateDropdownDirection() {

@@ -40,7 +40,7 @@
 	gap:8px;
 	border-radius:5px;
 	background-color:var(--color-input);
-	box-shadow:1px 1px 4px var(--color-shade-input);
+	box-shadow:var(--shadow-input);
 	box-sizing:border-box;
 	overflow:visible;
 }
