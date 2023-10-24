@@ -233,6 +233,35 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 			name1.String)
 	}
 
+	// check widget access to external forms
+	if err := tx.QueryRow(db.Ctx, `
+		SELECT COUNT(*), STRING_AGG(f.name, ', ')
+		FROM app.widget AS h
+		INNER JOIN app.form AS f ON f.id = h.form_id
+		INNER JOIN app.module AS m
+			ON m.id = h.module_id
+			AND m.id = $1
+		
+		-- dependency
+		WHERE f.id NOT IN (
+			SELECT id
+			FROM app.form
+			WHERE module_id = m.id
+			OR module_id IN (
+				SELECT module_id_on
+				FROM app.module_depends
+				WHERE module_id = m.id
+			)
+		)
+	`, moduleId).Scan(&cnt, &name1); err != nil {
+		return err
+	}
+
+	if cnt != 0 {
+		return fmt.Errorf("dependency check failed, widgets(s) accessing form(s) '%s' from independent module(s)",
+			name1.String)
+	}
+
 	// check menu access to external forms
 	if err := tx.QueryRow(db.Ctx, `
 		SELECT COUNT(*), STRING_AGG(f.name, ', ')

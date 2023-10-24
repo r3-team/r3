@@ -133,6 +133,52 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			-- add NULL to module color
 			ALTER TABLE app.module ALTER COLUMN color1 DROP NOT NULL;
 			UPDATE app.module SET color1 = null WHERE color1 = '      ';
+			
+			-- widgets
+			CREATE TABLE IF NOT EXISTS app.widget (
+			    id uuid NOT NULL,
+			    module_id uuid NOT NULL,
+			    form_id uuid,
+			    name character varying(64) COLLATE pg_catalog."default" NOT NULL,
+			    size smallint NOT NULL,
+			    CONSTRAINT widget_pkey PRIMARY KEY (id),
+			    CONSTRAINT widget_form_id_fkey FOREIGN KEY (form_id)
+			        REFERENCES app.form (id) MATCH SIMPLE
+			        ON UPDATE NO ACTION
+			        ON DELETE NO ACTION
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT widget_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			
+			CREATE INDEX IF NOT EXISTS fki_widget_form_id_fkey ON app.widget USING btree (form_id ASC NULLS LAST);
+			
+			ALTER TABLE app.caption ADD COLUMN widget_id uuid;
+			ALTER TABLE app.caption ADD CONSTRAINT caption_widget_id_fkey FOREIGN KEY (widget_id)
+				REFERENCES app.widget (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX fki_caption_widget_id_fkey
+				ON app.caption USING btree (widget_id ASC NULLS LAST);
+			
+			ALTER TYPE app.caption_content ADD VALUE 'widgetTitle';
+			
+			ALTER TABLE app.collection_consumer ADD COLUMN widget_id UUID;
+			ALTER TABLE app.collection_consumer
+				ADD CONSTRAINT collection_consumer_widget_id_fkey FOREIGN KEY (widget_id)
+				REFERENCES app.widget (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			CREATE INDEX IF NOT EXISTS fki_collection_consumer_widget_id_fkey ON app.collection_consumer
+				USING BTREE (widget_id ASC NULLS LAST);
+			
+			ALTER TYPE app.collection_consumer_content ADD VALUE 'widgetDisplay';
 		`)
 		return "3.6", err
 	},
@@ -957,7 +1003,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX IF NOT EXISTS fki_tab_id_fkey
 				ON app.field USING btree (tab_id ASC NULLS LAST);
-				
+			
 			ALTER TABLE app.caption ADD COLUMN tab_id uuid;
 			ALTER TABLE app.caption ADD CONSTRAINT caption_tab_id_fkey FOREIGN KEY (tab_id)
 				REFERENCES app.tab (id) MATCH SIMPLE
