@@ -17,6 +17,7 @@ type Settings struct {
 	HeaderModules      bool        `json:"headerModules"`
 	HintUpdateVersion  int         `json:"hintUpdateVersion"`
 	LanguageCode       string      `json:"languageCode"`
+	ListSpaced         bool        `json:"listSpaced"`
 	MobileScrollForm   bool        `json:"mobileScrollForm"`
 	PageLimit          int         `json:"pageLimit"`
 	Pattern            pgtype.Text `json:"pattern"`

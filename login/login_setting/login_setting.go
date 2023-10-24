@@ -29,7 +29,7 @@ func Get(loginId pgtype.Int8, loginTemplateId pgtype.Int8) (types.Settings, erro
 		SELECT language_code, date_format, sunday_first_dow, font_size,
 			borders_all, borders_squared, header_captions, header_modules,
 			spacing, dark, hint_update_version, mobile_scroll_form,
-			warn_unsaved, pattern, font_family, tab_remember,
+			warn_unsaved, pattern, font_family, tab_remember, list_spaced,
 			color_classic_mode, color_header, color_header_single, color_menu, ARRAY(
 				SELECT name::TEXT
 				FROM instance.login_search_dict
@@ -43,8 +43,8 @@ func Get(loginId pgtype.Int8, loginTemplateId pgtype.Int8) (types.Settings, erro
 		&s.SundayFirstDow, &s.FontSize, &s.BordersAll, &s.BordersSquared,
 		&s.HeaderCaptions, &s.HeaderModules, &s.Spacing, &s.Dark,
 		&s.HintUpdateVersion, &s.MobileScrollForm, &s.WarnUnsaved, &s.Pattern,
-		&s.FontFamily, &s.TabRemember, &s.ColorClassicMode, &s.ColorHeader,
-		&s.ColorHeaderSingle, &s.ColorMenu, &s.SearchDictionaries)
+		&s.FontFamily, &s.TabRemember, &s.ListSpaced, &s.ColorClassicMode,
+		&s.ColorHeader, &s.ColorHeaderSingle, &s.ColorMenu, &s.SearchDictionaries)
 
 	return s, err
 }
@@ -69,14 +69,14 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 				sunday_first_dow, font_size, borders_all, borders_squared,
 				header_captions, header_modules, spacing, dark,
 				hint_update_version, mobile_scroll_form, warn_unsaved, pattern,
-				font_family, tab_remember, color_classic_mode, color_header,
-				color_header_single, color_menu)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21)
+				font_family, tab_remember, list_spaced, color_classic_mode,
+				color_header, color_header_single, color_menu)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17,$18,$19,$20,$21,$22)
 		`, entryName), entryId, s.LanguageCode, s.DateFormat, s.SundayFirstDow,
 			s.FontSize, s.BordersAll, s.BordersSquared, s.HeaderCaptions,
 			s.HeaderModules, s.Spacing, s.Dark, s.HintUpdateVersion,
 			s.MobileScrollForm, s.WarnUnsaved, s.Pattern, s.FontFamily,
-			s.TabRemember, s.ColorClassicMode, s.ColorHeader,
+			s.TabRemember, s.ListSpaced, s.ColorClassicMode, s.ColorHeader,
 			s.ColorHeaderSingle, s.ColorMenu); err != nil {
 
 			return err
@@ -89,14 +89,14 @@ func Set_tx(tx pgx.Tx, loginId pgtype.Int8, loginTemplateId pgtype.Int8, s types
 				header_captions = $7, header_modules = $8, spacing = $9,
 				dark = $10, hint_update_version = $11, mobile_scroll_form = $12,
 				warn_unsaved = $13, pattern = $14, font_family = $15,
-				tab_remember = $16, color_classic_mode = $17,
-				color_header = $18, color_header_single = $19, color_menu = $20
-			WHERE %s = $21
+				tab_remember = $16, list_spaced = $17, color_classic_mode = $18,
+				color_header = $19, color_header_single = $20, color_menu = $21
+			WHERE %s = $22
 		`, entryName), s.LanguageCode, s.DateFormat, s.SundayFirstDow,
 			s.FontSize, s.BordersAll, s.BordersSquared, s.HeaderCaptions,
 			s.HeaderModules, s.Spacing, s.Dark, s.HintUpdateVersion,
 			s.MobileScrollForm, s.WarnUnsaved, s.Pattern, s.FontFamily,
-			s.TabRemember, s.ColorClassicMode, s.ColorHeader,
+			s.TabRemember, s.ListSpaced, s.ColorClassicMode, s.ColorHeader,
 			s.ColorHeaderSingle, s.ColorMenu, entryId); err != nil {
 
 			return err

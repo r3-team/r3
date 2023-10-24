@@ -1066,6 +1066,19 @@ let MySettings = {
 								</select>
 							</td>
 						</tr>
+						<tr>
+							<td>{{ capApp.listSpaced }}</td>
+							<td>
+								<div class="row">
+									<my-bool
+										v-model="settingsInput.listSpaced"
+										:caption0="capApp.listSpacedOff"
+										:caption1="capApp.listSpacedOn"
+										:grow="false"
+									/>
+								</div>
+							</td>
+						</tr>
 						<tr class="default-inputs">
 							<td>{{ capApp.pattern }}</td>
 							<td>

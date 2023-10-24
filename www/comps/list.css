@@ -66,6 +66,7 @@
 	flex-flow:column nowrap;
 	flex:1 1 auto;
 	overflow:auto;
+	background-color:var(--color-bg);
 }
 .list .layoutTable table{
 	width:100%;
@@ -75,6 +76,16 @@
 }
 .list .layoutTable.scrolls table{
 	position:absolute; /* to keep table from growing over its parent */
+}
+.list .layoutTable thead tr{
+	position:sticky;
+	top:0px;
+	z-index:var(--z-index-list-header);
+}
+.list .layoutTable tfoot tr{
+	position:sticky;
+	bottom:0px;
+	z-index:var(--z-index-list-footer);
 }
 .list .layoutTable tbody tr{
 	color:var(--color-font);
@@ -99,9 +110,6 @@
 .list .layoutTable tbody tr.rowSelect.active{
 	background-color:var(--color-accent3-alt);
 }
-.list .layoutTable tfoot tr{
-	background-color:var(--color-bg);
-}
 .list .layoutTable tfoot tr.aggregation td{
 	font-weight:bold;
 	border-top:2px solid var(--color-border);
@@ -110,12 +118,9 @@
 .list .layoutTable th{
 	padding:0px;
 	margin-bottom:-1px;
-	position:sticky;
-	top:0px;
-	border-bottom:2px solid var(--color-border);
 	background-color:var(--color-bg);
-	border-collapse:separate;
-	z-index:var(--z-index-list-header);
+	position:relative;
+	border-bottom:1px solid var(--color-border);
 }
 .list .layoutTable th,
 .list .layoutTable td{
@@ -135,7 +140,6 @@
 	justify-content:center;
 	padding:6px 2px 6px 10px;
 	border-radius:2px;
-	background-color:var(--color-bg);
 	transition:background-color 0.3s;
 }
 .list .layoutTable th .columnOptionWrap{
@@ -144,7 +148,6 @@
 	max-width:360px;
 	right:unset;
 	left:-1px;
-	bottom:-2px;
 }
 .list .layoutTable th .columnOptionWrap.lastInRow{
 	right:0px;
@@ -156,7 +159,8 @@
 	display:flex;
 	flex-flow:column nowrap;
 	gap:6px;
-	border-color:var(--color-border);
+	border:1px solid var(--color-border);
+	border-top:none;
 	background-color:var(--color-bg);
 }
 .list .layoutTable th .columnOptionItem{
@@ -169,6 +173,7 @@
 	flex-flow:column nowrap;
 	max-height:250px;
 	background-color:var(--color-input);
+	border-radius:4px;
 	box-shadow:1px 1px 4px var(--color-shade-input);
 	overflow-y:scroll;
 }
@@ -186,6 +191,7 @@
 .list .layoutTable td{
 	padding:0px;
 	border-bottom:1px solid var(--color-border);
+	background-color:var(--color-input);
 }
 .list .layoutTable td:last-child{
 	border-right:none;
@@ -227,6 +233,8 @@
 	flex-flow:row nowrap;
 	align-items:center;
 	justify-content:space-between;
+	padding:0px 10px;
+	gap:10px;
 }
 
 
@@ -377,6 +385,10 @@
 .list-input-row-actions{
 	background-color:var(--color-bg);
 }
+.list-input-row-actions td{
+	border-top:1px solid var(--color-border);
+	background-color:transparent !important;
+}
 .list-input-rows-wrap.multi-line .list-input-rows td{
 	border-bottom:1px dotted var(--color-border);
 }
@@ -471,6 +483,28 @@
 .user-bordersSquared .list .layoutCards .card .header,
 .user-bordersSquared .list .layoutCards .card .actions{
 	border-radius:0px;
+}
+.user-listSpaced .list .layoutTable table:not(.asInput){
+	border-spacing:0px 8px;
+	border-left:8px solid transparent;
+	border-right:8px solid transparent;
+	box-sizing:border-box;
+}
+.user-listSpaced .list .layoutTable table:not(.asInput) tfoot tr,
+.user-listSpaced .list .layoutTable table:not(.asInput) tbody tr{
+	box-shadow:var(--shadow-input);
+	border-radius:6px;
+}
+.user-listSpaced .list .layoutTable table:not(.asInput) td{
+	border-bottom:none;
+}
+.user-listSpaced .list .layoutTable table:not(.asInput) td:first-child{
+	border-top-left-radius:6px;
+	border-bottom-left-radius:6px;
+}
+.user-listSpaced .list .layoutTable table:not(.asInput) td:last-child{
+	border-top-right-radius:6px;
+	border-bottom-right-radius:6px;
 }
 
 /* mobile overwrites */

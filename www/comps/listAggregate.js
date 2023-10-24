@@ -11,7 +11,7 @@ let MyListAggregate = {
 	template:`<tr class="aggregation" v-if="anyValues">
 		<td v-if="leaveOneEmpty"></td>
 		<td v-for="(b,i) in columnBatches">
-			{{ valuesByColumnBatch[i] !== null ? valuesByColumnBatch[i] : '' }}
+			<div class="batch">{{ valuesByColumnBatch[i] !== null ? valuesByColumnBatch[i] : '' }}</div>
 		</td>
 	</tr>`,
 	props:{
