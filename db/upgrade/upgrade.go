@@ -135,7 +135,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			UPDATE app.module SET color1 = null WHERE color1 = '      ';
 			
 			-- widgets
-			CREATE TABLE IF NOT EXISTS app.widget (
+			CREATE TABLE app.widget (
 			    id uuid NOT NULL,
 			    module_id uuid NOT NULL,
 			    form_id uuid,
@@ -154,7 +154,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			        DEFERRABLE INITIALLY DEFERRED
 			);
 			
-			CREATE INDEX IF NOT EXISTS fki_widget_form_id_fkey ON app.widget USING btree (form_id ASC NULLS LAST);
+			CREATE INDEX fki_widget_form_id_fkey ON app.widget USING btree (form_id ASC NULLS LAST);
 			
 			ALTER TABLE app.caption ADD COLUMN widget_id uuid;
 			ALTER TABLE app.caption ADD CONSTRAINT caption_widget_id_fkey FOREIGN KEY (widget_id)
@@ -164,7 +164,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				DEFERRABLE INITIALLY DEFERRED;
 			
 			CREATE INDEX fki_caption_widget_id_fkey
-				ON app.caption USING btree (widget_id ASC NULLS LAST);
+				ON app.caption USING BTREE (widget_id ASC NULLS LAST);
 			
 			ALTER TYPE app.caption_content ADD VALUE 'widgetTitle';
 			
@@ -175,10 +175,53 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
-			CREATE INDEX IF NOT EXISTS fki_collection_consumer_widget_id_fkey ON app.collection_consumer
+			
+			CREATE INDEX fki_collection_consumer_widget_id_fkey ON app.collection_consumer
 				USING BTREE (widget_id ASC NULLS LAST);
 			
 			ALTER TYPE app.collection_consumer_content ADD VALUE 'widgetDisplay';
+			
+			-- widget user store
+			CREATE TABLE instance.login_widget_group (
+				id uuid NOT NULL DEFAULT gen_random_uuid(),
+				login_id integer NOT NULL,
+				title character varying(64) COLLATE pg_catalog."default" NOT NULL,
+				"position" smallint NOT NULL,
+				CONSTRAINT login_widget_group_pkey PRIMARY KEY (id),
+				CONSTRAINT login_widget_group_login_id_fkey FOREIGN KEY (login_id)
+					REFERENCES instance.login (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+					NOT VALID
+			);
+			CREATE INDEX fki_login_widget_group_login_id_fkey ON instance.login_widget_group
+				USING BTREE (login_id ASC NULLS LAST);
+			CREATE INDEX ind_login_widget_group_position ON instance.login_widget_group
+				USING BTREE (position ASC NULLS LAST);
+			
+			CREATE TABLE instance.login_widget_group_item (
+				login_widget_group_id uuid NOT NULL,
+				"position" smallint NOT NULL,
+				widget_id uuid,
+				CONSTRAINT login_widget_group_item_pkey PRIMARY KEY (login_widget_group_id, "position"),
+				CONSTRAINT login_widget_group_item_login_widget_group_id_fkey FOREIGN KEY (login_widget_group_id)
+					REFERENCES instance.login_widget_group (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT login_widget_group_item_widget_id_fkey FOREIGN KEY (widget_id)
+					REFERENCES app.widget (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX fki_login_widget_group_item_login_widget_group_id_fkey ON instance.login_widget_group_item
+				USING BTREE (login_widget_group_id ASC NULLS LAST);
+			CREATE INDEX fki_login_widget_group_item_widget_id_fkey ON instance.login_widget_group_item
+				USING BTREE (widget_id ASC NULLS LAST);
+			CREATE INDEX ind_login_widget_group_item_position ON instance.login_widget_group_item
+				USING BTREE (position ASC NULLS LAST);
 		`)
 		return "3.6", err
 	},

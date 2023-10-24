@@ -182,6 +182,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			}
 			return LoginSettingsSet_tx(tx, reqJson, loginId)
 		}
+	case "loginWidget":
+		switch action {
+		case "get":
+			return LoginWidgetGet(reqJson, loginId)
+		case "set":
+			return LoginWidgetSet_tx(tx, reqJson, loginId)
+		}
 	case "lookup":
 		switch action {
 		case "get":

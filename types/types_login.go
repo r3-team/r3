@@ -1,6 +1,9 @@
 package types
 
-import "github.com/gofrs/uuid"
+import (
+	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 type Login struct {
 	Id   int64  `json:"id"`
@@ -33,4 +36,11 @@ type LoginTokenFixed struct {
 type LoginMfaToken struct {
 	Id   int64  `json:"id"`
 	Name string `json:"name"`
+}
+type LoginWidgetGroupItem struct {
+	WidgetId pgtype.UUID `json:"widgetId"`
+}
+type LoginWidgetGroup struct {
+	Title string                 `json:"title"`
+	Items []LoginWidgetGroupItem `json:"items"`
 }

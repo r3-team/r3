@@ -71,7 +71,5 @@ let MyBuilderWidgets = {
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		capApp:     (s) => s.$store.getters.captions.builder.widget,
 		capGen:     (s) => s.$store.getters.captions.generic
-	},
-	methods:{
 	}
 };
