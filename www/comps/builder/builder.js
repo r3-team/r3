@@ -163,6 +163,13 @@ let MyBuilder = {
 						<span>{{ capApp.navigationApis }}</span>
 					</router-link>
 					
+					<router-link class="entry clickable"
+						:to="'/builder/widgets/'+module.id"
+					>
+						<img src="images/tiles.png" />
+						<span>{{ capApp.navigationWidgets }}</span>
+					</router-link>
+					
 					<!-- so router link is not last child (CSS) -->
 					<div />
 				</div>
@@ -281,6 +288,15 @@ let MyBuilder = {
 					>{{ a.name + ' (v' + a.version + ')' }}</router-link>
 				</template>
 				
+				<!-- widgets -->
+				<template v-if="navigation === 'widgets'">
+					<router-link class="entry clickable"
+						v-for="a in module.widgets.filter(v => v.name.toLowerCase().includes(filter.toLowerCase()))"
+						:key="a.id"
+						:to="'/builder/widget/'+a.id" 
+					>{{ a.name }}</router-link>
+				</template>
+				
 				<!-- PG functions -->
 				<template v-if="navigation === 'pg-functions'">
 					<router-link class="entry clickable"
@@ -384,6 +400,7 @@ let MyBuilder = {
 						case 'relation':    targetIdMap = this.relationIdMap;   break;
 						case 'role':        targetIdMap = this.roleIdMap;       break;
 						case 'pg-function': targetIdMap = this.pgFunctionIdMap; break;
+						case 'widget':      targetIdMap = this.widgetIdMap;     break;
 					}
 				}
 				
@@ -411,13 +428,14 @@ let MyBuilder = {
 		}
 	},
 	computed:{
-		subMenu:(s) => s.navigation === 'relations' && s.module.relations.length !== 0
-			|| s.navigation === 'forms'        && s.module.forms.length !== 0
-			|| s.navigation === 'roles'        && s.module.roles.length !== 0
-			|| s.navigation === 'collections'  && s.module.collections.length !== 0
-			|| s.navigation === 'apis'         && s.module.apis.length !== 0
-			|| s.navigation === 'js-functions' && s.module.jsFunctions.length !== 0
-			|| s.navigation === 'pg-functions' && s.module.pgFunctions.length !== 0,
+		subMenu:(s) =>
+			s.navigation === 'relations'    && s.module.relations.length   !== 0 ||
+			s.navigation === 'forms'        && s.module.forms.length       !== 0 ||
+			s.navigation === 'roles'        && s.module.roles.length       !== 0 ||
+			s.navigation === 'collections'  && s.module.collections.length !== 0 ||
+			s.navigation === 'apis'         && s.module.apis.length        !== 0 ||
+			s.navigation === 'js-functions' && s.module.jsFunctions.length !== 0 ||
+			s.navigation === 'pg-functions' && s.module.pgFunctions.length !== 0,
 		moduleIdInput:{
 			get()  { return !this.module ? '' : this.module.id; },
 			set(v) {
@@ -434,18 +452,19 @@ let MyBuilder = {
 		moduleOwner:  (s) => s.isNew ? true  : s.moduleIdMapOptions[s.moduleId].owner,
 		
 		// stores
-		modules:           (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
-		moduleIdMapOptions:(s) => s.$store.getters['schema/moduleIdMapOptions'],
-		relationIdMap:     (s) => s.$store.getters['schema/relationIdMap'],
+		apiIdMap:          (s) => s.$store.getters['schema/apiIdMap'],
 		attributeIdMap:    (s) => s.$store.getters['schema/attributeIdMap'],
+		collectionIdMap:   (s) => s.$store.getters['schema/collectionIdMap'],
 		formIdMap:         (s) => s.$store.getters['schema/formIdMap'],
 		iconIdMap:         (s) => s.$store.getters['schema/iconIdMap'],
 		jsFunctionIdMap:   (s) => s.$store.getters['schema/jsFunctionIdMap'],
+		modules:           (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
+		moduleIdMapOptions:(s) => s.$store.getters['schema/moduleIdMapOptions'],
 		pgFunctionIdMap:   (s) => s.$store.getters['schema/pgFunctionIdMap'],
+		relationIdMap:     (s) => s.$store.getters['schema/relationIdMap'],
 		roleIdMap:         (s) => s.$store.getters['schema/roleIdMap'],
-		collectionIdMap:   (s) => s.$store.getters['schema/collectionIdMap'],
-		apiIdMap:          (s) => s.$store.getters['schema/apiIdMap'],
+		widgetIdMap:       (s) => s.$store.getters['schema/widgetIdMap'],
 		bgStyle:           (s) => s.$store.getters.colorMenuStyle,
 		builderEnabled:    (s) => s.$store.getters.builderEnabled,
 		capApp:            (s) => s.$store.getters.captions.builder,
@@ -494,6 +513,7 @@ let MyBuilder = {
 				case 'pg-functions': entity = 'pgFunction'; break;
 				case 'relations':    entity = 'relation';   break;
 				case 'roles':        entity = 'role';       break;
+				case 'widgets':      entity = 'widget';     break;
 			}
 			this.createNew(entity,{name:this.filter});
 		},

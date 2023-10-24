@@ -23,6 +23,7 @@ const MyStoreSchema = {
 		pgFunctionIdMap:{},
 		relationIdMap:{},
 		roleIdMap:{},
+		widgetIdMap:{},
 		
 		// computed
 		formIdMapMenu:{},
@@ -69,6 +70,7 @@ const MyStoreSchema = {
 			state.pgFunctionIdMap = {};
 			state.relationIdMap   = {};
 			state.roleIdMap       = {};
+			state.widgetIdMap     = {};
 			
 			// reset module options & preset records
 			state.moduleIdMapOptions = {};
@@ -138,6 +140,11 @@ const MyStoreSchema = {
 					state.apiIdMap[api.id] = api;
 				}
 				
+				// process widgets
+				for(const widget of mod.widgets) {
+					state.widgetIdMap[widget.id] = widget;
+				}
+				
 				// process PG functions
 				for(const pgFunc of mod.pgFunctions) {
 					state.pgFunctionIdMap[pgFunc.id] = pgFunc;
@@ -169,6 +176,7 @@ const MyStoreSchema = {
 		presetIdMapRecordId:(state) => state.presetIdMapRecordId,
 		relationIdMap:      (state) => state.relationIdMap,
 		roleIdMap:          (state) => state.roleIdMap,
+		widgetIdMap:        (state) => state.widgetIdMap,
 		
 		languageCodes:(state) => {
 			for(const mod of state.modules) {

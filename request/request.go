@@ -545,6 +545,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "storeExportKey":
 			return TransferStoreExportKey(reqJson)
 		}
+	case "widget":
+		switch action {
+		case "del":
+			return WidgetDel_tx(tx, reqJson)
+		case "set":
+			return WidgetSet_tx(tx, reqJson)
+		}
 	}
 	return nil, fmt.Errorf("unknown ressource or action")
 }

@@ -156,6 +156,7 @@ let MyBuilderNew = {
 				case 'pgFunction': searchList = s.module.pgFunctions; break;
 				case 'relation':   searchList = s.module.relations;   break;
 				case 'role':       searchList = s.module.roles;       break;
+				case 'widget':     searchList = s.module.widgets;     break;
 			}
 			for(let e of searchList) {
 				// only compare names of functions within the same scope (global or form)
@@ -179,6 +180,7 @@ let MyBuilderNew = {
 				case 'pgFunction': return s.capApp.pgFunction; break;
 				case 'relation':   return s.capApp.relation;   break;
 				case 'role':       return s.capApp.role;       break;
+				case 'widget':     return s.capApp.widget;     break;
 			}
 			return '';
 		},
@@ -192,6 +194,7 @@ let MyBuilderNew = {
 				case 'pgFunction': return 'images/codeDatabase.png';   break;
 				case 'relation':   return 'images/database.png';       break;
 				case 'role':       return 'images/personMultiple.png'; break;
+				case 'widget':     return 'images/tiles.png';          break;
 			}
 			return '';
 		},
@@ -378,6 +381,15 @@ let MyBuilderNew = {
 						accessCollections:{},
 						accessMenus:{},
 						accessRelations:{}
+					};
+				break;
+				case 'widget':
+					request = {
+						id:this.getNilUuid(),
+						moduleId:this.moduleId,
+						formId:null,
+						size:1,
+						name:this.inputs.name
 					};
 				break;
 				default: return; break;

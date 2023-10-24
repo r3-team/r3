@@ -502,6 +502,9 @@ func deleteWidgets_tx(tx pgx.Tx, moduleId uuid.UUID, widgets []types.Widget) err
 		idsKeep = append(idsKeep, entity.Id)
 	}
 	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "widget", moduleId, idsKeep)
+	if err != nil {
+		return err
+	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del widget %s", id.String()))
 		if err := widget.Del_tx(tx, id); err != nil {

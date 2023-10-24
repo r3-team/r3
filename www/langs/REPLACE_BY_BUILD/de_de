@@ -1241,7 +1241,8 @@
 			"relation":"Neue Relation",
 			"relationEncryption":"Ende-zu-Ende-Verschlüsselung",
 			"relationEncryptionHint":"Erlaubt Ende-zu-Ende-Verschlüsselung (E2EE) für Attribute auf dieser Relation. E2EE hat Vor- und Nachteile - die Builder-Dokumentation sollte hierzu gelesen werden. Diese Einstellung kann nachträglich nicht geändert werden.",
-			"role":"Neue Rolle"
+			"role":"Neue Rolle",
+			"widget":"Neues Widget"
 		},
 		"openFormInput":{
 			"option":{
@@ -1433,6 +1434,19 @@
 			"titleRelations":"Relationen definieren",
 			"titleRelationsHint":"Um Datensätze zu speichern und Daten zuweisen."
 		},
+		"widget":{
+			"dialog":{
+				"delete":"Bist du sicher, dass du dieses Widget löschen möchtest?"
+			},
+			"collectionHint":"Widget zeigt den Inhalt der ausgewählten Sammlung.",
+			"edit":"Widget '{NAME}'",
+			"formHint":"Widget zeigt den Inhalt des ausgewählten Formulars.",
+			"nameHint":"Der Name dient als interne Referenz - er wird den Benutzern nicht angezeigt.",
+			"new":"Neues Widget",
+			"sizeHint":"Widgets werden als Kacheln angezeigt, wobei jede Kachel 1 oder 2 Plätze besetzt.",
+			"title":"Widgets",
+			"titleHint":"Der Titel kann in die verfügbaren Anwendungssprachen übersetzt werden. Er wird am oberen Rand des Widgets angezeigt."
+		},
 		"backHint":"Zurück zur Anwendungsübersicht",
 		"language":"Übersetzung",
 		"languageNextHint":"Zur nächsten Übersetzung wechseln (Hotkey: STRG + q)",
@@ -1451,6 +1465,7 @@
 		"navigationRelations":"Relationen",
 		"navigationRoles":"Rollen",
 		"navigationStart":"Erste Schritte",
+		"navigationWidgets":"Widgets",
 		"pageTitle":"Builder",
 		"pageTitleDocs":"Builder-Dokumentation"
 	},

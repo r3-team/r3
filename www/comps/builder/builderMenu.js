@@ -1,5 +1,6 @@
 import MyBuilderCaption                from './builderCaption.js';
 import MyBuilderCollectionInput        from './builderCollectionInput.js';
+import MyBuilderFormInput              from './builderFormInput.js';
 import MyBuilderIconInput              from './builderIconInput.js';
 import {getCollectionConsumerTemplate} from '../shared/collection.js';
 import {getDependentModules}           from '../shared/builder.js';
@@ -12,6 +13,7 @@ let MyBuilderMenuItems = {
 		'chrome-picker':VueColor.Chrome,
 		MyBuilderCaption,
 		MyBuilderCollectionInput,
+		MyBuilderFormInput,
 		MyBuilderIconInput
 	},
 	template:`<draggable handle=".dragAnchor" group="menu" itemKey="id" animation="100"
@@ -47,16 +49,12 @@ let MyBuilderMenuItems = {
 						/>
 						
 						<!-- form open input -->
-						<select v-model="element.formId" :disabled="readonly">
-							<option :value="null">{{ capApp.formId }}</option>
-							<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
-							<optgroup
-								v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.forms.length !== 0)"
-								:label="mod.name"
-							>
-								<option v-for="f in mod.forms" :value="f.id">{{ f.name }}</option>
-							</optgroup>
-						</select>
+						<my-builder-form-input
+							v-model="element.formId"
+							:captionEmpty="capApp.formId"
+							:module="module"
+							:readonly="readonly"
+						/>
 						
 						<!-- show options -->
 						<my-button image="settings.png"
@@ -198,7 +196,6 @@ let MyBuilderMenuItems = {
 	methods:{
 		// externals
 		getCollectionConsumerTemplate,
-		getDependentModules,
 		getNilUuid,
 		
 		// presentation
