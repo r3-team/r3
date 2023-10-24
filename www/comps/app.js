@@ -238,7 +238,8 @@ let MyApp = {
 			if(s.settings.bordersAll)       classes.push('user-bordersAll');
 			if(s.settings.bordersSquared)   classes.push('user-bordersSquared');
 			if(s.settings.dark)             classes.push('user-dark');
-			if(s.settings.mobileScrollForm) classes.push('user-mobile-scroll-form');
+			if(s.settings.mobileScrollForm) classes.push('user-mobileScrollForm');
+			if(s.settings.listSpaced)       classes.push('user-listSpaced');
 			if(s.isMobile)                  classes.push('is-mobile');
 			
 			return classes.join(' ');

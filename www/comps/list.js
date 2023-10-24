@@ -51,7 +51,7 @@ let MyList = {
 	template:`<div class="list" ref="content"
 		v-click-outside="escape"
 		@keydown="keyDown"
-		:class="{asInput:isInput, readonly:inputIsReadonly, isSingleField:isSingleField }"
+		:class="{ asInput:isInput, readonly:inputIsReadonly, isSingleField:isSingleField }"
 	>
 		<!-- list as input field (showing record(s) from active field value) -->
 		<template v-if="isInput">
@@ -374,7 +374,7 @@ let MyList = {
 					:class="{ layoutCards:isCards, layoutTable:isTable, scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
 					:id="usesPageHistory ? scrollFormId : null"
 				>
-					<table v-if="isTable" :class="{ 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
+					<table v-if="isTable" :class="{ asInput:isInput, 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
 						<thead v-if="header">
 							<tr>
 								<th v-if="hasBulkActions" class="minimum checkbox">

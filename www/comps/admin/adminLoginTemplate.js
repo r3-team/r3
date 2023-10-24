@@ -202,6 +202,19 @@ let MyAdminLoginTemplate = {
 						</td>
 					</tr>
 					<tr>
+						<td>{{ capAppSet.listSpaced }}</td>
+						<td>
+							<div class="row">
+								<my-bool
+									v-model="settings.listSpaced"
+									:caption0="capAppSet.listSpacedOff"
+									:caption1="capAppSet.listSpacedOn"
+									:grow="false"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr>
 						<td>{{ capAppSet.pattern }}</td>
 						<td>
 							<select v-model="settings.pattern">
@@ -334,6 +347,7 @@ let MyAdminLoginTemplate = {
 			headerCaptions:true,
 			hintUpdateVersion:0,
 			languageCode:'en_us',
+			listSpaced:true,
 			mobileScrollForm:true,
 			pattern:'bubbles',
 			searchDictionaries:['english'],

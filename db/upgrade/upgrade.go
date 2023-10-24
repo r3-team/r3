@@ -121,8 +121,10 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE instance.login_setting ADD   COLUMN color_menu          CHARACTER(6);
 			ALTER TABLE instance.login_setting ADD   COLUMN color_header_single BOOLEAN NOT NULL DEFAULT FALSE;
 			ALTER TABLE instance.login_setting ALTER COLUMN color_header_single DROP DEFAULT;
-			ALTER TABLE instance.login_setting ADD   COLUMN header_modules BOOLEAN NOT NULL DEFAULT TRUE;
-			ALTER TABLE instance.login_setting ALTER COLUMN header_modules DROP DEFAULT;
+			ALTER TABLE instance.login_setting ADD   COLUMN header_modules      BOOLEAN NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.login_setting ALTER COLUMN header_modules      DROP DEFAULT;
+			ALTER TABLE instance.login_setting ADD   COLUMN list_spaced         BOOLEAN NOT NULL DEFAULT TRUE;
+			ALTER TABLE instance.login_setting ALTER COLUMN list_spaced         DROP DEFAULT;
 			
 			-- menu colors
 			ALTER TABLE app.menu ADD COLUMN color CHARACTER(6);

@@ -129,6 +129,6 @@
 }
 
 /* combined mobile & user overwrites */
-.user-mobile-scroll-form.is-mobile .form .fields{
+.user-mobileScrollForm.is-mobile .form .fields{
 	overflow:unset;
 }
