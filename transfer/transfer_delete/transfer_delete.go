@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"r3/db"
 	"r3/log"
+	"r3/schema/api"
 	"r3/schema/article"
 	"r3/schema/attribute"
 	"r3/schema/collection"
@@ -90,6 +91,11 @@ func NotExisting_tx(tx pgx.Tx, module types.Module) error {
 
 	// articles
 	if err := deleteArticles_tx(tx, module.Id, module.Articles); err != nil {
+		return err
+	}
+
+	// APIs
+	if err := deleteApis_tx(tx, module.Id, module.Apis); err != nil {
 		return err
 	}
 
@@ -473,15 +479,29 @@ func deleteArticles_tx(tx pgx.Tx, moduleId uuid.UUID, articles []types.Article) 
 	}
 	return nil
 }
+func deleteApis_tx(tx pgx.Tx, moduleId uuid.UUID, apis []types.Api) error {
+	idsKeep := make([]uuid.UUID, 0)
+	for _, entity := range apis {
+		idsKeep = append(idsKeep, entity.Id)
+	}
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "api", moduleId, idsKeep)
+	if err != nil {
+		return err
+	}
+	for _, id := range idsDelete {
+		log.Info("transfer", fmt.Sprintf("del API %s", id.String()))
+		if err := api.Del_tx(tx, id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 func deleteWidgets_tx(tx pgx.Tx, moduleId uuid.UUID, widgets []types.Widget) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range widgets {
 		idsKeep = append(idsKeep, entity.Id)
 	}
 	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "widget", moduleId, idsKeep)
-	if err != nil {
-		return err
-	}
 	for _, id := range idsDelete {
 		log.Info("transfer", fmt.Sprintf("del widget %s", id.String()))
 		if err := widget.Del_tx(tx, id); err != nil {
@@ -531,7 +551,7 @@ func importGetIdsToDeleteFromModule_tx(tx pgx.Tx, entity string,
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !slices.Contains([]string{"article", "collection", "form", "icon",
+	if !slices.Contains([]string{"api", "article", "collection", "form", "icon",
 		"js_function", "login_form", "menu", "pg_function", "relation",
 		"role", "widget"}, entity) {
 
