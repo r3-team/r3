@@ -222,7 +222,7 @@ let MyField = {
 					:iconId="iconId ? iconId : null"
 					:isHidden="isHidden"
 					:isSingleField="isAloneInForm || isAloneInTab"
-					:layout="field.layout"
+					:layoutDefault="field.layout"
 					:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 					:popUpFormInline="popUpFormInline"
 					:query="field.query"

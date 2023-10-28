@@ -102,7 +102,7 @@
 	--color-accent1:       hsl(311,57%,40%);
 	--color-accent2:       hsl(127,86%,96%); /* calendar/gantt weekend */
 	--color-accent3:       hsl(199,11%,96%); /* menu/list/calendar entry hover */
-	--color-accent3-alt:   hsl(199,11%,93%); /* menu/list/calendar entry active */
+	--color-accent3-alt:   hsl(199,41%,43%); /* menu/list/calendar entry active */
 	--color-accent4:       hsl(339, 4%,61%); /* gantt entry */
 	--color-accent5:       hsl(207,20%,42%); /* collection entry */
 	--color-accent5-alt:   hsl(207,20%,34%); /* collection entry hover */

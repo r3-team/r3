@@ -93,19 +93,15 @@
 .list .layoutTable tbody tr.rowSelect:hover,
 .list .layoutTable tbody tr.rowSelect:focus{
 	cursor:pointer;
-	background-color:var(--color-accent3);
 	outline:none;
-	transition:background-color 0.2s;
+	filter:brightness(95%);
+	background-color:var(--color-accent3);
+	transition:background-color 0.2s, filter 0.2s;
 }
 .list .layoutTable tbody tr.rowSelect:hover td,
 .list .layoutTable tbody tr.rowSelect:focus td{
 	box-shadow:inset 0 -2px 0 0 var(--color-accent3-alt);
 	transition:box-shadow 0.5s;
-}
-.list .layoutTable tbody tr.rowSelect:hover td .batch.colored,
-.list .layoutTable tbody tr.rowSelect:focus td .batch.colored{
-	filter:brightness(88%);
-	transition:filter 0.5s;
 }
 .list .layoutTable tbody tr.rowSelect.active{
 	background-color:var(--color-accent3-alt);
@@ -228,6 +224,9 @@
 	align-items:flex-start;
 	gap:4px;
 }
+.list .layoutTable td .batch .gallery-item{
+	max-height:var(--row-height);
+}
 .list .layoutTable .sub-actions{
 	display:flex;
 	flex-flow:row nowrap;
@@ -241,19 +240,23 @@
 /* box layout view */
 .list .layoutCards{
 	flex:1 1 auto;
-	padding:16px 0px 0px 16px;
 	display:flex;
 	flex-flow:column nowrap;
 	overflow:auto;
 	align-content:flex-start;
-	border-top:1px solid var(--color-border);
+	background-color:var(--color-bg);
 }
 .list .layoutCards .top-actions{
-	margin:0px 0px 16px 0px;
+	position:sticky;
+	top:0px;
+	padding:4px 0px 16px 0px;
 	display:flex;
 	flex-flow:row wrap;
 	justify-content:center;
 	align-items:center;
+	background-color:var(--color-bg);
+	z-index:var(--z-index-list-header);
+	border-bottom:1px solid var(--color-border);
 }
 .list .layoutCards .top-actions span.select{
 	margin:0px 9px 0px 18px;
@@ -265,51 +268,36 @@
 	margin:0px 9px 0px 0px;
 	padding:3px;
 }
-.list .layoutCards .top-actions .no-results{
-	font-style:italic;
-	font-size:120%;
-}
 .list .layoutCards .cards{
-	display:flex;
-	flex-flow:row wrap;
+	display:grid;
+	grid-template-columns:repeat(auto-fill, minmax(320px, 1fr));
+	overflow:auto;
 }
 .list .layoutCards .card{
-	flex:1 1 400px;
-	max-width:500px;
-	min-height:90px;
-	margin:0px 16px 16px 0px;
 	position:relative;
-	border:1px solid var(--color-border);
-	border-radius:5px;
-	overflow:hidden;
-	box-shadow:1px 1px 4px var(--color-shade);
-	background-image:var(--image-list-cards);
-	background-size:cover;
-}
-.list .layoutCards .card .header{
-	height:8px;
-	margin:0px 0px 12px 0px;
-	background-color:var(--color-bg);
+	border-right:1px solid var(--color-border);
 	border-bottom:1px solid var(--color-border);
+	background-color:var(--color-input);
 }
 .list .layoutCards .card .actions{
 	position:absolute;
-	left:0px;
+	right:0px;
 	top:0px;
 	padding:2px 3px;
 	display:flex;
 	flex-flow:column nowrap;
-	border-right:2px solid var(--color-border);
-	border-bottom:2px solid var(--color-border);
-	border-radius:3px 0px 3px 0px;
-	background-color:var(--color-bg);
 }
 .list .layoutCards .card.rowSelect:hover{
-	margin:-2px 16px 18px 0px;
 	cursor:pointer;
 	outline:none;
-	transition:background-color 0.2s, box-shadow 0.2s, margin 0.2s, padding 0.2s, border 0.5s;
-	box-shadow:1px 1px 5px var(--color-shade);
+	filter:brightness(98%);
+	box-shadow:inset 0 -3px 0 0 var(--color-accent3-alt), filter 0.2s;
+	transition:box-shadow 0.2s, filter 0.2s;
+}
+.list .layoutCards .card.no-results{
+	font-style:italic;
+	font-size:120%;
+	padding:var(--spacing);
 }
 .list .layoutCards .card img.checkbox{
 	height:26px;
@@ -327,19 +315,18 @@
 }
 .list .layoutCards .card table{
 	max-width:100%;
-	margin:0px 20px 8px 50px;
+	margin:var(--spacing) 50px 8px var(--spacing);
 }
 .list .layoutCards .card td{
 	padding:0px 24px 5px 0px;
 	vertical-align:bottom;
 }
-.list .layoutCards .card td:first-child{
+.list .layoutCards .card td.caption{
 	color:var(--color-font-disabled);
 }
 .list .layoutCards .card .batch{
 	display:flex;
 	flex-flow:row nowrap;
-	align-items:flex-end;
 	gap:6px;
 	
 	/* auto cutting text */
@@ -478,12 +465,6 @@
 
 
 /* user overwrites */
-.user-bordersSquared .list,
-.user-bordersSquared .list .layoutCards .card,
-.user-bordersSquared .list .layoutCards .card .header,
-.user-bordersSquared .list .layoutCards .card .actions{
-	border-radius:0px;
-}
 .user-listSpaced .list .layoutTable table:not(.asInput){
 	border-spacing:0px 8px;
 	border-left:8px solid transparent;
@@ -505,6 +486,25 @@
 .user-listSpaced .list .layoutTable table:not(.asInput) td:last-child{
 	border-top-right-radius:6px;
 	border-bottom-right-radius:6px;
+}
+.user-listSpaced .list .layoutCards .cards{
+	padding:var(--spacing);
+	gap:var(--spacing);
+}
+.user-listSpaced .list .layoutCards .card{
+	border:none;
+	border-radius:5px;
+	box-shadow:1px 1px 4px var(--color-shade);
+}
+.user-listSpaced .list .layoutCards .card.rowSelect:hover{
+	box-shadow:1px 1px 12px #000, inset 0 -3px 0 0 var(--color-accent3-alt);
+}
+.user-bordersSquared .list,
+.user-bordersSquared .list .layoutTable td,
+.user-bordersSquared .list .layoutCards .card,
+.user-bordersSquared .list .layoutCards .card .header,
+.user-bordersSquared .list .layoutCards .card .actions{
+	border-radius:0px !important;
 }
 
 /* mobile overwrites */

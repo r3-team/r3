@@ -306,6 +306,12 @@ let MyList = {
 					>
 						<option v-for="o in limitOptions" :value="o">{{ o }}</option>
 					</select>
+					
+					<my-button
+						@trigger="toggleLayout"
+						:image="isTable ? 'files_list1.png' : 'files_list3.png'"
+						:naked="true"
+					/>
 				</div>
 			</div>
 			
@@ -525,7 +531,8 @@ let MyList = {
 					<template v-if="isCards">
 					
 						<!-- actions -->
-						<div class="top-actions default-inputs">
+						<div class="top-actions default-inputs" v-if="hasResults">
+							
 							<my-button
 								v-if="hasBulkActions"
 								@trigger="selectRowsAllToggle"
@@ -535,8 +542,15 @@ let MyList = {
 								:naked="true"
 							/>
 							
+							<my-button
+								@trigger="toggleCardsCaptions"
+								:caption="capGen.details"
+								:image="cardsCaptions ? 'checkbox1.png' : 'checkbox0.png'"
+								:naked="true"
+							/>
+							
 							<!-- sorting -->
-							<template v-if="rowsClear.length !== 0">
+							<template v-if="hasResults">
 								<span class="select">{{ capApp.orderBy }}</span>
 								<select
 									@change="cardsSetOrderBy($event.target.value)"
@@ -557,20 +571,21 @@ let MyList = {
 									:naked="true"
 								/>
 							</template>
+						</div>
+						
+						<div class="cards">
 							
 							<!-- no results message -->
-							<template v-if="rowsClear.length === 0">
-								<div class="no-results" v-if="!rowsFetching">
+							<template v-if="!hasResults">
+								<div class="card no-results" v-if="!rowsFetching">
 									{{ capGen.resultsNone }}
 								</div>
-								<div class="no-results fetching" v-if="rowsFetching">
+								<div class="card no-results fetching" v-if="rowsFetching">
 									<img src="images/load.gif">
 									<span>{{ capApp.fetching }}</span>
 								</div>
 							</template>
-						</div>
-						
-						<div class="cards">
+							
 							<div class="card"
 								v-for="(r,ri) in rowsClear"
 								@click="clickRow(r,false)"
@@ -592,16 +607,15 @@ let MyList = {
 										:naked="true"
 									/>
 								</div>
-								<div class="header"></div>
 								
 								<!-- row values per column batch -->
 								<table>
 									<tr v-for="b in columnBatches">
-										<td>{{ b.caption }}</td>
+										<td class="caption" v-if="cardsCaptions">{{ b.caption }}</td>
 										<td>
 											<div class="batch" :class="{ vertical:b.vertical }">
 												<my-value-rich
-													v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null || columns[v].display === 'gallery')"
+													v-for="ind in b.columnIndexes.filter(v => r.values[v] !== null)"
 													@clipboard="$emit('clipboard')"
 													:attributeId="columns[ind].attributeId"
 													:basis="columns[ind].basis"
@@ -654,7 +668,7 @@ let MyList = {
 		fieldId:        { type:String,  required:true },
 		filters:        { type:Array,   required:true },                    // processed query filters
 		iconId:         { required:false, default:null },
-		layout:         { type:String,  required:false, default:'table' },  // list layout: table, cards
+		layoutDefault:  { type:String,  required:false, default:'table' },  // default list layout: table, cards
 		limitDefault:   { type:Number,  required:false, default:10 },       // default list limit
 		popUpFormInline:{ required:false, default:null },                   // form to show inside list
 		query:          { type:Object,  required:true },                    // list query
@@ -698,6 +712,7 @@ let MyList = {
 			focused:false,
 			inputAutoSelectDone:false,
 			inputDropdownUpwards:false, // show dropdown above input
+			layout:'table',             // current list layout (table, cards)
 			orderOverwritten:false,     // sort options were changed by user
 			rowsFetching:false,         // row values are being fetched
 			selectedRows:[],            // bulk selected rows by row index
@@ -712,6 +727,7 @@ let MyList = {
 			
 			// list card layout state
 			cardsOrderByColumnIndex:-1,
+			cardsCaptions:true,
 			
 			// list data
 			columnIdMapAggr:{}, // aggregators by column ID
@@ -728,10 +744,10 @@ let MyList = {
 			rowsInput:[], // rows that reflect current input (following active record IDs)
 			              // as opposed to list rows which show lookup data (regular list or input dropdown)
 			
-			// list layout
-			layoutCheckTimer:null,
-			layoutElements:[],               // elements that are shown, based on available space
-			layoutElementsAvailableInOrder:[ // elements that can be shown, in order of priority
+			// list header
+			headerCheckTimer:null,
+			headerElements:[],               // elements that are shown, based on available space
+			headerElementsAvailableInOrder:[ // elements that can be shown, in order of priority
 				'collectionValuesAll',       // optional, show all collection filter values
 				'collectionValuesFew',       // optional, show few collection filter values
 				'actionTitles',              // optional
@@ -931,6 +947,7 @@ let MyList = {
 		hasChoices:          (s) => s.query.choices.length > 1,
 		hasCreate:           (s) => s.joins.length !== 0 && s.joins[0].applyCreate && s.hasOpenForm,
 		hasPaging:           (s) => s.query.fixedLimit === 0,
+		hasResults:          (s) => s.rowsClear.length !== 0,
 		hasUpdate:           (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenForm,
 		hasUpdateBulk:       (s) => s.joins.length !== 0 && s.joins[0].applyUpdate && s.hasOpenFormBulk,
 		isCards:             (s) => s.layout === 'cards',
@@ -938,18 +955,18 @@ let MyList = {
 		joins:               (s) => s.fillRelationRecordIds(s.query.joins),
 		relationsJoined:     (s) => s.getRelationsJoined(s.joins),
 		rowSelect:           (s) => s.isInput || s.hasUpdate,
-		showActionTitles:    (s) => s.layoutElements.includes('actionTitles'),
-		showAutoRenewIcon:   (s) => s.layoutElements.includes('autoRenewIcon'),
-		showCollectionTitles:(s) => s.layoutElements.includes('collectionTitles'),
-		showPageLimit:       (s) => s.layoutElements.includes('pageLimit'),
+		showActionTitles:    (s) => s.headerElements.includes('actionTitles'),
+		showAutoRenewIcon:   (s) => s.headerElements.includes('autoRenewIcon'),
+		showCollectionTitles:(s) => s.headerElements.includes('collectionTitles'),
+		showPageLimit:       (s) => s.headerElements.includes('pageLimit'),
 		showInputAddLine:    (s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
-		showInputAddAll:     (s) => s.inputMulti && s.rowsClear.length > 0,
+		showInputAddAll:     (s) => s.inputMulti && s.hasResults,
 		showInputHeader:     (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
-		showOffsetArrows:    (s) => s.layoutElements.includes('offsetArrows'),
-		showRefresh:         (s) => s.layoutElements.includes('refresh'),
+		showOffsetArrows:    (s) => s.headerElements.includes('offsetArrows'),
+		showRefresh:         (s) => s.headerElements.includes('refresh'),
 		showCollectionCnt:   (s) => {
-			if(s.layoutElements.includes('collectionValuesAll')) return 999;
-			if(s.layoutElements.includes('collectionValuesFew')) return 2;
+			if(s.headerElements.includes('collectionValuesAll')) return 999;
+			if(s.headerElements.includes('collectionValuesFew')) return 2;
 			return 0;
 		},
 		
@@ -1033,10 +1050,12 @@ let MyList = {
 		}
 		
 		// load cached list options
+		this.columnIdMapAggr = this.fieldOptionGet(this.fieldId,'columnIdMapAggr',{});
 		this.filtersColumn   = this.fieldOptionGet(this.fieldId,'filtersColumn',[]);
 		this.filtersQuick    = this.fieldOptionGet(this.fieldId,'filtersQuick','');
 		this.filtersUser     = this.fieldOptionGet(this.fieldId,'filtersUser',[]);
-		this.columnIdMapAggr = this.fieldOptionGet(this.fieldId,'columnIdMapAggr',{});
+		this.layout          = this.fieldOptionGet(this.fieldId,'layout',this.layoutDefault);
+		this.cardsCaptions   = this.fieldOptionGet(this.fieldId,'cardsCaptions',true);
 	},
 	beforeUnmount() {
 		this.setAutoRenewTimer(true);
@@ -1081,24 +1100,24 @@ let MyList = {
 			let font = this.colorMakeContrastFont(bg);
 			return `background-color:${bg};color:${font};`;
 		},
-		layoutAdjust() {
-			this.layoutCheckTimer = null;
+		headerAdjust() {
+			this.headerCheckTimer = null;
 			
-			if(typeof this.$refs.empty === 'undefined' || this.$refs.empty.offsetWidth > 10 || this.layoutElements.length === 0)
+			if(typeof this.$refs.empty === 'undefined' || this.$refs.empty.offsetWidth > 10 || this.headerElements.length === 0)
 				return;
 			
 			// space insufficient and still elements available to reduce
-			this.layoutElements.shift();       // remove next element
-			this.$nextTick(this.layoutAdjust); // recheck after change
+			this.headerElements.shift();       // remove next element
+			this.$nextTick(this.headerAdjust); // recheck after change
 		},
 		resized() {
-			if(this.layoutCheckTimer !== null)
-				clearTimeout(this.layoutCheckTimer);
+			if(this.headerCheckTimer !== null)
+				clearTimeout(this.headerCheckTimer);
 			
-			this.layoutCheckTimer = setTimeout(() => {
+			this.headerCheckTimer = setTimeout(() => {
 				// reset elements, then wait for layout to settle to check
-				this.layoutElements = JSON.parse(JSON.stringify(this.layoutElementsAvailableInOrder));
-				this.$nextTick(this.layoutAdjust);
+				this.headerElements = JSON.parse(JSON.stringify(this.headerElementsAvailableInOrder));
+				this.$nextTick(this.headerAdjust);
 			},300);
 		},
 		updateDropdownDirection() {
@@ -1358,6 +1377,10 @@ let MyList = {
 			}
 			this.reloadInside('order');
 		},
+		toggleCardsCaptions() {
+			this.cardsCaptions = !this.cardsCaptions;
+			this.fieldOptionSet(this.fieldId,'cardsCaptions',this.cardsCaptions);
+		},
 		toggleDropdown() {
 			this.showTable = !this.showTable;
 			
@@ -1369,6 +1392,10 @@ let MyList = {
 				if(inputEl !== null)
 					inputEl.focus();
 			}
+		},
+		toggleLayout() {
+			this.layout = this.isTable ? 'cards' : 'table';
+			this.fieldOptionSet(this.fieldId,'layout',this.layout);
 		},
 		toggleUserFilters() {
 			this.showFilters = !this.showFilters;
