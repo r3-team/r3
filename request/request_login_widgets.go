@@ -8,7 +8,7 @@ import (
 	"github.com/jackc/pgx/v5"
 )
 
-func LoginWidgetGroupsGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
+func LoginWidgetGroupsGet(loginId int64) (interface{}, error) {
 	return login_widget.Get(loginId)
 }
 func LoginWidgetGroupsSet_tx(tx pgx.Tx, reqJson json.RawMessage, loginId int64) (interface{}, error) {

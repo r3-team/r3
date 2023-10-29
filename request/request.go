@@ -185,7 +185,7 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 	case "loginWidgetGroups":
 		switch action {
 		case "get":
-			return LoginWidgetGroupsGet(reqJson, loginId)
+			return LoginWidgetGroupsGet(loginId)
 		case "set":
 			return LoginWidgetGroupsSet_tx(tx, reqJson, loginId)
 		}

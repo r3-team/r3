@@ -318,7 +318,7 @@ let MyBuilderArticles = {
 					:list="articleIdsAssigned"
 				>
 					<template #item="{element,index}">
-				    		<div class="builder-article-line shade">
+				    	<div class="builder-article-line shade">
 							<img v-if="!readonly" class="action dragAnchor" src="images/drag.png" />
 							
 							<span v-if="articleIdMap[element].moduleId === id">{{ articleIdMap[element].name }}</span>

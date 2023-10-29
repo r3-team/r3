@@ -1963,5 +1963,12 @@
 		"titleSubMenu":"Application menu",
 		"titleTheme":"Téma",
 		"warnUnsaved":"Figyelmeztetés mentetlen változtatásoknál"
+	},
+	"widgets":{
+		"button":{
+			"groupAdd":"Add group"
+		},
+		"groupNameNew":"New widget group",
+		"placeholder":"Drag & drop widgets to add to this group"
 	}
 }

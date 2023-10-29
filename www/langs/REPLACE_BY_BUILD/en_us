@@ -1963,5 +1963,12 @@
 		"titleSubMenu":"Application menu",
 		"titleTheme":"Theme",
 		"warnUnsaved":"Warnings for unsaved changes"
+	},
+	"widgets":{
+		"button":{
+			"groupAdd":"Add group"
+		},
+		"groupNameNew":"New widget group",
+		"placeholder":"Drag & drop widgets to add to this group"
 	}
 }

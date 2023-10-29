@@ -1963,5 +1963,12 @@
 		"titleSubMenu":"Anwendungsmenü",
 		"titleTheme":"Darstellung",
 		"warnUnsaved":"Warnung bei ungespeicherten Änderungen"
+	},
+	"widgets":{
+		"button":{
+			"groupAdd":"Gruppe hinzufügen"
+		},
+		"groupNameNew":"Neue Widget-Gruppe",
+		"placeholder":"Widgets hier ablegen um sie zur Gruppe hinzuzufügen"
 	}
 }
