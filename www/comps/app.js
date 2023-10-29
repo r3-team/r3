@@ -590,10 +590,11 @@ let MyApp = {
 		initApp() {
 			let requests = [
 				ws.prepare('loginSetting','get',{}),
+				ws.prepare('loginWidgetGroups','get',{}),
 				ws.prepare('lookup','get',{name:'access'}),
 				ws.prepare('lookup','get',{name:'feedback'}),
 				ws.prepare('lookup','get',{name:'loginHasClient'}),
-				ws.prepare('lookup','get',{name:'loginKeys'}),
+				ws.prepare('lookup','get',{name:'loginKeys'})
 			];
 			
 			// system meta data, admins only
@@ -606,28 +607,29 @@ let MyApp = {
 			ws.sendMultiple(requests,true).then(
 				async res => {
 					this.$store.commit('settings',res[0].payload);
-					this.$store.commit('access',res[1].payload);
-					this.$store.commit('feedback',res[2].payload === 1);
-					this.$store.commit('loginHasClient',res[3].payload);
+					this.$store.commit('loginWidgetGroups',res[1].payload);
+					this.$store.commit('access',res[2].payload);
+					this.$store.commit('feedback',res[3].payload === 1);
+					this.$store.commit('loginHasClient',res[4].payload);
 					
-					if(this.loginKeyAes !== null && res[4].payload.privateEnc !== null) {
+					if(this.loginKeyAes !== null && res[5].payload.privateEnc !== null) {
 						this.$store.commit('loginEncryption',true);
 						this.$store.commit('loginPrivateKey',null);
-						this.$store.commit('loginPrivateKeyEnc',res[4].payload.privateEnc);
-						this.$store.commit('loginPrivateKeyEncBackup',res[4].payload.privateEncBackup);
+						this.$store.commit('loginPrivateKeyEnc',res[5].payload.privateEnc);
+						this.$store.commit('loginPrivateKeyEncBackup',res[5].payload.privateEncBackup);
 						
-						await this.pemImport(res[4].payload.public,'RSA',true)
+						await this.pemImport(res[5].payload.public,'RSA',true)
 							.then(res => this.$store.commit('loginPublicKey',res))
 							.catch(this.setInitErr);
 						
-						await this.pemImportPrivateEnc(res[4].payload.privateEnc)
+						await this.pemImportPrivateEnc(res[5].payload.privateEnc)
 							.catch(this.setInitErr);
 					}
 					
 					if(this.isAdmin) {
-						this.$store.commit('config',res[5].payload);
-						this.$store.commit('license',res[6].payload);
-						this.$store.commit('system',res[7].payload);
+						this.$store.commit('config',res[6].payload);
+						this.$store.commit('license',res[7].payload);
+						this.$store.commit('system',res[8].payload);
 					}
 					
 					// load captions & collections

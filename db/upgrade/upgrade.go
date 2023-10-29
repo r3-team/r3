@@ -99,7 +99,10 @@ func oneIteration(tx pgx.Tx, dbVersionCut string) error {
 var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	// clean up on next release
-	// nothing yet
+	/*
+		ALTER TABLE instance.login_widget_group_item ALTER COLUMN content
+			TYPE instance.widget_content USING content::text::instance.widget_content;
+	*/
 
 	"3.5": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
@@ -183,7 +186,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			ALTER TYPE app.collection_consumer_content ADD VALUE 'widgetDisplay';
 			
-			-- widget user store
+			-- login widget data
 			CREATE TABLE instance.login_widget_group (
 				id uuid NOT NULL DEFAULT gen_random_uuid(),
 				login_id integer NOT NULL,
@@ -206,6 +209,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				login_widget_group_id uuid NOT NULL,
 				"position" smallint NOT NULL,
 				widget_id uuid,
+				module_id uuid,
+				content text COLLATE pg_catalog."default" NOT NULL,
 				CONSTRAINT login_widget_group_item_pkey PRIMARY KEY (login_widget_group_id, "position"),
 				CONSTRAINT login_widget_group_item_login_widget_group_id_fkey FOREIGN KEY (login_widget_group_id)
 					REFERENCES instance.login_widget_group (id) MATCH SIMPLE
@@ -216,14 +221,23 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 					REFERENCES app.widget (id) MATCH SIMPLE
 					ON UPDATE CASCADE
 					ON DELETE CASCADE
+					DEFERRABLE INITIALLY DEFERRED,
+				CONSTRAINT login_widget_group_item_module_id_fkey FOREIGN KEY (module_id)
+					REFERENCES app.module (id) MATCH SIMPLE
+					ON UPDATE CASCADE
+					ON DELETE CASCADE
 					DEFERRABLE INITIALLY DEFERRED
 			);
 			CREATE INDEX fki_login_widget_group_item_login_widget_group_id_fkey ON instance.login_widget_group_item
 				USING BTREE (login_widget_group_id ASC NULLS LAST);
 			CREATE INDEX fki_login_widget_group_item_widget_id_fkey ON instance.login_widget_group_item
 				USING BTREE (widget_id ASC NULLS LAST);
+			CREATE INDEX fki_login_widget_group_item_module_id_fkey ON instance.login_widget_group_item
+				USING BTREE (module_id ASC NULLS LAST);
 			CREATE INDEX ind_login_widget_group_item_position ON instance.login_widget_group_item
 				USING BTREE (position ASC NULLS LAST);
+			
+			CREATE TYPE instance.widget_content AS ENUM ('moduleWidget','systemModuleMenu','systemLoginDetails');
 		`)
 		return "3.6", err
 	},

@@ -1,10 +1,12 @@
 import srcBase64Icon                   from './shared/image.js';
 import {getBuildFromVersion}           from './shared/generic.js';
 import {setSingle as setSettingSingle} from './shared/settings.js';
+import MyWidgets                       from './widgets.js';
 export {MyHome as default};
 
 let MyHome = {
 	name:'my-go-home',
+	components:{ MyWidgets },
 	template:`<div class="home">
 		
 		<!-- instance setup wizard -->
@@ -115,6 +117,7 @@ let MyHome = {
 		</div>
 		
 		<!-- module navigation -->
+		<!--
 		<span class="home-title" v-if="!isMobile && !noNavigation">
 			{{ capGen.applications }}
 		</span>
@@ -154,6 +157,12 @@ let MyHome = {
 				<div class="module-title lower" :style="me.styleBg"></div>
 			</div>
 		</div>
+		-->
+		
+		<!-- login widgets -->
+		<my-widgets
+			:moduleEntries="moduleEntries"
+		/>
 		
 		<!-- application version -->
 		<a target="_blank" class="version"
