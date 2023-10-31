@@ -160,9 +160,7 @@ let MyHome = {
 		-->
 		
 		<!-- login widgets -->
-		<my-widgets
-			:moduleEntries="moduleEntries"
-		/>
+		<my-widgets />
 		
 		<!-- application version -->
 		<a target="_blank" class="version"
@@ -170,9 +168,6 @@ let MyHome = {
 			:href="capGen.appWebsite"
 		>{{ capGen.appName + ' ' + appVersion }}</a>
 	</div>`,
-	props:{
-		moduleEntries:{ type:Array, required:true }
-	},
 	data() {
 		return {
 			installStarted:false,
@@ -189,20 +184,21 @@ let MyHome = {
 			? 0 : s.getBuildFromVersion(s.config.updateCheckVersion),		
 		
 		// stores
-		activated:  (s) => s.$store.getters['local/activated'],
-		appName:    (s) => s.$store.getters['local/appName'],
-		appVersion: (s) => s.$store.getters['local/appVersion'],
-		colorHeader:(s) => s.$store.getters['local/companyColorHeader'],
-		modules:    (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		iconIdMap:  (s) => s.$store.getters['schema/iconIdMap'],
-		capApp:     (s) => s.$store.getters.captions.home,
-		capGen:     (s) => s.$store.getters.captions.generic,
-		config:     (s) => s.$store.getters.config,
-		isAdmin:    (s) => s.$store.getters.isAdmin,
-		isMobile:   (s) => s.$store.getters.isMobile,
-		pwaModuleId:(s) => s.$store.getters.pwaModuleId,
-		settings:   (s) => s.$store.getters.settings
+		activated:    (s) => s.$store.getters['local/activated'],
+		appName:      (s) => s.$store.getters['local/appName'],
+		appVersion:   (s) => s.$store.getters['local/appVersion'],
+		colorHeader:  (s) => s.$store.getters['local/companyColorHeader'],
+		modules:      (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:  (s) => s.$store.getters['schema/moduleIdMap'],
+		iconIdMap:    (s) => s.$store.getters['schema/iconIdMap'],
+		capApp:       (s) => s.$store.getters.captions.home,
+		capGen:       (s) => s.$store.getters.captions.generic,
+		config:       (s) => s.$store.getters.config,
+		isAdmin:      (s) => s.$store.getters.isAdmin,
+		isMobile:     (s) => s.$store.getters.isMobile,
+		moduleEntries:(s) => s.$store.getters.moduleEntries,
+		pwaModuleId:  (s) => s.$store.getters.pwaModuleId,
+		settings:     (s) => s.$store.getters.settings
 	},
 	mounted() {
 		this.$store.commit('pageTitle',this.capApp.title);

@@ -46,6 +46,7 @@
 	--z-index-tab-active:2;
 	
 	/* home */
+	--z-index-home-header:4;
 	--z-index-home-entry:3;
 	--z-index-home-watermark:2;
 	
@@ -361,6 +362,9 @@ h3{
 }
 .contentBox.grow{
 	flex:1 1 auto;
+}
+.contentBox.naked{
+	background-color:transparent;
 }
 .contentBox.start{
 	align-self:flex-start;

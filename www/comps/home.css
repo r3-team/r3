@@ -1,7 +1,7 @@
 .home{
 	flex-flow:column nowrap !important;
-	padding:var(--spacing) !important;
 	gap:var(--spacing);
+	align-items:center;
 }
 .home .message{
 	display:flex;

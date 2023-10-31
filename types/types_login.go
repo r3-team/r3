@@ -39,7 +39,7 @@ type LoginMfaToken struct {
 }
 type LoginWidgetGroupItem struct {
 	WidgetId pgtype.UUID `json:"widgetId"` // ID of a module widget, empty if system widget is used
-	ModuleId pgtype.UUID `json:"widgetId"` // ID of a module, if relevant for widget (systemModuleMenu)
+	ModuleId pgtype.UUID `json:"moduleId"` // ID of a module, if relevant for widget (systemModuleMenu)
 	Content  string      `json:"content"`  // content of widget (moduleWidget, systemModuleMenu, systemLoginDetails)
 }
 type LoginWidgetGroup struct {

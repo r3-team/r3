@@ -49,12 +49,9 @@ let MyApp = {
 				@show-module-hover-menu="showHoverNav = true"
 				@show-settings="showSettings = !showSettings"
 				:keysLocked="loginEncryption && loginPrivateKey === null"
-				:moduleEntries="moduleEntries"
 			/>
 			
-			<router-view class="app-content"
-				:moduleEntries="moduleEntries"
-			/>
+			<router-view class="app-content" />
 			
 			<!-- global pop-up form window -->
 			<div class="app-sub-window under-header"
@@ -80,7 +77,6 @@ let MyApp = {
 				<my-settings
 					@close="showSettings = false"
 					@logout="showSettings = false;sessionInvalid()"
-					:moduleEntries="moduleEntries"
 				/>
 			</div>
 			
@@ -202,6 +198,12 @@ let MyApp = {
 			},
 			immediate:true
 		},
+		moduleEntries:{
+			handler(v) {
+				this.$store.commit('moduleEntries',v);
+			},
+			immediate:true
+		},
 		pwaManifestHref:{
 			handler(v) {
 				// set manifest (for PWA installation)
@@ -258,6 +260,9 @@ let MyApp = {
 		
 		// navigation
 		moduleEntries:(s) => {
+			if(!s.appReady)
+				return [];
+			
 			let idMapChildren = {};
 			let entries       = [];
 			
@@ -280,7 +285,7 @@ let MyApp = {
 					return false;
 				
 				// module is accessible if start form is set and user has access to any menu
-				let formIdStart = getStartFormId(module,s.access);
+				let formIdStart = s.getStartFormId(module,s.access);
 				let accessible  = formIdStart !== null;
 				
 				// ignore hidden modules

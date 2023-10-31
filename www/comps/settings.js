@@ -122,9 +122,6 @@ let MySettingsEncryption = {
 			/>
 		</template>
 	</div>`,
-	props:{
-		moduleEntries:{ type:Array, required:true }
-	},
 	data() {
 		return {
 			running:false,
@@ -181,6 +178,7 @@ let MySettingsEncryption = {
 		loginPrivateKeyEnc:(s) => s.$store.getters.loginPrivateKeyEnc,
 		loginPrivateKeyEncBackup:(s) => s.$store.getters.loginPrivateKeyEncBackup,
 		loginPublicKey:    (s) => s.$store.getters.loginPublicKey,
+		moduleEntries:     (s) => s.$store.getters.moduleEntries,
 		kdfIterations:     (s) => s.$store.getters.constants.kdfIterations,
 		capApp:            (s) => s.$store.getters.captions.settings.encryption,
 		capErr:            (s) => s.$store.getters.captions.error,
@@ -1170,15 +1168,10 @@ let MySettings = {
 					<img class="icon" src="images/key.png" />
 					<h1>{{ capApp.titleEncryption }}</h1>
 				</div>
-				<my-settings-encryption
-					:moduleEntries="moduleEntries"
-				/>
+				<my-settings-encryption />
 			</div>
 		</div>
 	</div>`,
-	props:{
-		moduleEntries:{ type:Array, required:true }
-	},
 	emits:['close','logout'],
 	data() {
 		return {

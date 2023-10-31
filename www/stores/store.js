@@ -10,7 +10,7 @@ const MyStore = Vuex.createStore({
 		schema:MyStoreSchema
 	},
 	state:{
-		access:{},                     // access permissions for each entity (attribute, collection, menu, relation), key: entity ID
+		access:{},                     // access permissions for each entity (attribute, collection, menu, relation, widget), key: entity ID
 		builderMode:false,             // builder mode active
 		busyCounter:0,                 // counter of calls making the app busy (WS requests, uploads, etc.)
 		captions:{},                   // all application captions in the user interface language

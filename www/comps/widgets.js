@@ -1,4 +1,5 @@
 import { getCaption } from './shared/language.js';
+import srcBase64Icon  from './shared/image.js';
 import MyForm from './form.js';
 export {MyWidgets as default};
 
@@ -6,17 +7,35 @@ let MyWidget = {
 	name:'my-widget',
 	components:{ MyForm },
 	template:`<div class="widget">
-		<div class="header">
-			<div class="row gap centered">
-				<img class="dragAnchor" src="images/drag.png" v-if="editMode" />
-				<span v-if="moduleWidget !== false">{{ getCaption(moduleWidget.captions,'') }}</span>
-			</div>
+		<div class="header" :style="headerStyle">
+			<img class="dragAnchor" src="images/drag.png" v-if="editMode" />
+			<span v-if="moduleWidget !== false">{{ getCaption(moduleWidget.captions.widgetTitle,'') }}</span>
 		</div>
 		<div class="content">
 			
 			<!-- system widget: module menu -->
-			<div v-if="isSystem">
-				SYSTEM WIDGET
+			<div class="system-module-menu" v-if="moduleEntry !== false">
+				
+				<router-link class="clickable"
+					:to="'/app/'+moduleEntry.name"
+				>
+					<img :src="srcBase64Icon(moduleEntry.iconId,'images/module.png')" />
+					<span>{{ moduleEntry.caption }}</span>
+				</router-link>
+				
+				<div class="children">
+					<router-link class="clickable"
+						v-for="mec in moduleEntry.children"
+						:key="mec.id"
+						:to="'/app/'+moduleEntry.name+'/'+mec.name"
+					>
+						<img :src="srcBase64Icon(mec.iconId,'images/module.png')" />
+						<span>{{ mec.caption }}</span>
+						
+					</router-link>
+				</div>
+				
+				<img class="watermark" :src="srcBase64Icon(moduleEntry.iconId,'images/module.png')" />
 			</div>
 			
 			<!-- system widget: login details -->
@@ -25,6 +44,7 @@ let MyWidget = {
 			<my-form
 				v-if="form !== false"
 				:formId="form.id"
+				:isWidget="true"
 				:moduleId="form.moduleId"
 				:recordIds="[]"
 			/>
@@ -37,18 +57,58 @@ let MyWidget = {
 		widget:  { type:Object,  required:true }
 	},
 	computed:{
+		icon:(s) => {
+			
+		},
+		title:(s) => {
+			// use most specific title in order: Widget title, form title, collection title, widget name
+			let t = '';
+			if(s.moduleWidget !== false)
+				t = s.getCaption(s.moduleWidget.captions.widgetTitle,'');
+			
+			if(t === '' && s.form !== false)
+				t = s.getCaption(s.form.captions.formTitle, '');
+			
+			if(t === '' && s.collection !== false)
+				t = s.getCaption(s.collection.captions.collectionTitle, '');
+			
+			if(t === '')
+				t = s.moduleWidget.name;
+			
+			return t;
+		},
+		
 		// simple
-		isSystem:(s) => s.widget.content.startsWith('system'),
+		headerStyle:(s) => s.moduleEntry !== false ? s.moduleEntry.styleBg : '',
+		isSystem:   (s) => s.widget.content.startsWith('system'),
+		
+		// entities
+		collection:  (s) => s.moduleWidget === false || s.moduleWidget.collectionId === null ? false : s.collectionIdMap[s.moduleWidget.collectionId],
+		form:        (s) => s.moduleWidget === false || s.moduleWidget.formId       === null ? false : s.formIdMap[s.moduleWidget.formId],
+		moduleWidget:(s) => s.widget.widgetId === null ? false : s.widgetIdMap[s.widget.widgetId],
+		moduleEntry: (s) => {
+			if(s.widget.content !== 'systemModuleMenu')
+				return false;
+			
+			for(const me of s.moduleEntries) {
+				if(me.id === s.widget.moduleId)
+					return me;
+			}
+			return false;
+		},
 		
 		// stores
-		formIdMap:   (s) => s.$store.getters['schema/formIdMap'],
-		widgetIdMap: (s) => s.$store.getters['schema/widgetIdMap'],
-		form:        (s) => s.moduleWidget === false || s.moduleWidget.formId === null ? false : s.formIdMap[s.moduleWidget.formId],
-		moduleWidget:(s) => s.widget.widgetId === null ? false : s.widgetIdMap[s.widget.widgetId]
+		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
+		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
+		widgetIdMap:    (s) => s.$store.getters['schema/widgetIdMap'],
+		moduleEntries:  (s) => s.$store.getters.moduleEntries
+	},
+	mounted() {
 	},
 	methods:{
 		// externals
-		getCaption
+		getCaption,
+		srcBase64Icon
 	}
 };
 
@@ -60,6 +120,11 @@ let MyWidgetGroup = {
 			<img class="dragAnchor" src="images/drag.png" v-if="editMode" />
 			<span v-if="!editMode">{{ widgetGroup.title }}</span>
 			<input v-if="editMode" @input="$emit('set-title',$event.target.value)" :value="widgetGroup.title" />
+			<my-button image="delete.png"
+				v-if="editMode"
+				@trigger="$emit('remove')"
+				:naked="true"
+			/>
 		</div>
 		
 		<draggable class="widget-group-items" handle=".dragAnchor" group="widget-group-items" itemKey="id" animation="150"
@@ -78,7 +143,7 @@ let MyWidgetGroup = {
 			</template>
 		</draggable>
 	</div>`,
-	emits:['set-title'],
+	emits:['remove','set-title'],
 	props:{
 		editMode:   { type:Boolean, required:true },
 		widgetGroup:{ type:Object,  required:true }
@@ -96,11 +161,18 @@ let MyWidgets = {
 		MyWidgetGroup
 	},
 	template:`<div class="widgets">
+		
+		<my-button image="edit.png"
+			v-if="!editMode"
+			@trigger="openEditMode"
+			:caption="capGen.button.edit"
+		/>
 		<draggable class="widget-groups" handle=".dragAnchor" group="widget-groups" itemKey="id" animation="150" direction="vertical"
 			:list="widgetGroupsInput"
 		>
 			<template #item="{element,index}">
 				<my-widget-group
+					@remove="groupDel(index)"
 					@set-title="groupSetTitle(index,$event)"
 					:editMode="editMode"
 					:widgetGroup="element"
@@ -108,13 +180,8 @@ let MyWidgets = {
 			</template>
 		</draggable>
 		
-		<div class="widgets-sidebar">
+		<div class="widgets-sidebar" :class="{ shown:editMode }" v-if="editMode">
 			<div class="row gap">
-				<my-button image="edit.png"
-					v-if="!editMode"
-					@trigger="openEditMode"
-					:caption="capGen.button.edit"
-				/>
 				<my-button image="save.png"
 					v-if="editMode"
 					@trigger="set"
@@ -135,7 +202,6 @@ let MyWidgets = {
 			</div>
 			
 			<draggable class="widget-group-items" handle=".dragAnchor" group="widget-group-items" itemKey="id" animation="150"
-				v-if="editMode"
 				:list="widgetTemplates"
 			>
 				<template #item="{element,index}">
@@ -147,12 +213,9 @@ let MyWidgets = {
 			</draggable>
 		</div>
 	</div>`,
-	props:{
-		moduleEntries:{ type:Array, required:true }
-	},
 	data() {
 		return {
-			editMode:true,
+			editMode:false,
 			widgetGroupsInput:[] // widget groups, updated by user input
 		};
 	},
@@ -216,10 +279,11 @@ let MyWidgets = {
 		hasChanges:(s) => JSON.stringify(s.widgetGroups) !== JSON.stringify(s.widgetGroupsInput),
 		
 		// stores
-		modules:     (s) => s.$store.getters['schema/modules'],
-		capApp:      (s) => s.$store.getters.captions.widgets,
-		capGen:      (s) => s.$store.getters.captions.generic,
-		widgetGroups:(s) => s.$store.getters.loginWidgetGroups
+		modules:      (s) => s.$store.getters['schema/modules'],
+		capApp:       (s) => s.$store.getters.captions.widgets,
+		capGen:       (s) => s.$store.getters.captions.generic,
+		moduleEntries:(s) => s.$store.getters.moduleEntries,
+		widgetGroups: (s) => s.$store.getters.loginWidgetGroups
 	},
 	mounted() {
 		this.reset();
@@ -237,7 +301,7 @@ let MyWidgets = {
 			});
 		},
 		groupDel(index) {
-			this.widgetGroupsInput.splice(i,1);
+			this.widgetGroupsInput.splice(index,1);
 		},
 		groupSetTitle(index,value) {
 			this.widgetGroupsInput[index].title = value;
