@@ -1,7 +1,7 @@
 .home{
 	flex-flow:column nowrap !important;
 	gap:var(--spacing);
-	align-items:center;
+	align-items:stretch;
 }
 .home .message{
 	display:flex;
@@ -16,6 +16,14 @@
 	margin:15px 0px !important;
 	box-shadow:1px 1px 8px var(--color-shade) !important;
 	align-self:center;
+}
+.home .version{
+	position:absolute;
+	right:20px;
+	bottom:20px;
+	font-size:100%;
+	font-style:italic;
+	text-decoration:none;
 }
 
 /* no access */
@@ -65,102 +73,6 @@
 	margin:15px 0px 9px 12px;
 	filter:var(--image-filter);
 	float:right;
-}
-
-/* module navigation */
-.home .modules{
-	display:flex;
-	flex-flow:row wrap;
-	justify-content:center;
-	flex:0 1 auto;
-}
-.home .module{
-	flex:0 1 350px;
-	display:flex;
-	flex-flow:column nowrap;
-	color:var(--color-font);
-	font-size:130%;
-	margin:10px;
-	border-radius:4px;
-	background-color:var(--color-bg);
-	position:relative;
-	overflow:hidden; /* hide watermark */
-	z-index:var(--z-index-home-entry);
-}
-.home .module-title{
-	height:22px;
-	margin-bottom:10px;
-	border-bottom:2px solid var(--color-border);
-	position:relative;
-}
-.home .module-title.lower{
-	height:6px;
-	margin:10px 0px 0px 0px;
-	border-top:1px solid var(--color-border);
-	border-bottom:none;
-}
-.home .module .entries{
-	flex:1 1 auto;
-}
-.home .module .entry{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	position:relative;
-	z-index:var(--z-index-home-entry);
-}
-.home .module .entry a{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	flex:1 1 auto;
-	padding:8px 12px;
-	margin:2px 12px;
-	text-decoration:none;
-	color:inherit;
-	outline:none;
-}
-.home .module .entry a:focus,
-.home .module .entry a:hover{
-	font-size:110%;
-	transition:background-color 0.2s, font-size 0.6s;
-	background-color:var(--color-accent3);
-	box-shadow:1px 1px 2px var(--color-shade);
-	border-radius:4px;
-}
-.home .module .entry a>img{
-	height:26px;
-	margin-right:9px;
-	filter:var(--image-filter);
-}
-.home .module .children{
-	margin:5px 0px 0px 5px;
-}
-.home .module .watermark{
-	height:96px;
-	bottom:14px;
-	right:12px;
-	position:absolute;
-	opacity:0.08;
-	z-index:var(--z-index-home-watermark);
-	filter:var(--image-filter);
-}
-.home .version{
-	position:absolute;
-	right:20px;
-	bottom:20px;
-	font-size:100%;
-	font-style:italic;
-	text-decoration:none;
-}
-.home .home-title{
-	flex:0 1 auto;
-	margin:20px 0px;
-	text-align:center;
-	font-size:300%;
-	letter-spacing:3px;
-	color:var(--color-font);
-	filter:contrast(60%);
 }
 
 

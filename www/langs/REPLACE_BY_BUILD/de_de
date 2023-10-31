@@ -1968,7 +1968,13 @@
 		"button":{
 			"groupAdd":"Gruppe hinzufügen"
 		},
+		"option":{
+			"flowColumn":"oben-nach-unten",
+			"flowRow":"links-nach-rechts"
+		},
+		"flow":"Richtung",
 		"groupNameNew":"Neue Widget-Gruppe",
-		"placeholder":"Widgets hier ablegen um sie zur Gruppe hinzuzufügen"
+		"placeholder":"Widgets hier ablegen um sie zur Gruppe hinzuzufügen",
+		"width":"Breite"
 	}
 }

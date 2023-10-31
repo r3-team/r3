@@ -46,9 +46,9 @@
 	--z-index-tab-active:2;
 	
 	/* home */
-	--z-index-home-header:4;
-	--z-index-home-entry:3;
-	--z-index-home-watermark:2;
+	--z-index-widget-header:1;
+	--z-index-widget-entry:1;
+	--z-index-widget-watermark:0;
 	
 	/* main content */
 	--z-index-form:2;

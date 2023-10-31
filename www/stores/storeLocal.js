@@ -3,25 +3,27 @@ export {MyStoreLocal as default};
 const MyStoreLocal = {
 	namespaced:true,
 	state:{
-		activated:false,      // application is activated via valid license file
-		appName:'App Name',
-		appNameShort:'App',
-		appVersion:'',        // full application version (as in 1.2.0.3422)
-		companyColorHeader:'',// custom color on header
-		companyColorLogin:'', // custom color on login screen
-		companyLogo:'',       // custom company logo
-		companyLogoUrl:'',    // custom company logo, href URL when clicked on
-		companyName:'',       // custom company name on login screen
-		companyWelcome:'',    // custom welcome message on login screen
-		css:'',               // custom CSS, applied to everything
-		fieldIdMapOption:{},  // map of field IDs with field options (reset on schema change)
-		loginBackground:0,    // background image for login page
-		loginKeyAes:null,     // en-/decryption key for login private key
-		loginKeySalt:null,    // salt for login key KDF
-		menuIdMapOpen:{},     // map of menu IDs with open state (true/false)
-		schemaTimestamp:-1,   // last known schema timestamp
-		token:'',             // JWT token
-		tokenKeep:false       // keep JWT token between sessions
+		activated:false,       // application is activated via valid license file
+		appName:'App Name',    
+		appNameShort:'App',    
+		appVersion:'',         // full application version (as in 1.2.0.3422)
+		companyColorHeader:'', // custom color on header
+		companyColorLogin:'',  // custom color on login screen
+		companyLogo:'',        // custom company logo
+		companyLogoUrl:'',     // custom company logo, href URL when clicked on
+		companyName:'',        // custom company name on login screen
+		companyWelcome:'',     // custom welcome message on login screen
+		css:'',                // custom CSS, applied to everything
+		fieldIdMapOption:{},   // map of field IDs with field options (reset on schema change)
+		loginBackground:0,     // background image for login page
+		loginKeyAes:null,      // en-/decryption key for login private key
+		loginKeySalt:null,     // salt for login key KDF
+		menuIdMapOpen:{},      // map of menu IDs with open state (true/false)
+		schemaTimestamp:-1,    // last known schema timestamp
+		token:'',              // JWT token
+		tokenKeep:false,       // keep JWT token between sessions
+		widgetFlow:'column',   // direction of widget groups (column, row)
+		widgetWidth:1600       // max. width of widget groups
 	},
 	mutations:{
 		activated(state,payload) {
@@ -111,6 +113,14 @@ const MyStoreLocal = {
 		schemaTimestamp(state,payload) {
 			state.schemaTimestamp = payload;
 			set('schemaTimestamp',payload);
+		},
+		widgetFlow(state,payload) {
+			state.widgetFlow = payload;
+			set('widgetFlow',payload);
+		},
+		widgetWidth(state,payload) {
+			state.widgetWidth = payload;
+			set('widgetWidth',payload);
 		}
 	},
 	getters:{
@@ -139,7 +149,9 @@ const MyStoreLocal = {
 		menuIdMapOpen:     (state) => state.menuIdMapOpen,
 		schemaTimestamp:   (state) => state.schemaTimestamp,
 		token:             (state) => state.token,
-		tokenKeep:         (state) => state.tokenKeep
+		tokenKeep:         (state) => state.tokenKeep,
+		widgetFlow:        (state) => state.widgetFlow,
+		widgetWidth:       (state) => state.widgetWidth
 	}
 };
 

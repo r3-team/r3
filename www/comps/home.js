@@ -1,4 +1,3 @@
-import srcBase64Icon                   from './shared/image.js';
 import {getBuildFromVersion}           from './shared/generic.js';
 import {setSingle as setSettingSingle} from './shared/settings.js';
 import MyWidgets                       from './widgets.js';
@@ -116,49 +115,6 @@ let MyHome = {
 			</div>
 		</div>
 		
-		<!-- module navigation -->
-		<!--
-		<span class="home-title" v-if="!isMobile && !noNavigation">
-			{{ capGen.applications }}
-		</span>
-		<div class="modules">
-			<div class="module shade"
-				v-for="me in moduleEntries"
-				:key="me.id"
-			>
-				<div class="module-title" :style="me.styleBg"></div>
-				
-				<div class="entries">
-					<div class="entry">
-						<router-link class="clickable"
-							:to="'/app/'+me.name"
-						>
-							<img :src="srcBase64Icon(me.iconId,'images/module.png')" />
-							<span>{{ me.caption }}</span>
-						</router-link>
-					</div>
-					
-					<div class="children">
-						<div class="entry" v-for="mec in me.children">
-							<router-link class="clickable"
-								:key="mec.id"
-								:to="'/app/'+me.name+'/'+mec.name"
-							>
-								<img :src="srcBase64Icon(mec.iconId,'images/module.png')" />
-								<span>{{ mec.caption }}</span>
-								
-							</router-link>
-						</div>
-					</div>
-					
-					<img class="watermark" :src="srcBase64Icon(me.iconId,'images/module.png')" />
-				</div>
-				
-				<div class="module-title lower" :style="me.styleBg"></div>
-			</div>
-		</div>
-		-->
-		
 		<!-- login widgets -->
 		<my-widgets />
 		
@@ -215,7 +171,6 @@ let MyHome = {
 	methods:{
 		// externals
 		getBuildFromVersion,
-		srcBase64Icon,
 		setSettingSingle,
 		
 		// actions

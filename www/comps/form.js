@@ -82,7 +82,7 @@ let MyForm = {
 		<!-- form proper -->
 		<div class="form contentBox grow scroll"
 			v-if="!isMobile || (!showLog && !showHelp)"
-			:class="{ float:isPopUpFloating, naked:isWidget, popUp:isPopUp }"
+			:class="{ float:isPopUpFloating, popUp:isPopUp }"
 		>
 			<!-- title bar upper -->
 			<div class="top nowrap" :class="{ lower:!hasBarLower && !isSingleField }" v-if="!isWidget">

@@ -1968,7 +1968,13 @@
 		"button":{
 			"groupAdd":"Add group"
 		},
+		"option":{
+			"flowColumn":"top-to-bottom",
+			"flowRow":"left-to-right"
+		},
+		"flow":"Direction",
 		"groupNameNew":"New widget group",
-		"placeholder":"Drag & drop widgets to add to this group"
+		"placeholder":"Drag & drop widgets to add to this group",
+		"width":"Width"
 	}
 }

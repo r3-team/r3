@@ -6,10 +6,18 @@ export {MyWidgets as default};
 let MyWidget = {
 	name:'my-widget',
 	components:{ MyForm },
-	template:`<div class="widget">
+	template:`<div class="widget" :class="cssClasses">
 		<div class="header" :style="headerStyle">
 			<img class="dragAnchor" src="images/drag.png" v-if="editMode" />
-			<span v-if="moduleWidget !== false">{{ getCaption(moduleWidget.captions.widgetTitle,'') }}</span>
+			
+			<span v-if="moduleWidget !== false">
+				{{ getCaption(moduleWidget.captions.widgetTitle,'') }}
+			</span>
+			
+			<img class="clickable" src="images/delete.png"
+				v-if="editMode && !isTemplate"
+				@click="$emit('remove')"
+			/>
 		</div>
 		<div class="content">
 			
@@ -52,11 +60,21 @@ let MyWidget = {
 			<!-- collection -->
 		</div>
 	</div>`,
+	emits:['remove'],
 	props:{
-		editMode:{ type:Boolean, required:true },
-		widget:  { type:Object,  required:true }
+		editMode:  { type:Boolean, required:true },
+		isTemplate:{ type:Boolean, required:false, default:false },
+		widget:    { type:Object,  required:true }
 	},
 	computed:{
+		cssClasses:(s) => {
+			let out = [];
+			
+			if(s.isTemplate)                              out.push('template');
+			if(s.moduleWidget && s.moduleWidget.size > 1) out.push('size2');
+			
+			return out.join(' ');
+		},
 		icon:(s) => {
 			
 		},
@@ -115,7 +133,7 @@ let MyWidget = {
 let MyWidgetGroup = {
 	name:'my-widget-group',
 	components:{ MyWidget },
-	template:`<div class="widget-group">
+	template:`<div class="widget-group" :class="{ editMode:editMode }">
 		<div class="widget-group-title default-inputs">
 			<img class="dragAnchor" src="images/drag.png" v-if="editMode" />
 			<span v-if="!editMode">{{ widgetGroup.title }}</span>
@@ -132,6 +150,7 @@ let MyWidgetGroup = {
 		>
 			<template #item="{element,index}">
 				<my-widget
+					@remove="$emit('remove-widget',index)"
 					:editMode="editMode"
 					:widget="element"
 				/>
@@ -143,7 +162,7 @@ let MyWidgetGroup = {
 			</template>
 		</draggable>
 	</div>`,
-	emits:['remove','set-title'],
+	emits:['remove','remove-widget','set-title'],
 	props:{
 		editMode:   { type:Boolean, required:true },
 		widgetGroup:{ type:Object,  required:true }
@@ -161,32 +180,46 @@ let MyWidgets = {
 		MyWidgetGroup
 	},
 	template:`<div class="widgets">
+		<div class="widgets-content-wrap">
+			<div class="widgets-content"
+				:class="{ editMode:editMode }"
+				:style="'max-width:' + widgetWidth + 'px'"
+			>
+				<draggable class="widget-groups" handle=".dragAnchor" group="widget-groups" itemKey="id" animation="150" direction="vertical"
+					:class="{ editMode:editMode, flowsAsRow:widgetFlow === 'row' }"
+					:list="widgetGroupsInput"
+				>
+					<template #item="{element,index}">
+						<my-widget-group
+							@remove="groupDel(index)"
+							@remove-widget="widgetDel(index,$event)"
+							@set-title="groupSetTitle(index,$event)"
+							:editMode="editMode"
+							:widgetGroup="element"
+						/>
+					</template>
+				</draggable>
+			</div>
+		</div>
 		
-		<my-button image="edit.png"
-			v-if="!editMode"
-			@trigger="openEditMode"
-			:caption="capGen.button.edit"
-		/>
-		<draggable class="widget-groups" handle=".dragAnchor" group="widget-groups" itemKey="id" animation="150" direction="vertical"
-			:list="widgetGroupsInput"
-		>
-			<template #item="{element,index}">
-				<my-widget-group
-					@remove="groupDel(index)"
-					@set-title="groupSetTitle(index,$event)"
-					:editMode="editMode"
-					:widgetGroup="element"
-				/>
-			</template>
-		</draggable>
-		
-		<div class="widgets-sidebar" :class="{ shown:editMode }" v-if="editMode">
+		<div class="widgets-sidebar" :class="{ shown:editMode }" v-if="!isMobile">
 			<div class="row gap">
+				<my-button image="edit.png"
+					v-if="!editMode"
+					@trigger="openEditMode"
+					:caption="capGen.button.edit"
+				/>
 				<my-button image="save.png"
 					v-if="editMode"
 					@trigger="set"
 					:active="hasChanges"
 					:caption="capGen.button.save"
+				/>
+				<my-button image="refresh.png"
+					v-if="editMode"
+					@trigger="reset"
+					:active="hasChanges"
+					:caption="capGen.button.refresh"
 				/>
 				<my-button image="add.png"
 					v-if="editMode"
@@ -201,22 +234,55 @@ let MyWidgets = {
 				/>
 			</div>
 			
-			<draggable class="widget-group-items" handle=".dragAnchor" group="widget-group-items" itemKey="id" animation="150"
-				:list="widgetTemplates"
-			>
-				<template #item="{element,index}">
-					<my-widget
-						:editMode="editMode"
-						:widget="element"
-					/>
-				</template>
-			</draggable>
+			<div class="widgets-sidebar-content" v-if="editMode">
+				<h2>{{ capGen.settings }}</h2>
+				<div class="container default-inputs">
+					<table>
+						<tr>
+							<td>{{ capApp.flow }}</td>
+							<td>
+								<select v-model="flowInput">
+									<option value="column">{{ capApp.option.flowColumn }}</option>
+									<option value="row">{{ capApp.option.flowRow }}</option>
+								</select>
+							</td>
+						</tr>
+						<tr>
+							<td>{{ capApp.width }}</td>
+							<td>
+								<div class="row centered gap">
+									<my-button image="remove.png" @trigger="widthInput -= widthSteps" :active="widthInput > widthSteps" />
+									<input disabled="disabled" :value="widthInput" />
+									<my-button image="add.png" @trigger="widthInput += widthSteps" />
+								</div>
+							</td>
+						</tr>
+					</table>
+				</div>
+			</div>
+			
+			<div class="widgets-sidebar-content shrinks" v-if="editMode">
+				<h2>{{ capGen.available }}</h2>
+				<draggable class="widget-group-items container" handle=".dragAnchor" itemKey="id" animation="150"
+					:group="{ name:'widget-group-items', put:false }"
+					:list="widgetTemplates"
+				>
+					<template #item="{element,index}">
+						<my-widget
+							:editMode="editMode"
+							:isTemplate="true"
+							:widget="element"
+						/>
+					</template>
+				</draggable>
+			</div>
 		</div>
 	</div>`,
 	data() {
 		return {
 			editMode:false,
-			widgetGroupsInput:[] // widget groups, updated by user input
+			widgetGroupsInput:[], // widget groups, updated by user input
+			widthSteps:50
 		};
 	},
 	computed:{
@@ -227,9 +293,19 @@ let MyWidgets = {
 			}
 			return out;
 		},
+		moduleIdsUsedMenu:(s) => {
+			let out = [];
+			for(const g of s.widgetGroupsInput) {
+				for(const w of g.items) {
+					if(w.moduleId !== null)
+						out.push(w.moduleId);
+				}
+			}
+			return out;
+		},
 		widgetIdsUsed:(s) => {
 			let out = [];
-			for(const g of s.widgetGroups) {
+			for(const g of s.widgetGroupsInput) {
 				for(const w of g.items) {
 					if(w.widgetId !== null)
 						out.push(w.widgetId);
@@ -249,7 +325,7 @@ let MyWidgets = {
 			
 			// system widget: module menu
 			for(const m of s.modules) {
-				if(!s.moduleIdsAccessible.includes(m.id))
+				if(!s.moduleIdsAccessible.includes(m.id) || s.moduleIdsUsedMenu.includes(m.id))
 					continue;
 				
 				out.push({
@@ -275,13 +351,26 @@ let MyWidgets = {
 			return out;
 		},
 		
+		// inputs
+		flowInput:{
+			get()  { return this.widgetFlow; },
+			set(v) { this.$store.commit('local/widgetFlow',v); }
+		},
+		widthInput:{
+			get()  { return this.widgetWidth; },
+			set(v) { this.$store.commit('local/widgetWidth',v); }
+		},
+		
 		// simple
 		hasChanges:(s) => JSON.stringify(s.widgetGroups) !== JSON.stringify(s.widgetGroupsInput),
 		
 		// stores
+		widgetFlow:   (s) => s.$store.getters['local/widgetFlow'],
+		widgetWidth:  (s) => s.$store.getters['local/widgetWidth'],
 		modules:      (s) => s.$store.getters['schema/modules'],
 		capApp:       (s) => s.$store.getters.captions.widgets,
 		capGen:       (s) => s.$store.getters.captions.generic,
+		isMobile:     (s) => s.$store.getters.isMobile,
 		moduleEntries:(s) => s.$store.getters.moduleEntries,
 		widgetGroups: (s) => s.$store.getters.loginWidgetGroups
 	},
@@ -311,6 +400,9 @@ let MyWidgets = {
 				this.groupAdd();
 			
 			this.editMode = true;
+		},
+		widgetDel(groupIndex,widgetIndex) {
+			this.widgetGroupsInput[groupIndex].items.splice(widgetIndex,1);
 		},
 		
 		// backend calls
