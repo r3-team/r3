@@ -1,5 +1,6 @@
 import {getColumnTitle} from './shared/column.js';
 import {formOpen}       from './shared/form.js';
+import {colorAdjustBg}  from './shared/generic.js';
 import {getCaption}     from './shared/language.js';
 import srcBase64Icon    from './shared/image.js';
 import MyForm           from './form.js';
@@ -7,27 +8,29 @@ import {
 	getCollectionColumn,
 	getCollectionValues
 } from './shared/collection.js';
-import {
-	colorAdjustBg,
-	colorMakeContrastFont
-} from './shared/generic.js';
 export {MyWidgets as default};
 
 let MyWidget = {
 	name:'my-widget',
 	components:{ MyForm },
 	template:`<div class="widget" v-if="active" :class="cssClasses">
-		<div class="header" :style="headerStyle">
-			<img class="dragAnchor" src="images/drag.png" v-if="editMode" />
+		<div class="header">
+			<div class="row gap centered">
+				<img class="dragAnchor" src="images/drag.png" v-if="editMode" />
+				
+				<span v-if="moduleWidget">
+					{{ getCaption(moduleWidget.captions.widgetTitle,'') }}
+				</span>
+			</div>
 			
-			<span v-if="moduleWidget !== false">
-				{{ getCaption(moduleWidget.captions.widgetTitle,'') }}
-			</span>
-			
-			<img class="clickable" src="images/delete.png"
-				v-if="editMode && !isTemplate"
-				@click="$emit('remove')"
-			/>
+			<div class="row gap centered">
+				<img class="clickable" src="images/cancel.png"
+					v-if="editMode && !isTemplate"
+					@click="$emit('remove')"
+				/>
+				
+				<div class="moduleBobble" v-if="true" :style="bobbleStyle"></div>
+			</div>
 		</div>
 		<div class="content">
 			
@@ -122,6 +125,16 @@ let MyWidget = {
 			
 			return true;
 		},
+		bobbleStyle:(s) => {
+			let moduleId = null;
+			
+			if(s.moduleEntry) moduleId = s.moduleEntry.id;
+			if(s.collection)  moduleId = s.collection.moduleId;
+			if(s.form)        moduleId = s.form.moduleId;
+			
+			return moduleId !== null && s.moduleIdMap[moduleId].color1 !== null
+				? `border-bottom-color:${s.colorAdjustBg(s.moduleIdMap[moduleId].color1)}` : '';
+		},
 		cssClasses:(s) => {
 			let out = [];
 			
@@ -129,22 +142,6 @@ let MyWidget = {
 			if(s.moduleWidget && s.moduleWidget.size > 1) out.push('size2');
 			
 			return out.join(' ');
-		},
-		headerStyle:(s) => {
-			if(s.moduleEntry && s.moduleIdMap[s.moduleEntry.id].color1 !== null)
-				return `background-color:${s.colorAdjustBg(s.moduleIdMap[s.moduleEntry.id].color1)}`;
-			
-			if(s.collection) {
-				const m = s.moduleIdMap[s.collection.moduleId];
-				
-				if(m.color1 !== null) {
-					const cBg   = s.colorAdjustBg(m.color1);
-					const cFont = s.colorMakeContrastFont(cBg);
-					return `background-color:${cBg};color:${cFont};`
-				}
-			}
-			
-			return '';
 		},
 		title:(s) => {
 			// use most specific title in order: Widget title, form title, collection title, widget name
@@ -192,7 +189,6 @@ let MyWidget = {
 	methods:{
 		// externals
 		colorAdjustBg,
-		colorMakeContrastFont,
 		formOpen,
 		getCaption,
 		getCollectionColumn,
@@ -216,7 +212,7 @@ let MyWidgetGroup = {
 			<img class="dragAnchor" src="images/drag.png" v-if="editMode" />
 			<span v-if="!editMode">{{ widgetGroup.title }}</span>
 			<input v-if="editMode" @input="$emit('set-title',$event.target.value)" :value="widgetGroup.title" />
-			<my-button image="delete.png"
+			<my-button image="cancel.png"
 				v-if="editMode"
 				@trigger="$emit('remove')"
 				:naked="true"
