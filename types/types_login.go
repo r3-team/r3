@@ -16,6 +16,7 @@ type LoginAccess struct {
 	Collection map[uuid.UUID]int `json:"collection"` // effective access to specific collection
 	Menu       map[uuid.UUID]int `json:"menu"`       // effective access to specific menus
 	Relation   map[uuid.UUID]int `json:"relation"`   // effective access to specific relations
+	Widget     map[uuid.UUID]int `json:"widget"`     // effective access to specific widgets
 }
 type LoginPublicKey struct {
 	LoginId   int64   `json:"loginId"`   // ID of login

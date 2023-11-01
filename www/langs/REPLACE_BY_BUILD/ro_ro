@@ -1402,7 +1402,9 @@
 			"newRole":"Rol nou",
 			"relation":"Relație",
 			"title":"Roluri",
-			"titleOne":"Role '{NAME}'"
+			"titleOne":"Role '{NAME}'",
+			"widget":"Widget",
+			"widgets":"Widgets"
 		},
 		"start":{
 			"button":{

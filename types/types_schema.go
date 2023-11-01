@@ -481,6 +481,7 @@ type Role struct {
 	AccessCollections map[uuid.UUID]int `json:"accessCollections"`
 	AccessMenus       map[uuid.UUID]int `json:"accessMenus"`
 	AccessRelations   map[uuid.UUID]int `json:"accessRelations"`
+	AccessWidgets     map[uuid.UUID]int `json:"accessWidgets"`
 	Captions          CaptionMap        `json:"captions"`
 }
 type PgFunction struct {

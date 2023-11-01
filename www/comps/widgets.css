@@ -41,7 +41,6 @@
 }
 .widgets-sidebar{
 	flex:0 0 auto;
-	max-width:420px;
 	display:flex;
 	flex-flow:column nowrap;
 	color:var(--color-font);
@@ -61,11 +60,11 @@
 .widgets-sidebar-content.shrinks{
 	flex-shrink:1;
 }
-.widgets-sidebar-content .container{
+.widgets-sidebar-content-box{
 	display:flex;
 	flex-flow:column nowrap;
+	max-width:420px;
 	flex:1 1 auto;
-	
 	border-radius:5px;
 	padding:10px;
 	margin:5px;
@@ -137,6 +136,7 @@
 	width:calc((var(--widget-size-width) * 2) + var(--widget-size-gap));
 }
 .widget.template{
+	width:var(--widget-size-width);
 	height:auto;
 }
 .widget>.header{

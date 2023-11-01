@@ -1402,7 +1402,9 @@
 			"newRole":"Új szerep",
 			"relation":"Reláció",
 			"title":"Szerepek",
-			"titleOne":"Szerep \"{NAME}\""
+			"titleOne":"Szerep \"{NAME}\"",
+			"widget":"Widget",
+			"widgets":"Widgets"
 		},
 		"start":{
 			"button":{

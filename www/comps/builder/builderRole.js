@@ -30,6 +30,33 @@ let MyBuilderRoleAccessApi = {
 	}
 };
 
+let MyBuilderRoleAccessWidget = {
+	name:'my-builder-role-access-widget',
+	template:`<tbody>
+		<tr class="entry">
+			<td class="maximum">{{ widget.name }}</td>
+			<td>
+				<my-bool
+					@update:modelValue="$emit('apply',widget.id,access === 1 ? -1 : 1)"
+					:modelValue="access === 1 ? true : false"
+					:readonly="readonly"
+				/>
+			</td>
+		</tr>
+	</tbody>`,
+	props:{
+		builderLanguage:{ type:String,  required:true },
+		widget:         { type:Object,  required:true },
+		idMapAccess:    { type:Object,  required:true },
+		readonly:       { type:Boolean, required:true }
+	},
+	emits:['apply'],
+	computed:{
+		access:(s) => typeof s.idMapAccess[s.widget.id] === 'undefined'
+			? -1 : s.idMapAccess[s.widget.id]
+	}
+};
+
 let MyBuilderRoleAccessCollection = {
 	name:'my-builder-role-access-collection',
 	template:`<tbody>
@@ -227,7 +254,8 @@ let MyBuilderRole = {
 		MyBuilderRoleAccessApi,
 		MyBuilderRoleAccessCollection,
 		MyBuilderRoleAccessMenu,
-		MyBuilderRoleAccessRelation
+		MyBuilderRoleAccessRelation,
+		MyBuilderRoleAccessWidget
 	},
 	template:`<div class="builder-role contentBox grow" v-if="ready">
 			
@@ -381,6 +409,29 @@ let MyBuilderRole = {
 						/>
 					</table>
 				</div>
+				<div class="contentPart">
+					<div class="contentPartHeader">
+						<img class="icon" src="images/tiles.png" />
+						<h1>{{ capApp.widgets }}</h1>
+					</div>
+					
+					<table class="default-inputs">
+						<thead>
+							<th>{{ capApp.widget }}</th>
+							<th>{{ capApp.access }}</th>
+						</thead>
+						
+						<my-builder-role-access-widget
+							v-for="w in module.widgets"
+							@apply="(...args) => apply('widget',args[0],args[1])"
+							:builderLanguage="builderLanguage"
+							:idMapAccess="accessWidgets"
+							:key="role.id + '_' + w.id"
+							:readonly="readonly"
+							:widget="w"
+						/>
+					</table>
+				</div>
 			</div>
 			
 			<!-- sidebar -->
@@ -498,6 +549,7 @@ let MyBuilderRole = {
 			accessCollections:{},
 			accessMenus:{},
 			accessRelations:{},
+			accessWidgets:{},
 			assignable:true,
 			captions:{},
 			childrenIds:[],
@@ -521,6 +573,7 @@ let MyBuilderRole = {
 			|| JSON.stringify(s.accessCollections) !== JSON.stringify(s.role.accessCollections)
 			|| JSON.stringify(s.accessMenus)       !== JSON.stringify(s.role.accessMenus)
 			|| JSON.stringify(s.accessRelations)   !== JSON.stringify(s.role.accessRelations)
+			|| JSON.stringify(s.accessWidgets)     !== JSON.stringify(s.role.accessWidgets)
 			|| JSON.stringify(s.captions)          !== JSON.stringify(s.role.captions),
 		
 		// simple
@@ -548,6 +601,7 @@ let MyBuilderRole = {
 				case 'collection': this.accessCollections[id] = access; break;
 				case 'menu':       this.accessMenus[id]       = access; break;
 				case 'relation':   this.accessRelations[id]   = access; break;
+				case 'widget':     this.accessWidgets[id]     = access; break;
 			}
 		},
 		childAdd(id) {
@@ -568,6 +622,7 @@ let MyBuilderRole = {
 			this.accessCollections = JSON.parse(JSON.stringify(this.role.accessCollections));
 			this.accessMenus       = JSON.parse(JSON.stringify(this.role.accessMenus));
 			this.accessRelations   = JSON.parse(JSON.stringify(this.role.accessRelations));
+			this.accessWidgets     = JSON.parse(JSON.stringify(this.role.accessWidgets));
 			this.captions          = JSON.parse(JSON.stringify(this.role.captions));
 			this.ready = true;
 		},
@@ -615,6 +670,7 @@ let MyBuilderRole = {
 				accessCollections:this.accessCollections,
 				accessMenus:this.accessMenus,
 				accessRelations:this.accessRelations,
+				accessWidgets:this.accessWidgets,
 				captions:this.captions
 			},true).then(
 				() => {

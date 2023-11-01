@@ -186,6 +186,17 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			ALTER TYPE app.collection_consumer_content ADD VALUE 'widgetDisplay';
 			
+			-- widget permissions
+			ALTER TABLE app.role_access ADD COLUMN widget_id uuid;
+			ALTER TABLE app.role_access ADD CONSTRAINT role_access_widget_id_fkey FOREIGN KEY (widget_id)
+				REFERENCES app.widget (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS fki_role_access_widget_id_fkey
+			    ON app.role_access USING btree (widget_id ASC NULLS LAST);
+			
 			-- login widget data
 			CREATE TABLE instance.login_widget_group (
 				id uuid NOT NULL DEFAULT gen_random_uuid(),

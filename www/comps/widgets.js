@@ -6,7 +6,7 @@ export {MyWidgets as default};
 let MyWidget = {
 	name:'my-widget',
 	components:{ MyForm },
-	template:`<div class="widget" :class="cssClasses">
+	template:`<div class="widget" v-if="active" :class="cssClasses">
 		<div class="header" :style="headerStyle">
 			<img class="dragAnchor" src="images/drag.png" v-if="editMode" />
 			
@@ -75,34 +75,24 @@ let MyWidget = {
 			
 			return out.join(' ');
 		},
-		icon:(s) => {
-			
-		},
 		title:(s) => {
 			// use most specific title in order: Widget title, form title, collection title, widget name
 			let t = '';
-			if(s.moduleWidget !== false)
-				t = s.getCaption(s.moduleWidget.captions.widgetTitle,'');
-			
-			if(t === '' && s.form !== false)
-				t = s.getCaption(s.form.captions.formTitle, '');
-			
-			if(t === '' && s.collection !== false)
-				t = s.getCaption(s.collection.captions.collectionTitle, '');
-			
-			if(t === '')
-				t = s.moduleWidget.name;
-			
+			if(s.moduleWidget)           t = s.getCaption(s.moduleWidget.captions.widgetTitle,'');
+			if(t === '' && s.form)       t = s.getCaption(s.form.captions.formTitle, '');
+			if(t === '' && s.collection) t = s.getCaption(s.collection.captions.collectionTitle, '');
+			if(t === '')                 t = s.moduleWidget.name;
 			return t;
 		},
 		
 		// simple
-		headerStyle:(s) => s.moduleEntry !== false ? s.moduleEntry.styleBg : '',
+		active:     (s) => !s.moduleWidget || typeof s.accessWidgetIdMap[s.moduleWidget.id] !== 'undefined',
+		headerStyle:(s) => s.moduleEntry ? s.moduleEntry.styleBg : '',
 		isSystem:   (s) => s.widget.content.startsWith('system'),
 		
 		// entities
-		collection:  (s) => s.moduleWidget === false || s.moduleWidget.collectionId === null ? false : s.collectionIdMap[s.moduleWidget.collectionId],
-		form:        (s) => s.moduleWidget === false || s.moduleWidget.formId       === null ? false : s.formIdMap[s.moduleWidget.formId],
+		collection:  (s) => !s.moduleWidget || s.moduleWidget.collectionId === null ? false : s.collectionIdMap[s.moduleWidget.collectionId],
+		form:        (s) => !s.moduleWidget || s.moduleWidget.formId       === null ? false : s.formIdMap[s.moduleWidget.formId],
 		moduleWidget:(s) => s.widget.widgetId === null ? false : s.widgetIdMap[s.widget.widgetId],
 		moduleEntry: (s) => {
 			if(s.widget.content !== 'systemModuleMenu')
@@ -116,10 +106,11 @@ let MyWidget = {
 		},
 		
 		// stores
-		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
-		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
-		widgetIdMap:    (s) => s.$store.getters['schema/widgetIdMap'],
-		moduleEntries:  (s) => s.$store.getters.moduleEntries
+		collectionIdMap:  (s) => s.$store.getters['schema/collectionIdMap'],
+		formIdMap:        (s) => s.$store.getters['schema/formIdMap'],
+		widgetIdMap:      (s) => s.$store.getters['schema/widgetIdMap'],
+		accessWidgetIdMap:(s) => s.$store.getters.access.widget,
+		moduleEntries:    (s) => s.$store.getters.moduleEntries
 	},
 	mounted() {
 	},
@@ -236,7 +227,7 @@ let MyWidgets = {
 			
 			<div class="widgets-sidebar-content" v-if="editMode">
 				<h2>{{ capGen.settings }}</h2>
-				<div class="container default-inputs">
+				<div class="widgets-sidebar-content-box default-inputs">
 					<table>
 						<tr>
 							<td>{{ capApp.flow }}</td>
@@ -263,7 +254,7 @@ let MyWidgets = {
 			
 			<div class="widgets-sidebar-content shrinks" v-if="editMode">
 				<h2>{{ capGen.available }}</h2>
-				<draggable class="widget-group-items container" handle=".dragAnchor" itemKey="id" animation="150"
+				<draggable class="widget-group-items widgets-sidebar-content-box" handle=".dragAnchor" itemKey="id" animation="150"
 					:group="{ name:'widget-group-items', put:false }"
 					:list="widgetTemplates"
 				>
@@ -338,7 +329,7 @@ let MyWidgets = {
 			// module widgets
 			for(const m of s.modules) {
 				for(const w of m.widgets) {
-					if(s.widgetIdsUsed.includes(w.id))
+					if(s.widgetIdsUsed.includes(w.id) || typeof s.accessWidgetIdMap[w.id] === 'undefined')
 						continue;
 					
 					out.push({
@@ -365,14 +356,15 @@ let MyWidgets = {
 		hasChanges:(s) => JSON.stringify(s.widgetGroups) !== JSON.stringify(s.widgetGroupsInput),
 		
 		// stores
-		widgetFlow:   (s) => s.$store.getters['local/widgetFlow'],
-		widgetWidth:  (s) => s.$store.getters['local/widgetWidth'],
-		modules:      (s) => s.$store.getters['schema/modules'],
-		capApp:       (s) => s.$store.getters.captions.widgets,
-		capGen:       (s) => s.$store.getters.captions.generic,
-		isMobile:     (s) => s.$store.getters.isMobile,
-		moduleEntries:(s) => s.$store.getters.moduleEntries,
-		widgetGroups: (s) => s.$store.getters.loginWidgetGroups
+		widgetFlow:       (s) => s.$store.getters['local/widgetFlow'],
+		widgetWidth:      (s) => s.$store.getters['local/widgetWidth'],
+		modules:          (s) => s.$store.getters['schema/modules'],
+		accessWidgetIdMap:(s) => s.$store.getters.access.widget,
+		capApp:           (s) => s.$store.getters.captions.widgets,
+		capGen:           (s) => s.$store.getters.captions.generic,
+		isMobile:         (s) => s.$store.getters.isMobile,
+		moduleEntries:    (s) => s.$store.getters.moduleEntries,
+		widgetGroups:     (s) => s.$store.getters.loginWidgetGroups
 	},
 	mounted() {
 		this.reset();

@@ -1402,7 +1402,9 @@
 			"newRole":"New role",
 			"relation":"Relation",
 			"title":"Roles",
-			"titleOne":"Role '{NAME}'"
+			"titleOne":"Role '{NAME}'",
+			"widget":"Widget",
+			"widgets":"Widgets"
 		},
 		"start":{
 			"button":{

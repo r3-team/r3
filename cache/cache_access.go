@@ -70,6 +70,7 @@ func load(loginId int64) error {
 		Collection: make(map[uuid.UUID]int),
 		Menu:       make(map[uuid.UUID]int),
 		Relation:   make(map[uuid.UUID]int),
+		Widget:     make(map[uuid.UUID]int),
 	}
 
 	for _, roleId := range roleIds {
@@ -109,6 +110,13 @@ func load(loginId int64) error {
 				loginIdMapAccess[loginId].Relation[id] < access {
 
 				loginIdMapAccess[loginId].Relation[id] = access
+			}
+		}
+		for id, access := range role.AccessWidgets {
+			if _, exists := loginIdMapAccess[loginId].Widget[id]; !exists ||
+				loginIdMapAccess[loginId].Widget[id] < access {
+
+				loginIdMapAccess[loginId].Widget[id] = access
 			}
 		}
 	}
