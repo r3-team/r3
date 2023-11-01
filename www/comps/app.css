@@ -50,11 +50,6 @@
 	--z-index-widget-entry:1;
 	--z-index-widget-watermark:0;
 	
-	/* main content */
-	--z-index-form:2;
-	--z-index-menu:1;
-	--z-index-content:1;
-	
 	/**/
 	/* spacing */
 	--spacing:16px;
@@ -354,7 +349,6 @@ h3{
 	box-sizing:border-box;
 	background-color:var(--color-bg);
 	border-color:var(--color-border); /* default for border setting */
-	z-index:var(--z-index-content);
 }
 .contentBox.float{
 	border-radius:12px;

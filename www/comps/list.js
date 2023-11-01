@@ -371,7 +371,7 @@ let MyList = {
 			<div class="layoutWrap">
 				<!-- list results as table or card layout -->
 				<div
-					:class="{ layoutCards:isCards, layoutTable:isTable, scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
+					:class="{ layoutCards:isCards, layoutTable:isTable, formInline:popUpFormInline !== null, scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
 					:id="usesPageHistory ? scrollFormId : null"
 				>
 					<table v-if="isTable" :class="{ asInput:isInput, 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
