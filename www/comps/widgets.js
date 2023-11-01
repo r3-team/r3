@@ -1,6 +1,16 @@
-import { getCaption } from './shared/language.js';
-import srcBase64Icon  from './shared/image.js';
-import MyForm from './form.js';
+import {getColumnTitle} from './shared/column.js';
+import {formOpen}       from './shared/form.js';
+import {getCaption}     from './shared/language.js';
+import srcBase64Icon    from './shared/image.js';
+import MyForm           from './form.js';
+import {
+	getCollectionColumn,
+	getCollectionValues
+} from './shared/collection.js';
+import {
+	colorAdjustBg,
+	colorMakeContrastFont
+} from './shared/generic.js';
 export {MyWidgets as default};
 
 let MyWidget = {
@@ -21,43 +31,61 @@ let MyWidget = {
 		</div>
 		<div class="content">
 			
-			<!-- system widget: module menu -->
-			<div class="system-module-menu" v-if="moduleEntry !== false">
+			<!-- system widgets -->
+			<template v-if="isSystem">
 				
-				<router-link class="clickable"
-					:to="'/app/'+moduleEntry.name"
-				>
-					<img :src="srcBase64Icon(moduleEntry.iconId,'images/module.png')" />
-					<span>{{ moduleEntry.caption }}</span>
-				</router-link>
-				
-				<div class="children">
+				<!-- module menu -->
+				<div class="system-module-menu" v-if="moduleEntry">
+					
 					<router-link class="clickable"
-						v-for="mec in moduleEntry.children"
-						:key="mec.id"
-						:to="'/app/'+moduleEntry.name+'/'+mec.name"
+						:to="'/app/'+moduleEntry.name"
 					>
-						<img :src="srcBase64Icon(mec.iconId,'images/module.png')" />
-						<span>{{ mec.caption }}</span>
-						
+						<img :src="srcBase64Icon(moduleEntry.iconId,'images/module.png')" />
+						<span>{{ moduleEntry.caption }}</span>
 					</router-link>
+					
+					<div class="children">
+						<router-link class="clickable"
+							v-for="mec in moduleEntry.children"
+							:key="mec.id"
+							:to="'/app/'+moduleEntry.name+'/'+mec.name"
+						>
+							<img :src="srcBase64Icon(mec.iconId,'images/module.png')" />
+							<span>{{ mec.caption }}</span>
+							
+						</router-link>
+					</div>
+					
+					<img class="watermark" :src="srcBase64Icon(moduleEntry.iconId,'images/module.png')" />
 				</div>
 				
-				<img class="watermark" :src="srcBase64Icon(moduleEntry.iconId,'images/module.png')" />
-			</div>
+				<!-- login details -->
+				
+			</template>
 			
-			<!-- system widget: login details -->
-			
-			<!-- form -->
-			<my-form
-				v-if="form !== false"
-				:formId="form.id"
-				:isWidget="true"
-				:moduleId="form.moduleId"
-				:recordIds="[]"
-			/>
-			
-			<!-- collection -->
+			<!-- module widgets -->
+			<template v-if="moduleWidget">
+				<my-form
+					v-if="form"
+					:formId="form.id"
+					:isWidget="true"
+					:moduleId="form.moduleId"
+					:recordIds="[]"
+				/>
+				
+				<!-- collection -->
+				<div class="widget-collection-consumer" v-if="collectionConsumer">
+					<img
+						v-if="collection.iconId !== null"
+						:src="srcBase64Icon(collection.iconId,'')"
+					/>
+					<span
+						v-if="collectionHasDisplay"
+						@click="clickCollection"
+						:class="{ clickable:collectionOpenForm }"
+					>{{ collectionValue + ' ' + collectionTitle }}</span>
+				</div>
+			</template>
 		</div>
 	</div>`,
 	emits:['remove'],
@@ -67,6 +95,33 @@ let MyWidget = {
 		widget:    { type:Object,  required:true }
 	},
 	computed:{
+		active:(s) => {
+			if(s.moduleWidget) {
+				
+				// no access to widget
+				if(typeof s.access.widget[s.moduleWidget.id] === 'undefined')
+					return false;
+				
+				// no access to collection
+				if(s.collection && typeof s.access.collection[s.collection.id] === 'undefined')
+					return false;
+				
+				// collection consumer cases (no display on mobile / no display if empty)
+				if(s.collectionConsumer && !s.collectionConsumer.onMobile && s.isMobile)
+					return false;
+				
+				if(s.collectionConsumer && s.collectionConsumer.noDisplayEmpty && (
+					s.collectionValue === null || s.collectionValue === 0 || s.collectionValue === '')) {
+					
+					return false;
+				}
+			}
+			
+			if(s.isSystemModuleMenu && !s.moduleEntry)
+				return false;
+			
+			return true;
+		},
 		cssClasses:(s) => {
 			let out = [];
 			
@@ -74,6 +129,22 @@ let MyWidget = {
 			if(s.moduleWidget && s.moduleWidget.size > 1) out.push('size2');
 			
 			return out.join(' ');
+		},
+		headerStyle:(s) => {
+			if(s.moduleEntry && s.moduleIdMap[s.moduleEntry.id].color1 !== null)
+				return `background-color:${s.colorAdjustBg(s.moduleIdMap[s.moduleEntry.id].color1)}`;
+			
+			if(s.collection) {
+				const m = s.moduleIdMap[s.collection.moduleId];
+				
+				if(m.color1 !== null) {
+					const cBg   = s.colorAdjustBg(m.color1);
+					const cFont = s.colorMakeContrastFont(cBg);
+					return `background-color:${cBg};color:${cFont};`
+				}
+			}
+			
+			return '';
 		},
 		title:(s) => {
 			// use most specific title in order: Widget title, form title, collection title, widget name
@@ -86,16 +157,20 @@ let MyWidget = {
 		},
 		
 		// simple
-		active:     (s) => !s.moduleWidget || typeof s.accessWidgetIdMap[s.moduleWidget.id] !== 'undefined',
-		headerStyle:(s) => s.moduleEntry ? s.moduleEntry.styleBg : '',
-		isSystem:   (s) => s.widget.content.startsWith('system'),
+		isSystem:          (s) => s.widget.content.startsWith('system'),
+		isSystemModuleMenu:(s) => s.widget.content === 'systemModuleMenu',
 		
 		// entities
-		collection:  (s) => !s.moduleWidget || s.moduleWidget.collectionId === null ? false : s.collectionIdMap[s.moduleWidget.collectionId],
-		form:        (s) => !s.moduleWidget || s.moduleWidget.formId       === null ? false : s.formIdMap[s.moduleWidget.formId],
-		moduleWidget:(s) => s.widget.widgetId === null ? false : s.widgetIdMap[s.widget.widgetId],
-		moduleEntry: (s) => {
-			if(s.widget.content !== 'systemModuleMenu')
+		collection:          (s) => !s.moduleWidget || s.moduleWidget.collection === null ? false : s.collectionIdMap[s.moduleWidget.collection.collectionId],
+		collectionConsumer:  (s) => !s.collection ? false : s.moduleWidget.collection,
+		collectionHasDisplay:(s) => !s.collectionConsumer ? false : s.collectionConsumer.columnIdDisplay !== null,
+		collectionOpenForm:  (s) => !s.collectionConsumer ? false : s.collectionConsumer.openForm,
+		collectionTitle:     (s) => !s.collectionHasDisplay ? '' : s.getColumnTitle(s.getCollectionColumn(s.collection.id,s.collectionConsumer.columnIdDisplay)),
+		collectionValue:     (s) => !s.collectionHasDisplay ? '' : s.getCollectionValues(s.collection.id,s.collectionConsumer.columnIdDisplay,true),
+		form:                (s) => !s.moduleWidget || s.moduleWidget.formId        === null ? false : s.formIdMap[s.moduleWidget.formId],
+		moduleWidget:        (s) => s.widget.widgetId === null ? false : s.widgetIdMap[s.widget.widgetId],
+		moduleEntry:         (s) => {
+			if(!s.isSystemModuleMenu)
 				return false;
 			
 			for(const me of s.moduleEntries) {
@@ -106,18 +181,30 @@ let MyWidget = {
 		},
 		
 		// stores
-		collectionIdMap:  (s) => s.$store.getters['schema/collectionIdMap'],
-		formIdMap:        (s) => s.$store.getters['schema/formIdMap'],
-		widgetIdMap:      (s) => s.$store.getters['schema/widgetIdMap'],
-		accessWidgetIdMap:(s) => s.$store.getters.access.widget,
-		moduleEntries:    (s) => s.$store.getters.moduleEntries
-	},
-	mounted() {
+		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
+		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		widgetIdMap:    (s) => s.$store.getters['schema/widgetIdMap'],
+		access:         (s) => s.$store.getters.access,
+		isMobile:       (s) => s.$store.getters.isMobile,
+		moduleEntries:  (s) => s.$store.getters.moduleEntries
 	},
 	methods:{
 		// externals
+		colorAdjustBg,
+		colorMakeContrastFont,
+		formOpen,
 		getCaption,
-		srcBase64Icon
+		getCollectionColumn,
+		getCollectionValues,
+		getColumnTitle,
+		srcBase64Icon,
+		
+		// actions
+		clickCollection() {
+			if(this.collectionOpenForm)
+				this.formOpen(this.collectionOpenForm);
+		}
 	}
 };
 
@@ -329,7 +416,7 @@ let MyWidgets = {
 			// module widgets
 			for(const m of s.modules) {
 				for(const w of m.widgets) {
-					if(s.widgetIdsUsed.includes(w.id) || typeof s.accessWidgetIdMap[w.id] === 'undefined')
+					if(s.widgetIdsUsed.includes(w.id))
 						continue;
 					
 					out.push({
@@ -356,15 +443,14 @@ let MyWidgets = {
 		hasChanges:(s) => JSON.stringify(s.widgetGroups) !== JSON.stringify(s.widgetGroupsInput),
 		
 		// stores
-		widgetFlow:       (s) => s.$store.getters['local/widgetFlow'],
-		widgetWidth:      (s) => s.$store.getters['local/widgetWidth'],
-		modules:          (s) => s.$store.getters['schema/modules'],
-		accessWidgetIdMap:(s) => s.$store.getters.access.widget,
-		capApp:           (s) => s.$store.getters.captions.widgets,
-		capGen:           (s) => s.$store.getters.captions.generic,
-		isMobile:         (s) => s.$store.getters.isMobile,
-		moduleEntries:    (s) => s.$store.getters.moduleEntries,
-		widgetGroups:     (s) => s.$store.getters.loginWidgetGroups
+		widgetFlow:   (s) => s.$store.getters['local/widgetFlow'],
+		widgetWidth:  (s) => s.$store.getters['local/widgetWidth'],
+		modules:      (s) => s.$store.getters['schema/modules'],
+		capApp:       (s) => s.$store.getters.captions.widgets,
+		capGen:       (s) => s.$store.getters.captions.generic,
+		isMobile:     (s) => s.$store.getters.isMobile,
+		moduleEntries:(s) => s.$store.getters.moduleEntries,
+		widgetGroups: (s) => s.$store.getters.loginWidgetGroups
 	},
 	mounted() {
 		this.reset();
