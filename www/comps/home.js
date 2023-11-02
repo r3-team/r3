@@ -1,10 +1,11 @@
-import srcBase64Icon                   from './shared/image.js';
 import {getBuildFromVersion}           from './shared/generic.js';
 import {setSingle as setSettingSingle} from './shared/settings.js';
+import MyWidgets                       from './widgets.js';
 export {MyHome as default};
 
 let MyHome = {
 	name:'my-go-home',
+	components:{ MyWidgets },
 	template:`<div class="home">
 		
 		<!-- instance setup wizard -->
@@ -114,46 +115,8 @@ let MyHome = {
 			</div>
 		</div>
 		
-		<!-- module navigation -->
-		<span class="home-title" v-if="!isMobile && !noNavigation">
-			{{ capGen.applications }}
-		</span>
-		<div class="modules">
-			<div class="module shade"
-				v-for="me in moduleEntries"
-				:key="me.id"
-			>
-				<div class="module-title" :style="me.styleBg"></div>
-				
-				<div class="entries">
-					<div class="entry">
-						<router-link class="clickable"
-							:to="'/app/'+me.name"
-						>
-							<img :src="srcBase64Icon(me.iconId,'images/module.png')" />
-							<span>{{ me.caption }}</span>
-						</router-link>
-					</div>
-					
-					<div class="children">
-						<div class="entry" v-for="mec in me.children">
-							<router-link class="clickable"
-								:key="mec.id"
-								:to="'/app/'+me.name+'/'+mec.name"
-							>
-								<img :src="srcBase64Icon(mec.iconId,'images/module.png')" />
-								<span>{{ mec.caption }}</span>
-								
-							</router-link>
-						</div>
-					</div>
-					
-					<img class="watermark" :src="srcBase64Icon(me.iconId,'images/module.png')" />
-				</div>
-				
-				<div class="module-title lower" :style="me.styleBg"></div>
-			</div>
-		</div>
+		<!-- login widgets -->
+		<my-widgets />
 		
 		<!-- application version -->
 		<a target="_blank" class="version"
@@ -161,9 +124,6 @@ let MyHome = {
 			:href="capGen.appWebsite"
 		>{{ capGen.appName + ' ' + appVersion }}</a>
 	</div>`,
-	props:{
-		moduleEntries:{ type:Array, required:true }
-	},
 	data() {
 		return {
 			installStarted:false,
@@ -180,20 +140,21 @@ let MyHome = {
 			? 0 : s.getBuildFromVersion(s.config.updateCheckVersion),		
 		
 		// stores
-		activated:  (s) => s.$store.getters['local/activated'],
-		appName:    (s) => s.$store.getters['local/appName'],
-		appVersion: (s) => s.$store.getters['local/appVersion'],
-		colorHeader:(s) => s.$store.getters['local/companyColorHeader'],
-		modules:    (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		iconIdMap:  (s) => s.$store.getters['schema/iconIdMap'],
-		capApp:     (s) => s.$store.getters.captions.home,
-		capGen:     (s) => s.$store.getters.captions.generic,
-		config:     (s) => s.$store.getters.config,
-		isAdmin:    (s) => s.$store.getters.isAdmin,
-		isMobile:   (s) => s.$store.getters.isMobile,
-		pwaModuleId:(s) => s.$store.getters.pwaModuleId,
-		settings:   (s) => s.$store.getters.settings
+		activated:    (s) => s.$store.getters['local/activated'],
+		appName:      (s) => s.$store.getters['local/appName'],
+		appVersion:   (s) => s.$store.getters['local/appVersion'],
+		colorHeader:  (s) => s.$store.getters['local/companyColorHeader'],
+		modules:      (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:  (s) => s.$store.getters['schema/moduleIdMap'],
+		iconIdMap:    (s) => s.$store.getters['schema/iconIdMap'],
+		capApp:       (s) => s.$store.getters.captions.home,
+		capGen:       (s) => s.$store.getters.captions.generic,
+		config:       (s) => s.$store.getters.config,
+		isAdmin:      (s) => s.$store.getters.isAdmin,
+		isMobile:     (s) => s.$store.getters.isMobile,
+		moduleEntries:(s) => s.$store.getters.moduleEntries,
+		pwaModuleId:  (s) => s.$store.getters.pwaModuleId,
+		settings:     (s) => s.$store.getters.settings
 	},
 	mounted() {
 		this.$store.commit('pageTitle',this.capApp.title);
@@ -210,7 +171,6 @@ let MyHome = {
 	methods:{
 		// externals
 		getBuildFromVersion,
-		srcBase64Icon,
 		setSettingSingle,
 		
 		// actions

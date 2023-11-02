@@ -9,14 +9,14 @@ let MyGoModule = {
 	name:'my-go-module',
 	template:`<div />`,
 	props:{
-		moduleEntries:  { type:Array,  required:true },
 		moduleName:     { type:String, required:true },
 		moduleNameChild:{ type:String, required:false, default:'' }
 	},
 	computed:{
-		access:       (s) => s.$store.getters.access,
 		modules:      (s) => s.$store.getters['schema/modules'],
-		moduleNameMap:(s) => s.$store.getters['schema/moduleNameMap']
+		moduleNameMap:(s) => s.$store.getters['schema/moduleNameMap'],
+		access:       (s) => s.$store.getters.access,
+		moduleEntries:(s) => s.$store.getters.moduleEntries
 	},
 	mounted() {
 		// route to home if invalid module was given

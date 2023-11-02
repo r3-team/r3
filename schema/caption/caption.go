@@ -117,6 +117,9 @@ func getEntityName(content string) (string, error) {
 
 	case "tabTitle":
 		return "tab_id", nil
+
+	case "widgetTitle":
+		return "widget_id", nil
 	}
 	return "", errors.New("bad caption content name")
 }

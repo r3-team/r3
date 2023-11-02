@@ -3,7 +3,6 @@
 	display:flex;
 	flex-flow:row nowrap;
 	overflow:visible;
-	z-index:var(--z-index-form);
 }
 .form-wrap.popUp{
 	z-index:var(--z-index-form-pop-up);

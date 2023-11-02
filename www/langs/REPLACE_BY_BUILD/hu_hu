@@ -1241,7 +1241,8 @@
 			"relation":"Új összefüggés",
 			"relationEncryption":"Vége-ponttól-vége-pontig titkosítás",
 			"relationEncryptionHint":"Lehetővé teszi a vége-ponttól-vége-pontig titkosítást (E2EE) ennek az összefüggésnek az attribútumaira. Az E2EE-nek előnyei és hátrányai vannak - erről a Builder dokumentációban olvashat. Ezt a beállítást később nem lehet megváltoztatni.",
-			"role":"Új szerep"
+			"role":"Új szerep",
+			"widget":"New widget"
 		},
 		"openFormInput":{
 			"option":{
@@ -1401,7 +1402,9 @@
 			"newRole":"Új szerep",
 			"relation":"Reláció",
 			"title":"Szerepek",
-			"titleOne":"Szerep \"{NAME}\""
+			"titleOne":"Szerep \"{NAME}\"",
+			"widget":"Widget",
+			"widgets":"Widgets"
 		},
 		"start":{
 			"button":{
@@ -1433,6 +1436,19 @@
 			"titleRelations":"Relációk definiálása",
 			"titleRelationsHint":"Adatok tárolása és kapcsolódása."
 		},
+		"widget":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this widget?"
+			},
+			"collectionHint":"Widget will display content of a chosen collection.",
+			"edit":"Widget '{NAME}'",
+			"formHint":"Widget will display content of a chosen form.",
+			"nameHint":"The name serves as internal reference - it is not shown to users.",
+			"new":"New widget",
+			"sizeHint":"Widgets are displayed as tiles, with each taking up space of 1 or 2 tiles.",
+			"title":"Widgets",
+			"titleHint":"The title can be translated in available application languages. It is displayed at the top of the widget."
+		},
 		"backHint":"Vissza az alkalmazás áttekintőhöz",
 		"language":"Fordítás",
 		"languageNextHint":"Váltás a következő fordításra (Billentyűkombináció: CTRL + q)",
@@ -1451,6 +1467,7 @@
 		"navigationRelations":"Kapcsolatok",
 		"navigationRoles":"Szerepek",
 		"navigationStart":"Első lépések",
+		"navigationWidgets":"Widgets",
 		"pageTitle":"Builder",
 		"pageTitleDocs":"Builder Dokumentáció"
 	},
@@ -1948,5 +1965,18 @@
 		"titleSubMenu":"Application menu",
 		"titleTheme":"Téma",
 		"warnUnsaved":"Figyelmeztetés mentetlen változtatásoknál"
+	},
+	"widgets":{
+		"button":{
+			"groupAdd":"Add group"
+		},
+		"option":{
+			"flowColumn":"top-to-bottom",
+			"flowRow":"left-to-right"
+		},
+		"flow":"Direction",
+		"groupNameNew":"New widget group",
+		"placeholder":"Drag & drop widgets to add to this group",
+		"width":"Width"
 	}
 }

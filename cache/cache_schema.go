@@ -26,6 +26,7 @@ import (
 	"r3/schema/preset"
 	"r3/schema/relation"
 	"r3/schema/role"
+	"r3/schema/widget"
 	"r3/tools"
 	"r3/types"
 	"sync"
@@ -168,6 +169,7 @@ func updateSchemaCache(moduleIdsUpdateOnly []uuid.UUID) error {
 		mod.JsFunctions = make([]types.JsFunction, 0)
 		mod.Collections = make([]types.Collection, 0)
 		mod.Apis = make([]types.Api, 0)
+		mod.Widgets = make([]types.Widget, 0)
 		ModuleApiNameMapId[mod.Name] = make(map[string]uuid.UUID)
 
 		// get articles
@@ -305,6 +307,14 @@ func updateSchemaCache(moduleIdsUpdateOnly []uuid.UUID) error {
 		for _, a := range mod.Apis {
 			ApiIdMap[a.Id] = a
 			ModuleApiNameMapId[mod.Name][fmt.Sprintf("%s.v%d", a.Name, a.Version)] = a.Id
+		}
+
+		// get widgets
+		log.Info("cache", "load widgets")
+
+		mod.Widgets, err = widget.Get(mod.Id)
+		if err != nil {
+			return err
 		}
 
 		// update cache map with parsed module

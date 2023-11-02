@@ -1,7 +1,6 @@
 .builder{
 	display:flex;
 	flex-flow:row nowrap;
-	z-index:var(--z-index-content);
 }
 .builder .sidebar{
 	flex:0 0 auto;

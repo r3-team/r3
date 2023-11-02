@@ -37,6 +37,7 @@ type Module struct {
 	JsFunctions     []JsFunction      `json:"jsFunctions"`
 	Collections     []Collection      `json:"collections"`
 	Apis            []Api             `json:"apis"`
+	Widgets         []Widget          `json:"widgets"`
 	ArticleIdsHelp  []uuid.UUID       `json:"articleIdsHelp"` // IDs of articles for primary module help, in order
 	Captions        CaptionMap        `json:"captions"`
 }
@@ -480,6 +481,7 @@ type Role struct {
 	AccessCollections map[uuid.UUID]int `json:"accessCollections"`
 	AccessMenus       map[uuid.UUID]int `json:"accessMenus"`
 	AccessRelations   map[uuid.UUID]int `json:"accessRelations"`
+	AccessWidgets     map[uuid.UUID]int `json:"accessWidgets"`
 	Captions          CaptionMap        `json:"captions"`
 }
 type PgFunction struct {
@@ -550,6 +552,15 @@ type Tab struct {
 	State          string        `json:"state"`          // tab default state (default, hidden)
 	Fields         []interface{} `json:"fields"`         // fields assigned to tab
 	Captions       CaptionMap    `json:"captions"`
+}
+type Widget struct {
+	Id         uuid.UUID          `json:"id"`
+	ModuleId   uuid.UUID          `json:"moduleId"`
+	FormId     pgtype.UUID        `json:"formId"`
+	Name       string             `json:"name"`
+	Size       int                `json:"size"`
+	Collection CollectionConsumer `json:"collection"` // collection to display
+	Captions   CaptionMap         `json:"captions"`
 }
 type Deletion struct {
 	Id     uuid.UUID `json:"id"`

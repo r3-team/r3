@@ -1,6 +1,9 @@
 package types
 
-import "github.com/gofrs/uuid"
+import (
+	"github.com/gofrs/uuid"
+	"github.com/jackc/pgx/v5/pgtype"
+)
 
 type Login struct {
 	Id   int64  `json:"id"`
@@ -13,6 +16,7 @@ type LoginAccess struct {
 	Collection map[uuid.UUID]int `json:"collection"` // effective access to specific collection
 	Menu       map[uuid.UUID]int `json:"menu"`       // effective access to specific menus
 	Relation   map[uuid.UUID]int `json:"relation"`   // effective access to specific relations
+	Widget     map[uuid.UUID]int `json:"widget"`     // effective access to specific widgets
 }
 type LoginPublicKey struct {
 	LoginId   int64   `json:"loginId"`   // ID of login
@@ -33,4 +37,13 @@ type LoginTokenFixed struct {
 type LoginMfaToken struct {
 	Id   int64  `json:"id"`
 	Name string `json:"name"`
+}
+type LoginWidgetGroupItem struct {
+	WidgetId pgtype.UUID `json:"widgetId"` // ID of a module widget, empty if system widget is used
+	ModuleId pgtype.UUID `json:"moduleId"` // ID of a module, if relevant for widget (systemModuleMenu)
+	Content  string      `json:"content"`  // content of widget (moduleWidget, systemModuleMenu, systemLoginDetails)
+}
+type LoginWidgetGroup struct {
+	Title string                 `json:"title"`
+	Items []LoginWidgetGroupItem `json:"items"`
 }

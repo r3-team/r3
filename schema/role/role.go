@@ -73,9 +73,10 @@ func getAccess(role types.Role) (types.Role, error) {
 	role.AccessCollections = make(map[uuid.UUID]int)
 	role.AccessRelations = make(map[uuid.UUID]int)
 	role.AccessMenus = make(map[uuid.UUID]int)
+	role.AccessWidgets = make(map[uuid.UUID]int)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT api_id, attribute_id, collection_id, menu_id, relation_id, access
+		SELECT api_id, attribute_id, collection_id, menu_id, relation_id, widget_id, access
 		FROM app.role_access
 		WHERE role_id = $1
 	`, role.Id)
@@ -85,11 +86,11 @@ func getAccess(role types.Role) (types.Role, error) {
 	defer rows.Close()
 
 	for rows.Next() {
-		var apiId, attributeId, collectionId, menuId, relationId uuid.NullUUID
+		var apiId, attributeId, collectionId, menuId, relationId, widgetId uuid.NullUUID
 		var access int
 
 		if err := rows.Scan(&apiId, &attributeId, &collectionId,
-			&menuId, &relationId, &access); err != nil {
+			&menuId, &relationId, &widgetId, &access); err != nil {
 
 			return role, err
 		}
@@ -107,6 +108,9 @@ func getAccess(role types.Role) (types.Role, error) {
 		}
 		if relationId.Valid {
 			role.AccessRelations[relationId.UUID] = access
+		}
+		if widgetId.Valid {
+			role.AccessWidgets[widgetId.UUID] = access
 		}
 	}
 	return role, nil
@@ -205,6 +209,11 @@ func Set_tx(tx pgx.Tx, role types.Role) error {
 			return err
 		}
 	}
+	for trgId, access := range role.AccessWidgets {
+		if err := setAccess_tx(tx, role.Id, trgId, "widget", access); err != nil {
+			return err
+		}
+	}
 
 	// set captions
 	return caption.Set_tx(tx, role.Id, role.Captions)
@@ -232,6 +241,10 @@ func setAccess_tx(tx pgx.Tx, roleId uuid.UUID, id uuid.UUID, entity string, acce
 		}
 	case "relation": // 1 read, 2 write, 3 delete relation record
 		if access < -1 || access > 3 {
+			return errors.New("invalid access level")
+		}
+	case "widget": // 1 access widget
+		if access < -1 || access > 1 {
 			return errors.New("invalid access level")
 		}
 	default:

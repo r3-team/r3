@@ -13,7 +13,7 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var entitiesAllowed = []string{"collection", "field", "menu"}
+var entitiesAllowed = []string{"collection", "field", "menu", "widget"}
 
 func GetOne(entity string, entityId uuid.UUID, content string) (types.CollectionConsumer, error) {
 

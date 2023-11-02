@@ -186,8 +186,7 @@ let MyHeader = {
 		</div>
 	</div>`,
 	props:{
-		keysLocked:   { type:Boolean, required:true },
-		moduleEntries:{ type:Array,   required:true }
+		keysLocked:{ type:Boolean, required:true }
 	},
 	emits:['logout','show-collection-input','show-module-hover-menu','show-settings'],
 	data() {
@@ -328,6 +327,7 @@ let MyHeader = {
 		isAtMenu:         (s) => s.$store.getters.isAtMenu,
 		isMobile:         (s) => s.$store.getters.isMobile,
 		isNoAuth:         (s) => s.$store.getters.isNoAuth,
+		moduleEntries:    (s) => s.$store.getters.moduleEntries,
 		pwaModuleId:      (s) => s.$store.getters.pwaModuleId,
 		moduleIdLast:     (s) => s.$store.getters.moduleIdLast,
 		settings:         (s) => s.$store.getters.settings

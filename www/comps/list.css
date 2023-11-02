@@ -68,6 +68,9 @@
 	overflow:auto;
 	background-color:var(--color-bg);
 }
+.list .layoutTable.formInline{
+	border-right:1px solid var(--color-border);
+}
 .list .layoutTable table{
 	width:100%;
 }
@@ -245,6 +248,9 @@
 	overflow:auto;
 	align-content:flex-start;
 	background-color:var(--color-bg);
+}
+.list .layoutCards.formInline{
+	border-right:1px solid var(--color-border);
 }
 .list .layoutCards .top-actions{
 	position:sticky;

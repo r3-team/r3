@@ -46,13 +46,9 @@
 	--z-index-tab-active:2;
 	
 	/* home */
-	--z-index-home-entry:3;
-	--z-index-home-watermark:2;
-	
-	/* main content */
-	--z-index-form:2;
-	--z-index-menu:1;
-	--z-index-content:1;
+	--z-index-widget-header:1;
+	--z-index-widget-entry:1;
+	--z-index-widget-watermark:0;
 	
 	/**/
 	/* spacing */
@@ -353,7 +349,6 @@ h3{
 	box-sizing:border-box;
 	background-color:var(--color-bg);
 	border-color:var(--color-border); /* default for border setting */
-	z-index:var(--z-index-content);
 }
 .contentBox.float{
 	border-radius:12px;
@@ -361,6 +356,9 @@ h3{
 }
 .contentBox.grow{
 	flex:1 1 auto;
+}
+.contentBox.naked{
+	background-color:transparent;
 }
 .contentBox.start{
 	align-self:flex-start;

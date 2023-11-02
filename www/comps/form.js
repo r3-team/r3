@@ -55,7 +55,7 @@ let MyForm = {
 		MyFormLog
 	},
 	template:`<div class="form-wrap"
-		:class="{ popUp:isPopUp, float:isPopUpFloating, fullscreen:popUpFullscreen }"
+		:class="{ float:isPopUpFloating, fullscreen:popUpFullscreen, popUp:isPopUp }"
 		:key="form.id"
 		:style="bgStyle"
 	>
@@ -82,10 +82,10 @@ let MyForm = {
 		<!-- form proper -->
 		<div class="form contentBox grow scroll"
 			v-if="!isMobile || (!showLog && !showHelp)"
-			:class="{ popUp:isPopUp, float:isPopUpFloating }"
+			:class="{ float:isPopUpFloating, popUp:isPopUp }"
 		>
 			<!-- title bar upper -->
-			<div class="top nowrap" :class="{ lower:!hasBarLower && !isSingleField }">
+			<div class="top nowrap" :class="{ lower:!hasBarLower && !isSingleField }" v-if="!isWidget">
 				<div class="area nowrap">
 					<my-button image="upward.png"
 						v-if="hasGoBack"
@@ -162,7 +162,7 @@ let MyForm = {
 			</div>
 			
 			<!-- title bar lower -->
-			<div class="top lower" v-if="hasBarLower">
+			<div class="top lower" v-if="hasBarLower && !isWidget">
 				<div class="area">
 					<my-button image="new.png"
 						v-if="!isBulkUpdate && allowNew && !noDataActions"
@@ -216,7 +216,7 @@ let MyForm = {
 			<!-- form fields -->
 			<div class="content grow fields" ref="fields"
 				:class="{ onlyOne:isSingleField }"
-				:style="patternStyle"
+				:style="isWidget ? '' : patternStyle"
 			>
 				<my-field flexDirParent="column"
 					v-for="(f,i) in fields"
@@ -283,6 +283,7 @@ let MyForm = {
 		hasLog:           { type:Boolean, required:false, default:true },
 		isPopUp:          { type:Boolean, required:false, default:false }, // form pop-ups from another element (either floating or inline)
 		isPopUpFloating:  { type:Boolean, required:false, default:false }, // this form is a floating pop-up
+		isWidget:         { type:Boolean, required:false, default:false },
 		moduleId:         { type:String,  required:true },
 		recordIds:        { type:Array,   required:true } // to be handled records, [] is new
 	},
@@ -345,7 +346,7 @@ let MyForm = {
 	},
 	computed:{
 		// states
-		bgStyle:(s) => s.isPopUp ? '' : `background-color:${s.colorMenu.toString()};`,
+		bgStyle:(s) => s.isPopUp || s.isWidget ? '' : `background-color:${s.colorMenu.toString()};`,
 		canCreate:(s) =>!s.updatingRecord
 			&& s.joins.length !== 0
 			&& s.joins[0].applyCreate
@@ -1251,8 +1252,8 @@ let MyForm = {
 			const path = this.getFormRoute(this.form.id,
 				(this.isNew ? 0 : this.recordIds[0]),true,args);
 			
-			if(this.$route.fullPath === path || this.isPopUp)
-				return; // nothing changed or pop-up form, ignore
+			if(this.$route.fullPath === path || this.isPopUp || this.isWidget)
+				return; // nothing changed or pop-up/widget form, ignore
 			
 			if(push) this.$router.push(path);
 			else     this.$router.replace(path);

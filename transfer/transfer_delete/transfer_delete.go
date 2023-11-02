@@ -24,6 +24,7 @@ import (
 	"r3/schema/relation"
 	"r3/schema/role"
 	"r3/schema/tab"
+	"r3/schema/widget"
 	"r3/types"
 	"slices"
 
@@ -95,6 +96,11 @@ func NotExisting_tx(tx pgx.Tx, module types.Module) error {
 
 	// APIs
 	if err := deleteApis_tx(tx, module.Id, module.Apis); err != nil {
+		return err
+	}
+
+	// widgets
+	if err := deleteWidgets_tx(tx, module.Id, module.Widgets); err != nil {
 		return err
 	}
 
@@ -490,6 +496,23 @@ func deleteApis_tx(tx pgx.Tx, moduleId uuid.UUID, apis []types.Api) error {
 	}
 	return nil
 }
+func deleteWidgets_tx(tx pgx.Tx, moduleId uuid.UUID, widgets []types.Widget) error {
+	idsKeep := make([]uuid.UUID, 0)
+	for _, entity := range widgets {
+		idsKeep = append(idsKeep, entity.Id)
+	}
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "widget", moduleId, idsKeep)
+	if err != nil {
+		return err
+	}
+	for _, id := range idsDelete {
+		log.Info("transfer", fmt.Sprintf("del widget %s", id.String()))
+		if err := widget.Del_tx(tx, id); err != nil {
+			return err
+		}
+	}
+	return nil
+}
 func deletePgFunctions_tx(tx pgx.Tx, moduleId uuid.UUID, pgFunctions []types.PgFunction) error {
 	idsKeep := make([]uuid.UUID, 0)
 	for _, entity := range pgFunctions {
@@ -532,7 +555,8 @@ func importGetIdsToDeleteFromModule_tx(tx pgx.Tx, entity string,
 	idsDelete := make([]uuid.UUID, 0)
 
 	if !slices.Contains([]string{"api", "article", "collection", "form", "icon",
-		"js_function", "login_form", "menu", "pg_function", "relation", "role"}, entity) {
+		"js_function", "login_form", "menu", "pg_function", "relation",
+		"role", "widget"}, entity) {
 
 		return idsDelete, errors.New("unsupported type for delete check")
 	}

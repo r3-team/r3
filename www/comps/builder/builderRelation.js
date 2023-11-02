@@ -229,7 +229,7 @@ let MyBuilderRelation = {
 						</div>
 					</div>
 					
-					<!-- new attribute dialog -->
+					<!-- attribute dialog -->
 					<my-builder-attribute
 						v-if="attributeIdEdit !== false"
 						@close="attributeIdEdit = false"
