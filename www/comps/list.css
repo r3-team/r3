@@ -5,6 +5,7 @@
 	display:flex;
 	flex-flow:column nowrap;
 	overflow:auto;
+	--list-header-height:48px;
 }
 .list.isSingleField{
 	border-radius:0px;
@@ -27,7 +28,6 @@
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
-	overflow:auto;
 	background-color:var(--color-input);
 }
 .list .layoutWrap .form-wrap.popUp{
@@ -41,15 +41,19 @@
 	flex:0 0 auto;
 }
 .list-header{
+	height:var(--list-header-height);
     line-height:30px;
     background-color:var(--color-bg);
     flex:0 0 auto;
     gap:12px;
-    padding:12px 10px;
+    padding:0px 10px;
+    position:sticky;
+    top:0px;
     display:flex;
     flex-flow:row nowrap;
     justify-content:space-between;
-    align-content:center;
+    align-items:center;
+	z-index:var(--z-index-list-header);
 }
 .list-header .empty{
 	flex:1 1 auto;
@@ -65,7 +69,6 @@
 	display:flex;
 	flex-flow:column nowrap;
 	flex:1 1 auto;
-	overflow:auto;
 	background-color:var(--color-bg);
 }
 .list .layoutTable.formInline{
@@ -82,8 +85,11 @@
 }
 .list .layoutTable thead tr{
 	position:sticky;
-	top:0px;
+	top:var(--list-header-height);
 	z-index:var(--z-index-list-header);
+}
+.list .layoutTable thead tr.atTop{
+	top:0px;
 }
 .list .layoutTable tfoot tr{
 	position:sticky;
@@ -126,7 +132,11 @@
 	height:var(--row-height);
 	box-sizing:border-box;
 }
+.list .layoutTable th:last-child{
+	padding-right:10px; /* for header toggle */
+}
 .list .layoutTable th .columnBatch{
+	flex:1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
 	justify-content:space-between;
@@ -245,7 +255,6 @@
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
-	overflow:auto;
 	align-content:flex-start;
 	background-color:var(--color-bg);
 }
@@ -254,15 +263,18 @@
 }
 .list .layoutCards .top-actions{
 	position:sticky;
-	top:0px;
-	padding:4px 0px 16px 0px;
+	top:var(--list-header-height);
+	padding:8px 10px;
 	display:flex;
 	flex-flow:row wrap;
-	justify-content:center;
+	justify-content:space-between;
 	align-items:center;
 	background-color:var(--color-bg);
-	z-index:var(--z-index-list-header);
 	border-bottom:1px solid var(--color-border);
+	z-index:var(--z-index-list-header);
+}
+.list .layoutCards .top-actions.atTop{
+	top:0px;
 }
 .list .layoutCards .top-actions span.select{
 	margin:0px 9px 0px 18px;

@@ -189,7 +189,7 @@ let MyList = {
 		<template v-if="showTable && !inputAsCategory">
 			
 			<!-- list header line -->
-			<div class="list-header" v-if="header">
+			<div class="list-header" v-if="header && showHeader">
 				
 				<!-- actions -->
 				<div class="row gap nowrap">
@@ -382,7 +382,7 @@ let MyList = {
 				>
 					<table v-if="isTable" :class="{ asInput:isInput, 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
 						<thead v-if="header">
-							<tr>
+							<tr :class="{ atTop:!showHeader }">
 								<th v-if="hasBulkActions" class="minimum checkbox">
 									<img class="clickable" tabindex="0"
 										@click="selectRowsAllToggle"
@@ -391,27 +391,35 @@ let MyList = {
 									/>
 								</th>
 								<th v-for="(b,i) in columnBatches">
-									<my-list-column-batch
-										@close="columnBatchIndexOption = -1"
-										@del-aggregator="setAggregators"
-										@del-order="setOrder(b,null)"
-										@set-aggregator="setAggregators"
-										@set-filters="filtersColumn = $event;reloadInside('filtersColumn')"
-										@set-order="setOrder(b,$event)"
-										@toggle="clickColumn(i)"
-										:columnBatch="b"
-										:columnIdMapAggr="columnIdMapAggr"
-										:columns="columns"
-										:columnSortPos="getColumnBatchSortPos(b)"
-										:filters="filters"
-										:filtersColumn="filtersColumn"
-										:lastInRow="i === columnBatches.length - 1"
-										:joins="relationsJoined"
-										:orders="orders"
-										:relationId="query.relationId"
-										:rowCount="count"
-										:show="columnBatchIndexOption === i"
-									/>
+									<div class="row centered">
+										<my-list-column-batch
+											@close="columnBatchIndexOption = -1"
+											@del-aggregator="setAggregators"
+											@del-order="setOrder(b,null)"
+											@set-aggregator="setAggregators"
+											@set-filters="filtersColumn = $event;reloadInside('filtersColumn')"
+											@set-order="setOrder(b,$event)"
+											@toggle="clickColumn(i)"
+											:columnBatch="b"
+											:columnIdMapAggr="columnIdMapAggr"
+											:columns="columns"
+											:columnSortPos="getColumnBatchSortPos(b)"
+											:filters="filters"
+											:filtersColumn="filtersColumn"
+											:lastInRow="i === columnBatches.length - 1"
+											:joins="relationsJoined"
+											:orders="orders"
+											:relationId="query.relationId"
+											:rowCount="count"
+											:show="columnBatchIndexOption === i"
+										/>
+											<my-button
+												v-if="i === columnBatches.length-1"
+												@trigger="toggleHeader"
+												:image="showHeader ? 'toggleUp.png' : 'toggleDown.png'"
+												:naked="true"
+											/>
+									</div>
 								</th>
 							</tr>
 						</thead>
@@ -531,7 +539,7 @@ let MyList = {
 					<template v-if="isCards">
 					
 						<!-- actions -->
-						<div class="top-actions default-inputs" v-if="hasResults">
+						<div class="top-actions default-inputs" v-if="hasResults" :class="{ atTop:!showHeader }">
 							
 							<my-button
 								v-if="hasBulkActions"
@@ -542,35 +550,42 @@ let MyList = {
 								:naked="true"
 							/>
 							
-							<my-button
-								@trigger="toggleCardsCaptions"
-								:caption="capGen.details"
-								:image="cardsCaptions ? 'checkbox1.png' : 'checkbox0.png'"
-								:naked="true"
-							/>
-							
-							<!-- sorting -->
-							<template v-if="hasResults">
-								<span class="select">{{ capApp.orderBy }}</span>
-								<select
-									@change="cardsSetOrderBy($event.target.value)"
-									v-model.number="cardsOrderByColumnIndex"
-								>
-									<option value="-1">-</option>
-									<option
-										v-for="(b,i) in columnBatches.filter(v => v.columnIndexSortBy !== -1)"
-										:value="b.columnIndexSortBy"
-									>
-										{{ b.caption }}
-									</option>
-								</select>
+							<div class="row centered">
 								<my-button
-									v-if="orders.length !== 0"
-									@trigger="cardsToggleOrderBy"
-									:image="orders[0].ascending ? 'triangleUp.png' : 'triangleDown.png'"
+									@trigger="toggleCardsCaptions"
+									:caption="capGen.details"
+									:image="cardsCaptions ? 'checkbox1.png' : 'checkbox0.png'"
 									:naked="true"
 								/>
-							</template>
+								<!-- sorting -->
+								<template v-if="hasResults">
+									<span class="select">{{ capApp.orderBy }}</span>
+									<select
+										@change="cardsSetOrderBy($event.target.value)"
+										v-model.number="cardsOrderByColumnIndex"
+									>
+										<option value="-1">-</option>
+										<option
+											v-for="(b,i) in columnBatches.filter(v => v.columnIndexSortBy !== -1)"
+											:value="b.columnIndexSortBy"
+										>
+											{{ b.caption }}
+										</option>
+									</select>
+									<my-button
+										v-if="orders.length !== 0"
+										@trigger="cardsToggleOrderBy"
+										:image="orders[0].ascending ? 'triangleUp.png' : 'triangleDown.png'"
+										:naked="true"
+									/>
+								</template>
+							</div>
+							
+							<my-button
+								@trigger="toggleHeader"
+								:image="showHeader ? 'toggleUp.png' : 'toggleDown.png'"
+								:naked="true"
+							/>
 						</div>
 						
 						<div class="cards">
@@ -720,6 +735,7 @@ let MyList = {
 			showAutoRenew:false,        // show UI for auto list renew
 			showCsv:false,              // show UI for CSV import/export
 			showFilters:false,          // show UI for user filters
+			showHeader:true,            // show UI for list header
 			showTable:false,            // show regular list table as view or input dropdown
 			
 			// list constants
@@ -989,7 +1005,7 @@ let MyList = {
 		this.showTable = !this.isInput;
 		
 		// react to field resize
-		if(!this.Input) {
+		if(!this.isInput) {
 			window.addEventListener('resize',this.resized);
 			this.resized();
 		}
@@ -1054,6 +1070,7 @@ let MyList = {
 		this.filtersColumn   = this.fieldOptionGet(this.fieldId,'filtersColumn',[]);
 		this.filtersQuick    = this.fieldOptionGet(this.fieldId,'filtersQuick','');
 		this.filtersUser     = this.fieldOptionGet(this.fieldId,'filtersUser',[]);
+		this.showHeader      = this.fieldOptionGet(this.fieldId,'header',true);
 		this.layout          = this.fieldOptionGet(this.fieldId,'layout',this.layoutDefault);
 		this.cardsCaptions   = this.fieldOptionGet(this.fieldId,'cardsCaptions',true);
 	},
@@ -1392,6 +1409,10 @@ let MyList = {
 				if(inputEl !== null)
 					inputEl.focus();
 			}
+		},
+		toggleHeader() {
+			this.showHeader = !this.showHeader;
+			this.fieldOptionSet(this.fieldId,'header',this.showHeader);
 		},
 		toggleLayout() {
 			this.layout = this.isTable ? 'cards' : 'table';
