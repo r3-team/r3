@@ -337,7 +337,7 @@ let MyWidgets = {
 			
 			<div class="widgets-sidebar-content shrinks" v-if="editMode">
 				<h2>{{ capGen.available }}</h2>
-				<draggable class="widget-group-items widgets-sidebar-content-box" handle=".dragAnchor" itemKey="id" animation="150"
+				<draggable class="widget-group-items templates widgets-sidebar-content-box" handle=".dragAnchor" itemKey="id" animation="150"
 					:group="{ name:'widget-group-items', put:false }"
 					:list="widgetTemplates"
 				>
@@ -449,7 +449,32 @@ let MyWidgets = {
 		widgetGroups: (s) => s.$store.getters.loginWidgetGroups
 	},
 	mounted() {
+		// if, at mount, there are no widget groups, prepopulate with module menus
+		if(this.widgetGroups.length === 0) {
+			let wg = [];
+			for(const m of this.modules) {
+				if(!this.moduleIdsAccessible.includes(m.id))
+					continue;
+				
+				wg.push({
+					content:'systemModuleMenu',
+					moduleId:m.id,
+					widgetId:null
+				});
+			}
+			this.$store.commit('loginWidgetGroups',[{
+				title:this.capGen.applications,
+				items:wg
+			}]);
+		}
+		
+		// reset widget group input
 		this.reset();
+		
+		window.addEventListener('keydown',this.handleHotkeys);
+	},
+	unmounted() {
+		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	methods:{
 		reset() {
@@ -468,6 +493,12 @@ let MyWidgets = {
 		},
 		groupSetTitle(index,value) {
 			this.widgetGroupsInput[index].title = value;
+		},
+		handleHotkeys(evt) {
+			if(this.hasChanges && evt.ctrlKey && evt.key === 's') {
+				evt.preventDefault();
+				this.set();
+			}
 		},
 		openEditMode() {
 			if(this.widgetGroupsInput.length === 0)

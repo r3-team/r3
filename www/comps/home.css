@@ -2,6 +2,10 @@
 	flex-flow:column nowrap !important;
 	gap:var(--spacing);
 	align-items:stretch;
+	justify-content:center;
+}
+.home.showWidgets{
+	justify-content:flex-start;
 }
 .home .message{
 	display:flex;
@@ -21,6 +25,7 @@
 	position:absolute;
 	right:20px;
 	bottom:20px;
+	padding:10px;
 	font-size:100%;
 	font-style:italic;
 	text-decoration:none;

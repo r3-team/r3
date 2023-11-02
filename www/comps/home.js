@@ -6,7 +6,13 @@ export {MyHome as default};
 let MyHome = {
 	name:'my-go-home',
 	components:{ MyWidgets },
-	template:`<div class="home">
+	template:`<div class="home" :class="{ showWidgets:showWidgets }">
+		
+		<!-- application version -->
+		<a target="_blank" class="version"
+			v-if="!isMobile"
+			:href="capGen.appWebsite"
+		>{{ capGen.appName + ' ' + appVersion }}</a>
 		
 		<!-- instance setup wizard -->
 		<div class="home-standardBox contentBox home-wizard" v-if="noModules && isAdmin">
@@ -116,13 +122,7 @@ let MyHome = {
 		</div>
 		
 		<!-- login widgets -->
-		<my-widgets />
-		
-		<!-- application version -->
-		<a target="_blank" class="version"
-			v-if="!isMobile"
-			:href="capGen.appWebsite"
-		>{{ capGen.appName + ' ' + appVersion }}</a>
+		<my-widgets v-if="showWidgets" />
 	</div>`,
 	data() {
 		return {
@@ -136,6 +136,7 @@ let MyHome = {
 		noNavigation:   (s) => s.moduleEntries.length === 0,
 		showUpdate:     (s) => !s.isAdmin || s.versionBuildNew <= s.settings.hintUpdateVersion
 			? false : s.versionBuildNew > s.getBuildFromVersion(s.appVersion),
+		showWidgets:    (s) => !s.noAccess && !s.noModules,
 		versionBuildNew:(s) => !s.isAdmin || s.config.updateCheckVersion === ''
 			? 0 : s.getBuildFromVersion(s.config.updateCheckVersion),		
 		

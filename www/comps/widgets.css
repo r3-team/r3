@@ -113,6 +113,11 @@
 	flex-flow:row wrap;
 	gap:20px;
 }
+.widget-group-items.templates{
+	display:flex;
+	flex-flow:row wrap;
+	gap:5px;
+}
 
 /* widgets */
 .widget{

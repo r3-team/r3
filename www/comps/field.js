@@ -117,7 +117,7 @@ let MyField = {
 					:isSingleField="isAloneInForm || isAloneInTab"
 					:popUpFormInline="popUpFormInline"
 					:query="field.query"
-					:usesPageHistory="isAloneInForm && !formIsPopUp"
+					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				/>
 				
 				<!-- gantt -->
@@ -151,7 +151,7 @@ let MyField = {
 					:stepTypeDefault="field.ganttSteps"
 					:stepTypeToggle="field.ganttStepsToggle"
 					:query="field.query"
-					:usesPageHistory="isAloneInForm && !formIsPopUp"
+					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				/>
 				
 				<!-- kanban -->
@@ -180,7 +180,7 @@ let MyField = {
 					:relationIndexAxisX="field.relationIndexAxisX"
 					:relationIndexAxisY="field.relationIndexAxisY"
 					:query="field.query"
-					:usesPageHistory="isAloneInForm && !formIsPopUp"
+					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				/>
 				
 				<!-- chart -->
@@ -226,7 +226,7 @@ let MyField = {
 					:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 					:popUpFormInline="popUpFormInline"
 					:query="field.query"
-					:usesPageHistory="isAloneInForm && !formIsPopUp"
+					:usesPageHistory="isAloneInForm && !formIsEmbedded"
 				/>
 				
 				<!-- tabs -->
@@ -279,7 +279,7 @@ let MyField = {
 							:fieldIdMapCaption="fieldIdMapCaption"
 							:fieldIdMapError="fieldIdMapError"
 							:formBadSave="formBadSave"
-							:formIsPopUp="formIsPopUp"
+							:formIsEmbedded="formIsEmbedded"
 							:formLoading="formLoading"
 							:formReadonly="formReadonly"
 							:isAloneInTab="t.fields.length === 1"
@@ -570,7 +570,7 @@ let MyField = {
 			:fieldIdMapCaption="fieldIdMapCaption"
 			:fieldIdMapError="fieldIdMapError"
 			:formBadSave="formBadSave"
-			:formIsPopUp="formIsPopUp"
+			:formIsEmbedded="formIsEmbedded"
 			:formLoading="formLoading"
 			:formReadonly="formReadonly"
 			:flexDirParent="field.direction"
@@ -590,7 +590,7 @@ let MyField = {
 		fieldIdMapCaption:{ type:Object,  required:false, default:() => {return {}} }, // overwritten captions
 		fieldIdMapError:  { type:Object,  required:false, default:() => {return {}} }, // overwritten error messages
 		formBadSave:      { type:Boolean, required:true }, // attempted save with invalid inputs
-		formIsPopUp:      { type:Boolean, required:true }, // parent form is a pop-up form
+		formIsEmbedded:   { type:Boolean, required:true }, // parent form is a pop-up form
 		formLoading:      { type:Boolean, required:true },
 		formReadonly:     { type:Boolean, required:true }, // form is read only, disable all inputs
 		flexDirParent:    { type:String,  required:true }, // flex direction (row/column) of parent
