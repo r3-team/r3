@@ -6,7 +6,6 @@
 	flex-flow:row nowrap;
 	justify-content:space-between;
 	gap:20px;
-	overflow:auto;
 	--widget-size-width:380px;
 	--widget-size-height:320px;
 	--widget-size-gap:20px;
@@ -143,7 +142,7 @@
 .widget>.header{
 	height:var(--widget-size-header);
 	padding-left:12px;
-	background-color:#444;
+	background-color:#555;
 	border-bottom:1px solid var(--color-border);
 	color:var(--color-font-bright);
 	font-size:130%;
@@ -254,7 +253,7 @@
 
 /* user overwrites */
 .user-dark .widget>.header{
-	background-color:#1D1D1D;
+	background-color:#232323;
 }
 
 /* mobile overwrites */
