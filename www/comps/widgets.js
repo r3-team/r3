@@ -401,13 +401,6 @@ let MyWidgets = {
 			let out = [];
 			
 			if(s.templatesSystem) {
-				// system widget: login details
-				out.push({
-					content:'systemLoginDetails',
-					moduleId:null,
-					widgetId:null
-				});
-				
 				// system widget: module menu
 				for(const m of s.modules) {
 					if(!s.moduleIdsAccessible.includes(m.id) || s.moduleIdsUsedMenu.includes(m.id))

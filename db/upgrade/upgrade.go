@@ -248,7 +248,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX ind_login_widget_group_item_position ON instance.login_widget_group_item
 				USING BTREE (position ASC NULLS LAST);
 			
-			CREATE TYPE instance.widget_content AS ENUM ('moduleWidget','systemModuleMenu','systemLoginDetails');
+			CREATE TYPE instance.widget_content AS ENUM ('moduleWidget','systemModuleMenu');
 		`)
 		return "3.6", err
 	},
