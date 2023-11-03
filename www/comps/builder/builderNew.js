@@ -1,4 +1,3 @@
-import {getDependentModules} from '../shared/builder.js';
 import {getQueryTemplate}    from '../shared/query.js';
 import {getNilUuid}          from '../shared/generic.js';
 import {
@@ -6,10 +5,12 @@ import {
 	getTemplateFnc,
 	getTemplateReturn
 } from '../shared/templates.js';
+import MyBuilderFormInput from './builderFormInput.js';
 export {MyBuilderNew as default};
 
 let MyBuilderNew = {
 	name:'my-builder-new',
+	components:{ MyBuilderFormInput },
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
 		<div class="contentBox builder-new popUp">
 			<div class="top lower">
@@ -25,7 +26,7 @@ let MyBuilderNew = {
 				</div>
 			</div>
 			
-			<div class="content default-inputs">
+			<div class="content gap default-inputs">
 				<div class="row gap centered">
 					<span>{{ capGen.name }}</span>
 					<input spellcheck="false" v-model="inputs.name" v-focus />
@@ -44,16 +45,10 @@ let MyBuilderNew = {
 					<template v-if="entity === 'form'">
 						<div class="row centered gap">
 							<span>{{ capApp.formIdDuplicate }}</span>
-							<select v-model="inputs.formIdDuplicate">
-								<option :value="null">-</option>
-								<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
-								<optgroup
-									v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.forms.length !== 0)"
-									:label="mod.name"
-								>
-									<option v-for="f in mod.forms" :value="f.id">{{ f.name }}</option>
-								</optgroup>
-							</select>
+							<my-builder-form-input
+								v-model="inputs.formIdDuplicate"
+								:module="module"
+							/>
 						</div>
 					</template>
 					
@@ -221,7 +216,6 @@ let MyBuilderNew = {
 	},
 	methods:{
 		// externals
-		getDependentModules,
 		getNilUuid,
 		getQueryTemplate,
 		getTemplateArgs,

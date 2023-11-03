@@ -107,6 +107,7 @@ let MyBuilderWidget = {
 								v-model="values.formId"
 								:module="module"
 								:readonly="readonly"
+								:showOpen="true"
 							/>
 						</td>
 						<td>{{ capApp.formHint }}</td>

@@ -3,21 +3,31 @@ export {MyBuilderFormInput as default};
 
 let MyBuilderFormInput = {
 	name:'my-builder-form-input',
-	template:`<select v-model="input" :disabled="readonly">
-		<option value="">{{ captionEmpty }}</option>
-		<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
-		<optgroup
-			v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.forms.length !== 0)"
-			:label="mod.name"
-		>
-			<option v-for="f in mod.forms" :value="f.id">{{ f.name }}</option>
-		</optgroup>
-	</select>`,
+	template:`<div class="row gap centered">
+		<select v-model="input" :disabled="readonly">
+			<option value="">{{ captionEmpty }}</option>
+			<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
+			<optgroup
+				v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.forms.length !== 0)"
+				:label="mod.name"
+			>
+				<option v-for="f in mod.forms" :value="f.id">{{ f.name }}</option>
+			</optgroup>
+		</select>
+		
+		<my-button image="open.png"
+			v-if="showOpen"
+			@trigger="$router.push('/builder/form/'+input)"
+			:active="input !== ''"
+			:captionTitle="capGen.button.open"
+		/>
+	</div>`,
 	props:{
 		captionEmpty:{ type:String,  required:false, default:'-' },
 		modelValue:  { required:true },
 		module:      { type:Object,  required:true },
-		readonly:    { type:Boolean, required:true }
+		readonly:    { type:Boolean, required:false, default:false },
+		showOpen:    { type:Boolean, required:false, default:false }
 	},
 	emits:['update:modelValue'],
 	computed:{
@@ -27,7 +37,8 @@ let MyBuilderFormInput = {
 		},
 		
 		// stores
-		modules:(s) => s.$store.getters['schema/modules']
+		modules:(s) => s.$store.getters['schema/modules'],
+		capGen: (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals

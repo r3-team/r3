@@ -452,6 +452,9 @@ h3{
 	padding:var(--spacing);
 	overflow:auto;
 }
+.contentBox .content.gap{
+	gap:var(--spacing);
+}
 .contentBox .content.grow{
 	flex:1 1 auto;
 }
