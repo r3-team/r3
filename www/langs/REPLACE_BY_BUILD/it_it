@@ -245,6 +245,7 @@
 			"titlePerformance":"Performance",
 			"titleRepo":"Archivio applicazione",
 			"tokenExpiryHours":"Massima durata della sessione in ore",
+			"tokenKeepEnable":"Allow users to stay logged in",
 			"updateCheck":"Stato versione",
 			"updateCheckCurrent":"Attuale",
 			"updateCheckNewer":"Cutting edge",

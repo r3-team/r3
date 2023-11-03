@@ -245,6 +245,7 @@
 			"titlePerformance":"Teljesítmény",
 			"titleRepo":"Alkalmazás Repository",
 			"tokenExpiryHours":"Makszimális munkamenet-idő órában",
+			"tokenKeepEnable":"Allow users to stay logged in",
 			"updateCheck":"Verzióellenőrzés",
 			"updateCheckCurrent":"Jelenlegi",
 			"updateCheckNewer":"Cutting-Edge",

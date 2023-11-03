@@ -67,7 +67,8 @@ const MyStore = Vuex.createStore({
 		searchDictionaries:[],// dictionaries used for full text search for this login, ['english', 'german', ...]
 		settings:{},          // setting values for logged in user, key: settings name
 		sessionValueStore:{}, // user session key-value store for frontend functions, { moduleId1:{ key1:value1, key2:value2 }, moduleId2:{ ... } }
-		system:{}             // system details (admin only)
+		system:{},            // system details (admin only)
+		tokenKeepEnable:false // allow users to keep token to 'stay logged in'
 	},
 	mutations:{
 		config:(state,payload) => {
@@ -189,7 +190,8 @@ const MyStore = Vuex.createStore({
 		pwaDomainMap:            (state,payload) => state.pwaDomainMap             = payload,
 		searchDictionaries:      (state,payload) => state.searchDictionaries       = payload,
 		settings:                (state,payload) => state.settings                 = payload,
-		system:                  (state,payload) => state.system                   = payload
+		system:                  (state,payload) => state.system                   = payload,
+		tokenKeepEnable:         (state,payload) => state.tokenKeepEnable          = payload
 	},
 	getters:{
 		colorHeaderAccent:(state,payload) => {
@@ -302,6 +304,7 @@ const MyStore = Vuex.createStore({
 		searchDictionaries:      (state) => state.searchDictionaries,
 		sessionValueStore:       (state) => state.sessionValueStore,
 		settings:                (state) => state.settings,
-		system:                  (state) => state.system
+		system:                  (state) => state.system,
+		tokenKeepEnable:         (state) => state.tokenKeepEnable
 	}
 });

@@ -560,12 +560,17 @@ let MyApp = {
 					this.$store.commit('local/css',res.payload.css);
 					this.$store.commit('local/loginBackground',res.payload.loginBackground);
 					this.$store.commit('local/schemaTimestamp',res.payload.schemaTimestamp);
+					this.$store.commit('schema/languageCodes',res.payload.languageCodes);
 					this.$store.commit('clusterNodeName',res.payload.clusterNodeName);
 					this.$store.commit('productionMode',res.payload.productionMode === 1);
 					this.$store.commit('pageTitleRefresh'); // update page title with new app name
 					this.$store.commit('pwaDomainMap',res.payload.pwaDomainMap);
 					this.$store.commit('searchDictionaries',res.payload.searchDictionaries);
-					this.$store.commit('schema/languageCodes',res.payload.languageCodes);
+					this.$store.commit('tokenKeepEnable',res.payload.tokenKeepEnable);
+					
+					if(!res.payload.tokenKeepEnable)
+						this.$store.commit('local/tokenKeep',false);
+					
 					this.publicLoaded = true;
 					this.stateChange();
 				},

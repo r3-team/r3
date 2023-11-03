@@ -94,6 +94,10 @@ let MyAdminConfig = {
 						<td><input v-model="configInput.tokenExpiryHours" /></td>
 					</tr>
 					<tr>
+						<td>{{ capApp.tokenKeepEnable }}</td>
+						<td><my-bool-string-number v-model="configInput.tokenKeepEnable" /></td>
+					</tr>
+					<tr>
 						<td colspan="2"><br /><h3>{{ capApp.pwTitle }}</h3></td>
 					</tr>
 					<tr>
@@ -102,35 +106,19 @@ let MyAdminConfig = {
 					</tr>
 					<tr>
 						<td>{{ capApp.pwForceDigit }}</td>
-						<td>
-							<my-bool-string-number
-								v-model="configInput.pwForceDigit"
-							/>
-						</td>
+						<td><my-bool-string-number v-model="configInput.pwForceDigit" /></td>
 					</tr>
 					<tr>
 						<td>{{ capApp.pwForceLower }}</td>
-						<td>
-							<my-bool-string-number
-								v-model="configInput.pwForceLower"
-							/>
-						</td>
+						<td><my-bool-string-number v-model="configInput.pwForceLower" /></td>
 					</tr>
 					<tr>
 						<td>{{ capApp.pwForceUpper }}</td>
-						<td>
-							<my-bool-string-number
-								v-model="configInput.pwForceUpper"
-							/>
-						</td>
+						<td><my-bool-string-number v-model="configInput.pwForceUpper" /></td>
 					</tr>
 					<tr>
 						<td>{{ capApp.pwForceSpecial }}</td>
-						<td>
-							<my-bool-string-number
-								v-model="configInput.pwForceSpecial"
-							/>
-						</td>
+						<td><my-bool-string-number v-model="configInput.pwForceSpecial" /></td>
 					</tr>
 				</table>
 			</div>

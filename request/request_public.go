@@ -28,6 +28,7 @@ func PublicGet() (interface{}, error) {
 		PwaDomainMap       map[string]uuid.UUID `json:"pwaDomainMap"`
 		SchemaTimestamp    int64                `json:"schemaTimestamp"`
 		SearchDictionaries []string             `json:"searchDictionaries"`
+		TokenKeepEnable    bool                 `json:"tokenKeepEnable"`
 	}
 	res.Activated = config.GetLicenseActive()
 	res.AppName = config.GetString("appName")
@@ -46,6 +47,7 @@ func PublicGet() (interface{}, error) {
 	res.PwaDomainMap = cache.GetPwaDomainMap()
 	res.SchemaTimestamp = cache.GetSchemaTimestamp()
 	res.SearchDictionaries = cache.GetSearchDictionaries()
+	res.TokenKeepEnable = config.GetUint64("tokenKeepEnable") == 1
 
 	// random background from available list
 	var loginBackgrounds = config.GetUint64Slice("loginBackgrounds")

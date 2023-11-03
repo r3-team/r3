@@ -100,12 +100,15 @@ let MyLogin = {
 			</template>
 			
 			<div class="row centered space-between">
-				<my-button
-					@trigger="tokenKeepInput = !tokenKeepInput"
-					:caption="message.stayLoggedIn[language]"
-					:image="tokenKeep ? 'checkbox1.png' : 'checkbox0.png'"
-					:naked="true"
-				/>
+				<div class="row">
+					<my-button
+						v-if="tokenKeepEnable"
+						@trigger="tokenKeepInput = !tokenKeepInput"
+						:caption="message.stayLoggedIn[language]"
+						:image="tokenKeep ? 'checkbox1.png' : 'checkbox0.png'"
+						:naked="true"
+					/>
+				</div>
 				<button
 					@click="authenticate"
 					@keyup.enter="authenticate"
@@ -257,7 +260,8 @@ let MyLogin = {
 		clusterNodeName:  (s) => s.$store.getters.clusterNodeName,
 		colorLogin:       (s) => s.$store.getters.colorLogin,
 		kdfIterations:    (s) => s.$store.getters.constants.kdfIterations,
-		productionMode:   (s) => s.$store.getters.productionMode
+		productionMode:   (s) => s.$store.getters.productionMode,
+		tokenKeepEnable:  (s) => s.$store.getters.tokenKeepEnable
 	},
 	watch:{
 		loginReady(v) {

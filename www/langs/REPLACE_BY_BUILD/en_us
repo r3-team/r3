@@ -245,6 +245,7 @@
 			"titlePerformance":"Performance",
 			"titleRepo":"Application repository",
 			"tokenExpiryHours":"Max. session time in hours",
+			"tokenKeepEnable":"Allow users to stay logged in",
 			"updateCheck":"Version state",
 			"updateCheckCurrent":"Current",
 			"updateCheckNewer":"Cutting edge",

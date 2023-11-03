@@ -245,6 +245,7 @@
 			"titlePerformance":"Leistung",
 			"titleRepo":"Anwendungs-Repository",
 			"tokenExpiryHours":"Max. Sitzungszeit in Stunden",
+			"tokenKeepEnable":"Benutzern erlauben, angemeldet zu bleiben",
 			"updateCheck":"Versionsstand",
 			"updateCheckCurrent":"Aktuell",
 			"updateCheckNewer":"Cutting-Edge",
