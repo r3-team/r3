@@ -3,95 +3,95 @@ export {MyListCsv as default};
 
 let MyListCsv = {
 	name:'my-list-csv',
-	template:`<div class="list-header list-csv default-inputs">
-	
-		<div class="list-csv-line">
+	template:`<div class="contentBox float list-csv">
+		<div class="top lower">
+			<div class="area">
+				<img class="icon" src="images/fileSheet.png" />
+				<div class="caption">{{ capApp.button.csv }}</div>
+			</div>
+			<div class="area">
+				<my-button image="cancel.png"
+					@trigger="$emit('close')"
+					:blockBubble="true"
+					:cancel="true"
+				/>
+			</div>
+		</div>
+		<div class="content grow default-inputs">
 			<p v-if="action === 'export'">{{ capApp.message.csvExport }}</p>
 			<p v-if="action === 'import'">{{ capApp.message.csvImport.replace('{COUNT}',this.columns.length) }}</p>
-		</div>
-		
-		<div class="list-csv-line"
-			v-if="isExport && isImport"
-		>
-			<span>{{ capApp.csvAction }}</span>
-			<select v-model="action" @change="message = ''">
-				<option value="export">{{ capApp.option.csvExport }}</option>
-				<option value="import">{{ capApp.option.csvImport }}</option>
-			</select>
-		</div>
-		
-		<div class="list-csv-line">
-			<span>{{ capApp.csvHasHeader }}</span>
-			<my-bool v-model="hasHeader" />
-		</div>
-		
-		<div class="list-csv-line">
-			<span>{{ capApp.csvCommaChar }}</span>
-			<input v-model="commaChar" />
-		</div>
-		
-		<div class="list-csv-line" v-if="hasTime">
-			<span>{{ capApp.csvTime }}</span>
-			<input disabled="disabled" :value="capApp.csvTimeHint" />
-		</div>
-		
-		<div class="list-csv-line" v-if="hasDate">
-			<span>{{ capApp.csvDate }}</span>
-			<input disabled="disabled" :value="settings.dateFormat" />
-		</div>
-		
-		<div class="list-csv-line" v-if="hasDatetime">
-			<span>{{ capApp.csvDatetime }}</span>
-			<input disabled="disabled" :value="settings.dateFormat + ' ' + capApp.csvTimeHint" />
-		</div>
-		
-		<div class="list-csv-line" v-if="hasDatetime">
-			<span>{{ capApp.csvTimezone }}</span>
-			<input disabled="disabled" :value="timezone" />
-		</div>
-		
-		<div class="list-csv-line" v-if="hasBool">
-			<span>{{ capApp.csvBool }}</span>
-			<select v-model="boolNative">
-				<option :value="true">true / false</option>
-				<option :value="false">
-					{{ capGen.option.yes + ' / ' +capGen.option.no }}
-				</option>
-			</select>
-		</div>
-		
-		<div class="list-csv-line" v-if="action === 'export'">
-			<span>{{ capApp.csvTotalLimit }}</span>
-			<input v-model.number="totalLimit" />
-		</div>
-		
-		<div class="list-csv-line" v-if="action === 'import'">
-			<span>{{ capApp.csvFile }}</span>
-			<input type="file" @change="setFile" />
-		</div>
-		
-        <transition name="fade">
-			<span class="message"
-				v-if="message !== ''"
-				:class="{ error:messageError }"
-			>{{ message }}</span>
-		</transition>
-		
-		<my-button image="upload.png"
-			v-if="action === 'import'"
-			@trigger="send"
-			:active="file !== null"
-			:caption="capGen.button.import"
-		/>
-		
-		<a download="export.csv"
-			v-if="action === 'export'"
-			:href="exportHref"
-		>
-			<my-button image="download.png"
-				:caption="capGen.button.export"
+			
+			<table>
+				<tr v-if="isExport && isImport">
+					<td>{{ capApp.csvAction }}</td>
+					<td>
+						<select v-model="action" @change="message = ''">
+							<option value="export">{{ capApp.option.csvExport }}</option>
+							<option value="import">{{ capApp.option.csvImport }}</option>
+						</select>
+					</td>
+				</tr>
+				<tr>
+					<td>{{ capApp.csvHasHeader }}</td>
+					<td><my-bool v-model="hasHeader" /></td>
+				</tr>
+				<tr>
+					<td>{{ capApp.csvCommaChar }}</td>
+					<td><input v-model="commaChar" /></td>
+				</tr>
+				<tr v-if="hasTime">
+					<td>{{ capApp.csvTime }}</td>
+					<td><input disabled="disabled" :value="capApp.csvTimeHint" /></td>
+				</tr>
+				<tr v-if="hasDate">
+					<td>{{ capApp.csvDate }}</td>
+					<td><input disabled="disabled" :value="settings.dateFormat" /></td>
+				</tr>
+				<tr v-if="hasDatetime">
+					<td>{{ capApp.csvDatetime }}</td>
+					<td><input disabled="disabled" :value="settings.dateFormat + ' ' + capApp.csvTimeHint" /></td>
+				</tr>
+				<tr v-if="hasDatetime">
+					<td>{{ capApp.csvTimezone }}</td>
+					<td><input disabled="disabled" :value="timezone" /></td>
+				</tr>
+				<tr v-if="hasBool">
+					<td>{{ capApp.csvBool }}</td>
+					<td>
+						<select v-model="boolNative">
+							<option :value="true">true / false</option>
+							<option :value="false">{{ capGen.option.yes + ' / ' +capGen.option.no }}</option>
+						</select>
+					</td>
+				</tr>
+				<tr v-if="action === 'export'">
+					<td>{{ capApp.csvTotalLimit }}</td>
+					<td><input v-model.number="totalLimit" /></td>
+				</tr>
+				<tr v-if="action === 'import'">
+					<td>{{ capApp.csvFile }}</td>
+					<td><input type="file" @change="setFile" /></td>
+				</tr>
+			</table>
+			
+			<transition name="fade">
+				<p v-if="message !== ''" :class="{ error:messageError }">{{ message }}</p>
+			</transition>
+			
+			<my-button image="upload.png"
+				v-if="action === 'import'"
+				@trigger="send"
+				:active="file !== null"
+				:caption="capGen.button.import"
 			/>
-		</a>
+			
+			<a download="export.csv"
+				v-if="action === 'export'"
+				:href="exportHref"
+			>
+				<my-button image="download.png" :caption="capGen.button.export" />
+			</a>
+		</div>
 	</div>`,
 	props:{
 		columns:    { type:Array,  required:true },
@@ -103,7 +103,7 @@ let MyListCsv = {
 		orders:     { type:Array,  required:true },
 		query:      { type:Object, required:true }
 	},
-	emits:['reload'],
+	emits:['close','reload'],
 	data() {
 		return {
 			action:'',               // CSV action (export/import)

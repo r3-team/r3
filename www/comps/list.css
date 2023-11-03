@@ -59,9 +59,6 @@
 	flex:1 1 auto;
 	max-width:11px;
 }
-.list-header .selector{
-	min-width:unset;
-}
 
 /* list as lookup or dropdown */
 /* HTML table view */
@@ -444,23 +441,11 @@
 }
 
 /* CSV */
-.list-csv{
-	align-items:flex-start;
+.list-csv table{
+	margin:10px 0px;
 }
-.list-csv-line{
-	min-width:400px;
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	margin:0px 0px 6px 0px;
-}
-.list-csv-line span{
-	flex:0 0 200px;
-	margin:0px 12px 0px 0px;
-}
-.list-csv-line input,
-.list-csv-line select{
-	min-width:250px !important;
+.list-csv table td{
+	padding:5px 10px;
 }
 
 /* aggregators */

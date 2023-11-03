@@ -53,6 +53,26 @@ let MyList = {
 		@keydown="keyDown"
 		:class="{ asInput:isInput, readonly:inputIsReadonly, isSingleField:isSingleField }"
 	>
+		<!-- CSV -->
+		<div class="app-sub-window under-header"
+			v-if="showCsv"
+			@click.self.stop="showCsv = false"
+		>
+			<my-list-csv
+				v-if="showCsv"
+				@close="showCsv = false"
+				@reload="get"
+				:columns="columns"
+				:expressions="expressions"
+				:filters="filtersCombined"
+				:isExport="csvExport"
+				:isImport="csvImport"
+				:joins="relationsJoined"
+				:orders="orders"
+				:query="query"
+			/>
+		</div>
+	
 		<!-- list as input field (showing record(s) from active field value) -->
 		<template v-if="isInput">
 			<div class="list-input-rows-wrap"
@@ -232,7 +252,7 @@ let MyList = {
 					/>
 					
 					<!-- offset -->
-					<my-input-offset class-input="selector"
+					<my-input-offset
 						v-if="hasPaging"
 						@input="offset = $event;reloadInside()"
 						:arrows="showOffsetArrows"
@@ -269,7 +289,7 @@ let MyList = {
 						:naked="true"
 					/>
 					
-					<input class="selector lookup" enterkeyhint="send" type="text"
+					<input class="short" enterkeyhint="send" type="text"
 						v-if="filterQuick"
 						@keyup.enter="updatedFilterQuick"
 						v-model="filtersQuick"
@@ -289,7 +309,7 @@ let MyList = {
 						:showTitle="showCollectionTitles"
 					/>
 					
-					<select class="selector"
+					<select class="auto"
 						v-if="hasChoices"
 						@change="reloadInside('choice')"
 						v-model="choiceId"
@@ -299,7 +319,7 @@ let MyList = {
 						</option>
 					</select>
 					
-					<select class="selector"
+					<select class="auto"
 						v-if="showPageLimit && hasPaging"
 						v-model.number="limit"
 						@change="reloadInside()"
@@ -315,7 +335,7 @@ let MyList = {
 				</div>
 			</div>
 			
-			<div class="list-options-wrap" v-if="showAggregators || showCsv || showFilters || showAutoRenew">
+			<div class="list-options-wrap" v-if="showAggregators || showFilters || showAutoRenew">
 				<!-- list header functions -->
 				
 				<!-- auto renew -->
@@ -357,20 +377,6 @@ let MyList = {
 						</template>
 					</my-filters>
 				</div>
-				
-				<!-- CSV -->
-				<my-list-csv
-					v-if="showCsv"
-					@reload="get"
-					:columns="columns"
-					:expressions="expressions"
-					:filters="filtersCombined"
-					:isExport="csvExport"
-					:isImport="csvImport"
-					:joins="relationsJoined"
-					:orders="orders"
-					:query="query"
-				/>
 			</div>
 			
 			<!-- list results -->
@@ -413,12 +419,12 @@ let MyList = {
 											:rowCount="count"
 											:show="columnBatchIndexOption === i"
 										/>
-											<my-button
-												v-if="i === columnBatches.length-1"
-												@trigger="toggleHeader"
-												:image="showHeader ? 'toggleUp.png' : 'toggleDown.png'"
-												:naked="true"
-											/>
+										<my-button
+											v-if="i === columnBatches.length-1"
+											@trigger="toggleHeader"
+											:image="showHeader ? 'toggleUp.png' : 'toggleDown.png'"
+											:naked="true"
+										/>
 									</div>
 								</th>
 							</tr>
@@ -446,7 +452,7 @@ let MyList = {
 											:total="count"
 										/>
 										
-										<input class="selector lookup small" enterkeyhint="send" type="text"
+										<input class="short" enterkeyhint="send" type="text"
 											v-if="filterQuick"
 											@keyup.enter="updatedFilterQuick"
 											v-model="filtersQuick"
@@ -541,14 +547,16 @@ let MyList = {
 						<!-- actions -->
 						<div class="top-actions default-inputs" v-if="hasResults" :class="{ atTop:!showHeader }">
 							
-							<my-button
-								v-if="hasBulkActions"
-								@trigger="selectRowsAllToggle"
-								:caption="capApp.button.all"
-								:captionTitle="capApp.button.allHint"
-								:image="rows.length !== 0 && selectedRows.length === rows.length ? 'checkbox1.png' : 'checkbox0.png'"
-								:naked="true"
-							/>
+							<div class="row centered">
+								<my-button
+									v-if="hasBulkActions"
+									@trigger="selectRowsAllToggle"
+									:caption="capApp.button.all"
+									:captionTitle="capApp.button.allHint"
+									:image="rows.length !== 0 && selectedRows.length === rows.length ? 'checkbox1.png' : 'checkbox0.png'"
+									:naked="true"
+								/>
+							</div>
 							
 							<div class="row centered">
 								<my-button

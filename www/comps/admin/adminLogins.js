@@ -27,7 +27,7 @@ let MyAdminLogins = {
 				/>
 			</div>
 			<div class="area default-inputs">
-				<my-input-offset class-input="selector"
+				<my-input-offset
 					@input="offsetSet"
 					:caption="true"
 					:limit="limit"

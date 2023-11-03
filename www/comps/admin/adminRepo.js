@@ -130,7 +130,7 @@ let MyAdminRepo = {
 			</div>
 				
 			<div class="area nowrap default-inputs">
-				<my-input-offset class-input="selector"
+				<my-input-offset
 					v-if="repoModules.length !== 0"
 					@input="offsetSet"
 					:caption="true"
