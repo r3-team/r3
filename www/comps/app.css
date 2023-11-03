@@ -611,6 +611,15 @@ table td.maximum{
 	min-width:50px;
 	max-width:unset;
 }
+.default-inputs input.auto,
+.default-inputs select.auto,
+.default-inputs textarea.auto,
+.default-inputs .input-custom.auto{
+	flex:0 1 auto;
+	width:auto;
+	min-width:50px;
+	max-width:unset;
+}
 .default-inputs input:disabled,
 .default-inputs select:disabled,
 .default-inputs textarea:disabled,

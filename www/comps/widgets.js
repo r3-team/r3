@@ -309,7 +309,9 @@ let MyWidgets = {
 			</div>
 			
 			<div class="widgets-sidebar-content" v-if="editMode">
-				<h2>{{ capGen.settings }}</h2>
+				<div class="widgets-sidebar-title">
+					<span>{{ capGen.settings }}</span>
+				</div>
 				<div class="widgets-sidebar-content-box default-inputs">
 					<table>
 						<tr>
@@ -336,7 +338,14 @@ let MyWidgets = {
 			</div>
 			
 			<div class="widgets-sidebar-content shrinks" v-if="editMode">
-				<h2>{{ capGen.available }}</h2>
+				<div class="widgets-sidebar-title default-inputs">
+					<span>{{ capGen.available }}</span>
+					<select class="auto" v-model="templateFilter">
+						<option value="all">{{ capGen.button.all }}</option>
+						<option value="module">{{ capApp.option.filterModule }}</option>
+						<option value="system">{{ capApp.option.filterSystem }}</option>
+					</select>
+				</div>
 				<draggable class="widget-group-items templates widgets-sidebar-content-box" handle=".dragAnchor" itemKey="id" animation="150"
 					:group="{ name:'widget-group-items', put:false }"
 					:list="widgetTemplates"
@@ -355,6 +364,7 @@ let MyWidgets = {
 	data() {
 		return {
 			editMode:false,
+			templateFilter:'all', // filter for widget templates (all, module, system)
 			widgetGroupsInput:[], // widget groups, updated by user input
 			widthSteps:50
 		};
@@ -390,36 +400,40 @@ let MyWidgets = {
 		widgetTemplates:(s) => {
 			let out = [];
 			
-			// system widget: login details
-			out.push({
-				content:'systemLoginDetails',
-				moduleId:null,
-				widgetId:null
-			});
-			
-			// system widget: module menu
-			for(const m of s.modules) {
-				if(!s.moduleIdsAccessible.includes(m.id) || s.moduleIdsUsedMenu.includes(m.id))
-					continue;
-				
+			if(s.templatesSystem) {
+				// system widget: login details
 				out.push({
-					content:'systemModuleMenu',
-					moduleId:m.id,
+					content:'systemLoginDetails',
+					moduleId:null,
 					widgetId:null
 				});
-			}
-			
-			// module widgets
-			for(const m of s.modules) {
-				for(const w of m.widgets) {
-					if(s.widgetIdsUsed.includes(w.id))
+				
+				// system widget: module menu
+				for(const m of s.modules) {
+					if(!s.moduleIdsAccessible.includes(m.id) || s.moduleIdsUsedMenu.includes(m.id))
 						continue;
 					
 					out.push({
-						content:'moduleWidget',
-						moduleId:null,
-						widgetId:w.id
+						content:'systemModuleMenu',
+						moduleId:m.id,
+						widgetId:null
 					});
+				}
+			}
+			
+			if(s.templatesModule) {
+				// module widgets
+				for(const m of s.modules) {
+					for(const w of m.widgets) {
+						if(s.widgetIdsUsed.includes(w.id))
+							continue;
+						
+						out.push({
+							content:'moduleWidget',
+							moduleId:null,
+							widgetId:w.id
+						});
+					}
 				}
 			}
 			return out;
@@ -436,7 +450,9 @@ let MyWidgets = {
 		},
 		
 		// simple
-		hasChanges:(s) => JSON.stringify(s.widgetGroups) !== JSON.stringify(s.widgetGroupsInput),
+		hasChanges:     (s) => JSON.stringify(s.widgetGroups) !== JSON.stringify(s.widgetGroupsInput),
+		templatesModule:(s) => s.templateFilter === 'all' || s.templateFilter === 'module',
+		templatesSystem:(s) => s.templateFilter === 'all' || s.templateFilter === 'system',
 		
 		// stores
 		widgetFlow:   (s) => s.$store.getters['local/widgetFlow'],

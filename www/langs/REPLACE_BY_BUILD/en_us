@@ -1971,6 +1971,8 @@
 			"groupAdd":"Add group"
 		},
 		"option":{
+			"filterModule":"Application widgets",
+			"filterSystem":"System widgets",
 			"flowColumn":"top-to-bottom",
 			"flowRow":"left-to-right"
 		},
