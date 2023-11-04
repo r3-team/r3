@@ -12,7 +12,7 @@ let MyBuilderNew = {
 	name:'my-builder-new',
 	components:{ MyBuilderFormInput },
 	template:`<div class="app-sub-window under-header" @mousedown.self="$emit('close')">
-		<div class="contentBox builder-new popUp">
+		<div class="contentBox builder-new float">
 			<div class="top lower">
 				<div class="area nowrap">
 					<img class="icon" :src="titleImgSrc" />

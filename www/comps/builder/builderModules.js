@@ -8,7 +8,7 @@ let displayArrow = function(state) {
 
 let MyBuilderModulesKeyCreate = {
 	name:'my-builder-modules-key-create',
-	template:`<div class="builder-modules-key-create contentBox grow">
+	template:`<div class="key-create contentBox grow">
 		
 		<div class="top nowrap clickable" @click="show = !show">
 			<div class="area nowrap">
@@ -81,7 +81,7 @@ let MyBuilderModulesGraph = {
 	components:{
 		echarts:VueECharts,
 	},
-	template:`<div class="builder-modules-graph contentBox grow">
+	template:`<div class="contentBox grow">
 		
 		<div class="top nowrap clickable" @click="show = !show">
 			<div class="area nowrap">
@@ -90,7 +90,7 @@ let MyBuilderModulesGraph = {
 			</div>
 		</div>
 		
-		<div class="content default-inputs graph" v-if="show">
+		<div class="content no-padding default-inputs graph" v-if="show">
 			<echarts
 				:option="graphOption"
 				:theme="settings.dark ? 'dark' : ''"
@@ -167,7 +167,7 @@ let MyBuilderModulesGraph = {
 let MyBuilderModulesExport = {
 	name:'my-builder-modules-export',
 	components:{MyModuleSelect},
-	template:`<div class="builder-modules contentBox grow">
+	template:`<div class="contentBox grow">
 		
 		<div class="top nowrap clickable" @click="show = !show">
 			<div class="area nowrap">
