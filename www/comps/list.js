@@ -245,12 +245,15 @@ let MyList = {
 				
 				<div ref="empty" class="empty"></div>
 				
-				<div class="row gap nowrap">
-					<img class="icon"
+				<div class="row gap nowrap centered list-header-title" v-if="showTitle">
+					<img
 						v-if="iconId !== null"
 						:src="srcBase64(iconIdMap[iconId].file)"
 					/>
-					
+					<span v-if="caption !== ''">{{ caption }}</span>
+				</div>
+				
+				<div class="row gap nowrap">
 					<!-- offset -->
 					<my-input-offset
 						v-if="hasPaging"
@@ -684,6 +687,7 @@ let MyList = {
 	</div>`,
 	props:{
 		autoRenew:      { required:false, default:null },                   // refresh list data every x seconds
+		caption:        { type:String,  required:false, default:'' },       // caption to display in list header
 		choices:        { type:Array,   required:false, default:() => [] }, // processed query choices
 		collections:    { type:Array,   required:false, default:() => [] }, // consumed collections to filter by user input
 		collectionIdMapIndexes:{ type:Object, required:false, default:() => {return {}} },
@@ -774,6 +778,7 @@ let MyList = {
 			headerElementsAvailableInOrder:[ // elements that can be shown, in order of priority
 				'collectionValuesAll',       // optional, show all collection filter values
 				'collectionValuesFew',       // optional, show few collection filter values
+				'listTitle',                 // optional
 				'actionTitles',              // optional
 				'refresh',                   // optional
 				'offsetArrows',              // optional
@@ -988,6 +993,7 @@ let MyList = {
 		showInputHeader:     (s) => s.isInput && (s.filterQuick || s.hasChoices || s.showInputAddAll || s.offset !== 0 || s.count > s.limit),
 		showOffsetArrows:    (s) => s.headerElements.includes('offsetArrows'),
 		showRefresh:         (s) => s.headerElements.includes('refresh'),
+		showTitle:           (s) => s.headerElements.includes('listTitle'),
 		showCollectionCnt:   (s) => {
 			if(s.headerElements.includes('collectionValuesAll')) return 999;
 			if(s.headerElements.includes('collectionValuesFew')) return 2;

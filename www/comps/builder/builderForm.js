@@ -1036,6 +1036,9 @@ let MyBuilderForm = {
 				layout:'table',
 				openForm:null,
 				openFormBulk:null,
+				captions:{
+					fieldTitle:{}
+				},
 				query:this.getQueryTemplate(),
 				resultLimit:50
 			};
@@ -1047,6 +1050,9 @@ let MyBuilderForm = {
 				content:'tabs',
 				state:'default',
 				onMobile:true,
+				captions:{
+					fieldTitle:{}
+				},
 				tabs:[{
 					id:this.getNilUuid(),
 					state:'default',

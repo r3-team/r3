@@ -78,7 +78,7 @@ let MyField = {
 			</div>
 			
 			<div class="field-content"
-				:class="{ data:isData, disabled:isReadonly, isSingleField:isAloneInForm || isAloneInTab, intent:hasIntent }"
+				:class="{ data:isData, disabled:isReadonly, isSingleField:isAlone, intent:hasIntent }"
 		 		v-click-outside="clickOutside"
 			>
 				<!-- data field icon -->
@@ -114,7 +114,7 @@ let MyField = {
 					:indexDate0="field.indexDate0"
 					:indexDate1="field.indexDate1"
 					:isHidden="isHidden"
-					:isSingleField="isAloneInForm || isAloneInTab"
+					:isSingleField="isAlone"
 					:popUpFormInline="popUpFormInline"
 					:query="field.query"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
@@ -146,7 +146,7 @@ let MyField = {
 					:indexDate0="field.indexDate0"
 					:indexDate1="field.indexDate1"
 					:isHidden="isHidden"
-					:isSingleField="isAloneInForm || isAloneInTab"
+					:isSingleField="isAlone"
 					:popUpFormInline="popUpFormInline"
 					:stepTypeDefault="field.ganttSteps"
 					:stepTypeToggle="field.ganttStepsToggle"
@@ -174,7 +174,7 @@ let MyField = {
 					:hasOpenForm="field.openForm !== null"
 					:iconId="iconId ? iconId : null"
 					:isHidden="isHidden"
-					:isSingleField="isAloneInForm || isAloneInTab"
+					:isSingleField="isAlone"
 					:popUpFormInline="popUpFormInline"
 					:relationIndexData="field.relationIndexData"
 					:relationIndexAxisX="field.relationIndexAxisX"
@@ -191,7 +191,7 @@ let MyField = {
 					:filters="filtersProcessed"
 					:formLoading="formLoading"
 					:limit="field.query.fixedLimit"
-					:needsHeader="isAloneInForm || isAloneInTab"
+					:needsHeader="isAlone"
 					:optionJson="field.chartOption"
 					:query="field.query"
 				/>
@@ -207,6 +207,7 @@ let MyField = {
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-collection-indexes="setCollectionIndexes"
 					:autoRenew="field.autoRenew"
+					:caption="isAlone ? caption : ''"
 					:choices="choicesProcessed"
 					:collections="field.collections"
 					:collectionIdMapIndexes="collectionIdMapIndexes"
@@ -221,7 +222,7 @@ let MyField = {
 					:hasOpenFormBulk="field.openFormBulk !== null"
 					:iconId="iconId ? iconId : null"
 					:isHidden="isHidden"
-					:isSingleField="isAloneInForm || isAloneInTab"
+					:isSingleField="isAlone"
 					:layoutDefault="field.layout"
 					:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 					:popUpFormInline="popUpFormInline"
@@ -230,7 +231,7 @@ let MyField = {
 				/>
 				
 				<!-- tabs -->
-				<div class="tabs" v-if="isTabs" :class="{ isSingleField:isAloneInForm || isAloneInTab }">
+				<div class="tabs" v-if="isTabs" :class="{ isSingleField:isAlone }">
 					<div class="tabs-entries">
 						<div class="tabs-icon" v-if="iconId">
 							<img :src="srcBase64(iconIdMap[iconId].file)" />
@@ -589,13 +590,13 @@ let MyField = {
 		fieldIdsInvalid:  { type:Array,   required:false, default:() => {return []} },
 		fieldIdMapCaption:{ type:Object,  required:false, default:() => {return {}} }, // overwritten captions
 		fieldIdMapError:  { type:Object,  required:false, default:() => {return {}} }, // overwritten error messages
-		formBadSave:      { type:Boolean, required:true }, // attempted save with invalid inputs
-		formIsEmbedded:   { type:Boolean, required:true }, // parent form is a pop-up form
+		formBadSave:      { type:Boolean, required:true },                 // attempted save with invalid inputs
+		formIsEmbedded:   { type:Boolean, required:true },                 // parent form is embedded (pop-up, inline, widget)
 		formLoading:      { type:Boolean, required:true },
-		formReadonly:     { type:Boolean, required:true }, // form is read only, disable all inputs
-		flexDirParent:    { type:String,  required:true }, // flex direction (row/column) of parent
-		isAloneInForm:    { type:Boolean, required:true }, // parent form contains only this field
-		isAloneInTab:     { type:Boolean, required:false, default:false }, // only field in a tab
+		formReadonly:     { type:Boolean, required:true },                 // form is read only
+		flexDirParent:    { type:String,  required:true },                 // flex direction (row/column) of parent
+		isAloneInForm:    { type:Boolean, required:true },                 // parent form contains only this field
+		isAloneInTab:     { type:Boolean, required:false, default:false }, // parent tab only contains this field
 		isBulkUpdate:     { type:Boolean, required:false, default:false }, // form is in bulk update mode
 		isHiddenInParent: { type:Boolean, required:false, default:false }, // field is hidden in parent (tab/container)
 		joinsIndexMap:    { type:Object,  required:true },
@@ -698,10 +699,6 @@ let MyField = {
 					out = s.attribute.name;
 			}
 			
-			// if empty: mark as missing
-			if(out === '')
-				out = s.capGen.missingCaption;
-			
 			// required marker
 			if(s.isRequired)
 				out += '*';
@@ -729,8 +726,9 @@ let MyField = {
 			return '';
 		},
 		captionHelp:(s) => typeof s.field.captions !== 'undefined'
+			&& typeof s.field.captions.fieldHelp !== 'undefined'
 			&& typeof s.field.captions.fieldHelp[s.moduleLanguage] !== 'undefined'
-			? s.field.captions.fieldHelp[s.moduleLanguage] : '',
+				? s.field.captions.fieldHelp[s.moduleLanguage] : '',
 		domClass:(s) => {
 			let out = [];
 			if(s.isDropdown) out.push('dropdown');
@@ -1031,7 +1029,7 @@ let MyField = {
 			? false : s.attributeIdMap[s.field.attributeId],
 		customErr:  (s) => typeof s.fieldIdMapError[s.field.id] !== 'undefined'
 			&& s.fieldIdMapError[s.field.id] !== null ? s.fieldIdMapError[s.field.id] : null,
-		hasCaption: (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isAloneInTab,
+		hasCaption: (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
 		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList,
 		inputRegex: (s) => !s.isData || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
@@ -1049,6 +1047,7 @@ let MyField = {
 		isTabs:     (s) => s.field.content === 'tabs',
 		
 		// states
+		isAlone:   (s) => s.isAloneInForm || s.isAloneInTab,
 		isHidden:  (s) => s.stateFinal === 'hidden' || s.isHiddenInParent,
 		isReadonly:(s) => s.stateFinal === 'readonly',
 		isRequired:(s) => s.stateFinal === 'required',

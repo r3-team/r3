@@ -415,6 +415,7 @@ type FieldList struct {
 	OpenForm     OpenForm             `json:"openForm"`     // regular form to open records with
 	OpenFormBulk OpenForm             `json:"openFormBulk"` // form for bulk actions (multiple record updates)
 	Query        Query                `json:"query"`
+	Captions     CaptionMap           `json:"captions"`
 
 	// legacy
 	AttributeIdRecord pgtype.UUID `json:"attributeIdRecord"`
@@ -427,6 +428,7 @@ type FieldTabs struct {
 	Content  string      `json:"content"`
 	State    string      `json:"state"`
 	OnMobile bool        `json:"onMobile"`
+	Captions CaptionMap  `json:"captions"`
 	Tabs     []Tab       `json:"tabs"`
 }
 type Collection struct {

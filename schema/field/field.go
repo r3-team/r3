@@ -335,21 +335,23 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 
 		case "list":
 			fields = append(fields, types.FieldList{
-				Id:          fieldId,
-				TabId:       tabId,
-				IconId:      iconId,
-				Content:     content,
-				State:       state,
-				OnMobile:    onMobile,
-				Columns:     []types.Column{},
-				AutoRenew:   autoRenew,
-				CsvExport:   csvExport.Bool,
-				CsvImport:   csvImport.Bool,
-				Layout:      layout.String,
-				FilterQuick: filterQuickList.Bool,
-				Query:       types.Query{},
-				OpenForm:    types.OpenForm{},
-				ResultLimit: int(resultLimit.Int16),
+				Id:           fieldId,
+				TabId:        tabId,
+				IconId:       iconId,
+				Content:      content,
+				State:        state,
+				OnMobile:     onMobile,
+				Columns:      []types.Column{},
+				AutoRenew:    autoRenew,
+				CsvExport:    csvExport.Bool,
+				CsvImport:    csvImport.Bool,
+				Layout:       layout.String,
+				FilterQuick:  filterQuickList.Bool,
+				Query:        types.Query{},
+				Captions:     types.CaptionMap{},
+				OpenForm:     types.OpenForm{},
+				OpenFormBulk: types.OpenForm{},
+				ResultLimit:  int(resultLimit.Int16),
 
 				// legacy
 				FormIdOpen:        pgtype.UUID{},
@@ -365,6 +367,7 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 				Content:  content,
 				State:    state,
 				OnMobile: onMobile,
+				Captions: types.CaptionMap{},
 				Tabs:     []types.Tab{},
 			})
 			posTabsLookup = append(posTabsLookup, pos)
@@ -515,6 +518,10 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 		if err != nil {
 			return fields, err
 		}
+		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle"})
+		if err != nil {
+			return fields, err
+		}
 		field.Query, err = query.Get("field", field.Id, 0, 0)
 		if err != nil {
 			return fields, err
@@ -533,6 +540,10 @@ func Get(formId uuid.UUID) ([]interface{}, error) {
 	// lookup tabs fields: get tabs
 	for _, pos := range posTabsLookup {
 		var field = fields[pos].(types.FieldTabs)
+		field.Captions, err = caption.Get("field", field.Id, []string{"fieldTitle"})
+		if err != nil {
+			return fields, err
+		}
 		field.Tabs, err = tab.Get("field", field.Id)
 		if err != nil {
 			return fields, err
@@ -768,6 +779,9 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 
 				return err
 			}
+			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
+				return err
+			}
 			fieldIdMapQuery[fieldId] = f.Query
 
 		case "tabs":
@@ -801,6 +815,9 @@ func Set_tx(tx pgx.Tx, formId uuid.UUID, parentId pgtype.UUID, tabId pgtype.UUID
 				WHERE field_id = $1
 				AND id <> ALL($2)
 			`, f.Id, idsKeep); err != nil {
+				return err
+			}
+			if err := caption.Set_tx(tx, fieldId, f.Captions); err != nil {
 				return err
 			}
 

@@ -59,6 +59,15 @@
 	flex:1 1 auto;
 	max-width:11px;
 }
+.list-header-title>img{
+	width:auto;
+	height:24px;
+	filter:var(--image-filter);
+}
+.list-header-title>span{
+	font-size:120%;
+	text-wrap:nowrap;
+}
 
 /* list as lookup or dropdown */
 /* HTML table view */
