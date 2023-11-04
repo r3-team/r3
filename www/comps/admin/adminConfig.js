@@ -339,7 +339,7 @@ let MyAdminConfig = {
 			configInput:{},
 			bruteforceCountBlocked:0,
 			bruteforceCountTracked:0,
-			loginBackgroundCount:13,
+			loginBackgroundCount:12,
 			publicKeyInputName:'',
 			publicKeyInputValue:''
 		};

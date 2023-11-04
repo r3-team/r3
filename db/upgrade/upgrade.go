@@ -133,7 +133,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE app.menu ADD COLUMN color CHARACTER(6);
 			
 			-- more config options: login background images, stay-logged-in option
-			INSERT INTO instance.config (name,value) VALUES ('loginBackgrounds','[1,2,3,4,5,6,7,8,9,10,11,12]');
+			INSERT INTO instance.config (name,value) VALUES ('loginBackgrounds','[2,5,6,9,11]');
 			INSERT INTO instance.config (name,value) VALUES ('tokenKeepEnable','1');
 			
 			-- add NULL to module color
