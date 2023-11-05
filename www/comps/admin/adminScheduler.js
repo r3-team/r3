@@ -39,7 +39,7 @@ let MyAdminScheduler = {
 					<h1>{{ capApp.systemTasks }}</h1>
 				</div>
 				
-				<table class="table-default default-inputs shade">
+				<table class="generic-table default-inputs shade">
 					<thead>
 						<tr>
 							<th>{{ capGen.name }}</th>
@@ -82,7 +82,7 @@ let MyAdminScheduler = {
 					<h1>{{ capApp.systemTasksNode }}</h1>
 				</div>
 				
-				<table class="table-default default-inputs shade">
+				<table class="generic-table default-inputs shade">
 					<thead>
 						<tr>
 							<th colspan="2">{{ capGen.name }}</th>
@@ -142,7 +142,7 @@ let MyAdminScheduler = {
 					<h1>{{ capApp.functions }}</h1>
 				</div>
 				
-				<table class="table-default shade">
+				<table class="generic-table shade">
 					<thead>
 						<tr>
 							<th>{{ capGen.application }}</th>

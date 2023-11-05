@@ -181,8 +181,8 @@ let MyAdminMailAccounts = {
 			</div>
 		</div>
 		
-		<div class="content no-padding mails table-default-wrap">
-			<table class="table-default no-padding default-inputs">
+		<div class="content no-padding mails generic-table-wrap">
+			<table class="generic-table no-padding default-inputs">
 				<thead>
 					<tr>
 						<th>{{ capGen.name }}</th>

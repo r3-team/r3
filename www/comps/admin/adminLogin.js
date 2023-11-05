@@ -116,7 +116,7 @@ let MyAdminLogin = {
 			/>
 			
 			<div class="content" :class="{ 'no-padding':tabTarget === 'roles' }">
-				<table class="table-default generic-table-vertical fullWidth" v-if="tabTarget === 'properties'">
+				<table class="generic-table generic-table-vertical fullWidth" v-if="tabTarget === 'properties'">
 					<tr>
 						<td>
 							<div class="title-cell">
@@ -230,14 +230,14 @@ let MyAdminLogin = {
 				</table>
 				
 				<!-- roles -->
-				<table class="table-default role-select" v-if="tabTarget === 'roles'">
+				<table class="generic-table sticky-top role-select" v-if="tabTarget === 'roles'">
 					<thead>
 						<tr>
 							<th v-if="isLdapAssignedRoles" colspan="4"><b>{{ capApp.ldapAssignActive }}</b></th>
 						</tr>
 						<tr>
 							<th class="minimum">
-								<div class="row centered gap space-between">
+								<div class="row centered gap space-between default-inputs">
 									<span>{{ capGen.application }}</span>
 									<input class="short" placeholder="..." v-model="roleFilter" :title="capGen.button.filter" />
 								</div>

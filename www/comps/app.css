@@ -780,7 +780,46 @@ table td.maximum{
 	background-color:rgba(0,0,0,0.22);
 }
 
-/* generic record table */
+/* generic table */
+.generic-table-wrap{
+	flex:1 1 auto;
+	overflow-y:auto;
+}
+.generic-table{
+	width:100%;
+}
+.generic-table>thead>tr>th,
+.generic-table>tbody>tr>td{
+	height:36px;
+	padding:3px 8px;
+	border-bottom:1px solid var(--color-border);
+	background-color:var(--color-bg);
+}
+.generic-table>thead>tr>th:first-child,
+.generic-table>tbody>tr>td:first-child{
+	padding-left:12px;
+}
+.generic-table.sticky-top>thead>tr>th{
+	position:sticky;
+	top:0px;
+	z-index:var(--z-index-admin-table-sticky-top);
+}
+.generic-table>thead>tr>th .mixed-header{
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+}
+.generic-table>thead>tr>th .mixed-header>img{
+	width:16px;
+	height:16px;
+	margin-right:6px;
+	filter:var(--image-filter);
+}
+.generic-table.no-padding>tbody>tr>td{
+	padding:3px 2px 3px 4px;
+}
+
+/* generic vertical table */
 .generic-table-vertical{
 	border-collapse:separate;
 	border-spacing:0px 6px;
@@ -1309,6 +1348,7 @@ table td.maximum{
 	--shadow-input:1px 1px 4px #000000;
 	
 	--image-filter:        invert(1) brightness(90%);
+	--image-filter-alt:    invert(1) brightness(40%);
 	--image-filter-bg:     var(--image-filter);
 	--image-filter-error:  invert(13%) sepia(92%) saturate(4889%) hue-rotate(359deg) brightness(97%) contrast(38%);
 	--image-filter-success:invert(36%) sepia(75%) saturate(1288%) hue-rotate(76deg) brightness(92%) contrast(18%);

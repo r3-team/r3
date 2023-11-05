@@ -69,7 +69,7 @@ let MyBuilderMenuItems = {
 					v-if="showOptionsIndex === index"
 					@mousedown.self="showOptionsIndex = -1"
 				>
-					<div class="contentBox popUp">
+					<div class="contentBox float">
 						<div class="top lower">
 							<div class="area nowrap">
 								<img class="icon" src="images/settings.png" />

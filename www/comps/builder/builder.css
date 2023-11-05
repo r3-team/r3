@@ -909,17 +909,6 @@
 
 /* role */
 .builder-roles{}
-.builder-role table{
-	width:100%;
-}
-.builder-role.contentBox>.content{
-	flex:1 1 auto;
-	display:flex;
-	flex-flow:row nowrap;
-}
-.builder-role .contentBox.access{
-	flex-flow:row nowrap;
-}
 .builder-role .contentBox.sidebar{
 	flex:1 1 300px;
 	max-width:500px;
@@ -939,6 +928,16 @@
 	width:24px;
 	height:24px;
 	filter:var(--image-filter);
+}
+.builder-role-content{
+	display:flex;
+	flex-flow:column nowrap;
+	overflow:auto;
+}
+.builder-role-td-name{
+	display:block;
+	min-width:260px;
+	text-wrap:nowrap;
 }
 
 /* attributes */

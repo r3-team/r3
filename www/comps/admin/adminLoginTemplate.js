@@ -47,7 +47,7 @@ let MyAdminLoginTemplate = {
 			</div>
 			
 			<div class="content default-inputs">
-				<table class="table-default generic-table-vertical fullWidth">
+				<table class="generic-table generic-table-vertical fullWidth">
 					<tr>
 						<td>{{ capGen.name }}*</td>
 						<td><input v-model="name" v-focus :disabled="isGlobal" /></td>

@@ -62,7 +62,7 @@ let MyAdminMailSpooler = {
 		<div class="content mails default-inputs" :class="{ 'no-padding':!noMails }">
 			<span v-if="noMails"><i>{{ capApp.noMailsInSpool }}</i></span>
 			
-			<table class="table-default shade" v-if="!noMails">
+			<table class="generic-table shade" v-if="!noMails">
 				<thead>
 					<tr>
 						<th>
