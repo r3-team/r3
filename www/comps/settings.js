@@ -942,11 +942,11 @@ let MySettings = {
 								<td>{{ capApp.dateFormat }}</td>
 								<td>
 									<select v-model="settingsInput.dateFormat">
-										<option value="Y-m-d">{{ capApp.dateFormat0 }}</option>
-										<option value="Y/m/d">{{ capApp.dateFormat1 }}</option>
-										<option value="d.m.Y">{{ capApp.dateFormat2 }}</option>
-										<option value="d/m/Y">{{ capApp.dateFormat3 }}</option>
-										<option value="m/d/Y">{{ capApp.dateFormat4 }}</option>
+										<option value="Y-m-d">{{ capGen.dateFormat0 }}</option>
+										<option value="Y/m/d">{{ capGen.dateFormat1 }}</option>
+										<option value="d.m.Y">{{ capGen.dateFormat2 }}</option>
+										<option value="d/m/Y">{{ capGen.dateFormat3 }}</option>
+										<option value="m/d/Y">{{ capGen.dateFormat4 }}</option>
 									</select>
 								</td>
 							</tr>
