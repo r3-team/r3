@@ -134,7 +134,7 @@ let MyCalendarMonth = {
 			for(let i = 0; i < 42; i++) {
 				days.push({
 					events:[],
-					unix:Math.floor(s.date0.getTime() / 1000) + (i * 86400)
+					unix:s.getUnixFromDate(s.getDateAtUtcZero(s.date0)) + (i * 86400)
 				});
 			}
 			
@@ -284,11 +284,9 @@ let MyCalendarMonth = {
 				return;
 			}
 			
-			if(this.unixInput0 !== null && this.unixInput1 !== null) {
-				let d0 = this.getDateAtUtcZero(new Date(this.unixInput0 * 1000));
-				let d1 = this.getDateAtUtcZero(new Date(this.unixInput1 * 1000));
-				this.$emit('date-selected',this.getUnixFromDate(d0),this.getUnixFromDate(d1),false);
-			}
+			if(this.unixInput0 !== null && this.unixInput1 !== null)
+				this.$emit('date-selected',this.unixInput0,this.unixInput1,false);
+			
 			this.unixInput0 = null;
 			this.unixInput1 = null;
 		},
@@ -343,7 +341,7 @@ let MyCalendarMonth = {
 			}
 			
 			// day outside of current month?
-			if(dayOffset < this.daysBefore || dayOffset >= (42-this.daysAfter))
+			if(dayOffset < this.daysBefore || dayOffset >= (42-this.daysAfter+1))
 				cls.outside = true;
 			
 			// day used as active input
