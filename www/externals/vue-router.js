@@ -1,5 +1,5 @@
 /*!
-  * vue-router v4.2.2
+  * vue-router v4.2.5
   * (c) 2023 Eduardo San Martin Morote
   * @license MIT
   */
@@ -411,7 +411,6 @@ var VueRouter = (function (exports, vue) {
           else {
               replace(to);
           }
-          // console.log({ deltaFromCurrent })
           // Here we could also revert the navigation by calling history.go(-delta)
           // this listener will have to be adapted to not trigger again and to wait for the url
           // to be updated before triggering the listeners. Some kind of validation function would also
@@ -614,15 +613,11 @@ var VueRouter = (function (exports, vue) {
       base = normalizeBase(base);
       function setLocation(location) {
           position++;
-          if (position === queue.length) {
-              // we are at the end, we can simply append a new entry
-              queue.push(location);
-          }
-          else {
+          if (position !== queue.length) {
               // we are in the middle, we remove everything from here in the queue
               queue.splice(position);
-              queue.push(location);
           }
+          queue.push(location);
       }
       function triggerListeners(to, from, { direction, delta }) {
           const info = {
@@ -1441,7 +1436,7 @@ var VueRouter = (function (exports, vue) {
               // this also allows the user to control the encoding
               path = location.path;
               if (!path.startsWith('/')) {
-                  warn(`The Matcher cannot resolve relative paths but received "${path}". Unless you directly called \`matcher.resolve("${path}")\`, this is probably a bug in vue-router. Please open an issue at https://new-issue.vuejs.org/?repo=vuejs/router.`);
+                  warn(`The Matcher cannot resolve relative paths but received "${path}". Unless you directly called \`matcher.resolve("${path}")\`, this is probably a bug in vue-router. Please open an issue at https://github.com/vuejs/router/issues/new/choose.`);
               }
               matcher = matchers.find(m => m.re.test(path));
               // matcher should have a value after the loop
@@ -1536,7 +1531,7 @@ var VueRouter = (function (exports, vue) {
           // NOTE: we could also allow a function to be applied to every component.
           // Would need user feedback for use cases
           for (const name in record.components)
-              propsObject[name] = typeof props === 'boolean' ? props : props[name];
+              propsObject[name] = typeof props === 'object' ? props[name] : props;
       }
       return propsObject;
   }
@@ -1902,7 +1897,7 @@ var VueRouter = (function (exports, vue) {
       }
       return {
           add,
-          list: () => handlers,
+          list: () => handlers.slice(),
           reset,
       };
   }
@@ -2858,7 +2853,10 @@ var VueRouter = (function (exports, vue) {
                   return;
               const payload = activeRoutesPayload;
               // children routes will appear as nested
-              let routes = matcher.getRoutes().filter(route => !route.parent);
+              let routes = matcher.getRoutes().filter(route => !route.parent ||
+                  // these routes have a parent with no component which will not appear in the view
+                  // therefore we still need to include them
+                  !route.parent.record.components);
               // reset match state to false
               routes.forEach(resetMatchStateOnRouteRecord);
               // apply a match state if there is a payload
@@ -3429,9 +3427,9 @@ var VueRouter = (function (exports, vue) {
               .then(() => {
               // check the route beforeEnter
               guards = [];
-              for (const record of to.matched) {
+              for (const record of enteringRecords) {
                   // do not trigger beforeEnter on reused views
-                  if (record.beforeEnter && !from.matched.includes(record)) {
+                  if (record.beforeEnter) {
                       if (isArray(record.beforeEnter)) {
                           for (const beforeEnter of record.beforeEnter)
                               guards.push(guardToPromiseFn(beforeEnter, to, from));
@@ -3472,9 +3470,9 @@ var VueRouter = (function (exports, vue) {
       function triggerAfterEach(to, from, failure) {
           // navigation is confirmed, call afterGuards
           // TODO: wrap with error handlers
-          for (const guard of afterGuards.list()) {
-              runWithContext(() => guard(to, from, failure));
-          }
+          afterGuards
+              .list()
+              .forEach(guard => runWithContext(() => guard(to, from, failure)));
       }
       /**
        * - Cleans up any navigation guards
@@ -3594,15 +3592,16 @@ var VueRouter = (function (exports, vue) {
                   }
                   triggerAfterEach(toLocation, from, failure);
               })
+                  // avoid warnings in the console about uncaught rejections, they are logged by triggerErrors
                   .catch(noop);
           });
       }
       // Initialization and Errors
       let readyHandlers = useCallbacks();
-      let errorHandlers = useCallbacks();
+      let errorListeners = useCallbacks();
       let ready;
       /**
-       * Trigger errorHandlers added via onError and throws the error as well
+       * Trigger errorListeners added via onError and throws the error as well
        *
        * @param error - error to throw
        * @param to - location we were navigating to when the error happened
@@ -3611,7 +3610,7 @@ var VueRouter = (function (exports, vue) {
        */
       function triggerError(error, to, from) {
           markAsReady(error);
-          const list = errorHandlers.list();
+          const list = errorListeners.list();
           if (list.length) {
               list.forEach(handler => handler(error, to, from));
           }
@@ -3621,6 +3620,7 @@ var VueRouter = (function (exports, vue) {
               }
               console.error(error);
           }
+          // reject the error no matter there were error listeners or not
           return Promise.reject(error);
       }
       function isReady() {
@@ -3677,7 +3677,7 @@ var VueRouter = (function (exports, vue) {
           beforeEach: beforeGuards.add,
           beforeResolve: beforeResolveGuards.add,
           afterEach: afterGuards.add,
-          onError: errorHandlers.add,
+          onError: errorListeners.add,
           isReady,
           install(app) {
               const router = this;
@@ -3704,11 +3704,13 @@ var VueRouter = (function (exports, vue) {
               }
               const reactiveRoute = {};
               for (const key in START_LOCATION_NORMALIZED) {
-                  // @ts-expect-error: the key matches
-                  reactiveRoute[key] = vue.computed(() => currentRoute.value[key]);
+                  Object.defineProperty(reactiveRoute, key, {
+                      get: () => currentRoute.value[key],
+                      enumerable: true,
+                  });
               }
               app.provide(routerKey, router);
-              app.provide(routeLocationKey, vue.reactive(reactiveRoute));
+              app.provide(routeLocationKey, vue.shallowReactive(reactiveRoute));
               app.provide(routerViewLocationKey, currentRoute);
               const unmountApp = app.unmount;
               installedApps.add(app);
