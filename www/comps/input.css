@@ -440,6 +440,43 @@
 	bottom:30px;
 	z-index:var(--z-index-dropdown);
 }
+.input-color-picker.downwards{
+	bottom:unset;
+	top:30px;
+}
+
+/* draw input */
+.input-draw{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:column nowrap;
+}
+.input-draw>.actions{
+	display:flex;
+	flex-flow:row wrap;
+	justify-content:space-between;
+	padding:8px 6px;
+	background-color:var(--color-bg);
+	border-bottom:1px solid var(--color-border);
+	border-radius:5px 5px 0px 0px;
+}
+.input-draw>canvas{
+	width:100%;
+	flex:1 1 auto;
+	touch-action:none; /* fix: chrome mobile stops touch input otherwise */
+}
+.input-draw .colors{
+	flex:0 1 auto;
+}
+.input-draw .range{
+	flex:0 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+}
+.input-draw .range>input{
+	width:70px;
+}
 
 /* richtext input */
 .input-richtext{
@@ -480,6 +517,7 @@
 .user-bordersSquared .input-collection .entries,
 .user-bordersSquared .input-collection .entry,
 .user-bordersSquared .input-dropdown,
+.user-bordersSquared .input-draw>.actions,
 .user-bordersSquared .input-color-preview,
 .user-bordersSquared .input-dropdown-wrap.left-overhang .input-dropdown{
 	border-radius:0px !important;

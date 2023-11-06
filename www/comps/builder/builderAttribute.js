@@ -128,6 +128,7 @@ let MyBuilderAttribute = {
 										<option value="decimal"  :disabled="!isNew && !isNumeric">{{ capApp.option.decimal }}</option>
 										<option value="color"    :disabled="!isNew && !isString">{{ capApp.option.color }}</option>
 										<option value="iframe"   :disabled="!isNew && !isString">{{ capApp.option.iframe }}</option>
+										<option value="drawing"  :disabled="!isNew && !isString">{{ capApp.option.drawing }}</option>
 										<option value="boolean"  :disabled="!isNew && !isBoolean">{{ capApp.option.boolean }}</option>
 										<option value="files"    :disabled="!isNew && !isFiles">{{ capApp.option.files }}</option>
 									</optgroup>
@@ -313,6 +314,7 @@ let MyBuilderAttribute = {
 				if(this.isColor)     return 'color';
 				if(this.isDate)      return 'date';
 				if(this.isDatetime)  return 'datetime';
+				if(this.isDrawing)   return 'drawing';
 				if(this.isNumber)    return 'number';
 				if(this.isNumeric)   return 'decimal';
 				if(this.isFiles)     return 'files';
@@ -346,6 +348,11 @@ let MyBuilderAttribute = {
 						this.values.content    = 'varchar';
 						this.values.contentUse = 'color';
 						this.values.length     = 6;
+					break;
+					case 'drawing':
+						this.values.content    = 'text';
+						this.values.contentUse = 'drawing';
+						this.values.length     = 0;
 					break;
 					case 'iframe':
 						this.values.content    = 'text';
@@ -451,6 +458,7 @@ let MyBuilderAttribute = {
 		isColor:   (s) => s.isString  && s.values.contentUse === 'color',
 		isDate:    (s) => s.isInteger && s.values.contentUse === 'date',
 		isDatetime:(s) => s.isInteger && s.values.contentUse === 'datetime',
+		isDrawing: (s) => s.isString  && s.values.contentUse === 'drawing',
 		isIframe:  (s) => s.isString  && s.values.contentUse === 'iframe',
 		isNumber:  (s) => s.isInteger && s.values.contentUse === 'default',
 		isRichtext:(s) => s.isString  && s.values.contentUse === 'richtext',

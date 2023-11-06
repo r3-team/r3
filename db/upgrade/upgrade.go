@@ -250,6 +250,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				USING BTREE (position ASC NULLS LAST);
 			
 			CREATE TYPE instance.widget_content AS ENUM ('moduleWidget','systemModuleMenu');
+			
+			-- drawing attribute use
+			ALTER TYPE app.attribute_content_use ADD VALUE 'drawing';
 		`)
 		return "3.6", err
 	},

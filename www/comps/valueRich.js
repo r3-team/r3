@@ -65,6 +65,9 @@ let MyValueRich = {
 			/>
 		</a>
 		
+		<!-- drawing -->
+		<img class="drawing" v-if="isDrawing && value !== null" :src="JSON.parse(value).image" />
+		
 		<template v-if="isGallery">
 			<img class="gallery-item"
 				v-for="f in files"
@@ -98,6 +101,7 @@ let MyValueRich = {
 	data() {
 		return {
 			isColor:false,
+			isDrawing:false,
 			isFiles:false,
 			isGallery:false,
 			isLink:false,
@@ -167,7 +171,8 @@ let MyValueRich = {
 					
 					// handle different uses and display options
 					switch(atr.contentUse) {
-						case 'color': return this.isColor = true; break;
+						case 'color':   return this.isColor   = true; break;
+						case 'drawing': return this.isDrawing = true; break;
 						case 'richtext':
 							if(this.value !== null)
 								this.stringValueFull = this.getHtmlStripped(this.value);

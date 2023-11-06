@@ -26,12 +26,14 @@ let MyInputColor = {
 		<chrome-picker class="input-color-picker"
 			v-if="showPicker"
 			@update:modelValue="input = $event.hex.substr(1)"
+			:class="{ downwards:downwards }"
 			:disableAlpha="true"
 			:modelValue="input"
 		/>
 	</div>`,
 	props:{
 		allowNull: { type:Boolean, required:false, default:false },
+		downwards: { type:Boolean, required:false, default:false },
 		modelValue:{ required:true },
 		readonly:  { type:Boolean, required:false, default:false }
 	},

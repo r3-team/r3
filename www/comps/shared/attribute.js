@@ -123,6 +123,7 @@ export function getAttributeIcon(attribute,outsideIn,isNm) {
 			case 'richtext': return 'text_rich.png';  break;
 			case 'textarea': return 'text_lines.png'; break;
 			case 'color':    return 'colors.png';     break;
+			case 'drawing':  return 'drawing.png';    break;
 			case 'iframe':   return 'iframe.png';     break;
 		}
 	}

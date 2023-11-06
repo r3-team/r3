@@ -194,8 +194,8 @@ let MyListColumnBatch = {
 				let c = s.columns[ind];
 				let a = s.attributeIdMap[c.attributeId];
 				
-				// ignore color display, sub query, aggregator, encrypted and file attribute columns
-				if(a.contentUse !== 'color' && c.query === null && c.aggregator === null &&
+				// ignore color/drawing display, sub query, aggregator, encrypted and file attribute columns
+				if(a.contentUse !== 'color' && a.contentUse !== 'drawing' && c.query === null && c.aggregator === null &&
 					!a.encrypted && !s.isAttributeFiles(a.content)) {
 					
 					return c;

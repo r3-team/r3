@@ -34,6 +34,7 @@ export function getFirstColumnUsableAsAggregator(batch,columns) {
 			&& c.aggregator === null
 			&& !a.encrypted
 			&& a.contentUse !== 'color'
+			&& a.contentUse !== 'drawing'
 			&& !isAttributeFiles(a.content)
 			&& !isAttributeBoolean(a.content)
 			&& !isAttributeString(a.content)

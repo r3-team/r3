@@ -332,10 +332,10 @@
 .field .tabs-entry.error{
 	color:var(--color-error);
 }
-.field .tabs-entry.active.showsData{
+.field .tabs-entry.active.inputBg{
 	background-color:var(--color-input);
 }
-.field .tabs-entry.active.showsData.readonly{
+.field .tabs-entry.active.inputBg.readonly{
 	background-color:var(--color-input-disabled);
 }
 .field .tabs>.fields{

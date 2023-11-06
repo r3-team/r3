@@ -3,6 +3,7 @@ import MyChart                from './chart.js';
 import MyGantt                from './gantt.js';
 import MyKanban               from './kanban.js';
 import MyInputDate            from './inputDate.js';
+import MyInputDrawing         from './inputDrawing.js';
 import MyInputFiles           from './inputFiles.js';
 import MyInputIframe          from './inputIframe.js';
 import MyInputLogin           from './inputLogin.js';
@@ -52,6 +53,7 @@ let MyField = {
 		MyGantt,
 		MyKanban,
 		MyInputDate,
+		MyInputDrawing,
 		MyInputFiles,
 		MyInputIframe,
 		MyInputLogin,
@@ -437,6 +439,15 @@ let MyField = {
 					:isReadonly="isReadonly"
 					:unixFrom="value"
 					:unixTo="valueAlt"
+				/>
+				
+				<!-- drawing input -->
+				<my-input-drawing
+					v-if="isDrawingInput"
+					v-model="value"
+					:formLoading="formLoading"
+					:isHidden="isHidden"
+					:readonly="isReadonly"
 				/>
 				
 				<!-- boolean input -->
@@ -976,6 +987,7 @@ let MyField = {
 			&& !s.isBoolean
 			&& !s.isColor
 			&& !s.isDateInput
+			&& !s.isDrawingInput
 			&& !s.isFiles
 			&& !s.isIframe
 			&& !s.isLogin
@@ -1030,7 +1042,7 @@ let MyField = {
 		customErr:  (s) => typeof s.fieldIdMapError[s.field.id] !== 'undefined'
 			&& s.fieldIdMapError[s.field.id] !== null ? s.fieldIdMapError[s.field.id] : null,
 		hasCaption: (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
-		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList,
+		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawingInput,
 		inputRegex: (s) => !s.isData || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
 		showInvalid:(s) => !s.isValid && (s.formBadSave || !s.notTouched),
@@ -1070,6 +1082,7 @@ let MyField = {
 		isDateInput:     (s) => s.isData && s.isDatetime || s.isDate || s.isTime,
 		isDateRange:     (s) => s.isDateInput && s.field.attributeIdAlt !== null,
 		isDecimal:       (s) => s.isData && s.isAttributeDecimal(s.attribute.content),
+		isDrawingInput:  (s) => s.isData && s.attribute.contentUse === 'drawing',
 		isDropdown:      (s) => s.isData && (s.isRelationship || s.isDateInput || s.isLogin || s.isColor || s.isRegconfig),
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
 		isIframe:        (s) => s.isData && s.attribute.contentUse === 'iframe',
@@ -1129,24 +1142,25 @@ let MyField = {
 		// presentation
 		getTabClasses(tabIndex) {
 			if(!this.isTabs) return {};
-			let active   = tabIndex === this.tabIndexShow;
-			let fields   = this.field.tabs[tabIndex].fields;
-			let oneField = fields.length === 1;
-			let readonly = false;
+			const active   = tabIndex === this.tabIndexShow;
+			const fields   = this.field.tabs[tabIndex].fields;
+			const oneField = fields.length === 1 ? fields[0] : false;
+			let   readonly = false;
+			let   drawing  = false;
 			
-			if(oneField && typeof this.$refs['tabField_'+fields[0].id] !== 'undefined')
-				readonly = this.$refs['tabField_'+fields[0].id]['0'].isReadonly;
+			if(oneField && typeof this.$refs['tabField_'+oneField.id] !== 'undefined')
+				readonly = this.$refs['tabField_'+oneField.id]['0'].isReadonly;
+			
+			if(oneField && oneField.content === 'data') {
+				const atr = this.attributeIdMap[oneField.attributeId];
+				drawing = atr.contentUse === 'drawing';
+			}
 			
 			return {
-				active:tabIndex === this.tabIndexShow,
-				error:this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
-				readonly:   active && oneField && readonly,
-				showsCal:   active && oneField && fields[0].content === 'calendar',
-				showsChart: active && oneField && fields[0].content === 'chart',
-				showsData:  active && oneField && fields[0].content === 'data',
-				showsKanban:active && oneField && fields[0].content === 'kanban',
-				showsList:  active && oneField && fields[0].content === 'list',
-				showsTabs:  active && oneField && fields[0].content === 'tabs'
+				active:  tabIndex === this.tabIndexShow,
+				error:   this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
+				inputBg: active && oneField && !drawing && oneField.content === 'data',
+				readonly:active && oneField && readonly
 			};
 		},
 		

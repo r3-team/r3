@@ -23,6 +23,12 @@
 .value-rich.italic{
 	font-style:italic;
 }
+.value-rich .drawing{
+	object-fit:cover;
+	border-radius:5px;
+	box-sizing:border-box;
+	border:1px solid var(--color-border);
+}
 .value-rich .gallery-item{
 	object-fit:cover;
 	box-sizing:border-box;

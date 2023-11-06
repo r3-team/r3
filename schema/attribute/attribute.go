@@ -22,8 +22,8 @@ var contentTypes = []string{"integer", "bigint", "numeric", "real",
 	"double precision", "varchar", "text", "boolean", "regconfig", "uuid",
 	"1:1", "n:1", "files"}
 
-var contentUseTypes = []string{"default", "textarea",
-	"richtext", "date", "datetime", "time", "color", "iframe"}
+var contentUseTypes = []string{"default", "textarea", "richtext",
+	"date", "datetime", "time", "color", "iframe", "drawing"}
 
 var fkBreakActions = []string{"NO ACTION", "RESTRICT", "CASCADE", "SET NULL",
 	"SET DEFAULT"}

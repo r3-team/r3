@@ -46,6 +46,7 @@
 			"send":"Küldés",
 			"show":"Megjelenítés",
 			"tryAnyway":"Try anyway",
+			"undo":"Undo",
 			"unlock":"Feloldás",
 			"zoomReset":"Zoom szint visszaállítása"
 		},
@@ -696,6 +697,7 @@
 				"date":"Dátum",
 				"datetime":"Dátum + Idő",
 				"decimal":"Szám, tizedes",
+				"drawing":"Drawing",
 				"float":"Szám, lebegőpontos",
 				"files":"Fájlok",
 				"iframe":"iframe",
@@ -716,6 +718,7 @@
 				"date":"Dátumérték. Tiszta dátumértékekhez használják, mint például a születési vagy vásárlási dátum.",
 				"datetime":"Dátumérték időkomponenssel. Eseményekhez, időpontokhoz stb. használatos. Naptárakban egész vagy részleges napi eseményeket lehet vele kezelni.",
 				"decimal":"Tizedesértékek, gyakran pénzösszegekhez használják.",
+				"drawing":"A simple drawing, created via mouse or touch input. Often used for signatures.",
 				"files":"Egy vagy több fájl. A maximális fájlméret/arány beállításától függően a felhasználók tartósan tárolhatnak fájlokat. A kliensalkalmazással a fájlokat helyben megnyithatják közvetlen szerkesztésre.",
 				"float":"Lebegőpontos számértékek. Leggyakrabban összetett számításokhoz használják.",
 				"iframe":"URL-érték, amely külső erőforrást jelenít meg, mint például egy weboldal.",

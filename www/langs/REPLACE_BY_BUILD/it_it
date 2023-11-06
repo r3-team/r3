@@ -46,6 +46,7 @@
 			"send":"Invia",
 			"show":"Mostra",
 			"tryAnyway":"Try anyway",
+			"undo":"Undo",
 			"unlock":"Unlock",
 			"zoomReset":"Ripristina livello di zoom"
 		},
@@ -696,6 +697,7 @@
 				"date":"Date",
 				"datetime":"Date + time",
 				"decimal":"Number, decimal",
+				"drawing":"Drawing",
 				"float":"Number, floating",
 				"files":"Files",
 				"iframe":"iframe",
@@ -716,6 +718,7 @@
 				"date":"A date value. Used for date-only values, like date of birth or purchase date.",
 				"datetime":"A date value with time component. Used for events, appointments and so on. If used in calendars, full or partial day events can be managed.",
 				"decimal":"Decimal values, often used for currency amounts.",
+				"drawing":"A simple drawing, created via mouse or touch input. Often used for signatures.",
 				"files":"One or many files. Depending on max. file count/size settings, users can permanently store files. With the client application, files can be opened locally for direct editing.",
 				"float":"Number values with floating decimal. Mostly used for expensive calculations.",
 				"iframe":"A URL value, which is used to show an external resource like a web site.",

@@ -243,6 +243,7 @@
 	align-items:flex-start;
 	gap:4px;
 }
+.list .layoutTable td .batch .drawing,
 .list .layoutTable td .batch .gallery-item{
 	max-height:var(--row-height);
 }
@@ -363,6 +364,9 @@
 	justify-content:center;
 	align-items:flex-start;
 	gap:4px;
+}
+.list .layoutCards .card .batch .drawing{
+	width:100%;
 }
 
 

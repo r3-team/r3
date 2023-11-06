@@ -63,7 +63,6 @@
 	
 	/**/
 	/* images */
-	--image-list-cards:         url('../images/texture_paper01.webp');
 	--image-filter:             invert(1) brightness(10%);
 	--image-filter-alt:         invert(1) brightness(60%);
 	--image-filter-bg:          invert(1) brightness(90%);
@@ -1352,7 +1351,6 @@ table td.maximum{
 	--image-filter-bg:     var(--image-filter);
 	--image-filter-error:  invert(13%) sepia(92%) saturate(4889%) hue-rotate(359deg) brightness(97%) contrast(38%);
 	--image-filter-success:invert(36%) sepia(75%) saturate(1288%) hue-rotate(76deg) brightness(92%) contrast(18%);
-	--image-list-cards:    url('../images/texture_paper02.webp');
 }
 .user-dark *::-webkit-scrollbar {
 	width:15px;
