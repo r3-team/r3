@@ -613,7 +613,7 @@ let MyBuilderAttribute = {
 					}
 					for(let id of res.payload.pgIndexIds) {
 						const rel = this.relationIdMap[this.indexIdMap[id].relationId];
-						const url = `#/builder/relation/${id}`;
+						const url = `#/builder/relation/${rel.id}`;
 						dependencies.push(`${this.moduleIdMap[rel.moduleId].name}: ${this.capGen.index} <a href="${url}">'${rel.name}'</a>`);
 					}
 					for(let f of res.payload.fields) {

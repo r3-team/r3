@@ -45,11 +45,27 @@ let MyListCsv = {
 				</tr>
 				<tr v-if="hasDate">
 					<td>{{ capApp.csvDate }}</td>
-					<td><input disabled="disabled" :value="settings.dateFormat" /></td>
+					<td>
+						<select v-model="dateFormat">
+							<option value="Y-m-d">{{ capGen.dateFormat0 }}</option>
+							<option value="Y/m/d">{{ capGen.dateFormat1 }}</option>
+							<option value="d.m.Y">{{ capGen.dateFormat2 }}</option>
+							<option value="d/m/Y">{{ capGen.dateFormat3 }}</option>
+							<option value="m/d/Y">{{ capGen.dateFormat4 }}</option>
+						</select>
+					</td>
 				</tr>
 				<tr v-if="hasDatetime">
 					<td>{{ capApp.csvDatetime }}</td>
-					<td><input disabled="disabled" :value="settings.dateFormat + ' ' + capApp.csvTimeHint" /></td>
+					<td>
+						<select v-model="dateFormat">
+							<option value="Y-m-d">{{ capGen.dateFormat0 + ' ' + capApp.csvTimeHint }}</option>
+							<option value="Y/m/d">{{ capGen.dateFormat1 + ' ' + capApp.csvTimeHint }}</option>
+							<option value="d.m.Y">{{ capGen.dateFormat2 + ' ' + capApp.csvTimeHint }}</option>
+							<option value="d/m/Y">{{ capGen.dateFormat3 + ' ' + capApp.csvTimeHint }}</option>
+							<option value="m/d/Y">{{ capGen.dateFormat4 + ' ' + capApp.csvTimeHint }}</option>
+						</select>
+					</td>
 				</tr>
 				<tr v-if="hasDatetime">
 					<td>{{ capApp.csvTimezone }}</td>
@@ -111,6 +127,7 @@ let MyListCsv = {
 			cacheDenialTimeout:null, // timer do refresh cache denial timestamp
 			cacheDenialTimestamp:0,  // unix timestamp, used for CSV export cache denial
 			commaChar:',',
+			dateFormat:'Y-m-d',
 			file:null,
 			hasBool:false,
 			hasDate:false,
@@ -123,7 +140,8 @@ let MyListCsv = {
 		};
 	},
 	mounted() {
-		this.action = this.isExport ? 'export' : 'import';
+		this.action     = this.isExport ? 'export' : 'import';
+		this.dateFormat = this.settings.dateFormat;
 		
 		for(let i = 0, j = this.columns.length; i < j; i++) {
 			let atr = this.attributeIdMap[this.columns[i].attributeId];
@@ -144,7 +162,7 @@ let MyListCsv = {
 				`bool_false=${s.boolNative ? 'false' : s.capGen.option.no}`,
 				`bool_true=${s.boolNative ? 'true' : s.capGen.option.yes}`,
 				`comma_char=${encodeURIComponent(s.commaChar)}`,
-				`date_format=${encodeURIComponent(s.settings.dateFormat)}`,
+				`date_format=${encodeURIComponent(s.dateFormat)}`,
 				`timezone=${encodeURIComponent(s.timezone)}`,
 				`language_code=${s.settings.languageCode}`,
 				`ignore_header=${s.hasHeader ? 'false' : 'true'}`,
@@ -208,7 +226,7 @@ let MyListCsv = {
 			formData.append('joins',JSON.stringify(this.query.joins));
 			formData.append('lookups',JSON.stringify(this.query.lookups));
 			formData.append('boolTrue',this.boolNative ? 'true' : this.capGen.option.yes);
-			formData.append('dateFormat',this.settings.dateFormat);
+			formData.append('dateFormat',this.dateFormat);
 			formData.append('timezone',this.timezone);
 			formData.append('commaChar',this.commaChar);
 			formData.append('ignoreHeader',this.hasHeader ? 'true' : 'false');
