@@ -25,11 +25,9 @@
 	/* calendar elements */
 	--z-index-gantt-hover:5;
 	--z-index-calendar-month-header:5;
-	--z-index-calendar-month-day-event-text-hover:4;
-	--z-index-calendar-month-day-event-text:2;
-	--z-index-calendar-month-day-event-ending-beam:3;
 	--z-index-calendar-month-caption:3;
 	--z-index-calendar-month-line:2;
+	--z-index-calendar-days-full-values:4;
 	--z-index-calendar-days-full-days:3;
 	--z-index-calendar-days-full-day:2;
 	
@@ -81,6 +79,8 @@
 	--color-border:        #9b9b9b;
 	--color-border-bright: #9f9f9f;
 	--color-border-dark:   #2f2f2f;
+	--color-cal-day-event: #d6e2e9;
+	--color-cal-outside:   #e9eeef;
 	--color-font:          #101010;
 	--color-font-bright:   #ffffff;
 	--color-font-dark:     #101010;
@@ -1315,6 +1315,8 @@ table td.maximum{
 	--color-bright:        #323232;
 	--color-border:        #111111;
 	--color-border-bright: #8f8f8f;
+	--color-cal-day-event: #444c51;
+	--color-cal-outside:   #525455;
 	--color-font:          #f7f7f7;
 	--color-input:         var(--color-input-dark);
 	--color-input-disabled:#222222;
@@ -1325,7 +1327,7 @@ table td.maximum{
 	--color-shade-input-sel:hsl(311,57%,20%);
 	
 	--color-accent1:       hsl(311,47%,70%);
-	--color-accent2:       hsl(127,06%,25%);
+	--color-accent2:       hsl(128, 4%,30%);
 	--color-accent3:       hsl(199,11%,35%);
 	--color-accent3-alt:   hsl(199,11%,45%);
 	--color-accent4:       hsl(339, 4%,61%);

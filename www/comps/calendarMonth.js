@@ -1,6 +1,7 @@
 import MyValueRich              from './valueRich.js';
 import {getColumnIndexesHidden} from './shared/form.js';
 import {
+	colorAdjustBg,
 	colorMakeContrastFont,
 	getStringFilled
 } from './shared/generic.js';
@@ -37,57 +38,37 @@ let MyCalendarMonth = {
 				
 				<!-- full day events -->
 				<div class="event"
-					@mousedown.stop=""
-					@mouseup.left="clickRecord($event,e.row,e.placeholder,false)"
-					@mouseup.middle="clickRecord($event,e.row,e.placeholder,true)"
+					@click.left="clickRecord($event,e.row,e.placeholder,false)"
+					@click.middle="clickRecord($event,e.row,e.placeholder,true)"
 					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => v.fullDay || v.placeholder)"
 					:class="{ first:e.entryFirst, last:e.entryLast, placeholder:e.placeholder, clickable:hasUpdate }"
+					:style="e.style"
 				>
-					<template v-if="!e.placeholder">
-						<!-- border line -->
-						<div class="background"
-							:style="getColor('border-bottom-color',e.color)"
-						></div>
-						
-						<!-- caption -->
-						<span class="values"
-							v-if="day === 1 || e.entryFirst"
-							:style="getFullDayTextStyles(day,e)"
-						>
-							<template v-for="(v,i) in e.values">
-								<my-value-rich class="context-calendar"
-									v-if="v !== null"
-									:attributeId="columns[i].attributeId"
-									:basis="columns[i].basis"
-									:bold="columns[i].styles.includes('bold')"
-									:display="columns[i].display"
-									:italic="columns[i].styles.includes('italic')"
-									:key="i"
-									:length="columns[i].length"
-									:value="v"
-								/>
-							</template>
+					<div class="values-wrap" v-if="!e.placeholder" :style="getFullDayTextStyles(day,e)">
+						<span class="values" v-if="day === 1 || e.entryFirst">
+							<my-value-rich class="context-calendar"
+								v-for="(v,i) in e.values.filter(v => v !== null)"
+								:attributeId="columns[i].attributeId"
+								:basis="columns[i].basis"
+								:bold="columns[i].styles.includes('bold')"
+								:display="columns[i].display"
+								:italic="columns[i].styles.includes('italic')"
+								:key="i"
+								:length="columns[i].length"
+								:value="v"
+							/>
 						</span>
-						
-						<!-- ending beam -->
-						<div class="ending-beam"
-							v-if="e.entryLast"
-							:style="getColor('background-color',e.color)"
-						></div>
-					</template>
+					</div>
 				</div>
 				
 				<!-- partial day events -->
 				<div class="part"
-					@mousedown.stop=""
-					@mouseup.left="clickRecord($event,e.row,false,false)"
-					@mouseup.middle="clickRecord($event,e.row,false,true)"
+					@click.left="clickRecord($event,e.row,false,false)"
+					@click.middle="clickRecord($event,e.row,false,true)"
 					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => !v.fullDay && !v.placeholder)"
 					:class="{ clickable:hasUpdate }"
 				>
-					<span :style="getStylesPartialDayEvent(e.color)">
-						{{ getPartCaption(e.unix0) }}
-					</span>
+					<span :style="e.style">{{ getPartCaption(e.unix0) }}</span>
 					
 					<template v-for="(v,i) in e.values">
 						<my-value-rich class="context-calendar"
@@ -152,14 +133,18 @@ let MyCalendarMonth = {
 			// each row is one event (partial day, full day or spanning multiple days)
 			for(let i = 0, j = s.rows.length; i < j; i++) {
 				
+				const colorThere = s.hasColor && s.rows[i].values[2] !== null;
+				const colorBg    = colorThere ? s.colorAdjustBg(s.rows[i].values[2]) : null;
+				const colorFont  = colorThere ? s.colorMakeContrastFont(colorBg) : null;
+				
 				let ev = {
-					color:s.hasColor ? s.rows[i].values[2] : null,
 					entryFirst:true,
 					entryLast:false,
 					fullDay:false,
 					fullDaysLeft:0,
 					placeholder:false,
 					row:s.rows[i],
+					style:colorBg === null ? '' : `background-color:${colorBg};color:${colorFont};`,
 					unix0:s.rows[i].values[0],
 					unix1:s.rows[i].values[1],
 					values:[]
@@ -269,6 +254,7 @@ let MyCalendarMonth = {
 	},
 	methods:{
 		// externals
+		colorAdjustBg,
 		colorMakeContrastFont,
 		getColumnIndexesHidden,
 		getDateAtUtcZero,
@@ -295,6 +281,8 @@ let MyCalendarMonth = {
 			this.unixInput1 = null;
 		},
 		clickRecord(event,row,placeholder,middleClick) {
+			console.log('click');
+			
 			if(placeholder) return;
 			
 			// block clickDay() event (placeholders must bubble)
@@ -320,14 +308,6 @@ let MyCalendarMonth = {
 			let h = this.getStringFilled(d.getHours(),2,"0");
 			let m = this.getStringFilled(d.getMinutes(),2,"0");
 			return `${h}:${m}`;
-		},
-		getColor(styleName,color) {
-			if(color !== null) return `${styleName}:#${color};`;
-			return '';
-		},
-		getStylesPartialDayEvent(color) {
-			return color === null ? ''
-				: `background-color:#${color};color:${this.colorMakeContrastFont(color)};`;
 		},
 		getDayClasses(dayOffset,day) {
 			let cls = {};

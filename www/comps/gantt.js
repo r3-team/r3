@@ -282,7 +282,7 @@ let MyGantt = {
 		<div class="gantt-content">
 			<div class="gantt-labels" v-if="showGroupLabels">
 				<div class="gantt-label-entry"></div>
-				<div class="gantt-label-entry gantt-group"
+				<div class="gantt-label-entry"
 					v-for="(g,k) in groups"
 					:key="k"
 					:style="styleLabel(g)"

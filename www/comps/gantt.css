@@ -38,6 +38,7 @@
 	gap:6px;
 	box-sizing:border-box;
 	border-bottom:1px solid var(--color-border);
+	background-color:var(--color-bg);
 }
 .gantt-label-entry:first-child{
 	height:60px; /* double line height */

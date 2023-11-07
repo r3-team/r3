@@ -110,6 +110,7 @@
 	overflow:hidden;
 	background:yellow;
 	background-color:var(--color-accent3);
+	box-shadow:1px 1px 1px var(--color-shade);
 	display:flex;
 	flex-flow:column nowrap;
 	gap:5px;
@@ -138,14 +139,15 @@
 	opacity:0.9;
 	box-sizing:border-box;
 	border-bottom:1px dotted var(--color-border);
+	background-color:var(--color-input);
 }
 .calendar-days .dayInput.clickable.active,
 .calendar-days .hourInput.clickable.active{
-	background-color:var(--color-accent3-alt);
+	filter:brightness(80%);
 }
 .calendar-days .dayInput.clickable:hover,
 .calendar-days .hourInput.clickable:hover{
-	background-color:var(--color-accent3);
+	filter:brightness(90%);
 }
 
 /* month view */
@@ -173,6 +175,7 @@
 	display:flex;
 	flex-direction:row;
 	background-color:var(--color-bg);
+	border-bottom:1px solid var(--color-border);
 	z-index:var(--z-index-calendar-month-header);
 }
 .calendar-month .days .item{
@@ -182,12 +185,12 @@
 .calendar-month .week{
 	flex:1 1 auto;
 	display:flex;
-	border-top:1px solid var(--color-border);
+	border-bottom:1px solid var(--color-border);
 	flex-direction:row;
 }
 .calendar-month .day{
 	min-height:50px;
-	flex:1 1 0px;
+	width:calc(100%/7);
 	display:flex;
 	flex-direction:column;
 	background-color:var(--color-input);
@@ -200,18 +203,18 @@
 	background-color:var(--color-accent2);
 }
 .calendar-month .day.outside{
-	background-color:var(--color-bg);
+	background-color:var(--color-cal-outside);
 }
 .calendar-month .day.selected{
-	background-color:var(--color-accent3-alt);
+	filter:brightness(80%);
 }
 .calendar-month .day.clickable:hover{
-	background-color:var(--color-accent3);
+	filter:brightness(90%);
 }
 .calendar-month .day h1{
 	margin:6px 8px;
 	font-size:110%;
-	color:var(--color-font-disabled);
+	color:var(--color-font);
 }
 .calendar-month .day.today h1{
 	color:var(--color-font);
@@ -225,60 +228,46 @@
 
 /* full day event */
 .calendar-month .day .event{
-	height:22px;
+	height:26px;
+	margin:2px 0px;
+	padding-left:8px;
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
+	box-shadow:1px 1px 1px var(--color-shade);
+	background-color:var(--color-cal-day-event);
 	position:relative;
-	background-color:inherit;
 }
-.calendar-month .day .event .background{
-	overflow:hidden;
-	margin:10px 0px 0px;
-	border-bottom:3px solid var(--color-accent4);
-}
-.calendar-month .day .event.first .background{
+.calendar-month .day .event.first{
 	margin-left:5px;
+	border-radius:5px 0px 0px 5px;
 }
-.calendar-month .day .event.last .background{
-	margin-right:3px;
+.calendar-month .day .event.last{
+	margin-right:5px;
+	border-radius:0px 5px 5px 0px;
 }
-.calendar-month .day .event.placeholder .background{
-	height:22px;
-	margin:0px;
+.calendar-month .day .event.placeholder{
+	box-shadow:none;
 	background-color:transparent;
 }
-.calendar-month .day .event .ending-beam{
-	width:3px;
-	height:14px;
+.calendar-month .day .event .values-wrap{
 	position:absolute;
-	bottom:4px;
-	right:3px;
-	background-color:var(--color-accent4);
-	z-index:var(--z-index-calendar-month-day-event-ending-beam);
+	left:7px;
+	z-index:var(--z-index-calendar-days-full-values);
 }
 .calendar-month .day .event .values{
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
 	gap:6px;
-	height:22px;
-	line-height:22px;
-	padding:0px 3px;
-	position:absolute;
-	bottom:1px;
-	left:5%;
 	white-space:nowrap;
-	z-index:var(--z-index-calendar-month-day-event-text);
-	background-color:inherit;
 }
 .calendar-month .day .event .values:hover span{
 	font-weight:bold;
 }
-.calendar-month .day .event.first .text{
-	left:0px;
-}
 .calendar-month .day .event:hover .text{
 	max-width:unset !important;
 	font-weight:bold;
-	z-index:var(--z-index-calendar-month-day-event-text-hover);
 }
 
 /* partial day event */
@@ -289,16 +278,16 @@
 	line-height:18px;
 	padding:2px 4px;
 	margin:0px 2px;
-	border-bottom:1px dotted var(--color-accent3-alt);
+	border-bottom:1px dotted var(--color-border);
 }
 .calendar-month .day .part:hover>span{
 	font-weight:bold;
 }
 .calendar-month .day .part>span{
-	padding:0px 3px;
+	padding:0px 5px;
 	margin-right:4px;
 	border-radius:4px;
-	background-color:var(--color-accent3-alt);
+	background-color:var(--color-cal-day-event);
 }
 
 

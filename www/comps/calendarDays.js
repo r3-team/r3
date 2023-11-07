@@ -21,7 +21,7 @@ let MyCalendarDaysEvent = {
 		@click.middle="$emit('click-middle')"
 		:style="style"
 	>
-		<div class="event shade" tabindex="0"
+		<div class="event" tabindex="0"
 			:class="{ clickable:hasUpdate }"
 			:style="styleCard"
 		>
