@@ -125,6 +125,31 @@ let MyAdminLoginTemplate = {
 							</div>
 						</td>
 					</tr>
+					<tr>
+						<td colspan="2"><b>{{ capAppSet.titleSubNumbers }}</b></td>
+					</tr>
+					<tr class="default-inputs">
+						<td>{{ capAppSet.numberSepThousand }}</td>
+						<td>
+							<select v-model="settings.numberSepThousand">
+								<option value=".">{{ capAppSet.option.numberSeparator.dot }}</option>
+								<option value=",">{{ capAppSet.option.numberSeparator.comma }}</option>
+								<option value="'">{{ capAppSet.option.numberSeparator.apos }}</option>
+								<option value="·">{{ capAppSet.option.numberSeparator.mdot }}</option>
+							</select>
+						</td>
+					</tr>
+					<tr class="default-inputs">
+						<td>{{ capAppSet.numberSepDecimal }}</td>
+						<td>
+							<select v-model="settings.numberSepDecimal">
+								<option value=".">{{ capAppSet.option.numberSeparator.dot }}</option>
+								<option value=",">{{ capAppSet.option.numberSeparator.comma }}</option>
+								<option value="'">{{ capAppSet.option.numberSeparator.apos }}</option>
+								<option value="·">{{ capAppSet.option.numberSeparator.mdot }}</option>
+							</select>
+						</td>
+					</tr>
 					
 					<!-- theming -->
 					<tr>
@@ -349,6 +374,8 @@ let MyAdminLoginTemplate = {
 			languageCode:'en_us',
 			listSpaced:true,
 			mobileScrollForm:true,
+			numberSepDecimal:'.',
+			numberSepThousand:',',
 			pattern:'bubbles',
 			searchDictionaries:['english'],
 			spacing:3,

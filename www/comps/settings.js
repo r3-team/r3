@@ -987,6 +987,31 @@ let MySettings = {
 								</div>
 							</td>
 						</tr>
+						<tr>
+							<td colspan="2"><b>{{ capApp.titleSubNumbers }}</b></td>
+						</tr>
+						<tr class="default-inputs">
+							<td>{{ capApp.numberSepThousand }}</td>
+							<td>
+								<select v-model="settingsInput.numberSepThousand">
+									<option value=".">{{ capApp.option.numberSeparator.dot }}</option>
+									<option value=",">{{ capApp.option.numberSeparator.comma }}</option>
+									<option value="'">{{ capApp.option.numberSeparator.apos }}</option>
+									<option value="·">{{ capApp.option.numberSeparator.mdot }}</option>
+								</select>
+							</td>
+						</tr>
+						<tr class="default-inputs">
+							<td>{{ capApp.numberSepDecimal }}</td>
+							<td>
+								<select v-model="settingsInput.numberSepDecimal">
+									<option value=".">{{ capApp.option.numberSeparator.dot }}</option>
+									<option value=",">{{ capApp.option.numberSeparator.comma }}</option>
+									<option value="'">{{ capApp.option.numberSeparator.apos }}</option>
+									<option value="·">{{ capApp.option.numberSeparator.mdot }}</option>
+								</select>
+							</td>
+						</tr>
 					</tbody>
 				</table>
 			</div>

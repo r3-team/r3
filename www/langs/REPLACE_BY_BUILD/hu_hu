@@ -1892,6 +1892,14 @@
 			"resetAccessDesc":"Ha sem a korábbi jelszavadhoz, sem a biztonsági kódodhoz nincs hozzáférésed, az titkosított adatokhoz való hozzáférést már elveszítetted.<br /><br />Ebben az esetben dönthetsz úgy, hogy visszaállítod a személyes kulcsaidat, hogy az új adatokat titkosítsd - EZ NEM fogja visszaállítani a korábban titkosított adatokhoz való hozzáférést.",
 			"resetAccessHint":"Biztos vagy benne, hogy vissza szeretnéd állítani a személyes kulcsaidat? Ha igen, akkor nincs visszaút, még akkor sem, ha később megtalálod az előző biztonsági kódodat."
 		},
+		"option":{
+			"numberSeparator":{
+				"apos":"Apostrophe (')",
+				"comma":"Comma (,)",
+				"dot":"Dot (.)",
+				"mdot":"Middle dot (·)"
+			}
+		},
 		"tokensFixed":{
 			"button":{
 				"loadApp":"Alkalmazás",
@@ -1955,6 +1963,8 @@
 		"listSpacedOff":"Compact",
 		"listSpacedOn":"Larger",
 		"mobileScrollForm":"Mobil: Teljes űrlap görgetése",
+		"numberSepDecimal":"Decimal separator",
+		"numberSepThousand":"Thousands separator",
 		"pageTitle":"Beállítások",
 		"pattern":"Háttérminta",
 		"searchDictionaries":"Teljes szövegkeresés szótárai",
@@ -1968,6 +1978,7 @@
 		"titleGeneral":"Általános",
 		"titleSubHeader":"Header menu",
 		"titleSubMenu":"Application menu",
+		"titleSubNumbers":"Numbers",
 		"titleTheme":"Téma",
 		"warnUnsaved":"Figyelmeztetés mentetlen változtatásoknál"
 	},

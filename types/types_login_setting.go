@@ -19,6 +19,8 @@ type Settings struct {
 	LanguageCode       string      `json:"languageCode"`
 	ListSpaced         bool        `json:"listSpaced"`
 	MobileScrollForm   bool        `json:"mobileScrollForm"`
+	NumberSepDecimal   string      `json:"numberSepDecimal"`
+	NumberSepThousand  string      `json:"numberSepThousand"`
 	PageLimit          int         `json:"pageLimit"`
 	Pattern            pgtype.Text `json:"pattern"`
 	SearchDictionaries []string    `json:"searchDictionaries"`

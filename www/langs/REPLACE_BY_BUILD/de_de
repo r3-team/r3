@@ -1892,6 +1892,14 @@
 			"resetAccessDesc":"Falls du weder Zugriff auf dein vorheriges Passwort noch auf dein Backup-Code hast, ist Zugriff auf verschlüsselte Daten bereits verloren.<br /><br />In diesem Fall kannst du entscheiden, deine persönlichen Schlüssel zurückzusetzen, um neue Daten zu verschlüsseln - dies wird <b>NICHT</b> den Zugriff auf vorher verschlüsselte Daten wiederherstellen.",
 			"resetAccessHint":"Bist du sicher, dass du deine persönlichen Schlüssel zurücksetzen möchtest? Falls ja, kannst du nicht mehr zurück, selbst wenn du deinen alten Backup-Code später wiederfindest."
 		},
+		"option":{
+			"numberSeparator":{
+				"apos":"Apostroph (')",
+				"comma":"Komma (,)",
+				"dot":"Punkt (.)",
+				"mdot":"Punkt, mittig (·)"
+			}
+		},
 		"tokensFixed":{
 			"button":{
 				"loadApp":"Anwendung",
@@ -1955,6 +1963,8 @@
 		"listSpacedOff":"Kompakt",
 		"listSpacedOn":"Größer",
 		"mobileScrollForm":"Mobil: Gesamtes Formular scrollen",
+		"numberSepDecimal":"Dezimal-Trennzeichen",
+		"numberSepThousand":"Tausender-Trennzeichen",
 		"pageTitle":"Einstellungen",
 		"pattern":"Hintergrundmuster",
 		"searchDictionaries":"Wörterbücher für Volltextsuche",
@@ -1968,6 +1978,7 @@
 		"titleGeneral":"Allgemein",
 		"titleSubHeader":"Titelleiste",
 		"titleSubMenu":"Anwendungsmenü",
+		"titleSubNumbers":"Nummern",
 		"titleTheme":"Darstellung",
 		"warnUnsaved":"Warnung bei ungespeicherten Änderungen"
 	},

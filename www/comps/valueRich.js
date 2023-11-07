@@ -203,11 +203,31 @@ let MyValueRich = {
 						break;
 						case 'datetime': this.stringValueFull = this.getUnixFormat(this.value,this.settings.dateFormat + ' H:i'); break;
 						case 'time':     this.stringValueFull = this.getUtcTimeStringFromUnix(this.value);                        break;
-						default:         directValue = true; break;
+						default:
+							this.stringValueFull = String(this.value).replace(/\B(?=(\d{3})+(?!\d))/g,this.settings.numberSepThousand);
+						break;
 					}
 				break;
 				
-				// others (numbers, UUID)
+				// decimals
+				case 'numeric': // fallthrough
+				case 'double precision':
+				case 'real':
+					const hasFraction = this.value % 1 !== 0;
+					let strNum        = String(this.value);
+					let strFraction   = '';
+					
+					if(hasFraction)
+						[strNum,strFraction] = strNum.split('.');
+					
+					strNum = strNum.replace(/\B(?=(\d{3})+(?!\d))/g,this.settings.numberSepThousand);
+					
+					this.stringValueFull = hasFraction
+						? strNum + this.settings.numberSepDecimal + strFraction
+						: strNum;
+				break;
+				
+				// others (UUID)
 				default: directValue = true; break;
 			}
 			

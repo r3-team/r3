@@ -1892,6 +1892,14 @@
 			"resetAccessDesc":"If you do not have access to either your previous password nor your backup code, you permanently lost access to your encrypted data.<br /><br />If this is the case, you can decide to reset your personal keys to encrypt new data - this will <b>NOT</b> re-establish access to previously encrypted data.",
 			"resetAccessHint":"Are you sure you want to reset your personal keys? If you do this, there is no going back even if you find your old backup code later."
 		},
+		"option":{
+			"numberSeparator":{
+				"apos":"Apostrophe (')",
+				"comma":"Comma (,)",
+				"dot":"Dot (.)",
+				"mdot":"Middle dot (·)"
+			}
+		},
 		"tokensFixed":{
 			"button":{
 				"loadApp":"Application",
@@ -1955,6 +1963,8 @@
 		"listSpacedOff":"Compact",
 		"listSpacedOn":"Larger",
 		"mobileScrollForm":"Mobile: Scroll entire form",
+		"numberSepDecimal":"Decimal separator",
+		"numberSepThousand":"Thousands separator",
 		"pageTitle":"Setări",
 		"pattern":"Background pattern",
 		"searchDictionaries":"Dictionaries for full-text search",
@@ -1968,6 +1978,7 @@
 		"titleGeneral":"General",
 		"titleSubHeader":"Header menu",
 		"titleSubMenu":"Application menu",
+		"titleSubNumbers":"Numbers",
 		"titleTheme":"Temă",
 		"warnUnsaved":"Avertismente pentru modificări nesalvate"
 	},
