@@ -119,10 +119,23 @@ let MyAdminCustom = {
 			
 			<br />
 			<div class="contentPartHeader">
+				<img class="icon" src="images/lock.png" />
+				<h1>{{ capApp.titleLoginPage }}</h1>
+			</div>
+			<table class="generic-table-vertical">
+				<tr>
+					<td>{{ capApp.tokenKeepEnable }}</td>
+					<td><my-bool-string-number v-model="configInput.tokenKeepEnable" :readonly="!activated" /></td>
+					<td>{{ capApp.tokenKeepEnableHint }}</td>
+				</tr>
+			</table>
+			
+			<br />
+			<div class="contentPartHeader">
 				<img class="icon" src="images/colors.png" />
 				<h1>{{ capApp.titleColors }}</h1>
 			</div>
-			<table class="generic-table-vertical default-inputs">
+			<table class="generic-table-vertical">
 				<tr>
 					<td>{{ capApp.companyColorLogin }}</td>
 					<td><my-input-color v-model="configInput.companyColorLogin" :readonly="!activated" /></td>

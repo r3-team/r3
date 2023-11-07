@@ -251,7 +251,6 @@
 			"titlePerformance":"Leistung",
 			"titleRepo":"Anwendungs-Repository",
 			"tokenExpiryHours":"Max. Sitzungszeit in Stunden",
-			"tokenKeepEnable":"Benutzern erlauben, angemeldet zu bleiben",
 			"updateCheck":"Versionsstand",
 			"updateCheckCurrent":"Aktuell",
 			"updateCheckNewer":"Cutting-Edge",
@@ -290,8 +289,11 @@
 			"titleCaptions":"Beschriftungen",
 			"titleColors":"Farben",
 			"titleCss":"CSS-Regeln",
+			"titleLoginPage":"Anmeldeseite",
 			"titleLogos":"Logos",
-			"titlePwas":"Progressive-Web-Apps (PWAs)"
+			"titlePwas":"Progressive-Web-Apps (PWAs)",
+			"tokenKeepEnable":"Benutzern erlauben, angemeldet zu bleiben",
+			"tokenKeepEnableHint":"Wenn deaktiviert, wird die Option \"angemeldet bleiben\" von der Anmeldeseite entfernt. Ohne diese Option werden Benutzer gezwungen, sich neu anzumelden, wenn sie auf das System zugreifen. Diese Einstellung betrifft nicht Gerätezugriffe wie Kalendar-Abonnements oder REI3-Clients."
 		},
 		"files":{
 			"deleteDate":"Datei gelöscht",

@@ -94,10 +94,6 @@ let MyAdminConfig = {
 						<td><input v-model="configInput.tokenExpiryHours" /></td>
 					</tr>
 					<tr>
-						<td>{{ capApp.tokenKeepEnable }}</td>
-						<td><my-bool-string-number v-model="configInput.tokenKeepEnable" /></td>
-					</tr>
-					<tr>
 						<td colspan="2"><br /><h3>{{ capApp.pwTitle }}</h3></td>
 					</tr>
 					<tr>

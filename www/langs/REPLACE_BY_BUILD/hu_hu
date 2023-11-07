@@ -251,7 +251,6 @@
 			"titlePerformance":"Teljesítmény",
 			"titleRepo":"Alkalmazás Repository",
 			"tokenExpiryHours":"Makszimális munkamenet-idő órában",
-			"tokenKeepEnable":"Allow users to stay logged in",
 			"updateCheck":"Verzióellenőrzés",
 			"updateCheckCurrent":"Jelenlegi",
 			"updateCheckNewer":"Cutting-Edge",
@@ -290,8 +289,11 @@
 			"titleCaptions":"Feliratok",
 			"titleColors":"Színek",
 			"titleCss":"CSS szabályok",
+			"titleLoginPage":"Login page",
 			"titleLogos":"Logók",
-			"titlePwas":"Progresszív Webalkalmazások (PWA-k)"
+			"titlePwas":"Progresszív Webalkalmazások (PWA-k)",
+			"tokenKeepEnable":"Allow users to stay logged in",
+			"tokenKeepEnableHint":"If switched off, the 'stay logged in' option on the login page is removed. Without this option, users are forced to authenticate every time they access the system. This setting does not affect device access, like calendar subscriptions or REI3 clients."
 		},
 		"files":{
 			"deleteDate":"Fájl törlése",
