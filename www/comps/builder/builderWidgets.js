@@ -1,4 +1,5 @@
-import MyBuilderWidget from './builderWidget.js';
+import MyBuilderWidget    from './builderWidget.js';
+import {routeParseParams} from '../shared/router.js';
 export {MyBuilderWidgets as default};
 
 let MyBuilderWidgets = {
@@ -71,5 +72,16 @@ let MyBuilderWidgets = {
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		capApp:     (s) => s.$store.getters.captions.builder.widget,
 		capGen:     (s) => s.$store.getters.captions.generic
+	},
+	mounted() {
+		let params = { widgetIdEdit:{ parse:'string', value:null } };
+		this.routeParseParams(params);
+		
+		if(params.widgetIdEdit.value !== null)
+			this.widgetIdEdit = params.widgetIdEdit.value;
+	},
+	methods:{
+		// external
+		routeParseParams
 	}
 };

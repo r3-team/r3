@@ -24,6 +24,11 @@ let MyWidget = {
 			</div>
 			
 			<div class="row gap centered">
+				<img class="clickable" src="images/builder.png"
+					v-if="moduleWidget && isAdmin && builderEnabled"
+					@click.exact="openBuilder(false)"
+					@click.middle="openBuilder(true)"
+				/>
 				<img class="clickable" src="images/cancel.png"
 					v-if="editMode && !isTemplate"
 					@click="$emit('remove')"
@@ -164,7 +169,7 @@ let MyWidget = {
 		collectionOpenForm:  (s) => !s.collectionConsumer ? false : s.collectionConsumer.openForm,
 		collectionTitle:     (s) => !s.collectionHasDisplay ? '' : s.getColumnTitle(s.getCollectionColumn(s.collection.id,s.collectionConsumer.columnIdDisplay)),
 		collectionValue:     (s) => !s.collectionHasDisplay ? '' : s.getCollectionValues(s.collection.id,s.collectionConsumer.columnIdDisplay,true),
-		form:                (s) => !s.moduleWidget || s.moduleWidget.formId        === null ? false : s.formIdMap[s.moduleWidget.formId],
+		form:                (s) => !s.moduleWidget || s.moduleWidget.formId === null ? false : s.formIdMap[s.moduleWidget.formId],
 		moduleWidget:        (s) => s.widget.widgetId === null ? false : s.widgetIdMap[s.widget.widgetId],
 		moduleEntry:         (s) => {
 			if(!s.isSystemModuleMenu)
@@ -183,6 +188,8 @@ let MyWidget = {
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		widgetIdMap:    (s) => s.$store.getters['schema/widgetIdMap'],
 		access:         (s) => s.$store.getters.access,
+		builderEnabled: (s) => s.$store.getters.builderEnabled,
+		isAdmin:        (s) => s.$store.getters.isAdmin,
 		isMobile:       (s) => s.$store.getters.isMobile,
 		moduleEntries:  (s) => s.$store.getters.moduleEntries
 	},
@@ -200,6 +207,15 @@ let MyWidget = {
 		clickCollection() {
 			if(this.collectionOpenForm)
 				this.formOpen(this.collectionOpenForm);
+		},
+		openBuilder(middle) {
+			if(!this.moduleWidget)
+				return;
+			
+			const url = `/builder/widgets/${this.moduleWidget.moduleId}?widgetIdEdit=${this.moduleWidget.id}`;
+			
+			if(!middle) this.$router.push(url);
+			else        window.open(`#${url}`,'_blank');
 		}
 	}
 };
