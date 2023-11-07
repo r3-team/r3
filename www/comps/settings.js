@@ -1090,13 +1090,19 @@ let MySettings = {
 							</td>
 						</tr>
 						<tr>
-							<td>{{ capApp.listSpaced }}</td>
+							<td>{{ capApp.listRows }}</td>
 							<td>
-								<div class="row">
+								<div class="row gap">
 									<my-bool
 										v-model="settingsInput.listSpaced"
 										:caption0="capApp.listSpacedOff"
 										:caption1="capApp.listSpacedOn"
+										:grow="false"
+									/>
+									<my-bool
+										v-model="settingsInput.listColored"
+										:caption0="capApp.listColoredOff"
+										:caption1="capApp.listColoredOn"
 										:grow="false"
 									/>
 								</div>

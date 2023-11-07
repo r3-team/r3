@@ -88,13 +88,14 @@
 	--color-input:         #ffffff;
 	--color-input-dark:    #444444;
 	--color-input-disabled:#efefef;
+	--color-list-row-even: #e9eeef;
 	--color-shade:         #333333;
 	--color-shade-bright:  #dddddd;
 	--color-shade-input:   #757575;
 	--color-shade-input-sel:hsl(311,57%,20%);
 	--color-hover-underlay:rgba(0,0,0,0.35);
 	
-	--color-accent1:       hsl(311,57%,40%);
+	--color-accent1:       hsl(311,57%,40%); /* input outlines */
 	--color-accent2:       hsl(127,86%,96%); /* calendar/gantt weekend */
 	--color-accent3:       hsl(199,11%,96%); /* menu/list/calendar entry hover */
 	--color-accent3-alt:   hsl(199,41%,43%); /* menu/list/calendar entry active */
@@ -1317,6 +1318,7 @@ table td.maximum{
 	--color-font:          #f7f7f7;
 	--color-input:         var(--color-input-dark);
 	--color-input-disabled:#222222;
+	--color-list-row-even: #525455;
 	--color-shade:         #000000;
 	--color-shade-bright:  #222222;
 	--color-shade-input:   #080808;

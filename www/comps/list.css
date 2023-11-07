@@ -49,6 +49,7 @@
     padding:0px 10px;
     position:sticky;
     top:0px;
+    left:0px;
     display:flex;
     flex-flow:row nowrap;
     justify-content:space-between;
@@ -109,17 +110,13 @@
 .list .layoutTable tbody tr.rowSelect:focus{
 	cursor:pointer;
 	outline:none;
-	filter:brightness(95%);
-	background-color:var(--color-accent3);
-	transition:background-color 0.2s, filter 0.2s;
+	filter:brightness(90%);
+	transition:filter 0.2s;
 }
 .list .layoutTable tbody tr.rowSelect:hover td,
 .list .layoutTable tbody tr.rowSelect:focus td{
 	box-shadow:inset 0 -2px 0 0 var(--color-accent3-alt);
 	transition:box-shadow 0.5s;
-}
-.list .layoutTable tbody tr.rowSelect.active{
-	background-color:var(--color-accent3-alt);
 }
 .list .layoutTable tfoot tr.aggregation td{
 	font-weight:bold;
@@ -210,6 +207,12 @@
 }
 .list .layoutTable td:last-child{
 	border-right:none;
+}
+.list .layoutTable.rowsColored tr:nth-child(even) td{
+	background-color:var(--color-list-row-even);
+}
+.list .layoutTable tr.rowSelect.active td{
+	filter:brightness(80%);
 }
 .list .layoutTable th.checkbox img:focus,
 .list .layoutTable th.checkbox img:hover,

@@ -227,13 +227,19 @@ let MyAdminLoginTemplate = {
 						</td>
 					</tr>
 					<tr>
-						<td>{{ capAppSet.listSpaced }}</td>
+						<td>{{ capAppSet.listRows }}</td>
 						<td>
-							<div class="row">
+							<div class="row gap">
 								<my-bool
 									v-model="settings.listSpaced"
 									:caption0="capAppSet.listSpacedOff"
 									:caption1="capAppSet.listSpacedOn"
+									:grow="false"
+								/>
+								<my-bool
+									v-model="settings.listColored"
+									:caption0="capAppSet.listColoredOff"
+									:caption1="capAppSet.listColoredOn"
 									:grow="false"
 								/>
 							</div>
@@ -372,6 +378,7 @@ let MyAdminLoginTemplate = {
 			headerCaptions:true,
 			hintUpdateVersion:0,
 			languageCode:'en_us',
+			listColored:false,
 			listSpaced:true,
 			mobileScrollForm:true,
 			numberSepDecimal:'.',

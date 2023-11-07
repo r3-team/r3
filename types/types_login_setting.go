@@ -17,6 +17,7 @@ type Settings struct {
 	HeaderModules      bool        `json:"headerModules"`
 	HintUpdateVersion  int         `json:"hintUpdateVersion"`
 	LanguageCode       string      `json:"languageCode"`
+	ListColored        bool        `json:"listColored"`
 	ListSpaced         bool        `json:"listSpaced"`
 	MobileScrollForm   bool        `json:"mobileScrollForm"`
 	NumberSepDecimal   string      `json:"numberSepDecimal"`
