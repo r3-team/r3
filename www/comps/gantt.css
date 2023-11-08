@@ -28,6 +28,7 @@
 	display:flex;
 	flex-flow:column nowrap;
 	border-right:1px solid var(--color-border);
+	background-color:var(--color-bg);
 }
 .gantt-label-entry{
 	height:30px;
@@ -38,7 +39,6 @@
 	gap:6px;
 	box-sizing:border-box;
 	border-bottom:1px solid var(--color-border);
-	background-color:var(--color-bg);
 }
 .gantt-label-entry:first-child{
 	height:60px; /* double line height */
@@ -93,11 +93,14 @@
 	box-sizing:border-box;
 	border-right:1px solid var(--color-border);
 }
+.gantt-header-item.clickable{
+	background-color:var(--color-bg);
+}
 .gantt-header-item.clickable.selected{
-	background-color:var(--color-accent3-alt);
+	filter:brightness(80%);
 }
 .gantt-header-item.clickable:hover{
-	background-color:var(--color-accent3);
+	filter:brightness(90%);
 }
 .gantt-header-item.lower{
 	text-align:center;
@@ -124,59 +127,43 @@
 	border-bottom:1px solid var(--color-border);
 }
 .gantt-line-record{
-	top:0px;
-	height:30px;
+	top:2px;
+	height:26px;
 	white-space:nowrap;
 	position:absolute;
-	box-sizing:border-box;
-	border-radius:5px;
 }
 .gantt-line-record:hover{
 	max-width:unset !important;
-	color:var(--color-font-bright);
-	background:rgba(0,0,0,0.7);
 	z-index:var(--z-index-gantt-hover);
-	border-radius:3px;
 	overflow:visible;
 }
 .gantt-line-record .record-values{
-	height:24px;
-	line-height:24px;
-	display:flex;
-	flex-flow:row nowrap;
+	height:100%;
 	gap:6px;
-	align-items:center;
 	overflow:hidden;
 	position:relative;
-	padding:0px 6px;
+	padding:0px 3px;
+	box-sizing:border-box;
+	box-shadow:1px 1px 1px var(--color-shade);
+	background-color:var(--color-cal-day-event);
+	display:flex;
+	flex-flow:row nowrap;
+	align-items:center;
 	z-index:var(--z-index-calendar-month-caption);
 }
-.gantt-line-record .record-line{
-	position:absolute;
-	border-radius:5px;
-	background-color:var(--color-accent4);
-	z-index:var(--z-index-calendar-month-line);
+.gantt-line-record .record-values.start{
+	margin-left:1px;
+	border-top-left-radius:7px;
+	border-bottom-left-radius:7px;
 }
-.gantt-line-record .record-line.start{
-	width:3px;
-	left:1px;
-	top:9px;
-	bottom:4px;
+.gantt-line-record .record-values.end{
+	margin-right:3px;
+	border-top-right-radius:7px;
+	border-bottom-right-radius:7px;
 }
-.gantt-line-record .record-line.middle{
-	height:3px;
-	left:1px;
-	right:1px;
-	top:20px;
-}
-.gantt-line-record:hover .record-line.end{
-	display:none;
-}
-.gantt-line-record .record-line.end{
-	width:3px;
-	right:1px;
-	top:9px;
-	bottom:4px;
+.gantt-line-record .record-values:hover{
+	color:var(--color-font-bright) !important;
+	background-color:rgba(0,0,0,0.7) !important;
 }
 
 

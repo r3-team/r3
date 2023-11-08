@@ -12,6 +12,10 @@ import {
 	getColumnIndexesHidden
 } from './shared/form.js';
 import {
+	colorAdjustBg,
+	colorMakeContrastFont
+} from './shared/generic.js';
+import {
 	getDateFormat,
 	getDateFromUnix,
 	getDateShifted,
@@ -39,21 +43,12 @@ let MyGanttLineRecord = {
 	`<div class="gantt-line-record"
 		@click="clickRecord(false)"
 		@click.middle="clickRecord(true)"
-		:class="{ clickable:hasUpdate }"
 		:style="style"
 	>
-		<div class="record-line start"
-			v-if="date0 >= date0Range"
+		<div class="record-values"
+			:class="{ clickable:hasUpdate, start:date0 >= date0Range, end:date1 <= date1Range }"
 			:style="styleBg"
-		></div>
-		<div class="record-line middle"
-			:style="styleBg"
-		></div>
-		<div class="record-line end"
-			v-if="date1 <= date1Range"
-			:style="styleBg"
-		></div>
-		<div class="record-values">
+		>
 			<template v-for="(v,i) in values">
 				<my-value-rich class="context-calendar-gantt"
 					v-if="!indexesHidden.includes(i) && v !== null"
@@ -125,12 +120,16 @@ let MyGanttLineRecord = {
 			return [`min-width:${width}px`,`max-width:${width}px`,`left:${offset}px`].join(';');
 		},
 		styleBg(r) {
-			return this.color === null
-				? '' : `background-color:#${this.color};`;
+			if(this.color === null) return '';
+			const colorBg   = this.colorAdjustBg(this.color);
+			const colorFont = this.colorMakeContrastFont(colorBg);
+			return `background-color:${colorBg};color:${colorFont};`
 		}
 	},
 	methods:{
 		// externals
+		colorAdjustBg,
+		colorMakeContrastFont,
 		getDateShifted,
 		getUnixFromDate,
 		isUnixUtcZero,
