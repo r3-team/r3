@@ -53,26 +53,60 @@ let MyList = {
 		@keydown="keyDown"
 		:class="{ asInput:isInput, readonly:inputIsReadonly, isSingleField:isSingleField }"
 	>
-		<!-- CSV -->
+		<!-- hover menus -->
 		<div class="app-sub-window under-header"
-			v-if="showCsv"
-			@click.self.stop="showCsv = false"
+			v-if="showHover"
+			@click.self.stop="closeHover"
 		>
-			<my-list-csv
-				v-if="showCsv"
-				@close="showCsv = false"
-				@reload="get"
-				:columns="columns"
-				:expressions="expressions"
-				:filters="filtersCombined"
-				:isExport="csvExport"
-				:isImport="csvImport"
-				:joins="relationsJoined"
-				:orders="orders"
-				:query="query"
-			/>
+			<div class="contentBox float" :class="{ 'list-csv':showCsv,'list-filters':showFilters }">
+				<div class="top lower">
+					<div class="area">
+						<img class="icon" :src="hoverIconSrc" />
+						<div class="caption">{{ hoverCaption }}</div>
+					</div>
+					<my-button image="cancel.png"
+						@trigger="closeHover"
+						:blockBubble="true"
+						:cancel="true"
+					/>
+				</div>
+				<div class="content grow default-inputs">
+					<my-list-csv
+						v-if="showCsv"
+						@reload="get"
+						:columns="columns"
+						:expressions="expressions"
+						:filters="filtersCombined"
+						:isExport="csvExport"
+						:isImport="csvImport"
+						:joins="relationsJoined"
+						:orders="orders"
+						:query="query"
+					/>
+					<my-filters class="default-inputs"
+						v-if="showFilters"
+						v-model="filtersUser"
+						@apply="reloadInside('filtersUser')"
+						:columns="columns"
+						:joins="joins"
+						:showReset="true"
+						:userFilter="true"
+					/>
+					<div class="row gap centered default-inputs" v-if="showAutoRenew">
+						<span>{{ capApp.autoRenewInput }}</span>
+						<input class="short"
+							v-model.number="autoRenewInput"
+							:placeholder="capApp.autoRenewInputHint"
+						/>
+						<my-button image="save.png"
+							@trigger="setAutoRenewTimer(false)"
+							:active="autoRenewInput !== '' && autoRenewInput !== autoRenewInputLast"
+						/>
+					</div>
+				</div>
+			</div>
 		</div>
-	
+		
 		<!-- list as input field (showing record(s) from active field value) -->
 		<template v-if="isInput">
 			<div class="list-input-rows-wrap"
@@ -208,185 +242,139 @@ let MyList = {
 		<!-- regular list view (either view or input dropdown) -->
 		<template v-if="showTable && !inputAsCategory">
 			
-			<!-- list header line -->
-			<div class="list-header" v-if="header && showHeader">
-				
-				<!-- actions -->
-				<div class="row gap nowrap">
-					<my-button image="new.png"
-						v-if="hasCreate"
-						@trigger="$emit('open-form',[],false)"
-						@trigger-middle="$emit('open-form',[],true)"
-						:caption="showActionTitles ? capGen.button.new : ''"
-						:captionTitle="capGen.button.newHint"
-					/>
-					<my-button image="edit.png"
-						v-if="hasUpdateBulk"
-						@trigger="selectRowsBulkEdit(selectedRows)"
-						:active="selectedRows.length !== 0"
-						:caption="showActionTitles ? capGen.button.editBulk.replace('{COUNT}',selectedRows.length) : '(' + String(selectedRows.length) + ')'"
-						:captionTitle="capGen.button.editBulk.replace('{COUNT}',selectedRows.length)"
-					/>
-					<my-button image="fileSheet.png"
-						v-if="csvImport || csvExport"
-						@trigger="showCsv = !showCsv"
-						:caption="showActionTitles ? capApp.button.csv : ''"
-						:captionTitle="capApp.button.csvHint"
-					/>
-					<my-button image="shred.png"
-						v-if="hasDeleteAny"
-						@trigger="delAsk(selectedRows)"
-						:active="selectedRows.length !== 0"
-						:cancel="true"
-						:caption="showActionTitles ? capGen.button.delete : ''"
-						:captionTitle="capGen.button.deleteHint"
-					/>
-				</div>
-				
-				<div ref="empty" class="empty"></div>
-				
-				<div class="row gap nowrap centered list-header-title" v-if="showTitle">
-					<img
-						v-if="iconId !== null"
-						:src="srcBase64(iconIdMap[iconId].file)"
-					/>
-					<span v-if="caption !== ''">{{ caption }}</span>
-				</div>
-				
-				<div class="row gap nowrap">
-					<!-- offset -->
-					<my-input-offset
-						v-if="hasPaging"
-						@input="offset = $event;reloadInside()"
-						:arrows="showOffsetArrows"
-						:caption="false"
-						:limit="limit"
-						:offset="offset"
-						:total="count"
-					/>
-				</div>
-				
-				<div class="row gap nowrap default-inputs">
-					<!-- auto renew / user filter / quick filter / collection filter / query choice filter / page limits -->
-					
-					<my-button image="autoRenew.png"
-						v-if="showAutoRenewIcon && autoRenew !== null"
-						@trigger="showAutoRenew = !showAutoRenew"
-						:caption="capApp.button.autoRenew.replace('{VALUE}',autoRenewInput)"
-						:captionTitle="capApp.button.autoRenewHint.replace('{VALUE}',autoRenewInput)"
-						:naked="true"
-					/>
-					
-					<my-button image="refresh.png"
-						v-if="showRefresh"
-						@trigger="reloadInside('manual')"
-						:captionTitle="capGen.button.refresh"
-						:naked="true"
-					/>
-					
-					<my-button image="filterCog.png"
-						@trigger="toggleUserFilters"
-						@trigger-right="filtersUser = [];reloadInside('filtersUser')"
-						:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
-						:captionTitle="capGen.button.filterHint"
-						:naked="true"
-					/>
-					
-					<input class="short" enterkeyhint="send" type="text"
-						v-if="filterQuick"
-						@keyup.enter="updatedFilterQuick"
-						v-model="filtersQuick"
-						:placeholder="capGen.threeDots"
-						:title="capApp.quick"
-					/>
-					
-					<my-input-collection
-						v-for="c in collections"
-						@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event);resized()"
-						:collectionId="c.collectionId"
-						:columnIdDisplay="c.columnIdDisplay"
-						:key="c.collectionId"
-						:modelValue="collectionIdMapIndexes[c.collectionId]"
-						:multiValue="c.multiValue"
-						:previewCount="showCollectionCnt"
-						:showTitle="showCollectionTitles"
-					/>
-					
-					<select class="auto"
-						v-if="hasChoices"
-						@change="reloadInside('choice')"
-						v-model="choiceId"
-					>
-						<option v-for="c in query.choices" :value="c.id">
-							{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
-						</option>
-					</select>
-					
-					<select class="auto"
-						v-if="showPageLimit && hasPaging"
-						v-model.number="limit"
-						@change="reloadInside()"
-					>
-						<option v-for="o in limitOptions" :value="o">{{ o }}</option>
-					</select>
-					
-					<my-button
-						@trigger="toggleLayout"
-						:image="isTable ? 'files_list1.png' : 'files_list3.png'"
-						:naked="true"
-					/>
-				</div>
-			</div>
 			
-			<div class="list-options-wrap" v-if="showAggregators || showFilters || showAutoRenew">
-				<!-- list header functions -->
-				
-				<!-- auto renew -->
-				<div class="list-options" v-if="showAutoRenew">
-					<div class="list-options-title">
-						<img src="images/autoRenew.png" />
-						<span>{{ capApp.autoRenew }}</span>
+			<!-- list content -->
+			<div class="list-content">
+			
+				<!-- list header -->
+				<div class="list-header" v-if="header && showHeader">
+					
+					<div class="row gap nowrap">
+						<!-- record actions -->
+						<my-button image="new.png"
+							v-if="hasCreate"
+							@trigger="$emit('open-form',[],false)"
+							@trigger-middle="$emit('open-form',[],true)"
+							:caption="showActionTitles ? capGen.button.new : ''"
+							:captionTitle="capGen.button.newHint"
+						/>
+						<my-button image="edit.png"
+							v-if="hasUpdateBulk"
+							@trigger="selectRowsBulkEdit(selectedRows)"
+							:active="selectedRows.length !== 0"
+							:caption="showActionTitles ? capGen.button.editBulk.replace('{COUNT}',selectedRows.length) : '(' + String(selectedRows.length) + ')'"
+							:captionTitle="capGen.button.editBulk.replace('{COUNT}',selectedRows.length)"
+						/>
+						<my-button image="fileSheet.png"
+							v-if="csvImport || csvExport"
+							@trigger="showCsv = !showCsv"
+							:caption="showActionTitles ? capApp.button.csv : ''"
+							:captionTitle="capApp.button.csvHint"
+						/>
+						<my-button image="shred.png"
+							v-if="hasDeleteAny"
+							@trigger="delAsk(selectedRows)"
+							:active="selectedRows.length !== 0"
+							:cancel="true"
+							:caption="showActionTitles ? capGen.button.delete : ''"
+							:captionTitle="capGen.button.deleteHint"
+						/>
 					</div>
 					
-					<div class="list-auto-renew-line default-inputs">
-						<span>{{ capApp.autoRenewInput }}</span>
-						<input class="short"
-							v-model.number="autoRenewInput"
-							:placeholder="capApp.autoRenewInputHint"
+					<!-- empty element for header collapse calculation -->
+					<div ref="empty" class="empty"></div>
+					
+					<div class="row gap nowrap centered list-header-title" v-if="showTitle">
+						<img v-if="iconId !== null" :src="srcBase64(iconIdMap[iconId].file)" />
+						<span v-if="caption !== ''">{{ caption }}</span>
+					</div>
+					
+					<div class="row gap nowrap">
+						<my-input-offset
+							v-if="hasPaging"
+							@input="offset = $event;reloadInside()"
+							:arrows="showOffsetArrows"
+							:caption="false"
+							:limit="limit"
+							:offset="offset"
+							:total="count"
 						/>
-						<my-button image="save.png"
-							@trigger="setAutoRenewTimer(false)"
-							:active="autoRenewInput !== '' && autoRenewInput !== autoRenewInputLast"
+					</div>
+					
+					<div class="row gap nowrap default-inputs">
+						<!-- other actions -->
+						<my-button image="autoRenew.png"
+							v-if="showAutoRenewIcon && autoRenew !== null"
+							@trigger="showAutoRenew = !showAutoRenew"
+							:caption="capApp.button.autoRenew.replace('{VALUE}',autoRenewInput)"
+							:captionTitle="capApp.button.autoRenewHint.replace('{VALUE}',autoRenewInput)"
+							:naked="true"
+						/>
+						
+						<my-button image="refresh.png"
+							v-if="showRefresh"
+							@trigger="reloadInside('manual')"
+							:captionTitle="capGen.button.refresh"
+							:naked="true"
+						/>
+						
+						<my-button image="filterCog.png"
+							@trigger="toggleUserFilters"
+							@trigger-right="filtersUser = [];reloadInside('filtersUser')"
+							:caption="filtersUser.length !== 0 ? String(filtersUser.length) : ''"
+							:captionTitle="capGen.button.filterHint"
+							:naked="true"
+						/>
+						
+						<input class="short" enterkeyhint="send" type="text"
+							v-if="filterQuick"
+							@keyup.enter="updatedFilterQuick"
+							v-model="filtersQuick"
+							:placeholder="capGen.threeDots"
+							:title="capApp.quick"
+						/>
+						
+						<my-input-collection
+							v-for="c in collections"
+							@update:modelValue="$emit('set-collection-indexes',c.collectionId,$event);resized()"
+							:collectionId="c.collectionId"
+							:columnIdDisplay="c.columnIdDisplay"
+							:key="c.collectionId"
+							:modelValue="collectionIdMapIndexes[c.collectionId]"
+							:multiValue="c.multiValue"
+							:previewCount="showCollectionCnt"
+							:showTitle="showCollectionTitles"
+						/>
+						
+						<select class="auto"
+							v-if="hasChoices"
+							@change="reloadInside('choice')"
+							v-model="choiceId"
+						>
+							<option v-for="c in query.choices" :value="c.id">
+								{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
+							</option>
+						</select>
+						
+						<select class="auto"
+							v-if="showPageLimit && hasPaging"
+							v-model.number="limit"
+							@change="reloadInside()"
+						>
+							<option v-for="o in limitOptions" :value="o">{{ o }}</option>
+						</select>
+						
+						<my-button
+							@trigger="toggleLayout"
+							:image="isTable ? 'files_list1.png' : 'files_list3.png'"
+							:naked="true"
 						/>
 					</div>
 				</div>
 				
-				<!-- filters -->
-				<div class="list-options" v-if="showFilters">
-					<my-filters class="default-inputs"
-						v-model="filtersUser"
-						@apply="reloadInside('filtersUser')"
-						@close="showFilters = false"
-						:columns="columns"
-						:joins="joins"
-						:showReset="true"
-						:userFilter="true"
-					>
-						<template #title>
-							<div class="list-options-title">
-								<img src="images/filterCog.png" />
-								<span>{{ capGen.button.filterHint }}</span>
-							</div>
-						</template>
-					</my-filters>
-				</div>
-			</div>
-			
-			<!-- list results -->
-			<div class="layoutWrap">
 				<!-- list results as table or card layout -->
 				<div
-					:class="{ layoutCards:isCards, layoutTable:isTable, formInline:popUpFormInline !== null, rowsColored:settings.listColored, scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
+					:class="{ layoutCards:isCards, layoutTable:isTable, rowsColored:settings.listColored, scrolls:isSingleField, 'input-dropdown-wrap':isInput, upwards:inputDropdownUpwards }"
 					:id="usesPageHistory ? scrollFormId : null"
 				>
 					<table v-if="isTable" :class="{ asInput:isInput, 'input-dropdown':isInput, upwards:inputDropdownUpwards }">
@@ -548,8 +536,7 @@ let MyList = {
 					<template v-if="isCards">
 					
 						<!-- actions -->
-						<div class="top-actions default-inputs" v-if="hasResults" :class="{ atTop:!showHeader }">
-							
+						<div class="card-actions default-inputs" v-if="hasResults" :class="{ atTop:!showHeader }">
 							<div class="row centered">
 								<my-button
 									v-if="hasBulkActions"
@@ -664,25 +651,25 @@ let MyList = {
 					
 					<div class="empty-space" @click="clickOnEmpty"></div>
 				</div>
-				
-				<!-- inline form -->
-				<my-form
-					v-if="popUpFormInline !== null"
-					@close="$emit('close-inline')"
-					@record-deleted="get"
-					@record-updated="get"
-					@records-open="popUpFormInline.recordIds = $event"
-					:attributeIdMapDef="popUpFormInline.attributeIdMapDef"
-					:formId="popUpFormInline.formId"
-					:hasHelp="false"
-					:hasLog="false"
-					:isPopUp="true"
-					:isPopUpFloating="false"
-					:moduleId="popUpFormInline.moduleId"
-					:recordIds="popUpFormInline.recordIds"
-					:style="popUpFormInline.style"
-				/>
 			</div>
+			
+			<!-- inline form -->
+			<my-form class="inline"
+				v-if="popUpFormInline !== null"
+				@close="$emit('close-inline')"
+				@record-deleted="get"
+				@record-updated="get"
+				@records-open="popUpFormInline.recordIds = $event"
+				:attributeIdMapDef="popUpFormInline.attributeIdMapDef"
+				:formId="popUpFormInline.formId"
+				:hasHelp="false"
+				:hasLog="false"
+				:isPopUp="true"
+				:isPopUpFloating="false"
+				:moduleId="popUpFormInline.moduleId"
+				:recordIds="popUpFormInline.recordIds"
+				:style="popUpFormInline.style"
+			/>
 		</template>
 	</div>`,
 	props:{
@@ -743,7 +730,6 @@ let MyList = {
 			orderOverwritten:false,     // sort options were changed by user
 			rowsFetching:false,         // row values are being fetched
 			selectedRows:[],            // bulk selected rows by row index
-			showAggregators:false,      // show UI for aggregators
 			showAutoRenew:false,        // show UI for auto list renew
 			showCsv:false,              // show UI for CSV import/export
 			showFilters:false,          // show UI for user filters
@@ -884,6 +870,18 @@ let MyList = {
 				(!s.isInput || s.rowsInput.length !== 0) &&
 				s.attributeIdMap[s.columns[0].attributeId].content === 'files';
 		},
+		hoverCaption:(s) => {
+			if     (s.showCsv)       return s.capApp.button.csv;
+			else if(s.showFilters)   return s.capGen.button.filterHint;
+			else if(s.showAutoRenew) return s.capApp.autoRenew;
+			return '';
+		},
+		hoverIconSrc:(s) => {
+			if     (s.showCsv)       return 'images/fileSheet.png';
+			else if(s.showFilters)   return 'images/filterCog.png';
+			else if(s.showAutoRenew) return 'images/autoRenew.png';
+			return '';
+		},
 		inputLinePlaceholder:(s) => {
 			if(s.focused) return '';
 			return s.anyInputRows ? s.capApp.inputPlaceholderAdd : s.capGen.threeDots;
@@ -987,6 +985,7 @@ let MyList = {
 		showActionTitles:    (s) => s.headerElements.includes('actionTitles'),
 		showAutoRenewIcon:   (s) => s.headerElements.includes('autoRenewIcon'),
 		showCollectionTitles:(s) => s.headerElements.includes('collectionTitles'),
+		showHover:           (s) => s.showCsv || s.showFilters || s.showAutoRenew,
 		showPageLimit:       (s) => s.headerElements.includes('pageLimit'),
 		showInputAddLine:    (s) => !s.inputAsCategory && (!s.anyInputRows || (s.inputMulti && !s.inputIsReadonly)),
 		showInputAddAll:     (s) => s.inputMulti && s.hasResults,
@@ -1296,6 +1295,11 @@ let MyList = {
 				this.clickRow(r,false);
 			}
 		},
+		closeHover() {
+			this.showAutoRenew = false;
+			this.showCsv       = false;
+			this.showFilters   = false;
+		},
 		escape() {
 			if(this.isInput) {
 				this.blur();
@@ -1362,7 +1366,7 @@ let MyList = {
 			if(justClear)
 				return;
 			
-			if(this.autoRenewInput < 10)
+			if(!Number.isInteger(this.autoRenewInput) || this.autoRenewInput < 10)
 				this.autoRenewInput = 10;
 			
 			// set new timer

@@ -971,11 +971,6 @@ let MyFilters = {
 		
 		<div class="filter-actions end" v-if="userFilter && nestedIndexAttributeIds.length !== 0">
 			<div class="row gap">
-				<my-button image="ok.png"
-					@trigger="apply"
-					:active="anyFilters && bracketsEqual"
-					:caption="capGen.button.apply"
-				/>
 				<my-button image="add.png"
 					v-if="showAdd"
 					@trigger="add"
@@ -985,16 +980,17 @@ let MyFilters = {
 			</div>
 			<div class="row gap">
 				<my-button image="delete.png"
+					v-if="anyFilters"
 					@trigger="removeAll"
 					:active="anyFilters"
 					:cancel="true"
 					:caption="capGen.button.all"
 					:captionTitle="capGen.button.reset"
 				/>
-				<my-button image="cancel.png"
-					@trigger="$emit('close')"
-					:cancel="true"
-					:caption="capGen.button.close"
+				<my-button image="ok.png"
+					@trigger="apply"
+					:active="anyFilters && bracketsEqual"
+					:caption="capGen.button.apply"
 				/>
 			</div>
 		</div>
@@ -1016,7 +1012,7 @@ let MyFilters = {
 		showReset:     { type:Boolean, required:false, default:false },
 		userFilter:    { type:Boolean, required:false, default:false }     // filter is for end users
 	},
-	emits:['apply','close','update:modelValue'],
+	emits:['apply','update:modelValue'],
 	watch:{
 		filterAddCnt() { this.add(); }, // ugly hack to trigger inside this component
 		modelValue:{
