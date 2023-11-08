@@ -4,6 +4,9 @@
 	flex-flow:row nowrap;
 	overflow:visible;
 }
+.form-wrap.inline{
+	border-left:1px solid var(--color-border);
+}
 .form-wrap.popUp{
 	z-index:var(--z-index-form-pop-up);
 }

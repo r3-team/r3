@@ -139,14 +139,15 @@
 	opacity:0.9;
 	box-sizing:border-box;
 	border-bottom:1px dotted var(--color-border);
-	background-color:var(--color-input);
 }
 .calendar-days .dayInput.clickable.active,
 .calendar-days .hourInput.clickable.active{
+	background-color:var(--color-input);
 	filter:brightness(80%);
 }
 .calendar-days .dayInput.clickable:hover,
 .calendar-days .hourInput.clickable:hover{
+	background-color:var(--color-input);
 	filter:brightness(90%);
 }
 

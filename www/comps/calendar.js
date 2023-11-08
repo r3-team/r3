@@ -345,7 +345,7 @@ let MyCalendar = {
 			/>
 			
 			<!-- inline form -->
-			<my-form
+			<my-form class="inline"
 				v-if="popUpFormInline !== null"
 				@close="$emit('close-inline')"
 				@record-deleted="reloadOutside"

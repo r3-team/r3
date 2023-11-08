@@ -163,7 +163,7 @@ let MyCalendarDays = {
 			let events = {
 				fullDays:[],        // 1 day per column in calendar
 				fullDaysEvents:[],  // full day events
-				fullDaysLanes:[[]], // full day event lanes (event indexes per lane, to calculate overlaps)
+				fullDaysLanes:[],   // full day event lanes (event indexes per lane, to calculate overlaps)
 				fullDaysHeight:'',  // total height of all full day events
 				partDays:[]         // partial day events (each day has their own event blocks/lanes to manage)
 			};
@@ -430,6 +430,11 @@ let MyCalendarDays = {
 		// processing
 		addToFreeLane(lanes,events,event,eventIndexNew,touchMatch) {
 			let laneIndex = 0;
+			
+			// if lanes are empty, add first one
+			if(lanes.length === 0)
+				lanes.push([]);
+			
 			while(true) {
 				let eventsOverlap = false;
 				
