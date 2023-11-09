@@ -1582,7 +1582,23 @@
 	},
 	"feedback":{
 		"button":{
-			"whatIsSent":"What is being sent?"
+			"moreInfo":"More information"
+		},
+		"info":{
+			"data":[
+				"Feedback category (general, bug/issue, suggestion, praise)",
+				"Feedback text",
+				"Smiley that was selected",
+				"Application that is currently open",
+				"Application and system version numbers",
+				"Whether the user giving feedback is an administrator",
+				"A random identifier to bundle feedback from the same system"
+			],
+			"admin":"<b>Info for admins:</b> The feedback function can be disabled in the admin panel. If enabled, feedback is sent to the currently chosen repository. Organizations can run their own repository (with the <a href=\"https://store.rei3.de/#/app/lsw_repo/form/31231ad0-71c6-4396-9685-102b414a6bfb/11?login=public\" target=\"_blank\">REI3 Repository</a> application) to manage application releases and receive internal feedback.",
+			"personal":"No personal information is being sent. If you want to receive a response, you can add contact details to your feedback text.",
+			"repoUrl":"Feedback will be sent to",
+			"repoUrlDefault":"<i>(this system is operated by the <a href=\"https://rei3.de/\" target=\"_blank\">REI3</a> developers)</i>",
+			"what":"What is being sent?"
 		},
 		"option":{
 			"codeBug":"Bug / Issue",
@@ -1593,10 +1609,8 @@
 		"moduleRelated":"Is this feedback for the open application? ({NAME})",
 		"sendNok":"Feedback could not be send. Please try again later.",
 		"sendOk":"Feedback was send successfully. Thank you!",
-		"textHint":"Enter feedback here (optional)",
-		"title":"Send anonymous feedback",
-		"whatIsSent":"In addition to the visible fields (feedback text, chosen smiley, etc.) the following data is being sent:<br /><ul><li>Which application and form are open</li><li>Versions of the application and the system</li><li>Whether the user giving feedback is an administrator</li><li>A random identifier to bundle feedback from the same system</li></ul>",
-		"whatIsSentPost":"This data helps processing feedback. No personal information is being sent. We take privacy very seriously."
+		"textHint":"Your feedback",
+		"title":"Send anonymous feedback"
 	},
 	"filter":{
 		"dialog":{

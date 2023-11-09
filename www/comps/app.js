@@ -619,7 +619,8 @@ let MyApp = {
 					this.$store.commit('settings',res[0].payload);
 					this.$store.commit('loginWidgetGroups',res[1].payload);
 					this.$store.commit('access',res[2].payload);
-					this.$store.commit('feedback',res[3].payload === 1);
+					this.$store.commit('feedback',res[3].payload.feedback);
+					this.$store.commit('feedbackUrl',res[3].payload.feedbackUrl);
 					this.$store.commit('loginHasClient',res[4].payload);
 					
 					if(this.loginKeyAes !== null && res[5].payload.privateEnc !== null) {

@@ -1582,7 +1582,23 @@
 	},
 	"feedback":{
 		"button":{
-			"whatIsSent":"Cosa viene inviato?"
+			"moreInfo":"More information"
+		},
+		"info":{
+			"data":[
+				"Feedback category (general, bug/issue, suggestion, praise)",
+				"Feedback text",
+				"Smiley that was selected",
+				"Application that is currently open",
+				"Application and system version numbers",
+				"Whether the user giving feedback is an administrator",
+				"A random identifier to bundle feedback from the same system"
+			],
+			"admin":"<b>Info for admins:</b> The feedback function can be disabled in the admin panel. If enabled, feedback is sent to the currently chosen repository. Organizations can run their own repository (with the <a href=\"https://store.rei3.de/#/app/lsw_repo/form/31231ad0-71c6-4396-9685-102b414a6bfb/11?login=public\" target=\"_blank\">REI3 Repository</a> application) to manage application releases and receive internal feedback.",
+			"personal":"No personal information is being sent. If you want to receive a response, you can add contact details to your feedback text.",
+			"repoUrl":"Feedback will be sent to",
+			"repoUrlDefault":"<i>(this system is operated by the <a href=\"https://rei3.de/\" target=\"_blank\">REI3</a> developers)</i>",
+			"what":"What is being sent?"
 		},
 		"option":{
 			"codeBug":"Bachi / Problema",
@@ -1593,10 +1609,8 @@
 		"moduleRelated":"Questo feedback è per l'applicazione aperta? ({NOME})",
 		"sendNok":"Non è stato possibile inviare il feedback. Per favore riprova più tardi.",
 		"sendOk":"Il feedback è stato inviato con successo. Grazie!",
-		"textHint":"Inserisci qui il feedback (facoltativo)",
-		"title":"Invia feedback anonimo",
-		"whatIsSent":"Oltre ai campi visibili (testo del feedback, smiley scelto, ecc.) vengono inviati i seguenti dati:<br /><ul><li>Quale applicazione e modulo sono aperti</li><li>Versioni dell'applicazione e il sistema</li><li>Se l'utente che fornisce feedback è un amministratore</li><li>Un identificatore casuale per raggruppare feedback dallo stesso sistema</li></ul>",
-		"whatIsSentPost":"Questi dati aiutano a elaborare il feedback. Non vengono inviate informazioni personali. Prendiamo molto sul serio la privacy."
+		"textHint":"Your feedback",
+		"title":"Invia feedback anonimo"
 	},
 	"filter":{
 		"dialog":{

@@ -1582,7 +1582,23 @@
 	},
 	"feedback":{
 		"button":{
-			"whatIsSent":"Ce se trimite?"
+			"moreInfo":"More information"
+		},
+		"info":{
+			"data":[
+				"Feedback category (general, bug/issue, suggestion, praise)",
+				"Feedback text",
+				"Smiley that was selected",
+				"Application that is currently open",
+				"Application and system version numbers",
+				"Whether the user giving feedback is an administrator",
+				"A random identifier to bundle feedback from the same system"
+			],
+			"admin":"<b>Info for admins:</b> The feedback function can be disabled in the admin panel. If enabled, feedback is sent to the currently chosen repository. Organizations can run their own repository (with the <a href=\"https://store.rei3.de/#/app/lsw_repo/form/31231ad0-71c6-4396-9685-102b414a6bfb/11?login=public\" target=\"_blank\">REI3 Repository</a> application) to manage application releases and receive internal feedback.",
+			"personal":"No personal information is being sent. If you want to receive a response, you can add contact details to your feedback text.",
+			"repoUrl":"Feedback will be sent to",
+			"repoUrlDefault":"<i>(this system is operated by the <a href=\"https://rei3.de/\" target=\"_blank\">REI3</a> developers)</i>",
+			"what":"What is being sent?"
 		},
 		"option":{
 			"codeBug":"Bug / Problemă",
@@ -1593,10 +1609,8 @@
 		"moduleRelated":"Acest feedback este pentru aplicația deschisă? ({NUME})",
 		"sendNok":"Feedback-ul nu a putut fi trimis. Vă rugăm să încercați din nou mai târziu.",
 		"sendOk":"Feedback-ul a fost trimis cu succes. Mulțumesc!",
-		"textHint":"Introdu feedback-ul aici (opțional)",
-		"title":"Trimite feedback anonim",
-		"whatIsSent":"Pe lângă câmpurile vizibile (textul din feedback, zâmbetul ales etc.) sunt trimise următoarele date:<br /><ul><li>Ce aplicație și formular sunt deschise</li><li>Versiuni ale aplicației și sistemul</li><li>Dacă utilizatorul care oferă feedback este un administrator</li><li>Un identificator aleatoriu pentru a grupa feedback de la același sistem</li></ul>",
-		"whatIsSentPost":"Aceste date ajută la procesarea feedback-ului. Nu sunt trimise informații personale. Luăm intimitatea foarte în serios."
+		"textHint":"Your feedback",
+		"title":"Trimite feedback anonim"
 	},
 	"filter":{
 		"dialog":{

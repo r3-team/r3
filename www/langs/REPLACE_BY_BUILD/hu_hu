@@ -1582,7 +1582,23 @@
 	},
 	"feedback":{
 		"button":{
-			"whatIsSent":"Mit kerül elküldésre?"
+			"moreInfo":"More information"
+		},
+		"info":{
+			"data":[
+				"Feedback category (general, bug/issue, suggestion, praise)",
+				"Feedback text",
+				"Smiley that was selected",
+				"Application that is currently open",
+				"Application and system version numbers",
+				"Whether the user giving feedback is an administrator",
+				"A random identifier to bundle feedback from the same system"
+			],
+			"admin":"<b>Info for admins:</b> The feedback function can be disabled in the admin panel. If enabled, feedback is sent to the currently chosen repository. Organizations can run their own repository (with the <a href=\"https://store.rei3.de/#/app/lsw_repo/form/31231ad0-71c6-4396-9685-102b414a6bfb/11?login=public\" target=\"_blank\">REI3 Repository</a> application) to manage application releases and receive internal feedback.",
+			"personal":"No personal information is being sent. If you want to receive a response, you can add contact details to your feedback text.",
+			"repoUrl":"Feedback will be sent to",
+			"repoUrlDefault":"<i>(this system is operated by the <a href=\"https://rei3.de/\" target=\"_blank\">REI3</a> developers)</i>",
+			"what":"What is being sent?"
 		},
 		"option":{
 			"codeBug":"Hiba / Probléma",
@@ -1593,10 +1609,8 @@
 		"moduleRelated":"Igényelt visszajelzés az aktuális alkalmazáshoz? ({NAME})",
 		"sendNok":"A visszajelzést nem sikerült elküldeni. Kérjük, próbálja meg később újra.",
 		"sendOk":"A visszajelzést sikeresen elküldtük. Köszönjük!",
-		"textHint":"Visszajelzés itt (opcionális)",
-		"title":"Névtelen visszajelzés küldése",
-		"whatIsSent":"Az elérhető mezőkön (visszajelzés szövege, választott mosoly stb.) kívül az alábbi adatok is elküldésre kerülnek:<br /><ul><li>Melyik alkalmazás és űrlap van nyitva</li><li>Az alkalmazás és rendszer verziói</li><li>A visszajelzést adó felhasználó rendszergazda-e</li><li>Egy véletlenszerű azonosító a visszajelzések csoportosításához</li></ul>",
-		"whatIsSentPost":"Ezen adatok segítik a visszajelzések feldolgozását. Nincs személyes információk küldése. A magánélet védelme fontos számunkra."
+		"textHint":"Your feedback",
+		"title":"Névtelen visszajelzés küldése"
 	},
 	"filter":{
 		"dialog":{

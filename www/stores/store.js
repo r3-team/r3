@@ -32,6 +32,7 @@ const MyStore = Vuex.createStore({
 		dialogStyles:'',
 		dialogTextDisplay:'', // display option (html, textarea, richtext)
 		feedback:false,       // feedback function is enabled
+		feedbackUrl:'',       // feedback receiver, URL of current repository
 		filesCopy:{           // meta data for file copy (filled on copy, emptied on paste)
 			attributeId:null,
 			fileIds:[]
@@ -165,6 +166,7 @@ const MyStore = Vuex.createStore({
 		captions:                (state,payload) => state.captions                 = payload,
 		clusterNodeName:         (state,payload) => state.clusterNodeName          = payload,
 		feedback:                (state,payload) => state.feedback                 = payload,
+		feedbackUrl:             (state,payload) => state.feedbackUrl              = payload,
 		filesCopy:               (state,payload) => state.filesCopy                = payload,
 		isAdmin:                 (state,payload) => state.isAdmin                  = payload,
 		isAtDialog:              (state,payload) => state.isAtDialog               = payload,
@@ -274,6 +276,7 @@ const MyStore = Vuex.createStore({
 		dialogStyles:            (state) => state.dialogStyles,
 		dialogTextDisplay:       (state) => state.dialogTextDisplay,
 		feedback:                (state) => state.feedback,
+		feedbackUrl:             (state) => state.feedbackUrl,
 		filesCopy:               (state) => state.filesCopy,
 		isAdmin:                 (state) => state.isAdmin,
 		isAtDialog:              (state) => state.isAtDialog,

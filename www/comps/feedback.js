@@ -18,7 +18,7 @@ let MyFeedback = {
 				</div>
 			</div>
 			
-			<div class="content default-inputs">
+			<div class="content gap default-inputs">
 				<select v-model.number="code">
 					<option value="1">{{ capApp.option.codeGeneric }}</option>
 					<option value="2">{{ capApp.option.codeBug }}</option>
@@ -78,9 +78,9 @@ let MyFeedback = {
 				><span>{{ message }}</span></div>
 				
 				<div class="row gap space-between">
-					<my-button
-						@trigger="showWhatIsSent = !showWhatIsSent"
-						:caption="capApp.button.whatIsSent"
+					<my-button image="question.png"
+						@trigger="showInfo = !showInfo"
+						:caption="capApp.button.moreInfo"
 						:naked="true"
 					/>
 					<my-button image="ok.png"
@@ -90,10 +90,17 @@ let MyFeedback = {
 					/>
 				</div>
 				
-				<div class="whatIsSent"
-					v-if="showWhatIsSent"
-					v-html="capApp.whatIsSent + capApp.whatIsSentPost"
-				></div>
+				<div class="moreInfo default-inputs" v-if="showInfo">
+					<h3>{{ capApp.info.what }}</h3>
+					<ul>
+						<li v-for="l in capApp.info.data">{{ l }}</li>
+					</ul>
+					<p>{{ capApp.info.personal }}</p>
+					<h3>{{ capApp.info.repoUrl }}</h3>
+					<input disabled="disabled" :value="feedbackUrl" />
+					<p v-if="isRepoDefault" v-html="capApp.info.repoUrlDefault" />
+					<p v-if="isAdmin" v-html="capApp.info.admin" />
+				</div>
 			</div>
 		</div>
 	</div>`,
@@ -104,7 +111,7 @@ let MyFeedback = {
 			messageError:false,
 			moduleRelated:true,
 			mood:3,
-			showWhatIsSent:false,
+			showInfo:false,
 			text:''
 		};
 	},
@@ -113,11 +120,15 @@ let MyFeedback = {
 			? false : s.formIdMap[s.$route.params.formId],
 		module:(s) => !s.form ? false : s.moduleIdMap[s.form.moduleId],
 		
+		// simple
+		isRepoDefault:(s) => s.feedbackUrl === 'https://store.rei3.de',
+		
 		// stores
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		formIdMap:  (s) => s.$store.getters['schema/formIdMap'],
 		capApp:     (s) => s.$store.getters.captions.feedback,
 		capGen:     (s) => s.$store.getters.captions.generic,
+		feedbackUrl:(s) => s.$store.getters.feedbackUrl,
 		isAdmin:    (s) => s.$store.getters.isAdmin
 	},
 	mounted() {

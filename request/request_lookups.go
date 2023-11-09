@@ -33,7 +33,13 @@ func LookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 		return res, nil
 
 	case "feedback":
-		return config.GetUint64("repoFeedback"), nil
+		var res struct {
+			Feedback    bool   `json:"feedback"`
+			FeedbackUrl string `json:"feedbackUrl"`
+		}
+		res.Feedback = config.GetUint64("repoFeedback") == 1
+		res.FeedbackUrl = config.GetString("repoUrl")
+		return res, nil
 
 	case "loginHasClient":
 		var hasClient bool

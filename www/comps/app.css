@@ -918,7 +918,7 @@ table td.maximum{
 .feedback{
 	width:95%;
 	max-height:90%;
-	max-width:500px;
+	max-width:600px;
 	margin:5% 0px;
 }
 .feedback .content{
@@ -930,12 +930,8 @@ table td.maximum{
 .feedback textarea{
 	width:auto;
 	max-width:unset;
-	margin:3px 6px 9px 6px;
 	box-sizing:border-box;
 	font-size:105%;
-}
-.feedback select{
-	padding:4px 6px;
 }
 .feedback textarea{
 	height:220px;
@@ -965,7 +961,7 @@ table td.maximum{
 	display:flex;
 	flex-flow:row nowrap;
 	justify-content:center;
-	margin:0px 0px 24px 0px;
+	margin:0px 0px 12px 0px;
 }
 .feedback .submit-box img{
 	height:48px;
@@ -985,14 +981,15 @@ table td.maximum{
 	margin:2px;
 	border:2px solid var(--color-accent3-alt);
 }
-.feedback .whatIsSent{
-	margin:6px 0px;
-	padding:6px 9px 9px;
+.feedback .moreInfo{
+	flex:1 1 auto;
+	padding:6px 9px;
 	text-align:left;
 	border:2px solid #aaa;
-	border-radius:3px;
+	border-radius:5px;
 	color:var(--color-font);
-	background-color:var(--color-bg);
+	background-color:var(--color-input);
+	overflow:auto;
 }
 
 
