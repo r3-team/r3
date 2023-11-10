@@ -44,7 +44,6 @@
 	flex-flow:row nowrap;
 	align-items:center;
 	gap:6px;
-	cursor:pointer;
 }
 .builder-form .sidebar .warning>img{
 	width:24px;

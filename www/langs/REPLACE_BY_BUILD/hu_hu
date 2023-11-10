@@ -79,6 +79,7 @@
 		},
 		"actions":"Műveletek",
 		"active":"Aktív",
+		"after":"After",
 		"api":"API",
 		"application":"Alkalmazás",
 		"applications":"Alkalmazások",
@@ -86,6 +87,7 @@
 		"appWebsite":"https://rei3.de",
 		"attribute":"Attribútum",
 		"available":"Elérhető",
+		"before":"Before",
 		"busy":"Folyamatban - Kattintson ide a megszakításhoz",
 		"category":"Kategória",
 		"collection":"Gyűjtemény",
@@ -813,13 +815,23 @@
 				"formStateFieldRemovedEffect":"Törölt mező még mindig hivatkozva van a(z) \"{NAME}\" űrlapállapotban lévő hatásban."
 			},
 			"functions":{
+				"help":{
+					"formLoadedAfter":"This event is executed after a form is opened and the current form record has been loaded. It´s also executed when no form record exists (if new record or form does not handle records at all).<br /><br />This event is also executed after a record is saved or deleted, as the form reloads after these actions; in these cases, first the 'record saved/deleted' events are handled and then the event 'form loaded'.<br /><br />This event can be used to overwrite values of existing records or set default values for new records.",
+					"formLoadedBefore":"This event is executed when a form is opened, but before the current form record is being loaded. It´s also executed when no form record exists (if new record or form does not handle records at all).<br /><br />This event is also executed after a record is saved or deleted, as the form reloads after these actions; in these cases, first the 'record saved/deleted' events are handled and then the event 'form loaded'.<br /><br />Be aware that field values, changed by this event, are immediately overwritten when the form loads its record. To overwrite values of an existing record, use the 'after form loaded' event.",
+					"recordDeletedAfter":"This event is executed after a user successfully deleted the current form record.",
+					"recordDeletedBefore":"This event is executed when a user attempts to delete the current form record, but before the deletion is being executed on the server.",
+					"recordSavedAfter":"This event is executed after a user successfully executes a save of the form record. This works for both new & existing records.<br /><br />Because a record is reloaded after a successful save, the event 'form loaded' is also executed after this event is finished.",
+					"recordSavedBefore":"This event is executed when a user attempts to save the current form record, but before changes are being sent to the server. This works for both new & existing records.<br /><br />This event is useful if record values need to be overwritten before being sent to the server.<br /><br />If a change log is used, overwritten values will still be shown as applied by the current user."
+				},
 				"option":{
 					"delete":"Űrlap rekord törölve",
 					"open":"Űrlap megnyitva",
 					"save":"Űrlap rekord elmentve"
 				},
+				"warning":{
+					"noJsFunction":"At least one event has no frontend function assigned."
+				},
 				"event":"Esemény",
-				"eventBefore":"Esemény előtt",
 				"jsFunctionId":"Előtéri funkció végrehajtása"
 			},
 			"kanban":{

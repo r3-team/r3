@@ -5,17 +5,25 @@ let MyBuilderFormFunction = {
 	name:'my-builder-form-function',
 	template:`<tr class="builder-form-function">
 		<td>
+			<img class="dragAnchor" src="images/drag.png" />
+		</td>
+		<td>
 			<div class="row centered gap">
-				<img class="dragAnchor" src="images/drag.png" />
+				<my-bool
+					v-model="eventBefore"
+					:caption0="capGen.after"
+					:caption1="capGen.before"
+				/>
 				<select v-model="event">
 					<option value="open"  >{{ capApp.option.open   }}</option>
 					<option value="save"  >{{ capApp.option.save   }}</option>
 					<option value="delete">{{ capApp.option.delete }}</option>
 				</select>
+				<my-button image="question.png"
+					:active="jsFunctionId !== null"
+					@trigger="showHelp"
+				/>
 			</div>
-		</td>
-		<td>
-			<my-bool v-model="eventBefore" />
 		</td>
 		<td>
 			<div class="row gap">
@@ -86,6 +94,15 @@ let MyBuilderFormFunction = {
 		getDependentModules,
 		
 		// actions
+		showHelp() {
+			let msg = '';
+			switch(this.event) {
+				case 'open':   msg = this.eventBefore ? this.capApp.help.formLoadedBefore    : this.capApp.help.formLoadedAfter;    break;
+				case 'delete': msg = this.eventBefore ? this.capApp.help.recordDeletedBefore : this.capApp.help.recordDeletedAfter; break;
+				case 'save':   msg = this.eventBefore ? this.capApp.help.recordSavedBefore   : this.capApp.help.recordSavedAfter;   break;
+			}
+			this.$store.commit('dialog',{ captionBody:msg, captionTop:this.capGen.contextHelp });
+		},
 		update(name,value) {
 			let v = JSON.parse(JSON.stringify(this.modelValue));
 			v[name] = value;
@@ -107,9 +124,9 @@ let MyBuilderFormFunctions = {
 		<table class="default-inputs" v-if="modelValue.length !== 0">
 			<thead>
 				<tr>
+					<th></th>
 					<th>{{ capApp.event }}</th>
-					<th>{{ capApp.eventBefore }}</th>
-					<th>{{ capApp.jsFunctionId }}</th>
+					<th>{{ capApp.jsFunctionId }}*</th>
 				</tr>
 			</thead>
 			<draggable handle=".dragAnchor" tag="tbody" group="functions" itemKey="id" animation="100"
@@ -128,6 +145,11 @@ let MyBuilderFormFunctions = {
 				</template>
 			</draggable>
 		</table>
+		
+		<div v-if="anyWithoutFunction" class="warning">
+			<img src="images/warning.png" />
+			<span>{{ capApp.warning.noJsFunction }}</span>
+		</div>
 	</div>`,
 	props:{
 		formId:    { type:String, required:true },
@@ -135,6 +157,14 @@ let MyBuilderFormFunctions = {
 	},
 	emits:['createNew','update:modelValue'],
 	computed:{
+		anyWithoutFunction:(s) => {
+			for(const f of s.modelValue) {
+				if(f.jsFunctionId === '')
+					return true;
+			}
+			return false;
+		},
+		
 		// stores
 		capApp:(s) => s.$store.getters.captions.builder.form.functions,
 		capGen:(s) => s.$store.getters.captions.generic

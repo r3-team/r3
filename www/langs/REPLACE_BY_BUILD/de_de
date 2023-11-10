@@ -79,6 +79,7 @@
 		},
 		"actions":"Aktionen",
 		"active":"Aktiv",
+		"after":"Danach",
 		"api":"API",
 		"application":"Anwendung",
 		"applications":"Anwendungen",
@@ -86,6 +87,7 @@
 		"appWebsite":"https://rei3.de",
 		"attribute":"Attribut",
 		"available":"Verfügbar",
+		"before":"Davor",
 		"busy":"Arbeitet - Zum Abbrechen hier klicken",
 		"category":"Kategorie",
 		"collection":"Sammlung",
@@ -813,13 +815,23 @@
 				"formStateFieldRemovedEffect":"Gelöschtes Feld wird noch als Effekt im Formularzustand \"{NAME}\" referenziert."
 			},
 			"functions":{
+				"help":{
+					"formLoadedAfter":"Dieses Ereignis wird ausgeführt, nachdem ein Formular geöffnet und der aktuelle Datensatz geladen wurde. Es wird auch ausgeführt, wenn kein Datensatz im Formular vorhanden ist (im Falle eines neuen Datensatzes oder wenn das Formular keine Datensätze verarbeitet).<br /><br />Dieses Ereignis wird auch ausgeführt, nachdem ein Datensatz gespeichert oder gelöscht wurde, da das Formular nach diesen Aktionen neu geladen wird; in diesen Fällen werden zuerst die Ereignisse \"Datensatz gespeichert/gelöscht\" und dann das Ereignis \"Formular geladen\" behandelt.<br /><br />Dieses Ereignis kann verwendet werden, um Werte bestehender Datensätze zu überschreiben oder Standardwerte für neue Datensätze zu setzen.",
+					"formLoadedBefore":"Dieses Ereignis wird ausgeführt, wenn ein Formular geöffnet, aber bevor der aktuelle Datensatz des Formulars geladen wird. Es wird auch ausgeführt, wenn kein Datensatz im Formular vorhanden ist (im Falle eines neuen Datensatzes oder wenn das Formular keine Datensätze verarbeitet).<br /><br />Dieses Ereignis wird ebenfalls ausgeführt, nachdem ein Datensatz gespeichert oder gelöscht wurde, da das Formular nach diesen Aktionen neu geladen wird; in diesen Fällen werden zuerst die Ereignisse \"Datensatz gespeichert/gelöscht\" und dann das Ereignis \"Formular geladen\" behandelt. Feldwerte, die durch dieses Ereignis geändert wurden, werden überschrieben, wenn das Formular seinen Datensatz lädt.<br /><br />Um die Werte eines bestehenden Datensatzes zu überschreiben, kann das Ereignis \"Nach Formular geladen\" genutzt werden.",
+					"recordDeletedAfter":"Dieses Ereignis wird ausgeführt, nachdem ein Benutzer den aktuellen Formulardatensatz erfolgreich gelöscht hat.",
+					"recordDeletedBefore":"Dieses Ereignis wird ausgeführt, wenn ein Benutzer versucht, den aktuellen Formulardatensatz zu löschen, aber bevor der Löschvorgang auf dem Server ausgeführt wird.",
+					"recordSavedAfter":"Dieses Ereignis wird ausgeführt, nachdem ein Benutzer erfolgreich einen Datensatz des Formulars gespeichert hat. Dies gilt sowohl für neue als auch für bestehende Datensätze.<br /><br />Da ein Datensatz nach erfolgreichem Speichern neu geladen wird, wird das Ereignis \"Formular geladen\" ebenfalls nach Beendigung dieses Ereignisses ausgeführt.",
+					"recordSavedBefore":"Dieses Ereignis wird ausgeführt, wenn ein Benutzer versucht, den aktuellen Formulardatensatz zu speichern, aber bevor die Änderungen an den Server gesendet werden. Dies funktioniert sowohl für neue als auch für bestehende Datensätze.<br /><br />Dieses Ereignis ist nützlich, wenn Datensatzwerte überschrieben werden müssen, bevor sie an den Server gesendet werden.<br /><br />Wenn ein Änderungsprotokoll verwendet wird, werden die Änderungen dem aktuellen Benutzer zugeschrieben."
+				},
 				"option":{
 					"delete":"Formulardatensatz gelöscht",
-					"open":"Formular geöffnet",
+					"open":"Formular geladen",
 					"save":"Formulardatensatz gespeichert"
 				},
+				"warning":{
+					"noJsFunction":"Mindestens ein Ereignis hat keine Frontend-Funktion zugewiesen."
+				},
 				"event":"Ereignis",
-				"eventBefore":"Vor Ereignis",
 				"jsFunctionId":"Frontend-Funktion ausführen"
 			},
 			"kanban":{

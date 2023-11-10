@@ -223,7 +223,7 @@ let MyBuilderForm = {
 					/>
 					
 					<!-- 1:n join warning -->
-					<div v-if="tabTarget === 'content' && hasAny1nJoin" class="warning"
+					<div v-if="tabTarget === 'content' && hasAny1nJoin" class="warning clickable"
 						@click="showMessage(capApp.warning.joinN1,capApp.warning.joinN1Hint,'link2.png')"
 					>
 						<img src="images/link2.png" />
@@ -822,6 +822,18 @@ let MyBuilderForm = {
 				this.tabTargetField = 'properties';
 				this.fieldIdShow    = params.fieldIdShow.value;
 			}
+		},
+		showJsFunctionHelp(event) {
+			let msg = '';
+			switch(event) {
+				case 'formLoadedAfter':     msg = this.capApp.dialog.eventHelp.formLoadedAfter;     break;
+				case 'formLoadedBefore':    msg = this.capApp.dialog.eventHelp.formLoadedBefore;    break;
+				case 'recordDeletedAfter':  msg = this.capApp.dialog.eventHelp.recordDeletedAfter;  break;
+				case 'recordDeletedBefore': msg = this.capApp.dialog.eventHelp.recordDeletedBefore; break;
+				case 'recordSavedAfter':    msg = this.capApp.dialog.eventHelp.recordSavedAfter;    break;
+				case 'recordSavedBefore':   msg = this.capApp.dialog.eventHelp.recordSavedBefore;   break;
+			}
+			this.$store.commit('dialog',{ captionBody:msg });
 		},
 		
 		createFieldButton() {
