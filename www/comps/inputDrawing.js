@@ -68,13 +68,15 @@ let MyInputDraw = {
 				/>
 			</div>
 		</div>
-		<canvas height="300" ref="inputField" width="300" oncontextmenu="return false;"
-			@pointerdown="pointerDown"
-			@pointermove="pointerMove"
-			@pointerup="pointerUp"
-			@wheel.passive="wheel"
-			:class="{ dragMode:dragMode }"
-		/>
+		<div class="canvasWrap" ref="canvasWrap">
+			<canvas height="300" width="300" oncontextmenu="return false;" ref="canvas"
+				@pointerdown="pointerDown"
+				@pointermove="pointerMove"
+				@pointerup="pointerUp"
+				@wheel.passive="wheel"
+				:class="{ dragMode:dragMode }"
+			/>
+		</div>
 	</div>`,
 	props:{
 		formLoading:{ type:Boolean, required:true },
@@ -127,7 +129,7 @@ let MyInputDraw = {
 		isMobile:(s) => s.$store.getters.isMobile
 	},
 	mounted() {
-		this.canvasCtx = this.$refs.inputField.getContext('2d');
+		this.canvasCtx = this.$refs.canvas.getContext('2d');
 		this.canvasCtx.lineCap  = 'round';
 		this.canvasCtx.lineJoin = 'round';
 		
@@ -189,8 +191,8 @@ let MyInputDraw = {
 		canvasRedraw() {
 			if(this.isHidden) return;
 			
-			this.$refs.inputField.width  = this.$refs.inputField.clientWidth;
-			this.$refs.inputField.height = this.$refs.inputField.clientHeight;
+			this.$refs.canvas.width  = this.$refs.canvasWrap.clientWidth;
+			this.$refs.canvas.height = this.$refs.canvasWrap.clientHeight;
 			this.canvasReset();
 			
 			// performance optimization: draw strokes after a new line started (or at the very end)
@@ -216,8 +218,8 @@ let MyInputDraw = {
 		},
 		canvasReset() {
 			this.canvasCtx.clearRect(0,0,
-				this.$refs.inputField.width,
-				this.$refs.inputField.height);
+				this.$refs.canvas.width,
+				this.$refs.canvas.height);
 		},
 		canvasStroke() {
 			this.canvasCtx.stroke();
@@ -301,11 +303,11 @@ let MyInputDraw = {
 			}
 		},
 		update() {
-			const empty = this.strokes.length === 0 || this.$refs.inputField === null;
+			const empty = this.strokes.length === 0 || this.$refs.canvas === null;
 			
 			this.$emit('update:modelValue', empty ? null : JSON.stringify({
 				data:this.strokes,
-				image:this.$refs.inputField.toDataURL()
+				image:this.$refs.canvas.toDataURL()
 			}));
 		},
 		wheel(evt) {

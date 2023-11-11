@@ -461,12 +461,16 @@
 	border-bottom:1px solid var(--color-border);
 	border-radius:5px 5px 0px 0px;
 }
-.input-draw>canvas{
+.input-draw .canvasWrap{
+	/* required to apply real height to canvas child*/
+	flex:1 1 0;
+	overflow:hidden;
+}
+.input-draw canvas{
 	width:100%;
-	flex:1 1 auto;
 	touch-action:none; /* fix: chrome mobile stops touch input otherwise */
 }
-.input-draw>canvas.dragMode{
+.input-draw canvas.dragMode{
 	cursor:move;
 }
 .input-draw .colors{
