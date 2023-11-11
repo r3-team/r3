@@ -115,6 +115,17 @@ export function getUnixNowTime() {
 	return getUnixFromDate(d);
 };
 
+export function applyUnixDateToDatetime(unixDatetime,unixAtUtcMidnight) {
+	let dateOld = getDateFromUnix(unixDatetime);
+	let dateNew = getDateFromUnix(unixAtUtcMidnight);
+	
+	// only apply date component to datetime unix
+	dateOld.setFullYear(dateNew.getUTCFullYear());
+	dateOld.setMonth(dateNew.getUTCMonth());
+	dateOld.setDate(dateNew.getUTCDate());
+	return getUnixFromDate(dateOld);
+};
+
 export function getWeek(dInput) {
 	let d = new Date(dInput.valueOf());
 	d.setHours(0,0,0,0);

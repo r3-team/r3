@@ -129,10 +129,10 @@ export function getAttributeIcon(attribute,outsideIn,isNm) {
 	}
 	if(isAttributeInteger(attribute.content)) {
 		switch(attribute.contentUse) {
-			case 'datetime': return 'calendar_time.png'; break;
-			case 'date':     return 'calendar.png';      break;
-			case 'time':     return 'clock.png';         break;
-			default:         return 'numbers.png';       break;
+			case 'datetime': return 'calendarTime.png'; break;
+			case 'date':     return 'calendar.png';     break;
+			case 'time':     return 'clock.png';        break;
+			default:         return 'numbers.png';      break;
 		}
 	}
 	if(isAttributeBoolean(attribute.content))   return 'bool.png';

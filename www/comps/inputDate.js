@@ -8,11 +8,13 @@ import {
 	getCalendarCutOff1
 } from './shared/calendar.js';
 import {
+	applyUnixDateToDatetime,
 	getDateAtUtcZero,
 	getDateShifted,
 	getDateFullDayToggled,
 	getDateNoUtcZero,
 	getUnixFromDate,
+	getUnixNowDatetime,
 	isUnixUtcZero
 } from './shared/time.js';
 export {MyInputDate as default};
@@ -335,13 +337,23 @@ let MyInputDate = {
 				<div class="top lower">
 					<div class="area nowrap"></div>
 					<div class="area nowrap default-inputs">
-						<my-calendar-date-select v-model="date" :daysShow="fullDay ? 42 : 7" />
+						<my-calendar-date-select v-model="date" :daysShow="viewMonth ? 42 : 7" />
 					</div>
-					<div class="area nowrap"></div>
+					<div class="area nowrap">
+						<my-button image="arrowsSwitch.png"
+							v-if="isDateTime"
+							@trigger="viewMonth = !viewMonth"
+							:captionTitle="capApp.button.viewHint"
+						/>
+						<my-button image="calendarDot.png"
+							@trigger="goToToday"
+							:captionTitle="capApp.button.todayHint"
+						/>
+					</div>
 				</div>
 				
 				<my-calendar-days
-					v-if="!fullDay"
+					v-if="!viewMonth"
 					@set-date="date = $event"
 					@date-selected="dateSet"
 					:date="date"
@@ -354,9 +366,9 @@ let MyInputDate = {
 					:isRange="isRange"
 				/>
 				<my-calendar-month
-					v-if="fullDay"
+					v-if="viewMonth"
 					@set-date="date = $event"
-					@date-selected="dateSet"
+					@date-selected="dateSetByMonthView"
 					:date="date"
 					:date0="date0"
 					:date1="date1"
@@ -380,12 +392,16 @@ let MyInputDate = {
 	emits:['blurred','focused','set-unix-from','set-unix-to'],
 	data() {
 		return {
-			date:new Date(),   // date to control calendar navigation
-			dateSelect0:null,  // for date range selection, start date
-			dateSelect1:null,  // for date range selection, end date
-			showUpwards:false, // show calendar dropdown above input
-			showCalendar:false
+			date:new Date(),    // date to control calendar navigation
+			dateSelect0:null,   // for date range selection, start date
+			dateSelect1:null,   // for date range selection, end date
+			showUpwards:false,  // show calendar dropdown above input
+			showCalendar:false,
+			viewMonth:true      // calendar view is either month (true) or days (false)
 		};
+	},
+	mounted() {
+		this.viewMonth = this.fullDay;
 	},
 	computed:{
 		// full day events start and end at 00:00:00 UTC
@@ -420,9 +436,12 @@ let MyInputDate = {
 			}
 		},
 		
+		// simple
+		isDateTime:(s) => s.isDate && s.isTime,
+		
 		// start/end date of calendar (month input)
-		date0:(s) => s.getCalendarCutOff0((s.fullDay ? 42 : 7),new Date(s.date.valueOf())),
-		date1:(s) => s.getCalendarCutOff1((s.fullDay ? 42 : 7),new Date(s.date.valueOf()),s.date0),
+		date0:(s) => s.getCalendarCutOff0((s.viewMonth ? 42 : 7),new Date(s.date.valueOf())),
+		date1:(s) => s.getCalendarCutOff1((s.viewMonth ? 42 : 7),new Date(s.date.valueOf()),s.date0),
 		
 		// stores
 		capApp:  (s) => s.$store.getters.captions.input.date,
@@ -430,6 +449,7 @@ let MyInputDate = {
 	},
 	methods:{
 		// externals
+		applyUnixDateToDatetime,
 		getCalendarCutOff0,
 		getCalendarCutOff1,
 		getDateAtUtcZero,
@@ -437,6 +457,7 @@ let MyInputDate = {
 		getDateNoUtcZero,
 		getDateShifted,
 		getUnixFromDate,
+		getUnixNowDatetime,
 		isDropdownUpwards,
 		isUnixUtcZero,
 		
@@ -455,6 +476,30 @@ let MyInputDate = {
 		},
 		
 		// actions
+		goToToday() {
+			let now = new Date();
+			
+			const todayIsVisible = (
+				this.viewMonth
+				&& now.getMonth()    === this.date.getMonth()
+				&& now.getFullYear() === this.date.getFullYear()
+			) || (
+				!this.viewMonth && now >= this.date0 && now <= this.date1
+			);
+			
+			// move view to show 'today'
+			if(!todayIsVisible)
+				return this.date = now;
+			
+			// view is already on 'today', apply value
+			if(this.viewMonth) {
+				const v = this.getUnixFromDate(this.getDateAtUtcZero(now));
+				this.dateSetByMonthView(v,v,false);
+			} else {
+				const v = this.getUnixFromDate(now);
+				this.dateSet(v,v);
+			}
+		},
 		toggleCalendar() {
 			if(!this.showCalendar) {
 				
@@ -506,8 +551,7 @@ let MyInputDate = {
 				this.$emit('set-unix-to',this.getUnixFromDate(this.getDateFullDayToggled(
 					new Date(this.unixTo*1000),this.fullDay)));
 		},
-		dateSet(unix0,unix1,middleClick) {
-			// first date of range or only date
+		dateSet(unix0,unix1) {
 			this.dateSelect0 = new Date(unix0 * 1000);
 			this.$emit('set-unix-from',unix0);
 			
@@ -516,6 +560,22 @@ let MyInputDate = {
 				this.$emit('set-unix-to',unix1);
 			}
 			this.showCalendar = false;
+		},
+		dateSetByMonthView(unix0,unix1,middleClick) {
+			if(this.fullDay)
+				return this.dateSet(unix0,unix1);
+			
+			// if not full day values, only apply date component
+			let unixFrom = this.unixFromInput;
+			let unixTo   = this.unixToInput;
+			
+			if(unixFrom === null) unixFrom = this.getUnixNowDatetime();
+			if(unixTo   === null) unixTo   = this.getUnixNowDatetime();
+			
+			this.dateSet(
+				this.applyUnixDateToDatetime(unixFrom,unix0),
+				this.applyUnixDateToDatetime(unixTo,unix1)
+			);
 		},
 		setNull() {
 			this.unixFromInput = null;

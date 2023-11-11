@@ -1791,6 +1791,10 @@
 	},
 	"input":{
 		"date":{
+			"button":{
+				"todayHint":"Today/now",
+				"viewHint":"Change view"
+			},
 			"dateFrom":"Din",
 			"dateTo":"La",
 			"fullDayHint":"Selecție pe tot parcursul zilei",

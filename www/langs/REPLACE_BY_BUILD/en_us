@@ -1791,6 +1791,10 @@
 	},
 	"input":{
 		"date":{
+			"button":{
+				"todayHint":"Today/now",
+				"viewHint":"Change view"
+			},
 			"dateFrom":"From",
 			"dateTo":"To",
 			"fullDayHint":"All day selection",

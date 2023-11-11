@@ -268,7 +268,7 @@ let MyGantt = {
 					</option>
 				</select>
 				
-				<my-button image="calendar.png"
+				<my-button image="calendarDot.png"
 					v-if="!isMobile"
 					@trigger="scrollToNow"
 					:caption="!isMobile ? capApp.now : ''"

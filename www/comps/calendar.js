@@ -300,7 +300,7 @@ let MyCalendar = {
 					:caption="!isMobile ? capApp.button.ics : ''"
 					:captionTitle="capApp.button.icsHint"
 				/>
-				<my-button image="calendar.png"
+				<my-button image="calendarDot.png"
 					v-if="!isMobile"
 					@trigger="goToToday"
 					:caption="!isMobile ? capApp.today : ''"
