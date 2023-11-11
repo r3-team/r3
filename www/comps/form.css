@@ -5,7 +5,6 @@
 	overflow:visible;
 }
 .form-wrap.inline{
-	border-top:1px solid var(--color-border);
 	border-left:1px solid var(--color-border);
 }
 .form-wrap.popUp{

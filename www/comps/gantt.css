@@ -31,6 +31,7 @@
 	background-color:var(--color-bg);
 }
 .gantt-label-entry{
+	flex:0 0 auto;
 	height:30px;
 	padding:0px 0px 0px 9px;
 	line-height:30px;
@@ -53,20 +54,22 @@
 	flex: 1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
+	overflow:auto;
 }
 .gantt-content .form-wrap.popUp{
 	flex:1 1 auto;
 	width:100%;
 }
-.gantt-lines{
-	flex:1 1 auto;
+.gantt-data{
+	flex: 1 1 auto;
 	display:flex;
-	flex-flow:column wrap;
-	overflow-x:auto;
+	flex-flow:row nowrap;
+	overflow:auto;
 }
 
 /* headers */
 .gantt-headers{
+	flex:0 0 auto;
 	height:60px;
 	position:relative;
 	background-color:var(--color-bg);
@@ -115,6 +118,11 @@
 }
 
 /* lines */
+.gantt-lines{
+	flex:1 1 auto;
+	display:flex;
+	flex-flow:column nowrap;
+}
 .gantt-line{
 	height:30px;
 	line-height:30px;

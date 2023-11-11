@@ -3,7 +3,7 @@
 	min-height:240px;
 	border-radius:5px;
 	display:flex;
-	flex-flow:row nowrap;
+	flex-flow:column nowrap;
 	overflow:auto;
 	--list-header-height:48px;
 }
@@ -12,7 +12,6 @@
 }
 .list.asInput{
 	min-height:unset;
-	flex-flow:column nowrap;
 	background-color:transparent;
 }
 .list .fetching{
@@ -28,9 +27,12 @@
 .list-content{
 	flex:1 1 auto;
 	display:flex;
-	flex-flow:column nowrap;
+	flex-flow:row nowrap;
 	background-color:var(--color-bg);
 	overflow:auto;
+}
+.list-content.showsInlineForm{
+	border-top:1px solid var(--color-border);
 }
 .list-content .form-wrap.popUp{
 	flex:1 1 auto;
@@ -79,6 +81,7 @@
 	flex-flow:column nowrap;
 	flex:1 1 auto;
 	background-color:var(--color-bg);
+	overflow:auto;
 }
 .list .layoutTable.formInline{
 	border-right:1px solid var(--color-border);
@@ -94,7 +97,7 @@
 }
 .list .layoutTable thead tr{
 	position:sticky;
-	top:var(--list-header-height);
+	top:0px;
 	z-index:var(--z-index-list-header);
 }
 .list .layoutTable thead tr.atTop{
@@ -123,7 +126,6 @@
 .list .layoutTable tfoot tr.aggregation td{
 	font-weight:bold;
 	border-top:2px solid var(--color-border);
-	border-bottom:2px solid var(--color-border);
 }
 .list .layoutTable th{
 	padding:0px;
@@ -272,7 +274,7 @@
 }
 .list .layoutCards .card-actions{
 	position:sticky;
-	top:var(--list-header-height);
+	top:0px;
 	padding:8px 10px;
 	display:flex;
 	flex-flow:row wrap;
@@ -301,7 +303,6 @@
 	overflow:auto;
 }
 .list .layoutCards .card{
-	min-height:72px;
 	position:relative;
 	border-right:1px solid var(--color-border);
 	border-bottom:1px solid var(--color-border);
@@ -311,9 +312,10 @@
 	position:absolute;
 	right:0px;
 	top:0px;
+	bottom:0px;
 	padding:2px 3px;
 	display:flex;
-	flex-flow:column nowrap;
+	flex-flow:column wrap;
 }
 .list .layoutCards .card.rowSelect:hover{
 	cursor:pointer;

@@ -279,73 +279,75 @@ let MyGantt = {
 		
 		<!-- gantt content -->
 		<div class="gantt-content">
-			<div class="gantt-labels" v-if="showGroupLabels">
-				<div class="gantt-label-entry"></div>
-				<div class="gantt-label-entry"
-					v-for="(g,k) in groups"
-					:key="k"
-					:style="styleLabel(g)"
-				>
-					<my-value-rich class="context-calendar-gantt"
-						v-for="c in g.columns.filter(v => !columnIndexesHidden.includes(v.index) && v.value !== null)"
-						:attribute-id="columns[c.index].attributeId"
-						:bold="columns[c.index].styles.includes('bold')"
-						:display="columns[c.index].display"
-						:italic="columns[c.index].styles.includes('italic')"
-						:key="c.index"
-						:length="columns[c.index].length"
-						:value="c.value"
-					/>
-				</div>
-			</div>
-			
-			<div class="gantt-lines" ref="content">
-				<div class="gantt-headers">
-					
-					<!-- header meta line: shows groupings of step entities (hours->days, days->months) -->
-					<div class="gantt-header">
-						<div class="gantt-header-item"
-							v-for="i in headerItemsMeta"
-							:style="'width:'+stepPixels*i.steps+'px'"
-						>
-							{{ displayHeaderMetaItem(i.value) }}
-						</div>
-					</div>
-					
-					<!-- header line: shows step entities (hours, days, ...) -->
-					<div class="gantt-header lower">
-						<div class="gantt-header-item lower"
-							v-for="i in headerItems"
-							@mousedown.left="clickHeaderItem(i.unixTime,true)"
-							@mouseover="hoverHeaderItem(i.unixTime)"
-							@mouseup.left="clickHeaderItem(i.unixTime,false)"
-							:class="{ clickable:hasCreate, selected:i.unixTime >= unixInput0 && i.unixTime <= unixInput1, today:getUnixFromDate(dateStart) === i.unixTime, weekend:i.isWeekend }"
-							:style="'width:'+stepPixels+'px'"
-						>
-							{{ i.caption }}
-						</div>
+			<div class="gantt-data">
+				<div class="gantt-labels" v-if="showGroupLabels">
+					<div class="gantt-label-entry"></div>
+					<div class="gantt-label-entry"
+						v-for="(g,k) in groups"
+						:key="k"
+						:style="styleLabel(g)"
+					>
+						<my-value-rich class="context-calendar-gantt"
+							v-for="c in g.columns.filter(v => !columnIndexesHidden.includes(v.index) && v.value !== null)"
+							:attribute-id="columns[c.index].attributeId"
+							:bold="columns[c.index].styles.includes('bold')"
+							:display="columns[c.index].display"
+							:italic="columns[c.index].styles.includes('italic')"
+							:key="c.index"
+							:length="columns[c.index].length"
+							:value="c.value"
+						/>
 					</div>
 				</div>
 				
-				<div class="gantt-group" v-for="(g,i) in groups">
-					<my-gantt-line
-						v-for="(l,li) in g.lines"
-						@record-selected="(...args) => $emit('open-form',[args[0]],[],args[1])"
-						:class="{ 'show-line':li === g.lines.length-1 }"
-						:columns="columns"
-						:date0Range="date0"
-						:date1Range="date1"
-						:hasUpdate="hasUpdate"
-						:indexesHidden="columnIndexesHidden.concat(group0LabelExpressionIndexes)"
-						:isDays="isDays"
-						:pxPerSec="pxPerSec"
-						:key="i+'_'+li"
-						:style="styleLine"
-						:records="l"
-					/>
-				</div>
-				<div class="nothing-there" v-if="isEmpty">
-					{{ capGen.nothingThere }}
+				<div class="gantt-lines" ref="content">
+					<div class="gantt-headers">
+						
+						<!-- header meta line: shows groupings of step entities (hours->days, days->months) -->
+						<div class="gantt-header">
+							<div class="gantt-header-item"
+								v-for="i in headerItemsMeta"
+								:style="'width:'+stepPixels*i.steps+'px'"
+							>
+								{{ displayHeaderMetaItem(i.value) }}
+							</div>
+						</div>
+						
+						<!-- header line: shows step entities (hours, days, ...) -->
+						<div class="gantt-header lower">
+							<div class="gantt-header-item lower"
+								v-for="i in headerItems"
+								@mousedown.left="clickHeaderItem(i.unixTime,true)"
+								@mouseover="hoverHeaderItem(i.unixTime)"
+								@mouseup.left="clickHeaderItem(i.unixTime,false)"
+								:class="{ clickable:hasCreate, selected:i.unixTime >= unixInput0 && i.unixTime <= unixInput1, today:getUnixFromDate(dateStart) === i.unixTime, weekend:i.isWeekend }"
+								:style="'width:'+stepPixels+'px'"
+							>
+								{{ i.caption }}
+							</div>
+						</div>
+					</div>
+					
+					<div class="gantt-group" v-for="(g,i) in groups">
+						<my-gantt-line
+							v-for="(l,li) in g.lines"
+							@record-selected="(...args) => $emit('open-form',[args[0]],[],args[1])"
+							:class="{ 'show-line':li === g.lines.length-1 }"
+							:columns="columns"
+							:date0Range="date0"
+							:date1Range="date1"
+							:hasUpdate="hasUpdate"
+							:indexesHidden="columnIndexesHidden.concat(group0LabelExpressionIndexes)"
+							:isDays="isDays"
+							:pxPerSec="pxPerSec"
+							:key="i+'_'+li"
+							:style="styleLine"
+							:records="l"
+						/>
+					</div>
+					<div class="nothing-there" v-if="isEmpty">
+						{{ capGen.nothingThere }}
+					</div>
 				</div>
 			</div>
 			
