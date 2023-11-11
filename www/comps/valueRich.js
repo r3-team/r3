@@ -203,9 +203,7 @@ let MyValueRich = {
 						break;
 						case 'datetime': this.stringValueFull = this.getUnixFormat(this.value,this.settings.dateFormat + ' H:i'); break;
 						case 'time':     this.stringValueFull = this.getUtcTimeStringFromUnix(this.value);                        break;
-						default:
-							this.stringValueFull = String(this.value).replace(/\B(?=(\d{3})+(?!\d))/g,this.settings.numberSepThousand);
-						break;
+						default: directValue = true; break;
 					}
 				break;
 				
