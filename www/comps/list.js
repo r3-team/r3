@@ -531,6 +531,11 @@ let MyList = {
 						</tfoot>
 					</table>
 					
+					<div class="empty-space"
+						v-if="isTable"
+						@click="clickOnEmpty"
+					></div>
+					
 					<!-- list results as cards -->
 					<template v-if="isCards">
 					
@@ -585,7 +590,7 @@ let MyList = {
 							/>
 						</div>
 						
-						<div class="cards">
+						<div class="cards" @click="clickOnEmpty">
 							
 							<!-- no results message -->
 							<template v-if="!hasResults">
@@ -600,9 +605,9 @@ let MyList = {
 							
 							<div class="card"
 								v-for="(r,ri) in rowsClear"
-								@click="clickRow(r,false)"
-								@click.middle="clickRow(r,true)"
-								@keyup.enter.space="clickRow(r,false)"
+								@click.stop="clickRow(r,false)"
+								@click.middle.stop="clickRow(r,true)"
+								@keyup.enter.space.stop="clickRow(r,false)"
 								:class="{ rowSelect:rowSelect && !inputIsReadonly }"
 								:key="ri + '_' + r.indexRecordIds['0']"
 								:ref="refTabindex+String(ri)"
@@ -647,8 +652,6 @@ let MyList = {
 							</div>
 						</div>
 					</template>
-					
-					<div class="empty-space" @click="clickOnEmpty"></div>
 				</div>
 				
 				<!-- inline form -->
@@ -1351,6 +1354,8 @@ let MyList = {
 			}
 		},
 		setAggregators(columnId,aggregator) {
+			if(!this.isTable) return;
+			
 			if(aggregator !== null) this.columnIdMapAggr[columnId] = aggregator;
 			else                    delete(this.columnIdMapAggr[columnId]);
 			
@@ -1434,6 +1439,11 @@ let MyList = {
 		toggleLayout() {
 			this.layout = this.isTable ? 'cards' : 'table';
 			this.fieldOptionSet(this.fieldId,'layout',this.layout);
+			
+			this.$nextTick(() => {
+				if(this.isTable && typeof this.$refs.aggregations !== 'undefined')
+					this.$refs.aggregations.get()
+			});
 		},
 		toggleUserFilters() {
 			this.showFilters = !this.showFilters;
@@ -1644,7 +1654,7 @@ let MyList = {
 							this.$emit('record-count-change',this.count);
 							
 							// update aggregations as well
-							if(typeof this.$refs.aggregations !== 'undefined')
+							if(this.isTable && typeof this.$refs.aggregations !== 'undefined')
 								this.$refs.aggregations.get();
 							
 							if(this.isInput) {

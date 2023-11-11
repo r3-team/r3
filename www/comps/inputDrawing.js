@@ -287,7 +287,6 @@ let MyInputDraw = {
 			}
 		},
 		pointerUp(evt) {
-			console.log('off');
 			this.dragMode          = false;
 			this.pointerActive     = false;
 			this.pointerStartCords = null;

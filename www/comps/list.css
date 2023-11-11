@@ -25,7 +25,7 @@
 	filter:var(--image-filter);
 }
 .list-content{
-	flex:1 1 auto;
+	flex:1 1 0px; /* important for list content to overflow */
 	display:flex;
 	flex-flow:row nowrap;
 	background-color:var(--color-bg);
@@ -91,9 +91,6 @@
 }
 .list .layoutTable.scrolls{
 	position:relative;
-}
-.list .layoutTable.scrolls table{
-	position:absolute; /* to keep table from growing over its parent */
 }
 .list .layoutTable thead tr{
 	position:sticky;
@@ -269,7 +266,6 @@
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
-	align-content:flex-start;
 	background-color:var(--color-bg);
 }
 .list .layoutCards .card-actions{
