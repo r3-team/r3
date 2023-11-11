@@ -32,7 +32,7 @@ let MyBuilderOpenFormInput = {
 					:disabled="readonly"
 					:value="isActive ? openForm.formIdOpen : null"
 				>
-					<option :value="null">-</option>
+					<option value="">-</option>
 					<option
 						v-for="f in module.forms.filter(v => allowAllForms || v.query.relationId === relationIdSource)" 
 						:value="f.id"

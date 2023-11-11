@@ -15,7 +15,7 @@ let MyBuilderCollectionInput = {
 			<td>{{ capApp.collection }}</td>
 			<td>
 				<select v-model="collectionIdInput" :disabled="fixedCollection || readonly">
-					<option :value="null">-</option>
+					<option value="">-</option>
 					<option v-for="c in module.collections" :value="c.id">
 						{{ c.name }}
 					</option>
@@ -36,7 +36,7 @@ let MyBuilderCollectionInput = {
 			<td>
 				<select v-model="columnIdInput" :disabled="readonly">
 					<option :value="null" disabled="disabled">-</option>
-					<option v-if="collectionIdInput !== null" v-for="c in collection.columns" :value="c.id">
+					<option v-if="collectionSet" v-for="c in collection.columns" :value="c.id">
 						{{ getItemTitleColumn(c,true) }}
 					</option>
 				</select>
@@ -129,7 +129,7 @@ let MyBuilderCollectionInput = {
 		
 		// simple
 		collection:   (s) => !s.collectionSet ? false : s.collectionIdMap[s.collectionIdInput],
-		collectionSet:(s) => s.collectionIdInput !== null,
+		collectionSet:(s) => s.consumerInput.collectionId !== null,
 		
 		// stores
 		modules:        (s) => s.$store.getters['schema/modules'],
@@ -149,8 +149,8 @@ let MyBuilderCollectionInput = {
 			v[name] = value;
 			
 			if(name === 'collectionId') {
-				if(value === 'null') v = null;
-				else                 v.columnIdDisplay = null;
+				if(value === '') v = null;
+				else             v.columnIdDisplay = null;
 			}
 			this.$emit('update:consumer',v);
 		}
