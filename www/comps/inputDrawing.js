@@ -31,6 +31,13 @@ let MyInputDraw = {
 				/>
 			</div>
 			<div class="colors">
+				<template v-if="isMobile || dragModeForce">
+					<my-button image="drag.png"
+						:active="false"
+						:naked="true"
+					/>
+					<my-bool v-model="dragModeForce" :grow="false" />
+				</template>
 				<my-button image="colors.png"
 					v-if="!readonly"
 					@trigger="strokeColor = strokeColorDef"
@@ -61,11 +68,12 @@ let MyInputDraw = {
 				/>
 			</div>
 		</div>
-		<canvas height="300" ref="inputField" width="300"
+		<canvas height="300" ref="inputField" width="300" oncontextmenu="return false;"
 			@pointerdown="pointerDown"
 			@pointermove="pointerMove"
 			@pointerup="pointerUp"
 			@wheel.passive="wheel"
+			:class="{ dragMode:dragMode }"
 		/>
 	</div>`,
 	props:{
@@ -88,15 +96,20 @@ let MyInputDraw = {
 	data() {
 		return {
 			canvasCtx:null,          // canvas context to draw in
-			strokeActive:false,
+			dragMode:false,
+			dragModeForce:false,     // for mobile device, toggle drag mode
+			dragOffsetX:0,
+			dragOffsetY:0,
+			pointerActive:false,
+			pointerStartCords:null,  // starting coords of pointer as array [x,y]
 			strokeColor:'000000',
 			strokeColorDef:'000000',
-			strokeStartCords:null,   // starting coords of a stroke as array [x,y]
 			strokeWidth:3,
 			strokeWidthDef:3,
 			strokeWidthMax:12,
 			strokeWidthMin:1,
 			strokes:[],              // strokes on canvas
+			timerDrag:null,
 			timerResize:null,
 			timerUpdate:null,
 			zoomInput:0,
@@ -110,7 +123,8 @@ let MyInputDraw = {
 		zoom:(s) => 1 + (s.zoomInput / 10),
 		
 		// stores
-		capGen:(s) => s.$store.getters.captions.generic
+		capGen:  (s) => s.$store.getters.captions.generic,
+		isMobile:(s) => s.$store.getters.isMobile
 	},
 	mounted() {
 		this.canvasCtx = this.$refs.inputField.getContext('2d');
@@ -129,6 +143,12 @@ let MyInputDraw = {
 		},
 		
 		// events
+		dragged() {
+			if(this.timerDrag !== null)
+				clearTimeout(this.timerDrag);
+			
+			this.timerDrag = setTimeout(this.canvasRedraw,0.5);
+		},
 		resized() {
 			if(this.timerResize !== null)
 				clearTimeout(this.timerResize);
@@ -155,10 +175,16 @@ let MyInputDraw = {
 			this.canvasCtx.strokeStyle = `#${color}`;
 			this.canvasCtx.lineWidth   = width*this.zoom;
 			this.canvasCtx.beginPath();
-			this.canvasCtx.moveTo(posX*zoom,posY*zoom);
+			this.canvasCtx.moveTo(
+				(posX*zoom) + this.dragOffsetX,
+				(posY*zoom) + this.dragOffsetY
+			);
 		},
 		canvasLineTo(zoom,posX,posY) {
-			this.canvasCtx.lineTo(posX*zoom,posY*zoom);
+			this.canvasCtx.lineTo(
+				(posX * zoom) + this.dragOffsetX,
+				(posY * zoom) + this.dragOffsetY
+			);
 		},
 		canvasRedraw() {
 			if(this.isHidden) return;
@@ -198,50 +224,71 @@ let MyInputDraw = {
 		},
 		
 		// actions
-		wheel(evt) {
-			const wheelUp = evt.wheelDelta > 0;
-			
-			if(wheelUp && this.zoomInput > this.zoomInputMin)
-				this.zoomInput -= 1;
-			
-			if(!wheelUp && this.zoomInput < this.zoomInputMax)
-				this.zoomInput += 1;
-		},
-		
 		clear() {
 			this.canvasReset();
 			this.strokes = [];
 			this.updated();
 		},
 		pointerDown(evt) {
-			if(this.readonly) return;
-			
-			this.strokeActive     = true;
-			this.strokeStartCords = this.getCursorPosition(evt);
+			this.dragMode          = evt.button === 2 || this.dragModeForce;
+			this.pointerActive     = true;
+			this.pointerStartCords = this.getCursorPosition(evt);
 		},
 		pointerMove(evt) {
-			if(this.readonly || !this.strokeActive)
+			if(!this.pointerActive)
 				return;
 			
-			// record beginning of path only if there is movement
-			if(this.strokeStartCords !== null) {
-				const [startPosX,startPosY] = this.strokeStartCords;
-				this.canvasBeginPath(1,startPosX,startPosY,this.strokeColor,this.strokeWidth);
-				this.strokes.push(['b',startPosX/this.zoom,startPosY/this.zoom,this.strokeColor,this.strokeWidth]);
-				this.strokeStartCords = null;
+			if(this.dragMode && this.pointerStartCords !== null) {
+				const [posXStart,posYStart] = this.pointerStartCords;
+				const [posX,posY]           = this.getCursorPosition(evt);
+				this.dragOffsetX -= posXStart - posX;
+				this.dragOffsetY -= posYStart - posY;
+				this.pointerStartCords = [posX,posY];
+				this.dragged();
+				return;
 			}
 			
-			const [posX,posY] = this.getCursorPosition(evt);
-			this.canvasLineTo(1,posX,posY);
-			this.canvasStroke();
-			this.strokes.push(['l',posX/this.zoom,posY/this.zoom]);
-			this.updated();
+			if(!this.readonly) {
+				// path is started on the first pointer move event (otherwise: empty path)
+				if(this.pointerStartCords !== null) {
+					const [posXStart,posYStart] = this.pointerStartCords;
+					this.canvasBeginPath(
+						1,
+						posXStart - this.dragOffsetX,
+						posYStart - this.dragOffsetY,
+						this.strokeColor,
+						this.strokeWidth
+					);
+					this.strokes.push([
+						'b',
+						(posXStart - this.dragOffsetX) / this.zoom,
+						(posYStart - this.dragOffsetY) / this.zoom,
+						this.strokeColor,
+						this.strokeWidth
+					]);
+					this.pointerStartCords = null;
+				}
+				
+				const [posX,posY] = this.getCursorPosition(evt);
+				this.canvasLineTo(
+					1,
+					posX - this.dragOffsetX,
+					posY - this.dragOffsetY
+				);
+				this.canvasStroke();
+				this.strokes.push([
+					'l',
+					(posX - this.dragOffsetX) / this.zoom,
+					(posY - this.dragOffsetY) / this.zoom
+				]);
+				this.updated();
+			}
 		},
-		pointerUp() {
-			if(this.readonly) return;
-			
-			this.strokeActive     = false;
-			this.strokeStartCords = null;
+		pointerUp(evt) {
+			console.log('off');
+			this.dragMode          = false;
+			this.pointerActive     = false;
+			this.pointerStartCords = null;
 		},
 		undo() {
 			for(let i = this.strokes.length-1; i >= 0; i--) {
@@ -260,6 +307,15 @@ let MyInputDraw = {
 				data:this.strokes,
 				image:this.$refs.inputField.toDataURL()
 			}));
+		},
+		wheel(evt) {
+			const wheelUp = evt.wheelDelta > 0;
+			
+			if(!wheelUp && this.zoomInput > this.zoomInputMin)
+				this.zoomInput -= 1;
+			
+			if(wheelUp && this.zoomInput < this.zoomInputMax)
+				this.zoomInput += 1;
 		}
 	}
 };

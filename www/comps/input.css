@@ -466,8 +466,13 @@
 	flex:1 1 auto;
 	touch-action:none; /* fix: chrome mobile stops touch input otherwise */
 }
+.input-draw>canvas.dragMode{
+	cursor:move;
+}
 .input-draw .colors{
 	flex:0 1 auto;
+	display:flex;
+	flex-flow:row nowrap;
 }
 .input-draw .range{
 	flex:0 1 auto;
