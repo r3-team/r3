@@ -183,7 +183,7 @@ let MyCalendar = {
 			v-if="showIcs"
 			@mousedown.self="showIcs = false"
 		>
-			<div class="contentBox popUp">
+			<div class="contentBox float">
 				<div class="top lower">
 					<div class="area">
 						<img class="icon" src="images/calendar.png" />
@@ -196,9 +196,13 @@ let MyCalendar = {
 						/>
 					</div>
 				</div>
-				<div class="content">
-					<div v-if="icsToken === ''" class="row wrap gap default-inputs">
-						<input v-model="icsTokenName" v-focus :placeholder="capApp.icsTokenNameHint" />
+				<div class="content column gap default-inputs">
+					<input
+						v-model="icsTokenName"
+						v-focus :disabled="icsToken !== ''"
+						:placeholder="capApp.icsTokenNameHint"
+					/>
+					<div v-if="icsToken === ''">
 						<my-button image="ok.png"
 							@trigger="setIcsTokenFixed"
 							:caption="capApp.button.icsPublish"
@@ -206,15 +210,14 @@ let MyCalendar = {
 					</div>
 					
 					<template v-if="icsToken !== ''">
-						<div class="row wrap gap default-inputs">
-							<input class="long" :value="icsUrl" readonly />
+						<div class="row gap">
+							<input readonly :value="icsUrl" />
 							<my-button image="copyClipboard.png"
 								@trigger="icsCopyToClipboard"
-								:caption="capGen.button.copy"
 								:captionTitle="capGen.button.copyClipboard"
 							/>
 						</div>
-						<p>{{ capApp.icsDesc }}</p>
+						<span>{{ capApp.icsDesc }}</span>
 					</template>
 				</div>
 			</div>

@@ -16,6 +16,7 @@ let MyInputOffset = {
 			v-if="offsetSelectShow" 
 			v-model="offsetSelect"
 			:class="classInput"
+			:title="captionText"
 		>
 			<option v-for="n in pageCount" :value="(n-1)*limit">
 				{{ displayOffset(n, pageCount) }}

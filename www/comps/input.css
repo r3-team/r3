@@ -250,6 +250,7 @@
 }
 .input-offset .input-offset-caption{
 	flex:0 0 auto;
+	margin-left:6px;
 }
 .input-offset .input-offset-selector{
 	width:auto;

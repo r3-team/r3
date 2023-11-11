@@ -242,7 +242,6 @@ let MyList = {
 		<!-- regular list view (either view or input dropdown) -->
 		<template v-if="showTable && !inputAsCategory">
 			
-			
 			<!-- list content -->
 			<div class="list-content">
 			
