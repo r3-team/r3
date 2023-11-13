@@ -76,13 +76,23 @@ let MyInputFiles = {
 		>
 		<!-- header -->
 		<div v-if="!dragActive" class="input-files-header default-inputs">
-			<div class="row centered">
+			<div class="row gap centered">
 				<slot name="input-icon" />
-	   			<transition name="fade_out">
-					<div v-if="progress !== 100">
-						{{ progress + '%' }}
-					</div>
-				</transition>
+				
+				<!-- new files upload -->
+				<template v-if="!readonly && !maxFiles">
+					<input hidden="hidden" id="upload" multiple="multiple" type="file"
+						@change="upload($event.target.files)"
+					/>
+					<label for="upload">
+						<my-button image="add.png"
+							:caption="capGen.button.add"
+							:naked="true"
+						/>
+					</label>
+				</template>
+				
+				<!-- file actions -->
 				<my-button image="files.png"
 					v-if="!unsavedSelected && fileIdsSelected.length !== 0"
 					@trigger="copyFilesSelected"
@@ -103,18 +113,22 @@ let MyInputFiles = {
 					:caption="!noSpace ? capGen.button.delete : ''"
 					:naked="true"
 				/>
+				
+	   			<transition name="fade_out">
+					<span v-if="progress !== 100">{{ progress + '%' }}</span>
+				</transition>
 			</div>
 			
 			<!-- file count -->
 			<div>{{ fileCountCaption }}</div>
 			
 			<!-- file name filter -->
-			<div class="right-side">
-				<div class="view-toggle" v-if="!noFiles">
-					<img draggable="false" src="images/files_list1.png" :class="{ active:viewListCompact }" @click="setViewMode('listCompact')" />
-					<img draggable="false" src="images/files_list2.png" :class="{ active:viewListComfort }" @click="setViewMode('listComfort')" />
-					<img draggable="false" src="images/files_list3.png" :class="{ active:viewGallery }"     @click="setViewMode('gallery')" />
-				</div>
+			<div class="row gap centered">
+				<img class="view-toggle" draggable="false"
+					@click="toggleViewMode"
+					v-if="!noFiles"
+					:src="viewSrc"
+				/>
 				<input v-if="!noSpace && !noFiles" v-model="filterName" class="short" placeholder="..." />
 			</div>
 		</div>
@@ -125,25 +139,20 @@ let MyInputFiles = {
 		</div>
 		
 		<div v-if="!dragActive" class="input-files-content">
-			<div class="input-files-actions">
+			<div class="input-files-actions" v-if="!viewListCompact">
 				
-				<!-- file upload -->
-				<div class="input-files-upload" v-if="!readonly && !maxFiles">
-					<input type="file" multiple="multiple"
-						@change="upload($event.target.files)"
-					/>
-				</div>
-				
-				<!-- toggle all -->
 				<div class="row centered gap">
+					<!-- toggle all -->
 					<my-button
-						v-if="!viewListCompact && !noFiles && !oneFile && !readonly"
+						v-if="!noFiles && !oneFile && !readonly"
 						@trigger="toggleAll"
-						:caption="!noSpace ? capGen.button.selectAll : capGen.button.selectAllShort"
+						:caption="capGen.button.all"
 						:image="displayChecked(allSelected)"
 						:naked="true"
 					/>
-					
+				</div>
+				
+				<div class="row gap centered default-inputs">
 					<!-- gallery option: show meta -->
 					<my-button
 						v-if="viewGallery && !noFiles && !oneFile"
@@ -152,21 +161,23 @@ let MyInputFiles = {
 						:image="displayChecked(galleryMeta)"
 						:naked="true"
 					/>
+					
+					<!-- sort mode -->
+					<div class="row centered" v-if="!fewFiles && !noSpace">
+						<select @change="setSortMode($event.target.value)" :value="sortMode">
+							<option value="name">{{ capApp.fileName }}</option>
+							<option value="size">{{ capApp.fileSize }}</option>
+							<option value="changed">{{ capApp.fileChanged }}</option>
+						</select>
+						<my-button
+							@trigger="toggleSortDir"
+							:image="sortDirAsc ? 'triangleUp.png' : 'triangleDown.png'"
+							:naked="true"
+						/>
+					</div>
 				</div>
 				
-				<!-- sort mode -->
-				<div class="row default-inputs" v-if="!viewListCompact && !fewFiles && !noSpace">
-					<my-button
-						@trigger="toggleSortDir"
-						:image="sortDirAsc ? 'triangleUp.png' : 'triangleDown.png'"
-						:naked="true"
-					/>
-					<select @change="setSortMode($event.target.value)" :value="sortMode">
-						<option value="name">{{ capApp.fileName }}</option>
-						<option value="size">{{ capApp.fileSize }}</option>
-						<option value="changed">{{ capApp.fileChanged }}</option>
-					</select>
-				</div>
+				<div />
 			</div>
 			
 			<!-- listCompact -->
@@ -415,6 +426,12 @@ let MyInputFiles = {
 			}
 			return out;
 		},
+		viewSrc:(s) => {
+			if(s.viewListComfort) return 'images/files_list2.png';
+			if(s.viewListCompact) return 'images/files_list1.png';
+			if(s.viewGallery)     return 'images/files_list3.png';
+			return '';
+		},
 		
 		// simple
 		allSelected:    (s) => s.filesProcessed.length === s.fileIdsSelected.length,
@@ -623,6 +640,13 @@ let MyInputFiles = {
 		},
 		toggleSortDir(){
 			this.sortDirAsc = !this.sortDirAsc;
+		},
+		toggleViewMode() {
+			switch(this.viewMode) {
+				case 'listCompact': this.setViewMode('listComfort'); break;
+				case 'listComfort': this.setViewMode('gallery');     break;
+				case 'gallery':     this.setViewMode('listCompact'); break;
+			}
 		},
 		update(fileId,action,name) {
 			if(typeof this.fileIdMapChange[fileId] === 'undefined') {

@@ -753,7 +753,7 @@ let MyField = {
 				out.push(s.field.direction);
 			}
 			
-			if(s.isTextarea || s.isRichtext || s.isFiles)
+			if(s.isTextarea || s.isRichtext)
 				out.push('top-aligned');
 			
 			if(s.isHeader && s.field.richtext)
@@ -1042,7 +1042,7 @@ let MyField = {
 		customErr:  (s) => typeof s.fieldIdMapError[s.field.id] !== 'undefined'
 			&& s.fieldIdMapError[s.field.id] !== null ? s.fieldIdMapError[s.field.id] : null,
 		hasCaption: (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
-		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawingInput,
+		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawingInput && !s.isFiles,
 		inputRegex: (s) => !s.isData || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
 		showInvalid:(s) => !s.isValid && (s.formBadSave || !s.notTouched),
@@ -1147,6 +1147,7 @@ let MyField = {
 			const oneField = fields.length === 1 ? fields[0] : false;
 			let   readonly = false;
 			let   drawing  = false;
+			let   files    = false;
 			
 			if(oneField && typeof this.$refs['tabField_'+oneField.id] !== 'undefined')
 				readonly = this.$refs['tabField_'+oneField.id]['0'].isReadonly;
@@ -1154,12 +1155,13 @@ let MyField = {
 			if(oneField && oneField.content === 'data') {
 				const atr = this.attributeIdMap[oneField.attributeId];
 				drawing = atr.contentUse === 'drawing';
+				files   = atr.content    === 'files';
 			}
 			
 			return {
 				active:  tabIndex === this.tabIndexShow,
 				error:   this.formBadSave && this.tabIndexesInvalidFields.includes(tabIndex),
-				inputBg: active && oneField && !drawing && oneField.content === 'data',
+				inputBg: active && oneField && !files && !drawing && oneField.content === 'data',
 				readonly:active && oneField && readonly
 			};
 		},

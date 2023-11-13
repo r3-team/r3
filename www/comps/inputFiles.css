@@ -7,50 +7,29 @@
 
 .input-files-header{
 	display:flex;
-	height:36px;
-	padding:0px 9px;
-	border-top:1px solid var(--color-border);
+	padding:8px 6px;
 	border-bottom:1px solid var(--color-border);
-	border-left:1px solid var(--color-border);
-	border-radius:3px 0px 0px 3px;
 	flex-flow:row nowrap;
 	align-items:center;
 	justify-content:space-between;
 	background-color:var(--color-bg);
-	box-shadow:1px 1px 3px var(--color-shade);
+	border-radius:5px 5px 0px 0px;
 	z-index:var(--z-index-field-file-header);
 }
 .input-files-header input{
 	width:100%;
 	max-with:120px;
 	min-width:30px;
-	background-color:var(--color-bg);
 }
-.input-files-header .right-side{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-}
-.input-files-header .view-toggle{
-	display:flex;
-	flex-flow:row nowrap;
-	align-items:center;
-	margin-right:5px;
-}
-.input-files-header .view-toggle img{
+.input-files-header img.view-toggle{
 	width:24px;
 	height:24px;
-	margin:0px 3px;
-	padding:2px 2px 3px;
+	margin:2px 3px;
 	filter:var(--image-filter);
 	cursor:pointer;
 }
-.input-files-header .view-toggle img.active{
-	border-radius:2px;
-	border-bottom:2px solid var(--color-border);
-}
-.input-files-header .view-toggle img:focus,
-.input-files-header .view-toggle img:hover{
+.input-files-header img.view-toggle:focus,
+.input-files-header img.view-toggle:hover{
 	width:28px;
 	height:28px;
 	margin:0px 1px;
@@ -98,7 +77,7 @@
 .input-files-name input:focus,
 .input-files-name input:hover{
 	padding:4px 6px;
-	background-color:var(--color-bg);
+	background-color:var(--color-input);
 	box-shadow:1px 1px 2px var(--color-shade);
 	border-radius:3px;
 }
@@ -106,6 +85,14 @@
 	flex:1 1 auto;
 	margin:0px 3px;
 	color:var(--color-error);
+}
+
+.input-files input[type=file]::file-selector-button{
+	border:none;
+	background:transparent;
+	border-radius:10px;
+	color:inherit;
+	cursor:pointer;
 }
 
 /* list compact */
@@ -124,6 +111,10 @@
 .input-files table.listCompact th,
 .input-files table.listCompact td{
 	padding:3px 4px 3px 0px;
+}
+.input-files table.listCompact th:first-child,
+.input-files table.listCompact td:first-child{
+	padding-left:8px;
 }
 .input-files table.listCompact td{
 	border-bottom:1px solid var(--color-border);
@@ -149,7 +140,7 @@
 	display:flex;
 	position:absolute;
 	flex-flow:row wrap;
-	margin:0px 3px;
+	margin:0px 5px;
 	padding:3px 0px 5px;
 	gap:6px;
 }
@@ -161,7 +152,7 @@
 	background-color:var(--color-bg);
 	border:1px solid var(--color-border);
 	border-radius:5px;
-	box-shadow:1px 1px 3px var(--color-shade);
+	box-shadow:1px 1px 1px var(--color-shade);
 }
 .input-files .listComfort .item:focus,
 .input-files .listComfort .item:hover{
@@ -213,11 +204,11 @@
 	display:flex;
 	position:absolute;
 	flex-flow:row wrap;
-	margin:0px 3px;
+	margin:0px 5px;
 	padding:3px 0px 5px;
 }
 .input-files .gallery .item{
-	margin-right:1px;
+	margin:2px;
 	position:relative;
 	display:flex;
 	flex-flow:column nowrap;
