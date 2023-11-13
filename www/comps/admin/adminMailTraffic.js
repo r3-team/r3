@@ -78,7 +78,7 @@ let MyAdminMailTraffic = {
 			
 			<span v-if="noMails"><i>{{ capApp.noMailsInTraffic }}</i></span>
 			
-			<table class="generic-table shade" v-if="!noMails">
+			<table class="generic-table bright shade" v-if="!noMails">
 				<thead>
 					<tr>
 						<th>{{ capApp.dir }}</th>

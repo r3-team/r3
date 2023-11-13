@@ -78,7 +78,7 @@ let MyAdminBackups = {
 				<h1>{{ capApp.list }}</h1>
 			</div>
 			
-			<table class="generic-table default-inputs shade sets">
+			<table class="generic-table bright default-inputs shade sets">
 				<thead>
 					<tr>
 						<th>{{ capGen.date }}</th>

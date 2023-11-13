@@ -54,7 +54,7 @@ let MyAdminFiles = {
 				<h1>{{ capApp.titleDeleted }}</h1>
 			</div>
 			
-			<table class="generic-table default-inputs shade">
+			<table class="generic-table bright sticky-top default-inputs shade">
 				<thead>
 					<tr>
 						<th>{{ capGen.actions }}</th>

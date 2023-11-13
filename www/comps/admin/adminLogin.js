@@ -230,7 +230,7 @@ let MyAdminLogin = {
 				</table>
 				
 				<!-- roles -->
-				<table class="generic-table sticky-top role-select" v-if="tabTarget === 'roles'">
+				<table class="generic-table bright sticky-top role-select" v-if="tabTarget === 'roles'">
 					<thead>
 						<tr>
 							<th v-if="isLdapAssignedRoles" colspan="4"><b>{{ capApp.ldapAssignActive }}</b></th>

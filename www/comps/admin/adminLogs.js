@@ -115,7 +115,7 @@ let MyAdminLogs = {
 			
 			<!-- logs -->
 			<div class="admin-logs-table">
-				<table class="generic-table sticky-top">
+				<table class="generic-table bright sticky-top">
 					<thead>
 						<tr class="title">
 							<th class="minimum">{{ capGen.button.show }}</th>

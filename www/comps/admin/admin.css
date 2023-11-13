@@ -341,13 +341,18 @@
 	flex-flow:row nowrap;
 	max-width:1200px;
 	margin:0px 12px 12px 0px;
-	border:2px solid var(--color-border);
-	border-radius:4px;
+	border-radius:5px;
+	box-shadow:1px 1px 3px var(--color-shade);
+	overflow:hidden;
+}
+.admin-repo .repo-module:hover{
+	box-shadow:1px 1px 8px var(--color-shade);
+	transition:box-shadow 0.3s;
 }
 .admin-repo .repo-module .part{
 	display:flex;
 	flex-flow:column nowrap;
-	background-color:var(--color-bg);
+	background-color:var(--color-input);
 }
 .admin-repo .repo-module .bad-state{
 	color:var(--color-error);
@@ -387,7 +392,7 @@
 	display:flex;
 	flex-flow:column;
 	align-items:flex-start;
-	border-left:2px solid var(--color-border);
+	border-left:1px solid var(--color-border);
 	flex:0 1 300px;
 }
 
@@ -441,7 +446,7 @@
 	overflow-x:hidden;
 	color:var(--color-font);
 	border-bottom:1px solid var(--color-border);
-	background-color:var(--color-bg);
+	background-color:var(--color-input);
 }
 .admin-roles .admin-role-members .entry{
 	display:flex;
@@ -460,7 +465,7 @@
 	border:none;
 	outline:none;
 	color:var(--color-font);
-	background-color:var(--color-bg);
+	background-color:var(--color-input);
 }
 
 
@@ -473,8 +478,6 @@
 }
 .admin-files tr.attribute-title td{
 	font-weight:bold;
-	padding-top:16px;
-	padding-bottom:16px;
 }
 
 

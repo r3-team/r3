@@ -556,8 +556,8 @@ let MySettingsAccount = {
 let MySettingsFixedTokens = {
 	name:'my-settings-fixed-tokens',
 	template:`<div>
-		<template v-if="tokensFixed.length !== 0">
-			<table class="default-inputs">
+		<div class="settings-tokens" v-if="tokensFixed.length !== 0">
+			<table class="generic-table sticky-top bright default-inputs">
 				<thead>
 					<tr>
 						<th>{{ capApp.titleName }}</th>
@@ -581,9 +581,7 @@ let MySettingsFixedTokens = {
 					</tr>
 				</tbody>
 			</table>
-			<br />
-			<br />
-		</template>
+		</div>
 		
 		<div class="settings-token-actions">
 			<my-button image="screen.png"
@@ -598,7 +596,7 @@ let MySettingsFixedTokens = {
 		
 		<!-- MFA sub window -->
 		<div class="app-sub-window" v-if="showMfa">
-			<div class="contentBox popUp settings-mfa">
+			<div class="contentBox float settings-mfa">
 				<div class="top lower">
 					<div class="area">
 						<img class="icon" src="images/smartphone.png" />
@@ -663,7 +661,7 @@ let MySettingsFixedTokens = {
 		
 		<!-- device install sub window -->
 		<div class="app-sub-window" v-if="showInstall">
-			<div class="contentBox popUp">
+			<div class="contentBox float">
 				<div class="top lower">
 					<div class="area">
 						<img class="icon" src="images/screen.png" />

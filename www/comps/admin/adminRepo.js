@@ -7,7 +7,7 @@ let MyAdminRepoModule = {
 	template:`<div class="repo-module">
 		<div class="part left">
 			<div class="title">
-				<h3>{{ meta.title }}</h3>
+				<h2>{{ meta.title }}</h2>
 				<a :href="meta.supportPage" target="_blank">
 					{{ capApp.supportPage }}
 				</a>
@@ -15,10 +15,10 @@ let MyAdminRepoModule = {
 			<div class="description" v-html="description"></div>
 		</div>
 		<div class="part right">
-			<div>'{{ repoModule.name }}' v{{ repoModule.releaseBuild }}</div>
+			<div><b>'{{ repoModule.name }}' v{{ repoModule.releaseBuild }}</b></div>
 			<div class="author">{{ capApp.author.replace('{NAME}',repoModule.author) }}</div>
 			<div>{{ releaseDate }}</div>
-			<div>{{ languageCodes }}</div>
+			<div><i>{{ languageCodes }}</i></div>
 			
 			<div class="actions-box">
 				<my-button

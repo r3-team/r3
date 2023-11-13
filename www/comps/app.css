@@ -795,6 +795,9 @@ table td.maximum{
 	border-bottom:1px solid var(--color-border);
 	background-color:var(--color-bg);
 }
+.generic-table.bright>tbody>tr>td{
+	background-color:var(--color-input);
+}
 .generic-table>thead>tr>th:first-child,
 .generic-table>tbody>tr>td:first-child{
 	padding-left:12px;
