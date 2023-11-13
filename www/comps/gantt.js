@@ -394,7 +394,7 @@ let MyGantt = {
 		stepTypeToggle:  { type:Boolean, required:true },
 		usesPageHistory: { type:Boolean, required:true }
 	},
-	emits:['close-inline','open-form','record-count-change','set-args','set-collection-indexes'],
+	emits:['close-inline','open-form','set-args','set-collection-indexes'],
 	data() {
 		return {
 			choiceId:null,
@@ -872,7 +872,6 @@ let MyGantt = {
 					let groupMap = {}; // map of all groups, key: groupBy
 					let groupColumns = []; // group column values
 					let values   = [];
-					this.$emit('record-count-change',res.payload.rows.length);
 					
 					for(let i = 0, j = res.payload.rows.length; i < j; i++) {
 						let r = res.payload.rows[i];

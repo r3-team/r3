@@ -387,6 +387,7 @@ let MyCalendar = {
 		indexDate1:      { type:Number,  required:true },
 		isHidden:        { type:Boolean, required:false, default:false },
 		isSingleField:   { type:Boolean, required:false, default:false },
+		loadWhileHidden: { type:Boolean, required:false, default:false },
 		popUpFormInline: { required:true },
 		query:           { type:Object,  required:true },
 		usesPageHistory: { type:Boolean, required:true }
@@ -628,7 +629,7 @@ let MyCalendar = {
 		
 		// backend calls
 		get() {
-			if(this.query.relationId === null || this.isHidden)
+			if(this.query.relationId === null || (this.isHidden && !this.loadWhileHidden))
 				return;
 			
 			let dateStart = this.getUnixFromDate(this.date0);

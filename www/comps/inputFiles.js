@@ -338,6 +338,7 @@ let MyInputFiles = {
 		countAllowed:{ type:Number,  required:true }, // number of allowed files
 		fieldId:     { type:String,  required:true },
 		formLoading: { type:Boolean, required:true }, // to react to form load events
+		isHidden:    { type:Boolean, required:false, default:false },
 		modelValue:  { required:true },
 		readonly:    { type:Boolean, required:false, default:false },
 		recordId:    { type:Number,  required:true },
@@ -371,15 +372,16 @@ let MyInputFiles = {
 		};
 	},
 	created() {
-		window.addEventListener('resize',this.setNoSpaceMode);
+		window.addEventListener('resize',this.resized);
 	},
 	mounted() {
 		// setup watchers
 		this.$watch('formLoading',v => { if(!v) this.reset(); });
+		this.$watch('isHidden',   v => { if(!v) this.$nextTick(this.resized); });
 		this.$watch('modelValue', v => this.reset());
 		
 		// apply initial view size
-		this.setNoSpaceMode();
+		this.resized();
 		
 		// apply defaults
 		if(this.showGallery)
@@ -389,7 +391,7 @@ let MyInputFiles = {
 		this.setViewMode(this.fieldOptionGet(this.fieldId,'fileViewMode',this.viewMode));
 	},
 	unmounted() {
-		window.removeEventListener('resize',this.setNoSpaceMode);
+		window.removeEventListener('resize',this.resized);
 	},
 	computed:{
 		filesProcessed:{
@@ -519,7 +521,7 @@ let MyInputFiles = {
 			
 			return 'images/noPic.png';
 		},
-		setNoSpaceMode() {
+		resized() {
 			this.noSpace = this.$refs.main.clientWidth <= 700;
 		},
 		

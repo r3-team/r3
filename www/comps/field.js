@@ -117,6 +117,7 @@ let MyField = {
 					:indexDate1="field.indexDate1"
 					:isHidden="isHidden"
 					:isSingleField="isAlone"
+					:loadWhileHidden="parentIsCounting"
 					:popUpFormInline="popUpFormInline"
 					:query="field.query"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
@@ -127,7 +128,6 @@ let MyField = {
 					v-if="isCalendar && field.gantt"
 					@close-inline="closeInline"
 					@open-form="(...args) => openForm(args[0],args[1],args[2],null)"
-					@record-count-change="$emit('set-counter',field.id,$event)"
 					@set-args="(...args) => $emit('set-form-args',...args)"
 					@set-collection-indexes="setCollectionIndexes"
 					:attributeIdColor="field.attributeIdColor"
@@ -177,6 +177,7 @@ let MyField = {
 					:iconId="iconId ? iconId : null"
 					:isHidden="isHidden"
 					:isSingleField="isAlone"
+					:loadWhileHidden="parentIsCounting"
 					:popUpFormInline="popUpFormInline"
 					:relationIndexData="field.relationIndexData"
 					:relationIndexAxisX="field.relationIndexAxisX"
@@ -227,6 +228,7 @@ let MyField = {
 					:isSingleField="isAlone"
 					:layoutDefault="field.layout"
 					:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
+					:loadWhileHidden="parentIsCounting"
 					:popUpFormInline="popUpFormInline"
 					:query="field.query"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
@@ -287,9 +289,10 @@ let MyField = {
 							:formReadonly="formReadonly"
 							:isAloneInTab="t.fields.length === 1"
 							:isAloneInForm="false"
-							:isHiddenInParent="isHidden || (i !== tabIndexShow && !t.contentCounter)"
 							:joinsIndexMap="joinsIndexMap"
 							:key="f.id"
+							:parentIsCounting="t.contentCounter"
+							:parentIsHidden="isHidden || i !== tabIndexShow"
 							:values="values"
 						/>
 					</div>
@@ -466,6 +469,7 @@ let MyField = {
 					:countAllowed="field.max !== null ? field.max : 0"
 					:fieldId="field.id"
 					:formLoading="formLoading"
+					:isHidden="isHidden"
 					:readonly="isReadonly"
 					:recordId="joinsIndexMap[field.index].recordId"
 					:showGallery="field.display === 'gallery'"
@@ -587,9 +591,10 @@ let MyField = {
 			:formReadonly="formReadonly"
 			:flexDirParent="field.direction"
 			:isAloneInForm="isAloneInForm"
-			:isHiddenInParent="isHidden"
 			:joinsIndexMap="joinsIndexMap"
 			:key="f.id"
+			:parentIsCounting="parentIsCounting"
+			:parentIsHidden="isHidden"
 			:values="values"
 		/>
 	</div>`,
@@ -609,9 +614,10 @@ let MyField = {
 		isAloneInForm:    { type:Boolean, required:true },                 // parent form contains only this field
 		isAloneInTab:     { type:Boolean, required:false, default:false }, // parent tab only contains this field
 		isBulkUpdate:     { type:Boolean, required:false, default:false }, // form is in bulk update mode
-		isHiddenInParent: { type:Boolean, required:false, default:false }, // field is hidden in parent (tab/container)
 		joinsIndexMap:    { type:Object,  required:true },
 		logViewer:        { type:Boolean, required:false, default:false }, // is part of log viewer
+		parentIsCounting: { type:Boolean, required:false, default:false }, // field parent is counting records (tab counter)
+		parentIsHidden:   { type:Boolean, required:false, default:false }, // field parent has its content hidden (tab/container)
 		values:           { type:Object,  required:true }
 	},
 	emits:[
@@ -1060,7 +1066,7 @@ let MyField = {
 		
 		// states
 		isAlone:   (s) => s.isAloneInForm || s.isAloneInTab,
-		isHidden:  (s) => s.stateFinal === 'hidden' || s.isHiddenInParent,
+		isHidden:  (s) => s.stateFinal === 'hidden' || s.parentIsHidden,
 		isReadonly:(s) => s.stateFinal === 'readonly',
 		isRequired:(s) => s.stateFinal === 'required',
 		

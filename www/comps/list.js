@@ -700,6 +700,7 @@ let MyList = {
 		isInput:        { type:Boolean, required:false, default:false }, // use list as input
 		isHidden:       { type:Boolean, required:false, default:false }, // list is not visible and therefore not loaded/updated
 		isSingleField:  { type:Boolean, required:false, default:false }, // list is single field within a parent (form/tab - not container!)
+		loadWhileHidden:{ type:Boolean, required:false, default:false },
 		usesPageHistory:{ type:Boolean, required:false, default:false }, // list uses page getters for filtering/sorting/etc.
 		
 		// list as input field
@@ -1032,7 +1033,10 @@ let MyList = {
 			this.reloadOutside();
 		});
 		this.$watch('isHidden',(val) => {
-			if(!val) this.reloadOutside();
+			if(!val) {
+				this.reloadOutside();
+				this.resized();
+			}
 		});
 		this.$watch(() => [this.choices,this.columns,this.filters],(newVals,oldVals) => {
 			for(let i = 0, j = newVals.length; i < j; i++) {
@@ -1150,7 +1154,7 @@ let MyList = {
 				// reset elements, then wait for layout to settle to check
 				this.headerElements = JSON.parse(JSON.stringify(this.headerElementsAvailableInOrder));
 				this.$nextTick(this.headerAdjust);
-			},300);
+			},200);
 		},
 		updateDropdownDirection() {
 			let headersPx  = 200; // rough height in px of all headers (menu/form) combined
@@ -1624,7 +1628,7 @@ let MyList = {
 		},
 		get() {
 			// do nothing if nothing is shown, form is loading or list is in a non-visible tab
-			if(!this.showTable || this.formLoading || this.isHidden)
+			if(!this.showTable || this.formLoading || (this.isHidden && !this.loadWhileHidden))
 				return;
 			
 			// fix invalid offset (can occur when limit is changed)

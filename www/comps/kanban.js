@@ -458,6 +458,7 @@ let MyKanban = {
 		iconId:             { required:true },
 		isHidden:           { type:Boolean, required:false, default:false },
 		isSingleField:      { type:Boolean, required:false, default:false },
+		loadWhileHidden:    { type:Boolean, required:false, default:false },
 		popUpFormInline:    { required:false, default:null },
 		query:              { type:Object,  required:true },
 		relationIndexData:  { type:Number,  required:true },                // relation by index, serving as base for data (cards)
@@ -734,7 +735,7 @@ let MyKanban = {
 		
 		// backend calls
 		get() {
-			if(this.formLoading || this.isHidden)
+			if(this.formLoading || (this.isHidden && !this.loadWhileHidden))
 				return;
 			
 			ws.send('data','get',{
