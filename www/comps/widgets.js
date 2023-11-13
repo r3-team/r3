@@ -18,6 +18,11 @@ let MyWidget = {
 			<div class="row gap centered">
 				<img class="dragAnchor" src="images/drag.png" v-if="editMode" />
 				
+				<img
+					v-if="moduleSource && moduleSource.iconId !== null && !editMode"
+					:src="srcBase64Icon(moduleSource.iconId,'')"
+				/>
+				
 				<span v-if="moduleWidget">
 					{{ getCaption(moduleWidget.captions.widgetTitle,'') }}
 				</span>
@@ -170,6 +175,7 @@ let MyWidget = {
 		collectionTitle:     (s) => !s.collectionHasDisplay ? '' : s.getColumnTitle(s.getCollectionColumn(s.collection.id,s.collectionConsumer.columnIdDisplay)),
 		collectionValue:     (s) => !s.collectionHasDisplay ? '' : s.getCollectionValues(s.collection.id,s.collectionConsumer.columnIdDisplay,true),
 		form:                (s) => !s.moduleWidget || s.moduleWidget.formId === null ? false : s.formIdMap[s.moduleWidget.formId],
+		moduleSource:        (s) => !s.moduleWidget ? false : s.moduleIdMap[s.moduleWidget.moduleId],
 		moduleWidget:        (s) => s.widget.widgetId === null ? false : s.widgetIdMap[s.widget.widgetId],
 		moduleEntry:         (s) => {
 			if(!s.isSystemModuleMenu)

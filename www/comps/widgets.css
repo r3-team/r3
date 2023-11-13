@@ -176,7 +176,7 @@
 .widget>.header img.dragAnchor{
 	cursor:move;
 }
-.widget>.header img:hover{
+.widget>.header img.clickable:hover{
 	width:24px;
 	margin:0px 0px;
 	transition:width 0.2s, margin 0.2s;
