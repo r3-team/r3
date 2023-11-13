@@ -82,11 +82,11 @@ let MyAdminLoginTemplate = {
 						<td>{{ capAppSet.dateFormat }}</td>
 						<td>
 							<select v-model="settings.dateFormat">
-								<option value="Y-m-d">{{ capAppSet.dateFormat0 }}</option>
-								<option value="Y/m/d">{{ capAppSet.dateFormat1 }}</option>
-								<option value="d.m.Y">{{ capAppSet.dateFormat2 }}</option>
-								<option value="d/m/Y">{{ capAppSet.dateFormat3 }}</option>
-								<option value="m/d/Y">{{ capAppSet.dateFormat4 }}</option>
+								<option value="Y-m-d">{{ capGen.dateFormat0 }}</option>
+								<option value="Y/m/d">{{ capGen.dateFormat1 }}</option>
+								<option value="d.m.Y">{{ capGen.dateFormat2 }}</option>
+								<option value="d/m/Y">{{ capGen.dateFormat3 }}</option>
+								<option value="m/d/Y">{{ capGen.dateFormat4 }}</option>
 							</select>
 						</td>
 					</tr>
