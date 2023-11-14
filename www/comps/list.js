@@ -590,7 +590,7 @@ let MyList = {
 							/>
 						</div>
 						
-						<div class="cards" @click="clickOnEmpty">
+						<div class="cards" @click="clickOnEmpty" :id="usesPageHistory ? scrollFormId : null">
 							
 							<!-- no results message -->
 							<template v-if="!hasResults">
