@@ -139,12 +139,12 @@ let MyInputFiles = {
 		</div>
 		
 		<div v-if="!dragActive" class="input-files-content">
-			<div class="input-files-actions" v-if="!viewListCompact">
+			<div class="input-files-actions" v-if="showActionBar">
 				
 				<div class="row centered gap">
 					<!-- toggle all -->
 					<my-button
-						v-if="!noFiles && !oneFile && !readonly"
+						v-if="showToggleAll"
 						@trigger="toggleAll"
 						:caption="capGen.button.all"
 						:image="displayChecked(allSelected)"
@@ -155,15 +155,15 @@ let MyInputFiles = {
 				<div class="row gap centered default-inputs">
 					<!-- gallery option: show meta -->
 					<my-button
-						v-if="viewGallery && !noFiles && !oneFile"
+						v-if="showGalleryMeta"
 						@trigger="galleryMeta = !galleryMeta"
 						:caption="capGen.details"
 						:image="displayChecked(galleryMeta)"
 						:naked="true"
 					/>
 					
-					<!-- sort mode -->
-					<div class="row centered" v-if="!fewFiles && !noSpace">
+					<!-- sort mode input (for non-tables) -->
+					<div class="row centered" v-if="showSortInput">
 						<select @change="setSortMode($event.target.value)" :value="sortMode">
 							<option value="name">{{ capApp.fileName }}</option>
 							<option value="size">{{ capApp.fileSize }}</option>
@@ -441,6 +441,10 @@ let MyInputFiles = {
 		maxFiles:       (s) => s.countAllowed !== 0 && s.countAllowed <= s.files.length,
 		noFiles:        (s) => s.files.length === 0,
 		oneFile:        (s) => s.files.length === 1,
+		showActionBar:  (s) => !s.viewListCompact && (s.showGalleryMeta || s.showSortInput || s.showToggleAll),
+		showGalleryMeta:(s) => s.viewGallery && !s.noFiles && !s.oneFile,
+		showSortInput:  (s) => !s.fewFiles && !s.noSpace,
+		showToggleAll:  (s) => !s.noFiles && !s.oneFile && !s.readonly,
 		sortByChanged:  (s) => s.sortMode === 'changed',
 		sortByName:     (s) => s.sortMode === 'name',
 		sortBySize:     (s) => s.sortMode === 'size',
