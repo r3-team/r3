@@ -23,9 +23,7 @@ let MyWidget = {
 					:src="srcBase64Icon(moduleSource.iconId,'')"
 				/>
 				
-				<span v-if="moduleWidget">
-					{{ getCaption(moduleWidget.captions.widgetTitle,'') }}
-				</span>
+				<span v-if="moduleWidget">{{ title }}</span>
 			</div>
 			
 			<div class="row gap centered">
@@ -156,10 +154,9 @@ let MyWidget = {
 		title:(s) => {
 			// use most specific title in order: Widget title, form title, collection title, widget name
 			let t = '';
-			if(s.moduleWidget)           t = s.getCaption(s.moduleWidget.captions.widgetTitle,'');
-			if(t === '' && s.form)       t = s.getCaption(s.form.captions.formTitle, '');
-			if(t === '' && s.collection) t = s.getCaption(s.collection.captions.collectionTitle, '');
-			if(t === '')                 t = s.moduleWidget.name;
+			if(s.moduleWidget)     t = s.getCaption(s.moduleWidget.captions.widgetTitle,'');
+			if(t === '' && s.form) t = s.getCaption(s.form.captions.formTitle,'');
+			if(t === '')           t = s.moduleWidget ? s.moduleWidget.name : '';
 			return t;
 		},
 		

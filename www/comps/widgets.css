@@ -1,10 +1,10 @@
 /* widgets */
 .widgets{
-	padding:40px 20px 20px;
+	height:calc(100% - 40px);
+	margin:20px;
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
-	justify-content:space-between;
 	gap:20px;
 	--widget-size-width:380px;
 	--widget-size-height:320px;
@@ -28,13 +28,16 @@
 	padding:20px;
 	border:4px dotted var(--color-border);
 	border-radius:5px;
+	overflow:auto;
 }
 .widget-groups{
+	padding:20px 0px;
 	display:flex;
 	flex-flow:column wrap;
 	gap:20px;
 }
 .widget-groups.editMode{
+	padding:0px;
 	gap:0px;
 }
 .widget-groups.flowsAsRow{
@@ -42,7 +45,8 @@
 }
 .widgets-sidebar{
 	max-width:500px;
-	flex:0 1 auto;
+	flex:0 0 auto;
+	padding:5px;
 	display:flex;
 	flex-flow:column nowrap;
 	color:var(--color-font);
@@ -51,7 +55,8 @@
 	z-index:var(--z-index-widget-entry);
 }
 .widgets-sidebar.shown{
-	padding:0px 20px 10px 20px;
+	flex:0 1 auto;
+	padding:0px 0px 0px 20px;
 	border-left:1px solid var(--color-border);
 }
 .widgets-sidebar-title{
