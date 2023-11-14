@@ -1,6 +1,6 @@
 /* widgets */
 .widgets{
-	padding:40px 20px;
+	padding:40px 20px 20px;
 	flex:1 1 auto;
 	display:flex;
 	flex-flow:row nowrap;
@@ -41,12 +41,14 @@
 	flex-flow:row wrap;
 }
 .widgets-sidebar{
-	flex:0 0 auto;
+	max-width:500px;
+	flex:0 1 auto;
 	display:flex;
 	flex-flow:column nowrap;
 	color:var(--color-font);
 	gap:20px;
 	overflow:auto;
+	z-index:var(--z-index-widget-entry);
 }
 .widgets-sidebar.shown{
 	padding:0px 20px 10px 20px;
@@ -73,7 +75,6 @@
 .widgets-sidebar-content-box{
 	display:flex;
 	flex-flow:column nowrap;
-	max-width:420px;
 	flex:1 1 auto;
 	border-radius:5px;
 	padding:10px;

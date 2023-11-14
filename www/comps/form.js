@@ -847,7 +847,8 @@ let MyForm = {
 			this.popUpFieldIdSrc = null;
 			this.get();
 			
-			this.$nextTick(() => this.fieldSetFocus(this.form.fieldIdFocus,true));
+			if(!this.isWidget)
+				this.$nextTick(() => this.fieldSetFocus(this.form.fieldIdFocus,true));
 		},
 		releaseLoadingOnNextTick() {
 			// releases state on next tick for watching components to react to with updated data

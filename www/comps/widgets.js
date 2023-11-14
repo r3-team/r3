@@ -299,7 +299,7 @@ let MyWidgets = {
 		</div>
 		
 		<div class="widgets-sidebar" :class="{ shown:editMode }" v-if="!isMobile">
-			<div class="row gap">
+			<div class="row gap wrap">
 				<my-button image="edit.png"
 					v-if="!editMode"
 					@trigger="openEditMode"
