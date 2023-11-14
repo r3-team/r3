@@ -55,7 +55,7 @@
 	font-size:120%;
 	text-align:center;
 	vertical-align:middle;
-	margin:6px 6px 6px 0px;
+	margin:6px;
 	border:3px dashed var(--color-border);
 }
 .input-files-name{
@@ -104,7 +104,6 @@
 	top:0px;
 	position:sticky;
 	background-color:var(--color-bg);
-	z-index:var(--z-index-list-header);
 	border-bottom:2px solid var(--color-border);
 	z-index:var(--z-index-field-file-list);
 }

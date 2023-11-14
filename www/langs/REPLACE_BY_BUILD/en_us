@@ -152,6 +152,7 @@
 		"resultsOf":"/ {CNT}",
 		"role":"Role",
 		"selected":"Selected",
+		"selectedMaxOne":"Selected (max. 1)",
 		"settings":"Settings",
 		"size":"Size",
 		"standard":"Standard",

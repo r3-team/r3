@@ -78,7 +78,7 @@ let MyInputCollection = {
 					<!-- active selections -->
 					<div class="input-collection-side">
 						<div class="row gap centered">
-							<span class="label">{{ capGen.selected }}</span>
+							<span class="label">{{ multiValue ? capGen.selected : capGen.selectedMaxOne }}</span>
 							<my-button image="delete.png"
 								@trigger="$emit('update:modelValue',[])"
 								:active="hasSelections"

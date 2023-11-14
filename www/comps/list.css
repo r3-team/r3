@@ -51,14 +51,10 @@
     flex:0 0 auto;
     gap:12px;
     padding:0px 10px;
-    position:sticky;
-    top:0px;
-    left:0px;
     display:flex;
     flex-flow:row nowrap;
     justify-content:space-between;
     align-items:center;
-	z-index:var(--z-index-list-header);
 }
 .list-header .empty{
 	flex:1 1 auto;

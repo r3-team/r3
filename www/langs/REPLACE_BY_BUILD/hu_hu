@@ -152,6 +152,7 @@
 		"resultsOf":"/ {CNT}",
 		"role":"Szerep",
 		"selected":"Kiválasztva",
+		"selectedMaxOne":"Kiválasztva (max. 1)",
 		"settings":"Beállítások",
 		"size":"Méret",
 		"standard":"Szabvány",
