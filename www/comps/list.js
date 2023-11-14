@@ -362,6 +362,7 @@ let MyList = {
 					
 					<my-button
 						@trigger="toggleLayout"
+						:captionTitle="capApp.button.layoutSwitchHint"
 						:image="isTable ? 'files_list1.png' : 'files_list3.png'"
 						:naked="true"
 					/>
@@ -412,6 +413,7 @@ let MyList = {
 										<my-button
 											v-if="i === columnBatches.length-1"
 											@trigger="toggleHeader"
+											:captionTitle="capApp.button.collapseHeader"
 											:image="showHeader ? 'toggleUp.png' : 'toggleDown.png'"
 											:naked="true"
 										/>

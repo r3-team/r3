@@ -1831,10 +1831,12 @@
 			"allHint":"Összes eredmény kiválasztása",
 			"autoRenew":"{VALUE}s",
 			"autoRenewHint":"Minden {VALUE} másodpercben az adatok automatikus frissítése",
+			"collapseHeader":"Show/hide list header",
 			"columnFilters":"Oszlop szűrők megjelenítése (Jobb kattintás az eltávolításhoz)",
 			"columnOrderFlip":"Sorrend megfordítása (Jobb kattintás az eltávolításhoz)",
 			"csv":"CSV",
-			"csvHint":"Rekordok importálása/exportálása vesszővel elválasztott értékfájl segítségével"
+			"csvHint":"Rekordok importálása/exportálása vesszővel elválasztott értékfájl segítségével",
+			"layoutSwitchHint":"Change list view mode"
 		},
 		"columnFilter":{
 			"contains":"Tartalmazza"

@@ -1831,10 +1831,12 @@
 			"allHint":"Selectați toate rezultatele",
 			"autoRenew":"{VALUE}s",
 			"autoRenewHint":"Actualizează datele la fiecare {VALUE} secunde",
+			"collapseHeader":"Show/hide list header",
 			"columnFilters":"Show column filters (right-click to remove)",
 			"columnOrderFlip":"Reverse order (right-click to remove)",
 			"csv":"CSV",
-			"csvHint":"Importați/exportați înregistrări prin fișier cu valori separate prin virgulă"
+			"csvHint":"Importați/exportați înregistrări prin fișier cu valori separate prin virgulă",
+			"layoutSwitchHint":"Change list view mode"
 		},
 		"columnFilter":{
 			"contains":"Contains"

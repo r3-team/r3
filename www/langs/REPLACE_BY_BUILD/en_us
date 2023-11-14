@@ -1831,10 +1831,12 @@
 			"allHint":"Select all results",
 			"autoRenew":"{VALUE}s",
 			"autoRenewHint":"Refresh data every {VALUE} seconds",
+			"collapseHeader":"Show/hide list header",
 			"columnFilters":"Show column filters (right-click to remove)",
 			"columnOrderFlip":"Reverse order (right-click to remove)",
 			"csv":"CSV",
-			"csvHint":"Import/export records via comma separated values file"
+			"csvHint":"Import/export records via comma separated values file",
+			"layoutSwitchHint":"Change list view mode"
 		},
 		"columnFilter":{
 			"contains":"Contains"

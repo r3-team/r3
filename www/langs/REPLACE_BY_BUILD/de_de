@@ -1831,10 +1831,12 @@
 			"allHint":"Alle Ergebnisse auswählen",
 			"autoRenew":"{VALUE}s",
 			"autoRenewHint":"Alle {VALUE} Sekunden Daten erneuern",
+			"collapseHeader":"Listen-Header zeigen/verstecken",
 			"columnFilters":"Spaltenfilter anzeigen (Rechtsklick zum Entfernen)",
 			"columnOrderFlip":"Reihenfolge umdrehen (Rechtsklick zum Entfernen)",
 			"csv":"CSV",
-			"csvHint":"Datensätze über kommaseparierte Werte-Datei importieren/exportieren"
+			"csvHint":"Datensätze über kommaseparierte Werte-Datei importieren/exportieren",
+			"layoutSwitchHint":"Darstellungsmodus der Liste ändern"
 		},
 		"columnFilter":{
 			"contains":"Beinhaltet"
