@@ -18,7 +18,10 @@
 .home-standardBox{
 	width:550px;
 	margin:15px 0px !important;
-	box-shadow:1px 1px 8px var(--color-shade) !important;
+	box-shadow:1px 1px 12px var(--color-shade) !important;
+	background-color:var(--color-input);
+	border-radius:5px;
+	overflow:hidden;
 	align-self:center;
 }
 .home .version{
@@ -47,14 +50,13 @@
 	display:flex;
 	flex-flow:row nowrap;
 	border-top:1px solid var(--color-border);
-	border-bottom:2px solid var(--color-border);
 }
 .home-wizard .tabBar .entry{
 	height:32px;
 	line-height:32px;
 	padding:0px 15px;
 	border-right:1px solid var(--color-border);
-	background-color:var(--color-bg);
+	border-bottom:1px solid var(--color-border);
 	flex:1 1 auto;
 }
 .home-wizard .tabBar .entry:last-child{
@@ -62,6 +64,8 @@
 }
 .home-wizard .tabBar .entry.active{
 	font-weight:bold;
+	background-color:var(--color-bg);
+	border-bottom-color:var(--color-bg);
 }
 .home-wizard .home-wizardAction{
 	padding:0px 15px 25px 15px;
