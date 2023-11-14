@@ -79,6 +79,7 @@ let MyBuilderWidget = {
 							<div class="row gap centered">
 								<my-builder-caption
 									v-model="values.captions.widgetTitle"
+									:dynamicSize="true"
 									:language="builderLanguage"
 									:readonly="readonly"
 								/>
@@ -93,10 +94,13 @@ let MyBuilderWidget = {
 					<tr>
 						<td>{{ capGen.size }}</td>
 						<td>
-							<input type="range" min="1" max="2"
-								v-model.number="values.size"
-								:disabled="readonly"
-							/>
+							<div class="row gap centered">
+								<input type="range" min="1" max="2"
+									v-model.number="values.size"
+									:disabled="readonly"
+								/>
+								<span>{{ values.size }}</span>
+							</div>
 						</td>
 						<td>{{ capApp.sizeHint }}</td>
 					</tr>
@@ -175,7 +179,6 @@ let MyBuilderWidget = {
 	mounted() {
 		this.reset();
 		window.addEventListener('keydown',this.handleHotkeys);
-		console.log(this.widgetIdMap);
 	},
 	unmounted() {
 		window.removeEventListener('keydown',this.handleHotkeys);

@@ -36,6 +36,29 @@ let MyBuilderWidgets = {
 				>
 					<div class="lines">
 						<span>{{ w.name }}</span>
+						<span class="subtitle" v-if="typeof w.captions.widgetTitle[builderLanguage] !== 'undefined'">
+							[{{ w.captions.widgetTitle[builderLanguage] }}]
+						</span>
+					</div>
+					<div class="row">
+						<my-button image="tiles.png"
+							:active="false"
+							:caption="String(w.size)"
+							:captionTitle="capGen.size"
+							:naked="true"
+						/>
+						<my-button image="tray.png"
+							v-if="w.collection !== null"
+							:active="false"
+							:captionTitle="capGen.collection"
+							:naked="true"
+						/>
+						<my-button image="fileText.png"
+							v-if="w.formId !== null"
+							:active="false"
+							:captionTitle="capGen.form"
+							:naked="true"
+						/>
 					</div>
 				</div>
 			</div>
