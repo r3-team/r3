@@ -1049,8 +1049,12 @@ let MyForm = {
 			return Function(argNames,code)(this.exposedFunctions,...args);
 		},
 		openBuilder(middle) {
-			if(!middle) this.$router.push('/builder/form/'+this.form.id);
-			else        window.open('#/builder/form/'+this.form.id,'_blank');
+			if(!middle) {
+				this.$router.push('/builder/form/'+this.form.id);
+				this.$store.commit('popUpFormGlobal',null);
+				return;
+			}
+			window.open('#/builder/form/'+this.form.id,'_blank');
 		},
 		openNewAsk(middleClick) {
 			// middle click does not kill form inputs, no confirmation required
