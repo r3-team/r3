@@ -16,7 +16,7 @@ let MyHeader = {
 			
 			<!-- module hover menu action -->
 			<div class="entry no-wrap clickable" tabindex="0"
-				v-if="!showModuleIcons"
+				v-if="!showModuleIcons && !pwaSingle"
 				@click="$emit('show-module-hover-menu')"
 				@keyup.enter="$emit('show-module-hover-menu')"
 			>
