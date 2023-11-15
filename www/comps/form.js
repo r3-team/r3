@@ -847,7 +847,7 @@ let MyForm = {
 			this.popUpFieldIdSrc = null;
 			this.get();
 			
-			if(!this.isWidget)
+			if(!this.isWidget && !this.isMobile)
 				this.$nextTick(() => this.fieldSetFocus(this.form.fieldIdFocus,true));
 		},
 		releaseLoadingOnNextTick() {
