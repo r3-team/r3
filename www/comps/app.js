@@ -90,37 +90,45 @@ let MyApp = {
 					:style="'background-color:'+colorModuleMenu.toString()"
 				>
 					<div class="module-hover-menu-header">
-						<div class="row centered space-between">
-							<div class="row centered">
-								<img src="images/dots.png" />
-								<span>{{ capGen.applications }}</span>
-							</div>
-							<img class="clickable" src="images/cancel.png" tabindex="0"
+						<div class="row centered">
+							<img class="clickable" src="images/dots.png" tabindex="0"
 								@click="showHoverNav = false"
 							/>
+							<span>{{ capGen.applications }}</span>
 						</div>
 					</div>
-					<div class="module-hover-menu-entry parent"
-						v-for="me in moduleEntries"
-						:key="me.id"
-					>
-						<div class="module-hover-menu-entry-color" :style="me.styleBg"></div>
-						<div class="module-hover-menu-entry-content">
-							<router-link class="parent clickable" :to="'/app/'+me.name" @click="showHoverNav = false">
-								<img :src="srcBase64Icon(me.iconId,'images/module.png')" />
-								<span>{{ me.caption }}</span>
-							</router-link>
-							
-							<div class="module-hover-menu-entry-children">
-								<div class="module-hover-menu-entry" v-for="mec in me.children">
-									<router-link class="clickable"
-										@click="showHoverNav = false"
-										:key="mec.id"
-										:to="'/app/'+me.name+'/'+mec.name"
-									>
-										<img :src="srcBase64Icon(mec.iconId,'images/module.png')" />
-										<span>{{ mec.caption }}</span>
-									</router-link>
+					<div class="module-hover-menu-entries">
+						<div class="module-hover-menu-entry parent" v-if="isMobile">
+							<div class="module-hover-menu-entry-color home"></div>
+							<div class="module-hover-menu-entry-content">
+								<router-link class="parent clickable" to="/home" @click="showHoverNav = false">
+									<img src="images/home.png" />
+									<span>{{ capGen.home }}</span>
+								</router-link>
+							</div>
+						</div>
+						<div class="module-hover-menu-entry parent"
+							v-for="me in moduleEntries"
+							:key="me.id"
+						>
+							<div class="module-hover-menu-entry-color" :style="me.styleBg"></div>
+							<div class="module-hover-menu-entry-content">
+								<router-link class="parent clickable" :to="'/app/'+me.name" @click="showHoverNav = false">
+									<img :src="srcBase64Icon(me.iconId,'images/module.png')" />
+									<span>{{ me.caption }}</span>
+								</router-link>
+								
+								<div class="module-hover-menu-entry-children">
+									<div class="module-hover-menu-entry" v-for="mec in me.children">
+										<router-link class="clickable"
+											@click="showHoverNav = false"
+											:key="mec.id"
+											:to="'/app/'+me.name+'/'+mec.name"
+										>
+											<img :src="srcBase64Icon(mec.iconId,'images/module.png')" />
+											<span>{{ mec.caption }}</span>
+										</router-link>
+									</div>
 								</div>
 							</div>
 						</div>

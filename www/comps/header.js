@@ -39,7 +39,7 @@ let MyHeader = {
 			<!-- home page -->
 			<router-link class="entry no-wrap clickable" to="/home" v-if="!isMobile">
 				<img src="images/home.png" />
-				<span v-if="!isMobile && pwaSingle">{{ capGen.home }}</span>
+				<span v-if="pwaSingle">{{ capGen.home }}</span>
 			</router-link>
 			
 			<!-- single module link (for mobile view) -->

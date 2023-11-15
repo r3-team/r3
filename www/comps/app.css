@@ -1041,10 +1041,9 @@ table td.maximum{
 /* module hover menu */
 .module-hover-menu{
 	height:100vh;
-	padding:calc(var(--row-height) + 20px) 40px 20px 10px;
-	position:relative;
+	padding:0px 32px 0px 16px;
 	display:flex;
-	flex-flow:column wrap;
+	flex-flow:column nowrap;
 	border-right:1px solid var(--color-border-dark);
 	animation:0.2s fade-in;
 	box-shadow:0px 2px 5px var(--color-shade);
@@ -1052,12 +1051,8 @@ table td.maximum{
 }
 .module-hover-menu-header{
 	flex:0 0 auto;
-	height:var(--row-height);
-	position:absolute;
-	top:0px;
-	left:0px;
-	right:0px;
-	margin:0px 10px;
+	height:calc(var(--app-header-height) - 6px);
+	margin-bottom:16px;
 	display:flex;
 	flex-flow:column nowrap;
 	justify-content:flex-end;
@@ -1069,13 +1064,19 @@ table td.maximum{
 	height:22px;
 	filter:var(--image-filter-dark);
 }
+.module-hover-menu-header img.clickable:hover{
+	margin-bottom:5px;
+	transition:margin-bottom 0.2s;
+}
 .module-hover-menu-header span{
 	margin-left:12px;
 	line-height:28px;
 }
-.module-hover-menu-header img.clickable:hover{
-	margin-bottom:5px;
-	transition:margin-bottom 0.2s;
+.module-hover-menu-entries{
+	max-height:calc(100vh - var(--app-header-height));
+	display:flex;
+	flex-flow:column wrap;
+	overflow-x:auto;
 }
 .module-hover-menu-entry{
 	display:flex;
@@ -1083,11 +1084,14 @@ table td.maximum{
 	gap:8px;
 }
 .module-hover-menu-entry.parent{
-	margin-bottom:20px;
+	margin:0px 12px 12px 0px;
 }
 .module-hover-menu-entry-color{
 	width:8px;
 	border-radius:3px 1px 1px 3px;
+}
+.module-hover-menu-entry-color.home{
+	background-color:#ddd;
 }
 .module-hover-menu-entry-content a{
 	margin:5px 20px 5px 0px;
