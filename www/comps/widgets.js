@@ -19,7 +19,7 @@ let MyWidget = {
 				<img class="dragAnchor" src="images/drag.png" v-if="editMode" />
 				
 				<img
-					v-if="moduleSource && moduleSource.iconId !== null && !editMode"
+					v-if="moduleSource && moduleSource.iconId !== null"
 					:src="srcBase64Icon(moduleSource.iconId,'')"
 				/>
 				
