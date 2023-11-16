@@ -8,7 +8,6 @@ import MyListColumnBatch  from './listColumnBatch.js';
 import MyListCsv          from './listCsv.js';
 import MyValueRich        from './valueRich.js';
 import {consoleError}     from './shared/error.js';
-import {srcBase64}        from './shared/image.js';
 import {getCaption}       from './shared/language.js';
 import {isAttributeFiles} from './shared/attribute.js';
 import {getColumnTitle}   from './shared/column.js';
@@ -246,6 +245,8 @@ let MyList = {
 			<div class="list-header" v-if="header && showHeader">
 				
 				<div class="row gap nowrap">
+					<slot name="input-icon" />
+					
 					<!-- record actions -->
 					<my-button image="new.png"
 						v-if="hasCreate"
@@ -281,7 +282,6 @@ let MyList = {
 				<div ref="empty" class="empty"></div>
 				
 				<div class="row gap nowrap centered list-header-title" v-if="showTitle">
-					<img v-if="iconId !== null" :src="srcBase64(iconIdMap[iconId].file)" />
 					<span v-if="caption !== ''">{{ caption }}</span>
 				</div>
 				
@@ -685,7 +685,6 @@ let MyList = {
 		columns:        { type:Array,   required:true },                    // processed list columns
 		fieldId:        { type:String,  required:true },
 		filters:        { type:Array,   required:true },                    // processed query filters
-		iconId:         { required:false, default:null },
 		layoutDefault:  { type:String,  required:false, default:'table' },  // default list layout: table, cards
 		limitDefault:   { type:Number,  required:false, default:10 },       // default list limit
 		popUpFormInline:{ required:false, default:null },                   // form to show inside list
@@ -1007,7 +1006,6 @@ let MyList = {
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
 		capApp:        (s) => s.$store.getters.captions.list,
 		capGen:        (s) => s.$store.getters.captions.generic,
 		isMobile:      (s) => s.$store.getters.isMobile,
@@ -1122,7 +1120,6 @@ let MyList = {
 		isDropdownUpwards,
 		routeChangeFieldReload,
 		routeParseParams,
-		srcBase64,
 		
 		// presentation
 		displayRecordCheck(state) {

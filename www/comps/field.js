@@ -223,7 +223,6 @@ let MyField = {
 					:formLoading="formLoading"
 					:hasOpenForm="field.openForm !== null"
 					:hasOpenFormBulk="field.openFormBulk !== null"
-					:iconId="iconId ? iconId : null"
 					:isHidden="isHidden"
 					:isSingleField="isAlone"
 					:layoutDefault="field.layout"
@@ -232,7 +231,13 @@ let MyField = {
 					:popUpFormInline="popUpFormInline"
 					:query="field.query"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
-				/>
+				>
+					<template #input-icon>
+						<div class="field-icon" v-if="iconId">
+							<img :src="srcBase64(iconIdMap[iconId].file)" />
+						</div>
+					</template>
+				</my-list>
 				
 				<!-- tabs -->
 				<div class="tabs" v-if="isTabs" :class="{ isSingleField:isAlone }">
