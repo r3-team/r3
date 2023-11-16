@@ -27,6 +27,7 @@
 }
 .widgets-content.editMode{
 	padding:20px;
+	align-items:flex-start;
 	border:4px dotted var(--color-border);
 	border-radius:5px;
 	overflow:auto;
