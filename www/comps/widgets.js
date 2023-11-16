@@ -78,10 +78,11 @@ let MyWidget = {
 			<template v-if="moduleWidget">
 				<my-form
 					v-if="form"
+					@records-open="formRecordIds = $event"
 					:formId="form.id"
 					:isWidget="true"
 					:moduleId="form.moduleId"
-					:recordIds="[]"
+					:recordIds="formRecordIds"
 				/>
 				
 				<!-- collection -->
@@ -104,6 +105,11 @@ let MyWidget = {
 		editMode:  { type:Boolean, required:true },
 		isTemplate:{ type:Boolean, required:false, default:false },
 		widget:    { type:Object,  required:true }
+	},
+	data() {
+		return {
+			formRecordIds:[]
+		};
 	},
 	computed:{
 		active:(s) => {
