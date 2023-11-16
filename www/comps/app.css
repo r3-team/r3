@@ -1076,7 +1076,10 @@ table td.maximum{
 	max-height:calc(100vh - var(--app-header-height));
 	display:flex;
 	flex-flow:column wrap;
-	overflow-x:auto;
+	overflow:auto;
+}
+.module-hover-menu-entries.verticalScroll{
+	flex-wrap:nowrap;
 }
 .module-hover-menu-entry{
 	display:flex;

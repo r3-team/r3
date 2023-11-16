@@ -97,7 +97,7 @@ let MyApp = {
 							<span>{{ capGen.applications }}</span>
 						</div>
 					</div>
-					<div class="module-hover-menu-entries">
+					<div class="module-hover-menu-entries" :class="{ verticalScroll:isMobile }">
 						<div class="module-hover-menu-entry parent" v-if="isMobile">
 							<div class="module-hover-menu-entry-color home"></div>
 							<div class="module-hover-menu-entry-content">

@@ -1993,7 +1993,7 @@
 		"headerModules":"Show applications",
 		"languageCode":"Lingua",
 		"listColoredOff":"Plain",
-		"listColoredOn":"Colored",
+		"listColoredOn":"Contrast",
 		"listRows":"List rows",
 		"listSpacedOff":"Compact",
 		"listSpacedOn":"Larger",
