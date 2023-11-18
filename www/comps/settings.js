@@ -362,43 +362,37 @@ let MySettingsEncryption = {
 
 let MySettingsAccount = {
 	name:'my-settings-account',
-	template:`<div>
-		<table class="default-inputs">
-			<tbody>
-				<!-- pw change -->
-				<tr>
-					<td>{{ capGen.username }}</td>
-					<td><input disabled="disabled" :value="loginName" /></td>
-				</tr>
-				<tr>
-					<td>{{ capApp.pwOld }}</td>
-					<td><input autocomplete="current-password" type="password" v-model="pwOld" @input="newInput = true; generateOldPwKey()" /></td>
-				</tr>
-				<tr>
-					<td>{{ capApp.pwNew0 }}</td>
-					<td><input autocomplete="new-password" type="password" v-model="pwNew0" @input="newInput = true" /></td>
-				</tr>
-				<tr>
-					<td>{{ capApp.pwNew1 }}</td>
-					<td><input autocomplete="new-password" type="password" v-model="pwNew1" @input="newInput = true" /></td>
-				</tr>
-			</tbody>
-		</table>
-		
-		<div class="settings-account-action">
-			<my-button image="save.png"
-				@trigger="setCheck"
-				:active="canSave"
-				:caption="capGen.button.save"
-			/>
-		</div>
-		
-		<div class="settings-account-cluster-node">
-			{{ capApp.nodeName.replace('{NAME}',clusterNodeName) }}
-		</div>
-		
-		<div class="message" v-if="message !== ''">{{ message }}</div>
-	</div>`,
+	template:`<table class="default-inputs">
+		<!-- pw change -->
+		<tr>
+			<td>{{ capGen.username }}</td>
+			<td><input disabled="disabled" :value="loginName" /></td>
+		</tr>
+		<tr>
+			<td>{{ capApp.pwOld }}</td>
+			<td><input autocomplete="current-password" type="password" v-model="pwOld" @input="newInput = true; generateOldPwKey()" /></td>
+		</tr>
+		<tr>
+			<td>{{ capApp.pwNew0 }}</td>
+			<td><input autocomplete="new-password" type="password" v-model="pwNew0" @input="newInput = true" /></td>
+		</tr>
+		<tr>
+			<td>{{ capApp.pwNew1 }}</td>
+			<td><input autocomplete="new-password" type="password" v-model="pwNew1" @input="newInput = true" /></td>
+		</tr>
+	</table>
+	
+	<div class="settings-account-action">
+		<my-button image="save.png"
+			@trigger="setCheck"
+			:active="canSave"
+			:caption="capGen.button.save"
+		/>
+	</div>
+	<div class="message" v-if="message !== ''">{{ message }}</div>
+	
+	<div class="column grow"></div>
+	<span><i>{{ capApp.nodeName.replace('{NAME}',clusterNodeName) }}</i></span>`,
 	data() {
 		return {
 			// states
@@ -1174,7 +1168,7 @@ let MySettings = {
 			</div>
 			
 			<!-- account -->
-			<div class="contentPart short relative">
+			<div class="contentPart short">
 				<div class="contentPartHeader">
 					<img class="icon" src="images/lock.png" />
 					<h1>{{ capApp.titleAccount }}</h1>

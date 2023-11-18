@@ -322,7 +322,7 @@ let MyList = {
 						:naked="true"
 					/>
 					
-					<input class="short" enterkeyhint="send" type="text"
+					<input autocomplete="off" class="short" enterkeyhint="send" type="text"
 						v-if="filterQuick"
 						@keyup.enter="updatedFilterQuick"
 						v-model="filtersQuick"
@@ -444,7 +444,7 @@ let MyList = {
 											:total="count"
 										/>
 										
-										<input class="short" enterkeyhint="send" type="text"
+										<input autocomplete="off" class="short" enterkeyhint="send" type="text"
 											v-if="filterQuick"
 											@keyup.enter="updatedFilterQuick"
 											v-model="filtersQuick"

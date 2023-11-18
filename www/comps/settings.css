@@ -25,7 +25,7 @@
 	background-color:var(--color-bg);
 }
 .settings .message{
-	padding-top:10px;
+	padding:10px 0px 30px;
 	color:var(--color-error);
 }
 .settings .settings-page-limit{
@@ -40,13 +40,8 @@
 .settings .settings-account-action{
 	display:flex;
 	flex-flow:row nowrap;
+	justify-content:flex-end;
 	margin:10px 5px 10px 10px;
-}
-.settings .settings-account-cluster-node{
-	position:absolute;
-	bottom:10px;
-	left:10px;
-	font-style:italic;
 }
 .settings img.settings-install{
 	max-width:420px;
