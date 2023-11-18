@@ -272,6 +272,7 @@ const MyStore = Vuex.createStore({
 		collectionIdMap:         (state) => state.collectionIdMap,
 		config:                  (state) => state.config,
 		constants:               (state) => state.constants,
+		cryptoApiAvailable:      (state) => typeof crypto.subtle !== 'undefined',
 		dialogCaptionTop:        (state) => state.dialogCaptionTop,
 		dialogCaptionBody:       (state) => state.dialogCaptionBody,
 		dialogButtons:           (state) => state.dialogButtons,

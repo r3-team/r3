@@ -248,20 +248,21 @@ let MyLogin = {
 		showMfa:   (s) => s.mfaTokens.length !== 0,
 		
 		// stores
-		activated:        (s) => s.$store.getters['local/activated'],
-		appName:          (s) => s.$store.getters['local/appName'],
-		appVersion:       (s) => s.$store.getters['local/appVersion'],
-		companyName:      (s) => s.$store.getters['local/companyName'],
-		companyWelcome:   (s) => s.$store.getters['local/companyWelcome'],
-		customLogo:       (s) => s.$store.getters['local/customLogo'],
-		customLogoUrl:    (s) => s.$store.getters['local/customLogoUrl'],
-		token:            (s) => s.$store.getters['local/token'],
-		tokenKeep:        (s) => s.$store.getters['local/tokenKeep'],
-		clusterNodeName:  (s) => s.$store.getters.clusterNodeName,
-		colorLogin:       (s) => s.$store.getters.colorLogin,
-		kdfIterations:    (s) => s.$store.getters.constants.kdfIterations,
-		productionMode:   (s) => s.$store.getters.productionMode,
-		tokenKeepEnable:  (s) => s.$store.getters.tokenKeepEnable
+		activated:         (s) => s.$store.getters['local/activated'],
+		appName:           (s) => s.$store.getters['local/appName'],
+		appVersion:        (s) => s.$store.getters['local/appVersion'],
+		companyName:       (s) => s.$store.getters['local/companyName'],
+		companyWelcome:    (s) => s.$store.getters['local/companyWelcome'],
+		customLogo:        (s) => s.$store.getters['local/customLogo'],
+		customLogoUrl:     (s) => s.$store.getters['local/customLogoUrl'],
+		token:             (s) => s.$store.getters['local/token'],
+		tokenKeep:         (s) => s.$store.getters['local/tokenKeep'],
+		clusterNodeName:   (s) => s.$store.getters.clusterNodeName,
+		colorLogin:        (s) => s.$store.getters.colorLogin,
+		cryptoApiAvailable:(s) => s.$store.getters.cryptoApiAvailable,
+		kdfIterations:     (s) => s.$store.getters.constants.kdfIterations,
+		productionMode:    (s) => s.$store.getters.productionMode,
+		tokenKeepEnable:   (s) => s.$store.getters.tokenKeepEnable
 	},
 	watch:{
 		loginReady(v) {
@@ -405,13 +406,8 @@ let MyLogin = {
 			// store authentication token
 			this.$store.commit('local/token',token);
 			
-			if(saltKdf === null)
+			if(saltKdf === null || !this.cryptoApiAvailable)
 				return this.appEnable(loginId,loginName);
-			
-			if(typeof crypto.subtle === 'undefined') {
-				this.consoleError('crypto API not available');
-				return this.appEnable(loginId,loginName);
-			}
 			
 			// generate AES key from credentials and login private key salt
 			this.pbkdf2PassToAesGcmKey(this.password,saltKdf,this.kdfIterations,true).then(

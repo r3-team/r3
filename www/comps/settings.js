@@ -38,6 +38,8 @@ let MySettingsEncryption = {
 			</ul>
 		</template>
 		
+		<div class="message-error" v-if="!cryptoApiAvailable">{{ capApp.status.noCryptoApi }}</div>
+		
 		<!-- create new key pair -->
 		<template v-if="loginKeyAes !== null && !loginEncryption">
 			<my-button
@@ -173,6 +175,7 @@ let MySettingsEncryption = {
 		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
 		loginKeyAes:       (s) => s.$store.getters['local/loginKeyAes'],
 		loginKeySalt:      (s) => s.$store.getters['local/loginKeySalt'],
+		cryptoApiAvailable:(s) => s.$store.getters.cryptoApiAvailable,
 		loginEncryption:   (s) => s.$store.getters.loginEncryption,
 		loginPrivateKey:   (s) => s.$store.getters.loginPrivateKey,
 		loginPrivateKeyEnc:(s) => s.$store.getters.loginPrivateKeyEnc,
@@ -389,7 +392,7 @@ let MySettingsAccount = {
 			:caption="capGen.button.save"
 		/>
 	</div>
-	<div class="message" v-if="message !== ''">{{ message }}</div>
+	<div class="message-error" v-if="message !== ''">{{ message }}</div>
 	
 	<div class="column grow"></div>
 	<span><i>{{ capApp.nodeName.replace('{NAME}',clusterNodeName) }}</i></span>`,

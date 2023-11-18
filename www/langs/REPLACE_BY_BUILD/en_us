@@ -1908,6 +1908,7 @@
 			"status":{
 				"inactive":"Not enabled",
 				"locked":"Keys are locked",
+				"noCryptoApi":"This feature is currently disabled - it requires an encrypted connection (HTTPS) as well as a modern browser",
 				"unlocked":"Ready for use"
 			},
 			"backupCode":"Backup code",

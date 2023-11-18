@@ -1908,6 +1908,7 @@
 			"status":{
 				"inactive":"Nicht aktiviert",
 				"locked":"Schlüssel sind gesperrt",
+				"noCryptoApi":"Diese Funktion ist derzeit deaktiviert - sie erfordert eine verschlüsselte Verbindung (HTTPS) sowie einen modernen Browser",
 				"unlocked":"Bereit zur Nutzung"
 			},
 			"backupCode":"Backup-Code",

@@ -650,7 +650,6 @@ let MyForm = {
 		isAdmin:            (s) => s.$store.getters.isAdmin,
 		isMobile:           (s) => s.$store.getters.isMobile,
 		keyLength:          (s) => s.$store.getters.constants.keyLength,
-		loginEncryption:    (s) => s.$store.getters.loginEncryption,
 		loginId:            (s) => s.$store.getters.loginId,
 		loginPublicKey:     (s) => s.$store.getters.loginPublicKey,
 		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,

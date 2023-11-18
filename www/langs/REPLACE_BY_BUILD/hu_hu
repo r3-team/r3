@@ -1908,6 +1908,7 @@
 			"status":{
 				"inactive":"Nem aktív",
 				"locked":"A kulcsok zárva vannak",
+				"noCryptoApi":"This feature is currently disabled - it requires an encrypted connection (HTTPS) as well as a modern browser",
 				"unlocked":"Készen áll a használatra"
 			},
 			"backupCode":"Biztonsági kód",
