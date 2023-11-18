@@ -259,6 +259,14 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			-- drawing attribute use
 			ALTER TYPE app.attribute_content_use ADD VALUE 'drawing';
+			
+			-- fix wrong constraint action for form frontend functions
+			ALTER TABLE app.js_function DROP CONSTRAINT js_function_form_id_fkey;
+			ALTER TABLE app.js_function ADD  CONSTRAINT js_function_form_id_fkey FOREIGN KEY (form_id)
+				REFERENCES app.form (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
 		`)
 		return "3.6", err
 	},
