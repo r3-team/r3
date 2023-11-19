@@ -8,6 +8,7 @@ import (
 	"r3/types"
 	"regexp"
 	"slices"
+	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -67,6 +68,9 @@ func Get(moduleId uuid.UUID) ([]types.JsFunction, error) {
 func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, formId pgtype.UUID,
 	name string, codeArgs string, codeFunction string, codeReturns string,
 	captions types.CaptionMap) error {
+
+	// remove only invalid character (dot), used for form function references
+	name = strings.Replace(name, ".", "", -1)
 
 	if name == "" {
 		return fmt.Errorf("function name must not be empty")

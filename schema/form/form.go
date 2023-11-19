@@ -203,6 +203,9 @@ func Get(moduleId uuid.UUID, ids []uuid.UUID) ([]types.Form, error) {
 
 func Set_tx(tx pgx.Tx, frm types.Form) error {
 
+	// remove only invalid character (dot), used for form function references
+	frm.Name = strings.Replace(frm.Name, ".", "", -1)
+
 	known, err := schema.CheckCreateId_tx(tx, &frm.Id, "form", "id")
 	if err != nil {
 		return err

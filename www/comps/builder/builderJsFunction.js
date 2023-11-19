@@ -222,9 +222,15 @@ let MyBuilderJsFunction = {
 									>
 										<option value="">-</option>
 										<option
-											v-for="f in moduleIdMap[entityJsModuleId].jsFunctions.filter(v => v.formId === null || v.formId === formId)"
+											v-for="f in moduleIdMap[entityJsModuleId].jsFunctions.filter(v => v.formId === null)"
 											:value="f.id"
 										>{{ f.name }}</option>
+										<optgroup v-if="form !== false" :label="capGen.form + ': ' + form.name">
+											<option
+												v-for="f in moduleIdMap[entityJsModuleId].jsFunctions.filter(v => v.formId === formId)"
+												:value="f.id"
+											>{{ f.name }}</option>
+										</optgroup>
 									</select>
 								</td>
 								<td>
@@ -576,7 +582,9 @@ let MyBuilderJsFunction = {
 					fnc  = this.jsFunctionIdMap[this.entityId];
 					mod  = this.moduleIdMap[fnc.moduleId];
 					args = fnc.codeArgs === '' ? '' : ', '+fnc.codeArgs.toUpperCase();
-					text = `${prefix}.call_frontend({${mod.name}.${fnc.name}}${args})`;
+					text = fnc.formId === null
+						? `${prefix}.call_frontend({${mod.name}.${fnc.name}}${args})`
+						: `${prefix}.call_frontend({${mod.name}.${this.formIdMap[fnc.formId].name}.${fnc.name}}${args})`;
 				break;
 				case 'pgFunction':
 					fnc  = this.pgFunctionIdMap[this.entityId];
@@ -684,33 +692,37 @@ let MyBuilderJsFunction = {
 			pat = new RegExp(`${prefix}\.call_(backend|frontend)\\('(${uuid})'`,'g');
 			body = body.replace(pat,function(match,fncMode,id) {
 				
-				let fnc = false;
 				if(fncMode === 'backend' && that.pgFunctionIdMap[id] !== 'undefined') {
-					fnc = that.pgFunctionIdMap[id];
+					const fnc = that.pgFunctionIdMap[id];
+					const mod = that.moduleIdMap[fnc.moduleId];
+					return `${prefix}.call_backend({${mod.name}.${fnc.name}}`;
 				}
 				else if(fncMode === 'frontend' && that.jsFunctionIdMap[id] !== 'undefined') {
-					fnc = that.jsFunctionIdMap[id];
+					const fnc = that.jsFunctionIdMap[id];
+					const mod = that.moduleIdMap[fnc.moduleId];
+					
+					if(fnc.formId === null)
+						return `${prefix}.call_frontend({${mod.name}.${fnc.name}}`;
+					
+					const form = that.formIdMap[fnc.formId];
+					return `${prefix}.call_${fncMode}({${mod.name}.${form.name}.${fnc.name}}`;
 				}
-				if(fnc === false)
-					return match;
-				
-				let mod = that.moduleIdMap[fnc.moduleId];
-				return `${prefix}.call_${fncMode}({${mod.name}.${fnc.name}}`;
+				return match;
 			});
 			
 			return body;
 		},
 		placeholdersUnset() {
-			let that   = this;
-			let body   = this.codeFunction;
-			let fields = this.dataFieldMap;
-			let prefix = 'app';
-			let dbName = '[a-z0-9_]+'; // valid chars, DB entities (PG functions, modules, attributes, ...)
+			let that    = this;
+			let body    = this.codeFunction;
+			let fields  = this.dataFieldMap;
+			let prefix  = 'app';
+			let dbChars = '[a-z0-9_]+'; // valid chars, DB entities (PG functions, modules, attributes, ...)
 			let pat;
 			
 			// replace collection & column placeholders
 			// stored as: app.collection_read({module.collection},[column1,column2,...])
-			pat = new RegExp(`${prefix}\.collection_(read|update)\\(\{(${dbName})\.(${dbName})\}(,\\[(.*)\\])?`,'g');
+			pat = new RegExp(`${prefix}\.collection_(read|update)\\(\{(${dbChars})\.(${dbChars})\}(,\\[(.*)\\])?`,'g');
 			body = body.replace(pat,function(match,mode,modName,colName,optional,columnArray) {
 				if(typeof that.moduleNameMap[modName] === 'undefined')
 					return match;
@@ -744,7 +756,7 @@ let MyBuilderJsFunction = {
 			
 			// replace field value/caption get/set placeholders
 			// stored as: app.get_field_value({0:contact.is_active}...
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|error|focus)\\(\{(\\d+)\:(${dbName})\.(${dbName})\.(${dbName})\}`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|error|focus)\\(\{(\\d+)\:(${dbChars})\.(${dbChars})\.(${dbChars})\}`,'g');
 			body = body.replace(pat,function(match,mode,part,index,modName,relName,atrName) {
 				
 				// resolve relation inside given module
@@ -787,7 +799,7 @@ let MyBuilderJsFunction = {
 			
 			// replace backend function placeholders
 			// stored as: app.call_backend({r3_organizations.get_name_by_id},12...
-			pat = new RegExp(`${prefix}\.call_backend\\(\{(${dbName})\.(${dbName})\}`,'g');
+			pat = new RegExp(`${prefix}\.call_backend\\(\{(${dbChars})\.(${dbChars})\}`,'g');
 			body = body.replace(pat,function(match,modName,fncName) {
 				
 				if(typeof that.moduleNameMap[modName] === 'undefined')
@@ -810,31 +822,40 @@ let MyBuilderJsFunction = {
 				return `${prefix}\.call_backend('${fnc.id}'`;
 			});
 			
-			// replace frontend function placeholders
+			// replace global frontend function placeholders
 			// stored as: app.call_frontend({r3_organizations.add_numbers},12...
-			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbName})\.(.+)\}`,'g');
+			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.(.+)\}`,'g');
 			body = body.replace(pat,function(match,modName,fncName) {
 				
 				if(typeof that.moduleNameMap[modName] === 'undefined')
 					return match;
 				
-				let mod = that.moduleNameMap[modName];
-				let fnc = false;
+				const mod = that.moduleNameMap[modName];
 				
-				for(let i = 0, j = mod.jsFunctions.length; i < j; i++) {
-					if(mod.jsFunctions[i].name !== fncName)
-						continue;
-					
-					fnc = mod.jsFunctions[i];
-					break;
+				for(let f of mod.jsFunctions) {
+					if(f.formId === null && f.name === fncName)
+						return `${prefix}\.call_frontend('${f.id}'`;
 				}
+				return match;
 				
-				if(fnc === false)
-					return match;
-				
-				return `${prefix}\.call_frontend('${fnc.id}'`;
 			});
 			
+			// replace form assigned frontend function placeholders
+			// stored as: app.call_frontend({r3_organizations.contact.set_defaults},12...
+			pat = new RegExp(`${prefix}\.call_frontend\\(\{(${dbChars})\.([^\.]+)\.(.+)\}`,'g');
+			body = body.replace(pat,function(match,modName,formName,fncName) {
+				
+				if(that.form === false || typeof that.moduleNameMap[modName] === 'undefined')
+					return match;
+				
+				const mod = that.moduleNameMap[modName];
+				
+				for(let f of mod.jsFunctions) {
+					if(f.formId !== null && f.formId === that.form.id && formName === that.form.name && f.name === fncName)
+						return `${prefix}\.call_frontend('${f.id}'`;
+				}
+				return match;
+			});
 			return body;
 		},
 		
