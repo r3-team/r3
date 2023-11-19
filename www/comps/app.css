@@ -1205,7 +1205,20 @@ table td.maximum{
 .html-docs ul{
 	max-width:950px;
 }
-
+.html-docs table{
+	text-align:left;
+	border:1px solid var(--color-border);
+	border-radius:5px;
+	border-spacing:2px;
+	background-color:var(--color-input);
+	overflow:hidden;
+}
+.html-docs table th{
+	height:36px;
+	padding:3px 8px;
+	border-bottom:2px solid var(--color-border);
+	background-color:var(--color-bg);
+}
 
 /* transitions*/
 

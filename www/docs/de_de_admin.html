@@ -1,4 +1,4 @@
-<p><em>Aktualisiert 2023-06-18</em></p>
+<p><em>Aktualisiert 2023-11-19</em></p>
 <h1 id="inhaltsverzeichnis">Inhaltsverzeichnis</h1>
 <ol type="1">
 <li><a href="#einführung">Einführung</a></li>
@@ -7,6 +7,7 @@
 <li><a href="#eigenständig">Eigenständig</a></li>
 <li><a href="#dediziert">Dediziert</a></li>
 <li><a href="#portabel">Portabel</a></li>
+<li><a href="#docker">Docker</a></li>
 </ol></li>
 <li><a href="#technische-anforderungen">Technische Anforderungen</a>
 <ol type="1">
@@ -42,31 +43,78 @@
 <li><a href="#plattformaktualisierung">Plattformaktualisierung</a></li>
 </ol></li>
 <li><a href="#clusterbetrieb-und-systemleistung">Clusterbetrieb und Systemleistung</a></li>
+<li><a href="#vorbereiten-einer-neuen-postgresql-datenbank">Preparing a new PostgreSQL database</a></li>
 <li><a href="#cloudbetrieb">Cloudbetrieb</a></li>
 </ol>
 <h1 id="einführung">Einführung</h1>
 <p>Dies ist die Dokumentation zum Bereitstellen und Betreiben der REI3-Anwendungsplattform. Kenntnisse für die Zielinfrastruktur (Windows Server oder Linux) werden vorausgesetzt. Nach der Installation können Administratoren REI3-Anwendungen aus Online- oder lokalen Repositorys in Infrastrukturen mit oder ohne Internetzugang bereitstellen.</p>
 <h1 id="bereitstellungsmodelle">Bereitstellungsmodelle</h1>
-<p>Je nach Einsatzgebiet stehen verschiedene Bereitstellungsmodelle zur Verfügung.</p>
-<h2 id="eigenständig">Eigenständig</h2>
-<p>Dieses Modell wurde für kleine und mittlere Installationen (~250 Benutzer) entwickelt und ist verfügbar für Windows Server. Die eigenständige Bereitstellung weist fast keine externen Abhängigkeiten auf und inkludiert eine integrierte Datenbank. Es ist das empfohlene Modell für Unternehmen mit kleineren IT-Teams.</p>
+<p>Abhängig von der verfügbaren IT-Infrastruktur und wie REI3 eingesetzt werden soll, existieren verschiedene Bereitstellungsmodelle:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: center;">Dediziert</th>
+<th style="text-align: center;">Eigenständig</th>
+<th style="text-align: center;">Portable</th>
+<th style="text-align: center;">Docker</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Verwendungszweck</td>
+<td style="text-align: center;">Produktion</td>
+<td style="text-align: center;">Produktion</td>
+<td style="text-align: center;">Testen &amp; Bauen von REI3-Anwendungen</td>
+<td style="text-align: center;">Testen &amp; Bauen von REI3-Anwendungen</td>
+</tr>
+<tr class="even">
+<td>Bringt eine Datenbank mit</td>
+<td style="text-align: center;">eigenes Datenbanksystem erforderlich</td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;"><strong>X</strong></td>
+</tr>
+<tr class="odd">
+<td>Alle REI3-Features verfügbar</td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;">standardm. keine E2E-Verschlüsselung</td>
+<td style="text-align: center;">standardm. keine E2E-Verschlüsselung</td>
+</tr>
+<tr class="even">
+<td>Läuft unter Windows</td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;"><strong>X</strong></td>
+</tr>
+<tr class="odd">
+<td>Läuft unter Linux</td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>X</strong></td>
+</tr>
+</tbody>
+</table>
 <h2 id="dediziert">Dediziert</h2>
-<p>In diesem Modell wird REI3 getrennt von einem Datenbanksystem ausgeführt. Dies wird für große Instanzen empfohlen oder wenn eine Organisation ein Datenbankteam zur Verfügung hat. Diese Version kann auf Linux- und Windows-Servern bereitgestellt werden.</p>
-<h2 id="portabel">Portabel</h2>
-<p>Eine Option für Entwicklungs-, Demo- und Testinstanzen. Mit der portablen Version kann REI3 ohne Setup auf Windows-Servern oder -Endgeräten gestartet werden. Wie das eigenständige Modell enthält auch die portable Version eine interne Datenbank. Es wird nicht empfohlen, produktive Anwendungen von einer portablen Instanz aus auszuführen.</p>
+<p>Das häufigste Bereitstellungsmodell. REI3 wird auf einem Anwendungsserver (Windows oder Linux) installiert und mit einem separaten Datenbanksystem verbunden.</p>
+<h2 id="eigenständig">Eigenständig</h2>
+<p>Diese Option ist nur unter Windows Server verfügbar. Die eigenständige Bereitstellung hat fast keine externen Abhängigkeiten und verfügt über eine eigene Datenbank. Es ist das empfohlene Modell für Unternehmen mit kleinen IT-Teams.</p>
+<h2 id="portable">Portable</h2>
+<p>Für Entwicklungs- und Testinstanzen - die portable Version von REI3 kann auf Windows-Clients ohne jegliche Einrichtung gestartet werden. Wie das eigenständige Modell verfügt auch die portable Version über eine eigene Datenbank. Es wird nicht empfohlen, eine portable Instanz produktiv zu nutzen.</p>
+<h2 id="docker">Docker</h2>
+<p>Für Entwicklungs- und Testinstanzen steht eine <a href="https://rei3.de/en/downloads">Docker Compose-Datei</a> zur Verfügung, um schnell eine REI3-Instanz zu starten. Diese Datei ist jedoch nicht für den produktiven Einsatz konfiguriert. Um REI3 produktiv mit Docker zu betreiben, können die bereitgestellten Dateien als Vorlagen verwendet und an die Zielumgebung angepasst werden. Weitere Details finden sich auf der <a href="https://github.com/r3-team/r3_docker">Repository-Seite</a>.</p>
 <h1 id="technische-anforderungen">Technische Anforderungen</h1>
 <h2 id="server">Server</h2>
 <p>Um REI3 ausführen zu können, müssen folgende Anforderungen erfüllt sein:</p>
 <ul>
 <li>Betriebssystem (eines davon)
 <ul>
-<li>Linux Server (getestet unter Debian, CentOS und Ubuntu Server)</li>
+<li>Linux (getestet unter Debian, NixOS und Ubuntu Server)</li>
 <li>Windows Server 2016 oder höher</li>
-<li>Nicht offiziell unterstützt, aber kann genutzt werden:
-<ul>
-<li>Darwin</li>
-<li>FreeBSD</li>
-</ul></li>
+<li>Windows 10 oder höher (portable Version)</li>
 </ul></li>
 <li>Prozessor
 <ul>
@@ -107,7 +155,7 @@
 <p>REI3 wird mit einem grafischen Installationsprogramm für Windows Server geliefert. Das Installationsprogramm unterstützt sowohl <a href="#eigenständig">eigenständige</a> als auch <a href="#dediziert">dedizierte</a> Bereitstellungsmodelle.</p>
 <ul>
 <li><a href="#eigenständig">Eigenständig</a>: Nach Ausführung des Installationsprogrammes kann REI3 sofort gestartet werden.</li>
-<li><a href="#dediziert">Dediziert</a>: Nach der Installation müssen Datenbankverbindungsdetails für eine leere, UTF8-enkodierte PostgreSQL-Datenbank in der Konfigurationsdatei <code>config.json</code> eingetragen werden. Die Datei <code>config.json</code> befindet sich im ausgewählten Anwendungsverzeichnis. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben.</li>
+<li><a href="#dediziert">Dediziert</a>: Nach der Installation müssen Datenbankverbindungsdetails für eine leere, UTF8-enkodierte <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> in der Konfigurationsdatei <code>config.json</code> eingetragen werden. Die Datei <code>config.json</code> befindet sich im ausgewählten Anwendungsverzeichnis. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben.</li>
 </ul>
 <p>Unabhängig vom Bereitstellungsmodell, wird REI3 unter Windows Server als Windows-Dienst behandelt und kann über den Service-Manager gestartet werden (Befehl: <code>services.msc</code>). Falls der Dienst nicht starten kann, schreibt REI3 in das Windows-Applikationslog.</p>
 <p>Aus lizenzrechtlichen Gründen können wir Ghostscript nicht zusammen mit REI3 ausliefern. Wenn Sie PDF-Thumbnails erstellen möchten, müssen Sie eine aktuelle Version von Ghostscript herunterladen und auf dem REI3-Server installieren.</p>
@@ -117,7 +165,7 @@
 <li>Extrahieren Sie das REI3-Archiv in ein Verzeichnis Ihrer Wahl (<code>/opt/rei3/</code> zum Beispiel).</li>
 <li>Machen Sie die Datei <code>r3</code> ausführbar (<code>chmod u+x r3</code>).</li>
 <li>Kopieren Sie die Datei <code>config_template.json</code> zu <code>config.json</code> - die Datei muss im gleichen Verzeichnis sein wie die ausführbare Datei <code>r3</code>.</li>
-<li>Fügen Sie der Datei <code>config.json</code> Verbindungsdetails zu einer leeren, UTF8-enkodierten PostgreSQL-Datenbank hinzu. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben.</li>
+<li>Fügen Sie der Datei <code>config.json</code> Verbindungsdetails zu einer leeren, UTF8-enkodierten <a href="#vorbereiten-einer-neuen-postgresql-datenbank">PostgreSQL-Datenbank</a> hinzu. Der Datenbankbenutzer muss volle Berechtigungen für die gewählte Datenbank haben.</li>
 <li>Optional: Installieren Sie ImageMagick und Ghostscript falls Thumbnails erwünscht sind (<code>sudo apt install imagemagick ghostscript</code>).</li>
 <li>Optional: Installieren Sie PostgreSQL-Client-Werkzeuge falls Sie die integrierte Backup-Funktion nutzen möchten (<code>sudo apt install postgresql-client</code>).</li>
 <li>Registrieren Sie REI3 im Service-Manager (<code>sudo ./r3 -install</code>).</li>
@@ -252,6 +300,12 @@
 <li>Sobald sich ein neuer Serverknoten mit der bestehenden REI3-Datenbank verbindet, registriert er sich als neuer Clusterknoten und weist sich selbst eine eindeutige Knoten-ID zu.</li>
 </ol>
 <p>Dies ist die gesamte Einrichtung. Das Cluster konfiguriert sich automatisch und weist auch automatisch die Rolle des Clustermasters und die Aufgaben zu, je nachdem, welche Knoten einchecken.</p>
+<h1 id="vorbereiten-einer-neuen-postgresql-datenbank">Vorbereiten einer neuen PostgreSQL-Datenbank</h1>
+<p>REI3 im <a href="#dediziert">dedizierten Bereitstellungsmodell</a> benötigt volle Berechtigungen auf eine UTF8 kodierte PostgreSQL Datenbank. Diese Dokumentation behandelt nicht die Installation von PostgreSQL auf dem gewählten Betriebssystem. Sobald der PostgreSQL-Dienst jedoch verfügbar ist, mit einem PostgreSQL-Client (wie <code>psql</code> oder <code>pgAdmin</code>) verbinden und sicherstellen, dass sowohl ein Benutzer als auch eine Datenbank für REI3 existiert. Um beides zu erstellen:</p>
+<ol type="1">
+<li><code>CREATE ROLE my_rei3_user WITH LOGIN PASSWORD 'MY_STRONG_PW!';</code></li>
+<li><code>CREATE DATABASE my_rei3_db WITH OWNER = my_rei3_user TEMPLATE = template0 ENCODING = 'UTF8';</code></li>
+</ol>
 <h1 id="cloudbetrieb">Cloudbetrieb</h1>
 <p>REI3 kann im Internet zugänglich gemacht werden, indem entsprechende Firewall-Ports geöffnet werden. Wir, die REI3-Hersteller, sind bestrebt, die Plattform so sicher wie möglich zu gestalten. Wie bei jeder anderen Anwendung ist es immer möglich, dass unentdeckte Sicherheitslücken ausgenutzt und unbefugter Zugriff erreicht wird. Neben der regelmäßigen Aktualisierung von REI3 selbst sind wir der Ansicht, dass zusätzliche Sicherheitsmaßnahmen erforderlich sind, um Webanwendungen in der Cloud sicher auszuführen. Diese sind u. A.:</p>
 <ul>

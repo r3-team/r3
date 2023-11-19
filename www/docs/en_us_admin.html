@@ -1,4 +1,4 @@
-<p><em>Updated 2023-06-18</em></p>
+<p><em>Updated 2023-11-19</em></p>
 <h1 id="table-of-contents">Table of contents</h1>
 <ol type="1">
 <li><a href="#introduction">Introduction</a></li>
@@ -7,6 +7,7 @@
 <li><a href="#stand-alone">Stand-alone</a></li>
 <li><a href="#dedicated">Dedicated</a></li>
 <li><a href="#portable">Portable</a></li>
+<li><a href="#docker">Docker</a></li>
 </ol></li>
 <li><a href="#technical-requirements">Technical requirements</a>
 <ol type="1">
@@ -42,31 +43,79 @@
 <li><a href="#platform-updates">Platform updates</a></li>
 </ol></li>
 <li><a href="#clustering-and-system-performance">Clustering and system performance</a></li>
+<li><a href="#preparing-a-new-postgresql-database">Preparing a new PostgreSQL database</a></li>
 <li><a href="#cloud-operations">Cloud operations</a></li>
 </ol>
 <h1 id="introduction">Introduction</h1>
 <p>This is the documentation for deploying and operating the REI3 application platform. It assumes some knowledge for the target infrastructure (Windows Server or Linux). Once running, administrators can deploy REI3 applications from online or local repositories in infrastructures with or without internet access.</p>
 <h1 id="deployment-models">Deployment models</h1>
-<p>Depending on the environment, different deployment models are available.</p>
-<h2 id="stand-alone">Stand-alone</h2>
-<p>This model was created for small and medium size installations (~250 users) and is available for Windows Server. The stand-alone deployment has almost no external dependencies and includes an integrated database. It is the recommended model for organizations with smaller IT teams.</p>
+<p>Depending on the available IT infrastructure and how REI3 is to be used, different deployment models exist:</p>
+<table>
+<thead>
+<tr class="header">
+<th></th>
+<th style="text-align: center;">Dedicated</th>
+<th style="text-align: center;">Standalone</th>
+<th style="text-align: center;">Portable</th>
+<th style="text-align: center;">Docker</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Designed for</td>
+<td style="text-align: center;">production</td>
+<td style="text-align: center;">production</td>
+<td style="text-align: center;">testing &amp; building REI3 apps</td>
+<td style="text-align: center;">testing &amp; building REI3 apps</td>
+</tr>
+<tr class="even">
+<td>Comes with database</td>
+<td style="text-align: center;">separate database system required</td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;"><strong>X</strong></td>
+</tr>
+<tr class="odd">
+<td>All REI3 features available</td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;">no end-to-end encryption by default</td>
+<td style="text-align: center;">no end-to-end encryption by default</td>
+</tr>
+<tr class="even">
+<td>Runs on Windows</td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;"><strong>X</strong></td>
+</tr>
+<tr class="odd">
+<td>Runs on Linux</td>
+<td style="text-align: center;"><strong>X</strong></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>X</strong></td>
+</tr>
+</tbody>
+</table>
+<p>If you intend to build your own REI3 applications, it is a good practice to build REI3 applications with one system and then deploy to another for production. This way, users are only affected once tested applications are deployed. Especially the portable &amp; Docker versions can quickly be installed on PCs for building applications.</p>
 <h2 id="dedicated">Dedicated</h2>
-<p>In this model REI3 runs as an application separate from its database system. This is recommended for large instances or when an organization has a database team onhand. This version can be deployed on Linux and Windows servers.</p>
+<p>The most common deployment option. REI3 is installed on an application server (Windows or Linux), connecting to a separate database system.</p>
+<h2 id="stand-alone">Stand-alone</h2>
+<p>This option is available on Windows Server only. The stand-alone deployment has almost no external dependencies and comes with its own database. It is the recommended model for organizations with small IT teams.</p>
 <h2 id="portable">Portable</h2>
-<p>An option for development, demo and test instances. With the portable version, REI3 can be started on Windows servers or clients directly without any setup. Like the stand-alone model, the portable version includes its own database. It is not recommended to run anything productive from a portable instance.</p>
+<p>For development and test instances - the portable version of REI3 can be started on Windows clients without any setup. Like the stand-alone model, the portable version comes with its own database. It is not recommended to run anything productive from a portable instance.</p>
+<h2 id="docker">Docker</h2>
+<p>For development and test instances - a <a href="https://rei3.de/en/downloads">Docker Compose file</a> is available to quickly spin up a REI3 instance. This file is not configured for productive use however. To run REI3 productively with Docker, you can use the provided files as templates and adjust them to your environment. More details on the <a href="https://github.com/r3-team/r3_docker">repository page</a>.</p>
 <h1 id="technical-requirements">Technical requirements</h1>
 <h2 id="server">Server</h2>
 <p>To run REI3 the following requirements must be met:</p>
 <ul>
 <li>Operating system (one of them)
 <ul>
-<li>Linux server (tested on Debian, CentOS and Ubuntu Server)</li>
+<li>Linux (tested on Debian, NixOS and Ubuntu Server)</li>
 <li>Windows Server 2016 or later</li>
-<li>Not officially supported but can be used:
-<ul>
-<li>Darwin</li>
-<li>FreeBSD</li>
-</ul></li>
+<li>Windows 10 or later (portable version)</li>
 </ul></li>
 <li>Processor
 <ul>
@@ -107,7 +156,7 @@
 <p>REI3 comes with a graphical installer for Windows Server. The installer supports both <a href="#stand-alone">stand-alone</a> and <a href="#dedicated">dedicated</a> deployment models.</p>
 <ul>
 <li><a href="#stand-alone">Stand-alone</a>: After following the installer, REI3 can be started immediately.</li>
-<li><a href="#dedicated">Dedicated</a>: After the installation, database connection details for an empty, UTF8 encoded PostgreSQL database must be entered into the configuration file <code>config.json</code>. The file <code>config.json</code> is located inside the chosen application directory. The database user must have full permissions for the chosen database.</li>
+<li><a href="#dedicated">Dedicated</a>: After the installation, database connection details for an empty, UTF8 encoded <a href="#preparing-a-new-postgresql-database">PostgreSQL database</a> must be entered into the configuration file <code>config.json</code>. The file <code>config.json</code> is located inside the chosen application directory. The database user must have full permissions for the chosen database.</li>
 </ul>
 <p>Independent of deployment model, REI3 is handled as a Windows service and can be started with the service manager (command: <code>service.msc</code>). REI3 will write to the Windows application log, should the service not start correctly.</p>
 <p>Because of licensing terms, we cannot distribute Ghostscript with REI3. If you want to create PDF thumbnails, you have to download and install a current version of Ghostscript on the REI3 server.</p>
@@ -117,7 +166,7 @@
 <li>Extract the REI3 archive file to a location of your choice (<code>/opt/rei3/</code> for example).</li>
 <li>Make the file <code>r3</code> executable (<code>chmod u+x r3</code>).</li>
 <li>Copy the file <code>config_template.json</code> to <code>config.json</code> - keep it in the same directory as the <code>r3</code> executable.</li>
-<li>Add connection details to an empty, UTF8 encoded PostgreSQL database to <code>config.json</code>. The database user must have full permissions for the chosen database.</li>
+<li>Add connection details to an empty, UTF8 encoded <a href="#preparing-a-new-postgresql-database">PostgreSQL database</a> to <code>config.json</code>. The database user must have full permissions for the chosen database.</li>
 <li>Optional: Install ImageMagick and Ghostscript if you want to have thumbnails (<code>sudo apt install imagemagick ghostscript</code>).</li>
 <li>Optional: Install PostgreSQL client tools if you want to use the integrated backup feature (<code>sudo apt install postgresql-client</code>).</li>
 <li>Register REI3 with your service manager (<code>sudo ./r3 -install</code>).</li>
@@ -141,7 +190,7 @@
 <p>When clients talk to a REI3 server, they use two methods - both are running on the same port (usually 443) as TCP:</p>
 <ul>
 <li>HTTP(S) requests to load files, images and other web resources.</li>
-<li>A continous Websocket connection for exchanging data bidirectionally between server and client. If this connection breaks down, the client tries to re-establish the it.</li>
+<li>A continous Websocket connection for exchanging data bidirectionally between server and client. If this connection breaks down, the client tries to re-establish it.</li>
 </ul>
 <p>When it comes to proxy servers (regardless of forward or reverse proxy), HTTP(s) requests can be handled like any other web application. So good-practices such as request timeouts are sensible.</p>
 <p>Websockets however are meant to stay active until either side (server or client) purposefully closes the connection. This can be because of events like a logout or a server going into maintenance mode. When configuring a proxy, request timeouts for Websocket connections should be disabled or at least set to multiple hours. Some proxies (like HAProxy) call these connections 'tunnel' instead of 'client' or 'server'. Every time a Websocket connection is forcefully closed by a proxy, the client must re-connect and can loose unsaved changes.</p>
@@ -252,6 +301,12 @@
 <li>As soon as a new server node connects to the existing REI3 database, it will register itself as a new cluster node and assigns itself a unique node ID.</li>
 </ol>
 <p>This is the entire setup. The cluster auto-configures and also automatically assigns cluster master role and tasks depending on which nodes are checking in.</p>
+<h1 id="preparing-a-new-postgresql-database">Preparing a new PostgreSQL database</h1>
+<p>REI3 in the <a href="#dedicated">dedicated deployment model</a> requires full permissions to a UTF8 encoded PostgreSQL database. This documentation does not cover installation of PostgreSQL on the operating system of your choice. Once the PostgreSQL service is available however, connect with a PostgreSQL client (like <code>psql</code> or <code>pgAdmin</code>) and make sure that both a user as well as database exists for REI3 to use. To create both:</p>
+<ol type="1">
+<li><code>CREATE ROLE my_rei3_user WITH LOGIN PASSWORD 'MY_STRONG_PW!';</code></li>
+<li><code>CREATE DATABASE my_rei3_db WITH OWNER = my_rei3_user TEMPLATE = template0 ENCODING = 'UTF8';</code></li>
+</ol>
 <h1 id="cloud-operations">Cloud operations</h1>
 <p>REI3 can be made accessible on the internet by opening up corresponding firewall ports. We, the REI3 manufacturers, aim to make the platform as secure as possible. As with any other application, it is always possible that undiscovered security flaws are exploited and unauthorized access achieved. Besides regularly updating REI3 itself, it is our view that additional safety measures are necessary to safely run web applications in the cloud, such as:</p>
 <ul>
