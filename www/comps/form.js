@@ -294,11 +294,15 @@ let MyForm = {
 			immediate:true
 		});
 		
-		this.$store.commit('routingGuardAdd',this.routingGuard);
+		if(!this.isWidget)
+			this.$store.commit('routingGuardAdd',this.routingGuard);
+		
 		window.addEventListener('keydown',this.handleHotkeys);
 	},
 	unmounted() {
-		this.$store.commit('routingGuardDel',this.routingGuard);
+		if(!this.isWidget)
+			this.$store.commit('routingGuardDel',this.routingGuard);
+		
 		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	data() {
@@ -694,8 +698,8 @@ let MyForm = {
 		
 		// form management
 		handleHotkeys(e) {
-			// ignore hotkeys if a pop-up form (child of this form) is open
-			if(this.popUp !== null) return;
+			// ignore hotkeys if pop-up form (child of this form) is open or if its a widget
+			if(this.popUp !== null || this.isWidget) return;
 			
 			if(this.isPopUp && e.key === 'Escape')
 				this.closeAsk();
