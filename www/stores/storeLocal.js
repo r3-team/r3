@@ -9,6 +9,7 @@ const MyStoreLocal = {
 		appVersion:'',         // full application version (as in 1.2.0.3422)
 		companyColorHeader:'', // custom color on header
 		companyColorLogin:'',  // custom color on login screen
+		companyLoginImage:'',  // custom login background image
 		companyLogo:'',        // custom company logo
 		companyLogoUrl:'',     // custom company logo, href URL when clicked on
 		companyName:'',        // custom company name on login screen
@@ -49,6 +50,10 @@ const MyStoreLocal = {
 		companyColorLogin(state,payload) {
 			state.companyColorLogin = payload;
 			set('companyColorLogin',payload);
+		},
+		companyLoginImage(state,payload) {
+			state.companyLoginImage = payload;
+			set('companyLoginImage',payload);
 		},
 		companyLogo(state,payload) {
 			state.companyLogo = payload;
@@ -125,10 +130,14 @@ const MyStoreLocal = {
 	},
 	getters:{
 		customLogo:(state) => !state.activated || state.companyLogo === ''
-			? 'images/logo.png' : `data:image/png;base64,${state.companyLogo}`,
+			? 'images/logo.png' : `data:image;base64,${state.companyLogo}`,
 		
 		customLogoUrl:(state) => !state.activated || state.companyLogoUrl === ''
 			? 'https://rei3.de/' : state.companyLogoUrl,
+			
+		loginBackground:(state) => state.companyLoginImage === ''
+			? `background-image:url('../images/backgrounds/${state.loginBackground}.webp');`
+			: `background-image:url(data:image;base64,${state.companyLoginImage});`,
 		
 		// simple getters
 		activated:         (state) => state.activated,
@@ -137,13 +146,13 @@ const MyStoreLocal = {
 		appVersion:        (state) => state.appVersion,
 		companyColorHeader:(state) => state.companyColorHeader,
 		companyColorLogin: (state) => state.companyColorLogin,
+		companyLoginImage: (state) => state.companyLoginImage,
 		companyLogo:       (state) => state.companyLogo,
 		companyLogoUrl:    (state) => state.companyLogoUrl,
 		companyName:       (state) => state.companyName,
 		companyWelcome:    (state) => state.companyWelcome,
 		css:               (state) => state.css,
 		fieldIdMapOption:  (state) => state.fieldIdMapOption,
-		loginBackground:   (state) => state.loginBackground,
 		loginKeyAes:       (state) => state.loginKeyAes,
 		loginKeySalt:      (state) => state.loginKeySalt,
 		menuIdMapOpen:     (state) => state.menuIdMapOpen,

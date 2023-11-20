@@ -17,6 +17,7 @@ func PublicGet() (interface{}, error) {
 		ClusterNodeName    string               `json:"clusterNodeName"`
 		CompanyColorHeader string               `json:"companyColorHeader"`
 		CompanyColorLogin  string               `json:"companyColorLogin"`
+		CompanyLoginImage  string               `json:"companyLoginImage"`
 		CompanyLogo        string               `json:"companyLogo"`
 		CompanyLogoUrl     string               `json:"companyLogoUrl"`
 		CompanyName        string               `json:"companyName"`
@@ -37,6 +38,7 @@ func PublicGet() (interface{}, error) {
 	res.ClusterNodeName = cache.GetNodeName()
 	res.CompanyColorHeader = config.GetString("companyColorHeader")
 	res.CompanyColorLogin = config.GetString("companyColorLogin")
+	res.CompanyLoginImage = config.GetString("companyLoginImage")
 	res.CompanyLogo = config.GetString("companyLogo")
 	res.CompanyLogoUrl = config.GetString("companyLogoUrl")
 	res.CompanyName = config.GetString("companyName")

@@ -256,7 +256,7 @@ let MyApp = {
 		},
 		styles:(s) => {
 			if(!s.appReady)
-				return `background-image:url('../images/backgrounds/${s.loginBackground}.webp');`;
+				return s.loginBackground;
 			
 			let styles = [`font-size:${s.settings.fontSize}%`];
 			
@@ -561,6 +561,7 @@ let MyApp = {
 					this.$store.commit('local/appVersion',res.payload.appVersion);
 					this.$store.commit('local/companyColorHeader',res.payload.companyColorHeader);
 					this.$store.commit('local/companyColorLogin',res.payload.companyColorLogin);
+					this.$store.commit('local/companyLoginImage',res.payload.companyLoginImage);
 					this.$store.commit('local/companyLogo',res.payload.companyLogo);
 					this.$store.commit('local/companyLogoUrl',res.payload.companyLogoUrl);
 					this.$store.commit('local/companyName',res.payload.companyName);

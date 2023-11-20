@@ -124,6 +124,17 @@ let MyAdminCustom = {
 			</div>
 			<table class="generic-table-vertical">
 				<tr>
+					<td>{{ capApp.companyLoginImage }}</td>
+					<td>
+						<my-admin-custom-logo
+							v-model="configInput.companyLoginImage"
+							:maxSizeKb="256"
+							:readonly="!activated"
+						/>
+					</td>
+					<td>{{ capApp.companyLoginImageHint }}</td>
+				</tr>
+				<tr>
 					<td>{{ capApp.tokenKeepEnable }}</td>
 					<td><my-bool-string-number v-model="configInput.tokenKeepEnable" :readonly="!activated" /></td>
 					<td>{{ capApp.tokenKeepEnableHint }}</td>

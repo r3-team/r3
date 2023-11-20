@@ -23,15 +23,6 @@ func LookupGet(reqJson json.RawMessage, loginId int64) (interface{}, error) {
 	case "access":
 		return cache.GetAccessById(loginId)
 
-	case "customizing":
-		var res struct {
-			CompanyName    string `json:"companyName"`
-			CompanyWelcome string `json:"companyWelcome"`
-		}
-		res.CompanyName = config.GetString("companyName")
-		res.CompanyWelcome = config.GetString("companyWelcome")
-		return res, nil
-
 	case "feedback":
 		var res struct {
 			Feedback    bool   `json:"feedback"`
