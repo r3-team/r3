@@ -42,8 +42,8 @@
 
 <p align="center">Free yourself from walled gardens and cloud-only SaaS offerings. REI3 enables powerful low code applications, selfhosted in the cloud or on-premise. Create and then use, share or even sell your REI3 applications.</p>
 
-![Screenshot Orgas - DEMO](https://github.com/r3-team/r3/assets/91060542/fc7d54e5-fc29-4a5a-8593-eae60cfd8541)
-![Screenshot Gantt - DEMO](https://github.com/r3-team/r3/assets/91060542/ae3dc953-6ea9-4304-a446-e05c28be7459)
+![DEMO - Orgas](https://github.com/r3-team/r3/assets/91060542/77596cf1-5ea8-4130-999d-bbd4aa782535)
+![DEMO - Gantt](https://github.com/r3-team/r3/assets/91060542/3c103e67-6e48-4fc6-b99a-9dfcde00bba7)
 
 ## :star: Features
 * **Fast results**: Quickly replace grown, spreadsheet based 'solutions' with proper multi-user applications.
@@ -61,8 +61,8 @@
 * **Selfhosted**: Run REI3 as you wish, locally or in the cloud - with full control on where your data is located.
 * **Enterprise-ready**: Adjust REI3 to your corporate identity, manage users & access via LDAP and grow with your organization by extending applications and clustering REI3.
 
-![Screenshot Calendar - DEMO](https://github.com/r3-team/r3/assets/91060542/79f6a4c2-b7ec-4d15-85b7-b0992699bddf)
-![Screenshot IT Assets - DEMO](https://github.com/r3-team/r3/assets/91060542/845ef560-f96c-4270-afd9-4a6f000013c2)
+![DEMO - Calendar](https://github.com/r3-team/r3/assets/91060542/9aaad47b-fadf-4ed1-a07a-ca9ceb01e548)
+![DEMO - Assets](https://github.com/r3-team/r3/assets/91060542/36ea11cc-7c81-43ad-84c8-4722857e0d01)
 
 ## :rocket: Quickstart
 ### Linux
