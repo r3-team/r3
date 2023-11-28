@@ -1312,7 +1312,14 @@
 		"pgTrigger":{
 			"dialog":{
 				"delete":"Sigur doriți să ștergeți acest declanșator?"
-			}
+			},
+			"execute":"Execută",
+			"fires":"Fires",
+			"isDeferred":"AMÂNAT",
+			"onDelete":"DELETE",
+			"onInsert":"INSERT",
+			"onUpdate":"UPDATE",
+			"perRow":"EACH ROW"
 		},
 		"preset":{
 			"dialog":{
@@ -1354,9 +1361,7 @@
 			"codeCondition":"Condiție",
 			"encryption":"E2E encryption",
 			"encryptionHint":"Relation supports end-to-end encrypted attribute values.",
-			"execute":"Execută",
 			"external":"Relații de referință ({CNT})",
-			"fires":"Fires",
 			"graph":"Graficul relațiilor",
 			"graphBase":"Relația de bază",
 			"indexes":"Indexuri ({CNT})",
@@ -1365,12 +1370,7 @@
 			"indexSystem":"System index (managed by the system)",
 			"indexText":"Text index",
 			"indexUnique":"Unic",
-			"isDeferred":"AMÂNAT",
 			"nameHint":"Reference name for this relation. Must be unique within this application.",
-			"onDelete":"DELETE",
-			"onInsert":"INSERT",
-			"onUpdate":"UPDATE",
-			"perRow":"EACH ROW",
 			"policies":"Politici ({CNT})",
 			"policyActions":"Acțiune",
 			"policyActionDelete":"Ștergeți",

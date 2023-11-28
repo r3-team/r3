@@ -1312,7 +1312,14 @@
 		"pgTrigger":{
 			"dialog":{
 				"delete":"Biztos vagy benne, hogy törölni szeretnéd ezt a triggert?"
-			}
+			},
+			"execute":"Végrehajtás",
+			"fires":"Elindítja",
+			"isDeferred":"ELHALASZTOTT",
+			"onDelete":"TÖRLÉS",
+			"onInsert":"BESZÚRÁS",
+			"onUpdate":"FRISSÍTÉS",
+			"perRow":"MINDEN SOR"
 		},
 		"preset":{
 			"dialog":{
@@ -1354,9 +1361,7 @@
 			"codeCondition":"Feltétel",
 			"encryption":"Vége-végig titkosítás",
 			"encryptionHint":"A reláció támogatja az érték vége-végig titkosítását.",
-			"execute":"Végrehajtás",
 			"external":"Hivatkozó kapcsolatok ({CNT})",
-			"fires":"Elindítja",
 			"graph":"Kapcsolatok grafikona",
 			"graphBase":"Alapreláció",
 			"indexes":"Indexek ({CNT})",
@@ -1365,12 +1370,7 @@
 			"indexSystem":"Rendszerindex (rendszertől kezelt)",
 			"indexText":"Szövegindex",
 			"indexUnique":"Egyedülálló",
-			"isDeferred":"ELHALASZTOTT",
 			"nameHint":"Az elnevezés erre a relációra. Unikálisnak kell lennie ebben az alkalmazásban.",
-			"onDelete":"TÖRLÉS",
-			"onInsert":"BESZÚRÁS",
-			"onUpdate":"FRISSÍTÉS",
-			"perRow":"MINDEN SOR",
 			"policies":"Szabályok ({CNT})",
 			"policyActions":"Művelet",
 			"policyActionDelete":"Törlés",

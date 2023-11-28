@@ -1312,7 +1312,14 @@
 		"pgTrigger":{
 			"dialog":{
 				"delete":"Sei sicuro di voler eliminare questo trigger?"
-			}
+			},
+			"execute":"Eseguire",
+			"fires":"Accensioni",
+			"isDeferred":"DEFERRED",
+			"onDelete":"DELETE",
+			"onInsert":"INSERT",
+			"onUpdate":"UPDATE",
+			"perRow":"EACH ROW"
 		},
 		"preset":{
 			"dialog":{
@@ -1354,9 +1361,7 @@
 			"codeCondition":"Condizione",
 			"encryption":"E2E encryption",
 			"encryptionHint":"Relation supports end-to-end encrypted attribute values.",
-			"execute":"Eseguire",
 			"external":"Relazioni di riferimento ({CNT})",
-			"fires":"Accensioni",
 			"graph":"Grafico delle relazioni",
 			"graphBase":"relazione base",
 			"indexes":"Indici ({CNT})",
@@ -1365,12 +1370,7 @@
 			"indexSystem":"System index (managed by the system)",
 			"indexText":"Text index",
 			"indexUnique":"Univoco",
-			"isDeferred":"DEFERRED",
 			"nameHint":"Reference name for this relation. Must be unique within this application.",
-			"onDelete":"DELETE",
-			"onInsert":"INSERT",
-			"onUpdate":"UPDATE",
-			"perRow":"EACH ROW",
 			"policies":"Politica ({CNT})",
 			"policyActions":"Azione",
 			"policyActionDelete":"Dancella",

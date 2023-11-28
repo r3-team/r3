@@ -1312,7 +1312,14 @@
 		"pgTrigger":{
 			"dialog":{
 				"delete":"Bist du sicher, dass du diesen Trigger löschen möchtest?"
-			}
+			},
+			"execute":"Ausführen",
+			"fires":"Startet",
+			"isDeferred":"DEFERRED",
+			"onDelete":"DELETE",
+			"onInsert":"INSERT",
+			"onUpdate":"UPDATE",
+			"perRow":"EACH ROW"
 		},
 		"preset":{
 			"dialog":{
@@ -1354,9 +1361,7 @@
 			"codeCondition":"Kondition",
 			"encryption":"E2E-Verschlüsselung",
 			"encryptionHint":"Relation unterstützt Ende-zu-Ende verschlüsselte Attributwerte.",
-			"execute":"Ausführen",
 			"external":"Referenzierende Beziehungen ({CNT})",
-			"fires":"Startet",
 			"graph":"Beziehungsdiagramm",
 			"graphBase":"Basisrelation",
 			"indexes":"Indexe ({CNT})",
@@ -1365,12 +1370,7 @@
 			"indexSystem":"Systemindex (vom System verwaltet)",
 			"indexText":"Textindex",
 			"indexUnique":"Einzigartig",
-			"isDeferred":"DEFERRED",
 			"nameHint":"Referenzname für diese Relation. Muss einzigartig in dieser Anwendung sein.",
-			"onDelete":"DELETE",
-			"onInsert":"INSERT",
-			"onUpdate":"UPDATE",
-			"perRow":"EACH ROW",
 			"policies":"Richtlinien ({CNT})",
 			"policyActions":"Handlung",
 			"policyActionDelete":"Löschen",

@@ -1,6 +1,6 @@
 import MyBuilderAttribute    from './builderAttribute.js';
 import MyBuilderPreset       from './builderPreset.js';
-import MyBuilderPgTrigger    from './builderPgTrigger.js';
+import MyBuilderPgTriggers   from './builderPgTriggers.js';
 import MyBuilderPgIndex      from './builderPgIndex.js';
 import {getDependentModules} from '../shared/builder.js';
 import {srcBase64}           from '../shared/image.js';
@@ -130,7 +130,7 @@ let MyBuilderRelation = {
 		echarts:VueECharts,
 		MyBuilderAttribute,
 		MyBuilderPreset,
-		MyBuilderPgTrigger,
+		MyBuilderPgTriggers,
 		MyBuilderPgIndex,
 		MyBuilderRelationsItemPolicy
 	},
@@ -378,40 +378,13 @@ let MyBuilderRelation = {
 					<img class="icon" :src="displayArrow(showTriggers)" />
 					<h1>{{ capApp.triggers.replace('{CNT}',relation.triggers.length) }}</h1>
 				</div>
-				
-				<table class="default-inputs" v-if="showTriggers">
-					<thead>
-						<tr>
-							<th>{{ capGen.actions }}</th>
-							<th>{{ capApp.fires }}</th>
-							<th>{{ capGen.id }}</th>
-							<th>{{ capApp.onInsert }}</th>
-							<th>{{ capApp.onUpdate }}</th>
-							<th>{{ capApp.onDelete }}</th>
-							<th>{{ capApp.perRow }}</th>
-							<th>{{ capApp.isDeferred }}</th>
-							<th colspan="2">{{ capApp.execute }}</th>
-						</tr>
-					</thead>
-					<tbody>
-						<!-- new record -->
-						<my-builder-pg-trigger
-							@createNew="(...args) => $emit('createNew',...args)"
-							:readonly="readonly"
-							:relation="relation"
-						/>
-						
-						<!-- existing records -->
-						<my-builder-pg-trigger
-							v-for="trg in relation.triggers"
-							@createNew="(...args) => $emit('createNew',...args)"
-							:key="trg.id"
-							:readonly="readonly"
-							:relation="relation"
-							:pg-trigger="trg"
-						/>
-					</tbody>
-				</table>
+				<my-builder-pg-triggers
+					v-if="showTriggers"
+					@createNew="(...args) => $emit('createNew',...args)"
+					:readonly="readonly"
+					:relationIdContext="relation.id"
+					:triggers="relation.triggers"
+				/>
 			</div>
 			
 			<!-- policies -->
