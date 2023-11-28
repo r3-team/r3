@@ -171,7 +171,7 @@ func Set_tx(tx pgx.Tx, pgFunctionId uuid.UUID, id uuid.UUID,
 	}
 
 	// create trigger
-	_, nameFnc, argsFnc, _, err := schema.GetPgFunctionDetailsById_tx(tx, pgFunctionId)
+	nameModFnc, nameFnc, argsFnc, _, err := schema.GetPgFunctionDetailsById_tx(tx, pgFunctionId)
 	if err != nil {
 		return err
 	}
@@ -190,7 +190,7 @@ func Set_tx(tx pgx.Tx, pgFunctionId uuid.UUID, id uuid.UUID,
 		constraint,
 		forEach,
 		condition,
-		nameMod, nameFnc, argsFnc)); err != nil {
+		nameModFnc, nameFnc, argsFnc)); err != nil {
 
 		return err
 	}

@@ -1,5 +1,6 @@
-import MyBuilderCaption from './builderCaption.js';
-import MyTabs           from '../tabs.js';
+import MyBuilderCaption    from './builderCaption.js';
+import MyBuilderPgTriggers from './builderPgTriggers.js';
+import MyTabs              from '../tabs.js';
 import {
 	copyValueDialog,
 	getNilUuid,
@@ -122,6 +123,7 @@ let MyBuilderPgFunction = {
 	components:{
 		MyBuilderCaption,
 		MyBuilderPgFunctionItemSchedule,
+		MyBuilderPgTriggers,
 		MyTabs
 	},
 	template:`<div class="builder-function">
@@ -440,6 +442,15 @@ let MyBuilderPgFunction = {
 							<td>{{ capApp.codeReturns }}</td>
 							<td><input v-model="codeReturns" :disabled="isTrigger || readonly" placeholder="-" /></td>
 						</tr>
+						<tr v-if="isTrigger">
+							<td colspan="2">
+								<my-builder-pg-triggers
+									:pgFunctionIdContext="id"
+									:readonly="readonly"
+									:triggers="triggers"
+								/>
+							</td>
+						</tr>
 						<tr v-if="!isTrigger">
 							<td>{{ capApp.isFrontendExec }}</td>
 							<td><my-bool v-model="isFrontendExec" :readonly="isTrigger || readonly" /></td>
@@ -556,6 +567,18 @@ let MyBuilderPgFunction = {
 				out.icons.splice(1,0,'images/settingsPlay.png');
 				out.keys.splice(1,0,'exec');
 				out.labels.splice(1,0,s.capApp.exec);
+			}
+			return out;
+		},
+		triggers:(s) => {
+			let out = [];
+			for(const relId in s.relationIdMap) {
+				const rel = s.relationIdMap[relId];
+				
+				for(const trg of rel.triggers) {
+					if(trg.pgFunctionId === s.id)
+						out.push(trg);
+				}
 			}
 			return out;
 		},

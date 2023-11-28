@@ -22,6 +22,12 @@ let MyBuilderPgTrigger = {
 				/>
 			</div>
 		</td>
+		<td class="minimum">
+			<my-button image="visible1.png"
+				@trigger="copyValueDialog('',pgTrigger.id,pgTrigger.id)"
+				:active="!isNew"
+			/>
+		</td>
 		<td>
 			<div class="row gap">
 				<select
@@ -72,12 +78,6 @@ let MyBuilderPgTrigger = {
 				<option value="BEFORE">BEFORE</option>
 				<option value="AFTER">AFTER</option>
 			</select>
-		</td>
-		<td class="minimum">
-			<my-button image="visible1.png"
-				@trigger="copyValueDialog('',pgTrigger.id,pgTrigger.id)"
-				:active="!isNew"
-			/>
 		</td>
 		<td><my-bool v-model="onInsert" :readonly="readonly" /></td>
 		<td><my-bool v-model="onUpdate" :readonly="readonly" /></td>
@@ -261,9 +261,9 @@ let MyBuilderPgTriggers = {
 		<thead>
 			<tr>
 				<th>{{ capGen.actions }}</th>
+				<th>{{ capGen.id }}</th>
 				<th>{{ capApp.execute }}</th>
 				<th>{{ capApp.fires }}</th>
-				<th>{{ capGen.id }}</th>
 				<th>{{ capApp.onInsert }}</th>
 				<th>{{ capApp.onUpdate }}</th>
 				<th>{{ capApp.onDelete }}</th>
