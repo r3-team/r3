@@ -22,14 +22,10 @@ func PgTriggerDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 }
 
 func PgTriggerSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
 	var req types.PgTrigger
 
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, pgTrigger.Set_tx(tx, req.PgFunctionId, req.Id, req.RelationId,
-		req.OnInsert, req.OnUpdate, req.OnDelete, req.IsConstraint,
-		req.IsDeferrable, req.IsDeferred, req.PerRow, req.Fires,
-		req.CodeCondition)
+	return nil, pgTrigger.Set_tx(tx, req)
 }

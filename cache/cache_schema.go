@@ -214,12 +214,6 @@ func updateSchemaCache(moduleIdsUpdateOnly []uuid.UUID) error {
 				return err
 			}
 
-			// get triggers
-			rel.Triggers, err = pgTrigger.Get(rel.Id)
-			if err != nil {
-				return err
-			}
-
 			// store & backfill relation to module
 			RelationIdMap[rel.Id] = rel
 			mod.Relations = append(mod.Relations, rel)
@@ -266,6 +260,12 @@ func updateSchemaCache(moduleIdsUpdateOnly []uuid.UUID) error {
 		log.Info("cache", "load login forms")
 
 		mod.LoginForms, err = loginForm.Get(mod.Id)
+		if err != nil {
+			return err
+		}
+
+		// get triggers
+		mod.PgTriggers, err = pgTrigger.Get(mod.Id)
 		if err != nil {
 			return err
 		}

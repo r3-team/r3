@@ -34,6 +34,7 @@ type Module struct {
 	Articles        []Article         `json:"articles"`
 	LoginForms      []LoginForm       `json:"loginForms"`
 	PgFunctions     []PgFunction      `json:"pgFunctions"`
+	PgTriggers      []PgTrigger       `json:"pgTriggers"`
 	JsFunctions     []JsFunction      `json:"jsFunctions"`
 	Collections     []Collection      `json:"collections"`
 	Apis            []Api             `json:"apis"`
@@ -80,7 +81,9 @@ type Relation struct {
 	Indexes        []PgIndex        `json:"indexes"`        // read only, all relation indexes
 	Policies       []RelationPolicy `json:"policies"`       // read only, all relation policies
 	Presets        []Preset         `json:"presets"`        // read only, all relation presets
-	Triggers       []PgTrigger      `json:"triggers"`       // read only, all relation triggers
+
+	// legacy
+	Triggers []PgTrigger `json:"triggers"` // moved to module pgTriggers
 }
 type RelationPolicy struct {
 	RoleId           uuid.UUID     `json:"roleId"`
@@ -509,9 +512,10 @@ type PgFunctionSchedule struct {
 }
 type PgTrigger struct {
 	Id            uuid.UUID `json:"id"`
+	ModuleId      uuid.UUID `json:"moduleId"`
 	RelationId    uuid.UUID `json:"relationId"`
 	PgFunctionId  uuid.UUID `json:"pgFunctionId"`
-	Fires         string    `json:"fires"`
+	Fires         string    `json:"fires"` // BEFORE/AFTER
 	OnDelete      bool      `json:"onDelete"`
 	OnInsert      bool      `json:"onInsert"`
 	OnUpdate      bool      `json:"onUpdate"`

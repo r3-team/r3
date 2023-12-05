@@ -110,8 +110,8 @@ func NotExisting_tx(tx pgx.Tx, module types.Module) error {
 	}
 	return nil
 }
-func NotExistingPgTriggers_tx(tx pgx.Tx, moduleId uuid.UUID, relations []types.Relation) error {
-	return deletePgTriggers_tx(tx, moduleId, relations)
+func NotExistingPgTriggers_tx(tx pgx.Tx, moduleId uuid.UUID, pgTriggers []types.PgTrigger) error {
+	return deletePgTriggers_tx(tx, moduleId, pgTriggers)
 }
 
 // deletions
@@ -132,14 +132,12 @@ func deleteLoginForms_tx(tx pgx.Tx, moduleId uuid.UUID, loginForms []types.Login
 	}
 	return nil
 }
-func deletePgTriggers_tx(tx pgx.Tx, moduleId uuid.UUID, relations []types.Relation) error {
+func deletePgTriggers_tx(tx pgx.Tx, moduleId uuid.UUID, pgTriggers []types.PgTrigger) error {
 	idsKeep := make([]uuid.UUID, 0)
-	for _, rel := range relations {
-		for _, trg := range rel.Triggers {
-			idsKeep = append(idsKeep, trg.Id)
-		}
+	for _, trg := range pgTriggers {
+		idsKeep = append(idsKeep, trg.Id)
 	}
-	idsDelete, err := importGetIdsToDeleteFromRelation_tx(tx, "pg_trigger", moduleId, idsKeep)
+	idsDelete, err := importGetIdsToDeleteFromModule_tx(tx, "pg_trigger", moduleId, idsKeep)
 	if err != nil {
 		return err
 	}
@@ -555,8 +553,8 @@ func importGetIdsToDeleteFromModule_tx(tx pgx.Tx, entity string,
 	idsDelete := make([]uuid.UUID, 0)
 
 	if !slices.Contains([]string{"api", "article", "collection", "form", "icon",
-		"js_function", "login_form", "menu", "pg_function", "relation",
-		"role", "widget"}, entity) {
+		"js_function", "login_form", "menu", "pg_function", "pg_trigger",
+		"relation", "role", "widget"}, entity) {
 
 		return idsDelete, errors.New("unsupported type for delete check")
 	}
@@ -578,7 +576,7 @@ func importGetIdsToDeleteFromRelation_tx(tx pgx.Tx, entity string, moduleId uuid
 
 	idsDelete := make([]uuid.UUID, 0)
 
-	if !slices.Contains([]string{"attribute", "pg_index", "pg_trigger", "preset"}, entity) {
+	if !slices.Contains([]string{"attribute", "pg_index", "preset"}, entity) {
 		return idsDelete, errors.New("unsupport type for delete check")
 	}
 

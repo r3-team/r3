@@ -101,6 +101,7 @@ func Get(moduleId uuid.UUID) ([]types.Relation, error) {
 		}
 		r.ModuleId = moduleId
 		r.Attributes = make([]types.Attribute, 0)
+		r.Triggers = make([]types.PgTrigger, 0)
 
 		r.Policies, err = getPolicies(r.Id)
 		if err != nil {

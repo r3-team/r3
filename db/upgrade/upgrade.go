@@ -100,10 +100,36 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	// clean up on next release
 	/*
-		ALTER TABLE instance.login_widget_group_item ALTER COLUMN content
-			TYPE instance.widget_content USING content::text::instance.widget_content;
+		nothing yet
 	*/
 
+	"3.6": func(tx pgx.Tx) (string, error) {
+		_, err := tx.Exec(db.Ctx, `
+			-- cleanup from last release
+			ALTER TABLE instance.login_widget_group_item ALTER COLUMN content
+				TYPE instance.widget_content USING content::text::instance.widget_content;
+			
+			-- migrate PG triggers from relation to module
+			ALTER TABLE app.pg_trigger ADD COLUMN module_id UUID;
+			
+			CREATE INDEX fki_pg_trigger_module_id_fkey ON app.pg_trigger USING btree (module_id ASC NULLS LAST);
+			
+			UPDATE app.pg_trigger AS t
+			SET module_id = (
+				SELECT module_id
+				FROM app.relation
+				WHERE id = t.relation_id
+			);
+			ALTER TABLE app.pg_trigger ALTER COLUMN module_id SET NOT NULL;
+			ALTER TABLE app.pg_trigger ADD CONSTRAINT pg_trigger_module_id_fkey
+				FOREIGN KEY (module_id)
+				REFERENCES app.module (id) MATCH SIMPLE
+				ON UPDATE CASCADE
+				ON DELETE CASCADE
+				DEFERRABLE INITIALLY DEFERRED;
+		`)
+		return "3.7", err
+	},
 	"3.5": func(tx pgx.Tx) (string, error) {
 		_, err := tx.Exec(db.Ctx, `
 			-- remove outdated login settings / add new login settings

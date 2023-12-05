@@ -13,6 +13,18 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
+// < 3.7
+// migrate PG triggers from relations to module
+func FixPgTriggerLocation(triggers []types.PgTrigger, relations []types.Relation) []types.PgTrigger {
+	for _, relation := range relations {
+		for _, trg := range relation.Triggers {
+			trg.ModuleId = relation.ModuleId
+			triggers = append(triggers, trg)
+		}
+	}
+	return triggers
+}
+
 // < 3.5
 // migrate relation index apply
 func FixOpenFormRelationIndexApply(openForm types.OpenForm) types.OpenForm {

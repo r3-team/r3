@@ -17,6 +17,7 @@ import (
 	"r3/schema/article"
 	"r3/schema/attribute"
 	"r3/schema/collection"
+	"r3/schema/compatible"
 	"r3/schema/form"
 	"r3/schema/icon"
 	"r3/schema/jsFunction"
@@ -125,7 +126,9 @@ func ImportFromFiles(filePathsImport []string) error {
 				if other entities rely on deleted states (presets), they are applied on next loop
 			*/
 			if firstRun && !moduleIdMapMeta[m.Id].isNew {
-				if err := transfer_delete.NotExistingPgTriggers_tx(tx, m.Id, m.Relations); err != nil {
+				if err := transfer_delete.NotExistingPgTriggers_tx(tx, m.Id,
+					compatible.FixPgTriggerLocation(m.PgTriggers, m.Relations)); err != nil {
+
 					return err
 				}
 			}
@@ -361,24 +364,19 @@ func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
 	}
 
 	// PG triggers, refer to PG functions
-	for _, relation := range mod.Relations {
-		for _, e := range relation.Triggers {
-			run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
-			if err != nil {
-				return err
-			}
-			if !run {
-				continue
-			}
-			log.Info("transfer", fmt.Sprintf("set trigger %s", e.Id))
+	mod.PgTriggers = compatible.FixPgTriggerLocation(mod.PgTriggers, mod.Relations)
+	for _, e := range mod.PgTriggers {
+		run, err := importCheckRunAndSave(tx, firstRun, e.Id, idMapSkipped)
+		if err != nil {
+			return err
+		}
+		if !run {
+			continue
+		}
+		log.Info("transfer", fmt.Sprintf("set trigger %s", e.Id))
 
-			if err := importCheckResultAndApply(tx, pgTrigger.Set_tx(tx,
-				e.PgFunctionId, e.Id, e.RelationId, e.OnInsert, e.OnUpdate,
-				e.OnDelete, e.IsConstraint, e.IsDeferrable, e.IsDeferred,
-				e.PerRow, e.Fires, e.CodeCondition), e.Id, idMapSkipped); err != nil {
-
-				return err
-			}
+		if err := importCheckResultAndApply(tx, pgTrigger.Set_tx(tx, e), e.Id, idMapSkipped); err != nil {
+			return err
 		}
 	}
 

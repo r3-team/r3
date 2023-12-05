@@ -35,18 +35,17 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 	return nil
 }
 
-func Get(relationId uuid.UUID) ([]types.PgTrigger, error) {
-
+func Get(moduleId uuid.UUID) ([]types.PgTrigger, error) {
 	triggers := make([]types.PgTrigger, 0)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, pg_function_id, on_insert, on_update, on_delete,
+		SELECT id, relation_id, pg_function_id, on_insert, on_update, on_delete,
 			is_constraint, is_deferrable, is_deferred, per_row, fires,
 			code_condition
 		FROM app.pg_trigger
-		WHERE relation_id = $1
+		WHERE module_id = $1
 		ORDER BY id ASC -- an order is required for hash comparisson (module changes)
-	`, relationId)
+	`, moduleId)
 	if err != nil {
 		return triggers, err
 	}
@@ -55,47 +54,44 @@ func Get(relationId uuid.UUID) ([]types.PgTrigger, error) {
 	for rows.Next() {
 		var t types.PgTrigger
 
-		if err := rows.Scan(&t.Id, &t.PgFunctionId, &t.OnInsert, &t.OnUpdate,
-			&t.OnDelete, &t.IsConstraint, &t.IsDeferrable, &t.IsDeferred,
-			&t.PerRow, &t.Fires, &t.CodeCondition); err != nil {
+		if err := rows.Scan(&t.Id, &t.RelationId, &t.PgFunctionId, &t.OnInsert,
+			&t.OnUpdate, &t.OnDelete, &t.IsConstraint, &t.IsDeferrable,
+			&t.IsDeferred, &t.PerRow, &t.Fires, &t.CodeCondition); err != nil {
 
 			return triggers, err
 		}
-		t.RelationId = relationId
+		t.ModuleId = moduleId
 		triggers = append(triggers, t)
 	}
 	return triggers, nil
 }
 
-func Set_tx(tx pgx.Tx, pgFunctionId uuid.UUID, id uuid.UUID,
-	relationId uuid.UUID, onInsert bool, onUpdate bool, onDelete bool,
-	isConstraint bool, isDeferrable bool, isDeferred bool, perRow bool,
-	fires string, codeCondition string) error {
+func Set_tx(tx pgx.Tx, trg types.PgTrigger) error {
 
-	nameMod, nameRel, err := schema.GetRelationNamesById_tx(tx, relationId)
+	nameMod, nameRel, err := schema.GetRelationNamesById_tx(tx, trg.RelationId)
 	if err != nil {
 		return err
 	}
 
-	known, err := schema.CheckCreateId_tx(tx, &id, "pg_trigger", "id")
+	known, err := schema.CheckCreateId_tx(tx, &trg.Id, "pg_trigger", "id")
 	if err != nil {
 		return err
 	}
 
 	// overwrite invalid options
-	if !slices.Contains([]string{"BEFORE", "AFTER"}, fires) {
+	if !slices.Contains([]string{"BEFORE", "AFTER"}, trg.Fires) {
 		return errors.New("invalid trigger start")
 	}
 
-	if !perRow || fires != "AFTER" { // constraint trigger must be AFTER EACH ROW
-		isConstraint = false
-		isDeferrable = false
-		isDeferred = false
-	} else if !isConstraint { // deferrable only available for constraint triggers
-		isDeferrable = false
-		isDeferred = false
-	} else if !isDeferrable { // cannot defer, non-deferrable trigger<
-		isDeferred = false
+	if !trg.PerRow || trg.Fires != "AFTER" { // constraint trigger must be AFTER EACH ROW
+		trg.IsConstraint = false
+		trg.IsDeferrable = false
+		trg.IsDeferred = false
+	} else if !trg.IsConstraint { // deferrable only available for constraint triggers
+		trg.IsDeferrable = false
+		trg.IsDeferred = false
+	} else if !trg.IsDeferrable { // cannot defer, non-deferrable trigger<
+		trg.IsDeferred = false
 	}
 
 	if known {
@@ -105,8 +101,9 @@ func Set_tx(tx pgx.Tx, pgFunctionId uuid.UUID, id uuid.UUID,
 				on_delete = $4, is_constraint = $5, is_deferrable = $6,
 				is_deferred = $7, per_row = $8, fires = $9, code_condition = $10
 			WHERE id = $11
-		`, pgFunctionId, onInsert, onUpdate, onDelete, isConstraint, isDeferrable,
-			isDeferred, perRow, fires, codeCondition, id); err != nil {
+		`, trg.PgFunctionId, trg.OnInsert, trg.OnUpdate, trg.OnDelete,
+			trg.IsConstraint, trg.IsDeferrable, trg.IsDeferred, trg.PerRow,
+			trg.Fires, trg.CodeCondition, trg.Id); err != nil {
 
 			return err
 		}
@@ -114,17 +111,18 @@ func Set_tx(tx pgx.Tx, pgFunctionId uuid.UUID, id uuid.UUID,
 		// remove existing trigger
 		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 			DROP TRIGGER "%s" ON "%s"."%s"
-		`, getName(id), nameMod, nameRel)); err != nil {
+		`, getName(trg.Id), nameMod, nameRel)); err != nil {
 			return err
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO app.pg_trigger (id, pg_function_id, relation_id,
+			INSERT INTO app.pg_trigger (id, module_id, pg_function_id, relation_id,
 				on_insert, on_update, on_delete, is_constraint, is_deferrable,
 				is_deferred, per_row, fires, code_condition)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
-		`, id, pgFunctionId, relationId, onInsert, onUpdate, onDelete, isConstraint,
-			isDeferrable, isDeferred, perRow, fires, codeCondition); err != nil {
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+		`, trg.Id, trg.ModuleId, trg.PgFunctionId, trg.RelationId, trg.OnInsert,
+			trg.OnUpdate, trg.OnDelete, trg.IsConstraint, trg.IsDeferrable,
+			trg.IsDeferred, trg.PerRow, trg.Fires, trg.CodeCondition); err != nil {
 
 			return err
 		}
@@ -132,13 +130,13 @@ func Set_tx(tx pgx.Tx, pgFunctionId uuid.UUID, id uuid.UUID,
 
 	// process options
 	events := make([]string, 0)
-	if onInsert {
+	if trg.OnInsert {
 		events = append(events, "INSERT")
 	}
-	if onUpdate {
+	if trg.OnUpdate {
 		events = append(events, "UPDATE")
 	}
-	if onDelete {
+	if trg.OnDelete {
 		events = append(events, "DELETE")
 	}
 	if len(events) == 0 {
@@ -146,23 +144,23 @@ func Set_tx(tx pgx.Tx, pgFunctionId uuid.UUID, id uuid.UUID,
 	}
 
 	forEach := "STATEMENT"
-	if perRow {
+	if trg.PerRow {
 		forEach = "ROW"
 	}
 
 	condition := ""
-	if codeCondition != "" {
-		condition = fmt.Sprintf("WHEN (%s)", codeCondition)
+	if trg.CodeCondition != "" {
+		condition = fmt.Sprintf("WHEN (%s)", trg.CodeCondition)
 	}
 
 	// constraint trigger options
 	triggerType := "TRIGGER"
 	constraint := ""
-	if isConstraint {
+	if trg.IsConstraint {
 		triggerType = "CONSTRAINT TRIGGER"
 
-		if isDeferrable {
-			if !isDeferred {
+		if trg.IsDeferrable {
+			if !trg.IsDeferred {
 				constraint = "DEFERRABLE"
 			} else {
 				constraint = "DEFERRABLE INITIALLY DEFERRED"
@@ -171,7 +169,7 @@ func Set_tx(tx pgx.Tx, pgFunctionId uuid.UUID, id uuid.UUID,
 	}
 
 	// create trigger
-	nameModFnc, nameFnc, argsFnc, _, err := schema.GetPgFunctionDetailsById_tx(tx, pgFunctionId)
+	nameModFnc, nameFnc, argsFnc, _, err := schema.GetPgFunctionDetailsById_tx(tx, trg.PgFunctionId)
 	if err != nil {
 		return err
 	}
@@ -184,8 +182,8 @@ func Set_tx(tx pgx.Tx, pgFunctionId uuid.UUID, id uuid.UUID,
 		FOR EACH %s
 		%s
 		EXECUTE FUNCTION "%s"."%s"(%s)
-	`, triggerType, getName(id),
-		fires, strings.Join(events, " OR "),
+	`, triggerType, getName(trg.Id),
+		trg.Fires, strings.Join(events, " OR "),
 		nameMod, nameRel,
 		constraint,
 		forEach,
