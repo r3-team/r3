@@ -108,7 +108,7 @@ If you want to build REI3 itself, you can fork this repo or download the source 
    * By setting the environment parameter `GOOS`, you can cross-compile for other systems (`GOOS=windows`, `GOOS=linux`, ...).
    * Static resource files (HTML, JS, CSS, etc.) are embedded into the binary during compilation - so changes to these files are only reflected after you recompile. Alternatively, you can use the `-wwwpath` command line argument to load REI3 with an external `www` directory, in which you can make changes directly.
 1. Use your new, compiled binary of REI3 to replace an already installed one.
-1. You are now running your own version of REI3.
+1. You can now start your own REI3 version. Make sure to clear all browser caches after creating/updating your own version.
 
 ## :page_with_curl: License
 REI3 © 2019-2023 Gabriel Victor Herbert - released under the MIT license.
