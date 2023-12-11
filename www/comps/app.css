@@ -1337,7 +1337,7 @@ table td.maximum{
 	--color-border-bright: #8f8f8f;
 	--color-cal-day-event: #444c51;
 	--color-cal-outside:   #525455;
-	--color-font:          #f7f7f7;
+	--color-font:          #ededed;
 	--color-input:         var(--color-input-dark);
 	--color-input-disabled:#222222;
 	--color-list-row-even: #525455;
