@@ -283,8 +283,8 @@ let MyBuilderPgFunction = {
 									<div class="entity-title" v-for="atr in rel.attributes">
 										<my-button
 											@trigger="selectEntity('attribute',atr.id)"
-											:caption="atr.name"
-											:captionTitle="atr.name"
+											:caption="atr.name + (atr.nullable ? '' : '*')"
+											:captionTitle="titleAttribute(atr)"
 											:image="radioIcon('attribute',atr.id)"
 											:naked="true"
 										/>
@@ -587,6 +587,9 @@ let MyBuilderPgFunction = {
 		radioIcon(entity,id) {
 			return this.entity === entity && this.entityId === id
 				? 'radio1.png' : 'radio0.png';
+		},
+		titleAttribute(atr) {
+			return atr.nullable ? atr.name : this.capApp.attributeNotNull.replace('{ATR}',atr.name);
 		},
 		
 		// actions
