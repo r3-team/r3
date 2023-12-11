@@ -56,7 +56,7 @@
 	
 	/**/
 	/* heights */
-	--row-height:42px;
+	--row-height:40px;
 	--app-header-height:70px;
 	
 	/**/
@@ -387,7 +387,7 @@ h3{
 	background-color:var(--color-bg);
 	flex:0 0 auto;
 	gap:12px;
-	padding:12px 10px;
+	padding:10px;
 	display:flex;
 	flex-flow:row wrap;
 	justify-content:space-between;
@@ -675,7 +675,7 @@ table td.maximum{
 	--navigation-color-border:var(--color-border-bright);
 }
 .navigation-header{
-	padding:12px;
+	padding:10px 12px;
 	display:flex;
 	flex-flow:row nowrap;
 	justify-content:space-between;

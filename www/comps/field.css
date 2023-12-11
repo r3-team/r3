@@ -313,7 +313,7 @@
 	filter:var(--image-filter);
 }
 .field .tabs-entry{
-	line-height:40px;
+	line-height:36px;
 	padding:0px 9px;
 	margin-left:-1px;
 	border:1px solid var(--color-border);
