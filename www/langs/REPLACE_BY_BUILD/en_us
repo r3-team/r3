@@ -1105,6 +1105,7 @@
 				"intervalWeeks":"Weeks",
 				"intervalYears":"Years"
 			},
+			"attributeNotNull":"{ATR} (must have value)",
 			"code":"Function body",
 			"codeArgs":"Arguments",
 			"codeArgsHintJs":"optional, 'var1, var2, ...'",

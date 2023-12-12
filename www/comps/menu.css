@@ -11,7 +11,7 @@
 	color:var(--color-font-bright);
 }
 .menu-header{
-	padding:12px 8px;
+	padding:10px 8px;
 	border-bottom:1px solid var(--color-border-dark);
 }
 .menu.isDark .menu-header{

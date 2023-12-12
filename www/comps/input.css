@@ -352,6 +352,10 @@
 	background-color:transparent;
 	box-shadow:none;
 }
+.input-date .date-inputs input:disabled{
+	color:var(--color-font-disabled);
+	background-color:var(--color-input-disabled);
+}
 .input-date .date-inputs input::placeholder{
 	font-family:monospace;
 }

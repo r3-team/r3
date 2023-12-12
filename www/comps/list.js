@@ -1087,7 +1087,6 @@ let MyList = {
 		// load cached list options
 		this.columnIdMapAggr = this.fieldOptionGet(this.fieldId,'columnIdMapAggr',{});
 		this.filtersColumn   = this.fieldOptionGet(this.fieldId,'filtersColumn',[]);
-		this.filtersQuick    = this.fieldOptionGet(this.fieldId,'filtersQuick','');
 		this.filtersUser     = this.fieldOptionGet(this.fieldId,'filtersUser',[]);
 		this.showHeader      = this.fieldOptionGet(this.fieldId,'header',true);
 		this.layout          = this.fieldOptionGet(this.fieldId,'layout',this.layoutDefault);
@@ -1664,7 +1663,6 @@ let MyList = {
 								this.$nextTick(this.updateDropdownDirection);
 							} else {
 								this.fieldOptionSet(this.fieldId,'filtersColumn',this.filtersColumn);
-								this.fieldOptionSet(this.fieldId,'filtersQuick',this.filtersQuick);
 								this.fieldOptionSet(this.fieldId,'filtersUser',this.filtersUser);
 							}
 						},

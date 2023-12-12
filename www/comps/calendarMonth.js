@@ -38,8 +38,9 @@ let MyCalendarMonth = {
 				
 				<!-- full day events -->
 				<div class="event"
-					@click.left="clickRecord($event,e.row,e.placeholder,false)"
-					@click.middle="clickRecord($event,e.row,e.placeholder,true)"
+					@click.left="clickRecord($event,e.row,false)"
+					@click.middle="clickRecord($event,e.row,true)"
+					@mouseup.left="stopBubbleIfRecord($event,!e.placeholder)"
 					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => v.fullDay || v.placeholder)"
 					:class="{ first:e.entryFirst, last:e.entryLast, placeholder:e.placeholder, clickable:hasUpdate }"
 					:style="e.style"
@@ -63,8 +64,9 @@ let MyCalendarMonth = {
 				
 				<!-- partial day events -->
 				<div class="part"
-					@click.left="clickRecord($event,e.row,false,false)"
-					@click.middle="clickRecord($event,e.row,false,true)"
+					@click.left="clickRecord($event,e.row,false)"
+					@click.middle="clickRecord($event,e.row,true)"
+					@mouseup.left="stopBubbleIfRecord($event,true)"
 					v-for="e in eventsByDay[((week-1)*7)+day-1].events.filter(v => !v.fullDay && !v.placeholder)"
 					:class="{ clickable:hasUpdate }"
 				>
@@ -280,14 +282,7 @@ let MyCalendarMonth = {
 			this.unixInput0 = null;
 			this.unixInput1 = null;
 		},
-		clickRecord(event,row,placeholder,middleClick) {
-			console.log('click');
-			
-			if(placeholder) return;
-			
-			// block clickDay() event (placeholders must bubble)
-			event.stopPropagation();
-			
+		clickRecord(event,row,middleClick) {
 			if(this.hasUpdate)
 				this.$emit('open-form',[row],[],middleClick);
 		},
@@ -296,6 +291,9 @@ let MyCalendarMonth = {
 			
 			if(unix < this.unixInput0) this.unixInput0 = unix;
 			else                       this.unixInput1 = unix;
+		},
+		stopBubbleIfRecord(event,isRecord) {
+			if(isRecord) event.stopPropagation();
 		},
 		
 		// presentation

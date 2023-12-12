@@ -238,6 +238,7 @@ let MyBuilderNew = {
 		set() {
 			let action = 'set';
 			let request;
+			let dependencyCheck = false;
 			switch(this.entity) {
 				case 'api':
 					request = {
@@ -275,6 +276,7 @@ let MyBuilderNew = {
 							moduleId:this.moduleId,
 							newName:this.inputs.name
 						};
+						dependencyCheck = true;
 					} else {
 						request = {
 							id:this.getNilUuid(),
@@ -389,7 +391,12 @@ let MyBuilderNew = {
 				default: return; break;
 			}
 			
-			ws.send(this.entity,action,request,true).then(
+			let requests = [ws.prepare(this.entity,action,request)];
+			
+			if(dependencyCheck)
+				requests.push(ws.prepare('schema','check',{moduleId:this.moduleId}));
+			
+			ws.sendMultiple(requests,true).then(
 				() => {
 					if(this.entity === 'module')
 						this.$root.schemaReload();

@@ -1226,8 +1226,6 @@ let MySettings = {
 	},
 	mounted() {
 		this.settingsInput = JSON.parse(JSON.stringify(this.settings));
-		this.$store.commit('pageTitle',this.capApp.pageTitle);
-		
 		this.$nextTick(function() {
 			this.settingsLoaded = true;
 		});

@@ -5,7 +5,7 @@
 	display:flex;
 	flex-flow:column nowrap;
 	overflow:auto;
-	--list-header-height:48px;
+	--list-header-height:46px;
 }
 .list.isSingleField{
 	border-radius:0px;
@@ -147,7 +147,7 @@
 	display:flex;
 	flex-flow:column nowrap;
 	justify-content:center;
-	padding:6px 2px 6px 10px;
+	padding:6px 2px 6px 6px;
 	border-radius:2px;
 	transition:background-color 0.3s;
 }
@@ -224,9 +224,9 @@
 	margin:4px;
 }
 .list .layoutTable td .batch{
-	min-height:100%; /* relevant for color inputs */
-	padding:0px 10px;
-	margin:5px 0px;
+	min-height:100%;
+	padding:0px 8px;
+	margin:3px 0px;
 	display:flex;
 	flex-flow:row nowrap;
 	align-items:center;
@@ -236,8 +236,12 @@
 	width:inherit; /* inherit from table cell */
 	overflow:hidden;
 }
+@-moz-document url-prefix() {
+    .list .layoutTable td .batch{
+		margin:0.3px 0px;
+    }
+}
 .list .layoutTable td .batch.vertical{
-	margin:5px 0px;
 	flex-flow:column nowrap;
 	justify-content:center;
 	align-items:flex-start;
@@ -480,12 +484,4 @@
 .user-bordersSquared .list .layoutCards .card .header,
 .user-bordersSquared .list .layoutCards .card .actions{
 	border-radius:0px !important;
-}
-
-/* mobile overwrites */
-.is-mobile .list .layoutTable th.title{
-	padding:8px 6px;
-}
-.is-mobile .list .layoutTable td{
-	padding:8px 6px;
 }

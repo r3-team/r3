@@ -164,7 +164,7 @@ func jobBackup(tocFile *types.BackupTocFile, jobName string) error {
 
 	// database backup
 	dbPath := filepath.Join(jobDir, subPathDb)
-	if err := os.MkdirAll(dbPath, 0700); err != nil {
+	if err := os.MkdirAll(dbPath, 0755); err != nil {
 		return err
 	}
 	if err := dumpDb(dbPath); err != nil {
