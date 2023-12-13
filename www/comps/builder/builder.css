@@ -951,7 +951,7 @@
 	display:flex;
 	flex-flow:row nowrap;
 }
-.builder-function .contentBox{
+.builder-function .contentBox.left{
 	flex:1 1 900px;
 	display:flex;
 	flex-direction:column;

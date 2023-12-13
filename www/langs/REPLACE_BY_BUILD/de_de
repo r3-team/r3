@@ -145,6 +145,7 @@
 		"properties":"Eigenschaften",
 		"readonly":"Schreibschutz",
 		"record":"Datensatz",
+		"relation":"Relation",
 		"relationship":"Beziehung",
 		"relationships":"Beziehungen",
 		"results":"{CNT} Ergebnisse",
@@ -1153,6 +1154,7 @@
 			"titleJsOne":"Frontend-Funktionen \"{NAME}\"",
 			"titlePg":"Backend-Funktionen",
 			"titlePgOne":"Backend-Funktionen \"{NAME}\"",
+			"triggers":"Trigger",
 			"value":"VALUE"
 		},
 		"icon":{
@@ -1320,7 +1322,9 @@
 			"onDelete":"DELETE",
 			"onInsert":"INSERT",
 			"onUpdate":"UPDATE",
-			"perRow":"EACH ROW"
+			"perRow":"EACH ROW",
+			"title":"Trigger",
+			"titleNew":"Neuer Trigger"
 		},
 		"preset":{
 			"dialog":{

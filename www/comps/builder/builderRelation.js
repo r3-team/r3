@@ -1,7 +1,7 @@
 import MyBuilderAttribute    from './builderAttribute.js';
 import MyBuilderPreset       from './builderPreset.js';
-import MyBuilderPgTriggers   from './builderPgTriggers.js';
 import MyBuilderPgIndex      from './builderPgIndex.js';
+import MyBuilderPgTriggers   from './builderPgTriggers.js';
 import {getDependentModules} from '../shared/builder.js';
 import {srcBase64}           from '../shared/image.js';
 import {
@@ -130,8 +130,8 @@ let MyBuilderRelation = {
 		echarts:VueECharts,
 		MyBuilderAttribute,
 		MyBuilderPreset,
-		MyBuilderPgTriggers,
 		MyBuilderPgIndex,
+		MyBuilderPgTriggers,
 		MyBuilderRelationsItemPolicy
 	},
 	template:`<div class="contentBox builder-relation">
@@ -360,7 +360,7 @@ let MyBuilderRelation = {
 						</div>
 					</div>
 					
-					<!-- new index dialog -->
+					<!-- index dialog -->
 					<my-builder-pg-index
 						v-if="indexIdEdit !== false"
 						@close="indexIdEdit = false"
@@ -376,14 +376,14 @@ let MyBuilderRelation = {
 			<div class="contentPart full">
 				<div class="contentPartHeader clickable" @click="showTriggers = !showTriggers">
 					<img class="icon" :src="displayArrow(showTriggers)" />
-					<h1>{{ capApp.triggers.replace('{CNT}',relation.triggers.length) }}</h1>
+					<h1>{{ capApp.triggers.replace('{CNT}',triggerCnt) }}</h1>
 				</div>
+				
 				<my-builder-pg-triggers
 					v-if="showTriggers"
-					@createNew="(...args) => $emit('createNew',...args)"
+					:contextEntity="'relation'"
+					:contextId="relation.id"
 					:readonly="readonly"
-					:relationIdContext="relation.id"
-					:triggers="relation.triggers"
 				/>
 			</div>
 			
@@ -574,13 +574,13 @@ let MyBuilderRelation = {
 		return {
 			// inputs
 			attributeIdEdit:false,
+			comment:null,
 			encryption:false,
 			indexIdEdit:false,
 			name:'',
-			comment:null,
+			policies:[],
 			retentionCount:null,
 			retentionDays:null,
-			policies:[],
 			
 			// states
 			attributeFilter:'',
@@ -690,6 +690,14 @@ let MyBuilderRelation = {
 			|| s.retentionCount           !== s.relation.retentionCount
 			|| s.retentionDays            !== s.relation.retentionDays
 			|| JSON.stringify(s.policies) !== JSON.stringify(s.relation.policies),
+		triggerCnt:(s) => {
+			let cnt = 0;
+			for(let k in s.pgTriggerIdMap) {
+				if(s.pgTriggerIdMap[k].relationId === s.id)
+					cnt++;
+			}
+			return cnt;
+		},
 		
 		// simple
 		attributesNotFiles:(s) => s.relation === false ? [] : s.relation.attributes.filter(v => !s.isAttributeFiles(v.content)),
@@ -697,8 +705,9 @@ let MyBuilderRelation = {
 		relation:          (s) => typeof s.relationIdMap[s.id] === 'undefined' ? false : s.relationIdMap[s.id],
 		
 		// stores
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
+		pgTriggerIdMap:(s) => s.$store.getters['schema/pgTriggerIdMap'],
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
 		capApp:        (s) => s.$store.getters.captions.builder.relation,

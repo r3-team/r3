@@ -21,6 +21,7 @@ const MyStoreSchema = {
 		moduleIdMap:{},
 		moduleNameMap:{},
 		pgFunctionIdMap:{},
+		pgTriggerIdMap:{},
 		relationIdMap:{},
 		roleIdMap:{},
 		widgetIdMap:{},
@@ -68,6 +69,7 @@ const MyStoreSchema = {
 			state.indexIdMap      = {};
 			state.jsFunctionIdMap = {};
 			state.pgFunctionIdMap = {};
+			state.pgTriggerIdMap  = {};
 			state.relationIdMap   = {};
 			state.roleIdMap       = {};
 			state.widgetIdMap     = {};
@@ -104,6 +106,11 @@ const MyStoreSchema = {
 					for(const ind of rel.indexes) {
 						state.indexIdMap[ind.id] = ind;
 					}
+				}
+				
+				// process PG triggers
+				for(const trg of mod.pgTriggers) {
+					state.pgTriggerIdMap[trg.id] = trg;
 				}
 				
 				// process icons
@@ -173,6 +180,7 @@ const MyStoreSchema = {
 		moduleIdMapOptions: (state) => state.moduleIdMapOptions,
 		moduleNameMap:      (state) => state.moduleNameMap,
 		pgFunctionIdMap:    (state) => state.pgFunctionIdMap,
+		pgTriggerIdMap:     (state) => state.pgTriggerIdMap,
 		presetIdMapRecordId:(state) => state.presetIdMapRecordId,
 		relationIdMap:      (state) => state.relationIdMap,
 		roleIdMap:          (state) => state.roleIdMap,

@@ -39,7 +39,7 @@ let MyBuilderPgFunctions = {
 						</span>
 					</div>
 					<div class="row">
-						<my-button image="databaseCog.png"
+						<my-button image="databasePlay.png"
 							v-if="f.isTrigger"
 							:active="false"
 							:captionTitle="capApp.isTrigger"

@@ -845,8 +845,6 @@ table td.maximum{
 	border-bottom-left-radius:10px;
 }
 .generic-table-vertical>tr>td:last-child{
-	font-size:110%;
-	line-height:150%;
 	border-top-right-radius:10px;
 	border-bottom-right-radius:10px;
 }
@@ -877,6 +875,7 @@ table td.maximum{
 	align-items:center;
 	justify-content:space-between;
 	font-size:100%;
+	line-height:100%;
 	color:inherit;
 	border-radius:6px;
 	border-bottom:3px solid var(--color-border);

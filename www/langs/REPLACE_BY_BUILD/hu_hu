@@ -145,6 +145,7 @@
 		"properties":"Tulajdonságok",
 		"readonly":"Csak olvasható",
 		"record":"Rekord",
+		"relation":"Reláció",
 		"relationship":"Kapcsolat",
 		"relationships":"Kapcsolatok",
 		"results":"{CNT} eredmény",
@@ -1153,6 +1154,7 @@
 			"titleJsOne":"Frontend függvények \"{NÉV}\"",
 			"titlePg":"Backend függvények",
 			"titlePgOne":"Backend függvények \"{NÉV}\"",
+			"triggers":"Triggers",
 			"value":"ÉRTÉK"
 		},
 		"icon":{
@@ -1320,7 +1322,9 @@
 			"onDelete":"TÖRLÉS",
 			"onInsert":"BESZÚRÁS",
 			"onUpdate":"FRISSÍTÉS",
-			"perRow":"MINDEN SOR"
+			"perRow":"MINDEN SOR",
+			"title":"Trigger",
+			"titleNew":"New trigger"
 		},
 		"preset":{
 			"dialog":{

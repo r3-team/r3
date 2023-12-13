@@ -127,7 +127,7 @@ let MyBuilderPgFunction = {
 		MyTabs
 	},
 	template:`<div class="builder-function">
-		<div class="contentBox" v-if="pgFunction">
+		<div class="contentBox left" v-if="pgFunction">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/codeDatabase.png" />
@@ -443,11 +443,12 @@ let MyBuilderPgFunction = {
 							<td><input v-model="codeReturns" :disabled="isTrigger || readonly" placeholder="-" /></td>
 						</tr>
 						<tr v-if="isTrigger">
-							<td colspan="2">
+							<td>{{ capApp.triggers }}</td>
+							<td>
 								<my-builder-pg-triggers
-									:pgFunctionIdContext="id"
+									:contextEntity="'pgFunction'"
+									:contextId="id"
 									:readonly="readonly"
-									:triggers="triggers"
 								/>
 							</td>
 						</tr>
@@ -559,7 +560,7 @@ let MyBuilderPgFunction = {
 		modulesFnc: (s) => s.getDependentModules(s.module,s.modules).filter(v => v.pgFunctions.length !== 0),
 		tabs:(s) => {
 			let out = {
-				icons:['images/database.png','images/edit.png'],
+				icons:['images/code.png','images/edit.png'],
 				keys:['content','properties'],
 				labels:[s.capApp.placeholders,s.capGen.properties]
 			};

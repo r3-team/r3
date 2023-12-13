@@ -145,6 +145,7 @@
 		"properties":"Propriétés",
 		"readonly":"Lecture seule",
 		"record":"Enregistrement",
+		"relation":"Relation",
 		"relationship":"Relation",
 		"relationships":"Relations",
 		"results":"{CNT} résultats",
@@ -1153,6 +1154,7 @@
 			"titleJsOne":"Fonction côté client '{NAME}'",
 			"titlePg":"Fonctions côté serveur",
 			"titlePgOne":"Fonction côté serveur '{NAME}'",
+			"triggers":"Triggers",
 			"value":"VALEUR"
 		},
 		"icon":{
@@ -1313,7 +1315,16 @@
 		"pgTrigger":{
 			"dialog":{
 				"delete":"Êtes-vous sûr de vouloir supprimer ce déclencheur ?"
-			}
+			},
+			"execute":"Exécuter",
+			"fires":"Déclenche",
+			"isDeferred":"DIFFÉRÉ",
+			"onDelete":"DELETE",
+			"onInsert":"INSERT",
+			"onUpdate":"UPDATE",
+			"perRow":"CHAQUE LIGNE",
+			"title":"Trigger",
+			"titleNew":"New trigger"
 		},
 		"preset":{
 			"dialog":{
@@ -1355,9 +1366,7 @@
 			"codeCondition":"Condition",
 			"encryption":"Chiffrement de bout en bout",
 			"encryptionHint":"La relation prend en charge les valeurs d'attribut chiffrées de bout en bout.",
-			"execute":"Exécuter",
 			"external":"Relations référentes ({CNT})",
-			"fires":"Déclenche",
 			"graph":"Graphique de relation",
 			"graphBase":"Relation de base",
 			"indexes":"Index ({CNT})",
@@ -1366,12 +1375,7 @@
 			"indexSystem":"Index système (géré par le système)",
 			"indexText":"Index de texte",
 			"indexUnique":"Unique",
-			"isDeferred":"DIFFÉRÉ",
 			"nameHint":"Nom de référence pour cette relation. Doit être unique au sein de cette application.",
-			"onDelete":"DELETE",
-			"onInsert":"INSERT",
-			"onUpdate":"UPDATE",
-			"perRow":"CHAQUE LIGNE",
 			"policies":"Politiques ({CNT})",
 			"policyActions":"Action",
 			"policyActionDelete":"Supprimer",
