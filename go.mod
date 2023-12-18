@@ -14,8 +14,8 @@ require (
 	github.com/h2non/filetype v1.1.3
 	github.com/kardianos/service v1.2.2
 	github.com/magefile/mage v1.15.0 // indirect
-	golang.org/x/crypto v0.14.0 // indirect
-	golang.org/x/sys v0.14.0 // indirect
+	golang.org/x/crypto v0.17.0 // indirect
+	golang.org/x/sys v0.15.0 // indirect
 	golang.org/x/text v0.14.0 // indirect
 )
 
