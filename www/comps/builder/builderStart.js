@@ -166,14 +166,14 @@ let MyBuilderStart = {
 		hasRelations: (s) => s.module.relations.length !== 0,
 		hasRoles:     (s) => s.module.roles.length !== 1,
 		hasStartForm: (s) => s.module.formId !== null,
-		isHiddenAdmin:(s) => s.module && s.moduleIdMapOptions[s.id].hidden,
+		isHiddenAdmin:(s) => s.module && s.moduleIdMapMeta[s.id].hidden,
 		isVisible:    (s) => !s.isHiddenAdmin && s.hasStartForm && s.hasMenu && s.hasMenuInRole,
 		
 		// stores
-		module:            (s) => s.moduleIdMap[s.id],
-		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
-		moduleIdMapOptions:(s) => s.$store.getters['schema/moduleIdMapOptions'],
-		capApp:            (s) => s.$store.getters.captions.builder.start
+		module:         (s) => s.moduleIdMap[s.id],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:         (s) => s.$store.getters.captions.builder.start,
+		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta
 	},
 	methods:{
 		open(url) {

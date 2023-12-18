@@ -371,7 +371,6 @@ let MyAdminConfig = {
 		// stores
 		appVersion:  (s) => s.$store.getters['local/appVersion'],
 		token:       (s) => s.$store.getters['local/token'],
-		modules:     (s) => s.$store.getters['schema/modules'],
 		config:      (s) => s.$store.getters.config,
 		license:     (s) => s.$store.getters.license,
 		licenseDays: (s) => s.$store.getters.licenseDays,

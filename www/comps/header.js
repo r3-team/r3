@@ -311,7 +311,6 @@ let MyHeader = {
 		showNavPrev:     (s) => s.layoutElementsProcessed.includes('navigationPrev'),
 		
 		// stores
-		modules:          (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:      (s) => s.$store.getters['schema/moduleIdMap'],
 		moduleNameMap:    (s) => s.$store.getters['schema/moduleNameMap'],
 		formIdMap:        (s) => s.$store.getters['schema/formIdMap'],

@@ -10,6 +10,7 @@ import (
 	"r3/cache"
 	"r3/cluster"
 	"r3/config"
+	"r3/config/module_meta"
 	"r3/db"
 	"r3/log"
 	"r3/schema"
@@ -74,8 +75,8 @@ func ImportFromFiles(filePathsImport []string) error {
 	}
 
 	// parse modules from file paths, only modules that need to be imported are returned
-	moduleIdMapMeta := make(map[uuid.UUID]importMeta)
-	modules, err := parseModulesFromPaths(filePathsModules, moduleIdMapMeta)
+	moduleIdMapImportMeta := make(map[uuid.UUID]importMeta)
+	modules, err := parseModulesFromPaths(filePathsModules, moduleIdMapImportMeta)
 	if err != nil {
 		return err
 	}
@@ -125,7 +126,7 @@ func ImportFromFiles(filePathsImport []string) error {
 			3. delete all other entities after import is done
 				if other entities rely on deleted states (presets), they are applied on next loop
 			*/
-			if firstRun && !moduleIdMapMeta[m.Id].isNew {
+			if firstRun && !moduleIdMapImportMeta[m.Id].isNew {
 				if err := transfer_delete.NotExistingPgTriggers_tx(tx, m.Id,
 					compatible.FixPgTriggerLocation(m.PgTriggers, m.Relations)); err != nil {
 
@@ -137,7 +138,7 @@ func ImportFromFiles(filePathsImport []string) error {
 				return err
 			}
 
-			if _, exists := idMapSkipped[m.Id]; !exists && !moduleIdMapMeta[m.Id].isNew {
+			if _, exists := idMapSkipped[m.Id]; !exists && !moduleIdMapImportMeta[m.Id].isNew {
 				if err := transfer_delete.NotExisting_tx(tx, m); err != nil {
 					return err
 				}
@@ -150,12 +151,12 @@ func ImportFromFiles(filePathsImport []string) error {
 	for _, m := range modules {
 
 		// set new module hash value in instance
-		if err := setModuleHash_tx(tx, m.Id, moduleIdMapMeta[m.Id].hash); err != nil {
+		if err := module_meta.SetHash_tx(tx, m.Id, moduleIdMapImportMeta[m.Id].hash); err != nil {
 			return err
 		}
 
 		// move imported module file to transfer path for future exports
-		if err := tools.FileMove(moduleIdMapMeta[m.Id].filePath, filepath.Join(
+		if err := tools.FileMove(moduleIdMapImportMeta[m.Id].filePath, filepath.Join(
 			config.File.Paths.Transfer, getModuleFilename(m.Id)), true); err != nil {
 
 			return err
@@ -169,7 +170,12 @@ func ImportFromFiles(filePathsImport []string) error {
 	}
 	log.Info("transfer", "changes were commited successfully")
 
-	return cluster.SchemaChangedAll(true, true)
+	// update schema cache
+	moduleIdsUpdated := make([]uuid.UUID, 0)
+	for id, _ := range moduleIdMapImportMeta {
+		moduleIdsUpdated = append(moduleIdsUpdated, id)
+	}
+	return cluster.SchemaChanged(true, moduleIdsUpdated)
 }
 
 func importModule_tx(tx pgx.Tx, mod types.Module, firstRun bool, lastRun bool,
@@ -555,7 +561,7 @@ func importCheckResultAndApply(tx pgx.Tx, resultErr error, entityId uuid.UUID,
 	return nil
 }
 
-func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]importMeta) ([]types.Module, error) {
+func parseModulesFromPaths(filePaths []string, moduleIdMapImportMeta map[uuid.UUID]importMeta) ([]types.Module, error) {
 	cache.Schema_mx.RLock()
 	defer cache.Schema_mx.RUnlock()
 
@@ -608,7 +614,7 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]imp
 			}
 
 			// check whether installed module hash changed at all
-			hashedStrEx, err := getModuleHash(moduleId)
+			hashedStrEx, err := module_meta.GetHash(moduleId)
 			if err != nil {
 				return modules, err
 			}
@@ -622,10 +628,10 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]imp
 		}
 
 		// check whether module was added previously (multiple import files used with similar modules)
-		if _, exists := moduleIdMapMeta[moduleId]; exists {
-			if moduleIdMapMeta[moduleId].module.ReleaseBuild >= fileData.Content.Module.ReleaseBuild {
+		if _, exists := moduleIdMapImportMeta[moduleId]; exists {
+			if moduleIdMapImportMeta[moduleId].module.ReleaseBuild >= fileData.Content.Module.ReleaseBuild {
 				log.Info("transfer", fmt.Sprintf("import of module '%s' not required, same or newer version (%d -> %d) to be added",
-					fileData.Content.Module.Name, moduleIdMapMeta[moduleId].module.ReleaseBuild,
+					fileData.Content.Module.Name, moduleIdMapImportMeta[moduleId].module.ReleaseBuild,
 					fileData.Content.Module.ReleaseBuild))
 
 				continue
@@ -635,7 +641,7 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]imp
 		log.Info("transfer", fmt.Sprintf("import will install module '%s' v%d",
 			fileData.Content.Module.Name, fileData.Content.Module.ReleaseBuild))
 
-		moduleIdMapMeta[moduleId] = importMeta{
+		moduleIdMapImportMeta[moduleId] = importMeta{
 			filePath: filePath,
 			hash:     hashedStr,
 			isNew:    !isModuleUpgrade,
@@ -649,12 +655,12 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]imp
 	moduleIdsSort := make([]uuid.UUID, 0)
 	moduleNames := make([]string, 0)
 
-	for id, _ := range moduleIdMapMeta {
+	for id, _ := range moduleIdMapImportMeta {
 		moduleIdsSort = append(moduleIdsSort, id)
 	}
 	sort.SliceStable(moduleIdsSort, func(i, j int) bool {
-		return len(moduleIdMapMeta[moduleIdsSort[i]].module.DependsOn) <
-			len(moduleIdMapMeta[moduleIdsSort[j]].module.DependsOn)
+		return len(moduleIdMapImportMeta[moduleIdsSort[i]].module.DependsOn) <
+			len(moduleIdMapImportMeta[moduleIdsSort[j]].module.DependsOn)
 	})
 
 	// finalize import order
@@ -668,14 +674,14 @@ func parseModulesFromPaths(filePaths []string, moduleIdMapMeta map[uuid.UUID]imp
 		moduleIdsAdded = append(moduleIdsAdded, id)
 
 		// dependencies are imported first
-		for _, dependId := range moduleIdMapMeta[id].module.DependsOn {
-			if _, exists := moduleIdMapMeta[dependId]; exists {
+		for _, dependId := range moduleIdMapImportMeta[id].module.DependsOn {
+			if _, exists := moduleIdMapImportMeta[dependId]; exists {
 				addModule(dependId)
 			}
 		}
 
-		modules = append(modules, moduleIdMapMeta[id].module)
-		moduleNames = append(moduleNames, moduleIdMapMeta[id].module.Name)
+		modules = append(modules, moduleIdMapImportMeta[id].module)
+		moduleNames = append(moduleNames, moduleIdMapImportMeta[id].module.Name)
 	}
 	for _, id := range moduleIdsSort {
 		addModule(id)

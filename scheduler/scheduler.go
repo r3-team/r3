@@ -63,10 +63,10 @@ type taskSchedule struct {
 
 var (
 	change_mx                        = &sync.Mutex{}
-	loadTasks                        = false // if true, tasks are reloaded from the database on next run
-	loadCounter       int            = 0     // number of times tasks were loaded - used to check whether tasks were reloaded during execution
-	nextExecutionUnix int64          = 0     // unix time of next (earliest) task to run
-	tasks             []task                 // all tasks
+	loadTasks                        = true // if true, tasks are reloaded from the database on next run
+	loadCounter       int            = 0    // number of times tasks were loaded - used to check whether tasks were reloaded during execution
+	nextExecutionUnix int64          = 0    // unix time of next (earliest) task to run
+	tasks             []task                // all tasks
 	OsExit            chan os.Signal = make(chan os.Signal)
 
 	// main loop
@@ -76,9 +76,19 @@ var (
 )
 
 func Start() {
-	change_mx.Lock()
-	loadTasks = true
-	change_mx.Unlock()
+	time.Sleep(loopIntervalStartWait)
+	log.Info("scheduler", "started")
+
+	for {
+		time.Sleep(loopInterval)
+		if loopStopping {
+			log.Info("scheduler", "stopped")
+			return
+		}
+		if err := runTasksBySchedule(); err != nil {
+			log.Error("scheduler", "failed to start tasks", err)
+		}
+	}
 }
 func Stop() {
 	change_mx.Lock()
@@ -96,23 +106,6 @@ func init() {
 				change_mx.Lock()
 				loadTasks = true
 				change_mx.Unlock()
-			}
-		}
-	}()
-
-	// main loop
-	go func() {
-		time.Sleep(loopIntervalStartWait)
-		log.Info("scheduler", "started")
-
-		for {
-			time.Sleep(loopInterval)
-			if loopStopping {
-				log.Info("scheduler", "stopped")
-				return
-			}
-			if err := runTasksBySchedule(); err != nil {
-				log.Error("scheduler", "failed to start tasks", err)
 			}
 		}
 	}()

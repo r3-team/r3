@@ -367,8 +367,14 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
+	// initialize module meta data cache (before schema init)
+	if err := cache.LoadModuleIdMapMeta(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to initialize module meta cache, %v", err))
+		return
+	}
+
 	// initialize module schema cache
-	if err := cluster.SchemaChangedAll(false, false); err != nil {
+	if err := cache.LoadSchema(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize schema cache, %v", err))
 		return
 	}
@@ -413,6 +419,9 @@ func (prg *program) execute(svc service.Service) {
 	data_image.PrepareProcessing(cli.imageMagick)
 
 	log.Info("server", fmt.Sprintf("is ready to start application (%s)", appVersion))
+
+	// start scheduler (must start after module cache)
+	go scheduler.Start()
 
 	// prepare web server
 	go websocket.StartBackgroundTasks()

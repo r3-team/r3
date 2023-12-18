@@ -397,9 +397,9 @@ let MyBuilderNew = {
 				requests.push(ws.prepare('schema','check',{moduleId:this.moduleId}));
 			
 			ws.sendMultiple(requests,true).then(
-				() => {
+				res => {
 					if(this.entity === 'module')
-						this.$root.schemaReload();
+						this.$root.schemaReload(res[0].payload);
 					else
 						this.$root.schemaReload(this.moduleId);
 					

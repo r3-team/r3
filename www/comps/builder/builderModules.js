@@ -208,8 +208,8 @@ let MyBuilderModulesExport = {
 				<tbody>
 					<tr v-for="(changed,moduleId) in moduleIdMapChanged">
 						<td :class="{ 'export-master':moduleId === id }">{{ moduleIdMap[moduleId].name }}</td>
-						<td>{{ moduleIdMapOptions[moduleId].owner ? capGen.option.yes : capGen.option.no }}</td>
-						<template v-if="moduleIdMapOptions[moduleId].owner && changed">
+						<td>{{ moduleIdMapMeta[moduleId].owner ? capGen.option.yes : capGen.option.no }}</td>
+						<template v-if="moduleIdMapMeta[moduleId].owner && changed">
 							<td class="export-bad">
 								{{ capApp.exportStateNok }}
 							</td>
@@ -281,19 +281,19 @@ let MyBuilderModulesExport = {
 				let m = s.moduleIdMapChanged[k];
 				
 				// block if a dependency has changes
-				if(m.id !== s.id && s.moduleIdMapOptions[k].owner && s.moduleIdMapChanged[k])
+				if(m.id !== s.id && s.moduleIdMapMeta[k].owner && s.moduleIdMapChanged[k])
 					return false;
 			}
 			return true;
 		},
 		
 		// stores
-		token:      (s) => s.$store.getters['local/token'],
-		modules:    (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
-		moduleIdMapOptions:(s) => s.$store.getters['schema/moduleIdMapOptions'],
-		capApp:     (s) => s.$store.getters.captions.builder.module,
-		capGen:     (s) => s.$store.getters.captions.generic
+		token:          (s) => s.$store.getters['local/token'],
+		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:         (s) => s.$store.getters.captions.builder.module,
+		capGen:         (s) => s.$store.getters.captions.generic,
+		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta
 	},
 	data() {
 		return {

@@ -11,7 +11,6 @@ import (
 )
 
 func ModuleCheckChange_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
 	var (
 		err error
 		req struct {
@@ -34,7 +33,6 @@ func ModuleCheckChange_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, erro
 }
 
 func ModuleDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
-
 	var req struct {
 		Id uuid.UUID `json:"id"`
 	}
@@ -44,25 +42,10 @@ func ModuleDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	return nil, module.Del_tx(tx, req.Id)
 }
 
-func ModuleGet() (interface{}, error) {
-	var (
-		err error
-		res struct {
-			Modules []types.Module `json:"modules"`
-		}
-	)
-
-	res.Modules, err = module.Get([]uuid.UUID{})
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func ModuleSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req types.Module
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, module.Set_tx(tx, req)
+	return module.SetReturnId_tx(tx, req)
 }

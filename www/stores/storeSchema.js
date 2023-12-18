@@ -4,12 +4,9 @@ export {MyStoreSchema as default};
 const MyStoreSchema = {
 	namespaced:true,
 	state:{
-		// cache content
-		modules:[],             // all modules with everything beneath them
-		moduleIdMapOptions:{},  // instance options for all modules, key: module ID
 		presetIdMapRecordId:{}, // record IDs by preset, key: preset ID
 		
-		// references to specific entities
+		// references to specific module entities
 		apiIdMap:{},
 		articleIdMap:{},
 		attributeIdMap:{},
@@ -31,14 +28,19 @@ const MyStoreSchema = {
 		languageCodes:[]
 	},
 	mutations:{
-		set(state,payload) {
-			let getFormIdsFromMenus = function(menus) {
+		delModule(state,payload) {
+			// just delete module reference
+			// lingering module entity references (forms, roles, etc.) do not hurt and are gone on next app start
+			delete(state.moduleIdMap[payload]);
+		},
+		setModules(state,payload) {
+			const getFormIdsFromMenus = (menus) => {
 				for(const menu of menus) {
 					state.formIdMapMenu[menu.formId] = menu;
 					getFormIdsFromMenus(menu.menus);
 				}
 			};
-			let processFields = function(fields) {
+			const processFields = (fields) => {
 				for(let i = 0, j = fields.length; i < j; i++) {
 					if(typeof fields[i].query !== 'undefined')
 						fields[i].query = getQueryTemplateIfNull(fields[i].query);
@@ -55,34 +57,7 @@ const MyStoreSchema = {
 				return fields;
 			};
 			
-			// reset state
-			state.modules         = payload.modules;
-			state.apiIdMap        = {};
-			state.articleIdMap    = {};
-			state.attributeIdMap  = {};
-			state.collectionIdMap = {};
-			state.moduleIdMap     = {};
-			state.moduleNameMap   = {};
-			state.formIdMap       = {};
-			state.formIdMapMenu   = {};
-			state.iconIdMap       = {};
-			state.indexIdMap      = {};
-			state.jsFunctionIdMap = {};
-			state.pgFunctionIdMap = {};
-			state.pgTriggerIdMap  = {};
-			state.relationIdMap   = {};
-			state.roleIdMap       = {};
-			state.widgetIdMap     = {};
-			
-			// reset module options & preset records
-			state.moduleIdMapOptions = {};
-			for(let i = 0, j = payload.moduleOptions.length; i < j; i++) {
-				state.moduleIdMapOptions[payload.moduleOptions[i].id] = payload.moduleOptions[i];
-			}
-			state.presetIdMapRecordId = payload.presetRecordIds;
-			
-			// process modules
-			for(let mod of state.modules) {
+			for(let mod of payload) {
 				mod.formNameMap = {};
 				
 				state.moduleIdMap[mod.id]     = mod;
@@ -163,7 +138,8 @@ const MyStoreSchema = {
 				}
 			}
 		},
-		languageCodes(state,payload) { state.languageCodes = payload; }
+		languageCodes:      (state,payload) => state.languageCodes       = payload,
+		presetIdMapRecordId:(state,payload) => state.presetIdMapRecordId = payload
 	},
 	getters:{
 		apiIdMap:           (state) => state.apiIdMap,
@@ -177,7 +153,6 @@ const MyStoreSchema = {
 		jsFunctionIdMap:    (state) => state.jsFunctionIdMap,
 		modules:            (state) => state.modules,
 		moduleIdMap:        (state) => state.moduleIdMap,
-		moduleIdMapOptions: (state) => state.moduleIdMapOptions,
 		moduleNameMap:      (state) => state.moduleNameMap,
 		pgFunctionIdMap:    (state) => state.pgFunctionIdMap,
 		pgTriggerIdMap:     (state) => state.pgTriggerIdMap,
@@ -187,13 +162,17 @@ const MyStoreSchema = {
 		widgetIdMap:        (state) => state.widgetIdMap,
 		
 		languageCodes:(state) => {
-			for(const mod of state.modules) {
-				for(const lang of mod.languages) {
+			for(const k in state.moduleIdMap) {
+				for(const lang of state.moduleIdMap[k].languages) {
 					if(state.languageCodes.indexOf(lang) === -1)
 						state.languageCodes.push(lang);
 				}
 			}
 			return state.languageCodes;
+		},
+		modules:(state) => {
+			const getCombinedName = (m) => m.parentId === null ? m.name : `${state.moduleIdMap[m.parentId].name}_${m.name}`;
+			return Object.values(state.moduleIdMap).sort((a,b) => getCombinedName(a) < getCombinedName(b) ? -1 : 1);
 		}
 	}
 };

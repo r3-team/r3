@@ -36,5 +36,5 @@ func SchemaReload(reqJson json.RawMessage) (interface{}, error) {
 	if req.ModuleId.Valid {
 		modIds = append(modIds, req.ModuleId.Bytes)
 	}
-	return nil, cluster.SchemaChanged(true, true, modIds)
+	return nil, cluster.SchemaChanged(true, modIds)
 }

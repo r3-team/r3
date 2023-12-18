@@ -432,15 +432,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return ModuleCheckChange_tx(tx, reqJson)
 		case "del":
 			return ModuleDel_tx(tx, reqJson)
-		case "get":
-			return ModuleGet()
 		case "set":
 			return ModuleSet_tx(tx, reqJson)
 		}
-	case "moduleOption":
+	case "moduleMeta":
 		switch action {
-		case "set":
-			return ModuleOptionSet_tx(tx, reqJson)
+		case "setOptions":
+			return ModuleMetaSetOptions_tx(tx, reqJson)
 		}
 	case "package":
 		switch action {

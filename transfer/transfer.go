@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 	"r3/cache"
 	"r3/config"
+	"r3/config/module_meta"
 	"r3/db"
 	"r3/tools"
 	"r3/types"
@@ -67,7 +68,7 @@ func AddVersion_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 		return err
 	}
 
-	if err := setModuleHash_tx(tx, moduleId, hashedStr); err != nil {
+	if err := module_meta.SetHash_tx(tx, moduleId, hashedStr); err != nil {
 		return err
 	}
 
@@ -291,7 +292,7 @@ func hasModuleChanged(file types.TransferFile) (bool, error) {
 	if err != nil {
 		return false, err
 	}
-	hashedStrEx, err := getModuleHash(file.Content.Module.Id)
+	hashedStrEx, err := module_meta.GetHash(file.Content.Module.Id)
 	if err != nil {
 		return false, err
 	}
@@ -301,4 +302,14 @@ func hasModuleChanged(file types.TransferFile) (bool, error) {
 // get the export name of a module transfer file
 func getModuleFilename(moduleId uuid.UUID) string {
 	return fmt.Sprintf("%s.json", moduleId.String())
+}
+
+// returns the hash from the content part of a module transfer file
+func getModuleHashFromFile(file types.TransferFile) (string, error) {
+	jsonContent, err := json.Marshal(file.Content)
+	if err != nil {
+		return "", err
+	}
+	hashed := sha256.Sum256(jsonContent)
+	return base64.URLEncoding.EncodeToString(hashed[:]), nil
 }

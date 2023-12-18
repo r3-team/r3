@@ -13,7 +13,6 @@ let MyGoModule = {
 		moduleNameChild:{ type:String, required:false, default:'' }
 	},
 	computed:{
-		modules:      (s) => s.$store.getters['schema/modules'],
 		moduleNameMap:(s) => s.$store.getters['schema/moduleNameMap'],
 		access:       (s) => s.$store.getters.access,
 		moduleEntries:(s) => s.$store.getters.moduleEntries

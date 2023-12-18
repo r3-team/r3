@@ -297,7 +297,7 @@ let MyApp = {
 				let accessible  = formIdStart !== null;
 				
 				// ignore hidden modules
-				if(s.moduleIdMapOpts[module.id].hidden)
+				if(s.moduleIdMapMeta[module.id].hidden)
 					return false;
 				
 				// ignore inaccessible and childless modules
@@ -334,7 +334,7 @@ let MyApp = {
 					id:module.id,
 					name:module.name,
 					styleBg:module.color1 === null ? '' : `background-color:#${module.color1};`,
-					position:s.moduleIdMapOpts[module.id].position
+					position:s.moduleIdMapMeta[module.id].position
 				};
 			};
 			
@@ -355,7 +355,7 @@ let MyApp = {
 			}
 			
 			// apply module order
-			entries.sort((a, b) => (a.position > b.position) ? 1 : -1);
+			entries.sort((a,b) => a.position - b.position);
 			
 			return entries;
 		},
@@ -366,33 +366,33 @@ let MyApp = {
 		pwaManifestHref:(s) => `/manifests/${s.isAtModule ? s.moduleIdLast : ''}`,
 		
 		// stores
-		activated:        (s) => s.$store.getters['local/activated'],
-		appVersion:       (s) => s.$store.getters['local/appVersion'],
-		css:              (s) => s.$store.getters['local/css'],
-		loginBackground:  (s) => s.$store.getters['local/loginBackground'],
-		loginKeyAes:      (s) => s.$store.getters['local/loginKeyAes'],
-		schemaTimestamp:  (s) => s.$store.getters['local/schemaTimestamp'],
-		modules:          (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:      (s) => s.$store.getters['schema/moduleIdMap'],
-		moduleIdMapOpts:  (s) => s.$store.getters['schema/moduleIdMapOptions'],
-		formIdMap:        (s) => s.$store.getters['schema/formIdMap'],
-		access:           (s) => s.$store.getters.access,
-		blockInput:       (s) => s.$store.getters.blockInput,
-		capErr:           (s) => s.$store.getters.captions.error,
-		capGen:           (s) => s.$store.getters.captions.generic,
-		colorHeaderAccent:(s) => s.$store.getters.colorHeaderAccent,
-		colorHeaderMain:  (s) => s.$store.getters.colorHeaderMain,
-		isAdmin:          (s) => s.$store.getters.isAdmin,
-		isAtDialog:       (s) => s.$store.getters.isAtDialog,
-		isAtFeedback:     (s) => s.$store.getters.isAtFeedback,
-		isAtModule:       (s) => s.$store.getters.isAtModule,
-		isMobile:         (s) => s.$store.getters.isMobile,
-		loginEncryption:  (s) => s.$store.getters.loginEncryption,
-		loginPrivateKey:  (s) => s.$store.getters.loginPrivateKey,
-		moduleIdLast:     (s) => s.$store.getters.moduleIdLast,
-		patternStyle:     (s) => s.$store.getters.patternStyle,
-		popUpFormGlobal:  (s) => s.$store.getters.popUpFormGlobal,
-		settings:         (s) => s.$store.getters.settings
+		activated:          (s) => s.$store.getters['local/activated'],
+		appVersion:         (s) => s.$store.getters['local/appVersion'],
+		css:                (s) => s.$store.getters['local/css'],
+		loginBackground:    (s) => s.$store.getters['local/loginBackground'],
+		loginKeyAes:        (s) => s.$store.getters['local/loginKeyAes'],
+		modules:            (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
+		formIdMap:          (s) => s.$store.getters['schema/formIdMap'],
+		presetIdMapRecordId:(s) => s.$store.getters['schema/presetIdMapRecordId'],
+		access:             (s) => s.$store.getters.access,
+		blockInput:         (s) => s.$store.getters.blockInput,
+		capErr:             (s) => s.$store.getters.captions.error,
+		capGen:             (s) => s.$store.getters.captions.generic,
+		colorHeaderAccent:  (s) => s.$store.getters.colorHeaderAccent,
+		colorHeaderMain:    (s) => s.$store.getters.colorHeaderMain,
+		isAdmin:            (s) => s.$store.getters.isAdmin,
+		isAtDialog:         (s) => s.$store.getters.isAtDialog,
+		isAtFeedback:       (s) => s.$store.getters.isAtFeedback,
+		isAtModule:         (s) => s.$store.getters.isAtModule,
+		isMobile:           (s) => s.$store.getters.isMobile,
+		loginEncryption:    (s) => s.$store.getters.loginEncryption,
+		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
+		moduleIdLast:       (s) => s.$store.getters.moduleIdLast,
+		moduleIdMapMeta:    (s) => s.$store.getters.moduleIdMapMeta,
+		patternStyle:       (s) => s.$store.getters.patternStyle,
+		popUpFormGlobal:    (s) => s.$store.getters.popUpFormGlobal,
+		settings:           (s) => s.$store.getters.settings
 	},
 	created() {
 		window.addEventListener('resize',this.setMobileView);
@@ -424,9 +424,10 @@ let MyApp = {
 		stateChange() {
 			// create app states required for basic function
 			// order is required, earlier ones must be satisfied first
-			if(!this.wsConnected)  return this.wsConnect();  // backend connection
-			if(!this.publicLoaded) return this.initPublic(); // public data
-			if(!this.schemaLoaded) return this.initSchema(); // schema data
+			//  connect to server via websocket, load public data for app, load module schema
+			if(!this.wsConnected)  return this.wsConnect();
+			if(!this.publicLoaded) return this.initPublic();
+			if(!this.schemaLoaded) return this.initSchema(this.moduleIdMapMeta,this.presetIdMapRecordId);
 			if(!this.loginReady)   return this.loginReady = true;
 		},
 		setInitErr(err) {
@@ -463,10 +464,7 @@ let MyApp = {
 				break;
 				case 'schema_loaded':
 					this.$store.commit('busyRemove');
-					
-					// reload new schema
-					this.$store.commit('local/schemaTimestamp',res.payload);
-					this.initSchema();
+					this.initSchema(res.payload.moduleIdMapData,res.payload.presetIdMapRecordId);
 				break;
 				
 				// affects current login only
@@ -568,9 +566,10 @@ let MyApp = {
 					this.$store.commit('local/companyWelcome',res.payload.companyWelcome);
 					this.$store.commit('local/css',res.payload.css);
 					this.$store.commit('local/loginBackground',res.payload.loginBackground);
-					this.$store.commit('local/schemaTimestamp',res.payload.schemaTimestamp);
 					this.$store.commit('schema/languageCodes',res.payload.languageCodes);
+					this.$store.commit('schema/presetIdMapRecordId',res.payload.presetIdMapRecordId);
 					this.$store.commit('clusterNodeName',res.payload.clusterNodeName);
+					this.$store.commit('moduleIdMapMeta',res.payload.moduleIdMapMeta);
 					this.$store.commit('productionMode',res.payload.productionMode === 1);
 					this.$store.commit('pageTitleRefresh'); // update page title with new app name
 					this.$store.commit('pwaDomainMap',res.payload.pwaDomainMap);
@@ -588,21 +587,59 @@ let MyApp = {
 		},
 		
 		// schema retrieval
-		initSchema() {
-			this.$store.commit('busyAdd');
-			fetch(`./cache/download/schema_${this.schemaTimestamp}.json`).then(
-				res => {
+		initSchema(moduleIdMapMetaNew,presetIdMapRecordId) {
+			const fetchModuleJson = (url) => {
+				return fetch(url).then(res => {
 					if(res.status !== 200)
-						return this.setInitErr('Failed to load schema cache');
+						throw new Error(`Failed to load file, code ${res.status}`);
 					
-					res.json().then(v => {
-						this.$store.commit('schema/set',v);
-						this.schemaLoaded = true;
-						this.stateChange();
+					return res.json();
+				});
+			};
+			
+			this.$store.commit('busyAdd');
+			
+			// compare new and known module meta data
+			let modulesFetch = [];
+			
+			for(const k in moduleIdMapMetaNew) {
+				const metaNew = moduleIdMapMetaNew[k];
+				const metaOld = this.moduleIdMapMeta[k];
+				
+				// module not known or updated, fetch
+				if(typeof this.moduleIdMap[k] === 'undefined' || metaOld.dateChange !== metaNew.dateChange)
+					modulesFetch.push(`./cache/download/schema.json?module_id=${k}&date=${metaNew.dateChange}`);
+			}
+			
+			for(const k in this.moduleIdMapMeta) {
+				if(typeof moduleIdMapMetaNew[k] !== 'undefined')
+					continue;
+				
+				// module not included, remove
+				this.$store.commit('schema/delModule',k);
+				
+				window.caches.open(R3.appBuild).then(cache => {
+					cache.matchAll().then(res => {
+						res.forEach((element,index,array) => {
+							if(element.url.includes(`schema.json?module_id=${k}`))
+								cache.delete(element.url);
+						});
 					});
-				})
-				.catch(err => { this.setInitErr('Failed to load schema cache: '+err); } )
-				.finally(() => this.$store.commit('busyRemove'));
+				});
+			}
+			
+			const promises = modulesFetch.map(v => fetchModuleJson(v));
+			Promise.all(promises).then(
+				res => {
+					this.$store.commit('schema/presetIdMapRecordId',presetIdMapRecordId);
+					this.$store.commit('schema/setModules',res);
+					this.$store.commit('moduleIdMapMeta',moduleIdMapMetaNew);
+					this.schemaLoaded = true;
+					this.stateChange();
+				}
+			)
+			.catch(err => { this.setInitErr('Failed to load schema cache: '+err); })
+			.finally(() => this.$store.commit('busyRemove'));
 		},
 		
 		// final app meta retrieval, after authentication

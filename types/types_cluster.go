@@ -20,8 +20,7 @@ type ClusterEventMasterAssigned struct {
 	State bool `json:"state"`
 }
 type ClusterEventSchemaChanged struct {
-	ModuleIdsUpdateOnly []uuid.UUID `json:"moduleIdsUpdateOnly"`
-	NewVersion          bool        `json:"newVersion"`
+	ModuleIds []uuid.UUID `json:"moduleIds"`
 }
 type ClusterEventTaskTriggered struct {
 	PgFunctionId         uuid.UUID `json:"pgFunctionId"`
@@ -55,7 +54,7 @@ type ClusterNode struct {
 	StatMemory    int64     `json:"statMemory"`
 }
 
-// a server side event, affecting one or many websocket clients (by associated login ID)
+// a server-side event, affecting one or many websocket clients (by associated login ID)
 type ClusterWebsocketClientEvent struct {
 	LoginId int64 // affected login (0=all logins)
 
@@ -65,7 +64,7 @@ type ClusterWebsocketClientEvent struct {
 	KickNonAdmin      bool      // kick login if not admin (usually because maintenance mode was enabled)
 	Renew             bool      // renew login (permissions changed)
 	SchemaLoading     bool      // inform client: schema is loading
-	SchemaTimestamp   int64     // inform client: schema has a new timestamp (new version)
+	SchemaLoaded      bool      // inform client: schema has been loaded
 
 	// file open request for fat client
 	FileRequestedAttributeId uuid.UUID

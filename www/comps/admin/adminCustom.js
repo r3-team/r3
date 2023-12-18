@@ -316,7 +316,6 @@ let MyAdminCustom = {
 		
 		// stores
 		activated:   (s) => s.$store.getters['local/activated'],
-		modules:     (s) => s.$store.getters['schema/modules'],
 		capApp:      (s) => s.$store.getters.captions.admin.customizing,
 		capGen:      (s) => s.$store.getters.captions.generic,
 		config:      (s) => s.$store.getters.config,

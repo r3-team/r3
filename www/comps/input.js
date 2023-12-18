@@ -86,9 +86,7 @@ let MyModuleSelect = {
 		
 		// select any valid module
 		if(this.preSelectOne) {
-			for(let i = 0, j = this.modules.length; i < j; i++) {
-				let m = this.modules[i];
-				
+			for(const m of this.modules) {
 				if(!this.enableAssignable || !this.displayInvalid(m))
 					return this.$emit('update:modelValue',m.id);
 			}

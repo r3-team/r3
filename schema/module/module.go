@@ -3,7 +3,7 @@ package module
 import (
 	"errors"
 	"fmt"
-	"r3/config/module_option"
+	"r3/config/module_meta"
 	"r3/db"
 	"r3/db/check"
 	"r3/schema"
@@ -14,7 +14,6 @@ import (
 	"r3/schema/pgFunction"
 	"r3/types"
 	"slices"
-	"strings"
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5"
@@ -80,18 +79,9 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 }
 
 func Get(ids []uuid.UUID) ([]types.Module, error) {
-
 	modules := make([]types.Module, 0)
-	sqlWheres := []string{}
-	sqlValues := []interface{}{}
 
-	// filter to specified module IDs
-	if len(ids) != 0 {
-		sqlWheres = append(sqlWheres, fmt.Sprintf("WHERE id = ANY($%d)", len(sqlValues)+1))
-		sqlValues = append(sqlValues, ids)
-	}
-
-	rows, err := db.Pool.Query(db.Ctx, fmt.Sprintf(`
+	rows, err := db.Pool.Query(db.Ctx, `
 		SELECT id, parent_id, form_id, icon_id, icon_id_pwa1, icon_id_pwa2,
 			name, name_pwa, name_pwa_short, color1, position, language_main,
 			release_build, release_build_app, release_date,
@@ -114,17 +104,8 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 				ORDER BY language_code ASC
 			) AS "languages"
 		FROM app.module AS m
-		%s
-		ORDER BY
-			CASE
-				WHEN parent_id IS NULL THEN name
-				ELSE CONCAT((
-					SELECT name
-					FROM app.module
-					WHERE id = m.parent_id
-				),'_',name)
-			END
-	`, strings.Join(sqlWheres, "\n")), sqlValues...)
+		WHERE id = ANY($1)
+	`, ids)
 	if err != nil {
 		return modules, err
 	}
@@ -162,19 +143,23 @@ func Get(ids []uuid.UUID) ([]types.Module, error) {
 }
 
 func Set_tx(tx pgx.Tx, mod types.Module) error {
+	_, err := SetReturnId_tx(tx, mod)
+	return err
+}
+func SetReturnId_tx(tx pgx.Tx, mod types.Module) (uuid.UUID, error) {
 
 	if err := check.DbIdentifier(mod.Name); err != nil {
-		return err
+		return mod.Id, err
 	}
 
 	if len(mod.LanguageMain) != 5 {
-		return errors.New("language code must have 5 characters")
+		return mod.Id, errors.New("language code must have 5 characters")
 	}
 
 	create := mod.Id == uuid.Nil
 	known, err := schema.CheckCreateId_tx(tx, &mod.Id, "module", "id")
 	if err != nil {
-		return err
+		return mod.Id, err
 	}
 
 	if known {
@@ -184,7 +169,7 @@ func Set_tx(tx pgx.Tx, mod types.Module) error {
 			FROM app.module
 			WHERE id = $1
 		`, mod.Id).Scan(&nameEx); err != nil {
-			return err
+			return mod.Id, err
 		}
 
 		if _, err := tx.Exec(db.Ctx, `
@@ -199,23 +184,23 @@ func Set_tx(tx pgx.Tx, mod types.Module) error {
 			mod.LanguageMain, mod.ReleaseBuild, mod.ReleaseBuildApp,
 			mod.ReleaseDate, mod.Id); err != nil {
 
-			return err
+			return mod.Id, err
 		}
 
 		if mod.Name != nameEx {
 			if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`ALTER SCHEMA "%s" RENAME TO "%s"`,
 				nameEx, mod.Name)); err != nil {
 
-				return err
+				return mod.Id, err
 			}
 
 			if err := pgFunction.RecreateAffectedBy_tx(tx, "module", mod.Id); err != nil {
-				return fmt.Errorf("failed to recreate affected PG functions, %s", err)
+				return mod.Id, fmt.Errorf("failed to recreate affected PG functions, %s", err)
 			}
 		}
 	} else {
 		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`CREATE SCHEMA "%s"`, mod.Name)); err != nil {
-			return err
+			return mod.Id, err
 		}
 
 		// insert module reference
@@ -231,7 +216,7 @@ func Set_tx(tx pgx.Tx, mod types.Module) error {
 			mod.Position, mod.LanguageMain, mod.ReleaseBuild, mod.ReleaseBuildApp,
 			mod.ReleaseDate); err != nil {
 
-			return err
+			return mod.Id, err
 		}
 
 		if create {
@@ -240,35 +225,27 @@ func Set_tx(tx pgx.Tx, mod types.Module) error {
 			// otherwise everyone role with ID (and possible assignments) already exists
 			roleId, err := uuid.NewV4()
 			if err != nil {
-				return err
+				return mod.Id, err
 			}
 
 			if _, err := tx.Exec(db.Ctx, `
 				INSERT INTO app.role (id, module_id, name, content, assignable)
 				VALUES ($1,$2,'everyone','everyone',false)
 			`, roleId, mod.Id); err != nil {
-				return err
+				return mod.Id, err
 			}
 		}
 
-		// insert module options
-		if err := module_option.Set_tx(tx, mod.Id, false, create, mod.Position); err != nil {
-			return err
-		}
-
-		// insert module hash (updated after import transfer or on first version for new modules)
-		if _, err := tx.Exec(db.Ctx, `
-			INSERT INTO instance.module_hash (module_id, hash)
-			VALUES ($1,'00000000000000000000000000000000000000000000')
-		`, mod.Id); err != nil {
-			return err
+		// create module meta data record for instance
+		if err := module_meta.Create_tx(tx, mod.Id, false, create, mod.Position); err != nil {
+			return mod.Id, err
 		}
 	}
 
 	// set dependencies to other modules
 	dependsOnCurrent, err := getDependsOn_tx(tx, mod.Id)
 	if err != nil {
-		return err
+		return mod.Id, err
 	}
 
 	for _, moduleIdOn := range dependsOnCurrent {
@@ -283,7 +260,7 @@ func Set_tx(tx pgx.Tx, mod types.Module) error {
 			WHERE module_id = $1
 			AND module_id_on = $2
 		`, mod.Id, moduleIdOn); err != nil {
-			return err
+			return mod.Id, err
 		}
 	}
 
@@ -295,14 +272,14 @@ func Set_tx(tx pgx.Tx, mod types.Module) error {
 
 		// new dependency has been added
 		if mod.Id == moduleIdOn {
-			return errors.New("module dependency to itself is not allowed")
+			return mod.Id, errors.New("module dependency to itself is not allowed")
 		}
 
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.module_depends (module_id, module_id_on)
 			VALUES ($1,$2)
 		`, mod.Id, moduleIdOn); err != nil {
-			return err
+			return mod.Id, err
 		}
 	}
 
@@ -311,7 +288,7 @@ func Set_tx(tx pgx.Tx, mod types.Module) error {
 		DELETE FROM app.module_start_form
 		WHERE module_id = $1
 	`, mod.Id); err != nil {
-		return err
+		return mod.Id, err
 	}
 
 	for i, sf := range mod.StartForms {
@@ -319,7 +296,7 @@ func Set_tx(tx pgx.Tx, mod types.Module) error {
 			INSERT INTO app.module_start_form (module_id, position, role_id, form_id)
 			VALUES ($1,$2,$3,$4)
 		`, mod.Id, i, sf.RoleId, sf.FormId); err != nil {
-			return err
+			return mod.Id, err
 		}
 	}
 
@@ -328,34 +305,34 @@ func Set_tx(tx pgx.Tx, mod types.Module) error {
 		DELETE FROM app.module_language
 		WHERE module_id = $1
 	`, mod.Id); err != nil {
-		return err
+		return mod.Id, err
 	}
 
 	for _, code := range mod.Languages {
 		if len(code) != 5 {
-			return errors.New("language code must have 5 characters")
+			return mod.Id, errors.New("language code must have 5 characters")
 		}
 
 		if _, err := tx.Exec(db.Ctx, `
 			INSERT INTO app.module_language (module_id, language_code)
 			VALUES ($1,$2)
 		`, mod.Id, code); err != nil {
-			return err
+			return mod.Id, err
 		}
 	}
 
 	// set help articles
 	if err := article.Assign_tx(tx, "module", mod.Id, mod.ArticleIdsHelp); err != nil {
-		return err
+		return mod.Id, err
 	}
 
 	// set captions
 	// fix imports < 3.2: Migration from help captions to help articles
 	mod.Captions, err = compatible.FixCaptions_tx(tx, "module", mod.Id, mod.Captions)
 	if err != nil {
-		return err
+		return mod.Id, err
 	}
-	return caption.Set_tx(tx, mod.Id, mod.Captions)
+	return mod.Id, caption.Set_tx(tx, mod.Id, mod.Captions)
 }
 
 func getStartForms(id uuid.UUID) ([]types.ModuleStartForm, error) {

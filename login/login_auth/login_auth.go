@@ -273,7 +273,7 @@ func TokenFixed(loginId int64, context string, tokenFixed string, grantLanguageC
 	`, loginId, context, tokenFixed).Scan(&languageCode, &username)
 
 	if err == pgx.ErrNoRows {
-		return errors.New("login inactive")
+		return errors.New("login inactive or token invalid")
 	}
 	if err != nil {
 		return err

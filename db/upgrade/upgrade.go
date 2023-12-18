@@ -127,6 +127,22 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 				ON UPDATE CASCADE
 				ON DELETE CASCADE
 				DEFERRABLE INITIALLY DEFERRED;
+			
+			-- consolidate module meta data + add module change date
+			ALTER TABLE instance.module_option RENAME TO module_meta;
+			ALTER TABLE instance.module_meta ADD COLUMN hash character(44);
+			
+			UPDATE instance.module_meta AS m SET hash = (
+				SELECT hash
+				FROM instance.module_hash
+				WHERE module_id = m.module_id
+			);
+			ALTER TABLE instance.module_meta ALTER COLUMN hash SET NOT NULL;
+			DROP TABLE instance.module_hash;
+			
+			ALTER TABLE instance.module_meta ADD COLUMN date_change BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW());
+			
+			DELETE FROM instance.config WHERE name = 'schemaTimestamp';
 		`)
 		return "3.7", err
 	},

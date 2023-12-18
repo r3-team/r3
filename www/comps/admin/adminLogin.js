@@ -340,13 +340,13 @@ let MyAdminLogin = {
 		roleTotalNonHidden:(s) => {
 			let cnt = 0;
 			for(let roleId of s.roleIds) {
-				if(!s.moduleIdMapOptions[s.roleIdMap[roleId].moduleId].hidden)
+				if(!s.moduleIdMapMeta[s.roleIdMap[roleId].moduleId].hidden)
 					cnt++
 			}
 			return cnt;
 		},
-		modulesFiltered:(s) => s.modules.filter(v => !s.moduleIdMapOptions[v.id].hidden &&
-			(s.roleFilter === '' || 	s.getCaptionForModule(v.captions['moduleTitle'],v.name,v).toLowerCase().includes(s.roleFilter.toLowerCase()))),
+		modulesFiltered:(s) => s.modules.filter(v => !s.moduleIdMapMeta[v.id].hidden &&
+			(s.roleFilter === '' || s.getCaptionForModule(v.captions['moduleTitle'],v.name,v).toLowerCase().includes(s.roleFilter.toLowerCase()))),
 		
 		// simple states
 		canSave:   (s) => s.hasChanges && s.name !== '',
@@ -355,13 +355,13 @@ let MyAdminLogin = {
 		isNew:     (s) => s.id     === 0,
 		
 		// stores
-		modules:           (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
-		moduleIdMapOptions:(s) => s.$store.getters['schema/moduleIdMapOptions'],
-		formIdMap:         (s) => s.$store.getters['schema/formIdMap'],
-		roleIdMap:         (s) => s.$store.getters['schema/roleIdMap'],
-		capApp:            (s) => s.$store.getters.captions.admin.login,
-		capGen:            (s) => s.$store.getters.captions.generic
+		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
+		roleIdMap:      (s) => s.$store.getters['schema/roleIdMap'],
+		capApp:         (s) => s.$store.getters.captions.admin.login,
+		capGen:         (s) => s.$store.getters.captions.generic,
+		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta
 	},
 	mounted() {
 		window.addEventListener('keydown',this.handleHotkeys);

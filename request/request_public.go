@@ -4,32 +4,34 @@ import (
 	"math/rand"
 	"r3/cache"
 	"r3/config"
+	"r3/types"
 
 	"github.com/gofrs/uuid"
 )
 
 func PublicGet() (interface{}, error) {
 	var res struct {
-		Activated          bool                 `json:"activated"`
-		AppName            string               `json:"appName"`
-		AppNameShort       string               `json:"appNameShort"`
-		AppVersion         string               `json:"appVersion"`
-		ClusterNodeName    string               `json:"clusterNodeName"`
-		CompanyColorHeader string               `json:"companyColorHeader"`
-		CompanyColorLogin  string               `json:"companyColorLogin"`
-		CompanyLoginImage  string               `json:"companyLoginImage"`
-		CompanyLogo        string               `json:"companyLogo"`
-		CompanyLogoUrl     string               `json:"companyLogoUrl"`
-		CompanyName        string               `json:"companyName"`
-		CompanyWelcome     string               `json:"companyWelcome"`
-		Css                string               `json:"css"`
-		LanguageCodes      []string             `json:"languageCodes"`
-		LoginBackground    uint64               `json:"loginBackground"`
-		ProductionMode     uint64               `json:"productionMode"`
-		PwaDomainMap       map[string]uuid.UUID `json:"pwaDomainMap"`
-		SchemaTimestamp    int64                `json:"schemaTimestamp"`
-		SearchDictionaries []string             `json:"searchDictionaries"`
-		TokenKeepEnable    bool                 `json:"tokenKeepEnable"`
+		Activated           bool                           `json:"activated"`
+		AppName             string                         `json:"appName"`
+		AppNameShort        string                         `json:"appNameShort"`
+		AppVersion          string                         `json:"appVersion"`
+		ClusterNodeName     string                         `json:"clusterNodeName"`
+		CompanyColorHeader  string                         `json:"companyColorHeader"`
+		CompanyColorLogin   string                         `json:"companyColorLogin"`
+		CompanyLoginImage   string                         `json:"companyLoginImage"`
+		CompanyLogo         string                         `json:"companyLogo"`
+		CompanyLogoUrl      string                         `json:"companyLogoUrl"`
+		CompanyName         string                         `json:"companyName"`
+		CompanyWelcome      string                         `json:"companyWelcome"`
+		Css                 string                         `json:"css"`
+		LanguageCodes       []string                       `json:"languageCodes"`
+		LoginBackground     uint64                         `json:"loginBackground"`
+		ModuleIdMapMeta     map[uuid.UUID]types.ModuleMeta `json:"moduleIdMapMeta"`
+		PresetIdMapRecordId map[uuid.UUID]int64            `json:"presetIdMapRecordId"`
+		ProductionMode      uint64                         `json:"productionMode"`
+		PwaDomainMap        map[string]uuid.UUID           `json:"pwaDomainMap"`
+		SearchDictionaries  []string                       `json:"searchDictionaries"`
+		TokenKeepEnable     bool                           `json:"tokenKeepEnable"`
 	}
 	res.Activated = config.GetLicenseActive()
 	res.AppName = config.GetString("appName")
@@ -45,9 +47,10 @@ func PublicGet() (interface{}, error) {
 	res.CompanyWelcome = config.GetString("companyWelcome")
 	res.Css = config.GetString("css")
 	res.LanguageCodes = cache.GetCaptionLanguageCodes()
+	res.ModuleIdMapMeta = cache.GetModuleIdMapMeta()
+	res.PresetIdMapRecordId = cache.GetPresetRecordIds()
 	res.ProductionMode = config.GetUint64("productionMode")
 	res.PwaDomainMap = cache.GetPwaDomainMap()
-	res.SchemaTimestamp = cache.GetSchemaTimestamp()
 	res.SearchDictionaries = cache.GetSearchDictionaries()
 	res.TokenKeepEnable = config.GetUint64("tokenKeepEnable") == 1
 
@@ -58,6 +61,5 @@ func PublicGet() (interface{}, error) {
 	} else {
 		res.LoginBackground = loginBackgrounds[rand.Intn(len(loginBackgrounds))]
 	}
-
 	return res, nil
 }

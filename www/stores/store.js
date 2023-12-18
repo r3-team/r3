@@ -59,6 +59,7 @@ const MyStore = Vuex.createStore({
 		moduleEntries:[],     // module entries for header/home page
 		moduleLanguage:'',    // module language (either equal to user language or module fallback)
 		moduleIdLast:null,    // module ID of last active module
+		moduleIdMapMeta:{},   // module ID map of module meta data (is owner, hidden, position, date change)
 		pageTitle:'',         // web page title, set by app/form depending on navigation
 		pageTitleFull:'',     // web page title + instance name
 		popUpFormGlobal:null, // configuration of global pop-up form
@@ -187,6 +188,7 @@ const MyStore = Vuex.createStore({
 		moduleEntries:           (state,payload) => state.moduleEntries            = payload,
 		moduleLanguage:          (state,payload) => state.moduleLanguage           = payload,
 		moduleIdLast:            (state,payload) => state.moduleIdLast             = payload,
+		moduleIdMapMeta:         (state,payload) => state.moduleIdMapMeta          = payload,
 		popUpFormGlobal:         (state,payload) => state.popUpFormGlobal          = payload,
 		productionMode:          (state,payload) => state.productionMode           = payload,
 		pwaDomainMap:            (state,payload) => state.pwaDomainMap             = payload,
@@ -303,6 +305,7 @@ const MyStore = Vuex.createStore({
 		moduleEntries:           (state) => state.moduleEntries,
 		moduleLanguage:          (state) => state.moduleLanguage,
 		moduleIdLast:            (state) => state.moduleIdLast,
+		moduleIdMapMeta:         (state) => state.moduleIdMapMeta,
 		pageTitleFull:           (state) => state.pageTitleFull,
 		popUpFormGlobal:         (state) => state.popUpFormGlobal,
 		productionMode:          (state) => state.productionMode,

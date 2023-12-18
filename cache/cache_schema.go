@@ -6,8 +6,7 @@ package cache
 import (
 	"encoding/json"
 	"fmt"
-	"r3/config"
-	"r3/config/module_option"
+	"r3/config/module_meta"
 	"r3/db"
 	"r3/log"
 	"r3/schema/api"
@@ -33,52 +32,72 @@ import (
 
 	"github.com/gofrs/uuid"
 	"github.com/jackc/pgx/v5/pgtype"
+	"golang.org/x/exp/maps"
 )
-
-type schemaCacheType struct {
-	Modules         []types.Module       `json:"modules"`
-	ModuleOptions   []types.ModuleOption `json:"moduleOptions"`
-	PresetRecordIds map[uuid.UUID]int64  `json:"presetRecordIds"`
-}
 
 var (
 	// schema cache access and state
 	Schema_mx sync.RWMutex
 
-	// cached entities for regular use during normal operation
-	ModuleIdMap        map[uuid.UUID]types.Module      // all modules by ID
-	ModuleApiNameMapId map[string]map[string]uuid.UUID // all API IDs by module+API name
-	RelationIdMap      map[uuid.UUID]types.Relation    // all relations by ID
-	AttributeIdMap     map[uuid.UUID]types.Attribute   // all attributes by ID
-	RoleIdMap          map[uuid.UUID]types.Role        // all roles by ID
-	PgFunctionIdMap    map[uuid.UUID]types.PgFunction  // all PG functions by ID
-	ApiIdMap           map[uuid.UUID]types.Api         // all APIs by ID
-
 	// schema cache
-	moduleIdsOrdered []uuid.UUID     // all module IDs in desired order
-	schemaCacheJson  json.RawMessage // full schema cache as JSON
-	schemaTimestamp  int64           // timestamp of last update to schema cache
+	moduleIdMapJson = make(map[uuid.UUID]json.RawMessage)  // ID map of module definition as JSON
+	moduleIdMapMeta = make(map[uuid.UUID]types.ModuleMeta) // ID map of module meta data
+
+	// cached entities for regular use during normal operation
+	ModuleIdMap        = make(map[uuid.UUID]types.Module)      // all modules by ID
+	ModuleApiNameMapId = make(map[string]map[string]uuid.UUID) // all API IDs by module+API name
+	RelationIdMap      = make(map[uuid.UUID]types.Relation)    // all relations by ID
+	AttributeIdMap     = make(map[uuid.UUID]types.Attribute)   // all attributes by ID
+	RoleIdMap          = make(map[uuid.UUID]types.Role)        // all roles by ID
+	PgFunctionIdMap    = make(map[uuid.UUID]types.PgFunction)  // all PG functions by ID
+	ApiIdMap           = make(map[uuid.UUID]types.Api)         // all APIs by ID
 )
 
-func GetSchemaTimestamp() int64 {
+func GetModuleIdMapMeta() map[uuid.UUID]types.ModuleMeta {
 	Schema_mx.RLock()
 	defer Schema_mx.RUnlock()
-	return schemaTimestamp
+	return moduleIdMapMeta
 }
-func GetSchemaCacheJson() json.RawMessage {
+func GetModuleCacheJson(moduleId uuid.UUID) (json.RawMessage, error) {
 	Schema_mx.RLock()
 	defer Schema_mx.RUnlock()
-	return schemaCacheJson
+
+	json, exists := moduleIdMapJson[moduleId]
+	if !exists {
+		return []byte{}, fmt.Errorf("Module %s does not exist in schema cache", moduleId)
+	}
+	return json, nil
+}
+func LoadModuleIdMapMeta() error {
+	moduleIdMapMetaNew, err := module_meta.GetIdMap()
+	if err != nil {
+		return err
+	}
+	Schema_mx.Lock()
+	defer Schema_mx.Unlock()
+
+	// apply deletions if relevant
+	for id, _ := range moduleIdMapMeta {
+		if _, exists := moduleIdMapMetaNew[id]; !exists {
+			delete(ModuleIdMap, id)
+			delete(moduleIdMapJson, id)
+		}
+	}
+
+	// set new meta data
+	moduleIdMapMeta = moduleIdMapMetaNew
+	return nil
 }
 
-// update module schema cache in memory
-// takes either single module ID for specific update or NULL for updating all modules
-// can just load schema or create a new version timestamp, which forces reload on clients
-func UpdateSchema(newVersion bool, moduleIdsUpdateOnly []uuid.UUID) error {
-	var err error
+// load all modules into the schema cache
+func LoadSchema() error {
+	return UpdateSchema(maps.Keys(moduleIdMapMeta), true)
+}
 
-	// update schema cache
-	if err := updateSchemaCache(moduleIdsUpdateOnly); err != nil {
+// update module schema cache
+func UpdateSchema(moduleIds []uuid.UUID, initialLoad bool) error {
+
+	if err := updateSchemaCache(moduleIds); err != nil {
 		return err
 	}
 
@@ -89,30 +108,22 @@ func UpdateSchema(newVersion bool, moduleIdsUpdateOnly []uuid.UUID) error {
 	}
 
 	// create JSON copy of schema cache for fast retrieval
-	schemaCache := schemaCacheType{
-		Modules:         make([]types.Module, 0),
-		PresetRecordIds: GetPresetRecordIds(),
-	}
-	schemaCache.ModuleOptions, err = module_option.Get()
-	if err != nil {
-		return err
-	}
-	for _, id := range moduleIdsOrdered {
-		schemaCache.Modules = append(schemaCache.Modules, ModuleIdMap[id])
+	for _, id := range moduleIds {
+		Schema_mx.Lock()
+		var err error
+		moduleIdMapJson[id], err = json.Marshal(ModuleIdMap[id])
+		Schema_mx.Unlock()
+		if err != nil {
+			return err
+		}
 	}
 
-	schemaCacheJson, err = json.Marshal(schemaCache)
-	if err != nil {
-		return err
-	}
-
-	// set schema timestamp
-	// keep timestamp if nothing changed (cache reuse) or renew it (cache refresh)
-	if !newVersion {
-		schemaTimestamp = int64(config.GetUint64("schemaTimestamp"))
+	if initialLoad {
 		return nil
 	}
-	schemaTimestamp = tools.GetTimeUnix()
+
+	// update change date for updated modules
+	now := tools.GetTimeUnix()
 
 	tx, err := db.Pool.Begin(db.Ctx)
 	if err != nil {
@@ -120,43 +131,39 @@ func UpdateSchema(newVersion bool, moduleIdsUpdateOnly []uuid.UUID) error {
 	}
 	defer tx.Rollback(db.Ctx)
 
-	if err := config.SetUint64_tx(tx, "schemaTimestamp", uint64(schemaTimestamp)); err != nil {
+	for _, id := range moduleIds {
+		if err := module_meta.SetDateChange_tx(tx, id, now); err != nil {
+			return err
+		}
+	}
+	if err := tx.Commit(db.Ctx); err != nil {
 		return err
 	}
-	return tx.Commit(db.Ctx)
+
+	Schema_mx.Lock()
+	for _, id := range moduleIds {
+		meta, exists := moduleIdMapMeta[id]
+		if !exists {
+			meta.Id = id
+		}
+		meta.DateChange = now
+		moduleIdMapMeta[id] = meta
+	}
+	Schema_mx.Unlock()
+	return nil
 }
 
-func updateSchemaCache(moduleIdsUpdateOnly []uuid.UUID) error {
+func updateSchemaCache(moduleIds []uuid.UUID) error {
 	Schema_mx.Lock()
 	defer Schema_mx.Unlock()
 
-	allModules := len(moduleIdsUpdateOnly) == 0
+	log.Info("cache", fmt.Sprintf("starting schema processing for %d module(s)", len(moduleIds)))
 
-	if allModules {
-		log.Info("cache", "starting schema processing for all modules")
-		moduleIdsOrdered = make([]uuid.UUID, 0)
-		ModuleIdMap = make(map[uuid.UUID]types.Module)
-		ModuleApiNameMapId = make(map[string]map[string]uuid.UUID)
-		RelationIdMap = make(map[uuid.UUID]types.Relation)
-		AttributeIdMap = make(map[uuid.UUID]types.Attribute)
-		RoleIdMap = make(map[uuid.UUID]types.Role)
-		PgFunctionIdMap = make(map[uuid.UUID]types.PgFunction)
-		ApiIdMap = make(map[uuid.UUID]types.Api)
-	} else {
-		log.Info("cache", "starting schema processing for one module")
-	}
-
-	mods, err := module.Get(moduleIdsUpdateOnly)
+	mods, err := module.Get(moduleIds)
 	if err != nil {
 		return err
 	}
 	for _, mod := range mods {
-
-		if allModules {
-			// store returned module order to create ordered cache
-			moduleIdsOrdered = append(moduleIdsOrdered, mod.Id)
-		}
-
 		log.Info("cache", fmt.Sprintf("parsing module '%s'", mod.Name))
 		mod.Relations = make([]types.Relation, 0)
 		mod.Forms = make([]types.Form, 0)

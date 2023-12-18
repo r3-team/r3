@@ -474,13 +474,7 @@ let MyBuilderModule = {
 			];
 			
 			ws.sendMultiple(requests,true).then(
-				() => {
-					// reload entire schema if parent has changed
-					if(this.parentId !== this.module.parentId)
-						this.$root.schemaReload();
-					else
-						this.$root.schemaReload(this.id);
-				},
+				() => this.$root.schemaReload(this.id),
 				this.$root.genericError
 			);
 		}

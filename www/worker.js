@@ -1,6 +1,6 @@
 // service worker
 // updated when build number changes
-// attempts to fulfill from cache first, if not possible, gets resource from network and
+// attempts to fulfill from cache first, if not possible, gets resource from network
 const appCacheName = 'REPLACE_BY_BUILD'; // update this name to update worker cache
 const appCacheBase = [
 	'/',
@@ -10,6 +10,7 @@ const appCacheBase = [
 	'/styles_REPLACE_BY_BUILD.css',
 	'/websocket_REPLACE_BY_BUILD.js'
 ];
+const appCacheModuleFileRegex = /schema\.json\?module_id=([0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12})/i;
 
 // install new service worker
 self.addEventListener('install', event => {
@@ -34,14 +35,13 @@ self.addEventListener('fetch', event => {
 			return caches.match(event.request).then(res => {
 				return res || fetch(event.request).then(res => {
 					if(res.status === 200) {
-						
-						// special case: schema cache (as in 'schema_1630272350.json')
+						// special case: module schema cache (as in 'schema.json?module_id=36954b7c-807f-4a29-988c-f3945172da71&date=1702894325')
 						// if new one comes in, existing versions are deleted
-						if(/schema_\d+\.json/.test(event.request.url)) {
-							cache.matchAll().then(function(response) {
-								response.forEach(function(element,index,array) {
-									
-									if(/schema_\d+\.json/.test(element.url))
+						const rgxMatches = appCacheModuleFileRegex.exec(event.request.url);
+						if(rgxMatches !== null && rgxMatches.length === 2) {
+							cache.matchAll().then(response => {
+								response.forEach((element,index,array) => {
+									if(element.url.includes(`schema.json?module_id=${rgxMatches[1]}`))
 										cache.delete(element.url);
 								});
 							});

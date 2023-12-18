@@ -197,14 +197,10 @@ func MasterAssigned(state bool) error {
 	SchedulerRestart <- true
 	return nil
 }
-func SchemaChangedAll(updateNodes bool, newVersion bool) error {
-	return SchemaChanged(updateNodes, newVersion, make([]uuid.UUID, 0))
-}
-func SchemaChanged(updateNodes bool, newVersion bool, moduleIdsUpdateOnly []uuid.UUID) error {
+func SchemaChanged(updateNodes bool, moduleIds []uuid.UUID) error {
 	if updateNodes {
 		if err := createEventsForOtherNodes("schemaChanged", types.ClusterEventSchemaChanged{
-			ModuleIdsUpdateOnly: moduleIdsUpdateOnly,
-			NewVersion:          newVersion,
+			ModuleIds: moduleIds,
 		}); err != nil {
 			return err
 		}
@@ -213,27 +209,31 @@ func SchemaChanged(updateNodes bool, newVersion bool, moduleIdsUpdateOnly []uuid
 	// inform all clients about schema reloading
 	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, SchemaLoading: true}
 
+	// inform all clients about schema loading being finished, regardless of success or error
 	defer func() {
-		// inform regardless of success or error
-		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{
-			LoginId:         0,
-			SchemaTimestamp: int64(config.GetUint64("schemaTimestamp"))}
+		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, SchemaLoaded: true}
 	}()
 
-	if err := cache.UpdateSchema(newVersion, moduleIdsUpdateOnly); err != nil {
-		return err
+	if len(moduleIds) != 0 {
+		// modules were changed, update schema & access cache
+		if err := cache.UpdateSchema(moduleIds, false); err != nil {
+			return err
+		}
+		if err := cache.RenewAccessAll(); err != nil {
+			return err
+		}
+
+		// inform clients to retrieve new access cache
+		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, Renew: true}
+	} else {
+		// modules were deleted or module options were changed, reload the meta cache
+		if err := cache.LoadModuleIdMapMeta(); err != nil {
+			return err
+		}
 	}
 
-	// renew access cache for all logins
-	if err := cache.RenewAccessAll(); err != nil {
-		return err
-	}
-
-	// reload scheduler as module schedules could have changed
+	// reload scheduler as module schedules could have changed (modules changed or deleted)
 	SchedulerRestart <- true
-
-	// inform clients to retrieve new access cache
-	WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, Renew: true}
 	return nil
 }
 func TasksChanged(updateNodes bool) error {

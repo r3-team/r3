@@ -194,7 +194,6 @@ let MyAdminRepo = {
 	},
 	computed:{
 		// stores
-		modules:    (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		capApp:     (s) => s.$store.getters.captions.admin.repo,
 		capGen:     (s) => s.$store.getters.captions.generic,

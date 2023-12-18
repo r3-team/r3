@@ -20,7 +20,6 @@ const MyStoreLocal = {
 		loginKeyAes:null,      // en-/decryption key for login private key
 		loginKeySalt:null,     // salt for login key KDF
 		menuIdMapOpen:{},      // map of menu IDs with open state (true/false)
-		schemaTimestamp:-1,    // last known schema timestamp
 		token:'',              // JWT token
 		tokenKeep:false,       // keep JWT token between sessions
 		widgetFlow:'column',   // direction of widget groups (column, row)
@@ -115,10 +114,6 @@ const MyStoreLocal = {
 			state.tokenKeep = payload;
 			set('tokenKeep',payload);
 		},
-		schemaTimestamp(state,payload) {
-			state.schemaTimestamp = payload;
-			set('schemaTimestamp',payload);
-		},
 		widgetFlow(state,payload) {
 			state.widgetFlow = payload;
 			set('widgetFlow',payload);
@@ -156,7 +151,6 @@ const MyStoreLocal = {
 		loginKeyAes:       (state) => state.loginKeyAes,
 		loginKeySalt:      (state) => state.loginKeySalt,
 		menuIdMapOpen:     (state) => state.menuIdMapOpen,
-		schemaTimestamp:   (state) => state.schemaTimestamp,
 		token:             (state) => state.token,
 		tokenKeep:         (state) => state.tokenKeep,
 		widgetFlow:        (state) => state.widgetFlow,

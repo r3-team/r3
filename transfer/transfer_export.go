@@ -15,6 +15,7 @@ import (
 	"path/filepath"
 	"r3/cache"
 	"r3/config"
+	"r3/config/module_meta"
 	"r3/db"
 	"r3/log"
 	"r3/types"
@@ -83,12 +84,8 @@ func export_tx(tx pgx.Tx, moduleId uuid.UUID, original bool, filePaths *[]string
 	}
 
 	// check for ownership
-	var isOwner bool
-	if err := tx.QueryRow(db.Ctx, `
-		SELECT owner
-		FROM instance.module_option
-		WHERE module_id = $1
-	`, moduleId).Scan(&isOwner); err != nil {
+	isOwner, err := module_meta.GetOwner(moduleId)
+	if err != nil {
 		return err
 	}
 
@@ -110,7 +107,7 @@ func export_tx(tx pgx.Tx, moduleId uuid.UUID, original bool, filePaths *[]string
 	}
 	hashed := sha256.Sum256(jsonContent)
 	hashedStr := base64.URLEncoding.EncodeToString(hashed[:])
-	hashedStrEx, err := getModuleHash(moduleId)
+	hashedStrEx, err := module_meta.GetHash(moduleId)
 	if err != nil {
 		return err
 	}

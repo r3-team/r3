@@ -291,7 +291,7 @@ let MyAdminModulesItem = {
 			);
 		},
 		set() {
-			ws.send('moduleOption','set',{
+			ws.send('moduleMeta','setOptions',{
 				id:this.id,
 				hidden:this.hidden,
 				owner:this.owner,
@@ -436,7 +436,7 @@ let MyAdminModules = {
 						:installStarted="installStarted"
 						:key="m.id"
 						:module="m"
-						:options="moduleIdMapOptions[m.id]"
+						:options="moduleIdMapMeta[m.id]"
 						:repoModules="repoModules"
 					/>
 				</tbody>
@@ -477,16 +477,16 @@ let MyAdminModules = {
 		canUploadFile:(s) => !s.installStarted && !s.fileUploading && !s.productionMode,
 		
 		// stores
-		token:             (s) => s.$store.getters['local/token'],
-		modules:           (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:       (s) => s.$store.getters['schema/moduleIdMap'],
-		moduleIdMapOptions:(s) => s.$store.getters['schema/moduleIdMapOptions'],
-		builderEnabled:    (s) => s.$store.getters.builderEnabled,
-		capApp:            (s) => s.$store.getters.captions.admin.modules,
-		capGen:            (s) => s.$store.getters.captions.generic,
-		moduleLanguage:    (s) => s.$store.getters.moduleLanguage,
-		productionMode:    (s) => s.$store.getters.productionMode,
-		system:            (s) => s.$store.getters.system
+		token:          (s) => s.$store.getters['local/token'],
+		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		builderEnabled: (s) => s.$store.getters.builderEnabled,
+		capApp:         (s) => s.$store.getters.captions.admin.modules,
+		capGen:         (s) => s.$store.getters.captions.generic,
+		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta,
+		moduleLanguage: (s) => s.$store.getters.moduleLanguage,
+		productionMode: (s) => s.$store.getters.productionMode,
+		system:         (s) => s.$store.getters.system
 	},
 	methods:{
 		// externals

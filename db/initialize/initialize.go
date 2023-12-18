@@ -114,6 +114,7 @@ func renewDbUserPw_tx(tx pgx.Tx) error {
 
 	-- remove default language code (function replaced by login templates)
 	Remove 'defaultLanguageCode' from instance.config
+	Remove 'schemaTimestamp' from instance.config
 */
 
 // instance initalized to 3.0

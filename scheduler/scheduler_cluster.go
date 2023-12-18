@@ -102,7 +102,7 @@ func clusterProcessEvents() error {
 			if err := json.Unmarshal(e.Payload, &p); err != nil {
 				return err
 			}
-			err = cluster.SchemaChanged(false, p.NewVersion, p.ModuleIdsUpdateOnly)
+			err = cluster.SchemaChanged(false, p.ModuleIds)
 		case "tasksChanged":
 			err = cluster.TasksChanged(false)
 		case "taskTriggered":

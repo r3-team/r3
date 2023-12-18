@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"r3/bruteforce"
+	"r3/cache"
 	"r3/cluster"
 	"r3/handler"
 	"r3/log"
@@ -170,8 +171,15 @@ func (hub *hubType) start() {
 				if event.SchemaLoading {
 					jsonMsg, err = prepareUnrequested("schema_loading", nil)
 				}
-				if event.SchemaTimestamp != 0 {
-					jsonMsg, err = prepareUnrequested("schema_loaded", event.SchemaTimestamp)
+				if event.SchemaLoaded {
+					data := struct {
+						ModuleIdMapData     map[uuid.UUID]types.ModuleMeta `json:"moduleIdMapData"`
+						PresetIdMapRecordId map[uuid.UUID]int64            `json:"presetIdMapRecordId"`
+					}{
+						ModuleIdMapData:     cache.GetModuleIdMapMeta(),
+						PresetIdMapRecordId: cache.GetPresetRecordIds(),
+					}
+					jsonMsg, err = prepareUnrequested("schema_loaded", data)
 				}
 				if err != nil {
 					log.Error(handlerContext, "could not prepare unrequested transaction", err)
