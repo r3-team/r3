@@ -738,8 +738,10 @@ let MyApp = {
 						if(res.status !== 200)
 							return reject('Failed to load captions');
 						
-						res.json().then(v => this.$store.commit('captions',v));
-						resolve();
+						res.json().then(v => {
+							this.$store.commit('captions',v);
+							resolve();
+						});
 					}
 				);
 			});
