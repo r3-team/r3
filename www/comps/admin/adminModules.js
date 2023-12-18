@@ -10,27 +10,6 @@ export {MyAdminModules as default};
 let MyAdminModulesItem = {
 	name:'my-admin-modules-item',
 	template:`<tr :class="{ grouping:module.parentId === null }">
-		<td>
-			<div class="row gap">
-				<my-button image="save.png"
-					@trigger="set"
-					:active="hasChanges && !productionMode"
-					:captionTitle="capGen.button.save"
-				/>
-				<my-button image="builder.png"
-					:active="builderEnabled"
-					@trigger="openBuilder(false)"
-					@trigger-middle="openBuilder(true)"
-					:captionTitle="capGen.button.openBuilder"
-				/>
-				<my-button image="delete.png"
-					@trigger="delAsk"
-					:active="!productionMode"
-					:cancel="true"
-					:captionTitle="capGen.button.delete"
-				/>
-			</div>
-		</td>
 		<td class="noWrap">
 			<div class="row centered">
 				<my-button image="dash.png"
@@ -39,9 +18,7 @@ let MyAdminModulesItem = {
 					:naked="true"
 				/>
 				<img class="module-icon" :src="srcBase64Icon(module.iconId,'images/module.png')" />
-				<span>
-					{{ getCaptionForModule(module.captions.moduleTitle,module.name,module) }}
-				</span>
+				<span>{{ getCaptionForModule(module.captions.moduleTitle,module.name,module) }}</span>
 			</div>
 		</td>
 		<td class="minimum">v{{ module.releaseBuild }}</td>
@@ -94,11 +71,32 @@ let MyAdminModulesItem = {
 		<td class="noWrap">
 			<my-bool
 				v-model="hidden"
+				@update:modelValue="change"
 				:readonly="productionMode"
 			/>
 		</td>
 		<td class="default-inputs">
-			<input class="short" v-model.number="position" :disabled="productionMode" />
+			<input class="short"
+				v-model.number="position"
+				@input="change"
+				:disabled="productionMode"
+			/>
+		</td>
+		<td>
+			<div class="row gap">
+				<my-button image="builder.png"
+					:active="builderEnabled"
+					@trigger="openBuilder(false)"
+					@trigger-middle="openBuilder(true)"
+					:captionTitle="capGen.button.openBuilder"
+				/>
+				<my-button image="delete.png"
+					@trigger="delAsk"
+					:active="!productionMode"
+					:cancel="true"
+					:captionTitle="capGen.button.delete"
+				/>
+			</div>
 		</td>
 		<td></td>
 	</tr>`,
@@ -106,9 +104,10 @@ let MyAdminModulesItem = {
 		installStarted:{ type:Boolean, required:true },
 		module:        { type:Object,  required:true },
 		options:       { type:Object,  required:true },
-		repoModules:   { type:Array,   required:true }
+		repoModules:   { type:Array,   required:true },
+		warningShown:  { type:Boolean, required:true }
 	},
-	emits:['showHelp','install'],
+	emits:['change','install','showHelp','shownWarning'],
 	data() {
 		return {
 			id:this.module.id,
@@ -118,9 +117,6 @@ let MyAdminModulesItem = {
 		};
 	},
 	computed:{
-		hasChanges:(s) => s.position !== s.options.position
-			|| s.hidden !== s.options.hidden
-			|| s.owner  !== s.options.owner,
 		hasHelp:(s) => s.module.articleIdsHelp.length !== 0
 			&& typeof s.articleIdMap[s.module.articleIdsHelp[0]].captions.articleBody[s.settings.languageCode] !== 'undefined',
 		moduleNamesDependendOnUs:(s) => {
@@ -192,6 +188,13 @@ let MyAdminModulesItem = {
 		srcBase64Icon,
 		
 		// actions
+		change() {
+			this.$emit('change',this.module.id,{
+				hidden:this.hidden,
+				owner:this.owner,
+				position:this.position
+			});
+		},
 		changeLogShow() {
 			this.$store.commit('dialog',{
 				captionTop:this.capApp.changeLog,
@@ -204,14 +207,13 @@ let MyAdminModulesItem = {
 			if(!middle) this.$router.push('/builder/module/'+this.module.id);
 			else        window.open('#/builder/module/'+this.module.id,'_blank');
 		},
-		ownerEnable() {
-			this.owner = true;
+		ownerToggle() {
+			this.owner = !this.owner;
+			this.change();
 		},
 		ownerWarning(state) {
-			if(!state) {
-				this.owner = false;
-				return;
-			}
+			if(!state || this.warningShown)
+				return this.ownerToggle();
 			
 			this.$store.commit('dialog',{
 				captionBody:this.capApp.dialog.owner,
@@ -220,7 +222,7 @@ let MyAdminModulesItem = {
 				buttons:[{
 					cancel:true,
 					caption:this.capGen.button.apply,
-					exec:this.ownerEnable,
+					exec:this.ownerToggle,
 					keyEnter:true,
 					image:'warning.png'
 				},{
@@ -229,6 +231,7 @@ let MyAdminModulesItem = {
 					image:'cancel.png'
 				}]
 			});
+			this.$emit('shownWarning');
 		},
 		
 		// backend calls
@@ -289,17 +292,6 @@ let MyAdminModulesItem = {
 				() => this.$root.schemaReload(),
 				this.$root.genericError
 			);
-		},
-		set() {
-			ws.send('moduleMeta','setOptions',{
-				id:this.id,
-				hidden:this.hidden,
-				owner:this.owner,
-				position:this.position
-			},true).then(
-				() => this.$root.schemaReload(),
-				this.$root.genericError
-			);
 		}
 	}
 };
@@ -319,6 +311,11 @@ let MyAdminModules = {
 		</div>
 		<div class="top lower">
 			<div class="area">
+				<my-button image="save.png"
+					@trigger="set"
+					:active="hasChanges && !productionMode"
+					:caption="capGen.button.save"
+				/>
 				<my-button image="box.png"
 					@trigger="goToRepo"
 					:caption="capApp.button.repository"
@@ -371,12 +368,6 @@ let MyAdminModules = {
 			<table class="generic-table bright sticky-top" v-if="modules.length !== 0">
 				<thead>
 					<tr>
-						<th>
-							<div class="mixed-header">
-								<img src="images/ok.png" />
-								<span>{{ capGen.actions }}</span>
-							</div>
-						</th>
 						<th class="noWrap" colspan="2">
 							<div class="mixed-header">
 								<img src="images/module.png" />
@@ -425,19 +416,28 @@ let MyAdminModules = {
 								<span>{{ capApp.position }}</span>
 							</div>
 						</th>
+						<th>
+							<div class="mixed-header">
+								<img src="images/ok.png" />
+								<span>{{ capGen.actions }}</span>
+							</div>
+						</th>
 						<th class="maximum"></th>
 					</tr>
 				</thead>
 				<tbody>
 					<my-admin-modules-item
 						v-for="(m,i) in modules"
-						@showHelp="showHelp($event)"
+						@change="updateMeta"
 						@install="install"
+						@showHelp="showHelp($event)"
+						@shownWarning="warningShown = true"
 						:installStarted="installStarted"
 						:key="m.id"
 						:module="m"
 						:options="moduleIdMapMeta[m.id]"
 						:repoModules="repoModules"
+						:warningShown="warningShown"
 					/>
 				</tbody>
 			</table>
@@ -451,13 +451,19 @@ let MyAdminModules = {
 			fileToUpload:null,
 			fileUploading:false,
 			installStarted:false,
+			moduleIdMapUpdated:{}, // module ID map of updated module meta data (empty if nothing changed)
 			moduleIdShowHelp:null,
-			repoModules:[]
+			repoModules:[],
+			warningShown:false
 		};
 	},
 	mounted() {
 		this.$store.commit('pageTitle',this.menuTitle);
 		this.getRepo();
+		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+	},
+	unmounted() {
+		this.$emit('hotkeysRegister',[]);
 	},
 	computed:{
 		moduleIdsUpdate:(s) => {
@@ -475,6 +481,7 @@ let MyAdminModules = {
 		
 		// simple
 		canUploadFile:(s) => !s.installStarted && !s.fileUploading && !s.productionMode,
+		hasChanges:   (s) => Object.keys(s.moduleIdMapUpdated).length !== 0,
 		
 		// stores
 		token:          (s) => s.$store.getters['local/token'],
@@ -514,19 +521,19 @@ let MyAdminModules = {
 			this.fileUploading = true;
 			let formData       = new FormData();
 			let httpRequest    = new XMLHttpRequest();
-			let that           = this;
 			
-			httpRequest.upload.onprogress = function(event) {
+			httpRequest.upload.onprogress = (event) => {
 				if(event.lengthComputable) {
 					//
 				}
 			}
-			httpRequest.onload = function(event) {
+			httpRequest.onload = (event) => {
 				let res = JSON.parse(httpRequest.response);
-				that.fileUploading = false;
+				this.fileUploading = false;
+				this.$store.commit('busyRemove');
 				
 				if(!res.success) {
-					that.$root.genericError(that.capApp.error.uploadFailed);
+					this.$root.genericError(this.capApp.error.uploadFailed);
 					return;
 				}
 			}
@@ -534,6 +541,10 @@ let MyAdminModules = {
 			formData.append('file',this.fileToUpload);
 			httpRequest.open('POST','import',true);
 			httpRequest.send(formData);
+			this.$store.commit('busyAdd');
+		},
+		updateMeta(moduleId,meta) {
+			this.moduleIdMapUpdated[moduleId] = meta;
 		},
 		
 		// backend calls
@@ -562,6 +573,27 @@ let MyAdminModules = {
 				captionBody:this.capApp.updateDone
 			});
 			this.installStarted = false;
+		},
+		set() {
+			if(!this.hasChanges)
+				return;
+			
+			let requests = [];
+			for(let k in this.moduleIdMapUpdated) {
+				requests.push(ws.prepare('moduleMeta','setOptions',{
+					id:k,
+					hidden:this.moduleIdMapUpdated[k].hidden,
+					position:this.moduleIdMapUpdated[k].position,
+					owner:this.moduleIdMapUpdated[k].owner
+				}));
+			}
+			ws.sendMultiple(requests,true).then(
+				() => {
+					this.$root.schemaReload();
+					this.moduleIdMapUpdated = {};
+				},
+				this.$root.genericError
+			);
 		}
 	}
 };
