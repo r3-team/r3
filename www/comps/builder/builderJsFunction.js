@@ -431,7 +431,7 @@ let MyBuilderJsFunction = {
 				'timer_clear','timer_set','value_store_get','value_store_set'
 			],
 			appFunctionsAsync:[
-				'get_e2ee_data_key','get_e2ee_data_value'
+				'get_e2ee_data_key','get_e2ee_data_value','pdf_create'
 			],
 			
 			// states

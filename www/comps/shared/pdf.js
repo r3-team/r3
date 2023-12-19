@@ -1,10 +1,14 @@
 import MyStore from '../../stores/store.js';
 
 // generates a PDF file from HTML inputs inside a new window
-export function generatePdf(filename,format,orientation,marginX,marginY,htmlHeader,htmlBody,htmlFooter,cssStyles) {
+export function generatePdf(filename,format,orientation,marginX,marginY,
+	htmlHeader,htmlBody,htmlFooter,cssStyles,callbackResult,closeWhenDone
+) {
 	const capGen = MyStore.getters.captions.generic;
 	const win    = window.open('');
 	
+	win.r3_callbackResult = callbackResult;
+	win.r3_closeWhenDone  = closeWhenDone;
 	win.document.open();
 	win.document.write(`
 		<!DOCTYPE html>
@@ -112,7 +116,13 @@ export function generatePdf(filename,format,orientation,marginX,marginY,htmlHead
 								await addPageMeta(footer,footerPosY,i,j);
 							}
 							
-							// document ready, enable download
+							// document done
+							window.r3_callbackResult(doc.output('blob'));
+							
+							if(window.r3_closeWhenDone)
+								return self.close();
+							
+							// enable document save action
 							document.getElementById('pdf-download').onclick  = () => doc.save('${filename}');
 							document.getElementById('pdf-download-icon').src = 'images/download.png';
 						}
@@ -121,5 +131,4 @@ export function generatePdf(filename,format,orientation,marginX,marginY,htmlHead
 			});
 		<\/script>
 	`);
-	win.document.close();
 };

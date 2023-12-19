@@ -16,6 +16,7 @@ import {
 import {
 	filterIsCorrect,
 	filterOperatorIsSingleValue,
+	getNilUuid,
 	openLink
 } from './shared/generic.js';
 import {
@@ -484,7 +485,43 @@ let MyForm = {
 				record_save_new:() => { s.set(true);    s.recordActionFree = false; },
 				
 				// PDF functions
-				pdf_create:s.generatePdf,
+				pdf_create:(filename,format,orientation,marginX,marginY,header,body,footer,css,attributeId,recordId) => {
+					return new Promise((resolve,reject) => {
+						const uploadFile = typeof attributeId !== 'undefined' && typeof recordId !== 'undefined';
+						const callbackResult = (blob) => {
+							if(!uploadFile)
+								return resolve();
+							
+							let formData = new FormData();
+							let xhr      = new XMLHttpRequest();
+							xhr.onload = event => {
+								const res = JSON.parse(xhr.response);
+								if(typeof res.error !== 'undefined')
+									return reject(res.error);
+								
+								let value = {fileIdMapChange:{}};
+								value.fileIdMapChange[res.id] = {
+									action:'create',
+									name:filename,
+									version:-1
+								};
+								ws.send('data','set',{0:{
+									relationId:s.attributeIdMap[attributeId].relationId,
+									recordId:recordId,
+									attributes:[{attributeId:attributeId,value:value}]
+								}},true).then(() => resolve(),reject);
+							};
+							formData.append('token',s.token);
+							formData.append('attributeId',attributeId);
+							formData.append('fileId',s.getNilUuid());
+							formData.append('file',blob);
+							xhr.open('POST','data/upload',true);
+							xhr.send(formData);
+						};
+						s.generatePdf(filename,format,orientation,marginX,marginY,
+							header,body,footer,css,callbackResult,uploadFile);
+					});
+				},
 				
 				// timeout/interval function calls
 				timer_clear:s.timerClear,
@@ -637,6 +674,7 @@ let MyForm = {
 		},
 		
 		// stores
+		token:              (s) => s.$store.getters['local/token'],
 		moduleIdMap:        (s) => s.$store.getters['schema/moduleIdMap'],
 		relationIdMap:      (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:     (s) => s.$store.getters['schema/attributeIdMap'],
@@ -680,6 +718,7 @@ let MyForm = {
 		getIndexAttributeId,
 		getIndexAttributeIdByField,
 		getJoinIndexMapExpanded,
+		getNilUuid,
 		getQueryAttributePkFilter,
 		getQueryFiltersProcessed,
 		getRandomString,
