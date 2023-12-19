@@ -226,7 +226,7 @@ func SchemaChanged(updateNodes bool, moduleIds []uuid.UUID) error {
 		// inform clients to retrieve new access cache
 		WebsocketClientEvents <- types.ClusterWebsocketClientEvent{LoginId: 0, Renew: true}
 	} else {
-		// modules were deleted or module options were changed, reload the meta cache
+		// no module IDs are given if modules were deleted or module options were changed
 		if err := cache.LoadModuleIdMapMeta(); err != nil {
 			return err
 		}

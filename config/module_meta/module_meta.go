@@ -18,6 +18,17 @@ func Create_tx(tx pgx.Tx, moduleId uuid.UUID, hidden bool, owner bool, position 
 	return err
 }
 
+func Get(moduleId uuid.UUID) (types.ModuleMeta, error) {
+	var m types.ModuleMeta
+
+	err := db.Pool.QueryRow(db.Ctx, `
+		SELECT hidden, owner, position, date_change
+		FROM instance.module_meta
+		WHERE module_id = $1
+	`, moduleId).Scan(&m.Hidden, &m.Owner, &m.Position, &m.DateChange)
+
+	return m, err
+}
 func GetDateChange(moduleId uuid.UUID) (uint64, error) {
 	var dateChange uint64
 	err := db.Pool.QueryRow(db.Ctx, `
@@ -67,8 +78,8 @@ func GetOwner(moduleId uuid.UUID) (bool, error) {
 	return isOwner, err
 }
 
-func SetDateChange_tx(tx pgx.Tx, moduleId uuid.UUID, date int64) error {
-	_, err := tx.Exec(db.Ctx, `
+func SetDateChange(moduleId uuid.UUID, date int64) error {
+	_, err := db.Pool.Exec(db.Ctx, `
 		UPDATE instance.module_meta
 		SET date_change = $2
 		WHERE module_id = $1

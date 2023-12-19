@@ -7,7 +7,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"r3/config/module_meta"
-	"r3/db"
 	"r3/log"
 	"r3/schema/api"
 	"r3/schema/article"
@@ -125,26 +124,25 @@ func UpdateSchema(moduleIds []uuid.UUID, initialLoad bool) error {
 	// update change date for updated modules
 	now := tools.GetTimeUnix()
 
-	tx, err := db.Pool.Begin(db.Ctx)
-	if err != nil {
-		return err
-	}
-	defer tx.Rollback(db.Ctx)
-
 	for _, id := range moduleIds {
-		if err := module_meta.SetDateChange_tx(tx, id, now); err != nil {
+		if err := module_meta.SetDateChange(id, now); err != nil {
 			return err
 		}
 	}
-	if err := tx.Commit(db.Ctx); err != nil {
-		return err
-	}
 
+	// update module meta cache
 	Schema_mx.Lock()
 	for _, id := range moduleIds {
 		meta, exists := moduleIdMapMeta[id]
 		if !exists {
+			v, err := module_meta.Get(id)
+			if err != nil {
+				return err
+			}
 			meta.Id = id
+			meta.Hidden = v.Hidden
+			meta.Owner = v.Owner
+			meta.Position = v.Position
 		}
 		meta.DateChange = now
 		moduleIdMapMeta[id] = meta
