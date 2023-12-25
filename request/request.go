@@ -440,6 +440,17 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		case "setOptions":
 			return ModuleMetaSetOptions_tx(tx, reqJson)
 		}
+	case "oauthClient":
+		switch action {
+		case "del":
+			return OauthClientDel_tx(tx, reqJson)
+		case "get":
+			return OauthClientGet()
+		case "reload":
+			return OauthClientReload()
+		case "set":
+			return OauthClientSet_tx(tx, reqJson)
+		}
 	case "package":
 		switch action {
 		case "install":

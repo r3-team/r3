@@ -143,6 +143,30 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			ALTER TABLE instance.module_meta ADD COLUMN date_change BIGINT NOT NULL DEFAULT EXTRACT(EPOCH FROM NOW());
 			
 			DELETE FROM instance.config WHERE name = 'schemaTimestamp';
+			
+			-- oauth2 clients
+			CREATE TABLE IF NOT EXISTS instance.oauth_client (
+				id SERIAL NOT NULL,
+			    name CHARACTER VARYING(64) NOT NULL,
+			    tenant TEXT NOT NULL,
+			    client_id TEXT NOT NULL,
+			    client_secret TEXT NOT NULL,
+			    scopes TEXT[] NOT NULL,
+			    token_url TEXT NOT NULL,
+			    CONSTRAINT oauth_clienty_pkey PRIMARY KEY (id)
+			);
+			
+			ALTER TYPE instance.mail_account_auth_method ADD VALUE 'xoauth2';
+			ALTER TABLE instance.mail_account ADD COLUMN oauth_client INTEGER;
+			ALTER TABLE instance.mail_account ADD CONSTRAINT mail_account_oauth_client_fkey
+				FOREIGN KEY (oauth_client)
+				REFERENCES instance.oauth_client (id) MATCH SIMPLE
+				ON UPDATE NO ACTION
+				ON DELETE NO ACTION
+				DEFERRABLE INITIALLY DEFERRED;
+			
+			CREATE INDEX IF NOT EXISTS ind_mail_account_oauth_client
+			    ON instance.mail_account USING btree (oauth_client ASC NULLS LAST);
 		`)
 		return "3.7", err
 	},

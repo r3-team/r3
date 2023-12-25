@@ -44,20 +44,22 @@ func MailAccountSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) 
 
 	if newRecord {
 		_, err = tx.Exec(db.Ctx, `
-			INSERT INTO instance.mail_account (name, mode, auth_method, send_as,
-				username, password, start_tls, host_name, host_port)
-			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
-		`, req.Name, req.Mode, req.AuthMethod, req.SendAs, req.Username,
-			req.Password, req.StartTls, req.HostName, req.HostPort)
+			INSERT INTO instance.mail_account (oauth_client_id, name, mode,
+				auth_method, send_as, username, password, start_tls, host_name,
+				host_port)
+			VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
+		`, req.OauthClientId, req.Name, req.Mode, req.AuthMethod, req.SendAs,
+			req.Username, req.Password, req.StartTls, req.HostName, req.HostPort)
 	} else {
 		_, err = tx.Exec(db.Ctx, `
 			UPDATE instance.mail_account
-			SET name = $1, mode = $2, auth_method = $3, send_as = $4,
-				username = $5, password = $6, start_tls = $7, host_name = $8,
-				host_port = $9
-			WHERE id = $10
-		`, req.Name, req.Mode, req.AuthMethod, req.SendAs, req.Username,
-			req.Password, req.StartTls, req.HostName, req.HostPort, req.Id)
+			SET oauth_client_id = $1, name = $2, mode = $3, auth_method = $4,
+				send_as = $5, username = $6, password = $7, start_tls = $8,
+				host_name = $9, host_port = $10
+			WHERE id = $11
+		`, req.OauthClientId, req.Name, req.Mode, req.AuthMethod, req.SendAs,
+			req.Username, req.Password, req.StartTls, req.HostName, req.HostPort,
+			req.Id)
 	}
 	return nil, err
 }

@@ -367,34 +367,35 @@ func (prg *program) execute(svc service.Service) {
 		return
 	}
 
-	// initialize module meta data cache (before schema init)
+	// initialize caches
+	// module meta data must be loaded before module schema (informs about what modules to load)
 	if err := cache.LoadModuleIdMapMeta(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize module meta cache, %v", err))
 		return
 	}
-
-	// initialize module schema cache
 	if err := cache.LoadSchema(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize schema cache, %v", err))
 		return
 	}
-
-	// initialize LDAP cache
 	if err := cache.LoadLdapMap(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize LDAP cache, %v", err))
 		return
 	}
-
-	// initialize mail account cache
 	if err := cache.LoadMailAccountMap(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize mail account cache, %v", err))
 		return
 	}
-
-	// initialize PWA domain cache
+	if err := cache.LoadOauthClientMap(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to initialize oauth client cache, %v", err))
+		return
+	}
 	if err := cache.LoadPwaDomainMap(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize PWA domain cache, %v", err))
 		return
+	}
+	if err := cache.LoadSearchDictionaries(); err != nil {
+		// failure is not mission critical (in case of no access to DB system tables)
+		log.Error("server", "failed to read/update text search dictionaries", err)
 	}
 
 	// process token secret for future client authentication from database
@@ -407,12 +408,6 @@ func (prg *program) execute(svc service.Service) {
 	if err := config.SetInstanceIdIfEmpty(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to set instance ID, %v", err))
 		return
-	}
-
-	// cache full text search dictionaries from the database
-	if err := cache.LoadSearchDictionaries(); err != nil {
-		// failure is not mission critical (in case of no access to DB system tables)
-		log.Error("server", "failed to read/update text search dictionaries", err)
 	}
 
 	// prepare image processing

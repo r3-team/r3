@@ -79,3 +79,12 @@ type LdapRole struct {
 	RoleId  uuid.UUID `json:"roleId"`
 	GroupDn string    `json:"groupDn"`
 }
+type OauthClient struct {
+	Id           int32    `json:"id"`
+	Name         string   `json:"name"`
+	ClientId     string   `json:"clientId"`
+	ClientSecret string   `json:"clientSecret"`
+	Scopes       []string `json:"scopes"`
+	Tenant       string   `json:"tenant"`
+	TokenUrl     string   `json:"tokenUrl"`
+}
