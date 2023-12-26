@@ -524,6 +524,33 @@
 			"update":"Aktualisierung",
 			"updateDone":"Aktualisierung wurde erfolgreich durchgeführt"
 		},
+		"oauthClient":{
+			"dialog":{
+				"delete":"Bist du sicher, dass du diesen OAuth-Client löschen möchtest?<br /><br />Diese Aktion ist nicht umkehrbar.</b>"
+			},
+			"option":{
+				"template":{
+					"custom":"-",
+					"ms365_mail":"O365-Mailing"
+				}
+			},
+			"clientId":"Client-ID",
+			"clientIdHint":"Wird auf der Anbieterseite bei der Erstellung eines OAuth2-Clients erzeugt.",
+			"clientSecret":"Client-Secret",
+			"clientSecretHint":"Wird auf der Anbieterseite bei oder nach der Erstellung eines OAuth2-Clients generiert. Muss ein Geheimnis sein, Client-Zertifikate werden nicht unterstützt.",
+			"intro":"Ein OAuth-Client authentifiziert sich gegenüber einem Identitätsanbieter, um Aktionen auszuführen oder auf Ressourcen zuzugreifen.<br /><br />REI3 implementiert den \"OAuth 2.0 client credentials grant flow\"; dieser erfordert, dass der OAuth-Client beim Anbieter registriert ist, bevor er hier eingerichtet werden kann. Mehr Informationen sind in der <a href=\"https://rei3.de/de/docs/admin\">Admin-Doku</a> zu finden.",
+			"nameHint":"Ein interner Name, um auf diesen OAuth-Client innerhalb von REI3 zu referenzieren.",
+			"scopes":"Scopes",
+			"scopesHint":"Scopes teilen dem Anbieter mit, was ein OAuth-Client tun oder worauf er zugreifen möchte. Sie werden vom Anbieter definiert und müssen dem Client zugewiesen werden, um nutzbar zu sein - eine Liste der verfügbaren Scopes sollte in der Dokumentation vom Anbieter zu finden sein.",
+			"template":"Vorlage",
+			"templateHint":"Eine Vorlage kann ausgewählt werden, um Standardeinstellungen für bekannte Anbieter anzuwenden.",
+			"tenant":"Mandant",
+			"tenantHint":"Bei einigen Anbietern erforderlich. Ein Mandant (oder \"Tenant\") ist ein Name oder eine ID, die eine Organisation im Cloud-System eines Anbieters eindeutig identifiziert.",
+			"title":"OAuth-Client '{NAME}'",
+			"titleNew":"Neuer OAuth-Client",
+			"tokenUrl":"Token-URL",
+			"tokenUrlHint":"URL, unter der OAuth2-Tokens generiert werden. Die Token-URL wird vom Anbieter definiert."
+		},
 		"repo":{
 			"button":{
 				"install":"Installieren",
@@ -604,6 +631,7 @@
 		"navigationMailSpooler":"E-Mail-Warteschlange",
 		"navigationMailTraffic":"E-Mail-Verkehr",
 		"navigationModules":"Anwendungen",
+		"navigationOauthClients":"OAuth-Clients",
 		"navigationRepo":"Repository",
 		"navigationRoles":"Mitgliedschaften",
 		"navigationScheduler":"Aufgabenplaner",

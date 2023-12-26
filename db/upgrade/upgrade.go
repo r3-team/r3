@@ -145,6 +145,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			DELETE FROM instance.config WHERE name = 'schemaTimestamp';
 			
 			-- oauth2 clients
+			ALTER TYPE instance.mail_account_auth_method ADD VALUE 'xoauth2';
+			
 			CREATE TABLE IF NOT EXISTS instance.oauth_client (
 				id SERIAL NOT NULL,
 			    name CHARACTER VARYING(64) NOT NULL,
@@ -155,18 +157,16 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			    token_url TEXT NOT NULL,
 			    CONSTRAINT oauth_clienty_pkey PRIMARY KEY (id)
 			);
-			
-			ALTER TYPE instance.mail_account_auth_method ADD VALUE 'xoauth2';
-			ALTER TABLE instance.mail_account ADD COLUMN oauth_client INTEGER;
-			ALTER TABLE instance.mail_account ADD CONSTRAINT mail_account_oauth_client_fkey
-				FOREIGN KEY (oauth_client)
+			ALTER TABLE instance.mail_account ADD COLUMN oauth_client_id INTEGER;
+			ALTER TABLE instance.mail_account ADD CONSTRAINT mail_account_oauth_client_id_fkey
+				FOREIGN KEY (oauth_client_id)
 				REFERENCES instance.oauth_client (id) MATCH SIMPLE
 				ON UPDATE NO ACTION
 				ON DELETE NO ACTION
 				DEFERRABLE INITIALLY DEFERRED;
 			
-			CREATE INDEX IF NOT EXISTS ind_mail_account_oauth_client
-			    ON instance.mail_account USING btree (oauth_client ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_mail_account_oauth_client_id_fkey
+			    ON instance.mail_account USING btree (oauth_client_id ASC NULLS LAST);
 		`)
 		return "3.7", err
 	},

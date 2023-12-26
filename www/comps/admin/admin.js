@@ -115,6 +115,12 @@ let MyAdmin = {
 				<span>{{ capApp.navigationLdaps }}</span>
 			</router-link>
 			
+			<!-- OAuth clients -->
+			<router-link class="entry clickable" tag="div" to="/admin/oauthclients" :class="{ inactive:!activated }">
+				<img src="images/cluster.png" />
+				<span>{{ capApp.navigationOauthClients }}</span>
+			</router-link>
+			
 			<!-- cluster -->
 			<router-link class="entry clickable" tag="div" to="/admin/cluster" :class="{ inactive:!activated }">
 				<img src="images/cluster.png" />
@@ -177,6 +183,7 @@ let MyAdmin = {
 			if(s.$route.path.includes('mailspooler'))    return s.capApp.navigationMailSpooler;
 			if(s.$route.path.includes('mailtraffic'))    return s.capApp.navigationMailTraffic;
 			if(s.$route.path.includes('modules'))        return s.capApp.navigationModules;
+			if(s.$route.path.includes('oauthclients'))   return s.capApp.navigationOauthClients;
 			if(s.$route.path.includes('repo'))           return s.capApp.navigationRepo;
 			if(s.$route.path.includes('roles'))          return s.capApp.navigationRoles;
 			if(s.$route.path.includes('scheduler'))      return s.capApp.navigationScheduler;

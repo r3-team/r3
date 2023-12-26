@@ -524,6 +524,33 @@
 			"update":"Mettre à jour",
 			"updateDone":"La mise à jour a été appliquée avec succès"
 		},
+		"oauthClient":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this OAuth client?<br /><br />This action is irreversible.</b>"
+			},
+			"option":{
+				"template":{
+					"custom":"-",
+					"ms365_mail":"O365 mailing"
+				}
+			},
+			"clientId":"Client ID",
+			"clientIdHint":"Generated on the provider side when creating an OAuth2 client.",
+			"clientSecret":"Client secret",
+			"clientSecretHint":"Generated on the provider side when or after creating an OAuth2 client. Must be a secret, client certificates are not supported.",
+			"intro":"An OAuth client authenticates against an identity provider to execute actions or access resources.<br /><br />REI3 implements the 'OAuth 2.0 client credentials grant flow', which requires that the OAuth client is registered with the provider before it can be setup here. The full documentation is available in the <a href=\"https://rei3.de/en/docs/admin\">admin docs</a>.",
+			"nameHint":"An internal name to reference this OAuth client inside of REI3.",
+			"scopes":"Scopes",
+			"scopesHint":"Scopes tell the provider, what an OAuth client wishes to do or access. They are defined by the provider and must be assigned to the client to be usable - please refer to the provider´s documentation for a list of available scopes.",
+			"template":"Template",
+			"templateHint":"Select a template to apply default settings for known providers.",
+			"tenant":"Tenant",
+			"tenantHint":"Required for some providers. A tenant is a name or ID, uniquely identifying your organization on the cloud system of your provider.",
+			"title":"OAuth client '{NAME}'",
+			"titleNew":"New OAuth client",
+			"tokenUrl":"Token URL",
+			"tokenUrlHint":"URL of where OAuth2 tokens are generated. These are documented by your provider."
+		},
 		"repo":{
 			"button":{
 				"install":"Installer",
@@ -604,6 +631,7 @@
 		"navigationMailSpooler":"Spooler email",
 		"navigationMailTraffic":"Trafic email",
 		"navigationModules":"Applications",
+		"navigationOauthClients":"OAuth clients",
 		"navigationRepo":"Référentiel",
 		"navigationRoles":"Adhésions",
 		"navigationScheduler":"Planificateur",
