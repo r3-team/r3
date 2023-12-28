@@ -453,24 +453,29 @@
 			"node":"Klaszter csomópont"
 		},
 		"mails":{
-			"dialog":{
-				"imapWarn":"Kérjük, vegye figyelembe, hogy az IMAP kapcsolat e-maileket tölt le, majd törli őket a kiválasztott postafiókból. Csak dedikált postafiókkal használja, és ne személyes e-mail fiókokhoz való hozzáférésre."
-			},
 			"option":{
 				"authMethod":{
 					"login":"LOGIN (O365 Legacy SMTP-hez)",
-					"plain":"PLAIN (Alapértelmezett)"
+					"plain":"PLAIN",
+					"xoauth2":"OAUTH 2.0"
 				}
 			},
 			"account":"E-mail fiók",
 			"accounts":"E-mail fiókok",
 			"accountAuthMethod":"Hitelesítési mód",
+			"accountAuthMethodHintLogin":"Basic authentication via username & password. Compatibility option for legacy SMTP authentication against Office 365.",
+			"accountAuthMethodHintPlain":"Basic authentication via username & password.",
+			"accountAuthMethodHintXOAuth2":"Authentication via OAuth 2.0, sometimes called 'Modern Authentication'. Required by some providers to access their services.",
 			"accountHost":"Kiszolgáló",
-			"accountMode":"Mód",
-			"accountNew":"Új fiók",
+			"accountMode":"Connector",
+			"accountModeHintImap":"Kérjük, vegye figyelembe, hogy az IMAP kapcsolat e-maileket tölt le, majd törli őket a kiválasztott postafiókból. Csak dedikált postafiókkal használja, és ne személyes e-mail fiókokhoz való hozzáférésre.",
+			"accountModeHintSmtp":"The SMTP connector sends email messages.",
+			"accountOauth":"OAuth client",
+			"accountOauthHint":"An OAuth client must be created before it can be selected here. Check the menu entry 'OAuth clients'.",
 			"accountPass":"Jelszó",
 			"accountPort":"Port",
 			"accountSendAs":"Küldő cím",
+			"accountSendAsHint":"By default, the sender address should be the same as the email address of the mailbox. Some email systems however allow multiple sender addresses for accounts.",
 			"accountStartTls":"STARTTLS",
 			"accountTest":"Teszt e-mail",
 			"accountUser":"Felhasználónév",
@@ -491,6 +496,8 @@
 			"testOk":"A teszt e-mail sikeresen hozzá lett adva a várólistához.",
 			"testRecipient":"Címzett e-mail címe",
 			"testSubject":"Tárgy",
+			"title":"Email account '{NAME}'",
+			"titleNew":"New email account",
 			"trafficKeepDays": "Keep data (in days)"
 		},
 		"modules":{

@@ -63,7 +63,7 @@ let MyAdminOauthClient = {
 					</tr>
 					<tr>
 						<td>{{ capApp.clientSecret }}*</td>
-						<td><input v-model="inputs.clientSecret" /></td>
+						<td><input v-model="inputs.clientSecret" type="password" /></td>
 						<td>{{ capApp.clientSecretHint }}</td>
 					</tr>
 					<tr v-if="isNew">
@@ -221,8 +221,6 @@ let MyAdminOauthClient = {
 			);
 		},
 		set() {
-			this.inputs.tokenUrl.replace('{TENANT}',this.inputs.tenant);
-			
 			ws.send('oauthClient','set',{
 				id:this.id,
 				name:this.inputs.name,
@@ -230,7 +228,7 @@ let MyAdminOauthClient = {
 				clientSecret:this.inputs.clientSecret,
 				scopes:this.inputs.scopes,
 				tenant:this.inputs.tenant,
-				tokenUrl:this.inputs.tokenUrl
+				tokenUrl:this.inputs.tokenUrl.replace('{TENANT}',this.inputs.tenant)
 			},true).then(
 				this.reloadAndClose,
 				this.$root.genericError

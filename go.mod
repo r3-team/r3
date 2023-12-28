@@ -25,6 +25,7 @@ require (
 	github.com/wneessen/go-mail v0.4.0
 	github.com/xlzd/gotp v0.1.0
 	golang.org/x/exp v0.0.0-20231214170342-aacd6d4b4611
+	golang.org/x/oauth2 v0.15.0
 )
 
 require (
@@ -32,6 +33,7 @@ require (
 	github.com/emersion/go-sasl v0.0.0-20231106173351-e73c9f7bad43 // indirect
 	github.com/emersion/go-textwrapper v0.0.0-20200911093747-65d896831594 // indirect
 	github.com/gofrs/uuid/v5 v5.0.0 // indirect
+	github.com/golang/protobuf v1.5.3 // indirect
 	github.com/google/uuid v1.5.0 // indirect
 	github.com/jackc/pgpassfile v1.0.0 // indirect
 	github.com/jackc/pgservicefile v0.0.0-20231201235250-de7065d80cb9 // indirect
@@ -39,4 +41,6 @@ require (
 	golang.org/x/net v0.19.0 // indirect
 	golang.org/x/sync v0.5.0 // indirect
 	golang.org/x/xerrors v0.0.0-20231012003039-104605ab7028 // indirect
+	google.golang.org/appengine v1.6.7 // indirect
+	google.golang.org/protobuf v1.31.0 // indirect
 )

@@ -38,7 +38,7 @@ let MyAdminOauthClients = {
 				</div>
 			</div>
 			
-			<my-admin-oauth-Client
+			<my-admin-oauth-client
 				v-if="idOpen !== null"
 				@close="idOpen = null;get()"
 				@makeNew="idOpen = 0"

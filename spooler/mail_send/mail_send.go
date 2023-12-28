@@ -2,9 +2,7 @@ package mail_send
 
 import (
 	"crypto/tls"
-	"errors"
 	"fmt"
-	"net/smtp"
 	"os"
 	"r3/cache"
 	"r3/data"
@@ -108,6 +106,18 @@ func do(m types.Mail) error {
 		return err
 	}
 
+	// get OAuth client token if used
+	if ma.OauthClientId.Valid {
+		c, err := cache.GetOauthClient(ma.OauthClientId.Int32)
+		if err != nil {
+			return err
+		}
+		ma.Password, err = tools.GetOAuthToken(c.ClientId, c.ClientSecret, c.Tenant, c.TokenUrl, c.Scopes)
+		if err != nil {
+			return err
+		}
+	}
+
 	// build mail
 	msg := mail.NewMsg()
 	msg.Subject(m.Subject)
@@ -202,7 +212,7 @@ func do(m types.Mail) error {
 		len(msg.GetAttachments())))
 
 	client, err := mail.NewClient(ma.HostName, mail.WithPort(int(ma.HostPort)),
-		mail.WithSMTPAuth(mail.SMTPAuthPlain), mail.WithUsername(ma.Username),
+		mail.WithUsername(ma.Username),
 		mail.WithPassword(ma.Password),
 		mail.WithTLSConfig(&tls.Config{ServerName: ma.HostName}))
 
@@ -215,10 +225,12 @@ func do(m types.Mail) error {
 
 	// apply authentication method
 	switch ma.AuthMethod {
-	case "plain":
-		client.SetSMTPAuth(mail.SMTPAuthPlain)
 	case "login":
 		client.SetSMTPAuth(mail.SMTPAuthLogin)
+	case "plain":
+		client.SetSMTPAuth(mail.SMTPAuthPlain)
+	case "xoauth2":
+		client.SetSMTPAuth(mail.SMTPAuthXOAUTH2)
 	default:
 		return fmt.Errorf("unsupported authentication method '%s'", ma.AuthMethod)
 	}
@@ -232,36 +244,12 @@ func do(m types.Mail) error {
 		INSERT INTO instance.mail_traffic (from_list, to_list, cc_list,
 			subject, date, files, mail_account_id, outgoing)
 		VALUES ($1,$2,$3,$4,$5,$6,$7,TRUE)
-	`, m.FromList, m.ToList, m.CcList, m.Subject, tools.GetTimeUnix(), fileList, m.AccountId); err != nil {
+	`, m.FromList, m.ToList, m.CcList, m.Subject,
+		tools.GetTimeUnix(), fileList, m.AccountId); err != nil {
+
 		return err
 	}
 	return nil
-}
-
-// legacy O365 SMTP login auth
-type loginAuthSimple struct {
-	username string
-	password string
-}
-
-func o365LoginAuth(username, password string) smtp.Auth {
-	return &loginAuthSimple{username, password}
-}
-func (a *loginAuthSimple) Start(server *smtp.ServerInfo) (string, []byte, error) {
-	return "LOGIN", []byte{}, nil
-}
-func (a *loginAuthSimple) Next(fromServer []byte, more bool) ([]byte, error) {
-	if more {
-		switch string(fromServer) {
-		case "Username:":
-			return []byte(a.username), nil
-		case "Password:":
-			return []byte(a.password), nil
-		default:
-			return nil, errors.New("Unkown fromServer")
-		}
-	}
-	return nil, nil
 }
 
 // helper

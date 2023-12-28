@@ -2,6 +2,7 @@ package request
 
 import (
 	"encoding/json"
+	"fmt"
 	"r3/cache"
 	"r3/db"
 	"r3/types"
@@ -26,11 +27,7 @@ func MailAccountDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) 
 }
 
 func MailAccountGet() (interface{}, error) {
-	var res struct {
-		Accounts map[int32]types.MailAccount `json:"accounts"`
-	}
-	res.Accounts = cache.GetMailAccountMap()
-	return res, nil
+	return cache.GetMailAccountMap(), nil
 }
 
 func MailAccountSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
@@ -41,6 +38,14 @@ func MailAccountSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) 
 
 	var err error
 	newRecord := req.Id == 0
+
+	if req.AuthMethod == "xoauth2" {
+		if !req.OauthClientId.Valid {
+			return nil, fmt.Errorf("Cannot set email account with OAuth authentication but no OAuth client")
+		}
+	} else {
+		req.OauthClientId.Valid = false
+	}
 
 	if newRecord {
 		_, err = tx.Exec(db.Ctx, `

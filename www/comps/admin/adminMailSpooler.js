@@ -228,7 +228,7 @@ let MyAdminMailSpooler = {
 		},
 		getAccounts() {
 			ws.send('mailAccount','get',{},true).then(
-				res => this.accountIdMap = res.payload.accounts,
+				res => this.accountIdMap = res.payload,
 				this.$root.genericError
 			);
 		}

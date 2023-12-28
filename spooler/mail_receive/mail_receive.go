@@ -9,6 +9,7 @@ import (
 	"r3/cache"
 	"r3/db"
 	"r3/log"
+	"r3/tools"
 	"r3/types"
 	"regexp"
 	"strings"
@@ -52,6 +53,20 @@ func DoAll() error {
 
 func do(ma types.MailAccount) error {
 
+	// get OAuth client token if used
+	usesXoauth2 := ma.OauthClientId.Valid
+	if usesXoauth2 {
+		c, err := cache.GetOauthClient(ma.OauthClientId.Int32)
+		if err != nil {
+			return err
+		}
+		ma.Password, err = tools.GetOAuthToken(c.ClientId, c.ClientSecret, c.Tenant, c.TokenUrl, c.Scopes)
+		if err != nil {
+			return err
+		}
+	}
+
+	// start IMAP client
 	var c *client.Client
 	var err error
 
@@ -74,8 +89,14 @@ func do(ma types.MailAccount) error {
 		}
 	}
 
-	if err := c.Login(ma.Username, ma.Password); err != nil {
-		return err
+	if usesXoauth2 {
+		if err := c.Authenticate(newXoauth2Client(ma.Username, ma.Password)); err != nil {
+			return err
+		}
+	} else {
+		if err := c.Login(ma.Username, ma.Password); err != nil {
+			return err
+		}
 	}
 
 	mbox, err := c.Select(imapFolder, false)

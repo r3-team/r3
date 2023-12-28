@@ -453,24 +453,29 @@
 			"node":"Cluster node"
 		},
 		"mails":{
-			"dialog":{
-				"imapWarn":"Please note that the IMAP connector loads and then deletes messages from the chosen mailbox. It should only be used with a dedicated mailbox and not to access personal mail accounts."
-			},
 			"option":{
 				"authMethod":{
-					"login":"LOGIN (for O365 legacy SMTP)",
-					"plain":"PLAIN (default)"
+					"login":"LOGIN (O365 legacy SMTP)",
+					"plain":"PLAIN",
+					"xoauth2":"OAUTH 2.0"
 				}
 			},
 			"account":"Cont de email",
 			"accounts":"Conturi de email",
-			"accountAuthMethod":"Auth. method",
+			"accountAuthMethod":"Authentication method",
+			"accountAuthMethodHintLogin":"Basic authentication via username & password. Compatibility option for legacy SMTP authentication against Office 365.",
+			"accountAuthMethodHintPlain":"Basic authentication via username & password.",
+			"accountAuthMethodHintXOAuth2":"Authentication via OAuth 2.0, sometimes called 'Modern Authentication'. Required by some providers to access their services.",
 			"accountHost":"Nume gazdă",
-			"accountMode":"Modul",
-			"accountNew":"Cont nou",
+			"accountMode":"Connector",
+			"accountModeHintImap":"The IMAP connector loads and then <b>deletes messages</b> from the chosen mailbox. It should only be used with a dedicated mailbox and not to access personal mail accounts.",
+			"accountModeHintSmtp":"The SMTP connector sends email messages.",
+			"accountOauth":"OAuth client",
+			"accountOauthHint":"An OAuth client must be created before it can be selected here. Check the menu entry 'OAuth clients'.",
 			"accountPass":"Parola",
 			"accountPort":"Portul",
 			"accountSendAs":"Adresa de trimitere",
+			"accountSendAsHint":"By default, the sender address should be the same as the email address of the mailbox. Some email systems however allow multiple sender addresses for accounts.",
 			"accountStartTls":"STARTTLS",
 			"accountTest":"Test email",
 			"accountUser":"Nume utilizator",
@@ -491,6 +496,8 @@
 			"testOk":"E-mailul de testare a fost adăugat cu succes la spooler.",
 			"testRecipient":"Adresa destinatarului",
 			"testSubject":"Subiectul",
+			"title":"Email account '{NAME}'",
+			"titleNew":"New email account",
 			"trafficKeepDays":"Keep data (in days)"
 		},
 		"modules":{

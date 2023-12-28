@@ -453,24 +453,29 @@
 			"node":"Cluster-Knoten"
 		},
 		"mails":{
-			"dialog":{
-				"imapWarn":"Bitte beachte, dass der IMAP-Konnektor E-Mails ladet und sie danach vom gewählten Postfach löscht. Er sollte nur mit einem dedizierten Postfach und nicht für den Zugriff auf persönliche E-Mail-Accounts verwendet werden."
-			},
 			"option":{
 				"authMethod":{
-					"login":"LOGIN (für O365 Legacy-SMTP)",
-					"plain":"PLAIN (Standard)"
+					"login":"LOGIN (O365 legacy SMTP)",
+					"plain":"PLAIN",
+					"xoauth2":"OAUTH 2.0"
 				}
 			},
 			"account":"E-Mail-Account",
 			"accounts":"E-Mail-Accounts",
-			"accountAuthMethod":"Auth-Methode",
+			"accountAuthMethod":"Authentifizierungsmethode",
+			"accountAuthMethodHintLogin":"Basis-Authentifizierung via Benutzername und Passwort. Kompatibilitätsoption für Legacy-SMTP-Authentifizierung gegenüber Office 365.",
+			"accountAuthMethodHintPlain":"Basis-Authentifizierung via Benutzername und Passwort.",
+			"accountAuthMethodHintXOAuth2":"Authentifizierung über OAuth 2.0, manchmal auch \"Moderne Authentifizierung\" genannt. Wird von einigen Anbietern für den Zugriff auf ihre Dienste benötigt.",
 			"accountHost":"Hostname",
-			"accountMode":"Modus",
-			"accountNew":"Neuer Account",
+			"accountMode":"Konnektor",
+			"accountModeHintImap":"Der IMAP-Konnector lädt und <b>löscht Nachrichten</b> aus der gewählten Mailbox. Er sollte nur mit einem dedizierten Postfach verwendet werden und nicht für den Zugriff auf persönliche E-Mail-Konten.",
+			"accountModeHintSmtp":"Der SMTP-Konnector versendet E-Mail-Nachrichten.",
+			"accountOauth":"OAuth-Client",
+			"accountOauthHint":"Ein OAuth-Client muss erstellt werden, bevor er hier ausgewählt werden kann. Zu finden in dem Menüeintrag \"OAuth-Clients\".",
 			"accountPass":"Passwort",
 			"accountPort":"Port",
 			"accountSendAs":"Sendeadresse",
+			"accountSendAsHint":"Standardmäßig sollte die Absenderadresse mit der E-Mail-Adresse des Postfachs identisch sein. Einige E-Mail-Systeme erlauben jedoch mehrere Absenderadressen für Konten.",
 			"accountStartTls":"STARTTLS",
 			"accountTest":"Test-E-Mail",
 			"accountUser":"Benutzername",
@@ -491,6 +496,8 @@
 			"testOk":"Test-E-Mail wurde erfolgreich zur Warteschlange hinzugefügt.",
 			"testRecipient":"Empfängeradresse",
 			"testSubject":"Betreff",
+			"title":"E-Mail-Account '{NAME}'",
+			"titleNew":"Neuer E-Mail-Account",
 			"trafficKeepDays":"Daten aufheben (in Tagen)"
 		},
 		"modules":{

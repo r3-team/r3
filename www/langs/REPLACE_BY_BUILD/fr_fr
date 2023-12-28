@@ -453,24 +453,29 @@
 			"node":"Nœud du cluster"
 		},
 		"mails":{
-			"dialog":{
-				"imapWarn":"Veuillez noter que le connecteur IMAP charge puis supprime les messages de la boîte aux lettres choisie. Il ne doit être utilisé qu'avec une boîte aux lettres dédiée et non pour accéder à des comptes de messagerie personnels."
-			},
 			"option":{
 				"authMethod":{
 					"login":"LOGIN (pour O365 legacy SMTP)",
-					"plain":"PLAIN (par défaut)"
+					"plain":"PLAIN",
+					"xoauth2":"OAUTH 2.0"
 				}
 			},
 			"account":"Compte de messagerie",
 			"accounts":"Comptes de messagerie",
 			"accountAuthMethod":"Méthode d'authentification",
+			"accountAuthMethodHintLogin":"Basic authentication via username & password. Compatibility option for legacy SMTP authentication against Office 365.",
+			"accountAuthMethodHintPlain":"Basic authentication via username & password.",
+			"accountAuthMethodHintXOAuth2":"Authentication via OAuth 2.0, sometimes called 'Modern Authentication'. Required by some providers to access their services.",
 			"accountHost":"Nom d'hôte",
-			"accountMode":"Mode",
-			"accountNew":"Nouveau compte",
+			"accountMode":"Connector",
+			"accountModeHintImap":"Veuillez noter que le connecteur IMAP charge puis supprime les messages de la boîte aux lettres choisie. Il ne doit être utilisé qu'avec une boîte aux lettres dédiée et non pour accéder à des comptes de messagerie personnels.",
+			"accountModeHintSmtp":"The SMTP connector sends email messages.",
+			"accountOauth":"OAuth client",
+			"accountOauthHint":"An OAuth client must be created before it can be selected here. Check the menu entry 'OAuth clients'.",
 			"accountPass":"Mot de passe",
 			"accountPort":"Port",
 			"accountSendAs":"Adresse d'envoi",
+			"accountSendAsHint":"By default, the sender address should be the same as the email address of the mailbox. Some email systems however allow multiple sender addresses for accounts.",
 			"accountStartTls":"STARTTLS",
 			"accountTest":"Test d'email",
 			"accountUser":"Nom d'utilisateur",
@@ -491,6 +496,8 @@
 			"testOk":"Le test d'email a été ajouté avec succès au spooler.",
 			"testRecipient":"Adresse du destinataire",
 			"testSubject":"Objet",
+			"title":"Email account '{NAME}'",
+			"titleNew":"New email account",
 			"trafficKeepDays":"Conserver les données (en jours)"
 		},
 		"modules":{
