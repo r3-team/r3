@@ -56,6 +56,7 @@ let MyBuilderField = {
 				/>
 				
 				<img class="action clickable"
+					v-if="field.fields.length > 1"
 					@click="$emit('field-property-set','wrap',toggleBool(field.wrap))"
 					@click.prevent.right="$emit('field-property-set','wrap',toggleBool(field.wrap))"
 					:src="field.wrap ? 'images/wrap1.png' : 'images/wrap0.png'"
