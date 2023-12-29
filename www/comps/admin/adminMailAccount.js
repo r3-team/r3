@@ -88,13 +88,19 @@ let MyAdminMailAccount = {
 					<tr v-if="isOauth">
 						<td>{{ capApp.accountOauth }}*</td>
 						<td>
-							<select
-								@change="inputs.oauthClientId = $event.target.value !== '' ? parseInt($event.target.value) : null"
-								:value="inputs.oauthClientId !== null ? String(inputs.oauthClientId) : ''"
-							>
-								<option value="">-</option>
-								<option v-for="o in oauthClientIdMap" :value="o.id">{{ o.name }}</option>
-							</select>
+							<div class="row centered">
+								<select
+									@change="inputs.oauthClientId = $event.target.value !== '' ? parseInt($event.target.value) : null"
+									:value="inputs.oauthClientId !== null ? String(inputs.oauthClientId) : ''"
+								>
+									<option value="">-</option>
+									<option v-for="o in oauthClientIdMap" :value="o.id">{{ o.name }}</option>
+								</select>
+								<my-button image="lockCog.png"
+									:active="false"
+									:naked="true"
+								/>
+							</div>
 						</td>
 						<td>{{ capApp.accountOauthHint }}</td>
 					</tr>

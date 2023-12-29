@@ -117,7 +117,7 @@ let MyAdmin = {
 			
 			<!-- OAuth clients -->
 			<router-link class="entry clickable" tag="div" to="/admin/oauthclients" :class="{ inactive:!activated }">
-				<img src="images/cluster.png" />
+				<img src="images/lockCog.png" />
 				<span>{{ capApp.navigationOauthClients }}</span>
 			</router-link>
 			

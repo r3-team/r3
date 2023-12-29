@@ -7,7 +7,7 @@ let MyAdminOauthClients = {
 	template:`<div class="admin-oauth-client contentBox grow">
 		<div class="top">
 			<div class="area">
-				<img class="icon" src="images/personTemplate.png" />
+				<img class="icon" src="images/lockCog.png" />
 				<h1>{{ menuTitle }}</h1>
 			</div>
 		</div>
@@ -15,6 +15,7 @@ let MyAdminOauthClients = {
 			<div class="area">
 				<my-button image="add.png"
 					@trigger="idOpen = 0"
+					:active="licenseValid"
 					:caption="capGen.button.new"
 				/>
 				<my-button image="refresh.png"
@@ -44,6 +45,7 @@ let MyAdminOauthClients = {
 				@makeNew="idOpen = 0"
 				:id="idOpen"
 				:oauthClientIdMap="oauthClientIdMap"
+				:readonly="!licenseValid"
 			/>
 		</div>
 	</div>`,
@@ -58,8 +60,9 @@ let MyAdminOauthClients = {
 	},
 	computed:{
 		// stores
-		capApp:(s) => s.$store.getters.captions.admin.oauthClient,
-		capGen:(s) => s.$store.getters.captions.generic
+		capApp:      (s) => s.$store.getters.captions.admin.oauthClient,
+		capGen:      (s) => s.$store.getters.captions.generic,
+		licenseValid:(s) => s.$store.getters.licenseValid
 	},
 	mounted() {
 		this.get();

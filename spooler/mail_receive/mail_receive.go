@@ -7,6 +7,7 @@ import (
 	"fmt"
 	"io"
 	"r3/cache"
+	"r3/config"
 	"r3/db"
 	"r3/log"
 	"r3/tools"
@@ -56,6 +57,9 @@ func do(ma types.MailAccount) error {
 	// get OAuth client token if used
 	usesXoauth2 := ma.OauthClientId.Valid
 	if usesXoauth2 {
+		if !config.GetLicenseActive() {
+			return errors.New("no valid license (required for OAuth clients)")
+		}
 		c, err := cache.GetOauthClient(ma.OauthClientId.Int32)
 		if err != nil {
 			return err

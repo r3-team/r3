@@ -7,7 +7,7 @@ let MyAdminOauthClient = {
 		<div class="contentBox admin-oauth-client float">
 			<div class="top">
 				<div class="area nowrap">
-					<img class="icon" src="images/personTemplate.png" />
+					<img class="icon" src="images/lockCog.png" />
 					<h1 class="title">{{ isNew ? capApp.titleNew : capApp.title.replace('{NAME}',inputs.name) }}</h1>
 				</div>
 				<div class="area">
@@ -33,11 +33,13 @@ let MyAdminOauthClient = {
 					<my-button image="add.png"
 						v-if="!isNew"
 						@trigger="$emit('makeNew')"
+						:active="!readonly"
 						:caption="capGen.button.new"
 					/>
 					<my-button image="delete.png"
 						v-if="!isNew"
 						@trigger="delAsk"
+						:active="!readonly"
 						:cancel="true"
 						:caption="capGen.button.delete"
 					/>
@@ -48,28 +50,28 @@ let MyAdminOauthClient = {
 				<table class="generic-table generic-table-vertical fullWidth">
 					<tr>
 						<td>{{ capGen.name }}*</td>
-						<td><input v-model="inputs.name" v-focus /></td>
+						<td><input v-model="inputs.name" :disabled="readonly" v-focus /></td>
 						<td>{{ capApp.nameHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.tenant }}</td>
-						<td><input v-model="inputs.tenant" /></td>
+						<td><input v-model="inputs.tenant" :disabled="readonly" /></td>
 						<td>{{ capApp.tenantHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.clientId }}*</td>
-						<td><input v-model="inputs.clientId" /></td>
+						<td><input v-model="inputs.clientId" :disabled="readonly" /></td>
 						<td>{{ capApp.clientIdHint }}</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.clientSecret }}*</td>
-						<td><input v-model="inputs.clientSecret" type="password" /></td>
+						<td><input v-model="inputs.clientSecret" :disabled="readonly" type="password" /></td>
 						<td>{{ capApp.clientSecretHint }}</td>
 					</tr>
 					<tr v-if="isNew">
 						<td>{{ capApp.template }}</td>
 						<td>
-							<select @change="applyTemplate($event.target.value)">
+							<select @change="applyTemplate($event.target.value)" :disabled="readonly">
 								<option value="custom">{{ capApp.option.template.custom }}</option>
 								<option value="ms365_mail">{{ capApp.option.template.ms365_mail }}</option>
 							</select>
@@ -83,11 +85,12 @@ let MyAdminOauthClient = {
 								<my-button image="cancel.png"
 									v-for="(s,i) in inputs.scopes"
 									@trigger="inputs.scopes.splice(i,1)"
+									:active="!readonly"
 									:caption="s"
 									:naked="true"
 								/>
 								<div class="row gap centered">
-									<input v-model="scopeLine" />
+									<input v-model="scopeLine" :disabled="readonly" />
 									<my-button image="save.png"
 										@trigger="inputs.scopes.push(scopeLine);scopeLine = ''"
 										:active="scopeLine !== ''"
@@ -99,7 +102,7 @@ let MyAdminOauthClient = {
 					</tr>
 					<tr>
 						<td>{{ capApp.tokenUrl }}*</td>
-						<td><input v-model="inputs.tokenUrl" /></td>
+						<td><input v-model="inputs.tokenUrl" :disabled="readonly" /></td>
 						<td>{{ capApp.tokenUrlHint }}</td>
 					</tr>
 					<tr>
@@ -110,8 +113,9 @@ let MyAdminOauthClient = {
 		</div>
 	</div>`,
 	props:{
-		id:              { type:Number, required:true },
-		oauthClientIdMap:{ type:Object, required:true }
+		id:              { type:Number,  required:true },
+		oauthClientIdMap:{ type:Object,  required:true },
+		readonly:        { type:Boolean, required:true }
 	},
 	emits:['close','makeNew'],
 	watch:{
@@ -146,7 +150,9 @@ let MyAdminOauthClient = {
 		} : s.oauthClientIdMap[s.id],
 		
 		// simple states
-		canSave:(s) => s.isReady &&
+		canSave:(s) =>
+			s.isReady &&
+			!s.readonly &&
 			s.hasChanges &&
 			s.inputs.name          !== '' &&
 			s.inputs.clientId      !== '' &&

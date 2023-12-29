@@ -2,9 +2,11 @@ package mail_send
 
 import (
 	"crypto/tls"
+	"errors"
 	"fmt"
 	"os"
 	"r3/cache"
+	"r3/config"
 	"r3/data"
 	"r3/db"
 	"r3/log"
@@ -108,6 +110,9 @@ func do(m types.Mail) error {
 
 	// get OAuth client token if used
 	if ma.OauthClientId.Valid {
+		if !config.GetLicenseActive() {
+			return errors.New("no valid license (required for OAuth clients)")
+		}
 		c, err := cache.GetOauthClient(ma.OauthClientId.Int32)
 		if err != nil {
 			return err
