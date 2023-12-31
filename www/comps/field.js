@@ -84,7 +84,7 @@ let MyField = {
 		 		v-click-outside="clickOutside"
 			>
 				<!-- data field icon -->
-				<div class="field-icon" v-if="iconId && isData && !isRelationship && !isFiles && !isRichtext && !isTextarea">
+				<div class="field-icon" v-if="iconId && isData && !isRelationship && !isDrawing && !isFiles && !isRichtext && !isTextarea">
 					<img :src="srcBase64(iconIdMap[iconId].file)" />
 				</div>
 				
@@ -456,7 +456,13 @@ let MyField = {
 					:formLoading="formLoading"
 					:isHidden="isHidden"
 					:readonly="isReadonly"
-				/>
+				>
+					<template #input-icon>
+						<div class="field-icon" v-if="iconId">
+							<img :src="srcBase64(iconIdMap[iconId].file)" />
+						</div>
+					</template>
+				</my-input-drawing>
 				
 				<!-- boolean input -->
 				<my-bool

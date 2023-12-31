@@ -7,6 +7,7 @@ let MyInputDraw = {
 	template:`<div class="input-draw">
 		<div class="actions">
 			<div class="range">
+				<slot name="input-icon" />
 				<my-button image="drawing.png"
 					v-if="!readonly"
 					@trigger="strokeWidth = strokeWidthDef"
