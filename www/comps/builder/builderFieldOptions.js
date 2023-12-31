@@ -398,7 +398,7 @@ let MyBuilderFieldOptions = {
 						</div>
 					</td>
 				</tr>
-				<tr v-if="!isRelationship && !isRegconfig">
+				<tr v-if="!isDrawing && !isRelationship && !isRegconfig">
 					<td>{{ capApp.fieldMin }}</td>
 					<td>
 						<input
@@ -407,7 +407,7 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<tr v-if="!isRelationship && !isRegconfig">
+				<tr v-if="!isDrawing && !isRelationship && !isRegconfig">
 					<td>{{ capApp.fieldMax }}</td>
 					<td>
 						<input
@@ -427,7 +427,7 @@ let MyBuilderFieldOptions = {
 						</select>
 					</td>
 				</tr>
-				<tr v-if="!isFiles && !isRelationship">
+				<tr v-if="!isFiles && !isDrawing && !isRelationship">
 					<td>{{ capApp.fieldClipboard }}</td>
 					<td>
 						<my-bool
@@ -436,7 +436,7 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<tr v-if="!isRelationship">
+				<tr v-if="!isDrawing && !isRelationship">
 					<td>{{ capApp.fieldRegexCheck }}</td>
 					<td>
 						<input
@@ -447,7 +447,7 @@ let MyBuilderFieldOptions = {
 				</tr>
 				
 				<!-- default values -->
-				<tr v-if="!isFiles && !isRelationship">
+				<tr v-if="!isFiles && !isDrawing && !isRelationship">
 					<td>{{ capApp.fieldDefault }}</td>
 					<td>
 						<input
@@ -457,7 +457,7 @@ let MyBuilderFieldOptions = {
 						/>
 					</td>
 				</tr>
-				<tr v-if="!isFiles && field.def === ''">
+				<tr v-if="!isFiles && !isDrawing && field.def === ''">
 					<td>{{ capApp.collectionIdDef }}</td>
 					<td>
 						<my-builder-collection-input
@@ -1320,6 +1320,7 @@ let MyBuilderFieldOptions = {
 		isDate:          (s) => s.isData && s.attribute.contentUse === 'date',
 		isDatetime:      (s) => s.isData && s.attribute.contentUse === 'datetime',
 		isDisplayDefault:(s) => s.isData && s.attribute.contentUse === 'default',
+		isDrawing:       (s) => s.isData && s.attribute.contentUse === 'drawing',
 		isHeader:        (s) => s.field.content === 'header',
 		isList:          (s) => s.field.content === 'list',
 		isKanban:        (s) => s.field.content === 'kanban',
