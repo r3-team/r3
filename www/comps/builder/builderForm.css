@@ -116,6 +116,9 @@
 	/* to overwrite bad size inputs */
 	min-width:50px !important;
 }
+.builder-field.noGrow{
+	flex-grow:0;
+}
 .builder-field.tabs{
 	background-color:var(--color-form-builder-tabs);
 }

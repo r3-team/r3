@@ -1,13 +1,16 @@
 import MyBuilderCaption          from './builderCaption.js';
 import MyBuilderFields           from './builderFields.js';
 import {MyBuilderColumns}        from './builderColumns.js';
-import {isAttributeRelationship} from '../shared/attribute.js';
 import {getFieldIcon}            from '../shared/field.js';
 import {getFlexBasis}            from '../shared/form.js';
 import {
 	getFieldHasQuery,
 	getItemTitle
 } from '../shared/builder.js';
+import {
+	isAttributeFiles,
+	isAttributeRelationship
+} from '../shared/attribute.js';
 import {
 	getJoinsIndexMap,
 	getQueryExpressions,
@@ -301,6 +304,10 @@ let MyBuilderField = {
 				container:s.isContainer,
 				isTemplate:s.isTemplate,
 				notData:!s.isData,
+				noGrow:s.flexDirParent === 'column' && (s.isHeader || (
+					s.isData && !s.isRelationship1N && !s.isRichtext &&
+					!s.isTextarea && !s.isDrawing && !s.isFiles && !s.isIframe)
+				),
 				selected:s.isSelected,
 				tabs:s.isTabs
 			};
@@ -391,23 +398,29 @@ let MyBuilderField = {
 		},
 		
 		// simple
-		hasQuery:      (s) => s.getFieldHasQuery(s.field),
-		isButton:      (s) => s.field.content === 'button',
-		isCalendar:    (s) => s.field.content === 'calendar',
-		isContainer:   (s) => s.field.content === 'container',
-		isData:        (s) => s.field.content === 'data',
-		isGantt:       (s) => s.isCalendar && s.field.gantt,
-		isHeader:      (s) => s.field.content === 'header',
-		isKanban:      (s) => s.field.content === 'kanban',
-		isList:        (s) => s.field.content === 'list',
-		isTabs:        (s) => s.field.content === 'tabs',
-		isSelected:    (s) => s.field.id      === s.fieldIdShow,
-		isRelationship:(s) => !s.isData ? false : s.isAttributeRelationship(s.attribute.content),
-		parentChildren:(s) => s.isContainer ? s.field.fields : (s.isTabs ? s.field.tabs[s.tabIndex].fields : []),
-		moveActive:    (s) => s.fieldMoveList !== null,
-		reference:     (s) => s.isTemplate ? '' : 'F' + s.entityIdMapRef.field[s.field.id],
-		showColumns:   (s) => !s.isTemplate && s.hasQuery && ((s.fieldIdShow === s.field.id && s.fieldIdShowTab === 'content') || s.showColumnsAll),
-		tabIndexShown: (s) => s.isTabs && s.field.tabs.length > s.tabIndex ? s.tabIndex : 0,
+		hasQuery:        (s) => s.getFieldHasQuery(s.field),
+		isButton:        (s) => s.field.content === 'button',
+		isCalendar:      (s) => s.field.content === 'calendar',
+		isContainer:     (s) => s.field.content === 'container',
+		isData:          (s) => s.field.content === 'data',
+		isDrawing:       (s) => s.isData && s.attribute.contentUse === 'drawing',
+		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
+		isGantt:         (s) => s.isCalendar && s.field.gantt,
+		isHeader:        (s) => s.field.content === 'header',
+		isIframe:        (s) => s.isData && s.attribute.contentUse === 'iframe',
+		isKanban:        (s) => s.field.content === 'kanban',
+		isList:          (s) => s.field.content === 'list',
+		isRichtext:      (s) => s.isData && s.attribute.contentUse === 'richtext',
+		isTabs:          (s) => s.field.content === 'tabs',
+		isTextarea:      (s) => s.isData && s.attribute.contentUse === 'textarea',
+		isSelected:      (s) => s.field.id      === s.fieldIdShow,
+		isRelationship:  (s) => s.isData && s.isAttributeRelationship(s.attribute.content),
+		isRelationship1N:(s) => s.isRelationship && s.field.outsideIn === true && s.attribute.content === 'n:1',
+		parentChildren:  (s) => s.isContainer ? s.field.fields : (s.isTabs ? s.field.tabs[s.tabIndex].fields : []),
+		moveActive:      (s) => s.fieldMoveList !== null,
+		reference:       (s) => s.isTemplate ? '' : 'F' + s.entityIdMapRef.field[s.field.id],
+		showColumns:     (s) => !s.isTemplate && s.hasQuery && ((s.fieldIdShow === s.field.id && s.fieldIdShowTab === 'content') || s.showColumnsAll),
+		tabIndexShown:   (s) => s.isTabs && s.field.tabs.length > s.tabIndex ? s.tabIndex : 0,
 		
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
@@ -430,6 +443,7 @@ let MyBuilderField = {
 		getQueryExpressions,
 		getQueryFiltersProcessed,
 		getRelationsJoined,
+		isAttributeFiles,
 		isAttributeRelationship,
 		
 		// actions

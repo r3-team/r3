@@ -451,7 +451,7 @@ let MyField = {
 				
 				<!-- drawing input -->
 				<my-input-drawing
-					v-if="isDrawingInput"
+					v-if="isDrawing"
 					v-model="value"
 					:formLoading="formLoading"
 					:isHidden="isHidden"
@@ -770,6 +770,9 @@ let MyField = {
 			if(s.isHeader && s.field.richtext)
 				out.push('headerRichtext');
 			
+			if(s.flexDirParent === 'column' && (s.isHeader || s.isLineSingle))
+				out.push('noGrow');
+			
 			return out;
 		},
 		domStyle:(s) => !s.isContainer ? '' : s.getFlexStyle(
@@ -995,19 +998,17 @@ let MyField = {
 		
 		// bool states
 		isLineInput:(s) => s.isData
-			&& !s.isBoolean
-			&& !s.isColor
-			&& !s.isDateInput
-			&& !s.isDrawingInput
-			&& !s.isFiles
-			&& !s.isIframe
-			&& !s.isLogin
-			&& !s.isSlider
-			&& !s.isTextarea
-			&& !s.isRegconfig
-			&& !s.isRelationship
-			&& !s.isRichtext
+			&& !s.isBoolean      && !s.isColor
+			&& !s.isDateInput    && !s.isDrawing
+			&& !s.isFiles        && !s.isIframe
+			&& !s.isLogin        && !s.isSlider
+			&& !s.isTextarea     && !s.isRegconfig
+			&& !s.isRelationship && !s.isRichtext
 			&& !s.isUuid,
+		isLineSingle:(s) => s.isData && (
+			s.isLineInput || s.isBoolean || s.isColor || s.isDateInput ||
+			s.isRegconfig || s.isUuid || (s.isRelationship && !s.isRelationship1N)
+		),
 		isValid:(s) => {
 			if(!s.isData || s.isReadonly) return true;
 			if(s.value === null)          return !s.isRequired;
@@ -1053,7 +1054,7 @@ let MyField = {
 		customErr:  (s) => typeof s.fieldIdMapError[s.field.id] !== 'undefined'
 			&& s.fieldIdMapError[s.field.id] !== null ? s.fieldIdMapError[s.field.id] : null,
 		hasCaption: (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
-		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawingInput && !s.isFiles,
+		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles,
 		inputRegex: (s) => !s.isData || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),
 		link:       (s) => !s.isData ? false : s.getLinkMeta(s.field.display,s.value),
 		showInvalid:(s) => !s.isValid && (s.formBadSave || !s.notTouched),
@@ -1093,7 +1094,7 @@ let MyField = {
 		isDateInput:     (s) => s.isData && s.isDatetime || s.isDate || s.isTime,
 		isDateRange:     (s) => s.isDateInput && s.field.attributeIdAlt !== null,
 		isDecimal:       (s) => s.isData && s.isAttributeDecimal(s.attribute.content),
-		isDrawingInput:  (s) => s.isData && s.attribute.contentUse === 'drawing',
+		isDrawing:       (s) => s.isData && s.attribute.contentUse === 'drawing',
 		isDropdown:      (s) => s.isData && (s.isRelationship || s.isDateInput || s.isLogin || s.isColor || s.isRegconfig),
 		isFiles:         (s) => s.isData && s.isAttributeFiles(s.attribute.content),
 		isIframe:        (s) => s.isData && s.attribute.contentUse === 'iframe',
