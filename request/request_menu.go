@@ -35,28 +35,6 @@ func MenuDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	return nil, menu.Del_tx(tx, req.Id)
 }
 
-func MenuGet(reqJson json.RawMessage) (interface{}, error) {
-
-	var (
-		err error
-		req struct {
-			ModuleId uuid.UUID `json:"moduleId"`
-		}
-		res struct {
-			Menus []types.Menu `json:"menus"`
-		}
-	)
-
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-	res.Menus, err = menu.Get(req.ModuleId, pgtype.UUID{})
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func MenuSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req []types.Menu

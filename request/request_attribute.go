@@ -29,28 +29,6 @@ func AttributeDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	return nil, attribute.Del_tx(tx, req.Id)
 }
 
-func AttributeGet(reqJson json.RawMessage) (interface{}, error) {
-	var (
-		err error
-		req struct {
-			RelationId uuid.UUID `json:"relationId"`
-		}
-		res struct {
-			Attributes []types.Attribute `json:"attributes"`
-		}
-	)
-
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-
-	res.Attributes, err = attribute.Get(req.RelationId)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func AttributeSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req types.Attribute
 	if err := json.Unmarshal(reqJson, &req); err != nil {

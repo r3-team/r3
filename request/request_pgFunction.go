@@ -67,18 +67,6 @@ func PgFunctionExec_tx(tx pgx.Tx, reqJson json.RawMessage, onlyFrontendFnc bool)
 	return returnIf, nil
 }
 
-func PgFunctionGet(reqJson json.RawMessage) (interface{}, error) {
-
-	var req struct {
-		ModuleId uuid.UUID `json:"moduleId"`
-	}
-
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-	return pgFunction.Get(req.ModuleId)
-}
-
 func PgFunctionSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 
 	var req types.PgFunction

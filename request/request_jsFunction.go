@@ -21,18 +21,6 @@ func JsFunctionDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	return nil, jsFunction.Del_tx(tx, req.Id)
 }
 
-func JsFunctionGet(reqJson json.RawMessage) (interface{}, error) {
-
-	var req struct {
-		ModuleId uuid.UUID `json:"moduleId"`
-	}
-
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-	return jsFunction.Get(req.ModuleId)
-}
-
 func JsFunctionSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req types.JsFunction
 

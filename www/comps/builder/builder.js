@@ -119,6 +119,13 @@ let MyBuilder = {
 						<img src="images/fileImage.png" />
 						<span>{{ capApp.navigationIcons }}</span>
 					</router-link>
+					
+					<router-link class="entry clickable"
+						:to="'/builder/caption-map/'+module.id"
+					>
+						<img src="images/languages.png" />
+						<span>{{ capApp.navigationCaptionMap }}</span>
+					</router-link>
 				</div>
 				<div class="navigation-column">
 					<router-link class="entry clickable"

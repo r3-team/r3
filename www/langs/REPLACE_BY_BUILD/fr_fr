@@ -86,6 +86,7 @@
 		"appName":"REI3",
 		"appWebsite":"https://rei3.de",
 		"attribute":"Attribut",
+		"attributes":"Attributes",
 		"available":"Disponible",
 		"before":"Avant",
 		"busy":"En cours - Cliquez ici pour annuler",
@@ -110,6 +111,7 @@
 		"files":"Fichiers",
 		"filters":"Filtres",
 		"form":"Formulaire",
+		"forms":"Forms",
 		"help":"Aide",
 		"home":"Accueil",
 		"icon":"Icône",
@@ -132,6 +134,7 @@
 		"limit":"Limite",
 		"loginForm":"Formulaire de connexion",
 		"menu":"Menu",
+		"menus":"Menus",
 		"missingCaption":"LÉGENDE MANQUANTE",
 		"more":"Plus",
 		"name":"Nom",
@@ -146,12 +149,14 @@
 		"readonly":"Lecture seule",
 		"record":"Enregistrement",
 		"relation":"Relation",
+		"relations":"Relations",
 		"relationship":"Relation",
 		"relationships":"Relations",
 		"results":"{CNT} résultats",
 		"resultsNone":"- aucun résultat -",
 		"resultsOf":"/ {CNT}",
 		"role":"Rôle",
+		"roles":"Roles",
 		"selected":"Sélectionné",
 		"selectedMaxOne":"Sélectionné (max. 1)",
 		"settings":"Paramètres",
@@ -1520,6 +1525,7 @@
 		"noOwner":"L'application est en mode lecture seule",
 		"navigationApis":"API",
 		"navigationArticles":"Articles d'aide",
+		"navigationCaptionMap":"Captions",
 		"navigationCollections":"Collections",
 		"navigationFilterHint":"Filtrer par texte",
 		"navigationForms":"Formulaires",
@@ -1595,6 +1601,9 @@
 		"weekDayShort4":"Jeu",
 		"weekDayShort5":"Ven",
 		"weekDayShort6":"Sam"
+	},
+	"captionMap":{
+		"title":"Caption map"
 	},
 	"error":{
 		"APP":{

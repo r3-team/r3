@@ -86,6 +86,7 @@
 		"appName":"REI3",
 		"appWebsite":"https://rei3.de",
 		"attribute":"Attribute",
+		"attributes":"Attributes",
 		"available":"Available",
 		"before":"Before",
 		"busy":"Working - Click here to abort",
@@ -110,6 +111,7 @@
 		"files":"Files",
 		"filters":"Filters",
 		"form":"Form",
+		"forms":"Forms",
 		"help":"Help",
 		"home":"Home",
 		"icon":"Icon",
@@ -132,6 +134,7 @@
 		"limit":"Limit",
 		"loginForm":"Login form",
 		"menu":"Menu",
+		"menus":"Menus",
 		"missingCaption":"MISSING CAPTION",
 		"more":"More",
 		"name":"Name",
@@ -146,12 +149,14 @@
 		"readonly":"Readonly",
 		"record":"Record",
 		"relation":"Relation",
+		"relations":"Relations",
 		"relationship":"Relationship",
 		"relationships":"Relationships",
 		"results":"{CNT} results",
 		"resultsNone":"- no results -",
 		"resultsOf":"/ {CNT}",
 		"role":"Role",
+		"roles":"Roles",
 		"selected":"Selected",
 		"selectedMaxOne":"Selected (max. 1)",
 		"settings":"Settings",
@@ -1520,6 +1525,7 @@
 		"noOwner":"Application is in read-only mode",
 		"navigationApis":"APIs",
 		"navigationArticles":"Help articles",
+		"navigationCaptionMap":"Captions",
 		"navigationCollections":"Collections",
 		"navigationFilterHint":"Filter by text",
 		"navigationForms":"Forms",
@@ -1595,6 +1601,9 @@
 		"weekDayShort4":"Thu",
 		"weekDayShort5":"Fri",
 		"weekDayShort6":"Sat"
+	},
+	"captionMap":{
+		"title":"Caption map"
 	},
 	"error":{
 		"APP":{

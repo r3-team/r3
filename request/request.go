@@ -231,8 +231,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return AttributeDel_tx(tx, reqJson)
 		case "delCheck":
 			return AttributeDelCheck_tx(tx, reqJson)
-		case "get":
-			return AttributeGet(reqJson)
 		case "set":
 			return AttributeSet_tx(tx, reqJson)
 		}
@@ -245,6 +243,13 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		switch action {
 		case "get":
 			return BruteforceGet(reqJson)
+		}
+	case "captionMap":
+		switch action {
+		case "get":
+			return CaptionMapGet(reqJson)
+		case "setOne":
+			return CaptionMapSetOne_tx(tx, reqJson)
 		}
 	case "collection":
 		switch action {
@@ -294,8 +299,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return FormCopy_tx(tx, reqJson)
 		case "del":
 			return FormDel_tx(tx, reqJson)
-		case "get":
-			return FormGet(reqJson)
 		case "set":
 			return FormSet_tx(tx, reqJson)
 		}
@@ -310,8 +313,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		switch action {
 		case "del":
 			return JsFunctionDel_tx(tx, reqJson)
-		case "get":
-			return JsFunctionGet(reqJson)
 		case "set":
 			return JsFunctionSet_tx(tx, reqJson)
 		}
@@ -376,8 +377,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		switch action {
 		case "del":
 			return LoginFormDel_tx(tx, reqJson)
-		case "get":
-			return LoginFormGet(reqJson)
 		case "set":
 			return LoginFormSet_tx(tx, reqJson)
 		}
@@ -421,8 +420,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return MenuCopy_tx(tx, reqJson)
 		case "del":
 			return MenuDel_tx(tx, reqJson)
-		case "get":
-			return MenuGet(reqJson)
 		case "set":
 			return MenuSet_tx(tx, reqJson)
 		}
@@ -462,8 +459,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 			return PgFunctionDel_tx(tx, reqJson)
 		case "execAny": // admin may exec any non-trigger backend function
 			return PgFunctionExec_tx(tx, reqJson, false)
-		case "get":
-			return PgFunctionGet(reqJson)
 		case "set":
 			return PgFunctionSet_tx(tx, reqJson)
 		}
@@ -523,8 +518,6 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		switch action {
 		case "del":
 			return RoleDel_tx(tx, reqJson)
-		case "get":
-			return RoleGet(reqJson)
 		case "set":
 			return RoleSet_tx(tx, reqJson)
 		}

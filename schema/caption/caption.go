@@ -34,6 +34,10 @@ func Get(entity string, id uuid.UUID, expectedContents []string) (types.CaptionM
 		if err := rows.Scan(&code, &content, &value); err != nil {
 			return caps, err
 		}
+
+		if _, exists := caps[content]; !exists {
+			return caps, fmt.Errorf("caption content '%s' was unexpected", content)
+		}
 		caps[content][code] = value
 	}
 	return caps, nil
@@ -75,6 +79,7 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, captions types.CaptionMap) error {
 	return nil
 }
 
+// helpers
 func getEntityName(content string) (string, error) {
 
 	switch content {

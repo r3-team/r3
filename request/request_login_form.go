@@ -24,26 +24,6 @@ func LoginFormDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	return nil, nil
 }
 
-func LoginFormGet(reqJson json.RawMessage) (interface{}, error) {
-
-	var (
-		err error
-		req struct {
-			ModuleId uuid.UUID `json:"moduleId"`
-		}
-		res []types.LoginForm
-	)
-
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-	res, err = loginForm.Get(req.ModuleId)
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func LoginFormSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req types.LoginForm
 

@@ -38,6 +38,7 @@ import MyBuilder            from './comps/builder/builder.js';
 import MyBuilderApi         from './comps/builder/builderApi.js';
 import MyBuilderApis        from './comps/builder/builderApis.js';
 import MyBuilderArticles    from './comps/builder/builderArticles.js';
+import MyBuilderCaptionMap  from './comps/builder/builderCaptionMap.js';
 import MyBuilderCollection  from './comps/builder/builderCollection.js';
 import MyBuilderCollections from './comps/builder/builderCollections.js';
 import MyBuilderForm        from './comps/builder/builderForm.js';
@@ -211,6 +212,11 @@ const MyRouter = VueRouter.createRouter({
 				path:'widgets/:id',
 				meta:{ nav:'widgets', target:'module' },
 				component:MyBuilderWidgets,
+				props:true
+			},{
+				path:'caption-map/:id',
+				meta:{ nav:'caption-map', target:'module' },
+				component:MyBuilderCaptionMap,
 				props:true
 			}
 		]

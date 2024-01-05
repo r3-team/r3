@@ -86,6 +86,7 @@
 		"appName":"REI3",
 		"appWebsite":"https://rei3.de",
 		"attribute":"Attribut",
+		"attributes":"Attribute",
 		"available":"Verfügbar",
 		"before":"Davor",
 		"busy":"Arbeitet - Zum Abbrechen hier klicken",
@@ -110,6 +111,7 @@
 		"files":"Dateien",
 		"filters":"Filter",
 		"form":"Formular",
+		"forms":"Formulare",
 		"home":"Start",
 		"help":"Hilfe",
 		"icon":"Icon",
@@ -132,6 +134,7 @@
 		"limit":"Anzahl",
 		"loginForm":"Anmeldeformular",
 		"menu":"Menü",
+		"menus":"Menüs",
 		"missingCaption":"MISSING CAPTION",
 		"more":"Mehr",
 		"name":"Name",
@@ -146,12 +149,14 @@
 		"readonly":"Schreibschutz",
 		"record":"Datensatz",
 		"relation":"Relation",
+		"relations":"Relationen",
 		"relationship":"Beziehung",
 		"relationships":"Beziehungen",
 		"results":"{CNT} Ergebnisse",
 		"resultsNone":"- keine Ergebnisse -",
 		"resultsOf":"/ {CNT}",
 		"role":"Rolle",
+		"roles":"Rollen",
 		"selected":"Ausgewählt",
 		"selectedMaxOne":"Ausgewählt (max. 1)",
 		"settings":"Einstellungen",
@@ -1520,6 +1525,7 @@
 		"noOwner":"Anwendung ist schreibgeschützt",
 		"navigationApis":"APIs",
 		"navigationArticles":"Hilfe-Artikel",
+		"navigationCaptionMap":"Beschriftungen",
 		"navigationCollections":"Sammlungen",
 		"navigationFilterHint":"Nach Text filtern",
 		"navigationForms":"Formulare",
@@ -1595,6 +1601,9 @@
 		"weekDayShort4":"Do",
 		"weekDayShort5":"Fr",
 		"weekDayShort6":"Sa"
+	},
+	"captionMap":{
+		"title":"Beschriftungen"
 	},
 	"error":{
 		"APP":{

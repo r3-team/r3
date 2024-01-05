@@ -1,7 +1,6 @@
 import MyBuilderCaption          from './builderCaption.js';
 import MyBuilderFields           from './builderFields.js';
 import {MyBuilderColumns}        from './builderColumns.js';
-import {getFieldIcon}            from '../shared/field.js';
 import {getFlexBasis}            from '../shared/form.js';
 import {
 	getFieldHasQuery,
@@ -11,6 +10,10 @@ import {
 	isAttributeFiles,
 	isAttributeRelationship
 } from '../shared/attribute.js';
+import {
+	getFieldIcon,
+	getFieldTitle
+} from '../shared/field.js';
 import {
 	getJoinsIndexMap,
 	getQueryExpressions,
@@ -363,20 +366,6 @@ let MyBuilderField = {
 			if(s.filterDataNm && s.field.attributeIdNm !== null) return true;
 			return false;
 		},
-		title:(s) => {
-			switch(s.field.content) {
-				case 'button':    return 'Button';    break;
-				case 'chart':     return 'Chart';     break;
-				case 'container': return 'Container'; break;
-				case 'header':    return 'Label';     break;
-				case 'tabs':      return 'Tabs';      break;
-				case 'calendar':  return s.field.gantt ? 'Gantt' : 'Calendar'; break;
-				case 'data':      return s.getItemTitle(s.field.attributeId,s.field.index,s.field.outsideIn,s.field.attributeIdNm); break;
-				case 'kanban':    return s.field.query.relationId === null ? 'Kanban' : `Kanban: ${s.relationIdMap[s.field.query.relationId].name}`; break;
-				case 'list':      return s.field.query.relationId === null ? 'List' : `List: ${s.relationIdMap[s.field.query.relationId].name}`; break;
-			}
-			return '';
-		},
 		warnings:(s) => {
 			let out = [];
 			if(s.hasQuery) {
@@ -421,6 +410,7 @@ let MyBuilderField = {
 		reference:       (s) => s.isTemplate ? '' : 'F' + s.entityIdMapRef.field[s.field.id],
 		showColumns:     (s) => !s.isTemplate && s.hasQuery && ((s.fieldIdShow === s.field.id && s.fieldIdShowTab === 'content') || s.showColumnsAll),
 		tabIndexShown:   (s) => s.isTabs && s.field.tabs.length > s.tabIndex ? s.tabIndex : 0,
+		title:           (s) => s.getFieldTitle(s.field),
 		
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
@@ -437,6 +427,7 @@ let MyBuilderField = {
 		// externals
 		getFieldHasQuery,
 		getFieldIcon,
+		getFieldTitle,
 		getFlexBasis,
 		getItemTitle,
 		getJoinsIndexMap,

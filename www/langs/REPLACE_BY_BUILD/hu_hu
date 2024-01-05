@@ -86,6 +86,7 @@
 		"appName":"REI3",
 		"appWebsite":"https://rei3.de",
 		"attribute":"Attribútum",
+		"attributes":"Attributes",
 		"available":"Elérhető",
 		"before":"Before",
 		"busy":"Folyamatban - Kattintson ide a megszakításhoz",
@@ -110,6 +111,7 @@
 		"files":"Fájlok",
 		"filters":"Szűrők",
 		"form":"Űrlap",
+		"forms":"Forms",
 		"home":"Kezdőlap",
 		"help":"Segítség",
 		"icon":"Ikon",
@@ -132,6 +134,7 @@
 		"limit":"Korlát",
 		"loginForm":"Login form",
 		"menu":"Menü",
+		"menus":"Menus",
 		"missingCaption":"HIÁNYZÓ CÍM",
 		"more":"Továbbiak",
 		"name":"Név",
@@ -146,12 +149,14 @@
 		"readonly":"Csak olvasható",
 		"record":"Rekord",
 		"relation":"Reláció",
+		"relations":"Relations",
 		"relationship":"Kapcsolat",
 		"relationships":"Kapcsolatok",
 		"results":"{CNT} eredmény",
 		"resultsNone":"- nincs eredmény -",
 		"resultsOf":"/ {CNT}",
 		"role":"Szerep",
+		"roles":"Roles",
 		"selected":"Kiválasztva",
 		"selectedMaxOne":"Kiválasztva (max. 1)",
 		"settings":"Beállítások",
@@ -1520,6 +1525,7 @@
 		"noOwner":"Az alkalmazás írásvédett",
 		"navigationApis":"API-k",
 		"navigationArticles":"Súgó cikkek",
+		"navigationCaptionMap":"Captions",
 		"navigationCollections":"Gyűjtemények",
 		"navigationFilterHint":"Szöveg szűrés",
 		"navigationForms":"Űrlapok",
@@ -1595,6 +1601,9 @@
 		"weekDayShort4":"Cs",
 		"weekDayShort5":"P",
 		"weekDayShort6":"Szo"
+	},
+	"captionMap":{
+		"title":"Caption map"
 	},
 	"error":{
 		"APP":{

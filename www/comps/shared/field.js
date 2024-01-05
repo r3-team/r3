@@ -1,4 +1,5 @@
 import {getAttributeIcon} from './attribute.js';
+import {getItemTitle}     from './builder.js';
 import MyStore            from '../../stores/store.js';
 
 export function getFieldIcon(field) {
@@ -19,6 +20,21 @@ export function getFieldIcon(field) {
 		case 'tabs':      return 'tabs.png'; break;
 	}
 	return 'noPic.png';
+};
+
+export function getFieldTitle(field) {
+	switch(field.content) {
+		case 'button':    return 'Button';    break;
+		case 'chart':     return 'Chart';     break;
+		case 'container': return 'Container'; break;
+		case 'header':    return 'Label';     break;
+		case 'tabs':      return 'Tabs';      break;
+		case 'calendar':  return field.gantt ? 'Gantt' : 'Calendar'; break;
+		case 'data':      return getItemTitle(field.attributeId,field.index,field.outsideIn,field.attributeIdNm); break;
+		case 'kanban':    return field.query.relationId === null ? 'Kanban' : `Kanban: ${MyStore.getters['schema/relationIdMap'][field.query.relationId].name}`; break;
+		case 'list':      return field.query.relationId === null ? 'List' : `List: ${MyStore.getters['schema/relationIdMap'][field.query.relationId].name}`; break;
+	}
+	return '';
 };
 
 export function fieldOptionGet(fieldId,optionName,fallbackValue) {

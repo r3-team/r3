@@ -35,28 +35,6 @@ func FormDel_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	return nil, form.Del_tx(tx, req.Id)
 }
 
-func FormGet(reqJson json.RawMessage) (interface{}, error) {
-
-	var (
-		err error
-		req struct {
-			ModuleId uuid.UUID `json:"moduleId"`
-		}
-		res struct {
-			Forms []types.Form `json:"forms"`
-		}
-	)
-
-	if err := json.Unmarshal(reqJson, &req); err != nil {
-		return nil, err
-	}
-	res.Forms, err = form.Get(req.ModuleId, []uuid.UUID{})
-	if err != nil {
-		return nil, err
-	}
-	return res, nil
-}
-
 func FormSet_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error) {
 	var req types.Form
 
