@@ -41,29 +41,20 @@ let MyBuilderCaption = {
 	emits:['hotkey','update:modelValue'],
 	computed:{
 		valueInput:{
-			get() {
-				if(typeof this.modelValue[this.language] !== 'undefined')
-					return this.modelValue[this.language];
-				else
-					return '';
-			},
+			get()  { return this.modelValue[this.language] !== undefined ? this.modelValue[this.language] : ''; },
 			set(v) {
 				let value = JSON.parse(JSON.stringify(this.modelValue));
 				
-				if(v === '')
-					delete value[this.language];
-				else
-					value[this.language] = v;
+				if(v === '') delete value[this.language];
+				else         value[this.language] = v;
 				
 				// send sorted objected
 				// to compare against language codes from DB, which are always sorted
-				this.$emit('update:modelValue',
-					JSON.parse(JSON.stringify(value,Object.keys(value).sort())));
+				this.$emit('update:modelValue',JSON.parse(JSON.stringify(value,Object.keys(value).sort())));
 			}
 		},
 		placeholder() {
-			return this.contentName === ''
-				? this.language : `${this.contentName} (${this.language})`;
+			return this.contentName === '' ? this.language : `${this.contentName} (${this.language})`;
 		}
 	}
 };

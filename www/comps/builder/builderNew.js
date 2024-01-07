@@ -209,10 +209,14 @@ let MyBuilderNew = {
 				this.inputs[k] = this.presets[k];
 		}
 		
-		window.addEventListener('keydown',this.handleHotkeys);
+		this.$store.commit('keyDownHandlerSleep');
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape',keyCtrl:false});
 	},
 	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
+		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel',this.close);
+		this.$store.commit('keyDownHandlerWake');
 	},
 	methods:{
 		// externals
@@ -223,19 +227,12 @@ let MyBuilderNew = {
 		getTemplateReturn,
 		
 		// actions
-		handleHotkeys(e) {
-			if(e.ctrlKey && e.key === 's' && this.canSave) {
-				this.set();
-				e.preventDefault();
-			}
-			if(e.key === 'Escape') {
-				this.$emit('close');
-				e.preventDefault();
-			}
-		},
+		close() { this.$emit('close'); },
 		
 		// backend calls
 		set() {
+			if(!this.canSave) return;
+			
 			let action = 'set';
 			let request;
 			let dependencyCheck = false;

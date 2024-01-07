@@ -107,7 +107,6 @@ let MyAdminFiles = {
 			</table>
 		</div>
 	</div>`,
-	emits:['hotkeysRegister'],
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
@@ -121,10 +120,10 @@ let MyAdminFiles = {
 	mounted() {
 		this.reset();
 		this.$store.commit('pageTitle',this.menuTitle);
-		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
 	},
 	unmounted() {
-		this.$emit('hotkeysRegister',[]);
+		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	computed:{
 		// simple
@@ -186,6 +185,8 @@ let MyAdminFiles = {
 			);
 		},
 		set() {
+			if(!this.hasChanged) return;
+			
 			ws.send('config','set',this.configInput,true).then(
 				() => {},
 				this.$root.genericError

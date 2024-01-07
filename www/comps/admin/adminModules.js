@@ -458,12 +458,12 @@ let MyAdminModules = {
 		};
 	},
 	mounted() {
-		this.$store.commit('pageTitle',this.menuTitle);
 		this.getRepo();
-		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+		this.$store.commit('pageTitle',this.menuTitle);
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
 	},
 	unmounted() {
-		this.$emit('hotkeysRegister',[]);
+		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	computed:{
 		moduleIdsUpdate:(s) => {

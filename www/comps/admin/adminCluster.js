@@ -170,7 +170,7 @@ let MyAdminCluster = {
 			<div class="area">
 				<my-button image="save.png"
 					@trigger="setConfig"
-					:active="config.clusterNodeMissingAfter !== configInput.clusterNodeMissingAfter"
+					:active="hasChangesConfig"
 					:caption="capGen.button.save"
 				/>
 				<my-button image="refresh.png"
@@ -239,7 +239,6 @@ let MyAdminCluster = {
 			</template>
 		</div>
 	</div>`,
-	emits:['hotkeysRegister'],
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
@@ -251,6 +250,9 @@ let MyAdminCluster = {
 			}
 			return -1;
 		},
+		
+		// simple
+		hasChangesConfig:(s) => s.config.clusterNodeMissingAfter !== s.configInput.clusterNodeMissingAfter,
 		
 		// stores
 		capApp:      (s) => s.$store.getters.captions.admin.cluster,
@@ -267,7 +269,10 @@ let MyAdminCluster = {
 	mounted() {
 		this.reset();
 		this.$store.commit('pageTitle',this.menuTitle);
-		this.$emit('hotkeysRegister',[{fnc:this.setConfig,key:'s',keyCtrl:true}]);
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.setConfig,key:'s',keyCtrl:true});
+	},
+	unmounted() {
+		this.$store.commit('keyDownHandlerDel',this.setConfig);
 	},
 	methods:{
 		// actions
@@ -300,6 +305,8 @@ let MyAdminCluster = {
 			);
 		},
 		setConfig() {
+			if(!this.hasChangesConfig) return;
+			
 			ws.send('config','set',this.configInput,true).then(
 				() => {},
 				this.$root.genericError

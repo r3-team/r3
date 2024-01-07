@@ -88,7 +88,7 @@ let MyBuilderForm = {
 					<div class="area nowrap">
 						<my-button image="save.png"
 							@trigger="set"
-							:active="hasChanges && !readonly"
+							:active="canSave"
 							:caption="capGen.button.save"
 						/>
 						<my-button image="refresh.png"
@@ -488,17 +488,17 @@ let MyBuilderForm = {
 			</template>
 		</div>
 	</div>`,
-	emits:['createNew','hotkeysRegister'],
+	emits:['createNew'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		id:             { type:String,  required:false, default:'' },
 		readonly:       { type:Boolean, required:true }
 	},
 	mounted() {
-		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
 	},
 	unmounted() {
-		this.$emit('hotkeysRegister',[]);
+		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	data() {
 		return {
@@ -720,6 +720,7 @@ let MyBuilderForm = {
 		},
 		
 		// simple
+		canSave:          (s) => s.hasChanges && !s.readonly,
 		columnShow:       (s) => s.columnIdShow === null ? false : s.columnIdMap[s.columnIdShow],
 		dataFields:       (s) => s.getDataFields(s.fields),
 		fieldContentFocus:(s) => ['button','data'],
@@ -1293,6 +1294,8 @@ let MyBuilderForm = {
 			);
 		},
 		set() {
+			if(!this.canSave) return;
+			
 			// replace builder counter ID with empty field UUID for creation
 			let fieldsCleaned = this.replaceBuilderId(
 				JSON.parse(JSON.stringify(this.fields))

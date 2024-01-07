@@ -345,17 +345,17 @@ let MyBuilderArticles = {
 			</div>
 		</div>
 	</div>`,
-	emits:['hotkeysRegister','nextLanguage'],
+	emits:['nextLanguage'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		id:             { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
 	mounted() {
-		this.$emit('hotkeysRegister',[{fnc:this.assign,key:'s',keyCtrl:true}]);
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.assign,key:'s',keyCtrl:true});
 	},
 	unmounted() {
-		this.$emit('hotkeysRegister',[]);
+		this.$store.commit('keyDownHandlerDel',this.assign);
 	},
 	data() {
 		return {

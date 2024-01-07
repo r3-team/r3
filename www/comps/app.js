@@ -386,6 +386,7 @@ let MyApp = {
 		isAtFeedback:       (s) => s.$store.getters.isAtFeedback,
 		isAtModule:         (s) => s.$store.getters.isAtModule,
 		isMobile:           (s) => s.$store.getters.isMobile,
+		keyDownHandlers:    (s) => s.$store.getters.keyDownHandlers,
 		loginEncryption:    (s) => s.$store.getters.loginEncryption,
 		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
 		moduleIdLast:       (s) => s.$store.getters.moduleIdLast,
@@ -395,6 +396,7 @@ let MyApp = {
 		settings:           (s) => s.$store.getters.settings
 	},
 	created() {
+		window.addEventListener('keydown',this.handleKeydown);
 		window.addEventListener('resize',this.setMobileView);
 	},
 	mounted() {
@@ -403,6 +405,7 @@ let MyApp = {
 		this.setMobileView();               // initial state, mobile view: yes/no
 	},
 	unmounted() {
+		window.removeEventListener('keydown',this.handleKeydown);
 		window.removeEventListener('resize',this.setMobileView);
 	},
 	methods:{
@@ -724,6 +727,19 @@ let MyApp = {
 					);
 				}
 			);
+		},
+		
+		// hotkeys
+		handleKeydown(evt) {
+			for(let k of this.keyDownHandlers) {
+				if(k.sleep !== undefined || (k.keyCtrl && !evt.ctrlKey))
+					continue;
+				
+				if(k.key === evt.key) {
+					evt.preventDefault();
+					k.fnc();
+				}
+			}
 		},
 		
 		// backend reloads

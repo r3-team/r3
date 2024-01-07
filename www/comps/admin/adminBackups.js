@@ -98,7 +98,6 @@ let MyAdminBackups = {
 			</table>
 		</div>
 	</div>`,
-	emits:['hotkeysRegister'],
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
@@ -127,11 +126,11 @@ let MyAdminBackups = {
 	mounted() {
 		this.reset();
 		this.$store.commit('pageTitle',this.menuTitle);
-		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
 		this.ready = true;
 	},
 	unmounted() {
-		this.$emit('hotkeysRegister',[]);
+		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	methods:{
 		// externals
@@ -157,6 +156,8 @@ let MyAdminBackups = {
 			);
 		},
 		set() {
+			if(!this.hasChanges) return;
+			
 			ws.send('config','set',this.configInput,true).then(
 				() => {}, this.$root.genericError
 			);

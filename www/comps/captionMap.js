@@ -149,7 +149,7 @@ let MyCaptionMap = {
 			<div class="area nowrap">
 				<my-button image="save.png"
 					@trigger="set"
-					:active="hasChanges"
+					:active="canSave"
 					:caption="capGen.button.save"
 				/>
 				<my-button image="refresh.png"
@@ -415,6 +415,7 @@ let MyCaptionMap = {
 		captionsPgFunctions:(s) => s.makeSortedItemList(s.captionMap.pgFunctionIdMap,s.pgFunctionIdMap,'pg_function'),
 		captionsRoles:      (s) => s.makeSortedItemList(s.captionMap.roleIdMap,s.roleIdMap,'role'),
 		captionsWidgets:    (s) => s.makeSortedItemList(s.captionMap.widgetIdMap,s.widgetIdMap,'widget'),
+		canSave:            (s) => !s.readonly && s.hasChanges,
 		canSwitchModules:   (s) => s.moduleIdForce === null,
 		module:             (s) => s.moduleId === null ? false : s.moduleIdMap[s.moduleId],
 		
@@ -433,6 +434,12 @@ let MyCaptionMap = {
 		widgetIdMap:    (s) => s.$store.getters['schema/widgetIdMap'],
 		capApp:         (s) => s.$store.getters.captions.captionMap,
 		capGen:         (s) => s.$store.getters.captions.generic
+	},
+	mounted() {
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+	},
+	unmounted() {
+		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	methods:{
 		// external
@@ -524,6 +531,8 @@ let MyCaptionMap = {
 			);
 		},
 		set() {
+			if(!this.canSave) return;
+			
 			let requests = [];
 			for(let k in this.changes) {
 				requests.push(ws.prepare('captionMap','setOne',this.changes[k]));

@@ -146,7 +146,6 @@ let MyBuilderStart = {
 			</div>
 		</div>
 	</div>`,
-	emits:['hotkeysRegister'],
 	props:{
 		id:      { type:String,  required:true },
 		readonly:{ type:Boolean, required:true }

@@ -275,7 +275,6 @@ let MyAdminCustom = {
 			</table>
 		</div>
 	</div>`,
-	emits:['hotkeysRegister'],
 	props:{
 		menuTitle:{ type:String, required:true }
 	},
@@ -336,11 +335,11 @@ let MyAdminCustom = {
 	mounted() {
 		this.reset();
 		this.$store.commit('pageTitle',this.menuTitle);
-		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
 		this.ready = true;
 	},
 	unmounted() {
-		this.$emit('hotkeysRegister',[]);
+		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	methods:{
 		// externals
@@ -375,6 +374,8 @@ let MyAdminCustom = {
 		
 		// backend calls
 		set() {
+			if(!this.hasChanges) return;
+			
 			ws.sendMultiple([
 				ws.prepare('config','set',this.configInput),
 				ws.prepare('pwaDomain','set',this.pwaDomainMapInput)

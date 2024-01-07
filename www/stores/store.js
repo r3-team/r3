@@ -44,6 +44,7 @@ const MyStore = Vuex.createStore({
 		isAtModule:false,     // app currently shows a module (instead of Builder, admin panel, settings, etc.)
 		isMobile:false,       // app runs on small screen (probably mobile)
 		isNoAuth:false,       // user logged in without authentication
+		keyDownHandlers:[],   // global handlers, reacting for key down events (for hotkey events)
 		license:{},           // license info (admin only)
 		licenseValid:false,   // license is valid (set and within validity period)
 		loginEncryption:false,// user login E2E encryption is used
@@ -112,6 +113,29 @@ const MyStore = Vuex.createStore({
 				attributeId:null,
 				fileIds:[]
 			};
+		},
+		keyDownHandlerAdd:(state,payload) => {
+			// expected payload: { fnc:handlerFnc, key:'s', keyCtrl:true }
+			state.keyDownHandlers.unshift(payload);
+		},
+		keyDownHandlerDel:(state,payload) => {
+			// expected payload: the handler function to remove
+			for(let i = 0, j = state.keyDownHandlers.length; i < j; i++) {
+				if(state.keyDownHandlers[i].fnc === payload) {
+					state.keyDownHandlers.splice(i,1);
+					break;
+				}
+			}
+		},
+		keyDownHandlerSleep:(state,payload) => {
+			for(let i = 0, j = state.keyDownHandlers.length; i < j; i++) {
+				state.keyDownHandlers[i].sleep = true;
+			}
+		},
+		keyDownHandlerWake:(state,payload) => {
+			for(let i = 0, j = state.keyDownHandlers.length; i < j; i++) {
+				delete state.keyDownHandlers[i].sleep;
+			}
 		},
 		license:(state,payload) => {
 			state.license = payload;
@@ -291,6 +315,7 @@ const MyStore = Vuex.createStore({
 		isAtModule:              (state) => state.isAtModule && state.moduleIdLast !== null,
 		isMobile:                (state) => state.isMobile,
 		isNoAuth:                (state) => state.isNoAuth,
+		keyDownHandlers:         (state) => state.keyDownHandlers,
 		license:                 (state) => state.license,
 		licenseValid:            (state) => state.licenseValid,
 		loginEncryption:         (state) => state.loginEncryption,

@@ -96,7 +96,6 @@ let MyAdmin = {
 				<span>{{ capApp.navigationScheduler }}</span>
 			</router-link>
 			
-			
 			<!-- REI3 Professional -->
 			<router-link class="entry clickable separator" tag="div" to="/admin/license">
 				<img src="images/key.png" />
@@ -131,7 +130,6 @@ let MyAdmin = {
 		<router-view
 			v-if="ready"
 			v-show="!showDocs"
-			@hotkeysRegister="hotkeysChild = $event"
 			:concurrentLogins="concurrentLogins"
 			:menuTitle="contentTitle"
 		/>
@@ -150,7 +148,6 @@ let MyAdmin = {
 	data() {
 		return {
 			concurrentLogins:0, // count of concurrent logins
-			hotkeysChild:[],    // hotkeys from child components
 			ready:false,
 			showDocs:false
 		};
@@ -161,10 +158,6 @@ let MyAdmin = {
 		
 		this.getConcurrentLogins();
 		this.ready = true;
-		window.addEventListener('keydown',this.handleHotkeys);
-	},
-	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
 	},
 	computed:{
 		contentTitle:(s) => {
@@ -202,20 +195,6 @@ let MyAdmin = {
 		license:  (s) => s.$store.getters.license
 	},
 	methods:{
-		// handlers
-		handleHotkeys(evt) {
-			// registered child hotkeys
-			for(let k of this.hotkeysChild) {
-				if(k.keyCtrl && !evt.ctrlKey)
-					continue;
-				
-				if(k.key === evt.key) {
-					evt.preventDefault();
-					k.fnc();
-				}
-			}
-		},
-		
 		// backend calls
 		getConcurrentLogins() {
 			ws.send('login','getConcurrent',{},true).then(

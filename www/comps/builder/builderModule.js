@@ -311,17 +311,16 @@ let MyBuilderModule = {
 			</table>
 		</div>
 	</div>`,
-	emits:['hotkeysRegister'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		id:             { type:String,  required:true },
 		readonly:       { type:Boolean, required:true }
 	},
 	mounted() {
-		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
 	},
 	unmounted() {
-		this.$emit('hotkeysRegister',[]);
+		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	data() {
 		return {

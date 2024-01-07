@@ -330,8 +330,6 @@ let MyBuilder = {
 			v-if="isReady"
 			v-show="!showDocs"
 			@createNew="createNew"
-			@hotkey="handleHotkeys"
-			@hotkeysRegister="hotkeysChild = $event"
 			@nextLanguage="nextLanguage"
 			@toggleDocs="showDocs = !showDocs"
 			:builderLanguage="builderLanguage"
@@ -353,10 +351,10 @@ let MyBuilder = {
 		/>
 	</div>`,
 	created() {
-		window.addEventListener('keydown',this.handleHotkeys);
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.nextLanguage,key:'q',keyCtrl:true});
 	},
 	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
+		this.$store.commit('keyDownHandlerDel',this.nextLanguage);
 	},
 	data() {
 		return {
@@ -364,7 +362,6 @@ let MyBuilder = {
 			createNewEntity:null, // entity to create (module, relation, ...)
 			createNewPresets:{},  // preset inputs for new entity (to provide defaults)
 			filter:'',            // simple text filter for menu
-			hotkeysChild:[],      // hotkeys from child components
 			isReady:false,        // ready to show content
 			moduleId:'',          // selected module ID
 			navigation:'module',
@@ -484,30 +481,6 @@ let MyBuilder = {
 		getModuleCaption,
 		srcBase64Icon,
 		
-		// handlers
-		handleHotkeys(evt) {
-			if(this.createNewOpen)
-				return;
-			
-			// language switch
-			if(evt.ctrlKey && evt.key === 'q')
-				this.nextLanguage();
-			
-			// registered child hotkeys (if module is writable)
-			if(!this.moduleOwner)
-				return;
-			
-			for(let k of this.hotkeysChild) {
-				if(k.keyCtrl && !evt.ctrlKey)
-					continue;
-				
-				if(k.key === evt.key) {
-					evt.preventDefault();
-					k.fnc();
-				}
-			}
-		},
-		
 		// actions
 		add() {
 			let entity;
@@ -528,8 +501,9 @@ let MyBuilder = {
 			this.createNewPresets = typeof presets !== 'undefined' ? presets : {};
 		},
 		nextLanguage() {
-			let pos = this.module.languages.indexOf(this.builderLanguage);
+			if(this.createNewOpen) return;
 			
+			let pos = this.module.languages.indexOf(this.builderLanguage);
 			if(pos === -1 || pos >= this.module.languages.length - 1)
 				return this.builderLanguage = this.module.languages[0];
 			

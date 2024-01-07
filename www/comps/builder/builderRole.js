@@ -318,7 +318,7 @@ let MyBuilderRole = {
 			<div class="area">
 				<my-button image="save.png"
 					@trigger="set"
-					:active="hasChanges && !readonly"
+					:active="canSave"
 					:caption="capGen.button.save"
 				/>
 				<my-button image="refresh.png"
@@ -590,7 +590,6 @@ let MyBuilderRole = {
 			</div>
 		</div>
 	</div>`,
-	emits:['hotkeysRegister'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		id:             { type:String,  required:true },
@@ -603,10 +602,10 @@ let MyBuilderRole = {
 		}
 	},
 	mounted() {
-		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
 	},
 	unmounted() {
-		this.$emit('hotkeysRegister',[]);
+		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	data() {
 		return {
@@ -668,6 +667,7 @@ let MyBuilderRole = {
 		},
 		
 		// simple
+		canSave:   (s) => s.hasChanges && !s.readonly,
 		isEveryone:(s) => s.role.name === 'everyone',
 		module:    (s) => s.role === false ? false : s.moduleIdMap[s.role.moduleId],
 		role:      (s) => typeof s.roleIdMap[s.id] === 'undefined' ? false : s.roleIdMap[s.id],
@@ -771,6 +771,8 @@ let MyBuilderRole = {
 			);
 		},
 		set() {
+			if(!this.canSave) return;
+			
 			ws.send('role','set',{
 				id:this.role.id,
 				name:this.name,
