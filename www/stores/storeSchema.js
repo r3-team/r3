@@ -15,6 +15,7 @@ const MyStoreSchema = {
 		iconIdMap:{},
 		indexIdMap:{},
 		jsFunctionIdMap:{},
+		loginFormIdMap:{},
 		moduleIdMap:{},
 		moduleNameMap:{},
 		pgFunctionIdMap:{},
@@ -136,6 +137,11 @@ const MyStoreSchema = {
 				for(const jsFunc of mod.jsFunctions) {
 					state.jsFunctionIdMap[jsFunc.id] = jsFunc;
 				}
+				
+				// process login forms
+				for(const loginForm of mod.loginForms) {
+					state.loginFormIdMap[loginForm.id] = loginForm;
+				}
 			}
 		},
 		languageCodes:      (state,payload) => state.languageCodes       = payload,
@@ -151,6 +157,7 @@ const MyStoreSchema = {
 		iconIdMap:          (state) => state.iconIdMap,
 		indexIdMap:         (state) => state.indexIdMap,
 		jsFunctionIdMap:    (state) => state.jsFunctionIdMap,
+		loginFormIdMap:     (state) => state.loginFormIdMap,
 		modules:            (state) => state.modules,
 		moduleIdMap:        (state) => state.moduleIdMap,
 		moduleNameMap:      (state) => state.moduleNameMap,

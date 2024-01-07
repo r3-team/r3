@@ -1,9 +1,6 @@
-import {
-	getFieldTitle
-} from './shared/field.js';
-import {
-	getFieldMap
-} from './shared/form.js';
+import {getColumnTitle} from './shared/column.js';
+import {getFieldTitle}  from './shared/field.js';
+import {getFieldMap}    from './shared/form.js';
 export {MyCaptionMap as default};
 
 let MyCaptionMapItemValue = {
@@ -13,6 +10,7 @@ let MyCaptionMapItemValue = {
 			<input class="long"
 				v-for="(captions,content) in captionMap"
 				@input="$emit('update',content,languageCode,$event.target.value)"
+				:disabled="readonly"
 				:placeholder="content"
 				:value="typeof captions[languageCode] === 'undefined' ? '' : captions[languageCode]"
 			/>
@@ -20,8 +18,9 @@ let MyCaptionMapItemValue = {
 	</td>`,
 	emits:['update'],
 	props:{
-		captionMap:  { type:Object, required:true },
-		languageCode:{ type:String, required:true }
+		captionMap:  { type:Object,  required:true },
+		languageCode:{ type:String,  required:true },
+		readonly:    { type:Boolean, required:true }
 	}
 };
 
@@ -43,9 +42,10 @@ let MyCaptionMapItem = {
 		<td v-for="l in languageCodes">
 			<my-caption-map-item-value
 				v-if="item.capMap !== null"
-				@update="(...args) => $emit('update',levelEntities[level],item.id,args[0],args[1],args[2])"
+				@update="(...args) => $emit('update',item.entity,item.id,args[0],args[1],args[2])"
 				:captionMap="item.capMap"
 				:languageCode="l"
+				:readonly="readonly"
 			/>
 		</td>
 	</tr>
@@ -56,14 +56,16 @@ let MyCaptionMapItem = {
 		:item="child"
 		:languageCodes="languageCodes"
 		:level="level + 1"
-		:levelEntities="levelEntities"
+		:levelMax="levelMax"
+		:readonly="readonly"
 	/>`,
 	emits:['update'],
 	props:{
-		item:          { type:Object, required:true },
-		languageCodes: { type:Array,  required:true },
-		level:         { type:Number, required:false, default:0 },
-		levelEntities: { type:Array,  required:true }
+		item:         { type:Object,  required:true },
+		languageCodes:{ type:Array,   required:true },
+		level:        { type:Number,  required:false, default:0 },
+		levelMax:     { type:Number , required:true },
+		readonly:     { type:Boolean, required:true }
 	},
 	data() {
 		return {
@@ -72,15 +74,15 @@ let MyCaptionMapItem = {
 	},
 	computed:{
 		actionCaption:(s) => {
-			if(s.level >= s.levelEntities.length-1) return s.item.name;
+			if(s.level >= s.levelMax) return s.item.name;
 			return `${s.item.name} (${s.item.children.length})`;
 		},
 		actionImage:(s) => {
-			if(s.level >= s.levelEntities.length-1) return '';
+			if(s.level >= s.levelMax) return '';
 			return s.showChildrenIds.includes(s.item.id) ? 'triangleDown.png' : 'triangleRight.png';
 		},
 		children:(s) => typeof s.item.children !== 'undefined' ? s.item.children : [],
-		style:(s) => `margin-left:${s.level * 15}px;`
+		style:(s) => `margin-left:${s.level * 20}px;`
 	},
 	methods:{
 		toggleDisplay(list,value) {
@@ -91,9 +93,51 @@ let MyCaptionMapItem = {
 	}
 };
 
+let MyCaptionMapItems = {
+	name:'my-caption-map-items',
+	components:{ MyCaptionMapItem },
+	template:`<tr>
+		<td>
+			<my-button
+				@trigger="show = !show"
+				:active="items.length !== 0"
+				:caption="name + ' (' + items.length + ')'"
+				:images="[show ? 'triangleDown.png' : 'triangleRight.png',icon]"
+			/>
+		</td>
+		<td v-for="l in languageCodes"></td>
+	</tr>
+	<my-caption-map-item
+		v-if="show"
+		v-for="item in items"
+		@update="(...args) => $emit('update',...args)"
+		:item="item"
+		:languageCodes="languageCodes"
+		:levelMax="levelMax"
+		:readonly="readonly"
+	/>`,
+	emits:['update'],
+	props:{
+		icon:         { type:String,  required:true },
+		items:        { type:Array,   required:true },
+		languageCodes:{ type:Array,   required:true },
+		levelMax:     { type:Number,  required:false, default:0 },
+		name:         { type:String,  required:true },
+		readonly:     { type:Boolean, required:true }
+	},
+	data() {
+		return {
+			show:false
+		};
+	}
+};
+
 let MyCaptionMap = {
 	name:'my-caption-map',
-	components:{ MyCaptionMapItem },
+	components:{
+		MyCaptionMapItems,
+		MyCaptionMapItemValue
+	},
 	template:`<div class="contentBox grow">
 		<div class="top">
 			<div class="area nowrap">
@@ -125,87 +169,123 @@ let MyCaptionMap = {
 			</div>
 		</div>
 		<div class="content no-padding">
-			<div class="captionMap" v-if="module">
-				<table class="generic-table">
+			<div class="captionMap" v-if="isReady && module">
+				<table class="generic-table sticky-top">
+					<thead>
+						<tr>
+							<th></th>
+							<th v-for="l in showLanguageCodes">{{ l }}</th>
+						</tr>
+					</thead>
 					<tbody>
+						<tr>
+							<td>
+								<my-button image="module.png"
+									:active="false"
+									:caption="capGen.module"
+									:naked="true"
+								/>
+							</td>
+							<td v-for="l in showLanguageCodes">
+								<my-caption-map-item-value
+									@update="(...args) => storeChange('module',moduleId,args[0],args[1],args[2])"
+									:captionMap="captionMap.moduleIdMap[moduleId]"
+									:languageCode="l"
+									:readonly="readonly"
+								/>
+							</td>
+						</tr>
+						
 						<!-- relations -->
-						<tr>
-							<td>
-								<my-button
-									@trigger="toggleDisplay(showEntities,'relations')"
-									:caption="capGen.relations + ' (' + captionsAttributesByRelations.length + ')'"
-									:image="showEntities.includes('relations') ? 'triangleDown.png' : 'triangleRight.png'"
-								/>
-							</td>
-							<td v-for="l in showLanguageCodes">{{ l }}</td>
-						</tr>
-						<my-caption-map-item
-							v-if="showEntities.includes('relations')"
-							v-for="item in captionsAttributesByRelations"
+						<my-caption-map-items icon="database.png"
 							@update="storeChange"
-							:item="item"
+							:items="captionsAttributesByRelations"
 							:languageCodes="showLanguageCodes"
-							:levelEntities="['relation','attribute']"
+							:levelMax="1"
+							:name="capGen.relations"
+							:readonly="readonly"
 						/>
-						
 						<!-- forms -->
-						<tr>
-							<td>
-								<my-button
-									@trigger="toggleDisplay(showEntities,'forms')"
-									:caption="capGen.forms + ' (' + captionsFieldsByForms.length + ')'"
-									:image="showEntities.includes('forms') ? 'triangleDown.png' : 'triangleRight.png'"
-								/>
-							</td>
-							<td v-for="l in showLanguageCodes">{{ l }}</td>
-						</tr>
-						<my-caption-map-item
-							v-if="showEntities.includes('forms')"
-							v-for="item in captionsFieldsByForms"
+						<my-caption-map-items icon="fileText.png"
 							@update="storeChange"
-							:item="item"
+							:items="captionsFieldsByForms"
 							:languageCodes="showLanguageCodes"
-							:levelEntities="['form','field']"
+							:levelMax="2"
+							:name="capGen.forms"
+							:readonly="readonly"
 						/>
-						
 						<!-- menus -->
-						<tr>
-							<td>
-								<my-button
-									@trigger="toggleDisplay(showEntities,'menus')"
-									:caption="capGen.menus + ' (' + captionsMenus.length + ')'"
-									:image="showEntities.includes('menus') ? 'triangleDown.png' : 'triangleRight.png'"
-								/>
-							</td>
-							<td v-for="l in showLanguageCodes">{{ l }}</td>
-						</tr>
-						<my-caption-map-item
-							v-if="showEntities.includes('menus')"
-							v-for="item in captionsMenus"
+						<my-caption-map-items icon="menu.png"
 							@update="storeChange"
-							:item="item"
+							:items="captionsMenus"
 							:languageCodes="showLanguageCodes"
-							:levelEntities="['menu']"
+							:name="capGen.menus"
+							:readonly="readonly"
 						/>
-						
 						<!-- roles -->
-						<tr>
-							<td>
-								<my-button
-									@trigger="toggleDisplay(showEntities,'roles')"
-									:caption="capGen.roles + ' (' + captionsRoles.length + ')'"
-									:image="showEntities.includes('roles') ? 'triangleDown.png' : 'triangleRight.png'"
-								/>
-							</td>
-							<td v-for="l in showLanguageCodes">{{ l }}</td>
-						</tr>
-						<my-caption-map-item
-							v-if="showEntities.includes('roles')"
-							v-for="item in captionsRoles"
+						<my-caption-map-items icon="personMultiple.png"
 							@update="storeChange"
-							:item="item"
+							:items="captionsRoles"
 							:languageCodes="showLanguageCodes"
-							:levelEntities="['role']"
+							:name="capGen.roles"
+							:readonly="readonly"
+						/>
+						<!-- PG functions -->
+						<my-caption-map-items icon="codeDatabase.png"
+							@update="storeChange"
+							:items="captionsPgFunctions"
+							:languageCodes="showLanguageCodes"
+							:name="capGen.pgFunctions"
+							:readonly="readonly"
+						/>
+						<!-- JS functions -->
+						<my-caption-map-items icon="codeScreen.png"
+							@update="storeChange"
+							:items="captionsJsFunctions"
+							:languageCodes="showLanguageCodes"
+							:name="capGen.jsFunctions"
+							:readonly="readonly"
+						/>
+						<!-- collections -->
+						<my-caption-map-items icon="tray.png"
+							@update="storeChange"
+							:items="captionsCollections"
+							:languageCodes="showLanguageCodes"
+							:levelMax="1"
+							:name="capGen.collections"
+							:readonly="readonly"
+						/>
+						<!-- login forms -->
+						<my-caption-map-items icon="personCog.png"
+							@update="storeChange"
+							:items="captionsLoginForms"
+							:languageCodes="showLanguageCodes"
+							:name="capGen.loginForms"
+							:readonly="readonly"
+						/>
+						<!-- articles -->
+						<my-caption-map-items icon="question.png"
+							@update="storeChange"
+							:items="captionsArticles"
+							:languageCodes="showLanguageCodes"
+							:name="capGen.articles"
+							:readonly="readonly"
+						/>
+						<!-- widgets -->
+						<my-caption-map-items icon="tiles.png"
+							@update="storeChange"
+							:items="captionsWidgets"
+							:languageCodes="showLanguageCodes"
+							:name="capGen.widgets"
+							:readonly="readonly"
+						/>
+						<!-- query choices -->
+						<my-caption-map-items icon="search.png"
+							@update="storeChange"
+							:items="captionsQueryChoices"
+							:languageCodes="showLanguageCodes"
+							:name="capGen.queryChoices"
+							:readonly="readonly"
 						/>
 					</tbody>
 				</table>
@@ -215,7 +295,8 @@ let MyCaptionMap = {
 	props:{
 		languageDefault:{ required:false, default:null },
 		moduleIdForce:  { required:false, default:null }, // used for Builder context, only edits the current module
-		target:         { type:String, required:false }   // instance / app
+		readonly:       { type:Boolean, required:false, default:false },
+		target:         { type:String,  required:false }  // instance / app
 	},
 	data() {
 		return {
@@ -227,8 +308,7 @@ let MyCaptionMap = {
 			hasChanges:false,
 			isReady:false,
 			moduleId:null,
-			showLanguageCodes:[],
-			showEntities:[]
+			showLanguageCodes:[]
 		};
 	},
 	watch:{
@@ -239,8 +319,6 @@ let MyCaptionMap = {
 	},
 	computed:{
 		captionsAttributesByRelations:(s) => {
-			if(!s.isReady) return [];
-			
 			let relIdMap = {};
 			for(let atrId in s.captionMap.attributeIdMap) {
 				const atr   = s.attributeIdMap[atrId];
@@ -248,101 +326,117 @@ let MyCaptionMap = {
 				if(typeof relIdMap[relId] === 'undefined')
 					relIdMap[relId] = [];
 				
-				relIdMap[relId].push({
-					capMap:s.captionMap.attributeIdMap[atrId],
-					id:atr.id,
-					name:atr.name
-				});
+				relIdMap[relId].push(s.makeItem('attribute',atrId,atr.name,s.captionMap.attributeIdMap[atrId],[]));
 			}
 			
 			// return sorted by relation and attribute names
-			let relations = [];
-			for(let relId in relIdMap) {
-				relations.push({
-					capMap:null,
-					children:relIdMap[relId].sort((a,b) => (a.name > b.name) ? 1 : -1),
-					id:relId,
-					name:s.relationIdMap[relId].name
-				});
+			let out = [];
+			for(let id in relIdMap) {
+				out.push(s.makeItem('relation',id,s.relationIdMap[id].name,null,relIdMap[id]));
 			}
-			return relations.sort((a,b) => (a.name > b.name) ? 1 : -1);
+			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
+		},
+		captionsCollections:(s) => {
+			let collectionIdMap = {};
+			for(const collection of s.module.collections) {
+				let childCaptions = [];
+				for(const col of collection.columns) {
+					if(s.captionMap.columnIdMap[col.id] !== undefined)
+						childCaptions.push(s.makeItem('column',col.id,s.getColumnTitle(col),s.captionMap.columnIdMap[col.id],[]));
+				}
+				
+				if(childCaptions.length !== 0)
+					collectionIdMap[collection.id] = childCaptions;
+			}
+			let out = [];
+			for(const id in collectionIdMap) {
+				out.push(s.makeItem('collection',id,s.collectionIdMap[id].name,null,collectionIdMap[id]));
+			}
+			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
 		captionsFieldsByForms:(s) => {
-			if(!s.isReady) return [];
-			
 			let frmIdMap = {};
 			for(const frm of s.module.forms) {
 				const fieldIdMap = s.getFieldMap(frm.fields);
 				let fieldCaptions = [];
 				
 				for(const fldId in fieldIdMap) {
-					if(typeof s.captionMap.fieldIdMap[fldId] !== 'undefined')
-						fieldCaptions.push({
-							capMap:s.captionMap.fieldIdMap[fldId],
-							id:fldId,
-							name:s.getFieldTitle(fieldIdMap[fldId])
-						});
+					const fld = fieldIdMap[fldId];
+					
+					// check for field children (columns, tabs)
+					let fieldChildCaptions = [];
+					if(fld.columns !== undefined) {
+						for(const col of fld.columns) {
+							if(s.captionMap.columnIdMap[col.id] !== undefined)
+								fieldChildCaptions.push(s.makeItem('column',col.id,s.getColumnTitle(col),s.captionMap.columnIdMap[col.id],[]));
+						}
+					}
+					if(fld.tabs !== undefined) {
+						for(const tab of fld.tabs) {
+							if(s.captionMap.tabIdMap[tab.id] !== undefined)
+								fieldChildCaptions.push(s.makeItem('tab',tab.id,'-',s.captionMap.tabIdMap[tab.id],[]));
+						}
+					}
+					
+					if(fieldChildCaptions.length !== 0 || s.captionMap.fieldIdMap[fldId] !== undefined)
+						fieldCaptions.push(s.makeItem('field',fldId,s.getFieldTitle(fld),s.captionMap.fieldIdMap[fldId],fieldChildCaptions));
 				}
 				// form has fields with captions or has captions itself
-				if(fieldCaptions.length !== 0 || typeof s.captionMap.formIdMap[frm.id] !== 'undefined')
+				if(fieldCaptions.length !== 0 || s.captionMap.formIdMap[frm.id] !== undefined)
 					frmIdMap[frm.id] = fieldCaptions;
 			}
 			
 			// return sorted by form and field names
-			let forms = [];
-			for(const frmId in frmIdMap) {
-				forms.push({
-					capMap:typeof s.captionMap.formIdMap[frmId] !== 'undefined' ? s.captionMap.formIdMap[frmId] : null,
-					children:frmIdMap[frmId].sort((a,b) => (a.name > b.name) ? 1 : -1),
-					id:frmId,
-					name:s.formIdMap[frmId].name
-				});
-			}
-			return forms.sort((a,b) => (a.name > b.name) ? 1 : -1);
-		},
-		captionsMenus:(s) => {
-			if(!s.isReady) return [];
-			
 			let out = [];
-			for(const id in s.captionMap.menuIdMap) {
-				out.push({
-					capMap:s.captionMap.menuIdMap[id],
-					id:id,
-					name:'-'
-				});
-			}
-			return out;
-		},
-		captionsRoles:(s) => {
-			if(!s.isReady) return [];
-			
-			let out = [];
-			for(const id in s.captionMap.roleIdMap) {
-				out.push({
-					capMap:s.captionMap.roleIdMap[id],
-					id:id,
-					name:s.roleIdMap[id].name
-				});
+			for(const id in frmIdMap) {
+				out.push(s.makeItem('form',id,s.formIdMap[id].name,s.captionMap.formIdMap[id],frmIdMap[id]));
 			}
 			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
+		captionsMenus:(s) => {
+			let out = [];
+			for(const id in s.captionMap.menuIdMap) {
+				out.push(s.makeItem('menu',id,'-',s.captionMap.menuIdMap[id],[]));
+			}
+			return out;
+		},
+		captionsQueryChoices:(s) => {
+			let out = [];
+			for(const id in s.captionMap.queryChoiceIdMap) {
+				out.push(s.makeItem('query_choice',id,'-',s.captionMap.queryChoiceIdMap[id],[]));
+			}
+			return out;
+		},
 		
 		// simple
-		canSwitchModules:(s) => s.moduleIdForce === null,
-		module:          (s) => s.moduleId === null ? false : s.moduleIdMap[s.moduleId],
+		captionsArticles:   (s) => s.makeSortedItemList(s.captionMap.articleIdMap,s.articleIdMap,'article'),
+		captionsJsFunctions:(s) => s.makeSortedItemList(s.captionMap.jsFunctionIdMap,s.jsFunctionIdMap,'js_function'),
+		captionsLoginForms: (s) => s.makeSortedItemList(s.captionMap.loginFormIdMap,s.loginFormIdMap,'login_form'),
+		captionsPgFunctions:(s) => s.makeSortedItemList(s.captionMap.pgFunctionIdMap,s.pgFunctionIdMap,'pg_function'),
+		captionsRoles:      (s) => s.makeSortedItemList(s.captionMap.roleIdMap,s.roleIdMap,'role'),
+		captionsWidgets:    (s) => s.makeSortedItemList(s.captionMap.widgetIdMap,s.widgetIdMap,'widget'),
+		canSwitchModules:   (s) => s.moduleIdForce === null,
+		module:             (s) => s.moduleId === null ? false : s.moduleIdMap[s.moduleId],
 		
 		// stores
-		modules:       (s) => s.$store.getters['schema/modules'],
-		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		formIdMap:     (s) => s.$store.getters['schema/formIdMap'],
-		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
-		roleIdMap:     (s) => s.$store.getters['schema/roleIdMap'],
-		capApp:        (s) => s.$store.getters.captions.captionMap,
-		capGen:        (s) => s.$store.getters.captions.generic
+		modules:        (s) => s.$store.getters['schema/modules'],
+		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		articleIdMap:   (s) => s.$store.getters['schema/articleIdMap'],
+		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
+		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
+		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
+		jsFunctionIdMap:(s) => s.$store.getters['schema/jsFunctionIdMap'],
+		loginFormIdMap: (s) => s.$store.getters['schema/loginFormIdMap'],
+		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
+		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
+		roleIdMap:      (s) => s.$store.getters['schema/roleIdMap'],
+		widgetIdMap:    (s) => s.$store.getters['schema/widgetIdMap'],
+		capApp:         (s) => s.$store.getters.captions.captionMap,
+		capGen:         (s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// external
+		getColumnTitle,
 		getFieldMap,
 		getFieldTitle,
 		
@@ -396,6 +490,24 @@ let MyCaptionMap = {
 			const i = list.indexOf(value);
 			if(i === -1) list.push(value);
 			else         list.splice(i,1);
+		},
+		
+		// helper
+		makeItem(entity,id,name,capMap,children) {
+			return {
+				capMap:capMap !== undefined ? capMap : null,
+				children:children !== undefined ? children.sort((a,b) => (a.name > b.name) ? 1 : -1) : [],
+				entity:entity,
+				id:id,
+				name:name
+			};
+		},
+		makeSortedItemList(capMap,entityMap,entity) {
+			let out = [];
+			for(const id in capMap) {
+				out.push(this.makeItem(entity,id,entityMap[id].name,capMap[id],[]));
+			}
+			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
 		
 		// backend

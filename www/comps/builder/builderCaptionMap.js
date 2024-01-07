@@ -7,6 +7,7 @@ let MyBuilderCaptionMap = {
 	template:`<my-caption-map target="app"
 		:moduleIdForce="id"
 		:languageDefault="builderLanguage"
+		:readonly="readonly"
 	/>`,
 	props:{
 		builderLanguage:{ type:String,  required:true },

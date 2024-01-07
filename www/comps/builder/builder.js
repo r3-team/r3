@@ -82,42 +82,42 @@ let MyBuilder = {
 						:to="'/builder/module/'+module.id"
 					>
 						<img src="images/module.png" />
-						<span>{{ capApp.navigationModule }}</span>
+						<span>{{ capGen.module }}</span>
 					</router-link>
 					
 					<router-link class="entry clickable"
 						:to="'/builder/relations/'+module.id"
 					>
 						<img src="images/database.png" />
-						<span>{{ capApp.navigationRelations }}</span>
+						<span>{{ capGen.relations }}</span>
 					</router-link>
 					
 					<router-link class="entry clickable"
 						:to="'/builder/forms/'+module.id"
 					>
 						<img src="images/fileText.png" />
-						<span>{{ capApp.navigationForms }}</span>
+						<span>{{ capGen.forms }}</span>
 					</router-link>
 					
 					<router-link class="entry clickable"
 						:to="'/builder/menu/'+module.id"
 					>
 						<img src="images/menu.png" />
-						<span>{{ capApp.navigationMenu }}</span>
+						<span>{{ capGen.menus }}</span>
 					</router-link>
 					
 					<router-link class="entry clickable"
 						:to="'/builder/roles/'+module.id"
 					>
 						<img src="images/personMultiple.png" />
-						<span>{{ capApp.navigationRoles }}</span>
+						<span>{{ capGen.roles }}</span>
 					</router-link>
 					
 					<router-link class="entry clickable"
 						:to="'/builder/icons/'+module.id"
 					>
 						<img src="images/fileImage.png" />
-						<span>{{ capApp.navigationIcons }}</span>
+						<span>{{ capGen.icons }}</span>
 					</router-link>
 					
 					<router-link class="entry clickable"
@@ -132,49 +132,49 @@ let MyBuilder = {
 						:to="'/builder/pg-functions/'+module.id"
 					>
 						<img src="images/codeDatabase.png" />
-						<span>{{ capApp.navigationPgFunctions }}</span>
+						<span>{{ capGen.pgFunctions }}</span>
 					</router-link>
 					
 					<router-link class="entry clickable"
 						:to="'/builder/js-functions/'+module.id"
 					>
 						<img src="images/codeScreen.png" />
-						<span>{{ capApp.navigationJsFunctions }}</span>
+						<span>{{ capGen.jsFunctions }}</span>
 					</router-link>
 					
 					<router-link class="entry clickable"
 						:to="'/builder/collections/'+module.id"
 					>
 						<img src="images/tray.png" />
-						<span>{{ capApp.navigationCollections }}</span>
+						<span>{{ capGen.collections }}</span>
 					</router-link>
 					
 					<router-link class="entry clickable"
 						:to="'/builder/login-forms/'+module.id"
 					>
 						<img src="images/personCog.png" />
-						<span>{{ capApp.navigationLoginForms }}</span>
+						<span>{{ capGen.loginForms }}</span>
 					</router-link>
 					
 					<router-link class="entry clickable"
 						:to="'/builder/articles/'+module.id"
 					>
 						<img src="images/question.png" />
-						<span>{{ capApp.navigationArticles }}</span>
+						<span>{{ capGen.articles }}</span>
 					</router-link>
 					
 					<router-link class="entry clickable"
 						:to="'/builder/apis/'+module.id"
 					>
 						<img src="images/api.png" />
-						<span>{{ capApp.navigationApis }}</span>
+						<span>{{ capGen.apis }}</span>
 					</router-link>
 					
 					<router-link class="entry clickable"
 						:to="'/builder/widgets/'+module.id"
 					>
 						<img src="images/tiles.png" />
-						<span>{{ capApp.navigationWidgets }}</span>
+						<span>{{ capGen.widgets }}</span>
 					</router-link>
 					
 					<!-- so router link is not last child (CSS) -->
@@ -189,49 +189,49 @@ let MyBuilder = {
 					:to="'/builder/forms/'+module.id"
 				>
 					<img src="images/fileText.png" />
-					<span>{{ capApp.navigationForms }}</span>
+					<span>{{ capGen.forms }}</span>
 				</router-link>
 				<router-link class="entry isTitle clickable"
 					v-if="navigation === 'roles'"
 					:to="'/builder/roles/'+module.id"
 				>
 					<img src="images/personMultiple.png" />
-					<span>{{ capApp.navigationRoles }}</span>
+					<span>{{ capGen.roles }}</span>
 				</router-link>
 				<router-link class="entry isTitle clickable"
 					v-if="navigation === 'relations'"
 					:to="'/builder/relations/'+module.id"
 				>
 					<img src="images/database.png" />
-					<span>{{ capApp.navigationRelations }}</span>
+					<span>{{ capGen.relations }}</span>
 				</router-link>
 				<router-link class="entry isTitle clickable"
 					v-if="navigation === 'collections'"
 					:to="'/builder/collections/'+module.id"
 				>
 					<img src="images/tray.png" />
-					<span>{{ capApp.navigationCollections }}</span>
+					<span>{{ capGen.collections }}</span>
 				</router-link>
 				<router-link class="entry isTitle clickable"
 					v-if="navigation === 'apis'"
 					:to="'/builder/apis/'+module.id"
 				>
 					<img src="images/api.png" />
-					<span>{{ capApp.navigationApis }}</span>
+					<span>{{ capGen.apis }}</span>
 				</router-link>
 				<router-link class="entry isTitle clickable"
 					v-if="navigation === 'pg-functions'"
 					:to="'/builder/pg-functions/'+module.id"
 				>
 					<img src="images/codeDatabase.png" />
-					<span>{{ capApp.navigationPgFunctions }}</span>
+					<span>{{ capGen.pgFunctions }}</span>
 				</router-link>
 				<router-link class="entry isTitle clickable"
 					v-if="navigation === 'js-functions'"
 					:to="'/builder/js-functions/'+module.id"
 				>
 					<img src="images/codeScreen.png" />
-					<span>{{ capApp.navigationJsFunctions }}</span>
+					<span>{{ capGen.jsFunctions }}</span>
 				</router-link>
 				<div class="row gap centered default-inputs transparent">
 					<input class="short" placeholder="..." spellcheck="false"

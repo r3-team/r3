@@ -17,6 +17,11 @@ let MyButton = {
 			:src="image !== '' ? 'images/'+image : imageBase64"
 			:title="captionTitle"
 		/>
+		<img draggable="false"
+			v-for="img in images"
+			:src="'images/'+img"
+			:title="captionTitle"
+		/>
 		<span
 			v-if="caption !== ''"
 			:title="captionTitle"
@@ -44,6 +49,7 @@ let MyButton = {
 		caption:     { type:String,  required:false, default:'' },
 		captionTitle:{ type:String,  required:false, default:'' },
 		image:       { type:String,  required:false, default:'' },
+		images:      { type:Array,   required:false, default:() => [] },
 		imageBase64: { type:String,  required:false, default:'' },
 		
 		// alternative action (left-click only)
