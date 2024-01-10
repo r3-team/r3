@@ -96,7 +96,7 @@ let MyCaptionMapItem = {
 let MyCaptionMapItems = {
 	name:'my-caption-map-items',
 	components:{ MyCaptionMapItem },
-	template:`<tr>
+	template:`<tr :class="{ 'sticky-row':show }">
 		<td>
 			<my-button
 				@trigger="show = !show"
@@ -105,7 +105,7 @@ let MyCaptionMapItems = {
 				:images="[show ? 'triangleDown.png' : 'triangleRight.png',icon]"
 			/>
 		</td>
-		<td v-for="l in languageCodes"></td>
+		<td v-for="l in languageCodes">{{ show ? l : '-' }}</td>
 	</tr>
 	<my-caption-map-item
 		v-if="show"
@@ -271,6 +271,15 @@ let MyCaptionMap = {
 							:name="capGen.articles"
 							:readonly="readonly"
 						/>
+						<!-- APIs -->
+						<my-caption-map-items icon="api.png"
+							@update="storeChange"
+							:items="captionsApis"
+							:languageCodes="showLanguageCodes"
+							:levelMax="1"
+							:name="capGen.apis"
+							:readonly="readonly"
+						/>
 						<!-- widgets -->
 						<my-caption-map-items icon="tiles.png"
 							@update="storeChange"
@@ -318,6 +327,24 @@ let MyCaptionMap = {
 		}
 	},
 	computed:{
+		captionsApis:(s) => {
+			let apiIdMap = {};
+			for(const api of s.module.apis) {
+				let childCaptions = [];
+				for(const col of api.columns) {
+					if(s.captionMap.columnIdMap[col.id] !== undefined)
+						childCaptions.push(s.makeItem('column',col.id,s.getColumnTitle(col),s.captionMap.columnIdMap[col.id],[]));
+				}
+				
+				if(childCaptions.length !== 0)
+					apiIdMap[api.id] = childCaptions;
+			}
+			let out = [];
+			for(const id in apiIdMap) {
+				out.push(s.makeItem('api',id,s.apiIdMap[id].name,null,apiIdMap[id]));
+			}
+			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
+		},
 		captionsAttributesByRelations:(s) => {
 			let relIdMap = {};
 			for(let atrId in s.captionMap.attributeIdMap) {
@@ -422,6 +449,7 @@ let MyCaptionMap = {
 		// stores
 		modules:        (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
+		apiIdMap:       (s) => s.$store.getters['schema/apiIdMap'],
 		articleIdMap:   (s) => s.$store.getters['schema/articleIdMap'],
 		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],

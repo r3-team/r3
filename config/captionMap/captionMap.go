@@ -98,16 +98,19 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 				OR collection_id IN (
 					SELECT id FROM app.collection WHERE module_id = $4
 				)
+				OR api_id IN (
+					SELECT id FROM app.api WHERE module_id = $5
+				)
 			)
 			OR field_id IN (
 				SELECT id FROM app.field WHERE form_id IN (
-					SELECT id FROM app.form WHERE module_id = $5
+					SELECT id FROM app.form WHERE module_id = $6
 				)
 			)
 			OR tab_id IN (
 				SELECT id FROM app.tab WHERE field_id IN (
 					SELECT id FROM app.field WHERE form_id IN (
-						SELECT id FROM app.form WHERE module_id = $6
+						SELECT id FROM app.form WHERE module_id = $7
 					)
 				)
 			)
@@ -116,22 +119,22 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 					SELECT id FROM app.query
 					WHERE field_id IN (
 						SELECT id FROM app.field WHERE form_id IN (
-							SELECT id FROM app.form WHERE module_id = $7
+							SELECT id FROM app.form WHERE module_id = $8
 						)
 					)
 					-- only direct field queries have filter choices and therefore captions
 					-- most queries do not: form query, collection query, column sub query, filter sub query
 				)
 			)
-			OR article_id     IN (SELECT id FROM app.article     WHERE module_id = $8)
-			OR form_id        IN (SELECT id FROM app.form        WHERE module_id = $9)
-			OR js_function_id IN (SELECT id FROM app.js_function WHERE module_id = $10)
-			OR login_form_id  IN (SELECT id FROM app.login_form  WHERE module_id = $11)
-			OR menu_id        IN (SELECT id FROM app.menu        WHERE module_id = $12)
-			OR pg_function_id IN (SELECT id FROM app.pg_function WHERE module_id = $13)
-			OR role_id        IN (SELECT id FROM app.role        WHERE module_id = $14)
-			OR widget_id      IN (SELECT id FROM app.widget      WHERE module_id = $15)
-		`, sqlSelect, target), id, id, id, id, id, id, id, id, id, id, id, id, id, id, id)
+			OR article_id     IN (SELECT id FROM app.article     WHERE module_id = $9)
+			OR form_id        IN (SELECT id FROM app.form        WHERE module_id = $10)
+			OR js_function_id IN (SELECT id FROM app.js_function WHERE module_id = $11)
+			OR login_form_id  IN (SELECT id FROM app.login_form  WHERE module_id = $12)
+			OR menu_id        IN (SELECT id FROM app.menu        WHERE module_id = $13)
+			OR pg_function_id IN (SELECT id FROM app.pg_function WHERE module_id = $14)
+			OR role_id        IN (SELECT id FROM app.role        WHERE module_id = $15)
+			OR widget_id      IN (SELECT id FROM app.widget      WHERE module_id = $16)
+		`, sqlSelect, target), id, id, id, id, id, id, id, id, id, id, id, id, id, id, id, id)
 	}
 
 	if err != nil {

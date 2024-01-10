@@ -818,6 +818,11 @@ table td.maximum{
 	margin-right:6px;
 	filter:var(--image-filter);
 }
+.generic-table>tbody>tr.sticky-row{
+	position:sticky;
+	top:0px;
+	z-index:var(--z-index-admin-table-sticky-top);
+}
 .generic-table.no-padding>tbody>tr>td{
 	padding:3px 2px 3px 4px;
 }
