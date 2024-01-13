@@ -117,7 +117,8 @@ export function generatePdf(filename,format,orientation,marginX,marginY,
 							}
 							
 							// document done
-							window.r3_callbackResult(doc.output('blob'));
+							if(window.r3_callbackResult !== undefined)
+								window.r3_callbackResult(doc.output('blob'));
 							
 							if(window.r3_closeWhenDone)
 								return self.close();
