@@ -258,7 +258,7 @@ let MyKanban = {
 					@change="choiceIdSet($event.target.value)"
 				>
 					<option v-for="c in choices" :value="c.id">
-						{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
+						{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
 					</option>
 				</select>
 				<my-button

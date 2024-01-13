@@ -8,7 +8,7 @@ import {getStartFormId}      from './shared/access.js';
 import {updateCollections}   from './shared/collection.js';
 import {formOpen}            from './shared/form.js';
 import {colorAdjustBgHeader} from './shared/generic.js';
-import {getCaption2}          from './shared/language.js';
+import {getCaption}          from './shared/language.js';
 import srcBase64Icon         from './shared/image.js';
 import {
 	aesGcmDecryptBase64,
@@ -320,7 +320,7 @@ let MyApp = {
 				
 				return {
 					accessible:accessible,
-					caption:s.getCaption2('moduleTitle',module.id,module.id,module.captions,module.name),
+					caption:s.getCaption('moduleTitle',module.id,module.id,module.captions,module.name),
 					children:children,
 					formId:formIdStart,
 					iconId:module.iconId,
@@ -407,7 +407,7 @@ let MyApp = {
 		formOpen,
 		genericError,
 		genericErrorWithFallback,
-		getCaption2,
+		getCaption,
 		getStartFormId,
 		pemImport,
 		srcBase64Icon,

@@ -1,7 +1,7 @@
 import MyField                         from './field.js';
 import {aesGcmDecryptBase64WithPhrase} from './shared/crypto.js';
 import {consoleError}                  from './shared/error.js';
-import {getCaption2}                    from './shared/language.js';
+import {getCaption}                    from './shared/language.js';
 import {getUnixFormat}                 from './shared/time.js';
 import {
 	getAttributeFileHref,
@@ -191,8 +191,8 @@ let MyFormLog = {
 		// presentation
 		displayFieldCaption(f) {
 			const atr = this.attributeIdMap[f.attributeId];
-			return this.getCaption2('fieldTitle',this.moduleId,f.id,f.captions,
-				this.getCaption2('attributeTitle',this.moduleId,atr.Id,atr.captions,atr.name));
+			return this.getCaption('fieldTitle',this.moduleId,f.id,f.captions,
+				this.getCaption('attributeTitle',this.moduleId,atr.Id,atr.captions,atr.name));
 		},
 		displayTitle(i,unixTime,name) {
 			if(name === '') name = this.capApp.deletedUser;

@@ -1,6 +1,6 @@
 import {getStringFilled} from '../shared/generic.js';
 import {getUnixFormat}   from '../shared/time.js';
-import {getCaption2}      from '../shared/language.js';
+import {getCaption}      from '../shared/language.js';
 export {MyAdminScheduler as default};
 
 let MyAdminScheduler = {
@@ -213,7 +213,7 @@ let MyAdminScheduler = {
 	},
 	methods:{
 		// externals
-		getCaption2,
+		getCaption,
 		getStringFilled,
 		getUnixFormat,
 		
@@ -226,11 +226,11 @@ let MyAdminScheduler = {
 		},
 		displayModuleName(pgFunctionId) {
 			const m = this.moduleIdMap[this.pgFunctionIdMap[pgFunctionId].moduleId];
-			return this.getCaption2('moduleTitle',m.id,m.id,m.captions,m.name);
+			return this.getCaption('moduleTitle',m.id,m.id,m.captions,m.name);
 		},
 		displayFunctionName(pgFunctionId) {
 			const f = this.pgFunctionIdMap[pgFunctionId];
-			return this.getCaption2('pgFunctionTitle',f.moduleId,f.id,f.captions,f.name);
+			return this.getCaption('pgFunctionTitle',f.moduleId,f.id,f.captions,f.name);
 		},
 		displaySchedule(pgFunctionId,pgFunctionScheduleId) {
 			let f = this.pgFunctionIdMap[pgFunctionId];

@@ -13,7 +13,7 @@ import MyInputUuid            from './inputUuid.js';
 import MyList                 from './list.js';
 import {hasAccessToAttribute} from './shared/access.js';
 import {srcBase64}            from './shared/image.js';
-import {getCaption2}           from './shared/language.js';
+import {getCaption}           from './shared/language.js';
 import {
 	getLinkMeta,
 	getNilUuid,
@@ -119,6 +119,7 @@ let MyField = {
 					:isHidden="isHidden"
 					:isSingleField="isAlone"
 					:loadWhileHidden="parentIsCounting"
+					:moduleId="moduleId"
 					:popUpFormInline="popUpFormInline"
 					:query="field.query"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
@@ -150,6 +151,7 @@ let MyField = {
 					:indexDate1="field.indexDate1"
 					:isHidden="isHidden"
 					:isSingleField="isAlone"
+					:moduleId="moduleId"
 					:popUpFormInline="popUpFormInline"
 					:stepTypeDefault="field.ganttSteps"
 					:stepTypeToggle="field.ganttStepsToggle"
@@ -196,6 +198,7 @@ let MyField = {
 					:filters="filtersProcessed"
 					:formLoading="formLoading"
 					:limit="field.query.fixedLimit"
+					:moduleId="moduleId"
 					:needsHeader="isAlone"
 					:optionJson="field.chartOption"
 					:query="field.query"
@@ -721,12 +724,12 @@ let MyField = {
 				out = s.fieldIdMapCaption[s.field.id];
 			}
 			else {
-				const title = s.getCaption2('fieldTitle',s.moduleId,s.field.id,s.field.captions);
+				const title = s.getCaption('fieldTitle',s.moduleId,s.field.id,s.field.captions);
 				if(title !== '') {
 					out = title;
 				}
 				else if(s.attribute) {
-					out = s.getCaption2('attributeTitle',s.moduleId,s.attribute.id,s.attribute.captions,s.attribute.name);
+					out = s.getCaption('attributeTitle',s.moduleId,s.attribute.id,s.attribute.captions,s.attribute.name);
 				}
 			}
 			return s.isRequired ? out + '*' : out;
@@ -751,7 +754,7 @@ let MyField = {
 			if(!s.isValidValue) return s.capGen.inputInvalid; // generic error
 			return '';
 		},
-		captionHelp:(s) => s.getCaption2('fieldHelp',s.moduleId,s.field.id,s.field.captions),
+		captionHelp:(s) => s.getCaption('fieldHelp',s.moduleId,s.field.id,s.field.captions),
 		domClass:(s) => {
 			let out = [];
 			if(s.isDropdown) out.push('dropdown');
@@ -926,7 +929,7 @@ let MyField = {
 			let out = [];
 			for(let i = 0, j = s.field.tabs.length; i < j; i++) {
 				const tab = s.field.tabs[i];
-				out.push(s.getCaption2('tabTitle',s.moduleId,tab.id,tab.captions,'-'));
+				out.push(s.getCaption('tabTitle',s.moduleId,tab.id,tab.captions,'-'));
 				
 				if(typeof s.tabIndexFieldIdMapCounter[String(i)] === 'undefined')
 					continue;
@@ -1131,7 +1134,7 @@ let MyField = {
 		// externals
 		fieldOptionGet,
 		fieldOptionSet,
-		getCaption2,
+		getCaption,
 		getFlexStyle,
 		getFormPopUpConfig,
 		getIndexAttributeId,

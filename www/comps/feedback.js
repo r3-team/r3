@@ -1,4 +1,4 @@
-import {getCaption2} from './shared/language.js';
+import {getCaption} from './shared/language.js';
 export {MyFeedback as default};
 
 let MyFeedback = {
@@ -32,7 +32,7 @@ let MyFeedback = {
 				/>
 				<div class="submit-choice" v-if="module">
 					<span>
-						{{ capApp.moduleRelated.replace('{NAME}',getCaption2('moduleTitle',module.id,module.id,module.captions,module.name)) }}
+						{{ capApp.moduleRelated.replace('{NAME}',getCaption('moduleTitle',module.id,module.id,module.captions,module.name)) }}
 					</span>
 					<my-bool
 						v-model="moduleRelated"
@@ -136,7 +136,7 @@ let MyFeedback = {
 	},
 	methods:{
 		// externals
-		getCaption2,
+		getCaption,
 		
 		// general
 		handleHotkeys(e) {

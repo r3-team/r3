@@ -1,4 +1,4 @@
-import {getCaption2} from './language.js';
+import {getCaption} from './language.js';
 import MyStore from '../../stores/store.js';
 
 export function genericError(message) {
@@ -115,7 +115,7 @@ export function resolveErrCode(message) {
 				for(let i = 0, j = index.attributes.length; i < j; i++) {
 					atr = MyStore.getters['schema/attributeIdMap'][index.attributes[i].attributeId];
 					rel = MyStore.getters['schema/relationIdMap'][atr.relationId];
-					names.push(getCaption2('attributeTitle',rel.moduleId,atr.id,atr.captions,atr.name));
+					names.push(getCaption('attributeTitle',rel.moduleId,atr.id,atr.captions,atr.name));
 				}
 				return cap.replace('{NAMES}',names.join('+'));
 			break;
@@ -127,8 +127,8 @@ export function resolveErrCode(message) {
 				atr = MyStore.getters['schema/attributeIdMap'][matches[1]];
 				rel = MyStore.getters['schema/relationIdMap'][atr.relationId];
 				mod = MyStore.getters['schema/moduleIdMap'][rel.moduleId];
-				return cap.replace('{ATR}',getCaption2('attributeTitle',mod.id,atr.id,atr.captions,atr.name))
-					.replace('{MOD}',getCaption2('moduleTitle',mod.id,mod.id,mod.captions,mod.name));
+				return cap.replace('{ATR}',getCaption('attributeTitle',mod.id,atr.id,atr.captions,atr.name))
+					.replace('{MOD}',getCaption('moduleTitle',mod.id,mod.id,mod.captions,mod.name));
 			break;
 			case '005': // NOT NULL constraint broken
 				matches = message.match(/\[COLUMN_NAME\:([^\]]*)\]/);

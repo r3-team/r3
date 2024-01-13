@@ -1,5 +1,5 @@
 import {hasAnyAssignableRole} from './shared/access.js';
-import {getCaption2}           from './shared/language.js';
+import {getCaption}           from './shared/language.js';
 export {MyBool,MyBoolStringNumber,MyModuleSelect};
 
 // generic inputs
@@ -97,7 +97,7 @@ let MyModuleSelect = {
 	},
 	methods:{
 		// externals
-		getCaption2,
+		getCaption,
 		hasAnyAssignableRole,
 		
 		// presentation
@@ -105,7 +105,7 @@ let MyModuleSelect = {
 			return module.hidden || !this.hasAnyAssignableRole(module.roles);
 		},
 		displayModuleName(mod) {
-			return `${mod.parentId !== null ? '- ' : ''}` + this.getCaption2('moduleTitle',mod.id,mod.id,mod.captions,mod.name);
+			return `${mod.parentId !== null ? '- ' : ''}` + this.getCaption('moduleTitle',mod.id,mod.id,mod.captions,mod.name);
 		}
 	}
 };

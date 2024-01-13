@@ -4,7 +4,7 @@ import MyFormLog             from './formLog.js';
 import {hasAccessToRelation} from './shared/access.js';
 import {consoleError}        from './shared/error.js';
 import {srcBase64}           from './shared/image.js';
-import {getCaption2}          from './shared/language.js';
+import {getCaption}          from './shared/language.js';
 import {generatePdf}         from './shared/pdf.js';
 import {
 	aesGcmDecryptBase64WithPhrase,
@@ -418,12 +418,12 @@ let MyForm = {
 			if(s.titleOverwrite !== null)
 				return s.titleOverwrite;
 			
-			const formTitle = s.getCaption2('formTitle',s.moduleId,s.formId,s.form.captions);
+			const formTitle = s.getCaption('formTitle',s.moduleId,s.formId,s.form.captions);
 			if(formTitle !== '')
 				return formTitle;
 			
 			if(s.menuActive !== null && s.menuActive.formId === s.form.id)
-				return s.getCaption2('menuTitle',s.moduleId,s.menuActive.id,s.menuActive.captions);
+				return s.getCaption('menuTitle',s.moduleId,s.menuActive.id,s.menuActive.captions);
 			
 			return '';
 		},
@@ -709,7 +709,7 @@ let MyForm = {
 		filterOperatorIsSingleValue,
 		generatePdf,
 		getAttributeValueFromString,
-		getCaption2,
+		getCaption,
 		getCollectionMultiValues,
 		getCollectionValues,
 		getDataFieldMap,

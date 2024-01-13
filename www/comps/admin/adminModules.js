@@ -1,7 +1,7 @@
 import MyArticles            from '../articles.js';
 import srcBase64Icon         from '../shared/image.js';
 import {getUnixFormat}       from '../shared/time.js';
-import {getCaption2}          from '../shared/language.js';
+import {getCaption}          from '../shared/language.js';
 export {MyAdminModules as default};
 
 let MyAdminModulesItem = {
@@ -15,7 +15,7 @@ let MyAdminModulesItem = {
 					:naked="true"
 				/>
 				<img class="module-icon" :src="srcBase64Icon(module.iconId,'images/module.png')" />
-				<span>{{ getCaption2('moduleTitle',module.id,module.id,module.captions,module.name) }}</span>
+				<span>{{ getCaption('moduleTitle',module.id,module.id,module.captions,module.name) }}</span>
 			</div>
 		</td>
 		<td class="minimum">v{{ module.releaseBuild }}</td>
@@ -180,7 +180,7 @@ let MyAdminModulesItem = {
 	},
 	methods:{
 		// externals
-		getCaption2,
+		getCaption,
 		getUnixFormat,
 		srcBase64Icon,
 		

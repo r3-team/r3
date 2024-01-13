@@ -1,7 +1,7 @@
 import {getColumnTitle} from './shared/column.js';
 import {formOpen}       from './shared/form.js';
 import {colorAdjustBg}  from './shared/generic.js';
-import {getCaption2}     from './shared/language.js';
+import {getCaption}     from './shared/language.js';
 import srcBase64Icon    from './shared/image.js';
 import MyForm           from './form.js';
 import {
@@ -160,8 +160,8 @@ let MyWidget = {
 		title:(s) => {
 			// use most specific title in order: Widget title, form title, widget name
 			let t = '';
-			if(s.moduleWidget)     t = s.getCaption2('widgetTitle',s.moduleWidget.moduleId,s.moduleWidget.id,s.moduleWidget.captions);
-			if(t === '' && s.form) t = s.getCaption2('formTitle',s.form.moduleId,s.form.id,s.form.captions);
+			if(s.moduleWidget)     t = s.getCaption('widgetTitle',s.moduleWidget.moduleId,s.moduleWidget.id,s.moduleWidget.captions);
+			if(t === '' && s.form) t = s.getCaption('formTitle',s.form.moduleId,s.form.id,s.form.captions);
 			if(t === '')           t = s.moduleWidget ? s.moduleWidget.name : '';
 			return t;
 		},
@@ -206,7 +206,7 @@ let MyWidget = {
 		// externals
 		colorAdjustBg,
 		formOpen,
-		getCaption2,
+		getCaption,
 		getCollectionColumn,
 		getCollectionValues,
 		getColumnTitle,

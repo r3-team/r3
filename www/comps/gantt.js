@@ -264,7 +264,7 @@ let MyGantt = {
 					@change="choiceIdSet($event.target.value)"
 				>
 					<option v-for="c in choices" :value="c.id">
-						{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
+						{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
 					</option>
 				</select>
 				
@@ -388,6 +388,7 @@ let MyGantt = {
 		indexDate1:      { type:Number,  required:true }, // index of attribute that provides record date to
 		isHidden:        { type:Boolean, required:false, default:false },
 		isSingleField:   { type:Boolean, required:false, default:false },
+		moduleId:        { type:String,  required:true },
 		popUpFormInline: { required:false, default:null },
 		query:           { type:Object,  required:true },
 		stepTypeDefault: { type:String,  required:true },

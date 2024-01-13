@@ -1,5 +1,5 @@
 import srcBase64Icon    from '../shared/image.js';
-import {getCaption2}     from '../shared/language.js';
+import {getCaption}     from '../shared/language.js';
 import MyInputLogin     from '../inputLogin.js';
 import {MyModuleSelect} from '../input.js';
 export {MyAdminRoles as default};
@@ -14,7 +14,7 @@ let MyAdminRoleItem = {
 			<my-button
 				@trigger="showMembers = !showMembers"
 				:active="!showAll"
-				:caption="getCaption2('roleTitle',module.id,role.id,role.captions,role.name)"
+				:caption="getCaption('roleTitle',module.id,role.id,role.captions,role.name)"
 				:image="titleIcon"
 				:naked="true"
 			/>
@@ -78,7 +78,7 @@ let MyAdminRoleItem = {
 		},
 		
 		// simple
-		description:(s) => s.getCaption2('roleDesc',s.module.id,s.role.id,s.role.captions),
+		description:(s) => s.getCaption('roleDesc',s.module.id,s.role.id,s.role.captions),
 		titleIcon:  (s) => s.showAll ? '' : (s.showMembers ? 'triangleDown.png' : 'triangleRight.png'),
 		
 		// stores
@@ -86,7 +86,7 @@ let MyAdminRoleItem = {
 	},
 	methods:{
 		// externals
-		getCaption2,
+		getCaption,
 		
 		// actions
 		add(loginId) {

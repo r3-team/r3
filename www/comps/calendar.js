@@ -282,7 +282,7 @@ let MyCalendar = {
 				
 				<select class="selector" v-if="hasChoices" v-model="choiceIdInput">
 					<option v-for="c in choices" :value="c.id">
-						{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
+						{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
 					</option>
 				</select>
 				
@@ -388,6 +388,7 @@ let MyCalendar = {
 		isHidden:        { type:Boolean, required:false, default:false },
 		isSingleField:   { type:Boolean, required:false, default:false },
 		loadWhileHidden: { type:Boolean, required:false, default:false },
+		moduleId:        { type:String,  required:true },
 		popUpFormInline: { required:true },
 		query:           { type:Object,  required:true },
 		usesPageHistory: { type:Boolean, required:true }

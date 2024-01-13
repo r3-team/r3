@@ -45,23 +45,23 @@ let MyArticles = {
 				<h1>{{ capApp.toc }}</h1>
 				<ol>
 					<li v-for="a in articlesShown" @click="articleScrollTo(a.id)">
-						{{ getArticleTitle(a) }}
+						{{ getCaptionForLang('articleTitle',language,a.id,a.captions,articleTitleEmpty) }}
 					</li>
 				</ol>
 			</div>
 			
 			<div class="article" v-for="(a,i) in articlesShown">
-				<div class="article-title pdf-title" :ref="'article_'+a.id" v-if="hasArticleIndex || getArticleTitle(a) !== articleTitleEmpty">
+				<div class="article-title pdf-title" :ref="'article_'+a.id" v-if="hasArticleIndex || getCaptionForLang('articleTitle',language,a.id,a.captions) !== ''">
 					<my-button class="pdf-hide"
 						@trigger="articleToggle(a.id)"
 						:image="!articleIdsClosed.includes(a.id) ? 'triangleDown.png' : 'triangleRight.png'"
 						:naked="true"
 					/>
-					<span>{{ (i+1) + '. ' + getArticleTitle(a) }}</span>
+					<span>{{ (i+1) + '. ' + getCaptionForLang('articleTitle',language,a.id,a.captions) }}</span>
 				</div>
 				<div class="article-body"
 					v-if="!articleIdsClosed.includes(a.id)"
-					v-html="a.captions.articleBody[language]"
+					v-html="getCaptionForLang('articleBody',language,a.id,a.captions)"
 				/>
 			</div>
 		</div>
@@ -88,8 +88,8 @@ let MyArticles = {
 			
 			let out = [];
 			for(let articleId of articleIds) {
-				let a = s.articleIdMap[articleId];
-				if(typeof a.captions.articleBody[s.language] !== 'undefined')
+				const a = s.articleIdMap[articleId];
+				if(s.getCaptionForLang('articleBody',s.language,a.id,a.captions) !== '')
 					out.push(a);
 			}
 			return out;
@@ -111,12 +111,6 @@ let MyArticles = {
 		generatePdf,
 		getCaptionForLang,
 		getDateFormat,
-		
-		// presentation
-		getArticleTitle(article) {
-			return typeof article.captions.articleTitle[this.language] !== 'undefined'
-				? article.captions.articleTitle[this.language] : this.articleTitleEmpty;
-		},
 		
 		// actions
 		articleToggle(id) {

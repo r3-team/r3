@@ -348,7 +348,7 @@ let MyList = {
 						v-model="choiceId"
 					>
 						<option v-for="c in query.choices" :value="c.id">
-							{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
+							{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
 						</option>
 					</select>
 					
@@ -432,7 +432,7 @@ let MyList = {
 											v-model="choiceId"
 										>
 											<option v-for="c in query.choices" :value="c.id">
-												{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
+												{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
 											</option>
 										</select>
 										

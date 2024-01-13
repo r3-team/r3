@@ -26,7 +26,7 @@ let MyChart = {
 						@change="choiceIdSet($event.target.value)"
 					>
 						<option v-for="c in choices" :value="c.id">
-							{{ getCaption(c.captions.queryChoiceTitle,c.name) }}
+							{{ getCaption('queryChoiceTitle',moduleId,c.id,c.captions,c.name) }}
 						</option>
 					</select>
 				</div>
@@ -44,6 +44,7 @@ let MyChart = {
 		filters:    { type:Array,   required:true },
 		formLoading:{ type:Boolean, required:true },
 		limit:      { type:Number,  required:true },
+		moduleId:   { type:String,  required:true },
 		needsHeader:{ type:Boolean, required:true },
 		optionJson: { type:String,  required:true },
 		query:      { type:Object,  required:true }

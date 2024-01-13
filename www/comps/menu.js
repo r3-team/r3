@@ -4,7 +4,7 @@ import {hasAccessToAnyMenu} from './shared/access.js';
 import {getColumnTitle}     from './shared/column.js';
 import {getFormRoute}       from './shared/form.js';
 import {openLink}           from './shared/generic.js';
-import {getCaption2}         from './shared/language.js';
+import {getCaption}         from './shared/language.js';
 import {
 	getCollectionColumn,
 	getCollectionValues
@@ -117,7 +117,7 @@ let MyMenuItem = {
 		showChildren:(s) => s.hasChildren && s.menuIdMapOpen[s.menu.id],
 		style:       (s) => s.color === null ? '' : `border-left-color:#${s.color};`,
 		subIcon:     (s) => s.showChildren ? 'images/triangleDown.png' : 'images/triangleLeft.png',
-		title:       (s) => s.getCaption2('menuTitle',s.module.id,s.menu.id,s.menu.captions,s.capGen.missingCaption),
+		title:       (s) => s.getCaption('menuTitle',s.module.id,s.menu.id,s.menu.captions,s.capGen.missingCaption),
 		
 		// stores
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
@@ -133,7 +133,7 @@ let MyMenuItem = {
 		getCollectionValues,
 		getColumnTitle,
 		getFormRoute,
-		getCaption2,
+		getCaption,
 		srcBase64,
 		srcBase64Icon,
 		
@@ -174,7 +174,7 @@ let MyMenu = {
 					v-if="module.iconId !== null"
 					:src="srcBase64(iconIdMap[module.iconId].file)"
 				/>
-				<span>{{ getCaption2('moduleTitle',module.id,module.id,module.captions,module.name) }}</span>
+				<span>{{ getCaption('moduleTitle',module.id,module.id,module.captions,module.name) }}</span>
 			</div>
 			
 			<my-button image="builder.png"
@@ -229,7 +229,7 @@ let MyMenu = {
 	},
 	methods:{
 		// externals
-		getCaption2,
+		getCaption,
 		hasAccessToAnyMenu,
 		openLink,
 		srcBase64,

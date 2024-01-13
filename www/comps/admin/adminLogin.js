@@ -2,7 +2,7 @@ import MyForm        from '../form.js';
 import MyTabs        from '../tabs.js';
 import MyInputSelect from '../inputSelect.js';
 import srcBase64Icon from '../shared/image.js';
-import {getCaption2}  from '../shared/language.js';
+import {getCaption}  from '../shared/language.js';
 export {MyAdminLogin as default};
 
 let MyAdminLoginRole = {
@@ -12,8 +12,8 @@ let MyAdminLoginRole = {
 			v-for="r in module.roles.filter(v => v.assignable && v.content === content)"
 			@trigger="$emit('toggle',r.id)"
 			:active="!readonly"
-			:caption="getCaption2('roleTitle',module.id,r.id,r.captions,r.name)"
-			:captionTitle="getCaption2('roleDesc',module.id,r.id,r.captions)"
+			:caption="getCaption('roleTitle',module.id,r.id,r.captions,r.name)"
+			:captionTitle="getCaption('roleDesc',module.id,r.id,r.captions)"
 			:image="roleIds.includes(r.id) ? 'checkbox1.png' : 'checkbox0.png'"
 			:naked="true"
 		/>
@@ -26,7 +26,7 @@ let MyAdminLoginRole = {
 	},
 	emits:['toggle'],
 	methods:{
-		getCaption2
+		getCaption
 	}
 };
 
@@ -140,7 +140,7 @@ let MyAdminLogin = {
 						<td>
 							<div class="title-cell">
 								<img :src="srcBase64Icon(moduleIdMap[lf.moduleId].iconId,'images/module.png')" />
-								<span>{{ getCaption2('loginFormTitle',lf.moduleId,lf.id,lf.captions,lf.name) }}</span>
+								<span>{{ getCaption('loginFormTitle',lf.moduleId,lf.id,lf.captions,lf.name) }}</span>
 							</div>
 						</td>
 						<td>
@@ -258,7 +258,7 @@ let MyAdminLogin = {
 										:naked="true"
 									/>
 									<img class="module-icon" :src="srcBase64Icon(m.iconId,'images/module.png')" />
-									<span>{{ getCaption2('moduleTitle',m.id,m.id,m.captions,m.name) }}</span>
+									<span>{{ getCaption('moduleTitle',m.id,m.id,m.captions,m.name) }}</span>
 								</div>
 							</td>
 							
@@ -339,7 +339,7 @@ let MyAdminLogin = {
 			return cnt;
 		},
 		modulesFiltered:(s) => s.modules.filter(v => !s.moduleIdMapMeta[v.id].hidden &&
-			(s.roleFilter === '' || s.getCaption2('moduleTitle',v.id,v.id,v.captions,v.name).toLowerCase().includes(s.roleFilter.toLowerCase()))),
+			(s.roleFilter === '' || s.getCaption('moduleTitle',v.id,v.id,v.captions,v.name).toLowerCase().includes(s.roleFilter.toLowerCase()))),
 		
 		// simple states
 		canSave:   (s) => s.hasChanges && s.name !== '',
@@ -376,7 +376,7 @@ let MyAdminLogin = {
 	},
 	methods:{
 		// externals
-		getCaption2,
+		getCaption,
 		srcBase64Icon,
 		
 		handleHotkeys(e) {

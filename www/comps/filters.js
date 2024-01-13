@@ -1,6 +1,6 @@
 import MyBuilderQuery from './builder/builderQuery.js';
 import MyInputDate    from './inputDate.js';
-import {getCaption2}   from './shared/language.js';
+import {getCaption}   from './shared/language.js';
 import {
 	getDependentModules,
 	getItemTitleColumn,
@@ -213,7 +213,7 @@ let MyFilterAttribute = {
 	},
 	methods:{
 		// externals
-		getCaption2,
+		getCaption,
 		getItemTitleNoRelationship,
 		
 		// presentation
@@ -223,7 +223,7 @@ let MyFilterAttribute = {
 			const rel = this.relationIdMap[atr.relationId];
 			
 			return this.columnsMode
-				? this.getCaption2('attributeTitle',rel.moduleId,atr.id,atr.captions,atr.name)
+				? this.getCaption('attributeTitle',rel.moduleId,atr.id,atr.captions,atr.name)
 				: this.getItemTitleNoRelationship(atr.id,v[1]);
 		},
 		getQueryLabel(nestingLevel) {
