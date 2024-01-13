@@ -1,16 +1,18 @@
-import {getColumnTitle}  from './shared/column.js';
-import {getFieldTitle}   from './shared/field.js';
-import {getFieldMap}     from './shared/form.js';
-import {objectDeepMerge} from './shared/generic.js';
-import {MyModuleSelect}  from './input.js';
-import MyBuilderCaption  from './builder/builderCaption.js';
+import {getColumnTitle}    from './shared/column.js';
+import {getFieldTitle}     from './shared/field.js';
+import {getFieldMap}       from './shared/form.js';
+import {objectDeepMerge}   from './shared/generic.js';
+import srcBase64Icon       from './shared/image.js';
+import {getCaptionMapName} from './shared/language.js';
+import {MyModuleSelect}    from './input.js';
+import MyBuilderCaption    from './builder/builderCaption.js';
 export {MyCaptionMap as default};
 
 let MyCaptionMapNewLanguage = {
 	name:'my-caption-map-new-language',
 	template:`<div class="app-sub-window under-header" @mousedown.self="close">
 		<div class="contentBox float">
-			<div class="top">
+			<div class="top lower">
 				<div class="area nowrap">
 					<img class="icon" src="images/languages.png" />
 					<h1 class="title">{{ capApp.titleNew }}</h1>
@@ -22,22 +24,20 @@ let MyCaptionMapNewLanguage = {
 					/>
 				</div>
 			</div>
-			<div class="top lower">
-				<div class="area">
+			<div class="content default-inputs">
+				<div class="row gap">
+					<input v-focus v-model="input" />
 					<my-button image="save.png"
-						@trigger="set"
+						@trigger="$emit('create',input)"
 						:active="canSave"
 						:caption="capGen.button.save"
 					/>
 				</div>
-			</div>
-			<div class="content default-inputs">
-				<input v-model="input" />
 				<p v-for="t in capApp.newDesc">{{ t }}</p>
 			</div>
 		</div>
 	</div>`,
-	emits:['close'],
+	emits:['close','create'],
 	props:{
 		languages:      { type:Array,  required:true },
 		languagesCustom:{ type:Array,  required:true },
@@ -60,30 +60,17 @@ let MyCaptionMapNewLanguage = {
 	},
 	mounted() {
 		this.$store.commit('keyDownHandlerSleep');
-		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.create,key:'s',keyCtrl:true});
 		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape',keyCtrl:false});
 	},
 	unmounted() {
-		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel',this.create);
 		this.$store.commit('keyDownHandlerDel',this.close);
 		this.$store.commit('keyDownHandlerWake');
 	},
 	methods:{
-		close() {
-			this.$emit('close');
-		},
-		set() {
-			ws.send('moduleMeta','setLanguagesCustom',{
-				id:this.moduleId,
-				languages:this.languagesCustom.concat([this.input])
-			},true).then(
-				() => {
-					this.$root.schemaReload();
-					this.$emit('close');
-				},
-				this.$root.genericError
-			);
-		}
+		close()  { this.$emit('close'); },
+		create() { this.$emit('create',this.input); }
 	}
 };
 
@@ -164,7 +151,7 @@ let MyCaptionMapItem = {
 		<td v-for="l in languages">
 			<my-caption-map-item-value
 				v-if="item.capMap !== null"
-				@update="(...args) => $emit('update',item.entity,item.id,args[0],args[1],args[2])"
+				@update="(...args) => $emit('update',item.id,args[0],args[1],args[2])"
 				:captionMap="item.capMap"
 				:language="l"
 				:readonly="readonly || (isCustom && !languagesCustom.includes(l))"
@@ -174,7 +161,7 @@ let MyCaptionMapItem = {
 	<my-caption-map-item
 		v-if="showChildrenIds.includes(item.id)"
 		v-for="child in children"
-		@update="(...args) => $emit('update',args[0],args[1],args[2],args[3],args[4])"
+		@update="(...args) => $emit('update',args[0],args[1],args[2],args[3])"
 		:isCustom="isCustom"
 		:item="child"
 		:languages="languages"
@@ -270,7 +257,7 @@ let MyCaptionMap = {
 		MyCaptionMapNewLanguage,
 		MyModuleSelect
 	},
-	template:`<div class="contentBox grow">
+	template:`<div class="contentBox grow" v-if="isReady && module">
 		<div class="top">
 			<div class="area nowrap">
 				<img class="icon" src="images/languages.png" />
@@ -290,27 +277,39 @@ let MyCaptionMap = {
 					:caption="capGen.button.refresh"
 				/>
 			</div>
+			<div class="area default-inputs" v-if="canSwitchModules">
+				<img class="icon"
+					:src="srcBase64Icon(moduleIdMap[moduleId].iconId,'images/module.png')"
+				/>
+				<my-module-select
+					@update:modelValue="changeModule($event)"
+					:modelValue="moduleId"
+				/>
+			</div>
 			<div class="area nowrap">
-				<div class="row centered">
-					<span>{{ capApp.languagesApp }}</span>
-					<my-button
-						v-for="l in languages"
-						@trigger="toggleDisplay(showLanguageCodes,l)"
-						:caption="l"
-						:image="showLanguageCodes.includes(l) ? 'checkbox1.png' : 'checkbox0.png'"
-						:naked="true"
-					/>
-				</div>
-				<div class="row centered" v-if="isCustom">
-					<span>{{ capApp.languagesInstance }}</span>
-					<my-button
-						v-for="l in languagesCustom"
-						@trigger="toggleDisplay(showLanguageCodes,l)"
-						:caption="l"
-						:image="showLanguageCodes.includes(l) ? 'checkbox1.png' : 'checkbox0.png'"
-						:naked="true"
-					/>
+				<div class="row gap-large">
+					<div class="row centered">
+						<span>{{ capApp.languagesApp }}</span>
+						<my-button
+							v-for="l in languages.filter(v => !languagesCustom.includes(v))"
+							@trigger="toggleDisplay(showLanguageCodes,l)"
+							:caption="l"
+							:image="showLanguageCodes.includes(l) ? 'checkbox1.png' : 'checkbox0.png'"
+							:naked="true"
+						/>
+					</div>
+					<div class="row centered" v-if="isCustom">
+						<span>{{ capApp.languagesInstance }}</span>
+						<my-button
+							v-for="l in languagesCustom"
+							@trigger="toggleDisplay(showLanguageCodes,l)"
+							:caption="l"
+							:image="showLanguageCodes.includes(l) ? 'checkbox1.png' : 'checkbox0.png'"
+							:naked="true"
+						/>
+					</div>
 					<my-button image="add.png"
+						v-if="isCustom"
 						@trigger="showLanguageNew = true"
 						:caption="capGen.button.add"
 					/>
@@ -318,18 +317,22 @@ let MyCaptionMap = {
 			</div>
 		</div>
 		<div class="content no-padding">
-			<div class="captionMap" v-if="isReady && module">
+			<div class="captionMap">
 				<table class="generic-table sticky-top">
 					<thead>
 						<tr>
-							<th class="default-inputs">
-								<my-module-select
-									v-if="canSwitchModules"
-									@update:modelValue="changeModule($event)"
-									:modelValue="moduleId"
-								/>
+							<th></th>
+							<th v-for="l in showLanguageCodes">
+								<div class="row centered gap">
+									<span>{{ l }}</span>
+									<my-button image="delete.png"
+										v-if="languagesCustom.includes(l)"
+										@trigger="setLanguagesCustom(l,false)"
+										:captionTitle="capGen.button.delete"
+										:cancel="true"
+									/>
+								</div>
 							</th>
-							<th v-for="l in showLanguageCodes">{{ l }}</th>
 						</tr>
 					</thead>
 					<tbody>
@@ -344,7 +347,7 @@ let MyCaptionMap = {
 							<td v-for="l in showLanguageCodes">
 								<my-caption-map-item-value
 									v-if="captionMap.moduleIdMap[moduleId] !== undefined"
-									@update="(...args) => storeChange('module',moduleId,args[0],args[1],args[2])"
+									@update="(...args) => storeChange(moduleId,args[0],args[1],args[2])"
 									:captionMap="captionMap.moduleIdMap[moduleId]"
 									:language="l"
 									:readonly="readonly || (isCustom && !languagesCustom.includes(l))"
@@ -482,6 +485,7 @@ let MyCaptionMap = {
 				<my-caption-map-new-language
 					v-if="showLanguageNew"
 					@close="showLanguageNew = false"
+					@create="setLanguagesCustom($event,true)"
 					:languages="languages"
 					:languagesCustom="languagesCustom"
 					:moduleId="moduleId"
@@ -498,7 +502,8 @@ let MyCaptionMap = {
 	data() {
 		return {
 			// data
-			captionMap:{}, // map of all captions
+			captionMap:{},       // map of all captions (combines application + custom)
+			captionMapCustom:{}, // map of all custom captions
 			
 			// states
 			changes:[], // change to caption value, key = entity ID (attribute, form, field, etc.)
@@ -510,7 +515,10 @@ let MyCaptionMap = {
 		};
 	},
 	watch:{
-		moduleIdForce() { this.resetDefaults(); }
+		moduleIdForce(v) {
+			this.moduleId = v;
+			this.resetDefaults();
+		}
 	},
 	computed:{
 		captionsApis:(s) => {
@@ -519,7 +527,7 @@ let MyCaptionMap = {
 				let childCaptions = [];
 				for(const col of api.columns) {
 					if(s.captionMap.columnIdMap[col.id] !== undefined)
-						childCaptions.push(s.makeItem('column',col.id,s.getColumnTitle(col,s.moduleId),s.captionMap.columnIdMap[col.id],[]));
+						childCaptions.push(s.makeItem(col.id,s.getColumnTitle(col,s.moduleId),s.captionMap.columnIdMap[col.id],[]));
 				}
 				
 				if(childCaptions.length !== 0)
@@ -527,7 +535,7 @@ let MyCaptionMap = {
 			}
 			let out = [];
 			for(const id in apiIdMap) {
-				out.push(s.makeItem('api',id,s.apiIdMap[id].name,null,apiIdMap[id]));
+				out.push(s.makeItem(id,s.apiIdMap[id].name,null,apiIdMap[id]));
 			}
 			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
@@ -539,13 +547,13 @@ let MyCaptionMap = {
 				if(typeof relIdMap[relId] === 'undefined')
 					relIdMap[relId] = [];
 				
-				relIdMap[relId].push(s.makeItem('attribute',atrId,atr.name,s.captionMap.attributeIdMap[atrId],[]));
+				relIdMap[relId].push(s.makeItem(atrId,atr.name,s.captionMap.attributeIdMap[atrId],[]));
 			}
 			
 			// return sorted by relation and attribute names
 			let out = [];
 			for(let id in relIdMap) {
-				out.push(s.makeItem('relation',id,s.relationIdMap[id].name,null,relIdMap[id]));
+				out.push(s.makeItem(id,s.relationIdMap[id].name,null,relIdMap[id]));
 			}
 			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
@@ -555,7 +563,7 @@ let MyCaptionMap = {
 				let childCaptions = [];
 				for(const col of collection.columns) {
 					if(s.captionMap.columnIdMap[col.id] !== undefined)
-						childCaptions.push(s.makeItem('column',col.id,s.getColumnTitle(col,s.moduleId),s.captionMap.columnIdMap[col.id],[]));
+						childCaptions.push(s.makeItem(col.id,s.getColumnTitle(col,s.moduleId),s.captionMap.columnIdMap[col.id],[]));
 				}
 				
 				if(childCaptions.length !== 0)
@@ -563,7 +571,7 @@ let MyCaptionMap = {
 			}
 			let out = [];
 			for(const id in collectionIdMap) {
-				out.push(s.makeItem('collection',id,s.collectionIdMap[id].name,null,collectionIdMap[id]));
+				out.push(s.makeItem(id,s.collectionIdMap[id].name,null,collectionIdMap[id]));
 			}
 			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
@@ -581,18 +589,18 @@ let MyCaptionMap = {
 					if(fld.columns !== undefined) {
 						for(const col of fld.columns) {
 							if(s.captionMap.columnIdMap[col.id] !== undefined)
-								fieldChildCaptions.push(s.makeItem('column',col.id,s.getColumnTitle(col,s.moduleId),s.captionMap.columnIdMap[col.id],[]));
+								fieldChildCaptions.push(s.makeItem(col.id,s.getColumnTitle(col,s.moduleId),s.captionMap.columnIdMap[col.id],[]));
 						}
 					}
 					if(fld.tabs !== undefined) {
 						for(const tab of fld.tabs) {
 							if(s.captionMap.tabIdMap[tab.id] !== undefined)
-								fieldChildCaptions.push(s.makeItem('tab',tab.id,'-',s.captionMap.tabIdMap[tab.id],[]));
+								fieldChildCaptions.push(s.makeItem(tab.id,'-',s.captionMap.tabIdMap[tab.id],[]));
 						}
 					}
 					
 					if(fieldChildCaptions.length !== 0 || s.captionMap.fieldIdMap[fldId] !== undefined)
-						fieldCaptions.push(s.makeItem('field',fldId,s.getFieldTitle(fld),s.captionMap.fieldIdMap[fldId],fieldChildCaptions));
+						fieldCaptions.push(s.makeItem(fldId,s.getFieldTitle(fld),s.captionMap.fieldIdMap[fldId],fieldChildCaptions));
 				}
 				// form has fields with captions or has captions itself
 				if(fieldCaptions.length !== 0 || s.captionMap.formIdMap[frm.id] !== undefined)
@@ -602,32 +610,32 @@ let MyCaptionMap = {
 			// return sorted by form and field names
 			let out = [];
 			for(const id in frmIdMap) {
-				out.push(s.makeItem('form',id,s.formIdMap[id].name,s.captionMap.formIdMap[id],frmIdMap[id]));
+				out.push(s.makeItem(id,s.formIdMap[id].name,s.captionMap.formIdMap[id],frmIdMap[id]));
 			}
 			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
 		captionsMenus:(s) => {
 			let out = [];
 			for(const id in s.captionMap.menuIdMap) {
-				out.push(s.makeItem('menu',id,'-',s.captionMap.menuIdMap[id],[]));
+				out.push(s.makeItem(id,'-',s.captionMap.menuIdMap[id],[]));
 			}
 			return out;
 		},
 		captionsQueryChoices:(s) => {
 			let out = [];
 			for(const id in s.captionMap.queryChoiceIdMap) {
-				out.push(s.makeItem('query_choice',id,'-',s.captionMap.queryChoiceIdMap[id],[]));
+				out.push(s.makeItem(id,'-',s.captionMap.queryChoiceIdMap[id],[]));
 			}
 			return out;
 		},
 		
 		// simple
-		captionsArticles:   (s) => s.makeSortedItemList(s.captionMap.articleIdMap,s.articleIdMap,'article'),
-		captionsJsFunctions:(s) => s.makeSortedItemList(s.captionMap.jsFunctionIdMap,s.jsFunctionIdMap,'js_function'),
-		captionsLoginForms: (s) => s.makeSortedItemList(s.captionMap.loginFormIdMap,s.loginFormIdMap,'login_form'),
-		captionsPgFunctions:(s) => s.makeSortedItemList(s.captionMap.pgFunctionIdMap,s.pgFunctionIdMap,'pg_function'),
-		captionsRoles:      (s) => s.makeSortedItemList(s.captionMap.roleIdMap,s.roleIdMap,'role'),
-		captionsWidgets:    (s) => s.makeSortedItemList(s.captionMap.widgetIdMap,s.widgetIdMap,'widget'),
+		captionsArticles:   (s) => s.makeSortedItemList(s.captionMap.articleIdMap,s.articleIdMap),
+		captionsJsFunctions:(s) => s.makeSortedItemList(s.captionMap.jsFunctionIdMap,s.jsFunctionIdMap),
+		captionsLoginForms: (s) => s.makeSortedItemList(s.captionMap.loginFormIdMap,s.loginFormIdMap),
+		captionsPgFunctions:(s) => s.makeSortedItemList(s.captionMap.pgFunctionIdMap,s.pgFunctionIdMap),
+		captionsRoles:      (s) => s.makeSortedItemList(s.captionMap.roleIdMap,s.roleIdMap),
+		captionsWidgets:    (s) => s.makeSortedItemList(s.captionMap.widgetIdMap,s.widgetIdMap),
 		canSave:            (s) => !s.readonly && s.hasChanges,
 		canSwitchModules:   (s) => s.moduleIdForce === null,
 		languages:          (s) => s.moduleId === null ? [] : s.moduleIdMap[s.moduleId].languages,
@@ -661,10 +669,12 @@ let MyCaptionMap = {
 	},
 	methods:{
 		// external
+		getCaptionMapName,
 		getColumnTitle,
 		getFieldMap,
 		getFieldTitle,
 		objectDeepMerge,
+		srcBase64Icon,
 		
 		// actions
 		changeModule(id) {
@@ -706,18 +716,28 @@ let MyCaptionMap = {
 			}
 			this.reset();
 		},
-		storeChange(entity,entityId,content,languageCode,value) {
-			this.hasChanges = true;
+		storeChange(entityId,content,languageCode,value) {
+			const mapName    = this.getCaptionMapName(content);
+			const customLang = this.isCustom && this.languagesCustom.includes(languageCode);
 			
-			if(content === 'articleBody')
-				this.captionMap.articleIdMap[entityId][content][languageCode] = value;
+			this.hasChanges = true;
+			this.captionMap[mapName][entityId][content][languageCode] = value;
+			
+			if(customLang) {
+				if(this.captionMapCustom[mapName][entityId] === undefined)
+					this.captionMapCustom[mapName][entityId] = {};
+				
+				if(this.captionMapCustom[mapName][entityId][content] === undefined)
+					this.captionMapCustom[mapName][entityId][content] = {};
+				
+				this.captionMapCustom[mapName][entityId][content][languageCode] = value;
+			}
 			
 			this.changes[`${entityId}_${content}_${languageCode}`] = {
 				content:content,
-				entity:entity,
 				entityId:entityId,
 				languageCode:languageCode,
-				target:this.languagesCustom.includes(languageCode) ? 'instance' : 'app',
+				target:customLang ? 'instance' : 'app',
 				value:value
 			};
 		},
@@ -728,19 +748,18 @@ let MyCaptionMap = {
 		},
 		
 		// helper
-		makeItem(entity,id,name,capMap,children) {
+		makeItem(id,name,capMap,children) {
 			return {
 				capMap:capMap !== undefined ? capMap : null,
 				children:children !== undefined ? children.sort((a,b) => (a.name > b.name) ? 1 : -1) : [],
-				entity:entity,
 				id:id,
 				name:name
 			};
 		},
-		makeSortedItemList(capMap,entityMap,entity) {
+		makeSortedItemList(capMap,entityMap) {
 			let out = [];
 			for(const id in capMap) {
-				out.push(this.makeItem(entity,id,entityMap[id].name,capMap[id],[]));
+				out.push(this.makeItem(id,entityMap[id].name,capMap[id],[]));
 			}
 			return out.sort((a,b) => (a.name > b.name) ? 1 : -1);
 		},
@@ -760,9 +779,12 @@ let MyCaptionMap = {
 			
 			ws.sendMultiple(requests,true).then(
 				res => {
-					this.captionMap = res.length === 2
+					this.captionMap = this.isCustom
 						? this.objectDeepMerge(res[0].payload,res[1].payload)
 						: res[0].payload;
+					
+					if(this.isCustom)
+						this.captionMapCustom = res[1].payload;
 					
 					this.isReady = true;
 				},
@@ -778,13 +800,54 @@ let MyCaptionMap = {
 			}
 			ws.sendMultiple(requests,true).then(
 				() => {
-					if(this.isCustom)
-						this.$root.schemaReload();
-					else
-						this.$root.schemaReload(this.moduleId);
+					if(this.isCustom) this.$root.schemaReload();
+					else              this.$root.schemaReload(this.moduleId);
 					
 					this.changes    = {};
 					this.hasChanges = false;
+				},
+				this.$root.genericError
+			);
+		},
+		setLanguagesCustom(languageSet,add) {
+			let v = JSON.parse(JSON.stringify(this.languagesCustom));
+			
+			if(add) v.push(languageSet);
+			else    v.splice(v.indexOf(languageSet),1);
+			
+			let requests = [
+				ws.prepare('moduleMeta','setLanguagesCustom',{id:this.moduleId,languages:v})
+			];
+			
+			if(!add) {
+				// delete existing custom captions
+				for(const k in this.captionMapCustom) {
+					const map = this.captionMapCustom[k];
+					for(const entityId in map) {
+						for(const content in map[entityId]) {
+							for(const language in map[entityId][content]) {
+								if(language !== languageSet)
+									continue;
+								
+								requests.push(ws.prepare('captionMap','setOne',{
+									content:content,
+									entityId:entityId,
+									languageCode:language,
+									target:'instance',
+									value:''
+								}));
+							}
+						}
+					}
+				}
+			}
+			
+			ws.sendMultiple(requests,true).then(
+				() => {
+					this.$root.schemaReload();
+					this.showLanguageNew = false;
+					
+					if(!add) this.get();
 				},
 				this.$root.genericError
 			);

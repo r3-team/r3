@@ -7,7 +7,6 @@ import {
 import MyStore from '../../stores/store.js';
 
 export function getColumnTitle(c,moduleId) {
-	//return 'bacon!';
 	return getColumnTitleForLang(c,MyStore.getters.moduleIdMapLang[moduleId]);
 };
 export function getColumnTitleForLang(c,language) {
@@ -18,8 +17,8 @@ export function getColumnTitleForLang(c,language) {
 
 export function getFirstColumnUsableAsAggregator(batch,columns) {
 	for(let ind of batch.columnIndexes) {
-		let c = columns[ind];
-		let a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+		const c = columns[ind];
+		const a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
 		
 		// anything that can be counted can serve as aggregation
 		// sub queries and already aggregated colums are not supported

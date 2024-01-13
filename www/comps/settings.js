@@ -1216,11 +1216,22 @@ let MySettings = {
 		}
 	},
 	computed:{
+		languageCodes:(s) => {
+			let langs = s.$store.getters['schema/languageCodes'];
+			for(const k in s.moduleIdMapMeta) {
+				for(const l of s.moduleIdMapMeta[k].languagesCustom) {
+					if(!langs.includes(l))
+						langs.push(l);
+				}
+			}
+			return langs
+		},
+		
 		// stores
-		languageCodes:     (s) => s.$store.getters['schema/languageCodes'],
 		searchDictionaries:(s) => s.$store.getters['searchDictionaries'],
 		capGen:            (s) => s.$store.getters.captions.generic,
 		capApp:            (s) => s.$store.getters.captions.settings,
+		moduleIdMapMeta:   (s) => s.$store.getters.moduleIdMapMeta,
 		patternStyle:      (s) => s.$store.getters.patternStyle,
 		settings:          (s) => s.$store.getters.settings
 	},

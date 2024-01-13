@@ -3,6 +3,7 @@ package captionMap
 import (
 	"fmt"
 	"r3/db"
+	"r3/schema/caption"
 	"r3/types"
 	"slices"
 
@@ -11,9 +12,6 @@ import (
 	"github.com/jackc/pgx/v5/pgtype"
 )
 
-var captionMapEntities = []string{"article", "attribute", "column", "field",
-	"form", "js_function", "login_form", "menu", "module", "pg_function",
-	"query_choice", "role", "tab", "widget"}
 var captionMapTargets = []string{"app", "instance"}
 
 func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
@@ -186,7 +184,7 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 		}
 
 		if !exists {
-			captionMap = getDefaultContent(entity)
+			captionMap = caption.GetDefaultContent(entity)
 		}
 		captionMap[content][langCode] = value
 
@@ -226,21 +224,23 @@ func Get(id pgtype.UUID, target string) (types.CaptionMapsAll, error) {
 	return caps, nil
 }
 
-func SetOne_tx(tx pgx.Tx, target string, entity string, entityId uuid.UUID,
+func SetOne_tx(tx pgx.Tx, target string, entityId uuid.UUID,
 	content string, languageCode string, value string) error {
 
 	if !slices.Contains(captionMapTargets, target) {
 		return fmt.Errorf("invalid target '%s' for caption map", target)
 	}
-	if !slices.Contains(captionMapEntities, entity) {
-		return fmt.Errorf("invalid entity '%s' for caption map", entity)
+
+	entity, err := caption.GetEntityName(content)
+	if err != nil {
+		return err
 	}
 
 	// empty value, delete
 	if value == "" {
 		_, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 			DELETE FROM %s.caption
-			WHERE %s_id         = $1
+			WHERE %s            = $1
 			AND   content       = $2
 			AND   language_code = $3
 		`, target, entity), entityId, content, languageCode)
@@ -254,7 +254,7 @@ func SetOne_tx(tx pgx.Tx, target string, entity string, entityId uuid.UUID,
 		SELECT EXISTS (
 			SELECT 1
 			FROM %s.caption
-			WHERE %s_id         = $1
+			WHERE %s            = $1
 			AND   content       = $2
 			AND   language_code = $3
 		)
@@ -264,7 +264,7 @@ func SetOne_tx(tx pgx.Tx, target string, entity string, entityId uuid.UUID,
 
 	if !exists {
 		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
-			INSERT INTO %s.caption (%s_id, content, language_code, value)
+			INSERT INTO %s.caption (%s, content, language_code, value)
 			VALUES ($1,$2,$3,$4)
 		`, target, entity), entityId, content, languageCode, value); err != nil {
 			return err
@@ -273,7 +273,7 @@ func SetOne_tx(tx pgx.Tx, target string, entity string, entityId uuid.UUID,
 		if _, err := tx.Exec(db.Ctx, fmt.Sprintf(`
 			UPDATE %s.caption
 			SET value = $1
-			WHERE %s_id         = $2
+			WHERE %s            = $2
 			AND   content       = $3
 			AND   language_code = $4
 		`, target, entity), value, entityId, content, languageCode); err != nil {
@@ -281,72 +281,4 @@ func SetOne_tx(tx pgx.Tx, target string, entity string, entityId uuid.UUID,
 		}
 	}
 	return nil
-}
-
-// helpers
-func getDefaultContent(entity string) types.CaptionMap {
-	switch entity {
-	case "article":
-		return types.CaptionMap{
-			"articleTitle": make(map[string]string),
-			"articleBody":  make(map[string]string),
-		}
-	case "attribute":
-		return types.CaptionMap{
-			"attributeTitle": make(map[string]string),
-		}
-	case "column":
-		return types.CaptionMap{
-			"columnTitle": make(map[string]string),
-		}
-	case "field":
-		return types.CaptionMap{
-			"fieldTitle": make(map[string]string),
-			"fieldHelp":  make(map[string]string),
-		}
-	case "form":
-		return types.CaptionMap{
-			"formTitle": make(map[string]string),
-		}
-	case "jsFunction":
-		return types.CaptionMap{
-			"jsFunctionDesc":  make(map[string]string),
-			"jsFunctionTitle": make(map[string]string),
-		}
-	case "loginForm":
-		return types.CaptionMap{
-			"loginFormTitle": make(map[string]string),
-		}
-	case "menu":
-		return types.CaptionMap{
-			"menuTitle": make(map[string]string),
-		}
-	case "module":
-		return types.CaptionMap{
-			"moduleTitle": make(map[string]string),
-		}
-	case "pgFunction":
-		return types.CaptionMap{
-			"pgFunctionTitle": make(map[string]string),
-			"pgFunctionDesc":  make(map[string]string),
-		}
-	case "queryChoice":
-		return types.CaptionMap{
-			"queryChoiceTitle": make(map[string]string),
-		}
-	case "role":
-		return types.CaptionMap{
-			"roleTitle": make(map[string]string),
-			"roleDesc":  make(map[string]string),
-		}
-	case "tab":
-		return types.CaptionMap{
-			"tabTitle": make(map[string]string),
-		}
-	case "widget":
-		return types.CaptionMap{
-			"widgetTitle": make(map[string]string),
-		}
-	}
-	return types.CaptionMap{}
 }

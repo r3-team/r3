@@ -47,7 +47,7 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, captions types.CaptionMap) error {
 
 	for content, codes := range captions {
 
-		entityName, err := getEntityName(content)
+		entityName, err := GetEntityName(content)
 		if err != nil {
 			return err
 		}
@@ -80,7 +80,73 @@ func Set_tx(tx pgx.Tx, id uuid.UUID, captions types.CaptionMap) error {
 }
 
 // helpers
-func getEntityName(content string) (string, error) {
+func GetDefaultContent(entity string) types.CaptionMap {
+	switch entity {
+	case "article":
+		return types.CaptionMap{
+			"articleTitle": make(map[string]string),
+			"articleBody":  make(map[string]string),
+		}
+	case "attribute":
+		return types.CaptionMap{
+			"attributeTitle": make(map[string]string),
+		}
+	case "column":
+		return types.CaptionMap{
+			"columnTitle": make(map[string]string),
+		}
+	case "field":
+		return types.CaptionMap{
+			"fieldTitle": make(map[string]string),
+			"fieldHelp":  make(map[string]string),
+		}
+	case "form":
+		return types.CaptionMap{
+			"formTitle": make(map[string]string),
+		}
+	case "jsFunction":
+		return types.CaptionMap{
+			"jsFunctionDesc":  make(map[string]string),
+			"jsFunctionTitle": make(map[string]string),
+		}
+	case "loginForm":
+		return types.CaptionMap{
+			"loginFormTitle": make(map[string]string),
+		}
+	case "menu":
+		return types.CaptionMap{
+			"menuTitle": make(map[string]string),
+		}
+	case "module":
+		return types.CaptionMap{
+			"moduleTitle": make(map[string]string),
+		}
+	case "pgFunction":
+		return types.CaptionMap{
+			"pgFunctionTitle": make(map[string]string),
+			"pgFunctionDesc":  make(map[string]string),
+		}
+	case "queryChoice":
+		return types.CaptionMap{
+			"queryChoiceTitle": make(map[string]string),
+		}
+	case "role":
+		return types.CaptionMap{
+			"roleTitle": make(map[string]string),
+			"roleDesc":  make(map[string]string),
+		}
+	case "tab":
+		return types.CaptionMap{
+			"tabTitle": make(map[string]string),
+		}
+	case "widget":
+		return types.CaptionMap{
+			"widgetTitle": make(map[string]string),
+		}
+	}
+	return types.CaptionMap{}
+}
+func GetEntityName(content string) (string, error) {
 
 	switch content {
 

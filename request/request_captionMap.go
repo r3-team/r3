@@ -26,7 +26,6 @@ func CaptionMapSetOne_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error
 
 	var req struct {
 		Content      string    `json:"content"`
-		Entity       string    `json:"entity"`
 		EntityId     uuid.UUID `json:"entityId"`
 		LanguageCode string    `json:"languageCode"`
 		Target       string    `json:"target"`
@@ -36,6 +35,6 @@ func CaptionMapSetOne_tx(tx pgx.Tx, reqJson json.RawMessage) (interface{}, error
 	if err := json.Unmarshal(reqJson, &req); err != nil {
 		return nil, err
 	}
-	return nil, captionMap.SetOne_tx(tx, req.Target, req.Entity,
-		req.EntityId, req.Content, req.LanguageCode, req.Value)
+	return nil, captionMap.SetOne_tx(tx, req.Target, req.EntityId,
+		req.Content, req.LanguageCode, req.Value)
 }

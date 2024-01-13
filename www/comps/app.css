@@ -183,7 +183,10 @@ h3{
 	align-items:center;
 }
 .column.gap{
-	gap:10px;
+	gap:calc(var(--spacing) / 2.5);
+}
+.column.gap-large{
+	gap:var(--spacing);
 }
 .column.grow{
 	flex:1 1 auto;
@@ -203,6 +206,9 @@ h3{
 }
 .row.gap{
 	gap:calc(var(--spacing) / 2.5);
+}
+.row.gap-large{
+	gap:var(--spacing);
 }
 .row.grow{
 	flex:1 1 auto;
