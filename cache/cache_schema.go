@@ -95,6 +95,7 @@ func LoadSchema() error {
 
 // update module schema cache
 func UpdateSchema(moduleIds []uuid.UUID, initialLoad bool) error {
+	var err error
 
 	if err := updateSchemaCache(moduleIds); err != nil {
 		return err
@@ -109,7 +110,6 @@ func UpdateSchema(moduleIds []uuid.UUID, initialLoad bool) error {
 	// create JSON copy of schema cache for fast retrieval
 	for _, id := range moduleIds {
 		Schema_mx.Lock()
-		var err error
 		moduleIdMapJson[id], err = json.Marshal(ModuleIdMap[id])
 		Schema_mx.Unlock()
 		if err != nil {
@@ -135,14 +135,10 @@ func UpdateSchema(moduleIds []uuid.UUID, initialLoad bool) error {
 	for _, id := range moduleIds {
 		meta, exists := moduleIdMapMeta[id]
 		if !exists {
-			v, err := module_meta.Get(id)
+			meta, err = module_meta.Get(id)
 			if err != nil {
 				return err
 			}
-			meta.Id = id
-			meta.Hidden = v.Hidden
-			meta.Owner = v.Owner
-			meta.Position = v.Position
 		}
 		meta.DateChange = now
 		moduleIdMapMeta[id] = meta

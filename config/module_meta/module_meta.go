@@ -19,14 +19,19 @@ func Create_tx(tx pgx.Tx, moduleId uuid.UUID, hidden bool, owner bool, position 
 }
 
 func Get(moduleId uuid.UUID) (types.ModuleMeta, error) {
-	var m types.ModuleMeta
+	var m = types.ModuleMeta{
+		Id: moduleId,
+	}
 
 	err := db.Pool.QueryRow(db.Ctx, `
-		SELECT hidden, owner, position, date_change
+		SELECT hidden, owner, position, date_change, languages_custom
 		FROM instance.module_meta
 		WHERE module_id = $1
-	`, moduleId).Scan(&m.Hidden, &m.Owner, &m.Position, &m.DateChange)
+	`, moduleId).Scan(&m.Hidden, &m.Owner, &m.Position, &m.DateChange, &m.LanguagesCustom)
 
+	if m.LanguagesCustom == nil {
+		m.LanguagesCustom = make([]string, 0)
+	}
 	return m, err
 }
 func GetDateChange(moduleId uuid.UUID) (uint64, error) {
@@ -42,7 +47,7 @@ func GetIdMap() (map[uuid.UUID]types.ModuleMeta, error) {
 	moduleIdMap := make(map[uuid.UUID]types.ModuleMeta)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT module_id, hidden, owner, position, date_change
+		SELECT module_id, hidden, owner, position, date_change, languages_custom
 		FROM instance.module_meta
 	`)
 	if err != nil {
@@ -52,8 +57,13 @@ func GetIdMap() (map[uuid.UUID]types.ModuleMeta, error) {
 
 	for rows.Next() {
 		var m types.ModuleMeta
-		if err := rows.Scan(&m.Id, &m.Hidden, &m.Owner, &m.Position, &m.DateChange); err != nil {
+		if err := rows.Scan(&m.Id, &m.Hidden, &m.Owner, &m.Position,
+			&m.DateChange, &m.LanguagesCustom); err != nil {
+
 			return moduleIdMap, err
+		}
+		if m.LanguagesCustom == nil {
+			m.LanguagesCustom = make([]string, 0)
 		}
 		moduleIdMap[m.Id] = m
 	}
@@ -92,6 +102,14 @@ func SetHash_tx(tx pgx.Tx, moduleId uuid.UUID, hash string) error {
 		SET hash = $1
 		WHERE module_id = $2
 	`, hash, moduleId)
+	return err
+}
+func SetLanguagesCustom(tx pgx.Tx, moduleId uuid.UUID, languages []string) error {
+	_, err := tx.Exec(db.Ctx, `
+		UPDATE instance.module_meta
+		SET languages_custom = $1
+		WHERE module_id = $2
+	`, languages, moduleId)
 	return err
 }
 func SetOptions_tx(tx pgx.Tx, moduleId uuid.UUID, hidden bool, owner bool, position int) error {

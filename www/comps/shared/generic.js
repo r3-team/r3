@@ -56,15 +56,6 @@ export function copyValueDialog(captionTop,captionBody,copyClipboardValue) {
 	});
 };
 
-export function getModuleCaption(module,moduleLanguage) {
-	// 1st preference: dedicated module title
-	if(typeof module.captions.moduleTitle[moduleLanguage] !== 'undefined')
-		return module.captions.moduleTitle[moduleLanguage];
-	
-	// if nothing else is available: module name
-	return MyStore.getters['schema/moduleIdMap'][module.id].name;
-};
-
 export function getBuildFromVersion(fullVersion) {
 	let m = fullVersion.match(/\d+\.\d+\.\d+\.(\d+)/);
 	
@@ -128,6 +119,29 @@ export function getStringFilled(val,length,char) {
 		val = char + val;
 	
 	return val;
+};
+
+export function objectDeepMerge(target,...sources) {
+	if(!sources.length)
+		return target;
+	
+	const isObject = item => (item && typeof item === 'object' && !Array.isArray(item));
+	const source   = sources.shift();
+	
+	if(isObject(target) && isObject(source)) {
+		for(const k in source) {
+			if(isObject(source[k])) {
+				if(!target[k])
+					Object.assign(target, { [k]:{} });
+				
+				objectDeepMerge(target[k], source[k]);
+			}
+			else {
+				Object.assign(target, { [k]:source[k] });
+			}
+		}
+	}
+	return objectDeepMerge(target, ...sources);
 };
 
 export function openLink(href,blank) {

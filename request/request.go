@@ -434,6 +434,8 @@ func Exec_tx(ctx context.Context, tx pgx.Tx, loginId int64, isAdmin bool, isNoAu
 		}
 	case "moduleMeta":
 		switch action {
+		case "setLanguagesCustom":
+			return ModuleMetaSetLanguagesCustom_tx(tx, reqJson)
 		case "setOptions":
 			return ModuleMetaSetOptions_tx(tx, reqJson)
 		}

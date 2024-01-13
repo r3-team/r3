@@ -1,26 +1,148 @@
-import {getColumnTitle} from './shared/column.js';
-import {getFieldTitle}  from './shared/field.js';
-import {getFieldMap}    from './shared/form.js';
+import {getColumnTitle}  from './shared/column.js';
+import {getFieldTitle}   from './shared/field.js';
+import {getFieldMap}     from './shared/form.js';
+import {objectDeepMerge} from './shared/generic.js';
+import {MyModuleSelect}  from './input.js';
+import MyBuilderCaption  from './builder/builderCaption.js';
 export {MyCaptionMap as default};
+
+let MyCaptionMapNewLanguage = {
+	name:'my-caption-map-new-language',
+	template:`<div class="app-sub-window under-header" @mousedown.self="close">
+		<div class="contentBox float">
+			<div class="top">
+				<div class="area nowrap">
+					<img class="icon" src="images/languages.png" />
+					<h1 class="title">{{ capApp.titleNew }}</h1>
+				</div>
+				<div class="area">
+					<my-button image="cancel.png"
+						@trigger="close"
+						:cancel="true"
+					/>
+				</div>
+			</div>
+			<div class="top lower">
+				<div class="area">
+					<my-button image="save.png"
+						@trigger="set"
+						:active="canSave"
+						:caption="capGen.button.save"
+					/>
+				</div>
+			</div>
+			<div class="content default-inputs">
+				<input v-model="input" />
+				<p v-for="t in capApp.newDesc">{{ t }}</p>
+			</div>
+		</div>
+	</div>`,
+	emits:['close'],
+	props:{
+		languages:      { type:Array,  required:true },
+		languagesCustom:{ type:Array,  required:true },
+		moduleId:       { type:String, required:true }
+	},
+	data() {
+		return {
+			input:''
+		};
+	},
+	computed:{
+		canSave:(s) =>
+			s.input !== '' &&
+			s.input.length === 5 &&
+			!s.languagesCustom.includes(s.input),
+		
+		// stores
+		capApp:(s) => s.$store.getters.captions.captionMap,
+		capGen:(s) => s.$store.getters.captions.generic
+	},
+	mounted() {
+		this.$store.commit('keyDownHandlerSleep');
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape',keyCtrl:false});
+	},
+	unmounted() {
+		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel',this.close);
+		this.$store.commit('keyDownHandlerWake');
+	},
+	methods:{
+		close() {
+			this.$emit('close');
+		},
+		set() {
+			ws.send('moduleMeta','setLanguagesCustom',{
+				id:this.moduleId,
+				languages:this.languagesCustom.concat([this.input])
+			},true).then(
+				() => {
+					this.$root.schemaReload();
+					this.$emit('close');
+				},
+				this.$root.genericError
+			);
+		}
+	}
+};
 
 let MyCaptionMapItemValue = {
 	name:'my-caption-map-item-value',
+	components:{ MyBuilderCaption },
 	template:`<td>
 		<div class="row wrap gap default-inputs">
-			<input class="long"
-				v-for="(captions,content) in captionMap"
-				@input="$emit('update',content,languageCode,$event.target.value)"
-				:disabled="readonly"
-				:placeholder="content"
-				:value="typeof captions[languageCode] === 'undefined' ? '' : captions[languageCode]"
-			/>
+			<template v-for="(captions,content) in captionMap">
+				<input class="long"
+					v-if="!contentRichtext.includes(content)"
+					@input="$emit('update',content,language,$event.target.value)"
+					:disabled="readonly"
+					:placeholder="content"
+					:value="typeof captions[language] === 'undefined' ? '' : captions[language]"
+				/>
+				<my-button image="edit.png"
+					v-if="contentRichtext.includes(content)"
+					@trigger="showRichtextContent = content"
+					:caption="content"
+				/>
+			</template>
+			
+			<div class="app-sub-window under-header" v-if="showRichtextContent !== null" @mousedown.self="showRichtextContent = null">
+				<div class="contentBox shade popUp captionMap-richtext">
+					<div class="top lower">
+						<div class="area">{{ showRichtextContent }}</div>
+						<div class="area">
+							<my-button image="cancel.png"
+								@trigger="showRichtextContent = null"
+								:cancel="true"
+							/>
+						</div>
+					</div>
+					<div class="content grow no-padding captionMap-richtext-content">
+						<my-builder-caption
+							@update:modelValue="$emit('update',showRichtextContent,language,$event[language])"
+							:contentName="''"
+							:language="language"
+							:modelValue="captionMap[showRichtextContent]"
+							:readonly="readonly"
+							:richtext="true"
+						/>
+					</div>
+				</div>
+			</div>
 		</div>
 	</td>`,
+	data() {
+		return {
+			contentRichtext:['articleBody'],
+			showRichtextContent:null
+		};
+	},
 	emits:['update'],
 	props:{
-		captionMap:  { type:Object,  required:true },
-		languageCode:{ type:String,  required:true },
-		readonly:    { type:Boolean, required:true }
+		captionMap:{ type:Object,  required:true },
+		language:  { type:String,  required:true }, // language code: en_us, de_de, ...
+		readonly:  { type:Boolean, required:true }
 	}
 };
 
@@ -39,13 +161,13 @@ let MyCaptionMapItem = {
 				/>
 			</div>
 		</td>
-		<td v-for="l in languageCodes">
+		<td v-for="l in languages">
 			<my-caption-map-item-value
 				v-if="item.capMap !== null"
 				@update="(...args) => $emit('update',item.entity,item.id,args[0],args[1],args[2])"
 				:captionMap="item.capMap"
-				:languageCode="l"
-				:readonly="readonly"
+				:language="l"
+				:readonly="readonly || (isCustom && !languagesCustom.includes(l))"
 			/>
 		</td>
 	</tr>
@@ -53,19 +175,23 @@ let MyCaptionMapItem = {
 		v-if="showChildrenIds.includes(item.id)"
 		v-for="child in children"
 		@update="(...args) => $emit('update',args[0],args[1],args[2],args[3],args[4])"
+		:isCustom="isCustom"
 		:item="child"
-		:languageCodes="languageCodes"
+		:languages="languages"
+		:languagesCustom="languagesCustom"
 		:level="level + 1"
 		:levelMax="levelMax"
 		:readonly="readonly"
 	/>`,
 	emits:['update'],
 	props:{
-		item:         { type:Object,  required:true },
-		languageCodes:{ type:Array,   required:true },
-		level:        { type:Number,  required:false, default:0 },
-		levelMax:     { type:Number , required:true },
-		readonly:     { type:Boolean, required:true }
+		isCustom:       { type:Boolean, required:true },
+		item:           { type:Object,  required:true },
+		languages:      { type:Array,   required:true },
+		languagesCustom:{ type:Array,   required:true },
+		level:          { type:Number,  required:false, default:0 },
+		levelMax:       { type:Number , required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	data() {
 		return {
@@ -105,25 +231,29 @@ let MyCaptionMapItems = {
 				:images="[show ? 'triangleDown.png' : 'triangleRight.png',icon]"
 			/>
 		</td>
-		<td v-for="l in languageCodes">{{ show ? l : '-' }}</td>
+		<td v-for="l in languages">{{ show ? l : '-' }}</td>
 	</tr>
 	<my-caption-map-item
 		v-if="show"
 		v-for="item in items"
 		@update="(...args) => $emit('update',...args)"
+		:isCustom="isCustom"
 		:item="item"
-		:languageCodes="languageCodes"
+		:languages="languages"
+		:languagesCustom="languagesCustom"
 		:levelMax="levelMax"
 		:readonly="readonly"
 	/>`,
 	emits:['update'],
 	props:{
-		icon:         { type:String,  required:true },
-		items:        { type:Array,   required:true },
-		languageCodes:{ type:Array,   required:true },
-		levelMax:     { type:Number,  required:false, default:0 },
-		name:         { type:String,  required:true },
-		readonly:     { type:Boolean, required:true }
+		icon:           { type:String,  required:true },
+		isCustom:       { type:Boolean, required:true },
+		items:          { type:Array,   required:true },
+		languages:      { type:Array,   required:true },
+		languagesCustom:{ type:Array,   required:true },
+		levelMax:       { type:Number,  required:false, default:0 },
+		name:           { type:String,  required:true },
+		readonly:       { type:Boolean, required:true }
 	},
 	data() {
 		return {
@@ -136,7 +266,9 @@ let MyCaptionMap = {
 	name:'my-caption-map',
 	components:{
 		MyCaptionMapItems,
-		MyCaptionMapItemValue
+		MyCaptionMapItemValue,
+		MyCaptionMapNewLanguage,
+		MyModuleSelect
 	},
 	template:`<div class="contentBox grow">
 		<div class="top">
@@ -159,13 +291,30 @@ let MyCaptionMap = {
 				/>
 			</div>
 			<div class="area nowrap">
-				<my-button
-					v-for="l in module.languages"
-					@trigger="toggleDisplay(showLanguageCodes,l)"
-					:caption="l"
-					:image="showLanguageCodes.includes(l) ? 'checkbox1.png' : 'checkbox0.png'"
-					:naked="true"
-				/>
+				<div class="row centered">
+					<span>{{ capApp.languagesApp }}</span>
+					<my-button
+						v-for="l in languages"
+						@trigger="toggleDisplay(showLanguageCodes,l)"
+						:caption="l"
+						:image="showLanguageCodes.includes(l) ? 'checkbox1.png' : 'checkbox0.png'"
+						:naked="true"
+					/>
+				</div>
+				<div class="row centered" v-if="isCustom">
+					<span>{{ capApp.languagesInstance }}</span>
+					<my-button
+						v-for="l in languagesCustom"
+						@trigger="toggleDisplay(showLanguageCodes,l)"
+						:caption="l"
+						:image="showLanguageCodes.includes(l) ? 'checkbox1.png' : 'checkbox0.png'"
+						:naked="true"
+					/>
+					<my-button image="add.png"
+						@trigger="showLanguageNew = true"
+						:caption="capGen.button.add"
+					/>
+				</div>
 			</div>
 		</div>
 		<div class="content no-padding">
@@ -173,7 +322,13 @@ let MyCaptionMap = {
 				<table class="generic-table sticky-top">
 					<thead>
 						<tr>
-							<th></th>
+							<th class="default-inputs">
+								<my-module-select
+									v-if="canSwitchModules"
+									@update:modelValue="changeModule($event)"
+									:modelValue="moduleId"
+								/>
+							</th>
 							<th v-for="l in showLanguageCodes">{{ l }}</th>
 						</tr>
 					</thead>
@@ -188,10 +343,11 @@ let MyCaptionMap = {
 							</td>
 							<td v-for="l in showLanguageCodes">
 								<my-caption-map-item-value
+									v-if="captionMap.moduleIdMap[moduleId] !== undefined"
 									@update="(...args) => storeChange('module',moduleId,args[0],args[1],args[2])"
 									:captionMap="captionMap.moduleIdMap[moduleId]"
-									:languageCode="l"
-									:readonly="readonly"
+									:language="l"
+									:readonly="readonly || (isCustom && !languagesCustom.includes(l))"
 								/>
 							</td>
 						</tr>
@@ -199,8 +355,10 @@ let MyCaptionMap = {
 						<!-- relations -->
 						<my-caption-map-items icon="database.png"
 							@update="storeChange"
+							:isCustom="isCustom"
 							:items="captionsAttributesByRelations"
-							:languageCodes="showLanguageCodes"
+							:languages="showLanguageCodes"
+							:languagesCustom="languagesCustom"
 							:levelMax="1"
 							:name="capGen.relations"
 							:readonly="readonly"
@@ -208,8 +366,10 @@ let MyCaptionMap = {
 						<!-- forms -->
 						<my-caption-map-items icon="fileText.png"
 							@update="storeChange"
+							:isCustom="isCustom"
 							:items="captionsFieldsByForms"
-							:languageCodes="showLanguageCodes"
+							:languages="showLanguageCodes"
+							:languagesCustom="languagesCustom"
 							:levelMax="2"
 							:name="capGen.forms"
 							:readonly="readonly"
@@ -217,40 +377,50 @@ let MyCaptionMap = {
 						<!-- menus -->
 						<my-caption-map-items icon="menu.png"
 							@update="storeChange"
+							:isCustom="isCustom"
 							:items="captionsMenus"
-							:languageCodes="showLanguageCodes"
+							:languages="showLanguageCodes"
+							:languagesCustom="languagesCustom"
 							:name="capGen.menus"
 							:readonly="readonly"
 						/>
 						<!-- roles -->
 						<my-caption-map-items icon="personMultiple.png"
 							@update="storeChange"
+							:isCustom="isCustom"
 							:items="captionsRoles"
-							:languageCodes="showLanguageCodes"
+							:languages="showLanguageCodes"
+							:languagesCustom="languagesCustom"
 							:name="capGen.roles"
 							:readonly="readonly"
 						/>
 						<!-- PG functions -->
 						<my-caption-map-items icon="codeDatabase.png"
 							@update="storeChange"
+							:isCustom="isCustom"
 							:items="captionsPgFunctions"
-							:languageCodes="showLanguageCodes"
+							:languages="showLanguageCodes"
+							:languagesCustom="languagesCustom"
 							:name="capGen.pgFunctions"
 							:readonly="readonly"
 						/>
 						<!-- JS functions -->
 						<my-caption-map-items icon="codeScreen.png"
 							@update="storeChange"
+							:isCustom="isCustom"
 							:items="captionsJsFunctions"
-							:languageCodes="showLanguageCodes"
+							:languages="showLanguageCodes"
+							:languagesCustom="languagesCustom"
 							:name="capGen.jsFunctions"
 							:readonly="readonly"
 						/>
 						<!-- collections -->
 						<my-caption-map-items icon="tray.png"
 							@update="storeChange"
+							:isCustom="isCustom"
 							:items="captionsCollections"
-							:languageCodes="showLanguageCodes"
+							:languages="showLanguageCodes"
+							:languagesCustom="languagesCustom"
 							:levelMax="1"
 							:name="capGen.collections"
 							:readonly="readonly"
@@ -258,24 +428,30 @@ let MyCaptionMap = {
 						<!-- login forms -->
 						<my-caption-map-items icon="personCog.png"
 							@update="storeChange"
+							:isCustom="isCustom"
 							:items="captionsLoginForms"
-							:languageCodes="showLanguageCodes"
+							:languages="showLanguageCodes"
+							:languagesCustom="languagesCustom"
 							:name="capGen.loginForms"
 							:readonly="readonly"
 						/>
 						<!-- articles -->
 						<my-caption-map-items icon="question.png"
 							@update="storeChange"
+							:isCustom="isCustom"
 							:items="captionsArticles"
-							:languageCodes="showLanguageCodes"
+							:languages="showLanguageCodes"
+							:languagesCustom="languagesCustom"
 							:name="capGen.articles"
 							:readonly="readonly"
 						/>
 						<!-- APIs -->
 						<my-caption-map-items icon="api.png"
 							@update="storeChange"
+							:isCustom="isCustom"
 							:items="captionsApis"
-							:languageCodes="showLanguageCodes"
+							:languages="showLanguageCodes"
+							:languagesCustom="languagesCustom"
 							:levelMax="1"
 							:name="capGen.apis"
 							:readonly="readonly"
@@ -283,48 +459,58 @@ let MyCaptionMap = {
 						<!-- widgets -->
 						<my-caption-map-items icon="tiles.png"
 							@update="storeChange"
+							:isCustom="isCustom"
 							:items="captionsWidgets"
-							:languageCodes="showLanguageCodes"
+							:languages="showLanguageCodes"
+							:languagesCustom="languagesCustom"
 							:name="capGen.widgets"
 							:readonly="readonly"
 						/>
 						<!-- query choices -->
 						<my-caption-map-items icon="search.png"
 							@update="storeChange"
+							:isCustom="isCustom"
 							:items="captionsQueryChoices"
-							:languageCodes="showLanguageCodes"
+							:languages="showLanguageCodes"
+							:languagesCustom="languagesCustom"
 							:name="capGen.queryChoices"
 							:readonly="readonly"
 						/>
 					</tbody>
 				</table>
+				
+				<my-caption-map-new-language
+					v-if="showLanguageNew"
+					@close="showLanguageNew = false"
+					:languages="languages"
+					:languagesCustom="languagesCustom"
+					:moduleId="moduleId"
+				/>
 			</div>
 		</div>
 	</div>`,
 	props:{
+		isCustom:       { type:Boolean, required:false, default:false }, // if enabled, custom languages can be added
 		languageDefault:{ required:false, default:null },
-		moduleIdForce:  { required:false, default:null }, // used for Builder context, only edits the current module
-		readonly:       { type:Boolean, required:false, default:false },
-		target:         { type:String,  required:false }  // instance / app
+		moduleIdForce:  { required:false, default:null },                // only edit the current module
+		readonly:       { type:Boolean, required:false, default:false }
 	},
 	data() {
 		return {
 			// data
-			captionMap:{},
+			captionMap:{}, // map of all captions
 			
 			// states
 			changes:[], // change to caption value, key = entity ID (attribute, form, field, etc.)
 			hasChanges:false,
 			isReady:false,
 			moduleId:null,
+			showLanguageNew:false,
 			showLanguageCodes:[]
 		};
 	},
 	watch:{
-		moduleIdForce:{
-			handler(v) { this.resetDefaults(); },
-			immediate:true
-		}
+		moduleIdForce() { this.resetDefaults(); }
 	},
 	computed:{
 		captionsApis:(s) => {
@@ -444,6 +630,8 @@ let MyCaptionMap = {
 		captionsWidgets:    (s) => s.makeSortedItemList(s.captionMap.widgetIdMap,s.widgetIdMap,'widget'),
 		canSave:            (s) => !s.readonly && s.hasChanges,
 		canSwitchModules:   (s) => s.moduleIdForce === null,
+		languages:          (s) => s.moduleId === null ? [] : s.moduleIdMap[s.moduleId].languages,
+		languagesCustom:    (s) => s.moduleId === null ? [] : s.moduleIdMapMeta[s.moduleId].languagesCustom,
 		module:             (s) => s.moduleId === null ? false : s.moduleIdMap[s.moduleId],
 		
 		// stores
@@ -461,9 +649,11 @@ let MyCaptionMap = {
 		roleIdMap:      (s) => s.$store.getters['schema/roleIdMap'],
 		widgetIdMap:    (s) => s.$store.getters['schema/widgetIdMap'],
 		capApp:         (s) => s.$store.getters.captions.captionMap,
-		capGen:         (s) => s.$store.getters.captions.generic
+		capGen:         (s) => s.$store.getters.captions.generic,
+		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta
 	},
 	mounted() {
+		this.resetDefaults();
 		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
 	},
 	unmounted() {
@@ -474,8 +664,13 @@ let MyCaptionMap = {
 		getColumnTitle,
 		getFieldMap,
 		getFieldTitle,
+		objectDeepMerge,
 		
 		// actions
+		changeModule(id) {
+			this.moduleId = id;
+			this.resetDefaults();
+		},
 		reset() {
 			this.changes    = {};
 			this.hasChanges = false;
@@ -485,14 +680,15 @@ let MyCaptionMap = {
 			if(this.modules.length === 0)
 				return;
 			
-			this.showRelationIds   = [];
 			this.showLanguageCodes = [];
 			
-			// apply forced or first available module
-			if(this.moduleIdForce !== null)
-				this.moduleId = this.moduleIdForce;
-			else
-				this.moduleId = this.modules[0];
+			if(this.moduleId === null) {
+				// apply forced or first available module
+				if(this.moduleIdForce !== null)
+					this.moduleId = this.moduleIdForce;
+				else
+					this.moduleId = this.modules[0].id;
+			}
 			
 			const mod = this.moduleIdMap[this.moduleId];
 			
@@ -512,12 +708,16 @@ let MyCaptionMap = {
 		},
 		storeChange(entity,entityId,content,languageCode,value) {
 			this.hasChanges = true;
+			
+			if(content === 'articleBody')
+				this.captionMap.articleIdMap[entityId][content][languageCode] = value;
+			
 			this.changes[`${entityId}_${content}_${languageCode}`] = {
 				content:content,
 				entity:entity,
 				entityId:entityId,
 				languageCode:languageCode,
-				target:this.target,
+				target:this.languagesCustom.includes(languageCode) ? 'instance' : 'app',
 				value:value
 			};
 		},
@@ -547,13 +747,24 @@ let MyCaptionMap = {
 		
 		// backend
 		get() {
-			ws.send('captionMap','get',{
-				moduleId:this.moduleId,
-				target:this.target
-			},true).then(
+			// application captions from schema
+			let requests = [ws.prepare('captionMap','get',{
+				moduleId:this.moduleId, target:'app'
+			})];
+			
+			// custom captions from instance
+			if(this.isCustom)
+				requests.push(ws.prepare('captionMap','get',{
+					moduleId:this.moduleId, target:'instance'
+				}));
+			
+			ws.sendMultiple(requests,true).then(
 				res => {
-					this.captionMap = res.payload;
-					this.isReady    = true;
+					this.captionMap = res.length === 2
+						? this.objectDeepMerge(res[0].payload,res[1].payload)
+						: res[0].payload;
+					
+					this.isReady = true;
 				},
 				this.$root.genericError
 			);
@@ -567,7 +778,11 @@ let MyCaptionMap = {
 			}
 			ws.sendMultiple(requests,true).then(
 				() => {
-					this.$root.schemaReload(this.moduleId);
+					if(this.isCustom)
+						this.$root.schemaReload();
+					else
+						this.$root.schemaReload(this.moduleId);
+					
 					this.changes    = {};
 					this.hasChanges = false;
 				},

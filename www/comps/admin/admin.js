@@ -37,7 +37,7 @@ let MyAdmin = {
 			</router-link>
 			
 			<!-- login templates -->
-			<router-link class="entry clickable" tag="div" to="/admin/logintemplates">
+			<router-link class="entry clickable" tag="div" to="/admin/login-templates">
 				<img src="images/personTemplate.png" />
 				<span>{{ capApp.navigationLoginTemplates }}</span>
 			</router-link>
@@ -55,19 +55,19 @@ let MyAdmin = {
 			</router-link>
 			
 			<!-- mail accounts -->
-			<router-link class="entry clickable" tag="div" to="/admin/mailaccounts">
+			<router-link class="entry clickable" tag="div" to="/admin/mail-accounts">
 				<img src="images/mail2.png" />
 				<span>{{ capApp.navigationMailAccounts }}</span>
 			</router-link>
 			
 			<!-- mail spooler -->
-			<router-link class="entry clickable" tag="div" to="/admin/mailspooler">
+			<router-link class="entry clickable" tag="div" to="/admin/mail-spooler">
 				<img src="images/mail_spool.png" />
 				<span>{{ capApp.navigationMailSpooler }}</span>
 			</router-link>
 			
 			<!-- mail traffic -->
-			<router-link class="entry clickable" tag="div" to="/admin/mailtraffic">
+			<router-link class="entry clickable" tag="div" to="/admin/mail-traffic">
 				<img src="images/mail_clock.png" />
 				<span>{{ capApp.navigationMailTraffic }}</span>
 			</router-link>
@@ -96,6 +96,12 @@ let MyAdmin = {
 				<span>{{ capApp.navigationScheduler }}</span>
 			</router-link>
 			
+			<!-- caption map -->
+			<router-link class="entry clickable" tag="div" to="/admin/caption-map">
+				<img src="images/languages.png" />
+				<span>{{ capApp.navigationCaptionMap }}</span>
+			</router-link>
+			
 			<!-- REI3 Professional -->
 			<router-link class="entry clickable separator" tag="div" to="/admin/license">
 				<img src="images/key.png" />
@@ -115,7 +121,7 @@ let MyAdmin = {
 			</router-link>
 			
 			<!-- OAuth clients -->
-			<router-link class="entry clickable" tag="div" to="/admin/oauthclients" :class="{ inactive:!activated }">
+			<router-link class="entry clickable" tag="div" to="/admin/oauth-clients" :class="{ inactive:!activated }">
 				<img src="images/lockCog.png" />
 				<span>{{ capApp.navigationOauthClients }}</span>
 			</router-link>
@@ -161,25 +167,25 @@ let MyAdmin = {
 	},
 	computed:{
 		contentTitle:(s) => {
-			if(s.$route.path.includes('backups'))        return s.capApp.navigationBackups;
-			if(s.$route.path.includes('cluster'))        return s.capApp.navigationCluster;
-			if(s.$route.path.includes('config'))         return s.capApp.navigationConfig;
-			if(s.$route.path.includes('custom'))         return s.capApp.navigationCustom;
-			if(s.$route.path.includes('docs'))           return s.capApp.navigationDocs;
-			if(s.$route.path.includes('files'))          return s.capApp.navigationFiles;
-			if(s.$route.path.includes('license'))        return s.capApp.navigationLicense;
-			if(s.$route.path.includes('logins'))         return s.capApp.navigationLogins;
-			if(s.$route.path.includes('logintemplates')) return s.capApp.navigationLoginTemplates;
-			if(s.$route.path.includes('logs'))           return s.capApp.navigationLogs;
-			if(s.$route.path.includes('ldaps'))          return s.capApp.navigationLdaps;
-			if(s.$route.path.includes('mailaccounts'))   return s.capApp.navigationMailAccounts;
-			if(s.$route.path.includes('mailspooler'))    return s.capApp.navigationMailSpooler;
-			if(s.$route.path.includes('mailtraffic'))    return s.capApp.navigationMailTraffic;
-			if(s.$route.path.includes('modules'))        return s.capApp.navigationModules;
-			if(s.$route.path.includes('oauthclients'))   return s.capApp.navigationOauthClients;
-			if(s.$route.path.includes('repo'))           return s.capApp.navigationRepo;
-			if(s.$route.path.includes('roles'))          return s.capApp.navigationRoles;
-			if(s.$route.path.includes('scheduler'))      return s.capApp.navigationScheduler;
+			if(s.$route.path.includes('backups'))         return s.capApp.navigationBackups;
+			if(s.$route.path.includes('cluster'))         return s.capApp.navigationCluster;
+			if(s.$route.path.includes('config'))          return s.capApp.navigationConfig;
+			if(s.$route.path.includes('custom'))          return s.capApp.navigationCustom;
+			if(s.$route.path.includes('docs'))            return s.capApp.navigationDocs;
+			if(s.$route.path.includes('files'))           return s.capApp.navigationFiles;
+			if(s.$route.path.includes('license'))         return s.capApp.navigationLicense;
+			if(s.$route.path.includes('logins'))          return s.capApp.navigationLogins;
+			if(s.$route.path.includes('login-templates')) return s.capApp.navigationLoginTemplates;
+			if(s.$route.path.includes('logs'))            return s.capApp.navigationLogs;
+			if(s.$route.path.includes('ldaps'))           return s.capApp.navigationLdaps;
+			if(s.$route.path.includes('mail-accounts'))   return s.capApp.navigationMailAccounts;
+			if(s.$route.path.includes('mail-spooler'))    return s.capApp.navigationMailSpooler;
+			if(s.$route.path.includes('mail-traffic'))    return s.capApp.navigationMailTraffic;
+			if(s.$route.path.includes('modules'))         return s.capApp.navigationModules;
+			if(s.$route.path.includes('oauth-clients'))   return s.capApp.navigationOauthClients;
+			if(s.$route.path.includes('repo'))            return s.capApp.navigationRepo;
+			if(s.$route.path.includes('roles'))           return s.capApp.navigationRoles;
+			if(s.$route.path.includes('scheduler'))       return s.capApp.navigationScheduler;
 			return '';
 		},
 		licenseTitle:(s) => !s.activated

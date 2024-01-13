@@ -6,7 +6,7 @@ import {
 import MyStore from '../../stores/store.js';
 
 export function getColumnTitle(c,langOverwrite) {
-	let lang = typeof langOverwrite === 'undefined'
+	const lang = langOverwrite === undefined
 		? MyStore.getters.moduleLanguage : langOverwrite;
 	
 	// 1st preference: dedicated column title

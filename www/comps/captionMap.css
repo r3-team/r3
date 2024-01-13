@@ -3,3 +3,18 @@
 	flex-flow:column nowrap;
 	gap:6px;
 }
+
+.captionMap-richtext{
+	width:100%;
+	max-width:1400px;
+	height:90vh;
+	display:flex;
+	flex-flow:column nowrap;
+	border:1px solid var(--color-border);
+	border-radius:8px;
+	overflow:hidden;
+}
+.captionMap-richtext-content{
+	display:flex;
+	background-color:var(--color-bg);
+}

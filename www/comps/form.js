@@ -4,6 +4,7 @@ import MyFormLog             from './formLog.js';
 import {hasAccessToRelation} from './shared/access.js';
 import {consoleError}        from './shared/error.js';
 import {srcBase64}           from './shared/image.js';
+import {getCaption2}          from './shared/language.js';
 import {generatePdf}         from './shared/pdf.js';
 import {
 	aesGcmDecryptBase64WithPhrase,
@@ -245,6 +246,7 @@ let MyForm = {
 					:isAloneInForm="isSingleField"
 					:joinsIndexMap="joinsIndexMap"
 					:key="f.id"
+					:moduleId="moduleId"
 					:values="values"
 				/>
 			</div>
@@ -262,6 +264,7 @@ let MyForm = {
 			:isPopUpFloating="isPopUpFloating"
 			:indexMapRecordKey="indexMapRecordKey"
 			:joinsIndexMap="joinsIndexMap"
+			:moduleId="moduleId"
 			:values="values"
 		/>
 		
@@ -271,7 +274,7 @@ let MyForm = {
 			@close="showHelp = false"
 			:form="form"
 			:isFloat="isPopUpFloating"
-			:language="moduleLanguage"
+			:language="moduleIdMapLang[moduleId]"
 			:moduleId="moduleId"
 		/>
 	</div>`,
@@ -415,16 +418,13 @@ let MyForm = {
 			if(s.titleOverwrite !== null)
 				return s.titleOverwrite;
 			
-			// apply dedicated form title
-			if(typeof s.form.captions.formTitle[s.moduleLanguage] !== 'undefined')
-				return s.form.captions.formTitle[s.moduleLanguage];
+			const formTitle = s.getCaption2('formTitle',s.moduleId,s.formId,s.form.captions);
+			if(formTitle !== '')
+				return formTitle;
 			
-			// no form title available, use menu title if corresponding menu is active
-			if(s.menuActive !== null && s.menuActive.formId === s.form.id &&
-				typeof s.menuActive.captions.menuTitle[s.moduleLanguage] !== 'undefined') {
-				
-				return s.menuActive.captions.menuTitle[s.moduleLanguage];
-			}
+			if(s.menuActive !== null && s.menuActive.formId === s.form.id)
+				return s.getCaption2('menuTitle',s.moduleId,s.menuActive.id,s.menuActive.captions);
+			
 			return '';
 		},
 		
@@ -695,7 +695,7 @@ let MyForm = {
 		loginId:            (s) => s.$store.getters.loginId,
 		loginPublicKey:     (s) => s.$store.getters.loginPublicKey,
 		loginPrivateKey:    (s) => s.$store.getters.loginPrivateKey,
-		moduleLanguage:     (s) => s.$store.getters.moduleLanguage,
+		moduleIdMapLang:    (s) => s.$store.getters.moduleIdMapLang,
 		patternStyle:       (s) => s.$store.getters.patternStyle,
 		settings:           (s) => s.$store.getters.settings
 	},
@@ -709,6 +709,7 @@ let MyForm = {
 		filterOperatorIsSingleValue,
 		generatePdf,
 		getAttributeValueFromString,
+		getCaption2,
 		getCollectionMultiValues,
 		getCollectionValues,
 		getDataFieldMap,

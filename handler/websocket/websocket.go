@@ -175,9 +175,11 @@ func (hub *hubType) start() {
 					data := struct {
 						ModuleIdMapData     map[uuid.UUID]types.ModuleMeta `json:"moduleIdMapData"`
 						PresetIdMapRecordId map[uuid.UUID]int64            `json:"presetIdMapRecordId"`
+						CaptionMapCustom    types.CaptionMapsAll           `json:"captionMapCustom"`
 					}{
 						ModuleIdMapData:     cache.GetModuleIdMapMeta(),
 						PresetIdMapRecordId: cache.GetPresetRecordIds(),
+						CaptionMapCustom:    cache.GetCaptionMapCustom(),
 					}
 					jsonMsg, err = prepareUnrequested("schema_loaded", data)
 				}

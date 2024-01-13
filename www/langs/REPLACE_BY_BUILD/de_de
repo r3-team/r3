@@ -640,6 +640,7 @@
 			"systemTasksNode":"Systemaufgaben (Clusterknoten)"
 		},
 		"navigationBackups":"Sicherungen",
+		"navigationCaptionMap":"Übersetzungen",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"System",
 		"navigationCustom":"Anpassungen",
@@ -1600,7 +1601,14 @@
 		"weekDayShort6":"Sa"
 	},
 	"captionMap":{
-		"title":"Beschriftungen"
+		"languagesApp":"Anwendung",
+		"languagesInstance":"Benutzerdefiniert",
+		"newDesc":[
+			"Um eine benutzerdefinierte Sprache hinzuzufügen, den fünfstelligen Sprach-Code eingeben, wie z. B.: en_us, de_de, ch_ch, it_it...",
+			"Falls eine bestehende Übersetzung überschrieben werden soll, kann auch ein bestehender Sprach-Code eingegeben werden."
+		],
+		"title":"Beschriftungen",
+		"titleNew":"Benutzerdefinierte Sprache hinzufügen"
 	},
 	"error":{
 		"APP":{

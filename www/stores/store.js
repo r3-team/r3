@@ -14,6 +14,7 @@ const MyStore = Vuex.createStore({
 		builderMode:false,             // builder mode active
 		busyCounter:0,                 // counter of calls making the app busy (WS requests, uploads, etc.)
 		captions:{},                   // all application captions in the user interface language
+		captionMapCustom:{},           // map of all custom captions from the instance
 		clusterNodeName:'',            // name of the cluster node that session is connected to
 		collectionIdMap:{},            // map of all collection values, key = collection ID
 		colorHeaderDefault:'262626',   // default header color, if not overwritten
@@ -60,7 +61,8 @@ const MyStore = Vuex.createStore({
 		moduleEntries:[],     // module entries for header/home page
 		moduleLanguage:'',    // module language (either equal to user language or module fallback)
 		moduleIdLast:null,    // module ID of last active module
-		moduleIdMapMeta:{},   // module ID map of module meta data (is owner, hidden, position, date change)
+		moduleIdMapLang:{},   // module ID map of used module language (either language overlapping with user language or fallback)
+		moduleIdMapMeta:{},   // module ID map of module meta data (is owner, hidden, position, date change, custom languages)
 		pageTitle:'',         // web page title, set by app/form depending on navigation
 		pageTitleFull:'',     // web page title + instance name
 		popUpFormGlobal:null, // configuration of global pop-up form
@@ -189,6 +191,7 @@ const MyStore = Vuex.createStore({
 		// simple
 		access:                  (state,payload) => state.access                   = payload,
 		captions:                (state,payload) => state.captions                 = payload,
+		captionMapCustom:        (state,payload) => state.captionMapCustom         = payload,
 		clusterNodeName:         (state,payload) => state.clusterNodeName          = payload,
 		feedback:                (state,payload) => state.feedback                 = payload,
 		feedbackUrl:             (state,payload) => state.feedbackUrl              = payload,
@@ -274,6 +277,17 @@ const MyStore = Vuex.createStore({
 			let seconds = state.license.validUntil - (new Date().getTime() / 1000);
 			return Math.round(seconds / 60 / 60 / 24);
 		},
+		moduleIdMapLang:(state,payload) => {
+			let out = {};
+			for(const id in state.moduleIdMapMeta) {
+				const meta = state.moduleIdMapMeta[id];
+				const mod  = MyStoreSchema.state.moduleIdMap[id];
+				
+				out[id] = meta.languagesCustom.includes(state.settings.languageCode) || mod.languages.includes(state.settings.languageCode)
+					? state.settings.languageCode : mod.languageMain;
+			}
+			return out;
+		},
 		patternStyle:(state) => {
 			return state.settings.pattern !== null
 				? `background-image:url('images/pattern_${state.settings.pattern}.webp');background-repeat:repeat-x`
@@ -294,6 +308,7 @@ const MyStore = Vuex.createStore({
 		builderEnabled:          (state) => state.builderMode && !state.productionMode,
 		busyCounter:             (state) => state.busyCounter,
 		captions:                (state) => state.captions,
+		captionMapCustom:        (state) => state.captionMapCustom,
 		clusterNodeName:         (state) => state.clusterNodeName,
 		collectionIdMap:         (state) => state.collectionIdMap,
 		config:                  (state) => state.config,

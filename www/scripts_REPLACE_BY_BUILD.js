@@ -15,6 +15,7 @@ import {
 // admin
 import MyAdmin               from './comps/admin/admin.js';
 import MyAdminBackups        from './comps/admin/adminBackups.js';
+import MyAdminCaptionMap     from './comps/admin/adminCaptionMap.js';
 import MyAdminCluster        from './comps/admin/adminCluster.js';
 import MyAdminConfig         from './comps/admin/adminConfig.js';
 import MyAdminCustom         from './comps/admin/adminCustom.js';
@@ -81,24 +82,25 @@ const MyRouter = VueRouter.createRouter({
 		redirect:'/admin/config',
 		component:MyAdmin,
 		children:[
-			{ path:'backups',        component:MyAdminBackups },
-			{ path:'cluster',        component:MyAdminCluster },
-			{ path:'config',         component:MyAdminConfig },
-			{ path:'custom',         component:MyAdminCustom },
-			{ path:'files',          component:MyAdminFiles },
-			{ path:'ldaps',          component:MyAdminLdaps },
-			{ path:'license',        component:MyAdminLicense },
-			{ path:'logins',         component:MyAdminLogins },
-			{ path:'logintemplates', component:MyAdminLoginTemplates },
-			{ path:'logs',           component:MyAdminLogs },
-			{ path:'mailaccounts',   component:MyAdminMailAccounts },
-			{ path:'mailspooler',    component:MyAdminMailSpooler },
-			{ path:'mailtraffic',    component:MyAdminMailTraffic },
-			{ path:'modules',        component:MyAdminModules },
-			{ path:'oauthclients',   component:MyAdminOauthClients },
-			{ path:'repo',           component:MyAdminRepo },
-			{ path:'roles',          component:MyAdminRoles },
-			{ path:'scheduler',      component:MyAdminScheduler }
+			{ path:'backups',         component:MyAdminBackups },
+			{ path:'caption-map',     component:MyAdminCaptionMap },
+			{ path:'cluster',         component:MyAdminCluster },
+			{ path:'config',          component:MyAdminConfig },
+			{ path:'custom',          component:MyAdminCustom },
+			{ path:'files',           component:MyAdminFiles },
+			{ path:'ldaps',           component:MyAdminLdaps },
+			{ path:'license',         component:MyAdminLicense },
+			{ path:'logins',          component:MyAdminLogins },
+			{ path:'login-templates', component:MyAdminLoginTemplates },
+			{ path:'logs',            component:MyAdminLogs },
+			{ path:'mail-accounts',   component:MyAdminMailAccounts },
+			{ path:'mail-spooler',    component:MyAdminMailSpooler },
+			{ path:'mail-traffic',    component:MyAdminMailTraffic },
+			{ path:'modules',         component:MyAdminModules },
+			{ path:'oauth-clients',   component:MyAdminOauthClients },
+			{ path:'repo',            component:MyAdminRepo },
+			{ path:'roles',           component:MyAdminRoles },
+			{ path:'scheduler',       component:MyAdminScheduler }
 		]
 	},{
 		path:'/builder',

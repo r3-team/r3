@@ -373,6 +373,10 @@ func (prg *program) execute(svc service.Service) {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize module meta cache, %v", err))
 		return
 	}
+	if err := cache.LoadCaptionMapCustom(); err != nil {
+		prg.executeAborted(svc, fmt.Errorf("failed to initialize custom caption map cache, %v", err))
+		return
+	}
 	if err := cache.LoadSchema(); err != nil {
 		prg.executeAborted(svc, fmt.Errorf("failed to initialize schema cache, %v", err))
 		return

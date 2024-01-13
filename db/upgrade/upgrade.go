@@ -167,6 +167,119 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			
 			CREATE INDEX IF NOT EXISTS fki_mail_account_oauth_client_id_fkey
 			    ON instance.mail_account USING btree (oauth_client_id ASC NULLS LAST);
+			
+			-- caption map
+			ALTER TABLE instance.module_meta ADD COLUMN languages_custom CHARACTER(5)[];
+			CREATE TABLE IF NOT EXISTS instance.caption(
+			    module_id uuid,
+			    attribute_id uuid,
+			    form_id uuid,
+			    field_id uuid,
+			    column_id uuid,
+			    role_id uuid,
+			    menu_id uuid,
+			    query_choice_id uuid,
+			    pg_function_id uuid,
+			    js_function_id uuid,
+			    login_form_id uuid,
+			    language_code character(5) COLLATE pg_catalog."default" NOT NULL,
+			    content caption_content NOT NULL,
+			    value text COLLATE pg_catalog."default" NOT NULL,
+			    article_id uuid,
+			    tab_id uuid,
+			    widget_id uuid,
+			    CONSTRAINT caption_article_id_fkey FOREIGN KEY (article_id)
+			        REFERENCES app.article (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT caption_attribute_id_fkey FOREIGN KEY (attribute_id)
+			        REFERENCES app.attribute (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID,
+			    CONSTRAINT caption_column_id_fkey FOREIGN KEY (column_id)
+			        REFERENCES app."column" (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID,
+			    CONSTRAINT caption_field_id_fkey FOREIGN KEY (field_id)
+			        REFERENCES app.field (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID,
+			    CONSTRAINT caption_form_id_fkey FOREIGN KEY (form_id)
+			        REFERENCES app.form (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID,
+			    CONSTRAINT caption_js_function_id_fkey FOREIGN KEY (js_function_id)
+			        REFERENCES app.js_function (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT caption_login_form_id_fkey FOREIGN KEY (login_form_id)
+			        REFERENCES app.login_form (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT caption_menu_id_fkey FOREIGN KEY (menu_id)
+			        REFERENCES app.menu (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID,
+			    CONSTRAINT caption_module_id_fkey FOREIGN KEY (module_id)
+			        REFERENCES app.module (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID,
+			    CONSTRAINT caption_pg_function_id_fkey FOREIGN KEY (pg_function_id)
+			        REFERENCES app.pg_function (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT caption_query_choice_id_fkey FOREIGN KEY (query_choice_id)
+			        REFERENCES app.query_choice (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT caption_role_id_fkey FOREIGN KEY (role_id)
+			        REFERENCES app.role (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			        NOT VALID,
+			    CONSTRAINT caption_tab_id_fkey FOREIGN KEY (tab_id)
+			        REFERENCES app.tab (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED,
+			    CONSTRAINT caption_widget_id_fkey FOREIGN KEY (widget_id)
+			        REFERENCES app.widget (id) MATCH SIMPLE
+			        ON UPDATE CASCADE
+			        ON DELETE CASCADE
+			        DEFERRABLE INITIALLY DEFERRED
+			);
+			CREATE INDEX IF NOT EXISTS fki_caption_article_id_fkey      ON instance.caption USING btree (article_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_caption_attribute_id_fkey    ON instance.caption USING btree (attribute_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_caption_column_id_fkey       ON instance.caption USING btree (column_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_caption_field_id_fkey        ON instance.caption USING btree (field_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_caption_form_id_fkey         ON instance.caption USING btree (form_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_caption_js_function_id_fkey  ON instance.caption USING btree (js_function_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_caption_login_form_id_fkey   ON instance.caption USING btree (login_form_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_caption_menu_id_fkey         ON instance.caption USING btree (menu_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_caption_module_id_fkey       ON instance.caption USING btree (module_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_caption_pg_function_id_fkey  ON instance.caption USING btree (pg_function_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_caption_query_choice_id_fkey ON instance.caption USING btree (query_choice_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_caption_role_id_fkey         ON instance.caption USING btree (role_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_caption_tab_id_fkey          ON instance.caption USING btree (tab_id ASC NULLS LAST);
+			CREATE INDEX IF NOT EXISTS fki_caption_widget_id_fkey       ON instance.caption USING btree (widget_id ASC NULLS LAST);
 		`)
 		return "3.7", err
 	},

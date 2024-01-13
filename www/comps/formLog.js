@@ -69,6 +69,7 @@ let MyFormLog = {
 							:isAloneInForm="false"
 							:joinsIndexMap="joinsIndexMap"
 							:key="indexAttributeIdMapField[ia].id"
+							:moduleId="moduleId"
 							:values="{ ...values, ...l.values }"
 						/>
 						
@@ -124,6 +125,7 @@ let MyFormLog = {
 		isPopUpFloating:  { type:Boolean, required:true },
 		indexMapRecordKey:{ type:Object,  required:true },
 		joinsIndexMap:    { type:Object,  required:true },
+		moduleId:         { type:String,  required:true },
 		values:           { type:Object,  required:true }
 	},
 	emits:['close-log'],

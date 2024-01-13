@@ -379,6 +379,7 @@ let MyApp = {
 		blockInput:         (s) => s.$store.getters.blockInput,
 		capErr:             (s) => s.$store.getters.captions.error,
 		capGen:             (s) => s.$store.getters.captions.generic,
+		captionMapCustom:             (s) => s.$store.getters.captionMapCustom,
 		colorHeaderAccent:  (s) => s.$store.getters.colorHeaderAccent,
 		colorHeaderMain:    (s) => s.$store.getters.colorHeaderMain,
 		isAdmin:            (s) => s.$store.getters.isAdmin,
@@ -430,7 +431,7 @@ let MyApp = {
 			//  connect to server via websocket, load public data for app, load module schema
 			if(!this.wsConnected)  return this.wsConnect();
 			if(!this.publicLoaded) return this.initPublic();
-			if(!this.schemaLoaded) return this.initSchema(this.moduleIdMapMeta,this.presetIdMapRecordId);
+			if(!this.schemaLoaded) return this.initSchema(this.moduleIdMapMeta);
 			if(!this.loginReady)   return this.loginReady = true;
 		},
 		setInitErr(err) {
@@ -467,7 +468,9 @@ let MyApp = {
 				break;
 				case 'schema_loaded':
 					this.$store.commit('busyRemove');
-					this.initSchema(res.payload.moduleIdMapData,res.payload.presetIdMapRecordId);
+					this.$store.commit('captionMapCustom',res.payload.captionMapCustom);
+					this.$store.commit('schema/presetIdMapRecordId',res.payload.presetIdMapRecordId);
+					this.initSchema(res.payload.moduleIdMapData);
 				break;
 				
 				// affects current login only
@@ -571,6 +574,7 @@ let MyApp = {
 					this.$store.commit('local/loginBackground',res.payload.loginBackground);
 					this.$store.commit('schema/languageCodes',res.payload.languageCodes);
 					this.$store.commit('schema/presetIdMapRecordId',res.payload.presetIdMapRecordId);
+					this.$store.commit('captionMapCustom',res.payload.captionMapCustom);
 					this.$store.commit('clusterNodeName',res.payload.clusterNodeName);
 					this.$store.commit('moduleIdMapMeta',res.payload.moduleIdMapMeta);
 					this.$store.commit('productionMode',res.payload.productionMode === 1);
@@ -590,7 +594,7 @@ let MyApp = {
 		},
 		
 		// schema retrieval
-		initSchema(moduleIdMapMetaNew,presetIdMapRecordId) {
+		initSchema(moduleIdMapMetaNew) {
 			const fetchModuleJson = (url) => {
 				return fetch(url).then(res => {
 					if(res.status !== 200)
@@ -610,12 +614,12 @@ let MyApp = {
 				const metaOld = this.moduleIdMapMeta[k];
 				
 				// module not known or updated, fetch
-				if(typeof this.moduleIdMap[k] === 'undefined' || metaOld.dateChange !== metaNew.dateChange)
+				if(this.moduleIdMap[k] === undefined || metaOld.dateChange !== metaNew.dateChange)
 					modulesFetch.push(`./cache/download/schema.json?module_id=${k}&date=${metaNew.dateChange}`);
 			}
 			
 			for(const k in this.moduleIdMapMeta) {
-				if(typeof moduleIdMapMetaNew[k] !== 'undefined')
+				if(moduleIdMapMetaNew[k] !== undefined)
 					continue;
 				
 				// module not included, remove
@@ -634,7 +638,6 @@ let MyApp = {
 			const promises = modulesFetch.map(v => fetchModuleJson(v));
 			Promise.all(promises).then(
 				res => {
-					this.$store.commit('schema/presetIdMapRecordId',presetIdMapRecordId);
 					this.$store.commit('schema/setModules',res);
 					this.$store.commit('moduleIdMapMeta',moduleIdMapMetaNew);
 					this.schemaLoaded = true;

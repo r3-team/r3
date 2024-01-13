@@ -13,6 +13,7 @@ import MyInputUuid            from './inputUuid.js';
 import MyList                 from './list.js';
 import {hasAccessToAttribute} from './shared/access.js';
 import {srcBase64}            from './shared/image.js';
+import {getCaption2}           from './shared/language.js';
 import {
 	getLinkMeta,
 	getNilUuid,
@@ -296,6 +297,7 @@ let MyField = {
 							:isAloneInForm="false"
 							:joinsIndexMap="joinsIndexMap"
 							:key="f.id"
+							:moduleId="moduleId"
 							:parentIsCounting="t.contentCounter"
 							:parentIsHidden="isHidden || i !== tabIndexShow"
 							:values="values"
@@ -604,6 +606,7 @@ let MyField = {
 			:isAloneInForm="isAloneInForm"
 			:joinsIndexMap="joinsIndexMap"
 			:key="f.id"
+			:moduleId="moduleId"
 			:parentIsCounting="parentIsCounting"
 			:parentIsHidden="isHidden"
 			:values="values"
@@ -627,6 +630,7 @@ let MyField = {
 		isBulkUpdate:     { type:Boolean, required:false, default:false }, // form is in bulk update mode
 		joinsIndexMap:    { type:Object,  required:true },
 		logViewer:        { type:Boolean, required:false, default:false }, // is part of log viewer
+		moduleId:         { type:String,  required:true },
 		parentIsCounting: { type:Boolean, required:false, default:false }, // field parent is counting records (tab counter)
 		parentIsHidden:   { type:Boolean, required:false, default:false }, // field parent has its content hidden (tab/container)
 		values:           { type:Object,  required:true }
@@ -710,28 +714,19 @@ let MyField = {
 		
 		caption:(s) => {
 			let out = '';
-			
-			if(typeof s.fieldIdMapCaption[s.field.id] !== 'undefined') {
-				// 1st preference: field caption overwrite
+			if(s.fieldIdMapCaption[s.field.id] !== undefined) {
 				out = s.fieldIdMapCaption[s.field.id];
 			}
-			else if(typeof s.field.captions !== 'undefined' && typeof s.field.captions.fieldTitle[s.moduleLanguage] !== 'undefined') {
-				// 2nd preference: field caption
-				out = s.field.captions.fieldTitle[s.moduleLanguage];
+			else {
+				const title = s.getCaption2('fieldTitle',s.moduleId,s.field.id,s.field.captions);
+				if(title !== '') {
+					out = title;
+				}
+				else if(s.attribute) {
+					out = s.getCaption2('attributeTitle',s.moduleId,s.attribute.id,s.attribute.captions,s.attribute.name);
+				}
 			}
-			else if(s.attribute) {
-				// 3rd / 4th preference: dedicated attribute title / name
-				if(typeof s.attribute.captions.attributeTitle[s.moduleLanguage] !== 'undefined')
-					out = s.attribute.captions.attributeTitle[s.moduleLanguage];
-				else
-					out = s.attribute.name;
-			}
-			
-			// required marker
-			if(s.isRequired)
-				out += '*';
-			
-			return out;
+			return s.isRequired ? out + '*' : out;
 		},
 		captionError:(s) => {
 			if(s.customErr !== null) return s.customErr; // custom error is always shown
@@ -753,10 +748,7 @@ let MyField = {
 			if(!s.isValidValue) return s.capGen.inputInvalid; // generic error
 			return '';
 		},
-		captionHelp:(s) => typeof s.field.captions !== 'undefined'
-			&& typeof s.field.captions.fieldHelp !== 'undefined'
-			&& typeof s.field.captions.fieldHelp[s.moduleLanguage] !== 'undefined'
-				? s.field.captions.fieldHelp[s.moduleLanguage] : '',
+		captionHelp:(s) => s.getCaption2('fieldHelp',s.moduleId,s.field.id,s.field.captions),
 		domClass:(s) => {
 			let out = [];
 			if(s.isDropdown) out.push('dropdown');
@@ -930,8 +922,8 @@ let MyField = {
 		tabIndexesTitle:(s) => {
 			let out = [];
 			for(let i = 0, j = s.field.tabs.length; i < j; i++) {
-				let tab = s.field.tabs[i];
-				out.push(tab.captions.tabTitle[s.moduleLanguage]);
+				const tab = s.field.tabs[i];
+				out.push(s.getCaption2('tabTitle',s.moduleId,tab.id,tab.captions,'-'));
 				
 				if(typeof s.tabIndexFieldIdMapCounter[String(i)] === 'undefined')
 					continue;
@@ -1055,9 +1047,9 @@ let MyField = {
 		},
 		
 		// simple
-		attribute:  (s) => !s.isData || typeof s.attributeIdMap[s.field.attributeId] === 'undefined'
+		attribute:  (s) => !s.isData || s.attributeIdMap[s.field.attributeId] === undefined
 			? false : s.attributeIdMap[s.field.attributeId],
-		customErr:  (s) => typeof s.fieldIdMapError[s.field.id] !== 'undefined'
+		customErr:  (s) => s.fieldIdMapError[s.field.id] !== undefined
 			&& s.fieldIdMapError[s.field.id] !== null ? s.fieldIdMapError[s.field.id] : null,
 		hasCaption: (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
 		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles,
@@ -1125,7 +1117,6 @@ let MyField = {
 		capApp:             (s) => s.$store.getters.captions.form,
 		capGen:             (s) => s.$store.getters.captions.generic,
 		isMobile:           (s) => s.$store.getters.isMobile,
-		moduleLanguage:     (s) => s.$store.getters.moduleLanguage,
 		searchDictionaries: (s) => s.$store.getters.searchDictionaries,
 		settings:           (s) => s.$store.getters.settings
 	},
@@ -1137,6 +1128,7 @@ let MyField = {
 		// externals
 		fieldOptionGet,
 		fieldOptionSet,
+		getCaption2,
 		getFlexStyle,
 		getFormPopUpConfig,
 		getIndexAttributeId,

@@ -2,7 +2,7 @@ import MyBuilderDocs             from './builderDocs.js';
 import MyBuilderNew              from './builderNew.js';
 import {getJsFunctionsProcessed} from '../shared/builder.js';
 import srcBase64Icon             from '../shared/image.js';
-import {getModuleCaption}        from '../shared/generic.js';
+import {getCaptionForLang}       from '../shared/language.js';
 import {MyModuleSelect}          from '../input.js';
 export {MyBuilder as default};
 
@@ -20,7 +20,7 @@ let MyBuilder = {
 					<img class="icon"
 						:src="srcBase64Icon(module.iconId,'images/module.png')"
 					/>
-					<span>{{ getModuleCaption(module,builderLanguage) }}</span>
+					<span>{{ getCaptionForLang('moduleTitle',builderLanguage,module.id,module.captions,module.name) }}</span>
 				</div>
 				<my-button image="question.png"
 					@trigger="showDocs = !showDocs"
@@ -477,8 +477,8 @@ let MyBuilder = {
 	},
 	methods:{
 		// externals
+		getCaptionForLang,
 		getJsFunctionsProcessed,
-		getModuleCaption,
 		srcBase64Icon,
 		
 		// actions

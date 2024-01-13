@@ -640,6 +640,7 @@
 			"systemTasksNode":"System tasks (cluster nodes)"
 		},
 		"navigationBackups":"Backups",
+		"navigationCaptionMap":"Translations",
 		"navigationCluster":"Cluster",
 		"navigationConfig":"Sistema",
 		"navigationCustom":"Personalizzazione",
@@ -1600,7 +1601,14 @@
 		"weekDayShort6":"Sab"
 	},
 	"captionMap":{
-		"title":"Caption map"
+		"languagesApp":"Application",
+		"languagesInstance":"Custom",
+		"newDesc":[
+			"To add a custom translation, choose its five-letter language code, such as: en_us, de_de, ch_ch, it_it...",
+			"If you want to overwrite an existing translation, you can also add an already existing language code."
+		],
+		"title":"Caption map",
+		"titleNew":"Add custom translation"
 	},
 	"error":{
 		"APP":{

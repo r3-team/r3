@@ -15,6 +15,7 @@ func PublicGet() (interface{}, error) {
 		AppName             string                         `json:"appName"`
 		AppNameShort        string                         `json:"appNameShort"`
 		AppVersion          string                         `json:"appVersion"`
+		CaptionMapCustom    types.CaptionMapsAll           `json:"captionMapCustom"`
 		ClusterNodeName     string                         `json:"clusterNodeName"`
 		CompanyColorHeader  string                         `json:"companyColorHeader"`
 		CompanyColorLogin   string                         `json:"companyColorLogin"`
@@ -37,6 +38,7 @@ func PublicGet() (interface{}, error) {
 	res.AppName = config.GetString("appName")
 	res.AppNameShort = config.GetString("appNameShort")
 	res.AppVersion, _, _, _ = config.GetAppVersions()
+	res.CaptionMapCustom = cache.GetCaptionMapCustom()
 	res.ClusterNodeName = cache.GetNodeName()
 	res.CompanyColorHeader = config.GetString("companyColorHeader")
 	res.CompanyColorLogin = config.GetString("companyColorLogin")

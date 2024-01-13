@@ -3,14 +3,12 @@ import {srcBase64}          from './shared/image.js';
 import {hasAccessToAnyMenu} from './shared/access.js';
 import {getColumnTitle}     from './shared/column.js';
 import {getFormRoute}       from './shared/form.js';
+import {openLink}           from './shared/generic.js';
+import {getCaption2}         from './shared/language.js';
 import {
 	getCollectionColumn,
 	getCollectionValues
 } from './shared/collection.js';
-import {
-	getModuleCaption,
-	openLink
-} from './shared/generic.js';
 
 export {MyMenu as default};
 
@@ -119,8 +117,7 @@ let MyMenuItem = {
 		showChildren:(s) => s.hasChildren && s.menuIdMapOpen[s.menu.id],
 		style:       (s) => s.color === null ? '' : `border-left-color:#${s.color};`,
 		subIcon:     (s) => s.showChildren ? 'images/triangleDown.png' : 'images/triangleLeft.png',
-		title:       (s) => typeof s.menu.captions.menuTitle[s.moduleLanguage] !== 'undefined'
-			? s.menu.captions.menuTitle[s.moduleLanguage] : s.capGen.missingCaption,
+		title:       (s) => s.getCaption2('menuTitle',s.module.id,s.menu.id,s.menu.captions,s.capGen.missingCaption),
 		
 		// stores
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
@@ -128,8 +125,7 @@ let MyMenuItem = {
 		menuIdMapOpen:  (s) => s.$store.getters['local/menuIdMapOpen'],
 		capGen:         (s) => s.$store.getters.captions.generic,
 		isMobile:       (s) => s.$store.getters.isMobile,
-		menuAccess:     (s) => s.$store.getters.access.menu,
-		moduleLanguage: (s) => s.$store.getters.moduleLanguage
+		menuAccess:     (s) => s.$store.getters.access.menu
 	},
 	methods:{
 		// externals
@@ -137,6 +133,7 @@ let MyMenuItem = {
 		getCollectionValues,
 		getColumnTitle,
 		getFormRoute,
+		getCaption2,
 		srcBase64,
 		srcBase64Icon,
 		
@@ -177,7 +174,7 @@ let MyMenu = {
 					v-if="module.iconId !== null"
 					:src="srcBase64(iconIdMap[module.iconId].file)"
 				/>
-				<span>{{ getModuleCaption(module,moduleLanguage) }}</span>
+				<span>{{ getCaption2('moduleTitle',module.id,module.id,module.captions,module.name) }}</span>
 			</div>
 			
 			<my-button image="builder.png"
@@ -228,12 +225,11 @@ let MyMenu = {
 		isAdmin:       (s) => s.$store.getters.isAdmin,
 		isMobile:      (s) => s.$store.getters.isMobile,
 		menuAccess:    (s) => s.$store.getters.access.menu,
-		moduleLanguage:(s) => s.$store.getters.moduleLanguage,
 		settings:      (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
-		getModuleCaption,
+		getCaption2,
 		hasAccessToAnyMenu,
 		openLink,
 		srcBase64,

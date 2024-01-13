@@ -1,7 +1,7 @@
-import MyTabs             from './tabs.js';
-import {getModuleCaption} from './shared/generic.js';
-import {generatePdf}      from './shared/pdf.js';
-import {getDateFormat}    from './shared/time.js';
+import MyTabs              from './tabs.js';
+import {getCaptionForLang} from './shared/language.js';
+import {generatePdf}       from './shared/pdf.js';
+import {getDateFormat}     from './shared/time.js';
 export {MyArticles as default};
 
 let MyArticles = {
@@ -69,7 +69,7 @@ let MyArticles = {
 	props:{
 		form:    { type:Object,  required:false, default:null }, // show context help of which form
 		isFloat: { type:Boolean, required:true },
-		language:{ type:String,  required:false, default:null }, // language to use (5-letter code)
+		language:{ type:String,  required:true },                // language to use (5-letter code)
 		moduleId:{ type:String,  required:true }                 // show help of which module
 	},
 	emits:['close'],
@@ -109,8 +109,8 @@ let MyArticles = {
 	methods:{
 		// externals
 		generatePdf,
+		getCaptionForLang,
 		getDateFormat,
-		getModuleCaption,
 		
 		// presentation
 		getArticleTitle(article) {
@@ -129,9 +129,10 @@ let MyArticles = {
 			this.$refs['article_'+id][0].scrollIntoView();
 		},
 		pdfDownload() {
+			const mod       = this.module;
 			let titleDate   = this.getDateFormat(new Date(),'Y-m-d');
 			let titleHelp   = this.tabTarget === 'form' ? this.capApp.form : this.capApp.module;
-			let titleModule = `${this.getModuleCaption(this.module,this.language)} v${this.module.releaseBuild}`;
+			let titleModule = `${this.getCaptionForLang('moduleTitle',this.language,mod.id,mod.captions,mod.name)} v${mod.releaseBuild}`;
 			
 			this.generatePdf(
 				`${titleModule} - ${titleHelp}.pdf`
