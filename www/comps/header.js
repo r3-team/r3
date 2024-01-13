@@ -235,8 +235,8 @@ let MyHeader = {
 			let out = [];
 			for(let k in s.collectionIdMap) {
 				for(let i = 0, j = s.collectionIdMap[k].inHeader.length; i < j; i++) {
-					let collection = s.collectionIdMap[k];
-					let consumer   = collection.inHeader[i];
+					const collection = s.collectionIdMap[k];
+					const consumer   = collection.inHeader[i];
 					
 					if(!consumer.onMobile && s.isMobile)
 						continue;
@@ -258,7 +258,7 @@ let MyHeader = {
 						title:s.getColumnTitle(s.getCollectionColumn(
 							collection.id,
 							consumer.columnIdDisplay
-						)),
+						),collection.moduleId),
 						value:value
 					});
 				}

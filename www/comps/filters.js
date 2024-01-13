@@ -1,5 +1,6 @@
 import MyBuilderQuery from './builder/builderQuery.js';
 import MyInputDate    from './inputDate.js';
+import {getCaption2}   from './shared/language.js';
 import {
 	getDependentModules,
 	getItemTitleColumn,
@@ -208,27 +209,22 @@ let MyFilterAttribute = {
 		// stores
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
-		capApp:        (s) => s.$store.getters.captions.filter,
-		moduleLanguage:(s) => s.$store.getters.moduleLanguage
+		capApp:        (s) => s.$store.getters.captions.filter
 	},
 	methods:{
 		// externals
+		getCaption2,
 		getItemTitleNoRelationship,
 		
 		// presentation
 		getAttributeCaption(nestedIndexAttributeId) {
-			let v   = nestedIndexAttributeId.split('_');
-			let atr = this.attributeIdMap[v[2]];
+			const v   = nestedIndexAttributeId.split('_');
+			const atr = this.attributeIdMap[v[2]];
+			const rel = this.relationIdMap[atr.relationId];
 			
-			if(this.columnsMode) {
-				// 1st preference: dedicated attribute title
-				if(typeof atr.captions.attributeTitle[this.moduleLanguage] !== 'undefined')
-					return atr.captions.attributeTitle[this.moduleLanguage];
-				
-				// if nothing else is available: attribute name
-				return atr.name;
-			}
-			return this.getItemTitleNoRelationship(atr.id,v[1]);
+			return this.columnsMode
+				? this.getCaption2('attributeTitle',rel.moduleId,atr.id,atr.captions,atr.name)
+				: this.getItemTitleNoRelationship(atr.id,v[1]);
 		},
 		getQueryLabel(nestingLevel) {
 			if(nestingLevel === 0)

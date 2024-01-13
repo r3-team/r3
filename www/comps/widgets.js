@@ -175,7 +175,7 @@ let MyWidget = {
 		collectionConsumer:  (s) => !s.collection ? false : s.moduleWidget.collection,
 		collectionHasDisplay:(s) => !s.collectionConsumer ? false : s.collectionConsumer.columnIdDisplay !== null,
 		collectionOpenForm:  (s) => !s.collectionConsumer ? false : s.collectionConsumer.openForm,
-		collectionTitle:     (s) => !s.collectionHasDisplay ? '' : s.getColumnTitle(s.getCollectionColumn(s.collection.id,s.collectionConsumer.columnIdDisplay)),
+		collectionTitle:     (s) => !s.collectionHasDisplay ? '' : s.getColumnTitle(s.getCollectionColumn(s.collection.id,s.collectionConsumer.columnIdDisplay),s.collection.moduleId),
 		collectionValue:     (s) => !s.collectionHasDisplay ? '' : s.getCollectionValues(s.collection.id,s.collectionConsumer.columnIdDisplay,true),
 		form:                (s) => !s.moduleWidget || s.moduleWidget.formId === null ? false : s.formIdMap[s.moduleWidget.formId],
 		moduleSource:        (s) => !s.moduleWidget ? false : s.moduleIdMap[s.moduleWidget.moduleId],

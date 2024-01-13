@@ -1,9 +1,9 @@
-import MyBuilderCaption     from './builderCaption.js';
-import {getItemTitleColumn} from '../shared/builder.js';
-import {getColumnTitle}     from '../shared/column.js';
-import {getFlexBasis}       from '../shared/form.js';
-import {getRandomInt}       from '../shared/generic.js';
-import {getQueryTemplate}   from '../shared/query.js';
+import MyBuilderCaption        from './builderCaption.js';
+import {getItemTitleColumn}    from '../shared/builder.js';
+import {getColumnTitleForLang} from '../shared/column.js';
+import {getFlexBasis}          from '../shared/form.js';
+import {getRandomInt}          from '../shared/generic.js';
+import {getQueryTemplate}      from '../shared/query.js';
 import {
 	getAttributeIcon,
 	getIndexAttributeId,
@@ -30,7 +30,7 @@ export let MyBuilderColumns = {
 					<my-builder-caption class="caption"
 						v-if="hasCaptions"
 						@update:modelValue="batch.columns[0].captions = {columnTitle:$event}"
-						:contentName="getColumnTitle(batch.columns[0],builderLanguage)"
+						:contentName="getColumnTitleForLang(batch.columns[0],builderLanguage)"
 						:dynamicSize="true"
 						:language="builderLanguage"
 						:modelValue="batch.columns[0].captions.columnTitle"
@@ -176,7 +176,7 @@ export let MyBuilderColumns = {
 	methods:{
 		// externals
 		getAttributeIcon,
-		getColumnTitle,
+		getColumnTitleForLang,
 		getFlexBasis,
 		getItemTitleColumn,
 		

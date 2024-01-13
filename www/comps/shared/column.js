@@ -1,3 +1,4 @@
+import {getCaptionForLang} from './language.js';
 import {
 	isAttributeBoolean,
 	isAttributeFiles,
@@ -5,22 +6,14 @@ import {
 } from './attribute.js';
 import MyStore from '../../stores/store.js';
 
-export function getColumnTitle(c,langOverwrite) {
-	const lang = langOverwrite === undefined
-		? MyStore.getters.moduleLanguage : langOverwrite;
-	
-	// 1st preference: dedicated column title
-	if(typeof c.captions.columnTitle[lang] !== 'undefined')
-		return c.captions.columnTitle[lang];
-	
-	// 2nd preference: dedicated attribute title or attribute name
-	if(c.attributeId !== null) {
-		let a = MyStore.getters['schema/attributeIdMap'][c.attributeId];
-		
-		return typeof a.captions.attributeTitle[lang] !== 'undefined'
-			? a.captions.attributeTitle[lang] : a.name;
-	}
-	return '';
+export function getColumnTitle(c,moduleId) {
+	//return 'bacon!';
+	return getColumnTitleForLang(c,MyStore.getters.moduleIdMapLang[moduleId]);
+};
+export function getColumnTitleForLang(c,language) {
+	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+	return getCaptionForLang('columnTitle',language,c.id,c.captions,
+		getCaptionForLang('attributeTitle',language,atr.id,atr.captions,atr.name));
 };
 
 export function getFirstColumnUsableAsAggregator(batch,columns) {
@@ -43,7 +36,7 @@ export function getFirstColumnUsableAsAggregator(batch,columns) {
 	return null;
 };
 
-export function getColumnBatches(columns,columnIndexesIgnore,showCaptions) {
+export function getColumnBatches(moduleId,columns,columnIndexesIgnore,showCaptions) {
 	const isMobile = MyStore.getters.isMobile;
 	let batches   = [];
 	
@@ -64,7 +57,7 @@ export function getColumnBatches(columns,columnIndexesIgnore,showCaptions) {
 		// create even if first column is hidden as other columns in same batch might not be
 		batches.push({
 			batch:column.batch,
-			caption:showCaptions ? getColumnTitle(column) : null,
+			caption:showCaptions && moduleId !== null ? getColumnTitle(column,moduleId) : null,
 			columnIndexes:!hidden ? [index] : [],
 			style:'',
 			vertical:column.batchVertical

@@ -459,6 +459,7 @@ let MyKanban = {
 		isHidden:           { type:Boolean, required:false, default:false },
 		isSingleField:      { type:Boolean, required:false, default:false },
 		loadWhileHidden:    { type:Boolean, required:false, default:false },
+		moduleId:           { type:String,  required:true },
 		popUpFormInline:    { required:false, default:null },
 		query:              { type:Object,  required:true },
 		relationIndexData:  { type:Number,  required:true },                // relation by index, serving as base for data (cards)
@@ -502,7 +503,7 @@ let MyKanban = {
 		attributeIdAxisY:   (s) => s.relationIndexAxisY !== null && typeof s.joinsIndexMap[s.relationIndexAxisY] !== 'undefined'
 			? s.joinsIndexMap[s.relationIndexAxisY].attributeId : null,
 		choiceFilters:      (s) => s.getChoiceFilters(s.choices,s.choiceId),
-		columnBatches:      (s) => s.getColumnBatches(s.columns,s.columnIndexesAxisX.concat(s.columnIndexesAxisY),s.showCaptions),
+		columnBatches:      (s) => s.getColumnBatches(s.moduleId,s.columns,s.columnIndexesAxisX.concat(s.columnIndexesAxisY),s.showCaptions),
 		columnIndexesAxisX: (s) => s.getAxisColumnIndexes([]),
 		columnIndexesAxisY: (s) => s.relationIndexAxisY === null
 			? [] : s.getAxisColumnIndexes(s.columnIndexesAxisX),

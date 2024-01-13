@@ -209,7 +209,7 @@ export function getQueryFiltersProcessed(filters,joinsIndexMap,dataFieldIdMap,
 			case 'recordNew':    if(typeof joinsIndexMap['0'] !== 'undefined') s.value = joinsIndexMap['0'].recordId === 0; break;
 			
 			// login
-			case 'languageCode': s.value = MyStore.getters.moduleLanguage;                    break;
+			case 'languageCode': s.value = MyStore.getters.settings.languageCode;             break;
 			case 'login':        s.value = MyStore.getters.loginId;                           break;
 			case 'role':         s.value = MyStore.getters.access.roleIds.includes(s.roleId); break;
 			

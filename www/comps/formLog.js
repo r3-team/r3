@@ -1,6 +1,7 @@
 import MyField                         from './field.js';
 import {aesGcmDecryptBase64WithPhrase} from './shared/crypto.js';
 import {consoleError}                  from './shared/error.js';
+import {getCaption2}                    from './shared/language.js';
 import {getUnixFormat}                 from './shared/time.js';
 import {
 	getAttributeFileHref,
@@ -169,7 +170,6 @@ let MyFormLog = {
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		capApp:        (s) => s.$store.getters.captions.formLog,
 		capGen:        (s) => s.$store.getters.captions.generic,
-		moduleLanguage:(s) => s.$store.getters.moduleLanguage,
 		settings:      (s) => s.$store.getters.settings,
 		token:         (s) => s.$store.getters['local/token']
 	},
@@ -190,14 +190,9 @@ let MyFormLog = {
 		
 		// presentation
 		displayFieldCaption(f) {
-			if(typeof f.captions.fieldTitle[this.moduleLanguage] !== 'undefined')
-				return f.captions.fieldTitle[this.moduleLanguage];
-			
-			let atr = this.attributeIdMap[f.attributeId];
-			
-			return typeof atr.captions.attributeTitle[this.moduleLanguage] !== 'undefined'
-				? atr.captions.attributeTitle[this.moduleLanguage]
-				: atr.name;
+			const atr = this.attributeIdMap[f.attributeId];
+			return this.getCaption2('fieldTitle',this.moduleId,f.id,f.captions,
+				this.getCaption2('attributeTitle',this.moduleId,atr.Id,atr.captions,atr.name));
 		},
 		displayTitle(i,unixTime,name) {
 			if(name === '') name = this.capApp.deletedUser;

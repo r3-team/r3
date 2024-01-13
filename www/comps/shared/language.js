@@ -6,15 +6,6 @@ export function getCaption(captions,fallback) {
 	
 	return fallback;
 };
-export function getValidLanguageCode(module) {
-	// use user selected language, if module supports it
-	if(module.languages.indexOf(MyStore.getters.settings.languageCode) !== -1)
-		return MyStore.getters.settings.languageCode;
-	
-	// use module main language if not
-	return module.languageMain;
-};
-
 
 // new
 export function getCaption2(content,moduleId,id,captions,fallback) {
@@ -24,6 +15,7 @@ export function getCaptionForLang(content,language,id,captions,fallback) {
 	let captionsCustom;
 	switch(content) {
 		case 'attributeTitle':  captionsCustom = MyStore.getters.captionMapCustom.attributeIdMap;  break;
+		case 'columnTitle':     captionsCustom = MyStore.getters.captionMapCustom.columnIdMap;     break;
 		case 'fieldHelp':       // fallthrough
 		case 'fieldTitle':      captionsCustom = MyStore.getters.captionMapCustom.fieldIdMap;      break;
 		case 'formTitle':       captionsCustom = MyStore.getters.captionMapCustom.formIdMap;       break;

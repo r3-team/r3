@@ -179,6 +179,7 @@ let MyField = {
 					:isHidden="isHidden"
 					:isSingleField="isAlone"
 					:loadWhileHidden="parentIsCounting"
+					:moduleId="moduleId"
 					:popUpFormInline="popUpFormInline"
 					:relationIndexData="field.relationIndexData"
 					:relationIndexAxisX="field.relationIndexAxisX"
@@ -229,6 +230,7 @@ let MyField = {
 					:layoutDefault="field.layout"
 					:limitDefault="field.query.fixedLimit === 0 ? field.resultLimit : field.query.fixedLimit"
 					:loadWhileHidden="parentIsCounting"
+					:moduleId="moduleId"
 					:popUpFormInline="popUpFormInline"
 					:query="field.query"
 					:usesPageHistory="isAloneInForm && !formIsEmbedded"
@@ -519,6 +521,7 @@ let MyField = {
 					:inputRecordIds="relationshipRecordIds"
 					:inputValid="!showInvalid"
 					:isInput="true"
+					:moduleId="moduleId"
 					:query="field.query"
 				>
 					<template #input-icon>

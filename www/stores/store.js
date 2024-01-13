@@ -57,9 +57,7 @@ const MyStore = Vuex.createStore({
 		loginPrivateKeyEncBackup:null, // user login private key PEM, encrypted with backup code
 		loginPublicKey:null,  // user login public key for encryption (exportable key)
 		loginWidgetGroups:[], // user widgets, starting with widget groups
-		logo:'',
 		moduleEntries:[],     // module entries for header/home page
-		moduleLanguage:'',    // module language (either equal to user language or module fallback)
 		moduleIdLast:null,    // module ID of last active module
 		moduleIdMapLang:{},   // module ID map of used module language (either language overlapping with user language or fallback)
 		moduleIdMapMeta:{},   // module ID map of module meta data (is owner, hidden, position, date change, custom languages)
@@ -142,7 +140,7 @@ const MyStore = Vuex.createStore({
 		license:(state,payload) => {
 			state.license = payload;
 			
-			if(typeof payload.validUntil === 'undefined')
+			if(payload.validUntil === undefined)
 				return state.licenseValid = false;
 			
 			state.licenseValid = payload.validUntil > Math.floor(new Date().getTime() / 1000);
@@ -162,13 +160,6 @@ const MyStore = Vuex.createStore({
 		pageTitleRefresh:(state,payload) => {
 			MyStore.commit('pageTitle',state.pageTitle);
 		},
-		sessionValueStore:(state,payload) => {
-			if(typeof state.sessionValueStore[payload.moduleId] === 'undefined')
-				state.sessionValueStore[payload.moduleId] = {};
-			
-			state.sessionValueStore[payload.moduleId][payload.key] = payload.value;
-		},
-		
 		routingGuardAdd:(state,payload) => {
 			state.routingGuards.push(payload);
 		},
@@ -177,6 +168,12 @@ const MyStore = Vuex.createStore({
 				if(state.routingGuards[i] === payload)
 					return state.routingGuards.splice(i,1);
 			}
+		},
+		sessionValueStore:(state,payload) => {
+			if(typeof state.sessionValueStore[payload.moduleId] === 'undefined')
+				state.sessionValueStore[payload.moduleId] = {};
+			
+			state.sessionValueStore[payload.moduleId][payload.key] = payload.value;
 		},
 		
 		// collections
@@ -213,7 +210,6 @@ const MyStore = Vuex.createStore({
 		loginPublicKey:          (state,payload) => state.loginPublicKey           = payload,
 		loginWidgetGroups:       (state,payload) => state.loginWidgetGroups        = payload,
 		moduleEntries:           (state,payload) => state.moduleEntries            = payload,
-		moduleLanguage:          (state,payload) => state.moduleLanguage           = payload,
 		moduleIdLast:            (state,payload) => state.moduleIdLast             = payload,
 		moduleIdMapMeta:         (state,payload) => state.moduleIdMapMeta          = payload,
 		popUpFormGlobal:         (state,payload) => state.popUpFormGlobal          = payload,
@@ -283,6 +279,7 @@ const MyStore = Vuex.createStore({
 				const meta = state.moduleIdMapMeta[id];
 				const mod  = MyStoreSchema.state.moduleIdMap[id];
 				
+				// use login language if supported by module or custom captions - otherwise use module fallback
 				out[id] = meta.languagesCustom.includes(state.settings.languageCode) || mod.languages.includes(state.settings.languageCode)
 					? state.settings.languageCode : mod.languageMain;
 			}
@@ -343,7 +340,6 @@ const MyStore = Vuex.createStore({
 		loginPublicKey:          (state) => state.loginPublicKey,
 		loginWidgetGroups:       (state) => state.loginWidgetGroups,
 		moduleEntries:           (state) => state.moduleEntries,
-		moduleLanguage:          (state) => state.moduleLanguage,
 		moduleIdLast:            (state) => state.moduleIdLast,
 		moduleIdMapMeta:         (state) => state.moduleIdMapMeta,
 		pageTitleFull:           (state) => state.pageTitleFull,

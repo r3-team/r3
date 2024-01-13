@@ -84,7 +84,7 @@ let MyMenuItem = {
 		collectionEntries:(s) => {
 			let out = [];
 			for(let consumer of s.menu.collections) {
-				let collection = s.collectionIdMap[consumer.collectionId];
+				const collection = s.collectionIdMap[consumer.collectionId];
 				
 				if(!consumer.onMobile && s.isMobile)
 					continue;
@@ -102,7 +102,7 @@ let MyMenuItem = {
 					title:s.getColumnTitle(s.getCollectionColumn(
 						collection.id,
 						consumer.columnIdDisplay
-					)),
+					),collection.moduleId),
 					value:value
 				});
 			}

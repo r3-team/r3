@@ -1,6 +1,5 @@
-import MyStore                from '../../stores/store.js';
-import {getNilUuid}           from './generic.js';
-import {getValidLanguageCode} from './language.js';
+import MyStore      from '../../stores/store.js';
+import {getNilUuid} from './generic.js';
 import {
 	getJoinIndexMap,
 	getQueryColumnsProcessed,
@@ -139,10 +138,6 @@ export function updateCollections(continueOnError,errFnc,collectionId) {
 			
 			if(q.relationId === null)
 				return;
-			
-			// set module language so that language filters can work outside of module context
-			MyStore.commit('moduleLanguage',getValidLanguageCode(
-				MyStore.getters['schema/moduleIdMap'][c.moduleId]));
 			
 			const joinIndexMap = getJoinIndexMap(q.joins);
 			const filters      = getQueryFiltersProcessed(q.filters,joinIndexMap);

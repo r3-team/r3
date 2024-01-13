@@ -144,7 +144,7 @@ let MyInputCollection = {
 		hasIcon:          (s) => s.collection.iconId !== null,
 		hasSelections:    (s) => s.rowIndexesSelected.length !== 0,
 		rows:             (s) => s.collectionIdMap[s.collectionId],
-		title:            (s) => s.getColumnTitle(s.getCollectionColumn(s.collectionId,s.columnIdDisplay)),
+		title:            (s) => s.getColumnTitle(s.getCollectionColumn(s.collectionId,s.columnIdDisplay),s.collection.moduleId),
 		valueIndexDisplay:(s) => s.getCollectionColumnIndex(s.collectionId,s.columnIdDisplay),
 		
 		// stores

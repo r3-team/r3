@@ -519,7 +519,7 @@ let MyCaptionMap = {
 				let childCaptions = [];
 				for(const col of api.columns) {
 					if(s.captionMap.columnIdMap[col.id] !== undefined)
-						childCaptions.push(s.makeItem('column',col.id,s.getColumnTitle(col),s.captionMap.columnIdMap[col.id],[]));
+						childCaptions.push(s.makeItem('column',col.id,s.getColumnTitle(col,s.moduleId),s.captionMap.columnIdMap[col.id],[]));
 				}
 				
 				if(childCaptions.length !== 0)
@@ -555,7 +555,7 @@ let MyCaptionMap = {
 				let childCaptions = [];
 				for(const col of collection.columns) {
 					if(s.captionMap.columnIdMap[col.id] !== undefined)
-						childCaptions.push(s.makeItem('column',col.id,s.getColumnTitle(col),s.captionMap.columnIdMap[col.id],[]));
+						childCaptions.push(s.makeItem('column',col.id,s.getColumnTitle(col,s.moduleId),s.captionMap.columnIdMap[col.id],[]));
 				}
 				
 				if(childCaptions.length !== 0)
@@ -581,7 +581,7 @@ let MyCaptionMap = {
 					if(fld.columns !== undefined) {
 						for(const col of fld.columns) {
 							if(s.captionMap.columnIdMap[col.id] !== undefined)
-								fieldChildCaptions.push(s.makeItem('column',col.id,s.getColumnTitle(col),s.captionMap.columnIdMap[col.id],[]));
+								fieldChildCaptions.push(s.makeItem('column',col.id,s.getColumnTitle(col,s.moduleId),s.captionMap.columnIdMap[col.id],[]));
 						}
 					}
 					if(fld.tabs !== undefined) {

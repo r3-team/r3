@@ -687,6 +687,7 @@ let MyList = {
 		filters:        { type:Array,   required:true },                    // processed query filters
 		layoutDefault:  { type:String,  required:false, default:'table' },  // default list layout: table, cards
 		limitDefault:   { type:Number,  required:false, default:10 },       // default list limit
+		moduleId:       { type:String,  required:true },
 		popUpFormInline:{ required:false, default:null },                   // form to show inside list
 		query:          { type:Object,  required:true },                    // list query
 		
@@ -822,7 +823,7 @@ let MyList = {
 				batches.push({
 					basis:column.basis,
 					batch:column.batch,
-					caption:s.getColumnTitle(column),
+					caption:s.getColumnTitle(column,s.moduleId),
 					columnIndexes:!hidden ? [index] : [],
 					columnIndexColor:!isColor ? -1 : index,
 					columnIndexSortBy:noSort ? -1 : index,
