@@ -168,6 +168,7 @@ let MyAdmin = {
 	computed:{
 		contentTitle:(s) => {
 			if(s.$route.path.includes('backups'))         return s.capApp.navigationBackups;
+			if(s.$route.path.includes('caption-map'))     return s.capApp.navigationCaptionMap;
 			if(s.$route.path.includes('cluster'))         return s.capApp.navigationCluster;
 			if(s.$route.path.includes('config'))          return s.capApp.navigationConfig;
 			if(s.$route.path.includes('custom'))          return s.capApp.navigationCustom;
