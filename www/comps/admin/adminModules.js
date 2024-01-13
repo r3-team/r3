@@ -1,10 +1,7 @@
 import MyArticles            from '../articles.js';
 import srcBase64Icon         from '../shared/image.js';
 import {getUnixFormat}       from '../shared/time.js';
-import {
-	getCaptionForModule,
-	getValidLanguageCode
-} from '../shared/language.js';
+import {getCaption2}          from '../shared/language.js';
 export {MyAdminModules as default};
 
 let MyAdminModulesItem = {
@@ -18,7 +15,7 @@ let MyAdminModulesItem = {
 					:naked="true"
 				/>
 				<img class="module-icon" :src="srcBase64Icon(module.iconId,'images/module.png')" />
-				<span>{{ getCaptionForModule(module.captions.moduleTitle,module.name,module) }}</span>
+				<span>{{ getCaption2('moduleTitle',module.id,module.id,module.captions,module.name) }}</span>
 			</div>
 		</td>
 		<td class="minimum">v{{ module.releaseBuild }}</td>
@@ -183,7 +180,7 @@ let MyAdminModulesItem = {
 	},
 	methods:{
 		// externals
-		getCaptionForModule,
+		getCaption2,
 		getUnixFormat,
 		srcBase64Icon,
 		
@@ -349,7 +346,7 @@ let MyAdminModules = {
 				@close="moduleIdShowHelp = null"
 				:moduleId="moduleIdShowHelp"
 				:isFloat="false"
-				:language="moduleLanguage"
+				:language="moduleIdMapLang[moduleIdShowHelp]"
 			/>
 		</div>
 		
@@ -490,15 +487,12 @@ let MyAdminModules = {
 		builderEnabled: (s) => s.$store.getters.builderEnabled,
 		capApp:         (s) => s.$store.getters.captions.admin.modules,
 		capGen:         (s) => s.$store.getters.captions.generic,
+		moduleIdMapLang:(s) => s.$store.getters.moduleIdMapLang,
 		moduleIdMapMeta:(s) => s.$store.getters.moduleIdMapMeta,
-		moduleLanguage: (s) => s.$store.getters.moduleLanguage,
 		productionMode: (s) => s.$store.getters.productionMode,
 		system:         (s) => s.$store.getters.system
 	},
 	methods:{
-		// externals
-		getValidLanguageCode,
-		
 		// error handling
 		installError(message) {
 			message = this.capApp.error.installFailed.replace('{ERROR}',message);
@@ -507,9 +501,6 @@ let MyAdminModules = {
 			this.installStarted = false;
 		},
 		showHelp(moduleId) {
-			this.$store.commit('moduleLanguage',this.getValidLanguageCode(
-				this.moduleIdMap[moduleId]));
-			
 			this.moduleIdShowHelp = moduleId;
 		},
 		

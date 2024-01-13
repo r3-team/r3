@@ -1,9 +1,6 @@
 import {getStringFilled} from '../shared/generic.js';
 import {getUnixFormat}   from '../shared/time.js';
-import {
-	getCaption,
-	getCaptionForModule
-} from '../shared/language.js';
+import {getCaption2}      from '../shared/language.js';
 export {MyAdminScheduler as default};
 
 let MyAdminScheduler = {
@@ -216,8 +213,7 @@ let MyAdminScheduler = {
 	},
 	methods:{
 		// externals
-		getCaption,
-		getCaptionForModule,
+		getCaption2,
 		getStringFilled,
 		getUnixFormat,
 		
@@ -226,17 +222,15 @@ let MyAdminScheduler = {
 			return unixTime === 0 ? '-' : this.getUnixFormat(unixTime,'Y-m-d H:i:S');
 		},
 		displayName(name) {
-			return typeof this.capApp.names[name] === 'undefined'
-				? name : this.capApp.names[name];
+			return this.capApp.names[name] === undefined ? name : this.capApp.names[name];
 		},
 		displayModuleName(pgFunctionId) {
-			let m = this.moduleIdMap[this.pgFunctionIdMap[pgFunctionId].moduleId];
-			return this.getCaptionForModule(m.captions.moduleTitle,m.name,m);
+			const m = this.moduleIdMap[this.pgFunctionIdMap[pgFunctionId].moduleId];
+			return this.getCaption2('moduleTitle',m.id,m.id,m.captions,m.name);
 		},
 		displayFunctionName(pgFunctionId) {
-			let f = this.pgFunctionIdMap[pgFunctionId];
-			
-			return this.getCaption(f.captions.pgFunctionTitle,f.name);
+			const f = this.pgFunctionIdMap[pgFunctionId];
+			return this.getCaption2('pgFunctionTitle',f.moduleId,f.id,f.captions,f.name);
 		},
 		displaySchedule(pgFunctionId,pgFunctionScheduleId) {
 			let f = this.pgFunctionIdMap[pgFunctionId];

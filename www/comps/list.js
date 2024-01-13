@@ -1009,7 +1009,6 @@ let MyList = {
 		capApp:        (s) => s.$store.getters.captions.list,
 		capGen:        (s) => s.$store.getters.captions.generic,
 		isMobile:      (s) => s.$store.getters.isMobile,
-		moduleLanguage:(s) => s.$store.getters.moduleLanguage,
 		scrollFormId:  (s) => s.$store.getters.constants.scrollFormId,
 		settings:      (s) => s.$store.getters.settings
 	},

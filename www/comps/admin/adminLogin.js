@@ -2,10 +2,7 @@ import MyForm        from '../form.js';
 import MyTabs        from '../tabs.js';
 import MyInputSelect from '../inputSelect.js';
 import srcBase64Icon from '../shared/image.js';
-import {
-	getCaptionForModule,
-	getValidLanguageCode
-} from '../shared/language.js';
+import {getCaption2}  from '../shared/language.js';
 export {MyAdminLogin as default};
 
 let MyAdminLoginRole = {
@@ -15,8 +12,8 @@ let MyAdminLoginRole = {
 			v-for="r in module.roles.filter(v => v.assignable && v.content === content)"
 			@trigger="$emit('toggle',r.id)"
 			:active="!readonly"
-			:caption="getCaptionForModule(r.captions['roleTitle'],r.name,module)"
-			:captionTitle="getCaptionForModule(r.captions['roleDesc'],'',module)"
+			:caption="getCaption2('roleTitle',module.id,r.id,r.captions,r.name)"
+			:captionTitle="getCaption2('roleDesc',module.id,r.id,r.captions)"
 			:image="roleIds.includes(r.id) ? 'checkbox1.png' : 'checkbox0.png'"
 			:naked="true"
 		/>
@@ -29,7 +26,7 @@ let MyAdminLoginRole = {
 	},
 	emits:['toggle'],
 	methods:{
-		getCaptionForModule
+		getCaption2
 	}
 };
 
@@ -143,7 +140,7 @@ let MyAdminLogin = {
 						<td>
 							<div class="title-cell">
 								<img :src="srcBase64Icon(moduleIdMap[lf.moduleId].iconId,'images/module.png')" />
-								<span>{{ getCaptionForModule(lf.captions['loginFormTitle'],lf.name,moduleIdMap[lf.moduleId]) }}</span>
+								<span>{{ getCaption2('loginFormTitle',lf.moduleId,lf.id,lf.captions,lf.name) }}</span>
 							</div>
 						</td>
 						<td>
@@ -260,12 +257,8 @@ let MyAdminLogin = {
 										:active="false"
 										:naked="true"
 									/>
-									<img class="module-icon"
-										:src="srcBase64Icon(m.iconId,'images/module.png')"
-									/>
-									<span>
-										{{ getCaptionForModule(m.captions['moduleTitle'],m.name,m) }}
-									</span>
+									<img class="module-icon" :src="srcBase64Icon(m.iconId,'images/module.png')" />
+									<span>{{ getCaption2('moduleTitle',m.id,m.id,m.captions,m.name) }}</span>
 								</div>
 							</td>
 							
@@ -346,7 +339,7 @@ let MyAdminLogin = {
 			return cnt;
 		},
 		modulesFiltered:(s) => s.modules.filter(v => !s.moduleIdMapMeta[v.id].hidden &&
-			(s.roleFilter === '' || s.getCaptionForModule(v.captions['moduleTitle'],v.name,v).toLowerCase().includes(s.roleFilter.toLowerCase()))),
+			(s.roleFilter === '' || s.getCaption2('moduleTitle',v.id,v.id,v.captions,v.name).toLowerCase().includes(s.roleFilter.toLowerCase()))),
 		
 		// simple states
 		canSave:   (s) => s.hasChanges && s.name !== '',
@@ -383,8 +376,7 @@ let MyAdminLogin = {
 	},
 	methods:{
 		// externals
-		getCaptionForModule,
-		getValidLanguageCode,
+		getCaption2,
 		srcBase64Icon,
 		
 		handleHotkeys(e) {
@@ -408,20 +400,17 @@ let MyAdminLogin = {
 		
 		// actions
 		openLoginForm(index) {
-			let frm = this.formIdMap[this.loginForms[index].formId];
-			let mod = this.moduleIdMap[frm.moduleId];
-			
-			this.$store.commit('moduleLanguage',this.getValidLanguageCode(mod));
+			const frm = this.formIdMap[this.loginForms[index].formId];
+			const mod = this.moduleIdMap[frm.moduleId];
 			
 			this.loginFormIndexOpen = index;
 			this.loginFormRecords   = this.records[index].id !== null
 				? [this.records[index].id] : [];
 		},
 		toggleRoleId(roleId) {
-			let pos = this.roleIds.indexOf(roleId);
-			
-			if(pos === -1)      this.roleIds.push(roleId);
-			else if(pos !== -1) this.roleIds.splice(pos,1);
+			const pos = this.roleIds.indexOf(roleId);
+			if(pos === -1) this.roleIds.push(roleId);
+			else           this.roleIds.splice(pos,1);
 		},
 		toggleRolesByContent(content) {
 			let roleIdsByContent = [];

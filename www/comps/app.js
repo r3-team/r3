@@ -8,7 +8,7 @@ import {getStartFormId}      from './shared/access.js';
 import {updateCollections}   from './shared/collection.js';
 import {formOpen}            from './shared/form.js';
 import {colorAdjustBgHeader} from './shared/generic.js';
-import {getCaptionForModule} from './shared/language.js';
+import {getCaption2}          from './shared/language.js';
 import srcBase64Icon         from './shared/image.js';
 import {
 	aesGcmDecryptBase64,
@@ -279,7 +279,7 @@ let MyApp = {
 				if(mod.parentId === null)
 					continue;
 				
-				if(typeof idMapChildren[mod.parentId] === 'undefined')
+				if(idMapChildren[mod.parentId] === undefined)
 					idMapChildren[mod.parentId] = [];
 				
 				idMapChildren[mod.parentId].push(mod);
@@ -301,18 +301,11 @@ let MyApp = {
 					return false;
 				
 				// ignore inaccessible and childless modules
-				if(!accessible && typeof idMapChildren[module.id] === 'undefined') {
+				if(!accessible && idMapChildren[module.id] === undefined)
 					return false;
-				}
-				
-				// module caption
-				let caption = s.getCaptionForModule(
-					module.captions.moduleTitle,module.name,module
-				);
 				
 				// assigned modules (children)
 				let children = [];
-				
 				if(typeof idMapChildren[module.id] !== 'undefined') {
 					for(let i = 0, j = idMapChildren[module.id].length; i < j; i++) {
 						let m = parseModule(idMapChildren[module.id][i],false);
@@ -327,7 +320,7 @@ let MyApp = {
 				
 				return {
 					accessible:accessible,
-					caption:caption,
+					caption:s.getCaption2('moduleTitle',module.id,module.id,module.captions,module.name),
 					children:children,
 					formId:formIdStart,
 					iconId:module.iconId,
@@ -353,11 +346,7 @@ let MyApp = {
 					i--; j--;
 				}
 			}
-			
-			// apply module order
-			entries.sort((a,b) => a.position - b.position);
-			
-			return entries;
+			return entries.sort((a,b) => a.position - b.position);
 		},
 		
 		// simple
@@ -418,7 +407,7 @@ let MyApp = {
 		formOpen,
 		genericError,
 		genericErrorWithFallback,
-		getCaptionForModule,
+		getCaption2,
 		getStartFormId,
 		pemImport,
 		srcBase64Icon,

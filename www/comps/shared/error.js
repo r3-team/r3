@@ -1,3 +1,4 @@
+import {getCaption2} from './language.js';
 import MyStore from '../../stores/store.js';
 
 export function genericError(message) {
@@ -93,7 +94,6 @@ export function resolveErrCode(message) {
 		}
 	}
 	if(errContext === 'DBS') {
-		let lang = MyStore.getters.moduleLanguage;
 		let atr, name, mod, rel;
 		
 		switch(errNumber) {
@@ -113,12 +113,9 @@ export function resolveErrCode(message) {
 				let names = [];
 				
 				for(let i = 0, j = index.attributes.length; i < j; i++) {
-					let atr = MyStore.getters['schema/attributeIdMap'][index.attributes[i].attributeId];
-					
-					names.push(
-						typeof atr.captions.attributeTitle[lang] !== 'undefined'
-						? atr.captions.attributeTitle[lang] : atr.name
-					);
+					atr = MyStore.getters['schema/attributeIdMap'][index.attributes[i].attributeId];
+					rel = MyStore.getters['schema/relationIdMap'][atr.relationId];
+					names.push(getCaption2('attributeTitle',rel.moduleId,atr.id,atr.captions,atr.name));
 				}
 				return cap.replace('{NAMES}',names.join('+'));
 			break;
@@ -130,16 +127,8 @@ export function resolveErrCode(message) {
 				atr = MyStore.getters['schema/attributeIdMap'][matches[1]];
 				rel = MyStore.getters['schema/relationIdMap'][atr.relationId];
 				mod = MyStore.getters['schema/moduleIdMap'][rel.moduleId];
-				let atrName = atr.name;
-				let modName = mod.name;
-				
-				if(typeof atr.captions.attributeTitle[lang] !== 'undefined')
-					atrName = atr.captions.attributeTitle[lang];
-				
-				if(typeof mod.captions.moduleTitle[lang] !== 'undefined')
-					modName = mod.captions.moduleTitle[lang];
-				
-				return cap.replace('{ATR}',atrName).replace('{MOD}',modName);
+				return cap.replace('{ATR}',getCaption2('attributeTitle',mod.id,atr.id,atr.captions,atr.name))
+					.replace('{MOD}',getCaption2('moduleTitle',mod.id,mod.id,mod.captions,mod.name));
 			break;
 			case '005': // NOT NULL constraint broken
 				matches = message.match(/\[COLUMN_NAME\:([^\]]*)\]/);

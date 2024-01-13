@@ -1,7 +1,7 @@
-import srcBase64Icon         from './shared/image.js';
-import {getColumnTitle}      from './shared/column.js';
-import {formOpen}            from './shared/form.js';
-import {getCaptionForModule} from './shared/language.js';
+import srcBase64Icon    from './shared/image.js';
+import {getColumnTitle} from './shared/column.js';
+import {formOpen}       from './shared/form.js';
+import {getCaption2}     from './shared/language.js';
 import {
 	getCollectionColumn,
 	getCollectionValues
@@ -297,8 +297,8 @@ let MyHeader = {
 			if(s.moduleSingleActive && s.isMobile)
 				return s.capGen.menu;
 			
-			return s.moduleSingle === false
-				? '' : s.getCaptionForModule(s.moduleSingle.captions.moduleTitle,s.moduleSingle.name,s.moduleSingle);
+			const m = s.moduleSingle;
+			return m === false ? '' : s.getCaption2('moduleTitle',m.id,m.id,m.captions,m.name);
 		},
 		
 		// simple
@@ -347,7 +347,7 @@ let MyHeader = {
 	methods:{
 		// externals
 		formOpen,
-		getCaptionForModule,
+		getCaption2,
 		getCollectionColumn,
 		getCollectionValues,
 		getColumnTitle,
