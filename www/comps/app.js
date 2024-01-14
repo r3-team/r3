@@ -597,7 +597,6 @@ let MyApp = {
 			
 			// compare new and known module meta data
 			let modulesFetch = [];
-			
 			for(const k in moduleIdMapMetaNew) {
 				const metaNew = moduleIdMapMetaNew[k];
 				const metaOld = this.moduleIdMapMeta[k];

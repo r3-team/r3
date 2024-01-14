@@ -37,17 +37,8 @@ export function getJsFunctionsProcessed(fncs,filter) {
 	return outGlobal.concat(outForm);
 };
 
-export function getDependentModules(moduleSource,modulesAll) {
-	let out = [];
-	for(let i = 0, j = modulesAll.length; i < j; i++) {
-		let m = modulesAll[i];
-		
-		if(moduleSource.id !== m.id && !moduleSource.dependsOn.includes(m.id))
-			continue;
-		
-		out.push(m);
-	}
-	return out;
+export function getDependentModules(moduleSource) {
+	return MyStore.getters['schema/modules'].filter(v => v.id === moduleSource.id || moduleSource.dependsOn.includes(v.id));
 };
 
 export function getFunctionHelp(functionPrefix,functionObj,builderLanguage) {

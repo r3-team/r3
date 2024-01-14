@@ -287,7 +287,7 @@ let MyBuilderArticles = {
 								<option :value="null">-</option>
 								<option v-for="a in module.articles.filter(v => !articleIdsAssigned.includes(v.id))" :value="a.id">{{ a.name }}</option>
 								<optgroup
-									v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.articles.length !== 0)"
+									v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.articles.length !== 0)"
 									:label="mod.name"
 								>
 									<option v-for="a in mod.articles.filter(v => !articleIdsAssigned.includes(v.id))" :value="a.id">
@@ -375,7 +375,6 @@ let MyBuilderArticles = {
 		
 		// stores
 		module:      (s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
-		modules:     (s) => s.$store.getters['schema/modules'],
 		moduleIdMap: (s) => s.$store.getters['schema/moduleIdMap'],
 		formIdMap:   (s) => s.$store.getters['schema/formIdMap'],
 		articleIdMap:(s) => s.$store.getters['schema/articleIdMap'],

@@ -187,7 +187,6 @@ let MyBuilderMenuItems = {
 	},
 	computed:{
 		// stores
-		modules:    (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		capApp:     (s) => s.$store.getters.captions.builder.menu,
 		capGen:     (s) => s.$store.getters.captions.generic,
@@ -263,7 +262,7 @@ let MyBuilderMenu = {
 				<select v-model="menuIdCopy" :disabled="readonly">
 					<option :value="null">-</option>
 					<option
-						v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id)"
+						v-for="mod in getDependentModules(module).filter(v => v.id !== module.id)"
 						:value="mod.id"
 					>
 						{{ mod.name }}
@@ -308,7 +307,6 @@ let MyBuilderMenu = {
 		module:    (s) => typeof s.moduleIdMap[s.id] === 'undefined' ? false : s.moduleIdMap[s.id],
 		
 		// stores
-		modules:    (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		capApp:     (s) => s.$store.getters.captions.builder.menu,
 		capGen:     (s) => s.$store.getters.captions.generic,

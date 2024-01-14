@@ -163,7 +163,7 @@ let MyBuilderModule = {
 						<select v-model="parentId" :disabled="readonly">
 							<option :value="null">-</option>
 							<option
-								v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.parentId === null)"
+								v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.parentId === null)"
 								:value="mod.id"
 							>
 								{{ mod.name }}

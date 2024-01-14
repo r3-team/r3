@@ -2,10 +2,6 @@ import MyBuilderCaption         from './builderCaption.js';
 import MyBuilderCollectionInput from './builderCollectionInput.js';
 import MyBuilderFormInput       from './builderFormInput.js';
 import {copyValueDialog}        from '../shared/generic.js';
-import {
-	getDependentModules,
-	getItemTitle
-} from '../shared/builder.js';
 export {MyBuilderWidget as default};
 
 let MyBuilderWidget = {
@@ -170,7 +166,6 @@ let MyBuilderWidget = {
 		// stores
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
 		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
-		modules:        (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		widgetIdMap:    (s) => s.$store.getters['schema/widgetIdMap'],
 		capApp:         (s) => s.$store.getters.captions.builder.widget,
@@ -186,8 +181,6 @@ let MyBuilderWidget = {
 	methods:{
 		// external
 		copyValueDialog,
-		getDependentModules,
-		getItemTitle,
 		
 		// actions
 		handleHotkeys(e) {

@@ -26,7 +26,7 @@ let MyBuilderRelationsItemPolicy = {
 			<select v-model="roleId" :disabled="readonly">
 				<option v-for="r in module.roles" :value="r.id">{{ r.name }}</option>
 				<optgroup
-					v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id)"
+					v-for="mod in getDependentModules(module).filter(v => v.id !== module.id)"
 					:label="mod.name"
 				>
 					<option v-for="r in mod.roles" :value="r.id">{{ r.name }}</option>
@@ -107,9 +107,8 @@ let MyBuilderRelationsItemPolicy = {
 		},
 		
 		// stores
-		module: (s) => s.$store.getters['schema/moduleIdMap'][s.moduleId],
-		modules:(s) => s.$store.getters['schema/modules'],
-		capApp: (s) => s.$store.getters.captions.builder.relation
+		module:(s) => s.$store.getters['schema/moduleIdMap'][s.moduleId],
+		capApp:(s) => s.$store.getters.captions.builder.relation
 	},
 	methods:{
 		// external
@@ -692,9 +691,8 @@ let MyBuilderRelation = {
 			|| JSON.stringify(s.policies) !== JSON.stringify(s.relation.policies),
 		triggerCnt:(s) => {
 			let cnt = 0;
-			for(let k in s.pgTriggerIdMap) {
-				if(s.pgTriggerIdMap[k].relationId === s.id)
-					cnt++;
+			for(const mod of s.modules) {
+				cnt += mod.pgTriggers.filter(trg => trg.relationId === s.id).length;
 			}
 			return cnt;
 		},
@@ -706,6 +704,7 @@ let MyBuilderRelation = {
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
+		modules:       (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		pgTriggerIdMap:(s) => s.$store.getters['schema/pgTriggerIdMap'],
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],

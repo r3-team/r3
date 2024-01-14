@@ -173,7 +173,7 @@ let MyBuilderAttribute = {
 									
 									<!-- relations from other modules -->
 									<optgroup
-										v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.relations.length !== 0)"
+										v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.relations.length !== 0)"
 										:label="mod.name"
 									>
 										<option v-for="rel in mod.relations" :value="rel.id">
@@ -467,7 +467,6 @@ let MyBuilderAttribute = {
 		isTime:    (s) => s.isInteger && s.values.contentUse === 'time',
 		
 		// stores
-		modules:        (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		apiIdMap:       (s) => s.$store.getters['schema/apiIdMap'],
 		attributeIdMap: (s) => s.$store.getters['schema/attributeIdMap'],

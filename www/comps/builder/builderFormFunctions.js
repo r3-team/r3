@@ -32,7 +32,7 @@ let MyBuilderFormFunction = {
 					<option v-for="f in module.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
 						:value="f.id"
 					>{{ f.name }}</option>
-					<optgroup v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.jsFunctions.length !== 0)"
+					<optgroup v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.jsFunctions.length !== 0)"
 						:label="mod.name"
 					>
 						<option v-for="f in mod.jsFunctions.filter(v => v.formId === null || v.formId === formId)"
@@ -82,7 +82,6 @@ let MyBuilderFormFunction = {
 		
 		// store
 		module:         (s) => s.moduleIdMap[s.formIdMap[s.formId].moduleId],
-		modules:        (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		formIdMap:      (s) => s.$store.getters['schema/formIdMap'],
 		jsFunctionIdMap:(s) => s.$store.getters['schema/jsFunctionIdMap'],

@@ -38,7 +38,7 @@ let MyBuilderOpenFormInput = {
 						:value="f.id"
 					>{{ f.name }}</option>
 					<optgroup
-						v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.forms.length !== 0)"
+						v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.forms.length !== 0)"
 						:label="mod.name"
 					>
 						<option
@@ -238,7 +238,6 @@ let MyBuilderOpenFormInput = {
 		isActive:  (s) => s.openForm !== null,
 		
 		// stores
-		modules:       (s) => s.$store.getters['schema/modules'],
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		formIdMap:     (s) => s.$store.getters['schema/formIdMap'],

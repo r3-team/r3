@@ -20,7 +20,7 @@ let MyBuilderCollectionInput = {
 						{{ c.name }}
 					</option>
 					<optgroup
-						v-for="m in getDependentModules(module,modules).filter(v => v.id !== module.id && v.collections.length !== 0)"
+						v-for="m in getDependentModules(module).filter(v => v.id !== module.id && v.collections.length !== 0)"
 						:label="m.name"
 					>
 						<option v-for="c in m.collections" :value="c.id">
@@ -132,7 +132,6 @@ let MyBuilderCollectionInput = {
 		collectionSet:(s) => s.consumerInput.collectionId !== null,
 		
 		// stores
-		modules:        (s) => s.$store.getters['schema/modules'],
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
 		capApp:         (s) => s.$store.getters.captions.builder.collectionInput,
 		capGen:         (s) => s.$store.getters.captions.generic

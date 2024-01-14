@@ -305,7 +305,7 @@ let MyFilterSide = {
 					<option :value="null">-</option>
 					<option v-for="c in module.collections" :value="c.id">{{ c.name }}</option>
 					<optgroup
-						v-for="m in getDependentModules(module,modules).filter(v => v.id !== module.id && v.collections.length !== 0)"
+						v-for="m in getDependentModules(module).filter(v => v.id !== module.id && v.collections.length !== 0)"
 						:label="m.name"
 					>
 						<option v-for="c in m.collections" :value="c.id">{{ c.name }}</option>
@@ -343,7 +343,7 @@ let MyFilterSide = {
 						</option>
 					</optgroup>
 					
-					<template v-for="m in getDependentModules(module,modules).filter(v => v.id !== module.id)">
+					<template v-for="m in getDependentModules(module).filter(v => v.id !== module.id)">
 						<optgroup
 							v-for="r in m.relations.filter(v => v.presets.filter(p => p.protected).length !== 0)"
 							:label="m.name + '.' + r.name"
@@ -606,7 +606,6 @@ let MyFilterSide = {
 		isValue:      (s) => s.content === 'value',
 		
 		// stores
-		modules:        (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		collectionIdMap:(s) => s.$store.getters['schema/collectionIdMap'],
 		capApp:         (s) => s.$store.getters.captions.filter,

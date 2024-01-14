@@ -555,8 +555,8 @@ let MyBuilderPgFunction = {
 			|| s.isFrontendExec  !== s.pgFunction.isFrontendExec
 			|| JSON.stringify(s.schedules) !== JSON.stringify(s.pgFunction.schedules)
 			|| JSON.stringify(s.captions)  !== JSON.stringify(s.pgFunction.captions),
-		modulesData:(s) => s.getDependentModules(s.module,s.modules).filter(v => v.relations.length   !== 0),
-		modulesFnc: (s) => s.getDependentModules(s.module,s.modules).filter(v => v.pgFunctions.length !== 0),
+		modulesData:(s) => s.getDependentModules(s.module).filter(v => v.relations.length   !== 0),
+		modulesFnc: (s) => s.getDependentModules(s.module).filter(v => v.pgFunctions.length !== 0),
 		tabs:(s) => {
 			let out = {
 				icons:['images/code.png','images/edit.png'],
@@ -589,7 +589,6 @@ let MyBuilderPgFunction = {
 		preview:   (s) => !s.showPreview ? '' : s.placeholdersUnset(true),
 		
 		// stores
-		modules:        (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		moduleNameMap:  (s) => s.$store.getters['schema/moduleNameMap'],
 		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],

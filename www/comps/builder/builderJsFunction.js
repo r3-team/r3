@@ -187,7 +187,7 @@ let MyBuilderJsFunction = {
 							>
 								<option value="" disabled>{{ capApp.collectionId }}</option>
 								<optgroup
-									v-for="m in getDependentModules(module,modules).filter(v => v.collections.length !== 0)"
+									v-for="m in getDependentModules(module).filter(v => v.collections.length !== 0)"
 									:label="m.name"
 								>
 									<option v-for="c in m.collections" :value="c.id">{{ c.name }}</option>
@@ -208,7 +208,7 @@ let MyBuilderJsFunction = {
 									<select v-model="entityJsModuleId">
 										<option :value="null">-</option>
 										<option
-											v-for="mod in getDependentModules(module,modules).filter(v => v.jsFunctions.length !== 0)"
+											v-for="mod in getDependentModules(module).filter(v => v.jsFunctions.length !== 0)"
 											:value="mod.id"
 										>{{ mod.name }}</option>
 									</select>
@@ -254,7 +254,7 @@ let MyBuilderJsFunction = {
 									<select v-model="entityPgModuleId">
 										<option :value="null">-</option>
 										<option
-											v-for="mod in getDependentModules(module,modules).filter(v => v.pgFunctions.filter(f => f.isFrontendExec).length !== 0)"
+											v-for="mod in getDependentModules(module).filter(v => v.pgFunctions.filter(f => f.isFrontendExec).length !== 0)"
 											:value="mod.id"
 										>{{ mod.name }}</option>
 									</select>
@@ -482,7 +482,6 @@ let MyBuilderJsFunction = {
 		preview:      (s) => !s.showPreview ? '' : s.placeholdersUnset(),
 		
 		// stores
-		modules:        (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		moduleNameMap:  (s) => s.$store.getters['schema/moduleNameMap'],
 		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],

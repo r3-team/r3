@@ -158,7 +158,6 @@ const MyStoreSchema = {
 		indexIdMap:         (state) => state.indexIdMap,
 		jsFunctionIdMap:    (state) => state.jsFunctionIdMap,
 		loginFormIdMap:     (state) => state.loginFormIdMap,
-		modules:            (state) => state.modules,
 		moduleIdMap:        (state) => state.moduleIdMap,
 		moduleNameMap:      (state) => state.moduleNameMap,
 		pgFunctionIdMap:    (state) => state.pgFunctionIdMap,

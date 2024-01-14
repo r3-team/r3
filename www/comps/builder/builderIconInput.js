@@ -51,7 +51,7 @@ let MyBuilderIconInput = {
 					</div>
 					<div class="content">
 						<div class="module" :class="{ first:i === 0 }"
-							v-for="(mod,i) in getDependentModules(module,modules).filter(v => v.icons.length !== 0)"
+							v-for="(mod,i) in getDependentModules(module).filter(v => v.icons.length !== 0)"
 						>
 							<span>{{ mod.name }}</span>
 							
@@ -98,7 +98,6 @@ let MyBuilderIconInput = {
 		iconSelected:(s) => s.iconIdSelected === null ? false : s.iconIdMap[s.iconIdSelected],
 		
 		// stores
-		modules:  (s) => s.$store.getters['schema/modules'],
 		iconIdMap:(s) => s.$store.getters['schema/iconIdMap'],
 		capGen:   (s) => s.$store.getters.captions.generic
 	},

@@ -1,4 +1,5 @@
-import MyBuilderPgTrigger from './builderPgTrigger.js';
+import {getDependentModules} from '../shared/builder.js';
+import MyBuilderPgTrigger    from './builderPgTrigger.js';
 export {MyBuilderPgTriggers as default};
 
 let MyBuilderPgTriggers = {
@@ -89,12 +90,16 @@ let MyBuilderPgTriggers = {
 			if(s.module === false) return [];
 			
 			let out = [];
-			for(let k in s.pgTriggerIdMap) {
-				const trg = s.pgTriggerIdMap[k];
-				if(
-					(s.isFromRelation   && trg.relationId   === s.contextId) || 
-					(s.isFromPgFunction && trg.pgFunctionId === s.contextId)
-				) out.push(trg);
+			
+			// check relevant modules
+			const modules = s.isFromPgFunction ? s.getDependentModules(s.module) : s.modules;
+			for(const mod of modules) {
+				for(const trg of mod.pgTriggers) {
+					if(
+						(s.isFromRelation   && trg.relationId   === s.contextId) || 
+						(s.isFromPgFunction && trg.pgFunctionId === s.contextId)
+					) out.push(trg);
+				}
 			}
 			
 			// sort by execution event & deferred
@@ -111,11 +116,16 @@ let MyBuilderPgTriggers = {
 		isFromRelation:  (s) => s.contextEntity === 'relation',
 		
 		// stores
+		modules:        (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
 		pgTriggerIdMap: (s) => s.$store.getters['schema/pgTriggerIdMap'],
 		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
 		capApp:         (s) => s.$store.getters.captions.builder.pgTrigger,
 		capGen:         (s) => s.$store.getters.captions.generic
+	},
+	methods:{
+		// external
+		getDependentModules
 	}
 };

@@ -573,7 +573,7 @@ let MyBuilderQuery = {
 				<option :value="null">-</option>
 				<option v-for="rel in module.relations" :value="rel.id">{{ rel.name }}</option>
 				<optgroup
-					v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id)"
+					v-for="mod in getDependentModules(module).filter(v => v.id !== module.id)"
 					:label="mod.name"
 				>
 					<option v-for="rel in mod.relations" :value="rel.id">
@@ -888,7 +888,6 @@ let MyBuilderQuery = {
 		relation:(s) => typeof s.relationIdMap[s.relationId] === 'undefined' ? false : s.relationIdMap[s.relationId],
 		
 		// stores
-		modules:       (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],

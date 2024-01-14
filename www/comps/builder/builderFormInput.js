@@ -8,7 +8,7 @@ let MyBuilderFormInput = {
 			<option value="">{{ captionEmpty }}</option>
 			<option v-for="f in module.forms" :value="f.id">{{ f.name }}</option>
 			<optgroup
-				v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.forms.length !== 0)"
+				v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.forms.length !== 0)"
 				:label="mod.name"
 			>
 				<option v-for="f in mod.forms" :value="f.id">{{ f.name }}</option>
@@ -37,8 +37,7 @@ let MyBuilderFormInput = {
 		},
 		
 		// stores
-		modules:(s) => s.$store.getters['schema/modules'],
-		capGen: (s) => s.$store.getters.captions.generic
+		capGen:(s) => s.$store.getters.captions.generic
 	},
 	methods:{
 		// externals

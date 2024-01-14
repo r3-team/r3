@@ -572,7 +572,7 @@ let MyBuilderRole = {
 								>
 									<option disabled :value="null">[{{ capGen.button.add }}]</option>
 									<optgroup
-										v-for="mod in getDependentModules(module,modules)"
+										v-for="mod in getDependentModules(module)"
 										:label="mod.name"
 									>
 										<option
@@ -673,7 +673,6 @@ let MyBuilderRole = {
 		role:      (s) => typeof s.roleIdMap[s.id] === 'undefined' ? false : s.roleIdMap[s.id],
 		
 		// stores
-		modules:    (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
 		roleIdMap:  (s) => s.$store.getters['schema/roleIdMap'],
 		capApp:     (s) => s.$store.getters.captions.builder.role,

@@ -87,7 +87,7 @@ let MyBuilderPgTrigger = {
 										{{ rel.name }}
 									</option>
 									<optgroup
-										v-for="mod in getDependentModules(module,modules).filter(v => v.id !== module.id && v.relations.length !== 0)"
+										v-for="mod in getDependentModules(module).filter(v => v.id !== module.id && v.relations.length !== 0)"
 										:label="mod.name"
 									>
 										<option v-for="rel in mod.relations" :value="rel.id">
@@ -173,7 +173,6 @@ let MyBuilderPgTrigger = {
 			if(s.isFromPgFunction) return s.moduleIdMap[s.pgFunctionIdMap[s.contextId].moduleId];
 			return false;
 		},
-		modules:        (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
 		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
