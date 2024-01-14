@@ -23,8 +23,7 @@ let MyBuilderJsFunction = {
 		MyTabs
 	},
 	template:`<div class="builder-function">
-		
-		<div class="contentBox" v-if="jsFunction">
+		<div class="contentBox grow" v-if="jsFunction">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/codeScreen.png" />
