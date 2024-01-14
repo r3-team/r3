@@ -233,6 +233,33 @@ func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
 			name1.String)
 	}
 
+	// check trigger access to external relations
+	if err := tx.QueryRow(db.Ctx, `
+		SELECT COUNT(*), STRING_AGG(r.name, ', ')
+		FROM app.pg_trigger AS t
+		INNER JOIN app.relation AS r ON r.id = t.relation_id
+		INNER JOIN app.module   AS m ON m.id = t.module_id AND m.id = $1
+		
+		-- dependency
+		WHERE r.id NOT IN (
+			SELECT id
+			FROM app.relation
+			WHERE module_id = m.id
+			OR module_id IN (
+				SELECT module_id_on
+				FROM app.module_depends
+				WHERE module_id = m.id
+			)
+		)
+	`, moduleId).Scan(&cnt, &name1); err != nil {
+		return err
+	}
+
+	if cnt != 0 {
+		return fmt.Errorf("dependency check failed, trigger functions accessing relations(s) '%s' from independent module(s)",
+			name1.String)
+	}
+
 	// check widget access to external forms
 	if err := tx.QueryRow(db.Ctx, `
 		SELECT COUNT(*), STRING_AGG(f.name, ', ')
