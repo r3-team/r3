@@ -119,7 +119,6 @@ let MyBuilderPgTriggers = {
 		modules:        (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
-		pgTriggerIdMap: (s) => s.$store.getters['schema/pgTriggerIdMap'],
 		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
 		capApp:         (s) => s.$store.getters.captions.builder.pgTrigger,
 		capGen:         (s) => s.$store.getters.captions.generic

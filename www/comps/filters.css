@@ -71,3 +71,6 @@
 	min-width:unset !important;
 	max-width:unset !important;
 }
+.filter-side-indentation{
+	flex:0 0 auto;
+}

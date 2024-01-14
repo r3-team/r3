@@ -706,7 +706,6 @@ let MyBuilderRelation = {
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
 		modules:       (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:   (s) => s.$store.getters['schema/moduleIdMap'],
-		pgTriggerIdMap:(s) => s.$store.getters['schema/pgTriggerIdMap'],
 		relationIdMap: (s) => s.$store.getters['schema/relationIdMap'],
 		iconIdMap:     (s) => s.$store.getters['schema/iconIdMap'],
 		capApp:        (s) => s.$store.getters.captions.builder.relation,

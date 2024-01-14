@@ -690,6 +690,8 @@ let MyFilter = {
 	},
 	template:`<div class="filter">
 		<img v-if="multipleFilters" class="dragAnchor" src="images/drag.png" />
+		
+		<div class="filter-side-indentation" :style="'width:' + (indentation*8) + 'px'"></div>
 		<my-filter-connector class="connector"
 			v-if="multipleFilters"
 			v-model="connectorInput"
@@ -775,6 +777,7 @@ let MyFilter = {
 		disableContent: { type:Array,   required:true },
 		entityIdMapRef: { type:Object,  required:true },
 		fieldIdMap:     { type:Object,  required:true },
+		indentation:    { type:Number,  required:true },
 		joins:          { type:Array,   required:true },
 		joinsParents:   { type:Array,   required:true },
 		moduleId:       { type:String,  required:true },
@@ -949,6 +952,7 @@ let MyFilters = {
 					:disableContent="disableContent"
 					:entityIdMapRef="entityIdMapRef"
 					:fieldIdMap="fieldIdMap"
+					:indentation="getIndentation(index)"
 					:joins="joins"
 					:joinsParents="joinsParents"
 					:key="index"
@@ -1081,6 +1085,13 @@ let MyFilters = {
 		getNestedIndexAttributeIdsByJoins,
 		isAttributeFiles,
 		
+		getIndentation(filterIndex) {
+			let indentation = 0;
+			for(let i = 0; i < filterIndex; i++) {
+				indentation += this.filters[i].side0.brackets - this.filters[i].side1.brackets;
+			}
+			return indentation;
+		},
 		reset() {
 			this.filters = JSON.parse(JSON.stringify(this.modelValue));
 		},

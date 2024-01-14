@@ -48,7 +48,6 @@ func IsContentText(content string) bool {
 
 // fully validates module dependencies
 func ValidateDependency_tx(tx pgx.Tx, moduleId uuid.UUID) error {
-
 	var cnt int
 	var name1, name2 sql.NullString
 
