@@ -8,6 +8,157 @@ import {MyModuleSelect}    from './input.js';
 import MyBuilderCaption    from './builder/builderCaption.js';
 export {MyCaptionMap as default};
 
+let MyCaptionMapTransfer = {
+	name:'my-caption-map-transfer',
+	template:`<div class="app-sub-window under-header" @mousedown.self="close">
+		<div class="contentBox float">
+			<div class="top lower">
+				<div class="area nowrap">
+					<img class="icon" :src="'images/' + (isExport ? 'download.png' : 'upload.png')" />
+					<h1 class="title">{{ isExport ? capApp.export : capApp.import }}</h1>
+				</div>
+				<div class="area">
+					<my-button image="cancel.png"
+						@trigger="close"
+						:cancel="true"
+					/>
+				</div>
+			</div>
+			<div class="content default-inputs">
+				<div class="column gap-large">
+					<div class="row gap centered">
+						<span>{{ capGen.language }}</span>
+						<select v-model="language">
+							<option value="">-</option>
+							<option v-for="l in languages" :value="l">{{ l }}</option>
+						</select>
+					</div>
+					<input type="file"
+						v-if="!isExport"
+						@change="fileImport"
+					/>
+					<div class="row">
+						<my-button image="download.png"
+							v-if="isExport"
+							@trigger="fileExport"
+							:active="language !== ''"
+							:caption="capGen.button.export"
+						/>
+						<my-button image="upload.png"
+							v-if="!isExport"
+							@trigger="fileImportUpdate"
+							:active="importData !== null && language !== ''"
+							:caption="capGen.button.import"
+						/>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>`,
+	emits:['close','update'],
+	props:{
+		captionMap:{ type:Object,  required:true },
+		isCustom:  { type:Boolean, required:true },
+		isExport:  { type:Boolean, required:true },
+		languages: { type:Array,   required:true },
+		moduleId:  { type:String,  required:true }
+	},
+	data() {
+		return {
+			importData:null,
+			language:''
+		};
+	},
+	computed:{
+		// stores
+		moduleIdMap:(s) => s.$store.getters['schema/moduleIdMap'],
+		capApp:     (s) => s.$store.getters.captions.captionMap,
+		capGen:     (s) => s.$store.getters.captions.generic
+	},
+	mounted() {
+		this.$store.commit('keyDownHandlerSleep');
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape',keyCtrl:false});
+	},
+	unmounted() {
+		this.$store.commit('keyDownHandlerDel',this.close);
+		this.$store.commit('keyDownHandlerWake');
+	},
+	methods:{
+		// external
+		objectDeepMerge,
+		
+		// actions
+		close() {
+			this.$emit('close');
+		},
+		fileExport(filename,data) {
+			const module   = this.moduleIdMap[this.moduleId];
+			const fileName = `${module.name}_v${module.releaseBuild}_${this.language}_${this.isCustom ? 'custom' : 'app'}.json`;
+			const fileData = JSON.stringify(this.getContentFromMap(this.captionMap,this.language),null,4);
+			
+			// download file
+			const blob = new Blob([fileData],{type:'application/json'});
+			const elem = window.document.createElement('a');
+			const url  = window.URL.createObjectURL(blob);
+			
+			elem.href     = url;
+			elem.download = fileName;  
+			
+			document.body.appendChild(elem);
+			elem.click();
+			document.body.removeChild(elem);
+			window.URL.revokeObjectURL(url);
+		},
+		fileImport(event) {
+			if(event.target.files.length !== 1)
+				return;
+			
+			const reader = new FileReader();
+			reader.readAsText(event.target.files[0]);
+			reader.onload  = () => this.importData = JSON.parse(reader.result);
+			reader.onerror = this.$root.genericError;
+		},
+		fileImportUpdate() {
+			for(const k in this.importData) {
+				const map = this.importData[k];
+				for(const entityId in map) {
+					for(const content in map[entityId]) {
+						for(const language in map[entityId][content]) {
+							if(language !== this.language) continue;
+							
+							this.$emit('update',entityId,content,language,map[entityId][content][language]);
+						}
+					}
+				}
+			}
+		},
+		
+		// helper
+		getContentFromMap(captionMap,languageGet) {
+			let out = {};
+			for(const k in captionMap) {
+				const map = captionMap[k];
+				out[k] = {};
+				
+				for(const entityId in map) {
+					for(const content in map[entityId]) {
+						for(const language in map[entityId][content]) {
+							if(language !== languageGet)
+								continue;
+							
+							if(out[k][entityId]          === undefined) out[k][entityId]          = {};
+							if(out[k][entityId][content] === undefined) out[k][entityId][content] = {};
+							
+							out[k][entityId][content][language] = map[entityId][content][language];
+						}
+					}
+				}
+			}
+			return out;
+		}
+	}
+};
+
 let MyCaptionMapNewLanguage = {
 	name:'my-caption-map-new-language',
 	template:`<div class="app-sub-window under-header" @mousedown.self="close">
@@ -24,9 +175,9 @@ let MyCaptionMapNewLanguage = {
 					/>
 				</div>
 			</div>
-			<div class="content default-inputs">
+			<div class="content default-inputs captionMap-new-language">
 				<div class="row gap">
-					<input v-focus v-model="input" />
+					<input class="short" maxlength="5" size="5" v-focus v-model="input" />
 					<my-button image="save.png"
 						@trigger="$emit('create',input)"
 						:active="canSave"
@@ -255,6 +406,7 @@ let MyCaptionMap = {
 		MyCaptionMapItems,
 		MyCaptionMapItemValue,
 		MyCaptionMapNewLanguage,
+		MyCaptionMapTransfer,
 		MyModuleSelect
 	},
 	template:`<div class="contentBox grow" v-if="isReady && module">
@@ -308,11 +460,21 @@ let MyCaptionMap = {
 							:naked="true"
 						/>
 					</div>
-					<my-button image="add.png"
-						v-if="isCustom"
-						@trigger="showLanguageNew = true"
-						:caption="capGen.button.add"
-					/>
+					<div class="row gap">
+						<my-button image="add.png"
+							v-if="isCustom"
+							@trigger="showLanguageNew = true"
+							:caption="capGen.button.add"
+						/>
+						<my-button image="download.png"
+							@trigger="showTransferMode = 'export';showTransfer = true"
+							:caption="capGen.button.export"
+						/>
+						<my-button image="upload.png"
+							@trigger="showTransferMode = 'import';showTransfer = true"
+							:caption="capGen.button.import"
+						/>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -326,7 +488,7 @@ let MyCaptionMap = {
 								<div class="row centered gap">
 									<span>{{ l }}</span>
 									<my-button image="delete.png"
-										v-if="languagesCustom.includes(l)"
+										v-if="isCustom && languagesCustom.includes(l)"
 										@trigger="setLanguagesCustom(l,false)"
 										:captionTitle="capGen.button.delete"
 										:cancel="true"
@@ -490,6 +652,16 @@ let MyCaptionMap = {
 					:languagesCustom="languagesCustom"
 					:moduleId="moduleId"
 				/>
+				<my-caption-map-transfer
+					v-if="showTransfer"
+					@close="showTransfer = false"
+					@update="storeChange"
+					:captionMap="isCustom ? captionMapCustom : captionMap"
+					:isCustom="isCustom"
+					:isExport="showTransferMode === 'export'"
+					:languages="isCustom ? languagesCustom : languages"
+					:moduleId="moduleId"
+				/>
 			</div>
 		</div>
 	</div>`,
@@ -511,7 +683,9 @@ let MyCaptionMap = {
 			isReady:false,
 			moduleId:null,
 			showLanguageNew:false,
-			showLanguageCodes:[]
+			showLanguageCodes:[],
+			showTransfer:false,
+			showTransferMode:'export'
 		};
 	},
 	watch:{
@@ -721,9 +895,24 @@ let MyCaptionMap = {
 			const customLang = this.isCustom && this.languagesCustom.includes(languageCode);
 			
 			this.hasChanges = true;
+			
+			// add to combined caption map
+			if(this.captionMap[mapName] === undefined)
+				this.captionMap[mapName] = {};
+			
+			if(this.captionMap[mapName][entityId] === undefined)
+				this.captionMap[mapName][entityId] = {};
+			
+			if(this.captionMap[mapName][entityId][content] === undefined)
+				this.captionMap[mapName][entityId][content] = {};
+			
 			this.captionMap[mapName][entityId][content][languageCode] = value;
 			
+			// add to custom caption map
 			if(customLang) {
+				if(this.captionMapCustom[mapName] === undefined)
+					this.captionMapCustom[mapName] = {};
+				
 				if(this.captionMapCustom[mapName][entityId] === undefined)
 					this.captionMapCustom[mapName][entityId] = {};
 				

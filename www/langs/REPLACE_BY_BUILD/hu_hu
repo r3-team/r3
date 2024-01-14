@@ -134,6 +134,7 @@
 		"interval":"Intervallum",
 		"jsFunctions":"Függvények (elöl)",
 		"label":"Label",
+		"language":"Language",
 		"less":"Less",
 		"licenseRequired":"Licenc szükséges",
 		"limit":"Korlát",
@@ -1601,6 +1602,8 @@
 		"weekDayShort6":"Szo"
 	},
 	"captionMap":{
+		"export":"Export content",
+		"import":"Import content",
 		"languagesApp":"Application",
 		"languagesInstance":"Custom",
 		"newDesc":[

@@ -134,6 +134,7 @@
 		"interval":"Intervalle",
 		"jsFunctions":"Fonctions (front)",
 		"label":"Étiquette",
+		"language":"Language",
 		"less":"Moins",
 		"licenseRequired":"Nécessite une licence",
 		"limit":"Limite",
@@ -1601,6 +1602,8 @@
 		"weekDayShort6":"Sam"
 	},
 	"captionMap":{
+		"export":"Export content",
+		"import":"Import content",
 		"languagesApp":"Application",
 		"languagesInstance":"Custom",
 		"newDesc":[

@@ -134,6 +134,7 @@
 		"interval":"Intervall",
 		"jsFunctions":"Funktionen (front)",
 		"label":"Beschreibung",
+		"language":"Sprache",
 		"less":"Weniger",
 		"licenseRequired":"Lizenz erforderlich",
 		"limit":"Anzahl",
@@ -1601,6 +1602,8 @@
 		"weekDayShort6":"Sa"
 	},
 	"captionMap":{
+		"export":"Inhalte exportieren",
+		"import":"Inhalte importieren",
 		"languagesApp":"Anwendung",
 		"languagesInstance":"Benutzerdefiniert",
 		"newDesc":[

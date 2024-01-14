@@ -134,6 +134,7 @@
 		"interval":"Interval",
 		"jsFunctions":"Funcții (front)",
 		"label":"Label",
+		"language":"Language",
 		"less":"Less",
 		"licenseRequired":"Implică o licență",
 		"limit":"Limita",
@@ -1601,6 +1602,8 @@
 		"weekDayShort6":"Sâ"
 	},
 	"captionMap":{
+		"export":"Export content",
+		"import":"Import content",
 		"languagesApp":"Application",
 		"languagesInstance":"Custom",
 		"newDesc":[
