@@ -237,6 +237,7 @@ let MyForm = {
 					:fieldIdsInvalid="fieldIdsInvalid"
 					:fieldIdMapCaption="fieldIdMapCaption"
 					:fieldIdMapError="fieldIdMapError"
+					:fieldIdMapOrder="fieldIdMapOrder"
 					:formBadSave="badSave"
 					:formIsEmbedded="isPopUp || isWidget"
 					:formLoading="loading"
@@ -330,6 +331,7 @@ let MyForm = {
 			fieldIdsTouched:[],   // field IDs that were touched (changed their value in some way)
 			fieldIdMapCaption:{}, // overwrites for field captions
 			fieldIdMapError:{},   // overwrites for field error messages (custom errors)
+			fieldIdMapOrder:{},   // overwrites for field order in parent element (flex order)
 			indexMapRecordId:{},  // record IDs for form, key: relation index
 			indexMapRecordKey:{}, // record en-/decryption keys, key: relation index
 			indexesNoDel:{},      // relation indexes with no DEL permission (via relation policy)
@@ -518,19 +520,15 @@ let MyForm = {
 				},
 				
 				// field manipulation
-				get_field_value:(fieldId) => typeof s.fieldIdMapData[fieldId] === 'undefined'
+				get_field_value:(fieldId) => s.fieldIdMapData[fieldId] === undefined
 					? undefined : s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[fieldId],false)],
-				set_field_caption:(fieldId,caption) => {
-					s.fieldIdMapCaption[fieldId] = caption;
-				},
-				set_field_error:(fieldId,errorMsg) => {
-					s.fieldIdMapError[fieldId] = errorMsg;
-				},
-				set_field_focus:(fieldId) => s.fieldSetFocus(fieldId,false),
-				set_field_value:(fieldId,value) => {
+				set_field_caption:(fieldId,caption)  => s.fieldIdMapCaption[fieldId] = caption,
+				set_field_error:  (fieldId,errorMsg) => s.fieldIdMapError[fieldId]   = errorMsg,
+				set_field_focus:  (fieldId)          => s.fieldSetFocus(fieldId,false),
+				set_field_order:  (fieldId,order)    => s.fieldIdMapOrder[fieldId]   = order,
+				set_field_value:  (fieldId,value)    => {
 					// use common return codes: 0 = success, 1 = error
-					if(typeof s.fieldIdMapData[fieldId] === 'undefined')
-						return 1;
+					if(s.fieldIdMapData[fieldId] === undefined) return 1;
 					
 					s.valueSet(s.getIndexAttributeIdByField(
 						s.fieldIdMapData[fieldId],false),value,false,true);
@@ -838,6 +836,7 @@ let MyForm = {
 			this.blockInputs = false;
 			this.fieldIdMapCaption         = {};
 			this.fieldIdMapError           = {};
+			this.fieldIdMapOrder           = {};
 			this.loginIdsEncryptFor        = [];
 			this.loginIdsEncryptForOutside = [];
 			this.indexesNoDel              = [];

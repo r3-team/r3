@@ -298,7 +298,7 @@ let MyBuilderPgFunction = {
 					<div class="entities-title">
 						<my-button
 							@trigger="showHolderFncModule = !showHolderFncModule"
-							:caption="capApp.placeholderFunctions"
+							:caption="capApp.placeholderFncBackend"
 							:image="showHolderFncModule ? 'triangleDown.png' : 'triangleRight.png'"
 							:large="true"
 							:naked="true"
@@ -311,7 +311,7 @@ let MyBuilderPgFunction = {
 								</select>
 							</template>
 							<my-button image="question.png"
-								@trigger="showHelp(capApp.placeholderFunctions,capApp.placeholderFunctionsHelp)"
+								@trigger="showHelp(capApp.placeholderFncBackend,capApp.placeholderFncBackendHelp)"
 							/>
 						</div>
 					</div>
@@ -348,13 +348,13 @@ let MyBuilderPgFunction = {
 					<div class="entities-title">
 						<my-button
 							@trigger="showHolderFncInstance = !showHolderFncInstance"
-							:caption="capApp.placeholderInstance"
+							:caption="capApp.placeholderFncInstance"
 							:image="showHolderFncInstance ? 'triangleDown.png' : 'triangleRight.png'"
 							:large="true"
 							:naked="true"
 						/>
 						<my-button image="question.png"
-							@trigger="showHelp(capApp.placeholderInstance,capApp.placeholderInstanceHelp)"
+							@trigger="showHelp(capApp.placeholderFncInstance,capApp.placeholderFncInstanceHelp)"
 						/>
 					</div>
 					<div class="entities" v-if="showHolderFncInstance">
