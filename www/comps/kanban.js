@@ -41,7 +41,7 @@ let MyKanbanCard = {
 		<div class="kanban-card-content"
 			@click="$emit('click')"
 			@click.middle="$emit('click-middle')"
-			:class="{ clickable:hasOpenForm, template:isTemplate }"
+			:class="{ clickable:clickable, template:isTemplate }"
 		>
 			<span v-if="isTemplate">{{ capGen.button.new }}</span>
 			
@@ -72,9 +72,9 @@ let MyKanbanCard = {
 	</div>`,
 	emits:['click','click-middle','clipboard'],
 	props:{
+		clickable:    { type:Boolean, required:true },
 		columns:      { type:Array,   required:true },
 		columnBatches:{ type:Array,   required:true },
-		hasOpenForm:  { type:Boolean, required:true },
 		headerStyle:  { type:String,  required:true },
 		isTemplate:   { type:Boolean, required:true },
 		values:       { type:Array,   required:true }
@@ -92,7 +92,7 @@ let MyKanbanBox = {
 			@change="changed"
 			@end="$emit('drag-active',false)"
 			@start="$emit('drag-active',true)"
-			:class="{ dragActive:dragActive }"
+			:class="{ dragActive:dragActive, hasCreate:hasCreate }"
 			:list="cardsShown"
 		>
 			<template #item="{element,index}">
@@ -100,9 +100,9 @@ let MyKanbanBox = {
 					@click="click(element,false,false)"
 					@click-middle="click(element,false,true)"
 					@clipboard="$emit('clipboard')"
+					:clickable="hasUpdate"
 					:columns="columns"
 					:columnBatches="columnBatches"
-					:hasOpenForm="hasOpenForm"
 					:headerStyle="headerStyle"
 					:isTemplate="false"
 					:values="element.values"
@@ -110,12 +110,12 @@ let MyKanbanBox = {
 			</template>
 			<template #footer>
 				<my-kanban-card
-					v-if="hasOpenForm && !dragActive"
+					v-if="hasCreate && !dragActive"
 					@click="click(null,true,false)"
 					@click-middle="click(null,true,true)"
+					:clickable="hasCreate"
 					:columns="columns"
 					:columnBatches="columnBatches"
-					:hasOpenForm="hasOpenForm"
 					:headerStyle="headerStyle"
 					:isTemplate="true"
 					:values="[]"
@@ -131,7 +131,7 @@ let MyKanbanBox = {
 		columnIndexesData:{ type:Array,   required:true },
 		dragActive:       { type:Boolean, required:true },
 		hasCreate:        { type:Boolean, required:true },
-		hasOpenForm:      { type:Boolean, required:true },
+		hasUpdate:        { type:Boolean, required:true },
 		headerStyle:      { type:String,  required:false, default:'' },
 		relationIndexData:{ type:Number,  required:true },
 		search:           { type:String,  required:true }
@@ -185,6 +185,9 @@ let MyKanbanBox = {
 			);
 		},
 		click(element,isTemplate,middleClick) {
+			if(isTemplate  && !this.hasCreate) return;
+			if(!isTemplate && !this.hasUpdate) return;
+			
 			if(isTemplate)
 				return this.$emit('card-create',middleClick);
 			
@@ -327,7 +330,7 @@ let MyKanban = {
 									:columnIndexesData="columnIndexesData"
 									:dragActive="dragActive"
 									:hasCreate="hasCreate"
-									:hasOpenForm="hasOpenForm"
+									:hasUpdate="hasUpdate"
 									:relationIndexData="relationIndexData"
 									:search="search"
 								/>
@@ -345,7 +348,7 @@ let MyKanban = {
 									:columnIndexesData="columnIndexesData"
 									:dragActive="dragActive"
 									:hasCreate="hasCreate"
-									:hasOpenForm="hasOpenForm"
+									:hasUpdate="hasUpdate"
 									:headerStyle="x.style"
 									:relationIndexData="relationIndexData"
 									:search="search"
@@ -387,7 +390,7 @@ let MyKanban = {
 									:columnIndexesData="columnIndexesData"
 									:dragActive="dragActive"
 									:hasCreate="hasCreate"
-									:hasOpenForm="hasOpenForm"
+									:hasUpdate="hasUpdate"
 									:headerStyle="y.style"
 									:relationIndexData="relationIndexData"
 									:search="search"
@@ -408,7 +411,7 @@ let MyKanban = {
 									:columnIndexesData="columnIndexesData"
 									:dragActive="dragActive"
 									:hasCreate="hasCreate"
-									:hasOpenForm="hasOpenForm"
+									:hasUpdate="hasUpdate"
 									:headerStyle="x.style !== '' ? x.style : y.style"
 									:relationIndexData="relationIndexData"
 									:search="search"
@@ -427,7 +430,7 @@ let MyKanban = {
 			</div>
 			
 			<!-- inline form -->
-			<my-form
+			<my-form class="inline"
 				v-if="popUpFormInline !== null"
 				@close="$emit('close-inline')"
 				@record-deleted="get"
@@ -512,7 +515,8 @@ let MyKanban = {
 		dataReady:          (s) => typeof s.recordIdMapAxisXY.null !== 'undefined',
 		expressions:        (s) => s.getQueryExpressions(s.columns),
 		hasChoices:         (s) => s.choices.length > 1,
-		hasCreate:          (s) => s.query.joins.length === 0 ? false : s.query.joins[0].applyCreate && s.hasOpenForm,
+		hasCreate:          (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyCreate,
+		hasUpdate:          (s) => s.hasOpenForm && s.query.joins.length !== 0 && s.query.joins[0].applyUpdate,
 		hasNullsInX:        (s) => s.attributeIdMap[s.attributeIdAxisX].nullable,
 		hasNullsInY:        (s) => s.attributeIdAxisY !== null && s.attributeIdMap[s.attributeIdAxisY].nullable,
 		joins:              (s) => s.fillRelationRecordIds(s.query.joins),
