@@ -11,6 +11,10 @@ import {
 	getItemTitlePath
 } from '../shared/builder.js';
 import {
+	getFieldIcon,
+	getFieldTitle
+} from '../shared/field.js';
+import {
 	copyValueDialog,
 	textAddTab
 } from '../shared/generic.js';
@@ -144,7 +148,7 @@ let MyBuilderJsFunction = {
 							<my-button
 								@trigger="showHolderFields = !showHolderFields"
 								:caption="capApp.placeholdersFormFields"
-								:image="showHolderFields ? 'triangleDown.png' : 'triangleRight.png'"
+								:images="[showHolderFields ? 'triangleDown.png' : 'triangleRight.png','fileText.png']"
 								:large="true"
 								:naked="true"
 							/>
@@ -165,7 +169,7 @@ let MyBuilderJsFunction = {
 								<div class="entity-title">
 									<my-button
 										@trigger="toggleFieldShow(field.id)"
-										:image="holderFieldIdsOpen.includes(field.id) ? 'triangleDown.png' : 'triangleRight.png'"
+										:images="[holderFieldIdsOpen.includes(field.id) ? 'triangleDown.png' : 'triangleRight.png',field.icon]"
 										:naked="true"
 										:caption="field.name"
 									/>
@@ -219,7 +223,7 @@ let MyBuilderJsFunction = {
 						<my-button
 							@trigger="showHolderCollection = !showHolderCollection"
 							:caption="capApp.placeholdersCollections"
-							:image="showHolderCollection ? 'triangleDown.png' : 'triangleRight.png'"
+							:images="[showHolderCollection ? 'triangleDown.png' : 'triangleRight.png','tray.png']"
 							:large="true"
 							:naked="true"
 						/>
@@ -270,7 +274,7 @@ let MyBuilderJsFunction = {
 						<my-button
 							@trigger="showHolderFncFrontend = !showHolderFncFrontend"
 							:caption="capApp.placeholderFncFrontend"
-							:image="showHolderFncFrontend ? 'triangleDown.png' : 'triangleRight.png'"
+							:images="[showHolderFncFrontend ? 'triangleDown.png' : 'triangleRight.png','codeScreen.png']"
 							:large="true"
 							:naked="true"
 						/>
@@ -314,7 +318,7 @@ let MyBuilderJsFunction = {
 						<my-button
 							@trigger="showHolderFncBackend = !showHolderFncBackend"
 							:caption="capApp.placeholderFncBackend"
-							:image="showHolderFncBackend ? 'triangleDown.png' : 'triangleRight.png'"
+							:images="[showHolderFncBackend ? 'triangleDown.png' : 'triangleRight.png','codeDatabase.png']"
 							:large="true"
 							:naked="true"
 						/>
@@ -358,7 +362,7 @@ let MyBuilderJsFunction = {
 						<my-button
 							@trigger="showHolderFncInstance = !showHolderFncInstance"
 							:caption="capApp.placeholderFncInstance"
-							:image="showHolderFncInstance ? 'triangleDown.png' : 'triangleRight.png'"
+							:images="[showHolderFncInstance ? 'triangleDown.png' : 'triangleRight.png','server.png']"
 							:large="true"
 							:naked="true"
 						/>
@@ -526,9 +530,11 @@ let MyBuilderJsFunction = {
 		fieldsSorted:(s) => {
 			let out = [];
 			for(let id in s.entityIdMapRef.field) {
+				const f = s.fieldIdMap[id];
 				out.push({
+					icon:s.getFieldIcon(f),
 					id:id,
-					isData:s.fieldIdMap[id].content === 'data',
+					isData:f.content === 'data',
 					name:s.displayFieldName(id),
 					ref:s.entityIdMapRef.field[id]
 				});
@@ -576,6 +582,8 @@ let MyBuilderJsFunction = {
 		// externals
 		copyValueDialog,
 		getDependentModules,
+		getFieldIcon,
+		getFieldTitle,
 		getFieldMap,
 		getFormEntityMapRef,
 		getFunctionHelp,
@@ -587,14 +595,10 @@ let MyBuilderJsFunction = {
 		// presentation
 		displayFieldName(fieldId) {
 			const f = this.fieldIdMap[fieldId];
-			if(f === undefined)
-				return '-';
-			
-			return `F${this.entityIdMapRef.field[f.id]}: ${f.attributeId !== undefined ? this.getItemTitle(f.attributeId,f.index,false,null) : f.content}`;
+			return f === undefined ? '-' : `F${this.entityIdMapRef.field[f.id]}: ${this.getFieldTitle(f)}`;
 		},
 		radioIcon(entity,id) {
-			return this.entity === entity && this.entityId === id
-				? 'radio1.png' : 'radio0.png';
+			return this.entity === entity && this.entityId === id ? 'radio1.png' : 'radio0.png';
 		},
 		
 		// actions

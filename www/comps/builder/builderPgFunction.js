@@ -242,7 +242,7 @@ let MyBuilderPgFunction = {
 						<my-button
 							@trigger="showHolderRelation = !showHolderRelation"
 							:caption="capApp.placeholderRelations"
-							:image="showHolderRelation ? 'triangleDown.png' : 'triangleRight.png'"
+							:images="[showHolderRelation ? 'triangleDown.png' : 'triangleRight.png','database.png']"
 							:large="true"
 							:naked="true"
 						/>
@@ -301,7 +301,7 @@ let MyBuilderPgFunction = {
 						<my-button
 							@trigger="showHolderFncModule = !showHolderFncModule"
 							:caption="capApp.placeholderFncBackend"
-							:image="showHolderFncModule ? 'triangleDown.png' : 'triangleRight.png'"
+							:images="[showHolderFncModule ? 'triangleDown.png' : 'triangleRight.png','codeDatabase.png']"
 							:large="true"
 							:naked="true"
 						/>
@@ -351,7 +351,7 @@ let MyBuilderPgFunction = {
 						<my-button
 							@trigger="showHolderFncInstance = !showHolderFncInstance"
 							:caption="capApp.placeholderFncInstance"
-							:image="showHolderFncInstance ? 'triangleDown.png' : 'triangleRight.png'"
+							:images="[showHolderFncInstance ? 'triangleDown.png' : 'triangleRight.png','server.png']"
 							:large="true"
 							:naked="true"
 						/>
