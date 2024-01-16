@@ -107,7 +107,7 @@
 	display:flex;
 	flex-flow:column nowrap;
 }
-.kanban-box.dragActive{
+.kanban-box.dragActive.hasCreate{
 	margin-bottom:calc(var(--kanban-card-template-height) + (var(--kanban-card-margin) * 2));
 }
 .kanban-table td:hover .kanban-box{

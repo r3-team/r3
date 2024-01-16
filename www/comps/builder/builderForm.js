@@ -7,9 +7,12 @@ import MyBuilderFormStates    from './builderFormStates.js';
 import MyBuilderQuery         from './builderQuery.js';
 import MyBuilderFields        from './builderFields.js';
 import MyTabs                 from '../tabs.js';
-import {getFieldHasQuery}     from '../shared/builder.js';
 import {getFieldIcon}         from '../shared/field.js';
 import {routeParseParams}     from '../shared/router.js';
+import {
+	getFieldHasQuery,
+	getFormEntityMapRef
+} from '../shared/builder.js';
 import {
 	MyBuilderColumns,
 	MyBuilderColumnTemplates
@@ -585,28 +588,6 @@ let MyBuilderForm = {
 			collect(s.fields);
 			return map;
 		},
-		entityIdMapRef:(s) => {
-			let refs      = { field:{}, tab:{} }; // ID maps for fields/tabs
-			let ctrFields = 0; // unique reference number for each field
-			let ctrTabs   = 0; // unique reference number for each tab
-			
-			let collect = function(fields) {
-				for(let f of fields) {
-					refs.field[f.id] = ctrFields++;
-					switch(f.content) {
-						case 'container': collect(f.fields); break;
-						case 'tabs':
-							for(let t of f.tabs) {
-								refs.tab[t.id] = ctrTabs++;
-								collect(t.fields);
-							}
-						break;
-					}
-				}
-			};
-			collect(s.fields);
-			return refs;
-		},
 		fieldIdMap:(s) => {
 			let map = {};
 			let collect = function(fields) {
@@ -723,6 +704,7 @@ let MyBuilderForm = {
 		canSave:          (s) => s.hasChanges && !s.readonly,
 		columnShow:       (s) => s.columnIdShow === null ? false : s.columnIdMap[s.columnIdShow],
 		dataFields:       (s) => s.getDataFields(s.fields),
+		entityIdMapRef:   (s) => s.getFormEntityMapRef(s.fields),
 		fieldContentFocus:(s) => ['button','data'],
 		fieldShow:        (s) => s.fieldIdShow === null || typeof s.fieldIdMap[s.fieldIdShow] === 'undefined' ? false : s.fieldIdMap[s.fieldIdShow],
 		fieldShowHasQuery:(s) => s.fieldShow !== false && s.getFieldHasQuery(s.fieldShow),
@@ -758,6 +740,7 @@ let MyBuilderForm = {
 		getDataFields,
 		getFieldHasQuery,
 		getFieldIcon,
+		getFormEntityMapRef,
 		getFormRoute,
 		getIndexAttributeId,
 		getJoinsIndexMap,

@@ -24,13 +24,16 @@ let MyInputUuid = {
 	},
 	emits:['update:modelValue'],
 	watch:{
-		modelValue(valNew,valOld) {
-			if(valNew === valOld)                return;
-			if(valNew === null || valNew === '') return this.reset();
-			
-			let valNewSplit = valNew.split('-');
-			if(valNewSplit.length === 5)
-				this.val = valNewSplit;
+		modelValue:{
+			handler(valNew,valOld) {
+				if(valNew === valOld)                return;
+				if(valNew === null || valNew === '') return this.reset();
+				
+				let valNewSplit = valNew.split('-');
+				if(valNewSplit.length === 5)
+					this.val = valNewSplit;
+			},
+			immediate:true
 		}
 	},
 	methods:{

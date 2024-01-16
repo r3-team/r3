@@ -294,6 +294,7 @@ let MyField = {
 							:fieldIdsInvalid="fieldIdsInvalid"
 							:fieldIdMapCaption="fieldIdMapCaption"
 							:fieldIdMapError="fieldIdMapError"
+							:fieldIdMapOrder="fieldIdMapOrder"
 							:formBadSave="formBadSave"
 							:formIsEmbedded="formIsEmbedded"
 							:formLoading="formLoading"
@@ -604,6 +605,7 @@ let MyField = {
 			:fieldIdsInvalid="fieldIdsInvalid"
 			:fieldIdMapCaption="fieldIdMapCaption"
 			:fieldIdMapError="fieldIdMapError"
+			:fieldIdMapOrder="fieldIdMapOrder"
 			:formBadSave="formBadSave"
 			:formIsEmbedded="formIsEmbedded"
 			:formLoading="formLoading"
@@ -626,6 +628,7 @@ let MyField = {
 		fieldIdsInvalid:  { type:Array,   required:false, default:() => {return []} },
 		fieldIdMapCaption:{ type:Object,  required:false, default:() => {return {}} }, // overwritten captions
 		fieldIdMapError:  { type:Object,  required:false, default:() => {return {}} }, // overwritten error messages
+		fieldIdMapOrder:  { type:Object,  required:false, default:() => {return {}} }, // overwritten flex order
 		formBadSave:      { type:Boolean, required:true },                 // attempted save with invalid inputs
 		formIsEmbedded:   { type:Boolean, required:true },                 // parent form is embedded (pop-up, inline, widget)
 		formLoading:      { type:Boolean, required:true },
@@ -763,32 +766,36 @@ let MyField = {
 			if(s.isReadonly) out.push('readonly');
 			if(s.isRichtext) out.push('richtext');
 			
+			if(s.isTextarea || s.isRichtext)   out.push('top-aligned');
+			if(s.isHeader && s.field.richtext) out.push('headerRichtext');
+			
 			if(s.isContainer) {
 				out.push('container');
 				out.push(s.field.direction);
 			}
-			
-			if(s.isTextarea || s.isRichtext)
-				out.push('top-aligned');
-			
-			if(s.isHeader && s.field.richtext)
-				out.push('headerRichtext');
 			
 			if(s.flexDirParent === 'column' && (s.isHeader || s.isLineSingle))
 				out.push('noGrow');
 			
 			return out;
 		},
-		domStyle:(s) => !s.isContainer ? '' : s.getFlexStyle(
-			s.flexDirParent,s.field.justifyContent,s.field.alignItems,
-			s.field.alignContent,s.field.wrap,s.field.grow,s.field.shrink,
-			s.field.basis,s.field.perMax,s.field.perMin),
+		domStyle:(s) => {
+			let out = [];
+			if(s.isContainer) {
+				out.push(s.getFlexStyle(
+					s.flexDirParent,s.field.justifyContent,s.field.alignItems,
+					s.field.alignContent,s.field.wrap,s.field.grow,s.field.shrink,
+					s.field.basis,s.field.perMax,s.field.perMin));
+			}
+			if(s.fieldIdMapOrder[s.field.id] !== undefined)
+				out.push(`order:${s.fieldIdMapOrder[s.field.id]}`);
+			
+			return out.join(';');
+		},
 		fieldAttributeId:(s) => {
 			if(!s.isData) return false;
 			
-			let atrIdNm = typeof s.field.attributeIdNm !== 'undefined' ?
-				s.field.attributeIdNm : null;
-			
+			let atrIdNm = s.field.attributeIdNm !== undefined ? s.field.attributeIdNm : null;
 			return s.getIndexAttributeId(s.field.index,
 				s.field.attributeId,s.field.outsideIn === true,atrIdNm);
 		},

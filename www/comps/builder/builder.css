@@ -1009,12 +1009,6 @@
 .builder-function .placeholders .title span{
 	font-size:120%;
 }
-.builder-function .insert-ref{
-	font-style:italic;
-	margin:12px 0px 0px 0px;
-	color:var(--color-error);
-}
-
 .builder-function .entities-title{
 	display:flex;
 	flex-flow:row nowrap;
@@ -1026,12 +1020,15 @@
 .builder-function .entities{
 	display:flex;
 	flex-flow:column nowrap;
-	gap:2px;
+	border:1px solid var(--color-border);
+	border-radius:6px;
+	background-color:var(--color-input);
 }
 .builder-function .entity{
-	border:1px solid var(--color-border);
-	border-radius:4px;
-	background-color:var(--color-bg);
+	border-bottom:1px solid var(--color-border);
+}
+.builder-function .entity:last-child{
+	border:none;
 }
 .builder-function .entity-title{
 	display:flex;
