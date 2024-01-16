@@ -177,7 +177,7 @@ let MyCaptionMapNewLanguage = {
 			</div>
 			<div class="content default-inputs captionMap-new-language">
 				<div class="row gap">
-					<input class="short" maxlength="5" size="5" v-focus v-model="input" />
+					<input class="short" maxlength="5" size="5" v-focus v-model="inputLine" />
 					<my-button image="save.png"
 						@trigger="$emit('create',input)"
 						:active="canSave"
@@ -204,6 +204,10 @@ let MyCaptionMapNewLanguage = {
 			s.input !== '' &&
 			s.input.length === 5 &&
 			!s.languagesCustom.includes(s.input),
+		inputLine:{
+			get()  { return this.input; },
+			set(v) { this.input = v.toLowerCase().replace('-','_').replace(/[^a-z\_]/g,''); }
+		},
 		
 		// stores
 		capApp:(s) => s.$store.getters.captions.captionMap,
