@@ -84,16 +84,20 @@
 		"active":"Aktīvs",
 		"after":"Pēc",
 		"api":"API",
+		"apis":"APIs",
 		"application":"Lietotne",
 		"applications":"Lietotnes",
 		"appName":"REI3",
 		"appWebsite":"https://rei3.de",
+		"articles":"Help articles",
 		"attribute":"Atribūts",
+		"attributes":"Attributes",
 		"available":"Pieejams",
 		"before":"Pirms",
 		"busy":"Strādā - Noklikšķiniet šeit, lai pārtrauktu",
 		"category":"Kategorija",
 		"collection":"Kolekcija",
+		"collections":"Collections",
 		"color":"Krāsa",
 		"comments":"Komentāri",
 		"content":"Saturs",
@@ -113,9 +117,11 @@
 		"files":"Faili",
 		"filters":"Filtri",
 		"form":"Veidlapa",
+		"forms":"Forms",
 		"help":"Palīdzība",
 		"home":"Mājas",
 		"icon":"Ikona",
+		"icons":"Icons",
 		"id":"ID",
 		"index":"Indekss",
 		"inputDecimal":"Vērtībai jābūt decimālai",
@@ -129,13 +135,18 @@
 		"inputTooFewFiles":"Pārāk maz failu",
 		"inputTooManyFiles":"Pārāk daudz failu",
 		"interval":"Intervāls",
+		"jsFunctions":"Functions (front)",
 		"label":"Nosaukums",
+		"language":"Language",
 		"less":"Mazāk",
 		"licenseRequired":"Nepieciešama licences",
 		"limit":"Limits",
 		"loginForm":"Pieteikšanās forma",
+		"loginForms":"Login forms",
 		"menu":"Izvēlne",
+		"menus":"Menus",
 		"missingCaption":"TRŪKST UZRAKSTS",
+		"module":"Application",
 		"more":"Vairāk",
 		"name":"Nosaukums",
 		"nothingSelected":"Nav izvēlēts nekas",
@@ -144,16 +155,21 @@
 		"notSaved":"Nav saglabāts",
 		"order":"Kārtība",
 		"password":"Parole",
+		"pgFunctions":"Functions (back)",
 		"preview":"Priekšskatījums",
 		"properties":"Īpašības",
+		"queryChoices":"Filter sets",
 		"readonly":"Tikai lasāms",
 		"record":"Ieraksts",
+		"relation":"Relation",
+		"relations":"Relations",
 		"relationship":"Attiecība",
 		"relationships":"Attiecības",
 		"results":"{CNT} rezultāti",
 		"resultsNone":"- nav rezultātu -",
 		"resultsOf":"/ {CNT}",
 		"role":"Loma",
+		"roles":"Roles",
 		"selected":"Izvēlēts",
 		"selectedMaxOne":"Izvēlēts (maks. 1)",
 		"settings":"Iestatījumi",
@@ -168,7 +184,8 @@
 		"unassigned":"Nav piešķirts",
 		"username":"Lietotājvārds",
 		"version":"Versija",
-		"warnings":"Brīdinājumi"
+		"warnings":"Brīdinājumi",
+		"widgets":"Widgets"
 	},
 	"admin":{
 		"backups":{
@@ -455,24 +472,29 @@
 			"node":"Klastra mezgls"
 		},
 		"mails":{
-			"dialog":{
-				"imapWarn":"Lūdzu, ņemiet vērā, ka IMAP savienotājs ielādē un pēc tam dzēš ziņojumus no izvēlētā pasta nodalījuma. To vajadzētu izmantot tikai ar atsevišķu pasta nodalījumu un nevis piekļuvei personīgajiem e-pasta kontiem."
-			},
 			"option":{
 				"authMethod":{
 					"login":"LOGIN (priekš O365 legacy SMTP)",
-					"plain":"PLAIN (noklusējums)"
+					"plain":"PLAIN",
+					"xoauth2":"OAUTH 2.0"
 				}
 			},
 			"account":"E-pasta konts",
 			"accounts":"E-pasta konti",
 			"accountAuthMethod":"Autentifikācijas metode",
+			"accountAuthMethodHintLogin":"Basic authentication via username & password. Compatibility option for legacy SMTP authentication against Office 365.",
+			"accountAuthMethodHintPlain":"Basic authentication via username & password.",
+			"accountAuthMethodHintXOAuth2":"Authentication via OAuth 2.0, sometimes called 'Modern Authentication'. Required by some providers to access their services.",
 			"accountHost":"Resursdatora nosaukums",
-			"accountMode":"Režīms",
-			"accountNew":"Jauns konts",
+			"accountMode":"Connector",
+			"accountModeHintImap":"Lūdzu, ņemiet vērā, ka IMAP savienotājs ielādē un pēc tam dzēš ziņojumus no izvēlētā pasta nodalījuma. To vajadzētu izmantot tikai ar atsevišķu pasta nodalījumu un nevis piekļuvei personīgajiem e-pasta kontiem.",
+			"accountModeHintSmtp":"The SMTP connector sends email messages.",
+			"accountOauth":"OAuth client",
+			"accountOauthHint":"An OAuth client must be created before it can be selected here. Check the menu entry 'OAuth clients'.",
 			"accountPass":"Parole",
 			"accountPort":"Ports",
 			"accountSendAs":"Nosūtīšanas adrese",
+			"accountSendAsHint":"By default, the sender address should be the same as the email address of the mailbox. Some email systems however allow multiple sender addresses for accounts.",
 			"accountStartTls":"STARTTLS",
 			"accountTest":"Pārbaudīt e-pastu",
 			"accountUser":"Lietotājvārds",
@@ -493,6 +515,8 @@
 			"testOk":"Pārbaudes e-pasts veiksmīgi pievienots rezervētuvē.",
 			"testRecipient":"Saņēmēja adrese",
 			"testSubject":"Temats",
+			"title":"Email account '{NAME}'",
+			"titleNew":"New email account",
 			"trafficKeepDays":"Saglabāt datus (dienās)"
 		},
 		"modules":{
@@ -525,6 +549,33 @@
 			"repoUpToDate":"jaunākā versija",
 			"update":"Atjaunināt",
 			"updateDone":"Atjauninājums veiksmīgi piemērots"
+		},
+		"oauthClient":{
+			"dialog":{
+				"delete":"Are you sure you want to delete this OAuth client?<br /><br />This action is irreversible.</b>"
+			},
+			"option":{
+				"template":{
+					"custom":"-",
+					"ms365_mail":"O365 mailing"
+				}
+			},
+			"clientId":"Client ID",
+			"clientIdHint":"Generated on the provider side when creating an OAuth2 client.",
+			"clientSecret":"Client secret",
+			"clientSecretHint":"Generated on the provider side when or after creating an OAuth2 client. Must be a secret, client certificates are not supported.",
+			"intro":"An OAuth client authenticates against an identity provider to execute actions or access resources.<br /><br />REI3 implements the 'OAuth 2.0 client credentials grant flow', which requires that the OAuth client is registered with the provider before it can be setup here. The full documentation is available in the <a href=\"https://rei3.de/en/docs/admin\">admin docs</a>.",
+			"nameHint":"An internal name to reference this OAuth client inside of REI3.",
+			"scopes":"Scopes",
+			"scopesHint":"Scopes tell the provider, what an OAuth client wishes to do or access. They are defined by the provider and must be assigned to the client to be usable - please refer to the provider´s documentation for a list of available scopes.",
+			"template":"Template",
+			"templateHint":"Select a template to apply default settings for known providers.",
+			"tenant":"Tenant",
+			"tenantHint":"Required for some providers. A tenant is a name or ID, uniquely identifying your organization on the cloud system of your provider.",
+			"title":"OAuth client '{NAME}'",
+			"titleNew":"New OAuth client",
+			"tokenUrl":"Token URL",
+			"tokenUrlHint":"URL of where OAuth2 tokens are generated. These are documented by your provider."
 		},
 		"repo":{
 			"button":{
@@ -593,6 +644,7 @@
 			"systemTasksNode":"Sistēmas uzdevumi (klastra mezgli)"
 		},
 		"navigationBackups":"Rezerves kopijas",
+		"navigationCaptionMap":"Translations",
 		"navigationCluster":"Klasters",
 		"navigationConfig":"Sistēma",
 		"navigationCustom":"Pielāgošana",
@@ -606,6 +658,7 @@
 		"navigationMailSpooler":"E-pasta rezervju kopijas",
 		"navigationMailTraffic":"E-pasta datu pārsūtījumi",
 		"navigationModules":"Pieteikumi",
+		"navigationOauthClients":"OAuth clients",
 		"navigationRepo":"Repozitorijs",
 		"navigationRoles":"Dalībnieki",
 		"navigationScheduler":"Plānotājs",
@@ -1040,7 +1093,7 @@
 				"get_role_ids":"app.get_role_ids() => ARRAY<br /><br />Returns all assigned role IDs for the current login (nested roles are included).",
 				"go_back":"app.go_back() => UNDEFINED<br /><br />Executes a browser-back navigation.",
 				"has_role":"app.has_role(role_id) => BOOLEAN<br /><br />Returns true if the current login has the assigned role (nested roles are included).",
-				"pdf_create":"app.pdf_create(filename, pageFormat, pageOrientation, pageMarginX, pageMarginY, htmlHeader, htmlBody, htmlFooter, cssStyles) => UNDEFINED<br /><br />Generates a PDF file from given HTML templates and CSS styles. Parameters:<ul><li>filename: Any filename ending in '.pdf'</li><li>pageFormat: Format of page, such as: 'a4', 'letter', 'legal'</li><li>pageOrientation: 'portrait' or 'landscape'</li><li>pageMarginX: Left/right side page margins in pixel</li><li>pageMarginY: Top/bottom side page margins in pixel</li><li>htmlHeader: HTML template, applied to top of each page</li><li>htmlBody: HTML template, fills out document</li><li>htmlFooter: HTML template, applied to bottom of each page</li><li>cssStyles: CSS rules, applied to HTML templates</li></ul>",
+				"pdf_create":"app.pdf_create(filename, pageFormat, pageOrientation, pageMarginX, pageMarginY, htmlHeader, htmlBody, htmlFooter, cssStyles, attachAttributeId, attachRecordId) => UNDEFINED<br /><br />Generates a PDF file from given HTML templates and CSS styles. Parameters:<ul><li>filename: Any filename ending in '.pdf'</li><li>pageFormat: Format of page, such as: 'a4', 'letter', 'legal'</li><li>pageOrientation: 'portrait' or 'landscape'</li><li>pageMarginX: Left/right side page margins in pixel</li><li>pageMarginY: Top/bottom side page margins in pixel</li><li>htmlHeader: HTML template, applied to top of each page</li><li>htmlBody: HTML template, fills out document</li><li>htmlFooter: HTML template, applied to bottom of each page</li><li>cssStyles: CSS rules, applied to HTML templates</li><li>attachAttributeId: Optional, see below.</li><li>attachRecordId: Optional, see below.</li></ul>By default, the PDF document is generated in a new window, in which the user can see a preview and download the file. If both 'attachAttributeId' & 'attachRecordId' are set, the PDF file is instead immediately attached to the chosen files attribute of the chosen record.<br /><br />The placeholders '{PAGE_CUR}' & '{PAGE_END}' can be used in both header & footer HTML templates to display the current and total page numbers.",
 				"record_delete":"app.record_delete() => UNDEFINED<br /><br />Deletes the current form record.",
 				"record_new":"app.record_new() => UNDEFINED<br /><br />Opens new record.",
 				"record_reload":"app.record_reload() => UNDEFINED<br /><br />Reloads the current form record.",
@@ -1063,7 +1116,7 @@
 				"get_preset_record_id":"PRESET_ID",
 				"get_record_id":"RELATION_INDEX_NUMBER",
 				"has_role":"ROLE_ID_STRING",
-				"pdf_create":"FILE_NAME, PAGE_FORMAT, PAGE_ORIENTATION, PAGE_MARGIN_X, PAGE_MARGIN_Y, HTML_HEADER, HTML_BODY, HTML_FOOTER, CSS_STYLES",
+				"pdf_create":"FILE_NAME, PAGE_FORMAT, PAGE_ORIENTATION, PAGE_MARGIN_X, PAGE_MARGIN_Y, HTML_HEADER, HTML_BODY, HTML_FOOTER, CSS_STYLES, ATTACH_ATTRIBUTE_ID, ATTACH_RECORD_ID",
 				"timer_clear":"TIMER_NAME",
 				"timer_set":"TIMER_NAME, IS_INTERVAL, FUNCTION, TIME_IN_MILLISECONDS",
 				"value_store_get":"KEY",
@@ -1154,6 +1207,7 @@
 			"titleJsOne":"Frontend function '{NAME}'",
 			"titlePg":"Backend functions",
 			"titlePgOne":"Backend function '{NAME}'",
+			"triggers":"Triggers",
 			"value":"VALUE"
 		},
 		"icon":{
@@ -1314,7 +1368,16 @@
 		"pgTrigger":{
 			"dialog":{
 				"delete":"Are you sure you want to delete this trigger?"
-			}
+			},
+			"execute":"Execute",
+			"fires":"Fires",
+			"isDeferred":"DEFERRED",
+			"onDelete":"DELETE",
+			"onInsert":"INSERT",
+			"onUpdate":"UPDATE",
+			"perRow":"EACH ROW",
+			"title":"Trigger",
+			"titleNew":"New trigger"
 		},
 		"preset":{
 			"dialog":{
@@ -1356,9 +1419,7 @@
 			"codeCondition":"Condition",
 			"encryption":"E2E encryption",
 			"encryptionHint":"Relation supports end-to-end encrypted attribute values.",
-			"execute":"Execute",
 			"external":"Refering relationships ({CNT})",
-			"fires":"Fires",
 			"graph":"Relationship graph",
 			"graphBase":"Base relation",
 			"indexes":"Indexes ({CNT})",
@@ -1367,12 +1428,7 @@
 			"indexSystem":"System index (managed by the system)",
 			"indexText":"Text index",
 			"indexUnique":"Unique",
-			"isDeferred":"DEFERRED",
 			"nameHint":"Reference name for this relation. Must be unique within this application.",
-			"onDelete":"DELETE",
-			"onInsert":"INSERT",
-			"onUpdate":"UPDATE",
-			"perRow":"EACH ROW",
 			"policies":"Policies ({CNT})",
 			"policyActions":"Action",
 			"policyActionDelete":"Delete",
@@ -1480,21 +1536,9 @@
 		"language":"Translation",
 		"languageNextHint":"Switch to next language (hotkey: CTRL + q)",
 		"noOwner":"Application is in read-only mode",
-		"navigationApis":"APIs",
-		"navigationArticles":"Help articles",
-		"navigationCollections":"Collections",
+		"navigationCaptionMap":"Captions",
 		"navigationFilterHint":"Filter by text",
-		"navigationForms":"Forms",
-		"navigationJsFunctions":"Functions (front)",
-		"navigationPgFunctions":"Functions (back)",
-		"navigationIcons":"Icons",
-		"navigationLoginForms":"Login forms",
-		"navigationMenu":"Menus",
-		"navigationModule":"Application",
-		"navigationRelations":"Relations",
-		"navigationRoles":"Roles",
 		"navigationStart":"First steps",
-		"navigationWidgets":"Widgets",
 		"pageTitle":"Builder",
 		"pageTitleDocs":"Builder documentation"
 	},
@@ -1557,6 +1601,18 @@
 		"weekDayShort4":"Cet",
 		"weekDayShort5":"Pie",
 		"weekDayShort6":"Ses"
+	},
+	"captionMap":{
+		"export":"Export content",
+		"import":"Import content",
+		"languagesApp":"Application",
+		"languagesInstance":"Custom",
+		"newDesc":[
+			"To add a custom translation, choose its five-letter language code, such as: en_us, de_de, ch_ch, it_it...",
+			"If you want to overwrite an existing translation, you can also add an already existing language code."
+		],
+		"title":"Caption map",
+		"titleNew":"Add custom translation"
 	},
 	"error":{
 		"APP":{
