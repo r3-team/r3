@@ -25,7 +25,7 @@ let MyBuilderJsFunction = {
 	},
 	template:`<div class="builder-function">
 		
-		<div class="contentBox" v-if="jsFunction">
+		<div class="contentBox grow" v-if="jsFunction">
 			<div class="top">
 				<div class="area nowrap">
 					<img class="icon" src="images/codeScreen.png" />
@@ -227,7 +227,7 @@ let MyBuilderJsFunction = {
 							<template v-if="showHolderCollection">
 								<input class="short" v-model="holderCollectionFilter" :placeholder="capGen.threeDots" :title="capGen.button.filter" />
 								<select class="dynamic" v-model="holderCollectionModuleId">
-									<option v-for="m in getDependentModules(module,modules).filter(v => v.id === module.id || v.collections.length !== 0)" :value="m.id">{{ m.name }}</option>
+									<option v-for="m in getDependentModules(module).filter(v => v.id === module.id || v.collections.length !== 0)" :value="m.id">{{ m.name }}</option>
 								</select>
 							</template>
 						</div>
@@ -453,7 +453,6 @@ let MyBuilderJsFunction = {
 			</div>
 		</div>
 	</div>`,
-	emits:['hotkeysRegister'],
 	props:{
 		builderLanguage:{ type:String,  required:true },
 		id:             { type:String,  required:true },
@@ -466,7 +465,7 @@ let MyBuilderJsFunction = {
 		}
 	},
 	mounted() {
-		this.$emit('hotkeysRegister',[{fnc:this.set,key:'s',keyCtrl:true}]);
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
 		
 		// set defaults
 		this.holderCollectionModuleId  = this.module.id;
@@ -474,7 +473,7 @@ let MyBuilderJsFunction = {
 		this.holderFncFrontendModuleId = this.module.id;
 	},
 	unmounted() {
-		this.$emit('hotkeysRegister',[]);
+		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	data() {
 		return {
@@ -495,7 +494,7 @@ let MyBuilderJsFunction = {
 				'timer_clear','timer_set','value_store_get','value_store_set'
 			],
 			appFunctionsAsync:[
-				'get_e2ee_data_key','get_e2ee_data_value'
+				'get_e2ee_data_key','get_e2ee_data_value','pdf_create'
 			],
 			
 			// states
@@ -557,12 +556,11 @@ let MyBuilderJsFunction = {
 		joinsIndexMap:     (s) => s.form !== false ? s.getJoinsIndexMap(s.form.query.joins) : {},
 		jsFunction:        (s) => s.jsFunctionIdMap[s.id] === undefined ? false : s.jsFunctionIdMap[s.id],
 		module:            (s) => s.jsFunction === false ? false : s.moduleIdMap[s.jsFunction.moduleId],
-		modulesFncBackend: (s) => s.getDependentModules(s.module,s.modules).filter(v => v.id === s.module.id || v.pgFunctions.filter(v => v.isFrontendExec).length !== 0),
-		modulesFncFrontend:(s) => s.getDependentModules(s.module,s.modules).filter(v => v.id === s.module.id || v.jsFunctions.length !== 0),
+		modulesFncBackend: (s) => s.getDependentModules(s.module).filter(v => v.id === s.module.id || v.pgFunctions.filter(v => v.isFrontendExec).length !== 0),
+		modulesFncFrontend:(s) => s.getDependentModules(s.module).filter(v => v.id === s.module.id || v.jsFunctions.length !== 0),
 		preview:           (s) => !s.showPreview ? '' : s.placeholdersUnset(),
 		
 		// stores
-		modules:        (s) => s.$store.getters['schema/modules'],
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		moduleNameMap:  (s) => s.$store.getters['schema/moduleNameMap'],
 		relationIdMap:  (s) => s.$store.getters['schema/relationIdMap'],
