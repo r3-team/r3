@@ -1111,6 +1111,7 @@ let MyForm = {
 			});
 		},
 		openPrev() {
+			this.$store.commit('routingGuardDel',this.routingGuard);
 			window.history.back();
 		},
 		popUpRecordChanged(change,recordId) {

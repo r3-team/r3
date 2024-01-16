@@ -135,13 +135,6 @@ const MyStore = Vuex.createStore({
 		pageTitleRefresh:(state,payload) => {
 			MyStore.commit('pageTitle',state.pageTitle);
 		},
-		sessionValueStore:(state,payload) => {
-			if(typeof state.sessionValueStore[payload.moduleId] === 'undefined')
-				state.sessionValueStore[payload.moduleId] = {};
-			
-			state.sessionValueStore[payload.moduleId][payload.key] = payload.value;
-		},
-		
 		routingGuardAdd:(state,payload) => {
 			state.routingGuards.push(payload);
 		},
@@ -150,6 +143,12 @@ const MyStore = Vuex.createStore({
 				if(state.routingGuards[i] === payload)
 					return state.routingGuards.splice(i,1);
 			}
+		},
+		sessionValueStore:(state,payload) => {
+			if(typeof state.sessionValueStore[payload.moduleId] === 'undefined')
+				state.sessionValueStore[payload.moduleId] = {};
+			
+			state.sessionValueStore[payload.moduleId][payload.key] = payload.value;
 		},
 		
 		// collections
