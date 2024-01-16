@@ -171,7 +171,7 @@ let MyAdminRoles = {
 		</div>
 		
 		<div class="content" v-if="module === false">
-			<i>{{ capApp.nothingInstalled }}</i>
+			<i>{{ capGen.nothingInstalled }}</i>
 		</div>
 		
 		<div class="content no-padding" v-if="module !== false">

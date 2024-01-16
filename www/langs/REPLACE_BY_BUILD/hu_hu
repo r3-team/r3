@@ -149,6 +149,7 @@
 		"module":"Alkalmazás",
 		"more":"Továbbiak",
 		"name":"Név",
+		"nothingInstalled":"Nincsenek telepített alkalmazások.",
 		"nothingSelected":"Nincs kiválasztva",
 		"nothingThere":"Nincs elérhető eredmény",
 		"notice":"Értesítés",
@@ -540,7 +541,6 @@
 			"changeLog":"Változások",
 			"hidden":"Rejtett",
 			"import":"Fájlból hozzáadás",
-			"nothingInstalled":"Nincsenek telepített alkalmazások.",
 			"position":"Sorrend a menüben",
 			"productionMode":"Az alkalmazások csak karbantartási módban módosíthatók.",
 			"releaseDate":"Kiadás dátuma",
@@ -595,8 +595,7 @@
 				"descriptions":"Leírások"
 			},
 			"addLogin":"Bejelentkezés hozzáadása",
-			"descriptionEmpty":"Nincs leírás elérhető",
-			"nothingInstalled":"Nincsenek telepített alkalmazások."
+			"descriptionEmpty":"Nincs leírás elérhető"
 		},
 		"scheduler":{
 			"button":{

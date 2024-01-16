@@ -358,7 +358,7 @@ let MyAdminModules = {
 			</p>
 			
 			<p class="message" v-if="modules.length === 0">
-				<i>{{ capApp.nothingInstalled }}</i>
+				<i>{{ capGen.nothingInstalled }}</i>
 			</p>
 			
 			<!-- installed modules -->

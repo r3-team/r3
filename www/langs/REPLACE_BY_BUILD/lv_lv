@@ -149,6 +149,7 @@
 		"module":"Application",
 		"more":"Vairāk",
 		"name":"Nosaukums",
+		"nothingInstalled":"Nav instalētu lietotņu.",
 		"nothingSelected":"Nav izvēlēts nekas",
 		"nothingThere":"Nav pieejamu rezultātu",
 		"notice":"Paziņojums",
@@ -540,7 +541,6 @@
 			"changeLog":"Izmaiņu žurnāls",
 			"hidden":"Paslēpts",
 			"import":"Pievienot no faila",
-			"nothingInstalled":"Nav instalētu lietotņu.",
 			"position":"Secība izvēlnē",
 			"productionMode":"Lietotnes var mainīt tikai tad, ja ir aktīvs apkopes režīms.",
 			"releaseDate":"Izdošanas datums",
@@ -595,8 +595,7 @@
 				"descriptions":"Apraksti"
 			},
 			"addLogin":"Pievienot pieteikšanos",
-			"descriptionEmpty":"Nav pieejams apraksts",
-			"nothingInstalled":"Nav instalētu lietotņu."
+			"descriptionEmpty":"Nav pieejams apraksts"
 		},
 		"scheduler":{
 			"button":{

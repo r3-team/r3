@@ -149,6 +149,7 @@
 		"module":"Application",
 		"more":"More",
 		"name":"Nome",
+		"nothingInstalled":"Nessuna applicazione è installata.",
 		"nothingSelected":"Niente selezionato",
 		"nothingThere":"Nessun risultato disponibile",
 		"notice":"Avviso",
@@ -540,7 +541,6 @@
 			"changeLog":"Log modifiche",
 			"hidden":"Nascosto",
 			"import":"Aggiungi dal file",
-			"nothingInstalled":"Nessuna applicazione è installata.",
 			"position":"Ordine nel menu",
 			"productionMode":"Le applicazioni possono essere modificate solo quando è attiva la modalità di manutenzione.",
 			"releaseDate":"Data rilascio",
@@ -595,8 +595,7 @@
 				"descriptions":"Descrizioni"
 			},
 			"addLogin":"Aggiungi login",
-			"descriptionEmpty":"Nessuna descrizione disponibile",
-			"nothingInstalled":"Nessuna applicazione installata."
+			"descriptionEmpty":"Nessuna descrizione disponibile"
 		},
 		"scheduler":{
 			"button":{

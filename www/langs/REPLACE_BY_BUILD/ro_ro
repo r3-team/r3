@@ -149,6 +149,7 @@
 		"module":"Application",
 		"more":"More",
 		"name":"Nume",
+		"nothingInstalled":"Nu sunt instalate aplicații.",
 		"nothingSelected":"Nimic selectat",
 		"nothingThere":"Rezultate lipsă",
 		"notice":"Notă",
@@ -540,7 +541,6 @@
 			"changeLog":"Jurnalul schimbărilor",
 			"hidden":"Ascuns",
 			"import":"Adăugați din fișier",
-			"nothingInstalled":"Nu sunt instalate aplicații.",
 			"position":"Ordinea în meniu",
 			"productionMode":"Aplicațiile pot fi modificate numai atunci când modul de întreținere este activ.",
 			"releaseDate":"Data lansării",
@@ -595,8 +595,7 @@
 				"descriptions":"Descrieri"
 			},
 			"addLogin":"Adăugați autentificare",
-			"descriptionEmpty":"Nu există descriere disponibilă",
-			"nothingInstalled":"Nu există aplicații instalate."
+			"descriptionEmpty":"Nu există descriere disponibilă"
 		},
 		"scheduler":{
 			"button":{

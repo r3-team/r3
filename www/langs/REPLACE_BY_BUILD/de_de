@@ -149,6 +149,7 @@
 		"module":"Anwendung",
 		"more":"Mehr",
 		"name":"Name",
+		"nothingInstalled":"Es sind keine Anwendungen installiert.",
 		"nothingSelected":"Keine Auswahl getroffen",
 		"nothingThere":"Keine Ergebnisse verfügbar",
 		"notice":"Hinweis",
@@ -540,7 +541,6 @@
 			"changeLog":"Änderungen",
 			"hidden":"Versteckt",
 			"import":"Von Datei hinzufügen",
-			"nothingInstalled":"Es sind keine Anwendungen installiert.",
 			"position":"Reihenfolge im Menü",
 			"productionMode":"Anwendungen können nur im Wartungsmodus verändert werden.",
 			"releaseDate":"Veröff.-Datum",
@@ -595,8 +595,7 @@
 				"descriptions":"Beschreibungen"
 			},
 			"addLogin":"Anmeldung hinzufügen",
-			"descriptionEmpty":"Keine Beschreibung vorhanden",
-			"nothingInstalled":"Es sind keine Anwendungen installiert."
+			"descriptionEmpty":"Keine Beschreibung vorhanden"
 		},
 		"scheduler":{
 			"button":{

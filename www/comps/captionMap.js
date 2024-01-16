@@ -413,7 +413,7 @@ let MyCaptionMap = {
 		MyCaptionMapTransfer,
 		MyModuleSelect
 	},
-	template:`<div class="contentBox grow" v-if="isReady && module">
+	template:`<div class="contentBox grow">
 		<div class="top">
 			<div class="area nowrap">
 				<img class="icon" src="images/languages.png" />
@@ -443,7 +443,7 @@ let MyCaptionMap = {
 				/>
 			</div>
 			<div class="area nowrap">
-				<div class="row gap-large">
+				<div class="row gap-large" v-if="module">
 					<div class="row centered">
 						<span>{{ capApp.languagesApp }}</span>
 						<my-button
@@ -484,7 +484,10 @@ let MyCaptionMap = {
 		</div>
 		<div class="content no-padding">
 			<div class="captionMap">
-				<table class="generic-table sticky-top">
+				<div class="content" v-if="module === false">
+					<i>{{ capGen.nothingInstalled }}</i>
+				</div>
+				<table class="generic-table sticky-top" v-if="isReady && module">
 					<thead>
 						<tr>
 							<th></th>
@@ -682,10 +685,10 @@ let MyCaptionMap = {
 			captionMapCustom:{}, // map of all custom captions
 			
 			// states
-			changes:[], // change to caption value, key = entity ID (attribute, form, field, etc.)
+			changes:[],               // change to caption value, key = entity ID (attribute, form, field, etc.)
 			hasChanges:false,
 			isReady:false,
-			moduleId:null,
+			moduleId:null,            // current module to show caption map for
 			showLanguageNew:false,
 			showLanguageCodes:[],
 			showTransfer:false,
@@ -815,7 +818,7 @@ let MyCaptionMap = {
 		captionsRoles:      (s) => s.makeSortedItemList(s.captionMap.roleIdMap,s.roleIdMap),
 		captionsWidgets:    (s) => s.makeSortedItemList(s.captionMap.widgetIdMap,s.widgetIdMap),
 		canSave:            (s) => !s.readonly && s.hasChanges,
-		canSwitchModules:   (s) => s.moduleIdForce === null,
+		canSwitchModules:   (s) => s.moduleIdForce === null && s.moduleId !== null,
 		languages:          (s) => s.moduleId === null ? [] : s.moduleIdMap[s.moduleId].languages,
 		languagesCustom:    (s) => s.moduleId === null ? [] : s.moduleIdMapMeta[s.moduleId].languagesCustom,
 		module:             (s) => s.moduleId === null ? false : s.moduleIdMap[s.moduleId],

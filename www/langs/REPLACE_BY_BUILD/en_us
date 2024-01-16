@@ -149,6 +149,7 @@
 		"module":"Application",
 		"more":"More",
 		"name":"Name",
+		"nothingInstalled":"No applications are installed.",
 		"nothingSelected":"Nothing selected",
 		"nothingThere":"No results available",
 		"notice":"Notice",
@@ -540,7 +541,6 @@
 			"changeLog":"Change log",
 			"hidden":"Hidden",
 			"import":"Add from file",
-			"nothingInstalled":"No applications are installed.",
 			"position":"Order in menu",
 			"productionMode":"Applications can only be changed when the maintenance mode is active.",
 			"releaseDate":"Release date",
@@ -595,8 +595,7 @@
 				"descriptions":"Descriptions"
 			},
 			"addLogin":"Add login",
-			"descriptionEmpty":"No description available",
-			"nothingInstalled":"No applications are installed."
+			"descriptionEmpty":"No description available"
 		},
 		"scheduler":{
 			"button":{
