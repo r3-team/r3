@@ -275,7 +275,6 @@ let MyForm = {
 			@close="showHelp = false"
 			:form="form"
 			:isFloat="isPopUpFloating"
-			:language="moduleIdMapLang[moduleId]"
 			:moduleId="moduleId"
 		/>
 	</div>`,

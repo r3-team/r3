@@ -346,7 +346,6 @@ let MyAdminModules = {
 				@close="moduleIdShowHelp = null"
 				:moduleId="moduleIdShowHelp"
 				:isFloat="false"
-				:language="moduleIdMapLang[moduleIdShowHelp]"
 			/>
 		</div>
 		

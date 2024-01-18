@@ -1,7 +1,10 @@
 import MyTabs              from './tabs.js';
-import {getCaptionForLang} from './shared/language.js';
 import {generatePdf}       from './shared/pdf.js';
 import {getDateFormat}     from './shared/time.js';
+import {
+	getCaption,
+	getCaptionForLang
+} from './shared/language.js';
 export {MyArticles as default};
 
 let MyArticles = {
@@ -44,39 +47,36 @@ let MyArticles = {
 			<div class="articles-toc" v-if="hasArticleIndex">
 				<h1>{{ capApp.toc }}</h1>
 				<ol>
-					<li v-for="a in articlesShown" @click="articleScrollTo(a.id)">
-						{{ getCaptionForLang('articleTitle',language,a.id,a.captions,articleTitleEmpty) }}
-					</li>
+					<li v-for="a in articlesShown" @click="articleScrollTo(a.id)">{{ a.title }}</li>
 				</ol>
 			</div>
 			
 			<div class="article" v-for="(a,i) in articlesShown">
-				<div class="article-title pdf-title" :ref="'article_'+a.id" v-if="hasArticleIndex || getCaptionForLang('articleTitle',language,a.id,a.captions) !== ''">
+				<div class="article-title pdf-title" :ref="'article_'+a.id" v-if="hasArticleIndex || a.title !== ''">
 					<my-button class="pdf-hide"
 						@trigger="articleToggle(a.id)"
 						:image="!articleIdsClosed.includes(a.id) ? 'triangleDown.png' : 'triangleRight.png'"
 						:naked="true"
 					/>
-					<span>{{ (i+1) + '. ' + getCaptionForLang('articleTitle',language,a.id,a.captions) }}</span>
+					<span>{{ (i+1) + '. ' + a.title }}</span>
 				</div>
 				<div class="article-body"
 					v-if="!articleIdsClosed.includes(a.id)"
-					v-html="getCaptionForLang('articleBody',language,a.id,a.captions)"
+					v-html="a.body"
 				/>
 			</div>
 		</div>
 	</div>`,
 	props:{
-		form:    { type:Object,  required:false, default:null }, // show context help of which form
-		isFloat: { type:Boolean, required:true },
-		language:{ type:String,  required:true },                // language to use (5-letter code)
-		moduleId:{ type:String,  required:true }                 // show help of which module
+		form:         { type:Object,  required:false, default:null }, // show context help of which form
+		isFloat:      { type:Boolean, required:true },
+		languageForce:{ type:String,  required:false, default:''   }, // language to use (5-letter code)
+		moduleId:     { type:String,  required:true }                 // show help of which module
 	},
 	emits:['close'],
 	data() {
 		return {
 			articleIdsClosed:[],
-			articleTitleEmpty:'-',
 			tabTarget:this.form !== null && this.form.articleIdsHelp.length !== 0 ? 'form' : 'module',
 			showLarge:false
 		};
@@ -88,9 +88,18 @@ let MyArticles = {
 			
 			let out = [];
 			for(let articleId of articleIds) {
-				const a = s.articleIdMap[articleId];
-				if(s.getCaptionForLang('articleBody',s.language,a.id,a.captions) !== '')
-					out.push(a);
+				const a    = s.articleIdMap[articleId];
+				const body = s.languageForce === ''
+					? s.getCaption('articleBody',a.moduleId,a.id,a.captions)
+					: s.getCaptionForLang('articleBody',s.languageForce,a.id,a.captions);
+				
+				if(body === '') continue;
+				
+				const title = s.languageForce === ''
+					? s.getCaption('articleTitle',a.moduleId,a.id,a.captions,'-')
+					: s.getCaptionForLang('articleTitle',s.languageForce,a.id,a.captions,'-');
+				
+				out.push({ id:a.id, body:body, title:title });
 			}
 			return out;
 		},
@@ -109,6 +118,7 @@ let MyArticles = {
 	methods:{
 		// externals
 		generatePdf,
+		getCaption,
 		getCaptionForLang,
 		getDateFormat,
 		
@@ -123,10 +133,12 @@ let MyArticles = {
 			this.$refs['article_'+id][0].scrollIntoView();
 		},
 		pdfDownload() {
-			const mod       = this.module;
-			let titleDate   = this.getDateFormat(new Date(),'Y-m-d');
-			let titleHelp   = this.tabTarget === 'form' ? this.capApp.form : this.capApp.module;
-			let titleModule = `${this.getCaptionForLang('moduleTitle',this.language,mod.id,mod.captions,mod.name)} v${mod.releaseBuild}`;
+			const mod         = this.module;
+			const titleDate   = this.getDateFormat(new Date(),'Y-m-d');
+			const titleHelp   = this.tabTarget === 'form' ? this.capApp.form : this.capApp.module;
+			const titleModule = this.languageForce === ''
+				? `${this.getCaption('moduleTitle',mod.id,mod.id,mod.captions,mod.name)} v${mod.releaseBuild}`
+				: `${this.getCaptionForLang('moduleTitle',this.languageForce,mod.id,mod.captions,mod.name)} v${mod.releaseBuild}`;
 			
 			this.generatePdf(
 				`${titleModule} - ${titleHelp}.pdf`

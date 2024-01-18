@@ -339,7 +339,7 @@ let MyBuilderArticles = {
 					@close="showPreview = false"
 					:form="formIdAssignTo !== null ? formIdMap[formIdAssignTo] : null"
 					:isFloat="true"
-					:language="builderLanguage"
+					:languageForce="builderLanguage"
 					:moduleId="module.id"
 				/>
 			</div>

@@ -1,12 +1,16 @@
 import MyStore from '../../stores/store.js';
 
 export function getCaption(content,moduleId,id,captions,fallback) {
-	return getCaptionForLang(content,MyStore.getters.moduleIdMapLang[moduleId],id,captions,fallback);
+	return getCaptionForLang(content,MyStore.getters.moduleIdMapLang[moduleId],
+		id,captions,fallback,MyStore.getters['schema/moduleIdMap'][moduleId].languageMain);
 };
-export function getCaptionForLang(content,language,id,captions,fallback) {
+export function getCaptionForLang(content,lang,id,captions,fallback,fallbackLang) {
 	const captionsCustom = MyStore.getters.captionMapCustom[getCaptionMapName(content)];
-	if(captionsCustom[id]?.[content]?.[language] !== undefined) return captionsCustom[id][content][language];
-	if(captions?.[content]?.[language]           !== undefined) return captions[content][language];
+	if(captionsCustom[id]?.[content]?.[lang] !== undefined) return captionsCustom[id][content][lang];
+	if(captions?.[content]?.[lang]           !== undefined) return captions[content][lang];
+	
+	if(fallbackLang !== undefined)
+		return getCaptionForLang(content,fallbackLang,id,captions,fallback);
 	
 	return fallback !== undefined ? fallback : '';
 };

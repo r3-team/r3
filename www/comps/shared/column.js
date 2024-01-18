@@ -1,13 +1,18 @@
-import {getCaptionForLang} from './language.js';
 import {
 	isAttributeBoolean,
 	isAttributeFiles,
 	isAttributeString
 } from './attribute.js';
+import {
+	getCaption,
+	getCaptionForLang
+} from './language.js';
 import MyStore from '../../stores/store.js';
 
 export function getColumnTitle(c,moduleId) {
-	return getColumnTitleForLang(c,MyStore.getters.moduleIdMapLang[moduleId]);
+	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
+	return getCaption('columnTitle',moduleId,c.id,c.captions,
+		getCaption('attributeTitle',moduleId,atr.id,atr.captions,atr.name));
 };
 export function getColumnTitleForLang(c,language) {
 	const atr = MyStore.getters['schema/attributeIdMap'][c.attributeId];
