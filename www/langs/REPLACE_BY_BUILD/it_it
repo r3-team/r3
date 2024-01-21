@@ -1150,6 +1150,7 @@
 			"option":{
 				"fieldGetValue":"Legge valore",
 				"fieldSetCaption":"Write caption",
+				"fieldSetChart":"Write ECharts option object",
 				"fieldSetError":"Write error message",
 				"fieldSetFocus":"Jump to field input",
 				"fieldSetOrder":"Set field order in parent",

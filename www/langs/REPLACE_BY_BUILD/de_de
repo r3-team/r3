@@ -1150,6 +1150,7 @@
 			"option":{
 				"fieldGetValue":"Wert lesen",
 				"fieldSetCaption":"Titel setzen",
+				"fieldSetChart":"ECharts-Optionen-Objekt setzen",
 				"fieldSetError":"Fehlermeldung setzen",
 				"fieldSetFocus":"Zur Feldeingabe springen",
 				"fieldSetOrder":"Feldreihenfolge im Element setzen",

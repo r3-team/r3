@@ -1,11 +1,12 @@
-import MyArticles            from './articles.js';
-import MyField               from './field.js';
-import MyFormLog             from './formLog.js';
-import {hasAccessToRelation} from './shared/access.js';
-import {consoleError}        from './shared/error.js';
-import {srcBase64}           from './shared/image.js';
-import {getCaption}          from './shared/language.js';
-import {generatePdf}         from './shared/pdf.js';
+import MyArticles                  from './articles.js';
+import MyField                     from './field.js';
+import MyFormLog                   from './formLog.js';
+import {hasAccessToRelation}       from './shared/access.js';
+import {consoleError}              from './shared/error.js';
+import {getFieldOverwritesDefault} from './shared/field.js';
+import {srcBase64}                 from './shared/image.js';
+import {getCaption}                from './shared/language.js';
+import {generatePdf}               from './shared/pdf.js';
 import {
 	aesGcmDecryptBase64WithPhrase,
 	aesGcmEncryptBase64WithPhrase,
@@ -237,9 +238,7 @@ let MyForm = {
 					:field="f"
 					:fieldIdsChanged="fieldIdsChanged"
 					:fieldIdsInvalid="fieldIdsInvalid"
-					:fieldIdMapCaption="fieldIdMapCaption"
-					:fieldIdMapError="fieldIdMapError"
-					:fieldIdMapOrder="fieldIdMapOrder"
+					:fieldIdMapOverwrite="fieldIdMapOverwrite"
 					:formBadSave="badSave"
 					:formIsEmbedded="isPopUp || isWidget"
 					:formLoading="loading"
@@ -332,9 +331,7 @@ let MyForm = {
 			fields:[],            // all fields (nested within each other)
 			fieldIdsInvalid:[],   // field IDs with invalid values
 			fieldIdsTouched:[],   // field IDs that were touched (changed their value in some way)
-			fieldIdMapCaption:{}, // overwrites for field captions
-			fieldIdMapError:{},   // overwrites for field error messages (custom errors)
-			fieldIdMapOrder:{},   // overwrites for field order in parent element (flex order)
+			fieldIdMapOverwrite:{}, // overwrites for fields: { caption, chart, error, order }
 			indexMapRecordId:{},  // record IDs for form, key: relation index
 			indexMapRecordKey:{}, // record en-/decryption keys, key: relation index
 			indexesNoDel:{},      // relation indexes with no DEL permission (via relation policy)
@@ -558,10 +555,11 @@ let MyForm = {
 				// field manipulation
 				get_field_value:(fieldId) => s.fieldIdMapData[fieldId] === undefined
 					? undefined : s.values[s.getIndexAttributeIdByField(s.fieldIdMapData[fieldId],false)],
-				set_field_caption:(fieldId,caption)  => s.fieldIdMapCaption[fieldId] = caption,
-				set_field_error:  (fieldId,errorMsg) => s.fieldIdMapError[fieldId]   = errorMsg,
+				set_field_caption:(fieldId,caption)  => s.fieldIdMapOverwrite.caption[fieldId] = caption,
+				set_field_chart:  (fieldId,option)   => s.fieldIdMapOverwrite.chart[fieldId]   = option,
+				set_field_error:  (fieldId,errorMsg) => s.fieldIdMapOverwrite.error[fieldId]   = errorMsg,
 				set_field_focus:  (fieldId)          => s.fieldSetFocus(fieldId,false),
-				set_field_order:  (fieldId,order)    => s.fieldIdMapOrder[fieldId]   = order,
+				set_field_order:  (fieldId,order)    => s.fieldIdMapOverwrite.order[fieldId]   = order,
 				set_field_value:  (fieldId,value)    => {
 					// use common return codes: 0 = success, 1 = error
 					if(s.fieldIdMapData[fieldId] === undefined) return 1;
@@ -711,6 +709,7 @@ let MyForm = {
 		getCollectionValues,
 		getDataFieldMap,
 		getDetailsFromIndexAttributeId,
+		getFieldOverwritesDefault,
 		getFormPopUpConfig,
 		getFormRoute,
 		getIndexAttributeId,
@@ -873,15 +872,13 @@ let MyForm = {
 			this.badSave     = false;
 			this.badLoad     = false;
 			this.blockInputs = false;
-			this.fieldIdMapCaption         = {};
-			this.fieldIdMapError           = {};
-			this.fieldIdMapOrder           = {};
 			this.loginIdsEncryptFor        = [];
 			this.loginIdsEncryptForOutside = [];
 			this.indexesNoDel              = [];
 			this.indexesNoSet              = [];
 			this.indexMapRecordId          = {};
 			this.indexMapRecordKey         = {};
+			this.fieldIdMapOverwrite       = this.getFieldOverwritesDefault();
 			this.valuesSetAllDefault();
 			this.timerClearAll();
 			this.popUp = null;

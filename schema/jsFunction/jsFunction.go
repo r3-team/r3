@@ -115,7 +115,7 @@ func Set_tx(tx pgx.Tx, moduleId uuid.UUID, id uuid.UUID, formId pgtype.UUID,
 	if err := storeDependencies_tx(tx, id, "collection", fmt.Sprintf(`%s\.collection_(read|update)\('(%s)'`, rxPrefix, rxUuid), 2, codeFunction); err != nil {
 		return err
 	}
-	if err := storeDependencies_tx(tx, id, "field", fmt.Sprintf(`%s\.(get|set)_field_(value|caption|error|focus|order)\('(%s)'`, rxPrefix, rxUuid), 3, codeFunction); err != nil {
+	if err := storeDependencies_tx(tx, id, "field", fmt.Sprintf(`%s\.(get|set)_field_(value|caption|chart|error|focus|order)\('(%s)'`, rxPrefix, rxUuid), 3, codeFunction); err != nil {
 		return err
 	}
 	if err := storeDependencies_tx(tx, id, "js_function", fmt.Sprintf(`%s\.call_frontend\('(%s)'`, rxPrefix, rxUuid), 1, codeFunction); err != nil {

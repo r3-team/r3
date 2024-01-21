@@ -201,6 +201,7 @@ let MyField = {
 					:moduleId="moduleId"
 					:needsHeader="isAlone"
 					:optionJson="field.chartOption"
+					:optionOverwrite="fieldIdMapOverwrite.chart[field.id]"
 					:query="field.query"
 				/>
 				
@@ -292,9 +293,7 @@ let MyField = {
 							:field="f"
 							:fieldIdsChanged="fieldIdsChanged"
 							:fieldIdsInvalid="fieldIdsInvalid"
-							:fieldIdMapCaption="fieldIdMapCaption"
-							:fieldIdMapError="fieldIdMapError"
-							:fieldIdMapOrder="fieldIdMapOrder"
+							:fieldIdMapOverwrite="fieldIdMapOverwrite"
 							:formBadSave="formBadSave"
 							:formIsEmbedded="formIsEmbedded"
 							:formLoading="formLoading"
@@ -603,9 +602,7 @@ let MyField = {
 			:field="f"
 			:fieldIdsChanged="fieldIdsChanged"
 			:fieldIdsInvalid="fieldIdsInvalid"
-			:fieldIdMapCaption="fieldIdMapCaption"
-			:fieldIdMapError="fieldIdMapError"
-			:fieldIdMapOrder="fieldIdMapOrder"
+			:fieldIdMapOverwrite="fieldIdMapOverwrite"
 			:formBadSave="formBadSave"
 			:formIsEmbedded="formIsEmbedded"
 			:formLoading="formLoading"
@@ -621,28 +618,26 @@ let MyField = {
 		/>
 	</div>`,
 	props:{
-		dataFieldMap:     { type:Object,  required:true },
-		entityIdMapState: { type:Object,  required:false, default:() => {return {}} }, // overwritten states
-		field:            { type:Object,  required:true },
-		fieldIdsChanged:  { type:Array,   required:false, default:() => {return []} },
-		fieldIdsInvalid:  { type:Array,   required:false, default:() => {return []} },
-		fieldIdMapCaption:{ type:Object,  required:false, default:() => {return {}} }, // overwritten captions
-		fieldIdMapError:  { type:Object,  required:false, default:() => {return {}} }, // overwritten error messages
-		fieldIdMapOrder:  { type:Object,  required:false, default:() => {return {}} }, // overwritten flex order
-		formBadSave:      { type:Boolean, required:true },                 // attempted save with invalid inputs
-		formIsEmbedded:   { type:Boolean, required:true },                 // parent form is embedded (pop-up, inline, widget)
-		formLoading:      { type:Boolean, required:true },
-		formReadonly:     { type:Boolean, required:true },                 // form is read only
-		flexDirParent:    { type:String,  required:true },                 // flex direction (row/column) of parent
-		isAloneInForm:    { type:Boolean, required:true },                 // parent form contains only this field
-		isAloneInTab:     { type:Boolean, required:false, default:false }, // parent tab only contains this field
-		isBulkUpdate:     { type:Boolean, required:false, default:false }, // form is in bulk update mode
-		joinsIndexMap:    { type:Object,  required:true },
-		logViewer:        { type:Boolean, required:false, default:false }, // is part of log viewer
-		moduleId:         { type:String,  required:true },
-		parentIsCounting: { type:Boolean, required:false, default:false }, // field parent is counting records (tab counter)
-		parentIsHidden:   { type:Boolean, required:false, default:false }, // field parent has its content hidden (tab/container)
-		values:           { type:Object,  required:true }
+		dataFieldMap:       { type:Object,  required:true },
+		entityIdMapState:   { type:Object,  required:false, default:() => {return {}} }, // overwritten states
+		field:              { type:Object,  required:true },
+		fieldIdsChanged:    { type:Array,   required:false, default:() => {return []} },
+		fieldIdsInvalid:    { type:Array,   required:false, default:() => {return []} },
+		fieldIdMapOverwrite:{ type:Object,  required:true },
+		formBadSave:        { type:Boolean, required:true },                 // attempted save with invalid inputs
+		formIsEmbedded:     { type:Boolean, required:true },                 // parent form is embedded (pop-up, inline, widget)
+		formLoading:        { type:Boolean, required:true },
+		formReadonly:       { type:Boolean, required:true },                 // form is read only
+		flexDirParent:      { type:String,  required:true },                 // flex direction (row/column) of parent
+		isAloneInForm:      { type:Boolean, required:true },                 // parent form contains only this field
+		isAloneInTab:       { type:Boolean, required:false, default:false }, // parent tab only contains this field
+		isBulkUpdate:       { type:Boolean, required:false, default:false }, // form is in bulk update mode
+		joinsIndexMap:      { type:Object,  required:true },
+		logViewer:          { type:Boolean, required:false, default:false }, // is part of log viewer
+		moduleId:           { type:String,  required:true },
+		parentIsCounting:   { type:Boolean, required:false, default:false }, // field parent is counting records (tab counter)
+		parentIsHidden:     { type:Boolean, required:false, default:false }, // field parent has its content hidden (tab/container)
+		values:             { type:Object,  required:true }
 	},
 	emits:[
 		'clipboard','execute-function','hotkey','open-form','set-form-args',
@@ -723,8 +718,8 @@ let MyField = {
 		
 		caption:(s) => {
 			let out = '';
-			if(s.fieldIdMapCaption[s.field.id] !== undefined) {
-				out = s.fieldIdMapCaption[s.field.id];
+			if(s.fieldIdMapOverwrite.caption[s.field.id] !== undefined) {
+				out = s.fieldIdMapOverwrite.caption[s.field.id];
 			}
 			else {
 				const title = s.getCaption('fieldTitle',s.moduleId,s.field.id,s.field.captions);
@@ -787,8 +782,8 @@ let MyField = {
 					s.field.alignContent,s.field.wrap,s.field.grow,s.field.shrink,
 					s.field.basis,s.field.perMax,s.field.perMin));
 			}
-			if(s.fieldIdMapOrder[s.field.id] !== undefined)
-				out.push(`order:${s.fieldIdMapOrder[s.field.id]}`);
+			if(s.fieldIdMapOverwrite.order[s.field.id] !== undefined)
+				out.push(`order:${s.fieldIdMapOverwrite.order[s.field.id]}`);
 			
 			return out.join(';');
 		},
@@ -1062,8 +1057,8 @@ let MyField = {
 		// simple
 		attribute:  (s) => !s.isData || s.attributeIdMap[s.field.attributeId] === undefined
 			? false : s.attributeIdMap[s.field.attributeId],
-		customErr:  (s) => s.fieldIdMapError[s.field.id] !== undefined
-			&& s.fieldIdMapError[s.field.id] !== null ? s.fieldIdMapError[s.field.id] : null,
+		customErr:  (s) => s.fieldIdMapOverwrite.error[s.field.id] !== undefined
+			&& s.fieldIdMapOverwrite.error[s.field.id] !== null ? s.fieldIdMapOverwrite.error[s.field.id] : null,
 		hasCaption: (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isAlone && s.caption !== '',
 		hasIntent:  (s) => !s.isChart && !s.isKanban && !s.isCalendar && !s.isTabs && !s.isList && !s.isDrawing && !s.isFiles,
 		inputRegex: (s) => !s.isData || s.field.regexCheck === null ? null : new RegExp(s.field.regexCheck),

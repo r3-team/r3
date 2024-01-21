@@ -37,15 +37,16 @@ export function getFieldTitle(field) {
 	return '';
 };
 
-export function fieldOptionGet(fieldId,optionName,fallbackValue) {
-	let map = MyStore.getters['local/fieldIdMapOption'];
-	
-	if(typeof map[fieldId] === 'undefined' || typeof map[fieldId][optionName] === 'undefined')
-		return fallbackValue;
-	
-	return map[fieldId][optionName];
+export function getFieldOverwritesDefault() {
+	return { caption:{}, chart:{}, error:{}, order:{} };
 };
 
+// field options
+export function fieldOptionGet(fieldId,optionName,fallbackValue) {
+	const map = MyStore.getters['local/fieldIdMapOption'];
+	return map[fieldId] !== undefined && map[fieldId][optionName] !== undefined
+		? map[fieldId][optionName] : fallbackValue;
+};
 export function fieldOptionSet(fieldId,optionName,value) {
 	MyStore.commit('local/fieldOptionSet',{
 		fieldId:fieldId,

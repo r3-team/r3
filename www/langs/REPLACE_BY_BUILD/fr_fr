@@ -1150,6 +1150,7 @@
 			"option":{
 				"fieldGetValue":"Lire la valeur",
 				"fieldSetCaption":"Écrire la légende",
+				"fieldSetChart":"Write ECharts option object",
 				"fieldSetError":"Écrire le message d'erreur",
 				"fieldSetFocus":"Sauter à la saisie du champ",
 				"fieldSetOrder":"Set field order in parent",

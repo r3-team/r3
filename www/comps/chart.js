@@ -39,15 +39,16 @@ let MyChart = {
 		/>
 	</div>`,
 	props:{
-		choices:    { type:Array,   required:false, default:() => [] },
-		columns:    { type:Array,   required:true },
-		filters:    { type:Array,   required:true },
-		formLoading:{ type:Boolean, required:true },
-		limit:      { type:Number,  required:true },
-		moduleId:   { type:String,  required:true },
-		needsHeader:{ type:Boolean, required:true },
-		optionJson: { type:String,  required:true },
-		query:      { type:Object,  required:true }
+		choices:        { type:Array,   required:false, default:() => [] },
+		columns:        { type:Array,   required:true },
+		filters:        { type:Array,   required:true },
+		formLoading:    { type:Boolean, required:true },
+		limit:          { type:Number,  required:true },
+		moduleId:       { type:String,  required:true },
+		needsHeader:    { type:Boolean, required:true },
+		optionJson:     { type:String,  required:true },  // general chart options object, as JSON
+		optionOverwrite:{ required:false, default:null }, // overwrite entire echarts option object (incl. data)
+		query:          { type:Object,  required:true }
 	},
 	data() {
 		return {
@@ -69,7 +70,7 @@ let MyChart = {
 		
 		// simple
 		choiceFilters:(s) => s.getChoiceFilters(s.choices,s.choiceId),
-		hasChoices:   (s) => s.choices.length > 1,
+		hasChoices:   (s) => s.choices.length > 1 && s.optionOverwrite === null,
 		
 		// stores
 		attributeIdMap:(s) => s.$store.getters['schema/attributeIdMap'],
@@ -79,6 +80,12 @@ let MyChart = {
 		window.addEventListener('resize',this.resize);
 	},
 	mounted() {
+		if(this.optionOverwrite !== null) {
+			this.option = this.optionOverwrite;
+			this.ready  = true;
+			return;
+		}
+		
 		// setup watchers
 		this.$watch('formLoading',(val) => {
 			if(!val) this.get();

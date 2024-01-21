@@ -1150,6 +1150,7 @@
 			"option":{
 				"fieldGetValue":"Érték olvasása",
 				"fieldSetCaption":"Címke beállítása",
+				"fieldSetChart":"Write ECharts option object",
 				"fieldSetError":"Hibaüzenet beállítása",
 				"fieldSetFocus":"Jump to field input",
 				"fieldSetOrder":"Set field order in parent",

@@ -120,8 +120,8 @@ let MyBuilderJsFunction = {
 				<template v-if="tabTarget === 'content'">
 					<div class="message" v-html="capApp.entityInput"></div>
 					
-					<template v-if="form !== false && form.query.joins.length !== 0">
-						<div class="placeholders">
+					<template v-if="form !== false">
+						<div class="placeholders" v-if="form.query.joins.length !== 0">
 							
 							<!-- read only form query view -->
 							<h2>{{ capApp.placeholdersFormQuery }}</h2>
@@ -143,7 +143,7 @@ let MyBuilderJsFunction = {
 							/>
 						</div>
 						
-						<!-- current form data field input -->
+						<!-- current form fields -->
 						<div class="entities-title">
 							<my-button
 								@trigger="showHolderFields = !showHolderFields"
@@ -207,6 +207,13 @@ let MyBuilderJsFunction = {
 											:naked="true"
 										/>
 									</template>
+									<my-button
+										v-if="field.isChart"
+										@trigger="selectEntity('field_chart_set',field.id)"
+										:caption="capApp.option.fieldSetChart"
+										:image="radioIcon('field_chart_set',field.id)"
+										:naked="true"
+									/>
 									<my-button
 										@trigger="selectEntity('field_order_set',field.id)"
 										:caption="capApp.option.fieldSetOrder"
@@ -534,6 +541,7 @@ let MyBuilderJsFunction = {
 				out.push({
 					icon:s.getFieldIcon(f),
 					id:id,
+					isChart:f.content === 'chart',
 					isData:f.content === 'data',
 					name:s.displayFieldName(id),
 					ref:s.entityIdMapRef.field[id]
@@ -674,6 +682,7 @@ let MyBuilderJsFunction = {
 				case 'field_value_get':   text = `${prefix}.get_field_value({${this.displayFieldName(this.entityId)}})`;                         break;
 				case 'field_value_set':   text = `${prefix}.set_field_value({${this.displayFieldName(this.entityId)}}, ${this.capApp.value})`;   break;
 				case 'field_caption_set': text = `${prefix}.set_field_caption({${this.displayFieldName(this.entityId)}}, ${this.capApp.value})`; break;
+				case 'field_chart_set':   text = `${prefix}.set_field_chart({${this.displayFieldName(this.entityId)}}, ${this.capApp.value})`;   break;
 				case 'field_error_set':   text = `${prefix}.set_field_error({${this.displayFieldName(this.entityId)}}, ${this.capApp.value})`;   break;
 				case 'field_focus_set':   text = `${prefix}.set_field_focus({${this.displayFieldName(this.entityId)}})`;                         break;
 				case 'field_order_set':   text = `${prefix}.set_field_order({${this.displayFieldName(this.entityId)}}, ${this.capApp.value})`;   break;
@@ -771,7 +780,7 @@ let MyBuilderJsFunction = {
 			});
 			
 			// replace field IDs with placeholders
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|error|focus|order)\\('(${uuid})'`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|chart|error|focus|order)\\('(${uuid})'`,'g');
 			body = body.replace(pat,(match,mode,part,id) => this.fieldIdMap[id] !== undefined
 				? `${prefix}.${mode}_field_${part}({${this.displayFieldName(id)}}` : match
 			);
@@ -842,7 +851,7 @@ let MyBuilderJsFunction = {
 			
 			// replace field value/caption get/set placeholders
 			// stored as: app.get_field_value(F12: 0 display_name... or app.get_field_value(F13: Container...
-			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|error|focus|order)\\(\{F(\\d+)\:.*?\}`,'g');
+			pat = new RegExp(`${prefix}\.(get|set)_field_(value|caption|chart|error|focus|order)\\(\{F(\\d+)\:.*?\}`,'g');
 			body = body.replace(pat,(match,mode,part,ref) => {
 				for(let fieldId in this.entityIdMapRef.field) {
 					if(this.entityIdMapRef.field[fieldId] === parseInt(ref))
