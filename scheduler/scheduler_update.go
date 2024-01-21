@@ -8,7 +8,6 @@ import (
 	"r3/config"
 	"r3/db"
 	"r3/log"
-	"time"
 )
 
 func updateCheck() error {
@@ -21,8 +20,9 @@ func updateCheck() error {
 
 	log.Info("server", fmt.Sprintf("starting update check at '%s'", url))
 
-	httpClient := http.Client{
-		Timeout: time.Second * 10,
+	httpClient, err := config.GetHttpClient(false, 10)
+	if err != nil {
+		return err
 	}
 
 	httpReq, err := http.NewRequest(http.MethodGet, url, nil)

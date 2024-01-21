@@ -29,7 +29,11 @@ func Download(fileId uuid.UUID) (string, error) {
 	fileUrl := fmt.Sprintf("%s/data/download/file.zip?attribute_id=%s&file_id=%s&token=%s",
 		baseUrl, fileAttributeId, fileId, token)
 
-	httpClient := tools.GetHttpClient(skipVerify)
+	httpClient, err := config.GetHttpClient(skipVerify, 30)
+	if err != nil {
+		return "", err
+	}
+
 	httpRes, err := httpClient.Get(fileUrl)
 	if err != nil {
 		return "", err

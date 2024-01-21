@@ -280,6 +280,9 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX IF NOT EXISTS fki_caption_role_id_fkey         ON instance.caption USING btree (role_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_caption_tab_id_fkey          ON instance.caption USING btree (tab_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_caption_widget_id_fkey       ON instance.caption USING btree (widget_id ASC NULLS LAST);
+			
+			-- proxy config
+			INSERT INTO instance.config (name,value) VALUES ('proxyUrl','');
 		`)
 		return "3.7", err
 	},

@@ -53,9 +53,28 @@ let MyAdminConfig = {
 						<td v-if="licenseValid">{{ capApp.licenseStateOk.replace('{COUNT}',this.licenseDays) }}</td>
 						<td v-if="!licenseValid">{{ capApp.licenseStateNok }}</td>
 					</tr>
+					<tr><td colspan="2"></td></tr>
 					<tr>
 						<td>{{ capApp.publicHostName }}</td>
-						<td><input v-model="configInput.publicHostName" /></td>
+						<td>
+							<div class="row gap centered">
+								<input v-model="configInput.publicHostName" />
+								<my-button image="question.png"
+									@trigger="showHelp(capApp.publicHostNameDesc)"
+								/>
+							</div>
+						</td>
+					</tr>
+					<tr>
+						<td>{{ capApp.proxyUrl }}</td>
+						<td>
+							<div class="row gap centered">
+								<input v-model="configInput.proxyUrl" />
+								<my-button image="question.png"
+									@trigger="showHelp(capApp.proxyUrlDesc)"
+								/>
+							</div>
+						</td>
 					</tr>
 					<tr>
 						<td>{{ capApp.productionMode }}</td>
@@ -405,6 +424,15 @@ let MyAdminConfig = {
 				captionTop:this.capApp.dialog.pleaseRead
 			});
 		},
+		loginBgToggle(n) {
+			var list = JSON.parse(this.configInput.loginBackgrounds);
+			
+			const pos = list.indexOf(n);
+			if(pos !== -1) list.splice(pos,1);
+			else           list.push(n);
+			
+			this.configInput.loginBackgrounds = JSON.stringify(list);
+		},
 		publicKeyShow(name,key) {
 			this.$store.commit('dialog',{
 				captionBody:key,
@@ -423,14 +451,8 @@ let MyAdminConfig = {
 			
 			this.publicKeys = this.publicKeys;
 		},
-		loginBgToggle(n) {
-			var list = JSON.parse(this.configInput.loginBackgrounds);
-			
-			const pos = list.indexOf(n);
-			if(pos !== -1) list.splice(pos,1);
-			else           list.push(n);
-			
-			this.configInput.loginBackgrounds = JSON.stringify(list);
+		showHelp(msg) {
+			this.$store.commit('dialog',{ captionBody:msg });
 		},
 		
 		// backend calls

@@ -21,7 +21,7 @@ var (
 		"companyColorHeader", "companyColorLogin", "companyLoginImage",
 		"companyLogo", "companyLogoUrl", "companyName", "companyWelcome", "css",
 		"dbVersionCut", "exportPrivateKey", "iconPwa1", "iconPwa2",
-		"instanceId", "licenseFile", "publicHostName", "repoPass",
+		"instanceId", "licenseFile", "publicHostName", "proxyUrl", "repoPass",
 		"repoPublicKeys", "repoUrl", "repoUser", "tokenSecret",
 		"updateCheckUrl", "updateCheckVersion"}
 

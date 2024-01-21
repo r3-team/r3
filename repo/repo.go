@@ -7,7 +7,6 @@ import (
 	"io"
 	"net/http"
 	"r3/config"
-	"r3/tools"
 )
 
 func getToken(url string, skipVerify bool) (string, error) {
@@ -41,7 +40,11 @@ func post(url string, reqIf interface{}, resIf interface{}, skipVerify bool) err
 	}
 	httpReq.Header.Set("User-Agent", "r3-application")
 
-	httpClient := tools.GetHttpClient(skipVerify)
+	httpClient, err := config.GetHttpClient(skipVerify, 30)
+	if err != nil {
+		return err
+	}
+
 	httpRes, err := httpClient.Do(httpReq)
 	if err != nil {
 		return err

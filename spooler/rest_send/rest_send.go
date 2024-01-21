@@ -7,9 +7,9 @@ import (
 	"io"
 	"net/http"
 	"r3/cache"
+	"r3/config"
 	"r3/db"
 	"r3/log"
-	"r3/tools"
 	"strings"
 
 	"github.com/gofrs/uuid"
@@ -100,7 +100,11 @@ func callExecute(c restCall) error {
 		httpReq.Header.Set(k, v)
 	}
 
-	httpClient := tools.GetHttpClient(c.skipVerify)
+	httpClient, err := config.GetHttpClient(c.skipVerify, 30)
+	if err != nil {
+		return err
+	}
+
 	httpRes, err := httpClient.Do(httpReq)
 	if err != nil {
 		return err
