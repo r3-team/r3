@@ -14,7 +14,7 @@
 	text-align:center;
 	border-bottom:1px solid var(--color-border);
 	border-right:1px solid var(--color-border);
-	background-color:var(--color-bg);
+	background-color:var(--color-bg-bright);
 }
 .tabs .tab-entry:last-child{
 	border-right:none
@@ -22,6 +22,7 @@
 .tabs .tab-entry.active{
 	font-size:110%;
 	border-bottom:none;
+	background-color:var(--color-bg);
 }
 .tabs .tab-entry:not(.active):hover{
 	background-color:var(--color-accent3);

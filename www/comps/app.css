@@ -74,7 +74,7 @@
 	/**/
 	/* colors */
 	--color-bg:            #f7f7f7;
-	--color-bg-dark:       #101010;
+	--color-bg-bright:     #fcfcfc;
 	--color-bright:        #f5f5f5;
 	--color-border:        #9b9b9b;
 	--color-border-bright: #9f9f9f;
@@ -1349,6 +1349,7 @@ table td.maximum{
 .user-dark *{
 	/* color overwites */
 	--color-bg:            #2d2d2d;
+	--color-bg-bright:     #363636;
 	--color-bright:        #323232;
 	--color-border:        #111111;
 	--color-border-bright: #8f8f8f;

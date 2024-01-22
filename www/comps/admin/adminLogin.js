@@ -109,6 +109,7 @@ let MyAdminLogin = {
 			<my-tabs
 				v-model="tabTarget"
 				:entries="['properties','roles']"
+				:entriesIcon="['images/edit.png','images/personMultiple.png']"
 				:entriesText="[capGen.properties,capApp.roles.replace('{COUNT}',roleTotalNonHidden)]"
 			/>
 			
