@@ -372,6 +372,7 @@
 /* calendar overwrites (month/days views) */
 .input-date .calendar-month .day{
 	min-height:unset !important;
+	line-height:16px;
 }
 .input-date .calendar-month .days .item{
 	padding:0px;

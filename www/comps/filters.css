@@ -4,6 +4,10 @@
 	display:flex;
 	flex-flow:column nowrap;
 }
+.filters.userFilter{
+	height:100%;
+	justify-content:space-between;
+}
 .filter-actions{
 	display:flex;
 	flex-flow:row wrap;

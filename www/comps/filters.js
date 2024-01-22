@@ -921,52 +921,53 @@ let MyFilter = {
 let MyFilters = {
 	name:'my-filters',
 	components:{MyFilter},
-	template:`<div class="filters">
-		<div class="filter-actions" v-if="nestedIndexAttributeIds.length !== 0">
-			<slot name="title" />
-			
-			<div>
-				<my-button image="add.png"
-					v-if="showAdd && !userFilter"
-					@trigger="add"
-					:caption="capApp.add"
-					:naked="true"
-				/>
+	template:`<div class="filters" :class="{ userFilter:userFilter }">
+		<div class="column">
+			<div class="filter-actions" v-if="nestedIndexAttributeIds.length !== 0">
+				<slot name="title" />
+				<div>
+					<my-button image="add.png"
+						v-if="showAdd && !userFilter"
+						@trigger="add"
+						:caption="capApp.add"
+						:naked="true"
+					/>
+				</div>
 			</div>
+			
+			<draggable handle=".dragAnchor" group="filters" itemKey="id" animation="100"
+				@change="set"
+				:fallbackOnBody="true"
+				:list="filters"
+			>
+				<template #item="{element,index}">
+					<my-filter
+						@apply-value="apply"
+						@remove="remove"
+						@update="setValue"
+						:builderMode="builderMode"
+						:columns="columns"
+						:columnsMode="columnsMode"
+						:connector="element.connector"
+						:disableContent="disableContent"
+						:entityIdMapRef="entityIdMapRef"
+						:fieldIdMap="fieldIdMap"
+						:indentation="getIndentation(index)"
+						:joins="joins"
+						:joinsParents="joinsParents"
+						:key="index"
+						:moduleId="moduleId"
+						:multipleFilters="filters.length > 1"
+						:nestedIndexAttributeIds="nestedIndexAttributeIds"
+						:nestingLevels="joinsParents.length+1"
+						:operator="element.operator"
+						:position="index"
+						:side0="element.side0"
+						:side1="element.side1"
+					/>
+				</template>
+			</draggable>
 		</div>
-		
-		<draggable handle=".dragAnchor" group="filters" itemKey="id" animation="100"
-			@change="set"
-			:fallbackOnBody="true"
-			:list="filters"
-		>
-			<template #item="{element,index}">
-				<my-filter
-					@apply-value="apply"
-					@remove="remove"
-					@update="setValue"
-					:builderMode="builderMode"
-					:columns="columns"
-					:columnsMode="columnsMode"
-					:connector="element.connector"
-					:disableContent="disableContent"
-					:entityIdMapRef="entityIdMapRef"
-					:fieldIdMap="fieldIdMap"
-					:indentation="getIndentation(index)"
-					:joins="joins"
-					:joinsParents="joinsParents"
-					:key="index"
-					:moduleId="moduleId"
-					:multipleFilters="filters.length > 1"
-					:nestedIndexAttributeIds="nestedIndexAttributeIds"
-					:nestingLevels="joinsParents.length+1"
-					:operator="element.operator"
-					:position="index"
-					:side0="element.side0"
-					:side1="element.side1"
-				/>
-			</template>
-		</draggable>
 		
 		<div class="filter-actions end" v-if="userFilter && nestedIndexAttributeIds.length !== 0">
 			<div class="row gap">

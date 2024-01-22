@@ -413,7 +413,8 @@
 /* filtesr */
 .list-filters{
 	width:100%;
-	max-width:850px;
+	max-width:950px;
+	min-height:360px;
 }
 
 /* CSV */
