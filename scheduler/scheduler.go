@@ -66,7 +66,8 @@ var (
 	loadTasks                        = true // if true, tasks are reloaded from the database on next run
 	loadCounter       int            = 0    // number of times tasks were loaded - used to check whether tasks were reloaded during execution
 	nextExecutionUnix int64          = 0    // unix time of next (earliest) task to run
-	tasks             []task                // all tasks
+	oneDayInSeconds   int64          = 60 * 60 * 24
+	tasks             []task         // all tasks
 	OsExit            chan os.Signal = make(chan os.Signal)
 
 	// main loop
@@ -332,6 +333,9 @@ func load() error {
 		t.runNextUnix = getNextRunFromSchedule(s)
 
 		switch t.name {
+		case "adminMails":
+			t.nameLog = "Admin notification mails"
+			t.fn = adminMails
 		case "backupRun":
 			t.nameLog = "Integrated full backups"
 			t.fn = backup.Run

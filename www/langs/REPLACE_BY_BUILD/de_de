@@ -232,6 +232,13 @@
 				"productionMode":"Der Wartungsmodus wird genutzt, um Anwendungen zu aktualisieren, installieren oder zu entfernen.<br /><br />Beim Aktivieren des Wartungsmodus werden <b>alle Benutzer ohne Adminrechte abgemeldet</b>.",
 				"pleaseRead":"Bitte vor dem Speichern lesen"
 			},
+			"adminMailsDesc":"Wenn ein funktionierendes E-Mail-Konto vorhanden ist, verschickt das System Benachrichtigungen über wichtige Ereignisse. Diese sind derzeit:",
+			"adminMailsHint":"Empfänger-E-Mail-Adresse hinzufügen",
+			"adminMailsList":[
+				"Bevorstehender Ablauf registrierter OAuth-Clients.",
+				"Bevorstehender Ablauf einer aktiven REI3 Professional-Lizenz."
+			],
+			"adminMailsTitle":"Admin-Benachrichtigungen",
 			"appVersion":"Plattform-Version",
 			"bruteforceAttempts":"Host blocken nach Versuchen",
 			"bruteforceCountBlocked":"Blockierte Hosts",
@@ -606,6 +613,7 @@
 				"runNowHint":"Aufgabe wird so bald wie möglich ausgeführt."
 			},
 			"names":{
+				"adminMails":"Admin-Benachrichtigungen",
 				"backupRun":"Integrierte Sicherungen steuern",
 				"cleanupBruteforce":"Bereinigung des Bruteforce-Cache",
 				"cleanupDataLogs":"Bereinigung abgelaufener Änderungshistorie",

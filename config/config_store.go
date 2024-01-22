@@ -17,7 +17,7 @@ var (
 	storeUint64      = make(map[string]uint64)
 	storeUint64Slice = make(map[string][]uint64)
 
-	NamesString = []string{"appName", "appNameShort", "backupDir",
+	NamesString = []string{"adminMails", "appName", "appNameShort", "backupDir",
 		"companyColorHeader", "companyColorLogin", "companyLoginImage",
 		"companyLogo", "companyLogoUrl", "companyName", "companyWelcome", "css",
 		"dbVersionCut", "exportPrivateKey", "iconPwa1", "iconPwa2",

@@ -80,6 +80,11 @@ func GetLicenseUsed() bool {
 	defer access_mx.RUnlock()
 	return license.ValidUntil != 0
 }
+func GetLicenseValidUntil() int64 {
+	access_mx.RLock()
+	defer access_mx.RUnlock()
+	return license.ValidUntil
+}
 func GetTokenSecret() *jwt.HMACSHA {
 	access_mx.RLock()
 	defer access_mx.RUnlock()

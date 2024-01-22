@@ -232,6 +232,13 @@
 				"productionMode":"Modul de întreținere este folosit pentru a actualiza, instala sau elimina aplicații din sistem.<br /><br />Comutarea la modul întreținere <b>va deconecta toți utilizatorii fără permisiuni de administrator</b>.",
 				"pleaseRead":"Vă rugăm să citiți înainte de a salva"
 			},
+			"adminMailsDesc":"If a working email account is available, the system will send out notifications about important events. These are currently:",
+			"adminMailsHint":"Add receiver email address",
+			"adminMailsList":[
+				"Upcoming expiration of registered OAuth clients.",
+				"Upcoming expiration of an active REI3 Professional license."
+			],
+			"adminMailsTitle":"Admin notifications",
 			"appVersion":"Versiunea platformei",
 			"bruteforceAttempts":"Nr. de încercări după care gazdele vor fi blocate",
 			"bruteforceCountBlocked":"Gazde blocate",
@@ -606,6 +613,7 @@
 				"runNowHint":"Task will be executed as soon as possible."
 			},
 			"names":{
+				"adminMails":"Admin notification mails",
 				"backupRun":"Gestionați copiile de siguranță integrate",
 				"cleanupBruteforce":"Curățați memoria cache de brutforce",
 				"cleanupDataLogs":"Curățare jurnalele de modificări expirate",

@@ -100,7 +100,8 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 
 	// clean up on next release
 	/*
-		nothing yet
+		ALTER TABLE instance.admin_mail ALTER COLUMN reason
+			TYPE instance.admin_mail_reason USING reason::text::instance.admin_mail_reason;
 	*/
 
 	"3.6": func(tx pgx.Tx) (string, error) {
@@ -281,8 +282,30 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			CREATE INDEX IF NOT EXISTS fki_caption_tab_id_fkey          ON instance.caption USING btree (tab_id ASC NULLS LAST);
 			CREATE INDEX IF NOT EXISTS fki_caption_widget_id_fkey       ON instance.caption USING btree (widget_id ASC NULLS LAST);
 			
-			-- proxy config
+			-- proxy config & admin notifications
 			INSERT INTO instance.config (name,value) VALUES ('proxyUrl','');
+			INSERT INTO instance.config (name,value) VALUES ('adminMails','');
+			
+			-- admin notification mails
+			CREATE TABLE IF NOT EXISTS instance.admin_mail(
+				reason TEXT NOT NULL,
+				days_before INTEGER[] NOT NULL,
+				date_last_sent BIGINT NOT NULL
+			);
+			INSERT INTO instance.admin_mail (reason,days_before,date_last_sent)
+			VALUES
+				('licenseExpiration','{10,30,90}',0),
+				('oauthClientExpiration','{10,30,90}',0);
+			
+			CREATE TYPE instance.admin_mail_reason AS ENUM ('licenseExpiration','oauthClientExpiration');
+			
+			INSERT INTO instance.task (
+				name,interval_seconds,cluster_master_only,
+				embedded_only,active_only,active
+			) VALUES ('adminMails',86400,true,false,false,true);
+			
+			INSERT INTO instance.schedule (task_name,date_attempt,date_success)
+			VALUES ('adminMails',0,0);
 		`)
 		return "3.7", err
 	},

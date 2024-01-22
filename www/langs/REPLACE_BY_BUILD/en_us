@@ -232,6 +232,13 @@
 				"productionMode":"The maintenance mode is used to update, install or remove applications from the system.<br /><br />Switching to maintenance mode will <b>logout all users without admin permissions</b>.",
 				"pleaseRead":"Please read before saving"
 			},
+			"adminMailsDesc":"If a working email account is available, the system will send out notifications about important events. These are currently:",
+			"adminMailsHint":"Add receiver email address",
+			"adminMailsList":[
+				"Upcoming expiration of registered OAuth clients.",
+				"Upcoming expiration of an active REI3 Professional license."
+			],
+			"adminMailsTitle":"Admin notifications",
 			"appVersion":"Platform version",
 			"bruteforceAttempts":"Block hosts after attempts",
 			"bruteforceCountBlocked":"Blocked hosts",
@@ -606,6 +613,7 @@
 				"runNowHint":"Task will be executed as soon as possible."
 			},
 			"names":{
+				"adminMails":"Admin notification mails",
 				"backupRun":"Manage integrated backups",
 				"cleanupBruteforce":"Cleanup bruteforce cache",
 				"cleanupDataLogs":"Cleanup expired change logs",

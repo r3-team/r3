@@ -232,6 +232,13 @@
 				"productionMode":"A karbantartási mód az alkalmazások frissítéséhez, telepítéséhez vagy eltávolításához szolgál.<br /><br />A karbantartási mód aktiválásakor <b>MINDEN nem adminisztrátor felhasználót kijelentkeztet</b>.",
 				"pleaseRead":"Kérjük, olvassa el a mentés előtt"
 			},
+			"adminMailsDesc":"If a working email account is available, the system will send out notifications about important events. These are currently:",
+			"adminMailsHint":"Add receiver email address",
+			"adminMailsList":[
+				"Upcoming expiration of registered OAuth clients.",
+				"Upcoming expiration of an active REI3 Professional license."
+			],
+			"adminMailsTitle":"Admin notifications",
 			"appVersion":"Platform verzió",
 			"bruteforceAttempts":"Host blokkolása próbálkozások után",
 			"bruteforceCountBlocked":"Blokkolt hosztok",
@@ -606,6 +613,7 @@
 				"runNowHint":"A feladat a lehető leghamarabb végrehajtódik."
 			},
 			"names":{
+				"adminMails":"Admin notification mails",
 				"backupRun":"Beépített biztonsági mentések irányítása",
 				"cleanupBruteforce":"Brute-force gyorsítótár tisztítása",
 				"cleanupDataLogs":"Lejárt változásnaplók tisztítása",

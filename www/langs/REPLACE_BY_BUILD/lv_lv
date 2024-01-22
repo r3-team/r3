@@ -232,6 +232,13 @@
 				"productionMode":"Uzturēšanas režīms tiek izmantots, lai atjauninātu, instalētu vai noņemtu lietotnes no sistēmas.<br /><br />Pārslēgšanās uz uzturēšanas režīmu <b>izlogos ārā visus lietotājus bez administratīvām atļaujām</b>.",
 				"pleaseRead":"Lūdzu, lasiet pirms saglabāšanas"
 			},
+			"adminMailsDesc":"If a working email account is available, the system will send out notifications about important events. These are currently:",
+			"adminMailsHint":"Add receiver email address",
+			"adminMailsList":[
+				"Upcoming expiration of registered OAuth clients.",
+				"Upcoming expiration of an active REI3 Professional license."
+			],
+			"adminMailsTitle":"Admin notifications",
 			"appVersion":"Platformas versija",
 			"bruteforceAttempts":"Bloķēt resursdatorus pēc mēģinājumiem",
 			"bruteforceCountBlocked":"Bloķētie resursdatori",
@@ -606,6 +613,7 @@
 				"runNowHint":"Uzdevums tiks izpildīts pēc iespējas ātrāk."
 			},
 			"names":{
+				"adminMails":"Admin notification mails",
 				"backupRun":"Pārvaldīt integrētās rezerves kopijas",
 				"cleanupBruteforce":"Notīrīt bruteforce kešatmiņu",
 				"cleanupDataLogs":"Notīrīt beidzoties izmaiņu žurnālu ierakstiem",

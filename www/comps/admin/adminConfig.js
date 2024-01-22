@@ -334,6 +334,41 @@ let MyAdminConfig = {
 					</tr>
 				</table>
 			</div>
+			
+			<!-- admin mails -->
+			<div class="contentPart">
+				<div class="contentPartHeader">
+					<img class="icon" src="images/lock.png" />
+					<h1>{{ capApp.adminMailsTitle }}</h1>
+				</div>
+				
+				<p>{{ capApp.adminMailsDesc }}</p>
+				<ul>
+					<li v-for="l in capApp.adminMailsList">{{ l }}</li>
+				</ul>
+				
+				<div class="column">
+					<my-button image="cancel.png"
+						v-for="(c,i) in adminMailContacts"
+						@trigger="adminMailDel(i)"
+						:caption="c"
+						:naked="true"
+					/>
+				</div>
+				<br />
+				
+				<div class="row gap centered default-inputs">
+					<input
+						v-model="adminMailInput"
+						@keyup.enter="adminMailAdd"
+						:placeholder="capApp.adminMailsHint"
+					/>
+					<my-button image="add.png"
+						@trigger="adminMailAdd"
+						:active="adminMailInput !== ''"
+					/>
+				</div>
+			</div>
 		</div>
 	</div>`,
 	props:{
@@ -349,13 +384,14 @@ let MyAdminConfig = {
 	},
 	data() {
 		return {
-			ready:false,
+			adminMailInput:'',
 			configInput:{},
 			bruteforceCountBlocked:0,
 			bruteforceCountTracked:0,
 			loginBackgroundCount:12,
 			publicKeyInputName:'',
-			publicKeyInputValue:''
+			publicKeyInputValue:'',
+			ready:false
 		};
 	},
 	mounted() {
@@ -367,8 +403,6 @@ let MyAdminConfig = {
 		this.$store.commit('keyDownHandlerDel',this.set);
 	},
 	computed:{
-		hasChanges:(s) => JSON.stringify(s.config) !== JSON.stringify(s.configInput),
-		loginBackgrounds:(s) => JSON.parse(s.configInput.loginBackgrounds),
 		publicKeys:{
 			get()  { return JSON.parse(this.configInput.repoPublicKeys); },
 			set(v) { this.configInput.repoPublicKeys = JSON.stringify(v); }
@@ -385,6 +419,11 @@ let MyAdminConfig = {
 			
 			return s.capApp.updateCheckNewer;
 		},
+		
+		// simple
+		adminMailContacts:(s) => s.configInput.adminMails === '' ? [] : JSON.parse(s.configInput.adminMails),
+		hasChanges:       (s) => JSON.stringify(s.config) !== JSON.stringify(s.configInput),
+		loginBackgrounds: (s) => JSON.parse(s.configInput.loginBackgrounds),
 		
 		// stores
 		appVersion:  (s) => s.$store.getters['local/appVersion'],
@@ -406,6 +445,19 @@ let MyAdminConfig = {
 		},
 		
 		// actions
+		adminMailAdd() {
+			if(this.adminMailInput === '') return;
+			
+			let v = JSON.parse(JSON.stringify(this.adminMailContacts));
+			v.push(this.adminMailInput);
+			this.configInput.adminMails = JSON.stringify(v);
+			this.adminMailInput = '';
+		},
+		adminMailDel(index) {
+			let v = JSON.parse(JSON.stringify(this.adminMailContacts));
+			v.splice(index,1);
+			this.configInput.adminMails = JSON.stringify(v);
+		},
 		informBuilderMode() {
 			if(this.configInput.builderMode === '0')
 				return;

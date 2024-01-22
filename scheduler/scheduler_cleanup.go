@@ -14,8 +14,6 @@ import (
 	"github.com/gofrs/uuid"
 )
 
-var oneDayInSeconds int64 = 60 * 60 * 24
-
 // optimize DB
 func dbOptimize() error {
 	_, err := db.Pool.Exec(db.Ctx, `VACUUM`)
