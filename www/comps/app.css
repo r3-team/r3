@@ -876,6 +876,9 @@ table td.maximum{
 .generic-entry-list.height-large{
 	max-height:700px;
 }
+.generic-entry-list.singleColumn{
+	flex-flow:column nowrap;
+}
 .generic-entry-list .entry{
 	width:380px;
 	height:46px;
@@ -895,6 +898,10 @@ table td.maximum{
 	box-shadow:1px 1px 3px var(--color-shade);
 	box-sizing:border-box;
 	transition:background-color 0.2s, border-bottom 0.2s, box-shadow 0.2s;
+}
+.generic-entry-list.singleColumn .entry{
+	width:100%;
+	margin:3px 0px;
 }
 .generic-entry-list.wide .entry{
 	width:500px;

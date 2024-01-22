@@ -449,6 +449,7 @@ let MyBuilderPgFunction = {
 									:contextEntity="'pgFunction'"
 									:contextId="id"
 									:readonly="readonly"
+									:singleColumn="true"
 								/>
 							</td>
 						</tr>

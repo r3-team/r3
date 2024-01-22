@@ -5,7 +5,7 @@ export {MyBuilderPgTriggers as default};
 let MyBuilderPgTriggers = {
 	name:'my-builder-pg-triggers',
 	components:{MyBuilderPgTrigger},
-	template:`<div class="generic-entry-list height-small">
+	template:`<div class="generic-entry-list height-small" :class="{ singleColumn:singleColumn }">
 		<div class="entry"
 			v-if="!readonly"
 			@click="idEdit = null"
@@ -73,7 +73,8 @@ let MyBuilderPgTriggers = {
 	props:{
 		contextEntity:{ type:String,  required:true }, // relation / pgFunction
 		contextId:    { type:String,  required:true }, // ID of relation or pgFunction
-		readonly:     { type:Boolean, required:true }
+		readonly:     { type:Boolean, required:true },
+		singleColumn: { type:Boolean, required:false, default:false }
 	},
 	data() {
 		return {
