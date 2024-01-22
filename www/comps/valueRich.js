@@ -50,6 +50,13 @@ let MyValueRich = {
 			{{ stringValue }}
 		</span>
 		
+		<!-- boolean value -->
+		<img class="boolean"
+			v-if="isBoolean && value !== null"
+			:class="{ ok:value }"
+			:src="value ? 'images/ok.png' : 'images/cancel.png'"
+		/>
+		
 		<!-- files -->
 		<a target="_blank"
 			v-if="isFiles && !isGallery"
@@ -100,6 +107,7 @@ let MyValueRich = {
 	},
 	data() {
 		return {
+			isBoolean:false,
 			isColor:false,
 			isDrawing:false,
 			isFiles:false,
@@ -157,8 +165,7 @@ let MyValueRich = {
 			let atr = this.attributeIdMap[this.attributeId];
 			switch(atr.content) {
 				case 'boolean':
-					this.stringValue = this.value ? this.capGen.option.yes : this.capGen.option.no;
-					return this.isString = true;
+					return this.isBoolean = true;
 				break;
 				case 'files':
 					this.isGallery = this.display === 'gallery';

@@ -68,8 +68,8 @@
 	--image-filter-bright-shade:invert(1) brightness(95%) drop-shadow(1px 1px 2px rgba(0,0,0,0.6));
 	--image-filter-dark:        invert(1) brightness(10%);
 	--image-filter-dark-shade:  invert(1) brightness(10%) drop-shadow(1px 1px 2px rgba(0,0,0,0.6));
-	--image-filter-error:       invert(13%) sepia(92%) saturate(4089%) hue-rotate(359deg) brightness(97%) contrast(88%);
-	--image-filter-success:     invert(36%) sepia(95%) saturate(788%) hue-rotate(76deg) brightness(98%) contrast(93%);
+	--image-filter-error:       invert(13%) sepia(92%) saturate(4089%) hue-rotate(359deg) brightness(97%) contrast(78%);
+	--image-filter-success:     invert(36%) sepia(95%) saturate(788%) hue-rotate(76deg) brightness(98%) contrast(88%);
 	
 	/**/
 	/* colors */
@@ -1383,8 +1383,8 @@ table td.maximum{
 	--image-filter:        invert(1) brightness(90%);
 	--image-filter-alt:    invert(1) brightness(40%);
 	--image-filter-bg:     var(--image-filter);
-	--image-filter-error:  invert(13%) sepia(92%) saturate(4889%) hue-rotate(359deg) brightness(97%) contrast(38%);
-	--image-filter-success:invert(36%) sepia(75%) saturate(1288%) hue-rotate(76deg) brightness(92%) contrast(18%);
+	--image-filter-error:  invert(13%) sepia(95%) saturate(4289%) hue-rotate(359deg) brightness(84%) contrast(58%);
+	--image-filter-success:invert(36%) sepia(75%) saturate(1288%) hue-rotate(76deg) brightness(92%) contrast(48%);
 }
 .user-dark *::-webkit-scrollbar {
 	width:15px;
