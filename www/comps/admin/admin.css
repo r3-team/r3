@@ -132,6 +132,14 @@
 }
 
 
+/* OAuth client */
+.admin-oauth-client{}
+.admin-oauth-client-date-wrap{
+	min-width:330px !important;
+	position:relative;
+}
+
+
 /* backups */
 .admin-backups .note{
 	max-width:500px;

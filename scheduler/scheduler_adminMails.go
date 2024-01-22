@@ -13,8 +13,6 @@ import (
 )
 
 func adminMails() error {
-	now := tools.GetTimeUnix()
-	reasonsSent := make([]string, 0) // avoid multiple mails for the same notification reason
 
 	var templates = struct {
 		intro                        string
@@ -32,10 +30,6 @@ func adminMails() error {
 	}
 
 	var sendMail = func(subject string, body string, dateExpiration int64, reason string) error {
-		if slices.Contains(reasonsSent, reason) {
-			return nil
-		}
-
 		// get mail receivers
 		if config.GetString("adminMails") == "" {
 			log.Warning("server", "cannot send admin notification mails", fmt.Errorf("no mail receivers defined"))
@@ -72,7 +66,6 @@ func adminMails() error {
 		`, reason); err != nil {
 			return err
 		}
-		reasonsSent = append(reasonsSent, reason)
 		return nil
 	}
 
@@ -101,31 +94,54 @@ func adminMails() error {
 	}
 	rows.Close()
 
+	// collect earliest expirying OAuth client
+	var dateExpirationOauth int64
+	if err := db.Pool.QueryRow(db.Ctx, `
+		SELECT date_expiry
+		FROM instance.oauth_client
+		WHERE date_expiry > DATE_PART('EPOCH',CURRENT_DATE)
+		ORDER BY date_expiry ASC
+		LIMIT 1
+	`).Scan(&dateExpirationOauth); err != nil {
+		return err
+	}
+
 	// send admin mails
+	now := tools.GetTimeUnix()
+	reasonsSent := make([]string, 0) // avoid multiple mails for the same notification reason
+
 	for _, am := range adminMails {
 		for _, daysBefore := range am.daysBeforeList {
+			if slices.Contains(reasonsSent, am.reason) {
+				continue
+			}
+
+			var body, subject string
+			var dateExpiration int64
 
 			switch am.reason {
 			case "licenseExpiration":
 				if !config.GetLicenseUsed() {
 					continue
 				}
-				dateExpiration := config.GetLicenseValidUntil()
-				dateNotifySend := dateExpiration - (daysBefore * oneDayInSeconds)
+				dateExpiration = config.GetLicenseValidUntil()
+				subject = templates.licenseExpirationSubject
+				body = templates.licenseExpirationBody
 
-				if now < dateNotifySend || am.dateLastSent > dateNotifySend {
-					continue
-				}
-
-				if err := sendMail(
-					templates.licenseExpirationSubject,
-					templates.licenseExpirationBody,
-					dateExpiration, am.reason); err != nil {
-
-					return err
-				}
 			case "oauthClientExpiration":
+				dateExpiration = dateExpirationOauth
+				subject = templates.oauthClientExpirationSubject
+				body = templates.oauthClientExpirationBody
 			}
+
+			dateNotifySend := dateExpiration - (daysBefore * oneDayInSeconds)
+			if now < dateNotifySend || am.dateLastSent > dateNotifySend {
+				continue
+			}
+			if err := sendMail(subject, body, dateExpiration, am.reason); err != nil {
+				return err
+			}
+			reasonsSent = append(reasonsSent, am.reason)
 		}
 	}
 	return nil

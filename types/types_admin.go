@@ -84,6 +84,7 @@ type OauthClient struct {
 	Name         string   `json:"name"`
 	ClientId     string   `json:"clientId"`
 	ClientSecret string   `json:"clientSecret"`
+	DateExpiry   int64    `json:"dateExpiry"`
 	Scopes       []string `json:"scopes"`
 	Tenant       string   `json:"tenant"`
 	TokenUrl     string   `json:"tokenUrl"`

@@ -37,7 +37,7 @@ func LoadOauthClientMap() error {
 	oauthClientIdMap = make(map[int32]types.OauthClient)
 
 	rows, err := db.Pool.Query(db.Ctx, `
-		SELECT id, name, client_id, client_secret, scopes, tenant, token_url
+		SELECT id, name, client_id, client_secret, date_expiry, scopes, tenant, token_url
 		FROM instance.oauth_client
 	`)
 	if err != nil {
@@ -49,7 +49,7 @@ func LoadOauthClientMap() error {
 		var c types.OauthClient
 
 		if err := rows.Scan(&c.Id, &c.Name, &c.ClientId, &c.ClientSecret,
-			&c.Scopes, &c.Tenant, &c.TokenUrl); err != nil {
+			&c.DateExpiry, &c.Scopes, &c.Tenant, &c.TokenUrl); err != nil {
 
 			return err
 		}

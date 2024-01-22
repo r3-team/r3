@@ -154,6 +154,7 @@ var upgradeFunctions = map[string]func(tx pgx.Tx) (string, error){
 			    tenant TEXT NOT NULL,
 			    client_id TEXT NOT NULL,
 			    client_secret TEXT NOT NULL,
+			    date_expiry BIGINT NOT NULL,
 			    scopes TEXT[] NOT NULL,
 			    token_url TEXT NOT NULL,
 			    CONSTRAINT oauth_clienty_pkey PRIMARY KEY (id)

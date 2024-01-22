@@ -1,7 +1,10 @@
+import MyInputDate      from '../inputDate.js';
+import {getUnixNowDate} from '../shared/time.js';
 export {MyAdminOauthClient as default};
 
 let MyAdminOauthClient = {
 	name:'my-admin-oauth-client',
+	components:{ MyInputDate },
 	template:`<div class="app-sub-window under-header at-top with-margin" @mousedown.self="$emit('close')">
 		
 		<div class="contentBox admin-oauth-client float">
@@ -68,6 +71,21 @@ let MyAdminOauthClient = {
 						<td><input v-model="inputs.clientSecret" :disabled="readonly" type="password" /></td>
 						<td>{{ capApp.clientSecretHint }}</td>
 					</tr>
+					<tr>
+						<td>{{ capApp.dateExpiry }}</td>
+						<td>
+							<div class="input-custom admin-oauth-client-date-wrap">
+								<my-input-date
+									@set-unix-from="inputs.dateExpiry = $event"
+									:isDate="true"
+									:isTime="false"
+									:isValid="true"
+									:unixFrom="inputs.dateExpiry"
+								/>
+							</div>
+						</td>
+						<td>{{ capApp.dateExpiryHint }}</td>
+					</tr>
 					<tr v-if="isNew">
 						<td>{{ capApp.template }}</td>
 						<td>
@@ -91,7 +109,7 @@ let MyAdminOauthClient = {
 								/>
 								<div class="row gap centered">
 									<input v-model="scopeLine" :disabled="readonly" />
-									<my-button image="save.png"
+									<my-button image="add.png"
 										@trigger="inputs.scopes.push(scopeLine);scopeLine = ''"
 										:active="scopeLine !== ''"
 									/>
@@ -144,6 +162,7 @@ let MyAdminOauthClient = {
 			name:'',
 			clientId:'',
 			clientSecret:'',
+			dateExpiry:s.getUnixNowDate(),
 			scopes:[],
 			tenant:'',
 			tokenUrl:''
@@ -157,6 +176,7 @@ let MyAdminOauthClient = {
 			s.inputs.name          !== '' &&
 			s.inputs.clientId      !== '' &&
 			s.inputs.clientSecret  !== '' &&
+			s.inputs.dateExpiry    !== null &&
 			s.inputs.scopes.length !== 0 &&
 			s.inputs.tokenUrl      !== '',
 		isNew:(s) => s.id === 0,
@@ -166,24 +186,18 @@ let MyAdminOauthClient = {
 		capGen:(s) => s.$store.getters.captions.generic
 	},
 	mounted() {
-		window.addEventListener('keydown',this.handleHotkeys);
+		this.$store.commit('keyDownHandlerSleep');
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.set,key:'s',keyCtrl:true});
+		this.$store.commit('keyDownHandlerAdd',{fnc:this.close,key:'Escape',keyCtrl:false});
 	},
 	unmounted() {
-		window.removeEventListener('keydown',this.handleHotkeys);
+		this.$store.commit('keyDownHandlerDel',this.set);
+		this.$store.commit('keyDownHandlerDel',this.close);
+		this.$store.commit('keyDownHandlerWake');
 	},
 	methods:{
-		handleHotkeys(e) {
-			if(e.ctrlKey && e.key === 's') {
-				if(this.canSave)
-					this.set();
-				
-				e.preventDefault();
-			}
-			if(e.key === 'Escape') {
-				this.$emit('close');
-				e.preventDefault();
-			}
-		},
+		// external
+		getUnixNowDate,
 		
 		// actions
 		applyTemplate(value) {
@@ -193,6 +207,9 @@ let MyAdminOauthClient = {
 					this.inputs.tokenUrl = 'https://login.microsoftonline.com/{TENANT}/oauth2/v2.0/token';
 				break;
 			}
+		},
+		close() {
+			this.$emit('close');
 		},
 		reloadAndClose() {
 			ws.send('oauthClient','reload',{},true).then(
@@ -227,11 +244,14 @@ let MyAdminOauthClient = {
 			);
 		},
 		set() {
+			if(!this.canSave) return;
+			
 			ws.send('oauthClient','set',{
 				id:this.id,
 				name:this.inputs.name,
 				clientId:this.inputs.clientId,
 				clientSecret:this.inputs.clientSecret,
+				dateExpiry:this.inputs.dateExpiry,
 				scopes:this.inputs.scopes,
 				tenant:this.inputs.tenant,
 				tokenUrl:this.inputs.tokenUrl.replace('{TENANT}',this.inputs.tenant)

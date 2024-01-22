@@ -1,4 +1,5 @@
 import MyAdminOauthClient from './adminOauthClient.js';
+import {getUnixFormat}    from '../shared/time.js';
 export {MyAdminOauthClients as default};
 
 let MyAdminOauthClients = {
@@ -33,8 +34,9 @@ let MyAdminOauthClients = {
 					:key="e.id"
 					:title="e.name"
 				>
-					<div class="row centered">
+					<div class="lines">
 						<span>{{ e.name }}</span>
+						<span class="subtitle">{{ capApp.dateExpiry + ': ' + getUnixFormat(e.dateExpiry,settings.dateFormat) }}</span>
 					</div>
 				</div>
 			</div>
@@ -62,13 +64,17 @@ let MyAdminOauthClients = {
 		// stores
 		capApp:      (s) => s.$store.getters.captions.admin.oauthClient,
 		capGen:      (s) => s.$store.getters.captions.generic,
-		licenseValid:(s) => s.$store.getters.licenseValid
+		licenseValid:(s) => s.$store.getters.licenseValid,
+		settings:    (s) => s.$store.getters.settings
 	},
 	mounted() {
 		this.get();
 		this.$store.commit('pageTitle',this.menuTitle);
 	},
 	methods:{
+		// externals
+		getUnixFormat,
+		
 		// backend calls
 		get() {
 			ws.send('oauthClient','get',true).then(
