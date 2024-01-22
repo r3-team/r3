@@ -1200,7 +1200,6 @@
 			"placeholders":"Segnaposti",
 			"placeholdersCollections":"Collections",
 			"placeholdersFormFields":"Form fields",
-			"placeholdersFormQuery":"Query dati modulo",
 			"runOnce":"Once",
 			"runRegular":"Regularly",
 			"runType":"Execution",

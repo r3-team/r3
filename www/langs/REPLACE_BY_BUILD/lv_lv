@@ -1200,7 +1200,6 @@
 			"placeholders":"Placeholders",
 			"placeholdersCollections":"Collections",
 			"placeholdersFormFields":"Form fields",
-			"placeholdersFormQuery":"Form data query",
 			"runOnce":"Once",
 			"runRegular":"Regularly",
 			"runType":"Execution",

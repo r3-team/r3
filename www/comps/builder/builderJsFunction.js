@@ -121,11 +121,17 @@ let MyBuilderJsFunction = {
 					<div class="message" v-html="capApp.entityInput"></div>
 					
 					<template v-if="form !== false">
+						<div class="row gap centered">
+							<router-link :to="'/builder/form/'+form.id">
+								<my-button image="open.png"
+									:caption="capGen.form + ': ' + form.name"
+									:captionTitle="capGen.button.open"
+									:naked="true"
+								/>
+							</router-link>
+						</div>
+						
 						<div class="placeholders" v-if="form.query.joins.length !== 0">
-							
-							<!-- read only form query view -->
-							<h2>{{ capApp.placeholdersFormQuery }}</h2>
-							
 							<my-builder-query
 								:allowChoices="false"
 								:allowFixedLimit="false"
