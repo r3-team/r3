@@ -209,7 +209,8 @@ let MyAdminScheduler = {
 		moduleIdMap:    (s) => s.$store.getters['schema/moduleIdMap'],
 		pgFunctionIdMap:(s) => s.$store.getters['schema/pgFunctionIdMap'],
 		capApp:         (s) => s.$store.getters.captions.admin.scheduler,
-		capGen:         (s) => s.$store.getters.captions.generic
+		capGen:         (s) => s.$store.getters.captions.generic,
+		settings:       (s) => s.$store.getters.settings
 	},
 	methods:{
 		// externals
@@ -219,7 +220,7 @@ let MyAdminScheduler = {
 		
 		// presentation
 		displayTime(unixTime) {
-			return unixTime === 0 ? '-' : this.getUnixFormat(unixTime,'Y-m-d H:i:S');
+			return unixTime === 0 ? '-' : this.getUnixFormat(unixTime,`${this.settings.dateFormat} H:i:S`);
 		},
 		displayName(name) {
 			return this.capApp.names[name] === undefined ? name : this.capApp.names[name];

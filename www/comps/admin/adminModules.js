@@ -20,7 +20,7 @@ let MyAdminModulesItem = {
 		</td>
 		<td class="minimum">v{{ module.releaseBuild }}</td>
 		<td class="noWrap">
-			{{ module.releaseDate === 0 ? '-' : getUnixFormat(module.releaseDate,'Y-m-d') }}
+			{{ module.releaseDate === 0 ? '-' : getUnixFormat(module.releaseDate,settings.dateFormat) }}
 		</td>
 		<td class="noWrap">
 			<div v-if="!isInRepo">
