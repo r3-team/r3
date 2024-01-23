@@ -40,6 +40,29 @@ export function getFirstColumnUsableAsAggregator(batch,columns) {
 	return null;
 };
 
+export function getOrderIndexesFromColumnBatch(columnBatch,columns,orders) {
+	if(columnBatch.columnIndexesSortBy.length === 0)
+		return [];
+	
+	let orderIndexesUsed = [];
+	for(const columnIndexSort of columnBatch.columnIndexesSortBy) {
+		const col = columns[columnIndexSort];
+		
+		for(let i = 0, j = orders.length; i < j; i++) {
+			const order = orders[i];
+			
+			if(col.subQuery && order.expressionPos === columnIndexSort) {
+				orderIndexesUsed.push(i);
+				continue;
+			}
+			
+			if(order.attributeId === col.attributeId && order.index === col.index)
+				orderIndexesUsed.push(i);
+		}
+	}
+	return orderIndexesUsed;
+};
+
 export function getColumnBatches(moduleId,columns,columnIndexesIgnore,showCaptions) {
 	const isMobile = MyStore.getters.isMobile;
 	let batches   = [];

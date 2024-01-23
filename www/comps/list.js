@@ -10,7 +10,10 @@ import MyValueRich        from './valueRich.js';
 import {consoleError}     from './shared/error.js';
 import {getCaption}       from './shared/language.js';
 import {isAttributeFiles} from './shared/attribute.js';
-import {getColumnTitle}   from './shared/column.js';
+import {
+	getColumnTitle,
+	getOrderIndexesFromColumnBatch
+} from './shared/column.js';
 import {
 	fieldOptionGet,
 	fieldOptionSet
@@ -400,12 +403,12 @@ let MyList = {
 											:columnBatch="b"
 											:columnIdMapAggr="columnIdMapAggr"
 											:columns="columns"
-											:columnSortPos="getColumnBatchSortPos(b)"
 											:filters="filters"
 											:filtersColumn="filtersColumn"
 											:lastInRow="i === columnBatches.length - 1"
 											:joins="relationsJoined"
 											:orders="orders"
+											:orderOverwritten="orderOverwritten"
 											:relationId="query.relationId"
 											:rowCount="count"
 											:show="columnBatchIndexOption === i"
@@ -781,7 +784,7 @@ let MyList = {
 	},
 	computed:{
 		// columns can be batched by using the same batch number
-		// first column in batch is used for header caption and ordering
+		// first column in batch is used for header caption
 		columnBatches:(s) => {
 			let batches   = [];
 			let addColumn = (column,index) => {
@@ -802,11 +805,9 @@ let MyList = {
 						
 						// add its own column index + sort setting + width to batch
 						batches[i].columnIndexes.push(index);
-						batches[i].columnIndexSortBy = batches[i].columnIndexSortBy !== -1 || noSort
-							? batches[i].columnIndexSortBy : index;
 						
-						if(isColor)
-							batches[i].columnIndexColor = index;
+						if(!noSort) batches[i].columnIndexesSortBy.push(index);
+						if(isColor) batches[i].columnIndexColor = index;
 						
 						if(!batches[i].vertical)
 							batches[i].basis += column.basis;
@@ -823,10 +824,14 @@ let MyList = {
 				batches.push({
 					basis:column.basis,
 					batch:column.batch,
+					batchOrderIndex:batches.length,
 					caption:s.getColumnTitle(column,s.moduleId),
 					columnIndexes:!hidden ? [index] : [],
+					columnIndexesSortBy:noSort ? [] : [index],
 					columnIndexColor:!isColor ? -1 : index,
-					columnIndexSortBy:noSort ? -1 : index,
+					orderIndexesSmallest:0, // smallest order index used to sort this column batch by
+					orderIndexesUsed:[],    // which order indexes were used to sort this column batch by, empty if batch was not sorted by
+					orderPosition:0,        // position of this column batch sort compared to other column batches (smallest sorted by first)
 					style:'',
 					vertical:column.batchVertical
 				});
@@ -835,15 +840,26 @@ let MyList = {
 				addColumn(s.columns[i],i);
 			}
 			
-			// batches with no columns are removed
+			// process finished batches
 			for(let i = 0, j = batches.length; i < j; i++) {
 				if(batches[i].columnIndexes.length === 0) {
-					batches.splice(i,1);
+					batches.splice(i,1); // batches with no columns are removed
 					i--; j--;
 					continue;
 				}
 				if(batches[i].basis !== 0)
 					batches[i].style = `max-width:${batches[i].basis}px`;
+				
+				batches[i].orderIndexesUsed     = s.getOrderIndexesFromColumnBatch(batches[i],s.columns,s.orders);
+				batches[i].orderIndexesSmallest = batches[i].orderIndexesUsed.length !== 0 ? Math.min(...batches[i].orderIndexesUsed) : 999;
+			}
+			
+			// calculate which batch is sorted by in order (to show sort order indicators)
+			const batchesSortedBySmallestOrderIndex =
+				[...batches].sort((a,b) => a.orderIndexesSmallest > b.orderIndexesSmallest ? 1 : -1);
+			
+			for(let i = 0, j = batchesSortedBySmallestOrderIndex.length; i < j; i++) {
+				batches[batchesSortedBySmallestOrderIndex[i].batchOrderIndex].orderPosition = i;
 			}
 			return batches;
 		},
@@ -1111,6 +1127,7 @@ let MyList = {
 		getChoiceFilters,
 		getColumnTitle,
 		getFiltersEncapsulated,
+		getOrderIndexesFromColumnBatch,
 		getQueryAttributesPkFilter,
 		getQueryExpressions,
 		getRelationsJoined,
@@ -1204,9 +1221,7 @@ let MyList = {
 			// fullpage lists update their form arguments, this results in history change
 			// history change then triggers form load
 			let orders = [];
-			for(let i = 0, j = this.orders.length; i < j; i++) {
-				let o = this.orders[i];
-				
+			for(let o of this.orders) {
 				if(typeof o.expressionPos !== 'undefined')
 					// sort by expression position
 					orders.push(`expr_${o.expressionPos}_${o.ascending ? 'asc' : 'desc'}`);
@@ -1387,19 +1402,17 @@ let MyList = {
 			if(!this.orderOverwritten)
 				this.orders = [];
 			
-			const pos = this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
-			
-			// remove sort if direction null or same sort option was chosen
-			if(pos !== -1 && (directionAsc === null || this.orders[pos].ascending === directionAsc)) {
-				this.orders.splice(pos,1);
-			}
-			else {
-				if(pos === -1) {
-					// add new sort
-					const col = this.columns[columnBatch.columnIndexSortBy];
+			const orderIndexesUsed = this.getOrderIndexesFromColumnBatch(columnBatch,this.columns,this.orders);
+			const notOrdered       = orderIndexesUsed.length === 0;
+			if(notOrdered) {
+				if(directionAsc === null)
+					return; // not ordered and nothing to order, no change
+				
+				for(const columnIndexSort of columnBatch.columnIndexesSortBy) {
+					const col = this.columns[columnIndexSort];
 					if(col.subQuery) {
 						this.orders.push({
-							expressionPos:columnBatch.columnIndexSortBy, // equal to expression index
+							expressionPos:columnIndexSort, // equal to expression index
 							ascending:directionAsc
 						});
 					}
@@ -1411,9 +1424,14 @@ let MyList = {
 						});
 					}
 				}
-				else if(this.orders[pos].ascending !== directionAsc) {
-					// overwrite sort direction
-					this.orders[pos].ascending = directionAsc;
+			} else {
+				if(directionAsc === null) {
+					this.orders = this.orders.filter((v,i) => !orderIndexesUsed.includes(i));
+				} else {
+					for(const orderIndex of orderIndexesUsed) {
+						if(this.orders[orderIndex].ascending !== directionAsc)
+							this.orders[orderIndex].ascending = directionAsc;
+					}
 				}
 			}
 			this.reloadInside('order');
@@ -1557,10 +1575,6 @@ let MyList = {
 		},
 		
 		// helpers
-		getColumnBatchSortPos(columnBatch) {
-			return !this.orderOverwritten
-				? -1 : this.getColumnPosInOrder(columnBatch.columnIndexSortBy);
-		},
 		getColumnPosInOrder(columnIndex) {
 			if(columnIndex === -1)
 				return -1;

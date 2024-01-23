@@ -20,11 +20,11 @@ let MyListColumnBatch = {
 		/>
 		
 		<my-button
-			v-if="isOrdered"
+			v-if="isOrdered && orderOverwritten"
 			@trigger="$emit('set-order',!isOrderedAsc)"
 			@trigger-right="$emit('set-order',null)"
 			:blockBubble="true"
-			:caption="orders.length === 1 ? '' : String(columnSortPos+1)"
+			:caption="columnBatch.orderPosition === 0 ? '' : String(columnBatch.orderPosition)"
 			:captionTitle="capApp.button.columnOrderFlip"
 			:image="isOrderedAsc ? 'triangleUp.png' : 'triangleDown.png'"
 			:naked="true"
@@ -44,7 +44,7 @@ let MyListColumnBatch = {
 			<div class="input-dropdown default-inputs columnOption">
 				
 				<!-- sorting -->
-				<div class="columnOptionItem" v-if="columnBatch.columnIndexSortBy !== -1">
+				<div class="columnOptionItem" v-if="canOrder">
 					<my-button image="sort.png"
 						@trigger="$emit('del-order')"
 						:active="isOrdered"
@@ -58,7 +58,7 @@ let MyListColumnBatch = {
 					/>
 					<my-button caption="\u25BC"
 						@trigger="$emit('set-order',false)"
-						:image="isOrderedDesc ? 'radio1.png' : 'radio0.png'"
+						:image="isOrdered && !isOrderedAsc ? 'radio1.png' : 'radio0.png'"
 						:naked="true"
 					/>
 				</div>
@@ -140,18 +140,18 @@ let MyListColumnBatch = {
 		</div>
 	</div>`,
 	props:{
-		columnBatch:    { type:Object,  required:true }, // column batch to show options for
-		columnIdMapAggr:{ type:Object,  required:true },
-		columns:        { type:Array,   required:true }, // list columns
-		columnSortPos:  { type:Number,  required:true }, // list sort for this column (number indicates sort position)
-		filters:        { type:Array,   required:true }, // list filters (predefined)
-		filtersColumn:  { type:Array,   required:true }, // list filters from users column selection
-		lastInRow:      { type:Boolean, required:true },
-		joins:          { type:Array,   required:true }, // list joins
-		orders:         { type:Array,   required:true }, // list orders
-		relationId:     { type:String,  required:true }, // list query base relation ID
-		rowCount:       { type:Number,  required:true }, // list total row count
-		show:           { type:Boolean, required:true }
+		columnBatch:     { type:Object,  required:true }, // column batch to show options for
+		columnIdMapAggr: { type:Object,  required:true },
+		columns:         { type:Array,   required:true }, // list columns
+		filters:         { type:Array,   required:true }, // list filters (predefined)
+		filtersColumn:   { type:Array,   required:true }, // list filters from users column selection
+		lastInRow:       { type:Boolean, required:true },
+		joins:           { type:Array,   required:true }, // list joins
+		orders:          { type:Array,   required:true }, // list orders
+		orderOverwritten:{ type:Boolean, required:true }, // list orders were overwritten by user
+		relationId:      { type:String,  required:true }, // list query base relation ID
+		rowCount:        { type:Number,  required:true }, // list total row count
+		show:            { type:Boolean, required:true }
 	},
 	emits:[
 		'close','del-aggregator','del-order','set-aggregator',
@@ -224,15 +224,15 @@ let MyListColumnBatch = {
 		// simple
 		aggrColumn:     (s) => s.getFirstColumnUsableAsAggregator(s.columnBatch,s.columns),
 		canOpen:        (s) => s.rowCount > 1 || s.isFiltered,
+		canOrder:       (s) => s.columnBatch.columnIndexesSortBy.length !== 0,
 		showFilterAny:  (s) => s.showFilterItems || s.showFilterText,
 		showFilterItems:(s) => s.values.length != 0,
 		showFilterText: (s) => s.values.length >= 5 && !s.isDateOrTime,
 		isArrayInput:   (s) => typeof s.input === 'object',
 		isDateOrTime:   (s) => s.isValidFilter && ['datetime','date','time'].includes(s.attributeIdMap[s.columnUsedFilter.attributeId].contentUse),
 		isFiltered:     (s) => s.columnFilterIndexes.length !== 0,
-		isOrdered:      (s) => s.columnSortPos !== -1,
-		isOrderedAsc:   (s) => s.isOrdered && s.orders[s.columnSortPos].ascending,
-		isOrderedDesc:  (s) => s.isOrdered && !s.orders[s.columnSortPos].ascending,
+		isOrdered:      (s) => s.columnBatch.orderIndexesUsed.length !== 0,
+		isOrderedAsc:   (s) => s.isOrdered && s.orders[s.columnBatch.orderIndexesUsed[0]].ascending,
 		isValidFilter:  (s) => s.columnUsedFilter !== null,
 		
 		// stores
