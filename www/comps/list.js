@@ -567,20 +567,12 @@ let MyList = {
 								<!-- sorting -->
 								<template v-if="hasResults">
 									<span class="select">{{ capApp.orderBy }}</span>
-									<select
-										@change="cardsSetOrderBy($event.target.value)"
-										v-model.number="cardsOrderByColumnIndex"
-									>
+									<select @change="cardsSetOrderBy($event.target.value)" :value="cardsOrderByColumnBatchIndex">
 										<option value="-1">-</option>
-										<option
-											v-for="(b,i) in columnBatches.filter(v => v.columnIndexSortBy !== -1)"
-											:value="b.columnIndexSortBy"
-										>
-											{{ b.caption }}
-										</option>
-									</select>
+										<option v-for="(b,i) in columnBatches" :value="i">{{ b.caption }}</option>
+									</select>	
 									<my-button
-										v-if="orders.length !== 0"
+										v-if="cardsOrderByColumnBatchIndex !== -1"
 										@trigger="cardsToggleOrderBy"
 										:image="orders[0].ascending ? 'triangleUp.png' : 'triangleDown.png'"
 										:naked="true"
@@ -748,7 +740,7 @@ let MyList = {
 			refTabindex:'input_row_', // prefix for vue references to tabindex elements
 			
 			// list card layout state
-			cardsOrderByColumnIndex:-1,
+			cardsOrderByColumnBatchIndex:-1,
 			cardsCaptions:true,
 			
 			// list data
@@ -1259,10 +1251,10 @@ let MyList = {
 			this.orders = JSON.parse(params['orderby'].value);
 			
 			// apply first order for card layout selector
-			this.cardsOrderByColumnIndex = -1;
-			for(let i = 0, j = this.columns.length; i < j; i++) {
-				if(this.getColumnPosInOrder(i) !== -1) {
-					this.cardsOrderByColumnIndex = i;
+			this.cardsOrderByColumnBatchIndex = -1;
+			for(let i = 0, j = this.columnBatches.length; i < j; i++) {
+				if(this.columnBatches[i].orderIndexesUsed.length !== 0) {
+					this.cardsOrderByColumnBatchIndex = i;
 					break;
 				}
 			}
@@ -1505,30 +1497,20 @@ let MyList = {
 		},
 		
 		// user actions, cards layout
-		cardsSetOrderBy(columnIndexSortByString) {
-			const columnIndexSortBy = parseInt(columnIndexSortByString);
+		cardsSetOrderBy(columnBatchIndexStr) {
+			const columnBatchIndex = parseInt(columnBatchIndexStr);
+			this.cardsOrderByColumnBatchIndex = columnBatchIndex;
 			this.orders = [];
 			
-			if(columnIndexSortBy !== -1) {
-				const col = this.columns[columnIndexSortBy];
-				if(col.subQuery) {
-					this.orders.push({
-						expressionPos:columnIndexSortBy, // equal to expression index
-						ascending:true
-					});
-				}
-				else {
-					this.orders.push({
-						attributeId:col.attributeId,
-						index:col.index,
-						ascending:true
-					});
-				}
-			}
+			if(columnBatchIndex === -1) return;
+			
+			this.setOrder(this.columnBatches[columnBatchIndex],true);
 			this.reloadInside('order');
 		},
 		cardsToggleOrderBy() {
-			this.orders[0].ascending = !this.orders[0].ascending;
+			const wasAsc = this.orders[0].ascending;
+			this.orders = [];
+			this.setOrder(this.columnBatches[this.cardsOrderByColumnBatchIndex],!wasAsc);
 			this.reloadInside('order');
 		},
 		
@@ -1572,30 +1554,6 @@ let MyList = {
 			}
 			if(this.hasUpdateBulk && rows.length !== 0)
 				this.$emit('open-form-bulk',rows,false);
-		},
-		
-		// helpers
-		getColumnPosInOrder(columnIndex) {
-			if(columnIndex === -1)
-				return -1;
-			
-			let col = this.columns[columnIndex];
-			for(let i = 0, j = this.orders.length; i < j; i++) {
-				
-				if(col.subQuery) {
-					if(this.orders[i].expressionPos === columnIndex)
-						return i;
-					
-					continue;
-				}
-				
-				if(this.orders[i].attributeId === col.attributeId
-					&& this.orders[i].index === col.index) {
-					
-					return i;
-				}
-			}
-			return -1;
 		},
 		
 		// backend calls
