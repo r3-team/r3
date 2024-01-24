@@ -14,7 +14,7 @@
 	},
 	"paths": {
 		"certificates": "data/certificates/",
-		"embeddedDbBin": "pgsql/bin/",
+		"embeddedDbBin": "pgsql16/bin/",
 		"embeddedDbData": "data/database/",
 		"files": "data/files/",
 		"temp": "data/temp/",
