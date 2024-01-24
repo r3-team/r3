@@ -22,8 +22,8 @@ func Del_tx(tx pgx.Tx, id uuid.UUID) error {
 		SELECT pr.record_id_wofk, r.name, m.name, p.protected
 		FROM app.preset AS p
 		INNER JOIN instance.preset_record AS pr ON pr.preset_id = p.id
-		INNER JOIN app.relation AS r ON r.id = p.relation_id
-		INNER JOIN app.module   AS m ON m.id = r.module_id
+		INNER JOIN app.relation           AS r  ON r.id         = p.relation_id
+		INNER JOIN app.module             AS m  ON m.id         = r.module_id
 		WHERE p.id = $1
 	`, id).Scan(&recordId, &relName, &modName, &protected); err != nil && err != pgx.ErrNoRows {
 		return err
@@ -96,7 +96,6 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 		return errors.New("cannot set preset with zero values")
 	}
 
-	// resolve dependencies
 	modName, relName, err := schema.GetRelationNamesById_tx(tx, relationId)
 	if err != nil {
 		return err
@@ -134,7 +133,7 @@ func Set_tx(tx pgx.Tx, relationId uuid.UUID, id uuid.UUID, name string,
 	}
 
 	// set new preset values
-	if err := setValues_tx(tx, id, values); err != nil {
+	if err := setValues_tx(tx, relationId, id, values); err != nil {
 		return err
 	}
 
@@ -203,7 +202,7 @@ func getValues(presetId uuid.UUID) ([]types.PresetValue, error) {
 	return values, nil
 }
 
-func setValues_tx(tx pgx.Tx, presetId uuid.UUID, values []types.PresetValue) error {
+func setValues_tx(tx pgx.Tx, relationId uuid.UUID, presetId uuid.UUID, values []types.PresetValue) error {
 
 	// delete old preset values
 	if _, err := tx.Exec(db.Ctx, `
@@ -222,6 +221,20 @@ func setValues_tx(tx pgx.Tx, presetId uuid.UUID, values []types.PresetValue) err
 			if err != nil {
 				return err
 			}
+		}
+
+		// make sure that preset values belong to the correct relation
+		var relationIdAtr uuid.UUID
+		if err := tx.QueryRow(db.Ctx, `
+			SELECT relation_id
+			FROM app.attribute
+			WHERE id = $1
+		`, value.AttributeId).Scan(&relationIdAtr); err != nil {
+			return err
+		}
+
+		if relationIdAtr.String() != relationId.String() {
+			return fmt.Errorf("cannot save preset values, at least 1 attribute value is from a different relation")
 		}
 
 		if _, err := tx.Exec(db.Ctx, `
