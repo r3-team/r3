@@ -133,7 +133,7 @@ let MyInputRichtext = {
 			
 			this.imageList = [];
 			for(let f of this.valueFiles) {
-				if(!f.name.match(/\.(bmp|jpg|jpeg|png|gif|webp)$/i))
+				if(!f.name.match(/\.(bmp|jpg|jpeg|png|gif|svg|webp)$/i))
 					continue;
 				
 				// token is added to file HREF so that tiny can download image aspect ratios
